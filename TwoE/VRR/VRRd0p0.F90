@@ -36,3 +36,118 @@
       VRR0(10,3)=V(5)+V(7)+PAz*VRR0(4,3)+WPz*VRR1(4,3)
       VRR0(10,4)=V(8)+V(10)+V(12)+PAz*VRR0(4,4)+WPz*VRR1(4,4)
 END SUBROUTINE VRRd0p0
+SUBROUTINE MVRRd0p0(IXYZ,LBS,LKS,VS0,VS1,LBR,LKR,VR1)
+USE DerivedTypes
+USE VScratchB
+USE GlobalScalars
+IMPLICIT NONE
+INTEGER IXYZ,LBS,LKS,LBR,LKR
+REAL(DOUBLE) VS0(LBS,LKS),VS1(LBS,LKS),VR1(LBR,LKR)
+SELECT CASE(IXYZ)
+CASE(1)
+VS0(5,2)=PAx*VS0(2,2)+WPx*VS1(2,2)+r1x2Z*VR1(2,2)&
+   +r1x2Z*(VS0(1,2)-ExZpE*VS1(1,2))&
+   +HfxZpE*VS1(2,1)
+VS0(5,3)=PAx*VS0(2,3)+WPx*VS1(2,3)+r1x2Z*VR1(2,3)&
+   +r1x2Z*(VS0(1,3)-ExZpE*VS1(1,3))
+VS0(5,4)=PAx*VS0(2,4)+WPx*VS1(2,4)+r1x2Z*VR1(2,4)&
+   +r1x2Z*(VS0(1,4)-ExZpE*VS1(1,4))
+VS0(6,2)=PAx*VS0(3,2)+WPx*VS1(3,2)+r1x2Z*VR1(3,2)&
+   +HfxZpE*VS1(3,1)
+VS0(6,3)=PAx*VS0(3,3)+WPx*VS1(3,3)+r1x2Z*VR1(3,3)
+VS0(6,4)=PAx*VS0(3,4)+WPx*VS1(3,4)+r1x2Z*VR1(3,4)
+VS0(7,2)=PAy*VS0(3,2)+WPy*VS1(3,2)&
+   +r1x2Z*(VS0(1,2)-ExZpE*VS1(1,2))
+VS0(7,3)=PAy*VS0(3,3)+WPy*VS1(3,3)&
+   +r1x2Z*(VS0(1,3)-ExZpE*VS1(1,3))&
+   +HfxZpE*VS1(3,1)
+VS0(7,4)=PAy*VS0(3,4)+WPy*VS1(3,4)&
+   +r1x2Z*(VS0(1,4)-ExZpE*VS1(1,4))
+VS0(8,2)=PAx*VS0(4,2)+WPx*VS1(4,2)+r1x2Z*VR1(4,2)&
+   +HfxZpE*VS1(4,1)
+VS0(8,3)=PAx*VS0(4,3)+WPx*VS1(4,3)+r1x2Z*VR1(4,3)
+VS0(8,4)=PAx*VS0(4,4)+WPx*VS1(4,4)+r1x2Z*VR1(4,4)
+VS0(9,2)=PAy*VS0(4,2)+WPy*VS1(4,2)
+VS0(9,3)=PAy*VS0(4,3)+WPy*VS1(4,3)&
+   +HfxZpE*VS1(4,1)
+VS0(9,4)=PAy*VS0(4,4)+WPy*VS1(4,4)
+VS0(10,2)=PAz*VS0(4,2)+WPz*VS1(4,2)&
+   +r1x2Z*(VS0(1,2)-ExZpE*VS1(1,2))
+VS0(10,3)=PAz*VS0(4,3)+WPz*VS1(4,3)&
+   +r1x2Z*(VS0(1,3)-ExZpE*VS1(1,3))
+VS0(10,4)=PAz*VS0(4,4)+WPz*VS1(4,4)&
+   +r1x2Z*(VS0(1,4)-ExZpE*VS1(1,4))&
+   +HfxZpE*VS1(4,1)
+CASE(2)
+VS0(5,2)=PAx*VS0(2,2)+WPx*VS1(2,2)&
+   +r1x2Z*(VS0(1,2)-ExZpE*VS1(1,2))&
+   +HfxZpE*VS1(2,1)
+VS0(5,3)=PAx*VS0(2,3)+WPx*VS1(2,3)&
+   +r1x2Z*(VS0(1,3)-ExZpE*VS1(1,3))
+VS0(5,4)=PAx*VS0(2,4)+WPx*VS1(2,4)&
+   +r1x2Z*(VS0(1,4)-ExZpE*VS1(1,4))
+VS0(6,2)=PAx*VS0(3,2)+WPx*VS1(3,2)&
+   +HfxZpE*VS1(3,1)
+VS0(6,3)=PAx*VS0(3,3)+WPx*VS1(3,3)
+VS0(6,4)=PAx*VS0(3,4)+WPx*VS1(3,4)
+VS0(7,2)=PAy*VS0(3,2)+WPy*VS1(3,2)+r1x2Z*VR1(3,2)&
+   +r1x2Z*(VS0(1,2)-ExZpE*VS1(1,2))
+VS0(7,3)=PAy*VS0(3,3)+WPy*VS1(3,3)+r1x2Z*VR1(3,3)&
+   +r1x2Z*(VS0(1,3)-ExZpE*VS1(1,3))&
+   +HfxZpE*VS1(3,1)
+VS0(7,4)=PAy*VS0(3,4)+WPy*VS1(3,4)+r1x2Z*VR1(3,4)&
+   +r1x2Z*(VS0(1,4)-ExZpE*VS1(1,4))
+VS0(8,2)=PAx*VS0(4,2)+WPx*VS1(4,2)&
+   +HfxZpE*VS1(4,1)
+VS0(8,3)=PAx*VS0(4,3)+WPx*VS1(4,3)
+VS0(8,4)=PAx*VS0(4,4)+WPx*VS1(4,4)
+VS0(9,2)=PAy*VS0(4,2)+WPy*VS1(4,2)+r1x2Z*VR1(4,2)
+VS0(9,3)=PAy*VS0(4,3)+WPy*VS1(4,3)+r1x2Z*VR1(4,3)&
+   +HfxZpE*VS1(4,1)
+VS0(9,4)=PAy*VS0(4,4)+WPy*VS1(4,4)+r1x2Z*VR1(4,4)
+VS0(10,2)=PAz*VS0(4,2)+WPz*VS1(4,2)&
+   +r1x2Z*(VS0(1,2)-ExZpE*VS1(1,2))
+VS0(10,3)=PAz*VS0(4,3)+WPz*VS1(4,3)&
+   +r1x2Z*(VS0(1,3)-ExZpE*VS1(1,3))
+VS0(10,4)=PAz*VS0(4,4)+WPz*VS1(4,4)&
+   +r1x2Z*(VS0(1,4)-ExZpE*VS1(1,4))&
+   +HfxZpE*VS1(4,1)
+CASE(3)
+VS0(5,2)=PAx*VS0(2,2)+WPx*VS1(2,2)&
+   +r1x2Z*(VS0(1,2)-ExZpE*VS1(1,2))&
+   +HfxZpE*VS1(2,1)
+VS0(5,3)=PAx*VS0(2,3)+WPx*VS1(2,3)&
+   +r1x2Z*(VS0(1,3)-ExZpE*VS1(1,3))
+VS0(5,4)=PAx*VS0(2,4)+WPx*VS1(2,4)&
+   +r1x2Z*(VS0(1,4)-ExZpE*VS1(1,4))
+VS0(6,2)=PAx*VS0(3,2)+WPx*VS1(3,2)&
+   +HfxZpE*VS1(3,1)
+VS0(6,3)=PAx*VS0(3,3)+WPx*VS1(3,3)
+VS0(6,4)=PAx*VS0(3,4)+WPx*VS1(3,4)
+VS0(7,2)=PAy*VS0(3,2)+WPy*VS1(3,2)&
+   +r1x2Z*(VS0(1,2)-ExZpE*VS1(1,2))
+VS0(7,3)=PAy*VS0(3,3)+WPy*VS1(3,3)&
+   +r1x2Z*(VS0(1,3)-ExZpE*VS1(1,3))&
+   +HfxZpE*VS1(3,1)
+VS0(7,4)=PAy*VS0(3,4)+WPy*VS1(3,4)&
+   +r1x2Z*(VS0(1,4)-ExZpE*VS1(1,4))
+VS0(8,2)=PAx*VS0(4,2)+WPx*VS1(4,2)&
+   +HfxZpE*VS1(4,1)
+VS0(8,3)=PAx*VS0(4,3)+WPx*VS1(4,3)
+VS0(8,4)=PAx*VS0(4,4)+WPx*VS1(4,4)
+VS0(9,2)=PAy*VS0(4,2)+WPy*VS1(4,2)
+VS0(9,3)=PAy*VS0(4,3)+WPy*VS1(4,3)&
+   +HfxZpE*VS1(4,1)
+VS0(9,4)=PAy*VS0(4,4)+WPy*VS1(4,4)
+VS0(10,2)=PAz*VS0(4,2)+WPz*VS1(4,2)+r1x2Z*VR1(4,2)&
+   +r1x2Z*(VS0(1,2)-ExZpE*VS1(1,2))
+VS0(10,3)=PAz*VS0(4,3)+WPz*VS1(4,3)+r1x2Z*VR1(4,3)&
+   +r1x2Z*(VS0(1,3)-ExZpE*VS1(1,3))
+VS0(10,4)=PAz*VS0(4,4)+WPz*VS1(4,4)+r1x2Z*VR1(4,4)&
+   +r1x2Z*(VS0(1,4)-ExZpE*VS1(1,4))&
+   +HfxZpE*VS1(4,1)
+CASE DEFAULT
+WRITE(*,*) 'STOP IN MVRRd0p0'
+STOP
+END SELECT
+END SUBROUTINE MVRRd0p0

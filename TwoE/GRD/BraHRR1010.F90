@@ -1,13 +1,15 @@
-    SUBROUTINE BraHRR1010ab(NINT,LDA,LDB,OA,OB,GOA,GOB,CDOffSet,HRR,HRRA,HRRB,GRADIENT)
+    SUBROUTINE BraHRR1010ab(NINT,LDA,LDB,OA,OB,GOA,GOB,CDOffSet,HRR,HRRA,HRRB,GRADIENT,FP,STRESS)
       USE DerivedTypes
       USE VScratchB
       USE GlobalScalars
+      IMPLICIT NONE
       INTEGER       :: NINT,LDA,LDB,OA,OB,GOA,GOB,CDOffSet,OffSet
       REAL(DOUBLE)  :: HRR(*),HRRA(*),HRRB(*)
       REAL(DOUBLE)  :: GRADIENT(NINT,12)
+      REAL(DOUBLE)  :: STRESS(NINT,9),FP(9),DUM
       OffSet=(OA+0)*LDA+(OB+0)*LDB+CDOffSet !=
       !=(11_x,11|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)-3.D0*HRR(36)+&
+      DUM=-3.D0*HRR(36)+&
                          ABx*(-9.D0*HRR(21)+&
                          ABx*(-9.D0*HRR(11)+&
                          ABx*(-3.D0*HRR(5)+&
@@ -15,8 +17,16 @@
                          3.D0*HRRA(36))+&
                          3.D0*HRRA(57))+&
                          HRRA(85)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(11,11_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)-3.D0*HRR(36)+&
+      DUM=-3.D0*HRR(36)+&
                          ABx*(-6.D0*HRR(21)+&
                          ABx*(-3.D0*HRR(11)+&
                          ABx*(ABx*HRRB(11)+&
@@ -24,17 +34,30 @@
                          6.D0*HRRB(36))+&
                          4.D0*HRRB(57))+&
                          HRRB(85)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(11_y,11|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)+&
-                         ABx*(ABx*(ABx*HRRA(22)+&
+      DUM=ABx*(ABx*(ABx*HRRA(22)+&
                          3.D0*HRRA(37))+&
                          3.D0*HRRA(58))+&
                          HRRA(86)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(11,11_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)+&
-                         ABy*HRRB(57)+&
+      DUM=ABy*HRRB(57)+&
                          ABx*(3.D0*ABy*HRRB(36)+&
                          ABx*(3.D0*ABy*HRRB(21)+&
                          ABx*(ABy*HRRB(11)+&
@@ -42,17 +65,31 @@
                          3.D0*HRRB(37))+&
                          3.D0*HRRB(58))+&
                          HRRB(86)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(11_z,11|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)+&
-                         ABx*(ABx*(ABx*HRRA(26)+&
+      DUM=ABx*(ABx*(ABx*HRRA(26)+&
                          3.D0*HRRA(42))+&
                          3.D0*HRRA(64))+&
                          HRRA(93)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(11,11_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)+&
-                         ABz*HRRB(57)+&
+      DUM=ABz*HRRB(57)+&
                          ABx*(3.D0*ABz*HRRB(36)+&
                          ABx*(3.D0*ABz*HRRB(21)+&
                          ABx*(ABz*HRRB(11)+&
@@ -60,9 +97,18 @@
                          3.D0*HRRB(42))+&
                          3.D0*HRRB(64))+&
                          HRRB(93)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+1)*LDA+(OB+0)*LDB+CDOffSet !=
       !=(12_x,11|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)-2.D0*HRR(37)+&
+      DUM=-2.D0*HRR(37)+&
                          ABx*(-6.D0*HRR(22)+&
                          ABx*(-6.D0*HRR(12)+&
                          ABx*(-2.D0*HRR(6)+&
@@ -70,8 +116,16 @@
                          3.D0*HRRA(37))+&
                          3.D0*HRRA(58))+&
                          HRRA(86)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(12,11_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)-3.D0*HRR(37)+&
+      DUM=-3.D0*HRR(37)+&
                          ABx*(-6.D0*HRR(22)+&
                          ABx*(-3.D0*HRR(12)+&
                          ABx*(ABx*HRRB(12)+&
@@ -79,9 +133,16 @@
                          6.D0*HRRB(37))+&
                          4.D0*HRRB(58))+&
                          HRRB(86)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(12_y,11|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)-HRR(36)+&
+      DUM=-HRR(36)+&
                          ABx*(-3.D0*HRR(21)+&
                          ABx*(-3.D0*HRR(11)+&
                          ABx*(-HRR(5)+&
@@ -89,10 +150,17 @@
                          3.D0*HRRA(38))+&
                          3.D0*HRRA(59))+&
                          HRRA(87)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(12,11_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)+&
-                         ABy*HRRB(58)+&
+      DUM=ABy*HRRB(58)+&
                          ABx*(3.D0*ABy*HRRB(37)+&
                          ABx*(3.D0*ABy*HRRB(22)+&
                          ABx*(ABy*HRRB(12)+&
@@ -100,17 +168,31 @@
                          3.D0*HRRB(38))+&
                          3.D0*HRRB(59))+&
                          HRRB(87)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(12_z,11|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)+&
-                         ABx*(ABx*(ABx*HRRA(27)+&
+      DUM=ABx*(ABx*(ABx*HRRA(27)+&
                          3.D0*HRRA(43))+&
                          3.D0*HRRA(65))+&
                          HRRA(94)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(12,11_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)+&
-                         ABz*HRRB(58)+&
+      DUM=ABz*HRRB(58)+&
                          ABx*(3.D0*ABz*HRRB(37)+&
                          ABx*(3.D0*ABz*HRRB(22)+&
                          ABx*(ABz*HRRB(12)+&
@@ -118,9 +200,18 @@
                          3.D0*HRRB(43))+&
                          3.D0*HRRB(65))+&
                          HRRB(94)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+2)*LDA+(OB+0)*LDB+CDOffSet !=
       !=(13_x,11|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)-HRR(38)+&
+      DUM=-HRR(38)+&
                          ABx*(-3.D0*HRR(23)+&
                          ABx*(-3.D0*HRR(13)+&
                          ABx*(-HRR(7)+&
@@ -128,8 +219,16 @@
                          3.D0*HRRA(38))+&
                          3.D0*HRRA(59))+&
                          HRRA(87)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(13,11_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)-3.D0*HRR(38)+&
+      DUM=-3.D0*HRR(38)+&
                          ABx*(-6.D0*HRR(23)+&
                          ABx*(-3.D0*HRR(13)+&
                          ABx*(ABx*HRRB(13)+&
@@ -137,9 +236,16 @@
                          6.D0*HRRB(38))+&
                          4.D0*HRRB(59))+&
                          HRRB(87)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(13_y,11|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)-2.D0*HRR(37)+&
+      DUM=-2.D0*HRR(37)+&
                          ABx*(-6.D0*HRR(22)+&
                          ABx*(-6.D0*HRR(12)+&
                          ABx*(-2.D0*HRR(6)+&
@@ -147,10 +253,17 @@
                          3.D0*HRRA(39))+&
                          3.D0*HRRA(60))+&
                          HRRA(88)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(13,11_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)+&
-                         ABy*HRRB(59)+&
+      DUM=ABy*HRRB(59)+&
                          ABx*(3.D0*ABy*HRRB(38)+&
                          ABx*(3.D0*ABy*HRRB(23)+&
                          ABx*(ABy*HRRB(13)+&
@@ -158,17 +271,31 @@
                          3.D0*HRRB(39))+&
                          3.D0*HRRB(60))+&
                          HRRB(88)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(13_z,11|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)+&
-                         ABx*(ABx*(ABx*HRRA(28)+&
+      DUM=ABx*(ABx*(ABx*HRRA(28)+&
                          3.D0*HRRA(44))+&
                          3.D0*HRRA(66))+&
                          HRRA(95)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(13,11_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)+&
-                         ABz*HRRB(59)+&
+      DUM=ABz*HRRB(59)+&
                          ABx*(3.D0*ABz*HRRB(38)+&
                          ABx*(3.D0*ABz*HRRB(23)+&
                          ABx*(ABz*HRRB(13)+&
@@ -176,15 +303,31 @@
                          3.D0*HRRB(44))+&
                          3.D0*HRRB(66))+&
                          HRRB(95)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+3)*LDA+(OB+0)*LDB+CDOffSet !=
       !=(14_x,11|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)+&
-                         ABx*(ABx*(ABx*HRRA(24)+&
+      DUM=ABx*(ABx*(ABx*HRRA(24)+&
                          3.D0*HRRA(39))+&
                          3.D0*HRRA(60))+&
                          HRRA(88)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(14,11_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)-3.D0*HRR(39)+&
+      DUM=-3.D0*HRR(39)+&
                          ABx*(-6.D0*HRR(24)+&
                          ABx*(-3.D0*HRR(14)+&
                          ABx*(ABx*HRRB(14)+&
@@ -192,9 +335,16 @@
                          6.D0*HRRB(39))+&
                          4.D0*HRRB(60))+&
                          HRRB(88)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(14_y,11|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)-3.D0*HRR(38)+&
+      DUM=-3.D0*HRR(38)+&
                          ABx*(-9.D0*HRR(23)+&
                          ABx*(-9.D0*HRR(13)+&
                          ABx*(-3.D0*HRR(7)+&
@@ -202,10 +352,17 @@
                          3.D0*HRRA(40))+&
                          3.D0*HRRA(61))+&
                          HRRA(89)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(14,11_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)+&
-                         ABy*HRRB(60)+&
+      DUM=ABy*HRRB(60)+&
                          ABx*(3.D0*ABy*HRRB(39)+&
                          ABx*(3.D0*ABy*HRRB(24)+&
                          ABx*(ABy*HRRB(14)+&
@@ -213,17 +370,31 @@
                          3.D0*HRRB(40))+&
                          3.D0*HRRB(61))+&
                          HRRB(89)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(14_z,11|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)+&
-                         ABx*(ABx*(ABx*HRRA(29)+&
+      DUM=ABx*(ABx*(ABx*HRRA(29)+&
                          3.D0*HRRA(45))+&
                          3.D0*HRRA(67))+&
                          HRRA(96)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(14,11_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)+&
-                         ABz*HRRB(60)+&
+      DUM=ABz*HRRB(60)+&
                          ABx*(3.D0*ABz*HRRB(39)+&
                          ABx*(3.D0*ABz*HRRB(24)+&
                          ABx*(ABz*HRRB(14)+&
@@ -231,9 +402,18 @@
                          3.D0*HRRB(45))+&
                          3.D0*HRRB(67))+&
                          HRRB(96)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+4)*LDA+(OB+0)*LDB+CDOffSet !=
       !=(15_x,11|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)-2.D0*HRR(42)+&
+      DUM=-2.D0*HRR(42)+&
                          ABx*(-6.D0*HRR(26)+&
                          ABx*(-6.D0*HRR(15)+&
                          ABx*(-2.D0*HRR(8)+&
@@ -241,8 +421,16 @@
                          3.D0*HRRA(42))+&
                          3.D0*HRRA(64))+&
                          HRRA(93)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(15,11_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)-3.D0*HRR(42)+&
+      DUM=-3.D0*HRR(42)+&
                          ABx*(-6.D0*HRR(26)+&
                          ABx*(-3.D0*HRR(15)+&
                          ABx*(ABx*HRRB(15)+&
@@ -250,17 +438,30 @@
                          6.D0*HRRB(42))+&
                          4.D0*HRRB(64))+&
                          HRRB(93)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(15_y,11|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)+&
-                         ABx*(ABx*(ABx*HRRA(27)+&
+      DUM=ABx*(ABx*(ABx*HRRA(27)+&
                          3.D0*HRRA(43))+&
                          3.D0*HRRA(65))+&
                          HRRA(94)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(15,11_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)+&
-                         ABy*HRRB(64)+&
+      DUM=ABy*HRRB(64)+&
                          ABx*(3.D0*ABy*HRRB(42)+&
                          ABx*(3.D0*ABy*HRRB(26)+&
                          ABx*(ABy*HRRB(15)+&
@@ -268,9 +469,17 @@
                          3.D0*HRRB(43))+&
                          3.D0*HRRB(65))+&
                          HRRB(94)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(15_z,11|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)-HRR(36)+&
+      DUM=-HRR(36)+&
                          ABx*(-3.D0*HRR(21)+&
                          ABx*(-3.D0*HRR(11)+&
                          ABx*(-HRR(5)+&
@@ -278,10 +487,17 @@
                          3.D0*HRRA(47))+&
                          3.D0*HRRA(70))+&
                          HRRA(100)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(15,11_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)+&
-                         ABz*HRRB(64)+&
+      DUM=ABz*HRRB(64)+&
                          ABx*(3.D0*ABz*HRRB(42)+&
                          ABx*(3.D0*ABz*HRRB(26)+&
                          ABx*(ABz*HRRB(15)+&
@@ -289,9 +505,18 @@
                          3.D0*HRRB(47))+&
                          3.D0*HRRB(70))+&
                          HRRB(100)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+5)*LDA+(OB+0)*LDB+CDOffSet !=
       !=(16_x,11|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)-HRR(43)+&
+      DUM=-HRR(43)+&
                          ABx*(-3.D0*HRR(27)+&
                          ABx*(-3.D0*HRR(16)+&
                          ABx*(-HRR(9)+&
@@ -299,8 +524,16 @@
                          3.D0*HRRA(43))+&
                          3.D0*HRRA(65))+&
                          HRRA(94)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(16,11_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)-3.D0*HRR(43)+&
+      DUM=-3.D0*HRR(43)+&
                          ABx*(-6.D0*HRR(27)+&
                          ABx*(-3.D0*HRR(16)+&
                          ABx*(ABx*HRRB(16)+&
@@ -308,9 +541,16 @@
                          6.D0*HRRB(43))+&
                          4.D0*HRRB(65))+&
                          HRRB(94)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(16_y,11|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)-HRR(42)+&
+      DUM=-HRR(42)+&
                          ABx*(-3.D0*HRR(26)+&
                          ABx*(-3.D0*HRR(15)+&
                          ABx*(-HRR(8)+&
@@ -318,10 +558,17 @@
                          3.D0*HRRA(44))+&
                          3.D0*HRRA(66))+&
                          HRRA(95)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(16,11_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)+&
-                         ABy*HRRB(65)+&
+      DUM=ABy*HRRB(65)+&
                          ABx*(3.D0*ABy*HRRB(43)+&
                          ABx*(3.D0*ABy*HRRB(27)+&
                          ABx*(ABy*HRRB(16)+&
@@ -329,9 +576,17 @@
                          3.D0*HRRB(44))+&
                          3.D0*HRRB(66))+&
                          HRRB(95)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(16_z,11|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)-HRR(37)+&
+      DUM=-HRR(37)+&
                          ABx*(-3.D0*HRR(22)+&
                          ABx*(-3.D0*HRR(12)+&
                          ABx*(-HRR(6)+&
@@ -339,10 +594,17 @@
                          3.D0*HRRA(48))+&
                          3.D0*HRRA(71))+&
                          HRRA(101)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(16,11_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)+&
-                         ABz*HRRB(65)+&
+      DUM=ABz*HRRB(65)+&
                          ABx*(3.D0*ABz*HRRB(43)+&
                          ABx*(3.D0*ABz*HRRB(27)+&
                          ABx*(ABz*HRRB(16)+&
@@ -350,15 +612,31 @@
                          3.D0*HRRB(48))+&
                          3.D0*HRRB(71))+&
                          HRRB(101)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+6)*LDA+(OB+0)*LDB+CDOffSet !=
       !=(17_x,11|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)+&
-                         ABx*(ABx*(ABx*HRRA(28)+&
+      DUM=ABx*(ABx*(ABx*HRRA(28)+&
                          3.D0*HRRA(44))+&
                          3.D0*HRRA(66))+&
                          HRRA(95)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(17,11_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)-3.D0*HRR(44)+&
+      DUM=-3.D0*HRR(44)+&
                          ABx*(-6.D0*HRR(28)+&
                          ABx*(-3.D0*HRR(17)+&
                          ABx*(ABx*HRRB(17)+&
@@ -366,9 +644,16 @@
                          6.D0*HRRB(44))+&
                          4.D0*HRRB(66))+&
                          HRRB(95)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(17_y,11|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)-2.D0*HRR(43)+&
+      DUM=-2.D0*HRR(43)+&
                          ABx*(-6.D0*HRR(27)+&
                          ABx*(-6.D0*HRR(16)+&
                          ABx*(-2.D0*HRR(9)+&
@@ -376,10 +661,17 @@
                          3.D0*HRRA(45))+&
                          3.D0*HRRA(67))+&
                          HRRA(96)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(17,11_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)+&
-                         ABy*HRRB(66)+&
+      DUM=ABy*HRRB(66)+&
                          ABx*(3.D0*ABy*HRRB(44)+&
                          ABx*(3.D0*ABy*HRRB(28)+&
                          ABx*(ABy*HRRB(17)+&
@@ -387,9 +679,17 @@
                          3.D0*HRRB(45))+&
                          3.D0*HRRB(67))+&
                          HRRB(96)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(17_z,11|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)-HRR(38)+&
+      DUM=-HRR(38)+&
                          ABx*(-3.D0*HRR(23)+&
                          ABx*(-3.D0*HRR(13)+&
                          ABx*(-HRR(7)+&
@@ -397,10 +697,17 @@
                          3.D0*HRRA(49))+&
                          3.D0*HRRA(72))+&
                          HRRA(102)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(17,11_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)+&
-                         ABz*HRRB(66)+&
+      DUM=ABz*HRRB(66)+&
                          ABx*(3.D0*ABz*HRRB(44)+&
                          ABx*(3.D0*ABz*HRRB(28)+&
                          ABx*(ABz*HRRB(17)+&
@@ -408,9 +715,18 @@
                          3.D0*HRRB(49))+&
                          3.D0*HRRB(72))+&
                          HRRB(102)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+7)*LDA+(OB+0)*LDB+CDOffSet !=
       !=(18_x,11|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)-HRR(47)+&
+      DUM=-HRR(47)+&
                          ABx*(-3.D0*HRR(30)+&
                          ABx*(-3.D0*HRR(18)+&
                          ABx*(-HRR(10)+&
@@ -418,8 +734,16 @@
                          3.D0*HRRA(47))+&
                          3.D0*HRRA(70))+&
                          HRRA(100)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(18,11_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)-3.D0*HRR(47)+&
+      DUM=-3.D0*HRR(47)+&
                          ABx*(-6.D0*HRR(30)+&
                          ABx*(-3.D0*HRR(18)+&
                          ABx*(ABx*HRRB(18)+&
@@ -427,17 +751,30 @@
                          6.D0*HRRB(47))+&
                          4.D0*HRRB(70))+&
                          HRRB(100)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(18_y,11|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)+&
-                         ABx*(ABx*(ABx*HRRA(31)+&
+      DUM=ABx*(ABx*(ABx*HRRA(31)+&
                          3.D0*HRRA(48))+&
                          3.D0*HRRA(71))+&
                          HRRA(101)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(18,11_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)+&
-                         ABy*HRRB(70)+&
+      DUM=ABy*HRRB(70)+&
                          ABx*(3.D0*ABy*HRRB(47)+&
                          ABx*(3.D0*ABy*HRRB(30)+&
                          ABx*(ABy*HRRB(18)+&
@@ -445,9 +782,17 @@
                          3.D0*HRRB(48))+&
                          3.D0*HRRB(71))+&
                          HRRB(101)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(18_z,11|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)-2.D0*HRR(42)+&
+      DUM=-2.D0*HRR(42)+&
                          ABx*(-6.D0*HRR(26)+&
                          ABx*(-6.D0*HRR(15)+&
                          ABx*(-2.D0*HRR(8)+&
@@ -455,10 +800,17 @@
                          3.D0*HRRA(51))+&
                          3.D0*HRRA(75))+&
                          HRRA(106)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(18,11_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)+&
-                         ABz*HRRB(70)+&
+      DUM=ABz*HRRB(70)+&
                          ABx*(3.D0*ABz*HRRB(47)+&
                          ABx*(3.D0*ABz*HRRB(30)+&
                          ABx*(ABz*HRRB(18)+&
@@ -466,15 +818,31 @@
                          3.D0*HRRB(51))+&
                          3.D0*HRRB(75))+&
                          HRRB(106)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+8)*LDA+(OB+0)*LDB+CDOffSet !=
       !=(19_x,11|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)+&
-                         ABx*(ABx*(ABx*HRRA(31)+&
+      DUM=ABx*(ABx*(ABx*HRRA(31)+&
                          3.D0*HRRA(48))+&
                          3.D0*HRRA(71))+&
                          HRRA(101)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(19,11_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)-3.D0*HRR(48)+&
+      DUM=-3.D0*HRR(48)+&
                          ABx*(-6.D0*HRR(31)+&
                          ABx*(-3.D0*HRR(19)+&
                          ABx*(ABx*HRRB(19)+&
@@ -482,9 +850,16 @@
                          6.D0*HRRB(48))+&
                          4.D0*HRRB(71))+&
                          HRRB(101)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(19_y,11|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)-HRR(47)+&
+      DUM=-HRR(47)+&
                          ABx*(-3.D0*HRR(30)+&
                          ABx*(-3.D0*HRR(18)+&
                          ABx*(-HRR(10)+&
@@ -492,10 +867,17 @@
                          3.D0*HRRA(49))+&
                          3.D0*HRRA(72))+&
                          HRRA(102)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(19,11_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)+&
-                         ABy*HRRB(71)+&
+      DUM=ABy*HRRB(71)+&
                          ABx*(3.D0*ABy*HRRB(48)+&
                          ABx*(3.D0*ABy*HRRB(31)+&
                          ABx*(ABy*HRRB(19)+&
@@ -503,9 +885,17 @@
                          3.D0*HRRB(49))+&
                          3.D0*HRRB(72))+&
                          HRRB(102)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(19_z,11|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)-2.D0*HRR(43)+&
+      DUM=-2.D0*HRR(43)+&
                          ABx*(-6.D0*HRR(27)+&
                          ABx*(-6.D0*HRR(16)+&
                          ABx*(-2.D0*HRR(9)+&
@@ -513,10 +903,17 @@
                          3.D0*HRRA(52))+&
                          3.D0*HRRA(76))+&
                          HRRA(107)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(19,11_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)+&
-                         ABz*HRRB(71)+&
+      DUM=ABz*HRRB(71)+&
                          ABx*(3.D0*ABz*HRRB(48)+&
                          ABx*(3.D0*ABz*HRRB(31)+&
                          ABx*(ABz*HRRB(19)+&
@@ -524,15 +921,31 @@
                          3.D0*HRRB(52))+&
                          3.D0*HRRB(76))+&
                          HRRB(107)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+9)*LDA+(OB+0)*LDB+CDOffSet !=
       !=(20_x,11|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)+&
-                         ABx*(ABx*(ABx*HRRA(33)+&
+      DUM=ABx*(ABx*(ABx*HRRA(33)+&
                          3.D0*HRRA(51))+&
                          3.D0*HRRA(75))+&
                          HRRA(106)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(20,11_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)-3.D0*HRR(51)+&
+      DUM=-3.D0*HRR(51)+&
                          ABx*(-6.D0*HRR(33)+&
                          ABx*(-3.D0*HRR(20)+&
                          ABx*(ABx*HRRB(20)+&
@@ -540,17 +953,30 @@
                          6.D0*HRRB(51))+&
                          4.D0*HRRB(75))+&
                          HRRB(106)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(20_y,11|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)+&
-                         ABx*(ABx*(ABx*HRRA(34)+&
+      DUM=ABx*(ABx*(ABx*HRRA(34)+&
                          3.D0*HRRA(52))+&
                          3.D0*HRRA(76))+&
                          HRRA(107)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(20,11_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)+&
-                         ABy*HRRB(75)+&
+      DUM=ABy*HRRB(75)+&
                          ABx*(3.D0*ABy*HRRB(51)+&
                          ABx*(3.D0*ABy*HRRB(33)+&
                          ABx*(ABy*HRRB(20)+&
@@ -558,9 +984,17 @@
                          3.D0*HRRB(52))+&
                          3.D0*HRRB(76))+&
                          HRRB(107)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(20_z,11|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)-3.D0*HRR(47)+&
+      DUM=-3.D0*HRR(47)+&
                          ABx*(-9.D0*HRR(30)+&
                          ABx*(-9.D0*HRR(18)+&
                          ABx*(-3.D0*HRR(10)+&
@@ -568,10 +1002,17 @@
                          3.D0*HRRA(54))+&
                          3.D0*HRRA(79))+&
                          HRRA(111)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(20,11_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)+&
-                         ABz*HRRB(75)+&
+      DUM=ABz*HRRB(75)+&
                          ABx*(3.D0*ABz*HRRB(51)+&
                          ABx*(3.D0*ABz*HRRB(33)+&
                          ABx*(ABz*HRRB(20)+&
@@ -579,9 +1020,18 @@
                          3.D0*HRRB(54))+&
                          3.D0*HRRB(79))+&
                          HRRB(111)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+0)*LDA+(OB+1)*LDB+CDOffSet !=
       !=(11_x,12|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)-3.D0*HRR(37)+&
+      DUM=-3.D0*HRR(37)+&
                          ABy*(-3.D0*HRR(21)+&
                          HRRA(57))+&
                          ABx*(-6.D0*HRR(22)+&
@@ -593,8 +1043,16 @@
                          HRRA(37))+&
                          2.D0*HRRA(58))+&
                          HRRA(86)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(11,12_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)-2.D0*HRR(37)+&
+      DUM=-2.D0*HRR(37)+&
                          ABy*(-2.D0*HRR(21)+&
                          HRRB(57))+&
                          ABx*(-2.D0*HRR(22)+&
@@ -606,18 +1064,32 @@
                          3.D0*HRRB(37))+&
                          3.D0*HRRB(58))+&
                          HRRB(86)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(11_y,12|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)+&
-                         ABy*HRRA(58)+&
+      DUM=ABy*HRRA(58)+&
                          ABx*(2.D0*ABy*HRRA(37)+&
                          ABx*(ABy*HRRA(22)+&
                          HRRA(38))+&
                          2.D0*HRRA(59))+&
                          HRRA(87)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(11,12_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)-HRR(36)+&
+      DUM=-HRR(36)+&
                          ABy*(ABy*HRRB(36)+&
                          2.D0*HRRB(58))+&
                          ABx*(-2.D0*HRR(21)+&
@@ -629,19 +1101,33 @@
                          HRRB(38))+&
                          2.D0*HRRB(59))+&
                          HRRB(87)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(11_z,12|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)+&
-                         ABy*HRRA(64)+&
+      DUM=ABy*HRRA(64)+&
                          ABx*(2.D0*ABy*HRRA(42)+&
                          ABx*(ABy*HRRA(26)+&
                          HRRA(43))+&
                          2.D0*HRRA(65))+&
                          HRRA(94)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(11,12_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)+&
-                         ABz*HRRB(58)+&
+      DUM=ABz*HRRB(58)+&
                          ABy*(ABz*HRRB(36)+&
                          HRRB(64))+&
                          ABx*(2.D0*ABz*HRRB(37)+&
@@ -653,9 +1139,18 @@
                          HRRB(43))+&
                          2.D0*HRRB(65))+&
                          HRRB(94)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+1)*LDA+(OB+1)*LDB+CDOffSet !=
       !=(12_x,12|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)-2.D0*HRR(38)+&
+      DUM=-2.D0*HRR(38)+&
                          ABy*(-2.D0*HRR(22)+&
                          HRRA(58))+&
                          ABx*(-4.D0*HRR(23)+&
@@ -667,8 +1162,16 @@
                          HRRA(38))+&
                          2.D0*HRRA(59))+&
                          HRRA(87)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(12,12_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)-2.D0*HRR(38)+&
+      DUM=-2.D0*HRR(38)+&
                          ABy*(-2.D0*HRR(22)+&
                          HRRB(58))+&
                          ABx*(-2.D0*HRR(23)+&
@@ -680,9 +1183,16 @@
                          3.D0*HRRB(38))+&
                          3.D0*HRRB(59))+&
                          HRRB(87)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(12_y,12|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)-HRR(37)+&
+      DUM=-HRR(37)+&
                          ABy*(-HRR(21)+&
                          HRRA(59))+&
                          ABx*(-2.D0*HRR(22)+&
@@ -694,9 +1204,17 @@
                          HRRA(39))+&
                          2.D0*HRRA(60))+&
                          HRRA(88)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(12,12_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)-HRR(37)+&
+      DUM=-HRR(37)+&
                          ABy*(ABy*HRRB(37)+&
                          2.D0*HRRB(59))+&
                          ABx*(-2.D0*HRR(22)+&
@@ -708,19 +1226,33 @@
                          HRRB(39))+&
                          2.D0*HRRB(60))+&
                          HRRB(88)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(12_z,12|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)+&
-                         ABy*HRRA(65)+&
+      DUM=ABy*HRRA(65)+&
                          ABx*(2.D0*ABy*HRRA(43)+&
                          ABx*(ABy*HRRA(27)+&
                          HRRA(44))+&
                          2.D0*HRRA(66))+&
                          HRRA(95)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(12,12_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)+&
-                         ABz*HRRB(59)+&
+      DUM=ABz*HRRB(59)+&
                          ABy*(ABz*HRRB(37)+&
                          HRRB(65))+&
                          ABx*(2.D0*ABz*HRRB(38)+&
@@ -732,9 +1264,18 @@
                          HRRB(44))+&
                          2.D0*HRRB(66))+&
                          HRRB(95)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+2)*LDA+(OB+1)*LDB+CDOffSet !=
       !=(13_x,12|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)-HRR(39)+&
+      DUM=-HRR(39)+&
                          ABy*(-HRR(23)+&
                          HRRA(59))+&
                          ABx*(-2.D0*HRR(24)+&
@@ -746,8 +1287,16 @@
                          HRRA(39))+&
                          2.D0*HRRA(60))+&
                          HRRA(88)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(13,12_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)-2.D0*HRR(39)+&
+      DUM=-2.D0*HRR(39)+&
                          ABy*(-2.D0*HRR(23)+&
                          HRRB(59))+&
                          ABx*(-2.D0*HRR(24)+&
@@ -759,9 +1308,16 @@
                          3.D0*HRRB(39))+&
                          3.D0*HRRB(60))+&
                          HRRB(88)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(13_y,12|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)-2.D0*HRR(38)+&
+      DUM=-2.D0*HRR(38)+&
                          ABy*(-2.D0*HRR(22)+&
                          HRRA(60))+&
                          ABx*(-4.D0*HRR(23)+&
@@ -773,9 +1329,17 @@
                          HRRA(40))+&
                          2.D0*HRRA(61))+&
                          HRRA(89)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(13,12_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)-HRR(38)+&
+      DUM=-HRR(38)+&
                          ABy*(ABy*HRRB(38)+&
                          2.D0*HRRB(60))+&
                          ABx*(-2.D0*HRR(23)+&
@@ -787,19 +1351,33 @@
                          HRRB(40))+&
                          2.D0*HRRB(61))+&
                          HRRB(89)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(13_z,12|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)+&
-                         ABy*HRRA(66)+&
+      DUM=ABy*HRRA(66)+&
                          ABx*(2.D0*ABy*HRRA(44)+&
                          ABx*(ABy*HRRA(28)+&
                          HRRA(45))+&
                          2.D0*HRRA(67))+&
                          HRRA(96)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(13,12_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)+&
-                         ABz*HRRB(60)+&
+      DUM=ABz*HRRB(60)+&
                          ABy*(ABz*HRRB(38)+&
                          HRRB(66))+&
                          ABx*(2.D0*ABz*HRRB(39)+&
@@ -811,17 +1389,33 @@
                          HRRB(45))+&
                          2.D0*HRRB(67))+&
                          HRRB(96)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+3)*LDA+(OB+1)*LDB+CDOffSet !=
       !=(14_x,12|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)+&
-                         ABy*HRRA(60)+&
+      DUM=ABy*HRRA(60)+&
                          ABx*(2.D0*ABy*HRRA(39)+&
                          ABx*(ABy*HRRA(24)+&
                          HRRA(40))+&
                          2.D0*HRRA(61))+&
                          HRRA(89)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(14,12_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)-2.D0*HRR(40)+&
+      DUM=-2.D0*HRR(40)+&
                          ABy*(-2.D0*HRR(24)+&
                          HRRB(60))+&
                          ABx*(-2.D0*HRR(25)+&
@@ -833,9 +1427,16 @@
                          3.D0*HRRB(40))+&
                          3.D0*HRRB(61))+&
                          HRRB(89)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(14_y,12|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)-3.D0*HRR(39)+&
+      DUM=-3.D0*HRR(39)+&
                          ABy*(-3.D0*HRR(23)+&
                          HRRA(61))+&
                          ABx*(-6.D0*HRR(24)+&
@@ -847,9 +1448,17 @@
                          HRRA(41))+&
                          2.D0*HRRA(62))+&
                          HRRA(90)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(14,12_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)-HRR(39)+&
+      DUM=-HRR(39)+&
                          ABy*(ABy*HRRB(39)+&
                          2.D0*HRRB(61))+&
                          ABx*(-2.D0*HRR(24)+&
@@ -861,19 +1470,33 @@
                          HRRB(41))+&
                          2.D0*HRRB(62))+&
                          HRRB(90)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(14_z,12|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)+&
-                         ABy*HRRA(67)+&
+      DUM=ABy*HRRA(67)+&
                          ABx*(2.D0*ABy*HRRA(45)+&
                          ABx*(ABy*HRRA(29)+&
                          HRRA(46))+&
                          2.D0*HRRA(68))+&
                          HRRA(97)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(14,12_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)+&
-                         ABz*HRRB(61)+&
+      DUM=ABz*HRRB(61)+&
                          ABy*(ABz*HRRB(39)+&
                          HRRB(67))+&
                          ABx*(2.D0*ABz*HRRB(40)+&
@@ -885,9 +1508,18 @@
                          HRRB(46))+&
                          2.D0*HRRB(68))+&
                          HRRB(97)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+4)*LDA+(OB+1)*LDB+CDOffSet !=
       !=(15_x,12|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)-2.D0*HRR(43)+&
+      DUM=-2.D0*HRR(43)+&
                          ABy*(-2.D0*HRR(26)+&
                          HRRA(64))+&
                          ABx*(-4.D0*HRR(27)+&
@@ -899,8 +1531,16 @@
                          HRRA(43))+&
                          2.D0*HRRA(65))+&
                          HRRA(94)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(15,12_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)-2.D0*HRR(43)+&
+      DUM=-2.D0*HRR(43)+&
                          ABy*(-2.D0*HRR(26)+&
                          HRRB(64))+&
                          ABx*(-2.D0*HRR(27)+&
@@ -912,18 +1552,32 @@
                          3.D0*HRRB(43))+&
                          3.D0*HRRB(65))+&
                          HRRB(94)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(15_y,12|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)+&
-                         ABy*HRRA(65)+&
+      DUM=ABy*HRRA(65)+&
                          ABx*(2.D0*ABy*HRRA(43)+&
                          ABx*(ABy*HRRA(27)+&
                          HRRA(44))+&
                          2.D0*HRRA(66))+&
                          HRRA(95)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(15,12_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)-HRR(42)+&
+      DUM=-HRR(42)+&
                          ABy*(ABy*HRRB(42)+&
                          2.D0*HRRB(65))+&
                          ABx*(-2.D0*HRR(26)+&
@@ -935,9 +1589,17 @@
                          HRRB(44))+&
                          2.D0*HRRB(66))+&
                          HRRB(95)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(15_z,12|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)-HRR(37)+&
+      DUM=-HRR(37)+&
                          ABy*(-HRR(21)+&
                          HRRA(70))+&
                          ABx*(-2.D0*HRR(22)+&
@@ -949,10 +1611,17 @@
                          HRRA(48))+&
                          2.D0*HRRA(71))+&
                          HRRA(101)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(15,12_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)+&
-                         ABz*HRRB(65)+&
+      DUM=ABz*HRRB(65)+&
                          ABy*(ABz*HRRB(42)+&
                          HRRB(70))+&
                          ABx*(2.D0*ABz*HRRB(43)+&
@@ -964,9 +1633,18 @@
                          HRRB(48))+&
                          2.D0*HRRB(71))+&
                          HRRB(101)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+5)*LDA+(OB+1)*LDB+CDOffSet !=
       !=(16_x,12|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)-HRR(44)+&
+      DUM=-HRR(44)+&
                          ABy*(-HRR(27)+&
                          HRRA(65))+&
                          ABx*(-2.D0*HRR(28)+&
@@ -978,8 +1656,16 @@
                          HRRA(44))+&
                          2.D0*HRRA(66))+&
                          HRRA(95)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(16,12_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)-2.D0*HRR(44)+&
+      DUM=-2.D0*HRR(44)+&
                          ABy*(-2.D0*HRR(27)+&
                          HRRB(65))+&
                          ABx*(-2.D0*HRR(28)+&
@@ -991,9 +1677,16 @@
                          3.D0*HRRB(44))+&
                          3.D0*HRRB(66))+&
                          HRRB(95)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(16_y,12|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)-HRR(43)+&
+      DUM=-HRR(43)+&
                          ABy*(-HRR(26)+&
                          HRRA(66))+&
                          ABx*(-2.D0*HRR(27)+&
@@ -1005,9 +1698,17 @@
                          HRRA(45))+&
                          2.D0*HRRA(67))+&
                          HRRA(96)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(16,12_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)-HRR(43)+&
+      DUM=-HRR(43)+&
                          ABy*(ABy*HRRB(43)+&
                          2.D0*HRRB(66))+&
                          ABx*(-2.D0*HRR(27)+&
@@ -1019,9 +1720,17 @@
                          HRRB(45))+&
                          2.D0*HRRB(67))+&
                          HRRB(96)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(16_z,12|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)-HRR(38)+&
+      DUM=-HRR(38)+&
                          ABy*(-HRR(22)+&
                          HRRA(71))+&
                          ABx*(-2.D0*HRR(23)+&
@@ -1033,10 +1742,17 @@
                          HRRA(49))+&
                          2.D0*HRRA(72))+&
                          HRRA(102)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(16,12_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)+&
-                         ABz*HRRB(66)+&
+      DUM=ABz*HRRB(66)+&
                          ABy*(ABz*HRRB(43)+&
                          HRRB(71))+&
                          ABx*(2.D0*ABz*HRRB(44)+&
@@ -1048,17 +1764,33 @@
                          HRRB(49))+&
                          2.D0*HRRB(72))+&
                          HRRB(102)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+6)*LDA+(OB+1)*LDB+CDOffSet !=
       !=(17_x,12|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)+&
-                         ABy*HRRA(66)+&
+      DUM=ABy*HRRA(66)+&
                          ABx*(2.D0*ABy*HRRA(44)+&
                          ABx*(ABy*HRRA(28)+&
                          HRRA(45))+&
                          2.D0*HRRA(67))+&
                          HRRA(96)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(17,12_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)-2.D0*HRR(45)+&
+      DUM=-2.D0*HRR(45)+&
                          ABy*(-2.D0*HRR(28)+&
                          HRRB(66))+&
                          ABx*(-2.D0*HRR(29)+&
@@ -1070,9 +1802,16 @@
                          3.D0*HRRB(45))+&
                          3.D0*HRRB(67))+&
                          HRRB(96)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(17_y,12|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)-2.D0*HRR(44)+&
+      DUM=-2.D0*HRR(44)+&
                          ABy*(-2.D0*HRR(27)+&
                          HRRA(67))+&
                          ABx*(-4.D0*HRR(28)+&
@@ -1084,9 +1823,17 @@
                          HRRA(46))+&
                          2.D0*HRRA(68))+&
                          HRRA(97)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(17,12_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)-HRR(44)+&
+      DUM=-HRR(44)+&
                          ABy*(ABy*HRRB(44)+&
                          2.D0*HRRB(67))+&
                          ABx*(-2.D0*HRR(28)+&
@@ -1098,9 +1845,17 @@
                          HRRB(46))+&
                          2.D0*HRRB(68))+&
                          HRRB(97)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(17_z,12|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)-HRR(39)+&
+      DUM=-HRR(39)+&
                          ABy*(-HRR(23)+&
                          HRRA(72))+&
                          ABx*(-2.D0*HRR(24)+&
@@ -1112,10 +1867,17 @@
                          HRRA(50))+&
                          2.D0*HRRA(73))+&
                          HRRA(103)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(17,12_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)+&
-                         ABz*HRRB(67)+&
+      DUM=ABz*HRRB(67)+&
                          ABy*(ABz*HRRB(44)+&
                          HRRB(72))+&
                          ABx*(2.D0*ABz*HRRB(45)+&
@@ -1127,9 +1889,18 @@
                          HRRB(50))+&
                          2.D0*HRRB(73))+&
                          HRRB(103)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+7)*LDA+(OB+1)*LDB+CDOffSet !=
       !=(18_x,12|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)-HRR(48)+&
+      DUM=-HRR(48)+&
                          ABy*(-HRR(30)+&
                          HRRA(70))+&
                          ABx*(-2.D0*HRR(31)+&
@@ -1141,8 +1912,16 @@
                          HRRA(48))+&
                          2.D0*HRRA(71))+&
                          HRRA(101)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(18,12_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)-2.D0*HRR(48)+&
+      DUM=-2.D0*HRR(48)+&
                          ABy*(-2.D0*HRR(30)+&
                          HRRB(70))+&
                          ABx*(-2.D0*HRR(31)+&
@@ -1154,18 +1933,32 @@
                          3.D0*HRRB(48))+&
                          3.D0*HRRB(71))+&
                          HRRB(101)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(18_y,12|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)+&
-                         ABy*HRRA(71)+&
+      DUM=ABy*HRRA(71)+&
                          ABx*(2.D0*ABy*HRRA(48)+&
                          ABx*(ABy*HRRA(31)+&
                          HRRA(49))+&
                          2.D0*HRRA(72))+&
                          HRRA(102)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(18,12_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)-HRR(47)+&
+      DUM=-HRR(47)+&
                          ABy*(ABy*HRRB(47)+&
                          2.D0*HRRB(71))+&
                          ABx*(-2.D0*HRR(30)+&
@@ -1177,9 +1970,17 @@
                          HRRB(49))+&
                          2.D0*HRRB(72))+&
                          HRRB(102)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(18_z,12|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)-2.D0*HRR(43)+&
+      DUM=-2.D0*HRR(43)+&
                          ABy*(-2.D0*HRR(26)+&
                          HRRA(75))+&
                          ABx*(-4.D0*HRR(27)+&
@@ -1191,10 +1992,17 @@
                          HRRA(52))+&
                          2.D0*HRRA(76))+&
                          HRRA(107)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(18,12_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)+&
-                         ABz*HRRB(71)+&
+      DUM=ABz*HRRB(71)+&
                          ABy*(ABz*HRRB(47)+&
                          HRRB(75))+&
                          ABx*(2.D0*ABz*HRRB(48)+&
@@ -1206,17 +2014,33 @@
                          HRRB(52))+&
                          2.D0*HRRB(76))+&
                          HRRB(107)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+8)*LDA+(OB+1)*LDB+CDOffSet !=
       !=(19_x,12|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)+&
-                         ABy*HRRA(71)+&
+      DUM=ABy*HRRA(71)+&
                          ABx*(2.D0*ABy*HRRA(48)+&
                          ABx*(ABy*HRRA(31)+&
                          HRRA(49))+&
                          2.D0*HRRA(72))+&
                          HRRA(102)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(19,12_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)-2.D0*HRR(49)+&
+      DUM=-2.D0*HRR(49)+&
                          ABy*(-2.D0*HRR(31)+&
                          HRRB(71))+&
                          ABx*(-2.D0*HRR(32)+&
@@ -1228,9 +2052,16 @@
                          3.D0*HRRB(49))+&
                          3.D0*HRRB(72))+&
                          HRRB(102)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(19_y,12|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)-HRR(48)+&
+      DUM=-HRR(48)+&
                          ABy*(-HRR(30)+&
                          HRRA(72))+&
                          ABx*(-2.D0*HRR(31)+&
@@ -1242,9 +2073,17 @@
                          HRRA(50))+&
                          2.D0*HRRA(73))+&
                          HRRA(103)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(19,12_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)-HRR(48)+&
+      DUM=-HRR(48)+&
                          ABy*(ABy*HRRB(48)+&
                          2.D0*HRRB(72))+&
                          ABx*(-2.D0*HRR(31)+&
@@ -1256,9 +2095,17 @@
                          HRRB(50))+&
                          2.D0*HRRB(73))+&
                          HRRB(103)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(19_z,12|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)-2.D0*HRR(44)+&
+      DUM=-2.D0*HRR(44)+&
                          ABy*(-2.D0*HRR(27)+&
                          HRRA(76))+&
                          ABx*(-4.D0*HRR(28)+&
@@ -1270,10 +2117,17 @@
                          HRRA(53))+&
                          2.D0*HRRA(77))+&
                          HRRA(108)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(19,12_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)+&
-                         ABz*HRRB(72)+&
+      DUM=ABz*HRRB(72)+&
                          ABy*(ABz*HRRB(48)+&
                          HRRB(76))+&
                          ABx*(2.D0*ABz*HRRB(49)+&
@@ -1285,17 +2139,33 @@
                          HRRB(53))+&
                          2.D0*HRRB(77))+&
                          HRRB(108)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+9)*LDA+(OB+1)*LDB+CDOffSet !=
       !=(20_x,12|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)+&
-                         ABy*HRRA(75)+&
+      DUM=ABy*HRRA(75)+&
                          ABx*(2.D0*ABy*HRRA(51)+&
                          ABx*(ABy*HRRA(33)+&
                          HRRA(52))+&
                          2.D0*HRRA(76))+&
                          HRRA(107)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(20,12_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)-2.D0*HRR(52)+&
+      DUM=-2.D0*HRR(52)+&
                          ABy*(-2.D0*HRR(33)+&
                          HRRB(75))+&
                          ABx*(-2.D0*HRR(34)+&
@@ -1307,18 +2177,32 @@
                          3.D0*HRRB(52))+&
                          3.D0*HRRB(76))+&
                          HRRB(107)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(20_y,12|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)+&
-                         ABy*HRRA(76)+&
+      DUM=ABy*HRRA(76)+&
                          ABx*(2.D0*ABy*HRRA(52)+&
                          ABx*(ABy*HRRA(34)+&
                          HRRA(53))+&
                          2.D0*HRRA(77))+&
                          HRRA(108)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(20,12_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)-HRR(51)+&
+      DUM=-HRR(51)+&
                          ABy*(ABy*HRRB(51)+&
                          2.D0*HRRB(76))+&
                          ABx*(-2.D0*HRR(33)+&
@@ -1330,9 +2214,17 @@
                          HRRB(53))+&
                          2.D0*HRRB(77))+&
                          HRRB(108)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(20_z,12|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)-3.D0*HRR(48)+&
+      DUM=-3.D0*HRR(48)+&
                          ABy*(-3.D0*HRR(30)+&
                          HRRA(79))+&
                          ABx*(-6.D0*HRR(31)+&
@@ -1344,10 +2236,17 @@
                          HRRA(55))+&
                          2.D0*HRRA(80))+&
                          HRRA(112)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(20,12_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)+&
-                         ABz*HRRB(76)+&
+      DUM=ABz*HRRB(76)+&
                          ABy*(ABz*HRRB(51)+&
                          HRRB(79))+&
                          ABx*(2.D0*ABz*HRRB(52)+&
@@ -1359,9 +2258,18 @@
                          HRRB(55))+&
                          2.D0*HRRB(80))+&
                          HRRB(112)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+0)*LDA+(OB+2)*LDB+CDOffSet !=
       !=(11_x,13|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)-3.D0*HRR(38)+&
+      DUM=-3.D0*HRR(38)+&
                          ABy*(-6.D0*HRR(22)+&
                          ABy*(-3.D0*HRR(11)+&
                          HRRA(36))+&
@@ -1373,8 +2281,16 @@
                          2.D0*HRRA(37))+&
                          HRRA(59))+&
                          HRRA(87)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(11,13_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)-HRR(38)+&
+      DUM=-HRR(38)+&
                          ABy*(-2.D0*HRR(22)+&
                          ABy*(-HRR(11)+&
                          HRRB(36))+&
@@ -1386,18 +2302,32 @@
                          HRRB(38))+&
                          2.D0*HRRB(59))+&
                          HRRB(87)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(11_y,13|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)+&
-                         ABy*(ABy*HRRA(37)+&
+      DUM=ABy*(ABy*HRRA(37)+&
                          2.D0*HRRA(59))+&
                          ABx*(ABy*(ABy*HRRA(22)+&
                          2.D0*HRRA(38))+&
                          HRRA(60))+&
                          HRRA(88)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(11,13_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)-2.D0*HRR(37)+&
+      DUM=-2.D0*HRR(37)+&
                          ABy*(-2.D0*HRR(21)+&
                          ABy*(ABy*HRRB(21)+&
                          3.D0*HRRB(37))+&
@@ -1409,19 +2339,33 @@
                          3.D0*HRRB(38))+&
                          HRRB(60))+&
                          HRRB(88)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(11_z,13|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)+&
-                         ABy*(ABy*HRRA(42)+&
+      DUM=ABy*(ABy*HRRA(42)+&
                          2.D0*HRRA(65))+&
                          ABx*(ABy*(ABy*HRRA(26)+&
                          2.D0*HRRA(43))+&
                          HRRA(66))+&
                          HRRA(95)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(11,13_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)+&
-                         ABz*HRRB(59)+&
+      DUM=ABz*HRRB(59)+&
                          ABy*(2.D0*ABz*HRRB(37)+&
                          ABy*(ABz*HRRB(21)+&
                          HRRB(42))+&
@@ -1433,9 +2377,18 @@
                          2.D0*HRRB(43))+&
                          HRRB(66))+&
                          HRRB(95)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+1)*LDA+(OB+2)*LDB+CDOffSet !=
       !=(12_x,13|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)-2.D0*HRR(39)+&
+      DUM=-2.D0*HRR(39)+&
                          ABy*(-4.D0*HRR(23)+&
                          ABy*(-2.D0*HRR(12)+&
                          HRRA(37))+&
@@ -1447,8 +2400,16 @@
                          2.D0*HRRA(38))+&
                          HRRA(60))+&
                          HRRA(88)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(12,13_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)-HRR(39)+&
+      DUM=-HRR(39)+&
                          ABy*(-2.D0*HRR(23)+&
                          ABy*(-HRR(12)+&
                          HRRB(37))+&
@@ -1460,9 +2421,16 @@
                          HRRB(39))+&
                          2.D0*HRRB(60))+&
                          HRRB(88)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(12_y,13|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)-HRR(38)+&
+      DUM=-HRR(38)+&
                          ABy*(-2.D0*HRR(22)+&
                          ABy*(-HRR(11)+&
                          HRRA(38))+&
@@ -1474,9 +2442,17 @@
                          2.D0*HRRA(39))+&
                          HRRA(61))+&
                          HRRA(89)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(12,13_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)-2.D0*HRR(38)+&
+      DUM=-2.D0*HRR(38)+&
                          ABy*(-2.D0*HRR(22)+&
                          ABy*(ABy*HRRB(22)+&
                          3.D0*HRRB(38))+&
@@ -1488,19 +2464,33 @@
                          3.D0*HRRB(39))+&
                          HRRB(61))+&
                          HRRB(89)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(12_z,13|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)+&
-                         ABy*(ABy*HRRA(43)+&
+      DUM=ABy*(ABy*HRRA(43)+&
                          2.D0*HRRA(66))+&
                          ABx*(ABy*(ABy*HRRA(27)+&
                          2.D0*HRRA(44))+&
                          HRRA(67))+&
                          HRRA(96)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(12,13_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)+&
-                         ABz*HRRB(60)+&
+      DUM=ABz*HRRB(60)+&
                          ABy*(2.D0*ABz*HRRB(38)+&
                          ABy*(ABz*HRRB(22)+&
                          HRRB(43))+&
@@ -1512,9 +2502,18 @@
                          2.D0*HRRB(44))+&
                          HRRB(67))+&
                          HRRB(96)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+2)*LDA+(OB+2)*LDB+CDOffSet !=
       !=(13_x,13|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)-HRR(40)+&
+      DUM=-HRR(40)+&
                          ABy*(-2.D0*HRR(24)+&
                          ABy*(-HRR(13)+&
                          HRRA(38))+&
@@ -1526,8 +2525,16 @@
                          2.D0*HRRA(39))+&
                          HRRA(61))+&
                          HRRA(89)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(13,13_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)-HRR(40)+&
+      DUM=-HRR(40)+&
                          ABy*(-2.D0*HRR(24)+&
                          ABy*(-HRR(13)+&
                          HRRB(38))+&
@@ -1539,9 +2546,16 @@
                          HRRB(40))+&
                          2.D0*HRRB(61))+&
                          HRRB(89)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(13_y,13|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)-2.D0*HRR(39)+&
+      DUM=-2.D0*HRR(39)+&
                          ABy*(-4.D0*HRR(23)+&
                          ABy*(-2.D0*HRR(12)+&
                          HRRA(39))+&
@@ -1553,9 +2567,17 @@
                          2.D0*HRRA(40))+&
                          HRRA(62))+&
                          HRRA(90)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(13,13_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)-2.D0*HRR(39)+&
+      DUM=-2.D0*HRR(39)+&
                          ABy*(-2.D0*HRR(23)+&
                          ABy*(ABy*HRRB(23)+&
                          3.D0*HRRB(39))+&
@@ -1567,19 +2589,33 @@
                          3.D0*HRRB(40))+&
                          HRRB(62))+&
                          HRRB(90)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(13_z,13|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)+&
-                         ABy*(ABy*HRRA(44)+&
+      DUM=ABy*(ABy*HRRA(44)+&
                          2.D0*HRRA(67))+&
                          ABx*(ABy*(ABy*HRRA(28)+&
                          2.D0*HRRA(45))+&
                          HRRA(68))+&
                          HRRA(97)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(13,13_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)+&
-                         ABz*HRRB(61)+&
+      DUM=ABz*HRRB(61)+&
                          ABy*(2.D0*ABz*HRRB(39)+&
                          ABy*(ABz*HRRB(23)+&
                          HRRB(44))+&
@@ -1591,17 +2627,33 @@
                          2.D0*HRRB(45))+&
                          HRRB(68))+&
                          HRRB(97)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+3)*LDA+(OB+2)*LDB+CDOffSet !=
       !=(14_x,13|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)+&
-                         ABy*(ABy*HRRA(39)+&
+      DUM=ABy*(ABy*HRRA(39)+&
                          2.D0*HRRA(61))+&
                          ABx*(ABy*(ABy*HRRA(24)+&
                          2.D0*HRRA(40))+&
                          HRRA(62))+&
                          HRRA(90)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(14,13_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)-HRR(41)+&
+      DUM=-HRR(41)+&
                          ABy*(-2.D0*HRR(25)+&
                          ABy*(-HRR(14)+&
                          HRRB(39))+&
@@ -1613,9 +2665,16 @@
                          HRRB(41))+&
                          2.D0*HRRB(62))+&
                          HRRB(90)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(14_y,13|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)-3.D0*HRR(40)+&
+      DUM=-3.D0*HRR(40)+&
                          ABy*(-6.D0*HRR(24)+&
                          ABy*(-3.D0*HRR(13)+&
                          HRRA(40))+&
@@ -1627,9 +2686,17 @@
                          2.D0*HRRA(41))+&
                          HRRA(63))+&
                          HRRA(91)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(14,13_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)-2.D0*HRR(40)+&
+      DUM=-2.D0*HRR(40)+&
                          ABy*(-2.D0*HRR(24)+&
                          ABy*(ABy*HRRB(24)+&
                          3.D0*HRRB(40))+&
@@ -1641,19 +2708,33 @@
                          3.D0*HRRB(41))+&
                          HRRB(63))+&
                          HRRB(91)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(14_z,13|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)+&
-                         ABy*(ABy*HRRA(45)+&
+      DUM=ABy*(ABy*HRRA(45)+&
                          2.D0*HRRA(68))+&
                          ABx*(ABy*(ABy*HRRA(29)+&
                          2.D0*HRRA(46))+&
                          HRRA(69))+&
                          HRRA(98)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(14,13_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)+&
-                         ABz*HRRB(62)+&
+      DUM=ABz*HRRB(62)+&
                          ABy*(2.D0*ABz*HRRB(40)+&
                          ABy*(ABz*HRRB(24)+&
                          HRRB(45))+&
@@ -1665,9 +2746,18 @@
                          2.D0*HRRB(46))+&
                          HRRB(69))+&
                          HRRB(98)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+4)*LDA+(OB+2)*LDB+CDOffSet !=
       !=(15_x,13|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)-2.D0*HRR(44)+&
+      DUM=-2.D0*HRR(44)+&
                          ABy*(-4.D0*HRR(27)+&
                          ABy*(-2.D0*HRR(15)+&
                          HRRA(42))+&
@@ -1679,8 +2769,16 @@
                          2.D0*HRRA(43))+&
                          HRRA(66))+&
                          HRRA(95)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(15,13_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)-HRR(44)+&
+      DUM=-HRR(44)+&
                          ABy*(-2.D0*HRR(27)+&
                          ABy*(-HRR(15)+&
                          HRRB(42))+&
@@ -1692,18 +2790,32 @@
                          HRRB(44))+&
                          2.D0*HRRB(66))+&
                          HRRB(95)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(15_y,13|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)+&
-                         ABy*(ABy*HRRA(43)+&
+      DUM=ABy*(ABy*HRRA(43)+&
                          2.D0*HRRA(66))+&
                          ABx*(ABy*(ABy*HRRA(27)+&
                          2.D0*HRRA(44))+&
                          HRRA(67))+&
                          HRRA(96)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(15,13_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)-2.D0*HRR(43)+&
+      DUM=-2.D0*HRR(43)+&
                          ABy*(-2.D0*HRR(26)+&
                          ABy*(ABy*HRRB(26)+&
                          3.D0*HRRB(43))+&
@@ -1715,9 +2827,17 @@
                          3.D0*HRRB(44))+&
                          HRRB(67))+&
                          HRRB(96)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(15_z,13|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)-HRR(38)+&
+      DUM=-HRR(38)+&
                          ABy*(-2.D0*HRR(22)+&
                          ABy*(-HRR(11)+&
                          HRRA(47))+&
@@ -1729,10 +2849,17 @@
                          2.D0*HRRA(48))+&
                          HRRA(72))+&
                          HRRA(102)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(15,13_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)+&
-                         ABz*HRRB(66)+&
+      DUM=ABz*HRRB(66)+&
                          ABy*(2.D0*ABz*HRRB(43)+&
                          ABy*(ABz*HRRB(26)+&
                          HRRB(47))+&
@@ -1744,9 +2871,18 @@
                          2.D0*HRRB(48))+&
                          HRRB(72))+&
                          HRRB(102)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+5)*LDA+(OB+2)*LDB+CDOffSet !=
       !=(16_x,13|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)-HRR(45)+&
+      DUM=-HRR(45)+&
                          ABy*(-2.D0*HRR(28)+&
                          ABy*(-HRR(16)+&
                          HRRA(43))+&
@@ -1758,8 +2894,16 @@
                          2.D0*HRRA(44))+&
                          HRRA(67))+&
                          HRRA(96)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(16,13_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)-HRR(45)+&
+      DUM=-HRR(45)+&
                          ABy*(-2.D0*HRR(28)+&
                          ABy*(-HRR(16)+&
                          HRRB(43))+&
@@ -1771,9 +2915,16 @@
                          HRRB(45))+&
                          2.D0*HRRB(67))+&
                          HRRB(96)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(16_y,13|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)-HRR(44)+&
+      DUM=-HRR(44)+&
                          ABy*(-2.D0*HRR(27)+&
                          ABy*(-HRR(15)+&
                          HRRA(44))+&
@@ -1785,9 +2936,17 @@
                          2.D0*HRRA(45))+&
                          HRRA(68))+&
                          HRRA(97)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(16,13_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)-2.D0*HRR(44)+&
+      DUM=-2.D0*HRR(44)+&
                          ABy*(-2.D0*HRR(27)+&
                          ABy*(ABy*HRRB(27)+&
                          3.D0*HRRB(44))+&
@@ -1799,9 +2958,17 @@
                          3.D0*HRRB(45))+&
                          HRRB(68))+&
                          HRRB(97)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(16_z,13|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)-HRR(39)+&
+      DUM=-HRR(39)+&
                          ABy*(-2.D0*HRR(23)+&
                          ABy*(-HRR(12)+&
                          HRRA(48))+&
@@ -1813,10 +2980,17 @@
                          2.D0*HRRA(49))+&
                          HRRA(73))+&
                          HRRA(103)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(16,13_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)+&
-                         ABz*HRRB(67)+&
+      DUM=ABz*HRRB(67)+&
                          ABy*(2.D0*ABz*HRRB(44)+&
                          ABy*(ABz*HRRB(27)+&
                          HRRB(48))+&
@@ -1828,17 +3002,33 @@
                          2.D0*HRRB(49))+&
                          HRRB(73))+&
                          HRRB(103)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+6)*LDA+(OB+2)*LDB+CDOffSet !=
       !=(17_x,13|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)+&
-                         ABy*(ABy*HRRA(44)+&
+      DUM=ABy*(ABy*HRRA(44)+&
                          2.D0*HRRA(67))+&
                          ABx*(ABy*(ABy*HRRA(28)+&
                          2.D0*HRRA(45))+&
                          HRRA(68))+&
                          HRRA(97)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(17,13_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)-HRR(46)+&
+      DUM=-HRR(46)+&
                          ABy*(-2.D0*HRR(29)+&
                          ABy*(-HRR(17)+&
                          HRRB(44))+&
@@ -1850,9 +3040,16 @@
                          HRRB(46))+&
                          2.D0*HRRB(68))+&
                          HRRB(97)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(17_y,13|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)-2.D0*HRR(45)+&
+      DUM=-2.D0*HRR(45)+&
                          ABy*(-4.D0*HRR(28)+&
                          ABy*(-2.D0*HRR(16)+&
                          HRRA(45))+&
@@ -1864,9 +3061,17 @@
                          2.D0*HRRA(46))+&
                          HRRA(69))+&
                          HRRA(98)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(17,13_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)-2.D0*HRR(45)+&
+      DUM=-2.D0*HRR(45)+&
                          ABy*(-2.D0*HRR(28)+&
                          ABy*(ABy*HRRB(28)+&
                          3.D0*HRRB(45))+&
@@ -1878,9 +3083,17 @@
                          3.D0*HRRB(46))+&
                          HRRB(69))+&
                          HRRB(98)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(17_z,13|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)-HRR(40)+&
+      DUM=-HRR(40)+&
                          ABy*(-2.D0*HRR(24)+&
                          ABy*(-HRR(13)+&
                          HRRA(49))+&
@@ -1892,10 +3105,17 @@
                          2.D0*HRRA(50))+&
                          HRRA(74))+&
                          HRRA(104)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(17,13_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)+&
-                         ABz*HRRB(68)+&
+      DUM=ABz*HRRB(68)+&
                          ABy*(2.D0*ABz*HRRB(45)+&
                          ABy*(ABz*HRRB(28)+&
                          HRRB(49))+&
@@ -1907,9 +3127,18 @@
                          2.D0*HRRB(50))+&
                          HRRB(74))+&
                          HRRB(104)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+7)*LDA+(OB+2)*LDB+CDOffSet !=
       !=(18_x,13|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)-HRR(49)+&
+      DUM=-HRR(49)+&
                          ABy*(-2.D0*HRR(31)+&
                          ABy*(-HRR(18)+&
                          HRRA(47))+&
@@ -1921,8 +3150,16 @@
                          2.D0*HRRA(48))+&
                          HRRA(72))+&
                          HRRA(102)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(18,13_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)-HRR(49)+&
+      DUM=-HRR(49)+&
                          ABy*(-2.D0*HRR(31)+&
                          ABy*(-HRR(18)+&
                          HRRB(47))+&
@@ -1934,18 +3171,32 @@
                          HRRB(49))+&
                          2.D0*HRRB(72))+&
                          HRRB(102)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(18_y,13|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)+&
-                         ABy*(ABy*HRRA(48)+&
+      DUM=ABy*(ABy*HRRA(48)+&
                          2.D0*HRRA(72))+&
                          ABx*(ABy*(ABy*HRRA(31)+&
                          2.D0*HRRA(49))+&
                          HRRA(73))+&
                          HRRA(103)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(18,13_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)-2.D0*HRR(48)+&
+      DUM=-2.D0*HRR(48)+&
                          ABy*(-2.D0*HRR(30)+&
                          ABy*(ABy*HRRB(30)+&
                          3.D0*HRRB(48))+&
@@ -1957,9 +3208,17 @@
                          3.D0*HRRB(49))+&
                          HRRB(73))+&
                          HRRB(103)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(18_z,13|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)-2.D0*HRR(44)+&
+      DUM=-2.D0*HRR(44)+&
                          ABy*(-4.D0*HRR(27)+&
                          ABy*(-2.D0*HRR(15)+&
                          HRRA(51))+&
@@ -1971,10 +3230,17 @@
                          2.D0*HRRA(52))+&
                          HRRA(77))+&
                          HRRA(108)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(18,13_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)+&
-                         ABz*HRRB(72)+&
+      DUM=ABz*HRRB(72)+&
                          ABy*(2.D0*ABz*HRRB(48)+&
                          ABy*(ABz*HRRB(30)+&
                          HRRB(51))+&
@@ -1986,17 +3252,33 @@
                          2.D0*HRRB(52))+&
                          HRRB(77))+&
                          HRRB(108)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+8)*LDA+(OB+2)*LDB+CDOffSet !=
       !=(19_x,13|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)+&
-                         ABy*(ABy*HRRA(48)+&
+      DUM=ABy*(ABy*HRRA(48)+&
                          2.D0*HRRA(72))+&
                          ABx*(ABy*(ABy*HRRA(31)+&
                          2.D0*HRRA(49))+&
                          HRRA(73))+&
                          HRRA(103)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(19,13_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)-HRR(50)+&
+      DUM=-HRR(50)+&
                          ABy*(-2.D0*HRR(32)+&
                          ABy*(-HRR(19)+&
                          HRRB(48))+&
@@ -2008,9 +3290,16 @@
                          HRRB(50))+&
                          2.D0*HRRB(73))+&
                          HRRB(103)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(19_y,13|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)-HRR(49)+&
+      DUM=-HRR(49)+&
                          ABy*(-2.D0*HRR(31)+&
                          ABy*(-HRR(18)+&
                          HRRA(49))+&
@@ -2022,9 +3311,17 @@
                          2.D0*HRRA(50))+&
                          HRRA(74))+&
                          HRRA(104)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(19,13_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)-2.D0*HRR(49)+&
+      DUM=-2.D0*HRR(49)+&
                          ABy*(-2.D0*HRR(31)+&
                          ABy*(ABy*HRRB(31)+&
                          3.D0*HRRB(49))+&
@@ -2036,9 +3333,17 @@
                          3.D0*HRRB(50))+&
                          HRRB(74))+&
                          HRRB(104)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(19_z,13|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)-2.D0*HRR(45)+&
+      DUM=-2.D0*HRR(45)+&
                          ABy*(-4.D0*HRR(28)+&
                          ABy*(-2.D0*HRR(16)+&
                          HRRA(52))+&
@@ -2050,10 +3355,17 @@
                          2.D0*HRRA(53))+&
                          HRRA(78))+&
                          HRRA(109)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(19,13_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)+&
-                         ABz*HRRB(73)+&
+      DUM=ABz*HRRB(73)+&
                          ABy*(2.D0*ABz*HRRB(49)+&
                          ABy*(ABz*HRRB(31)+&
                          HRRB(52))+&
@@ -2065,17 +3377,33 @@
                          2.D0*HRRB(53))+&
                          HRRB(78))+&
                          HRRB(109)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+9)*LDA+(OB+2)*LDB+CDOffSet !=
       !=(20_x,13|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)+&
-                         ABy*(ABy*HRRA(51)+&
+      DUM=ABy*(ABy*HRRA(51)+&
                          2.D0*HRRA(76))+&
                          ABx*(ABy*(ABy*HRRA(33)+&
                          2.D0*HRRA(52))+&
                          HRRA(77))+&
                          HRRA(108)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(20,13_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)-HRR(53)+&
+      DUM=-HRR(53)+&
                          ABy*(-2.D0*HRR(34)+&
                          ABy*(-HRR(20)+&
                          HRRB(51))+&
@@ -2087,18 +3415,32 @@
                          HRRB(53))+&
                          2.D0*HRRB(77))+&
                          HRRB(108)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(20_y,13|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)+&
-                         ABy*(ABy*HRRA(52)+&
+      DUM=ABy*(ABy*HRRA(52)+&
                          2.D0*HRRA(77))+&
                          ABx*(ABy*(ABy*HRRA(34)+&
                          2.D0*HRRA(53))+&
                          HRRA(78))+&
                          HRRA(109)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(20,13_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)-2.D0*HRR(52)+&
+      DUM=-2.D0*HRR(52)+&
                          ABy*(-2.D0*HRR(33)+&
                          ABy*(ABy*HRRB(33)+&
                          3.D0*HRRB(52))+&
@@ -2110,9 +3452,17 @@
                          3.D0*HRRB(53))+&
                          HRRB(78))+&
                          HRRB(109)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(20_z,13|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)-3.D0*HRR(49)+&
+      DUM=-3.D0*HRR(49)+&
                          ABy*(-6.D0*HRR(31)+&
                          ABy*(-3.D0*HRR(18)+&
                          HRRA(54))+&
@@ -2124,10 +3474,17 @@
                          2.D0*HRRA(55))+&
                          HRRA(81))+&
                          HRRA(113)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(20,13_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)+&
-                         ABz*HRRB(77)+&
+      DUM=ABz*HRRB(77)+&
                          ABy*(2.D0*ABz*HRRB(52)+&
                          ABy*(ABz*HRRB(33)+&
                          HRRB(54))+&
@@ -2139,9 +3496,18 @@
                          2.D0*HRRB(55))+&
                          HRRB(81))+&
                          HRRB(113)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+0)*LDA+(OB+3)*LDB+CDOffSet !=
       !=(11_x,14|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)-3.D0*HRR(39)+&
+      DUM=-3.D0*HRR(39)+&
                          ABy*(-9.D0*HRR(23)+&
                          ABy*(-9.D0*HRR(12)+&
                          ABy*(-3.D0*HRR(5)+&
@@ -2149,9 +3515,16 @@
                          3.D0*HRRA(37))+&
                          3.D0*HRRA(59))+&
                          HRRA(88)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(11,14_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)+&
-                         ABy*(ABy*(ABy*HRRB(21)+&
+      DUM=ABy*(ABy*(ABy*HRRB(21)+&
                          3.D0*HRRB(37))+&
                          3.D0*HRRB(59))+&
                          ABx*(ABy*(ABy*(ABy*HRRB(11)+&
@@ -2159,16 +3532,30 @@
                          3.D0*HRRB(38))+&
                          HRRB(60))+&
                          HRRB(88)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(11_y,14|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)+&
-                         ABy*(ABy*(ABy*HRRA(22)+&
+      DUM=ABy*(ABy*(ABy*HRRA(22)+&
                          3.D0*HRRA(38))+&
                          3.D0*HRRA(60))+&
                          HRRA(89)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(11,14_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)-3.D0*HRR(38)+&
+      DUM=-3.D0*HRR(38)+&
                          ABy*(-6.D0*HRR(22)+&
                          ABy*(-3.D0*HRR(11)+&
                          ABy*(ABy*HRRB(11)+&
@@ -2176,17 +3563,31 @@
                          6.D0*HRRB(38))+&
                          4.D0*HRRB(60))+&
                          HRRB(89)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(11_z,14|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)+&
-                         ABy*(ABy*(ABy*HRRA(26)+&
+      DUM=ABy*(ABy*(ABy*HRRA(26)+&
                          3.D0*HRRA(43))+&
                          3.D0*HRRA(66))+&
                          HRRA(96)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(11,14_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)+&
-                         ABz*HRRB(60)+&
+      DUM=ABz*HRRB(60)+&
                          ABy*(3.D0*ABz*HRRB(38)+&
                          ABy*(3.D0*ABz*HRRB(22)+&
                          ABy*(ABz*HRRB(11)+&
@@ -2194,9 +3595,18 @@
                          3.D0*HRRB(43))+&
                          3.D0*HRRB(66))+&
                          HRRB(96)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+1)*LDA+(OB+3)*LDB+CDOffSet !=
       !=(12_x,14|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)-2.D0*HRR(40)+&
+      DUM=-2.D0*HRR(40)+&
                          ABy*(-6.D0*HRR(24)+&
                          ABy*(-6.D0*HRR(13)+&
                          ABy*(-2.D0*HRR(6)+&
@@ -2204,9 +3614,16 @@
                          3.D0*HRRA(38))+&
                          3.D0*HRRA(60))+&
                          HRRA(89)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(12,14_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)+&
-                         ABy*(ABy*(ABy*HRRB(22)+&
+      DUM=ABy*(ABy*(ABy*HRRB(22)+&
                          3.D0*HRRB(38))+&
                          3.D0*HRRB(60))+&
                          ABx*(ABy*(ABy*(ABy*HRRB(12)+&
@@ -2214,9 +3631,16 @@
                          3.D0*HRRB(39))+&
                          HRRB(61))+&
                          HRRB(89)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(12_y,14|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)-HRR(39)+&
+      DUM=-HRR(39)+&
                          ABy*(-3.D0*HRR(23)+&
                          ABy*(-3.D0*HRR(12)+&
                          ABy*(-HRR(5)+&
@@ -2224,9 +3648,17 @@
                          3.D0*HRRA(39))+&
                          3.D0*HRRA(61))+&
                          HRRA(90)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(12,14_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)-3.D0*HRR(39)+&
+      DUM=-3.D0*HRR(39)+&
                          ABy*(-6.D0*HRR(23)+&
                          ABy*(-3.D0*HRR(12)+&
                          ABy*(ABy*HRRB(12)+&
@@ -2234,17 +3666,31 @@
                          6.D0*HRRB(39))+&
                          4.D0*HRRB(61))+&
                          HRRB(90)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(12_z,14|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)+&
-                         ABy*(ABy*(ABy*HRRA(27)+&
+      DUM=ABy*(ABy*(ABy*HRRA(27)+&
                          3.D0*HRRA(44))+&
                          3.D0*HRRA(67))+&
                          HRRA(97)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(12,14_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)+&
-                         ABz*HRRB(61)+&
+      DUM=ABz*HRRB(61)+&
                          ABy*(3.D0*ABz*HRRB(39)+&
                          ABy*(3.D0*ABz*HRRB(23)+&
                          ABy*(ABz*HRRB(12)+&
@@ -2252,9 +3698,18 @@
                          3.D0*HRRB(44))+&
                          3.D0*HRRB(67))+&
                          HRRB(97)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+2)*LDA+(OB+3)*LDB+CDOffSet !=
       !=(13_x,14|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)-HRR(41)+&
+      DUM=-HRR(41)+&
                          ABy*(-3.D0*HRR(25)+&
                          ABy*(-3.D0*HRR(14)+&
                          ABy*(-HRR(7)+&
@@ -2262,9 +3717,16 @@
                          3.D0*HRRA(39))+&
                          3.D0*HRRA(61))+&
                          HRRA(90)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(13,14_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)+&
-                         ABy*(ABy*(ABy*HRRB(23)+&
+      DUM=ABy*(ABy*(ABy*HRRB(23)+&
                          3.D0*HRRB(39))+&
                          3.D0*HRRB(61))+&
                          ABx*(ABy*(ABy*(ABy*HRRB(13)+&
@@ -2272,9 +3734,16 @@
                          3.D0*HRRB(40))+&
                          HRRB(62))+&
                          HRRB(90)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(13_y,14|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)-2.D0*HRR(40)+&
+      DUM=-2.D0*HRR(40)+&
                          ABy*(-6.D0*HRR(24)+&
                          ABy*(-6.D0*HRR(13)+&
                          ABy*(-2.D0*HRR(6)+&
@@ -2282,9 +3751,17 @@
                          3.D0*HRRA(40))+&
                          3.D0*HRRA(62))+&
                          HRRA(91)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(13,14_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)-3.D0*HRR(40)+&
+      DUM=-3.D0*HRR(40)+&
                          ABy*(-6.D0*HRR(24)+&
                          ABy*(-3.D0*HRR(13)+&
                          ABy*(ABy*HRRB(13)+&
@@ -2292,17 +3769,31 @@
                          6.D0*HRRB(40))+&
                          4.D0*HRRB(62))+&
                          HRRB(91)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(13_z,14|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)+&
-                         ABy*(ABy*(ABy*HRRA(28)+&
+      DUM=ABy*(ABy*(ABy*HRRA(28)+&
                          3.D0*HRRA(45))+&
                          3.D0*HRRA(68))+&
                          HRRA(98)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(13,14_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)+&
-                         ABz*HRRB(62)+&
+      DUM=ABz*HRRB(62)+&
                          ABy*(3.D0*ABz*HRRB(40)+&
                          ABy*(3.D0*ABz*HRRB(24)+&
                          ABy*(ABz*HRRB(13)+&
@@ -2310,16 +3801,31 @@
                          3.D0*HRRB(45))+&
                          3.D0*HRRB(68))+&
                          HRRB(98)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+3)*LDA+(OB+3)*LDB+CDOffSet !=
       !=(14_x,14|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)+&
-                         ABy*(ABy*(ABy*HRRA(24)+&
+      DUM=ABy*(ABy*(ABy*HRRA(24)+&
                          3.D0*HRRA(40))+&
                          3.D0*HRRA(62))+&
                          HRRA(91)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(14,14_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)+&
-                         ABy*(ABy*(ABy*HRRB(24)+&
+      DUM=ABy*(ABy*(ABy*HRRB(24)+&
                          3.D0*HRRB(40))+&
                          3.D0*HRRB(62))+&
                          ABx*(ABy*(ABy*(ABy*HRRB(14)+&
@@ -2327,9 +3833,16 @@
                          3.D0*HRRB(41))+&
                          HRRB(63))+&
                          HRRB(91)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(14_y,14|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)-3.D0*HRR(41)+&
+      DUM=-3.D0*HRR(41)+&
                          ABy*(-9.D0*HRR(25)+&
                          ABy*(-9.D0*HRR(14)+&
                          ABy*(-3.D0*HRR(7)+&
@@ -2337,9 +3850,17 @@
                          3.D0*HRRA(41))+&
                          3.D0*HRRA(63))+&
                          HRRA(92)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(14,14_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)-3.D0*HRR(41)+&
+      DUM=-3.D0*HRR(41)+&
                          ABy*(-6.D0*HRR(25)+&
                          ABy*(-3.D0*HRR(14)+&
                          ABy*(ABy*HRRB(14)+&
@@ -2347,17 +3868,31 @@
                          6.D0*HRRB(41))+&
                          4.D0*HRRB(63))+&
                          HRRB(92)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(14_z,14|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)+&
-                         ABy*(ABy*(ABy*HRRA(29)+&
+      DUM=ABy*(ABy*(ABy*HRRA(29)+&
                          3.D0*HRRA(46))+&
                          3.D0*HRRA(69))+&
                          HRRA(99)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(14,14_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)+&
-                         ABz*HRRB(63)+&
+      DUM=ABz*HRRB(63)+&
                          ABy*(3.D0*ABz*HRRB(41)+&
                          ABy*(3.D0*ABz*HRRB(25)+&
                          ABy*(ABz*HRRB(14)+&
@@ -2365,9 +3900,18 @@
                          3.D0*HRRB(46))+&
                          3.D0*HRRB(69))+&
                          HRRB(99)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+4)*LDA+(OB+3)*LDB+CDOffSet !=
       !=(15_x,14|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)-2.D0*HRR(45)+&
+      DUM=-2.D0*HRR(45)+&
                          ABy*(-6.D0*HRR(28)+&
                          ABy*(-6.D0*HRR(16)+&
                          ABy*(-2.D0*HRR(8)+&
@@ -2375,9 +3919,16 @@
                          3.D0*HRRA(43))+&
                          3.D0*HRRA(66))+&
                          HRRA(96)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(15,14_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)+&
-                         ABy*(ABy*(ABy*HRRB(26)+&
+      DUM=ABy*(ABy*(ABy*HRRB(26)+&
                          3.D0*HRRB(43))+&
                          3.D0*HRRB(66))+&
                          ABx*(ABy*(ABy*(ABy*HRRB(15)+&
@@ -2385,16 +3936,30 @@
                          3.D0*HRRB(44))+&
                          HRRB(67))+&
                          HRRB(96)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(15_y,14|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)+&
-                         ABy*(ABy*(ABy*HRRA(27)+&
+      DUM=ABy*(ABy*(ABy*HRRA(27)+&
                          3.D0*HRRA(44))+&
                          3.D0*HRRA(67))+&
                          HRRA(97)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(15,14_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)-3.D0*HRR(44)+&
+      DUM=-3.D0*HRR(44)+&
                          ABy*(-6.D0*HRR(27)+&
                          ABy*(-3.D0*HRR(15)+&
                          ABy*(ABy*HRRB(15)+&
@@ -2402,9 +3967,17 @@
                          6.D0*HRRB(44))+&
                          4.D0*HRRB(67))+&
                          HRRB(97)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(15_z,14|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)-HRR(39)+&
+      DUM=-HRR(39)+&
                          ABy*(-3.D0*HRR(23)+&
                          ABy*(-3.D0*HRR(12)+&
                          ABy*(-HRR(5)+&
@@ -2412,10 +3985,17 @@
                          3.D0*HRRA(48))+&
                          3.D0*HRRA(72))+&
                          HRRA(103)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(15,14_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)+&
-                         ABz*HRRB(67)+&
+      DUM=ABz*HRRB(67)+&
                          ABy*(3.D0*ABz*HRRB(44)+&
                          ABy*(3.D0*ABz*HRRB(27)+&
                          ABy*(ABz*HRRB(15)+&
@@ -2423,9 +4003,18 @@
                          3.D0*HRRB(48))+&
                          3.D0*HRRB(72))+&
                          HRRB(103)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+5)*LDA+(OB+3)*LDB+CDOffSet !=
       !=(16_x,14|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)-HRR(46)+&
+      DUM=-HRR(46)+&
                          ABy*(-3.D0*HRR(29)+&
                          ABy*(-3.D0*HRR(17)+&
                          ABy*(-HRR(9)+&
@@ -2433,9 +4022,16 @@
                          3.D0*HRRA(44))+&
                          3.D0*HRRA(67))+&
                          HRRA(97)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(16,14_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)+&
-                         ABy*(ABy*(ABy*HRRB(27)+&
+      DUM=ABy*(ABy*(ABy*HRRB(27)+&
                          3.D0*HRRB(44))+&
                          3.D0*HRRB(67))+&
                          ABx*(ABy*(ABy*(ABy*HRRB(16)+&
@@ -2443,9 +4039,16 @@
                          3.D0*HRRB(45))+&
                          HRRB(68))+&
                          HRRB(97)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(16_y,14|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)-HRR(45)+&
+      DUM=-HRR(45)+&
                          ABy*(-3.D0*HRR(28)+&
                          ABy*(-3.D0*HRR(16)+&
                          ABy*(-HRR(8)+&
@@ -2453,9 +4056,17 @@
                          3.D0*HRRA(45))+&
                          3.D0*HRRA(68))+&
                          HRRA(98)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(16,14_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)-3.D0*HRR(45)+&
+      DUM=-3.D0*HRR(45)+&
                          ABy*(-6.D0*HRR(28)+&
                          ABy*(-3.D0*HRR(16)+&
                          ABy*(ABy*HRRB(16)+&
@@ -2463,9 +4074,17 @@
                          6.D0*HRRB(45))+&
                          4.D0*HRRB(68))+&
                          HRRB(98)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(16_z,14|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)-HRR(40)+&
+      DUM=-HRR(40)+&
                          ABy*(-3.D0*HRR(24)+&
                          ABy*(-3.D0*HRR(13)+&
                          ABy*(-HRR(6)+&
@@ -2473,10 +4092,17 @@
                          3.D0*HRRA(49))+&
                          3.D0*HRRA(73))+&
                          HRRA(104)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(16,14_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)+&
-                         ABz*HRRB(68)+&
+      DUM=ABz*HRRB(68)+&
                          ABy*(3.D0*ABz*HRRB(45)+&
                          ABy*(3.D0*ABz*HRRB(28)+&
                          ABy*(ABz*HRRB(16)+&
@@ -2484,16 +4110,31 @@
                          3.D0*HRRB(49))+&
                          3.D0*HRRB(73))+&
                          HRRB(104)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+6)*LDA+(OB+3)*LDB+CDOffSet !=
       !=(17_x,14|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)+&
-                         ABy*(ABy*(ABy*HRRA(28)+&
+      DUM=ABy*(ABy*(ABy*HRRA(28)+&
                          3.D0*HRRA(45))+&
                          3.D0*HRRA(68))+&
                          HRRA(98)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(17,14_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)+&
-                         ABy*(ABy*(ABy*HRRB(28)+&
+      DUM=ABy*(ABy*(ABy*HRRB(28)+&
                          3.D0*HRRB(45))+&
                          3.D0*HRRB(68))+&
                          ABx*(ABy*(ABy*(ABy*HRRB(17)+&
@@ -2501,9 +4142,16 @@
                          3.D0*HRRB(46))+&
                          HRRB(69))+&
                          HRRB(98)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(17_y,14|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)-2.D0*HRR(46)+&
+      DUM=-2.D0*HRR(46)+&
                          ABy*(-6.D0*HRR(29)+&
                          ABy*(-6.D0*HRR(17)+&
                          ABy*(-2.D0*HRR(9)+&
@@ -2511,9 +4159,17 @@
                          3.D0*HRRA(46))+&
                          3.D0*HRRA(69))+&
                          HRRA(99)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(17,14_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)-3.D0*HRR(46)+&
+      DUM=-3.D0*HRR(46)+&
                          ABy*(-6.D0*HRR(29)+&
                          ABy*(-3.D0*HRR(17)+&
                          ABy*(ABy*HRRB(17)+&
@@ -2521,9 +4177,17 @@
                          6.D0*HRRB(46))+&
                          4.D0*HRRB(69))+&
                          HRRB(99)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(17_z,14|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)-HRR(41)+&
+      DUM=-HRR(41)+&
                          ABy*(-3.D0*HRR(25)+&
                          ABy*(-3.D0*HRR(14)+&
                          ABy*(-HRR(7)+&
@@ -2531,10 +4195,17 @@
                          3.D0*HRRA(50))+&
                          3.D0*HRRA(74))+&
                          HRRA(105)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(17,14_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)+&
-                         ABz*HRRB(69)+&
+      DUM=ABz*HRRB(69)+&
                          ABy*(3.D0*ABz*HRRB(46)+&
                          ABy*(3.D0*ABz*HRRB(29)+&
                          ABy*(ABz*HRRB(17)+&
@@ -2542,9 +4213,18 @@
                          3.D0*HRRB(50))+&
                          3.D0*HRRB(74))+&
                          HRRB(105)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+7)*LDA+(OB+3)*LDB+CDOffSet !=
       !=(18_x,14|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)-HRR(50)+&
+      DUM=-HRR(50)+&
                          ABy*(-3.D0*HRR(32)+&
                          ABy*(-3.D0*HRR(19)+&
                          ABy*(-HRR(10)+&
@@ -2552,9 +4232,16 @@
                          3.D0*HRRA(48))+&
                          3.D0*HRRA(72))+&
                          HRRA(103)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(18,14_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)+&
-                         ABy*(ABy*(ABy*HRRB(30)+&
+      DUM=ABy*(ABy*(ABy*HRRB(30)+&
                          3.D0*HRRB(48))+&
                          3.D0*HRRB(72))+&
                          ABx*(ABy*(ABy*(ABy*HRRB(18)+&
@@ -2562,16 +4249,30 @@
                          3.D0*HRRB(49))+&
                          HRRB(73))+&
                          HRRB(103)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(18_y,14|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)+&
-                         ABy*(ABy*(ABy*HRRA(31)+&
+      DUM=ABy*(ABy*(ABy*HRRA(31)+&
                          3.D0*HRRA(49))+&
                          3.D0*HRRA(73))+&
                          HRRA(104)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(18,14_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)-3.D0*HRR(49)+&
+      DUM=-3.D0*HRR(49)+&
                          ABy*(-6.D0*HRR(31)+&
                          ABy*(-3.D0*HRR(18)+&
                          ABy*(ABy*HRRB(18)+&
@@ -2579,9 +4280,17 @@
                          6.D0*HRRB(49))+&
                          4.D0*HRRB(73))+&
                          HRRB(104)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(18_z,14|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)-2.D0*HRR(45)+&
+      DUM=-2.D0*HRR(45)+&
                          ABy*(-6.D0*HRR(28)+&
                          ABy*(-6.D0*HRR(16)+&
                          ABy*(-2.D0*HRR(8)+&
@@ -2589,10 +4298,17 @@
                          3.D0*HRRA(52))+&
                          3.D0*HRRA(77))+&
                          HRRA(109)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(18,14_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)+&
-                         ABz*HRRB(73)+&
+      DUM=ABz*HRRB(73)+&
                          ABy*(3.D0*ABz*HRRB(49)+&
                          ABy*(3.D0*ABz*HRRB(31)+&
                          ABy*(ABz*HRRB(18)+&
@@ -2600,16 +4316,31 @@
                          3.D0*HRRB(52))+&
                          3.D0*HRRB(77))+&
                          HRRB(109)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+8)*LDA+(OB+3)*LDB+CDOffSet !=
       !=(19_x,14|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)+&
-                         ABy*(ABy*(ABy*HRRA(31)+&
+      DUM=ABy*(ABy*(ABy*HRRA(31)+&
                          3.D0*HRRA(49))+&
                          3.D0*HRRA(73))+&
                          HRRA(104)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(19,14_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)+&
-                         ABy*(ABy*(ABy*HRRB(31)+&
+      DUM=ABy*(ABy*(ABy*HRRB(31)+&
                          3.D0*HRRB(49))+&
                          3.D0*HRRB(73))+&
                          ABx*(ABy*(ABy*(ABy*HRRB(19)+&
@@ -2617,9 +4348,16 @@
                          3.D0*HRRB(50))+&
                          HRRB(74))+&
                          HRRB(104)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(19_y,14|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)-HRR(50)+&
+      DUM=-HRR(50)+&
                          ABy*(-3.D0*HRR(32)+&
                          ABy*(-3.D0*HRR(19)+&
                          ABy*(-HRR(10)+&
@@ -2627,9 +4365,17 @@
                          3.D0*HRRA(50))+&
                          3.D0*HRRA(74))+&
                          HRRA(105)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(19,14_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)-3.D0*HRR(50)+&
+      DUM=-3.D0*HRR(50)+&
                          ABy*(-6.D0*HRR(32)+&
                          ABy*(-3.D0*HRR(19)+&
                          ABy*(ABy*HRRB(19)+&
@@ -2637,9 +4383,17 @@
                          6.D0*HRRB(50))+&
                          4.D0*HRRB(74))+&
                          HRRB(105)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(19_z,14|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)-2.D0*HRR(46)+&
+      DUM=-2.D0*HRR(46)+&
                          ABy*(-6.D0*HRR(29)+&
                          ABy*(-6.D0*HRR(17)+&
                          ABy*(-2.D0*HRR(9)+&
@@ -2647,10 +4401,17 @@
                          3.D0*HRRA(53))+&
                          3.D0*HRRA(78))+&
                          HRRA(110)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(19,14_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)+&
-                         ABz*HRRB(74)+&
+      DUM=ABz*HRRB(74)+&
                          ABy*(3.D0*ABz*HRRB(50)+&
                          ABy*(3.D0*ABz*HRRB(32)+&
                          ABy*(ABz*HRRB(19)+&
@@ -2658,16 +4419,31 @@
                          3.D0*HRRB(53))+&
                          3.D0*HRRB(78))+&
                          HRRB(110)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+9)*LDA+(OB+3)*LDB+CDOffSet !=
       !=(20_x,14|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)+&
-                         ABy*(ABy*(ABy*HRRA(33)+&
+      DUM=ABy*(ABy*(ABy*HRRA(33)+&
                          3.D0*HRRA(52))+&
                          3.D0*HRRA(77))+&
                          HRRA(109)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(20,14_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)+&
-                         ABy*(ABy*(ABy*HRRB(33)+&
+      DUM=ABy*(ABy*(ABy*HRRB(33)+&
                          3.D0*HRRB(52))+&
                          3.D0*HRRB(77))+&
                          ABx*(ABy*(ABy*(ABy*HRRB(20)+&
@@ -2675,16 +4451,30 @@
                          3.D0*HRRB(53))+&
                          HRRB(78))+&
                          HRRB(109)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(20_y,14|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)+&
-                         ABy*(ABy*(ABy*HRRA(34)+&
+      DUM=ABy*(ABy*(ABy*HRRA(34)+&
                          3.D0*HRRA(53))+&
                          3.D0*HRRA(78))+&
                          HRRA(110)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(20,14_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)-3.D0*HRR(53)+&
+      DUM=-3.D0*HRR(53)+&
                          ABy*(-6.D0*HRR(34)+&
                          ABy*(-3.D0*HRR(20)+&
                          ABy*(ABy*HRRB(20)+&
@@ -2692,9 +4482,17 @@
                          6.D0*HRRB(53))+&
                          4.D0*HRRB(78))+&
                          HRRB(110)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(20_z,14|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)-3.D0*HRR(50)+&
+      DUM=-3.D0*HRR(50)+&
                          ABy*(-9.D0*HRR(32)+&
                          ABy*(-9.D0*HRR(19)+&
                          ABy*(-3.D0*HRR(10)+&
@@ -2702,10 +4500,17 @@
                          3.D0*HRRA(55))+&
                          3.D0*HRRA(81))+&
                          HRRA(114)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(20,14_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)+&
-                         ABz*HRRB(78)+&
+      DUM=ABz*HRRB(78)+&
                          ABy*(3.D0*ABz*HRRB(53)+&
                          ABy*(3.D0*ABz*HRRB(34)+&
                          ABy*(ABz*HRRB(20)+&
@@ -2713,9 +4518,18 @@
                          3.D0*HRRB(55))+&
                          3.D0*HRRB(81))+&
                          HRRB(114)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+0)*LDA+(OB+4)*LDB+CDOffSet !=
       !=(11_x,15|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)-3.D0*HRR(42)+&
+      DUM=-3.D0*HRR(42)+&
                          ABz*(-3.D0*HRR(21)+&
                          HRRA(57))+&
                          ABx*(-6.D0*HRR(26)+&
@@ -2727,8 +4541,16 @@
                          HRRA(42))+&
                          2.D0*HRRA(64))+&
                          HRRA(93)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(11,15_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)-2.D0*HRR(42)+&
+      DUM=-2.D0*HRR(42)+&
                          ABz*(-2.D0*HRR(21)+&
                          HRRB(57))+&
                          ABx*(-2.D0*HRR(26)+&
@@ -2740,19 +4562,32 @@
                          3.D0*HRRB(42))+&
                          3.D0*HRRB(64))+&
                          HRRB(93)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(11_y,15|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)+&
-                         ABz*HRRA(58)+&
+      DUM=ABz*HRRA(58)+&
                          ABx*(2.D0*ABz*HRRA(37)+&
                          ABx*(ABz*HRRA(22)+&
                          HRRA(43))+&
                          2.D0*HRRA(65))+&
                          HRRA(94)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(11,15_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)+&
-                         ABz*HRRB(58)+&
+      DUM=ABz*HRRB(58)+&
                          ABy*(ABz*HRRB(36)+&
                          HRRB(64))+&
                          ABx*(2.D0*ABz*HRRB(37)+&
@@ -2764,18 +4599,33 @@
                          HRRB(43))+&
                          2.D0*HRRB(65))+&
                          HRRB(94)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(11_z,15|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)+&
-                         ABz*HRRA(64)+&
+      DUM=ABz*HRRA(64)+&
                          ABx*(2.D0*ABz*HRRA(42)+&
                          ABx*(ABz*HRRA(26)+&
                          HRRA(47))+&
                          2.D0*HRRA(70))+&
                          HRRA(100)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(11,15_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)-HRR(36)+&
+      DUM=-HRR(36)+&
                          ABz*(ABz*HRRB(36)+&
                          2.D0*HRRB(64))+&
                          ABx*(-2.D0*HRR(21)+&
@@ -2787,9 +4637,18 @@
                          HRRB(47))+&
                          2.D0*HRRB(70))+&
                          HRRB(100)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+1)*LDA+(OB+4)*LDB+CDOffSet !=
       !=(12_x,15|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)-2.D0*HRR(43)+&
+      DUM=-2.D0*HRR(43)+&
                          ABz*(-2.D0*HRR(22)+&
                          HRRA(58))+&
                          ABx*(-4.D0*HRR(27)+&
@@ -2801,8 +4660,16 @@
                          HRRA(43))+&
                          2.D0*HRRA(65))+&
                          HRRA(94)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(12,15_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)-2.D0*HRR(43)+&
+      DUM=-2.D0*HRR(43)+&
                          ABz*(-2.D0*HRR(22)+&
                          HRRB(58))+&
                          ABx*(-2.D0*HRR(27)+&
@@ -2814,9 +4681,16 @@
                          3.D0*HRRB(43))+&
                          3.D0*HRRB(65))+&
                          HRRB(94)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(12_y,15|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)-HRR(42)+&
+      DUM=-HRR(42)+&
                          ABz*(-HRR(21)+&
                          HRRA(59))+&
                          ABx*(-2.D0*HRR(26)+&
@@ -2828,10 +4702,17 @@
                          HRRA(44))+&
                          2.D0*HRRA(66))+&
                          HRRA(95)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(12,15_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)+&
-                         ABz*HRRB(59)+&
+      DUM=ABz*HRRB(59)+&
                          ABy*(ABz*HRRB(37)+&
                          HRRB(65))+&
                          ABx*(2.D0*ABz*HRRB(38)+&
@@ -2843,18 +4724,33 @@
                          HRRB(44))+&
                          2.D0*HRRB(66))+&
                          HRRB(95)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(12_z,15|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)+&
-                         ABz*HRRA(65)+&
+      DUM=ABz*HRRA(65)+&
                          ABx*(2.D0*ABz*HRRA(43)+&
                          ABx*(ABz*HRRA(27)+&
                          HRRA(48))+&
                          2.D0*HRRA(71))+&
                          HRRA(101)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(12,15_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)-HRR(37)+&
+      DUM=-HRR(37)+&
                          ABz*(ABz*HRRB(37)+&
                          2.D0*HRRB(65))+&
                          ABx*(-2.D0*HRR(22)+&
@@ -2866,9 +4762,18 @@
                          HRRB(48))+&
                          2.D0*HRRB(71))+&
                          HRRB(101)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+2)*LDA+(OB+4)*LDB+CDOffSet !=
       !=(13_x,15|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)-HRR(44)+&
+      DUM=-HRR(44)+&
                          ABz*(-HRR(23)+&
                          HRRA(59))+&
                          ABx*(-2.D0*HRR(28)+&
@@ -2880,8 +4785,16 @@
                          HRRA(44))+&
                          2.D0*HRRA(66))+&
                          HRRA(95)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(13,15_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)-2.D0*HRR(44)+&
+      DUM=-2.D0*HRR(44)+&
                          ABz*(-2.D0*HRR(23)+&
                          HRRB(59))+&
                          ABx*(-2.D0*HRR(28)+&
@@ -2893,9 +4806,16 @@
                          3.D0*HRRB(44))+&
                          3.D0*HRRB(66))+&
                          HRRB(95)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(13_y,15|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)-2.D0*HRR(43)+&
+      DUM=-2.D0*HRR(43)+&
                          ABz*(-2.D0*HRR(22)+&
                          HRRA(60))+&
                          ABx*(-4.D0*HRR(27)+&
@@ -2907,10 +4827,17 @@
                          HRRA(45))+&
                          2.D0*HRRA(67))+&
                          HRRA(96)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(13,15_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)+&
-                         ABz*HRRB(60)+&
+      DUM=ABz*HRRB(60)+&
                          ABy*(ABz*HRRB(38)+&
                          HRRB(66))+&
                          ABx*(2.D0*ABz*HRRB(39)+&
@@ -2922,18 +4849,33 @@
                          HRRB(45))+&
                          2.D0*HRRB(67))+&
                          HRRB(96)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(13_z,15|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)+&
-                         ABz*HRRA(66)+&
+      DUM=ABz*HRRA(66)+&
                          ABx*(2.D0*ABz*HRRA(44)+&
                          ABx*(ABz*HRRA(28)+&
                          HRRA(49))+&
                          2.D0*HRRA(72))+&
                          HRRA(102)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(13,15_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)-HRR(38)+&
+      DUM=-HRR(38)+&
                          ABz*(ABz*HRRB(38)+&
                          2.D0*HRRB(66))+&
                          ABx*(-2.D0*HRR(23)+&
@@ -2945,17 +4887,33 @@
                          HRRB(49))+&
                          2.D0*HRRB(72))+&
                          HRRB(102)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+3)*LDA+(OB+4)*LDB+CDOffSet !=
       !=(14_x,15|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)+&
-                         ABz*HRRA(60)+&
+      DUM=ABz*HRRA(60)+&
                          ABx*(2.D0*ABz*HRRA(39)+&
                          ABx*(ABz*HRRA(24)+&
                          HRRA(45))+&
                          2.D0*HRRA(67))+&
                          HRRA(96)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(14,15_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)-2.D0*HRR(45)+&
+      DUM=-2.D0*HRR(45)+&
                          ABz*(-2.D0*HRR(24)+&
                          HRRB(60))+&
                          ABx*(-2.D0*HRR(29)+&
@@ -2967,9 +4925,16 @@
                          3.D0*HRRB(45))+&
                          3.D0*HRRB(67))+&
                          HRRB(96)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(14_y,15|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)-3.D0*HRR(44)+&
+      DUM=-3.D0*HRR(44)+&
                          ABz*(-3.D0*HRR(23)+&
                          HRRA(61))+&
                          ABx*(-6.D0*HRR(28)+&
@@ -2981,10 +4946,17 @@
                          HRRA(46))+&
                          2.D0*HRRA(68))+&
                          HRRA(97)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(14,15_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)+&
-                         ABz*HRRB(61)+&
+      DUM=ABz*HRRB(61)+&
                          ABy*(ABz*HRRB(39)+&
                          HRRB(67))+&
                          ABx*(2.D0*ABz*HRRB(40)+&
@@ -2996,18 +4968,33 @@
                          HRRB(46))+&
                          2.D0*HRRB(68))+&
                          HRRB(97)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(14_z,15|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)+&
-                         ABz*HRRA(67)+&
+      DUM=ABz*HRRA(67)+&
                          ABx*(2.D0*ABz*HRRA(45)+&
                          ABx*(ABz*HRRA(29)+&
                          HRRA(50))+&
                          2.D0*HRRA(73))+&
                          HRRA(103)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(14,15_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)-HRR(39)+&
+      DUM=-HRR(39)+&
                          ABz*(ABz*HRRB(39)+&
                          2.D0*HRRB(67))+&
                          ABx*(-2.D0*HRR(24)+&
@@ -3019,9 +5006,18 @@
                          HRRB(50))+&
                          2.D0*HRRB(73))+&
                          HRRB(103)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+4)*LDA+(OB+4)*LDB+CDOffSet !=
       !=(15_x,15|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)-2.D0*HRR(47)+&
+      DUM=-2.D0*HRR(47)+&
                          ABz*(-2.D0*HRR(26)+&
                          HRRA(64))+&
                          ABx*(-4.D0*HRR(30)+&
@@ -3033,8 +5029,16 @@
                          HRRA(47))+&
                          2.D0*HRRA(70))+&
                          HRRA(100)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(15,15_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)-2.D0*HRR(47)+&
+      DUM=-2.D0*HRR(47)+&
                          ABz*(-2.D0*HRR(26)+&
                          HRRB(64))+&
                          ABx*(-2.D0*HRR(30)+&
@@ -3046,19 +5050,32 @@
                          3.D0*HRRB(47))+&
                          3.D0*HRRB(70))+&
                          HRRB(100)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(15_y,15|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)+&
-                         ABz*HRRA(65)+&
+      DUM=ABz*HRRA(65)+&
                          ABx*(2.D0*ABz*HRRA(43)+&
                          ABx*(ABz*HRRA(27)+&
                          HRRA(48))+&
                          2.D0*HRRA(71))+&
                          HRRA(101)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(15,15_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)+&
-                         ABz*HRRB(65)+&
+      DUM=ABz*HRRB(65)+&
                          ABy*(ABz*HRRB(42)+&
                          HRRB(70))+&
                          ABx*(2.D0*ABz*HRRB(43)+&
@@ -3070,9 +5087,17 @@
                          HRRB(48))+&
                          2.D0*HRRB(71))+&
                          HRRB(101)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(15_z,15|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)-HRR(42)+&
+      DUM=-HRR(42)+&
                          ABz*(-HRR(21)+&
                          HRRA(70))+&
                          ABx*(-2.D0*HRR(26)+&
@@ -3084,9 +5109,17 @@
                          HRRA(51))+&
                          2.D0*HRRA(75))+&
                          HRRA(106)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(15,15_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)-HRR(42)+&
+      DUM=-HRR(42)+&
                          ABz*(ABz*HRRB(42)+&
                          2.D0*HRRB(70))+&
                          ABx*(-2.D0*HRR(26)+&
@@ -3098,9 +5131,18 @@
                          HRRB(51))+&
                          2.D0*HRRB(75))+&
                          HRRB(106)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+5)*LDA+(OB+4)*LDB+CDOffSet !=
       !=(16_x,15|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)-HRR(48)+&
+      DUM=-HRR(48)+&
                          ABz*(-HRR(27)+&
                          HRRA(65))+&
                          ABx*(-2.D0*HRR(31)+&
@@ -3112,8 +5154,16 @@
                          HRRA(48))+&
                          2.D0*HRRA(71))+&
                          HRRA(101)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(16,15_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)-2.D0*HRR(48)+&
+      DUM=-2.D0*HRR(48)+&
                          ABz*(-2.D0*HRR(27)+&
                          HRRB(65))+&
                          ABx*(-2.D0*HRR(31)+&
@@ -3125,9 +5175,16 @@
                          3.D0*HRRB(48))+&
                          3.D0*HRRB(71))+&
                          HRRB(101)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(16_y,15|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)-HRR(47)+&
+      DUM=-HRR(47)+&
                          ABz*(-HRR(26)+&
                          HRRA(66))+&
                          ABx*(-2.D0*HRR(30)+&
@@ -3139,10 +5196,17 @@
                          HRRA(49))+&
                          2.D0*HRRA(72))+&
                          HRRA(102)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(16,15_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)+&
-                         ABz*HRRB(66)+&
+      DUM=ABz*HRRB(66)+&
                          ABy*(ABz*HRRB(43)+&
                          HRRB(71))+&
                          ABx*(2.D0*ABz*HRRB(44)+&
@@ -3154,9 +5218,17 @@
                          HRRB(49))+&
                          2.D0*HRRB(72))+&
                          HRRB(102)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(16_z,15|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)-HRR(43)+&
+      DUM=-HRR(43)+&
                          ABz*(-HRR(22)+&
                          HRRA(71))+&
                          ABx*(-2.D0*HRR(27)+&
@@ -3168,9 +5240,17 @@
                          HRRA(52))+&
                          2.D0*HRRA(76))+&
                          HRRA(107)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(16,15_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)-HRR(43)+&
+      DUM=-HRR(43)+&
                          ABz*(ABz*HRRB(43)+&
                          2.D0*HRRB(71))+&
                          ABx*(-2.D0*HRR(27)+&
@@ -3182,17 +5262,33 @@
                          HRRB(52))+&
                          2.D0*HRRB(76))+&
                          HRRB(107)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+6)*LDA+(OB+4)*LDB+CDOffSet !=
       !=(17_x,15|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)+&
-                         ABz*HRRA(66)+&
+      DUM=ABz*HRRA(66)+&
                          ABx*(2.D0*ABz*HRRA(44)+&
                          ABx*(ABz*HRRA(28)+&
                          HRRA(49))+&
                          2.D0*HRRA(72))+&
                          HRRA(102)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(17,15_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)-2.D0*HRR(49)+&
+      DUM=-2.D0*HRR(49)+&
                          ABz*(-2.D0*HRR(28)+&
                          HRRB(66))+&
                          ABx*(-2.D0*HRR(32)+&
@@ -3204,9 +5300,16 @@
                          3.D0*HRRB(49))+&
                          3.D0*HRRB(72))+&
                          HRRB(102)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(17_y,15|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)-2.D0*HRR(48)+&
+      DUM=-2.D0*HRR(48)+&
                          ABz*(-2.D0*HRR(27)+&
                          HRRA(67))+&
                          ABx*(-4.D0*HRR(31)+&
@@ -3218,10 +5321,17 @@
                          HRRA(50))+&
                          2.D0*HRRA(73))+&
                          HRRA(103)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(17,15_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)+&
-                         ABz*HRRB(67)+&
+      DUM=ABz*HRRB(67)+&
                          ABy*(ABz*HRRB(44)+&
                          HRRB(72))+&
                          ABx*(2.D0*ABz*HRRB(45)+&
@@ -3233,9 +5343,17 @@
                          HRRB(50))+&
                          2.D0*HRRB(73))+&
                          HRRB(103)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(17_z,15|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)-HRR(44)+&
+      DUM=-HRR(44)+&
                          ABz*(-HRR(23)+&
                          HRRA(72))+&
                          ABx*(-2.D0*HRR(28)+&
@@ -3247,9 +5365,17 @@
                          HRRA(53))+&
                          2.D0*HRRA(77))+&
                          HRRA(108)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(17,15_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)-HRR(44)+&
+      DUM=-HRR(44)+&
                          ABz*(ABz*HRRB(44)+&
                          2.D0*HRRB(72))+&
                          ABx*(-2.D0*HRR(28)+&
@@ -3261,9 +5387,18 @@
                          HRRB(53))+&
                          2.D0*HRRB(77))+&
                          HRRB(108)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+7)*LDA+(OB+4)*LDB+CDOffSet !=
       !=(18_x,15|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)-HRR(51)+&
+      DUM=-HRR(51)+&
                          ABz*(-HRR(30)+&
                          HRRA(70))+&
                          ABx*(-2.D0*HRR(33)+&
@@ -3275,8 +5410,16 @@
                          HRRA(51))+&
                          2.D0*HRRA(75))+&
                          HRRA(106)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(18,15_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)-2.D0*HRR(51)+&
+      DUM=-2.D0*HRR(51)+&
                          ABz*(-2.D0*HRR(30)+&
                          HRRB(70))+&
                          ABx*(-2.D0*HRR(33)+&
@@ -3288,19 +5431,32 @@
                          3.D0*HRRB(51))+&
                          3.D0*HRRB(75))+&
                          HRRB(106)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(18_y,15|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)+&
-                         ABz*HRRA(71)+&
+      DUM=ABz*HRRA(71)+&
                          ABx*(2.D0*ABz*HRRA(48)+&
                          ABx*(ABz*HRRA(31)+&
                          HRRA(52))+&
                          2.D0*HRRA(76))+&
                          HRRA(107)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(18,15_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)+&
-                         ABz*HRRB(71)+&
+      DUM=ABz*HRRB(71)+&
                          ABy*(ABz*HRRB(47)+&
                          HRRB(75))+&
                          ABx*(2.D0*ABz*HRRB(48)+&
@@ -3312,9 +5468,17 @@
                          HRRB(52))+&
                          2.D0*HRRB(76))+&
                          HRRB(107)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(18_z,15|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)-2.D0*HRR(47)+&
+      DUM=-2.D0*HRR(47)+&
                          ABz*(-2.D0*HRR(26)+&
                          HRRA(75))+&
                          ABx*(-4.D0*HRR(30)+&
@@ -3326,9 +5490,17 @@
                          HRRA(54))+&
                          2.D0*HRRA(79))+&
                          HRRA(111)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(18,15_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)-HRR(47)+&
+      DUM=-HRR(47)+&
                          ABz*(ABz*HRRB(47)+&
                          2.D0*HRRB(75))+&
                          ABx*(-2.D0*HRR(30)+&
@@ -3340,17 +5512,33 @@
                          HRRB(54))+&
                          2.D0*HRRB(79))+&
                          HRRB(111)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+8)*LDA+(OB+4)*LDB+CDOffSet !=
       !=(19_x,15|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)+&
-                         ABz*HRRA(71)+&
+      DUM=ABz*HRRA(71)+&
                          ABx*(2.D0*ABz*HRRA(48)+&
                          ABx*(ABz*HRRA(31)+&
                          HRRA(52))+&
                          2.D0*HRRA(76))+&
                          HRRA(107)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(19,15_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)-2.D0*HRR(52)+&
+      DUM=-2.D0*HRR(52)+&
                          ABz*(-2.D0*HRR(31)+&
                          HRRB(71))+&
                          ABx*(-2.D0*HRR(34)+&
@@ -3362,9 +5550,16 @@
                          3.D0*HRRB(52))+&
                          3.D0*HRRB(76))+&
                          HRRB(107)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(19_y,15|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)-HRR(51)+&
+      DUM=-HRR(51)+&
                          ABz*(-HRR(30)+&
                          HRRA(72))+&
                          ABx*(-2.D0*HRR(33)+&
@@ -3376,10 +5571,17 @@
                          HRRA(53))+&
                          2.D0*HRRA(77))+&
                          HRRA(108)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(19,15_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)+&
-                         ABz*HRRB(72)+&
+      DUM=ABz*HRRB(72)+&
                          ABy*(ABz*HRRB(48)+&
                          HRRB(76))+&
                          ABx*(2.D0*ABz*HRRB(49)+&
@@ -3391,9 +5593,17 @@
                          HRRB(53))+&
                          2.D0*HRRB(77))+&
                          HRRB(108)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(19_z,15|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)-2.D0*HRR(48)+&
+      DUM=-2.D0*HRR(48)+&
                          ABz*(-2.D0*HRR(27)+&
                          HRRA(76))+&
                          ABx*(-4.D0*HRR(31)+&
@@ -3405,9 +5615,17 @@
                          HRRA(55))+&
                          2.D0*HRRA(80))+&
                          HRRA(112)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(19,15_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)-HRR(48)+&
+      DUM=-HRR(48)+&
                          ABz*(ABz*HRRB(48)+&
                          2.D0*HRRB(76))+&
                          ABx*(-2.D0*HRR(31)+&
@@ -3419,17 +5637,33 @@
                          HRRB(55))+&
                          2.D0*HRRB(80))+&
                          HRRB(112)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+9)*LDA+(OB+4)*LDB+CDOffSet !=
       !=(20_x,15|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)+&
-                         ABz*HRRA(75)+&
+      DUM=ABz*HRRA(75)+&
                          ABx*(2.D0*ABz*HRRA(51)+&
                          ABx*(ABz*HRRA(33)+&
                          HRRA(54))+&
                          2.D0*HRRA(79))+&
                          HRRA(111)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(20,15_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)-2.D0*HRR(54)+&
+      DUM=-2.D0*HRR(54)+&
                          ABz*(-2.D0*HRR(33)+&
                          HRRB(75))+&
                          ABx*(-2.D0*HRR(35)+&
@@ -3441,19 +5675,32 @@
                          3.D0*HRRB(54))+&
                          3.D0*HRRB(79))+&
                          HRRB(111)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(20_y,15|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)+&
-                         ABz*HRRA(76)+&
+      DUM=ABz*HRRA(76)+&
                          ABx*(2.D0*ABz*HRRA(52)+&
                          ABx*(ABz*HRRA(34)+&
                          HRRA(55))+&
                          2.D0*HRRA(80))+&
                          HRRA(112)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(20,15_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)+&
-                         ABz*HRRB(76)+&
+      DUM=ABz*HRRB(76)+&
                          ABy*(ABz*HRRB(51)+&
                          HRRB(79))+&
                          ABx*(2.D0*ABz*HRRB(52)+&
@@ -3465,9 +5712,17 @@
                          HRRB(55))+&
                          2.D0*HRRB(80))+&
                          HRRB(112)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(20_z,15|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)-3.D0*HRR(51)+&
+      DUM=-3.D0*HRR(51)+&
                          ABz*(-3.D0*HRR(30)+&
                          HRRA(79))+&
                          ABx*(-6.D0*HRR(33)+&
@@ -3479,9 +5734,17 @@
                          HRRA(56))+&
                          2.D0*HRRA(82))+&
                          HRRA(115)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(20,15_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)-HRR(51)+&
+      DUM=-HRR(51)+&
                          ABz*(ABz*HRRB(51)+&
                          2.D0*HRRB(79))+&
                          ABx*(-2.D0*HRR(33)+&
@@ -3493,9 +5756,18 @@
                          HRRB(56))+&
                          2.D0*HRRB(82))+&
                          HRRB(115)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+0)*LDA+(OB+5)*LDB+CDOffSet !=
       !=(11_x,16|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)-3.D0*HRR(43)+&
+      DUM=-3.D0*HRR(43)+&
                          ABz*(-3.D0*HRR(22)+&
                          HRRA(58))+&
                          ABy*(-3.D0*HRR(26)+&
@@ -3511,8 +5783,16 @@
                          HRRA(42))+&
                          HRRA(65))+&
                          HRRA(94)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(11,16_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)-HRR(43)+&
+      DUM=-HRR(43)+&
                          ABz*(-HRR(22)+&
                          HRRB(58))+&
                          ABy*(-HRR(26)+&
@@ -3528,10 +5808,16 @@
                          HRRB(43))+&
                          2.D0*HRRB(65))+&
                          HRRB(94)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(11_y,16|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)+&
-                         ABz*HRRA(59)+&
+      DUM=ABz*HRRA(59)+&
                          ABy*(ABz*HRRA(37)+&
                          HRRA(65))+&
                          ABx*(ABz*HRRA(38)+&
@@ -3539,9 +5825,17 @@
                          HRRA(43))+&
                          HRRA(66))+&
                          HRRA(95)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(11,16_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)-HRR(42)+&
+      DUM=-HRR(42)+&
                          ABz*(-HRR(21)+&
                          HRRB(59))+&
                          ABy*(2.D0*ABz*HRRB(37)+&
@@ -3557,10 +5851,17 @@
                          2.D0*HRRB(43))+&
                          HRRB(66))+&
                          HRRB(95)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(11_z,16|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)+&
-                         ABz*HRRA(65)+&
+      DUM=ABz*HRRA(65)+&
                          ABy*(ABz*HRRA(42)+&
                          HRRA(70))+&
                          ABx*(ABz*HRRA(43)+&
@@ -3568,9 +5869,17 @@
                          HRRA(47))+&
                          HRRA(71))+&
                          HRRA(101)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(11,16_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)-HRR(37)+&
+      DUM=-HRR(37)+&
                          ABz*(ABz*HRRB(37)+&
                          2.D0*HRRB(65))+&
                          ABy*(-HRR(21)+&
@@ -3586,9 +5895,18 @@
                          HRRB(47))+&
                          HRRB(71))+&
                          HRRB(101)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+1)*LDA+(OB+5)*LDB+CDOffSet !=
       !=(12_x,16|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)-2.D0*HRR(44)+&
+      DUM=-2.D0*HRR(44)+&
                          ABz*(-2.D0*HRR(23)+&
                          HRRA(59))+&
                          ABy*(-2.D0*HRR(27)+&
@@ -3604,8 +5922,16 @@
                          HRRA(43))+&
                          HRRA(66))+&
                          HRRA(95)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(12,16_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)-HRR(44)+&
+      DUM=-HRR(44)+&
                          ABz*(-HRR(23)+&
                          HRRB(59))+&
                          ABy*(-HRR(27)+&
@@ -3621,9 +5947,16 @@
                          HRRB(44))+&
                          2.D0*HRRB(66))+&
                          HRRB(95)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(12_y,16|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)-HRR(43)+&
+      DUM=-HRR(43)+&
                          ABz*(-HRR(22)+&
                          HRRA(60))+&
                          ABy*(-HRR(26)+&
@@ -3639,9 +5972,17 @@
                          HRRA(44))+&
                          HRRA(67))+&
                          HRRA(96)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(12,16_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)-HRR(43)+&
+      DUM=-HRR(43)+&
                          ABz*(-HRR(22)+&
                          HRRB(60))+&
                          ABy*(2.D0*ABz*HRRB(38)+&
@@ -3657,10 +5998,17 @@
                          2.D0*HRRB(44))+&
                          HRRB(67))+&
                          HRRB(96)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(12_z,16|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)+&
-                         ABz*HRRA(66)+&
+      DUM=ABz*HRRA(66)+&
                          ABy*(ABz*HRRA(43)+&
                          HRRA(71))+&
                          ABx*(ABz*HRRA(44)+&
@@ -3668,9 +6016,17 @@
                          HRRA(48))+&
                          HRRA(72))+&
                          HRRA(102)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(12,16_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)-HRR(38)+&
+      DUM=-HRR(38)+&
                          ABz*(ABz*HRRB(38)+&
                          2.D0*HRRB(66))+&
                          ABy*(-HRR(22)+&
@@ -3686,9 +6042,18 @@
                          HRRB(48))+&
                          HRRB(72))+&
                          HRRB(102)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+2)*LDA+(OB+5)*LDB+CDOffSet !=
       !=(13_x,16|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)-HRR(45)+&
+      DUM=-HRR(45)+&
                          ABz*(-HRR(24)+&
                          HRRA(60))+&
                          ABy*(-HRR(28)+&
@@ -3704,8 +6069,16 @@
                          HRRA(44))+&
                          HRRA(67))+&
                          HRRA(96)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(13,16_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)-HRR(45)+&
+      DUM=-HRR(45)+&
                          ABz*(-HRR(24)+&
                          HRRB(60))+&
                          ABy*(-HRR(28)+&
@@ -3721,9 +6094,16 @@
                          HRRB(45))+&
                          2.D0*HRRB(67))+&
                          HRRB(96)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(13_y,16|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)-2.D0*HRR(44)+&
+      DUM=-2.D0*HRR(44)+&
                          ABz*(-2.D0*HRR(23)+&
                          HRRA(61))+&
                          ABy*(-2.D0*HRR(27)+&
@@ -3739,9 +6119,17 @@
                          HRRA(45))+&
                          HRRA(68))+&
                          HRRA(97)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(13,16_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)-HRR(44)+&
+      DUM=-HRR(44)+&
                          ABz*(-HRR(23)+&
                          HRRB(61))+&
                          ABy*(2.D0*ABz*HRRB(39)+&
@@ -3757,10 +6145,17 @@
                          2.D0*HRRB(45))+&
                          HRRB(68))+&
                          HRRB(97)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(13_z,16|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)+&
-                         ABz*HRRA(67)+&
+      DUM=ABz*HRRA(67)+&
                          ABy*(ABz*HRRA(44)+&
                          HRRA(72))+&
                          ABx*(ABz*HRRA(45)+&
@@ -3768,9 +6163,17 @@
                          HRRA(49))+&
                          HRRA(73))+&
                          HRRA(103)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(13,16_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)-HRR(39)+&
+      DUM=-HRR(39)+&
                          ABz*(ABz*HRRB(39)+&
                          2.D0*HRRB(67))+&
                          ABy*(-HRR(23)+&
@@ -3786,10 +6189,18 @@
                          HRRB(49))+&
                          HRRB(73))+&
                          HRRB(103)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+3)*LDA+(OB+5)*LDB+CDOffSet !=
       !=(14_x,16|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)+&
-                         ABz*HRRA(61)+&
+      DUM=ABz*HRRA(61)+&
                          ABy*(ABz*HRRA(39)+&
                          HRRA(67))+&
                          ABx*(ABz*HRRA(40)+&
@@ -3797,8 +6208,16 @@
                          HRRA(45))+&
                          HRRA(68))+&
                          HRRA(97)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(14,16_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)-HRR(46)+&
+      DUM=-HRR(46)+&
                          ABz*(-HRR(25)+&
                          HRRB(61))+&
                          ABy*(-HRR(29)+&
@@ -3814,9 +6233,16 @@
                          HRRB(46))+&
                          2.D0*HRRB(68))+&
                          HRRB(97)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(14_y,16|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)-3.D0*HRR(45)+&
+      DUM=-3.D0*HRR(45)+&
                          ABz*(-3.D0*HRR(24)+&
                          HRRA(62))+&
                          ABy*(-3.D0*HRR(28)+&
@@ -3832,9 +6258,17 @@
                          HRRA(46))+&
                          HRRA(69))+&
                          HRRA(98)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(14,16_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)-HRR(45)+&
+      DUM=-HRR(45)+&
                          ABz*(-HRR(24)+&
                          HRRB(62))+&
                          ABy*(2.D0*ABz*HRRB(40)+&
@@ -3850,10 +6284,17 @@
                          2.D0*HRRB(46))+&
                          HRRB(69))+&
                          HRRB(98)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(14_z,16|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)+&
-                         ABz*HRRA(68)+&
+      DUM=ABz*HRRA(68)+&
                          ABy*(ABz*HRRA(45)+&
                          HRRA(73))+&
                          ABx*(ABz*HRRA(46)+&
@@ -3861,9 +6302,17 @@
                          HRRA(50))+&
                          HRRA(74))+&
                          HRRA(104)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(14,16_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)-HRR(40)+&
+      DUM=-HRR(40)+&
                          ABz*(ABz*HRRB(40)+&
                          2.D0*HRRB(68))+&
                          ABy*(-HRR(24)+&
@@ -3879,9 +6328,18 @@
                          HRRB(50))+&
                          HRRB(74))+&
                          HRRB(104)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+4)*LDA+(OB+5)*LDB+CDOffSet !=
       !=(15_x,16|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)-2.D0*HRR(48)+&
+      DUM=-2.D0*HRR(48)+&
                          ABz*(-2.D0*HRR(27)+&
                          HRRA(65))+&
                          ABy*(-2.D0*HRR(30)+&
@@ -3897,8 +6355,16 @@
                          HRRA(47))+&
                          HRRA(71))+&
                          HRRA(101)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(15,16_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)-HRR(48)+&
+      DUM=-HRR(48)+&
                          ABz*(-HRR(27)+&
                          HRRB(65))+&
                          ABy*(-HRR(30)+&
@@ -3914,10 +6380,16 @@
                          HRRB(48))+&
                          2.D0*HRRB(71))+&
                          HRRB(101)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(15_y,16|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)+&
-                         ABz*HRRA(66)+&
+      DUM=ABz*HRRA(66)+&
                          ABy*(ABz*HRRA(43)+&
                          HRRA(71))+&
                          ABx*(ABz*HRRA(44)+&
@@ -3925,9 +6397,17 @@
                          HRRA(48))+&
                          HRRA(72))+&
                          HRRA(102)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(15,16_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)-HRR(47)+&
+      DUM=-HRR(47)+&
                          ABz*(-HRR(26)+&
                          HRRB(66))+&
                          ABy*(2.D0*ABz*HRRB(43)+&
@@ -3943,9 +6423,17 @@
                          2.D0*HRRB(48))+&
                          HRRB(72))+&
                          HRRB(102)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(15_z,16|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)-HRR(43)+&
+      DUM=-HRR(43)+&
                          ABz*(-HRR(22)+&
                          HRRA(71))+&
                          ABy*(-HRR(26)+&
@@ -3961,9 +6449,17 @@
                          HRRA(51))+&
                          HRRA(76))+&
                          HRRA(107)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(15,16_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)-HRR(43)+&
+      DUM=-HRR(43)+&
                          ABz*(ABz*HRRB(43)+&
                          2.D0*HRRB(71))+&
                          ABy*(-HRR(26)+&
@@ -3979,9 +6475,18 @@
                          HRRB(51))+&
                          HRRB(76))+&
                          HRRB(107)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+5)*LDA+(OB+5)*LDB+CDOffSet !=
       !=(16_x,16|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)-HRR(49)+&
+      DUM=-HRR(49)+&
                          ABz*(-HRR(28)+&
                          HRRA(66))+&
                          ABy*(-HRR(31)+&
@@ -3997,8 +6502,16 @@
                          HRRA(48))+&
                          HRRA(72))+&
                          HRRA(102)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(16,16_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)-HRR(49)+&
+      DUM=-HRR(49)+&
                          ABz*(-HRR(28)+&
                          HRRB(66))+&
                          ABy*(-HRR(31)+&
@@ -4014,9 +6527,16 @@
                          HRRB(49))+&
                          2.D0*HRRB(72))+&
                          HRRB(102)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(16_y,16|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)-HRR(48)+&
+      DUM=-HRR(48)+&
                          ABz*(-HRR(27)+&
                          HRRA(67))+&
                          ABy*(-HRR(30)+&
@@ -4032,9 +6552,17 @@
                          HRRA(49))+&
                          HRRA(73))+&
                          HRRA(103)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(16,16_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)-HRR(48)+&
+      DUM=-HRR(48)+&
                          ABz*(-HRR(27)+&
                          HRRB(67))+&
                          ABy*(2.D0*ABz*HRRB(44)+&
@@ -4050,9 +6578,17 @@
                          2.D0*HRRB(49))+&
                          HRRB(73))+&
                          HRRB(103)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(16_z,16|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)-HRR(44)+&
+      DUM=-HRR(44)+&
                          ABz*(-HRR(23)+&
                          HRRA(72))+&
                          ABy*(-HRR(27)+&
@@ -4068,9 +6604,17 @@
                          HRRA(52))+&
                          HRRA(77))+&
                          HRRA(108)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(16,16_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)-HRR(44)+&
+      DUM=-HRR(44)+&
                          ABz*(ABz*HRRB(44)+&
                          2.D0*HRRB(72))+&
                          ABy*(-HRR(27)+&
@@ -4086,10 +6630,18 @@
                          HRRB(52))+&
                          HRRB(77))+&
                          HRRB(108)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+6)*LDA+(OB+5)*LDB+CDOffSet !=
       !=(17_x,16|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)+&
-                         ABz*HRRA(67)+&
+      DUM=ABz*HRRA(67)+&
                          ABy*(ABz*HRRA(44)+&
                          HRRA(72))+&
                          ABx*(ABz*HRRA(45)+&
@@ -4097,8 +6649,16 @@
                          HRRA(49))+&
                          HRRA(73))+&
                          HRRA(103)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(17,16_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)-HRR(50)+&
+      DUM=-HRR(50)+&
                          ABz*(-HRR(29)+&
                          HRRB(67))+&
                          ABy*(-HRR(32)+&
@@ -4114,9 +6674,16 @@
                          HRRB(50))+&
                          2.D0*HRRB(73))+&
                          HRRB(103)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(17_y,16|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)-2.D0*HRR(49)+&
+      DUM=-2.D0*HRR(49)+&
                          ABz*(-2.D0*HRR(28)+&
                          HRRA(68))+&
                          ABy*(-2.D0*HRR(31)+&
@@ -4132,9 +6699,17 @@
                          HRRA(50))+&
                          HRRA(74))+&
                          HRRA(104)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(17,16_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)-HRR(49)+&
+      DUM=-HRR(49)+&
                          ABz*(-HRR(28)+&
                          HRRB(68))+&
                          ABy*(2.D0*ABz*HRRB(45)+&
@@ -4150,9 +6725,17 @@
                          2.D0*HRRB(50))+&
                          HRRB(74))+&
                          HRRB(104)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(17_z,16|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)-HRR(45)+&
+      DUM=-HRR(45)+&
                          ABz*(-HRR(24)+&
                          HRRA(73))+&
                          ABy*(-HRR(28)+&
@@ -4168,9 +6751,17 @@
                          HRRA(53))+&
                          HRRA(78))+&
                          HRRA(109)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(17,16_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)-HRR(45)+&
+      DUM=-HRR(45)+&
                          ABz*(ABz*HRRB(45)+&
                          2.D0*HRRB(73))+&
                          ABy*(-HRR(28)+&
@@ -4186,9 +6777,18 @@
                          HRRB(53))+&
                          HRRB(78))+&
                          HRRB(109)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+7)*LDA+(OB+5)*LDB+CDOffSet !=
       !=(18_x,16|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)-HRR(52)+&
+      DUM=-HRR(52)+&
                          ABz*(-HRR(31)+&
                          HRRA(71))+&
                          ABy*(-HRR(33)+&
@@ -4204,8 +6804,16 @@
                          HRRA(51))+&
                          HRRA(76))+&
                          HRRA(107)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(18,16_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)-HRR(52)+&
+      DUM=-HRR(52)+&
                          ABz*(-HRR(31)+&
                          HRRB(71))+&
                          ABy*(-HRR(33)+&
@@ -4221,10 +6829,16 @@
                          HRRB(52))+&
                          2.D0*HRRB(76))+&
                          HRRB(107)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(18_y,16|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)+&
-                         ABz*HRRA(72)+&
+      DUM=ABz*HRRA(72)+&
                          ABy*(ABz*HRRA(48)+&
                          HRRA(76))+&
                          ABx*(ABz*HRRA(49)+&
@@ -4232,9 +6846,17 @@
                          HRRA(52))+&
                          HRRA(77))+&
                          HRRA(108)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(18,16_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)-HRR(51)+&
+      DUM=-HRR(51)+&
                          ABz*(-HRR(30)+&
                          HRRB(72))+&
                          ABy*(2.D0*ABz*HRRB(48)+&
@@ -4250,9 +6872,17 @@
                          2.D0*HRRB(52))+&
                          HRRB(77))+&
                          HRRB(108)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(18_z,16|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)-2.D0*HRR(48)+&
+      DUM=-2.D0*HRR(48)+&
                          ABz*(-2.D0*HRR(27)+&
                          HRRA(76))+&
                          ABy*(-2.D0*HRR(30)+&
@@ -4268,9 +6898,17 @@
                          HRRA(54))+&
                          HRRA(80))+&
                          HRRA(112)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(18,16_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)-HRR(48)+&
+      DUM=-HRR(48)+&
                          ABz*(ABz*HRRB(48)+&
                          2.D0*HRRB(76))+&
                          ABy*(-HRR(30)+&
@@ -4286,10 +6924,18 @@
                          HRRB(54))+&
                          HRRB(80))+&
                          HRRB(112)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+8)*LDA+(OB+5)*LDB+CDOffSet !=
       !=(19_x,16|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)+&
-                         ABz*HRRA(72)+&
+      DUM=ABz*HRRA(72)+&
                          ABy*(ABz*HRRA(48)+&
                          HRRA(76))+&
                          ABx*(ABz*HRRA(49)+&
@@ -4297,8 +6943,16 @@
                          HRRA(52))+&
                          HRRA(77))+&
                          HRRA(108)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(19,16_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)-HRR(53)+&
+      DUM=-HRR(53)+&
                          ABz*(-HRR(32)+&
                          HRRB(72))+&
                          ABy*(-HRR(34)+&
@@ -4314,9 +6968,16 @@
                          HRRB(53))+&
                          2.D0*HRRB(77))+&
                          HRRB(108)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(19_y,16|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)-HRR(52)+&
+      DUM=-HRR(52)+&
                          ABz*(-HRR(31)+&
                          HRRA(73))+&
                          ABy*(-HRR(33)+&
@@ -4332,9 +6993,17 @@
                          HRRA(53))+&
                          HRRA(78))+&
                          HRRA(109)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(19,16_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)-HRR(52)+&
+      DUM=-HRR(52)+&
                          ABz*(-HRR(31)+&
                          HRRB(73))+&
                          ABy*(2.D0*ABz*HRRB(49)+&
@@ -4350,9 +7019,17 @@
                          2.D0*HRRB(53))+&
                          HRRB(78))+&
                          HRRB(109)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(19_z,16|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)-2.D0*HRR(49)+&
+      DUM=-2.D0*HRR(49)+&
                          ABz*(-2.D0*HRR(28)+&
                          HRRA(77))+&
                          ABy*(-2.D0*HRR(31)+&
@@ -4368,9 +7045,17 @@
                          HRRA(55))+&
                          HRRA(81))+&
                          HRRA(113)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(19,16_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)-HRR(49)+&
+      DUM=-HRR(49)+&
                          ABz*(ABz*HRRB(49)+&
                          2.D0*HRRB(77))+&
                          ABy*(-HRR(31)+&
@@ -4386,10 +7071,18 @@
                          HRRB(55))+&
                          HRRB(81))+&
                          HRRB(113)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+9)*LDA+(OB+5)*LDB+CDOffSet !=
       !=(20_x,16|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)+&
-                         ABz*HRRA(76)+&
+      DUM=ABz*HRRA(76)+&
                          ABy*(ABz*HRRA(51)+&
                          HRRA(79))+&
                          ABx*(ABz*HRRA(52)+&
@@ -4397,8 +7090,16 @@
                          HRRA(54))+&
                          HRRA(80))+&
                          HRRA(112)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(20,16_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)-HRR(55)+&
+      DUM=-HRR(55)+&
                          ABz*(-HRR(34)+&
                          HRRB(76))+&
                          ABy*(-HRR(35)+&
@@ -4414,10 +7115,16 @@
                          HRRB(55))+&
                          2.D0*HRRB(80))+&
                          HRRB(112)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(20_y,16|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)+&
-                         ABz*HRRA(77)+&
+      DUM=ABz*HRRA(77)+&
                          ABy*(ABz*HRRA(52)+&
                          HRRA(80))+&
                          ABx*(ABz*HRRA(53)+&
@@ -4425,9 +7132,17 @@
                          HRRA(55))+&
                          HRRA(81))+&
                          HRRA(113)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(20,16_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)-HRR(54)+&
+      DUM=-HRR(54)+&
                          ABz*(-HRR(33)+&
                          HRRB(77))+&
                          ABy*(2.D0*ABz*HRRB(52)+&
@@ -4443,9 +7158,17 @@
                          2.D0*HRRB(55))+&
                          HRRB(81))+&
                          HRRB(113)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(20_z,16|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)-3.D0*HRR(52)+&
+      DUM=-3.D0*HRR(52)+&
                          ABz*(-3.D0*HRR(31)+&
                          HRRA(80))+&
                          ABy*(-3.D0*HRR(33)+&
@@ -4461,9 +7184,17 @@
                          HRRA(56))+&
                          HRRA(83))+&
                          HRRA(116)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(20,16_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)-HRR(52)+&
+      DUM=-HRR(52)+&
                          ABz*(ABz*HRRB(52)+&
                          2.D0*HRRB(80))+&
                          ABy*(-HRR(33)+&
@@ -4479,9 +7210,18 @@
                          HRRB(56))+&
                          HRRB(83))+&
                          HRRB(116)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+0)*LDA+(OB+6)*LDB+CDOffSet !=
       !=(11_x,17|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)-3.D0*HRR(44)+&
+      DUM=-3.D0*HRR(44)+&
                          ABz*(-3.D0*HRR(23)+&
                          HRRA(59))+&
                          ABy*(-6.D0*HRR(27)+&
@@ -4493,9 +7233,16 @@
                          HRRA(42))+&
                          2.D0*HRRA(65))+&
                          HRRA(95)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(11,17_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)+&
-                         ABz*HRRB(59)+&
+      DUM=ABz*HRRB(59)+&
                          ABy*(2.D0*ABz*HRRB(37)+&
                          ABy*(ABz*HRRB(21)+&
                          HRRB(42))+&
@@ -4507,18 +7254,32 @@
                          2.D0*HRRB(43))+&
                          HRRB(66))+&
                          HRRB(95)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(11_y,17|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)+&
-                         ABz*HRRA(60)+&
+      DUM=ABz*HRRA(60)+&
                          ABy*(2.D0*ABz*HRRA(38)+&
                          ABy*(ABz*HRRA(22)+&
                          HRRA(43))+&
                          2.D0*HRRA(66))+&
                          HRRA(96)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(11,17_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)-2.D0*HRR(43)+&
+      DUM=-2.D0*HRR(43)+&
                          ABz*(-2.D0*HRR(22)+&
                          HRRB(60))+&
                          ABy*(-2.D0*HRR(26)+&
@@ -4530,18 +7291,33 @@
                          3.D0*HRRB(43))+&
                          3.D0*HRRB(66))+&
                          HRRB(96)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(11_z,17|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)+&
-                         ABz*HRRA(66)+&
+      DUM=ABz*HRRA(66)+&
                          ABy*(2.D0*ABz*HRRA(43)+&
                          ABy*(ABz*HRRA(26)+&
                          HRRA(47))+&
                          2.D0*HRRA(71))+&
                          HRRA(102)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(11,17_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)-HRR(38)+&
+      DUM=-HRR(38)+&
                          ABz*(ABz*HRRB(38)+&
                          2.D0*HRRB(66))+&
                          ABy*(-2.D0*HRR(22)+&
@@ -4553,9 +7329,18 @@
                          HRRB(47))+&
                          2.D0*HRRB(71))+&
                          HRRB(102)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+1)*LDA+(OB+6)*LDB+CDOffSet !=
       !=(12_x,17|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)-2.D0*HRR(45)+&
+      DUM=-2.D0*HRR(45)+&
                          ABz*(-2.D0*HRR(24)+&
                          HRRA(60))+&
                          ABy*(-4.D0*HRR(28)+&
@@ -4567,9 +7352,16 @@
                          HRRA(43))+&
                          2.D0*HRRA(66))+&
                          HRRA(96)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(12,17_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)+&
-                         ABz*HRRB(60)+&
+      DUM=ABz*HRRB(60)+&
                          ABy*(2.D0*ABz*HRRB(38)+&
                          ABy*(ABz*HRRB(22)+&
                          HRRB(43))+&
@@ -4581,9 +7373,16 @@
                          2.D0*HRRB(44))+&
                          HRRB(67))+&
                          HRRB(96)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(12_y,17|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)-HRR(44)+&
+      DUM=-HRR(44)+&
                          ABz*(-HRR(23)+&
                          HRRA(61))+&
                          ABy*(-2.D0*HRR(27)+&
@@ -4595,9 +7394,17 @@
                          HRRA(44))+&
                          2.D0*HRRA(67))+&
                          HRRA(97)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(12,17_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)-2.D0*HRR(44)+&
+      DUM=-2.D0*HRR(44)+&
                          ABz*(-2.D0*HRR(23)+&
                          HRRB(61))+&
                          ABy*(-2.D0*HRR(27)+&
@@ -4609,18 +7416,33 @@
                          3.D0*HRRB(44))+&
                          3.D0*HRRB(67))+&
                          HRRB(97)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(12_z,17|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)+&
-                         ABz*HRRA(67)+&
+      DUM=ABz*HRRA(67)+&
                          ABy*(2.D0*ABz*HRRA(44)+&
                          ABy*(ABz*HRRA(27)+&
                          HRRA(48))+&
                          2.D0*HRRA(72))+&
                          HRRA(103)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(12,17_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)-HRR(39)+&
+      DUM=-HRR(39)+&
                          ABz*(ABz*HRRB(39)+&
                          2.D0*HRRB(67))+&
                          ABy*(-2.D0*HRR(23)+&
@@ -4632,9 +7454,18 @@
                          HRRB(48))+&
                          2.D0*HRRB(72))+&
                          HRRB(103)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+2)*LDA+(OB+6)*LDB+CDOffSet !=
       !=(13_x,17|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)-HRR(46)+&
+      DUM=-HRR(46)+&
                          ABz*(-HRR(25)+&
                          HRRA(61))+&
                          ABy*(-2.D0*HRR(29)+&
@@ -4646,9 +7477,16 @@
                          HRRA(44))+&
                          2.D0*HRRA(67))+&
                          HRRA(97)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(13,17_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)+&
-                         ABz*HRRB(61)+&
+      DUM=ABz*HRRB(61)+&
                          ABy*(2.D0*ABz*HRRB(39)+&
                          ABy*(ABz*HRRB(23)+&
                          HRRB(44))+&
@@ -4660,9 +7498,16 @@
                          2.D0*HRRB(45))+&
                          HRRB(68))+&
                          HRRB(97)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(13_y,17|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)-2.D0*HRR(45)+&
+      DUM=-2.D0*HRR(45)+&
                          ABz*(-2.D0*HRR(24)+&
                          HRRA(62))+&
                          ABy*(-4.D0*HRR(28)+&
@@ -4674,9 +7519,17 @@
                          HRRA(45))+&
                          2.D0*HRRA(68))+&
                          HRRA(98)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(13,17_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)-2.D0*HRR(45)+&
+      DUM=-2.D0*HRR(45)+&
                          ABz*(-2.D0*HRR(24)+&
                          HRRB(62))+&
                          ABy*(-2.D0*HRR(28)+&
@@ -4688,18 +7541,33 @@
                          3.D0*HRRB(45))+&
                          3.D0*HRRB(68))+&
                          HRRB(98)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(13_z,17|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)+&
-                         ABz*HRRA(68)+&
+      DUM=ABz*HRRA(68)+&
                          ABy*(2.D0*ABz*HRRA(45)+&
                          ABy*(ABz*HRRA(28)+&
                          HRRA(49))+&
                          2.D0*HRRA(73))+&
                          HRRA(104)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(13,17_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)-HRR(40)+&
+      DUM=-HRR(40)+&
                          ABz*(ABz*HRRB(40)+&
                          2.D0*HRRB(68))+&
                          ABy*(-2.D0*HRR(24)+&
@@ -4711,18 +7579,33 @@
                          HRRB(49))+&
                          2.D0*HRRB(73))+&
                          HRRB(104)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+3)*LDA+(OB+6)*LDB+CDOffSet !=
       !=(14_x,17|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)+&
-                         ABz*HRRA(62)+&
+      DUM=ABz*HRRA(62)+&
                          ABy*(2.D0*ABz*HRRA(40)+&
                          ABy*(ABz*HRRA(24)+&
                          HRRA(45))+&
                          2.D0*HRRA(68))+&
                          HRRA(98)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(14,17_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)+&
-                         ABz*HRRB(62)+&
+      DUM=ABz*HRRB(62)+&
                          ABy*(2.D0*ABz*HRRB(40)+&
                          ABy*(ABz*HRRB(24)+&
                          HRRB(45))+&
@@ -4734,9 +7617,16 @@
                          2.D0*HRRB(46))+&
                          HRRB(69))+&
                          HRRB(98)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(14_y,17|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)-3.D0*HRR(46)+&
+      DUM=-3.D0*HRR(46)+&
                          ABz*(-3.D0*HRR(25)+&
                          HRRA(63))+&
                          ABy*(-6.D0*HRR(29)+&
@@ -4748,9 +7638,17 @@
                          HRRA(46))+&
                          2.D0*HRRA(69))+&
                          HRRA(99)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(14,17_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)-2.D0*HRR(46)+&
+      DUM=-2.D0*HRR(46)+&
                          ABz*(-2.D0*HRR(25)+&
                          HRRB(63))+&
                          ABy*(-2.D0*HRR(29)+&
@@ -4762,18 +7660,33 @@
                          3.D0*HRRB(46))+&
                          3.D0*HRRB(69))+&
                          HRRB(99)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(14_z,17|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)+&
-                         ABz*HRRA(69)+&
+      DUM=ABz*HRRA(69)+&
                          ABy*(2.D0*ABz*HRRA(46)+&
                          ABy*(ABz*HRRA(29)+&
                          HRRA(50))+&
                          2.D0*HRRA(74))+&
                          HRRA(105)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(14,17_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)-HRR(41)+&
+      DUM=-HRR(41)+&
                          ABz*(ABz*HRRB(41)+&
                          2.D0*HRRB(69))+&
                          ABy*(-2.D0*HRR(25)+&
@@ -4785,9 +7698,18 @@
                          HRRB(50))+&
                          2.D0*HRRB(74))+&
                          HRRB(105)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+4)*LDA+(OB+6)*LDB+CDOffSet !=
       !=(15_x,17|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)-2.D0*HRR(49)+&
+      DUM=-2.D0*HRR(49)+&
                          ABz*(-2.D0*HRR(28)+&
                          HRRA(66))+&
                          ABy*(-4.D0*HRR(31)+&
@@ -4799,9 +7721,16 @@
                          HRRA(47))+&
                          2.D0*HRRA(71))+&
                          HRRA(102)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(15,17_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)+&
-                         ABz*HRRB(66)+&
+      DUM=ABz*HRRB(66)+&
                          ABy*(2.D0*ABz*HRRB(43)+&
                          ABy*(ABz*HRRB(26)+&
                          HRRB(47))+&
@@ -4813,18 +7742,32 @@
                          2.D0*HRRB(48))+&
                          HRRB(72))+&
                          HRRB(102)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(15_y,17|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)+&
-                         ABz*HRRA(67)+&
+      DUM=ABz*HRRA(67)+&
                          ABy*(2.D0*ABz*HRRA(44)+&
                          ABy*(ABz*HRRA(27)+&
                          HRRA(48))+&
                          2.D0*HRRA(72))+&
                          HRRA(103)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(15,17_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)-2.D0*HRR(48)+&
+      DUM=-2.D0*HRR(48)+&
                          ABz*(-2.D0*HRR(27)+&
                          HRRB(67))+&
                          ABy*(-2.D0*HRR(30)+&
@@ -4836,9 +7779,17 @@
                          3.D0*HRRB(48))+&
                          3.D0*HRRB(72))+&
                          HRRB(103)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(15_z,17|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)-HRR(44)+&
+      DUM=-HRR(44)+&
                          ABz*(-HRR(23)+&
                          HRRA(72))+&
                          ABy*(-2.D0*HRR(27)+&
@@ -4850,9 +7801,17 @@
                          HRRA(51))+&
                          2.D0*HRRA(76))+&
                          HRRA(108)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(15,17_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)-HRR(44)+&
+      DUM=-HRR(44)+&
                          ABz*(ABz*HRRB(44)+&
                          2.D0*HRRB(72))+&
                          ABy*(-2.D0*HRR(27)+&
@@ -4864,9 +7823,18 @@
                          HRRB(51))+&
                          2.D0*HRRB(76))+&
                          HRRB(108)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+5)*LDA+(OB+6)*LDB+CDOffSet !=
       !=(16_x,17|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)-HRR(50)+&
+      DUM=-HRR(50)+&
                          ABz*(-HRR(29)+&
                          HRRA(67))+&
                          ABy*(-2.D0*HRR(32)+&
@@ -4878,9 +7846,16 @@
                          HRRA(48))+&
                          2.D0*HRRA(72))+&
                          HRRA(103)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(16,17_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)+&
-                         ABz*HRRB(67)+&
+      DUM=ABz*HRRB(67)+&
                          ABy*(2.D0*ABz*HRRB(44)+&
                          ABy*(ABz*HRRB(27)+&
                          HRRB(48))+&
@@ -4892,9 +7867,16 @@
                          2.D0*HRRB(49))+&
                          HRRB(73))+&
                          HRRB(103)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(16_y,17|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)-HRR(49)+&
+      DUM=-HRR(49)+&
                          ABz*(-HRR(28)+&
                          HRRA(68))+&
                          ABy*(-2.D0*HRR(31)+&
@@ -4906,9 +7888,17 @@
                          HRRA(49))+&
                          2.D0*HRRA(73))+&
                          HRRA(104)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(16,17_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)-2.D0*HRR(49)+&
+      DUM=-2.D0*HRR(49)+&
                          ABz*(-2.D0*HRR(28)+&
                          HRRB(68))+&
                          ABy*(-2.D0*HRR(31)+&
@@ -4920,9 +7910,17 @@
                          3.D0*HRRB(49))+&
                          3.D0*HRRB(73))+&
                          HRRB(104)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(16_z,17|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)-HRR(45)+&
+      DUM=-HRR(45)+&
                          ABz*(-HRR(24)+&
                          HRRA(73))+&
                          ABy*(-2.D0*HRR(28)+&
@@ -4934,9 +7932,17 @@
                          HRRA(52))+&
                          2.D0*HRRA(77))+&
                          HRRA(109)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(16,17_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)-HRR(45)+&
+      DUM=-HRR(45)+&
                          ABz*(ABz*HRRB(45)+&
                          2.D0*HRRB(73))+&
                          ABy*(-2.D0*HRR(28)+&
@@ -4948,18 +7954,33 @@
                          HRRB(52))+&
                          2.D0*HRRB(77))+&
                          HRRB(109)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+6)*LDA+(OB+6)*LDB+CDOffSet !=
       !=(17_x,17|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)+&
-                         ABz*HRRA(68)+&
+      DUM=ABz*HRRA(68)+&
                          ABy*(2.D0*ABz*HRRA(45)+&
                          ABy*(ABz*HRRA(28)+&
                          HRRA(49))+&
                          2.D0*HRRA(73))+&
                          HRRA(104)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(17,17_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)+&
-                         ABz*HRRB(68)+&
+      DUM=ABz*HRRB(68)+&
                          ABy*(2.D0*ABz*HRRB(45)+&
                          ABy*(ABz*HRRB(28)+&
                          HRRB(49))+&
@@ -4971,9 +7992,16 @@
                          2.D0*HRRB(50))+&
                          HRRB(74))+&
                          HRRB(104)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(17_y,17|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)-2.D0*HRR(50)+&
+      DUM=-2.D0*HRR(50)+&
                          ABz*(-2.D0*HRR(29)+&
                          HRRA(69))+&
                          ABy*(-4.D0*HRR(32)+&
@@ -4985,9 +8013,17 @@
                          HRRA(50))+&
                          2.D0*HRRA(74))+&
                          HRRA(105)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(17,17_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)-2.D0*HRR(50)+&
+      DUM=-2.D0*HRR(50)+&
                          ABz*(-2.D0*HRR(29)+&
                          HRRB(69))+&
                          ABy*(-2.D0*HRR(32)+&
@@ -4999,9 +8035,17 @@
                          3.D0*HRRB(50))+&
                          3.D0*HRRB(74))+&
                          HRRB(105)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(17_z,17|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)-HRR(46)+&
+      DUM=-HRR(46)+&
                          ABz*(-HRR(25)+&
                          HRRA(74))+&
                          ABy*(-2.D0*HRR(29)+&
@@ -5013,9 +8057,17 @@
                          HRRA(53))+&
                          2.D0*HRRA(78))+&
                          HRRA(110)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(17,17_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)-HRR(46)+&
+      DUM=-HRR(46)+&
                          ABz*(ABz*HRRB(46)+&
                          2.D0*HRRB(74))+&
                          ABy*(-2.D0*HRR(29)+&
@@ -5027,9 +8079,18 @@
                          HRRB(53))+&
                          2.D0*HRRB(78))+&
                          HRRB(110)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+7)*LDA+(OB+6)*LDB+CDOffSet !=
       !=(18_x,17|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)-HRR(53)+&
+      DUM=-HRR(53)+&
                          ABz*(-HRR(32)+&
                          HRRA(72))+&
                          ABy*(-2.D0*HRR(34)+&
@@ -5041,9 +8102,16 @@
                          HRRA(51))+&
                          2.D0*HRRA(76))+&
                          HRRA(108)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(18,17_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)+&
-                         ABz*HRRB(72)+&
+      DUM=ABz*HRRB(72)+&
                          ABy*(2.D0*ABz*HRRB(48)+&
                          ABy*(ABz*HRRB(30)+&
                          HRRB(51))+&
@@ -5055,18 +8123,32 @@
                          2.D0*HRRB(52))+&
                          HRRB(77))+&
                          HRRB(108)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(18_y,17|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)+&
-                         ABz*HRRA(73)+&
+      DUM=ABz*HRRA(73)+&
                          ABy*(2.D0*ABz*HRRA(49)+&
                          ABy*(ABz*HRRA(31)+&
                          HRRA(52))+&
                          2.D0*HRRA(77))+&
                          HRRA(109)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(18,17_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)-2.D0*HRR(52)+&
+      DUM=-2.D0*HRR(52)+&
                          ABz*(-2.D0*HRR(31)+&
                          HRRB(73))+&
                          ABy*(-2.D0*HRR(33)+&
@@ -5078,9 +8160,17 @@
                          3.D0*HRRB(52))+&
                          3.D0*HRRB(77))+&
                          HRRB(109)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(18_z,17|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)-2.D0*HRR(49)+&
+      DUM=-2.D0*HRR(49)+&
                          ABz*(-2.D0*HRR(28)+&
                          HRRA(77))+&
                          ABy*(-4.D0*HRR(31)+&
@@ -5092,9 +8182,17 @@
                          HRRA(54))+&
                          2.D0*HRRA(80))+&
                          HRRA(113)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(18,17_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)-HRR(49)+&
+      DUM=-HRR(49)+&
                          ABz*(ABz*HRRB(49)+&
                          2.D0*HRRB(77))+&
                          ABy*(-2.D0*HRR(31)+&
@@ -5106,18 +8204,33 @@
                          HRRB(54))+&
                          2.D0*HRRB(80))+&
                          HRRB(113)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+8)*LDA+(OB+6)*LDB+CDOffSet !=
       !=(19_x,17|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)+&
-                         ABz*HRRA(73)+&
+      DUM=ABz*HRRA(73)+&
                          ABy*(2.D0*ABz*HRRA(49)+&
                          ABy*(ABz*HRRA(31)+&
                          HRRA(52))+&
                          2.D0*HRRA(77))+&
                          HRRA(109)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(19,17_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)+&
-                         ABz*HRRB(73)+&
+      DUM=ABz*HRRB(73)+&
                          ABy*(2.D0*ABz*HRRB(49)+&
                          ABy*(ABz*HRRB(31)+&
                          HRRB(52))+&
@@ -5129,9 +8242,16 @@
                          2.D0*HRRB(53))+&
                          HRRB(78))+&
                          HRRB(109)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(19_y,17|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)-HRR(53)+&
+      DUM=-HRR(53)+&
                          ABz*(-HRR(32)+&
                          HRRA(74))+&
                          ABy*(-2.D0*HRR(34)+&
@@ -5143,9 +8263,17 @@
                          HRRA(53))+&
                          2.D0*HRRA(78))+&
                          HRRA(110)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(19,17_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)-2.D0*HRR(53)+&
+      DUM=-2.D0*HRR(53)+&
                          ABz*(-2.D0*HRR(32)+&
                          HRRB(74))+&
                          ABy*(-2.D0*HRR(34)+&
@@ -5157,9 +8285,17 @@
                          3.D0*HRRB(53))+&
                          3.D0*HRRB(78))+&
                          HRRB(110)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(19_z,17|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)-2.D0*HRR(50)+&
+      DUM=-2.D0*HRR(50)+&
                          ABz*(-2.D0*HRR(29)+&
                          HRRA(78))+&
                          ABy*(-4.D0*HRR(32)+&
@@ -5171,9 +8307,17 @@
                          HRRA(55))+&
                          2.D0*HRRA(81))+&
                          HRRA(114)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(19,17_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)-HRR(50)+&
+      DUM=-HRR(50)+&
                          ABz*(ABz*HRRB(50)+&
                          2.D0*HRRB(78))+&
                          ABy*(-2.D0*HRR(32)+&
@@ -5185,18 +8329,33 @@
                          HRRB(55))+&
                          2.D0*HRRB(81))+&
                          HRRB(114)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+9)*LDA+(OB+6)*LDB+CDOffSet !=
       !=(20_x,17|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)+&
-                         ABz*HRRA(77)+&
+      DUM=ABz*HRRA(77)+&
                          ABy*(2.D0*ABz*HRRA(52)+&
                          ABy*(ABz*HRRA(33)+&
                          HRRA(54))+&
                          2.D0*HRRA(80))+&
                          HRRA(113)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(20,17_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)+&
-                         ABz*HRRB(77)+&
+      DUM=ABz*HRRB(77)+&
                          ABy*(2.D0*ABz*HRRB(52)+&
                          ABy*(ABz*HRRB(33)+&
                          HRRB(54))+&
@@ -5208,18 +8367,32 @@
                          2.D0*HRRB(55))+&
                          HRRB(81))+&
                          HRRB(113)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(20_y,17|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)+&
-                         ABz*HRRA(78)+&
+      DUM=ABz*HRRA(78)+&
                          ABy*(2.D0*ABz*HRRA(53)+&
                          ABy*(ABz*HRRA(34)+&
                          HRRA(55))+&
                          2.D0*HRRA(81))+&
                          HRRA(114)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(20,17_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)-2.D0*HRR(55)+&
+      DUM=-2.D0*HRR(55)+&
                          ABz*(-2.D0*HRR(34)+&
                          HRRB(78))+&
                          ABy*(-2.D0*HRR(35)+&
@@ -5231,9 +8404,17 @@
                          3.D0*HRRB(55))+&
                          3.D0*HRRB(81))+&
                          HRRB(114)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(20_z,17|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)-3.D0*HRR(53)+&
+      DUM=-3.D0*HRR(53)+&
                          ABz*(-3.D0*HRR(32)+&
                          HRRA(81))+&
                          ABy*(-6.D0*HRR(34)+&
@@ -5245,9 +8426,17 @@
                          HRRA(56))+&
                          2.D0*HRRA(83))+&
                          HRRA(117)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(20,17_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)-HRR(53)+&
+      DUM=-HRR(53)+&
                          ABz*(ABz*HRRB(53)+&
                          2.D0*HRRB(81))+&
                          ABy*(-2.D0*HRR(34)+&
@@ -5259,9 +8448,18 @@
                          HRRB(56))+&
                          2.D0*HRRB(83))+&
                          HRRB(117)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+0)*LDA+(OB+7)*LDB+CDOffSet !=
       !=(11_x,18|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)-3.D0*HRR(47)+&
+      DUM=-3.D0*HRR(47)+&
                          ABz*(-6.D0*HRR(26)+&
                          ABz*(-3.D0*HRR(11)+&
                          HRRA(36))+&
@@ -5273,8 +8471,16 @@
                          2.D0*HRRA(42))+&
                          HRRA(70))+&
                          HRRA(100)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(11,18_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)-HRR(47)+&
+      DUM=-HRR(47)+&
                          ABz*(-2.D0*HRR(26)+&
                          ABz*(-HRR(11)+&
                          HRRB(36))+&
@@ -5286,19 +8492,32 @@
                          HRRB(47))+&
                          2.D0*HRRB(70))+&
                          HRRB(100)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(11_y,18|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)+&
-                         ABz*(ABz*HRRA(37)+&
+      DUM=ABz*(ABz*HRRA(37)+&
                          2.D0*HRRA(65))+&
                          ABx*(ABz*(ABz*HRRA(22)+&
                          2.D0*HRRA(43))+&
                          HRRA(71))+&
                          HRRA(101)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(11,18_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)+&
-                         ABz*(ABz*HRRB(37)+&
+      DUM=ABz*(ABz*HRRB(37)+&
                          2.D0*HRRB(65))+&
                          ABy*(ABz*(ABz*HRRB(21)+&
                          2.D0*HRRB(42))+&
@@ -5310,18 +8529,33 @@
                          HRRB(47))+&
                          HRRB(71))+&
                          HRRB(101)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(11_z,18|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)+&
-                         ABz*(ABz*HRRA(42)+&
+      DUM=ABz*(ABz*HRRA(42)+&
                          2.D0*HRRA(70))+&
                          ABx*(ABz*(ABz*HRRA(26)+&
                          2.D0*HRRA(47))+&
                          HRRA(75))+&
                          HRRA(106)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(11,18_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)-2.D0*HRR(42)+&
+      DUM=-2.D0*HRR(42)+&
                          ABz*(-2.D0*HRR(21)+&
                          ABz*(ABz*HRRB(21)+&
                          3.D0*HRRB(42))+&
@@ -5333,9 +8567,18 @@
                          3.D0*HRRB(47))+&
                          HRRB(75))+&
                          HRRB(106)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+1)*LDA+(OB+7)*LDB+CDOffSet !=
       !=(12_x,18|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)-2.D0*HRR(48)+&
+      DUM=-2.D0*HRR(48)+&
                          ABz*(-4.D0*HRR(27)+&
                          ABz*(-2.D0*HRR(12)+&
                          HRRA(37))+&
@@ -5347,8 +8590,16 @@
                          2.D0*HRRA(43))+&
                          HRRA(71))+&
                          HRRA(101)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(12,18_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)-HRR(48)+&
+      DUM=-HRR(48)+&
                          ABz*(-2.D0*HRR(27)+&
                          ABz*(-HRR(12)+&
                          HRRB(37))+&
@@ -5360,9 +8611,16 @@
                          HRRB(48))+&
                          2.D0*HRRB(71))+&
                          HRRB(101)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(12_y,18|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)-HRR(47)+&
+      DUM=-HRR(47)+&
                          ABz*(-2.D0*HRR(26)+&
                          ABz*(-HRR(11)+&
                          HRRA(38))+&
@@ -5374,10 +8632,17 @@
                          2.D0*HRRA(44))+&
                          HRRA(72))+&
                          HRRA(102)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(12,18_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)+&
-                         ABz*(ABz*HRRB(38)+&
+      DUM=ABz*(ABz*HRRB(38)+&
                          2.D0*HRRB(66))+&
                          ABy*(ABz*(ABz*HRRB(22)+&
                          2.D0*HRRB(43))+&
@@ -5389,18 +8654,33 @@
                          HRRB(48))+&
                          HRRB(72))+&
                          HRRB(102)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(12_z,18|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)+&
-                         ABz*(ABz*HRRA(43)+&
+      DUM=ABz*(ABz*HRRA(43)+&
                          2.D0*HRRA(71))+&
                          ABx*(ABz*(ABz*HRRA(27)+&
                          2.D0*HRRA(48))+&
                          HRRA(76))+&
                          HRRA(107)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(12,18_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)-2.D0*HRR(43)+&
+      DUM=-2.D0*HRR(43)+&
                          ABz*(-2.D0*HRR(22)+&
                          ABz*(ABz*HRRB(22)+&
                          3.D0*HRRB(43))+&
@@ -5412,9 +8692,18 @@
                          3.D0*HRRB(48))+&
                          HRRB(76))+&
                          HRRB(107)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+2)*LDA+(OB+7)*LDB+CDOffSet !=
       !=(13_x,18|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)-HRR(49)+&
+      DUM=-HRR(49)+&
                          ABz*(-2.D0*HRR(28)+&
                          ABz*(-HRR(13)+&
                          HRRA(38))+&
@@ -5426,8 +8715,16 @@
                          2.D0*HRRA(44))+&
                          HRRA(72))+&
                          HRRA(102)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(13,18_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)-HRR(49)+&
+      DUM=-HRR(49)+&
                          ABz*(-2.D0*HRR(28)+&
                          ABz*(-HRR(13)+&
                          HRRB(38))+&
@@ -5439,9 +8736,16 @@
                          HRRB(49))+&
                          2.D0*HRRB(72))+&
                          HRRB(102)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(13_y,18|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)-2.D0*HRR(48)+&
+      DUM=-2.D0*HRR(48)+&
                          ABz*(-4.D0*HRR(27)+&
                          ABz*(-2.D0*HRR(12)+&
                          HRRA(39))+&
@@ -5453,10 +8757,17 @@
                          2.D0*HRRA(45))+&
                          HRRA(73))+&
                          HRRA(103)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(13,18_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)+&
-                         ABz*(ABz*HRRB(39)+&
+      DUM=ABz*(ABz*HRRB(39)+&
                          2.D0*HRRB(67))+&
                          ABy*(ABz*(ABz*HRRB(23)+&
                          2.D0*HRRB(44))+&
@@ -5468,18 +8779,33 @@
                          HRRB(49))+&
                          HRRB(73))+&
                          HRRB(103)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(13_z,18|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)+&
-                         ABz*(ABz*HRRA(44)+&
+      DUM=ABz*(ABz*HRRA(44)+&
                          2.D0*HRRA(72))+&
                          ABx*(ABz*(ABz*HRRA(28)+&
                          2.D0*HRRA(49))+&
                          HRRA(77))+&
                          HRRA(108)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(13,18_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)-2.D0*HRR(44)+&
+      DUM=-2.D0*HRR(44)+&
                          ABz*(-2.D0*HRR(23)+&
                          ABz*(ABz*HRRB(23)+&
                          3.D0*HRRB(44))+&
@@ -5491,17 +8817,33 @@
                          3.D0*HRRB(49))+&
                          HRRB(77))+&
                          HRRB(108)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+3)*LDA+(OB+7)*LDB+CDOffSet !=
       !=(14_x,18|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)+&
-                         ABz*(ABz*HRRA(39)+&
+      DUM=ABz*(ABz*HRRA(39)+&
                          2.D0*HRRA(67))+&
                          ABx*(ABz*(ABz*HRRA(24)+&
                          2.D0*HRRA(45))+&
                          HRRA(73))+&
                          HRRA(103)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(14,18_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)-HRR(50)+&
+      DUM=-HRR(50)+&
                          ABz*(-2.D0*HRR(29)+&
                          ABz*(-HRR(14)+&
                          HRRB(39))+&
@@ -5513,9 +8855,16 @@
                          HRRB(50))+&
                          2.D0*HRRB(73))+&
                          HRRB(103)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(14_y,18|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)-3.D0*HRR(49)+&
+      DUM=-3.D0*HRR(49)+&
                          ABz*(-6.D0*HRR(28)+&
                          ABz*(-3.D0*HRR(13)+&
                          HRRA(40))+&
@@ -5527,10 +8876,17 @@
                          2.D0*HRRA(46))+&
                          HRRA(74))+&
                          HRRA(104)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(14,18_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)+&
-                         ABz*(ABz*HRRB(40)+&
+      DUM=ABz*(ABz*HRRB(40)+&
                          2.D0*HRRB(68))+&
                          ABy*(ABz*(ABz*HRRB(24)+&
                          2.D0*HRRB(45))+&
@@ -5542,18 +8898,33 @@
                          HRRB(50))+&
                          HRRB(74))+&
                          HRRB(104)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(14_z,18|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)+&
-                         ABz*(ABz*HRRA(45)+&
+      DUM=ABz*(ABz*HRRA(45)+&
                          2.D0*HRRA(73))+&
                          ABx*(ABz*(ABz*HRRA(29)+&
                          2.D0*HRRA(50))+&
                          HRRA(78))+&
                          HRRA(109)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(14,18_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)-2.D0*HRR(45)+&
+      DUM=-2.D0*HRR(45)+&
                          ABz*(-2.D0*HRR(24)+&
                          ABz*(ABz*HRRB(24)+&
                          3.D0*HRRB(45))+&
@@ -5565,9 +8936,18 @@
                          3.D0*HRRB(50))+&
                          HRRB(78))+&
                          HRRB(109)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+4)*LDA+(OB+7)*LDB+CDOffSet !=
       !=(15_x,18|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)-2.D0*HRR(51)+&
+      DUM=-2.D0*HRR(51)+&
                          ABz*(-4.D0*HRR(30)+&
                          ABz*(-2.D0*HRR(15)+&
                          HRRA(42))+&
@@ -5579,8 +8959,16 @@
                          2.D0*HRRA(47))+&
                          HRRA(75))+&
                          HRRA(106)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(15,18_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)-HRR(51)+&
+      DUM=-HRR(51)+&
                          ABz*(-2.D0*HRR(30)+&
                          ABz*(-HRR(15)+&
                          HRRB(42))+&
@@ -5592,19 +8980,32 @@
                          HRRB(51))+&
                          2.D0*HRRB(75))+&
                          HRRB(106)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(15_y,18|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)+&
-                         ABz*(ABz*HRRA(43)+&
+      DUM=ABz*(ABz*HRRA(43)+&
                          2.D0*HRRA(71))+&
                          ABx*(ABz*(ABz*HRRA(27)+&
                          2.D0*HRRA(48))+&
                          HRRA(76))+&
                          HRRA(107)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(15,18_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)+&
-                         ABz*(ABz*HRRB(43)+&
+      DUM=ABz*(ABz*HRRB(43)+&
                          2.D0*HRRB(71))+&
                          ABy*(ABz*(ABz*HRRB(26)+&
                          2.D0*HRRB(47))+&
@@ -5616,9 +9017,17 @@
                          HRRB(51))+&
                          HRRB(76))+&
                          HRRB(107)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(15_z,18|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)-HRR(47)+&
+      DUM=-HRR(47)+&
                          ABz*(-2.D0*HRR(26)+&
                          ABz*(-HRR(11)+&
                          HRRA(47))+&
@@ -5630,9 +9039,17 @@
                          2.D0*HRRA(51))+&
                          HRRA(79))+&
                          HRRA(111)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(15,18_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)-2.D0*HRR(47)+&
+      DUM=-2.D0*HRR(47)+&
                          ABz*(-2.D0*HRR(26)+&
                          ABz*(ABz*HRRB(26)+&
                          3.D0*HRRB(47))+&
@@ -5644,9 +9061,18 @@
                          3.D0*HRRB(51))+&
                          HRRB(79))+&
                          HRRB(111)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+5)*LDA+(OB+7)*LDB+CDOffSet !=
       !=(16_x,18|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)-HRR(52)+&
+      DUM=-HRR(52)+&
                          ABz*(-2.D0*HRR(31)+&
                          ABz*(-HRR(16)+&
                          HRRA(43))+&
@@ -5658,8 +9084,16 @@
                          2.D0*HRRA(48))+&
                          HRRA(76))+&
                          HRRA(107)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(16,18_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)-HRR(52)+&
+      DUM=-HRR(52)+&
                          ABz*(-2.D0*HRR(31)+&
                          ABz*(-HRR(16)+&
                          HRRB(43))+&
@@ -5671,9 +9105,16 @@
                          HRRB(52))+&
                          2.D0*HRRB(76))+&
                          HRRB(107)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(16_y,18|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)-HRR(51)+&
+      DUM=-HRR(51)+&
                          ABz*(-2.D0*HRR(30)+&
                          ABz*(-HRR(15)+&
                          HRRA(44))+&
@@ -5685,10 +9126,17 @@
                          2.D0*HRRA(49))+&
                          HRRA(77))+&
                          HRRA(108)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(16,18_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)+&
-                         ABz*(ABz*HRRB(44)+&
+      DUM=ABz*(ABz*HRRB(44)+&
                          2.D0*HRRB(72))+&
                          ABy*(ABz*(ABz*HRRB(27)+&
                          2.D0*HRRB(48))+&
@@ -5700,9 +9148,17 @@
                          HRRB(52))+&
                          HRRB(77))+&
                          HRRB(108)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(16_z,18|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)-HRR(48)+&
+      DUM=-HRR(48)+&
                          ABz*(-2.D0*HRR(27)+&
                          ABz*(-HRR(12)+&
                          HRRA(48))+&
@@ -5714,9 +9170,17 @@
                          2.D0*HRRA(52))+&
                          HRRA(80))+&
                          HRRA(112)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(16,18_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)-2.D0*HRR(48)+&
+      DUM=-2.D0*HRR(48)+&
                          ABz*(-2.D0*HRR(27)+&
                          ABz*(ABz*HRRB(27)+&
                          3.D0*HRRB(48))+&
@@ -5728,17 +9192,33 @@
                          3.D0*HRRB(52))+&
                          HRRB(80))+&
                          HRRB(112)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+6)*LDA+(OB+7)*LDB+CDOffSet !=
       !=(17_x,18|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)+&
-                         ABz*(ABz*HRRA(44)+&
+      DUM=ABz*(ABz*HRRA(44)+&
                          2.D0*HRRA(72))+&
                          ABx*(ABz*(ABz*HRRA(28)+&
                          2.D0*HRRA(49))+&
                          HRRA(77))+&
                          HRRA(108)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(17,18_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)-HRR(53)+&
+      DUM=-HRR(53)+&
                          ABz*(-2.D0*HRR(32)+&
                          ABz*(-HRR(17)+&
                          HRRB(44))+&
@@ -5750,9 +9230,16 @@
                          HRRB(53))+&
                          2.D0*HRRB(77))+&
                          HRRB(108)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(17_y,18|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)-2.D0*HRR(52)+&
+      DUM=-2.D0*HRR(52)+&
                          ABz*(-4.D0*HRR(31)+&
                          ABz*(-2.D0*HRR(16)+&
                          HRRA(45))+&
@@ -5764,10 +9251,17 @@
                          2.D0*HRRA(50))+&
                          HRRA(78))+&
                          HRRA(109)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(17,18_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)+&
-                         ABz*(ABz*HRRB(45)+&
+      DUM=ABz*(ABz*HRRB(45)+&
                          2.D0*HRRB(73))+&
                          ABy*(ABz*(ABz*HRRB(28)+&
                          2.D0*HRRB(49))+&
@@ -5779,9 +9273,17 @@
                          HRRB(53))+&
                          HRRB(78))+&
                          HRRB(109)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(17_z,18|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)-HRR(49)+&
+      DUM=-HRR(49)+&
                          ABz*(-2.D0*HRR(28)+&
                          ABz*(-HRR(13)+&
                          HRRA(49))+&
@@ -5793,9 +9295,17 @@
                          2.D0*HRRA(53))+&
                          HRRA(81))+&
                          HRRA(113)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(17,18_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)-2.D0*HRR(49)+&
+      DUM=-2.D0*HRR(49)+&
                          ABz*(-2.D0*HRR(28)+&
                          ABz*(ABz*HRRB(28)+&
                          3.D0*HRRB(49))+&
@@ -5807,9 +9317,18 @@
                          3.D0*HRRB(53))+&
                          HRRB(81))+&
                          HRRB(113)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+7)*LDA+(OB+7)*LDB+CDOffSet !=
       !=(18_x,18|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)-HRR(54)+&
+      DUM=-HRR(54)+&
                          ABz*(-2.D0*HRR(33)+&
                          ABz*(-HRR(18)+&
                          HRRA(47))+&
@@ -5821,8 +9340,16 @@
                          2.D0*HRRA(51))+&
                          HRRA(79))+&
                          HRRA(111)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(18,18_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)-HRR(54)+&
+      DUM=-HRR(54)+&
                          ABz*(-2.D0*HRR(33)+&
                          ABz*(-HRR(18)+&
                          HRRB(47))+&
@@ -5834,19 +9361,32 @@
                          HRRB(54))+&
                          2.D0*HRRB(79))+&
                          HRRB(111)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(18_y,18|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)+&
-                         ABz*(ABz*HRRA(48)+&
+      DUM=ABz*(ABz*HRRA(48)+&
                          2.D0*HRRA(76))+&
                          ABx*(ABz*(ABz*HRRA(31)+&
                          2.D0*HRRA(52))+&
                          HRRA(80))+&
                          HRRA(112)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(18,18_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)+&
-                         ABz*(ABz*HRRB(48)+&
+      DUM=ABz*(ABz*HRRB(48)+&
                          2.D0*HRRB(76))+&
                          ABy*(ABz*(ABz*HRRB(30)+&
                          2.D0*HRRB(51))+&
@@ -5858,9 +9398,17 @@
                          HRRB(54))+&
                          HRRB(80))+&
                          HRRB(112)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(18_z,18|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)-2.D0*HRR(51)+&
+      DUM=-2.D0*HRR(51)+&
                          ABz*(-4.D0*HRR(30)+&
                          ABz*(-2.D0*HRR(15)+&
                          HRRA(51))+&
@@ -5872,9 +9420,17 @@
                          2.D0*HRRA(54))+&
                          HRRA(82))+&
                          HRRA(115)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(18,18_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)-2.D0*HRR(51)+&
+      DUM=-2.D0*HRR(51)+&
                          ABz*(-2.D0*HRR(30)+&
                          ABz*(ABz*HRRB(30)+&
                          3.D0*HRRB(51))+&
@@ -5886,17 +9442,33 @@
                          3.D0*HRRB(54))+&
                          HRRB(82))+&
                          HRRB(115)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+8)*LDA+(OB+7)*LDB+CDOffSet !=
       !=(19_x,18|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)+&
-                         ABz*(ABz*HRRA(48)+&
+      DUM=ABz*(ABz*HRRA(48)+&
                          2.D0*HRRA(76))+&
                          ABx*(ABz*(ABz*HRRA(31)+&
                          2.D0*HRRA(52))+&
                          HRRA(80))+&
                          HRRA(112)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(19,18_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)-HRR(55)+&
+      DUM=-HRR(55)+&
                          ABz*(-2.D0*HRR(34)+&
                          ABz*(-HRR(19)+&
                          HRRB(48))+&
@@ -5908,9 +9480,16 @@
                          HRRB(55))+&
                          2.D0*HRRB(80))+&
                          HRRB(112)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(19_y,18|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)-HRR(54)+&
+      DUM=-HRR(54)+&
                          ABz*(-2.D0*HRR(33)+&
                          ABz*(-HRR(18)+&
                          HRRA(49))+&
@@ -5922,10 +9501,17 @@
                          2.D0*HRRA(53))+&
                          HRRA(81))+&
                          HRRA(113)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(19,18_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)+&
-                         ABz*(ABz*HRRB(49)+&
+      DUM=ABz*(ABz*HRRB(49)+&
                          2.D0*HRRB(77))+&
                          ABy*(ABz*(ABz*HRRB(31)+&
                          2.D0*HRRB(52))+&
@@ -5937,9 +9523,17 @@
                          HRRB(55))+&
                          HRRB(81))+&
                          HRRB(113)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(19_z,18|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)-2.D0*HRR(52)+&
+      DUM=-2.D0*HRR(52)+&
                          ABz*(-4.D0*HRR(31)+&
                          ABz*(-2.D0*HRR(16)+&
                          HRRA(52))+&
@@ -5951,9 +9545,17 @@
                          2.D0*HRRA(55))+&
                          HRRA(83))+&
                          HRRA(116)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(19,18_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)-2.D0*HRR(52)+&
+      DUM=-2.D0*HRR(52)+&
                          ABz*(-2.D0*HRR(31)+&
                          ABz*(ABz*HRRB(31)+&
                          3.D0*HRRB(52))+&
@@ -5965,17 +9567,33 @@
                          3.D0*HRRB(55))+&
                          HRRB(83))+&
                          HRRB(116)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+9)*LDA+(OB+7)*LDB+CDOffSet !=
       !=(20_x,18|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)+&
-                         ABz*(ABz*HRRA(51)+&
+      DUM=ABz*(ABz*HRRA(51)+&
                          2.D0*HRRA(79))+&
                          ABx*(ABz*(ABz*HRRA(33)+&
                          2.D0*HRRA(54))+&
                          HRRA(82))+&
                          HRRA(115)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(20,18_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)-HRR(56)+&
+      DUM=-HRR(56)+&
                          ABz*(-2.D0*HRR(35)+&
                          ABz*(-HRR(20)+&
                          HRRB(51))+&
@@ -5987,19 +9605,32 @@
                          HRRB(56))+&
                          2.D0*HRRB(82))+&
                          HRRB(115)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(20_y,18|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)+&
-                         ABz*(ABz*HRRA(52)+&
+      DUM=ABz*(ABz*HRRA(52)+&
                          2.D0*HRRA(80))+&
                          ABx*(ABz*(ABz*HRRA(34)+&
                          2.D0*HRRA(55))+&
                          HRRA(83))+&
                          HRRA(116)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(20,18_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)+&
-                         ABz*(ABz*HRRB(52)+&
+      DUM=ABz*(ABz*HRRB(52)+&
                          2.D0*HRRB(80))+&
                          ABy*(ABz*(ABz*HRRB(33)+&
                          2.D0*HRRB(54))+&
@@ -6011,9 +9642,17 @@
                          HRRB(56))+&
                          HRRB(83))+&
                          HRRB(116)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(20_z,18|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)-3.D0*HRR(54)+&
+      DUM=-3.D0*HRR(54)+&
                          ABz*(-6.D0*HRR(33)+&
                          ABz*(-3.D0*HRR(18)+&
                          HRRA(54))+&
@@ -6025,9 +9664,17 @@
                          2.D0*HRRA(56))+&
                          HRRA(84))+&
                          HRRA(118)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(20,18_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)-2.D0*HRR(54)+&
+      DUM=-2.D0*HRR(54)+&
                          ABz*(-2.D0*HRR(33)+&
                          ABz*(ABz*HRRB(33)+&
                          3.D0*HRRB(54))+&
@@ -6039,9 +9686,18 @@
                          3.D0*HRRB(56))+&
                          HRRB(84))+&
                          HRRB(118)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+0)*LDA+(OB+8)*LDB+CDOffSet !=
       !=(11_x,19|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)-3.D0*HRR(48)+&
+      DUM=-3.D0*HRR(48)+&
                          ABz*(-6.D0*HRR(27)+&
                          ABz*(-3.D0*HRR(12)+&
                          HRRA(37))+&
@@ -6053,9 +9709,16 @@
                          2.D0*HRRA(42))+&
                          HRRA(70))+&
                          HRRA(101)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(11,19_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)+&
-                         ABz*(ABz*HRRB(37)+&
+      DUM=ABz*(ABz*HRRB(37)+&
                          2.D0*HRRB(65))+&
                          ABy*(ABz*(ABz*HRRB(21)+&
                          2.D0*HRRB(42))+&
@@ -6067,18 +9730,32 @@
                          HRRB(47))+&
                          HRRB(71))+&
                          HRRB(101)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(11_y,19|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)+&
-                         ABz*(ABz*HRRA(38)+&
+      DUM=ABz*(ABz*HRRA(38)+&
                          2.D0*HRRA(66))+&
                          ABy*(ABz*(ABz*HRRA(22)+&
                          2.D0*HRRA(43))+&
                          HRRA(71))+&
                          HRRA(102)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(11,19_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)-HRR(47)+&
+      DUM=-HRR(47)+&
                          ABz*(-2.D0*HRR(26)+&
                          ABz*(-HRR(11)+&
                          HRRB(38))+&
@@ -6090,18 +9767,33 @@
                          HRRB(47))+&
                          2.D0*HRRB(71))+&
                          HRRB(102)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(11_z,19|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)+&
-                         ABz*(ABz*HRRA(43)+&
+      DUM=ABz*(ABz*HRRA(43)+&
                          2.D0*HRRA(71))+&
                          ABy*(ABz*(ABz*HRRA(26)+&
                          2.D0*HRRA(47))+&
                          HRRA(75))+&
                          HRRA(107)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(11,19_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)-2.D0*HRR(43)+&
+      DUM=-2.D0*HRR(43)+&
                          ABz*(-2.D0*HRR(22)+&
                          ABz*(ABz*HRRB(22)+&
                          3.D0*HRRB(43))+&
@@ -6113,9 +9805,18 @@
                          3.D0*HRRB(47))+&
                          HRRB(75))+&
                          HRRB(107)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+1)*LDA+(OB+8)*LDB+CDOffSet !=
       !=(12_x,19|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)-2.D0*HRR(49)+&
+      DUM=-2.D0*HRR(49)+&
                          ABz*(-4.D0*HRR(28)+&
                          ABz*(-2.D0*HRR(13)+&
                          HRRA(38))+&
@@ -6127,9 +9828,16 @@
                          2.D0*HRRA(43))+&
                          HRRA(71))+&
                          HRRA(102)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(12,19_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)+&
-                         ABz*(ABz*HRRB(38)+&
+      DUM=ABz*(ABz*HRRB(38)+&
                          2.D0*HRRB(66))+&
                          ABy*(ABz*(ABz*HRRB(22)+&
                          2.D0*HRRB(43))+&
@@ -6141,9 +9849,16 @@
                          HRRB(48))+&
                          HRRB(72))+&
                          HRRB(102)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(12_y,19|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)-HRR(48)+&
+      DUM=-HRR(48)+&
                          ABz*(-2.D0*HRR(27)+&
                          ABz*(-HRR(12)+&
                          HRRA(39))+&
@@ -6155,9 +9870,17 @@
                          2.D0*HRRA(44))+&
                          HRRA(72))+&
                          HRRA(103)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(12,19_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)-HRR(48)+&
+      DUM=-HRR(48)+&
                          ABz*(-2.D0*HRR(27)+&
                          ABz*(-HRR(12)+&
                          HRRB(39))+&
@@ -6169,18 +9892,33 @@
                          HRRB(48))+&
                          2.D0*HRRB(72))+&
                          HRRB(103)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(12_z,19|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)+&
-                         ABz*(ABz*HRRA(44)+&
+      DUM=ABz*(ABz*HRRA(44)+&
                          2.D0*HRRA(72))+&
                          ABy*(ABz*(ABz*HRRA(27)+&
                          2.D0*HRRA(48))+&
                          HRRA(76))+&
                          HRRA(108)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(12,19_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)-2.D0*HRR(44)+&
+      DUM=-2.D0*HRR(44)+&
                          ABz*(-2.D0*HRR(23)+&
                          ABz*(ABz*HRRB(23)+&
                          3.D0*HRRB(44))+&
@@ -6192,9 +9930,18 @@
                          3.D0*HRRB(48))+&
                          HRRB(76))+&
                          HRRB(108)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+2)*LDA+(OB+8)*LDB+CDOffSet !=
       !=(13_x,19|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)-HRR(50)+&
+      DUM=-HRR(50)+&
                          ABz*(-2.D0*HRR(29)+&
                          ABz*(-HRR(14)+&
                          HRRA(39))+&
@@ -6206,9 +9953,16 @@
                          2.D0*HRRA(44))+&
                          HRRA(72))+&
                          HRRA(103)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(13,19_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)+&
-                         ABz*(ABz*HRRB(39)+&
+      DUM=ABz*(ABz*HRRB(39)+&
                          2.D0*HRRB(67))+&
                          ABy*(ABz*(ABz*HRRB(23)+&
                          2.D0*HRRB(44))+&
@@ -6220,9 +9974,16 @@
                          HRRB(49))+&
                          HRRB(73))+&
                          HRRB(103)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(13_y,19|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)-2.D0*HRR(49)+&
+      DUM=-2.D0*HRR(49)+&
                          ABz*(-4.D0*HRR(28)+&
                          ABz*(-2.D0*HRR(13)+&
                          HRRA(40))+&
@@ -6234,9 +9995,17 @@
                          2.D0*HRRA(45))+&
                          HRRA(73))+&
                          HRRA(104)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(13,19_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)-HRR(49)+&
+      DUM=-HRR(49)+&
                          ABz*(-2.D0*HRR(28)+&
                          ABz*(-HRR(13)+&
                          HRRB(40))+&
@@ -6248,18 +10017,33 @@
                          HRRB(49))+&
                          2.D0*HRRB(73))+&
                          HRRB(104)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(13_z,19|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)+&
-                         ABz*(ABz*HRRA(45)+&
+      DUM=ABz*(ABz*HRRA(45)+&
                          2.D0*HRRA(73))+&
                          ABy*(ABz*(ABz*HRRA(28)+&
                          2.D0*HRRA(49))+&
                          HRRA(77))+&
                          HRRA(109)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(13,19_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)-2.D0*HRR(45)+&
+      DUM=-2.D0*HRR(45)+&
                          ABz*(-2.D0*HRR(24)+&
                          ABz*(ABz*HRRB(24)+&
                          3.D0*HRRB(45))+&
@@ -6271,18 +10055,33 @@
                          3.D0*HRRB(49))+&
                          HRRB(77))+&
                          HRRB(109)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+3)*LDA+(OB+8)*LDB+CDOffSet !=
       !=(14_x,19|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)+&
-                         ABz*(ABz*HRRA(40)+&
+      DUM=ABz*(ABz*HRRA(40)+&
                          2.D0*HRRA(68))+&
                          ABy*(ABz*(ABz*HRRA(24)+&
                          2.D0*HRRA(45))+&
                          HRRA(73))+&
                          HRRA(104)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(14,19_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)+&
-                         ABz*(ABz*HRRB(40)+&
+      DUM=ABz*(ABz*HRRB(40)+&
                          2.D0*HRRB(68))+&
                          ABy*(ABz*(ABz*HRRB(24)+&
                          2.D0*HRRB(45))+&
@@ -6294,9 +10093,16 @@
                          HRRB(50))+&
                          HRRB(74))+&
                          HRRB(104)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(14_y,19|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)-3.D0*HRR(50)+&
+      DUM=-3.D0*HRR(50)+&
                          ABz*(-6.D0*HRR(29)+&
                          ABz*(-3.D0*HRR(14)+&
                          HRRA(41))+&
@@ -6308,9 +10114,17 @@
                          2.D0*HRRA(46))+&
                          HRRA(74))+&
                          HRRA(105)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(14,19_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)-HRR(50)+&
+      DUM=-HRR(50)+&
                          ABz*(-2.D0*HRR(29)+&
                          ABz*(-HRR(14)+&
                          HRRB(41))+&
@@ -6322,18 +10136,33 @@
                          HRRB(50))+&
                          2.D0*HRRB(74))+&
                          HRRB(105)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(14_z,19|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)+&
-                         ABz*(ABz*HRRA(46)+&
+      DUM=ABz*(ABz*HRRA(46)+&
                          2.D0*HRRA(74))+&
                          ABy*(ABz*(ABz*HRRA(29)+&
                          2.D0*HRRA(50))+&
                          HRRA(78))+&
                          HRRA(110)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(14,19_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)-2.D0*HRR(46)+&
+      DUM=-2.D0*HRR(46)+&
                          ABz*(-2.D0*HRR(25)+&
                          ABz*(ABz*HRRB(25)+&
                          3.D0*HRRB(46))+&
@@ -6345,9 +10174,18 @@
                          3.D0*HRRB(50))+&
                          HRRB(78))+&
                          HRRB(110)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+4)*LDA+(OB+8)*LDB+CDOffSet !=
       !=(15_x,19|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)-2.D0*HRR(52)+&
+      DUM=-2.D0*HRR(52)+&
                          ABz*(-4.D0*HRR(31)+&
                          ABz*(-2.D0*HRR(16)+&
                          HRRA(43))+&
@@ -6359,9 +10197,16 @@
                          2.D0*HRRA(47))+&
                          HRRA(75))+&
                          HRRA(107)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(15,19_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)+&
-                         ABz*(ABz*HRRB(43)+&
+      DUM=ABz*(ABz*HRRB(43)+&
                          2.D0*HRRB(71))+&
                          ABy*(ABz*(ABz*HRRB(26)+&
                          2.D0*HRRB(47))+&
@@ -6373,18 +10218,32 @@
                          HRRB(51))+&
                          HRRB(76))+&
                          HRRB(107)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(15_y,19|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)+&
-                         ABz*(ABz*HRRA(44)+&
+      DUM=ABz*(ABz*HRRA(44)+&
                          2.D0*HRRA(72))+&
                          ABy*(ABz*(ABz*HRRA(27)+&
                          2.D0*HRRA(48))+&
                          HRRA(76))+&
                          HRRA(108)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(15,19_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)-HRR(51)+&
+      DUM=-HRR(51)+&
                          ABz*(-2.D0*HRR(30)+&
                          ABz*(-HRR(15)+&
                          HRRB(44))+&
@@ -6396,9 +10255,17 @@
                          HRRB(51))+&
                          2.D0*HRRB(76))+&
                          HRRB(108)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(15_z,19|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)-HRR(48)+&
+      DUM=-HRR(48)+&
                          ABz*(-2.D0*HRR(27)+&
                          ABz*(-HRR(12)+&
                          HRRA(48))+&
@@ -6410,9 +10277,17 @@
                          2.D0*HRRA(51))+&
                          HRRA(79))+&
                          HRRA(112)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(15,19_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)-2.D0*HRR(48)+&
+      DUM=-2.D0*HRR(48)+&
                          ABz*(-2.D0*HRR(27)+&
                          ABz*(ABz*HRRB(27)+&
                          3.D0*HRRB(48))+&
@@ -6424,9 +10299,18 @@
                          3.D0*HRRB(51))+&
                          HRRB(79))+&
                          HRRB(112)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+5)*LDA+(OB+8)*LDB+CDOffSet !=
       !=(16_x,19|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)-HRR(53)+&
+      DUM=-HRR(53)+&
                          ABz*(-2.D0*HRR(32)+&
                          ABz*(-HRR(17)+&
                          HRRA(44))+&
@@ -6438,9 +10322,16 @@
                          2.D0*HRRA(48))+&
                          HRRA(76))+&
                          HRRA(108)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(16,19_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)+&
-                         ABz*(ABz*HRRB(44)+&
+      DUM=ABz*(ABz*HRRB(44)+&
                          2.D0*HRRB(72))+&
                          ABy*(ABz*(ABz*HRRB(27)+&
                          2.D0*HRRB(48))+&
@@ -6452,9 +10343,16 @@
                          HRRB(52))+&
                          HRRB(77))+&
                          HRRB(108)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(16_y,19|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)-HRR(52)+&
+      DUM=-HRR(52)+&
                          ABz*(-2.D0*HRR(31)+&
                          ABz*(-HRR(16)+&
                          HRRA(45))+&
@@ -6466,9 +10364,17 @@
                          2.D0*HRRA(49))+&
                          HRRA(77))+&
                          HRRA(109)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(16,19_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)-HRR(52)+&
+      DUM=-HRR(52)+&
                          ABz*(-2.D0*HRR(31)+&
                          ABz*(-HRR(16)+&
                          HRRB(45))+&
@@ -6480,9 +10386,17 @@
                          HRRB(52))+&
                          2.D0*HRRB(77))+&
                          HRRB(109)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(16_z,19|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)-HRR(49)+&
+      DUM=-HRR(49)+&
                          ABz*(-2.D0*HRR(28)+&
                          ABz*(-HRR(13)+&
                          HRRA(49))+&
@@ -6494,9 +10408,17 @@
                          2.D0*HRRA(52))+&
                          HRRA(80))+&
                          HRRA(113)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(16,19_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)-2.D0*HRR(49)+&
+      DUM=-2.D0*HRR(49)+&
                          ABz*(-2.D0*HRR(28)+&
                          ABz*(ABz*HRRB(28)+&
                          3.D0*HRRB(49))+&
@@ -6508,18 +10430,33 @@
                          3.D0*HRRB(52))+&
                          HRRB(80))+&
                          HRRB(113)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+6)*LDA+(OB+8)*LDB+CDOffSet !=
       !=(17_x,19|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)+&
-                         ABz*(ABz*HRRA(45)+&
+      DUM=ABz*(ABz*HRRA(45)+&
                          2.D0*HRRA(73))+&
                          ABy*(ABz*(ABz*HRRA(28)+&
                          2.D0*HRRA(49))+&
                          HRRA(77))+&
                          HRRA(109)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(17,19_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)+&
-                         ABz*(ABz*HRRB(45)+&
+      DUM=ABz*(ABz*HRRB(45)+&
                          2.D0*HRRB(73))+&
                          ABy*(ABz*(ABz*HRRB(28)+&
                          2.D0*HRRB(49))+&
@@ -6531,9 +10468,16 @@
                          HRRB(53))+&
                          HRRB(78))+&
                          HRRB(109)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(17_y,19|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)-2.D0*HRR(53)+&
+      DUM=-2.D0*HRR(53)+&
                          ABz*(-4.D0*HRR(32)+&
                          ABz*(-2.D0*HRR(17)+&
                          HRRA(46))+&
@@ -6545,9 +10489,17 @@
                          2.D0*HRRA(50))+&
                          HRRA(78))+&
                          HRRA(110)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(17,19_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)-HRR(53)+&
+      DUM=-HRR(53)+&
                          ABz*(-2.D0*HRR(32)+&
                          ABz*(-HRR(17)+&
                          HRRB(46))+&
@@ -6559,9 +10511,17 @@
                          HRRB(53))+&
                          2.D0*HRRB(78))+&
                          HRRB(110)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(17_z,19|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)-HRR(50)+&
+      DUM=-HRR(50)+&
                          ABz*(-2.D0*HRR(29)+&
                          ABz*(-HRR(14)+&
                          HRRA(50))+&
@@ -6573,9 +10533,17 @@
                          2.D0*HRRA(53))+&
                          HRRA(81))+&
                          HRRA(114)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(17,19_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)-2.D0*HRR(50)+&
+      DUM=-2.D0*HRR(50)+&
                          ABz*(-2.D0*HRR(29)+&
                          ABz*(ABz*HRRB(29)+&
                          3.D0*HRRB(50))+&
@@ -6587,9 +10555,18 @@
                          3.D0*HRRB(53))+&
                          HRRB(81))+&
                          HRRB(114)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+7)*LDA+(OB+8)*LDB+CDOffSet !=
       !=(18_x,19|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)-HRR(55)+&
+      DUM=-HRR(55)+&
                          ABz*(-2.D0*HRR(34)+&
                          ABz*(-HRR(19)+&
                          HRRA(48))+&
@@ -6601,9 +10578,16 @@
                          2.D0*HRRA(51))+&
                          HRRA(79))+&
                          HRRA(112)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(18,19_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)+&
-                         ABz*(ABz*HRRB(48)+&
+      DUM=ABz*(ABz*HRRB(48)+&
                          2.D0*HRRB(76))+&
                          ABy*(ABz*(ABz*HRRB(30)+&
                          2.D0*HRRB(51))+&
@@ -6615,18 +10599,32 @@
                          HRRB(54))+&
                          HRRB(80))+&
                          HRRB(112)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(18_y,19|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)+&
-                         ABz*(ABz*HRRA(49)+&
+      DUM=ABz*(ABz*HRRA(49)+&
                          2.D0*HRRA(77))+&
                          ABy*(ABz*(ABz*HRRA(31)+&
                          2.D0*HRRA(52))+&
                          HRRA(80))+&
                          HRRA(113)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(18,19_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)-HRR(54)+&
+      DUM=-HRR(54)+&
                          ABz*(-2.D0*HRR(33)+&
                          ABz*(-HRR(18)+&
                          HRRB(49))+&
@@ -6638,9 +10636,17 @@
                          HRRB(54))+&
                          2.D0*HRRB(80))+&
                          HRRB(113)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(18_z,19|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)-2.D0*HRR(52)+&
+      DUM=-2.D0*HRR(52)+&
                          ABz*(-4.D0*HRR(31)+&
                          ABz*(-2.D0*HRR(16)+&
                          HRRA(52))+&
@@ -6652,9 +10658,17 @@
                          2.D0*HRRA(54))+&
                          HRRA(82))+&
                          HRRA(116)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(18,19_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)-2.D0*HRR(52)+&
+      DUM=-2.D0*HRR(52)+&
                          ABz*(-2.D0*HRR(31)+&
                          ABz*(ABz*HRRB(31)+&
                          3.D0*HRRB(52))+&
@@ -6666,18 +10680,33 @@
                          3.D0*HRRB(54))+&
                          HRRB(82))+&
                          HRRB(116)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+8)*LDA+(OB+8)*LDB+CDOffSet !=
       !=(19_x,19|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)+&
-                         ABz*(ABz*HRRA(49)+&
+      DUM=ABz*(ABz*HRRA(49)+&
                          2.D0*HRRA(77))+&
                          ABy*(ABz*(ABz*HRRA(31)+&
                          2.D0*HRRA(52))+&
                          HRRA(80))+&
                          HRRA(113)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(19,19_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)+&
-                         ABz*(ABz*HRRB(49)+&
+      DUM=ABz*(ABz*HRRB(49)+&
                          2.D0*HRRB(77))+&
                          ABy*(ABz*(ABz*HRRB(31)+&
                          2.D0*HRRB(52))+&
@@ -6689,9 +10718,16 @@
                          HRRB(55))+&
                          HRRB(81))+&
                          HRRB(113)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(19_y,19|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)-HRR(55)+&
+      DUM=-HRR(55)+&
                          ABz*(-2.D0*HRR(34)+&
                          ABz*(-HRR(19)+&
                          HRRA(50))+&
@@ -6703,9 +10739,17 @@
                          2.D0*HRRA(53))+&
                          HRRA(81))+&
                          HRRA(114)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(19,19_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)-HRR(55)+&
+      DUM=-HRR(55)+&
                          ABz*(-2.D0*HRR(34)+&
                          ABz*(-HRR(19)+&
                          HRRB(50))+&
@@ -6717,9 +10761,17 @@
                          HRRB(55))+&
                          2.D0*HRRB(81))+&
                          HRRB(114)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(19_z,19|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)-2.D0*HRR(53)+&
+      DUM=-2.D0*HRR(53)+&
                          ABz*(-4.D0*HRR(32)+&
                          ABz*(-2.D0*HRR(17)+&
                          HRRA(53))+&
@@ -6731,9 +10783,17 @@
                          2.D0*HRRA(55))+&
                          HRRA(83))+&
                          HRRA(117)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(19,19_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)-2.D0*HRR(53)+&
+      DUM=-2.D0*HRR(53)+&
                          ABz*(-2.D0*HRR(32)+&
                          ABz*(ABz*HRRB(32)+&
                          3.D0*HRRB(53))+&
@@ -6745,18 +10805,33 @@
                          3.D0*HRRB(55))+&
                          HRRB(83))+&
                          HRRB(117)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+9)*LDA+(OB+8)*LDB+CDOffSet !=
       !=(20_x,19|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)+&
-                         ABz*(ABz*HRRA(52)+&
+      DUM=ABz*(ABz*HRRA(52)+&
                          2.D0*HRRA(80))+&
                          ABy*(ABz*(ABz*HRRA(33)+&
                          2.D0*HRRA(54))+&
                          HRRA(82))+&
                          HRRA(116)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(20,19_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)+&
-                         ABz*(ABz*HRRB(52)+&
+      DUM=ABz*(ABz*HRRB(52)+&
                          2.D0*HRRB(80))+&
                          ABy*(ABz*(ABz*HRRB(33)+&
                          2.D0*HRRB(54))+&
@@ -6768,18 +10843,32 @@
                          HRRB(56))+&
                          HRRB(83))+&
                          HRRB(116)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(20_y,19|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)+&
-                         ABz*(ABz*HRRA(53)+&
+      DUM=ABz*(ABz*HRRA(53)+&
                          2.D0*HRRA(81))+&
                          ABy*(ABz*(ABz*HRRA(34)+&
                          2.D0*HRRA(55))+&
                          HRRA(83))+&
                          HRRA(117)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(20,19_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)-HRR(56)+&
+      DUM=-HRR(56)+&
                          ABz*(-2.D0*HRR(35)+&
                          ABz*(-HRR(20)+&
                          HRRB(53))+&
@@ -6791,9 +10880,17 @@
                          HRRB(56))+&
                          2.D0*HRRB(83))+&
                          HRRB(117)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(20_z,19|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)-3.D0*HRR(55)+&
+      DUM=-3.D0*HRR(55)+&
                          ABz*(-6.D0*HRR(34)+&
                          ABz*(-3.D0*HRR(19)+&
                          HRRA(55))+&
@@ -6805,9 +10902,17 @@
                          2.D0*HRRA(56))+&
                          HRRA(84))+&
                          HRRA(119)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(20,19_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)-2.D0*HRR(55)+&
+      DUM=-2.D0*HRR(55)+&
                          ABz*(-2.D0*HRR(34)+&
                          ABz*(ABz*HRRB(34)+&
                          3.D0*HRRB(55))+&
@@ -6819,9 +10924,18 @@
                          3.D0*HRRB(56))+&
                          HRRB(84))+&
                          HRRB(119)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+0)*LDA+(OB+9)*LDB+CDOffSet !=
       !=(11_x,20|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)-3.D0*HRR(51)+&
+      DUM=-3.D0*HRR(51)+&
                          ABz*(-9.D0*HRR(30)+&
                          ABz*(-9.D0*HRR(15)+&
                          ABz*(-3.D0*HRR(5)+&
@@ -6829,9 +10943,16 @@
                          3.D0*HRRA(42))+&
                          3.D0*HRRA(70))+&
                          HRRA(106)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(11,20_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)+&
-                         ABz*(ABz*(ABz*HRRB(21)+&
+      DUM=ABz*(ABz*(ABz*HRRB(21)+&
                          3.D0*HRRB(42))+&
                          3.D0*HRRB(70))+&
                          ABx*(ABz*(ABz*(ABz*HRRB(11)+&
@@ -6839,17 +10960,30 @@
                          3.D0*HRRB(47))+&
                          HRRB(75))+&
                          HRRB(106)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(11_y,20|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)+&
-                         ABz*(ABz*(ABz*HRRA(22)+&
+      DUM=ABz*(ABz*(ABz*HRRA(22)+&
                          3.D0*HRRA(43))+&
                          3.D0*HRRA(71))+&
                          HRRA(107)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(11,20_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)+&
-                         ABz*(ABz*(ABz*HRRB(22)+&
+      DUM=ABz*(ABz*(ABz*HRRB(22)+&
                          3.D0*HRRB(43))+&
                          3.D0*HRRB(71))+&
                          ABy*(ABz*(ABz*(ABz*HRRB(11)+&
@@ -6857,16 +10991,31 @@
                          3.D0*HRRB(47))+&
                          HRRB(75))+&
                          HRRB(107)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(11_z,20|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)+&
-                         ABz*(ABz*(ABz*HRRA(26)+&
+      DUM=ABz*(ABz*(ABz*HRRA(26)+&
                          3.D0*HRRA(47))+&
                          3.D0*HRRA(75))+&
                          HRRA(111)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(11,20_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)-3.D0*HRR(47)+&
+      DUM=-3.D0*HRR(47)+&
                          ABz*(-6.D0*HRR(26)+&
                          ABz*(-3.D0*HRR(11)+&
                          ABz*(ABz*HRRB(11)+&
@@ -6874,9 +11023,18 @@
                          6.D0*HRRB(47))+&
                          4.D0*HRRB(75))+&
                          HRRB(111)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+1)*LDA+(OB+9)*LDB+CDOffSet !=
       !=(12_x,20|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)-2.D0*HRR(52)+&
+      DUM=-2.D0*HRR(52)+&
                          ABz*(-6.D0*HRR(31)+&
                          ABz*(-6.D0*HRR(16)+&
                          ABz*(-2.D0*HRR(6)+&
@@ -6884,9 +11042,16 @@
                          3.D0*HRRA(43))+&
                          3.D0*HRRA(71))+&
                          HRRA(107)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(12,20_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)+&
-                         ABz*(ABz*(ABz*HRRB(22)+&
+      DUM=ABz*(ABz*(ABz*HRRB(22)+&
                          3.D0*HRRB(43))+&
                          3.D0*HRRB(71))+&
                          ABx*(ABz*(ABz*(ABz*HRRB(12)+&
@@ -6894,9 +11059,16 @@
                          3.D0*HRRB(48))+&
                          HRRB(76))+&
                          HRRB(107)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(12_y,20|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)-HRR(51)+&
+      DUM=-HRR(51)+&
                          ABz*(-3.D0*HRR(30)+&
                          ABz*(-3.D0*HRR(15)+&
                          ABz*(-HRR(5)+&
@@ -6904,10 +11076,17 @@
                          3.D0*HRRA(44))+&
                          3.D0*HRRA(72))+&
                          HRRA(108)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(12,20_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)+&
-                         ABz*(ABz*(ABz*HRRB(23)+&
+      DUM=ABz*(ABz*(ABz*HRRB(23)+&
                          3.D0*HRRB(44))+&
                          3.D0*HRRB(72))+&
                          ABy*(ABz*(ABz*(ABz*HRRB(12)+&
@@ -6915,16 +11094,31 @@
                          3.D0*HRRB(48))+&
                          HRRB(76))+&
                          HRRB(108)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(12_z,20|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)+&
-                         ABz*(ABz*(ABz*HRRA(27)+&
+      DUM=ABz*(ABz*(ABz*HRRA(27)+&
                          3.D0*HRRA(48))+&
                          3.D0*HRRA(76))+&
                          HRRA(112)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(12,20_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)-3.D0*HRR(48)+&
+      DUM=-3.D0*HRR(48)+&
                          ABz*(-6.D0*HRR(27)+&
                          ABz*(-3.D0*HRR(12)+&
                          ABz*(ABz*HRRB(12)+&
@@ -6932,9 +11126,18 @@
                          6.D0*HRRB(48))+&
                          4.D0*HRRB(76))+&
                          HRRB(112)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+2)*LDA+(OB+9)*LDB+CDOffSet !=
       !=(13_x,20|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)-HRR(53)+&
+      DUM=-HRR(53)+&
                          ABz*(-3.D0*HRR(32)+&
                          ABz*(-3.D0*HRR(17)+&
                          ABz*(-HRR(7)+&
@@ -6942,9 +11145,16 @@
                          3.D0*HRRA(44))+&
                          3.D0*HRRA(72))+&
                          HRRA(108)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(13,20_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)+&
-                         ABz*(ABz*(ABz*HRRB(23)+&
+      DUM=ABz*(ABz*(ABz*HRRB(23)+&
                          3.D0*HRRB(44))+&
                          3.D0*HRRB(72))+&
                          ABx*(ABz*(ABz*(ABz*HRRB(13)+&
@@ -6952,9 +11162,16 @@
                          3.D0*HRRB(49))+&
                          HRRB(77))+&
                          HRRB(108)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(13_y,20|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)-2.D0*HRR(52)+&
+      DUM=-2.D0*HRR(52)+&
                          ABz*(-6.D0*HRR(31)+&
                          ABz*(-6.D0*HRR(16)+&
                          ABz*(-2.D0*HRR(6)+&
@@ -6962,10 +11179,17 @@
                          3.D0*HRRA(45))+&
                          3.D0*HRRA(73))+&
                          HRRA(109)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(13,20_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)+&
-                         ABz*(ABz*(ABz*HRRB(24)+&
+      DUM=ABz*(ABz*(ABz*HRRB(24)+&
                          3.D0*HRRB(45))+&
                          3.D0*HRRB(73))+&
                          ABy*(ABz*(ABz*(ABz*HRRB(13)+&
@@ -6973,16 +11197,31 @@
                          3.D0*HRRB(49))+&
                          HRRB(77))+&
                          HRRB(109)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(13_z,20|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)+&
-                         ABz*(ABz*(ABz*HRRA(28)+&
+      DUM=ABz*(ABz*(ABz*HRRA(28)+&
                          3.D0*HRRA(49))+&
                          3.D0*HRRA(77))+&
                          HRRA(113)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(13,20_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)-3.D0*HRR(49)+&
+      DUM=-3.D0*HRR(49)+&
                          ABz*(-6.D0*HRR(28)+&
                          ABz*(-3.D0*HRR(13)+&
                          ABz*(ABz*HRRB(13)+&
@@ -6990,16 +11229,31 @@
                          6.D0*HRRB(49))+&
                          4.D0*HRRB(77))+&
                          HRRB(113)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+3)*LDA+(OB+9)*LDB+CDOffSet !=
       !=(14_x,20|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)+&
-                         ABz*(ABz*(ABz*HRRA(24)+&
+      DUM=ABz*(ABz*(ABz*HRRA(24)+&
                          3.D0*HRRA(45))+&
                          3.D0*HRRA(73))+&
                          HRRA(109)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(14,20_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)+&
-                         ABz*(ABz*(ABz*HRRB(24)+&
+      DUM=ABz*(ABz*(ABz*HRRB(24)+&
                          3.D0*HRRB(45))+&
                          3.D0*HRRB(73))+&
                          ABx*(ABz*(ABz*(ABz*HRRB(14)+&
@@ -7007,9 +11261,16 @@
                          3.D0*HRRB(50))+&
                          HRRB(78))+&
                          HRRB(109)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(14_y,20|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)-3.D0*HRR(53)+&
+      DUM=-3.D0*HRR(53)+&
                          ABz*(-9.D0*HRR(32)+&
                          ABz*(-9.D0*HRR(17)+&
                          ABz*(-3.D0*HRR(7)+&
@@ -7017,10 +11278,17 @@
                          3.D0*HRRA(46))+&
                          3.D0*HRRA(74))+&
                          HRRA(110)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(14,20_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)+&
-                         ABz*(ABz*(ABz*HRRB(25)+&
+      DUM=ABz*(ABz*(ABz*HRRB(25)+&
                          3.D0*HRRB(46))+&
                          3.D0*HRRB(74))+&
                          ABy*(ABz*(ABz*(ABz*HRRB(14)+&
@@ -7028,16 +11296,31 @@
                          3.D0*HRRB(50))+&
                          HRRB(78))+&
                          HRRB(110)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(14_z,20|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)+&
-                         ABz*(ABz*(ABz*HRRA(29)+&
+      DUM=ABz*(ABz*(ABz*HRRA(29)+&
                          3.D0*HRRA(50))+&
                          3.D0*HRRA(78))+&
                          HRRA(114)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(14,20_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)-3.D0*HRR(50)+&
+      DUM=-3.D0*HRR(50)+&
                          ABz*(-6.D0*HRR(29)+&
                          ABz*(-3.D0*HRR(14)+&
                          ABz*(ABz*HRRB(14)+&
@@ -7045,9 +11328,18 @@
                          6.D0*HRRB(50))+&
                          4.D0*HRRB(78))+&
                          HRRB(114)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+4)*LDA+(OB+9)*LDB+CDOffSet !=
       !=(15_x,20|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)-2.D0*HRR(54)+&
+      DUM=-2.D0*HRR(54)+&
                          ABz*(-6.D0*HRR(33)+&
                          ABz*(-6.D0*HRR(18)+&
                          ABz*(-2.D0*HRR(8)+&
@@ -7055,9 +11347,16 @@
                          3.D0*HRRA(47))+&
                          3.D0*HRRA(75))+&
                          HRRA(111)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(15,20_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)+&
-                         ABz*(ABz*(ABz*HRRB(26)+&
+      DUM=ABz*(ABz*(ABz*HRRB(26)+&
                          3.D0*HRRB(47))+&
                          3.D0*HRRB(75))+&
                          ABx*(ABz*(ABz*(ABz*HRRB(15)+&
@@ -7065,17 +11364,30 @@
                          3.D0*HRRB(51))+&
                          HRRB(79))+&
                          HRRB(111)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(15_y,20|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)+&
-                         ABz*(ABz*(ABz*HRRA(27)+&
+      DUM=ABz*(ABz*(ABz*HRRA(27)+&
                          3.D0*HRRA(48))+&
                          3.D0*HRRA(76))+&
                          HRRA(112)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(15,20_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)+&
-                         ABz*(ABz*(ABz*HRRB(27)+&
+      DUM=ABz*(ABz*(ABz*HRRB(27)+&
                          3.D0*HRRB(48))+&
                          3.D0*HRRB(76))+&
                          ABy*(ABz*(ABz*(ABz*HRRB(15)+&
@@ -7083,9 +11395,17 @@
                          3.D0*HRRB(51))+&
                          HRRB(79))+&
                          HRRB(112)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(15_z,20|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)-HRR(51)+&
+      DUM=-HRR(51)+&
                          ABz*(-3.D0*HRR(30)+&
                          ABz*(-3.D0*HRR(15)+&
                          ABz*(-HRR(5)+&
@@ -7093,9 +11413,17 @@
                          3.D0*HRRA(51))+&
                          3.D0*HRRA(79))+&
                          HRRA(115)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(15,20_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)-3.D0*HRR(51)+&
+      DUM=-3.D0*HRR(51)+&
                          ABz*(-6.D0*HRR(30)+&
                          ABz*(-3.D0*HRR(15)+&
                          ABz*(ABz*HRRB(15)+&
@@ -7103,9 +11431,18 @@
                          6.D0*HRRB(51))+&
                          4.D0*HRRB(79))+&
                          HRRB(115)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+5)*LDA+(OB+9)*LDB+CDOffSet !=
       !=(16_x,20|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)-HRR(55)+&
+      DUM=-HRR(55)+&
                          ABz*(-3.D0*HRR(34)+&
                          ABz*(-3.D0*HRR(19)+&
                          ABz*(-HRR(9)+&
@@ -7113,9 +11450,16 @@
                          3.D0*HRRA(48))+&
                          3.D0*HRRA(76))+&
                          HRRA(112)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(16,20_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)+&
-                         ABz*(ABz*(ABz*HRRB(27)+&
+      DUM=ABz*(ABz*(ABz*HRRB(27)+&
                          3.D0*HRRB(48))+&
                          3.D0*HRRB(76))+&
                          ABx*(ABz*(ABz*(ABz*HRRB(16)+&
@@ -7123,9 +11467,16 @@
                          3.D0*HRRB(52))+&
                          HRRB(80))+&
                          HRRB(112)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(16_y,20|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)-HRR(54)+&
+      DUM=-HRR(54)+&
                          ABz*(-3.D0*HRR(33)+&
                          ABz*(-3.D0*HRR(18)+&
                          ABz*(-HRR(8)+&
@@ -7133,10 +11484,17 @@
                          3.D0*HRRA(49))+&
                          3.D0*HRRA(77))+&
                          HRRA(113)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(16,20_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)+&
-                         ABz*(ABz*(ABz*HRRB(28)+&
+      DUM=ABz*(ABz*(ABz*HRRB(28)+&
                          3.D0*HRRB(49))+&
                          3.D0*HRRB(77))+&
                          ABy*(ABz*(ABz*(ABz*HRRB(16)+&
@@ -7144,9 +11502,17 @@
                          3.D0*HRRB(52))+&
                          HRRB(80))+&
                          HRRB(113)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(16_z,20|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)-HRR(52)+&
+      DUM=-HRR(52)+&
                          ABz*(-3.D0*HRR(31)+&
                          ABz*(-3.D0*HRR(16)+&
                          ABz*(-HRR(6)+&
@@ -7154,9 +11520,17 @@
                          3.D0*HRRA(52))+&
                          3.D0*HRRA(80))+&
                          HRRA(116)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(16,20_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)-3.D0*HRR(52)+&
+      DUM=-3.D0*HRR(52)+&
                          ABz*(-6.D0*HRR(31)+&
                          ABz*(-3.D0*HRR(16)+&
                          ABz*(ABz*HRRB(16)+&
@@ -7164,16 +11538,31 @@
                          6.D0*HRRB(52))+&
                          4.D0*HRRB(80))+&
                          HRRB(116)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+6)*LDA+(OB+9)*LDB+CDOffSet !=
       !=(17_x,20|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)+&
-                         ABz*(ABz*(ABz*HRRA(28)+&
+      DUM=ABz*(ABz*(ABz*HRRA(28)+&
                          3.D0*HRRA(49))+&
                          3.D0*HRRA(77))+&
                          HRRA(113)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(17,20_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)+&
-                         ABz*(ABz*(ABz*HRRB(28)+&
+      DUM=ABz*(ABz*(ABz*HRRB(28)+&
                          3.D0*HRRB(49))+&
                          3.D0*HRRB(77))+&
                          ABx*(ABz*(ABz*(ABz*HRRB(17)+&
@@ -7181,9 +11570,16 @@
                          3.D0*HRRB(53))+&
                          HRRB(81))+&
                          HRRB(113)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(17_y,20|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)-2.D0*HRR(55)+&
+      DUM=-2.D0*HRR(55)+&
                          ABz*(-6.D0*HRR(34)+&
                          ABz*(-6.D0*HRR(19)+&
                          ABz*(-2.D0*HRR(9)+&
@@ -7191,10 +11587,17 @@
                          3.D0*HRRA(50))+&
                          3.D0*HRRA(78))+&
                          HRRA(114)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(17,20_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)+&
-                         ABz*(ABz*(ABz*HRRB(29)+&
+      DUM=ABz*(ABz*(ABz*HRRB(29)+&
                          3.D0*HRRB(50))+&
                          3.D0*HRRB(78))+&
                          ABy*(ABz*(ABz*(ABz*HRRB(17)+&
@@ -7202,9 +11605,17 @@
                          3.D0*HRRB(53))+&
                          HRRB(81))+&
                          HRRB(114)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(17_z,20|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)-HRR(53)+&
+      DUM=-HRR(53)+&
                          ABz*(-3.D0*HRR(32)+&
                          ABz*(-3.D0*HRR(17)+&
                          ABz*(-HRR(7)+&
@@ -7212,9 +11623,17 @@
                          3.D0*HRRA(53))+&
                          3.D0*HRRA(81))+&
                          HRRA(117)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(17,20_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)-3.D0*HRR(53)+&
+      DUM=-3.D0*HRR(53)+&
                          ABz*(-6.D0*HRR(32)+&
                          ABz*(-3.D0*HRR(17)+&
                          ABz*(ABz*HRRB(17)+&
@@ -7222,9 +11641,18 @@
                          6.D0*HRRB(53))+&
                          4.D0*HRRB(81))+&
                          HRRB(117)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+7)*LDA+(OB+9)*LDB+CDOffSet !=
       !=(18_x,20|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)-HRR(56)+&
+      DUM=-HRR(56)+&
                          ABz*(-3.D0*HRR(35)+&
                          ABz*(-3.D0*HRR(20)+&
                          ABz*(-HRR(10)+&
@@ -7232,9 +11660,16 @@
                          3.D0*HRRA(51))+&
                          3.D0*HRRA(79))+&
                          HRRA(115)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(18,20_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)+&
-                         ABz*(ABz*(ABz*HRRB(30)+&
+      DUM=ABz*(ABz*(ABz*HRRB(30)+&
                          3.D0*HRRB(51))+&
                          3.D0*HRRB(79))+&
                          ABx*(ABz*(ABz*(ABz*HRRB(18)+&
@@ -7242,17 +11677,30 @@
                          3.D0*HRRB(54))+&
                          HRRB(82))+&
                          HRRB(115)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(18_y,20|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)+&
-                         ABz*(ABz*(ABz*HRRA(31)+&
+      DUM=ABz*(ABz*(ABz*HRRA(31)+&
                          3.D0*HRRA(52))+&
                          3.D0*HRRA(80))+&
                          HRRA(116)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(18,20_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)+&
-                         ABz*(ABz*(ABz*HRRB(31)+&
+      DUM=ABz*(ABz*(ABz*HRRB(31)+&
                          3.D0*HRRB(52))+&
                          3.D0*HRRB(80))+&
                          ABy*(ABz*(ABz*(ABz*HRRB(18)+&
@@ -7260,9 +11708,17 @@
                          3.D0*HRRB(54))+&
                          HRRB(82))+&
                          HRRB(116)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(18_z,20|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)-2.D0*HRR(54)+&
+      DUM=-2.D0*HRR(54)+&
                          ABz*(-6.D0*HRR(33)+&
                          ABz*(-6.D0*HRR(18)+&
                          ABz*(-2.D0*HRR(8)+&
@@ -7270,9 +11726,17 @@
                          3.D0*HRRA(54))+&
                          3.D0*HRRA(82))+&
                          HRRA(118)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(18,20_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)-3.D0*HRR(54)+&
+      DUM=-3.D0*HRR(54)+&
                          ABz*(-6.D0*HRR(33)+&
                          ABz*(-3.D0*HRR(18)+&
                          ABz*(ABz*HRRB(18)+&
@@ -7280,16 +11744,31 @@
                          6.D0*HRRB(54))+&
                          4.D0*HRRB(82))+&
                          HRRB(118)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+8)*LDA+(OB+9)*LDB+CDOffSet !=
       !=(19_x,20|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)+&
-                         ABz*(ABz*(ABz*HRRA(31)+&
+      DUM=ABz*(ABz*(ABz*HRRA(31)+&
                          3.D0*HRRA(52))+&
                          3.D0*HRRA(80))+&
                          HRRA(116)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(19,20_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)+&
-                         ABz*(ABz*(ABz*HRRB(31)+&
+      DUM=ABz*(ABz*(ABz*HRRB(31)+&
                          3.D0*HRRB(52))+&
                          3.D0*HRRB(80))+&
                          ABx*(ABz*(ABz*(ABz*HRRB(19)+&
@@ -7297,9 +11776,16 @@
                          3.D0*HRRB(55))+&
                          HRRB(83))+&
                          HRRB(116)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(19_y,20|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)-HRR(56)+&
+      DUM=-HRR(56)+&
                          ABz*(-3.D0*HRR(35)+&
                          ABz*(-3.D0*HRR(20)+&
                          ABz*(-HRR(10)+&
@@ -7307,10 +11793,17 @@
                          3.D0*HRRA(53))+&
                          3.D0*HRRA(81))+&
                          HRRA(117)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(19,20_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)+&
-                         ABz*(ABz*(ABz*HRRB(32)+&
+      DUM=ABz*(ABz*(ABz*HRRB(32)+&
                          3.D0*HRRB(53))+&
                          3.D0*HRRB(81))+&
                          ABy*(ABz*(ABz*(ABz*HRRB(19)+&
@@ -7318,9 +11811,17 @@
                          3.D0*HRRB(55))+&
                          HRRB(83))+&
                          HRRB(117)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(19_z,20|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)-2.D0*HRR(55)+&
+      DUM=-2.D0*HRR(55)+&
                          ABz*(-6.D0*HRR(34)+&
                          ABz*(-6.D0*HRR(19)+&
                          ABz*(-2.D0*HRR(9)+&
@@ -7328,9 +11829,17 @@
                          3.D0*HRRA(55))+&
                          3.D0*HRRA(83))+&
                          HRRA(119)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(19,20_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)-3.D0*HRR(55)+&
+      DUM=-3.D0*HRR(55)+&
                          ABz*(-6.D0*HRR(34)+&
                          ABz*(-3.D0*HRR(19)+&
                          ABz*(ABz*HRRB(19)+&
@@ -7338,16 +11847,31 @@
                          6.D0*HRRB(55))+&
                          4.D0*HRRB(83))+&
                          HRRB(119)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
       OffSet=(OA+9)*LDA+(OB+9)*LDB+CDOffSet !=
       !=(20_x,20|
-      GRADIENT(OffSet,GOA)=GRADIENT(OffSet,GOA)+&
-                         ABz*(ABz*(ABz*HRRA(33)+&
+      DUM=ABz*(ABz*(ABz*HRRA(33)+&
                          3.D0*HRRA(54))+&
                          3.D0*HRRA(82))+&
                          HRRA(118)
+      GRADIENT(OffSet,GOA)=DUM+&
+                         GRADIENT(OffSet,GOA)
+      STRESS(OffSet,1)=DUM*FP(1)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(2)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(3)+&
+                         STRESS(OffSet,7)
       !=(20,20_x|
-      GRADIENT(OffSet,GOB)=GRADIENT(OffSet,GOB)+&
-                         ABz*(ABz*(ABz*HRRB(33)+&
+      DUM=ABz*(ABz*(ABz*HRRB(33)+&
                          3.D0*HRRB(54))+&
                          3.D0*HRRB(82))+&
                          ABx*(ABz*(ABz*(ABz*HRRB(20)+&
@@ -7355,17 +11879,30 @@
                          3.D0*HRRB(56))+&
                          HRRB(84))+&
                          HRRB(118)
+      GRADIENT(OffSet,GOB)=DUM+&
+                         GRADIENT(OffSet,GOB)
+      STRESS(OffSet,1)=DUM*FP(7)+&
+                         STRESS(OffSet,1)
+      STRESS(OffSet,4)=DUM*FP(8)+&
+                         STRESS(OffSet,4)
+      STRESS(OffSet,7)=DUM*FP(9)+&
+                         STRESS(OffSet,7)
       !=(20_y,20|
-      GRADIENT(OffSet,1 + GOA)=GRADIENT(OffSet,1+&
-                         GOA)+&
-                         ABz*(ABz*(ABz*HRRA(34)+&
+      DUM=ABz*(ABz*(ABz*HRRA(34)+&
                          3.D0*HRRA(55))+&
                          3.D0*HRRA(83))+&
                          HRRA(119)
+      GRADIENT(OffSet,1 + GOA)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOA)
+      STRESS(OffSet,2)=DUM*FP(1)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(2)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(3)+&
+                         STRESS(OffSet,8)
       !=(20,20_y|
-      GRADIENT(OffSet,1 + GOB)=GRADIENT(OffSet,1+&
-                         GOB)+&
-                         ABz*(ABz*(ABz*HRRB(34)+&
+      DUM=ABz*(ABz*(ABz*HRRB(34)+&
                          3.D0*HRRB(55))+&
                          3.D0*HRRB(83))+&
                          ABy*(ABz*(ABz*(ABz*HRRB(20)+&
@@ -7373,9 +11910,17 @@
                          3.D0*HRRB(56))+&
                          HRRB(84))+&
                          HRRB(119)
+      GRADIENT(OffSet,1 + GOB)=DUM+&
+                         GRADIENT(OffSet,1+&
+                         GOB)
+      STRESS(OffSet,2)=DUM*FP(7)+&
+                         STRESS(OffSet,2)
+      STRESS(OffSet,5)=DUM*FP(8)+&
+                         STRESS(OffSet,5)
+      STRESS(OffSet,8)=DUM*FP(9)+&
+                         STRESS(OffSet,8)
       !=(20_z,20|
-      GRADIENT(OffSet,2 + GOA)=GRADIENT(OffSet,2+&
-                         GOA)-3.D0*HRR(56)+&
+      DUM=-3.D0*HRR(56)+&
                          ABz*(-9.D0*HRR(35)+&
                          ABz*(-9.D0*HRR(20)+&
                          ABz*(-3.D0*HRR(10)+&
@@ -7383,9 +11928,17 @@
                          3.D0*HRRA(56))+&
                          3.D0*HRRA(84))+&
                          HRRA(120)
+      GRADIENT(OffSet,2 + GOA)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOA)
+      STRESS(OffSet,3)=DUM*FP(1)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(2)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(3)+&
+                         STRESS(OffSet,9)
       !=(20,20_z|
-      GRADIENT(OffSet,2 + GOB)=GRADIENT(OffSet,2+&
-                         GOB)-3.D0*HRR(56)+&
+      DUM=-3.D0*HRR(56)+&
                          ABz*(-6.D0*HRR(35)+&
                          ABz*(-3.D0*HRR(20)+&
                          ABz*(ABz*HRRB(20)+&
@@ -7393,629 +11946,1138 @@
                          6.D0*HRRB(56))+&
                          4.D0*HRRB(84))+&
                          HRRB(120)
+      GRADIENT(OffSet,2 + GOB)=DUM+&
+                         GRADIENT(OffSet,2+&
+                         GOB)
+      STRESS(OffSet,3)=DUM*FP(7)+&
+                         STRESS(OffSet,3)
+      STRESS(OffSet,6)=DUM*FP(8)+&
+                         STRESS(OffSet,6)
+      STRESS(OffSet,9)=DUM*FP(9)+&
+                         STRESS(OffSet,9)
     END SUBROUTINE BraHRR1010ab
-    SUBROUTINE BraHRR1010cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,Cart,HRR,GRADIENT)
+    SUBROUTINE BraHRR1010cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,Cart,HRR,GRADIENT,FP,STRESS)
       USE DerivedTypes
       USE VScratchB
       USE GlobalScalars
+      IMPLICIT NONE
       INTEGER       :: NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,Cart,CDOffSet,OffSet
       REAL(DOUBLE)  :: HRR(*)
       REAL(DOUBLE)  :: GRADIENT(NINT,12)
+      REAL(DOUBLE)  :: STRESS(NINT,9),FP(9),DUM
       OffSet=(OA+0)*LDA+(OB+0)*LDB+CDOffSet !=
       !=(11,11|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABx*(ABx*(ABx*HRR(11)+&
+      DUM=ABx*(ABx*(ABx*HRR(11)+&
                                 3.D0*HRR(21))+&
                                 3.D0*HRR(36))+&
                                 HRR(57)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+1)*LDA+(OB+0)*LDB+CDOffSet !=
       !=(12,11|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABx*(ABx*(ABx*HRR(12)+&
+      DUM=ABx*(ABx*(ABx*HRR(12)+&
                                 3.D0*HRR(22))+&
                                 3.D0*HRR(37))+&
                                 HRR(58)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+2)*LDA+(OB+0)*LDB+CDOffSet !=
       !=(13,11|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABx*(ABx*(ABx*HRR(13)+&
+      DUM=ABx*(ABx*(ABx*HRR(13)+&
                                 3.D0*HRR(23))+&
                                 3.D0*HRR(38))+&
                                 HRR(59)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+3)*LDA+(OB+0)*LDB+CDOffSet !=
       !=(14,11|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABx*(ABx*(ABx*HRR(14)+&
+      DUM=ABx*(ABx*(ABx*HRR(14)+&
                                 3.D0*HRR(24))+&
                                 3.D0*HRR(39))+&
                                 HRR(60)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+4)*LDA+(OB+0)*LDB+CDOffSet !=
       !=(15,11|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABx*(ABx*(ABx*HRR(15)+&
+      DUM=ABx*(ABx*(ABx*HRR(15)+&
                                 3.D0*HRR(26))+&
                                 3.D0*HRR(42))+&
                                 HRR(64)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+5)*LDA+(OB+0)*LDB+CDOffSet !=
       !=(16,11|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABx*(ABx*(ABx*HRR(16)+&
+      DUM=ABx*(ABx*(ABx*HRR(16)+&
                                 3.D0*HRR(27))+&
                                 3.D0*HRR(43))+&
                                 HRR(65)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+6)*LDA+(OB+0)*LDB+CDOffSet !=
       !=(17,11|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABx*(ABx*(ABx*HRR(17)+&
+      DUM=ABx*(ABx*(ABx*HRR(17)+&
                                 3.D0*HRR(28))+&
                                 3.D0*HRR(44))+&
                                 HRR(66)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+7)*LDA+(OB+0)*LDB+CDOffSet !=
       !=(18,11|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABx*(ABx*(ABx*HRR(18)+&
+      DUM=ABx*(ABx*(ABx*HRR(18)+&
                                 3.D0*HRR(30))+&
                                 3.D0*HRR(47))+&
                                 HRR(70)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+8)*LDA+(OB+0)*LDB+CDOffSet !=
       !=(19,11|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABx*(ABx*(ABx*HRR(19)+&
+      DUM=ABx*(ABx*(ABx*HRR(19)+&
                                 3.D0*HRR(31))+&
                                 3.D0*HRR(48))+&
                                 HRR(71)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+9)*LDA+(OB+0)*LDB+CDOffSet !=
       !=(20,11|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABx*(ABx*(ABx*HRR(20)+&
+      DUM=ABx*(ABx*(ABx*HRR(20)+&
                                 3.D0*HRR(33))+&
                                 3.D0*HRR(51))+&
                                 HRR(75)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+0)*LDA+(OB+1)*LDB+CDOffSet !=
       !=(11,12|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABy*HRR(36)+&
+      DUM=ABy*HRR(36)+&
                                 ABx*(2.D0*ABy*HRR(21)+&
                                 ABx*(ABy*HRR(11)+&
                                 HRR(22))+&
                                 2.D0*HRR(37))+&
                                 HRR(58)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+1)*LDA+(OB+1)*LDB+CDOffSet !=
       !=(12,12|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABy*HRR(37)+&
+      DUM=ABy*HRR(37)+&
                                 ABx*(2.D0*ABy*HRR(22)+&
                                 ABx*(ABy*HRR(12)+&
                                 HRR(23))+&
                                 2.D0*HRR(38))+&
                                 HRR(59)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+2)*LDA+(OB+1)*LDB+CDOffSet !=
       !=(13,12|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABy*HRR(38)+&
+      DUM=ABy*HRR(38)+&
                                 ABx*(2.D0*ABy*HRR(23)+&
                                 ABx*(ABy*HRR(13)+&
                                 HRR(24))+&
                                 2.D0*HRR(39))+&
                                 HRR(60)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+3)*LDA+(OB+1)*LDB+CDOffSet !=
       !=(14,12|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABy*HRR(39)+&
+      DUM=ABy*HRR(39)+&
                                 ABx*(2.D0*ABy*HRR(24)+&
                                 ABx*(ABy*HRR(14)+&
                                 HRR(25))+&
                                 2.D0*HRR(40))+&
                                 HRR(61)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+4)*LDA+(OB+1)*LDB+CDOffSet !=
       !=(15,12|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABy*HRR(42)+&
+      DUM=ABy*HRR(42)+&
                                 ABx*(2.D0*ABy*HRR(26)+&
                                 ABx*(ABy*HRR(15)+&
                                 HRR(27))+&
                                 2.D0*HRR(43))+&
                                 HRR(65)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+5)*LDA+(OB+1)*LDB+CDOffSet !=
       !=(16,12|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABy*HRR(43)+&
+      DUM=ABy*HRR(43)+&
                                 ABx*(2.D0*ABy*HRR(27)+&
                                 ABx*(ABy*HRR(16)+&
                                 HRR(28))+&
                                 2.D0*HRR(44))+&
                                 HRR(66)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+6)*LDA+(OB+1)*LDB+CDOffSet !=
       !=(17,12|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABy*HRR(44)+&
+      DUM=ABy*HRR(44)+&
                                 ABx*(2.D0*ABy*HRR(28)+&
                                 ABx*(ABy*HRR(17)+&
                                 HRR(29))+&
                                 2.D0*HRR(45))+&
                                 HRR(67)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+7)*LDA+(OB+1)*LDB+CDOffSet !=
       !=(18,12|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABy*HRR(47)+&
+      DUM=ABy*HRR(47)+&
                                 ABx*(2.D0*ABy*HRR(30)+&
                                 ABx*(ABy*HRR(18)+&
                                 HRR(31))+&
                                 2.D0*HRR(48))+&
                                 HRR(71)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+8)*LDA+(OB+1)*LDB+CDOffSet !=
       !=(19,12|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABy*HRR(48)+&
+      DUM=ABy*HRR(48)+&
                                 ABx*(2.D0*ABy*HRR(31)+&
                                 ABx*(ABy*HRR(19)+&
                                 HRR(32))+&
                                 2.D0*HRR(49))+&
                                 HRR(72)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+9)*LDA+(OB+1)*LDB+CDOffSet !=
       !=(20,12|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABy*HRR(51)+&
+      DUM=ABy*HRR(51)+&
                                 ABx*(2.D0*ABy*HRR(33)+&
                                 ABx*(ABy*HRR(20)+&
                                 HRR(34))+&
                                 2.D0*HRR(52))+&
                                 HRR(76)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+0)*LDA+(OB+2)*LDB+CDOffSet !=
       !=(11,13|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABy*(ABy*HRR(21)+&
+      DUM=ABy*(ABy*HRR(21)+&
                                 2.D0*HRR(37))+&
                                 ABx*(ABy*(ABy*HRR(11)+&
                                 2.D0*HRR(22))+&
                                 HRR(38))+&
                                 HRR(59)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+1)*LDA+(OB+2)*LDB+CDOffSet !=
       !=(12,13|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABy*(ABy*HRR(22)+&
+      DUM=ABy*(ABy*HRR(22)+&
                                 2.D0*HRR(38))+&
                                 ABx*(ABy*(ABy*HRR(12)+&
                                 2.D0*HRR(23))+&
                                 HRR(39))+&
                                 HRR(60)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+2)*LDA+(OB+2)*LDB+CDOffSet !=
       !=(13,13|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABy*(ABy*HRR(23)+&
+      DUM=ABy*(ABy*HRR(23)+&
                                 2.D0*HRR(39))+&
                                 ABx*(ABy*(ABy*HRR(13)+&
                                 2.D0*HRR(24))+&
                                 HRR(40))+&
                                 HRR(61)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+3)*LDA+(OB+2)*LDB+CDOffSet !=
       !=(14,13|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABy*(ABy*HRR(24)+&
+      DUM=ABy*(ABy*HRR(24)+&
                                 2.D0*HRR(40))+&
                                 ABx*(ABy*(ABy*HRR(14)+&
                                 2.D0*HRR(25))+&
                                 HRR(41))+&
                                 HRR(62)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+4)*LDA+(OB+2)*LDB+CDOffSet !=
       !=(15,13|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABy*(ABy*HRR(26)+&
+      DUM=ABy*(ABy*HRR(26)+&
                                 2.D0*HRR(43))+&
                                 ABx*(ABy*(ABy*HRR(15)+&
                                 2.D0*HRR(27))+&
                                 HRR(44))+&
                                 HRR(66)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+5)*LDA+(OB+2)*LDB+CDOffSet !=
       !=(16,13|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABy*(ABy*HRR(27)+&
+      DUM=ABy*(ABy*HRR(27)+&
                                 2.D0*HRR(44))+&
                                 ABx*(ABy*(ABy*HRR(16)+&
                                 2.D0*HRR(28))+&
                                 HRR(45))+&
                                 HRR(67)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+6)*LDA+(OB+2)*LDB+CDOffSet !=
       !=(17,13|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABy*(ABy*HRR(28)+&
+      DUM=ABy*(ABy*HRR(28)+&
                                 2.D0*HRR(45))+&
                                 ABx*(ABy*(ABy*HRR(17)+&
                                 2.D0*HRR(29))+&
                                 HRR(46))+&
                                 HRR(68)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+7)*LDA+(OB+2)*LDB+CDOffSet !=
       !=(18,13|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABy*(ABy*HRR(30)+&
+      DUM=ABy*(ABy*HRR(30)+&
                                 2.D0*HRR(48))+&
                                 ABx*(ABy*(ABy*HRR(18)+&
                                 2.D0*HRR(31))+&
                                 HRR(49))+&
                                 HRR(72)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+8)*LDA+(OB+2)*LDB+CDOffSet !=
       !=(19,13|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABy*(ABy*HRR(31)+&
+      DUM=ABy*(ABy*HRR(31)+&
                                 2.D0*HRR(49))+&
                                 ABx*(ABy*(ABy*HRR(19)+&
                                 2.D0*HRR(32))+&
                                 HRR(50))+&
                                 HRR(73)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+9)*LDA+(OB+2)*LDB+CDOffSet !=
       !=(20,13|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABy*(ABy*HRR(33)+&
+      DUM=ABy*(ABy*HRR(33)+&
                                 2.D0*HRR(52))+&
                                 ABx*(ABy*(ABy*HRR(20)+&
                                 2.D0*HRR(34))+&
                                 HRR(53))+&
                                 HRR(77)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+0)*LDA+(OB+3)*LDB+CDOffSet !=
       !=(11,14|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABy*(ABy*(ABy*HRR(11)+&
+      DUM=ABy*(ABy*(ABy*HRR(11)+&
                                 3.D0*HRR(22))+&
                                 3.D0*HRR(38))+&
                                 HRR(60)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+1)*LDA+(OB+3)*LDB+CDOffSet !=
       !=(12,14|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABy*(ABy*(ABy*HRR(12)+&
+      DUM=ABy*(ABy*(ABy*HRR(12)+&
                                 3.D0*HRR(23))+&
                                 3.D0*HRR(39))+&
                                 HRR(61)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+2)*LDA+(OB+3)*LDB+CDOffSet !=
       !=(13,14|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABy*(ABy*(ABy*HRR(13)+&
+      DUM=ABy*(ABy*(ABy*HRR(13)+&
                                 3.D0*HRR(24))+&
                                 3.D0*HRR(40))+&
                                 HRR(62)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+3)*LDA+(OB+3)*LDB+CDOffSet !=
       !=(14,14|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABy*(ABy*(ABy*HRR(14)+&
+      DUM=ABy*(ABy*(ABy*HRR(14)+&
                                 3.D0*HRR(25))+&
                                 3.D0*HRR(41))+&
                                 HRR(63)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+4)*LDA+(OB+3)*LDB+CDOffSet !=
       !=(15,14|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABy*(ABy*(ABy*HRR(15)+&
+      DUM=ABy*(ABy*(ABy*HRR(15)+&
                                 3.D0*HRR(27))+&
                                 3.D0*HRR(44))+&
                                 HRR(67)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+5)*LDA+(OB+3)*LDB+CDOffSet !=
       !=(16,14|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABy*(ABy*(ABy*HRR(16)+&
+      DUM=ABy*(ABy*(ABy*HRR(16)+&
                                 3.D0*HRR(28))+&
                                 3.D0*HRR(45))+&
                                 HRR(68)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+6)*LDA+(OB+3)*LDB+CDOffSet !=
       !=(17,14|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABy*(ABy*(ABy*HRR(17)+&
+      DUM=ABy*(ABy*(ABy*HRR(17)+&
                                 3.D0*HRR(29))+&
                                 3.D0*HRR(46))+&
                                 HRR(69)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+7)*LDA+(OB+3)*LDB+CDOffSet !=
       !=(18,14|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABy*(ABy*(ABy*HRR(18)+&
+      DUM=ABy*(ABy*(ABy*HRR(18)+&
                                 3.D0*HRR(31))+&
                                 3.D0*HRR(49))+&
                                 HRR(73)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+8)*LDA+(OB+3)*LDB+CDOffSet !=
       !=(19,14|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABy*(ABy*(ABy*HRR(19)+&
+      DUM=ABy*(ABy*(ABy*HRR(19)+&
                                 3.D0*HRR(32))+&
                                 3.D0*HRR(50))+&
                                 HRR(74)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+9)*LDA+(OB+3)*LDB+CDOffSet !=
       !=(20,14|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABy*(ABy*(ABy*HRR(20)+&
+      DUM=ABy*(ABy*(ABy*HRR(20)+&
                                 3.D0*HRR(34))+&
                                 3.D0*HRR(53))+&
                                 HRR(78)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+0)*LDA+(OB+4)*LDB+CDOffSet !=
       !=(11,15|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABz*HRR(36)+&
+      DUM=ABz*HRR(36)+&
                                 ABx*(2.D0*ABz*HRR(21)+&
                                 ABx*(ABz*HRR(11)+&
                                 HRR(26))+&
                                 2.D0*HRR(42))+&
                                 HRR(64)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+1)*LDA+(OB+4)*LDB+CDOffSet !=
       !=(12,15|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABz*HRR(37)+&
+      DUM=ABz*HRR(37)+&
                                 ABx*(2.D0*ABz*HRR(22)+&
                                 ABx*(ABz*HRR(12)+&
                                 HRR(27))+&
                                 2.D0*HRR(43))+&
                                 HRR(65)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+2)*LDA+(OB+4)*LDB+CDOffSet !=
       !=(13,15|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABz*HRR(38)+&
+      DUM=ABz*HRR(38)+&
                                 ABx*(2.D0*ABz*HRR(23)+&
                                 ABx*(ABz*HRR(13)+&
                                 HRR(28))+&
                                 2.D0*HRR(44))+&
                                 HRR(66)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+3)*LDA+(OB+4)*LDB+CDOffSet !=
       !=(14,15|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABz*HRR(39)+&
+      DUM=ABz*HRR(39)+&
                                 ABx*(2.D0*ABz*HRR(24)+&
                                 ABx*(ABz*HRR(14)+&
                                 HRR(29))+&
                                 2.D0*HRR(45))+&
                                 HRR(67)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+4)*LDA+(OB+4)*LDB+CDOffSet !=
       !=(15,15|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABz*HRR(42)+&
+      DUM=ABz*HRR(42)+&
                                 ABx*(2.D0*ABz*HRR(26)+&
                                 ABx*(ABz*HRR(15)+&
                                 HRR(30))+&
                                 2.D0*HRR(47))+&
                                 HRR(70)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+5)*LDA+(OB+4)*LDB+CDOffSet !=
       !=(16,15|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABz*HRR(43)+&
+      DUM=ABz*HRR(43)+&
                                 ABx*(2.D0*ABz*HRR(27)+&
                                 ABx*(ABz*HRR(16)+&
                                 HRR(31))+&
                                 2.D0*HRR(48))+&
                                 HRR(71)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+6)*LDA+(OB+4)*LDB+CDOffSet !=
       !=(17,15|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABz*HRR(44)+&
+      DUM=ABz*HRR(44)+&
                                 ABx*(2.D0*ABz*HRR(28)+&
                                 ABx*(ABz*HRR(17)+&
                                 HRR(32))+&
                                 2.D0*HRR(49))+&
                                 HRR(72)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+7)*LDA+(OB+4)*LDB+CDOffSet !=
       !=(18,15|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABz*HRR(47)+&
+      DUM=ABz*HRR(47)+&
                                 ABx*(2.D0*ABz*HRR(30)+&
                                 ABx*(ABz*HRR(18)+&
                                 HRR(33))+&
                                 2.D0*HRR(51))+&
                                 HRR(75)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+8)*LDA+(OB+4)*LDB+CDOffSet !=
       !=(19,15|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABz*HRR(48)+&
+      DUM=ABz*HRR(48)+&
                                 ABx*(2.D0*ABz*HRR(31)+&
                                 ABx*(ABz*HRR(19)+&
                                 HRR(34))+&
                                 2.D0*HRR(52))+&
                                 HRR(76)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+9)*LDA+(OB+4)*LDB+CDOffSet !=
       !=(20,15|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABz*HRR(51)+&
+      DUM=ABz*HRR(51)+&
                                 ABx*(2.D0*ABz*HRR(33)+&
                                 ABx*(ABz*HRR(20)+&
                                 HRR(35))+&
                                 2.D0*HRR(54))+&
                                 HRR(79)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+0)*LDA+(OB+5)*LDB+CDOffSet !=
       !=(11,16|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABz*HRR(37)+&
+      DUM=ABz*HRR(37)+&
                                 ABy*(ABz*HRR(21)+&
                                 HRR(42))+&
                                 ABx*(ABz*HRR(22)+&
@@ -8023,14 +13085,24 @@
                                 HRR(26))+&
                                 HRR(43))+&
                                 HRR(65)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+1)*LDA+(OB+5)*LDB+CDOffSet !=
       !=(12,16|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABz*HRR(38)+&
+      DUM=ABz*HRR(38)+&
                                 ABy*(ABz*HRR(22)+&
                                 HRR(43))+&
                                 ABx*(ABz*HRR(23)+&
@@ -8038,14 +13110,24 @@
                                 HRR(27))+&
                                 HRR(44))+&
                                 HRR(66)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+2)*LDA+(OB+5)*LDB+CDOffSet !=
       !=(13,16|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABz*HRR(39)+&
+      DUM=ABz*HRR(39)+&
                                 ABy*(ABz*HRR(23)+&
                                 HRR(44))+&
                                 ABx*(ABz*HRR(24)+&
@@ -8053,14 +13135,24 @@
                                 HRR(28))+&
                                 HRR(45))+&
                                 HRR(67)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+3)*LDA+(OB+5)*LDB+CDOffSet !=
       !=(14,16|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABz*HRR(40)+&
+      DUM=ABz*HRR(40)+&
                                 ABy*(ABz*HRR(24)+&
                                 HRR(45))+&
                                 ABx*(ABz*HRR(25)+&
@@ -8068,14 +13160,24 @@
                                 HRR(29))+&
                                 HRR(46))+&
                                 HRR(68)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+4)*LDA+(OB+5)*LDB+CDOffSet !=
       !=(15,16|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABz*HRR(43)+&
+      DUM=ABz*HRR(43)+&
                                 ABy*(ABz*HRR(26)+&
                                 HRR(47))+&
                                 ABx*(ABz*HRR(27)+&
@@ -8083,14 +13185,24 @@
                                 HRR(30))+&
                                 HRR(48))+&
                                 HRR(71)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+5)*LDA+(OB+5)*LDB+CDOffSet !=
       !=(16,16|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABz*HRR(44)+&
+      DUM=ABz*HRR(44)+&
                                 ABy*(ABz*HRR(27)+&
                                 HRR(48))+&
                                 ABx*(ABz*HRR(28)+&
@@ -8098,14 +13210,24 @@
                                 HRR(31))+&
                                 HRR(49))+&
                                 HRR(72)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+6)*LDA+(OB+5)*LDB+CDOffSet !=
       !=(17,16|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABz*HRR(45)+&
+      DUM=ABz*HRR(45)+&
                                 ABy*(ABz*HRR(28)+&
                                 HRR(49))+&
                                 ABx*(ABz*HRR(29)+&
@@ -8113,14 +13235,24 @@
                                 HRR(32))+&
                                 HRR(50))+&
                                 HRR(73)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+7)*LDA+(OB+5)*LDB+CDOffSet !=
       !=(18,16|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABz*HRR(48)+&
+      DUM=ABz*HRR(48)+&
                                 ABy*(ABz*HRR(30)+&
                                 HRR(51))+&
                                 ABx*(ABz*HRR(31)+&
@@ -8128,14 +13260,24 @@
                                 HRR(33))+&
                                 HRR(52))+&
                                 HRR(76)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+8)*LDA+(OB+5)*LDB+CDOffSet !=
       !=(19,16|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABz*HRR(49)+&
+      DUM=ABz*HRR(49)+&
                                 ABy*(ABz*HRR(31)+&
                                 HRR(52))+&
                                 ABx*(ABz*HRR(32)+&
@@ -8143,14 +13285,24 @@
                                 HRR(34))+&
                                 HRR(53))+&
                                 HRR(77)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+9)*LDA+(OB+5)*LDB+CDOffSet !=
       !=(20,16|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABz*HRR(52)+&
+      DUM=ABz*HRR(52)+&
                                 ABy*(ABz*HRR(33)+&
                                 HRR(54))+&
                                 ABx*(ABz*HRR(34)+&
@@ -8158,506 +13310,918 @@
                                 HRR(35))+&
                                 HRR(55))+&
                                 HRR(80)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+0)*LDA+(OB+6)*LDB+CDOffSet !=
       !=(11,17|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABz*HRR(38)+&
+      DUM=ABz*HRR(38)+&
                                 ABy*(2.D0*ABz*HRR(22)+&
                                 ABy*(ABz*HRR(11)+&
                                 HRR(26))+&
                                 2.D0*HRR(43))+&
                                 HRR(66)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+1)*LDA+(OB+6)*LDB+CDOffSet !=
       !=(12,17|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABz*HRR(39)+&
+      DUM=ABz*HRR(39)+&
                                 ABy*(2.D0*ABz*HRR(23)+&
                                 ABy*(ABz*HRR(12)+&
                                 HRR(27))+&
                                 2.D0*HRR(44))+&
                                 HRR(67)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+2)*LDA+(OB+6)*LDB+CDOffSet !=
       !=(13,17|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABz*HRR(40)+&
+      DUM=ABz*HRR(40)+&
                                 ABy*(2.D0*ABz*HRR(24)+&
                                 ABy*(ABz*HRR(13)+&
                                 HRR(28))+&
                                 2.D0*HRR(45))+&
                                 HRR(68)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+3)*LDA+(OB+6)*LDB+CDOffSet !=
       !=(14,17|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABz*HRR(41)+&
+      DUM=ABz*HRR(41)+&
                                 ABy*(2.D0*ABz*HRR(25)+&
                                 ABy*(ABz*HRR(14)+&
                                 HRR(29))+&
                                 2.D0*HRR(46))+&
                                 HRR(69)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+4)*LDA+(OB+6)*LDB+CDOffSet !=
       !=(15,17|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABz*HRR(44)+&
+      DUM=ABz*HRR(44)+&
                                 ABy*(2.D0*ABz*HRR(27)+&
                                 ABy*(ABz*HRR(15)+&
                                 HRR(30))+&
                                 2.D0*HRR(48))+&
                                 HRR(72)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+5)*LDA+(OB+6)*LDB+CDOffSet !=
       !=(16,17|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABz*HRR(45)+&
+      DUM=ABz*HRR(45)+&
                                 ABy*(2.D0*ABz*HRR(28)+&
                                 ABy*(ABz*HRR(16)+&
                                 HRR(31))+&
                                 2.D0*HRR(49))+&
                                 HRR(73)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+6)*LDA+(OB+6)*LDB+CDOffSet !=
       !=(17,17|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABz*HRR(46)+&
+      DUM=ABz*HRR(46)+&
                                 ABy*(2.D0*ABz*HRR(29)+&
                                 ABy*(ABz*HRR(17)+&
                                 HRR(32))+&
                                 2.D0*HRR(50))+&
                                 HRR(74)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+7)*LDA+(OB+6)*LDB+CDOffSet !=
       !=(18,17|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABz*HRR(49)+&
+      DUM=ABz*HRR(49)+&
                                 ABy*(2.D0*ABz*HRR(31)+&
                                 ABy*(ABz*HRR(18)+&
                                 HRR(33))+&
                                 2.D0*HRR(52))+&
                                 HRR(77)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+8)*LDA+(OB+6)*LDB+CDOffSet !=
       !=(19,17|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABz*HRR(50)+&
+      DUM=ABz*HRR(50)+&
                                 ABy*(2.D0*ABz*HRR(32)+&
                                 ABy*(ABz*HRR(19)+&
                                 HRR(34))+&
                                 2.D0*HRR(53))+&
                                 HRR(78)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+9)*LDA+(OB+6)*LDB+CDOffSet !=
       !=(20,17|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABz*HRR(53)+&
+      DUM=ABz*HRR(53)+&
                                 ABy*(2.D0*ABz*HRR(34)+&
                                 ABy*(ABz*HRR(20)+&
                                 HRR(35))+&
                                 2.D0*HRR(55))+&
                                 HRR(81)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+0)*LDA+(OB+7)*LDB+CDOffSet !=
       !=(11,18|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABz*(ABz*HRR(21)+&
+      DUM=ABz*(ABz*HRR(21)+&
                                 2.D0*HRR(42))+&
                                 ABx*(ABz*(ABz*HRR(11)+&
                                 2.D0*HRR(26))+&
                                 HRR(47))+&
                                 HRR(70)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+1)*LDA+(OB+7)*LDB+CDOffSet !=
       !=(12,18|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABz*(ABz*HRR(22)+&
+      DUM=ABz*(ABz*HRR(22)+&
                                 2.D0*HRR(43))+&
                                 ABx*(ABz*(ABz*HRR(12)+&
                                 2.D0*HRR(27))+&
                                 HRR(48))+&
                                 HRR(71)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+2)*LDA+(OB+7)*LDB+CDOffSet !=
       !=(13,18|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABz*(ABz*HRR(23)+&
+      DUM=ABz*(ABz*HRR(23)+&
                                 2.D0*HRR(44))+&
                                 ABx*(ABz*(ABz*HRR(13)+&
                                 2.D0*HRR(28))+&
                                 HRR(49))+&
                                 HRR(72)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+3)*LDA+(OB+7)*LDB+CDOffSet !=
       !=(14,18|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABz*(ABz*HRR(24)+&
+      DUM=ABz*(ABz*HRR(24)+&
                                 2.D0*HRR(45))+&
                                 ABx*(ABz*(ABz*HRR(14)+&
                                 2.D0*HRR(29))+&
                                 HRR(50))+&
                                 HRR(73)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+4)*LDA+(OB+7)*LDB+CDOffSet !=
       !=(15,18|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABz*(ABz*HRR(26)+&
+      DUM=ABz*(ABz*HRR(26)+&
                                 2.D0*HRR(47))+&
                                 ABx*(ABz*(ABz*HRR(15)+&
                                 2.D0*HRR(30))+&
                                 HRR(51))+&
                                 HRR(75)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+5)*LDA+(OB+7)*LDB+CDOffSet !=
       !=(16,18|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABz*(ABz*HRR(27)+&
+      DUM=ABz*(ABz*HRR(27)+&
                                 2.D0*HRR(48))+&
                                 ABx*(ABz*(ABz*HRR(16)+&
                                 2.D0*HRR(31))+&
                                 HRR(52))+&
                                 HRR(76)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+6)*LDA+(OB+7)*LDB+CDOffSet !=
       !=(17,18|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABz*(ABz*HRR(28)+&
+      DUM=ABz*(ABz*HRR(28)+&
                                 2.D0*HRR(49))+&
                                 ABx*(ABz*(ABz*HRR(17)+&
                                 2.D0*HRR(32))+&
                                 HRR(53))+&
                                 HRR(77)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+7)*LDA+(OB+7)*LDB+CDOffSet !=
       !=(18,18|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABz*(ABz*HRR(30)+&
+      DUM=ABz*(ABz*HRR(30)+&
                                 2.D0*HRR(51))+&
                                 ABx*(ABz*(ABz*HRR(18)+&
                                 2.D0*HRR(33))+&
                                 HRR(54))+&
                                 HRR(79)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+8)*LDA+(OB+7)*LDB+CDOffSet !=
       !=(19,18|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABz*(ABz*HRR(31)+&
+      DUM=ABz*(ABz*HRR(31)+&
                                 2.D0*HRR(52))+&
                                 ABx*(ABz*(ABz*HRR(19)+&
                                 2.D0*HRR(34))+&
                                 HRR(55))+&
                                 HRR(80)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+9)*LDA+(OB+7)*LDB+CDOffSet !=
       !=(20,18|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABz*(ABz*HRR(33)+&
+      DUM=ABz*(ABz*HRR(33)+&
                                 2.D0*HRR(54))+&
                                 ABx*(ABz*(ABz*HRR(20)+&
                                 2.D0*HRR(35))+&
                                 HRR(56))+&
                                 HRR(82)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+0)*LDA+(OB+8)*LDB+CDOffSet !=
       !=(11,19|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABz*(ABz*HRR(22)+&
+      DUM=ABz*(ABz*HRR(22)+&
                                 2.D0*HRR(43))+&
                                 ABy*(ABz*(ABz*HRR(11)+&
                                 2.D0*HRR(26))+&
                                 HRR(47))+&
                                 HRR(71)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+1)*LDA+(OB+8)*LDB+CDOffSet !=
       !=(12,19|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABz*(ABz*HRR(23)+&
+      DUM=ABz*(ABz*HRR(23)+&
                                 2.D0*HRR(44))+&
                                 ABy*(ABz*(ABz*HRR(12)+&
                                 2.D0*HRR(27))+&
                                 HRR(48))+&
                                 HRR(72)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+2)*LDA+(OB+8)*LDB+CDOffSet !=
       !=(13,19|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABz*(ABz*HRR(24)+&
+      DUM=ABz*(ABz*HRR(24)+&
                                 2.D0*HRR(45))+&
                                 ABy*(ABz*(ABz*HRR(13)+&
                                 2.D0*HRR(28))+&
                                 HRR(49))+&
                                 HRR(73)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+3)*LDA+(OB+8)*LDB+CDOffSet !=
       !=(14,19|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABz*(ABz*HRR(25)+&
+      DUM=ABz*(ABz*HRR(25)+&
                                 2.D0*HRR(46))+&
                                 ABy*(ABz*(ABz*HRR(14)+&
                                 2.D0*HRR(29))+&
                                 HRR(50))+&
                                 HRR(74)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+4)*LDA+(OB+8)*LDB+CDOffSet !=
       !=(15,19|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABz*(ABz*HRR(27)+&
+      DUM=ABz*(ABz*HRR(27)+&
                                 2.D0*HRR(48))+&
                                 ABy*(ABz*(ABz*HRR(15)+&
                                 2.D0*HRR(30))+&
                                 HRR(51))+&
                                 HRR(76)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+5)*LDA+(OB+8)*LDB+CDOffSet !=
       !=(16,19|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABz*(ABz*HRR(28)+&
+      DUM=ABz*(ABz*HRR(28)+&
                                 2.D0*HRR(49))+&
                                 ABy*(ABz*(ABz*HRR(16)+&
                                 2.D0*HRR(31))+&
                                 HRR(52))+&
                                 HRR(77)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+6)*LDA+(OB+8)*LDB+CDOffSet !=
       !=(17,19|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABz*(ABz*HRR(29)+&
+      DUM=ABz*(ABz*HRR(29)+&
                                 2.D0*HRR(50))+&
                                 ABy*(ABz*(ABz*HRR(17)+&
                                 2.D0*HRR(32))+&
                                 HRR(53))+&
                                 HRR(78)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+7)*LDA+(OB+8)*LDB+CDOffSet !=
       !=(18,19|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABz*(ABz*HRR(31)+&
+      DUM=ABz*(ABz*HRR(31)+&
                                 2.D0*HRR(52))+&
                                 ABy*(ABz*(ABz*HRR(18)+&
                                 2.D0*HRR(33))+&
                                 HRR(54))+&
                                 HRR(80)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+8)*LDA+(OB+8)*LDB+CDOffSet !=
       !=(19,19|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABz*(ABz*HRR(32)+&
+      DUM=ABz*(ABz*HRR(32)+&
                                 2.D0*HRR(53))+&
                                 ABy*(ABz*(ABz*HRR(19)+&
                                 2.D0*HRR(34))+&
                                 HRR(55))+&
                                 HRR(81)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+9)*LDA+(OB+8)*LDB+CDOffSet !=
       !=(20,19|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABz*(ABz*HRR(34)+&
+      DUM=ABz*(ABz*HRR(34)+&
                                 2.D0*HRR(55))+&
                                 ABy*(ABz*(ABz*HRR(20)+&
                                 2.D0*HRR(35))+&
                                 HRR(56))+&
                                 HRR(83)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+0)*LDA+(OB+9)*LDB+CDOffSet !=
       !=(11,20|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABz*(ABz*(ABz*HRR(11)+&
+      DUM=ABz*(ABz*(ABz*HRR(11)+&
                                 3.D0*HRR(26))+&
                                 3.D0*HRR(47))+&
                                 HRR(75)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+1)*LDA+(OB+9)*LDB+CDOffSet !=
       !=(12,20|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABz*(ABz*(ABz*HRR(12)+&
+      DUM=ABz*(ABz*(ABz*HRR(12)+&
                                 3.D0*HRR(27))+&
                                 3.D0*HRR(48))+&
                                 HRR(76)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+2)*LDA+(OB+9)*LDB+CDOffSet !=
       !=(13,20|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABz*(ABz*(ABz*HRR(13)+&
+      DUM=ABz*(ABz*(ABz*HRR(13)+&
                                 3.D0*HRR(28))+&
                                 3.D0*HRR(49))+&
                                 HRR(77)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+3)*LDA+(OB+9)*LDB+CDOffSet !=
       !=(14,20|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABz*(ABz*(ABz*HRR(14)+&
+      DUM=ABz*(ABz*(ABz*HRR(14)+&
                                 3.D0*HRR(29))+&
                                 3.D0*HRR(50))+&
                                 HRR(78)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+4)*LDA+(OB+9)*LDB+CDOffSet !=
       !=(15,20|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABz*(ABz*(ABz*HRR(15)+&
+      DUM=ABz*(ABz*(ABz*HRR(15)+&
                                 3.D0*HRR(30))+&
                                 3.D0*HRR(51))+&
                                 HRR(79)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+5)*LDA+(OB+9)*LDB+CDOffSet !=
       !=(16,20|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABz*(ABz*(ABz*HRR(16)+&
+      DUM=ABz*(ABz*(ABz*HRR(16)+&
                                 3.D0*HRR(31))+&
                                 3.D0*HRR(52))+&
                                 HRR(80)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+6)*LDA+(OB+9)*LDB+CDOffSet !=
       !=(17,20|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABz*(ABz*(ABz*HRR(17)+&
+      DUM=ABz*(ABz*(ABz*HRR(17)+&
                                 3.D0*HRR(32))+&
                                 3.D0*HRR(53))+&
                                 HRR(81)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+7)*LDA+(OB+9)*LDB+CDOffSet !=
       !=(18,20|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABz*(ABz*(ABz*HRR(18)+&
+      DUM=ABz*(ABz*(ABz*HRR(18)+&
                                 3.D0*HRR(33))+&
                                 3.D0*HRR(54))+&
                                 HRR(82)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+8)*LDA+(OB+9)*LDB+CDOffSet !=
       !=(19,20|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABz*(ABz*(ABz*HRR(19)+&
+      DUM=ABz*(ABz*(ABz*HRR(19)+&
                                 3.D0*HRR(34))+&
                                 3.D0*HRR(55))+&
                                 HRR(83)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+9)*LDA+(OB+9)*LDB+CDOffSet !=
       !=(20,20|
-      GRADIENT(OffSet,Cart + GOC)=GRADIENT(OffSet,cart+&
-                                GOC)+&
-                                ABz*(ABz*(ABz*HRR(20)+&
+      DUM=ABz*(ABz*(ABz*HRR(20)+&
                                 3.D0*HRR(35))+&
                                 3.D0*HRR(56))+&
                                 HRR(84)
+      GRADIENT(OffSet,Cart + GOC)=DUM+&
+                                GRADIENT(OffSet,Cart+&
+                                GOC)
+      STRESS(OffSet,1+Cart)=DUM*FP(4)+&
+                                STRESS(OffSet,1+&
+                                Cart)
+      STRESS(OffSet,4+Cart)=DUM*FP(5)+&
+                                STRESS(OffSet,4+&
+                                Cart)
+      STRESS(OffSet,7+Cart)=DUM*FP(6)+&
+                                STRESS(OffSet,7+&
+                                Cart)
       GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)

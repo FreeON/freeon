@@ -2,7 +2,7 @@
 ! COMPUTES THE INTEGRAL CLASS (s s|s s) 
 ! ---------------------------------------------------------- 
 SUBROUTINE dIntB1010101(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
- OA,LDA,OB,LDB,OC,LDC,OD,LDD,GOA,GOB,GOC,GOD,NINT,PBC,GRADIENTS)
+ OA,LDA,OB,LDB,OC,LDC,OD,LDD,GOA,GOB,GOC,GOD,NINT,PBC,GRADIENTS,STRESS)
        USE DerivedTypes
       USE VScratchB
       USE GlobalScalars
@@ -15,6 +15,7 @@ SUBROUTINE dIntB1010101(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
       TYPE(SmallAtomInfo) :: ACInfo,BDInfo
       TYPE(PBCInfo) :: PBC
       REAL(DOUBLE)  :: GRADIENTS(NINT,12)
+      REAL(DOUBLE)  :: STRESS(NINT,9)
       REAL(DOUBLE)  :: Ax,Ay,Az,Bx,By,Bz,Cx,Cy,Cz
       REAL(DOUBLE)  :: Dx,Dy,Dz,Qx,Qy,Qz,Px,Py,Pz
       REAL(DOUBLE)  :: PQx,PQy,PQz,FPQx,FPQy,FPQz
@@ -26,12 +27,16 @@ SUBROUTINE dIntB1010101(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
       REAL(DOUBLE), DIMENSION(4,1,1) :: HRRA,HRRB 
       REAL(DOUBLE), DIMENSION(1,4,1) :: HRRC 
       REAL(DOUBLE)  :: VRR(4,4,0:1)
-      INTEGER       :: OffSet,OA,LDA,GOA,OB,LDB,GOB,OC,LDC,GOC,OD,LDD,GOD,I,J,K,L
+      REAL(DOUBLE)  :: VRRS(1,1,0:0,3)
+      REAL(DOUBLE)  :: HRRS(1,1,1,9)
+      REAL(DOUBLE)  :: TOm,PQJ(3),FP(9)
+      INTEGER       :: OffSet,OA,LDA,GOA,OB,LDB,GOB,OC,LDC,GOC,OD,LDD,GOD,I,J,K,L,IJ
       EXTERNAL InitDbl
       CALL InitDbl(1*1,HRR(1,1,1))
       CALL InitDbl(4*1,HRRA(1,1,1))
       CALL InitDbl(4*1,HRRB(1,1,1))
       CALL InitDbl(1*4,HRRC(1,1,1))
+      CALL InitDbl(9*1*1*1,HRRS(1,1,1,1))
       Ax=ACInfo%Atm1X
       Ay=ACInfo%Atm1Y
       Az=ACInfo%Atm1Z
@@ -50,6 +55,18 @@ SUBROUTINE dIntB1010101(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
       CDx=Cx-Dx
       CDy=Cy-Dy
       CDz=Cz-Dz
+      !
+      !This will feel better above!
+      FP(1)=PBC%InvBoxSh%D(1,1)*(Ax-Dx)+PBC%InvBoxSh%D(1,2)*(Ay-Dy)+PBC%InvBoxSh%D(1,3)*(Az-Dz)
+      FP(2)=                            PBC%InvBoxSh%D(2,2)*(Ay-Dy)+PBC%InvBoxSh%D(2,3)*(Az-Dz)
+      FP(3)=                                                        PBC%InvBoxSh%D(3,3)*(Az-Dz)
+      FP(4)=PBC%InvBoxSh%D(1,1)*(Cx-Dx)+PBC%InvBoxSh%D(1,2)*(Cy-Dy)+PBC%InvBoxSh%D(1,3)*(Cz-Dz)
+      FP(5)=                            PBC%InvBoxSh%D(2,2)*(Cy-Dy)+PBC%InvBoxSh%D(2,3)*(Cz-Dz)
+      FP(6)=                                                        PBC%InvBoxSh%D(3,3)*(Cz-Dz)
+      FP(7)=PBC%InvBoxSh%D(1,1)*(Bx-Dx)+PBC%InvBoxSh%D(1,2)*(By-Dy)+PBC%InvBoxSh%D(1,3)*(Bz-Dz)
+      FP(8)=                            PBC%InvBoxSh%D(2,2)*(By-Dy)+PBC%InvBoxSh%D(2,3)*(Bz-Dz)
+      FP(9)=                                                        PBC%InvBoxSh%D(3,3)*(Bz-Dz)
+      !
       DO J=1,LKet ! K^2 VRR |N0) loop 
          Eta=PrmBufK(1,J)
          Qx=PrmBufK(2,J)
@@ -86,9 +103,25 @@ SUBROUTINE dIntB1010101(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
             FPQx = PQx*PBC%InvBoxSh%D(1,1)+PQy*PBC%InvBoxSh%D(1,2)+PQz*PBC%InvBoxSh%D(1,3)
             FPQy = PQy*PBC%InvBoxSh%D(2,2)+PQz*PBC%InvBoxSh%D(2,3)
             FPQz = PQz*PBC%InvBoxSh%D(3,3)
-            IF(PBC%AutoW%I(1)==1)FPQx=FPQx-ANINT(FPQx-SIGN(1D-15,FPQx))
-            IF(PBC%AutoW%I(2)==1)FPQy=FPQy-ANINT(FPQy-SIGN(1D-15,FPQy))
-            IF(PBC%AutoW%I(3)==1)FPQz=FPQz-ANINT(FPQz-SIGN(1D-15,FPQz))
+            TOm=2.0d0*Omega
+            IF(PBC%AutoW%I(1)==1) THEN
+              PQJ(1)=ANINT(FPQx-SIGN(1D-15,FPQx));FPQx=FPQx-PQJ(1)
+              PQJ(1)=PQJ(1)*TOm
+            ELSE
+              PQJ(1)=0.0D0
+            ENDIF
+            IF(PBC%AutoW%I(2)==1) THEN
+              PQJ(2)=ANINT(FPQy-SIGN(1D-15,FPQy));FPQy=FPQy-PQJ(2)
+              PQJ(2)=PQJ(2)*TOm
+            ELSE
+              PQJ(2)=0.0D0
+            ENDIF
+            IF(PBC%AutoW%I(3)==1) THEN
+              PQJ(3)=ANINT(FPQz-SIGN(1D-15,FPQz));FPQz=FPQz-PQJ(3)
+              PQJ(3)=PQJ(3)*TOm
+            ELSE
+              PQJ(3)=0.0D0
+            ENDIF
             PQx=FPQx*PBC%BoxShape%D(1,1)+FPQy*PBC%BoxShape%D(1,2)+FPQz*PBC%BoxShape%D(1,3)
             PQy=FPQy*PBC%BoxShape%D(2,2)+FPQz*PBC%BoxShape%D(2,3)
             PQz=FPQz*PBC%BoxShape%D(3,3)
@@ -119,38 +152,69 @@ SUBROUTINE dIntB1010101(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
             VRR(1,2,0)=QCx*VRR(1,1,0)+WQx*VRR(1,1,1)
             VRR(1,3,0)=QCy*VRR(1,1,0)+WQy*VRR(1,1,1)
             VRR(1,4,0)=QCz*VRR(1,1,0)+WQz*VRR(1,1,1)
+            IF(PBC%AutoW%I(1).EQ.1) THEN
+            VRRS(1,1,0,1)=PQx*VRR(1,1,1)
+            ENDIF
+            IF(PBC%AutoW%I(2).EQ.1) THEN
+            VRRS(1,1,0,2)=PQy*VRR(1,1,1)
+            ENDIF
+            IF(PBC%AutoW%I(3).EQ.1) THEN
+            VRRS(1,1,0,3)=PQz*VRR(1,1,1)
+            ENDIF
             ! Contracting ... 
-            CALL CNTRCTG1111(VRR,HRR,Alpha,HRRA,Beta,HRRB,Gamma,HRRC)
+            CALL CNTRCTG1111(VRR,HRR,Alpha,HRRA,Beta,HRRB,Gamma,HRRC, &
+                     & VRRS,HRRS(1,1,1,1),PQJ(1),PBC%AutoW%I(1))
          ENDDO ! (M0| loop
       ENDDO ! |N0) loop
       ! Dont need to generate (s,0|s,s)
       ! Dont need to generate (p,0|s,s)^a
       ! Dont need to generate (p,0|s,s)^b
       ! Dont need to generate (s,0|p,s)^c
+      ! Stress: No need to generate [s,0|s,s] 
       DO L=1,1
       
          !K = 1
          CDOffSet=(OC+1-1)*LDC+(OD+L-1)*LDD
          ! Generating (s',s|1,L)  and (s,s'|1,L)
          CALL BraHRR11ab(NINT,LDA,LDB,OA,OB,GOA,GOB,CDOffSet,HRR(1,1,L),&
-                          HRRA(1,1,L),HRRB(1,1,L),GRADIENTS(1,1))
+                      HRRA(1,1,L),HRRB(1,1,L),GRADIENTS(1,1),FP(1),&
+                      STRESS(1,1))
          ! Generating (s,s|1_x,L)  and (s,s|1,L_x)
-         CALL BraHRR11cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,0,HRRC(1,2,L),GRADIENTS(1,1))
+         CALL BraHRR11cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,0,&
+                      HRRC(1,2,L),GRADIENTS(1,1),FP(1),STRESS(1,1))
          ! Generating (s,s|1_y,L)  and (s,s|1,L_y)
-         CALL BraHRR11cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,1,HRRC(1,3,L),GRADIENTS(1,1))
+         CALL BraHRR11cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,1,&
+                      HRRC(1,3,L),GRADIENTS(1,1),FP(1),STRESS(1,1))
          ! Generating (s,s|1_z,L)  and (s,s|1,L_z)
-         CALL BraHRR11cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,2,HRRC(1,4,L),GRADIENTS(1,1))
+         CALL BraHRR11cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,2,&
+                      HRRC(1,4,L),GRADIENTS(1,1),FP(1),STRESS(1,1))
       ENDDO 
-    END SUBROUTINE dIntB1010101
-    SUBROUTINE CNTRCTG1111(VRR,HRR,Alpha,HRRA,Beta,HRRB,Gamma,HRRC)
+      ! Stress: Generating (s,s|s,s)^(1) 
+      DO J=1,3
+      DO I=1,3
+      IJ=3*(J-1)+I
+        DO L=1,1
+          DO K=1,1
+            CDOffSet=(OC+K-1)*LDC+(OD+L-1)*LDD 
+            CALL BraHRR11(OA,OB,LDA,LDB,CDOffSet,HRRS(1,K,L,IJ),STRESS(1,IJ))
+          ENDDO 
+        ENDDO 
+      ENDDO 
+      ENDDO 
+   END SUBROUTINE dIntB1010101
+    SUBROUTINE CNTRCTG1111(VRR,HRR,Alpha,HRRA,Beta,HRRB,Gamma,HRRC,VRRS,HRRS,PQJ,IW)
       USE DerivedTypes
       USE VScratchB
+      IMPLICIT NONE
       INTEGER :: K
       REAL(DOUBLE)  :: Alpha,Beta,Gamma
       REAL(DOUBLE), DIMENSION(1,1,1) :: HRR 
       REAL(DOUBLE), DIMENSION(4,1,1) :: HRRA,HRRB 
       REAL(DOUBLE), DIMENSION(1,4,1) :: HRRC 
       REAL(DOUBLE)  :: VRR(4,4,0:1)
+      REAL(DOUBLE)  :: VRRS(1,1,0:0,3)
+      REAL(DOUBLE)  :: HRRS(1,1,1,9),PQJ(3)
+      INTEGER :: IJ,J,I,IW(3)
       HRR(1,1,1)=HRR(1,1,1)+VRR(1,1,0)
       HRRA(1,1,1)=HRRA(1,1,1)+Alpha*VRR(1,1,0)
       HRRB(1,1,1)=HRRB(1,1,1)+Beta*VRR(1,1,0)
@@ -164,4 +228,23 @@ SUBROUTINE dIntB1010101(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
       HRRB(3,1,1)=HRRB(3,1,1)+Beta*VRR(3,1,0)
       HRRA(4,1,1)=HRRA(4,1,1)+Alpha*VRR(4,1,0)
       HRRB(4,1,1)=HRRB(4,1,1)+Beta*VRR(4,1,0)
+      IJ=1
+      DO J=1,3
+      IF(IW(J).EQ.1) THEN
+        IF(IW(1).EQ.1) THEN
+        HRRS(1,1,1,IJ)=HRRS(1,1,1,IJ)+PQJ(J)*VRRS(1,1,0,1)
+        ENDIF
+        IJ=IJ+1
+        IF(IW(2).EQ.1) THEN
+        HRRS(1,1,1,IJ)=HRRS(1,1,1,IJ)+PQJ(J)*VRRS(1,1,0,2)
+        ENDIF
+        IJ=IJ+1
+        IF(IW(3).EQ.1) THEN
+        HRRS(1,1,1,IJ)=HRRS(1,1,1,IJ)+PQJ(J)*VRRS(1,1,0,3)
+        ENDIF
+        IJ=IJ+1
+      ELSE
+        IJ=IJ+3
+      ENDIF
+      ENDDO !J
     END SUBROUTINE CNTRCTG1111

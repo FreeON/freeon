@@ -66,3 +66,220 @@
       VRR0(20,3)=2.D0*V(24)-2.D0*V(25)+PAz*VRR0(10,3)+WPz*VRR1(10,3)
       VRR0(20,4)=2.D0*V(27)-2.D0*V(28)+PAz*VRR0(10,4)+HfxZpE*VRR1(10,1)+WPz*VRR1(10,4)
 END SUBROUTINE VRRf0p0
+SUBROUTINE MVRRf0p0(IXYZ,LBS,LKS,VS0,VS1,LBR,LKR,VR1)
+USE DerivedTypes
+USE VScratchB
+USE GlobalScalars
+IMPLICIT NONE
+INTEGER IXYZ,LBS,LKS,LBR,LKR
+REAL(DOUBLE) VS0(LBS,LKS),VS1(LBS,LKS),VR1(LBR,LKR)
+SELECT CASE(IXYZ)
+CASE(1)
+VS0(11,2)=PAx*VS0(5,2)+WPx*VS1(5,2)+r1x2Z*VR1(5,2)&
+   +2D0*r1x2Z*(VS0(2,2)-ExZpE*VS1(2,2))&
+   +HfxZpE*VS1(5,1)
+VS0(11,3)=PAx*VS0(5,3)+WPx*VS1(5,3)+r1x2Z*VR1(5,3)&
+   +2D0*r1x2Z*(VS0(2,3)-ExZpE*VS1(2,3))
+VS0(11,4)=PAx*VS0(5,4)+WPx*VS1(5,4)+r1x2Z*VR1(5,4)&
+   +2D0*r1x2Z*(VS0(2,4)-ExZpE*VS1(2,4))
+VS0(12,2)=PAx*VS0(6,2)+WPx*VS1(6,2)+r1x2Z*VR1(6,2)&
+   +r1x2Z*(VS0(3,2)-ExZpE*VS1(3,2))&
+   +HfxZpE*VS1(6,1)
+VS0(12,3)=PAx*VS0(6,3)+WPx*VS1(6,3)+r1x2Z*VR1(6,3)&
+   +r1x2Z*(VS0(3,3)-ExZpE*VS1(3,3))
+VS0(12,4)=PAx*VS0(6,4)+WPx*VS1(6,4)+r1x2Z*VR1(6,4)&
+   +r1x2Z*(VS0(3,4)-ExZpE*VS1(3,4))
+VS0(13,2)=PAy*VS0(6,2)+WPy*VS1(6,2)&
+   +r1x2Z*(VS0(2,2)-ExZpE*VS1(2,2))
+VS0(13,3)=PAy*VS0(6,3)+WPy*VS1(6,3)&
+   +r1x2Z*(VS0(2,3)-ExZpE*VS1(2,3))&
+   +HfxZpE*VS1(6,1)
+VS0(13,4)=PAy*VS0(6,4)+WPy*VS1(6,4)&
+   +r1x2Z*(VS0(2,4)-ExZpE*VS1(2,4))
+VS0(14,2)=PAy*VS0(7,2)+WPy*VS1(7,2)&
+   +2D0*r1x2Z*(VS0(3,2)-ExZpE*VS1(3,2))
+VS0(14,3)=PAy*VS0(7,3)+WPy*VS1(7,3)&
+   +2D0*r1x2Z*(VS0(3,3)-ExZpE*VS1(3,3))&
+   +HfxZpE*VS1(7,1)
+VS0(14,4)=PAy*VS0(7,4)+WPy*VS1(7,4)&
+   +2D0*r1x2Z*(VS0(3,4)-ExZpE*VS1(3,4))
+VS0(15,2)=PAx*VS0(8,2)+WPx*VS1(8,2)+r1x2Z*VR1(8,2)&
+   +r1x2Z*(VS0(4,2)-ExZpE*VS1(4,2))&
+   +HfxZpE*VS1(8,1)
+VS0(15,3)=PAx*VS0(8,3)+WPx*VS1(8,3)+r1x2Z*VR1(8,3)&
+   +r1x2Z*(VS0(4,3)-ExZpE*VS1(4,3))
+VS0(15,4)=PAx*VS0(8,4)+WPx*VS1(8,4)+r1x2Z*VR1(8,4)&
+   +r1x2Z*(VS0(4,4)-ExZpE*VS1(4,4))
+VS0(16,2)=PAx*VS0(9,2)+WPx*VS1(9,2)+r1x2Z*VR1(9,2)&
+   +HfxZpE*VS1(9,1)
+VS0(16,3)=PAx*VS0(9,3)+WPx*VS1(9,3)+r1x2Z*VR1(9,3)
+VS0(16,4)=PAx*VS0(9,4)+WPx*VS1(9,4)+r1x2Z*VR1(9,4)
+VS0(17,2)=PAy*VS0(9,2)+WPy*VS1(9,2)&
+   +r1x2Z*(VS0(4,2)-ExZpE*VS1(4,2))
+VS0(17,3)=PAy*VS0(9,3)+WPy*VS1(9,3)&
+   +r1x2Z*(VS0(4,3)-ExZpE*VS1(4,3))&
+   +HfxZpE*VS1(9,1)
+VS0(17,4)=PAy*VS0(9,4)+WPy*VS1(9,4)&
+   +r1x2Z*(VS0(4,4)-ExZpE*VS1(4,4))
+VS0(18,2)=PAz*VS0(8,2)+WPz*VS1(8,2)&
+   +r1x2Z*(VS0(2,2)-ExZpE*VS1(2,2))
+VS0(18,3)=PAz*VS0(8,3)+WPz*VS1(8,3)&
+   +r1x2Z*(VS0(2,3)-ExZpE*VS1(2,3))
+VS0(18,4)=PAz*VS0(8,4)+WPz*VS1(8,4)&
+   +r1x2Z*(VS0(2,4)-ExZpE*VS1(2,4))&
+   +HfxZpE*VS1(8,1)
+VS0(19,2)=PAz*VS0(9,2)+WPz*VS1(9,2)&
+   +r1x2Z*(VS0(3,2)-ExZpE*VS1(3,2))
+VS0(19,3)=PAz*VS0(9,3)+WPz*VS1(9,3)&
+   +r1x2Z*(VS0(3,3)-ExZpE*VS1(3,3))
+VS0(19,4)=PAz*VS0(9,4)+WPz*VS1(9,4)&
+   +r1x2Z*(VS0(3,4)-ExZpE*VS1(3,4))&
+   +HfxZpE*VS1(9,1)
+VS0(20,2)=PAz*VS0(10,2)+WPz*VS1(10,2)&
+   +2D0*r1x2Z*(VS0(4,2)-ExZpE*VS1(4,2))
+VS0(20,3)=PAz*VS0(10,3)+WPz*VS1(10,3)&
+   +2D0*r1x2Z*(VS0(4,3)-ExZpE*VS1(4,3))
+VS0(20,4)=PAz*VS0(10,4)+WPz*VS1(10,4)&
+   +2D0*r1x2Z*(VS0(4,4)-ExZpE*VS1(4,4))&
+   +HfxZpE*VS1(10,1)
+CASE(2)
+VS0(11,2)=PAx*VS0(5,2)+WPx*VS1(5,2)&
+   +2D0*r1x2Z*(VS0(2,2)-ExZpE*VS1(2,2))&
+   +HfxZpE*VS1(5,1)
+VS0(11,3)=PAx*VS0(5,3)+WPx*VS1(5,3)&
+   +2D0*r1x2Z*(VS0(2,3)-ExZpE*VS1(2,3))
+VS0(11,4)=PAx*VS0(5,4)+WPx*VS1(5,4)&
+   +2D0*r1x2Z*(VS0(2,4)-ExZpE*VS1(2,4))
+VS0(12,2)=PAx*VS0(6,2)+WPx*VS1(6,2)&
+   +r1x2Z*(VS0(3,2)-ExZpE*VS1(3,2))&
+   +HfxZpE*VS1(6,1)
+VS0(12,3)=PAx*VS0(6,3)+WPx*VS1(6,3)&
+   +r1x2Z*(VS0(3,3)-ExZpE*VS1(3,3))
+VS0(12,4)=PAx*VS0(6,4)+WPx*VS1(6,4)&
+   +r1x2Z*(VS0(3,4)-ExZpE*VS1(3,4))
+VS0(13,2)=PAy*VS0(6,2)+WPy*VS1(6,2)+r1x2Z*VR1(6,2)&
+   +r1x2Z*(VS0(2,2)-ExZpE*VS1(2,2))
+VS0(13,3)=PAy*VS0(6,3)+WPy*VS1(6,3)+r1x2Z*VR1(6,3)&
+   +r1x2Z*(VS0(2,3)-ExZpE*VS1(2,3))&
+   +HfxZpE*VS1(6,1)
+VS0(13,4)=PAy*VS0(6,4)+WPy*VS1(6,4)+r1x2Z*VR1(6,4)&
+   +r1x2Z*(VS0(2,4)-ExZpE*VS1(2,4))
+VS0(14,2)=PAy*VS0(7,2)+WPy*VS1(7,2)+r1x2Z*VR1(7,2)&
+   +2D0*r1x2Z*(VS0(3,2)-ExZpE*VS1(3,2))
+VS0(14,3)=PAy*VS0(7,3)+WPy*VS1(7,3)+r1x2Z*VR1(7,3)&
+   +2D0*r1x2Z*(VS0(3,3)-ExZpE*VS1(3,3))&
+   +HfxZpE*VS1(7,1)
+VS0(14,4)=PAy*VS0(7,4)+WPy*VS1(7,4)+r1x2Z*VR1(7,4)&
+   +2D0*r1x2Z*(VS0(3,4)-ExZpE*VS1(3,4))
+VS0(15,2)=PAx*VS0(8,2)+WPx*VS1(8,2)&
+   +r1x2Z*(VS0(4,2)-ExZpE*VS1(4,2))&
+   +HfxZpE*VS1(8,1)
+VS0(15,3)=PAx*VS0(8,3)+WPx*VS1(8,3)&
+   +r1x2Z*(VS0(4,3)-ExZpE*VS1(4,3))
+VS0(15,4)=PAx*VS0(8,4)+WPx*VS1(8,4)&
+   +r1x2Z*(VS0(4,4)-ExZpE*VS1(4,4))
+VS0(16,2)=PAx*VS0(9,2)+WPx*VS1(9,2)&
+   +HfxZpE*VS1(9,1)
+VS0(16,3)=PAx*VS0(9,3)+WPx*VS1(9,3)
+VS0(16,4)=PAx*VS0(9,4)+WPx*VS1(9,4)
+VS0(17,2)=PAy*VS0(9,2)+WPy*VS1(9,2)+r1x2Z*VR1(9,2)&
+   +r1x2Z*(VS0(4,2)-ExZpE*VS1(4,2))
+VS0(17,3)=PAy*VS0(9,3)+WPy*VS1(9,3)+r1x2Z*VR1(9,3)&
+   +r1x2Z*(VS0(4,3)-ExZpE*VS1(4,3))&
+   +HfxZpE*VS1(9,1)
+VS0(17,4)=PAy*VS0(9,4)+WPy*VS1(9,4)+r1x2Z*VR1(9,4)&
+   +r1x2Z*(VS0(4,4)-ExZpE*VS1(4,4))
+VS0(18,2)=PAz*VS0(8,2)+WPz*VS1(8,2)&
+   +r1x2Z*(VS0(2,2)-ExZpE*VS1(2,2))
+VS0(18,3)=PAz*VS0(8,3)+WPz*VS1(8,3)&
+   +r1x2Z*(VS0(2,3)-ExZpE*VS1(2,3))
+VS0(18,4)=PAz*VS0(8,4)+WPz*VS1(8,4)&
+   +r1x2Z*(VS0(2,4)-ExZpE*VS1(2,4))&
+   +HfxZpE*VS1(8,1)
+VS0(19,2)=PAz*VS0(9,2)+WPz*VS1(9,2)&
+   +r1x2Z*(VS0(3,2)-ExZpE*VS1(3,2))
+VS0(19,3)=PAz*VS0(9,3)+WPz*VS1(9,3)&
+   +r1x2Z*(VS0(3,3)-ExZpE*VS1(3,3))
+VS0(19,4)=PAz*VS0(9,4)+WPz*VS1(9,4)&
+   +r1x2Z*(VS0(3,4)-ExZpE*VS1(3,4))&
+   +HfxZpE*VS1(9,1)
+VS0(20,2)=PAz*VS0(10,2)+WPz*VS1(10,2)&
+   +2D0*r1x2Z*(VS0(4,2)-ExZpE*VS1(4,2))
+VS0(20,3)=PAz*VS0(10,3)+WPz*VS1(10,3)&
+   +2D0*r1x2Z*(VS0(4,3)-ExZpE*VS1(4,3))
+VS0(20,4)=PAz*VS0(10,4)+WPz*VS1(10,4)&
+   +2D0*r1x2Z*(VS0(4,4)-ExZpE*VS1(4,4))&
+   +HfxZpE*VS1(10,1)
+CASE(3)
+VS0(11,2)=PAx*VS0(5,2)+WPx*VS1(5,2)&
+   +2D0*r1x2Z*(VS0(2,2)-ExZpE*VS1(2,2))&
+   +HfxZpE*VS1(5,1)
+VS0(11,3)=PAx*VS0(5,3)+WPx*VS1(5,3)&
+   +2D0*r1x2Z*(VS0(2,3)-ExZpE*VS1(2,3))
+VS0(11,4)=PAx*VS0(5,4)+WPx*VS1(5,4)&
+   +2D0*r1x2Z*(VS0(2,4)-ExZpE*VS1(2,4))
+VS0(12,2)=PAx*VS0(6,2)+WPx*VS1(6,2)&
+   +r1x2Z*(VS0(3,2)-ExZpE*VS1(3,2))&
+   +HfxZpE*VS1(6,1)
+VS0(12,3)=PAx*VS0(6,3)+WPx*VS1(6,3)&
+   +r1x2Z*(VS0(3,3)-ExZpE*VS1(3,3))
+VS0(12,4)=PAx*VS0(6,4)+WPx*VS1(6,4)&
+   +r1x2Z*(VS0(3,4)-ExZpE*VS1(3,4))
+VS0(13,2)=PAy*VS0(6,2)+WPy*VS1(6,2)&
+   +r1x2Z*(VS0(2,2)-ExZpE*VS1(2,2))
+VS0(13,3)=PAy*VS0(6,3)+WPy*VS1(6,3)&
+   +r1x2Z*(VS0(2,3)-ExZpE*VS1(2,3))&
+   +HfxZpE*VS1(6,1)
+VS0(13,4)=PAy*VS0(6,4)+WPy*VS1(6,4)&
+   +r1x2Z*(VS0(2,4)-ExZpE*VS1(2,4))
+VS0(14,2)=PAy*VS0(7,2)+WPy*VS1(7,2)&
+   +2D0*r1x2Z*(VS0(3,2)-ExZpE*VS1(3,2))
+VS0(14,3)=PAy*VS0(7,3)+WPy*VS1(7,3)&
+   +2D0*r1x2Z*(VS0(3,3)-ExZpE*VS1(3,3))&
+   +HfxZpE*VS1(7,1)
+VS0(14,4)=PAy*VS0(7,4)+WPy*VS1(7,4)&
+   +2D0*r1x2Z*(VS0(3,4)-ExZpE*VS1(3,4))
+VS0(15,2)=PAx*VS0(8,2)+WPx*VS1(8,2)&
+   +r1x2Z*(VS0(4,2)-ExZpE*VS1(4,2))&
+   +HfxZpE*VS1(8,1)
+VS0(15,3)=PAx*VS0(8,3)+WPx*VS1(8,3)&
+   +r1x2Z*(VS0(4,3)-ExZpE*VS1(4,3))
+VS0(15,4)=PAx*VS0(8,4)+WPx*VS1(8,4)&
+   +r1x2Z*(VS0(4,4)-ExZpE*VS1(4,4))
+VS0(16,2)=PAx*VS0(9,2)+WPx*VS1(9,2)&
+   +HfxZpE*VS1(9,1)
+VS0(16,3)=PAx*VS0(9,3)+WPx*VS1(9,3)
+VS0(16,4)=PAx*VS0(9,4)+WPx*VS1(9,4)
+VS0(17,2)=PAy*VS0(9,2)+WPy*VS1(9,2)&
+   +r1x2Z*(VS0(4,2)-ExZpE*VS1(4,2))
+VS0(17,3)=PAy*VS0(9,3)+WPy*VS1(9,3)&
+   +r1x2Z*(VS0(4,3)-ExZpE*VS1(4,3))&
+   +HfxZpE*VS1(9,1)
+VS0(17,4)=PAy*VS0(9,4)+WPy*VS1(9,4)&
+   +r1x2Z*(VS0(4,4)-ExZpE*VS1(4,4))
+VS0(18,2)=PAz*VS0(8,2)+WPz*VS1(8,2)+r1x2Z*VR1(8,2)&
+   +r1x2Z*(VS0(2,2)-ExZpE*VS1(2,2))
+VS0(18,3)=PAz*VS0(8,3)+WPz*VS1(8,3)+r1x2Z*VR1(8,3)&
+   +r1x2Z*(VS0(2,3)-ExZpE*VS1(2,3))
+VS0(18,4)=PAz*VS0(8,4)+WPz*VS1(8,4)+r1x2Z*VR1(8,4)&
+   +r1x2Z*(VS0(2,4)-ExZpE*VS1(2,4))&
+   +HfxZpE*VS1(8,1)
+VS0(19,2)=PAz*VS0(9,2)+WPz*VS1(9,2)+r1x2Z*VR1(9,2)&
+   +r1x2Z*(VS0(3,2)-ExZpE*VS1(3,2))
+VS0(19,3)=PAz*VS0(9,3)+WPz*VS1(9,3)+r1x2Z*VR1(9,3)&
+   +r1x2Z*(VS0(3,3)-ExZpE*VS1(3,3))
+VS0(19,4)=PAz*VS0(9,4)+WPz*VS1(9,4)+r1x2Z*VR1(9,4)&
+   +r1x2Z*(VS0(3,4)-ExZpE*VS1(3,4))&
+   +HfxZpE*VS1(9,1)
+VS0(20,2)=PAz*VS0(10,2)+WPz*VS1(10,2)+r1x2Z*VR1(10,2)&
+   +2D0*r1x2Z*(VS0(4,2)-ExZpE*VS1(4,2))
+VS0(20,3)=PAz*VS0(10,3)+WPz*VS1(10,3)+r1x2Z*VR1(10,3)&
+   +2D0*r1x2Z*(VS0(4,3)-ExZpE*VS1(4,3))
+VS0(20,4)=PAz*VS0(10,4)+WPz*VS1(10,4)+r1x2Z*VR1(10,4)&
+   +2D0*r1x2Z*(VS0(4,4)-ExZpE*VS1(4,4))&
+   +HfxZpE*VS1(10,1)
+CASE DEFAULT
+WRITE(*,*) 'STOP IN MVRRf0p0'
+STOP
+END SELECT
+END SUBROUTINE MVRRf0p0

@@ -2,7 +2,7 @@
 ! COMPUTES THE INTEGRAL CLASS (f d|s s) 
 ! ---------------------------------------------------------- 
 SUBROUTINE dIntB10060101(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
- OA,LDA,OB,LDB,OC,LDC,OD,LDD,GOA,GOB,GOC,GOD,NINT,PBC,GRADIENTS)
+ OA,LDA,OB,LDB,OC,LDC,OD,LDD,GOA,GOB,GOC,GOD,NINT,PBC,GRADIENTS,STRESS)
        USE DerivedTypes
       USE VScratchB
       USE GlobalScalars
@@ -14,6 +14,7 @@ SUBROUTINE dIntB10060101(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
       TYPE(SmallAtomInfo) :: ACInfo,BDInfo
       TYPE(PBCInfo) :: PBC
       REAL(DOUBLE)  :: GRADIENTS(NINT,12)
+      REAL(DOUBLE)  :: STRESS(NINT,9)
       REAL(DOUBLE)  :: Ax,Ay,Az,Bx,By,Bz,Cx,Cy,Cz
       REAL(DOUBLE)  :: Dx,Dy,Dz,Qx,Qy,Qz,Px,Py,Pz
       REAL(DOUBLE)  :: PQx,PQy,PQz,FPQx,FPQy,FPQz
@@ -25,12 +26,16 @@ SUBROUTINE dIntB10060101(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
       REAL(DOUBLE), DIMENSION(84,1,1) :: HRRA,HRRB 
       REAL(DOUBLE), DIMENSION(56,4,1) :: HRRC 
       REAL(DOUBLE)  :: VRR(84,4,0:6)
-      INTEGER       :: OffSet,OA,LDA,GOA,OB,LDB,GOB,OC,LDC,GOC,OD,LDD,GOD,I,J,K,L
+      REAL(DOUBLE)  :: VRRS(56,1,0:5,3)
+      REAL(DOUBLE)  :: HRRS(56,1,1,9)
+      REAL(DOUBLE)  :: TOm,PQJ(3),FP(9)
+      INTEGER       :: OffSet,OA,LDA,GOA,OB,LDB,GOB,OC,LDC,GOC,OD,LDD,GOD,I,J,K,L,IJ
       EXTERNAL InitDbl
       CALL InitDbl(56*1,HRR(1,1,1))
       CALL InitDbl(84*1,HRRA(1,1,1))
       CALL InitDbl(84*1,HRRB(1,1,1))
       CALL InitDbl(56*4,HRRC(1,1,1))
+      CALL InitDbl(9*1*56*1,HRRS(1,1,1,1))
       Ax=ACInfo%Atm1X
       Ay=ACInfo%Atm1Y
       Az=ACInfo%Atm1Z
@@ -49,6 +54,18 @@ SUBROUTINE dIntB10060101(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
       CDx=Cx-Dx
       CDy=Cy-Dy
       CDz=Cz-Dz
+      !
+      !This will feel better above!
+      FP(1)=PBC%InvBoxSh%D(1,1)*(Ax-Dx)+PBC%InvBoxSh%D(1,2)*(Ay-Dy)+PBC%InvBoxSh%D(1,3)*(Az-Dz)
+      FP(2)=                            PBC%InvBoxSh%D(2,2)*(Ay-Dy)+PBC%InvBoxSh%D(2,3)*(Az-Dz)
+      FP(3)=                                                        PBC%InvBoxSh%D(3,3)*(Az-Dz)
+      FP(4)=PBC%InvBoxSh%D(1,1)*(Cx-Dx)+PBC%InvBoxSh%D(1,2)*(Cy-Dy)+PBC%InvBoxSh%D(1,3)*(Cz-Dz)
+      FP(5)=                            PBC%InvBoxSh%D(2,2)*(Cy-Dy)+PBC%InvBoxSh%D(2,3)*(Cz-Dz)
+      FP(6)=                                                        PBC%InvBoxSh%D(3,3)*(Cz-Dz)
+      FP(7)=PBC%InvBoxSh%D(1,1)*(Bx-Dx)+PBC%InvBoxSh%D(1,2)*(By-Dy)+PBC%InvBoxSh%D(1,3)*(Bz-Dz)
+      FP(8)=                            PBC%InvBoxSh%D(2,2)*(By-Dy)+PBC%InvBoxSh%D(2,3)*(Bz-Dz)
+      FP(9)=                                                        PBC%InvBoxSh%D(3,3)*(Bz-Dz)
+      !
       DO J=1,LKet ! K^2 VRR |N0) loop 
          Eta=PrmBufK(1,J)
          Qx=PrmBufK(2,J)
@@ -85,9 +102,25 @@ SUBROUTINE dIntB10060101(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
             FPQx = PQx*PBC%InvBoxSh%D(1,1)+PQy*PBC%InvBoxSh%D(1,2)+PQz*PBC%InvBoxSh%D(1,3)
             FPQy = PQy*PBC%InvBoxSh%D(2,2)+PQz*PBC%InvBoxSh%D(2,3)
             FPQz = PQz*PBC%InvBoxSh%D(3,3)
-            IF(PBC%AutoW%I(1)==1)FPQx=FPQx-ANINT(FPQx-SIGN(1D-15,FPQx))
-            IF(PBC%AutoW%I(2)==1)FPQy=FPQy-ANINT(FPQy-SIGN(1D-15,FPQy))
-            IF(PBC%AutoW%I(3)==1)FPQz=FPQz-ANINT(FPQz-SIGN(1D-15,FPQz))
+            TOm=2.0d0*Omega
+            IF(PBC%AutoW%I(1)==1) THEN
+              PQJ(1)=ANINT(FPQx-SIGN(1D-15,FPQx));FPQx=FPQx-PQJ(1)
+              PQJ(1)=PQJ(1)*TOm
+            ELSE
+              PQJ(1)=0.0D0
+            ENDIF
+            IF(PBC%AutoW%I(2)==1) THEN
+              PQJ(2)=ANINT(FPQy-SIGN(1D-15,FPQy));FPQy=FPQy-PQJ(2)
+              PQJ(2)=PQJ(2)*TOm
+            ELSE
+              PQJ(2)=0.0D0
+            ENDIF
+            IF(PBC%AutoW%I(3)==1) THEN
+              PQJ(3)=ANINT(FPQz-SIGN(1D-15,FPQz));FPQz=FPQz-PQJ(3)
+              PQJ(3)=PQJ(3)*TOm
+            ELSE
+              PQJ(3)=0.0D0
+            ENDIF
             PQx=FPQx*PBC%BoxShape%D(1,1)+FPQy*PBC%BoxShape%D(1,2)+FPQz*PBC%BoxShape%D(1,3)
             PQy=FPQy*PBC%BoxShape%D(2,2)+FPQz*PBC%BoxShape%D(2,3)
             PQz=FPQz*PBC%BoxShape%D(3,3)
@@ -307,38 +340,265 @@ SUBROUTINE dIntB10060101(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
             CALL VRRg0p0(84,4,VRR(1,1,0),VRR(1,1,1))
             ! Generating (h0|p0)^(0)
             CALL VRRh0p0(84,4,VRR(1,1,0),VRR(1,1,1))
+            !MAY BE BETTER TO PUT WHAT FOLLOWS IN A DO LOOP!
+            IF(PBC%AutoW%I(1).EQ.1) THEN
+            VRRS(1,1,0,1)=PQx*VRR(1,1,1)
+            VRRS(1,1,1,1)=PQx*VRR(1,1,2)
+            VRRS(1,1,2,1)=PQx*VRR(1,1,3)
+            VRRS(1,1,3,1)=PQx*VRR(1,1,4)
+            VRRS(1,1,4,1)=PQx*VRR(1,1,5)
+            VRRS(1,1,5,1)=PQx*VRR(1,1,6)
+            ! MIC-VRR: Generating [p0|s0]^(4)
+            VRRS(2,1,4,1)=PAx*VRRS(1,1,4,1)+WPx*VRRS(1,1,5,1)+r1x2Z*VRR(1,1,5)
+            VRRS(3,1,4,1)=PAy*VRRS(1,1,4,1)+WPy*VRRS(1,1,5,1) 
+            VRRS(4,1,4,1)=PAz*VRRS(1,1,4,1)+WPz*VRRS(1,1,5,1) 
+            ! MIC-VRR: Generating [p0|s0]^(3)
+            VRRS(2,1,3,1)=PAx*VRRS(1,1,3,1)+WPx*VRRS(1,1,4,1)+r1x2Z*VRR(1,1,4)
+            VRRS(3,1,3,1)=PAy*VRRS(1,1,3,1)+WPy*VRRS(1,1,4,1) 
+            VRRS(4,1,3,1)=PAz*VRRS(1,1,3,1)+WPz*VRRS(1,1,4,1) 
+            ! MIC-VRR: Generating [p0|s0]^(2)
+            VRRS(2,1,2,1)=PAx*VRRS(1,1,2,1)+WPx*VRRS(1,1,3,1)+r1x2Z*VRR(1,1,3)
+            VRRS(3,1,2,1)=PAy*VRRS(1,1,2,1)+WPy*VRRS(1,1,3,1) 
+            VRRS(4,1,2,1)=PAz*VRRS(1,1,2,1)+WPz*VRRS(1,1,3,1) 
+            ! MIC-VRR: Generating [p0|s0]^(1)
+            VRRS(2,1,1,1)=PAx*VRRS(1,1,1,1)+WPx*VRRS(1,1,2,1)+r1x2Z*VRR(1,1,2)
+            VRRS(3,1,1,1)=PAy*VRRS(1,1,1,1)+WPy*VRRS(1,1,2,1) 
+            VRRS(4,1,1,1)=PAz*VRRS(1,1,1,1)+WPz*VRRS(1,1,2,1) 
+            ! MIC-VRR: Generating [p0|s0]^(0)
+            VRRS(2,1,0,1)=PAx*VRRS(1,1,0,1)+WPx*VRRS(1,1,1,1)+r1x2Z*VRR(1,1,1)
+            VRRS(3,1,0,1)=PAy*VRRS(1,1,0,1)+WPy*VRRS(1,1,1,1) 
+            VRRS(4,1,0,1)=PAz*VRRS(1,1,0,1)+WPz*VRRS(1,1,1,1) 
+            ! MIC-VRR: Generating [d0|s0]^(3)
+            VRRS( 5,1,3,1)=PAx*VRRS(2,1,3,1)+r1x2Z*(VRRS(1,1,3,1)-ExZpE*VRRS(1,1,4,1))+WPx*VRRS(2,1,4,1)+r1x2Z*VRR(2,1,4)
+            VRRS( 6,1,3,1)=PAx*VRRS(3,1,3,1)+WPx*VRRS(3,1,4,1)+r1x2Z*VRR(3,1,4)
+            VRRS( 7,1,3,1)=PAy*VRRS(3,1,3,1)+r1x2Z*(VRRS(1,1,3,1)-ExZpE*VRRS(1,1,4,1))+WPy*VRRS(3,1,4,1)
+            VRRS( 8,1,3,1)=PAx*VRRS(4,1,3,1)+WPx*VRRS(4,1,4,1)+r1x2Z*VRR(4,1,4)
+            VRRS( 9,1,3,1)=PAy*VRRS(4,1,3,1)+WPy*VRRS(4,1,4,1)
+            VRRS(10,1,3,1)=PAz*VRRS(4,1,3,1)+r1x2Z*(VRRS(1,1,3,1)-ExZpE*VRRS(1,1,4,1))+WPz*VRRS(4,1,4,1)
+            ! MIC-VRR: Generating [d0|s0]^(2)
+            VRRS( 5,1,2,1)=PAx*VRRS(2,1,2,1)+r1x2Z*(VRRS(1,1,2,1)-ExZpE*VRRS(1,1,3,1))+WPx*VRRS(2,1,3,1)+r1x2Z*VRR(2,1,3)
+            VRRS( 6,1,2,1)=PAx*VRRS(3,1,2,1)+WPx*VRRS(3,1,3,1)+r1x2Z*VRR(3,1,3)
+            VRRS( 7,1,2,1)=PAy*VRRS(3,1,2,1)+r1x2Z*(VRRS(1,1,2,1)-ExZpE*VRRS(1,1,3,1))+WPy*VRRS(3,1,3,1)
+            VRRS( 8,1,2,1)=PAx*VRRS(4,1,2,1)+WPx*VRRS(4,1,3,1)+r1x2Z*VRR(4,1,3)
+            VRRS( 9,1,2,1)=PAy*VRRS(4,1,2,1)+WPy*VRRS(4,1,3,1)
+            VRRS(10,1,2,1)=PAz*VRRS(4,1,2,1)+r1x2Z*(VRRS(1,1,2,1)-ExZpE*VRRS(1,1,3,1))+WPz*VRRS(4,1,3,1)
+            ! MIC-VRR: Generating [d0|s0]^(1)
+            VRRS( 5,1,1,1)=PAx*VRRS(2,1,1,1)+r1x2Z*(VRRS(1,1,1,1)-ExZpE*VRRS(1,1,2,1))+WPx*VRRS(2,1,2,1)+r1x2Z*VRR(2,1,2)
+            VRRS( 6,1,1,1)=PAx*VRRS(3,1,1,1)+WPx*VRRS(3,1,2,1)+r1x2Z*VRR(3,1,2)
+            VRRS( 7,1,1,1)=PAy*VRRS(3,1,1,1)+r1x2Z*(VRRS(1,1,1,1)-ExZpE*VRRS(1,1,2,1))+WPy*VRRS(3,1,2,1)
+            VRRS( 8,1,1,1)=PAx*VRRS(4,1,1,1)+WPx*VRRS(4,1,2,1)+r1x2Z*VRR(4,1,2)
+            VRRS( 9,1,1,1)=PAy*VRRS(4,1,1,1)+WPy*VRRS(4,1,2,1)
+            VRRS(10,1,1,1)=PAz*VRRS(4,1,1,1)+r1x2Z*(VRRS(1,1,1,1)-ExZpE*VRRS(1,1,2,1))+WPz*VRRS(4,1,2,1)
+            ! MIC-VRR: Generating [d0|s0]^(0)
+            VRRS( 5,1,0,1)=PAx*VRRS(2,1,0,1)+r1x2Z*(VRRS(1,1,0,1)-ExZpE*VRRS(1,1,1,1))+WPx*VRRS(2,1,1,1)+r1x2Z*VRR(2,1,1)
+            VRRS( 6,1,0,1)=PAx*VRRS(3,1,0,1)+WPx*VRRS(3,1,1,1)+r1x2Z*VRR(3,1,1)
+            VRRS( 7,1,0,1)=PAy*VRRS(3,1,0,1)+r1x2Z*(VRRS(1,1,0,1)-ExZpE*VRRS(1,1,1,1))+WPy*VRRS(3,1,1,1)
+            VRRS( 8,1,0,1)=PAx*VRRS(4,1,0,1)+WPx*VRRS(4,1,1,1)+r1x2Z*VRR(4,1,1)
+            VRRS( 9,1,0,1)=PAy*VRRS(4,1,0,1)+WPy*VRRS(4,1,1,1)
+            VRRS(10,1,0,1)=PAz*VRRS(4,1,0,1)+r1x2Z*(VRRS(1,1,0,1)-ExZpE*VRRS(1,1,1,1))+WPz*VRRS(4,1,1,1)
+            ! MIC-VRR: Generating [f0|s0]^(2)
+            CALL MVRRf0s0(1,56,1,VRRS(1,1,2,1),VRRS(1,1,3,1),84,4,VRR(1,1,3))
+            ! MIC-VRR: Generating [f0|s0]^(1)
+            CALL MVRRf0s0(1,56,1,VRRS(1,1,1,1),VRRS(1,1,2,1),84,4,VRR(1,1,2))
+            ! MIC-VRR: Generating [f0|s0]^(0)
+            CALL MVRRf0s0(1,56,1,VRRS(1,1,0,1),VRRS(1,1,1,1),84,4,VRR(1,1,1))
+            ! MIC-VRR: Generating [g0|s0]^(1)
+            CALL MVRRg0s0(1,56,1,VRRS(1,1,1,1),VRRS(1,1,2,1),84,4,VRR(1,1,2))
+            ! MIC-VRR: Generating [g0|s0]^(0)
+            CALL MVRRg0s0(1,56,1,VRRS(1,1,0,1),VRRS(1,1,1,1),84,4,VRR(1,1,1))
+            ! MIC-VRR: Generating [h0|s0]^(0)
+            CALL MVRRh0s0(1,56,1,VRRS(1,1,0,1),VRRS(1,1,1,1),84,4,VRR(1,1,1))
+            ENDIF
+            IF(PBC%AutoW%I(2).EQ.1) THEN
+            VRRS(1,1,0,2)=PQy*VRR(1,1,1)
+            VRRS(1,1,1,2)=PQy*VRR(1,1,2)
+            VRRS(1,1,2,2)=PQy*VRR(1,1,3)
+            VRRS(1,1,3,2)=PQy*VRR(1,1,4)
+            VRRS(1,1,4,2)=PQy*VRR(1,1,5)
+            VRRS(1,1,5,2)=PQy*VRR(1,1,6)
+            ! MIC-VRR: Generating [p0|s0]^(4)
+            VRRS(2,1,4,2)=PAx*VRRS(1,1,4,2)+WPx*VRRS(1,1,5,2)
+            VRRS(3,1,4,2)=PAy*VRRS(1,1,4,2)+WPy*VRRS(1,1,5,2)+r1x2Z*VRR(1,1,5)
+            VRRS(4,1,4,2)=PAz*VRRS(1,1,4,2)+WPz*VRRS(1,1,5,2)
+            ! MIC-VRR: Generating [p0|s0]^(3)
+            VRRS(2,1,3,2)=PAx*VRRS(1,1,3,2)+WPx*VRRS(1,1,4,2)
+            VRRS(3,1,3,2)=PAy*VRRS(1,1,3,2)+WPy*VRRS(1,1,4,2)+r1x2Z*VRR(1,1,4)
+            VRRS(4,1,3,2)=PAz*VRRS(1,1,3,2)+WPz*VRRS(1,1,4,2)
+            ! MIC-VRR: Generating [p0|s0]^(2)
+            VRRS(2,1,2,2)=PAx*VRRS(1,1,2,2)+WPx*VRRS(1,1,3,2)
+            VRRS(3,1,2,2)=PAy*VRRS(1,1,2,2)+WPy*VRRS(1,1,3,2)+r1x2Z*VRR(1,1,3)
+            VRRS(4,1,2,2)=PAz*VRRS(1,1,2,2)+WPz*VRRS(1,1,3,2)
+            ! MIC-VRR: Generating [p0|s0]^(1)
+            VRRS(2,1,1,2)=PAx*VRRS(1,1,1,2)+WPx*VRRS(1,1,2,2)
+            VRRS(3,1,1,2)=PAy*VRRS(1,1,1,2)+WPy*VRRS(1,1,2,2)+r1x2Z*VRR(1,1,2)
+            VRRS(4,1,1,2)=PAz*VRRS(1,1,1,2)+WPz*VRRS(1,1,2,2)
+            ! MIC-VRR: Generating [p0|s0]^(0)
+            VRRS(2,1,0,2)=PAx*VRRS(1,1,0,2)+WPx*VRRS(1,1,1,2)
+            VRRS(3,1,0,2)=PAy*VRRS(1,1,0,2)+WPy*VRRS(1,1,1,2)+r1x2Z*VRR(1,1,1)
+            VRRS(4,1,0,2)=PAz*VRRS(1,1,0,2)+WPz*VRRS(1,1,1,2)
+            ! MIC-VRR: Generating [d0|s0]^(3)
+            VRRS( 5,1,3,2)=PAx*VRRS(2,1,3,2)+r1x2Z*(VRRS(1,1,3,2)-ExZpE*VRRS(1,1,4,2))+WPx*VRRS(2,1,4,2)
+            VRRS( 6,1,3,2)=PAx*VRRS(3,1,3,2)+WPx*VRRS(3,1,4,2)
+            VRRS( 7,1,3,2)=PAy*VRRS(3,1,3,2)+r1x2Z*(VRRS(1,1,3,2)-ExZpE*VRRS(1,1,4,2))+WPy*VRRS(3,1,4,2)+r1x2Z*VRR(3,1,4)
+            VRRS( 8,1,3,2)=PAx*VRRS(4,1,3,2)+WPx*VRRS(4,1,4,2)
+            VRRS( 9,1,3,2)=PAy*VRRS(4,1,3,2)+WPy*VRRS(4,1,4,2)+r1x2Z*VRR(4,1,4)
+            VRRS(10,1,3,2)=PAz*VRRS(4,1,3,2)+r1x2Z*(VRRS(1,1,3,2)-ExZpE*VRRS(1,1,4,2))+WPz*VRRS(4,1,4,2)
+            ! MIC-VRR: Generating [d0|s0]^(2)
+            VRRS( 5,1,2,2)=PAx*VRRS(2,1,2,2)+r1x2Z*(VRRS(1,1,2,2)-ExZpE*VRRS(1,1,3,2))+WPx*VRRS(2,1,3,2)
+            VRRS( 6,1,2,2)=PAx*VRRS(3,1,2,2)+WPx*VRRS(3,1,3,2)
+            VRRS( 7,1,2,2)=PAy*VRRS(3,1,2,2)+r1x2Z*(VRRS(1,1,2,2)-ExZpE*VRRS(1,1,3,2))+WPy*VRRS(3,1,3,2)+r1x2Z*VRR(3,1,3)
+            VRRS( 8,1,2,2)=PAx*VRRS(4,1,2,2)+WPx*VRRS(4,1,3,2)
+            VRRS( 9,1,2,2)=PAy*VRRS(4,1,2,2)+WPy*VRRS(4,1,3,2)+r1x2Z*VRR(4,1,3)
+            VRRS(10,1,2,2)=PAz*VRRS(4,1,2,2)+r1x2Z*(VRRS(1,1,2,2)-ExZpE*VRRS(1,1,3,2))+WPz*VRRS(4,1,3,2)
+            ! MIC-VRR: Generating [d0|s0]^(1)
+            VRRS( 5,1,1,2)=PAx*VRRS(2,1,1,2)+r1x2Z*(VRRS(1,1,1,2)-ExZpE*VRRS(1,1,2,2))+WPx*VRRS(2,1,2,2)
+            VRRS( 6,1,1,2)=PAx*VRRS(3,1,1,2)+WPx*VRRS(3,1,2,2)
+            VRRS( 7,1,1,2)=PAy*VRRS(3,1,1,2)+r1x2Z*(VRRS(1,1,1,2)-ExZpE*VRRS(1,1,2,2))+WPy*VRRS(3,1,2,2)+r1x2Z*VRR(3,1,2)
+            VRRS( 8,1,1,2)=PAx*VRRS(4,1,1,2)+WPx*VRRS(4,1,2,2)
+            VRRS( 9,1,1,2)=PAy*VRRS(4,1,1,2)+WPy*VRRS(4,1,2,2)+r1x2Z*VRR(4,1,2)
+            VRRS(10,1,1,2)=PAz*VRRS(4,1,1,2)+r1x2Z*(VRRS(1,1,1,2)-ExZpE*VRRS(1,1,2,2))+WPz*VRRS(4,1,2,2)
+            ! MIC-VRR: Generating [d0|s0]^(0)
+            VRRS( 5,1,0,2)=PAx*VRRS(2,1,0,2)+r1x2Z*(VRRS(1,1,0,2)-ExZpE*VRRS(1,1,1,2))+WPx*VRRS(2,1,1,2)
+            VRRS( 6,1,0,2)=PAx*VRRS(3,1,0,2)+WPx*VRRS(3,1,1,2)
+            VRRS( 7,1,0,2)=PAy*VRRS(3,1,0,2)+r1x2Z*(VRRS(1,1,0,2)-ExZpE*VRRS(1,1,1,2))+WPy*VRRS(3,1,1,2)+r1x2Z*VRR(3,1,1)
+            VRRS( 8,1,0,2)=PAx*VRRS(4,1,0,2)+WPx*VRRS(4,1,1,2)
+            VRRS( 9,1,0,2)=PAy*VRRS(4,1,0,2)+WPy*VRRS(4,1,1,2)+r1x2Z*VRR(4,1,1)
+            VRRS(10,1,0,2)=PAz*VRRS(4,1,0,2)+r1x2Z*(VRRS(1,1,0,2)-ExZpE*VRRS(1,1,1,2))+WPz*VRRS(4,1,1,2)
+            ! MIC-VRR: Generating [f0|s0]^(2)
+            CALL MVRRf0s0(2,56,1,VRRS(1,1,2,2),VRRS(1,1,3,2),84,4,VRR(1,1,3))
+            ! MIC-VRR: Generating [f0|s0]^(1)
+            CALL MVRRf0s0(2,56,1,VRRS(1,1,1,2),VRRS(1,1,2,2),84,4,VRR(1,1,2))
+            ! MIC-VRR: Generating [f0|s0]^(0)
+            CALL MVRRf0s0(2,56,1,VRRS(1,1,0,2),VRRS(1,1,1,2),84,4,VRR(1,1,1))
+            ! MIC-VRR: Generating [g0|s0]^(1)
+            CALL MVRRg0s0(2,56,1,VRRS(1,1,1,2),VRRS(1,1,2,2),84,4,VRR(1,1,2))
+            ! MIC-VRR: Generating [g0|s0]^(0)
+            CALL MVRRg0s0(2,56,1,VRRS(1,1,0,2),VRRS(1,1,1,2),84,4,VRR(1,1,1))
+            ! MIC-VRR: Generating [h0|s0]^(0)
+            CALL MVRRh0s0(2,56,1,VRRS(1,1,0,2),VRRS(1,1,1,2),84,4,VRR(1,1,1))
+            ENDIF
+            IF(PBC%AutoW%I(3).EQ.1) THEN
+            VRRS(1,1,0,3)=PQz*VRR(1,1,1)
+            VRRS(1,1,1,3)=PQz*VRR(1,1,2)
+            VRRS(1,1,2,3)=PQz*VRR(1,1,3)
+            VRRS(1,1,3,3)=PQz*VRR(1,1,4)
+            VRRS(1,1,4,3)=PQz*VRR(1,1,5)
+            VRRS(1,1,5,3)=PQz*VRR(1,1,6)
+            ! MIC-VRR: Generating [p0|s0]^(4)
+            VRRS(2,1,4,3)=PAx*VRRS(1,1,4,3)+WPx*VRRS(1,1,5,3)
+            VRRS(3,1,4,3)=PAy*VRRS(1,1,4,3)+WPy*VRRS(1,1,5,3)
+            VRRS(4,1,4,3)=PAz*VRRS(1,1,4,3)+WPz*VRRS(1,1,5,3)+r1x2Z*VRR(1,1,5)
+            ! MIC-VRR: Generating [p0|s0]^(3)
+            VRRS(2,1,3,3)=PAx*VRRS(1,1,3,3)+WPx*VRRS(1,1,4,3)
+            VRRS(3,1,3,3)=PAy*VRRS(1,1,3,3)+WPy*VRRS(1,1,4,3)
+            VRRS(4,1,3,3)=PAz*VRRS(1,1,3,3)+WPz*VRRS(1,1,4,3)+r1x2Z*VRR(1,1,4)
+            ! MIC-VRR: Generating [p0|s0]^(2)
+            VRRS(2,1,2,3)=PAx*VRRS(1,1,2,3)+WPx*VRRS(1,1,3,3)
+            VRRS(3,1,2,3)=PAy*VRRS(1,1,2,3)+WPy*VRRS(1,1,3,3)
+            VRRS(4,1,2,3)=PAz*VRRS(1,1,2,3)+WPz*VRRS(1,1,3,3)+r1x2Z*VRR(1,1,3)
+            ! MIC-VRR: Generating [p0|s0]^(1)
+            VRRS(2,1,1,3)=PAx*VRRS(1,1,1,3)+WPx*VRRS(1,1,2,3)
+            VRRS(3,1,1,3)=PAy*VRRS(1,1,1,3)+WPy*VRRS(1,1,2,3)
+            VRRS(4,1,1,3)=PAz*VRRS(1,1,1,3)+WPz*VRRS(1,1,2,3)+r1x2Z*VRR(1,1,2)
+            ! MIC-VRR: Generating [p0|s0]^(0)
+            VRRS(2,1,0,3)=PAx*VRRS(1,1,0,3)+WPx*VRRS(1,1,1,3)
+            VRRS(3,1,0,3)=PAy*VRRS(1,1,0,3)+WPy*VRRS(1,1,1,3)
+            VRRS(4,1,0,3)=PAz*VRRS(1,1,0,3)+WPz*VRRS(1,1,1,3)+r1x2Z*VRR(1,1,1)
+            ! MIC-VRR: Generating [d0|s0]^(3)
+            VRRS( 5,1,3,3)=PAx*VRRS(2,1,3,3)+r1x2Z*(VRRS(1,1,3,3)-ExZpE*VRRS(1,1,4,3))+WPx*VRRS(2,1,4,3)
+            VRRS( 6,1,3,3)=PAx*VRRS(3,1,3,3)+WPx*VRRS(3,1,4,3)
+            VRRS( 7,1,3,3)=PAy*VRRS(3,1,3,3)+r1x2Z*(VRRS(1,1,3,3)-ExZpE*VRRS(1,1,4,3))+WPy*VRRS(3,1,4,3)
+            VRRS( 8,1,3,3)=PAx*VRRS(4,1,3,3)+WPx*VRRS(4,1,4,3)
+            VRRS( 9,1,3,3)=PAy*VRRS(4,1,3,3)+WPy*VRRS(4,1,4,3)
+            VRRS(10,1,3,3)=PAz*VRRS(4,1,3,3)+r1x2Z*(VRRS(1,1,3,3)-ExZpE*VRRS(1,1,4,3))+WPz*VRRS(4,1,4,3)+r1x2Z*VRR(4,1,4)
+            ! MIC-VRR: Generating [d0|s0]^(2)
+            VRRS( 5,1,2,3)=PAx*VRRS(2,1,2,3)+r1x2Z*(VRRS(1,1,2,3)-ExZpE*VRRS(1,1,3,3))+WPx*VRRS(2,1,3,3)
+            VRRS( 6,1,2,3)=PAx*VRRS(3,1,2,3)+WPx*VRRS(3,1,3,3)
+            VRRS( 7,1,2,3)=PAy*VRRS(3,1,2,3)+r1x2Z*(VRRS(1,1,2,3)-ExZpE*VRRS(1,1,3,3))+WPy*VRRS(3,1,3,3)
+            VRRS( 8,1,2,3)=PAx*VRRS(4,1,2,3)+WPx*VRRS(4,1,3,3)
+            VRRS( 9,1,2,3)=PAy*VRRS(4,1,2,3)+WPy*VRRS(4,1,3,3)
+            VRRS(10,1,2,3)=PAz*VRRS(4,1,2,3)+r1x2Z*(VRRS(1,1,2,3)-ExZpE*VRRS(1,1,3,3))+WPz*VRRS(4,1,3,3)+r1x2Z*VRR(4,1,3)
+            ! MIC-VRR: Generating [d0|s0]^(1)
+            VRRS( 5,1,1,3)=PAx*VRRS(2,1,1,3)+r1x2Z*(VRRS(1,1,1,3)-ExZpE*VRRS(1,1,2,3))+WPx*VRRS(2,1,2,3)
+            VRRS( 6,1,1,3)=PAx*VRRS(3,1,1,3)+WPx*VRRS(3,1,2,3)
+            VRRS( 7,1,1,3)=PAy*VRRS(3,1,1,3)+r1x2Z*(VRRS(1,1,1,3)-ExZpE*VRRS(1,1,2,3))+WPy*VRRS(3,1,2,3)
+            VRRS( 8,1,1,3)=PAx*VRRS(4,1,1,3)+WPx*VRRS(4,1,2,3)
+            VRRS( 9,1,1,3)=PAy*VRRS(4,1,1,3)+WPy*VRRS(4,1,2,3)
+            VRRS(10,1,1,3)=PAz*VRRS(4,1,1,3)+r1x2Z*(VRRS(1,1,1,3)-ExZpE*VRRS(1,1,2,3))+WPz*VRRS(4,1,2,3)+r1x2Z*VRR(4,1,2)
+            ! MIC-VRR: Generating [d0|s0]^(0)
+            VRRS( 5,1,0,3)=PAx*VRRS(2,1,0,3)+r1x2Z*(VRRS(1,1,0,3)-ExZpE*VRRS(1,1,1,3))+WPx*VRRS(2,1,1,3)
+            VRRS( 6,1,0,3)=PAx*VRRS(3,1,0,3)+WPx*VRRS(3,1,1,3)
+            VRRS( 7,1,0,3)=PAy*VRRS(3,1,0,3)+r1x2Z*(VRRS(1,1,0,3)-ExZpE*VRRS(1,1,1,3))+WPy*VRRS(3,1,1,3)
+            VRRS( 8,1,0,3)=PAx*VRRS(4,1,0,3)+WPx*VRRS(4,1,1,3)
+            VRRS( 9,1,0,3)=PAy*VRRS(4,1,0,3)+WPy*VRRS(4,1,1,3)
+            VRRS(10,1,0,3)=PAz*VRRS(4,1,0,3)+r1x2Z*(VRRS(1,1,0,3)-ExZpE*VRRS(1,1,1,3))+WPz*VRRS(4,1,1,3)+r1x2Z*VRR(4,1,1)
+            ! MIC-VRR: Generating [f0|s0]^(2)
+            CALL MVRRf0s0(3,56,1,VRRS(1,1,2,3),VRRS(1,1,3,3),84,4,VRR(1,1,3))
+            ! MIC-VRR: Generating [f0|s0]^(1)
+            CALL MVRRf0s0(3,56,1,VRRS(1,1,1,3),VRRS(1,1,2,3),84,4,VRR(1,1,2))
+            ! MIC-VRR: Generating [f0|s0]^(0)
+            CALL MVRRf0s0(3,56,1,VRRS(1,1,0,3),VRRS(1,1,1,3),84,4,VRR(1,1,1))
+            ! MIC-VRR: Generating [g0|s0]^(1)
+            CALL MVRRg0s0(3,56,1,VRRS(1,1,1,3),VRRS(1,1,2,3),84,4,VRR(1,1,2))
+            ! MIC-VRR: Generating [g0|s0]^(0)
+            CALL MVRRg0s0(3,56,1,VRRS(1,1,0,3),VRRS(1,1,1,3),84,4,VRR(1,1,1))
+            ! MIC-VRR: Generating [h0|s0]^(0)
+            CALL MVRRh0s0(3,56,1,VRRS(1,1,0,3),VRRS(1,1,1,3),84,4,VRR(1,1,1))
+            ENDIF
             ! Contracting ... 
-            CALL CNTRCTG10611(VRR,HRR,Alpha,HRRA,Beta,HRRB,Gamma,HRRC)
+            CALL CNTRCTG10611(VRR,HRR,Alpha,HRRA,Beta,HRRB,Gamma,HRRC, &
+                     & VRRS,HRRS(1,1,1,1),PQJ(1),PBC%AutoW%I(1))
          ENDDO ! (M0| loop
       ENDDO ! |N0) loop
       ! Dont need to generate (h,0|s,s)
       ! Dont need to generate (i,0|s,s)^a
       ! Dont need to generate (i,0|s,s)^b
       ! Dont need to generate (h,0|p,s)^c
+      ! Stress: No need to generate [f,0|s,s] 
       DO L=1,1
       
          !K = 1
          CDOffSet=(OC+1-1)*LDC+(OD+L-1)*LDD
          ! Generating (f',d|1,L)  and (f,d'|1,L)
          CALL BraHRR106ab(NINT,LDA,LDB,OA,OB,GOA,GOB,CDOffSet,HRR(1,1,L),&
-                          HRRA(1,1,L),HRRB(1,1,L),GRADIENTS(1,1))
+                      HRRA(1,1,L),HRRB(1,1,L),GRADIENTS(1,1),FP(1),&
+                      STRESS(1,1))
          ! Generating (f,d|1_x,L)  and (f,d|1,L_x)
-         CALL BraHRR106cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,0,HRRC(1,2,L),GRADIENTS(1,1))
+         CALL BraHRR106cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,0,&
+                      HRRC(1,2,L),GRADIENTS(1,1),FP(1),STRESS(1,1))
          ! Generating (f,d|1_y,L)  and (f,d|1,L_y)
-         CALL BraHRR106cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,1,HRRC(1,3,L),GRADIENTS(1,1))
+         CALL BraHRR106cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,1,&
+                      HRRC(1,3,L),GRADIENTS(1,1),FP(1),STRESS(1,1))
          ! Generating (f,d|1_z,L)  and (f,d|1,L_z)
-         CALL BraHRR106cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,2,HRRC(1,4,L),GRADIENTS(1,1))
+         CALL BraHRR106cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,2,&
+                      HRRC(1,4,L),GRADIENTS(1,1),FP(1),STRESS(1,1))
       ENDDO 
-    END SUBROUTINE dIntB10060101
-    SUBROUTINE CNTRCTG10611(VRR,HRR,Alpha,HRRA,Beta,HRRB,Gamma,HRRC)
+      ! Stress: Generating (f,d|s,s)^(1) 
+      DO J=1,3
+      DO I=1,3
+      IJ=3*(J-1)+I
+        DO L=1,1
+          DO K=1,1
+            CDOffSet=(OC+K-1)*LDC+(OD+L-1)*LDD 
+            CALL BraHRR106(OA,OB,LDA,LDB,CDOffSet,HRRS(1,K,L,IJ),STRESS(1,IJ))
+          ENDDO 
+        ENDDO 
+      ENDDO 
+      ENDDO 
+   END SUBROUTINE dIntB10060101
+    SUBROUTINE CNTRCTG10611(VRR,HRR,Alpha,HRRA,Beta,HRRB,Gamma,HRRC,VRRS,HRRS,PQJ,IW)
       USE DerivedTypes
       USE VScratchB
+      IMPLICIT NONE
       INTEGER :: K
       REAL(DOUBLE)  :: Alpha,Beta,Gamma
       REAL(DOUBLE), DIMENSION(56,1,1) :: HRR 
       REAL(DOUBLE), DIMENSION(84,1,1) :: HRRA,HRRB 
       REAL(DOUBLE), DIMENSION(56,4,1) :: HRRC 
       REAL(DOUBLE)  :: VRR(84,4,0:6)
+      REAL(DOUBLE)  :: VRRS(56,1,0:5,3)
+      REAL(DOUBLE)  :: HRRS(56,1,1,9),PQJ(3)
+      INTEGER :: IJ,J,I,IW(3)
       HRR(1,1,1)=HRR(1,1,1)+VRR(1,1,0)
       HRRA(1,1,1)=HRRA(1,1,1)+Alpha*VRR(1,1,0)
       HRRB(1,1,1)=HRRB(1,1,1)+Beta*VRR(1,1,0)
@@ -787,4 +1047,188 @@ SUBROUTINE dIntB10060101(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
       HRRB(83,1,1)=HRRB(83,1,1)+Beta*VRR(83,1,0)
       HRRA(84,1,1)=HRRA(84,1,1)+Alpha*VRR(84,1,0)
       HRRB(84,1,1)=HRRB(84,1,1)+Beta*VRR(84,1,0)
+      IJ=1
+      DO J=1,3
+      IF(IW(J).EQ.1) THEN
+        IF(IW(1).EQ.1) THEN
+        HRRS(1,1,1,IJ)=HRRS(1,1,1,IJ)+PQJ(J)*VRRS(1,1,0,1)
+        HRRS(2,1,1,IJ)=HRRS(2,1,1,IJ)+PQJ(J)*VRRS(2,1,0,1)
+        HRRS(3,1,1,IJ)=HRRS(3,1,1,IJ)+PQJ(J)*VRRS(3,1,0,1)
+        HRRS(4,1,1,IJ)=HRRS(4,1,1,IJ)+PQJ(J)*VRRS(4,1,0,1)
+        HRRS(5,1,1,IJ)=HRRS(5,1,1,IJ)+PQJ(J)*VRRS(5,1,0,1)
+        HRRS(6,1,1,IJ)=HRRS(6,1,1,IJ)+PQJ(J)*VRRS(6,1,0,1)
+        HRRS(7,1,1,IJ)=HRRS(7,1,1,IJ)+PQJ(J)*VRRS(7,1,0,1)
+        HRRS(8,1,1,IJ)=HRRS(8,1,1,IJ)+PQJ(J)*VRRS(8,1,0,1)
+        HRRS(9,1,1,IJ)=HRRS(9,1,1,IJ)+PQJ(J)*VRRS(9,1,0,1)
+        HRRS(10,1,1,IJ)=HRRS(10,1,1,IJ)+PQJ(J)*VRRS(10,1,0,1)
+        HRRS(11,1,1,IJ)=HRRS(11,1,1,IJ)+PQJ(J)*VRRS(11,1,0,1)
+        HRRS(12,1,1,IJ)=HRRS(12,1,1,IJ)+PQJ(J)*VRRS(12,1,0,1)
+        HRRS(13,1,1,IJ)=HRRS(13,1,1,IJ)+PQJ(J)*VRRS(13,1,0,1)
+        HRRS(14,1,1,IJ)=HRRS(14,1,1,IJ)+PQJ(J)*VRRS(14,1,0,1)
+        HRRS(15,1,1,IJ)=HRRS(15,1,1,IJ)+PQJ(J)*VRRS(15,1,0,1)
+        HRRS(16,1,1,IJ)=HRRS(16,1,1,IJ)+PQJ(J)*VRRS(16,1,0,1)
+        HRRS(17,1,1,IJ)=HRRS(17,1,1,IJ)+PQJ(J)*VRRS(17,1,0,1)
+        HRRS(18,1,1,IJ)=HRRS(18,1,1,IJ)+PQJ(J)*VRRS(18,1,0,1)
+        HRRS(19,1,1,IJ)=HRRS(19,1,1,IJ)+PQJ(J)*VRRS(19,1,0,1)
+        HRRS(20,1,1,IJ)=HRRS(20,1,1,IJ)+PQJ(J)*VRRS(20,1,0,1)
+        HRRS(21,1,1,IJ)=HRRS(21,1,1,IJ)+PQJ(J)*VRRS(21,1,0,1)
+        HRRS(22,1,1,IJ)=HRRS(22,1,1,IJ)+PQJ(J)*VRRS(22,1,0,1)
+        HRRS(23,1,1,IJ)=HRRS(23,1,1,IJ)+PQJ(J)*VRRS(23,1,0,1)
+        HRRS(24,1,1,IJ)=HRRS(24,1,1,IJ)+PQJ(J)*VRRS(24,1,0,1)
+        HRRS(25,1,1,IJ)=HRRS(25,1,1,IJ)+PQJ(J)*VRRS(25,1,0,1)
+        HRRS(26,1,1,IJ)=HRRS(26,1,1,IJ)+PQJ(J)*VRRS(26,1,0,1)
+        HRRS(27,1,1,IJ)=HRRS(27,1,1,IJ)+PQJ(J)*VRRS(27,1,0,1)
+        HRRS(28,1,1,IJ)=HRRS(28,1,1,IJ)+PQJ(J)*VRRS(28,1,0,1)
+        HRRS(29,1,1,IJ)=HRRS(29,1,1,IJ)+PQJ(J)*VRRS(29,1,0,1)
+        HRRS(30,1,1,IJ)=HRRS(30,1,1,IJ)+PQJ(J)*VRRS(30,1,0,1)
+        HRRS(31,1,1,IJ)=HRRS(31,1,1,IJ)+PQJ(J)*VRRS(31,1,0,1)
+        HRRS(32,1,1,IJ)=HRRS(32,1,1,IJ)+PQJ(J)*VRRS(32,1,0,1)
+        HRRS(33,1,1,IJ)=HRRS(33,1,1,IJ)+PQJ(J)*VRRS(33,1,0,1)
+        HRRS(34,1,1,IJ)=HRRS(34,1,1,IJ)+PQJ(J)*VRRS(34,1,0,1)
+        HRRS(35,1,1,IJ)=HRRS(35,1,1,IJ)+PQJ(J)*VRRS(35,1,0,1)
+        HRRS(36,1,1,IJ)=HRRS(36,1,1,IJ)+PQJ(J)*VRRS(36,1,0,1)
+        HRRS(37,1,1,IJ)=HRRS(37,1,1,IJ)+PQJ(J)*VRRS(37,1,0,1)
+        HRRS(38,1,1,IJ)=HRRS(38,1,1,IJ)+PQJ(J)*VRRS(38,1,0,1)
+        HRRS(39,1,1,IJ)=HRRS(39,1,1,IJ)+PQJ(J)*VRRS(39,1,0,1)
+        HRRS(40,1,1,IJ)=HRRS(40,1,1,IJ)+PQJ(J)*VRRS(40,1,0,1)
+        HRRS(41,1,1,IJ)=HRRS(41,1,1,IJ)+PQJ(J)*VRRS(41,1,0,1)
+        HRRS(42,1,1,IJ)=HRRS(42,1,1,IJ)+PQJ(J)*VRRS(42,1,0,1)
+        HRRS(43,1,1,IJ)=HRRS(43,1,1,IJ)+PQJ(J)*VRRS(43,1,0,1)
+        HRRS(44,1,1,IJ)=HRRS(44,1,1,IJ)+PQJ(J)*VRRS(44,1,0,1)
+        HRRS(45,1,1,IJ)=HRRS(45,1,1,IJ)+PQJ(J)*VRRS(45,1,0,1)
+        HRRS(46,1,1,IJ)=HRRS(46,1,1,IJ)+PQJ(J)*VRRS(46,1,0,1)
+        HRRS(47,1,1,IJ)=HRRS(47,1,1,IJ)+PQJ(J)*VRRS(47,1,0,1)
+        HRRS(48,1,1,IJ)=HRRS(48,1,1,IJ)+PQJ(J)*VRRS(48,1,0,1)
+        HRRS(49,1,1,IJ)=HRRS(49,1,1,IJ)+PQJ(J)*VRRS(49,1,0,1)
+        HRRS(50,1,1,IJ)=HRRS(50,1,1,IJ)+PQJ(J)*VRRS(50,1,0,1)
+        HRRS(51,1,1,IJ)=HRRS(51,1,1,IJ)+PQJ(J)*VRRS(51,1,0,1)
+        HRRS(52,1,1,IJ)=HRRS(52,1,1,IJ)+PQJ(J)*VRRS(52,1,0,1)
+        HRRS(53,1,1,IJ)=HRRS(53,1,1,IJ)+PQJ(J)*VRRS(53,1,0,1)
+        HRRS(54,1,1,IJ)=HRRS(54,1,1,IJ)+PQJ(J)*VRRS(54,1,0,1)
+        HRRS(55,1,1,IJ)=HRRS(55,1,1,IJ)+PQJ(J)*VRRS(55,1,0,1)
+        HRRS(56,1,1,IJ)=HRRS(56,1,1,IJ)+PQJ(J)*VRRS(56,1,0,1)
+        ENDIF
+        IJ=IJ+1
+        IF(IW(2).EQ.1) THEN
+        HRRS(1,1,1,IJ)=HRRS(1,1,1,IJ)+PQJ(J)*VRRS(1,1,0,2)
+        HRRS(2,1,1,IJ)=HRRS(2,1,1,IJ)+PQJ(J)*VRRS(2,1,0,2)
+        HRRS(3,1,1,IJ)=HRRS(3,1,1,IJ)+PQJ(J)*VRRS(3,1,0,2)
+        HRRS(4,1,1,IJ)=HRRS(4,1,1,IJ)+PQJ(J)*VRRS(4,1,0,2)
+        HRRS(5,1,1,IJ)=HRRS(5,1,1,IJ)+PQJ(J)*VRRS(5,1,0,2)
+        HRRS(6,1,1,IJ)=HRRS(6,1,1,IJ)+PQJ(J)*VRRS(6,1,0,2)
+        HRRS(7,1,1,IJ)=HRRS(7,1,1,IJ)+PQJ(J)*VRRS(7,1,0,2)
+        HRRS(8,1,1,IJ)=HRRS(8,1,1,IJ)+PQJ(J)*VRRS(8,1,0,2)
+        HRRS(9,1,1,IJ)=HRRS(9,1,1,IJ)+PQJ(J)*VRRS(9,1,0,2)
+        HRRS(10,1,1,IJ)=HRRS(10,1,1,IJ)+PQJ(J)*VRRS(10,1,0,2)
+        HRRS(11,1,1,IJ)=HRRS(11,1,1,IJ)+PQJ(J)*VRRS(11,1,0,2)
+        HRRS(12,1,1,IJ)=HRRS(12,1,1,IJ)+PQJ(J)*VRRS(12,1,0,2)
+        HRRS(13,1,1,IJ)=HRRS(13,1,1,IJ)+PQJ(J)*VRRS(13,1,0,2)
+        HRRS(14,1,1,IJ)=HRRS(14,1,1,IJ)+PQJ(J)*VRRS(14,1,0,2)
+        HRRS(15,1,1,IJ)=HRRS(15,1,1,IJ)+PQJ(J)*VRRS(15,1,0,2)
+        HRRS(16,1,1,IJ)=HRRS(16,1,1,IJ)+PQJ(J)*VRRS(16,1,0,2)
+        HRRS(17,1,1,IJ)=HRRS(17,1,1,IJ)+PQJ(J)*VRRS(17,1,0,2)
+        HRRS(18,1,1,IJ)=HRRS(18,1,1,IJ)+PQJ(J)*VRRS(18,1,0,2)
+        HRRS(19,1,1,IJ)=HRRS(19,1,1,IJ)+PQJ(J)*VRRS(19,1,0,2)
+        HRRS(20,1,1,IJ)=HRRS(20,1,1,IJ)+PQJ(J)*VRRS(20,1,0,2)
+        HRRS(21,1,1,IJ)=HRRS(21,1,1,IJ)+PQJ(J)*VRRS(21,1,0,2)
+        HRRS(22,1,1,IJ)=HRRS(22,1,1,IJ)+PQJ(J)*VRRS(22,1,0,2)
+        HRRS(23,1,1,IJ)=HRRS(23,1,1,IJ)+PQJ(J)*VRRS(23,1,0,2)
+        HRRS(24,1,1,IJ)=HRRS(24,1,1,IJ)+PQJ(J)*VRRS(24,1,0,2)
+        HRRS(25,1,1,IJ)=HRRS(25,1,1,IJ)+PQJ(J)*VRRS(25,1,0,2)
+        HRRS(26,1,1,IJ)=HRRS(26,1,1,IJ)+PQJ(J)*VRRS(26,1,0,2)
+        HRRS(27,1,1,IJ)=HRRS(27,1,1,IJ)+PQJ(J)*VRRS(27,1,0,2)
+        HRRS(28,1,1,IJ)=HRRS(28,1,1,IJ)+PQJ(J)*VRRS(28,1,0,2)
+        HRRS(29,1,1,IJ)=HRRS(29,1,1,IJ)+PQJ(J)*VRRS(29,1,0,2)
+        HRRS(30,1,1,IJ)=HRRS(30,1,1,IJ)+PQJ(J)*VRRS(30,1,0,2)
+        HRRS(31,1,1,IJ)=HRRS(31,1,1,IJ)+PQJ(J)*VRRS(31,1,0,2)
+        HRRS(32,1,1,IJ)=HRRS(32,1,1,IJ)+PQJ(J)*VRRS(32,1,0,2)
+        HRRS(33,1,1,IJ)=HRRS(33,1,1,IJ)+PQJ(J)*VRRS(33,1,0,2)
+        HRRS(34,1,1,IJ)=HRRS(34,1,1,IJ)+PQJ(J)*VRRS(34,1,0,2)
+        HRRS(35,1,1,IJ)=HRRS(35,1,1,IJ)+PQJ(J)*VRRS(35,1,0,2)
+        HRRS(36,1,1,IJ)=HRRS(36,1,1,IJ)+PQJ(J)*VRRS(36,1,0,2)
+        HRRS(37,1,1,IJ)=HRRS(37,1,1,IJ)+PQJ(J)*VRRS(37,1,0,2)
+        HRRS(38,1,1,IJ)=HRRS(38,1,1,IJ)+PQJ(J)*VRRS(38,1,0,2)
+        HRRS(39,1,1,IJ)=HRRS(39,1,1,IJ)+PQJ(J)*VRRS(39,1,0,2)
+        HRRS(40,1,1,IJ)=HRRS(40,1,1,IJ)+PQJ(J)*VRRS(40,1,0,2)
+        HRRS(41,1,1,IJ)=HRRS(41,1,1,IJ)+PQJ(J)*VRRS(41,1,0,2)
+        HRRS(42,1,1,IJ)=HRRS(42,1,1,IJ)+PQJ(J)*VRRS(42,1,0,2)
+        HRRS(43,1,1,IJ)=HRRS(43,1,1,IJ)+PQJ(J)*VRRS(43,1,0,2)
+        HRRS(44,1,1,IJ)=HRRS(44,1,1,IJ)+PQJ(J)*VRRS(44,1,0,2)
+        HRRS(45,1,1,IJ)=HRRS(45,1,1,IJ)+PQJ(J)*VRRS(45,1,0,2)
+        HRRS(46,1,1,IJ)=HRRS(46,1,1,IJ)+PQJ(J)*VRRS(46,1,0,2)
+        HRRS(47,1,1,IJ)=HRRS(47,1,1,IJ)+PQJ(J)*VRRS(47,1,0,2)
+        HRRS(48,1,1,IJ)=HRRS(48,1,1,IJ)+PQJ(J)*VRRS(48,1,0,2)
+        HRRS(49,1,1,IJ)=HRRS(49,1,1,IJ)+PQJ(J)*VRRS(49,1,0,2)
+        HRRS(50,1,1,IJ)=HRRS(50,1,1,IJ)+PQJ(J)*VRRS(50,1,0,2)
+        HRRS(51,1,1,IJ)=HRRS(51,1,1,IJ)+PQJ(J)*VRRS(51,1,0,2)
+        HRRS(52,1,1,IJ)=HRRS(52,1,1,IJ)+PQJ(J)*VRRS(52,1,0,2)
+        HRRS(53,1,1,IJ)=HRRS(53,1,1,IJ)+PQJ(J)*VRRS(53,1,0,2)
+        HRRS(54,1,1,IJ)=HRRS(54,1,1,IJ)+PQJ(J)*VRRS(54,1,0,2)
+        HRRS(55,1,1,IJ)=HRRS(55,1,1,IJ)+PQJ(J)*VRRS(55,1,0,2)
+        HRRS(56,1,1,IJ)=HRRS(56,1,1,IJ)+PQJ(J)*VRRS(56,1,0,2)
+        ENDIF
+        IJ=IJ+1
+        IF(IW(3).EQ.1) THEN
+        HRRS(1,1,1,IJ)=HRRS(1,1,1,IJ)+PQJ(J)*VRRS(1,1,0,3)
+        HRRS(2,1,1,IJ)=HRRS(2,1,1,IJ)+PQJ(J)*VRRS(2,1,0,3)
+        HRRS(3,1,1,IJ)=HRRS(3,1,1,IJ)+PQJ(J)*VRRS(3,1,0,3)
+        HRRS(4,1,1,IJ)=HRRS(4,1,1,IJ)+PQJ(J)*VRRS(4,1,0,3)
+        HRRS(5,1,1,IJ)=HRRS(5,1,1,IJ)+PQJ(J)*VRRS(5,1,0,3)
+        HRRS(6,1,1,IJ)=HRRS(6,1,1,IJ)+PQJ(J)*VRRS(6,1,0,3)
+        HRRS(7,1,1,IJ)=HRRS(7,1,1,IJ)+PQJ(J)*VRRS(7,1,0,3)
+        HRRS(8,1,1,IJ)=HRRS(8,1,1,IJ)+PQJ(J)*VRRS(8,1,0,3)
+        HRRS(9,1,1,IJ)=HRRS(9,1,1,IJ)+PQJ(J)*VRRS(9,1,0,3)
+        HRRS(10,1,1,IJ)=HRRS(10,1,1,IJ)+PQJ(J)*VRRS(10,1,0,3)
+        HRRS(11,1,1,IJ)=HRRS(11,1,1,IJ)+PQJ(J)*VRRS(11,1,0,3)
+        HRRS(12,1,1,IJ)=HRRS(12,1,1,IJ)+PQJ(J)*VRRS(12,1,0,3)
+        HRRS(13,1,1,IJ)=HRRS(13,1,1,IJ)+PQJ(J)*VRRS(13,1,0,3)
+        HRRS(14,1,1,IJ)=HRRS(14,1,1,IJ)+PQJ(J)*VRRS(14,1,0,3)
+        HRRS(15,1,1,IJ)=HRRS(15,1,1,IJ)+PQJ(J)*VRRS(15,1,0,3)
+        HRRS(16,1,1,IJ)=HRRS(16,1,1,IJ)+PQJ(J)*VRRS(16,1,0,3)
+        HRRS(17,1,1,IJ)=HRRS(17,1,1,IJ)+PQJ(J)*VRRS(17,1,0,3)
+        HRRS(18,1,1,IJ)=HRRS(18,1,1,IJ)+PQJ(J)*VRRS(18,1,0,3)
+        HRRS(19,1,1,IJ)=HRRS(19,1,1,IJ)+PQJ(J)*VRRS(19,1,0,3)
+        HRRS(20,1,1,IJ)=HRRS(20,1,1,IJ)+PQJ(J)*VRRS(20,1,0,3)
+        HRRS(21,1,1,IJ)=HRRS(21,1,1,IJ)+PQJ(J)*VRRS(21,1,0,3)
+        HRRS(22,1,1,IJ)=HRRS(22,1,1,IJ)+PQJ(J)*VRRS(22,1,0,3)
+        HRRS(23,1,1,IJ)=HRRS(23,1,1,IJ)+PQJ(J)*VRRS(23,1,0,3)
+        HRRS(24,1,1,IJ)=HRRS(24,1,1,IJ)+PQJ(J)*VRRS(24,1,0,3)
+        HRRS(25,1,1,IJ)=HRRS(25,1,1,IJ)+PQJ(J)*VRRS(25,1,0,3)
+        HRRS(26,1,1,IJ)=HRRS(26,1,1,IJ)+PQJ(J)*VRRS(26,1,0,3)
+        HRRS(27,1,1,IJ)=HRRS(27,1,1,IJ)+PQJ(J)*VRRS(27,1,0,3)
+        HRRS(28,1,1,IJ)=HRRS(28,1,1,IJ)+PQJ(J)*VRRS(28,1,0,3)
+        HRRS(29,1,1,IJ)=HRRS(29,1,1,IJ)+PQJ(J)*VRRS(29,1,0,3)
+        HRRS(30,1,1,IJ)=HRRS(30,1,1,IJ)+PQJ(J)*VRRS(30,1,0,3)
+        HRRS(31,1,1,IJ)=HRRS(31,1,1,IJ)+PQJ(J)*VRRS(31,1,0,3)
+        HRRS(32,1,1,IJ)=HRRS(32,1,1,IJ)+PQJ(J)*VRRS(32,1,0,3)
+        HRRS(33,1,1,IJ)=HRRS(33,1,1,IJ)+PQJ(J)*VRRS(33,1,0,3)
+        HRRS(34,1,1,IJ)=HRRS(34,1,1,IJ)+PQJ(J)*VRRS(34,1,0,3)
+        HRRS(35,1,1,IJ)=HRRS(35,1,1,IJ)+PQJ(J)*VRRS(35,1,0,3)
+        HRRS(36,1,1,IJ)=HRRS(36,1,1,IJ)+PQJ(J)*VRRS(36,1,0,3)
+        HRRS(37,1,1,IJ)=HRRS(37,1,1,IJ)+PQJ(J)*VRRS(37,1,0,3)
+        HRRS(38,1,1,IJ)=HRRS(38,1,1,IJ)+PQJ(J)*VRRS(38,1,0,3)
+        HRRS(39,1,1,IJ)=HRRS(39,1,1,IJ)+PQJ(J)*VRRS(39,1,0,3)
+        HRRS(40,1,1,IJ)=HRRS(40,1,1,IJ)+PQJ(J)*VRRS(40,1,0,3)
+        HRRS(41,1,1,IJ)=HRRS(41,1,1,IJ)+PQJ(J)*VRRS(41,1,0,3)
+        HRRS(42,1,1,IJ)=HRRS(42,1,1,IJ)+PQJ(J)*VRRS(42,1,0,3)
+        HRRS(43,1,1,IJ)=HRRS(43,1,1,IJ)+PQJ(J)*VRRS(43,1,0,3)
+        HRRS(44,1,1,IJ)=HRRS(44,1,1,IJ)+PQJ(J)*VRRS(44,1,0,3)
+        HRRS(45,1,1,IJ)=HRRS(45,1,1,IJ)+PQJ(J)*VRRS(45,1,0,3)
+        HRRS(46,1,1,IJ)=HRRS(46,1,1,IJ)+PQJ(J)*VRRS(46,1,0,3)
+        HRRS(47,1,1,IJ)=HRRS(47,1,1,IJ)+PQJ(J)*VRRS(47,1,0,3)
+        HRRS(48,1,1,IJ)=HRRS(48,1,1,IJ)+PQJ(J)*VRRS(48,1,0,3)
+        HRRS(49,1,1,IJ)=HRRS(49,1,1,IJ)+PQJ(J)*VRRS(49,1,0,3)
+        HRRS(50,1,1,IJ)=HRRS(50,1,1,IJ)+PQJ(J)*VRRS(50,1,0,3)
+        HRRS(51,1,1,IJ)=HRRS(51,1,1,IJ)+PQJ(J)*VRRS(51,1,0,3)
+        HRRS(52,1,1,IJ)=HRRS(52,1,1,IJ)+PQJ(J)*VRRS(52,1,0,3)
+        HRRS(53,1,1,IJ)=HRRS(53,1,1,IJ)+PQJ(J)*VRRS(53,1,0,3)
+        HRRS(54,1,1,IJ)=HRRS(54,1,1,IJ)+PQJ(J)*VRRS(54,1,0,3)
+        HRRS(55,1,1,IJ)=HRRS(55,1,1,IJ)+PQJ(J)*VRRS(55,1,0,3)
+        HRRS(56,1,1,IJ)=HRRS(56,1,1,IJ)+PQJ(J)*VRRS(56,1,0,3)
+        ENDIF
+        IJ=IJ+1
+      ELSE
+        IJ=IJ+3
+      ENDIF
+      ENDDO !J
     END SUBROUTINE CNTRCTG10611
