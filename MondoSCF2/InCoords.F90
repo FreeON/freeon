@@ -5700,7 +5700,8 @@ return
          ! Check for ionic systems
          !
          IF(Bond%N==0) THEN 
-           Fact=1.5D0
+           Fact=1.50D0
+           CALL Delete(Bond)
            CritRad%D=Fact*CritRad%D
          ELSE
            EXIT
@@ -6988,7 +6989,7 @@ return
        WRITE(*,*) 'NUMBER OF FRAGMENTS OBSERVED= ',II
        WRITE(Out,*) 'NUMBER OF FRAGMENTS OBSERVED= ',II
      ENDIF
-     K=(II*II-II)/2
+     K=II*(II-1)
      CALL New(BondF,K)
      K=0
      DO I=1,II
