@@ -3,8 +3,8 @@
 \newcommand{\Bulk}{B_0}
 \newcommand{\BPrime}{{B'_0}}
 
-%\documentclass[prb,aps,nobibnotes,twocolumn,doublespace,twocolumngrid,superbib]{revtex4}
-\documentclass[prb,aps,nobibnotes,superbib,preprint]{revtex4}
+\documentclass[prb,aps,nobibnotes,twocolumn,doublespace,twocolumngrid,superbib]{revtex4}
+%\documentclass[prb,aps,nobibnotes,superbib,preprint]{revtex4}
 
 \usepackage{graphicx}
 \usepackage{amsfonts}
@@ -26,7 +26,7 @@ pentaerythritol tetranitrate (PETN)}
 
 \affiliation{ Theoretical Division, Los Alamos
               National Laboratory,\\ Los Alamos, New Mexico 87545}
-\date{August 1, 2003}
+\date{Oct 29, 2003}
 
 \begin{abstract}
 All-electron calculations of the hydrostatic compression of
@@ -110,7 +110,7 @@ al.}~\cite{Sorescu_1999v103A, Sorescu_1999v103} They used an
 intermolecular potential function developed in their laboratory
 in conjunction with a rigid-molecule 
 approximation for the molecular structure. Agreement to within one percent 
-of experiment was obtained for the crystal lattice parameters at 300~K, although
+of experiment was obtained for the crystal lattice parameters at 298~K, although
 the calculated thermal expansion coefficient was three times smaller than the
 experimental value.  Sorescu {\it et al.}~\cite{Sorescu_1999v103}
 predicted linear compressibilities that were in reasonable agreement
@@ -257,7 +257,8 @@ to cryogenic temperatures.
 
 Calculated intramolecular coordinates and selected intermolecular
 distances are compared to the experimental results of Conant {\it et
-al.}~\cite{Conant_1979} in Table~\ref{tab:table2}.  The predicted
+al.}~\cite{Conant_1979} in Table~\ref{tab:table2} (see also 
+Fig.~\ref{fig:petn_2d}).  The predicted
 molecular geometry is in excellent agreement with experiment.  The
 12\% discrepancy in the C-H distances is expected, since we are
 comparing to x-ray data.  Otherwise, most of the intramolecular
@@ -311,7 +312,8 @@ angles in deuterated PETN between zero and 4.28~GPa.  We do not see any
 evidence for this in our calculations, based on the four compressions in
 our study that correspond to this pressure interval.)
 Figure~\ref{fig:intramolecular}(c) depicts the pressure response of 
-the three sets of intermolecular distances that are below 3 \AA\/ at zero
+the three sets of intermolecular van der Waals contacts that are below 
+3~\AA\/ at zero
 pressure; each of these corresponds to an O$\cdot\cdot\cdot$H
 interaction.  The two longer distances decrease essentially linearly
 over the entire interval of compression studied, whereas the shorter
@@ -407,7 +409,7 @@ $\BPrime=6.4$--$11.3$.  Sorescu {\it et al.}~\cite{Sorescu_1999v103}
 reported $\Bulk=14.1$~GPa and $\BPrime=10.4 $ for a fit of their
 rigid-molecule simulation results to the Murnaghan equation of state
 [Eq.~(\ref{eq:Murna})].  Values of $\Bulk=8.8$~GPa and $\BPrime=9.9$
-can be extracted from the results presented by Olinger {\it et
+can be deduced from the results presented by Olinger {\it et
 al.}~\cite{Olinger_1976} based on the experimental isotherm. Note that
 the latter are revised values of $\Bulk$ and $\BPrime$, and are
 different from the ones initially published in
@@ -425,14 +427,17 @@ can be transformed to an isothermal bulk modulus $\Bulk^t$ using the
 relation $\Bulk^t/\Bulk^s=C_V/C_P$, where $C_V$ and $C_P$ are specific
 heats at constant volume and constant pressure, respectively.  Using
 values for $C_V$ and $C_P$ recommended in Ref.~\cite{Olinger_1976}
-gives the result $\Bulk=9.1$~GPa.
+gives the result $\Bulk^t=9.1$~GPa, which we regard as the most accurate 
+value for the zero pressure isothermal bulk modulus of PETN at room 
+temperature.
 
 It is unsurprising that the values of $\Bulk$ estimated from the zero
 Kelvin isotherm are larger than the values obtained from
 room-temperature data.  Likewise, the fact that the value of $\Bulk$
-reported by Sorescu and Thompson is larger than experiment even though
+reported by Sorescu {\it et al.}~\cite{Sorescu_1999v103}
+is larger than experiment even though
 it is based on a simulated room-temperature isotherm can be
-tentatively attributed to the use of a rigid-molecule simulation
+tentatively attributed to the use of a rigid molecule simulation
 protocol.
 
 \section{Conclusions}
@@ -459,7 +464,7 @@ obtained by application of three different equation of state fitting
 forms to the calculated zero Kelvin isotherm are in reasonably good
 agreement with values obtained by application of those same fitting
 forms to the experimental data.  In both cases, the choice of fitting
-form can change the predicted bulk modulus by $\approx$10--25\%.  The
+form can change the predicted bulk modulus by $\sim$10--25\%.  The
 average theoretical bulk modulus, which corresponds to zero Kelvin,
 is 32\% larger than the corresponding average experimental value based
 on the room-temperature isotherm.  The success of these all-electron
@@ -474,90 +479,116 @@ U.S. Department of Energy under Contract No.~W-7405-ENG-36 and the
 ASCI project.  Most work was performed on the computing resources at
 the Advanced Computing Laboratory of Los Alamos National Laboratory,
 Los Alamos, NM 87545.  We thank Alejandro H.~Strachan for many
-fruitful discussions.
+fruitful discussions and Jerry Dick for useful comments on the 
+manuscript.
 \end{acknowledgments}
 
 \bibliographystyle{apsrmp} \bibliography{mondo}
 
 
 \begin{table}[p]
+\caption{Equilibrium lattice parameters and unit cell volumes for PETN.}
 \begin{center}
-\begin{tabular}{llll}
+\begin{tabular}{lllll}
 \hline\hline
-$a$(\AA) & $c$(\AA) & $V$(\AA$^3$) & Source \\
+$a$(\AA) & $c$(\AA) & $V$(\AA$^3$) & Source & Comment\\
 \hline
-9.425  & 6.758  &  600.3  & This work \\
-9.383  & 6.711  &  590.8  & Olinger {\it et al.}~\cite{Olinger_1975v62}\\
-9.3776 & 6.7075 &  589.9  & Conant {\it et al.}~\cite{Conant_1979} \\
-9.3348 & 6.6500 &  579.47 & Sorescu {\it et al.}~\cite{Sorescu_1999v103} (NPT-MD, 293K) \\
-9.35   & 6.67   &  583    & Bunte and Sun~\cite{Bunte_2000v104} (NPT-MD, 293K) \\
+9.425  & 6.758  &  600.3  & This work & PBE/6-31G**\\
+9.383  & 6.711  &  590.8  & Olinger {\it et al.}~\cite{Olinger_1975v62} 
+& X-ray diffraction, $\sim$~298~K\footnote{Room-temperature measurement; 
+precise temperature unspecified.}\\
+9.3776 & 6.7075 &  589.9  & Conant {\it et al.}~\cite{Conant_1979} &
+X-ray diffraction, $\sim$~298~K$^a$\\
+9.3348 & 6.6500 &  579.47 & Sorescu {\it et al.}~\cite{Sorescu_1999v103} &
+NPT-MD, 298~K, rigid molecules \\
+9.35   & 6.67   &  583    & Bunte and Sun~\cite{Bunte_2000v104} &
+ NPT-MD, 293~K \\
 \hline\hline
 \end{tabular}
 \end{center}
-\caption{Equilibrium lattice parameters and unit cell volumes for PETN.
-}
 \label{tab:table1}
 \end{table}
 
 
 \begin{table}[p]
+\caption{Comparison between experiment and PBE/6-31G** MondoSCF calculation
+of selected intra- and intermolecular parameters for
+PETN crystal (refer to Fig.~\ref{fig:petn_2d}).  
+Units are~\AA\ and degrees.  Numbers in parentheses
+are percent errors relative to experiment.}
 \begin{center}
 \begin{tabular}{llllll}
 \hline\hline
 Source & C-C & C-H & C-O & O-N & N=O  \\
 This work & 1.532 (0.1) & 1.098 (12.0) & 1.444 (0.1) &  1.437 (2.4) & 1.219 (1.9) \\
-Ref.~\cite{Conant_1979} &  1.531   &   0.98  & 1.446  &  1.403 &   1.196 \\
+Expt.~\cite{Conant_1979} &  1.531   &   0.98  & 1.446  &  1.403 &   1.196 \\
 \hline
 \\
 Source  &  CCH   &        HCH     &      CCO    &       HCO \\
 This work & 111.0 ($-$1.1)  & 108.1  (1.5) &  106.6 ($-$0.1) & 110.1 (0.5) \\
-Ref.~\cite{Conant_1979} &  112.2    &  106.5  &  106.7   & 109.6 \\
+Expt.~\cite{Conant_1979} &  112.2    &  106.5  &  106.7   & 109.6 \\
 \hline
 \\
-Source   &  CON     &       ONO1   &        ONO2     &      ONO \\
+Source   &  CON     &       ONO$^a$   &        ONO$^b$     &      ONO \\
 This work&  111.8 ($-$1.2) &  117.4 ($-$0.3)&  111.9 ($-$0.1)&  130.7 (0.3)\\
-Ref.~\cite{Conant_1979} &    113.2   &       117.7   &       112.0   &       130.0\\
+Expt.~\cite{Conant_1979} &    113.2   &       117.7   &       112.0   &       130.0\\
 \hline\\
-Source &    CCON    &       CONO1   &       CONO2    &   CCC1\\
-This work &  169.9 (0.3) &   3.4 (0.0) &     176.6 ($-$0.1) & 108.1 (0.4)\\
-Ref.~\cite{Conant_1979} &   169.4   &       3.4     &       176.8        & 107.7\\
+Source &    C$^a$CC$^a$ & C$^a$CC$^b$ & CCON    &       CONO$^a$   &       CONO$^b$ \\
+This work &  108.1 (0.4) & 112.2 ($-$0.4)&  169.9 (0.3) &   3.4 (0.0) &     176.6 ($-$0.1) \\
+Expt.~\cite{Conant_1979} & 107.7 & 112.7 &   169.4   &       3.4     &       176.8        \\
 \hline\\
-Source &  CCC2 &  O$\cdot\cdot\cdot$H   &       O$\cdot\cdot\cdot$H   &       O$\cdot\cdot\cdot$H\\
-This work &  112.2 ($-$0.4) & 2.396 ($-$3.5) &   2.779 ($-$0.7) & 2.898 (0.1)\\
-Ref.~\cite{Conant_1979} &   112.7 & 2.482   &       2.798   &       2.894\\
+Source &   O$\cdot\cdot\cdot$H   &       O$\cdot\cdot\cdot$H   &       O$\cdot\cdot\cdot$H\\
+This work &  2.396 ($-$3.5) &   2.779 ($-$0.7) & 2.898 (0.1)\\
+Expt.~\cite{Conant_1979} &   2.482   &       2.798   &       2.894\\
 \hline\hline
 \end{tabular}
 \end{center}
-\caption{Comparison of selected intra- and intermolecular parameters for
-PETN crystal.  Units are \AA\ and degrees.  Numbers in parentheses
-are percent errors relative to experiment.
-}
 \label{tab:table2}
 \end{table}
 
 \begin{table}[p]
+\caption{Calculated and measured bulk moduli $\Bulk$ and pressure
+derivative $\BPrime$ for PETN.}
 \begin{center}
 \begin{tabular}{lllll}
 \hline\hline
-$\Bulk$(GPa) &   $\BPrime$   &   Source  &    Fitting form &      Comment \\
+$\Bulk$(GPa) &   $\BPrime$   &   Data source  
+&    Fitting form &      Comment \\
 \hline
-15.8 & 5.3 & This work &  Eq.~(\ref{eq:Murna}) & For $P \le 10.45$~GPa \\
-14.5 & 6.7 & This work & Eq.~(\ref{eq:BM}) & For $P \le 10.45$~GPa \\
-16.0 & 5.2 & This work & Eq.~(\ref{eq:cs}) & For $P \le 10.45$~GPa \\
-11.7 & 6.8 & Olinger {\it et al.}~\cite{Olinger_1975v62} & Eq.~(\ref{eq:Murna}) \\
-9.4 & 11.3 & Olinger {\it et al.}~\cite{Olinger_1975v62} & Eq.~(\ref{eq:BM}) \\
-12.2 & 6.4 & Olinger {\it et al.}~\cite{Olinger_1975v62} & Eq.~(\ref{eq:cs}) \\
-8.8 & 9.9 &   Olinger {\it et al.}~\cite{Olinger_1976}&   &                  \\
+15.8 & 5.3 & This work &  Eq.~(\ref{eq:Murna}) 
+& Fit to PBE/6-31G** results for $P \le 10.45$~GPa \\
+14.5 & 6.7 & This work & Eq.~(\ref{eq:BM}) 
+& Fit to PBE/6-31G** results for $P \le 10.45$~GPa \\
+16.0 & 5.2 & This work & Eq.~(\ref{eq:cs}) 
+& Fit to PBE/6-31G** results for $P \le 10.45$~GPa \\
+11.7 & 6.8 & Olinger {\it et al.}~\cite{Olinger_1975v62} 
+& Eq.~(\ref{eq:Murna}) 
+& Fit to experimental isotherm\\
+9.4 & 11.3 & Olinger {\it et al.}~\cite{Olinger_1975v62} & Eq.~(\ref{eq:BM})
+& Fit to experimental isotherm \\
+12.2 & 6.4 & Olinger {\it et al.}~\cite{Olinger_1975v62} & Eq.~(\ref{eq:cs}) 
+& Fit to experimental isotherm\\
+8.8 & 9.9 &   Olinger {\it et al.}~\cite{Olinger_1976}&   & 
+Deduced from Ref.~\cite{Olinger_1976}, Table~II and Eq.~(18) \\
  9.1 & --- &   Winey and Gupta~\cite{Winey_2001v90} &     & Calculated from isentropic value \\
-14.1 &10.4 &Sorescu {\it et al.}~\cite{Sorescu_1999v103} & Eq.~(\ref{eq:Murna})&         NPT-MD at 298K\\
+14.1 &10.4 &Sorescu {\it et al.}~\cite{Sorescu_1999v103} & Eq.~(\ref{eq:Murna})
+& Taken from Ref.~\cite{Sorescu_1999v103}, NPT-MD at 298K\\
 \hline\hline
 \end{tabular}
 \end{center}
-\caption{Calculated and measured bulk moduli $\Bulk$ and pressure
-derivative $\BPrime$ for PETN.
-}
 \label{tab:table3}
 \end{table}
+
+
+\begin{figure}
+\resizebox*{3.5in}{!}{\includegraphics[clip]{petn_2d.eps}}
+\caption{
+Chemical structure of PETN.  Superscripts ``a'' and ``b'' are used
+in Table~\ref{tab:table2} to distinguish geometrically distinct
+internal coordinates for comparison to experiment.
+}
+\label{fig:petn_2d}
+\end{figure}
 
 \begin{figure}
 \resizebox*{3.5in}{!}{\includegraphics[clip]{VRatio_EDiff_Press.eps}}
@@ -591,13 +622,12 @@ Ref.~\cite{Olinger_1975v62}.  }
 \resizebox*{3.5in}{!}{\includegraphics[clip]{VRatio_Bond_Angle_CloseContact.eps}}
 \caption{(a) Variation of bond lengths in PETN as a function of hydrostatic 
 compression.  Circle: C-C; square: C-O; diamond: O-N; up-triangle and
-cross: N-O; down-triangle and plus: C-H.  (b) Variation of
+cross: N=O; down-triangle and plus: C-H.  (b) Variation of
 three-center angles. Circle: C-C-C; square: C-O-N; diamond: C-C-H;
 up-triangle: H-C-O; cross: C-C-O. (c) Compression of intermolecular
+van der Waals 
 contacts whose value is less than 3 \AA\/ at zero pressure.  All three
 correspond to O$\cdot\cdot\cdot$H contacts.}
 \label{fig:intramolecular}
 \end{figure}
 \end{document}
-
-
