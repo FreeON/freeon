@@ -179,9 +179,14 @@ MODULE ParseInPut
                Ctrl%OldInfo=TRIM(MONDO_PWD)//Ctrl%OldInfo
             ENDIF
             CALL Put(Ctrl%OldInfo,'oldinfo')
-         ELSE
+         ELSEIF(OptKeyQ(Inp,GUESS_OPTION,GUESS_SUPER))THEN
             Ctrl%SuperP=.TRUE.
             Ctrl%Rest=.FALSE.
+         ELSEIF(OptKeyQ(Inp,GUESS_OPTION,GUESS_CORE))THEN
+            Ctrl%SuperP=.FALSE.
+            Ctrl%Rest=.FALSE.
+         ELSE
+            CALL MondoHalt(PRSE_ERROR,'Unrecognised guess')
          ENDIF
          CLOSE(UNIT=Inp,STATUS='KEEP')
 !----------------------------------------------------------------------------

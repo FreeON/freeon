@@ -73,24 +73,12 @@ MODULE DrvSCFs
 !-------------------------------------------------------------------------------
 
       IF(CCyc==0.AND.CBas==PBas.AND.CGeo/=1)THEN
-!	  .AND.Ctrl%Extrap>EXTRAP_GEOM_RSTRT)THEN
-         ! Density projection is now the default guess for new geometries
-!         IF(Ctrl%Extrap==EXTRAP_GEOM_PRJCT)THEN
-!           Projection of density matrix between geometries
-            CALL LogSCF(Ctrl%Current,'Geometry projection from configuration #' &
-                                   //TRIM(PrvGeom)//' to configuration# ' &
-                                   //TRIM(CurGeom)//'.')
-!           Create density from last SCF 
-            CtrlVect=SetCtrlVect(Ctrl,'Project')
-!         ELSEIF(Ctrl%Extrap==EXTRAP_GEOM_INTRP)THEN
-!           Extrapolation of density matrix between geometries
-!            CALL LogSCF(Ctrl%Current,'Geometry extrapolation from configuration #' &
-!                                   //TRIM(PrvGeom)//' to configuration# ' &
-!                                   //TRIM(CurGeom)//'.')
-!           Create density from last SCFs DM (ICyc+1)
-!            Ctrl%Previous(1)=Ctrl%Previous(1)+1
-!            CtrlVect=SetCtrlVect(Ctrl,'Extrapolate')
-!         ENDIF
+         ! Projection of density matrix between geometries
+         CALL LogSCF(Ctrl%Current,'Geometry projection from configuration #' &
+              //TRIM(PrvGeom)//' to configuration# ' &
+              //TRIM(CurGeom)//'.')
+         ! Create density from last SCF 
+         CtrlVect=SetCtrlVect(Ctrl,'Project')
          CALL Invoke('P2Use',CtrlVect,MPIRun_O=.TRUE.)
          CALL Invoke('MakeRho',CtrlVect)
 #ifdef PARALLEL
@@ -109,6 +97,28 @@ MODULE DrvSCFs
          CALL Invoke('ParaMakeRho',CtrlVect,MPIRun_O=.TRUE.)
 #endif
          Ctrl%Rest=.FALSE.
+     ELSEIF(Ctrl%SuperP)THEN
+!        Start up density from atomic superposition in diagonal minimial basis 
+         CALL LogSCF(Ctrl%Current,' Density guess from superposition of AOs.')
+!        Create density from guess
+         CtrlVect=SetCtrlVect(Ctrl,'DensitySuperposition')
+         CALL Invoke('P2Use',CtrlVect,MPIRun_O=.TRUE.)
+         CALL Invoke('MakeRho',CtrlVect)
+#ifdef PARALLEL
+         CALL Invoke('ParaMakeRho',CtrlVect,MPIRun_O=.TRUE.)
+#endif
+         Ctrl%SuperP=.FALSE.
+      ELSEIF(CCyc==0.AND.CBas==1.AND.CGeo==1.AND.  &
+             .NOT.Ctrl%SuperP.AND..NOT.Ctrl%Rest)THEN
+!        Start up density from atomic superposition in diagonal minimial basis 
+         CALL LogSCF(Ctrl%Current,' Core guess.')
+         CtrlVect=SetCtrlVect(Ctrl,'GuessEqCore')
+         CALL Invoke('P2Use',CtrlVect,MPIRun_O=.TRUE.)
+!        Create density from guess
+         CALL Invoke('MakeRho',CtrlVect)
+#ifdef PARALLEL
+         CALL Invoke('ParaMakeRho',CtrlVect,MPIRun_O=.TRUE.)
+#endif
       ELSEIF(CCyc==0.AND.CBas/=PBas)THEN
 !        Basis set switch
          CALL LogSCF(Ctrl%Current,'Switching basis sets from ' &
@@ -118,17 +128,6 @@ MODULE DrvSCFs
          Ctrl%Previous(1)=Ctrl%Previous(1)+1
          CtrlVect=SetCtrlVect(Ctrl,'BasisSetSwitch')
          CALL Invoke('MakeRho',CtrlVect)
-     ELSEIF(CCyc==0.AND.CBas==1.AND.CGeo==1)THEN
-!        Start up density from atomic superposition in diagonal minimial basis 
-         CALL LogSCF(Ctrl%Current,' Density guess from superposition of AOs.')
-!        Create density from guess
-         CtrlVect=SetCtrlVect(Ctrl,'DensitySuperposition')
-         CALL Invoke('P2Use',CtrlVect,MPIRun_O=.TRUE.)
-         CALL Invoke('MakeRho',CtrlVect)
-#ifdef PARALLEL
-         write(*,*) 'calling ParaMakeRho...'
-         CALL Invoke('ParaMakeRho',CtrlVect,MPIRun_O=.TRUE.)
-#endif
       ELSEIF(Ctrl%InkFok)THEN
 !        First do a full density build 
          CALL LogSCF(Ctrl%Current,'Full density build followed by delta density build.',.TRUE.)
@@ -142,7 +141,6 @@ MODULE DrvSCFs
          CtrlVect=SetCtrlVect(Ctrl,'Direct')
          CALL Invoke('MakeRho',CtrlVect)
 #ifdef PARALLEL
-         write(*,*) 'calling ParaMakeRho...'
          CALL Invoke('ParaMakeRho',CtrlVect,MPIRun_O=.TRUE.)
 #endif
       ENDIF
@@ -164,8 +162,10 @@ MODULE DrvSCFs
       DoDIIS=CCyc>0
       Modl=Ctrl%Model(CBas)
       CALL Invoke('QCTC',CtrlVect,MPIRun_O=.TRUE.)
-      IF(HasDFT(Modl))CALL Invoke('HiCu',CtrlVect,MPIRun_O=.TRUE.)
-      IF(HasHF(Modl)) CALL Invoke('ONX',CtrlVect)
+      IF(CtrlVect(2)/='GuessEqCore')THEN
+         IF(HasDFT(Modl))CALL Invoke('HiCu',CtrlVect,MPIRun_O=.TRUE.)
+         IF(HasHF(Modl)) CALL Invoke('ONX',CtrlVect)
+      ENDIF
       CALL Invoke('FBuild',CtrlVect,MPIRun_O=.TRUE.)
       IF(DoDIIS) &
       CALL Invoke('DIIS',CtrlVect,MPIRun_O=.TRUE.)

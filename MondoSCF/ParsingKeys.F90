@@ -61,6 +61,7 @@ MODULE ParsingKeys
 !  <Options.Guess=>
    CHARACTER(LEN=5),  PARAMETER :: GUESS_OPTION   ='Guess'
    CHARACTER(LEN=8),  PARAMETER :: GUESS_SUPER    ='SuperPos'
+   CHARACTER(LEN=4),  PARAMETER :: GUESS_CORE     ='Core'
    CHARACTER(LEN=7),  PARAMETER :: GUESS_RESTART  ='Restart'
    CHARACTER(LEN=7),  PARAMETER :: RESTART_INFO   ='HDFFile'
 !  <Options.InkFok=>
