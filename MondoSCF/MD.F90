@@ -59,6 +59,8 @@ MODULE MD
     TYPE(SCFControls)               :: Ctrl
     TYPE(MDState)                   :: MDS
     TYPE(CRDS)                      :: GM  
+
+    INTEGER :: ISet
 !
 !------------------------------------
 ! Miscellaneous setup
@@ -134,6 +136,17 @@ MODULE MD
 ! more MDS variables which depend on GM
 !------------------------------------
 !
+    ! Do SCFs possibly over a preliminary number
+    ! of basis sets, required untill parallel
+    ! makerho works on restart -- MC
+    DO ISet=1,Ctrl%NSet-1
+       Ctrl%Current=(/0,ISet,1/)
+       CALL SetGlobalCtrlIndecies(Ctrl)           
+       CALL OneSCF(Ctrl)
+    ENDDO
+    Ctrl%Current=(/0,Ctrl%NSet,1/)
+    CALL SetGlobalCtrlIndecies(Ctrl)           
+
     Call OneSCF(Ctrl)
     Call Get(MDS%E_POT,'Etot',StatsToChar(Ctrl%Current))
     MDS%E_KIN = computeKE(GM)
@@ -195,17 +208,18 @@ MODULE MD
 !   Open Files
 !--------------------------------------------------------
 !
-    Call OpenRESOUT(Ctrl%MDC%RESTRT_OUT,MDS%TITLE,Ctrl%MDC%CLOBBER)
-    Call OpenCRD(Ctrl%MDC%CRD_NAME,MDS%TITLE,Ctrl%MDC%CLOBBER)
-    Call OpenVEL(Ctrl%MDC%VEL_NAME,MDS%TITLE,Ctrl%MDC%CLOBBER)
-    Call OpenENE(Ctrl%MDC%ENE_NAME,MDS%TITLE,Ctrl%MDC%CLOBBER)
+
+
+
+
 !
 !--------------------------------------------------------
 !   compute forces
 !--------------------------------------------------------
 !
+    Ctrl%Project=.TRUE.
     write(6,*)'Computing force once at start'    ! debug
-    Call OneSCF(Ctrl)
+!    Call OneSCF(Ctrl)
     Call Forces(Ctrl)
     Call Get(F,'GradE',Tag_O=IntToChar(IGeo))
     F%D = -F%D    ! Hartrees per Bohr
@@ -259,6 +273,7 @@ MODULE MD
        Ctrl%Current(3)=IGeo
        Call Put(GMnew,Tag_O=IntToChar(IGeo))  
        Call SetGlobalCtrlIndecies(Ctrl)
+
 !
 !      compute force at t+dt
 !
@@ -309,17 +324,29 @@ MODULE MD
        MDS%TEMPERATURE = computeTinstant(Ctrl,GM)
        MDS%DE_TOT = MDS%E_TOT - MDS%E_TOT_START
 !
-!      output
+!      output  CHANGED BY MC TO FLUSH AT EACH CYCLE...
 !
-       if ( MOD(STEP,Ctrl%MDC%CRDfreq) .EQ. 0) &
-            Call WriteCRD(GM,Ctrl)
-       if ( MOD(STEP,Ctrl%MDC%VELfreq) .EQ. 0) &
-            Call WriteVEL(GM)
-       if ( MOD(STEP,Ctrl%MDC%ENEfreq) .EQ. 0) &
-            Call WriteENE(GM,Ctrl,MDS)
-       if ( MOD(STEP,Ctrl%MDC%RESfreq) .EQ. 0) &
-            Call WriteRESOUT(Ctrl,MDS,GM)
-!
+       if ( MOD(STEP,Ctrl%MDC%CRDfreq) .EQ. 0)THEN
+          Call OpenCRD(Ctrl%MDC%CRD_NAME,MDS%TITLE,Ctrl%MDC%CLOBBER)
+          Call WriteCRD(GM,Ctrl)
+          CALL CloseCRD
+       ENDIF
+       if ( MOD(STEP,Ctrl%MDC%VELfreq) .EQ. 0)THEN
+          Call OpenVEL(Ctrl%MDC%VEL_NAME,MDS%TITLE,Ctrl%MDC%CLOBBER)
+          Call WriteVEL(GM)
+          Call CloseVEL
+       ENDIF
+       if ( MOD(STEP,Ctrl%MDC%ENEfreq) .EQ. 0)THEN
+          Call OpenENE(Ctrl%MDC%ENE_NAME,MDS%TITLE,Ctrl%MDC%CLOBBER)
+          Call WriteENE(GM,Ctrl,MDS)
+          Call CloseENE
+       ENDIF
+       if ( MOD(STEP,Ctrl%MDC%RESfreq) .EQ. 0)THEN
+          Call OpenRESOUT(Ctrl%MDC%RESTRT_OUT,MDS%TITLE,Ctrl%MDC%CLOBBER)
+          Call WriteRESOUT(Ctrl,MDS,GM)
+          Call CloseRESOUT
+       ENDIF
+       !
 !      update GM structures
 !
        Call Get(GM,Tag_O=IntToChar(IGeo)) 
@@ -334,10 +361,9 @@ MODULE MD
 !   cleanup
 !--------------------------------------------------------
 !
-    Call CloseCRD
-    Call CloseVEL
-    Call CloseENE
-    Call CloseRESOUT
+
+
+
     Call Delete(F)
 !
 !--------------------------------------------------------

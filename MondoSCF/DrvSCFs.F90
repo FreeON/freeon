@@ -72,7 +72,7 @@ MODULE DrvSCFs
       LOGICAL,PARAMETER    :: DensityProject=.FALSE.
 !-------------------------------------------------------------------------------
 
-      IF(CCyc==0.AND.CBas==PBas.AND.CGeo/=1)THEN
+      IF(CCyc==0.AND.CBas==PBas.AND.CGeo/=1.OR.Ctrl%Project.AND.CCyc==0)THEN
          ! Projection of density matrix between geometries
          CALL LogSCF(Ctrl%Current,'Geometry projection from configuration #' &
               //TRIM(PrvGeom)//' to configuration# ' &
@@ -128,6 +128,9 @@ MODULE DrvSCFs
          Ctrl%Previous(1)=Ctrl%Previous(1)+1
          CtrlVect=SetCtrlVect(Ctrl,'BasisSetSwitch')
          CALL Invoke('MakeRho',CtrlVect)
+#ifdef PARALLEL
+         CALL Invoke('ParaMakeRho',CtrlVect,MPIRun_O=.TRUE.)
+#endif
       ELSEIF(Ctrl%InkFok)THEN
 !        First do a full density build 
          CALL LogSCF(Ctrl%Current,'Full density build followed by delta density build.',.TRUE.)
@@ -212,8 +215,7 @@ MODULE DrvSCFs
 #ifdef PERIODIC
       CALL LogSCF(Current,'Peridic Far-Field Tensor',.TRUE.)
       CtrlVect=SetCtrlVect(Ctrl,'MakingPFFT')
-      !! CALL Invoke('MakePFFT',CtrlVect,MPIRun_O=.TRUE.)
-      CALL Invoke('MakePFFT',CtrlVect)
+      CALL Invoke('MakePFFT',CtrlVect)!,MPIRun_O=.TRUE.)
 #endif
       CALL LogSCF(Current,'One-electron matrices.',.TRUE.)
       CtrlVect=SetCtrlVect(Ctrl,'OneElectron')
@@ -572,8 +574,7 @@ MODULE DrvSCFs
 
 #ifdef PERIODIC
        CtrlVect=SetCtrlVect(Ctrl,'MakingPFFT')
-       !! CALL Invoke('MakePFFT',CtrlVect,MPIRun_O=.TRUE.)
-       CALL Invoke('MakePFFT',CtrlVect)
+       CALL Invoke('MakePFFT',CtrlVect)!,MPIRun_O=.TRUE.)
 #endif
 
        IF(CalcMMForce) THEN

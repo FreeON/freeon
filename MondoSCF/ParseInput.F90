@@ -45,7 +45,7 @@ MODULE ParseInPut
 !
 !        Read comand line, environement variables, create file names, init files etc
          CALL ParseCmndLine(Ctrl) 
-         CALL OpenHDF(InfFile)
+         HDF_CurrentID=OpenHDF(InfFile)
 #ifdef MMech
          CALL ParseMech(Ctrl)
          Call InitMMech()
@@ -83,7 +83,7 @@ MODULE ParseInPut
 !
          CALL ParseThresholds(Ctrl)
 !
-      CALL CloseHDF()
+      CALL CloseHDF(HDF_CurrentID)
 !
       END SUBROUTINE ParseInp
 !============================================================================
@@ -163,8 +163,8 @@ MODULE ParseInPut
 !        Set SCF and InfoFile names
          Ctrl%Info=InfFile
          Ctrl%Name=TRIM(SCF_NAME)
-         CALL InitHDF(Ctrl%Info)
-         CALL OpenHDF(Ctrl%Info)
+         HDF_CurrentID=InitHDF(Ctrl%Info)
+         HDF_CurrentID=OpenHDF(Ctrl%Info)
 !----------------------------------------------------------------------------
 !        Check for guess, restart. Initialize HDF file
 !
@@ -307,14 +307,14 @@ MODULE ParseInPut
 !----------------------------------------------------------------------------
 !       Tidy up 
 !
-         CALL CloseHDF()
+         CALL CloseHDF(HDF_CurrentID)
          CALL Delete(Args)
 !
          IF(Ctrl%Rest)THEN
             CALL New(Stat,3)
-            CALL OpenHDF(Ctrl%OldInfo)
+            HDF_CurrentID=OpenHDF(Ctrl%OldInfo)
             CALL Get(Stat,'current')
-            CALL CloseHDF()
+            CALL CloseHDF(HDF_CurrentID)
             Ctrl%Previous=Stat%I
             CALL Delete(Stat)
          ENDIF
@@ -339,14 +339,14 @@ MODULE ParseInPut
         WRITE(Out,*)'Current HDF file :: ',TRIM(Ctrl%Info)
         IF(Ctrl%Rest)THEN
            WRITE(Out,*)'Restart HDF file :: ',TRIM(Ctrl%OldInfo)
-           CALL OpenHDF(Ctrl%OldInfo)
+           HDF_CurrentID=OpenHDF(Ctrl%OldInfo)
            Cur=IntToChar(Ctrl%Previous(2))
            CALL Get(RestAccL,'SCFAccuracy',Cur)
            CALL Get(RestMeth,'SCFMethod',Cur)
            CALL Get(RestModl,'ModelChemistry',Cur)
            CALL Get(BName,'bsetname',Cur)
-           CALL CloseHDF()
-           CALL OpenHDF(InfFile)
+           CALL CloseHDF(HDF_CurrentID)
+           HDF_CurrentID=OpenHDF(InfFile)
            Cur=IntToChar(Ctrl%Previous(3)) 
            Mssg='Restart using '//TRIM(BName)//'/'//TRIM(FunctionalName(RestModl)) &
                 //' density and coordinates from previous geometry #'//TRIM(Cur)
@@ -572,13 +572,12 @@ MODULE ParseInPut
 !
          ! If restart, use previous geometry
          IF(Ctrl%Rest)THEN
-            CALL OpenHDF(Ctrl%OldInfo)
+            HDF_CurrentID=OpenHDF(Ctrl%OldInfo)
             CALL New(GM)
             CALL Get(GM,Tag_O=IntToChar(Ctrl%Previous(3)))
-            CALL CloseHDF()
-            CALL OpenHDF(InfFile)
+            CALL CloseHDF(HDF_CurrentID)
+            HDF_CurrentID=OpenHDF(InfFile)
             CALL Put(GM,Tag_O="1")
-!           CALL CloseHDF() 
             NAtoms=GM%NAtms
             CALL Delete(GM)
             CLOSE(Inp,STATUS='KEEP')
@@ -2810,7 +2809,7 @@ END SUBROUTINE ParsePeriodic
 !       Variables for Namelist input
 !
         INTEGER                         :: IOerror
-        CHARACTER(LEN=DEFAULT_CHR_LEN)  :: INPUT_NAME
+        CHARACTER(LEN=DEFAULT_CHR_LEN)  :: INPUT_NAME,Mssg
 	INTEGER                         :: CRDfreq,VELfreq,ENEfreq,RESfreq,MAX_STEPS
 	REAL(DOUBLE)                    :: DT,TEMP0,TEMP,PRES,TTAU,PTAU,TRANSfreq,ROTATfreq
         LOGICAL                         :: REM_TRANS,REM_ROTAT,AtomWrap,CLOBBER
@@ -2828,7 +2827,7 @@ END SUBROUTINE ParsePeriodic
         VELfreq    = 1                                  ! freq to write velocity file
         ENEfreq    = 1                                  ! freq to write energy file
         RESfreq    = 1                                  ! freq to write restart
-        MAX_STEPS  = 50                                 ! # of integration steps
+        MAX_STEPS  = 150                                ! # of integration steps
         DT         = 0.5D0                              ! timstep in femtoseconds
         TEMP0      = 0.0D0                              ! 0 Kelvin starting T 
         TEMP       = 300.0D0                            ! 300 Kelvin set T
@@ -2845,15 +2844,15 @@ END SUBROUTINE ParsePeriodic
         VEL_NAME   = 'vel'                              ! file to dump velocities to
         ENE_NAME   = 'ene'                              ! file to dump energies to
         AtomWrap   = .TRUE.                             ! wrap coordinates dumped to crd file
-        CLOBBER    = .FALSE.                            ! don't overwrite existing MD files
+        CLOBBER    = .TRUE.                             ! don't overwrite existing MD files
 !
 ! * * * * * * * * * * * * * * * *
 ! Read Namelist Input
 ! * * * * * * * * * * * * * * * *
 !
-        Open(INP_UNIT,FILE="MDinputs")
-        Read(INP_UNIT,NML=MDinputs)
-        Close(INP_UNIT)
+!        Open(INP_UNIT,FILE="MDinputs")
+!        Read(INP_UNIT,NML=MDinputs)
+!        Close(INP_UNIT)
 !
 ! * * * * * * * * * * * * * * * *
 ! Copy Namelist Inputs to Ctrl
@@ -2892,19 +2891,36 @@ END SUBROUTINE ParsePeriodic
         write(6,'(A80)')&
     "--------------------------------------------------------------------------------"
 !        write(6,NML=MDinputs)
+!,
 !
-	write(6,'(A12,I12,(4X),A12,F12.6)')"MAX_STEPS  =",MAX_STEPS,"DT         =",DT
-	write(6,'(2(A12,I12,(4X)))')"CRDfreq    =",CRDfreq,"VELfreq    =",VELfreq
-        write(6,'(2(A12,I12,(4x)))')"ENEfreq    =",ENEfreq,"RESfreq    =",RESfreq
-	write(6,'(3(A12,X,A12,(3X)))')"CRD_NAME   =",CRD_NAME, "VEL_NAME   =",VEL_NAME,&
-                                "ENE_NAME   =",ENE_NAME
-	write(6,'(A12,X,A12,(3X),A12,X,A12)')"RESTRT_IN  =",RESTRT_IN,"RESTRT_OUT =",RESTRT_OUT
-        write(6,'(A12,F12.6,(4X),A12,F12.6,(4X),A12,F12.6)')"TEMP0      =",TEMP0,&
-                        "TEMP       =",TEMP,"TTAU       =",TTAU
-        write(6,'(A12,F12.6,(4X),A12,F12.6)')"PRES       =",PRES,"PTAU       =",PTAU	
+        Mssg="MAX_STEPS  = "//TRIM(IntToChar(MAX_STEPS))//", DT = "//TRIM(DblToMedmChar(DT))
+	write(6,*)TRIM(Mssg)
+        Mssg="CRDfreq = "//TRIM(IntToChar(CRDfreq))//", VELfreq = "//TRIM(IntToChar(VELfreq))
+        write(6,*)TRIM(Mssg)
+        Mssg="ENEfreq = "//TRIM(IntToChar(ENEfreq))//", RESfreq = "//TRIM(IntToChar(RESfreq))
+        write(6,*)TRIM(Mssg)
+	Mssg="CRD_NAME = "//TRIM(CRD_NAME)//", VEL_NAME = "//TRIM(VEL_NAME)//", ENE_NAME = "//TRIM(ENE_NAME)
+        write(6,*)TRIM(Mssg)
+	Mssg="RESTRT_IN = "//TRIM(RESTRT_IN)//"RESTRT_OUT ="//TRIM(RESTRT_OUT)
+        write(6,*)TRIM(Mssg)
+        Mssg="TEMP0 = "//TRIM(DblToMedmChar(TEMP0))//", TEMP = "//TRIM(DblToMedmChar(TEMP))//", TTAU = "//TRIM(DblToMedmChar(TTAU))
+        write(6,*)TRIM(Mssg)
+        Mssg=" PRES = "//TRIM(DblToMedmChar(PRES))//", PTAU = "//TRIM(DblToMedmChar(PTAU))	
+        write(6,*)TRIM(Mssg)
+        write(6,*)"--------------------------------------------------------------------------------"
+!=======
+!	write(6,'(A12,I12,(4X),A12,F12.6)')"MAX_STEPS  =",MAX_STEPS,"DT         =",DT
+!	write(6,'(2(A12,I12,(4X)))')"CRDfreq    =",CRDfreq,"VELfreq    =",VELfreq
+!        write(6,'(2(A12,I12,(4x)))')"ENEfreq    =",ENEfreq,"RESfreq    =",RESfreq
+!	write(6,'(3(A12,X,A12,(3X)))')"CRD_NAME   =",CRD_NAME, "VEL_NAME   =",VEL_NAME,&
+!                                "ENE_NAME   =",ENE_NAME
+!	write(6,'(A12,X,A12,(3X),A12,X,A12)')"RESTRT_IN  =",RESTRT_IN,"RESTRT_OUT =",RESTRT_OUT
+!        write(6,'(A12,F12.6,(4X),A12,F12.6,(4X),A12,F12.6)')"TEMP0      =",TEMP0,&
+!                        "TEMP       =",TEMP,"TTAU       =",TTAU
+!        write(6,'(A12,F12.6,(4X),A12,F12.6)')"PRES       =",PRES,"PTAU       =",PTAU	
 !
-        write(6,'(A80)')&
-    "--------------------------------------------------------------------------------"
+!        write(6,'(A80)')&
+!    "--------------------------------------------------------------------------------"
 !
 ! * * * * * * * * * * * * * * * *
 ! Convert to internal units

@@ -17,7 +17,7 @@ MODULE SCFLocals
 !  CHARACTER(LEN=6)     :: PrvGeom,CurGeom,NxtGeom
 !  CHARACTER(LEN=20)    :: SCFActn
 !-----------------------------------------------------------
-   INTEGER,               PARAMETER :: DCL=DEFAULT_CHR_LEN
+!   INTEGER,               PARAMETER :: DCL=DEFAULT_CHR_LEN
    CHARACTER(LEN=DCL),    PARAMETER :: False  = '.FALSE.'   ! False flag
    CHARACTER(LEN=DCL),    PARAMETER :: True   = '.TRUE.'    ! True flag
    CHARACTER(LEN=DCL),    PARAMETER :: Direct = 'Direct'    ! Do direct SCF
@@ -88,6 +88,7 @@ MODULE SCFLocals
       LOGICAL                            :: ShudInk! To do or not to do incremental Fock builds
 !
       LOGICAL                            :: Rest   ! Restart from a specified Info file
+      LOGICAL                            :: Project
       CHARACTER(LEN=DEFAULT_CHR_LEN)     :: OldInfo! Old hdf file from which to restart
       INTEGER                            :: Fail   ! SCF convergence key
       CHARACTER(LEN=DEFAULT_CHR_LEN), &

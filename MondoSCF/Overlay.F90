@@ -71,7 +71,7 @@ MODULE Overlay
          ENDIF
 #endif
 !
-      CALL OpenHDF(InfFile)
+      HDF_CurrentID=OpenHDF(InfFile)
 !
       END SUBROUTINE Invoke
 !
@@ -147,9 +147,9 @@ MODULE Overlay
             ENDDO
          ENDDO
          IF(.NOT.PRESENT(AbsPath_O))THEN
-            CALL OpenHDF(InfFile)
+            HDF_CurrentID=OpenHDF(InfFile)
             CALL Put(.TRUE.,'ProgramFailed')
-            CALL CloseHDF()
+            CALL CloseHDF(HDF_CurrentID)
          ENDIF
 !        Log this run
          CALL Logger(CmndLine,.FALSE.)
@@ -159,9 +159,9 @@ MODULE Overlay
          IF(IErr/=SUCCEED)CALL MondoHalt(IErr,'<'//TRIM(CmndLine)//'>')
 !        Double check success if a MONDO Exec ...        
          IF(.NOT.PRESENT(AbsPath_O))THEN
-            CALL OpenHDF(InfFile)
+            HDF_CurrentID=OpenHDF(InfFile)
             CALL Get(ProgramFailed,'ProgramFailed')
-            CALL CloseHDF()
+            CALL CloseHDF(HDF_CurrentID)
             IF(ProgramFailed)CALL MondoHalt(-999,'<'//TRIM(CmndLine)//'>')
          ENDIF
 !        Tidy up ...

@@ -206,7 +206,7 @@ MODULE MDIO
 !
 ! Need to convert to "outside" units before printing
 !
-    WRITE(UNIT=ENE_UNIT,FMT='(" 0 ",I14,X,5(E14.6,E2.0,X))') &
+    WRITE(UNIT=ENE_UNIT,FMT='(" 0 ",I14,1X,5(E14.6,2X))') &
          MDS%STEP                               , &
 	 MDS%TIME * InternalTimeToSeconds       , &
 	 MDS%E_POT                              , &
@@ -215,23 +215,23 @@ MODULE MDIO
          MDS%DE_TOT
 !
 #ifdef PERIODIC
-    WRITE(UNIT=ENE_UNIT,FMT='(" 1 ",4(E14.6,E2.0,X))') &
+    WRITE(UNIT=ENE_UNIT,FMT='(" 1 ",4(E14.6,2X))') &
          (GM%PBC%TransVec(i),i=1,3),GM%PBC%CellVolume
 #else
-    WRITE(UNIT=ENE_UNIT,FMT='(" 1 ",4(E14.6,E2.0,X))') &
-         0.0D0,0.0D0,0.0D0,0.0D0
+    WRITE(UNIT=ENE_UNIT,FMT='(" 1 ",4(E14.6,2X))') &
+         0.0D0,0.0D0,0.0.0D0,0.0D0
 #endif
 !
-    WRITE(UNIT=ENE_UNIT,FMT='(" 2 ",5(E14.6,E2.0,X))') &
+    WRITE(UNIT=ENE_UNIT,FMT='(" 2 ",5(E14.6,2X))') &
          (MDS%VIRIAL(i),i=1,3),CTRL%MDC%PRES,MDS%PRESSURE
 !
-    WRITE(UNIT=ENE_UNIT,FMT='(" 3 ",2(E14.6,E2.0,X))') &
+    WRITE(UNIT=ENE_UNIT,FMT='(" 3 ",2(E14.6,2X))') &
          CTRL%MDC%TEMP,MDS%TEMPERATURE
 !
-    WRITE(UNIT=ENE_UNIT,FMT='(" 4 ",4(E14.6,E2.0,X))') &
+    WRITE(UNIT=ENE_UNIT,FMT='(" 4 ",4(E14.6,2X))') &
          (MDS%VCM(i),i=1,3),MDS%CM_KIN
 !
-    WRITE(UNIT=ENE_UNIT,FMT='(" 5 ",4(E14.6,E2.0,X))') &
+    WRITE(UNIT=ENE_UNIT,FMT='(" 5 ",4(E14.6,2X))') &
          (MDS%OMEGA(i),i=1,3),MDS%OMEGA_KIN
 !
     WRITE(UNIT=ENE_UNIT,FMT='(A80)') &

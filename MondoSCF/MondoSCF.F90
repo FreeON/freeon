@@ -31,9 +31,7 @@ PROGRAM MondoSCF
 !------------------------------------------------------------
 
 #if defined(PARALLEL) && defined(MPI2)
-WRITE(*,*)' INITING '
   CALL InitMPI()
-WRITE(*,*)' INITed '
   InParallel=.FALSE.
   IF(MyID==0)THEN
 #endif
@@ -49,7 +47,7 @@ WRITE(*,*)' INITed '
 !
 ! Parse input
   CALL ParseInp(Ctrl)  
-  CALL OpenHDF(InfFile)
+  HDF_CurrentID=OpenHDF(InfFile)
 #ifdef MMech
    Call InitMMech()
 #endif
@@ -88,7 +86,7 @@ WRITE(*,*)' INITed '
     CALL Mulliken_Analysis(Ctrl)
   ENDIF
 !
-  CALL CloseHDF()
+  CALL CloseHDF(HDF_CurrentID)
 !
 #if defined(PARALLEL) && defined(MPI2)
   ENDIF
