@@ -1,49 +1,73 @@
-#================================================================================
+#------------------------------------------------------------------------------
+#--  This code is part of the MondoSCF suite of programs for linear scaling 
+#    electronic structure theory and ab initio molecular dynamics.
 #
-#     Matt Challacombe
-#     Los Alamos National Laboratory
-#     Copyright 2000, The University of California
-#
-#================================================================================
+#--  Copyright (c) 2001, the Regents of the University of California.  
+#    This SOFTWARE has been authored by an employee or employees of the 
+#    University of California, operator of the Los Alamos National Laboratory 
+#    under Contract No. W-7405-ENG-36 with the U.S. Department of Energy.  
+#    The U.S. Government has rights to use, reproduce, and distribute this 
+#    SOFTWARE.  The public may copy, distribute, prepare derivative works 
+#    and publicly display this SOFTWARE without charge, provided that this 
+#    Notice and any statement of authorship are reproduced on all copies.  
+#    Neither the Government nor the University makes any warranty, express 
+#    or implied, or assumes any liability or responsibility for the use of 
+#    this SOFTWARE.  If SOFTWARE is modified to produce derivative works, 
+#    such modified SOFTWARE should be clearly marked, so as not to confuse 
+#    it with the version available from LANL.  The return of derivative works
+#    to the primary author for integration and general release is encouraged. 
+#    The first publication realized with the use of MondoSCF shall be
+#    considered a joint work.  Publication of the results will appear
+#    under the joint authorship of the researchers nominated by their
+#    respective institutions. In future publications of work performed
+#    with MondoSCF, the use of the software shall be properly acknowledged,
+#    e.g. in the form "These calculations have been performed using MondoSCF, 
+#    a suite of programs for linear scaling electronic structure theory and
+#    ab initio molecular dynamics", and given appropriate citation.  
+#------------------------------------------------------------------------------
 include $(MONDO_COMPILER)
 include $(MONDO_HOME)/Includes/Suffixes
 include $(MONDO_HOME)/Includes/RemoveAll
 #
-EXTRA_INCLUDES= -I$(MONDO_HOME)/MondoMods/MMA/Functions \
-                -I$(MONDO_HOME)/MondoMods/MMA/Functionals
+EXTRA_INCLUDES= -I$(MONDO_HOME)/MondoMods/MMA/LookUpTables \
+                -I$(MONDO_HOME)/MondoMods/MMA/Functionals  \
+                -I$(MONDO_HOME)/MondoMods/MMA/PAC
 #
-MModObjs =    GlobalScalars.o                                         \
-              GlobalCharacters.o                                      \
-              DerivedTypes.o                                          \
-              GlobalObjects.o                                         \
-              BasisSetParameters.o                                    \
-              MPIInclude.o                                            \
-              ProcessControl.o Trap.o                                 \
-              MemMan.o                                                \
-              MondoMPI.o                                              \
-              Clock.o Seconds.o                                       \
-              ParsingConstants.o                                      \
-              Parse.o                                                 \
-              Indexing.o                                              \
-              SetEq.o SetEq77.o                                       \
-              InOut.o                                                 \
-              Order.o Order77.o Random.o                              \
-              PrettyPrint.o                                           \
-              McMurch.o                                               \
-              LinAlg.o LinAlg77.o MatFunk.o SMWrap.o                  \
-              SpecFun.o                                               \
-              Thresholding.o                                          \
-              Functionals.o                                           \
-              PBC.o AtomPairs.o                                       \
-              BoundingBox.o BraKetBloks.o                             \
-              Macros.o                                                \
-              HDF5Wrap.o
-#
-all:	Mods ToEll DGEMM SM 
+MModObjs =    GlobalScalars.o                                              \
+              GlobalCharacters.o                                           \
+              DerivedTypes.o                                               \
+              GlobalObjects.o                                              \
+              BasisSetParameters.o                                         \
+              MPIInclude.o                                                 \
+              ProcessControl.o Trap.o                                      \
+              MemMan.o                                                     \
+              MondoMPI.o                                                   \
+              Clock.o Seconds.o                                            \
+              ParsingConstants.o                                           \
+              Parse.o                                                      \
+              Indexing.o                                                   \
+              SetEq.o SetEq77.o                                            \
+              InOut.o HDF5Wrap.o                                           \
+              Order.o Order77.o Random.o                                   \
+              PrettyPrint.o                                                \
+              McMurch.o                                                    \
+              LinAlg.o LinAlg77.o MatFunk.o SMWrap.o                       \
+              SpecFun.o D1Mach.o DCSEvl.o DErf.o DErfc.o DMach.o InitDS.o  \
+              Thresholding.o                                               \
+              Functionals.o                                                \
+              PBC.o                                                        \
+              AtomPairs.o                                                  \
+              BoundingBox.o                                                \
+              BraBloks.o                                                   \
+              Macros.o          
 #
 small:	Mods
 #
-clean:	CMods CDGEMM CSM
+all:	Mods ToEll DGEMM 
+#
+test:	SM F
+#
+clean:	CMods CDGEMM CSM CF
 #
 purge:	clean
 	rm -f $(REMOVEALL)
@@ -55,7 +79,7 @@ Mods:	$(MModObjs)
 	$(RANLIB) $(MONDO_HOME)/Libs/libMondoMods.a	
 #
 CMods:
-	rm -f $(REMOVEMISC)
+	rm -f $(REMOVEALL)
 	rm -f \#*
 	rm -f *~
 	ln -s /dev/null core
@@ -74,16 +98,26 @@ CDGEMM:
 	rm -f $(MONDO_HOME)/MondoMods/DGEMMs
 #
 SMTestObjs=  SMTest.o 
-#
 SM:	$(SMTestObjs)
 	$(LD) $(LDFLAGS) SMTest $(SMTestObjs) $(LibOpts) $(F90_LIBRARIES) 
-	./SMTest>SMPerf.log
+	./SMTest>Mods.log
 	rm -f $(SMTestObjs) ./SMTest
-	cat SMPerf.log
+	cat Mods.log
 #
 CSM:	
 	rm -f $(SMTestObjs)
 	rm -f ./SMTest
+#
+FTestObjs=  FTest.o 
+F:	$(FTestObjs)
+	$(LD) $(LDFLAGS) FTest $(FTestObjs) $(LibOpts) $(F90_LIBRARIES) 
+	./FTest>>Mods.log
+	rm -f $(FTestObjs) ./FTest
+	cat Mods.log
+#
+CF:	
+	rm -f $(FTestObjs)
+	rm -f ./FTest
 #---------------------------------------------------------------------------------------------
 #       DEPENDENCIES
 #
@@ -163,14 +197,26 @@ PrettyPrint.o: 		Order.o InOut.o SetEq.o Parse.o Clock.o \
 ProcessControl.o: 	MPIInclude.o GlobalCharacters.o GlobalScalars.o \
 			DerivedTypes.o 
 #
-SetEq.o: 		MondoMPI.o MemMan.o GlobalObjects.o \
+SetEq.o: 		MondoMPI.o MemMan.o GlobalObjects.o        \
 			GlobalScalars.o DerivedTypes.o 
 #
-SMTest.o: 		Order.o MemMan.o Parse.o PrettyPrint.o \
+SMTest.o: 		Order.o MemMan.o Parse.o PrettyPrint.o     \
 			InOut.o GlobalCharacters.o GlobalScalars.o \
 			DerivedTypes.o 
 #
-SpecFun.o: 		MMA/Functions/Exp.Inc MMA/Functions/Erf.Inc \
+SpecFun.o: 		MMA/LookUpTables/Exp.Inc \
+			MMA/LookUpTables/Erf.Inc \
+			MMA/LookUpTables/F0.Inc  \
+			MMA/LookUpTables/F1.Inc  \
+			MMA/LookUpTables/F2.Inc  \
+			MMA/LookUpTables/F3.Inc  \
+			MMA/LookUpTables/F4.Inc  \
+			MMA/LookUpTables/F5.Inc  \
+			MMA/LookUpTables/F7.Inc  \
+			MMA/LookUpTables/F8.Inc  \
+			MMA/LookUpTables/F9.Inc  \
+			MMA/LookUpTables/F10.Inc \
+			MMA/LookUpTables/F11.Inc \
 			DerivedTypes.o 
 #
 Thresholding.o: 	GlobalObjects.o GlobalCharacters.o GlobalScalars.o \
