@@ -47,7 +47,7 @@ CONTAINS
     ! Load control of internal coord. optimizer
     CALL LoadGeomOpt(C%Nams,C%GOpt)
     ! Load constraints and extra internal coords
-    CALL LoadExtraCoords(C%GOpt,C%Opts,C%Nams,C%Geos,C%PBCs)
+    CALL LoadExtraCoords(C%GOpt,C%Opts,C%Nams,C%Geos)
     ! Load CPSCF options.
     CALL LoadPropertyOptions(C%Nams,C%POpt)
     ! Check for Global conflicts.

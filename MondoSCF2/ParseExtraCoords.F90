@@ -13,7 +13,7 @@ MODULE ParseExtraCoords
    IMPLICIT NONE
    CONTAINS
    !
-   SUBROUTINE LoadExtraCoords(GOpt,Opts,Nams,Geos,PBCs)
+   SUBROUTINE LoadExtraCoords(GOpt,Opts,Nams,Geos)
      !
      ! This subroutine parses the inPut file for
      ! additional internal coordinate definitions
@@ -25,7 +25,6 @@ MODULE ParseExtraCoords
      TYPE(Options)               :: Opts
      TYPE(Geometries)            :: Geos
      TYPE(GeomOpt)               :: GOpt
-     TYPE(Periodics)             :: PBCs
      CHARACTER(LEN=DCL)          :: Line,LineLowCase,Atomname,chGEO
      CHARACTER(LEN=5)            :: CHAR
      INTEGER                     :: I1,I2,J,NIntCs,SerNum,NConstr
@@ -125,7 +124,7 @@ MODULE ParseExtraCoords
          !--------------------
          ELSE IF(INDEX(LineLowCase,'stre_b')/=0) THEN
          !--------------------
-                IF(PBCs%Dimen==1) CALL Halt('Extra coord stre_b while PBC dimension is 1')
+                IF(Geos%Clone(1)%PBC%Dimen==1) CALL Halt('Extra coord stre_b while PBC dimension is 1')
                 NIntCs=NIntCs+1 
                 GOpt%ExtIntCs%Def%C(NIntCs)(1:6)='STRE_B' 
                 GOpt%ExtIntCs%Atoms%I(NIntCs,1:2)=1
@@ -142,7 +141,7 @@ MODULE ParseExtraCoords
          !--------------------
          ELSE IF(INDEX(LineLowCase,'stre_c')/=0) THEN
          !--------------------
-                IF(PBCs%Dimen<3) CALL Halt('Extra coord stre_c while PBC dimension is < 3')
+                IF(Geos%Clone(1)%PBC%Dimen<3) CALL Halt('Extra coord stre_c while PBC dimension is < 3')
                 NIntCs=NIntCs+1 
                 GOpt%ExtIntCs%Def%C(NIntCs)(1:6)='STRE_C' 
                 GOpt%ExtIntCs%Atoms%I(NIntCs,1:2)=1
@@ -189,7 +188,7 @@ MODULE ParseExtraCoords
          !--------------------
          ELSE IF(INDEX(LineLowCase,'gamma')/=0) THEN 
          !--------------------
-                IF(PBCs%Dimen<2) CALL Halt('Extra coord gamma while PBC dimension is 1')
+                IF(Geos%Clone(1)%PBC%Dimen<2) CALL Halt('Extra coord gamma while PBC dimension is 1')
                 NIntCs=NIntCs+1 
                 GOpt%ExtIntCs%Def%C(NIntCs)(1:5)='GAMMA' 
                 GOpt%ExtIntCs%Atoms%I(NIntCs,1:3)=1
@@ -206,7 +205,7 @@ MODULE ParseExtraCoords
          !--------------------
          ELSE IF(INDEX(LineLowCase,'area_l')/=0) THEN 
          !--------------------
-                IF(PBCs%Dimen/=2) CALL Halt('Extra coord area_l while PBC dimension is 1')
+                IF(Geos%Clone(1)%PBC%Dimen/=2) CALL Halt('Extra coord area_l while PBC dimension is 1')
                 NIntCs=NIntCs+1 
                 GOpt%ExtIntCs%Def%C(NIntCs)(1:6)='AREA_L' 
                 GOpt%ExtIntCs%Atoms%I(NIntCs,1:3)=1
@@ -223,7 +222,7 @@ MODULE ParseExtraCoords
          !--------------------
          ELSE IF(INDEX(LineLowCase,'volm_l')/=0) THEN 
          !--------------------
-                IF(PBCs%Dimen/=3) CALL Halt('Extra coord volm_l while PBC dimension is /= 3')
+                IF(Geos%Clone(1)%PBC%Dimen/=3) CALL Halt('Extra coord volm_l while PBC dimension is /= 3')
                 NIntCs=NIntCs+1 
                 GOpt%ExtIntCs%Def%C(NIntCs)(1:6)='VOLM_L' 
                 GOpt%ExtIntCs%Atoms%I(NIntCs,1:4)=1
@@ -239,7 +238,7 @@ MODULE ParseExtraCoords
          !--------------------
          ELSE IF(INDEX(LineLowCase,'beta')/=0) THEN 
          !--------------------
-                IF(PBCs%Dimen/=3) CALL Halt('Extra coord beta while PBC dimension is /= 3')
+                IF(Geos%Clone(1)%PBC%Dimen/=3) CALL Halt('Extra coord beta while PBC dimension is /= 3')
                 NIntCs=NIntCs+1 
                 GOpt%ExtIntCs%Def%C(NIntCs)(1:4)='BETA' 
                 GOpt%ExtIntCs%Atoms%I(NIntCs,1:3)=1
@@ -256,7 +255,7 @@ MODULE ParseExtraCoords
          !--------------------
          ELSE IF(INDEX(LineLowCase,'alpha')/=0) THEN 
          !--------------------
-                IF(PBCs%Dimen/=3) CALL Halt('Extra coord alpha while PBC dimension is /= 3')
+                IF(Geos%Clone(1)%PBC%Dimen/=3) CALL Halt('Extra coord alpha while PBC dimension is /= 3')
                 NIntCs=NIntCs+1 
                 GOpt%ExtIntCs%Def%C(NIntCs)(1:5)='ALPHA' 
                 GOpt%ExtIntCs%Atoms%I(NIntCs,1:3)=1
