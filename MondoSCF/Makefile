@@ -16,9 +16,9 @@ ObjectFiles = SCFLocals.o            \
               Overlay.o              \
               ParseInput.o           \
               SetSCFs.o              \
+              ChkSCFs.o              \
               DrvSCFs.o              \
               DrvFrcs.o              \
-              ChkSCFs.o              \
               MondoSCF.o
 #              MondoSCF_Grads.o
 
