@@ -35,7 +35,12 @@ PROGRAM ODA
 #endif
   iSCF=Args%I%I(1)
 ! Suss for matrix threshold overide
-!  CALL SussTrix('ODA',Prog)  
+  CALL SussTrix('ODATrix',Prog)  
+! Allocate All Read from Disk Matrices, what a waste
+  CALL New(P)
+  CALL New(PTilde)
+  CALL New(F)
+  CALL New(FTilde)
 ! Allocate temp Matrices
   CALL New(T1)
   CALL New(T2)  
@@ -270,6 +275,11 @@ PROGRAM ODA
   ENucTotTilde=L*Enuc1+L1*Enuc0
   CALL Put(ENucTotTilde,'E_NuclearTotal',StatsToChar(Current))
 ! Tidy up
+  CALL Delete(P)
+  CALL Delete(PTilde)
+  CALL Delete(F)
+  CALL Delete(FTilde)
+! Delete Temps
   CALL Delete(T1) 
   CALL Delete(T2)
   CALL Delete(T3)
