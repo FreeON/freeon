@@ -1,7 +1,7 @@
 !    COMPUTE THE DENSITY IN A HGTF BASIS FROM THE DENSITY MATRIX
 !    BASED ON AHMADI AND ALMLOF, CPL 246 p.364 (1995) 
 !    Authors: Matt Challacombe and C.J. Tymczak
-!-------------------------------------------------------------------
+!----------------------------------------------------------------
 PROGRAM MakeRho
   USE DerivedTypes
   USE GlobalScalars
@@ -52,11 +52,10 @@ PROGRAM MakeRho
 !
      CALL StartUp(Args,Prog)
 !----------------------------------------------
-#ifdef MMech
 ! Calculate density of point charges
+#ifdef MMech
   IF(HasMM())THEN
      CALL Get(GM_MM,Tag_O='GM_MM'//CurGeom)
-     IF(.NOT.HasQM()) CALL SetMMThresholds('1')
   ENDIF
   IF(HasQM())THEN
 #endif
