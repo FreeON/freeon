@@ -326,7 +326,6 @@ CONTAINS
      TYPE(CoordCtrl)              :: GCoordCtrl
      TYPE(TrfCtrl)                :: GTrfCtrl
      !
-write(*,*) 'chk 1'
      NMem=SIZE(RefStruct,2)
      IF(NMem/=SIZE(RefGrad,2)) CALL Halt('Dim err in IntCFit')
      NatmsLoc=SIZE(XYZ,2)
@@ -439,8 +438,8 @@ write(*,*) 'chk 1'
        !
        CALL FitXY(VectX%D,VectY%D,RMSErr,FitVal%D(I),PredGrad%D(I),&
                   A,B,IntCs%Def(I))
-       CALL PrtFits(I,IntCs,iGEO,NDim,VectX%D,VectY%D,Path, &
-                    A,B,FitVal%D(I),PredGrad%D(I),IntCs%Def(I))
+      !CALL PrtFits(I,IntCs,iGEO,NDim,VectX%D,VectY%D,Path, &
+      !             A,B,FitVal%D(I),PredGrad%D(I),IntCs%Def(I))
        !
        IF(IntCs%Def(I)(1:4)=='LINB'.OR. & 
           IntCs%Def(I)(1:4)=='OUTP'.OR. & 
@@ -455,19 +454,10 @@ write(*,*) 'chk 1'
        ENDIF
        Displ(I)=FitVal%D(I)-IntCValues(I,NDim)
        CALL MapDAngle(IntCs%Def(I),IntCValues(I,NDim),Displ(I))
-if(IntCs%Def(I)(1:4)=='STRE') then
-write(*,*) 'fit= ',FitVal%D(I),FitVal%D(I)/angstromstoau
-write(*,*) iGEO,'displ= ',i,IntCs%Def(I),IntCValues(I,NDim)/angstromstoau,Displ(I)/angstromstoau
-write(*,*) igeo,' final line= ',A,B
-else if(IntCs%Def(I)(1:4)/='CART') then
-write(*,*) 'fit= ',FitVal%D(I),FitVal%D(I)*180.D0/PI
-write(*,*) iGEO,'displ= ',i,IntCs%Def(I),IntCValues(I,NDim)*180.D0/PI,Displ(I)*180.D0/PI
-write(*,*) igeo,' final line= ',A,B
-endif
      ENDDO
-!
-     CALL PrtPred(iGEO,NDim,IntCs,IntCValues,IntCGrads, &
-                  FitVal%D,PredGrad%D,Path)
+     !
+    !CALL PrtPred(iGEO,NDim,IntCs,IntCValues,IntCGrads, &
+    !             FitVal%D,PredGrad%D,Path)
      !
      CALL Delete(PredGrad)
      CALL Delete(VectY)
@@ -572,8 +562,6 @@ endif
           b=b+t*y(i)
 14      continue
       endif
-write(*,*) 'st2= ',st2
-write(*,*) 'ss = ',ss 
       b=b/st2
       a=(sy-sx*b)/ss
       siga=sqrt((One+sx*sx/(ss*st2))/ss)
@@ -807,24 +795,18 @@ write(*,*) 'ss = ',ss
                 Sig(IStart:NDim),MWT,A,B,SigA,SigB,Chi2,Q)
    !   CALL MedFit(VectX(IStart:NDim),VectY(IStart:NDim), &
    !               NFit,A,B,AbDev)
-       write(*,*) 'SigA,SigB,Chi2,Q= ',SigA,SigB,Chi2,Q
-       write(*,*) nfit,'line= ',a,b     
        !
        Devs%D=Zero
        DO I=1,NFit
          K=IStart+I-1
          Devs%D(K)=ABS(VectY(K)-(A+B*VectX(K)))
        ENDDO
-       write(*,*) 'Devs= ',Devs%D
        MaxDev=MAXVAL(Devs%D)
        MeanDev=SUM(Devs%D)/DBLE(NFit)
-       write(*,*) 'MaxDev= ',MaxDev,' MeanDev= ',MeanDev,' MeanDevOld= ',MeanDevOld
        IF(MeanDev<MeanDevOld.OR.NFit==NFitStart) THEN
          IF(B<Zero) THEN
-write(*,*) 'original a,b= ',a,b
            A=VectY(NDim)+B*VectX(NDim)
            B=-B
-write(*,*) 'modified a,b= ',a,b
          ENDIF
          PredGrad=-VectY(NDim)/Two
          IF(ABS(B)>CritFlat) THEN
@@ -836,13 +818,11 @@ write(*,*) 'modified a,b= ',a,b
            CALL CtrlDispl(Def_O,A,B,PredGrad,FitVal,&
                           VectX,VectY,CritFlat)
          ENDIF
-         write(*,*) 'extrap 2, predgrad= ',PredGrad 
          !
          MeanDevOld=MeanDev
          AFit=A
          BFit=B
        ENDIF
-       write(*,*) ' FitVal = ',FitVal
      ENDDO
      !
      CALL Delete(SigAux)
@@ -868,7 +848,6 @@ write(*,*) 'modified a,b= ',a,b
      FitValOld=FitVal
      B2=B*B
      SinAlp2=B2/(One+B2)
-write(*,*) Def,' alph= ',ASIN(SQRT(SinAlp2))
      LastVal=VectX(NDim)
      !
      IF(Def(1:4)=='STRE') THEN
@@ -880,11 +859,9 @@ write(*,*) Def,' alph= ',ASIN(SQRT(SinAlp2))
      Delta=FitVal-LastVal
      IF(ABS(Delta)>MaxStep) THEN
        FitVal=LastVal+SIGN(MaxStep,Delta)
-write(*,*) 'fitval is changing from-to ',fitvalold,FitVal
      ENDIF
      IF(ABS(B)<CritFlat) THEN
        FitVal=LastVal+SIGN(MaxStep,VectX(NDim)-VectX(Ndim-1))
-write(*,*) 'fitval is changing in critflat ',fitvalold,FitVal
      ENDIF
    END SUBROUTINE CtrlDispl
 !
@@ -1148,10 +1125,8 @@ write(*,*) 'fitval is changing in critflat ',fitvalold,FitVal
    SUBROUTINE TestExtraPol(Val,Grad,FitVal)
      REAL(DOUBLE) :: Val,Grad,FitVal
      !
-write(*,*) 'in TestExtraPol ',Val,Grad,FitVal  
      IF((FitVal-Val)*(-Grad)<Zero) THEN
        FitVal=Val-Grad
-write(*,*) 'fitval is changing in TestExtraPol to ',FitVal
      ENDIF
    END SUBROUTINE TestExtraPol
 !
@@ -1160,7 +1135,6 @@ write(*,*) 'fitval is changing in TestExtraPol to ',FitVal
    SUBROUTINE ChkBendLim(Val,FitVal,DeltaMax)
      REAL(DOUBLE) :: Val,FitVal,DeltaMax
      IF(FitVal>PI.OR.FitVal<Zero) THEN
-write(*,*) 'fitval is changing in ChkBendLim to ',FitVal
        FitVal=Val+SIGN(DeltaMax*PI/180.D0,FitVal-Val)
      ENDIF
    END SUBROUTINE ChkBendLim
@@ -1170,7 +1144,6 @@ write(*,*) 'fitval is changing in ChkBendLim to ',FitVal
    SUBROUTINE ChkStreLim(Val,FitVal,DeltaMax)
      REAL(DOUBLE) :: Val,FitVal,DeltaMax
      IF(FitVal<Zero.OR.FitVal>Val*Two) THEN
-write(*,*) 'fitval is changing in ChkBendLim to ',FitVal
        FitVal=Val+DeltaMax
      ENDIF
    END SUBROUTINE ChkStreLim
@@ -1193,14 +1166,10 @@ write(*,*) 'fitval is changing in ChkBendLim to ',FitVal
      NMem=SIZE(IntCValues,2)
      !
      DO I=1,NMem
-write(*,*) i,'IntCValues(:,I)= ',IntCValues(:,I)
        CALL PrimToDeloc(IntCValues(:,I),DelocVals(:,I), &
                         ISpB,JSpB,ASpB,UMatr)
-write(*,*) i,'DelocVals(:,I)=  ',DelocVals(:,I)
-write(*,*) i,'IntCGrads(:,I)= ',IntCGrads(:,I)
        CALL PrimToDeloc(IntCGrads(:,I),DelocGrads(:,I), &
                         ISpB,JSpB,ASpB,UMatr)
-write(*,*) i,'DelocGrads(:,I)= ',DelocGrads(:,I)
      ENDDO
      !
      CALL Delete(ISpB)
@@ -1277,7 +1246,6 @@ write(*,*) i,'DelocGrads(:,I)= ',DelocGrads(:,I)
      ENDIF
      DoBisect=(VectY(NMem)*VectY(NMem-1)<Zero)
      IF(DoBisect) THEN
-write(*,*) 'doing bisection'
        G1=VectY(NMem) ; G2=VectY(NMem-1)
        X1=VectX(NMem) ; X2=VectX(NMem-1)
        B=(G1-G2)/(X1-X2) ; A=G1-B*X1
@@ -1285,20 +1253,15 @@ write(*,*) 'doing bisection'
        IF(ABS(B)>1.D-4) THEN
          FitVal=-A/B
          PredGrad=Zero
-write(*,*) 'bis 1, predgrad= ',PredGrad 
         !FitVal=(SIGN(AbsG/Two,-G1)-A)/B
        ELSE
          FitVal=(X1+X2)/Two
          PredGrad=G1+G2/Two
-write(*,*) 'bis 2, predgrad= ',PredGrad 
        ENDIF
-write(*,*) 'fitval= ',FitVal
      ELSE
-write(*,*) 'doing extrapolation'
        CALL Extrapolate(VectX,VectY,RMSErr,FitVal,PredGrad, &
                         A,B,Def_O=Def_O)
      ENDIF
-write(*,*) 'predgrad= ',PredGrad
    END SUBROUTINE FitXY
 !
 !---------------------------------------------------------------------

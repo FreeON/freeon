@@ -1008,8 +1008,10 @@ CONTAINS
        CALL Delete(Top13)
      ELSE
        !
-      !CALL ShortestHBonds(NatmsLoc,AtNum,NBond,SCRPath, &
-      !                    HBondMark,BondIJ,BondLength)
+       CALL SortNonCov(NatmsLoc,AtNum,NBond,SCRPath, &
+                       HBondMark,BondIJ,BondLength)
+     ! CALL ShortestHBonds(NatmsLoc,AtNum,NBond,SCRPath, &
+     !                     HBondMark,BondIJ,BondLength)
      ENDIF
      !
      ! Now define bond angles and torsions
@@ -4790,6 +4792,100 @@ CONTAINS
    END SUBROUTINE ShortestHBonds
 !
 !------------------------------------------------------------------
+!
+   SUBROUTINE SortNonCov(NatmsLoc,AtNum,NBond,SCRPath, &
+                   HBondMark,BondIJ,BondLength)
+     INTEGER                :: NatmsLoc,NBond
+     TYPE(INT_VECT)         :: HBondMark,HBondMarkNew
+     TYPE(INT_VECT)         :: BondCount,AllowBond
+     TYPE(INT_RNK2)         :: BondIJ,BondIJNew,AtmBonds
+     TYPE(DBL_VECT)         :: BondLength,BondLengthNew
+     INTEGER,DIMENSION(:)   :: AtNum
+     CHARACTER(LEN=*)       :: SCRPath
+     TYPE(DBL_VECT)         :: MinLength
+     REAL(DOUBLE)           :: Dist,DistK,DistFact
+     INTEGER                :: I,J,K,I1,I2,NBondNew,MaxBonds
+     !
+     MaxBonds=50
+     DistFact=1.15D0
+     CALL New(AllowBond,NBond)
+     CALL New(MinLength,NatmsLoc)
+     CALL New(BondCount,NatmsLoc)
+     CALL New(AtmBonds,(/NatmsLoc,MaxBonds/))
+     AtmBonds%I=0
+     BondCount%I=0
+     MinLength%D=Zero
+     DO I=1,NBond
+       I1=BondIJ%I(1,I)
+       I2=BondIJ%I(2,I)
+       BondCount%I(I1)=BondCount%I(I1)+1
+       BondCount%I(I2)=BondCount%I(I2)+1
+       AtmBonds%I(I1,BondCount%I(I1))=I
+       AtmBonds%I(I2,BondCount%I(I2))=I
+     ENDDO
+     !
+     DO I=1,NatmsLoc
+       IF(BondCount%I(I)==0) THEN
+         MinLength%D(I)=Zero
+         CYCLE
+       ENDIF
+       Dist=BondLength%D(AtmBonds%I(I,1))
+       DO J=1,BondCount%I(I)
+         K=AtmBonds%I(I,J) 
+         DistK=BondLength%D(K)
+         IF(DistK<Dist) THEN
+           Dist=DistK
+         ENDIF
+       ENDDO
+       MinLength%D(I)=Dist
+     ENDDO
+     !
+     AllowBond%I=1
+     DO I=1,NatmsLoc
+       Dist=MinLength%D(I)*DistFact
+       DO J=1,BondCount%I(I)
+         K=AtmBonds%I(I,J) 
+         IF(BondLength%D(K)>Dist) THEN
+           AllowBond%I(K)=0
+         ENDIF
+       ENDDO
+     ENDDO
+     !
+     NBondNew=SUM(AllowBond%I)
+     CALL New(BondIJNew,(/2,NBondNew/))
+     CALL New(BondLengthNew,NBondNew)
+     CALL New(HBondMarkNew,NBondNew)
+     NBondNew=0
+     DO I=1,NBond
+       IF(AllowBond%I(I)==1) THEN
+         NBondNew=NBondNew+1
+         BondIJNew%I(1:2,NBondNew)=BondIJ%I(1:2,I)
+         BondLengthNew%D(NBondNew)=BondLength%D(I)
+         HBondMarkNew%I(NBondNew)=HBondMark%I(I)
+       ENDIF
+     ENDDO
+     !
+     CALL Delete(BondIJ)
+     CALL Delete(BondLength)
+     CALL Delete(HBondMark)
+     NBond=NBondNew
+     CALL New(BondIJ,(/2,NBond/))
+     CALL New(BondLength,NBond)
+     CALL New(HBondMark,NBond)
+     BondIJ%I=BondIJNew%I
+     BondLength%D=BondLengthNew%D
+     HBondMarkNew%I=HBondMarkNew%I 
+     !
+     CALL Delete(HBondMarkNew)
+     CALL Delete(BondLengthNew)
+     CALL Delete(BondIJNew)
+     CALL Delete(AllowBond)
+     CALL Delete(BondCount)
+     CALL Delete(AtmBonds)
+     CALL Delete(MinLength)
+   END SUBROUTINE SortNonCov
+!
+!---------------------------------------------------------------------
 !
    SUBROUTINE TranslToAt1(VectCart,ThreeAt,Vect_O)
      REAL(DOUBLE),DIMENSION(:),OPTIONAL :: Vect_O
