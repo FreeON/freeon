@@ -35,12 +35,12 @@ MODULE LinAlg
 !===============================================================================
    INTERFACE Multiply
 #ifdef PARALLEL
-      MODULE PROCEDURE MultiplyM_BCSR, MultiplyM_DBCSR, &
-                       MultiplyM_BCSR_SCLR, MultiplyM_DBCSR_SCLR
-!,MultiplyM_DBL_RNK2
+      MODULE PROCEDURE MultiplyM_BCSR, MultiplyM_DBCSR,           &
+                       MultiplyM_BCSR_SCLR, MultiplyM_DBCSR_SCLR, &
+                       MultiplyM_BCSR_VECT, MultiplyM_DBCSR_VECT 
 #else
-      MODULE PROCEDURE MultiplyM_BCSR, MultiplyM_BCSR_SCLR
-!,MultiplyM_DBL_RNK2
+      MODULE PROCEDURE MultiplyM_BCSR, MultiplyM_BCSR_SCLR,       &
+                       MultiplyM_BCSR_VECT
 #endif
    END INTERFACE
 !-------------------------------------------------------------------------------
@@ -1223,6 +1223,42 @@ MODULE LinAlg
          IF(PRESENT(Perf_O))  &
            Perf_O%FLOP=Perf_O%FLOP+DBLE(A%NNon0)
       END SUBROUTINE MultiplyM_BCSR_SCLR
+!===============================================================================
+!     BCSR: Matrix Vector Multiply
+!===============================================================================
+      SUBROUTINE  MultiplyM_BCSR_VECT(A,Vin,Vout)
+        TYPE(BCSR)       :: A
+        TYPE(DBL_VECT)   :: Vin,Vout
+        INTEGER          :: AtA,AtB,Abeg,Aend,P,R,MA,MB,IJ,I,J,IA,IB
+!
+        DO I=1,NBasF
+           Vout%D(I)=Zero 
+        ENDDO
+!
+        IA = 0
+        DO AtA=1,A%NAtms
+           MA   = BSiz%I(AtA)
+           Abeg = A%RowPt%I(AtA)
+           Aend = A%RowPt%I(AtA+1)-1
+           DO P=Abeg,Aend
+              AtB  = A%ColPt%I(P)
+              R    = A%BlkPt%I(P)
+              MB   = BSiz%I(AtB)
+              IB   = 0
+              DO I=1,AtB-1
+                 IB = IB + BSiz%I(I)
+              ENDDO
+              DO J=1,MB
+                 DO I=1,MA
+                    Vout%D(IA+I) = Vout%D(IA+I) + A%MTrix%D(R)*Vin%D(IB+J)
+                    R = R + 1
+                 ENDDO
+              ENDDO
+           ENDDO
+           IA = IA + MA
+        ENDDO
+!
+      END SUBROUTINE MultiplyM_BCSR_VECT
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 !     MATRIX ADDITION, MATRIX ADDITION, MATRIX ADDITION, MATRIX ADDITION, MATRIX ADDITION
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1244,7 +1280,7 @@ MODULE LinAlg
          CALL New(Flag,NAtoms)
          CALL SetEq(Flag,0)
          FlOp=Zero
-         Status=Add_GENERIC(SIZE(C%ColPt%I),SIZE(C%MTrix%D),          &
+         Status=Add_GENERIC(SIZE(C%ColPt%I),SIZE(C%MTrix%D),   &
                       A%NAtms,OffSt%I(MyId),                   &
                       C%NAtms,C%NBlks,C%NNon0,                 &
                       A%RowPt%I,A%ColPt%I,A%BlkPt%I,A%MTrix%D, &
