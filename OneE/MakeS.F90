@@ -45,13 +45,16 @@ PROGRAM MakeS
      CALL CloseHDF(HDFFileID)
      ! Open the old group and HDF
      HDF_CurrentID=OpenHDF(Restart)
-     OldFileID=HDF_CurrentID
+     OldFileID=HDF_CurrentID 
      CALL New(Stat,3)
      CALL Get(Stat,'current_state')
      HDF_CurrentID=OpenHDFGroup(HDF_CurrentID,"Clone #"//TRIM(IntToChar(MyClone)))
      ! Get old basis set stuff
      CurGeom=TRIM(IntToChar(Stat%I(3)))
+     CurBase=TRIM(IntToChar(Stat%I(2)))
      CALL Get(GM,Tag_O=CurGeom)
+     CALL Delete(CS_OUT%CellCarts)
+     CALL SetCellNumber(GM,CS_OUT)
      ! Close the old hdf up 
      CALL CloseHDFGroup(HDF_CurrentID)
      CALL CloseHDF(OldFileID)
