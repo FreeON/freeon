@@ -26,8 +26,6 @@ MODULE ParallelHiCu
   TYPE(DBL_RNK2)::RepLCoor,RepRCoor ! Coordinates of the repartitioned boxes
   INTEGER::NVol                     ! number of the bounding boxes
   REAL(DOUBLE)::MyLeavesTm          ! time to create all leaves in a subvolume
-  REAL(DOUBLE)::VolTm               ! total time to work on a subvolume
-  TYPE(DBL_VECT)::TmNode            ! the array to store VolTm
   REAL(DOUBLE)::BoxPoint(6)
   REAL(DOUBLE)::TotExc
 
@@ -69,7 +67,7 @@ MODULE ParallelHiCu
       GRhoBBoxVol = GRhoBBoxVol*(GRhoBBox%BndBox(I,2)-GRhoBBox%BndBox(I,1))
     ENDDO
     IF(MyID == 0) THEN
-      WRITE(*,*) 'MyID = ', MyID,', GRhoBBox = ',GRhoBBox%BndBox(1:3,1),GRhoBBox%BndBox(1:3,2), ', GRhoBBoxVol = ',GRhoBBoxVol
+      WRITE(*,*) 'MyID = 0, GRhoBBox = ',GRhoBBox%BndBox(1:3,1),GRhoBBox%BndBox(1:3,2), ', GRhoBBoxVol = ',GRhoBBoxVol
     ENDIF
     CALL AlignNodes()
   END SUBROUTINE ParaInitRho
@@ -103,7 +101,7 @@ MODULE ParallelHiCu
 
     IF(Exist) THEN
       IF(MyID == 0) THEN
-        WRITE(*,*) 'LineLoc.dat exists. It is going to be opened..'
+        WRITE(*,*) 'LineLoc.dat exists. To be opened..'
         OPEN(UNIT=54,FILE='LineLoc.dat',FORM='formatted',Status='unknown')
         READ(54,*) NVol
         IF(NVol /= NPrc) THEN
@@ -412,7 +410,7 @@ MODULE ParallelHiCu
     CALL MPI_AllReduce(LocalDblSendMaxSize,GDblSendMaxSize,1,MPI_INTEGER,MPI_MAX,MPI_COMM_WORLD,IErr)
     !! 
     IF(MyID == 0) THEN
-      write(*,*) 'MyID = ',MyID, ', GIntSendMaxSize=',GIntSendMaxSize,' ,GDblSendMaxSize = ',GDblSendMaxSize
+      write(*,*) 'MyID=0, GIntSendMaxSize=',GIntSendMaxSize,' ,GDblSendMaxSize = ',GDblSendMaxSize
     ENDIF
     IntSendToOthers = 0
     DblSendToOthers = 0
@@ -634,7 +632,7 @@ MODULE ParallelHiCu
     IF(NumOfCo /= CoFillIndex) STOP 'ERR: NumOfCo /= CoFillIndex!'
     CALL AlignNodes()
     IF(MyID == 0) THEN
-      WRITE(*,*) 'MyID = ',MyID, ' end of DistDist.'
+      WRITE(*,*) 'MyID=0, end of DistDist.'
     ENDIF
     CALL Delete(IndexToSend)
     CALL Delete(CoToSend)
@@ -842,14 +840,16 @@ MODULE ParallelHiCu
   SUBROUTINE WorkBBox(Kxc)
     TYPE(BBox) :: WBox
     REAL(DOUBLE)::TotRho,SubVolRho,SubVolExc
-    REAL(DOUBLE)::TmBegM,TmEndM
+    REAL(DOUBLE)::HiCuBegTm,HiCuEndTm,HiCuTm
+    TYPE(DBL_VECT) :: TmHiCuArr
     TYPE(FastMat),POINTER  :: Kxc
+    INTEGER :: IErr
     
     WBox%BndBox(1:3,1) = LCoor%D(1:3,MyID+1)
     WBox%BndBox(1:3,2) = RCoor%D(1:3,MyID+1)
     
     CALL CalCenterAndHalf(WBox)
-    TmBegM = MPI_WTime()
+    HiCuBegTm = MPI_WTime()
     IF(MyID == 0) THEN
       WRITE(*,*) 'Calling GridGen...'
     ENDIF
@@ -857,16 +857,23 @@ MODULE ParallelHiCu
     TotRho = Reduce(SubVolRho)
     TotExc = Reduce(SubVolExc)
     IF(MyID == ROOT) THEN
-      WRITE(*,*) 'TotRho = ',TotRho
-      WRITE(*,*) 'TotExc = ',TotExc
+      WRITE(*,*) 'TotRho = ',TotRho,', TotExc = ',TotExc
     ENDIF
     MyLeavesTm = LeavesTmCount(CubeRoot)
     IF(MyID == 0) THEN
       WRITE(*,*) 'GridGen is done. Calling MakeKxc...'
     ENDIF
     CALL MakeKxc(Kxc,CubeRoot)
-    TmEndM = MPI_WTime()
-    VolTm = TmEndM-TmBegM
+    HiCuEndTm = MPI_WTime()
+    ! VolTm = TmEndM-TmBegM
+    HiCuTm = HiCuEndTm-HiCuBegTm
+    CALL New(TmHiCuArr,NPrc)
+    CALL MPI_Gather(HiCuTm,1,MPI_DOUBLE_PRECISION,TmHiCuArr%D(1),1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,IErr)
+    IF(MyID == ROOT) THEN
+      CALL PImbalance(TmHiCuArr,NPrc,Prog_O='HiCu')
+    ENDIF
+    CALL Delete(TmHiCuArr)
+
   END SUBROUTINE WorkBBox
 
 !===============================================================================
@@ -1229,40 +1236,6 @@ MODULE ParallelHiCu
       LeavesTmCount=LeavesTmCount(Cube%Descend)+LeavesTmCount(Cube%Descend%Travrse)
     ENDIF
   END FUNCTION LeavesTmCount
-
-!===============================================================================
-  SUBROUTINE CollectTime()
-    INTEGER::IErr,I
-    INTEGER,DIMENSION(MPI_STATUS_SIZE)::Status
-
-    CALL New(TmNode,NPrc)
-    CALL MPI_Gather(VolTm,1,MPI_DOUBLE_PRECISION,TmNode%D(1),1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,IErr)
-    IF(MyID == 0) THEN
-      DO I = 0, NPrc-1
-        !! WRITE(*,*) 'Time on node = '//TRIM(IntToChar(I))//' is ',TmNode%D(I+1)
-      ENDDO
-    ENDIF
-    
-  END SUBROUTINE CollectTime
-!===============================================================================
-  SUBROUTINE CalImbalance
-    REAL(DOUBLE)::TmMax,Imbalance,DevSum
-    INTEGER::I
-  
-    TmMax = -100.0D0
-    IF(MyID == 0) THEN
-      DO I = 1, NPrc
-        TmMax = Max(TmMax,TmNode%D(I))
-      ENDDO
-      WRITE(*,*) 'TmMax = ',TmMax
-      DevSum = 0.0D0
-      DO I = 1, NPrc
-        DevSum = DevSum + (TmMax-TmNode%D(I))
-      ENDDO
-      Imbalance = DevSum/(NPrc*TmMax)
-      WRITE(*,*) 'Imbalance = ',Imbalance
-    ENDIF
-  END SUBROUTINE CalImbalance
 
 !===============================================================================
   FUNCTION AtomRad(Z)

@@ -124,8 +124,6 @@ PROGRAM HaiKu
   CALL NewBraBlok(BS)
 #ifdef PARALLEL 
   CALL WorkBBOx(Kxc)
-  CALL CollectTime()
-  CALL CalImbalance()
   CALL RepartitionVol()
 #else
 ! Generate the CubeTree (a 3-D BinTree) 

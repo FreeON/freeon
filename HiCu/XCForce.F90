@@ -31,6 +31,8 @@ PROGRAM XCForce
   TYPE(BCSR)                     :: P
   TYPE(DBL_VECT)      :: TotXCFrc
   INTEGER :: IErr,TotFrcComp
+  REAL(DOUBLE) :: XCFrcBegTm,XCFrcEndTm,XCFrcTm
+  TYPE(DBL_VECT) :: TmXCFrcArr
 #else
   TYPE(BCSR)                     :: P
 #endif
@@ -108,6 +110,9 @@ PROGRAM XCForce
 ! Compute the exchange-correlation contribution to the force in O(N)
 !
   XCFrc%D=Zero
+#ifdef PARALLEL
+  XCFrcBegTm = MPI_Wtime()
+#endif
   DO AtA=1,NAtoms
      MA=BSiz%I(AtA)
      A1=3*(AtA-1)+1
@@ -148,6 +153,10 @@ PROGRAM XCForce
      ENDDO
   ENDDO
 !--------------------------------------------------------------------------------
+#ifdef PARALLEL
+  XCFrcEndTm = MPI_Wtime()
+  XCFrcTm = XCFrcEndTm-XCFrcBegTm
+#endif
 ! Do some checksumming, resumming and IO 
 
 #ifdef PARALLEL
@@ -176,6 +185,15 @@ PROGRAM XCForce
   CALL Delete(Frc)
   CALL Delete(XCFrc)
   CALL DeleteBraBlok(Gradients_O=.TRUE.)
+#ifdef PARALLEL
+  CALL New(TmXCFrcArr,NPrc)
+  CALL MPI_Gather(XCFrcTm,1,MPI_DOUBLE_PRECISION,TmXCFrcArr%D(1),1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,IErr)
+  IF(MyID == ROOT) THEN
+    CALL PImbalance(TmXCFrcArr,NPrc,Prog_O='XCFrc')
+  ENDIF
+  CALL Delete(TmXCFrcArr)
+#endif
+
 ! didn't count flops, any accumulation is residual
 ! from matrix routines
   PerfMon%FLOP=Zero 
