@@ -1,3 +1,28 @@
+2004-01-28 09:13  mchalla
+
+	* SCFeqs/P2Use.F90: Yet another minor fix; more carefull testing of
+	DMPT AO-DMX using a relative error in number of electrons vs matrix
+	threshold.
+
+2004-01-27 22:39  nemeth
+
+	* MondoMods/Slatec.F90: Some new subroutines have been added during
+	the constraction of the variance matrix. These routines are
+	currently not used, just saved for future applications.
+
+2004-01-27 11:28  mchalla
+
+	* SCFeqs/P2Use.F90: [no log message]
+
+2004-01-27 11:25  tymczak
+
+	* Docs/DSAndErrorEstimates/: ExactMultipoleError.ps,
+	ExactMultipoleError.tex: [no log message]
+
+2004-01-27 11:13  mchalla
+
+	* ChangeLog: [no log message]
+
 2004-01-27 11:09  mchalla
 
 	* SCFeqs/: DenMatMethods.F90, Makefile, P2Use.F90: Ok, this is
