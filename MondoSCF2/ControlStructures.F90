@@ -46,32 +46,22 @@ MODULE ControlStructures
   END TYPE Options
 
   TYPE Dynamics
-     INTEGER                         :: MDAlgorithm
-     INTEGER                         :: CRDfreq
-     INTEGER                         :: VELfreq
-     INTEGER                         :: ENEfreq
-     INTEGER                         :: RESfreq
-     INTEGER                         :: MAX_STEPS
-     INTEGER                         :: TRANSfreq
-     INTEGER                         :: ROTATfreq 
-     REAL(DOUBLE)                    :: DT
-     REAL(DOUBLE)                    :: TEMP0
-     REAL(DOUBLE)                    :: TEMP
-     REAL(DOUBLE)                    :: PRES
-     REAL(DOUBLE)                    :: TTAU
-     REAL(DOUBLE)                    :: PTAU
-     LOGICAL                         :: REM_TRANS
-     LOGICAL                         :: REM_ROTAT
-     LOGICAL                         :: RESTRT
-     LOGICAL                         :: AtomWrap
-     LOGICAL                         :: CLOBBER
-     CHARACTER(LEN=DCL)              :: RESTRT_IN
-     CHARACTER(LEN=DCL)              :: RESTRT_OUT
-     CHARACTER(LEN=DCL)              :: CRD_NAME
-     CHARACTER(LEN=DCL)              :: VEL_NAME
-     CHARACTER(LEN=DCL)              :: ENE_NAME
+     INTEGER                        :: MDMaxSteps
+     INTEGER                        :: MDAlgorithm
+     REAL(DOUBLE)                   :: DTime
+!
+     LOGICAL                        :: Velcty_Scaling
+!
+     LOGICAL                        :: Const_Temp
+!
+     LOGICAL                        :: Const_Press
+     REAL(DOUBLE)                   :: Press0
+     REAL(DOUBLE)                   :: PressMass
+!
+     LOGICAL                        :: Parallel_Rep
+!
   END TYPE Dynamics
-
+!
   TYPE Geometries
      INTEGER                         :: Clones
      TYPE(CRDS),POINTER,DIMENSION(:) :: Clone

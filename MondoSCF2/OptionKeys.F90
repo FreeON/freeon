@@ -98,7 +98,7 @@ MODULE OptionKeys
   CHARACTER(LEN=*),   PARAMETER  :: GRAD_OPTIMIZE     ='Optimize'
   INTEGER,            PARAMETER  :: GRAD_GO_DOWNHILL  = 3489343 
   ! Molecular dynamics 
-  CHARACTER(LEN=*),   PARAMETER  :: GRAD_DYNAMICS     = 'MD'      
+  CHARACTER(LEN=*),   PARAMETER  :: GRAD_DYNAMICS     = 'MolecularDynamics'      
   INTEGER,            PARAMETER  :: GRAD_DO_DYNAMICS  = 6413123 
   ! Transition state
   CHARACTER(LEN=*),   PARAMETER  :: GRAD_TS_SEARCH    ='TSSearch'
@@ -114,7 +114,7 @@ MODULE OptionKeys
   INTEGER,            PARAMETER  :: GRAD_CART_OPT    =34243945
   !------------------------------------------------------------------------------
   ! Options:NEB=
-  CHARACTER(LEN=*),  PARAMETER :: NEB_OPTION       ='NEB'
+  CHARACTER(LEN=*),  PARAMETER :: NEB_OPTION         ='NEB'
   ! Climbing Image
   CHARACTER(LEN=*),   PARAMETER :: NEB_CLIMB         ='NEBClimb'
   ! Start NEB from reactants and products HDF files

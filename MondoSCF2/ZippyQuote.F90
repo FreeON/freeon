@@ -1,15 +1,17 @@
 MODULE ZippyQuote
   USE Order
+  USE ControlStructures  
   IMPLICIT NONE
 CONTAINS
   !===========================================================================================================================
   ! INSIPID SAYINGS TO CELIBRATE OUR INNER CONEHEAD 
   !===========================================================================================================================
-  SUBROUTINE ZippySez()
-    INTEGER :: N,PU
+  SUBROUTINE ZippySez(C)
+    TYPE(Controls)  :: C
+    INTEGER         :: N,PU
     !------------------------------------------------------------------------------------------------------------------------!
     PU=6
-    N=Random((/1,42/))
+    N=Random((/1,42/),StringToASCII(C%Nams%SCF_NAME))
     SELECT CASE(N)
     CASE (1)
        WRITE(PU,*)"Are we having fun yet?"    
