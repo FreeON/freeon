@@ -54,7 +54,7 @@
 @timestamp rot 0
 @timestamp font 0
 @timestamp char size 1.000000
-@timestamp def "Sun Feb 22 15:02:56 2004"
+@timestamp def "Thu Feb 26 11:02:01 2004"
 @r0 off
 @link r0 to g0
 @r0 type above
@@ -111,7 +111,7 @@
 @    view xmax 1.150000
 @    view ymin 0.150000
 @    view ymax 0.850000
-@    title "Table 3"
+@    title ""
 @    title font 0
 @    title size 1.500000
 @    title color 1
@@ -181,7 +181,7 @@
 @    yaxis  bar color 1
 @    yaxis  bar linestyle 1
 @    yaxis  bar linewidth 1.0
-@    yaxis  label "\f{Symbol}g\f{Times-Roman}\szzzz\N [a.u.]"
+@    yaxis  label "\f{Symbol}g\f{Times-Roman}\szzzz\N/N [a.u.]"
 @    yaxis  label layout para
 @    yaxis  label place spec
 @    yaxis  label place 0.000000, 0.110000

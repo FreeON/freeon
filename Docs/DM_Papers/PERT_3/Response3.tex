@@ -232,9 +232,9 @@ and the idempotency-like constraint \cite{Furche_2001}
 \begin{subequations}
   \begin{gather}
     \D^{0} =\D^{0} \D^{0},\\
-    \D^{a} =\D^{a} \D^{0}+\D^{0}\D^{a},\\
-    \D^{ab}=\D^{ab}\D^{0}+\D^{0}\D^{ab}+\D^{a}\D^{b}+\D^{b}\D^{a}\\
-    \text{May be the third order???}
+    \D^{a} =\{\D^{a},\D^{0}\},\\
+    \D^{ab}=\{\D^{ab},\D^{0}\}+\{\D^{a},\D^{b}\}\\
+    \text{May be the third order???}\\
   \end{gather}
 \end{subequations}
 The following schematic algorithm is a higher order generalization of the
@@ -265,10 +265,7 @@ second... DDIIS optimizing scheme based on DIIS.\\
 third... density matrix derivative through perturbation projection.\\
 
 
-%with starting point $D^a_0=0$. In step~(\ref{FockBuild}),  $F^a_n$ is constructed in 
-%${\cal O}(N)$ using algorithms \cite{MChallacombe97,ESchwegler97} in 
-%the {\sc MondoSCF} \cite{MondoSCF} suite of linear scaling quantum chemistry programs.
-\subsection{DDIIS}
+\subsection{DDIIS Maybe}
 
 \subsection{Perturbed projection}
 Perturbed projection is based on purification projections for the 
@@ -363,7 +360,10 @@ bounds of the eigenvalues of $\F^0$.
 \subsubsection{Higher order response and Wigner's 2n+1 rule }
 Higher order energy derivatives can be calculated from the lower
 order response. Wigner's 2n+1 rule gives a general way to calculate the 2n+1
-energy response from the n-th order response. A density matrix analogy to
+energy response from the n-th order response. These kind of expressions
+based on the wave function perturbation theory are well known and are 
+descibed in for exemple \cite{Dupuis_1991}.
+A density matrix analogy to 
 the Wigner's 2n+1 rule was given in cite{...}, here we will present
 a generalization to the non orthogonal case for mixed derivatives 
 up to fourth order....
@@ -412,7 +412,11 @@ E^{abcd}=\frac{1}{24}\Tr(&[P^{ab},P] P^c F^d +[P^a,P](P^{bc} F^d + P^b F^{cd})+\
 \end{equation}
 OR A LITTLE BIT SHORTER
 \begin{equation}
-  E^{abcd}=\frac{1}{24}P(a,b,c,d)\Tr([\D^{ab},\D^0] \D^c \F^d +[\D^a,\D^0](\D^{bc} \F^d + \D^b \F^{cd}))
+  \begin{split}
+    E^{abcd}=&\frac{1}{24}P(a,b,c,d) \\
+    &\Tr([\D^{ab},\D^0] \D^c \F^d + \\ 
+    &[\D^a,\D^0](\D^{bc} \F^d +\D^b \F^{cd}))
+  \end{split}
 \end{equation}
 
 \begin{equation}
@@ -428,20 +432,33 @@ OR A LITTLE BIT SHORTER
 \end{equation}
 
 
-
 \section{Examples}
-To demonstrate the ability, accuracy and numerical stability we present
-...
+To demonstrate the ability, accuracy, numerical stability and efficiency 
+of the algorithm we present
+the solution of the 10th order UPSCF equation for the $\rm C_{60}$ and for one 
+dimensional water chains. 
+Then the CPSCF equations are solved up to third order for the one dimensional 
+water chains and the results obtained are compared with the 2n+1 rule presented 
+above and with GAMESS calculations \cite{gamess}. We have also performed polarizabilities
+calculations up to third order on a series of water clusters at standard 
+liquid density \cite{MChallacombe97,ESchwegler97}, up to $(\rm H_2O)_{150}$. 
+
+Calculations were carried out on a single Intel Xeon 2.4GHz processor 
+running RedHat Linux 8.0 and  executables compiled
+with Portland Group Fortran Compiler pgf90 4.0-2 \cite{PGF90}.
+
+
 
 \subsection{C60: 10th order response (uncoupled)}
+ANDERS SHOULD ADD SOMETHING HERE.
 
 
 \subsection{One dimensional water chains 10th order response (uncoupled)}
+ANDERS SHOULD ADD SOMETHING HERE.
 
 \subsection{One dimensional water chains}
 figures ... show the saturation ....
 table shows comparison to 2n+1 and n+1.
-10-th order (at least +2n+1 til 21-th order in E (for Anders)).
 
 We have computed the (hyper)polarizabilities $\alpha_{zz}$, 
 $\beta_{zzz}$ and $\gamma_{zzzz}$ of water oligomers containing
@@ -460,7 +477,8 @@ Tables (\ref{tab:Alpha_1D_Values},\ref{tab:Beta_1D_Values},\ref{tab:Gamma_1D_Val
 
 \begin{figure}[t]
   \caption{\protect
-    Longitudinal polarizability per water molecule for 
+    Longitudinal polarizability per water molecule
+    $\alpha_{zz}/N$ for 
     the 6-31G and 6-31G** basis sets in function
     of the number of water molecule in the chain.
   }\label{fig:Alpha_1D}
@@ -472,7 +490,8 @@ Tables (\ref{tab:Alpha_1D_Values},\ref{tab:Beta_1D_Values},\ref{tab:Gamma_1D_Val
 
 \begin{figure}[t]
   \caption{\protect
-    Longitudinal first hyperpolarizability per water molecule for 
+    Longitudinal first hyperpolarizability per water 
+    molecule $\beta_{zzz}/N$ for 
     the 6-31G and 6-31G** basis sets in function
     of the number of water molecule in the chain.
   }\label{fig:Beta_1D}
@@ -484,7 +503,8 @@ Tables (\ref{tab:Alpha_1D_Values},\ref{tab:Beta_1D_Values},\ref{tab:Gamma_1D_Val
 
 \begin{figure}[t]
   \caption{\protect
-    Longitudinal second hyperpolarizability per water molecule for 
+    Longitudinal second hyperpolarizability per water
+    molecule $\gamma_{zzzz}/N$ for 
     the 6-31G and 6-31G** basis sets in function
     of the number of water molecule in the chain.
   }\label{fig:Gamma_1D}
@@ -502,12 +522,13 @@ Tables (\ref{tab:Alpha_1D_Values},\ref{tab:Beta_1D_Values},\ref{tab:Gamma_1D_Val
     and {\tt TIGHT} accuracy (See text) and the results obtained with
     the GAMESS quantum chemistry package \cite{gamess} with the 6-31G. 
     All the results are in $[a.u.]$.
+    WE CAN REMOVE SOME DIGITS.
   }\label{tab:Alpha_1D_Values}
   \begin{tabular}{cccc}
     \toprule
     $N$ &\multicolumn{1}{c}{6-31G\footnotemark[1]}
-    &\multicolumn{1}{c}{6-31G\footnotemark[2]}
-    &\multicolumn{1}{c}{6-31G**\footnotemark[2]}\\
+        &\multicolumn{1}{c}{6-31G\footnotemark[2]}
+        &\multicolumn{1}{c}{6-31G**\footnotemark[2]}\\
     \hline
      1 & 5.8136 & 5.813589 & 6.318837     \\
      2 & 6.3448 & 6.344830 & 7.047412     \\
@@ -536,6 +557,7 @@ Tables (\ref{tab:Alpha_1D_Values},\ref{tab:Beta_1D_Values},\ref{tab:Gamma_1D_Val
     and {\tt TIGHT} accuracy (See text) and the results obtained with
     the GAMESS quantum chemistry package \cite{gamess} with the 6-31G. 
     All the results are in $[a.u.]$.
+    WE CAN REMOVE SOME DIGITS.
   }\label{tab:Beta_1D_Values}
   \begin{tabular}{ccccc}
     \toprule
@@ -572,6 +594,7 @@ Tables (\ref{tab:Alpha_1D_Values},\ref{tab:Beta_1D_Values},\ref{tab:Gamma_1D_Val
     and {\tt TIGHT} accuracy (See text) and the results obtained with
     the GAMESS quantum chemistry package \cite{gamess} with the 6-31G. 
     All the results are in $[a.u.]$.
+    WE CAN REMOVE SOME DIGITS.
   }\label{tab:Gamma_1D_Values}
   \begin{tabular}{ccccc}
     \toprule
@@ -601,16 +624,6 @@ Tables (\ref{tab:Alpha_1D_Values},\ref{tab:Beta_1D_Values},\ref{tab:Gamma_1D_Val
 
 
 \subsection{Linear scaling: 3D water clusters}
-We have performed polarizability calculations on a series of water 
-clusters at standard liquid density \cite{MChallacombe97,ESchwegler97},
-up to (H$_2$O)$_{150}$. 
-Calculations have been carried out at both the RHF/6-31G and RHF/6-31G** levels of
-theory and at both the {\tt GOOD} and {\tt TIGHT} thresholding parameter 
-sets that control precision of the linear scaling algorithms, corresponding 
-to matrix thresholds of $10^{-5}$ and $10^{-6}$, respectively.
-Calculations were carried out on a single Intel Xeon 2.4GHz processor 
-running RedHat Linux 8.0 and  executables compiled
-with Portland Group Fortran Compiler pgf90 4.0-2 \cite{PGF90}.
 
 
 Figure \ref{fig:Superposition_Decay} shows the superposition 
@@ -626,6 +639,11 @@ of the internuclear distance, however the decay is slower and the locality
 becomes lower for the higher order response functions.
 Therefor, we find a later onset for the linear scaling for the higher order
 responses.
+
+Calculations have been carried out at both the RHF/6-31G and RHF/6-31G** levels of
+theory and at both the {\tt GOOD} and {\tt TIGHT} thresholding parameter 
+sets that control precision of the linear scaling algorithms, corresponding 
+to matrix thresholds of $10^{-5}$ and $10^{-6}$, respectively.
 
 
 
@@ -737,7 +755,7 @@ responses.
     WE MAY REMOVE THIS!
     Magnitudes of the RHF/6-31G density matrix derivative elements $D^{x}_{cd}$
     along the $x$ axis with the separation of basis function centers
-    for the $(H_2O)_{150}$ water cluster. The density matrix 
+    for the $\rm (H_2O)_{150}$ water cluster. The density matrix 
     derivative has been converged to within {\tt TIGHT} (e.g. 
     matrix threshold of $10^{-6}$ $[a.u.]$).
   }\label{fig:Alpha_Decay}
@@ -750,7 +768,7 @@ responses.
     WE MAY REMOVE THIS!
     Magnitudes of the RHF/6-31G density matrix second derivative elements $D^{xx}_{cd}$
     along the $x$ axis with the separation of basis function centers
-    for the $(H_2O)_{150}$ water cluster. The density matrix 
+    for the $\rm (H_2O)_{150}$ water cluster. The density matrix 
     derivative has been converged to within {\tt TIGHT} (e.g. 
     matrix threshold of $10^{-6}$ $[a.u.]$).
   }\label{fig:Beta_Decay}
@@ -763,7 +781,7 @@ responses.
     WE MAY REMOVE THIS!
     Magnitudes of the RHF/6-31G density matrix third derivative elements $D^{xxx}_{cd}$
     along the $x$ axis with the separation of basis function centers
-    for the $(H_2O)_{150}$ water cluster. The density matrix 
+    for the $\rm (H_2O)_{150}$ water cluster. The density matrix 
     derivative has been converged to within {\tt TIGHT} (e.g. 
     matrix threshold of $10^{-6}$ $[a.u.]$).
   }\label{fig:Beta_Decay}
@@ -776,9 +794,10 @@ responses.
     Superposition of the magnitudes of the RHF/6-31G density matrix
     derivative elements $D_{cd}$, $D^{x}_{cd}$, $D^{xx}_{cd}$ and $D^{xxx}_{cd}$
     along the $x$ axis with the separation of basis function centers
-    for the $(H_2O)_{150}$ water cluster. The density matrix 
+    for the $\rm (H_2O)_{150}$ water cluster. The density matrix 
     derivatives have been converged to within {\tt TIGHT} (e.g. 
     matrix threshold of $10^{-6}$ $[a.u.]$).
+    IT MISS THE GROUND STATE DENSITY MATRIX.
   }\label{fig:Superposition_Decay}
   \resizebox*{3.5in}{!}{\includegraphics[angle=0.00]{DPrimeMix2}}
 \end{figure}

@@ -14,7 +14,7 @@ links:
 	ln -s ../../RevTex/12pt.rtx ./12pt.rtx
 
 ps:	latex
-	dvips -o prl2.ps Response3
+	dvips -o jcp3.ps Response3
 
 dvi:	latex
 	xdvi -s 3 Response3
