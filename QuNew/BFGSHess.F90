@@ -100,7 +100,7 @@ PROGRAM BFGSHess
          DO M2=-NRgn(2),NRgn(2)
             DO M3=-NRgn(3),NRgn(3)  
                VecF=(/DBLE(M1),DBLE(M2),DBLE(M3)/)
-               VecA=ABS(FracToAtom(GM1,VecF)+X0%D(I1:I2)-X1%D(I1:I2))
+               VecA=FracToAtom(GM1,VecF)+X1%D(I1:I2)-X0%D(I1:I2)
                AB2=VecA(1)**2+VecA(2)**2+VecA(3)**2
                IF(AB2<AB2MAX)THEN
                   DX%D(I1:I2)=VecA
@@ -113,7 +113,6 @@ PROGRAM BFGSHess
       DX%D(I1:I2)=X1%D(I1:I2)-X0%D(I1:I2)
 #endif
    ENDDO
-!WRITE(*,*)' DX = ',DX%D
    DG%D=G1%D-G0%D
    GradEDotDeltaX=DOT_PRODUCT(G1%D,DX%D)/DBLE(N3)
    CALL Put(GradEDotDeltaX,'GradEDotDeltaX')

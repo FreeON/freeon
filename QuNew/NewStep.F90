@@ -49,8 +49,11 @@ PROGRAM NewStep
    CALL New(X1,N3)
    CALL New(X2,N3)!
    CALL Get(GM,Tag_O=PrvGeom)
-!   WRITE(*,*)' NewStep: OLD GEOMETRY # ',PrvGeom
-!   CALL PPrint(GM,Unit_O=6,PrintGeom_O='XYZ')
+!
+!  WRITE(*,*)' NewStep: OLD GEOMETRY # ',PrvGeom
+!  CALL PPrint(GM,Unit_O=6,PrintGeom_O='PDB')
+!
+   CALL Get(StepSz,'StepSize')
    CALL Get(G1,'GradE',Tag_O=PrvGeom)
 !   WRITE(*,*)' NewStep: NEW GRADIENT # ',CurGeom
 !   CALL PPrint(G1,'GradE',Unit_O=6)
@@ -62,23 +65,25 @@ PROGRAM NewStep
       ENDDO
    ENDDO
    CALL Get(B,TrixFile('B',Args,NoTags_O=.TRUE.))
-!   CALL PPrint(B,'B',Unit_O=6)
    CALL New(DnsB,(/N3,N3/))
    CALL New(BInv,(/N3,N3/))
    CALL SetEq(DnsB,B)
    CALL FunkOnSqMat(N3,Inverse,DnsB%D,BInv%D)
    X2%D=-MATMUL(BInv%D,G1%D)
+   X2%D=X1%D+StepSz*X2%D
 !   CALL PPrint(X2,'DescentDir',Unit_O=6)
    GradEDotNewStep=DOT_PRODUCT(X2%D,G1%D)
+   XRMS=SQRT(DOT_PRODUCT(X1%D-X2%D,X1%D-X2%D))/DBLE(N3)
+   GRMS=SQRT(DOT_PRODUCT(G1%D,G1%D))/DBLE(N3)
+   XMAX=Zero;GMAX=Zero
+   DO I=1,N3;XMAX=MAX(XMAX,ABS(X1%D(I)-X2%D(I)));ENDDO
+   DO I=1,N3;GMAX=MAX(GMAX,ABS(G1%D(I)));ENDDO
    CALL Put(GradEDotNewStep,'GradEDotNewStep')
-   CALL Get(StepSz,'StepSize')
-   XRMS=StepSz*SQRT(DOT_PRODUCT(X2%D,X2%D))/DBLE(N3)
-   XMAX=Zero
-   DO I=1,N3;XMAX=MAX(XMAX,ABS(X2%D(I)));ENDDO
-   XMAX=XMAX*StepSz
    CALL Put(XRMS,'RMSDisp',CurGeom)
+   CALL Put(GRMS,'RMSGrad',CurGeom)
    CALL Put(XMAX,'MaxDisp',CurGeom)
-   X2%D=X1%D+StepSz*X2%D
+   CALL Put(GMAX,'MaxGrad',CurGeom)
+!  Morph back to CRDS array
    K=0
    DO I=1,NAtoms
       DO J=1,3
@@ -87,6 +92,7 @@ PROGRAM NewStep
       ENDDO
    ENDDO   
 #ifdef PERIODIC
+!  Wrap atoms back into unit cell
    DO I=1,NAtoms
       CALL AtomCyclic(GM,GM%Carts%D(:,I))
       GM%BoxCarts%D(:,I)=AtomToFrac(GM,GM%Carts%D(:,I)) 
@@ -94,12 +100,7 @@ PROGRAM NewStep
 #endif   
    CALL Put(GM,CurGeom)   
 !   WRITE(*,*)' NewStep: NEW GEOMETRY # ',CurGeom
-!   CALL PPrint(GM,Unit_O=6,PrintGeom_O='XYZ')
-   GRMS=SQRT(DOT_PRODUCT(G1%D,G1%D))/DBLE(N3)
-   GMAX=Zero
-   DO I=1,N3;GMAX=MAX(GMAX,ABS(G1%D(I)));ENDDO
-   CALL Put(GRMS,'RMSGrad',CurGeom)
-   CALL Put(GMAX,'MaxGrad',CurGeom)
+!   CALL PPrint(GM,Unit_O=6,PrintGeom_O='PDB')
 !   WRITE(*,*)NxtGeom,'GradStats ',GRMS,GMAX
    CALL Shutdown(Prog)
 END PROGRAM 

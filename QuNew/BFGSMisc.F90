@@ -91,7 +91,8 @@ MODULE BFGSMisc
             ENDDO
 !           Update
             DO AtB=1,NAtoms
-               IF(SetAtomPair(GM,BS,AtA,AtB,Pair))THEN
+!               Commented out following to give correct behavior for periodics.
+!               IF(SetAtomPair(GM,BS,AtA,AtB,Pair))THEN
                   OB=OffS%I(AtB)
                   S=Flag%I(AtB)    
                   N=BSiz%I(AtB)
@@ -112,7 +113,7 @@ MODULE BFGSMisc
                         R=R+1
                      ENDIF          
                   ENDIF
-               ENDIF
+!              ENDIF
             ENDDO
             DO KL=BNew%RowPt%I(AtA),R-1
                Flag%I(BNew%ColPt%I(KL))=0
