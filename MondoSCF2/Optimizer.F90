@@ -1529,6 +1529,8 @@ CONTAINS
          !
          CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
          CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
+         C%Stat%Previous%I(3)=iGEO-1
+         C%Stat%Current%I(3)=iGEO
          CALL SCF(iBAS,iGEO,C)
        ELSE
          EXIT
