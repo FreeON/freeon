@@ -447,6 +447,8 @@ CONTAINS
          Top(I,1)=4
        ELSE IF(IntCs%Def%C(I)(1:4)=='LINB') THEN
          Top(I,1)=3
+       ELSE IF(IntCs%Def%C(I)(1:4)=='CART') THEN
+         Top(I,1)=1
        ENDIF
        DO J=1,Top(I,1)
          Top(I,J+1)=IntCs%Atoms%I(I,J)
