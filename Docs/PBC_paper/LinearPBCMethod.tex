@@ -1,51 +1,36 @@
-%% LyX 1.1 created this file.  For more info, see http://www.lyx.org/.
-%% Do not edit unless you really know what you are doing.
-\documentclass[twocolumn,english]{revtex4}
-\usepackage[T1]{fontenc}
-\usepackage{babel}
-\usepackage{graphics}
+% NOTE TO AIP TYPSETERS: TO CONVERT FROM TWO-COL TO PREPRINT, SWITCH
+% COMMENTOUT COMMAND FROM A TO B IE. use
+% \newcommand{\commentoutA}[1]{}
+% \newcommand{\commentoutB}[1]{#1}
+% instead of the following
+\newcommand{\commentoutA}[1]{#1}
+\newcommand{\commentoutB}[1]{}
+\renewcommand{\thefootnote}{\fnsymbol{footnote}}
 
-\makeatletter
+\commentoutA{\documentclass[prb,aps,twocolumn,showpacs,twocolumngrid,superbib]{revtex4}}
+\commentoutB{\documentclass[prb,aps,nobibnotes,showpacs,superbib,preprint]{revtex4}}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% LyX specific LaTeX commands.
-\providecommand{\LyX}{L\kern-.1667em\lower.25em\hbox{Y}\kern-.125emX\@}
-%% Special footnote code from the package 'stblftnt.sty'
-%% Author: Robin Fairbairns -- Last revised Dec 13 1996
-\let\SF@@footnote\footnote
-\def\footnote{\ifx\protect\@typeset@protect
-    \expandafter\SF@@footnote
-  \else
-    \expandafter\SF@gobble@opt
-  \fi
-}
-\expandafter\def\csname SF@gobble@opt \endcsname{\@ifnextchar[%]
-  \SF@gobble@twobracket
-  \@gobble
-}
-\edef\SF@gobble@opt{\noexpand\protect
-  \expandafter\noexpand\csname SF@gobble@opt \endcsname}
-\def\SF@gobble@twobracket[#1]#2{}
+\usepackage{graphicx}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{bm}
+\usepackage{alltt}
+%\usepackage{epsfig}
+%%
+%%
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Textclass specific LaTeX commands.
- \newcommand{\lyxaddress}[1]{
-   \par {\raggedright #1 
-   \vspace{1.4em}
-   \noindent\par}
- }
-
-\makeatother
 \begin{document}
 
-\title{\textbf{Linear scaling computation of the Fock matrix VI. Gaussian
-orbital methods for simulation of periodic systems}}
+\date{\today}
 
+\title{Linear scaling computation of the Fock matrix VI. \\
+       Periodic boundary conditions and pure Density Functional Theory}
 
 \author{C.J. Tymczak and Matt Challacombe}
 
-\maketitle
-
-\lyxaddress{Theoretical Division, Los Alamos National Laboratory, Los Alamos,
-New Mexico 87545 }
+\affiliation{
+Theoretical Division, Los Alamos National Laboratory,
+Los Alamos, NM 87545, USA}
 
 \begin{abstract}
 Periodic boundary conditions have been implemented in the linear scaling
@@ -63,8 +48,23 @@ data structures (k-d trees) that maximally exploits locality of the
 density. Finally, the current capabilities of MondoSCF for large condensed
 phases will be demonstrated.
 \end{abstract}
-\vfill\vfill\vfill \textbf{LA-UR-5555} \eject
 
+
+\smallskip
+\noindent{\bf Keywords}: Self-Consistent-Field, Density Functional Theory, Hartree-Fock, Gaussian-Orbital, 
+                         Linear-Scaling, Density Matrix, Spectral Projection, Purification, Sparse Matrix,
+                         Degeneracy, Fractional Occupation
+\end{abstract}
+
+\pacs{02.60.Dc,31.15.Ne,71.15Dx,71.15Nc}
+
+\keywords{self-consistent-field,linear-scaling,tree-code,adaptive numerical integration,Gaussian-orbital}
+
+\maketitle
+
+\footnotetext[3]{\tt Tymczak@LANL.Gov}
+\footnotetext[6]{\tt MChalla@LANL.Gov}
+\footnotetext[4]{Preprint LA-UR-03-XXXX.}
 
 \section{INTRODUCTION}
 

@@ -1,17 +1,16 @@
-all: normal
+all:	latex dvi
 
-normal:
+latex:
 	latex LinearPBCMethod_revtex4.tex
 	latex LinearPBCMethod_revtex4.tex
-	xdvi -s 2 LinearPBCMethod_revtex4
 
-new: 	clean links figs bib ps
+new: 	clean links bib dvi
 
 bib:	
 	latex LinearPBCMethod_revtex4.tex
 	bibtex LinearPBCMethod_revtex4
-#	latex LinearPBCMethod_revtex4.tex
-#	bibtex LinearPBCMethod_revtex4
+	latex LinearPBCMethod_revtex4.tex
+	bibtex LinearPBCMethod_revtex4
 #	latex LinearPBCMethod_revtex4.tex	
 #	latex LinearPBCMethod_revtex4.tex	
 
@@ -29,6 +28,9 @@ links:
 
 ps:
 	dvips -o LinearPBCMethod_revtex4.ps LinearPBCMethod_revtex4
+
+dvi:
+	xdvi -s 2 LinearPBCMethod_revtex4
 
 clean:
 	rm -rf *.log *.aux *.bbl *.blg *.dvi *~

@@ -1,34 +1,42 @@
-\documentclass[prb,aps,nobibnotes,twocolumn,doublespace,twocolumngrid,superbib]{revtex4}
-%\documentclass[prb,aps,nobibnotes,superbib,preprint]{revtex4}
+% NOTE TO AIP TYPSETERS: TO CONVERT FROM TWO-COL TO PREPRINT, SWITCH
+% COMMENTOUT COMMAND FROM A TO B IE. use
+% \newcommand{\commentoutA}[1]{}
+% \newcommand{\commentoutB}[1]{#1}
+% instead of the following
+\newcommand{\commentout}[1]{}
+\newcommand{\commentoutA}[1]{#1}
+\newcommand{\commentoutB}[1]{}
+\renewcommand{\thefootnote}{\fnsymbol{footnote}}
+
+\commentoutA{\documentclass[prb,aps,twocolumn,showpacs,twocolumngrid,superbib]{revtex4}}
+\commentoutB{\documentclass[prb,aps,nobibnotes,showpacs,superbib,preprint]{revtex4}}
 
 \usepackage{graphicx}
 \usepackage{amsfonts}
 \usepackage{amsmath}
 \usepackage{bm}
 \usepackage{alltt}
-\usepackage{dcolumn} 
-\usepackage{graphicx}
-\makeatletter 
-\makeatother
+%\usepackage{epsfig}
+%%
+%%
 
 \begin{document}
 
-\title{\textbf{Linear scaling computation of the Fock matrix VII. Gaussian
-orbital methods for simulation of periodic systems}}
-
-
-\author{C. J. Tymczak}
-\author{Matt Challacombe}
-
-\affiliation{Theoretical Division, Los Alamos National Laboratory, Los Alamos,
-New Mexico 87545 }
-
 \date{\today}
+
+\title{Linear scaling computation of the Fock matrix VII. Pure \\ 
+       Density Functional Theory with periodic boundary conditions}
+
+\author{C.J. Tymczak and Matt Challacombe}
+
+\affiliation{
+Theoretical Division, Los Alamos National Laboratory,
+Los Alamos, NM 87545, USA}
 
 \begin{abstract}
 Periodic boundary conditions have been implemented in the linear scaling
 Quantum Chemistry code \textbf{MondoSCF}. For the two-electron Coulomb
-matrix, this has been achieved with an exact multi-pole expansion of
+matrix, this has been achieved with an exact multipole expansion of
 the long range Coulomb field. This yields a spherically summed boundary
 condition that is easily transformed to Ewald boundary conditions.
 In order to achieve linear scaling of the local Coulomb field, a Quantum
@@ -38,11 +46,19 @@ matrix and the exact-exchange matrix. A Hierarchical Cubature (HiCu),
 pure Cartesian adaptive grid is used for the local exchange-correlation
 matrix. This method achieves linear scaling through the use of advanced
 data structures (k-d trees) that maximally exploits locality of the
-density. Finally, the current capabilities of \textbf{MondoSCF} for large condensed
-phases will be demonstrated.
+density. Finally, the current capabilities of MondoSCF for large condensed
+phases will be demonstrated.\\[.1cm]
+\noindent{\bf Keywords}: self-consistent-field, linear-scaling,tree-code, adaptive numerical integration, Gaussian-orbital
 \end{abstract}
 
+\pacs{02.60.Dc,31.15.Ne,71.15Dx,71.15Nc}
+
+
 \maketitle
+
+\footnotetext[3]{\tt Tymczak@LANL.Gov}
+\footnotetext[6]{\tt MChalla@LANL.Gov}
+\footnotetext[4]{Preprint LA-UR-03-XXXX.}
 
 \section{INTRODUCTION}
 In recent years several successful methods for the calculating the electronic structure of
@@ -112,6 +128,8 @@ of the Silicon (111) surface with a step.
 Finally we give some conclusion concerning the accuracy and utility of \textbf{MondoSCF}
 and future research directions.
 
+\commentout{
+
 \section{The Kohn-Sham Equations}
 
 Following the seminary work of Kohn and Sham\cite{KohnSham65}, we start with the KS single 
@@ -137,42 +155,58 @@ discuss the calculation of each of the terms in the Hamiltonian
 and how they are calculated in the non-orthogonal Gaussian basis
 with the inclusion of periodic boundary conditions.
 
-\section{One-Electron Matrices}
+}
 
-The first step in including periodic boundary conditions into our
-linear scaling code is to determine the minimal modifications to the
-one-electron integrals needed to obtain this. We incorporate periodic
-boundary conditions into our linear scaling method by modifying the
-integrals. Consider the non-periodic overlap matrix
+\section{Boundary Conditions}
 
+In conventional implementations of periodic boundary conditions, 
+Bloch functions 
+\begin{equation}
+\psi_a({\bf r},{\bf k})  =  \sum_{\bf R} e^{i {\bf k}\cdot {\bf R}} \phi_a ({\bf r}-{\bf R}),
+\end{equation}
+are often constructed from non-orthogonal functions local to the unit cell (UC). Here, the local function
+$\phi_a$ is a Gaussian-Type Atomic Orbital (GTAO) centered on atom {\bf A}, while the 
+sum on $\bf R$ runs over the Bravais lattice defined by integer translates of the primitive 
+lattice vectors {\bf a}, {\bf b} and {\bf  c}.   These Bloch functions (crystal orbitals)
+yeild all possible translational symmetries through variation of the reciprocal lattice vector $\bf k$.     
+For small system sizes with high symmetry, a carefull sampling of reciprocal space is required 
+for an accurate description of the periodic system.  An alternative approach to including these
+important symmetries is to set ${\bf k}=0$ but to use a larger supercell created through replication 
+and translation of the primitive UC.  This is the supercell $\Gamma$-point approximation, used
+primarily for the study of defects and vacencies rather than as a replacement for $\bf k$-space integration,
+perhaps due to the expense of conventional algorithms and slow convergence for small gap systems.
+
+In this contribution, ${\cal O}(N)$ algorithms are developed specifically for the the $\Gamma$-point 
+approximation, allowing the use of large supercells in the case of high symmetry and large primary UCs 
+in the case of disordered systems.  While the $\bf k$  dependence is avoided, lattice summation and formal integration over 
+the unit cell volume, $V_{\rm UC}$ are retained, at first sight making matrix construction seem quite different than in the 
+gas phase,  where integrals are typically taken over all space, $V_\infty$.  Thus, elements of the gas phase overlap matrix 
 \begin{equation}
 \label{Sab_norm}
 S_{ab}=\int _{V_{\infty }}\, d{\mathbf{r}}\, \phi _{a}({\mathbf{r}})\phi _{b}
 ({\mathbf{r}})
 \end{equation}
- where \( \{\phi _{a}(x),\phi _{b}(x)\} \) are the atomic orbitals
-(LCAO) at atom \( a \) and atom \( b \) and \( V_{\infty } \) is
-the integration over all space. In the periodic case this is replaced
-by,
-
+become 
 \begin{equation}
 \label{Sab_pbc1}
-S_{ab}^{PBC}=\sum _{\mathbf{R},\mathbf{R}'}\int _{V_{cell}}\, d{\mathbf{r}}\, 
+S_{ab}=\sum _{\mathbf{R},\mathbf{R}'}\int _{V_{\rm UC}}\, d{\mathbf{r}}\, 
 \phi _{a}({\mathbf{r}+\mathbf{R}})\phi _{b}({\mathbf{r}+\mathbf{R}'})
 \end{equation}
-where, \( V_{cell} \) is the integration over the simulation cell,
-and \( \{\mathbf{R},\mathbf{R}'\} \) are the brava lattice vectors,
-this is illustrated in figure \ref{figure:SimCell}, where \( \left\{ {\mathbf{a},
-\mathbf{b},\mathbf{c}}\right\}  \)
-are the primitive lattice vectors. Because of the locality of the
-atomic orbitals, we can remove the double sum over lattice vectors
-to get
-
+in the periodic regime.  
+This formalism can be changed via the 
+transformation $\sum_{\bf R} \int_{V_{\rm UC}} d {\bf r} f({\bf r+R}) \rightarrow \int_{V_\infty} d {\bf r} f({\bf r})$,
+allowing use of conventional analytic integral technologies \cite{twoels}.  With this
+transformation, elements of the periodic overlap matrix become
 \begin{equation}
 \label{Sab_pbc2}
 S_{ab}^{PBC}=\sum _{\mathbf{R}}\int _{V_{\infty }}\, d{\mathbf{r}}\, \phi _{a}
-({\mathbf{r}})\phi _{b}({\mathbf{r}+\mathbf{R}})
+({\mathbf{r}})\phi _{b}({\mathbf{r}+\mathbf{R}}).
 \end{equation}
+
+
+
+
+
 We will use this Periodic Localization Transformation repeatedly
 in what follows. Let us present some useful definitions:
 
@@ -217,6 +251,8 @@ T^{PBC}_{ab}=-\frac{1}{2}\sum _{\mathbf{R}}\int _{V_{\infty }}\, d{\mathbf{r}}\,
 Both the $S_{ab}$ and $T_{ab}$ matrix elements are calculated very efficiently
 with this method, asymptotically costing the same as non-periodic phase calculations
 within the code.
+
+
 
 \section{The Two-Electron matrices}
 
