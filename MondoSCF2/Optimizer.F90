@@ -732,18 +732,18 @@ CONTAINS
        CALL SteepestDesc(GOpt%CoordCtrl,GOpt%Hessian, &
                          Grad,Displ,XYZ)
      CASE(GRAD_DIAGHESS_OPT) 
-      !IF(iGEO<3) THEN
+      !IF(iGEO<2) THEN
          CALL RescaleGrad(Grad%D,Print)
          CALL DiagHess(GOpt%CoordCtrl,GOpt%Hessian,Grad,Displ, &
                        IntCs,AtNum,iGEO,XYZ)
+         CALL CutOffDispl(Displ%D,IntCs)
+         CALL RedundancyOff(Displ%D,SCRPath,Print)
       !ELSE
       !  CALL GeoDIIS(XYZ,GOpt%Constr,GOpt%BackTrf, &
       !    GOpt%GrdTrf,GOpt%TrfCtrl,GOpt%CoordCtrl,GOpt%GDIIS, &
       !    HFileIn,iCLONE,iGEO-1,Print,SCRPath, &
       !    Displ_O=Displ%D,Grad_O=CartGrad,IntGrad_O=Grad%D)
       !ENDIF
-       CALL CutOffDispl(Displ%D,IntCs)
-       CALL RedundancyOff(Displ%D,SCRPath,Print)
      END SELECT
      !
      ! Set constraints on the displacements

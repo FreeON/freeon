@@ -46,7 +46,7 @@ CONTAINS
      REAL(DOUBLE),DIMENSION(:),OPTIONAL :: Displ_O,Grad_O,IntGrad_O
      !
      IF(PRESENT(Displ_O)) THEN
-       GDIISMemory=MIN(7,iGEO)
+       GDIISMemory=MIN(10,iGEO)
      ELSE
        GDIISMemory=MIN(6,iGEO)
      ENDIF
@@ -904,7 +904,7 @@ enddo
           IntCs%Def(I)(1:4)=='OUTP'.OR. & 
           IntCs%Def(I)(1:4)=='TORS') THEN
          CALL PeriodicAngle(VectX%D)
-write(*,*) 'center= ',Center
+write(*,*) 'data points angle ordered= '
 do j=1,ndim
 write(*,*) vectx%d(j),vecty%d(j)
 enddo
@@ -918,14 +918,18 @@ enddo
          CALL Loose2PIs(FitVal%D(I))
          CALL LinBTo180(FitVal%D(I)) 
        ELSE IF(IntCs%Def(I)(1:4)=='BEND') THEN
+         CALL ChkBendLim(IntCValues(I,NDim),FitVal%D(I),5.D0)
          CALL BendTo180(FitVal%D(I))
+       ELSE IF(IntCs%Def(I)(1:4)=='STRE') THEN
+         CALL ChkStreLim(IntCValues(I,NDim),FitVal%D(I),0.3D0)
        ENDIF
-write(*,*) 'fit= ',FitVal%D(I)
        Displ(I)=FitVal%D(I)-IntCValues(I,NDim)
        CALL MapDAngle(IntCs%Def(I),IntCValues(I,NDim),Displ(I))
 if(IntCs%Def(I)(1:4)=='STRE') then
+write(*,*) 'fit= ',FitVal%D(I),FitVal%D(I)/angstromstoau
 write(*,*) 'displ= ',i,IntCs%Def(I),IntCValues(I,NDim)/angstromstoau,Displ(I)/angstromstoau
 else
+write(*,*) 'fit= ',FitVal%D(I),FitVal%D(I)*180.D0/PI
 write(*,*) 'displ= ',i,IntCs%Def(I),IntCValues(I,NDim)*180.D0/PI,Displ(I)*180.D0/PI
 endif
      ENDDO
@@ -941,41 +945,47 @@ endif
    SUBROUTINE FitInt(VectX,VectY,Sig,FitVal,Def)
      REAL(DOUBLE),DIMENSION(:) :: VectX,VectY,Sig
      REAL(DOUBLE)              :: FitVal
-     INTEGER                   :: I,J,NDim,MWT
-     REAL(DOUBLE)              :: A,B,SigA,SigB,Chi2,Q
-     REAL(DOUBLE)              :: XMax,XMin,YMax,YMin,AbDev
+     INTEGER                   :: I,J,NDim,MWT,ILower,IUpper
+     REAL(DOUBLE)              :: A,B,SigA,SigB,Chi2,Q,G1,G2,X1,X2
+     REAL(DOUBLE)              :: XMax,XMin,YMax,YMin,AbDev,Center
+     REAL(DOUBLE)              :: UpperB,LowerB
      CHARACTER(LEN=*)          :: Def
+     LOGICAL                   :: DoBisect
      !
      NDim=SIZE(VectX)
      MWT=1
-write(*,*) 'VectX= ',VectX
      XMin=MINVAL(VectX)
      XMax=MAXVAL(VectX)
-write(*,*) 'xmin= ',xmin,' xmax= ',xmax
-     IF(ABS(XMin-XMax)<1.D-7) THEN
-write(*,*) 'in critical X'
-       YMin=MINVAL(VectY)
-       YMax=MAXVAL(VectY)
-write(*,*) 'ymin= ',ymin,' ymax= ',ymax
+     YMin=MINVAL(VectY)
+     YMax=MAXVAL(VectY)
+     IF(ABS(XMin-XMax)<1.D-5) THEN
        IF(ABS(YMin)>1.D-4.AND.ABS(YMax)>1.D-4) THEN
-write(*,*) 'in critical Y1'
          CALL Halt('Grad too big in FitInt, while coordinate does not move.')
        ELSE
-write(*,*) 'in critical Y2'
          FitVal=VectX(NDim)-VectY(NDim)
          RETURN
        ENDIF
      ENDIF
-   ! CALL Fit(VectX,VectY,NDim,Sig,MWT,A,B,SigA,SigB,Chi2,Q)
-!write(*,*) 'SigA= ',SigA,' SigB= ',SigB,' Q= ',Q,' Chi2= ',Chi2
-     CALL MedFit(VectX,VectY,NDim,A,B,AbDev)
-write(*,*) 'AbDev= ',AbDev
-     ! B refers to the harmonic force constant
-write(*,*) 'line= ',a,b     
-     IF(ABS(B)>1.D-7) THEN
-       FitVal=-A/B
+     !
+     ! Now bisect or extrapolate
+     !
+     DoBisect=(VectY(Ndim)*VectY(NDim-1)<Zero)
+     IF(DoBisect) THEN
+       G1=VectY(NDim) ; G2=VectY(Ndim-1)
+       X1=VectX(NDim) ; X2=VectX(Ndim-1)
+write(*,*) 'doing bisect ',X1,G1,X2,G2
+       IF(ABS(X1-X2)<1.D-4) THEN
+         FitVal=(X1+X2)/Two
+write(*,*) 'doing bisect 1 ',X1,X2,FitVal
+       ELSE
+         B=(G1-G2)/(X1-X2) ; A=G1-B*X1
+         FitVal=-A/B
+write(*,*) 'doing bisect 2 ',FitVal
+       ENDIF
      ELSE
-       FitVal=VectX(NDim)
+write(*,*) 'doing extrapolation '
+       CALL Extrapolate(VectX,VectY,Sig,FitVal)
+ !!!!! CALL TestExtraPol(VectX(NDim),VectY(NDim),FitVal)
      ENDIF
    END SUBROUTINE FitInt
 !
@@ -1215,10 +1225,66 @@ write(*,*) 'ss = ',ss
 !
 !---------------------------------------------------------------------
 !
-   SUBROUTINE Extrapolate(VectX,VectY,FitVal)
-     REAL(DOUBLE),DIMENSION(:) :: VectX,VectY
-     REAL(DOUBLE)              :: FitVal      
-     INTEGER                   :: I,J,NDim
+   SUBROUTINE Extrapolate(VectX,VectY,Sig,FitVal)
+     REAL(DOUBLE),DIMENSION(:) :: VectX,VectY,Sig
+     REAL(DOUBLE)              :: FitVal,Center,A,B,AbDev,MaxDev
+     REAL(DOUBLE)              :: Filter,FitValOld
+     REAL(DOUBLE)              :: SigA,SigB,Chi2,Q
+     INTEGER                   :: I,J,NDim,NFit,K,MWT
+     TYPE(DBL_VECT)            :: VectXAct,VectYAct,Devs
+     !
+     NDim=SIZE(VectX)
+     Filter=Sig(NDim)
+     CALL New(Devs,NDim)
+     CALL New(VectXAct,NDim)
+     CALL New(VectYAct,NDim)
+     !
+     NFit=NDim
+     VectXAct%D=VectX
+     VectYAct%D=VectY
+     FitValOld=Zero
+     DO K=1,NDim
+       IF(NFit<3) THEN
+         FitVal=VectX(NDim)-VectY(NDim)
+write(*,*) 'fitval is changing in ExtraPol to ',FitVal
+         EXIT
+       ENDIF
+       MWT=0 ; CALL Fit(VectX,VectY,NDim,Sig,MWT,A,B,SigA,SigB,Chi2,Q)
+   !   CALL MedFit(VectXAct%D(1:NFit),VectYAct%D(1:NFit),NFit,A,B,AbDev)
+write(*,*) 'AbDev= ',AbDev
+write(*,*) 'line= ',a,b     
+write(*,*) 'last RMS= ',Filter   
+       FitVal=(-A)/B
+       IF(ABS(FitVal-FitValOld)<Filter) EXIT
+       FitValOld=FitVal
+write(*,*) K,' FitVal = ',FitVal,(FitVal-VectX(NDim))*180.D0/PI
+       !
+       DO I=1,NDim
+         Devs%D(I)=ABS(VectY(I)-(A+B*VectX(I)))
+       ENDDO
+write(*,*) 'Devs= ',Devs%D
+       MaxDev=MAXVAL(Devs%D)
+       IF(MaxDev>Filter) THEN
+         NFit=0
+         DO J=1,NDim-1
+           IF(Devs%D(J)<Filter) THEN
+             NFit=NFit+1
+             VectXAct%D(NFit)=VectX(J)
+             VectYAct%D(NFit)=VectY(J)
+write(*,*) 'newfit= ',nfit,VectXAct%D(NFit),VectYAct%D(NFit)
+           ENDIF
+         ENDDO
+         NFit=NFit+1
+         VectXAct%D(NFit)=VectX(NDim)
+         VectYAct%D(NFit)=VectY(NDim)
+       ELSE
+         EXIT
+       ENDIF
+     ENDDO
+     IF(K>=NDim) CALL Halt('Error in Extrapolate.')
+     CALL Delete(VectXAct)
+     CALL Delete(VectYAct)
+     CALL Delete(Devs)
    END SUBROUTINE Extrapolate
 !
 !---------------------------------------------------------------------
@@ -1475,6 +1541,38 @@ write(*,*) 'ss = ',ss
       endif
       goto 1
    END FUNCTION Select
+!
+!---------------------------------------------------------------------
+!
+   SUBROUTINE TestExtraPol(Val,Grad,FitVal)
+     REAL(DOUBLE) :: Val,Grad,FitVal
+     !
+write(*,*) 'in TestExtraPol ',Val,Grad,FitVal  
+     IF((FitVal-Val)*(-Grad)<Zero) THEN
+       FitVal=Val-Grad
+write(*,*) 'fitval is changing in TestExtraPol to ',FitVal
+     ENDIF
+   END SUBROUTINE TestExtraPol
+!
+!---------------------------------------------------------------------
+!
+   SUBROUTINE ChkBendLim(Val,FitVal,DeltaMax)
+     REAL(DOUBLE) :: Val,FitVal,DeltaMax
+     IF(FitVal>PI.OR.FitVal<Zero) THEN
+write(*,*) 'fitval is changing in ChkBendLim to ',FitVal
+       FitVal=Val+SIGN(DeltaMax*PI/180.D0,FitVal-Val)
+     ENDIF
+   END SUBROUTINE ChkBendLim
+!
+!---------------------------------------------------------------------
+!
+   SUBROUTINE ChkStreLim(Val,FitVal,DeltaMax)
+     REAL(DOUBLE) :: Val,FitVal,DeltaMax
+     IF(FitVal<Zero.OR.FitVal>Val*Two) THEN
+write(*,*) 'fitval is changing in ChkBendLim to ',FitVal
+       FitVal=Val+DeltaMax
+     ENDIF
+   END SUBROUTINE ChkStreLim
 !
 !---------------------------------------------------------------------
 !
