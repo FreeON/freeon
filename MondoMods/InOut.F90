@@ -2272,6 +2272,7 @@ CONTAINS
     !
     CALL Put(A%N1,TRIM(Name)//'N1',Tag_O=Tag_O)
     CALL Put(A%N2,TRIM(Name)//'N2',Tag_O=Tag_O)
+    IF(A%N1==0) RETURN
     IF(A%N1/=0) THEN
       CALL Put(A%Count,TRIM(Name)//'Count',Tag_O=Tag_O)
       IF(A%N2/=0) THEN

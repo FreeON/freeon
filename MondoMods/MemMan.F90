@@ -431,6 +431,7 @@ MODULE MemMan
         INTEGER         :: NatmsLoc,MaxBonds
         !
         IF(AllocQ(A%Alloc)) CALL Delete(A)
+        IF(NatmsLoc==0) RETURN
         A%N1=NatmsLoc
         A%N2=MaxBonds
         CALL New(A%Count,NatmsLoc)
@@ -451,6 +452,7 @@ MODULE MemMan
       SUBROUTINE Delete_ATOMBONDS(A)
         TYPE(ATOMBONDS) :: A
         !
+        IF(A%N1==0) RETURN
         A%N1=0        
         A%N2=0        
         CALL Delete(A%Count)
@@ -583,7 +585,7 @@ MODULE MemMan
          CALL New(A%PBCDispl)
          CALL New(A%IntCs,IntCMax)
         !CALL New(A%IntCs,A%IntCs%N)
-         CALL New(A%AtmB,A%NAtms,0)
+         CALL New(A%AtmB,0,0)
          CALL New(A%Bond,0)
          A%Alloc=ALLOCATED_TRUE
          A%ETotal=Zero
