@@ -1,3 +1,49 @@
+2003-12-12 10:05  mchalla
+
+	* HiCu/HiCu.F90: More hooks for ODA and MIX
+
+2003-12-12 10:05  mchalla
+
+	* QCTC/QCTC.F90: Hooks for ODA and MIX
+
+2003-12-12 10:04  mchalla
+
+	* SCFeqs/: MIX.F90, MixMaster.F90, ODA.F90, SCFStatus.F90: More
+	work on extrapolation routines.
+
+2003-12-12 09:18  vweber
+
+	* TwoE/: Gradients.m, DERIInterface.m: Minor changes.
+
+2003-12-11 16:33  vweber
+
+	* TwoE/: DERIInterface.m, Gradients.m: Minor changes.
+
+2003-12-11 15:25  ckgan
+
+	* Docs/PETN_paper/: petn_2d.eps, petn.tex: Accepted version.
+
+2003-12-11 14:58  vweber
+
+	* TwoE/: Gradients.m, Makefile, dInt1111.F90, dInt3111.F90,
+	dInt3131.F90, dInt3311.F90, dInt3331.F90, dInt3333.F90: Some minor
+	modifications.
+
+2003-12-11 13:38  mchalla
+
+	* SCFeqs/: MIX.F90, Makefile, ODA.F90: New extrapolation routines.
+
+2003-12-10 19:15  nemeth
+
+	* MondoMods/Makefile: An option, related to CHR_VECT is turned off
+	from the compilation. This was originally turned off, but at last
+	check in I've put in, to make sure, puts and gets of CHR_VECT will
+	work OK. It might have contributed to slowing down MakeRho.
+
+2003-12-10 16:50  mchalla
+
+	* ChangeLog: [no log message]
+
 2003-12-10 16:47  mchalla
 
 	* Docs/DM_Papers/PERT_2/: Alpha_h2o3D_6-31G_G_T_t.eps,
@@ -170,11 +216,6 @@
 
 	* SCFeqs/MixMaster.F90: [no log message]
 
-2003-11-12 15:06  mchalla
-
-	* SCFeqs/MMA/SCFDev/Cr2_6-31G_STANTON.nb: Stanton example combined
-	with Pulay Fock DIIS.
-
 2003-11-12 15:05  mchalla
 
 	* SCFeqs/MixMaster.F90: Very early attempt at Stanton like Fock
@@ -200,11 +241,6 @@
 2003-11-10 13:00  mchalla
 
 	* ChangeLog: [no log message]
-
-2003-11-10 12:58  mchalla
-
-	* SCFeqs/MMA/SCFDev/Cr2_6-31G_STANTON.nb: Fock mixing convergence
-	forcing
 
 2003-11-06 22:34  vweber
 
@@ -2091,11 +2127,6 @@
 	* Docs/PBC_paper/LinearPBCMethod_revtex4.tex: Fixed Tables Fixed
 	Appendix Fxed Figures except Fig 2 Fixed Reff
 
-2003-07-17 14:00  mchalla
-
-	* SCFeqs/MMA/SCFDev/FockNMix.nb: This is Anders new SCF optimizer
-	that mixes  Fockians together to minimize the energy.
-
 2003-07-16 11:36  vweber
 
 	* MondoMods/MatFunk.F90: Added check for non-positive def matrices,
@@ -2190,17 +2221,6 @@
 	this is also associated with the treatment of hydrogen bonds. Of
 	crucial importance was the reduction of the number of long-range
 	torsions along linear bendings.
-
-2003-07-10 12:44  mchalla
-
-	* SCFeqs/MMA/SCFDev/Cr2_6-31G.in.gz: Removed this big file, but can
-	still be retrived.
-
-2003-07-10 09:37  mchalla
-
-	* SCFeqs/MMA/SCFDev/: Cr2_6-31G.in.gz, Cr2_6-31G.nb,
-	SCF_STO-2G_Water.nb: New files, somewhat large though.	Will delete
-	the integrals file to keep it from the main release though...
 
 2003-07-09 10:44  ckgan
 
@@ -2797,11 +2817,6 @@
 	* ONX/NONX/Notes.txt: Whats left to fix for the gradients. Almost
 	there.
 
-2003-05-09 16:09  mchalla
-
-	* SCFeqs/MMA/SCFDev/: SCF_STO-2G_Water.nb, STO-2G_Water.in: Added
-	compilation of two electron integral contrtraction.
-
 2003-05-09 15:33  mchalla
 
 	* MMA/Compile.m: This is a MMA module to allow inline compilation
@@ -2964,13 +2979,6 @@
 
 	* SCFeqs/SP2.F90: Added in levelshift capability to SP2.  Needs to
 	be called twice ...
-
-2003-05-03 10:51  mchalla
-
-	* SCFeqs/MMA/SCFDev/: SCF_STO-2G_Water.nb, STO-2G_Water.in: example
-	scf calculations for minimal basis set HF water.  .in file obtained
-	from new hooks in FBuild, which print out core hamiltonian,
-	intergrals, etc to this directory.
 
 2003-05-03 09:59  mchalla
 
@@ -12192,11 +12200,6 @@
 
 	* README: [no log message]
 
-2000-12-12 11:02  mchalla
-
-	* SCFeqs/MMA/SCFDev/new.m: New file that mirrors the SDMM.F90
-	methods just introduced.
-
 2000-12-12 11:01  mchalla
 
 	* SCFeqs/SDMM.F90: The McWeeny purification scheme has been
@@ -12479,21 +12482,21 @@
 2000-11-28 09:56  mchalla
 
 	* SCFeqs/: DIIS.F90, FBuild.F90, FillPBlok.F90, Makefile,
-	RHeqs.F90, SCFStatus.F90, SDMM.F90, ToDev.F90, MMA/SCFDev/dev.m,
-	MMA/SDMM/dev.m: o SCFeqs   - DIIS: Works now.  Fixed several
-	bigbugs,included an uninitialized variable.	 OOed the inverse
-	matrix to MatFunk.  Avoid thresholding the error matrices,     
-	since these will go to zero much to fast otherwise.  May want to
-	threshold      eventually with a tighter value....    - FBuild:
-	Fixed bug that added in whole K matrix for B3LYP.  B3LYP works fine
-	now.	- RHeqs: Removed DSYEVD source.  Fixed bug in computing
-	HOMO-LUMO gap.	  - SCFStatus:	Reformated stdoutput.	 - SDMM:
-	SDMM now has an automatic criterion for swithcing from CG to
-	purification.	   Numerous minor improvments. Still needs some
-	tuning.    - ToDev: New routine added which writes MMA formatted
-	matrices to MMA/SCFDev	    for development of DMM methods.  Only
-	made if requested, eg "make Dev"    - /MMA/SCFDev/dev.m:
-	Development code that mirrors changes to SDMM.
+	RHeqs.F90, SCFStatus.F90, SDMM.F90, ToDev.F90: o SCFeqs   - DIIS:
+	Works now.  Fixed several bigbugs,included an uninitialized
+	variable.      OOed the inverse matrix to MatFunk.  Avoid
+	thresholding the error matrices,      since these will go to zero
+	much to fast otherwise.  May want to threshold	    eventually with
+	a tighter value....    - FBuild: Fixed bug that added in whole K
+	matrix for B3LYP.  B3LYP works fine now.    - RHeqs: Removed DSYEVD
+	source.  Fixed bug in computing HOMO-LUMO gap.	  - SCFStatus: 
+	Reformated stdoutput.	 - SDMM: SDMM now has an automatic
+	criterion for swithcing from CG to purification.      Numerous
+	minor improvments. Still needs some tuning.    - ToDev: New routine
+	added which writes MMA formatted matrices to MMA/SCFDev      for
+	development of DMM methods.  Only made if requested, eg "make Dev" 
+	  - /MMA/SCFDev/dev.m: Development code that mirrors changes to
+	SDMM.
 
 2000-11-28 09:16  mchalla
 
@@ -12983,8 +12986,7 @@
 	QCTC/VMD/OLD/VMD43.f, QCTC/VMD/OLD/VMD44.f, SCFeqs/DIIS.F90,
 	SCFeqs/FBuild.F90, SCFeqs/FillPBlok.F90, SCFeqs/Makefile,
 	SCFeqs/P2Use.F90, SCFeqs/RHeqs.F90, SCFeqs/SCFStatus.F90,
-	SCFeqs/SDMM.F90, SCFeqs/MMA/DIIS/DIIS.nb, SCFeqs/MMA/SCFDev/scf.in,
-	SCFeqs/MMA/SDMM/OrthogCG.m, Scripts/CSHRC, Scripts/ListInf,
+	SCFeqs/SDMM.F90, Scripts/CSHRC, Scripts/ListInf,
 	Scripts/MondoSetUp, Scripts/aix_pedb, Scripts/mondo,
 	Scripts/nag_dbx, Scripts/pgf_dbx, Scripts/sgi_dbx,
 	Scripts/sgi_dbx2, XForm/BlokAInv.F90, XForm/LowdinO.F90,
@@ -13196,8 +13198,7 @@
 	QCTC/VMD/OLD/VMD43.f, QCTC/VMD/OLD/VMD44.f, SCFeqs/DIIS.F90,
 	SCFeqs/FBuild.F90, SCFeqs/FillPBlok.F90, SCFeqs/Makefile,
 	SCFeqs/P2Use.F90, SCFeqs/RHeqs.F90, SCFeqs/SCFStatus.F90,
-	SCFeqs/SDMM.F90, SCFeqs/MMA/DIIS/DIIS.nb, SCFeqs/MMA/SCFDev/scf.in,
-	SCFeqs/MMA/SDMM/OrthogCG.m, Scripts/CSHRC, Scripts/ListInf,
+	SCFeqs/SDMM.F90, Scripts/CSHRC, Scripts/ListInf,
 	Scripts/MondoSetUp, Scripts/aix_pedb, Scripts/mondo,
 	Scripts/nag_dbx, Scripts/pgf_dbx, Scripts/sgi_dbx,
 	Scripts/sgi_dbx2, XForm/BlokAInv.F90, XForm/LowdinO.F90,
