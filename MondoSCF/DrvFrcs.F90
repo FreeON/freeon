@@ -1081,13 +1081,13 @@ MODULE DrvFrcs
 !
 ! Parametrize block matrix algebra for different cases
 !
-       IF(Ctrl%Coordtype==CoordType_Cartesian) THEN
+       IF(Ctrl%GeOp%Coordtype==CoordType_Cartesian) THEN
 !
 !for Cartesian Optimization, only--------------------------------
 !
          NCoordsEff0=3*GMLoc%Natms
 !
-       ELSE IF(Ctrl%Coordtype==CoordType_PrimInt) THEN
+       ELSE IF(Ctrl%GeOp%Coordtype==CoordType_PrimInt) THEN
 !
 ! For primitive internal coordinates -----------------------------
 ! first, generate primitive internal coordinates to be able to set matrix
@@ -1145,7 +1145,7 @@ MODULE DrvFrcs
 ! Get gradient in internal coordinates
 !
 !CALL CoordTrf(GMLoc,TrixThresh,AInvDistanceThresh,IntCs,NIntC,VectCart,VectInt,1)
-CALL FullCoordTrf(GMLoc,IntCs,NIntC,VectCart,VectInt,1)
+!CALL FullCoordTrf(GMLoc,IntCs,NIntC,VectCart,VectInt,1)
 !
 ! Calculate single relaxation (SR) step from an inverse Hessian
 !
@@ -1159,7 +1159,7 @@ CALL FullCoordTrf(GMLoc,IntCs,NIntC,VectCart,VectInt,1)
 ! Transform internal displacements back to Cartesian
 !
 !CALL CoordTrf(GMLoc,TrixThresh,AInvDistanceThresh,IntCs,NIntC,VectCart,IntDispl,2)
-CALL FullCoordTrf(GMLoc,IntCs,NIntC,VectCart,IntDispl,2)
+!CALL FullCoordTrf(GMLoc,IntCs,NIntC,VectCart,IntDispl,2)
 stop
 !
 ! Now call GDIIS
