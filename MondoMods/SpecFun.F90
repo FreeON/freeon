@@ -161,6 +161,28 @@ MODULE ErfFunk
          REAL(DOUBLE) :: ERFC,X
          ERFC=1.0D0-ERF(X)
       END FUNCTION ERFC
+!========================================================================================
+!     The Funtion ==> -ProductLog[-1,-x] from [0,1/E]
+!========================================================================================
+      FUNCTION ProductLog1(X)
+        INTEGER                  :: I
+        REAL(DOUBLE)             :: X,ProductLog1,Error
+        REAL(DOUBLE),PARAMETER   :: Xmax = 0.3678794411714423216D0
+!
+        IF(X > Xmax) THEN
+           WRITE(*,*) 'In ProductLog[-1,-x] :: |x| > 1/E'
+           STOP
+        ELSE
+           ProductLog1 = One
+           DO I=1,40
+              Error       = ProductLog1
+              ProductLog1 = -LOG(X/ProductLog1)
+              Error = ABS(ProductLog1-Error)
+              IF(Error < 1.0D-14) RETURN
+           ENDDO
+        ENDIF
+!
+      END FUNCTION ProductLog1
 END MODULE
 
 MODULE GammaFunctions
