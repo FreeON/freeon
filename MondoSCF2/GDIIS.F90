@@ -20,12 +20,13 @@ CONTAINS
 !--------------------------------------------------------------
 !
    SUBROUTINE GeoDIIS(XYZ,CConstr,LagrMult,GConstr,GBackTrf, &
-              GTrfCtrl,GCoordCtrl,GDIISCtrl, &
-              HFileIn,iCLONE,iGEO,Print,SCRPath)
+              GGrdTrf,GTrfCtrl,GCoordCtrl,GDIISCtrl, &
+              HFileIn,iCLONE,iGEO,Print,SCRPath,Displ_O,Grad_O)
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
      CHARACTER(LEN=*)            :: HFileIn
      TYPE(Constr)                :: GConstr
      TYPE(BackTrf)               :: GBackTrf
+     TYPE(GrdTrf)                :: GGrdTrf 
      TYPE(TrfCtrl)               :: GTrfCtrl
      TYPE(CoordCtrl)             :: GCoordCtrl 
      TYPE(GDIIS)                 :: GDIISCtrl  
@@ -41,6 +42,7 @@ CONTAINS
      TYPE(DBL_RNK2)              :: RefStruct,SRDispl
      TYPE(DBL_RNK2)              :: Aux
      TYPE(DBL_VECT)              :: Vect,VectLagr
+     REAL(DOUBLE),DIMENSION(:),OPTIONAL :: Displ_O,Grad_O
      REAL(DOUBLE),DIMENSION(:)   :: LagrMult
      !
      GDIISMemory=MIN(6,iGEO)
@@ -100,14 +102,19 @@ CONTAINS
      !
      ! Calculate new Cartesian coordinates and Lagr. multipliers
      !
-     CALL BasicGDIIS(XYZ,GConstr,Print,RefStruct,RefGrad, &
-                     SRStruct,SRDispl,LagrMult_O=LagrMult)
-     !CALL PIntGDIIS(XYZ,Print,GBackTrf,GTrfCtrl, &
-     !  GCoordCtrl,GConstr,SCRPath,RefStruct,RefGrad,SRStruct,SRDispl)
-     !
-     !CALL DelocGDIIS(SRStruct%D,RefStruct%D,RefGrad%D,SRDispl%D,&
-     !  XYZ,Print,SCRPath,GTrfCtrl,GCoordCtrl,GBackTrf,GConstr)
-     !
+     IF(PRESENT(Displ_O).AND.PRESENT(Grad_O)) THEN
+       CALL IntCFit(XYZ,Grad_O,RefStruct%D,RefGrad%D,SCRPath,Displ_O, &
+                    GGrdTrf,GCoordCtrl,GTrfCtrl,Print)
+     ELSE
+       CALL BasicGDIIS(XYZ,GConstr,Print,RefStruct,RefGrad, &
+                       SRStruct,SRDispl,LagrMult_O=LagrMult)
+       !CALL PIntGDIIS(XYZ,Print,GBackTrf,GTrfCtrl, &
+       !  GCoordCtrl,GConstr,SCRPath,RefStruct,RefGrad,SRStruct,SRDispl)
+       !
+       !CALL DelocGDIIS(SRStruct%D,RefStruct%D,RefGrad%D,SRDispl%D,&
+       !  XYZ,Print,SCRPath,GTrfCtrl,GCoordCtrl,GBackTrf,GConstr)
+       !
+     ENDIF
      CALL CloseHDFGroup(HDF_CurrentID)
      CALL CloseHDF(HDFFileID)
      !
@@ -807,6 +814,298 @@ CONTAINS
      CALL Delete(EigVals)
      CALL Delete(EigVects)
    END SUBROUTINE DIISInvMat
+!
+!---------------------------------------------------------------------
+!
+   SUBROUTINE IntCFit(XYZ,Grad,RefStruct,RefGrad,SCRPath,Displ, &
+                      GGrdTrf,GCoordCtrl,GTrfCtrl,Print)
+     REAL(DOUBLE),DIMENSION(:,:)  :: XYZ,RefStruct,RefGrad
+     REAL(DOUBLE),DIMENSION(:)    :: Grad,Displ
+     CHARACTER(LEN=*)             :: SCRPath
+     INTEGER                      :: Print
+     INTEGER                      :: I,J,NMem,NCart,NatmsLoc,NIntC
+     TYPE(INTC)                   :: IntCs
+     TYPE(DBL_RNK2)               :: XYZAux,IntCGrads,IntCValues
+     TYPE(DBL_VECT)               :: VectC,VectI,VectCG
+     TYPE(GrdTrf)                 :: GGrdTrf
+     TYPE(CoordCtrl)              :: GCoordCtrl
+     TYPE(TrfCtrl)                :: GTrfCtrl
+     !
+     NMem=SIZE(RefStruct,2)
+     IF(NMem/=SIZE(RefGrad,2)) CALL Halt('Dim err in IntCFit')
+     NatmsLoc=SIZE(XYZ,2)
+     NCart=NatmsLoc*3
+     IF(NCart/=SIZE(RefStruct,1)) CALL Halt('Dim err 2 in IntCFit')
+     !
+     CALL New(XYZAux,(/3,NatmsLoc/))
+     CALL New(VectC,NCart)
+     !
+     CALL ReadIntCs(IntCs,TRIM(SCRPath)//'IntCs')
+     NIntC=SIZE(IntCs%Def)
+     !
+     CALL New(IntCGrads,(/NIntC,NMem+1/))
+     CALL New(IntCValues,(/NIntC,NMem+1/))
+     CALL New(VectI,NIntC)
+     !
+     ! Calculate IntC gradients using the latest IntC-s     
+     !
+     DO I=1,NMem
+       VectC%D=RefStruct(:,I)
+       VectCG%D=RefGrad(:,I)
+       CALL CartRNK1ToCartRNK2(VectC%D,XYZAux%D)
+       CALL CartToInternal(XYZAux%D,IntCs,VectCG%D,VectI%D,&
+         GGrdTrf,GCoordCtrl,GTrfCtrl,Print,SCRPath)
+       IntCGrads%D(:,I)=VectI%D
+       CALL INTCValue(IntCs,XYZAux%D,GCoordCtrl%LinCrit,GCoordCtrl%TorsLinCrit)
+       IntCValues%D(:,I)=IntCs%Value
+     ENDDO
+       CALL CartToInternal(XYZ,IntCs,Grad,VectI%D,&
+         GGrdTrf,GCoordCtrl,GTrfCtrl,Print,SCRPath)
+       IntCGrads%D(:,NMem+1)=VectI%D
+       CALL INTCValue(IntCs,XYZ,GCoordCtrl%LinCrit,GCoordCtrl%TorsLinCrit)
+       IntCValues%D(:,NMem+1)=IntCs%Value
+     !
+     ! Calculate new values of internals by fitting
+     !
+     CALL DisplFit(IntCs,IntCGrads%D,IntCValues%D,Displ)
+     !
+     CALL Delete(IntCGrads) 
+     CALL Delete(IntCValues) 
+     CALL Delete(VectI) 
+     CALL Delete(VectC) 
+     CALL Delete(XYZAux) 
+     CALL Delete(IntCs) 
+   END SUBROUTINE IntCFit
+!
+!---------------------------------------------------------------------
+!
+   SUBROUTINE DisplFit(IntCs,IntCGrads,IntCValues,Displ)
+     TYPE(INTC)                 :: IntCs
+     REAL(DOUBLE),DIMENSION(:)  :: Displ
+     REAL(DOUBLE),DIMENSION(:,:):: IntCGrads,IntCValues
+     INTEGER                    :: I,J,NIntC,NDim
+     TYPE(DBL_VECT)             :: FitVal,VectX,VectY
+     !
+     NIntC=SIZE(IntCs%Def)
+     NDim=SIZE(IntCGrads,2)
+     CALL New(VectX,NDim)
+     CALL New(VectY,NDim)
+     CALL New(FitVal,NIntC)
+     !
+     DO I=1,NIntC
+       IF(.NOT.IntCs%Active(I)) THEN
+         FitVal%D(I)=Zero
+         CYCLE
+       ENDIF
+       DO J=1,NDim 
+         VectX%D=IntCValues(I,J) 
+         VectY%D=IntCGrads(I,J) 
+       ENDDO
+       CALL Reorder(VectY%D,VectX%D) 
+       IF(IntCs%Def(I)=='STRE') THEN
+         CALL FitInt(VectX%D,VectY%D,FitVal%D(I),'Morse')
+       ELSE IF(HasAngle(IntCs%Def(I))) THEN
+         CALL FitInt(VectX%D,VectY%D,FitVal%D(I),'Trigon')
+       ENDIF
+       Displ(I)=FitVal%D(I)-IntCValues(I,NDim)
+     ENDDO
+     !
+     CALL Delete(VectY)
+     CALL Delete(VectX)
+     CALL Delete(FitVal)
+   END SUBROUTINE DisplFit
+!
+!---------------------------------------------------------------------
+!
+   SUBROUTINE FitInt(VectX,VectY,FitVal,Char)
+     REAL(DOUBLE),DIMENSION(:) :: VectX,VectY
+     REAL(DOUBLE)              :: FitVal
+     INTEGER                   :: I,J,NDim
+     CHARACTER(LEN=*)          :: Char
+     !
+     
+     !
+   END SUBROUTINE FitInt
+!
+!---------------------------------------------------------------------
+!
+   FUNCTION MorsePotDer1(Deq,Req,A,R,D2)
+     REAL(DOUBLE) :: MorsePotDer1,Deq,Req,A,R,D2
+     !
+     MorsePotDer1=Two*Deq*A*(One-exp(-A*(R-Req)))
+     D2=Two*Deq*A*A*exp(-A*(R-Req))
+   END FUNCTION MorsePotDer1
+!
+!---------------------------------------------------------------------
+!
+   SUBROUTINE LocateEndPts(VectX,VectY,XMin,YMin,XMax,YMax)
+     REAL(DOUBLE),DIMENSION(:) :: VectX,VectY
+     REAL(DOUBLE)              :: XMin,YMin,XMax,YMax
+     REAL(DOUBLE)              :: Tangent,H,D,DY,X,Y,Step,DMax
+     INTEGER                   :: I,J,NDim
+     !
+     ! An ordered set of Y-s must be passed in
+     !
+     DMax=0.3D0
+     NDim=SIZE(VectX)
+     IF(VectY(1)<Zero.AND.VectY(NDim)>Zero) THEN ! interpolation
+       CALL Locate(VectY,NDim,Zero,J)
+       XMin=VectX(J)
+       YMin=VectY(J)
+       XMax=VectX(J+1)
+       YMax=VectY(J+1)
+     ELSE ! extrapolation
+       IF(ABS(VectY(1))<ABS(VectY(NDim))) THEN
+         XMin=VectX(1)
+         YMin=VectY(1)
+         H=VectX(2)-VectX(1)
+         D=VectY(2)-VectY(1)
+       ELSE
+         XMin=VectX(NDim)
+         YMin=VectY(NDim)
+         H=VectX(NDim)-VectX(NDim-1)
+         D=VectY(NDim)-VectY(NDim-1)
+       ENDIF
+       ! do linear extrapolation for XMax
+       IF(ABS(H)>1.D-7) THEN
+         Tangent=D/H
+       ELSE
+         Tangent=One
+       ENDIF
+       Step=YMin/Tangent
+       X=XMin
+       Y=YMin
+       DO I=1,10
+         X=X+Step
+         CALL RatInt(VectX,VectY,NDim,X,Y,DY)
+         IF(Y*YMin<Zero) EXIT
+       ENDDO
+       IF(Y*YMin<Zero) THEN
+         XMax=X
+         YMax=Y
+       ELSE
+         XMax=XMin+MIN(SIGN(DMax,(X-XMin)),(X-XMin))
+         CALL RatInt(VectX,VectY,NDim,XMax,YMax,DY)
+       ENDIF
+     ENDIF
+   END SUBROUTINE LocateEndPts
+!
+!---------------------------------------------------------------------
+!
+   SUBROUTINE Interpolate(VectX,VectY,FitVal)
+     REAL(DOUBLE),DIMENSION(:) :: VectX,VectY
+     REAL(DOUBLE)              :: FitVal      
+     INTEGER                   :: I,J,NDim
+     !
+     NDim=SIZE(VectX)
+     CALL Locate(VectY,NDim,Zero,J)
+   END SUBROUTINE Interpolate
+!
+!---------------------------------------------------------------------
+!
+   SUBROUTINE Extrapolate(VectX,VectY,FitVal)
+     REAL(DOUBLE),DIMENSION(:) :: VectX,VectY
+     REAL(DOUBLE)              :: FitVal      
+     INTEGER                   :: I,J,NDim
+   END SUBROUTINE Extrapolate
+!
+!---------------------------------------------------------------------
+!
+   SUBROUTINE Locate(XX,N,X,J)
+     INTEGER      :: J,N
+     REAL(DOUBLE) :: X,XX(N) 
+     INTEGER      :: JL,JM,JU,I
+     !
+     JL=0
+     JU=N+1
+     DO I=1,N
+       IF(JU-JL>1) THEN
+         JM=(JU+JL)/2
+         IF((XX(N)>XX(1)).EQV.(X>XX(JM))) THEN
+           JL=JM
+         ELSE
+           JU=JM
+         ENDIF
+       ELSE
+         EXIT
+       ENDIF
+     ENDDO
+     J=JL
+   END SUBROUTINE Locate
+!
+!---------------------------------------------------------------------
+!
+   SUBROUTINE Reorder(VectX,VectY) 
+     REAL(DOUBLE),DIMENSION(:) :: VectX,VectY
+     REAL(DOUBLE)              :: X1,X2,Y1,Y2
+     INTEGER                   :: I,J,NDim
+     !
+     NDim=SIZE(VectX)
+     DO I=1,NDim-1
+       DO J=1,NDim-I
+         X1=VectX(J)
+         X2=VectX(J+1)
+         Y1=VectY(J)
+         Y2=VectY(J+1)
+         IF(X1>X2) THEN
+           VectX(J)=X2
+           VectX(J+1)=X1
+           VectY(J)=Y2
+           VectY(J+1)=Y1
+         ENDIF
+       ENDDO
+     ENDDO
+   END SUBROUTINE Reorder
+!
+!---------------------------------------------------------------------
+!
+   SUBROUTINE RatInt(XA,YA,N,X,Y,DY)
+     INTEGER      :: N,NMax
+     REAL(DOUBLE) :: DY,X,Y,XA(N),YA(N),Tiny
+     PARAMETER(NMax=10,Tiny=1.D-25)
+     INTEGER      :: I,M,NS
+     REAL(DOUBLE) :: DD,H,HH,T,W,C(NMax),D(NMax),DistMin
+     !
+     NS=1
+     DistMin=1.D-7
+     HH=ABS(X-XA(1))
+     DO I=1,N
+       H=ABS(X-XA(I))
+       IF(H<DistMin) THEN
+         Y=YA(I)
+         DY=Zero 
+         RETURN
+       ELSE IF(H<HH) THEN
+         NS=I
+         HH=H
+       ENDIF
+       C(I)=YA(I)
+       D(I)=YA(I)+Tiny
+     ENDDO 
+     !
+     Y=YA(NS)
+     NS=NS-1
+     DO M=1,N-1
+       DO I=1,N-M
+         W=C(I+1)-D(I)
+         H=XA(I+M)-X
+         T=(XA(I)-X)*D(I)/H
+         DD=T-C(I+1)
+         IF(ABS(DD)<DistMin) CALL Halt('Failure in RatInt')
+         DD=W/DD
+         D(I)=C(I+1)*DD
+         C(I)=T*DD
+       ENDDO
+       IF(2*NS<N-M) THEN
+         DY=D(NS+1)
+       ELSE
+         DY=D(NS)
+         NS=NS-1
+       ENDIF
+       Y=Y+DY
+     ENDDO
+     !
+   END SUBROUTINE RatInt
 !
 !---------------------------------------------------------------------
 !

@@ -634,7 +634,7 @@ CONTAINS
      ! Calculate simple relaxation step from an inverse Hessian
      !
      IF(.NOT.GOpt%GOptStat%GeOpConvgd) THEN
-       CALL RelaxGeom(GOpt,XYZ,AtNum,CartGrad%D,GradMult, &
+       CALL RelaxGeom(GOpt,XYZ,AtNum,CartGrad%D,GradMult,iCLONE, &
                       LagrMult,LagrDispl,IntCs,iGEO,SCRPath,Print) 
      ELSE
        WRITE(*,200) iCLONE
@@ -673,7 +673,7 @@ CONTAINS
 !
 !--------------------------------------------------------------------
 !
-   SUBROUTINE RelaxGeom(GOpt,XYZ,AtNum,CartGrad,GradMult, &
+   SUBROUTINE RelaxGeom(GOpt,XYZ,AtNum,CartGrad,GradMult,iCLONE, &
                         LagrMult,LagrDispl,IntCs,IGEO,SCRPath,Print)
      !
      ! Simple Relaxation step
@@ -685,7 +685,7 @@ CONTAINS
      TYPE(DBL_VECT)                 :: Displ
      TYPE(DBL_VECT)                 :: IntGrad,Grad
      TYPE(INTC)                     :: IntCs
-     INTEGER                        :: I,J,NDim,iGEO
+     INTEGER                        :: I,J,NDim,iGEO,iCLONE
      INTEGER                        :: NatmsLoc,NCart,NIntC,Print
      CHARACTER(LEN=*)               :: SCRPath 
      !
@@ -1316,8 +1316,8 @@ CONTAINS
        CALL OPENAscii(OutFile,Out)
        IF((.NOT.GOpt%GDIIS%NoGDIIS).AND.GOpt%GDIIS%On) THEN
          CALL GeoDIIS(GMLoc%AbCarts%D,GMLoc%CConstrain%I, &
-           GMLoc%LagrMult%D,GOpt%Constr,GOpt%BackTrf,GOpt%TrfCtrl, &
-           GOpt%CoordCtrl,GOpt%GDIIS,Nams%HFile, &
+           GMLoc%LagrMult%D,GOpt%Constr,GOpt%BackTrf,GOpt%GrdTrf, &
+           GOpt%TrfCtrl,GOpt%CoordCtrl,GOpt%GDIIS,Nams%HFile, &
            iCLONE,iGEO,Opts%PFlags%GeOp,SCRPath)
        ELSE
          IF(Opts%PFlags%GeOp>=DEBUG_GEOP_MIN) THEN

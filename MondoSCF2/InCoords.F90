@@ -2528,13 +2528,19 @@ CONTAINS
        !
        ! Get B and refresh values of internal coords
        !
+       CALL INTCValue(IntCs,ActCarts%D, &
+                      GCoordCtrl%LinCrit,GCoordCtrl%TorsLinCrit)
        IF(RefreshB.AND.RefreshAct) THEN
          CALL RefreshBMatInfo(IntCs,ActCarts%D,GTrfCtrl, &
                               GCoordCtrl,Print,SCRPath,.TRUE.)
          CALL GetBMatInfo(SCRPath,ISpB,JSpB,ASpB,CholData)
-       ELSE
-         CALL INTCValue(IntCs,ActCarts%D, &
-                        GCoordCtrl%LinCrit,GCoordCtrl%TorsLinCrit)
+         IF(IStep>=4) THEN
+           VectIntAux%D=VectIntReq%D-IntCs%Value
+           CALL RedundancyOff(VectIntAux%D,SCRPath,Print)
+           CALL MapAngleDispl(IntCs,NIntC,VectIntAux%D) 
+           VectIntReq%D=IntCs%Value+VectIntAux%D
+           CALL MapBackAngle(IntCs,VectIntReq%D) 
+         ENDIF
        ENDIF
        !
        ! Calculate difference between required and actual internals
