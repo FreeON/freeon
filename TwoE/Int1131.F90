@@ -76,7 +76,7 @@
          ENDDO ! (M0| loop
       ENDDO ! |N0) loop
       ! HRR 
-      I(1,1,2,1)=MBarN(2,5)+MBarN(2,2)*CDx+(MBarN(1,5)+MBarN(1,2)*CDx)*ABx+I(1,1,2,1)
-      I(1,1,3,1)=MBarN(2,6)+MBarN(2,3)*CDx+(MBarN(1,6)+MBarN(1,3)*CDx)*ABx+I(1,1,3,1)
-      I(1,1,4,1)=MBarN(2,8)+MBarN(2,4)*CDx+(MBarN(1,8)+MBarN(1,4)*CDx)*ABx+I(1,1,4,1)
+      I(1,1,2,1)=MBarN(2,5)+MBarN(2,2)*CDx+(MBarN(1,5)+MBarN(1,2)*CDx)*ABx
+      I(1,1,3,1)=MBarN(2,6)+MBarN(2,3)*CDx+(MBarN(1,6)+MBarN(1,3)*CDx)*ABx
+      I(1,1,4,1)=MBarN(2,8)+MBarN(2,4)*CDx+(MBarN(1,8)+MBarN(1,4)*CDx)*ABx
    END SUBROUTINE Int1131

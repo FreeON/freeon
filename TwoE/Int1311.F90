@@ -79,7 +79,7 @@
       ! HRR 
       V1=MBarN(1,1)*CDx
       V2=MBarN(1,2)+V1
-      I(1,2,1,1)=MBarN(2,2)+MBarN(2,1)*CDx+V2*ABx+I(1,2,1,1)
-      I(1,3,1,1)=MBarN(3,2)+MBarN(3,1)*CDx+V2*ABy+I(1,3,1,1)
-      I(1,4,1,1)=MBarN(4,2)+MBarN(4,1)*CDx+V2*ABz+I(1,4,1,1)
+      I(1,2,1,1)=MBarN(2,2)+MBarN(2,1)*CDx+V2*ABx
+      I(1,3,1,1)=MBarN(3,2)+MBarN(3,1)*CDx+V2*ABy
+      I(1,4,1,1)=MBarN(4,2)+MBarN(4,1)*CDx+V2*ABz
    END SUBROUTINE Int1311

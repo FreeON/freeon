@@ -126,13 +126,13 @@
       V4=MBarN(1,3)+V3
       V5=MBarN(1,1)*CDz
       V6=MBarN(1,4)+V5
-      I(1,2,1,2)=MBarN(2,2)+MBarN(2,1)*CDx+V2*ABx+I(1,2,1,2)
-      I(1,3,1,2)=MBarN(3,2)+MBarN(3,1)*CDx+V2*ABy+I(1,3,1,2)
-      I(1,4,1,2)=MBarN(4,2)+MBarN(4,1)*CDx+V2*ABz+I(1,4,1,2)
-      I(1,2,1,3)=MBarN(2,3)+V4*ABx+MBarN(2,1)*CDy+I(1,2,1,3)
-      I(1,3,1,3)=MBarN(3,3)+MBarN(3,1)*CDy+V4*ABy+I(1,3,1,3)
-      I(1,4,1,3)=MBarN(4,3)+MBarN(4,1)*CDy+V4*ABz+I(1,4,1,3)
-      I(1,2,1,4)=MBarN(2,4)+V6*ABx+MBarN(2,1)*CDz+I(1,2,1,4)
-      I(1,3,1,4)=MBarN(3,4)+V6*ABy+MBarN(3,1)*CDz+I(1,3,1,4)
-      I(1,4,1,4)=MBarN(4,4)+MBarN(4,1)*CDz+V6*ABz+I(1,4,1,4)
+      I(1,2,1,2)=MBarN(2,2)+MBarN(2,1)*CDx+V2*ABx
+      I(1,3,1,2)=MBarN(3,2)+MBarN(3,1)*CDx+V2*ABy
+      I(1,4,1,2)=MBarN(4,2)+MBarN(4,1)*CDx+V2*ABz
+      I(1,2,1,3)=MBarN(2,3)+V4*ABx+MBarN(2,1)*CDy
+      I(1,3,1,3)=MBarN(3,3)+MBarN(3,1)*CDy+V4*ABy
+      I(1,4,1,3)=MBarN(4,3)+MBarN(4,1)*CDy+V4*ABz
+      I(1,2,1,4)=MBarN(2,4)+V6*ABx+MBarN(2,1)*CDz
+      I(1,3,1,4)=MBarN(3,4)+V6*ABy+MBarN(3,1)*CDz
+      I(1,4,1,4)=MBarN(4,4)+MBarN(4,1)*CDz+V6*ABz
    END SUBROUTINE Int1313

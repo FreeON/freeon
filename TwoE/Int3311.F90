@@ -123,13 +123,13 @@
       V7=MBarN(4,1)*CDx
       V8=MBarN(4,2)+V7
       V9=MBarN(9,1)*CDx
-      I(2,2,1,1)=MBarN(5,2)+MBarN(5,1)*CDx+V2*ABx+I(2,2,1,1)
-      I(3,2,1,1)=MBarN(6,2)+V3+V5*ABx+I(3,2,1,1)
-      I(4,2,1,1)=MBarN(8,2)+V6+V8*ABx+I(4,2,1,1)
-      I(2,3,1,1)=MBarN(6,2)+V3+V2*ABy+I(2,3,1,1)
-      I(3,3,1,1)=MBarN(7,2)+MBarN(7,1)*CDx+V5*ABy+I(3,3,1,1)
-      I(4,3,1,1)=MBarN(9,2)+V9+V8*ABy+I(4,3,1,1)
-      I(2,4,1,1)=MBarN(8,2)+V6+V2*ABz+I(2,4,1,1)
-      I(3,4,1,1)=MBarN(9,2)+V9+V5*ABz+I(3,4,1,1)
-      I(4,4,1,1)=MBarN(10,2)+MBarN(10,1)*CDx+V8*ABz+I(4,4,1,1)
+      I(2,2,1,1)=MBarN(5,2)+MBarN(5,1)*CDx+V2*ABx
+      I(3,2,1,1)=MBarN(6,2)+V3+V5*ABx
+      I(4,2,1,1)=MBarN(8,2)+V6+V8*ABx
+      I(2,3,1,1)=MBarN(6,2)+V3+V2*ABy
+      I(3,3,1,1)=MBarN(7,2)+MBarN(7,1)*CDx+V5*ABy
+      I(4,3,1,1)=MBarN(9,2)+V9+V8*ABy
+      I(2,4,1,1)=MBarN(8,2)+V6+V2*ABz
+      I(3,4,1,1)=MBarN(9,2)+V9+V5*ABz
+      I(4,4,1,1)=MBarN(10,2)+MBarN(10,1)*CDx+V8*ABz
    END SUBROUTINE Int3311

@@ -120,13 +120,13 @@
          ENDDO ! (M0| loop
       ENDDO ! |N0) loop
       ! HRR 
-      I(2,1,1,2)=MBarN(5,2)+MBarN(5,1)*CDx+(MBarN(2,2)+MBarN(2,1)*CDx)*ABx+I(2,1,1,2)
-      I(3,1,1,2)=MBarN(6,2)+MBarN(6,1)*CDx+(MBarN(3,2)+MBarN(3,1)*CDx)*ABx+I(3,1,1,2)
-      I(4,1,1,2)=MBarN(8,2)+MBarN(8,1)*CDx+(MBarN(4,2)+MBarN(4,1)*CDx)*ABx+I(4,1,1,2)
-      I(2,1,1,3)=MBarN(5,3)+MBarN(5,1)*CDy+ABx*(MBarN(2,3)+MBarN(2,1)*CDy)+I(2,1,1,3)
-      I(3,1,1,3)=MBarN(6,3)+MBarN(6,1)*CDy+ABx*(MBarN(3,3)+MBarN(3,1)*CDy)+I(3,1,1,3)
-      I(4,1,1,3)=MBarN(8,3)+MBarN(8,1)*CDy+ABx*(MBarN(4,3)+MBarN(4,1)*CDy)+I(4,1,1,3)
-      I(2,1,1,4)=MBarN(5,4)+MBarN(5,1)*CDz+ABx*(MBarN(2,4)+MBarN(2,1)*CDz)+I(2,1,1,4)
-      I(3,1,1,4)=MBarN(6,4)+MBarN(6,1)*CDz+ABx*(MBarN(3,4)+MBarN(3,1)*CDz)+I(3,1,1,4)
-      I(4,1,1,4)=MBarN(8,4)+MBarN(8,1)*CDz+ABx*(MBarN(4,4)+MBarN(4,1)*CDz)+I(4,1,1,4)
+      I(2,1,1,2)=MBarN(5,2)+MBarN(5,1)*CDx+(MBarN(2,2)+MBarN(2,1)*CDx)*ABx
+      I(3,1,1,2)=MBarN(6,2)+MBarN(6,1)*CDx+(MBarN(3,2)+MBarN(3,1)*CDx)*ABx
+      I(4,1,1,2)=MBarN(8,2)+MBarN(8,1)*CDx+(MBarN(4,2)+MBarN(4,1)*CDx)*ABx
+      I(2,1,1,3)=MBarN(5,3)+MBarN(5,1)*CDy+ABx*(MBarN(2,3)+MBarN(2,1)*CDy)
+      I(3,1,1,3)=MBarN(6,3)+MBarN(6,1)*CDy+ABx*(MBarN(3,3)+MBarN(3,1)*CDy)
+      I(4,1,1,3)=MBarN(8,3)+MBarN(8,1)*CDy+ABx*(MBarN(4,3)+MBarN(4,1)*CDy)
+      I(2,1,1,4)=MBarN(5,4)+MBarN(5,1)*CDz+ABx*(MBarN(2,4)+MBarN(2,1)*CDz)
+      I(3,1,1,4)=MBarN(6,4)+MBarN(6,1)*CDz+ABx*(MBarN(3,4)+MBarN(3,1)*CDz)
+      I(4,1,1,4)=MBarN(8,4)+MBarN(8,1)*CDz+ABx*(MBarN(4,4)+MBarN(4,1)*CDz)
    END SUBROUTINE Int3113

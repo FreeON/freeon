@@ -257,7 +257,7 @@ PunchHRRClass[FileName_,ic_,jc_,kc_,lc_]:=Module[{oList,IList,Kount,a,b,c,d},
                                                              b = {lx[j], my[j], nz[j]};
                                                              c = {lx[k], my[k], nz[k]};
                                                              d = {lx[l], my[l], nz[l]};
-                                                             IList=Append[IList,HRR[a,b,c,d]+o[Kount]];
+                                                             IList=Append[IList,HRR[a,b,c,d]];
                                                              oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["I(",ToString[i],",",ToString[j],",",ToString[k],",",ToString[l],")"]];
                                                 ,{i,LBegin[il],LEnd[il]}]
                                                 ,{j,LBegin[jl],LEnd[jl]}]
@@ -300,6 +300,8 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_]:=Block[{WS,LBra,LKet,BKTyp
            LenKet=LEnd[LKet];
            WS[StringJoin["REAL(DOUBLE),DIMENSION(",ToString[LBra+LKet],") :: AuxR"]];
            WS[StringJoin["REAL(DOUBLE),DIMENSION(",ToString[LenBra],",",ToString[LenKet],") :: MBarN=0D0"]];
+
+
            WS[StringJoin["REAL(DOUBLE),DIMENSION(",ToString[LEnd[IMax]],",", \
                                                    ToString[LEnd[JMax]],",",
                                                    ToString[LEnd[KMax]],",",
