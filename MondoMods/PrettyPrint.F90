@@ -35,6 +35,9 @@ MODULE PrettyPrint
       MODULE PROCEDURE Print_CheckSum_DBCSR 
 #endif
    END INTERFACE
+
+
+   CHARACTER(LEN=DEFAULT_CHR_LEN) :: String
    CONTAINS 
       SUBROUTINE TimeStamp(Mssg,Enter_O)
          CHARACTER(LEN=*),INTENT(IN) :: Mssg
@@ -185,7 +188,8 @@ MODULE PrettyPrint
          IF(PrintFlags%Fmt==DEBUG_MMASTYLE)THEN
             WRITE(PU,11)Name,FRACTION(X),EXPONENT(X)
          ELSE
-            WRITE(PU,*)Name,' = ',TRIM(DblToChar(X))
+            String=TRIM(Name)//' = '//TRIM(DblToChar(X))
+            WRITE(PU,*)TRIM(String)
          ENDIF
          CALL ClosePU(PU)
       11 FORMAT(1x,A,' = ',F19.16,'*2^(',I4,');')
