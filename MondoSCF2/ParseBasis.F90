@@ -17,7 +17,7 @@ CONTAINS
     TYPE(Geometries)   :: G
     TYPE(BasisSets)    :: B
     INTEGER            :: I,J
-    CHARACTER(LEN=DCL) :: BaseFile
+    CHARACTER(LEN=DCL) :: BaseFile,GhostFile
    !-------------------------------------------------------------------------!    
     CALL OpenASCII(N%IFile,Inp)
     ! Find out how many basis sets we are going over, and their names
@@ -33,10 +33,12 @@ CONTAINS
     DO J=1,B%NBSets
        BaseFile=TRIM(N%M_HOME)//'BasisSets/'//TRIM(B%BName(J))//BasF
        CALL OpenASCII(BaseFile,Bas,OldFileQ_O=.TRUE.)
+       GhostFile=TRIM(N%M_HOME)//'BasisSets/Ghost.bas'
+       CALL OpenASCII(GhostFile,GBas,OldFileQ_O=.TRUE.)
        DO I=1,G%Clones
-          IF(.NOT.ParseBasisSets(G%Clone(I),B%BSets(I,J),B%BSiz(I,J),B%OffS(I,J)))   &
-               CALL MondoHalt(PRSE_ERROR,'ParseBasisSets failed for basis set file ' &
-                              //RTRN//TRIM(BaseFile))
+          IF(.NOT.ParseBasisSets(G%Clone(I),B%BSets(I,J),B%BSiz(I,J),B%OffS(I,J)))  THEN
+             CALL MondoHalt(PRSE_ERROR,'ParseBasisSets failed for basis set file '//RTRN//TRIM(BaseFile))
+          ENDIF
           B%BSets(I,J)%BName=B%BName(J)
           CALL BCSRDimensions(G%Clone(I),B%BSets(I,J),O%AccuracyLevels(J), &
                               B%MxAts(J),B%MxBlk(J),B%MxN0s(J))
@@ -91,10 +93,10 @@ CONTAINS
 !    WRITE(*,*)' MaxNon0 = ',MaxNon0,1D2*DBLE(MaxNon0)/DBLE(B%NBasF**2)
 !    STOP
   END SUBROUTINE BCSRDimensions
-  !============================================================================
-  ! PARSE A BASIS SET, SET UP ITS INDECIES, NORMALIZE THE PRIMITIVES AND 
-  ! COMPUTE BLOCKING FOR SPARSE BLOCKED LINEAR ALGEBRA
-  !============================================================================
+!============================================================================
+! PARSE A BASIS SET, SET UP ITS INDECIES, NORMALIZE THE PRIMITIVES AND 
+! COMPUTE BLOCKING FOR SPARSE BLOCKED LINEAR ALGEBRA
+!============================================================================
   FUNCTION ParseBasisSets(G,B,BlkSiz,OffSet)
     TYPE(BSET)                 :: BS,B
     TYPE(CRDS)                 :: G
@@ -106,8 +108,8 @@ CONTAINS
     LOGICAL                    :: ParseBasisSets
     CHARACTER(LEN=DCL)         :: Line
     INTEGER                    :: I,J,K,L,N,NC,NK,NP,NS,MinL,MaxL,KFound,Prim,ECP
-    !-------------------------------------------------------------------------!
-    ! Allocate temporary set
+!-------------------------------------------------------------------------!
+! Allocate temporary set
     BS%LMNLen=LHGTF(MaxAsymt)
     BS%NCtrt=MaxCntrx
     BS%NPrim=MaxPrmtv
@@ -127,7 +129,7 @@ CONTAINS
        BS%Kinds%I(BS%NKind)=G%AtNum%D(I)
 10     CONTINUE
     ENDDO
-    ! now load geometry atom type (kinds pointer) array.
+!   now load geometry atom type (kinds pointer) array.
     G%NKind=BS%NKind
     DO K=1,BS%NKind
        DO I=1,G%NAtms
@@ -146,7 +148,7 @@ CONTAINS
           BS%NPFnc%I(J,I)=0
        ENDDO
     ENDDO
-    ! Parse basis set 
+!   Parse basis set 
     KFound=0
     REWIND(Bas)
     DO 
@@ -230,6 +232,65 @@ CONTAINS
 100    CONTINUE
     ENDDO
 99  CONTINUE
+!
+!   Do the Same Search, but in Ghost.bas
+!
+    IF(KFound/=BS%NKind) THEN
+       REWIND(GBas)
+       DO 
+          READ(GBas,DEFAULT_CHR_FMT,END=999)Line                 
+          DO NK=1,BS%NKind    
+             ! Look for the basis set 
+             IF(KeyQ(Line,Ats(BS%Kinds%I(NK))).AND.KeyQ(Line,'0'))THEN                    
+                NC=0
+                KFound=KFound+1
+                DO 
+                   READ(GBas,DEFAULT_CHR_FMT,END=999)Line         
+                   IF(KeyQ(Line,Stars))GOTO 1000
+                   NC=NC+1                 
+                   DO K=1,MaxLTyps
+                      IF(KeyQ(Line,CLTyps(K)))THEN
+                         BS%ASymm%I(1,NC,NK)=LTyps(1,K)                     
+                         BS%ASymm%I(2,NC,NK)=LTyps(2,K)
+                         DO L=1,MaxPrmtv
+                            IF(KeyQ(Line,TRIM(IntToChar(L))))THEN
+                               NP=L
+                               GOTO 1001
+                            ENDIF
+                         ENDDO
+                      ENDIF
+                   ENDDO
+                   RETURN
+1001               CONTINUE
+                   BS%NCFnc%I(NK)=NC
+                   BS%NPFnc%I(NC,NK)=NP
+                   BS%NCtrt=Max(BS%NCtrt,NC)
+                   BS%NPrim=Max(BS%NPrim,NP)
+                   MinL=BS%ASymm%I(1,NC,NK)
+                   MaxL=BS%ASymm%I(2,NC,NK)
+                   BS%NAsym=Max(BS%NAsym,MaxL)
+                   DO NP=1,BS%NPFnc%I(NC,NK)
+                      READ(GBas,DEFAULT_CHR_FMT,END=999)Line
+                      N=MaxL-MinL+2
+                      CALL LineToDbls(Line,N,Dbls)
+                      BS%Expnt%D(NP,NC,NK)=Dbls(1)
+                      K=1
+                      BS%CCoef%D(1:,NP,NC,NK)=Zero
+                      DO NS=MinL,MaxL
+                         K=K+1
+                         BS%CCoef%D(NS+1,NP,NC,NK)=Dbls(K) 
+                      ENDDO
+                   ENDDO
+                ENDDO
+             ENDIF
+          ENDDO
+1000      CONTINUE
+       ENDDO
+999    CONTINUE
+    ENDIF
+!
+!   Continue On
+!
     IF(KFound/=BS%NKind)RETURN
     ! Computing basis set indexing
     CALL BSetIndx(BS)
