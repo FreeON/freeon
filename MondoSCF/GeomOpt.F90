@@ -479,11 +479,12 @@ MODULE GeomOpt
        REAL(DOUBLE)              :: TrixThresh,AInvDistanceThresh
        REAL(DOUBLE)              :: BondConvCrit,AngleConvCrit,GradConvCrit
        REAL(DOUBLE)              :: MaxBondDispl,MaxAngleDispl,RMSIntDispl
-       REAL(DOUBLE)              :: Etot
+       REAL(DOUBLE)              :: Etot,GDIISThresh
        REAL(DOUBLE),DIMENSION(3) :: PrevState,CrntState
        TYPE(INTC)                :: IntCs
-       TYPE(DBL_VECT)            :: IntOld,Displ
-       INTEGER                   :: GDIISMemory,FirstGeom
+       TYPE(DBL_VECT)            :: IntOld,Displ,AuxVect
+       INTEGER                   :: FirstGeom
+       INTEGER                   :: GDIISMemory,GDIISMaxMem,InitGDIIS
        INTEGER                   :: AccL
        LOGICAL                   :: GCnvrgd     
        LOGICAL                   :: LineSearchOn
@@ -491,6 +492,18 @@ MODULE GeomOpt
 !-------------------------------------------------------
 !
        CALL SetGlobalCtrlIndecies(Ctrl)           
+!
+! Put initial value of GDIISMemory and GDIISMaxMem
+!
+       InitGDIIS=6
+       GDIISMaxMem=500
+       GDIISThresh=1.D-7
+       CALL Put(0,'RefMemory')  
+       CALL Put(0,'SRMemory')  
+       CALL Put(InitGDIIS,'GDIISMemory')  
+       CALL Put(InitGDIIS,'InitGDIIS')  
+       CALL Put(GDIISMaxMem,'GDIISMaxMem')  
+       CALL Put(GDIISThresh,'GDIISThresh')  
 !
 ! Get some thresholds
 !
@@ -576,7 +589,6 @@ MODULE GeomOpt
 !!!!         MaxBlkSize=MAXVAL(BSiz%I)
 !!!!         PrintFlags%Mat=DEBUG_MATRICES
 !
-!
 ! Start iteration over geometries
 !
        FirstGeom=Ctrl%Current(3)
@@ -598,6 +610,11 @@ MODULE GeomOpt
 !      CALL PrtIntCoords(IntCs,IntCs%Value, &
 !                        'Internals at step '//TRIM(IntToChar(II)))
 !
+! Put current Geometry as a reference for GDIIS
+!
+       CALL PutSRStep(XYZ_O=GMLoc%Carts%D,Tag_O='Ref')
+call prtxyz(GMLoc%Carts%D,PrtU_O=20,Title_O='geometry at step= '//TRIM(IntToChar(II)))
+!
 ! Get Energy and Cartesian gradient at current geometry
 !
        CALL CALC_SinglePoint(Ctrl)
@@ -609,7 +626,7 @@ MODULE GeomOpt
 !
 ! Calculate new geometry 
 !
-       CALL NewStructure(Ctrl,GMLoc,Displ,LineSearchOn,IntCs)
+       CALL NewStructure(Ctrl,GMLoc,Displ,LineSearchOn,IntCs,FirstGeom)
        CALL Delete(Displ)
 !
 ! Check convergence
@@ -758,6 +775,12 @@ MODULE GeomOpt
         Grad%D=CartGrad%D
       ENDIF
 !
+! Check for gradient-convergence
+!
+      MaxGrad=Zero
+      DO I=1,NDim ; MaxGrad=MAX(MaxGrad,ABS(Grad%D(I))) ; ENDDO
+      RMSGrad=SQRT(DOT_PRODUCT(Grad%D,Grad%D)/DBLE(NDim))
+!
 ! Steepest descent (may be either internal or Cartesian)
 ! or other inverse Hessian guess
 !
@@ -767,12 +790,6 @@ MODULE GeomOpt
 !
       CALL SetConstraint(IntCs,GMLoc%Carts%D,Displ)
 !
-! Check for convergence
-!
-      MaxGrad=Zero
-      DO I=1,NDim ; MaxGrad=MAX(MaxGrad,ABS(Grad%D(I))) ; ENDDO
-      RMSGrad=SQRT(DOT_PRODUCT(Grad%D,Grad%D)/DBLE(NDim))
-!
 ! Tidy up
 !
       IF(DoInternals) CALL Delete(IntGrad)
@@ -781,7 +798,7 @@ MODULE GeomOpt
 !
       END SUBROUTINE SRStep
 !-------------------------------------------------------
-      SUBROUTINE NewStructure(Ctrl,GMLoc,Displ,LineSearchOn,IntCs)
+      SUBROUTINE NewStructure(Ctrl,GMLoc,Displ,LineSearchOn,IntCs,FirstGeom)
 !
 ! Line search. Can be carried out either in internals
 ! or in Cartesian.
@@ -792,7 +809,7 @@ MODULE GeomOpt
       TYPE(CRDS)                     :: GMLoc
       TYPE(INTC)                     :: IntCs
       INTEGER                        :: I,J,II,MaxSteps,NDim,NInTc
-      INTEGER                        :: NatmsLoc,NCart
+      INTEGER                        :: NatmsLoc,NCart,InitGDIIS
       REAL(DOUBLE)                   :: EStart,Fact
       TYPE(DBL_VECT)                 :: Displ
       TYPE(DBL_RNK2)                 :: ActXYZ
@@ -800,7 +817,7 @@ MODULE GeomOpt
       TYPE(DBL_VECT)                 :: Energy
       CHARACTER(LEN=DEFAULT_CHR_LEN) :: GMTag
       LOGICAL                        :: IntSearch,LineSearchOn
-      INTEGER                        :: OldGrad,GDIISMemory
+      INTEGER                        :: OldGrad,FirstGeom
 !
 ! MaxSteps : Maximum number of Line Search Steps
 ! Displ    : Initial displacement vector from SR step, 
@@ -810,9 +827,8 @@ MODULE GeomOpt
 !            MaxFact must be small enough for internal coordinates
 !            in order coordinate transformation can converge
 !
+      CALL Get(InitGDIIS,'InitGDIIS')
       MaxSteps=15
-!
-      GDIISMemory=500
 !
       NatmsLoc=GMLoc%Natms
       NCart=3*NatmsLoc   
@@ -870,6 +886,10 @@ MODULE GeomOpt
         CALL CartRNK1ToCartRNK2(ActDispl%D,ActXYZ%D,.TRUE.)
       ENDIF
 !
+! Save simple relaxation geometry (Cartesians) into HDF
+!
+      CALL PutSRStep(XYZ_O=ActXYZ%D,Tag_O='SR')
+!
 ! Calculate energy at new structure; CurGeom has a new value now,
 ! and does not change until new call for LineSearch.
 !
@@ -894,8 +914,7 @@ MODULE GeomOpt
 ! May work in either Cartesian or internal displacemets space.
 ! Subroutine modifies Cartesian Coordinates in GMLoc, now.
 !
-!     IF(CGeo>2) CALL GDIIS(CGeo,GDIISMemory,GMLoc)
-!
+!     IF(CGeo-FirstGeom+1>InitGDIIS) CALL GDIIS(CGeo,GMLoc)
 !
 ! Tidy up
 !
