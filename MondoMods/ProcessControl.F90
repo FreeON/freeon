@@ -55,6 +55,11 @@ MODULE ProcessControl
             WRITE(*,*)  'Unknown error: '//TRIM(Mssg)
             CALL Logger('Unknown error: '//TRIM(Mssg),.TRUE.)
          ENDIF
+         WRITE(*,*)' '
+         WRITE(*,*)' To have no errors '
+         WRITE(*,*)' Would be life without meaning '
+         WRITE(*,*)' No struggle, no joy '
+         WRITE(*,*)' '
          STOP 'Termination of MondoSCF'
       END SUBROUTINE MondoHalt
 
