@@ -324,10 +324,15 @@ PROGRAM MakeRho
      CALL ClosePU(I)
   ENDIF
   ! Check error
-  IF(RelRhoErr>Thresholds%Dist*5.D3.AND.SCFActn/='NumForceEvaluation') &
-       CALL Halt('In MakeRho, relative error in density = '//TRIM(DblToShrtChar(RelRhoErr)) &
-       //'. Distribution threshold = '//TRIM(DblToShrtChar(Thresholds%Dist))      &
-       //'. Total charge lost = '//TRIM(DblToShrtChar(dQMCharge+dMMCharge)))
+  IF(RelRhoErr>Thresholds%Dist*5.D3.AND.SCFActn/='NumForceEvaluation')THEN
+     IF(SCFActn=='Restart')THEN
+        CALL Warn('In MakeRho, relative error in density = '//TRIM(DblToShrtChar(RelRhoErr)))
+     ELSE
+        CALL Halt('In MakeRho, relative error in density = '//TRIM(DblToShrtChar(RelRhoErr)) &
+             //'. Distribution threshold = '//TRIM(DblToShrtChar(Thresholds%Dist))      &
+             //'. Total charge lost = '//TRIM(DblToShrtChar(dQMCharge+dMMCharge)))
+     ENDIF
+  ENDIF
   ! Put Rho and MPs to disk
   IF(SCFActn=='ForceEvaluation')THEN
      CALL Put_HGRho(Rho2,'Rho',Args,1) 
