@@ -72,7 +72,7 @@ PROGRAM IRInv
      WRITE(*,'(i4,1x,D14.6,1x,F8.2,1x,F8.2)') I,Error,                                   &
                                            100.D0*DBLE(SInvL%NNon0)/DBLE(NBasF*NBasF),   &
                                            100.D0*DBLE(Tmp1%NNon0)/DBLE(NBasF*NBasF)
-     IF(Error < Thresholds%Trix .AND. ErrorTrue==.FALSE.) ErrorTrue = .TRUE.
+     IF(Error < Thresholds%Trix .AND. .NOT. ErrorTrue) ErrorTrue = .TRUE.
      IF(ErrorTrue) IC = IC + 1
      IF(IC > 1) EXIT
 !    Calculate X2
