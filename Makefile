@@ -30,7 +30,7 @@
 #
 include $(MONDO_HOME)/Includes/RemoveAll
 #
-all:	CatCpy rmLegacy mm s e 1 2 #d #v 
+all:	CatCpy mm s e 1 2 #d #v 
 #
 clean:	cmm cs ce c1 c2 cd cv 
 	rm -f $(REMOVEALL)
@@ -130,6 +130,16 @@ po:
 	$(MAKE) -i -C ONX purge
 co:	
 	$(MAKE) -i -C ONX clean 
+#----------------------------------------------
+#     ONX2
+ o2:	
+	$(MAKE)    -C ONX2
+ro2:	
+	$(MAKE) -i -C ONX2 release
+po2:	
+	$(MAKE) -i -C ONX2 purge
+co2:	
+	$(MAKE) -i -C ONX2 clean 
 #----------------------------------------------
 #     QCTC 
  q:	
