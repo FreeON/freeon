@@ -691,11 +691,11 @@ CONTAINS
      CALL Set_BONDDATA_EQ_BONDDATA(Bond,BondTot)
      CALL Set_AtmB_EQ_AtmB(AtmB,AtmBTot)
      !
-     IF(PRESENT(HFileIn_O).AND.PRESENT(iCLONE_O).AND.&
-        PRESENT(iGEO_O).AND.PRESENT(ArchMem_O)) THEN
-       CALL ArchiveTop(TOPS,ArchMem_O, &
-                       BondTot,AtmBTot,HFileIn_O,iCLONE_O,iGEO_O)
-     ENDIF
+   ! IF(PRESENT(HFileIn_O).AND.PRESENT(iCLONE_O).AND.&
+   !    PRESENT(iGEO_O).AND.PRESENT(ArchMem_O)) THEN
+   !   CALL ArchiveTop(TOPS,ArchMem_O, &
+   !                   BondTot,AtmBTot,HFileIn_O,iCLONE_O,iGEO_O)
+   ! ENDIF
      !
      ! Now define bond angles and torsions
      !
@@ -800,11 +800,11 @@ CONTAINS
    !     ENDIF
    !   ENDIF
    ! ENDIF
-     IF(.NOT.(FoundHBond.OR.FoundMetLig.OR.&
-        LonelyAtom)) THEN
-       DoExclude=.TRUE.
-       RETURN
-     ENDIF
+    !IF(.NOT.(FoundHBond.OR.FoundMetLig.OR.&
+    !   LonelyAtom)) THEN
+    !  DoExclude=.TRUE.
+    !  RETURN
+    !ENDIF
    END SUBROUTINE BondExcl
 !
 !----------------------------------------------------------------
@@ -1135,14 +1135,26 @@ CONTAINS
      INTEGER,DIMENSION(:,:)      :: Cells
      INTEGER,DIMENSION(:)        :: IEq  
      TYPE(INT_VECT)              :: Sort
-     INTEGER                     :: I,I1,J1,J,K,L,N,II
+     INTEGER                     :: I,I1,I2,J1,J,K,L,N,II
      INTEGER,DIMENSION(3)        :: Cell1
+     INTEGER,DIMENSION(4)        :: DotProds
      !
      CALL New(Sort,IntCs%N)
      Sort%I=0
      !
      II=0
      DO I=1,IntCs%N
+      !DotProds=1000000
+      !DO J=1,4
+      !  I1=IntCs%Atoms%I(I,J)
+      !  IF(I1/=0) THEN
+      !    Cell1=Cells(I1,1:3)  
+      !  ELSE
+      !    EXIT 
+      !  ENDIF
+      !  DotProds(J)=DOT_PRODUCT(Cell1,Cell1)     
+      !ENDDO
+      !IF(.NOT.(ANY(DotProds==0))) CYCLE
        I1=IntCs%Atoms%I(I,1)
        IF(I1/=0) THEN
          Cell1=Cells(I1,1:3)  
@@ -1150,7 +1162,9 @@ CONTAINS
          CYCLE
        ENDIF
        J1=DOT_PRODUCT(Cell1,Cell1)
-       IF(J1/=0) CYCLE !!!see phi(T1,T2,T3,T4) -> phi(T1-T1,T2-T1,T3-T1,T4-T1)
+       IF(J1/=0) THEN
+         CYCLE !!!see phi(T1,T2,T3,T4) -> phi(T1-T1,T2-T1,T3-T1,T4-T1)
+       ENDIF
        II=II+1
        Sort%I(I)=1
        !
@@ -1183,7 +1197,7 @@ CONTAINS
 !
 !-------------------------------------------------------------------
 !
-   SUBROUTINE PrepCells(XYZ,AtNum,PBCDim,XYZBig,AtNumRepl,Cells,IEq)
+   SUBROUTINE PrepCells(XYZ,AtNum,PBCDim,XYZBig,AtNumRepl,Cells,IEq,Dir_O)
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
      TYPE(INT_VECT)              :: IEq,AtNumRepl
      INTEGER,DIMENSION(:)        :: AtNum
@@ -1193,6 +1207,7 @@ CONTAINS
      INTEGER                     :: NatmsLoc,I,J,II,NA,NB,NC
      INTEGER                     :: NCells,IA,IB,IC,PBCDim
      TYPE(DBL_RNK2)              :: XYZBig
+     CHARACTER(LEN=1),OPTIONAL   :: Dir_O
      !
      NatmsLoc=SIZE(XYZ,2)-3 ! last 3 row are PBC data
      !
@@ -1210,6 +1225,17 @@ CONTAINS
      IF(PBCDim>0)  NA=NDim
      IF(PBCDim>1)  NB=NDim
      IF(PBCDim>2)  NC=NDim
+     IF(PRESENT(Dir_O)) THEN
+       IF(Dir_O=='A') THEN
+         NB=0 ; NC=0
+       ENDIF
+       IF(Dir_O=='B') THEN
+         NA=0 ; NC=0
+       ENDIF
+       IF(Dir_O=='C') THEN
+         NA=0 ; NB=0
+       ENDIF
+     ENDIF
      !
      NCells=(2*NA+1)*(2*NB+1)*(2*NC+1)
      CALL New(Cells,(/NCells*NatmsLoc,3/))
@@ -1220,9 +1246,20 @@ CONTAINS
      CALL New(XYZBig,(/3,NCells*NatmsLoc/))
      !
      II=0
+     DO I=1,NatmsLoc 
+       II=II+1
+       XYZBig%D(1:3,II)=XYZ(1:3,I) 
+       Cells%I(II,1)=0 
+       Cells%I(II,2)=0 
+       Cells%I(II,3)=0 
+       IEq%I(II)=I ! equivalent atom from central cell
+       AtNumRepl%I(II)=AtNum(I) 
+     ENDDO
+     !
      DO IA=-NA,NA
        DO IB=-NB,NB
          DO IC=-NC,NC
+           IF(IA==0.AND.IB==0.AND.IC==0) CYCLE
            DO I=1,NatmsLoc
              XTrans=IA*XYZ(1,NatmsLoc+1)+&
                    IB*XYZ(1,NatmsLoc+2)+IC*XYZ(1,NatmsLoc+3)
@@ -1639,10 +1676,10 @@ CONTAINS
        RMSD=1.D+9
        !
        DO IStep=1,GBackTrf%MaxIt_CooTrf
-        !IF(PRESENT(iGEO_O)) THEN
-        !  CALL PrtBackTrf(AtNum,ActCarts%D,PBCDim,PWDPath, &
-        !                  IRep,IStep,iGEO_O)
-        !ENDIF
+         IF(PRESENT(iGEO_O)) THEN
+           CALL PrtBackTrf(AtNum,ActCarts%D,PBCDim,PWDPath, &
+                           IRep,IStep,iGEO_O)
+         ENDIF
          !
          ! Get B and refresh values of internal coords
          !
@@ -1905,7 +1942,10 @@ CONTAINS
      TYPE(DBL_RNK2)              :: XYZRepl
      TYPE(INT_VECT)              :: IEq,AtNum,AtNumRepl
      TYPE(INT_RNK2)              :: Cells
+     LOGICAL                     :: PrtLVect
+     CHARACTER(LEN=1)            :: Dir
      !
+     PrtLVect=.TRUE.
      NatmsLoc=SIZE(XYZ,2)
      Title='Geom= '//TRIM(IntToChar(iGEO))//'IRep= '//TRIM(IntToChar(IRep))//' IStep= '//TRIM(IntToChar(IStep))
      !
@@ -1914,17 +1954,36 @@ CONTAINS
        AtNum%I(I)=INT(AtNumIn(I))
      ENDDO
      !
-     CALL PrepCells(XYZ,AtNum%I,PBCDim,XYZRepl,AtNumRepl,Cells,IEq)
-   ! CALL PrtXYZ(AtNumRepl%I,XYZRepl%D,TRIM(PWDPath)//'Back.xyz',&
-   !             Title,XYZL_O=XYZ)
-     CALL PrtXYZ(AtNumRepl%I,XYZRepl%D,TRIM(PWDPath)//'Back.xyz',&
-                 Title)
+     IF(PBCDim>0) THEN
+       DO I=1,3
+         IF(I==1) Dir='A'
+         IF(I==2) Dir='B'
+         IF(I==3) Dir='C'
+         CALL PrepCells(XYZ,AtNum%I,PBCDim,XYZRepl, &
+                        AtNumRepl,Cells,IEq,Dir_O=Dir)
+         IF(PrtLVect) THEN
+           CALL PrtXYZ(AtNumRepl%I,XYZRepl%D,TRIM(PWDPath)//Dir//'Back.xyz',&
+                       Title,XYZL_O=XYZ)
+         ELSE 
+           CALL PrtXYZ(AtNumRepl%I,XYZRepl%D,TRIM(PWDPath)//'Back.xyz',&
+                       Title)
+         ENDIF
+         CALL Delete(XYZRepl) 
+         CALL Delete(AtNumRepl) 
+         CALL Delete(Cells) 
+         CALL Delete(IEq) 
+       ENDDO
+     ELSE
+       CALL PrepCells(XYZ,AtNum%I,PBCDim,XYZRepl,AtNumRepl,Cells,IEq)
+       CALL PrtXYZ(AtNumRepl%I,XYZRepl%D,TRIM(PWDPath)//'Back.xyz',&
+                   Title)
+       CALL Delete(XYZRepl) 
+       CALL Delete(AtNumRepl) 
+       CALL Delete(Cells) 
+       CALL Delete(IEq) 
+     ENDIF
      !
      CALL Delete(AtNum) 
-     CALL Delete(XYZRepl) 
-     CALL Delete(AtNumRepl) 
-     CALL Delete(Cells) 
-     CALL Delete(IEq) 
    END SUBROUTINE PrtBackTrf
 !
 !---------------------------------------------------------------------
@@ -2012,17 +2071,21 @@ CONTAINS
 !
 !----------------------------------------------------------
 !
-   SUBROUTINE PrtIntCoords(IntCs,Value,CHAR)
+   SUBROUTINE PrtIntCoords(IntCs,Value,CHAR,PBCDim_O)
      !
-     TYPE(INTC) :: IntCs
-     INTEGER    :: I,NIntC,J
+     TYPE(INTC)       :: IntCs
+     INTEGER          :: I,NIntC,J
      REAL(DOUBLE),DIMENSION(:) :: Value
-     REAL(DOUBLE) :: SUM,SumConstr,Conv,ConvC
+     REAL(DOUBLE)     :: SUM,SumConstr,Conv,ConvC
      CHARACTER(LEN=*) :: CHAR   
+     INTEGER,OPTIONAL :: PBCDim_O
+     LOGICAL          :: DoPrtCells
      !
      Conv=180.D0/PI
      ConvC=One/AngstromsToAu
      NIntC=SIZE(IntCs%Def%C)
+     DoPrtCells=.FALSE.
+     IF(PRESENT(PBCDim_O)) DoPrtCells=(PBCDim_O>0)
      !
      WRITE(*,*) TRIM(CHAR)
      WRITE(Out,*) TRIM(CHAR)
@@ -2059,9 +2122,16 @@ CONTAINS
          IntCs%Constraint%L(I),SumConstr,IntCs%Active%L(I)
        WRITE(Out,111) I,IntCs%Def%C(I)(1:8),IntCs%Atoms%I(I,1:4),SUM, &
          IntCs%Constraint%L(I),SumConstr,IntCs%Active%L(I)
+       IF(DoPrtCells) THEN
+         IF(ANY(IntCs%Cells%I(I,1:12)/=0)) THEN
+           WRITE(*,112) IntCs%Cells%I(I,1:12)
+           WRITE(Out,112) IntCs%Cells%I(I,1:12)
+         ENDIF
+       ENDIF
      ENDDO
      !      
      111 FORMAT(I7,2X,A8,2X,4I5,2X,F12.6,L5,F12.6,L5)
+     112 FORMAT(17X,4(3I2,2X))
      222 FORMAT(I7,2X,A8,2X,4I5,2X,3F12.6,L5,F12.6,L5)
      !
    END SUBROUTINE PrtIntCoords
@@ -3877,7 +3947,7 @@ B%BL%D=Zero
      ELSE
        WRITE(99,*) NatmsLoc 
      ENDIF
-     WRITE(99,*) Title 
+     WRITE(99,*) TRIM(Title)
      IF(PRESENT(Vects_O)) THEN
        DO I=1,NatmsLoc
          WRITE(99,100) AtNum(I),XYZ(1:3,I)/AngstromsToAu,100.D0*Vects_O(1:3,I)
@@ -4412,12 +4482,12 @@ return
      HAtm=0
      IF(NJJ1/=1.AND.NJJ2/=1) RETURN
      IF((NJJ1==1.AND.HasLigand(NJJ2))) THEN
-       HasHBond=HasAttached(AtNum,Top12%I,JJ1)
-      !HasHBond=.TRUE.
+      !HasHBond=HasAttached(AtNum,Top12%I,JJ1)
+       HasHBond=.TRUE.
        HAtm=JJ1
      ELSE IF((NJJ2==1.AND.HasLigand(NJJ1))) THEN
-       HasHBond=HasAttached(AtNum,Top12%I,JJ2)
-      !HasHBond=.TRUE.
+      !HasHBond=HasAttached(AtNum,Top12%I,JJ2)
+       HasHBond=.TRUE.
        HAtm=JJ2
      ENDIF
    END FUNCTION HasHBond
@@ -4497,7 +4567,9 @@ return
          M1=Bond%IJ%I(1,L)
          M2=Bond%IJ%I(2,L)
          M=MIN(AtmB%Count%I(M1),AtmB%Count%I(M2))
-         IF(Dist>CondNumb2.AND.M>1) THEN
+         IF(Dist>CondNumb2.AND.M>1) THEN 
+       ! IF(Dist>CondNumb2.AND.M>1.AND. &
+       !    Bond%Type%C(L)(1:4)/='Frag') THEN
            AllowBond%I(L)=0
            AtmB%Count%I(M1)=AtmB%Count%I(M1)-1
            AtmB%Count%I(M2)=AtmB%Count%I(M2)-1
@@ -5606,11 +5678,11 @@ return
                                              LonelyAtom,DoExclude)
                                IF(DoExclude) CYCLE
                              ENDIF
-                             IF(FoundHBond.AND..NOT.LonelyAtom) THEN
-                               CritDist=HBondMax
-                             ELSE
+                      !!!!!! IF(FoundHBond.AND..NOT.LonelyAtom) THEN
+                      !!!!!!   CritDist=HBondMax
+                      !!!!!! ELSE
                                CritDist=CritRadMod%D(JJ1)+CritRad%D(JJ2)
-                             ENDIF
+                      !!!!!! ENDIF
                              DVect(:)=XYZ(:,JJ1)-XYZ(:,JJ2)
                              R12_2=DOT_PRODUCT(DVect,DVect)
                              R12=SQRT(R12_2)
@@ -6663,24 +6735,23 @@ return
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
      TYPE(TOPOLOGY)              :: TOPS
      TYPE(INT_VECT)              :: ITop,JTop,Perm,IPerm
-     TYPE(INT_VECT)              :: Center,CenterT,Mark
+     TYPE(INT_VECT)              :: Center,IFrag,Mark,FragID
+     TYPE(INT_VECT)              :: LastFrag,JFrag
      TYPE(DBL_VECT)              :: ATop
-     TYPE(DBL_RNK2)              :: XYZf
+     TYPE(DBL_RNK2)              :: CenterFrag
      INTEGER                     :: NZ,NAtmsLoc,I,J,II,K,L,M,N
-     INTEGER                     :: TAtoms(4),ColMax
-     REAL(DOUBLE)                :: CT(3),CTX(3),V1(3),V2(3)
+     INTEGER                     :: ColMax
      INTEGER,DIMENSION(:)        :: AtNum
      TYPE(BONDDATA)              :: BondF
-     LOGICAL                     :: Linearity
-     REAL(DOUBLE)                :: Fact1,Fact2
+     REAL(DOUBLE),DIMENSION(3)   :: Vect  
+     REAL(DOUBLE)                :: Length
      ! 
      ! Calculate sparse topology matrix
      ! 
      NatmsLoc=SIZE(XYZ,2)
      CALL TopToSp1x1(TOPS%Tot12%I,ITop,JTop)
      NZ=SIZE(JTop%I)
-     CALL New(Center,NatmsLoc)
-     CALL New(CenterT,NatmsLoc)
+     CALL New(FragID,NatmsLoc)
      CALL New(ATop,NZ)
      !
      ! Calculate permutations, which make the tightest ordering
@@ -6693,11 +6764,12 @@ return
      ! Now, identify separate blocks in Top
      ! It is easy, based on an ordered representation of the topology
      !
+     FragID%I=0 
      II=1
-     Center%I(II)=IPerm%I(1)
+     M=IPerm%I(1)
+     FragID%I(M)=II
      K=ITop%I(1)
      L=ITop%I(2)
-     CenterT%I(II)=L-K
      ColMax=MAX(1,MAXVAL(JTop%I(K:L-1)))
      DO I=2,NatmsLoc
        K=ITop%I(I)
@@ -6705,117 +6777,125 @@ return
        M=IPerm%I(I)
        IF(ColMax<I) THEN
          II=II+1
-         Center%I(II)=M
-         CenterT%I(II)=L-K
-       ELSE IF(CenterT%I(II)<L-K) THEN
-         Center%I(II)=M
-         CenterT%I(II)=L-K
        ENDIF
+       FragID%I(M)=II
        ColMax=MAX(ColMax,MAXVAL(JTop%I(K:L-1)))
        ColMax=MAX(ColMax,I)
      ENDDO 
      !
-     ! Sort fragment centers into separate arrays
+     ! Sort fragment atoms
      !
-     CALL New(XYZf,(/3,II/))
-     DO I=1,II
-       K=Center%I(I)
-       XYZf%D(1:3,I)=XYZ(1:3,K)
+     CALL New(IFrag,II+1)
+     CALL New(CenterFrag,(/3,II/))
+     !
+     IFrag%I=0
+     CenterFrag%D=Zero
+     DO I=1,NatmsLoc
+       M=FragID%I(I)
+       IFrag%I(M+1)=IFrag%I(M+1)+1
+       CenterFrag%D(1:3,M)=CenterFrag%D(1:3,M)+XYZ(1:3,I)
      ENDDO
      !
-     IF(II<4) THEN
-       K=(II*II-II)/2
-       CALL New(BondF,K)
-       K=0
-       DO I=1,II
-         DO J=I+1,II
-           K=K+1
-           M=Center%I(I)
-           N=Center%I(J)
-           BondF%IJ%I(1:2,K)=(/M,N/)
-           V1(1:3)=XYZ(1:3,M)-XYZ(1:3,N)
-           Fact1=SQRT(DOT_PRODUCT(V1,V1))
-           BondF%Length%D(K)=Fact1
-           BondF%Type%C(K)(1:4)='Frag'
-         ENDDO
-       ENDDO
-     ELSE
-       !
-       ! Select largest triangle
-       !
-       CALL ThreeAtoms(XYZf%D,TOPS%Tot12,TAtoms(1:3),Linearity)
-       DO J=1,3
-         CT(J)=(XYZf%D(J,TAtoms(1))+XYZf%D(J,TAtoms(2))+ &
-            XYZf%D(J,TAtoms(3)))/3.D0
-         V1(J)=XYZf%D(J,TAtoms(1))-CT(J)
-         V2(J)=XYZf%D(J,TAtoms(2))-CT(J)
-       ENDDO
-       CALL CROSS_PRODUCT(V1,V2,CTX)
-       !
-       ! Select 4th atom, based on overlap with CTX
-       Fact1=Zero
-       TAtoms(4)=0
-       DO I=1,II
-         IF(ANY(TAtoms(1:3)==I)) CYCLE
-         DO J=1,3 ; V1(J)=XYZf%D(J,I)-CT(J) ; ENDDO
-         Fact2=ABS(DOT_PRODUCT(V1,CTX))+One
-         IF(Fact2>Fact1) THEN
-           TAtoms(4)=I
-           Fact1=Fact2
-         ENDIF
-       ENDDO
-       !
-       CALL New(Mark,II)
-       Mark%I=0
-       DO I=1,4 
-         Mark%I(TAtoms(I))=1
-       ENDDO
-       !
-       DO I=1,4
-         TAtoms(I)=Center%I(TAtoms(I))
-       ENDDO
-       !
-       K=6+(II-4)*4
-       CALL New(BondF,K)
-       K=0
-       DO I=1,4 
-         DO J=I+1,4 
-           K=K+1
-           L=TAtoms(I)
-           M=TAtoms(J)
-           BondF%IJ%I(1:2,K)=(/L,M/)
-           V1(1:3)=XYZ(1:3,L)-XYZ(1:3,M)
-           Fact1=SQRT(DOT_PRODUCT(V1,V1))
-           BondF%Length%D(K)=Fact1
-           BondF%Type%C(K)(1:4)='Frag'
-         ENDDO
-       ENDDO
-       DO I=1,II
-         IF(Mark%I(I)==0) THEN
-           DO L=1,4
-             K=K+1
-             M=Center%I(I)
-             N=TAtoms(L)
-             BondF%IJ%I(1:2,K)=(/M,N/)
-             V1(1:3)=XYZ(1:3,M)-XYZ(1:3,N)
-             Fact1=SQRT(DOT_PRODUCT(V1,V1))
-             BondF%Length%D(K)=Fact1
-             BondF%Type%C(K)(1:4)='Frag'
-           ENDDO
-         ENDIF
-       ENDDO
-       CALL Delete(Mark)
-     ENDIF
+     DO I=1,II
+       CenterFrag%D(1:3,I)=CenterFrag%D(1:3,I)/DBLE(IFrag%I(I+1))
+     ENDDO
      !
-     CALL Delete(XYZf)
-     CALL Delete(Center)
-     CALL Delete(CenterT)
+     IFrag%I(1)=1
+     DO I=1,II
+       IFrag%I(I+1)=IFrag%I(I)+IFrag%I(I+1) 
+     ENDDO
+     !
+     CALL New(LastFrag,II)
+     CALL New(JFrag,NatmsLoc)
+     LastFrag%I=0
+     DO I=1,NatmsLoc
+       M=FragID%I(I)
+       K=IFrag%I(M)+LastFrag%I(M)
+       JFrag%I(K)=I
+       LastFrag%I(M)=LastFrag%I(M)+1
+     ENDDO
+     !
+     ! Connect fragments
+     !
+     K=(II*II-II)/2
+     CALL New(BondF,K)
+     K=0
+     DO I=1,II
+       DO J=I+1,II
+         K=K+1
+       ! M=Center%I(I)
+       ! N=Center%I(J)
+       ! V1(1:3)=XYZ(1:3,M)-XYZ(1:3,N)
+       ! Length=SQRT(DOT_PRODUCT(V1,V1))
+         CALL ClosestAtms(M,N,I,J,IFrag%I,JFrag%I,CenterFrag%D,XYZ)
+         Vect=XYZ(1:3,M)-XYZ(1:3,N)
+         Length=SQRT(DOT_PRODUCT(Vect,Vect))
+         BondF%IJ%I(1:2,K)=(/M,N/)
+         BondF%Length%D(K)=Length
+         BondF%Type%C(K)(1:4)='Frag'
+       ENDDO
+     ENDDO
+     !
+     CALL Delete(CenterFrag)
+     CALL Delete(FragID)
+     CALL Delete(IFrag)
+     CALL Delete(LastFrag)
+     CALL Delete(JFrag)
      CALL Delete(ITop)
      CALL Delete(JTop)
      CALL Delete(ATop)
      CALL Delete(Perm)
      CALL Delete(IPerm)
    END SUBROUTINE ConnectFragments
+!
+!-------------------------------------------------------------------
+! 
+   SUBROUTINE ClosestAtms(MM,NN,II,JJ,IFrag,JFrag,CenterFrag,XYZ)
+     INTEGER                     :: II,JJ,M,N,I,J,MaxIt,It,K,L
+     INTEGER                     :: MMOld,NNOld,MM,NN
+     INTEGER,DIMENSION(:)        :: IFrag,JFrag
+     REAL(DOUBLE),DIMENSION(:,:) :: XYZ,CenterFrag
+     REAL(DOUBLE),DIMENSION(3)   :: XYZII,XYZJJ
+     REAL(DOUBLE)                :: DistM,DistN,Dist,Length
+     !
+     ! Find the closest atoms from fragments I and J
+     !
+     XYZII=CenterFrag(1:3,II)
+     XYZJJ=CenterFrag(1:3,JJ)
+     MMOld=0 
+     NNOld=0 
+     MaxIt=MAX(IFrag(II+1)-IFrag(II),IFrag(JJ+1)-IFrag(JJ))
+     DO It=1,Maxit
+       CALL FragFrag(MM,XYZJJ,II,IFrag,JFrag,XYZ)
+       XYZII=XYZ(1:3,MM) 
+       CALL FragFrag(NN,XYZII,JJ,IFrag,JFrag,XYZ)
+       XYZJJ=XYZ(1:3,NN) 
+       IF(MMOld==MM.AND.NNOld==NN) EXIT
+       MMOld=MM
+       NNOld=NN
+     ENDDO 
+   END SUBROUTINE ClosestAtms
+!
+!----------------------------------------------------------------
+!
+   SUBROUTINE FragFrag(MM,XYZJJ,II,IFrag,JFrag,XYZ)
+     INTEGER                     :: M,N,II,MM,K
+     INTEGER,DIMENSION(:)        :: IFrag,JFrag
+     REAL(DOUBLE),DIMENSION(:,:) :: XYZ
+     REAL(DOUBLE),DIMENSION(3)   :: DistV,XYZJJ
+     REAL(DOUBLE)                :: DistM,Dist
+     !
+     DistM=1.D99
+     DO K=IFrag(II),IFrag(II+1)-1 
+       M=JFrag(K)
+       DistV=XYZ(1:3,M)-XYZJJ
+       Dist=SQRT(DOT_PRODUCT(DistV,DistV))
+       IF(Dist<DistM) THEN
+         MM=M
+         DistM=Dist
+       ENDIF
+     ENDDO 
+   END SUBROUTINE FragFrag
 !
 !-------------------------------------------------------------------
 ! 
