@@ -31,12 +31,16 @@ MODULE PFFTen
       TYPE(CRDS)             :: GM
       TYPE(ARGMT)            :: Args
 !-------------------------------------------------------------------------------- 
-      INTEGER                :: I,IR,Layers,MaxEll
+      INTEGER                :: MaxEll
+      INTEGER                :: I,IR,Layers
       LOGICAL                :: CellIsRect,CellIsBox
       REAL(DOUBLE)           :: BoxRadius
       REAL(DOUBLE)           :: MagA,MagB,MagC,AdotB,AdotC,BdotC
 !
       IF(GM%PBC%Dimen==0) THEN 
+         CALL New_CellSet_Cube(CS_IN,GM%PBC%AutoW,GM%PBC%BoxShape,(/0,0,0/))      
+         CALL Put_CellSet(CS_IN,'CS_IN')
+!
          MaxEll = 0
          CALL New(TensorC,LSP(2*MaxEll),0)
          CALL New(TensorS,LSP(2*MaxEll),0)
@@ -79,27 +83,36 @@ MODULE PFFTen
 ! 
       CellIsRect = .FALSE.
       CellIsBox  = .FALSE.
-      IF(GM%PBC%Dimen==3) THEN
-         IF(AdotB < Small .AND. AdotC < Small .AND. BdotC < Small) THEN
-            CellIsRect = .TRUE.
-            IF( ABS(MagA-MagB) < Small .AND. ABS(MagA-MagC) < Small .AND. ABS(MagB-MagC) < Small) THEN
-               CellIsBox = .TRUE.
-            ENDIF
+      IF(AdotB < Small .AND. AdotC < Small .AND. BdotC < Small) THEN
+         CellIsRect = .TRUE.
+         IF( ABS(MagA-MagB) < Small .AND. ABS(MagA-MagC) < Small .AND. ABS(MagB-MagC) < Small) THEN
+            CellIsBox = .TRUE.
          ENDIF
       ENDIF
 !      
-!     Read from Archive or Make the Tensor
+!     Make and Store the Inner Box
 !
       Layers = GM%PBC%PFFMaxLay
-      CellIsBox = .FALSE.
       CALL New_CellSet_Cube(CS_IN,GM%PBC%AutoW,GM%PBC%BoxShape,(/Layers,Layers,Layers/))
+      CALL Sort_CellSet(CS_IN)
+      CALL Put_CellSet(CS_IN,'CS_IN')
+!     
+!     Read from Archive or Make the Tensor
 !
-      IF(    CellIsBox .AND. Layers==1) THEN
-         CALL GetExactTensor(2*MaxEll,GM,'Box111Lay01',MagA)
-      ELSEIF(CellIsBox .AND. Layers==2) THEN
-         CALL GetExactTensor(2*MaxEll,GM,'Box111Lay02',MagA)
+      CellIsBox=.FALSE.
+!
+      IF(CellIsBox) THEN
+         IF(GM%PBC%Dimen==3) THEN
+            CALL GetExactTensor3D(2*MaxEll,GM,MagA)
+         ENDIF
       ELSE
-         CALL MakeTensor(MaxEll+HGEll,GM,Args)
+         IF(GM%PBC%Dimen==1) THEN
+            CALL MakeTensor1D(2*MaxEll,GM,Args)
+         ELSEIF(GM%PBC%Dimen==2) THEN
+            CALL MakeTensor2D(2*MaxEll,GM,Args)
+         ELSEIF(GM%PBC%Dimen==3) THEN
+            CALL MakeTensor3D(2*MaxEll,GM,Args)
+         ENDIF
       ENDIF
 !
 !     Store the Tensor
@@ -112,8 +125,8 @@ MODULE PFFTen
 !========================================================================================
 ! Calculate the PFF
 !========================================================================================
-    SUBROUTINE PFFTensor(MaxL,GM,Args)
-      INTEGER              :: MaxL
+    SUBROUTINE PFFTensor(MaxEll,GM,Args)
+      INTEGER              :: MaxEll
       LOGICAL              :: HaveTensor
       TYPE(CRDS)           :: GM
       TYPE(ARGMT)          :: Args
@@ -122,30 +135,37 @@ MODULE PFFTen
       TensorS%D = Zero
       IF(GM%PBC%Dimen==0) RETURN
 !
-      IF(.NOT. GetTensor(MaxL,GM,Args)) THEN
-         CALL MakeTensor(MaxL,GM,Args)
-         CALL PutTensor(MaxL,GM,Args)
+      IF(.NOT. GetTensor(MaxEll,GM,Args)) THEN
+         IF(GM%PBC%Dimen==1) THEN
+            CALL MakeTensor1D(2*MaxEll,GM,Args)
+         ELSEIF(GM%PBC%Dimen==2) THEN
+            CALL MakeTensor2D(2*MaxEll,GM,Args)
+         ELSEIF(GM%PBC%Dimen==3) THEN
+            CALL MakeTensor3D(2*MaxEll,GM,Args)
+         ENDIF
+         CALL PutTensor(MaxEll,GM,Args)
       ENDIF
 !
     END SUBROUTINE PFFTensor
 !========================================================================================
 ! 
 !========================================================================================
-    SUBROUTINE GetExactTensor(MaxL,GM,TensorType,Scale)
-      INTEGER              :: I,MaxL,NumberOfRecords,L,M,LM
+    SUBROUTINE GetExactTensor3D(MaxL,GM,Scale)
+      INTEGER              :: MaxL
+      INTEGER              :: I,NumberOfRecords,L,M,LM,K
       REAL(DOUBLE)         :: Scale,TenC,TenS
       TYPE(CRDS)           :: GM
-      CHARACTER(LEN=11)    :: TensorType
-      CHARACTER(LEN=120)   :: FileName
-      INTEGER              :: K
-      INCLUDE "Majik_Kubic_WS1.Inc"		
-      INCLUDE "Majik_Kubic_WS2.Inc"		
+!
+      INCLUDE "PBCTensor/Majik_Kubic_WS1.Inc"		
+      INCLUDE "PBCTensor/Majik_Kubic_WS2.Inc"		
+!
       TensorC%D = Zero
       TensorS%D = Zero 
       IF(GM%PBC%Dimen==0) RETURN
-      ! Load Majik numbers from parameter statements	
-      IF(GM%PBC%PFFMaxLay==1)THEN
-	 WRITE(*,*)' Loading exact WS=1 '
+!
+!     Load Majik numbers from parameter statements	
+!
+      IF(GM%PBC%PFFMaxLay==1) THEN
 	 K=0
 	 DO L=4,MIN(128,MaxL),2
 	    DO M=0,L,4
@@ -154,7 +174,7 @@ MODULE PFFTen
                TensorC%D(LM)=Majik1(K)
             ENDDO
          ENDDO
-       ELSEIF(GM%PBC%PFFMaxLay==2)THEN
+       ELSEIF(GM%PBC%PFFMaxLay==2) THEN
 	 K=0
 	 DO L=4,MIN(128,MaxL),2
 	    DO M=0,L,4
@@ -163,34 +183,19 @@ MODULE PFFTen
                TensorC%D(LM)=Majik2(K)
             ENDDO
          ENDDO
-       ELSE
-	 CALL Halt("Majik numbers not available for WS>2!")
        ENDIF	
-!
-!     Read the Tensor
-!
-!
-!      FileName = TRIM(MONDO_HOME) // 'QCTC/PBCTensor/' // TRIM(TensorType) // ".pfft"
-!      OPEN(UNIT=77,FILE=FileName,FORM='UNFORMATTED',STATUS='OLD')
-!      READ(77) NumberOfRecords
-!      DO I=1,NumberOfRecords
-!!         READ(77) L,M,TenC,TenS
-!         LM = LTD(L)+M
-!         TensorC%D(LM)=TenC
-!         TensorS%D(LM)=TenS
-!      ENDDO
 !
 !     Rescale the Tensor
 !
-      DO L=0,MaxL,2
-         DO M=0,L,4
-            LM=LTD(L)+M
-            TensorC%D(LM) = TensorC%D(LM)/(Scale**(DBLE(L)+One))
-!            TensorS%D(LM) = TensorS%D(LM)/(Scale**(DBLE(L)+One))
-         ENDDO
-      ENDDO
+       DO L=0,MaxL,2
+          DO M=0,L,4
+             LM=LTD(L)+M
+             TensorC%D(LM) = TensorC%D(LM)/(Scale**(DBLE(L)+One))
+             TensorS%D(LM) = TensorS%D(LM)/(Scale**(DBLE(L)+One))
+          ENDDO
+       ENDDO
 !
-    END SUBROUTINE GetExactTensor
+     END SUBROUTINE GetExactTensor3D
 !========================================================================================
 ! 
 !========================================================================================
@@ -266,9 +271,66 @@ MODULE PFFTen
 !
     END SUBROUTINE PutTensor
 !========================================================================================
-! Calculate the PFFTensor
+! Calculate the PFFTensor 1D
 !========================================================================================
-    SUBROUTINE MakeTensor(MaxL,GM,Args)
+    SUBROUTINE MakeTensor1D(MaxL,GM,Args)
+      INTEGER                           :: MaxL
+      INTEGER                           :: I,J,L,M,LM,NC
+      REAL(DOUBLE),DIMENSION(3,3)       :: RecpLatVec,LatVec
+      TYPE(CRDS)                        :: GM
+      TYPE(ARGMT)                       :: Args
+!
+!     Get The Lattice and Reciprocal Lattice Vectors
+!
+      DO I = 1,3
+         DO J = 1,3
+            RecpLatVec(I,J) = GM%PBC%InvBoxSh(J,I)
+            LatVec(I,J)     = GM%PBC%BoxShape(I,J)
+         ENDDO
+      ENDDO
+!
+!     Number of Inner Boxes
+!
+      NC = (CS_IN%NCells-1)/2
+!
+!     One Dimension: Right
+!
+      IF(GM%PBC%AutoW(1)) THEN
+         CALL IrRegular(MaxL,LatVec(1,1),Zero,Zero)
+      ELSEIF(GM%PBC%AutoW(2)) THEN
+         CALL IrRegular(MaxL,Zero,LatVec(2,2),Zero)
+      ELSEIF(GM%PBC%AutoW(3)) THEN      
+         CALL IrRegular(MaxL,Zero,Zero,LatVec(3,3))
+      ENDIF
+      DO L=1,MaxL
+         DO M = 0,L
+            LM = LTD(L)+M
+            TensorC%D(LM) = Cpq(LM)*RZeta(L+1,NC)
+         ENDDO
+      ENDDO
+!
+!     One Dimension: Left
+!
+      IF(GM%PBC%AutoW(1)) THEN
+         CALL IrRegular(MaxL,-LatVec(1,1),Zero,Zero)
+      ELSEIF(GM%PBC%AutoW(2)) THEN
+         CALL IrRegular(MaxL,Zero,-LatVec(2,2),Zero)
+      ELSEIF(GM%PBC%AutoW(3)) THEN      
+         CALL IrRegular(MaxL,Zero,Zero,-LatVec(3,3))
+      ENDIF
+      NC = (CS_IN%NCells-1)/2
+      DO L=1,MaxL
+         DO M = 0,L
+            LM = LTD(L)+M
+            TensorC%D(LM) =  TensorC%D(LM) + Cpq(LM)*RZeta(L+1,NC)
+         ENDDO
+      ENDDO
+!
+    END SUBROUTINE MakeTensor1D
+!========================================================================================
+! Calculate the PFFTensor 2D
+!========================================================================================
+    SUBROUTINE MakeTensor2D(MaxL,GM,Args)
       INTEGER                           :: MaxL
       INTEGER                           :: I,J,K,L,M,LM,NC
       INTEGER                           :: LSwitch
@@ -285,7 +347,170 @@ MODULE PFFTen
 !
 !     Initialize 
 !
-      Accuracy = 1.D-16
+      Accuracy = 1.D-14
+      Rmin     = SQRT(CS_IN%CellCarts%D(1,1)**2+CS_IN%CellCarts%D(2,1)**2+CS_IN%CellCarts%D(3,1)**2)
+!
+!     Get The Lattice and Reciprocal Lattice Vectors
+!
+      DO I = 1,3
+         DO J = 1,3
+            RecpLatVec(I,J) = GM%PBC%InvBoxSh(J,I)
+            LatVec(I,J)     = GM%PBC%BoxShape(I,J)
+         ENDDO
+      ENDDO
+
+!
+!     Two Dimension
+!
+      LSwitch  = 10
+      LenScale = GM%PBC%CellVolume**(Half)
+      Rmax     = Rmin+LenScale*(One/Accuracy)**(One/DBLE(LSwitch))
+      BetaSq   = 0.25D0/(LenScale)**2
+!           
+!     Sum the Real Space
+!
+      DO
+         CALL New_CellSet_Sphere(CSMM,GM%PBC%AutoW,LatVec,Rmin)
+         IF(CSMM%NCells .GT. 500000) THEN
+            Rmax = 0.99*Rmax
+            CALL Delete_CellSet(CSMM)
+         ELSE
+            EXIT
+         ENDIF
+      ENDDO
+!
+      DO NC = 1,CSMM%NCells
+         PQ(:) = CSMM%CellCarts%D(:,NC)
+         IF(.NOT. InCell_CellSet(CS_IN,PQ(1),PQ(2),PQ(3))) THEN
+            RadSq = BetaSq*(PQ(1)*PQ(1)+PQ(2)*PQ(2)+PQ(3)*PQ(3))
+            CALL IrRegular(MaxL,PQ(1),PQ(2),PQ(3))
+            DO L = 1,MaxL
+               IF(L .LE. LSwitch) THEN
+                  CFac = GScript(L,RadSq)
+               ELSE
+                  CFac = One
+               ENDIF
+               DO M = 0,L
+                  LM = LTD(L)+M
+                  TensorC%D(LM)=TensorC%D(LM)+Cpq(LM)*CFac
+                  TensorS%D(LM)=TensorS%D(LM)+Spq(LM)*CFac
+               ENDDO
+            ENDDO
+         ENDIF
+      ENDDO
+      CALL Delete_CellSet(CSMM)
+!
+!     Sum the Reciprical Space 
+!
+      ExpFac = Pi*Pi/BetaSq
+      Rmax = SQRT(ABS(LOG(Accuracy/(10.D0**(LSwitch)))/ExpFac))
+      DO
+         CALL New_CellSet_Sphere(CSMM,GM%PBC%AutoW,RecpLatVec,Rmax)
+         IF(CSMM%NCells .LT. 9) THEN
+            Rmax = 1.01D0*Rmax
+         ELSE
+            EXIT
+         ENDIF
+      ENDDO
+!
+      NDiv    = 1000
+      LenMax  = SQRT(ABS(LOG(1.D-6))/ExpFac)
+      Delt    = LenMax/DBLE(NDiv)
+      DO I=-NDiv,NDiv
+         Vec(:) = Zero
+         IF(.NOT.GM%PBC%AutoW(1)) Vec(1) = I*Delt
+         IF(.NOT.GM%PBC%AutoW(2)) Vec(2) = I*Delt
+         IF(.NOT.GM%PBC%AutoW(3)) Vec(3) = I*Delt
+         DO NC = 1,CSMM%NCells
+            PQ(:) = CSMM%CellCarts%D(:,NC)+Vec(:)
+            Rad   = SQRT(PQ(1)*PQ(1)+PQ(2)*PQ(2)+PQ(3)*PQ(3))
+            IF(Rad .GT. 1.D-14) THEN
+               CALL IrRegular(MaxL,PQ(1),PQ(2),PQ(3))
+               DO L = 1,LSwitch
+                  CFac = Delt*FT_FScriptC_3D(L,ExpFac,Rad)/GM%PBC%CellVolume
+                  SFac = Delt*FT_FScriptS_3D(L,ExpFac,Rad)/GM%PBC%CellVolume
+                  DO M = 0,L
+                     LM = LTD(L)+M
+                     TensorC%D(LM)=TensorC%D(LM)+Cpq(LM)*CFac-Spq(LM)*SFac
+                     TensorS%D(LM)=TensorS%D(LM)+Spq(LM)*CFac+Cpq(LM)*SFac
+                  ENDDO
+               ENDDO
+            ENDIF
+         ENDDO
+      ENDDO
+!
+!        Add in the k=0 piece for the L=2 multipoles (Zero in 3D)
+!
+      DO I=1,3
+         IF(.NOT. GM%PBC%AutoW(I)) THEN
+            PQ(:) = Zero
+            PQ(I) = 1.D-10
+            Rad   = SQRT(PQ(1)*PQ(1)+PQ(2)*PQ(2)+PQ(3)*PQ(3))
+            L     = 2
+            CALL IrRegular(L,PQ(1),PQ(2),PQ(3))
+            CFac = Half*Delt*FT_FScriptC_3D(L,ExpFac,Rad)/GM%PBC%CellVolume
+            SFac = Half*Delt*FT_FScriptS_3D(L,ExpFac,Rad)/GM%PBC%CellVolume           
+            DO M = 0,L
+               LM = LTD(L)+M
+               TensorC%D(LM)=TensorC%D(LM)+Cpq(LM)*CFac-Spq(LM)*SFac
+               TensorS%D(LM)=TensorS%D(LM)+Spq(LM)*CFac+Cpq(LM)*SFac
+            ENDDO
+            PQ(:) = Zero
+            PQ(I) = -1.D-10
+            Rad   = SQRT(PQ(1)*PQ(1)+PQ(2)*PQ(2)+PQ(3)*PQ(3))
+            L     = 2
+            CALL IrRegular(L,PQ(1),PQ(2),PQ(3))
+            CFac = Half*Delt*FT_FScriptC_3D(L,ExpFac,Rad)/GM%PBC%CellVolume
+            SFac = Half*Delt*FT_FScriptS_3D(L,ExpFac,Rad)/GM%PBC%CellVolume           
+            DO M = 0,L
+               LM = LTD(L)+M
+               TensorC%D(LM)=TensorC%D(LM)+Cpq(LM)*CFac-Spq(LM)*SFac
+               TensorS%D(LM)=TensorS%D(LM)+Spq(LM)*CFac+Cpq(LM)*SFac
+            ENDDO
+         ENDIF
+      ENDDO
+      CALL Delete_CellSet(CSMM)
+!
+!        Substract the inner boxes
+!
+      DO NC = 1,CS_IN%NCells
+         PQ(:) = CS_IN%CellCarts%D(:,NC)
+         RadSq = BetaSq*(PQ(1)*PQ(1)+PQ(2)*PQ(2)+PQ(3)*PQ(3))
+         IF(RadSq .GT. 1.D-14) THEN
+            CALL IrRegular(MaxL,PQ(1),PQ(2),PQ(3))
+            DO L = 1,LSwitch
+               CFac = FScript(L,RadSq)
+               DO M = 0,L
+                  LM = LTD(L)+M
+                  TensorC%D(LM)=TensorC%D(LM)-Cpq(LM)*CFac
+                  TensorS%D(LM)=TensorS%D(LM)-Spq(LM)*CFac
+               ENDDO
+            ENDDO
+         ENDIF
+      ENDDO
+!
+    END SUBROUTINE MakeTensor2D
+!========================================================================================
+! Calculate the PFFTensor 3D
+!========================================================================================
+    SUBROUTINE MakeTensor3D(MaxL,GM,Args)
+      INTEGER                           :: MaxL
+      INTEGER                           :: I,J,K,L,M,LM,NC
+      INTEGER                           :: LSwitch
+      REAL(DOUBLE),DIMENSION(3)         :: PQ
+      REAL(DOUBLE)                      :: CFac,SFac,BetaSq,Rad,RadSq,ExpFac
+      REAL(DOUBLE)                      :: Rmin,RMAX,Accuracy,LenScale,SUM
+!
+      INTEGER                           :: NDiv
+      REAL(DOUBLE)                      :: LenMax,Delt,IntFac
+      REAL(DOUBLE),DIMENSION(3)         :: Vec
+      REAL(DOUBLE),DIMENSION(3,3)       :: RecpLatVec,LatVec
+      TYPE(CRDS)                        :: GM
+      TYPE(ARGMT)                       :: Args
+!
+!     Initialize 
+!
+      Accuracy = 1.D-14
       Rmin     = SQRT(CS_IN%CellCarts%D(1,1)**2+CS_IN%CellCarts%D(2,1)**2+CS_IN%CellCarts%D(3,1)**2)
 !
 !     Get The Lattice and Reciprocal Lattice Vectors
@@ -297,259 +522,99 @@ MODULE PFFTen
          ENDDO
       ENDDO
 !
-!     One Dimension
-!
-      IF(GM%PBC%Dimen==1) THEN
-         IF(GM%PBC%AutoW(1)) THEN
-            CALL IrRegular(MaxL,LatVec(1,1),Zero,Zero)
-         ELSEIF(GM%PBC%AutoW(2)) THEN
-            CALL IrRegular(MaxL,Zero,LatVec(2,2),Zero)
-         ELSEIF(GM%PBC%AutoW(3)) THEN      
-            CALL IrRegular(MaxL,Zero,Zero,LatVec(3,3))
-         ENDIF
-         NC = (CS_IN%NCells-1)/2
-         DO L=1,MaxL
-            DO M = 0,L
-               LM = LTD(L)+M
-               TensorC%D(LM) = Two*Cpq(LM)*RZeta(L+1,NC)
-            ENDDO
-         ENDDO
-      ENDIF
-!
-!     Two Dimension
-!
-      IF(GM%PBC%Dimen == 2) THEN
-         LSwitch  = 10
-         LenScale = GM%PBC%CellVolume**(Half)
-         Rmax     = Rmin+LenScale*(One/Accuracy)**(One/DBLE(LSwitch))
-         BetaSq   = 0.25D0/(LenScale)**2
-!           
-!        Sum the Real Space
-!
-         DO
-            CALL New_CellSet_Sphere(CSMM,GM%PBC%AutoW,LatVec,Rmin)
-            IF(CSMM%NCells .GT. 500000) THEN
-               Rmax = 0.99*Rmax
-               CALL Delete_CellSet(CSMM)
-            ELSE
-               EXIT
-            ENDIF
-         ENDDO
-!
-         DO NC = 1,CSMM%NCells
-            PQ(:) = CSMM%CellCarts%D(:,NC)
-            IF(.NOT. InCell_CellSet(CS_IN,PQ(1),PQ(2),PQ(3))) THEN
-               RadSq = BetaSq*(PQ(1)*PQ(1)+PQ(2)*PQ(2)+PQ(3)*PQ(3))
-               CALL IrRegular(MaxL,PQ(1),PQ(2),PQ(3))
-               DO L = 1,MaxL
-                  IF(L .LE. LSwitch) THEN
-                     CFac = GScript(L,RadSq)
-                  ELSE
-                     CFac = One
-                  ENDIF
-                  DO M = 0,L
-                     LM = LTD(L)+M
-                     TensorC%D(LM)=TensorC%D(LM)+Cpq(LM)*CFac
-                     TensorS%D(LM)=TensorS%D(LM)+Spq(LM)*CFac
-                  ENDDO
-               ENDDO
-            ENDIF
-         ENDDO
-         CALL Delete_CellSet(CSMM)
-!
-!        Sum the Reciprical Space 
-!
-         ExpFac = Pi*Pi/BetaSq
-         Rmax = SQRT(ABS(LOG(Accuracy/(10.D0**(LSwitch)))/ExpFac))
-         DO
-            CALL New_CellSet_Sphere(CSMM,GM%PBC%AutoW,RecpLatVec,Rmax)
-            IF(CSMM%NCells .LT. 9) THEN
-               Rmax = 1.01D0*Rmax
-            ELSE
-               EXIT
-            ENDIF
-         ENDDO
-!
-         NDiv    = 1000
-         LenMax  = SQRT(ABS(LOG(1.D-6))/ExpFac)
-         Delt    = LenMax/DBLE(NDiv)
-         DO I=-NDiv,NDiv
-            Vec(:) = Zero
-            IF(.NOT.GM%PBC%AutoW(1)) Vec(1) = I*Delt
-            IF(.NOT.GM%PBC%AutoW(2)) Vec(2) = I*Delt
-            IF(.NOT.GM%PBC%AutoW(3)) Vec(3) = I*Delt
-            DO NC = 1,CSMM%NCells
-               PQ(:) = CSMM%CellCarts%D(:,NC)+Vec(:)
-               Rad   = SQRT(PQ(1)*PQ(1)+PQ(2)*PQ(2)+PQ(3)*PQ(3))
-               IF(Rad .GT. 1.D-14) THEN
-                  CALL IrRegular(MaxL,PQ(1),PQ(2),PQ(3))
-                  DO L = 1,LSwitch
-                     CFac = Delt*FT_FScriptC_3D(L,ExpFac,Rad)/GM%PBC%CellVolume
-                     SFac = Delt*FT_FScriptS_3D(L,ExpFac,Rad)/GM%PBC%CellVolume
-                     DO M = 0,L
-                        LM = LTD(L)+M
-                        TensorC%D(LM)=TensorC%D(LM)+Cpq(LM)*CFac-Spq(LM)*SFac
-                        TensorS%D(LM)=TensorS%D(LM)+Spq(LM)*CFac+Cpq(LM)*SFac
-                     ENDDO              
-                  ENDDO
-               ENDIF
-            ENDDO
-         ENDDO
-!
-!        Add in the k=0 piece for the L=2 multipoles (Zero in 3D)
-!
-         DO I=1,3
-            IF(.NOT. GM%PBC%AutoW(I)) THEN
-               PQ(:) = Zero
-               PQ(I) = 1.D-10
-               Rad   = SQRT(PQ(1)*PQ(1)+PQ(2)*PQ(2)+PQ(3)*PQ(3))
-               L     = 2
-               CALL IrRegular(L,PQ(1),PQ(2),PQ(3))
-               CFac = Half*Delt*FT_FScriptC_3D(L,ExpFac,Rad)/GM%PBC%CellVolume
-               SFac = Half*Delt*FT_FScriptS_3D(L,ExpFac,Rad)/GM%PBC%CellVolume           
-               DO M = 0,L
-                  LM = LTD(L)+M
-                  TensorC%D(LM)=TensorC%D(LM)+Cpq(LM)*CFac-Spq(LM)*SFac
-                  TensorS%D(LM)=TensorS%D(LM)+Spq(LM)*CFac+Cpq(LM)*SFac
-               ENDDO
-               PQ(:) = Zero
-               PQ(I) = -1.D-10
-               Rad   = SQRT(PQ(1)*PQ(1)+PQ(2)*PQ(2)+PQ(3)*PQ(3))
-               L     = 2
-               CALL IrRegular(L,PQ(1),PQ(2),PQ(3))
-               CFac = Half*Delt*FT_FScriptC_3D(L,ExpFac,Rad)/GM%PBC%CellVolume
-               SFac = Half*Delt*FT_FScriptS_3D(L,ExpFac,Rad)/GM%PBC%CellVolume           
-               DO M = 0,L
-                  LM = LTD(L)+M
-                  TensorC%D(LM)=TensorC%D(LM)+Cpq(LM)*CFac-Spq(LM)*SFac
-                  TensorS%D(LM)=TensorS%D(LM)+Spq(LM)*CFac+Cpq(LM)*SFac
-               ENDDO
-            ENDIF
-         ENDDO
-         CALL Delete_CellSet(CSMM)
-!
-!        Substract the inner boxes
-!
-         DO NC = 1,CS_IN%NCells
-            PQ(:) = CS_IN%CellCarts%D(:,NC)
-            RadSq = BetaSq*(PQ(1)*PQ(1)+PQ(2)*PQ(2)+PQ(3)*PQ(3))
-            IF(RadSq .GT. 1.D-14) THEN
-               CALL IrRegular(MaxL,PQ(1),PQ(2),PQ(3))
-               DO L = 1,LSwitch
-                  CFac = FScript(L,RadSq)
-                  DO M = 0,L
-                     LM = LTD(L)+M
-                     TensorC%D(LM)=TensorC%D(LM)-Cpq(LM)*CFac
-                     TensorS%D(LM)=TensorS%D(LM)-Spq(LM)*CFac
-                  ENDDO
-               ENDDO
-            ENDIF
-         ENDDO
-      ENDIF
-!
 !     Three Dimension
 !
-      IF(GM%PBC%Dimen == 3) THEN
-         LSwitch  = 10
-         LenScale = GM%PBC%CellVolume**(One/Three)
-         Rmax     = Rmin+LenScale*(One/Accuracy)**(One/DBLE(LSwitch))
-         BetaSq   = 0.25D0/(LenScale)**2
+      LSwitch  = 10
+      LenScale = GM%PBC%CellVolume**(One/Three)
+      Rmax     = Rmin+LenScale*(One/Accuracy)**(One/DBLE(LSwitch))
+      BetaSq   = 0.25D0/(LenScale)**2
 !           
-!        Sum the Real Space
+!     Sum the Real Space
 !
-         DO
-            CALL New_CellSet_Sphere(CSMM,GM%PBC%AutoW,LatVec,Rmax)
-            IF(CSMM%NCells .GT. 500000) THEN
-               Rmax = 0.99*Rmax
-               CALL Delete_CellSet(CSMM)
-            ELSE
-               EXIT
-            ENDIF
-         ENDDO
+      DO
+         CALL New_CellSet_Sphere(CSMM,GM%PBC%AutoW,LatVec,Rmax)
+         IF(CSMM%NCells .GT. 500000) THEN
+            Rmax = 0.99*Rmax
+            CALL Delete_CellSet(CSMM)
+         ELSE
+            EXIT
+         ENDIF
+      ENDDO
+      CALL Sort_CellSet(CSMM)
 !
-         DO NC = 1,CSMM%NCells
-            PQ(:) = CSMM%CellCarts%D(:,NC)
-            IF(.NOT. InCell_CellSet(CS_IN,PQ(1),PQ(2),PQ(3))) THEN
-               RadSq = BetaSq*(PQ(1)*PQ(1)+PQ(2)*PQ(2)+PQ(3)*PQ(3))
-               CALL IrRegular(MaxL,PQ(1),PQ(2),PQ(3))
-               DO L = 1,MaxL
-                  IF(L .LE. LSwitch) THEN
-                     CFac = GScript(L,RadSq)
-                  ELSE
-                     CFac = One
-                  ENDIF
-                  DO M = 0,L
-                     LM = LTD(L)+M
-                     TensorC%D(LM)=TensorC%D(LM)+Cpq(LM)*CFac
-                     TensorS%D(LM)=TensorS%D(LM)+Spq(LM)*CFac
-                  ENDDO
-               ENDDO
-            ENDIF
-         ENDDO
-         CALL Delete_CellSet(CSMM)
-!
-!        Sum the Reciprical Space 
-!
-         ExpFac = Pi*Pi/BetaSq
-         Rmax   = SQRT(ABS(LOG(Accuracy/(10.D0**(LSwitch)))/ExpFac))
-         DO
-            CALL New_CellSet_Sphere(CSMM,GM%PBC%AutoW,RecpLatVec,Rmax)
-            IF(CSMM%NCells .LT. 27) THEN
-               Rmax = 1.01D0*Rmax
-            ELSE
-               EXIT
-            ENDIF
-         ENDDO
-!
-         DO NC = 1,CSMM%NCells
-            PQ(:) = CSMM%CellCarts%D(:,NC)
-            Rad   = SQRT(PQ(1)*PQ(1)+PQ(2)*PQ(2)+PQ(3)*PQ(3))
-            IF(Rad .GT. 1.D-14) THEN 
-               CALL IrRegular(MaxL,PQ(1),PQ(2),PQ(3))
-               DO L = 1,LSwitch
-                  CFac = FT_FScriptC_3D(L,ExpFac,Rad)/GM%PBC%CellVolume
-                  SFac = FT_FScriptS_3D(L,ExpFac,Rad)/GM%PBC%CellVolume
-                  DO M = 0,L
-                     LM = LTD(L)+M
-                      TensorC%D(LM)=TensorC%D(LM)+Cpq(LM)*CFac-Spq(LM)*SFac
-                      TensorS%D(LM)=TensorS%D(LM)+Spq(LM)*CFac+Cpq(LM)*SFac
-                  ENDDO
-               ENDDO
-            ENDIF
-         ENDDO
-         CALL Delete_CellSet(CSMM)
-!
-!        Substract the inner boxes
-!
-         DO NC = 1,CS_IN%NCells
-            PQ(:) = CS_IN%CellCarts%D(:,NC)
+      DO NC = 1,CSMM%NCells
+         PQ(:) = CSMM%CellCarts%D(:,NC)
+         IF(.NOT. InCell_CellSet(CS_IN,PQ(1),PQ(2),PQ(3))) THEN
             RadSq = BetaSq*(PQ(1)*PQ(1)+PQ(2)*PQ(2)+PQ(3)*PQ(3))
-            IF(RadSq .GT. 1.D-14) THEN
-               CALL IrRegular(MaxL,PQ(1),PQ(2),PQ(3))
-               DO L = 1,LSwitch
-                  CFac = FScript(L,RadSq)
-                  DO M = 0,L
-                     LM = LTD(L)+M
-                     TensorC%D(LM)=TensorC%D(LM)-Cpq(LM)*CFac
-                     TensorS%D(LM)=TensorS%D(LM)-Spq(LM)*CFac
-                  ENDDO
+            CALL IrRegular(MaxL,PQ(1),PQ(2),PQ(3))
+            DO L = 1,MaxL
+               IF(L .LE. LSwitch) THEN
+                  CFac = GScript(L,RadSq)
+               ELSE
+                  CFac = One
+               ENDIF
+               DO M = 0,L
+                  LM = LTD(L)+M
+                  TensorC%D(LM)=TensorC%D(LM)+Cpq(LM)*CFac
+                  TensorS%D(LM)=TensorS%D(LM)+Spq(LM)*CFac
                ENDDO
-            ENDIF
-         ENDDO
-         CALL Delete_CellSet(CSMM)
-      ENDIF
+            ENDDO
+         ENDIF
+      ENDDO
+      CALL Delete_CellSet(CSMM)
 !
-!     Filter out the Zero Elements
+!     Sum the Reciprical Space 
 !
-      DO L = 0,MaxL
-         DO M = 0,L
-            LM = LTD(L)+M
-            IF(ABS(TensorC%D(LM)) .LT. 1.D-10) TensorC%D(LM) = Zero
-            IF(ABS(TensorS%D(LM)) .LT. 1.D-10) TensorS%D(LM) = Zero
-         ENDDO
+      ExpFac = Pi*Pi/BetaSq
+      Rmax   = SQRT(ABS(LOG(Accuracy/(10.D0**(LSwitch)))/ExpFac))
+      DO
+         CALL New_CellSet_Sphere(CSMM,GM%PBC%AutoW,RecpLatVec,Rmax)
+         IF(CSMM%NCells .LT. 27) THEN
+            Rmax = 1.01D0*Rmax
+            CALL Delete_CellSet(CSMM)
+         ELSE
+            EXIT
+         ENDIF
+      ENDDO
+      CALL Sort_CellSet(CSMM)
+!
+      DO NC = 1,CSMM%NCells
+         PQ(:) = CSMM%CellCarts%D(:,NC)
+         Rad   = SQRT(PQ(1)*PQ(1)+PQ(2)*PQ(2)+PQ(3)*PQ(3))
+         IF(Rad .GT. 1.D-14) THEN 
+            CALL IrRegular(MaxL,PQ(1),PQ(2),PQ(3))
+            DO L = 1,LSwitch
+               CFac = FT_FScriptC_3D(L,ExpFac,Rad)/GM%PBC%CellVolume
+               SFac = FT_FScriptS_3D(L,ExpFac,Rad)/GM%PBC%CellVolume
+               DO M = 0,L
+                  LM = LTD(L)+M
+                  TensorC%D(LM)=TensorC%D(LM)+Cpq(LM)*CFac-Spq(LM)*SFac
+                  TensorS%D(LM)=TensorS%D(LM)+Spq(LM)*CFac+Cpq(LM)*SFac
+               ENDDO
+            ENDDO
+         ENDIF
+      ENDDO
+      CALL Delete_CellSet(CSMM)
+!
+!     Substract the inner boxes
+!
+      DO NC = 1,CS_IN%NCells
+         PQ(:) = CS_IN%CellCarts%D(:,NC)
+         RadSq = BetaSq*(PQ(1)*PQ(1)+PQ(2)*PQ(2)+PQ(3)*PQ(3))
+         IF(RadSq .GT. 1.D-14) THEN
+            CALL IrRegular(MaxL,PQ(1),PQ(2),PQ(3))
+            DO L = 1,LSwitch
+               CFac = FScript(L,RadSq)
+               DO M = 0,L
+                  LM = LTD(L)+M
+                  TensorC%D(LM)=TensorC%D(LM)-Cpq(LM)*CFac
+                  TensorS%D(LM)=TensorS%D(LM)-Spq(LM)*CFac
+               ENDDO
+            ENDDO
+         ENDIF
       ENDDO
 !
-    END SUBROUTINE MakeTensor
+    END SUBROUTINE MakeTensor3D
 !========================================================================================
 !   FT_FSCriptC
 !========================================================================================
