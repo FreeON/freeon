@@ -18,36 +18,47 @@ dN4KObjs=GetAtomPair.o dN4K.o
 TwoEObjs=VScratch.o  \
  Int1111.o \
  Int3111.o \
- Int1311.o \
+ Int6111.o \
  Int3311.o \
- Int1131.o \
+ Int6311.o \
+ Int6611.o \
  Int3131.o \
- Int1331.o \
+ Int6131.o \
  Int3331.o \
- Int1113.o \
- Int3113.o \
- Int1313.o \
- Int3313.o \
- Int1133.o \
- Int3133.o \
- Int1333.o \
+ Int6331.o \
+ Int6631.o \
+ Int6161.o \
+ Int6361.o \
+ Int6661.o \
+ Int6133.o \
  Int3333.o \
+ Int6333.o \
+ Int6633.o \
+ Int6363.o \
+ Int6663.o \
+ Int6666.o \
  dInt1111.o \
  dInt3111.o \
- dInt1311.o \
+ dInt6111.o \
  dInt3311.o \
- dInt1131.o \
+ dInt6311.o \
+ dInt6611.o \
  dInt3131.o \
- dInt1331.o \
+ dInt6131.o \
  dInt3331.o \
- dInt1113.o \
- dInt3113.o \
- dInt1313.o \
- dInt3313.o \
- dInt1133.o \
- dInt3133.o \
- dInt1333.o \
- dInt3333.o 
+ dInt6331.o \
+ dInt6631.o \
+ dInt6161.o \
+ dInt6361.o \
+ dInt6661.o \
+ dInt6133.o \
+ dInt3333.o \
+ dInt6333.o \
+ dInt6633.o \
+ dInt6363.o \
+ dInt6663.o \
+ dInt6666.o 
+
 
 #
 all:    TwoE N4K dN4K
