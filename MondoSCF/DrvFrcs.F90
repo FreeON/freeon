@@ -58,9 +58,9 @@ MODULE DrvFrcs
          CALL Get(GM,Tag_O=CurGeom)
          CALL CloseHDF()
 !        Print the gradients
+         Frc%D = -Frc%D
          Mssg = '     Nuclear gradients for geometry #'//TRIM(CurGeom)//Rtrn
          CALL Print_Force(GM,Frc,Mssg,FileName_O,Unit_O,Fmat_O=2)
-         Mssg = 'Nuclear gradients for geometry #'//TRIM(CurGeom)
 !        Tidy
          CALL Delete(Frc)
       ENDIF
