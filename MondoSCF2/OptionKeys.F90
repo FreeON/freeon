@@ -47,6 +47,7 @@ MODULE OptionKeys
   CHARACTER(LEN=*),  PARAMETER :: CPSCF_OPTION       ='CPSCF'   ! unused for now
   CHARACTER(LEN=*),  PARAMETER :: GUESS_DIPOLE       ='Dipole'  ! unused for now
   INTEGER,           PARAMETER :: GUESS_EQ_DIPOLE    = 2834032  ! hard wired for now
+  INTEGER,           PARAMETER :: GUESS_EQ_NOGUESS   = 4523123  ! hard wired for now
   CHARACTER(LEN=*),  PARAMETER :: RESTART_INFO       ='HDFFile'
   !------------------------------------------------------------------------------
   ! Options:Restart=

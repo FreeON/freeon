@@ -262,10 +262,12 @@ MODULE ControlStructures
   END TYPE GeomOpt
 
   TYPE RespOpts
-     LOGICAL               :: StcAlpha
-     LOGICAL, DIMENSION(3) :: AlphaAxis
-     LOGICAL               :: StcBeta
-     LOGICAL               :: StcGamma
+     LOGICAL                :: StcAlpha
+     LOGICAL, DIMENSION( 3) :: AlphaAxis
+     LOGICAL                :: StcBeta
+     LOGICAL, DIMENSION( 6) :: BetaAxis
+     LOGICAL                :: StcGamma
+     LOGICAL, DIMENSION(10) :: GammaAxis
   END TYPE RespOpts
 
   TYPE PropOpts
