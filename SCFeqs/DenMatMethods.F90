@@ -94,10 +94,11 @@ CONTAINS
     LOGICAL              :: CnvrgChck
     TYPE(BCSR)           :: F,P,POld,Tmp1,Tmp2
     REAL(DOUBLE)         :: Ne,Energy,AbsErrP,FNormErrP,TwoNP,N2F,  &
-         AbsErrE,RelErrE,AveErrE,MaxCommErr,FNormCommErr
+         AbsErrE,RelErrE,AveErrE,MaxCommErr,FNormCommErr,PNon0
+
     REAL(DOUBLE),DIMENSION(2) :: CErr
     REAL(DOUBLE),SAVE    :: OldE,OldAEP
-    INTEGER              :: MM,PNon0,NPur
+    INTEGER              :: MM,NPur
     CHARACTER(LEN=*)     :: Prog
     CHARACTER(LEN=2*DEFAULT_CHR_LEN) :: Mssg,CnvrgCmmnt
 !---------------------------------------------------------------------
@@ -159,8 +160,7 @@ CONTAINS
      Mssg=ProcessName(Prog,'Pure '//TRIM(IntToChar(NPur)))      &
           //'dE='//TRIM(DblToShrtChar(RelErrE))                 &
           //', dP='//TRIM(DblToShrtChar(AbsErrP))               &
-          //', ThrX='//TRIM(DblToShrtChar(Thresholds%Trix))     &
-          //', %Non0='//TRIM(IntToChar(PNon0))              
+          //', %Non0='//TRIM(DblToShrtChar(PNon0))              
 #ifdef PARALLEL
      IF(MyId==ROOT)THEN
 #endif
@@ -185,6 +185,7 @@ CONTAINS
      ! Normalize Trace
      CALL NormTrace(P,Tmp2,Tmp1,Ne,1)
      MM=MM+1
+#ifdef COMPUTE_COMMUTATOR
      ! Commutator [F,P] 
      N2F=FNorm(F)
      CALL Multiply(F,P,Tmp1)
@@ -194,6 +195,7 @@ CONTAINS
      MM=MM+2
      FNormCommErr=FNorm(F)
      MaxCommErr=Max(F)
+#endif
      ! Print summary stats
 #ifdef PARALLEL
      IF(MyId==ROOT)THEN
@@ -215,25 +217,30 @@ CONTAINS
               WRITE(*,*)TRIM(Mssg)
            ENDIF
            WRITE(Out,*)TRIM(Mssg)
-           Mssg=ProcessName(Prog)//'Fractional occupation = '                     &
-                //TRIM(DblToShrtChar(Half*DBLE(NEl)/DBLE(NBasF)))                 &
-                //', %Non0s = '//TRIM(IntToChar(PNon0))              
+           Mssg=ProcessName(Prog)//'Fractional occupation = '              &
+                //TRIM(DblToShrtChar(Half*DBLE(NEl)/DBLE(NBasF)))          &
+                //', ThrX='//TRIM(DblToShrtChar(Thresholds%Trix))          &
+                //', %Non0s = '//TRIM(DblToShrtChar(PNon0))              
            IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
               WRITE(*,*)TRIM(Mssg)
            ENDIF
            WRITE(Out,*)TRIM(Mssg)
            Mssg=ProcessName(Prog,'Max abs errors') &
                 //'dE='//TRIM(DblToShrtChar(AbsErrE))//', '                 &
-                //'dP='//TRIM(DblToShrtChar(AbsErrP))//', '                 &
-                //'[F,P]='//TRIM(DblToShrtChar(MaxCommErr))
+                //'dP='//TRIM(DblToShrtChar(AbsErrP))
+#ifdef COMPUTE_COMMUTATORS
+           Mssg=TRIM(Mssg)//', '//'[F,P]='//TRIM(DblToShrtChar(MaxCommErr))
+#endif
            IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
               WRITE(*,*)TRIM(Mssg)
            ENDIF
            WRITE(Out,*)TRIM(Mssg)
            Mssg=ProcessName(Prog) &
                 //'Rel dE='//TRIM(DblToShrtChar(RelErrE))//', '                &
-                //'||dP||_F='//TRIM(DblToShrtChar(FNormErrP))//', '              &
-                //'||[F,P]||_F='//TRIM(DblToShrtChar(FNormCommErr))
+                //'||dP||_F='//TRIM(DblToShrtChar(FNormErrP))
+#ifdef COMPUTE_COMMUTATORS
+           Mssg=TRIM(Mssg)//', '//'||[F,P]||_F='//TRIM(DblToShrtChar(FNormCommErr))
+#endif
            IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
               WRITE(*,*)TRIM(Mssg)
            ENDIF
@@ -372,17 +379,18 @@ CONTAINS
         CALL Add(Tmp1,G)
         CALL Filter(P,Tmp1)
         CALL Multiply(Tmp2,P,Tmp1)         ! P^2*(G+(4-2*G)*P+(G-3)*P^2)
+        CALL Filter(P,Tmp1)
         MMMs = MMMs+1
      ELSE
         IF (G < 0) THEN                      ! Too many states
-           CALL SetEq(Tmp1,P2)              ! P = P^2
+           CALL Filter(P,P2)                 ! P = P^2
         ELSE                                 ! Too few states 
            CALL Multiply(P ,Two) 
            CALL Multiply(P2,-One)
            CALL Add(P,P2,Tmp1)             ! P = 2P-P^2
+           CALL Filter(P,Tmp1)
         ENDIF
      ENDIF
-     CALL Filter(P,Tmp1)
    END SUBROUTINE NT4
 !----------------------------------------------------------------------------
 !
