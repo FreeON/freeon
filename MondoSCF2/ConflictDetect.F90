@@ -30,11 +30,23 @@ CONTAINS
     TYPE(Options) :: O
     IF(O%NModls==0) &
          CALL MondoHalt(PRSE_ERROR,'Option '//MODEL_OPTION//' not set in input.'//RTRN   &
-         //'Options include '//MODEL_ExactX//', '//MODEL_SD//', '//       &
-         MODEL_XA//', '//MODEL_PW91x//', '//MODEL_PBEx//', '//           &
-         MODEL_B88x//', '//MODEL_VWN3xc//', '//MODEL_VWN5xc//', '//      &
-         MODEL_PW91xc//', '//MODEL_PBExc//', '//MODEL_BLYPxc//', '//     &
-         MODEL_B3LYP_VWN3xc//', '//MODEL_B3LYP_PW91xc//', and '//MODEL_PBE0xc)
+         //'Options include '//        &      
+         MODEL_ExactX//', '//          &      
+         MODEL_SD//', '//              &       
+         MODEL_XA//', '//              &      
+         MODEL_B88x//', '//            &      
+         MODEL_PBEx//', '//            &      
+         MODEL_PW91x//', '//           &      
+         MODEL_VWN3//', '//            &      
+         MODEL_VWN5//', '//            &      
+         MODEL_PW91PW91//', '//        &      
+         MODEL_PW91LYP//', '//         &      
+         MODEL_BLYP//', '//            &      
+         MODEL_PBEPBE//', '//          &      
+         MODEL_B3LYP_VWN3//', '//      &      
+         MODEL_B3LYP_VWN5//', '//      &      
+         MODEL_PBE0//', '//            &      
+         MODEL_X3LYP)      
   END SUBROUTINE OptConflictCheck
   !
   SUBROUTINE GlbConflictCheck(C)

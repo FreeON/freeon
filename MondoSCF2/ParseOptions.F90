@@ -97,63 +97,77 @@ CONTAINS
        ENDDO
     ENDIF
     ! Pure Slater exchange with VWN3 LSDA correlation 
-    IF(OptKeyLocQ(Inp,MODEL_OPTION,MODEL_VWN3xc,MaxSets,NLoc,Location))THEN
+    IF(OptKeyLocQ(Inp,MODEL_OPTION,MODEL_VWN3,MaxSets,NLoc,Location))THEN
        NModls=NModls+NLoc
        DO I=1,NLoc
           Models(Location(I))=PURE_VWN3_LSD
        ENDDO
     ENDIF
     ! Pure Slater exchange with VWN5 LSDA correlation 
-    IF(OptKeyLocQ(Inp,MODEL_OPTION,MODEL_VWN5xc,MaxSets,NLoc,Location))THEN
+    IF(OptKeyLocQ(Inp,MODEL_OPTION,MODEL_VWN5,MaxSets,NLoc,Location))THEN
        NModls=NModls+NLoc
        DO I=1,NLoc
           Models(Location(I))=PURE_VWN5_LSD
        ENDDO
     ENDIF
-    ! Pure Slater exchange with PW91 LSDA correlation 
-    IF(OptKeyLocQ(Inp,MODEL_OPTION,MODEL_PW91xc,MaxSets,NLoc,Location))THEN
+    ! Pure PW91 exchange and correlation 
+    IF(OptKeyLocQ(Inp,MODEL_OPTION,MODEL_PW91PW91,MaxSets,NLoc,Location))THEN
        NModls=NModls+NLoc
        DO I=1,NLoc
-          Models(Location(I))=PURE_PW91_LSD
+          Models(Location(I))=PURE_PW91_PW91
+       ENDDO
+    ENDIF
+    ! Pure PW91 exchange with LYP correlation 
+    IF(OptKeyLocQ(Inp,MODEL_OPTION,MODEL_PW91LYP,MaxSets,NLoc,Location))THEN
+       NModls=NModls+NLoc
+       DO I=1,NLoc
+          Models(Location(I))=PURE_PW91_LYP
        ENDDO
     ENDIF
     ! Pure PBE GGA exchange-correlation 
-    IF(OptKeyLocQ(Inp,MODEL_OPTION,MODEL_PBExc,MaxSets,NLoc,Location))THEN
+    IF(OptKeyLocQ(Inp,MODEL_OPTION,MODEL_PBEPBE,MaxSets,NLoc,Location))THEN
        NModls=NModls+NLoc
        DO I=1,NLoc
-          Models(Location(I))=PURE_PBE_GGA
+          Models(Location(I))=PURE_PBE_PBE
        ENDDO
     ENDIF
     ! Pure BLYP GGA exchange-correlation 
-    IF(OptKeyLocQ(Inp,MODEL_OPTION,MODEL_BLYPxc,MaxSets,NLoc,Location))THEN
+    IF(OptKeyLocQ(Inp,MODEL_OPTION,MODEL_BLYP,MaxSets,NLoc,Location))THEN
        NModls=NModls+NLoc
        DO I=1,NLoc
-          Models(Location(I))=PURE_BLYP_GGA
+          Models(Location(I))=PURE_B88_LYP
        ENDDO
     ENDIF
     ! Hybrid B3LYP/VWN3 exchange-correlation 
-    IF(OptKeyLocQ(Inp,MODEL_OPTION,MODEL_B3LYP_VWN3xc,MaxSets,NLoc,Location))THEN
+    IF(OptKeyLocQ(Inp,MODEL_OPTION,MODEL_B3LYP_VWN3,MaxSets,NLoc,Location))THEN
        NModls=NModls+NLoc
        DO I=1,NLoc
           Models(Location(I))=HYBRID_B3LYP_VWN3
        ENDDO
     ENDIF
     ! Hybrid B3LYP/VWN5 exchange-correlation 
-    IF(OptKeyLocQ(Inp,MODEL_OPTION,MODEL_B3LYP_VWN5xc,MaxSets,NLoc,Location))THEN
+    IF(OptKeyLocQ(Inp,MODEL_OPTION,MODEL_B3LYP_VWN5,MaxSets,NLoc,Location))THEN
        NModls=NModls+NLoc
        DO I=1,NLoc
           Models(Location(I))=HYBRID_B3LYP_VWN5
        ENDDO
     ENDIF
-    ! Hybrid B3LYP/PW91 exchange-correlation 
-    IF(OptKeyLocQ(Inp,MODEL_OPTION,MODEL_B3LYP_PW91xc,MaxSets,NLoc,Location))THEN
+!    ! Hybrid B3LYP/PW91 exchange-correlation 
+!    IF(OptKeyLocQ(Inp,MODEL_OPTION,MODEL_B3LYP_PW91,MaxSets,NLoc,Location))THEN
+!       NModls=NModls+NLoc
+!       DO I=1,NLoc
+!          Models(Location(I))=HYBRID_B3LYP_PW91
+!       ENDDO
+!    ENDIF
+    ! Hybrid PBE0 exchange-correlation 
+    IF(OptKeyLocQ(Inp,MODEL_OPTION,MODEL_PBE0,MaxSets,NLoc,Location))THEN
        NModls=NModls+NLoc
-       DO I=1,NLoc
-          Models(Location(I))=HYBRID_B3LYP_PW91
+       DO I=1,NLoc 
+          Models(Location(I))=HYBRID_PBE0
        ENDDO
     ENDIF
-    ! Hybrid PBE0 exchange-correlation 
-    IF(OptKeyLocQ(Inp,MODEL_OPTION,MODEL_PBE0xc,MaxSets,NLoc,Location))THEN
+    ! Hybrid X3LYP exchange-correlation 
+    IF(OptKeyLocQ(Inp,MODEL_OPTION,MODEL_X3LYP,MaxSets,NLoc,Location))THEN
        NModls=NModls+NLoc
        DO I=1,NLoc 
           Models(Location(I))=HYBRID_PBE0
