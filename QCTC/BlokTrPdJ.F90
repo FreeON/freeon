@@ -98,9 +98,9 @@ MODULE BlokTrPdJ
 !---------------------------------------------------------------------------------------------
 !               Compute maximal HG extent (for PAC) and Unsold esitmiate (for MAC)
 !               Looping over all angular symmetries and Directions
-                DP2=Zero
-                PExtent=Zero
-                IA = IndexA
+                DP2     = Zero
+                PExtent = Zero
+                IA      = IndexA
                 DO LMNA=StartLA,StopLA
                    IA=IA+1
                    IB=IndexB
@@ -117,6 +117,16 @@ MODULE BlokTrPdJ
                          PExtent=MAX(PExtent,Ext)
 !                        Strength (for MAC)
                          CALL HGToSP(Prim%Zeta,EllAB,Pab*dHGBra%D(1:LenAB,IA,IB,K),SPBraC,SPBraS)
+!
+                         PStrength = Zero
+                         DO L=0,EllAB
+                            PStrength = PStrength+FudgeFactorial(L,SPEll+1)*Unsold0(L,SPBraC,SPBraS)
+                         ENDDO
+                         PStrength = (PStrength/TauMAC)**(Two/DBLE(SPEll+2))
+                         IF(DP2 < PStrength) THEN
+                            DP2   = PStrength
+                         ENDIF
+!
                          DO L=0,EllAB
                             PStrength = FudgeFactorial(L,SPEll+1)*Unsold0(L,SPBraC,SPBraS)
                             DP2       = MAX(DP2,(PStrength/TauMAC)**(Two/DBLE(SPELL+L+2)))
@@ -126,14 +136,12 @@ MODULE BlokTrPdJ
                 ENDDO
                 DP2=MIN(1.D10,DP2)
 !-----------------------------------------------------------------------------------------
-                IF(PExtent>Zero)THEN ! Evaluate this primitives Ket contribution
+                IF(PExtent>Zero .AND. DP2 > Zero)THEN ! Evaluate this primitives Ket contribution
 !                  Initialize <KET|
                    CALL SetKet(Prim,PExtent)
 #ifdef PERIODIC
-#ifdef WRAPDIST
 !                  WRAP the center of d Phi_A(r) Phi_B(r+R) back into the box
                    CALL AtomCyclic(GMLoc,Prim%P)
-#endif
                    PTmp=Prim%P
 !                  Sum over cells
                    DO NC=1,CS_IN%NCells
