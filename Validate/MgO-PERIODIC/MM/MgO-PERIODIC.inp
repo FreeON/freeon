@@ -1,0 +1,25 @@
+<BeginTitle>
+Mg, cubic, periodic
+Ewald electrostatic energy: -1.436089339056234 Hartree
+MONDO (so far):             -1.436089305567932
+<EndTitle>
+
+<BeginOptions>
+Mechanics=(MM)
+Accuracy =(VeryTight)
+DebugAll =(MaxDebug,BasisSet)
+Geometry=(InAnstroms,NoOrder) 
+Periodic=(On-XYZ,AtomWrap,AngFormat,FracCoord)
+<EndOptions>
+
+<BeginPeriodic>
+d3   3.0D0  3.0D0  3.0D0  90.0D0   90.0D0     90.0D0
+<EndPeriodic>
+
+<BeGIN_MM_filenames>
+spec2.opls
+MgO.seq
+MgO-PERIODIC.crd
+<END_MM_filenames>
+
+
