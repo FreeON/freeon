@@ -42,12 +42,12 @@ MODULE JGen
       CALL SetEq(J%MTrix,Zero)
 !     Loop over atom pairs
       J%NAtms= NAtoms
-      DO AtA=1,NAtoms
+      DO AtA=1,NAtoms            
          DO AtB=1,NAtoms
             IF(SetAtomPair(GM,BS,AtA,AtB,Pair)) THEN
                NAB = Pair%NA*Pair%NB
                IF(AtB<=AtA)THEN
-!               Compute only the lower triangle of symmetric J
+!              Compute only the lower triangle of symmetric J
 #ifdef PERIODIC
                   Bx = Pair%B(1)
                   By = Pair%B(2)           
@@ -95,7 +95,7 @@ MODULE JGen
                CALL XPose(NA,NB,J%MTrix%D(P:P+NAB-1),J%MTrix%D(Q:Q+NAB-1))
             ENDIF
          ENDDO
-      ENDDO
+      ENDDO  
 !
     END SUBROUTINE MakeJ
 !=============================================================================================
@@ -128,7 +128,7 @@ MODULE JGen
                                                    MDx,MDxy,MDxyz,Amp2,MaxAmp, &
                                                    Tau,OmegaMin,Px,Py,Pz
        REAL(DOUBLE)                             :: PExtent,EX
-       REAL(DOUBLE)                             :: PStrength
+       REAL(DOUBLE)                             :: PStrength,Error
 
        INTEGER                                  :: KA,KB,CFA,CFB,PFA,PFB,      &
                                                    IndexA,IndexB,StartLA,      &
@@ -193,7 +193,7 @@ MODULE JGen
                             IB=IB+1
                             EllB=BS%LxDex%I(LMNB)+BS%LyDex%I(LMNB)+BS%LzDex%I(LMNB)       
 !                           Extent (for PAC)
-                            EX=Extent(EllA+EllB,Prim%Zeta,HGBra%D(:,IA,IB),TauPAC,ExtraEll_O=0)
+                            EX=Extent(EllA+EllB,Prim%Zeta,HGBra%D(:,IA,IB),TauPAC,ExtraEll_O=0,Potential_O=.FALSE.)
                             PExtent=MAX(PExtent,EX)
 !                           Strength (for MAC)
                             CALL HGToSP(Prim,HGBra%D(:,IA,IB),SPBraC,SPBraS)
@@ -202,7 +202,8 @@ MODULE JGen
                                DP2       = MAX(DP2,(PStrength/TauMAC)**(Two/DBLE(2+SPELL+L)))
                             ENDDO
                          ENDDO
-                      ENDDO
+                      ENDDO 
+                      DP2 = MIN(1.D10,DP2)
 !--------------------------------------------------------------------------------------------
 !                     If finite compute ...
                       IF(PExtent>Zero.AND.PStrength>Zero)THEN
@@ -235,10 +236,11 @@ MODULE JGen
                          Prim%P(3)=Pz
 #else
 !                        Walk the walk
-                         CALL JWalk(PoleRoot)                        
+                         CALL JWalk(PoleRoot)
 #endif
 !---------------------------------------------------------------------------------------
 !                        Contract <Bra|Ket> bloks to compute matrix elements of J
+!**
                          IA = IndexA
                          DO LMNA=StartLA,StopLA
                             IA=IA+1
@@ -257,9 +259,8 @@ MODULE JGen
                                DO LM=0,LSP(Ell)
                                   JBlk(IA,IB)=JBlk(IA,IB)+SPBraC(LM)*SPKetC(LM)+SPBraS(LM)*SPKetS(LM)
                                ENDDO
-
                             ENDDO
-                        ENDDO
+                         ENDDO
 #ifdef PERIODIC
 !                       Calculate the FarField Multipole Contribution to the Matrix Element
 !                       Contract the Primative MM  with the density MM
@@ -270,8 +271,7 @@ MODULE JGen
                               IB=IndexB
                               DO LMNB=StartLB,StopLB  
                                  IB=IB+1
-                                 JBlk(IA,IB) = JBlk(IA,IB) + CTraxFF(Prim,HGBra%D(:,IA,IB)) &
-                                                           + CTraxQ(Prim,HGBra%D(:,IA,IB))
+                                 JBlk(IA,IB) = JBlk(IA,IB) + CTraxFF(Prim,HGBra%D(:,IA,IB))
                               ENDDO
                            ENDDO
                         ENDIF
@@ -283,5 +283,7 @@ MODULE JGen
           ENDDO
        ENDDO
        Jvct=BlockToVect(Pair%NA,Pair%NB,Jblk)
+!
      END FUNCTION JBlock 
 END MODULE JGen
+
