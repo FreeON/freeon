@@ -277,8 +277,8 @@ PROGRAM MakeRho
 #ifdef MMech
   IF(HasQM())THEN
 #endif
-     QMCharge=Two*(RSumE-RSumN)
-     IF(ABS(QMCharge-GM%TotCh)>1.D-2)THEN
+     QMCharge=Two*(RSumE+RSumN)
+     IF(ABS(QMCharge+GM%TotCh)>1.D-2)THEN
         CALL Halt(' Wrong charge state in MakeRho: '//Rtrn &
 	          //' Integrated electron population = '   &
                   //TRIM(DblToShrtChar(RSumE))//Rtrn       &
