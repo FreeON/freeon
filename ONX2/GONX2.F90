@@ -68,7 +68,7 @@ PROGRAM GONX2
 #endif
 !--------------------------------------------------------------------------------
   integer :: ixyz,jxyz
-  DoStrs=.FALSE.
+  DoStrs=.TRUE.!.FALSE.
   !
 #ifdef ONX2_PARALLEL
   CALL StartUp(Args,Prog,Serial_O=.FALSE.)
@@ -263,6 +263,17 @@ PROGRAM GONX2
      CALL MPI_REDUCE(BoxX%D(1,1),GradTmp%D(1,1),9,MPI_DOUBLE_PRECISION, &
           &          MPI_SUM,ROOT,MONDO_COMM,IErr)
      CALL DAXPY(9,KScale,GradTmp%D(1,1),1,GMc%PBC%LatFrc%D(1,1),1)
+     if(myid.eq.root) then
+        do jxyz=1,3
+           do ixyz=1,3
+              !           if(GMc%PBC%AutoW%I(ixyz).eq.1.and.GMc%PBC%AutoW%I(jxyz).eq.1) then
+              write(*,'(2(A,I1,A,I1,A,E22.15))') 'XBox(',ixyz,',',jxyz,')=',GradTmp%D(ixyz,jxyz),&
+                   &                          ', TotBox(',ixyz,',',jxyz,')=',GMc%PBC%LatFrc%D(ixyz,jxyz)
+              !           endif
+           enddo
+        enddo
+     endif
+     !
      CALL Delete(GradTmp)
   ENDIF
   !STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS 
@@ -278,15 +289,16 @@ PROGRAM GONX2
   !
   !STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS 
   IF(DoStrs) THEN
+     CALL DAXPY(9,KScale,BoxX%D(1,1),1,GMc%PBC%LatFrc%D(1,1),1)
      do jxyz=1,3
         do ixyz=1,3
 !           if(GMc%PBC%AutoW%I(ixyz).eq.1.and.GMc%PBC%AutoW%I(jxyz).eq.1) then
-              write(*,'(A,I1,A,I1,A,E26.15)') 'BoxX%D(',ixyz,',',jxyz,')',BoxX%D(ixyz,jxyz)
+              write(*,'(2(A,I1,A,I1,A,E22.15))') 'XBox(',ixyz,',',jxyz,')=',BoxX%D(ixyz,jxyz),&
+                   &                          ', TotBox(',ixyz,',',jxyz,')=',GMc%PBC%LatFrc%D(ixyz,jxyz)
 !           endif
         enddo
      enddo
      !
-     CALL DAXPY(9,KScale,BoxX%D(1,1),1,GMc%PBC%LatFrc%D(1,1),1)
   ENDIF
   !STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS 
   !
