@@ -37,7 +37,7 @@ CONTAINS
     TYPE(AtomPair)             :: Pair
     TYPE(HGRho)                :: Rho
 !
-    INTEGER                    :: KA,KB,CFA,CFB,PFA,PFB,IE,Endex,CFBbeg,PFBbeg
+    INTEGER                    :: KA,KB,CFA,CFB,PFA,PFB,IE,Endex
     REAL(DOUBLE)               :: AB2,ZetaA,ZetaB,ZetaAB,XiAB,ExpAB
     LOGICAL                    :: AEQB
 !      
@@ -47,27 +47,18 @@ CONTAINS
     AEQB = Pair%SameAtom
 !
     DO CFA=1,BS%NCFnc%I(KA)                       ! Loop over contracted function A 
-       IF(AEQB) THEN 
-          CFBbeg = CFA
-       ELSE
-          CFBbeg = 1
-       ENDIF
-       DO CFB=CFBbeg,BS%NCFnc%I(KB)               ! Loop over contracted function B          
-          DO PFA=1,BS%NPFnc%I(CFA,KA)             ! Loops over primitives in 
-             IF(AEQB .AND. CFA==CFB) THEN                        ! contracted functions A and B
-                PFBbeg = PFA
-             ELSE
-                PFBbeg = 1
-             ENDIF
-             DO PFB=PFBbeg,BS%NPFnc%I(CFB,KB)     
+       DO CFB=1,BS%NCFnc%I(KB)                    ! Loop over contracted function B          
+          DO PFA=1,BS%NPFnc%I(CFA,KA)             ! Loops over primitives in A
+             DO PFB=1,BS%NPFnc%I(CFB,KB)          ! Loops over primitives in A
                 ZetaA = BS%Expnt%D(PFA,CFA,KA)
                 ZetaB = BS%Expnt%D(PFB,CFB,KB)
                 ZetaAB= ZetaA+ZetaB 
                 XiAB  = ZetaA*ZetaB/ZetaAB
                 IF(TestPrimPair(XiAB,Pair%AB2))THEN
-!
                    ExpAB = EXP(-XiAB*AB2)
+!
 !                  Determine the Exponent Index
+!
                    Endex=0
                    DO IE=1,Rho%NExpt
                       IF(ABS(ZetaAB-Rho%Expt%D(IE))<1.0D-8) THEN
@@ -96,7 +87,7 @@ CONTAINS
     TYPE(DBL_RNK4)                          :: MD
     TYPE(AtomPair)                          :: Pair
     TYPE(HGRho)                             :: Rho
-    REAL(DOUBLE)                            :: FacAtom,FacState,FacPrim
+    REAL(DOUBLE)                            :: FacAtom
 !
     REAL(DOUBLE),DIMENSION(Pair%NA*Pair%NB) :: Dmat
     REAL(DOUBLE),DIMENSION(Pair%NA,Pair%NB) :: DD
@@ -105,7 +96,7 @@ CONTAINS
                                                IndexB,StartLB,StopLB,MaxLB, &
                                                IE,Endex,Qndex,Rndex,LMN,LMNA,LMNB, &
                                                IA,IB,LA,MA,NA,LB,MB,NB,LAB,MAB,NAB, &
-                                               CFBbeg,PFBbeg,LenKet
+                                               LenKet
     REAL(DOUBLE)                            :: ZetaA,ZetaB,ZetaAB,ZetaIn,XiAB,ExpAB, &
                                                AB2,Ax,Ay,Az,Bx,By,Bz, &
                                                Px,Py,Pz,PAx,PAy,PAz,PBx,PBy,PBz, &
@@ -138,29 +129,19 @@ CONTAINS
     AEQB = Pair%SameAtom
 !
     DD = VectToBlock(NBFA,NBFB,Dmat)
-!
-    DO CFA=1,BS%NCFnc%I(KA)                         ! Loop over contracted function A 
+! 
+    DO CFA=1,BS%NCFnc%I(KA)                          ! Loop over contracted function A 
        IndexA  = CFBlokDex(BS,CFA,KA)
        StartLA = BS%LStrt%I(CFA,KA)        
        StopLA  = BS%LStop%I(CFA,KA)
        MaxLA   = BS%ASymm%I(2,CFA,KA)
-       IF(AEQB) THEN 
-          CFBbeg = CFA
-       ELSE
-          CFBbeg = 1
-       ENDIF
-       DO CFB=CFBbeg,BS%NCFnc%I(KB)                    ! Loop over contracted function B
+       DO CFB=1,BS%NCFnc%I(KB)                       ! Loop over contracted function B
           IndexB  = CFBlokDex(BS,CFB,KB)
           StartLB = BS%LStrt%I(CFB,KB)
           StopLB  = BS%LStop%I(CFB,KB)
           MaxLB   = BS%ASymm%I(2,CFB,KB)
-          DO PFA=1,BS%NPFnc%I(CFA,KA)                  ! Loops over primitives in CFA and CFB
-             IF(AEQB .AND. CFA==CFB) THEN                     
-                PFBbeg = PFA
-             ELSE
-                PFBbeg = 1
-             ENDIF
-             DO PFB=PFBbeg,BS%NPFnc%I(CFB,KB)          ! Loops over primitives in CFB
+          DO PFA=1,BS%NPFnc%I(CFA,KA)                ! Loops over primitives in CFA and CFB
+             DO PFB=1,BS%NPFnc%I(CFB,KB)             ! Loops over primitives in CFB
                 ZetaA=BS%Expnt%D(PFA,CFA,KA)
                 ZetaB=BS%Expnt%D(PFB,CFB,KB)
                 ZetaAB=ZetaA+ZetaB 
@@ -171,23 +152,10 @@ CONTAINS
 !                  Determine the Counting Factors
                    IF(AEQB) THEN
                       FacAtom = one
-                      IF(CFA == CFB) THEN
-                         FacState = one
-                         IF(PFA == PFB) THEN
-                            FacPrim = one
-                         ELSE
-                            FacPrim = two
-                         ENDIF
-                      ELSE
-                         FacState = two
-                         FacPrim  = one
-                      ENDIF
                    ELSE
-                      FacAtom  = two
-                      FacState = one
-                      FacPrim  = one
+                      FacAtom = two
                    ENDIF
-                   ExpAB = FacAtom*FacState*FacPrim*ExpAB
+                   ExpAB = FacAtom*ExpAB
 !
 !                  Determine the Indexs
 !
@@ -274,12 +242,6 @@ CONTAINS
     REAL(DOUBLE)                 :: Zeta,SqUqq
 !
     IF(Rho%AllocRE==ALLOCATED_TRUE) THEN
-!
-       MaxL = 1
-       DO zq = 1,Rho%NExpt
-          IF(MaxL < Rho%Lndx%I(zq)) MaxL = Rho%Lndx%I(zq)
-       ENDDO
-!
        DO zq = 1,Rho%NExpt
           NQ     = Rho%NQ%I(zq)
           IF(NQ/=0) THEN
@@ -289,20 +251,24 @@ CONTAINS
              LKet  =Rho%Lndx%I(zq)
              LenKet=LHGTF(LKet)
              SqUqq =Sqrt2Pi5x2*Zeta**(-FiveFourths)
+!
 !            Generate The R and AuxR Function
+!
              CALL GenerateRfun(Zeta,LKet)
+!
 !            Calculate the Estimate
+!
              DO iq=1,NQ
                 qadd=oq+iq
                 radd=or+(iq-1)*LenKet
                 Rho%Est%D(qadd)=SqUqq*Estimate(LKet,LenKet,Rho%Co%D(radd+1:))  
              ENDDO
+!
 !            Sort the estimates
+!
              CALL SortRhoEst(zq,NQ,LenKet,Rho)
           ENDIF
        ENDDO
-       CALL Delete(AuxRfun)
-       CALL Delete(Rfun)
     ENDIF
 !       DO zq = 1,Rho%NExpt
 !          NQ     = Rho%NQ%I(zq)
@@ -317,12 +283,11 @@ CONTAINS
 !             WRITE(11,*)' oq, or, zeta, lket = ',oq,or,zeta,lket
 !             WRITE(11,*)' SqUqq = ',SqUqq
 !             DO iq=1,NQ
-!@                qadd=oq+iq
-!!                WRITE(11,*)iq,Rho%Est%D(qadd)
+!               qadd=oq+iq
+!               WRITE(11,*)iq,Rho%Est%D(qadd)
 !             ENDDO
 !          ENDIF
 !       ENDDO
-
   END SUBROUTINE RhoEst
 !--------------------------------------------------------------
 ! Sort the Estimates per Exponent
