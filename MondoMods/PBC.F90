@@ -96,7 +96,7 @@ MODULE CellSets
 !--------------------------------------------------------------------------
   SUBROUTINE New_CellSet_Cube(CS,AW,MAT,N)
     TYPE(CellSet)                        :: CS
-    LOGICAL,DIMENSION(3)                 :: AW
+    INTEGER,DIMENSION(3)                 :: AW
     REAL(DOUBLE),DIMENSION(3,3)          :: MAT
     INTEGER,DIMENSION(3)                 :: N
 !
@@ -107,9 +107,9 @@ MODULE CellSets
     IF(N(2) .LT. 0) CALL Halt('N(2) is Miss Dimensioning in New_CellSet_Box')
     IF(N(3) .LT. 0) CALL Halt('N(3) is Miss Dimensioning in New_CellSet_Box')
 !
-    IF(.NOT. AW(1)) N(1)=0
-    IF(.NOT. AW(2)) N(2)=0
-    IF(.NOT. AW(3)) N(3)=0
+    IF(AW(1)==0) N(1)=0
+    IF(AW(2)==0) N(2)=0
+    IF(AW(3)==0) N(3)=0
 !
     NCELL = 0
     DO I = -N(1),N(1)
@@ -143,7 +143,7 @@ MODULE CellSets
 !--------------------------------------------------------------------------
   SUBROUTINE New_CellSet_Sphere(CS,AW,MAT,Radius,Rmin_O)
     TYPE(CellSet)                        :: CS
-    LOGICAL,DIMENSION(3)                 :: AW
+    INTEGER,DIMENSION(3)                 :: AW
     REAL(DOUBLE),DIMENSION(3,3)          :: MAT
     REAL(DOUBLE)                         :: Radius,Radius_min
     REAL(DOUBLE),OPTIONAL                :: Rmin_O
@@ -161,9 +161,9 @@ MODULE CellSets
     IXM = 0
     IYM = 0
     IZM = 0
-    IF(AW(1)) IXM = 2*(1+INT(Radius/SQRT(MAT(1,1)**2+MAT(2,1)**2+MAT(3,1)**2)))
-    IF(AW(2)) IYM = 2*(1+INT(Radius/SQRT(MAT(1,2)**2+MAT(2,2)**2+MAT(3,2)**2)))
-    IF(AW(3)) IZM = 2*(1+INT(Radius/SQRT(MAT(1,3)**2+MAT(2,3)**2+MAT(3,3)**2)))
+    IF(AW(1)==1) IXM = 2*(1+INT(Radius/SQRT(MAT(1,1)**2+MAT(2,1)**2+MAT(3,1)**2)))
+    IF(AW(2)==1) IYM = 2*(1+INT(Radius/SQRT(MAT(1,2)**2+MAT(2,2)**2+MAT(3,2)**2)))
+    IF(AW(3)==1) IZM = 2*(1+INT(Radius/SQRT(MAT(1,3)**2+MAT(2,3)**2+MAT(3,3)**2)))
 !
     NCELL = 0
     DO I=-IXM,IXM
