@@ -125,12 +125,7 @@ PROGRAM SCFStatus
       CALL Add(Tmp1,Tmp2,P)
       DMax=Max(P)
    ENDIF
-#ifdef PARALLEL_CLONES
    CALL Put(DMax,'DMax')
-#else
-   CALL Put(DMax,'DMax',StatsToChar(Current))
-#endif
-
 !  IO for the delta density matrix
    IF(SCFActn=='InkFok')THEN
       CALL Put(P,TrixFile('DeltaD',Args,1))
@@ -141,12 +136,8 @@ PROGRAM SCFStatus
 
 !-----------------------------------------------------------
 !  Get DIIS Err and HOMO-LUMO Gap
-   IF(Current(1)>=1.AND.SCFActn/='NumForceEvaluation')THEN
-#ifdef PARALLEL_CLONES      
+   IF(Current(1)>=1.AND.SCFActn/='NumForceEvaluation') THEN  
       CALL Get(DIISErr,'diiserr')
-#else
-      CALL Get(DIISErr,'diiserr',StatsToChar(Current))
-#endif
    ELSE
       DIISErr=Zero
    ENDIF
