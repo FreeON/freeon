@@ -36,7 +36,7 @@ CONTAINS
      TYPE(DBL_VECT)              :: Vect
      !
      GDIISMemory=MIN(6,iGEO)
-     IF(GDIISMemory<InitGDIIS) RETURN
+     IF(iGEO<InitGDIIS) RETURN
      IStart=iGEO-GDIISMemory+1
      !
      HDFFileID=OpenHDF(HFileIn)
