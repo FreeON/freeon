@@ -1,3 +1,95 @@
+2002-11-21 10:05  mchalla
+
+	* VisDX/PotUtil.F90: [no log message]
+
+2002-11-20 20:14  mchalla
+
+	* Scripts/MondoSetUp: Added True64 options.
+
+2002-11-20 20:11  mchalla
+
+	* MondoSCF/: DrvSCFs.F90, ParseInput.F90: fixed problems with
+	uninitialized values.
+
+2002-11-20 20:01  mchalla
+
+	* MondoMods/Parse.F90: Fixed in option dble so that input value is
+	retained on out.
+
+2002-11-20 20:00  mchalla
+
+	* MondoMods/InCoords.F90: NAG fix.
+
+2002-11-20 19:56  mchalla
+
+	* Includes/: CompilerSpecifics.IntelLinux.NAG,
+	CompilerSpecifics.IntelLinux.PG, CompilerSpecifics.True64.COMPAQ:
+	New compiler options for True64, and revised options and default
+	flags for NAG and PG.
+
+2002-11-20 19:55  mchalla
+
+	* HiCu/XCForce.F90: [no log message]
+
+2002-11-20 19:55  mchalla
+
+	* OneE/: SForce.F90, TForce.F90: CPP'd out the latice vector force
+	stuff, there was uninitialized soemthing or other that faulted
+	under NAG F90.
+
+2002-11-20 19:51  mchalla
+
+	* QCTC/: BlokTrPdJ.F90, JForce.F90, JGen.F90, MakePFFT.F90,
+	MondoPoles.F90, PBCFarField.F90, PoleTree.F90, QCTC.F90: Various
+	changes to get code to run under NAG F90 with -nan and on compaq
+	f95.  S:
+	-------------------------------------------------------------------
+	---
+
+2002-11-19 11:42  mchalla
+
+	* Docs/HiCu/paper/hicu.tex: palser99->palse98
+
+2002-11-18 18:12  nemeth
+
+	* MondoMods/InCoords.F90: [no log message]
+
+2002-11-18 17:52  anders
+
+	* Docs/DM_Papers/TS4/TS4.tex: 
+	:q!
+
+2002-11-18 17:42  anders
+
+	* Docs/DM_Papers/TS4/TS4.tex: 
+	:q!
+
+2002-11-18 17:24  nemeth
+
+	* MondoSCF/GeomOpt.F90: GDIIS related changes.
+
+2002-11-18 17:23  nemeth
+
+	* MondoSCF/ParseInput.F90: Setting of GMLoc%BndBox%D moved into
+	ConvertCoords.
+
+2002-11-18 17:19  nemeth
+
+	* MondoMods/InCoords.F90: Modifications on GDIIS and B matrix
+	generation.
+
+2002-11-18 17:18  nemeth
+
+	* MondoMods/GlobalScalars.F90: D0-s added to Slater and VDW Radii.
+
+2002-11-18 16:24  mchalla
+
+	* Docs/DM_Papers/TS4/Let.tex: [no log message]
+
+2002-11-18 15:35  ckgan
+
+	* ChangeLog: [no log message]
+
 2002-11-18 15:26  ckgan
 
 	* MondoSCF/DrvSCFs.F90: MPIRun_0 is .TRUE. for QCTC invokation.
