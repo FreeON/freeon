@@ -1348,11 +1348,6 @@ CONTAINS
        DoDeloc=.FALSE.
      ENDIF
      !
-     ! Refresh B matrix during iterative back-trf?
-     !
-     RefreshB=.TRUE.
-     RefreshAct=.TRUE.
-     !
      ! Auxiliary arrays
      !
      CALL New(ActCarts,(/3,NatmsLoc/))
@@ -1370,6 +1365,9 @@ CONTAINS
      ! Repeat until convergence
      !
      DO IRep=1,RepMax
+       RefreshB=.TRUE.
+       RefreshAct=.TRUE.
+       !
        IF(DoRepeat) THEN
          RefreshAct=.TRUE.
          VectIntAux%D=VectIntReq%D-IntCValSt%D  
@@ -1497,7 +1495,7 @@ CONTAINS
            DoIterate,DiffMax,RMSD,RMSDOld,ConstrMax, &
            ConstrRMS,ConstrRMSOld,IStep,RefreshAct)
          !
-         IF(DoIterate) THEN
+         IF(DoIterate.AND.IStep/=GBackTrf%MaxIt_CooTrf) THEN
            IF(RefreshB.AND.RefreshAct) THEN
              CALL DeleteBMatInfo(ISpB,JSpB,ASpB,CholData)
            ENDIF
@@ -1524,8 +1522,8 @@ CONTAINS
            WRITE(Out,180) 
            WRITE(*,190) 
            WRITE(Out,190) 
-           EXIT 
          ENDIF
+         EXIT 
        ELSE
          CALL INTCValue(IntCs,ActCarts%D, &
                         GCoordCtrl%LinCrit,GCoordCtrl%TorsLinCrit)
