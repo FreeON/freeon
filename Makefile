@@ -206,7 +206,7 @@ cv:
 pMisc:	pLib pInp pScr pPWD
 #
 pLib:	
-	rm -rf $(MONDO_HOME)/Libs/*
+	rm -f $(MONDO_HOME)/Libs/*
 #
 pExec:	
 	rm -rf $(MONDO_HOME)/Exec/*
