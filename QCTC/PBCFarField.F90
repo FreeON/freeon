@@ -124,9 +124,12 @@ MODULE PBCFarField
          RETURN
       ELSEIF(GMLoc%PBC%Dimen==3) THEN
          HGDipole = CalculateDiPole(Prim%Ell,Prim%Zeta,PQ(1),PQ(2),PQ(3),HGBra(1:))
-         CTFF  = CTFF + GMLoc%PBC%DipoleFAC*(HGDipole(1)*RhoPoles%DPole%D(1) &
-                            + HGDipole(2)*RhoPoles%DPole%D(2) &
-                            + HGDipole(3)*RhoPoles%DPole%D(3) )
+         CTFF  = CTFF + GMLoc%PBC%DipoleFAC*(HGDipole(1)*RhoPoles%DPole%D(1)         &
+                                           + HGDipole(2)*RhoPoles%DPole%D(2)         &
+                                           + HGDipole(3)*RhoPoles%DPole%D(3) )
+         CTFF  = CTFF + (PiZ*HGBra(1))*GMLoc%PBC%QupoleFAC*(RhoPoles%QPole%D(1)      &
+                                                          + RhoPoles%QPole%D(2)      &
+                                                          + RhoPoles%QPole%D(3))
          RETURN
       ENDIF
 !
@@ -173,9 +176,12 @@ MODULE PBCFarField
          RETURN
       ELSEIF(GMLoc%PBC%Dimen==3) THEN
          HGDipole = CalculateDiPole(Prim%Ell,Prim%Zeta,PQ(1),PQ(2),PQ(3),HGBra(1:))
-         CTFF  = CTFF + GMLoc%PBC%DipoleFAC*(HGDipole(1)*RhoPoles%DPole%D(1) &
-                                           + HGDipole(2)*RhoPoles%DPole%D(2) &
+         CTFF  = CTFF + GMLoc%PBC%DipoleFAC*(HGDipole(1)*RhoPoles%DPole%D(1)         &
+                                           + HGDipole(2)*RhoPoles%DPole%D(2)         &
                                            + HGDipole(3)*RhoPoles%DPole%D(3) )
+         CTFF  = CTFF + (PiZ*HGBra(1))*GMLoc%PBC%QupoleFAC*(RhoPoles%QPole%D(1)      &
+                                                          + RhoPoles%QPole%D(2)      &
+                                                          + RhoPoles%QPole%D(3))
          RETURN
       ENDIF
 !
