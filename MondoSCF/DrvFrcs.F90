@@ -180,10 +180,10 @@ MODULE DrvFrcs
 !        Check for convergence
          AccL=Ctrl%AccL(CBas)
          ET=ETol(AccL)
-         ECnvrgd=RelErrE<1D2*ET
+         ECnvrgd=ABS(RelErrE)<1D1*ET.AND.StepSz==One
          GCnvrgd=RMSGrad<GTol(AccL).AND.MaxGrad<GTol(AccL)
          XCnvrgd=RMSDisp<XTol(AccL).AND.MaxDisp<XTol(AccL)
-         IF(ECnvrgd.AND.GCnvrgd.AND.XCnvrgd)THEN
+         IF(ECnvrgd.OR.(GCnvrgd.AND.XCnvrgd))THEN
             KeepStep=-1
             Mssg=ProcessName('QuNew','Converged #'//TRIM(CurGeom))
           ELSEIF(RelErrE<Zero)THEN
@@ -196,7 +196,7 @@ MODULE DrvFrcs
 !           Decrease step by half (could get fancy here and try interpolation...)
             Mssg=ProcessName('QuNew','Backtrack #'//TRIM(CurGeom))
             StepSz=StepSz*Half
-            IF(StepSz<1.D-3) CALL MondoHalt(DRIV_ERROR,                    &
+            IF(StepSz<1.D-2) CALL MondoHalt(DRIV_ERROR,                    &
                                             ' Reached max resolution = '   &
                                            //TRIM(DblToShrtChar(RelErrE))  &
                                            //' in minimization of energy')
@@ -217,6 +217,7 @@ MODULE DrvFrcs
          IF(ABS(KeepStep)==1)THEN
             CALL Get(GM,CurGeom)
             GM%Confg=CGeo
+            GM%ETotal=E1
             CALL PPrint(GM,GeoFile,Geo,'XYZ')
          ENDIF
          CALL CloseHDF()

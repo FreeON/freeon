@@ -5,17 +5,17 @@
 <BeginOptions>
 Charge=0
 Multiplicity=1
+DebugAll=(MinDebug,CheckSums)
+SDMM=MaxDebug
+PulayDIIS=MaxDebug
 Guess=SuperPos
-SDMM=14
-DIISDamp=0.1
+CGCycles=14
+DIISDamp=0.05
 SCFMethod=(SDMM,SDMM)
 BasisSets=(STO-2G,3-21G)
 ModelChem=(HF,BLYPxc)
 Accuracy =(Loose,Good)
-DebugAll =(MinDebug)
-PulayDIIS=MaxDebug
-SDMM=MaxDebug
-Geometry=(InAngstroms,NoOrder)
+Geometry =(InAngstroms,NoOrder)
 <EndOptions>
 
 <BeginGeometry>

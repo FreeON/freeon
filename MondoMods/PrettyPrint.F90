@@ -59,8 +59,7 @@ MODULE PrettyPrint
          ELSEIF(Enter)THEN
             WRITE(Out,'(A)')'<<'//TRIM(Mssg)//' '//DDay//' @ '//HMS//'>>'
          ELSE
-            WRITE(Out,'(A)')'>>---------------------------------------- done ' &
-                            //DDay//' @ '//HMS
+            WRITE(Out,'(A)')'>-'//TRIM(Mssg)//' '//DDay//' @ '//HMS//'-<'
          ENDIF
          CLOSE(UNIT=Out,STATUS='KEEP')
       END SUBROUTINE TimeStamp
@@ -389,7 +388,8 @@ MODULE PrettyPrint
                  CALL PrintProtectL(PU)
                  Mssg=IntToChar(GM%NAtms)
                  WRITE(PU,*)TRIM(Mssg)
-                 Mssg='Configuration #'//TRIM(IntToChar(GM%Confg))//' 0.0 '
+                 Mssg='Geom #'//TRIM(IntToChar(GM%Confg)) &
+                    //', <SCF> = '//TRIM(FltToMedmChar(GM%ETotal))
                  WRITE(PU,*)TRIM(Mssg)
                  AA=One/AngstromsToAU
                  DO I=1,GM%NAtms
@@ -1037,7 +1037,7 @@ MODULE PrettyPrint
     CHARACTER(LEN=24)          :: Tag
     CHARACTER(LEN=24)          :: Name
     CHARACTER(LEN=24),PARAMETER:: Blks=""                    
-    CHARACTER(LEN=1), PARAMETER:: Colon =","
+    CHARACTER(LEN=3), PARAMETER:: Colon =" : "
     CHARACTER(LEN=4), PARAMETER:: Colons=" :: "
     IF(PRESENT(Proc_O).AND.PRESENT(Misc_O))THEN
        Name=TRIM(ADJUSTL(TRIM(Proc_O)))//Colon//TRIM(Misc_O)

@@ -4,14 +4,14 @@
 <BeginOptions>
 Charge=0
 Multiplicity=1
+DebugAll=(MinDebug,CheckSums)
 Guess=SuperPos
 Opt=(QuNew,OneBase)
 Extrap=Interp
 SCFMethod=(RH,RH)
 BasisSets=(STO-3G,6-31G**)
 ModelChem=(HF,BLYPxc)
-Accuracy =(Loose,Loose)
-DebugAll =(MinDebug)
+Accuracy=(Loose,Loose)
 Geometry=(InAngstroms,NoOrder)
 <EndOptions>
 

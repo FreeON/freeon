@@ -98,4 +98,5 @@ PROGRAM MondoSCF
 #if defined(PARALLEL) && defined(MPI2)
   CALL FiniMPI()
 #endif
+ CALL TimeStamp('Succesfull MondoSCF run',.FALSE.)   
 END PROGRAM MondoSCF

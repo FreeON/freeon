@@ -7,14 +7,16 @@
 <BeginOptions>
 Charge=0
 Multiplicity=1
+DebugAll =(MinDebug,CheckSums)
+PulayDIIS=MaxDebug
 Guess=SuperPos
-SCFMethod=(RH,RH)
 Opt=QuNew
-BasisSets=(STO-2G,STO-3G)
-ModelChem=(PBExc,PBExc)
-Accuracy =(Loose,Good)
-DebugAll =(MinDebug)
-Geometry=(InAngstroms)
+Extrap=Proj
+SCFMethod=(RH,RH,RH)
+BasisSets=(STO-3G,STO-6G,STO-6G)
+ModelChem=(PBExc,PBExc,PBExc)
+Accuracy =(Loose,Good,Tight)
+Geometry =(InAngstroms,NoOrder)
 <EndOptions>
 
 <BeginGeometry>

@@ -5,14 +5,15 @@
 <BeginOptions>
 Charge=0
 Multiplicity=1
+DebugAll =(MinDebug,CheckSums)
 Guess=SuperPos
+Extrap=Interp
 Opt=(QuNew,OneBase)
 SCFMethod=(RH,RH)
 BasisSets=(STO-3G,6-31G**)
-ModelChem=(HF,BLYPxc)
+ModelChem=(HF,PBExc)
 Accuracy =(Good,Good)
-DebugAll =(MinDebug)
-Geometry=(InAngstroms,NoOrder)
+Geometry =(InAngstroms,NoOrder)
 <EndOptions>
 
 <BeginGeometry>

@@ -45,7 +45,7 @@ PROGRAM SDMM
   CALL StartUp(Args,Prog)
 ! Look for overide of default number of CG cycles
   CALL OpenASCII(InpFile,Inp)  
-  IF(.NOT.OptIntQ(Inp,Prog,CGCycles))CGCycles=14
+  IF(.NOT.OptIntQ(Inp,'CGCycles',CGCycles))CGCycles=12
   CLOSE(Inp)
 #ifdef PARALLEL
 !-----------------------------------------------------------------------
@@ -357,8 +357,7 @@ PROGRAM SDMM
       ToExit=.FALSE.
 !     Test when in the asymptotic regime
       IF(NPur>6)THEN
-         IF(DeltaEQ<Thresholds%ETol*1D-1)THEN !.OR. &
-!            DeltaP<5.D1*Thresholds%Trix)THEN
+         IF(DeltaEQ<Thresholds%ETol*1D-2)THEN
 !           Check for non-decreasing /P
             IF(DeltaP>OldDeltaP)ToExit=.TRUE.
         ENDIF

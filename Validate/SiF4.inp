@@ -1,16 +1,18 @@
 <BeginTitle>
-            ** Silicontetrafluride **
+            ** Silicontetraflouride **
 <EndTitle>
 
 <BeginOptions>
 Charge=0
 Multiplicity=1
+DebugAll=(MinDebug,CheckSums)
+DIISDamp=0.4
+PulayDIIS=MaxDebug
 Guess=SuperPos
-SCFMethod=(RH,RH)
-BasisSets=(STO-3G,6-31G**)
-ModelChem=(HF,BLYPxc)
-Accuracy =(Good,Tight)
-DebugAll =(MaxDebug)
+SCFMethod=(RH,RH,RH)
+BasisSets=(STO-2G,6-31G**,6-31G**)
+ModelChem=(HF,HF,B3LYP/VWN5)
+Accuracy =(Loose,Loose,Tight)
 Geometry=(InAngstroms,NoOrder)
 <EndOptions>
 
