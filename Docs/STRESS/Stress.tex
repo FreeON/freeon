@@ -1,0 +1,476 @@
+%
+%   This file is part of the APS files in the REVTeX 4 distribution.
+%   Version 4.0 of REVTeX, August 2001
+%
+%   Copyright (c) 2001 The American Physical Society.
+%
+%   See the REVTeX 4 README file for restrictions and more information.
+%
+% TeX'ing this file requires that you have AMS-LaTeX 2.0 installed
+% as well as the rest of the prerequisites for REVTeX 4.0
+%
+% See the REVTeX 4 README file
+% It also requires running BibTeX. The commands are as follows:
+%
+%  1)  latex apssamp.tex
+%  2)  bibtex apssamp
+%  3)  latex apssamp.tex
+%  4)  latex apssamp.tex
+%
+%\documentclass[prb,aps,nobibnotes,twocolumn,doublespace,twocolumngrid,superbib]{revtex4}
+%%\documentclass[twocolumn,showpacs,preprintnumbers,amsmath,amssymb]{revtex4}
+%\documentclass[preprint,showpacs,preprintnumbers,amsmath,amssymb]{revtex4}
+
+% Some other (several out of many) possibilities
+%\documentclass[preprint,aps]{revtex4}
+%\documentclass[preprint,aps,draft]{revtex4}
+%\documentclass[prb]{revtex4}% Physical Review B
+
+%%\usepackage{amsmath}
+%%\usepackage{amssymb}
+%%\usepackage{graphicx}% Include figure files
+%%\usepackage{dcolumn}% Align table columns on decimal point
+%%\usepackage{bm}% bold math
+
+%\documentclass[prb,aps,twocolumn,showpacs,twocolumngrid,superbib]{revtex4}
+\documentclass[pra,aps,twocolumn,showkeys,twocolumngrid,superbib]{revtex4}
+
+\usepackage{graphicx}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{bm}
+\usepackage{alltt}
+\usepackage{fancyhdr}
+
+\pagestyle{fancy}
+
+\def\n{\mathbf{n}}
+\def\m{\mathbf{m}}
+\def\0{\mathbf{0}}
+\def\r{\mathbf{r}}
+\def\R{\mathbf{R}}
+\def\A{\mathbf{A}}
+\def\B{\mathbf{B}}
+\def\Tr{{\rm Tr}}
+%\nofiles
+
+\begin{document}
+
+%\preprint{APS/123-QED}
+
+\title{Analytical ??gradients?? and stress tensor within the $\Gamma$-point approximation}
+
+\author{Christopher J. Tymczak}%
+\author{Matt Challacombe}%
+\affiliation{Los Alamos National Laboratory, Theoretical Division, Los Alamos 87545, New Mexico, USA.}%
+\author{Val\'ery Weber}
+\email{valery.weber@unifr.ch}
+\affiliation{Department of Chemistry, University of Fribourg, 1700 Fribourg, Switzerland.}%
+
+
+\date{\today}% It is always \today, today,
+             %  but any date may be explicitly specified
+
+\begin{abstract}
+  Recently, construction of the periodic Coulomb cite, Exchange-Correlation cite 
+  and exact Hartree-Fock exchange cite matrices within the $\Gamma$-point approximation
+  have been introduiced. In this article, the formalism for the evaluation of 
+  the analytical Hartree-Fock and Kohn-Sham stress at the $\Gamma$-point approximation is
+  presented. 
+\end{abstract}
+
+%\pacs{Valid PACS appear here}% PACS, the Physics and Astronomy
+                             % Classification Scheme.
+\keywords{Analytical stress tensor, periodic systems, Hartree-Fock, 
+  density functional theory.}%Use showkeys class option if keyword
+                              %display desired
+\maketitle
+
+\section{Introduction}
+
+In preceding papers, we have developed linear scaling quantum chemical methods
+for construction of the periodic Coulomb~\cite{CTymczak03a}, 
+Exchange-Correlation~\cite{CTymczak03a} and 
+exact Hartree-Fock exchange~\cite{CTymczak03b} matrices within the $\Gamma$-point approximation. 
+In this paper, the implementation of the Hartree-Fock
+and Kohn-Sham stress tensor at the $\Gamma$-point is presented.
+
+Stress is an important concept in characterizing the states of condensed
+matter. The simulation of system with PBC involves the atomic positions 
+in the unit cell and the lattice parameters. The location of an energy minimum 
+requires an optimization of both sets of coordinates. This minimization can be
+achived with the help of the periodic nuclear gradients and the stress tensor.
+The latter represents the derivatives of the energy of a periodic system 
+with respect to the strain tensor.
+
+                                  
+The first implementation of the Hartree-Fock stress tensor based on GTAO,
+were for one dimensional periodic systems~\cite{HTeramae83,HTeramae84}. 
+Other groups have also described such implementation for 
+one~\cite{DJacquemin99A,DJacquemin99B} or two~\cite{MTobita03} dimensions. 
+The analytical stress method of density functional theory using GTAO for 
+1D extended systems was implemented by Hirata and Iwata~\cite{SHirata98}.
+The three dimensional case has been implemented by Kudin and Scuseria 
+~\cite{KKudin00A,KKudin00B}. Their approach for the Coulomb problem is 
+based on the direct space fast multipole method.  
+Recently Doll, Dovesi and Orlando~\cite{KDoll04} presented 
+the implementation of the Hartree-Fock stress tensor into 
+the CRYSTAL~\cite{RDovesi00} package for three dimensional systems. 
+Their code is based on GTAO and the summation 
+of the Coulomb energy is performed with the Ewald method~\cite{PEwald21} 
+which is a combination of direct and reciprocal lattice summations.
+
+
+In this article, we introduice the formalism and the implementaion
+of the Hartree-Fock and Kohn-Sham stress tensor at the $\Gamma$-point 
+approximation and present results on various systems. 
+In the next Section, the integrals and their
+derivatives with respect to cell parameters are discussed.....
+Finally, some examples are shown to illustrate the method.
+
+
+\section{Integrals and their derivatives}
+$M$ is the $3\times3$ matrix composed of the primitive lattice vectors $\mathbf{a}$, 
+$\mathbf{b}$ and $\mathbf{c}$,
+\begin{equation}
+  M=(\mathbf{a},\mathbf{b},\mathbf{c}).
+\end{equation}
+The position of the direct lattice is defined as $\mathbf{R}=M\n$,
+with $\mathbf{n}=(n_1,n_2,n_3)^T$ being integer numbers.
+The position of an atom $A$ in a cell is $\mathbf{A}=M(\mathbf{f}_A+\n)$,
+and $\mathbf{f}_A=(f_{A1},f_{A2},f_{A3})^T$ are the fractional coordinates of the atom $A$.
+
+The volume of the cell is given by the triple product 
+$V=\mathbf{a}\cdot(\mathbf{b}\times \mathbf{c})=\det M$.
+The derivative of the volume of the cell with respect to the cell parameters are given by
+\begin{align}
+  \frac{\partial V}{\partial M_{i1}}&=\epsilon_{ijk}M_{j2}M_{k3},\\
+  \frac{\partial V}{\partial M_{i2}}&=\epsilon_{ijk}M_{j3}M_{k1},\\
+  \frac{\partial V}{\partial M_{i3}}&=\epsilon_{ijk}M_{j1}M_{k2},
+\end{align}
+...a bit of tensorial masturbation...
+where the permutation symbol $\epsilon_{ijk}$ has been used.
+
+
+\subsection{Overlap and kinetic energy integrals}
+The overlap matrix, in the periodic $\Gamma$-point regime, is given
+\begin{equation}
+  \begin{split}
+    S_{ab}&=\sum_{\R}\int_{V_\infty}\phi_a(\r-\A)\phi_b(\r-(\B+\R))d^3r\\
+    &=\sum_{\n}S_{ab}^{{\0\n}},
+  \end{split}
+\end{equation}
+where the integration is extended to all the space.
+The evaluation of its derivative with respect to the cell parameters $M_{ij}$
+is 
+\begin{equation}\label{Eq:OvDer}
+  \frac{\partial S_{ab}}{\partial M_{ij}}=\sum_{\n}(f_{Aj}-(f_{Bj}+n_j))
+  \frac{\partial S_{ab}^{{\0\n}}}{\partial A_i},
+\end{equation}
+where translational invariance cite has been used. 
+In the sameway, the kinetic energy integral is
+\begin{equation}
+  \begin{split}
+    T_{ab}&=\sum_{\R}\int_{V_\infty}\phi_a(\r-\A)\left(-\frac{1}{2}\nabla^2\right)
+    \phi_b(\r-(\B+\R))d^3r\\
+    &=\sum_{\n}T_{ab}^{{\0\n}},
+  \end{split}
+\end{equation}
+and its derivatives
+\begin{equation}
+  \frac{\partial T_{ab}}{\partial M_{ij}}=\sum_{\n}(f_{Aj}-(f_{Bj}+n_j))
+  \frac{\partial T_{ab}^{{\0\n}}}{\partial A_i}.
+\end{equation}
+
+
+\subsection{Hartree-Fock exchange matrix}
+
+
+
+%\begin{verbatim}
+%  FPQx = PQx*PBC%InvBoxSh%D(1,1)+PQy*PBC%InvBoxSh%D(1,2)+PQz*PBC%InvBoxSh%D(1,3)
+%  FPQy = PQy*PBC%InvBoxSh%D(2,2)+PQz*PBC%InvBoxSh%D(2,3)
+%  FPQz = PQz*PBC%InvBoxSh%D(3,3)
+%  IF(PBC%AutoW%I(1)==1) THEN
+%     Dumx=DNINT(FPQx-SIGN(1.D-14,FPQx))
+%     FPQx=FPQx-DNINT(FPQx-SIGN(1.D-14,FPQx))
+%  ENDIF
+%  IF(PBC%AutoW%I(2)==1) THEN
+%     Dumy=DNINT(FPQy-SIGN(1.D-14,FPQy))
+%     FPQy=FPQy-DNINT(FPQy-SIGN(1.D-14,FPQy))
+%  ENDIF
+%  IF(PBC%AutoW%I(3)==1) THEN
+%     Dumz=DNINT(FPQz-SIGN(1.D-14,FPQz))
+%     FPQz=FPQz-DNINT(FPQz-SIGN(1.D-14,FPQz))
+%  ENDIF
+%  PQx = FPQx*PBC%BoxShape%D(1,1)+FPQy*PBC%BoxShape%D(1,2)+FPQz*PBC%BoxShape%D(1,3)
+%  PQy = FPQy*PBC%BoxShape%D(2,2)+FPQz*PBC%BoxShape%D(2,3)
+%  PQz = FPQz*PBC%BoxShape%D(3,3)
+%\end{verbatim}
+
+%Then we have $PQ_x^{w}=PQx$ and $[f_{PQx}^{nw}]=Dumx$.
+%\\
+
+%\begin{equation}
+%  I_{acbd}=\sum_{{n,m}}\iint
+%  \phi_a({r}_1)\phi_c({r}_1+M{n})
+%  \frac{1}{|{r}_1-{r}_2|}
+%  \phi_b({r}_2)\phi_d({r}_2+M{m})
+%  d^3r_1d^3r_2=\sum_{{n,m}}I_{acbd}^{{0n0m}}
+%\end{equation}
+
+%\begin{equation}
+%  \begin{split}
+%    \frac{\partial I_{acbd}}{\partial M_{ij}}=&\sum_{{n,m}}
+%    (f_{Aj}-(f_{Dj}+m_j))\frac{\partial I_{acbd}^{{0n0m}}}{\partial A_{i}}\\
+%    &+(f_{Cj}+n_j-(f_{Dj}+m_j))\frac{\partial I_{acbd}^{{0n0m}}}{\partial C_{i}}\\
+%    &+(f_{Bj}-(f_{Dj}+m_j))\frac{\partial I_{acbd}^{{0n0m}}}{\partial B_{i}}\\
+%    &+2\Omega PQ_i^{w}[f_{PQj}^{nw}] \widetilde I_{acbd}^{{0n0m}}
+%  \end{split}
+%\end{equation}
+In computation of the Hartree-Fock exchange matrix, 
+the MIC $\Gamma$-point approximation~\cite{CTymczak03b}
+is given 
+\begin{equation}
+  K_{ab}= -\frac{1}{2}\sum_{\n\m,cd}P_{cd}(ac^\n|bd^\m)
+%  \sum_{cd}P_{cd}I_{acbd}
+%  \sum_{{n,m}}\iint
+% \phi_a({r}_1)\phi_c({r}_1+M{n})
+% \frac{1}{|{r}_1-{r}_2|}
+% \phi_b({r}_2)\phi_d({r}_2+M{m})
+% d^3r_1d^3r_2=
+\end{equation}
+where the MIC condition is appiled at the primitive level.
+The derivative of the integrals $(ac^\n|bd^\m)$, with respect 
+to cell parameters $M_{ij}$, is given
+\begin{equation}
+  \begin{split}
+%    \frac{\partial I_{acbd}}{\partial M_{ij}}
+    \frac{\partial (ac^\n|bd^\m)}{\partial M_{ij}}
+%    =&\sum_{\n,\m}(f_{Aj}-(f_{Dj}+m_j))\frac{\partial (ac(\n)|bd(\m))}{\partial A_{i}}\\
+    &=(f_{Aj}-(f_{Dj}+m_j))\frac{\partial (ac^\n|bd^\m)}{\partial A_{i}}\\
+    &+(f_{Cj}+n_j-(f_{Dj}+m_j))\frac{\partial (ac^\n|bd^\m)}{\partial C_{i}}\\
+    &+(f_{Bj}-(f_{Dj}+m_j))\frac{\partial (ac^\n|bd^\m)}{\partial B_{i}}\\
+    &+2\rho PQ_i^{w}[f_{PQj}] (ac^\n|bd^\m)^{(1)},
+  \end{split}
+\end{equation}
+where we have used the translational invariance and 
+$\mathbf{f}_{PQ}=M^{-1}\mathbf{PQ}$
+is a non-wrapped ``fractional`` distance, 
+$\mathbf{PQ}^{w}=\mathbf{PQ}-M[\mathbf{f}_{PQ}-\varepsilon \mathrm{sgn}(\mathbf{f}_{PQ})]$ 
+is a wrapped distance, 
+$\rho=(\alpha+\gamma)(\beta+\delta)/(\alpha+\gamma+\beta+\delta)$ and 
+$(ac^\n|bd^\m)^{(1)}$ is a byproduct in the Obara and Saika~\cite{SObara86} 
+reccurence relation when computing first nuclear derivatives.
+Where $[\bullet]$ is the nearest integer function.
+
+\subsection{Coulomb matrix}
+
+\begin{equation}
+  J_{ab}=J_{ab}^{In}+J_{ab}^{PFF}+J_{ab}^{TF}
+\end{equation}
+
+
+\subsubsection{Periodic far field}
+
+\begin{equation}
+  J_{ab}^{PFF}=\sum_{R\in PFF}\iint
+  \frac{\rho_{ab}^{\infty}(r_1)\rho_{tot}^{\infty}(r_2)}{|r_1-r_2+R|}
+  d^3r_1d^3r_2
+\end{equation}
+
+\subsubsection{Tin-Foil}
+The tin-foil correction to the Coulomb matrix is
+\begin{equation}
+  J_{ab}^{TF}=\frac{2\pi}{3V}(QS_{ab}-2\mathbf{d}_{ab}\cdot\mathbf{D})
+\end{equation}
+where $Q$ is the trace of the system quadrupole, $S_{ab}$ is an element of the overlap matrix, 
+$\mathbf{D}$ the dipole moment of the system,
+$\mathbf{d}_{ab}$ the dipole moment of the distribution $\rho_{ab}^\infty$.
+The derivative of $J_{ab}^{TF}$ with respect to the cell parameter $M_{ij}$ is
+\begin{equation}
+  \begin{split}
+    \frac{\partial J_{ab}^{TF}}{\partial M_{ij}}&=
+    -\frac{2\pi}{3V^2}\frac{\partial V}{\partial M_{ij}}(QS_{ab}-2\mathbf{d}_{ab}\cdot\mathbf{D})\\
+    &+\frac{2\pi}{3V}(\frac{\partial Q}{\partial M_{ij}}S_{ab}+Q\frac{\partial S_{ab}}{\partial M_{ij}}\\
+    &-2\frac{\partial \mathbf{d}_{ab}}{\partial M_{ij}}\cdot\mathbf{D}
+    -2\mathbf{d}_{ab}\cdot\frac{\partial \mathbf{D}}{\partial M_{ij}}),
+  \end{split}
+\end{equation}
+where the derivatives ${\partial Q}/{\partial M_{ij}}$, 
+${\partial \mathbf{d}_{ab}}/{\partial M_{ij}}$ and 
+${\partial \mathbf{D}}/{\partial M_{ij}}$ can be easily evaluated; 
+the term ${\partial S_{ab}}/{\partial M_{ij}}$ 
+is given in (\ref{Eq:OvDer}).
+
+\subsection{Exchange-correlation matrix}
+In calculation with PBC, the numerical integration of the DFT 
+exchange-correlation term is carried out over a cuboid 
+integration domain $V_{\Box}$ which is equivalent to the unit 
+cell volume $V_{UC}$. The exchange-correlation matrix element is thus
+\begin{equation}\label{Eq:xc}
+  K_{ab}^{xc}=\int_{V_\Box}\rho_{ab}(\r)v_{xc}[\rho,\r]d^3r.
+\end{equation}
+This simple integration volume should be contrasted with more 
+conventional methods for computing the exchange-correlation matrix, involving
+the ``Becke weights'' cite, which requirs integration over $V_\infty$.
+The derivative of $K_{ab}^{xc}$ with respect to cell parameters is given by
+\begin{equation}
+  \begin{split}
+    \frac{\partial K_{ab}^{xc}}{\partial M_{ij}}&=
+    \int_{V_{\Box}}\frac{\partial}{\partial M_{ij}}(\rho_{ab}(\r)v_{xc}[\rho,\r])d^3r\\
+    &+\delta_{ij}\int_{S_{j\Box}}\rho_{ab}(\r)v_{xc}[\rho,\r]dS
+  \end{split}
+\end{equation}
+where the intergale on the surface $S_{j\Box}$ arises 
+from the derivative of the limits of the integral (\ref{Eq:xc}).
+
+
+
+\section{The stress}
+
+A straightforward differentiation of Eq. \ref{Eq:E} with respect to 
+the cell parameter $M_{ij}$ gives
+\begin{equation}
+  \begin{split}
+    \frac{\partial E}{\partial M_{ij}}&=\Tr[P\frac{\partial T}{\partial M_{ij}}]
+    -\Tr[PFP\frac{\partial S}{\partial M_{ij}}]\\
+    &+\Tr[P\frac{\partial J}{\partial M_{ij}}]+\Tr[P\frac{\partial K}{\partial M_{ij}}]\\
+    &+\Tr[P\frac{\partial K^{xc}}{\partial M_{ij}}],
+  \end{split}
+\end{equation}
+where all the derivatives have been identify and 
+explicitly given in the previous Section.
+
+
+\section{Numerical Examples}
+The evaluation of the analytical Hartree-Fock and Kohn-Sham 
+nuclear gradients and stress have been implemented in the 
+MondoSCF~\cite{MondoSCF} suite of programs
+for linear scaling quantum chemistry. The code was compiled using....
+with the ... options and with the GNU C compiler GCC v....
+using the -O1 flag. All calculations were carried out on a ...
+runing ....\cite{TOPUT}
+\\
+\\
+We may try MgO 1x1x1 to 5x5x5 and compare with CRYSTAL.
+
+\section{Conclusions}
+We blablabla...
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Acknowledgements
+\begin{acknowledgments}
+ V.W. would like to thank K. Doll for a preprint of his manuscript.
+ This work has been supported by the US Department of Energy 
+ under contract ???????????? and the ASCI project.  
+ The Advanced Computing Laboratory of Los 
+ Alamos National Laboratory is acknowledged.
+ All the numerical computations have been
+ performed on computing resources located at this facility.
+\end{acknowledgments}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibliography{mondo_new}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\end{document}
+%
+% ****** End of file apssamp.tex ******
+
+
+
+
+@Article{KDoll04,
+  author = 	 {K. Doll and R. Dovesi and R. Orlando},
+  journal = 	 {Theo. Chim. Acta},
+  year = 	 {2004},
+  note = 	 {submitted},
+}
+
+@Article{PEwald21,
+        author = {P. P. Ewald},
+        journal = {Ann. Phys. (Leipzig)},
+        year = 1921,
+        volume = 64,
+        pages = {253}
+}
+
+@Article{HTeramae83,
+  author = 	 {H. Teramae and T. Yamabe and C. Satoko and A. Imamura},
+  journal = 	 {Chem. Phys. Lett.},
+  year = 	 {1983},
+  volume = 	 {101},
+  pages = 	 {149},
+}
+
+@Article{HTeramae84,
+  author = 	 {H. Teramae and T. Yamabe and A. Imamura},
+  journal = 	 {J. Chem. Phys.},
+  year = 	 {1984},
+  volume = 	 {81},
+  pages = 	 {3564},
+}
+
+@Article{DJacquemin99A,
+  author = 	 {D. Jacquemin and J. Andr\'e and Benoît Champagne },
+  journal = 	 {J. Chem. Phys.},
+  year = 	 {1999},
+  volume = 	 {111},
+  pages = 	 {5306},
+}
+
+@Article{DJacquemin99B,
+  author = 	 {D. Jacquemin and J. Andr\'e and Benoît Champagne },
+  journal = 	 {J. Chem. Phys.},
+  year = 	 {1999},
+  volume = 	 {111},
+  pages = 	 {5324},
+}
+
+@Article{MTobita03,
+  author = 	 {M. Tobita and S. Hirata and R. J. Bartlett},
+  journal = 	 {J. Chem. Phys.},
+  year = 	 {2003},
+  volume = 	 {118},
+  pages = 	 {5776},
+}
+
+@Article{SHirata98,
+  author = 	 {S. Hirata and S. Iwata},
+  journal = 	 {J. Phys. Chem. A},
+  year = 	 {1998},
+  volume = 	 {102},
+  pages = 	 {8426},
+}
+
+@Article{KKudin00A,
+  author = 	 {K. N. Kudin and G. E. Scuseria},
+  journal = 	 {Phys. Rev. B},
+  year = 	 {2000},
+  volume = 	 {61},
+  pages = 	 {5141},
+}
+
+@Article{KKudin00B,
+  author = 	 {K. N. Kudin and G. E. Scuseria},
+  journal = 	 {Phys. Rev. B},
+  year = 	 {2000},
+  volume = 	 {61},
+  pages = 	 {16440},
+}
+
+@Article{TOPUT,
+  author = 	 {},
+  journal = 	 {},
+  year = 	 {},
+  volume = 	 {},
+  pages = 	 {},
+}
+
+
