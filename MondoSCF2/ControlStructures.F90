@@ -221,20 +221,23 @@ MODULE ControlStructures
   END TYPE StepSize 
   !
   TYPE TrfCtrl
-     INTEGER,DIMENSION(3)               :: ThreeAt
      LOGICAL                            :: DoFullTrf
      LOGICAL                            :: DoClssTrf
      LOGICAL                            :: DoInternals
      LOGICAL                            :: DoNewChol 
      LOGICAL                            :: DoRotOff
      LOGICAL                            :: DoTranslOff
+     LOGICAL                            :: Linearity
+     INTEGER,DIMENSION(3)               :: ThreeAt
+     REAL(DOUBLE),DIMENSION(3)          :: TranslAt1
+     REAL(DOUBLE),DIMENSION(3,3)        :: RotAt2ToX
+     REAL(DOUBLE),DIMENSION(3,3)        :: RotAt3ToXY
   END TYPE TrfCtrl
   !
   TYPE CoordCtrl
      INTEGER                            :: RefreshIn
      INTEGER                            :: Refresh
      REAL(DOUBLE)                       :: VDWFact
-     LOGICAL                            :: Linearity
      CHARACTER(LEN=DEFAULT_CHR_LEN)     :: CoordType
      INTEGER                            :: NCov  
      INTEGER                            :: NExtra

@@ -37,9 +37,10 @@ MODULE ParseGeomOpt
        GOpt%GDIIS%NoGDIIS=.TRUE.
      ENDIF
      !
-     ! Parse for GDIIS 
+     ! Parse for Lagr multiplier algorithm
      !
-     GOpt%Constr%DoLagr=.TRUE.
+    !GOpt%Constr%DoLagr=.TRUE.
+     GOpt%Constr%DoLagr=.FALSE.
      IF(OptKeyQ(Inp,GRADIENTS,OPT_NoLagr)) THEN
        GOpt%Constr%DoLagr=.FALSE.
      ENDIF
@@ -102,11 +103,11 @@ MODULE ParseGeomOpt
      !
      ! Do classical coordinate transformation? (No cartesian internals)
      !
-     GOpt%TrfCtrl%DoClssTrf=.TRUE.
-     !GOpt%TrfCtrl%DoClssTrf=.FALSE.
-     !IF(OptKeyQ(Inp,COORDTYPE,CoordType_DoClssTrf)) THEN
-     !  GOpt%TrfCtrl%DoClssTrf=.TRUE.
-     !ENDIF
+     !GOpt%TrfCtrl%DoClssTrf=.TRUE.
+     GOpt%TrfCtrl%DoClssTrf=.FALSE.
+     IF(OptKeyQ(Inp,GRADIENTS,CoordType_DoClssTrf)) THEN
+       GOpt%TrfCtrl%DoClssTrf=.TRUE.
+     ENDIF
      !
      ! Fix MM coordinates?
      !

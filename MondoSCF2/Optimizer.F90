@@ -561,7 +561,7 @@ CONTAINS
      !
      ! Do we have to refresh internal coord defs?   
      !
-     CALL IntCReDef(GOpt,Refresh)
+     CALL IntCReDef(GOpt,Refresh,iGEO)
      !
      ! Get internal coord defs.
      !
@@ -584,9 +584,8 @@ CONTAINS
      !
      ! Calculate the B matrix and put it onto the disk.
      !
-     CALL RefreshBMatInfo(IntCs,XYZ,GOpt%TrfCtrl%DoClssTrf,Print, &
-                     GOpt%CoordCtrl%LinCrit,GOpt%TrfCtrl%ThreeAt, &
-                     SCRPath)
+     CALL RefreshBMatInfo(IntCs,XYZ,GOpt%TrfCtrl, &
+                          GOpt%CoordCtrl,Print,SCRPath)
      !
      ! Overwrite Cartesian Energy gradients with Lagrangian ones.
      !
@@ -612,6 +611,7 @@ CONTAINS
      CALL GeOpConv(GOpt%Constr,GOpt%GOptStat,GOpt%CoordCtrl, &
                    GOpt%GConvCrit,XYZ,ETot,ELagr,IntCs,IntOld, &
                    iCLONE,iGEO)
+     CALL TurnOnGDIIS(GOpt%GOptStat%MaxGrad,GOpt%GDIIS%On)
      !
      IF(GOpt%GOptStat%GeOpConvgd) THEN
        Convgd(iCLONE)=1
@@ -665,6 +665,7 @@ CONTAINS
          GOpt%GrdTrf,GOpt%CoordCtrl,GOpt%TrfCtrl,Print,SCRPath)
        Grad%D=IntGrad%D
        CALL Delete(IntGrad)
+      !CALL RedundancyOff(Grad%D,SCRPath,Print)
      ELSE
        Grad%D=CartGrad%D
      ENDIF
@@ -687,6 +688,7 @@ CONTAINS
         !ELSE
            CALL DiagHess(GOpt%CoordCtrl,GOpt%Hessian,Grad,Displ, &
                          IntCs,AtNum,XYZ)
+          !CALL RedundancyOff(Displ%D,SCRPath,Print)
         !ENDIF
      END SELECT
      !
@@ -759,20 +761,19 @@ CONTAINS
 !
 !-----------------------------------------------------------------
 !
-   SUBROUTINE IntCReDef(GOpt,Refresh)
+   SUBROUTINE IntCReDef(GOpt,Refresh,iGEO)
      TYPE(GeomOpt)     :: GOpt
-     INTEGER           :: Refresh
+     INTEGER           :: Refresh,iGEO
      !
      !WARNING! refresh may change the number of internal coordinates!
      !
+     Refresh=1
+     IF(iGeo==1) THEN
        Refresh=1
-     !IF(GOpt%GOptStat%ActStep==1) THEN
-     !  Refresh=1
-     !  IF(GOpt%CoordCtrl%RefreshIn==4) Refresh=4
-     !ELSE
-     !  Refresh=GOpt%CoordCtrl%RefreshIn
-     !ENDIF
-       GOpt%CoordCtrl%Refresh=Refresh
+       IF(GOpt%CoordCtrl%RefreshIn==4) Refresh=4
+     ELSE
+       Refresh=GOpt%CoordCtrl%RefreshIn
+     ENDIF
    END SUBROUTINE IntCReDef
 !
 !------------------------------------------------------------------
@@ -843,7 +844,6 @@ CONTAINS
        DO I=1,NIntC
          Displ%D(I)=-DHess%D(I)*Grad%D(I)
        ENDDO
-       ! CALL RedundancyOff(Displ%D,XYZ,DoSet_O=.TRUE.)
      ELSE
        CALL Halt('Only Primitiv Internals are available yet.')
      ENDIF 
@@ -1397,7 +1397,7 @@ CONTAINS
    SUBROUTINE SetCoordCtrl(CoordC)
      TYPE(CoordCtrl) :: CoordC
      !
-     CoordC%LinCrit =20.D0
+     CoordC%LinCrit = 0.01D0
      CoordC%OutPCrit=20.D0
    END SUBROUTINE SetCoordCtrl
 !
@@ -1824,7 +1824,8 @@ CONTAINS
      !
      ! Calculate constraint B-matrix
      !
-   ! CALL BMatrConstr(IBc,JBc,ABc,IntCs,SCRPath,NLagr,NCart)
+   ! CALL BMatrConstr(IBc,JBc,ABc,XYZ,IntCs,GCoordCtrl, &
+   !                  GTrfCtrl,SCRPath,NLagr,NCart)
      !
      ! Calculate new values of Lagrange multipliers 
      ! on internal coord constraints
@@ -2054,6 +2055,18 @@ CONTAINS
                  (XYZ(3,I1Row)-XYZ(3,I2Row))**2)
      ENDIF 
    END FUNCTION GetR
+!
+!-------------------------------------------------------------------
+!
+   SUBROUTINE TurnOnGDIIS(MaxGrad,On)
+     REAL(DOUBLE)  :: MaxGrad
+     LOGICAL       :: On
+     !
+     On=.FALSE. 
+     IF(MaxGrad<0.010D0) THEN
+       On=.TRUE. 
+     ENDIF
+   END SUBROUTINE TurnOnGDIIS
 !
 !-------------------------------------------------------------------
 !

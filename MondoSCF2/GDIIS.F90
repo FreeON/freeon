@@ -158,7 +158,9 @@ CONTAINS
      !
      CALL New(XYZRot,(/3,NatmsLoc/))
      XYZRot%D=XYZ
-     CALL CALC_XYZRot(XYZRot%D,ThreeAt,Linearity)
+     CALL CALC_XYZRot(XYZRot%D,IntCs,SCRPath,ThreeAt,Linearity,&
+                      CtrlTrf%TranslAt1,CtrlTrf%RotAt2ToX, &
+                      CtrlTrf%RotAt3ToXY)
      !
      ! Calculate B matrix for reference system 
      !
@@ -197,8 +199,7 @@ CONTAINS
      CALL New(Displ,NIntC) 
      Displ%D=NewPrims%D-IntCs%Value
      !
-     CALL RefreshBMatInfo(IntCs,XYZ, &
-       CtrlTrf%DoClssTrf,Print,LinCrit,CtrlTrf%ThreeAt,SCRPath)
+     CALL RefreshBMatInfo(IntCs,XYZ,CtrlTrf,CtrlCoord,Print,SCRPath)
      CALL InternalToCart(XYZ,IntCs,Displ%D,Print, &
        CtrlBackTrf,CtrlTrf,CtrlCoord,CtrlConstr,SCRPath)
      !
@@ -750,7 +751,7 @@ CONTAINS
      TYPE(DBL_RNK2)              :: EigVects,Aux,EigVals
      CHARACTER(LEN=*)            :: Char
      !
-     CondNum=1.D-4
+     CondNum=1.D-7
      NDim=SIZE(AMat,1)
      CALL New(EigVects,(/NDim,NDim/))
      CALL New(Aux,(/NDim,NDim/))
