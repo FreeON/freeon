@@ -45,11 +45,7 @@ backup:	purge rmLegacy tarball
 #
 rmLegacy:
 	rm -rf DirectJ
-	rm -rf ONX/GMEONX
-	rm -rf ONX/GSONX
-	rm -rf ONX/MASONX
-	rm -rf ONX/PONX*
-	rm -rf ONX/SONX
+	rm -rf ONX
 	rm -rf Inpts
 
 swREADME:
