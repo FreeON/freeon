@@ -43,7 +43,7 @@ PROGRAM LowdinO
   TYPE(ARGMT)                    :: Args
   INTEGER                        :: I,J,K,LgN,LWORK,LIWORK,Info,Status
   CHARACTER(LEN=7),PARAMETER     :: Prog='LowdinO'
-  REAL(DOUBLE)                   :: Chk
+  REAL(DOUBLE)                   :: Chk,CondS
 !--------------------------------------------------------------------
   CALL StartUp(Args,Prog)
   CALL New(Values,NBasF)
@@ -79,6 +79,14 @@ PROGRAM LowdinO
   CALL Halt('DSYEV flaked in LowdinO. INFO='//TRIM(IntToChar(Info)))
   CALL Delete(Work)
 #endif
+!--------------------------------------------------------------------
+  IF(Values%D(1)<Zero)CALL Halt(' S matrix is not pos def')
+  CondS=Values%D(NBasF)/Values%D(1)
+  IF(CondS>1D2.AND.CondS<1D3)THEN 
+     CALL Warn('Near linear dependence detected in MakeS: Cond(S)='//TRIM(DblToShrtChar(CondS)))
+  ELSEIF(CondS>1D3)THEN
+     CALL Halt('Linear dependence detected in MakeS: Cond(S)='//TRIM(DblToShrtChar(CondS)))
+  ENDIF
 !--------------------------------------------------------------------
   CALL New(Tmp2,(/NBasF,NBasF/))
   CALL New(Tmp1,(/NBasF,NBasF/))
