@@ -1,2 +1,0 @@
-#!/bin/sh
-h5dump  $MONDO_SCRATCH/$1*.inf > $PWD/$1.ASCII
