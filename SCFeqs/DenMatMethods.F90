@@ -101,7 +101,40 @@ CONTAINS
     INTEGER              :: MM,NPur
     CHARACTER(LEN=*)     :: Prog
     CHARACTER(LEN=2*DEFAULT_CHR_LEN) :: Mssg,CnvrgCmmnt
-!---------------------------------------------------------------------
+#ifdef PRINT_PURE_EVALS
+        INTERFACE DSYEV
+           SUBROUTINE DSYEV(JOBZ,UPLO,N,A,LDA,W,WORK,LWORK,INFO)
+             USE GlobalScalars
+             CHARACTER(LEN=1), INTENT(IN)    :: JOBZ, UPLO
+             INTEGER,          INTENT(IN)    :: LDA,  LWORK, N
+             INTEGER,          INTENT(OUT)   :: INFO
+             REAL(DOUBLE),     INTENT(INOUT) :: A(LDA,*)
+             REAL(DOUBLE),     INTENT(OUT)   :: W(*)
+             REAL(DOUBLE),     INTENT(OUT)   :: WORK(*)
+           END SUBROUTINE DSYEV
+        END INTERFACE
+        TYPE(DBL_RNK2)                 :: dP
+        TYPE(DBL_VECT)                 :: EigenV,Work
+        TYPE(INT_VECT)                 :: IWork
+        INTEGER                        :: LWORK,LIWORK,Info
+
+        CALL New(dP,(/NBasF,NBasF/))
+        CALL SetEq(dP,P)
+        CALL New(EigenV,NBasF)
+        CALL SetEq(EigenV,Zero)
+        LWORK=MAX(1,3*NBasF+10)
+        CALL New(Work,LWork)
+        CALL DSYEV('V','U',NBasF,dP%D,NBasF,EigenV%D,Work%D,LWORK,Info)
+        IF(Info/=SUCCEED)CALL Halt('DSYEV flaked in FockGuess. INFO='//TRIM(IntToChar(Info)))
+        PrintFlags%Fmt=DEBUG_MMASTYLE
+        CALL Print_DBL_VECT(EigenV,'Values['//TRIM(IntToChar(NPur))//']',Unit_O=6)
+        PrintFlags%Fmt=DEBUG_DBLSTYLE
+        CALL Delete(EigenV)
+        CALL Delete(Work)
+        CALL Delete(dP)
+#endif
+
+
      IF(NPur==0)THEN
         OldE=BIG_DBL
         OldAEP=BIG_DBL
@@ -130,7 +163,7 @@ CONTAINS
         CnvrgCmmnt='Met dE/dP goals'
      ENDIF
      ! Test in the asymptotic regime for stall out
-     IF(RelErrE<1D1*Thresholds%Trix**2)THEN
+     IF(RelErrE<1D2*Thresholds%Trix**2)THEN
 !    IF(RelErrE<Thresholds%ETol)THEN
         ! Check for increasing /P
         IF(AbsErrP>OldAEP)THEN
@@ -144,14 +177,14 @@ CONTAINS
         ENDIF
      ENDIF
 !
-!     IF(NPur<40)CnvrgChck=.FALSE.
-!     CALL OpenASCII('CommErr_'//TRIM(DblToShrtChar(Thresholds%Trix))//'.dat',77)
+     IF(NPur<35)CnvrgChck=.FALSE.
+     CALL OpenASCII('CommErr_'//TRIM(DblToShrtChar(Thresholds%Trix))//'.dat',77)
 !     CALL OpenASCII('CommErr_'//TRIM(DblToShrtChar(CurThresh))//'.dat',77)
-!     CErr=CommutatorErrors(F,P)
-!     WRITE(77,22)NPur,Thresholds%Trix,AbsErrP,FNormErrP,CErr(1),CErr(2), &
-!                 100.D0*DBLE(P%NNon0)/DBLE(NBasF*NBasF)
-!     22 FORMAT(I3,8(1x,F20.14))
-!     CLOSE(77)
+     CErr=CommutatorErrors(F,P)
+     WRITE(77,22)NPur,Thresholds%Trix,AbsErrP,FNormErrP,CErr(1),CErr(2), &
+                 100.D0*DBLE(P%NNon0)/DBLE(NBasF*NBasF)
+     22 FORMAT(I3,8(1x,F20.14))
+     CLOSE(77)
 !
      ! Updtate previous cycle values
      OldE=Energy
@@ -451,6 +484,7 @@ CONTAINS
       TrP2=Trace(P2)
       TrP3=Trace(P3)
       c=(TrP2-TrP3)/(TrP1-TrP2+1D-30)
+WRITE(*,*)' C = ',C
       IF(ABS(c-Half)<1.D-5.OR.FixedUVW)THEN
          c=Half
          u=Zero
@@ -483,19 +517,47 @@ CONTAINS
       REAL(DOUBLE)                   :: Fmin,Fmax,DF,Coeff,Mu,Lmbd1,  &
                                         Lmbd2,Norm
       INTEGER                        :: Order
+#ifdef PRINT_GUESS_EVALS
+        INTERFACE DSYEV
+           SUBROUTINE DSYEV(JOBZ,UPLO,N,A,LDA,W,WORK,LWORK,INFO)
+             USE GlobalScalars
+             CHARACTER(LEN=1), INTENT(IN)    :: JOBZ, UPLO
+             INTEGER,          INTENT(IN)    :: LDA,  LWORK, N
+             INTEGER,          INTENT(OUT)   :: INFO
+             REAL(DOUBLE),     INTENT(INOUT) :: A(LDA,*)
+             REAL(DOUBLE),     INTENT(OUT)   :: W(*)
+             REAL(DOUBLE),     INTENT(OUT)   :: WORK(*)
+           END SUBROUTINE DSYEV
+        END INTERFACE
+        TYPE(DBL_RNK2)                 :: dP
+        TYPE(DBL_VECT)                 :: EigenV,Work
+        TYPE(INT_VECT)                 :: IWork
+        INTEGER                        :: LWORK,LIWORK,Info
+#endif
 !----------------------------------------------------------------------------
 !     Estimate spectral bounds 
-!----------------------------------------------------------------------------
       CALL SpectralBounds(F,Fmin,Fmax)
-!----------------------------------------------------------------------------
 !     Set up the Density Matrix
-!----------------------------------------------------------------------------
-      IF(Order==1) THEN
+     IF(Order==1) THEN
          Call SetEq(P,F)
          DF = (Fmax - Fmin)
          CALL Add(P,-Fmax)
          Coeff = -One/DF
          CALL Multiply(P,Coeff)          ! P = (I*F_max-F)/DF
+#ifdef PRINT_GUESS_EVALS
+        CALL New(dP,(/NBasF,NBasF/))
+        CALL SetEq(dP,P)
+        CALL New(EigenV,NBasF)
+        CALL SetEq(EigenV,Zero)
+        LWORK=MAX(1,3*NBasF+10)
+        CALL New(Work,LWork)
+        CALL DSYEV('V','U',NBasF,dP%D,NBasF,EigenV%D,Work%D,LWORK,Info)
+        IF(Info/=SUCCEED)CALL Halt('DSYEV flaked in FockGuess. INFO='//TRIM(IntToChar(Info)))
+        CALL Print_DBL_VECT(EigenV,'Guess1Values',Unit_O=6)
+        CALL Delete(EigenV)
+        CALL Delete(Work)
+        CALL Delete(dP)
+#endif
       ELSEIF(Order==2) THEN
          Mu    = Trace(F)/DBLE(NBasF)
          Lmbd1 = Norm/(Fmax-Mu)
@@ -515,10 +577,103 @@ CONTAINS
             Coeff = Norm/DBLE(NBasF)
             CALL Add(P,Coeff)
          ENDIF
+#ifdef PRINT_GUESS_EVALS
+        CALL New(dP,(/NBasF,NBasF/))
+        CALL SetEq(dP,P)
+        CALL New(EigenV,NBasF)
+        CALL SetEq(EigenV,Zero)
+        LWORK=MAX(1,3*NBasF+10)
+        CALL New(Work,LWork)
+        CALL DSYEV('V','U',NBasF,dP%D,NBasF,EigenV%D,Work%D,LWORK,Info)
+        IF(Info/=SUCCEED)CALL Halt('DSYEV flaked in FockGuess. INFO='//TRIM(IntToChar(Info)))
+        CALL Print_DBL_VECT(EigenV,'Guess2Values',Unit_O=6)
+        CALL Delete(EigenV)
+        CALL Delete(Work)
+        CALL Delete(dP)
+#endif
       ELSE
          CALL MondoHalt(99,'Wrong Order in FockGuess')
       ENDIF
     END SUBROUTINE FockGuess
+!---------------------------------------------------------------------
+! Estimate spectral bounds via Gersgorin approximation, [F_min-F_max].
+!---------------------------------------------------------------------
+!   S(R) = Sum_R,C { ABS(F(R,C) }
+!   F_max = Max_R { F(R,R) + S(R) - ABS(F(R,R)) }
+!   F_min = Min_R { F(R,R) - S(R) + ABS(F(R,R)) }
+!---------------------------------------------------------------------
+      SUBROUTINE SpectralBounds(F,F_min,F_max)
+        TYPE(BCSR)       :: F
+        INTEGER          :: I,R,J,M,Col,Blk,N,C,Check
+        REAL(DOUBLE)     :: F_min,F_max,Tmp_max,Tmp_min,Diag,Sum
+#ifdef EXACT_EIGEN_VALUES
+        INTERFACE DSYEV
+           SUBROUTINE DSYEV(JOBZ,UPLO,N,A,LDA,W,WORK,LWORK,INFO)
+             USE GlobalScalars
+             CHARACTER(LEN=1), INTENT(IN)    :: JOBZ, UPLO
+             INTEGER,          INTENT(IN)    :: LDA,  LWORK, N
+             INTEGER,          INTENT(OUT)   :: INFO
+             REAL(DOUBLE),     INTENT(INOUT) :: A(LDA,*)
+             REAL(DOUBLE),     INTENT(OUT)   :: W(*)
+             REAL(DOUBLE),     INTENT(OUT)   :: WORK(*)
+           END SUBROUTINE DSYEV
+        END INTERFACE
+        TYPE(DBL_RNK2)                 :: dF
+        TYPE(DBL_VECT)                 :: EigenV,Work
+        TYPE(INT_VECT)                 :: IWork
+        INTEGER                        :: LWORK,LIWORK,Info
+!--------------------------------------------------------------------
+        CALL New(dF,(/NBasF,NBasF/))
+        CALL SetEq(dF,F)
+        CALL New(EigenV,NBasF)
+        CALL SetEq(EigenV,Zero)
+        LWORK=MAX(1,3*NBasF+10)
+        CALL New(Work,LWork)
+        CALL DSYEV('V','U',NBasF,dF%D,NBasF,EigenV%D,Work%D,LWORK,Info)
+        IF(Info/=SUCCEED)CALL Halt('DSYEV flaked in RHEqs. INFO='//TRIM(IntToChar(Info)))
+        CALL PPrint(EigenV,'FockValues',Unit_O=6)
+        F_Min=EigenV%D(1)
+        F_Max=EigenV%D(NBasF)
+        CALL Delete(EigenV)
+        CALL Delete(Work)
+        CALL Delete(dF)
+#else
+        F_min =  1.0D10
+        F_max = -1.0D10 
+        DO I = 1,F%NAtms                                   ! Step over row blocks
+           M = BSiz%I(I)
+           DO R = 0,M-1                                    ! Step over rows in each block
+              Sum = Zero
+              Check = 0
+              DO J = F%RowPt%I(I),F%RowPt%I(I+1)-1         ! Step over column blocks
+                 Col = F%ColPt%I(J)
+                 Blk = F%BlkPt%I(J)
+                 N = BSiz%I(Col)
+                 DO C = 0,N-1                              ! Step over colums in each block
+                    Sum = Sum + ABS(F%MTrix%D(Blk+C*M+R))  ! Assume col by col storage?
+                    IF(I.EQ.Col) THEN
+                       IF(R.EQ.C) THEN
+                          Diag = F%MTrix%D(Blk+C*M+R)      ! Diagonal elements
+                          Check = 1
+                       ENDIF
+                    ENDIF
+                 ENDDO
+              ENDDO
+              IF (Check.EQ.0) THEN                         ! In case there wasn't a diagonal element
+                 Diag = Zero
+              ENDIF
+              Tmp_max = Diag + Sum - ABS(Diag)             ! Upper bound of Grsg. circle
+              Tmp_min = Diag - Sum + ABS(Diag)             ! Lower bound of Grsg. circle
+              IF(F_max .LE.Tmp_max) THEN                   ! Check for the highest bound
+                 F_max = Tmp_max
+              ENDIF
+              IF (F_min.GE.Tmp_min) THEN                   ! Check for the lowest bound
+                 F_min = Tmp_min
+              ENDIF
+           ENDDO
+        ENDDO
+#endif
+      END SUBROUTINE SpectralBounds
 !----------------------------------------------------------------------------
 !
 !----------------------------------------------------------------------------
