@@ -265,7 +265,7 @@ CONTAINS
        Radius = (One+1.D-14)*MaxBoxDim(G)+SQRT(AtomPairThresh)
     ENDIF
     CALL New_CellSet_Sphere(CS_OUT,G%PBC%AutoW%I,G%PBC%BoxShape%D,Radius)   
-!   CS_IN
+!   CS_IN : Quick fix for now, we will need to address a much better fix, later
     IF(PRESENT(Rad_O)) THEN
        Radius = Rad_O
     ELSE
