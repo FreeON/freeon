@@ -37,6 +37,7 @@ MODULE Macros
    CHARACTER(LEN=3)     :: PrvBase
    CHARACTER(LEN=3)     :: CurGeom
    CHARACTER(LEN=3)     :: PrvGeom
+   CHARACTER(LEN=3)     :: NxtGeom
 !--------------------------------------------------
    CONTAINS
       SUBROUTINE StartUp(Args,Prog,Serial_O)
@@ -65,13 +66,26 @@ MODULE Macros
             SCFActn=TRIM(Args%C%C(2))
          Current=Args%I%I(1:3)
          Previous=Args%I%I(4:6)
+!
          SCFCycl=TRIM(IntToChar(Args%I%I(1)))
+         IF(Args%I%I(3)-1<1)THEN
+            PrvCycl=TRIM(IntToChar(Previous(1)))        
+         ELSE
+            PrvCycl=TRIM(IntToChar(Args%I%I(1)-1))
+         ENDIF
          NxtCycl=TRIM(IntToChar(Args%I%I(1)+1))
-         CurBase=TRIM(IntToChar(Args%I%I(2)))
+!
          CurGeom=TRIM(IntToChar(Args%I%I(3)))
-         PrvCycl=TRIM(IntToChar(Previous(1)))
+         IF(Args%I%I(3)-1<1)THEN
+            PrvGeom=TRIM(IntToChar(Previous(3)))        
+         ELSE
+            PrvGeom=TRIM(IntToChar(Args%I%I(3)-1))
+         ENDIF
+         NxtGeom=TRIM(IntToChar(Args%I%I(3)+1))
+!
+         CurBase=TRIM(IntToChar(Args%I%I(2)))
          PrvBase=TRIM(IntToChar(Previous(2)))
-         PrvGeom=TRIM(IntToChar(Previous(3)))        
+!
          InfFile=TRIM(SCFName)//TRIM(InfF)
          CALL OpenHDF(TRIM(InfFile))
          CALL MarkFailure(Prog)
