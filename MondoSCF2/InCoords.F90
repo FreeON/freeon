@@ -583,8 +583,10 @@ CONTAINS
      ENDDO !!!! loop over internal coords
      100 format(A5,4I6,/,6F12.6,/,6F12.6)
      !
-     ! Clean columns which cause redundancy
+     ! Clean columns which cause redundancy or are related to Cartesian
+     ! constraints
      !
+     CALL CleanBConstr(IntCs,B,NatmsLoc)
      IF(.NOT.DoClssTrf) THEN
        CALL CleanB(ThreeAt,B,NIntC)
      ENDIF
@@ -3849,6 +3851,41 @@ CONTAINS
      READ(99) CholData%ChFact%D
      CLOSE(99,STATUS='KEEP')
    END SUBROUTINE ReadChol
+!
+!--------------------------------------------------------------------
+!
+   SUBROUTINE CleanBConstr(IntCs,B,NatmsLoc)
+     TYPE(BMATR) :: B
+     TYPE(INTC)  :: IntCs
+     INTEGER     :: I,J,K,L,NIntC,JJ,LL,NatmsLoc,NCart
+     TYPE(INT_VECT):: IConstr
+     !
+     NCart=3*NatmsLoc
+     NIntC=SIZE(IntCs%Def)
+     CALL New(IConstr,NCart)
+     IConstr%I(J)=1  
+     DO I=1,NIntC
+       IF(IntCs%Constraint(I)) THEN
+         J=3*(B%IB(I,1)-1)
+         IF(IntCs%Def(I)(1:5)=='CARTX') IConstr%I(J+1)=0
+         IF(IntCs%Def(I)(1:5)=='CARTY') IConstr%I(J+2)=0
+         IF(IntCs%Def(I)(1:5)=='CARTZ') IConstr%I(J+3)=0
+       ENDIF
+     ENDDO 
+     !
+     DO I=1,NIntC
+       DO J=1,4
+         JJ=B%IB(I,J)
+         IF(JJ==0) EXIT
+         JJ=3*(JJ-1)
+         LL=3*(J-1)
+         DO L=1,3
+           IF(IConstr%I(JJ+L)==0) B%B(I,LL+L)=Zero
+         ENDDO
+       ENDDO
+     ENDDO 
+     CALL Delete(IConstr)
+   END SUBROUTINE CleanBConstr
 !
 !--------------------------------------------------------------------
 !

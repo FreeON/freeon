@@ -180,7 +180,7 @@ CONTAINS
      ! Calculate new set of delocalized internals
      !
      CALL New(Coeffs,GDIISMemory)
-     CALL CalcGDCoeffs(RefGrad,Coeffs%D)
+     CALL CalcGDCoeffs(RefGrad,Coeffs%D,Print)
      !
      CALL New(NewDelocs,NCart) 
      !CALL MixDeloc(Coeffs%D,DelocSR%D,NewDelocs%D) !!! continue here
@@ -363,13 +363,13 @@ CONTAINS
          WRITE(*,200) 
          WRITE(Out,200) 
        ENDIF
-       CALL CalcGDCoeffs(SRDispl%D,Coeffs%D)
+       CALL CalcGDCoeffs(SRDispl%D,Coeffs%D,Print)
      ELSE
        IF(Print>=DEBUG_GEOP_MIN) THEN
          WRITE(*,300) 
          WRITE(Out,300) 
        ENDIF
-       CALL CalcGDCoeffs(RefGrad%D,Coeffs%D)
+       CALL CalcGDCoeffs(RefGrad%D,Coeffs%D,Print)
      ENDIF
      200 FORMAT("Doing Geometric DIIS based on Cartesian displacements.")
      300 FORMAT("Doing Geometric DIIS based on Cartesian gradients.")
@@ -481,8 +481,8 @@ CONTAINS
      ! Calculate GDIIS coeffs from internal coord displacements!
      !
      CALL New(Coeffs,GDIISMemory)
-     !CALL CalcGDCoeffs(PrIDispl%D,Coeffs%D)
-     CALL CalcGDCoeffs(RefGrad%D,Coeffs%D)
+     !CALL CalcGDCoeffs(PrIDispl%D,Coeffs%D,PrintIn)
+     CALL CalcGDCoeffs(RefGrad%D,Coeffs%D,PrintIn)
      !
      ! Calculate new geometry
      !
@@ -504,15 +504,17 @@ CONTAINS
 !
 !-------------------------------------------------------------------
 !
-   SUBROUTINE CalcGDCoeffs(ErrorVects,Coeffs)
+   SUBROUTINE CalcGDCoeffs(ErrorVects,Coeffs,PrintIn)
      REAL(DOUBLE),DIMENSION(:,:) :: ErrorVects
      REAL(DOUBLE),DIMENSION(:)   :: Coeffs
-     REAL(DOUBLE)                :: Sum   
-     INTEGER                     :: I,J,K,L
+     REAL(DOUBLE)                :: Sum,CondNum
+     INTEGER                     :: I,J,K,L,PrintIn
      INTEGER                     :: GDIISMemory,DimGDIIS
      TYPE(DBL_RNK2)              :: AMat,InvA
      TYPE(DBL_VECT)              :: Vect,Scale
+     LOGICAL                     :: Print
      !
+     Print=PrintIn>=DEBUG_GEOP_MIN
      GDIISMemory=SIZE(ErrorVects,2)
      DimGDIIS=SIZE(ErrorVects,1)
      CALL New(AMat,(/GDIISMemory,GDIISMemory/))
@@ -537,9 +539,8 @@ CONTAINS
      ! Calculate SVD inverse of 'A'.     
      !
      CALL New(InvA,(/GDIISMemory,GDIISMemory/))
-     CALL SetDSYEVWork(GDIISMemory**2)
-     CALL FunkOnSqMat(GDIISMemory,Inverse,AMat%D,InvA%D,Unit_O=6)
-     CALL UnSetDSYEVWork()
+     CALL DIISInvMat(AMat%D,InvA%D,'Basic')
+     !CALL DIISInvMat(AMat%D,InvA%D,'StpD')
      !
      ! Scale inverse back to original system
      !
@@ -739,6 +740,57 @@ CONTAINS
        ENDIF  
      ENDDO
    END SUBROUTINE RangeBack
+!
+!---------------------------------------------------------------------
+!
+   SUBROUTINE DIISInvMat(AMat,InvA,Char)
+     REAL(DOUBLE),DIMENSION(:,:) :: AMat,InvA
+     REAL(DOUBLE)                :: CondNum,EigMax,TolAbs,EigAux   
+     INTEGER                     :: NDim,I,INFO
+     TYPE(DBL_RNK2)              :: EigVects,Aux,EigVals
+     CHARACTER(LEN=*)            :: Char
+     !
+     CondNum=1.D-4
+     NDim=SIZE(AMat,1)
+     CALL New(EigVects,(/NDim,NDim/))
+     CALL New(Aux,(/NDim,NDim/))
+     CALL New(EigVals,(/NDim,NDim/))
+     EigVals%D=Zero
+     CALL SetDSYEVWork(NDim)
+       BLKVECT%D=AMat
+       CALL DSYEV('V','U',NDim,BLKVECT%D,BIGBLOK,BLKVALS%D, &
+       BLKWORK%D,BLKLWORK,INFO)
+       IF(INFO/=SUCCEED) &
+       CALL Halt('DSYEV hosed in DIISInvMat. INFO='&
+                  //TRIM(IntToChar(INFO)))
+       DO I=1,NDim ; EigVals%D(I,I)=BLKVALS%D(I) ; ENDDO
+       EigVects%D=BLKVECT%D 
+     CALL UnSetDSYEVWork()
+     !
+     EigMax=Zero
+     DO I=1,NDim ; EigMax=MAX(EigMax,ABS(EigVals%D(I,I))) ; ENDDO
+     TolAbs=CondNum*EigMax
+     DO I=1,NDim
+       IF(Char=='StpD') THEN
+         EigVals%D=Zero
+         EigVals%D(NDim,NDim)=One
+       ELSE 
+         IF(ABS(EigVals%D(I,I))>TolAbs) THEN
+           EigVals%D(I,I)=One/EigVals%D(I,I) 
+         ELSE
+           EigVals%D(I,I)=Zero
+         ENDIF
+       ENDIF
+     ENDDO
+     CALL DGEMM_NNc(NDim,NDim,NDim,One,Zero,EigVects%D,&
+                    EigVals%D,Aux%D)
+     CALL DGEMM_NTc(NDim,NDim,NDim,One,Zero,Aux%D, &
+                    EigVects%D,InvA)
+     !
+     CALL Delete(Aux)
+     CALL Delete(EigVals)
+     CALL Delete(EigVects)
+   END SUBROUTINE DIISInvMat
 !
 !---------------------------------------------------------------------
 !
