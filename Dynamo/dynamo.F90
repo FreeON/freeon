@@ -131,7 +131,6 @@ CONTAINS
      ENDIF
 !
      DO I=1,Natoms
-       IF(AtmMark%I(I)/=0) CYCLE !!!interactions of MM atoms only
        IF(PRESENT(E_LJ_EXCL)) THEN
          QI=LJEps%D(I)
          QI14=LJEps14%D(I)
@@ -143,7 +142,8 @@ CONTAINS
        ENDIF
      DO M=1,Top_Loc%I(I,1)
        J=Top_Loc%I(I,M+1)
-     IF(AtmMark%I(J)==0.AND.J<I) CYCLE !!!avoid double counting
+     IF(J<=I) CYCLE !!!avoid double counting
+     IF(AtmMark%I(I)/=0.AND.AtmMark%I(J)/=0) CYCLE !!! no QM-QM intr.act
        DVect%D(:)=GM_Loc%Carts%D(:,I)-GM_Loc%Carts%D(:,J)
        DVect%D(:)=DVect%D(:)/AngstromsToAU !!!work in angstroems
        DIJ2=DOT_PRODUCT(DVect%D,DVect%D)
@@ -222,7 +222,7 @@ CONTAINS
    SUBROUTINE ENERGY_LENNARD_JONES(ELJ,ISet,BoxSize,Grad_Loc)
 !
    IMPLICIT NONE
-   INTEGER :: ISET,NBox,Natoms,NX,NY,NZ
+   INTEGER :: ISET,NBox,Natoms,NX,NY,NZ,I,J
    REAL(DOUBLE) :: BXMIN,BYMIN,BZMIN,BoxSize
    INTEGER :: IX,IY,IZ,IOrd,IOrdD
    INTEGER :: I1,I2,JJ1,JJ2,IXD,IYD,IZD
@@ -287,7 +287,6 @@ CONTAINS
 !
      DO I1=BoxI%I(IOrd),BoxI%I(IOrd+1)-1
        JJ1=BoxJ%I(I1)
-       IF(AtmMark%I(JJ1)/=0) CYCLE !!!interactions of MM atoms only
         R1=LJRad%D(JJ1)
         Q1=LJEps%D(JJ1)
 ! second atom may come from central or neigbouring Boxes 
@@ -302,7 +301,8 @@ CONTAINS
        IOrdD=NX*NY*(IZ-1+IZD)+NY*(IX-1+IXD)+IY+IYD
          DO I2=BoxI%I(IOrdD),BoxI%I(IOrdD+1)-1
            JJ2=BoxJ%I(I2)
-       IF(AtmMark%I(JJ2)==0.AND.JJ2<JJ1) CYCLE !!!avoid double counting
+       IF(JJ2<=JJ1) CYCLE !!!avoid double counting
+       IF(AtmMark%I(JJ1)/=0.AND.AtmMark%I(JJ2)/=0) CYCLE 
          IF(AtmMark%I(JJ2)==0) THEN
            R2=LJRad%D(JJ2)
            Q2=LJEps%D(JJ2)
@@ -338,8 +338,6 @@ CONTAINS
    ENDDO
 !
 ! All interactions have been counted twice
-!
-!  write(*,*) 'elj in dynamo= ',elj
 !
    CALL CloseHDF()
 !
