@@ -521,65 +521,6 @@ MODULE ParseInPut
             CALL Put(Ctrl%Model(I),'ModelChemistry',Tag_O=IntToChar(I))
          ENDDO
 !!----------------------------------------------------------------------------
-!!        Parse <OPTIONS.ACCURACY> 
-!!
-!         Ctrl%AccL=2 ! Default is "good"    
-!         NOpts=0
-!!
-!         IF(OptKeyLocQ(Inp,ACCURACY_OPTION,ACCURACY_CHEEZY,MaxSets,NLoc,Loc))THEN
-!            NOpts=NOpts+NLoc
-!            DO ILoc=1,NLoc; Ctrl%AccL(Loc(ILoc))=1; ENDDO
-!         ENDIF
-!         IF(OptKeyLocQ(Inp,ACCURACY_OPTION,ACCURACY_GOOD,MaxSets,NLoc,Loc))THEN
-!            NOpts=NOpts+NLoc
-!            DO ILoc=1,NLoc; Ctrl%AccL(Loc(ILoc))=2; ENDDO
-!         ENDIF
-!         IF(OptKeyLocQ(Inp,ACCURACY_OPTION,ACCURACY_TIGHT,MaxSets,NLoc,Loc))THEN
-!            NOpts=NOpts+NLoc
-!            DO ILoc=1,NLoc; Ctrl%AccL(Loc(ILoc))=3; ENDDO
-!         ENDIF
-!         IF(OptKeyLocQ(Inp,ACCURACY_OPTION,ACCURACY_RETENTIVE,MaxSets,NLoc,Loc))THEN
-!            NOpts=NOpts+NLoc
-!            DO ILoc=1,NLoc; Ctrl%AccL(Loc(ILoc))=4; ENDDO
-!         ENDIF
-!         IF(NOpts>1.AND.NOpts/=Ctrl%NSet) &
-!            CALL MondoHalt(PRSE_ERROR,'Number of '//ACCURACY_OPTION &
-!                           //' options does not match number of Basis sets.')
-!!        Set thresholds
-!         IF(NOpts==Ctrl%NSet)THEN
-!!           All thresholds are user determined
-!            write(*,*) 'thrsh 1'
-!            DO I=1,Ctrl%NSet
-!               Thrsh%Cube=CubeNeglect(Ctrl%AccL(I))
-!               Thrsh%Trix=TrixNeglect(Ctrl%AccL(I))
-!               Thrsh%Dist=DistNeglect(Ctrl%AccL(I))
-!               Thrsh%TwoE=TwoENeglect(Ctrl%AccL(I))
-!               Thrsh%ETol=ETol(Ctrl%AccL(I))
-!               Thrsh%DTol=DTol(Ctrl%AccL(I))
-!               CALL Put(Thrsh,Tag_O=IntToChar(I))
-!            ENDDO
-!         ELSE ! Default, cheezy for all sets except last, which is good or user defined.
-!            write(*,*) 'thrsh 2'
-!            DO I=1,Ctrl%NSet-1
-!               Thrsh%Cube=CubeNeglect(1)
-!               Thrsh%Trix=TrixNeglect(1)
-!               Thrsh%Dist=DistNeglect(1)
-!               Thrsh%TwoE=TwoENeglect(1)
-!               Thrsh%ETol=ETol(1)
-!               Thrsh%DTol=DTol(1)
-!               CALL Put(Thrsh,Tag_O=IntToChar(I))
-!            ENDDO
-!            write(*,*) 'thrsh 3'
-!            Thrsh%Cube=CubeNeglect(Ctrl%AccL(1))
-!            Thrsh%Trix=TrixNeglect(Ctrl%AccL(1))
-!            Thrsh%Dist=DistNeglect(Ctrl%AccL(1))
-!            Thrsh%TwoE=TwoENeglect(Ctrl%AccL(1))
-!            Thrsh%ETol=ETol(Ctrl%AccL(1))
-!            Thrsh%DTol=DTol(Ctrl%AccL(1))
-!            CALL Put(Thrsh,Tag_O=IntToChar(Ctrl%NSet))
-!         ENDIF
-!
-!        Close files
          CLOSE(UNIT=Inp,STATUS='KEEP')
          CALL CloseHDF()
       END SUBROUTINE ParseMethods
@@ -752,44 +693,15 @@ MODULE ParseInPut
 !           NOTE: Should recomPute basis for EACH geometry.  Things are quite
 !           messed up at present.  Need to really clean house on front end.
             CALL FindKind(GM)
-#ifdef PERIODIC
-!           Convert to AU and ComPute Fractioan and Atomic Coordinates
-            IF(GM%PBC%InAtomCrd) THEN
-               IF(.NOT.GM%InAU) THEN
-                  GM%Carts%D    = GM%Carts%D*AngstromsToAU
-               ENDIF
-               CALL CalFracCarts(GM)
-            ELSE
-               GM%BoxCarts%D=GM%Carts%D
-               GM%BoxVects%D=GM%Vects%D
-               CALL CalAtomCarts(GM)
-            ENDIF
 !
-            IF(GM%PBC%Trans_COM) THEN
-               CALL CalTransVec(GM)
-            ENDIF
-            CALL Translate(GM,GM%PBC%TransVec)
-            CALL WrapAtoms(GM)
-#else
-!           Convert to AU
-            IF(.NOT.GM%InAU) THEN
-               GM%Carts%D=GM%Carts%D*AngstromsToAU
-            ENDIF
-#endif
+! Convert coordinates
+!
+            CALL ConvertCoords(GM)
 !
 !           ComPute spin coordinates
             CALL SpinCoords(GM) 
 !           Determine a bounding box for the system
             GM%BndBox%D=SetBox(GM%Carts)
-!
-#ifdef PERIODIC
-!           ReSet the Cell Center
-            DO I=1,3
-               IF(.NOT. GM%PBC%AutoW(I)) THEN
-                  GM%PBC%CellCenter(I) = Half*(GM%BndBox%D(I,2)+GM%BndBox%D(I,1))
-               ENDIF
-            ENDDO
-#endif
 !
 !           OutPut the coordinates
             CALL Put(GM,Tag_O=TRIM(IntToChar(NumGeom)))
@@ -2066,78 +1978,10 @@ MODULE ParseInPut
       ELSE
         GM_MM%BndBox%D=SetBox(GM_MM%Carts)
       ENDIF
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!write(*,*) 'X GM_MM%BndBox%D= ',GM_MM%BndBox%D(1,1:2)/Angstromstoau
-!write(*,*) 'Y GM_MM%BndBox%D= ',GM_MM%BndBox%D(2,1:2)/Angstromstoau
-!write(*,*) 'Z GM_MM%BndBox%D= ',GM_MM%BndBox%D(3,1:2)/Angstromstoau
-!! translate coordinates into 'positive' box
-!Sum=MAX((GM_MM%BndBox%D(1,2)-GM_MM%BndBox%D(1,1)),(GM_MM%BndBox%D(2,2)-GM_MM%BndBox%D(2,1)),(GM_MM%BndBox%D(3,2)-GM_MM%BndBox%D(3,1)))
-!sum=sum+1.d0
-!write(*,*) 'Cartesians of the cell'
-!do i=1,GM_MM%Natms
-!write(*,124) i,GM_MM%Carts%D(1,i)+SUM
-!write(*,125) i,GM_MM%Carts%D(2,i)+SUM
-!write(*,126) i,GM_MM%Carts%D(3,i)+SUM
-!enddo
-!write(*,*) 'charges'
-!do i=1,GM_MM%Natms
-!write(*,123) i,GM_MM%AtNum%D(i)
-!enddo
-!122 format(i4,A10,I8,3F12.6)
-!123 format('z(',I4,')=',3F12.6)
-!124 format('rx(',I4,')=',3F12.6)
-!125 format('ry(',I4,')=',3F12.6)
-!126 format('rz(',I4,')=',3F12.6)
-!!!!!!!!!!!!!!!!
-!sumo=sum
-!sum=zero
-!do i=1,GM_MM%Natms; do j=1,3
-!Sum=MAX(GM_MM%Carts%D(j,i)+SUMO,SUM)
-!enddo; enddo
-!write(*,*) 'edge of the cell= ',sum
-!write(*,*) 'fractional coords of the cell'
-!do i=1,GM_MM%Natms
-!write(*,122) i,ATMNAM(I),ATMNUM(I),(GM_MM%Carts%D(1:3,i)+SUMO)/SUM
-!enddo
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
 ! Fractional coordinates handling
 !
-#ifdef PERIODIC
-!
-!           IF(PBC_On) THEN !------------------------PBC
-!
-!           Convert to AU and ComPute Fractioan and Atomic Coordinates
-!
-            IF(GM_MM%PBC%InAtomCrd) THEN
-               IF(.NOT.GM_MM%InAU) THEN
-                  GM_MM%Carts%D    = GM_MM%Carts%D*AngstromsToAU
-               ENDIF
-               CALL CalFracCarts(GM_MM)
-            ELSE
-               GM_MM%BoxCarts%D=GM_MM%Carts%D
-               GM_MM%BoxVects%D=GM_MM%Vects%D
-               CALL CalAtomCarts(GM_MM)
-            ENDIF
-!
-            IF(GM_MM%PBC%Trans_COM) THEN
-               CALL CalTransVec(GM_MM)
-            ENDIF
-            CALL Translate(GM_MM,GM_MM%PBC%TransVec)
-            CALL WrapAtoms(GM_MM)
-!
-!           ReSet the Cell Center
-            DO I=1,3
-               IF(.NOT. GM_MM%PBC%AutoW(I)) THEN
-                  GM_MM%PBC%CellCenter(I) = Half*(GM_MM%BndBox%D(I,2)+GM_MM%BndBox%D(I,1))
-               ENDIF
-            ENDDO
-!
-!            ENDIF !------------------------PBC
-#else
-! Convert MM input
-        IF(.NOT.GM_MM%InAU) GM_MM%Carts%D = GM_MM%Carts%D*AngstromsToAU
-#endif
+        CALL ConvertCoords(GM_MM)
 !
 ! Print out MM coordinates into outPut file
 !
@@ -2145,15 +1989,17 @@ MODULE ParseInPut
         WRITE(Out,*) 'MM system Cartesian Coordinates in Angstroems:'
         WRITE(Out,*) 
         DO I=1,GM_MM%Natms
-          WRITE(Out,110) I,ATMNAM(I),GM_MM%Carts%D(1:3,I)/AngstromsToAu
+          WRITE(Out,120) I,ATMNAM(I),GM_MM%Carts%D(1:3,I)/AngstromsToAu
+!         WRITE(Out,110) I,ATMNAM(I),GM_MM%Carts%D(1:3,I)/AngstromsToAu
         ENDDO
-        WRITE(Out,*) 
-        WRITE(Out,*) 'MM system Cartesian Coordinates in Bohrs:'
-        WRITE(Out,*) 
-        DO I=1,GM_MM%Natms
-          WRITE(Out,*) I,ATMNAM(I),GM_MM%Carts%D(1:3,I)
-        ENDDO
-110   FORMAT(I7,2X,A8,3F34.25)
+!       WRITE(Out,*) 
+!       WRITE(Out,*) 'MM system Cartesian Coordinates in Bohrs:'
+!       WRITE(Out,*) 
+!       DO I=1,GM_MM%Natms
+!         WRITE(Out,*) I,ATMNAM(I),GM_MM%Carts%D(1:3,I)
+!       ENDDO
+110   FORMAT(I7,2X,A8,3F30.16)
+120   FORMAT(I7,2X,A8,3F12.6)
 !
 ! Zero GrdMM (initial gradients) for the case MMOnly
 !
@@ -2883,4 +2729,47 @@ SUBROUTINE ParsePeriodic(Ctrl,GMLoc)
 !
 END SUBROUTINE ParsePeriodic
 #endif
+!
+!---------------------------------------------------------------------
+!
+    SUBROUTINE ConvertCoords(GMLoc)
+         TYPE(CRDS) :: GMLoc
+!
+#ifdef PERIODIC
+!           Convert to AU and ComPute Fractioan and Atomic Coordinates
+            IF(GMLoc%PBC%InAtomCrd) THEN
+               IF(.NOT.GMLoc%InAU) THEN
+                  GMLoc%Carts%D    = GMLoc%Carts%D*AngstromsToAU
+               ENDIF
+               GMLoc%AbCarts%D=GMLoc%Carts%D
+               CALL CalFracCarts(GMLoc)
+            ELSE
+               GMLoc%BoxCarts%D=GMLoc%Carts%D
+               GMLoc%BoxVects%D=GMLoc%Vects%D
+               GMLoc%AbBoxCarts%D=GMLoc%BoxCarts%D
+               CALL CalAtomCarts(GMLoc)
+            ENDIF
+!
+            IF(GMLoc%PBC%Trans_COM) THEN
+               CALL CalTransVec(GMLoc)
+            ENDIF
+            CALL Translate(GMLoc,GMLoc%PBC%TransVec)
+!
+            CALL WrapAtoms(GMLoc)
+!
+!           ReSet the Cell Center
+            DO I=1,3
+               IF(.NOT. GMLoc%PBC%AutoW(I)) THEN
+                  GMLoc%PBC%CellCenter(I) = Half*(GMLoc%BndBox%D(I,2)+GMLoc%BndBox%D(I,1))
+               ENDIF
+            ENDDO
+#else
+!           Convert to AU
+            IF(.NOT.GMLoc%InAU) THEN
+               GMLoc%Carts%D=GMLoc%Carts%D*AngstromsToAU
+            ENDIF
+#endif
+!
+    END SUBROUTINE ConvertCoords
+!
 END MODULE
