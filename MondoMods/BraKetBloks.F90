@@ -8,7 +8,7 @@ MODULE BraKetBloks
 !--------------------------------------------------------------
   TYPE(DBL_RNK3)  :: HGBra 
   TYPE(DBL_VECT)  :: HGKet
-  TYPE(DBL_VECT)  :: PhFactor
+  TYPE(DBL_VECT)  :: PhFactor,Phase
   TYPE(DBL_VECT)  :: AuxRfun
   TYPE(DBL_RNK3)  :: Rfun
   CONTAINS
@@ -31,14 +31,24 @@ MODULE BraKetBloks
 !   Max L for a two electron integral
     MaxL2=2*(MaxL+1)
 !   Allocate space for computing integral estimates
+!   
+!   OBSOLEATE WITH QCTC, SHOULD REALLY BE ALLOCATING GLOBAL MD INSTEAD!
+!
     CALL New(AuxRfun,MaxL2,-1)
     CALL New(Rfun,(/MaxL2,MaxL2,MaxL2/),(/-1,-1,-1/))
 !   Allocate space for BraKet contraction
     CALL New(HGKet,MaxLMN)
     CALL New(HGBra,(/MaxLMN,MaxBF,MaxBF/))
-!   Allocate and set intermediate phase factor
+!   Allocate and set intermediate phase factors
     CALL New(PhFactor,MaxL,0)
     DO L=0,MaxL; PhFactor%D(L)=(-One)**L; ENDDO
+    CALL New(Phase,MaxLMN)
+    DO L=0,MaxL
+    DO M=0,MaxL-L
+    DO N=0,MaxL-L-M
+       LMN=LMNDex(L,M,N)
+       Phase%D(LMN)=(-One)**(L+M+N)
+    ENDDO; ENDDO; ENDDO
   END SUBROUTINE NewBraKetBlok
 !--------------------------------------------------------------
 ! Delete the Global Objects 
