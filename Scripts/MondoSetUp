@@ -5,35 +5,15 @@
 #
 chmod u+x  $MONDO_HOME/Scripts/*
 #
-# Eric likes this one
-#
-setenv MONDO_ID $$
 #
 # expand user's path
 #
 setenv PATH ${PATH}:${MONDO_HOME}/Scripts:${MONDO_HOME}/Exec
 #
-# make all of MondoSCF
+# aliasing 
 #
 alias ma  ${MAKE} -C ${MONDO_HOME} all 
-# 
-# clean all source files
-#
-alias mc  ${MAKE} -C ${MONDO_HOME} clean
-#
-# clean source, scratch and work directories
-#
-alias mp  ${MAKE} -C ${MONDO_HOME} purge
-#
-# make a date-tagged backup
-#
-alias mb  ${MAKE} -C ${MONDO_HOME} backup
-#
-# remake a source directory as given in the main Makefile
-#
 alias mk  ${MAKE} -C ${MONDO_HOME} $1
-#
-# goto shortcuts
 #
 alias gm    'cd ${MONDO_HOME};           ls -l; pwd'
 alias gw    'cd ${MONDO_WORK};           ls -l; pwd'
@@ -49,79 +29,37 @@ alias go    'cd ${MONDO_HOME}/ONX;       ls -l; pwd'
 alias g1    'cd ${MONDO_HOME}/OneE;      ls -l; pwd'
 alias gx    'cd ${MONDO_HOME}/XForm;     ls -l; pwd'
 alias gn    'cd ${MONDO_HOME}/QuNew;     ls -l; pwd'
+alias gv    'cd ${MONDO_HOME}/Vis;       ls -l; pwd'
 alias gd    'cd ${MONDO_DGEMMS};         ls -l; pwd'
 #
-# cvs shortcuts
+# Set environmental varaibles
 #
-alias ai    'add Includes  $1'
-alias amm   'add MondoMods $1'
-alias as    'add MondoSCF  $1'
-alias a1    'add OneE      $1'
-alias ah    'add HiCu      $1'
-alias aq    'add QCTC      $1'
-alias an    'add QuNew     $1'
-alias ae    'add SCFeqs    $1'
-alias ao    'add ONX       $1'
+setenv MONDO_ID $$
+setenv MONDO_HOST `hostname`   
+setenv MONDO_SYST `/bin/uname -s`  
+setenv MONDO_VRSN `/bin/uname -r`  
+setenv MONDO_MACH `/bin/uname -m`   
 #
-set OP_SYSTM = `/bin/uname -s`  
-set OP_VRSN  = `/bin/uname -r`  
-set MACH_TYP = `/bin/uname -m`  
-
-rm -f ${MONDO_HOME}/Includes/CompilerSpecifics
-
-if ( "$PLATFORM" == "IntelLinux.NAG" ) then
-#
+if ( "$MONDO_PLAT" == "IntelLinux.NAG" ) then
      setenv MONDO_COMPILER  ${MONDO_HOME}/Includes/CompilerSpecifics.IntelLinux.NAG 
-#
      setenv MONDO_DGEMMS ${MONDO_HOME}/PHiPAC/runs/P3/PHiPAC_dgemm/src 
-#
-else if ( "$PLATFORM" == "IntelLinux.LAHEY" ) then
-#
-     setenv MONDO_COMPILER ${MONDO_HOME}/Includes/CompilerSpecifics.IntelLinux.LAHEY
-#
-     setenv MONDO_DGEMMS ${MONDO_HOME}/PHiPAC/runs/P3/PHiPAC_dgemm/src 
-#
-else if ( "$PLATFORM" == "IntelLinux.PG" ) then
-#
+else if ( "$MONDO_PLAT" == "IntelLinux.PG" ) then
      setenv MONDO_COMPILER ${MONDO_HOME}/Includes/CompilerSpecifics.IntelLinux.PG
-#
      setenv MONDO_DGEMMS ${MONDO_HOME}/PHiPAC/runs/P3/PHiPAC_dgemm/src 
-#
      setenv NO_STOP_MESSAGE
-#
-else if ( "$PLATFORM" == "IntelLinux.ABSOFT" ) then
-#
-     setenv MONDO_COMPILER ${MONDO_HOME}/Includes/CompilerSpecifics.IntelLinux.ABSOFT
-#
-     setenv MONDO_DGEMMS ${MONDO_HOME}/PHiPAC/runs/P3/PHiPAC_dgemm/src 
-#
-     ulimit -s 8*1024*1024
-#
-else if ( "$PLATFORM" == "AMDLinux.PG" ) then
-#
+else if ( "$MONDO_PLAT" == "AMDLinux.PG" ) then
      setenv MONDO_COMPILER ${MONDO_HOME}/Includes/CompilerSpecifics.AMDLinux.PG
-#
      setenv MONDO_DGEMMS ${MONDO_HOME}/PHiPAC/runs/TBird/PHiPAC_dgemm/src 
-#
-else if ( "$PLATFORM" == "IBMAIX.XLF" ) then 
-#
+     setenv NO_STOP_MESSAGE
+else if ( "$MONDO_PLAT" == "IBMAIX.XLF" ) then 
      setenv MONDO_COMPILER ${MONDO_HOME}/Includes/CompilerSpecifics.IBMAIX.XLF
-#
      setenv MONDO_DGEMMS ${MONDO_HOME}/PHiPAC/runs/P3/PHiPAC_dgemm/src 
-#
-else if ( "$PLATFORM" == "SGIIrix.MIPS" ) then
-#
+else if ( "$MONDO_PLAT" == "SGIIrix.MIPS" ) then
      setenv MONDO_COMPILER ${MONDO_HOME}/Includes/CompilerSpecifics.SGIIrix.MIPS
-#
      setenv MONDO_DGEMMS ${MONDO_HOME}/PHiPAC/runs/P3/PHiPAC_dgemm/src 
-#
-else if ( "$PLATFORM" == "AlphaLinux.Compaq" ) then
-#
+else if ( "$MONDO_PLAT" == "AlphaLinux.Compaq" ) then
      setenv MONDO_COMPILER ${MONDO_HOME}/Includes/CompilerSpecifics.AlphaLinux.COMPAQ
-#
      setenv MONDO_DGEMMS ${MONDO_HOME}/PHiPAC/runs/P3/PHiPAC_dgemm/src 
-#
-
 endif
 
 
