@@ -136,7 +136,8 @@ MODULE ParseGeomOpt
      ! Parse for VDW Radius factor
      !
      IF(.NOT.OptDblQ(Inp,VDWFACT,GOpt%CoordCtrl%VDWFact)) THEN
-       GOpt%CoordCtrl%VDWFact=0.8D0 !default value
+      !GOpt%CoordCtrl%VDWFact=0.8D0 !default value
+       GOpt%CoordCtrl%VDWFact=1.0D0 !default value
      ELSE
      ! GOpt%CoordCtrl%VDWFact=GOpt%CoordCtrl%VDWFact*One !default value
      ! GOpt%CoordCtrl%VDWFact=GOpt%CoordCtrl%VDWFact*0.8 !default value

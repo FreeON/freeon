@@ -6256,7 +6256,7 @@ return
          Fact=GCoordCtrl%VDWFact !!! Scaling factor for VDW Radii
          DO I=1,NatmsLoc
           !CritRad%D(I)=Fact*VDWRadii(AtNum(I))*AngstromsToAU
-           CritRad%D(I)=1.6*SLRadii(AtNum(I))*AngstromsToAU
+           CritRad%D(I)=Fact*1.6*SLRadii(AtNum(I))*AngstromsToAU
          ENDDO
        ENDIF
        StRad%D=CritRad%D
