@@ -13,29 +13,30 @@ MODULE Functionals
    CHARACTER(LEN=*),  PARAMETER :: MODEL_OPTION='ModelChem'
 !  Exchange only
    CHARACTER(LEN=*),  PARAMETER :: MODEL_ExactX       ='HF'
-   CHARACTER(LEN=*), PARAMETER :: MODEL_SD           ='SlaterDirac'
+   CHARACTER(LEN=*),  PARAMETER :: MODEL_SD           ='SlaterDirac'
    CHARACTER(LEN=*),  PARAMETER :: MODEL_XA           ='XAlpha'
    CHARACTER(LEN=*),  PARAMETER :: MODEL_B88x         ='B88x'
    CHARACTER(LEN=*),  PARAMETER :: MODEL_PBEx         ='PBEx'
    CHARACTER(LEN=*),  PARAMETER :: MODEL_PW91x        ='PW91x'
 !  Pure exchange-correlation functionals
-   CHARACTER(LEN=*),  PARAMETER :: MODEL_VWN3xc       ='VWN3xc'
-   CHARACTER(LEN=*),  PARAMETER :: MODEL_VWN5xc       ='VWN5xc'
-   CHARACTER(LEN=*),  PARAMETER :: MODEL_PW91xc       ='PW91xc'
-   CHARACTER(LEN=*),  PARAMETER :: MODEL_BLYPxc       ='BLYPxc'
-   CHARACTER(LEN=*),  PARAMETER :: MODEL_PBExc        ='PBExc'
+   CHARACTER(LEN=*),  PARAMETER :: MODEL_VWN3         ='VWN3xc'
+   CHARACTER(LEN=*),  PARAMETER :: MODEL_VWN5         ='VWN5xc'
+   CHARACTER(LEN=*),  PARAMETER :: MODEL_PW91PW91     ='PW91xc'
+   CHARACTER(LEN=*),  PARAMETER :: MODEL_PW91LYP      ='PW91LYP'
+   CHARACTER(LEN=*),  PARAMETER :: MODEL_BLYP         ='BLYPxc'
+   CHARACTER(LEN=*),  PARAMETER :: MODEL_PBEPBE       ='PBExc'
 !  Hybrid exchange-correlation functionals
-   CHARACTER(LEN=*),  PARAMETER :: MODEL_B3LYP_VWN3xc='B3LYP/VWN3'
-   CHARACTER(LEN=*),  PARAMETER :: MODEL_B3LYP_VWN5xc='B3LYP/VWN5'
-   CHARACTER(LEN=*),  PARAMETER :: MODEL_B3LYP_PW91xc='B3LYP/PW91'
-   CHARACTER(LEN=*),   PARAMETER :: MODEL_PBE0xc      ='PBE0'
+   CHARACTER(LEN=*),  PARAMETER :: MODEL_B3LYP_VWN3   ='B3LYP'
+   CHARACTER(LEN=*),  PARAMETER :: MODEL_B3LYP_VWN5   ='B3LYP/VWN5'
+   CHARACTER(LEN=*),  PARAMETER :: MODEL_PBE0         ='PBE0'
+   CHARACTER(LEN=*),  PARAMETER :: MODEL_X3LYP        ='X3LYP'
 !-----------------------------------------------------------------------------------------------------
 !  Numerical keys for model chemistries
    INTEGER, PARAMETER :: EXACT_EXCHANGE   =03045805 ! Use exact Hartree-Fock exchange
    INTEGER, PARAMETER :: HAS_DFT          =10000000 ! Any key above this has DFT
    INTEGER, PARAMETER :: HYBRID_B3LYP_VWN3=10268305 ! Use Beckes B3LYP model with VWN3 LSD correlation
    INTEGER, PARAMETER :: HYBRID_B3LYP_VWN5=10429495 ! Use Beckes B3LYP model with VWN5 LSD correlation
-   INTEGER, PARAMETER :: HYBRID_B3LYP_PW91=10685608 ! Use Beckes B3LYP model with PW91 LSD correlation
+   INTEGER, PARAMETER :: HYBRID_X3LYP     =10685608 ! Xtended LYP hybrid   
    INTEGER, PARAMETER :: HYBRID_PBE0      =14506981 ! Use Adamo and Barones PBE0 model
    INTEGER, PARAMETER :: HAS_HF           =20000000 ! Any key below this has exact exchange   
    INTEGER, PARAMETER :: SD_EXCHANGE      =32098243 ! Slater-Dirac Uniform Electron Gas exchange
@@ -45,17 +46,18 @@ MODULE Functionals
    INTEGER, PARAMETER :: PBE_EXCHANGE     =36792335 ! Perdew Burke Enzerhoff exchange
    INTEGER, PARAMETER :: PURE_VWN3_LSD    =40022304 ! Slater exchange and VWN3 LSDA correlation
    INTEGER, PARAMETER :: PURE_VWN5_LSD    =40038402 ! Slater exchange and VWN5 LSDA correlation
-   INTEGER, PARAMETER :: PURE_PW91_LSD    =40230174 ! Slater exchange and PW92 beyond RPA LSDA correlation
-   INTEGER, PARAMETER :: PURE_PBE_GGA     =42509434 ! Perdew Burke Enzerhoff GGA exchange-correlation
-   INTEGER, PARAMETER :: PURE_BLYP_GGA    =43083038 ! B88 exchange with LYP correlation
+   INTEGER, PARAMETER :: PURE_PBE_PBE     =42509434 ! Perdew Burke Enzerhoff GGA exchange-correlation
+   INTEGER, PARAMETER :: PURE_B88_LYP     =43083038 ! B88 exchange with LYP correlation
+   INTEGER, PARAMETER :: PURE_PW91_LYP    =42034802 ! PW91 exchange with LYP correlation
+   INTEGER, PARAMETER :: PURE_PW91_PW91   =41243253 ! PW91 exchange with PW91 correlation
 !-----------------------------------------------------------------------------------------------------
 !  Avoid under and over flows
    REAL(DOUBLE), PARAMETER :: NoNAN=1.D-30
 !  Global variable set to the current model chemistry
    INTEGER :: ModelChem
 !  Global intermediates for optimized functional forms
-   REAL(DOUBLE),DIMENSION(200) :: UTmp
-   REAL(DOUBLE),DIMENSION(100) :: VTmp
+   REAL(DOUBLE),DIMENSION(500) :: UTmp
+   REAL(DOUBLE),DIMENSION(500) :: VTmp
 !------------
    CONTAINS !
 !====================================================================================
@@ -81,11 +83,11 @@ MODULE Functionals
             Name='X-Alpha/VWN3c'
          CASE(PURE_VWN5_LSD)
             Name='X-Alpha/VWN5c'
-         CASE(PURE_PW91_LSD)
+         CASE(PURE_PW91_PW91)
             Name='PW91x/PW91c'
-         CASE(PURE_BLYP_GGA)
+         CASE(PURE_B88_LYP)
             Name='B88x/LYPc'
-         CASE(PURE_PBE_GGA)
+         CASE(PURE_PBE_PBE)
             Name='PBEx/PBEc'  
          CASE(HYBRID_PBE0)
             Name='PBE0'
@@ -93,8 +95,8 @@ MODULE Functionals
             Name='B3LYP(VWN3)' 
          CASE(HYBRID_B3LYP_VWN5)
             Name='B3LYP(VWN5)'
-         CASE(HYBRID_B3LYP_PW91)
-            Name='B3LYP(PW91)'
+         CASE(HYBRID_X3LYP)
+            Name='X3LYP'
          CASE DEFAULT
             CALL Halt('Unknown functional key = '//TRIM(IntToChar(Key)))
          END SELECT
@@ -111,6 +113,8 @@ MODULE Functionals
                 Key==HYBRID_B3LYP_VWN5.OR. &
                 Key==HYBRID_B3LYP_PW91)THEN
             Scalar=0.20D0
+         ELSEIF(Key==HYBRID_X3LYP)THEN
+            Scalar=0.218D0
          ELSE
             Scalar=0.0D0
          ENDIF
@@ -140,6 +144,7 @@ MODULE Functionals
 !====================================================================================
       SUBROUTINE ExcOnTheGrid_ClSh(NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam) 
          INTEGER                        :: NGrid
+         REAL(DOUBLE)                   :: a0,ax,ac
          REAL(DOUBLE), DIMENSION(NGrid) :: Rho,AbsGradRho2
          REAL(DOUBLE), DIMENSION(NGrid) :: E,dEdRho,dEdGam
 !---------------------------------------------------------------------------------------
@@ -163,13 +168,17 @@ MODULE Functionals
          CASE(PURE_VWN5_LSD)
             CALL XAx_ClSh  (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,One)
             CALL VWN5c_ClSh(NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,One)
-         CASE(PURE_PW91_LSD)
+         CASE(PURE_PW91_PW91)
             CALL PW91x_ClSh(NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,One)
+            CALL Halt(' PW91c is buggy.  Sorry, please try another functional ')
             CALL PW91c_ClSh(NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,One)
-         CASE(PURE_BLYP_GGA)
+         CASE(PURE_PW91_LYP)
+            CALL PW91x_ClSh(NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,One)
+            CALL LYPc_ClSh (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,One) 
+         CASE(PURE_B88_LYP)
             CALL B88x_ClSh (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,One) 
             CALL LYPc_ClSh (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,One) 
-         CASE(PURE_PBE_GGA)
+         CASE(PURE_PBE_PBE)
             CALL PBEx_ClSh (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,One) 
             CALL PBEc_ClSh (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,One) 
          CASE(HYBRID_PBE0)
@@ -184,12 +193,15 @@ MODULE Functionals
 !           R. H. Hertwig and W. Koch: CPL 268, p.345 (1997)
 !           P. J. Stevens et al, J. Phys. Chem. 98, p.11623 (1994)
 !           a0=0.2, ax=0.72, ac=0.81
-!           E^{B3LYP}_{xc}=(1-a0-ax)E^{LSD}_{x}+(1-ac)E^{VWN3}_c 
+!           E^{B3LYP}_{xc}=(1-a0-ax)E^{LSD}_{x}+(1-ac)E^{VWN5}_c 
 !                         +ax*E^{B88}_x+ac*E^{LYP}_c+a0*E^{HF}_x                 
-            CALL XAx_ClSh  (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,0.08D0)
-            CALL B88x_ClSh (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,0.72D0)
-            CALL VWN3c_ClSh(NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,0.19D0)
-            CALL LYPc_ClSh (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,0.81D0)
+            a0=0.20D0
+            ax=0.72D0
+            ac=0.81D0
+            CALL XAx_ClSh  (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam, One-a0-ax )
+            CALL B88x_ClSh (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam, ax )
+            CALL VWN3c_ClSh(NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam, One-ac )
+            CALL LYPc_ClSh (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam, ac )
          CASE(HYBRID_B3LYP_VWN5)
 !           Turbomolized B3LYP Model, 
 !           A. Becke: JCP 98, p.5648 (1993), uses VWN5 LSD correlation functional
@@ -197,19 +209,25 @@ MODULE Functionals
 !           a0=0.2, ax=0.72, ac=0.81
 !           E^{B3LYP}_{xc}=(1-a0-ax)E^{LSD}_{x}+(1-ac)E^{VWN5}_c 
 !                         +ax*E^{B88}_x+ac*E^{LYP}_c+a0*E^{HF}_x                 
-            CALL XAx_ClSh  (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,0.08D0)
-            CALL B88x_ClSh (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,0.72D0)
-            CALL VWN5c_ClSh(NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,0.19D0)
-            CALL LYPc_ClSh (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,0.81D0)
-         CASE(HYBRID_B3LYP_PW91)
-!           A. Becke: JCP 98, p.5648 (1993), uses PW91 LSD correlation functional
-!           a0=0.2, ax=0.72, ac=0.81
-!           E^{B3LYP}_{xc}=(1-a0-ax)E^{LSD}_{x}+(1-ac)E^{VWN5}_c 
-!                         +ax*E^{B88}_x+ac*E^{LYP}_c+a0*E^{HF}_x                 
-            CALL XAx_ClSh  (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,0.08D0)
-            CALL B88x_ClSh (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,0.72D0)
-            CALL PW91c_ClSh(NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,0.19D0)
-            CALL LYPc_ClSh (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,0.81D0)
+            a0=0.20D0
+            ax=0.72D0
+            ac=0.81D0
+            CALL XAx_ClSh  (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam, One-a0-ax )
+            CALL B88x_ClSh (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam, ax )
+            CALL VWN5c_ClSh(NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam, One-ac )
+            CALL LYPc_ClSh (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam, ac )
+         CASE(HYBRID_X3LYP)
+!           Extended hybrid LYP functional
+!           Xu and Goddard, PNAS 101, p.2673 (2004)             
+!           E^{X3LYP}_{xc}=(1-a0-ax)E^{LSD}_{x}+ac*E^{VWN3}_c 
+!                         +ax*E^{XG04}_x+(1-ac)*E^{LYP}_c+a0*E^{HF}_x                 
+            a0=0.218D0
+            ax=0.709D0
+            ac=0.129D0
+            CALL XAx_ClSh  (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam, One-a0-ax )
+            CALL XG04x_ClSh(NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam, ax )
+            CALL VWN3c_ClSh(NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam, ac )
+            CALL LYPc_ClSh (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam, One-ac )
          CASE DEFAULT
             CALL Halt('Unknown functional requested ') 
          END SELECT
@@ -294,6 +312,27 @@ MODULE Functionals
             ENDIF
          ENDDO
       END SUBROUTINE PW91x_ClSh
+!====================================================================================
+!     Closed shell version of the Xu Goddard 04 GGA
+!     PNAS, p.2673 (2004)
+!====================================================================================
+      SUBROUTINE XG04x_ClSh(NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,Scale)
+         INTEGER                        :: I,NGrid
+         REAL(DOUBLE), DIMENSION(NGrid) :: Rho,AbsGradRho2,E,dEdRho,dEdGam
+         REAL(DOUBLE)                   :: R,A,Scale,Ei,dEdRhoi,dEdGami,X,ASinh
+         ASinh(X)=LOG(X+SQRT(1.0D0+X*X))
+!-------------------------------------------------------------------------------------
+         DO I=1,NGrid
+            R=Rho(I)
+            IF(NoNAN<R)THEN
+               A=AbsGradRho2(I) 
+               INCLUDE "XG04x.Inc"
+               E(I)=E(I)+Scale*Ei
+               dEdRho(I)=dEdRho(I)+Scale*dEdRhoi
+               dEdGam(I)=dEdGam(I)+Scale*dEdGami
+            ENDIF
+         ENDDO
+      END SUBROUTINE XG04x_ClSh
 !====================================================================================
 !     Closed shell version of the Perdew Burke Ernnzerhof exchange GGA
 !     Physical Review Letters 77, p.3865 (1996)
