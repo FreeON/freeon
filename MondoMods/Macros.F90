@@ -52,7 +52,6 @@ MODULE Macros
 #endif
 !        Get arguments and open InfFile 
          CALL Get(Args)
-! 
          IF(Args%NC>=2) &
             SCFActn=TRIM(Args%C%C(2))
          Current=Args%I%I(1:3)

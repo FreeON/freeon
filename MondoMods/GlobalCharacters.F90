@@ -53,7 +53,7 @@ MODULE GlobalCharacters
    CHARACTER(LEN=4), PARAMETER :: InpF='.inp'
    CHARACTER(LEN=4), PARAMETER :: OutF='.out'
    CHARACTER(LEN=4), PARAMETER :: InfF='.hdf'
-   CHARACTER(LEN=4), PARAMETER :: GeoF='.geo'
+   CHARACTER(LEN=4), PARAMETER :: GeoF='.car'
    CHARACTER(LEN=4), PARAMETER :: LogF='.log'
    CHARACTER(LEN=4), PARAMETER :: BasF='.bas'
 !-------------------------------------------------  

@@ -608,8 +608,14 @@ MODULE Parse
                                //'.'//TRIM(PostFix)            
          ENDIF
       END FUNCTION TrixFile
-
-
+!------------------------------------------------------------------
+      FUNCTION StatsToChar(Stats) RESULT(StatString)
+         INTEGER,DIMENSION(3) :: Stats
+         CHARACTER(LEN=DEFAULT_CHR_LEN) :: StatString
+         StatString='_'//TRIM(IntToChar(Stats(3)))  &
+                   //'_'//TRIM(IntToChar(Stats(2))) &
+                   //'_'//TRIM(IntToChar(Stats(1)))
+      END FUNCTION StatsToChar
 !------------------------------------------------------------------
 !     Remove all blanks from a string
 !

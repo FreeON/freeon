@@ -14,6 +14,7 @@ MODULE ProcessControl
    INTEGER, PARAMETER     :: DRIV_ERROR=-704823
    INTEGER, PARAMETER     :: PRSE_ERROR=-803484
    INTEGER, PARAMETER     :: MPIS_ERROR=-975239
+   INTEGER, PARAMETER     :: USUP_ERROR=-993942
    CONTAINS 
       SUBROUTINE MondoHalt(IErr,Mssg)
          CHARACTER (LEN=*) :: Mssg
@@ -39,11 +40,14 @@ MODULE ProcessControl
          ELSEIF(IErr==MPIS_ERROR)THEN
             WRITE(*,*)  'MPI error: '//TRIM(Mssg)
             CALL Logger('MPI error: '//TRIM(Mssg),.TRUE.)
+         ELSEIF(IErr==USUP_ERROR)THEN
+            WRITE(*,*)  'Unsupported feature: '//TRIM(Mssg)
+            CALL Logger('Unsupported feature: '//TRIM(Mssg),.TRUE.)
          ELSE
             WRITE(*,*)  'Unknown error: '//TRIM(Mssg)
             CALL Logger('Unknown error: '//TRIM(Mssg),.TRUE.)
          ENDIF
-         STOP 'Abnormal termination of MondoSCF'
+         STOP 'Termination of MondoSCF'
       END SUBROUTINE MondoHalt
 
       SUBROUTINE Halt(String)
