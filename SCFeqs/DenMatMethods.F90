@@ -82,8 +82,8 @@ MODULE DenMatMethods
 !
 !
 !----------------------------------------------------------------------------
-   SUBROUTINE NormTrace(Pin,Pout,Norm,Order)
-     TYPE(BCSR)                     :: Pin,Pout,P2,Ptmp1
+   SUBROUTINE NormTrace(Pin,Norm,Order)
+     TYPE(BCSR)                     :: Pin,P2,Ptmp1
      REAL(DOUBLE)                   :: Norm,CR,C1,C2
      INTEGER                        :: Order
 ! 
@@ -93,12 +93,13 @@ MODULE DenMatMethods
         CALL Filter(P2,Ptmp1)
         TrP2 = Trace(P2)
         CR   = TrP - TrP2
+        IF(CR==Zero)RETURN
         C1   = (Norm - TrP2)/CR
         C2   = (TrP- Norm)/CR
         CALL Multiply(Pin ,C1)
         CALL Multiply(P2  ,C2)
         CALL Add(Pin,P2,Ptmp1)
-        CALL Filter(Pout,Ptmp1)
+        CALL Filter(Pin,Ptmp1)
      ELSE
         CALL MondoHalt(99,'Wrong Order in NormTrace')
      ENDIF
@@ -335,10 +336,12 @@ MODULE DenMatMethods
      ELSE
         CALL  SetEq(Pout,Ptmp1)
      ENDIF
+
      CALL Delete(P2)
+     IF(AllocQ(Ptmp1%Alloc))&
      CALL Delete(Ptmp1)
+     IF(AllocQ(Ptmp2%Alloc))&
      CALL Delete(Ptmp2)
-!
    END SUBROUTINE SP4
 !----------------------------------------------------------------------------
 !
@@ -406,7 +409,9 @@ MODULE DenMatMethods
      ENDIF
 
      CALL Delete(P2)
+     IF(AllocQ(Ptmp1%Alloc))&
      CALL Delete(Ptmp1)
+     IF(AllocQ(Ptmp2%Alloc))&
      CALL Delete(Ptmp2)
 !
    END SUBROUTINE NT4

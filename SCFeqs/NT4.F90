@@ -106,7 +106,7 @@ PROGRAM NT4
   !--------------------------------------------------------------------------
   ! Normalize Trace
   !--------------------------------------------------------------------------
-  CALL NormTrace(P,P,Ne,1)
+  CALL NormTrace(P,Ne,1)
   !--------------------------------------------------------------------------
   ! Write Out Statisitcs
   !--------------------------------------------------------------------------
@@ -119,8 +119,6 @@ PROGRAM NT4
   CALL Commute(F,P,T)
   ErrorFP = TwoNorm(T)/TwoNorm(F)
   CALL FinalOut(Prog,Energy,ErrorE,ErrorN,ErrorP,ErrorFP,PNon0,MM)
-  CALL ShutDown(Prog)
-  IF(.TRUE.) STOP
   !=============================================================================
   !  TRANSFORMATION TO AN AO REPRESENTATION AND IO
   !=============================================================================
