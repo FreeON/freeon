@@ -54,7 +54,8 @@ PROGRAM TestMondoSCFOutput
          IF(RD>1.D-10)THEN
             WRITE(*,*)' VALIDATION TEST FAILED! '
             CALL OpenASCII(LogFile,Log)
-            WRITE(Log,*)'Test failed on comparison of total energies: '
+            WRITE(Log,*)'Test of '//TRIM(Arg%C%C(1))//' failed at line # '//TRIM(IntToChar(I))
+            WRITE(Log,*)'on comparison of total energies: '
             WRITE(Log,*)TRIM(Line1) 
             WRITE(Log,*)TRIM(Line2)
             CLOSE(Log)
@@ -63,7 +64,8 @@ PROGRAM TestMondoSCFOutput
       ELSEIF(I1/=0.AND.I2==0.OR.I1==0.AND.I2/=0)THEN
         WRITE(*,*)' VALIDATION TEST FAILED! '
         CALL OpenASCII(LogFile,Log)
-        WRITE(Log,*)'Test failed by lines out of sinc '
+        WRITE(Log,*)'Test of '//TRIM(Arg%C%C(1))//' failed at line # '//TRIM(IntToChar(I))
+        WRITE(Log,*)' by lines out of sinc'
         WRITE(Log,*)TRIM(Line1) 
         WRITE(Log,*)TRIM(Line2)
         CLOSE(Log)
@@ -82,7 +84,8 @@ PROGRAM TestMondoSCFOutput
          IF(RD>1.D-8)THEN
             WRITE(*,*)' VALIDATION TEST FAILED! '
             CALL OpenASCII(LogFile,Log)
-            WRITE(Log,*)'Test failed on comparison of check sums: '
+            WRITE(Log,*)'Test of '//TRIM(Arg%C%C(1))//' failed at line # '//TRIM(IntToChar(I))
+            WRITE(Log,*)'on comparison of check sums: '
             WRITE(Log,*)TRIM(Line1) 
             WRITE(Log,*)TRIM(Line2)
             CLOSE(Log)
@@ -91,7 +94,8 @@ PROGRAM TestMondoSCFOutput
       ELSEIF(I1/=0.AND.I2==0.OR.I1==0.AND.I2/=0)THEN
         WRITE(*,*)' VALIDATION TEST FAILED! '
         CALL OpenASCII(LogFile,Log)
-        WRITE(Log,*)'Test failed by lines out of sinc '
+        WRITE(Log,*)'Test of '//TRIM(Arg%C%C(1))//' failed at line # '//TRIM(IntToChar(I))
+        WRITE(Log,*)' by lines out of sinc'
         WRITE(Log,*)TRIM(Line1) 
         WRITE(Log,*)TRIM(Line2)
         CLOSE(Log)
