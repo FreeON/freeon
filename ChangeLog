@@ -1,3 +1,185 @@
+2002-10-25 08:49  mchalla
+
+	* Makefile: Removed purge of scratch--there might be something you
+	want to keep there!
+
+2002-10-24 18:05  tymczak
+
+	* QCTC/PFFTensor.F90: Fixed Read Bug
+
+2002-10-24 17:49  tymczak
+
+	* Validate/: MgOmm.inp, Water64mm.inp: New Stuff
+
+2002-10-24 17:48  tymczak
+
+	* QCTC/PBCFarField.F90, Validate/MgO.inp: [no log message]
+
+2002-10-24 17:46  tymczak
+
+	* QCTC/PBCFarField.F90: Redid the Logic and the Output/Input
+
+2002-10-24 17:45  tymczak
+
+	* QCTC/PFFTensor.F90: 1) Reorganized the programs 2) added
+	DetCellType 3) Added Logic for PFFOvRide
+
+2002-10-24 17:44  tymczak
+
+	* QCTC/MakePFFT.F90: Logic for makeing CS_OUT and putting it to the
+	HDF file
+
+2002-10-24 17:42  tymczak
+
+	* QCTC/: JForce.F90, QCTC.F90: CS_OUT is now read from the HDF file
+
+2002-10-24 17:42  tymczak
+
+	* MondoSCF/ParsingKeys.F90: Added Keys
+
+2002-10-24 17:41  tymczak
+
+	* MondoSCF/ParseInput.F90: Added the logic for reading the
+	PFFOveride and the Defaults for PFFMaxEll and PFFMaxLay
+
+2002-10-24 17:40  tymczak
+
+	* MondoMods/InOut.F90: Added Inout to PFFOvRide
+
+2002-10-24 17:39  tymczak
+
+	* MondoMods/DerivedTypes.F90: Added Logical PFFOvRide to PBCinfo
+
+2002-10-24 17:39  tymczak
+
+	* MondoMods/AtomPairs.F90: Added an Option to SetCellNumber
+
+2002-10-24 12:38  tymczak
+
+	* QCTC/Majik_Kubic_WS2.Inc: [no log message]
+
+2002-10-24 12:38  tymczak
+
+	* QCTC/Majik_Kubic_WS1.Inc: Moved to PBCTensor
+
+2002-10-24 09:46  nemeth
+
+	* MondoSCF/ParseInput.F90: Some coment lines deleted, convertcoords
+	routine introduced.
+
+2002-10-24 09:40  nemeth
+
+	* MondoSCF/DrvSCFs.F90: [no log message]
+
+2002-10-24 09:35  nemeth
+
+	* MondoMods/: InCoords.F90, DerivedTypes.F90, InOut.F90,
+	MemMan.F90: [no log message]
+
+2002-10-24 09:34  nemeth
+
+	* Dynamo/dynamo.F90: Excl energies are now based on absolute
+	coordinates (important for crystals).
+
+2002-10-23 12:34  tymczak
+
+	* Validate/Makefile: added periodic_pbs
+
+2002-10-23 12:33  tymczak
+
+	* QCTC/PBCTensor/Majik_Kubic_WS2.Inc, Validate/MgO.inp: [no log
+	message]
+
+2002-10-23 10:33  tymczak
+
+	* QCTC/PBCTensor/Majik_Kubic_WS1.Inc: Exact Tensor Moved to a
+	subdirectory
+
+2002-10-23 10:33  tymczak
+
+	* QCTC/PFFTensor.F90: Split MakeTensor into   MakeTensor1D  
+	MakeTensor2D   MakeTensor3D
+
+2002-10-23 10:31  tymczak
+
+	* QCTC/PBCFarField.F90: FIXED BUGS
+
+2002-10-23 09:36  tymczak
+
+	* QCTC/MondoPoles.F90: Added IrregularL() which calculates the
+	Irregular at a spicific L
+
+2002-10-23 09:34  tymczak
+
+	* QCTC/MakePFFT.F90: USE AtomPairs
+
+2002-10-23 09:34  tymczak
+
+	* MondoMods/PBC.F90: CellSet now has a Put and A Get
+
+2002-10-23 09:33  tymczak
+
+	* MondoMods/GlobalScalars.F90: FFELL=64
+
+2002-10-23 09:32  tymczak
+
+	* MondoMods/AtomPairs.F90: Added a New SetCellNumber which
+	determins the maxium distance of the atoms from the box center
+	instead of the maxium box diagonal
+
+2002-10-22 21:14  ckgan
+
+	* Docs/Bib/mondo.bib: bibtex file update.
+
+2002-10-22 12:26  nemeth
+
+	* MondoSCF/DrvSCFs.F90: [no log message]
+
+2002-10-22 12:22  nemeth
+
+	* Dynamo/dynamo.F90: Lennard-Jones terms and excl-terms get
+	coordinates in angstroms now.
+
+2002-10-22 12:19  nemeth
+
+	* MondoMods/InCoords.F90: Some variable names changed, ordering
+	algorithm modified to avoid using too large integer numbers.
+
+2002-10-22 11:57  nemeth
+
+	* MondoSCF/: atoms.F90, dynamo_variables.F90, parsing.F90:
+	Additional Dynamo files removal.
+
+2002-10-22 11:52  nemeth
+
+	* MondoSCF/: constants.F90, constraint.F90, coordinate_io.F90,
+	definitions.F90, dynamo.F90, elements.F90, energy_covalent.F90,
+	energy_nb_full.F90, files.F90, io_units.F90, linear_algebra.F90,
+	mm_file_data.F90, mm_file_io.F90, mm_system.F90, mm_terms.F90,
+	pdb_io.F90, sequence.F90, sort.F90, status.F90, string.F90,
+	symmetry.F90: Dynamo files removal.
+
+2002-10-22 09:31  nemeth
+
+	* MondoSCF/connectivity.F90: [no log message]
+
+2002-10-21 15:37  nemeth
+
+	* Validate/: bALAmmPBC.inp, MgOmm.inp, Water64mm.inp: [no log
+	message]
+
+2002-10-21 11:22  nemeth
+
+	* Dynamo/dynamo.F90: some underscores removed from variable names
+
+2002-10-21 11:19  nemeth
+
+	* MondoSCF/DrvSCFs.F90: [no log message]
+
+2002-10-20 09:29  mchalla
+
+	* ChangeLog: [no log message]
+
 2002-10-20 09:28  mchalla
 
 	* QCTC/PFFTensor.F90: MondoHalt->Halt
@@ -7013,7 +7195,7 @@
 	SCFeqs/MMA/SDMM/OrthogCG.m, Scripts/CSHRC, Scripts/ListInf,
 	Scripts/MondoSetUp, Scripts/aix_pedb, Scripts/mondo,
 	Scripts/nag_dbx, Scripts/pgf_dbx, Scripts/sgi_dbx,
-	Scripts/sgi_dbx2: Initial revision
+	Scripts/sgi_dbx2: New, restructured and improved MondoSCF
 
 2000-10-30 12:54  mondo
 
@@ -7175,5 +7357,5 @@
 	SCFeqs/MMA/SDMM/OrthogCG.m, Scripts/CSHRC, Scripts/ListInf,
 	Scripts/MondoSetUp, Scripts/aix_pedb, Scripts/mondo,
 	Scripts/nag_dbx, Scripts/pgf_dbx, Scripts/sgi_dbx,
-	Scripts/sgi_dbx2: New, restructured and improved MondoSCF
+	Scripts/sgi_dbx2: Initial revision
 
