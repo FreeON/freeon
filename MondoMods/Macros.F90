@@ -64,7 +64,7 @@ CONTAINS
     H5File=TRIM(MONDO_SCRATCH)//TRIM(Args%C%C(1))//TRIM(InfF)
     InfFile=H5File
     ! Open the HDF file
-    HDFFileID=OpenHDF(H5File)
+    HDFFileID=OpenHDF(H5File)    
     ! This is the global IO file ID
     HDF_CurrentID=HDFFileID
     ! Mark prog for failure
@@ -82,6 +82,7 @@ CONTAINS
     CALL Get(SpaceTimeSplit,'spacetime')
     ! Create Cartesian topology for the clones         
     MyClone=CartCommSplit(SpaceTimeSplit,Serial_O)
+!    CALL AlignNodes(' After CartCommSplit ')
 #else
     CALL Get(MyClone,'spacetime')
     CALL CloseHDF(HDFFileID)
@@ -110,30 +111,57 @@ CONTAINS
 #endif 
     ENDIF
   END SUBROUTINE StartUp
-
+#ifdef PARALLEL
+  FUNCTION CartCommSplit(SpaceTime,Serial_O) RESULT(MyClone)
+    INTEGER               :: IErr,MyClone,CART_COMM
+    TYPE(INT_VECT)        :: SpaceTime 
+    LOGICAL,OPTIONAL      :: Serial_O
+    CHARACTER(LEN=10)     :: Sub='SpaceNTime'
+    LOGICAl               :: AllButRootMustDie
+    INTEGER,DIMENSION(2)  :: Local
+    !-----------------------------------------------------------------------!
+    ! Determine parallel status 
+    IF(PRESENT(Serial_O))THEN
+       IF(Serial_O)THEN
+          InParallel=.FALSE.
+       ELSE
+          InParallel=.TRUE.
+       ENDIF
+    ELSE
+       InParallel=.FALSE.
+    ENDIF
+    ! Create a SpaceTime%I(1) x SpaceTime%I(2) Cartesian communicator
+    IF(InParallel)THEN
+       CALL MPI_CART_CREATE(MPI_COMM_WORLD,2,(/SpaceTime%I(1),SpaceTime%I(2)/),  & 
+            (/.FALSE.,.FALSE./),.TRUE.,CART_COMM,IErr)
+    ELSE
+       CALL MPI_CART_CREATE(MPI_COMM_WORLD,2,(/1,SpaceTime%I(2)/),  & 
+            (/.FALSE.,.FALSE./),.TRUE.,CART_COMM,IErr)
+    ENDIF
+    CALL ErrChk(IErr,Sub)
+    IF(CART_COMM/=0)THEN
+       ! Find out which row (group) this PE belongs to
+       CALL MPI_CART_COORDS(CART_COMM,MyId,2,Local,IErr)
+       CALL ErrChk(IErr,Sub)
+    ELSE
+       ! This is a dead node
+       CALL ShutDown('DeaddNode')
+    ENDIF
+    ! Offset the actuall clone 
+    MyClone=SpaceTime%I(3)+Local(2)
+    !    CALL AlignNodes('MyClone = '//TRIM(IntToChar(MyClone)))
+    ! Now split into SpaceTime%I(1) rows. Each row has SpaceTime%I(2) processors
+    ! parallel in the spatial domain and using MONDO_COMM as their
+    ! default communicator
+    CALL MPI_CART_SUB(CART_COMM,(/.TRUE.,.FALSE./),MONDO_COMM,IErr)
+    CALL ErrChk(IErr,Sub)
+    ! Reload local rank and PE number for the new MONDO_COMM
+    MyID=MRank()
+    NPrc=MSize()
+  END FUNCTION CartCommSplit
+#endif
   SUBROUTINE ShutDown(Prog)
     CHARACTER(LEN=*),INTENT(IN) :: Prog
-#ifdef MMech
-    IF(HasQM()) THEN
-#endif
-       CALL Delete(BSiz)
-       CALL Delete(OffS)
-#ifdef MMech
-    ENDIF
-#endif
-#ifdef PARALLEL
-    IF(InParallel)THEN
-       CALL Delete(Beg)
-       CALL Delete(End)
-    ENDIF
-#endif
-    IF(PrintFlags%Key>=DEBUG_MEDIUM)THEN
-       !        IF(PrintFlags%Key>=DEBUG_MEDIUM.OR.PrintFlags%Chk==DEBUG_CHKSUMS)THEN
-       CALL Elapsed_TIME(PerfMon,'Accum',Proc_O=Prog)
-       CALL PPrint(PerfMon,Prog)
-    ENDIF
-    IF(PrintFlags%Key==DEBUG_MAXIMUM) &
-         CALL PPrint(MemStats,Prog)
 #ifdef PARALLEL_CLONES
     CALL CloseHDFGroup(H5GroupID)
     HDF_CurrentID=HDFFileID
@@ -143,6 +171,26 @@ CONTAINS
     MyID=MRank()    
 #endif
 #endif
+    !
+    CALL AlignNodes()
+    !
+    IF(HasQM()) THEN
+       CALL Delete(BSiz)
+       CALL Delete(OffS)
+    ENDIF
+#ifdef PARALLEL
+    IF(InParallel)THEN
+       CALL Delete(Beg)
+       CALL Delete(End)
+    ENDIF
+#endif
+    !
+    IF(PrintFlags%Key>=DEBUG_MEDIUM)THEN
+       CALL Elapsed_TIME(PerfMon,'Accum',Proc_O=Prog)
+       CALL PPrint(PerfMon,Prog)
+    ENDIF
+    IF(PrintFlags%Key==DEBUG_MAXIMUM) &
+         CALL PPrint(MemStats,Prog)
     ! Now mark sucess of this program ... 
     CALL Put(.FALSE.,'ProgramFailed')
     ! ... and close the HDF file ...
@@ -158,9 +206,8 @@ CONTAINS
          CALL TimeStamp('Exiting '//TRIM(Prog),Enter_O=.FALSE.)
 
 #endif     
-    STOP !Righteous! 
+    STOP 
   END SUBROUTINE ShutDown
-
   !==============================================================
   ! LOAD GLOBAL VARIABLES FROM THE TOP LEVEL OF THE HDF FILE
   !==============================================================

@@ -24,8 +24,19 @@ MODULE Clock
          CPUSec=CPU_Seconds()
 #endif
       END FUNCTION CPUSec
+
       FUNCTION WallSec()
          REAL(DOUBLE) WallSec
          WallSec=Wall_Seconds()
       END FUNCTION WallSec
+
+      SUBROUTINE Wait(Sec)
+         REAL(DOUBLE) :: Sec,Start
+         Start=WallSec()
+!         WRITE(*,*)' WAITING '
+         DO; IF(WallSec()-Start>Sec)EXIT
+         ENDDO
+!         WRITE(*,*)' WAITED FOR ',WallSec()-Start,' Seconds '
+      END SUBROUTINE Wait
+
 END MODULE
