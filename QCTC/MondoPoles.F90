@@ -348,6 +348,76 @@ MODULE MondoPoles
          ENDDO
       END SUBROUTINE IrRegular
 !====================================================================================
+!     Irregular Function
+!====================================================================================
+      SUBROUTINE IrRegularL(Ell,PQx,PQy,PQz)
+         INTEGER                    :: Ell
+         INTEGER                    :: M,M1,M2,MDex,MDex1,LDex,LDex0,LDex1,LDex2,LMDex
+         REAL(DOUBLE)               :: PQx2,PQy2,PQxy,PQ,OneOvPQ,CoTan,TwoC,Sq,RS,&
+                                       CoFact,PQToThMnsL,PQx,PQy,PQz
+!------------------------------------------------------------------------------------
+         Cpq = Zero
+         Spq = Zero
+         PQx2=PQx*PQx
+         PQy2=PQy*PQy      
+         PQ=SQRT(PQx2+PQy2+PQz*PQz)
+         OneOvPQ=One/PQ
+         CoTan=PQz*OneOvPQ
+!        Sine and Cosine by recursion
+         Cosine(0)=One
+         Sine(  0)=Zero
+         PQxy=SQRT(PQx2+PQy2)
+         IF(PQxy .GT. 1.D-12)THEN
+            Sine(1)=PQx/PQxy
+            Cosine(1)=PQy/PQxy
+         ELSE
+            Sine(1)=0.70710678118654752D0         
+            Cosine(1)=0.70710678118654752D0
+         ENDIF
+!
+         TwoC=Two*Cosine(1)
+         DO M=2,Ell
+            M1=M-1
+            M2=M-2
+            Sine(M)=TwoC*Sine(M1)-Sine(M2)
+            Cosine(M)=TwoC*Cosine(M1)-Cosine(M2)
+         ENDDO
+!        Associated Legendre Polynomials by recursion
+         Sq=SQRT(ABS(One-CoTan*CoTan))
+!
+         RS=One
+         DO M=0,Ell
+            MDex=LTD(M)+M
+            ALegendreP(MDex)=FactMlm0(M)*RS
+            RS=RS*Sq
+         ENDDO
+         DO M=0,Ell-1
+            MDex=LTD(M)+M
+            MDex1=LTD(M+1)+M
+            ALegendreP(MDex1)=CoTan*DBLE(2*M+1)*ALegendreP(MDex)
+         ENDDO
+!
+         CoFact=CoTan*DBLE(2*Ell-1)
+         LDex0=LTD(Ell)
+         LDex1=LTD(Ell-1)
+         LDex2=LTD(Ell-2)
+         DO M=0,Ell-2
+            ALegendreP(LDex0+M)=CoFact*ALegendreP(LDex1+M)-FactMlm2(LDex0+M)*ALegendreP(LDex2+M)
+         ENDDO
+!        IrRegular Spharical Harmonics
+
+
+         PQToThMnsL=OneOvPQ
+         LDex=LTD(Ell)
+         DO M=0,Ell
+            LMDex=LDex+M
+            Spq(LMDex)=PQToThMnsL*ALegendreP(LMDex)*Sine(M)
+            Cpq(LMDex)=PQToThMnsL*ALegendreP(LMDex)*Cosine(M)
+         ENDDO
+         PQToThMnsL=PQToThMnsL*OneOvPQ
+!
+      END SUBROUTINE IrRegularL
+!====================================================================================
 !     Compute a multipole strength O_L based on Unsolds theorem
 !====================================================================================
       FUNCTION Unsold2(Llow,Lhig,C,S)
@@ -501,9 +571,9 @@ MODULE MondoPoles
              Line='L = '//TRIM(IntToChar(L))//' M = '//TRIM(IntToChar(M)) &
                   //' Cq = '//TRIM(DblToChar(Cpp)) &
                   //' Sq = '//TRIM(DblToChar(Spp))
-             IF(.NOT. (Cpp == Zero .AND. Spp == Zero)) THEN
+!             IF(.NOT. (Cpp == Zero .AND. Spp == Zero)) THEN
                 WRITE(*,*)TRIM(Line)
-             ENDIF
+!             ENDIF
           ENDDO
        ENDDO
     ENDIF
