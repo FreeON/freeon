@@ -29,7 +29,7 @@ PROGRAM MondoSCF
      CALL CPSCF(C)
   CASE(GRAD_GO_DOWNHILL)
      CALL Descender(C)
-  CASE(GRAD_TS_SEARCH_NEB)
+  CASE(GRAD_TS_SEARCH_NEB)  
 !    Place holder for whatever
      CALL Descender(C)
   CASE(GRAD_DO_DYNAMICS)
@@ -39,7 +39,7 @@ PROGRAM MondoSCF
 !     CALL ScanGeom(C)
   CASE(GRAD_ONE_FORCE)
      CALL SinglePoints(C)
-     CALL Force(C%Sets%NBSets,1,C%Nams,C%Opts,C%Stat,C%Geos,C%Sets,C%MPIs)   
+     CALL Force(C%Sets%NBSets,1,C%Nams,C%Opts,C%Stat,C%Geos,C%Sets,C%MPIs)
   END SELECT
 #if defined(PARALLEL) && defined(MPI2)
   CALL FiniMPI()
