@@ -1630,6 +1630,7 @@ CONTAINS
      TYPE(DBL_RNK2)   :: RefXYZ1
      TYPE(LOG_VECT)   :: NeedBackTr
      !
+     IF(iGEO==1) RETURN
      BackTrackFact=1.D0
      AccL=C%Opts%AccuracyLevels(iBAS)
      IF(.NOT.C%GOpt%GConvCrit%DoLattStep) THEN
