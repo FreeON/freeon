@@ -16,4 +16,13 @@ to take some cut-and-paste work.
 digested... For some reason the subblock is not being loaded 
 correctly.
 
+        The call to get the density sub-blocks of centers A,B was 
+        messed up. It should be fixed now. 
 
+
+3. Still get Nans for the (sp,sp|sp,sp) integral class. All other 
+classes don't seem to give nans.
+
+        I think the problem is now the locations on new integrals in 
+        the G2 and G3 data files is no longer consistent with the new 
+        G1 driver files. Something is getting messed up here.
