@@ -498,12 +498,12 @@ CONTAINS
           ! Look for stall out if we have at least one consecutive digit in the DM
           IF(DMaxB<1.D-1.AND.DMaxA<1.D-1)THEN
              ! Look for non-decreasing errors due to incomplete numerics
-             IF(DIISQ<1.D-1.AND.DMaxQ<1.D-1.AND.cSCF>2)THEN
+             IF(DIISQ<1.D-1.AND.DMaxQ<1.D-1.AND.cSCF>6)THEN
                 IF(DIISB>DIISA.AND.DMaxB>DMaxA)THEN
                    Mssg='SCF hit DIIS & DMax increase.'
                    Converged(iCLONE)=.TRUE.
                 ENDIF
-             ELSEIF(DIISQ<1.D-2.AND.DMaxQ<1.D-2.AND.cSCF>2)THEN
+             ELSEIF(DIISQ<1.D-2.AND.DMaxQ<1.D-2.AND.cSCF>6)THEN
                 IF(DIISB>DIISA)THEN
                    Mssg='SCF hit DIIS increase'
                    Converged(iCLONE)=.TRUE.
@@ -511,7 +511,7 @@ CONTAINS
                    Mssg='SCF hit DMAX increase'
                    Converged(iCLONE)=.TRUE.
                 ENDIF
-             ELSEIF((DIISQ<1D-4.OR.DMaxQ<1D-4).AND.cSCF>2)THEN
+             ELSEIF((DIISQ<1D-4.OR.DMaxQ<1D-4).AND.cSCF>6)THEN
                 Mssg='SCF convergence due to DIIS stagnation.'
                 Converged(iCLONE)=.TRUE.
              ENDIF
