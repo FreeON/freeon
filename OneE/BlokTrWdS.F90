@@ -61,7 +61,7 @@ MODULE BlokTrWdS
           Prim%ZB=BS%Expnt%D(PFB,CFB,KB)
           Prim%Zeta=Prim%ZA+Prim%ZB
           Prim%Xi=Prim%ZA*Prim%ZB/Prim%Zeta
-          IF(TestPrimPair(Prim%Xi,Prim%AB2))THEN
+          IF(TestPrimPair(Prim%Ell,Prim%Xi,Prim%AB2)) THEN
              Prim%PFA=PFA
              Prim%PFB=PFB
              K=K+1

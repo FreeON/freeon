@@ -29,10 +29,11 @@ MODULE JGen
       TYPE(DBL_RNK2)         :: Temp
       TYPE(AtomPair)         :: Pair
       INTEGER                :: AtA,AtB
-      INTEGER                :: JP,K,NA,NB,NAB,P,Q,R,I1,I2,I3,L,I
+      INTEGER                :: JP,K,NA,NB,NAB,P,Q,R,I1,I2,I3,L,I,NACount
+      Logical                :: Log
 #ifdef PERIODIC 
-  INTEGER                   :: NC
-  REAL(DOUBLE),DIMENSION(3) :: B
+  INTEGER                    :: NC
+  REAL(DOUBLE),DIMENSION(3)  :: B
 #endif    
 !---------------------------------------------- 
 !     Initialize the matrix and associated indecies
@@ -91,8 +92,7 @@ MODULE JGen
                CALL XPose(NA,NB,J%MTrix%D(P:P+NAB-1),J%MTrix%D(Q:Q+NAB-1))
             ENDIF
          ENDDO
-      ENDDO  
-!
+      ENDDO  !
     END SUBROUTINE MakeJ
 !=============================================================================================
 !
@@ -162,7 +162,9 @@ MODULE JGen
                    Prim%ZB=BS%Expnt%D(PFB,CFB,KB)
                    Prim%Zeta=Prim%ZA+Prim%ZB
                    Prim%Xi=Prim%ZA*Prim%ZB/Prim%Zeta
-                   IF(TestPrimPair(Prim%Xi,Prim%AB2))THEN
+
+
+                   IF(TestPrimPair(Prim%Ell,Prim%Xi,Prim%AB2))THEN
                       Prim%PFA=PFA 
                       Prim%PFB=PFB
                       MaxAmp=SetBraBlok(Prim,BS)
