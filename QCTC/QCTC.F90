@@ -35,8 +35,6 @@ PROGRAM QCTC
 !-------------------------------------------------------------------------------- 
 ! Start up macro
   CALL StartUp(Args,Prog)
-!
-  CALL Get(PBC_On,'PBCOn')
 ! Get basis set and geometry
 #ifdef MMech
   IF(HasQM()) THEN
