@@ -512,6 +512,20 @@ MODULE Parse
 112      FORMAT(' K1 = ',I3,' S1 = ',I3,' K2 = ',I3, &
                 ' S2 = ',I3,'J = ',I3,' Chars = <',A,'>')
       END SUBROUTINE LineToChars
+
+!------------------------------------------------------------------
+!     Converts a string to the ASCII code ints and then sums them
+!
+      FUNCTION StringToASCII(S)
+        CHARACTER(LEN=*)            :: S
+        INTEGER                     :: I,StringToASCII
+!
+        StringToASCII=0
+        DO I=1,LEN_TRIM(S)
+          StringToASCII = StringToASCII + IACHAR(S(I:I))
+        ENDDO
+!
+      END FUNCTION StringToASCII
 !------------------------------------------------------------------
 !     Convert a character string into an integer
 !
