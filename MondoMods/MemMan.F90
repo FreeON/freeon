@@ -278,7 +278,10 @@ MODULE MemMan
       SUBROUTINE New_INTC(A,N)
          TYPE(INTC),      INTENT(OUT) :: A
          INTEGER,         INTENT(IN)  :: N
-         CALL AllocChk(A%Alloc)
+         !
+         IF(AllocQ(A%Alloc)) CALL Delete(A)
+         IF(N==0) RETURN
+        !CALL AllocChk(A%Alloc)
          A%N=N
          CALL New(A%Def,N)
            A%Def%C(:)(1:10)='XXXXXXXXXX'
@@ -583,8 +586,7 @@ MODULE MemMan
          CALL New(A%AbCarts,(/3,A%NAtms/))
          CALL New(A%Displ,(/3,A%NAtms/))
          CALL New(A%PBCDispl)
-         CALL New(A%IntCs,IntCMax)
-        !CALL New(A%IntCs,A%IntCs%N)
+         CALL New(A%IntCs,0)
          CALL New(A%AtmB,0,0)
          CALL New(A%Bond,0)
          A%Alloc=ALLOCATED_TRUE
@@ -929,6 +931,8 @@ MODULE MemMan
 !
       SUBROUTINE Delete_INTC(A)
          TYPE(INTC)     :: A
+         IF(AllocQ(A%Alloc)) A%Alloc=ALLOCATED_FALSE
+         IF(A%N==0) RETURN
          A%N=0
          CALL Delete(A%Def)
          CALL Delete(A%Atoms)

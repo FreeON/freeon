@@ -389,8 +389,9 @@ CONTAINS
     CHARACTER(LEN=*),         INTENT(IN)    :: VarName
     CHARACTER(LEN=*),OPTIONAL,INTENT(IN)    :: Tag_O
     !
-     IF(AllocQ(A%Alloc)) CALL Delete(A)         
      CALL Get(A%N,                'NIntC'//TRIM(VarName),Tag_O=Tag_O)
+     IF(A%N==0) RETURN
+     IF(AllocQ(A%Alloc)) CALL Delete(A)         
      CALL New(A,A%N)                                           
      CALL Get(A%Atoms,            'Atoms'//TRIM(VarName),Tag_O=Tag_O)
      CALL Get(A%Cells,            'Cells'//TRIM(VarName),Tag_O=Tag_O)
@@ -410,11 +411,11 @@ CONTAINS
        CHARACTER(LEN=*),         INTENT(IN) :: VarName
        CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Tag_O
        !
-       IF(A%N<=0) RETURN
 !#ifdef PARALLEL 
 !       IF(MyId==ROOT)THEN
 !#endif 
           CALL Put(A%N,                'NIntC'//TRIM(VarName),Tag_O=Tag_O)
+          IF(A%N<=0) RETURN
           CALL Put(A%Def,                'Def'//TRIM(VarName),Tag_O=Tag_O)
           CALL Put(A%Atoms,            'Atoms'//TRIM(VarName),Tag_O=Tag_O)
           CALL Put(A%Cells,            'Cells'//TRIM(VarName),Tag_O=Tag_O)
@@ -427,7 +428,6 @@ CONTAINS
 !#ifdef PARALLEL 
 !       ENDIF       
 !#endif 
-
         END SUBROUTINE Put_INTC
 !
 !---------------------------------------------------------------------
