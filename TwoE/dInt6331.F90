@@ -615,9 +615,18 @@
             FPQx = PQx*PBC%InvBoxSh%D(1,1)+PQy*PBC%InvBoxSh%D(1,2)+PQz*PBC%InvBoxSh%D(1,3)
             FPQy = PQy*PBC%InvBoxSh%D(2,2)+PQz*PBC%InvBoxSh%D(2,3)
             FPQz = PQz*PBC%InvBoxSh%D(3,3)
-            IF(PBC%AutoW%I(1)==1) FPQx = FPQx-ANINT(ANINT(FPQx*1d9)*1d-9)
-            IF(PBC%AutoW%I(2)==1) FPQy = FPQy-ANINT(ANINT(FPQy*1d9)*1d-9)
-            IF(PBC%AutoW%I(3)==1) FPQz = FPQz-ANINT(ANINT(FPQz*1d9)*1d-9)
+           IF(PBC%AutoW%I(1)==1) THEN
+               Dum = FPQx-ANINT(FPQx)
+               IF(ABS(Dum)-0.5d0 > 1d-10) FPQx = Dum
+           ENDIF
+           IF(PBC%AutoW%I(2)==1) THEN
+               Dum = FPQy-ANINT(FPQy)
+               IF(ABS(Dum)-0.5d0 > 1d-10) FPQy = Dum
+           ENDIF
+           IF(PBC%AutoW%I(3)==1) THEN
+               Dum = FPQz-ANINT(FPQz)
+               IF(ABS(Dum)-0.5d0 > 1d-10) FPQz = Dum
+           ENDIF
             PQx  = FPQx*PBC%BoxShape%D(1,1)+FPQy*PBC%BoxShape%D(1,2)+FPQz*PBC%BoxShape%D(1,3)
             PQy  = FPQy*PBC%BoxShape%D(2,2)+FPQz*PBC%BoxShape%D(2,3)
             PQz  = FPQz*PBC%BoxShape%D(3,3)
