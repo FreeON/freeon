@@ -303,7 +303,7 @@ CONTAINS
        ENDIF
     ELSE
        ! Take some steps 
-       StepLength=2D0
+       StepLength=1D0
        DO iSTEP=1,MaxSTEP
           StepLength=StepLength/Two
           ! Step the absolute positions
@@ -1168,6 +1168,9 @@ CONTAINS
    SUBROUTINE InitGDIIS(HFileIn,NClones)
      INTEGER         :: iCLONE,NClones
      CHARACTER(LEN=*):: HFileIn
+
+
+WRITE(*,*)' IN INITGDIIS !!!!!!!!!!!!!!!!!!!'
      !
      HDFFileID=OpenHDF(HFileIn)
      DO iCLONE=1,NClones
@@ -1203,14 +1206,14 @@ CONTAINS
      GRestart =(Opts%Guess==GUESS_EQ_RESTART)
      Print    =(Opts%PFlags%GeOp==DEBUG_GEOP)
      !
-     CALL GDIISArch(Nams,iCLONE,XYZ_O=GMLoc%AbCarts%D,Tag_O='Ref')
-     CALL GDIISArch(Nams,iCLONE,XYZ_O=GMLoc%Vects%D,Tag_O='CartGrad') 
+!     CALL GDIISArch(Nams,iCLONE,XYZ_O=GMLoc%AbCarts%D,Tag_O='Ref')
+!     CALL GDIISArch(Nams,iCLONE,XYZ_O=GMLoc%Vects%D,Tag_O='CartGrad') 
      !
      !--------------------------------------------
      CALL OpenASCII(OutFile,Out)
        CALL ModifyGeom(GOpt,GMLoc,IGeo,iCLONE,SCRPath,Print)
        !
-       CALL GDIISArch(Nams,iCLONE,XYZ_O=GMLoc%AbCarts%D,Tag_O='SR')
+!       CALL GDIISArch(Nams,iCLONE,XYZ_O=GMLoc%AbCarts%D,Tag_O='SR')
        !
        IF(.NOT.GOpt%GOptStat%GeOpConvgd) THEN
          IF((.NOT.NoGDIIS).AND.( &

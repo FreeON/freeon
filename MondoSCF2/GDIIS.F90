@@ -252,12 +252,14 @@ CONTAINS
      ! B3^t * PrimDispl
      !
      DO I=1,GDIISMemory
-       VectCart%D=CartStruct(1:NCart,I)
+       VectCart%D(1:NCart)=CartStruct(1:NCart,I)
        CALL CartRNK1ToCartRNK2(VectCart%D,ActCarts%D)
        CALL INTCValue(IntCs,ActCarts%D,LinCrit)
        VectInt%D=IntCs%Value
        CALL PrimToDeloc(VectInt%D,VectCart%D,B3,CholData3)
-       DelocStruct(1:NCart,I)=VectCart%D
+       DO J=1,NCart
+          DelocStruct(J,I)=VectCart%D(J)
+       ENDDO
      ENDDO
      !
      CALL Delete(ActCarts)

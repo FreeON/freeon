@@ -4026,8 +4026,9 @@ CONTAINS
      NatmsLoc=SIZE(XYZ,2)
      OPEN(File=FileName,Unit=99,FORM='FORMATTED',STATUS='UNKNOWN')
      DO 
-       READ(99,'A1',END=1) Char
+       READ(99,33,END=1) Char
      ENDDO
+     33 format(a1)
      1    CONTINUE
      WRITE(99,*) NatmsLoc 
      WRITE(99,*) Title 
