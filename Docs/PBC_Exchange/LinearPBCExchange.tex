@@ -184,20 +184,18 @@ K_{ab}= -\frac{1}{2}
 {\big | }
       \phi_b  
       \phi^{\bf L}_d  
-\right)\, .
+\right)\, ,
 \label{CryEq_2}
 \end{equation}
 where we have relabeled the lattice sums for clarity.
 However, there are two significant problems with this naive approach.
-First, the exact exchange potential, which is periodic in Eq. \ref{CryEq}, has been truncated 
-asymmetrically in Eq. \ref{CryEq_2}. Neighboring cells correctly representing the exchange interaction,  
-have been removed,  leading to an non-periodic exchange potential which varies with position of the 
-coordinates in relation to the unit cell. 
-Effectively, this leads to a position dependent environment for each charge distribution.
-And second, this truncation leads to a violation of the generalized
-exchange energy expression,
+First, the exact exchange potential, which is periodic in Eq.~\ref{CryEq}, has been truncated 
+asymmetrically to yield Eq.~\ref{CryEq_2}. Neighboring cells correctly representing the exchange interaction  
+have been removed,  leading to a non-periodic exchange potential that varies with position of the coordinates in relation 
+to the unit cell.   Effectively, a position dependent environment has been created for each charge distribution.
+Secondly, this truncated expression violates symmetry of the generalized exchange energy:
 \begin{equation}
-E_x[{\bf P}^a,{\bf P}^b] \ne E_x[{\bf P}^b,{\bf P}^a]
+E_x[{\bf P}^a,{\bf P}^b] \ne E_x[{\bf P}^b,{\bf P}^a] \, , 
 \end{equation}
 where 
 \begin{equation}
@@ -242,7 +240,7 @@ where $\delta \approx 10^{-15}$  is needed to avoid wrapping errors
 distributions lie exactly at the cell boundary.  In effect, this implementation 
 changes the wrapping condition from $|pq_i| \ge 1$ to $|pq_i| > 1$.
 {\tt ANINT}($x$) rounds $x$ to the closest integer and
-{\tt SIGN}($x,y$) put the sign of $y$ on $x$.
+{\tt SIGN}($x,y$) transfers the sign from  $y$ to  $x$.
 }, 
 and ${\bf  M}$ is the $3 \times 3$ shape matrix of the unit cell, 
 composed of the primitive lattice vectors,
@@ -260,7 +258,7 @@ exchange matrix, it  does not recover Exchange Kernel Permutational Symmetry (EK
 expense, we could recover the EKPS by  explicitly symmetrizing the primitive Gaussian 
 products within the kernel.  However, in the limit of large systems, where the range of the density 
 matrix becomes smaller than the system size, the  EKPS is recovered as demonstrated in Section 
-\ref{validation} (note, without the MIC condition, EKPS would not be recovered in the limit of large systems).
+\ref{validation} (note that, without the MIC, EKPS is  not recovered in this limit).
 
 \section{Optimal damping and symmetry of the exchange kernel}
 
