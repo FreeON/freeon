@@ -217,7 +217,7 @@ MODULE Parse
       FUNCTION OptDblQ(Unit,Option,Dbl)
          INTEGER,         INTENT(IN)    :: Unit
          CHARACTER(LEN=*),INTENT(IN)    :: Option
-         REAL(DOUBLE),    INTENT(Out)   :: Dbl
+         REAL(DOUBLE),    INTENT(InOut) :: Dbl
          CHARACTER(LEN=DEFAULT_CHR_LEN) :: Line,OptLC
          LOGICAL                        :: OptDblQ
          INTEGER                        :: J,L,K1,K2,S1,S2
