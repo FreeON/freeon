@@ -50,7 +50,7 @@ MODULE DrvFrcs
         CALL Invoke('ParaMakeRho',CtrlVect,MPIRun_O=.TRUE.)
 #endif
 !       Coulomb part
-        CALL Invoke('JForce',CtrlVect)
+        CALL Invoke('JForce',CtrlVect,MPIRun_O=.TRUE.)
 !       Exact Hartree-Fock exchange component
         IF(HasHF(Modl))CALL Invoke('XForce', CtrlVect)       
 !       DFT exchange corrleation term
