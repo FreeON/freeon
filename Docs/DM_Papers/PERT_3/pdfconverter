@@ -1,0 +1,13 @@
+#!/bin/sh
+# 2003-06-13T09:50:02+0200
+# update-epdfs by zsdc at wp.pl
+# converts eps to pdf files in the working directory using epstopdf
+for e in *.eps; do
+    [ ! -e $e ] && echo No *.eps files. && exit
+    p=`echo $e | sed s/eps$/pdf/`
+    [ $p -nt $e ] && echo $p is up to date. && continue
+    echo -n "$p epstopdf... "
+    epstopdf $e -o=$p >/dev/null 2>&1 && echo Done. || (echo ERROR. && 
+rm $p)
+done
+

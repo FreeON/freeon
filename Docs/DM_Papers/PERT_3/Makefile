@@ -12,19 +12,20 @@ links:
 	ln -s $(MONDO_HOME)/Docs/RevTex/10pt.rtx ./10pt.rtx
 	ln -s $(MONDO_HOME)/Docs/RevTex/11pt.rtx ./11pt.rtx
 	ln -s $(MONDO_HOME)/Docs/RevTex/12pt.rtx ./12pt.rtx
-	ln -s ./Gamma_h2o3D_6-31G_6-31Gss_G_T.ps ./figure1.ps
-	ln -s ./Gamma_QCTC_T.ps ./figure2.ps
-	ln -s Gamma_TC2R_T.ps ./figure3.ps
-	ln -s Gamma_ONX_T.ps ./figure4.ps
-	ln -s Mix_h2o3D_6-31G_T.ps ./figure5.ps
-	ln -s DMix_40pts.ps ./figure6.ps
+	ln -s ./Gamma_h2o3D_6-31G_6-31Gss_G_T.ps ./figure1.eps
+	ln -s ./Gamma_QCTC_T.ps ./figure2.eps
+	ln -s Gamma_TC2R_T.ps ./figure3.eps
+	ln -s Gamma_ONX_T.ps ./figure4.eps
+	ln -s Mix_h2o3D_6-31G_T.ps ./figure5.eps
+	ln -s DMix_40pts.ps ./figure6.eps
 
 ps:	latex
-	dvips  -o jcp3.ps Response3
+	dvips  -o Response3.ps  Response3
 
-pdf:	ps
-	ps2pdf jcp3.ps jcp3.pdf
-
+pdf:	
+	chmod u+x ./pdfconverter
+	./pdfconverter
+	pdflatex Response3 
 
 dvi:	latex
 	xdvi  -s 2 Response3 &
