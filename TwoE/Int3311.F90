@@ -4,10 +4,11 @@
    SUBROUTINE Int3311(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, & 
                               OA,LDA,OB,LDB,OC,LDC,OD,LDD,PBC,I) 
       USE DerivedTypes
+      USE VScratch
       USE GlobalScalars
       USE ShellPairStruct
       USE GammaF2
-      IMPLICIT REAL(DOUBLE) (A,I,V,W)
+      IMPLICIT REAL(DOUBLE) (A,I,W)
       INTEGER        :: LBra,LKet
       REAL(DOUBLE)   :: PrmBufB(5,LBra),PrmBufK(5,LKet)
       TYPE(SmallAtomInfo) :: ACInfo,BDInfo
@@ -17,7 +18,7 @@
       REAL(DOUBLE)  :: Ax,Ay,Az,Bx,By,Bz,Cx,Cy,Cz,Dx,Dy,Dz,Qx,Qy,Qz,Px,Py,Pz
       REAL(DOUBLE)  :: QCx,QCy,QCz,PAx,PAy,PAz,PQx,PQy,PQz,WPx,WPy,WPz,WQx,WQy,WQz   
       REAL(DOUBLE)  :: T,ET,TwoT,InvT,SqInvT,ABx,ABy,ABz,CDx,CDy,CDz
-      INTEGER       :: OA,LDA,OB,LDB,OC,LDC,OD,LDD,J,K,L
+      INTEGER       :: OffSet,OA,LDA,OB,LDB,OC,LDC,OD,LDD,J,K,L
       REAL(DOUBLE)  :: FPQx,FPQy,FPQz
       I1Bar1=0.0d0
       I2Bar1=0.0d0
@@ -113,45 +114,55 @@
               SqInvT=SqInvT*InvT
               AuxR2=+6.646701940895685D-01*Upq*SqInvT
             ENDIF
-            V1=AuxR0*PAx
-            V2=AuxR1*WPx
-            V3=AuxR0*PAy
-            V4=AuxR1*WPy
-            V5=AuxR0*PAz
-            V6=AuxR1*WPz
-            V7=-(AuxR1*ExZpE)
-            V8=AuxR0+V7
-            V9=r1x2Z*V8
-            V10=V3+V4
-            V11=AuxR1*PAy
-            V12=AuxR2*WPy
-            V13=V11+V12
-            V14=V5+V6
-            V15=AuxR1*PAz
-            V16=AuxR2*WPz
-            V17=V15+V16
-            I1Bar1=AuxR0+I1Bar1
-            I2Bar1=V1+V2+I2Bar1
-            I3Bar1=V3+V4+I3Bar1
-            I4Bar1=V5+V6+I4Bar1
-            W1=PAx*(V1+V2)+V9
-            W2=WPx*(AuxR1*PAx+AuxR2*WPx)+I5Bar1
-            I5Bar1=W1+W2
-            I6Bar1=PAx*V10+V13*WPx+I6Bar1
-            I7Bar1=PAy*V10+V9+V13*WPy+I7Bar1
-            I8Bar1=PAx*V14+V17*WPx+I8Bar1
-            I9Bar1=PAy*V14+V17*WPy+I9Bar1
-            I10Bar1=PAz*V14+V9+V17*WPz+I10Bar1
+      V(1)=AuxR0*PAx
+      V(2)=AuxR1*WPx
+      V(3)=AuxR0*PAy
+      V(4)=AuxR1*WPy
+      V(5)=AuxR0*PAz
+      V(6)=AuxR1*WPz
+      V(7)=AuxR1*ExZpE
+      V(8)=-V(7)
+      V(9)=AuxR0+V(8)
+      V(10)=r1x2Z*V(9)
+      V(11)=V(3)+V(4)
+      V(12)=AuxR1*PAy
+      V(13)=AuxR2*WPy
+      V(14)=V(12)+V(13)
+      V(15)=V(5)+V(6)
+      V(16)=AuxR1*PAz
+      V(17)=AuxR2*WPz
+      V(18)=V(16)+V(17)
+      I1Bar1=AuxR0+I1Bar1
+      I2Bar1=I2Bar1+V(1)+V(2)
+      I3Bar1=I3Bar1+V(3)+V(4)
+      I4Bar1=I4Bar1+V(5)+V(6)
+      W1=WPx*(AuxR1*PAx+AuxR2*WPx)+I5Bar1
+      W2=PAx*(V(1)+V(2))+V(10)
+      I5Bar1=W1+W2
+      I6Bar1=I6Bar1+PAx*V(11)+WPx*V(14)
+      I7Bar1=I7Bar1+V(10)+PAy*V(11)+WPy*V(14)
+      I8Bar1=I8Bar1+PAx*V(15)+WPx*V(18)
+      I9Bar1=I9Bar1+PAy*V(15)+WPy*V(18)
+      I10Bar1=I10Bar1+V(10)+PAz*V(15)+WPz*V(18)
          ENDDO ! (M0| loop
       ENDDO ! |N0) loop
       ! HRR 
-      I((OA+0)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+0)*LDD)=ABx*I2Bar1+I5Bar1+I((OA+0)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+0)*LDD)
-      I((OA+1)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+0)*LDD)=ABx*I3Bar1+I6Bar1+I((OA+1)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+0)*LDD)
-      I((OA+2)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+0)*LDD)=ABx*I4Bar1+I8Bar1+I((OA+2)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+0)*LDD)
-      I((OA+0)*LDA+(OB+1)*LDB+(OC+0)*LDC+(OD+0)*LDD)=ABy*I2Bar1+I6Bar1+I((OA+0)*LDA+(OB+1)*LDB+(OC+0)*LDC+(OD+0)*LDD)
-      I((OA+1)*LDA+(OB+1)*LDB+(OC+0)*LDC+(OD+0)*LDD)=ABy*I3Bar1+I7Bar1+I((OA+1)*LDA+(OB+1)*LDB+(OC+0)*LDC+(OD+0)*LDD)
-      I((OA+2)*LDA+(OB+1)*LDB+(OC+0)*LDC+(OD+0)*LDD)=ABy*I4Bar1+I9Bar1+I((OA+2)*LDA+(OB+1)*LDB+(OC+0)*LDC+(OD+0)*LDD)
-      I((OA+0)*LDA+(OB+2)*LDB+(OC+0)*LDC+(OD+0)*LDD)=ABz*I2Bar1+I8Bar1+I((OA+0)*LDA+(OB+2)*LDB+(OC+0)*LDC+(OD+0)*LDD)
-      I((OA+1)*LDA+(OB+2)*LDB+(OC+0)*LDC+(OD+0)*LDD)=ABz*I3Bar1+I9Bar1+I((OA+1)*LDA+(OB+2)*LDB+(OC+0)*LDC+(OD+0)*LDD)
-      I((OA+2)*LDA+(OB+2)*LDB+(OC+0)*LDC+(OD+0)*LDD)=I10Bar1+ABz*I4Bar1+I((OA+2)*LDA+(OB+2)*LDB+(OC+0)*LDC+(OD+0)*LDD)
+      OffSet=(OA+0)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+0)*LDD 
+      I(OffSet)=ABx*I2Bar1+I5Bar1+I(OffSet)
+      OffSet=(OA+1)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+0)*LDD 
+      I(OffSet)=ABx*I3Bar1+I6Bar1+I(OffSet)
+      OffSet=(OA+2)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+0)*LDD 
+      I(OffSet)=ABx*I4Bar1+I8Bar1+I(OffSet)
+      OffSet=(OA+0)*LDA+(OB+1)*LDB+(OC+0)*LDC+(OD+0)*LDD 
+      I(OffSet)=ABy*I2Bar1+I6Bar1+I(OffSet)
+      OffSet=(OA+1)*LDA+(OB+1)*LDB+(OC+0)*LDC+(OD+0)*LDD 
+      I(OffSet)=ABy*I3Bar1+I7Bar1+I(OffSet)
+      OffSet=(OA+2)*LDA+(OB+1)*LDB+(OC+0)*LDC+(OD+0)*LDD 
+      I(OffSet)=ABy*I4Bar1+I9Bar1+I(OffSet)
+      OffSet=(OA+0)*LDA+(OB+2)*LDB+(OC+0)*LDC+(OD+0)*LDD 
+      I(OffSet)=ABz*I2Bar1+I8Bar1+I(OffSet)
+      OffSet=(OA+1)*LDA+(OB+2)*LDB+(OC+0)*LDC+(OD+0)*LDD 
+      I(OffSet)=ABz*I3Bar1+I9Bar1+I(OffSet)
+      OffSet=(OA+2)*LDA+(OB+2)*LDB+(OC+0)*LDC+(OD+0)*LDD 
+      I(OffSet)=I10Bar1+ABz*I4Bar1+I(OffSet)
    END SUBROUTINE Int3311

@@ -164,7 +164,8 @@ Get[StringJoin[MondoHome,"/MMA/Optimize.m"]];
 
 FF[x_] := ToString[FixedNumberForm[SetPrecision[N[x,32],32], 16, 2]];
 
-SetOptions[Optimize,OptimizeVariable->{V,Sequence},OptimizeTimes->True];
+SetOptions[FortranAssign,AssignOptimize->True,AssignMaxSize->250,AssignBreak->{132," & \n          "},AssignIndent->"      ",AssignTemporary->{W,Sequence}];
+SetOptions[Optimize,OptimizeVariable->{V,Array},OptimizeTimes->True,OptimizePlus->True,OptimizeCoefficients->True,OptimizeFunction->False]; 
 SetOptions[OpenWrite, PageWidth -> 200];
 
 SetAttributes[o,NHoldAll];
@@ -251,7 +252,7 @@ PunchHRRClass[FileName_,ic_,jc_,kc_,lc_]:=Module[{oList,IList,Kount,a,b,c,d},
 						 jmin = Classes[[jc, 1]]; jmax = Classes[[jc, 2]];
 						 kmin = Classes[[kc, 1]]; kmax = Classes[[kc, 2]];
 						 lmin = Classes[[lc, 1]]; lmax = Classes[[lc, 2]];
-						 oList={" "->"","u"->"(","v"->",","w"->")","x1"->"CDx","y1"->"CDy","z1"->"CDz","x2"->"ABx","y2"->"ABy","z2"->"ABz"};
+						 oList={" "->"","u"->"(","v"->",","w"->")","x1"->"CDx","y1"->"CDy","z1"->"CDz","x2"->"ABx","y2"->"ABy","z2"->"ABz","In"->"I"};
 						 IList={};
 						 Kount = 0;
                                                  Do[Do[Do[Do[
@@ -261,13 +262,21 @@ PunchHRRClass[FileName_,ic_,jc_,kc_,lc_]:=Module[{oList,IList,Kount,a,b,c,d},
                                                              b = {lx[j], my[j], nz[j]};
                                                              c = {lx[k], my[k], nz[k]};
                                                              d = {lx[l], my[l], nz[l]};
-                                                             IList=Append[IList,HRR[a,b,c,d]+o[Kount]];
+                                                             IList=Append[IList,HRR[a,b,c,d]+In[OffSet]];
                                                              oList=Append[oList,StringJoin["o(",ToString[Kount],")"]-> 
-                                                                                StringJoin["I((OA+",ToString[i-LBegin[il]],")*LDA",     \
+                                                                                StringJoin["OffSet=(OA+",ToString[i-LBegin[il]],")*LDA",     \
+                                                                                                 "+(OB+",ToString[j-LBegin[jl]],")*LDB",     \
+                                                                                                 "+(OC+",ToString[k-LBegin[kl]],")*LDC",     \
+                                                                                                 "+(OD+",ToString[l-LBegin[ll]],")*LDD \n", \
+											   "      I(OffSet)"]];
+							     (*
+
+I((OA+",ToString[i-LBegin[il]],")*LDA",     \
                                                                                             "+(OB+",ToString[j-LBegin[jl]],")*LDB",     \
                                                                                             "+(OC+",ToString[k-LBegin[kl]],")*LDC",     \
                                                                                             "+(OD+",ToString[l-LBegin[ll]],")*LDD)"]];
 
+*)
                                                 ,{i,LBegin[il],LEnd[il]}]
                                                 ,{j,LBegin[jl],LEnd[jl]}]
                                                 ,{k,LBegin[kl],LEnd[kl]}]
@@ -294,6 +303,7 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_]:=Block[{WS,LBra,LKet,BKTyp
 	   WS[String_]:=WriteString[Subroutine,"      ",String,"\n"];
 
 	   WS["USE DerivedTypes"];
+	   WS["USE VScratch"];
 	   WS["USE GlobalScalars"];
            (*WS["USE ONX2DataType"];*)
            WS["USE ShellPairStruct"];
@@ -301,8 +311,7 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_]:=Block[{WS,LBra,LKet,BKTyp
               WS["USE GammaF0"];
               WS["USE GammaF1"];,
               WS[StringJoin["USE GammaF",ToString[LBra+LKet]]]];
-
-           WS["IMPLICIT REAL(DOUBLE) (A,I,V,W)"];
+           WS["IMPLICIT REAL(DOUBLE) (A,I,W)"];
            WS["INTEGER        :: LBra,LKet"];
            WS["REAL(DOUBLE)   :: PrmBufB(5,LBra),PrmBufK(5,LKet)"];
 	   WS["TYPE(SmallAtomInfo) :: ACInfo,BDInfo"];
@@ -317,7 +326,7 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_]:=Block[{WS,LBra,LKet,BKTyp
            WS["REAL(DOUBLE)  :: QCx,QCy,QCz,PAx,PAy,PAz,PQx,PQy,PQz,WPx,WPy,WPz,WQx,WQy,WQz   "];
            WS["REAL(DOUBLE)  :: T,ET,TwoT,InvT,SqInvT,ABx,ABy,ABz,CDx,CDy,CDz"];
 
-           WS["INTEGER       :: OA,LDA,OB,LDB,OC,LDC,OD,LDD,J,K,L"];
+           WS["INTEGER       :: OffSet,OA,LDA,OB,LDB,OC,LDC,OD,LDD,J,K,L"];
            WS["REAL(DOUBLE)  :: FPQx,FPQy,FPQz"];
 
 
@@ -532,19 +541,9 @@ Print["ijklType=",ijklType," i=",IntegralClass[Classes[[ic]]]," j=",IntegralClas
 
            PunchFront[Subroutine,imax,jmax,kmax,lmax,ijklType]; 
 
-           SetOptions[FortranAssign,AssignOptimize->True,AssignMaxSize->200, \
-           AssignBreak->{132," & \n          "},AssignIndent->"            ",\
-           AssignTemporary->{W,Sequence}];
-
-
            PunchVRRClass[Subroutine,BraEll,KetEll];
 
            PunchVRRBack[Subroutine,BKType];
-
-
-           SetOptions[FortranAssign,AssignOptimize->True,AssignMaxSize->200, \
-           AssignBreak->{132," & \n          "},AssignIndent->"      ",\
-           AssignTemporary->{W,Sequence}];
 
            WS["   ! HRR "];
            PunchHRRClass[Subroutine,ic,jc,kc,lc]; 

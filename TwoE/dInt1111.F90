@@ -4,24 +4,26 @@
    SUBROUTINE dInt1111(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, & 
                               OA,LDA,OB,LDB,OC,LDC,OD,LDD,GOA,GOB,GOC,GOD,NINT,PBC,dI) 
       USE DerivedTypes
+      USE VScratch
       USE GlobalScalars
       USE ShellPairStruct
       USE GammaF0
       USE GammaF1
-      IMPLICIT REAL(DOUBLE) (A,I,V,W)
+      IMPLICIT REAL(DOUBLE) (A,I,W)
       INTEGER        :: LBra,LKet,NINT
       REAL(DOUBLE)   :: PrmBufB(7,LBra),PrmBufK(7,LKet)
       TYPE(SmallAtomInfo) :: ACInfo,BDInfo
       TYPE(PBCInfo) :: PBC
-      REAL(DOUBLE) :: dI(NINT,12)
+      REAL(DOUBLE) :: dI(NINT,9)
       REAL(DOUBLE)  :: Zeta,Eta,r1xZpE,HfxZpE,r1x2E,r1x2Z,ExZpE,ZxZpE,Omega,Up,Uq,Upq
       REAL(DOUBLE)  :: Ax,Ay,Az,Bx,By,Bz,Cx,Cy,Cz,Dx,Dy,Dz,Qx,Qy,Qz,Px,Py,Pz
       REAL(DOUBLE)  :: QCx,QCy,QCz,PAx,PAy,PAz,PQx,PQy,PQz,WPx,WPy,WPz,WQx,WQy,WQz   
       REAL(DOUBLE)  :: T,ET,TwoT,InvT,SqInvT,ABx,ABy,ABz,CDx,CDy,CDz
       REAL(DOUBLE)  :: Alpha,Beta,Gamma
-      INTEGER       :: OffSet,CrtSet
+      INTEGER       :: CrtSet1,CrtSet2,CrtSet3,CrtSet4
+      INTEGER       :: CrtSet5,CrtSet6,CrtSet7,CrtSet8
+      INTEGER       :: CrtSet9,OffSet,GOA,GOB,GOC,GOD
       INTEGER       :: OA,LDA,OB,LDB,OC,LDC,OD,LDD,J,K,L
-      INTEGER       :: GOA,GOB,GOC,GOD
       REAL(DOUBLE)  :: FPQx,FPQy,FPQz
       CrtSet1=GOA
       CrtSet2=GOA+1
@@ -131,20 +133,20 @@
               SqInvT=SqInvT*InvT
               AuxR1=+4.431134627263790D-01*Upq*SqInvT
             ENDIF
-            RawI1Bar1=AuxR0
-            I1Bar1=RawI1Bar1+I1Bar1
-            RawI2Bar1=AuxR0*PAx+AuxR1*WPx
-            I2Bar1=RawI2Bar1+I2Bar1
-            RawI3Bar1=AuxR0*PAy+AuxR1*WPy
-            I3Bar1=RawI3Bar1+I3Bar1
-            RawI4Bar1=AuxR0*PAz+AuxR1*WPz
-            I4Bar1=RawI4Bar1+I4Bar1
-            RawI1Bar2=AuxR0*QCx+AuxR1*WQx
-            I1Bar2=RawI1Bar2+I1Bar2
-            RawI1Bar3=AuxR0*QCy+AuxR1*WQy
-            I1Bar3=RawI1Bar3+I1Bar3
-            RawI1Bar4=AuxR0*QCz+AuxR1*WQz
-            I1Bar4=RawI1Bar4+I1Bar4
+      RawI1Bar1=AuxR0
+      I1Bar1=RawI1Bar1+I1Bar1
+      RawI2Bar1=AuxR0*PAx+AuxR1*WPx
+      I2Bar1=RawI2Bar1+I2Bar1
+      RawI3Bar1=AuxR0*PAy+AuxR1*WPy
+      I3Bar1=RawI3Bar1+I3Bar1
+      RawI4Bar1=AuxR0*PAz+AuxR1*WPz
+      I4Bar1=RawI4Bar1+I4Bar1
+      RawI1Bar2=AuxR0*QCx+AuxR1*WQx
+      I1Bar2=RawI1Bar2+I1Bar2
+      RawI1Bar3=AuxR0*QCy+AuxR1*WQy
+      I1Bar3=RawI1Bar3+I1Bar3
+      RawI1Bar4=AuxR0*QCz+AuxR1*WQz
+      I1Bar4=RawI1Bar4+I1Bar4
             Ia4Bar1=Ia4Bar1+Alpha*RawI4Bar1
             Ia3Bar1=Ia3Bar1+Alpha*RawI3Bar1
             Ia2Bar1=Ia2Bar1+Alpha*RawI2Bar1
@@ -162,16 +164,10 @@
       dI(OffSet,CrtSet1)=Ia2Bar1+dI(OffSet,CrtSet1)
       dI(OffSet,CrtSet4)=ABx*Ib1Bar1+Ib2Bar1+dI(OffSet,CrtSet4)
       dI(OffSet,CrtSet7)=Ic1Bar2+dI(OffSet,CrtSet7)
-      Tmp=-(dI(OffSet,CrtSet1)+dI(OffSet,CrtSet4)+dI(OffSet,CrtSet7))+dI(OffSet,CrtSet10)
-      dI(OffSet,CrtSet10)=Tmp
             dI(OffSet,CrtSet2)=Ia3Bar1+dI(OffSet,CrtSet2)
       dI(OffSet,CrtSet5)=ABy*Ib1Bar1+Ib3Bar1+dI(OffSet,CrtSet5)
       dI(OffSet,CrtSet8)=Ic1Bar3+dI(OffSet,CrtSet8)
-      Tmp=-(dI(OffSet,CrtSet2)+dI(OffSet,CrtSet5)+dI(OffSet,CrtSet8))+dI(OffSet,CrtSet11)
-      dI(OffSet,CrtSet11)=Tmp
             dI(OffSet,CrtSet3)=Ia4Bar1+dI(OffSet,CrtSet3)
       dI(OffSet,CrtSet6)=ABz*Ib1Bar1+Ib4Bar1+dI(OffSet,CrtSet6)
       dI(OffSet,CrtSet9)=Ic1Bar4+dI(OffSet,CrtSet9)
-      Tmp=-(dI(OffSet,CrtSet3)+dI(OffSet,CrtSet6)+dI(OffSet,CrtSet9))+dI(OffSet,CrtSet12)
-      dI(OffSet,CrtSet12)=Tmp
    END SUBROUTINE dInt1111

@@ -4,10 +4,11 @@
    SUBROUTINE Int1111(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, & 
                               OA,LDA,OB,LDB,OC,LDC,OD,LDD,PBC,I) 
       USE DerivedTypes
+      USE VScratch
       USE GlobalScalars
       USE ShellPairStruct
       USE GammaF0
-      IMPLICIT REAL(DOUBLE) (A,I,V,W)
+      IMPLICIT REAL(DOUBLE) (A,I,W)
       INTEGER        :: LBra,LKet
       REAL(DOUBLE)   :: PrmBufB(5,LBra),PrmBufK(5,LKet)
       TYPE(SmallAtomInfo) :: ACInfo,BDInfo
@@ -17,7 +18,7 @@
       REAL(DOUBLE)  :: Ax,Ay,Az,Bx,By,Bz,Cx,Cy,Cz,Dx,Dy,Dz,Qx,Qy,Qz,Px,Py,Pz
       REAL(DOUBLE)  :: QCx,QCy,QCz,PAx,PAy,PAz,PQx,PQy,PQz,WPx,WPy,WPz,WQx,WQy,WQz   
       REAL(DOUBLE)  :: T,ET,TwoT,InvT,SqInvT,ABx,ABy,ABz,CDx,CDy,CDz
-      INTEGER       :: OA,LDA,OB,LDB,OC,LDC,OD,LDD,J,K,L
+      INTEGER       :: OffSet,OA,LDA,OB,LDB,OC,LDC,OD,LDD,J,K,L
       REAL(DOUBLE)  :: FPQx,FPQy,FPQz
       I1Bar1=0.0d0
       Ax=ACInfo%Atm1X
@@ -92,9 +93,10 @@
               SqInvT=DSQRT(InvT)
               AuxR0=+8.862269254527580D-01*Upq*SqInvT
             ENDIF
-            I1Bar1=AuxR0+I1Bar1
+      I1Bar1=AuxR0+I1Bar1
          ENDDO ! (M0| loop
       ENDDO ! |N0) loop
       ! HRR 
-      I((OA+0)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+0)*LDD)=I1Bar1+I((OA+0)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+0)*LDD)
+      OffSet=(OA+0)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+0)*LDD 
+      I(OffSet)=I1Bar1+I(OffSet)
    END SUBROUTINE Int1111

@@ -8,7 +8,7 @@ EXTRA_INCLUDES=
 #
 SPObObjs=ShellPairStruct.o
 #
-TwoEObjs=  \
+TwoEObjs=VScratch.o  \
 	Int1111.o \
 	Int3111.o \
 	Int3311.o \
@@ -22,7 +22,7 @@ TwoEObjs=  \
 	dInt3331.o \
 	dInt3333.o 
 #
-TwoERels=  \
+TwoERels=VScratch.x  \
 	Int1111.x \
 	Int3111.x \
 	Int3311.x \
@@ -47,6 +47,14 @@ purge:clean
 TwoE:$(SPObObjs) $(TwoEObjs)
 	$(AR) $(ARFLAGS) $(MONDO_LIB)/libTwoE.a $(?:.F90=.o)
 	$(RANLIB) $(MONDO_LIB)/libTwoE.a
+
+Source: Ints Grads
+#
+Ints:
+	math<Integrals.m
+#
+Grads:
+	math<Gradients.m
 #
 CTwoE:
 	rm -f $(REMOVEMISC) $(REMOVEMODS)

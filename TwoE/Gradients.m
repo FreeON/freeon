@@ -198,8 +198,11 @@ Get[StringJoin[MondoHome,"/MMA/Optimize.m"]];
 
 FF[x_] := ToString[FixedNumberForm[SetPrecision[N[x,32],32], 16, 2]];
 
-SetOptions[Optimize,OptimizeVariable->{V,Sequence},OptimizeNull->{dI,OffSet,GOA},OptimizeTimes->True,OptimizeFunction->False];
+
+SetOptions[FortranAssign,AssignOptimize->True,AssignMaxSize->250,AssignBreak->{200," & \n          "},AssignIndent->"      ",AssignTemporary->{W,Sequence}];
+SetOptions[Optimize,OptimizeVariable->{V,Array},OptimizeTimes->True,OptimizePlus->True,OptimizeCoefficients->True,OptimizeFunction->False]; 
 SetOptions[OpenWrite, PageWidth -> 200];
+
 
 SetAttributes[o,NHoldAll];
 SetAttributes[SSSS,NHoldAll];
@@ -210,6 +213,8 @@ SetAttributes[OB,NHoldAll];
 SetAttributes[OC,NHoldAll];
 SetAttributes[OD,NHoldAll];
 SetAttributes[MBarN,NHoldAll];
+
+
 
 (* PUT THE TRANSFORMATIONS TO FILE *)
 
@@ -367,7 +372,9 @@ PunchHRRClass[FileName_,ic_,jc_,kc_,lc_]:=Module[{oList,IList,Kount,a,b,c,d},
 						 lmin = Classes[[lc, 1]]; lmax = Classes[[lc, 2]];
 						 oList={" "->"","u"->"(","v"->",","w"->")","x1"->"CDx","y1"->"CDy","z1"->"CDz","x2"->"ABx","y2"->"ABy","z2"->"ABz"};
 						 IList={};
-						 NullTemp=NullList;
+						 LHS={};
+						 RHS={};
+
 						 Kount = 0;
                                                  Do[Do[Do[Do[
                                                  Do[Do[Do[Do[
@@ -389,6 +396,7 @@ PunchHRRClass[FileName_,ic_,jc_,kc_,lc_]:=Module[{oList,IList,Kount,a,b,c,d},
 						  TmpA=dHRR["F","a",a+plus,b,c,d]- a[[cart]]  HRR[a+mnus,b,c,d];
 						  TmpB=dHRR["F","b",a,b+plus,c,d]- b[[cart]]  HRR[a,b+mnus,c,d];
 						  TmpC=dHRR["F","c",a,b,c+plus,d]- c[[cart]]  HRR[a,b,c+mnus,d];
+						  TmpD=-(TmpA+TmpB+TmpC);
 
                                                   CffSetA=ToExpression[StringJoin["CrtSet",ToString[0+cart]]];
                                                   CffSetB=ToExpression[StringJoin["CrtSet",ToString[3+cart]]];
@@ -411,12 +419,12 @@ PunchHRRClass[FileName_,ic_,jc_,kc_,lc_]:=Module[{oList,IList,Kount,a,b,c,d},
                                                   IList=Append[IList,TmpC+dI[OffSet,CffSetC]];
                                                   oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["dI(OffSet,",ToString[CffSetC],")"]];
 
+						  (*
                                                   Kount = Kount + 1;
-						  recurstring=StringJoin["-(dI(OffSet,",ToString[CffSetA],")+dI(OffSet,",ToString[CffSetB],")+dI(OffSet,",ToString[CffSetC],"))+dI(OffSet,",ToString[CffSetD],")"];
-                                                  IList=Append[IList,Tmp];
-                                                  oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["Tmp=",recurstring,"\n",
-                                                                                                                 "      dI(OffSet,",ToString[CffSetD],")"]];
+                                                  IList=Append[IList,TmpD+dI[OffSet,CffSetD]];
+                                                  oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["dI(OffSet,",ToString[CffSetD],")"]];
 
+						   *)
 ,{cart,1,3}]; 
 
                                                 ,{i,LBegin[il],LEnd[il]}]
@@ -426,12 +434,16 @@ PunchHRRClass[FileName_,ic_,jc_,kc_,lc_]:=Module[{oList,IList,Kount,a,b,c,d},
                                                 ,{il,imin,imax}]
                                                 ,{jl,jmin,jmax}]
                                                 ,{kl,kmin,kmax}]
+
                                                 ,{ll,lmin,lmax}];
+
 						 olist=Append[olist,{" "->"","u"->"(","v"->",","w"->")"}];
                                                  olist=Flatten[olist];
-                                                Write[FileName,FortranAssign[o,IList,AssignReplace->oList]];
+
+						 Write[FileName,FortranAssign[o,IList,AssignReplace->oList]];
+
                                               (*   Print["IList = ",IList];
-					       Print["OList = ",oList]; *)
+   					       Print["OList = ",oList]; *)
 
                                                ];
 
@@ -546,6 +558,7 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_,Needs_]:=Block[{WS,LBra,LKe
 	   WS[String_]:=WriteString[Subroutine,"      ",String,"\n"];
 
 	   WS["USE DerivedTypes"];
+           WS["USE VScratch"];
 	   WS["USE GlobalScalars"];
            (*WS["USE ONX2DataType"];*)
            WS["USE ShellPairStruct"];
@@ -555,7 +568,7 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_,Needs_]:=Block[{WS,LBra,LKe
               WS[StringJoin["USE GammaF",ToString[LBra+LKet]]];
               WS[StringJoin["USE GammaF",ToString[LBra+LKet+1]]]];
 
-           WS["IMPLICIT REAL(DOUBLE) (A,I,V,W)"];
+           WS["IMPLICIT REAL(DOUBLE) (A,I,W)"];
            WS["INTEGER        :: LBra,LKet,NINT"];
            WS["REAL(DOUBLE)   :: PrmBufB(7,LBra),PrmBufK(7,LKet)"];
 	   WS["TYPE(SmallAtomInfo) :: ACInfo,BDInfo"];
@@ -563,7 +576,7 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_,Needs_]:=Block[{WS,LBra,LKe
 	   LenBra=LEnd[LBra];
            LenKet=LEnd[LKet];
 
-           WS[StringJoin["REAL(DOUBLE) :: dI(NINT,12)"]];
+           WS[StringJoin["REAL(DOUBLE) :: dI(NINT,9)"]];
 
            WS["REAL(DOUBLE)  :: Zeta,Eta,r1xZpE,HfxZpE,r1x2E,r1x2Z,ExZpE,ZxZpE,Omega,Up,Uq,Upq"];
            WS["REAL(DOUBLE)  :: Ax,Ay,Az,Bx,By,Bz,Cx,Cy,Cz,Dx,Dy,Dz,Qx,Qy,Qz,Px,Py,Pz"];
@@ -571,10 +584,10 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_,Needs_]:=Block[{WS,LBra,LKe
            WS["REAL(DOUBLE)  :: T,ET,TwoT,InvT,SqInvT,ABx,ABy,ABz,CDx,CDy,CDz"];
 
            WS["REAL(DOUBLE)  :: Alpha,Beta,Gamma"];
-           WS["INTEGER       :: OffSet,CrtSet"];
-
+           WS["INTEGER       :: CrtSet1,CrtSet2,CrtSet3,CrtSet4"];
+           WS["INTEGER       :: CrtSet5,CrtSet6,CrtSet7,CrtSet8"];
+           WS["INTEGER       :: CrtSet9,OffSet,GOA,GOB,GOC,GOD"];
            WS["INTEGER       :: OA,LDA,OB,LDB,OC,LDC,OD,LDD,J,K,L"];
-           WS["INTEGER       :: GOA,GOB,GOC,GOD"];
            WS["REAL(DOUBLE)  :: FPQx,FPQy,FPQz"];
 
            WS["CrtSet1=GOA"];           
@@ -806,21 +819,11 @@ Print["ijklType=",ijklType," i=",IntegralClass[Classes[[ic]]]," j=",IntegralClas
 
            PunchFront[Subroutine,imax,jmax,kmax,lmax,ijklType,GNeeds]; 
 
-           SetOptions[FortranAssign,AssignOptimize->True,AssignMaxSize->200, \
-           AssignBreak->{132," & \n          "},AssignIndent->"            ",\
-           AssignTemporary->{W,Sequence}];
-
-     
            PunchVRRClass[Subroutine,BraEll,KetEll];
 
            PunchGNeeds[GNeeds]; 
  
            PunchVRRBack[Subroutine,BKType];
-
-
-           SetOptions[FortranAssign,AssignOptimize->True,AssignMaxSize->200, \
-           AssignBreak->{132," & \n          "},AssignIndent->"      ",\
-           AssignTemporary->{W,Sequence}];
 
            WS["   ! HRR "];
            PunchHRRClass[Subroutine,ic,jc,kc,lc]; 
