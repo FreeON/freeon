@@ -30,7 +30,7 @@ PROGRAM P2Use
                                 :: S,P,T0,T1,T2
   TYPE(DBL_RNK2)                :: BlkP
   REAL(DOUBLE)                  :: Scale,TrP,Fact,ECount, &
-                                   MxDelP,DensityDev
+                                   DeltaP,OldDeltaP,DensityDev
   INTEGER                       :: I,J,AtA,Q,R,KA,NBFA, &
                                    NPur,PcntPNon0
   CHARACTER(LEN=2)              :: Cycl
@@ -74,6 +74,7 @@ PROGRAM P2Use
      CALL Filter(P,T1)
      CALL Multiply(S,-One)
      NPur=0
+     OldDeltaP=1.D20
      DO I=1,20
         NPur=NPur+1
 !       P.S
@@ -93,7 +94,7 @@ PROGRAM P2Use
 !       DeltaP
         CALL Multiply(P,-One)
         CALL Add(P,T0,T1)
-        MxDelP=MAX(T1)
+        DeltaP=ABS(Max(T1)+1.D-20)                 ! DeltaP=MAX(P[J+1]-P[J])
         CALL Filter(P,T0)
         ECount=Trace(S,P)
         DensityDev=DBLE(Nel)-Two*ECount
@@ -107,7 +108,7 @@ PROGRAM P2Use
               Mssg=ProcessName(Prog,'Pure '//TRIM(IntToChar(NPur)))            &
                              //'Tr(P)-NEl= '//TRIM(DblToShrtChar(DensityDev))  &
                              //', %Non0= '//TRIM(IntToChar(PcntPNon0))         &
-                             //', MAX(/P) = '//TRIM(DblToShrtChar(MxDelP)) 
+                             //', MAX(/P) = '//TRIM(DblToShrtChar(DeltaP))
             WRITE(*,*)TRIM(Mssg)
             WRITE(Out,*)TRIM(Mssg)
             CALL PrintProtectR(Out)
@@ -116,7 +117,8 @@ PROGRAM P2Use
 #ifdef PARALLEL
       ENDIF
 #endif
-        IF(DensityDev<1.D-5)GOTO 999
+        IF(I>3.AND.DeltaP>OldDeltaP.OR.DeltaP<1.D-10)GOTO 999
+        OldDeltaP=DeltaP
      ENDDO
      CALL Warn('In P2Use, failed to converge McWeeny purification.'//RTRN    &
               //'   Still missing '//TRIM(DblToShrtChar(DensityDev))//' electrons.'//RTRN &
@@ -135,7 +137,7 @@ PROGRAM P2Use
              WRITE(*,*)TRIM(Mssg)
           ENDIF
           WRITE(Out,*)TRIM(Mssg)
-          Mssg=ProcessName(Prog)//'MAX(/\P) = '//TRIM(DblToShrtChar(MxDelP))//', ' &
+          Mssg=ProcessName(Prog)//'MAX(/\P) = '//TRIM(DblToShrtChar(DeltaP))//', ' &
                 //'|Tr(P)-NEl| = '//TRIM(DblToShrtChar(DensityDev))//' .'
           IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
              WRITE(*,*)TRIM(Mssg)
