@@ -666,9 +666,35 @@ goes like
 \left[ I-B_{r}^{t}(B_{r}B_{r}^{t})^{-1}B_{r} \right] ,
 \end{equation}
 where $I$ is the $9 \times 9$ identity matrix and the superscript  
-${\rm pur}$ refers to the result of the purification.
+``${\rm pur}$'' refers to the result of the purification.
+
+\subsection{Realization}
+The crystal structure optimizer has been implemented in the
+MondoSCF suite of linear scaling quantum chemistry codes 
+\cite{MondoSCF}, in the FORTRAN-90/95 programming language.
+Lattice forces have been calculated analytically, as described in 
+Ref.~\cite{CJTymczak04LatF}. Note, that all energies and gradients
+have been calculated by means of the gamma point approximation,
+i.e. there is no band structure calculation in our treatment.
+
+\section{Results and discussion}
+\subsection{The test set}
+Our test set of crystal structures contains
+10 different systems:
+Polyacetilene, boron-nitride, diamond, (10,0)carbon-nanotube,
+Ice \cite{AGoto90}, Urea \cite{SSwaminathan84}, 
+Benzene \cite{GJeffrey87}, Halite, Sulphure, Quartz.
+Most of the structures were
+taken either from the Inorganic Crystal Stuctures Database
+(ICSD) \cite{ICSD} or from Cambridge Crystallographic Data Center
+\cite{CCDC} and the translationally unique positions were
+generated using Mercury \cite{Mercury}. 
+A brief description follows to provide data for the reproduction
+of input structures in case they cannot be found
+in the above mentioned data bases. 
+
+\subsubsection{Polyacetilene}
 
 
 \bibliography{../../Bib/mondo_new}
 \end{document}
-
