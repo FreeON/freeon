@@ -1003,10 +1003,17 @@ MODULE MemMan
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !     
 !
-      SUBROUTINE Delete_BCSR(A)
-         TYPE(BCSR),INTENT(INOUT)       :: A
+      SUBROUTINE Delete_BCSR(A,OnAll_O)
+         TYPE(BCSR),INTENT(INOUT) :: A
+         LOGICAL,OPTIONAL         :: OnAll_O
+         LOGICAL                  :: OnAll
+         IF(PRESENT(OnAll_O))THEN
+            OnAll=OnAll_O
+         ELSE
+            OnAll=.FALSE.
+         ENDIF
 #ifdef PARALLEL
-         IF(MyId==ROOT)THEN
+         IF(MyId==ROOT.OR.OnAll)THEN
 #endif
             CALL Delete(A%RowPt)
             CALL Delete(A%ColPt)
