@@ -882,29 +882,29 @@ CONTAINS
     CALL Invoke('JForce',N,S,M)
     ! DFT exchange corrleation term
     IF(HasDFT(O%Models(cBas))) THEN
-#ifdef PARALLEL 
-       CALL New(AuxLatF,(/3,3/))
-       HDFFileID=OpenHDF(N%HFile)
-       HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(1)))
-       CALL Get(AuxLatF,'latfrc',Tag_O=chGEO)
-       CALL CloseHDFGroup(HDF_CurrentID)
-       CALL CloseHDF(HDFFileID)
-!
-       CALL Invoke('XCForce',N,S,M)
-!
-       HDFFileID=OpenHDF(N%HFile)
-       HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(1)))
-       CALL Get(G%Clone(1)%PBC%LatFrc,'latfrc',Tag_O=chGEO)
-       G%Clone(1)%PBC%LatFrc%D=AuxLatF%D
-       CALL Put(G%Clone(1)%PBC%LatFrc,'latfrc',Tag_O=chGEO)
-       CALL CloseHDFGroup(HDF_CurrentID)
-       CALL CloseHDF(HDFFileID)
-       CALL Delete(AuxLatF)
-       CALL NLATTFORCE_XC(cBAS,cGEO,G,B,N,S,M)
-#else
+!#ifdef PARALLEL 
+!       CALL New(AuxLatF,(/3,3/))
+!       HDFFileID=OpenHDF(N%HFile)
+!       HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(1)))
+!       CALL Get(AuxLatF,'latfrc',Tag_O=chGEO)
+!       CALL CloseHDFGroup(HDF_CurrentID)
+!       CALL CloseHDF(HDFFileID)
+!!
+!       CALL Invoke('XCForce',N,S,M)
+!!
+!       HDFFileID=OpenHDF(N%HFile)
+!       HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(1)))
+!       CALL Get(G%Clone(1)%PBC%LatFrc,'latfrc',Tag_O=chGEO)
+!       G%Clone(1)%PBC%LatFrc%D=AuxLatF%D
+!       CALL Put(G%Clone(1)%PBC%LatFrc,'latfrc',Tag_O=chGEO)
+!       CALL CloseHDFGroup(HDF_CurrentID)
+!       CALL CloseHDF(HDFFileID)
+!       CALL Delete(AuxLatF)
+!       CALL NLATTFORCE_XC(cBAS,cGEO,G,B,N,S,M)
+!#else
 !       CALL NLATTFORCE_XC(cBAS,cGEO,G,B,N,S,M)
        CALL Invoke('XCForce',N,S,M)
-#endif
+!#endif
     ENDIF
 !   Exact Hartree-Fock exchange component
     IF(HasHF(O%Models(cBas)))THEN
