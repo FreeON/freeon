@@ -23,10 +23,13 @@ MODULE PrettyPrint
                        Print_DBL_Rank2A, Print_BSET,      &
                        Print_CRDS,       Print_BCSR,      &
 #ifdef PARALLEL
-                       Print_DBCSR,      &
+                       Print_DBCSR,                       &
+#endif
+#ifdef PERIODIC
+                       Print_PBCInfo,    Print_CellSet,   &
 #endif
                        Print_MEMS,       Print_TIME,      &
-                       Print_HGRHO
+                       Print_HGRho,      Print_CMPoles
    END INTERFACE
    INTERFACE PChkSum   
       MODULE PROCEDURE Print_CheckSum_DBL_VECT
@@ -39,7 +42,8 @@ MODULE PrettyPrint
 
 
    CHARACTER(LEN=DEFAULT_CHR_LEN) :: String
-   CHARACTER(LEN=12),PARAMETER    :: CheckEq=' CheckSum = '
+   CHARACTER(LEN=12),PARAMETER    :: CheckEq=' CheckSum  = '
+   CHARACTER(LEN=12),PARAMETER    :: RhoSumE=' Integrate = '
    CONTAINS 
       SUBROUTINE TimeStamp(Mssg,Enter_O)
          CHARACTER(LEN=*),INTENT(IN) :: Mssg
@@ -351,6 +355,113 @@ MODULE PrettyPrint
    1006 FORMAT(1x,I2,6x,8(1x,D14.8))
    1007 FORMAT(60('='))
      END SUBROUTINE Print_BSET 
+#ifdef PERIODIC
+!----------------------------------------------------------------PRINT PBC
+!
+!----------------------------------------------------------------PRINT PBC
+     SUBROUTINE Print_PBCInfo(PBC,FileName_O,Unit_O)
+        TYPE(PBCInfo)                        :: PBC         
+        INTEGER                              :: I,K,PU
+        LOGICAL                              :: Opened
+        INTEGER,         OPTIONAL,INTENT(IN) :: Unit_O
+        CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: FileName_O
+        CHARACTER(LEN=DEFAULT_CHR_LEN)       :: Mssg
+!
+        PU=OpenPU(FileName_O=FileName_O,Unit_O=Unit_O)
+!
+        IF(PrintFlags%Fmt .NE. DEBUG_MMASTYLE) THEN
+           IF(PBC%Dimen .NE. 0) THEN          
+              WRITE(PU,100)
+              WRITE(PU,101) PBC%Dimen,PBC%CellVolume,PBC%Dimen
+              WRITE(PU,102) PBC%AutoW(1),PBC%AutoW(2),PBC%AutoW(3)
+              WRITE(PU,103) PBC%CellCenter(1),PBC%CellCenter(2),PBC%CellCenter(3)
+              WRITE(PU,104) PBC%TransVec(1),PBC%TransVec(2),PBC%TransVec(3)
+              WRITE(PU,110)  
+              IF(PBC%Dimen==1) THEN
+                 IF(PBC%AutoW(1)) WRITE(PU,121) PBC%BoxShape(1,1)
+                 IF(PBC%AutoW(2)) WRITE(PU,122) PBC%BoxShape(2,2)                 
+                 IF(PBC%AutoW(3)) WRITE(PU,123) PBC%BoxShape(3,3)
+              ELSEIF(PBC%Dimen==2) THEN
+                 IF(.NOT. PBC%AutoW(1) ) THEN
+                    WRITE(PU,132) PBC%BoxShape(2,2), PBC%BoxShape(3,2)
+                    WRITE(PU,133) PBC%BoxShape(2,3), PBC%BoxShape(3,3)
+                 ENDIF
+                 IF(.NOT. PBC%AutoW(2) ) THEN
+                    WRITE(PU,131) PBC%BoxShape(1,1), PBC%BoxShape(3,1)
+                    WRITE(PU,133) PBC%BoxShape(1,3), PBC%BoxShape(3,3)
+                 ENDIF
+                 IF(.NOT. PBC%AutoW(3) ) THEN
+                    WRITE(PU,131) PBC%BoxShape(1,1), PBC%BoxShape(2,1)
+                    WRITE(PU,132) PBC%BoxShape(1,2), PBC%BoxShape(2,2)
+                 ENDIF
+              ELSEIF(PBC%Dimen==3) THEN
+                 WRITE(PU,111) PBC%BoxShape(1,1),PBC%BoxShape(2,1),PBC%BoxShape(3,1)
+                 WRITE(PU,112) PBC%BoxShape(1,2),PBC%BoxShape(2,2),PBC%BoxShape(3,2)
+                 WRITE(PU,113) PBC%BoxShape(1,3),PBC%BoxShape(2,3),PBC%BoxShape(3,3)
+              ENDIF  
+              WRITE(PU,51)
+           ELSE
+              WRITE(PU,200)
+              WRITE(PU,51)
+           ENDIF
+        ENDIF
+        CALL ClosePU(PU)
+!
+50      FORMAT(72('='))
+51      FORMAT(72('-'))
+100     FORMAT(1x,'Representation of the Lattice:')
+101     FORMAT(1x,' Dimension = ',I1,'  Cell Volume = ',F14.8, ' AU^',I1)
+102     FORMAT(1x,' Periodic Boundry Conditions (x,y,z) => {',L1,',',L1,',',L1,'}')
+103     FORMAT(1x,' Cell Center Vector = (',F14.10,',',F14.10,',',F14.10,')')
+104     FORMAT(1x,' Translation Vector = (',F14.10,',',F14.10,',',F14.10,')')
+110     FORMAT(1x,' Lattice Vectors: ')
+!
+111     FORMAT(1x,'  a  = (',F14.10,',',F14.10,',',F14.10,')')
+112     FORMAT(1x,'  b  = (',F14.10,',',F14.10,',',F14.10,')')
+113     FORMAT(1x,'  c  = (',F14.10,',',F14.10,',',F14.10,')')
+!
+121     FORMAT(1x,'  a  = (',F14.10,')')
+122     FORMAT(1x,'  b  = (',F14.10,')')
+123     FORMAT(1x,'  c  = (',F14.10,')')
+!
+131     FORMAT(1x,'  a  = (',F14.10,',',F14.10,')')
+132     FORMAT(1x,'  b  = (',F14.10,',',F14.10,')')
+133     FORMAT(1x,'  c  = (',F14.10,',',F14.10,')')
+!
+200     FORMAT(1x,' *** Periodic is Off *** ')
+!
+     END SUBROUTINE Print_PBCInfo
+!--------------------------------------------------------------------------
+! Print the CellSet
+!--------------------------------------------------------------------------
+  SUBROUTINE Print_CellSet(CS,Name,Proc_O,Unit_O)
+    TYPE(CellSet)                    :: CS
+    CHARACTER(LEN=*),OPTIONAL        :: Proc_O
+    CHARACTER(LEN=*)                 :: Name
+    INTEGER,OPTIONAL                 :: Unit_O
+    INTEGER                          :: PU 
+    CHARACTER(LEN=2*DEFAULT_CHR_LEN) :: CellStr
+!
+    IF(.NOT. AllocQ(CS%Alloc)) THEN
+       CALL Halt(' Cells are  not allocated in Print_CellSet')
+    ENDIF
+    PU=OpenPU(Unit_O=Unit_O)
+!
+    IF(PRESENT(Proc_O)) THEN
+       IF(PrintFlags%Key > DEBUG_MINIMUM) THEN
+          CellStr=ProcessName(Proc_O)//'Number of Cells in '//TRIM(Name)//' = '//TRIM(IntToChar(CS%NCells))
+       ENDIF
+    ELSE
+       IF(PrintFlags%Key > DEBUG_MINIMUM) THEN
+          CellStr='Number of Cells in '//TRIM(Name)//' = '//TRIM(IntToChar(CS%NCells))
+       ENDIF
+    ENDIF
+    WRITE(PU,'(1x,A)')TRIM(CellStr)
+    CALL ClosePU(PU)
+!
+  END SUBROUTINE Print_CellSet
+#endif   
+!----------------------------------------------------------------PRINT COORDINATES
 !----------------------------------------------------------------PRINT COORDINATES
      SUBROUTINE Print_CRDS(GM,FileName_O,Unit_O,PrintGeom_O)
         TYPE(CRDS) :: GM         
@@ -365,7 +476,7 @@ MODULE PrettyPrint
         IF(MyId==ROOT)THEN
 #endif
           PU=OpenPU(FileName_O=FileName_O,Unit_O=Unit_O)
-
+!
 !           Mssg='Configuration #'//TRIM(IntToChar(GM%Confg))
 !           IF(GM%ETotal/=BIG_DBL)THEN
 !              Mssg='Escf['//TRIM(IntToChar(GM%Confg))//']='//TRIM(DblToChar(GM%ETotal)) 
@@ -406,18 +517,11 @@ MODULE PrettyPrint
               WRITE(PU,*)TRIM(Mssg)
               WRITE(PU,*)'(* Coordinates are in AU *)'
               DO I=1,GM%NAtms
-#ifdef PERIODIC
-                 Mssg='R['//TRIM(IntToChar(I))//']={'              &
-                          //DblToMMAChar(GM%BoxCarts%D(1,I))//','  &
-                          //DblToMMAChar(GM%BoxCarts%D(2,I))//','  &
-                          //DblToMMAChar(GM%BoxCarts%D(3,I))//'};'  
-#else
                  Mssg='R['//TRIM(IntToChar(I))//']={'           &
                           //DblToMMAChar(GM%Carts%D(1,I))//','  &
                           //DblToMMAChar(GM%Carts%D(2,I))//','  &
                           //DblToMMAChar(GM%Carts%D(3,I))//'};'  
-#endif
-                  WRITE(PU,*)TRIM(Mssg)
+                 WRITE(PU,*)TRIM(Mssg)
               ENDDO
            ELSE
 !             Default is the full dump of the internal representation
@@ -442,23 +546,18 @@ MODULE PrettyPrint
               WRITE(PU,*)TRIM(Mssg)
               WRITE(PU,2)
 #ifdef PERIODIC
-              WRITE(PU,*)' Periodic geometry has been wrapped into box coordinates '
+              CALL ClosePU(PU)
+              CALL Print_PBCInfo(GM%PBC,FileName_O,Unit_O)
+              PU=OpenPU(FileName_O=FileName_O,Unit_O=Unit_O)
 #endif              
               DO I=1,GM%NAtms
-#ifdef PERIODIC
-                  Mssg=TRIM(IntToChar(I))//'   '//Ats(GM%AtNum%I(I)) &
-                    //'   '//DblToMedmChar(GM%BoxCarts%D(1,I))       &
-                    //'   '//DblToMedmChar(GM%BoxCarts%D(2,I))       &
-                    //'   '//DblToMedmChar(GM%BoxCarts%D(3,I)) 
-#else
                   Mssg=TRIM(IntToChar(I))//'   '//Ats(GM%AtNum%I(I)) &
                     //'   '//DblToMedmChar(GM%Carts%D(1,I))          &
                     //'   '//DblToMedmChar(GM%Carts%D(2,I))          &
                     //'   '//DblToMedmChar(GM%Carts%D(3,I)) 
-#endif 
                    WRITE(PU,*)TRIM(Mssg)
               ENDDO
-              WRITE(PU,2)
+              WRITE(PU,3)
               CALL PrintProtectR(PU)
            ENDIF
            CALL ClosePU(PU)
@@ -626,7 +725,7 @@ MODULE PrettyPrint
 !      
 !===============================================================
 !
-     SUBROUTINE Print_CheckSum_DBL_VECT(A,Name,Unit_O,Proc_O)
+   SUBROUTINE Print_CheckSum_DBL_VECT(A,Name,Unit_O,Proc_O)
         TYPE(DBL_VECT), INTENT(IN)           :: A
         REAL(DOUBLE)                         :: Chk
         CHARACTER(LEN=*)                     :: Name
@@ -672,9 +771,10 @@ MODULE PrettyPrint
 #ifdef PARALLEL
         ENDIF
 #endif
-   END SUBROUTINE Print_CheckSum_DBL_VECT
-
-
+      END SUBROUTINE Print_CheckSum_DBL_VECT
+!----------------------------------------------------------------------------------------
+!
+!----------------------------------------------------------------------------------------
      SUBROUTINE Print_CheckSum_BCSR(A,Name,Proc_O,Unit_O)
         TYPE(BCSR), INTENT(IN)               :: A
         REAL(DOUBLE)                         :: Chk
@@ -766,15 +866,17 @@ MODULE PrettyPrint
       ENDIF
    END SUBROUTINE Print_CheckSum_DBCSR
 #endif
+!----------------------------------------------------------------------------------------
 !
+!----------------------------------------------------------------------------------------
   SUBROUTINE Print_CheckSum_HGRho(A,Name,Proc_O,Unit_O)
-    TYPE(HGRho)                      :: A
-    CHARACTER(LEN=*)                 :: Name   
+    TYPE(HGRho)                          :: A
+    CHARACTER(LEN=*)                     :: Name   
     INTEGER,         OPTIONAL,INTENT(IN) :: Unit_O
     CHARACTER(LEN=*),OPTIONAL            :: Proc_O
-    INTEGER                              :: PU,I,L,M,N,LMN,jadd,zq,iq,oq,orr,Ell,LenKet
-    REAL(DOUBLE)                         :: Chk
-    CHARACTER(LEN=2*DEFAULT_CHR_LEN)     :: ChkStr
+    INTEGER                              :: PU,I,L,M,N,LMN,jadd,zq,iq,oq,orr,Ell,LenKet,NQ
+    REAL(DOUBLE)                         :: Chk,RSum,Expt
+    CHARACTER(LEN=2*DEFAULT_CHR_LEN)     :: ChkStr1,ChkStr2
 !----------------------------------------------------------------------------------------
     IF(PrintFlags%Key/=DEBUG_MAXIMUM.AND. &
        PrintFlags%Chk/=DEBUG_CHKSUMS)RETURN
@@ -782,6 +884,7 @@ MODULE PrettyPrint
     IF(.NOT. AllocQ(A%Alloc)) THEN
        CALL Halt(' Density not allocated in Print_CheckSum_HGRho')
     ENDIF
+!
     Chk=Zero
     DO zq=1,A%NExpt-1
        oq =A%OffQ%I(zq)
@@ -796,27 +899,46 @@ MODULE PrettyPrint
        ENDDO
     ENDDO
 !
+    RSum = Zero
+    DO zq = 1,A%NExpt-1
+       Expt   = A%Expt%D(zq)
+       oq     = A%OffQ%I(zq)
+       orr    = A%OffR%I(zq)
+       Ell    = A%Lndx%I(zq) 
+       LenKet = LHGTF(Ell)
+       DO iq = 1,A%NQ%I(zq)
+          jadd = orr+(iq-1)*LenKet+1
+          RSum = RSum+A%Co%D(jadd)*((Pi/Expt)**ThreeHalves)
+       ENDDO
+    ENDDO
+!
+    PU=OpenPU(Unit_O=Unit_O)
     IF(PRESENT(Proc_O).AND.PrintFlags%Fmt/=DEBUG_MMASTYLE)THEN
-       ChkStr=ProcessName(Proc_O)//TRIM(Name)//CheckEq//TRIM(DblToChar(Chk))
+       ChkStr1=ProcessName(Proc_O)//TRIM(Name)//CheckEq//TRIM(DblToChar(Chk))
+       ChkStr2=ProcessName(Proc_O)//TRIM(Name)//RhoSumE//TRIM(DblToChar(RSum))
     ELSEIF(PrintFlags%Fmt/=DEBUG_MMASTYLE)THEN
-       ChkStr=TRIM(Name)//CheckEq//TRIM(DblToChar(Chk))
+       ChkStr1=TRIM(Name)//CheckEq//TRIM(DblToChar(Chk))
+       ChkStr2=TRIM(Name)//RhoSumE//TRIM(DblToChar(RSum))
     ELSEIF(PRESENT(Proc_O).AND.PrintFlags%Fmt==DEBUG_MMASTYLE)THEN
-       ChkStr='(* '//TRIM(Proc_O)//' *)'//'ChkSum'//TRIM(Name)       &
+       ChkStr1='(* '//TRIM(Proc_O)//' *)'//'ChkSum'//TRIM(Name)       &
                    //' = '//TRIM(FltToChar(FRACTION(Chk))) &
                    //'*2^('//TRIM(IntToChar(EXPONENT(Chk)))//');'
-     ELSEIF(PrintFlags%Fmt==DEBUG_MMASTYLE)THEN
-       ChkStr='ChkSum'//TRIM(Name)//' = '//TRIM(FltToChar(FRACTION(Chk))) &
+       ChkStr1='(* '//TRIM(Proc_O)//' *)'//'RhoSum'//TRIM(Name)       &
+                   //' = '//TRIM(FltToChar(FRACTION(RSum))) &
+                   //'*2^('//TRIM(IntToChar(EXPONENT(RSum)))//');'
+    ELSEIF(PrintFlags%Fmt==DEBUG_MMASTYLE)THEN
+       ChkStr1='ChkSum'//TRIM(Name)//' = '//TRIM(FltToChar(FRACTION(Chk))) &
                       //'*2^('//TRIM(IntToChar(EXPONENT(Chk)))//');'
-     ELSE 
+       ChkStr2='RhoSum'//TRIM(Name)//' = '//TRIM(FltToChar(FRACTION(RSum))) &
+                      //'*2^('//TRIM(IntToChar(EXPONENT(RSum)))//');'
+    ELSE 
        CALL Halt(' Logic error in Print_CheckSum_HGRho')
-     ENDIF
-!
-     PU=OpenPU(Unit_O=Unit_O)
-     WRITE(PU,'(1x,A)')TRIM(ChkStr)
-     CALL ClosePU(PU)
+    ENDIF
+    WRITE(PU,'(1x,A)')TRIM(ChkStr1)
+    WRITE(PU,'(1x,A)')TRIM(ChkStr2)
+    CALL ClosePU(PU)
 !
   END SUBROUTINE Print_CheckSum_HGRho
-
 !========================================================================================
 !     Print Out the Density 
 !========================================================================================
@@ -939,6 +1061,42 @@ MODULE PrettyPrint
 33  FORMAT(1x,' Number of Distribution = ',I8,2x)
 34  FORMAT(1x,' Number of Coeffients   = ',I8,2x)
   END SUBROUTINE Print_HGRho
+!========================================================================================
+!     Print Out the Cartesian Multipoles
+!========================================================================================
+  SUBROUTINE Print_CMPoles(A,Name,Unit_O)
+    TYPE(CMPoles)                    :: A
+    CHARACTER(LEN=*)                 :: Name   
+    INTEGER,OPTIONAL                 :: Unit_O
+    INTEGER                          :: PU
+    INTEGER                          :: I,J
+    CHARACTER(LEN=DEFAULT_CHR_LEN)   :: Strng
+!
+    IF(.NOT. AllocQ(A%Alloc)) THEN
+       CALL Halt(' Mutipoles not allocated in PPrint_CMPoles')
+    ENDIF
+    Strng = TRIM(Name)// ' Mutipoles:'
+!
+    PU=OpenPU(Unit_O=Unit_O)
+    WRITE(PU,10)
+    WRITE(PU,11) Strng
+    WRITE(PU,12) 
+    WRITE(PU,20) A%DPole%D(1),A%DPole%D(2),A%DPole%D(3)      
+    WRITE(PU,13)
+    WRITE(PU,20) A%QPole%D(1),A%QPole%D(2),A%QPole%D(3)
+    WRITE(PU,14)
+    WRITE(PU,20) A%QPole%D(4),A%QPole%D(5),A%QPole%D(6)
+    WRITE(PU,10)
+    CALL ClosePU(PU)
+!
+10  FORMAT(54('='))
+11  FORMAT(1x,A54)
+12  FORMAT(6x,' p(x) ',12x,' p(y) ',12x,' p(z) ')
+13  FORMAT(6x,'q(x*x)',12x,'q(y*y)',12x,'q(z*z)')
+14  FORMAT(6x,'q(x*y)',12x,'q(x*z)',12x,'q(y*z)')
+20  FORMAT(1x,D15.8,3x,D15.8,3x,D15.8)
+!
+  END SUBROUTINE Print_CMPoles
 !---------------------------------------------------------------------
 !
 !---------------------------------------------------------------------
