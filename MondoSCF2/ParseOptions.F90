@@ -342,8 +342,8 @@ CONTAINS
     ELSE
        PFlags%MM=DEBUG_NONE
     ENDIF
-    GeomPrint='PDB' ! hard set for now
-!    GeomPrint='XYZ' ! hard set for now
+!    GeomPrint='PDB' ! hard set for now
+    GeomPrint='XYZ' ! hard set for now
   END SUBROUTINE ParsePrintFlags
   !===============================================================================================
   !
