@@ -65,7 +65,7 @@ void gcmaker(int *GCDrv, int *BC, int *KC, int *L1, int *L2,
     }
 
     fscanf(InFile,"%d",L1);
-    for (i=0; i < (*L1)*4; ++i) {
+    for (i=0; i < (*L1)*5; ++i) {
        fscanf(InFile,"%d",GCDrv+i);
     }
     fclose(InFile);
@@ -77,7 +77,7 @@ void gcmaker(int *GCDrv, int *BC, int *KC, int *L1, int *L2,
        exit( EXIT_FAILURE );
     }
     fwrite(L1,sizeof(int),1,InFile);
-    fwrite(GCDrv,sizeof(int),(*L1)*4,InFile);
+    fwrite(GCDrv,sizeof(int),(*L1)*5,InFile);
     fclose(InFile);
 
 /* G3 */
@@ -91,7 +91,7 @@ void gcmaker(int *GCDrv, int *BC, int *KC, int *L1, int *L2,
     }
 
     fscanf(InFile,"%d",L1);
-    for (i=0; i < (*L1)*4; ++i) {
+    for (i=0; i < (*L1)*5; ++i) {
        fscanf(InFile,"%d",GCDrv+i);
     }
     fclose(InFile);
@@ -103,7 +103,7 @@ void gcmaker(int *GCDrv, int *BC, int *KC, int *L1, int *L2,
        exit( EXIT_FAILURE );
     }
     fwrite(L1,sizeof(int),1,InFile);
-    fwrite(GCDrv,sizeof(int),(*L1)*4,InFile);
+    fwrite(GCDrv,sizeof(int),(*L1)*5,InFile);
     fclose(InFile);
 
 /* G4 */
