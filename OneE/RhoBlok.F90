@@ -129,7 +129,7 @@ MODULE RhoBlok
 !
 !                  Calculate and Store the Coefficients of the Distribution
 !
-                   Rho%Co%D(OffCo:OffCo+LenKet) = Zero 
+                   Rho%Co%D(OffCo:OffCo+LenKet-1) = Zero 
                    IA=IndexA
                    DO LMNA=StartLA,StopLA
                       IA=IA+1
