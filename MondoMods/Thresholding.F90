@@ -74,6 +74,9 @@ MODULE Thresholding
         REAL(DOUBLE),DIMENSION(3) :: PairMidPnt,PairUntVct, &
                                      PairBoxVct,PrBxUntVct
 !----------------------------------------------------------------
+!        TestBoxPairOverlap=.TRUE.
+!        RETURN
+
 !       Midpoint vector of AB
         PairMidPnt=(Pair%A+Pair%B)*Half
 !       Distance from Box center to line midpoint
