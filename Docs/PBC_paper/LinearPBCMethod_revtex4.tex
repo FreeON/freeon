@@ -29,7 +29,7 @@
 \title{Linear scaling computation of the Fock matrix VII.  \\
        Periodic Density Functional Theory at the $\Gamma$-point.}
 
-\author{C.J. Tymczak}
+\author{C.~J.~Tymczak}
 \affiliation{Theoretical Division, Los Alamos National Laboratory, Los Alamos, New Mexico 87545 }
 \author{Matt Challacombe}
 \affiliation{Theoretical Division, Los Alamos National Laboratory, Los Alamos, New Mexico 87545 }
@@ -45,7 +45,9 @@ the unit cell.  Commonalities between the Coulomb and exchange-correlation algor
 achieving linear scaling through the use of modern data structures.  With these developments, convergence of the 
 $\Gamma$-point supercell approximation to the ${\bf k}$-space integration limit is demonstrated for MgO and NaCl. 
 Linear scaling construction of the Fockian and control of error is demonstrated for RBLYP/6-21G* diamond up to 512 atoms.\\
-\noindent{\bf Keywords}: Self-consistent-field, linear-scaling, periodic systems, tree-code, Gaussian-orbital
+
+\noindent{\bf Keywords}: Self-consistent-field, linear-scaling, periodic systems, $\Gamma$-point, tree-code, Gaussian-orbital, adaptive grid, $k$-d trees
+
 %
 \end{abstract}
 
@@ -71,8 +73,8 @@ and Dirac-Kohn-Sham \cite{TYanai01} theories.  Perhaps most important though, th
 may be computed efficiently with a GTAO basis set.  In addition to providing a reference for 
 correlated wavefunction methods, the exact HF exchange is central to hybrid HF/DFT models \cite{Gill92,Becke93,VBarone96,CAdamo99}.
 The use of hybrid methods  in the condensed phase, pioneered by the {\sc CRYSTAL} group \cite{Crystal98},
-has proven to be a usefull improvement beyond the generalized gradient approximation for a number of properties, including
-bulk geometries, electronic properties \cite{TBredow00,JMuscat01} and absorbtion energies \cite{PBaranek01,AWander01}.
+has proven to be a useful improvement beyond the generalized gradient approximation for a number of properties, including
+bulk geometries, electronic properties \cite{TBredow00,JMuscat01} and absorption energies \cite{PBaranek01,AWander01}.
 
 Recently, we have developed linear scaling quantum chemical methods for gas phase Density Functional Theory 
 (DFT), including computation of the Coulomb matrix ${\bf J}$ \cite{MChallacombe97} and the exchange-correlation
@@ -625,7 +627,7 @@ $ ^g$Cubic  \\
 \center{
 \begin{tabular}{rll}
 \toprule
- $N_{\rm at}$  & Energy (Hatree) & Energy/$N_{\rm at}$\\ 
+ $N_{\rm at}$  & Energy (au) & Energy/$N_{\rm at}$\\ 
 \colrule
   8    &   -303.989 &  -37.9986 \\
   16   &   -608.667 &  -38.0417 \\
@@ -883,9 +885,8 @@ initial box dimension and angles which are independent of the summation, and
 $\zeta (l+1)$ is the Riemann zeta function.
 
 In two dimensions, the Fourier integrals for the calculation of \( {\cal M} \)
-become more complicated.  We have opted to obtain the two dimensional tensor 
-via numerical integration of three dimensional values. In this case, we take the limit as the
-non-periodic direction (the $z$ direction in the following) goes to infinity:
+become more complicated. Taking the limit as the box dimension in the non-periodic
+direction  goes to infinity (the $z$ direction in the following), we obtain from Eq.~\ref{C4} 
 \begin{eqnarray}
 {\cal M}^{m}_{l} 
  & = & \sum _{{\mathbf{R}}\in V_{\rm PFF}}\, \left( l-m\right) !\, P_{l}^{m}\left( \cos 
@@ -900,20 +901,19 @@ non-periodic direction (the $z$ direction in the following) goes to infinity:
 \right| ^{l-2}e^{-\frac{\pi ^{2}\left| \mathbf{G}\right| ^{2}}{\beta ^{2}}}\, 
 \nonumber\\
 && \qquad \qquad \qquad \qquad  {\tilde P}_{l}^{m}
-\left( \cos  \theta _{\mathbf{G}} \right) e^{im\phi _{\mathbf{G}}}
+\left( \cos  \theta _{\mathbf{G}} \right) e^{im\phi _{\mathbf{G}}} \, ,
 \nonumber\\
 \label{C10}
 \end{eqnarray}
 %
-where,
+where
 \begin{eqnarray}
 {\cal C}_2 =  \frac{4\pi ^{\frac{3}{2}}(\frac{i}{2})^{l}}{A_{\rm UC}\Gamma \left( l+\frac{1}{2}\right) }
 \label{C10p}
 \end{eqnarray}
 and \( A_{\rm UC} \) is the area of the cell along the non-periodic
-direction. With this, we are able to obtain  $\sim 8-10$ digit accuracy 
-in the calculation of the two-dimensional \( {\cal M} \).
-
+direction. In practice, we carry out numerical evaluation of this integral.
+%
 %\section{Coordinates of Validation Suite}\label{FracCoords}
 %
 %\begin{table}[h]
