@@ -2041,7 +2041,7 @@ CONTAINS
          !
          IF(PBCDim>0) THEN
            Aux9=VectCart%D(NCart-8:NCart)+VectCartAux2%D(NCart-8:NCart)
-           CALL SetFixedLattice(Aux9,IntCsE)
+           CALL SetFixedLattice(Aux9,IntCsE,GConstr)
            VectCartAux2%D(NCart-8:NCart)=Aux9-VectCart%D(NCart-8:NCart)
            DO J=1,3
              K=3*(J-1)+1
@@ -3282,12 +3282,13 @@ CONTAINS
 !
 !-------------------------------------------------------------
 !
-   SUBROUTINE SetFixedLattice(VectCart,IntCs)
+   SUBROUTINE SetFixedLattice(VectCart,IntCs,GConstr)
      REAL(DOUBLE),DIMENSION(:)   :: VectCart
      TYPE(INTC)                  :: IntCs
      INTEGER                     :: I,J,K,L,NCart
      REAL(DOUBLE),DIMENSION(3,3) :: BoxShape
      REAL(DOUBLE),DIMENSION(6)   :: Vec
+     TYPE(Constr)                :: GConstr
      !
      NCart=SIZE(VectCart)-9
      DO I=1,3
@@ -3296,7 +3297,7 @@ CONTAINS
        BoxShape(1:3,I)=VectCart(K:L)
      ENDDO
      CALL CalcBoxPars(Vec,BoxShape)
-     CALL SetLattValues(Vec,IntCs)
+     CALL SetLattValues(Vec,IntCs,GConstr)
      CALL BoxParsToCart(Vec,BoxShape)
      DO I=1,3
        K=NCart+3*(I-1)+1
@@ -3307,10 +3308,11 @@ CONTAINS
 !
 !--------------------------------------------------------------------
 !
-   SUBROUTINE SetLattValues(Vec,IntCs)
+   SUBROUTINE SetLattValues(Vec,IntCs,GConstr)
      REAL(DOUBLE),DIMENSION(6) :: Vec
      TYPE(INTC)                :: IntCs
      INTEGER                   :: I
+     TYPE(Constr)              :: GConstr
      !
      DO I=1,IntCs%N
        IF(.NOT.IntCs%Constraint%L(I)) CYCLE
@@ -3321,6 +3323,12 @@ CONTAINS
        IF(IntCs%Def%C(I)(1:4)=='BETA')   Vec(5)=IntCs%ConstrValue%D(I)
        IF(IntCs%Def%C(I)(1:5)=='GAMMA')  Vec(6)=IntCs%ConstrValue%D(I)
      ENDDO
+     IF(GConstr%AeqB) Vec(1)=Vec(2)
+     IF(GConstr%AeqC) Vec(1)=Vec(3)
+     IF(GConstr%BeqC) Vec(2)=Vec(3)
+     IF(GConstr%ALPHAeqBETA)  Vec(4)=Vec(5)
+     IF(GConstr%ALPHAeqGAMMA) Vec(4)=Vec(6)
+     IF(GConstr%BETAeqGAMMA)  Vec(5)=Vec(6)
    END SUBROUTINE SetLattValues
 !
 !----------------------------------------------------------------------

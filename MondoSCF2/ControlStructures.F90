@@ -145,6 +145,12 @@ MODULE ControlStructures
      REAL(DOUBLE)                       :: ConstrMaxCrit
      LOGICAL                            :: DoFixMM
      LOGICAL                            :: TSSearch
+     LOGICAL                            :: AeqB
+     LOGICAL                            :: AeqC
+     LOGICAL                            :: BeqC
+     LOGICAL                            :: ALPHAeqBETA
+     LOGICAL                            :: ALPHAeqGAMMA
+     LOGICAL                            :: BETAeqGAMMA
   END TYPE Constr
   !
   TYPE BackTrf

@@ -61,6 +61,33 @@ MODULE ParseGeomOpt
        GOpt%GConvCrit%ExplLatt=.TRUE.
      ENDIF
      !
+     ! Parse for lattice parameter equivalence constraints
+     !
+     GOpt%Constr%AeqB=.FALSE.
+     IF(OptKeyQ(Inp,GRADIENTS,OPT_AeqB)) THEN
+       GOpt%Constr%AeqB=.TRUE.
+     ENDIF
+     GOpt%Constr%AeqC=.FALSE.
+     IF(OptKeyQ(Inp,GRADIENTS,OPT_AeqC)) THEN
+       GOpt%Constr%AeqC=.TRUE.
+     ENDIF
+     GOpt%Constr%BeqC=.FALSE.
+     IF(OptKeyQ(Inp,GRADIENTS,OPT_BeqC)) THEN
+       GOpt%Constr%BeqC=.TRUE.
+     ENDIF
+     GOpt%Constr%ALPHAeqBETA=.FALSE.
+     IF(OptKeyQ(Inp,GRADIENTS,OPT_ALPHAeqBETA)) THEN
+       GOpt%Constr%ALPHAeqBETA=.TRUE.
+     ENDIF
+     GOpt%Constr%ALPHAeqGAMMA=.FALSE.
+     IF(OptKeyQ(Inp,GRADIENTS,OPT_ALPHAeqGAMMA)) THEN
+       GOpt%Constr%ALPHAeqGAMMA=.TRUE.
+     ENDIF
+     GOpt%Constr%BETAeqGAMMA=.FALSE.
+     IF(OptKeyQ(Inp,GRADIENTS,OPT_BETAeqGAMMA)) THEN
+       GOpt%Constr%BETAeqGAMMA=.TRUE.
+     ENDIF
+     !
      ! Parse for alternating lattice and atomic positions relaxation 
      !
      GOpt%GConvCrit%Alternate=.FALSE.
