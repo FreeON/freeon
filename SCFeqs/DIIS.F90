@@ -24,7 +24,7 @@ PROGRAM PulayDIIS
    TYPE(INT_VECT)                 :: IWork
    TYPE(DBL_VECT)                 :: V,DIISCo
    TYPE(DBL_RNK2)                 :: B,BOld,BInv,BTmp
-   REAL(DOUBLE)                   :: DIISErr,C0,C1,EigThresh
+   REAL(DOUBLE)                   :: DIISErr,C0,C1,Damp,EigThresh
    INTEGER                        :: I,J,K,N,ISCF,JSCF,KSCF
    CHARACTER(LEN=2)               :: Cycl,NxtC
    CHARACTER(LEN=9),PARAMETER     :: Prog='PulayDIIS'
@@ -138,9 +138,14 @@ PROGRAM PulayDIIS
 !--------------------------------------------------------------------------------
    IF(ISCF<=1)THEN
 !    Damping on the first cycle
-     C0=8D-1 
-     C1=2D-1
+     CALL OpenASCII(InpFile,Inp)  
+     IF(.NOT.OptDblQ(Inp,'DIISDamp',Damp))Damp=2D0
+     CLOSE(Inp)
+     C0=One-Damp
+     C1=Damp
+!    Damp current Fock matrix by C1
      CALL Multiply(F,C1)
+!    Damp previous Fock matrix by C0
      CALL Get(Tmp1,TrixFile('OrthoF',Args,-1))
      CALL Multiply(Tmp1,C0)
      CALL Add(F,Tmp1,E)
