@@ -1036,6 +1036,7 @@ MODULE FastMatrices
        ENDDO
        R => R%Next
     ENDDO
+    FNorm_FASTMAT=SQRT(FNorm_FASTMAT)
     IF(PRESENT(Perf_O)) Perf_O%FLOP = Perf_O%FLOP+Op
   END FUNCTION FNorm_FASTMAT
 
