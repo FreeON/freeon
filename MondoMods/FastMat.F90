@@ -7,6 +7,7 @@ MODULE FastMatrices
    USE Order
    USE MondoMPI
    USE Thresholding
+   IMPLICIT NONE
 !======================================================================
 !   LINKED ROW LIST WITH COLOUMN INDEXED SEARCH TREE
 !   A FAST O(N LG N) SPARSE MATRIX DATA STRUCTURE FOR ALL PROCCEDURES
@@ -1228,7 +1229,7 @@ MODULE FastMatrices
   RECURSIVE SUBROUTINE SetSRSTSkipPtrs(A,B)
     TYPE(SRST),POINTER          :: A
     TYPE(SRST),POINTER,OPTIONAL :: B
-    LOGICAL                     :: AssocAL,AssocAR, &
+    LOGICAL                     :: AssocB,AssocAL,AssocAR, &
                                    AssocBL,AssocBR
 !----------------------------------------------------------------------
     IF(PRESENT(B))THEN
