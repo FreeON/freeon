@@ -5,7 +5,7 @@
            & (OffSet%C-1)*NBFA*NBFB+ &
            & (OffSet%D-1)*NBFA*NBFB*NBFC
       CALL IntSSSS5(ACAtmPair(CFAC)%SP%Cst(1,1),ACAtmPair(CFAC)%SP%L, &
-           &        BDAtmPair(CFBD)%SP%Cst(1,1),BDAtmPair(CFBD)%SP%L,C(Off))
+           &        BDAtmPair(CFBD)%SP%Cst(1,1),BDAtmPair(CFBD)%SP%L,C(Off),GM%PBC)
      LocNInt=1
    CASE(3010101)
      CALL Int3111(ACAtmPair(CFAC)%SP%Cst(1,1),ACAtmPair(CFAC)%SP%L, & 

@@ -1,7 +1,7 @@
    SELECT CASE(IntType)
    CASE(101)
      CALL IntSSSS5(ACAtmPair(CFAC)%SP%Cst(1,1),ACAtmPair(CFAC)%SP%L, &
-           &        ACAtmPair(CFAC)%SP%Cst(1,1),ACAtmPair(CFAC)%SP%L,C(1))
+           &        ACAtmPair(CFAC)%SP%Cst(1,1),ACAtmPair(CFAC)%SP%L,C(1),GM%PBC)
      LocNInt=1
    CASE(301)
      CALL Int3131(ACAtmPair(CFAC)%SP%Cst(1,1),ACAtmPair(CFAC)%SP%L, & 

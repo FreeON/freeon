@@ -29,6 +29,8 @@ include $(MONDO_COMPILER)
 include $(MONDO_HOME)/Includes/Suffixes
 include $(MONDO_HOME)/Includes/RemoveAll
 
+EXTRA_INCLUDES=-I$(MONDO_HOME)/TwoE
+
 all: ONX2
 
 Objects = QuickSortDis.o ONXParameters.o ONXInit.o ONXGet.o   \
