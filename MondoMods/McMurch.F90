@@ -233,4 +233,59 @@ MODULE McMurchie
          ENDDO
       END SUBROUTINE AuxInts
 
+
+
+
+!-------------------------------------------------------------
+!     Compute the auxiliary integrals R_{0,0,0,J}(T)
+!
+      SUBROUTINE ErrInts(MaxL,LTot,ErrR,Omega,T)
+         REAL(DOUBLE),                  INTENT(IN)  :: Omega,T
+         INTEGER,                       INTENT(IN)  :: MaxL,LTot 
+         REAL(DOUBLE),DIMENSION(0:MaxL),INTENT(OUT) :: ErrR
+         REAL(DOUBLE),PARAMETER                     :: Switch=35.0D0
+         INTEGER,PARAMETER                          :: LPlus=150
+         INTEGER,PARAMETER                          :: L2=12+LPlus
+         REAL(DOUBLE),DIMENSION(0:MaxL)             :: E
+         REAL(DOUBLE),DIMENSION(0:L2)               :: M,F
+         REAL(DOUBLE)                               :: SqrtT,ET,OneOvT,FJ,TwoT, &
+                                                       OmegaJ,TwoO
+         INTEGER                                    :: J
+!---------------------------------------------------------------------------------
+!        Compute the incomplete gamma functions F_j(T)
+!
+         IF(T==Zero) &
+            CALL Halt('Infinity in ErrInts')
+         IF(T>Switch)THEN
+            ErrR=Zero
+            RETURN
+         ENDIF
+!---------------------------------------------------
+!        Downward recursion:
+!        F_{j}(T)=(2*T*F_{j+1}+Exp[-T])/(2*j+1)
+         TwoT=Two*T
+         ET=EXP(-T)
+         FJ=Zero
+         DO J=LTot+LPlus,0,-1
+            F(J)=FJ
+            FJ=(TwoT*F(J)+ET)/(Two*DBLE(J)-One)
+         ENDDO
+!----------------------------------------------------
+!        Multipole approx and upward recursion
+         SqrtT=SQRT(T)
+         OneOvT=One/T
+         M(0)=SqrtPi/(Two*SqrtT) 
+         DO J=1,LTot
+            M(J)=M(J-1)*(DBLE(J)-Half)*OneOvT
+         ENDDO
+!------------------------------------------------------
+!        Generate the auxiliary error integrals 
+!        R_{000j}=(-2*omega)^j [F_{j}(T)-M_{j}(T)]
+         OmegaJ=One
+         TwoO=-Two*Omega
+         DO J=0,LTot
+            ErrR(J)=OmegaJ*ABS(M(J)-F(J))
+            OmegaJ=TwoO*OmegaJ
+         ENDDO
+      END SUBROUTINE ErrInts
 END MODULE
