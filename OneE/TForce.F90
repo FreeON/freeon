@@ -21,8 +21,9 @@ PROGRAM TForce
   TYPE(BCSR)          :: P
 #endif
 #ifdef PERIODIC 
-  INTEGER                   :: NC
-  REAL(DOUBLE),DIMENSION(3) :: B
+  INTEGER                     :: NC
+  REAL(DOUBLE),DIMENSION(3)   :: B,F_nlm,nlm
+  REAL(DOUBLE),DIMENSION(3,3) :: LatFrc_T
 #endif
   TYPE(AtomPair)      :: Pair
   TYPE(BSET)          :: BS
@@ -32,6 +33,7 @@ PROGRAM TForce
   TYPE(HGRho)         :: Rho
   TYPE(DBL_VECT)      :: TFrc,Frc
   REAL(DOUBLE)        :: TFrcChk
+!
   CHARACTER(LEN=6),PARAMETER :: Prog='TForce'
 !------------------------------------------------------------------------------------- 
 ! Start up macro
@@ -54,6 +56,8 @@ PROGRAM TForce
 !--------------------------------------------------------------------------------
 ! TForce=2*Tr{P.dT} (Extra 2 to account for symmetry of T in the trace)
 !--------------------------------------------------------------------------------
+  LatFrc_T = Zero
+!
   TFrc%D=Zero
   DO AtA=1,NAtoms
      A1=3*(AtA-1)+1
@@ -73,9 +77,16 @@ PROGRAM TForce
                       +(Pair%A(2)-Pair%B(2))**2  &
                       +(Pair%A(3)-Pair%B(3))**2
               IF(TestAtomPair(Pair)) THEN
-                 TFrc%D(A1:A2)=TFrc%D(A1:A2) &
-                              +Four*TrPdT(BS,Pair,P%MTrix%D(Q:Q+MN1))
+                 F_nlm(1:3)    = Four*TrPdT(BS,Pair,P%MTrix%D(Q:Q+MN1))
+                 TFrc%D(A1:A2) = TFrc%D(A1:A2) + F_nlm(1:3)
+!
+                 nlm = AtomToFrac(GM,CS_OUT%CellCarts%D(1:3,NC))
+                 LatFrc_T(1,1:3) = LatFrc_T(1,1:3) + nlm(1)*F_nlm(1:3)
+                 LatFrc_T(2,1:3) = LatFrc_T(2,1:3) + nlm(2)*F_nlm(1:3)
+                 LatFrc_T(3,1:3) = LatFrc_T(3,1:3) + nlm(3)*F_nlm(1:3)
+!
               ENDIF
+              
            ENDDO
 #else
            TFrc%D(A1:A2)=TFrc%D(A1:A2)  &
@@ -88,6 +99,9 @@ PROGRAM TForce
 ! Do some checksumming, resumming and IO 
   CALL PPrint(TFrc,'dT/dR')
   CALL PChkSum(TFrc,'dT/dR',Proc_O=Prog)  
+! Print The TForce
+  CALL Print_Force(GM,TFrc,' dT/dR ')
+  CALL Print_CheckSum_Force(TFrc,' dT/dR ')
 ! Sum in contribution to total force
   CALL New(Frc,3*NAtoms)
   CALL Get(Frc,'GradE',Tag_O=CurGeom)
