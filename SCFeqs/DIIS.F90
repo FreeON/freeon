@@ -91,6 +91,8 @@ PROGRAM DIIS
       ELSE
          Sloshed=.FALSE.
       ENDIF
+      ! Charge sloshing DIIS seems to be broken. Leave off for now...
+      Sloshed=.FALSE.
 !-------------------------------------------------------------------------------------
 !     Build the B matrix, possibly with Sellers multipole modification
       I0=M-ISCF
