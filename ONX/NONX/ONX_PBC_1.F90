@@ -115,7 +115,9 @@ PROGRAM ONX
 ! Compute and sort the distribution buffers
 !--------------------------------------------------------------------------------
   CALL RangeOfDensity(D,NameBuf,BfnInd,DB1,BSp,GMp)
+#ifdef PERIODIC
   CALL RangeOfDensity(D,NameBuf,BfnInd,DB2,BSp,GMp)
+#endif
 
      PBC_h=Zero
      PBC_g=Zero
@@ -124,7 +126,9 @@ PROGRAM ONX
         CALL DisOrder(BSc,GMc,BSp,GMp,DB1,IB,SB,Drv,NameBuf)
      ENDDO
      ErrorCode=eInit
+#ifdef PERIODIC
      CALL MemInit(DB2,IB,SB,Drv,BSc,BSp)
+#endif
 !--------------------------------------------------------------------------------
 ! Allocate space for the exchange matrix. The routines below make sure 
 ! that there is *always* enough space allocated for the exchange matrix. 
