@@ -226,27 +226,25 @@ MODULE DerivedTypes
 ! Periodic Information
 !
   TYPE PBCInfo
+     INTEGER                     :: Alloc      !-- Allocation key
      INTEGER                     :: Dimen      !-- Dimension of the System
      INTEGER                     :: PFFMaxEll  !-- Maxium Ell of the PFF contribution     
      INTEGER                     :: PFFMaxLay  !-- Maxium Layer of the PFF contribution
      LOGICAL                     :: PFFOvRide  !-- Override of Automatic PFF stuff
-
      LOGICAL                     :: AtomW      !-- Wrap atoms back into box--BE CAREFUL
      LOGICAL                     :: InVecForm  !-- What form are the Lattice vectors in
      LOGICAL                     :: InAtomCrd  !-- Atomic or Fractional Coordinates
      LOGICAL                     :: Translate  !-- Should the Atomic Coordinated be Translated 
-     LOGICAL                     :: Trans_COM  !-- Weither to Translate to The center of The Box
-     LOGICAL,DIMENSION(3)        :: AutoW      !-- Periodic in X, Y and or Z  direction
-
      REAL(DOUBLE)                :: CellVolume !-- Cell Volume
      REAL(DOUBLE)                :: Epsilon    !-- Epsilon at Infinity (Metal == Infinity)
      REAL(DOUBLE)                :: DipoleFAC  !-- Normalization of the Dipole Term
      REAL(DOUBLE)                :: QupoleFAC  !-- Normalization of Quadrupole Term 
-     REAL(DOUBLE),DIMENSION(3)   :: CellCenter !-- Center of Cell
-     REAL(DOUBLE),DIMENSION(3)   :: TransVec   !-- Origin Translate Vector
-     REAL(DOUBLE),DIMENSION(3,3) :: BoxShape   !-- Box Shape Vectors
-     REAL(DOUBLE),DIMENSION(3,3) :: InvBoxSh   !-- Inverse of the Box Shape Vectors
-     REAL(DOUBLE),DIMENSION(3,3) :: LatFrc     !-- Lattice Forces
+     TYPE(INT_VECT)              :: AutoW      !-- Periodic in X, Y and or Z  direction
+     TYPE(DBL_VECT)              :: CellCenter !-- Center of Cell
+     TYPE(DBL_VECT)              :: TransVec   !-- Origin Translate Vector
+     TYPE(DBL_RNK2)              :: BoxShape   !-- Box Shape Vectors
+     TYPE(DBL_RNK2)              :: InvBoxSh   !-- Inverse of the Box Shape Vectors
+     TYPE(DBL_RNK2)              :: LatFrc     !-- Lattice Forces
   END TYPE PBCInfo                               
 !----------------------------------------------------------------
 !  Coordinates
@@ -272,23 +270,23 @@ MODULE DerivedTypes
       TYPE(DBL_RNK2)   :: BndBox    !-- Bounding box of the system
 !     Perodic Stuff
       TYPE(PBCInfo)    :: PBC       !-- Periodic Information
-      TYPE(DBL_RNK2)   :: BoxCarts  !-- Lattice coordinates 
-      TYPE(DBL_RNK2)   :: AbBoxCarts!-- Abosolute coords in fractional
-      TYPE(DBL_RNK2)   :: BoxVects  !-- Velocity Lattice coordinates 
 !     Atomic coordinates
       INTEGER          :: NAtms     !-- Number of atoms
       INTEGER          :: Nkind     !-- Number of atom kinds or types
       TYPE(DBL_VECT)   :: AtNum     !-- Atomic number per atom      
       TYPE(INT_VECT)   :: AtTyp     !-- Atom type or kind per atom 
-      TYPE(INT_VECT)   :: CConstrain!-- Atom type or kind per atom 
       TYPE(CHR_VECT)   :: AtNam     !-- Atomname
       TYPE(CHR_VECT)   :: AtMMTyp   !-- Molecular Mechanics atomtype
       TYPE(DBL_VECT)   :: AtMss     !-- Atomic Mass per Atom
-      TYPE(DBL_RNK2)   :: AbCarts   !-- Absolute, unwrapped coordinates
+      TYPE(INT_VECT)   :: CConstrain!-- Atom type or kind per atom 
       TYPE(DBL_RNK2)   :: Carts     !-- Cartesian coordinates 
-      TYPE(DBL_RNK2)   :: Vects     !-- Something related to gradients (velocities, forces, etc)
+      TYPE(DBL_RNK2)   :: BoxCarts  !-- Lattice coordinates 
+      TYPE(DBL_RNK2)   :: Velocity  !-- velocities    
+      TYPE(DBL_RNK2)   :: Gradients !-- Gradients
+!
+      TYPE(DBL_RNK2)   :: AbCarts   !-- Absolute, unwrapped coordinates
       TYPE(DBL_RNK2)   :: Displ     !-- Displaced Cartesian geometry
-      ! Constraints and Lagrangians
+!     Constraints and Lagrangians
       INTEGER          :: NLagr     !-- Number of geometric Constrts
       TYPE(DBL_VECT)   :: LagrDispl !-- Displaced Lagrange multipl.
       TYPE(DBL_VECT)   :: LagrMult  !-- Lagrange multipliers
