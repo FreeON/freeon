@@ -94,8 +94,8 @@ method to linear scaling computation of quantum Coulomb sums tin-foil boundaries
 ${\cal O}(N)$ methods for computing the GTAO-based  exchange-correlation matrix are presented. 
 In Section~\ref{implement} we discuss the implementation of these developments in the {\sc  MondoSCF} \cite{MondoSCF} suite
 of linear scaling quantum chemistry codes.  In Section~\ref{validate}, comparison of the $\Gamma$-point results
-is made with those obtained with {\sc CRYSTAL98} using $\bf k$-space integration for NaCl and MgO.  Next, 
-in Section~\ref{scale}, linear scaling is demonstrated for construction of the diamond Fock matrix at the RBLYP/6-21G* 
+is made with those obtained with {\sc CRYSTAL98} using ${\bf k}$-space integration for NaCl and MgO.  Next, 
+in Section~\ref{scale}, linear scaling is demonstrated for construction of the diamond Fock matrix at the RBLYP/6-21G*  
 level of theory.     Finally, we present our conclusions in Section~\ref{conclude}.
 
 \section{periodic boundary conditions, linear scaling and basis sets}\label{pbcintro}
@@ -598,9 +598,9 @@ $N_{\rm at}=2$ and 8 are  are given in Ref.~[\cite{PBCCoordinates}].}
 Program         & $N_{\rm at}$              & Energy (Hatree) & Energy/$N_{\rm at}$\\ 
 \colrule
 {\sc MondoSCF}      & $2^f$  &  -622.39101   & -311.19551  \\
-{\sc CRYSTAL}     & $2^f$  &  -622.3911    & -311.1955    \\
+{\sc CRYSTAL}     & $2^f$  &  -622.39114    & -311.19557    \\
 {\sc MondoSCF}      & $8^g$  &  -2490.0016   & -311.25020  \\
-{\sc CRYSATAL}     & $8^g$  &  -2490.0013   & -311.25016   \\
+{\sc CRYSTAL}     & $8^g$  &  -2490.0013   & -311.25016   \\
 \botrule
 $ ^f$Triclinic \\
 $ ^g$Cubic
@@ -624,7 +624,7 @@ Program         & $N_{\rm at}$              & Energy (Hatree) & Energy/$N_{\rm a
                 & 128$^f$  & -39109.912    & -305.54618   \\
                 & 216$^g$  & -65997.977    & -305.54619   \\ 
 \hline
-{\sc CRYSATAL}$^h$ & 2$^f$    &  -611.09228    & -305.54614    \\ 
+{\sc CRYSTAL}$^h$ & 2$^f$    &  -611.09228    & -305.54614    \\ 
 \botrule
 $ ^f$Triclinic \\
 $ ^g$Cubic  \\
@@ -654,7 +654,7 @@ Program         & $N_{\rm at}$              & Energy (Hatree) & Energy/$N_{\rm a
                 & 128$^f$  &  -17630.430  & -137.73774  \\
                 & 216$^g$  &  -29751.352  & -137.73774  \\ 
 \hline
-{\sc CRYSATAL }$^h$ & 2$^f$    &   -275.47547  & -137.73774  \\ 
+{\sc CRYSTAL }$^h$ & 2$^f$    &   -275.47547  & -137.73774  \\ 
 \botrule
 $ ^f$Triclinic \\
 $ ^g$Cubic  \\
