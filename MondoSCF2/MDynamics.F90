@@ -101,7 +101,7 @@ MODULE MDynamics
           CALL Put(MDTime%D(iCLONE),"MDTime")
        ENDDO
        IF(.FALSE.) THEN
-          C%Stat%Action%C(1)==SCF_GUESSEQCORE
+          C%Stat%Action%C(1)=SCF_GUESSEQCORE
           DO iBAS=1,C%Sets%NBSets
              CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos) 
              CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
