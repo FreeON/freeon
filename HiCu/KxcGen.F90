@@ -133,6 +133,7 @@ MODULE KxcGen
        INTEGER                                  :: I,J,MaxLA,MaxLB,IA,IB,    &
                                                    LMNA,LMNB,LA,LB,MA,MB,    &
                                                    NA,NB,LAB,MAB,NAB,LMN,EllA,EllB
+real(double):: Pextent_Old
 !-------------------------------------------------------------------------------------- 
        KBlk=Zero
        KA=Pair%KA
@@ -172,9 +173,15 @@ MODULE KxcGen
                 Prim%PFB=PFB
 !               Set primitive values
                 MaxAmp=SetBraBlok(Prim,BS)
-                PBox%BndBox(1,:)=Prim%P(1)
-                PBox%BndBox(2,:)=Prim%P(2)
-                PBox%BndBox(3,:)=Prim%P(3)
+#ifdef PERIODIC
+!               Quick check to see if primitive touches the grid
+!               add in fudge factor for safety
+                PExtent=GaussianExtent(Prim%Zeta,1.D4*MaxAmp)
+                PBox%BndBox(:,1)=Prim%P
+                PBox%BndBox(:,2)=Prim%P
+                PBox=ExpandBox(PBox,PExtent)
+                IF(.NOT.BoxOutSideBox(PBox,CubeRoot%Box))THEN
+#endif
 !               Find the maximum extent of this primitive
                 PExtent=Zero
                 IA = IndexA
@@ -212,6 +219,9 @@ MODULE KxcGen
                          ENDDO
                       ENDDO
                    ENDDO
+#ifdef PERIODIC
+                ENDIF
+#endif
                 ENDIF
 !---------------------------------------------------------------------------
              ENDIF

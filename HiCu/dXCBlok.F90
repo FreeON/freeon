@@ -77,6 +77,14 @@ MODULE dXCBlok
                 Prim%PFB=PFB
 !               Set primitive values, find distributions wheight
                 MaxAmp=SetBraBlok(Prim,BS,Gradients_O=Pair%SameAtom)
+#ifdef PERIODIC
+!               Quick check to see if primitive touches the grid
+                PExtent=GaussianExtent(Prim%Zeta,1.D4*MaxAmp)
+                PBox%BndBox(:,1)=Prim%P
+                PBox%BndBox(:,2)=Prim%P
+                PBox=ExpandBox(PBox,PExtent)
+                IF(.NOT.BoxOutSideBox(PBox,CubeRoot%Box))THEN
+#endif
 !-----------------------------------------------------------------------------------------
 !               Find the maximum extent of this primitive
                 PExtent=Zero
@@ -124,6 +132,9 @@ MODULE dXCBlok
                          ENDDO
                       ENDDO
                    ENDDO
+#ifdef PERIODIC
+                ENDIF
+#endif
                 ENDIF
 !---------------------------------------------------------------------------
              ENDIF 
