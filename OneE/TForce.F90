@@ -102,8 +102,14 @@ PROGRAM TForce
      ENDDO
   ENDDO
 !
-! Print Out Lattice Force
+! Print The Forces and Lattice Forces
 !
+!!$  WRITE(*,*) 'TForce'
+!!$  DO AtA=1,NAtoms
+!!$     A1=3*(AtA-1)+1
+!!$     A2=3*AtA
+!!$     WRITE(*,*) TFrc%D(A1:A2)
+!!$  ENDDO
 !!$  WRITE(*,*) 'LatFrc_T'
 !!$  DO I=1,3
 !!$     WRITE(*,*) (LatFrc_T%D(I,J),J=1,3) 
