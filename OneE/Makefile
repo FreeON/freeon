@@ -31,8 +31,8 @@ include $(MONDO_HOME)/Includes/RemoveAll
 #
 ObjsS = SBlok.o     MakeS.o 
 ObjsT = TBlok.o     MakeT.o 
-ObjsR = RhoBlok.o RhoTools.o  MakeRho.o 
-ObjsParaR = RhoBlok.o RhoTools.o  ParaMakeRho.o
+ObjsR = RhoTools.o RhoBlok.o  MakeRho.o 
+ObjsParaR = RhoTools.o RhoBlok.o ParaMakeRho.o
 ObjSF = BlokTrWdS.o SForce.o 
 ObjTF = BlokTrPdT.o TForce.o
 
@@ -90,3 +90,4 @@ MakeT.o  : TBlok.o                $(MONDO_LIB)/libMondoMods.a
 MakeRho.o: RhoBlok.o  RhoTools.o  $(MONDO_LIB)/libMondoMods.a
 SForce.o : BlokTrWdS.o            $(MONDO_LIB)/libMondoMods.a
 TForce.o : BlokTrPdT.o            $(MONDO_LIB)/libMondoMods.a
+RhoBlok.o: RhoTools.o             $(MONDO_LIB)/libMondoMods.a
