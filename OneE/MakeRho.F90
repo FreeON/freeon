@@ -52,28 +52,12 @@ PROGRAM MakeRho
   CALL Get(GM,Tag_O=CurGeom)
   CALL NewBraBlok(BS)  
 !----------------------------------------------
-! Set up the appropriate action
-!----------------------------------------------
-  IF(Args%C%C(2)=='Core') THEN
-     iSwitch=0
-  ELSEIF(Args%C%C(2)=='Direct') THEN
-     iSwitch=1
-  ELSEIF(Args%C%C(2)=='Switch') THEN
-     iSwitch=2
-  ELSEIF(Args%C%C(2)=='InkFok') THEN
-     iSwitch=3
-  ELSE
-     CALL MondoHalt(-100,' Inappropriate Action in MakeRho:'//Args%C%C(2))
-  ENDIF
-!----------------------------------------------
 ! Get the Density Matrix
 !----------------------------------------------
-  IF(iSwitch==1) THEN
-     CALL Get(Dmat,TrixFile('D',Args,0))
-  ELSEIF(iSwitch==2) THEN
-     CALL Get(Dmat,TrixFile('D',Args,0))
-  ELSEIF(iSwitch==3) THEN
+  IF(SCFActn=='InkFok')THEN
      CALL Get(Dmat,TrixFile('DeltaD',Args,0))
+  ELSEIF(SCFActn/='Core')THEN
+     CALL Get(Dmat,TrixFile('D',Args,0))
   ENDIF
 !---------------------------------------------- 
 ! Allocations 
@@ -96,7 +80,7 @@ PROGRAM MakeRho
 ! Main loops: First pass calculates the size.
 !             Second pass calculates the density
 !---------------------------------------------------
-  IF(iSwitch==0) THEN
+  IF(SCFActn=='Core') THEN
 !---------------------------------------------------
 !    Re-allocate the density
 !
@@ -121,7 +105,7 @@ PROGRAM MakeRho
 !    Initailize  NQ
 !
      Rho%NQ%I = 0
-     IF(iSwitch == 1 .OR. iSwitch == 2) Rho%NQ%I(Rho%NExpt) = NAtoms
+     IF(SCFActn/='InkFok')Rho%NQ%I(Rho%NExpt)=NAtoms
 !----------------------------------------------------
 !    Loop over atoms and count primatives
 !
@@ -208,7 +192,7 @@ PROGRAM MakeRho
 !---------------------------------------------------
 !    Add in the density for the nuclear centers
 !
-     IF(iSwitch == 1 .OR. iSwitch == 2) CALL AddNukes(GM,Rho)
+     IF(SCFActn/='InkFok')CALL AddNukes(GM,Rho)
   ENDIF
 #ifdef PERIODIC
 !-----------------------------------------------------------
