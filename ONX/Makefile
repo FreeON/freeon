@@ -7,7 +7,7 @@ all:
 release:clean
 	$(MAKE) -C NONX release
 	rm -rf MakeTables PONXMults PONX GMEONX GSONX MEONX \
-               Drivers GDrivers VRR VRRm ONX
+               Drivers GDrivers VRR VRRm ONX SONX MASONX
 #
 clean:
 #	cd MakeTables ; $(MAKE) -i clean
