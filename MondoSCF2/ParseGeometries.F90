@@ -8,6 +8,7 @@ MODULE ParseGeometries
   USE PrettyPrint
   USE ControlStructures
   USE NEB
+  USE Conflicted
 CONTAINS
   !================================================================================================================
   !
@@ -128,6 +129,11 @@ CONTAINS
        !       CALL Print_CRDS(G%Clone(I),UNIT_O=6)
     ENDDO
 #endif
+
+    !
+    ! Check the coordinates.
+    CALL GeoConflictCheck1(G)
+    !
   END SUBROUTINE LoadCoordinates
 !
 !
