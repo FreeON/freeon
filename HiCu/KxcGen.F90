@@ -37,10 +37,8 @@ MODULE KxcGen
     TYPE(AtomPair)         :: Pair
     INTEGER                :: AtA,AtB
     INTEGER                :: JP,K,NA,NB,NAB,P,Q,R,I,J
-#ifdef PERIODIC        
     INTEGER                   :: NCA,NCB
     REAL(DOUBLE),DIMENSION(3) :: A,B
-#endif     
 !------------------------------------------------------------------------------- 
 !   Initialize the matrix and associated indecies
 #ifdef PARALLEL
@@ -60,7 +58,6 @@ MODULE KxcGen
           IF(AtB<=AtA)THEN
 #endif
 !         Compute only the lower triangle of symmetric Kxc
-#ifdef PERIODIC
             A = Pair%A
             B = Pair%B
             DO NCA = 1,CS_OUT%NCells
@@ -79,16 +76,6 @@ MODULE KxcGen
                 ENDIF
               ENDDO
             ENDDO
-#else
-#ifdef PARALLEL
-            !! use TestAtomPair..
-            IF(TestAtomPair(Pair,CubeRoot%Box)) THEN
-              CALL AddFASTMATBlok(Kxc,AtA,AtB,KxcBlock(Pair,CubeRoot))
-            ENDIF
-#else
-            Kxc%MTrix%D(R:R+NAB-1)=KxcBlock(Pair,CubeRoot)
-#endif
-#endif
 #ifndef PARALLEL
           ENDIF
 #endif
@@ -220,15 +207,11 @@ real(double):: Pextent_Old
                 Prim%PFB=PFB
 !               Set primitive bra blok, find its extent
                 PExtent=SetBraBlok(Prim,BS,Tau_O=TauRho,ExtraEll_O=1)
-#ifdef PERIODIC
                 PBox%BndBox(:,1)=Prim%P
                 PBox%BndBox(:,2)=Prim%P
                 PBox=ExpandBox(PBox,PExtent)
 !               Quick check to see if primitive touches the grid
                 IF(PExtent>Zero.AND.(.NOT.BoxOutSideBox(PBox,CubeRoot%Box)))THEN
-#else
-                IF(PExtent>Zero)THEN
-#endif
 !                  Recompute extent now on case by case basis
 !                  Perhaps using a better extent
                    PExtent=Zero

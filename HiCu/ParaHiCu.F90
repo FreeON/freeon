@@ -53,13 +53,11 @@ CONTAINS
          3,MPI_DOUBLE_PRECISION,MPI_MIN,MONDO_COMM,IErr)
     CALL MPI_AllReduce(LocalRhoBBox%BndBox(1,2),GRhoBBox%BndBox(1,2),&
          3,MPI_DOUBLE_PRECISION,MPI_MAX,MONDO_COMM,IErr)
-#ifdef PERIODIC
     IF(MyID == 0) THEN
        CALL MakeBoxPeriodic(GRhoBBox)
     ENDIF
     CALL MPI_Bcast(GRhoBBox%BndBox(1,1),3,MPI_DOUBLE_PRECISION,0,MONDO_COMM,IErr)
     CALL MPI_Bcast(GRhoBBox%BndBox(1,2),3,MPI_DOUBLE_PRECISION,0,MONDO_COMM,IErr)
-#endif
     GRhoBBoxVol = 1.0D0
     DO I = 1, 3
        GRhoBBoxVol = GRhoBBoxVol*(GRhoBBox%BndBox(I,2)-GRhoBBox%BndBox(I,1))
@@ -291,28 +289,6 @@ CONTAINS
        !! Distribution box obtained
        !! WRITE(*,*) 'Distribution with index KQ = ',KQ, ' is to be inserted.'
        DO J = 0, NPrc-1
-#if !defined(PERIODIC)
-          BoxL(1:3) = LCoor%D(1:3,J+1)
-          BoxU(1:3) = RCoor%D(1:3,J+1)
-          QBL(1:3) = NodeBox%BndBox(1:3,1)
-          QBU(1:3) = NodeBox%BndBox(1:3,2)
-          IF(QBU(1) <= BoxL(1) .OR. QBL(1) >= BoxU(1) .OR. &
-               QBU(2) <= BoxL(2) .OR. QBL(2) >= BoxU(2) .OR. &
-               QBU(3) <= BoxL(3) .OR. QBL(3) >= BoxU(3)) THEN
-             !! do nothing, no intersection
-          ELSE
-             !! Put KQ into the list
-             !! first go the pointer that has is pointing to J
-             !! WRITE(*,*) 'Distribution with index KQ = ',KQ, ' is to be inserted.'
-             !! J is the proc to send
-             IndexToSend%I(J) = IndexToSend%I(J) + 1
-             IntToSend%I(J) = IntToSend%I(J) + 1 !! Ell 
-             Ell = Ldex(KQ)
-             LMNLen = LHGTF(Ell)
-             CoToSend%I(J) = CoToSend%I(J) + LMNLen
-             DblToSend%I(J) = DblToSend%I(J) + 5 + LMNLen !! x,y,z,zeta,extent,co
-          ENDIF
-#else
           DO NC = 1, CS_OUT%NCells
              BoxL(1:3) = LCoor%D(1:3,J+1)+CS_OUT%CellCarts%D(:,NC)
              BoxU(1:3) = RCoor%D(1:3,J+1)+CS_OUT%CellCarts%D(:,NC)
@@ -336,7 +312,6 @@ CONTAINS
                 EXIT ! crucial exit
              ENDIF
           ENDDO
-#endif
        ENDDO
     ENDDO
     !! allocate memory
@@ -355,24 +330,6 @@ CONTAINS
        NodeBox=ExpandBox(NodeBox,Ext(KQ))
        !! Distribution box obtained
        DO J = 0, NPrc-1
-#if !defined(PERIODIC)
-          BoxL(1:3) = LCoor%D(1:3,J+1)
-          BoxU(1:3) = RCoor%D(1:3,J+1)
-          QBL(1:3) = NodeBox%BndBox(1:3,1)
-          QBU(1:3) = NodeBox%BndBox(1:3,2)
-          IF(QBU(1) <= BoxL(1) .OR. QBL(1) >= BoxU(1) .OR. &
-               QBU(2) <= BoxL(2) .OR. QBL(2) >= BoxU(2) .OR. &
-               QBU(3) <= BoxL(3) .OR. QBL(3) >= BoxU(3)) THEN
-             !! do nothing, no intersection
-          ELSE
-             !! Put KQ into the list
-             !! first go the pointer that has is pointing to J
-             !! WRITE(*,*) 'Distribution with index KQ = ',KQ, ' is to be inserted.'
-             !! J is the proc to send
-             IndexToSend%I(J) = IndexToSend%I(J) + 1
-             HeadArr(J)%LS(IndexToSend%I(J)) = I
-          ENDIF
-#else
           DO NC = 1, CS_OUT%NCells
              BoxL(1:3) = LCoor%D(1:3,J+1)+CS_OUT%CellCarts%D(:,NC)
              BoxU(1:3) = RCoor%D(1:3,J+1)+CS_OUT%CellCarts%D(:,NC)
@@ -392,7 +349,6 @@ CONTAINS
                 EXIT ! crucial exit
              ENDIF
           ENDDO
-#endif
        ENDDO
     ENDDO
     CALL AlignNodes()
