@@ -785,12 +785,14 @@ MODULE ParseInput
             CALL SpinCoords(GM) 
 !           Determine a bounding box for the system
             GM%BndBox%D=SetBox(GM%Carts)
+#ifdef PERIODIC
 !           ReSet the Cell Center
             DO I=1,3
                IF(.NOT. GM%PBC%AutoW(I)) THEN
                   GM%PBC%CellCenter(I) = Half*(GM%BndBox%D(I,2)+GM%BndBox%D(I,1))
                ENDIF
             ENDDO
+#endif
 !           Output the coordinates
             CALL Put(GM,Tag_O=IntToChar(NumGeom))
 !           Print the coordinates

@@ -164,6 +164,13 @@ CONTAINS
     TYPE(CRDS)                :: GM
     INTEGER                   :: zq,iq,iadd,jadd,NQ,OffQ,OffR,LQ,LenQ
     REAL(DOUBLE)              :: RX,RY,RZ,R2,Expt
+    REAL(DOUBLE),DIMENSION(3) :: Center
+!
+#ifdef PERIODIC
+    Center(:) = GM%PBC%CellCenter(:)
+#else
+    Center(:) = Half*(GM%BndBox%D(:,2)+GM%BndBox%D(:,1))
+#endif
 !
     RhoPoles%DPole%D = Zero
     RhoPoles%QPole%D = Zero
@@ -178,9 +185,9 @@ CONTAINS
           DO iq = 1,NQ
              iadd = Rho%OffQ%I(zq)+iq
              jadd = Rho%OffR%I(zq)+(iq-1)*LenQ+1
-             RX   = Rho%Qx%D(iadd)-GM%PBC%CellCenter(1)
-             RY   = Rho%Qy%D(iadd)-GM%PBC%CellCenter(2)
-             RZ   = Rho%Qz%D(iadd)-GM%PBC%CellCenter(3)
+             RX   = Rho%Qx%D(iadd)-Center(1)
+             RY   = Rho%Qy%D(iadd)-Center(2)
+             RZ   = Rho%Qz%D(iadd)-Center(3)
 !
              RhoPoles%DPole%D = RhoPoles%DPole%D + CalculateDiPole(LQ,Expt,RX,RY,RZ,Rho%Co%D(jadd:jadd+LenQ+1))
              RhoPoles%QPole%D = RhoPoles%QPole%D + CalculateQuadruPole(LQ,Expt,RX,RY,RZ,Rho%Co%D(jadd:jadd+LenQ+1)) 
