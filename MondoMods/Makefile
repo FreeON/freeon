@@ -76,7 +76,7 @@ Mods:	$(MModObjs)
 	$(RANLIB) $(MONDO_HOME)/Libs/libMondoMods.a	
 #
 CMods:
-	rm -f $(REMOVEALL)
+	rm -f $(REMOVEMISC) $(REMOVEMODS)
 	rm -f \#*
 	rm -f *~
 	ln -s /dev/null core
