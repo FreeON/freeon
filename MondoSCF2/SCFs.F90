@@ -135,6 +135,10 @@ CONTAINS
     CALL Invoke('SForce',N,S,M)
     ! Kinetic energy piece
     CALL Invoke('TForce',N,S,M)
+    IF(B%BSets(cBAS,1)%HasECPs)THEN
+       ! Compute ECP component of the force
+       CALL Invoke('UForce',N,S,M)
+    ENDIF
     ! Build density with last DM
     CALL Invoke('MakeRho',N,S,M)
 #ifdef PARALLEL
@@ -599,8 +603,6 @@ CONTAINS
     CALL Delete(OffS)
     CALL Delete(K)
   END SUBROUTINE NXForce
-
-
 END MODULE SCFs
 
 
