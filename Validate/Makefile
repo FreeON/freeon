@@ -89,7 +89,7 @@ purge:	clean
 #
 clean:
 	rm -f $(REMOVEMISC) $(REMOVEMODS)
-	rm -f *.o* *.pbs*
+	rm -f *.o* *.pbs* *.pdb*
 	rm -f *.inf.ascii
 	rm -rf  core core.* core*
 	rm -f PI*
