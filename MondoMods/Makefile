@@ -69,7 +69,6 @@ purge:	clean
 	rm -f $(REMOVESRCE)
 #
 release:$(MModRel)
-	rm -rf MMA/Functions
 #
 Mods:	$(MModObjs)
 	$(AR) $(ARFLAGS) $(MONDO_LIB)/libMondoMods.a $(?:.F90=.o)
