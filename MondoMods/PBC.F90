@@ -110,120 +110,112 @@ MODULE CellSets
 30  FORMAT(1x,'=========================================================================')
 31  FORMAT(1x,'=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=')
   END SUBROUTINE PPrint_CellSet
+!--------------------------------------------------------------------------
+! Test if in Cell With Coordinates (x,y,z) 
+!--------------------------------------------------------------------------
+  FUNCTION InCell_CellSet(CS,N,X,Y,Z)
+    TYPE(CellSet)      :: CS
+    INTEGER            :: N
+    REAL(DOUBLE)       :: X,Y,Z
+    LOGICAL            :: InCell_CellSet
 !
+    IF(ABS(CS%CellCarts%D(1,N)-X) < 1.0D-10 .AND. &
+       ABS(CS%CellCarts%D(2,N)-Y) < 1.0D-10 .AND. &
+       ABS(CS%CellCarts%D(3,N)-Z) < 1.0D-10) THEN
+       InCell_CellSet = .TRUE.
+    ELSE
+       InCell_CellSet = .FALSE.
+    ENDIF
+!
+  END FUNCTION InCell_CellSet
 !--------------------------------------------------------------------------
 ! Set up the CellSet from {-N,N} minus the Cells in {-M,M}
 !--------------------------------------------------------------------------
-  SUBROUTINE New_CellSet_Cube(CS,GM,N,M_O)
-    TYPE(CellSet)                  :: CS
-    TYPE(CRDS)                     :: GM
-    INTEGER                        :: I,J,K,NCELL
-    REAL(DOUBLE)                   :: X,Y,Z
-    INTEGER,DIMENSION(3)           :: N
-    INTEGER,OPTIONAL,DIMENSION(3)  :: M_O
+  SUBROUTINE New_CellSet_Cube(CS,MAT,N,M_O)
+    TYPE(CellSet)                        :: CS
+    REAL(DOUBLE),DIMENSION(3,3)          :: MAT
+    INTEGER,DIMENSION(3)                 :: N,M
+    INTEGER,OPTIONAL,DIMENSION(3)        :: M_O
 !
-    IF(.NOT. PRESENT(M_O)) THEN
-       IF(.NOT. GM%AutoW(1)) N(1) = 0
-       IF(.NOT. GM%AutoW(2)) N(2) = 0
-       IF(.NOT. GM%AutoW(3)) N(3) = 0
-       NCELL = (2*N(1)+1)*(2*N(2)+1)*(2*N(3)+1)
-       CALL New_CellSet(CS,NCELL)
+    INTEGER                              :: I,J,K,NCELL
+    REAL(DOUBLE)                         :: X,Y,Z
 !
-       NCELL = 0
-       DO I = -N(1),N(1)
-          DO J = -N(2),N(2)
-             DO K = -N(3),N(3)
+    IF(PRESENT(M_O)) THEN 
+       M = M_O
+    ELSE
+       M = 0
+    ENDIF
+!
+    IF(N(1) .LT. 0) CALL Halt('N(1) is Miss Dimensioning in New_CellSet_Box')
+    IF(N(2) .LT. 0) CALL Halt('N(2) is Miss Dimensioning in New_CellSet_Box')
+    IF(N(3) .LT. 0) CALL Halt('N(3) is Miss Dimensioning in New_CellSet_Box')
+!
+    IF(M(1) .LT. 0) CALL Halt('M(1) is Miss Dimensioning in New_CellSet_Box')
+    IF(M(2) .LT. 0) CALL Halt('M(2) is Miss Dimensioning in New_CellSet_Box')
+    IF(M(3) .LT. 0) CALL Halt('M(3) is Miss Dimensioning in New_CellSet_Box')
+!
+    NCELL = 0
+    DO I = -N(1),N(1)
+       DO J = -N(2),N(2)
+          DO K = -N(3),N(3)
+             IF(IJKTest(I,J,K,M(1),M(2),M(3))) THEN
                 NCELL = NCELL+1
-                X  = I*GM%BoxShape%D(1,1)
-                Y  = I*GM%BoxShape%D(1,2)+J*GM%BoxShape%D(2,2)
-                Z  = I*GM%BoxShape%D(1,3)+J*GM%BoxShape%D(2,3) &
-                     + K*GM%BoxShape%D(3,3)
+             ENDIF
+          ENDDO
+       ENDDO
+    ENDDO
+!
+    CALL New_CellSet(CS,NCELL)
+!
+    NCELL = 0
+    DO I = -N(1),N(1)
+       DO J = -N(2),N(2)
+          DO K = -N(3),N(3)
+             IF(IJKTest(I,J,K,M(1),M(2),M(3))) THEN
+                NCELL = NCELL+1
+                X  = I*MAT(1,1)
+                Y  = I*MAT(1,2)+J*MAT(2,2)
+                Z  = I*MAT(1,3)+J*MAT(2,3)+K*MAT(3,3)
                 CS%CellCarts%D(1,NCELL)= X
                 CS%CellCarts%D(2,NCELL)= Y
                 CS%CellCarts%D(3,NCELL)= Z
-             ENDDO
+             ENDIF
           ENDDO
        ENDDO
-!
-    ELSE
-       IF(M_O(1) > N(1)) CALL Halt('M_O(1) is Miss Dimensioning in New_CellSet_Box')
-       IF(M_O(2) > N(2)) CALL Halt('M_O(2) is Miss Dimensioning in New_CellSet_Box')
-       IF(M_O(3) > N(3)) CALL Halt('M_O(3) is Miss Dimensioning in New_CellSet_Box')
-       DO I = 1,3
-          IF(.NOT. GM%AutoW(I)) THEN
-             N(I)   = 0
-             M_O(I) = 0
-          ENDIF
-       ENDDO
-       NCELL = (2*N(1)+1)*(2*N(2)+1)*(2*N(3)+1)-(2*M_O(1)+1)*(2*M_O(2)+1)*(2*M_O(3)+1)
-       CALL New_CellSet(CS,NCELL)
-       IF(NCELL == 0) RETURN
-!
-       NCELL = 0
-       DO I = -N(1),N(1)
-          DO J = -N(2),N(2)
-             DO K = -N(3),N(3)
-                IF(I .LT. -M_O(1) .OR. I .GT. M_O(1) .OR. & 
-                   J .LT. -M_O(2) .OR. J .GT. M_O(2) .OR. &
-                   K .LT. -M_O(3) .OR. K .GT. M_O(3) ) THEN
-                   NCELL = NCELL+1
-                   X  = I*GM%BoxShape%D(1,1)
-                   Y  = I*GM%BoxShape%D(1,2)+J*GM%BoxShape%D(2,2)
-                   Z  = I*GM%BoxShape%D(1,3)+J*GM%BoxShape%D(2,3) &
-                        + K*GM%BoxShape%D(3,3)
-                   CS%CellCarts%D(1,NCELL)= X
-                   CS%CellCarts%D(2,NCELL)= Y
-                   CS%CellCarts%D(3,NCELL)= Z
-                ENDIF
-             ENDDO
-          ENDDO
-       ENDDO
-!
-    ENDIF
+    ENDDO
     CS%Alloc=ALLOCATED_TRUE
 !
   END SUBROUTINE New_CellSet_Cube
 !--------------------------------------------------------------------------
 ! Set up the set of cells out to some radius R
 !--------------------------------------------------------------------------
-  SUBROUTINE New_CellSet_Sphere(CS,GM,Radius)
-    TYPE(CellSet)                  :: CS
-    TYPE(CRDS)                     :: GM
-    REAL(DOUBLE)                   :: Radius
-    INTEGER                        :: I,J,K
-    INTEGER                        :: IXM,IYM,IZM,NCELL
-    REAL(DOUBLE)                   :: X,Y,Z,Rad,R,R2
+  SUBROUTINE New_CellSet_Sphere(CS,AW,MAT,Radius)
+    TYPE(CellSet)                        :: CS
+    LOGICAL,DIMENSION(3)                 :: AW
+    REAL(DOUBLE),DIMENSION(3,3)          :: MAT
+    REAL(DOUBLE)                         :: Radius
+!
+    INTEGER                              :: I,J,K
+    INTEGER                              :: IXM,IYM,IZM,NCELL
+    REAL(DOUBLE)                         :: X,Y,Z,Rad,R
 !
     IXM = 0
     IYM = 0
     IZM = 0
-    IF(GM%AutoW(1)) THEN
-       IXM = 1+INT(SQRT(Radius/(GM%BoxShape%D(1,1)**2)))
-    ENDIF
-    IF(GM%AutoW(2)) THEN
-       IYM = 1+INT(SQRT(Radius/(GM%BoxShape%D(1,2)**2 &
-            +GM%BoxShape%D(2,2)**2)))
-    ENDIF
-    IF(GM%AutoW(3)) THEN
-       IZM = 1+INT(SQRT(Radius/(GM%BoxShape%D(1,3)**2 &
-            +GM%BoxShape%D(2,3)**2 &
-            +GM%BoxShape%D(3,3)**2)))
-    ENDIF
+    IF(AW(1)) IXM = 1+INT(Radius/SQRT(MAT(1,1)**2))
+    IF(AW(2)) IYM = 1+INT(Radius/SQRT(MAT(1,2)**2+MAT(2,2)**2))
+    IF(AW(3)) IZM = 1+INT(Radius/SQRT(MAT(1,3)**2+MAT(2,3)**2+MAT(3,3)**2))
 !
     NCELL = 0
     DO I=-IXM,IXM
        DO J=-IYM,IYM
           DO K=-IZM,IZM
-             X  = I*GM%BoxShape%D(1,1)
-             Y  = I*GM%BoxShape%D(1,2)+J*GM%BoxShape%D(2,2)
-             Z  = I*GM%BoxShape%D(1,3)+J*GM%BoxShape%D(2,3)+K*GM%BoxShape%D(3,3)
-             R2 = X*X+Y*Y+Z*Z
-             IF(ABS(I) .LE. 1 .AND. ABS(J) .LE. 1 .AND. ABS(K) .LE. 1) THEN
+             X  = I*MAT(1,1)
+             Y  = I*MAT(1,2)+J*MAT(2,2)
+             Z  = I*MAT(1,3)+J*MAT(2,3)+K*MAT(3,3)
+             R = SQRT(X*X+Y*Y+Z*Z)
+             IF(R .LE. Radius) THEN
                 NCELL = NCELL+1
-             ELSE
-                IF(R2 < Radius) THEN
-                   NCELL = NCELL+1
-                ENDIF
              ENDIF
           ENDDO
        ENDDO
@@ -235,22 +227,15 @@ MODULE CellSets
     DO I=-IXM,IXM
        DO J=-IYM,IYM
           DO K=-IZM,IZM
-             X  = I*GM%BoxShape%D(1,1)
-             Y  = I*GM%BoxShape%D(1,2)+J*GM%BoxShape%D(2,2)
-             Z  = I*GM%BoxShape%D(1,3)+J*GM%BoxShape%D(2,3)+K*GM%BoxShape%D(3,3)
-             R2 = X*X+Y*Y+Z*Z
-             IF(ABS(I) .LE. 1 .AND. ABS(J) .LE. 1 .AND. ABS(K) .LE. 1) THEN
+             X  = I*MAT(1,1)
+             Y  = I*MAT(1,2)+J*MAT(2,2)
+             Z  = I*MAT(1,3)+J*MAT(2,3)+K*MAT(3,3)
+             R = SQRT(X*X+Y*Y+Z*Z)
+             IF(R .LE. Radius) THEN
                 NCELL = NCELL+1
                 CS%CellCarts%D(1,NCELL)= X
                 CS%CellCarts%D(2,NCELL)= Y
                 CS%CellCarts%D(3,NCELL)= Z
-             ELSE
-                IF(R2 < Radius) THEN
-                   NCELL = NCELL+1
-                   CS%CellCarts%D(1,NCELL)= X
-                   CS%CellCarts%D(2,NCELL)= Y
-                   CS%CellCarts%D(3,NCELL)= Z
-                ENDIF
              ENDIF
           ENDDO
        ENDDO
@@ -258,6 +243,29 @@ MODULE CellSets
     CS%Alloc=ALLOCATED_TRUE
 !
   END SUBROUTINE New_CellSet_Sphere
+!--------------------------------------------------------------------------
+! Set up the set of cells out to some radius R
+!--------------------------------------------------------------------------
+  FUNCTION IJKTest(I,J,K,MI,MJ,MK)
+    INTEGER               :: I,J,K,MI,MJ,MK
+    LOGICAL               :: IJKTest
+!
+    IJKTest = .FALSE.
+    IF(ABS(I) .GE. MI) THEN 
+       IJKTest = .TRUE.
+       RETURN
+    ENDIF
+    IF(ABS(J) .GE. MJ) THEN
+       IJKTest = .TRUE.
+       RETURN
+    ENDIF
+    IF(ABS(K) .GE. MK) THEN
+       IJKTest = .TRUE.
+       RETURN
+    ENDIF
+!   
+  END FUNCTION IJKTest
+!
 #endif
 !
 END MODULE CellSets
