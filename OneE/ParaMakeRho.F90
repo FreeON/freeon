@@ -70,6 +70,7 @@ PROGRAM ParaMakeRho
      CALL Get(NBasF,'nbasf',PrvBase)
      CALL Get(Dmat,TrixFile('D',Args,-1))
   ELSEIF(SCFActn=='Restart')THEN
+     CALL Get(GM,CurGeom)
 #ifdef PARALLEL_CLONES
      ! Close current group and HDF
      CALL CloseHDFGroup(H5GroupID)
@@ -85,7 +86,6 @@ PROGRAM ParaMakeRho
      CurBase=TRIM(IntToChar(Stat%I(2)))
      CurGeom=TRIM(IntToChar(Stat%I(3)))
      CALL Get(BS,CurBase)
-     CALL Get(GM,CurGeom)
      ! Compute a sparse matrix blocking scheme for the old BS
      CALL BlockBuild(GM,BS,BSiz,OffS)
      CALL BCast(BSiz)

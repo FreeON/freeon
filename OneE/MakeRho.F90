@@ -66,10 +66,12 @@ PROGRAM MakeRho
         CALL Get(Dmat,TrixFile('D',Args,-1))
      ELSEIF(SCFActn=='Restart')THEN
 #ifdef PARALLEL_CLONES
-!       Close current group and HDF
+        ! Get the current geometry from the current HDF first
+        CALL Get(GM,CurGeom)
+        ! ... then close current group and HDF
         CALL CloseHDFGroup(H5GroupID)
         CALL CloseHDF(HDFFileID)
-!       Open old group and HDF
+        ! ... and open the old group and HDF
         HDF_CurrentID=OpenHDF(Restart)
         OldFileID=HDF_CurrentID
         CALL New(Stat,3)
@@ -80,7 +82,6 @@ PROGRAM MakeRho
         CurBase=TRIM(IntToChar(Stat%I(2)))
         CurGeom=TRIM(IntToChar(Stat%I(3)))
         CALL Get(BS,CurBase)
-        CALL Get(GM,CurGeom)
         ! Compute a sparse matrix blocking scheme for the old BS
         CALL BlockBuild(GM,BS,BSiz,OffS)
 !       Close the old hdf up 
