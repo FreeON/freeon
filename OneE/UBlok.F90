@@ -29,8 +29,8 @@ MODULE ECPBlock
     REAL(DOUBLE)                              :: Discriminator
     REAL(DOUBLE),DIMENSION(1:NPts,1:Infty)    :: Points,Weights
     REAL(DOUBLE),DIMENSION(1:NPts)            :: XA,XB,EX
-    INCLUDE "QQuad32.Inc"
-!    INCLUDE "QQuad64.Inc"
+!    INCLUDE "QQuad32.Inc"
+    INCLUDE "QQuad64.Inc"
 CONTAINS  !
   FUNCTION UBlock(BS,Pair,KC,Cx,Cy,Cz) RESULT(UVck)
     TYPE(BSET)                              :: BS
