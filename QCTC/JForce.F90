@@ -71,11 +71,6 @@ PROGRAM JForce
 ! Get basis set and geometry
   CALL Get(BS,Tag_O=CurBase)
   CALL Get(GM,Tag_O=CurGeom)
-
-  Thresholds%TwoE=1.D-10
-  Thresholds%Dist=1.D-14
-
-
 ! Allocations 
   CALL NewBraBlok(BS,Gradients_O=.TRUE.)
   CALL New(Frc,3*NAtoms)

@@ -65,6 +65,7 @@ MODULE PoleTree
         RhoLevel=0
 !       Initialize the root node
         CALL NewPoleNode(PoleRoot,0)
+        CALL NewSPArrays(PoleRoot)
         PoleRoot%Bdex=1
         PoleRoot%Edex=Rho%NDist
         PoleRoot%NQ=Rho%NDist
@@ -96,6 +97,9 @@ MODULE PoleTree
 !           Recur
             CALL SplitPole(Left)
             CALL SplitPole(Right)
+!           Allocate multipole arrays
+            CALL NewSPArrays(Left)
+            CALL NewSPArrays(Right)
          ENDIF
        END SUBROUTINE SplitPole
 !=================================================================================
@@ -105,10 +109,12 @@ MODULE PoleTree
          TYPE(PoleNode)         :: P
          TYPE(PoleNode),POINTER :: LeftQ,RightQ
          INTEGER                :: K
+         REAL(DOUBLE),PARAMETER :: UnsoldExp=Two/(Two+SPEll) * (SPEll+1)/SPEll
 !--------------------------------------------------------------
          IF(P%Box%Tier==CurrentTier.AND.P%Leaf)THEN
             P%C=Zero
             P%S=Zero
+            P%Strength=Zero
             CALL HGToSP(P)
          ELSEIF(P%Leaf)THEN
             RETURN
@@ -134,8 +140,8 @@ MODULE PoleTree
 !           Copy lower portion of accumulators into nodes
             P%C(0:SPLen)=Cx(0:SPLen)
             P%S(0:SPLen)=Sx(0:SPLen)
-!           Compute the multipole strength [O^P_(L+1)]^(2/(2+L))
-            P%Strength=UnsoldO(SPEll+1,Cx,Sx)**(Two/(Two+DBLE(SPEll)))          
+!           Compute the multipole strength [O^P_(L+1)]^(2/(2+L)*(L+1)/L)
+            P%Strength=UnsoldO(SPEll+1,Cx,Sx)**UnsoldExp
          ELSE
 !           Keep on truckin ...
             CALL MakePoleTree(P%Descend)
@@ -190,13 +196,19 @@ MODULE PoleTree
          PoleNodes=PoleNodes+1
          NULLIFY(Node%Travrse)
          NULLIFY(Node%Descend)
-         ALLOCATE(Node%S(0:SPLen),STAT=Status)
-         CALL IncMem(Status,0,SPLen+1)
-         ALLOCATE(Node%C(0:SPLen),STAT=Status)
-         CALL IncMem(Status,0,SPLen+1)
-         Node%S(0:SPLen)=Zero
-         Node%C(0:SPLen)=Zero
       END SUBROUTINE NewPoleNode
+
+      SUBROUTINE NewSPArrays(Node)
+         TYPE(PoleNode), POINTER   :: Node
+         INTEGER                   :: LenSP,Status        
+         LenSP=LSP(Node%Ell)
+         ALLOCATE(Node%S(0:LenSP),STAT=Status)
+         CALL IncMem(Status,0,LenSP+1)
+         ALLOCATE(Node%C(0:LenSP),STAT=Status)
+         CALL IncMem(Status,0,LenSP+1)
+         Node%S=Zero
+         Node%C=Zero
+      END SUBROUTINE NewSPArrays
 !================================================================================
 !     Bisection   
 !================================================================================

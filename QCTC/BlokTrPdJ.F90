@@ -119,7 +119,21 @@ MODULE BlokTrPdJ
                 Prim%PFA=PFA 
                 Prim%PFB=PFB
                 MaxAmp=SetBraBlok(Prim,BS,Gradients_O=Pair%SameAtom)
-!-----------------------------------------------------------------------------------------
+!---------------------------------------------------------------------------------------------
+!               Compute maximal HG extent (for PAC) and Unsold esitmiate (for MAC)
+!               looping over all angular symmetries
+!
+!               PAC: Int{ Lambda_P[r] Potential_Q[r] } := Zero by non-overlapping BBoxes
+!
+!               MAC: PQ^2>(O[P]_Lp FF[Lp,L+1]/TauMac)^(2/(Lp+L+2)) 
+!                                       ^^^^^^
+!                                        DP2
+!
+!                         *(O[Q]_L)^(2/({Lp->0}+L+2)*(L+1)/L ) with L:=SPEll
+!                                       ^^^^^^
+!                                     Q%Strength
+                DP2=Zero
+                PExtent=Zero
                 IA = IndexA
                 DO LMNA=StartLA,StopLA
                    IA=IA+1
@@ -141,11 +155,7 @@ MODULE BlokTrPdJ
                    ENDDO
                 ENDDO
 !-----------------------------------------------------------------------------------------
-                IF(PExtent>Zero)THEN
-!                  Evaluate this primitives Ket contribution to J_ab
-                   HGKet=Zero
-                   SPKetC=Zero
-                   SPKetS=Zero
+                IF(PExtent>Zero)THEN ! Evaluate this primitives Ket contribution
 !                  Zero the Acumulators
                    HGKet=Zero
                    SPKetC=Zero

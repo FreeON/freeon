@@ -154,7 +154,7 @@ MODULE JGen
                                                    PAx,PAy,PAz,PBx,PBy,PBz,    &
                                                    MDx,MDxy,MDxyz,Amp2,MaxAmp, &
                                                    Tau,OmegaMin,Px,Py,Pz
-       REAL(DOUBLE)                             :: PExtent
+       REAL(DOUBLE)                             :: PExtent,EX
        REAL(DOUBLE)                             :: PStrength
 
        INTEGER                                  :: KA,KB,CFA,CFB,PFA,PFB,      &
@@ -197,6 +197,20 @@ MODULE JGen
                       Prim%PFA=PFA 
                       Prim%PFB=PFB
                       MaxAmp=SetBraBlok(Prim,BS)
+!---------------------------------------------------------------------------------------------
+!                     Compute maximal HG extent (for PAC) and Unsold esitmiate (for MAC)
+!                     looping over all angular symmetries
+!
+!                     PAC: Int{ Lambda_P[r] Potential_Q[r] } := Zero by non-overlapping BBoxes
+!
+!                     MAC: PQ^2>(O[P]_Lp FF[Lp,L+1]/TauMac)^(2/(Lp+L+2)) 
+!                                       ^^^^^^
+!                                        DP2
+!                              *(O[Q]_L)^(2/({Lp->0}+L+2)*(L+1)/L ) with L:=SPEll
+!                                       ^^^^^^
+!                                        Q%Strength
+                      DP2=Zero
+                      PExtent=Zero
                       IA = IndexA
                       DO LMNA=StartLA,StopLA
                          IA=IA+1
@@ -206,8 +220,8 @@ MODULE JGen
                             IB=IB+1
                             EllB=BS%LxDex%I(LMNB)+BS%LyDex%I(LMNB)+BS%LzDex%I(LMNB)       
 !                           Extent (for PAC)
-                            PExtent=MAX(PExtent, & 
-                                        Extent(EllA+EllB,Prim%Zeta,HGBra%D(:,IA,IB),TauPAC,ExtraEll_O=0))
+                            EX=Extent(EllA+EllB,Prim%Zeta,HGBra%D(:,IA,IB),TauPAC,ExtraEll_O=0)
+                            PExtent=MAX(PExtent,EX)
 !                           Strength (for MAC)
                             CALL HGToSP(Prim,HGBra%D(:,IA,IB),SPBraC,SPBraS)
                             DO L=0,EllA+EllB
@@ -216,6 +230,7 @@ MODULE JGen
                             ENDDO
                          ENDDO
                       ENDDO
+!--------------------------------------------------------------------------------------------
 !                     If finite compute ...
                       IF(PExtent>Zero.AND.PStrength>Zero)THEN
 !                        Set BBox for this primitive
@@ -238,7 +253,7 @@ MODULE JGen
                             Prim%P(1)=Px+CSMM1%CellCarts%D(1,NC)
                             Prim%P(2)=Py+CSMM1%CellCarts%D(2,NC)
                             Prim%P(3)=Pz+CSMM1%CellCarts%D(3,NC)
-                            PBox%Center(:)=Prim%P(:) !<<<<<<<<<<<<<<<????????????
+                            PBox%Center(:)=Prim%P(:) ! redundant
 !                           Walk the walk
                             CALL JWalk(PoleRoot)
                          ENDDO
@@ -249,6 +264,7 @@ MODULE JGen
 !                        Walk the walk
                          CALL JWalk(PoleRoot)                        
 #endif
+!---------------------------------------------------------------------------------------
 !                        Contract <Bra|Ket> bloks to compute matrix elements of J
                          IA = IndexA
                          DO LMNA=StartLA,StopLA
@@ -259,13 +275,16 @@ MODULE JGen
                                IB=IB+1
                                EllB=BS%LxDex%I(LMNB)+BS%LyDex%I(LMNB)+BS%LzDex%I(LMNB)
                                Ell=EllA+EllB
+!                              Near field
                                DO LMN=1,LHGTF(Ell)
                                   JBlk(IA,IB)=JBlk(IA,IB)+Phase%D(LMN)*HGBra%D(LMN,IA,IB)*HGKet(LMN)
                                ENDDO
+!                              Far field
                                CALL HGToSP(Prim,HGBra%D(:,IA,IB),SPBraC,SPBraS)
                                DO LM=0,LSP(Ell)
                                   JBlk(IA,IB)=JBlk(IA,IB)+SPBraC(LM)*SPKetC(LM)+SPBraS(LM)*SPKetS(LM)
                                ENDDO
+
                             ENDDO
                         ENDDO
 #ifdef PERIODIC
