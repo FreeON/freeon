@@ -223,14 +223,13 @@ PROGRAM SDMM
      NumPot=Trace(T2)
      c=NumPot/DenPot
      FixedPoint=Half-c
-!
-     CALL Multiply(P,F,T1)              ! T1=P.F    
+     CALL Multiply(P,F,T3)              ! T1=P.F    
      CALL Multiply(F,P,T2)              ! T2=F.P
      CALL Multiply(T2,-One)
-     CALL ADD(T1,T2,T3)
-     MxCom=MAX(T3)
+     CALL ADD(T3,T2,T1)
+     MxCom=MAX(T1)
      OldE=NewE
-     NewE=Trace(T1)                     ! Tr{P.F}
+     NewE=Trace(T3)                     ! Tr{P.F}
 !-----------------------------------------------------------------------------
 !    PRINT CONVERGENCE STATS IF REQUESTED
 !
