@@ -462,6 +462,7 @@ CONTAINS
      INTEGER                   :: FirstGeom,NatmsLoc
      INTEGER                   :: ConvgdAll,MaxSteps,IStart
      TYPE(INT_VECT)            :: Convgd
+     TYPE(INT_VECT)            :: BPrev,BCur
      !
      ! Set geometry optimization controls
      CALL SetGeOpCtrl(C%GOpt,C%Geos,C%Opts,C%Sets,C%Nams)
@@ -469,6 +470,8 @@ CONTAINS
      iGEO=C%Stat%Previous%I(3)
      iGEOst=iGEO
      MaxSteps=C%GOpt%GConvCrit%MaxGeOpSteps
+     CALL NEW(BPrev,SIZE(C%Stat%Previous%I))
+     CALL NEW(BCur ,SIZE(C%Stat%Previous%I))
      ! Build the guess 
      DO iBAS=1,C%Sets%NBSets-1
        CALL ReSetConnect(C%Geos)
@@ -507,8 +510,10 @@ CONTAINS
       !  iBAS=C%Sets%NBSets
       !  C%GOpt%RestartBas=.FALSE.
       !ENDIF
+       BPrev%I=C%Stat%Previous%I
+       BCur%I=C%Stat%Current%I
        CALL SCF(iBAS,iGEO,C)
-       IF(iGEO>1) CALL BackTrack(iBAS,iGEO,C)
+       IF(iGEO>1) CALL BackTrack(iBAS,iGEO,C,BPrev%I,BCur%I)
        CALL Force(iBAS,iGEO,C%Nams,C%Opts,C%Stat, &
                   C%Geos,C%Sets,C%MPIs)
      ! CALL PrintClones(IGeo,C%Nams,C%Geos)
@@ -584,6 +589,8 @@ CONTAINS
      460  FORMAT('Geometry Optimization converged in ',I6,' steps.')
      700  FORMAT('Maximum number of optimization'&
             //' steps exceeded, optimization did not converge.')
+     CALL Delete(BPrev)
+     CALL Delete(BCur)
    END SUBROUTINE IntOpt
 !
 !------------------------------------------------------------------
@@ -1456,7 +1463,7 @@ CONTAINS
 !
 !-------------------------------------------------------------------
 !
-   SUBROUTINE BackTrack(iBAS,iGEO,C)
+   SUBROUTINE BackTrack(iBAS,iGEO,C,BPrev,BCur)
      ! Go over clones and do backtracking whenever necessary
      TYPE(Controls)   :: C
      INTEGER          :: iBAS,iGEO,iCLONE
@@ -1467,6 +1474,7 @@ CONTAINS
      LOGICAL          :: DoBackTrack
      REAL(DOUBLE)     :: EOld,ENew,MeanDist
      TYPE(DBL_VECT)   :: DistVect1,DistVect2
+     INTEGER,DIMENSION(:) :: BPrev,BCur
      !
      IF(.NOT.C%GOpt%GConvCrit%DoBackTr) THEN
        RETURN
@@ -1527,10 +1535,12 @@ CONTAINS
            EXIT
          ENDIF
          !
+        !C%Stat%Previous%I(3)=iGEO-1
+        !C%Stat%Current%I(3)=iGEO
+         C%Stat%Previous%I=BPrev
+         C%Stat%Current%I=BCur
          CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
          CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
-         C%Stat%Previous%I(3)=iGEO-1
-         C%Stat%Current%I(3)=iGEO
          CALL SCF(iBAS,iGEO,C)
        ELSE
          EXIT
