@@ -194,6 +194,9 @@ MODULE GlobalScalars
 !these are the elements considered for H-bridges
    INTEGER,DIMENSION(10)  :: HBondList
    DATA HBondList(1:9) /5,7,8,9,16,34,17,35,53/
+! Tabulated statistical Q-test values for 90% confidence
+   REAL(DOUBLE),DIMENSION(10) :: QTest90
+   DATA QTest90(1:10) /Zero,Zero,0.94D0,0.76D0,0.64D0,0.56D0,0.51D0,0.47D0,0.44D0,0.41D0/
 !
 ! Maximum number of internal coords per atom
 ! this is needed to estimate storage of IntCs in HDF
