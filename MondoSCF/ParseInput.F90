@@ -1,3 +1,37 @@
+!------------------------------------------------------------------------------
+!--  This source code is part of the MondoSCF suite of programs for 
+!    linear scaling electronic structure theory and ab initio molecular 
+!    dynamics.
+!
+!--  Matt Challacombe
+!    Los Alamos National Laboratory
+!
+!--  Copyright (c) 2001, the Regents of the University of California.  
+!    This SOFTWARE has been authored by an employee or employees of the 
+!    University of California, operator of the Los Alamos National Laboratory 
+!    under Contract No. W-7405-ENG-36 with the U.S. Department of Energy.  
+!    The U.S. Government has rights to use, reproduce, and distribute this 
+!    SOFTWARE.  The public may copy, distribute, prepare derivative works 
+!    and publicly display this SOFTWARE without charge, provided that this 
+!    Notice and any statement of authorship are reproduced on all copies.  
+!    Neither the Government nor the University makes any warranty, express 
+!    or implied, or assumes any liability or responsibility for the use of 
+!    this SOFTWARE.  If SOFTWARE is modified to produce derivative works, 
+!    such modified SOFTWARE should be clearly marked, so as not to confuse 
+!    it with the version available from LANL.  The return of derivative works
+!    to the primary author for integration and general release is encouraged. 
+!    The first publication realized with the use of MondoSCF shall be
+!    considered a joint work.  Publication of the results will appear
+!    under the joint authorship of the researchers nominated by their
+!    respective institutions. In future publications of work performed
+!    with MondoSCF, the use of the software shall be properly acknowledged,
+!    e.g. in the form "These calculations have been performed using MondoSCF, 
+!    a suite of programs for linear scaling electronic structure theory and
+!    ab initio molecular dynamics", and given appropriate citation.
+!------------------------------------------------------------------------------
+!    PARSING MODULE
+!    Authors :: Matt Challacombe, C.J. Tymczak
+!------------------------------------------------------------------------------
 MODULE ParseInput
    USE DerivedTypes
    USE GlobalScalars
@@ -76,12 +110,15 @@ MODULE ParseInput
          IF(Args%NC==1)THEN
             OutFile=TRIM(MONDO_PWD)    //TRIM(SCF_NAME)//'.'//TRIM(PROCESS_ID)//OutF 
             LogFile=TRIM(MONDO_PWD)    //TRIM(SCF_NAME)//'.'//TRIM(PROCESS_ID)//LogF
+            GeoFile=TRIM(MONDO_PWD)    //TRIM(SCF_NAME)//'.'//TRIM(PROCESS_ID)//GeoF
          ELSEIF(Args%NC==2)THEN
-            OutFile=TRIM(MONDO_PWD)    //TRIM(Args%C%C(2))!//'.'//TRIM(PROCESS_ID)//OutF 
+            OutFile=TRIM(MONDO_PWD)    //TRIM(Args%C%C(2))
             LogFile=TRIM(MONDO_PWD)    //TRIM(Args%C%C(2))//'.'//TRIM(PROCESS_ID)//LogF
+            GeoFile=TRIM(MONDO_PWD)    //TRIM(Args%C%C(2))//'.'//TRIM(PROCESS_ID)//GeoF
          ELSEIF(Args%NC==3)THEN
-            OutFile=TRIM(MONDO_PWD)    //TRIM(Args%C%C(2))!//'.'//TRIM(PROCESS_ID)//OutF 
-            LogFile=TRIM(MONDO_PWD)    //TRIM(Args%C%C(3))!//'.'//TRIM(PROCESS_ID)//LogF
+            OutFile=TRIM(MONDO_PWD)    //TRIM(Args%C%C(2))
+            LogFile=TRIM(MONDO_PWD)    //TRIM(Args%C%C(3))
+            GeoFile=TRIM(MONDO_PWD)    //TRIM(Args%C%C(2))//'.'//TRIM(PROCESS_ID)//GeoF
          ENDIF
 !        SCF and InfoFile names
          Ctrl%Info=InfFile
@@ -671,11 +708,11 @@ MODULE ParseInput
 !           Determine a bounding box for the system
             GM%BndBox%D=SetBox(GM%Carts)
 !           Compute nuclear-nuclear repulsion energy
-#ifdef PERIODIC
-            GM%ENucN  = Zero
-#else
-            GM%ENucN  = ENukeNuke(GM)
-#endif
+!#ifdef PERIODIC
+!            GM%ENucN  = Zero
+!#else
+!            GM%ENucN  = ENukeNuke(GM)
+!#endif
 !           Output the coordinates
             CALL Put(GM,Tag_O=IntToChar(Ctrl%NGeom))
             CALL Put(Ctrl%NGeom,'NumberOfGeometries')
@@ -788,7 +825,7 @@ MODULE ParseInput
 !           Determine a bounding box for the system
             GM%BndBox%D=SetBox(GM%Carts)
 !           Compute nuclear-nuclear repulsion energy
-            GM%ENucN=ENukeNuke(GM)
+!            GM%ENucN=ENukeNuke(GM)
 !           Output the coordinates
 !            CALL OpenASCII(OutFile,Out)
 !            CALL PPrint(GM)            
@@ -902,7 +939,7 @@ MODULE ParseInput
 !           Determine a bounding box for the system
             GM%BndBox%D=SetBox(GM%Carts)
 !           Compute nuclear-nuclear repulsion energy
-            GM%ENucN=ENukeNuke(GM)
+!            GM%ENucN=ENukeNuke(GM)
 !           Output the coordinates
 !            CALL OpenASCII(OutFile,Out)
 !            CALL PPrint(GM)            
@@ -1196,21 +1233,21 @@ MODULE ParseInput
 !===================================================================================
 !
 !===================================================================================
-      FUNCTION ENukeNuke(GM) RESULT(ENucN)
-         TYPE(CRDS)   :: GM
-         REAL(DOUBLE) :: ENucN,R
-         INTEGER      :: I,J
+!      FUNCTION ENukeNuke(GM) RESULT(ENucN)
+!         TYPE(CRDS)   :: GM
+!         REAL(DOUBLE) :: ENucN,R
+!         INTEGER      :: I,J
 !-----------------------------------------------------------------------------------
-         ENucN=0.D0
-         DO I=1,NAtoms
-            DO J=1,I-1
-               R=DSQRT((GM%Carts%D(1,i)-GM%Carts%D(1,j))**2 & 
-                      +(GM%Carts%D(2,i)-GM%Carts%D(2,j))**2 & 
-                      +(GM%Carts%D(3,i)-GM%Carts%D(3,j))**2 )
-               ENucN=ENucN+DBLE(GM%AtNum%I(I)*GM%AtNum%I(J))/R
-            ENDDO
-         ENDDO
-      END FUNCTION ENukeNuke
+!         ENucN=0.D0
+!         DO I=1,NAtoms
+!            DO J=1,I-1
+!               R=DSQRT((GM%Carts%D(1,i)-GM%Carts%D(1,j))**2 & 
+!                      +(GM%Carts%D(2,i)-GM%Carts%D(2,j))**2 & 
+!                      +(GM%Carts%D(3,i)-GM%Carts%D(3,j))**2 )
+!               ENucN=ENucN+DBLE(GM%AtNum%I(I)*GM%AtNum%I(J))/R
+!            ENDDO
+!         ENDDO
+!      END FUNCTION ENukeNuke
 !===================================================================================
 !
 !===================================================================================
@@ -1236,8 +1273,8 @@ MODULE ParseInput
          INTEGER        :: J
 !-----------------------------------------------------------------------------------
          IF(GM%Ordrd==SFC_NONE)RETURN
-         CALL Warn('Reordering turned off for now.  '//Rtrn// &
-                   'Needs fix that works with multiple geometries and DM extrapolation ')
+!         CALL Warn('Reordering turned off for now.  '//Rtrn// &
+!                   'Needs fix that works with multiple geometries and DM extrapolation ')
          GM%Ordrd=SFC_NONE
          RETURN
 !
