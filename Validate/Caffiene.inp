@@ -12,9 +12,10 @@ Grad=(Optimize,PrimInt,NoGDIIS,NoBackTr,DiagHess)
 
 Guess=SuperPos
 SCFMethod=(RH,RH)
-BasisSets=(STO-3G-split,6-31G**-split)
+BasisSets=(STO-3G-split,6-31G**)
 ModelChem=(HF,BLYPxc)
 Accuracy=(Loose,Loose)
+SCFConvergence=(DIIS,DIIS)
 
 MPIInvoke="mpirun"
 MPIProcessors=4
