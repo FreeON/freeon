@@ -15,6 +15,7 @@ PROGRAM MondoSCF
   USE DrvFrcs
   USE ProcessControl    
   USE InOut
+!
   IMPLICIT NONE
   TYPE(SCFControls)     :: Ctrl
   INTEGER               :: ICyc,ISet,IGeo,Bak,IChk,K
@@ -36,10 +37,18 @@ WRITE(*,*)' INITed '
   CALL Init(MemStats)
 ! Parse input
   CALL ParseInp(Ctrl)
-! Set up the SCF
-  CALL SetSCF(Ctrl)
+  Mechanics=Ctrl%Mechanics
+!
+! Set up the SCF or MM
   Ctrl%Current=(/0,1,1/)
   Ctrl%Previous=(/0,1,1/)
+#ifdef MMech
+  IF(HasQM())THEN
+#endif
+     CALL SetSCF(Ctrl)
+#ifdef MMech
+  ENDIF
+#endif
   CALL SetGlobalCtrlIndecies(Ctrl)           
 ! Decide about forces
   SELECT CASE(Ctrl%Grad)
@@ -78,10 +87,29 @@ WRITE(*,*)' INITed '
      CALL GeOp(Ctrl)
   CASE(GRAD_TS_SEARCH)
      CALL MondoHalt(USUP_ERROR,' Look for transition state optimizer in version 1.0b2.')
-  CASE(GRAD_NO_GRAD)
+!
+  CASE(GRAD_NO_GRAD) !!!!! Energy only calculation
+!
 !    Loop first over basis sets 
+#ifdef MMech
+   If(MMOnly()) Then
+!    Ctrl%Current(2)=1
+     CALL MM_ENERG(Ctrl)
+   ELSE 
+     IF(HasMM()) THEN
+       IF(Ctrl%Current(2)==1) THEN
+         CALL MM_ENERG(Ctrl)
+       ELSE
+         CALL MM_COULOMBENERGY(Ctrl) !!!only the coulomb energy changes
+       ENDIF
+     ENDIF 
+   ENDIF
+#endif
+#ifdef MMech
+   If(HasQM()) Then
+#endif
      DO ISet=1,Ctrl%NSet
-        Ctrl%Current(2)=ISet
+        Ctrl%Current=(/0,ISet,1/)
         CALL OneSCF(Ctrl)
      ENDDO
      IF(Ctrl%NGeom>1)THEN
@@ -91,10 +119,14 @@ WRITE(*,*)' INITed '
            CALL OneSCF(Ctrl)
         ENDDO
      ENDIF
+#ifdef MMech
+   EndIf
+#endif
   END SELECT
 #if defined(PARALLEL) && defined(MPI2)
   ENDIF
   CALL FiniMPI()
 #endif
   CALL TimeStamp('Succesfull MondoSCF run',.FALSE.)   
+
 END PROGRAM MondoSCF
