@@ -51,35 +51,23 @@ PROGRAM QCTC
   ETimer(:) = Zero
 ! Start up macro
   CALL StartUp(Args,Prog,Serial_O=.FALSE.)
-!
-  IF(HasQM()) THEN
-!    Get basis set and geometry
-     CALL Get(BS,Tag_O=CurBase)
-     CALL Get(GM,Tag_O=CurGeom)
-!    Allocations 
-     CALL NewBraBlok(BS)
-  ELSEIF(HasMM()) THEN
-    CALL Get(GM_MM,Tag_O='GM_MM'//CurGeom)
-  ENDIF
+! Get basis set and geometry
+  CALL Get(BS,Tag_O=CurBase)
+  CALL Get(GM,Tag_O=CurGeom)
+! Allocations 
+  CALL NewBraBlok(BS)
+! Get Density
   IF(SCFActn=='InkFok')THEN
      CALL Get(Rho,'DeltaRho',Args,0)
      CALL Get(RhoPoles,'Delta')
-  ELSE IF(SCFActn=='ForceEvaluation')THEN
-     IF(MMOnly()) THEN
-       CALL Get(Rho,'Rho',Args,Current(1))
-       CALL Get(RhoPoles)
-     ELSE
-!!!!!!       CALL Get(Rho,'Rho',Args,1)
-!!!!!!       CALL Get(RhoPoles)
+  ELSEIF(SCFActn=='ForceEvaluation')THEN
 #ifdef PARALLEL
-       CALL GetDistrRho('Rho',Args,1)
+     CALL GetDistrRho('Rho',Args,1)
 #else
-       CALL Get(Rho,'Rho',Args,1,Bcast_O=.TRUE.)
+     CALL Get(Rho,'Rho',Args,1,Bcast_O=.TRUE.)
 #endif
-       CALL Get(RhoPoles)
-     ENDIF
+     CALL Get(RhoPoles)
   ELSE
-     
 #ifdef PARALLEL
      CALL GetDistrRho('Rho',Args,0)
 #else
@@ -132,8 +120,6 @@ PROGRAM QCTC
 #else
   CALL RhoToPoleTree
 #endif
-
-  CALL RhoToPoleTree
   CALL Elapsed_TIME(TimeMakeTree,'Accum')
 #ifdef PARALLEL
   CALL EqualTimeSetUp()
@@ -144,117 +130,69 @@ PROGRAM QCTC
   CALL DeleteRhoAux
 ! Delete the Density
   CALL Delete(Rho)
-!
-  IF(HasQM()) THEN
-     ! Allocate J
+! Allocate J
 #ifdef PARALLEL
-     CALL New_FASTMAT(J,0,(/0,0/))
+  CALL New_FASTMAT(J,0,(/0,0/))
 #else
-     CALL New(J)
+  CALL New(J)
 #endif
-     ! Compute the Coulomb matrix J in O(N Lg N)
-     CALL Elapsed_Time(TimeMakeJ,'Init')
+! Compute the Coulomb matrix J in O(N Lg N)
+  CALL Elapsed_Time(TimeMakeJ,'Init')
 #ifdef PARALLEL
-     TmBegJ = MondoTimer()
+  TmBegJ = MondoTimer()
 #endif
-!     WRITE(*,*) 'TauPAC = ',TauPAC 
-!     WRITE(*,*) 'TauMAC = ',TauMAC
-     CALL MakeJ(J)
-!     WRITE(*,*) 'JWalk Done'
-     CALL Elapsed_TIME(TimeMakeJ,'Accum')
-!     WRITE(*,*) 'Time = ',TimeMakeJ%Wall
-!
-!     IF(.FALSE.) THEN
-!        OPEN(UNIT=99,FILE='JMatrix.dat',STATUS='new')
-!        DO I=1,J%NNon0
-!           WRITE(99,*) J%MTrix%D(I)
-!        ENDDO
-!        CLOSE(99)
-!     ELSE
-!        OPEN(UNIT=99,FILE='JMatrix.dat',STATUS='old')
-!        MaxErrorJ = Zero
-!        SdvErrorJ = Zero
-!        DO I=1,J%NNon0
-!           READ(99,*) JMExact
-!           MaxErrorJ = MAX(MaxErrorJ,ABS(J%MTrix%D(I)-JMExact))
-!           SdvErrorJ = SdvErrorJ + (J%MTrix%D(I)-JMExact)**2
-!        ENDDO
-!        CLOSE(99)
-!        WRITE(*,*) 'Max  Error = ', MaxErrorJ
-!        WRITE(*,*) 'SDV  Error = ', SQRT(SdvErrorJ/DBLE(J%NNon0-1))
-!     ENDIF
-!     IF(.TRUE.) STOP
-!
+  CALL MakeJ(J)
+  CALL Elapsed_TIME(TimeMakeJ,'Accum')
 #ifdef PARALLEL
-     TmEndJ = MondoTimer()
-     TmJ = TmEndJ - TmBegJ
+  TmEndJ = MondoTimer()
+  TmJ = TmEndJ - TmBegJ
 #endif
-     CALL Elapsed_TIME(TimeMakeJ,'Accum')
+  CALL Elapsed_TIME(TimeMakeJ,'Accum')
 #ifdef PARALLEL
   IF(SCFActn=='InkFok') THEN
-    STOP 'InkFok in PARALLEL QCTC is not supported.'
+     STOP 'InkFok in PARALLEL QCTC is not supported.'
   ENDIF
   CALL Redistribute_FASTMAT(J)
   CALL ET_Part
   CALL Set_BCSR_EQ_DFASTMAT(T1,J) ! T1 is allocated in Set_BCSR...
 #else
-     IF(SCFActn=='InkFok')THEN
-        !    Add in correction if incremental J build
-        CALL New(T1)
-        CALL New(T2)
-        CALL Get(T1,TrixFile('J',Args,-1))
-        CALL Add(T1,J,T2)
-        CALL Filter(T1,T2)
-        CALL Delete(T2)
-     ELSE
-        CALL Filter(T1,J)
-     ENDIF
-#endif
-     ! Put J to disk
-     IF(SCFActn=='FockPrimeBuild'.OR.SCFActn=='StartResponse')THEN
-        CALL Put(T1,TrixFile('JPrime'//TRIM(Args%C%C(3)),Args,0))
-     ELSE
-        CALL Put(T1,TrixFile('J',Args,0))
-     ENDIF
-     ! Compute the nuclear-total electrostatic energy in O(N Lg N)
-     IF(SCFActn=='InkFok')THEN
-        CALL Get(E_Nuc_Tot,'E_NuclearTotal')
-        CALL Elapsed_Time(TimeNukE,'Init')
-        E_Nuc_Tot=E_Nuc_Tot+NukE(GM)
-        CALL Elapsed_Time(TimeNukE,'Accum')
-     ELSE     
-        CALL Elapsed_Time(TimeNukE,'Init')
-#ifdef PARALLEL
-        CALL NukE_ENPart(GM)
-        LE_Nuc_Tot=NukE(GM)
-        E_Nuc_Tot = Reduce(LE_Nuc_Tot)
-#else
-        E_Nuc_Tot=NukE(GM)
-#endif
-        CALL Elapsed_Time(TimeNukE,'Accum')
-     ENDIF
-
-     CALL Put(E_Nuc_Tot,'E_NuclearTotal')
-     CALL Put(E_Nuc_Tot,'E_NuclearTotal',StatsToChar(Current))
-  ENDIF 
-!-------------------------------------------------------------------------------
-! QM calculations
-  IF(HasMM()) THEN
-     CALL Elapsed_Time(TimeNukE,'Init')
-     MM_COUL = NukE(GM_MM)
-     CALL Elapsed_Time(TimeNukE,'Accum')
-     CALL Put(MM_COUL,'MM_COUL')
+  IF(SCFActn=='InkFok')THEN
+!    Add in correction if incremental J build
+     CALL New(T1)
+     CALL New(T2)
+     CALL Get(T1,TrixFile('J',Args,-1))
+     CALL Add(T1,J,T2)
+     CALL Filter(T1,T2)
+     CALL Delete(T2)
+  ELSE
+     CALL Filter(T1,J)
   ENDIF
-!*******
-!!$  OPEN(99,FILE='Timing_QCTC.dat',STATUS='UNKNOWN',POSITION='APPEND')
-!!$  WRITE(99,7) TRIM(CurGeom),TRIM(CurBase),TRIM(SCFCycl),TimeNukE%CPUS,TimeNukE%WALL
-!!$  WRITE(99,8) TRIM(CurGeom),TRIM(CurBase),TRIM(SCFCycl),TimeMakeJ%CPUS,TimeMakeJ%WALL
-!!$  WRITE(99,9) TRIM(CurGeom),TRIM(CurBase),TRIM(SCFCycl),TimeMakeTree%CPUS,TimeMakeTree%WALL
-!!$7 FORMAT(A2,'  ',A2,'  ',A2,'  QCTC.TimeNukE     = ',F12.4,1X,F12.4)
-!!$8 FORMAT(A2,'  ',A2,'  ',A2,'  QCTC.TimeMakeJ    = ',F12.4,1X,F12.4)
-!!$9 FORMAT(A2,'  ',A2,'  ',A2,'  QCTC.TimeMakeTree = ',F12.4,1X,F12.4)
-!!$  CLOSE(99)
-!*******
+#endif
+! Put J to disk
+  IF(SCFActn=='FockPrimeBuild'.OR.SCFActn=='StartResponse')THEN
+     CALL Put(T1,TrixFile('JPrime'//TRIM(Args%C%C(3)),Args,0))
+  ELSE
+     CALL Put(T1,TrixFile('J',Args,0))
+  ENDIF
+! Compute the nuclear-total electrostatic energy in O(N Lg N)
+  IF(SCFActn=='InkFok')THEN
+     CALL Get(E_Nuc_Tot,'E_NuclearTotal')
+     CALL Elapsed_Time(TimeNukE,'Init')
+     E_Nuc_Tot=E_Nuc_Tot+NukE(GM)
+     CALL Elapsed_Time(TimeNukE,'Accum')
+  ELSE     
+     CALL Elapsed_Time(TimeNukE,'Init')
+#ifdef PARALLEL
+     CALL NukE_ENPart(GM)
+     LE_Nuc_Tot=NukE(GM)
+     E_Nuc_Tot = Reduce(LE_Nuc_Tot)
+#else
+     E_Nuc_Tot=NukE(GM)
+#endif
+     CALL Elapsed_Time(TimeNukE,'Accum')
+  ENDIF
+  CALL Put(E_Nuc_Tot,'E_NuclearTotal')
+  CALL Put(E_Nuc_Tot,'E_NuclearTotal',StatsToChar(Current))
 !-------------------------------------------------------------------------------
 ! Printing
 !  CALL PChkSum(T1,'J['//TRIM(SCFCycl)//']',Prog,Unit_O=6)
@@ -274,6 +212,7 @@ PROGRAM QCTC
 #else
   CALL Delete(J)
 #endif
+! Tidy up
   CALL Delete(T1)
   CALL Delete(BS)
   CALL Delete(GM)
@@ -282,13 +221,6 @@ PROGRAM QCTC
 #ifdef PARALLEL
   CALL New(TmJArr,NPrc)
   CALL MPI_Gather(TmJ,1,MPI_DOUBLE_PRECISION,TmJArr%D(1),1,MPI_DOUBLE_PRECISION,0,MONDO_COMM,IErr)
-  IF(MyID == ROOT) THEN
-! Output needs a lot of work, and should not go to STDOUT
-! Also, these statistics were written long ago by      
-! Elapsed_TIME(T,Init_O,Proc_O) in PrettyPrint.  Why create
-! another routine to do this????
-!    CALL PImbalance(TmJArr,NPrc,Prog_O='MakeJ')
-  ENDIF
   CALL Delete(TmJArr)
 #endif
 ! didn't count flops, any accumulation is residual from matrix routines
