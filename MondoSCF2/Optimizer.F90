@@ -1240,6 +1240,8 @@ CONTAINS
          XYZNew%D(J,NatmsNew+K)=GMLoc%PBC%BoxShape%D(J,K)
          RefXYZ%D(1:3,NatmsNew+K)=Zero
          GradNew%D(J,NatmsNew+K)=GMLoc%PBC%LatFrc%D(J,K)
+write(*,*) 'lattice forces are temporarily hardwired to zero'
+GradNew%D(J,NatmsNew+K)=Zero
        ENDDO
      ENDDO
      CALL Delete(RefXYZ1)
