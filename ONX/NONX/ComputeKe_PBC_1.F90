@@ -6,11 +6,11 @@ SUBROUTINE ComputeKe(BSc,GMc,BSp,GMp,D,K,DB1,DB2,IB,SB,IS,Drv,SubInd,BfnInd)
   USE ONXParameters
   USE ONXMemory
   USE Stats
-#ifdef PARALLEL
+#ifdef PARALLEL_ONX
   USE MondoMPI
 #endif
   IMPLICIT NONE
-#ifdef PARALLEL
+#ifdef PARALLEL_ONX
   TYPE(DBCSR)           :: D
   TYPE(DBCSR)           :: K
   TYPE(BCSR)            :: KTotal

@@ -12,7 +12,7 @@ SUBROUTINE RangeOfExchange(BSc,GMc,BSp,GMp,D,NameBuf)
 !--------------------------------------------------------------------------------
   TYPE(BSET),INTENT(IN)    :: BSc,BSp
   TYPE(CRDS),INTENT(IN)    :: GMc,GMp
-#ifdef PARALLEL
+#ifdef PARALLEL_ONX
   TYPE(DBCSR)              :: D
 #else
   TYPE(BCSR)               :: D
@@ -32,7 +32,7 @@ SUBROUTINE RangeOfExchange(BSc,GMc,BSp,GMp,D,NameBuf)
   NElem=0
   NameBuf%I=0
   DenRange=0.0D0
-#ifdef PARALLEL
+#ifdef PARALLEL_ONX
   DO AtC=Beg%I(MyID),End%I(MyID)
     ri=AtC-Beg%I(MyID)+1
 #else
@@ -60,7 +60,7 @@ SUBROUTINE RangeOfExchange(BSc,GMc,BSp,GMp,D,NameBuf)
     Ax=GMc%Carts%D(1,AtA)
     Ay=GMc%Carts%D(2,AtA)
     Az=GMc%Carts%D(3,AtA)
-#ifdef PARALLEL
+#ifdef PARALLEL_ONX
     DO AtC=Beg%I(MyID),End%I(MyID)
 #else
     DO ATC=1,NAtoms
@@ -106,7 +106,7 @@ SUBROUTINE RangeOfExchange(BSc,GMc,BSp,GMp,D,NameBuf)
     END DO ! ci
   END DO ! ri
 
-#ifdef PARALLEL
+#ifdef PARALLEL_ONX
   IF (MyID==ROOT) THEN
     CALL New(MR,NPrc,0)
   END IF

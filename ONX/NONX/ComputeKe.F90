@@ -6,18 +6,17 @@ SUBROUTINE ComputeKe(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,IS,Drv,SubInd,BfnInd)
   USE ONXParameters
   USE ONXMemory
   USE Stats
-#ifdef PARALLEL
+#ifdef PARALLEL_ONX
   USE MondoMPI
 #endif
   IMPLICIT NONE
-#ifdef PARALLEL
+#ifdef PARALLEL_ONX
   TYPE(DBCSR)           :: D
   TYPE(DBCSR)           :: K
   TYPE(BCSR)            :: KTotal
 #else
   TYPE(BCSR)            :: D
   TYPE(BCSR)            :: K
-  INTEGER               :: MyID=0
 #endif
   TYPE(BSET),INTENT(IN)     :: BSc,BSp   ! basis set info
   TYPE(CRDS),INTENT(IN)     :: GMc,GMp   ! geometry info

@@ -7,11 +7,11 @@ SUBROUTINE ComputeKg(BSc,GMc,BSp,GMp,D,K,DB1,DB2,IB,SB,IS,Drv,SubInd,BfnInd)
   USE ONXMemory
   USE Stats
   USE LinAlg
-#ifdef PARALLEL
+#ifdef PARALLEL_ONX
   USE MondoMPI
 #endif
   IMPLICIT NONE
-#ifdef PARALLEL
+#ifdef PARALLEL_ONX
   TYPE(DBCSR)           :: D
   TYPE(DBCSR)           :: K
   TYPE(BCSR)            :: KTotal

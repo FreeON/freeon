@@ -4,7 +4,7 @@
     USE Macros
     USE ONXParameters
     IMPLICIT NONE
-#ifdef PARALLEL
+#ifdef PARALLEL_ONX
     TYPE(DBCSR),INTENT(IN)        :: D
 #else
     TYPE(BCSR),INTENT(IN)         :: D
@@ -18,7 +18,7 @@
     INTEGER                       :: AtB
     INTEGER                       :: ri,ci
     NameBuf%I=0
-#ifdef PARALLEL
+#ifdef PARALLEL_ONX
   NameBuf%I=0
   DO AtA=Beg%I(MyID),End%I(MyID)
     ri=AtA-Beg%I(MyID)+1

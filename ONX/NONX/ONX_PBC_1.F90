@@ -15,11 +15,11 @@ PROGRAM ONX
   USE ContractionScaling
   USE MatFilter
   USE InitExchangeMatrix
-#ifdef PARALLEL
+#ifdef PARALLEL_ONX
   USE MondoMPI
 #endif
   IMPLICIT NONE
-#ifdef PARALLEL
+#ifdef PARALLEL_ONX
   TYPE(DBCSR)         :: D
   TYPE(DBCSR)         :: K,T1,T2
   TYPE(BCSR)          :: KTotal
@@ -67,8 +67,8 @@ PROGRAM ONX
   IF(SCFActn=='Restart')THEN
 !    Get the old information
      CALL Get(RestartHDF,'OldInfo')
-     CALL CloseHDF()
-     CALL OpenHDF(RestartHDF)
+     CALL CloseHDF(HDF_CurrentID)
+     HDF_CurrentID=OpenHDF(RestartHDF)
      CALL New(Stat,3)
      CALL Get(Stat,'current')
      PrvCycl=TRIM(IntToChar(Stat%I(1)))
@@ -79,8 +79,8 @@ PROGRAM ONX
      CALL Get(BSiz,'atsiz',Tag_O=PrvBase)
      CALL Get(OffS,'atoff',Tag_O=PrvBase)
      CALL Get(NBasF,'nbasf',Tag_O=PrvBase)
-     CALL CloseHDF()
-     CALL OpenHDF(InfFile)     
+     CALL CloseHDF(HDF_CurrentID)
+     HDF_CurrentID=OpenHDF(InfFile)     
   ELSE
      CALL Get(BSp,Tag_O=PrvBase)
      CALL Get(GMp,Tag_O=PrvGeom)

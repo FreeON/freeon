@@ -5,7 +5,7 @@ MODULE MatFilter
   USE LinAlg
   USE ONXParameters
   INTERFACE ONXFilter
-#ifdef PARALLEL
+#ifdef PARALLEL_ONX
     MODULE PROCEDURE ONXFilter_DBCSR 
 #endif
     MODULE PROCEDURE ONXFilter_BCSR
@@ -13,7 +13,7 @@ MODULE MatFilter
 
   CONTAINS
 
-#ifdef PARALLEL
+#ifdef PARALLEL_ONX
 SUBROUTINE ONXFilter_DBCSR(BS,GM,A,NameBuf,Tol_O)
   IMPLICIT NONE
   TYPE(BSET),INTENT(IN)             :: BS

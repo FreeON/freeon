@@ -69,7 +69,7 @@ MODULE DOrder
   SB%SLDis%I(1)=5
   IndexC=0
   DO AtC=1,NAtoms
-#ifdef PARALLEL
+#ifdef PARALLEL_ONX
     IF (NameBuf%I(AtC)==1) THEN
 #endif
     KC=GMp%AtTyp%I(AtC)
@@ -320,7 +320,7 @@ MODULE DOrder
   END DO
 
     END DO ! CFC
-#ifdef PARALLEL
+#ifdef PARALLEL_ONX
   END IF
 #endif
   END DO ! Atc

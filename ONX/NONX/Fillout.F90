@@ -9,7 +9,7 @@ SUBROUTINE Fillout_BCSR(BS,GM,A)
   INTEGER                  :: AtB,KB,NBFB
   INTEGER                  :: iPnt1,iPnt2,ci,Ind
 
-#ifdef PARALLEL
+#ifdef PARALLEL_ONX
   IF (MyID==ROOT) THEN
 #endif
     DO AtA=1,NAtoms
@@ -31,12 +31,12 @@ SUBROUTINE Fillout_BCSR(BS,GM,A)
         END IF
       END DO
     END DO
-#ifdef PARALLEL
+#ifdef PARALLEL_ONX
   END IF
 #endif
 END SUBROUTINE Fillout_BCSR
 
-#ifdef PARALLEL
+#ifdef PARALLEL_ONX
 SUBROUTINE Fillout_DBCSR(BS,GM,A,NameBuf)
   USE DerivedTypes
   USE GlobalScalars

@@ -9,7 +9,7 @@ MODULE ContractionScaling
   USE ONXParameters
   IMPLICIT NONE
 
-#ifdef PARALLEL
+#ifdef PARALLEL_ONX
   INTERFACE TrnMatBlk
     MODULE PROCEDURE TrnMatBlk_DBCSR, TrnMatBlk_BCSR
   END INTERFACE
@@ -21,7 +21,7 @@ MODULE ContractionScaling
 
   CONTAINS
 
-#ifdef PARALLEL
+#ifdef PARALLEL_ONX
 SUBROUTINE TrnMatBlk_DBCSR(BS,GM,A)
   IMPLICIT NONE
   TYPE(BSET),INTENT(IN)     :: BS
