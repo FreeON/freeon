@@ -45,10 +45,11 @@ self-consistent-field equations
 is extended to the computation of higher order static response properties.
 Although generally applicable, perturbed projection is developed here 
 in the context of the self-consistent first and second electric hyperpolarizabilities 
-of three dimensional water clusters at the Hartree-Fock level of theory. 
+of one dimensional water chains and three dimensional water clusters at the 
+Hartree-Fock level of theory. 
 Non-orthogonal, density matrix analogues of Wigner's $2n+1$ rule are given up to fourth order.
 Linear scaling and locality of the higher order response densities under perturbation 
-by a global electric field are demonstrated.  
+by a global electric field are demonstrated for the three dimensional water clusters.  
 \end{abstract}
 
 \keywords{Perturbed Projection, density matrix, perturbation theory, purification, linear scaling, 
@@ -78,6 +79,7 @@ by a global electric field are demonstrated.
 %(in terms of the number of atoms required for onset)  in the case of
 %quasilinear rather than 3D clusters. I think it would be appropriate for
 %the authors to comment on this point in the text. 
+%  VW-added comments in the abstract.
 %
 %2. I haven't been able to verify the various multiplicative factors that
 %appear on the rhs of Eqs.(4) and elsewhere. In this connection, reference
@@ -104,11 +106,13 @@ by a global electric field are demonstrated.
 %rule is used and in another place that the n + 1 rule is used. Later on
 %the two different usages is made clear but, at this point in my reading, I
 %was confused. 
+%  VW-modified the sentence there.
 %
 %7. The behavior of water chains is interesting but workers in the field
 %will be more interested in delocalized systems such as polyacetylene,
 %polymethineimine or polydiacetylene chains. Will the onset of linear
 %scaling depend upon the degree of delocalization and to what extent ? 
+%  VW-this is in the introduction!
 %
 %8. Perhaps it is due to the quality of my printout but, frankly, I was not
 %able to come with anything from Fig.6. 
@@ -793,9 +797,10 @@ We have implemented these methods in the MondoSCF suite of linear scaling quantu
 programs \cite{MondoSCF}.  The construction of the Fockian and derivative Fockian was carried
 out using the linear scaling QCTC method for computation of the Coulomb matrix \cite{MChallacombe97,CTymczak04a} and the
 ONX algorithm \cite{ESchwegler97,CTymczak04b} for computation of the Hartree-Fock exchange matrix. 
-The CPSCF equations were solved in an entirely orthogonal representation,
-with higher order properties evaluated using the $2 n+1$ rule with the non-orthogonal formulae given
-by Eqs.~(\ref{eq:2n+1 third order}-\ref{eq:2n+1 fourth order}).  Two different levels of numerical 
+The CPSCF equations were solved, at each order, in an entirely orthogonal representation and
+the higher order properties were also evaluated using the $2 n+1$ rule with 
+the non-orthogonal formulae given by Eqs.~(\ref{eq:2n+1 third order}-\ref{eq:2n+1 fourth order}).
+Two different levels of numerical 
 accuracy have been used, {\tt GOOD} and {\tt TIGHT}.   Thresholds that define the {\tt GOOD} 
 accuracy level include a matrix threshold $\tau=10^{-5}$, as well as other numerical thresholds 
 detailed in Ref.~[\onlinecite{CTymczak04a}], which deliver 6 digits of relative accuracy in the total 
