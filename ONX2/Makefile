@@ -33,7 +33,7 @@ CPPMISC = -DONX2_PARALLEL -DGTRESH
 
 EXTRA_INCLUDES=-I$(MONDO_HOME)/TwoE  -I$(MONDO_HOME)/TwoE/MSC  -I$(MONDO_HOME)/TwoE/INT -I$(MONDO_HOME)/TwoE/GRD
 
-all: ONX2 GONX2
+all: ONX2 GONX2 #HONX
 
 Objects = QSDis.o PartDrv.o ONXParameters.o ONXInit.o ONXGet.o   \
 	  ONXFillOut.o Stats.o ONXRng.o \
@@ -43,6 +43,10 @@ Objects = QSDis.o PartDrv.o ONXParameters.o ONXInit.o ONXGet.o   \
 GObjects = QSDis.o PartDrv.o ONXParameters.o ONXGet.o \
 	   ONX2F77.o ONX2DataType.o ONXCtrSclg.o \
 	   GONX2ComputDK.o GONX2.o ONX2List.o
+#
+HObjects = QSDis.o PartDrv.o ONXParameters.o ONXGet.o \
+	   ONX2F77.o ONX2DataType.o ONXCtrSclg.o \
+	   HONXComputD2K.o HONX.o ONX2List.o
 #
 ReleaseFiles=QSDis.x PartDrv.x ONXParameters.x ONXInit.x ONXGet.x   \
 	  ONXFillOut.x Stats.x ONXRng.x \
@@ -63,6 +67,10 @@ GONX2:	$(GObjects)
 	$(LD) $(LDFLAGS) GONX2 $(GObjects) $(F90_LIBRARIES) -lGRD -lINT -lVRR -lHRR -lTwoEMisc $(LAPACK)
 	mv GONX2 $(MONDO_EXEC)/GONX
 #
+HONX:	$(HObjects)
+	$(LD) $(LDFLAGS) HONX $(HObjects) $(F90_LIBRARIES) -lGRD -lINT -lVRR -lHRR -lTwoEMisc $(LAPACK)
+	mv HONX $(MONDO_EXEC)/HONX
+#
 release:purge $(ReleaseFiles)
 	rm -f *.F*
 #
@@ -74,6 +82,8 @@ clean:
 	rm -f \#*
 	rm -f *~
 	rm -f $(Objects)
+	rm -f $(GObjects)
+	rm -f $(HObjects)
 	ls
 #
 doc.txt:
