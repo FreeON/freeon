@@ -906,10 +906,10 @@ CONTAINS
 !      Get Lattice Forces
        CALL Get(G%Clone(iCLONE)%PBC%LatFrc,'latfrc',Tag_O=chGEO)
 !      Print Tot Lattice Forces
-       WRITE(*,*) 'LatFrc NUM'
-       DO I=1,3
-          WRITE(*,*) (G%Clone(iCLONE)%PBC%LatFrc%D(I,J),J=1,3)
-       ENDDO
+!!$       WRITE(*,*) 'LatFrc NUM'
+!!$       DO I=1,3
+!!$          WRITE(*,*) (G%Clone(iCLONE)%PBC%LatFrc%D(I,J),J=1,3)
+!!$       ENDDO
 !      Close the group
        CALL CloseHDFGroup(HDF_CurrentID)
        G%Clone(iCLONE)%GradRMS=SQRT(G%Clone(iCLONE)%GradRMS)/DBLE(3*G%Clone(iCLONE)%NAtms)
