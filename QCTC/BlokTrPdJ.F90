@@ -132,7 +132,7 @@ MODULE BlokTrPdJ
 #ifdef PERIODIC
 #ifdef WRAPDIST
 !                  WRAP the center of d Phi_A(r) Phi_B(r+R) back into the box
-                   CALL AtomCyclic(GM,Prim%P)
+                   CALL AtomCyclic(GMLoc,Prim%P)
 #endif
                    PTmp=Prim%P
 !                  Sum over cells
