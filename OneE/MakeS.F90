@@ -17,17 +17,9 @@ PROGRAM MakeS
 #ifdef PARALLEL
   USE MondoMPI
 #endif
-#ifdef PARALLEL_DEVELOPMENT
-  USE FastMatrices
-#endif
   IMPLICIT NONE
 #ifdef PARALLEL
-#ifdef PARALLEL_DEVELOPMENT
-  TYPE(FastMat),POINTER :: S
-  TYPE(BCSR)            :: T1
-#else
   TYPE(DBCSR)         :: S,T1
-#endif
 #else
   TYPE(BCSR)          :: S,T1
 #endif
@@ -57,35 +49,26 @@ PROGRAM MakeS
 ! Allocations 
 
   CALL NewBraBlok(BS)
-#ifdef PARALLEL_DEVELOPMENT
-  CALL New_FASTMAT(S,0,(/0,0/))
-#else
   CALL New(S)
-#endif
 #ifdef PERIODIC
-! Get the Outer Cell Set
-  CALL Get_CellSet(CS_OUT,'CS_OUT'//CurBase//CurGeom)
+!-----------------------------------------------
+! Calculate the Number of Cells
+
+  CALL SetCellNumber(GM)
   CALL PPrint(CS_OUT,'outer sum',Prog)
 #endif
 !-----------------------------------------------
 ! Initialize the matrix and associated indecies
 
-#ifdef PARALLEL_DEVELOPMENT
-#else
   P=1; R=1; S%RowPt%I(1)=1
   CALL SetEq(S%MTrix,Zero)
-#endif
 !-----------------------------------------------
 ! Main loops
 
 #ifdef PARALLEL
-#ifdef PARALLEL_DEVELOPMENT
-  DO AtA=1,NAtoms
-#else
   S%NAtms=0
   DO AtA=Beg%I(MyId),End%I(MyId)
      S%NAtms=S%NAtms+1  
-#endif
 #else
   S%NAtms=NAtoms
   DO AtA=1,NAtoms
@@ -101,24 +84,13 @@ PROGRAM MakeS
                         + (Pair%A(2)-Pair%B(2))**2 &
                         + (Pair%A(3)-Pair%B(3))**2
               IF(TestAtomPair(Pair)) THEN
-#ifdef PARALLEL_DEVELOPMENT
-                 CALL AddFASTMATBlok(S,AtA,AtB,SBlok(BS,Pair))
-#else
                  S%MTrix%D(R:R+NN-1)=S%MTrix%D(R:R+NN-1)+SBlok(BS,Pair)
-#endif
               ENDIF
            ENDDO
 #else
-#ifdef PARALLEL_DEVELOPMENT
-           CALL AddFASTMATBlok(S,AtA,AtB,SBlok(BS,Pair))
-#else
            S%MTrix%D(R:R+NN-1)=SBlok(BS,Pair)
 #endif
-#endif
 
-#ifdef PARALLEL_DEVELOPMENT
-! do nothing
-#else
            S%ColPt%I(P)=AtB
            S%BlkPt%I(P)=R
            R=R+NN 
@@ -135,34 +107,18 @@ PROGRAM MakeS
            IF(R>MaxNon0.OR.P>MaxBlks) &
                 CALL Halt(' BCSR dimensions blown in MakeS ')
 #endif
-#endif
         ENDIF
      ENDDO
   ENDDO
-#ifdef PARALLEL_DEVELOPMENT
-! do nothing
-#else
   S%NBlks=P-1
   S%NNon0=R-1
-#endif
 !------------------------------------------------------------
 ! Put S to disk
 
-#ifdef PARALLEL_DEVELOPMENT
-  CALL Redistribute_FASTMAT(S)
-  CALL AlignNodes()
-  CALL Multiply_FASTMAT_SCALAR(S,One/DBLE(NPrc))
-!  >>>>>>>>>> FilterOut is BROKEN! <<<<<<<<<<<<<
-!  CALL FilterOut_FASTMAT(S)
-  CALL AlignNodes()
-  CALL Set_BCSR_EQ_DFASTMAT(T1,S)
-!  CALL PPrint(T1,'S',Unit_O=6)
-!  CALL PChkSum(T1,'S',Prog)
-#else
   CALL Filter(T1,S)
+
   !! the following line gives a problem!!
 ! CALL PPrint(T1,'S',Unit_O=6)
-#endif
   CALL Put(T1,TrixFile('S',Args))
 !-----------------------------------------------------------
 ! Printing
@@ -173,11 +129,7 @@ PROGRAM MakeS
 !------------------------------------------------------------
 ! Tidy up
 
-#ifdef PARALLEL_DEVELOPMENT
-  CALL Delete_FastMat1(S)
-#else
   CALL Delete(S)
-#endif
   CALL Delete(T1)
   CALL Delete(BS)
   CALL Delete(GM)
