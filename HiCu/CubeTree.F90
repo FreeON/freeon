@@ -74,7 +74,7 @@ MODULE CubeTree
                                              RelativeError,NewCubes,OldCubes
          REAL(DOUBLE)                     :: MaxError,BoxSep,Delta,TargtThresh
          REAL(DOUBLE), DIMENSION(0:MaxRes):: MaxRelError
-         INTEGER                          :: I,J,K,ErrCount,PtsPerAtom
+         INTEGER                          :: I,J,K,ErrCount,PtsPerAtom,PU
          TYPE(BBox)                       :: CubeBox    
          CHARACTER(LEN=DEFAULT_CHR_LEN)   :: Mssg     
 !---------------------------------------------------------------------------------
@@ -90,6 +90,7 @@ MODULE CubeTree
          MaxRelError=BIG_DBL
          TauRel=TauRel*ResSpan
          Delta=(One/ResSpan)**(One/DBLE(MaxRes))
+         PU=OpenPU(); CALL PrintProtectL(PU); CLOSE(PU)
 !        Begin generation of the hierarchical grid
          DO J=1,MaxRes
 !           Target relative error
@@ -132,6 +133,7 @@ MODULE CubeTree
             WRITE(Out,*)TRIM(Mssg)
             CLOSE(Out)
          ENDIF
+         PU=OpenPU(); CALL PrintProtectR(PU); CLOSE(PU)
      END SUBROUTINE GridGen  
 !================================================================================
 !          
