@@ -108,7 +108,7 @@ equations.
  paradigm has evolved in electronic structure theory, where
  no single part of a calculation is allowed to increase in 
  computational complexity more than linearly with the number
- of atoms \cite{ON_Reviews}. 
+ of atoms \cite{GGalli96,DBowler97,SGoedecker99,POrdejon00,VGogonea01,SWu02}. 
 
  Linear scaling algorithms exploit the quantum locality 
  (or nearsightedness) of non-metallic systems, 
@@ -149,7 +149,7 @@ equations.
  where both the density matrix and its derivatives are calculated directly.
  A few linear scaling response schemes have been proposed.
  Ochsenfeld and Head-Gordon developed a scheme based on the
- Li-Nunes-Vanderbilt density matrix functional \cite{Ochsenfeld_1997}
+ Li-Nunes-Vanderbilt density matrix functional \cite{Ochsenfeld97}
  and later Larsen {\em et al.} \cite{Helgaker_2001} proposed iterative 
  solutions to the CPSCF equations based on unitary operations
  involving matrix exponentials. In both of these approaches, a linear 
@@ -162,10 +162,10 @@ equations.
  Our approach to linear scaling response theory is quite different 
  from previous attempts. It is based on the perturbed projection
  method in density matrix perturbation theory, recently developed
- by the authors \cite{Niklasson04,Weber04}. With this theory it
+ by the authors \cite{ANiklasson04,Weber04}. With this theory it
  was possible to demonstrate efficient linear scaling {\em ab initio}
  computations for the first electric polarizability of three-dimensional 
- water clusters. And incontrast to many alternative approaches, linear scaling 
+ water clusters. And in contrast to many alternative approaches, linear scaling 
  was achieved without assuming a predefined range of locality. Instead a 
  numerical threshold was used defining a desired numerical accuracy similar
  to a variable machine precision.
@@ -185,10 +185,10 @@ equations.
  First we give a general description through the solution of the CPSCF equations.
  Then we describe the perturbed projection approach for the calculation
  of the density matrix derivatives and present
- an algorithm for derivatives up to third order in the density matrix.
+ an algorithm for derivatives up to second order in the density matrix.
  Thereafter, we present a density matrix analogy to Wigner's 2n+1 rule 
  for nonorthogonal representations with mixed perturbation terms within the
- coupled perturbed sheme. We also briefly 
+ coupled perturbed scheme. We also briefly 
  discuss the self consistent acceleration technique by Weber and Daul \cite{Weber_2003}. 
  In the next section, we first show the saturation of the hyperpolarizabilities up to 
  fourth order (i.e. up to the second hyperpolarizability $\gamma$) for a series 
@@ -227,10 +227,10 @@ a molecule in a static electric field $\mathcal{E}$ is
                   &=Tr[DF]-\frac{1}{2}Tr[D(J(D)+K(D)),
   \end{split}
 \end{equation}
-where $D$ is the density matrix in the electric field, 
+where $D=D(\E)$ is the density matrix in the electric field, 
 $h^0$ is the core Hamiltonian, $\mu$ is the dipole moment matrix, 
 $J(D)$ is the Coulomb matrix, $K(D)$ the exact HF exchange matrix
-and $F=h^0+\mu\E+J(D)+K(D)$ is the perturbed Fockian.
+and $F=F(\E)=h^0+\mu\E+J(D)+K(D)$ is the perturbed Fockian.
 The total energy of a molecule in a homogenous electric field may 
 be developed in a Taylor expansion as
 \begin{equation}
@@ -249,8 +249,7 @@ be developed in a Taylor expansion as
  moment and $\E^a$ is the electric field in direction $a$. 
  The polarizability is the second order response of the total energy with respect
  to variation in the electric field while the higher derivatives
- give rise to the first and second hyperpolarizabilities \cite{StandardCPSCF}
- %\cite{Sekino_1986}
+ give rise to the first and second hyperpolarizabilities \cite{Sekino_1986,Dupuis_1991}
  \begin{subequations}\label{pol}
    \begin{gather}
      \alpha_{ab}=
@@ -267,10 +266,10 @@ be developed in a Taylor expansion as
      -12Tr[D^{abc}\mu_d].
    \end{gather}
 \end{subequations}
-Here $D^{a\ldots}$ denotes density matrix derivates with respect to a field in directions $a\ldots$ 
+Here $D^{a\ldots}$ denotes density matrix derivatives with respect to a field in directions $a\ldots$ 
 at $\mathcal{E} = 0$ and is given by
 \begin{equation}
- \displaystyle\D^{a\ldots}_{n+1}=
+ \displaystyle\D^{a\ldots}=
  \frac{\partial^N}{\partial\E^a\ldots}\theta(\tilde{\mu}I-
  \F(\E))\bigg|_{\E=0} \label{DDeriv}.
 \end{equation}
@@ -289,7 +288,7 @@ may also be expanded by order in the perturbation to yield
 \end{equation}
 where $\F^{a}$ stands for $\partial\F(\E)/\partial\E^{a}$ 
 and so on for the higher terms.
-A similar expantion also holds for the density matrix $\D(\E)$.
+A similar expansion also holds for the density matrix $\D(\E)$.
 
 Within HF theory, the Fockian $F^0$ in the non-orthogonal 
 basis is 
@@ -313,10 +312,10 @@ with the same algorithms in linear scaling time if
 $D^{a\ldots}$ manifests decay properties similar to $D^0$. 
 
 The expansions above are given within Hartree-Fock Theory. 
-Similar epxansions hold also for the derivatives of Fockian
+Similar expansions hold also for the derivatives of Fockian
 within Kohn-Sham and hybrid HF/DFT with addition of 
 the exchange-correlation matrix $V_{xc}^{a\cdots}(D^0,D^a,\cdots)$ 
-{\bf TO CHECK IF IT IS THE RIGHT DEPANDENCY} \cite{Lee_1994}.
+\cite{Lee_1994,PSalek02}.
 
 \subsection{Technical details}
 
@@ -328,13 +327,13 @@ linear algebra \cite{ANiklasson03,MChallacombe00B}.
 Linear scaling is achieved for insulating systems through the dropping (filtering) of atom-atom
 blocks with Frobenious norm below a numerical threshold ($\sim 10^{-4}-10^{-6}$).
 At SCF convergence the TC2 algorithm generates a polynomial sequence 
-defining the groundstate projector, from which expansion of the derivative 
+defining the ground state projector, from which expansion of the derivative 
 density matrices can be obtained term by term.
 
-\subsection{Convergence criterea}
+\subsection{Convergence criteria}
 
 The derivative density matrices and derivative Fockians depend on 
-each other implicitly and must be solved for self-consistently 
+each other implicitly and must be solved for self-consistency 
 via the coupled-perturbed self-consistent-field (CPSCF) equations.
 The necessary and sufficient criteria for convergence of the 
 CPSCF equations involve an extension to the well-known SCF equations \cite{Furche_2001}
@@ -361,7 +360,7 @@ and the idempotency-like constraints \cite{Furche_2001}
 \subsection{The CPSCF algorithm}
 
 The following schematic algorithm is a higher order generalization of the
-self consistent scheme for the solution of the CPSCF equations describe 
+self consistent scheme for the solution of the $N$-th order CPSCF equations describe 
 in \cite{Weber04} based on perturbed projection:
 \begin{subequations}
   \begin{gather}
@@ -374,7 +373,7 @@ in \cite{Weber04} based on perturbed projection:
 %    F^{ab\ldots}_{n}=J(D^{ab\ldots}_n)+K(D^{ab\ldots}_n) \label{FockBuild2} \\
     \displaystyle\widetilde{F}^{a\ldots}_{n}=\sum_{k=n-m}^{n}c_k F^{a\ldots}_{k} \label{DDIIS} \\
     \displaystyle\D^{a\ldots}_{n+1}=
-    \frac{\partial^N}{\partial\E^a\ldots}\theta(\tilde{\mu}I-
+    \frac{\partial N}{\partial\E^a\ldots}\theta(\tilde{\mu}I-
     \F(\E))\bigg|_{\E=0} \label{DDeriv}
 %    (\F^{0}+\sum_c\E^{c}\widetilde{\F}^{c}_n+\ldots))\bigg|_{\E=0} \label{DDeriv}
   \end{gather} 
@@ -399,7 +398,7 @@ have reached a sufficient level of accuracy.
 
 \subsection{Derivative based DIIS Algorithm (DDIIS)}
  The direct inversion in the iterative subspace (DIIS) method, introduced
- some time ago by Pulay \cite{Pulay1,Pulay2}, provides a significant 
+ some time ago by Pulay \cite{Pulay80,Pulay82}, provides a significant 
  acceleration of the SCF rate. The idea of the DIIS scheme consists to use
  the information accumulated during the preceding iterations by 
  constructing an averaged effective AO
@@ -417,7 +416,7 @@ of the averaged error vector $\mathbf{\bar{e}}_n$ given by
   \mathbf{\bar{e}}_n=\sum_{i=n-m}^{n}c_i\mathbf{e}_i,
 \end{equation}
 where the $\mathbf{e}_i$'s are just one of the commutator relations 
-Eqs. (\ref{eq:commutators}) depeanding on the order of the perturbation. 
+Eq. \eqref{eq:commutators} depending on the order of the perturbation. 
 The optimal coefficients $c_i$ are solution to the 
 quadratic programming problem
 \begin{equation}
@@ -455,29 +454,29 @@ density matrix derivatives directly from the relation in Eq.\ (\ref{DDeriv})
 is not possible because the discontinuity of the Heaviside step function $\theta$.
 The new density matrix perturbation theory avoids the discontinuity problem
 by dividing the perturbation expansion in sequential steps of projections,
-where perturbations are performed exactley, or to any order, at each
-projection level \cite{Niklasson04}. The perturbed projection method yields
+where perturbations are performed exactly, or to any order, at each
+projection level \cite{ANiklasson04}. The perturbed projection method yields
 an explicit and rapidly convergent recursive construction of
 the density matrix response. This is in contrast to previous suggestions for
 solving the CPSCF equations with N-scaling complexity through implicit
 formulations, where the density matrix derivatives are given as solutions
 to commuting operator equations of Sylvester type 
-{\bf CITE: Frisch, Ochsenfeld, Larsen ...?}.
+\cite{Ochsenfeld97,Helgaker_2001}.
 
 
-{\bf WE SHOULD SAY STG ABOUT THE SYM OF THE DERIVATVES}
-{\bf . That should be clear, but maybe as a brief note?}
-\begin{equation}
-  D^{ab\ldots}=D^{ba\ldots}=\ldots
-\end{equation}
+%{\bf WE SHOULD SAY STG ABOUT THE SYM OF THE DERIVATVES}
+%{\bf . That should be clear, but maybe as a brief note?}
+%\begin{equation}
+%  D^{ab\ldots}=D^{ba\ldots}=\ldots
+%\end{equation}
 
 \subsection{Algorithm}
 To make things clear assume the Fockian \eqref{FockianTaylor} up to second order
 $$
-\F(\E)=\F^0+\sum_a\F^a\E^a+\sum_{ab}\F^{ab}\E^a\E^b.
+\F(\E)=\F^0+\sum_a\F^a\E^a+\frac{1}{2}\sum_{ab}\F^{ab}\E^a\E^b.
 $$
 The density matrix derivatives are given by Eq. \eqref{DDeriv} and can be
-calculated by perturbed projection with the following algorithm (up to second order)
+calculated by perturbed projection with the following algorithm (up to second order).
 \begin{enumerate}
 \item 
   The starting matrix guess initiating the sequence are obtained from $\F^0$,
@@ -491,21 +490,21 @@ calculated by perturbed projection with the following algorithm (up to second or
   \end{align}
   where $\F_{min}$ and $\F_{max}$ are approximate upper and lower 
   bounds of the eigenvalues of $\F^0$.
-\item Perturbed projections are applied.\\
+\item Perturbed projections are then applied.\\
   If $\Tr[\X^0_{i}]\ge N_e$ then
   \begin{align}\label{PP1}
     \begin{split}
       \X^{ab}_{i+1}&=\{\X^{ab}_{i},\X^0_{i}\}+\frac{1}{2}\{\X^a_{i},\X^b_{i}\}\\
       \X^a_{i+1}&=\{\X^a_{i},\X^0_{i}\}\\
       \X^b_{i+1}&=\{\X^b_{i},\X^0_{i}\}\\
-      \X^0_{i+1}&=(\X^0_{i})^2
+      \X^0_{i+1}&=(\X^0_{i})^2,
     \end{split}
-    \intertext{else $\Tr[X^0_{i}]< N_e$}
+    \intertext{else $\Tr[X^0_{i}]< N_e$,}
     \begin{split}
       \X^{ab}_{i+1}&=2 \X^{ab}_{i}-(\{\X^{ab}_{i},\X^0_{i}\}+\frac{1}{2}\{\X^a_{i},\X^b_{i}\})\\
       \X^b_{i+1}&=2 \X^b_{i}-\{\X^b_{i},\X^0_{i}\} \\
       \X^a_{i+1}&=2 \X^a_{i}-\{\X^a_{i},\X^0_{i}\} \\
-      \X^0_{i+1}&=2 \X^0_{i}-(\X^0_{i})^2
+      \X^0_{i+1}&=2 \X^0_{i}-(\X^0_{i})^2.
     \end{split}
   \end{align}
 
@@ -559,16 +558,16 @@ Higher order energy derivatives can be calculated from the lower
 order response. Wigner's $2n+1$ rule gives a general way to calculate the $2n+1$
 energy response from the $n$-th order response. These kind of expressions
 based on the wave function perturbation theory are well known and are 
-descibed in for example \cite{Dupuis_1991}.
+described in for example \cite{Dupuis_1991}.
 A density matrix analogy to the Wigner's $2n+1$ rule in the orthogonal 
 representation for a single perturbation parameter
-was given to third order by Mcweeny {\bf Phys. Rev. vol. 126, 1028 (1962) Check!} 
-and up to fourth order by Niklasson and Challacombe \cite{Niklasson04} 
-within the uncoupled perturbed sheme and one perturbation.
+was given to third order by Mcweeny {\bf Phys. Rev. vol. 126, 1028 (1962) Check!, I have not seen any thing like that YET} 
+and up to fourth order by Niklasson and Challacombe \cite{ANiklasson04} 
+within the uncoupled perturbed scheme and one perturbation.
 Here we will present a full generalization to the non orthogonal case 
 and for mixed derivatives up to fourth order.
 The third order energy correction is given in the 
-othogonal and non orthogonal representations respectively by
+orthogonal and non orthogonal representations respectively by
 \begin{align}
 %  \begin{split}
     E^{abc}&=\frac{1}{6}P(a,b,c)\Tr([\D^a,\D^0]\D^b\F^c)\label{eq:2n+1 third order ortho}\\
@@ -578,7 +577,7 @@ othogonal and non orthogonal representations respectively by
 where $P(a,b,c)$ stands for the permutation operator such that all
 permutations of $a$, $b$ and $c$ are made (e.g. $P(a,b,c)$ generates the sum of
 all the six terms: $(a,b,c)$, $(a,c,b)$, $(b,a,c)$, $(b,c,a)$, $(c,a,b)$ and $(c,b,a)$)
-and $[A,B]_S=ASB-BSA$. 
+and $[A,B]_S=ASB-BSA$ where $S$ is the overlap matrix. 
 %\begin{equation}
 %\begin{split}
 %  E^{abc}=\frac{1}{6}\Tr(&[\D^a,\D^0]\D^b\F^c+[\D^a,\D^0]\D^c\F^b+\\
@@ -644,9 +643,9 @@ Similar expressions can be derived for the fourth order
 %\end{equation}
 
 Those relations may seem to be very expansive to compute. But after further
-inspections, we see ,for example in the orhtogonal representation, that the 
-correction along the same direction $a$ i.e. $E^{aaaa}$,
-the relation reduces to only one term (7 matrix multipilcations).
+inspections, we see ,for example in the orthogonal representation, that the 
+correction along the same direction $a$ i.e. $E^{aaaa}$ (or any other permutations of $(a,a,b,c)$) 
+reduces to only one term (7 matrix multiplications).
 In the worst case where all the directions are different i.e. $E^{aabc}$, the
 relation \eqref{eq:2n+1 fourth order ortho} simplifies to only 12 
 terms (84 matrix multiplications). 
@@ -655,11 +654,13 @@ Eqs. \eqref{eq:2n+1 third order ortho}, \eqref{eq:2n+1 third order nonortho}
 and \eqref{eq:2n+1 fourth order nonortho}.
 We can mention that those equations 
 (\ref{eq:2n+1 third order ortho}-\ref{eq:2n+1 fourth order nonortho}) 
-do not depend on any parametrizations of the wave function
+do not depend on any parametrization of the wave function
 as the relations previously given \cite{Helgaker_2001,Dupuis_1991}.
 
 
 \section{Examples}
+We have implemented these methods in the MondoSCF suite of linear 
+scaling quantum chemistry programs \cite{MondoSCF}.
 To demonstrate the ability, accuracy, numerical stability and efficiency 
 of the algorithm we present
 the solution of the $10$-th order UPSCF (Uncoupled Perturbed SCF) 
@@ -698,20 +699,20 @@ with Portland Group Fortran Compiler pgf90 4.0-2 \cite{PGF90}.
 
 To show the simplicity of the method, we have computed 
 the electric response up to the $10$-th order for a $\rm C_{60}$
-molecule and linear chains of water molecules.
+molecule and linear chains of water molecules within the uncoupled perturbed scheme.
 
 Table \ref{tab:C60_Values} shows static electric response
 calculated up to $10$-th order for a $\rm C_{60}$ molecule.
-Figure ... $10$-th order for linear chains of water molecules 
-... {\bf describe the result, state
-that even if no O(N) but O(N3) for $\rm C_{60}$ the algorithm actually 
-provides and efficient technique to achieve high order response that
-would be very very cumbersome with traditional methods}
+Even if no O(N) but O(N3) scaling is recovered due to a very small gap in the $\rm C_{60}$,
+the algorithm provides an efficient technique to achieve high order response that
+would be very cumbersome to obtain with traditional methods.
+
+%Figure ... $10$-th order for linear chains of water molecules 
 
 \begin{table}[t]
   \centering
-  \caption{\protect {\bf Numbers in paranthesis should read $10^{(...)}$}
-    Polarizabilites along the $z$ axis of $\rm C_{60}$ up 
+  \caption{\protect {\bf Numbers in parenthesis should read $10^{(...)}$}
+    Polarizabilities along the $z$ axis of $\rm C_{60}$ up 
     to $10$-th order via UPSCF equations.
     The calculations have been done at the HF/6-31G level of 
     theory and the {\tt GOOD} thresholding.
@@ -856,25 +857,25 @@ would be very very cumbersome with traditional methods}
 
 
 \subsection{One dimensional water chains}
-figures ... show the saturation ....
-table shows comparison to 2n+1 and n+1.
+%figures ... show the saturation ....
+%table shows comparison to 2n+1 and n+1.
 
 We have computed the (hyper)polarizabilities $\alpha_{zz}$, 
 $\beta_{zzz}$ and $\gamma_{zzzz}$ of water oligomers containing
-up to fourty water molecules. These calculations have been carried out at
+up to forty water molecules. These calculations have been carried out at
 both the RHF/6-31G and RHF/6-31G** levels of
 theory and at the {\tt TIGHT} thresholding parameter 
 that control precision of the linear scaling algorithms.
 The static properties of water chains have been evaluated
-by using the same geometry as Otto et al \cite{POtto00}. We also
+by using the same geometry as Otto et al \cite{POtto99}. We also
 present the results obtained with the density matrix based 2n+1 rule 
-previously introduiced.
+previously introduced.
 We also draw comparison with the results obtained with the GAMESS 
 quantum chemistry package \cite{gamess} at the RHF/6-31G level of theory.
 
 
-Figures (\ref{fig:Alpha_1D},\ref{fig:Beta_1D},\ref{fig:Gamma_1D})
-Tables (\ref{tab:Alpha_1D_Values},\ref{tab:Beta_1D_Values},\ref{tab:Gamma_1D_Values})
+%Figures (\ref{fig:Alpha_1D},\ref{fig:Beta_1D},\ref{fig:Gamma_1D})
+%Tables (\ref{tab:Alpha_1D_Values},\ref{tab:Beta_1D_Values},\ref{tab:Gamma_1D_Values})
 
 
 \begin{figure}[t]
@@ -1028,8 +1029,11 @@ theory and at both the {\tt GOOD} and {\tt TIGHT} thresholding parameter
 sets that control precision of the linear scaling algorithms, corresponding 
 to matrix thresholds of $10^{-5}$ and $10^{-6}$, respectively.
 
-3D water clusters show an early onset of linear scaling for accurate
+The 3D water clusters show an early onset of linear scaling for accurate
 basis set and low thresholds and higher order response.
+
+
+{\bf I STOPPED HERE  I STOPPED HERE  I STOPPED HERE  I STOPPED HERE}
 
 
 \subsection{Exponential decay}
@@ -1226,7 +1230,7 @@ upon {\em global} electric perturbation, corresponding to an approximate
 exponential decay of matrix elements. A similar exponential decay
 in the first order response corresponding to the {\em local} nuclear 
 displacement has previously been demonstrated by Ochsenfeld and 
-Head-Gordon \cite{Ochsenfeld_1997}. These key observations are expected to
+Head-Gordon \cite{Ochsenfeld97}. These key observations are expected to
 hold generally for both local and global perturbations to insulating systems.  
 We note also that the method is not unique to the TC2 generator or 
 {\sc MondoSCF} $N$-scaling algorithms, but can be straightforwardly 
@@ -1234,7 +1238,7 @@ extended to other purification schemes such as TRS4 \cite{ANiklasson03} as
 well as other electronic structure programs.
 
 Convergence of the CPSCF equations for these systems (water cluster ...)
-are typically achived in about 10 cycles, independent of cluster size, basis set,
+are typically achieved in about 10 cycles, independent of cluster size, basis set,
 matrix threshold or order of the response calculated.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
