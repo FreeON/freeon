@@ -9,7 +9,7 @@ CONTAINS
     INTEGER :: N,PU
     !------------------------------------------------------------------------------------------------------------------------!
     PU=6
-    N=Random((/1,41/))
+    N=Random((/1,42/))
     SELECT CASE(N)
     CASE (1)
        WRITE(PU,*)"Are we having fun yet?"    
@@ -93,6 +93,8 @@ CONTAINS
        WRITE(PU,*)"I will SHAVE and buy JELL-O and bring my MARRIAGE MANUAL!!"
     CASE (41)
        WRITE(PU,*)"Impudent..  Yet possessing a certain ALUMINUM SILICATE overbite....Needs REDDY-WHIP!!"
+    CASE (42)
+       WRITE(PU,*) "REAL(DOUBLE) or REAL(TROUBLE)? That is the question here..."
     END SELECT
   END SUBROUTINE ZippySez
 END MODULE ZippyQuote
