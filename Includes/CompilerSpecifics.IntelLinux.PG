@@ -5,7 +5,7 @@ CPP       =/lib/cpp -P -C
 CPPINCLUDE=-I$(MONDO_INC) -I$(HDF_INC) -I/usr/local/include
 #
 # PREPROCESSING OPTIONS: 
-CPPOPTS   =
+CPPOPTS   = -DPERIODIC  
 #           -DPARALLEL 
 #           -DPERIODIC
 #---------------------------------------------------------------
