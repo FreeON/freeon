@@ -213,7 +213,7 @@ MODULE BlokTrPdJ
 #endif
 !---------------------------------------------------------------------------------------------
 !      Initialize |dBRA>
-       NukeCo=-GM%AtNum%I(At)*(NuclearExpnt/Pi)**(ThreeHalves)
+       NukeCo=-GM%AtNum%D(At)*(NuclearExpnt/Pi)**(ThreeHalves)
        DO K=1,3
           dHGBra%D(1:4,1,1,K)=Zero
        ENDDO
@@ -225,7 +225,7 @@ MODULE BlokTrPdJ
        Prim%P=GM%Carts%D(:,At)
        Prim%Zeta=NuclearExpnt
 !      Set the MAC
-       DP2=((FudgeFactorial(1,SPEll+1)*GM%AtNum%I(At))/TauMAC)**(Two/DBLE(SPEll+3))
+       DP2=((FudgeFactorial(1,SPEll+1)*GM%AtNum%D(At))/TauMAC)**(Two/DBLE(SPEll+3))
        DP2=MIN(1.D10,DP2)
 !      Set the PAC
        PExtent=Extent(1,NuclearExpnt,dHGBra%D(:,1,1,1),TauPAC)
