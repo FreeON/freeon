@@ -554,30 +554,15 @@ CONTAINS
        CALL ReDefIntCs(C%Geos,C%Opts,iGEO,iGEOst)
        CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
        CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
-     ! CALL AdjustLatt(iGEO,C%GOpt%ExtIntCs,IntCES,C%Geos%Clone(1)%PBC%Dimen)
        !
        ! Calculate energy and force for all clones at once.
        !
-      !IF(C%GOpt%RestartBas) THEN
-      !  DO iBAS=1,C%Sets%NBSets-1
-      !    CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
-      !    CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
-      !    CALL SCF(iBAS,iGEO,C)
-      !  ENDDO
-      !  iBAS=C%Sets%NBSets
-      !  C%GOpt%RestartBas=.FALSE.
-      !ENDIF
        BPrev%I=C%Stat%Previous%I
        BCur%I=C%Stat%Current%I
        CALL SCF(iBAS,iGEO,C)
        IF(iGEO>iGEOst) CALL BackTrack(iBAS,iGEO,C,BPrev%I,BCur%I)
        CALL Force(iBAS,iGEO,C%Nams,C%Opts,C%Stat, &
                   C%Geos,C%Sets,C%MPIs)
-     ! !
-     ! ! Project out constraints and put them onto disk
-     ! !
-     ! CALL ProjectConstr(C%Geos)
-     ! CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
        !
        ! Loop over all clones and modify geometries.
        !
@@ -677,6 +662,7 @@ CONTAINS
      INTEGER                     :: Print,PBCDim
      LOGICAL                     :: DoNEB,Print2
      TYPE(TOPOLOGY)              :: TOPS
+     TYPE(DBL_RNK2)              :: RefStruct,RefGrad,SRStruct,SRDispl
      !
      NatmsLoc=SIZE(XYZ,2)
      NCart=3*NatmsLoc
@@ -741,12 +727,9 @@ CONTAINS
      !
      ! Get B matrices for redundancy projector, etc.
      !
-   ! CALL GetMixedBMat(IntCs,XYZ,PBE,GOpt%TrfCtrl,GOpt%CoordCtrl,TOPS, &
-   !                   GOpt%Constr%NCartConstr,Print,SCRPath,.TRUE.)
      CALL RefreshBMatInfo(IntCs,XYZ,GOpt%TrfCtrl,GOpt%GConvCrit, &
                     GOpt%CoordCtrl%LinCrit,GOpt%CoordCtrl%TorsLinCrit,&
                     PBCDim,Print,SCRPath)
-   ! CALL BuildUMatr(SCRPath,NCart)
      !
      ! Print current set of internals for debugging
      !
@@ -771,7 +754,6 @@ CONTAINS
      CALL GeOpReview(GOpt%Constr,GOpt%GOptStat,GOpt%CoordCtrl, &
                      GOpt%GConvCrit,XYZ,ETot,IntCs,IntCL,IntOld,LatOld, &
                      iCLONE,iGEO,DoNEB,GOpt%LattIntC,PBCDim)
-     CALL DoRestartBas(GOpt%RestartBas,GOpt%GOptStat)
      CALL TurnOnGDIIS(GOpt%GOptStat%MaxCGrad,GOpt%GDIIS%On)
      !
      ! tidy up
@@ -823,7 +805,7 @@ CONTAINS
          CALL RelaxDiagHess(GOpt,SCRPath,PWDPath,CartGrad,IntCs,AtNum,&
                             iGEO,XYZ,Print,PBCDim)
        ELSE
-         CALL RelaxBiSect(GOpt,SCRPath,PWDPath,HFileIn,CartGrad,IntCs, &
+         CALL RelaxBiSect(GOpt,SCRPath,PWDPath,HFileIn,IntCs, &
                           AtNum,PBCDim,PBCFit,iGEO,iCLONE,XYZ,RefXYZ, &
                           Print)
        ENDIF
@@ -832,12 +814,12 @@ CONTAINS
 !
 !-------------------------------------------------------
 !
-   SUBROUTINE RelaxBiSect(GOpt,SCRPath,PWDPath,HFileIn,CartGrad,IntCs, &
+   SUBROUTINE RelaxBiSect(GOpt,SCRPath,PWDPath,HFileIn,IntCs, &
                           AtNum,PBCDim,PBCFit,iGEO,iCLONE,XYZ,RefXYZ, &
                           Print)
      TYPE(GeomOpt)               :: GOpt
      TYPE(INTC)                  :: IntCs
-     REAL(DOUBLE),DIMENSION(:)   :: AtNum,CartGrad
+     REAL(DOUBLE),DIMENSION(:)   :: AtNum
      INTEGER                     :: iGEO,iCLONE,Print,PBCDim
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ,RefXYZ
      TYPE(PBCFits)               :: PBCFit
@@ -863,13 +845,7 @@ CONTAINS
      !
      CALL CollectPast(RefXYZ,SRStruct,RefStruct,RefGrad,SRDispl, &
                       HFileIn,NatmsLoc,NDim,iGEO,iCLONE)
-     !
-     ! Substitute last set of cart grads, as it may contain
-     ! information (projection) that is not yet put onto disk
-     !
-     DO J=1,NCart
-       RefGrad%D(J,NDim)=CartGrad(J)
-     ENDDO
+     CALL CleanPastGrads(RefStruct%D,RefGrad%D,PBCDim,GOpt,SCRPath,Print2)
      !
      CALL CollectINTCPast(RefStruct%D,RefGrad%D,IntCValues,IntCGrads, &
                           IntCs,GOpt,SCRPath,Print,PBCDim)
@@ -1342,7 +1318,6 @@ CONTAINS
      NatmsLoc=Geos%Clone(1)%Natms
      NCart=3*NatmsLoc
      !
-     GOpt%RestartBas=.FALSE.
      CALL SetCoordCtrl(GOpt%CoordCtrl)
      CALL   SetHessian(GOpt%Hessian)
      CALL SetGConvCrit(GOpt%GConvCrit,GOpt%Hessian,AccL,NatmsLoc)
@@ -1434,13 +1409,11 @@ CONTAINS
        IF(GMLoc%CConstrain%I(I)/=2) THEN
          NatmsNew=NatmsNew+1
          GMLoc%Displ%D(1:3,I)=XYZNew%D(1:3,NatmsNew)
-         GMLoc%Gradients%D(1:3,I)=GradNew%D(1:3,NatmsNew)
        ENDIF
      ENDDO
      DO K=1,3
        DO J=1,3
          GMLoc%PBCDispl%BoxShape%D(J,K)=XYZNew%D(J,NatmsNew+K)
-         GMLoc%PBC%LatFrc%D(J,K)=GradNew%D(J,NatmsNew+K)
        ENDDO
      ENDDO
      !
@@ -1625,8 +1598,8 @@ CONTAINS
        CALL OPENAscii(OutFile,Out)
        IF((.NOT.GOpt%GDIIS%NoGDIIS).AND.GOpt%GDIIS%On.AND.&
            iGEO>=GOpt%GDIIS%Init) THEN
-         CALL GeoDIIS(GMLoc%AbCarts%D,RefXYZ1%D,GOpt%GDIIS,Nams%HFile,iCLONE, &
-                      iGEO,Opts%PFlags%GeOp,PWDPath)
+         CALL GeoDIIS(GMLoc%AbCarts%D,RefXYZ1%D,Nams%HFile,iCLONE, &
+                     iGEO,Opts%PFlags%GeOp,PWDPath,GMLoc%PBC%Dimen,GOpt,SCRPath)
        ELSE
          IF(Opts%PFlags%GeOp>=DEBUG_GEOP_MIN) THEN
            WRITE(*,200)
@@ -2002,113 +1975,9 @@ CONTAINS
      !
      On=.FALSE.
      IF(MaxCGrad<1.000D0) THEN
-    !IF(MaxCGrad<0.001D0) THEN
        On=.TRUE.
      ENDIF
    END SUBROUTINE TurnOnGDIIS
-!
-!-------------------------------------------------------------------
-!
-   SUBROUTINE RescaleGrad(Grad,Print)
-     REAL(DOUBLE),DIMENSION(:) :: Grad
-     REAL(DOUBLE)              :: MaxGrad,SetMax,MaxGradP,MaxGradN,Fact
-     INTEGER                   :: Print
-     LOGICAL                   :: Print2
-     !
-     Print2= Print>=DEBUG_GEOP_MAX
-     SetMax=0.050D0
-     MaxGradP=MAXVAL(Grad)
-     MaxGradN=MAXVAL(-Grad)
-     MaxGrad=MAX(MaxGradP,MaxGradN)
-     IF(MaxGrad>SetMax) THEN
-       Fact=SetMax/MaxGrad
-       Grad=Fact*Grad
-       IF(Print2) THEN
-         WRITE(*,100) MaxGrad,SetMax
-         WRITE(Out,100) MaxGrad,SetMax
-         100 FORMAT('Internal Gradients have been rescaled from ',F10.5,' to ',F10.5)
-       ENDIF
-     ENDIF
-   END SUBROUTINE RescaleGrad
-!
-!-------------------------------------------------------------------
-!
-   SUBROUTINE DoRestartBas(RestartBas,GStat)
-     LOGICAL        :: RestartBas
-     TYPE(GOptStat) :: GStat
-     REAL(DOUBLE)   :: AngleCrit
-     !
-     AngleCrit=3.D0/180.D0*PI
-     IF(GStat%MaxStreDispl>0.03.OR. &
-        GStat%MaxBendDispl>AngleCrit.OR. &
-        GStat%MaxLinBDispl>AngleCrit.OR. &
-        GStat%MaxTorsDispl>AngleCrit.OR. &
-        GStat%MaxOutPDispl>AngleCrit) THEN
-       RestartBas=.TRUE.
-     ENDIF  
-   END SUBROUTINE DoRestartBas
-!
-!-------------------------------------------------------------------
-!
-   SUBROUTINE PrepBiSect(Grad,IntCs,Displ)
-     INTEGER                     :: I,NIntC
-     REAL(DOUBLE)                :: DStre,DAngle,DTors,DOutP
-     REAL(DOUBLE)                :: DPhase,Conv,D,Tol
-     TYPE(INTC)                  :: IntCs
-     REAL(DOUBLE),DIMENSION(:)   :: Grad
-     TYPE(DBL_VECT)              :: Displ
-     !
-     Conv=PI/180.D0
-     NIntC=IntCs%N     
-     Tol=1.D-8
-     !
-     DStre=0.010D0 ! in atomic units 
-     DAngle=7.D0*Conv ! in radians      
-     DTors=7.D0*Conv
-     DOutP=7.D0*Conv
-     DO I=1,NIntC
-       IF(IntCs%Def%C(I)(1:4)=='STRE') THEN
-       ! D=RANDOM_DBL((/-DStre,DStre/))
-       ! D=DStre
-         D=Grad(I)/0.5D0
-       ELSE IF(IntCs%Def%C(I)(1:4)=='TORS') THEN
-       ! D=RANDOM_DBL((/-DTors,DTors/))
-       ! D=DTors
-         D=Grad(I)/0.1D0
-       ELSE IF(IntCs%Def%C(I)(1:4)=='OUTP') THEN
-       ! D=RANDOM_DBL((/-DOutP,DOutP/))
-       ! D=DOutP
-         D=Grad(I)/0.2D0
-       ELSE IF(IntCs%Def%C(I)(1:4)=='BEND') THEN
-       ! D=RANDOM_DBL((/-DAngle,DAngle/))
-       ! D=DAngle
-         D=Grad(I)/0.2D0
-       ELSE IF(IntCs%Def%C(I)(1:4)=='LINB') THEN
-       ! D=RANDOM_DBL((/-DAngle,DAngle/))
-       ! D=DAngle
-         D=Grad(I)/0.2D0
-       ELSE
-       ! D=RANDOM_DBL((/-DStre,DStre/))
-       ! D=DStre
-         D=Grad(I)/0.5D0
-       ENDIF
-       IF(ABS(Grad(I))>Tol) THEN
-         Displ%D(I)=SIGN(ABS(D),-Grad(I))
-       ELSE
-         Displ%D(I)=D
-       ENDIF
-     ENDDO
-   END SUBROUTINE PrepBiSect
-!
-!-------------------------------------------------------------------
-!
-   SUBROUTINE ProjectConstr(G)
-     TYPE(Geometries)   :: G
-     INTEGER            :: iCLONE
-     !
-     DO iCLONE=1,G%Clones 
-     ENDDO
-   END SUBROUTINE ProjectConstr
 !
 !-------------------------------------------------------------------
 !

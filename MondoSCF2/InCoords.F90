@@ -2505,15 +2505,12 @@ CONTAINS
      CALL MapAngleDispl(IntCs,DReq%D) 
      CALL MapAngleDispl(IntCs,DReqAct%D) 
      DO I=1,IntCs%N
-       IF(IntCs%Active%L(I)) THEN
-           DReq%D(I)=DReq%D(I) 
-           DReqAct%D(I)=DReqAct%D(I) 
-       ELSE
+       IF(.NOT.IntCs%Active%L(I)) THEN
          DReq%D(I)=Zero
          DReqAct%D(I)=Zero
        ENDIF
      ENDDO
-     Rigid=One-ABS(DOT_PRODUCT(DReqAct%D,DReq%D)/DOT_PRODUCT(DReq%D,DReq%D))
+     Rigid=DOT_PRODUCT(DReqAct%D,DReqAct%D)/DOT_PRODUCT(DReq%D,DReq%D)
      CALL Delete(DReq) 
      CALL Delete(DReqAct) 
      !

@@ -964,7 +964,9 @@ TYPE(DBL_RNK2) :: AuxLatF
                    G%Clone(iCLONE)%GradMax=MAX(G%Clone(iCLONE)%GradMax,ABS(GradVal))
                 ENDDO
              ELSE
-                G%Clone(iCLONE)%Gradients%D(1:3,iATS)=Zero
+               IF(O%Coordinates/=GRAD_INTS_OPT) THEN
+                 G%Clone(iCLONE)%Gradients%D(1:3,iATS)=Zero
+               ENDIF
              ENDIF
           ENDDO
           ! Put the zeroed forces back ...

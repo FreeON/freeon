@@ -22,18 +22,21 @@ CONTAINS
 !
 !--------------------------------------------------------------
 !
-   SUBROUTINE GeoDIIS(XYZ,RefXYZ,GDIISCtrl,HFileIn,iCLONE,iGEO,Print,Path)   
+   SUBROUTINE GeoDIIS(XYZ,RefXYZ,HFileIn,iCLONE,iGEO, &
+                      Print,Path,PBCDim,GOpt,SCRPath)   
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ,RefXYZ
      CHARACTER(LEN=*)            :: HFileIn
-     TYPE(GDIIS)                 :: GDIISCtrl  
-     INTEGER                     :: Print,iCLONE,iGEO,I
+     TYPE(GeomOpt)               :: GOpt
+     INTEGER                     :: Print,iCLONE,iGEO,I,PBCDim
      INTEGER                     :: HDFFileID,NatmsLoc,Memory,MemAux
      TYPE(DBL_RNK2)              :: SRStruct,RefGrad,RefStruct,SRDispl
-     CHARACTER(LEN=*)            :: Path
+     CHARACTER(LEN=*)            :: Path,SCRPath
+     LOGICAL                     :: Print2
      !
      NatmsLoc=SIZE(XYZ,2)
-     MemAux=MIN(GDIISCtrl%MaxMem,iGEO-GDIISCtrl%iGEOStart+1)
+     MemAux=MIN(GOpt%GDIIS%MaxMem,iGEO-GOpt%GDIIS%iGEOStart+1)
      Memory=MIN(MemAux,iGEO)
+     Print2=(Print>=DEBUG_GEOP_MAX)
      CALL Halt('GDIIS is under development, Displ array needs to be coolected for PBC from remembered steps!')
    ! CALL Halt('GDIIS is under development in this version, use the option NoGDIIS!')
      !
@@ -41,6 +44,7 @@ CONTAINS
      !
      CALL CollectPast(RefXYZ,SRStruct,RefStruct,RefGrad,SRDispl, &
                       HFileIn,NatmsLoc,Memory,iGEO,iCLONE)
+     CALL CleanPastGrads(RefStruct%D,RefGrad%D,PBCDim,GOpt,SCRPath,Print2)
      !
      ! Do fitting in step-directions
      !
@@ -1841,5 +1845,48 @@ CONTAINS
    END SUBROUTINE GrdConvrgd
 !
 !----------------------------------------------------------------------
+!
+   SUBROUTINE CleanPastGrads(RefStruct,RefGrad,PBCDim,GOpt,SCRPath,Print2)
+     REAL(DOUBLE),DIMENSION(:,:) :: RefStruct,RefGrad
+     TYPE(DBL_VECT)   :: Carts,CartGrad,AuxGrad
+     TYPE(DBL_RNK2)   :: XYZAux
+     INTEGER          :: NCart,NatmsLoc,I,J,PBCDim,NDim
+     TYPE(GeomOpt)    :: GOpt
+     CHARACTER(LEN=*) :: SCRPath
+     LOGICAL          :: Print2
+     REAL(DOUBLE)     :: Vect9
+     !
+     NCart=SIZE(RefStruct,1)
+     NDim=SIZE(RefStruct,2)
+     NatmsLoc=NCart/3
+     CALL NEW(Carts,NCart)
+     CALL NEW(AuxGrad,NCart-9)
+     CALL NEW(CartGrad,NCart)
+     CALL New(XYZAux,(/3,NatmsLoc/))
+     !
+     DO I=1,NDim
+       DO J=1,NCart ; Carts%D(J)=RefStruct(J,I) ; ENDDO
+       DO J=1,NCart ; CartGrad%D(J)=RefGrad(J,I) ; ENDDO
+       CALL CartRNK1ToCartRNK2(Carts%D,XYZAux%D)
+       !
+       CALL CleanConstrCart(XYZAux%D,PBCDim,CartGrad%D,GOpt,SCRPath)
+       IF(GOpt%TrfCtrl%DoTranslOff) THEN
+         DO J=1,NCart-9 ; AuxGrad%D(J)=CartGrad%D(J) ; ENDDO
+         CALL TranslsOff(AuxGrad%D,Print2)
+         DO J=1,NCart-9 ; CartGrad%D(J)=AuxGrad%D(J) ; ENDDO
+       ENDIF
+       IF(GOpt%TrfCtrl%DoRotOff) THEN
+         CALL RotationsOff(CartGrad%D,Carts%D,Print2,PBCDim)
+       ENDIF
+       DO J=1,NCart ; RefGrad(J,I)=CartGrad%D(J) ; ENDDO
+     ENDDO
+     !
+     CALL Delete(AuxGrad)
+     CALL Delete(CartGrad)
+     CALL Delete(Carts)
+     CALL Delete(XYZAux)
+   END SUBROUTINE CleanPastGrads
+!
+!-------------------------------------------------------------------
 !
 END MODULE QUICCAMod
