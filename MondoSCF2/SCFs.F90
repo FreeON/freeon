@@ -892,6 +892,7 @@ CONTAINS
 #else
     ! Exact Hartree-Fock exchange component
     IF(HasHF(O%Models(cBas)))THEN
+       !CALL NLATTFORCE_X(cBAS,cGEO,G,B,N,O,S,M)
        CALL Invoke('GONX',N,S,M)
     ENDIF
 #endif
@@ -1190,6 +1191,7 @@ CONTAINS
                 CALL Add(K1,K2,K3)
                 CALL Multiply(P,K3,K1)
                 LatFrc_X(I,J) = Trace(K1)/(Two*DDelta)
+                write(*,'(A,I1,A,I1,A,E26.15)') 'LatFrc_X(',i,',',j,')',LatFrc_X(I,J)
 !
                 G%Clone(iCLONE)%PBC%BoxShape%D(I,J) =  Lat00
                 CALL MakeGMPeriodic(G%Clone(iCLONE))
@@ -1206,8 +1208,8 @@ CONTAINS
        G%Clone(iCLONE)%PBC%LatFrc%D = G%Clone(iCLONE)%PBC%LatFrc%D + LatFrc_X
        HDFFileID=OpenHDF(N%HFile)
        HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
-       CALL Put(G%Clone(iCLONE)%PBC%LatFrc,'latfrc',Tag_O=chGEO)
-       CALL Put(G%Clone(iCLONE)%Gradients,'Gradients',Tag_O=chGEO)
+!!$       CALL Put(G%Clone(iCLONE)%PBC%LatFrc,'latfrc',Tag_O=chGEO)
+!!$       CALL Put(G%Clone(iCLONE)%Gradients,'Gradients',Tag_O=chGEO)
        CALL CloseHDFGroup(HDF_CurrentID)
        CALL CloseHDF(HDFFileID)
 !      Print X Lattice Forces

@@ -31,6 +31,7 @@ PROGRAM XCForce
   INTEGER                        :: IErr,TotFrcComp
   REAL(DOUBLE)                   :: XCFrcBegTm,XCFrcEndTm,XCFrcTm
   TYPE(DBL_VECT)                 :: TmXCFrcArr
+  TYPE(DBL_RNK2)                 :: TmpLatFrc_XC
 #else
   TYPE(BCSR)                     :: P
 #endif
@@ -188,7 +189,16 @@ PROGRAM XCForce
      A2=3*AtA
      GM%Gradients%D(1:3,AtA) =  GM%Gradients%D(1:3,AtA)+XCFrc%D(A1:A2)
   ENDDO
+#ifdef PARALLEL
+  CALL New(TmpLatFrc_XC,(/3,3/))
+  CALL DBL_VECT_EQ_DBL_SCLR(9,TmpLatFrc_XC%D(1,1),0.0d0)
+  CALL MPI_REDUCE(LatFrc_XC%D(1,1),TmpLatFrc_XC%D(1,1),9,MPI_DOUBLE_PRECISION, &
+       &          MPI_SUM,ROOT,MONDO_COMM,IErr)
+  GM%PBC%LatFrc%D = GM%PBC%LatFrc%D+TmpLatFrc_XC%D
+  CALL Delete(TmpLatFrc_XC)
+#else
   GM%PBC%LatFrc%D = GM%PBC%LatFrc%D+LatFrc_XC%D
+#endif
   CALL Put(GM,Tag_O=CurGeom)
 !--------------------------------------------------------------------------------
 ! Tidy up

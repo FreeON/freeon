@@ -21,6 +21,7 @@ PROGRAM SForce
   TYPE(DBCSR)                :: T1,F,P_DBCSR
   TYPE(BCSR)                 :: P
   TYPE(DBL_VECT)             :: TotSFrc
+  TYPE(DBL_RNK2)             :: TmpLatFrc_S
   INTEGER                    :: IErr,TotFrcComp
 #else
   TYPE(BCSR)                 :: T1,F,P
@@ -157,7 +158,16 @@ PROGRAM SForce
      A2=3*AtA
      GM%Gradients%D(1:3,AtA) = SFrc%D(A1:A2)
   ENDDO
+#ifdef PARALLEL
+  CALL New(TmpLatFrc_S,(/3,3/))
+  CALL DBL_VECT_EQ_DBL_SCLR(9,TmpLatFrc_S%D(1,1),0.0d0)
+  CALL MPI_REDUCE(LatFrc_S%D(1,1),TmpLatFrc_S%D(1,1),9,MPI_DOUBLE_PRECISION, &
+       &          MPI_SUM,ROOT,MONDO_COMM,IErr)
+  GM%PBC%LatFrc%D = TmpLatFrc_S%D
+  CALL Delete(TmpLatFrc_S)
+#else
   GM%PBC%LatFrc%D = LatFrc_S%D
+#endif
   CALL Put(GM,Tag_O=CurGeom)
 !--------------------------------------------------------------------------------
 ! Tidy up 
