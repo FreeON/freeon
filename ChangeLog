@@ -1,3 +1,797 @@
+2004-06-29 17:58  ckgan
+
+	* OneE/MakeRho.F90, OneE/Makefile, QCTC/JForce.F90,
+	MondoSCF2/SCFs.F90: MakeRho.F90 and ParaMakeRho.F90 merged!
+
+2004-06-29 11:29  ckgan
+
+	* SCFeqs/P2Use.F90: Get rid of multiple warning messages from
+	non-root nodes.
+
+2004-06-28 16:53  ckgan
+
+	* OneE/RhoTools.F90, QCTC/QCTC.F90: Previous incorrect logic about
+	the HG density remedied.
+
+2004-06-26 23:48  nemeth
+
+	* MondoMods/CholFact.F90: A test (1x1 matrix) was missing from
+	Cholesky factorization.
+
+2004-06-24 17:47  ckgan
+
+	* QCTC/: NukE.F90, QCTC.F90: [no log message]
+
+2004-06-24 12:13  ckgan
+
+	* OneE/RhoTools.F90, QCTC/ParaQ.F90, QCTC/QCTC.F90: Paralllel QCTC
+	now reads the distributed densities.
+
+2004-06-23 17:10  nemeth
+
+	* MondoSCF2/: GDIIS.F90, InCoords.F90, Optimizer.F90: Another set
+	of modifications for the periodic optimizer.
+
+2004-06-23 17:03  nemeth
+
+	* MondoMods/: CholFact.F90, DerivedTypes.F90, InOut.F90,
+	MemMan.F90, SetEq.F90, Slatec.F90: Modifications for the periodic
+	optimizer.
+
+2004-06-23 12:22  ckgan
+
+	* MondoMods/LinAlg.F90: Fixed a silly bug introduced by CJ!
+
+2004-06-21 15:24  tymczak
+
+	* SCFeqs/DIIS.F90: [no log message]
+
+2004-06-21 15:21  tymczak
+
+	* SCFeqs/DIIS.F90: Fixed DIIS
+	
+	CJ
+
+2004-06-21 13:29  ckgan
+
+	* Docs/Bib/mondo_new.bib: [no log message]
+
+2004-06-17 15:12  tymczak
+
+	* Validate/MDWater_3.inp: Three waters at an Initial temperature of
+	20 K
+
+2004-06-17 15:11  tymczak
+
+	* MondoSCF2/: MDynamics.F90, MDynamics.F90: [no log message]
+
+2004-06-17 14:50  tymczak
+
+	* MondoSCF2/SCFs2.F90: removed the PARALLEL_CLONES flag
+	
+	CJ
+
+2004-06-17 14:49  tymczak
+
+	* MondoSCF2/SCFs.F90: Rlogic was never used, so I removed it
+	
+	CJ
+
+2004-06-17 14:48  tymczak
+
+	* MondoSCF2/PunchHDF.F90: Fixed the CellSet Bug
+	
+	CJ
+
+2004-06-17 14:47  tymczak
+
+	* OneE/MakeRho.F90: Removed PARALLEL_CLONES flag
+
+2004-06-17 14:46  tymczak
+
+	* QCTC/JForce.F90: removed PARALLEL_CLONES flag
+
+2004-06-17 14:46  tymczak
+
+	* SCFeqs/SCFStatus.F90: removed the PARALLEL_CLONES Flag CJ
+
+2004-06-17 14:45  tymczak
+
+	* SCFeqs/IRInv.F90: Fixed a Bug
+	
+	CJ
+
+2004-06-17 14:44  tymczak
+
+	* MondoMods/: InOut.F90, Macros.F90, MemMan.F90, MondoMPI.F90,
+	Order.F90, PBC.F90, Parse.F90, ProcessControl.F90: Removewd the
+	PARAELLEL_CLONES flag Fixe the CellSet (I Hope) Bug
+	
+	CJ
+
+2004-06-17 14:42  tymczak
+
+	* Includes/CompilerSpecifics.True64.COMPAQ: [no log message]
+
+2004-06-17 14:42  tymczak
+
+	* Includes/: CompilerSpecifics.AMDLinux.IFC,
+	CompilerSpecifics.AMDLinux.PG, CompilerSpecifics.IntelLinux.NAG,
+	CompilerSpecifics.IntelLinux.PG: Removed the PARAELLEL_CLONES FLAG
+
+2004-06-16 20:14  nemeth
+
+	* MondoSCF2/GDIIS.F90: A new work array introduced to avoid
+	problems with the use of Slatec on pink.
+
+2004-06-16 15:30  ckgan
+
+	* QCTC/: ParaQ.F90, PoleTree.F90, QCTC.F90: Changes needed before
+	MakeRho.F90 and ParaMakeRho.F90 can be merged.
+
+2004-06-16 13:03  tymczak
+
+	* MondoSCF2/: MDynamics.F90, PunchHDF.F90, SCFs.F90,
+	ZippyQuote.F90: Fixed the Random Number Generater Fixe CS_IN and
+	CS_OUT in the HDF File
+	
+	CJ
+
+2004-06-16 13:01  tymczak
+
+	* MondoMods/Random.C: Me and CK fixed this
+	
+	CJ
+
+2004-06-16 13:00  tymczak
+
+	* MondoMods/: InOut.F90, Order.F90, PBC.F90: Fixed the Random
+	Number Generator
+	
+	CJ
+
+2004-06-15 14:14  ckgan
+
+	* MondoMods/PrettyPrint.F90, OneE/ParaMakeRho.F90: Work done before
+	merging MakeRho.F90 and ParaMakeRho.F90.
+
+2004-06-14 10:38  tymczak
+
+	* MondoSCF2/MDynamics.F90: Fixed Nag Bugs
+	
+	CJ
+
+2004-06-11 15:20  tymczak
+
+	* MondoSCF2/MDynamics.F90: [no log message]
+
+2004-06-11 14:53  tymczak
+
+	* MondoSCF2/: MDynamics.F90, MDynamics.F90, MDynamics.F90: [no log
+	message]
+
+2004-06-11 14:49  tymczak
+
+	* MondoSCF2/PunchHDF.F90, SCFeqs/Makefile, MondoSCF2/Makefile: [no
+	log message]
+
+2004-06-11 14:47  tymczak
+
+	* MondoSCF2/ParseDynamics.F90: New Parser for Dynamics
+
+2004-06-11 14:46  tymczak
+
+	* MondoSCF2/: ParseBasis.F90, ParseGeometries.F90, ParseInput.F90,
+	ParseOptions.F90: [no log message]
+
+2004-06-11 14:11  tymczak
+
+	* MondoSCF2/SCFs.F90: Added A Scratch Cleaner that removes old
+	geometries
+
+2004-06-11 14:08  tymczak
+
+	* MondoSCF2/MDynamics.F90: The New MD Driver MODULE
+
+2004-06-11 14:07  tymczak
+
+	* MondoSCF2/MondoSCF.F90: Added the MD Driver Fixed ZippyQuote
+
+2004-06-11 14:05  tymczak
+
+	* MondoSCF2/: ControlStructures.F90, DynamicsKeys.F90,
+	OptionKeys.F90, ZippyQuote.F90: [no log message]
+
+2004-06-11 14:03  tymczak
+
+	* SCFeqs/IRInv.F90: Anders Matrix Inverter: Still in Development
+
+2004-06-11 14:01  tymczak
+
+	* SCFeqs/DenMatMethods.F90: New Eigenestimater: Still needs work
+
+2004-06-11 13:55  tymczak
+
+	* MondoMods/Parse.F90: Added the Function StringToASCII
+
+2004-06-11 13:54  tymczak
+
+	* MondoMods/Order.F90: Added a Seed Option to the random number
+	Generater
+
+2004-06-11 13:52  tymczak
+
+	* MondoMods/LinAlg.F90: Added a vector matrix multiply
+
+2004-06-11 13:51  tymczak
+
+	* MondoMods/AtomPairs.F90: [no log message]
+
+2004-06-11 12:17  nemeth
+
+	* MondoSCF2/GeomOptKeys.F90: Length of character types fixed.
+
+2004-06-04 15:57  ckgan
+
+	* Docs/: Bib/mondo_new.bib, ParaQCTC/arXiv_ParaQCTC.pdf: [no log
+	message]
+
+2004-06-04 15:42  ckgan
+
+	* Docs/ParaQCTC/: Let.tex, paraqctc.tex: [no log message]
+
+2004-06-02 18:54  ckgan
+
+	* Docs/: Bib/mondo_new.bib, ParaQCTC/paraqctc.tex: [no log message]
+
+2004-06-02 13:57  mchalla
+
+	* TwoE/: GetAtomPair.F90, IntegralsE.m: [no log message]
+
+2004-06-01 18:22  ckgan
+
+	* Docs/ParaQCTC/paraqctc.tex: [no log message]
+
+2004-06-01 09:03  mchalla
+
+	* TwoE/IntegralsE.m: [no log message]
+
+2004-05-28 11:53  mchalla
+
+	* Docs/DM_Papers/: PERT/DMPT.pdf, PERT_2/RTPP.pdf: [no log message]
+
+2004-05-28 11:45  mchalla
+
+	* Docs/PBC_paper/PBCDFT.pdf: [no log message]
+
+2004-05-27 16:27  mchalla
+
+	* Docs/: PBC_paper/LinearPBCMethod_revtex4.ps,
+	PBC_paper/LinearPBCMethod_revtex4.tex, Bib/mondo_new.bib: [no log
+	message]
+
+2004-05-27 15:18  mchalla
+
+	* Docs/PBC_paper/: LinearPBCMethod_revtex4.ps,
+	LinearPBCMethod_revtex4.tex: [no log message]
+
+2004-05-27 14:50  mchalla
+
+	* Docs/: PBC_paper/LinearPBCMethod_revtex4.tex, Bib/mondo_new.bib:
+	[no log message]
+
+2004-05-27 13:37  tymczak
+
+	* Docs/PBC_paper/LinearPBCMethod_revtex4.tex: [no log message]
+
+2004-05-27 13:21  tymczak
+
+	* Docs/PBC_paper/: LinearPBCMethod_revtex4.ps,
+	LinearPBCMethod_revtex4.tex: [no log message]
+
+2004-05-27 13:09  tymczak
+
+	* Docs/PBC_paper/LinearPBCMethod_revtex4.tex: [no log message]
+
+2004-05-27 12:13  ckgan
+
+	* Docs/ParaQCTC/paraqctc.tex: [no log message]
+
+2004-05-27 09:14  tymczak
+
+	* Docs/PBC_paper/LinearPBCMethod_revtex4.tex: [no log message]
+
+2004-05-27 03:13  vweber
+
+	* ONX2/: GONX2.F90, ONX2ComputK.F90, ONXGet.F90: The nice internal
+	f... bug should have been fixed.  Seem to not be present in pgf90
+	5. Who can have a better one? pgf90   -Mbackslash  -O1 -tp p6 
+	-I/users/ckg/Rho-MONDO/Includes/ -I/users/ckg/Rho-MONDO/MondoMods
+	-I/usr/local/include -I/usr/mpich-gm-pgi/include		   
+	-I/users/ckg/Rho-MONDO/TwoE -c GONX2.f90 ILM error: internal
+	routine gets bad address for outer variable z_c_2
+	PGF90-F-0000-Internal compiler error. Errors in ILM file       1
+	(GONX2.f90: 523) PGF90/x86 Linux/x86 4.0-2: compilation aborted
+	make[1]: *** [GONX2.o] Error 2
+
+2004-05-26 14:30  tymczak
+
+	* Docs/PBC_paper/LinearPBCMethod_revtex4.tex: [no log message]
+
+2004-05-25 18:05  ckgan
+
+	* Makefile: Who messed up this file ? mk clean will cause
+	validation suite test cases to run!
+
+2004-05-25 17:58  ckgan
+
+	* SCFeqs/IRInv.F90: A compilation problem caused by an unused
+	variable 'Send' is solved.
+
+2004-05-25 17:43  mchalla
+
+	* Docs/PBC_paper/: LinearPBCMethod_revtex4.ps,
+	LinearPBCMethod_revtex4.tex: [no log message]
+
+2004-05-25 14:58  tymczak
+
+	* Docs/: Bib/mondo_new.bib, PBC_paper/LinearPBCMethod_revtex4.tex:
+	[no log message]
+
+2004-05-25 14:33  tymczak
+
+	* Docs/: PBC_paper/LinearPBCMethod_revtex4.ps,
+	PBC_paper/LinearPBCMethod_revtex4.tex, Bib/mondo_new.bib: [no log
+	message]
+
+2004-05-25 13:48  tymczak
+
+	* Docs/Bib/mondo_new.bib: [no log message]
+
+2004-05-25 12:30  mchalla
+
+	* Docs/: PBC_paper/LinearPBCMethod_revtex4.tex, PBC_paper/Makefile,
+	Bib/mondo_new.bib: [no log message]
+
+2004-05-25 12:20  tymczak
+
+	* Docs/PBC_paper/LinearPBCMethod_revtex4.tex: [no log message]
+
+2004-05-25 10:50  tymczak
+
+	* Docs/PBC_Exchange/LinearPBCExchange.tex: [no log message]
+
+2004-05-25 10:15  tymczak
+
+	* Docs/: PBC_paper/LinearPBCMethod_revtex4.tex, Bib/mondo_new.bib:
+	[no log message]
+
+2004-05-25 06:07  vweber
+
+	* Docs/DM_Papers/PERT_3/: Response3.bib, Response3.tex: [no log
+	message]
+
+2004-05-24 18:31  ckgan
+
+	* Docs/: Bib/mondo_new.bib, ParaQCTC/paraqctc.tex: [no log message]
+
+2004-05-24 15:07  ckgan
+
+	* Docs/Bib/mondo_new.bib: [no log message]
+
+2004-05-24 14:27  ckgan
+
+	* Docs/Bib/mondo_new.bib: [no log message]
+
+2004-05-24 11:18  mchalla
+
+	* Docs/PBC_paper/: LinearPBCMethod_revtex4.ps,
+	LinearPBCMethod_revtex4.tex: [no log message]
+
+2004-05-24 11:15  tymczak
+
+	* Docs/PBC_Exchange/: LinearPBCExchange.tex, LinearPBCExchange.tex:
+	[no log message]
+
+2004-05-24 10:50  tymczak
+
+	* Docs/PBC_paper/LinearPBCMethod_revtex4.tex: [no log message]
+
+2004-05-24 07:26  vweber
+
+	* Docs/DM_Papers/PERT_3/Response3.tex: [no log message]
+
+2004-05-24 04:45  vweber
+
+	* MondoSCF2/SCFs.F90: Added numerical kinetic hessian.
+
+2004-05-24 04:41  vweber
+
+	* OneE/: BlokTrPd2T.F90, Makefile, THess.F90: Added kinetic
+	hessian.
+
+2004-05-21 15:37  tymczak
+
+	* Docs/Bib/mondo_new.bib: [no log message]
+
+2004-05-21 15:31  tymczak
+
+	* Docs/Bib/mondo_new.bib: [no log message]
+
+2004-05-21 15:18  tymczak
+
+	* Docs/Bib/mondo_new.bib: [no log message]
+
+2004-05-21 14:02  nemeth
+
+	* MondoMods/CholFact.F90: A few more optional arguments introduced
+	to Cholesky factorization routines.
+
+2004-05-21 13:16  tymczak
+
+	* Docs/PBC_paper/LinearPBCMethod_revtex4.tex: [no log message]
+
+2004-05-21 12:39  tymczak
+
+	* Docs/PBC_paper/: LinearPBCMethod_revtex4.ps,
+	LinearPBCMethod_revtex4.tex: [no log message]
+
+2004-05-21 12:07  mchalla
+
+	* Docs/PBC_Exchange/PBCExchange.pdf: [no log message]
+
+2004-05-21 10:41  mchalla
+
+	* Docs/PBC_Exchange/: LinearPBCExchange.ps, LinearPBCExchange.tex:
+	[no log message]
+
+2004-05-21 08:53  mchalla
+
+	* BasisSets/SrTiOAllE.bas: [no log message]
+
+2004-05-21 06:36  vweber
+
+	* Docs/DM_Papers/PERT_3/Response3.tex: [no log message]
+
+2004-05-21 03:42  vweber
+
+	* ONX2/IntSSSS.F90: Added the include file for the wrapping.
+
+2004-05-21 03:36  vweber
+
+	* TwoE/: ERIMIC.Inc, dInt1111.F90, dInt3111.F90, dInt3131.F90,
+	dInt3311.F90, dInt3331.F90, dInt3333.F90, Gradients.m, Int1111.F90,
+	Int3111.F90, Int3131.F90, Int3311.F90, Int3331.F90, Int3333.F90,
+	Integrals.m: Moved the ERI wrapping into an include file.
+
+2004-05-20 17:24  tymczak
+
+	* Docs/PBC_Exchange/: LinearPBCExchange.pdf, LinearPBCExchange.ps,
+	LinearPBCExchange.tex: [no log message]
+
+2004-05-20 16:38  tymczak
+
+	* Docs/PBC_Exchange/: LinearPBCExchange.ps, LinearPBCExchange.tex:
+	[no log message]
+
+2004-05-20 15:30  tymczak
+
+	* Docs/PBC_Exchange/: LinearPBCExchange.ps, LinearPBCExchange.tex,
+	pIce_En_vs_a.ps: [no log message]
+
+2004-05-20 12:01  mchalla
+
+	* Docs/PBC_Exchange/: LinearPBCExchange.ps, LinearPBCExchange.tex:
+	[no log message]
+
+2004-05-20 11:22  ckgan
+
+	* Docs/ParaQCTC/paraqctc.tex: [no log message]
+
+2004-05-20 11:11  ckgan
+
+	* Docs/ParaQCTC/paraqctc.tex: [no log message]
+
+2004-05-20 10:58  mchalla
+
+	* Docs/: PBC_Exchange/LinearPBCExchange.ps,
+	PBC_Exchange/LinearPBCExchange.tex, Bib/mondo_new.bib: [no log
+	message]
+
+2004-05-19 19:01  nemeth
+
+	* MondoSCF2/GDIIS.F90: [no log message]
+
+2004-05-19 13:45  mchalla
+
+	* Docs/: Bib/mondo_new.bib, PBC_Exchange/LinearPBCExchange.ps,
+	PBC_Exchange/LinearPBCExchange.tex: [no log message]
+
+2004-05-19 09:19  mchalla
+
+	* Docs/: Bib/mondo_new.bib, PBC_Exchange/LinearPBCExchange.ps,
+	PBC_Exchange/LinearPBCExchange.tex,
+	PBC_paper/LinearPBCMethod_revtex4.tex: [no log message]
+
+2004-05-18 21:34  nemeth
+
+	* MondoSCF2/: GDIIS.F90, InCoords.F90: A new version of the
+	optimizer, that can recognize isolated fragments of the the
+	optimized system and connects them by internal coordinates. Also, a
+	selection of data points, based on their weights is introduced.
+	Only those points with the largest weights will be used for the
+	fit, whose normalized weights add up to 0.9999.
+
+2004-05-18 17:52  nemeth
+
+	* Docs/Optimizer/PRL/GFS_PRL.tex: [no log message]
+
+2004-05-18 14:52  mchalla
+
+	* Docs/PBC_Exchange/LinearPBCExchange.tex: [no log message]
+
+2004-05-18 14:48  mchalla
+
+	* Docs/PBC_Exchange/: LinearPBCExchange.ps, LinearPBCExchange.tex,
+	LinearPBCExchange.ps: [no log message]
+
+2004-05-18 14:29  tymczak
+
+	* Docs/PBC_Exchange/Timing_pIce_ONX_1.ps: [no log message]
+
+2004-05-18 13:35  mchalla
+
+	* Docs/PBC_Exchange/LinearPBCExchange.tex: [no log message]
+
+2004-05-18 13:32  mchalla
+
+	* Docs/PBC_Exchange/: LinearPBCExchange.ps, LinearPBCExchange.tex:
+	[no log message]
+
+2004-05-18 13:10  mchalla
+
+	* Docs/PBC_Exchange/: LinearPBCExchange.ps, LinearPBCExchange.tex:
+	[no log message]
+
+2004-05-18 13:06  mchalla
+
+	* Docs/Bib/mondo_new.bib: [no log message]
+
+2004-05-18 10:46  mchalla
+
+	* Docs/PBC_Exchange/LinearPBCExchange.tex: [no log message]
+
+2004-05-18 10:25  mchalla
+
+	* Docs/PBC_Exchange/LinearPBCExchange.tex: [no log message]
+
+2004-05-18 04:25  vweber
+
+	* Docs/DM_Papers/PERT_3/Response3.tex: Added Anders corrections.
+
+2004-05-17 22:47  nemeth
+
+	* Docs/Optimizer/PRL/GFS_PRL.tex: [no log message]
+
+2004-05-17 17:57  nemeth
+
+	* Docs/Optimizer/PRL/GFS_PRL.tex: [no log message]
+
+2004-05-17 16:22  tymczak
+
+	* Docs/PBC_paper/LinearPBCMethod_revtex4.tex: [no log message]
+
+2004-05-17 16:11  tymczak
+
+	* Docs/: PBC_Exchange/LinearPBCExchange.tex, Bib/mondo_new.bib,
+	PBC_paper/LinearPBCMethod_revtex4.tex: [no log message]
+
+2004-05-17 15:05  nemeth
+
+	* Docs/Optimizer/PRL/GFS_PRL.tex: [no log message]
+
+2004-05-17 11:56  nemeth
+
+	* Docs/Optimizer/PRL/GFS_PRL.tex: [no log message]
+
+2004-05-17 08:51  vweber
+
+	* ONX2/GONX2ComputDK.F90, ONX2/ONX2ComputK.F90,
+	TwoE/ShellPairStruct.F90: Changed variable name.
+
+2004-05-17 07:51  vweber
+
+	* ONX2/: GONX2.F90, GONX2ComputDK.F90, IntSSSS.F90,
+	ONX2ComputK.F90, DERIInterface.Inc, ERIInterface.Inc,
+	ERIListInterface.Inc, Makefile, ONX2.F90, ONX2DataType.F90,
+	ONX2F77.F, ONX2List.F90, ONXFillOut.F90, ONXGet.F90, ONXInit.F90,
+	ONXRng.F90: New onx2 with function-based thresholding.
+
+2004-05-15 15:58  nemeth
+
+	* Docs/Optimizer/PRL/GFS_PRL.tex: [no log message]
+
+2004-05-15 00:13  nemeth
+
+	* Docs/Optimizer/PRL/GFS_PRL.tex: [no log message]
+
+2004-05-14 18:27  nemeth
+
+	* Docs/Optimizer/PRL/: GFS_PRL.tex, snap3.eps: [no log message]
+
+2004-05-14 18:16  nemeth
+
+	* Docs/Optimizer/PRL/curve2_1.eps: [no log message]
+
+2004-05-14 17:48  nemeth
+
+	* Docs/Bib/mondo_new.bib: New bibliography file contains optimizer
+	entries.
+
+2004-05-14 14:13  mchalla
+
+	* Docs/: Bib/mondo_new.bib, PBC_Exchange/LinearPBCExchange.ps,
+	PBC_Exchange/LinearPBCExchange.tex, PBC_Exchange/Makefile,
+	PBC_paper/LinearPBCMethod_revtex4.ps: [no log message]
+
+2004-05-13 19:30  nemeth
+
+	* Docs/Optimizer/PRL/: GFS_PRL.tex, mondo_new.bib: Depositing new
+	versions of the optimizer paper and the bibliography.
+
+2004-05-13 03:06  vweber
+
+	* TwoE/: Gradients.m, dInt1111.F90, dInt3111.F90, dInt3131.F90,
+	dInt3311.F90, dInt3331.F90, dInt3333.F90, dInt6111.F90,
+	dInt6131.F90, dInt6133.F90, dInt6161.F90, dInt6311.F90,
+	dInt6331.F90, dInt6361.F90, dInt6611.F90, dInt6631.F90,
+	dInt6661.F90: Added CJ wrapping.
+
+2004-05-13 02:43  vweber
+
+	* Includes/CompilerSpecifics.AMDLinux.IFC: [no log message]
+
+2004-05-13 02:31  vweber
+
+	* ONX2/: DERIInterface.Inc, GONX2.F90, GONX2ComputDK.F90, Makefile,
+	ONX2DataType.F90, ONX2List.F90, ONXGet.F90, QSDis.F,
+	QuickSortDis.F: New gonx with function based thresholding which
+	replaces atom based thresholding. It should be a bit faster.
+
+2004-05-12 01:30  nemeth
+
+	* Docs/Optimizer/PRL/mondo_new.bib: A few more references added to
+	the optimizer paper.
+
+2004-05-11 16:54  mchalla
+
+	* TwoE/IntegralsE.m: [no log message]
+
+2004-05-11 13:28  tymczak
+
+	* Docs/PBC_Exchange/LinearPBCExchange.ps: [no log message]
+
+2004-05-11 12:47  mchalla
+
+	* Validate/Makefile: changed m to MondoSCF
+
+2004-05-11 12:33  mchalla
+
+	* SCFeqs/FBuild.F90: Got rid of integrals printing logic.  CPP was
+	messed up by it, and it can always be retrived from CVS and
+	hardwired in if the need arizes.
+
+2004-05-11 12:20  ckgan
+
+	* Docs/ParaQCTC/: Makefile, NProc_TRatio_110H2O_GoodAndTight.eps,
+	NProc_TTBTTTRatio.eps, Sys3Iter3_Sys8Iter3.eps, paraqctc.tex,
+	sys1Iter2_sys2Iter3.eps, sys1Iter2_sys7Iter3.eps,
+	taxol-6-31g-6-31gss.eps: Parallel QCTC paper.
+
+2004-05-11 11:27  ckgan
+
+	* Docs/Bib/mondo.bib: [no log message]
+
+2004-05-11 11:26  tymczak
+
+	* Docs/: PBC_Exchange/LinearPBCExchange.tex, Bib/mondo_new.bib: [no
+	log message]
+
+2004-05-11 11:14  tymczak
+
+	* Docs/PBC_Exchange/: LinearPBCExchange.tex,
+	Timing_Diamond_ONX_1.ps, Timing_pIce_ONX_1.ps: [no log message]
+
+2004-05-10 17:17  tymczak
+
+	* Docs/PBC_Exchange/: LinearPBCExchange.ps, LinearPBCExchange.tex,
+	Timing_Diamond_ONX.ps, Timing_Diamond_ONX_2.ps, pIce_En_vs_a.ps:
+	[no log message]
+
+2004-05-10 15:00  tymczak
+
+	* Docs/: Bib/mondo_new.bib, PBC_Exchange/LinearPBCExchange.tex: [no
+	log message]
+
+2004-05-10 11:56  tymczak
+
+	* SCFeqs/ODA.F90: Better Estimate of the IKPS error
+	
+	CJ
+
+2004-05-10 11:19  mchalla
+
+	* Makefile: Got rid of rm -r TwoE.
+
+2004-05-10 10:24  tymczak
+
+	* SCFeqs/Makefile: Added IRInv to Make
+	
+	CJ
+
+2004-05-10 10:23  tymczak
+
+	* SCFeqs/IRInv.F90: Anders New Algorithm
+	
+	CJ.
+
+2004-05-10 10:22  tymczak
+
+	* SCFeqs/ODA.F90: Small fix
+
+2004-05-10 10:21  tymczak
+
+	* SCFeqs/P2Use.F90: Fixed the Geometry Changes to be more robust
+	
+	CJ
+
+2004-05-07 10:26  vweber
+
+	* QCTC/PBCFarField.F90: Added initialization for E_DP in
+	PBCFarFieldSetUp, this affected only 1d periodic calculations. It
+	may have other variables uninitailized.
+
+2004-05-07 06:33  vweber
+
+	* ONX2/: GONX2.F90, GONX2ComputDK.F90, IntSSSS.F90, Makefile,
+	ONX2DataType.F90, ONX2List.F90: Clean up a bit + add some simple
+	checks for shellpair arrays + modify a potentialy big automatic
+	array to allocatable (easier to detect memory errors).
+
+2004-05-06 10:41  mchalla
+
+	* SCFeqs/: BlokAInv.F90, Makefile: Added in SussTrix to BlockAINV
+	so we can change the AINVThreshold on the fly from the input file. 
+	VS:
+	-------------------------------------------------------------------
+	---
+
+2004-05-06 08:32  vweber
+
+	* TwoE/ShellPairStruct.F90: Reduced the shell pair buffer.
+
+2004-05-06 06:17  vweber
+
+	* Scripts/MondoSetUp: Added intel compiler.
+
+2004-05-06 06:16  vweber
+
+	* Includes/CompilerSpecifics.AMDLinux.IFC: I could get mondo
+	compiling with the following intel compiler: Intel(R) Fortran
+	Compiler for 32-bit applications, Version 8.0	Build 20031016Z
+	Package ID: l_fc_p_8.0.034 Copyright (C) 1985-2003 Intel
+	Corporation.  All rights reserved.  FOR NON-COMMERCIAL USE ONLY
+
+2004-05-05 15:22  nemeth
+
+	* MondoSCF2/: InCoords.F90, Optimizer.F90: Linear scaling algorithm
+	for projecting out the space of constraints from Cartesian
+	gradients is added.
+
+2004-05-05 09:41  mchalla
+
+	* ChangeLog: [no log message]
+
 2004-05-05 05:14  vweber
 
 	* Docs/DM_Papers/PERT_3/: Alpha_h2o3D_6-31G_6-31Gss_G_T.ps,
