@@ -3677,7 +3677,7 @@ selection%i=1
 !      
       CALL BackTrfConvg(DoIterate,DiffMax,CooTrfCrit, &
         RMSD,RMSDOld,RMSCrit,ConstrMax,ConstrMaxCrit, &
-        ConstrRMS,ConstrRMSOld,NConstr,MaxIt_CooTrf,IStep)
+        ConstrRMS,ConstrRMSOld,NConstr,MaxIt_CooTrf,MaxCartDiff,IStep)
 !
       IF(DoIterate) THEN
 !
@@ -4524,11 +4524,11 @@ END SUBROUTINE ChkBendToLinB
 !-------------------------------------------------------
       SUBROUTINE BackTrfConvg(DoIterate,DiffMax,CooTrfCrit, &
         RMSD,RMSDOld,RMSCrit,ConstrMax,ConstrMaxCrit, &
-        ConstrRMS,ConstrRMSOld,NConstr,MaxIt_CooTrf,IStep)
+        ConstrRMS,ConstrRMSOld,NConstr,MaxIt_CooTrf,MaxCartDiff,IStep)
 !
         REAL(DOUBLE) :: DiffMax,CooTrfCrit,RMSD,RMSDOld,RMSCrit
         REAL(DOUBLE) :: ConstrMax,ConstrMaxCrit,ConstrRMS
-        REAL(DOUBLE) :: ConstrRMSOld            
+        REAL(DOUBLE) :: ConstrRMSOld,MaxCartDiff            
         INTEGER      :: NConstr,MaxIt_CooTrf,IStep
         LOGICAL      :: DoIterate
         LOGICAL      :: ConvConstr
@@ -4542,8 +4542,9 @@ END SUBROUTINE ChkBendToLinB
         ENDIF
 !
         DoIterate=(DiffMax>CooTrfCrit.AND.IStep<=MaxIt_CooTrf)
-!       DoIterate=(DiffMax>CooTrfCrit.AND.IStep<=MaxIt_CooTrf.AND. &
-!                  RMSD<RMSDOld*RMSCrit)
+        IF(RMSD>RMSDOld*RMSCrit.AND.DiffMax<MaxCartDiff*RMSCrit) THEN
+          DoIterate=.FALSE.
+        ENDIF
         DoIterate=DoIterate.AND.ConvConstr
 !
       END SUBROUTINE BackTrfConvg
