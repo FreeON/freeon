@@ -4,7 +4,7 @@
 ! Constructs the density matrix from the Hamiltonian in terms of a
 ! trace correcting purification expansion with 2nd order purifications.
 !----------------------------------------------------------------------
-PROGRAM SP2p
+PROGRAM SP2
   USE DerivedTypes
   USE GlobalScalars
   USE GlobalCharacters
@@ -22,12 +22,12 @@ PROGRAM SP2p
 ! Trace Setting SP2
 !-------------------------------------------------------------------------------------
   TYPE(ARGMT)                    :: Args
-!
   REAL(DOUBLE)                   :: Energy,Energy_old,Thresh_old
   REAL(DOUBLE)                   :: ErrorE,ErrorN,ErrorP,ErrorFP,Ne
-!
   INTEGER                        :: I,Nr_Max_It,PNon0,MM
   LOGICAL                        :: Present,Converged
+  REAL(DOUBLE),PARAMETER         :: FirstIter = 1.0D-2
+  REAL(DOUBLE),PARAMETER         :: GrowFac   = 1.25D0
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg,FFile
   CHARACTER(LEN=3),PARAMETER     :: Prog='SP2'
 !-------------------------------------------------------------------------
@@ -58,7 +58,13 @@ PROGRAM SP2p
 !
   CALL New(P)
   CALL New(Pold)
-  CALL New(T)    
+  CALL New(T) 
+!
+  CALL New(P2)
+  CALL New(P3)
+  CALL New(Ptmp1)
+  CALL New(Ptmp2)
+!   
   CALL SetEq(Pold,P)    
 !-------------------------------------------------------------------------
 !  Set up the starting Density Matrix from the Fock Matrix
@@ -74,14 +80,14 @@ PROGRAM SP2p
 !    Set the Threshold for reduction of the error
 !--------------------------------------------------------------------------
      IF(I==1) THEN
-        Thresholds%Trix = Thresh_old*1.D-2
+        Thresholds%Trix = Thresh_old*FirstIter
      ELSEIF(I >= 2) THEN
-        Thresholds%Trix = MIN(1.25D0*Thresholds%Trix,Thresh_old)
+        Thresholds%Trix = MIN(GrowFac*Thresholds%Trix,Thresh_old)
      ENDIF
 !--------------------------------------------------------------------------
 !    One Step of the Algorithm
 !--------------------------------------------------------------------------
-     CALL SP2(P,P,Ne,MM,.TRUE.)
+     CALL SP2(P,Ne,MM,.TRUE.)
 !--------------------------------------------------------------------------
 !    Output Convergence Infomation
 !--------------------------------------------------------------------------
@@ -95,7 +101,9 @@ PROGRAM SP2p
 !--------------------------------------------------------------------------
 !    Output Convergence Infomation
 !--------------------------------------------------------------------------
-     IF(ErrorP < 5.0D0*Thresh_old) EXIT
+     IF(ErrorP  < Thresh_old) Converged=.TRUE.
+     IF(ErrorE  < MAX(Thresh_old**2,1.D-14)) Converged=.TRUE.
+     IF(Converged) EXIT
   ENDDO
 !--------------------------------------------------------------------------
 ! Normalize Trace
@@ -141,7 +149,6 @@ PROGRAM SP2p
 !----------------------------------------------------------------------------0-
 !  IO for the non-orthogonal P
 !
-   CALL Put(T,'CurrentDM',CheckPoint_O=.TRUE.)
    CALL Put(T,TrixFile('D',Args,1))
    CALL Put(Zero,'homolumogap')
    CALL PChkSum(T,'P['//TRIM(NxtCycl)//']',Prog)
@@ -155,6 +162,16 @@ PROGRAM SP2p
    CALL Delete(Pold)
    CALL Delete(T)
    CALL Delete(Z)
+!
+   CALL Delete(P2)
+   CALL Delete(P3)
+   CALL Delete(Ptmp1)
+   CALL Delete(Ptmp2)
+!
    CALL ShutDown(Prog)
 !
- END PROGRAM SP2p
+ END PROGRAM SP2
+
+
+
+
