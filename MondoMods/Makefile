@@ -37,7 +37,7 @@ EXTRA_INCLUDES= -I$(MONDO_HOME)/MondoMods/MMA/LookUpTables \
 #
 MModObjs = GlobalScalars.o GlobalCharacters.o DerivedTypes.o    \
            GlobalObjects.o BasisSetParameters.o  MPIInclude.o   \
-           ProcessControl.o Trap.o MemMan.o Clock.o  Seconds.o  \
+           ProcessControl.o Trap.o MemMan.o Clock.o  Seconds.o TimerWrapper.o \
            ParsingConstants.o Parse.o MondoMPI.o                \
            Indexing.o SetEq.o SetEq77.o InOut.o HDF5Wrap.o      \
            Anneal.o Order.o Order77.o Random.o PrettyPrint.o McMurch.o   \
@@ -49,7 +49,7 @@ MModObjs = GlobalScalars.o GlobalCharacters.o DerivedTypes.o    \
 #
 MModRel  = GlobalScalars.x GlobalCharacters.x DerivedTypes.x    \
            GlobalObjects.x BasisSetParameters.x MPIInclude.x    \
-           ProcessControl.x Trap.x MemMan.x Clock.x  Seconds.x  \
+           ProcessControl.x Trap.x MemMan.x Clock.x  Seconds.x  TimerWrapper.o\
            ParsingConstants.x Parse.x  MondoMPI.x               \
            Indexing.x SetEq.x SetEq77.x InOut.x HDF5Wrap.x      \
            Anneal.x Order.x Order77.x Random.x PrettyPrint.x McMurch.x   \
