@@ -619,11 +619,13 @@ MODULE DrvSCFs
 !
 #ifdef PERIODIC
   IF(PBC_On) THEN
+     CALL OpenASCII(OutFile,Out)
        write(out,*) 'E_MM_Coulomb    TOTAL= ',MM_COUL,' KJ/mol'
        write(*,*) 'E_MM_Coulomb    TOTAL= ',MM_COUL,' KJ/mol'
        MM_COUL=MM_COUL*CONVF
        write(out,*) 'E_MM_Coulomb    TOTAL= ',MM_COUL,' Hartree'
        write(*,*) 'E_MM_Coulomb    TOTAL= ',MM_COUL,' Hartree'
+     CLOSE(Out)
     RETURN
   ENDIF
 #endif
