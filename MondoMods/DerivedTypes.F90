@@ -214,7 +214,8 @@ MODULE DerivedTypes
      LOGICAL                     :: AtomW      !-- Wrap atoms back into box--BE CAREFUL
      LOGICAL                     :: InVecForm  !-- What form are the Lattice vectors in
      LOGICAL                     :: InAtomCrd  !-- Atomic or Fractional Coordinates
-     LOGICAL                     :: NoTransVec !-- Was the translate calculated or suppied
+     LOGICAL                     :: Translate  !-- Should the Atomic Coordinated be Translated 
+     LOGICAL                     :: Trans_COM  !-- Weither to Translate to The center of The Box
      LOGICAL,DIMENSION(3)        :: AutoW      !-- Periodic in X, Y and or Z  direction
      REAL(DOUBLE)                :: CellVolume !-- Cell Volume
      REAL(DOUBLE)                :: DipoleFAC  !-- Normalization of the Dipole Term
