@@ -93,7 +93,7 @@ to the study of small systems with a limited number of nonequivalent atoms.
 Despite the tremendous increase in computational power of digital computers this 
 has remained the case, until the advent of reduced complexity algorithms over the
 last decade \cite{GGalli96,DBowler97,SGoedecker99,POrdejon00,VGogonea01,SWu02}. In the 
-best case, these reduced complexity algorithms scale only linearly with system size, 
+best case, these reduced complexity algorithms scale only linearly with system size, $N$, 
 allowing simulation capabilities to keep pace with hardware improvements.
 These linear scaling algorithms exploit the quantum locality (or nearsightedness) of 
 non-metallic systems,  manifested in the approximate exponential decay of density matrix elements 
@@ -107,7 +107,7 @@ attention devoted to the problem of response properties.  The calculation of sta
 response within  Hartree-Fock or Density Functional Theory is obtained through solution 
 of the Coupled-Perturbed Self-Consistent-Field (CPSCF) equations, which yield properties 
 such as the electric polarizability and hyperpolarizability \cite{HSekino86,SKarna91}, 
-the Born-effective charge \cite{}, the nuclear magnetic shielding tensor \cite{KWolinski90}, 
+the Born-effective charge, the nuclear magnetic shielding tensor \cite{KWolinski90}, 
 indirect spin-spin coupling
 constant \cite{CPennington91,OMalkin96}, geometric derivatives (i.e.~higher order
 analytic force constants) \cite{RAmos89} and polarizability derivatives such as the Raman 
@@ -182,8 +182,6 @@ the evaluation of higher order geometric energy derivatives \cite{RAmos89}).
  the solution of the CPSCF equations for a series of 1D chains of water molecules. 
  Thereafter, we demonstrate linear scaling complexity for the solution of the CPSCF
  equations for the higher order electric response properties of 3D water clusters.
-
-
 
 \section{The Coupled Perturbed Self-Consistent-Field Equations}
 
@@ -373,7 +371,7 @@ where the anti-commutator notation $\{A,B\} = AB+BA$ has been used.
 Perturbed Projection was originally presented in Ref.~[\onlinecite{Weber04}]
 for solution of the first order CPSCF equations.  Here, a higher order, generally applicable 
 extension of perturbed projection is outlined for self consistent solution 
-of the $N$-th order CPSCF equations, with specific application to the case of polarization and the
+of the $n$-th order CPSCF equations, with specific application to the case of polarization and the
 Hartree-Fock  model.  
 
 First, it is necessary to determine the ground state density matrix $\mathcal{D}^0$.  This may 
@@ -385,24 +383,24 @@ the dropping (filtering) of atom-atom blocks with Frobenious norm below a numeri
 defining the ground state projector, from which the derivative density matrices are directly obtained.
 
 Having solved the groundstate SCF equations, solution of the CPSCF equations commences with a guess at the 
-derivative density, followed by computation of the derivative Fockian.  At the $n^{\rm th}$ 
-CPSCF cycle, the $N^{\rm th}$ order derivative Fockian is 
+derivative density, followed by computation of the derivative Fockian.  At the $r^{\rm th}$ 
+CPSCF cycle, the $n^{\rm th}$ order derivative Fockian is 
 \begin{equation}
-    F^{a\ldots}_{n}= \left\{
+    F^{a\ldots}_{r}= \left\{
     \begin{array}{ll}
-      \mu_a+J(D^{a}_n)+K(D^{a}_n), & N=1\label{FockBuild}\\
-      J(D^{a\ldots}_n)+K(D^{a\ldots}_n), & N>1 \,.
+      \mu_a+J(D^{a}_r)+K(D^{a}_r), & n=1\label{FockBuild}\\
+      J(D^{a\ldots}_r)+K(D^{a\ldots}_r), & n>1 \,.
     \end{array}\right.
 \end{equation}
 After construction of the derivative Fockian, response functions through 
-$D^{a\ldots}_{n+1}$ are computed, constituting one cycle in solution of the CPSCF.  
+$D^{a\ldots}_{r+1}$ are computed, constituting one cycle in solution of the CPSCF.  
 As described fully in Section \ref{ResponseFunctions},  these response functions are 
 obtained directly through variation of the occupied subspace projector,  
 \begin{equation}
-%    \displaystyle\D^{a\ldots}_{n+1}=N!
-    \displaystyle\D^{a\ldots}_{n+1}=
-    \frac{\partial^N}{\partial\E^{a\ldots}}\theta(\tilde{\mu}I-
-    \F_n(\E))\bigg|_{\E=0} \, , \label{DDeriv}
+%    \displaystyle\D^{a\ldots}_{r+1}=n!
+    \displaystyle\D^{a\ldots}_{r+1}=
+    \frac{\partial^n}{\partial\E^{a\ldots}}\theta(\tilde{\mu}I-
+    \F_r(\E))\bigg|_{\E=0} \, , \label{DDeriv}
 \end{equation}
 which is accomplished via the Niklasson and Challacombe approach to density matrix 
 perturbation theory \cite{ANiklasson04}.  
@@ -410,10 +408,10 @@ perturbation theory \cite{ANiklasson04}.
 After a few CPSCF cycles, the approach to self-consistency may be accelerated with 
 Weber and Daul's DDIIS algorithm \cite{VWeber03}, 
 \begin{equation}
-    \displaystyle\widetilde{\F}^{a\ldots}_{n}=\sum_{k=n-m}^{n}c_k \F^{a\ldots}_{k} \label{DDIISEq} \\
+    \displaystyle\widetilde{\F}^{a\ldots}_{r}=\sum_{k=r-s}^{r}c_k \F^{a\ldots}_{k} \label{DDIISEq} \\
 \end{equation}
 in which the $c_k$ coefficients are chosen to minimize the 
-$N^{\rm th}$ order commutation 
+$n^{\rm th}$ order commutation 
 relations, as in Eqs.~(\ref{eq:commutators2})-(\ref{eq:commutators4}). The application of the
 DDIIS algorithm to acceleration of higher order CPSCF equations is developed further in Section \ref{DDIIS}.
 
@@ -426,7 +424,7 @@ where in the case of polarization we have the (hyper)polarizabilities $\alpha_{a
 $\beta_{abc}=-4\Tr[D^{ab}\mu_c]$ or $\gamma_{abcd}=-12\Tr[D^{abc}\mu_d]$.
 Alternatively, it is possible to construct density matrix analogues of 
 Wigner's $2 n+1$ rule, which allows the evaluation of response properties up to order $2 n+1$ from response 
-functions of order $N$.  These analogues are given in Section \ref{Wigner2Np1} through $4^{th}$ order in
+functions of order $n$.  These analogues are given in Section \ref{Wigner2Np1} through $4^{th}$ order in
 the energy.
 
 \subsection{Perturbed Projection}\label{ResponseFunctions}
@@ -434,11 +432,11 @@ the energy.
 Although a number of analytic, asymptotically discontinuous representations exist for the Heaviside 
 step function $\theta$, direct representation (and variation) of these forms as in Eq.~(\ref{DDeriv1}) 
 is problematic.  Moreover, the accurate polynomial representation of the step function and it's 
-derivatives demands a very high order;  a $m$'th order polynomial representation involves a 
-cost that is at best ${\cal O}\sqrt{m}$ cite{}, while recursive purification methods are 
-${\cal O}( \log m )$.  As methods of modern purification such as TC2 are smooth and strictly monotonic, 
-the resultant approximation is also smooth and monotonic, avoiding the Gibbs oscillations that
-plague direct polynomial approximation schemes, such as those that employ the Tchebychev polynomials \cite{AVoter96}.  
+derivatives demands a very high order;  a $p$'th order polynomial representation involves a 
+cost that is at best ${\cal O}(\sqrt{p})$ \cite{WLiang04}, while recursive purification methods are 
+${\cal O}( \log p )$ \cite{ANiklasson03}.  Also, reursive purification methods such as TC2 are smooth and strictly monotonic,  avoiding 
+the Gibbs oscillations that can plague polynomial approximation schemes, such as those that employ the Tchebychev 
+polynomials \cite{AVoter96}.  
 
 Perturbed Projection, based on the recently developed Density Matrix Perturbation Theory of Niklasson and 
 Challacombe \cite{ANiklasson04}, is based on recursive purification, retaining the convergence and
@@ -492,12 +490,12 @@ or
 \end{equation}
 As with the  TC2 generator, the response functions
 \begin{equation}
- \D^{a...} = N!\lim_{i\rightarrow\infty} \X_i^{a...},
+ \D^{a...} = n!\lim_{i\rightarrow\infty} \X_i^{a...},
 \end{equation}
 converge quadratically, reaching  convergence when either 
-the error $\epsilon = |\Tr[\X^0_{i}]-N_e| + |\Tr[\X^{a}_{i}]| + \ldots$, or 
-the change $\delta \X = |\X^{a\ldots}_{i+1}-\X^{a\ldots}_{i}|$ falls below $\tau$,
-the atom-atom block drop tolerance described in Ref.~[\onlinecite{ANiklasson03}].
+the error $\varepsilon = |\Tr[\X^0_{i}]-N_e| + |\Tr[\X^{a}_{i}]| + \ldots$, or 
+the maximum element in the change $\delta \X^{a\ldots} = |\X^{a\ldots}_{i+1}-\X^{a\ldots}_{i}|$ 
+falls below $\tau$, the atom-atom block drop tolerance described in Ref.~[\onlinecite{ANiklasson03}].
 As described more completely in a preceding paper \cite{ANiklasson05a}, when the solution gets 
 close to convergence, i.e.~$|\Tr[\X^0_{i}]-N_e|< \epsilon$ with 
 $\epsilon \approx 10^{-1}-10^{-3}$, we alternate the projection at each step,
@@ -515,16 +513,16 @@ to generate an improved density matrix.
 
 Recently, Weber and Daul have developed the Derivative DIIS (DDIIS) scheme for accelerating 
 convergence of the CPSCF equations \cite{VWeber03}.  Like DIIS, DDIIS is based on 
-minimization of the Frobenious norm of an error matrix %$\widetilde e_n^{a\ldots}$ given by
+minimization of the Frobenious norm of an error matrix 
 \begin{equation}
-  \widetilde e_n^{a\ldots}=\sum_{i=n-m}^{n}c_i e_i^{a\ldots},
+  \widetilde e_r^{a\ldots}=\sum_{i=r-s}^{r}c_i e_i^{a\ldots},
 \end{equation}
-where the $e_i^{a\ldots}$'s are just the $N$-th order commutator relation
+where the $e_i^{a\ldots}$'s are just the $n$-th order commutator relation
 of Eqs.~(\ref{eq:commutators1}-\ref{eq:commutators4}) (e.g. the first order error matrix 
 is given by $e_i^{a}=[\F^{a}_i ,\D^{0}]+[\F^{0},\D^{a}_i]$).
 The optimal coefficients $c_i$ are solutions to the quadratic programming problem
 \begin{equation}
-  \inf \left \{-\frac{1}{2}\sum_{i,j=n-m}^nc_iB_{ij}c_j,\, \sum_{i=n-m}^n c_i=1 \right \},
+  \inf \left \{-\frac{1}{2}\sum_{i,j=r-s}^nc_iB_{ij}c_j,\, \sum_{i=r-s}^r c_i=1 \right \},
 \end{equation}
 where elements of the $\mathbf{B}$ matrix are given by 
 $B_{ij}=\Tr[e_i^{a\ldots}(e_j^{a\ldots})^T]$.
@@ -548,7 +546,7 @@ A working equation is then obtained through the associated Euler-Lagrange equati
  and $\lambda$ is the Lagrange multiplier of the constraint 
  $\sum_{i=n-m}^{n}c_{i}=1$. The set of linear equations is solved
  by inverting the left-hand side matrix.  In the event of a singular or near singular
- matrix, the rank of Eq.~(\ref{diismatrix}) is reduced by discarding the oldest entries 
+ matrix, the rank of Eq.~(\ref{eq:diismatrix}) is reduced by discarding the oldest entries (increasing $s$)
  until the linear system stabilizes.
 
 \subsection{Density matrix formulation of Wigner's $2n+1$ rule }\label{Wigner2Np1}
