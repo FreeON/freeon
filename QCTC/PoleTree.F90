@@ -37,6 +37,7 @@ MODULE PoleTree
 !       Initialize counters
         PoleNodes=0
         RhoLevel=0
+        MaxTier=0
 !       Initialize the root node
         CALL NewPoleNode(PoleRoot,0)
         CALL NewSPArrays(PoleRoot)
@@ -89,15 +90,15 @@ MODULE PoleTree
          REAL(DOUBLE)                          :: M1,M2,M3,CQ,Del
 !--------------------------------------------------------------
          IF(P%Box%Tier==CurrentTier.AND.P%Leaf)THEN
-            P%C=Zero
-            P%S=Zero
+            ! P%C=Zero
+            ! P%S=Zero
             P%Strength=Zero
             CALL HGToSP(P)
          ELSEIF(P%Leaf)THEN
             RETURN
          ELSEIF(P%Box%Tier==CurrentTier)THEN 
-            P%C=Zero 
-            P%S=Zero
+            ! P%C=Zero 
+            ! P%S=Zero
             LeftQ=>P%Descend
             RightQ=>P%Descend%Travrse
 !           Compute new nodes BBox
@@ -105,8 +106,12 @@ MODULE PoleTree
                P%Box%BndBox(K,1)=MIN(LeftQ%Box%BndBox(K,1),RightQ%Box%BndBox(K,1))
                P%Box%BndBox(K,2)=MAX(LeftQ%Box%BndBox(K,2),RightQ%Box%BndBox(K,2))
             ENDDO
-            P%Box%Half(:)  = Half*(P%Box%BndBox(:,2)-P%Box%BndBox(:,1))
-            P%Box%Center(:)= Half*(P%Box%BndBox(:,2)+P%Box%BndBox(:,1))
+            P%Box%Half(1)  = Half*(P%Box%BndBox(1,2)-P%Box%BndBox(1,1))
+            P%Box%Half(2)  = Half*(P%Box%BndBox(2,2)-P%Box%BndBox(2,1))
+            P%Box%Half(3)  = Half*(P%Box%BndBox(3,2)-P%Box%BndBox(3,1))
+            P%Box%Center(1)= Half*(P%Box%BndBox(1,2)+P%Box%BndBox(1,1))
+            P%Box%Center(2)= Half*(P%Box%BndBox(2,2)+P%Box%BndBox(2,1))
+            P%Box%Center(3)= Half*(P%Box%BndBox(3,2)+P%Box%BndBox(3,1))
 !           Compute DMax2
             P%DMax2 = Zero
             DO I=P%Bdex,P%Edex
@@ -221,8 +226,10 @@ MODULE PoleTree
          CALL IncMem(Status,0,LenSP+1)
          ALLOCATE(Node%C(0:LenSP),STAT=Status)
          CALL IncMem(Status,0,LenSP+1)
-         Node%S=Zero
-         Node%C=Zero
+         ! Node%S=Zero
+         ! Node%C=Zero
+         CALL DBL_VECT_EQ_DBL_SCLR(LenSP+1,Node%S(0),Zero)
+         CALL DBL_VECT_EQ_DBL_SCLR(LenSP+1,Node%C(0),Zero)
       END SUBROUTINE NewSPArrays
 !================================================================================
 !     Bisection   
@@ -240,12 +247,14 @@ MODULE PoleTree
 !        SPlit in the Largest Direction direction
          MaxBox=Zero
          ISplit=Mod(Node%Box%Tier,3)+1
-         DO I=1,3
-            IF(MaxBox > Node%Box%Half(I)) THEN
-               MaxBox = Node%Box%Half(I)
-               ISplit = I
-            ENDIF
-         ENDDO
+
+!        DO I=1,3
+!           IF(MaxBox > Node%Box%Half(I)) THEN
+!              MaxBox = Node%Box%Half(I)
+!              ISplit = I
+!           ENDIF
+!        ENDDO
+
          IF(ISplit==1)THEN
             DO I=B,E
                J=J+1;K=Qdex(I)
