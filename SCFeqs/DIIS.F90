@@ -24,7 +24,7 @@ PROGRAM PulayDIIS
    TYPE(INT_VECT)                 :: IWork
    TYPE(DBL_VECT)                 :: V,DIISCo
    TYPE(DBL_RNK2)                 :: B,BOld,BInv,BTmp
-   REAL(DOUBLE)                   :: DIISErr
+   REAL(DOUBLE)                   :: DIISErr,C0,C1,EigThresh
    INTEGER                        :: I,J,K,N,ISCF,JSCF,KSCF
    CHARACTER(LEN=2)               :: Cycl,NxtC
    CHARACTER(LEN=9),PARAMETER     :: Prog='PulayDIIS'
@@ -37,6 +37,11 @@ PROGRAM PulayDIIS
    ISCF=Args%I%I(1)
    Cycl=IntToChar(ISCF)
    NxtC=IntToChar(ISCF+1)
+!
+   CALL OpenASCII(InpFile,Inp)  
+   IF(.NOT.OptDblQ(Inp,Prog,EigThresh))EigThresh=1.D-9
+   CLOSE(Inp)
+!
 !  Allocations
    CALL New(P)
    CALL New(F)
@@ -46,12 +51,16 @@ PROGRAM PulayDIIS
 !  Create a new error vector E=[F_(i+1),P_i]
 !
    CALL Get(F,TrixFile('OrthoF',Args,0))    ! the orthogonalized Fock matrix 
-!
+   
 !   Turn off DIIS
 !   CALL Put(F,TrixFile('F_DIIS',Args,0))    ! the orthogonalized Fock matrix 
 !   CALL Put(One,'diiserr',Tag_O='_'//TRIM(CurGeom)//'_'//TRIM(CurBase)//'_'//TRIM(SCFCycl))
 !   CALL ShutDown(Prog)
 !
+
+
+
+
    CALL Get(P,TrixFile('OrthoD',Args,0))    ! the orthogonalized Density matrix
    CALL Multiply(F,P,E)  
    CALL Multiply(P,F,E,-One)
@@ -62,7 +71,7 @@ PROGRAM PulayDIIS
 !----------------------------------------------
 !  Build a new B matrix
 !
-   N=ISCF+1
+   N=ISCF+1 
    CALL New(B,(/N,N/))
 !  Start with the last cycles B
    IF(ISCF>1)THEN
@@ -97,7 +106,12 @@ PROGRAM PulayDIIS
      V%D(N)=One
      CALL SetDSYEVWork(N)
      BInv%D=Zero
-     CALL FunkOnSqMat(N,Inverse,B%D,BInv%D)
+     IF(PrintFlags%Key>=DEBUG_MEDIUM)THEN
+        CALL FunkOnSqMat(N,Inverse,B%D,BInv%D,EigenThresh_O=EigThresh, &
+                         PrintCond_O=.TRUE.,Prog_O=Prog)
+     ELSE
+        CALL FunkOnSqMat(N,Inverse,B%D,BInv%D,EigenThresh_O=EigThresh)
+     ENDIF
      CALL UnSetDSYEVWork()
      CALL DGEMV('N',N,N,One,BInv%D,N,V%D,1,Zero,DIISCo%D,1)
      CALL Delete(V)
@@ -127,21 +141,31 @@ PROGRAM PulayDIIS
       CLOSE(Out)
   ENDIF
 !--------------------------------------------------------------------------------
-!  Extrapolation with the DIIS coefficients
-!
-   CALL Multiply(F,DIISCo%D(ISCF))     
-   DO JSCF=iSCF-1,1,-1 
-      KSCF=JSCF-ISCF
-      CALL Get(Tmp1,TrixFile('OrthoF',Args,KSCF))
-      CALL Multiply(Tmp1,DIISCo%D(JSCF))
-      CALL Add(F,Tmp1,E)
-      IF(JSCF==1)THEN
-!        Only filter the end product
-         CALL Filter(F,E)
-      ELSE
-         CALL SetEq(F,E)
-      ENDIF
-   ENDDO
+   IF(ISCF==1)THEN
+!    Damping on the first cycle
+     C0=0.95D0
+     C1=0.05D0
+     CALL Multiply(F,C1)
+     CALL Get(Tmp1,TrixFile('OrthoF',Args,-1))
+     CALL Multiply(Tmp1,C0)
+     CALL Add(F,Tmp1,E)
+     CALL Filter(F,E)
+   ELSE
+!    Extrapolation with the DIIS coefficients after first cycle
+     CALL Multiply(F,DIISCo%D(ISCF))     
+      DO JSCF=iSCF-1,1,-1 
+         KSCF=JSCF-ISCF
+         CALL Get(Tmp1,TrixFile('OrthoF',Args,KSCF))
+         CALL Multiply(Tmp1,DIISCo%D(JSCF))
+         CALL Add(F,Tmp1,E)
+         IF(JSCF==1)THEN
+!           Only filter the end product
+            CALL Filter(F,E)
+         ELSE
+            CALL SetEq(F,E)
+         ENDIF
+      ENDDO
+   ENDIF
 !--------------------------------------------------------------------
 !  IO for the orthogonal, extrapolated F 
 !
