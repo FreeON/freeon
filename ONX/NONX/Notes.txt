@@ -3,4 +3,11 @@ The SpaceV array appears to be messed up in at least the SpaceV(9)
 possition. This is used in ContractG.F90 for the 4th array index of 
 the uncontracted integrals. 
 
+The problem here is actually being caused by the GDriver data files 
+being out of sync with the rest of the integral code. This should be 
+an easy fix. The DriverMaker.F program in /ONX/GDrivers should be set
+up to regenerate all of the data files correctly. It is just going 
+to take some cut-and-paste work. 
+
+
 
