@@ -107,7 +107,9 @@ PROGRAM P2Use
         ! structure occupancies--works only for minimal (STO) basis sets
         CALL New(BlkP,(/MaxBlkSize**2,NAtoms/))
         DO I=1,NAtoms
-           CALL FillPBlok(BSiz%I(I),INT(GM%AtNum%D(I)),BlkP%D(:,I))
+           IF(GM%AtNum%D(I) < 105.D0) THEN
+              CALL FillPBlok(BSiz%I(I),INT(GM%AtNum%D(I)),BlkP%D(:,I))
+           ENDIF
         ENDDO
         CALL SetToI(P,BlkP)
         ! Check for the correct elctron count
