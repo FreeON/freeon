@@ -67,6 +67,8 @@ PROGRAM ONX
      PrvBase=TRIM(IntToChar(Stat%I(2)))
      PrvGeom=TRIM(IntToChar(Stat%I(3)))
      CALL Get(BSp,Tag_O=PrvBase)
+!    Get the previous geometry, ASSUMING that 
+!    we are not extrapolating the DM
      CALL Get(GMp,Tag_O=PrvGeom)
      CALL Get(BSiz,'atsiz',Tag_O=PrvBase)
      CALL Get(OffS,'atoff',Tag_O=PrvBase)
@@ -75,7 +77,8 @@ PROGRAM ONX
      CALL OpenHDF(InfFile)     
   ELSE
      CALL Get(BSp,Tag_O=PrvBase)
-     CALL Get(GMp,Tag_O=PrvGeom)
+!    Get the current geometry here...
+     CALL Get(GMp,Tag_O=CurGeom)
      CALL Get(BSiz,'atsiz',Tag_O=PrvBase)
      CALL Get(OffS,'atoff',Tag_O=PrvBase)
      CALL Get(NBasF,'nbasf',Tag_O=PrvBase)
@@ -149,12 +152,12 @@ PROGRAM ONX
   CALL Fillout_BCSR(BSc,GMc,K)
   CALL TrnMatBlk(BSc,GMc,K)
   CALL ONXFilter(BSc,GMc,K,NameBuf,Thresholds%Trix)
+  K%NAtms=NAtoms ! never set before this...
 ! Add in correction if incremental K build
   IF(SCFActn=='InkFok')THEN
      CALL New(T1)
      CALL New(T2)
      CALL Get(T1,TrixFile('K',Args,-1))
-     K%NAtms=NAtoms ! never set before this...
      CALL Add(K,T1,T2)
      CALL Filter(K,T2)
      CALL Delete(T1)
