@@ -88,13 +88,15 @@ by a global electric field are demonstrated for the three dimensional water clus
 %same.  In a similar vein the factors of 1/2 in Eqs.(12) and (16) give me
 %pause. See also Eq.(21). Eqs.(24) and (25) seem ok to me with the
 %definition of Eq.(26), but why not use a coefficient of unity everywhere. 
-%                                                                           VW-OK
+% WE NOW HAVE ONLY TAYLOR EXPANSION!                                        VW-OK
 %
 %3. The CPSCF procedure begins with a guess at the derivative densities. It
-%would be nice to know how that guess is obtained.                          VW-OK
+%would be nice to know how that guess is obtained.
+% Added the guess we use before eq 18                                       VW-OK
 %
 %4. In Eq.(22) the identity matrix is missing from the first term in the 
-%numerator.                                                                 VW-OK
+%numerator.
+% Added the identity                                                        VW-OK
 %
 %5. I tried to check Eqs.(30) and (31) for the limiting case S = I and
 %a=b=c=d.  Except for a factor of 2 Eq.(30) is in agreement with Ref. [21].
@@ -113,7 +115,7 @@ by a global electric field are demonstrated for the three dimensional water clus
 %will be more interested in delocalized systems such as polyacetylene,
 %polymethineimine or polydiacetylene chains. Will the onset of linear
 %scaling depend upon the degree of delocalization and to what extent ? 
-%  VW-this is in the introduction!
+%  VW-this is in the introduction! The referee should have read the intro!
 %
 %8. Perhaps it is due to the quality of my printout but, frankly, I was not
 %able to come with anything from Fig.6. 
@@ -286,8 +288,8 @@ Here $D^{a\ldots}$ denotes a density matrix derivative with respect to a field i
 at $\mathcal{E} = 0$ and the factor $2$ accounts for the orbital occupation. 
 The  density matrix derivative or ``response function'' is given by 
 \begin{equation}
- \displaystyle\D^{a\ldots}=n!
-% \displaystyle\D^{a\ldots}=
+% \displaystyle\D^{a\ldots}=n!
+ \displaystyle\D^{a\ldots}=
  \frac{\partial^n}{\partial\E^{a\ldots}}\theta(\tilde{\mu}I-
  \F(\E))\bigg|_{\E=0} \label{DDeriv1}.
 \end{equation}
@@ -404,8 +406,8 @@ $D^{a\ldots}_{r+1}$ are computed, constituting one cycle in solution of the CPSC
 As described in Section \ref{ResponseFunctions},  these response functions are 
 obtained directly through variation of the occupied subspace projector,  
 \begin{equation}
-    \displaystyle\D^{a\ldots}_{r+1}=n!
-%    \displaystyle\D^{a\ldots}_{r+1}=
+%    \displaystyle\D^{a\ldots}_{r+1}=n!
+    \displaystyle\D^{a\ldots}_{r+1}=
     \frac{\partial^n}{\partial\E^{a\ldots}}\theta(\tilde{\mu}I-
     \F_r(\E))\bigg|_{\E=0} \, , \label{DDeriv}
 \end{equation}
@@ -421,14 +423,24 @@ in which the $c_k$ coefficients are chosen to minimize the
 $n^{\rm th}$ order commutation 
 relations, as in Eqs.~(\ref{eq:commutators2})-(\ref{eq:commutators4}). The application of the
 DDIIS algorithm to acceleration of higher order CPSCF equations is developed further in Section \ref{DDIIS}.
-
+%vw>>>>
 At self-consistency, the conditions given in Section \ref{SelfConsistency} have been met, and it is then 
-appropriate to compute response properties.   In general, we can use the expectation value 
+appropriate to compute response properties.   
+%In general, we can use the expectation value 
+%In the case of electric polarizabilities, we can use the expectation value 
+For ``simple'' perturbation, we can use the expectation value 
 \begin{equation}
-E^{(\gamma)} = 2 Tr(D^{(\gamma-1)} h^{(1)}), \label{Np1Rule}
+%E^{ab\ldots c}\equiv
+%\frac{\partial^n E_{\rm tot}}{\partial \mathcal{E}^a\partial\mathcal{E}^b\cdots\partial\mathcal{E}^c}
+%     \bigg|_{\mathcal{E}=0}
+% = 2 Tr(D^{ab\ldots}\mu_c), \label{Np1Rule}
+E^{(\gamma+1)} = 2 Tr(D^{(\gamma)} h^{(1)}), \label{Np1Rule}
 \end{equation}
-where in the case of polarization we have the (hyper)polarizabilities $\alpha_{ab}=-2\Tr[D^a\mu_b]$, 
-$\beta_{abc}=-2\Tr[D^{ab}\mu_c]$ or $\gamma_{abcd}=-2\Tr[D^{abc}\mu_d]$.
+where in the case of polarization, $h^{(1)}$ is the dipole moment matrix and 
+the (hyper)polarizabilities are given by Eqs.~\ref{pol}(a-c).
+%$\alpha_{ab}=-2\Tr[D^a\mu_b]$, 
+%$\beta_{abc}=-2\Tr[D^{ab}\mu_c]$ or $\gamma_{abcd}=-2\Tr[D^{abc}\mu_d]$.
+%vw<<<<
 Alternatively, it is possible to construct density matrix analogues of 
 Wigner's $2 n+1$ rule, which allows the evaluation of response properties up to order $2 n+1$ from response 
 functions of order $n$.  These analogues are given in Section \ref{Wigner2Np1} through $4^{th}$ order in
@@ -479,7 +491,8 @@ Within this framework, the second order TC2 Perturbed Projection sequence is
 \begin{equation}\label{PP1}
 \left.
 \begin{array}{ll}
-\X^{ab}_{i+1}&=\{\X^{ab}_{i},\X^0_{i}\}+\frac{1}{2}\{\X^a_{i},\X^b_{i}\}\\
+%\X^{ab}_{i+1}&=\{\X^{ab}_{i},\X^0_{i}\}+\frac{1}{2}\{\X^a_{i},\X^b_{i}\}\\
+\X^{ab}_{i+1}&=\{\X^{ab}_{i},\X^0_{i}\}+\{\X^a_{i},\X^b_{i}\}\\
 \X^a_{i+1}&=\{\X^a_{i},\X^0_{i}\}\\
 \X^b_{i+1}&=\{\X^b_{i},\X^0_{i}\}\\
 \X^0_{i+1}&=(\X^0_{i})^2 
@@ -490,7 +503,8 @@ or
 \begin{equation}\label{PP2}
 \left.
 \begin{array}{ll}
-      \X^{ab}_{i+1}&=2 \X^{ab}_{i}-(\{\X^{ab}_{i},\X^0_{i}\}+\frac{1}{2}\{\X^a_{i},\X^b_{i}\})\\
+%      \X^{ab}_{i+1}&=2 \X^{ab}_{i}-(\{\X^{ab}_{i},\X^0_{i}\}+\frac{1}{2}\{\X^a_{i},\X^b_{i}\})\\
+      \X^{ab}_{i+1}&=2 \X^{ab}_{i}-(\{\X^{ab}_{i},\X^0_{i}\}+\{\X^a_{i},\X^b_{i}\})\\
       \X^b_{i+1}&=2 \X^b_{i}-\{\X^b_{i},\X^0_{i}\} \\
       \X^a_{i+1}&=2 \X^a_{i}-\{\X^a_{i},\X^0_{i}\} \\
       \X^0_{i+1}&=2 \X^0_{i}-(\X^0_{i})^2
@@ -499,7 +513,8 @@ or
 \end{equation}
 As with the  TC2 generator, the $n^{\rm th}$ order response functions
 \begin{equation}
- \D^{a...} = n!\lim_{i\rightarrow\infty} \X_i^{a...},
+% \D^{a...} = n!\lim_{i\rightarrow\infty} \X_i^{a...},
+ \D^{a...} = \lim_{i\rightarrow\infty} \X_i^{a...},
 \end{equation}
 converge quadratically, reaching  convergence when either 
 the error $\varepsilon = |\Tr[\X^0_{i}]-N_e| + |\Tr[\X^{a}_{i}]| + \ldots$, or 
@@ -567,20 +582,28 @@ A density matrix analogue of Wigner's $2n+1$ rule for a single perturbation para
 was given to third order by McWeeny \cite{RMcWeeny62} and up to fourth order by 
 Niklasson and Challacombe \cite{ANiklasson04} in the orthogonal representation.  
 
-For completeness, we present non-orthogonal generalizations up to fourth order, 
-which may require less memory due to the less dense structure of non-orthogonal 
-matrix intermediates. The new formulation includes mixed perturbations and 
+%vw>>>
+%For completeness, we present non-orthogonal generalizations up to fourth order, 
+%which may require less memory due to the less dense structure of non-orthogonal 
+%matrix intermediates. The new formulation includes mixed perturbations and 
+%accounts for self-consistency.
+In the frame of electric polarizabilities, we present non-orthogonal $2n+1$ rule 
+up to fourth order. The new formulation includes mixed perturbations and 
 accounts for self-consistency.
+%vw<<<
 
-The first and second order energy corrections are well known, corresponding simply to expectation
-values as in Eq.~(\ref{Np1Rule}).  Beyond second order, the $2 n+1$ rule offers a valuable alternative. 
+The first and second order energy corrections to electric perturbations 
+are well known, corresponding simply to expectation
+values as in Eq.~(\ref{Np1Rule}).  Beyond second order, the $2 n+1$ rule offers a valuable alternative
+to compute higher order polarizabilites. 
 The third order non-orthogonal contribution is 
 \begin{align}
 %  \begin{split}
-    E^{abc}
+%    E^{abc} %This is too general and confusing!
+    \beta_{abc}
 %&=\frac{1}{6}P(a,b,c)\Tr([\D^a,\D^0]\D^b\F^c)\label{eq:2n+1 third order ortho}\\
 %    &=\frac{1}{6}\sum_{P(a,b,c)}\Tr[[D^a,D^0]_SSD^bF^c]\label{eq:2n+1 third order}
-    &=2\sum_{P(a,b,c)}\Tr[[D^a,D^0]_SSD^bF^c]\label{eq:2n+1 third order}
+    &=-2\sum_{P(a,b,c)}\Tr[[D^a,D^0]_SSD^bF^c]\label{eq:2n+1 third order}%We need the - now.
 %  \end{split}
 \end{align}
 where $P(a,b,c)$ stands for the permutation operator such that all
@@ -591,7 +614,9 @@ Similarly, the fourth order non-orthogonal contribution is
 \begin{align}
   \begin{split}
 %    E^{abcd} =&\frac{1}{24}\sum_{P(a,b,c,d)}\Tr[[D^{ab},D^0]_S SD^cF^d + \\ 
-    E^{abcd} =\frac{1}{2}\sum_{P(a,b,c,d)}&\Tr[[D^{ab},D^0]_S SD^cF^d+\\ 
+%    E^{abcd} %This is too general and confusing!
+    \gamma_{abcd}
+    =-\frac{1}{2}\sum_{P(a,b,c,d)}&\Tr[[D^{ab},D^0]_S SD^cF^d+\\ %We need the - now.
     &[D^a,D^0]_S S(D^{bc}F^d +D^bF^{cd})].\label{eq:2n+1 fourth order}
   \end{split}
 \end{align}
@@ -601,8 +626,8 @@ In most cases the complexity of these equations
 can be reduced by taking advantage of indicial symmetry; 
 $a,b,c,$ and $d$ represent the Cartesian directions $x,y,z$
 so that terms with indecies in the same direction simplify. 
-For example, $E^{aaaa}$ reduces to only one term requiring only 15 matrix multiplications.
-In the worst case, where all the directions are different, i.e. $E^{aabc}$ 
+For example, $\gamma_{aaaa}$ reduces to only one term requiring only 15 matrix multiplications.
+In the worst case, where all the directions are different, i.e. $\gamma_{aabc}$ 
 (or any other permutation of $(a,a,b,c)$), the relation \eqref{eq:2n+1 fourth order} 
 reduces to include only 12 terms with 180 matrix multiplications. 
 Similar reductions of the computational cost also apply to 
@@ -672,7 +697,7 @@ density matrix analogue to all orders.
      3 & -25.3696 & -25.372208 & -25.373615 & -25.370297 & -25.370381 \\
      4 & -22.1411 & -22.143436 & -22.145040 & -22.141494 & -22.141603 \\
      5 & -19.8925 & -19.902088 & -19.904449 & -19.896462 & -19.897141 \\
-    10 & -14.8063 & -14.807075 & -29.617990 & -14.806973 & -14.807119 \\
+    10 & -14.8063 & -14.807075 & -14.808995 & -14.806973 & -14.807119 \\
     15 & -12.9713 & -12.969238 & -12.972227 & -12.971940 & -12.972124 \\
     20 & -12.0334 & -12.028709 & -12.033633 & -12.034014 & -12.034238 \\
 %#BETA/N
