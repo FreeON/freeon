@@ -1339,36 +1339,6 @@ MODULE ParseInput
 !============================================================================
 !
 !============================================================================
-      SUBROUTINE  CalFracCarts(GM)
-         TYPE(CRDS)                 :: GM
-         INTEGER                    :: I
-!
-!        Generate the Fractioanl Coordinates
-!
-         DO I=1,GM%NAtms
-            GM%BoxCarts%D(:,I) = AtomToFrac(GM,GM%Carts%D(:,I))
-            GM%BoxVects%D(:,I) = AtomToFrac(GM,GM%Vects%D(:,I))
-         ENDDO
-!
-       END SUBROUTINE CalFracCarts
-!============================================================================
-!
-!============================================================================
-      SUBROUTINE  CalAtomCarts(GM)
-        TYPE(CRDS)                 :: GM
-        INTEGER                    :: I
-!
-!       Generate the Atomic Coordinates
-!
-        DO I=1,GM%NAtms
-           GM%Carts%D(:,I)   = FracToAtom(GM,GM%BoxCarts%D(:,I))
-           GM%Vects%D(:,I)   = FracToAtom(GM,GM%BoxVects%D(:,I))
-        ENDDO
-!
-      END SUBROUTINE CalAtomCarts
-!============================================================================
-!
-!============================================================================
       SUBROUTINE  CalTransVec(GM)
         TYPE(CRDS)                  :: GM
         REAL(DOUBLE),DIMENSION(1:3) :: CMVec

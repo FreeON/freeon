@@ -112,7 +112,7 @@ MODULE KxcGen
        INTEGER                                  :: I,J,MaxLA,MaxLB,IA,IB,      &
                                                    LMNA,LMNB,LA,LB,MA,MB,      &
                                                    NA,NB,LAB,MAB,NAB,LMN,EllA, &
-                                                   EllB,NC
+                                                   LenHG,EllB,NC
 !-------------------------------------------------------------------------------------- 
        KBlk=Zero
        KA=Pair%KA
