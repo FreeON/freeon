@@ -44,8 +44,8 @@ PROGRAM DIIS
    IF(.NOT.OptDblQ(Inp,'DIISThresh',EigThresh))EigThresh=1.D-10
 !  Damping coefficient for first cycle
    IF(.NOT.OptDblQ(Inp,'DIISDamp',Damp))Damp=2D-1
-!  Dont allow damping below 0.05, as this can cause false convergence
-   Damp=MAX(Damp,5D-2)
+!  Dont allow damping below 0.005, as this can cause false convergence
+   Damp=MAX(Damp,5D-3)
 !  Max number of equations to keep in DIIS 
    IF(.NOT.OptIntQ(Inp,'DIISDimension',BMax))BMax=15
    CLOSE(Inp)
@@ -148,6 +148,7 @@ PROGRAM DIIS
    ELSE
       Mssg=ProcessName(Prog,'Damping')//'Co = '
       N=3
+      M=ISCF-N+2
       CALL New(DIISCo,2)
 !     Damping on the second cycle
       DIISCo%D(1)=One-Damp
@@ -182,7 +183,7 @@ PROGRAM DIIS
      CALL Get(Tmp1,TrixFile('OrthoF',Args,I-ISCF))
      CALL Multiply(Tmp1,DIISCo%D(I0))
      CALL Add(F,Tmp1,E)
-     IF(I==1)THEN
+     IF(I==M)THEN
 !       Only filter the end product
         CALL Filter(F,E)
      ELSE
