@@ -15,8 +15,7 @@ MODULE HiCuThresholds
    CONTAINS
       SUBROUTINE SetLocalThresholds(Tau)
          REAL(DOUBLE) :: Tau
-         TauRel=Tau*1.D0  ! Determines integration error
-         TauRho=Tau*1.D0  ! Deterines error of density on the grid
+         TauRel=Tau*1.D-0  ! Determines integration error
+         TauRho=Tau*1.D-3  ! Deterines error of density on the grid
       END SUBROUTINE SetLocalThresholds
 END MODULE
-
