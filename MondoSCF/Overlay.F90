@@ -53,9 +53,14 @@ MODULE Overlay
          ELSE
             Command=TRIM(MONDO_Exec)//TRIM(Exec)
          ENDIF
-#ifdef PARALLEL 
+
+#ifdef PARALLEL
          IF(PRESENT(MPIRun_O))THEN
+#if !defined(MPI2) 
             CALL SerialSpawn(Command,CmndOpts,MPIRun_O=MPIRun_O,AbsPath_O=AbsPath_O)
+#else    
+            CALL MPISpawn(Command,CmndOpts)
+#endif
          ELSE
 #endif
             CALL SerialSpawn(Command,CmndOpts,AbsPath_O=AbsPath_O)
@@ -81,7 +86,7 @@ MODULE Overlay
             END FUNCTION Spawn
          END INTERFACE
 !--------------------------------------------------------------------         
-#ifdef PARALLEL 
+#if defined(PARALLEL) && !defined(MPI2) 
          IF(PRESENT(MPIRun_O))THEN
             IF(MPIRun_O)THEN
                IF(INDEX(MPI_INVOKE,'poe')/=0)THEN
@@ -98,7 +103,7 @@ MODULE Overlay
          ELSE
 #endif
             CmndLine=TRIM(Command)//Blnk//TRIM(CmndOpts)              
-#ifdef PARALLEL
+#if defined(PARALLEL) && !defined(MPI2)
          ENDIF
 #endif
          CALL LineToChars(CmndLine,ArgV)
@@ -116,7 +121,7 @@ MODULE Overlay
          DO I=1,NArg
             CmndLine=TRIM(CmndLine)//Blnk//TRIM(ArgV%C(I))
          ENDDO
-         IF(PrintFlags%Key>DEBUG_MEDIUM) &
+!        IF(PrintFlags%Key>DEBUG_MEDIUM) &
 !            WRITE(*,*)TRIM(CmndLine)
 !        Max number of characters in an arg
          MaxLen=0
@@ -159,7 +164,8 @@ MODULE Overlay
          CALL Delete(IChr)
          CALL Delete(ArgV)
       END SUBROUTINE SerialSpawn
-#ifdef defined(PARALLEL) && defined(MPI2)
+
+#if defined(PARALLEL) && defined(MPI2) 
 !--------------------------------------------------------------------------
       SUBROUTINE MPISpawn(Command,CmndOpts)
          CHARACTER(LEN=*),INTENT(IN)         :: Command,CmndOpts
@@ -169,15 +175,22 @@ MODULE Overlay
          CHARACTER(LEN=2*DEFAULT_CHR_LEN)    :: CmndLine
          CHARACTER(LEN=MPI_MAX_ERROR_STRING) :: ErrMsg
          CHARACTER(LEN=2*DEFAULT_CHR_LEN)    :: LogMssg
+         INTEGER                             :: NProcess,IErr,Child_Inter
 !------------------------------------------------------------------------         
          Status=SUCCEED
-         CmndLine=TRIM(Command)//CmndOpts
-         CALL InitMPI()
+!        CmndLine=TRIM(Command)//CmndOpts
+         CmndLine=CmndOpts
+!        CALL InitMPI()
+         NProcess = MSize()
+         IF(NProcess /= NPrc) THEN
+           write(*,*) 'ERROR in MPISpawn(): NProcess not equal to NPrc'
+         ENDIF
          IF(MyId==ROOT)THEN
             CALL LineToChars(CmndLine,ArgV,NULL_O=.TRUE.)
             NArg=SIZE(ArgV%C)
             CALL New(ErrCodes,NPrc)            
-            CALL MPI_COMM_SPAWN(Command,ArgV%C,NPrc,MPI_INFO_NULL,ROOT,ErrCodes%I)
+!           CALL MPI_COMM_SPAWN(Command,ArgV%C,NPrc,MPI_INFO_NULL,ROOT,ErrCodes%I)
+            CALL MPI_COMM_SPAWN(Command,ArgV%C,NPrc,MPI_INFO_NULL,ROOT,MPI_COMM_SELF,child_inter,ErrCodes%I,IErr)
             DO I=1,NPrc
                IF(ErrCodes%I(I)/=MPI_SUCCESS)THEN
                   CALL MPI_ERROR_STRING(ErrCodes%I(I),ErrMsg,LenMsg)
