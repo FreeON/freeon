@@ -26,7 +26,7 @@ CONTAINS
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
      CHARACTER(LEN=*)            :: HFileIn
      TYPE(GDIIS)                 :: GDIISCtrl  
-     INTEGER                     :: Print,iCLONE,iGEO
+     INTEGER                     :: Print,iCLONE,iGEO,I
      INTEGER                     :: HDFFileID,NatmsLoc,Memory
      TYPE(DBL_RNK2)              :: SRStruct,RefGrad,RefStruct,SRDispl
      !
@@ -141,11 +141,11 @@ CONTAINS
    SUBROUTINE CalcGDCoeffs(ErrorVects,Coeffs,PrintIn)
      REAL(DOUBLE),DIMENSION(:,:) :: ErrorVects
      REAL(DOUBLE),DIMENSION(:)   :: Coeffs
-     REAL(DOUBLE)                :: Sum,CondNum
+     REAL(DOUBLE)                :: CondNum
      INTEGER                     :: I,J,K,L,PrintIn
      INTEGER                     :: GDIISMemory,DimGDIIS
      TYPE(DBL_RNK2)              :: AMat,InvA
-     TYPE(DBL_VECT)              :: Vect,Scale
+     TYPE(DBL_VECT)              :: Vect
      LOGICAL                     :: Print
      !
      Print=PrintIn>=DEBUG_GEOP_MIN
@@ -160,30 +160,11 @@ CONTAINS
      !
      ! Equilibrate A
      !
-     CALL New(Scale,GDIISMemory)
-     DO I=1,GDIISMemory
-       Scale%D(I)=One/SQRT(AMat%D(I,I))
-     ENDDO
-     DO I=1,GDIISMemory
-       DO J=1,GDIISMemory
-         AMat%D(I,J)=Scale%D(I)*Scale%D(J)*AMat%D(I,J)
-       ENDDO
-     ENDDO
-     !
      ! Calculate SVD inverse of 'A'.     
      !
      CALL New(InvA,(/GDIISMemory,GDIISMemory/))
      CALL DIISInvMat(AMat%D,InvA%D,'Basic')
      !CALL DIISInvMat(AMat%D,InvA%D,'StpD')
-     !
-     ! Scale inverse back to original system
-     !
-     DO I=1,GDIISMemory
-       DO J=1,GDIISMemory
-         InvA%D(I,J)=Scale%D(I)*Scale%D(J)*InvA%D(I,J)
-       ENDDO
-     ENDDO
-     CALL Delete(Scale)
      !
      ! Calculate GDIIS coeffs 
      !
@@ -195,12 +176,7 @@ CONTAINS
      ! 
      ! Rescale coeffs to get a sum of One.
      !
-     Sum=Zero
-     DO I=1,GDIISMemory 
-       Sum=Sum+Coeffs(I)  
-     ENDDO
-     Sum=One/Sum
-     Coeffs=Sum*Coeffs
+     Coeffs=Coeffs/SUM(Coeffs)
      !
      CALL Delete(AMat)
      CALL Delete(InvA)
@@ -234,8 +210,9 @@ CONTAINS
      REAL(DOUBLE),DIMENSION(:,:) :: AMat,InvA
      REAL(DOUBLE)                :: CondNum,EigMax,TolAbs,EigAux   
      REAL(DOUBLE),OPTIONAL       :: Cond_O
-     INTEGER                     :: NDim,I,INFO
+     INTEGER                     :: NDim,I,J,K,INFO
      TYPE(DBL_RNK2)              :: EigVects,Aux,EigVals
+     TYPE(DBL_VECT)              :: Scale
      CHARACTER(LEN=*)            :: Char
      !
      CondNum=1.D-7
@@ -243,7 +220,18 @@ CONTAINS
      NDim=SIZE(AMat,1)
      CALL New(EigVects,(/NDim,NDim/))
      CALL New(Aux,(/NDim,NDim/))
+     CALL New(Scale,NDim)
      CALL New(EigVals,(/NDim,NDim/))
+     !
+     DO I=1,NDim
+       Scale%D(I)=One/SQRT(AMat(I,I))
+     ENDDO 
+     DO I=1,NDim
+       DO J=1,NDim
+         AMat(I,J)=AMat(I,J)*Scale%D(I)*Scale%D(J)
+       ENDDO 
+     ENDDO 
+     !
      EigVals%D=Zero
      CALL SetDSYEVWork(NDim)
        BLKVECT%D=AMat
@@ -258,17 +246,18 @@ CONTAINS
      !
      EigMax=Zero
      DO I=1,NDim ; EigMax=MAX(EigMax,ABS(EigVals%D(I,I))) ; ENDDO
-     TolAbs=CondNum*EigMax
+     TolAbs=CondNum
+    !TolAbs=CondNum*EigMax
      DO I=1,NDim
        IF(Char=='StpD') THEN
          EigVals%D=Zero
          EigVals%D(NDim,NDim)=One
        ELSE 
-         IF(ABS(EigVals%D(I,I))>TolAbs) THEN
-           EigVals%D(I,I)=One/EigVals%D(I,I) 
-         ELSE
-           EigVals%D(I,I)=Zero
-         ENDIF
+          IF(ABS(EigVals%D(I,I))>TolAbs) THEN
+            EigVals%D(I,I)=One/EigVals%D(I,I) 
+          ELSE
+            EigVals%D(I,I)=Zero
+          ENDIF
        ENDIF
      ENDDO
      CALL DGEMM_NNc(NDim,NDim,NDim,One,Zero,EigVects%D,&
@@ -276,6 +265,13 @@ CONTAINS
      CALL DGEMM_NTc(NDim,NDim,NDim,One,Zero,Aux%D, &
                     EigVects%D,InvA)
      !
+     DO I=1,NDim
+       DO J=1,NDim
+         InvA(I,J)=InvA(I,J)*Scale%D(I)*Scale%D(J)
+       ENDDO 
+     ENDDO 
+     !
+     CALL Delete(Scale)
      CALL Delete(Aux)
      CALL Delete(EigVals)
      CALL Delete(EigVects)

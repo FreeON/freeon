@@ -714,7 +714,7 @@ CONTAINS
 !
    SUBROUTINE GetIntCs(XYZ,AtNumIn,IntCs,NIntC,Refresh,SCRPath, &
                        CtrlCoord,CtrlConstr,ArchMem,IntC_Extra, &
-                       TOPS,Bond,AtmB,HFileIn_O,iCLONE_O,iGEO_O)
+                       TOPS,Bond,AtmB,PBC,HFileIn_O,iCLONE_O,iGEO_O)
      !
      ! This subroutine constructs the IntCs array, which holds
      ! definitions of internal coordinates to be used in the 
@@ -735,6 +735,7 @@ CONTAINS
      TYPE(INTC)                  :: IntC_Cart
      TYPE(BONDDATA)              :: Bond
      TYPE(ATOMBONDS)             :: AtmB
+     TYPE(PBCInfo)               :: PBC
      CHARACTER(LEN=*)            :: SCRPath
      TYPE(CoordCtrl)             :: CtrlCoord
      TYPE(Constr)                :: CtrlConstr
@@ -749,11 +750,13 @@ CONTAINS
      INTEGER                     :: I1,I2,I3,I4,NMax12
      INTEGER                     :: NStreGeOp,NBendGeOp
      INTEGER                     :: NLinBGeOp,NOutPGeOp,NTorsGeOp
-     TYPE(INT_VECT)              :: AtNum
+     TYPE(INT_VECT)              :: AtNum,AtNumRepl
      TYPE(INT_RNK2)              :: Top12
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
      TYPE(TOPOLOGY)              :: TOPS
      TYPE(IntCBox)               :: Box
+     TYPE(DBL_RNK2)              :: XYZRepl
+     TYPE(INT_VECT)              :: CellA,CellB,CellC,IEq
      !
      NatmsLoc=SIZE(XYZ,2)
      IF(AllocQ(IntCs%Alloc)) CALL Delete(IntCs)
@@ -767,15 +770,17 @@ CONTAINS
        AtNum%I(I)=INT(AtNumIn(I))
      ENDDO
      !
+     CALL PrepCells(XYZ,AtNum,PBC,XYZRepl,AtNumRepl,CellA,CellB,CellC,IEq)
+     !
      IF(Refresh==1) THEN !!! Total refresh
        IF(PRESENT(HFileIn_O).AND.PRESENT(iCLONE_O)) THEN
-         CALL DefineIntCoos(XYZ,AtNum%I,IntC_Bas,NIntC_Bas,CtrlCoord,&
-                            Bond,AtmB,TOPS,ArchMem_O=ArchMem, &
-                            HFileIn_O=HFileIn_O, &
-                            iCLONE_O=iCLONE_O,iGEO_O=iGEO_O)
+         CALL DefineIntCoos(XYZRepl%D,AtNumRepl%I,IntC_Bas,NIntC_Bas, &
+                            CtrlCoord,Bond,AtmB,TOPS,ArchMem_O=ArchMem,&
+                            HFileIn_O=HFileIn_O,iCLONE_O=iCLONE_O, &
+                            iGEO_O=iGEO_O)
        ELSE
-         CALL DefineIntCoos(XYZ,AtNum%I,IntC_Bas,NIntC_Bas,CtrlCoord,&
-                            Bond,AtmB,TOPS)
+         CALL DefineIntCoos(XYZRepl%D,AtNumRepl%I,IntC_Bas,NIntC_Bas, &
+                            CtrlCoord,Bond,AtmB,TOPS)
        ENDIF
      ELSE IF(Refresh==5) THEN !!! use only extra coords from input
        NIntC_Bas=0 
@@ -783,6 +788,16 @@ CONTAINS
      ELSE
        CALL Halt('Unknown Refresh option in GetIntCs') 
      ENDIF
+     !
+!continue_here with filtering of internal coordinates 
+!continue_here OR do filtering in DefineIntCoos
+     !
+     CALL Delete(CellA)
+     CALL Delete(CellB)
+     CALL Delete(CellC)
+     CALL Delete(IEq)
+     CALL Delete(XYZRepl)
+     CALL Delete(AtNumRepl)
      !
      ! Merge INTC arrays
      !
@@ -857,6 +872,79 @@ CONTAINS
      CALL Delete(AtNum)
     !CALL PrtIntCoords(IntCs,IntCs%Value%D,'GetIntC Internals')
    END SUBROUTINE GetIntCs
+!
+!-------------------------------------------------------------------
+!
+   SUBROUTINE PrepCells(XYZ,AtNum,PBC,XYZBig,AtNumRepl,CellA,CellB,CellC,IEq)
+     REAL(DOUBLE),DIMENSION(:,:) :: XYZ
+     TYPE(PBCInfo)               :: PBC
+     TYPE(INT_VECT)              :: CellA,CellB,CellC,IEq,AtNum,AtNumRepl
+     REAL(DOUBLE)                :: DL,LA,LB,LC
+     REAL(DOUBLE)                :: XTrans,YTrans,ZTrans
+     INTEGER                     :: NatmsLoc,I,J,II,NA,NB,NC
+     INTEGER                     :: NCells,IA,IB,IC
+     TYPE(DBL_RNK2)              :: XYZBig
+     !
+     NatmsLoc=SIZE(XYZ,2)
+     !
+     ! Grow a layer of 16 a.u. (appr. 8 A) around central cell
+     ! To be able to model far reaching internal coordinates
+     !
+     DL=16.D0
+     LA=DOT_PRODUCT(PBC%BoxShape%D(1,1:3),PBC%BoxShape%D(1,1:3))
+     LB=DOT_PRODUCT(PBC%BoxShape%D(2,1:3),PBC%BoxShape%D(2,1:3))
+     LC=DOT_PRODUCT(PBC%BoxShape%D(3,1:3),PBC%BoxShape%D(3,1:3))
+     IF(PBC%Dimen>0) THEN
+       NA=INT(DL/LA)+1
+     ELSE
+       NA=0
+     ENDIF
+     IF(PBC%Dimen>1) THEN
+       NB=INT(DL/LB)+1
+     ELSE
+       NB=0
+     ENDIF
+     IF(PBC%Dimen>2) THEN
+       NC=INT(DL/LC)+1
+     ELSE
+       NC=0
+     ENDIF
+     !
+     NCells=(2*NA+1)*(2*NB+1)*(2*NC+1)
+     CALL New(CellA,NCells*NatmsLoc)
+     CALL New(CellB,NCells*NatmsLoc)
+     CALL New(CellC,NCells*NatmsLoc)
+     CALL New(IEq,NCells*NatmsLoc)
+     CALL New(AtNumRepl,NCells*NatmsLoc)
+     CALL New(XYZBig,(/3,NCells*NatmsLoc/))
+!write(*,*) 'NA,NB,NC= ',NA,NB,NC  
+     !
+     II=0
+     DO IA=-NA,NA
+       DO IB=-NB,NB
+         DO IC=-NC,NC
+           DO I=1,NatmsLoc
+             XTrans=IA*PBC%BoxShape%D(1,1)+&
+                   IB*PBC%BoxShape%D(2,1)+IC*PBC%BoxShape%D(3,1)
+             YTrans=IA*PBC%BoxShape%D(1,2)+&
+                   IB*PBC%BoxShape%D(2,2)+IC*PBC%BoxShape%D(3,2)
+             ZTrans=IA*PBC%BoxShape%D(1,3)+&
+                   IB*PBC%BoxShape%D(2,3)+IC*PBC%BoxShape%D(3,3)
+             II=II+1
+             XYZBig%D(1,II)=XYZ(1,I)+XTrans
+             XYZBig%D(2,II)=XYZ(2,I)+YTrans
+             XYZBig%D(3,II)=XYZ(3,I)+ZTrans
+             CellA%I(II)=IA
+             CellB%I(II)=IB
+             CellC%I(II)=IC
+             IEq%I(II)=I ! equivalent atom from central cell
+             AtNumRepl%I(II)=AtNum%I(I) 
+           ENDDO
+         ENDDO
+       ENDDO
+     ENDDO
+     !
+   END SUBROUTINE PrepCells
 !
 !-------------------------------------------------------------------
 !
@@ -1834,7 +1922,7 @@ CONTAINS
      ! Now, project out translations from CartVect
      !
      SUM =DOT_PRODUCT(CartVect,CartVect)
-     IF(SQRT(SUM/DBLE(NCart)) > 1.D-14) THEN
+     IF(SQRT(SUM) > 1.D-12) THEN
        SUM1=DOT_PRODUCT(Tr1%D,CartVect)
          CartVect=CartVect-SUM1*Tr1%D
        SUM2=DOT_PRODUCT(Tr2%D,CartVect)
@@ -1926,7 +2014,7 @@ CONTAINS
          CALL DGEMM_NNc(3,3,1,One,Zero,Rot,V2,Vect%D(1:3))
          !
          SumM=DOT_PRODUCT((V1-Vect%D),(V1-Vect%D))
-         IF(SQRT(SumM)>1.D-12) THEN
+         IF(SumM>1.D-6) THEN
            SinPhi=-SinPhi
            Step=Step+1
            IF(Step > 2) THEN

@@ -64,7 +64,6 @@ CONTAINS
     DO iCLONE=GBeg,GEnd
        CALL PPrint(C%Geos%Clone(iCLONE),TRIM(C%Nams%GFile)//IntToChar(iCLONE),Geo,C%Opts%GeomPrint)
     ENDDO
-!!!
     CALL MergePrintClones(C%Geos,C%Nams,C%Opts,GBeg,GEnd)
     iBAS=C%Sets%NBSets
     IStart=iGEO
@@ -88,17 +87,15 @@ CONTAINS
              ! otherwise, it is the step number 
              gtmp=C%Geos%Clone(iCLONE)%Confg
              C%Geos%Clone%Confg=iCLONE+1
-             ! CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile,Geo,C%Opts%GeomPrint)
+            !CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile,Geo,C%Opts%GeomPrint)
              CALL PPrint(C%Geos%Clone(iCLONE),TRIM(C%Nams%GFile)//IntToChar(iCLONE),Geo,C%Opts%GeomPrint)
              C%Geos%Clone%Confg=gtmp
           ENDDO
-!!!!
        ELSE
           ! No transitions states, just good old downhill 
           IF(C%Opts%GeomPrint=='XSF') &
              CALL XSFPreamble(C%Geos%Clone(1)%Confg,C%Nams%GFile,Geo)
           DO iCLONE=1,C%Geos%Clones
-             ! CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile,Geo,C%Opts%GeomPrint)
              CALL PPrint(C%Geos%Clone(iCLONE),TRIM(C%Nams%GFile)//IntToChar(iCLONE),Geo,C%Opts%GeomPrint)
           ENDDO
        ENDIF
@@ -118,6 +115,7 @@ CONTAINS
        CALL MergePrintClones(C%Geos,C%Nams,C%Opts,GBeg,GEnd)
     ENDDO
   END SUBROUTINE SteepD
+  !
   !=====================================================================================
   !
   SUBROUTINE MergePrintClones(Geos,Nams,Opts,GBeg,GEnd)
@@ -139,7 +137,7 @@ CONTAINS
     CME2=CME2/DBLE(Geos%Clone(GBeg)%Natms)
     TR=CME2-CME1
     TR=TR/SQRT(DOT_PRODUCT(TR,TR))
-
+  
     ! find bounding box
     Geos%Clone(GBeg)%BndBox%D(1:3,1) = Geos%Clone(GBeg)%Carts%D(1:3,1)
     Geos%Clone(GBeg)%BndBox%D(1:3,2) = Geos%Clone(GBeg)%Carts%D(1:3,1)
@@ -149,7 +147,7 @@ CONTAINS
     ENDDO
     DIAG=Geos%Clone(GBeg)%BndBox%D(1:3,2)-Geos%Clone(GBeg)%BndBox%D(1:3,1)
     TR=TR*SQRT(DOT_PRODUCT(DIAG,DIAG))
-     
+ 
     GMMerge%Natms=NatmsMerge
     CALL New(GMMerge)
     M=0
@@ -166,7 +164,7 @@ CONTAINS
     CALL PPrint(GMMerge,TRIM(Nams%GFile)//'M',Geo,Opts%GeomPrint)
     CALL Delete(GMMerge)
   END SUBROUTINE MergePrintClones
-
+  !
   !=====================================================================================  
   SUBROUTINE GDicer(C)
     TYPE(Controls)         :: C
@@ -403,7 +401,7 @@ CONTAINS
     ENDDO
 !   Take some steps, more conservative if we are doing NEB ...
     IF(C%Opts%Grad==GRAD_TS_SEARCH_NEB)THEN
-       ! StepLength=0.5D0
+      !StepLength=0.5D0
        StepLength = C%Opts%RSL
        ! Take a step, any step
        DO iCLONE=1,C%Geos%Clones
@@ -650,10 +648,11 @@ CONTAINS
 !------------------------------------------------------------------
 !
    SUBROUTINE ModifyGeom(GOpt,XYZ,AtNum,IntCs,GradIn, &
-                  Bond,AtmB,Convgd,ETot,iGEO,iCLONE, &
+                  Bond,AtmB,Convgd,ETot,PBC,iGEO,iCLONE, &
                   SCRPath,PWDPath,DoNEB,Print,HFileIn)
      TYPE(GeomOpt)               :: GOpt
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ,GradIn
+     TYPE(PBCInfo)               :: PBC
      REAL(DOUBLE),DIMENSION(:)   :: AtNum
      TYPE(BONDDATA)              :: Bond
      TYPE(ATOMBONDS)             :: AtmB
@@ -692,7 +691,7 @@ CONTAINS
      IF(Refresh/=0) THEN
        CALL GetIntCs(XYZ,AtNum,IntCs,NIntC,Refresh,SCRPath, &
                      GOpt%CoordCtrl,GOpt%Constr,GOpt%GDIIS%MaxMem, &
-                     GOpt%ExtIntCs,TOPS,Bond,AtmB, &
+                     GOpt%ExtIntCs,TOPS,Bond,AtmB,PBC, &
                      HFileIn_O=HFileIn,iCLONE_O=iCLONE,iGEO_O=iGEO)
        IF(NIntC==0) CALL Halt('Molecule has dissociated,'// &
                     'optimizer has not found any internal coordinates.')
@@ -1266,8 +1265,8 @@ CONTAINS
      CALL OpenASCII(OutFile,Out)
        CALL ModifyGeom(GOpt,XYZNew%D,AtNumNew%D,GMLoc%IntCs,GradNew%D, &
                        GMLoc%Bond,GMLoc%AtmB,Convgd,GMLoc%Etotal, &
-                       iGEO,iCLONE,SCRPath,PWDPath, &
-                       DoNEB,Opts%PFlags%GeOp,Nams%HFile)
+                       GMLoc%PBC,iGEO,iCLONE,SCRPath, &
+                       PWDPath,DoNEB,Opts%PFlags%GeOp,Nams%HFile)
      CLOSE(Out,STATUS='KEEP')
      !--------------------------------------------
      !
@@ -1317,7 +1316,7 @@ CONTAINS
      IF(GOptimizer==GRAD_BiSect_OPT) THEN
        GD%MaxMem  = 7 
      ELSE
-       GD%MaxMem  = 3
+       GD%MaxMem  = 7
      ENDIF
      GD%On=.TRUE.
    END SUBROUTINE SetGDIIS
@@ -1517,23 +1516,34 @@ CONTAINS
 !
 !-------------------------------------------------------------------
 !
-   SUBROUTINE BackTrack(iBAS,iGEO,C,BPrev,BCur)
+   SUBROUTINE BackTrack(iBAS,iGEO,C,BPrev,BCur,DoLineS_O)
      ! Go over clones and do backtracking whenever necessary
      TYPE(Controls)   :: C
      INTEGER          :: iBAS,iGEO,iCLONE
+     INTEGER,DIMENSION(:):: BPrev,BCur
      INTEGER          :: NatmsLoc,NCart
      INTEGER          :: MaxBStep,IBStep
      CHARACTER(LEN=DCL):: chGEO
      TYPE(CRDS)       :: GMOld
-     LOGICAL          :: DoBackTrack
+     LOGICAL          :: DoBackTrack,DoLineS
+     LOGICAL,OPTIONAL :: DoLineS_O
      REAL(DOUBLE)     :: EOld,ENew,MeanDist
      TYPE(DBL_VECT)   :: DistVect1,DistVect2
-     INTEGER,DIMENSION(:) :: BPrev,BCur
      !
-     IF(.NOT.C%GOpt%GConvCrit%DoBackTr) THEN
-       RETURN
+   ! IF(.NOT.C%GOpt%GConvCrit%DoBackTr) THEN
+   !   RETURN
+   ! ENDIF
+     !
+     DoLineS=.FALSE.
+     IF(PRESENT(DoLineS_O)) DoLineS=DoLineS_O
+     IF(DoLineS) THEN
+       CALL Force(iBAS,iGEO,C%Nams,C%Opts,C%Stat, &
+                  C%Geos,C%Sets,C%MPIs)
      ENDIF
+     !
      MaxBStep=10
+     IF(DoLineS) MaxBStep=1
+     !
      DO iBStep=1,MaxBStep+1
        DoBackTrack=.FALSE.
        HDFFileID=OpenHDF(C%Nams%HFile)
@@ -1570,10 +1580,14 @@ CONTAINS
          !
          IF(DoBackTrack) THEN  
            ! do bisection
-           C%Geos%Clone(iCLONE)%Carts%D= &
-             (C%Geos%Clone(iCLONE)%Carts%D+GMOld%Carts%D)*Half
-           C%Geos%Clone(iCLONE)%AbCarts%D= &
-             (C%Geos%Clone(iCLONE)%AbCarts%D+GMOld%AbCarts%D)*Half
+           IF(DoLineS) THEN
+             CALL LineSearch(C%Geos%Clone(iCLONE),GMOld)
+           ELSE
+             C%Geos%Clone(iCLONE)%Carts%D= &
+               (C%Geos%Clone(iCLONE)%Carts%D+GMOld%Carts%D)*Half
+             C%Geos%Clone(iCLONE)%AbCarts%D= &
+               (C%Geos%Clone(iCLONE)%AbCarts%D+GMOld%AbCarts%D)*Half
+           ENDIF
          ENDIF
          CALL CloseHDF(HDFFileID)
        ENDDO
@@ -1589,10 +1603,10 @@ CONTAINS
            EXIT
          ENDIF
          !
-        !C%Stat%Previous%I(3)=iGEO-1
-        !C%Stat%Current%I(3)=iGEO
          C%Stat%Previous%I=BPrev
          C%Stat%Current%I=BCur
+        !C%Stat%Previous%I(3)=iGEO-1
+        !C%Stat%Current%I(3)=iGEO
          CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
          CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
          CALL SCF(iBAS,iGEO,C)
@@ -1607,6 +1621,129 @@ CONTAINS
      !
      CALL Delete(GMOld)
    END SUBROUTINE BackTrack
+!
+!-------------------------------------------------------------------
+!
+   SUBROUTINE LineSearch(GMNew,GMOld)
+     TYPE(CRDS)     :: GMNew,GMOld 
+     INTEGER        :: I,J,NCart,II
+     TYPE(DBL_VECT) :: DeltaX,Grad,PVect,VAux,XV1,XV2,PGrad
+     TYPE(DBL_RNK2) :: Mat,Aux,InvMat
+     REAL(DOUBLE)   :: GO,GN,DX2,DE,DX,DX3,DX4,X1,X2,X3,E0,E1,E2,E3,D0
+     REAL(DOUBLE)   :: DE2DX21,DE2DX22,Fact
+     LOGICAL        :: DoHalve
+     !
+     NCart=3*GMNew%Natms
+     CALL New(DeltaX,NCart)
+     CALL New(Grad,NCart)
+     CALL New(XV1,NCart)
+     CALL New(XV2,NCart)
+     CALL New(Mat,(/4,4/))
+     CALL New(Aux,(/4,4/))
+     CALL New(InvMat,(/4,4/))
+     CALL New(PVect,4)
+     CALL New(PGrad,4)
+     CALL New(VAux,4)
+     !
+     CALL CartRNK2ToCartRNK1(XV1%D,GMOld%AbCarts%D)
+     CALL CartRNK2ToCartRNK1(XV2%D,GMNew%AbCarts%D)
+     DeltaX%D=XV2%D-XV1%D
+     DX2=DOT_PRODUCT(DeltaX%D,DeltaX%D)
+     DX=SQRT(DX2)
+     DX3=DX*DX2
+     DX4=DX2*DX2
+     !
+     CALL CartRNK2ToCartRNK1(Grad%D,GMNew%Gradients%D)
+     GN=DOT_PRODUCT(Grad%D,DeltaX%D)/DX
+     CALL CartRNK2ToCartRNK1(Grad%D,GMOld%Gradients%D)
+     GO=DOT_PRODUCT(Grad%D,DeltaX%D)/DX
+     DE=GMNew%ETotal-GMOld%ETotal
+     !
+     Mat%D(1,1:4)=(/DX,DX2,DX3,DX4/)
+     Mat%D(2,1:4)=(/One,Zero,Zero,Zero/)
+     Mat%D(3,1:4)=(/One,Two*DX,3.D0*DX2,4.D0*DX3/)
+     Mat%D(4,1:4)=(/Zero,Two,Zero,Zero/)
+     DO II=1,2
+       PVect%D(1)=DE
+       PVect%D(2)=GO
+       PVect%D(3)=GN
+       PVect%D(4)=Zero
+       !
+       CALL DGEMM_TNc(4,4,4,One,Zero,Mat%D,Mat%D,Aux%D)
+       CALL DIISInvMat(Aux%D,InvMat%D,'Basic')
+       CALL DGEMM_TNc(4,4,1,One,Zero,Mat%D,PVect%D,VAux%D)
+       CALL DGEMM_NNc(4,4,1,One,Zero,InvMat%D,VAux%D,PVect%D)
+       !
+       PGrad%D(1)=PVect%D(1)
+       PGrad%D(2)=2.D0*PVect%D(2)
+       PGrad%D(3)=3.D0*PVect%D(3)
+       PGrad%D(4)=4.D0*PVect%D(4)
+       CALL CubicRoots(PGrad%D(1),PGrad%D(2),PGrad%D(3),PGrad%D(4), &
+                       X1,X2,X3)
+       !
+       ! Check second derivatives
+       !
+       DE2DX21=2.D0*PVect%D(2)
+       DE2DX22=2.D0*PVect%D(2)+6.D0*PVect%D(3)*DX+12.D0*PVect%D(4)*DX2
+       IF(DE2DX21>-1.D-10.AND.DE2DX22>-1.D-10) THEN
+         EXIT
+       ELSE IF(II<2) THEN
+         Mat%D(4,1:4)=(/Zero,Two,6.D0*DX,12.D0*DX2/)
+       ELSE
+         X1=-One ; X2=-One ; X3=-One
+       ENDIF
+     ENDDO
+     !
+     E1=GMOld%Etotal+PVect%D(1)*X1+PVect%D(2)*X1**2+ &
+        PVect%D(3)*X1**3+PVect%D(4)*X1**4
+     E2=GMOld%Etotal+PVect%D(1)*X2+PVect%D(2)*X2**2+ &
+        PVect%D(3)*X2**3+PVect%D(4)*X2**4
+     E3=GMOld%Etotal+PVect%D(1)*X3+PVect%D(2)*X3**2+ &
+        PVect%D(3)*X3**3+PVect%D(4)*X3**4
+     !
+     DoHalve=.TRUE.
+     E0=E1
+     IF(X1>Zero.AND.X1<DX) THEN
+       DoHalve=.FALSE. 
+       D0=X1
+       E0=E1
+     ENDIF
+     IF((X2>Zero.AND.X2<DX).AND.E2<E0) THEN
+       DoHalve=.FALSE. 
+       D0=X2
+       E0=E2
+     ENDIF
+     IF((X3>Zero.AND.X3<DX).AND.E3<E0) THEN
+       DoHalve=.FALSE. 
+       D0=X3
+       E0=E3
+     ENDIF
+     !
+     IF(DoHalve) THEN
+       GMNew%AbCarts%D=Half*(GMNew%AbCarts%D+GMOld%AbCarts%D)
+       GMNew%Carts%D=Half*(GMNew%Carts%D+GMOld%Carts%D)
+     ELSE
+       Fact=D0/DX
+       GMNew%AbCarts%D=GMOld%AbCarts%D+ &
+                       Fact*(GMNew%AbCarts%D-GMOld%AbCarts%D)
+       GMNew%Carts%D  =GMOld%Carts%D+   &
+                       Fact*(GMNew%Carts%D-GMOld%Carts%D)
+      !GMNew%ETotal=E0
+      !GMNew%Gradients%D=GMOld%Gradients%D+ &
+      !                Fact*(GMNew%Gradients%D-GMOld%Gradients%D)
+     ENDIF
+     !
+     CALL Delete(Grad)
+     CALL Delete(DeltaX)
+     CALL Delete(Mat)
+     CALL Delete(Aux)
+     CALL Delete(InvMat)
+     CALL Delete(PGrad)
+     CALL Delete(PVect)
+     CALL Delete(VAux)
+     CALL Delete(XV1)
+     CALL Delete(XV2)
+   END SUBROUTINE LineSearch
 !
 !-------------------------------------------------------------------
 !
