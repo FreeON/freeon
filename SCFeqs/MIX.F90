@@ -37,8 +37,8 @@ PROGRAM FockForce
   CALL Get(FnMns1,TrixFile('OrthoF',Args,-2),BCast_O=.FALSE.)
   ! First expand P_n=Theta[L*F_(n-2)+(1-L)*F_(n-1)] about L=0
   ! via E_n(L=0) ~ E_(n-1)(0)+Tr{ F_(n-2) PPrime(0) }
-  CALL PPrint(FnMns2,'F0',Unit_O=6)
-  CALL PPrint(FnMns1,'F1',Unit_O=6)
+  !CALL PPrint(FnMns2,'F0',Unit_O=6)
+  !CALL PPrint(FnMns1,'F1',Unit_O=6)
 
   Current(1)=Current(1)-1
   CALL Get(e0,'Etot',StatsToChar(Current))
@@ -51,7 +51,7 @@ PROGRAM FockForce
      CALL TC2R_DMP(P,PPrime,Tmp1,Tmp2,Tmp3,Ne,MM)
 !     IF(CnvrgChckPrim(Prog,I,Ne,MM,T,PPrim,PPrimOld,Tmp1,Tmp2)) EXIT
   ENDDO
-  CALL PPrint(PPrime,'PPrime',Unit_O=6)
+  !CALL PPrint(PPrime,'PPrime',Unit_O=6)
   e0p=Two*Trace(PPrime,FnMns2)
 
   ! Now switch around and expand P_n=Theta[L*F_(n-2)+(1-L)*F_(n-1)] about L=1
@@ -65,10 +65,10 @@ PROGRAM FockForce
      CALL TC2R_DMP(P,PPrime,Tmp1,Tmp2,Tmp3,Ne,MM)
 !     IF(CnvrgChckPrim(Prog,I,Ne,MM,T,PPrim,PPrimOld,Tmp1,Tmp2)) EXIT
   ENDDO
-  CALL PPrint(PPrime,'PPrime',Unit_O=6)
+  !CALL PPrint(PPrime,'PPrime',Unit_O=6)
   ! F_(n-1)
   CALL Get(FnMns1,TrixFile('OrthoF',Args,0),BCast_O=.FALSE.)
-  CALL PPrint(FnMns1,' F111 = ',Unit_O=6)
+  !CALL PPrint(FnMns1,' F111 = ',Unit_O=6)
   e1p=-Two*Trace(PPrime,FnMns1)
 
   WRITE(*,*)' e0 = ',e0
