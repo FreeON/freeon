@@ -31,20 +31,28 @@ CONTAINS
 !--------------------------------------------------------------------------
   FUNCTION SetAtomPair(GM,BS,I,J,Pair)
     LOGICAL                   :: SetAtomPair
-    INTEGER                   :: I,J,K
+    INTEGER                   :: I,J,K,N1,N2,N3,M1,M2,M3
     TYPE(AtomPair)            :: Pair
     TYPE(CRDS)                :: GM
     TYPE(BSet)                :: BS
 #ifdef PERIODIC
-    REAL(DOUBLE),DIMENSION(3) :: VecF,VecA
+    REAL(DOUBLE),DIMENSION(3) :: VecF,VecA,NRgn
 !
+    NRgn = 0
     DO K=1,3
-       VecF(K) = ABS(GM%BoxCarts%D(K,I)-GM%BoxCarts%D(K,J))
-       IF(GM%AutoW(K) .AND. VecF(K) > Half) VecF(K) = One-VecF(K)
+       IF(GM%AutoW(K)) NRgn(K) = 1
     ENDDO
 !
-    VecA = FracToAtom(GM,VecF) 
-    Pair%AB2 = VecA(1)**2+VecA(2)**2+VecA(3)**2
+    Pair%AB2 = 1.D16
+    DO N1 = -NRgn(1),NRgn(1)
+       DO N2 = -NRgn(2),NRgn(2)
+          DO N3 = -NRgn(3),NRgn(3)
+             VecF   = (/DBLE(N1),DBLE(N2),DBLE(N3)/)
+             VecA   = ABS(FracToAtom(GM,VecF)+GM%Carts%D(:,I)-GM%Carts%D(:,J))
+             Pair%AB2 = MIN(Pair%AB2,VecA(1)**2+VecA(2)**2+VecA(3)**2)
+          ENDDO
+       ENDDO
+    ENDDO
 #else
     Pair%AB2 = (GM%Carts%D(1,I)-GM%Carts%D(1,J))**2 &
              + (GM%Carts%D(2,I)-GM%Carts%D(2,J))**2 &
@@ -119,10 +127,8 @@ CONTAINS
     Radius = Radd+SQRT(AtomPairDistanceThreshold)
     CALL New_CellSet_Sphere(CS,GM%AutoW,GM%BoxShape%D,Radius)
 !
-    WRITE(*,*) 'THE NUMBER OF CELLS  in CS = ',CS%NCells  
-!
+    WRITE(*,*) 'THE NUMBER OF CELLS  in CS = ',CS%NCells 
   END SUBROUTINE SetCellNumber
-
 !----------------------------------------------------------------------------
 ! Convert from Atomic Coordinates  to Fractional Coordinates
 !----------------------------------------------------------------------------

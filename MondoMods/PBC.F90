@@ -212,9 +212,9 @@ MODULE CellSets
     IXM = 0
     IYM = 0
     IZM = 0
-    IF(AW(1)) IXM = 1+INT(Radius/SQRT(MAT(1,1)**2))
-    IF(AW(2)) IYM = 1+INT(Radius/SQRT(MAT(1,2)**2+MAT(2,2)**2))
-    IF(AW(3)) IZM = 1+INT(Radius/SQRT(MAT(1,3)**2+MAT(2,3)**2+MAT(3,3)**2))
+    IF(AW(1)) IXM = 2*(1+INT(Radius/SQRT(MAT(1,1)**2+MAT(2,1)**2+MAT(3,1)**2)))
+    IF(AW(2)) IYM = 2*(1+INT(Radius/SQRT(MAT(1,2)**2+MAT(2,2)**2+MAT(3,2)**2)))
+    IF(AW(3)) IZM = 2*(1+INT(Radius/SQRT(MAT(1,3)**2+MAT(2,3)**2+MAT(3,3)**2)))
 !
     NCELL = 0
     DO I=-IXM,IXM
