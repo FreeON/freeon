@@ -38,14 +38,15 @@ full:	all big
 serial:	small big
 #
 small:
+	MondoSCF Ice.inp           Ice.out           Ice.log   
+	MondoSCF Steam.inp         Steam.out         Steam.log   
 	MondoSCF Water.inp         Water.out         Water.log
+	MondoSCF Urea.inp          Urea.out          Urea.log
 	MondoSCF Biotin.inp        Biotin.out        Biotin.log    
 	MondoSCF Graphite.inp      Graphite.out      Graphite.log
-	MondoSCF PeroxideCycle.inp PeroxideCycle.out PeroxideCycle.log
+	MondoSCF Peroxide.inp      Peroxide.out      Peroxide.log
 	MondoSCF Histidine.inp     Histidine.out     Histidine.log 
-	MondoSCF PBCUrea.inp       PBCUrea.out       PBCUrea.log
 big:	
-	MondoSCF PBCWater.inp     PBCWater.out      PBCWater.log
 	MondoSCF Caffiene.inp     Caffiene.out      Caffine.log
 	MondoSCF Diamond.inp      Diamond.out       Diamond.log
 	MondoSCF BetaCarotene.inp BetaCarotene.out  BetaCarotene.log
@@ -62,7 +63,7 @@ pbs:
 	./sub_pbs Urea           1
 	./sub_pbs Biotin         1
 	./sub_pbs Graphite       1
-	./sub_pbs PeroxideCycle  1
+	./sub_pbs Peroxide       1
 	./sub_pbs Histidine      1
 	./sub_pbs Caffiene       1
 	./sub_pbs Vancomycin     1
@@ -70,24 +71,10 @@ pbs:
 	./sub_pbs Diamond        1
 	./sub_pbs Chlorophyll    1
 #
-#       Submit parallel validation suite to pbs queing system 
-#
-pbs_parallel:
-	chmod u+x sub_pbs
-	./sub_pbs Water         2
-	./sub_pbs Biotin        4
-	./sub_pbs Graphite      2
-	./sub_pbs Diamond       4
-	./sub_pbs PeroxideCycle 2
-	./sub_pbs Histidine     4
-	./sub_pbs Caffiene      4
-	./sub_pbs BetaCarotene  8
-	./sub_pbs Chlorophyll   8
-	./sub_pbs Vancomycin    8
-#
 release:  purge 
 	rm -rf BALA-PERIODIC
 	rm -rf MgO-PERIODIC
+	rm -rf CVS
 #
 purge:	clean 
 	rm -f $(REMOVESRCE)
