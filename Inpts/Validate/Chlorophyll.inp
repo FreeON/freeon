@@ -9,10 +9,10 @@ RBLYPxc/STO-3G -2349.76079 345
 Charge=0
 Multiplicity=1
 Guess=SuperPos
-SCFMethod=(RH,RH)
+SCFMethod=(SDMM,SDMM)
 BasisSets=(STO-3G,STO-3G)
 ModelChem=(BLYPxc,BLYPxc)
-Accuracy =(Loose,Tight)
+Accuracy =(Loose,Good)
 DebugAll =(MaxDebug)
 Geometry=(InAngstroms)
 <EndOptions>

@@ -9,7 +9,7 @@ RBLYPxc/6-31G**
 Charge=0
 Multiplicity=1
 Guess=SuperPos
-SCFMethod=(RH,RH,RH)
+SCFMethod=(SDMM,SDMM,SDMM)
 BasisSets=(STO-3G,STO-3G,,STO-3G)
 ModelChem=(BLYPxc,BLYPxc,BLYPxc)
 Accuracy =(Loose,Good,Tight)
