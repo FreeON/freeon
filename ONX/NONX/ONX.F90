@@ -35,6 +35,7 @@ PROGRAM ONX
   TYPE(DBuf)          :: DB        ! distribution buffers
   TYPE(IBuf)          :: IB        ! 2-e eval buffers
   TYPE(DSL)           :: SB        ! distribution pointers
+  TYPE(ISpc)          :: IS
   TYPE(IDrv)          :: Drv       ! VRR/contraction drivers
   TYPE(INT_VECT)      :: NameBuf,Stat
   TYPE(INT_RNK2)      :: SubInd
@@ -121,13 +122,13 @@ PROGRAM ONX
 !--------------------------------------------------------------------------------
 ! All set to compute the exchange matrix
 !--------------------------------------------------------------------------------
-  CALL ComputeKg(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,Drv,SubInd,BfnInd)
+  CALL ComputeKg(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,IS,Drv,SubInd,BfnInd)
   IF (ErrorCode/=eAOK) THEN
     CALL Delete(K)
     CALL Delete(SubInd)
     GOTO 1000
   END IF
-  CALL ComputeKe(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,Drv,SubInd,BfnInd)
+  CALL ComputeKe(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,IS,Drv,SubInd,BfnInd)
   IF (ErrorCode/=eAOK) THEN
     CALL Delete(K)
     CALL Delete(SubInd)

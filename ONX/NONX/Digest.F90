@@ -70,6 +70,7 @@ SUBROUTINE Digest(N,NA,NB,NC,ND,L1,L2,L3,L4,IntSwitch,K,W,D)
     END DO
     END DO
   CASE DEFAULT
+    WRITE(*,*) "IntSwitch=",IntSwitch
     CALL Halt(' Illegal IntSwitch in ONX:Digest')
   END SELECT
 END SUBROUTINE Digest

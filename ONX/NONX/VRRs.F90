@@ -1,10 +1,9 @@
-  SUBROUTINE VRRs(LBra,LKet,NVRR,Drv)
+  SUBROUTINE VRRs(LBra,LKet,Drv)
     USE DerivedTypes
     USE InOut
     IMPLICIT NONE
     TYPE(IDrv),INTENT(INOUT)   :: Drv
     INTEGER,INTENT(IN)         :: LBra,LKet
-    INTEGER,INTENT(INOUT)      :: NVRR
     INTEGER                    :: VRRSpace
     INTEGER                    :: LMAX=4      ! Maximum distribution angular
                                               ! symmetry that is included in 
@@ -18,5 +17,4 @@
     Drv%is = Drv%SLoc%I(1,Drv%id)
     Drv%nr = Drv%SLoc%I(2,Drv%id)
     Drv%ns = Drv%SLoc%I(3,Drv%id)
-    NVRR   = VRRSpace(LBra,LKet)
   END SUBROUTINE VRRs

@@ -1,4 +1,4 @@
-SUBROUTINE ComputeKe(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,Drv,SubInd,BfnInd)
+SUBROUTINE ComputeKe(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,IS,Drv,SubInd,BfnInd)
   USE DerivedTypes
   USE GlobalScalars
   USE PrettyPrint
@@ -25,6 +25,7 @@ SUBROUTINE ComputeKe(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,Drv,SubInd,BfnInd)
   TYPE(DBuf)                :: DB        ! ONX distribution buffers
   TYPE(IBuf)                :: IB        ! ONX 2-e eval buffers
   TYPE(DSL)                 :: SB        ! ONX distribution pointers
+  TYPE(ISpc)                :: IS        ! Array dimms for 2-e routines
   TYPE(IDrv)                :: Drv       ! VRR/contraction drivers
   TYPE(INT_RNK2)            :: SubInd    ! Index -> BCSR converter
   TYPE(INT_RNK2),INTENT(IN) :: BfnInd
@@ -39,11 +40,10 @@ SUBROUTINE ComputeKe(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,Drv,SubInd,BfnInd)
   INTEGER               :: AtC,KC,CFC,StartLC,StopLC,StrideC,IndexC,NBFC
   INTEGER               :: AtD,KD,CFD,StartLD,StopLD,StrideD,IndexD,NBFD
   INTEGER               :: ri,ci,iPtr,iCP,iCL
-  INTEGER               :: I,J,I0,I1,I2,ISL,NVRR,NInts
+  INTEGER               :: I,J,I0,I1,I2,ISL,NInts
   INTEGER               :: IBD,IBP,IKD,IKP
-  INTEGER               :: NB1,NB2,NK1,NK2
   INTEGER               :: NA,NB,NC,ND
-  INTEGER               :: L1,L2,L3,L4,IntSpace,IntCodeV,IntCodeC
+  INTEGER               :: IntSpace,IntCodeV,IntCodeC
   INTEGER               :: BraSwitch,KetSwitch,IntSwitch
   REAL(DOUBLE)          :: Dcd,SchB,SchK,Test
   REAL(DOUBLE)          :: ACx,ACy,ACz
@@ -72,18 +72,9 @@ SUBROUTINE ComputeKe(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,Drv,SubInd,BfnInd)
     LTot=LBra+LKet
 
     CALL GetIntCode(LTot,TBra,TKet,IntCodeV,IntCodeC,Explicit)
-    IF (Explicit) THEN
+    CALL GetIntSpace(TBra,TKet,LBra,LKet,IS)
 
-    NB1=IDmn(LBra)
-    NK1=IDmn(LKet)
-    L1=NFinal(ITypeC)
-    L2=NFinal(ITypeA)
-    L3=NFinal(ITypeD)
-    L4=NFinal(ITypeB)
-    NB2=L1*L2
-    NK2=L3*L4
-    NVRR=NB1*NK1
-    NInts=NB2*NK2
+    IF (Explicit) THEN
 
     I0=iT(MIN(ITypeC,ITypeA),MAX(ITypeC,ITypeA))
     I1=iT(MIN(ITypeD,ITypeB),MAX(ITypeD,ITypeB))
@@ -92,7 +83,7 @@ SUBROUTINE ComputeKe(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,Drv,SubInd,BfnInd)
     iCL=Drv%CDrv%I(iCP)           ! driver
 
     CALL GetGammaTable(LTot,IB)   ! Get the correct gamma fcn table
-    CALL VRRs(LBra,LKet,NVRR,Drv)      ! Get the pointers to the VRR table
+    CALL VRRs(LBra,LKet,Drv)      ! Get the pointers to the VRR table
 
   DO iCBra=1,DB%LenCC       ! Loop over contraction lengths on the Bra
     CBra=DB%CCode%I(iCBra)
@@ -140,21 +131,21 @@ SUBROUTINE ComputeKe(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,Drv,SubInd,BfnInd)
 
             IF (DB%DisBuf%D(iDBra+1)<0.0D0) THEN
               BraSwitch=1
-              NA=L1
-              NC=L2
+              NA=IS%L1
+              NC=IS%L2
             ELSE
               BraSwitch=0
-              NA=L2
-              NC=L1
+              NA=IS%L2
+              NC=IS%L1
             END IF
             IF (DB%DisBuf%D(iDKet+1)<0.0D0) THEN
               KetSwitch=1
-              NB=L3
-              ND=L4
+              NB=IS%L3
+              ND=IS%L4
             ELSE 
               KetSwitch=0
-              NB=L4
-              ND=L3
+              NB=IS%L4
+              ND=IS%L3
             END IF
             IntSwitch=10*BraSwitch+KetSwitch
 
@@ -184,7 +175,7 @@ SUBROUTINE ComputeKe(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,Drv,SubInd,BfnInd)
  
               IF (ISL>0) THEN
 
-                IntSpace=ISL*CBra*CKet*NVRR    ! WRONG HERE
+                IntSpace=ISL*CBra*CKet*IS%NVRR    ! WRONG HERE
                 IF (IntSpace.GT.IB%MAXI) THEN
                   ErrorCode=eMAXI
                   GOTO 9000
@@ -248,18 +239,18 @@ SUBROUTINE ComputeKe(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,Drv,SubInd,BfnInd)
                     CALL Halt(' Illegal integral type in ONX:ComputeKe')
                 END SELECT
 
-                xNERIs=xNERIs+FLOAT(L1*L2*L3*L4*ISL)
+                xNERIs=xNERIs+FLOAT(IS%L1*IS%L2*IS%L3*IS%L4*ISL)
 
                 IF (LKet>0) CALL HRRKet(IB%W1%D,DB%DisBuf%D,ISL,               &
-                                        SB%SLDis%I,NB1,NB1,TKet)
+                                        SB%SLDis%I,IS%NB1,IS%NB2,IS%NK1,TKet)
                 IF (LBra>0) THEN 
                   CALL HRRBra(IB%W1%D,IB%W2%D,ACx,ACy,ACz,ISL,                 &
-                              NB1,NB2,NK2,TBra)
-                  CALL Digest(ISL,NA,NB,NC,ND,L1,L2,L3,L4,                     &
+                              IS%NB1,IS%L1*IS%L2,IS%L3*IS%L4,TBra)
+                  CALL Digest(ISL,NA,NB,NC,ND,IS%L1,IS%L2,IS%L3,IS%L4,         &
                               IntSwitch,IB%W1%D,IB%W2%D,DA%D)
                   CALL Scatter(ISL,NA,NB,IndexA,SB,SubInd,DB,IB%W1%D,K)
                 ELSE
-                  CALL Digest(ISL,NA,NB,NC,ND,L1,L2,L3,L4,                     &
+                  CALL Digest(ISL,NA,NB,NC,ND,IS%L1,IS%L2,IS%L3,IS%L4,         &
                               IntSwitch,IB%W2%D,IB%W1%D,DA%D)
                   CALL Scatter(ISL,NA,NB,IndexA,SB,SubInd,DB,IB%W2%D,K)
                 END IF

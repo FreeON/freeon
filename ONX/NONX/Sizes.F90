@@ -65,7 +65,7 @@
     INTEGER,PARAMETER  :: VSpace(25) = (/   1,   4,   17,   24,   48, &
                                             4,  16,   68,   97,  197, &
                                            17,  68,  289,  408,  816, &
-                                           24,  80,  408,  493,  983, &
+                                           24,  88,  408,  526,  983, &
                                            48, 140,  816,  863, 1708  /)
     IF(LBra>4.OR.LKet>4) THEN
       CALL Halt('Illegal LBra or LKet in VRRSpace')

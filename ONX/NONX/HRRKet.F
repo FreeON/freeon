@@ -1,4 +1,4 @@
-      SUBROUTINE HRRKet(W,BD,N,SLDis,LenB,NumB,IType)
+      SUBROUTINE HRRKet(W,BD,N,SLDis,LenB,NumB,LenK,IType)
 c----------------------------------------------------------------------
 c  Input:
 c     W      Contracted (p|q) integrals (from VRR+contraction steps)
@@ -16,10 +16,10 @@ c  IType =  KType*100 + LType
 c
 c----------------------------------------------------------------------
       IMPLICIT NONE
-      INTEGER N,LenB,NumB,IType,NN
+      INTEGER N,LenB,NumB,LenK,IType,NN
       INTEGER I,Ioff
       INTEGER SLDis(N)
-      REAL*8 W(N*LenB,*)
+      REAL*8 W(N*LenB,LenK)
       REAL*8 T(36)
       REAL*8 BD(*),x,y,z
 

@@ -12,7 +12,7 @@ SUBROUTINE MemInit(DB,IB,SB,Drv,BSc,BSp)
   TYPE(BSet),INTENT(IN)    :: BSc,BSp
   INTEGER                  :: LR
 
-  write(*,*) "In MemInit: ",ErrorCode
+!  write(*,*) "In MemInit: ",ErrorCode
 
   IF (ErrorCode==eInit) THEN
     DB%MAXDis  = 1000
