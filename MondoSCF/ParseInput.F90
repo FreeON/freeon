@@ -39,14 +39,22 @@ MODULE ParseInPut
          CHARACTER (LEN=DEFAULT_CHR_LEN) :: OPLS_DATABASE,MM_COORDS,MM_SEQ
 !
          TYPE(SCFControls), INTENT(INOUT) :: Ctrl
+logical :: opened
 !
 !        Read comand line, environement variables, create file names, init files etc
-         CALL ParseCmndLine(Ctrl) !!! This opens HDF for main program
+         CALL ParseCmndLine(Ctrl) 
+!
+         CALL OpenHDF(InfFile)
+         CALL OpenASCII(InpFile,Inp)
+         CALL OpenASCII(OutFile,Out)
+!
+! Read in the accuracies requested
+!
+         Call ParseAcc(Ctrl)
+!
 #ifdef MMech
          CALL ParseMech(Ctrl)
-         CALL OpenHDF(InfFile)
          Call InitMMech()
-         CALL CloseHDF()
 #endif
          CALL ParseGrad(Ctrl)
 #ifdef MMech
@@ -69,8 +77,12 @@ MODULE ParseInPut
            CALL ParseMM(Ctrl)
          EndIf
 #endif
-         ! Read in the accuracies requested
-         Call ParseAcc(Ctrl)
+!
+      CALL ParseThresholds(Ctrl)
+!
+      CLOSE(Out,STATUS='KEEP')
+      CLOSE(Inp,STATUS='KEEP')
+      CALL CloseHDF()
 !
       END SUBROUTINE ParseInp
 !============================================================================
@@ -277,8 +289,7 @@ MODULE ParseInPut
 !
          CALL CloseHDF()
          CALL Delete(Args)
-
-
+!
          IF(Ctrl%Rest)THEN
             CALL New(Stat,3)
             CALL OpenHDF(Ctrl%OldInfo)
@@ -299,9 +310,8 @@ MODULE ParseInPut
         CHARACTER(LEN=BASESET_CHR_LEN)   :: BName   
         CHARACTER(LEN=2*DEFAULT_CHR_LEN) :: Mssg
 !----------------------------------------------------------------------------
-        ! Open inPut file
-        CALL OpenASCII(OutFile,Out)
-        CALL PrintProtectL(Out)
+!       CALL PrintProtectL(Out)
+!       CALL OpenASCII(OutFile,Out)
         WRITE(Out,*)'Current HDF file :: ',TRIM(Ctrl%Info)
         IF(Ctrl%Rest)THEN
            WRITE(Out,*)'Restart HDF file :: ',TRIM(Ctrl%OldInfo)
@@ -312,6 +322,7 @@ MODULE ParseInPut
            CALL Get(RestModl,'ModelChemistry',Cur)
            CALL Get(BName,'bsetname',Cur)
            CALL CloseHDF()
+           CALL OpenHDF(InfFile)
            Cur=IntToChar(Ctrl%Previous(3)) 
            Mssg='Restart using '//TRIM(BName)//'/'//TRIM(FunctionalName(RestModl)) &
                 //' density and coordinates from previous geometry #'//TRIM(Cur)
@@ -320,7 +331,6 @@ MODULE ParseInPut
         WRITE(Out,*)
         ! Print the accuracy, method and model chemistry for each basis set
         WRITE(Out,*)'PROGRAM OF CALCULATIONS:',Rtrn
-        CALL OpenHDF(InfFile)
         DO I=1,Ctrl%NSet
 !
            IF(Ctrl%AccL(I)==1)THEN
@@ -367,9 +377,8 @@ MODULE ParseInPut
         ENDIF
 #endif
         ENDDO
-        CALL CloseHDF()
-        CALL PrintProtectR(Out)
-        CLOSE(UNIT=Out,STATUS='KEEP')
+!   CALL CloseHDF() !!!!!!!! leave HDF open for main program
+!       CALL PrintProtectR(Out)
 !
       END SUBROUTINE ParsePrint
 !============================================================================
@@ -379,10 +388,6 @@ MODULE ParseInPut
          TYPE(SCFControls)          :: Ctrl
          TYPE(TOLS)                 :: Thrsh ! Thresholds
 !----------------------------------------------------------------------------
-!        Open info file
-         CALL OpenHDF(InfFile)
-!        Open inPut file
-         CALL OpenASCII(InpFile,Inp) 
 !
 !        Parse <OPTIONS.SCF>
 !
@@ -521,8 +526,6 @@ MODULE ParseInPut
             CALL Put(Ctrl%Model(I),'ModelChemistry',Tag_O=IntToChar(I))
          ENDDO
 !!----------------------------------------------------------------------------
-         CLOSE(UNIT=Inp,STATUS='KEEP')
-         CALL CloseHDF()
       END SUBROUTINE ParseMethods
 !============================================================================
 !     Parse the Geometry Variable
@@ -534,6 +537,7 @@ MODULE ParseInPut
          LOGICAL                         :: ReOrder,HilbertOrder
          CHARACTER(LEN=2)                :: At
          CHARACTER(LEN=DEFAULT_CHR_LEN)  :: Line
+logical :: opened
 !----------------------------------------------------------------------------
          ! If restart, use previous geometry
          IF(Ctrl%Rest)THEN
@@ -543,15 +547,11 @@ MODULE ParseInPut
             CALL CloseHDF()
             CALL OpenHDF(InfFile)
             CALL Put(GM,Tag_O="1")
-            CALL CloseHDF()
+!!!    CALL CloseHDF() !!!!!! leave HDF open for main program
             NAtoms=GM%NAtms
             CALL Delete(GM)
             RETURN
          ENDIF
-         ! Open infofile
-         CALL OpenHDF(InfFile)
-!        Open inPut file for parsing
-         CALL OpenASCII(InpFile,Inp)
 !----------------------------------------------------------------------------
 !        Parse <OPTIONS> for <GEOMETRY> keys 
 !
@@ -616,9 +616,6 @@ MODULE ParseInPut
             CALL ParseCoordinates_MONDO(Ctrl,GM)
          ENDIF
 !
-         CLOSE(UNIT=Inp,STATUS='KEEP')
-         CALL CloseHDF()
-!  
       END SUBROUTINE ParseGeometry
 !---------------------------------------------------------------------------- 
 !
@@ -633,6 +630,7 @@ MODULE ParseInPut
          CHARACTER(LEN=2)                :: At
          CHARACTER(LEN=DEFAULT_CHR_LEN)  :: Line, LineLowCase
          LOGICAL                         :: LastConfig
+logical :: opened
 !---------------------------------------------------------------------------- 
 !
 !        Find number of atoms and atom types
@@ -706,7 +704,10 @@ MODULE ParseInPut
 !           OutPut the coordinates
             CALL Put(GM,Tag_O=TRIM(IntToChar(NumGeom)))
 !           Print the coordinates
-            IF(PrintFlags%Key>DEBUG_NONE) CALL PPrint(GM)
+            IF(PrintFlags%Key>DEBUG_NONE) THEN
+              CALL PPrint(GM,Filename_O=OutFile,Unit_O=Out)
+              CALL OpenASCII(OutFile,Out)
+            ENDIF
 !            CALL PPrint(GM,'Graphite_98.xyz',6,'XYZ')
 !            IF(.TRUE.) STOP
 !           Exit 
@@ -726,7 +727,6 @@ MODULE ParseInPut
 !---------------------------------------------------------------------------- 
 !        Finish up
          CALL Delete(GM)
-         CLOSE(UNIT=Inp,STATUS='KEEP') 
          CALL Put(Ctrl%NGeom,'nconfig') 
          CALL PPrint(MemStats,'ParseGeometry')
          RETURN
@@ -752,7 +752,6 @@ MODULE ParseInPut
 !---------------------------------------------------------------------------- 
 !        Find number of atoms and atom types
 !
-         CALL OpenHDF(InfFile)
          CALL Align(BEGIN_GEOMETRY,Inp)
          READ(Inp,DEFAULT_CHR_FMT,END=1)Line
          READ(Inp,DEFAULT_CHR_FMT,END=1)Line
@@ -835,9 +834,7 @@ MODULE ParseInPut
 !---------------------------------------------------------------------------- 
 !        Finish up
          CALL Delete(GM)
-         CLOSE(UNIT=Inp,STATUS='KEEP')
          CALL Put(Ctrl%NGeom,'nconfig')
-         CALL CloseHDF()
          CALL PPrint(MemStats,'ParseGeometry')
          RETURN
        1 CALL Halt('While parsing '//TRIM(InpFile)//', failed to find '     &
@@ -860,7 +857,6 @@ MODULE ParseInPut
 !---------------------------------------------------------------------------- 
 !        Find number of atoms and atom types
 !
-         CALL OpenHDF(InfFile)
          CALL Align(BEGIN_GEOMETRY,Inp)
          NAtoms=0
          DO 
@@ -938,9 +934,7 @@ MODULE ParseInPut
 !           ComPute nuclear-nuclear repulsion energy
 !            GM%ENucN=ENukeNuke(GM)
 !           OutPut the coordinates
-!            CALL OpenASCII(OutFile,Out)
 !            CALL PPrint(GM)            
-!            CLOSE(Out)
             CALL Put(GM,Tag_O=IntToChar(Ctrl%NGeom))
             CALL Put(Ctrl%NGeom,'NumberOfGeometries')
          ENDDO
@@ -950,9 +944,7 @@ MODULE ParseInPut
 !
          CALL Delete(GM)
          CALL Delete(Chars)
-         CLOSE(UNIT=Inp,STATUS='KEEP')
          CALL Put(Ctrl%NGeom,'nconfig')
-         CALL CloseHDF()
          CALL PPrint(MemStats,'ParseGeometry')
          RETURN
 1        CALL Halt('While parsing '//TRIM(InpFile)//', failed to find '     &
@@ -1074,8 +1066,6 @@ MODULE ParseInPut
                             /(GM%PBC%BoxShape(1,1)*GM%PBC%BoxShape(2,2)*GM%PBC%BoxShape(3,3))
         GM%PBC%InvBoxSh(2,3)=-GM%PBC%BoxShape(2,3)/(GM%PBC%BoxShape(2,2)*GM%PBC%BoxShape(3,3))
         GM%PBC%InvBoxSh(3,3)=One/GM%PBC%BoxShape(3,3)
-!
-!     CALL CloseHDF()
 !
       END SUBROUTINE ParsePeriodic_MONDO
 !============================================================================
@@ -1433,10 +1423,7 @@ MODULE ParseInPut
          INTEGER                               :: I,J,K,L,N,NS,NP,NC,NK, &
                                                   MinL,MaxL,ISet,KFound
 !----------------------------------------------------------------------------
-!        Open infofile
-         CALL OpenHDF(InfFile)
 !        Parse basis sets from inPut file
-         CALL OpenASCII(InpFile,Inp) 
 !        Parse <OPTIONS.BASIS_SETS>
          Ctrl%NSet=0
          Base(:)%BType=0
@@ -1449,7 +1436,6 @@ MODULE ParseInPut
                ENDDO
             ENDIF       
          ENDDO
-         CLOSE(UNIT=Inp,STATUS='KEEP')
 !
          IF(Ctrl%NSet==0)CALL Halt('<'//TRIM(BASIS_SETS)  &
            //'> keyword not found in '//TRIM(InpFile))  
@@ -1605,7 +1591,6 @@ MODULE ParseInPut
          CALL Put(Ctrl%NSet,'NumberOfSets')
          IF(PrintFlags%Key==DEBUG_MaxIMUM)  &
             CALL PPrint(MemStats,'ParseBaseSets')
-         CALL CloseHDF()
       END SUBROUTINE ParseBaseSets
 !============================================================================
       SUBROUTINE NormalizeBaseSets(A,B)
@@ -1744,10 +1729,6 @@ MODULE ParseInPut
 !
         REAL(DOUBLE) :: SUM_OLD,XTrans,YTrans,ZTrans
         INTEGER :: IA,IB,IC,IAtTrans,IAtOrig
-!
-        CALL OpenASCII(OutFile,Out)
-        CALL OpenASCII(InpFile,Inp)
-        CALL OpenHDF(Ctrl%Info)
 !
           CALL New(Stat,3)
           Stat%I=Ctrl%Current
@@ -2051,74 +2032,7 @@ MODULE ParseInPut
           CALL Delete(Active_Torsion)
           CALL Delete(Active_OutOfPlane)
 !
-! test coulomb energy
-!
-!       SUM=zero
-!     Do i=1,MM_NATOMS
-!     Do j=i+1,MM_NATOMS
-!       DX=GM_MM%Carts%D(1,i)-GM_MM%Carts%D(1,j)
-!       DY=GM_MM%Carts%D(2,i)-GM_MM%Carts%D(2,j)
-!       DZ=GM_MM%Carts%D(3,i)-GM_MM%Carts%D(3,j)
-!       DD=SQRT(DX**2+DY**2+DZ**2) !!!!*AngstromsToAU  
-!       SUM=SUM+GM_MM%AtNum%D(i)*GM_MM%AtNum%D(j)/DD
-!     enddo
-!     enddo
-!       write(*,*) 'exact coulomb energy= ',sum 
-!       write(out,*) 'exact coulomb energy= ',sum 
-!
-! Test periodic Coulomb energy by O(N2) scheme
-!
-!    IF(PBC_On) THEN
-!!
-!    SUM=Zero
-!!
-!    DO I=1,GM_MM%Natms
-!    DO J=I+1,GM_MM%Natms
-!      DX=GM_MM%Carts%D(1,I)-GM_MM%Carts%D(1,J)
-!      DY=GM_MM%Carts%D(2,I)-GM_MM%Carts%D(2,J)
-!      DZ=GM_MM%Carts%D(3,I)-GM_MM%Carts%D(3,J)
-!      DD=SQRT(DX**2+DY**2+DZ**2) !!!!*AngstromsToAU  
-!      SUM=SUM+GM_MM%AtNum%D(I)*GM_MM%AtNum%D(J)/DD
-!    ENDDO
-!    ENDDO
-!    SUM=Two*SUM
-!
-!! DO I=1,10000 !!! number of 'layers' around elementary cell
-!  DO I=200,200 !!! number of 'layers' around elementary cell
-!    SUM_OLD=SUM
-!
-! translate along 'a' axis, given by BoxShape
-!
-!    DO IA=-I,I
-!    DO IB=-I,I
-!    DO IC=-I,I
-!IF(IA==0.AND.IB==0.AND.IC==0) CYCLE
-! 111 format('test vector= ',3F15.6)
-!      DO IAtTrans=1,GM_MM%Natms
-!        XTrans=GM_MM%Carts%D(1,IAtTrans)+IA*GM_MM%PBC%BoxShape(1,1)+IB*GM_MM%PBC%BoxShape(2,1)+IC*GM_MM%PBC%BoxShape(3,1)
-!        YTrans=GM_MM%Carts%D(2,IAtTrans)+IA*GM_MM%PBC%BoxShape(1,2)+IB*GM_MM%PBC%BoxShape(2,2)+IC*GM_MM%PBC%BoxShape(3,2)
-!        ZTrans=GM_MM%Carts%D(3,IAtTrans)+IA*GM_MM%PBC%BoxShape(1,3)+IB*GM_MM%PBC%BoxShape(2,3)+IC*GM_MM%PBC%BoxShape(3,3)
-!      DO IAtOrig=1,GM_MM%Natms
-!        DX=GM_MM%Carts%D(1,IAtOrig)-XTrans
-!        DY=GM_MM%Carts%D(2,IAtOrig)-YTrans
-!        DZ=GM_MM%Carts%D(3,IAtOrig)-ZTrans
-!        DD=SQRT(DX**2+DY**2+DZ**2) !!!!*AngstromsToAU  
-!        SUM=SUM+GM_MM%AtNum%D(IAtOrig)*GM_MM%AtNum%D(IAtTrans)/DD
-!      ENDDO
-!      ENDDO
-!    ENDDO
-!    ENDDO
-!    ENDDO
-!!
-!   ENDDO
-!
-!   ENDIF !!!! PBC_On
-!
       CALL Delete(GM_MM)
-!
-      CALL CloseHDF()
-      CLOSE(UNIT=Out,STATUS='KEEP')
-      CLOSE(UNIT=Inp,STATUS='KEEP')
 !
       END SUBROUTINE ParseMM
 #endif
@@ -2130,14 +2044,8 @@ MODULE ParseInPut
       SUBROUTINE ParseMech(Ctrl)
          TYPE(SCFControls)          :: Ctrl
 !----------------------------------------------------------------------------
-!        Open info file
-         CALL OpenHDF(InfFile)
-!        Open inPut file
-         CALL OpenASCII(InpFile,Inp) 
 !
 !        Parse <OPTIONS> for QM_MM
-!
-         CALL OpenASCII(InpFile,Inp)
 !
          Ctrl%Mechanics(1) = .false.
          Ctrl%Mechanics(2) = .true.  !!!! default is QM 
@@ -2155,9 +2063,6 @@ MODULE ParseInPut
         CALL Put(Ctrl%Mechanics(1),'Ctrl_Mechanics1')
         CALL Put(Ctrl%Mechanics(2),'Ctrl_Mechanics2')
 !
-        CALL CLOSEHDF()
-        CLOSE(UNIT=Inp,STATUS='KEEP')
-!
       END SUBROUTINE ParseMech
 #endif
 !---------------------------------------------------------------------------- 
@@ -2165,10 +2070,6 @@ MODULE ParseInPut
          TYPE(SCFControls)          :: Ctrl
          TYPE(TOLS)                 :: Thrsh ! Thresholds
 !----------------------------------------------------------------------------
-!        Open info file
-         CALL OpenHDF(InfFile)
-!        Open inPut file
-         CALL OpenASCII(InpFile,Inp) 
 !        Parse <OPTIONS> for <Grad=>
 !     
          Ctrl%CoordType=CoordType_PrimInt !!!default coordinate type
@@ -2221,8 +2122,6 @@ MODULE ParseInPut
                Ctrl%NGeom=500
             ENDIF
          ENDIF
-        CALL CLOSEHDF()
-        CLOSE(UNIT=Inp,STATUS='KEEP')
 !
      END SUBROUTINE PARSEGRAD
 !
@@ -2294,46 +2193,12 @@ MODULE ParseInPut
 !============================================================================
 !     Parse Accuracy for MM
 !============================================================================
-      SUBROUTINE ParseAcc(Ctrl)
+      SUBROUTINE ParseThresholds(Ctrl)
          TYPE(SCFControls)          :: Ctrl
          TYPE(TOLS)                 :: Thrsh ! Thresholds
 !----------------------------------------------------------------------------
-!        Open info file
-         CALL OpenHDF(InfFile)
-!        Open inPut file
-         CALL OpenASCII(InpFile,Inp) 
 !
-!        Parse <OPTIONS.ACCURACY> 
-!
-         Ctrl%AccL=2 ! Default is "good"    
-         NOpts=0
-!
-         IF(OptKeyLocQ(Inp,ACCURACY_OPTION,ACCURACY_CHEEZY,MaxSets,NLoc,Loc))THEN
-            NOpts=NOpts+NLoc
-            DO ILoc=1,NLoc; Ctrl%AccL(Loc(ILoc))=1; ENDDO
-         ENDIF
-         IF(OptKeyLocQ(Inp,ACCURACY_OPTION,ACCURACY_GOOD,MaxSets,NLoc,Loc))THEN
-            NOpts=NOpts+NLoc
-            DO ILoc=1,NLoc; Ctrl%AccL(Loc(ILoc))=2; ENDDO
-         ENDIF
-         IF(OptKeyLocQ(Inp,ACCURACY_OPTION,ACCURACY_TIGHT,MaxSets,NLoc,Loc))THEN
-            NOpts=NOpts+NLoc
-            DO ILoc=1,NLoc; Ctrl%AccL(Loc(ILoc))=3; ENDDO
-         ENDIF
-         IF(OptKeyLocQ(Inp,ACCURACY_OPTION,ACCURACY_RETENTIVE,MaxSets,NLoc,Loc))THEN
-            NOpts=NOpts+NLoc
-            DO ILoc=1,NLoc; Ctrl%AccL(Loc(ILoc))=4; ENDDO
-         ENDIF
-#ifdef MMech
-         IF(HasQM()) THEN
-#endif        
-           IF(NOpts>1.AND.NOpts/=Ctrl%NSet) &
-              CALL MondoHalt(PRSE_ERROR,'Number of '//ACCURACY_OPTION &
-                           //' options does not match number of Basis sets.')
-#ifdef MMech
-         ENDIF
-#endif        
-!        Set thresholds
+!        Parse <OPTIONS.THRESHOLDS> 
 !
 #ifdef MMech
 !
@@ -2392,10 +2257,7 @@ MODULE ParseInPut
          ENDIF !!! MMonly
 #endif
 !
-!        Close files
-         CLOSE(UNIT=Inp,STATUS='KEEP')
-         CALL CloseHDF()
-      END SUBROUTINE ParseAcc
+      END SUBROUTINE ParseThresholds
 !----------------------------------------------------------
 #ifdef MMech
       SUBROUTINE ParseIntCoo(Ctrl)
@@ -2416,19 +2278,12 @@ MODULE ParseInPut
       INTEGER :: I1,I2,J,NIntC_Extra
       REAL(DOUBLE) :: V
 !
-      CALL OpenASCII(InpFile,Inp)
-      CALL OpenASCII(OutFile,Out)
-      CALL OpenHDF(InfFile)
-!
 ! Find extra internal coordinates and constraints
 !
         NIntC_Extra=0
 !
       IF(.NOT.FindMixedCaseKey('BEGIN_ADD_INTERNALS',Inp)) THEN
         CALL Put(NIntC_Extra,'NIntC_Extra')
-        CALL CloseHDF()
-        Close(Inp)
-        Close(Out)
         RETURN
       ENDIF
 !
@@ -2454,9 +2309,6 @@ MODULE ParseInPut
 !
       IF(NIntC_Extra==0) THEN
         CALL Put(NIntC_Extra,'NIntC_Extra')
-        CALL CloseHDF()
-        Close(Inp)
-        Close(Out)
         RETURN
       ENDIF
 !
@@ -2587,9 +2439,6 @@ READ(LineLowCase,*) CHAR,IntC_Extra%ATOMS(NIntC_Extra,1)
 200   format(A5,2X,4I4,F12.6,L6)
 !
       CALL Delete(IntC_Extra)
-      CALL CloseHDF()
-      Close(Inp)
-      Close(Out)
 !
       END SUBROUTINE ParseIntCoo
 #endif
@@ -2661,9 +2510,7 @@ SUBROUTINE ParsePeriodic(Ctrl,GMLoc)
          ELSEIF(OptKeyQ(Inp,PBOUNDRY,ATOMW_OFF)) THEN
             GMLoc%PBC%AtomW=.FALSE.
          ELSE
-            CALL OpenASCII(OutFile,Out)
             WRITE(Out,*) '** Atom-Wrap at default value => (AtomWrap-Off) **'
-            CLOSE(UNIT=Out,STATUS='KEEP')
             GMLoc%PBC%AtomW=.FALSE.
          ENDIF
 !----------------------------------------------------------------------------
@@ -2674,9 +2521,7 @@ SUBROUTINE ParsePeriodic(Ctrl,GMLoc)
          ELSEIF(OptKeyQ(Inp,PBOUNDRY,LVF_ANG)) THEN
             GMLoc%PBC%InVecForm=.FALSE.
          ELSE
-            CALL OpenASCII(OutFile,Out)
             WRITE(Out,*) '** Lattice Vector Format at default value => (Vector Format) **'
-            CLOSE(UNIT=Out,STATUS='KEEP')
             GMLoc%PBC%InVecForm=.TRUE.
          ENDIF
 !
@@ -2688,9 +2533,7 @@ SUBROUTINE ParsePeriodic(Ctrl,GMLoc)
          ELSEIF (OptKeyQ(Inp,PBOUNDRY,CRT_FRAC)) THEN
             GMLoc%PBC%InAtomCrd=.FALSE.
          ELSE
-            CALL OpenASCII(OutFile,Out)
             WRITE(Out,*) '** Coodinate Format at default value => (Atomic Coord) **'
-            CLOSE(UNIT=Out,STATUS='KEEP')
             GMLoc%PBC%InAtomCrd=.TRUE.
          ENDIF
 !
@@ -2785,5 +2628,45 @@ END SUBROUTINE ParsePeriodic
 #endif
 !
     END SUBROUTINE ConvertCoords
+!
+!-------------------------------------------------------------
+!
+      SUBROUTINE ParseAcc(Ctrl)
+         TYPE(SCFControls)          :: Ctrl
+         TYPE(TOLS)                 :: Thrsh ! Thresholds
+!----------------------------------------------------------------------------
+!
+!        Parse <OPTIONS.ACCURACY> 
+!
+         Ctrl%AccL=2 ! Default is "good"    
+         NOpts=0
+!
+         IF(OptKeyLocQ(Inp,ACCURACY_OPTION,ACCURACY_CHEEZY,MaxSets,NLoc,Loc))THEN
+            NOpts=NOpts+NLoc
+            DO ILoc=1,NLoc; Ctrl%AccL(Loc(ILoc))=1; ENDDO
+         ENDIF
+         IF(OptKeyLocQ(Inp,ACCURACY_OPTION,ACCURACY_GOOD,MaxSets,NLoc,Loc))THEN
+            NOpts=NOpts+NLoc
+            DO ILoc=1,NLoc; Ctrl%AccL(Loc(ILoc))=2; ENDDO
+         ENDIF
+         IF(OptKeyLocQ(Inp,ACCURACY_OPTION,ACCURACY_TIGHT,MaxSets,NLoc,Loc))THEN
+            NOpts=NOpts+NLoc
+            DO ILoc=1,NLoc; Ctrl%AccL(Loc(ILoc))=3; ENDDO
+         ENDIF
+         IF(OptKeyLocQ(Inp,ACCURACY_OPTION,ACCURACY_RETENTIVE,MaxSets,NLoc,Loc))THEN
+            NOpts=NOpts+NLoc
+            DO ILoc=1,NLoc; Ctrl%AccL(Loc(ILoc))=4; ENDDO
+         ENDIF
+#ifdef MMech
+         IF(HasQM()) THEN
+#endif        
+           IF(NOpts>1.AND.NOpts/=Ctrl%NSet) &
+              CALL MondoHalt(PRSE_ERROR,'Number of '//ACCURACY_OPTION &
+                           //' options does not match number of Basis sets.')
+#ifdef MMech
+         ENDIF
+#endif        
+!
+      END SUBROUTINE ParseAcc
 !
 END MODULE
