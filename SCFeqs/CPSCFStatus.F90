@@ -168,14 +168,17 @@ PROGRAM CPSCFSts
      ! Add in DDIIS error.
      IF(DIISErr/=Zero)                                                             &
           &       CPSCFMessage=TRIM(CPSCFMessage)                                  &
-          &           //'      DDIISErr = '//TRIM(DblToShrtChar(DIISErr))//RTRN
+          &           //'   DDIISErr    = '//TRIM(DblToShrtChar(DIISErr))//RTRN
      !
      ! Add in Tensor elements.
      CPSCFMessage=TRIM(CPSCFMessage)                                               &
           &           //'   MaxDelDPrim = '//TRIM(DblToShrtChar(DPrimMax)) //RTRN  &
-          &           //'       <T>     = '//TRIM(DblToMedmChar(Tensor(1)))//RTRN  &
-          &           //'       <T>     = '//TRIM(DblToMedmChar(Tensor(2)))//RTRN  &
-          &           //'       <T>     = '//TRIM(DblToMedmChar(Tensor(3)))//RTRN
+          &           //'   Alpha '//TRIM(Args%C%C(4))//'X    = '                  &
+          &           //TRIM(DblToMedmChar(Tensor(1)))//RTRN                       &
+          &           //'   Alpha '//TRIM(Args%C%C(4))//'Y    = '                  & 
+          &           //TRIM(DblToMedmChar(Tensor(2)))//RTRN                       &
+          &           //'   Alpha '//TRIM(Args%C%C(4))//'Z    = '                  & 
+          &           //TRIM(DblToMedmChar(Tensor(3)))//RTRN
      !
   ELSEIF(PrintFlags%Key>=DEBUG_NONE) THEN
      !
@@ -190,9 +193,12 @@ PROGRAM CPSCFSts
      !   SCFMessage=TRIM(SCFMessage)//' Restarting ... '       &
      !                              //' MxD = '//TRIM(DblToShrtChar(DMax)) 
      !ELSE
-     CPSCFMessage=TRIM(CPSCFMessage)//' T = '//TRIM(FltToShrtChar(Tensor(1)))      &
-          &                         //', '   //TRIM(FltToShrtChar(Tensor(2)))      &
-          &                         //', '   //TRIM(FltToShrtChar(Tensor(3))) 
+     CPSCFMessage=TRIM(CPSCFMessage)//' Alpha '//TRIM(Args%C%C(4))//'X,'           &
+          &                                    //TRIM(Args%C%C(4))//'Y,'           &
+          &                                    //TRIM(Args%C%C(4))//'Z = '         &
+          &                                    //TRIM(FltToShrtChar(Tensor(1)))    &
+          &                         //', '     //TRIM(FltToShrtChar(Tensor(2)))    &
+          &                         //', '     //TRIM(FltToShrtChar(Tensor(3)))
 
      IF(CPSCFCycl.GT.0) &
           & CPSCFMessage=TRIM(CPSCFMessage)//', dD'' = '//TRIM(DblToShrtChar(DPrimMax))
