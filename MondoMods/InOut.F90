@@ -430,7 +430,7 @@ CONTAINS
           CALL OpenData(Meta)
           CALL ReadIntegerVector(Meta,B)
           CALL CloseData(Meta)
-          A%Constraint=.FALSE.
+          A%Active=.FALSE.
           DO I=1,NN
              IF(B(I)==1) A%Active(I)=.TRUE.
           ENDDO
