@@ -1541,7 +1541,7 @@ CONTAINS
                   C%Geos,C%Sets,C%MPIs)
      ENDIF
      !
-     MaxBStep=10
+     MaxBStep=1
      IF(DoLineS) MaxBStep=1
      !
      DO iBStep=1,MaxBStep+1
