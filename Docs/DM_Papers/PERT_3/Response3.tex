@@ -1,15 +1,15 @@
 % NOTE TO AIP TYPSETERS: TO CONVERT FROM TWO-COL TO PREPRINT, SWITCH
 % COMMENTOUT COMMAND FROM A TO B IE. USE:
 %
-% \documentclass[prl,twocolumn,showpacs,twocolumngrid,superbib]{revtex4}
-% \newcommand{\commentoutB}[1]{}
-% \newcommand{\commentoutA}[1]{#1}
+ \documentclass[prl,twocolumn,showpacs,twocolumngrid,superbib]{revtex4}
+ \newcommand{\commentoutB}[1]{}
+ \newcommand{\commentoutA}[1]{#1}
 %
 % INSTEAD OF THE FOLLOWING:
 %
-\newcommand{\commentoutB}[1]{#1}
-\newcommand{\commentoutA}[1]{}
-\documentclass[prl,aps,preprint,showpacs,superbib]{revtex4}
+%\newcommand{\commentoutB}[1]{#1}
+%\newcommand{\commentoutA}[1]{}
+%\documentclass[prl,aps,preprint,showpacs,superbib]{revtex4}
 %
 \usepackage{graphicx}
 \usepackage{amsmath}
@@ -210,7 +210,7 @@ Hartree-Fock (HF) and Density Functional Theory (DFT).  In the following
 we develop Perturbed Projection for solution of the CPSCF equations in the framework of polarization and 
 Hartree-Fock theory.  In many cases, the extension of Perturbed Projection to
 the computation of other static perturbations is straightforward.  In
-the case of model chemistries that involve DFT, an extra programming effort is required \cite{Lee_1994,PSalek02}.
+the case of model chemistries that involve DFT, an extra programming effort is required \cite{ALee94,PSalek02}.
 Also, in the case of properties such as the NMR chemical shift and geometric derivatives 
 (force constants), perturbation of the non-orthogonal basis requires additional 
 considerations that we have detailed in a preceding paper \cite{ANiklasson05a}.
@@ -329,7 +329,7 @@ similar to the decay properties of $D^0$.
 
 While the expansions above are given explicitly for Hartree-Fock Theory, similar expressions 
 hold also for Kohn-Sham and hybrid HF/DFT,  which involve variation of the  exchange-correlation 
-matrix $V_{xc}^{a\ldots}(D^0,D^a,\ldots)$ \cite{Lee_1994,PSalek02}.
+matrix $V_{xc}^{a\ldots}(D^0,D^a,\ldots)$ \cite{ALee94,PSalek02}.
 
 \subsection{Conditions for self-consistency}\label{SelfConsistency}
 
@@ -452,7 +452,7 @@ Although a number of analytic, asymptotically discontinuous representations exis
 step function $\theta$, direct representation (and variation) of these forms as in Eq.~(\ref{DDeriv}) 
 is problematic. Polynomial expansion of the step function is a alternative choice, but demands a very high 
 order and can be costly.  Specifically, polynomial expansion of $\theta$ with a $p$'th order polynomial 
-incurs a cost that is at best ${\cal O}(\sqrt{p})$ \cite{WLiang04}.  Polynomial expansion techniques,
+incurs a cost that is at best ${\cal O}(\sqrt{p})$ \cite{WLiang03,WLiang04}.  Polynomial expansion techniques,
 such as those based on the the Chebychev polynomials, may also be plagued by Gibbs oscillations \cite{AVoter96},
 which are high order ripples in the approximate $\theta$ due to incompleteness.
 Alternatively, recursive purification methods achieve high order representation in 
@@ -965,8 +965,8 @@ in computation of the Hessian matrix.
  performed on computing resources located at this facility.
 \end{acknowledgments}
 
-\bibliography{Response3}
-%\bibliography{mondo_new}
+%\bibliography{Response3}
+\bibliography{mondo_new}
 
 \commentoutB{
 
