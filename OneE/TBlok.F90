@@ -39,12 +39,12 @@ CONTAINS
     TBlk=Zero
 !                 
     DO CFA=1,BS%NCFnc%I(KA)                       ! Loop over contracted function A 
-       IndexA  = IBloDex(BS,CFA,KA)
+       IndexA  = CFBlokDex(BS,CFA,KA)
        StartLA = BS%LStrt%I(CFA,KA)        
        StopLA  = BS%LStop%I(CFA,KA)
        MaxLA   = BS%ASymm%I(2,CFA,KA)
        DO CFB=1,BS%NCFnc%I(KB)                    ! Loop over contracted function B
-          IndexB  = IBloDex(BS,CFB,KB)
+          IndexB  = CFBlokDex(BS,CFB,KB)
           StartLB = BS%LStrt%I(CFB,KB)
           StopLB  = BS%LStop%I(CFB,KB)
           MaxLB   = BS%ASymm%I(2,CFB,KB)   

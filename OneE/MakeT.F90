@@ -137,9 +137,9 @@ PROGRAM MakeT
 !-----------------------------------------------------------
 ! Printing
 !
-  CALL PChkSum(T2,'TK',Prog)
-  CALL PPrint( T2,'TK')
-  CALL Plot(   T2,'TK')
+  CALL PChkSum(T2,'T',Prog)
+  CALL PPrint( T2,'T')
+  CALL Plot(   T2,'T')
 !------------------------------------------------------------
 ! Tidy up
 ! 

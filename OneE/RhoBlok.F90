@@ -8,22 +8,7 @@ MODULE RhoBlok
   IMPLICIT NONE
 CONTAINS
 !--------------------------------------------------------------
-! Add in the Nuclear Centers
-!--------------------------------------------------------------
-  FUNCTION ThreshPrim(ExpAB,PFA,PFB) 
-    LOGICAL         :: ThreshPrim
-    INTEGER         :: PFA,PFB
-    REAL(DOUBLE)    :: ExpAB
-!
-    IF(ExpAB > 1.D-32) THEN
-       ThreshPrim = .TRUE.
-    ELSE
-       ThreshPrim = .FALSE.
-    ENDIF
-!
-  END FUNCTION ThreshPrim
-!--------------------------------------------------------------
-! Add in the Nuclear Centers
+! Add nuclear centers to the density
 !--------------------------------------------------------------
   SUBROUTINE AddNukes(GM,Rho)
     TYPE(CRDS)                 :: GM
@@ -33,7 +18,8 @@ CONTAINS
 !---------------------------------------------------
 !   Initialize the Nuclear centers and Constants
 !
-    DDelta = Half*(Rho%Expt%D(Rho%NExpt)/Pi)**(ThreeHalf)
+    DDelta = Half*(Rho%Expt%D(Rho%NExpt)/Pi)**(ThreeHalves)
+!
     DO IA = 1,NAtoms
        Iq = Rho%OffQ%I(Rho%NExpt)+IA
        Ir = Rho%OffR%I(Rho%NExpt)+IA
@@ -74,27 +60,21 @@ CONTAINS
                 PFBbeg = 1
              ENDIF
              DO PFB=PFBbeg,BS%NPFnc%I(CFB,KB)     
-!
                 ZetaA = BS%Expnt%D(PFA,CFA,KA)
                 ZetaB = BS%Expnt%D(PFB,CFB,KB)
                 ZetaAB= ZetaA+ZetaB 
                 XiAB  = ZetaA*ZetaB/ZetaAB
-                ExpAB = EXP(-XiAB*AB2)
+                IF(TestPrimPair(XiAB,Pair%AB2))THEN
 !
-!               Needs to get schwartz factors (see orig initrho) !!!!
-!
-                IF(ThreshPrim(ExpAB,PFA,PFB)) THEN
-!
+                   ExpAB = EXP(-XiAB*AB2)
 !                  Determine the Exponent Index
-!
-                   Endex = 0
+                   Endex=0
                    DO IE=1,Rho%NExpt
                       IF(ABS(ZetaAB-Rho%Expt%D(IE))<1.0D-8) THEN
                          Endex = IE
-                         GOTO 200
+                         EXIT
                       ENDIF
                    ENDDO
-200                CONTINUE
                    IF(Endex == 0) THEN
                       CALL MondoHalt(-100,' Problem in PrimCount, No Exponent found ') 
                    ELSE
@@ -160,7 +140,7 @@ CONTAINS
     DD = VectToBlock(NBFA,NBFB,Dmat)
 !
     DO CFA=1,BS%NCFnc%I(KA)                         ! Loop over contracted function A 
-       IndexA  = IBloDex(BS,CFA,KA)
+       IndexA  = CFBlokDex(BS,CFA,KA)
        StartLA = BS%LStrt%I(CFA,KA)        
        StopLA  = BS%LStop%I(CFA,KA)
        MaxLA   = BS%ASymm%I(2,CFA,KA)
@@ -170,7 +150,7 @@ CONTAINS
           CFBbeg = 1
        ENDIF
        DO CFB=CFBbeg,BS%NCFnc%I(KB)                    ! Loop over contracted function B
-          IndexB  = IBloDex(BS,CFB,KB)
+          IndexB  = CFBlokDex(BS,CFB,KB)
           StartLB = BS%LStrt%I(CFB,KB)
           StopLB  = BS%LStop%I(CFB,KB)
           MaxLB   = BS%ASymm%I(2,CFB,KB)
@@ -186,14 +166,9 @@ CONTAINS
                 ZetaAB=ZetaA+ZetaB 
                 ZetaIn=One/ZetaAB
                 XiAB =ZetaA*ZetaB*ZetaIn
-                ExpAB=EXP(-XiAB*AB2)
-!
-!               Needs to get schwartz factors (see orig initrho) !!!!
-!
-                IF(ThreshPrim(ExpAB,PFA,PFB)) THEN
-!
+                IF(TestPrimPair(XiAB,Pair%AB2))THEN
+                   ExpAB=EXP(-XiAB*AB2)
 !                  Determine the Counting Factors
-!
                    IF(AEQB) THEN
                       FacAtom = one
                       IF(CFA == CFB) THEN
@@ -296,7 +271,7 @@ CONTAINS
   SUBROUTINE RhoEst(Rho)
     TYPE(HGRho)                  :: Rho
     INTEGER                      :: MaxL,zq,iq,oq,or,LKet,LenKet,qadd,radd,NQ
-    REAL(DOUBLE)                 :: Zeta,Uqq
+    REAL(DOUBLE)                 :: Zeta,SqUqq
 !
     IF(Rho%AllocRE==ALLOCATED_TRUE) THEN
 !
@@ -309,35 +284,47 @@ CONTAINS
 !
        DO zq = 1,Rho%NExpt
           NQ     = Rho%NQ%I(zq)
-          IF(NQ /= 0) THEN
-             oq     = Rho%OffQ%I(zq)
-             or     = Rho%OffR%I(zq)
-             Zeta   = Rho%Expt%D(zq)
-             LKet   = Rho%Lndx%I(zq)
-             LenKet = LHGTF(LKet)
-             Uqq    = SQRT(Sqrt2Pi5x2*(Zeta**(-FiveHalf)))
-
-!
-!         Generate The R and AuxR Function
-!
+          IF(NQ/=0) THEN
+             oq    =Rho%OffQ%I(zq)
+             or    =Rho%OffR%I(zq)
+             Zeta  =Rho%Expt%D(zq)
+             LKet  =Rho%Lndx%I(zq)
+             LenKet=LHGTF(LKet)
+             SqUqq =Sqrt2Pi5x2*Zeta**(-FiveFourths)
+!            Generate The R and AuxR Function
              CALL GenerateRfun(Zeta,LKet)
-!
-!         Calculate the Estimate
-!    
+!            Calculate the Estimate
              DO iq=1,NQ
-                qadd = oq+iq
-                radd = or+(iq-1)*LenKet
-                Rho%Est%D(qadd)=Uqq*Estimate(LKet,LenKet,Rho%Co%D(radd+1:))  
+                qadd=oq+iq
+                radd=or+(iq-1)*LenKet
+                Rho%Est%D(qadd)=SqUqq*Estimate(LKet,LenKet,Rho%Co%D(radd+1:))  
              ENDDO
-             !
-!         Sort the Estimates
-!
+!            Sort the estimates
              CALL SortRhoEst(zq,NQ,LenKet,Rho)
           ENDIF
        ENDDO
        CALL Delete(AuxRfun)
        CALL Delete(Rfun)
     ENDIF
+!       DO zq = 1,Rho%NExpt
+!          NQ     = Rho%NQ%I(zq)
+!          IF(NQ/=0) THEN
+!             oq    =Rho%OffQ%I(zq)
+!             or    =Rho%OffR%I(zq)
+!             Zeta  =Rho%Expt%D(zq)
+!             LKet  =Rho%Lndx%I(zq)
+!             LenKet=LHGTF(LKet)
+!             SqUqq   =Sqrt2Pi5x2*Zeta**(-FiveFourths)
+!             WRITE(11,*)' ====================================================='
+!             WRITE(11,*)' oq, or, zeta, lket = ',oq,or,zeta,lket
+!             WRITE(11,*)' SqUqq = ',SqUqq
+!             DO iq=1,NQ
+!@                qadd=oq+iq
+!!                WRITE(11,*)iq,Rho%Est%D(qadd)
+!             ENDDO
+!          ENDIF
+!       ENDDO
+
   END SUBROUTINE RhoEst
 !--------------------------------------------------------------
 ! Sort the Estimates per Exponent
@@ -355,8 +342,8 @@ CONTAINS
 !
     DO iq = 1,NQ
        qadd = oq+iq
-       IntRhoEst(iq) = iq
-       RhoEst(iq)    = Rho%Est%D(qadd)
+       IntRhoEst(iq)= iq
+       RhoEst(iq)   = Rho%Est%D(qadd)
     ENDDO
     CALL DblIntSort77(NQ,RhoEst,IntRhoEst,-2)
 !
@@ -408,7 +395,7 @@ CONTAINS
        LenKet = LHGTF(Ell)
        DO iq = 1,NQ
           jadd = or+(iq-1)*LenKet
-          RhoSumE = RhoSumE + Rho%Co%D(jadd+1)*((Pi/Dex)**ThreeHalf)
+          RhoSumE = RhoSumE + Rho%Co%D(jadd+1)*((Pi/Dex)**ThreeHalves)
        ENDDO
     ENDDO
 !
@@ -422,7 +409,7 @@ CONTAINS
     LenKet = LHGTF(Ell)
     DO iq = 1,NQ
        jadd = or+(iq-1)*LenKet
-       RhoSumN = RhoSumN + Rho%Co%D(jadd+1)*((Pi/Dex)**ThreeHalf)
+       RhoSumN = RhoSumN + Rho%Co%D(jadd+1)*((Pi/Dex)**ThreeHalves)
     ENDDO
 !
     WRITE(*,*) ' Int[Rho_E] = ',RhoSumE
