@@ -23,7 +23,30 @@ MODULE OptionKeys
   ! Restricted quartic Trace Re-Setting Purification
   CHARACTER(LEN=*),  PARAMETER :: SCF_TS4            ='TRS4'
   INTEGER,           PARAMETER :: TS4_R_SCF          =58638506 
-  !---------------------------------------------------------
+  !------------------------------------------------------------------------------
+  ! Options:ConAls=
+  CHARACTER(LEN=*),  PARAMETER :: CONALS_OPTION       ='SCFConvergence' 
+  CHARACTER(LEN=*),  PARAMETER :: CONALS_OVRIDE       ='OverRideSCFConvergence'
+  INTEGER,           PARAMETER :: NO_CONALS           =41414141 
+  ! DIIS
+  CHARACTER(LEN=*),  PARAMETER :: CONALS_DIIS         ='DIIS'
+  INTEGER,           PARAMETER :: DIIS_CONALS         =42424242 
+  ! ODA
+  CHARACTER(LEN=*),  PARAMETER :: CONALS_ODA          ='ODA'
+  INTEGER,           PARAMETER :: ODA_CONALS          =43434343
+  ! ODA then DIIS
+  CHARACTER(LEN=*),  PARAMETER :: CONALS_ODMIX        ='ODA-DIIS'
+  INTEGER,           PARAMETER :: ODMIX_CONALS        =44444444
+  ! DIIS then ODA on Fail
+  CHARACTER(LEN=*),  PARAMETER :: CONALS_DOMIX        ='DIIS-ODA'
+  INTEGER,           PARAMETER :: DOMIX_CONALS        =45454545
+  ! Stanton Mixing
+  CHARACTER(LEN=*),  PARAMETER :: CONALS_SMIX         ='SMIX'
+  INTEGER,           PARAMETER :: SMIX_CONALS         =46464646
+  ! Test Algorithm
+  CHARACTER(LEN=*),  PARAMETER :: CONALS_TEST         ='TestSCF'
+  INTEGER,           PARAMETER :: TEST_CONALS         =47474747
+  !------------------------------------------------------------------------------
   ! Options:Accuracy=
   CHARACTER(LEN=*),  PARAMETER :: ACCURACY_OPTION    ='Accuracy' 
   CHARACTER(LEN=*),  PARAMETER :: ACCURACY_CHEEZY    ='Loose'
@@ -59,11 +82,6 @@ MODULE OptionKeys
   ! Options:InkFok=
   CHARACTER(LEN=*),  PARAMETER :: INKFOCK_OPTION     ='InkFok'
   CHARACTER(LEN=*),  PARAMETER :: INKFOCK_ON         ='On'
-  !------------------------------------------------------------------------------
-  ! Options: Convergence=
-  CHARACTER(LEN=*),  PARAMETER :: CONVERGE_OPTION     ='Convergence'
-  CHARACTER(LEN=*),  PARAMETER :: CONVERGE_DODIIS     ='DoDIIS'
-  CHARACTER(LEN=*),  PARAMETER :: CONVERGE_DOODA      ='DoODA'
   !------------------------------------------------------------------------------
   ! Options:Grad=  
   CHARACTER(LEN=*),   PARAMETER :: GRADIENTS         ='Grad'
