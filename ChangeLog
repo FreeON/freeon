@@ -1,3 +1,20 @@
+2003-08-25 17:59  nemeth
+
+	* MondoSCF2/InCoords.F90: Redundancy projector of actual geometry
+	of iterative back-transformation is commented out. In case of using
+	this projector within iteretive back-transformation, only projector
+	of initial geometry should be used.
+
+2003-08-24 21:46  nemeth
+
+	* MondoSCF2/GDIIS.F90: A new version of gradient fitting optimizer,
+	with constraints on the maximum allowed steps of internal
+	coordinates.
+
+2003-08-23 19:27  mchalla
+
+	* ChangeLog: [no log message]
+
 2003-08-22 14:31  ckgan
 
 	* MondoMods/PrettyPrint.F90: Changes made for consistency. Use
