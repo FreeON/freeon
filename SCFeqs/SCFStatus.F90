@@ -38,8 +38,8 @@ PROGRAM SCFStatus
    CALL New(Tmp1)
    CALL New(Tmp2)
 !---------------------------------------------
-!  Get the density matrix 
-   IF(SCFActn=='BasisSetSwitch')THEN !.OR.SCFActn=='Restart')THEN 
+!  Get the density matrix
+   IF(SCFActn=='BasisSetSwitch' .OR. SCFActn=="RestartBasisSwitch") THEN
       ! If switching the density matrix or using a previous one from 
       ! restart use i+1 density matrix--its all that is available
       CALL Get(P,TrixFile('D',Args,1))
@@ -116,7 +116,7 @@ PROGRAM SCFStatus
 !--------------------------------------------------------
 !  Find the largest block of the delta density matrix
 !  Allows for checking between extrapolated or projected DMs
-   IF(SCFActn=='BasisSetSwitch'.OR.SCFActn=='Restart'.OR.SCFActn=='NumForceEvaluation')THEN
+   IF(SCFActn=='BasisSetSwitch'.OR. SCFActn=="RestartBasisSwitch" .OR. SCFActn=='NumForceEvaluation')THEN
       DMax=Max(P)
    ELSE
       CALL Get(Tmp1,TrixFile('D',Args,0))
@@ -138,9 +138,7 @@ PROGRAM SCFStatus
       CALL PPrint( P,'DeltaP['//TRIM(NxtCycl)//']')
       CALL Plot(   P,'DeltaP_'//TRIM(NxtCycl))
    ENDIF
-   CALL Delete(P)
-   CALL Delete(Tmp1)
-   CALL Delete(Tmp2)
+
 !-----------------------------------------------------------
 !  Get DIIS Err and HOMO-LUMO Gap
    IF(Current(1)>=1.AND.SCFActn/='NumForceEvaluation')THEN
@@ -155,7 +153,7 @@ PROGRAM SCFStatus
    CALL Get(Gap,'HomoLumoGap')
 !-----------------------------------------------------------  
 !  PRINT STATISTICS
-!   
+!  
    IF(NClones>1)THEN
       CurClone=IntToChar(MyClone)
    ELSE
@@ -264,6 +262,9 @@ ENDIF
 #ifdef PARALLEL
   ENDIF
 #endif
+  CALL Delete(P)
+  CALL Delete(Tmp1)
+  CALL Delete(Tmp2)
   CALL ShutDown(Prog)
 END PROGRAM SCFStatus
 
