@@ -48,7 +48,7 @@ PROGRAM JForce
   CALL NewBraBlok(BS,Gradients_O=.TRUE.)
   CALL Get(P,TrixFile('D',Args,1))
 ! Get the Density for Poletree
-  CALL Get(Rho,'Rho',Args,0)
+  CALL Get(Rho,'Rho',Args,1)
 ! Set thresholds local to JForce (for PAC and MAC)
   CALL SetLocalThresholds(Thresholds%TwoE)
 ! Setup global arrays for computation of multipole tensors
