@@ -276,7 +276,7 @@ MODULE BlokTrPdJ
           DO LMN=1,HGLenEll
              Vct(K)=Vct(K)+Phase%D(LMN)*dHGBra%D(LMN,1,1,K)*HGKet(LMN)
           ENDDO
-          CALL HGToSP(Prim,dHGBra%D(:,1,1,K),SPBraC,SPBraS)
+          CALL HGToSP(Prim%Zeta,1,dHGBra%D(:,1,1,K),SPBraC,SPBraS)
           DO LM=0,SPLenEll
              Vct(K)=Vct(K)+SPBraC(LM)*SPKetC(LM)+SPBraS(LM)*SPKetS(LM)
           ENDDO
