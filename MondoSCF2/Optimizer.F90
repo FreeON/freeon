@@ -299,7 +299,7 @@ CONTAINS
        ENDIF
     ELSE
        ! Take some steps 
-       StepLength=1D0
+       StepLength=2D0
        DO iSTEP=1,MaxSTEP
           StepLength=StepLength/Two
           ! Step the absolute positions
@@ -347,6 +347,7 @@ CONTAINS
                   //', Step= '//TRIM(DblToShrtChar(StepLength))
              !    WRITE(*,*)TRIM(Mssg)             
              CALL OpenASCII(OutFile,Out)
+             WRITE(*,*)TRIM(Mssg)             
              WRITE(Out,*)TRIM(Mssg)             
              CLOSE(Out)
           ENDIF

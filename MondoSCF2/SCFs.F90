@@ -546,8 +546,7 @@ CONTAINS
        ENDIF
     ENDDO
     CALL CloseHDF(HDFFileID)
-    IF(cSCF>6) &
-       ConvergedQ=.TRUE.
+    IF(cSCF>1)ConvergedQ=.TRUE.
     DO iCLONE=1,G%Clones
        ConvergedQ=ConvergedQ.AND.Converged(iCLONE)
     ENDDO
