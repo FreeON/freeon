@@ -1,0 +1,24 @@
+<BeginTitle>
+             ** Water **
+<EndTitle>
+
+<BeginOptions>
+Charge=0
+Multiplicity=1
+DebugAll =(MaxDebug,CheckSums)
+Guess=Core
+SCFMethod=(RH)
+BasisSets=(SBKJC)
+ModelChem=(HF)
+Accuracy =(Tight)
+Geometry =(InAngstroms,NoOrder)
+<EndOptions>
+
+<BeginGeometry>
+o              0.000000    0.000000    0.000000
+h              0.000000    0.000000    1.949000
+h              1.803234    0.000000   -0.739560
+<EndGeometry>
+
+External reference number RPBE/STO-3G        -75.222866 0852  
+BENCHMARK PBE/STO-3G            <SCF>     = -.75 22286613 134627E+02 
