@@ -29,8 +29,9 @@ alias go    'cd ${MONDO_HOME}/ONX;       ls -l; pwd'
 alias g1    'cd ${MONDO_HOME}/OneE;      ls -l; pwd'
 alias gx    'cd ${MONDO_HOME}/XForm;     ls -l; pwd'
 alias gn    'cd ${MONDO_HOME}/QuNew;     ls -l; pwd'
-alias gv    'cd ${MONDO_HOME}/VisDX;     ls -l; pwd'
-alias gd    'cd ${MONDO_DGEMMS};         ls -l; pwd'
+alias gd    'cd ${MONDO_HOME}/VisDX;     ls -l; pwd'
+alias gdg   'cd ${MONDO_DGEMMS};         ls -l; pwd'
+alias gv    'cd ${MONDO_HOME}/Validate;  ls -l; pwd'
 #
 # Set environmental varaibles
 #

@@ -113,10 +113,10 @@ c1:
 #----------------------------------------------
 #     Two electron directories
 #
- 2:	q   h  #o
-r2:	rq rh  #ro
-c2:	cq ch  #co
-p2:	ph pq  #po
+ 2:	q   h  o
+r2:	rq rh  ro
+c2:	cq ch  co
+p2:	ph pq  po
 #----------------------------------------------
 #     ONX
  o:	

@@ -81,9 +81,11 @@ release:purge $(ReleaseFiles)
 purge:	clean 
 	rm -f $(REMOVESRCE)
 	rm -f Test
+	rm -f \#*
 	rm -f *.out
 	rm -f *.log
 	rm -f *.car
+	rm -f *.xyz
 #
 clean:
 	rm -f $(REMOVEMISC) $(REMOVEMODS)
