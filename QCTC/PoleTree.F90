@@ -182,7 +182,7 @@ MODULE PoleTree
          NULLIFY(Node%Descend)
       END SUBROUTINE NewPoleNode
 !==========================================================================
-!     Initialize a new PoleNode's Array
+!     Initialize a new PoleNodes Array
 !==========================================================================
       SUBROUTINE NewSPArrays(Node)
          TYPE(PoleNode), POINTER   :: Node
@@ -317,4 +317,3 @@ MODULE PoleTree
        END SUBROUTINE DeleteRhoAux
 !
 END MODULE
-
