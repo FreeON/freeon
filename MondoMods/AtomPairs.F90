@@ -31,24 +31,20 @@ CONTAINS
 !--------------------------------------------------------------------------
   FUNCTION SetAtomPair(GM,BS,I,J,Pair)
     LOGICAL                   :: SetAtomPair
-    INTEGER                   :: I,J
+    INTEGER                   :: I,J,K
     TYPE(AtomPair)            :: Pair
     TYPE(CRDS)                :: GM
     TYPE(BSet)                :: BS
 #ifdef PERIODIC
-    REAL(DOUBLE)              :: LX
-    REAL(DOUBLE)              :: LY
-    REAL(DOUBLE)              :: LZ
-    LX = ABS(GM%BoxCarts%D(1,I)-GM%BoxCarts%D(1,J))
-    LY = ABS(GM%BoxCarts%D(2,I)-GM%BoxCarts%D(2,J))
-    LZ = ABS(GM%BoxCarts%D(3,I)-GM%BoxCarts%D(3,J))
-    IF(GM%AutoW(1) .AND. LX > half) LX = one-LX
-    IF(GM%AutoW(2) .AND. LY > half) LY = one-LY    
-    IF(GM%AutoW(3) .AND. LZ > half) LZ = one-LZ
-    LX = LX*GM%BoxShape%D(1,1)
-    LY = LX*GM%BoxShape%D(1,2)+LY*GM%BoxShape%D(2,2)
-    LZ = LX*GM%BoxShape%D(1,3)+LY*GM%BoxShape%D(2,3)+LZ*GM%BoxShape%D(3,3)
-    Pair%AB2 = LX*LX+LY*LY+LZ*LZ
+    REAL(DOUBLE),DIMENSION(3) :: VecF,VecA
+!
+    DO K=1,3
+       VecF(K) = ABS(GM%BoxCarts%D(K,I)-GM%BoxCarts%D(K,J))
+       IF(GM%AutoW(K) .AND. VecF(K) > Half) VecF(K) = One-VecF(K)
+    ENDDO
+!
+    VecA = FracToAtom(GM,VecF) 
+    Pair%AB2 = VecA(1)**2+VecA(2)**2+VecA(3)**2
 #else
     Pair%AB2 = (GM%Carts%D(1,I)-GM%Carts%D(1,J))**2 &
              + (GM%Carts%D(2,I)-GM%Carts%D(2,J))**2 &
@@ -126,6 +122,7 @@ CONTAINS
     WRITE(*,*) 'THE NUMBER OF CELLS  in CS = ',CS%NCells  
 !
   END SUBROUTINE SetCellNumber
+
 !----------------------------------------------------------------------------
 ! Convert from Atomic Coordinates  to Fractional Coordinates
 !----------------------------------------------------------------------------
@@ -133,10 +130,9 @@ CONTAINS
     TYPE(CRDS)                 :: GM
     REAL(DOUBLE),DIMENSION(3)  :: VecA,VecF
 !
-    VecF(1) = VecA(1)*GM%InvBoxSh%D(1,1)
-    VecF(2) = VecA(1)*GM%InvBoxSh%D(1,2)+VecA(2)*GM%InvBoxSh%D(2,2)
-    VecF(3) = VecA(1)*GM%InvBoxSh%D(1,3)+VecA(2)*GM%InvBoxSh%D(2,3) &
-         + VecA(3)*GM%InvBoxSh%D(3,3)
+    VecF(1) = VecA(1)*GM%InvBoxSh%D(1,1) + VecA(2)*GM%InvBoxSh%D(1,2) + VecA(3)*GM%InvBoxSh%D(1,3)
+    VecF(2) = VecA(1)*GM%InvBoxSh%D(2,1) + VecA(2)*GM%InvBoxSh%D(2,2) + VecA(3)*GM%InvBoxSh%D(2,3)
+    VecF(3) = VecA(1)*GM%InvBoxSh%D(3,1) + VecA(2)*GM%InvBoxSh%D(3,2) + VecA(3)*GM%InvBoxSh%D(3,3)
 !
   END FUNCTION AtomToFrac
 !-----------------------------------------------------------------------------
@@ -146,9 +142,9 @@ CONTAINS
     TYPE(CRDS)                 :: GM
     REAL(DOUBLE),DIMENSION(3)  :: VecA,VecF
 !
-    VecA(1) = VecF(1)*GM%BoxShape%D(1,1)
-    VecA(2) = VecF(1)*GM%BoxShape%D(1,2)+VecF(2)*GM%BoxShape%D(2,2)
-    VecA(3) = VecF(1)*GM%BoxShape%D(1,3)+VecF(2)*GM%BoxShape%D(2,3) + VecF(3)*GM%BoxShape%D(3,3)
+    VecA(1) = VecF(1)*GM%BoxShape%D(1,1) + VecF(2)*GM%BoxShape%D(1,2) + VecF(3)*GM%BoxShape%D(1,3)
+    VecA(2) = VecF(1)*GM%BoxShape%D(2,1) + VecF(2)*GM%BoxShape%D(2,2) + VecF(3)*GM%BoxShape%D(2,3)
+    VecA(3) = VecF(1)*GM%BoxShape%D(3,1) + VecF(2)*GM%BoxShape%D(3,2) + VecF(3)*GM%BoxShape%D(3,3)
 !
   END FUNCTION FracToAtom
 !-----------------------------------------------------------------------------
@@ -204,6 +200,18 @@ CONTAINS
     ENDDO
 !
   END FUNCTION InFracBox
+!------------------------------------------------------------------------------
+! Test to See if in the Box (Atomic Coordinates)
+!------------------------------------------------------------------------------
+  FUNCTION InAtomBox(GM,VecA)
+    TYPE(CRDS)                 :: GM   
+    LOGICAL                    :: InAtomBox
+    REAL(DOUBLE),DIMENSION(3)  :: VecA,VecF     
+!
+    VecF = AtomToFrac(GM,VecA)
+    InAtomBox = InFracBox(GM,VecF)
+!
+  END FUNCTION InAtomBox
 #endif
 !
 END MODULE AtomPairs
