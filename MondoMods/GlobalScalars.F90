@@ -143,9 +143,12 @@ MODULE GlobalScalars
 ! For nobel gas atoms and other missing elements
 ! the 0.75*VDWRadii value is recommended
 !
+! Hydrogen modified from 0.25 to 0.30
+! Oxigen modified from 0.6 to 0.61
+!
    REAL(DOUBLE),DIMENSION(1:120) :: SLRadii
-   DATA SLRadii(  1) /0.25D0/
-   DATA SLRadii(  3: 9) /1.45D0, 1.05D0, 0.85D0, 0.70D0, 0.65D0, 0.60D0, 0.5D0 /
+   DATA SLRadii(  1) /0.30D0/
+   DATA SLRadii(  3: 9) /1.45D0, 1.05D0, 0.85D0, 0.70D0, 0.65D0, 0.61D0, 0.5D0 /
    DATA SLRadii( 11: 17) /1.8D0, 1.50D0, 1.25D0, 1.1D0, 1.1D0, 1.0D0, 1.0D0/
    DATA SLRadii( 19: 35) /2.2D0, 1.8D0, 1.6D0, 1.4D0, 1.35D0, 1.4D0, 1.4D0, &
                           1.4D0, 1.35D0, 1.35D0, 1.35D0, 1.35D0, 1.30D0, 1.25D0, &
