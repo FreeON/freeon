@@ -189,6 +189,8 @@ MODULE ControlStructures
      REAL(DOUBLE)                       :: MaxCGrad
      REAL(DOUBLE)                       :: MaxLGrad
      REAL(DOUBLE)                       :: MaxDMult
+     REAL(DOUBLE)                       :: MaxTrGrad
+     REAL(DOUBLE)                       :: MaxRotGrad
      REAL(DOUBLE)                       :: RMSGrad
      INTEGER                            :: IMaxGradNoConstr
      REAL(DOUBLE)                       :: MaxGradNoConstr

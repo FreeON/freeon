@@ -1003,27 +1003,27 @@ CONTAINS
      !
      B=Zero
      IF(CHAR=='X') THEN
-       !IF(Constraint) THEN
-       !  B(1)=1.D-6
-       !ELSE
+       IF(Constraint) THEN
+         B(1)=Zero 
+       ELSE
          B(1)=One
-       !ENDIF
+       ENDIF
      ENDIF
      !
      IF(CHAR=='Y') THEN
-       !IF(Constraint) THEN
-       !  B(2)=1.D-6
-       !ELSE
-         B(2)=One
-       !ENDIF
+       IF(Constraint) THEN
+         B(2)=Zero 
+       ELSE
+         B(2)=One  
+       ENDIF
      ENDIF
      !
      IF(CHAR=='Z') THEN
-       !IF(Constraint) THEN
-       !  B(3)=1.D-6
-       !ELSE
-         B(3)=One
-       !ENDIF
+       IF(Constraint) THEN
+         B(3)=Zero 
+       ELSE
+         B(3)=One 
+       ENDIF
      ENDIF
    END SUBROUTINE BCART
 !
@@ -2586,7 +2586,7 @@ CONTAINS
        !
        ! Check convergence on constraints
        !
-       IF(GConstr%NConstr/=0) THEN
+       IF(GConstr%NConstr/=0.AND..NOT.GConstr%DoLagr) THEN
          ConstrRMSOld=ConstrRMS
          CALL ConstrConv(IntCs,VectIntAux%D,ConstrMax,ConstrRMS)
        ENDIF
@@ -2602,10 +2602,6 @@ CONTAINS
        CALL CALC_GcInvCartV(CholData,VectCartAux%D,VectCartAux2%D)
        !
        ! Project out rotations and translations 
-       ! from Cartesian displacements
-       ! this is especially important in the presence 
-       ! of Cartesian constraints,
-       ! or when sparse, approximate GcInv is available only.
        !
        IF(GTrfCtrl%DoTranslOff) &
          CALL TranslsOff(VectCartAux2%D,Print2)
@@ -2618,7 +2614,6 @@ CONTAINS
        CALL ScaleDispl(VectCartAux2%D,GBackTrf%MaxCartDiff, &
                        DiffMax,RMSD) 
        IF(.NOT.GConstr%DoLagr) THEN
-write(out,*) 'setting hard Cartesian constraints '
          CALL SetCartConstr(VectCartAux2%D,IntCs,GConstr%NCartConstr)
        ENDIF
        !
@@ -3325,8 +3320,9 @@ write(out,*) 'setting hard Cartesian constraints '
      !
      IF(GConstr%NConstr/=0) THEN
        IF(IStep>1) THEN
-         ConvConstr=(ConstrMax<GConstr%ConstrMaxCrit.OR. &
-           (ConstrRMS>ConstrRMSOld*GBackTrf%RMSCrit.AND.Istep>5)) 
+         ConvConstr=(GConstr%DoLagr.OR. &
+           ConstrMax<GConstr%ConstrMaxCrit.OR. &
+           (ConstrRMS>ConstrRMSOld*GBackTrf%RMSCrit.AND.IStep>5)) 
        ELSE
          ConvConstr=.FALSE.
        ENDIF

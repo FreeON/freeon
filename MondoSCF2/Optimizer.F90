@@ -567,6 +567,8 @@ CONTAINS
      IF(Refresh/=0) THEN
        CALL GetIntCs(XYZ,AtNum, &
          IntCs,NIntC,Refresh,SCRPath,GOpt%CoordCtrl,GOpt%Constr)
+       IF(NIntC==0) CALL Halt('Molecule has dissociated,'// &
+                     'optimizer did not find any internal coordinates.')
      ENDIF
      IF(NIntC/=0) THEN
        CALL INTCValue(IntCs,XYZ,GOpt%CoordCtrl%LinCrit)
@@ -607,7 +609,8 @@ CONTAINS
      !
      CALL LagrConv(GOpt%GOptStat,LagrDispl,LagrMult,GradMult)
      CALL GeOpConv(GOpt%Constr,GOpt%GOptStat,GOpt%CoordCtrl, &
-                 GOpt%GConvCrit,XYZ,ETot,ELagr,IntCs,IntOld,iCLONE,iGEO)
+                   GOpt%GConvCrit,XYZ,ETot,ELagr,IntCs,IntOld, &
+                   iCLONE,iGEO)
      !
      IF(GOpt%GOptStat%GeOpConvgd) THEN
        Convgd(iCLONE)=1
@@ -635,6 +638,7 @@ CONTAINS
      INTEGER                        :: I,J,NDim
      INTEGER                        :: NatmsLoc,NCart,NIntC,Print
      CHARACTER(LEN=*)               :: SCRPath 
+     TYPE(DBL_VECT)                 :: RotGrad,TrGrad
      !
      NatmsLoc=SIZE(XYZ,2)
      NCart=3*NatmsLoc
@@ -648,14 +652,20 @@ CONTAINS
      !
      CALL New(Grad,NDim)
      CALL New(CartGrad,NCart)
+     CALL New(RotGrad,NCart)
+     CALL New(TrGrad,NCart)
      CALL CartRNK2ToCartRNK1(CartGrad%D,GradIn)
      !
-     CALL GetCGradMax(GOpt%Constr,CartGrad%D,NCart, &
-                      IntCs,GOpt%GOptStat%IMaxCGrad,GOpt%GOptStat%MaxCGrad)
-     !
-     ! If requested, compute internal coord. gradients
+     CALL GetCGradMax(GOpt%Constr,CartGrad%D,NCart,  &
+                      IntCs,GOpt%GOptStat%IMaxCGrad, &
+                      GOpt%GOptStat%MaxCGrad)
      !
      IF(GOpt%TrfCtrl%DoInternals) THEN
+       !
+       ! Separate gradients into internal and outer components
+       !
+       CALL SepGrads(CartGrad%D,RotGrad%D,TrGrad%D,XYZ,Print)
+       !
        CALL New(IntGrad,NDim)
        CALL CartToInternal(XYZ,IntCs,CartGrad%D,IntGrad%D,&
          GOpt%GrdTrf,GOpt%CoordCtrl,GOpt%TrfCtrl,Print,SCRPath)
@@ -663,12 +673,14 @@ CONTAINS
        CALL Delete(IntGrad)
      ELSE
        Grad%D=CartGrad%D
+       TrGrad%D=Zero
+       RotGrad%D=Zero
      ENDIF
      CALL Delete(CartGrad)
      !
      ! Check for gradient-convergence
      !
-     CALL GrdConvrgd(GOpt%GOptStat,IntCs,Grad%D)
+     CALL GrdConvrgd(GOpt%GOptStat,IntCs,Grad%D,TrGrad%D,RotGrad%D)
      !
      ! Use Hessian matrix to calculate displacement
      !
@@ -698,6 +710,8 @@ CONTAINS
      ! to current structure
      !
      IF(GOpt%TrfCtrl%DoInternals) THEN 
+       CALL OrientMolecule(XYZ,TrGrad%D,RotGrad%D,GOpt%Hessian)
+       !
        CALL INTCValue(IntCs,XYZ,GOpt%CoordCtrl%LinCrit)
        IntCs%Value=IntCs%Value+Displ%D
        CALL InternalToCart(XYZ,IntCs,IntCs%Value,Print, &
@@ -707,6 +721,8 @@ CONTAINS
        CALL CartRNK1ToCartRNK2(Displ%D,XYZ,.TRUE.)
      ENDIF
      !
+     CALL Delete(RotGrad)
+     CALL Delete(TrGrad)
      CALL Delete(Displ)
    END SUBROUTINE RelaxGeom
 !
@@ -1040,6 +1056,8 @@ CONTAINS
      !
      IF(CtrlConstr%NConstr/=0) THEN
        CtrlStat%GeOpConvgd=CtrlStat%MaxLGrad<GConvCr%Grad.AND. &
+                           CtrlStat%MaxTrGrad<GConvCr%Grad.AND. &
+                           CtrlStat%MaxRotGrad<GConvCr%Grad.AND. &
                            MaxStreDispl<GConvCr%Stre.AND. &
                            MaxBendDispl<GConvCr%Bend.AND. &
                            MaxLinBDispl<GConvCr%LinB.AND. &
@@ -1048,6 +1066,8 @@ CONTAINS
      ELSE
      ! no constraints
        CtrlStat%GeOpConvgd=MaxCGrad<2.D0*GConvCr%Grad.AND. &
+                           CtrlStat%MaxTrGrad<GConvCr%Grad.AND. &
+                           CtrlStat%MaxRotGrad<GConvCr%Grad.AND. &
                            RMSGrad<GConvCr%Grad.AND. &
                            MaxGrad<GConvCr%Grad.AND. &
                            MaxStreDispl<GConvCr%Stre.AND. &
@@ -1062,8 +1082,8 @@ CONTAINS
      WRITE(*,399) iCLONE,iGEO,ETot
      WRITE(Out,399) iCLONE,iGEO,ETot
      IF(CtrlConstr%NConstr/=0.AND.CtrlConstr%DoLagr) THEN
-       WRITE(*,499) ETot+ELagr
-       WRITE(Out,499) ETot+ELagr
+       WRITE(*,499) ELagr
+       WRITE(Out,499) ELagr
      ENDIF
      !
      MaxStreDispl=MaxStreDispl/AngstromsToAu
@@ -1073,9 +1093,13 @@ CONTAINS
      MaxTorsDispl=MaxTorsDispl*180.D0/PI
      !
      WRITE(*,410) MaxGrad,IntCs%Atoms(IMaxGrad,1:4)
+     WRITE(*,555) CtrlStat%MaxTrGrad
+     WRITE(*,444) CtrlStat%MaxRotGrad
      WRITE(*,140) MaxCGrad,(IMaxCGrad-1)/3+1
      WRITE(*,420) RMSGrad
      WRITE(Out,410) MaxGrad,IntCs%Atoms(IMaxGrad,1:4)
+     WRITE(Out,555) CtrlStat%MaxTrGrad
+     WRITE(Out,444) CtrlStat%MaxRotGrad
      WRITE(Out,140) MaxCGrad,(IMaxCGrad-1)/3+1
      WRITE(Out,420) RMSGrad
      IF(CtrlConstr%NConstr/=0) THEN
@@ -1123,8 +1147,10 @@ CONTAINS
 399 FORMAT('       Clone = ',I6,' GeOp step = ',I6,' Total Energy = ',F20.8)
 400 FORMAT('Total Energy at Current Geometry = ',F20.8)
 401 FORMAT('                    Total Energy = ',F20.8)
-499 FORMAT('               ',6X,'             ',2X,' Total Lagrangian = ',F20.8)
+499 FORMAT('               ',6X,'             ',2X,'       Lagrangian = ',F20.8)
 410 FORMAT('                        Max Grad = ',F12.6,' between atoms ',4I4)
+555 FORMAT('                      Max TrGrad = ',F12.6)
+444 FORMAT('                     Max RotGrad = ',F12.6)
 140 FORMAT('     Max Unconstrained Cart Grad = ',F12.6,'      on atom  ',4I4)
 420 FORMAT('                        RMS Grad = ',F12.6)
 510 FORMAT('Max Grad on Unconstrained Coords = ',F12.6,' between atoms ',4I4)
@@ -1392,8 +1418,8 @@ CONTAINS
        TrfC%DoTranslOff=.FALSE.
        TrfC%DoRotOff=.FALSE.
      ENDIF
-     IF(GConstr%NCartConstr>0) TrfC%DoTranslOff=.FALSE.
-     IF(GConstr%NCartConstr>12) TrfC%DoRotOff=.FALSE.
+    !IF(GConstr%NCartConstr>0) TrfC%DoTranslOff=.FALSE.
+    !IF(GConstr%NCartConstr>12) TrfC%DoRotOff=.FALSE.
      IF(CoordC%CoordType/=CoordType_Cartesian) THEN
        TrfC%DoInternals=.TRUE.
      ELSE
@@ -1717,15 +1743,16 @@ write(*,*) 'aft DiagDispl'
 !
 !-------------------------------------------------------------------
 !
-   SUBROUTINE GrdConvrgd(GStat,IntCs,Grad)
+   SUBROUTINE GrdConvrgd(GStat,IntCs,Grad,TrGrad,RotGrad)
      TYPE(GOptStat)            :: GStat
      TYPE(INTC)                :: IntCs
-     REAL(DOUBLE),DIMENSION(:) :: Grad
+     REAL(DOUBLE),DIMENSION(:) :: Grad,TrGrad,RotGrad
      REAL(DOUBLE)              :: Sum
-     INTEGER                   :: I,J,NDim,NIntC
+     INTEGER                   :: I,J,NDim,NIntC,NCart
      !
      NDim=SIZE(Grad)
      NIntC=SIZE(IntCs%Def)
+     NCart=SIZE(TrGrad)
      !
      GStat%IMaxGrad=1
      GStat%MaxGrad=ABS(Grad(1))
@@ -1756,6 +1783,11 @@ write(*,*) 'aft DiagDispl'
        ENDIF
      ENDDO
      IF(J/=0) GStat%RMSGradNoConstr=SQRT(GStat%RMSGradNoConstr)/DBLE(J)
+     !
+     ! Check gradients of translation and rotation
+     !
+     GStat%MaxTrGrad=MAX(MAXVAL(TrGrad),MAXVAL(-TrGrad))
+     GStat%MaxRotGrad=MAX(MAXVAL(RotGrad),MAXVAL(-RotGrad))
    END SUBROUTINE GrdConvrgd
 !
 !-------------------------------------------------------------------
@@ -1837,7 +1869,8 @@ write(*,*) 'aft DiagDispl'
          NConstr=NConstr+1
          IF(NConstr>NLagr) CALL Halt('Dimension error in CalcLagrMult') 
          Sum=Zero
-         Hess=ABS(LagrMult(NConstr))
+         !Hess=ABS(LagrMult(NConstr))
+         Hess=GHess%Stre
          J=IntCs%Atoms(I,1)
          IF(IntCs%Def(I)(1:4)/='CART') THEN
            Sum=IntGrad%D(I)
@@ -1882,6 +1915,56 @@ write(*,*) 'aft DiagDispl'
        ENDIF
      ENDDO
    END SUBROUTINE LagrEnergy
+!
+!-------------------------------------------------------------------
+!
+   SUBROUTINE SepGrads(CartGrad,RotGrad,TrGrad,XYZ,Print)
+     REAL(DOUBLE),DIMENSION(:)   :: CartGrad,RotGrad,TrGrad 
+     REAL(DOUBLE),DIMENSION(:,:) :: XYZ
+     INTEGER                     :: Print
+     INTEGER                     :: I,J,NatmsLoc,NCart
+     TYPE(DBL_VECT)              :: Aux
+     LOGICAL                     :: Print2
+     !
+     NatmsLoc=SIZE(XYZ,2)
+     NCart=3*NatmsLoc
+     IF(NCart/=SIZE(CartGrad)) CALL Halt('Dimension error in SepGrads.')
+     Print2= Print>=DEBUG_GEOP_MAX
+     CALL New(Aux,NCart)
+     !
+     Aux%D=CartGrad
+     CALL TranslsOff(CartGrad,Print2)
+     TrGrad=Aux%D-CartGrad
+     Aux%D=CartGrad
+     CALL RotationsOff(CartGrad,XYZ,Print2)
+     RotGrad=Aux%D-CartGrad
+     !
+     CALL Delete(Aux)  
+   END SUBROUTINE SepGrads
+!
+!-------------------------------------------------------------------
+!
+   SUBROUTINE OrientMolecule(XYZ,TrGrad,RotGrad,GHess)
+     REAL(DOUBLE),DIMENSION(:,:) :: XYZ
+     REAL(DOUBLE),DIMENSION(:)   :: TrGrad,RotGrad
+     REAL(DOUBLE)                :: Hess
+     INTEGER                     :: NatmsLoc,NCart,I,J
+     TYPE(DBL_VECT)              :: VectCart
+     TYPE(Hessian)               :: GHess
+     !
+     NatmsLoc=SIZE(XYZ,2)
+     NCart=SIZE(TrGrad) 
+     IF(NCart/=3*NatmsLoc) CALL Halt('Dimension error in OrientMolecule.')
+     CALL New(VectCart,NCart)
+     !
+     CALL CartRNK2ToCartRNK1(VectCart%D,XYZ) 
+     Hess=GHess%Stre
+     VectCart%D=VectCart%D-Hess*TrGrad
+     VectCart%D=VectCart%D-Hess*RotGrad
+     CALL CartRNK1ToCartRNK2(VectCart%D,XYZ)
+     !
+     CALL Delete(VectCart)
+   END SUBROUTINE OrientMolecule
 !
 !-------------------------------------------------------------------
 !
