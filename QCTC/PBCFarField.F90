@@ -1,5 +1,4 @@
 MODULE PBCFarField
-#ifdef PERIODIC
   USE Derivedtypes
   USE GlobalScalars   
   USE GlobalObjects
@@ -23,16 +22,12 @@ MODULE PBCFarField
   REAL(DOUBLE)                        :: E_PFF,E_DP
   REAL(DOUBLE)                        :: PDist,BDist,RDist
   REAL(DOUBLE),DIMENSION(3)           :: BOXDist
-
-#ifdef PARALLEL_CLONES
+!
   TYPE(DBL_VECT)                      :: TensorC,TensorS
   TYPE(DBL_VECT)                      :: TenRhoC,TenRhoS
   TYPE(DBL_VECT)                      :: RhoC,RhoS
   TYPE(DBL_VECT)                      :: PFFBraC,PFFBraS
   TYPE(DBL_VECT)                      :: PFFKetC,PFFKetS
-#endif
-
-!
   CONTAINS
 !====================================================================================
 !   Setup the PBCFarField Matrix. 
@@ -43,23 +38,13 @@ MODULE PBCFarField
       INTEGER                         :: I,J,K,NC,L,LM,LP
       REAL(DOUBLE)                    :: Layers,OL,NL,FAC,Px,Py,Pz
       REAL(DOUBLE),DIMENSION(3)       :: PQ
-#ifdef PARALLEL_CLONES
-      CALL Get(CS_IN,Tag_O=CurBase)
+!
       IF(GMLoc%PBC%Dimen==0) RETURN
       CALL Get(MaxEll,'MaxEll')
       CALL New(TensorC,LSP(2*MaxEll),0)
       CALL New(TensorS,LSP(2*MaxEll),0) 
       CALL Get(TensorC,'PFFTensorC')
       CALL Get(TensorS,'PFFTensorS')
-#else
-      CALL Get(CS_IN,'CS_IN',Tag_O=CurBase)
-      IF(GMLoc%PBC%Dimen==0) RETURN
-      CALL Get(MaxEll,'MaxEll'//CurBase)
-      CALL New(TensorC,LSP(2*MaxEll),0)
-      CALL New(TensorS,LSP(2*MaxEll),0) 
-      CALL Get(TensorC,'PFFTensorC'//CurBase)
-      CALL Get(TensorS,'PFFTensorS'//CurBase)
-#endif
 !     Initialize Arrays
       CALL New(TenRhoC,LSP(MaxEll),0)
       CALL New(TenRhoS,LSP(MaxEll),0)
@@ -100,22 +85,23 @@ MODULE PBCFarField
 !====================================================================================
 !   Calculate the FarField Component of the J matrix
 !====================================================================================
-    FUNCTION CTraxFF(Prim,HGBra,GMLoc)
+    FUNCTION CTraxFF(Prim,HGBra,GMLoc) RESULT(CTFF)
       TYPE(PrimPair)                   :: Prim
       INTEGER                          :: LM
-      REAL(DOUBLE)                     :: PiZ,CTraxFF
+      REAL(DOUBLE)                     :: PiZ,CTFF
       REAL(DOUBLE), DIMENSION(3)       :: PQ,HGDipole
       REAL(DOUBLE), DIMENSION(1:)      :: HGBra
       TYPE(CRDS)                       :: GMLoc
-      CTraxFF=Zero   
-      ! Transform <Bra| coefficients from HG to SP
+!
+      CTFF=Zero
+!     Transform <Bra| coefficients from HG to SP
       PiZ=(Pi/Prim%Zeta)**(ThreeHalves)
       CALL HGToSP_Gen(Prim%Ell,PiZ,HGBra,PFFKetC%D,PFFKetS%D)   
       PQ = Prim%P-GMLoc%PBC%CellCenter   
-      ! Contract
+!     Contract
       IF(NoTranslate(PQ)) THEN
          DO LM = 0,LSP(Prim%Ell)
-            CTraxFF = CTraxFF + PFFKetC%D(LM)*TenRhoC%D(LM)+PFFKetS%D(LM)*TenRhoS%D(LM)
+            CTFF = CTFF + PFFKetC%D(LM)*TenRhoC%D(LM)+PFFKetS%D(LM)*TenRhoS%D(LM)
          ENDDO
       ELSE
          PFFBraC%D=Zero 
@@ -123,82 +109,113 @@ MODULE PBCFarField
          CALL Regular(MaxELL,PQ(1),PQ(2),PQ(3))
          CALL XLate77(MaxEll,Prim%Ell,PFFBraC%D,PFFBraS%D,Cpq,Spq,PFFKetC%D,PFFKetS%D)
          DO LM=0,LSP(MaxEll)
-            CTraxFF = CTraxFF + PFFBraC%D(LM)*TenRhoC%D(LM)+PFFBraS%D(LM)*TenRhoS%D(LM)
+            CTFF = CTFF + PFFBraC%D(LM)*TenRhoC%D(LM)+PFFBraS%D(LM)*TenRhoS%D(LM)
          ENDDO
       ENDIF
-      ! Include the Dipole correction to FarFC and FarFS
+!     Include the Dipole correction to FarFC and FarFS
       PQ=Prim%P-GMLoc%PBC%CellCenter 
       IF(GMLoc%PBC%Dimen==1) THEN
          RETURN
       ELSEIF(GMLoc%PBC%Dimen==2) THEN
          HGDipole = CalculateDiPole(Prim%Ell,Prim%Zeta,PQ(1),PQ(2),PQ(3),HGBra(1:))
-         IF(.NOT. GMLoc%PBC%AutoW(1)) CTraxFF  = CTraxFF + GMLoc%PBC%DipoleFAC*HGDipole(1)*RhoPoles%DPole%D(1)         
-         IF(.NOT. GMLoc%PBC%AutoW(2)) CTraxFF  = CTraxFF + GMLoc%PBC%DipoleFAC*HGDipole(2)*RhoPoles%DPole%D(2)
-         IF(.NOT. GMLoc%PBC%AutoW(3)) CTraxFF  = CTraxFF + GMLoc%PBC%DipoleFAC*HGDipole(3)*RhoPoles%DPole%D(3)
+         IF(.NOT. GMLoc%PBC%AutoW(1)) CTFF  = CTFF + GMLoc%PBC%DipoleFAC*HGDipole(1)*RhoPoles%DPole%D(1)         
+         IF(.NOT. GMLoc%PBC%AutoW(2)) CTFF  = CTFF + GMLoc%PBC%DipoleFAC*HGDipole(2)*RhoPoles%DPole%D(2)
+         IF(.NOT. GMLoc%PBC%AutoW(3)) CTFF  = CTFF + GMLoc%PBC%DipoleFAC*HGDipole(3)*RhoPoles%DPole%D(3)
          RETURN
       ELSEIF(GMLoc%PBC%Dimen==3) THEN
          HGDipole = CalculateDiPole(Prim%Ell,Prim%Zeta,PQ(1),PQ(2),PQ(3),HGBra(1:))
-         CTraxFF  = CTraxFF + GMLoc%PBC%DipoleFAC*(HGDipole(1)*RhoPoles%DPole%D(1) &
-              + HGDipole(2)*RhoPoles%DPole%D(2) &
-              + HGDipole(3)*RhoPoles%DPole%D(3) )
+         CTFF  = CTFF + GMLoc%PBC%DipoleFAC*(HGDipole(1)*RhoPoles%DPole%D(1) &
+                            + HGDipole(2)*RhoPoles%DPole%D(2) &
+                            + HGDipole(3)*RhoPoles%DPole%D(3) )
          RETURN
       ENDIF
+!
     END FUNCTION CTraxFF
 !====================================================================================
-!   Calculate the FarField Component of the JForce matrix
+!   Calculate the FarField Component of the J matrix
 !====================================================================================
-   FUNCTION CTraxFF_Grad(Prim,HGBra,GMLoc)
+    FUNCTION CTraxFF_Grad(Prim,HGBra,GMLoc) RESULT(CTFF)
       TYPE(PrimPair)                   :: Prim
       INTEGER                          :: LM
-      REAL(DOUBLE)                     :: PiZ,CTraxFF_Grad
+      REAL(DOUBLE)                     :: PiZ,CTFF
       REAL(DOUBLE), DIMENSION(3)       :: PQ,HGDipole
       REAL(DOUBLE), DIMENSION(1:)      :: HGBra
       TYPE(CRDS)                       :: GMLoc
-! 
-      CtraxFF_Grad = Zero   
 !
+      CTFF=Zero
 !     Transform <Bra| coefficients from HG to SP
-!
       PiZ=(Pi/Prim%Zeta)**(ThreeHalves)
       CALL HGToSP_Gen(Prim%Ell,PiZ,HGBra,PFFKetC%D,PFFKetS%D)   
       PQ = Prim%P-GMLoc%PBC%CellCenter   
-!
 !     Contract
-!      
       IF(NoTranslate(PQ)) THEN
          DO LM = 0,LSP(Prim%Ell)
-            CTraxFF_Grad = CTraxFF_Grad + PFFKetC%D(LM)*TenRhoC%D(LM)+PFFKetS%D(LM)*TenRhoS%D(LM)
+            CTFF = CTFF + PFFKetC%D(LM)*TenRhoC%D(LM)+PFFKetS%D(LM)*TenRhoS%D(LM)
          ENDDO
       ELSE
-         PFFBraC%D = Zero 
-         PFFBraS%D = Zero 
+         PFFBraC%D=Zero 
+         PFFBraS%D=Zero 
          CALL Regular(MaxELL,PQ(1),PQ(2),PQ(3))
-         CALL XLate77(MaxELL,Prim%Ell,PFFBraC%D,PFFBraS%D,Cpq,Spq,PFFKetC%D,PFFKetS%D)
-         DO LM = 0,LSP(MaxEll)
-            CTraxFF_Grad = CTraxFF_Grad + PFFBraC%D(LM)*TenRhoC%D(LM)+PFFBraS%D(LM)*TenRhoS%D(LM)
+         CALL XLate77(MaxEll,Prim%Ell,PFFBraC%D,PFFBraS%D,Cpq,Spq,PFFKetC%D,PFFKetS%D)
+         DO LM=0,LSP(MaxEll)
+            CTFF = CTFF + PFFBraC%D(LM)*TenRhoC%D(LM)+PFFBraS%D(LM)*TenRhoS%D(LM)
          ENDDO
       ENDIF
-!
-!     Include the Dipole and Quadripole Correction to FarFC and FarFS
-!
-      PQ = Prim%P-GMLoc%PBC%CellCenter 
-      IF(GMLoc%PBC%Dimen == 1) THEN
+!     Include the Dipole correction to FarFC and FarFS
+      PQ=Prim%P-GMLoc%PBC%CellCenter 
+      IF(GMLoc%PBC%Dimen==1) THEN
          RETURN
-      ELSEIF(GMLoc%PBC%Dimen == 2) THEN
+      ELSEIF(GMLoc%PBC%Dimen==2) THEN
          HGDipole = CalculateDiPole(Prim%Ell,Prim%Zeta,PQ(1),PQ(2),PQ(3),HGBra(1:))
-         IF(.NOT. GMLoc%PBC%AutoW(1)) CTraxFF_Grad  = CTraxFF_Grad + GMLoc%PBC%DipoleFAC*HGDipole(1)*RhoPoles%DPole%D(1)
-         IF(.NOT. GMLoc%PBC%AutoW(2)) CTraxFF_Grad  = CTraxFF_Grad + GMLoc%PBC%DipoleFAC*HGDipole(2)*RhoPoles%DPole%D(2)
-         IF(.NOT. GMLoc%PBC%AutoW(3)) CTraxFF_Grad  = CTraxFF_Grad + GMLoc%PBC%DipoleFAC*HGDipole(3)*RhoPoles%DPole%D(3)
+         IF(.NOT. GMLoc%PBC%AutoW(1)) CTFF  = CTFF + GMLoc%PBC%DipoleFAC*HGDipole(1)*RhoPoles%DPole%D(1)         
+         IF(.NOT. GMLoc%PBC%AutoW(2)) CTFF  = CTFF + GMLoc%PBC%DipoleFAC*HGDipole(2)*RhoPoles%DPole%D(2)
+         IF(.NOT. GMLoc%PBC%AutoW(3)) CTFF  = CTFF + GMLoc%PBC%DipoleFAC*HGDipole(3)*RhoPoles%DPole%D(3)
          RETURN
-      ELSEIF(GMLoc%PBC%Dimen == 3) THEN
-         HGDipole = CalculateDiPole(Prim%Ell,Prim%Zeta,-PQ(1),-PQ(2),-PQ(3),HGBra(1:))
-         CTraxFF_Grad  = CTraxFF_Grad + GMLoc%PBC%DipoleFAC*(HGDipole(1)*RhoPoles%DPole%D(1) &
-                                                        + HGDipole(2)*RhoPoles%DPole%D(2) &
-                                                        + HGDipole(3)*RhoPoles%DPole%D(3) )
+      ELSEIF(GMLoc%PBC%Dimen==3) THEN
+         HGDipole = CalculateDiPole(Prim%Ell,Prim%Zeta,PQ(1),PQ(2),PQ(3),HGBra(1:))
+         CTFF  = CTFF + GMLoc%PBC%DipoleFAC*(HGDipole(1)*RhoPoles%DPole%D(1) &
+                                           + HGDipole(2)*RhoPoles%DPole%D(2) &
+                                           + HGDipole(3)*RhoPoles%DPole%D(3) )
          RETURN
       ENDIF
 !
     END FUNCTION CTraxFF_Grad
+!====================================================================================
+!   Calculate the FarField Component of the JForce matrix
+!====================================================================================
+   FUNCTION CTraxFF_LF(Prim,HGBra,GMLoc,I) RESULT(CTFF)
+     TYPE(PrimPair)                   :: Prim
+     INTEGER                          :: I,LM
+     REAL(DOUBLE)                     :: PiZ,CTFF
+     REAL(DOUBLE), DIMENSION(3)       :: PQ,HGDipole
+     REAL(DOUBLE), DIMENSION(1:)      :: HGBra
+     TYPE(CRDS)                       :: GMLoc
+!
+     CTFF = Zero
+     RETURN
+!    Transform <Bra| coefficients from HG to SP
+     PiZ=(Pi/Prim%Zeta)**(ThreeHalves)
+     CALL HGToSP_Gen(Prim%Ell,PiZ,HGBra,PFFKetC%D,PFFKetS%D)   
+     PQ = Prim%P-GMLoc%PBC%CellCenter   
+!    Contract
+!***
+!    Have to construct the Tensors in MakePFFT    M[l,m,I] = Sum_[R] n_I M_[l,m,R]
+!***
+     IF(NoTranslate(PQ)) THEN
+        DO LM = 0,LSP(Prim%Ell)
+!           CTFF = CTFF + PFFKetC%D(LM)*TenRhoC_LF%D(LM,I)+PFFKetS%D(LM)*TenRhoS_LF%D(LM,I)
+        ENDDO
+     ELSE
+        PFFBraC%D=Zero 
+        PFFBraS%D=Zero 
+        CALL Regular(MaxELL,PQ(1),PQ(2),PQ(3))
+        CALL XLate77(MaxEll,Prim%Ell,PFFBraC%D,PFFBraS%D,Cpq,Spq,PFFKetC%D,PFFKetS%D)
+        DO LM=0,LSP(MaxEll)
+!           CTFF = CTFF + PFFBraC%D(LM)*TenRhoC_LF%D(LM,I)+PFFBraS%D(LM)*TenRhoS_LF%D(LM,I)
+        ENDDO
+     ENDIF
+!
+   END FUNCTION CTraxFF_LF
 !---------------------------------------------------------------------------------------------- 
 !   Print out Periodic Info
 !----------------------------------------------------------------------------------------------  
@@ -375,6 +392,6 @@ MODULE PBCFarField
       LOGICAL                   :: NoTranslate
       NoTranslate = (ABS(X(1)).LT.TOL) .AND. (ABS(X(2)).LT.TOL) .AND. (ABS(X(3)).LT.TOL)
     END FUNCTION NoTranslate
-#endif
+!
 END MODULE PBCFarField
 

@@ -14,9 +14,7 @@ MODULE JGen
   USE BraBloks
   USE PoleTree
   USE TreeWalk
-#ifdef PERIODIC
   USE PBCFarField
-#endif
 #ifdef PARALLEL
   USE FastMatrices
 #endif
@@ -37,10 +35,8 @@ MODULE JGen
       TYPE(AtomPair)            :: Pair
       INTEGER                   :: AtA,AtB
       INTEGER                   :: JP,K,NA,NB,NAB,P,Q,R,I1,I2,I3,L,I
-#ifdef PERIODIC 
       INTEGER                   :: NC
-      REAL(DOUBLE),DIMENSION(3) :: B
-#endif    
+      REAL(DOUBLE),DIMENSION(3) :: B  
 !------------------------------------------------------------------------------- 
 !     Initialize the matrix and associated indecies
 #ifdef PARALLEL
@@ -64,7 +60,6 @@ MODULE JGen
                ! Compute only the lower triangle of symmetric J
                IF(AtB<=AtA)THEN  
 #endif
-#ifdef PERIODIC
                   B = Pair%B
                   DO NC=1,CS_OUT%NCells
                      Pair%B   = B+CS_OUT%CellCarts%D(:,NC)
@@ -77,16 +72,6 @@ MODULE JGen
 #endif
                      ENDIF
                   ENDDO
-#else
-
-#ifdef PARALLEL
-                  CALL AddFASTMATBlok(J,AtA,AtB,Two*JBlock(Pair,PoleRoot))
-#else
-                  J%MTrix%D(R:R+NAB-1)=Two*JBlock(Pair,PoleRoot)
-#endif
-
-#endif
-
 #ifndef PARALLEL
                ENDIF
 #endif
@@ -246,7 +231,6 @@ MODULE JGen
                       IF(PExtent>Zero.AND.DP2>Zero)THEN
 !                        Initialize <KET|
                          CALL SetKet(Prim,PExtent)
-#ifdef PERIODIC  
 !                        WRAP the center of Phi_A(r) Phi_B(r+R) back into the box
                          CALL AtomCyclic(GM,Prim%P)
                          PTmp=Prim%P
@@ -258,10 +242,6 @@ MODULE JGen
                             CALL JWalk(PoleRoot) 
                          ENDDO
                          Prim%P=PTmp
-#else
-!                        Walk the walk
-                         CALL JWalk(PoleRoot)
-#endif
 !-------------------------------------------------------------------------------
 !                        <BRA|KET>
                          IA = IndexA
@@ -284,23 +264,20 @@ MODULE JGen
                                ENDDO
                             ENDDO
                          ENDDO
-#ifdef PERIODIC
-!                       Calculate the FarField Multipole Contribution to the Matrix Element
-!                       Contract the Primative MM  with the density MM
-                        IF(GM%PBC%Dimen > 0) THEN
-                           IA = IndexA
-                           DO LMNA=StartLA,StopLA
-                              IA=IA+1
-                              IB=IndexB
-                              DO LMNB=StartLB,StopLB  
-                                 IB=IB+1
-                                 ! ANOTHER PROBLEM WITH COPY IN COPY OUT HERE 
-                                 JBlk(IA,IB)=JBlk(IA,IB)+CTraxFF(Prim,HGBra%D(:,IA,IB),GM)
-                              ENDDO
-                           ENDDO
-                        ENDIF
-#endif
-                      ENDIF                     
+!                        Calculate the FarField Multipole Contribution to the Matrix Element
+!                        Contract the Primative MM  with the density MM
+                         IF(GM%PBC%Dimen > 0) THEN
+                            IA = IndexA
+                            DO LMNA=StartLA,StopLA
+                               IA=IA+1
+                               IB=IndexB
+                               DO LMNB=StartLB,StopLB  
+                                  IB=IB+1
+                                  JBlk(IA,IB)=JBlk(IA,IB)+CTraxFF(Prim,HGBra%D(:,IA,IB),GM)
+                               ENDDO
+                            ENDDO
+                         ENDIF
+                      ENDIF
                    ENDIF !End primitive thresholding
                 ENDDO
              ENDDO

@@ -16,9 +16,7 @@ PROGRAM JForce
   USE AtomPairs
   USE BraBloks
   USE PoleTree
-#ifdef PERIODIC
   USE PBCFarField
-#endif
   USE BlokTrPdJ
   USE BlokTrWdS
   USE NuklarE
@@ -39,11 +37,10 @@ PROGRAM JForce
   INTEGER                      :: AtA,AtB,A1,A2,MA,NB,MN1,JP,Q
   REAL(DOUBLE)                 :: JFrcChk
   CHARACTER(LEN=6),PARAMETER   :: Prog='JForce'
-#ifdef PERIODIC 
-  INTEGER                      :: NC
-  REAL(DOUBLE),DIMENSION(3)    :: B,F_nlm,nlm
-  REAL(DOUBLE),DIMENSION(3,3)  :: LatFrc_J
-#endif
+  INTEGER                      :: NC,I,J
+  REAL(DOUBLE),DIMENSION(3)    :: B,nlm
+  REAL(DOUBLE),DIMENSION(15)   :: F_nlm
+  TYPE(DBL_RNK2)               :: LatFrc_J
 #ifdef MMech
   INTEGER                      :: NatmsLoc,I,I1,I2
   TYPE(DBL_VECT)               :: MMJFrc
@@ -56,12 +53,7 @@ PROGRAM JForce
 !-------------------------------------------------------------------------------- 
 ! Start up macro
   CALL StartUp(Args,Prog,Serial_O=.FALSE.)
-#ifdef PERIODIC 
-#ifdef PARALLEL_CLONES
-#else
-  CALL Get(CS_OUT,'CS_OUT',Tag_O=CurBase)
-#endif
-#endif
+!
 #ifdef MMech
   IF(HasQM()) THEN
 !    Get basis set and geometry
@@ -135,6 +127,10 @@ PROGRAM JForce
 !--------------------------------------------------------------------------------
 ! Compute the Coulomb contribution to the force in O(N Lg N)
 !--------------------------------------------------------------------------------
+!
+  CALL New(LatFrc_J,(/3,3/))
+  LatFrc_J%D = Zero
+!
 #ifdef MMech
   IF(HasQM()) THEN
 #endif
@@ -154,14 +150,22 @@ PROGRAM JForce
      MA=BSiz%I(AtA)
      A1=3*(AtA-1)+1
      A2=3*AtA
-     JFrc%D(A1:A2)= dNukE(GMLoc,AtA)
-     DO JP=P%RowPt%I(AtA),P%RowPt%I(AtA+1)-1
+     F_nlm = dNukE(GMLoc,AtA)
+     JFrc%D(A1:A2)= Two*F_nlm(1:3)
+!    Store Inner Nuc Lattice Forces
+     LatFrc_J%D(1,1:3) =   LatFrc_J%D(1,1:3) + F_nlm(7:9)
+     LatFrc_J%D(2,1:3) =   LatFrc_J%D(2,1:3) + F_nlm(10:12)
+     LatFrc_J%D(3,1:3) =   LatFrc_J%D(3,1:3) + F_nlm(13:15)
+!    Outer Nuc Lattice Forces
+     nlm        = AtomToFrac(GMLoc,GMLoc%Carts%D(:,AtA))
+     LatFrc_J%D = LatFrc_J%D + Two*LaticeForce(GMLoc,nlm,F_nlm(1:3))
+!    Start AtB Loop
+     DO JP=P%RowPt%I(AtA),P%RowPt%I(AtA+1)-1 
         AtB=P%ColPt%I(JP)
-        IF(SetAtomPair(GMLoc,BS,AtA,AtB,Pair))THEN
+        IF(SetAtomPair(GMLoc,BS,AtA,AtB,Pair)) THEN 
            Q=P%BlkPt%I(JP)
            NB=BSiz%I(AtB)
            MN1=MA*NB-1
-#ifdef PERIODIC
            B=Pair%B
            DO NC=1,CS_OUT%NCells
               Pair%B=B+CS_OUT%CellCarts%D(:,NC)
@@ -169,18 +173,31 @@ PROGRAM JForce
                       +(Pair%A(2)-Pair%B(2))**2 &
                       +(Pair%A(3)-Pair%B(3))**2
               IF(TestAtomPair(Pair))THEN
-                 F_nlm(1:3)    = TrPdJ(Pair,P%MTrix%D(Q:Q+MN1),GMLoc)
-                 JFrc%D(A1:A2) = JFrc%D(A1:A2) + F_nlm(1:3)
+                 F_nlm = TrPdJ(Pair,P%MTrix%D(Q:Q+MN1),GMLoc)
+                 IF(Pair%SameAtom) THEN
+                    JFrc%D(A1:A2) = JFrc%D(A1:A2) +  Four*F_nlm(4:6)
+                 ELSE
+                    JFrc%D(A1:A2) = JFrc%D(A1:A2) + Eight*F_nlm(1:3)
+                 ENDIF
+!                Store Inner J Lattice Forces
+                 LatFrc_J%D(1,1:3) =   LatFrc_J%D(1,1:3) + Two*F_nlm(7:9)
+                 LatFrc_J%D(2,1:3) =   LatFrc_J%D(2,1:3) + Two*F_nlm(10:12)
+                 LatFrc_J%D(3,1:3) =   LatFrc_J%D(3,1:3) + Two*F_nlm(13:15)
+!                Outer Lattice J Forces
+                 nlm        = AtomToFrac(GMLoc,Pair%A) 
+                 LatFrc_J%D = LatFrc_J%D+Four*LaticeForce(GMLoc,nlm,F_nlm(1:3))
+                 nlm        = AtomToFrac(GMLoc,Pair%B) 
+                 LatFrc_J%D = LatFrc_J%D+Four*LaticeForce(GMLoc,nlm,(F_nlm(4:6)-F_nlm(1:3)))
               ENDIF
            ENDDO
-#else
-           JFrc%D(A1:A2)=JFrc%D(A1:A2)+TrPdJ(Pair,P%MTrix%D(Q:Q+MN1),GMLoc)
-#endif
+!
         ENDIF
      ENDDO
   ENDDO
-! Closed shell...
-  JFrc%D=Two*JFrc%D
+! Dipole Correction
+  DO I=1,3
+     LatFrc_J%D(I,I) = LatFrc_J%D(I,I)-E_DP/GMLoc%PBC%BoxShape(I,I)
+  ENDDO  
 #ifdef PARALLEL
   JFrcEndTm = MPI_Wtime()
   JFrcTm = JFrcEndTm-JFrcBegTm
@@ -267,7 +284,6 @@ PROGRAM JForce
      ENDIF
   ENDIF
 #else
-
 #ifdef PARALLEL
   TotFrcComp = 3*GMLoc%Natms
   CALL New(TotJFrc,TotFrcComp)
@@ -282,6 +298,10 @@ PROGRAM JForce
   Frc%D=Frc%D+JFrc%D
   CALL PChkSum(Frc,'Frc after dJ/dR added',Proc_O=Prog)  
   CALL Put(Frc,'GradE',Tag_O=CurGeom)
+!
+  CALL Put(LatFrc_J,'LatFrc_J',Tag_O=CurGeom)
+  CALL Delete(LatFrc_J)
+!
   CALL Delete(Frc)
   CALL Delete(BS)
   CALL Delete(GMLoc)

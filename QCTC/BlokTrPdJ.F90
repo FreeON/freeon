@@ -25,35 +25,39 @@ MODULE BlokTrPdJ
 !
 !=======================================================================================
      FUNCTION TrPdJ(Pair,P,GMLoc) RESULT(Vck)
-       TYPE(AtomPair)                           :: Pair
-       TYPE(CRDS)                               :: GMLoc
+       TYPE(AtomPair)                             :: Pair
+       TYPE(CRDS)                                 :: GMLoc
 !
-       REAL(DOUBLE),DIMENSION(Pair%NA,Pair%NB)  :: P
-       REAL(DOUBLE),DIMENSION(Pair%NA,Pair%NB,3):: dJ
-       REAL(DOUBLE),DIMENSION(3)                :: PTmp,Vck
-       REAL(DOUBLE),DIMENSION(0:SPLen)          :: SPBraC,SPBraS 
-       REAL(DOUBLE)                             :: ZetaA,ZetaB,EtaAB,EtaIn,    &
-                                                   XiAB,ExpAB,CA,CB,CC,Ov,     &
-                                                   PAx,PAy,PAz,PBx,PBy,PBz,    &
-                                                   MDx,MDxy,MDxyz,Amp2,MaxAmp, &
-                                                   Pab,JNorm,Tau,OmegaMin,     &
-                                                   PExtent,PStrength,Ext
-       INTEGER                                  :: KA,KB,CFA,CFB,PFA,PFB,AtA,ATB,    &
-                                                   IndexA,IndexB,              &
-                                                   StartLA,StartLB,            &
-                                                   StopLA,StopLB
-       INTEGER                                  :: I,J,K,L,MaxLA,MaxLB,IA,IB,  &
-                                                   LMNA,LMNB,LA,LB,MA,MB,    &
-                                                   NA,NB,LAB,MAB,NAB,LM,LMN, &
-                                                   Ell,EllA,EllB,EllAB,LenAB,&
-                                                   HGLenEll,SPLenEll
-       REAL(DOUBLE), EXTERNAL                   :: BlkTrace_2 
-#ifdef PERIODIC
-       INTEGER                                  :: NC
-       REAL(DOUBLE)                             :: Px,Py,Pz
-#endif
+       REAL(DOUBLE),DIMENSION(Pair%NA,Pair%NB)    :: P
+       REAL(DOUBLE),DIMENSION(Pair%NA,Pair%NB,15) :: dJ
+       REAL(DOUBLE),DIMENSION(3)                  :: PTmp,PShft
+       REAL(DOUBLE),DIMENSION(0:SPLen)            :: SPBraC,SPBraS 
+       REAL(DOUBLE)                               :: ZetaA,ZetaB,EtaAB,EtaIn,    &
+                                                     XiAB,ExpAB,CA,CB,CC,Ov,     &
+                                                     PAx,PAy,PAz,PBx,PBy,PBz,    &
+                                                     MDx,MDxy,MDxyz,Amp2,MaxAmp, &
+                                                     Pab,JNorm,Tau,OmegaMin,     &
+                                                     PExtent,PStrength,Ext
+       INTEGER                                    :: KA,KB,CFA,CFB,PFA,PFB,AtA,AtB,    &
+                                                     IndexA,IndexB,              &
+                                                     StartLA,StartLB,            &
+                                                     StopLA,StopLB
+       INTEGER                                    :: I,J,K,L,MaxLA,MaxLB,IA,IB,  &
+                                                     LMNA,LMNB,LA,LB,MA,MB,    &
+                                                     NA,NB,LAB,MAB,NAB,LM,LMN, &
+                                                     Ell,EllA,EllB,EllAB,LenAB,&
+                                                     HGLenEll,SPLenEll,KI 
+       REAL(DOUBLE), EXTERNAL                     :: BlkTrace_2 
+       INTEGER                                    :: NC
+       REAL(DOUBLE)                               :: Px,Py,Pz,HGFac
+!
+       REAL(DOUBLE),DIMENSION(15)                 :: Vck
+       REAL(DOUBLE),DIMENSION(3)                  :: nlm
+       REAL(DOUBLE),DIMENSION(0:SPLen,3)          :: SPKetC_L,SPKetS_L
+       REAL(DOUBLE),DIMENSION(1:HGLen,3)          :: HGKet_L
+       REAL(DOUBLE),DIMENSION(1:HGLen)            :: HGKet_old
+       REAL(DOUBLE),DIMENSION(0:SPLen)            :: SPKetC_old,SPKetS_old
 !----------------------------------------------------------------------------------------- 
-!
        Prim%A=Pair%A
        Prim%B=Pair%B
        Prim%KA=Pair%KA
@@ -63,12 +67,6 @@ MODULE BlokTrPdJ
        KA=Prim%KA
        KB=Prim%KB
        dJ=Zero
-!       PNorm=Zero
-!       DO IA=1,Pair%NA; DO IB=1,Pair%NB
-!          PNorm=PNorm+P(IA,IB)**2
-!       ENDDO; ENDDO
-!       PNorm=SQRT(PNorm)
-!----------------------------------
        DO CFA=1,BS%NCFnc%I(KA)    
        DO CFB=1,BS%NCFnc%I(KB) 
           IndexA  = CFBlokDex(BS,CFA,KA)                
@@ -94,7 +92,7 @@ MODULE BlokTrPdJ
              IF(TestPrimPair(Prim%Xi,Prim%AB2))THEN
                 Prim%PFA=PFA 
                 Prim%PFB=PFB
-                MaxAmp=SetBraBlok(Prim,BS,Gradients_O=Pair%SameAtom)
+                MaxAmp=SetBraBlok(Prim,BS,Gradients_O=.FALSE.)
 !---------------------------------------------------------------------------------------------
 !               Compute maximal HG extent (for PAC) and Unsold esitmiate (for MAC)
 !               Looping over all angular symmetries and Directions
@@ -139,23 +137,31 @@ MODULE BlokTrPdJ
                 IF(PExtent>Zero .AND. DP2 > Zero)THEN ! Evaluate this primitives Ket contribution
 !                  Initialize <KET|
                    CALL SetKet(Prim,PExtent)
-#ifdef PERIODIC
-!                  WRAP the center of d Phi_A(r) Phi_B(r+R) back into the box
-                   CALL AtomCyclic(GMLoc,Prim%P)
+                   HGKet_L(:,:)  = Zero
+                   SPKetC_L(:,:) = Zero
+                   SPKetS_L(:,:) = Zero
                    PTmp=Prim%P
 !                  Sum over cells
                    DO NC=1,CS_IN%NCells
-                      Prim%P=PTmp+CS_IN%CellCarts%D(:,NC)
+                      Prim%P=PTmp+CS_IN%CellCarts%D(:,NC) 
                       PBox%Center=Prim%P
+!                     Calculate the fractional coordinates
+                      nlm =  AtomToFrac(GMLoc,CS_IN%CellCarts%D(:,NC))
+!                     Store the Old Stuff
+                      HGKet_old(1:HGLenEll)  = HGKet(1:HGLenEll)
+                      SPKetC_old(0:SPLenEll) = SPKetC(0:SPLenEll)
+                      SPKetS_old(0:SPLenEll) = SPKetS(0:SPLenEll)
 !                     Walk the walk
                       CALL JWalk(PoleRoot)
+!                     Acumulate the Lattice Forces
+                      DO I=1,3
+                         HGKet_L(1:HGLenEll,I)  = HGKet_L(1:HGLenEll,I)  + nlm(I)*(HGKet(1:HGLenEll)  - HGKet_old(1:HGLenEll))
+                         SPKetC_L(0:SPLenEll,I) = SPKetC_L(0:SPLenEll,I) + nlm(I)*(SPKetC(0:SPLenEll) - SPKetC_old(0:SPLenEll))
+                         SPKetS_L(0:SPLenEll,I) = SPKetS_L(0:SPLenEll,I) + nlm(I)*(SPKetS(0:SPLenEll) - SPKetS_old(0:SPLenEll))
+                      ENDDO
                    ENDDO
                    Prim%P=PTmp
-#else
-!                  Walk the walk
-                   CALL JWalk(PoleRoot)
-#endif
-!                  Contract <Bra|Ket> bloks to compute matrix elements of J
+!                  Contract <Bra|Ket> bloks to compute matrix elements of J : SameAtom=.FALSE.
                    IA = IndexA
                    DO LMNA=StartLA,StopLA
                       IA=IA+1
@@ -168,17 +174,17 @@ MODULE BlokTrPdJ
                          SPLenEll=LSP(Ell)
                          HGLenEll=LHGTF(Ell)
                          DO K=1,3
+                            KI = K
                             DO LMN=1,HGLenEll
-                               dJ(IA,IB,K)=dJ(IA,IB,K)+Phase%D(LMN)*dHGBra%D(LMN,IA,IB,K)*HGKet(LMN)
+                               dJ(IA,IB,KI) = dJ(IA,IB,KI)+Phase%D(LMN)*dHGBra%D(LMN,IA,IB,K)*HGKet(LMN)
                             ENDDO
                             CALL HGToSP(Prim%Zeta,Ell,dHGBra%D(:,IA,IB,K),SPBraC,SPBraS)
                             DO LM=0,SPLenEll
-                               dJ(IA,IB,K)=dJ(IA,IB,K)+SPBraC(LM)*SPKetC(LM)+SPBraS(LM)*SPKetS(LM)
+                               dJ(IA,IB,KI) = dJ(IA,IB,KI)+SPBraC(LM)*SPKetC(LM)+SPBraS(LM)*SPKetS(LM)
                             ENDDO
                          ENDDO
                       ENDDO
-                   ENDDO
-#ifdef PERIODIC
+                   ENDDO                   
 !                  Calculate the FarField Multipole Contribution to the Matrix Element 
 !                  Contract the Primative MM  with the density MM
                    IF(GMLoc%PBC%Dimen > 0) THEN
@@ -189,42 +195,112 @@ MODULE BlokTrPdJ
                          DO LMNB=StartLB,StopLB  
                             IB=IB+1                      
                             DO K=1,3
-                               dJ(IA,IB,K)=dJ(IA,IB,K) + CTraxFF_Grad(Prim,dHGBra%D(:,IA,IB,K),GMLoc) 
+                               KI = K
+                               dJ(IA,IB,KI) = dJ(IA,IB,KI)+CTraxFF_Grad(Prim,dHGBra%D(:,IA,IB,K),GMLoc) 
                             ENDDO
                          ENDDO
                       ENDDO
                    ENDIF
-#endif
-             ENDIF
+!                  Contract <Bra|Ket> bloks to compute matrix elements of J : SameAtom=.TRUE.
+                   MaxAmp=SetBraBlok(Prim,BS,Gradients_O=.TRUE.)
+                   IA = IndexA
+                   DO LMNA=StartLA,StopLA
+                      IA=IA+1
+                      IB=IndexB
+                      EllA=BS%LxDex%I(LMNA)+BS%LyDex%I(LMNA)+BS%LzDex%I(LMNA)                         
+                      DO LMNB=StartLB,StopLB
+                         IB=IB+1
+                         EllB=BS%LxDex%I(LMNB)+BS%LyDex%I(LMNB)+BS%LzDex%I(LMNB)                         
+                         Ell=EllA+EllB+1
+                         SPLenEll=LSP(Ell)
+                         HGLenEll=LHGTF(Ell)
+                         DO K=1,3
+                            KI = K+3
+                            DO LMN=1,HGLenEll
+                               dJ(IA,IB,KI) = dJ(IA,IB,KI)+Phase%D(LMN)*dHGBra%D(LMN,IA,IB,K)*HGKet(LMN)
+                            ENDDO
+                            CALL HGToSP(Prim%Zeta,Ell,dHGBra%D(:,IA,IB,K),SPBraC,SPBraS)
+                            DO LM=0,SPLenEll
+                               dJ(IA,IB,KI) = dJ(IA,IB,KI)+SPBraC(LM)*SPKetC(LM)+SPBraS(LM)*SPKetS(LM)
+                            ENDDO
+                         ENDDO
+                      ENDDO
+                   ENDDO                   
+!                  Calculate the FarField Multipole Contribution to the Matrix Element 
+!                  Contract the Primative MM  with the density MM
+                   IF(GMLoc%PBC%Dimen > 0) THEN
+                      IA=IndexA
+                      DO LMNA=StartLA,StopLA
+                         IA=IA+1                    
+                         IB=IndexB
+                         DO LMNB=StartLB,StopLB  
+                            IB=IB+1                      
+                            DO K=1,3
+                               KI = K+3
+                               dJ(IA,IB,KI) = dJ(IA,IB,KI)+CTraxFF_Grad(Prim,dHGBra%D(:,IA,IB,K),GMLoc)  
+                            ENDDO
+                         ENDDO
+                      ENDDO
+                   ENDIF
+!                  Inner Sum J Box Forces: Included PFF contribution
+                   IA = IndexA
+                   DO LMNA=StartLA,StopLA
+                      IA=IA+1
+                      IB=IndexB
+                      EllA=BS%LxDex%I(LMNA)+BS%LyDex%I(LMNA)+BS%LzDex%I(LMNA)                         
+                      DO LMNB=StartLB,StopLB
+                         IB=IB+1
+                         EllB=BS%LxDex%I(LMNB)+BS%LyDex%I(LMNB)+BS%LzDex%I(LMNB)                         
+                         Ell=EllA+EllB+1
+                         SPLenEll=LSP(Ell)
+                         HGLenEll=LHGTF(Ell)
+                         DO K=1,3
+                            CALL HGToSP(Prim%Zeta,Ell,dHGBra%D(:,IA,IB,K),SPBraC,SPBraS)
+                            DO I=1,3
+                               KI = K + 3*(I+1)
+                               IF(GMLoc%PBC%AutoW(I).AND.GMLoc%PBC%AutoW(K)) THEN
+                                  DO LMN=1,HGLenEll
+                                     dJ(IA,IB,KI)=dJ(IA,IB,KI)+Phase%D(LMN)*dHGBra%D(LMN,IA,IB,K)*HGKet_L(LMN,I)
+                                  ENDDO  
+                                  DO LM=0,SPLenEll
+                                     dJ(IA,IB,KI)=dJ(IA,IB,KI)+SPBraC(LM)*SPKetC_L(LM,I)+SPBraS(LM)*SPKetS_L(LM,I)
+                                  ENDDO
+                                  dJ(IA,IB,KI) = dJ(IA,IB,KI)+CTraxFF_LF(Prim,dHGBra%D(:,IA,IB,K),GMLoc,I) 
+                               ENDIF
+                            ENDDO
+                         ENDDO
+                      ENDDO
+                   ENDDO
+!
+                ENDIF
              ENDIF
           ENDDO 
           ENDDO
        ENDDO
        ENDDO
 !
-       DO K=1,3
+       DO K=1,15
           Vck(K)=BlkTrace_2(Pair%NA,Pair%NB,P,TRANSPOSE(dJ(:,:,K)))
        ENDDO
-       IF(.NOT.Pair%SameAtom)THEN
-          Vck=Four*Vck
-       ELSE
-          Vck=Two*Vck
-       ENDIF
+!
      END FUNCTION TrPdJ
 !====================================================================================================
 !
 !====================================================================================================
-    FUNCTION dNukE(GMLoc,At) RESULT(Vct)
-       TYPE(CRDS)                      :: GMLoc
-       REAL(DOUBLE)                    :: Tau,NukeCo,NukePole,PExtent
-       REAL(DOUBLE),DIMENSION(4)       :: dBra
-       REAL(DOUBLE),DIMENSION(3)       :: Vct
-       REAL(DOUBLE),DIMENSION(0:SPLen) :: SPBraC,SPBraS 
-       INTEGER                         :: At,SPLenEll,HGLenEll,K,LM,LMN
-#ifdef PERIODIC
-       INTEGER                         :: NC
-       REAL(DOUBLE),DIMENSION(3)       :: PTmp
-#endif
+    FUNCTION dNukE(GMLoc,At) RESULT(Vck)
+       TYPE(CRDS)                        :: GMLoc
+       REAL(DOUBLE)                      :: Tau,NukeCo,NukePole,PExtent
+       REAL(DOUBLE),DIMENSION(4)         :: dBra
+       REAL(DOUBLE),DIMENSION(0:SPLen)   :: SPBraC,SPBraS 
+       INTEGER                           :: At,SPLenEll,HGLenEll,I,J,K,LM,LMN
+       INTEGER                           :: NC,KI
+       REAL(DOUBLE),DIMENSION(3)         :: PTmp,nlm
+!
+       REAL(DOUBLE),DIMENSION(15)        :: Vck
+       REAL(DOUBLE),DIMENSION(0:SPLen,3) :: SPKetC_L,SPKetS_L
+       REAL(DOUBLE),DIMENSION(1:HGLen,3) :: HGKet_L
+       REAL(DOUBLE),DIMENSION(1:HGLen)   :: HGKet_old
+       REAL(DOUBLE),DIMENSION(0:SPLen)   :: SPKetC_old,SPKetS_old
 !---------------------------------------------------------------------------------------------
 !      Initialize |dBRA>
        NukeCo=-GMLoc%AtNum%D(At)*(NuclearExpnt/Pi)**(ThreeHalves)
@@ -245,50 +321,67 @@ MODULE BlokTrPdJ
        PExtent=Extent(1,NuclearExpnt,dHGBra%D(:,1,1,1),TauPAC)
 !      Initialize <KET|
        CALL SetKet(Prim,PExtent)
-!      Klumsy
+       HGKet_L(:,:)  = Zero
+       SPKetC_L(:,:) = Zero
+       SPKetS_L(:,:) = Zero
+!      KlumsyBl
        SPLenEll=LSP(1)
        HGLenEll=LHGTF(1)
-#ifdef PERIODIC
        PTmp=GMLoc%Carts%D(:,At)
        DO NC=1,CS_IN%NCells
 !         Set atomic "primitive"
           Prim%P=PTmp+CS_IN%CellCarts%D(:,NC)
+!         Calculate the fractional coordinates
+          nlm =  AtomToFrac(GMLoc,CS_IN%CellCarts%D(:,NC))
+!         Store the Old Stuff
+          HGKet_old(1:HGLenEll)  = HGKet(1:HGLenEll)
+          SPKetC_old(0:SPLenEll) = SPKetC(0:SPLenEll)
+          SPKetS_old(0:SPLenEll) = SPKetS(0:SPLenEll)
 !         Walk the walk
           CALL VWalk(PoleRoot)
+!         Acumulate the Lattice Forces
+          DO I=1,3
+             HGKet_L(1:HGLenEll,I)  = HGKet_L(1:HGLenEll,I)  + nlm(I)*(HGKet(1:HGLenEll)  - HGKet_old(1:HGLenEll))
+             SPKetC_L(0:SPLenEll,I) = SPKetC_L(0:SPLenEll,I) + nlm(I)*(SPKetC(0:SPLenEll) - SPKetC_old(0:SPLenEll))
+             SPKetS_L(0:SPLenEll,I) = SPKetS_L(0:SPLenEll,I) + nlm(I)*(SPKetS(0:SPLenEll) - SPKetS_old(0:SPLenEll))
+          ENDDO
        ENDDO
 !      Reset the Atomic Coordinates
        Prim%P=PTmp
 !      Init bra xforms
-       Vct=Zero
+
+       Vck=Zero
        DO K=1,3
           DO LMN=1,HGLenEll
-             Vct(K)=Vct(K)+Phase%D(LMN)*dHGBra%D(LMN,1,1,K)*HGKet(LMN)
+             Vck(K)=Vck(K)+Phase%D(LMN)*dHGBra%D(LMN,1,1,K)*HGKet(LMN)
           ENDDO
           CALL HGToSP(Prim%Zeta,1,dHGBra%D(:,1,1,K),SPBraC,SPBraS)
           DO LM=0,SPLenEll
-             Vct(K)=Vct(K)+SPBraC(LM)*SPKetC(LM)+SPBraS(LM)*SPKetS(LM)
+             Vck(K)=Vck(K)+SPBraC(LM)*SPKetC(LM)+SPBraS(LM)*SPKetS(LM)
           ENDDO
        ENDDO
 !      Add in the Far Field, Dipole and Quadripole Correction
        IF(GMLoc%PBC%Dimen>0) THEN
           DO K=1,3
-             Vct(K)=Vct(K)+CTraxFF_Grad(Prim,dHGBra%D(:,1,1,K),GMLoc)
+             Vck(K)=Vck(K)+CTraxFF_Grad(Prim,dHGBra%D(:,1,1,K),GMLoc)
           ENDDO
        ENDIF
-#else
-!      Walk the walk
-       CALL VWalk(PoleRoot)
-!      <BRA|KET> 
-       Vct=Zero
+!      Inner Sum Nuc Box Force
        DO K=1,3
-          DO LMN=1,HGLenEll
-             Vct(K)=Vct(K)+Phase%D(LMN)*dHGBra%D(LMN,1,1,K)*HGKet(LMN)
-          ENDDO
           CALL HGToSP(Prim%Zeta,1,dHGBra%D(:,1,1,K),SPBraC,SPBraS)
-          DO LM=0,SPLenEll
-             Vct(K)=Vct(K)+SPBraC(LM)*SPKetC(LM)+SPBraS(LM)*SPKetS(LM)
+          DO I=1,3
+             KI = K + 3*(I+1)
+             IF(GMLoc%PBC%AutoW(I).AND.GMLoc%PBC%AutoW(K)) THEN
+                DO LMN=1,HGLenEll
+                   Vck(KI)=Vck(KI)+Phase%D(LMN)*dHGBra%D(LMN,1,1,K)*HGKet_L(LMN,I)
+                ENDDO
+                DO LM=0,SPLenEll
+                   Vck(KI)=Vck(KI)+SPBraC(LM)*SPKetC_L(LM,I)+SPBraS(LM)*SPKetS_L(LM,I)
+                ENDDO
+                Vck(KI) = Vck(KI)+CTraxFF_LF(Prim,dHGBra%D(:,1,1,K),GMLoc,I) 
+             ENDIF
           ENDDO
-       ENDDO
-#endif
+       ENDDO    
+!
      END FUNCTION dNukE
 END MODULE BlokTrPdJ
