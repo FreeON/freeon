@@ -46,6 +46,7 @@ MODULE ONX2List
 !--------------------------------------------------------------------------------- 
   PUBLIC  :: MakeList
   PUBLIC  :: MakeGList
+  PUBLIC  :: MakeHList
   !
 !--------------------------------------------------------------------------------- 
 ! PRIVATE DECLARATIONS
@@ -569,6 +570,265 @@ CONTAINS
 #endif
     !
   END SUBROUTINE MakeGList
+  !
+  !
+#ifdef ONX2_PARALLEL
+  SUBROUTINE MakeHList(List,GMc,BSc,CS_OUT,Ptr1,Nbr1,Ptr2,Nbr2)
+#else
+  SUBROUTINE MakeHList(List,GMc,BSc,CS_OUT)
+#endif
+!H---------------------------------------------------------------------------------
+!H SUBROUTINE MakeHList(List,GMc,BSc,CS_OUT)
+!H  Does the thresholding based on the ERIs.
+!H---------------------------------------------------------------------------------
+    !
+    IMPLICIT NONE
+    !-------------------------------------------------------------------
+    TYPE(CList) , DIMENSION(:), POINTER :: List
+    TYPE(CRDS)                          :: GMc
+    TYPE(BSET)                          :: BSc
+    TYPE(CellSet)                       :: CS_OUT
+#ifdef ONX2_PARALLEL
+    TYPE(INT_VECT)              :: Ptr1
+    TYPE(INT_VECT)              :: Ptr2
+    INTEGER       , INTENT(IN ) :: Nbr1
+    INTEGER       , INTENT(OUT) :: Nbr2
+#endif
+    !-------------------------------------------------------------------
+    TYPE(ANode) , POINTER       :: NodeA
+    TYPE(AtomInfo)              :: ACAtmInfo
+    INTEGER                     :: AtA,AtC,KA,KC,CFA,CFC,iCell,CFAC
+    INTEGER                     :: NFPair,I,IntType,LocNInt,NBFA,NBFC
+    INTEGER                     :: iErr
+    REAL(DOUBLE)                :: Dum,AC2,NInts,ThresholdDistance
+#ifdef ONX2_PARALLEL
+    TYPE(INT_VECT)              :: Tmp2
+    INTEGER                     :: iC,Idx2
+#endif
+    !-------------------------------------------------------------------
+    REAL(DOUBLE) , DIMENSION(  CS_OUT%NCells*MaxShelPerAtmBlk**2) :: RInt
+    INTEGER      , DIMENSION(3*CS_OUT%NCells*MaxShelPerAtmBlk**2) :: Indx
+    !-------------------------------------------------------------------
+    REAL(DOUBLE) , DIMENSION(12*MaxFuncPerAtmBlk**4) :: C
+    TYPE(AtomPr) , DIMENSION(:), ALLOCATABLE :: ACAtmPair
+    !-------------------------------------------------------------------
+    REAL(DOUBLE) , EXTERNAL :: DGetAbsMax
+    !-------------------------------------------------------------------
+    !
+    integer :: oa,lda,ob,ldb,oc,ldc,od,ldd
+    integer :: isize,idum
+    real(double) :: ChkSum
+    !
+    ChkSum=0.0d0
+    !
+    ! Allocate arrays.
+    ALLOCATE(ACAtmPair(MaxShelPerAtmBlk**2*CS_OUT%NCells),STAT=iErr)
+    IF(iErr.NE.0) CALL Halt('In MakeGList: Allocation problem.')
+    !
+    !Simple check Simple check Simple check Simple check Simple check Simple check
+    isize=0
+    do i=1,natoms
+       isize=MAX(isize,BSc%BfKnd%I(GMc%AtTyp%I(i)))
+       IF((BSc%BfKnd%I(GMc%AtTyp%I(i)))**4.GT.SIZE(C)) THEN
+          write(*,*) 'size',(BSc%BfKnd%I(GMc%AtTyp%I(i)))**4
+          write(*,*) 'MaxShelPerAtmBlk',MaxShelPerAtmBlk
+          write(*,*) 'SIZE(ACAtmPair)=',MaxShelPerAtmBlk**2*CS_OUT%NCells
+          write(*,*) 'SIZE(C)',12*MaxFuncPerAtmBlk**4
+          STOP 'In MakeGList: Incrase the size of C'
+       ENDIF
+    enddo
+    !Simple check Simple check Simple check Simple check Simple check Simple check
+    !
+    !
+    idum=0
+    NULLIFY(NodeA)
+    NInts=0.0D0
+    !
+#ifdef ONX2_PARALLEL
+    CALL New(Tmp2,NAtoms)
+    CALL INT_VECT_EQ_INT_SCLR(NAtoms,Tmp2%I(1),0)
+#endif
+    !
+    !
+    ThresholdDistance=-10.d0*DLOG(Thresholds%Dist)
+    !
+#ifdef ONX2_PARALLEL
+    DO iC = 1,Nbr1
+       AtC = Ptr1%I(iC)
+#else
+    DO AtC=1,NAtoms ! Run over AtC
+#endif
+       !
+       KC=GMc%AtTyp%I(AtC)
+       NBFC=BSc%BfKnd%I(KC)
+       !
+       ACAtmInfo%Atm2X=GMc%Carts%D(1,AtC)
+       ACAtmInfo%Atm2Y=GMc%Carts%D(2,AtC)
+       ACAtmInfo%Atm2Z=GMc%Carts%D(3,AtC)
+       ACAtmInfo%K2=KC
+       !
+       DO AtA=1,NAtoms ! Run over AtA
+          !
+          KA=GMc%AtTyp%I(AtA)
+          NBFA=BSc%BfKnd%I(KA)
+          !
+          ACAtmInfo%Atm1X=GMc%Carts%D(1,AtA)
+          ACAtmInfo%Atm1Y=GMc%Carts%D(2,AtA)
+          ACAtmInfo%Atm1Z=GMc%Carts%D(3,AtA)
+          ACAtmInfo%K1=KA
+          !
+          ACAtmInfo%Atm12X=ACAtmInfo%Atm1X-ACAtmInfo%Atm2X
+          ACAtmInfo%Atm12Y=ACAtmInfo%Atm1Y-ACAtmInfo%Atm2Y
+          ACAtmInfo%Atm12Z=ACAtmInfo%Atm1Z-ACAtmInfo%Atm2Z
+          !
+          ! Initialize some cell variables.
+          NFPair=0
+          !
+          DO iCell=1,CS_OUT%NCells ! Run over R
+             !
+             ! Check the interatomic distance between boxes.
+             AC2 =  (ACAtmInfo%Atm12X-CS_OUT%CellCarts%D(1,iCell))**2+ &
+                  & (ACAtmInfo%Atm12Y-CS_OUT%CellCarts%D(2,iCell))**2+ &
+                  & (ACAtmInfo%Atm12Z-CS_OUT%CellCarts%D(3,iCell))**2
+             !
+             ! Set the range for range of exchange.
+             DisRange=MAX(DisRange,SQRT(AC2)*1.01D0)
+             !
+             ! Cycle if needed.
+#ifdef GTRESH
+             IF(AC2.GT.ThresholdDistance) CYCLE
+#endif
+             !
+             ! Get the atom pair.
+             CALL GetAtomPair_(ACAtmInfo,ACAtmPair,BSc,BSc,CS_OUT%CellCarts%D(1,iCell))
+             !CALL GetAtomPairH_(ACAtmInfo,ACAtmPair,BSc,CS_OUT%CellCarts%D(1,iCell))
+             !
+             CFAC=0
+             DO CFA=1,BSc%NCFnc%I(KA) ! Run over blkfunc on A
+                DO CFC=1,BSc%NCFnc%I(KC) ! Run over blkfunc on C
+                   !
+                   CFAC=CFAC+1
+                   idum=idum+ACAtmPair(CFAC)%SP%L
+                   !
+                   ! Compute integral type.
+                   IntType=ACAtmPair(CFAC)%SP%IntType
+                   !
+                   LocNInt=(BSc%LStop%I(CFA,KA)-BSc%LStrt%I(CFA,KA)+1)**2* &
+                        &  (BSc%LStop%I(CFC,KC)-BSc%LStrt%I(CFC,KC)+1)**2
+                   !
+                   CALL DBL_VECT_EQ_DBL_SCLR(LocNInt,C(1),0.0D0)
+                   !
+                   ! The integral interface.
+                   INCLUDE 'ERIListInterfaceB.Inc'
+                   !INCLUDE 'd2ERIListInterface.Inc'
+                   !
+                   Dum=DSQRT(DGetAbsMax(LocNInt,C(1)))
+                   ChkSum=ChkSum+SUM(ABS(C(1:LocNInt)))
+                   !
+#ifdef GONX2_DBUG
+                   WRITE(*,'(A,E22.15,6(A,I6))') 'Dum',Dum, &
+                        & ' LocNInt',LocNInt,' IntType',IntType,' CFC',CFC,' CFA',CFA,' AtA',AtA,' AtC',AtC
+#endif
+                   !
+                   ! Keep the cell if needed.
+#ifdef GTRESH
+                IF(Dum.GT.Thresholds%TwoE) THEN
+#endif
+                   NFPair=NFPair+1
+                   RInt(NFPair)=Dum
+                   Indx(3*(NFPair-1)+1)=CFA
+                   Indx(3*(NFPair-1)+2)=CFC
+                   Indx(3*(NFPair-1)+3)=iCell
+                   !
+#ifdef GTRESH
+                ELSE
+                   !write(*,*) 'Int smaller that treshold',Dum,Thresholds%TwoE
+                ENDIF
+#endif
+                   !
+                   NInts=NInts+DBLE(LocNInt)
+                ENDDO ! End over blkfunc on A
+             ENDDO ! End over blkfunc on C
+             !
+          ENDDO ! End R
+          !
+          ! Check if no function pair.
+          IF(NFPair.EQ.0) CYCLE
+          !
+          ! Allocate a new node.
+          ALLOCATE(NodeA)
+          NULLIFY(NodeA%AtmNext)
+          NodeA%Atom=AtA
+          NodeA%NFPair=NFPair
+          !
+          ! PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL
+          ! PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL
+#ifdef ONX2_PARALLEL
+          Tmp2%I(AtA)=1
+#endif
+          ! PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL
+          ! PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL
+          !
+          ! Order the Cell list.
+          CALL QSDis(RInt(1),Indx(1),NFPair,-2)
+          !
+          ! Allocate the Cell array.
+          ALLOCATE(NodeA%Indx(3,NFPair),NodeA%RInt(NFPair),STAT=iErr)
+          IF(iErr.NE.0) CALL Halt('In MakeGList: Allocation problem.')
+          !
+          ! Copy the arrays.
+          DO I=1,NFPair
+             NodeA%RInt(I)=RInt(I)
+             NodeA%Indx(1,I)=Indx(3*(I-1)+1)
+             NodeA%Indx(2,I)=Indx(3*(I-1)+2)
+             NodeA%Indx(3,I)=Indx(3*(I-1)+3)
+          ENDDO
+          !
+          ! Insert the new node (at the right place).
+          CALL InsertNode(List(AtC)%GoList,NodeA)
+          !
+       ENDDO ! End AtA
+       !
+    ENDDO ! End AtC
+    !
+    ! PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL
+    ! PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL
+#ifdef ONX2_PARALLEL
+    Nbr2=SUM(Tmp2%I)
+    CALL New(Ptr2,Nbr2)
+    CALL INT_VECT_EQ_INT_SCLR(Nbr2,Ptr2%I(1),0)
+    Idx2=1
+    DO AtA=1,NAtoms
+       IF(Tmp2%I(AtA).EQ.1) THEN
+          Ptr2%I(Idx2)=AtA
+          Idx2=Idx2+1
+       ENDIF
+    ENDDO
+    CALL Delete(Tmp2)
+#endif
+    ! PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL
+    ! PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL
+    !write(*,*) 'Number of primitive pairs ',idum
+    !!write(*,*) 'ChkSum',ChkSum
+    !
+    ! DeAllocate arrays.
+    DEALLOCATE(ACAtmPair,STAT=iErr)
+    IF(iErr.NE.0) CALL Halt('In MakeGList: DeAllocation problem.')
+    !
+#ifdef GONX2_INFO
+#ifdef ONX2_PARALLEL
+    IF(MyID.EQ.ROOT) THEN
+#endif
+       WRITE(*,*) '-------------------------------------'
+       WRITE(*,*) 'MakeList Statistic.'
+       WRITE(*,'(A,F22.1)') ' Nbr ERI=',NInts
+       WRITE(*,*) '-------------------------------------'
+#ifdef ONX2_PARALLEL
+    ENDIF
+#endif
+#endif
+    !
+  END SUBROUTINE MakeHList
   !
   !
   SUBROUTINE GetAtomPair_(AtmInfo,AtmPair,BSc,BSp,PBC)
