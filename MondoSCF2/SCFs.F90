@@ -96,8 +96,9 @@ CONTAINS
 !   Initailize
     SCFCycle=.FALSE.
     IF(cSCF==0) THEN
-       ODA_DONE  = .FALSE.
-       DIIS_FAIL = .FALSE.
+       SCF_STATUS = NOT_CONVERGE
+       ODA_DONE   = .FALSE.
+       DIIS_FAIL  = .FALSE.
     ENDIF
 !   Are we maybe solving CPSCF equations?
     IF(PRESENT(CPSCF_O))THEN
@@ -149,7 +150,7 @@ CONTAINS
           ELSE
              IF(SCF_STATUS==SCF_STALLED) THEN
                 IConAls     = ODA_CONALS
-                DIIS_FAIL   = .FALSE.
+                DIIS_FAIL   = .TRUE.
                 Mssg = 'DIIS Failed: Turning on ODA'
                 CALL OpenASCII(OutFile,Out)
                 WRITE(Out,*)TRIM(Mssg)
@@ -169,8 +170,9 @@ CONTAINS
        CLOSE(Inp)
 !      Defaults
        IF(cSCF < 1)                                    IConAls = NO_CONALS
-       IF(O%ConAls(cBAS)==SMIX_CONALS .AND. cSCF < 2)  IConAls = NO_CONALS
        IF(cBAS > 1 .AND. cSCF < 2 .AND. cGEO==1)       IConAls = NO_CONALS 
+       IF(O%ConAls(cBAS)==SMIX_CONALS    .AND. cSCF<2) IConAls = NO_CONALS
+       IF(S%Action%C(1)==SCF_GUESSEQCORE .AND. cSCF<2)  IConAls = NO_CONALS 
 !      Select the Case
        SELECT CASE (IConAls)
        CASE (DIIS_CONALS)

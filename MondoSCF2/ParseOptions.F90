@@ -251,9 +251,6 @@ CONTAINS
        ENDDO
     ENDIF
 !
-    IF(NConAls==0) &
-         CALL MondoHalt(PRSE_ERROR,'Convergence Alogorithm '//SCF_OPTION//' not set in input.'//RTRN   &
-         //'Algorithms include '//CONALS_DIIS//', '//CONALS_ODA//', '//CONALS_ODMIX//' and '// CONALS_DOMIX)
   END SUBROUTINE ParseConAls
   !===============================================================================================
   ! PARSE FOR ACCURACY LEVELS AND SET THRESHOLDS
