@@ -736,7 +736,7 @@ CONTAINS
 !
 !--------------------------------------------------------------------
 !
-   SUBROUTINE GetGc(NCart,ISpB,JSpB,ASpB,IGc,JGc,AGc)
+   SUBROUTINE GetGc(NCart,ISpB,JSpB,ASpB,IGc,JGc,AGc,SymbOnly_O)
      TYPE(INT_VECT)  :: ISpB,JSpB
      TYPE(DBL_VECT)  :: ASpB
      TYPE(INT_VECT)  :: ISpBt,JSpBt
@@ -747,6 +747,7 @@ CONTAINS
      TYPE(DBL_VECT)  :: AGc2,X
      INTEGER         :: I,J,K,L
      INTEGER         :: NZSpB,NZGc,NIntC,NCart
+     LOGICAL,OPTIONAL:: SymbOnly_O
      !
      NIntC=SIZE(ISpB%I)-1
      NZSpB=ISpB%I(NIntC+1)-1
@@ -767,12 +768,21 @@ CONTAINS
           ISpBt%I,JSpBt%I,ASpBt%D,'full')
      !
      CALL MatMul_1x1(ISpBt%I,JSpBt%I,ASpBt%D,ISpB%I,JSpB%I,ASpB%D, &
-                     IGc,JGc,AGc,NCart,NIntC,NCart)
-     CALL ThreshMatr(IGc,JGc,AGc,1.D-7)
+                     IGc,JGc,AGc,NCart,NIntC,NCart,SymbOnly_O=SymbOnly_O)
+     IF(PRESENT(SymbOnly_O)) THEN
+       IF(SymbOnly_O) THEN
+         CALL Delete(ISpBt) 
+         CALL Delete(JSpBt) 
+         CALL Delete(ASpBt) 
+         RETURN
+       ENDIF
+     ELSE
+       CALL ThreshMatr(IGc,JGc,AGc,1.D-7)
+       CALL Delete(ISpBt) 
+       CALL Delete(JSpBt) 
+       CALL Delete(ASpBt) 
+     ENDIF
      !
-     CALL Delete(ISpBt) 
-     CALL Delete(JSpBt) 
-     CALL Delete(ASpBt) 
    END SUBROUTINE GetGc
 !
 !--------------------------------------------------------------------
@@ -820,16 +830,33 @@ CONTAINS
 !
 !--------------------------------------------------------------------
 !
-   SUBROUTINE MatMul_1x1(IA,JA,AN,IB,JB,BN,IC,JC,CN,NP,NQ,NR)
+   SUBROUTINE MatMul_1x1(IA,JA,AN,IB,JB,BN,IC,JC,CN,NP,NQ,NR,SymbOnly_O)
      INTEGER,DIMENSION(:) :: IA,JA,IB,JB
      REAL(DOUBLE),DIMENSION(:) :: AN,BN
-     TYPE(INT_VECT) :: IC,JC,JC2,ColSum
-     TYPE(DBL_VECT) :: CN
-     INTEGER        :: I,J,K,L,NP,NQ,NR,NZC
+     TYPE(INT_VECT)   :: IC,JC
+     TYPE(DBL_VECT)   :: CN
+     INTEGER          :: I,J,K,L,NP,NQ,NR,NZC
+     LOGICAL,OPTIONAL :: SymbOnly_O
      ! C=A*B
      ! A : NP x NQ matrix
      ! B : NQ x NR matrix
      ! C : NP x NR matrix
+     !
+     CALL MatMulSymbDriver(IA,JA,IB,JB,NP,NQ,NR,IC,JC)
+     IF(PRESENT(SymbOnly_O)) THEN
+       IF(SymbOnly_O) RETURN
+     ENDIF
+     NZC=IC%I(NP+1)-1
+     CALL New(CN,NZC)
+     CALL MatMulNum(IA,JA,AN,IB,JB,BN,IC%I,JC%I,NP,NR,CN%D)
+   END SUBROUTINE MatMul_1x1
+!
+!--------------------------------------------------------------------
+!
+   SUBROUTINE MatMulSymbDriver(IA,JA,IB,JB,NP,NQ,NR,IC,JC)
+     TYPE(INT_VECT)       :: IC,JC,JC2,ColSum
+     INTEGER,DIMENSION(:) :: IA,JA,IB,JB
+     INTEGER              :: NP,NQ,NR,NZC,I,J,K
      !
      ! first, calc. upper-limit for filing of matrix C
      CALL New(ColSum,NQ)
@@ -847,15 +874,12 @@ CONTAINS
      CALL Delete(ColSum)
      CALL New(IC,NP+1)
      CALL New(JC2,NZC)
-     !
      CALL MatMulSymb(IA,JA,IB,JB,NP,NQ,NR,IC%I,JC2%I)
      NZC=IC%I(NP+1)-1
      CALL New(JC,NZC)
      JC%I(1:NZC)=JC2%I(1:NZC)
      CALL Delete(JC2)
-     CALL New(CN,NZC)
-     CALL MatMulNum(IA,JA,AN,IB,JB,BN,IC%I,JC%I,NP,NR,CN%D)
-   END SUBROUTINE MatMul_1x1
+   END SUBROUTINE MatMulSymbDriver
 !
 !--------------------------------------------------------------------
 !
@@ -1207,37 +1231,34 @@ CONTAINS
 !
 !----------------------------------------------------------------
 !
-   SUBROUTINE CholFact(B,NCart,CholData,DoClssTrf,Print,ThreeAt)
-     TYPE(BMATR)    :: B 
+   SUBROUTINE CholFact(ISpB,JSpB,ASpB,NCart,NIntC, &
+                       CholData,Print,Shift_O,ILow_O)
      TYPE(Cholesky) :: CholData
      TYPE(INT_VECT) :: ISpB,JSpB
      TYPE(DBL_VECT) :: ASpB
      TYPE(INT_VECT) :: IGc,JGc
      TYPE(DBL_VECT) :: AGc
-     INTEGER        :: NCart
+     INTEGER        :: NCart,NIntC
      REAL(DOUBLE)   :: SparsitySpB,SparsityGc,SparsityCh
      INTEGER        :: NZSpB,NZGc,NZCh
-     INTEGER        :: ThreeAt(1:3),NIntC
-     LOGICAL        :: DoClssTrf,Print
+     LOGICAL        :: Print
+     REAL(DOUBLE),OPTIONAL :: Shift_O
+     INTEGER,OPTIONAL :: ILow_O
      !
-     NIntC=SIZE(B%IB,1)
-     ! 
      ! Compute Gc=Bt*B
      !
-     CALL BtoSpB_1x1(B,ISpB,JSpB,ASpB)
-       NZSpB=ISpB%I(NIntC+1)-1
+     NZSpB=ISpB%I(NIntC+1)-1
      CALL GetGc(NCart,ISpB,JSpB,ASpB,IGc,JGc,AGc)
-     CALL Delete(ISpB)
-     CALL Delete(JSpB)
-     CALL Delete(ASpB)
      !
-     IF(DoClssTrf) THEN
-       CALL SpectrShift_1x1(IGc,JGc,AGc,1.D-4) 
-     ELSE
-       CALL CompleteDiag_1x1(IGc,JGc,AGc,ThreeAt) 
-       CALL SpectrShift_1x1(IGc,JGc,AGc,1.D-4) 
+     IF(PRESENT(Shift_O)) THEN
+       CALL SpectrShift_1x1(IGc,JGc,AGc,Shift_O) 
      ENDIF
-       NZGc=IGc%I(NCart+1)-1
+     IF(PRESENT(ILow_O)) THEN
+      !CALL Plot_1x1(IGc%I,JGc%I,'Gc_1',NCart)
+       CALL CompleteDiag_1x1(IGc,JGc,AGc,ILow_O) 
+      !CALL Plot_1x1(IGc%I,JGc%I,'Gc_2',NCart)
+     ENDIF
+     NZGc=IGc%I(NCart+1)-1
      !
      CALL TriangFact(IGc,JGc,AGc,CholData)
        NZCh=CholData%ChRowPt%I(NCart+1)-1
@@ -1953,24 +1974,21 @@ CONTAINS
 !
 !--------------------------------------------------------------------
 !
-   SUBROUTINE CompleteDiag_1x1(IGc,JGc,AGc,ThreeAt) 
+   SUBROUTINE CompleteDiag_1x1(IGc,JGc,AGc,ILow) 
      TYPE(INT_VECT)      :: IGc,JGc,IUnit,JUnit,IC,JC
      TYPE(DBL_VECT)      :: AGc,AUnit,CN
      REAL(DOUBLE)        :: Shift
-     INTEGER             :: NDim,I,J,NZ,K
-     INTEGER,DIMENSION(3):: ThreeAt
+     INTEGER             :: NDim,I,J,NZ,K,ILow
      !
      NDim=SIZE(IGc%I)-1
      CALL GetUnit_1x1(IUnit,JUnit,AUnit,NDim) 
      AUnit%D=Zero
-     K=3*(ThreeAt(1)-1)
-     AUnit%D(K+1:K+3)=One 
-     K=3*(ThreeAt(2)-1)
-     AUnit%D(K+2:K+3)=One 
-     K=3*(ThreeAt(3)-1)
-     AUnit%D(K+3)=One 
+     DO I=ILow+1,NDim
+       AUnit%D(I)=One
+     ENDDO
      !
-     CALL AddMat_1x1(IGc%I,JGc%I,AGc%D,IUnit%I,JUnit%I,AUnit%D,IC,JC,CN,NDim,NDim)
+     CALL AddMat_1x1(IGc%I,JGc%I,AGc%D,IUnit%I,JUnit%I,AUnit%D, &
+                     IC,JC,CN,NDim,NDim)
      CALL Delete(IGc)
      CALL Delete(JGc)
      CALL Delete(AGc)
