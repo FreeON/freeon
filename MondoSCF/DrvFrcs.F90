@@ -27,42 +27,55 @@ MODULE DrvFrcs
       CHARACTER(LEN=DCL),OPTIONAL    :: FileName_O
       INTEGER,OPTIONAL               :: Unit_O
       INTEGER                        :: ICyc,IGeo,IBas
-      TYPE(CRDS)                     :: GM
+      TYPE(CRDS)                     :: GM,GM_MM
       TYPE(DBL_VECT)                 :: Frc
       INTEGER                        :: Modl
       CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg
 !----------------------------------------------------------------------------------------
-      Modl=Ctrl%Model(CBas)
-!     Calculate analytic gradients piece by piece
-      CALL LogSCF(Current,' Evaluating forces ')
-      CtrlVect=SetCtrlVect(Ctrl,'ForceEvaluation')
-!     The non-orthongonal response    
-      CALL Invoke('SForce',CtrlVect)
-!     Kinetic energy piece
-      CALL Invoke('TForce',CtrlVect)
-!     Build a density with last DM
-      CALL Invoke('MakeRho',CtrlVect)
-!     Coulomb part
-      CALL Invoke('JForce',CtrlVect)
-!     Exact Hartree-Fock exchange component
-      IF(HasHF(Modl))CALL Invoke('XForce', CtrlVect)       
-!     DFT exchange corrleation term
-      IF(HasDFT(Modl))CALL Invoke('XCForce',CtrlVect)       
+#ifdef MMech
+      IF(HasQM()) THEN
+#endif
+        Modl=Ctrl%Model(CBas)
+!       Calculate analytic gradients piece by piece
+        CALL LogSCF(Current,' Evaluating forces ')
+        CtrlVect=SetCtrlVect(Ctrl,'ForceEvaluation')
+!       The non-orthogonal response    
+        CALL Invoke('SForce',CtrlVect)
+!       Kinetic energy piece
+        CALL Invoke('TForce',CtrlVect)
+!       Build a density with last DM
+        CALL Invoke('MakeRho',CtrlVect)
+!       Coulomb part
+        CALL Invoke('JForce',CtrlVect)
+!       Exact Hartree-Fock exchange component
+        IF(HasHF(Modl))CALL Invoke('XForce', CtrlVect)       
+!       DFT exchange corrleation term
+        IF(HasDFT(Modl))CALL Invoke('XCForce',CtrlVect)       
+#ifdef MMech
+      ENDIF
+#endif
 !---------------------------------------------------------------------------
 !     If asking for just one force evaluation, we print forces to outfile
       IF(Ctrl%Grad==GRAD_ONE_FORCE)THEN
 !        Get the current forces and atomic numbers 
-         CALL OpenHDF(InfFile)
-         CALL New(Frc,3*NAtoms)
-         CALL Get(Frc,'GradE',CurGeom)
-         CALL Get(GM,Tag_O=CurGeom)
-         CALL CloseHDF()
+#ifdef MMech
+           IF(QMOnly()) THEN
+#endif
+             CALL Get(GM,Tag_O=CurGeom)
+#ifdef MMech
+           ELSE 
+             CALL Get(GM,Tag_O='GM_MM'//CurGeom)
+           ENDIF
+#endif
+           CALL New(Frc,3*GM%NAtms)
+           CALL Get(Frc,'GradE',CurGeom)
 !        Print the gradients
-         Frc%D = -Frc%D
+         Frc%D = -Frc%D/KJPerMolPerAngstToHPerBohr !!!in KJ/mol/Angstroem
          Mssg = '     Nuclear gradients for geometry #'//TRIM(CurGeom)//Rtrn
          CALL Print_Force(GM,Frc,Mssg,FileName_O,Unit_O,Fmat_O=2)
 !        Tidy
          CALL Delete(Frc)
+         CALL Delete(GM)
       ENDIF
 !
     END SUBROUTINE Forces
@@ -82,48 +95,94 @@ MODULE DrvFrcs
           CALL OpenASCII(GeoFile,Geo,NewFile_O=.TRUE.)
           CLOSE(UNIT=Geo,STATUS='KEEP')
        ENDIF
-!      Compute starting energy
+!  Compute starting energy and forces for the 
+!  actual basis set and geometry
+#ifdef MMech
+       IF(HasQM()) Then
+         IF(HasMM()) CALL MM_ENERG(Ctrl)
+         CALL OneSCF(Ctrl)
+         CALL Forces(Ctrl)
+       ENDIF
+!
+       IF(MMOnly()) Then
+         Ctrl%Current=(/0,0,1/)
+         CALL SetGlobalCtrlIndecies(Ctrl)           
+         CALL MM_ENERG(Ctrl)
+       ENDIF
+#else
        CALL OneSCF(Ctrl)
-!      Print first configuration
-       CALL OpenHDF(Ctrl%Info)
+       CALL Forces(Ctrl)
+#endif
+!  Print first configuration
+#ifdef MMech
+       IF(QMOnly()) THEN
+         CALL Get(GM,CurGeom)
+         CALL Get(GM%ETotal,'Etot',Tag_O=StatsToChar(Ctrl%Current))
+         GM%Confg=CGeo
+         CALL PPrint(GM,GeoFile,Geo,'PDB')
+         CALL Delete(GM)
+       ELSE 
+         CALL Get(GM_MM,'GM_MM'//CurGeom)
+         CALL Get(GM_MM%ETotal,'Etot',Tag_O=StatsToChar(Ctrl%Current))
+         GM_MM%Confg=CGeo
+         CALL PPrint(GM_MM,GeoFile,Geo,'PDB')
+         CALL Delete(GM_MM)
+       ENDIF
+#else
        CALL Get(GM,CurGeom)
        CALL Get(GM%ETotal,'Etot',Tag_O=StatsToChar(Ctrl%Current))
        GM%Confg=CGeo
        CALL PPrint(GM,GeoFile,Geo,'PDB')
        CALL Delete(GM)
-       CALL CloseHDF()
-!      Evaluate starting forces
-       CALL Forces(Ctrl)
-!      First Hessian update
+#endif
+!  First Hessian update
+!      CtrlVect=SetCtrlVect(Ctrl,'BFGSHess') !!!no CtrlVect definition was given before, in front of Invoke('BFGSHess'
        CALL Invoke('BFGSHess',CtrlVect)
        PrevState=Ctrl%Current
        Ctrl%Previous=Ctrl%Current
-       Ctrl%Current=(/0,CBas,CGeo+1/)
+       Ctrl%Current=(/0,CBas,CGeo+1/) ! step geometry count
        CrntState=Ctrl%Current
        CALL SetGlobalCtrlIndecies(Ctrl)           
-       CALL OpenHDF(InfFile)
        CALL Put(One,'StepSize')
-       CALL CloseHDF()
-!      Take a step 
+!  Take a step 
        CtrlVect=SetCtrlVect(Ctrl,'QuNew',NoAdvance_O=.TRUE.)
        CALL Invoke('NewStep',CtrlVect)
-!      Loop over geometries
+!  Loop over geometries
        JGeo=CGeo
        DO WHILE(JGeo<=Ctrl%NGeom)
-!         Evaluate an energy
-          CALL OneSCF(Ctrl,Sum_O=.FALSE.)
-!         Set to last succesful (minimizing) state
-          Ctrl%Previous=PrevState
-!         Evaluate forces 
-          CALL Forces(Ctrl)
+!  Evaluate energies and forces
+#ifdef MMech
+       IF(HasQM()) Then
+         IF(HasMM()) CALL MM_ENERG(Ctrl)
+         CALL OneSCF(Ctrl,Sum_O=.FALSE.)
+         Ctrl%Previous=PrevState
+         CALL Forces(Ctrl)
+       ENDIF
+!
+       IF(MMOnly()) Then
+         Ctrl%Current=(/0,0,JGeo/)
+         CALL SetGlobalCtrlIndecies(Ctrl)           
+         CALL MM_ENERG(Ctrl)
+       ENDIF
+#else
+       CALL OneSCF(Ctrl,Sum_O=.FALSE.)
+!  Set to last succesful (minimizing) state
+       Ctrl%Previous=PrevState
+!  Evaluate forces 
+       CALL Forces(Ctrl)
+#endif
           KS=KeepStep(Ctrl)
-!         Decide if we will keep this step, and check convergence
+!  Decide if we will keep this step, and check convergence
           IF(KS==1)THEN
-!            Update Hessian
+!  Update Hessian
              CALL Invoke('BFGSHess',CtrlVect)
-!            Write SCF statistics for minimizing geometry
+!  Write SCF statistics for minimizing geometry
+#ifdef MMech
+             IF(HasQM()) CALL SCFSummry(Ctrl)
+#else
              CALL SCFSummry(Ctrl)
-!            Update status
+#endif
+!  Update status
              JGeo=JGeo+1
              Ctrl%Previous=Ctrl%Current
              PrevState=Ctrl%Current
@@ -138,14 +197,14 @@ MODULE DrvFrcs
              Ctrl%Previous=Ctrl%Current
              RETURN
           ENDIF
-          ! Take another step 
+!  Take another step 
           CtrlVect=SetCtrlVect(Ctrl,'QuNew',NoAdvance_O=.TRUE.)
           CALL Invoke('NewStep',CtrlVect)
        ENDDO
        CLOSE(Geo)
    END SUBROUTINE GeOp
 !==============================================================================
-!     Simple, very naive backtracking 
+!     Simple, very naive backtracking (line search)
 !==============================================================================
       FUNCTION KeepStep(Ctrl)
          INTEGER            :: KeepStep
@@ -158,7 +217,6 @@ MODULE DrvFrcs
          CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg
 !---------------------------------------------------------------------------
 !        Open the InfFile
-         CALL OpenHDF(Ctrl%Info)
 !        Get the current step size
          CALL Get(StepSz,'StepSize')
          OldStep=StepSz
@@ -211,12 +269,19 @@ MODULE DrvFrcs
          WRITE(Out,*)TRIM(Mssg)             
          CLOSE(Out)
          IF(ABS(KeepStep)==1)THEN
-            CALL Get(GM,CurGeom)
+#ifdef MMech
+           IF(QMOnly()) THEN
+             CALL Get(GM,Tag_O=CurGeom)
+           ELSE IF(HasMM()) THEN
+             CALL Get(GM,Tag_O='GM_MM'//CurGeom)
+           ENDIF
+#else
+           CALL Get(GM,CurGeom)
+#endif
             GM%Confg=CGeo
             GM%ETotal=E1
             CALL PPrint(GM,GeoFile,Geo,'PDB')
          ENDIF
-         CALL CloseHDF()
       END FUNCTION KeepStep
 !========================================================================================
 !
@@ -236,12 +301,9 @@ MODULE DrvFrcs
 !  
       CALL SetGlobalCtrlIndecies(Ctrl)
       CtrlVect=SetCtrlVect(Ctrl,'NumForceEvaluation')
-      CALL OpenHDF(InfFile)
       CALL Get(GM   ,Tag_O=CurGeom)
       CALL Get(GMOLD,Tag_O=CurGeom)
-      CALL CloseHDF()
 !     Load globals 
-      CALL OpenHDF(InfFile)
       CALL Get(ModelChem,'ModelChemistry',Tag_O=CurBase)
       CALL Get(MaxAtms,  'maxatms',   Tag_O=CurBase)
       CALL Get(MaxBlks,  'maxblks',   Tag_O=CurBase)
@@ -253,7 +315,6 @@ MODULE DrvFrcs
       CALL Get(OffS,'atoff',          Tag_O=CurBase)
       MaxBlkSize=0
       DO II=1,NAtoms; MaxBlkSize=MAX(MaxBlkSize,BSiz%I(II)); ENDDO
-      CALL CloseHDF()
 !
       CALL New(F)
       CALL New(P)
@@ -293,55 +354,39 @@ MODULE DrvFrcs
                   ELSEIF(II==2) THEN
                      GM%Carts%D(IX,AtA) = GMOLD%Carts%D(IX,AtA)-DDelta
                   ENDIF
-                  CALL OpenHDF(InfFile)
                   CALL Put(GM,Tag_O=CurGeom)
-                  CALL CloseHDF()
 !                 Calculate the Overlap Term
                   CALL Invoke('MakeS'  ,   CtrlVect)
-                  CALL OpenHDF(InfFile)
                   CALL Get(T1,TrixFile('S',Name_O=CtrlVect(1),Stats_O=Ctrl%Current(1:3)))
-                  CALL CloseHDF()
                   CALL Multiply(P,F,T2)       
                   CALL Multiply(T2,P,T3)     
                   ES(II) = -Two*Trace(T3,T1)
 !                 Calcualte the Kinectic Term
                   CALL Invoke('MakeT'  ,   CtrlVect)
-                  CALL OpenHDF(InfFile)
                   CALL Get(T1,TrixFile('T',Name_O=CtrlVect(1),Stats_O=Ctrl%Current(1:3)))
-                  CALL CloseHDF()
                   ET(II) =  Two*Trace(P,T1)        
 !                 Calculate the Coulomb Term d(Vee + Vne)/dR
                   CALL Invoke('QCTC'   ,   CtrlVect)
-                  CALL OpenHDF(InfFile)
                   CALL Get(T1,TrixFile('J',OffSet_O=0,Name_O=CtrlVect(1),Stats_O=Ctrl%Current(1:3)))
-                  CALL CloseHDF()                  
                   EJ(II) =  Two*Trace(P,T1)
 !                 Calculate the Coulomb Term d(Vne + Vnn)/dR
-                  CALL OpenHDF(InfFile)
                   CALL Get(EN(II), 'E_NuclearTotal'    ,Tag_O=IntToChar(Ctrl%Current(1)))
-                  CALL CloseHDF()
                   EN(II) =  Two*EN(II)
 !                 Calculate the x term
                   IF(HasHF(ModelChem))  THEN
                      CALL Invoke('ONX'    ,   CtrlVect) 
-                     CALL OpenHDF(InfFile)
                      CALL Get(T1,TrixFile('K',OffSet_O=0,Name_O=CtrlVect(1),Stats_O=Ctrl%Current(1:3)))
                      EX(II) = Trace(P,T1)   
-                     CALL CloseHDF()
                   ENDIF
 !                 Calculate the xc term
                   IF(HasDFT(ModelChem)) THEN
                      CALL Invoke('HiCu'   ,   CtrlVect)
-                     CALL OpenHDF(InfFile)
                      CALL Get(T1,TrixFile('Kxc',OffSet_O=0,Name_O=CtrlVect(1),Stats_O=Ctrl%Current(1:3)))
-                     CALL CloseHDF()
                      EXC(II) = Two*Trace(P,T1)
                   ENDIF
 !                 Reset geometry
                   GM%Carts%D(IX,AtA) = GMOLD%Carts%D(IX,AtA)
-                  CALL OpenHDF(InfFile)
                   CALL Put(GM,Tag_O=CurGeom)
-                  CALL CloseHDF()
                ENDDO
                IA=3*(AtA-1)+IX
                FS%D(IA)=(ES(1)-ES(2))/(Two*DDelta)
@@ -380,9 +425,7 @@ MODULE DrvFrcs
                   ELSEIF(II==2) THEN
                      GM%Carts%D(IX,AtA) = GMOLD%Carts%D(IX,AtA)-DDelta
                   ENDIF
-                  CALL OpenHDF(InfFile)
                   CALL Put(GM,Tag_O=CurGeom)
-                  CALL CloseHDF()   
 !                 SCF
                   DO N=1,4
                      Ctrl%Current(1)=ICyc+N
@@ -392,17 +435,13 @@ MODULE DrvFrcs
                   ENDDO
                   
 !                 Get Energy     
-                  CALL OpenHDF(InfFile)
                   CALL Get(ES(II),'Etot',StatsToChar(Ctrl%Current))
-                  CALL CloseHDF()             
 !                 Reset geometry
                   GM%Carts%D(IX,AtA) = GMOLD%Carts%D(IX,AtA)
-                  CALL OpenHDF(InfFile)
                   CALL Put(GM,Tag_O=CurGeom)
-                  CALL CloseHDF()
                ENDDO
                IA=3*(AtA-1)+IX
-               WRITE(*,*) " Energys ",ES(1),ES(2),ES(1)-ES(2)
+               WRITE(*,*) " Energies ",ES(1),ES(2),ES(1)-ES(2)
                FTot%D(IA)=(ES(1)-ES(2))/(Two*DDelta)
             ENDDO
          ENDDO
@@ -455,11 +494,9 @@ MODULE DrvFrcs
       CALL New(Frc,3*NAtoms)
 !
       IF(IGeo==1) THEN
-         CALL OpenHDF(InfFile)
          CALL Get(GM     ,Tag_O=IntToChar(IGeo))  
          CALL Get(GMNEW  ,Tag_O=IntToChar(IGeo+1))
          CALL Get(Frc    ,'GradE' ,Tag_O=IntToChar(IGeo))
-         CALL CloseHDF()
          DO AtA=1,NAtoms
             A1  = 3*(AtA-1)+1
             D1MASS =  DELT/(GM%AtMss%D(AtA))
@@ -483,11 +520,9 @@ MODULE DrvFrcs
          ENDDO
 !
       ELSEIF(IGeo .LT. Ctrl%NGeom) THEN
-         CALL OpenHDF(InfFile)
          CALL Get(GM     ,Tag_O=IntToChar(IGeo))
          CALL Get(GMNEW  ,Tag_O=IntToChar(IGeo+1))
          CALL Get(Frc    ,'GradE' ,Tag_O=IntToChar(IGeo))
-         CALL CloseHDF()
          DO AtA=1,NAtoms
             A1  = 3*(AtA-1)+1
             D1MASS =  DELT/GM%AtMss%D(AtA)
@@ -514,10 +549,8 @@ MODULE DrvFrcs
 #endif          
          ENDDO
       ELSEIF(IGeo .EQ. Ctrl%NGeom) THEN
-         CALL OpenHDF(InfFile)
          CALL Get(GM     ,Tag_O=IntToChar(IGeo))
          CALL Get(Frc    ,'GradE' ,Tag_O=IntToChar(IGeo))
-         CALL CloseHDF()
          DO AtA=1,NAtoms
             A1  = 3*(AtA-1)+1
             D1MASS =  DELT/GM%AtMss%D(AtA)
@@ -537,10 +570,8 @@ MODULE DrvFrcs
          ENDDO
       ENDIF 
 !
-      CALL OpenHDF(InfFile)
       CALL Put(GM     ,Tag_O=IntToChar(IGeo))
       CALL Put(GMNEW  ,Tag_O=IntToChar(IGeo+1))
-      CALL CloseHDF()
       CALL Delete(Frc)
 
 !
@@ -612,9 +643,7 @@ MODULE DrvFrcs
 !
 !     Store the Energies and Angular Momentum
 !
-      CALL OpenHDF(InfFile)
       CALL Get(E_TOT_EL,'E_total',Tag_O=IntToChar(ICyc))
-      CALL CloseHDF()
 !
       MDFile   = 'MDEnergy_'// TRIM(SCF_NAME)// "_" // TRIM(PROCESS_ID) // '.out'
       OPEN(UNIT=30,FILE=MDFile,POSITION='APPEND',STATUS='UNKNOWN')
@@ -626,5 +655,182 @@ MODULE DrvFrcs
 !
     END SUBROUTINE NextMDGeometry
 #endif
+!-------------------------------------------------------------
+  SUBROUTINE CALC_GRAD_ONE_FORCE(Ctrl)
+    IMPLICIT NONE
+    TYPE(SCFControls)     :: Ctrl
+    INTEGER :: I,ISet,IGeo
+!
+#ifdef MMech
+   If(HasQM()) Then
+#endif
+!  Loop first over basis sets 
+     DO ISet=1,Ctrl%NSet
+        Ctrl%Current=(/0,ISet,1/)
+        CALL SetGlobalCtrlIndecies(Ctrl)           
+#ifdef MMech
+        IF(ISet==1.AND.HasMM()) CALL MM_ENERG(Ctrl)
+#endif
+        CALL OneSCF(Ctrl)
+     ENDDO
+!    Calculate the Force (last basis set)
+     CALL Forces(Ctrl)
+!
+     IF(Ctrl%NGeom>1)THEN
+!  Go over additional geometries at last basis set
+        DO IGeo=2,Ctrl%NGeom
+           Ctrl%Current=(/0,Ctrl%NSet,IGeo/)
+           CALL SetGlobalCtrlIndecies(Ctrl)           
+#ifdef MMech
+           IF(HasMM()) CALL MM_ENERG(Ctrl) !!! temporary; overwrites energy terms calcd at prev geoms
+#endif
+           CALL OneSCF(Ctrl)
+           CALL Forces(Ctrl)
+        ENDDO
+     ENDIF
+#ifdef MMech
+   EndIf
+#endif
+!
+#ifdef MMech
+   If(MMOnly()) Then
+     Ctrl%Current=(/0,0,1/)
+     CALL SetGlobalCtrlIndecies(Ctrl)           
+     CALL MM_ENERG(Ctrl)
+   ENDIF
+#endif
+  END SUBROUTINE CALC_GRAD_ONE_FORCE 
+!--------------------------------------------------------
+  SUBROUTINE CALC_GRAD_MD(Ctrl)
+     IMPLICIT NONE
+     TYPE(SCFControls)     :: Ctrl
+     CALL MondoHalt(USUP_ERROR,' Look for MD in version 1.0b2. ')
+  END SUBROUTINE CALC_GRAD_MD
+!--------------------------------------------------------
+  SUBROUTINE CALC_GRAD_QNEW_OPT(Ctrl)
+     IMPLICIT NONE
+     TYPE(SCFControls)     :: Ctrl
+     INTEGER :: I,ISet,IGeo
+!
+        CALL SetGlobalCtrlIndecies(Ctrl)           
+!
+#ifdef MMech
+     IF(MMOnly()) THEN
+        Ctrl%Current=(/0,0,CGeo/)
+        CALL SetGlobalCtrlIndecies(Ctrl)           
+        CALL GeOp(Ctrl)
+     ELSE
+#endif
+     DO ISet=1,Ctrl%NSet
+!       Optimize geometry for each basis set
+        Ctrl%Current=(/0,ISet,CGeo/)
+        CALL SetGlobalCtrlIndecies(Ctrl)           
+        CALL GeOp(Ctrl)
+     ENDDO
+#ifdef MMech
+     ENDIF
+#endif
+  END SUBROUTINE CALC_GRAD_QNEW_OPT
+!------------------------------------------------------------
+  SUBROUTINE CALC_GRAD_QNEW_ONE_OPT(Ctrl)
+     IMPLICIT NONE
+     TYPE(SCFControls)     :: Ctrl
+     INTEGER :: I,ISet,IGeo
+!
+!optimize only in last basis set and just one step
+!
+#ifdef MMech
+   If(HasQM()) Then
+#endif
+!  Loop first over basis sets 
+     DO ISet=1,Ctrl%NSet
+        Ctrl%Current=(/0,ISet,1/)
+        CALL SetGlobalCtrlIndecies(Ctrl)           
+#ifdef MMech
+        IF(ISet==1.AND.HasMM()) CALL MM_ENERG(Ctrl)
+#endif
+        CALL OneSCF(Ctrl)
+     ENDDO
+     Ctrl%Current=(/0,Ctrl%NSet,1/)
+     CALL SetGlobalCtrlIndecies(Ctrl)           
+     CALL GeOp(Ctrl)
+!
+!     IF(Ctrl%NGeom>1)THEN
+!!  Go over additional geometries at last basis set
+!        DO IGeo=2,Ctrl%NGeom
+!           Ctrl%Current=(/0,Ctrl%NSet,IGeo/)
+!           CALL SetGlobalCtrlIndecies(Ctrl)           
+!           IF(HasMM()) CALL MM_ENERG(Ctrl) !!! temporary; overwrites energy terms calcd at prev geoms
+!           CALL OneSCF(Ctrl)
+!           Ctrl%Current=(/0,Ctrl%NSet,IGeo/)
+!           CALL SetGlobalCtrlIndecies(Ctrl)           
+!           CALL GeOp(Ctrl)
+!        ENDDO
+!     ENDIF
+#ifdef MMech
+   EndIf
+#endif
+!
+#ifdef MMech
+   If(MMOnly()) Then
+     Ctrl%Current=(/0,0,1/)
+     CALL SetGlobalCtrlIndecies(Ctrl)           
+     CALL MM_ENERG(Ctrl)
+     CALL GeOp(Ctrl)
+   ENDIF
+#endif
+!    Optimize geometry only in last basis set
+  END SUBROUTINE CALC_GRAD_QNEW_ONE_OPT
+!--------------------------------------------------------
+  SUBROUTINE CALC_TS_SEARCH(Ctrl)
+     IMPLICIT NONE
+     TYPE(SCFControls)     :: Ctrl
+     INTEGER :: I,ISet,IGeo
+!
+     CALL MondoHalt(USUP_ERROR,' Look for transition state optimizer in version 1.0b2.')
+  END SUBROUTINE CALC_TS_SEARCH
+!--------------------------------------------------------
+  SUBROUTINE CALC_GRAD_NO_GRAD(Ctrl)
+     IMPLICIT NONE
+     TYPE(SCFControls)     :: Ctrl
+     INTEGER :: I,ISet,IGeo
+!
+#ifdef MMech
+   If(HasQM()) Then
+#endif
+!  Loop first over basis sets 
+     DO ISet=1,Ctrl%NSet
+        Ctrl%Current=(/0,ISet,1/)
+        CALL SetGlobalCtrlIndecies(Ctrl)           
+#ifdef MMech
+        IF(ISet==1.AND.HasMM()) CALL MM_ENERG(Ctrl)
+#endif
+        CALL OneSCF(Ctrl)
+     ENDDO
+     IF(Ctrl%NGeom>1)THEN
+!  Go over additional geometries at last basis set
+        DO IGeo=2,Ctrl%NGeom
+           Ctrl%Current=(/0,Ctrl%NSet,IGeo/)
+           CALL SetGlobalCtrlIndecies(Ctrl)           
+#ifdef MMech
+           IF(HasMM()) CALL MM_ENERG(Ctrl) !!! temporary; overwrites energy terms calcd at prev geoms, also for MM multiple geomeptries are not available yet
+#endif
+           CALL OneSCF(Ctrl)
+        ENDDO
+     ENDIF
+#ifdef MMech
+   EndIf
+#endif
+!
+#ifdef MMech
+   If(MMOnly()) Then
+     Ctrl%Current=(/0,0,1/)
+     CALL SetGlobalCtrlIndecies(Ctrl)           
+     CALL MM_ENERG(Ctrl)
+   ENDIF
+#endif
+  END SUBROUTINE CALC_GRAD_NO_GRAD
+!
+!-------------------------------------------------------------
 !
  END MODULE DrvFrcs
