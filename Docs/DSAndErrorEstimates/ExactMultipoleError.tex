@@ -1,5 +1,5 @@
-%\documentclass[prb,aps,nobibnotes,twocolumn,doublespace,twocolumngrid,superbib]{revtex4}
-\documentclass[prb,aps,nobibnotes,superbib,preprint]{revtex4}
+\documentclass[prb,aps,nobibnotes,twocolumn,doublespace,twocolumngrid,superbib]{revtex4}
+%\documentclass[prb,aps,nobibnotes,superbib,preprint]{revtex4}
 
 \usepackage{graphicx}
 \usepackage{amsfonts}
@@ -13,7 +13,7 @@
 
 \begin{document}
 
-\title{An Exact Bounded Error Estimate for Multipoles}
+\title{An Exact Bounded Error Estimate for the Multipole Expansion}
 
 \author{C. J. Tymczak}
 \author{Matt Challacombe}
@@ -23,27 +23,24 @@
 \date{\today}
 
 \begin{abstract}
-We derive an exact bounded error estimate for the multipole approximation which is essential for the control of
-errors within several important algorithms such as the multipole tree-codes 
+We derive an exact bounded error estimate for the multipole expansion in ${\cal R}^3$.
+%
+This expansion is used in many important algorithms such as the multipole tree-codes 
 or the fast multipole method  algorithms. 
 %
-The multipole tree-codes and the fast multipole method 
-are used in order to achieve {\cal O}($N {\rm log}(N)$) scaling for long range interactions.
+Examples include the large scale simulations of gravitationally bound systems, such as galaxies, to
+the simulations of large charge distributions, such as di-polar proteins in water. 
 %
-Examples include the large scale astrophysical simulations, such as galaxies, and in large scale  
-Quantum Chemistry simulations, such as di-polar proteins in water. 
+Error control is essential in order to achieve both  accuracy and efficiency for these algorithms. 
 %
-Error control is essential in order to achieve both  accuracy and efficiency for both of these example algorithms. 
-%
-Specifically, we then illustrate how this new exact multipole error bound can be incorporated into our existing 
-quantum chemical tree-code within the linear scaling {\bf MondoSCF} suite.
+Specifically, we then illustrate how this new exact multipole error bound can be incorporated 
+into our existing  quantum chemical tree-code within the linear scaling {\bf MondoSCF} suite.
 %  
-We then illustrate, with several example systems,  how these modifications improves both the accuracy and 
-efficiency of our quantum chemical tree code, where we have achieve orders of magnitude reduction of the
-computational cost.
+We then illustrate, with several example systems,  how these modifications improves both the 
+accuracy and efficiency of our quantum chemical tree code, where we have achieve orders of 
+magnitude reduction of thecomputational cost.
 %
 \end{abstract}
-
 
 \maketitle
 
@@ -52,18 +49,22 @@ computational cost.
 \footnotetext[3]{\tt Preprint LA-UR-03-1948}
 
 
-
 \section{INTRODUCTION}
 
-In many interesting and technically relevant areas it sometimes becomes essential to simulate 
-the behavior of large scale systems where the interaction 
-falls of as one over the distance. 
+%In many interesting and technically relevant areas it sometimes becomes essential to simulate 
+%the behavior of large scale systems where the interaction 
+%falls of as one over the distance. 
 %
-Examples range from  the astrophysical simulation
-of the gravitational interaction, to the condensed matter simulations of electrostatic interactions.
+In the astrophysical simulation of the gravitational interaction, to the condensed matter simulations of 
+electrostatic interactions, the interaction potential falls of as (where $\Delta_i$ is either the mass 
+or the charge), 
+\begin{equation}
+\phi({\bf x})= \sum_i {\Delta_i \over |{\bf x} - {\bf x}_i|},
+\end{equation}
 % 
-In both cases the interaction potential falls of with one over the distance, 
-which leads to {\cal O}($N^2$) scaling with system size. 
+In both cases the interaction potential falls off with one over the distance, 
+which leads to {\cal O}($N^2$) scaling with system size (a charge interacting with $N-1$ 
+charges done $N$ times). 
 %
 Several algorithm's have been developed to overcome this limitation such as the 
 Ewald Method (EM)  \cite{DFincham94} algorithm, 
@@ -71,12 +72,13 @@ Particle Mesh Ewald (PME) \cite{luty:94}  algorithm,
 the Fast Multipole Method (FMM) \cite{Singh93,shimada:94,singer:95a}  algorithm,
 and the multipole tree-code (MTC) \cite{JSalmon94} algorithm. 
 %
-Of specific interest to us are the multipole tree-code methods. 
+Of specific interest, and to illustrate our new error bound for the multipole expansion, 
+are the multipole tree-code methods. 
 %
-Tree-codes have several important advantages over these other methods [ref]: i) they are easy to parallelize,
-ii) they allow easy and accurate calculation of the energies and the forces, iii) Periodic boundary
-conditions can be easily included [ref], iv) and, because of this work, they
-now have excellent error control compared to other methods.
+Tree-codes have several important advantages over these other methods [ref]: i) 
+they are easy to parallelize, ii) they allow easy and accurate calculation of the 
+energies and the forces, iii) Periodic boundary conditions can be easily included [ref], iv) 
+and, because of this work, they now have excellent error control compared to other methods.
 %
 
 Previous work on tree-code algorithm's has been severely limited by the lack of
@@ -93,65 +95,78 @@ Which would usually force us to lower our error
 thresholds to unacceptable small levels, also increasing the time to compute the matrix by orders of
 magnitude. 
 %
-This problem is easily rectified by our new bounded error estimate
-
-In the next section we first review the MTC algorithm. 
+This problem is easily rectified by our new bounded error estimate.
 %
-We then show how the efficiency of these codes are
-controlled by the efficiency of the error estimates. 
 %
-Next we briefly outline the derivation of 
-our exact error bound and how it can be implemented into existing MTC's. 
 %
-In the final section we show how this exact error bound improves dramatically the efficiency and accuracy
-of our Quantum chemical tree code (QCTC) for quantum and classical simulations of di-polar water.
+
+In the next section we first review the multipole expansion specifically to sperical multipoles [ref]. 
+%
+We then briefly review the multipole tree-code algorithm,and we then show how the efficiency of 
+the multipole tree-code code is controlled by the efficiency of the error estimates. 
+%
+We then briefly outline the derivation of our exact error bound and how it can be easilly implemented 
+into existing codes which use the multipole expansion.
+%
+In the final section we illustrate how this exact error bound improves dramatically the efficiency 
+and accuracy of our Quantum chemical tree code (QCTC) for quantum and classical simulations 
+of di-polar water.
 
 
-\section{MULTIPOLE TREE-CODES}
+\section{The Multipole Expansion}
 
-\subsection{The Multipole Expansion}
-
-Consider figure {\ref{figure:MultInBox}}, where we have depicted $N$ distributions in a box, and a 
-reference distribution , $a$, to which we want to calculate the long range interactions with the 
-distributions in the box. 
+Consider figure {\ref{figure:MultInBox}}, where we have depicted $N$ distributions inside the bounded 
+region $\Sigma$, and a interacting reference distribution $a$. 
 %
 Here we are defining {\it distribution} as a confined area of charge, be it
-a point charge or other.  
+a point charge or local function, such as a gussian.  
 %
-Let us also consider the long range interaction to be electrostatic in nature.
+%Let us also consider the long range interaction to be electrostatic in nature.
 %
-Of course the very simple way to calculated the interaction of distribution $a$ with all 
-the distributions in the box is,
-\begin{equation}
+A simple, but computationally expensive, method to calculated the 
+interaction of distribution $a$ with all the distributions in the region $\Sigma$ is,
+\begin{eqnarray}
 V[\mathbf{R}_{a},\mathbf{R}_{box}] =
 \sum_{i=1}^{N} \frac{q_{a} \, q_{i}}{|\mathbf{R}_{a}-\mathbf{R}_{i}|}
-\end{equation}
+\end{eqnarray}
 %
 However, this scales with the number of distributions in the box, leading to quadratic scaling for 
-the interaction energy of $N$ distributions (a distributions interacting with $N-1$ 
-distributions done $N$ times) . 
+the total interaction energy of $N$ distributions. 
 %
 One solution to this poor scaling would be to calculate the multipoles (here we use 
-spherical multipoles [ref]) of the set of distributions in the box at the center of the box, and 
-then interact the reference distribution $a$ with the multipoles via
+spherical multipoles) of the set of distributions in the region $\Sigma$ at some center (in the 
+figure depicted by the red crosshairs), and then interact the reference distribution $a$ with the 
+multipoles via
 %
-\begin{equation}
-V[\mathbf{R}_{a},\mathbf{R}_{box}]  
-= \varepsilon + \frac{1}{2}\sum _{l=0}^{L}\, \sum _{l'=0}^{L'}\, \sum _{m=-l}^{l}\, 
-\sum _{m'=-l'}^{l'}\,
-\left( -1\right) ^{l}
-\, {\cal O}_{l}^{m}[\mathbf{R}_{a}]M_{l+l'}^{m+m'}[\mathbf{R}_{a}-\mathbf{R}_{box}]\, 
-{\cal O}_{l'}^{m'}[\mathbf{R}_{box}]
+\begin{eqnarray}
+V[&&\mathbf{R}_{a}, \mathbf{R}_{\Sigma}]  = 
+\frac{1}{2} \sum _{l=0}^{L}\, \sum _{l'=0}^{L'}\, \sum _{m=-l}^{l}\, 
+\sum _{m'=-l'}^{l'}\, \nonumber\\
+&& \left( -1\right) ^{l}
+\, {\cal O}_{l}^{m}[\mathbf{R}_{a}]M_{l+l'}^{m+m'}[\mathbf{R}_{a}-\mathbf{R}_{\Sigma}]\, 
+{\cal O}_{l'}^{m'}[\mathbf{R}_{\Sigma}]+\varepsilon \nonumber\\
 \label{MultI}
-\end{equation}
+\end{eqnarray}
 %
-Where ${\cal O}_{l}^{m}[\mathbf{R}_{a}]$ and ${\cal O}_{l'}^{m'}[\mathbf{R}_{box}]$ are the 
-spherical multiple's of the distribution $a$ and the distributions in the box , 
-$M_{l+l'}^{m+m'}[\mathbf{R}_{a}-\mathbf{R}_{box}]$ is the interaction tensor 
+where ${\cal O}_{l}^{m}[\mathbf{R}_{a}]$ is the spherical  multiple's of the distribution $a$, 
+${\cal O}_{l'}^{m'}[\mathbf{R}_{\Sigma}]$ is the spherical  multiple's of the distributions in 
+the region $\Sigma$,
+$M_{l+l'}^{m+m'}[\mathbf{R}_{a}-\mathbf{R}_{\Sigma}]$ is the interaction tensor 
 (see equations (A1-A3) in Appendix A), and $\varepsilon$ is the error we make by this approximation. 
+In equation (\ref{MultI}) we have made use of the exact expansion [ref],
 %
-This is exact, $\varepsilon=0$,  in the limit of $L$ and $L'$ approaching  infinity as long as 
-$|\mathbf{R}_{a}-\mathbf{R}_{box}| < \mathbf{d}_{max}$. 
+\begin{eqnarray}
+&& \frac{1}{ {|\mathbf{R}-\mathbf{R'}}|}  = 
+\frac{1}{2}\sum _{l=0}^{\infty}\, \sum _{l'=0}^{\infty}\, \sum _{m=-l}^{l}\, 
+\sum _{m'=-l'}^{l'}\,\nonumber\\
+&& \left( -1\right) ^{l} \,
+{\cal \tilde O}_{l}^{m}[\mathbf{R}-\mathbf{P}]M_{l+l'}^{m+m'}[\mathbf{P}-\mathbf{Q}]\, 
+{\cal \tilde O}_{l'}^{m'}[\mathbf{R'}-\mathbf{Q}]
+\label{OneOverR}
+\end{eqnarray}
+%
+given that $|\mathbf{R}-\mathbf{R'}| > |\mathbf{P}-\mathbf{Q}|$.
+
 %
 In tree code calculations ${\cal O}_{l}^{m}[\mathbf{R}_{a}]$ is usually of a particular angular 
 momentum type, $l_0$, such that the sum over $L$ is removed, and the value of $L'$ are usually fixed at 
@@ -161,71 +176,97 @@ However, fixing the value of $L'$ creates the problem of how to control the accu
 for the reference distribution $a$, which is of central importance if we want to have any hope of 
 controlling our error.
 
-\subsection{Tree Codes}
+%
+% Figure 1
+%
+\begin{figure}
+\caption{A set of $N$ distributions in a region $\Sigma$ and the interacting distribution $a$.
+And we define ${\bf d}_{max}$ as the maximum distance of the distrubutions from the regions center.}
+{\centering \includegraphics {MultInBox.ps} \par} 
+\label{figure:MultInBox} 
+\end{figure}
 
-A solution to this problem is presented in Figure {\ref{figure:TreeInBox}}. 
+\section{Multipole Tree Codes}
+
+One solution to this problem is presented in Figure {\ref{figure:TreeInBox}}. 
 %
-Instead of contracting the reference distribution $a$ with the multipole moments of all the distributions in the
-box, which can lead to large errors, instead we contract our reference distributions with sub-boxes of the original
-box such that our error is well controlled. 
+Instead of contracting the reference distribution $a$ with the multipole moments of all the 
+distributions in the region $\Sigma$, which can lead to large errors, we contract our reference 
+distributions with sub-regions of the original region such that our error is well controlled. 
 %
-The simplest method for achieving this is to split our original box into two sub-boxes, then split 
-these sub-boxes int sub-sub-boxes, etc. 
+The simplest method for achieving this is to split our original region into two sub-regions, then split 
+these sub-regions int sub-sub-regions, etc. 
 %
-If we have $N$ distributions in the original box our splitting scheme gives us $N$ boxes (nodes) 
-and $N$ distributions (leafs) for this {\it tree}. 
+If we have $N$ distributions in the original region our splitting scheme gives us $N$ (sub)regions and, which 
+we refer to as nodes on the {\bf tree}, 
+and $N$ distributions, which we refer to as leafs of the {\bf tree}. 
 %
 This is also depicted in  Figure {\ref{figure:TreeInBox}}. 
 %
 So instead of contracting our reference distribution $a$ with the 
-original box, we now contract it with the set of sub-boxes which will control the error. 
+original region, we now contract it with the set of sub-regions, which should control the error. 
 %
-In general for our reference
-distribution we will need to visit {\cal O}($\log (N)$) nodes and leafs, which is also depicted in the figure. 
+In general for our reference distribution we will need to visit {\cal O}($\log (N)$) nodes and 
+leafs, which we also depicted in 
+Figure {\ref{figure:TreeInBox}} . 
 %
-The only issue yet to be resolved is how we estimate the error due to the contraction; what should be our
-{\it Multipole Acceptability Criteria} (MAC) for whether or not we contract on this node, or recur down to the 
-next two sub nodes. 
+The only issue yet to be resolved is how we estimate the error due to the translations of the 
+distributions multipoles to the (sub)regions centers; what should be our error criteria for whether 
+or not we contract on this node, or recur down to the 
+next two sub nodes of the {\bf tree}. 
 %
 In the next section we explore this issue.
 
-
-\section{MULTIPOLE ACCEPTABILITY CRITERIA } 
-
-Several multipole acceptability criteria have been devised for multipole tree codes [ref].
 %
-The simplest
-multipole acceptability criteria which is most often used in applications is the, and
+% Figure 2
+%
+\begin{figure}
+\caption{The regions and sub-regions that distribution $a$ interacts with, and the depiction of the
+organization of the multipole of the {\bf tree}}
+{\centering \includegraphics {TreeInBox.ps} \par} 
+\label{figure:TreeInBox} 
+\end{figure}
+
+\section{Exact Error Bound of the Multipole Expansion} 
+
+Several multipole error criteria have been devised for multipole tree codes [ref].
+%
+The simplest multipole error criteria which is most often used in applications is the, and
 which we use as an illustration of the problems associated with using unbounded error estimates, is the 
 {\it opening criteria}, which is due to Barn and Hut [ref],
 \begin{equation}
-\varepsilon_{oc} \approx \frac{ \left| {\bf d}_{max} \right| }{ \left| {\bf R}_a - {\bf R}_{box} \right|}
+\varepsilon_{oc} \approx \frac{ \left| {\bf d}_{max} \right| }{ \left| {\bf R}_a - {\bf R}_{\Sigma} \right|}
 \label{OpenCri}
 \end{equation} 
 %
 However, this suffers from several severe problems: 
-i) It does not take into account the decay of the multipoles,
-ii) It does not take into account the weight of the distributions within the box, a serious 
+\begin{itemize}
+\item[i)] It does not take into account the decay of the multipoles
+\item[ii)] It does not take into account the weight of the distributions within the region $\Sigma$, a serious 
 problem for quantum chemistry codes where the distribution weights can span several orders of magnitude,
-iii) It does not take into account the angular momentum type of the distributions,
-iv) When $|R_a - R_{box}| \rightarrow |{\bf d}_{max}|$ it can significantly underestimate
-the error. 
+\item[iii)] It does not take into account the angular momentum type of the distributions,
+\item[iv)] When $|R_a - R_{\Sigma}| \rightarrow |{\bf d}_{max}|$ it can significantly underestimate
+the error.
+\end{itemize}
 %
 To avoid this problem we have derived an exact bounded error estimate which significantly improves the 
 performance of our multipole tree codes.
 %
-In Appendix A we give a complete derivation of this exact bounded error estimate, here we just give a 
-brief description. 
+In Appendix A we give a complete derivation of this exact bounded error estimate for the translation of 
+multipoles, here we just give a brief description. 
 %
 Let us start with the expression of the exact multipole error as,
-\begin{equation}
+\begin{eqnarray}
 \label{MultErr}
-\varepsilon \left( l_{0}\right) =\left| \frac{1}{2}\sum _{l'=L_{max}+1}^{\infty }\, 
+\varepsilon \left( l_{0}\right) && =\Big| \frac{1}{2}\sum _{l'=L_{max}+1}^{\infty }\, 
 \sum _{m=-l_{0}}^{l_{0}}\, 
-\sum _{m'=-l'}^{l'}\, \left( -1\right) ^{l}\, {\cal O}_{l_{0}}^{m}[\mathbf{R}_a]\, 
+\sum _{m'=-l'}^{l'}\, \nonumber\\
+&& \left( -1\right) ^{l}\, 
+{\cal O}_{l_{0}}^{m}[\mathbf{R}_a]\, 
 M_{l_{0}+l'}^{m+m'}
-[{\mathbf{R}_a-\mathbf{R}_{box}}]\, {\cal O}_{l'}^{m'}[\mathbf{Q}]\right| 
-\end{equation}
+[{\mathbf{R}_a-\mathbf{R}_{\Sigma}}]\, {\cal O}_{l'}^{m'}[\mathbf{R}_{\Sigma}] \Big| \nonumber\\
+\end{eqnarray}
+%
 which are the multipoles that are not summed in equation (\ref{MultI}) 
 (This is the same as equation (\ref{B7}) in Appendix A). What we then make use of is the
 Us{\"o}ld operator,
@@ -234,30 +275,33 @@ Us{\"o}ld operator,
 \left| {\cal O}_{l}^{m}
 \left[ \mathbf{R}\right] \right|^{2}}
 \end{equation}
-Which we will refer to as the Us{\"o}ld weight of the distributions in the box. 
+Which we will refer to as the Us{\"o}ld weight of the distributions in the region $\Sigma$. 
 Using this definition allows us to rewrite the error bound as,
 %
 %
-\begin{equation}
-\varepsilon \left( l_{0}\right) \leq \frac{1}{2}\frac{{\cal O}_{l_{0}}\left[
+\begin{eqnarray}
+\varepsilon \left( l_{0}\right) &&  \leq \frac{1}{2}\frac{{\cal O}_{l_{0}}\left[
 \left| \mathbf{R}_a \right| 
-\right] }{\left| \mathbf{R}_a-\mathbf{R}_{box}\right| ^{l_{0}+L_{max}+2}}\sum _{l=0}^{\infty }\frac{n\left[ 
+\right] }{\left| \mathbf{R}_a-\mathbf{R}_{\Sigma}\right| ^{l_{0}+L_{max}+2}} \nonumber\\
+&& \sum _{l=0}^{\infty }\frac{n\left[ 
 l_{0},l+L_{max}+1\right] 
-{\cal O}_{l+L_{max}+1}\left[\left| \mathbf{R}_{box} \right| \right] }{\left| \mathbf{R}_a-\mathbf{R}_{box}
-\right| ^{l}}
-\end{equation}
+{\cal O}_{l+L_{max}+1}\left[\left| \mathbf{R}_{\Sigma} \right| \right] }{\left| \mathbf{R}_a-
+\mathbf{R}_{\Sigma}\right| ^{l}}
+\end{eqnarray}
 %
 %
 where
 \begin{equation}
 n\left[ l,l'\right] =\sqrt{2} \frac{(l+l')!}{l!\, l'!}
 \end{equation}
-To continue with the main points of our derivation, we can then show that
+%
+To continue with the main points of our derivation, we can then show that 
 \begin{equation}
 {\cal O}_{l}[\left| \mathbf{R}\right| ]\leq {\cal C} \left| \mathbf{d}_{max}\right| ^{l}
 \label{Cbound}
 \end{equation}
-Where we refer to ${\cal C}$ as the asymptotic Uns{\"o}ld weight, and  is tabulated beforehand. 
+Where we refer to ${\cal C}$ as the asymptotic Uns{\"o}ld weight, is independent 
+of $l$ and ${\bf d}_{max}$, and can be tabulated beforehand. 
 Using equation (\ref{Cbound}) allows us to write our error bound in its final form
 \begin{equation}
 \varepsilon \left( l_{0}\right) \leq \frac{1}{2}\frac{{\cal C} \,{\cal O}_{l_{0}}\left[\left| 
@@ -269,30 +313,33 @@ Using equation (\ref{Cbound}) allows us to write our error bound in its final fo
 \right| ^{L_{max}+1}}
 \end{equation}
 This error bound solves all the problems associated with the {\it opening criteria} error estimate: 
-i) It takes into account the decay of the multipoles,
-ii) It takes into account the weight of the distribution within the box,
-iii) It takes into account the angular momentum type of the distributions,
-iv) When $|R_a - R_{box}| \rightarrow |{\bf d}_{max}|$ it correctly bounds the error. 
+\begin{itemize}
+\item[i)] It takes into account the decay of the multipoles,
+\item[ii)] It takes into account the weight of the distribution within the box,
+\item[iii)] It takes into account the angular momentum type of the distributions,
+\item[iv)] When $|R_a - R_{box}| \rightarrow |{\bf d}_{max}|$ it correctly bounds the error. 
+\end{itemize}
 %
 
 For illustrative purposes, we can continue this analysis to include the multipole error made within the 
-fast multipole algorithm, but in this case we are contracting distributions in two different boxes. 
+fast multipole algorithm, but in this case we are contracting distributions in two different regions. 
 %
 Making the assumption that $L=L'=L_{max}$ we can write the fast multipole error as
-\begin{equation}
-\varepsilon_{FMM} \leq 
-\frac{1}{2} \frac{{\cal C}_{box_1} {\cal C}_{box_2} 
-\left| \left| \mathbf{d}_{max_1}\right| +  \left| \mathbf{d}_{max_2}\right| \right|^{L_{max}+1}}
-{\left|\mathbf{R_{box_1}}-\mathbf{R_{box_2}}\right|^{L_{max}+1}
-\left|\left|\mathbf{R}_{box_1}-\mathbf{R}_{box_2} \right|-\left| 
- \mathbf{d}_{max_1}\right| -  \left| \mathbf{d}_{max_2}\right|
-\right|}
+\begin{eqnarray}
+&& \varepsilon_{FMM}   \leq  \nonumber\\
+&& \frac{1}{2} \frac{{\cal C}_{\Sigma_1} {\cal C}_{\Sigma_2} 
+\left| \mathbf{d}_{max}\right|^{L_{max}+1}}
+{\left|\mathbf{R_{\Sigma_1}}-\mathbf{R_{\Sigma_2}}\right|^{L_{max}+1}
+\left|\left|\mathbf{R}_{\Sigma_1}-\mathbf{R}_{\Sigma_2} \right|-\left| 
+ \mathbf{d}_{max}\right| \right|}\nonumber\\
 \label{FMM_EB}
-\end{equation}
-where ${\bf R}_{box_1}$ and ${\bf R}_{box_2}$ are the centers of,
-${\bf d}_{max_1}$ and ${\bf d}_{max_2}$ are the sizes of, and
-${\cal C}_{box_1}$ and ${\cal C}_{box_2}$ asymptotic Uns{\"o}ld weight of the distributions within 
-box 1 and box 2.
+\end{eqnarray}
+where $|{\bf d}_{max}| = |{\bf d}_{max}^{\Sigma_1}|+|{\bf d}_{max}^{\Sigma_2}|$ and 
+${\bf R}_{\Sigma_1}$ and ${\bf R}_{\Sigma_2}$ are the centers of, 
+${\bf d}_{max}^{\Sigma_1}$ and ${\bf d}_{max}^{\Sigma_2}$ are maxium distance of 
+the distributions from the centers, and
+${\cal C}_{\Sigma_1}$ and ${\cal C}_{\Sigma_2}$ asymptotic Uns{\"o}ld weight of the distributions within 
+region $\Sigma_1$ and region $\Sigma_2$.
 
 \section{RESULTS}
 
@@ -321,6 +368,28 @@ Again we see that no distribution error ever falls above the  $\tau=Error$,
 which is exceptional for the quantum system where the distributions weights can vary
 many orders of magnitude, and where in this case approximately ten million nodes where tested.  
 
+%
+% Figure 3
+%
+\begin{figure}
+\caption{A contour plot of the binned error calculated on each visited node of the multipole tree for a
+classical water system of 512 molecules per unit cell with 125 image cells. 
+The red line is the $\tau=Error$ line}
+{\centering \includegraphics {Error_vs_TauMAC_bin_Water512.ps} \par} 
+\label{figure:MultipoleErrorWaterC512} 
+\end{figure}
+%
+% Figure 4
+%
+\begin{figure}
+\caption{A contour plot of the binned error calculated on each visited node of the multipole tree for a 
+quantum  water system of 64 molecules per unit cell with 125 image cells using the STO-3G basis set.
+The red line is the $\tau=Error$ line}
+{\centering \includegraphics{Error_vs_TauMAC_Water64_bin.ps} \par} 
+\label{figure:MultipoleErrorWaterQ64} 
+\end{figure}
+
+
 \subsection{Scaling}
 
 In Figure \ref{figure:TimeVsNwater} we show the time to calculate all the forces and the time it takes
@@ -344,6 +413,28 @@ crossover happening around about $\tau=10^{-3}$.
 To our knowledge, this effect has yet to be observed and we attribute it to
 the our bounded error estimate. 
 
+
+%
+% Figure 5
+%
+\begin{figure}
+\caption{The time to both build the multipole tree, and calculate the force for every particle, for  
+a classical water system with 125 image cells at a tolerance of $\tau=10^{-8}$ and $L_{max}=(4,6,8)$ 
+for increasing system size.}
+{\centering \includegraphics {Time_vs_N_water_2.ps} \par} 
+\label{figure:TimeVsNwater} 
+\end{figure}
+
+
+%
+% Figure 6
+%
+\begin{figure}
+\caption{The time to calculate the force for a classical water system with 4096 molecules
+per unit cell and 125 image cells for  decreasing tolerance and  $L_{max}=(4,5,6,7)$.}
+{\centering \includegraphics {Time_vs_Tau_W4096.ps} \par} 
+\label{figure:TimeVsTauWater4096} 
+\end{figure}
 
 \section{CONCLUSIONS}
 
@@ -725,51 +816,4 @@ For the case where $L=L'$ and $|\mathbf{d}|= |\mathbf{d'}|$ this has a particula
 \label{B44}
 \end{equation}
 \eject
-%
-%
-%
-\begin{figure}
-\caption{A set of $N$ distributions in a box and the distribution $a$.}
-{\centering \includegraphics {MultInBox.ps} \par} 
-\label{figure:MultInBox} 
-\end{figure}
-
-\begin{figure}
-\caption{The boxes and sub-boxes that distribution $a$ interacts with, and the depiction of the
-organization of the multipole of the tree}
-{\centering \includegraphics {TreeInBox.ps} \par} 
-\label{figure:TreeInBox} 
-\end{figure}
-
-\begin{figure}
-\caption{A contour plot of the binned error calculated on each visited node of the multipole tree for a
-classical water system of 512 molecules per unit cell with 125 image cells. 
-The red line is the $\tau=Error$ line}
-{\centering \includegraphics {Error_vs_TauMAC_bin_Water512.ps} \par} 
-\label{figure:MultipoleErrorWaterC512} 
-\end{figure}
-
-\begin{figure}
-\caption{A contour plot of the binned error calculated on each visited node of the multipole tree for a 
-quantum  water system of 64 molecules per unit cell with 125 image cells using the STO-3G basis set.
-The red line is the $\tau=Error$ line}
-{\centering \includegraphics{Error_vs_TauMAC_Water64_bin.ps} \par} 
-\label{figure:MultipoleErrorWaterQ64} 
-\end{figure}
-
-\begin{figure}
-\caption{The time to both build the multipole tree, and calculate the force for every particle, for  
-a classical water system with 125 image cells at a tolerance of $\tau=10^{-8}$ and $L_{max}=(4,6,8)$ 
-for increasing system size.}
-{\centering \includegraphics {Time_vs_N_water_2.ps} \par} 
-\label{figure:TimeVsNwater} 
-\end{figure}
-
-\begin{figure}
-\caption{The time to calculate the force for a classical water system with 4096 molecules
-per unit cell and 125 image cells for  decreasing tolerance and  $L_{max}=(4,5,6,7)$.}
-{\centering \includegraphics {Time_vs_Tau_W4096.ps} \par} 
-\label{figure:TimeVsTauWater4096} 
-\end{figure}
-
 \end{document}
