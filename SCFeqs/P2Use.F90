@@ -48,11 +48,11 @@ PROGRAM P2Use
      CALL Halt(' Extrapolation turned off, need non-orthogonal SP2 or TS4... ')
   ELSEIF(SCFActn=='Restart')THEN
      CALL Get(RestartHDF,'OldInfo')
-     CALL CloseHDF()
-     CALL OpenHDF(RestartHDF)
+     CALL CloseHDF(HDF_CurrentID)
+     HDF_CurrentID=OpenHDF(RestartHDF)
      CALL Get(P,'CurrentDM',CheckPoint_O=.TRUE.)   
-     CALL CloseHDF()
-     CALL OpenHDF(InfFile)
+     CALL CloseHDF(HDF_CurrentID)
+     HDF_CurrentID=OpenHDF(InfFile)
   ELSEIF(SCFActn=='Project')THEN
      ! Allocations 
      CALL New(P)
