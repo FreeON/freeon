@@ -202,7 +202,10 @@ S_{ab}=\sum _{\mathbf{R},\mathbf{R}'}\int _{V_{\rm UC}}\, d{\mathbf{r}}\,
 \end{equation}
 in the periodic regime.  
 However, this formalism can be changed via the 
-transformation $\sum_{\bf R} \int_{V_{\rm UC}} d {\bf r} f({\bf r+R}) \rightarrow \int_{V_\infty} d {\bf r} f({\bf r})$,
+transformation,
+\begin{equation}
+\sum_{\bf R} \int_{V_{\rm UC}} d {\bf r} f({\bf r+R}) \rightarrow \int_{V_\infty} d {\bf r} f({\bf r}),
+\end{equation}
 allowing use of conventional analytic integral technologies \cite{twoels}.  For example, 
 elements of the periodic overlap matrix become
 \begin{equation}
@@ -214,8 +217,9 @@ It is convenient to define the corresponding intermediate basis function product
 $\rho _{ab}^{\scriptscriptstyle \infty}({\mathbf{r}})=\sum _{\mathbf{R}}\phi _{a}({\mathbf{r}})\phi _{b}
 ({\mathbf{r}+\mathbf{R}})
 $ associated with integration over $V_\infty$.  We likewise define an intermediate 
-electron density $\rho^{\scriptscriptstyle \infty}({\bf{r}})= \sum _{ab} P_{ab} \rho _{ab}^{\scriptscriptstyle \infty}({\mathbf{r}})$,
-where ${\bf P}$ is the one-electron reduced density matrix.  
+electron density $\rho^{\scriptscriptstyle \infty}({\bf{r}})= \sum _{ab} P_{ab} 
+\rho _{ab}^{\scriptscriptstyle \infty}({\mathbf{r}})$,
+where $P_{ab}$ is the one-electron reduced density matrix.  
 In this convention, $V_\infty$ is the default volume of integration, and elements of the periodic overlap 
 matrix are expressed simply  as $S_{ab}=\int  d{\mathbf{r}}\, \rho^{\scriptscriptstyle \infty}_{ab}({\mathbf{r}})$,
  while the electron count is
@@ -231,7 +235,7 @@ These considerations and others are discussed by Towler in an excellent overview
 phase \cite{MTowler00}.  Also, there are at least two libraries\cite{CrystalLib,TowlerLib} of Gaussian 
 basis sets appropriate for materials at standard densities. For high densities though, these basis sets may 
 still encounter problems with linear dependence and sensitivity to truncation.  One solution to this problem, suggested 
-by Gr{\"u}neich and He\ss \cite{AGruneich98} for even tempered basis sets, is to scale the exponents by the inverse square 
+by Gr{\"u}neich and Hess \cite{AGruneich98} for even tempered basis sets, is to scale the exponents by the inverse square 
 of the lattice constant.  In many cases though, especially for large systems, standard quantum chemistry basis sets
 work well \cite{}.
 
@@ -543,7 +547,7 @@ shown in Fig.~\ref{BoxUC},  are equivalent due to full periodicity of the distri
 and the density.  However, because the distributions and density involve a double sum over 
 lattice vectors, there will be a large number of atom-atom pairs that do not overlap
 with $V_\Box$.  A similar situation is encounted in the gas phase for parallel versions 
-of HiCu \cite{CGan02}, where each processor has a small, local cube-tree that may 
+of HiCu \cite{CGan03}, where each processor has a small, local cube-tree that may 
 overlap only a few of the many possible atom-atom pairs.  
 
 The solution again comes from the ray tracing litterature, in the form of a modified 
@@ -627,7 +631,7 @@ Program         & $N_{\rm at}$              & Energy (hartree) & Energy/$N_{\rm 
                 & 128$^f$  & -39109.912    & -305.54618   \\
                 & 216$^g$  & -65997.977    & -305.54619   \\ 
 \hline
-{\sc Crystal98} & 2$^f$    &  -611.09228    & -305.54614    \\ 
+${\sc Crystal98}^h$ & 2$^f$    &  -611.09228    & -305.54614    \\ 
 \botrule
 $ ^f$Triclinic \\
 $ ^g$Cubic  \\
@@ -656,7 +660,7 @@ Program         & $N_{\rm at}$              & Energy (hartree) & Energy/$N_{\rm 
                 & 128$^f$  &  -17630.430  & -137.73774  \\
                 & 216$^g$  &  -29751.352  & -137.73774  \\ 
 \hline
-{\sc Crystal98} & 2$^f$    &   -275.47547  & -137.73774  \\ 
+${\sc Crystal98}^h$ & 2$^f$    &   -275.47547  & -137.73774  \\ 
 \botrule
 $ ^f$Triclinic \\
 $ ^g$Cubic  \\
