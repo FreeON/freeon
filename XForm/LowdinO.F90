@@ -94,20 +94,20 @@ PROGRAM LowdinO
 !
 !**************************
 !
-  DO I=1,NBasF
-     DO J=1,NBasF
-        SUM = Zero
-        DO K=1,NBasF
-           SUM = SUM + Vectors%D(I,K)*Vectors%D(J,K)/SQRT(Values%D(K))
-        ENDDO
-        Tmp1%D(I,J) = SUM
-     ENDDO
-  ENDDO
+!!$  DO I=1,NBasF
+!!$     DO J=1,NBasF
+!!$        SUM = Zero
+!!$        DO K=1,NBasF
+!!$           SUM = SUM + Vectors%D(I,K)*Vectors%D(J,K)/SQRT(Values%D(K))
+!!$        ENDDO
+!!$        Tmp1%D(I,J) = SUM
+!!$     ENDDO
+!!$  ENDDO
 !
-!  CALL DGEMM('N','N',NBasF,NBasF,NBasF,One,Vectors%D, &
-!             NBasF,Tmp1%D,NBasF,Zero,Tmp2%D,NBasF)
-!  CALL DGEMM('N','T',NBasF,NBasF,NBasF,One,Tmp2%D,    &
-!             NBasF,Vectors%D,NBasF,Zero,Tmp1%D,NBasF)
+  CALL DGEMM('N','N',NBasF,NBasF,NBasF,One,Vectors%D, &
+             NBasF,Tmp1%D,NBasF,Zero,Tmp2%D,NBasF)
+  CALL DGEMM('N','T',NBasF,NBasF,NBasF,One,Tmp2%D,    &
+             NBasF,Vectors%D,NBasF,Zero,Tmp1%D,NBasF)
 !--------------------------------------------------------------------
 !
   CALL Delete(Values)
