@@ -1823,7 +1823,7 @@ CONTAINS
      Tr1%D=Zero
      Tr2%D=Zero
      Tr3%D=Zero
-     Sum=One/DBLE(NatmsLoc)
+     Sum=One/SQRT(DBLE(NatmsLoc))
      DO I=1,NatmsLoc
        J=(I-1)*3
        Tr1%D(J+1)=Sum
@@ -1834,7 +1834,7 @@ CONTAINS
      ! Now, project out translations from CartVect
      !
      SUM =DOT_PRODUCT(CartVect,CartVect)
-     IF(SUM > 1.D-6) THEN
+     IF(SQRT(SUM/DBLE(NCart)) > 1.D-14) THEN
        SUM1=DOT_PRODUCT(Tr1%D,CartVect)
          CartVect=CartVect-SUM1*Tr1%D
        SUM2=DOT_PRODUCT(Tr2%D,CartVect)
@@ -1891,7 +1891,7 @@ CONTAINS
      !
      Sum1=DOT_PRODUCT(CrossProd%D(1:3),CrossProd%D(1:3))
      !
-     IF(ABS(Sum1) < 1.D-6) THEN  !!! V1 & V2 are parallel
+     IF(SQRT(Sum1) < 1.D-12) THEN  !!! V1 & V2 are parallel
        Rot=Zero
        Sum=DOT_PRODUCT(V1,V2)
        DO I=1,3 ; Rot(I,I)=Sum ; ENDDO
@@ -1926,7 +1926,7 @@ CONTAINS
          CALL DGEMM_NNc(3,3,1,One,Zero,Rot,V2,Vect%D(1:3))
          !
          SumM=DOT_PRODUCT((V1-Vect%D),(V1-Vect%D))
-         IF(SumM>1.D-6) THEN
+         IF(SQRT(SumM)>1.D-12) THEN
            SinPhi=-SinPhi
            Step=Step+1
            IF(Step > 2) THEN
