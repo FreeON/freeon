@@ -30,10 +30,11 @@ PROGRAM JForce
 #endif
   TYPE(AtomPair)             :: Pair
   TYPE(DBL_VECT)             :: Frc,JFrc
-#ifdef PERIODIC        
-  REAL(DOUBLE),DIMENSION(3)  :: B
-  INTEGER                    :: NC
-#endif   
+#ifdef PERIODIC 
+  INTEGER                     :: NC
+  REAL(DOUBLE),DIMENSION(3)   :: B,F_nlm,nlm
+  REAL(DOUBLE),DIMENSION(3,3) :: LatFrc_J
+#endif
   INTEGER                    :: AtA,AtB,A1,A2,MA,NB,MN1,JP,Q
   REAL(DOUBLE)               :: JFrcChk
   CHARACTER(LEN=6),PARAMETER :: Prog='JForce'
@@ -77,7 +78,7 @@ PROGRAM JForce
      MA=BSiz%I(AtA)
      A1=3*(AtA-1)+1
      A2=3*AtA
-     JFrc%D(A1:A2)=dNukE(AtA)
+     JFrc%D(A1:A2)= dNukE(AtA)
      DO JP=P%RowPt%I(AtA),P%RowPt%I(AtA+1)-1
         AtB=P%ColPt%I(JP)
         IF(SetAtomPair(GM,BS,AtA,AtB,Pair))THEN
@@ -92,7 +93,8 @@ PROGRAM JForce
                       +(Pair%A(2)-Pair%B(2))**2 &
                       +(Pair%A(3)-Pair%B(3))**2
               IF(TestAtomPair(Pair))THEN
-                 JFrc%D(A1:A2)=JFrc%D(A1:A2)+TrPdJ(Pair,P%MTrix%D(Q:Q+MN1))
+                 F_nlm(1:3)    = TrPdJ(Pair,P%MTrix%D(Q:Q+MN1))
+                 JFrc%D(A1:A2) = JFrc%D(A1:A2) + F_nlm(1:3)
               ENDIF
            ENDDO
 #else
@@ -107,6 +109,10 @@ PROGRAM JForce
 ! Do some checksumming, resumming and IO 
   CALL PPrint(JFrc,'dJ/dR')
   CALL PChkSum(JFrc,'dJ/dR',Proc_O=Prog)  
+! Print The JForce
+  CALL Print_Force(GM,JFrc,' dJ/dR ')
+  CALL Print_CheckSum_Force(JFrc,' dJ/dR ')
+!  IF(.TRUE.) STOP
 ! Sum in contribution to total force
   CALL New(Frc,3*NAtoms)
   CALL Get(Frc,'GradE',Tag_O=CurGeom)
