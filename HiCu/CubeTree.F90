@@ -83,10 +83,10 @@ MODULE CubeTree
          BoxCenter(:) = Box%Center(:)
          BoxBndLow(:) = Box%BndBox(:,1)
          BoxBndHig(:) = Box%BndBox(:,2)
-         DO NC = 1,CS_OUT%NCells
-            Box%Center(:)   = BoxCenter(:)+CS_OUT%CellCarts%D(:,NC)
-            Box%BndBox(:,1) = BoxBndLow(:)+CS_OUT%CellCarts%D(:,NC)
-            Box%BndBox(:,2) = BoxBndHig(:)+CS_OUT%CellCarts%D(:,NC)        
+         DO NC = 1,CS_Grid%NCells
+            Box%Center(:)   = BoxCenter(:)+CS_Grid%CellCarts%D(:,NC)
+            Box%BndBox(:,1) = BoxBndLow(:)+CS_Grid%CellCarts%D(:,NC)
+            Box%BndBox(:,2) = BoxBndHig(:)+CS_Grid%CellCarts%D(:,NC)        
             IXact=IXact+PopInBox(RhoRoot)
          ENDDO
          Box%Center(:)   = BoxCenter(:)
@@ -249,12 +249,12 @@ MODULE CubeTree
          BoxBndLow(:) = Box%BndBox(:,1)
          BoxBndHig(:) = Box%BndBox(:,2)
          GridOld(:,:) = Grid(:,:)
-         DO NC = 1,CS_OUT%NCells
-            Box%Center(:)   = BoxCenter(:)+CS_OUT%CellCarts%D(:,NC)
-            Box%BndBox(:,1) = BoxBndLow(:)+CS_OUT%CellCarts%D(:,NC)
-            Box%BndBox(:,2) = BoxBndHig(:)+CS_OUT%CellCarts%D(:,NC)        
+         DO NC = 1,CS_Grid%NCells
+            Box%Center(:)   = BoxCenter(:)+CS_Grid%CellCarts%D(:,NC)
+            Box%BndBox(:,1) = BoxBndLow(:)+CS_Grid%CellCarts%D(:,NC)
+            Box%BndBox(:,2) = BoxBndHig(:)+CS_Grid%CellCarts%D(:,NC)        
             DO I=1,NGrid
-               Grid(I,:) = GridOld(I,:)+CS_OUT%CellCarts%D(:,NC)
+               Grid(I,:) = GridOld(I,:)+CS_Grid%CellCarts%D(:,NC)
             ENDDO
             CALL RhoOnGrid(RhoRoot)
          ENDDO
