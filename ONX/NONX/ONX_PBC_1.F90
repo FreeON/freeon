@@ -15,7 +15,6 @@ PROGRAM ONX
   USE ContractionScaling
   USE MatFilter
   USE InitExchangeMatrix
-  USE GetTables
 #ifdef PARALLEL
   USE MondoMPI
 #endif
