@@ -95,15 +95,17 @@ PROGRAM CPSCFSts
   ! Compute expectation values.
   !-------------------------------------------------------------------
   !
-  COrig(:)=Zero! must be changed.
-  !
-  MltN(:)=Zero
-  DO iAtom=1,NAtoms
-     ZNuc=GM%AtNum%D(iAtom)
-     DO iXYZ=1,3
-        MltN(iXYZ)=MltN(iXYZ)+ZNuc*(GM%Carts%D(iXYZ,iAtom)-COrig(iXYZ))
+  IF(CPSCFCycl.LE.0) THEN
+     COrig(:)=Zero! must be changed.
+     !
+     MltN(:)=Zero
+     DO iAtom=1,NAtoms
+        ZNuc=GM%AtNum%D(iAtom)
+        DO iXYZ=1,3
+           MltN(iXYZ)=MltN(iXYZ)+ZNuc*(GM%Carts%D(iXYZ,iAtom)-COrig(iXYZ))
+        ENDDO
      ENDDO
-  ENDDO
+  ENDIF
   !
   Prop=BIG_DBL
   !
@@ -116,16 +118,18 @@ PROGRAM CPSCFSts
 #ifdef PARALLEL
      CALL Multiply(PPrim,T,Tmp1)
      Tensor(iXYZ)=-Two*Trace(Tmp1)
-     CALL Multiply(P,T,Tmp1)
-     MltE(iXYZ)=-Two*Trace(Tmp1)
+     IF(CPSCFCycl.LE.0) THEN
+        CALL Multiply(P,T,Tmp1)
+        MltE(iXYZ)=-Two*Trace(Tmp1)
+     ENDIF
 #else
-     MltE(iXYZ)=-Two*Trace(P,T)
      Tensor(iXYZ)=-Two*Trace(PPrim,T)
+     IF(CPSCFCycl.LE.0) MltE(iXYZ)=-Two*Trace(P,T)
 #endif
      !      IF(Cart(iXYZ).EQ.TRIM(Args%C%C(4))) Prop=Tensor(iXYZ)  ! Dangerous
-     IF('X'.EQ.TRIM(Args%C%C(4))) Prop=Tensor(1) 
-     IF('Y'.EQ.TRIM(Args%C%C(4))) Prop=Tensor(2) 
-     IF('Z'.EQ.TRIM(Args%C%C(4))) Prop=Tensor(3) 
+     IF('X'.EQ.TRIM(Args%C%C(4))) Prop=Tensor(1)
+     IF('Y'.EQ.TRIM(Args%C%C(4))) Prop=Tensor(2)
+     IF('Z'.EQ.TRIM(Args%C%C(4))) Prop=Tensor(3)
      IF(    'X'.NE.TRIM(Args%C%C(4)).AND.'Y'.NE.TRIM(Args%C%C(4)).AND. &
           & 'Z'.NE.TRIM(Args%C%C(4))) THEN
         CALL Halt('The args in CPSCFStatus is not one of X,Y or Z, args=' &
@@ -139,9 +143,11 @@ PROGRAM CPSCFSts
 #ifdef PARALLEL
   IF(MyID.EQ.ROOT) THEN
 #endif
-     WRITE(*,'(A,3E20.12)') 'MltN in a.u.',MltN(1),MltN(2),MltN(3)
-     WRITE(*,'(A,3E20.12)') 'MltE in a.u.',MltE(1),MltE(2),MltE(3)
-     WRITE(*,'(A,3E20.12)') 'MltT in a.u.',MltN(1)+MltE(1),MltN(2)+MltE(2),MltN(3)+MltE(3)
+     IF(CPSCFCycl.LE.0) THEN
+        WRITE(*,'(A,3E20.12)') 'MltN in a.u.',MltN(1),MltN(2),MltN(3)
+        WRITE(*,'(A,3E20.12)') 'MltE in a.u.',MltE(1),MltE(2),MltE(3)
+        WRITE(*,'(A,3E20.12)') 'MltT in a.u.',MltN(1)+MltE(1),MltN(2)+MltE(2),MltN(3)+MltE(3)
+     ENDIF
 #ifdef PARALLEL
   ENDIF
 #endif
