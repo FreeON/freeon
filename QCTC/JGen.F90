@@ -198,9 +198,6 @@ MODULE JGen
 !                        Initialize <KET|
                          CALL SetKet(Prim,PExtent)
 #ifdef PERIODIC
-!                        Fold primative back into the unit cell
-                         CALL AtomCyclic(GM,Prim%P)
-!
                          PTmp=Prim%P
 !                        Sum over cells
                          DO NC=1,CS_IN%NCells
