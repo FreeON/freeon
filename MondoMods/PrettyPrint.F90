@@ -451,6 +451,9 @@ MODULE PrettyPrint
 !-----------------------------------------------------------------------------------------
      IF(PrintFlags%Key<DEBUG_MAXIMUM.OR.CS%NCells==1)RETURN
      IF(.NOT. AllocQ(CS%Alloc))CALL Halt(' Cells not allocated in Print_CellSet')
+#ifdef PARALLEL
+   IF(MyID == ROOT) THEN
+#endif
      PU=OpenPU(Unit_O=Unit_O)
      IF(PRESENT(Proc_O)) THEN
         CellStr=ProcessName(Proc_O)//'Cells in '//TRIM(Name)//' = '//TRIM(IntToChar(CS%NCells))
@@ -459,6 +462,9 @@ MODULE PrettyPrint
      ENDIF
      WRITE(PU,*)TRIM(CellStr)
      CALL ClosePU(PU)
+#ifdef PARALLEL
+   ENDIF
+#endif
   END SUBROUTINE Print_CellSet
 #endif   
 !----------------------------------------------------------------PRINT COORDINATES
