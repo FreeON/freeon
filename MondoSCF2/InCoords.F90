@@ -955,6 +955,9 @@ CONTAINS
      NatmsLoc=SIZE(XYZ,2)
      NIntC_Bas=0
      NIntC_VDW=0
+!!! restart may cause filled up IntCs; 
+!!! this here is a temporary solution, until restart gets reprganized
+     IF(AllocQ(IntCs%Alloc)) CALL Delete(IntCs) 
      !
      CALL New(AtNum,NatmsLoc)
      DO I=1,NatmsLoc
