@@ -218,9 +218,7 @@ PROGRAM ONX2
 #ifdef ONX2_PARALLEL
   Time1 = MondoTimer()
   CALL MakeList(ListC,GMc,BSc,GMp,BSp,CS_OUT,CPt,CNbr,APt,ANbr)
-  CALL MPI_Barrier(MONDO_COMM,IErr)
   CALL MakeList(ListD,GMc,BSc,GMp,BSp,CS_OUT,DPt,DNbr,BPt,BNbr)
-  CALL MPI_Barrier(MONDO_COMM,IErr)
   Time2 = MondoTimer()
 #else
   CALL CPU_TIME(Time1)
