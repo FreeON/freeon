@@ -223,7 +223,7 @@ K_{ab}=
 However, there are two significant problems with this approximation. One, in this approximation the exact 
 exchange potential, symmetric in the limit of infinite summation, has been asymmetrically truncated, 
 resulting in a potential that depends on position  of the unit cell. 
-And two, the permutational symmetry of the exchange integral kernal, 
+And two, the permutational symmetry of the exchange integral kernal has been violated:
 \begin{eqnarray}
 \sum _{\bf H G}
 \left(
@@ -249,11 +249,11 @@ And two, the permutational symmetry of the exchange integral kernal,
       \phi^{\bf H}_c    
 {\big | }
       \phi_d 
-      \phi^{\bf G}_b 
+      \phi^{\bf G}_b .
 \right) 
 \label{PermSym}
-\end{eqnarray}
-is violated. 
+\end{eqnarray} 
+
 The translational non-invariance has a well understood analogue in classical
 molecular dynamics, where the arbitrary truncation of short range potentials also leads to numerical 
 artifacts in energies and forces.  In both cases, translational invariance is restored by 
@@ -293,18 +293,20 @@ composed of the primative lattice vectors,
 \end{equation}
 This approach is completely general, and can be used at the primitive level with any modern approach
 to computing two-electron integrals. Imposing this condition recovers translational invariace of the
-exchange matrix, and in the limit of a sparce density matrix it also recovers the permutational
-symmetry mentioned above.
+exchange matrix. However, the MIC conditions does not recover the exchange integral kernal permutational symmetry 
+(EIKPS). We could recover this symmetry be explicitly sysmmetrizing the primitive produces within the 
+integral kernal. But, in the limit of large systems, where the range of the density matrix becomes smaller
+then the system size, we recover the permutational symmetry mentioned above.
 
 Surprisingly, this work is the first to correctly define the exact Hartree-Fock 
 exchange potential for periodic boundary conditions and the $\Gamma$-point approximation.  Moreover,
 effects related to asymmetric truncation may also manifest in methods that perform incomplete 
 ${\bf k}$-space sampling, and may likewise benefit from employing the Minimum Image Convention. 
 
-\section{Integral Kernal Permutational Symmetry (IKPS)}
+\section{EIKPS and ODA}
 
 For small systems, the permutatioanl non-invariance of Eq. (\ref{PermSym}) can create problems 
-with the Optinal Damping Algorithm (ODA) \cite{ECances00} we use to converge the SCF. The Optimal Damping
+with the Optinal Damping Algorithm (ODA) \cite{ECances00} we often use to converge the SCF. The Optimal Damping
 Algorithm makes the implecit assumption of permutational symmetry, which is lost in periodic systems 
 using the Minium Image Convention. This can lead to an incorrect determination of the mixing energy, losing
 the bounded energy convergence of the Optinal Damping Algorithm.  
@@ -332,8 +334,10 @@ E[1] &&= {\rm Tr}\left[{\bf P}_1 \left({\bf T} + {\bf F}_1 \right)\right]+E^{1}_
    +2 {\rm Tr}\left[ {\bf P}_1 {\bf F}_1 \right] \nonumber\\
 \end{eqnarray}
 and where  ${\bf P}_0$, ${\bf F}_0$ and $E^{0}_{nuc}$ are the previous density matrix, fockian and nuclear 
-electrostatic energy; ${\bf P}_0$, ${\bf F}_0$ and $E^{0}_{nuc}$ are the present density matrix, fockian 
-and nuclear electrostatic energy; and  ${\bf T}$ is the kinectic energy matrix. 
+electrostatic energy; ${\bf P}_1$, ${\bf F}_1$ and $E^{1}_{nuc}$ are the present density matrix, fockian 
+and nuclear electrostatic energy; and  ${\bf T}$ is the kinectic energy matrix. We find that our new Symmetrized 
+Optimal Damping Algorithm (SODA) easilly corrects this problem. It also has the advantage of correctly estimating
+the energy for large gas-phase systems where matrix truncations can also lead to the afor mentioned problem. 
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -399,27 +403,35 @@ made to a final value approaching the ${\bf k}$-space integration limit for the 
 \toprule
 Program         & $N_{\rm at}$              & Energy (au)    & Energy/$N_{\rm at}$\\ 
 \colrule
-{\sc MondoSCF}       & 2$^f$    & -274.53003     & -137.26501\\
-{\sc Crystal98}      & 2$^f$    & -288.83329$^h$ & -144.41664$^h$\\
-{\sc MondoSCF}       & 8$^g$    & -1098.4382     & -137.30478  \\
-{\sc Crystal98}      & 16$^f$   & -2166.9440$^h$ & -135.43400$^h$ \\
-{\sc MondoSCF}       & 16$^f$   & -2197.0564     & -137.31603  \\
-{\sc Crystal98}      & 32$^g$   & -4394.5847     & -137.33077  \\
-{\sc MondoSCF}       & 32$^g$   & -4394.4846     & -137.32764  \\
-                     & 54$^f$   & -7415.8962     & -137.33141  \\
-{\sc Crystal98}      & 64$^g$   & -8789.2484     & -137.33201  \\
-{\sc MondoSCF}       & 64$^g$   & -8789.2494     & -137.33202  \\
-                     & 128$^f$  & -17578.502     & -137.33205  \\
-                     & 216$^g$  & -29663.729     & -137.33208  \\ 
+%{\sc MondoSCF}       & 2$^f$    & -274.53003     & -137.26501\\
+%{\sc Crystal98}      & 2$^f$    & -288.83329$^h$ & -144.41664$^h$\\
+%{\sc MondoSCF}       & 8$^g$    & -1098.4382     & -137.30478  \\
+%{\sc Crystal98}      & 16$^f$   & -2166.9440$^h$ & -135.43400$^h$ \\
+%{\sc MondoSCF}       & 16$^f$   & -2197.0564     & -137.31603  \\
+%{\sc Crystal98}      & 32$^g$   & -4394.5847     & -137.33077  \\
+%{\sc MondoSCF}       & 32$^g$   & -4394.4846     & -137.32764  \\
+%                     & 54$^f$   & -7415.8962     & -137.33141  \\
+%{\sc Crystal98}      & 64$^g$   & -8789.2484     & -137.33201  \\
+%{\sc MondoSCF}       & 64$^g$   & -8789.2494     & -137.33202  \\
+%                     & 128$^f$  & -17578.502     & -137.33205  \\
+%                     & 216$^g$  & -29663.729     & -137.33208  \\ 
+{\sc MondoSCF}       & 2$^b$    & -274.53003     & -137.26501\\
+                     & 8$^c$    & -1098.4382     & -137.30478  \\
+                     & 16$^b$   & -2197.0564     & -137.31603  \\
+                     & 32$^c$   & -4394.4846     & -137.32764  \\
+                     & 54$^b$   & -7415.8962     & -137.33141  \\
+                     & 64$^c$   & -8789.2494     & -137.33202  \\
+                     & 128$^b$  & -17578.502     & -137.33205  \\
+                     & 216$^c$  & -29663.729     & -137.33208  \\ 
 \hline
-{\sc Crystal98}$^i$  & 2$^f$    & -274.66415     & -137.33208  \\ 
+{\sc Crystal98}$^a$  & 2$^d$    & -274.66415     & -137.33208  \\ 
 \botrule 
 \end{tabular}\\}
 \raggedright{
-{\hskip 0.330in}$^f$Triclinic \\
-{\hskip 0.330in}$^g$Cubic \\
-{\hskip 0.330in}$^h$Did not converge (See Ref.~\onlinecite{BCivalleri02}) \\
-{\hskip 0.330in}$^i 8\times8\times8$ ${\bf k}$-space integration grid  \\}
+{\hskip 0.330in}$^a \Gamma$-point\\
+{\hskip 0.330in}$^b$Triclinic \\
+{\hskip 0.330in}$^c$Cubic \\
+{\hskip 0.330in}$^d 8\times8\times8$ ${\bf k}$-space integration grid  \\}
 \end{table}
 
 Table \ref{MgOTable} shows {\sc MondoSCF} $\Gamma$-point super-cell total energies for MgO 
@@ -442,13 +454,13 @@ In Table~\ref{PIceTable}, total energies computed with the RHF-MIC $\Gamma$-poin
 super cell approach are listed for proton ordered ice \cite{}, using the 8-51G basis 
 for Oxygen and the 5-11G$^*$ basis for Hydrogen.  A comparison is made to a final 
 value obtained using {\sc Cyrstal98} with a $6\times6\times6$ ${\bf k}$-space integration grid
-as explained in Ref.~\cite{PIceProceedure}.  The {\sc MondoSCF} values were obtained 
-using the {\it tight} option, defining numerical thresholds that deliver total energies
-precise to the digits quoted (8).  The primitive cubic cell coordinates used in these
+as explained in Ref.~[\onlinecite{PIceProceedure}].  The {\sc MondoSCF} values were obtained 
+using the {\tt good} option, defining numerical thresholds that deliver total energies
+precise to the digits quoted (7).  The primitive cubic cell coordinates used in these
 ice calculations are listed in Appendix~\ref{Coordinates}. We also show the level at which
-the integral kernal permutaional symmetry (IKPS) is violated. Which for small systems is at the
-level of about $10^-3$ going rapidly to numerical zero as the unit cell becomes larger then the
-range of the density matrix.
+the exchange integral kernal permutaional symmetry (IKPS) is violated. Which for small systems is at the
+level of about $10^{-3}$ going rapidly to the matrix threshold of $10^{-6}$ as the unit cell becomes 
+larger then the range of the density matrix.
 
 
 \begin{table}[ht]
@@ -458,13 +470,13 @@ approaching the ${\bf k}$-space integration limit for the primitive cell.}
 \label{PIceTable}
 \center{\begin{tabular}{lrccc}
 \toprule
-Program             & $N_{\rm H_20}$ & Energy (au)    & Energy/$N_{\rm H_2O}$ & IKPS\\ 
+Program             & $N_{\rm H_20}$ & Energy (au)    & Energy/$N_{\rm H_2O}$ & EIKPS\\ 
 \colrule
-{\sc MondoSCF}$^a$  & 2              &  -152.03025  &  -76.01512  & $2.5 \times 10^{-3}$\\
-                    & 16             &  -1216.3003  &  -76.01877  & $2.8 \times 10^{-4}$ \\
-                    & 54             &  -4105.0163  &  -76.01882  & $2.7 \times 10^{-5}$ \\
-                    & 128            &  -9730.4090  &  -76.01882  & $10^0$ \\
-                    & 250            &  -19004.705  &  -76.01882  & $10^0$ \\ 
+{\sc MondoSCF}$^a$  & 2              &  -152.03025  &  -76.01512  & $10^{-3}$\\
+                    & 16             &  -1216.3003  &  -76.01877  & $10^{-4}$ \\
+                    & 54             &  -4105.0163  &  -76.01882  & $10^{-5}$ \\
+                    & 128            &  -9730.4090  &  -76.01882  & $10^{-6}$ \\
+                    & 250            &  -19004.705  &  -76.01882  & $10^{-6}$ \\ 
 \hline
 {\sc Crystal98}$^b$  & 2   &  -152.03765  &  -76.01882  \\ 
 \botrule
@@ -559,7 +571,7 @@ proton ordered ice \cite{} in the $a$ direction (see Appendix \ref{Coordinates} 
 Comparison is made between a 250 molecule RHF-MIC $\Gamma$-point super-cell calculation performed 
 with {\sc MondoSCF} and {\sc Crystal98} calculations carried out with a two molecule primitive
 cell using a~$6\times6\times6$ ${\bf k}$-space integration grid, the 8-51G basis for Oxygen and the 
-5-11G${^*}$ basis for Hydrogen.  The {\sc MondoSCF} {\it good} option was used, delivering 
+5-11G${^*}$ basis for Hydrogen.  The {\sc MondoSCF} {\tt good} option was used, delivering 
 a relative accuracy of 6-8 digits. The potential minimum for the {\sc Crystal98} curve is $7.144$\AA~
 and  for the {\sc MondoSCF} calculation $7.145$\AA.
 
@@ -586,7 +598,7 @@ at the RHF-MIC/STO-3G level of theory.}
 matrix build (scaled by 20) of diamond using {\it loose} thresholding 
 at the RHF-MIC/6-31G\cite{Modified631g} level of theory.}
 \label{DiamondScaling_2}
-{\centering \includegraphics{Timing_Diamond_ONX.ps} \par}
+{\centering \includegraphics{Timing_Diamond_ONX_2.ps} \par}
 \end{figure}
 
 In Fig~\ref{DiamondScaling_1}  linear scaling is shown for diamond for 
@@ -611,14 +623,14 @@ demonstrate an early onset of linear scaling.
 
 \begin{figure}[h]
 \caption{CPU time for the exchange, Coulomb and density 
-matrix build (scaled by 10) of proton ordered ice using {\it tight}
+matrix build (scaled by 10) of proton ordered ice using {\tt good}
 thresholding at the RHF-MIC/8-51G/5-11G$^*$ level of theory.}
 \label{IceScaling}
 {\centering \includegraphics{Timing_pIce_ONX_1.ps} \par} 
 \end{figure}
 
 Figure~\ref{IceScaling} shows linear scaling for the exchange, Coulomb and density matrix
-construction of proton ordered ice \cite{} using {\it tight} thresholds, the 8-51G basis set
+construction of proton ordered ice \cite{} using {\tt good} thresholds, the 8-51G basis set
 for Oxygen and the 5-11G$^*$ basis set for Hydrogen.  An early onset of linear scaling 
 is observed at about 50 water molecules, which is similar to the onset achieved in the gas 
 phase \cite{ANiklasson03}.
@@ -649,7 +661,7 @@ tighter calculations for difficult systems like diamond well beyond this mark,
 as will data parallelism.  
 
 For less dense systems such as ice, the periodic {\sc MondoSCF} algorithms handily 
-achieve an early onset of linear scaling using {\it tight} thresholding.  With parallelism,
+achieve an early onset of linear scaling using {\tt good} thresholding.  With parallelism,
 this opens the prospect of performing hybrid HF/DFT simulations of fluids. 
 
 Convergence of the MIC $\Gamma$-point super-cell calculations to values obtained with 
@@ -720,7 +732,7 @@ in preparation of this manuscript.
 \begin{table}[ht]
 \caption{Fractional coordinates for the triclinic 2 atom unit cell of MgO, cooresponding to the 
          calculations reported in Table~\ref{MgOTable}.  Length of the unit cell is 
-         $a=b=c=2.977776807$\AA, with angles $\alpha=\beta=\gamma=60^\circ$.}
+         $a=b=c=2.977776807$\AA $\,$ with angles $\alpha=\beta=\gamma=60^\circ$.}
 \center{
 \begin{tabular}{cccc}
 \toprule
@@ -735,7 +747,7 @@ O   &    0.500 &   0.500 &  0.500  \\
 \begin{table}[ht]
 \caption{Fractional coordinates for the cubic 8 atom unit cell of MgO, cooresponding to the 
          calculations reported in Table~\ref{MgOTable}.  Length of the unit cell is 
-         $a=b=c=4.21121$\AA, with angles $\alpha=\beta=\gamma=90^\circ$.}
+         $a=b=c=4.21121$\AA $\,$ with angles $\alpha=\beta=\gamma=90^\circ$.}
 \center{
 \begin{tabular}{cccc}
 \toprule
@@ -760,7 +772,7 @@ O  &    0.500 &   0.500 &  0.500  \\
 \begin{table}[ht]
 \caption{Fractional coordinates for the 8 atom unit cell of Diamond, cooresponding to the supercell 
 calculations reported in Table~\ref{DiamondGammaPt}.  Dimensions of the cubic unit cell are 
-$a=b=c=3.5700$\AA with angles  $\alpha=\beta=\gamma=90^\circ$.}
+$a=b=c=3.5700$\AA, with angles  $\alpha=\beta=\gamma=90^\circ$.}
 \center{
 \begin{tabular}{cccc}
 \toprule
@@ -779,10 +791,11 @@ C &     0.375 &    0.875 &    0.875  \\
 \end{table}
 %
 %
+
 \begin{table}[ht]
 \caption{Fractional coordinates for the 2 molecule unit cell of proton ordered ice, cooresponding to 
 the supercell calculations reported in Table~\ref{PIceTable}.  Dimensions of the cubic unit 
-cell are $a=7.328$\AA, $b=7.920$\AA  and $c=4.400$\AA with angles  $\alpha=\beta=\gamma=90^\circ$. }
+cell are $a=7.328$\AA, $b=7.920$\AA $\,$ and $c=4.400$\AA $\,$ with angles  $\alpha=\beta=\gamma=90^\circ$. }
 \center{
 \begin{tabular}{cccc}
 \toprule
@@ -797,6 +810,9 @@ H &     0.981535 &  0.975827 &   0.822424 \\
 \botrule
 \end{tabular}}
 \end{table}
+\vfill
+\vfill
+\vskip 1.0in
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %\newpage
