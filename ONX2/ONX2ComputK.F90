@@ -252,7 +252,7 @@ tt=tt+t2-t1
                 AtB=AtBList%Atom 
                 !
                 IF(AtB.LE.AtA) THEN ! Symmetry of the K matrix
-                   !
+
                    BDAtmInfo%NFPair=GetNonNFPair(AtBList,AtAList%RInt(1)*Dcd,Thresholds%TwoE &
 #ifdef GTRESH
                    & )
@@ -289,17 +289,18 @@ tt=tt+t2-t1
                       IF(Dcd*AtAList%RInt(iFAC)*AtBList%RInt(1).LT.Thresholds%TwoE) EXIT RnOvFAC
 #endif
                       CFA=AtAList%Indx(1,iFAC)
-                      AALen=BSc%LStop%I(CFA,KA)-BSc%LStrt%I(CFA,KA)+1
                       CFC=AtAList%Indx(2,iFAC)
-                      CCLen=BSc%LStop%I(CFC,KC)-BSc%LStrt%I(CFC,KC)+1
+                      AALen=BSc%LStop%I(CFA,KA)-BSc%LStrt%I(CFA,KA)+1
+                      CCLen=BSp%LStop%I(CFC,KC)-BSp%LStrt%I(CFC,KC)+1
                       OffSet%A=OffArrC%I(CFA,KA)
                       OffSet%C=OffArrP%I(CFC,KC)
                       !
                       RnOvFBD: DO iFBD=1,BDAtmInfo%NFPair 
                          CFB=AtBList%Indx(1,iFBD)
-                         BBLen=BSp%LStop%I(CFB,KB)-BSp%LStrt%I(CFB,KB)+1
                          CFD=AtBList%Indx(2,iFBD)
+                         BBLen=BSc%LStop%I(CFB,KB)-BSc%LStrt%I(CFB,KB)+1
                          DDLen=BSp%LStop%I(CFD,KD)-BSp%LStrt%I(CFD,KD)+1
+
 !#ifdef GTRESH
 !                         IF(DMcd((CFC-1)*NCFncD+CFD)* &
 !                              & AtAList%RInt(iFAC)*AtBList%RInt(iFBD)>Thresholds%TwoE) THEN
@@ -377,10 +378,10 @@ tt=tt+t2-t1
 !!$            &       NIntsTot/(CS_OUT%NCells**2*DBLE(NBasF)**4)*100D0
 !!$    ENDIF
 !!$#else
-    WRITE(*,100) NInts,CS_OUT%NCells**2*DBLE(NBasF)**4, &
-         &       NInts/(CS_OUT%NCells**2*DBLE(NBasF)**4)*100D0
+!!$    WRITE(*,100) NInts,CS_OUT%NCells**2*DBLE(NBasF)**4, &
+!!$         &       NInts/(CS_OUT%NCells**2*DBLE(NBasF)**4)*100D0
 !!$#endif
-100 FORMAT(' NInts = ',E8.2,' NIntTot = ',E8.2,' Ratio = ',E8.2,'%')
+!!$100 FORMAT(' NInts = ',E8.2,' NIntTot = ',E8.2,' Ratio = ',E8.2,'%')
     !
   END SUBROUTINE ComputK
   !
