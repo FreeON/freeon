@@ -3989,13 +3989,15 @@ call prtxyz(GMLoc%Carts%D,Title_O='Final Carts.')
 !
       NatmsLoc=SIZE(ActCarts,2)
 !
-      IF(PRESENT(Add_O).AND.Add_O) THEN
-        DO I=1,NatmsLoc 
-          J=3*(I-1)
-          ActCarts(1,I)=ActCarts(1,I)+VectCart(J+1)
-          ActCarts(2,I)=ActCarts(2,I)+VectCart(J+2)
-          ActCarts(3,I)=ActCarts(3,I)+VectCart(J+3)
-        ENDDO
+      IF(PRESENT(Add_O)) THEN
+        IF(Add_O) THEN
+          DO I=1,NatmsLoc 
+            J=3*(I-1)
+            ActCarts(1,I)=ActCarts(1,I)+VectCart(J+1)
+            ActCarts(2,I)=ActCarts(2,I)+VectCart(J+2)
+            ActCarts(3,I)=ActCarts(3,I)+VectCart(J+3)
+          ENDDO
+        ENDIF
       ELSE
         DO I=1,NatmsLoc 
           J=3*(I-1)
@@ -4625,8 +4627,12 @@ write(*,*) 'LOG scaled eigenvals= ',AuxVect%D
 !
         Selection(:)=0
         DO I=1,NDim
-          IF(MarkDom%I(I)==IDom) Selection(I)=1
+!         IF(MarkDom%I(I)==IDom) Selection(I)=1
+          IF(AuxVect%D(I)>-7.D0) Selection(I)=1
         ENDDO
+        IF(NDim>1 .AND. &
+         AuxVect%D(NDim)-AuxVect%D(NDim-1) > GapWidth) Selection(NDim)=0
+!
 write(*,*) 'ndomain= ',ndomain
 write(*,*) 'markdom= ',MarkDom%I
 write(*,*) 'countdom= ',CountDom%I
