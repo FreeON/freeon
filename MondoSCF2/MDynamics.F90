@@ -65,6 +65,8 @@ MODULE MDynamics
 !      Give an intial Maxwell Boltzman Temp
        IF(C%Dyns%Initial_Temp) THEN
           CALL SetTempMaxBoltDist(C,C%Dyns%TempInit)
+       ELSE
+          CALL ResetMomentum(C,Zero,Zero,Zero)
        ENDIF
 !      Init the Time
        MDTime%D(:) = Zero
@@ -121,20 +123,10 @@ MODULE MDynamics
           HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
           CALL Put(MDTime%D(iCLONE),"MDTime")
        ENDDO
-       IF(.FALSE.) THEN
-          C%Opts%Guess=GUESS_EQ_SUPR
-          DO iBAS=1,C%Sets%NBSets
-             CALL GeomArchive(iBAS,iGEO+1,C%Nams,C%Sets,C%Geos) 
-             CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
-             CALL SCF(iBAS,iGEO+1,C)
-          ENDDO
-          iBAS=C%Sets%NBSets
-       ELSE
-!         Archive Geometry for next step
-          CALL GeomArchive(iBAS,iGEO+1,C%Nams,C%Sets,C%Geos)     
-!         Evaluate energies at the new geometry
-          CALL SCF(iBAS,iGEO+1,C)
-       ENDIF
+!      Archive Geometry for next step
+       CALL GeomArchive(iBAS,iGEO+1,C%Nams,C%Sets,C%Geos)     
+!      Evaluate energies at the new geometry
+       CALL SCF(iBAS,iGEO+1,C)
 !      Store the Last P matrix
        CALL RenameDensityMatrix(C,iREMOVE)
 !      Remove old Stuff from Scratch
@@ -147,7 +139,7 @@ MODULE MDynamics
   SUBROUTINE MDVerlet_NVE(C,iGEO)
     TYPE(Controls)            :: C
     INTEGER                   :: iGEO
-    INTEGER                   :: iCLONE,iATS
+    INTEGER                   :: iCLONE,iATS,nATOMS
     REAL(DOUBLE)              :: Mass,dT,dT2,dTSq2,Time,Dist
     REAL(DOUBLE),DIMENSION(3) :: Pos,Vel,Acc
 !--------------------------------------------------------------
@@ -158,31 +150,35 @@ MODULE MDynamics
 !   Clone Loop
     DO iCLONE=1,C%Geos%Clones
 !      Move The Atoms
+       nATOMS=0
        MDKin%D(iCLONE)      = Zero
        MDLinP%D(1:3,iCLONE) = Zero
        DO iATS=1,C%Geos%Clone(iCLONE)%NAtms
-          Mass      =  C%Geos%Clone(iCLONE)%AtMss%D(iATS)
-          Pos(1:3)  =  C%Geos%Clone(iCLONE)%AbCarts%D(1:3,iATS)
-          Vel(1:3)  =  C%Geos%Clone(iCLONE)%Velocity%D(1:3,iATS)
-          Acc(1:3)  = -C%Geos%Clone(iCLONE)%Gradients%D(1:3,iATS)/Mass
-!         Velocity: v(t) = v(t-dT/2(t)*dT/2
-          Vel(1:3) = Vel(1:3) + Acc(1:3)*dT2
-!         Calculate EKin
-          MDKin%D(iCLONE) = MDKin%D(iCLONE) + Half*Mass*(Vel(1)**2+Vel(2)**2+Vel(3)**2)
-!         Calculate Linear Momentum
-          MDLinP%D(1:3,iCLONE) = MDLinP%D(1:3,iCLONE)+Vel(1:3)*Mass
-!         Position: r(t+dT)= r(t)+v(t)*dT+a(t)*dT*dT/2
-          Pos(1:3) = Pos(1:3) + Vel(1:3)*dT + Acc(1:3)*dTSq2
-!         Velocity: v(t+dT/2= v(t) + a(t)*dT/2
-          Vel(1:3) = Vel(1:3) + Acc(1:3)*dT2
-!         Update
-          C%Geos%Clone(iCLONE)%AbCarts%D(1:3,iATS)  = Pos(1:3) 
-          C%Geos%Clone(iCLONE)%Velocity%D(1:3,iATS) = Vel(1:3)
+          IF(C%Geos%Clone(iCLONE)%CConstrain%I(iATS)==0)THEN
+             nATOMS = nATOMS+1
+             Mass      =  C%Geos%Clone(iCLONE)%AtMss%D(iATS)
+             Pos(1:3)  =  C%Geos%Clone(iCLONE)%AbCarts%D(1:3,iATS)
+             Vel(1:3)  =  C%Geos%Clone(iCLONE)%Velocity%D(1:3,iATS)
+             Acc(1:3)  = -C%Geos%Clone(iCLONE)%Gradients%D(1:3,iATS)/Mass
+!            Velocity: v(t) = v(t-dT/2(t)*dT/2
+             Vel(1:3) = Vel(1:3) + Acc(1:3)*dT2
+!            Calculate EKin
+             MDKin%D(iCLONE) = MDKin%D(iCLONE) + Half*Mass*(Vel(1)**2+Vel(2)**2+Vel(3)**2)
+!            Calculate Linear Momentum
+             MDLinP%D(1:3,iCLONE) = MDLinP%D(1:3,iCLONE)+Vel(1:3)*Mass
+!            Position: r(t+dT)= r(t)+v(t)*dT+a(t)*dT*dT/2
+             Pos(1:3) = Pos(1:3) + Vel(1:3)*dT + Acc(1:3)*dTSq2
+!            Velocity: v(t+dT/2= v(t) + a(t)*dT/2
+             Vel(1:3) = Vel(1:3) + Acc(1:3)*dT2
+!            Update
+             C%Geos%Clone(iCLONE)%AbCarts%D(1:3,iATS)  = Pos(1:3) 
+             C%Geos%Clone(iCLONE)%Velocity%D(1:3,iATS) = Vel(1:3)
+          ENDIF
        ENDDO
 !
        MDEpot%D(iCLONE) = C%Geos%Clone(iCLONE)%ETotal
        MDEtot%D(iCLONE) = MDEpot%D(iCLONE)+MDKin%D(iCLONE)
-       MDTemp%D(iCLONE)= (Two/Three)*MDKin%D(iCLONE)/DBLE(C%Geos%Clone(iCLONE)%NAtms)*HartreesToKelvin
+       MDTemp%D(iCLONE)= (Two/Three)*MDKin%D(iCLONE)/DBLE(nATOMS)*HartreesToKelvin
 !
        IF(.TRUE.) THEN
           CALL OpenASCII("EnergiesMD.dat",99)
@@ -197,6 +193,8 @@ MODULE MDynamics
 !
           WRITE(*,*) "Time = ",MDTime%D(iCLONE)," Temperature = ",MDTemp%D(iCLONE)
        ENDIF
+!
+       CALL ResetMomentum(C,Zero,Zero,Zero)
 !
     ENDDO
   END SUBROUTINE MDVerlet_NVE
@@ -294,8 +292,8 @@ MODULE MDynamics
           WRITE(Out,*)
        ENDIF
 !      Add MD Timestep Configuration
-       Line = "----------------------------------------------"//TRIM(IntToChar(iGEO))// &
-              "----------------------------------------------"
+       Line = "-------------------------------------------MD-"//TRIM(IntToChar(iGEO))// &
+              "-MD-------------------------------------------"
        WRITE(Out,97) Line
        WRITE(Out,98) "MD Time        = ",MDTime%D(iCLONE)
        WRITE(Out,98) "MD Kinetic     = ",MDKin%D(iCLONE)
@@ -303,16 +301,108 @@ MODULE MDynamics
        WRITE(Out,98) "MD Total       = ",MDEtot%D(iCLONE)
        WRITE(Out,98) "MD Temperature = ",MDTemp%D(iCLONE)
        WRITE(Out,96) "MD L. Momentum = ",MDLinP%D(1:3,iCLONE)
+!      Output Lattice and Lattice Forces
+       IF(C%Geos%Clone(iCLONE)%PBC%Dimen==1) THEN
+          IF(C%Geos%Clone(iCLONE)%PBC%AutoW%I(1)==1) THEN
+             WRITE(Out,85) 
+             WRITE(Out,82) "       a       = ",C%Geos%Clone(iCLONE)%PBC%BoxShape%D(1,1)
+             WRITE(Out,85) 
+             WRITE(Out,82) "     div(a)    = ",C%Geos%Clone(iCLONE)%PBC%LatFrc%D(1,1)
+             WRITE(Out,85) 
+          ENDIF
+          IF(C%Geos%Clone(iCLONE)%PBC%AutoW%I(2)==1) THEN
+             WRITE(Out,85) 
+             WRITE(Out,82) "       b       = ",C%Geos%Clone(iCLONE)%PBC%BoxShape%D(2,2)
+             WRITE(Out,85) 
+             WRITE(Out,82) "     div(b)    = ",C%Geos%Clone(iCLONE)%PBC%LatFrc%D(2,2)
+             WRITE(Out,85) 
+          ENDIF
+          IF(C%Geos%Clone(iCLONE)%PBC%AutoW%I(3)==1) THEN
+             WRITE(Out,85) 
+             WRITE(Out,82) "       c       = ",C%Geos%Clone(iCLONE)%PBC%BoxShape%D(3,3)
+             WRITE(Out,85) 
+             WRITE(Out,82) "     div(c)    = ",C%Geos%Clone(iCLONE)%PBC%LatFrc%D(3,3)
+             WRITE(Out,85) 
+          ENDIF
+       ELSEIF(C%Geos%Clone(iCLONE)%PBC%Dimen==2) THEN
+          IF(C%Geos%Clone(iCLONE)%PBC%AutoW%I(1)==0) THEN
+             WRITE(Out,85) 
+             WRITE(Out,82) "       b       = ",C%Geos%Clone(iCLONE)%PBC%BoxShape%D(2,2), & 
+                                               C%Geos%Clone(iCLONE)%PBC%BoxShape%D(3,2)
+             WRITE(Out,82) "       c       = ",C%Geos%Clone(iCLONE)%PBC%BoxShape%D(2,3), & 
+                                               C%Geos%Clone(iCLONE)%PBC%BoxShape%D(3,3)
+             WRITE(Out,85) 
+             WRITE(Out,82) "     div(b)    = ",C%Geos%Clone(iCLONE)%PBC%LatFrc%D(2,2),   &
+                                               C%Geos%Clone(iCLONE)%PBC%LatFrc%D(3,2)
+             WRITE(Out,82) "     div(c)    = ",C%Geos%Clone(iCLONE)%PBC%LatFrc%D(2,3),   &
+                                               C%Geos%Clone(iCLONE)%PBC%LatFrc%D(3,3)
+             WRITE(Out,85) 
+          ENDIF
+          IF(C%Geos%Clone(iCLONE)%PBC%AutoW%I(2)==0) THEN
+             WRITE(Out,85) 
+             WRITE(Out,82) "       a       = ",C%Geos%Clone(iCLONE)%PBC%BoxShape%D(1,1), & 
+                                               C%Geos%Clone(iCLONE)%PBC%BoxShape%D(3,1)
+             WRITE(Out,82) "       c       = ",C%Geos%Clone(iCLONE)%PBC%BoxShape%D(1,3), & 
+                                               C%Geos%Clone(iCLONE)%PBC%BoxShape%D(3,3)
+             WRITE(Out,85) 
+             WRITE(Out,82) "     div(a)    = ",C%Geos%Clone(iCLONE)%PBC%LatFrc%D(1,1),   &
+                                               C%Geos%Clone(iCLONE)%PBC%LatFrc%D(3,1)
+             WRITE(Out,82) "     div(c)    = ",C%Geos%Clone(iCLONE)%PBC%LatFrc%D(1,3),   &
+                                               C%Geos%Clone(iCLONE)%PBC%LatFrc%D(3,3)
+             WRITE(Out,85) 
+          ENDIF
+          IF(C%Geos%Clone(iCLONE)%PBC%AutoW%I(3)==0) THEN
+             WRITE(Out,85) 
+             WRITE(Out,82) "       a       = ",C%Geos%Clone(iCLONE)%PBC%BoxShape%D(1,1), & 
+                                               C%Geos%Clone(iCLONE)%PBC%BoxShape%D(2,1)
+             WRITE(Out,82) "       b       = ",C%Geos%Clone(iCLONE)%PBC%BoxShape%D(1,2), & 
+                                               C%Geos%Clone(iCLONE)%PBC%BoxShape%D(2,2)
+             WRITE(Out,85) 
+             WRITE(Out,82) "     div(a)    = ",C%Geos%Clone(iCLONE)%PBC%LatFrc%D(1,1),   &
+                                               C%Geos%Clone(iCLONE)%PBC%LatFrc%D(2,1)
+             WRITE(Out,82) "     div(b)    = ",C%Geos%Clone(iCLONE)%PBC%LatFrc%D(1,2),   &
+                                               C%Geos%Clone(iCLONE)%PBC%LatFrc%D(2,2)
+             WRITE(Out,85) 
+          ENDIF
+       ELSEIF(C%Geos%Clone(iCLONE)%PBC%Dimen==3) THEN
+          WRITE(Out,85) 
+          WRITE(Out,82) "       a       = ",C%Geos%Clone(iCLONE)%PBC%BoxShape%D(1,1), & 
+                                            C%Geos%Clone(iCLONE)%PBC%BoxShape%D(2,1), &
+                                            C%Geos%Clone(iCLONE)%PBC%BoxShape%D(3,1)
+          WRITE(Out,82) "       b       = ",C%Geos%Clone(iCLONE)%PBC%BoxShape%D(1,2), & 
+                                            C%Geos%Clone(iCLONE)%PBC%BoxShape%D(2,2), &
+                                            C%Geos%Clone(iCLONE)%PBC%BoxShape%D(3,2)
+          WRITE(Out,82) "       c       = ",C%Geos%Clone(iCLONE)%PBC%BoxShape%D(1,3), & 
+                                            C%Geos%Clone(iCLONE)%PBC%BoxShape%D(2,3), &
+                                            C%Geos%Clone(iCLONE)%PBC%BoxShape%D(3,3)
+          WRITE(Out,85) 
+          WRITE(Out,82) "     div(a)    = ",C%Geos%Clone(iCLONE)%PBC%LatFrc%D(1,1),   &
+                                            C%Geos%Clone(iCLONE)%PBC%LatFrc%D(2,1),   &
+                                            C%Geos%Clone(iCLONE)%PBC%LatFrc%D(3,1)
+          WRITE(Out,82) "     div(b)    = ",C%Geos%Clone(iCLONE)%PBC%LatFrc%D(1,2),   &
+                                            C%Geos%Clone(iCLONE)%PBC%LatFrc%D(2,2),   &
+                                            C%Geos%Clone(iCLONE)%PBC%LatFrc%D(3,2)
+          WRITE(Out,82) "     div(c)    = ",C%Geos%Clone(iCLONE)%PBC%LatFrc%D(1,3),   &
+                                            C%Geos%Clone(iCLONE)%PBC%LatFrc%D(2,3),   &
+                                            C%Geos%Clone(iCLONE)%PBC%LatFrc%D(3,3)
+          WRITE(Out,85) 
+       ENDIF
        DO iATS=1,C%Geos%Clone(iCLONE)%NAtms
           WRITE(Out,99) TRIM(C%Geos%Clone(iCLONE)%AtNam%C(iATS)),  &
-                        C%Geos%Clone(iCLONE)%AbCarts%D(1:3,iATS),  &
+                        C%Geos%Clone(iCLONE)%Carts%D(1:3,iATS),    &
                         C%Geos%Clone(iCLONE)%Velocity%D(1:3,iATS)
        ENDDO
        CLOSE(Out)
     ENDDO
+!
+80  FORMAT(a18,F14.8)
+81  FORMAT(a18,F14.8,1x,F14.8)
+82  FORMAT(a18,F14.8,1x,F14.8,1x,F14.8)
+85  FORMAT("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
+!
+96  FORMAT(a18,3(F16.10,1x))
 97  FORMAT(a128)
 98  FORMAT(a18,F16.10)
-96  FORMAT(a18,3(F16.10,1x))
 99  FORMAT(a3,6(1x,F14.8))
   END SUBROUTINE OutputMD
 !--------------------------------------------------------------
@@ -326,19 +416,21 @@ MODULE MDynamics
     Jmax = 20
     DO iCLONE=1,C%Geos%Clones
        DO iATS=1,C%Geos%Clone(iCLONE)%NAtms
-          Mass  =  C%Geos%Clone(iCLONE)%AtMss%D(iATS) 
-          TVel  = SQRT(Three*Temp*KelvinToHartrees/Mass)
-          VX = Zero
-          VY = Zero
-          VZ = Zero
-          DO J=1,Jmax
-             VX = VX+TVel*Random((/-One,One/))
-             VY = VY+TVel*Random((/-One,One/))
-             VZ = VZ+TVel*Random((/-One,One/))
-          ENDDO
-          C%Geos%Clone(iCLONE)%Velocity%D(1,iATS) = VX
-          C%Geos%Clone(iCLONE)%Velocity%D(2,iATS) = VY
-          C%Geos%Clone(iCLONE)%Velocity%D(3,iATS) = VZ
+          IF(C%Geos%Clone(iCLONE)%CConstrain%I(iATS)==0)THEN
+             Mass  =  C%Geos%Clone(iCLONE)%AtMss%D(iATS) 
+             TVel  = SQRT(Three*Temp*KelvinToHartrees/Mass)
+             VX = Zero
+             VY = Zero
+             VZ = Zero
+             DO J=1,Jmax
+                VX = VX+TVel*Random((/-One,One/))
+                VY = VY+TVel*Random((/-One,One/))
+                VZ = VZ+TVel*Random((/-One,One/))
+             ENDDO
+             C%Geos%Clone(iCLONE)%Velocity%D(1,iATS) = VX
+             C%Geos%Clone(iCLONE)%Velocity%D(2,iATS) = VY
+             C%Geos%Clone(iCLONE)%Velocity%D(3,iATS) = VZ
+          ENDIF
        ENDDO
     ENDDO
     CALL ResetMomentum(C,Zero,Zero,Zero)
@@ -351,25 +443,31 @@ MODULE MDynamics
   SUBROUTINE ResetMomentum(C,PX0,PY0,PZ0)
     TYPE(Controls)        :: C
     REAL(DOUBLE)          :: Mass,PX,PY,PZ,PX0,PY0,PZ0
-    INTEGER               :: iCLONE,iATS
+    INTEGER               :: iCLONE,iATS,nATOMS
 !
     DO iCLONE=1,C%Geos%Clones
 !      Calculate Linear Momentum
        PX = Zero
        PY = Zero
        PZ = Zero
+       nATOMS = 0
        DO iATS=1,C%Geos%Clone(iCLONE)%NAtms
-          Mass = C%Geos%Clone(iCLONE)%AtMss%D(iATS)
-          PX  = PX + Mass*C%Geos%Clone(iCLONE)%Velocity%D(1,iATS)
-          PY  = PY + Mass*C%Geos%Clone(iCLONE)%Velocity%D(2,iATS)
-          PZ  = PZ + Mass*C%Geos%Clone(iCLONE)%Velocity%D(3,iATS)
+          IF(C%Geos%Clone(iCLONE)%CConstrain%I(iATS)==0)THEN
+             nATOMS = nATOMS + 1
+             Mass = C%Geos%Clone(iCLONE)%AtMss%D(iATS)
+             PX  = PX + Mass*C%Geos%Clone(iCLONE)%Velocity%D(1,iATS)
+             PY  = PY + Mass*C%Geos%Clone(iCLONE)%Velocity%D(2,iATS)
+             PZ  = PZ + Mass*C%Geos%Clone(iCLONE)%Velocity%D(3,iATS)
+          ENDIF
        ENDDO
 !      Reset Linear Momentum
        DO iATS=1,C%Geos%Clone(iCLONE)%NAtms
-          Mass = C%Geos%Clone(iCLONE)%AtMss%D(iATS)
-          C%Geos%Clone(iCLONE)%Velocity%D(1,iATS) = C%Geos%Clone(iCLONE)%Velocity%D(1,iATS)-(PX-PX0)/(C%Geos%Clone(iCLONE)%NAtms*Mass)
-          C%Geos%Clone(iCLONE)%Velocity%D(2,iATS) = C%Geos%Clone(iCLONE)%Velocity%D(2,iATS)-(PY-PY0)/(C%Geos%Clone(iCLONE)%NAtms*Mass)
-          C%Geos%Clone(iCLONE)%Velocity%D(3,iATS) = C%Geos%Clone(iCLONE)%Velocity%D(3,iATS)-(PZ-PZ0)/(C%Geos%Clone(iCLONE)%NAtms*Mass)
+          IF(C%Geos%Clone(iCLONE)%CConstrain%I(iATS)==0)THEN
+             Mass = C%Geos%Clone(iCLONE)%AtMss%D(iATS)
+             C%Geos%Clone(iCLONE)%Velocity%D(1,iATS) = C%Geos%Clone(iCLONE)%Velocity%D(1,iATS)-(PX-PX0)/(nATOMS*Mass)
+             C%Geos%Clone(iCLONE)%Velocity%D(2,iATS) = C%Geos%Clone(iCLONE)%Velocity%D(2,iATS)-(PY-PY0)/(nATOMS*Mass)
+             C%Geos%Clone(iCLONE)%Velocity%D(3,iATS) = C%Geos%Clone(iCLONE)%Velocity%D(3,iATS)-(PZ-PZ0)/(nATOMS*Mass)
+          ENDIF
        ENDDO
     ENDDO
 
@@ -380,24 +478,30 @@ MODULE MDynamics
   SUBROUTINE RescaleTemp(C,Temp)
     TYPE(Controls)        :: C
     REAL(DOUBLE)          :: Temp,Mass,Temp0,SUMV,VX,VY,VZ,Scale
-    INTEGER               :: iCLONE,iATS,I,J,Jmax
+    INTEGER               :: iCLONE,iATS,I,J,Jmax,nATOMS
 !  
     DO iCLONE=1,C%Geos%Clones
 !      Determine the Temp
        SUMV = Zero
+       nATOMS = 0
        DO iATS=1,C%Geos%Clone(iCLONE)%NAtms
-          Mass = C%Geos%Clone(iCLONE)%AtMss%D(iATS)
-          VX = C%Geos%Clone(iCLONE)%Velocity%D(1,iATS) 
-          VY = C%Geos%Clone(iCLONE)%Velocity%D(2,iATS) 
-          VZ = C%Geos%Clone(iCLONE)%Velocity%D(3,iATS) 
-          SUMV = SUMV+Half*Mass*(VX**2+VY**2+VZ**2)
+          IF(C%Geos%Clone(iCLONE)%CConstrain%I(iATS)==0)THEN
+             nATOMS = nATOMS + 1
+             Mass = C%Geos%Clone(iCLONE)%AtMss%D(iATS)
+             VX = C%Geos%Clone(iCLONE)%Velocity%D(1,iATS) 
+             VY = C%Geos%Clone(iCLONE)%Velocity%D(2,iATS) 
+             VZ = C%Geos%Clone(iCLONE)%Velocity%D(3,iATS) 
+             SUMV = SUMV+Half*Mass*(VX**2+VY**2+VZ**2)
+          ENDIF
        ENDDO
-       Temp0 =  (Two/Three)*SUMV/DBLE(C%Geos%Clone(iCLONE)%NAtms)*HartreesToKelvin
+       Temp0 =  (Two/Three)*SUMV/DBLE(nATOMS)*HartreesToKelvin
        Scale = SQRT(Temp/Temp0)
        DO iATS=1,C%Geos%Clone(iCLONE)%NAtms
-          C%Geos%Clone(iCLONE)%Velocity%D(1,iATS) = Scale*C%Geos%Clone(iCLONE)%Velocity%D(1,iATS)
-          C%Geos%Clone(iCLONE)%Velocity%D(2,iATS) = Scale*C%Geos%Clone(iCLONE)%Velocity%D(2,iATS)
-          C%Geos%Clone(iCLONE)%Velocity%D(3,iATS) = Scale*C%Geos%Clone(iCLONE)%Velocity%D(3,iATS)
+          IF(C%Geos%Clone(iCLONE)%CConstrain%I(iATS)==0)THEN
+             C%Geos%Clone(iCLONE)%Velocity%D(1,iATS) = Scale*C%Geos%Clone(iCLONE)%Velocity%D(1,iATS)
+             C%Geos%Clone(iCLONE)%Velocity%D(2,iATS) = Scale*C%Geos%Clone(iCLONE)%Velocity%D(2,iATS)
+             C%Geos%Clone(iCLONE)%Velocity%D(3,iATS) = Scale*C%Geos%Clone(iCLONE)%Velocity%D(3,iATS)
+          ENDIF
        ENDDO
 !
     ENDDO
