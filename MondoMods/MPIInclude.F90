@@ -1,6 +1,6 @@
 MODULE MPIInclude
    IMPLICIT NONE   
 #ifdef PARALLEL
-   INCLUDE 'MONDO_MPI_INCLUDE.Inc'
+   INCLUDE mpif.h
 #endif
 END MODULE
