@@ -23,6 +23,14 @@ MODULE PFFTen
   REAL(DOUBLE), DIMENSION(0:FFLen)    :: PFFBraC,PFFBraS,PFFKetC,PFFKetS,FarFS,FarFC
 !
   REAL(DOUBLE),PARAMETER              :: Small=1.0D-12
+  CHARACTER(LEN=7),PARAMETER          :: Cube   ='Cube   '
+  CHARACTER(LEN=7),PARAMETER          :: Rect   ='Rect   '
+  CHARACTER(LEN=7),PARAMETER          :: NonCube='NonCube'
+  CHARACTER(LEN=7),PARAMETER          :: Cube111='Cube111'
+  CHARACTER(LEN=7),PARAMETER          :: Cube112='Cube112'
+  CHARACTER(LEN=7),PARAMETER          :: Cube122='Cube122'
+  CHARACTER(LEN=7),PARAMETER          :: Cube222='Cube112'
+
   CONTAINS
 !========================================================================================
 ! 
@@ -32,14 +40,15 @@ MODULE PFFTen
       TYPE(ARGMT)            :: Args
 !-------------------------------------------------------------------------------- 
       INTEGER                :: MaxEll
-      INTEGER                :: I,IR,Layers
-      LOGICAL                :: CellIsRect,CellIsBox
-      REAL(DOUBLE)           :: BoxRadius
-      REAL(DOUBLE)           :: MagA,MagB,MagC,AdotB,AdotC,BdotC
+      INTEGER                :: Layers
+      REAL(DOUBLE)           :: Scale,R1,R2,Radius
+      CHARACTER(LEN=7)       :: CellType
 !
       IF(GM%PBC%Dimen==0) THEN 
-         CALL New_CellSet_Cube(CS_IN,GM%PBC%AutoW,GM%PBC%BoxShape,(/0,0,0/))      
-         CALL Put_CellSet(CS_IN,'CS_IN')
+!
+         CALL New_CellSet_Cube(CS_IN,GM%PBC%AutoW,GM%PBC%BoxShape,(/0,0,0/))    
+         CALL Put(1.D-12,'CS_IN%Radius'//CurBase//CurGeom)
+         CALL Put_CellSet(CS_IN,'CS_IN'//CurBase//CurGeom)
 !
          MaxEll = 0
          CALL New(TensorC,LSP(2*MaxEll),0)
@@ -47,229 +56,165 @@ MODULE PFFTen
          TensorC%D = Zero
          TensorS%D = Zero 
          CALL Put(MaxEll ,'MaxEll')
-         CALL Put(TensorC,'PFFTensorC')
-         CALL Put(TensorS,'PFFTensorS')
+         CALL Put(TensorC,'PFFTensorC'//CurGeom)
+         CALL Put(TensorS,'PFFTensorS'//CurGeom)
+!
          RETURN
       ENDIF
-!
-      CALL New(TensorC,LSP(2*MaxEll),0)
-      CALL New(TensorS,LSP(2*MaxEll),0)
-      TensorC%D = Zero
-      TensorS%D = Zero 
-         
-!
-!     Determine the cell type
-!
-      MagA  = Zero
-      MagB  = Zero
-      MagC  = Zero
-      AdotB = Zero
-      AdotC = Zero
-      BdotC = Zero
-      DO I=1,3
-         MagA  = MagA+GM%PBC%BoxShape(I,1)*GM%PBC%BoxShape(I,1)
-         MagB  = MagB+GM%PBC%BoxShape(I,2)*GM%PBC%BoxShape(I,2)
-         MagC  = MagC+GM%PBC%BoxShape(I,3)*GM%PBC%BoxShape(I,3)
-         AdotB = AdotB+GM%PBC%BoxShape(I,1)*GM%PBC%BoxShape(I,2)
-         AdotC = AdotC+GM%PBC%BoxShape(I,1)*GM%PBC%BoxShape(I,3)
-         BdotC = BdotC+GM%PBC%BoxShape(I,2)*GM%PBC%BoxShape(I,3)
-      ENDDO      
-      MagA  = SQRT(MagA)
-      MagB  = SQRT(MagB)      
-      MagC  = SQRT(MagC)
-      AdotB = SQRT(AdotB/(MagA*MagB))
-      AdotC = SQRT(AdotC/(MagA*MagC))
-      BdotC = SQRT(BdotC/(MagB*MagC))
 ! 
-      CellIsRect = .FALSE.
-      CellIsBox  = .FALSE.
-      IF(AdotB < Small .AND. AdotC < Small .AND. BdotC < Small) THEN
-         CellIsRect = .TRUE.
-         IF( ABS(MagA-MagB) < Small .AND. ABS(MagA-MagC) < Small .AND. ABS(MagB-MagC) < Small) THEN
-            CellIsBox = .TRUE.
-         ENDIF
-      ENDIF
-!      
-!     Make and Store the Inner Box
+!     Make The Tensor
 !
-      Layers = GM%PBC%PFFMaxLay
-      CALL New_CellSet_Cube(CS_IN,GM%PBC%AutoW,GM%PBC%BoxShape,(/Layers,Layers,Layers/))
-      CALL Sort_CellSet(CS_IN)
-      CALL Put_CellSet(CS_IN,'CS_IN')
+      IF(GM%PBC%PFFOvRide) THEN
+!
+!        Initialize
+!
+         CALL New(TensorC,LSP(2*MaxEll),0)
+         CALL New(TensorS,LSP(2*MaxEll),0)
+         TensorC%D = Zero
+         TensorS%D = Zero 
+!             
+!        Make and Store the Inner Box
+!
+         Layers = GM%PBC%PFFMaxLay
+         Radius = DBLE(Layers)*MaxBoxDim(GM)
+         CALL New_CellSet_Cube(CS_IN,GM%PBC%AutoW,GM%PBC%BoxShape,(/Layers,Layers,Layers/))
+         CALL Sort_CellSet(CS_IN)
+!
+         CALL Put(Radius,'CS_IN%Radius'//CurBase//CurGeom)
+         CALL Put_CellSet(CS_IN,'CS_IN'//CurBase//CurGeom)
+!
+!        Determine Cell Type
+!
+         CellType=DetCellType(GM,CS_IN%NCells,Scale)
 !     
-!     Read from Archive or Make the Tensor
+!        Read from Archive or Make the Tensor
 !
-      CellIsBox=.FALSE.
-!
-      IF(CellIsBox) THEN
-         IF(GM%PBC%Dimen==3) THEN
-            CALL GetExactTensor3D(2*MaxEll,GM,MagA)
+         IF(    CellType==Cube111) THEN
+            CALL GetExactTensor1L3D(2*MaxEll,GM,Scale)
+         ELSEIF(CellType==Cube222) THEN
+            CALL GetExactTensor2L3D(2*MaxEll,GM,Scale)
+         ELSE
+            IF(GM%PBC%Dimen==1) THEN
+               CALL MakeTensor1D(2*MaxEll,GM,Args)
+            ELSEIF(GM%PBC%Dimen==2) THEN
+               CALL MakeTensor2D(2*MaxEll,GM,Args)
+            ELSEIF(GM%PBC%Dimen==3) THEN
+               CALL MakeTensor3D(2*MaxEll,GM,Args)
+            ENDIF
          ENDIF
+!
+!        Store the Tensor
+!
+         CALL Put(MaxEll ,'MaxEll'//CurGeom)
+         CALL Put(TensorC,'PFFTensorC'//CurGeom)
+         CALL Put(TensorS,'PFFTensorS'//CurGeom)
+         RETURN
       ELSE
-         IF(GM%PBC%Dimen==1) THEN
-            CALL MakeTensor1D(2*MaxEll,GM,Args)
-         ELSEIF(GM%PBC%Dimen==2) THEN
-            CALL MakeTensor2D(2*MaxEll,GM,Args)
-         ELSEIF(GM%PBC%Dimen==3) THEN
-            CALL MakeTensor3D(2*MaxEll,GM,Args)
+!
+!        Initialize
+!
+         CALL New(TensorC,LSP(2*FFELL),0)
+         CALL New(TensorS,LSP(2*FFELL),0)
+         TensorC%D = Zero
+         TensorS%D = Zero 
+!
+!        Determin The Minuim Radius
+!
+         Layers = GM%PBC%PFFMaxLay
+         R1     = Two*MaxAtomDist(GM) + SQRT(AtomPairDistanceThreshold)
+         R2     = DBLE(Layers)*MaxBoxDim(GM)*(One+1.D-12)
+         Radius = MAX(R1,R2)
+         GM%PBC%PFFMaxLay = INT(Radius/MaxBoxDim(GM)+Half)
+!             
+!        Make and Store the Inner Box
+!
+         CALL New_CellSet_Sphere(CS_IN,GM%PBC%AutoW,GM%PBC%BoxShape,Radius)
+         CALL Sort_CellSet(CS_IN)
+!
+         CALL Put(Radius,'CS_IN%Radius'//CurBase//CurGeom)
+         CALL Put_CellSet(CS_IN,'CS_IN'//CurBase//CurGeom)
+!
+!        Determine Cell Type
+!
+         CellType=DetCellType(GM,CS_IN%NCells,Scale)
+!     
+!        Read from Archive or Make the Tensor
+!
+         IF(    CellType==Cube111) THEN
+            CALL GetExactTensor1L3D(2*FFELL,GM,Scale)
+         ELSEIF(CellType==Cube222) THEN
+            CALL GetExactTensor2L3D(2*FFELL,GM,Scale)
+         ELSE
+            IF(GM%PBC%Dimen==1) THEN
+               CALL MakeTensor1D(2*FFELL,GM,Args)
+            ELSEIF(GM%PBC%Dimen==2) THEN
+               CALL MakeTensor2D(2*FFELL,GM,Args)
+            ELSEIF(GM%PBC%Dimen==3) THEN
+               CALL MakeTensor3D(2*FFELL,GM,Args)
+            ENDIF
          ENDIF
+!
+!        Store the Tensor
+!
+         CALL Put(FFELL  ,'MaxEll'//CurGeom)
+         CALL Put(TensorC,'PFFTensorC'//CurGeom)
+         CALL Put(TensorS,'PFFTensorS'//CurGeom)
+         RETURN
       ENDIF
-!
-!     Store the Tensor
-!
-      CALL Put(MaxEll ,'MaxEll')
-      CALL Put(TensorC,'PFFTensorC')
-      CALL Put(TensorS,'PFFTensorS')
 !
     END SUBROUTINE CalculatePFFT
 !========================================================================================
-! Calculate the PFF
-!========================================================================================
-    SUBROUTINE PFFTensor(MaxEll,GM,Args)
-      INTEGER              :: MaxEll
-      LOGICAL              :: HaveTensor
-      TYPE(CRDS)           :: GM
-      TYPE(ARGMT)          :: Args
-!
-      TensorC%D = Zero
-      TensorS%D = Zero
-      IF(GM%PBC%Dimen==0) RETURN
-!
-      IF(.NOT. GetTensor(MaxEll,GM,Args)) THEN
-         IF(GM%PBC%Dimen==1) THEN
-            CALL MakeTensor1D(2*MaxEll,GM,Args)
-         ELSEIF(GM%PBC%Dimen==2) THEN
-            CALL MakeTensor2D(2*MaxEll,GM,Args)
-         ELSEIF(GM%PBC%Dimen==3) THEN
-            CALL MakeTensor3D(2*MaxEll,GM,Args)
-         ENDIF
-         CALL PutTensor(MaxEll,GM,Args)
-      ENDIF
-!
-    END SUBROUTINE PFFTensor
-!========================================================================================
 ! 
 !========================================================================================
-    SUBROUTINE GetExactTensor3D(MaxL,GM,Scale)
+    SUBROUTINE GetExactTensor1L3D(MaxL,GM,Scale)
       INTEGER              :: MaxL
-      INTEGER              :: I,NumberOfRecords,L,M,LM,K
-      REAL(DOUBLE)         :: Scale,TenC,TenS
       TYPE(CRDS)           :: GM
+      INTEGER              :: I,L,M,LM,K,NumberOfRecords
+      REAL(DOUBLE)         :: Scale
 !
-      INCLUDE "PBCTensor/Majik_Kubic_WS1.Inc"		
-      INCLUDE "PBCTensor/Majik_Kubic_WS2.Inc"		
+      INCLUDE "PBCTensor/Majik_Kubic_WS1.Inc"			
 !
       TensorC%D = Zero
       TensorS%D = Zero 
-      IF(GM%PBC%Dimen==0) RETURN
 !
 !     Load Majik numbers from parameter statements	
 !
-      IF(GM%PBC%PFFMaxLay==1) THEN
-	 K=0
-	 DO L=4,MIN(128,MaxL),2
-	    DO M=0,L,4
-	       K=K+1	
-               LM=LTD(L)+M   
-               TensorC%D(LM)=Majik1(K)
-            ENDDO
-         ENDDO
-       ELSEIF(GM%PBC%PFFMaxLay==2) THEN
-	 K=0
-	 DO L=4,MIN(128,MaxL),2
-	    DO M=0,L,4
-	       K=K+1	
-               LM=LTD(L)+M   
-               TensorC%D(LM)=Majik2(K)
-            ENDDO
-         ENDDO
-       ENDIF	
-!
-!     Rescale the Tensor
-!
-       DO L=0,MaxL,2
-          DO M=0,L,4
-             LM=LTD(L)+M
-             TensorC%D(LM) = TensorC%D(LM)/(Scale**(DBLE(L)+One))
-             TensorS%D(LM) = TensorS%D(LM)/(Scale**(DBLE(L)+One))
-          ENDDO
-       ENDDO
-!
-     END SUBROUTINE GetExactTensor3D
-!========================================================================================
-! 
-!========================================================================================
-    FUNCTION GetTensor(MaxL,GM,Args)
-      INTEGER              :: MaxL,L,M,LM
-      LOGICAL              :: GetTensor
-      CHARACTER(LEN=120)   :: FileName
-      CHARACTER(LEN=1)     :: AWX,AWY,AWZ
-      TYPE(CRDS)           :: GM
-      TYPE(ARGMT)          :: Args
-!
-      AWX = '0'
-      AWY = '0'
-      AWZ = '0'
-      IF(GM%PBC%AutoW(1)) AWX = '1'
-      IF(GM%PBC%AutoW(2)) AWY = '1'      
-      IF(GM%PBC%AutoW(3)) AWZ = '1'
-      FileName= TRIM(MONDO_SCRATCH) // TRIM(Args%C%C(1)) // "_Geom#" // TRIM(CurGeom) //    &
-                "_AW"   // TRIM(AWX) // TRIM(AWY) // TRIM(AWZ) //    &
-                "_NC"   // TRIM(IntToChar(CS_IN%NCells))   //        &    
-                "_LM"   // TRIM(IntToChar(MaxL)) //                  &
-                ".PFFT"
-!
-      INQUIRE(FILE=FileName,EXIST=GetTensor)
-      IF(GetTensor) THEN
-         OPEN(UNIT=77,FILE=FileName,FORM='UNFORMATTED',STATUS='OLD')
-         DO L = 1,MaxL
-            DO M = 0,L
-               LM = LTD(L)+M
-               READ(77) TensorC%D(LM),TensorS%D(LM)
-            ENDDO
-         ENDDO
-         CLOSE(77)
-      ENDIF
-!
-    END FUNCTION GetTensor
-!========================================================================================
-! 
-!========================================================================================
-    SUBROUTINE PutTensor(MaxL,GM,Args)
-      INTEGER             :: MaxL,IMin,JMin,KMin,L,M,LM
-      CHARACTER(LEN=120)  :: FileName
-      CHARACTER(LEN=1)    :: AWX,AWY,AWZ
-      LOGICAL             :: Exists
-      TYPE(CRDS)          :: GM
-      TYPE(ARGMT)         :: Args
-!
-      AWX = '0'
-      AWY = '0'
-      AWZ = '0'
-      IF(GM%PBC%AutoW(1)) AWX = '1'
-      IF(GM%PBC%AutoW(2)) AWY = '1'      
-      IF(GM%PBC%AutoW(3)) AWZ = '1'
-      FileName= TRIM(MONDO_SCRATCH) // TRIM(Args%C%C(1)) // "_Geom#" // TRIM(CurGeom) //    &
-                "_AW"   // TRIM(AWX) // TRIM(AWY) // TRIM(AWZ) //    &
-                "_NC"   // TRIM(IntToChar(CS_IN%NCells))   //        &    
-                "_LM"   // TRIM(IntToChar(MaxL)) //                  &
-                ".PFFT"
-!
-      INQUIRE(FILE=FileName,EXIST=Exists)
-      IF(Exists)THEN
-         RETURN
-      ELSE
-         OPEN(FILE=Filename,Unit=77,FORM='UNFORMATTED')
-      ENDIF
-      DO L = 1,MaxL
-         DO M = 0,L
-            LM = LTD(L)+M
-            WRITE(77) TensorC%D(LM),TensorS%D(LM)
+      K=0
+      DO L=4,MIN(128,MaxL),2
+         DO M=0,L,4
+            K=K+1	
+            LM=LTD(L)+M   
+            TensorC%D(LM)=Majik1(K)/(Scale**(DBLE(L)+One))
          ENDDO
       ENDDO
-      CLOSE(77)
 !
-    END SUBROUTINE PutTensor
+     END SUBROUTINE GetExactTensor1L3D
+!========================================================================================
+! 
+!========================================================================================
+    SUBROUTINE GetExactTensor2L3D(MaxL,GM,Scale)
+      INTEGER              :: MaxL
+      TYPE(CRDS)           :: GM
+      INTEGER              :: I,L,M,LM,K,NumberOfRecords
+      REAL(DOUBLE)         :: Scale
+!
+      INCLUDE "PBCTensor/Majik_Kubic_WS2.Inc"			
+!
+      TensorC%D = Zero
+      TensorS%D = Zero 
+!
+!     Load Majik numbers from parameter statements	
+!
+      K=0
+      DO L=4,MIN(128,MaxL),2
+         DO M=0,L,4
+            K=K+1	
+            LM=LTD(L)+M   
+            TensorC%D(LM)=Majik2(K)/(Scale**(DBLE(L)+One))
+         ENDDO
+      ENDDO
+!
+    END SUBROUTINE GetExactTensor2L3D
 !========================================================================================
 ! Calculate the PFFTensor 1D
 !========================================================================================
@@ -616,6 +561,56 @@ MODULE PFFTen
 !
     END SUBROUTINE MakeTensor3D
 !========================================================================================
+!   Determine Cell Type
+!========================================================================================
+    FUNCTION DetCellType(GM,NC,Scale)
+      TYPE(CRDS)                   :: GM
+      INTEGER                      :: I,NC
+      REAL(DOUBLE)                 :: MagA,MagB,MagC,AdotB,AdotC,BdotC,Scale
+      CHARACTER(LEN=7)             :: DetCellType
+!
+!     Determine the cell type
+!
+      MagA  = Zero
+      MagB  = Zero
+      MagC  = Zero
+      AdotB = Zero
+      AdotC = Zero
+      BdotC = Zero
+      DO I=1,3
+         MagA  = MagA+GM%PBC%BoxShape(I,1)*GM%PBC%BoxShape(I,1)
+         MagB  = MagB+GM%PBC%BoxShape(I,2)*GM%PBC%BoxShape(I,2)
+         MagC  = MagC+GM%PBC%BoxShape(I,3)*GM%PBC%BoxShape(I,3)
+         AdotB = AdotB+GM%PBC%BoxShape(I,1)*GM%PBC%BoxShape(I,2)
+         AdotC = AdotC+GM%PBC%BoxShape(I,1)*GM%PBC%BoxShape(I,3)
+         BdotC = BdotC+GM%PBC%BoxShape(I,2)*GM%PBC%BoxShape(I,3)
+      ENDDO      
+      MagA  = SQRT(MagA)
+      MagB  = SQRT(MagB)      
+      MagC  = SQRT(MagC)
+      AdotB = SQRT(AdotB/(MagA*MagB))
+      AdotC = SQRT(AdotC/(MagA*MagC))
+      BdotC = SQRT(BdotC/(MagB*MagC))
+!
+      IF(AdotB < Small .AND. AdotC < Small .AND. BdotC < Small) THEN
+         IF( ABS(MagA-MagB) < Small .AND. ABS(MagA-MagC) < Small .AND. ABS(MagB-MagC) < Small) THEN
+            IF(    NC==27 ) THEN
+               DetCellType=Cube111
+            ELSEIF(NC==125) THEN
+               DetCellType=Cube222
+            ELSE  
+               DetCellType=Cube
+            ENDIF
+            Scale = (MagA+MagB+MagC)/Three
+         ELSE
+            DetCellType=Rect
+         ENDIF
+      ELSE
+         DetCellType=NonCube
+      ENDIF
+!
+    END FUNCTION DetCellType
+!========================================================================================
 !   FT_FSCriptC
 !========================================================================================
     FUNCTION FT_FScriptC_3D(L,ExpFac,R)
@@ -785,4 +780,102 @@ MODULE PFFTen
     END FUNCTION RZeta
 #endif
   END MODULE PFFTen
-
+!!$!========================================================================================
+!!$! Calculate the PFF
+!!$!========================================================================================
+!!$    SUBROUTINE PFFTensor(MaxEll,GM,Args)
+!!$      INTEGER              :: MaxEll
+!!$      LOGICAL              :: HaveTensor
+!!$      TYPE(CRDS)           :: GM
+!!$      TYPE(ARGMT)          :: Args
+!!$!
+!!$      TensorC%D = Zero
+!!$      TensorS%D = Zero
+!!$      IF(GM%PBC%Dimen==0) RETURN
+!!$!
+!!$      IF(.NOT. GetTensor(MaxEll,GM,Args)) THEN
+!!$         IF(GM%PBC%Dimen==1) THEN
+!!$            CALL MakeTensor1D(2*MaxEll,GM,Args)
+!!$         ELSEIF(GM%PBC%Dimen==2) THEN
+!!$            CALL MakeTensor2D(2*MaxEll,GM,Args)
+!!$         ELSEIF(GM%PBC%Dimen==3) THEN
+!!$            CALL MakeTensor3D(2*MaxEll,GM,Args)
+!!$         ENDIF
+!!$         CALL PutTensor(MaxEll,GM,Args)
+!!$      ENDIF
+!!$!
+!!$    END SUBROUTINE PFFTensor
+!!$!========================================================================================
+!!$! 
+!!$!========================================================================================
+!!$    FUNCTION GetTensor(MaxL,GM,Args)
+!!$      INTEGER              :: MaxL,L,M,LM
+!!$      LOGICAL              :: GetTensor
+!!$      CHARACTER(LEN=120)   :: FileName
+!!$      CHARACTER(LEN=1)     :: AWX,AWY,AWZ
+!!$      TYPE(CRDS)           :: GM
+!!$      TYPE(ARGMT)          :: Args
+!!$!
+!!$      AWX = '0'
+!!$      AWY = '0'
+!!$      AWZ = '0'
+!!$      IF(GM%PBC%AutoW(1)) AWX = '1'
+!!$      IF(GM%PBC%AutoW(2)) AWY = '1'      
+!!$      IF(GM%PBC%AutoW(3)) AWZ = '1'
+!!$      FileName= TRIM(MONDO_SCRATCH) // TRIM(Args%C%C(1)) // "_Geom#" // TRIM(CurGeom) //    &
+!!$                "_AW"   // TRIM(AWX) // TRIM(AWY) // TRIM(AWZ) //    &
+!!$                "_NC"   // TRIM(IntToChar(CS_IN%NCells))   //        &    
+!!$                "_LM"   // TRIM(IntToChar(MaxL)) //                  &
+!!$                ".PFFT"
+!!$!
+!!$      INQUIRE(FILE=FileName,EXIST=GetTensor)
+!!$      IF(GetTensor) THEN
+!!$         OPEN(UNIT=77,FILE=FileName,FORM='UNFORMATTED',STATUS='OLD')
+!!$         DO L = 1,MaxL
+!!$            DO M = 0,L
+!!$               LM = LTD(L)+M
+!!$               READ(77) TensorC%D(LM),TensorS%D(LM)
+!!$            ENDDO
+!!$         ENDDO
+!!$         CLOSE(77)
+!!$      ENDIF
+!!$!
+!!$    END FUNCTION GetTensor
+!!$!========================================================================================
+!!$! 
+!!$!========================================================================================
+!!$    SUBROUTINE PutTensor(MaxL,GM,Args)
+!!$      INTEGER             :: MaxL,IMin,JMin,KMin,L,M,LM
+!!$      CHARACTER(LEN=120)  :: FileName
+!!$      CHARACTER(LEN=1)    :: AWX,AWY,AWZ
+!!$      LOGICAL             :: Exists
+!!$      TYPE(CRDS)          :: GM
+!!$      TYPE(ARGMT)         :: Args
+!!$!
+!!$      AWX = '0'
+!!$      AWY = '0'
+!!$      AWZ = '0'
+!!$      IF(GM%PBC%AutoW(1)) AWX = '1'
+!!$      IF(GM%PBC%AutoW(2)) AWY = '1'      
+!!$      IF(GM%PBC%AutoW(3)) AWZ = '1'
+!!$      FileName= TRIM(MONDO_SCRATCH) // TRIM(Args%C%C(1)) // "_Geom#" // TRIM(CurGeom) //    &
+!!$                "_AW"   // TRIM(AWX) // TRIM(AWY) // TRIM(AWZ) //    &
+!!$                "_NC"   // TRIM(IntToChar(CS_IN%NCells))   //        &    
+!!$                "_LM"   // TRIM(IntToChar(MaxL)) //                  &
+!!$                ".PFFT"
+!!$!
+!!$      INQUIRE(FILE=FileName,EXIST=Exists)
+!!$      IF(Exists)THEN
+!!$         RETURN
+!!$      ELSE
+!!$         OPEN(FILE=Filename,Unit=77,FORM='UNFORMATTED')
+!!$      ENDIF
+!!$      DO L = 1,MaxL
+!!$         DO M = 0,L
+!!$            LM = LTD(L)+M
+!!$            WRITE(77) TensorC%D(LM),TensorS%D(LM)
+!!$         ENDDO
+!!$      ENDDO
+!!$      CLOSE(77)
+!!$!
+!!$    END SUBROUTINE PutTensor
