@@ -51,12 +51,12 @@ PROGRAM P2Use
 ! Allocations 
 !
   CALL New(P)
-  CALL New(BlkP,(/MaxBlkSize**2,NAtoms/))
+  CALL New(T0)
+  CALL New(T1)
+  CALL New(T2)
+
 !
   IF(SCFActn=='Extrapolate')THEN
-     CALL New(T0)
-     CALL New(T1)
-     CALL New(T2)
      CALL Get(T0,TrixFile('S',Args,Stats_O=Previous))
      CALL Get(S,TrixFile('S',Args,Stats_O=Current))
      CALL Multiply(S,-One)
@@ -75,7 +75,7 @@ PROGRAM P2Use
      CALL Filter(P,T1)
      CALL Multiply(S,-One)
      NPur=0
-     DO I=1,30
+     DO I=1,20
         NPur=NPur+1
 !       P.S
         CALL Multiply(P,S,T1)
@@ -119,10 +119,11 @@ PROGRAM P2Use
 #endif
         IF(DensityDev<1.D-7)GOTO 999
      ENDDO
-     CALL Halt('In P2Use, failed to converge McWeeny purification.'//RTRN    &
+     CALL Warn('In P2Use, failed to converge McWeeny purification.'//RTRN    &
               //'   Still missing '//TRIM(DblToShrtChar(DensityDev))//' electrons.'//RTRN &
-              //'   Try projection instead of interpolation.')
-
+              //'   Will try projection instead of interpolation.')
+     SCFActn='Project'      
+     GOTO 1
 999 CONTINUE
 #ifdef PARALLEL
     IF(MyId==ROOT)THEN
@@ -147,20 +148,22 @@ PROGRAM P2Use
 #ifdef PARALLEL
    ENDIF
 #endif
-
-
-  ELSE
-     IF(SCFActn=='Restart')THEN
-       CALL Get(P,'CurrentOrthoD',CheckPoint_O=.TRUE.)   
-       CALL Put(P,TrixFile('OrthoD',Args,0)) 
-     ELSEIF(SCFActn=='Project')THEN
-!      Get previous geometries orthogonal density matrix 
-       CALL Get(P,TrixFile('OrthoD',Args,-1))     
-     ELSE
-       CALL Get(BName,'bsetname',CurBase)
-       IF(INDEX(BName,'STO')/=0)THEN
+  ENDIF
+1 CONTINUE
+!
+  IF(SCFActn=='Restart')THEN
+     CALL Get(P,'CurrentOrthoD',CheckPoint_O=.TRUE.)   
+     CALL Put(P,TrixFile('OrthoD',Args,0)) 
+  ELSEIF(SCFActn=='Project')THEN
+!    Get previous geometries orthogonal density matrix 
+     CALL Get(P,TrixFile('OrthoD',Args,-1))     
+  ELSEIF(SCFActn=='DensitySuperposition')THEN
+!    Make a diagonal guess
+     CALL Get(BName,'bsetname',CurBase)
+     IF(INDEX(BName,'STO')/=0)THEN
 !         Compute a diagonal guess as the superposition of atomic lewis 
 !         structure occupancies--works only for minimal (STO) basis sets
+          CALL New(BlkP,(/MaxBlkSize**2,NAtoms/))
           DO I=1,NAtoms
              CALL FillPBlok(BSiz%I(I),GM%AtNum%I(I),BlkP%D(:,I))
           ENDDO
@@ -176,10 +179,9 @@ PROGRAM P2Use
           Scale=Half*DBLE(NEl)/DBLE(NBasF)
           CALL Multiply(P,Scale)
         ENDIF
-     ENDIF
-     CALL New(T0)
-     CALL New(T1)
-     CALL New(T2)
+  ENDIF
+! Create density matrix in AO representation
+  IF(SCFActn/='Extrapolate')THEN
      INQUIRE(FILE=TrixFile('X',Args),EXIST=Present)
      IF(Present)THEN     
          CALL Get(T1,TrixFile('X',Args))   ! T1=S^(-1/2)
@@ -196,21 +198,17 @@ PROGRAM P2Use
   ENDIF    
 ! IO for the non-orthogonal P 
   CALL Put(P,TrixFile('D',Args,0))
-!----------------------------------------------
-   CALL PChkSum(P,'P['//TRIM(Cycl)//']',Prog)
-   CALL PPrint( P,'P['//TRIM(Cycl)//']')
-   CALL Plot(   P,'P_'//TRIM(Cycl))
-!---------------------------------
-!  Tidy up ...
-!
-   CALL Delete(GM)
-   CALL Delete(BS)
-   CALL Delete(P)
-   CALL Delete(T0)
-   CALL Delete(T1)
-   CALL Delete(T2)
-   CALL ShutDown(Prog)   
-!------------------------
+  CALL PChkSum(P,'P['//TRIM(Cycl)//']',Prog)
+  CALL PPrint( P,'P['//TRIM(Cycl)//']')
+  CALL Plot(   P,'P_'//TRIM(Cycl))
+! Tidy up ...
+  CALL Delete(GM)
+  CALL Delete(BS)
+  CALL Delete(P)
+  CALL Delete(T0)
+  CALL Delete(T1)
+  CALL Delete(T2)
+  CALL ShutDown(Prog)   
 END PROGRAM 
 
       
