@@ -1,0 +1,4705 @@
+2001-11-27 16:19  mchalla
+
+	* MondoMods/SpecFun.F90: Added in test for product log.
+
+2001-11-27 14:06  mchalla
+
+	* MondoSCF/DrvFrcs.F90: Now writes minimization trajectory to a pdb
+	file.
+
+2001-11-27 14:05  mchalla
+
+	* MondoMods/: GlobalCharacters.F90, PrettyPrint.F90, SetEq.F90:
+	Added support for printing PDB files
+
+2001-11-27 11:11  tymczak
+
+	* MondoMods/PrettyPrint.F90: Whay are you messing with the Printing
+	of Periodic Info
+
+2001-11-27 11:05  tymczak
+
+	* HiCu/KxcGen.F90, MondoSCF/ParseInput.F90: [no log message]
+
+2001-11-27 10:45  tymczak
+
+	* HiCu/XCForce.F90: New way of doing the periodic sums
+
+2001-11-27 10:43  tymczak
+
+	* HiCu/KxcGen.F90: New Way of Doing the Periodic Sums
+
+2001-11-27 10:41  tymczak
+
+	* HiCu/HiCu.F90: New , more efficient, way of doing the cell sums
+
+2001-11-27 10:39  tymczak
+
+	* HiCu/dXCBlok.F90: New Periodic Summation
+
+2001-11-27 10:36  tymczak
+
+	* HiCu/CubeTree.F90: Periodics Loop over CS_Grid
+
+2001-11-27 10:35  tymczak
+
+	* MondoMods/Thresholding.F90: Created the New Extent
+
+2001-11-27 10:30  tymczak
+
+	* MondoMods/PBC.F90: Change the way New_CellSet works, can now
+	create a NCells by Dimen set of cells
+
+2001-11-27 10:29  tymczak
+
+	* MondoMods/SpecFun.F90: Added the New Fuction ProductLog[-1,-x]
+
+2001-11-27 10:28  tymczak
+
+	* MondoMods/PrettyPrint.F90: Modified the 'XYZ' output so that
+	MOLDEN could read it
+
+2001-11-27 10:27  tymczak
+
+	* MondoMods/InOut.F90: Added the Logical Trans_COM
+
+2001-11-27 10:26  tymczak
+
+	* MondoMods/DerivedTypes.F90: The Logical Trans_COM was added
+
+2001-11-27 10:25  tymczak
+
+	* MondoMods/AtomPairs.F90: Lots of Changes: New Stuff For HiCu
+
+2001-11-27 10:23  tymczak
+
+	* MondoSCF/ParseInput.F90: Change some Periodic Parsing: Hopfully
+	OK
+
+2001-11-27 10:18  tymczak
+
+	* MondoSCF/ParsingKeys.F90: New Key: TRAN_COM	  ='CenterAtoms'  :
+	Translate to center of Mass
+
+2001-11-27 10:16  tymczak
+
+	* SCFeqs/Makefile: Includes the Coplilation of SDMM2
+
+2001-11-27 10:16  tymczak
+
+	* SCFeqs/SDMM.F90: Added the Calculation of [F,P] to the
+	purifcation step
+
+2001-11-27 10:15  tymczak
+
+	* SCFeqs/SDMM2.F90: A New Density Matrix Minimizer, still in
+	testing
+
+2001-11-26 12:29  mchalla
+
+	* Docs/MondoSCF.tex: Docs!
+
+2001-11-20 18:44  ckgan
+
+	* MondoSCF/ParsingKeys.F90: A string constant for TRAVEL_ORDER is
+	included.
+
+2001-11-20 18:43  ckgan
+
+	* MondoSCF/ParseInput.F90: TRAVEL_Order is introduced for
+	reordering by solving the traveling salesman problem with
+	metropolis technique.
+
+2001-11-20 18:40  ckgan
+
+	* MondoMods/Order.F90: Module TravelMan which contains the
+	important subroutine Anneal for reordering of the atoms by solving
+	the Traveling salesman problem with metropolis technique. SFC_KEY =
+	SCF_TRAVEL is introduced.
+
+2001-11-20 17:31  ckgan
+
+	* MondoSCF/ParseInput.F90: simply change the long lines of comments
+	(!======= or !------) to a shorter one. Nothing else has changed.
+
+2001-11-20 11:00  ckgan
+
+	* MondoMods/Random.C: use drand48() instead!
+
+2001-11-19 20:16  ckgan
+
+	* MondoSCF/Overlay.F90: remove FiniMPI() from the subroutine
+	MPISpawn
+
+2001-11-19 20:14  ckgan
+
+	* MondoSCF/MondoSCF.F90: InParallel variable is used in the
+	program.
+
+2001-11-19 20:13  ckgan
+
+	* MondoMods/PrettyPrint.F90: TimeStamp is only accessible to the
+	root node.
+
+2001-11-19 12:34  ckgan
+
+	* MondoMods/LinAlg77.F: include the header file mpif.h more
+	directly.
+
+2001-11-19 12:33  ckgan
+
+	* MondoMods/MPIInclude.F90: header is included more directly.
+
+2001-11-19 11:08  mchalla
+
+	* MondoMods/MPIInclude.F90: [no log message]
+
+2001-11-19 08:14  mchalla
+
+	* ONX/Makefile: Now removes Drivers/*.binary on purge
+
+2001-11-19 08:11  mchalla
+
+	* Scripts/cpq_dbx: compaq dbxer
+
+2001-11-19 08:11  mchalla
+
+	* Makefile: Makefile now wipes Scratch and Exec on removing legacy
+	dirs.
+
+2001-11-19 08:10  mchalla
+
+	* MondoSCF/ParseInput.F90: Alpha2
+
+2001-11-19 08:10  mchalla
+
+	* Includes/: ALPHA_RELEASE, CompilerSpecifics.AMDLinux.PG,
+	CompilerSpecifics.AlphaLinux.COMPAQ, CompilerSpecifics.IBMAIX.XLF,
+	CompilerSpecifics.IntelLinux.NAG, CompilerSpecifics.IntelLinux.PG,
+	CompilerSpecifics.SGIIrix.MIPS: Permanently turned on periodic
+	flag.
+
+2001-11-19 08:00  mchalla
+
+	* Includes/: MONDO_MPI_INCLUDE.Inc, MPICH.h: Nolonger needed.
+
+2001-11-19 07:59  mchalla
+
+	* Includes/: CompilerSpecifics.AMDLinux.PG,
+	CompilerSpecifics.IntelLinux.ABSOFT,
+	CompilerSpecifics.IntelLinux.LAHEY,
+	CompilerSpecifics.IntelLinux.PG, Ell.m: No longer given even token
+	support.
+
+2001-11-19 07:57  mchalla
+
+	* ONX/Makefile: Added purge for NONX
+
+2001-11-19 07:54  mchalla
+
+	* Scripts/: aix_dbx, aix_pedb, nag_dbx, pgf_dbx, sgi_dbx: [no log
+	message]
+
+2001-11-19 07:42  mchalla
+
+	* Scripts/: HDF2ASCII, ListInf, mondo: [no log message]
+
+2001-11-19 07:37  mchalla
+
+	* SCFeqs/: P2Use.F90, RHeqs.F90, SCFStatus.F90, SDMM.F90:
+	Reconfigured to allow restarts.
+
+2001-11-19 07:30  mchalla
+
+	* QuNew/: BFGSHess.F90, NewStep.F90: Fixed to use the minimum image
+	in periodic BFGS updates.
+
+2001-11-19 07:28  mchalla
+
+	* OneE/MakeRho.F90, ONX/NONX/ONX.F90: Reconfigured to allow
+	restarts.
+
+2001-11-19 07:27  mchalla
+
+	* MondoSCF/: DrvFrcs.F90, DrvSCFs.F90, MondoSCF.F90,
+	ParseInput.F90, ParsingKeys.F90, SCFLocals.F90, SetSCFs.F90:
+	Reconfigured to enable restarts from a previous HDF file.
+
+2001-11-15 17:00  mchalla
+
+	* SCFeqs/: P2Use.F90, P2Use.F90: [no log message]
+
+2001-11-15 12:24  mchalla
+
+	* SCFeqs/P2Use.F90: [no log message]
+
+2001-11-14 16:18  njh
+
+	* MondoMods/ParsingConstants.F90: [no log message]
+
+2001-11-14 14:03  mchalla
+
+	* SCFeqs/P2Use.F90: [no log message]
+
+2001-11-14 13:51  mchalla
+
+	* MondoSCF/ParseInput.F90: [no log message]
+
+2001-11-14 11:24  mchalla
+
+	* MMA/Approximations.m: [no log message]
+
+2001-11-13 16:30  mchalla
+
+	* MondoSCF/DrvFrcs.F90: Now prints first config.
+
+2001-11-13 16:30  mchalla
+
+	* QuNew/NewStep.F90: Added correct periodic logic to wrap atoms
+	back into the cell.
+
+2001-11-11 05:33  mchalla
+
+	* Includes/: CompilerSpecifics.AlphaLinux.COMPAQ, Ell.m: [no log
+	message]
+
+2001-11-11 04:57  mchalla
+
+	* MondoMods/: HDF5Wrap.C, SMWrap.C, Seconds.C: Added underscores.
+
+2001-11-09 13:47  mchalla
+
+	* SCFeqs/DIIS.F90: [no log message]
+
+2001-11-09 13:25  mchalla
+
+	* MondoSCF/DrvSCFs.F90: [no log message]
+
+2001-11-09 12:55  mchalla
+
+	* MondoSCF/DrvSCFs.F90: Turned off cleaning of F_DIIS
+
+2001-11-09 12:54  mchalla
+
+	* SCFeqs/: DIIS.F90, SDMM.F90: Fixed damping (again) in DIIS. 
+	Divide by 0 in SDMM.
+
+2001-11-09 09:22  mchalla
+
+	* XForm/LowdinO.F90: This code works for large systems.  Last code
+	checked in is broken for large systems.  If this code doesnot work
+	for you GET MATT TO FIX IT, RATHER THAN CHECKING IN NEW CODE.
+
+2001-11-09 07:04  mchalla
+
+	* SCFeqs/DIIS.F90: [no log message]
+
+2001-11-09 06:52  mchalla
+
+	* SCFeqs/DIIS.F90: Fixed damping
+
+2001-11-08 16:40  mchalla
+
+	* OneE/MakeRho.F90, QCTC/QCTC.F90, SCFeqs/FBuild.F90,
+	MondoSCF/DrvSCFs.F90, MondoSCF/ParseInput.F90,
+	MondoSCF/ParsingKeys.F90: [no log message]
+
+2001-11-07 23:22  mchalla
+
+	* ONX/NONX/Makefile: Added purge feature to Makefile.
+
+2001-11-07 23:18  mchalla
+
+	* QCTC/: Makefile, QCTC.F90: [no log message]
+
+2001-11-07 23:17  mchalla
+
+	* OneE/: MakeRho.F90, RhoTools.F90: Enabled InkFok in MakeRho,
+	fixed outof bounds bug in RhoTools in multipole calculation.
+
+2001-11-07 23:11  mchalla
+
+	* README: [no log message]
+
+2001-11-07 23:11  mchalla
+
+	* ONX/NONX/ONX.F90: Added logic for incremental K builds.
+
+2001-11-07 23:09  mchalla
+
+	* SCFeqs/: DIIS.F90, FBuild.F90, RHeqs.F90, SCFStatus.F90: Turned
+	on InkFok.  Added pure damping option to DIIS.
+
+2001-11-07 23:07  mchalla
+
+	* MondoMods/PrettyPrint.F90: [no log message]
+
+2001-11-07 23:06  mchalla
+
+	* MondoSCF/: DrvSCFs.F90, ParseInput.F90, SCFLocals.F90: Turned on
+	InkFok.  Still some minor fixes like scratch cleaning etc.
+
+2001-11-07 09:20  mchalla
+
+	* OneE/MakeRho.F90: [no log message]
+
+2001-11-06 17:31  mchalla
+
+	* SCFeqs/DIIS.F90: [no log message]
+
+2001-11-06 16:50  mchalla
+
+	* SCFeqs/DIIS.F90: [no log message]
+
+2001-11-06 15:06  mchalla
+
+	* Validate/MgO.inp: [no log message]
+
+2001-11-06 15:06  mchalla
+
+	* Validate/MgO_2_rombic.inp: Changed name to Mg0.inp
+
+2001-11-06 15:02  mchalla
+
+	* Makefile, Scripts/MondoSetUp, Validate/Makefile: [no log message]
+
+2001-11-06 15:02  mchalla
+
+	* VisDX/PotMapRho.F90: Fixed declarations.
+
+2001-11-06 15:01  mchalla
+
+	* SCFeqs/: DIIS.F90, Makefile, P2Use.F90: Major overhaul of DIIS. 
+	Now only keeps the last BMax equations.  Also, now checks for
+	charge sloshing and turns on Sellers style B matrix that takes into
+	account delta multipole moments.
+
+2001-11-06 15:00  mchalla
+
+	* QCTC/: JForce.F90, QCTC.F90: Fixed interface for getting of
+	MPoles, and now gets correct density in JForce.
+
+2001-11-06 14:57  mchalla
+
+	* OneE/: MakeRho.F90, MakeS.F90, MakeT.F90, SForce.F90, TForce.F90:
+	Fixed bug in MakeRho (now uses correct geometry on basis set
+	switch), fixed checking of # of electrons and corrected unsightly
+	printing of outer sum stats.
+
+2001-11-06 14:55  mchalla
+
+	* HiCu/: HiCu.F90, KxcGen.F90, XCForce.F90: [no log message]
+
+2001-11-06 14:55  mchalla
+
+	* MondoSCF/: DrvSCFs.F90, MondoSCF.F90, ParsingKeys.F90,
+	SCFLocals.F90: Added full support for cleaning scratch files.  Also
+	added support for visualization via VisDX.
+
+2001-11-06 14:54  mchalla
+
+	* MondoMods/: InOut.F90, PrettyPrint.F90, Thresholding.F90: Fixed
+	CMPoles IO and printing.
+
+2001-11-02 13:06  mchalla
+
+	* Makefile: [no log message]
+
+2001-11-02 12:59  mchalla
+
+	* MondoSCF/: SCFLocals.F90, SetSCFs.F90: [no log message]
+
+2001-11-02 12:49  mchalla
+
+	* ONX/NONX/GradONX.F90: Gets the right density matrix now (SCF+1).
+
+2001-11-02 12:37  mchalla
+
+	* Scripts/: aix_pedb, nag_dbx: [no log message]
+
+2001-11-02 12:34  mchalla
+
+	* Includes/CompilerSpecifics.IBMAIX.XLF, Makefile: [no log message]
+
+2001-11-02 12:31  mchalla
+
+	* QCTC/MondoPoles.F90: Fixed HGToSP interface to work under AIX
+
+2001-11-02 12:30  mchalla
+
+	* MondoMods/: HDF5Wrap.C, SMWrap.C, Seconds.C: Fixed wrappers to
+	work under AIX.
+
+2001-11-01 12:57  tymczak
+
+	* MondoSCF/ParseInput.F90, OneE/RhoTools.F90: Fixed Some Periodic
+	Errors
+
+2001-11-01 10:44  tymczak
+
+	* HiCu/: XCForce.F90, KxcGen.F90, HiCu.F90, CubeTree.F90: Redid
+	Periodics
+
+2001-11-01 10:43  tymczak
+
+	* MondoMods/PrettyPrint.F90: Redid The Periodics and Includes
+	Printing FOr the New Types
+
+2001-11-01 10:43  tymczak
+
+	* MondoMods/Parse.F90: Redid LineToGeom
+
+2001-11-01 10:41  tymczak
+
+	* MondoMods/MemMan.F90: Redid Periodics, MemMan for the Two New
+	Types
+
+2001-11-01 10:16  tymczak
+
+	* MondoMods/InOut.F90: Redid Periodics, Added the Input Output for
+	the two new Types
+
+2001-11-01 10:15  tymczak
+
+	* MondoMods/DerivedTypes.F90: Added two new types:
+	
+	  PBCInfo which holds alll the Periodic Info
+	
+	  CMPoles which are the Cartesian Multi Poles
+
+2001-11-01 10:13  tymczak
+
+	* MondoMods/AtomPairs.F90: Redid Periodics and add the funtions to
+	calcul;ate the mutipoles of HG's, will move to McDav in the next
+	update
+
+2001-11-01 10:11  tymczak
+
+	* MondoSCF/MondoSCF.F90: Cange Name to GRAD_MD
+
+2001-11-01 10:08  tymczak
+
+	* MondoSCF/ParseInput.F90: Redid Periodics, also redid some of the
+	periodic parsing
+
+2001-11-01 10:06  tymczak
+
+	* MondoSCF/DrvFrcs.F90: Redid Periodics, Plan on Redoing the MD
+	Stuff
+
+2001-11-01 10:05  tymczak
+
+	* MondoSCF/ParsingKeys.F90: Redid some MD keys and added New ones
+
+2001-11-01 10:04  tymczak
+
+	* MondoSCF/SCFLocals.F90: Added a new TYPE MDContols
+	
+	this type will be used to store information needed for a MD
+	Simulation
+
+2001-11-01 10:01  tymczak
+
+	* OneE/RhoTools.F90: Added Subroutine to calculate the Multipoles
+	of Rho, cleaned up some functions
+
+2001-11-01 10:00  tymczak
+
+	* OneE/: SForce.F90, TForce.F90: Redid Periodics
+
+2001-11-01 09:59  tymczak
+
+	* OneE/MakeRho.F90: Redid the Periodics and Added the Calculation
+	of the Multipoles to MakeRho
+
+2001-11-01 09:59  schwegle
+
+	* ONX/VRR/: Int1166.F90, Makefile: Adding more int code.
+
+2001-11-01 09:58  schwegle
+
+	* ONX/NONX/: GetIntCode.F90, MemInit.F90: Anouther fix to the
+	integral code
+
+2001-11-01 09:58  tymczak
+
+	* QCTC/Globals.F90: Added RhoPoles, the multipoles of Rho to
+	Globals
+
+2001-11-01 09:56  tymczak
+
+	* QCTC/BlokTrPdJ.F90, OneE/MakeS.F90, OneE/MakeT.F90: Redid
+	Periodics
+
+2001-11-01 09:55  tymczak
+
+	* QCTC/PBCFarField.F90: Major Revamp, Redid Periodics, Multipole
+	now calculated in MakeRho removed some outdated programs, redid the
+	output
+
+2001-11-01 09:53  tymczak
+
+	* QCTC/: PFFTensor.F90, NukE.F90, JGen.F90, JForce.F90: Redid
+	Periodics
+
+2001-11-01 09:53  tymczak
+
+	* QCTC/QCTC.F90: Redid Periodics, Also picks up the dipole and
+	quadripole from disk instead of calculating them in PBFFarField
+
+2001-11-01 09:51  tymczak
+
+	* Validate/MgO_2_rombic.inp: Magnisium Oxide Periodic Test System
+
+2001-11-01 09:50  tymczak
+
+	* VisDX/PotMapRho.F90: Redid Periodics
+
+2001-11-01 09:46  tymczak
+
+	* XForm/LowdinO.F90: Redid the Matrix inverse such that it is
+	faster and it projects out the zero eigenvalues also have a inverse
+	tester (%ifdef DEBUG)
+
+2001-11-01 06:25  mchalla
+
+	* MondoSCF/SCFLocals.F90: [no log message]
+
+2001-10-30 12:58  schwegle
+
+	* ONX/VRR/: Int1161.F90, Int2121.F90, Int6111.F90, Int6611.F90,
+	Makefile: Explicit code works up to L=2
+
+2001-10-30 12:49  schwegle
+
+	* ONX/NONX/: ComputeKe.F90, GetIntCode.F90: Explicit code ok up to
+	L=2 CVS
+	-------------------------------------------------------------------
+	---
+
+2001-10-29 09:12  schwegle
+
+	* ONX/NONX/GetIntCode.F90: Should be a stable version for matrices.
+
+2001-10-29 09:03  schwegle
+
+	* ONX/NONX/: ComputeKe.F90, ComputeKg.F90, GetIntCode.F90,
+	Makefile: Should be a stable verrsion for matrices.
+
+2001-10-29 08:48  mchalla
+
+	* README, Makefile: [no log message]
+
+2001-10-29 08:46  mchalla
+
+	* Makefile: Removed ONX from release.
+
+2001-10-29 08:42  schwegle
+
+	* ONX/NONX/: ComputeKe.F90, ComputeKg.F90, ComputeXForce.F90,
+	ContractG.F90, Digest.F90, DigestGradient.F90, DisOrder.F90,
+	DisOrderGrad.F90, GetGradient.F90, GradONX.F90, HRRBra.F,
+	HRRKetGrad.F, Sizes.F90, VRRs.F90: [no log message]
+
+2001-10-29 08:32  mchalla
+
+	* ONX/Makefile: Fixed release mechanism.
+
+2001-10-29 08:29  mchalla
+
+	* ONX/NONX/Makefile: Added release funtion.
+
+2001-10-29 08:05  mchalla
+
+	* Scripts/CSHRC, Includes/ALPHA_RELEASE: [no log message]
+
+2001-10-28 18:54  mchalla
+
+	* Validate/: BetaCarotene.ref, Caffiene.ref, Urea.ref,
+	Chlorophyll.ref: [no log message]
+
+2001-10-28 16:35  mchalla
+
+	* Validate/: Urea.inp, Vancomycin.ref: [no log message]
+
+2001-10-28 16:17  mchalla
+
+	* Validate/: Biotin.ref, SiF4.ref, Water.ref: [no log message]
+
+2001-10-28 15:42  mchalla
+
+	* Validate/Test.F90: [no log message]
+
+2001-10-28 15:34  mchalla
+
+	* Validate/: BetaCarotene.inp, Biotin.inp, Caffiene.inp,
+	Chlorophyll.inp, SiF4.inp, Vancomycin.inp, Water.inp: [no log
+	message]
+
+2001-10-28 14:16  mchalla
+
+	* Validate/: BetaCarotene.inp, Makefile, Test.F90, Vancomycin.inp,
+	sub_pbs: [no log message]
+
+2001-10-28 14:12  mchalla
+
+	* Validate/Chlorophyll.ref, Makefile, Includes/ALPHA_RELEASE,
+	MondoSCF/MondoSCF.F90: [no log message]
+
+2001-10-28 13:23  mchalla
+
+	* Validate/: BetaCarotene.ref, Vancomycin.ref, Water.ref: [no log
+	message]
+
+2001-10-28 11:14  mchalla
+
+	* Validate/Water.ref: [no log message]
+
+2001-10-28 11:09  mchalla
+
+	* Validate/: Biotin.ref, Caffiene.ref, SiF4.ref, Urea.ref:
+	Reference files for validation.
+
+2001-10-28 11:08  mchalla
+
+	* HiCu/XCForce.F90, QCTC/JForce.F90: [no log message]
+
+2001-10-28 09:33  mchalla
+
+	* Validate/: BetaCarotene.inp, Makefile, SiF4.inp: [no log message]
+
+2001-10-28 09:08  mchalla
+
+	* ONX/NONX/ONX.F90: Fixed printing of checksums etc.
+
+2001-10-28 09:00  mchalla
+
+	* ONX/NONX/ONX.F90: [no log message]
+
+2001-10-28 08:15  mchalla
+
+	* Validate/BetaCarotene.inp, Validate/Biotin.inp,
+	Validate/Caffiene.inp, Validate/Chlorophyll.inp, Validate/SiF4.inp,
+	Validate/Urea.inp, Validate/Vancomycin.inp, Validate/Water.inp,
+	MondoSCF/DrvFrcs.F90, MondoSCF/MondoSCF.F90,
+	MondoSCF/SCFLocals.F90, SCFeqs/SDMM.F90,
+	MondoMods/ParsingConstants.F90, MondoMods/PrettyPrint.F90: [no log
+	message]
+
+2001-10-27 11:29  schwegle
+
+	* ONX/VRR/: Int1111.F90, Int1121.F90, Int1122.F90, Int2111.F90,
+	Int2121.F90, Int2211.F90, Makefile: Added more explicit integral
+	code. Int2121.F90 is messed up for pure p (not sp) basis functions.
+
+2001-10-26 16:54  mchalla
+
+	* MondoSCF/DrvFrcs.F90, MondoSCF/DrvSCFs.F90,
+	MondoSCF/MondoSCF.F90, MondoSCF/SCFLocals.F90, QuNew/NewStep.F90,
+	SCFeqs/DIIS.F90, SCFeqs/SCFStatus.F90, HiCu/Thresholds.F90,
+	Validate/Biotin.inp, Validate/Caffiene.inp, Validate/Urea.inp,
+	Validate/Water.inp: [no log message]
+
+2001-10-25 12:16  mchalla
+
+	* MondoMods/PrettyPrint.F90, QCTC/BlokTrPdJ.F90,
+	SCFeqs/SCFStatus.F90: [no log message]
+
+2001-10-25 12:12  mchalla
+
+	* HiCu/TreeWalk.F90, HiCu/dXCBlok.F90, VisDX/PotMapRho.F90: [no log
+	message]
+
+2001-10-24 16:35  mchalla
+
+	* MondoSCF/DrvSCFs.F90, MondoSCF/MondoSCF.F90, SCFeqs/DIIS.F90: [no
+	log message]
+
+2001-10-23 21:02  mchalla
+
+	* SCFeqs/DIIS.F90: Added online damping.
+
+2001-10-23 16:53  mchalla
+
+	* Validate/Makefile: [no log message]
+
+2001-10-23 16:53  mchalla
+
+	* Validate/: BetaCarotene.inp, Biotin.inp, Caffiene.inp,
+	Chlorophyll.inp, SiF4.inp, Urea.inp, Vancomycin.inp: New options.
+
+2001-10-23 14:32  tymczak
+
+	* QCTC/PFFTensor.F90: Writes PFFT matrix in scratch
+
+2001-10-23 14:31  tymczak
+
+	* QCTC/PBCFarField.F90: Minor Changes
+
+2001-10-23 14:30  tymczak
+
+	* MondoMods/DerivedTypes.F90: Added PBCInfo Type, will be used to
+	hold the periodic information
+
+2001-10-23 14:29  mchalla
+
+	* VisDX/: DXExample.net, PotMapRho.F90: [no log message]
+
+2001-10-22 15:35  mchalla
+
+	* MondoSCF/DrvSCFs.F90: Remove prv not cur OrthoD.
+
+2001-10-22 15:24  mchalla
+
+	* SCFeqs/: DIIS.F90, SDMM.F90: Fixed default CGCycles to be 14
+	instead of 8.
+
+2001-10-22 15:23  tymczak
+
+	* XForm/LowdinO.F90: Added a Test to see if the Accuracy of the
+	inverse matrix
+
+2001-10-22 15:13  tymczak
+
+	* MondoSCF/ParseInput.F90: Changed the Periodic Stuff in ParesInput
+	Fixed bugs in the Angles to Vectors conversion
+
+2001-10-22 15:10  tymczak
+
+	* OneE/MakeRho.F90: On Integrate_HGRho, now we return the densities
+
+2001-10-22 14:41  tymczak
+
+	* QCTC/PBCFarField.F90: Redid and Fixed the Dipole,Quadripoles and
+	The calculation of the size of the inner box sum
+
+2001-10-22 14:39  tymczak
+
+	* QCTC/JGen.F90: Turned of AtomCyclic for Now
+
+2001-10-22 14:38  tymczak
+
+	* QCTC/MondoPoles.F90: Small bug that rears its head on the alpha,
+	
+	Sq=SQRT(One-CoTan**2)  ==> Sq=SQRT(ABS(One-CoTan**2))
+
+2001-10-22 14:36  tymczak
+
+	* QCTC/PFFTensor.F90: Completely Redid the MakePFF, now the iner
+	box sum is over a (approx) spherical region, this helpt accuracy
+	alot
+
+2001-10-22 14:35  tymczak
+
+	* OneE/RhoTools.F90: Integrate_HGRho now returns the integrated
+	Nuclear and Electronic densities
+
+2001-10-22 14:32  tymczak
+
+	* MondoMods/Thresholding.F90: Fixed the AtomPair Distanceing to
+	include anglear sysmetries
+
+2001-10-22 14:29  tymczak
+
+	* MondoMods/Parse.F90: [no log message]
+
+2001-10-22 14:28  tymczak
+
+	* MondoMods/PBC.F90: A new CellSet_Sphere which allows us to find
+	all the cells betweemn R1 and R2
+
+2001-10-22 14:27  tymczak
+
+	* MondoMods/AtomPairs.F90: Better way of doing Periodic Wraping
+
+2001-10-22 08:31  mchalla
+
+	* SCFeqs/: SDMM.F90, SDMM.F90: [no log message]
+
+2001-10-21 21:17  mchalla
+
+	* Scripts/MondoSetUp, Scripts/mondo, QCTC/JForce.F90,
+	QCTC/Makefile, QCTC/QCTC.F90, QuNew/Makefile, HiCu/HiCu.F90,
+	HiCu/Makefile, HiCu/XCForce.F90, Includes/ALPHA_RELEASE, Makefile:
+	[no log message]
+
+2001-10-21 21:14  mchalla
+
+	* MondoSCF/DrvFrcs.F90, MondoSCF/DrvSCFs.F90, MondoSCF/Makefile,
+	MondoSCF/MondoSCF.F90, MondoSCF/ParseInput.F90,
+	MondoSCF/ParsingKeys.F90, MondoSCF/SCFLocals.F90,
+	MondoMods/DerivedTypes.F90, MondoMods/Macros.F90,
+	MondoMods/MatFunk.F90, MondoMods/Parse.F90,
+	MondoMods/ParsingConstants.F90, MondoMods/PrettyPrint.F90,
+	OneE/MakeS.F90, OneE/MakeT.F90, OneE/Makefile, OneE/SForce.F90,
+	OneE/TForce.F90, ONX/NONX/GradONX.F90, ONX/NONX/Makefile,
+	SCFeqs/DIIS.F90, SCFeqs/Makefile, SCFeqs/P2Use.F90,
+	SCFeqs/SCFStatus.F90, SCFeqs/SDMM.F90, XForm/BlokAInv.F90,
+	XForm/Makefile, VisDX/Makefile: [no log message]
+
+2001-10-19 16:46  mchalla
+
+	* MondoMods/MatFunk.F90: Added print options for MatFunk, fixed
+	error in coding of condition number.
+
+2001-10-19 16:45  mchalla
+
+	* SCFeqs/: DIIS.F90, SDMM.F90: Added parameter EigThresh to read
+	from input file.  Parameter controls projection of near zero
+	eigenvalues.  Should really go to Sellers C2-DIIS.  Also, added a
+	damping for first (0'th->1'st) cycle transition, which should
+	prevent problematic overshooting that occurs on basis set
+	switching.
+
+2001-10-18 15:29  mchalla
+
+	* MondoSCF/: DrvFrcs.F90, DrvSCFs.F90: [no log message]
+
+2001-10-18 14:00  mchalla
+
+	* ONX/NONX/GradONX.F90: Changed to get DM from CCyc+1, which is
+	presumably more converged.
+
+2001-10-18 13:48  mchalla
+
+	* README, Scripts/MondoSetUp: [no log message]
+
+2001-10-18 13:45  mchalla
+
+	* Makefile: [no log message]
+
+2001-10-18 13:45  mchalla
+
+	* Includes/ALPHA_RELEASE: Warning that this is an alpha release.
+
+2001-10-18 13:35  mchalla
+
+	* HiCu/: RhoTree.F90, Thresholds.F90, dXCBlok.F90: Now set to get
+	correct DM and Rho on basis set switch.
+
+2001-10-18 13:34  mchalla
+
+	* MondoMods/: Macros.F90, PrettyPrint.F90: Added NAG support to
+	macros.  Got PPrint of CRDS to work with NAG by using PRESENT
+
+2001-10-18 13:32  mchalla
+
+	* QCTC/JForce.F90: Fixed to get last rho and DM from previous SCF
+	cycle.
+
+2001-10-18 13:31  mchalla
+
+	* SCFeqs/P2Use.F90: Fixed indexing to employ only the very last
+	density matrix in last geometry on extrapolation.
+
+2001-10-18 13:26  mchalla
+
+	* OneE/: MakeRho.F90, SForce.F90, TForce.F90: Changed code to more
+	sophisticated use of SCFActn.  Force routines now use the very last
+	density matrix produced, rather than the one preceeding the last
+	fock build.
+
+2001-10-18 13:22  mchalla
+
+	* ONX/NONX/: Makefile, ONX.F90: Changed make file so it removes ONX
+	from Exec.  Also, changed control structure on SCFActn so it reads
+	in the correct density matrix, avoiding the front end from doing a
+	system call to copy matrices.
+
+2001-10-18 13:21  mchalla
+
+	* MondoSCF/: DrvFrcs.F90, DrvSCFs.F90, MondoSCF.F90, Overlay.F90,
+	ParseInput.F90, ParsingKeys.F90: Additional rehacking of front end.
+	 Turned on scratch cleaning per SCF.  Changed numbering so that the
+	verly last density matrix produced, typically CCyc+1 is used in DM
+	extrapolation and ONX on basis set switches.
+
+2001-10-17 15:30  ckgan
+
+	* Scripts/mondo: changed sh to csh, more arguments added.
+
+2001-10-17 15:27  ckgan
+
+	* MondoSCF/SetSCFs.F90: MPI2 flags included.
+
+2001-10-17 15:25  ckgan
+
+	* MondoSCF/: ParseInput.F90, SCFLocals.F90: MPI2 flag included.
+
+2001-10-17 15:23  ckgan
+
+	* MondoSCF/Overlay.F90: MPI2 flags added.  MPI_COMM_SPAWN included.
+
+2001-10-17 15:19  ckgan
+
+	* MondoSCF/MondoSCF.F90: MPI2 flags added.
+
+2001-10-16 15:16  mchalla
+
+	* MondoSCF/DrvFrcs.F90: Added back in CJs code.
+
+2001-10-16 14:58  mchalla
+
+	* Makefile, README: [no log message]
+
+2001-10-16 14:41  mchalla
+
+	* Scripts/add: silly....
+
+2001-10-16 14:40  mchalla
+
+	* MondoSCF/: DrvFrcs.F90, DrvSCFs.F90, Makefile, MondoSCF.F90,
+	ParseInput.F90, ParsingKeys.F90, SCFLocals.F90: Major re-write of
+	front end.  Parser now is gradients friendly.  MondoSCF is able to
+	handle a number of gradients related jobs including geometry
+	optimization.  QuNew optimizer has been redone with drivers
+	residing in DrvFrcs.  Output formatting has been improved. 
+	Geometry durring optimization is output to the GeoFile, which is
+	now tagged with a ".car".
+
+2001-10-16 14:38  mchalla
+
+	* MondoSCF/ChkSCFs.F90: Removed. Has been split into DrvSCFs and
+	DrvFrcs
+
+2001-10-16 14:37  mchalla
+
+	* SCFeqs/: P2Use.F90, SCFStatus.F90: Major rewrite of P2Use and
+	SCFStatus.  P2Use no longer outputs an orthogonal density matrix. 
+	P2Use now does density extrapolation and projection.  SCFStatus has
+	been cleaned significantly.  Now reports DeltaD for non-orthogonal
+	density matrices, and has better output capabilites.  Removed many
+	non-essential puts and gets.
+
+2001-10-16 14:33  mchalla
+
+	* QuNew/: BFGSHess.F90, NewStep.F90: Removed old liscenses from
+	files.	Changed cur->prev and nxt->cur
+
+2001-10-16 14:32  mchalla
+
+	* QuNew/Test: ?
+
+2001-10-16 14:30  mchalla
+
+	* QCTC/QCTC.F90: Removed print for nuke
+
+2001-10-16 14:28  mchalla
+
+	* OneE/MakeRho.F90: Got rid of all that iSwitch sillyness...
+
+2001-10-16 14:27  mchalla
+
+	* ONX/NONX/ONX.F90: Removed all the iswitch stuff.  Just check for
+	DeltaD.  Default is D.
+
+2001-10-16 14:26  mchalla
+
+	* MondoMods/: GlobalCharacters.F90, Macros.F90, Parse.F90,
+	ProcessControl.F90: minor
+
+2001-10-16 14:25  mchalla
+
+	* HiCu/: HiCu.F90, XCForce.F90: Put print protection about timers. 
+	Changed thresholds in XCForce by 1.D-1.
+
+2001-10-12 09:23  mchalla
+
+	* HiCu/: CubeTree.F90, XCForce.F90: [no log message]
+
+2001-10-12 08:45  mchalla
+
+	* MondoMods/Macros.F90: HDF file in Scratch
+
+2001-10-12 08:44  mchalla
+
+	* MondoSCF/ParseInput.F90: HDF file goes to Scratch.
+
+2001-10-11 17:36  mchalla
+
+	* Validate/Makefile: [no log message]
+
+2001-10-11 17:22  mchalla
+
+	* Includes/CompilerSpecifics.AMDLinux.PG: turned off periodic
+
+2001-10-11 17:20  mchalla
+
+	* Validate/: BetaCarotene.inp, Biotin.inp, Caffiene.inp,
+	Chlorophyll.inp, SiF4.inp, Urea.inp, Vancomycin.inp, Water.inp:
+	reformatted
+
+2001-10-11 16:03  mchalla
+
+	* BasisSets/MMA/: EvenTempered.m, RETParameters.m: Files for
+	generating uncontracted RET basis sets.
+
+2001-10-11 15:50  mchalla
+
+	* Makefile: [no log message]
+
+2001-10-11 15:48  mchalla
+
+	* VisDX/: DXExample.net, Makefile, PotMapRho.F90: New directory for
+	visualization.
+
+2001-10-11 15:43  mchalla
+
+	* Validate/Makefile: Added some extra stuff for purging and
+	testing.
+
+2001-10-11 15:41  mchalla
+
+	* Scripts/MondoSetUp: Added extra env variables.
+
+2001-10-11 15:35  mchalla
+
+	* SCFeqs/SDMM.F90: [no log message]
+
+2001-10-11 15:32  mchalla
+
+	* MondoMods/: Macros.F90, Macros.F90: [no log message]
+
+2001-10-11 15:17  mchalla
+
+	* QCTC/QCTC.F90: Turned filtering back on.
+
+2001-10-11 15:16  mchalla
+
+	* OneE/MakeT.F90: Turned filter back on.
+
+2001-10-11 15:14  mchalla
+
+	* ONX/NONX/: GradONX.F90, ONX.F90: Turned filter back on, changed
+	from SCFName to ScrName
+
+2001-10-11 15:06  mchalla
+
+	* MondoSCF/SCFLocals.F90: Added new env globals.
+
+2001-10-11 15:04  mchalla
+
+	* MondoSCF/ParseInput.F90: Improved the way files are named. 
+	Changed banner.
+
+2001-10-11 15:02  mchalla
+
+	* MondoSCF/DrvSCFs.F90: cleaned matrix cleaner
+
+2001-10-11 14:56  mchalla
+
+	* MondoMods/PrettyPrint.F90: Major (incomplete) re-write of
+	print_crds.  Needs help for periodics.
+
+2001-10-11 14:54  mchalla
+
+	* MondoMods/Parse.F90: Now TrixFile has PWD option
+
+2001-10-11 14:44  mchalla
+
+	* MondoMods/Macros.F90: Changed to reflect new file naming
+	structures
+
+2001-10-11 14:13  mchalla
+
+	* MondoMods/GlobalCharacters.F90: Changed some postfixes, added
+	character vars for env variables.
+
+2001-10-11 14:08  mchalla
+
+	* MondoMods/BoundingBox.F90: Got rid of extent argument to
+	pointoutside of box.
+
+2001-10-11 13:53  mchalla
+
+	* HiCu/HiCu.F90: Turned filter back on.
+
+2001-10-11 13:50  mchalla
+
+	* Benchmarks/: HMX/Makefile, HMX/sub_pbs, PROTEINS/sub_pbs: [no log
+	message]
+
+2001-10-11 13:47  mchalla
+
+	* Makefile: [no log message]
+
+2001-10-03 15:48  ckgan
+
+	* OneE/MakeS.F90: option Serial_O is set.
+
+2001-10-03 15:43  ckgan
+
+	* MondoSCF/SetSCFs.F90: Added tags to parallel offset vars
+
+2001-10-03 15:39  ckgan
+
+	* MondoSCF/ParseInput.F90: Now should die if input file does not
+	exist
+
+2001-10-03 15:31  ckgan
+
+	* MondoSCF/DrvSCFs.F90: Turned on MPIRun for MakeS
+
+2001-10-03 15:29  ckgan
+
+	* MondoMods/Parse.F90: Also, turned on case sensitivity.
+
+2001-10-03 15:24  ckgan
+
+	* MondoMods/MondoMPI.F90: minor
+
+2001-10-03 15:21  ckgan
+
+	* MondoMods/: Parse.F90, ParsingConstants.F90: fixed spelling
+
+2001-10-03 15:09  ckgan
+
+	* MondoMods/Macros.F90: minor changes.
+
+2001-10-03 14:58  ckgan
+
+	* MondoMods/InOut.F90: Most of the problems arising from
+	'IF(MyId==ROOT) &' have been solved by changing the line to
+	'If(MyId==ROOT) THEN'.	OpenACII is modified a little bit.
+
+2001-10-03 14:41  ckgan
+
+	* MondoMods/HDF5Wrap.C: memory allocation for the variable
+	`VarName' is done in a proper way.  strcpy is used rather than
+	memcpy.
+
+2001-10-03 14:29  ckgan
+
+	* MondoMods/GlobalScalars.F90: More formatting changes
+
+2001-10-03 14:28  ckgan
+
+	* MondoMods/BraBloks.F90: changed formatting a bit
+
+2001-10-03 14:26  ckgan
+
+	* MondoMods/AtomPairs.F90: Changed comment lines so we don't get
+	wraparound...
+
+2001-10-03 14:22  ckgan
+
+	* Makefile: Commented out cat of README
+
+2001-09-28 08:23  mchalla
+
+	* Includes/: CompilerSpecifics.AMDLinux.PG,
+	CompilerSpecifics.IntelLinux.PG: backslash
+
+2001-09-27 13:22  mchalla
+
+	* HiCu/CubeTree.F90: Fixed popinbox for periodics
+
+2001-09-27 11:34  tymczak
+
+	* MondoSCF/ParseInput.F90: Fix for the Lattice vector Parsing
+
+2001-09-27 10:14  mchalla
+
+	* Benchmarks/HMX/: sub_pbs.AMD, sub_pbs.alpha, mkinpts,
+	submit_pbs_hmx, mkinpt, sub_pbs: [no log message]
+
+2001-09-27 10:05  mchalla
+
+	* Validate/: BetaCarotene.inp, Biotin.inp, Caffiene.inp,
+	Chlorophyll.inp, SiF4.inp, Urea.inp: [no log message]
+
+2001-09-26 16:00  tymczak
+
+	* Validate/TATB_4Cell.inp: TATB 4 cell Input
+
+2001-09-26 16:00  tymczak
+
+	* Validate/TATB_1Cell.inp: TATB 1 Cell Input
+
+2001-09-26 15:56  tymczak
+
+	* Benchmarks/HMX/XYZ/: hmx_111.xyz.gz, hmx_112.xyz.gz,
+	hmx_122.xyz.gz, hmx_222.xyz.gz, hmx_223.xyz.gz: xyz Inputs
+
+2001-09-26 15:55  tymczak
+
+	* Benchmarks/HMX/: Makefile, mkinpts, sub_pbs.AMD, sub_pbs.alpha,
+	submit_pbs_hmx, template_inp: HMX Input Directory
+
+2001-09-25 14:21  mchalla
+
+	* MondoSCF/MondoSCF.F90: Calls forces in default mode.
+
+2001-09-25 13:35  mchalla
+
+	* Validate/: BetaCarotene.inp, Biotin.inp: switch model to blyp
+	based one untill all thresholds are done being tuned.
+
+2001-09-25 13:31  mchalla
+
+	* MondoSCF/DrvFrcs.F90: [no log message]
+
+2001-09-25 13:18  mchalla
+
+	* HiCu/Thresholds.F90, MondoSCF/SCFLocals.F90: Dialed HiCu
+	thresholds yet again
+
+2001-09-25 13:17  mchalla
+
+	* OneE/SForce.F90, OneE/TForce.F90, QCTC/JForce.F90,
+	HiCu/XCForce.F90: turned of force printing
+
+2001-09-24 16:29  schwegle
+
+	* ONX/NONX/: ComputeKe.F90, ComputeKg.F90, RGen.F90: Added explcit
+	2-e code for integrals that involve a single sp function.  This
+	update most likely will break for integrals with p (like 6-31G**)
+	functions...
+
+2001-09-24 16:27  schwegle
+
+	* ONX/VRR/: Int1111.F90, Int1121.F90, Int2111.F90, Makefile: Added
+	explicit 2-e code for 2-e ints that have a single p function.
+
+2001-09-22 17:38  mchalla
+
+	* Validate/: Makefile, sub_pbs, BetaCarotene.inp, Caffiene.inp,
+	Chlorophyll.inp, SiF4.inp: [no log message]
+
+2001-09-22 17:37  mchalla
+
+	* MondoSCF/ParseInput.F90: Fixed IO for parsing title
+
+2001-09-22 15:50  mchalla
+
+	* Validate/: Makefile, Test.F90: Extra files for validation.
+
+2001-09-22 15:39  mchalla
+
+	* MondoSCF/ParseInput.F90: Upgrated first part of parse input
+
+2001-09-22 09:54  mchalla
+
+	* Validate/Vancomycin.inp: [no log message]
+
+2001-09-21 20:52  mchalla
+
+	* Validate/: Caffiene.inp, Chlorophyll.inp, Urea.inp,
+	Vancomycin.inp, sub_pbs: [no log message]
+
+2001-09-21 14:29  schwegle
+
+	* ONX/VRR/Int1111.F90: Removed some USE statements that are not
+	needed.
+
+2001-09-21 14:28  schwegle
+
+	* ONX/Makefile: Correct compiler order, do not change...
+
+2001-09-21 12:42  mchalla
+
+	* Validate/: BetaCarotene.inp, Biotin.inp, Chlorophyll.inp,
+	SiF4.inp, Urea.inp, Vancomycin.inp, Makefile, sub_pbs,
+	SiliconTetraFluride.inp: [no log message]
+
+2001-09-21 11:33  schwegle
+
+	* ONX/NONX/: ComputeK.F90, ComputeKe.F90, ComputeKg.F90, Makefile,
+	ONX.F90: Started adding explicit two-electron integral code. So far
+	only s-type functions have been included. Now links with the
+	libVRR.a library.
+
+2001-09-21 11:25  schwegle
+
+	* ONX/Makefile: Added VRR to the make list.
+
+2001-09-21 11:20  schwegle
+
+	* ONX/VRR/: Int1111.F90, Makefile: New explicit integral code for
+	use in NONX.  So far this only includes s-type functions...
+
+2001-09-21 11:15  mchalla
+
+	* MondoSCF/SetSCFs.F90: [no log message]
+
+2001-09-21 11:05  mchalla
+
+	* Validate/Water.inp, README: [no log message]
+
+2001-09-21 07:34  mchalla
+
+	* Makefile, README: [no log message]
+
+2001-09-21 06:14  mchalla
+
+	* MondoSCF/DrvSCFs.F90: removed old tidy routines
+
+2001-09-21 06:09  mchalla
+
+	* OneE/MakeT.F90: Postpone filtration
+
+2001-09-21 06:06  mchalla
+
+	* MondoMods/Functionals.F90: PBE functional turned back on.
+
+2001-09-21 06:06  mchalla
+
+	* HiCu/HiCu.F90: Postpone filtration
+
+2001-09-21 06:05  mchalla
+
+	* MondoSCF/: SCFLocals.F90, SetSCFs.F90: [no log message]
+
+2001-09-21 06:00  mchalla
+
+	* QCTC/QCTC.F90: Don't filter at this stage, wait untill Fock
+	update
+
+2001-09-21 05:58  mchalla
+
+	* SCFeqs/DIIS.F90: Only filter end product now, not after each
+	addition
+
+2001-09-20 15:59  mchalla
+
+	* Benchmarks/PROTEINS/: Makefile, end_inp, mkinpts, pdb_to_xyz,
+	sub_pbs, sub_proteins_lsf, submit_pbs_proteins, template_inp: [no
+	log message]
+
+2001-09-20 15:55  mchalla
+
+	* Benchmarks/: WATER/mkinpts, PROTEINS/XYZ/Charybdotoxin.xyz.gz,
+	PROTEINS/XYZ/ChyInh2.xyz.gz, PROTEINS/XYZ/CytB562.xyz.gz,
+	PROTEINS/XYZ/Endothelin.xyz.gz, PROTEINS/XYZ/FibroblastGF.xyz.gz,
+	PROTEINS/XYZ/HIVProtease.xyz.gz, PROTEINS/XYZ/Interleukin.xyz.gz,
+	PROTEINS/XYZ/Lysozyme.xyz.gz, PROTEINS/XYZ/P53Frag.xyz.gz,
+	PROTEINS/XYZ/TyrPhos.xyz.gz, PROTEINS/PDB/ChyInh2.pdb,
+	PROTEINS/PDB/Conotoxin.pdb, PROTEINS/PDB/CytB562.pdb,
+	PROTEINS/PDB/FibroblastGF.pdb, PROTEINS/PDB/HIVProtease.pdb,
+	PROTEINS/PDB/Interleukin.pdb, PROTEINS/PDB/Lysozyme.pdb,
+	PROTEINS/PDB/P53Dimer.pdb, PROTEINS/PDB/TyrPhos.pdb: [no log
+	message]
+
+2001-09-20 15:54  mchalla
+
+	* Benchmarks/WATER/BENCH/RHF_3-21G_Values: vals
+
+2001-09-20 15:49  mchalla
+
+	* Benchmarks/WATER/: XYZ/h2o_10.xyz.gz, XYZ/h2o_110.xyz.gz,
+	XYZ/h2o_130.xyz.gz, XYZ/h2o_150.xyz.gz, XYZ/h2o_200.xyz.gz,
+	XYZ/h2o_250.xyz.gz, XYZ/h2o_30.xyz.gz, XYZ/h2o_300.xyz.gz,
+	XYZ/h2o_350.xyz.gz, XYZ/h2o_50.xyz.gz, XYZ/h2o_70.xyz.gz,
+	XYZ/h2o_90.xyz.gz, end_inp, Makefile, mkinpts, run_waters, sub_lsf,
+	sub_nqs, sub_pbs, submit_lsf_waters, submit_pbs_waters,
+	template_inp: [no log message]
+
+2001-09-20 15:43  mchalla
+
+	* Validate/Makefile: [no log message]
+
+2001-09-20 15:24  mchalla
+
+	* Inpts/Validate/: BetaCarotene.inp, Biotin.inp, Caffiene.inp,
+	Chlorophyll.inp, Makefile, SiliconTetraFluride.inp, Urea.inp,
+	Vancomycin.inp, core: [no log message]
+
+2001-09-20 15:14  mchalla
+
+	* Validate/: Makefile, sub_pbs: [no log message]
+
+2001-09-20 15:14  mchalla
+
+	* Validate/: BetaCarotene.inp, Biotin.inp, Caffiene.inp,
+	Chlorophyll.inp, SiliconTetraFluride.inp, Urea.inp, Vancomycin.inp:
+	Validation suite
+
+2001-09-20 12:11  tymczak
+
+	* XForm/LowdinO.F90: [no log message]
+
+2001-09-20 10:35  mchalla
+
+	* MondoMods/InOut.F90, MondoMods/PrettyPrint.F90,
+	MondoSCF/SetSCFs.F90: fixed parallel bits to compile.
+
+2001-09-19 14:40  tymczak
+
+	* XForm/LowdinO.F90: Temp FIx to the DGEMM being broken
+
+2001-09-19 14:37  tymczak
+
+	* QCTC/PFFTensor.F90: Total Revamp
+
+2001-09-19 14:36  tymczak
+
+	* QCTC/PBCFarField.F90: Change the Way in which the inner box sum
+	is done Now done over a spherical Volume
+
+2001-09-19 13:55  tymczak
+
+	* MondoSCF/ParseInput.F90: Fixed the Front end of the Periodic
+	Stuff
+
+2001-09-19 13:54  tymczak
+
+	* MondoSCF/DrvSCFs.F90: Added a Scratch Cleaner
+
+2001-09-19 13:53  tymczak
+
+	* MondoSCF/DrvFrcs.F90: added the Calculation of the Total Ang Mom
+	And the Presure Tensor
+
+2001-09-19 13:49  tymczak
+
+	* MondoMods/: AtomPairs.F90, PBC.F90: [no log message]
+
+2001-09-19 06:05  mchalla
+
+	* Inpts/Validate/: BetaCarotene.inp, Caffiene.inp, Chlorophyll.inp,
+	Vancomycin.inp: [no log message]
+
+2001-09-17 13:59  mchalla
+
+	* SCFeqs/SDMM.F90: Improved convergence criteria.
+
+2001-09-15 09:29  mchalla
+
+	* Inpts/PROTEINS/: mkinpts, submit_pbs_proteins, template_inp:
+	Added CRD and P53 proteins
+
+2001-09-15 09:22  mchalla
+
+	* Inpts/PROTEINS/XYZ/: Charybdotoxin.xyz.gz, P53Frag.xyz.gz,
+	Conotoxin.xyz.gz: [no log message]
+
+2001-09-14 14:37  mchalla
+
+	* Inpts/PROTEINS/: mkinpts, sub_pbs, submit_pbs_proteins,
+	template_inp: Added Endothelin.
+
+2001-09-14 14:34  mchalla
+
+	* Inpts/PROTEINS/XYZ/Endothelin.xyz.gz: Endothelin
+
+2001-09-14 14:25  mchalla
+
+	* MondoSCF/SCFLocals.F90: Again changed thresholds
+
+2001-09-14 14:25  mchalla
+
+	* MondoSCF/ChkSCFs.F90: Tightened convergence criteria somewhat.
+
+2001-09-14 14:19  mchalla
+
+	* SCFeqs/SDMM.F90: Significantly enhanced.  Added symetrization of
+	CG gradient which minimizes the commutator [P,F] durring
+	minimization (original assumptions of SDMM equations).	 Removed
+	several filter opperations which were causing instabilities.  
+	Modified output to give information on [P,F]
+
+2001-09-11 15:17  mchalla
+
+	* XForm/Makefile: Turned off spatial thresholding for now.
+
+2001-09-11 14:55  mchalla
+
+	* Inpts/Validate/: Chlorophyll.inp, BetaCarotene.inp: [no log
+	message]
+
+2001-09-11 14:52  mchalla
+
+	* SCFeqs/SDMM.F90: Tried to robustify SDMM.  Fixed number of CG
+	steps, made purification halt less likely to stop prematurely.
+
+2001-09-11 14:51  mchalla
+
+	* MondoSCF/SCFLocals.F90: changed thresholds yet again.
+
+2001-09-09 12:00  mchalla
+
+	* HiCu/Thresholds.F90: Tunned TauRho.  Made quite a large
+	improvement!
+
+2001-08-29 15:06  schwegle
+
+	* ONX/NONX/: ComputeK.F90, DisOrder.F90, HRRBra.F, MemInit.F90,
+	ONX.F90, README, RangeOfExchange.F90: Fixed d-function bug in
+	integral code and bug in the dynamic memory allocation scheme.
+	Should give 9 digit agreement with 6-31G** HF on the urea test
+	input.
+
+2001-08-27 11:32  tymczak
+
+	* QCTC/TreeWalk.F90: Cange to -> IF(Q%Zeta==NuclearExpnt .AND.
+	PQ2<VTol) RETURN
+
+2001-08-27 11:31  tymczak
+
+	* QCTC/PoleTree.F90: Work in Progress: Did a better DMax2
+	estinmater
+
+2001-08-27 11:30  tymczak
+
+	* QCTC/PBCFarField.F90: Removed the PrintFields Subroutine
+
+2001-08-27 11:29  tymczak
+
+	* QCTC/NukE.F90: [no log message]
+
+2001-08-27 11:28  tymczak
+
+	* QCTC/MondoPoles.F90: Added a PrintFields Subroutine
+
+2001-08-27 11:27  tymczak
+
+	* QCTC/BlokTrPdJ.F90: Neatened it up abit. Also for the loop
+	L=0,EllA+EllB changed to L=0,EllA+EllB+1
+
+2001-08-27 11:26  tymczak
+
+	* MondoSCF/MondoSCF.F90: removed the force calls that matt put in
+	for testing
+
+2001-08-27 11:25  tymczak
+
+	* MondoSCF/DrvFrcs.F90: Modified Force_Num_1
+
+2001-08-27 11:23  tymczak
+
+	* MondoMods/Thresholding.F90: Commented out function taged onto the
+	end
+
+2001-08-27 11:22  tymczak
+
+	* MondoMods/PrettyPrint.F90: Put a logical around the periodic
+	output so it wold not be printed if periodics are off
+
+2001-08-27 11:21  tymczak
+
+	* MondoMods/Parse.F90: Included the logical function FindKey()
+	Fixed LinrToGeom()
+
+2001-08-27 11:20  tymczak
+
+	* MondoMods/PBC.F90: Fixed the Conversion between Frac and Atom
+
+2001-08-27 11:19  tymczak
+
+	* MondoMods/AtomPairs.F90: Fixed The Periodics in Atom Pairs:
+	
+	  SetAtomPair() Better overlap logic
+	  AtomToFrac()
+	  FracToAtom()
+
+2001-08-27 11:15  tymczak
+
+	* HiCu/XCForce.F90: [no log message]
+
+2001-08-27 09:53  mchalla
+
+	* Inpts/WATER/sub_pbs: [no log message]
+
+2001-08-26 12:25  mchalla
+
+	* Inpts/PROTEINS/: sub_pbs, submit_pbs_proteins, XYZ/ChyInh2.xyz:
+	[no log message]
+
+2001-08-26 12:21  mchalla
+
+	* Inpts/PROTEINS/: sub_pbs, submit_pbs_proteins: [no log message]
+
+2001-08-26 10:27  mchalla
+
+	* OneE/: MakeRho.F90, RhoTools.F90: Added check for correct density
+	(ie die if densities are not approximately charge nutral. 
+	Currently dies for Conotoxin.  This appears to be a fundamental bug
+	in MakeRho (not a pruning error).
+
+2001-08-26 08:26  mchalla
+
+	* Inpts/PROTEINS/: XYZ/Conotoxin.xyz, XYZ/CytB562.xyz,
+	XYZ/FibroblastGF.xyz, XYZ/HIVProtease.xyz, XYZ/Interleukin.xyz,
+	XYZ/Lysozyme.xyz, XYZ/TyrPhos.xyz, XYZ/ChyInh2.xyz.gz,
+	XYZ/Conotoxin.xyz.gz, XYZ/CytB562.xyz.gz, XYZ/FibroblastGF.xyz.gz,
+	XYZ/HIVProtease.xyz.gz, XYZ/Interleukin.xyz.gz,
+	XYZ/Lysozyme.xyz.gz, XYZ/TyrPhos.xyz.gz, template_inp: [no log
+	message]
+
+2001-08-26 08:23  mchalla
+
+	* Inpts/PROTEINS/: end, template, Makefile, end_inp, template_inp,
+	submit_pbs_proteins, mkinpts: [no log message]
+
+2001-08-26 08:09  mchalla
+
+	* Inpts/PROTEINS/sub_pbs: [no log message]
+
+2001-08-20 05:48  mchalla
+
+	* Makefile: Added remove legacy.  Makes much smaller backup file
+	now.
+
+2001-08-20 05:30  mchalla
+
+	* PHiPAC/runs/TBird/PHiPAC_dgemm/src/: mm_double_NN_1.c,
+	mm_double_NN_c.c, mm_double_NT_1.c, mm_double_NT_c.c,
+	mm_double_TN_1.c, mm_double_TN_c.c, mm_double_TT_1.c,
+	mm_double_TT_c.c: New TBird optimized DGEMMS.  Optimized for 3x3x3,
+	3x9x3, ... 15x15x15.
+
+2001-08-20 05:25  mchalla
+
+	* Makefile: ONX support has been turned back on.
+
+2001-08-20 05:24  mchalla
+
+	* Includes/CompilerSpecifics.IntelLinux.PG: Added commented out
+	option for static linking
+
+2001-08-20 05:22  mchalla
+
+	* Inpts/Validate/Urea.inp: Added lots of benchmark data.
+
+2001-08-20 05:21  mchalla
+
+	* HiCu/: ExplicitLeafPopulation.Inc, XCForce.F90: Fixed copy in
+	copy out problem with blocked force subroutine.  Added
+	checksumming.  Cleaned PBC code.
+
+2001-08-20 05:18  mchalla
+
+	* MondoMods/PrettyPrint.F90: Added checkpoint routine for DBL_VECT.
+	 Turned on sqrt in checksums.
+
+2001-08-20 05:17  mchalla
+
+	* MondoMods/DerivedTypes.F90: Corrected END TYPE name for Eric's
+	new type.
+
+2001-08-20 05:15  mchalla
+
+	* OneE/: MakeT.F90, RhoTools.F90, SForce.F90, TForce.F90: Added
+	checksumming to force routines.  Also removed copy in copy out from
+	block trace routines.  Removed some printing.
+
+2001-08-20 05:13  mchalla
+
+	* MondoSCF/: ChkSCFs.F90, DrvFrcs.F90, MondoSCF.F90, Overlay.F90:
+	Turned off annoying print statements.  Added calls to HasHF and
+	HasDFT to numerical gradients routines, allowing derivatives of
+	HF/DFT.  Added force calls to MondoSCF. Note, at present, calls to
+	numerical forces before analytic forces will hose the analytics.
+
+2001-08-20 05:00  mchalla
+
+	* ONX/: Makefile, MakeTables/Convert.F, MakeTables/ConvertE.F,
+	MakeTables/ConvertG0.F, MakeTables/ConvertG1.F,
+	MakeTables/ConvertG10.F, MakeTables/ConvertG11.F,
+	MakeTables/ConvertG12.F, MakeTables/ConvertG2.F,
+	MakeTables/ConvertG3.F, MakeTables/ConvertG4.F,
+	MakeTables/ConvertG5.F, MakeTables/ConvertG6.F,
+	MakeTables/ConvertG7.F, MakeTables/ConvertG8.F,
+	MakeTables/ConvertG9.F, NONX/DigestGradient.F90, NONX/DisOrder.F90,
+	NONX/DisOrderGrad.F90, NONX/GetGradient.F90, NONX/GradONX.F90,
+	NONX/HRRBraGrad.F, NONX/ONX.F90, NONX/RGen.F90, NONX/RGen1C.F90,
+	NONX/VRRs.F90: Added checksumming and IO to GradONX, modified code
+	to compile under NAG with implicit none enforced.  This included
+	DFLOAT->DBLE, moving array bounds declerations above the arrays,
+	and changing INTENT(IN) to INTENT(INOUT) in cases where the
+	variable occured on the left hand side of an equals sign.
+
+2001-08-20 04:57  mchalla
+
+	* ONX/GDrivers/: GCMaker.C, GCMaker.c: Changed .c to .C to avoid
+	being purged.
+
+2001-08-20 04:54  mchalla
+
+	* QCTC/: BlokTrPdJ.F90, JForce.F90, MondoPoles.F90, PoleTree.F90,
+	QCTC.F90, TreeWalk.F90: Fixed numerous errors in force routines.
+	These include passing arrays with (Q:) rather than (Q:Q+MN1), the
+	fact that localthresholds was never set in jforce.  Added check
+	summing in force routines, removed misselaneous, annonying print
+	statements.
+
+2001-08-20 04:49  mchalla
+
+	* SCFeqs/SCFStatus.F90: removed call to get of model chem.  Already
+	done in macros.
+
+2001-08-18 09:12  mchalla
+
+	* Inpts/Validate/Urea.inp: Added force numbers for sto-3g
+
+2001-08-18 09:07  mchalla
+
+	* MondoSCF/DrvFrcs.F90: changed formating for force logging.
+
+2001-08-18 09:06  mchalla
+
+	* HiCu/: KxcGen.F90, XCForce.F90, dXCBlok.F90: Fixed problems with
+	call to extent, where the wrong ell was being passed.
+
+2001-08-18 09:04  mchalla
+
+	* QCTC/TreeWalk.F90: New subroutine setket for setting up
+	accumulators and BBoxs prior to doing the tree walking.  Useing
+	CJ's selfinteraction criteria now also.
+
+2001-08-18 09:01  mchalla
+
+	* QCTC/: BlokTrPdJ.F90, JForce.F90, JGen.F90, NukE.F90: Major
+	rehack of force routines.  Gives the right answer now.	Basic
+	problem involved mismatching ells in calls to extent, resulting in
+	derivatives with zero extent.
+
+2001-08-18 08:53  mchalla
+
+	* MondoMods/: BraBloks.F90, SMTest.F90: [no log message]
+
+2001-08-18 08:48  mchalla
+
+	* Inpts/WATER/: sub_pbs, submit_pbs_waters: [no log message]
+
+2001-08-17 18:39  schwegle
+
+	* ONX/Makefile: Added the MakeTables dir
+
+2001-08-17 18:38  schwegle
+
+	* ONX/MakeTables/: ADump.C, EDump.C, GCMaker.C, GDump.C,
+	GetGammaTable.C, HDump.C, MAIN.C: Trying to convert c to C?
+
+2001-08-17 18:37  schwegle
+
+	* ONX/MakeTables/: ADump.c, EDump.c, GCMaker.c, GDump.c,
+	GetGammaTable.c, HDump.c, MAIN.c: Trying to change c to C?
+
+2001-08-17 18:36  schwegle
+
+	* ONX/MakeTables/: GCMaker.c, MakeGD.F, Makefile: New maketable
+	code
+
+2001-08-17 18:17  schwegle
+
+	* ONX/Makefile: Addede
+
+2001-08-17 18:13  schwegle
+
+	* ONX/GDrivers/: G1.101x101.ascii, G1.101x201.ascii,
+	G1.101x202.ascii, G1.201x101.ascii, G1.201x201.ascii,
+	G1.201x202.ascii, G1.202x101.ascii, G1.202x201.ascii,
+	G1.202x202.ascii, G2.101x101.ascii, G2.101x201.ascii,
+	G2.101x202.ascii, G2.201x101.ascii, G2.201x201.ascii,
+	G2.201x202.ascii, G2.202x101.ascii, G2.202x201.ascii,
+	G2.202x202.ascii, G3.101x101.ascii, G3.101x201.ascii,
+	G3.101x202.ascii, G3.201x101.ascii, G3.201x201.ascii,
+	G3.201x202.ascii, G3.202x101.ascii, G3.202x201.ascii,
+	G3.202x202.ascii, G4.101x101.ascii, G4.101x201.ascii,
+	G4.101x202.ascii, G4.201x101.ascii, G4.201x201.ascii,
+	G4.201x202.ascii, G4.202x101.ascii, G4.202x201.ascii,
+	G4.202x202.ascii, G5.101x101.ascii, G5.101x201.ascii,
+	G5.101x202.ascii, G5.201x101.ascii, G5.201x201.ascii,
+	G5.201x202.ascii, G5.202x101.ascii, G5.202x201.ascii,
+	G5.202x202.ascii, GCMaker.c, MAIN.c, MakeGD.F, Makefile: These are
+	the integral driver files for doing an onx gradient calculation. 
+	Includes indexing to do gradients of s and p type integrals.
+
+2001-08-17 18:10  schwegle
+
+	* MondoMods/MemMan.F90: Added several subroutines for onx. ERS
+
+2001-08-17 18:10  schwegle
+
+	* MondoMods/DerivedTypes.F90: Added several entries for onx. ERS
+
+2001-08-17 18:08  schwegle
+
+	* ONX/NONX/: ComputeK.F90, ComputeXForce.F90, ContractG.F90,
+	DigestGradient.F90, DisOrder.F90, DisOrderGrad.F90, GDLoader.C,
+	GDrivers.F90, GetGradient.F90, GradONX.F90, HRRBraGrad.F,
+	HRRKetGrad.F, InitExchangeMatrix.F90, InitSubInd.F90, LSearch.F,
+	Makefile, MemInit.F90, ONX.F90, ONXParameters.F90, RGen.F90,
+	vrrl.F: First version with the gradient code. Warning, there are
+	many bugs in the gradient code. This is still very much a work in
+	progress. At least it should compile...
+
+2001-08-15 18:48  mchalla
+
+	* Inpts/WATER/: sub_pbs, submit_pbs_waters, template_inp: More
+	relanvent now..
+
+2001-08-15 18:29  mchalla
+
+	* Inpts/: WATER/Makefile, Validate/Makefile: Now with purge
+
+2001-08-15 18:27  mchalla
+
+	* Includes/CompilerSpecifics.AMDLinux.PG: Added option for static
+	linking.
+
+2001-08-15 15:10  mchalla
+
+	* HiCu/HiCu.F90: Got rid of annoying binary under pgf90
+
+2001-08-14 15:07  mchalla
+
+	* Includes/CompilerSpecifics.AMDLinux.PG: Fixed CPP
+
+2001-08-14 15:04  mchalla
+
+	* Includes/CompilerSpecifics.SGIIrix.MIPS: Enhanced debuging
+	options.
+
+2001-08-14 15:02  mchalla
+
+	* XForm/BlokAInv.F90: Some small changes.
+
+2001-08-14 15:01  mchalla
+
+	* MondoSCF/SCFLocals.F90: Tuned thresholds some more.
+
+2001-08-14 15:01  mchalla
+
+	* SCFeqs/SDMM.F90: Tunned exit criteria some more.
+
+2001-08-14 14:56  mchalla
+
+	* MondoMods/LinAlg.F90: Added routine for plotting matrix decay
+	with seperation.
+
+2001-08-14 14:52  mchalla
+
+	* MondoMods/MatFunk.F90: Now with optional variable to project out
+	zero eigenvalues.
+
+2001-08-14 14:51  mchalla
+
+	* MondoMods/SetEq.F90: Fixed array limits in call to DiagI
+
+2001-08-13 10:44  mchalla
+
+	* MondoMods/BraBloks.F90: Changed dHGBra%D=Zero and HGBra%D=zero to
+	explicit fortran 77 seteq calls because this was a huge bottleneck
+	on several compliers.  Silly F90 compiler writers...
+
+2001-08-13 09:20  mchalla
+
+	* Inpts/WATER/XYZ/: h2o_10.xyz, h2o_110.xyz, h2o_130.xyz,
+	h2o_150.xyz, h2o_200.xyz, h2o_250.xyz, h2o_30.xyz, h2o_50.xyz,
+	h2o_70.xyz, h2o_90.xyz, h2o_300.xyz, h2o_350.xyz: [no log message]
+
+2001-08-13 09:00  mchalla
+
+	* QCTC/PoleTree.F90: Removed DBLE from parameter statement.
+
+2001-08-13 08:55  mchalla
+
+	* MondoMods/LinAlg.F90: Fixed again copy in copy out.
+
+2001-08-10 17:04  mchalla
+
+	* SCFeqs/Makefile: Fixed delete of DIIS
+
+2001-08-10 17:04  mchalla
+
+	* XForm/Makefile: Fixed delete of LowdinO
+
+2001-08-10 16:54  mchalla
+
+	* Includes/CompilerSpecifics.AlphaLinux.COMPAQ: Downgraded periodic
+	option, upgraded debug, now use COMPAQ LAPACK and BLAS libs
+
+2001-08-10 16:51  mchalla
+
+	* SCFeqs/SDMM.F90: Downgraded use of BIG_DBL (segfaults alpha),
+	retuned purify exit tols.
+
+2001-08-10 16:49  mchalla
+
+	* XForm/BlokAInv.F90: Added level shifting.
+
+2001-08-10 16:48  mchalla
+
+	* MondoSCF/SCFLocals.F90: reset thresholds again...
+
+2001-08-10 16:47  mchalla
+
+	* MondoSCF/ParsingKeys.F90: Fixed problem with mis-dimentioned
+	string.
+
+2001-08-10 16:47  mchalla
+
+	* MondoMods/: LinAlg.F90, SetEq.F90: Fixed copy in copy out
+	slowdowns!
+
+2001-08-08 16:36  mchalla
+
+	* MondoSCF/ChkSCFs.F90: Fixed problem with uninitialized DMaxA..
+
+2001-08-02 12:53  mchalla
+
+	* SCFeqs/SDMM.F90: Now go NCG+1 cycles, and tuned exit criteria a
+	bit more.
+
+2001-08-02 12:52  mchalla
+
+	* QCTC/Thresholds.F90: Safe side thresholds.  QCTC is fast for now.
+
+2001-08-02 12:51  mchalla
+
+	* MondoSCF/: ChkSCFs.F90, SCFLocals.F90: Small modifications of
+	thresholds and convergence criteria.
+
+2001-08-02 10:43  mchalla
+
+	* MondoMods/PrettyPrint.F90: At last, think binaries are out of
+	ProcessName
+
+2001-08-02 10:15  mchalla
+
+	* MondoMods/PrettyPrint.F90: Fixed again binaries in strings
+	problem.
+
+2001-08-02 10:09  mchalla
+
+	* QCTC/PoleTree.F90: No appostrafes in comments...
+
+2001-08-02 09:57  mchalla
+
+	* MondoMods/PrettyPrint.F90: Fixed problems with binary in strings
+	under pgf compiler.
+
+2001-08-01 16:25  mchalla
+
+	* Inpts/HMX/XYZ/hmx_223.xyz.gz: hmx!
+
+2001-08-01 16:24  mchalla
+
+	* Inpts/HMX/XYZ/hmx_233.xyz.gz: should have been hmx_223
+
+2001-08-01 16:21  mchalla
+
+	* Inpts/HMX/: XYZ/hmx_111.xyz.gz, XYZ/hmx_112.xyz.gz,
+	XYZ/hmx_122.xyz.gz, XYZ/hmx_222.xyz.gz, XYZ/hmx_233.xyz.gz,
+	Makefile, end_inp, mkinpts, sub_pbs, submit_pbs_hmx, template_inp:
+	New directory with HMX coords.
+
+2001-08-01 10:47  mchalla
+
+	* MondoSCF/ParseInput.F90: Fixed reodering bug.  Needed to call
+	FindKind after GeometryReorder.
+
+2001-07-31 16:15  mchalla
+
+	* MondoSCF/ParseInput.F90: Somehow, the reorder hoses the
+	calculation.  Nees looking into.
+
+2001-07-31 13:45  mchalla
+
+	* Inpts/Validate/Chlorophyll.inp: end geometry
+
+2001-07-31 13:34  mchalla
+
+	* Makefile: small
+
+2001-07-31 13:30  mchalla
+
+	* HiCu/VRhoMD.F90: Made changes to work on AlphaLinux, pre-wrapping
+	strings because crappy compiler wraps for us...
+
+2001-07-31 13:29  mchalla
+
+	* QCTC/Thresholds.F90: Changed to be somewhat consistent with TwoE
+	thresholds in SCFLocals.
+
+2001-07-31 13:26  mchalla
+
+	* MondoSCF/ParseInput.F90: CJs periodic mods.
+
+2001-07-31 13:25  mchalla
+
+	* MondoMods/Thresholding.F90: CJs new thresholding code!
+
+2001-07-31 13:22  mchalla
+
+	* MondoMods/Parse.F90: Fixed linetogeom.
+
+2001-07-31 13:19  mchalla
+
+	* MondoMods/GlobalScalars.F90: Small, very small changes.  In fact
+	so small we don't know what the hell we did.
+
+2001-07-31 13:18  mchalla
+
+	* QCTC/: MondoPoles.F90, PoleTree.F90: removed SPellP and its
+	derivatives.  Use only SPEll+1 now...
+
+2001-07-31 13:11  mchalla
+
+	* MondoMods/BraBloks.F90: zero one or the other.
+
+2001-07-31 13:10  mchalla
+
+	* MondoMods/AtomPairs.F90: Fit a line on a line
+
+2001-07-31 13:09  mchalla
+
+	* Scripts/MondoSetUp: Added support for Alpha.Linux
+
+2001-07-31 13:07  mchalla
+
+	* QCTC/TreeWalk.F90: New MAC! Good CJ!
+
+2001-07-31 13:07  mchalla
+
+	* QCTC/Thresholds.F90: new thresholds for new MAC
+
+2001-07-31 13:05  mchalla
+
+	* QCTC/QCTC.F90: Call through PoleRoot, timings for MakeJ alone.
+
+2001-07-31 13:02  mchalla
+
+	* QCTC/: PBCFarField.F90, PFFTensor.F90: CJs changes.  God help us
+	all.
+
+2001-07-31 13:01  mchalla
+
+	* QCTC/NukE.F90: Added periodic stuff right
+
+2001-07-31 12:59  mchalla
+
+	* QCTC/JGen.F90: Misc improvements.  Protected DP2. Turned on
+	potential in the PAC.
+
+2001-07-31 12:56  mchalla
+
+	* QCTC/: MondoPoles.F90, PoleTree.F90: Hopefully fixed all the
+	issues with Ell!
+
+2001-07-31 12:31  mchalla
+
+	* QCTC/JForce.F90: Now calls through the pole root for PBC farfield
+
+2001-07-31 12:30  mchalla
+
+	* QCTC/BlokTrPdJ.F90: Fixed problems in estimation of PStrength in
+	force calculation
+
+2001-07-31 10:22  mchalla
+
+	* Inpts/WATER/template_inp: template now contains options for AInv
+
+2001-07-31 10:17  mchalla
+
+	* XForm/: BlokAInv.F90, Makefile: spatial thresholding option
+	implimented.  Must use ordering to take effect, and can control
+	threshold through input file.
+
+2001-07-31 10:16  mchalla
+
+	* SCFeqs/SDMM.F90: Cleaned up slightly
+
+2001-07-31 10:15  mchalla
+
+	* QuNew/BFGSMisc.F90: Removed liscense, fixed declarations.
+
+2001-07-31 10:14  mchalla
+
+	* QCTC/: CTraX.F, JForce.F90, XLate.F: fixed declarations
+
+2001-07-31 10:13  mchalla
+
+	* OneE/: SForce.F90, TForce.F90: declared ChkFrc vars
+
+2001-07-31 10:09  mchalla
+
+	* OneE/RhoTools.F90: Fixed declarations, interfaces
+
+2001-07-31 10:08  mchalla
+
+	* MondoSCF/ParseInput.F90: Turn reordering back on!
+
+2001-07-31 10:03  mchalla
+
+	* MondoMods/PrettyPrint.F90: String temporary used now
+
+2001-07-31 10:02  mchalla
+
+	* MondoMods/MatFunk.F90: Added options for printing condition
+	numbers
+
+2001-07-31 10:02  mchalla
+
+	* MondoMods/Makefile: changed removeall to removesrc
+
+2001-07-31 10:01  mchalla
+
+	* MondoMods/: BraBloks.F90, DCSEvl.F, DErf.F, DErfc.F, InitDS.F:
+	fixed declarations
+
+2001-07-31 09:52  mchalla
+
+	* Inpts/WATER/XYZ/: h2o_10.xyz.gz, h2o_110.xyz.gz, h2o_130.xyz.gz,
+	h2o_150.xyz.gz, h2o_200.xyz.gz, h2o_250.xyz.gz, h2o_30.xyz.gz,
+	h2o_300.xyz.gz, h2o_350.xyz.gz, h2o_50.xyz.gz, h2o_70.xyz.gz,
+	h2o_90.xyz.gz: Compressed xyz files
+
+2001-07-30 16:43  mchalla
+
+	* Includes/RemoveAll: now with .c
+
+2001-07-30 16:43  mchalla
+
+	* Includes/CompilerSpecifics.IntelLinux.PG: needs -traditional in
+	cpp line..
+
+2001-07-30 16:42  mchalla
+
+	* Includes/CompilerSpecifics.IntelLinux.NAG: more sophistication..
+
+2001-07-30 16:39  mchalla
+
+	* Includes/CompilerSpecifics.AMDLinux.PG: depricating -O2 to -O1
+
+2001-07-30 16:38  mchalla
+
+	* HiCu/VRhoMD.F90: Needed to declare I
+
+2001-07-30 16:38  mchalla
+
+	* HiCu/RhoTree.F90: Hopefully fixed deallocation routine for
+	RhoTree--changed deallocate to nullify (duh!).
+
+2001-07-30 16:37  mchalla
+
+	* HiCu/CubeTree.F90: Initialize BBox of cube root!
+
+2001-07-30 16:35  mchalla
+
+	* Makefile: enhanced makefile
+
+2001-07-24 15:02  mchalla
+
+	* Includes/CompilerSpecifics.AlphaLinux.COMPAQ: [no log message]
+
+2001-07-18 15:59  mchalla
+
+	* MondoMods/LinAlg.F90: New permutation/ordering routines
+
+2001-07-18 15:58  mchalla
+
+	* XForm/BlokAInv.F90: Now with linear scaling!	Needs work on
+	TestAtomPair...
+
+2001-07-18 15:57  mchalla
+
+	* Inpts/WATER/: h2o_90.inp, h2o_110.inp, h2o_130.inp, h2o_150.inp,
+	h2o_200.inp, h2o_250.inp, h2o_300.inp, h2o_350.inp: fresh
+
+2001-07-18 15:56  mchalla
+
+	* Inpts/WATER/: h2o_10.inp, h2o_30.inp, h2o_50.inp, h2o_70.inp:
+	Make fresh
+
+2001-07-18 15:54  mchalla
+
+	* Inpts/WATER/: Makefile, run_waters, template_inp: Waters makefile
+	etc run more smoothly.
+
+2001-07-18 15:52  mchalla
+
+	* MondoMods/: Parse.F90, PrettyPrint.F90: Fixed bugs on SGIs.
+
+2001-07-10 12:30  mchalla
+
+	* Includes/CompilerSpecifics.AMDLinux.PG: Turned on athlon flags,
+	01->02.
+
+2001-06-29 15:27  mchalla
+
+	* ONX/Makefile: Removed extra old directories.
+
+2001-06-29 15:25  mchalla
+
+	* MondoMods/Makefile: fixed.
+
+2001-06-29 15:19  mchalla
+
+	* XForm/Makefile: fixed.
+
+2001-06-29 15:17  mchalla
+
+	* Includes/Suffixes: Added rules for little suffixes so make
+	release may be resumed.
+
+2001-06-29 15:04  mchalla
+
+	* XForm/Makefile: rm old
+
+2001-06-29 15:03  mchalla
+
+	* OneE/Makefile: r1
+
+2001-06-29 15:00  mchalla
+
+	* Makefile: r2
+
+2001-06-29 14:57  mchalla
+
+	* Makefile: New Makefile!
+
+2001-06-29 14:24  mchalla
+
+	* QuNew/Hessian.F90: Nolongerused
+
+2001-06-29 14:23  mchalla
+
+	* QuNew/Makefile: Now supporting make release
+
+2001-06-29 14:21  mchalla
+
+	* QuNew/: BFGS.nb, Grad.F90, MDTest.nb, MDTest2.nb, QuGrad.F90,
+	QuGrad2.F90, QuGrad3.F90, grad2.m, mdtest: These files have gone to
+	live in OLD/
+
+2001-06-29 14:20  mchalla
+
+	* QuNew/OLD/: BFGS.nb, Grad.F90, MDTest.nb, MDTest2.nb, QuGrad.F90,
+	QuGrad2.F90, QuGrad3.F90, grad2.m, mdtest: Old debug type files
+	from the development of QuNew
+
+2001-06-29 14:05  mchalla
+
+	* ONX/Makefile: Now targeting only NONX.  Deletes old ONX
+	directories when making a release.
+
+2001-06-29 14:03  mchalla
+
+	* ONX/NONX/Makefile: fixed.
+
+2001-06-29 14:02  mchalla
+
+	* ONX/NONX/Makefile: Makefile now supports make release capability.
+
+2001-06-29 13:55  mchalla
+
+	* ONX/NONX/Makefile: Makefile that supprots make release.
+
+2001-06-29 13:51  mchalla
+
+	* ONX/NONX/: CCDriver.C, Tables.C, VRRDriver.C: Now in big C flavor
+
+2001-06-29 13:51  mchalla
+
+	* ONX/NONX/: CCDriver.c, Tables.c, VRRDriver.c: Switched to big C.
+
+2001-06-29 13:49  mchalla
+
+	* XForm/: BlokAInv.F90, LowdinO.F90, Makefile: Updated to enable
+	make release, modified headers.
+
+2001-06-29 13:28  mchalla
+
+	* SCFeqs/: DIIS.F90, FBuild.F90, Makefile, P2Use.F90, RHeqs.F90,
+	SCFStatus.F90, SDMM.F90, ToDev.F90: Enabled new make release
+	capability, fixed some headers.
+
+2001-06-29 13:14  mchalla
+
+	* QCTC/: BlokTrPdJ.F90, CTraX.F, JForce.F90, JGen.F90, Makefile,
+	MondoPoles.F90, NukE.F90, PoleTree.F90, QCTC.F90, Thresholds.F90,
+	TreeWalk.F90, XLate.F: Enabled new make release capabilities, fixed
+	some headers.
+
+2001-06-29 09:47  mchalla
+
+	* HiCu/: ExplicitBraElements.Inc, ExplicitLeafContribution.Inc,
+	ExplicitLeafPopulation.Inc, HiCu.F90, KxcGen.F90, Makefile,
+	RhoTree.F90, Thresholds.F90, XCForce.F90, dXCBlok.F90: Fixed
+	headers and makefile for new release capability.  explicit inc
+	files now include analytic capabilities for integrals of gradients
+	over nodes.
+
+2001-06-29 09:40  mchalla
+
+	* HiCu/: GradXC.F90, GradXCBlok.F90: Removed MS's crap code.
+
+2001-06-29 09:26  mchalla
+
+	* OneE/: BlokTrPdT.F90, BlokTrWdS.F90, MakeRho.F90, MakeS.F90,
+	MakeT.F90, Makefile, SForce.F90, TForce.F90: Updated makefile and
+	headers to comply with new release capabilities.
+
+2001-06-29 08:49  mchalla
+
+	* MondoSCF/: DrvFrcs.F90, GetPID.C, MondoSCF.F90, ParseInput.F90,
+	ParsingKeys.F90, Spawn.C: Fixed headers a bit
+
+2001-06-29 08:33  mchalla
+
+	* MondoSCF/Makefile: Updated for release!
+
+2001-06-29 08:24  mchalla
+
+	* PHiPAC/runs/: P3/PHiPAC_dgemm/src/Makefile,
+	TBird/PHiPAC_dgemm/src/Makefile: Changed removeall to omit source.
+
+2001-06-28 16:57  mchalla
+
+	* MondoSCF/: GetPID.c, Spawn.c: Switched to the big C
+
+2001-06-28 16:57  mchalla
+
+	* MondoSCF/: GetPID.C, Spawn.C: Moved to th big C
+
+2001-06-28 16:55  mchalla
+
+	* MondoMods/SpecFun77.F: Obsolete
+
+2001-06-28 16:22  mchalla
+
+	* MondoMods/FTest.F90: Pruned header
+
+2001-06-28 16:22  mchalla
+
+	* MondoMods/: DerivedTypes.F90, Functionals.F90,
+	GlobalCharacters.F90, Seconds.C: Pruned header info, removed some
+	liscences stuff.
+
+2001-06-28 16:21  mchalla
+
+	* MondoMods/: MPIInclude.F90, Macros.F90, McMurch.F90,
+	MondoMPI.F90, Order.F90, PBC.F90, Parse.F90, ParsingConstants.F90,
+	PrettyPrint.F90, ProcessControl.F90, SMTest.F90, SMWrap.C,
+	SpecFun.F90, Thresholding.F90, Trap.C, GlobalObjects.F90,
+	GlobalScalars.F90, HDF5Wrap.C, InOut.F90, Indexing.F90, LinAlg.F90:
+	Pruned header comments, removed partial liscence banners.
+
+2001-06-28 15:26  mchalla
+
+	* MondoSCF/DrvFrcs.F90: Added periodic protection of atomcyclic.
+
+2001-06-28 15:18  mchalla
+
+	* Includes/Suffixes: Fixed again.
+
+2001-06-28 15:09  mchalla
+
+	* Includes/Suffixes: Fixed
+
+2001-06-28 14:45  mchalla
+
+	* Includes/: CopyrightBanner.C, CopyrightBanner.F,
+	CopyrightBanner.F90: Copyright banners to include in released
+	source.
+
+2001-06-28 14:45  mchalla
+
+	* Includes/Suffixes: Modified to support the release of *.f90 *.c
+	and *.f files with copyright banner prepended to files.
+
+2001-06-28 14:43  tymczak
+
+	* Includes/CompilerSpecifics.IntelLinux.PG: [no log message]
+
+2001-06-28 14:42  mchalla
+
+	* MondoMods/Makefile: Now correctly makes release
+
+2001-06-28 14:36  mchalla
+
+	* MondoMods/Makefile: Dont removeall
+
+2001-06-28 14:25  mchalla
+
+	* MondoMods/Makefile: Updated all files to be in a release.
+
+2001-06-28 13:53  tymczak
+
+	* MondoSCF/ParseInput.F90: 1) Added ForceAction:
+	
+	     a) Force
+	     b) MolecularDynamics
+	     c) GeometryOptimization
+	2) If the Option is MD, then it readis in the Number of Steps, the
+	TimeStep and the    velocity scaling. It Assume that the Initial
+	Geometry is provided, then it creates	 "Number of Step" GM's and
+	stores them to disk
+	
+	3) In the Reordering, velocites and AtMss are also reordered
+
+2001-06-28 13:46  tymczak
+
+	* SCFeqs/SCFStatus.F90: Put E_total to Disk
+
+2001-06-28 13:44  tymczak
+
+	* MondoSCF/SCFLocals.F90: Added a array MDControls for storing the
+	timestep and the velocity scaling
+
+2001-06-28 13:41  tymczak
+
+	* MondoSCF/ParsingKeys.F90: Added Keys for Molecular Dynamics
+	Control
+
+2001-06-28 13:30  tymczak
+
+	* MondoSCF/MondoSCF.F90: 1) Redid the Key-Words (MolecularDynamics)
+	2) Reset the Begin() array at the end of the loops
+
+2001-06-28 13:27  tymczak
+
+	* MondoSCF/Makefile: Added the Depenancies for DrvFrcs.o
+
+2001-06-28 13:25  tymczak
+
+	* MondoSCF/DrvSCFs.F90: Added two write's
+
+2001-06-28 13:25  mchalla
+
+	* MondoMods/Makefile: Adding make release capabilities.
+
+2001-06-28 13:25  tymczak
+
+	* MondoSCF/DrvFrcs.F90: 1) Added an MD driver: Uses the Velet
+	Algorithmn: Stores all the Geometries	 In GM Includes
+	
+	   a) Initial Velocities
+	   b) Number of TimeSteps
+	   c) TimeStep
+	   d) Velocity Scaling
+
+2001-06-28 13:25  mchalla
+
+	* MondoMods/: HDF5Wrap.c, Random.c, SMWrap.c, Seconds.c, Trap.c:
+	Changed from little c to big C
+
+2001-06-28 13:23  mchalla
+
+	* MondoMods/Trap.C: Going to big C
+
+2001-06-28 13:23  mchalla
+
+	* MondoMods/Seconds.C: going to big C
+
+2001-06-28 13:22  mchalla
+
+	* MondoMods/SMWrap.C: big c
+
+2001-06-28 13:22  mchalla
+
+	* MondoMods/Random.C: Going to th big C
+
+2001-06-28 13:21  mchalla
+
+	* MondoMods/HDF5Wrap.C: Changing to uppercase suffix to deal with
+	preprossesing and make release.
+
+2001-06-28 13:20  tymczak
+
+	* MondoMods/Parse.F90: Changed the subroutine "LineToGeom" It can
+	now read in both the carts and the velocies
+
+2001-06-28 13:17  tymczak
+
+	* MondoMods/MemMan.F90: Added Memory managment for AtMss Vect and
+	BoxVect
+
+2001-06-28 13:15  tymczak
+
+	* MondoMods/InOut.F90: File managment for AtMss and Vects and
+	BoxVects added
+
+2001-06-28 13:13  tymczak
+
+	* MondoMods/DerivedTypes.F90: Added
+	
+	1) AtMss to each atom 2) Velecity to each atom
+
+2001-06-28 13:11  tymczak
+
+	* MondoMods/BasisSetParameters.F90: Added the Atomic Masses of the
+	Atomic Species
+
+2001-06-28 13:08  tymczak
+
+	* Includes/CompilerSpecifics.IntelLinux.PG: Added the PERIODIC Flag
+	(Commented out)
+
+2001-06-28 11:01  mchalla
+
+	* Inpts/Validate/: BetaCarotene.inp, Biotin.inp, Chlorophyll.inp:
+	Input files for validation.
+
+2001-06-28 10:54  mchalla
+
+	* HiCu/CubeTree.F90, HiCu/Thresholds.F90, MondoSCF/SCFLocals.F90,
+	QCTC/Thresholds.F90: Retuned thresholds and SCF locals.
+
+2001-06-22 10:29  mchalla
+
+	* MondoMods/LinAlg.F90: Op now set to zero in Dot_generic
+
+2001-06-22 10:28  mchalla
+
+	* OneE/RhoTools.F90: Fixed copy in copy out problem with MagDist
+	API
+
+2001-06-22 10:27  mchalla
+
+	* QCTC/: BlokTrPdJ.F90, JForce.F90, JGen.F90, PoleTree.F90:
+	Allocates only min ell for leaf nodes, fixed a number of unset 
+	variables.
+
+2001-06-21 13:54  mchalla
+
+	* HiCu/dXCBlok.F90: got rid of pnorm
+
+2001-06-21 13:33  mchalla
+
+	* QCTC/BlokTrPdJ.F90: Added extra declerations.
+
+2001-06-21 11:00  mchalla
+
+	* MondoMods/SpecFun.F90: Added USE ErrFunk to Gamma module.
+
+2001-06-21 11:00  mchalla
+
+	* MondoSCF/Makefile: Moved make of ChkSCFs up...
+
+2001-06-20 15:23  mchalla
+
+	* QCTC/: PBCFarField.F90, PFFTensor.F90: Moved ifdefs further
+	towards the top.
+
+2001-06-20 15:22  mchalla
+
+	* QCTC/QCTC.F90: Added ifdef PERIODIC...
+
+2001-06-20 15:21  mchalla
+
+	* QCTC/Thresholds.F90: Retuned.  Still needs work...
+
+2001-06-20 15:21  mchalla
+
+	* QCTC/Makefile: Moved position of PFFTensor
+
+2001-06-20 15:20  mchalla
+
+	* QCTC/: JForce.F90, JGen.F90, NukE.F90, PoleTree.F90: Added new
+	code for PAC boxing and extent definition.
+
+2001-06-20 15:19  mchalla
+
+	* QCTC/BlokTrPdJ.F90: Added new code for PAC boxing and extent.
+
+2001-06-20 15:17  mchalla
+
+	* OneE/MakeRho.F90: Turned on Prune_rho so that we now used the
+	pruned density.
+
+2001-06-20 15:16  mchalla
+
+	* MondoSCF/SCFLocals.F90: Changed dimensioning in CVect
+
+2001-06-20 15:15  mchalla
+
+	* MondoMods/Thresholding.F90: CJ added new Extent subroutine which
+	uses nodeless envelope functions of the HGTFs, which avoids
+	spurious zeros.
+
+2001-06-20 15:13  mchalla
+
+	* MondoMods/SpecFun.F90: CJ added extra gamma functions for HGTF
+	envelope functions in Thresholds.F90
+
+2001-06-20 15:12  mchalla
+
+	* MondoMods/MemMan.F90: Initialized Crds%ETot
+
+2001-06-20 15:11  mchalla
+
+	* HiCu/: KxcGen.F90, RhoTree.F90, Thresholds.F90, dXCBlok.F90:
+	Changed to work with new extent
+
+2001-06-13 15:57  mchalla
+
+	* QCTC/TreeWalk.F90: New MAC and PAC!
+
+2001-06-13 15:56  mchalla
+
+	* QCTC/: JGen.F90, PoleTree.F90, QCTC.F90: New boxing scheme
+	related to new PAC and MAC.
+
+2001-06-13 15:55  mchalla
+
+	* QCTC/Thresholds.F90: Thresholds for controling MAC and PAC
+	errors, controled by Thresholds%TwoE
+
+2001-06-13 15:44  mchalla
+
+	* QCTC/NukE.F90: Updated to include PBCs with new boxing scheme.
+
+2001-06-13 15:20  mchalla
+
+	* QCTC/MondoPoles.F90: Added FudgeFactorial.  Reworked (slightly)
+	Xlate and CTrax APIs.
+
+2001-06-13 15:18  mchalla
+
+	* QCTC/Makefile: [no log message]
+
+2001-06-13 15:17  mchalla
+
+	* QCTC/JGen.F90: Reconciled differences WRT new boxing scheme.
+
+2001-06-13 14:16  mchalla
+
+	* MondoSCF/SCFLocals.F90: Changed thresholds yet again.
+
+2001-06-13 14:14  mchalla
+
+	* MondoSCF/ChkSCFs.F90: temporary kluge to fix open ascii file
+	problem associated with geometry printing.  Needs major overhaul.
+
+2001-06-13 13:47  mchalla
+
+	* MondoMods/Thresholding.F90: Added subroutine Extent, which
+	determines the extent of a primitive distribution based on its
+	overlap or potential.
+
+2001-06-13 13:46  mchalla
+
+	* MondoMods/McMurch.F90: Added ErrInts.  Probably a temporary
+	subroutine.
+
+2001-06-13 13:38  mchalla
+
+	* Inpts/Validate/: Caffiene.inp, Makefile, SiliconTetraFluride.inp,
+	Urea.inp, core: Directory containing input and reference files for
+	code validation.
+
+2001-06-13 13:33  mchalla
+
+	* HiCu/Thresholds.F90: Tuning parameters that control integration
+	and density errors from Thresholds%Cube are now in Thresholds.F90
+	so that both HiCu and XCForce may access them without duplication.
+
+2001-06-13 13:32  mchalla
+
+	* HiCu/: CubeTree.F90, GeneralLeafContribution.Inc,
+	GeneralLeafPopulation.Inc, Grid.F90, HiCu.F90, KxcGen.F90,
+	Makefile, RhoTree.F90, VRhoMD.F90, XCForce.F90, dXCBlok.F90: Now
+	includes integration of the gradient as a metric for continued
+	downward recursion.   Now uses extent only (see Thresholds.F90)
+	instead of Zeta and Amp to determine each leaf nodes BBox.  Also,
+	uses upward, recursive merges of child BBoxes to generate pararent
+	BBoxes.  Tuning parameters that control integration and density
+	errors from Thresholds%Cube have been moved into Thresholds.F90.
+
+2001-05-29 11:25  tymczak
+
+	* SCFeqs/SCFStatus.F90: Save the Kinectic and ExchE energies
+
+2001-05-29 11:18  tymczak
+
+	* QCTC/PFFTensor.F90: Modulal for calculating PFF Tensor
+
+2001-05-29 11:13  tymczak
+
+	* QCTC/TreeWalk.F90: Fixed a bug
+
+2001-05-29 11:13  tymczak
+
+	* QCTC/QCTC.F90: Removed the calculation of the Quadripole
+	Correction
+
+2001-05-29 11:12  tymczak
+
+	* QCTC/PBCFarField.F90: Moved the calculation of the Multipole
+	Tensor into its own modulal Redid CTRaxFF
+
+2001-05-29 11:08  tymczak
+
+	* QCTC/NukE.F90: Reorganized and removed bugs
+
+2001-05-29 11:04  tymczak
+
+	* QCTC/Makefile: Added MakePFFT.o to the makefile
+
+2001-05-29 11:00  tymczak
+
+	* QCTC/JGen.F90: Redid the Loops, Change CTraXFF
+
+2001-05-29 10:55  tymczak
+
+	* QCTC/JForce.F90: Added Periodics
+
+2001-05-29 10:50  tymczak
+
+	* QCTC/BlokTrPdJ.F90: Added Periodics to JForce
+
+2001-05-29 10:46  tymczak
+
+	* OneE/: SForce.F90, TForce.F90: Added Periodics
+
+2001-05-29 10:42  tymczak
+
+	* OneE/RhoTools.F90: Debuged the Pruner
+
+2001-05-29 10:42  tymczak
+
+	* OneE/MakeRho.F90: Uncommented the Pruner
+
+2001-05-29 10:40  tymczak
+
+	* OneE/: BlokTrPdT.F90, BlokTrWdS.F90: [no log message]
+
+2001-05-29 10:37  tymczak
+
+	* MondoSCF/SCFLocals.F90: Added a Action for Force calculations
+
+2001-05-29 10:36  tymczak
+
+	* MondoSCF/ParsingKeys.F90: Added some options for the force
+	calculation
+
+2001-05-29 10:29  tymczak
+
+	* MondoSCF/MondoSCF.F90: Included the Geometry loop in the main
+	driver
+
+2001-05-29 10:25  tymczak
+
+	* MondoSCF/DrvSCFs.F90: Redit the Switches to include BasisSwitch
+	and GeometrySwitch
+
+2001-05-29 10:23  tymczak
+
+	* MondoSCF/DrvFrcs.F90: Added several subroutines 1) Force:
+	Calculates the Forces, then writes them out to		 a out file
+	2) Force_Num_1: Calculate the Numerical Forces: For testing
+	Purposes 3) Force_Num_2: Calculate the Numerical Forces: For
+	testing Purposes
+
+2001-05-29 10:20  tymczak
+
+	* MondoMods/PrettyPrint.F90: Uncommented some loops
+
+2001-05-29 10:19  tymczak
+
+	* MondoMods/GlobalScalars.F90: FFELL = 32 default
+
+2001-05-29 10:15  tymczak
+
+	* HiCu/XCForce.F90: Added the Periodics to the XCForce
+
+2001-05-29 10:14  tymczak
+
+	* HiCu/HiCu.F90: Coomented out the print
+
+2001-05-29 10:12  tymczak
+
+	* BasisSets/STO-2G.bas: [no log message]
+
+2001-05-29 10:12  tymczak
+
+	* Makefile: Added rm *.PFFT to the Scratch Purger
+
+2001-05-11 09:54  mchalla
+
+	* QCTC/Makefile: Changed to quit purging MMA stuff (Inc files).
+
+2001-04-24 14:32  mchalla
+
+	* HiCu/GeneralLeafPopulation.Inc: Fixed this piece of code!
+
+2001-04-20 11:12  tymczak
+
+	* OneE/: RhoTools.F90, MakeRho.F90: Protected Fold_Rho with
+	PERIODIC
+
+2001-04-20 10:33  mchalla
+
+	* Includes/CompilerSpecifics.AMDLinux.PG: Removed functions
+	include, depricated to -O1
+
+2001-04-19 15:57  tymczak
+
+	* QCTC/JForce.F90: FIxed some errors
+
+2001-04-19 15:56  tymczak
+
+	* OneE/: RhoBlok.F90, SForce.F90, TBlok.F90: [no log message]
+
+2001-04-19 15:55  tymczak
+
+	* OneE/MakeRho.F90, OneE/MakeT.F90, OneE/Makefile,
+	QCTC/PoleTree.F90: Fixed Errors
+
+2001-04-19 13:47  tymczak
+
+	* Includes/CompilerSpecifics.IntelLinux.PG: -DPERIODIC FLAG ADDED
+
+2001-04-19 13:42  tymczak
+
+	* OneE/Makefile: RhoToools.o added
+
+2001-04-19 13:39  tymczak
+
+	* OneE/RhoBlok.F90: Removed Integrate_Rho
+
+2001-04-19 13:35  tymczak
+
+	* OneE/MakeRho.F90: Include USE RhoTools
+
+2001-04-19 13:33  tymczak
+
+	* OneE/MakeS.F90: No Change
+
+2001-04-19 13:30  tymczak
+
+	* MondoMods/PrettyPrint.F90: ClosePU
+
+2001-04-19 13:27  tymczak
+
+	* MondoMods/MemMan.F90: Removed the allocation of Est from HGRho
+
+2001-04-19 13:26  tymczak
+
+	* MondoMods/DerivedTypes.F90: Removed Est from HGRho
+
+2001-04-19 13:20  tymczak
+
+	* HiCu/RhoTree.F90: Removed the Est read
+
+2001-04-19 13:14  tymczak
+
+	* HiCu/KxcGen.F90: [no log message]
+
+2001-04-19 13:02  tymczak
+
+	* QCTC/PBCFarField.F90: All the PBC stuff
+
+2001-04-19 13:01  tymczak
+
+	* QCTC/Makefile: Refined
+
+2001-04-19 12:56  tymczak
+
+	* QCTC/TreeWalk.F90: Added VTol, somewhat dubious variable explicit
+	source if defs...
+
+2001-04-19 12:47  tymczak
+
+	* QCTC/: PoleTree.F90, QCTC.F90: Redid the memory management
+	somewhat.
+
+2001-04-19 12:25  tymczak
+
+	* QCTC/MondoPoles.F90: Not sure exactly what happend here?!
+
+2001-04-19 12:12  tymczak
+
+	* MondoMods/GlobalScalars.F90: Added FFEll
+
+2001-04-19 12:07  tymczak
+
+	* QCTC/: GradJGen.F90, GradNukE.F90, GradQCTC.F90: Removed old
+	gradients routines.
+
+2001-04-19 12:02  tymczak
+
+	* QCTC/JGen.F90: Reconciled periodics with new MC update.
+
+2001-04-19 11:50  tymczak
+
+	* QCTC/Globals.F90: Resolved conflicts with Matt's version.
+
+2001-04-19 11:32  tymczak
+
+	* OneE/RhoTools.F90: A Modulae for Manipulating ans Pruning Rho
+
+2001-04-19 11:28  tymczak
+
+	* MondoMods/PBC.F90: Redid some periodic Stuff
+
+2001-04-19 11:27  tymczak
+
+	* MondoMods/InOut.F90: I remove Est from HGRho, removed this from
+	the input output
+
+2001-04-19 11:24  tymczak
+
+	* MondoMods/AtomPairs.F90: Redit the Periodic Box Wrapping
+
+2001-04-17 16:20  mchalla
+
+	* Includes/CopyrightNotice.txt: Removed anti-g98 clause.
+
+2001-04-17 16:19  mchalla
+
+	* MondoSCF/: MondoSCF.F90, ParseInput.F90: Call it 1.0, don't
+	default to optimization
+
+2001-04-17 16:07  mchalla
+
+	* QCTC/Makefile: removed Diff routine.
+
+2001-04-17 16:03  mchalla
+
+	* MondoMods/BraBloks.F90: sdfksdf
+
+2001-04-17 15:55  mchalla
+
+	* QCTC/MMA/HGTraX/: Gammas.m, HGContract.m, HGTraX.Inc, MD3TRR.m,
+	Makefile, OptThreeT.m, RecThreeT.m: Writes explicit HG RRs for fast
+	ERI generation by QCTC.
+
+2001-04-17 15:51  mchalla
+
+	* MondoMods/DErfc.F: SLATEC routine, nuff said
+
+2001-04-17 15:48  mchalla
+
+	* MondoMods/MMA/PAC/: Makefile, PACFunctions.m, PFunk.Inc:
+	Penetration functions for Coulomb type intergrals
+
+2001-04-17 15:32  mchalla
+
+	* MondoMods/MMA/LookUpTables/: BurnTables.m, Erf.Inc,
+	ErrorFunction.Inc, ErrorFunction.m, Exp.Inc, F0.Inc, F1.Inc,
+	F10.Inc, F11.Inc, F2.Inc, F3.Inc, F4.Inc, F5.Inc, F6.Inc, F7.Inc,
+	F8.Inc, F9.Inc, GammaDimensions.Inc, GammaFunctions.Inc,
+	GammaFunctions.m, GammaGrid.Inc, InvExponential.m, InverseExp.Inc,
+	Makefile, Rules.m: Lookuptables for special function interpolaiton
+
+2001-04-17 15:23  mchalla
+
+	* Scripts/nag_dbx: Updated this.
+
+2001-04-17 15:22  mchalla
+
+	* Scripts/MondoSetUp: Added alliasing for the cvs add
+
+2001-04-17 15:22  mchalla
+
+	* Scripts/add: Script for cvs addition/updating of files
+
+2001-04-17 15:20  mchalla
+
+	* SCFeqs/P2Use.F90: Changed the previous density to use in a guess.
+	 Could use much more work and verificaiton.
+
+2001-04-17 15:20  mchalla
+
+	* SCFeqs/SDMM.F90: Added better convergence criteria.
+
+2001-04-17 15:15  mchalla
+
+	* QCTC/: Globals.F90, JGen.F90, Makefile, MondoPoles.F90, NukE.F90,
+	PoleTree.F90, QCTC.F90, MMA/CTraX/CTraX.m, MMA/CTraX/Contract.m,
+	MMA/CTraX/Makefile, MMA/HGToSP/HGToSP.m: Made lots of changes,
+	mostly in OOing PrimPair and calls to BraBloks.
+
+2001-04-17 15:12  mchalla
+
+	* QCTC/MMA/MD3TRR/: Gammas.m, HGContract.m, HGTraX.Inc, MD3TRR.m,
+	OptThreeT.m, RecThreeT.m: Files generate explicit source in
+	HGTraX.Inc
+
+2001-04-17 15:11  mchalla
+
+	* QCTC/MMA/MD3TRR/Makefile: File generates explicit HG RRs
+
+2001-04-17 15:10  mchalla
+
+	* QCTC/MMA/HGToSP/HGToSP.Inc: *.Inc files where they belong
+
+2001-04-17 15:10  mchalla
+
+	* QCTC/MMA/CTraX/: CTraX.Inc, IrRegulars.Inc: Inc files where they
+	belong.
+
+2001-04-17 15:07  mchalla
+
+	* QCTC/TreeWalk.F90: TreeWalking routine.  Used in force and matrix
+	builds.
+
+2001-04-17 15:06  mchalla
+
+	* QCTC/JWalk.F90: Ooopsss
+
+2001-04-17 15:05  mchalla
+
+	* QCTC/JWalk.F90: Tree walking to accumulate J!
+
+2001-04-17 15:05  mchalla
+
+	* QCTC/BlokTrPdJ.F90: Blockwise trace of Coulomb force
+
+2001-04-17 15:04  mchalla
+
+	* QCTC/JForce.F90: Force routine for Coulomb term
+
+2001-04-17 15:03  mchalla
+
+	* QCTC/: CTraX.Inc, HGToSP.Inc, IrRegulars.Inc, PFunk.Inc: Moved
+	*.Inc files to MMA subdirectories
+
+2001-04-17 15:00  mchalla
+
+	* OneE/: MakeRho.F90, MakeS.F90, MakeT.F90, Makefile, RhoBlok.F90,
+	SBlok.F90, TBlok.F90: Use new primpair object, make call to
+	SetBraBlok instead of SetBraKetBlocks
+
+2001-04-17 14:59  mchalla
+
+	* OneE/BlokTrWdS.F90: Blockwise accumulate the overlap contribution
+	to the force.
+
+2001-04-17 14:57  mchalla
+
+	* OneE/TForce.F90: Outer loops for T part of force
+
+2001-04-17 14:55  mchalla
+
+	* OneE/BlokTrPdT.F90: Module for block trace of S force.
+
+2001-04-17 14:54  mchalla
+
+	* OneE/SForce.F90: Outer loops for S force generation
+
+2001-04-17 14:52  mchalla
+
+	* OneE/GradT.F90: later
+
+2001-04-17 14:52  mchalla
+
+	* OneE/: GradSBlok.F90, GradTBlok.F90: hasta
+
+2001-04-17 14:51  mchalla
+
+	* OneE/GradS.F90: Hasta la vista
+
+2001-04-17 14:47  mchalla
+
+	* MondoSCF/DrvFrcs.F90: Force/QuNew Driver
+
+2001-04-17 14:46  mchalla
+
+	* MondoSCF/SetSCFs.F90: Previous and Current are now arrays rather
+	than INT_VECTs.
+
+2001-04-17 14:45  mchalla
+
+	* MondoSCF/SCFLocals.F90: Added Ctrl related subroutines and
+	associated globals.
+
+2001-04-17 14:44  mchalla
+
+	* MondoSCF/ParseInput.F90: Got rid of ENukeNuke
+
+2001-04-17 14:43  mchalla
+
+	* MondoSCF/MondoSCF.F90: Added geometry optimization driver. 
+	Should encapsulate in serpate module.
+
+2001-04-17 14:42  mchalla
+
+	* MondoSCF/Makefile: Added DrfFrcs
+
+2001-04-17 14:40  mchalla
+
+	* MondoSCF/DrvSCFs.F90: Not sure what happended here!?
+
+2001-04-17 14:00  mchalla
+
+	* MondoSCF/ChkSCFs.F90: Added improved SCF convergence criteria and
+	a backtracking algorithm (partiall) for control of the quasi-newton
+	optimization.
+
+2001-04-17 13:57  mchalla
+
+	* QCTC/MMA/PAC/: PACFunctions.m, PFunk.Inc: Pennetration function
+	for computing PACs
+
+2001-04-17 12:35  mchalla
+
+	* MondoMods/BraKetBloks.F90: BraKetBlocks now replaced by BraBloks
+
+2001-04-17 12:34  mchalla
+
+	* MondoMods/: D1Mach.F, DCSEvl.F, DErf.F, DMach.F, InitDS.F: SLATEC
+	routines for computing ERF AND ERFC.  Used by SpecFun
+
+2001-04-17 12:33  mchalla
+
+	* MondoMods/FTest.F90: Testing routine for interpolation functions
+	parameterized in  lookuptables
+
+2001-04-17 12:31  mchalla
+
+	* MondoMods/Thresholding.F90: Added use of SpecFun, PFunk for
+	computation of pennetration acceptability.
+
+2001-04-17 12:30  mchalla
+
+	* MondoMods/SpecFun.F90: Added new quartic interpolation
+	lookuptables
+
+2001-04-17 12:11  mchalla
+
+	* MondoMods/SetEq.F90: Removed NBasF and other stuff that prohibits
+	different blocking schemes (for example 3*NAtoms for geometry
+	optimization work).
+
+2001-04-17 12:09  mchalla
+
+	* MondoMods/ProcessControl.F90: Removed the stop.  Halt should now
+	go to full traping
+
+2001-04-17 12:08  mchalla
+
+	* MondoMods/PrettyPrint.F90: Added some (mediocre) support for
+	printing CRDS info to *.geo
+
+2001-04-17 12:07  mchalla
+
+	* MondoMods/ParsingConstants.F90: Added * as a Special character
+
+2001-04-17 12:05  mchalla
+
+	* MondoMods/Parse.F90: Added NoTags_O flag to TrixFile
+
+2001-04-17 12:05  mchalla
+
+	* MondoMods/McMurch.F90: Added MD0 as input variable for start of
+	third dimension of MD.
+
+2001-04-17 12:02  mchalla
+
+	* MondoMods/Makefile: Added SpecFun support for new function
+	tables, and FTest for testing them.
+
+2001-04-17 12:01  mchalla
+
+	* MondoMods/Macros.F90: Fixed (Hopefully) the previous/current
+	tags.
+
+2001-04-17 11:59  mchalla
+
+	* MondoMods/InOut.F90: Removed put and get for ENucNuc from CRDS
+	type IO.
+
+2001-04-17 11:58  mchalla
+
+	* MondoMods/GlobalScalars.F90: Got rid of lame dHGLen, added IGeo
+	as unit for .geo file.
+
+2001-04-17 11:57  mchalla
+
+	* MondoMods/DerivedTypes.F90: Add grad info to CRDS type, PrimPair
+	as a global object.
+
+2001-04-17 11:48  mchalla
+
+	* Includes/CopyrightNotice.txt: Copyright notice
+
+2001-04-17 11:48  mchalla
+
+	* Includes/CopyrightBanner.txt: Copyright banner
+
+2001-04-17 11:09  mchalla
+
+	* Includes/Ell.m: File that hast the maximum ell for HG and SP type
+	arrays.
+
+2001-04-17 10:56  mchalla
+
+	* HiCu/MMA/Density/DensityDebug.nb: new
+
+2001-04-16 15:19  mchalla
+
+	* HiCu/TreeWalk.F90: TreeWaling functionality for both KxcGen and
+	XCForce
+
+2001-04-16 15:18  mchalla
+
+	* HiCu/dXCBlok.F90: Support module for XCForce
+
+2001-04-16 15:17  mchalla
+
+	* HiCu/KxcGen.F90: Uses TreeWalk now.
+
+2001-04-16 15:16  mchalla
+
+	* HiCu/HiCu.F90: Added global CubeRoot.
+
+2001-04-16 15:15  mchalla
+
+	* HiCu/Makefile: [no log message]
+
+2001-04-16 15:13  mchalla
+
+	* HiCu/XCForce.F90: New routine for XC part of SCF force
+
+2001-04-16 15:12  mchalla
+
+	* HiCu/: CubeTree.F90, VRhoMD.F90: New interpolation scheme.
+
+2001-04-16 15:09  mchalla
+
+	* QuNew/: BFGS.nb, BFGSHess.F90, BFGSMisc.F90, Grad.F90,
+	Hessian.F90, MDTest.nb, MDTest2.nb, Makefile, NewStep.F90,
+	QuGrad.F90, QuGrad2.F90, QuGrad3.F90, Test, core, grad2.m, h2.in,
+	mdtest, tmp: New directory containing code for quasi-newton
+	minimization
+
+2001-04-16 15:02  mchalla
+
+	* Makefile: Added info for QuNew
+
+2001-03-10 11:34  schwegle
+
+	* ONX/MakeTables/: ADump.c, Convert.F, ConvertG0.F, ConvertG1.F,
+	ConvertG10.F, ConvertG11.F, ConvertG12.F, ConvertG2.F, ConvertG3.F,
+	ConvertG4.F, ConvertG5.F, ConvertG6.F, ConvertG7.F, ConvertG8.F,
+	ConvertG9.F, GDump.c, Makefile: New binary gamma table format for
+	NONX
+
+2001-03-10 11:33  schwegle
+
+	* MondoMods/: DerivedTypes.F90, MemMan.F90: Small changes for NONX
+
+2001-03-10 11:33  schwegle
+
+	* ONX/NONX/: ComputeK.F90, Contract.F90, Digest.F90, DisOrder.F90,
+	Fillout.F90, GetAdr.F90, HRRKet.F, InitExchangeMatrix.F90,
+	LSearch.F, Makefile, MemInit.F90, ONX.F90, ONXParameters.F90,
+	README, RGen.F90, RangeOfDensity.F90, SkipOut.F, XPose.F, vrrl.F:
+	New version of ONX that appears to work. Uses much less memory than
+	previous versions and is in most cases able to reallocate memory on
+	the fly. This version does not have multipoles or all of the
+	explicit integral code yet. The only known problem is that the 2-e
+	scratch spaces W1 and W2 can potentially go out of bounds. Some
+	simple logic statements will be added to fix this in the next
+	version. As it is now, this code is a little bit slower than PONX.
+	Once the explicit integral code is moved over this version should
+	be the fastest ONX version.
+
+2001-03-03 13:03  schwegle
+
+	* ONX/NONX/: ComputeK.F90, Contract.F90, Digest.F90, DisOrder.F90,
+	GetAdr.F90, GetTables.F90, HRRKet.F, Makefile, MemInit.F90,
+	ONX.F90, ONXMemory.F90, PutDis.F90, PutSubBlk.F90, README,
+	RGen.F90, RGen1C.F90, Scatter.F90, Tables.c: Everything seems to be
+	in place and more less working.  Time to compare the integrals and
+	K matrices with PONX.
+
+2001-02-24 12:29  schwegle
+
+	* ONX/NONX/: BSearch.F, ComputeK.F90, DisOrder.F90, GetSubBlk.F,
+	LSearch.F, Makefile, README, SkipOut.F: Fixed some pointer bugs in
+	DisOrder. ComputeK is all set up now to find the skipout points and
+	compute integrals...
+
+2001-02-05 13:55  salazarm
+
+	* README: 2/5/01 added work by MS
+
+2001-02-05 13:50  salazarm
+
+	* OneE/Makefile, HiCu/Makefile, QCTC/Makefile: 2/5/01 Changed
+	Makefile for gradients
+
+2001-02-05 13:49  salazarm
+
+	* MondoMods/GlobalScalars.F90: 2/5/01 Added
+	dHGLen=(HGEll+2)*(HGEll+3)*(HGEll+4)/6
+
+2001-02-05 13:47  salazarm
+
+	* MondoMods/BraKetBloks.F90: 2/5/01 Added gradient routines
+
+2001-02-05 13:46  salazarm
+
+	* HiCu/: GradXC.F90, GradXCBlok.F90: 2/5/01 Linear scaling gradient
+	of HiCu
+
+2001-02-05 13:45  salazarm
+
+	* QCTC/GradNukE.F90: 2/5/01 Linear scaling gradient of V_nn
+
+2001-02-05 13:42  salazarm
+
+	* QCTC/: GradQCTC.F90, GradJGen.F90: 2/5/01 Linear scaling gradient
+	of QCTC
+
+2001-02-05 13:30  salazarm
+
+	* OneE/GradTBlok.F90: 2/5/01 Working gradient of T_ab
+
+2001-02-05 13:30  salazarm
+
+	* OneE/GradT.F90: 2/5/01 Working gradient of T
+
+2001-02-05 13:29  salazarm
+
+	* OneE/GradSBlok.F90: 2/5/01 Working gradient of S_ab
+
+2001-02-05 13:29  salazarm
+
+	* OneE/GradS.F90: 2/5/01 Linear gradient of S
+
+2001-01-17 11:04  mchalla
+
+	* QCTC/JGen.F90: Added near exact PAC functions
+
+2001-01-17 10:57  mchalla
+
+	* HiCu/CubeTree.F90: Added MMA protection for gridgen output under
+	full debug.
+
+2001-01-17 10:54  mchalla
+
+	* MondoMods/MMA/Functionals/: B88x.Inc, Functionals.nb, LYPc.Inc,
+	PBEc.Inc, PBEx.Inc, PW91c.Inc, PW91x.Inc, SDx.Inc, VWN3c.Inc,
+	VWN5c.Inc, XAx.Inc: Fixed bug dEdAbsGradRho2->dEdGami
+
+2001-01-17 10:52  mchalla
+
+	* QCTC/Makefile: Added penetration functions, cleaned makefiel
+
+2001-01-17 10:50  mchalla
+
+	* QCTC/PFunk.Inc: Penetration addmisability functions
+
+2001-01-17 10:48  mchalla
+
+	* QCTC/MMA/: CTraX/Makefile, HGToSP/Makefile, MD3TRR/Makefile:
+	clean added to makefiles
+
+2001-01-17 10:40  mchalla
+
+	* QCTC/MMA/PAC/: Makefile, PACFunctions.m: penetration
+	acceptability functions
+
+2001-01-17 09:21  schwegle
+
+	* ONX/NONX/: ComputeK.F90, GammaHeader.c, GammaTable.c,
+	GetTables.F90, Makefile, Sizes.F90, Tables.c: Working on ComputeK,
+	there is a bug in the distribution lists. Somethig goes out of
+	bounds.
+
+2001-01-17 08:26  schwegle
+
+	* ONX/NONX/: ComputeK.F90, GetGammaTable.F90: Moved into single
+	GetTable module
+
+2001-01-15 16:49  schwegle
+
+	* ONX/MakeTables/: Convert.F, ConvertG0.F, ConvertG1.F,
+	ConvertG10.F, ConvertG11.F, ConvertG12.F, ConvertG2.F, ConvertG3.F,
+	ConvertG4.F, ConvertG5.F, ConvertG6.F, ConvertG7.F, ConvertG8.F,
+	ConvertG9.F, GDump.c, HDump.c, Makefile: Reordered the gamma
+	function tables to go with the new ONX f90 code.
+
+2001-01-15 16:47  schwegle
+
+	* MondoMods/: DerivedTypes.F90, MemMan.F90: Modified the ONX data
+	types -Eric
+
+2001-01-15 16:47  schwegle
+
+	* ONX/NONX/: ComputeK.F90, GammaHeader.c, GammaTable.c,
+	GetGammaTable.F90, Makefile, MemInit.F90, ONX.F90: Now loads in the
+	gamma function tables on the fly.
+
+2001-01-15 14:25  schwegle
+
+	* MondoMods/: DerivedTypes.F90, MemMan.F90: I added a couple of new
+	data types to DerivedTypes and the corresponding memory allocation
+	routines in MemMan. These are specific to ONX and are probably not
+	the final version, I just want to get the current versions checked
+	in for now.
+	
+	-Eric
+
+2001-01-15 14:14  schwegle
+
+	* ONX/NONX/: DisOrder.F90, HRRBra.F, HRRKet.F, Makefile,
+	MemInit.F90, ONX.F90, ONXMemory.F90, PutDis.F90, QuickSortDis.F,
+	README, RangeOfExchange.F90, Stats.F90, VRRs.F90: New version of
+	onx. At this point it should compute the swartz ineq. and put the
+	distributions into buffers. All the the distribution buffers are
+	dynamic so that if it runs out of memory it can in almost all cases
+	recover.
+
+2001-01-10 18:13  tymczak
+
+	* SCFeqs/FillPBlok.F90: Added Zinc to FillBlok.F90
+
+2001-01-10 18:12  tymczak
+
+	* OneE/RhoBlok.F90: Removed all the counting factors(FacAtom, ect)
+	in RhoBlok.F90: Does not work.
+
+2001-01-10 18:09  tymczak
+
+	* OneE/MakeRho.F90: Took out the Sum over the upper triagle of the
+	Density Matrix in MakeRho.F90. This was calculating an incorrect
+	density in Peridoc Systems. Needs to be Fixed later.
+
+2001-01-10 18:05  tymczak
+
+	* MondoSCF/ParseInput.F90: Uncommented the PPrint(GM)
+
+2001-01-10 18:01  tymczak
+
+	* MondoMods/PrettyPrint.F90: Added Printing of HGRho in Prettyprint
+
+2001-01-10 17:56  tymczak
+
+	* MondoMods/AtomPairs.F90: Fixed a Error in the Thresholding in
+	SetCellNumber(GM) neded to \ Sqrt[ AtomPairDistanceThreshold]
+
+2001-01-09 07:52  mchalla
+
+	* OneE/RhoBlok.F90: Dont sort nuclear positions!
+
+2001-01-09 06:36  mchalla
+
+	* MondoSCF/SCFLocals.F90: redid thresholds (again..)
+
+2001-01-09 06:25  mchalla
+
+	* HiCu/: CubeTree.F90, RhoTree.F90, VRhoMD.F90: MaxEll->HGEll
+
+2001-01-09 06:13  mchalla
+
+	* HiCu/KxcGen.F90: Added back in the primitive type, removing it
+	from Derived types.
+
+2001-01-09 06:07  mchalla
+
+	* MondoMods/BraKetBloks.F90: Added extra phase factor.
+
+2001-01-09 06:04  mchalla
+
+	* MondoMods/DerivedTypes.F90: MaxLen->HGLen
+
+2001-01-09 06:00  mchalla
+
+	* MondoMods/GlobalScalars.F90: Added hardwired limmits for HG and
+	SP sizes
+
+2001-01-09 05:55  mchalla
+
+	* MondoMods/Functionals.F90: Universal temp space U and V for
+	optimized functionals
+
+2001-01-09 05:45  mchalla
+
+	* HiCu/Makefile: Avoid rm -f *.Inc!
+
+2001-01-09 05:28  mchalla
+
+	* DirectJ/: JBlok.F90, MMML.F90, MMML_OLD.F, MMoments.F90,
+	MakeDJ.F90, Makefile, Moments.F90, MultipoleLib.F, Multipoles.F90,
+	Multipoles_Cube.dat, hgtftosp.F, MMA/Multipoles_Cube.dat,
+	MMA/Moments/HGTFToCarts.inc, MMA/Moments/HGTFToSP.inc,
+	MMA/Moments/Multipoles_Cube.dat, VMD/Makefile, VMD/VMD0.f,
+	VMD/VMD1.f, VMD/VMD10.f, VMD/VMD11.f, VMD/VMD12.f, VMD/VMD13.f,
+	VMD/VMD14.f, VMD/VMD2.f, VMD/VMD20.f, VMD/VMD21.f, VMD/VMD22.f,
+	VMD/VMD23.f, VMD/VMD24.f, VMD/VMD3.f, VMD/VMD30.f, VMD/VMD31.f,
+	VMD/VMD32.f, VMD/VMD33.f, VMD/VMD34.f, VMD/VMD4.f, VMD/VMD40.f,
+	VMD/VMD41.f, VMD/VMD42.f, VMD/VMD43.f, VMD/VMD44.f,
+	VMD/VMDBlock.Inc, VMD/VMDBlok.Inc, VMD/VMDObjs, VMD/core,
+	VMD/expVMD.f.original: N^2 J build.  Seems to work for periodics.
+
+2001-01-09 05:19  mchalla
+
+	* QCTC/: CTraX.F, CTraX.Inc, Globals.F90, HGToSP.Inc,
+	IrRegulars.Inc, JGen.F90, Makefile, MondoPoles.F90, NukE.F90,
+	PoleTree.F90, QCTC.F90, XLate.F, MMA/CTraX/CTraX.m,
+	MMA/CTraX/Contract.m, MMA/CTraX/IrRegular.m, MMA/CTraX/Makefile,
+	MMA/CTraX/OLD/ContractGen.mma, MMA/CTraX/OLD/cg,
+	MMA/CTraX/OLD/explicitdefs, MMA/HGToSP/HGToSP.m,
+	MMA/HGToSP/Makefile, OLD/MMML.F: New QCTC O(N Lg N)
+
+2001-01-08 16:17  mchalla
+
+	* QCTC/: CTraX.F, CTraX.Inc, Globals.F90, HGToSP.Inc,
+	IrRegulars.Inc, JGen.F90, Makefile, MondoPoles.F90, NukE.F90,
+	PoleTree.F90, QCTC.F90, XLate.F, MMA/CTraX/CTraX.m,
+	MMA/CTraX/CTraX.m~, MMA/CTraX/Contract.m, MMA/CTraX/IrRegular.m,
+	MMA/CTraX/Makefile, MMA/CTraX/OLD/ContractGen.mma,
+	MMA/CTraX/OLD/cg, MMA/CTraX/OLD/explicitdefs, MMA/HGToSP/HGToSP.m,
+	MMA/HGToSP/Makefile: trying to get it right this time...
+
+2001-01-08 16:10  mchalla
+
+	* Scripts/MondoSetUp: directJ support
+
+2001-01-08 16:10  mchalla
+
+	* Makefile: added DirectJ support
+
+2001-01-08 16:09  mchalla
+
+	* MondoMods/: Makefile, McMurch.F90, Thresholding.F90: ToEll in
+	Makefile, improved R function in McMurch, radial vs product
+	exponents in thresholding.
+
+2001-01-08 16:07  mchalla
+
+	* MondoMods/EllToInclude.F90: Writes file to be included in MMA
+	codes that generate explicit source.
+
+2001-01-08 16:07  mchalla
+
+	* MMA/: FixedNumberForm.m, Format.m, Format.ps, Optimize.m,
+	PrintTime.m: Central location for global MMA files.  Some may be
+	slightly hacked.
+
+2001-01-08 16:05  mchalla
+
+	* MondoMods/MMA/Functionals/: B88x.Inc, Functionals.nb, LYPc.Inc,
+	PBEc.Inc, PBEx.Inc, PW91c.Inc, PW91x.Inc, SDx.Inc, VWN3c.Inc,
+	VWN5c.Inc, XAx.Inc: New functionals
+
+2001-01-08 16:02  mchalla
+
+	* MondoMods/MMA/Functionals/: B88x.Inc, ClosedShellFunctionals.nb,
+	Format.m, Format.ps, Format.sty, Format.tex, Functionals.nb,
+	LYPc.Inc, Optimize.m, PBEc.Inc, PBEx.Inc, PW91c.Inc, PW91x.Inc,
+	README.txt, SDx.Inc, VWN3c.Inc, VWN5c.Inc, XAx.Inc, example.mf,
+	func.mf, newton.mf, rksub.mf, sub.mf: New functionals stuff
+
+2001-01-08 15:45  mchalla
+
+	* QCTC/MMA/: CTraX/#Makefile#, CTraX/Makefile~, HGToSP/#Makefile#:
+	rm garbage
+
+2001-01-08 15:42  mchalla
+
+	* QCTC/: CTraX.F, CTraX.Inc, Globals.F90, HGToSP.Inc,
+	IrRegulars.Inc, JGen.F90, Makefile, MondoPoles.F90, NukE.F90,
+	PoleTree.F90, QCTC.F90, XLate.F, MMA/CTraX/#Makefile#,
+	MMA/CTraX/CTraX.m, MMA/CTraX/CTraX.m~, MMA/CTraX/Contract.m,
+	MMA/CTraX/IrRegular.m, MMA/CTraX/Makefile, MMA/CTraX/Makefile~,
+	MMA/CTraX/OLD/ContractGen.mma, MMA/CTraX/OLD/cg,
+	MMA/CTraX/OLD/explicitdefs, MMA/HGToSP/#Makefile#,
+	MMA/HGToSP/HGToSP.m, MMA/HGToSP/Makefile: New QCTC that is O(N Lg
+	N)
+
+2001-01-08 15:24  mchalla
+
+	* QCTC/: JBlok.F90, MMML.F90, MMML_OLD.F, MMoments.F90, MakeDJ.F90,
+	Makefile, Moments.F90, MultipoleLib.F, Multipoles.F90,
+	Multipoles_Cube.dat, MMA/Multipoles_Cube.dat,
+	MMA/Moments/HGTFToCarts.inc, MMA/Moments/HGTFToSP.inc,
+	MMA/Moments/Multipoles_Cube.dat,
+	MMA/Moments/FortranCode/HGToCarts_L0.F90,
+	MMA/Moments/FortranCode/HGToCarts_L1.F90,
+	MMA/Moments/FortranCode/HGToCarts_L2.F90,
+	MMA/Moments/FortranCode/HGToCarts_L3.F90,
+	MMA/Moments/FortranCode/HGToSP_L0to4.F90,
+	MMA/Moments/HGToCart/Format.m, MMA/Moments/HGToCart/Format.ps,
+	MMA/Moments/HGToCart/HGToCarts.form,
+	MMA/Moments/HGToCart/HGToCarts.m,
+	MMA/Moments/HGToCart/HGToCarts_form.m, MMA/Moments/HGToSP/Format.m,
+	MMA/Moments/HGToSP/Format.ps, MMA/Moments/HGToSP/HGToSP.m,
+	MMA/Moments/HGToSP/HGToSP_new.m, MMA/Moments/HGToSP/Optimize.m,
+	MMA/Moments/HGToSP/PrintTime.m, MMA/Moments/HGToSP/QCrc_2.inc,
+	MMA/Moments/HGToSP/ReIm.m, VMD/Indexing.Inc, VMD/Makefile,
+	VMD/SMDBlock.Inc, VMD/SMDObjs, VMD/VMD0.f, VMD/VMD1.f, VMD/VMD10.f,
+	VMD/VMD11.f, VMD/VMD12.f, VMD/VMD13.f, VMD/VMD14.f, VMD/VMD2.f,
+	VMD/VMD20.f, VMD/VMD21.f, VMD/VMD22.f, VMD/VMD23.f, VMD/VMD24.f,
+	VMD/VMD3.f, VMD/VMD30.f, VMD/VMD31.f, VMD/VMD32.f, VMD/VMD33.f,
+	VMD/VMD34.f, VMD/VMD4.f, VMD/VMD40.f, VMD/VMD41.f, VMD/VMD42.f,
+	VMD/VMD43.f, VMD/VMD44.f, VMD/VMDBlock.Inc, VMD/VMDBlok.Inc,
+	VMD/VMDObjs, VMD/expVMD.f.original, VMD/MMA/OptMDRRs.m,
+	VMD/OLD/VMD0.f, VMD/OLD/VMD1.f, VMD/OLD/VMD10.f, VMD/OLD/VMD11.f,
+	VMD/OLD/VMD12.f, VMD/OLD/VMD13.f, VMD/OLD/VMD14.f, VMD/OLD/VMD2.f,
+	VMD/OLD/VMD20.f, VMD/OLD/VMD21.f, VMD/OLD/VMD22.f, VMD/OLD/VMD23.f,
+	VMD/OLD/VMD24.f, VMD/OLD/VMD3.f, VMD/OLD/VMD30.f, VMD/OLD/VMD31.f,
+	VMD/OLD/VMD32.f, VMD/OLD/VMD33.f, VMD/OLD/VMD34.f, VMD/OLD/VMD4.f,
+	VMD/OLD/VMD40.f, VMD/OLD/VMD41.f, VMD/OLD/VMD42.f, VMD/OLD/VMD43.f,
+	VMD/OLD/VMD44.f: Removed QCTC!	To be replaced with the real
+	QCTC...
+
+2000-12-20 09:55  schwegle
+
+	* ONX/NONX/contract.F: contract.F has been F90'ed and is now called
+	Contract.F90
+
+2000-12-20 09:53  schwegle
+
+	* ONX/NONX/: HRRBra.F, HRRKet.F: New versions (basically a name
+	change) of the HRR files. These originally were called hrrbra_old.F
+	and hrrket_old.F. The plan is to get rid of the explict versions
+	for now (hrrbra.F and hrrket.F).
+
+2000-12-20 09:50  schwegle
+
+	* ONX/NONX/: Contract.F90, DisOrder.F90, MemInit.F90, ONX.F90,
+	ONXMemory.F90, RGen1C.F90, hrrbra_old.F, hrrket_old.F: Renamed some
+	of the HRR files.
+
+2000-12-12 13:56  mchalla
+
+	* HiCu/Makefile: Makefile shouldn't allow deletion of General*.Inc
+
+2000-12-12 13:34  mchalla
+
+	* ONX/PONX/pmonx.inc: Bumped up buffers some more...
+
+2000-12-12 12:22  mchalla
+
+	* README: [no log message]
+
+2000-12-12 12:19  mchalla
+
+	* MondoMods/Parse.F90: Lengthend DblToMedmChar
+
+2000-12-12 12:17  mchalla
+
+	* MondoSCF/SCFLocals.F90: Added looser matrix thresholds.
+
+2000-12-12 12:16  mchalla
+
+	* ONX/PONX/pmonx.inc: Doubled buffer sizes to allow calculations on
+	Si and Zn.
+
+2000-12-12 12:15  mchalla
+
+	* MondoMods/DerivedTypes.F90, MondoMods/InOut.F90,
+	MondoSCF/ParseInput.F90, SCFeqs/SDMM.F90: Added DTol and ETol to
+	type TOLS, and propigated the change systemically.  These values
+	are used in SDMM to halt convergence.
+
+2000-12-12 12:14  mchalla
+
+	* HiCu/HiCu.F90: minor cosmetic touch up
+
+2000-12-12 11:19  mchalla
+
+	* README: [no log message]
+
+2000-12-12 11:02  mchalla
+
+	* SCFeqs/MMA/SCFDev/new.m: New file that mirrors the SDMM.F90
+	methods just introduced.
+
+2000-12-12 11:01  mchalla
+
+	* SCFeqs/SDMM.F90: The McWeeny purification scheme has been
+	replaced by the Parser-Manopolis purification.	Works robustly now
+	without loss of electrons.
+
+2000-12-11 10:57  schwegle
+
+	* ONX/NONX/: DisOrder.F90, MemInit.F90, ONX.F90, ONXMemory.F90:
+	First version of putting the distribution and integral buffers into
+	their own data sets.
+
+2000-12-11 08:52  schwegle
+
+	* ONX/Drivers/: VRRDriver.ascii, VRRLoc.ascii: New VRR driver files
+	that include all of the lower angular symmetry types.
+
+2000-12-11 08:38  schwegle
+
+	* ONX/NONX/: CCDriver.c, Contract.F90, ContractionScaling.F90,
+	DisOrder.F90, InitExchangeMatrix.F90, Makefile, MatFilter.F90,
+	MemInit.F90, ONX.F90, ONXMemory.F90, ONXParameters.F90, README,
+	RGen1C.F90, RangeOfDensity.F90, Sizes.F90, Stats.F90, VRRDriver.c,
+	VRRs.F90, contract.F, hrrbra_old.F, hrrket_old.F, vrrl.F: First
+	version of NONX. Looks like it does distribution thresholding
+	right.
+
+2000-12-11 08:36  schwegle
+
+	* ONX/NONX/: CCDriver.c, ContractionScaling.F90, DisOrder.F90,
+	DisOrder.f.original, GetBigInt.F, IDmn.F, InitExchangeMatrix.F90,
+	Makefile, MatFilter.F90, NFinal.F, ONX.F90, ONXBuf.F90,
+	ONXParameters.F90, README, RGen1C.F90, VRRDriver.c, contract.F,
+	hrrbra_old.F, hrrket_old.F, iT.F, vrrl.F: Cleaning up the NONX
+	stuff
+
+2000-12-05 17:32  tymczak
+
+	* README: [no log message]
+
+2000-12-05 17:31  tymczak
+
+	* QCTC/: JBlok.F90, MMML.F90, MMML_OLD.F, MakeDJ.F90, Makefile,
+	Moments.F90, Multipoles.F90, MMA/Multipoles_Cube.dat,
+	MMA/Moments/HGTFToCarts.inc, MMA/Moments/HGTFToSP.inc,
+	MMA/Moments/Multipoles_Cube.dat,
+	MMA/Moments/FortranCode/HGToCarts_L0.F90,
+	MMA/Moments/FortranCode/HGToCarts_L1.F90,
+	MMA/Moments/FortranCode/HGToCarts_L2.F90,
+	MMA/Moments/FortranCode/HGToCarts_L3.F90,
+	MMA/Moments/FortranCode/HGToSP_L0to4.F90,
+	MMA/Moments/HGToCart/Format.m, MMA/Moments/HGToCart/Format.ps,
+	MMA/Moments/HGToCart/HGToCarts.form,
+	MMA/Moments/HGToCart/HGToCarts.m,
+	MMA/Moments/HGToCart/HGToCarts_form.m, MMA/Moments/HGToSP/Format.m,
+	MMA/Moments/HGToSP/Format.ps, MMA/Moments/HGToSP/HGToSP.m,
+	MMA/Moments/HGToSP/HGToSP_new.m, MMA/Moments/HGToSP/Optimize.m,
+	MMA/Moments/HGToSP/PrintTime.m, MMA/Moments/HGToSP/QCrc_2.inc,
+	MMA/Moments/HGToSP/ReIm.m:  - Makefile:    Modified to include the
+	New Moduales
+	 - Moments/:	Subdirectory that includes the Include files
+	(HGTFToCarts.inc, HGTFToSP.inc)
+			plus the matematica Programs which generates them.
+	 - MakeDJ:	MaxL = 16: Now calls a CalQRho(rho) which calculate
+	the Cartesisan Multipole
+			tensor
+	 - JBlok:	Added in the Calculation of the Cartesian Multipole
+	Correction to the Matrix
+			elemets. Took the MD2TRR,SetBraBlok,BraEst
+	calculation out of the cell sum,
+			which was an error. Added some logic (Dimen) so
+	that CTraxBraKet and
+			QTraxBraKet will only be done in the correct
+	dimensional system.
+	
+	 - Multipoles:	Originally MMoments, split this into Multipole.F90
+	and Moments.F90
+			Multipoles can now be done in box shape or size,
+	now longer read the file
+			Multipoles_Cube.dat, but generated them. Still
+	needs work in one and two
+			dimensions
+	 - Moments:	NEW Moduale, two classes (Spherical) SpMoments and
+	(Cartesian) QMoments.
+	 - MMML:	Fortran90 Vesion of MMML_OLD.F, not completed
+	 - MMML_OLD:	Matts Multipole Manipultion Library, in F77
+	 - MMA/Moments: Added a new directory with symbolics for the
+	multipole moments.
+
+2000-12-05 17:23  tymczak
+
+	* OneE/RhoBlok.F90:  - RhoBlock:    Removed the
+	Atom,State,Primative sysmetiztion factors, this was incorrect
+
+2000-12-05 17:22  tymczak
+
+	* MondoSCF/: ParseInput.F90, ParsingKeys.F90:  - ParseInput:  Added
+	the functionality to turn the Periodicd on in any direction
+			{On-X,On-Y,On-Z,On-XY,On-XZ,On-YZ,On-XYZ}
+
+2000-12-05 17:21  tymczak
+
+	* MondoMods/PBC.F90:  - PBC:	     Fixed New_CellSet_spher and
+	New_CellSet_Cube. Now the Lattice vectors need
+			to be called threw to make CellSet. Also Added the
+	Logical Funtion IJKTest
+
+2000-12-05 17:20  tymczak
+
+	* MondoMods/AtomPairs.F90:  - AtomPairs:   Added an extra distance
+	to New_CellSet_sphere to take into account
+			atoms at the corners of the cell. Takes into
+	account the size and shape
+			of the box
+
+2000-12-05 17:19  tymczak
+
+	* HiCu/: CubeTree.F90, KxcGen.F90: Fixed the Periodic In CubeTree
+
+2000-12-05 15:17  mchalla
+
+	* OneE/RhoBlok.F90: Removed allocation of RFun and AuxRFun, since
+	this is now done through a call to NewBraKetBlok.
+
+2000-12-04 17:44  tymczak
+
+	* README: [no log message]
+
+2000-12-04 17:29  mchalla
+
+	* HiCu/CubeTree.F90: [no log message]
+
+2000-12-04 17:25  mchalla
+
+	* README: [no log message]
+
+2000-12-04 17:15  mchalla
+
+	* HiCu/: CubeTree.F90, ExplicitBraElements.Inc,
+	ExplicitLeafContribution.Inc, ExplicitLeafPopulation.Inc,
+	GeneralLeafContribution.Inc, GeneralLeafPopulation.Inc, HiCu.F90,
+	KxcGen.F90, Makefile, RhoTree.F90, VRhoMD.F90: o  HiCu	  - 
+	CubeTree:  Removed RhoOnGrid from RhoTree and put it in here,	   
+	along with associated routines.  Got rid of RhoAtPoint.        Now
+	have both explicit and general source for computing the       
+	population and evaluation the density on the grid.  Recoded	  
+	(renamed) the code that determines the CubeRoots bounding box;	   
+	  InitCubeRoot uses bisection to find the BBox that integrates	   
+	  the density to exactly Thresholds%cube.	 All loops over
+	NGrid variables now have quickest running variable	  (IGrid)
+	to the left.  Added an extra RETURN statement to check	      for
+	insignificant distributions in both RhoOnGrid and PopInBox	 
+	(which is a new routine that evaluates the density in a Cube%BBox).
+	       Cleaned up GridGen substantially and added new output lines
+	that	    still need some work.
+	
+	  -   VRhoMD:  All interpolatory EXPInv and ERF functions have been
+	      explicitly inlined into the include files.
+
+2000-12-01 15:14  salazarm
+
+	* OneE/MakeRho.F90: Put in a call to NewBraKetBlok.
+
+2000-12-01 09:34  schwegle
+
+	* ONX/PONX/: CalcK.F, ONXBuf.F90: Increased the fixed distribution
+	buffers in ONXBuf so that the large hydrogen calculation will work.
+	These sort of problems will be eliminated in the next version of
+	onx.
+	
+	Also turned on the multipole code in CalcK. The multipoles have not
+	really been tested very much, but they appear to work for now.
+
+2000-11-28 14:07  mchalla
+
+	* SCFeqs/SDMM.F90: Fixed typo
+
+2000-11-28 11:33  mchalla
+
+	* Includes/CompilerSpecifics.IntelLinux.PG: Ooops, had profiling
+	on....
+
+2000-11-28 11:30  mchalla
+
+	* README: [no log message]
+
+2000-11-28 11:23  mchalla
+
+	* README: Added new changelog.
+
+2000-11-28 11:20  mchalla
+
+	* MondoSCF/: ChkSCFs.F90, DrvSCFs.F90, Overlay.F90, ParseInput.F90,
+	SCFLocals.F90, SetSCFs.F90:   - ChkSCFs:  Convergence checking has
+	been improved somewhat.  Still needs
+	    more work.
+	  - Overlay:  Added code to mark ProgramFailed=.TRUE. before
+	invokation.
+	  - ParseInput: Moved parsing for guess in to parsebasissets. 
+	Guess=Core works now.
+	    Fixed uninitialized basis set name bug.
+	  - SetSCFs:  Commented out BKEst call and associated IO.
+	  - SCFLocals:	Still fidling with thresholds ...
+
+2000-11-28 11:08  mchalla
+
+	* Includes/: CompilerSpecifics.IntelLinux.ABSOFT,
+	CompilerSpecifics.IntelLinux.LAHEY,
+	CompilerSpecifics.IntelLinux.NAG, CompilerSpecifics.IntelLinux.PG,
+	Suffixes:   - Suffixes:  Added $(EXTRA_INCLUDES) to compiler line. 
+	This is where non-standard
+	    includes to say MondoMods/MMA/Functions should og.
+	  - CompilerSpecifics.IntelLinux.X have been updated.  In
+	particular, now
+	    works for LAHEY, NAG, and PG.  PG optimizations have been
+	depricated to -O1
+	    for now, as -O2 breaks certain functionals.  ABSOFT compiles
+	but is broken
+	    in many places (compilers fault I'm 99% sure).
+
+2000-11-28 11:02  mchalla
+
+	* XForm/BlokAInv.F90:	- BlokAInv:  Switched Z and Zt in output.
+
+2000-11-28 11:00  mchalla
+
+	* HiCu/: CubeTree.F90, Grid.F90, HiCu.F90, KxcGen.F90, Makefile,
+	RhoTree.F90, VRhoMD.F90: o HiCu   - CubeTree:  Added optional
+	argument Exp_Switch to SetPenetrationThresh.	  Changed
+	IF(Cube%Box%Tier<2)THEN to IF(Cube%Box%Tier<10)THEN.  I think this 
+	    fixes the near infinite recursion that occurs for high-symmetry
+	systems.      Added an ABS as in ABS(RhoV(J+1,I))) when determining
+	ISplit.    - HiCu:  Added call to NewBraKetBlok to initialize
+	braketbloks.	- Makefile:  Added option -DEXPLICIT_SOURCE which
+	togles on the explicit	    fortran source gerated by VRhoMD.F90. 
+	Also added EXTRA_INCLUDES.    - RhoTree:  Added general source back
+	in, and made optional.	General source	    for computing
+	populations may still be broken.    - KxcGen: Switched sign of
+	grid-center vectors and removed phase factor.	   Added HGRho and
+	SetBraBlok.  Computes only upper triagle of Kxc now.	  Added
+	general code.  In gernal code, factor of two has moved to     
+	MondoMods/MMA/Functionals/Functionals.nb.    - VRhoMD: Switched
+	sign of grid-center vectors and removed factor of two from     
+	explicitbraelements.
+
+2000-11-28 10:17  mchalla
+
+	* OneE/: MakeT.F90, RhoBlok.F90, SBlok.F90, TBlok.F90:	 - RhoBlok:
+	Switched ThreshPrim to the now standard TestPrimPair.
+	    Propigated misc changes through from MondoMods.
+	  - SBlok:  Added TestPrimPair.
+
+2000-11-28 10:10  mchalla
+
+	* QCTC/: JBlok.F90, MMoments.F90, MakeDJ.F90, Makefile,
+	VMD/Makefile:	- JBlok: Fixed the now famous "phase" bug. 
+	Eliminated the double counting of ExpAB
+	    by changing Tol=TwoENeglect/MAX(1.D-32,ExpAB*BraEstimate) to
+			Tol	= TwoENeglect/MAX(1.D-32,BraEstimate).
+	    Added a missing Sqrt to the Bra integral estimates.
+	  - MakeDJ:  Added new call to NewBraKetBlok(BS) which allocates
+	HGBra.
+	    removed underscores in PChkSum and PPrint which broke the MMA
+	formating.
+
+2000-11-28 10:03  mchalla
+
+	* Scripts/: MondoSetUp, nag_dbx: very minor changes
+
+2000-11-28 10:02  mchalla
+
+	* ONX/: MakeTables/Makefile, PONX/Makefile, PONX/ONXLoop.F90:	-
+	MakeTables/Makefile: Added EXTRA_INCLUDES to specify
+	MondoMods/MMA/Functions
+	  - PONX/ONXLoop:  Added "USE SpecFun" and changed "TE=ErrorFC(T)"
+	to "TE=ERFC(T)",
+	    where ERFC is defined in SpecFun.
+	  - PONX/Makefile: Removed $(LAPACK)
+
+2000-11-28 09:56  mchalla
+
+	* SCFeqs/: DIIS.F90, FBuild.F90, FillPBlok.F90, Makefile,
+	RHeqs.F90, SCFStatus.F90, SDMM.F90, ToDev.F90, MMA/SCFDev/dev.m,
+	MMA/SDMM/dev.m: o SCFeqs   - DIIS: Works now.  Fixed several
+	bigbugs,included an uninitialized variable.	 OOed the inverse
+	matrix to MatFunk.  Avoid thresholding the error matrices,     
+	since these will go to zero much to fast otherwise.  May want to
+	threshold      eventually with a tighter value....    - FBuild:
+	Fixed bug that added in whole K matrix for B3LYP.  B3LYP works fine
+	now.	- RHeqs: Removed DSYEVD source.  Fixed bug in computing
+	HOMO-LUMO gap.	  - SCFStatus:	Reformated stdoutput.	 - SDMM:
+	SDMM now has an automatic criterion for swithcing from CG to
+	purification.	   Numerous minor improvments. Still needs some
+	tuning.    - ToDev: New routine added which writes MMA formatted
+	matrices to MMA/SCFDev	    for development of DMM methods.  Only
+	made if requested, eg "make Dev"    - /MMA/SCFDev/dev.m:
+	Development code that mirrors changes to SDMM.
+
+2000-11-28 09:16  mchalla
+
+	* MondoMods/: BasisSetParameters.F90, BraKetBloks.F90, Clock.F90,
+	DerivedTypes.F90, Functionals.F90, GlobalScalars.F90, Indexing.F90,
+	Macros.F90, Makefile, MatFunk.F90, Order.F90, Parse.F90,
+	PrettyPrint.F90, SMWrap.c, Seconds.c, SpecFun.F90,
+	Thresholding.F90, MMA/Functionals/B88x.Inc,
+	MMA/Functionals/Format.m, MMA/Functionals/Functionals.nb,
+	MMA/Functionals/LYPc.Inc, MMA/Functionals/PBEc.Inc,
+	MMA/Functionals/PBEx.Inc, MMA/Functionals/PW91c.Inc,
+	MMA/Functionals/PW91x.Inc, MMA/Functionals/SDx.Inc,
+	MMA/Functionals/VWN3c.Inc, MMA/Functionals/VWN5c.Inc,
+	MMA/Functionals/XAx.Inc: 
+	
+	  - BraKetBloks: getprimative has been renamed SetBraBlok, and an
+	option for
+	    including a phase factor has been added.
+	  - DerivedTypes: The PrimPair type has Ket as the accumulatory
+	vector
+	    instead of Bra.  Bra is HGBra from BraKetBlocks.
+	  - Functionals: has been redone.  Includes Slater-Dirac which is
+	    alpha=1 and rhototal^(4/3) and XAlpha which is alpha=2/3 and
+	    rhoalpha^(4/3)+rhobeta^(4/3).  All functionals except PBE and
+	PBE0
+	    have been validated against G98 and Q-Chem.  Functionals now
+	include
+	    source from MMA/Functionals, generated by the completely redone
+	    MMA source Functionals.nb.	An important point here is that the
+	    factor of 2 multiplying dEdAbsGradRho2 in HiCu/KxcGen has been
+	subsumed
+	    into the functionals, as have misc factors of 2 and 4 from
+	Functionals.F90.
+	  - GlobalScalars: constants ThreeHalf etc have been changed to
+	ThreeHalves
+	    etc to be gramtically correct.  These changes have been
+	propigated
+	    throughout.
+	  - Indexing: IBloDex has been renamed CFBlokDex
+	  - Macros: Getting and setting thresholds has now been replaced by
+	a call to
+	    SetThresholds(CurBase).
+	  - Makefile:  mk mma makes the entire MondoMods, while mk mm makes
+	all but
+	    the DGEMMs and small matrix benchmarks.
+	  - MatFunk:  Fixed a serious bug (Missing ABS()) for thresholding
+	small
+	    eigenvalues.
+	  - Parse: Added the new function DblToMMAChar() which will return
+	a string
+	    suitable for printing a MMA formated character.  Fixed
+	DblToShrtChar()
+	    so that it can return a negative value.
+	  - PrettyPrint:  Added MMA support to Print_HGRHO.  Added the
+	optional argument
+	    Misc_O to ProcessName(Proc,Misc_O)	which lets additional info
+	be added.
+	  - SMWrap.c: removed double underscore routines.
+	  - Thresholds: Added SetThresholds(CurBase) which gets and sets
+	intermediate
+	    thresholds.
+	  - MondoMods/MMA/Functionals/PBEx.Inc etc. These are include files
+	used
+	    by Functionals.
+	  - MondoMods/MMA/Functionals/Functionals.nb.  This is the 99%
+	ready for openshell
+	    notebook that generates functional source.	Note that compiling
+	with
+	    PGF90 v3.1 and -O2 breaks some of this code. Therefore, use
+	only
+	    -O1 untill we try v3.2 (which still has bugs).
+
+2000-11-11 10:16  schwegle
+
+	* ONX/NONX/VRRDriver.c: [no log message]
+
+2000-11-07 09:51  schwegle
+
+	* ONX/NONX/: DisOrder.F90, Makefile, README, RGen1C.F, RGen1C.F90,
+	iT.F: Worked on RGen1C, converted it from F77 to F90, needs to be
+	tested.  Call to RGen1C in DisOrder.F90 needs to be updated.
+
+2000-11-06 12:06  schwegle
+
+	* ONX/PONX/: AddDis.F, ONXBuf.F90: Fixed an array bounds error. Was
+	passing the wroung array bounds for some temporary arrays that are
+	used in AddDis.F
+
+2000-11-06 09:28  schwegle
+
+	* ONX/NONX/: CCDriver.c, ContractionScaling.F90, DisOrder.F90,
+	DisOrder.f.original, GetBigInt.F, IDmn.F, InitExchangeMatrix.F90,
+	MatFilter.F90, NFinal.F, ONX.F90, ONXBuf.F90, ONXParameters.F90,
+	README, RGen1C.F, VRRDriver.c, contract.F, hrrbra_old.F,
+	hrrket_old.F, iT.F, vrrl.F: New version of ONX that combines all
+	versions of ONX (ONX, SONX, MASONX, ect) into one code.
+
+2000-11-04 11:24  schwegle
+
+	* ONX/Makefile: Main makefile for ONX versions
+
+2000-11-04 11:14  schwegle
+
+	* Makefile, Inpts/WATER/h2o_10.inp: I (ERS) added ONX to the make
+	all option
+
+2000-11-04 11:11  schwegle
+
+	* ONX/PONX/CalcK.F: [no log message]
+
+2000-11-02 10:04  schwegle
+
+	* README: Major reordering of ONX. Compiles and runs, but is still
+	messed up. Do not use this version yet.
+
+2000-11-02 09:51  schwegle
+
+	* ONX/Drivers/: CDriver.ascii, VRRDriver.ascii, VRRLoc.ascii: [no
+	log message]
+
+2000-11-02 09:49  schwegle
+
+	* ONX/PONX/: CCDriver.c, VRRDriver.c: Changed path to the driver
+	files.
+
+2000-11-02 09:48  schwegle
+
+	* ONX/PONX/Makefile: Changed the executable name from PONX to ONX
+
+2000-11-02 09:36  schwegle
+
+	* ONX/: PONXMults/ContKet0x0.inc, PONXMults/ContKet0x1.inc,
+	PONXMults/ContKet0x2.inc, PONXMults/ContKet0x3.inc,
+	PONXMults/ContKet0x4.inc, PONXMults/ContKet1x0.inc,
+	PONXMults/ContKet1x1.inc, PONXMults/ContKet1x2.inc,
+	PONXMults/ContKet1x3.inc, PONXMults/ContKet1x4.inc,
+	PONXMults/ContKet2x0.inc, PONXMults/ContKet2x1.inc,
+	PONXMults/ContKet2x2.inc, PONXMults/ContKet2x3.inc,
+	PONXMults/ContKet2x4.inc, PONXMults/ContKet3x0.inc,
+	PONXMults/ContKet3x1.inc, PONXMults/ContKet3x2.inc,
+	PONXMults/ContKet3x3.inc, PONXMults/ContKet3x4.inc,
+	PONXMults/ContKet4x0.inc, PONXMults/ContKet4x1.inc,
+	PONXMults/ContKet4x2.inc, PONXMults/ContKet4x3.inc,
+	PONXMults/ContKet4x4.inc, PONXMults/Interact0x0.inc,
+	PONXMults/Interact0x1.inc, PONXMults/Interact0x2.inc,
+	PONXMults/Interact0x3.inc, PONXMults/Interact0x4.inc,
+	PONXMults/Interact1x0.inc, PONXMults/Interact1x1.inc,
+	PONXMults/Interact1x2.inc, PONXMults/Interact1x3.inc,
+	PONXMults/Interact1x4.inc, PONXMults/Interact2x0.inc,
+	PONXMults/Interact2x1.inc, PONXMults/Interact2x2.inc,
+	PONXMults/Interact2x3.inc, PONXMults/Interact2x4.inc,
+	PONXMults/Interact3x0.inc, PONXMults/Interact3x1.inc,
+	PONXMults/Interact3x2.inc, PONXMults/Interact3x3.inc,
+	PONXMults/Interact3x4.inc, PONXMults/Interact4x0.inc,
+	PONXMults/Interact4x1.inc, PONXMults/Interact4x2.inc,
+	PONXMults/Interact4x3.inc, PONXMults/Interact4x4.inc,
+	PONXMults/Makefile, PONXMults/bkonx.inc, PONXMults/md0x0.F,
+	PONXMults/md0x1.F, PONXMults/md0x2.F, PONXMults/md0x3.F,
+	PONXMults/md0x4.F, PONXMults/md1x0.F, PONXMults/md1x1.F,
+	PONXMults/md1x2.F, PONXMults/md1x3.F, PONXMults/md1x4.F,
+	PONXMults/md2x0.F, PONXMults/md2x1.F, PONXMults/md2x2.F,
+	PONXMults/md2x3.F, PONXMults/md2x4.F, PONXMults/md3x0.F,
+	PONXMults/md3x1.F, PONXMults/md3x2.F, PONXMults/md3x3.F,
+	PONXMults/md3x4.F, PONXMults/md4x0.F, PONXMults/md4x1.F,
+	PONXMults/md4x2.F, PONXMults/md4x3.F, PONXMults/md4x4.F,
+	PONXMults/ms0x0.F, PONXMults/ms0x1.F, PONXMults/ms0x2.F,
+	PONXMults/ms0x3.F, PONXMults/ms0x4.F, PONXMults/ms1x0.F,
+	PONXMults/ms1x1.F, PONXMults/ms1x2.F, PONXMults/ms1x3.F,
+	PONXMults/ms1x4.F, PONXMults/ms2x0.F, PONXMults/ms2x1.F,
+	PONXMults/ms2x2.F, PONXMults/ms2x3.F, PONXMults/ms2x4.F,
+	PONXMults/ms3x0.F, PONXMults/ms3x1.F, PONXMults/ms3x2.F,
+	PONXMults/ms3x3.F, PONXMults/ms3x4.F, PONXMults/ms4x0.F,
+	PONXMults/ms4x1.F, PONXMults/ms4x2.F, PONXMults/ms4x3.F,
+	PONXMults/ms4x4.F, PONXMults/pmonx.inc, MakeTables/Convert.F,
+	MakeTables/ConvertE.F, MakeTables/ConvertG0.F,
+	MakeTables/ConvertG1.F, MakeTables/ConvertG10.F,
+	MakeTables/ConvertG11.F, MakeTables/ConvertG12.F,
+	MakeTables/ConvertG2.F, MakeTables/ConvertG3.F,
+	MakeTables/ConvertG4.F, MakeTables/ConvertG5.F,
+	MakeTables/ConvertG6.F, MakeTables/ConvertG7.F,
+	MakeTables/ConvertG8.F, MakeTables/ConvertG9.F, MakeTables/EDump.c,
+	MakeTables/GDump.c, MakeTables/GetGammaTable.c, MakeTables/MAIN.c,
+	MakeTables/Makefile: [no log message]
+
+2000-11-02 09:35  schwegle
+
+	* ONX/PONX/: MondoHalt.F, ONXBuf.F90, ONXLoop.F90: Added
+	thresholding module and fixed indexing bug in ONXLoop changed
+	mondohalt to just stop.
+
+2000-11-02 08:43  schwegle
+
+	* ONX/PONX/: AddDis.F, BSearch.F, BuffTbl.F, CCDriver.c, CalcK.F,
+	ContractionScaling.F90, ErrorF.F, Exponential.inc, Fillout.F90,
+	Gamma_0.inc, Gamma_1.inc, Gamma_2.inc, Gamma_3.inc, Gamma_4.inc,
+	Gamma_5.inc, Gamma_6.inc, Gamma_7.inc, Gamma_8.inc, Gamma_A.inc,
+	Gamma_Defs.inc, GatherK.F90, GetID.c, GetSubBlk.F,
+	InitExchangeMatrix.F90, IntegralSelect.inc, LSearch.F, LineEnd.F,
+	MAIN.c, MMML.F, Makefile, MatFilter.F90, MinMax.F90, Misc.F,
+	MondoHalt.F, MultipoleSelect.inc, ONX.F90, ONXBuf.F90, ONXLoop.F90,
+	ONXParameters.F90, ONXSch.F, ONXSch.F.hold, OpenAppend.F,
+	Order.F90, ParallelIO.F90, RLoader.F, RangeOfDensity.F90,
+	RangeOfExchange.F90, VRRDriver.c, XPose.F, bkonx.inc,
+	bkonx_F90.inc, contract.F, digest.F, getadr.F, hgtftosp.F,
+	hrrbra.F, hrrbra_old.F, hrrket.F, hrrket_old.F, mstats.inc,
+	onx1111.F, onx1121.F, onx1122.F, onx1161.F, onx1162.F, onx1166.F,
+	onx2111.F, onx2121.F, onx2122.F, onx2161.F, onx2162.F, onx2211.F,
+	onx2221.F, onx2222.F, onx2261.F, onx6111.F, onx6121.F, onx6122.F,
+	onx6161.F, onx6211.F, onx6221.F, onx6611.F, onxio.c, onxsch.F,
+	onxsort2.F, pmonx.inc, putsubblk.F, skipout.F, tgen0.F, tgen1t2.F,
+	tgen3t4.F, tgen5t6.F, tgen7t8.F, vrrl.F, vrrs.F: Initial version of
+	ONX with a F90 front end.
+
+2000-11-02 08:36  schwegle
+
+	* ONX/: AddDis.F, BSearch.F, BuffTbl.F, CCDriver.c, CalcK.F,
+	ContractionScaling.F90, ErrorF.F, Exponential.inc, Fillout.F90,
+	Gamma_0.inc, Gamma_1.inc, Gamma_2.inc, Gamma_3.inc, Gamma_4.inc,
+	Gamma_5.inc, Gamma_6.inc, Gamma_7.inc, Gamma_8.inc, Gamma_A.inc,
+	Gamma_Defs.inc, GatherK.F90, GetID.c, GetSubBlk.F,
+	InitExchangeMatrix.F90, IntegralSelect.inc, KonK2L.F, LSearch.F,
+	LineEnd.F, Loader.F90, MAIN.c, MMML.F, Makefile, MatFilter.F90,
+	MinMax.F90, Misc.F, MondoHalt.F, MultipoleSelect.inc, ONX.F90,
+	ONXBuf.F90, ONXHalt.F90, ONXLoop.F90, ONXParameters.F90, ONXSch.F,
+	ONXSch.F.hold, OpenAppend.F, RLoader.F, RangeOfDensity.F90,
+	RangeOfExchange.F90, VRRDriver.c, XPose.F, bkonx.inc,
+	bkonx_F90.inc, contract.F, digest.F, getadr.F, hgtftosp.F,
+	hrrbra.F, hrrbra_old.F, hrrket.F, hrrket_old.F, mstats.inc,
+	onx1111.F, onx1121.F, onx1122.F, onx1161.F, onx1162.F, onx1166.F,
+	onx2111.F, onx2121.F, onx2122.F, onx2161.F, onx2162.F, onx2211.F,
+	onx2221.F, onx2222.F, onx2261.F, onx6111.F, onx6121.F, onx6122.F,
+	onx6161.F, onx6211.F, onx6221.F, onx6611.F, onxio.c, onxsch.F,
+	onxsort2.F, pmonx.inc, putsubblk.F, skipout.F, tgen0.F, tgen1t2.F,
+	tgen3t4.F, tgen5t6.F, tgen7t8.F, tmp, vrrg.F, vrrl.F, vrrs.F,
+	Order.F90, ParallelIO.F90: [no log message]
+
+2000-11-01 12:57  mchalla
+
+	* PHiPAC/runs/P3/LOG: Bloat!
+
+2000-11-01 08:22  mchalla
+
+	* Scripts/MondoSetUp: [no log message]
+
+2000-10-31 09:56  mchalla
+
+	* PHiPAC/runs/P3/PHiPAC_dgemm/src/core: P3
+
+2000-10-31 09:55  mchalla
+
+	* PHiPAC/runs/TBird/PHiPAC_dgemm/src/: Makefile, mm_double_NN_1.c,
+	mm_double_NN_c.c, mm_double_NT_1.c, mm_double_NT_c.c,
+	mm_double_TN_1.c, mm_double_TN_c.c, mm_double_TT_1.c,
+	mm_double_TT_c.c, phipac_dgemm.c: TBird
+
+2000-10-31 09:51  mchalla
+
+	* MondoMods/Makefile: fixed dependencies to use .o instead of .mod
+
+2000-10-31 09:49  mchalla
+
+	* Scripts/sgi_dbx2: This was redundtant with sgi_dbx
+
+2000-10-31 09:47  mchalla
+
+	* QCTC/Makefile, SCFeqs/P2Use.F90, Scripts/CSHRC,
+	Scripts/MondoSetUp: Various improvements for SGI.
+
+2000-10-31 09:46  mchalla
+
+	* Includes/CompilerSpecifics.AMDLinux.PG: File for AMD Linux!
+
+2000-10-31 09:45  mchalla
+
+	* Includes/: CompilerSpecifics.SGIIrix.MIPS,
+	CompilerSpecifics.IntelLinux.NAG, CompilerSpecifics.IntelLinux.PG:
+	Improved CompilerSpecifics files.  Full optimization, no debug is
+	the default.
+
+2000-10-30 14:56  mchalla
+
+	* Makefile, MondoMods/Makefile: changed make to $(MAKE) in driving
+	makefiles.  Can now set MAKE to gnumake.
+
+2000-10-30 12:54  mondo
+
+	* Makefile, README, BasisSets/3-21G.bas, BasisSets/3-21GSP.bas,
+	BasisSets/3-21Gs.bas, BasisSets/4-22GSP.bas,
+	BasisSets/6-311Gss.bas, BasisSets/6-31G.bas, BasisSets/6-31Gs.bas,
+	BasisSets/6-31Gss.bas, BasisSets/6-31ppGss.bas,
+	BasisSets/Ahlrichs_TZV.bas, BasisSets/Ahlrichs_VDZ.bas,
+	BasisSets/Ahlrichs_VTZ.bas, BasisSets/Ahlrichs_pVDZ.bas,
+	BasisSets/DunningHay_SV.bas, BasisSets/DunningHay_SVP.bas,
+	BasisSets/Dunning_DZ.bas, BasisSets/Dunning_DZP.bas,
+	BasisSets/Dunning_TZ.bas, BasisSets/MIDI.bas, BasisSets/MINI.bas,
+	BasisSets/README, BasisSets/STO-2G.bas, BasisSets/STO-3G.bas,
+	BasisSets/STO-6G.bas, BasisSets/WTBS.bas, HiCu/CubeTree.F90,
+	HiCu/Grid.F90, HiCu/HiCu.F90, HiCu/KxcGen.F90, HiCu/Makefile,
+	HiCu/RhoTree.F90, HiCu/VRhoMD.F90,
+	HiCu/MMA/CubeRules/CubeDegree5.nb,
+	HiCu/MMA/CubeRules/CubeDegree7.nb, HiCu/MMA/CubeRules/Rule5.Inc,
+	HiCu/MMA/CubeRules/Rule7.Inc, HiCu/MMA/CubeRules/RuleB.Inc,
+	HiCu/MMA/CubeRules/RuleC.Inc, HiCu/MMA/CubeRules/RuleD.Inc,
+	HiCu/MMA/CubeRules/RuleE.Inc, HiCu/MMA/Density/DensityDebug.nb,
+	Includes/CompilerSpecifics.AlphaLinux.COMPAQ,
+	Includes/CompilerSpecifics.IBMAIX.XLF,
+	Includes/CompilerSpecifics.IntelLinux.ABSOFT,
+	Includes/CompilerSpecifics.IntelLinux.LAHEY,
+	Includes/CompilerSpecifics.IntelLinux.NAG,
+	Includes/CompilerSpecifics.IntelLinux.PG,
+	Includes/CompilerSpecifics.SGIIrix.MIPS,
+	Includes/MONDO_MPI_INCLUDE.Inc, Includes/MPICH.h,
+	Includes/Makefile, Includes/RemoveAll, Includes/Suffixes,
+	Inpts/DEVELOP/Heme.inp, Inpts/DEVELOP/Makefile,
+	Inpts/DEVELOP/h2o_1.inp, Inpts/DEVELOP/h2o_10.inp,
+	Inpts/DEVELOP/h2o_15.inp, Inpts/DEVELOP/h2o_5.inp,
+	Inpts/DEVELOP/helium.inp, Inpts/DEVELOP/oxim.inp,
+	Inpts/DEVELOP/oxim_b00.arc, Inpts/DEVELOP/SoftSeg_1.inp,
+	Inpts/DEVELOP/xterm.script, Inpts/ESTANE/Estane_1.in,
+	Inpts/ESTANE/Estane_2.in, Inpts/ESTANE/Estane_3.in,
+	Inpts/ESTANE/Estane_4.in, Inpts/ESTANE/Estane_8.in,
+	Inpts/ESTANE/HardSeg_1.in, Inpts/ESTANE/SoftSeg_1.in,
+	Inpts/ESTANE/end, Inpts/ESTANE/mkinpts,
+	Inpts/ESTANE/sub_estanes_lsf, Inpts/ESTANE/sub_estanes_nqs,
+	Inpts/ESTANE/template, Inpts/ESTANE/BIOSYM/Estane_1.inp,
+	Inpts/ESTANE/BIOSYM/Estane_2.inp, Inpts/ESTANE/BIOSYM/Estane_4.inp,
+	Inpts/ESTANE/BIOSYM/Estane_8.inp,
+	Inpts/ESTANE/BIOSYM/HardSeg_1.inp,
+	Inpts/ESTANE/BIOSYM/SoftSeg_1.inp, Inpts/ESTANE/XYZ/Estane_1.xyz,
+	Inpts/ESTANE/XYZ/Estane_2.xyz, Inpts/ESTANE/XYZ/Estane_3.xyz,
+	Inpts/ESTANE/XYZ/Estane_4.xyz, Inpts/ESTANE/XYZ/Estane_8.xyz,
+	Inpts/ESTANE/XYZ/HardSeg_1.xyz, Inpts/ESTANE/XYZ/SoftSeg_1.xyz,
+	Inpts/PROTEINS/end, Inpts/PROTEINS/mkinpts,
+	Inpts/PROTEINS/pdb_to_xyz, Inpts/PROTEINS/sub_proteins_lsf,
+	Inpts/PROTEINS/template, Inpts/PROTEINS/PDB/ChyInh2.pdb,
+	Inpts/PROTEINS/PDB/Conotoxin.pdb, Inpts/PROTEINS/PDB/CytB562.pdb,
+	Inpts/PROTEINS/PDB/FibroblastGF.pdb,
+	Inpts/PROTEINS/PDB/HIVProtease.pdb,
+	Inpts/PROTEINS/PDB/Interleukin.pdb,
+	Inpts/PROTEINS/PDB/Lysozyme.pdb, Inpts/PROTEINS/PDB/P53Dimer.pdb,
+	Inpts/PROTEINS/PDB/TyrPhos.pdb, Inpts/PROTEINS/XYZ/ChyInh2.xyz,
+	Inpts/PROTEINS/XYZ/Conotoxin.xyz, Inpts/PROTEINS/XYZ/CytB562.xyz,
+	Inpts/PROTEINS/XYZ/FibroblastGF.xyz,
+	Inpts/PROTEINS/XYZ/HIVProtease.xyz,
+	Inpts/PROTEINS/XYZ/Interleukin.xyz,
+	Inpts/PROTEINS/XYZ/Lysozyme.xyz, Inpts/PROTEINS/XYZ/TyrPhos.xyz,
+	Inpts/WATER/Makefile, Inpts/WATER/end_inp, Inpts/WATER/h2o_10.inp,
+	Inpts/WATER/h2o_110.inp, Inpts/WATER/h2o_130.inp,
+	Inpts/WATER/h2o_150.inp, Inpts/WATER/h2o_200.inp,
+	Inpts/WATER/h2o_250.inp, Inpts/WATER/h2o_30.inp,
+	Inpts/WATER/h2o_300.inp, Inpts/WATER/h2o_350.inp,
+	Inpts/WATER/h2o_50.inp, Inpts/WATER/h2o_70.inp,
+	Inpts/WATER/h2o_90.inp, Inpts/WATER/mkinpts, Inpts/WATER/sub_lsf,
+	Inpts/WATER/sub_nqs, Inpts/WATER/sub_pbs,
+	Inpts/WATER/submit_lsf_waters, Inpts/WATER/submit_pbs_waters,
+	Inpts/WATER/template_inp, Inpts/WATER/BENCH/G94_3_21G_Benchmarks,
+	Inpts/WATER/XYZ/h2o_10.xyz, Inpts/WATER/XYZ/h2o_110.xyz,
+	Inpts/WATER/XYZ/h2o_130.xyz, Inpts/WATER/XYZ/h2o_150.xyz,
+	Inpts/WATER/XYZ/h2o_200.xyz, Inpts/WATER/XYZ/h2o_250.xyz,
+	Inpts/WATER/XYZ/h2o_30.xyz, Inpts/WATER/XYZ/h2o_300.xyz,
+	Inpts/WATER/XYZ/h2o_350.xyz, Inpts/WATER/XYZ/h2o_50.xyz,
+	Inpts/WATER/XYZ/h2o_70.xyz, Inpts/WATER/XYZ/h2o_90.xyz,
+	MondoMods/AtomPairs.F90, MondoMods/BasisSetParameters.F90,
+	MondoMods/BoundingBox.F90, MondoMods/BraKetBloks.F90,
+	MondoMods/Clock.F90, MondoMods/DerivedTypes.F90,
+	MondoMods/Functionals.F90, MondoMods/GlobalCharacters.F90,
+	MondoMods/GlobalObjects.F90, MondoMods/GlobalScalars.F90,
+	MondoMods/HDF5Wrap.c, MondoMods/InOut.F90, MondoMods/Indexing.F90,
+	MondoMods/LinAlg.F90, MondoMods/LinAlg77.F,
+	MondoMods/MPIInclude.F90, MondoMods/Macros.F90, MondoMods/Makefile,
+	MondoMods/MatFunk.F90, MondoMods/McMurch.F90, MondoMods/MemMan.F90,
+	MondoMods/MondoMPI.F90, MondoMods/Order.F90, MondoMods/Order77.F,
+	MondoMods/PBC.F90, MondoMods/Parse.F90,
+	MondoMods/ParsingConstants.F90, MondoMods/PrettyPrint.F90,
+	MondoMods/ProcessControl.F90, MondoMods/Random.c,
+	MondoMods/SMTest.F90, MondoMods/SMWrap.c, MondoMods/Seconds.c,
+	MondoMods/SetEq.F90, MondoMods/SetEq77.F, MondoMods/SpecFun.F90,
+	MondoMods/SpecFun77.F, MondoMods/Thresholding.F90,
+	MondoMods/Trap.c, MondoMods/MMA/Functions/D1Mach.F,
+	MondoMods/MMA/Functions/DCSEvl.F, MondoMods/MMA/Functions/DErf.F,
+	MondoMods/MMA/Functions/DErfc.F, MondoMods/MMA/Functions/DMach.F,
+	MondoMods/MMA/Functions/Erf.Inc, MondoMods/MMA/Functions/Exp.Inc,
+	MondoMods/MMA/Functions/Exponential.Inc,
+	MondoMods/MMA/Functions/Gamma_0.Inc,
+	MondoMods/MMA/Functions/Gamma_1.Inc,
+	MondoMods/MMA/Functions/Gamma_10.Inc,
+	MondoMods/MMA/Functions/Gamma_11.Inc,
+	MondoMods/MMA/Functions/Gamma_12.Inc,
+	MondoMods/MMA/Functions/Gamma_2.Inc,
+	MondoMods/MMA/Functions/Gamma_3.Inc,
+	MondoMods/MMA/Functions/Gamma_4.Inc,
+	MondoMods/MMA/Functions/Gamma_5.Inc,
+	MondoMods/MMA/Functions/Gamma_6.Inc,
+	MondoMods/MMA/Functions/Gamma_7.Inc,
+	MondoMods/MMA/Functions/Gamma_8.Inc,
+	MondoMods/MMA/Functions/Gamma_9.Inc,
+	MondoMods/MMA/Functions/Gamma_Asymptotics.Inc,
+	MondoMods/MMA/Functions/InitDS.F, MondoMods/MMA/Functions/Mesh.Inc,
+	MondoMods/MMA/Functions/SpecFunc.nb,
+	MondoMods/MMA/Functionals/ClosedShellFunctionals.nb,
+	MondoMods/MMA/Functionals/Format.m,
+	MondoMods/MMA/Functionals/Format.ps,
+	MondoMods/MMA/Functionals/Format.sty,
+	MondoMods/MMA/Functionals/Format.tex,
+	MondoMods/MMA/Functionals/Optimize.m,
+	MondoMods/MMA/Functionals/README.txt,
+	MondoMods/MMA/Functionals/example.mf,
+	MondoMods/MMA/Functionals/func.mf,
+	MondoMods/MMA/Functionals/newton.mf,
+	MondoMods/MMA/Functionals/rksub.mf,
+	MondoMods/MMA/Functionals/sub.mf, MondoSCF/ChkSCFs.F90,
+	MondoSCF/DrvSCFs.F90, MondoSCF/GetPID.c, MondoSCF/Makefile,
+	MondoSCF/MondoSCF.F90, MondoSCF/Overlay.F90,
+	MondoSCF/ParseInput.F90, MondoSCF/ParsingKeys.F90,
+	MondoSCF/SCFLocals.F90, MondoSCF/SetSCFs.F90, MondoSCF/Spawn.c,
+	OneE/GradS.F90, OneE/GradSBlok.F90, OneE/GradT.F90, ONX/AddDis.F,
+	ONX/BSearch.F, ONX/BuffTbl.F, ONX/CCDriver.c, ONX/CalcK.F,
+	ONX/ContractionScaling.F90, ONX/ErrorF.F, ONX/Exponential.inc,
+	ONX/Fillout.F90, ONX/Gamma_0.inc, ONX/Gamma_1.inc, ONX/Gamma_2.inc,
+	ONX/Gamma_3.inc, ONX/Gamma_4.inc, ONX/Gamma_5.inc, ONX/Gamma_6.inc,
+	ONX/Gamma_7.inc, ONX/Gamma_8.inc, ONX/Gamma_A.inc,
+	ONX/Gamma_Defs.inc, ONX/GatherK.F90, ONX/GetID.c, ONX/GetSubBlk.F,
+	ONX/InitExchangeMatrix.F90, ONX/IntegralSelect.inc, ONX/KonK2L.F,
+	ONX/LSearch.F, ONX/LineEnd.F, ONX/Loader.F90, ONX/MAIN.c,
+	ONX/MMML.F, ONX/Makefile, ONX/MatFilter.F90, ONX/MinMax.F90,
+	ONX/Misc.F, ONX/MondoHalt.F, ONX/MultipoleSelect.inc, ONX/ONX.F90,
+	ONX/bkonx.inc, ONX/bkonx_F90.inc, ONX/contract.F, ONX/digest.F,
+	ONX/getadr.F, ONX/hgtftosp.F, ONX/hrrbra.F, ONX/hrrbra_old.F,
+	ONX/hrrket.F, ONX/hrrket_old.F, ONX/mstats.inc, ONX/onx1111.F,
+	ONX/onx1121.F, OneE/GradTBlok.F90, OneE/MakeRho.F90,
+	OneE/MakeS.F90, OneE/MakeT.F90, OneE/Makefile, OneE/RhoBlok.F90,
+	OneE/SBlok.F90, OneE/TBlok.F90, ONX/ONXBuf.F90, ONX/ONXHalt.F90,
+	ONX/ONXLoop.F90, ONX/ONXParameters.F90, ONX/ONXSch.F,
+	ONX/ONXSch.F.hold, ONX/OpenAppend.F, ONX/Order.F90,
+	ONX/ParallelIO.F90, ONX/RLoader.F, ONX/RangeOfDensity.F90,
+	ONX/RangeOfExchange.F90, ONX/VRRDriver.c, ONX/XPose.F,
+	ONX/onx1122.F, ONX/onx1161.F, ONX/onx1162.F, ONX/onx1166.F,
+	ONX/onx2111.F, ONX/onx2121.F, ONX/onx2122.F, ONX/onx2161.F,
+	ONX/onx2162.F, ONX/onx2211.F, ONX/onx2221.F, ONX/onx2222.F,
+	ONX/onx2261.F, ONX/onx6111.F, ONX/onx6121.F, ONX/onx6122.F,
+	ONX/onx6161.F, ONX/onx6211.F, ONX/onx6221.F, ONX/onx6611.F,
+	ONX/onxio.c, ONX/onxsch.F, ONX/onxsort2.F, ONX/pmonx.inc,
+	ONX/putsubblk.F, ONX/skipout.F, ONX/tgen0.F, ONX/tgen1t2.F,
+	ONX/tgen3t4.F, ONX/tgen5t6.F, ONX/tgen7t8.F, ONX/tmp, ONX/vrrg.F,
+	ONX/vrrl.F, ONX/vrrs.F, PHiPAC/runs/P3/L0_search,
+	PHiPAC/runs/P3/L1_search, PHiPAC/runs/P3/L2_search,
+	PHiPAC/runs/P3/LOG, PHiPAC/runs/P3/compiler_options,
+	PHiPAC/runs/P3/machine_specs, PHiPAC/runs/P3/my.matrixsizes_file,
+	PHiPAC/runs/P3/sample_run.sh,
+	PHiPAC/runs/P3/PHiPAC_dgemm/src/Makefile,
+	PHiPAC/runs/P3/PHiPAC_dgemm/src/mm_double_NN_1.c,
+	PHiPAC/runs/P3/PHiPAC_dgemm/src/mm_double_NN_c.c,
+	PHiPAC/runs/P3/PHiPAC_dgemm/src/mm_double_NT_1.c,
+	PHiPAC/runs/P3/PHiPAC_dgemm/src/mm_double_NT_c.c,
+	PHiPAC/runs/P3/PHiPAC_dgemm/src/mm_double_TN_1.c,
+	PHiPAC/runs/P3/PHiPAC_dgemm/src/mm_double_TN_c.c,
+	PHiPAC/runs/P3/PHiPAC_dgemm/src/mm_double_TT_1.c,
+	PHiPAC/runs/P3/PHiPAC_dgemm/src/mm_double_TT_c.c,
+	PHiPAC/runs/P3/PHiPAC_dgemm/src/phipac_dgemm.c,
+	PHiPAC/runs/P3/perf/L0CORE.double.NN.1.1A.CC,
+	PHiPAC/runs/P3/perf/L0CORE.double.NN.1.1B.CC,
+	PHiPAC/runs/P3/perf/L0CORE.double.NN.1.2lm.CC,
+	PHiPAC/runs/P3/perf/L0CORE.double.NN.1.2ma.CC,
+	PHiPAC/runs/P3/perf/L0CORE.double.NN.1.3.CC,
+	PHiPAC/runs/P3/perf/L0CORE_top.double, QCTC/JBlok.F90,
+	QCTC/MMoments.F90, QCTC/MakeDJ.F90, QCTC/Makefile,
+	QCTC/MultipoleLib.F, QCTC/Multipoles_Cube.dat,
+	QCTC/VMD/Indexing.Inc, QCTC/VMD/Makefile, QCTC/VMD/SMDBlock.Inc,
+	QCTC/VMD/SMDObjs, QCTC/VMD/VMD0.f, QCTC/VMD/VMD1.f,
+	QCTC/VMD/VMD10.f, QCTC/VMD/VMD11.f, QCTC/VMD/VMD12.f,
+	QCTC/VMD/VMD13.f, QCTC/VMD/VMD14.f, QCTC/VMD/VMD2.f,
+	QCTC/VMD/VMD20.f, QCTC/VMD/VMD21.f, QCTC/VMD/VMD22.f,
+	QCTC/VMD/VMD23.f, QCTC/VMD/VMD24.f, QCTC/VMD/VMD3.f,
+	QCTC/VMD/VMD30.f, QCTC/VMD/VMD31.f, QCTC/VMD/VMD32.f,
+	QCTC/VMD/expVMD.f.original, QCTC/VMD/VMD33.f, QCTC/VMD/VMD34.f,
+	QCTC/VMD/VMD4.f, QCTC/VMD/VMD40.f, QCTC/VMD/VMD41.f,
+	QCTC/VMD/VMD42.f, QCTC/VMD/VMD43.f, QCTC/VMD/VMD44.f,
+	QCTC/VMD/VMDBlock.Inc, QCTC/VMD/VMDBlok.Inc, QCTC/VMD/VMDObjs,
+	QCTC/VMD/MMA/OptMDRRs.m, QCTC/VMD/OLD/VMD0.f, QCTC/VMD/OLD/VMD1.f,
+	QCTC/VMD/OLD/VMD10.f, QCTC/VMD/OLD/VMD11.f, QCTC/VMD/OLD/VMD12.f,
+	QCTC/VMD/OLD/VMD13.f, QCTC/VMD/OLD/VMD14.f, QCTC/VMD/OLD/VMD2.f,
+	QCTC/VMD/OLD/VMD20.f, QCTC/VMD/OLD/VMD21.f, QCTC/VMD/OLD/VMD22.f,
+	QCTC/VMD/OLD/VMD23.f, QCTC/VMD/OLD/VMD24.f, QCTC/VMD/OLD/VMD3.f,
+	QCTC/VMD/OLD/VMD30.f, QCTC/VMD/OLD/VMD31.f, QCTC/VMD/OLD/VMD32.f,
+	QCTC/VMD/OLD/VMD33.f, QCTC/VMD/OLD/VMD34.f, QCTC/VMD/OLD/VMD4.f,
+	QCTC/VMD/OLD/VMD40.f, QCTC/VMD/OLD/VMD41.f, QCTC/VMD/OLD/VMD42.f,
+	QCTC/VMD/OLD/VMD43.f, QCTC/VMD/OLD/VMD44.f, SCFeqs/DIIS.F90,
+	SCFeqs/FBuild.F90, SCFeqs/FillPBlok.F90, SCFeqs/Makefile,
+	SCFeqs/P2Use.F90, SCFeqs/RHeqs.F90, SCFeqs/SCFStatus.F90,
+	SCFeqs/SDMM.F90, SCFeqs/MMA/DIIS/DIIS.nb, SCFeqs/MMA/SCFDev/scf.in,
+	SCFeqs/MMA/SDMM/OrthogCG.m, Scripts/CSHRC, Scripts/ListInf,
+	Scripts/MondoSetUp, Scripts/aix_pedb, Scripts/mondo,
+	Scripts/nag_dbx, Scripts/pgf_dbx, Scripts/sgi_dbx,
+	Scripts/sgi_dbx2, XForm/BlokAInv.F90, XForm/LowdinO.F90,
+	XForm/Makefile, XForm/OLD/BlokOpsDns.F90, XForm/OLD/DGEMMS.F90,
+	XForm/OLD/DenseAInv.F90: Initial revision
+
+2000-10-30 12:54  mondo
+
+	* Makefile, README, BasisSets/3-21G.bas, BasisSets/3-21GSP.bas,
+	BasisSets/3-21Gs.bas, BasisSets/4-22GSP.bas,
+	BasisSets/6-311Gss.bas, BasisSets/6-31G.bas, BasisSets/6-31Gs.bas,
+	BasisSets/6-31Gss.bas, BasisSets/6-31ppGss.bas,
+	BasisSets/Ahlrichs_TZV.bas, BasisSets/Ahlrichs_VDZ.bas,
+	BasisSets/Ahlrichs_VTZ.bas, BasisSets/Ahlrichs_pVDZ.bas,
+	BasisSets/DunningHay_SV.bas, BasisSets/DunningHay_SVP.bas,
+	BasisSets/Dunning_DZ.bas, BasisSets/Dunning_DZP.bas,
+	BasisSets/Dunning_TZ.bas, BasisSets/MIDI.bas, BasisSets/MINI.bas,
+	BasisSets/README, BasisSets/STO-2G.bas, BasisSets/STO-3G.bas,
+	BasisSets/STO-6G.bas, BasisSets/WTBS.bas, HiCu/CubeTree.F90,
+	HiCu/Grid.F90, HiCu/HiCu.F90, HiCu/KxcGen.F90, HiCu/Makefile,
+	HiCu/RhoTree.F90, HiCu/VRhoMD.F90,
+	HiCu/MMA/CubeRules/CubeDegree5.nb,
+	HiCu/MMA/CubeRules/CubeDegree7.nb, HiCu/MMA/CubeRules/Rule5.Inc,
+	HiCu/MMA/CubeRules/Rule7.Inc, HiCu/MMA/CubeRules/RuleB.Inc,
+	HiCu/MMA/CubeRules/RuleC.Inc, HiCu/MMA/CubeRules/RuleD.Inc,
+	HiCu/MMA/CubeRules/RuleE.Inc, HiCu/MMA/Density/DensityDebug.nb,
+	Includes/CompilerSpecifics.AlphaLinux.COMPAQ,
+	Includes/CompilerSpecifics.IBMAIX.XLF,
+	Includes/CompilerSpecifics.IntelLinux.ABSOFT,
+	Includes/CompilerSpecifics.IntelLinux.LAHEY,
+	Includes/CompilerSpecifics.IntelLinux.NAG,
+	Includes/CompilerSpecifics.IntelLinux.PG,
+	Includes/CompilerSpecifics.SGIIrix.MIPS,
+	Includes/MONDO_MPI_INCLUDE.Inc, Includes/MPICH.h,
+	Includes/Makefile, Includes/RemoveAll, Includes/Suffixes,
+	Inpts/DEVELOP/Heme.inp, Inpts/DEVELOP/Makefile,
+	Inpts/DEVELOP/h2o_1.inp, Inpts/DEVELOP/h2o_10.inp,
+	Inpts/DEVELOP/h2o_15.inp, Inpts/DEVELOP/h2o_5.inp,
+	Inpts/DEVELOP/helium.inp, Inpts/DEVELOP/oxim.inp,
+	Inpts/DEVELOP/oxim_b00.arc, Inpts/DEVELOP/SoftSeg_1.inp,
+	Inpts/DEVELOP/xterm.script, Inpts/ESTANE/Estane_1.in,
+	Inpts/ESTANE/Estane_2.in, Inpts/ESTANE/Estane_3.in,
+	Inpts/ESTANE/Estane_4.in, Inpts/ESTANE/Estane_8.in,
+	Inpts/ESTANE/HardSeg_1.in, Inpts/ESTANE/SoftSeg_1.in,
+	Inpts/ESTANE/end, Inpts/ESTANE/mkinpts,
+	Inpts/ESTANE/sub_estanes_lsf, Inpts/ESTANE/sub_estanes_nqs,
+	Inpts/ESTANE/template, Inpts/ESTANE/BIOSYM/Estane_1.inp,
+	Inpts/ESTANE/BIOSYM/Estane_2.inp, Inpts/ESTANE/BIOSYM/Estane_4.inp,
+	Inpts/ESTANE/BIOSYM/Estane_8.inp,
+	Inpts/ESTANE/BIOSYM/HardSeg_1.inp,
+	Inpts/ESTANE/BIOSYM/SoftSeg_1.inp, Inpts/ESTANE/XYZ/Estane_1.xyz,
+	Inpts/ESTANE/XYZ/Estane_2.xyz, Inpts/ESTANE/XYZ/Estane_3.xyz,
+	Inpts/ESTANE/XYZ/Estane_4.xyz, Inpts/ESTANE/XYZ/Estane_8.xyz,
+	Inpts/ESTANE/XYZ/HardSeg_1.xyz, Inpts/ESTANE/XYZ/SoftSeg_1.xyz,
+	Inpts/PROTEINS/end, Inpts/PROTEINS/mkinpts,
+	Inpts/PROTEINS/pdb_to_xyz, Inpts/PROTEINS/sub_proteins_lsf,
+	Inpts/PROTEINS/template, Inpts/PROTEINS/PDB/ChyInh2.pdb,
+	Inpts/PROTEINS/PDB/Conotoxin.pdb, Inpts/PROTEINS/PDB/CytB562.pdb,
+	Inpts/PROTEINS/PDB/FibroblastGF.pdb,
+	Inpts/PROTEINS/PDB/HIVProtease.pdb,
+	Inpts/PROTEINS/PDB/Interleukin.pdb,
+	Inpts/PROTEINS/PDB/Lysozyme.pdb, Inpts/PROTEINS/PDB/P53Dimer.pdb,
+	Inpts/PROTEINS/PDB/TyrPhos.pdb, Inpts/PROTEINS/XYZ/ChyInh2.xyz,
+	Inpts/PROTEINS/XYZ/Conotoxin.xyz, Inpts/PROTEINS/XYZ/CytB562.xyz,
+	Inpts/PROTEINS/XYZ/FibroblastGF.xyz,
+	Inpts/PROTEINS/XYZ/HIVProtease.xyz,
+	Inpts/PROTEINS/XYZ/Interleukin.xyz,
+	Inpts/PROTEINS/XYZ/Lysozyme.xyz, Inpts/PROTEINS/XYZ/TyrPhos.xyz,
+	Inpts/WATER/Makefile, Inpts/WATER/end_inp, Inpts/WATER/h2o_10.inp,
+	Inpts/WATER/h2o_110.inp, Inpts/WATER/h2o_130.inp,
+	Inpts/WATER/h2o_150.inp, Inpts/WATER/h2o_200.inp,
+	Inpts/WATER/h2o_250.inp, Inpts/WATER/h2o_30.inp,
+	Inpts/WATER/h2o_300.inp, Inpts/WATER/h2o_350.inp,
+	Inpts/WATER/h2o_50.inp, Inpts/WATER/h2o_70.inp,
+	Inpts/WATER/h2o_90.inp, Inpts/WATER/mkinpts, Inpts/WATER/sub_lsf,
+	Inpts/WATER/sub_nqs, Inpts/WATER/sub_pbs,
+	Inpts/WATER/submit_lsf_waters, Inpts/WATER/submit_pbs_waters,
+	Inpts/WATER/template_inp, Inpts/WATER/BENCH/G94_3_21G_Benchmarks,
+	Inpts/WATER/XYZ/h2o_10.xyz, Inpts/WATER/XYZ/h2o_110.xyz,
+	Inpts/WATER/XYZ/h2o_130.xyz, Inpts/WATER/XYZ/h2o_150.xyz,
+	Inpts/WATER/XYZ/h2o_200.xyz, Inpts/WATER/XYZ/h2o_250.xyz,
+	Inpts/WATER/XYZ/h2o_30.xyz, Inpts/WATER/XYZ/h2o_300.xyz,
+	Inpts/WATER/XYZ/h2o_350.xyz, Inpts/WATER/XYZ/h2o_50.xyz,
+	Inpts/WATER/XYZ/h2o_70.xyz, Inpts/WATER/XYZ/h2o_90.xyz,
+	MondoMods/AtomPairs.F90, MondoMods/BasisSetParameters.F90,
+	MondoMods/BoundingBox.F90, MondoMods/BraKetBloks.F90,
+	MondoMods/Clock.F90, MondoMods/DerivedTypes.F90,
+	MondoMods/Functionals.F90, MondoMods/GlobalCharacters.F90,
+	MondoMods/GlobalObjects.F90, MondoMods/GlobalScalars.F90,
+	MondoMods/HDF5Wrap.c, MondoMods/InOut.F90, MondoMods/Indexing.F90,
+	MondoMods/LinAlg.F90, MondoMods/LinAlg77.F,
+	MondoMods/MPIInclude.F90, MondoMods/Macros.F90, MondoMods/Makefile,
+	MondoMods/MatFunk.F90, MondoMods/McMurch.F90, MondoMods/MemMan.F90,
+	MondoMods/MondoMPI.F90, MondoMods/Order.F90, MondoMods/Order77.F,
+	MondoMods/PBC.F90, MondoMods/Parse.F90,
+	MondoMods/ParsingConstants.F90, MondoMods/PrettyPrint.F90,
+	MondoMods/ProcessControl.F90, MondoMods/Random.c,
+	MondoMods/SMTest.F90, MondoMods/SMWrap.c, MondoMods/Seconds.c,
+	MondoMods/SetEq.F90, MondoMods/SetEq77.F, MondoMods/SpecFun.F90,
+	MondoMods/SpecFun77.F, MondoMods/Thresholding.F90,
+	MondoMods/Trap.c, MondoMods/MMA/Functions/D1Mach.F,
+	MondoMods/MMA/Functions/DCSEvl.F, MondoMods/MMA/Functions/DErf.F,
+	MondoMods/MMA/Functions/DErfc.F, MondoMods/MMA/Functions/DMach.F,
+	MondoMods/MMA/Functions/Erf.Inc, MondoMods/MMA/Functions/Exp.Inc,
+	MondoMods/MMA/Functions/Exponential.Inc,
+	MondoMods/MMA/Functions/Gamma_0.Inc,
+	MondoMods/MMA/Functions/Gamma_1.Inc,
+	MondoMods/MMA/Functions/Gamma_10.Inc,
+	MondoMods/MMA/Functions/Gamma_11.Inc,
+	MondoMods/MMA/Functions/Gamma_12.Inc,
+	MondoMods/MMA/Functions/Gamma_2.Inc,
+	MondoMods/MMA/Functions/Gamma_3.Inc,
+	MondoMods/MMA/Functions/Gamma_4.Inc,
+	MondoMods/MMA/Functions/Gamma_5.Inc,
+	MondoMods/MMA/Functions/Gamma_6.Inc,
+	MondoMods/MMA/Functions/Gamma_7.Inc,
+	MondoMods/MMA/Functions/Gamma_8.Inc,
+	MondoMods/MMA/Functions/Gamma_9.Inc,
+	MondoMods/MMA/Functions/Gamma_Asymptotics.Inc,
+	MondoMods/MMA/Functions/InitDS.F, MondoMods/MMA/Functions/Mesh.Inc,
+	MondoMods/MMA/Functions/SpecFunc.nb,
+	MondoMods/MMA/Functionals/ClosedShellFunctionals.nb,
+	MondoMods/MMA/Functionals/Format.m,
+	MondoMods/MMA/Functionals/Format.ps,
+	MondoMods/MMA/Functionals/Format.sty,
+	MondoMods/MMA/Functionals/Format.tex,
+	MondoMods/MMA/Functionals/Optimize.m,
+	MondoMods/MMA/Functionals/README.txt,
+	MondoMods/MMA/Functionals/example.mf,
+	MondoMods/MMA/Functionals/func.mf,
+	MondoMods/MMA/Functionals/newton.mf,
+	MondoMods/MMA/Functionals/rksub.mf,
+	MondoMods/MMA/Functionals/sub.mf, MondoSCF/ChkSCFs.F90,
+	MondoSCF/DrvSCFs.F90, MondoSCF/GetPID.c, MondoSCF/Makefile,
+	MondoSCF/MondoSCF.F90, MondoSCF/Overlay.F90,
+	MondoSCF/ParseInput.F90, MondoSCF/ParsingKeys.F90,
+	MondoSCF/SCFLocals.F90, MondoSCF/SetSCFs.F90, MondoSCF/Spawn.c,
+	OneE/GradS.F90, OneE/GradSBlok.F90, OneE/GradT.F90, ONX/AddDis.F,
+	ONX/BSearch.F, ONX/BuffTbl.F, ONX/CCDriver.c, ONX/CalcK.F,
+	ONX/ContractionScaling.F90, ONX/ErrorF.F, ONX/Exponential.inc,
+	ONX/Fillout.F90, ONX/Gamma_0.inc, ONX/Gamma_1.inc, ONX/Gamma_2.inc,
+	ONX/Gamma_3.inc, ONX/Gamma_4.inc, ONX/Gamma_5.inc, ONX/Gamma_6.inc,
+	ONX/Gamma_7.inc, ONX/Gamma_8.inc, ONX/Gamma_A.inc,
+	ONX/Gamma_Defs.inc, ONX/GatherK.F90, ONX/GetID.c, ONX/GetSubBlk.F,
+	ONX/InitExchangeMatrix.F90, ONX/IntegralSelect.inc, ONX/KonK2L.F,
+	ONX/LSearch.F, ONX/LineEnd.F, ONX/Loader.F90, ONX/MAIN.c,
+	ONX/MMML.F, ONX/Makefile, ONX/MatFilter.F90, ONX/MinMax.F90,
+	ONX/Misc.F, ONX/MondoHalt.F, ONX/MultipoleSelect.inc, ONX/ONX.F90,
+	ONX/bkonx.inc, ONX/bkonx_F90.inc, ONX/contract.F, ONX/digest.F,
+	ONX/getadr.F, ONX/hgtftosp.F, ONX/hrrbra.F, ONX/hrrbra_old.F,
+	ONX/hrrket.F, ONX/hrrket_old.F, ONX/mstats.inc, ONX/onx1111.F,
+	ONX/onx1121.F, OneE/GradTBlok.F90, OneE/MakeRho.F90,
+	OneE/MakeS.F90, OneE/MakeT.F90, OneE/Makefile, OneE/RhoBlok.F90,
+	OneE/SBlok.F90, OneE/TBlok.F90, ONX/ONXBuf.F90, ONX/ONXHalt.F90,
+	ONX/ONXLoop.F90, ONX/ONXParameters.F90, ONX/ONXSch.F,
+	ONX/ONXSch.F.hold, ONX/OpenAppend.F, ONX/Order.F90,
+	ONX/ParallelIO.F90, ONX/RLoader.F, ONX/RangeOfDensity.F90,
+	ONX/RangeOfExchange.F90, ONX/VRRDriver.c, ONX/XPose.F,
+	ONX/onx1122.F, ONX/onx1161.F, ONX/onx1162.F, ONX/onx1166.F,
+	ONX/onx2111.F, ONX/onx2121.F, ONX/onx2122.F, ONX/onx2161.F,
+	ONX/onx2162.F, ONX/onx2211.F, ONX/onx2221.F, ONX/onx2222.F,
+	ONX/onx2261.F, ONX/onx6111.F, ONX/onx6121.F, ONX/onx6122.F,
+	ONX/onx6161.F, ONX/onx6211.F, ONX/onx6221.F, ONX/onx6611.F,
+	ONX/onxio.c, ONX/onxsch.F, ONX/onxsort2.F, ONX/pmonx.inc,
+	ONX/putsubblk.F, ONX/skipout.F, ONX/tgen0.F, ONX/tgen1t2.F,
+	ONX/tgen3t4.F, ONX/tgen5t6.F, ONX/tgen7t8.F, ONX/tmp, ONX/vrrg.F,
+	ONX/vrrl.F, ONX/vrrs.F, PHiPAC/runs/P3/L0_search,
+	PHiPAC/runs/P3/L1_search, PHiPAC/runs/P3/L2_search,
+	PHiPAC/runs/P3/LOG, PHiPAC/runs/P3/compiler_options,
+	PHiPAC/runs/P3/machine_specs, PHiPAC/runs/P3/my.matrixsizes_file,
+	PHiPAC/runs/P3/sample_run.sh,
+	PHiPAC/runs/P3/PHiPAC_dgemm/src/Makefile,
+	PHiPAC/runs/P3/PHiPAC_dgemm/src/mm_double_NN_1.c,
+	PHiPAC/runs/P3/PHiPAC_dgemm/src/mm_double_NN_c.c,
+	PHiPAC/runs/P3/PHiPAC_dgemm/src/mm_double_NT_1.c,
+	PHiPAC/runs/P3/PHiPAC_dgemm/src/mm_double_NT_c.c,
+	PHiPAC/runs/P3/PHiPAC_dgemm/src/mm_double_TN_1.c,
+	PHiPAC/runs/P3/PHiPAC_dgemm/src/mm_double_TN_c.c,
+	PHiPAC/runs/P3/PHiPAC_dgemm/src/mm_double_TT_1.c,
+	PHiPAC/runs/P3/PHiPAC_dgemm/src/mm_double_TT_c.c,
+	PHiPAC/runs/P3/PHiPAC_dgemm/src/phipac_dgemm.c,
+	PHiPAC/runs/P3/perf/L0CORE.double.NN.1.1A.CC,
+	PHiPAC/runs/P3/perf/L0CORE.double.NN.1.1B.CC,
+	PHiPAC/runs/P3/perf/L0CORE.double.NN.1.2lm.CC,
+	PHiPAC/runs/P3/perf/L0CORE.double.NN.1.2ma.CC,
+	PHiPAC/runs/P3/perf/L0CORE.double.NN.1.3.CC,
+	PHiPAC/runs/P3/perf/L0CORE_top.double, QCTC/JBlok.F90,
+	QCTC/MMoments.F90, QCTC/MakeDJ.F90, QCTC/Makefile,
+	QCTC/MultipoleLib.F, QCTC/Multipoles_Cube.dat,
+	QCTC/VMD/Indexing.Inc, QCTC/VMD/Makefile, QCTC/VMD/SMDBlock.Inc,
+	QCTC/VMD/SMDObjs, QCTC/VMD/VMD0.f, QCTC/VMD/VMD1.f,
+	QCTC/VMD/VMD10.f, QCTC/VMD/VMD11.f, QCTC/VMD/VMD12.f,
+	QCTC/VMD/VMD13.f, QCTC/VMD/VMD14.f, QCTC/VMD/VMD2.f,
+	QCTC/VMD/VMD20.f, QCTC/VMD/VMD21.f, QCTC/VMD/VMD22.f,
+	QCTC/VMD/VMD23.f, QCTC/VMD/VMD24.f, QCTC/VMD/VMD3.f,
+	QCTC/VMD/VMD30.f, QCTC/VMD/VMD31.f, QCTC/VMD/VMD32.f,
+	QCTC/VMD/expVMD.f.original, QCTC/VMD/VMD33.f, QCTC/VMD/VMD34.f,
+	QCTC/VMD/VMD4.f, QCTC/VMD/VMD40.f, QCTC/VMD/VMD41.f,
+	QCTC/VMD/VMD42.f, QCTC/VMD/VMD43.f, QCTC/VMD/VMD44.f,
+	QCTC/VMD/VMDBlock.Inc, QCTC/VMD/VMDBlok.Inc, QCTC/VMD/VMDObjs,
+	QCTC/VMD/MMA/OptMDRRs.m, QCTC/VMD/OLD/VMD0.f, QCTC/VMD/OLD/VMD1.f,
+	QCTC/VMD/OLD/VMD10.f, QCTC/VMD/OLD/VMD11.f, QCTC/VMD/OLD/VMD12.f,
+	QCTC/VMD/OLD/VMD13.f, QCTC/VMD/OLD/VMD14.f, QCTC/VMD/OLD/VMD2.f,
+	QCTC/VMD/OLD/VMD20.f, QCTC/VMD/OLD/VMD21.f, QCTC/VMD/OLD/VMD22.f,
+	QCTC/VMD/OLD/VMD23.f, QCTC/VMD/OLD/VMD24.f, QCTC/VMD/OLD/VMD3.f,
+	QCTC/VMD/OLD/VMD30.f, QCTC/VMD/OLD/VMD31.f, QCTC/VMD/OLD/VMD32.f,
+	QCTC/VMD/OLD/VMD33.f, QCTC/VMD/OLD/VMD34.f, QCTC/VMD/OLD/VMD4.f,
+	QCTC/VMD/OLD/VMD40.f, QCTC/VMD/OLD/VMD41.f, QCTC/VMD/OLD/VMD42.f,
+	QCTC/VMD/OLD/VMD43.f, QCTC/VMD/OLD/VMD44.f, SCFeqs/DIIS.F90,
+	SCFeqs/FBuild.F90, SCFeqs/FillPBlok.F90, SCFeqs/Makefile,
+	SCFeqs/P2Use.F90, SCFeqs/RHeqs.F90, SCFeqs/SCFStatus.F90,
+	SCFeqs/SDMM.F90, SCFeqs/MMA/DIIS/DIIS.nb, SCFeqs/MMA/SCFDev/scf.in,
+	SCFeqs/MMA/SDMM/OrthogCG.m, Scripts/CSHRC, Scripts/ListInf,
+	Scripts/MondoSetUp, Scripts/aix_pedb, Scripts/mondo,
+	Scripts/nag_dbx, Scripts/pgf_dbx, Scripts/sgi_dbx,
+	Scripts/sgi_dbx2, XForm/BlokAInv.F90, XForm/LowdinO.F90,
+	XForm/Makefile, XForm/OLD/BlokOpsDns.F90, XForm/OLD/DGEMMS.F90,
+	XForm/OLD/DenseAInv.F90: New, restructured and improved MondoSCF
+
