@@ -334,7 +334,7 @@ PROGRAM SDMM
 !
 !     Test only in asymptotic regime
 !      WRITE(*,*)' DeltaN = ',DeltaN,' DeltaP = ',DeltaP
-      IF(DeltaN<1.0D-2.AND.DetlaP<1.D-1.AND.NPur>3)THEN
+      IF(DeltaN<1.0D-2.AND.DeltaP<1.D-1.AND.NPur>3)THEN
 !        Check for low digit rebound
          IF(DeltaP>OldDeltaP)THEN
 !            WRITE(*,*)' exit 1 '
