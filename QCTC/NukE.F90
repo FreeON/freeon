@@ -34,7 +34,7 @@ MODULE NuklarE
 !---------------------------------------------------------------------------------------------
        NukE=Zero 
        DO At=1,GM_Loc%Natms
-	IF(GM_Loc%AtNum%D(At)<105D0)THEN
+	IF(GM_Loc%AtNum%D(At)<105.D0)THEN
 !         Initialize |BRA>
           HGBra(1) =-GM_Loc%AtNum%D(At)*(NuclearExpnt/Pi)**(ThreeHalves)
           SPBraC(0)=-GM_Loc%AtNum%D(At)
