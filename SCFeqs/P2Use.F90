@@ -189,12 +189,12 @@ PROGRAM P2Use
 #endif
            IF(I>6.AND.ABS(dN)>ABS(OldN))EXIT
            OldN=dN
-           IF(MOD(I,2)==0.AND.I<6)THEN
+           IF(MOD(I,2)==0.AND.I<1)THEN
               CALL Multiply(dP,Two)
               CALL Multiply(T2,-One)
               CALL Add(dP,T2,T1)
               CALL Filter(dP,T1)
-           ELSEIF(I<6)THEN
+           ELSEIF(I<1)THEN
               CALL Filter(dP,T2)
            ELSEIF(dN<0)THEN
               CALL Multiply(dP,Two)
