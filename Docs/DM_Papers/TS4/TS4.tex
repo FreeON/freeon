@@ -33,7 +33,7 @@
 \title{Trace setting density matrix purification in first-principles
 linear scaling electronic structure calculations}
 
-\author{Anders~M.~N.~Niklasson}
+\author{Anders~M.~N.~Niklasson\cite{Corr}}
 \author{C.~J.~Tymczak}
 \author{Matt Challacombe\homepage{www.t12.lanl.gov/~mchalla}}
 \affiliation{
@@ -50,14 +50,16 @@ purification scheme by Palser and Manolopoulos \cite{McWeeny60,Palser98},
 but instead of a fixed trace criteria we only require the correct
 occupation at convergence. The two methods are
 compared within the MondoSCF suite of linear scaling self-consistent total energy
-programs for different materials \cite{Mondo}, and we find an overall improved performance,
-especially at low and high occupancies. In comparison
+programs \cite{Mondo} for different materials, and we find an overall 
+improved performance, especially at low and high occupancies. In comparison
 with some variational methods the two schemes has the major advantage of
 dealing also with degenerate eigenstates and fractional occupancy. 
 Formulas for calculating the fractional filling and degeneracy from 
 the density matrix are derived, and alternative critereas to idempotency
 in the case of degeneracy and fractional filling are suggested.
 Thresholding is analyzed regarding numerical stability and error.
+Quadratic convergence in total energy as a function of thresholding
+is demonstrated.
 %
 %\keywords{density matrix, purification, linear scaling, electronic structure,
 %spectral projection, degeneracy}
@@ -391,7 +393,7 @@ $\varepsilon_0({\bf F})$ and $\varepsilon_N({\bf F})$ can be given
 by, for example, Gersgorin estimates \cite{Palser98}
 or via a couple of Lanczos iterations \cite{Daniels99},
 with only a small extra computational cost. In the present
-article we have chosen the Gersgorin bond, which is
+article we have chosen the Gersgorin bound, which is
 always giving an upper or lower eigenvalue estimate.
 It is less accurate than, for example, a Lanczos
 estimate. This leads to a somewhat compressed
@@ -402,8 +404,8 @@ could sometimes, at low or high occupancies, make a difference
 for the PM scheme, which is more sensitive to the initial
 guess.
 
-A main reason for the increased efficiency is the fact that
-the derivative at $0$ and $1$ of the spectral projections 
+A main reason for the increased efficiency of TS4 compared to the PM scheme is 
+the fact that the derivative at $0$ and $1$ of the spectral projections 
 no longer approaches $1$ in the limit of no or maximum
 occupancy as in the case of the PM scheme avoiding a spectral
 projection that is close to identity, which leads to a slow
@@ -413,7 +415,12 @@ derivative at the fixed points may be achieved, essentially without any
 extra computational cost since a 4th order polynomial can be
 calculated with only two matrix-matrix multiplications. The
 same number of matrix multiplications is needed for a third
-order polynomial. Order 2, 4 and 9 seems to be optimal \cite{Niklasson02}.
+order polynomial as in the Mc Weeny or the PM scheme. 
+Order 2, 4 and 9 seems to be optimal \cite{Niklasson02}.
+An additional important reason is the the slope of the
+purification polynomials at the infection point which should
+be as steep as possible which favours assymetric purification 
+compared to the symmetric cases \cite{Niklasson02b}.
 
 
 \section{Degeneracy}\label{Degen}
@@ -522,7 +529,7 @@ and is somewhat similar to a change in the computational machine epsilon, i.e. t
 In either case, we assume a filter opperation is applied after every sparse matrix-matrix 
 multiply to avoid fill in,
 \begin{eqnarray}
-{ \widetilde{ \bf X}}&=&\mbox{\tt filter} [\bf X,\tau ] \label{filter} \\
+{ \widetilde{ \bf X}}&=&\mbox{\tt Filter} [\bf X,\tau ] \label{filter} \\
 	      &=&{\bf X}+\bm{\epsilon},\nonumber 
 \end{eqnarray}
 leading to the approximate matrix $\widetilde{ \bf X}$ which is in error by $\bm \epsilon$,
@@ -615,48 +622,55 @@ calculations were carried out on a 1.2GHz AMD Athlon Thunderbird running RedHat
 All TES calculations employed L{\"o}wdin symmetric orthogonalization \cite{PLowdin50} (MATT check reference!), 
 while all TS4 and PM calculations used the congruence transformation provided by
 compuation of the sparse approximate inverse AINV \cite{AINV,MChallacombe02c} 
-(MATT check references! AINV should be included!)
-Cholesky factor.
+(MATT check references! AINV should be included!) Cholesky factor, except for chlorophyll.
 
-\subsubsection{Thresholds and convergence}
+subsubsection{Thresholds and convergence}
 Experiments were carried out with the thresholding in the algorithm of Eq. (\ref{Alg})
 as follows:
 \begin{equation} 
 \begin{array}{lll}
-i)    &{\bf X}_{n+1} &= {\rm filter}[2{\bf X}_n - \widetilde{\bf X}^2_n,\tau] \\
-ii)   &{\bf X}_{n+1} &= {\rm filter}[\widetilde{\bf X}^2_n,\tau] \\
-iii)~ &\widetilde{\bf X}^2_n &= {\rm filter}[\widetilde{\bf X}^2_n,\tau] \\
-      &{\bf X}_{n+1} &= 
-{\rm filter}[\widetilde{\bf X}^2_n {\rm filter}[\gamma_n + \\
- && +(4-2\gamma_n){\bf X}_n + (\gamma_n-3)\widetilde{\bf X}^2_n,\tau],\tau].
+i)    &{\bf X}_{n+1} &= {\tt Filter}[2{\bf X}_n - \widetilde{\bf X}^2_n,\tau] \\
+ii)   &{\bf X}_{n+1} &= {\tt Filter}[\widetilde{\bf X}^2_n,\tau] \\
+iii)  &{\bf Y}_{\rm tmp}     &= {\tt Filter}[\gamma_n + (4-2\gamma_n){\bf X}_n + (\gamma_n-3)\widetilde{\bf X}^2_n,\tau] \\
+      &{\bf X}_{n+1} &= {\tt Filter}[\widetilde{\bf X}^2_n {\bf Y}_{\rm tmp},\tau].
 \end{array}
 \end{equation}
 Unless otherwise stated, all errors in the TES coorespond to a single
 truncation of the exact solution of the density matrix (to machine precision) with $\tau=10^{-6}$.
 No variable thresholding or incremental Fock builds were used in the experiments. 
-Conditions for convergence (MATT this is not clear!) of the PM and TS4 algorithms include a rise in relative 
-error of the electronic energy $\delta E_{\rm el}$, a rise in the maximum absolute 
-error in a density matrix element $\Delta{\bf P}$, or meeting the criteria 
-$\delta E_{\rm el} < 10^{-11}$ and $\Delta{\bf P} < 10^{-6}$.  
 All calculations also employed DIIS extrapolation \cite{PPulay88}, with the SCF
 converged to within $\delta E < 10^{-9}$ and $\Delta{\bf P} < 10^{-5}$ when possible.
-The SCF convergence scheme DIIS attempts to extrapolate the between
-cycle, {\em inter-SCF} commutator ($[{\bf F}^{I},{\bf P}^{I-1}]$) to zero.  
-With thresholding however, the {\em intra-SCF} commutator 
-will never be truely zero, and for large accumulation errors this can lead to 
-stagnation of the DIIS.  An SCF termination policy that recognizes this is 
-therefore important.  In {\sc MondoSCF}, there are two additional conditions 
-in addition to the set accuracy goals.  The first looks for a simultaneous increase 
-in both the leading DIIS error vector and the difference density matrix error:
-$\varepsilon^{I+1}_{\rm DIIS}>\varepsilon^{I}_{\rm DIIS}$ and 
-$\Delta {\bf P}^{I+1}> \Delta {\bf P}^{I}$, where 
-$\varepsilon^{I}=||[{\bf F}^{I},{\bf P}^{I-1}]||_F$ and 
-$\Delta {\bf P}^{I}=\max_{P_{ij}}|{\bf P}^I-{\bf P}^{I-1}|$.  The second
-condition detects a stall in convergence corresponding to a relative change in the 
-DIIS error between SCF cycles $\delta { \varepsilon}_{\rm DIIS}<0.09$ and a 
-relative change in the difference density matrix $\delta \Delta {\bf P}<10^{-2}$.  
-For the tight thresholds employed here, these auxiliary conditions are typically
-accessed only for $\tau>10^{-3}$.
+Due to thresholding SCF convergence can never be reached exactely.
+An SCF termination policy that recognizes this is therefore important,
+especially at large thresholds. 
+
+%Conditions for convergence (MATT this is not clear!) of the PM and TS4 algorithms include a rise in relative 
+%error of the electronic energy $\delta E_{\rm el}$, a rise in the maximum absolute 
+%error in a density matrix element $\Delta{\bf P}$, or meeting the criteria 
+%$\delta E_{\rm el} < 10^{-11}$ and $\Delta{\bf P} < 10^{-6}$.  
+%All calculations also employed DIIS extrapolation \cite{PPulay88}, with the SCF
+%converged to within $\delta E < 10^{-9}$ and $\Delta{\bf P} < 10^{-5}$ when possible.
+%Due to thresholding SCF convergence can never be reached exactely.
+%An SCF termination policy that recognizes this is therefore important,
+%especially at large thresholds. 
+
+%scheme DIIS attempts to extrapolate the between
+%cycle, {\em inter-SCF} commutator ($[{\bf F}^{I},{\bf P}^{I-1}]$) to zero.  
+%With thresholding however, the {\em intra-SCF} commutator 
+%will never be truely zero, and for large accumulation errors this can lead to 
+%stagnation of the DIIS.  An SCF termination policy that recognizes this is 
+%therefore important.  In {\sc MondoSCF}, there are two additional conditions 
+%in addition to the set accuracy goals.  The first looks for a simultaneous increase 
+%in both the leading DIIS error vector and the difference density matrix error:
+%$\varepsilon^{I+1}_{\rm DIIS}>\varepsilon^{I}_{\rm DIIS}$ and 
+%$\Delta {\bf P}^{I+1}> \Delta {\bf P}^{I}$, where 
+%$\varepsilon^{I}=||[{\bf F}^{I},{\bf P}^{I-1}]||_F$ and 
+%$\Delta {\bf P}^{I}=\max_{P_{ij}}|{\bf P}^I-{\bf P}^{I-1}|$.  The second
+%condition detects a stall in convergence corresponding to a relative change in the 
+%DIIS error between SCF cycles $\delta { \varepsilon}_{\rm DIIS}<0.09$ and a 
+%relative change in the difference density matrix $\delta \Delta {\bf P}<10^{-2}$.  
+%For the tight thresholds employed here, these auxiliary conditions are typically
+%accessed only for $\tau>10^{-3}$.
 
 \subsection{Water}
 
@@ -673,10 +687,10 @@ $|{\bf X}_{N+1}-{\bf X}_N|$. Cycles were continued after convergence.}\label{wat
 for (H$_2$O)$_{150}$ RHF/6-31G**.} \label{fillin}
 \end{figure}
 
-\begin{figure}[t]
-\resizebox*{3.5in}{!}{\includegraphics{WATER_FIGS/EffectsOfBounds.eps}}
-\caption{for (H$_2$O)$_{150}$ RHF/6-31G**.} \label{EigenBounds}
-\end{figure}
+%\begin{figure}[t]
+%\resizebox*{3.5in}{!}{\includegraphics{WATER_FIGS/EffectsOfBounds.eps}}
+%\caption{for (H$_2$O)$_{150}$ RHF/6-31G**.} \label{EigenBounds}
+%\end{figure}
 
 A sequence of water clusters (H$_2$O)$_{10}$ through (H$_2$O)$_{150}$  \cite{WaterCluster}
 were used to explore the differences between PM, TS4 and ES at the RHF/6-31G** level of theory.  
@@ -764,11 +778,11 @@ corresponds to one order of magnitude in the total energy.
          thresholds and the line $10^{4.4} \tau^2$.}\label{c60convergence}
 \end{figure}
 
-\begin{figure}[h]
-\resizebox*{3.5in}{!}{\includegraphics{FULL_FIGS/C60SCFcycles.eps}}
-\caption{Number of SCF cycles to reach a tight convergence with PM and TS4         
-         for RPBE/STO-6G C60 at the RPBE level of theory.}\label{c60SCFs}
-\end{figure}
+%\begin{figure}[h]
+%\resizebox*{3.5in}{!}{\includegraphics{FULL_FIGS/C60SCFcycles.eps}}
+%\caption{Number of SCF cycles to reach a tight convergence with PM and TS4         
+%         for RPBE/STO-6G C60 at the RPBE level of theory.}\label{c60SCFs}
+%\end{figure}
 
 
 In reference~\onlinecite{JDaniels98} (MATT Check reference!), Daniels and Scuseria found the PM method to be 
@@ -797,23 +811,24 @@ $M_{\rm PM}/M_{\rm TS4} \approx 1.2$ and $M_{\rm TS4}=38$ for $\tau=10^{-5}$.
 Because tight numerical and convergence thresholds are used throughout, 
 except those that depend on the matrix threshold $\tau$ local to {\sc PM} and {\sc TS4},
 the number of SCF cycles behaves erratically for large thresholds due to large intra-SCF 
-commutator errors that pollute the DIIS solution.  This behavior is shown in 
-Figure~\ref{c60SCFs}. For smaller thresholds and TS4, the number of SCF cycles 
-approaches the TES value of 7.  
+commutator errors that pollute the DIIS SCF solution.  
+%This behavior is shown in 
+%Figure~\ref{c60SCFs}. For smaller thresholds and TS4, the number of SCF cycles 
+%approaches the TES value of 7.  
 
 \subsection{Chlorophyll}
 
-\begin{figure}[h]
+%\begin{figure}[h]
 %\resizebox*{3.5in}{!}{\includegraphics{ChIsoRho.jpg}}
-\caption{The electrostatic potential color mapped onto the Chlorophyll electron density isosurface,
-         computed at the RPBE/6-311G(3d,3p) level of theory.  Blue corresponds to a negative potential, 
-         and red is positive.  The iso-density was taken at 0.03 au.}\label{ChPic}
-\end{figure}
+%\caption{The electrostatic potential color mapped onto the Chlorophyll electron density isosurface,
+%         computed at the RPBE/6-311G(3d,3p) level of theory.  Blue corresponds to a negative potential, 
+%         and red is positive.  The iso-density was taken at 0.03 au.}\label{ChPic}
+%\end{figure}
 
 \begin{table}
 \caption{Dependence of the number of matrix-matrix multiplies $M$, order of the signed absolute 
 error in the converged total energy $\Delta E$ for both the PM and the TS4 method with basis set 
-progression for RPBE Cholophyll. $\tau = ?$ (MATT what is $\tau$ ?)}
+progression for RPBE Cholophyll. THe threshold was set to $\tau = 10^{-6}$}
 \label{ChlorophyllConvergence}
 \squeezetable
 \begin{tabular}{lcccccc}
@@ -838,8 +853,10 @@ regime will be accessed more frequently.
 
 Here, TES, PM and TS4 are used in the basis set progression 
 of Chlorophyll, a relatively small (91 atom) Mg containing porhyrin ring system. 
-The electrostatic mapped electron density isosurface of Chlorophyll at the
-RPBE/6-311G(3d,3p) level of theory is shown in Figure~\ref{ChPic}. 
+Symmetric L\"owdin orthogonalization was used siince it is less sensitive
+to the high condition numbers arising from the extended basis sets.
+%The electrostatic mapped electron density isosurface of Chlorophyll at the
+%RPBE/6-311G(3d,3p) level of theory is shown in Figure~\ref{ChPic}. 
 In Table~\ref{ChlorophyllConvergence}, total energies computed with TES, the number 
 of matrix-matrix multiplies and the absolute signed error in the total energies are 
 presented.  Although the Fock-derived initial guess for the PE methods is initially 
@@ -864,9 +881,13 @@ were shown to be an order of magnitude smaller than PM with $\tau=10^{-4}$.
 For larger basis sets, PM was shown to behave pathologically even 
 for a small system and with tight numerical thresholds, while TS4 was able to maintain
 sub-$\mu$hartree accuracy.  This pathology stems from domination of the eigenspectrum
-by the virtual space, skewing the PM polynomial towards it's rightmost endpoint 
-where it looses efficiency.   Having relaxed the trace-preserving constraint, TS4
-does not suffer this problem.  
+by the virtual space, skewing the PM polynomial to form a step close to $0$
+where it looses efficiency since the polynomials initially become close
+to identity. Improving on the starting guess, using the
+exact spectral bounds instead of the Gersgorin estimate, as used in the present study, 
+may partly shift the occupation limit where the PM scheme gives large errors, however the
+basic deficiency still remains. Having relaxed the trace-preserving constraint, TS4
+does not suffer this problem.
 %One approach to avoiding these difficulties might be to employ 
 %{\em in situ} basis set optimization \cite{Conquest,JTalman00,GBerghold02}, allowing 
 %high accuracy with a reduced representation.
@@ -892,7 +913,11 @@ It is also possible to achieve the same effect with PE only, but with a tighter 
 Here again there may be differences between numerical thresholds and radial cutoffs 
 that are not yet fully appreciated. It is certain though that the faster convergence of TS4 can 
 lead to faster CPU times in the small and large basis set limit with the static graphs 
-that are obtained using radial cut-offs.  
+that are obtained using radial cut-offs. Note, that even if TS4 and the PM scheme are 
+non-variational formulation of the single particle density matrix, the self-consistent
+total energy formulation is still variational. Thresholding limits the variational space
+both in the constrained DMM schemes and the PE methods, generally giving rise to a slightly
+higher total energy compared to exact arithmetics.
 
 \section{Conclusions}
 
@@ -926,6 +951,8 @@ may lead to problems for large metallic systems.
 
 
 \begin{references}
+
+\bibitem{Corr} Anders M.\ N.\ Niklasson email: niklasson@lanl.gov.
 
 \bibitem{Goedecker_RMP_99} S. Goedecker,
 Rev.\ Mod.\ Phys. {\bf 71}, 1085 (1999).
