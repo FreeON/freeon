@@ -1,3 +1,144 @@
+2003-08-07 17:36  mchalla
+
+	* Docs/PBC_paper/: LinearPBCMethod.tex, LinearPBCMethod_revtex4.ps,
+	LinearPBCMethod_revtex4.tex, Makefile: Matts latest changes.
+
+2003-08-07 16:29  tymczak
+
+	* ONX/NONX/ONX.F90: Remove CSTemp
+
+2003-08-07 15:23  tymczak
+
+	* MondoMods/AtomPairs.F90: Proprogated Changes in PBCInfo and CRDS
+	Also WrapAtoms only Wraps Cards and BoxCarts, it does not touch
+	AbCarts
+
+2003-08-07 15:21  tymczak
+
+	* MondoMods/PBC.F90: Proprogated Changes in PBCInfo
+
+2003-08-07 15:20  tymczak
+
+	* MondoMods/: InOut.F90, MemMan.F90, PrettyPrint.F90, SetEq.F90:
+	Proprogated Changes in PBCInfo and CRDS
+
+2003-08-07 15:19  tymczak
+
+	* MondoMods/DerivedTypes.F90: PBCInfo
+	
+	Alloc	   : Added Tran_COM   : Removed AutoW	   : Allacate
+	INT_VECT CellCenter : Allacate DBL_VECT TransVec   : Allacate
+	DBL_VECT BoxShape   : Allacate DBL_RNK2 InvBoxSh   : Allacate
+	DBL_RNK2 LatFrc     : Allacate DBL_RNK2
+	
+	CRDS
+	
+	AbBoxCards : Removed BoxVects	: Removed Velocty    : Added
+	Gradients  : Added
+
+2003-08-07 15:12  tymczak
+
+	* MondoSCF2/: InCoords.F90, NEB.F90, Optimizer.F90, SCFs.F90:
+	Propogated Changes in PBCInfo and CRDS specifically Vect--> Removed
+	Gradients --> Replaces Vect Velocy --> added
+
+2003-08-07 15:10  tymczak
+
+	* MondoSCF2/PunchHDF.F90: Propogated Changes in PBCInfo and CRDS
+
+2003-08-07 15:09  tymczak
+
+	* MondoSCF2/PeriodicKeys.F90: remove 'tv' key added 'CenterAtoms'
+	key
+
+2003-08-07 15:08  tymczak
+
+	* MondoSCF2/ParsePeriodic.F90: Proprogating Changes in PBCInfo and
+	CRDS
+	
+	Changed YeeshFourCoordinateArrays to CalculateCoordArrays
+
+2003-08-07 15:06  tymczak
+
+	* MondoSCF2/ParseGeometries.F90: Parsing will also now read in the
+	velocities
+
+2003-08-07 15:04  tymczak
+
+	* MondoSCF2/Massage.F90: Changed PeriodicXLate()   On Input:
+	
+	   Periodic=(CenterAtoms)
+	
+	   The Atoms will be centered in the box
+	
+	   Default is FALSE
+
+2003-08-07 15:02  tymczak
+
+	* MondoSCF2/MondoSCF.F90: CALL MDMove was added, but is commented
+	out
+
+2003-08-07 14:28  tymczak
+
+	* MondoSCF2/GDIIS.F90: Gradients are now store in CRDS and a
+	DBLE_RNK2
+
+2003-08-07 14:24  tymczak
+
+	* ONX/: VRR/Int1111.F90, VRR/Int1121.F90, VRR/Int1122.F90,
+	VRR/Int1161.F90, VRR/Int1162.F90, VRR/Int1166.F90, VRR/Int2111.F90,
+	VRR/Int2121.F90, VRR/Int2122.F90, VRR/Int2161.F90, VRR/Int2162.F90,
+	VRR/Int2166.F90, VRR/Int2211.F90, VRR/Int2221.F90, VRR/Int2222.F90,
+	VRR/Int2261.F90, VRR/Int2262.F90, VRR/Int2266.F90, VRR/Int6111.F90,
+	VRR/Int6121.F90, VRR/Int6122.F90, VRR/Int6161.F90, VRR/Int6162.F90,
+	VRR/Int6166.F90, VRR/Int6211.F90, VRR/Int6221.F90, VRR/Int6222.F90,
+	VRR/Int6261.F90, VRR/Int6262.F90, VRR/Int6266.F90, VRR/Int6611.F90,
+	VRR/Int6621.F90, VRR/Int6622.F90, VRR/Int6661.F90, VRR/Int6662.F90,
+	VRR/Int6666.F90, VRR/VRR.tar, NONX/ONXRGen.F90: Changes in PBCInfo
+	and CRDS
+
+2003-08-07 14:20  vweber
+
+	* MondoMods/FastMat.F90: Some modifications to FlattenAllRows1,
+	which is used for Multiply_FASTMAT.
+
+2003-08-07 14:19  tymczak
+
+	* QCTC/BlokTrPdJ.F90, QCTC/JForce.F90, QCTC/PBCFarField.F90,
+	QCTC/PFFTensor.F90, QuNew/BFGSHess.F90: Changes in PBCInfo and CRDS
+
+2003-08-07 14:18  tymczak
+
+	* OneE/: RhoTools.F90, SForce.F90, TForce.F90: Changes In PBCInfo
+	and CRDS
+
+2003-08-07 14:16  tymczak
+
+	* HiCu/: CubeTree.F90, XCForce.F90: Changes in PBCInfo and CRDS
+
+2003-08-07 14:14  tymczak
+
+	* Docs/PBC_Exchange/: ExchangeRegion.fig, ExchangeRegion.ps,
+	LinearPBCExchange.tex, UnitCell_2.ps, ExchangeRegion_k111.fig,
+	ExchangeRegion_k111.ps, LinearPBCExchange.ps: [no log message]
+
+2003-08-07 11:31  vweber
+
+	* MondoMods/FastMat.F90: Added Trace_FASTMAT, removed the old
+	FASTMAT style in Multiply_FASTMAT, Add_FASTMAT_SCLR and
+	Multiply_FASTMAT_SCALAR.
+
+2003-08-06 10:03  mchalla
+
+	* ChangeLog: [no log message]
+
+2003-08-06 09:56  njh
+
+	* Includes/CompilerSpecifics.IntelLinux.PG: 
+	
+	Hacked the includes to correspond more closely with those for the
+	AMD build.
+
 2003-08-05 20:18  vweber
 
 	* ONX/NONX/ONX.F90: Added IF constructs in the cell loops to reduce
