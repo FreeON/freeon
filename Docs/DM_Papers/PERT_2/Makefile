@@ -21,9 +21,9 @@ dvi:	latex
 
 latex:
 	latex perturbedprojector
-	bibtex perturbedprojector
+#	bibtex perturbedprojector
 	latex perturbedprojector
-	bibtex perturbedprojector
+#	bibtex perturbedprojector
 	latex perturbedprojector
 
 clean:
