@@ -44,22 +44,66 @@ simple ideas and arguments, we can correct this problem.
 \section{The Hartree Fock Equations}
 
 
-\subsection{The Exchange matrix}
+\section{The Exchange matrix}
+From Crystal Manual, Chapter 3,
 
+\begin{equation}
+K_{ab}=\sum _{\mathbf{hgn}\,\,cd} \int
+{{\phi _{a}(\mathbf{r}) 
+\phi _{c+{\bf h}}(\mathbf{r}) 
+P_{cd}[{\mathbf{n}}]\, 
+\phi _{b+{\bf n}}(\mathbf{r'})
+\phi _{d+{\bf n}+{\bf g}} ( \mathbf{r'})} \over {|{\bf r}-{\bf r'}|}} 
+\label{CryEq}
+\end{equation}
+For our approximation, where we do Gamma point only, 
 
+\begin{equation}
+P_{cd}[{\mathbf{n}}] \rightarrow P_{cd}[{0}]\, \delta _{{\mathbf{n},0}}
+\label{NoN}
+\end{equation}
+Therefore
+\begin{equation}
+K_{ab}=\sum _{\mathbf{hg}\,\,cd} \int
+{{\phi _{a}(\mathbf{r}) 
+\phi _{c+{\bf h}}(\mathbf{r}) 
+P_{cd}[0]\, 
+\phi _{b}(\mathbf{r'})
+\phi _{d+{\bf g}} ( \mathbf{r'})} \over {|{\bf r}-{\bf r'}|}} 
+\label{NoNKab}
+\end{equation}
+However this is still not correct because it neglets the exchange interaction 
+between neighbooring cells, and the exchange matrix is not translationally invariant.
+We could try to fix this by summming over the set of lattice vectors ${\bf n}$, 
+which leads to a translationally invariant exchange matrix, but these integrals do not converge. 
+Reffering to figure \ref{figure:ExchangeRegion} we can see a simple fix to this problem, when 
+we calculate the exchange matrix elements for atom $a$, include exchanges only within region
+defined by the volume centered about atom $a$ (the red box in figure \ref{figure:ExchangeRegion}).
+This leads to both a convergent exchange matrix, and also a  translationally invarient one.
+We do this via a Minium Image Distance Condition (MIDC).
+\begin{equation}
+K_{ab}=\sum _{\mathbf{hg}\,\,cd} \int
+{{\phi _{a}(\mathbf{r}) 
+\phi _{c+{\bf h}}(\mathbf{r}) 
+P_{cd} \, 
+{\cal MIDC}(\phi _{b}(\mathbf{r'})
+\phi _{d+{\bf g}}) ( \mathbf{r'})} \over {|{\bf r}-{\bf r'}|}} 
+\label{MinImageKab}
+\end{equation}
+where $\cal MIDC$ is a function which shifts the distribution to the nearest image.
 
 \section{Verification}
 
 \subsubsection{Magnesium Oxide}
 
-Table \ref{table:ComToCrystal98_2} shows our results for the total
+Table \ref{table:ComToCrystal98} shows our results for the total
 energy for Magnesium Oxide as compared to results obtained from \textbf{Crystal98}.
 Because of the high degree of Ionic bounding in this system, \textbf{Crystal98}
 does substantially better then for sodium Chloride. This allows for
 a much closer scrutiny of the energies then for the previous system.
 Again, we obtain excellent agreement with \textbf{Crystal98} for two
 different basis sets and theory levels to within the accuracy of these
-results.Also,in Table \ref{table:ComToCrystal98_2}
+results.Also,in Table \ref{table:ComToCrystal98}
 we show the convergence of the energy per atom of a Magnesium Oxide
 test system for increasing system size and we also has excellent agreement
 with \textbf{Crystal98} results in which we do k-space integration.
@@ -104,7 +148,7 @@ the accuracy of the quoted digits. All calculations where done at the Gamma poin
 for comparison except the last \textbf{Crystal98} calculation, which was done at ${\bf k}=(6,6,6)$.
 The \textbf{Crystal98} 8-511G  basis set was used \cite{C98Basis} and the BLYP gradient corrected 
 functional \cite{Becke93}.}
-\label{table:ComToCrystal98_1}
+\label{table:ComToCrystal98}
  
 \begin{tabular}{clcll}
 \hline 
@@ -123,7 +167,7 @@ STO-3G/HF &
 M&
 STO-3G/HF&
 8&
-0.0 &
+-1084.5 &
 0.0 \\
 M&
 STO-3G/HF&
