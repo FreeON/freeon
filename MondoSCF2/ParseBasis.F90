@@ -5,7 +5,10 @@ MODULE ParseBasis
   USE ControlStructures
   USE BasisSetParameters
   IMPLICIT NONE
-  CHARACTER(LEN=9),  PARAMETER :: BASIS_SETS ='BasisSets' 
+  CHARACTER(LEN=*), PARAMETER :: BASIS_SETS     = 'BasisSets' 
+  CHARACTER(LEN=*), PARAMETER, PRIVATE :: BCSR_MAXNON0S   = 'maxnon0s'
+  CHARACTER(LEN=*), PARAMETER, PRIVATE :: BCSR_MAXNBLKS   = 'maxnblks'
+  CHARACTER(LEN=*), PARAMETER, PRIVATE :: BCSR_MAXDEFAULT = 'default'
 CONTAINS
   !============================================================================
   ! 
@@ -16,12 +19,21 @@ CONTAINS
     TYPE(Options)      :: O
     TYPE(Geometries)   :: G
     TYPE(BasisSets)    :: B
-    INTEGER            :: I,J
+    TYPE(INT_VECT)     :: ArrMaxNon0s,ArrMaxNBlks
+    INTEGER            :: I,J,Ntot
     CHARACTER(LEN=DCL) :: BaseFile,GhostFile
+    CHARACTER(LEN=DEFAULT_CHR_LEN) :: Line
     !-------------------------------------------------------------------------!    
     CALL OpenASCII(N%IFile,Inp)
     ! Find out how many basis sets we are going over, and their names
     CALL ParseBasisNames(B)
+    !--------------------------------------
+    ! Look for MaxNon0s and MaxNBlks.
+    ! Allocate new array.
+    CALL New(ArrMaxNon0s,B%NBSets);CALL New(ArrMaxNBlks,B%NBSets)
+    ArrMaxNon0s%I=-BIG_INT;ArrMaxNBlks%I=-BIG_INT
+    CALL ParseMaxElemBCSR(B%NBSets,Inp,ArrMaxNon0s,ArrMaxNBlks)
+    !--------------------------------------
     ! Allocate aux stuff...
     ALLOCATE(B%BSiz(1:G%Clones,1:B%NBSets))
     ALLOCATE(B%OffS(1:G%Clones,1:B%NBSets))
@@ -41,7 +53,7 @@ CONTAINS
           ENDIF
           B%BSets(I,J)%BName=B%BName(J)
           CALL BCSRDimensions(G%Clone(I),B%BSets(I,J),O%AccuracyLevels(J), &
-                              B%MxAts(J),B%MxBlk(J),B%MxN0s(J))
+               &              B%MxAts(J),B%MxBlk(J),B%MxN0s(J),ArrMaxNon0s%I(J),ArrMaxNBlks%I(J))
           ! Compute primitive distribution statistics
           CALL PrimitiveReDistribution(B%BSets(I,J),B%NExpt(J),B%DExpt(I,J),B%Lndex(I,J))
           ! Compute basis set dependent distance thresholds
@@ -56,6 +68,9 @@ CONTAINS
        CLOSE(GBas,STATUS='KEEP')
     ENDDO
     CLOSE(Inp,STATUS='KEEP')
+    !Delete Arrays.
+    CALL Delete(ArrMaxNon0s)
+    CALL Delete(ArrMaxNBlks)
   END SUBROUTINE LoadBasisSets
   !============================================================================
   ! THIS ROUTINE IS A CLONE OF THOSE IN MONDOMODS/THRESHOLDING.F90, BUT DOES
@@ -75,10 +90,11 @@ CONTAINS
   ! WEAK ATTEMPT TO ESTIMATE NUMBER OF NONZEROS FOR SPARSE MATRICES, NEADS TWIDDLING
   ! AND SHOULD BECOME OBSOLETE IN NEAR FURTURE AS FASTMAT TAKES OVER...
   !============================================================================
-  SUBROUTINE BCSRDimensions(G,B,AccL,MaxAtms,MaxBlks,MaxNon0)
+  SUBROUTINE BCSRDimensions(G,B,AccL,MaxAtms,MaxBlks,MaxNon0,MaxNon0s,MaxNBlks)
     TYPE(CRDS) :: G
     TYPE(BSET) :: B
     INTEGER    :: AccL,MaxAtms,MaxBlks,MaxNon0
+    INTEGER, INTENT(IN) :: MaxNon0s,MaxNBlks ! From input.
     REAL(DOUBLE) :: BWEstim
     REAL(DOUBLE),PARAMETER,DIMENSION(4) :: BandWidth=(/ 1.D3, 1.3D3, 1.3D3,1.6D3/)
     REAL(DOUBLE),PARAMETER,DIMENSION(4) :: BWDecay  =(/ 1.D-4,1.D-4,1.D-3,1.D-2/)
@@ -90,6 +106,10 @@ CONTAINS
          /(One+BWDecay(AccL)*DBLE(G%NAtms)**2) ) ) 
     MaxBlks=1+G%NAtms*BWEstim
     MaxNon0=1+B%NBasF*(DBLE(B%NBasF)*DBLE(BWEstim)/DBLE(G%NAtms))
+    !
+    ! Set the variable if def in the input.
+    IF(MaxNon0s.GT.0) MaxNon0=MaxNon0s !if def in the input.
+    IF(MaxNBlks.GT.0) MaxBlks=MaxNBlks !if def in the input.
 !    WRITE(*,*)' MaxBlks = ',MaxBlks,1D2*DBLE(MaxBlks)/DBLE(G%NAtms**2)
 !    WRITE(*,*)' MaxNon0 = ',MaxNon0,1D2*DBLE(MaxNon0)/DBLE(B%NBasF**2)
 !    STOP
@@ -561,4 +581,77 @@ CONTAINS
     CALL Delete(ITmp)
     CALL Delete(IPnt)
   END SUBROUTINE PrimitiveReDistribution    
+  !
+  !
+  SUBROUTINE ParseMaxElemBCSR(NBSets,Unit,ArrMaxNon0s,ArrMaxNBlks)
+!H---------------------------------------------------------------------------------
+!H SUBROUTINE ParseMaxElemBCSR(NBSets,Unit,ArrMaxNon0s,ArrMaxNBlks)
+!H  This routine look in the unit <Unit> for the keywords <MaxNon0s> and 
+!H  <MaxNBlks>. The new value will replace the value of the estimate
+!H  dimension in <BCSRDimensions> if the key <Default> is not used.
+!H   e.g. MaxNon0s=(Default,Default,100000).
+!H        MaxNBlks=(Default,Default,   900).
+!H        MaxNon0s=(100000) or MaxNon0s=100000.
+!H        MaxNBlks=(   900) or MaxNBlks=   900.
+!H---------------------------------------------------------------------------------
+    IMPLICIT NONE
+    !-------------------------------------------------------------------
+    INTEGER       , INTENT(IN   ) :: NBSets,Unit
+    TYPE(INT_VECT), INTENT(INOUT) :: ArrMaxNon0s,ArrMaxNBlks
+    !-------------------------------------------------------------------
+    INTEGER                       :: iBS
+    TYPE(CHR_VECT)                :: Arg
+    !-------------------------------------------------------------------
+    !
+    ! Look for MaxNon0s
+    IF(OptGetKeyArg(Unit,BCSR_MAXNON0S,Arg)) THEN
+       IF(SIZE(Arg%C).NE.NBSets) &
+            & CALL Halt('The number of MaxNon0s arguments <'  //TRIM(IntToChar(SIZE(Arg%C)))// &
+            & '> must be the same as the number of BasisSets <'//TRIM(IntToChar(NBSets))//'>.')
+       !
+       ! Copy info.
+       DO iBS=1,NBSets
+          IF(TRIM(Arg%C(iBS)).EQ.BCSR_MAXDEFAULT) THEN
+             ArrMaxNon0s%I(iBS)=-BIG_INT
+          ELSE
+             !
+             ! Check for strange char.
+             IF(.NOT.ChrCkkIfInt(Arg%C(iBS))) &
+                  & CALL Halt('The argument <'//TRIM(Arg%C(iBS))// &
+                  & '> is not a positive integer nor <Default> in the Key <MaxNon0s>.')
+             ArrMaxNon0s%I(iBS)=CharToInt(TRIM(Arg%C(iBS)))
+          ENDIF
+          !write(*,*) 'ArrMaxNon0s%I(iBS)',ArrMaxNon0s%I(iBS)
+       ENDDO
+       !
+       CALL Delete(Arg)
+    ENDIF
+    !
+    ! Look for MaxNBlks
+    IF(OptGetKeyArg(Unit,BCSR_MAXNBLKS,Arg)) THEN
+       IF(SIZE(Arg%C).NE.NBSets) &
+            & CALL Halt('The number of MaxNBlks arguments <'  //TRIM(IntToChar(SIZE(Arg%C)))// &
+            & '> must be the same as the number of BasisSets <'//TRIM(IntToChar(NBSets))//'>.')
+       !
+       ! Copy info.
+       DO iBS=1,NBSets
+          IF(TRIM(Arg%C(iBS)).EQ.BCSR_MAXDEFAULT) THEN
+             ArrMaxNon0s%I(iBS)=-BIG_INT
+          ELSE
+             !
+             ! Check for strange char.
+             IF(.NOT.ChrCkkIfInt(Arg%C(iBS))) &
+                  & CALL Halt('The argument <'//TRIM(Arg%C(iBS))// &
+                  & '> is not a positive integer nor <Default> in the Key <MaxNBlks>.')
+             ArrMaxNBlks%I(iBS)=CharToInt(TRIM(Arg%C(iBS)))
+          ENDIF
+          !write(*,*) 'ArrMaxNBlks%I(iBS)',ArrMaxNBlks%I(iBS)
+       ENDDO
+       !
+       CALL Delete(Arg)
+    ENDIF
+    !
+  END SUBROUTINE ParseMaxElemBCSR
+  !
+  !
 END MODULE ParseBasis
