@@ -54,7 +54,7 @@ timestamp color 1
 timestamp rot 0
 timestamp font 0
 timestamp char size 1.000000
-timestamp def "Thu Feb 12 17:31:18 2004"
+timestamp def "Sat Feb 14 17:38:34 2004"
 r0 off
 link r0 to g0
 r0 type above
@@ -104,7 +104,7 @@ with g0
     world xmin 0
     world xmax 165
     world ymin 0
-    world ymax 8.5
+    world ymax 20
     stack world 0, 0, 0, 0
     znorm 1
     view xmin 0.150000
@@ -189,7 +189,7 @@ with g0
     yaxis  label color 1
     yaxis  label place normal
     yaxis  tick on
-    yaxis  tick major 2
+    yaxis  tick major 5
     yaxis  tick minor ticks 1
     yaxis  tick default 6
     yaxis  tick place rounded true

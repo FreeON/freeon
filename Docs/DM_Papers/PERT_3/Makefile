@@ -17,7 +17,7 @@ ps:	latex
 	dvips -o prl2.ps Response3
 
 dvi:	latex
-	xdvi -s 2 Response3
+	xdvi -s 3 Response3
 
 latex:
 	latex Response3
