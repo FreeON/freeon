@@ -24,8 +24,8 @@
 
 \date{\today}
 
-\title{Linear scaling computation of the Fock matrix. VII.  
-       Periodic \\ boundary conditions for the pure Density Functional Theory.}
+\title{Linear scaling computation of the Fock matrix VII.  \\
+       Periodic boundary conditions for Density Functional Theory.}
 
 \author{C.J. Tymczak and Matt Challacombe}
 
@@ -36,14 +36,8 @@ Los Alamos, NM 87545, USA}
 \begin{abstract}
 {\bf CJ, to do list:}
 \begin{itemize}
-\item Need a correct FMM estimate and appropriate citations for PFF: how much do we want to 
-      say about QCTC error bounds.  In the static limit, are they really different from the FMM estimate?
-\item Need specific details of benchmark calculations (how many digits, etc?) and a much much much 
-      better accounting of the various thresholds used.  Good way to do this is with footnotes.
-\item Need the geometry details for NaCl
 \item Need correct citations (not just generic website) for all the crystal basis sets used
-\item Need the correct BLYP citations
-\item Need the specific details of how errors computed for diamond
+\item {\it Need the correct BLYP citations}
 \end{itemize}
 {\bf Matt to do list:}
 \begin{itemize}
@@ -439,7 +433,8 @@ introduce tin-foil boundary conditions is detailed.
 
 By construction, the periodic far field (PFF) term in the Coulomb matrix,
 \begin{equation}
-J_{ab}^{\rm PFF} = \sum _{{\bf R}\in {\rm PFF}} \int \int d {\bf r} d {\bf r'}  \rho^\infty_{ab}({\bf r}) {\left| {\bf r}-{\bf r'}+{\bf R} \right|}^{-1}
+J_{ab}^{\rm PFF} = \sum _{{\bf R}\in {\rm PFF}} \int \int d {\bf r} d {\bf r'}  \rho^\infty_{ab}
+({\bf r}) {\left| {\bf r}-{\bf r'}+{\bf R} \right|}^{-1}
 \rho^\infty_{\rm tot} ({\bf r'}),
 \label{PFFOne}
 \end{equation}
@@ -473,7 +468,8 @@ through the precomputed multipole moments
 $O_{l}^{m}\left[ \rho^\infty_{ab}\right] 
 =\int  d\mathbf{r}\, {O}_{l}^{m} \left( \mathbf{r}\right) \, \rho^\infty_{ab} \left( \mathbf{r}\right) $
 and 
-$O_{l}^{m}\left[ \rho^\infty_{\rm tot}\right] =\int  d\mathbf{r}\, {O}_{l}^{m} \left( \mathbf{r}\right) \, \rho^\infty_{\rm tot} \left( \mathbf{r}\right)$.
+$O_{l}^{m}\left[ \rho^\infty_{\rm tot}\right] =\int  d\mathbf{r}\, {O}_{l}^{m} \left( \mathbf{r}\right) \, 
+\rho^\infty_{\rm tot} \left( \mathbf{r}\right)$.
 Following Nijboer and De Wette, we introduce the effective multipole interaction tensor 
 \begin{equation}
 {\cal M}^{m}_l=\sum_{{\bf R}\in V_{\rm PFF} } M^m_l({\bf R}) \;,
@@ -504,16 +500,15 @@ With $V_{\rm in}$ fixed, the precision of ${\bf J}^{\rm PFF}$ is controlled enti
 In general $p \gtrsim 20$ will be much higher than the expansion order ($\sim 5$) employed by QCTC in computation of ${\bf J}^{\rm in}$.  
 With QCTC accuracy is controlled on the fly by the MAC and PAC, establishing a dynamic near/far-field partition, while 
 computation of ${\bf J}^{\rm PFF}$ involves a static, worst case error dominated by the multipole expansion.  
-This static error is controlled by using the FMM-like error estimate 
+This static error is controlled by using the FMM-like error bound, 
 \begin{equation}
-\frac{ {d}_{\rm max}^{2 p+1}}
-{({R}^o)^{2 p+1}\left| {R}^o -2 {d}_{\rm max} \right| } 
-> \epsilon \;,
+\frac{ 2^{p} {\cal C}^2 \,{d}_{\rm max}^{p+1}}
+{({R}^o)^{p+1}\left| {R}^o -2 \, {d}_{\rm max} \right| } 
+\leq \epsilon \;,
 \end{equation}
-where $d_{\rm max}$ is the maximum translational distance, $R^o$ is the radius eliminating Gaussian overlap 
-between the unit cell and $V_{\rm PFF}$, and $\epsilon$ is a target error.
-({\bf OK CJ, we have to get our shit together with this estimate:  We don't really have an $C_\rho$ that
-we use when we pick $p$, right?.  Also, this is basically the FMM estimate, right? }).
+where $d_{\rm max}$ is the maximum translational distance, ${\cal C}$ is the Uns{\"o}ld weight of $\rho_{tot}^{\infty}$, 
+and $\epsilon$ is a target error. See reference \onlinecite{CTymczak03c} for a complete derivation and explanation of this error bound. 
+
 
 \newpage
 
@@ -528,7 +523,8 @@ iinvariance and often incur dramatic charge sloshing instabilities.   The correc
 strongly dependent on ordering of the direct sum, As the Nijboer and De Wette summation corresponds to 
 spherical summation, the appropriate correction is \cite{Redlack72} 
 \begin{equation}
-\Phi _{\rm Ew}\left( \mathbf{r}\right) =\Phi _{\rm SS}\left( \mathbf{r}\right) + \frac{2\pi }{3V_{\rm UC}} \left(  Q - 2 \, {\bf r } \cdot \mathbf{D} \right)
+\Phi _{\rm Ew}\left( \mathbf{r}\right) =\Phi _{\rm SS}\left( \mathbf{r}\right) + 
+\frac{2\pi }{3V_{\rm UC}} \left(  Q - 2 \, {\bf r } \cdot \mathbf{D} \right)
 \label{EW_pot}
 \end{equation}
 where ${\bf D}$ is the system dipole moment and $Q$ is the trace of the system quadrupole, and we have assumed origin centering, 
@@ -591,10 +587,9 @@ localization of the atomic orbitals.
 
 \begin{table}
 \caption{Comparison of {\sc Crystal98} and {\sc MondoSCF} $\Gamma$-point calculations on  NaCl at the 
-         8-511/BLYP level of theory. The lattice coordinates for $N_{\rm at}=2$ and 8 
-         are listed in Appendix~\ref{FracCoords}.}\label{NaCl8511}
-\tablenotetext[6]{Triclinic}%: $N_{\rm at}=2$, $a=b=c=$3.974 au, $\alpha=\beta=\gamma=60^\circ$}
-\tablenotetext[7]{Cubic}%: $N_{\rm at}=8$, $a=b=c=$5.620 au, $\alpha=\beta=\gamma=90^\circ$}    
+8-511/BLYP level of theory at a {\it verytight} accuracy level. The lattice coordinates for 
+$N_{\rm at}=2$ and 8 are listed in Appendix~\ref{FracCoords}.}\label{NaCl8511}
+\center{
 \begin{tabular}{lcll}
 \toprule
 Program         & $N_{\rm at}$              & Energy (hartree) & Energy/$N_{\rm at}$\\ 
@@ -604,17 +599,17 @@ Program         & $N_{\rm at}$              & Energy (hartree) & Energy/$N_{\rm 
 {\sc MondoSCF}      & $8^g$  &  -2490.00163  & -311.250204  \\
 {\sc Crystal98}     & $8^g$  &  -2490.0013   & -311.25016   \\
 \botrule
-\end{tabular}
+$ ^f$Triclinic \\
+$ ^g$Cubic
+\end{tabular}}
 \end{table}
 
-
 \begin{table}
-\caption{Convergence of the$\Gamma$-point super-cell approximation with {\sc MondoSCF} to 
+\caption{Convergence of the $\Gamma$-point super-cell approximation with {\sc MondoSCF} to 
          $k$-space integration with {\sc Crystal98} for NaCl at the STO-3G/LDA level
-         of theory.}\label{NaClGammaPt}
-\tablenotetext[6]{Triclinic}
-\tablenotetext[7]{Cubic}
-\begin{tabular}{lrll}
+         of theory at a {\it tight} accuracy level.}\label{NaClGammaPt}
+\center{
+\begin{tabular}{lcll}
 \toprule
 Program         & $N_{\rm at}$              & Energy (hartree) & Energy/$N_{\rm at}$\\ 
 \colrule
@@ -626,10 +621,12 @@ Program         & $N_{\rm at}$              & Energy (hartree) & Energy/$N_{\rm 
                 & 128$^f$  & -39109.9115    & -305.546184   \\
                 & 216$^g$  & -65997.9768    & -305.546185   \\ 
 \hline
-{\sc Crystal98}\footnote[8]{$6\times6\times6$ $k$-space grid.}
-                & 2$^f$    &  -611.09228    & -305.54614    \\ 
+{\sc Crystal98} & 2$^f$    &  -611.09228    & -305.54614    \\ 
 \botrule
-\end{tabular}
+$ ^f$Triclinic \\
+$ ^g$Cubic  \\
+\multicolumn{4}{l}{$ ^h6\times6\times6$ $k$-space grid.}
+\end{tabular}}
 \end{table}
 
 \newpage
@@ -638,10 +635,9 @@ Program         & $N_{\rm at}$              & Energy (hartree) & Energy/$N_{\rm 
 \begin{table}
 \caption{Convergence of the$\Gamma$-point super-cell approximation with {\sc MondoSCF} to 
          $k$-space integration with {\sc Crystal98} for MgO at the 8-61G/BLYP
-         level of theory. The lattice coordinates for $N_{\rm at}=2$ and 8 
+         level of theory at a {\it tight} accuracy level. The lattice coordinates for $N_{\rm at}=2$ and 8 
          are listed in Appendix~\ref{FracCoords}.}\label{MgOGammaPt}
-\tablenotetext[6]{Triclinic}
-\tablenotetext[7]{Cubic}
+\center{
 \begin{tabular}{lrll}
 \toprule
 Program         & $N_{\rm at}$              & Energy (hartree) & Energy/$N_{\rm at}$\\ 
@@ -654,16 +650,19 @@ Program         & $N_{\rm at}$              & Energy (hartree) & Energy/$N_{\rm 
                 & 128$^f$  &  -17630.4304  & -137.737737  \\
                 & 216$^g$  &  -29751.3517  & -137.737739  \\ 
 \hline
-{\sc Crystal98}\footnote[8]{$6\times6\times6$ $k$-space grid.}
-                & 2$^f$    &   -275.47547  & -137.73774  \\ 
+{\sc Crystal98} & 2$^f$    &   -275.47547  & -137.73774  \\ 
 \botrule
-\end{tabular}
+$ ^f$Triclinic \\
+$ ^g$Cubic  \\
+\multicolumn{4}{l}{$ ^h6\times6\times6$ $k$-space grid.}
+\end{tabular}}
 \end{table}
 
 \begin{table}
 \caption{Convergence of the $\Gamma$-point super-cell approximation for Diamond, 
-         computed with {\sc MondoSCF} at the 6-21G*/BLYP level of theory. The  
+         computed with {\sc MondoSCF} at the 6-21G*/BLYP level of theory at a {\it good} accuracy level. The  
          lattice coordinates for $N_{\rm at}=8$ are listed in Appendix~\ref{FracCoords}.}\label{DiamondGammaPt}
+\center{
 \begin{tabular}{rll}
 \toprule
  $N_{\rm at}$  & Energy (hartree) & Energy/$N_{\rm at}$\\ 
@@ -678,7 +677,7 @@ Program         & $N_{\rm at}$              & Energy (hartree) & Energy/$N_{\rm 
  288   &   -10964.1 &  -38.0700 \\
  384   &   -14618.9 &  -38.0700 \\ 
 \botrule
-\end{tabular}
+\end{tabular}}
 \end{table}
 
 
@@ -698,8 +697,8 @@ highly optimized by symbolic manipulation and factorization, using real arithmat
 7'th order in the calculation of ${\bf J}_{\rm in}$. The computation of ${\bf J}_{\rm PFF}$ 
 employs a general code for multipole contraction, allowing expansion through $p=64$.
 Eigensolution of the self-consistent-field equations has been used throughout, with the corresponding
-matrix thresholds $\tau_{\rm trix}=10^{-5}$ for "good" and $\tau_{\rm trix}=10^{-6}$ for "tight" 
-levels of precision.  All calculations were performed with $C_1$ (no) symmetry.
+matrix thresholds and other thresholds given in Table \ref{Table:AccurLevels}.
+All calculations were performed with $C_1$ (no) symmetry.
 \newpage
 \newpage
 
@@ -708,12 +707,8 @@ levels of precision.  All calculations were performed with $C_1$ (no) symmetry.
 \includegraphics{PFFMultipoles_water.ps}
 \caption{\label{ErrorPFF} Error in the Coulomb energy computed with the 
 Nijboer and De Wette scheme relative to true Ewald summation.  Shown
-is the approach with $p$ to zero with one (ws=1) and two (ws=2) layers of
+is the error in the Coulomb energy vers $p$ with one (ws=1) and two (ws=2) layers of
 cells in $V_{\rm PFF}$ for a periodic system of 64 classical water molecules.
-{\bf CJ, this figure needs to be relabled.  Please use $p$ instead of L.
-Also, please use ws=1 and ws=2 instead of one layer and two layer.
-Also, is this just the PFF energy or IN+PFF ??
-Also, is this natural log or log10? }
 }
 \end{figure}
 
@@ -733,12 +728,12 @@ program for periodic calculations, {\sc Crystal98}.  Calculations have been carr
 out largely with basis sets optimized for the 
 condensed phase\cite{}, which tend to have less diffuse valence orbitals.  
 Tables~\ref{NaCl8511}-\ref{MgOGammaPt} make a direct comparsion with {\sc Crystal98} for 
-NaCl and MgO obtained with the {\sc MondoSCF} "tight" precision level 
-\footnote{This level of precision correspods to a distribution threshold $\tau_{\rm dist}=10^{-12}$,
-a HiCu threshold $\tau_{\rm HiCu}=10^{-8}$, a QCTC threshold $\tau_{\rm QCTC} = 10^{-10}$ and
-a $10^{-6}$ convergence in the maximum element of the density matrix.}
-({\bf IS THIS RIGHT CJ?? OR IS IT VERYTIGHT??})
-delivering a relative precision of {\bf 8????} digits in the converged total energy.  
+NaCl and MgO obtained with the {\sc MondoSCF} {\it verytight} precision level 
+%\footnote{This level of precision correspods to a distribution threshold $\tau_{\rm dist}=10^{-12}$,
+%a HiCu threshold $\tau_{\rm HiCu}=10^{-8}$, a QCTC threshold $\tau_{\rm QCTC} = 10^{-10}$ and
+%a $10^{-6}$ convergence in the maximum element of the density matrix.}
+%({\bf IS THIS RIGHT CJ?? OR IS IT VERYTIGHT??})
+delivering a relative precision of 10 digits in the converged total energy.  
 For the {\sc Crystal98} calculations, we used the following threshold parameters: 
 {\tt TOLDENS=10}, {\tt TOLPOT=10}, {\tt TOLGRID= 15} and {\tt BASIS=4}.   
 The {\tt BASIS} parameter determines the auxiliary functions used to fit potentials
@@ -746,12 +741,12 @@ in {\sc Crystal98}, an approximation not used by {\sc MondoSCF}.
 %
 
 In Table~\ref{NaCl8511}, comparision is made for $\Gamma$-point NaCl with the 8-511G\cite{} basis set
-and BLYP functional\cite{}, while in Table~\ref{NaClGammaPt} convergence of the supercell $\Gamma$-point approximation 
+and BLYP functional \cite{Becke88,ABecke96}, while in Table~\ref{NaClGammaPt} convergence of the supercell $\Gamma$-point approximation 
 is demonstrated for NaCl with the STO-3G basis set and the local density approximation\cite{}.
 In Table~\ref{MgOGammaPt}, convergence of the {\sc MondoSCF} supercell $\Gamma$-point approximation
 to the {\sc Crystal98} $k$-space result is demonstrated for the 8-61G basis set \cite{} and the BLYP functional.
 Next, in Table~\ref{DiamondGammaPt} convergence of the supercell $\Gamma$-point approximation is shown for
-diamond, using the {\sc MondoSCF} "good" precsion (targeting 6 digits), the BLYP functional and the
+diamond, using the {\sc MondoSCF} {\it good} precsion (targeting 6 digits), the BLYP functional and the
 6-31G* basis set.  Since {\sc MondoSCF} employs 6-$d$ and 10-$f$ functions, while {\sc Crystal98} employs 
 5-$d$ and 7-$f$, we were not able to make a direct comparison.
 
@@ -764,23 +759,23 @@ diamond, using the {\sc MondoSCF} "good" precsion (targeting 6 digits), the BLYP
 \includegraphics{Timing_Diamond_512_log.ps} 
 \label{Scaling_Matrix_Build}
 \caption{Computational complexity for the $\bf J$ and $\bf K_{\rm xc}$ matrix builds
-of cubic diamond at the 6-21G*/BLYP level of theory using a "good" (6 digit) level of precision}
+of cubic diamond at the 6-21G*/BLYP level of theory using a {\it good} (6 digit) level of precision}
 \end{figure}
 
 \begin{figure}
 \centering \includegraphics{ErrorVsNumber_Diamond512.ps} 
 \label{ErrorPerN} 
 \caption{Relative error with system size for 6-21G*/BLYP diamond targeting a precision 
-         of 6 digits in the total energy. {\bf if log10, please label log10!}}
+         of 6 digits in the total energy.}
 \end{figure}
 
 Demonstrating perfect linear scaling at the outset,  Fig.~\ref{Scaling_Matrix_Build} shows the CPU time for $\bf J$ and $\bf K_{\rm xc}$
-builds with  6-21G*\cite{}/BLYP diamond at its standard density.  These timings coorespond to a "good" level of precision, 
+builds with  6-21G*\cite{}/BLYP diamond at its standard density.  These timings coorespond to a {\it good} level of accuracy, 
 targeting 6 digits in the total energy and corresponding to the values listed in Table\ref{DiamondGammaPt}.
 Shown in Fig.~\ref{} is the precision of the computed energies, obtained by performing a second set of calculations with
-{\bf CJ, exactly what happend in these calculations?  Converged SCFs or what?}.  For these calculations, the 
-largest source of error is the numerical integration performed by HiCu, as the QCTC thresholds are significantly more 
-conservative. 
+all thresholds reduced by an order of magnitude.
+For these calculations, the largest source of error is the numerical integration performed by HiCu, as the QCTC thresholds 
+are significantly more conservative. 
 
 \section{Conclusions}
 
@@ -994,38 +989,42 @@ and \( A_{cell} \) is the area of the cell along the non-periodic
 direction. We have found that we can obtain the \( {\cal M} \) tensor
 matrix elements to 8-10 digits of accuracy with this technique.
 
-\section{Lattice Coordinates}\label{FracCoords}
-
+\section{Coordinates of Validation Suite}\label{FracCoords}
+%
 \begin{table}
 \caption{Fractional coordinates for the triclinic 2 atom unit cell of NaCl, cooresponding to the 
          calculations reported in Tables~\ref{NaCl8511} and \ref{NaClGammaPt}.  Length of the unit cell is 
-         $a=b=c=XX$\AA ~~{\bf DOUBLE CHECK}, with angles $\alpha=\beta=\gamma=60^\circ$.}
+         $a=b=c=3.97394011$\AA, with angles $\alpha=\beta=\gamma=60^\circ$.}
+\center{
 \begin{tabular}{cccc}
 \toprule
  Atom &  X  & Y  & Z \\
 \colrule
-? &    ? &   ? &  ?  \\
+Na &    0.000 &  0.000 &  0.000  \\
+Cl &    0.500 &  0.500 &  0.500  \\
 \botrule
-\end{tabular}
+\end{tabular}}
 \end{table}
-
+%
 \begin{table}
 \caption{Fractional coordinates for the triclinic 2 atom unit cell of MgO, cooresponding to the 
          calculations reported in Tables~\ref{NaCl8511}-\ref{NaClGammaPt}.  Length of the unit cell is 
-         $a=b=c=2.977776807$\AA ~~{\bf NOT AU!!}, with angles $\alpha=\beta=\gamma=60^\circ$.}
+         $a=b=c=2.977776807$\AA, with angles $\alpha=\beta=\gamma=60^\circ$.}
+\center{
 \begin{tabular}{cccc}
 \toprule
  Atom &  X  & Y  & Z \\
 \colrule
-O  &    0 &   0 &  0  \\
-Mg &    1/2 &   1/2 &  1/2  \\
+O  &    0.000 &   0.000 &  0.000  \\
+Mg &    0.500 &   0.500 &  0.500  \\
 \botrule
-\end{tabular}
+\end{tabular}}
 \end{table}
-
+%
 \begin{table}
 \caption{Fractional coordinates for the 8 atom unit cell of Diamond, cooresponding to the supercell calculations
-         reported in Table~\ref{DiamondGammaPt}.  Dimensions of the cubic unit cell are $a=b=c=3.57$\AA ~~{\bf NOT AU}.}
+         reported in Table~\ref{DiamondGammaPt}.  Dimensions of the cubic unit cell are $a=b=c=3.5700$\AA.}
+\center{
 \begin{tabular}{cccc}
 \toprule
  Atom &  X  & Y  & Z \\
@@ -1039,7 +1038,28 @@ C &     0.875 &    0.375 &    0.875  \\
 C &     0.125 &    0.625 &    0.625  \\
 C &     0.375 &    0.875 &    0.875  \\
 \botrule
-\end{tabular}
+\end{tabular}}
 \end{table}
+
+%
+\begin{table}
+\caption{The various thresholds which enter into our four levels of accuracy}
+\label{Table:AccurLevels}
+\center{
+\begin{tabular}{ccccc}
+\toprule
+Level  & Matrix & Penatration & QCTC/ONX & Distrabution \\ 
+\colrule
+loose     & $10^{-4}$ & $10^{-3}$ & $10^{-6}$ & $10^{-8}$ \\
+good      & $10^{-5}$ & $10^{-5}$ & $10^{-8}$ & $10^{-10}$ \\
+tight     & $10^{-6}$ & $10^{-7}$ & $10^{-10}$ & $10^{-12}$ \\
+verytight & $10^{-7}$ & $10^{-9}$ & $10^{-12}$ & $10^{-14}$ \\
+\botrule
+\end{tabular}}
+
+\end{table}
+
+
+\vfill\vfill\vfill
 
 \end{document}
