@@ -27,7 +27,7 @@ PROGRAM MakePFFT
   CHARACTER(LEN=8),PARAMETER     :: Prog='MakePFFT'
 !-------------------------------------------------------------------------------- 
 ! Start up macro
-  CALL StartUp(Args,Prog)
+  CALL StartUp(Args,Prog,Serial_O=.TRUE.)
 ! Get the geometry
   CALL Get(GM,Tag_O=CurGeom)
 ! If Periodic, Make Tensors

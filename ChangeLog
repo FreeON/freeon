@@ -1,3 +1,46 @@
+2005-03-27 15:27  mchalla
+
+	* QCTC/MakePFFT.F90: [no log message]
+
+2005-03-27 15:27  mchalla
+
+	* SCFeqs/RHeqs.F90: Added Serial_O=.TRUE. option to StartUp.
+
+2005-03-27 15:26  mchalla
+
+	* MondoMods/: Macros.F90, MondoMPI.F90: MPI2 enabled.
+
+2005-03-27 15:25  mchalla
+
+	* MondoSCF2/: MondoSCF.F90, Overlay.F90: MPI2 enabled!
+
+2005-03-27 15:25  mchalla
+
+	* Includes/CompilerSpecifics.AMDLinux.PG: Compiler file for
+	PARALLEL zinc compilation.
+
+2005-03-25 22:10  nemeth
+
+	* MondoSCF2/Optimizer.F90: This has been left out from last
+	check-in.
+
+2005-03-25 12:57  nemeth
+
+	* MondoSCF2/: ControlStructures.F90, GeomOptKeys.F90, InCoords.F90,
+	Optimizer.F90, ParseGeomOpt.F90, SCFs.F90: Small change in SCFs
+	fixes restart bugs if previous calc stopped before completing the
+	first SCF step. Option "NoBTRep" added. It's an expert option yet,
+	don't use it yet. It avoids repeated iterative backtrasformation
+	for the case of rigidity induced above maximum-stepsize cases.
+
+2005-03-25 11:12  mchalla
+
+	* QCTC/ParaQ.F90: THink we can dispense with -DPERIODIC flag now...
+
+2005-03-23 16:01  mchalla
+
+	* ChangeLog: [no log message]
+
 2005-03-23 14:24  nemeth
 
 	* MondoSCF2/Optimizer.F90: Max number of backtracking steps is set
