@@ -87,10 +87,11 @@ MODULE ParseExtraCoords
           INDEX(LineLowCase,'tors')/=0.OR.&
           INDEX(LineLowCase,'outp')/=0.OR.&
           INDEX(LineLowCase,'linb1')/=0.OR.&
-          INDEX(LineLowCase,'linb2')/=0) THEN
+          INDEX(LineLowCase,'linb2')/=0.OR.&
+          INDEX(LineLowCase,'cartx')/=0.OR.& 
+          INDEX(LineLowCase,'carty')/=0.OR.& 
+          INDEX(LineLowCase,'cartz')/=0) THEN
           NIntCs=NIntCs+1 
-       ELSE IF(INDEX(LineLowCase,'cart')/=0) THEN
-          NIntCs=NIntCs+3 
        ENDIF
        !
          IF(INDEX(LineLowCase,'end_add_internals')/=0) GO TO 2
@@ -389,23 +390,13 @@ MODULE ParseExtraCoords
                   NConstr=NConstr+1
                 ENDIF
          !--------------------
-         ELSE IF(INDEX(LineLowCase,'cart')/=0) THEN
+         ELSE IF(INDEX(LineLowCase,'cartx')/=0) THEN
          !--------------------
                 GOpt%ExtIntCs%Def%C(NIntCs+1)(1:10)='CARTX     ' 
-                GOpt%ExtIntCs%Def%C(NIntCs+2)(1:10)='CARTY     ' 
-                GOpt%ExtIntCs%Def%C(NIntCs+3)(1:10)='CARTZ     ' 
-         !
                 READ(LineLowCase,*) CHAR,SerNum  
-         !
                 GOpt%ExtIntCs%Atoms%I(NIntCs+1,1)=SerNum
-                GOpt%ExtIntCs%Atoms%I(NIntCs+2,1)=SerNum
-                GOpt%ExtIntCs%Atoms%I(NIntCs+3,1)=SerNum
-         !
                 GOpt%ExtIntCs%Constraint%L(NIntCs+1)=.TRUE.
-                GOpt%ExtIntCs%Constraint%L(NIntCs+2)=.TRUE.
-                GOpt%ExtIntCs%Constraint%L(NIntCs+3)=.TRUE.
-                  NConstr=NConstr+3
-         !!!! supposing that constraints are the same for all clones
+                NConstr=NConstr+1
                 Vect1=XYZ%D(1:3,SerNum)
                 IF(Geos%Clone(1)%PBC%Dimen>0) THEN 
                   InvBoxSh=InverseMatrix(Geos%Clone(1)%PBC%BoxShape%D)
@@ -413,17 +404,38 @@ MODULE ParseExtraCoords
                   Vect1=Vect2
                 ENDIF
                 GOpt%ExtIntCs%ConstrValue%D(NIntCs+1)=Vect1(1)
-                GOpt%ExtIntCs%ConstrValue%D(NIntCs+2)=Vect1(2)
-                GOpt%ExtIntCs%ConstrValue%D(NIntCs+3)=Vect1(3)
-         !
-                NIntCs=NIntCs+3 
-                NCartConstr=NCartConstr+3
-         !
-         !               IF(INDEX(LineLowCase,'.')==0) THEN
-         ! READ(LineLowCase,*) CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1)
-         !               ELSE
-         !               ENDIF
-         !--------------------
+                NIntCs=NIntCs+1 
+                NCartConstr=NCartConstr+1
+         ELSE IF(INDEX(LineLowCase,'carty')/=0) THEN
+                GOpt%ExtIntCs%Def%C(NIntCs+1)(1:10)='CARTY     ' 
+                READ(LineLowCase,*) CHAR,SerNum  
+                GOpt%ExtIntCs%Atoms%I(NIntCs+1,1)=SerNum
+                GOpt%ExtIntCs%Constraint%L(NIntCs+1)=.TRUE.
+                NConstr=NConstr+1
+                Vect1=XYZ%D(1:3,SerNum)
+                IF(Geos%Clone(1)%PBC%Dimen>0) THEN 
+                  InvBoxSh=InverseMatrix(Geos%Clone(1)%PBC%BoxShape%D)
+                  CALL DGEMM_NNc(3,3,1,One,Zero,InvBoxSh,Vect1,Vect2)
+                  Vect1=Vect2
+                ENDIF
+                GOpt%ExtIntCs%ConstrValue%D(NIntCs+1)=Vect1(2)
+                NIntCs=NIntCs+1 
+                NCartConstr=NCartConstr+1
+         ELSE IF(INDEX(LineLowCase,'cartz')/=0) THEN
+                GOpt%ExtIntCs%Def%C(NIntCs+1)(1:10)='CARTZ     ' 
+                READ(LineLowCase,*) CHAR,SerNum  
+                GOpt%ExtIntCs%Atoms%I(NIntCs+1,1)=SerNum
+                GOpt%ExtIntCs%Constraint%L(NIntCs+1)=.TRUE.
+                NConstr=NConstr+1
+                Vect1=XYZ%D(1:3,SerNum)
+                IF(Geos%Clone(1)%PBC%Dimen>0) THEN 
+                  InvBoxSh=InverseMatrix(Geos%Clone(1)%PBC%BoxShape%D)
+                  CALL DGEMM_NNc(3,3,1,One,Zero,InvBoxSh,Vect1,Vect2)
+                  Vect1=Vect2
+                ENDIF
+                GOpt%ExtIntCs%ConstrValue%D(NIntCs+1)=Vect1(3)
+                NIntCs=NIntCs+1 
+                NCartConstr=NCartConstr+1
          ELSE 
          ! dont do anything with non-conform lines
          !
