@@ -102,8 +102,8 @@ CONTAINS
     ELSE      
        PBC%PFFMaxLay=1
 !      Look for MaxEll in periodic boundary options
-       IF(.NOT.OptIntQ(Inp,PBOUNDRY,PBC%PFFMaxEll)) THEN 
-          PBC%PFFMaxEll=16
+       IF(.NOT.OptIntQ(Inp,PFFMXELL,PBC%PFFMaxEll)) THEN 
+          PBC%PFFMaxEll=10
        ENDIF  
     ENDIF
 !   Parse permeability 
@@ -116,8 +116,9 @@ CONTAINS
     ELSE
        PBC%AtomW=.TRUE.
     ENDIF
-    PBC%PFFMaxEll=10
+!
 !    WRITE(*,*)   'PBC%PFFMaxEll = ',PBC%PFFMaxEll
+!    WRITE(*,*)   'PBC%PFFMaxLay = ',PBC%PFFMaxLay
 !
   END SUBROUTINE LoadPeriodicOptions
 !============================================================================
@@ -264,8 +265,8 @@ CONTAINS
     ELSEIF(PBC%Dimen==3)THEN
        PBC%DipoleFAC=-(Four*Pi/PBC%CellVolume)*(One/Three-One/(Two*PBC%Epsilon+One))
        PBC%QupoleFAC=(Two*Pi/PBC%CellVolume)*(One/Three-One/(Two*PBC%Epsilon+One))
-       IF(ABS(PBC%DipoleFAC).LT.1.D-14)PBC%DipoleFAC=Zero
-       IF(ABS(PBC%QupoleFAC).LT.1.D-14)PBC%QupoleFAC=Zero
+       IF(ABS(PBC%DipoleFAC).LT.1.D-14) PBC%DipoleFAC=Zero
+       IF(ABS(PBC%QupoleFAC).LT.1.D-14) PBC%QupoleFAC=Zero
     ENDIF
 !   Find the center of the cell
     DO I=1,3

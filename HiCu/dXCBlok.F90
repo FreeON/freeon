@@ -39,7 +39,10 @@ MODULE dXCBlok
                                                    LMNA,LMNB,LA,LB,MA,MB,    &
                                                    NA,NB,LAB,MAB,NAB,LMN,    &
                                                    EllA,EllB,EllAB,LenAB,KI
+       LOGICAL                                  :: SameAtom
 !-------------------------------------------------------------------------------------- 
+       SameAtom=.FALSE. 
+!--------------------------------------------------------------------------------------
        Prim%A=Pair%A
        Prim%B=Pair%B
        Prim%KA=Pair%KA
@@ -76,7 +79,8 @@ MODULE dXCBlok
                 Prim%PFA=PFA 
                 Prim%PFB=PFB
 !               Set primitive values, find distributions wheight
-                PExtent=SetBraBlok(Prim,BS,Gradients_O=.FALSE.,Tau_O=TauRho,ExtraEll_O=1)
+                PExtent=SetBraBlok(Prim,BS,Gradients_O=.TRUE.,Tau_O=TauRho,ExtraEll_O=1)
+                PExtent=MAX(PExtent,SetBraBlok(Prim,BS,Gradients_O=.FALSE.,Tau_O=TauRho,ExtraEll_O=1))
                 PBox%BndBox(:,1)=Prim%P
                 PBox%BndBox(:,2)=Prim%P
                 PBox=ExpandBox(PBox,PExtent)

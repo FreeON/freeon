@@ -399,7 +399,7 @@ CONTAINS
     DO I=1,3
        DO J=1,3
           IF(GM%PBC%AutoW%I(I)==1 .AND. GM%PBC%AutoW%I(J)==1) THEN
-             LatF(I,J)= nlm(I)*F(J)
+             LatF(I,J)= nlm(J)*F(I)
           ENDIF
        ENDDO
     ENDDO
