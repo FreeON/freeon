@@ -36,8 +36,8 @@ ObjectFiles = GetPID.o Spawn.o \
               DynamicsKeys.o ParseDynamics.o GeometryKeys.o ParseGeometries.o \
               PeriodicKeys.o ParsePeriodic.o ParseBasis.o                     \
               ParallelKeys.o ParseParallel.o Massage.o ParseInput.o           \
-              PunchHDF.o Overlay.o PrintParsed.o SCFKeys.o SCFs.o Optimizer.o MondoSCF.o
-
+              PunchHDF.o Overlay.o PrintParsed.o SCFKeys.o SCFs.o Optimizer.o \
+	      ZippyQuote.o MondoSCF.o
 #
 ReleaseFiles= GlobalParsing.x OptionKeys.x ParseCommands.x ParseOptions.x \
               ParseGeometries.x
