@@ -697,7 +697,7 @@ CONTAINS
                       GOpt%GOptStat%MaxCGrad,GOpt%GOptStat%ILMaxCGrad, &
                       GOpt%GOptStat%LMaxCGrad,PBCDim)
      !
-     CALL GradConv(GOpt%GOptStat,GOpt%GConvCrit,GOpt%Constr)
+   ! CALL GradConv(GOpt%GOptStat,GOpt%GConvCrit,GOpt%Constr)
      !
      ! Do we have to refresh internal coord defs?   
      !
