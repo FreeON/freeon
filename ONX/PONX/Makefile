@@ -23,13 +23,13 @@ Objects = ONXParameters.o ContractionScaling.o InitExchangeMatrix.o \
 Libs =  $(F90_LIBRARIES) $(LAPACK) -lPONXMults
 
 ONX:	$(Objects)
-	$(LD) $(LDFLAGS) PONX $(Objects) $(LibOpts) $(Libs)
-	mv PONX $(MONDO_HOME)/Exec/PONX
+	$(LD) $(LDFLAGS) ONX $(Objects) $(LibOpts) $(Libs)
+	mv ONX $(MONDO_HOME)/Exec/ONX
 
 clean:	
 	rm -f $(REMOVEALL)
 	rm -f \#*
 	rm -f *~
-	rm -f $(MONDO_HOME)/Exec/PONX
+	rm -f $(MONDO_HOME)/Exec/ONX
 	ls
 	
