@@ -56,14 +56,14 @@ PROGRAM JForce
   CALL InitRhoAux
 ! Setup global arrays for computation of multipole tensors
   CALL MultipoleSetUp(FFEll2)
+! Build the global PoleTree representation of the total density
+  CALL RhoToPoleTree
 #ifdef PERIODIC
 ! Calculate the Number of Cells
   CALL SetCellNumber(GM)
 ! Set the electrostatic background 
-  CALL PBCFarFieldSetUp(FFEll)
+  CALL PBCFarFieldSetUp(FFEll,PoleRoot)
 #endif
-! Build the global PoleTree representation of the total density
-  CALL RhoToPoleTree
 ! Delete the auxiliary density arrays
   CALL DeleteRhoAux
 ! Delete the Density
