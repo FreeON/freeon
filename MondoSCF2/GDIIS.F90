@@ -887,21 +887,43 @@ write(*,*) NMem+1,'internal values= ',IntCValues%D(:,I)
          VectX%D(J)=IntCValues(I,J) 
          VectY%D(J)=IntCGrads(I,J) 
        ENDDO
-write(*,*) I,IntCs%Def(I)
+write(*,*) I,IntCs%Def(I),IntCs%Atoms(I,1:4)
 write(*,*) 'data points= '
 do j=1,ndim
 write(*,*) vectx%d(j),vecty%d(j)
 enddo
-       IF(HasAngle(IntCs%Def(I))) THEN
-         CALL FilterAngles(VectX,VectY)
-         CALL AngleToCenter(VectX%D,Center)
+       IF(IntCs%Def(I)(1:4)=='LINB'.OR. & 
+          IntCs%Def(I)(1:4)=='OUTP'.OR. & 
+          IntCs%Def(I)(1:4)=='TORS') THEN
+         CALL PeriodicAngle(VectX%D)
+write(*,*) 'center= ',Center
+do j=1,ndim
+write(*,*) vectx%d(j),vecty%d(j)
+enddo
        ENDIF
-       CALL FitInt(VectX%D,VectY%D,Sig%D,FitVal%D(I))
-       IF(HasAngle(IntCs%Def(I))) THEN
-         FitVal%D(I)=Center+FitVal%D(I)
+       !
+       CALL FitInt(VectX%D,VectY%D,Sig%D,FitVal%D(I),IntCs%Def(I))
+       !
+       IF(IntCs%Def(I)(1:4)=='LINB'.OR. & 
+          IntCs%Def(I)(1:4)=='OUTP'.OR. & 
+          IntCs%Def(I)(1:4)=='TORS') THEN
+write(*,*) 'fit1= ',FitVal%D(I),FitVal%D(I)*180.D0/PI
+         CALL Loose2PIs(FitVal%D(I))
+         CALL LinBTo180(FitVal%D(I)) 
+write(*,*) 'fit2= ',FitVal%D(I),FitVal%D(I)*180.D0/PI
+       ELSE IF(IntCs%Def(I)(1:4)=='BEND') THEN
+write(*,*) 'fit1= ',FitVal%D(I),FitVal%D(I)*180.D0/PI
+         CALL BendTo180(FitVal%D(I))
+write(*,*) 'fit2= ',FitVal%D(I),FitVal%D(I)*180.D0/PI
        ENDIF
-       Displ(I)=FitVal%D(I)-IntCValues(I,NDim)
 write(*,*) 'fit= ',FitVal%D(I)
+       Displ(I)=FitVal%D(I)-IntCValues(I,NDim)
+       CALL MapDAngle(IntCs%Def(I),IntCValues(I,NDim),Displ(I))
+if(IntCs%Def(I)(1:4)=='STRE') then
+write(*,*) 'displ= ',i,IntCs%Def(I),IntCValues(I,NDim)/angstromstoau,Displ(I)/angstromstoau
+else
+write(*,*) 'displ= ',i,IntCs%Def(I),IntCValues(I,NDim)*180.D0/PI,Displ(I)*180.D0/PI
+endif
      ENDDO
      !
      CALL Delete(VectY)
@@ -912,12 +934,13 @@ write(*,*) 'fit= ',FitVal%D(I)
 !
 !---------------------------------------------------------------------
 !
-   SUBROUTINE FitInt(VectX,VectY,Sig,FitVal)
+   SUBROUTINE FitInt(VectX,VectY,Sig,FitVal,Def)
      REAL(DOUBLE),DIMENSION(:) :: VectX,VectY,Sig
      REAL(DOUBLE)              :: FitVal
      INTEGER                   :: I,J,NDim,MWT
      REAL(DOUBLE)              :: A,B,SigA,SigB,Chi2,Q
      REAL(DOUBLE)              :: XMax,XMin,YMax,YMin
+     CHARACTER(LEN=*)          :: Def
      !
      NDim=SIZE(VectX)
      MWT=0
@@ -926,11 +949,15 @@ write(*,*) 'VectX= ',VectX
      XMax=MAXVAL(VectX)
 write(*,*) 'xmin= ',xmin,' xmax= ',xmax
      IF(ABS(XMin-XMax)<1.D-7) THEN
+write(*,*) 'in critical X'
        YMin=MINVAL(VectY)
        YMax=MAXVAL(VectY)
-       IF(ABS(YMin)>1.D-4.AND.ABS(YMax)>1.D-4) THEN
+write(*,*) 'ymin= ',ymin,' ymax= ',ymax
+       IF(ABS(YMin)>1.D-4.AND.ABS(YMax)>1.D-4.AND.Def/='LINB2') THEN
+write(*,*) 'in critical Y1'
          CALL Halt('Grad too big in FitInt, while coordinate does not move.')
        ELSE
+write(*,*) 'in critical Y2'
          FitVal=VectX(NDim)-VectY(NDim)
          RETURN
        ENDIF

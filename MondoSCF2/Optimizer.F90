@@ -481,8 +481,10 @@ CONTAINS
      ! ENDIF
        CALL SCF(iBAS,iGEO,C)
        IF(iGEO>1) CALL BackTrack(iBAS,iGEO,C)
+write(*,*) 'chk 1'
        CALL Force(iBAS,iGEO,C%Nams,C%Opts,C%Stat, &
                   C%Geos,C%Sets,C%MPIs)
+write(*,*) 'chk 2'
        CALL PrintClones(IGeo,C%Nams,C%Geos)
        !
        ! Loop over all clones and modify geometries.
@@ -896,7 +898,7 @@ CONTAINS
      !
      CALL INTCValue(IntCs,XYZ,CtrlCoord%LinCrit,CtrlCoord%TorsLinCrit)
      IntOld%D=IntCs%Value-IntOld%D
-     CALL MapAngleDispl(IntCs,NIntC,IntOld%D)
+     CALL MapAngleDispl(IntCs,IntOld%D)
      MaxStre=0
      MaxBend=0
      MaxLinB=0

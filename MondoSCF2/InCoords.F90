@@ -542,16 +542,7 @@ CONTAINS
          K=IntCs%Atoms(IntCoo,3) !!! Def plane
          L=IntCs%Atoms(IntCoo,4) !!! Def plane
          CALL OutP(XYZ(1:3,I),XYZ(1:3,J),XYZ(1:3,K),XYZ(1:3,L),&
-           B%B(IntCoo,1:12))
-       ! write(*,100) IntCs%Def(IntCoo)(1:5),B%IB(IntCoo,1:4), &
-       !  B%B(IntCoo,1:12)*AngstromsToAu
-       ! CALL TORS(XYZ(1:3,I),XYZ(1:3,J),XYZ(1:3,L), &
-       !   XYZ(1:3,K),TorsLinCrit,IntCs%Active(IntCoo), &
-       !   BB_O=B%B(IntCoo,1:12))
-       ! CALL OutP2(XYZ(1:3,I),XYZ(1:3,J),XYZ(1:3,K),XYZ(1:3,L), &
-       !            IntCs%Active(IntCoo),BB_O=B%B(IntCoo,1:12), &
-       !            Value_O=Value)
-       ! write(*,*) 'value= ',value 
+           IntCs%Active(IntCoo),BB_O=B%B(IntCoo,1:12))
        ! write(*,100) IntCs%Def(IntCoo)(1:5),B%IB(IntCoo,1:4), &
        !  B%B(IntCoo,1:12)*AngstromsToAu
        ELSE IF(IntCs%Def(IntCoo)(1:4)=='TORS') THEN
@@ -577,8 +568,8 @@ CONTAINS
          J=IntCs%Atoms(IntCoo,2) 
          K=IntCs%Atoms(IntCoo,3) 
          L=IntCs%Atoms(IntCoo,4)  ! reference atom
-         CALL LinB3(XYZ(1:3,I),XYZ(1:3,J),XYZ(1:3,K),XYZ,L, &
-                    BB1=B%B(IntCoo,1:12),BB2=B%B(IntCoo+1,1:12))  
+         CALL LinB(XYZ(1:3,I),XYZ(1:3,J),XYZ(1:3,K),XYZ,L, &
+                   BB1=B%B(IntCoo,1:12),BB2=B%B(IntCoo+1,1:12))  
         !write(*,100) IntCs%Def(IntCoo)(1:5), &
         ! B%IB(IntCoo,1:4),B%B(IntCoo,1:12)
         !write(*,100) IntCs%Def(IntCoo)(1:5), &
@@ -687,7 +678,7 @@ CONTAINS
 !
 !----------------------------------------------------------------
 !
-   SUBROUTINE OutP(XI,XJ,XK,XL,BB)
+   SUBROUTINE OutP(XI,XJ,XK,XL,Active,BB_O,Value_O)
      !
      !  i is the end atom (atom wagged with respect to j-k-l plane).
      !  j is the apex atom (Atoms i, k and l are attached to j).
@@ -695,155 +686,62 @@ CONTAINS
      !
      IMPLICIT NONE
      REAL(DOUBLE),DIMENSION(1:3) :: XI,XJ,XK,XL,RJI,RJK,RJL
-     REAL(DOUBLE),DIMENSION(1:3) :: EJI,EJK,EJL,C1
-     REAL(DOUBLE) :: DIJSq,Tp,t,DJKSq,djlsq,dx,DOtj
-     REAL(DOUBLE) :: DJK,DJI,djl,cosi,cosk,cosl,Tpp
-     REAL(DOUBLE) :: sinsin,sini,dot,sint,cost,tant,cossin,sml
-     REAL(DOUBLE) :: sinj,SMI,SMK,SUM
-     INTEGER :: I,J,K,L,M,N,II,JJ,KK,LL,IER
-     REAL(DOUBLE) :: BB(1:12)
+     REAL(DOUBLE),DIMENSION(1:3) :: C1,SMI,SMK,SML
+     REAL(DOUBLE)          :: DJK,DJI,DJL,CosI,CosK,CosL
+     REAL(DOUBLE)          :: SinSin,SinI,Dot,SinT,CosT,TanT,CosSin
+     REAL(DOUBLE)          :: SinJ
+     INTEGER               :: I,J
+     REAL(DOUBLE),OPTIONAL :: BB_O(1:12),Value_O
+     LOGICAL               :: Active
      !
-     Dx=One 
-     DijSq=Zero
-     DjkSq=Zero
-     DjlSq=Zero
-     DO 20 M=1,3
-       Tp=XJ(M)
-       T=XI(M)-Tp
-       Rji(M)=T
-       DijSq=DijSq+T*T
-       T=XK(M)-Tp
-       Rjk(M)=T
-       DjkSq=DjkSq+T*T
-       T=XL(M)-XJ(M)
-       Rjl(M)=T
-       DjlSq=DjlSq+T*T
-     20 CONTINUE      
-     Dji=SQRT(DijSq)
-     Djk=SQRT(DjkSq)
-     Djl=SQRT(DjlSq)
-     CosI=Zero 
-     CosK=Zero 
-     CosL=Zero 
-     DO 30 M=1,3
-       T=Rji(M)/Dji
-       Eji(M)=T
-       Tp=Rjk(M)/Djk
-       Ejk(M)=Tp
-       Tpp=Rjl(M)/Djl
-       Ejl(M)=Tpp
-       CosI=CosI+Tp*Tpp
-       CosK=CosK+T*Tpp
-       CosL=CosL+T*Tp
-     30 CONTINUE         
+     Active=.TRUE.
+     RJI=XI-XJ
+     RJK=XK-XJ
+     RJL=XL-XJ
+     DJI=SQRT(DOT_PRODUCT(RJI,RJI))
+     DJK=SQRT(DOT_PRODUCT(RJK,RJK))
+     DJL=SQRT(DOT_PRODUCT(RJL,RJL))
+     IF(DJI<1.D-4.OR.DJK<1.D-4.OR.DJL<1.D-4) THEN
+       Active=.FALSE.
+       RETURN 
+     ENDIF
+     RJI=RJI/DJI
+     RJK=RJK/DJK
+     RJL=RJL/DJL
+     CosI=DOT_PRODUCT(RJK,RJL)
+     CosK=DOT_PRODUCT(RJI,RJL)
+     CosL=DOT_PRODUCT(RJI,RJK)
      IF(ABS(CosI) > 0.99995D0) RETURN  !!!! GO TO 70
      SinSin=One-CosI*CosI
      SinI=SQRT(SinSin)
-     C1(1)=Ejk(2)*Ejl(3)-Ejk(3)*Ejl(2)
-     C1(2)=Ejk(3)*Ejl(1)-Ejk(1)*Ejl(3)
-     C1(3)=Ejk(1)*Ejl(2)-Ejk(2)*Ejl(1)
-     Dot=Eji(1)*C1(1)+Eji(2)*C1(2)+Eji(3)*C1(3)
+     CALL CROSS_PRODUCT(RJK,RJL,C1)
+     Dot=DOT_PRODUCT(RJI,C1) ! this may be +-
+     IF(ABS(SinI)<1.D-4) THEN
+       Active=.FALSE.
+       RETURN
+     ENDIF
      SinT=Dot/SinI
-     !     if(abs(sint).gt.0.00005d0) then
-     !        write(6,1020)nob
-     !        write(6,'(15x,a36)')intch(nob)
-     !     end if
-     IF(ABS(SinT)>0.99995D0) RETURN !!!! GO TO 80 !!!! sint shows OutP angle
+     IF(ABS(SinT)>0.99995D0) THEN
+       Active=.FALSE.
+       RETURN !!!! sint shows OutP angle
+     ENDIF
      CosT=SQRT(One-SinT*SinT)
      TanT=SinT/CosT
      CosSin=CosT*SinI
-     DO 50 M=1,3
-       T=C1(M)/CosSin
-       SMI=(T-TanT*Eji(M))/Dji
-       BB(M) = Dx*SMI
-       SMK=T*(CosI*CosK-CosL)/(SinSin*Djk)
-       BB(6+M) = Dx*SMK
-       SML=T*(CosI*CosL-CosK)/(SinSin*Djl)
-       BB(9+M) = Dx*SML
-       Sum=SMI+SMK+SML
-       BB(3+M) = -Dx*Sum
-     50 CONTINUE
-       RETURN
-     60 CONTINUE
-       IEr=1
-       RETURN
-     70 CONTINUE
-       IEr=-1
-       WRITE(6,1000)
-       RETURN
-     80 CONTINUE
-     IEr=-1
-     WRITE(6,1010)
-     RETURN
-     !
-     1000 format(/,2x,'<!> k-j-l is colinear (no plane Defined for wag of i)')
-     1010 format(/,2x,'<!> i is perpendicular to j-k-l plane - use valence angle bends')
-     1020 format(/,2x,'<!> warning: wag of a non-planar system at internal',/,15x,'coordinate no.',i5,':')
-     !
-   END SUBROUTINE OutP
-!
-!----------------------------------------------------------------------
-!
-   SUBROUTINE OutP2(XI,XJ,XK,XL,Active,BB_O,Value_O)
-     !
-     !  i is the end atom (atom wagged with respect to j-k-l plane).
-     !  j is the apex atom (Atoms i, k and l are attached to j).
-     !  k and l are the anchor Atoms (Define the j-k-l plane).
-     !
-     REAL(DOUBLE),DIMENSION(1:3)           :: XI,XJ,XK,XL
-     REAL(DOUBLE),DIMENSION(1:12),OPTIONAL :: BB_O
-     REAL(DOUBLE),OPTIONAL                 :: Value_O
-     REAL(DOUBLE),DIMENSION(1:3)           :: VIJ,VKJ,VLJ
-     REAL(DOUBLE)                          :: RIJ,RKJ,RLJ,Tol,Sum
-     REAL(DOUBLE),DIMENSION(1:3)           :: WKL,WLI,WIK
-     REAL(DOUBLE)                          :: RWKL,RWLI,RWIK
-     LOGICAL                               :: Active
-     !
-     Tol=1.D-3
-     IF(PRESENT(BB_O)) BB_O=Zero
-     IF(PRESENT(Value_O)) Value_O=Zero
-     !
-     VIJ=XI-XJ 
-     VKJ=XK-XJ
-     VLJ=XL-XJ
-     RIJ=SQRT(DOT_PRODUCT(VIJ,VIJ))
-     RKJ=SQRT(DOT_PRODUCT(VKJ,VKJ))
-     RLJ=SQRT(DOT_PRODUCT(VLJ,VLJ))
-     IF(RIJ<Tol.OR.RKJ<Tol.OR.RLJ<Tol) THEN
-       Active=.FALSE.
-       RETURN
-     ENDIF
-     VIJ=VIJ/RIJ
-     VKJ=VKJ/RKJ
-     VLJ=VLJ/RLJ
-     !
-     CALL CROSS_PRODUCT(VKJ,VLJ,WKL)
-     CALL CROSS_PRODUCT(VLJ,VIJ,WLI)
-     CALL CROSS_PRODUCT(VIJ,VKJ,WIK)
-     RWKL=SQRT(DOT_PRODUCT(WKL,WKL))
-     RWLI=SQRT(DOT_PRODUCT(WLI,WLI))
-     RWIK=SQRT(DOT_PRODUCT(WIK,WIK))
-     IF(RWKL<Tol) THEN
-       Active=.FALSE.
-       RETURN
-     ENDIF
-   ! WKL=WKL/RWKL
-   ! WLI=WLI/RWLI
-   ! WIK=WIK/RWIK
-     !
      IF(PRESENT(Value_O)) THEN
-       Sum=DOT_PRODUCT(WKL,VIJ)
-       IF(ABS(Sum)>One-1.D-7) Sum=SIGN(One-1.D-7,Sum)
-       Value_O=PI-ACOS(Sum)
+       Value_O=SIGN(ASIN(SinT),-Dot)
      ENDIF
-     !
      IF(PRESENT(BB_O)) THEN
-       BB_O(1:3)=WKL
-       BB_O(4:6)=-(WKL+WLI+WIK)
-       BB_O(7:9)=WLI
-       BB_O(10:12)=WIK
+       C1=C1/CosSin
+       SMI=(C1-TanT*RJI)/DJI
+       SMK=C1*(CosI*CosK-CosL)/(SinSin*Djk)
+       SML=C1*(CosI*CosL-CosK)/(SinSin*Djl)
+       BB_O(1:3)=SMI
+       BB_O(7:9)=SMK
+       BB_O(10:12)=SML
+       BB_O(4:6)=-SMI-SMK-SML
      ENDIF
-   END SUBROUTINE OutP2
+   END SUBROUTINE OutP
 !
 !----------------------------------------------------------------------
 !
@@ -914,7 +812,7 @@ CONTAINS
 !
 !----------------------------------------------------------------------
 !
-   SUBROUTINE LinB3(XI,XJ,XK,XYZ,IRef,BB1,BB2,Value1,Value2)
+   SUBROUTINE LinB(XI,XJ,XK,XYZ,IRef,BB1,BB2,Value1,Value2)
      !
      REAL(DOUBLE),DIMENSION(1:3) :: XI,XJ,XK
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
@@ -943,9 +841,9 @@ CONTAINS
      !
      ! Set up reference coordinate system
      !
-    !IF(SinAlpha>0.001D0) THEN
-    !  VectRef=RIJJK
-    !ELSE
+   ! IF(SinAlpha>0.001D0) THEN
+   !   VectRef=RIJJK
+   ! ELSE
        IF(IRef==0) THEN
          VectAux=(/One,Zero,Zero/)
          CALL CROSS_PRODUCT(VectKI,VectAux,VectRef)
@@ -957,7 +855,7 @@ CONTAINS
        ELSE
          VectRef=XYZ(1:3,IRef)-XK
        ENDIF
-    !ENDIF
+   ! ENDIF
      EZ=VectKI
      CALL CROSS_PRODUCT(VectRef,EZ,EY)
      Sum=SQRT(DOT_PRODUCT(EY,EY))
@@ -981,7 +879,7 @@ CONTAINS
        CALL BEND(XI,XJ,XK,BB_O=BB2,W_O=EY)
      ENDIF
      !
-   END SUBROUTINE LinB3
+   END SUBROUTINE LinB
 !
 !--------------------------------------------------------------------
 !
@@ -2105,7 +2003,7 @@ CONTAINS
                    Value_O=IntCs%Value(I))
          !
        ELSE IF(IntCs%Def(I)(1:5)=='LINB1') THEN
-         CALL LinB3(XYZ(1:3,I1),XYZ(1:3,I2),XYZ(1:3,I3),XYZ,I4,&
+         CALL LinB(XYZ(1:3,I1),XYZ(1:3,I2),XYZ(1:3,I3),XYZ,I4,&
            Value1=IntCs%Value(I),Value2=IntCs%Value(I+1))  
          !
        ELSE IF(IntCs%Def(I)(1:4)=='TORS') THEN
@@ -2114,8 +2012,8 @@ CONTAINS
            Value_O=IntCs%Value(I))
          !
        ELSE IF(IntCs%Def(I)(1:4)=='OUTP') THEN
-         CALL OUTPValue(XYZ(1:3,I1),XYZ(1:3,I2),XYZ(1:3,I4),&
-           XYZ(1:3,I3),TorsLinCrit,IntCs%Value(I),IntCs%Active(I))
+         CALL OUTP(XYZ(1:3,I1),XYZ(1:3,I2),XYZ(1:3,I4),&
+           XYZ(1:3,I3),IntCs%Active(I),Value_O=IntCs%Value(I))
          !
        ELSE IF(IntCs%Def(I)(1:5)=='CARTX') THEN
          IntCs%Value(I)=XYZ(1,I1)
@@ -2129,22 +2027,6 @@ CONTAINS
    END SUBROUTINE INTCValue
 !
 !------------------------------------------------------------
-!
-   SUBROUTINE OUTPValue(XIin,XJin,XKin,XLin,LinCrit,VOutP,Active)
-     REAL(DOUBLE),DIMENSION(1:3) :: XIin,XJin,XKin,XLin
-     REAL(DOUBLE)                :: LinCrit,VOutP,Sum
-     LOGICAL                     :: Active
-     !
-     CALL TORS(XIin,XJin,XKin,XLin,LinCrit,Active,Value_O=VOutP)
-     !
-     IF(VOutP>Zero) THEN
-       VOutP=PI-VOutP
-     ELSE
-       VOutP=-(PI+VOutP)
-     ENDIF
-   END SUBROUTINE OUTPValue
-!
-!-------------------------------------------------------------
 !
    SUBROUTINE GetSpBMatr(XYZ,B,SpB) 
      !
@@ -2170,39 +2052,6 @@ CONTAINS
      !
      !     CALL PPrint(SpB,'SpB2',Unit_O=6)
    END SUBROUTINE GetSpBMatr
-!
-!---------------------------------------------------------
-!
-   SUBROUTINE MapBackAngle(IntCs,VectAux)
-     IMPLICIT NONE
-     TYPE(INTC) :: IntCs
-     INTEGER :: I,J,NIntC
-     REAL(DOUBLE),DIMENSION(:) :: VectAux
-     REAL(DOUBLE) :: SUM,TwoPi
-     !
-     ! Map back angles into the ranges the iterative 
-     ! back-transformation can cope with.
-     TwoPi=Two*PI
-     NIntC=SIZE(IntCs%Def)
-     !
-     DO I=1,NIntC
-       SUM=VectAux(I)
-       IF(IntCs%Def(I)(1:4)=='BEND') THEN
-         J=INT(SUM/TwoPI)
-         SUM=SUM-J*TwoPi
-         IF(SUM<Zero) SUM=TwoPi+SUM
-         IF(SUM>PI) SUM=TwoPI-SUM
-       ELSE IF(IntCs%Def(I)(1:4)=='TORS'.OR. &
-               IntCs%Def(I)(1:4)=='LINB'.OR. &
-               IntCs%Def(I)(1:4)=='OUTP') THEN
-         J=INT(SUM/TwoPi)
-         SUM=SUM-J*TwoPi
-         IF(SUM<-PI) SUM=TwoPi+SUM
-         IF(SUM> PI) SUM=SUM-TwoPi
-       ENDIF
-       VectAux(I)=SUM
-     ENDDO
-   END SUBROUTINE MapBackAngle
 !
 !-------------------------------------------------------
 !
@@ -2610,7 +2459,7 @@ CONTAINS
          IF(IStep>=4) THEN
            VectIntAux%D=VectIntReq%D-IntCs%Value
            CALL RedundancyOff(VectIntAux%D,SCRPath,Print)
-           CALL MapAngleDispl(IntCs,NIntC,VectIntAux%D) 
+           CALL MapAngleDispl(IntCs,VectIntAux%D) 
            VectIntReq%D=IntCs%Value+VectIntAux%D
            CALL MapBackAngle(IntCs,VectIntReq%D) 
          ENDIF
@@ -2619,7 +2468,7 @@ CONTAINS
        ! Calculate difference between required and actual internals
        !
        VectIntAux%D=VectIntReq%D-IntCs%Value
-       CALL MapAngleDispl(IntCs,NIntC,VectIntAux%D) 
+       CALL MapAngleDispl(IntCs,VectIntAux%D) 
        !
        ! Check convergence on constraints
        !
@@ -3060,26 +2909,6 @@ CONTAINS
      CALL Delete(Vect)
    END SUBROUTINE Rotate
 !
-!-------------------------------------------------------
-!
-   SUBROUTINE MapAngleDispl(IntCs,NIntC,VectInt) 
-     ! all angle displacements must be between -PI and +PI.
-     TYPE(INTC)                :: IntCs
-     INTEGER                   :: NIntC,I,II
-     REAL(DOUBLE),DIMENSION(:) :: VectInt
-     REAL(DOUBLE)              :: Sum,ASum,TwoPi
-     !
-     TwoPi=Two*PI
-     DO I=1,NIntC
-       IF(HasAngle(IntCs%Def(I))) THEN
-         Sum=VectInt(I)
-         IF(Sum>PI) Sum=Sum-TwoPi
-         IF(Sum<-PI) Sum=TwoPi+Sum
-         VectInt(I)=Sum
-       ENDIF
-     ENDDO
-   END SUBROUTINE MapAngleDispl
-!
 !--------------------------------------------------------------------
 !
    SUBROUTINE ChkBendToLinB(IntCs,NIntC,XYZ,AtNum,HBondCenter, &
@@ -3090,7 +2919,7 @@ CONTAINS
      TYPE(INT_VECT)              :: HBondCenter
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
      INTEGER,DIMENSION(:)        :: AtNum
-     REAL(DOUBLE)                :: Value,Conv,Val1,Val2
+     REAL(DOUBLE)                :: Value,Conv
      INTEGER                     :: I1,I2,I3,I4,NMax12,NLinB,NtorsLinb
      INTEGER                     :: I,J,K,L,NatmsLoc
      TYPE(INT_RNK2)              :: LinBBridge,Top12
@@ -3137,6 +2966,7 @@ CONTAINS
          IF(MarkLinB%I(I)==0) THEN
            CALL Set_INTC_EQ_INTC(IntCs,IntC_New,I,I,NLinB+I)
          ELSE
+           CALL FindLinBRef(XYZ,IntCs%Atoms(I,1:4),Top12%I)
            CALL Set_INTC_EQ_INTC(IntCs,IntC_New,I,I,NLinB+I)
            IntC_New%Def(NLinB+I)='LINB1'
            NLinB=NLinB+1
@@ -3163,10 +2993,8 @@ CONTAINS
          I2=IntCs%Atoms(I,2)
          I3=IntCs%Atoms(I,3)
          L =IntCs%Atoms(I,4)
-         CALL LinB3(XYZ(1:3,I1),XYZ(1:3,I2),XYZ(1:3,I3),XYZ,L,&
+         CALL LinB(XYZ(1:3,I1),XYZ(1:3,I2),XYZ(1:3,I3),XYZ,L,&
            Value1=IntCs%Value(I),Value2=IntCs%Value(I+1))  
-         Val1=180.D0-Conv*ACOS(One-IntCs%Value(I)**2)
-         Val2=180.D0-Conv*ACOS(One-IntCs%Value(I+1)**2)
          MarkLongR%I(I)=1 
          MarkLongR%I(I+1)=1 
       !ELSE IF(IntCs%Def(I)(1:5)=='BEND') THEN
@@ -3184,6 +3012,55 @@ CONTAINS
      CALL Delete(MarkLongR)
      CALL Delete(Top12)
    END SUBROUTINE ChkBendToLinB    
+!
+!-------------------------------------------------------
+!
+   SUBROUTINE FindLinBRef(XYZ,Atoms,Top12)
+     INTEGER,DIMENSION(1:4)  :: Atoms
+     INTEGER,DIMENSION(:,:)  :: Top12
+     INTEGER                 :: I,J,K,L,I1,I2,I3,N1,N3,IC,N,II
+     REAL(DOUBLE),DIMENSION(:,:) :: XYZ
+     REAL(DOUBLE)            :: Val,ValM,Conv,Sum
+     !
+     Conv=180.D0/PI
+     I1=Atoms(1)
+     I2=Atoms(2)
+     I3=Atoms(3)
+     N1=Top12(I1,1)
+     N3=Top12(I3,1)
+     IF(N1<=1.AND.N3<=1) RETURN
+     ValM=Zero
+     IF(N1>1) THEN
+       II=Top12(I1,2)
+       IF(II==I2) II=Top12(I1,3)
+       CALL BEND(XYZ(1:3,I2),XYZ(1:3,I1),XYZ(1:3,II),Value_O=ValM)
+     ELSE 
+       II=Top12(I3,2)
+       IF(II==I2) II=Top12(I3,3)
+       CALL BEND(XYZ(1:3,I2),XYZ(1:3,I3),XYZ(1:3,II),Value_O=ValM)
+     ENDIF
+     ValM=ABS(120.D0-ValM*Conv)
+     DO K=1,2 
+       IF(K==1) THEN
+         IC=I1
+         N=N1
+       ELSE
+         IC=I3
+         N=N3
+       ENDIF
+       DO I=1,N
+         J=Top12(IC,I+1)
+         IF(J==I2) CYCLE
+         CALL BEND(XYZ(1:3,I2),XYZ(1:3,IC),XYZ(1:3,J),Value_O=Val)
+         Sum=ABS(120.D0-Val*Conv)
+         IF(Sum<ValM) THEN
+           II=J
+           ValM=Sum 
+         ENDIF
+       ENDDO
+     ENDDO
+     Atoms(4)=II 
+   END SUBROUTINE FindLinBRef
 !
 !-------------------------------------------------------
 !
@@ -5232,8 +5109,9 @@ CONTAINS
      TYPE(DBL_VECT) :: VectX,VectY,VectX2,VectY2
      INTEGER        :: I,J,NDim,NDim2
      TYPE(INT_VECT) :: Mark
-     REAL(DOUBLE)   :: Center
+     REAL(DOUBLE)   :: Center,FilterWidth
      !
+     FilterWidth=PI*0.8D0
      NDim=SIZE(VectX%D)
      CALL New(Mark,NDim)
      !
@@ -5246,19 +5124,29 @@ CONTAINS
 !
 !------------------------------------------------------------------
 !
-   SUBROUTINE AngleToCenter(VectX,Center)
+   SUBROUTINE PeriodicAngle(VectX)
      REAL(DOUBLE),DIMENSION(:) :: VectX
-     REAL(DOUBLE)              :: Center,ToCenter
-     INTEGER                   :: I,J,NDim
+     REAL(DOUBLE)              :: Center,ToCenter,Dist,Dist2,Vect(3)
+     INTEGER                   :: I,J,II,NDim
      !
      NDim=SIZE(VectX)
      Center=VectX(1)
      DO I=1,NDim
-       ToCenter=VectX(I)-Center
-       CALL AngleTo180(ToCenter)
-       VectX(I)=ToCenter
+       Vect(1)=VectX(I)
+       Vect(2)=VectX(I)+TwoPI
+       Vect(3)=VectX(I)-TwoPI
+       II=1
+       Dist=ABS(Vect(1)-Center)
+       DO J=2,3
+         Dist2=ABS(Vect(J)-Center)
+         IF(Dist2<Dist) THEN
+           II=J
+           Dist=Dist2 
+         ENDIF 
+       ENDDO
+       VectX(I)=Vect(II)
      ENDDO
-   END SUBROUTINE AngleToCenter
+   END SUBROUTINE PeriodicAngle
 !
 !------------------------------------------------------------------
 !
@@ -5321,6 +5209,77 @@ CONTAINS
      REAL(DOUBLE) :: Angle
      Angle=Angle-TwoPi*INT(Angle/TwoPi)
    END SUBROUTINE Loose2PIs
+!
+!------------------------------------------------------------------
+!
+   SUBROUTINE MapBendDispl(Angle,AngleDispl)
+     REAL(DOUBLE)  :: Angle,AngleDispl,Sum
+     Sum=Angle+AngleDispl
+     IF(Sum>PI) AngleDispl=(TwoPi-Sum)-Angle
+   END SUBROUTINE MapBendDispl
+!
+!------------------------------------------------------------------
+!
+   SUBROUTINE MapLinBDispl(AngleDispl)
+     REAL(DOUBLE)  :: AngleDispl
+     CALL LinBTo180(AngleDispl)         
+   END SUBROUTINE MapLinBDispl
+!
+!------------------------------------------------------------------
+!
+   SUBROUTINE MapDAngle(Def,Angle,DAngle)
+     REAL(DOUBLE)     :: Angle,DAngle 
+     CHARACTER(LEN=*) :: Def
+     IF(Def(1:4)=='BEND') THEN
+       CALL MapBendDispl(Angle,DAngle)
+     ELSE IF(Def(1:4)=='LINB'.OR. &
+             Def(1:4)=='OUTP'.OR. &
+             Def(1:4)=='TORS') THEN
+       CALL MapLinBDispl(DAngle)
+     ENDIF
+   END SUBROUTINE MapDAngle
+!
+!---------------------------------------------------------
+!
+   SUBROUTINE MapBackAngle(IntCs,Values)
+     IMPLICIT NONE
+     TYPE(INTC) :: IntCs
+     INTEGER :: I,J,NIntC
+     REAL(DOUBLE),DIMENSION(:) :: Values
+     REAL(DOUBLE) :: Angle,TwoPi
+     !
+     ! Map back angles into the ranges the iterative 
+     ! back-transformation can cope with.
+     NIntC=SIZE(IntCs%Def)
+     !
+     DO I=1,NIntC
+       Angle=Values(I)
+       IF(IntCs%Def(I)(1:4)=='BEND') THEN
+         CALL Loose2PIs(Angle)
+         CALL BendTo180(Angle) 
+       ELSE IF(IntCs%Def(I)(1:4)=='TORS'.OR. &
+               IntCs%Def(I)(1:4)=='LINB'.OR. &
+               IntCs%Def(I)(1:4)=='OUTP') THEN
+         CALL Loose2PIs(Angle)
+         CALL LinBTo180(Angle) 
+       ENDIF
+       Values(I)=Angle
+     ENDDO
+   END SUBROUTINE MapBackAngle
+!
+!-------------------------------------------------------
+!
+   SUBROUTINE MapAngleDispl(IntCs,Displ) 
+     TYPE(INTC)                :: IntCs
+     INTEGER                   :: I,NIntC
+     REAL(DOUBLE),DIMENSION(:) :: Displ
+     !
+     NIntC=SIZE(IntCs%Def)
+     DO I=1,NIntC
+       CALL MapDAngle(IntCs%Def(I),IntCs%Value(I),Displ(I))
+     ENDDO
+   END SUBROUTINE MapAngleDispl
+!
 !------------------------------------------------------------------
 !
    END MODULE InCoords
