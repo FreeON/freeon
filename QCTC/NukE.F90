@@ -39,50 +39,36 @@ MODULE NuklarE
 !---------------------------------------------------------------------------------------------
        NukE=Zero 
        DO At=1,NAtoms
-          NukeCo    = -GM%AtNum%I(At)*(NuclearExpnt/Pi)**(ThreeHalves)
-          NukePole  = -GM%AtNum%I(At)
-!         Set MAC and PAC parameters
-          Tau       = Thresholds%TwoE
-          DP2       = (ABS(NukePole)/Tau)**(Two/DBLE(SPEll+1))
-          PoleSwitch= MAX(1.D-12,-LOG(Two*Tau/ABS(NukePole)))
-!         Set atomic "primitive"
-          Prim%Ell  = 0
-          Prim%Zeta = NuclearExpnt
-!         Zero Accumulators
-          HGBra(1)  = NukeCo
-          SPBraC(0) = NukePole
-          SPBraS(0) = Zero
-          HGKet(1)  = Zero
-          SPKetC(0) = Zero
-          SPKetS(0) = Zero
+          NukeCo=-GM%AtNum%I(At)*(NuclearExpnt/Pi)**(ThreeHalves)
+          NukePole=-GM%AtNum%I(At)
+          Tau=Thresholds%TwoE
+          DP2=(GM%AtNum%I(At)/Tau)**(Two/DBLE(SPEll+2))
+!         Set atomic "primitive"  
+          Prim%P=GM%Carts%D(:,At)
+          Prim%Zeta=NuclearExpnt
+          PBox%BndBox(:,1)=Prim%P
+          PBox%BndBox(:,2)=Prim%P
+          PBox=ExpandBox(PBox,Extent(0,NuclearExpnt,ABS(NukePole),TauPAC)
+          HGKet(1)=Zero
+          SPKetC(0)=Zero       
 #ifdef PERIODIC
           QC(:)=GM%Carts%D(:,At)
           DO NC=1,CSMM1%NCells
 !            Set Atomic Coordinates
              Prim%P(:)=QC(:)+CSMM1%CellCarts%D(:,NC)
+             PBox%Center=Prim%P
 !            Walk the walk
              CALL VWalk(PoleRoot)
           ENDDO
 !         Reset the Atomic Coordinates
           Prim%P(:) = QC(:)
-!         Accumulate the atomic contribution
-          NukE=NukE+HGBra(1)*HGKet(1)+SPBraC(0)*SPKetC(0)
-!         Add in the Far Field, Dipole and Quadripole  Correction
-          IF(Dimen > 0) THEN
-             NukE = NukE + CTraxFF(Prim,HGBra) &
-                         + CTraxQ(Prim,HGBra)
-          ENDIF
+          PBox%Center=Prim%P
 #else
-!         Set Atomic Coordinates
-          Prim%P=GM%Carts%D(:,At) 
 !         Walk the walk
           CALL VWalk(PoleRoot)
-!         Accumulate the atomic contribution
-          NukE=NukE+HGBra(1)*HGKet(1)+SPBraC(0)*SPKetC(0)
 #endif
-       ENDDO
-!
-       WRITE(*,*)' NukeE = ',NukE
+!         Accumulate the atomic contribution
+          NukE=NukE+NukeCo*HGKet(1)+NukePole*SPKetC(0) 
      END FUNCTION NukE
 !
 END MODULE
