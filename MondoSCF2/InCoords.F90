@@ -2425,8 +2425,7 @@ CONTAINS
        110  FORMAT('Grad Trf, step= ',I3,' MaxChange= ',F12.6,&
                    ' ChangeNorm= ',F12.6)
        !      
-       IF(DiffMax<GrdTrfCrit) THEN
-       ENDIF
+       IF(DiffMax<GrdTrfCrit) EXIT 
      ENDDO
      !
      IF(II>=MaxIt_GrdTrf) THEN
