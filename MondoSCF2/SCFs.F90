@@ -488,7 +488,7 @@ CONTAINS
                 Converged(iCLONE)=DID_CONVERGE
                 Mssg='Quasi convergence from wrong side.'
              ELSEIF(FLogic)THEN
-                Converged(iCLONE)=DID_CONVERGE
+!                Converged(iCLONE)=DID_CONVERGE
                 Mssg='Warning: ODA not strictly decreasing'
              ELSEIF(OLogic)THEN
                 Converged(iCLONE)=SCF_STALLED
@@ -883,117 +883,103 @@ TYPE(DBL_RNK2) :: AuxLatF
     ! DFT exchange corrleation term
     IF(HasDFT(O%Models(cBas))) THEN
 #ifdef PARALLEL 
-CALL New(AuxLatF,(/3,3/))
-HDFFileID=OpenHDF(N%HFile)
-HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(1)))
-CALL Get(AuxLatF,'latfrc',Tag_O=chGEO)
-CALL CloseHDFGroup(HDF_CurrentID)
-CALL CloseHDF(HDFFileID)
-#endif
+       CALL New(AuxLatF,(/3,3/))
+       HDFFileID=OpenHDF(N%HFile)
+       HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(1)))
+       CALL Get(AuxLatF,'latfrc',Tag_O=chGEO)
+       CALL CloseHDFGroup(HDF_CurrentID)
+       CALL CloseHDF(HDFFileID)
+!
        CALL Invoke('XCForce',N,S,M)
-#ifdef PARALLEL 
-HDFFileID=OpenHDF(N%HFile)
-HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(1)))
-CALL Get(G%Clone(1)%PBC%LatFrc,'latfrc',Tag_O=chGEO)
-G%Clone(1)%PBC%LatFrc%D=AuxLatF%D
-CALL Put(G%Clone(1)%PBC%LatFrc,'latfrc',Tag_O=chGEO)
-CALL CloseHDFGroup(HDF_CurrentID)
-CALL CloseHDF(HDFFileID)
-CALL Delete(AuxLatF)
+!
+       CALL Get(G%Clone(1)%PBC%LatFrc,'latfrc',Tag_O=chGEO)
+       G%Clone(1)%PBC%LatFrc%D=AuxLatF%D
+       CALL Put(G%Clone(1)%PBC%LatFrc,'latfrc',Tag_O=chGEO)
+       CALL CloseHDFGroup(HDF_CurrentID)
+       CALL CloseHDF(HDFFileID)
+       CALL Delete(AuxLatF)
        CALL NLATTFORCE_XC(cBAS,cGEO,G,B,N,S,M)
+#else
+       CALL Invoke('XCForce',N,S,M)
 #endif
     ENDIF
-#ifdef NLATTFORCE    
-    ! Exact Hartree-Fock exchange component
+!   Exact Hartree-Fock exchange component
     IF(HasHF(O%Models(cBas)))THEN
-       CALL Invoke('GONX',N,S,M)       
-       CALL NLATTFORCE_X(cBAS,cGEO,G,B,N,O,S,M)
-    ENDIF
-#else
-    ! Exact Hartree-Fock exchange component
-    IF(HasHF(O%Models(cBas)))THEN
-       !CALL NLATTFORCE_X(cBAS,cGEO,G,B,N,O,S,M)
+!       CALL NLATTFORCE_X(cBAS,cGEO,G,B,N,O,S,M)
        CALL Invoke('GONX',N,S,M)
     ENDIF
-#endif
-!
-!   Constraint the Gradients
-!
+!   Now, Decide what to do
     chGEO=IntToChar(cGEO)
     HDFFileID=OpenHDF(N%HFile)
-    DO iCLONE=1,G%Clones
-       HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
-!      Get Forces
-       CALL Get(G%Clone(iCLONE)%Gradients,'Gradients',Tag_O=chGEO)
-       IF(O%Coordinates/=GRAD_INTS_OPT) THEN
-         DO iATS=1,G%Clone(iCLONE)%NAtms
-            IF(G%Clone(iCLONE)%CConstrain%I(iATS)/=0)THEN
-               G%Clone(iCLONE)%Gradients%D(:,iATS)=Zero
-            ENDIF
-         ENDDO
-       ENDIF
-!      Get Lattice Forces
-       CALL Get(G%Clone(iCLONE)%PBC%LatFrc,'latfrc',Tag_O=chGEO)
-!      Print Tot Lattice Forces
-!!$       WRITE(*,*) 'LatFrc NUM'
-!!$       DO I=1,3
-!!$          WRITE(*,*) (G%Clone(iCLONE)%PBC%LatFrc%D(I,J),J=1,3)
-!!$       ENDDO
-     ! DO I=1,G%Clone(iCLONE)%PBC%Dimen
-     !   DO J=1,G%Clone(iCLONE)%PBC%Dimen
-     !     DO iATS=1,G%Clone(iCLONE)%NAtms
-     !       G%Clone(iCLONE)%PBC%LatFrc%D(I,J)= &
-     !       G%Clone(iCLONE)%PBC%LatFrc%D(I,J)+ &
-     !       G%Clone(iCLONE)%Gradients%D(I,iATS)* &
-     !       G%Clone(iCLONE)%BoxCarts%D(J,iATS)
-     !     ENDDO
-     !   ENDDO
-     ! ENDDO
-       CALL Put(G%Clone(iCLONE)%PBC%LatFrc,'latfrc',Tag_O=chGEO)
-!      Close the group
-       CALL CloseHDFGroup(HDF_CurrentID)
-       G%Clone(iCLONE)%GradRMS=SQRT(G%Clone(iCLONE)%GradRMS)/DBLE(3*G%Clone(iCLONE)%NAtms)
-!      Print the Forces and BoxForces if O%Grad==GRAD_ONE_FORCE
-       IF(O%Grad==GRAD_ONE_FORCE) THEN
+    IF(O%Grad==GRAD_ONE_FORCE) THEN
+       DO iCLONE=1,G%Clones
+          HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
+!         Get Forces
+          CALL Get(G%Clone(iCLONE)%Gradients,'Gradients',Tag_O=chGEO)
+!         Get Lattice Forces
+          CALL Get(G%Clone(iCLONE)%PBC%LatFrc,'latfrc',Tag_O=chGEO)
+!         Print Tot Lattice Forces
           CALL Print_Force(G%Clone(iCLONE))
-       ENDIF
-    ENDDO
-    CALL CloseHDF(HDFFileID)
-!   NEB force projections
-    IF(O%Grad==GRAD_TS_SEARCH_NEB) THEN
-       CALL NEBForce(G,O)
-    ENDIF
-!   Zero forces on constrained atoms and compute stats with projected forces
-    HDFFileID=OpenHDF(N%HFile)
-    DO iCLONE=1,G%Clones
-       HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
-       G%Clone(iCLONE)%GradMax=Zero
-       G%Clone(iCLONE)%GradRMS=Zero
-       DO iATS=1,G%Clone(iCLONE)%NAtms
-          IF(G%Clone(iCLONE)%CConstrain%I(iATS)==0)THEN
-             DO J=1,3
-                GradVal=G%Clone(iCLONE)%Gradients%D(J,iATS)
-                !If I remember well rms=\sqrt{\frac{\sum_{i=1}^N x_i^2}{N}}
-                G%Clone(iCLONE)%GradRMS=G%Clone(iCLONE)%GradRMS+GradVal**2
-                !old G%Clone(iCLONE)%GradRMS=G%Clone(iCLONE)%GradRMS+GradVal
-                G%Clone(iCLONE)%GradMax=MAX(G%Clone(iCLONE)%GradMax,ABS(GradVal))
-             ENDDO
-          ELSE
-            G%Clone(iCLONE)%Gradients%D(1:3,iATS)=Zero
-          ENDIF
+          CALL CloseHDFGroup(HDF_CurrentID)
        ENDDO
-       ! Put the zeroed forces back ...
-       ! ... and close the group
-       CALL CloseHDFGroup(HDF_CurrentID)
-       !
-       !If I remember well rms=\sqrt{\frac{\sum_{i=1}^N x_i^2}{N}}
-       G%Clone(iCLONE)%GradRMS=SQRT(G%Clone(iCLONE)%GradRMS/DBLE(3*G%Clone(iCLONE)%NAtms))
-       !old G%Clone(iCLONE)%GradRMS=SQRT(G%Clone(iCLONE)%GradRMS)/DBLE(3*G%Clone(iCLONE)%NAtms)
-       !
-    ENDDO
-    ! Now close the HDF file ..
+    ELSE        
+!      Constraint the Gradients
+       DO iCLONE=1,G%Clones
+          HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
+!         Get Forces
+          CALL Get(G%Clone(iCLONE)%Gradients,'Gradients',Tag_O=chGEO)
+          IF(O%Coordinates/=GRAD_INTS_OPT) THEN
+             DO iATS=1,G%Clone(iCLONE)%NAtms
+                IF(G%Clone(iCLONE)%CConstrain%I(iATS)/=0)THEN
+                   G%Clone(iCLONE)%Gradients%D(:,iATS)=Zero
+                ENDIF
+             ENDDO
+          ENDIF
+!         Get Lattice Forces
+          CALL Get(G%Clone(iCLONE)%PBC%LatFrc,'latfrc',Tag_O=chGEO)
+!         Put back to disk
+          CALL Put(G%Clone(iCLONE)%PBC%LatFrc,'latfrc',Tag_O=chGEO)
+!         Close the group
+          CALL CloseHDFGroup(HDF_CurrentID)
+          G%Clone(iCLONE)%GradRMS=SQRT(G%Clone(iCLONE)%GradRMS)/DBLE(3*G%Clone(iCLONE)%NAtms)
+       ENDDO
+       CALL CloseHDF(HDFFileID)
+!      NEB force projections
+       IF(O%Grad==GRAD_TS_SEARCH_NEB) THEN
+          CALL NEBForce(G,O)
+       ENDIF
+!      Zero forces on constrained atoms and compute stats with projected forces
+       HDFFileID=OpenHDF(N%HFile)
+       DO iCLONE=1,G%Clones
+          HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
+          G%Clone(iCLONE)%GradMax=Zero
+          G%Clone(iCLONE)%GradRMS=Zero
+          DO iATS=1,G%Clone(iCLONE)%NAtms
+             IF(G%Clone(iCLONE)%CConstrain%I(iATS)==0)THEN
+                DO J=1,3
+                   GradVal=G%Clone(iCLONE)%Gradients%D(J,iATS)
+                   !If I remember well rms=\sqrt{\frac{\sum_{i=1}^N x_i^2}{N}}
+                   G%Clone(iCLONE)%GradRMS=G%Clone(iCLONE)%GradRMS+GradVal**2
+                   !old G%Clone(iCLONE)%GradRMS=G%Clone(iCLONE)%GradRMS+GradVal
+                   G%Clone(iCLONE)%GradMax=MAX(G%Clone(iCLONE)%GradMax,ABS(GradVal))
+                ENDDO
+             ELSE
+                G%Clone(iCLONE)%Gradients%D(1:3,iATS)=Zero
+             ENDIF
+          ENDDO
+          ! Put the zeroed forces back ...
+          ! ... and close the group
+          CALL CloseHDFGroup(HDF_CurrentID)
+          !
+          !If I remember well rms=\sqrt{\frac{\sum_{i=1}^N x_i^2}{N}}
+          G%Clone(iCLONE)%GradRMS=SQRT(G%Clone(iCLONE)%GradRMS/DBLE(3*G%Clone(iCLONE)%NAtms))
+          !old G%Clone(iCLONE)%GradRMS=SQRT(G%Clone(iCLONE)%GradRMS)/DBLE(3*G%Clone(iCLONE)%NAtms)
+       ENDDO
+    ENDIF
+!   Now close the HDF file ..
     CALL CloseHDF(HDFFileID)
     CALL Delete(S%Action)
+!
   END SUBROUTINE Force
 !===============================================================================
 ! Numerically compute Lattice Forces for J
