@@ -3201,7 +3201,7 @@ CONTAINS
          N=N3
        ENDIF
        DO I=1,N
-         J=JTop12(ITop12(IC)+I)
+         J=JTop12(ITop12(IC)-1+I)
          IF(J==I2) CYCLE
          CALL BEND(XYZ(1:3,I2),XYZ(1:3,IC),XYZ(1:3,J),Value_O=Val)
          SumU=ABS(120.D0-Val*Conv)
