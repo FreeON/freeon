@@ -658,7 +658,7 @@ CALL OutOfPlane_Energy(EOutOfPlane,GMLoc%Carts%D)
 !
 ! Test gradient transformation
 !
-*    CALL CoordTrf(GMLoc,1,GrdTot,GrdTotInt,1)
+!    CALL CoordTrf(GMLoc,1,GrdTot,GrdTotInt,1)
 !
 ! print forces in KJ/mol/A or H/Bohr
 !
