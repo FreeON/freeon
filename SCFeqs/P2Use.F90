@@ -57,6 +57,8 @@ PROGRAM P2Use
   CALL New(BlkP,(/MaxBlkSize**2,NAtoms/))
 !
   IF(SCFActn=='Direct')THEN
+
+!    WRITE(*,*)' In P2Use, using SuperPos Guess'
 !   Compute a diagonal guess as the superposition of 
 !   atomic lewis structure occupancies 
     DO I=1,NAtoms
@@ -73,8 +75,15 @@ PROGRAM P2Use
     CALL PPrint( P,'OrthoP['//TRIM(Cycl)//']')
     CALL Plot(   P,'OrthoP_'//TRIM(Cycl))
   ELSEIF(SCFActn=='Switch')THEN
-    CALL Get(P,TrixFile('OrthoD',Args,0))
+!    WRITE(*,*)' In P2Use, using previous density matrix from file: '
+!    WRITE(*,*)' =  ',TrixFile('OrthoD',Args,-1)
+!    CALL Get(P,TrixFile('OrthoD',Args,-1))
+
+    WRITE(*,*)' In P2Use, using previous density matrix from info file '
+    CALL Get(P,'CurrentOrthoD',CheckPoint_O=.TRUE.)   
+    CALL Put(P,TrixFile('OrthoD',Args,0)) 
   ELSEIF(SCFActn=='Restart')THEN
+!    WRITE(*,*)' In P2Use, using previous density matrix from info file '
     CALL Get(P,'CurrentOrthoD',CheckPoint_O=.TRUE.)   
     CALL Put(P,TrixFile('OrthoD',Args,0)) 
   ENDIF    
