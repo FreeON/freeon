@@ -1530,9 +1530,9 @@ CONTAINS
      REAL(DOUBLE)     :: EOld,ENew,MeanDist
      TYPE(DBL_VECT)   :: DistVect1,DistVect2
      !
-   ! IF(.NOT.C%GOpt%GConvCrit%DoBackTr) THEN
-   !   RETURN
-   ! ENDIF
+     IF(.NOT.C%GOpt%GConvCrit%DoBackTr) THEN
+       RETURN
+     ENDIF
      !
      DoLineS=.FALSE.
      IF(PRESENT(DoLineS_O)) DoLineS=DoLineS_O
