@@ -23,7 +23,7 @@ PROGRAM SCFStatus
    REAL(DOUBLE)                    :: E_el_tot,E_nuc_tot,E_es_tot,KinE,ExchE,Exc, &
                                       Gap,Etot,DMax,Virial,DIISErr
 #ifdef MMech
-   REAL(DOUBLE)                    :: EBOND,EANGLE,EDIHEDRAL,ELJ,EIMPROPER,MM_COUL,MM_ENERGY
+   REAL(DOUBLE)                    :: EBOND,EANGLE,ETorsion,ELJ,EOutOfPlane,MM_COUL,MM_ENERGY
    REAL(DOUBLE)                    :: E_C_EXCL,E_LJ_EXCL
 #endif
    CHARACTER(LEN=5*DEFAULT_CHR_LEN):: SCFMessage
@@ -90,8 +90,8 @@ PROGRAM SCFStatus
    IF(HasMM()) THEN
      CALL Get(EBOND,'MM_EBOND',Tag_O=Curgeom)
      CALL Get(EANGLE,'MM_EANGLE',Tag_O=Curgeom)
-     CALL Get(EDIHEDRAL,'MM_EDIHEDRAL',Tag_O=Curgeom)
-     CALL Get(EIMPROPER,'MM_EIMPROPER',Tag_O=Curgeom)
+     CALL Get(ETorsion,'MM_ETorsion',Tag_O=Curgeom)
+     CALL Get(EOutOfPlane,'MM_EOutOfPlane',Tag_O=Curgeom)
      CALL Get(ELJ,'MM_ELJ',Tag_O=Curgeom)
      CALL Get(MM_COUL,'MM_COUL',Tag_O=Curgeom)
      CALL Get(E_LJ_EXCL,'E_LJ_EXCL',Tag_O=Curgeom)
@@ -101,19 +101,29 @@ PROGRAM SCFStatus
    ELSE
      EBOND=Zero
      EANGLE=Zero
-     EDIHEDRAL=Zero
-     EIMPROPER=Zero
+     ETorsion=Zero
+     EOutOfPlane=Zero
      ELJ=Zero
      MM_COUL=Zero
      E_LJ_EXCL=Zero
      E_C_EXCL=Zero
    ENDIF
-     MM_ENERGY=EBOND+EANGLE+EDIHEDRAL+EIMPROPER+ELJ+MM_COUL
+     MM_ENERGY=EBOND+EANGLE+ETorsion+EOutOfPlane+ELJ+MM_COUL
 !
 #endif
    E_es_tot = E_el_tot+E_nuc_tot
    Etot=KinE+E_es_tot+Exc+ExchE
-   CALL Put(Etot,'Etot',StatsToChar(Current))
+#ifdef MMech
+   IF(QMOnly()) THEN
+#endif
+     CALL Put(Etot,'Etot',StatsToChar(Current))
+#ifdef MMech
+   ELSE IF(MMOnly()) THEN
+     CALL Put(MM_ENERGY,'Etot',StatsToChar(Current))
+   ELSE
+     CALL Put(Etot+MM_ENERGY,'Etot',StatsToChar(Current))
+   ENDIF
+#endif
 !  The Virial
    Virial=E_es_tot/KinE
 !--------------------------------------------------------
@@ -188,9 +198,9 @@ PROGRAM SCFStatus
          SCFMessage=TRIM(SCFMessage)                                        &
                //'    <EANGLE>   = '//TRIM(DblToMedmChar(EANGLE))//RTRN         
          SCFMessage=TRIM(SCFMessage)                                        &
-               //' <EDIHEDRAL>   = '//TRIM(DblToMedmChar(EDIHEDRAL))//RTRN         
+               //' <ETorsion>   = '//TRIM(DblToMedmChar(ETorsion))//RTRN         
          SCFMessage=TRIM(SCFMessage)                                        &
-               //' <EIMPROPER>   = '//TRIM(DblToMedmChar(EIMPROPER))//RTRN         
+               //' <EOutOfPlane>   = '//TRIM(DblToMedmChar(EOutOfPlane))//RTRN         
          SCFMessage=TRIM(SCFMessage)                                        &
                //'<E_LENNARD_JONES>= '//TRIM(DblToMedmChar(ELJ))//RTRN         
          SCFMessage=TRIM(SCFMessage)                                        &
