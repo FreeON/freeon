@@ -14,7 +14,7 @@ MPISpatialProc=32
 
 Grad=(Optimize,PrimInt,NoBackTr,BiSect,NoGDIIS)
 SCFConvergence=(DIIS)
-DebugAll=(MaxDebug,MaxGeOp)
+DebugAll=(MinDebug,CheckSums)
 Guess=SuperPos
 SCFMethod=(RH)
 BasisSets=(STO-2G-SPLIT)

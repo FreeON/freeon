@@ -39,13 +39,11 @@ serial:	small big
 #
 small:
 	MondoSCF Water.inp         Water.out         Water.log
-	MondoSCF NH3.inp           NH3.out           NH3.log
 	MondoSCF Biotin.inp        Biotin.out        Biotin.log    
 	MondoSCF Graphite.inp      Graphite.out      Graphite.log
-	MondoSCF Na2Cl2.inp        Na2Cl2.out        Na2Cl2.log
 	MondoSCF PeroxideCycle.inp PeroxideCycle.out PeroxideCycle.log
 	MondoSCF Histidine.inp     Histidine.out     Histidine.log 
-#
+        MondoSCF Polyacetylene.inp Polyacetylene.out Polyacetylene.log
 big:	
 	MondoSCF Caffiene.inp     Caffiene.out      Caffine.log
 	MondoSCF Diamond.inp      Diamond.out       Diamond.log
@@ -57,19 +55,20 @@ big:
 #
 pbs:
 	chmod u+x sub_pbs
-	./sub_pbs Water         1
-	./sub_pbs Biotin        1
-	./sub_pbs Graphite      1
-	./sub_pbs Diamond       1
-	./sub_pbs Histidine     1
-	./sub_pbs Caffiene      1
-	./sub_pbs BetaCarotene  1
-	./sub_pbs Chlorophyll   1
-	./sub_pbs Vancomycin    1
-	./sub_pbs ureaPBCVopt   1
-	./sub_pbs MDSteam_10    1
-	./sub_pbs waterPBCopt   1
-#	./sub_pbs PeroxideCycle 1
+	./sub_pbs Water          1
+	./sub_pbs Biotin         1
+	./sub_pbs Graphite       1
+	./sub_pbs Histidine      1
+	./sub_pbs Caffiene       1
+	./sub_pbs Vancomycin     1
+	./sub_pbs Polyacetylene  1
+	./sub_pbs PBCUrea        1
+	./sub_pbs PBCWater       1
+	./sub_pbs Steam          1
+	./sub_pbs PeroxideCycle  1
+	./sub_pbs BetaCarotene   1
+	./sub_pbs Diamond        1
+	./sub_pbs Chlorophyll    1
 #
 #       Submit parallel validation suite to pbs queing system 
 #
