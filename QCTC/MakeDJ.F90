@@ -1,4 +1,4 @@
-!
+!==============================================================================
 !--  This source code is part of the MondoSCF suite of 
 !--  linear scaling electronic structure codes.  
 !
@@ -6,8 +6,8 @@
 !--  Los Alamos National Laboratory
 !--  Copyright 2000, The University of California
 !
-!    COMPUTE THE DENSITY FROM THE DENSITY MATRIX
-!
+!    COMPUTE THE COULOMB MATRIX
+!==============================================================================
 PROGRAM MakeDJ
   USE DerivedTypes
   USE GlobalScalars
@@ -21,7 +21,7 @@ PROGRAM MakeDJ
   USE AtomPairs
   USE BraKetBloks
   USE JBlock
-  USE MMoments
+  USE Multipoles
 #ifdef PARALLEL
   USE MondoMPI
   TYPE(DBCSR)         :: Jmat,T1
@@ -61,10 +61,12 @@ PROGRAM MakeDJ
 ! Calculate the Number of Cells
   CALL SetCellNumber(GM)
 ! Set Up the Multipoles  
-  MaxL = 32
+  MaxL = 16
   CALL MMSetup(MaxL,GM,Rho)
 ! Calculate the Multipoles for Rho
   CALL CalMMRho(Rho)
+! Calculate the Multipoles for Rho
+  CALL CalQRho(Rho)
 #endif
 !----------------------------------------------
 ! Set up the appropriate action

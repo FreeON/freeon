@@ -1,3 +1,13 @@
+!==============================================================================
+!--  This source code is part of the MondoSCF suite of 
+!--  linear scaling electronic structure codes.  
+!
+!--  Matt Challacombe and  C. J. Tymczak
+!--  Los Alamos National Laboratory
+!--  Copyright 2000, The University of California
+!
+!    COMPUTE THE BLOCK OF THE COULOMB MATRIX
+!==============================================================================
 MODULE JBlock
   USE DerivedTypes
   USE GlobalScalars
@@ -6,7 +16,7 @@ MODULE JBlock
   USE Thresholding
   USE AtomPairs
   USE BraKetBloks
-  USE MMoments
+  USE Multipoles
   IMPLICIT NONE
 CONTAINS
 !------------------------------------------------------------------------------
@@ -21,7 +31,7 @@ CONTAINS
 !
   END SUBROUTINE VMD
 !------------------------------------------------------------------------------
-!
+! Calculate JBlok
 !------------------------------------------------------------------------------
   FUNCTION JBlok(BS,MD,Pair,Rho) RESULT(JVck)
     TYPE(BSET)                              :: BS
@@ -42,7 +52,7 @@ CONTAINS
     INTEGER                                 :: MaxLMN,LBra,LenBra,zq,oq,or,NQ,LKet,LCode
 #ifdef PERIODIC
     INTEGER                                 :: NC
-    REAL(DOUBLE),DIMENSION(Pair%NA,Pair%NB) :: JBlk_MM
+    REAL(DOUBLE),DIMENSION(Pair%NA,Pair%NB) :: JBlk_MM,JBlk_QQ
 #endif
 !
     KA   = Pair%KA
@@ -60,6 +70,7 @@ CONTAINS
     JBlk    = Zero
 #ifdef PERIODIC
     JBlk_MM = Zero
+    JBlk_QQ = Zero
 #endif 
 !
     MaxLMN      = BS%LMNLen
@@ -88,34 +99,45 @@ CONTAINS
                    XiA     = ZetaA*EtaABIn
                    XiB     = ZetaB*EtaABIn
                    ExpAB   = EXP(-XiAB*AB2)
+                   Px=(XiA*Ax+XiB*Bx)
+                   Py=(XiA*Ay+XiB*By)
+                   Pz=(XiA*Az+XiB*Bz)
+                   PAx=Px-Ax
+                   PAy=Py-Ay
+                   PAz=Pz-Az
+                   PBx=Px-Bx
+                   PBy=Py-By
+                   PBz=Pz-Bz 
+!
+!                  McMurchie-Davidson 2 term coefficients
+!
+                   CALL MD2TRR(BS%NASym,0,MaxLA,MaxLB,EtaAB,MD%D,PAx,PBx,PAy,PBy,PAz,PBz) 
+!
+!                  Primitive coefficients in a HG representationj
+!
+                   CALL SetBraBlok(CFA,PFA,KA,CFB,PFB,KB,ExpAB,BS,MD,Phase_O=.TRUE.)
+!
+!                  Integral estimates (calculation should definately be moved out of inner loop!) 
+!
+                   CALL BraEst(StartIA,StopIA,StartIB,StopIB,LBra,XiAB,BraEstimate)
+!
+!                  Calculate the Tolerance
+!
+                   Tol = TwoENeglect/MAX(1.D-32,BraEstimate)
 #ifdef PERIODIC
 !
 !                  Sum over Cells
 !
+
                    DO NC=1,CSMM1%NCells
                       Px=(XiA*Ax+XiB*Bx)+CSMM1%CellCarts%D(1,NC)
                       Py=(XiA*Ay+XiB*By)+CSMM1%CellCarts%D(2,NC)
                       Pz=(XiA*Az+XiB*Bz)+CSMM1%CellCarts%D(3,NC)
-#else
-                      Px=(XiA*Ax+XiB*Bx)
-                      Py=(XiA*Ay+XiB*By)
-                      Pz=(XiA*Az+XiB*Bz)
 #endif
-                      PAx=Px-Ax
-                      PAy=Py-Ay
-                      PAz=Pz-Az
-                      PBx=Px-Bx
-                      PBy=Py-By
-                      PBz=Pz-Bz 
-!                     McMurchie-Davidson 2 term coefficients
-                      CALL MD2TRR(BS%NASym,0,MaxLA,MaxLB,EtaAB,MD%D,PAx,PBx,PAy,PBy,PAz,PBz) 
-!                     Primitive coefficients in a HG representationj
-                      CALL SetBraBlok(CFA,PFA,KA,CFB,PFB,KB,ExpAB,BS,MD,Phase_O=.TRUE.)
-!                     Integral estimates (calculation should definately be moved out of inner loop!) 
-                      CALL BraEst(StartIA,StopIA,StartIB,StopIB,LBra,XiAB,BraEstimate)
+!
 !                     Direct Contribution
+!
                       HGKet%D = Zero
-                      Tol     = TwoENeglect/MAX(1.D-32,BraEstimate)
                       DO zq=1,Rho%NExpt
                          NQ = Rho%NQ%I(zq)
                          IF(NQ /= 0) THEN
@@ -131,8 +153,6 @@ CONTAINS
                          ENDIF
                       ENDDO
 
-!                      WRITE(*,*)' CFA = ',CFA,' CFB = ',CFB,' PFA = ',PFA,' PFB = ',PFB
-!                      WRITE(*,*)' HGKet = ',HGKet%D(1:LenBra)
 !
 !                     Update the Matrix Block
 !
@@ -147,33 +167,30 @@ CONTAINS
                    ENDDO
 !
 !                  Calculate the Multipole Contribution to the Matrix Element
-!
-!                  >>>>>>>>> WHY WOULD YOU DO THIS TWICE CJ ????????
-!
-!                   Px=(XiA*Ax+XiB*Bx)
-!                   Py=(XiA*Ay+XiB*By)
-!                   Pz=(XiA*Az+XiB*Bz)
-!                   PAx=Px-Ax
-!                   PAy=Py-Ay
-!                   PAz=Pz-Az
-!                   PBx=Px-Bx
-!                   PBy=Py-By
-!                   PBz=Pz-Bz 
-!
-!
-!                   CALL MD2TRR(BS%NASym,0,MaxLA,MaxLB,EtaAB,MD%D,PAx,PBx,PAy,PBy,PAz,PBz) 
-!                  Calculate the  the Primative
-!
-!                   CALL GetPrimative(CFA,PFA,KA,CFB,PFB,KB,ExpAB,BS,MD)
-!
 !                  Contract the Primative MM  with the density MM
 !
-                   DO IA = StartIA,StopIA
-                      DO IB = StartIB,StopIB
-                         JBlk_MM(IA,IB) = JBlk_MM(IA,IB) &
-                              +CTraxBraKet(LBra,EtaAB,Px,Py,Pz,HGBra%D(:,IA,IB))
+                   IF(Dimen > 0) THEN
+                      Px=(XiA*Ax+XiB*Bx)
+                      Py=(XiA*Ay+XiB*By)
+                      Pz=(XiA*Az+XiB*Bz)
+                      HGBra%D = Zero
+                      CALL SetBraBlok(CFA,PFA,KA,CFB,PFB,KB,ExpAB,BS,MD,Phase_O=.FALSE.)
+                      DO IA = StartIA,StopIA
+                         DO IB = StartIB,StopIB
+                            JBlk_MM(IA,IB) = JBlk_MM(IA,IB)+CTraxBraKet(LBra,EtaAB,Px,Py,Pz,HGBra%D(:,IA,IB))
+                         ENDDO
                       ENDDO
-                   ENDDO
+!
+!                     Calculate the Cartiesian Moment Dipole and Quadipole Corrections
+!
+                      IF(Dimen > 1) THEN
+                         DO IA = StartIA,StopIA
+                            DO IB = StartIB,StopIB
+                               JBlk_QQ(IA,IB) = JBlk_QQ(IA,IB)+QTraxBraKet(LBra,EtaAB,Px,Py,Pz,HGBra%D(:,IA,IB))
+                            ENDDO
+                         ENDDO
+                      ENDIF
+                   ENDIF
 #endif
                 ENDIF
              ENDDO
@@ -182,7 +199,7 @@ CONTAINS
     ENDDO
 !
 #ifdef PERIODIC
-    JBlk = JBlk+JBlk_MM
+    JBlk = JBlk+JBlk_MM+JBlk_QQ
 #endif
 !
     JVck = BlockToVect(NBFA,NBFB,JBlk)
@@ -201,7 +218,7 @@ CONTAINS
                                             Omega,Upq,Tol,TwoENeglect,ExpA,CoefA
 #ifdef PERIODIC
     INTEGER                              :: NC
-    REAL(DOUBLE)                         :: VBlok_MM
+    REAL(DOUBLE)                         :: VBlok_MM,VBlok_QQ
 #endif
 !
     zqA   = Rho%NExpt
@@ -215,10 +232,12 @@ CONTAINS
 !
     VBlok    = Zero
 #ifdef PERIODIC
-    VBlok_MM = Zero
+    VBlok_MM = Zero    
+    VBlok_QQ = Zero
 #endif
     TwoENeglect = Thresholds%TwoE
     BraEstimate = Rho%Est%D(oqA+AtA)
+    Tol         = TwoENeglect/MAX(1.D-32,BraEstimate)
 !
 #ifdef PERIODIC
 !
@@ -237,7 +256,6 @@ CONTAINS
 !      Calculate the Direct Piece
 !
        HGKet%D = Zero
-       Tol     = TwoENeglect/MAX(1.D-32,ExpA*BraEstimate)
        DO zq=1,Rho%NExpt
           NQ = Rho%NQ%I(zq)
           IF(NQ /= 0) THEN
@@ -252,19 +270,22 @@ CONTAINS
              INCLUDE 'VMD/VMDBlok.Inc'
           ENDIF
        ENDDO
-       CALL MD2TRR(0,0,0,0,ExpA,MD%D,Px,Px,Py,Py,Pz,Pz) 
-       VBlok = VBlok+CoefA*MD%D(1,0,0,0)*MD%D(2,0,0,0)*MD%D(3,0,0,0)*HGKet%D(1)
+       VBlok = VBlok+CoefA*HGKet%D(1)
     ENDDO
 !
 !   Do the Multipole Piece
 !
-    Px    = Rho%Qx%D(oqA+AtA)
-    Py    = Rho%Qy%D(oqA+AtA)
-    Pz    = Rho%Qz%D(oqA+AtA)
-    HGBra%D(1,1,1) = CoefA
-    VBlok_MM       = VBlok_MM+CTraxBraKet(0,ExpA,Px,Py,Pz,HGBra%D(:,1,1))
-!
-    VBlok          = VBlok+VBlok_MM
+    IF(Dimen > 0) THEN
+       Px    = Rho%Qx%D(oqA+AtA)
+       Py    = Rho%Qy%D(oqA+AtA)
+       Pz    = Rho%Qz%D(oqA+AtA)
+       HGBra%D(1,1,1) = CoefA
+       VBlok_MM  = VBlok_MM+CTraxBraKet(0,ExpA,Px,Py,Pz,HGBra%D(:,1,1))
+       IF(Dimen > 1) THEN
+          VBlok_QQ = VBlok_QQ+QTraxBraKet(0,ExpA,Px,Py,Pz,HGBra%D(:,1,1))
+       ENDIF
+       VBlok = VBlok+VBlok_MM+VBlok_QQ
+    ENDIF
 !
 #else
     Px    = Rho%Qx%D(oqA+AtA)
@@ -275,7 +296,6 @@ CONTAINS
 !   Do the Direct Piece
 !
     HGKet%D = Zero
-    Tol     = TwoENeglect/MAX(1.D-32,ExpA*BraEstimate)
     DO zq=1,Rho%NExpt
        NQ = Rho%NQ%I(zq)
        IF(NQ /= 0) THEN
@@ -291,8 +311,7 @@ CONTAINS
           INCLUDE 'VMD/VMDBlok.Inc'
        ENDIF
     ENDDO
-    CALL MD2TRR(0,0,0,0,ExpA,MD%D,Px,Px,Py,Py,Pz,Pz) 
-    VBlok = VBlok+CoefA*MD%D(1,0,0,0)*MD%D(2,0,0,0)*MD%D(3,0,0,0)*HGKet%D(1)
+    VBlok = VBlok+CoefA*HGKet%D(1)
 #endif
 !
 !   Reset
@@ -325,6 +344,7 @@ CONTAINS
     ENDDO
     BraEstimate =SqUpp*BraEstimate
   END SUBROUTINE BraEst
+!
 END MODULE JBlock
 
 

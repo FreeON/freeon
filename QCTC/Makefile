@@ -9,9 +9,10 @@ include $(MONDO_COMPILER)
 include $(MONDO_HOME)/Includes/Suffixes
 include $(MONDO_HOME)/Includes/RemoveAll
 
-EXTRA_INCLUDES= -I$(MONDO_HOME)/MondoMods/MMA/Functions 
+EXTRA_INCLUDES= -I$(MONDO_HOME)/MondoMods/MMA/Functions  \
+                -I$(MONDO_HOME)/QCTC/MMA/Moments
 
-JObjs =  MultipoleLib.o MMoments.o JBlok.o MakeDJ.o 
+JObjs =  Moments.o MMML_OLD.o MMML.o Multipoles.o JBlok.o MakeDJ.o 
 
 all:	MD QCTC
 
@@ -37,6 +38,8 @@ CMD:
 	$(MAKE) -i -C VMD clean
 
 
-MakeDJ.o: 	JBlok.o MMoments.o MultipoleLib.o $(MONDO_HOME)/Libs/libMondoMods.a
-JBlok.o:	MMoments.o VMD/VMDBlok.Inc        $(MONDO_HOME)/Libs/libMondoMods.a
-MMoments.o:	                                  $(MONDO_HOME)/Libs/libMondoMods.a
+MakeDJ.o: 	  JBlok.o Multipoles.o                $(MONDO_HOME)/Libs/libMondoMods.a
+JBlok.o:	  Multipoles.o VMD/VMDBlok.Inc        $(MONDO_HOME)/Libs/libMondoMods.a
+MultipoleLib.o:   Moments.o  MMML_OLD.o MMML.o        $(MONDO_HOME)/Libs/libMondoMods.a
+Moments.o:	                                      $(MONDO_HOME)/Libs/libMondoMods.a
+
