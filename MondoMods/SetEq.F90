@@ -51,7 +51,7 @@ MODULE SetXYZ
             N=BSiz%I(I)
             A%ColPt%I(Q)=I
             A%BlkPt%I(Q)=R
-            CALL DiagI(N,A%MTrix%D(R:))
+            CALL DiagI(N,A%MTrix%D(R))
             Q=Q+1 
             R=R+N**2
             A%RowPt%I(A%NAtms+1)=Q

@@ -2044,7 +2044,7 @@ MODULE LinAlg
       REAL(DOUBLE), DIMENSION(:), OPTIONAL :: AMTrix,BMTrix
       INTEGER,      DIMENSION(:)           :: ARowPt,AColPt,ABlkPt, &
                                               BRowPt,BColPt,BBlkPt
-      INTEGER                              :: I,J,K,MI,NJ,MN,P,Q,NEXT
+      INTEGER                              :: I,J,K,MI,NJ,MN,MN1,P,Q,NEXT
       LOGICAL                              :: SymbolicOnly
       
 !
@@ -2097,7 +2097,8 @@ MODULE LinAlg
                   NJ=BSiz%I(J)
                   NEXT=BRowPt(J)
                   MN=MI*NJ
-                  CALL XPoseSqMat(MI,NJ,AMTrix(P:),BMTrix(Q:))
+                  MN1=MN-1
+                  CALL XPoseSqMat(MI,NJ,AMTrix(P),BMTrix(Q))
                   BBlkPt(NEXT)=Q
                   BColPt(NEXT)=I
                   BRowPt(J)=NEXT+1
