@@ -956,6 +956,89 @@ MODULE FastMatrices
     ENDDO
     IF(PRESENT(Perf_O)) Perf_O%FLOP = Perf_O%FLOP+Op
   END SUBROUTINE Multiply_FASTMAT_SCALAR
+  !
+  REAL(DOUBLE) FUNCTION Max_FASTMAT(A,Perf_O)
+!H--------------------------------------------------------------------------------- 
+!H FUNCTION Max_FASTMAT(A,Alpha,Perf_O)
+!H  This routine find the biggest element of a FASTMAT.
+!H
+!H--------------------------------------------------------------------------------- 
+    TYPE(FASTMAT), POINTER    :: A,R
+    TYPE(SRST   ), POINTER    :: C
+    TYPE(TIME   ), OPTIONAL   :: Perf_O
+    INTEGER                   :: Row,Col,M,N
+    REAL(DOUBLE )             :: Op
+    REAL(DOUBLE), EXTERNAL    :: DDOT
+    !
+    ! Build up the Skip list.
+    CALL FlattenAllRows(A)
+    !
+    Max_FASTMAT=Zero
+    Op=Zero                                                             !vw I should put the FlattenAllRows ?
+    IF(.NOT.ASSOCIATED(A)) &
+         & CALL Halt('ERR: A is null in Max_FASTMAT!')
+    R => A%Next
+    DO 
+       IF(.NOT. ASSOCIATED(R)) EXIT
+       Row = R%Row
+       M = BSiz%I(Row)
+       C => R%RowRoot
+       DO 
+          IF(.NOT. ASSOCIATED(C)) EXIT
+          Col = C%L
+          IF(Col == C%R) THEN
+             N = BSiz%I(Col)
+             Op = Op + M*N
+             Max_FASTMAT = MAX(Max_FASTMAT,DDOT(M*N,C%MTrix(1,1),1,C%MTrix(1,1),1))
+          ENDIF
+          C => C%Next 
+       ENDDO
+       R => R%Next
+    ENDDO
+    IF(PRESENT(Perf_O)) Perf_O%FLOP = Perf_O%FLOP+Op
+  END FUNCTION Max_FASTMAT
+
+  REAL(DOUBLE) FUNCTION FNorm_FASTMAT(A,Perf_O)
+!H--------------------------------------------------------------------------------- 
+!H FUNCTION FNorm_FASTMAT(A,Alpha,Perf_O)
+!H  This routine computes the Frobenus norm of a FASTMAT.
+!H
+!H--------------------------------------------------------------------------------- 
+    TYPE(FASTMAT), POINTER    :: A,R
+    TYPE(SRST   ), POINTER    :: C
+    TYPE(TIME   ), OPTIONAL   :: Perf_O
+    INTEGER                   :: Row,Col,M,N
+    REAL(DOUBLE )             :: Op
+    REAL(DOUBLE ), EXTERNAL   :: DDOT
+    !
+    ! Build up the Skip list.
+    CALL FlattenAllRows(A)
+    !
+    FNorm_FASTMAT=Zero
+    Op=Zero                                                             !vw I should put the FlattenAllRows ?
+    IF(.NOT.ASSOCIATED(A)) &
+         & CALL Halt('ERR: A is null in FNorm_FASTMAT!')
+    R => A%Next
+    DO 
+       IF(.NOT. ASSOCIATED(R)) EXIT
+       Row = R%Row
+       M = BSiz%I(Row)
+       C => R%RowRoot
+       DO 
+          IF(.NOT. ASSOCIATED(C)) EXIT
+          Col = C%L
+          IF(Col == C%R) THEN
+             N = BSiz%I(Col)
+             Op = Op + 2*M*N
+             FNorm_FASTMAT = FNorm_FASTMAT+DDOT(M*N,C%MTrix(1,1),1,C%MTrix(1,1),1)
+          ENDIF
+          C => C%Next 
+       ENDDO
+       R => R%Next
+    ENDDO
+    IF(PRESENT(Perf_O)) Perf_O%FLOP = Perf_O%FLOP+Op
+  END FUNCTION FNorm_FASTMAT
+
 !=================================================================
 !   ADD A BLOCK TO THE FAST MATRIX DATA STRUCTURE
 !=================================================================    
@@ -1355,6 +1438,72 @@ MODULE FastMatrices
       !
     END FUNCTION Trace_FASTMAT
     !
+    FUNCTION TraceMM_FASTMAT(A,B,Perf_O) RESULT(Trace)
+!H--------------------------------------------------------------------------------- 
+!H SUBROUTINE TraceMM_FASTMAT(A,B,Perf_O)
+!H  This routine computes the trace of a product of two FASTMAT.
+!H
+!H--------------------------------------------------------------------------------- 
+      TYPE(FASTMAT), POINTER  :: A,B,P,Q
+      TYPE(TIME   ), OPTIONAL :: Perf_O         
+      TYPE(SRST   ), POINTER  :: U,V
+      INTEGER                 :: Row,Col,M,N,Split
+      REAL(DOUBLE)            :: Trace,Op
+
+      REAL(DOUBLE), EXTERNAL :: BlkTrace_2
+      !
+      IF(.NOT.ASSOCIATED(A))  &
+           & CALL Halt(' A not associated in TraceMM_FASTMAT ')
+      IF(.NOT.ASSOCIATED(B))  &
+           & CALL Halt(' B not associated in TraceMM_FASTMAT ')
+      !
+      CALL FlattenAllRows(A)
+      !
+      Trace = Zero
+      Op = Zero
+      !
+      P=>A%Next
+      DO !i
+         IF(.NOT.ASSOCIATED(P)) EXIT
+         Row = P%Row
+         M = BSiz%I(Row)
+         U => P%RowRoot
+         DO !j
+            IF(.NOT.ASSOCIATED(U)) EXIT
+            IF(U%L==U%R) THEN
+               Col = U%L
+               N = BSiz%I(Col)
+               IF(ASSOCIATED(U%MTrix)) THEN
+                  Q=>FindFastMatRow_1(B,Col,SoftFind_O=.TRUE.)!j
+                  V=>Q%RowRoot
+                  Tree:DO !i
+                     IF(Row==V%L.AND.Row==V%R) then
+                        IF(ASSOCIATED(V%MTrix)) THEN
+                           ! Get the trace of the sub-block.
+                           Trace=Trace+BlkTrace_2(M,N,U%MTrix(1,1),V%MTrix(1,1))
+                           Op = Op+M
+                        ENDIF
+                        EXIT Tree
+                     ENDIF
+                     Split=IntervalSplit(V%L,V%R)
+                     IF(Row>=V%L.AND.Row<=Split.AND.ASSOCIATED(V%Left))THEN
+                        V=>V%Left
+                     ELSEIF(Row>=Split.AND.Row<=V%R.AND.ASSOCIATED(V%Right))THEN
+                        V=>V%Right
+                     ELSE
+                        EXIT Tree
+                     ENDIF
+                  ENDDO Tree
+               ENDIF
+            ENDIF
+            U => U%Next
+         ENDDO
+         P=>P%Next
+      ENDDO
+      !
+    END FUNCTION TraceMM_FASTMAT
+
+
 !======================================================================
 !  IN PLACE FILTERATION OF SMALL BLOCKS FROM A FAST MATRIX
 !======================================================================
