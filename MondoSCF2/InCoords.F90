@@ -757,7 +757,7 @@ CONTAINS
      CALL AngleList(AtmBTot,BondTot,TOPS,XYZ,GConvCr%NonCovBend, &
                     Angle,OutP,Cells,IEq)
      CALL TorsionList(NatmsLoc,AtmBTot,BondTot,XYZ, &
-                      GConvCr%NonCovTors, &
+                      GConvCr%NonCovTors,TOPS, &
                       AtNum,TorsionIJKL,NTorsion,IEq)
      !
      ! Fill Data into IntCs
@@ -881,7 +881,7 @@ CONTAINS
 !----------------------------------------------------------------
 !
    SUBROUTINE TorsionList(NatmsLoc,AtmB,Bond,XYZ,NonCovTors, &
-                          AtNum,TorsionIJKL,NTorsion,IEq)
+                          TOPS,AtNum,TorsionIJKL,NTorsion,IEq)
      IMPLICIT NONE
      INTEGER                     :: NatmsLoc,I,I1,I2
      INTEGER                     :: N1,N2,J,J1,J2,NBond
@@ -889,6 +889,7 @@ CONTAINS
      INTEGER                     :: I1Num,I2Num,JJ,I3,N3,JJ1,JJ2,NTIni
      TYPE(ATOMBONDS)             :: AtmB
      TYPE(BONDDATA)              :: Bond
+     TYPE(TOPOLOGY)              :: TOPS
      TYPE(INT_RNK2)              :: TorsionIJKL,TorsionIJKLAux
      LOGICAL                     :: SelectTors
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
@@ -917,9 +918,10 @@ CONTAINS
      !    
      NTorsion=0
      DO I=1,NBond 
-       IF(ExcludeVDW.AND.Bond%Type%C(I)(1:3)/='COV') CYCLE 
        I1=Bond%IJ%I(1,I)
        I2=Bond%IJ%I(2,I)
+       IF((ExcludeVDW.AND.Bond%Type%C(I)(1:3)/='COV').AND. &
+          (TOPS%Cov12%I(I1,1)/=0.AND.TOPS%Cov12%I(I2,1)/=0)) CYCLE 
        N1=AtmB%Count%I(I1)
        N2=AtmB%Count%I(I2)
        NTIni=NTorsion
@@ -928,7 +930,8 @@ CONTAINS
        DO J1=1,N1
          JJ1=AtmB%Atoms%I(I1,J1)
          I1JJ1=AtmB%Bonds%I(I1,J1)
-         IF(ExcludeVDW.AND.Bond%Type%C(I1JJ1)(1:3)/='COV') CYCLE 
+         IF((ExcludeVDW.AND.Bond%Type%C(I1JJ1)(1:3)/='COV').AND. &
+            (TOPS%Cov12%I(JJ1,1)/=0)) CYCLE 
          IF(SelectTors) THEN
            CALL BEND(XYZ(1:3,JJ1),XYZ(1:3,I1),XYZ(1:3,I2), &
                      Value_O=Alph1)
@@ -937,7 +940,8 @@ CONTAINS
          DO J2=1,N2
            JJ2=AtmB%Atoms%I(I2,J2)
            I2JJ2=AtmB%Bonds%I(I2,J2)
-           IF(ExcludeVDW.AND.Bond%Type%C(I2JJ2)(1:3)/='COV') CYCLE 
+           IF((ExcludeVDW.AND.Bond%Type%C(I2JJ2)(1:3)/='COV').AND. & 
+              (TOPS%Cov12%I(JJ2,1)/=0)) CYCLE 
            IF(JJ1==JJ2.OR.JJ1==I2.OR.JJ2==I1) CYCLE
            IF(SelectTors) THEN
              CALL BEND(XYZ(1:3,I1),XYZ(1:3,I2),XYZ(1:3,JJ2), &
@@ -7006,6 +7010,7 @@ return
      LOGICAL                       :: ExcludeVDW,NonCovBend
      !
      ExcludeVDW=.NOT.NonCovBend
+     IF(TOPS%Cov12%I(IAt,1)==0) ExcludeVDW=.FALSE. !lonelyatom-angles
      IF(NDimens==2.AND.TOPS%Tot12%I(IAt,1)>2) THEN
        NDim=AtmB%Count%I(IAt)
        CALL New(Mark,NDim)
@@ -7118,6 +7123,7 @@ return
      LOGICAL                :: ExcludeVDW,NonCovBend
      !
      ExcludeVDW=.NOT.NonCovBend
+     IF(TOPS%Cov12%I(IAt,1)==0) ExcludeVDW=.FALSE. !lonelyatom-angles
      DO J=1,AtmB%Count%I(IAt)
        B1=AtmB%Bonds%I(IAt,J)
        IF(ExcludeVDW.AND.Bond%Type%C(B1)(1:3)/='COV') CYCLE
