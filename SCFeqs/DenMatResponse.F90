@@ -992,7 +992,7 @@ CONTAINS
     ! Set convergence check.
     CnvrgChckPrim=.FALSE.
     !
-    IF(RelErrProp<SQRT(Thresholds%ETol).AND.AbsErrPPrim<Thresholds%DTol.AND.MM.GT.CyclMin) THEN
+    IF(RelErrProp<SQRT(Thresholds%ETol/100d0).AND.AbsErrPPrim<Thresholds%DTol.AND.MM.GT.CyclMin) THEN
        CnvrgChckPrim=.TRUE.
        SELECT CASE(RespOrder)
        CASE(1); CnvrgCmmnt='Met dE1 goals'
