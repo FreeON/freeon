@@ -110,21 +110,18 @@ VRR[a_List,c_List,m_]:=Module[{p,q,PA,QC,WP,WQ,one,two,a1,a2,c1,c2,Ai1,Ci1,CiO2z
 
 (**************** THE HRR RELATIONS: THX HGP! ************************)
 
-     HRR[a_List,b_List,c_List,d_List]:=Module[{pa,pb,pc,pd,MaxEll,a1,b1,c1,d1,one,two},
-
-                              pa=Position[a,Max[a]][[1, 1]];
+     HRR[a_List,b_List,c_List,d_List]:=Module[{pa,pb,pc,pd,MaxEll,a1,b1,c1,d1,one,two,adex,cdex},
                               pb=Position[b,Max[b]][[1, 1]];
-                              pc=Position[c,Max[c]][[1, 1]];
                               pd=Position[d,Max[d]][[1, 1]];
-                              MaxEll=Max[Join[a,b,c,d]];
+                              MaxEll=Max[Join[b,d]];
 			      (* Exit condition 1 *)
-
-                              If[a[[pa]]<0 || b[[pb]]<0 || c[[pc]]<0 || d[[pd]]<0 , Return[0] ];                                        
+                              If[ a[[pa]] < 0 || b[[pb]] < 0 || c[[pc]] < 0 || d[[pd]] < 0 ,Return[0];];                                        
 			      (* Exit condition 2 *)
                               If[ b[[pb]]==0 && d[[pd]]==0,
                                  adex=LMNDex[a[[1]],a[[2]],a[[3]]];
                                  cdex=LMNDex[c[[1]],c[[2]],c[[3]]];
-                                 Return[ToExpression[StringJoin["I",ToString[adex],"Bar",ToString[cdex]]]];
+                                 BarExp=ToExpression[StringJoin["I",ToString[adex],"Bar",ToString[cdex]]];
+                                 Return[BarExp]
                                 ];
 			      (* Recursion *)
 			      If[b[[pb]]==MaxEll,(* Taking down ell on b *)
@@ -264,6 +261,8 @@ PunchHRRClass[FileName_,ic_,jc_,kc_,lc_]:=Module[{oList,IList,Kount,a,b,c,d},
                                                 ,{jl,jmin,jmax}]
                                                 ,{kl,kmin,kmax}]
                                                 ,{ll,lmin,lmax}];
+						 Print[IList];
+
                                                 Write[FileName,FortranAssign[o,IList,AssignReplace->oList]];
                                                ];
 
