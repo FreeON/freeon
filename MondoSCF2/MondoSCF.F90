@@ -8,6 +8,7 @@ PROGRAM MondoSCF
   USE ParseInput
   USE ZippyQuote
   USE PrintParsed
+  USE MDynamics
   IMPLICIT NONE
   TYPE(Controls) :: C
   !------------------------------------------------------------!
@@ -32,8 +33,7 @@ PROGRAM MondoSCF
 !    Place holder for whatever
      CALL Descender(C)
   CASE(GRAD_DO_DYNAMICS)
-     CALL Halt('MD Not Implimented')
-!    CALL MDMove(C)
+     CALL MD(C)
   CASE(GRAD_DO_SCAN)
      CALL Halt('SCAN Not Implimented')
 !     CALL ScanGeom(C)
@@ -45,7 +45,7 @@ PROGRAM MondoSCF
   CALL FiniMPI()
 #endif
   ! Something surreal to celebrate this run
-  CALL ZippySez()
+  CALL ZippySez(C)
   !--------------------------------------------------------
   CALL TimeStamp('Successful MondoSCF run',.FALSE.)   
   !--------------------------------------------------------
