@@ -946,13 +946,11 @@ CONTAINS
      !
      CALL CartToInternal(IntCs,CartGrad,Grad%D,XYZ,PBCDim, &
        GOpt%GrdTrf,GOpt%CoordCtrl,GOpt%TrfCtrl,Print,SCRPath)
-!CALL ProjectBCol(SCRPath,IntCs,XYZ,Grad%D,PBCDim,.TRUE.)
-     IF(PBCDim>0) THEN
-       CALL PrtIntCoords(IntCs,Grad%D,&
-         'Internal Coordinate forces',PBCDim_O=PBCDim)
-     ENDIF
+   ! IF(PBCDim>0.AND.Print2) THEN
+   !   CALL PrtIntCoords(IntCs,Grad%D,&
+   !     'Internal Coordinate forces',PBCDim_O=PBCDim)
+   ! ENDIF
      CALL RedundancyOff(Grad%D,SCRPath,Print,Messg_O='IntC Grads')
-   ! CALL POffHardGc(IntCs,XYZ,PBCDim,Grad%D,SCRPath,Print2)
      !
      CALL GrdConvrgd(GOpt%GOptStat,IntCs,Grad%D)
      !
