@@ -2001,6 +2001,8 @@ CONTAINS
      LOGICAL                     :: LatticeOnly,Print2
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ,BoxCarts,GradIn
      REAL(DOUBLE),DIMENSION(3,3) :: BoxShapeT,XYZAux
+     REAL(DOUBLE)                :: MaxCGrad,LMaxCGrad
+     INTEGER                     :: IMaxCGrad,ILMaxCGrad
      INTEGER                     :: NatmsLoc,OldDim,NewDim,NIntCs
      INTEGER                     :: II,I,J,PBCDim,NCart,Print
      TYPE(DBL_VECT)              :: CartGrad,Carts
@@ -2026,13 +2028,12 @@ CONTAINS
      IF(GOpt%TrfCtrl%DoRotOff) &
        CALL RotationsOff(CartGrad%D,Carts%D,Print2,PBCDim)
      CALL Delete(Carts)
-     CALL GetCGradMax(CartGrad%D,NCart,GOpt%GOptStat%IMaxCGrad,&
-                      GOpt%GOptStat%MaxCGrad,GOpt%GOptStat%ILMaxCGrad, &
-                      GOpt%GOptStat%LMaxCGrad)
+     CALL GetCGradMax(CartGrad%D,NCart,IMaxCGrad,&
+                      MaxCGrad,ILMaxCGrad,LMaxCGrad)
      CALL Delete(CartGrad)
      !
      IF(LatticeOnly) THEN
-       LatticeOnly=(GOpt%GOptStat%LMaxCGrad>GOpt%GConvCrit%Grad).AND. &
+       LatticeOnly=(LMaxCGrad>GOpt%GConvCrit%Grad).AND. &
                    (AltCount<MaxLattice)
        IF(LatticeOnly) THEN
          AltCount=AltCount+1
@@ -2040,7 +2041,7 @@ CONTAINS
          AltCount=1
        ENDIF
      ELSE
-       LatticeOnly=(GOpt%GOptStat%MaxCGrad>GOpt%GConvCrit%Grad).AND. &
+       LatticeOnly=(MaxCGrad>GOpt%GConvCrit%Grad).AND. &
                    (AltCount<MaxAtoms)
        IF(.NOT.LatticeOnly) THEN
          AltCount=AltCount+1
@@ -2153,7 +2154,7 @@ CONTAINS
                    Value_O=GOpt%ExtIntCs%ConstrValue%D(NIntCs))
        ENDIF
      ENDIF
-CALL PrtIntCoords(GOpt%ExtIntCs,GOpt%ExtIntCs%Value%D,'ExtIntCs',PBCDim_O=PBCDim)
+     !CALL PrtIntCoords(GOpt%ExtIntCs,GOpt%ExtIntCs%Value%D,'ExtIntCs',PBCDim_O=PBCDim)
    END SUBROUTINE OpenAlternate
 !
 !------------------------------------------------------------------
