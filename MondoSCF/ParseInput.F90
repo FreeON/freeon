@@ -41,7 +41,9 @@ MODULE ParseInput
 !
 !        Read comand line, environement variables, create file names, init files etc
          CALL ParseCmndLine(Ctrl)
+#ifdef MMech
          CALL ParseMech(Ctrl)
+#endif
          CALL ParseGrad(Ctrl)
 #ifdef MMech
          If(Ctrl%Mechanics(2)) Then
@@ -719,7 +721,7 @@ MODULE ParseInput
             CALL ParseCoordinates_XMOL(Ctrl,GM)
          ELSE
 !          CALL New(GM)
-           CALL ParseCoordinates_MONDO(Ctrl,GM,'')
+           CALL ParseCoordinates_MONDO(Ctrl,GM)
          ENDIF
 !
          CLOSE(UNIT=Inp,STATUS='KEEP')
@@ -729,7 +731,7 @@ MODULE ParseInput
 !---------------------------------------------------------------------------- 
 !
 !---------------------------------------------------------------------------- 
-      SUBROUTINE ParseCoordinates_MONDO(Ctrl,GM,CH)
+      SUBROUTINE ParseCoordinates_MONDO(Ctrl,GM)
          TYPE(SCFControls),INTENT(INOUT) :: Ctrl
          TYPE(CRDS)                      :: GM
          TYPE(INT_VECT)                  :: Kinds
@@ -737,21 +739,19 @@ MODULE ParseInput
          REAL(DOUBLE),DIMENSION(6)       :: Carts !,Vects
          INTEGER                         :: I,J,K,NumGeom
          CHARACTER(LEN=2)                :: At
-         CHARACTER(LEN=*)                :: CH
          CHARACTER(LEN=DEFAULT_CHR_LEN)  :: Line, LineLowCase
          LOGICAL                         :: LastConfig
 !---------------------------------------------------------------------------- 
 !        Find number of atoms and atom types
 !
-         Call LowCase(CH)
-         CALL AlignLowCase('begin_'//CH//'geometry',Inp)
+         CALL AlignLowCase('begingeometry',Inp)
          NAtoms=0
          DO 
            READ(Inp,DEFAULT_CHR_FMT,END=1)Line
            LineLowCase = Line
            Call LowCase(LineLowCase)
-           IF(INDEX(LineLowCase,'end_'//CH//'geometry')/=0.OR. &
-              INDEX(LineLowCase,'next_geometry_'//CH//'mondo_default')/=0)EXIT
+           IF(INDEX(LineLowCase,'endgeometry')/=0.OR. &
+              INDEX(LineLowCase,'next_geometry_mondo_default')/=0)EXIT
            NAtoms=NAtoms+1
          ENDDO
          GM%NAtms=NAtoms
@@ -767,7 +767,7 @@ MODULE ParseInput
 !---------------------------------------------------------------------------- 
 !        Parse <GEOMETRY> for coordinates
 !
-         CALL AlignLowCase('begin_'//CH//'geometry',Inp)
+         CALL AlignLowCase('begingeometry',Inp)
          NumGeom   = 0
          LastConfig=.FALSE.
          DO
@@ -778,8 +778,8 @@ MODULE ParseInput
                READ(Inp,DEFAULT_CHR_FMT,END=1)Line
                LineLowCase = Line
                Call LowCase(LineLowCase)
-               IF(INDEX(LineLowCase,'next_geometry_'//CH//'mondo_default')/=0)EXIT
-               IF(INDEX(LineLowCase,'end_'//CH//'geometry')/=0)THEN
+               IF(INDEX(LineLowCase,'next_geometry_mondo_default')/=0)EXIT
+               IF(INDEX(LineLowCase,'endgeometry')/=0)THEN
                   LastConfig=.TRUE.
                   EXIT
                ELSE
@@ -853,7 +853,6 @@ MODULE ParseInput
             IF(LastConfig)EXIT
          ENDDO
 !
-       IF(CH == '') THEN !!!! quantum geometry only
          IF(Ctrl%Grad == GRAD_ONE_FORCE .OR. Ctrl%Grad == GRAD_NO_GRAD) THEN
             Ctrl%NGeom = NumGeom
          ELSE
@@ -861,15 +860,14 @@ MODULE ParseInput
                CALL MondoHalt(PRSE_ERROR,'Only the initial Geometry should be supplied for MD or Opt')
             ENDIF
          ENDIF
-         CALL Put(NumGeom,'NumberOfGeometries'//CH)
-       ENDIF
+         CALL Put(NumGeom,'NumberOfGeometries')
          NAtoms=GM%NAtms
 
 !---------------------------------------------------------------------------- 
 !        Finish up
          CALL Delete(GM)
 !        CLOSE(UNIT=Inp,STATUS='KEEP') !!!! it's done above, was done even before
-         CALL Put(Ctrl%NGeom,'nconfig'//CH) !!! currently only one MM geom
+         CALL Put(Ctrl%NGeom,'nconfig') !!! currently only one MM geom
 !        CALL CloseHDF()
          CALL PPrint(MemStats,'ParseGeometry')
          RETURN
@@ -1826,6 +1824,7 @@ MODULE ParseInput
 !
 !----------------------------------------------------------------------------
 !
+#ifdef MMech
       SUBROUTINE ParseMM(Ctrl)
         Implicit None
         TYPE(SCFControls)          :: Ctrl
@@ -1995,344 +1994,7 @@ MODULE ParseInput
 !!
 !
       END SUBROUTINE ParseMM
-!
-!--------------------------------------------------------------------------
-!
-      SUBROUTINE PUTDYNAMO
-      Implicit None
-!
-Call Put(MM_NATOMS,'MM_NATOMS')
-Call Put(MM_NATOMSMM,'MM_NATOMSMM')
-Call Put(MM_NATOMSQM,'MM_NATOMSQM')
-Call Put(NFIXED,'NFIXED')
-Call Put(NFREE,'NFREE')
-
-Call Put(ATMNAM,'ATMNAM',MM_NATOMS)
-Call Put(ATMIND(i),'ATMIND')
-Call Put(ATMNUM(i),'ATMNUM')
-Call Put(ATMQMI(i),'ATMQMI')
-Call Put(ATMFIX(i),'ATMFIX')
-Call Put(ATMMAS(i),'ATMMAS')
-Call Put(ATMCRD(i),'ATMCRD')
-
-!!!!Call Put(POINT_TYPE,'POINT_TYPE')
-!!!!Call Put(LINKED_POINT_TYPE,'LINKED_POINT_TYPE')
-!!!!Call Put(CONSTRAINT_TYPE,'CONSTRAINT_TYPE')
-!!!!Call Put(NPOINTS,'NPOINTS')
-!!!!Call Put(POINTER,'POINTER')
-!!!!Call Put(NCONSTRAINT,'NCONSTRAINT')
-!!!!Call Put(CONSTRAINT_FIRST,'CONSTRAINT_FIRST')
-!!!!Call Put(CONSTRAINT_LAST,'CONSTRAINT_LAST')
-!!!!Call Put(QTETHER,'QTETHER')
-!!!!Call Put(TETHER_FCS,'TETHER_FCS')
-!!!!Call Put(TETHER_REFCRD,'TETHER_REFCRD')
-
-Call Put(NANGLPS,'NANGLPS')
-Call Put(ANGLPS()%TYPE1,'ANGLPS_TYPE1')
-Call Put(ANGLPS()%TYPE2,'ANGLPS_TYPE2')
-Call Put(ANGLPS()%TYPE3,'ANGLPS_TYPE3')
-Call Put(ANGLPS()%EQ,'ANGLPS_EQ')
-Call Put(ANGLPS()%FC,'ANGLPS_FC')
-
-Call Put(NTYPES,'NTYPES')
-Call Put(TYPES()%NAME,'TYPES_NAME')
-Call Put(TYPES()%NUMBER,'TYPES_NUMBER')
-Call Put(TYPES()%EPSILON,'TYPES_EPSILON')
-Call Put(TYPES()%SIGMA,'TYPES_SIGMA')
-
-Call Put(NBONDPS,'NBONDPS')
-Call Put(BONDPS()%TYPE1,'NBONDPS_TYPE1')
-Call Put(BONDPS()%TYPE2,'NBONDPS_TYPE2')
-Call Put(BONDPS()%EQ,'NBONDPS_EQ')
-Call Put(BONDPS()%FC,'NBONDPS_FC')
-
-Call Put(NDIHEPS,'NDIHEPS')
-Call Put(DIHEPS()%TYPE1,'DIHEPS_TYPE1')
-Call Put(DIHEPS()%TYPE2,'DIHEPS_TYPE2')
-Call Put(DIHEPS()%TYPE3,'DIHEPS_TYPE3')
-Call Put(DIHEPS()%TYPE4,'DIHEPS_TYPE4')
-Call Put(DIHEPS()%V0,'DIHEPS_V0')
-Call Put(DIHEPS()%V1,'DIHEPS_V1')
-Call Put(DIHEPS()%V2,'DIHEPS_V2')
-Call Put(DIHEPS()%V3,'DIHEPS_V3')
-
-Call Put(NIMPRPS,'NIMPRPS')
-Call Put(IMPRPS()%TYPE1,'DIHEPS_TYPE1')
-Call Put(IMPRPS()%TYPE2,'DIHEPS_TYPE2')
-Call Put(IMPRPS()%TYPE3,'DIHEPS_TYPE3')
-Call Put(IMPRPS()%TYPE4,'DIHEPS_TYPE4')
-Call Put(IMPRPS()%V0,'DIHEPS_V0')
-Call Put(IMPRPS()%V1,'DIHEPS_V1')
-Call Put(IMPRPS()%V2,'DIHEPS_V2')
-Call Put(IMPRPS()%V3,'DIHEPS_V3')
-
-Call Put(NRESIDUES,'NRESIDUES')
-Call Put(RESIDUES()%NAME,'RESIDUES_NAME')
-Call Put(RESIDUES()%MM_NATOMS,'RESIDUES_MM_NATOMS')
-Call Put(RESIDUES()%NBONDS,'RESIDUES_NBONDS')
-Call Put(RESIDUES()%NIMPROPERS,'RESIDUES_NIMPROPERS')
-!Call Put(RESIDUES()%NAMES,'RESIDUES_NAMES')
-!Call Put(RESIDUES()%BONDS,'RESIDUES_BONDS')
-!Call Put(RESIDUES()%IMPROPERS,'RESIDUES_IMPROPERS')
-!Call Put(RESIDUES()%TYPES,'RESIDUES_TYPES')
-!Call Put(RESIDUES()%CHARGES,'RESIDUES_CHARGES')
-
-Call Put(NVARIANTS,'NVARIANTS')
-Call Put(VARIANTS()%NAME,'VARIANTS_NAME')
-Call Put(VARIANTS()%RESIDUE_NAME,'VARIANTS_RESIDUE_NAME')
-Call Put(VARIANTS()%NADDS,'VARIANTS_NADDS')
-Call Put(VARIANTS()%NBONDS,'VARIANTS_NBONDS')
-Call Put(VARIANTS()%NCHARGES,'VARIANTS_NCHARGES')
-Call Put(VARIANTS()%NDELETES,'VARIANTS_NDELETES')
-Call Put(VARIANTS()%NIMPROPERS,'VARIANTS_NIMPROPERS')
-
-Call Put(NRESLINK,'NRESLINK')
-Call Put(RESLINK()%NAME,'RESIDUE_NAME')
-!Call Put(RESLINK()%RESIDUE1,'RESIDUE_RESIDUE1') !!!variant types
-!Call Put(RESLINK()%RESIDUE2,'RESIDUE_RESIDUE2')
-
-Call Put(REF_SCALE_EL,'REF_SCALE_EL')
-Call Put(REF_SCALE_LJ,'REF_SCALE_LJ')
-
-!Call Put(TOTLNK,'TOTLNK')  !!!! only for first processeing step of dynamo
-!Call Put(TOTVAR,'TOTVAR')
-!Call Put(LNKIND,'LNKIND')
-!Call Put(RINDEX,'RINDEX')
-!Call Put(VARIND,'VARIND')
-!Call Put(VARRES,'VARRES')
-!Call Put(LNKNUM,'LNKNUM')
-!Call Put(TOTATOM,'TOTATOM')
-!Call Put(TOTBOND,'TOTBOND')
-!Call Put(TOTIMPR,'TOTIMPR')
-!Call Put(TMPNAM,'TMPNAM')
-!Call Put(TMPTYP,'TMPTYP')
-!Call Put(TMPBND,'TMPBND')
-!Call Put(TMPIMP,'TMPIMP')
-!Call Put(TMPCHG,'TMPCHG')
-
-Call Put(NANGLES,'NANGLES')
-Call Put(ANGLES()%I,'ANGLE_TERM_I')
-Call Put(ANGLES()%J,'ANGLE_TERM_J')
-Call Put(ANGLES()%K,'ANGLE_TERM_K')
-Call Put(ANGLES()%EQ,'ANGLE_TERM_EQ')
-Call Put(ANGLES()%FC,'ANGLE_TERM_FC')
-
-Call Put(NBONDS,'NBONDS')
-Call Put(BONDS()%I,'BONDS_I')
-Call Put(BONDS()%J,'BONDS_J')
-Call Put(BONDS()%EQ,'BONDS_EQ')
-Call Put(BONDS()%FC,'BONDS_FC')
-
-Call Put(NDIHEDRALS,'NDIHEDRALS')
-Call Put(DIHEDRALS()%I,'DIHEDRALS_I')
-Call Put(DIHEDRALS()%J,'DIHEDRALS_J')
-Call Put(DIHEDRALS()%K,'DIHEDRALS_K')
-Call Put(DIHEDRALS()%L,'DIHEDRALS_L')
-Call Put(DIHEDRALS()%PERIOD,'DIHEDRALS_PERIOD')
-Call Put(DIHEDRALS()%FC,'DIHEDRALS_FC')
-Call Put(DIHEDRALS()%PHASE,'DIHEDRALS_PHASE')
-
-Call Put(ATMTYP,'ATMTYP',MM_NATOMS)
-
-Call Put(NIMPROPERS,'NIMPROPERS')
-Call Put(IMPROPERS()%I,'IMPROPERS_I')
-Call Put(IMPROPERS()%J,'IMPROPERS_J')
-Call Put(IMPROPERS()%K,'IMPROPERS_K')
-Call Put(IMPROPERS()%L,'IMPROPERS_L')
-Call Put(IMPROPERS()%PERIOD,'IMPROPERS_PERIOD')
-Call Put(IMPROPERS()%FC,'IMPROPERS_FC')
-Call Put(IMPROPERS()%PHASE,'IMPROPERS_PHASE')
-
-Call Put(SCALE_EL14,'SCALE_EL14')
-Call Put(SCALE_LJ14,'SCALE_LJ14')
-
-!Call Put(ATMEXCI,'ATMEXCI') !!!! allocatables
-!Call Put(ATMEXCJ,'ATMEXCJ')
-!Call Put(ATME14I,'ATME14I')
-!Call Put(ATME14J,'ATME14J')
-!Call Put(ATMCHG,'ATMCHG')
-!Call Put(ATMCHG14,'ATMCHG14')
-!Call Put(ATMEPS,'ATMEPS')
-!Call Put(ATMEPS14,'ATMEPS14')
-!Call Put(ATMSIG,'ATMSIG')
-
-Call Put(NRESID,'NRESID')
-Call Put(NSUBSYS,'NSUBSYS')
-!Call Put(RESNAM,'RESNAM')
-!Call Put(SUBNAM,'SUBNAM')
-!Call Put(RESIND,'RESIND')
-!Call Put(SUBIND,'SUBIND')
-
-     END SUBROUTINE PUTDYNAMO
-
-!--------------------------------------------------------------------------
-!
-     SUBROUTINE GETDYNAMO
-      Implicit None
-!
-Call get(MM_NATOMS,'MM_NATOMS')
-Call get(MM_NATOMSMM,'MM_NATOMSMM')
-Call get(MM_NATOMSQM,'MM_NATOMSQM')
-Call get(NFIXED,'NFIXED')
-Call get(NFREE,'NFREE')
-
-Call get(ATMNAM,'ATMNAM',MM_NATOMS)
-Call get(ATMIND(i),'ATMIND')
-Call get(ATMNUM(i),'ATMNUM')
-Call get(ATMQMI(i),'ATMQMI')
-Call get(ATMFIX(i),'ATMFIX')
-Call get(ATMMAS(i),'ATMMAS')
-Call get(ATMCRD(i),'ATMCRD')
-
-!!!!Call get(POINT_TYPE,'POINT_TYPE')
-!!!!Call get(LINKED_POINT_TYPE,'LINKED_POINT_TYPE')
-!!!!Call get(CONSTRAINT_TYPE,'CONSTRAINT_TYPE')
-!!!!Call get(NPOINTS,'NPOINTS')
-!!!!Call get(POINTER,'POINTER')
-!!!!Call get(NCONSTRAINT,'NCONSTRAINT')
-!!!!Call get(CONSTRAINT_FIRST,'CONSTRAINT_FIRST')
-!!!!Call get(CONSTRAINT_LAST,'CONSTRAINT_LAST')
-!!!!Call get(QTETHER,'QTETHER')
-!!!!Call get(TETHER_FCS,'TETHER_FCS')
-!!!!Call get(TETHER_REFCRD,'TETHER_REFCRD')
-
-Call get(NANGLPS,'NANGLPS')
-Call get(ANGLPS()%TYPE1,'ANGLPS_TYPE1')
-Call get(ANGLPS()%TYPE2,'ANGLPS_TYPE2')
-Call get(ANGLPS()%TYPE3,'ANGLPS_TYPE3')
-Call get(ANGLPS()%EQ,'ANGLPS_EQ')
-Call get(ANGLPS()%FC,'ANGLPS_FC')
-
-Call get(NTYPES,'NTYPES')
-Call get(TYPES()%NAME,'TYPES_NAME')
-Call get(TYPES()%NUMBER,'TYPES_NUMBER')
-Call get(TYPES()%EPSILON,'TYPES_EPSILON')
-Call get(TYPES()%SIGMA,'TYPES_SIGMA')
-
-Call get(NBONDPS,'NBONDPS')
-Call get(BONDPS()%TYPE1,'NBONDPS_TYPE1')
-Call get(BONDPS()%TYPE2,'NBONDPS_TYPE2')
-Call get(BONDPS()%EQ,'NBONDPS_EQ')
-Call get(BONDPS()%FC,'NBONDPS_FC')
-
-Call get(NDIHEPS,'NDIHEPS')
-Call get(DIHEPS()%TYPE1,'DIHEPS_TYPE1')
-Call get(DIHEPS()%TYPE2,'DIHEPS_TYPE2')
-Call get(DIHEPS()%TYPE3,'DIHEPS_TYPE3')
-Call get(DIHEPS()%TYPE4,'DIHEPS_TYPE4')
-Call get(DIHEPS()%V0,'DIHEPS_V0')
-Call get(DIHEPS()%V1,'DIHEPS_V1')
-Call get(DIHEPS()%V2,'DIHEPS_V2')
-Call get(DIHEPS()%V3,'DIHEPS_V3')
-
-Call get(NIMPRPS,'NIMPRPS')
-Call get(IMPRPS()%TYPE1,'DIHEPS_TYPE1')
-Call get(IMPRPS()%TYPE2,'DIHEPS_TYPE2')
-Call get(IMPRPS()%TYPE3,'DIHEPS_TYPE3')
-Call get(IMPRPS()%TYPE4,'DIHEPS_TYPE4')
-Call get(IMPRPS()%V0,'DIHEPS_V0')
-Call get(IMPRPS()%V1,'DIHEPS_V1')
-Call get(IMPRPS()%V2,'DIHEPS_V2')
-Call get(IMPRPS()%V3,'DIHEPS_V3')
-
-Call get(NRESIDUES,'NRESIDUES')
-Call get(RESIDUES()%NAME,'RESIDUES_NAME')
-Call get(RESIDUES()%MM_NATOMS,'RESIDUES_MM_NATOMS')
-Call get(RESIDUES()%NBONDS,'RESIDUES_NBONDS')
-Call get(RESIDUES()%NIMPROPERS,'RESIDUES_NIMPROPERS')
-!Call get(RESIDUES()%NAMES,'RESIDUES_NAMES')
-!Call get(RESIDUES()%BONDS,'RESIDUES_BONDS')
-!Call get(RESIDUES()%IMPROPERS,'RESIDUES_IMPROPERS')
-!Call get(RESIDUES()%TYPES,'RESIDUES_TYPES')
-!Call get(RESIDUES()%CHARGES,'RESIDUES_CHARGES')
-
-Call get(NVARIANTS,'NVARIANTS')
-Call get(VARIANTS()%NAME,'VARIANTS_NAME')
-Call get(VARIANTS()%RESIDUE_NAME,'VARIANTS_RESIDUE_NAME')
-Call get(VARIANTS()%NADDS,'VARIANTS_NADDS')
-Call get(VARIANTS()%NBONDS,'VARIANTS_NBONDS')
-Call get(VARIANTS()%NCHARGES,'VARIANTS_NCHARGES')
-Call get(VARIANTS()%NDELETES,'VARIANTS_NDELETES')
-Call get(VARIANTS()%NIMPROPERS,'VARIANTS_NIMPROPERS')
-
-Call get(NRESLINK,'NRESLINK')
-Call get(RESLINK()%NAME,'RESIDUE_NAME')
-!Call get(RESLINK()%RESIDUE1,'RESIDUE_RESIDUE1') !!!variant types
-!Call get(RESLINK()%RESIDUE2,'RESIDUE_RESIDUE2')
-
-Call get(REF_SCALE_EL,'REF_SCALE_EL')
-Call get(REF_SCALE_LJ,'REF_SCALE_LJ')
-
-!Call get(TOTLNK,'TOTLNK')  !!!! only for first processeing step of dynamo
-!Call get(TOTVAR,'TOTVAR')
-!Call get(LNKIND,'LNKIND')
-!Call get(RINDEX,'RINDEX')
-!Call get(VARIND,'VARIND')
-!Call get(VARRES,'VARRES')
-!Call get(LNKNUM,'LNKNUM')
-!Call get(TOTATOM,'TOTATOM')
-!Call get(TOTBOND,'TOTBOND')
-!Call get(TOTIMPR,'TOTIMPR')
-!Call get(TMPNAM,'TMPNAM')
-!Call get(TMPTYP,'TMPTYP')
-!Call get(TMPBND,'TMPBND')
-!Call get(TMPIMP,'TMPIMP')
-!Call get(TMPCHG,'TMPCHG')
-
-Call get(NANGLES,'NANGLES')
-Call get(ANGLES()%I,'ANGLE_TERM_I')
-Call get(ANGLES()%J,'ANGLE_TERM_J')
-Call get(ANGLES()%K,'ANGLE_TERM_K')
-Call get(ANGLES()%EQ,'ANGLE_TERM_EQ')
-Call get(ANGLES()%FC,'ANGLE_TERM_FC')
-
-Call get(NBONDS,'NBONDS')
-Call get(BONDS()%I,'BONDS_I')
-Call get(BONDS()%J,'BONDS_J')
-Call get(BONDS()%EQ,'BONDS_EQ')
-Call get(BONDS()%FC,'BONDS_FC')
-
-Call get(NDIHEDRALS,'NDIHEDRALS')
-Call get(DIHEDRALS()%I,'DIHEDRALS_I')
-Call get(DIHEDRALS()%J,'DIHEDRALS_J')
-Call get(DIHEDRALS()%K,'DIHEDRALS_K')
-Call get(DIHEDRALS()%L,'DIHEDRALS_L')
-Call get(DIHEDRALS()%PERIOD,'DIHEDRALS_PERIOD')
-Call get(DIHEDRALS()%FC,'DIHEDRALS_FC')
-Call get(DIHEDRALS()%PHASE,'DIHEDRALS_PHASE')
-
-Call get(ATMTYP,'ATMTYP',MM_NATOMS)
-
-Call get(NIMPROPERS,'NIMPROPERS')
-Call get(IMPROPERS()%I,'IMPROPERS_I')
-Call get(IMPROPERS()%J,'IMPROPERS_J')
-Call get(IMPROPERS()%K,'IMPROPERS_K')
-Call get(IMPROPERS()%L,'IMPROPERS_L')
-Call get(IMPROPERS()%PERIOD,'IMPROPERS_PERIOD')
-Call get(IMPROPERS()%FC,'IMPROPERS_FC')
-Call get(IMPROPERS()%PHASE,'IMPROPERS_PHASE')
-
-Call get(SCALE_EL14,'SCALE_EL14')
-Call get(SCALE_LJ14,'SCALE_LJ14')
-
-!Call get(ATMEXCI,'ATMEXCI') !!!! allocatables
-!Call get(ATMEXCJ,'ATMEXCJ')
-!Call get(ATME14I,'ATME14I')
-!Call get(ATME14J,'ATME14J')
-!Call get(ATMCHG,'ATMCHG')
-!Call get(ATMCHG14,'ATMCHG14')
-!Call get(ATMEPS,'ATMEPS')
-!Call get(ATMEPS14,'ATMEPS14')
-!Call get(ATMSIG,'ATMSIG')
-
-Call get(NRESID,'NRESID')
-Call get(NSUBSYS,'NSUBSYS')
-!Call get(RESNAM,'RESNAM')
-!Call get(SUBNAM,'SUBNAM')
-!Call get(RESIND,'RESIND')
-!Call get(SUBIND,'SUBIND')
-
-    END SUBROUTINE GETDYNAMO
+#endif
 !
 !------------------------------------------------------------------------
 !
@@ -2433,6 +2095,7 @@ Call get(NSUBSYS,'NSUBSYS')
      END SUBROUTINE PARSEGRAD
 !
 !----------------------------------------------------------------------------
+#ifdef MMech
 !
       SUBROUTINE QMMMDATA_READ(FILE,ATMMARK,ACTIVE_BOND,ACTIVE_ANGLE, &
         ACTIVE_DIHEDRAL,ACTIVE_IMPROPER)
@@ -2495,6 +2158,7 @@ Call get(NSUBSYS,'NSUBSYS')
       CLOSE(60)
 !
       END SUBROUTINE QMMMDATA_READ
+#endif
 !============================================================================
 !     Parse Accuracy for MM
 !============================================================================
@@ -2528,12 +2192,19 @@ Call get(NSUBSYS,'NSUBSYS')
             NOpts=NOpts+NLoc
             DO ILoc=1,NLoc; Ctrl%AccL(Loc(ILoc))=4; ENDDO
          ENDIF
+#ifdef MMech
          IF(Ctrl%Mechanics(2)) THEN
+#endif        
            IF(NOpts>1.AND.NOpts/=Ctrl%NSet) &
               CALL MondoHalt(PRSE_ERROR,'Number of '//ACCURACY_OPTION &
                            //' options does not match number of Basis sets.')
+#ifdef MMech
          ENDIF
+#endif        
 !        Set thresholds
+!
+#ifdef MMech
+!
 !!! MMonly
 !
          IF(Ctrl%Mechanics(1).AND..NOT.Ctrl%Mechanics(2)) THEN
@@ -2546,6 +2217,7 @@ Call get(NSUBSYS,'NSUBSYS')
            Thrsh%DTol=DTol(Ctrl%AccL(1))
            CALL Put(Thrsh,Tag_O=IntToChar(1))
          ELSE
+#endif
 !    
 !!! not MMonly
          IF(NOpts==Ctrl%NSet)THEN
@@ -2578,7 +2250,9 @@ Call get(NSUBSYS,'NSUBSYS')
             CALL Put(Thrsh,Tag_O=IntToChar(Ctrl%NSet))
          ENDIF
 !
+#ifdef MMech
          ENDIF !!! MMonly
+#endif
 !
 !        Close files
          CLOSE(UNIT=Inp,STATUS='KEEP')
