@@ -46,7 +46,7 @@ advent of the hybrid functionals [ref] this functional has had very little impac
 condensed matter electronic structure community. Now because of the accuracy obtainable with
 the hybrid functionals, it has become very desirable to include exact exchange into
 existing condensed matter electronic structure algorithms. 
-However, most of these calculations make us of ${\bf k}$-space integrations to 
+However, most of these calculations make use of ${\bf k}$-space integrations to 
 deal with the periodicity of the system [ref]. But this is not an ideal situation 
 for linear scaling algorithms, where we would like to remove the need for doing
 ${\bf k}$-space integrations altogether by increasing the system size. 
@@ -101,7 +101,7 @@ P_{cd}[{\mathbf{n}}]\,
 \phi _{d+{\bf n}+{\bf g}} ( \mathbf{r'})} \over {|{\bf r}-{\bf r'}|}} 
 \label{CryEq}
 \end{equation}
-Let us consider two case; First let us consider Gamma point only, then,
+Let us consider two case; First let us consider the Gamma point, then in this case
 \begin{equation}
 P_{cd}[{\mathbf{n}}] \rightarrow P_{cd}[{0}]\, \delta _{{\mathbf{n},0}}
 \label{NoN}
@@ -122,12 +122,12 @@ are depicting the exchange interaction of atom $a$ with all its neighbors. Equat
 figure \ref{figure:ExchangeRegion}, however, this neglects the exchange interaction 
 between neighboring cells, and also the exchange matrix is not translationally invariant.
 We could fix this by summing over the infinite set of lattice vectors ${\bf n}$, 
-and this leads to a translationally invariant exchange matrix, but then these integrals do not converge. 
+and this leads to a translationally invariant exchange matrix, but these integrals do not converge. 
 Referring to figure \ref{figure:ExchangeRegion} we can see a simple fix to this problem. When 
 we calculate the exchange matrix elements for atom $a$, include exchanges only within region
 defined by the volume centered about atom $a$ (the red box in figure \ref{figure:ExchangeRegion}).
 This leads to both a convergent exchange matrix, and also a  translationally invariant one.
-We do this by defining  a Minimum Image Distance (MID) conditio, which is similiar to what is done
+We do this by defining  a Minimum Image Distance (MID) condition, which is similiar to what is done
 in Molecular Dynamics for the force on an atom due to neighboring cells [ref], 
 
 \begin{equation}
@@ -141,8 +141,8 @@ P_{cd} \,
 \label{MinImageKab}
 \end{equation}
 where $\cal MID$ is a function which shifts the distributions to there nearest images.
-This problem with the ${\bf k}$-space convergence, which is extreme for the Gamma point, 
-also exist for any finite set of lattice vectors ${\bf n}$. Consider 
+The problem with the ${\bf k}$-space convergence, which is extreme for the Gamma point, 
+will also exist for any finite set of lattice vectors ${\bf n}$. Consider 
 figure \ref{figure:ExchangeRegion_k111} where we show the regions that atom $a$ exchanges with
 for a maximum ${\bf k}$-space of ${\bf k}_{max} = \{1,1,1\}$. Here we see again that the integral
 defined in equation (\ref{CryEq}) is over the wrong region for atom $a$, and can be easily 
@@ -156,24 +156,24 @@ Table \ref{table:ComToCrystal98} shows our results for the total
 energy for Magnesium Oxide as compared to results obtained from \textbf{Crystal98}.
 for the STO-3G basis set for increasing system size. We see that we obtain excellent
 convergence to the {\bf Crystal98} large ${\bf k}$-space calculation. This verifies that
-our methodology for doing the exchange matrix at the Gamma point is correct.
-
+our methodology for doing the exchange matrix at the Gamma point is correct, and converges 
+in the correct fashion in regard to increasing system size.
 
 \section{Scaling}
  
-For testing of linear scaling, we us a set of periodic diamond systems.
+For testing of linear scaling, we us a set of periodic diamond systems [ref].
 Figure \ref{figure:Scaling_Matrix_Build} the time it takes to build the
 matrix  \( K_{x} \) for the dense diamond periodic system up to 512 atoms for the
 basis set 6-21G* \cite{C98Basis} at a {\it good} level of accuracy.
-Even in this very dense periodic system for a medium basis set with d-functions, 
-linear scaling for the matrix build commences very early. 
+%Even in this very dense periodic system for a medium basis set with d-functions, 
+%linear scaling for the matrix build commences very early. 
 
 We also show in figure \ref{figure:EnergyPerN} the energy per carbon atom and 
 in figure \ref{figure:ErrorPerN} the relative error in the total energy. 
 Again we see the convergence of the total energy
-as a function of increasing system size, which is akin to k-space integration. We also
-see that our relative error is very well controlled within the \textbf{MondoSCF} quantum
-chemistry code, even up to 512 carbon atoms.
+as a function of increasing system size, which is akin to k-space integration.
+We also see that our relative error is very well controlled within the \
+textbf{MondoSCF} quantum chemistry code, even up to 512 carbon atoms.
 
 
 \section{CONCLUSIONS}
@@ -211,23 +211,33 @@ Energy/{$N$}\\
 M &
 STO-3G/HF &
 2 &
--270.79320106 &
--135.39660053 \\
+-270.79642532 &
+-135.39821266 \\
 M&
 STO-3G/HF&
 8&
--1084.7952359 &
--135.59940448 \\
+-1084.795840 &
+-135.5994800 \\
+M&
+STO-3G/HF&
+54&
+-7322.793038 &
+-135.6072784 \\
 M&
 STO-3G/HF&
 64&
--8678.93726877 &
--135.608394824 \\
+-8678.937344 &
+-135.6083960 \\
+M&
+STO-3G/HF&
+128 &
+-17357.92014 &
+-135.6087511\\
 M&
 STO-3G/HF&
 216&
-0.0 &
-0.0 \\
+-29291.51545 &
+-135.6088678 \\
 \hline
 C&
 STO-3G/HF&

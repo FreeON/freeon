@@ -3,7 +3,7 @@
 %%Creator: gnuplot 3.7 patchlevel 1
 %%CreationDate: Tue Feb 18 13:27:32 2003
 %%DocumentFonts: (atend)
-%%BoundingBox: 0 0 580 400
+%%BoundingBox: 0 0 480 360
 %%Orientation: Portrait
 %%Pages: (atend)
 %%EndComments
@@ -255,12 +255,26 @@ end
 %%Page: 1 1
 gnudict begin
 gsave
-0 0 translate
-0.080 0.080 scale
+-15 10 translate
+0.070 0.070 scale
 0 setgray
 newpath
-(Times) findfont 140 scalefont setfont
+(Times) findfont 160 scalefont setfont
 1.000 UL
+%
+LTb
+3800 0 M
+[ [(Times) 220.0 0.0 true true (Log[N])]
+] -46.7 MCshow
+stroke
+%
+90 rotate
+2600 -390 M
+[ [(Times) 220.0 0.0 true true (Log[Time]  (sec))]
+] -46.7 MCshow
+-90 rotate
+stroke
+%
 LTb
 798 420 M
 63 0 V
@@ -544,6 +558,73 @@ grestore
 ] -46.7 MCshow
 1.000 UP
 1.000 UL
+%
+%
+LTb 
+1500 4600 M
+[ [(Times) 200.0 0.0 true true (Tree-Build: q      =4)]
+] -46.7 MLshow
+2720 4550 M
+[ [(Times) 160.0 0.0 true true (max)]
+] -46.7 MCshow
+%
+%
+LTb 
+1500 4300 M
+[ [(Times) 200.0 0.0 true true (Tree-Build: q      =6)]
+] -46.7 MLshow
+2720 4250 M
+[ [(Times) 160.0 0.0 true true (max)]
+] -46.7 MCshow
+%
+%
+LTb 
+1500 4000 M
+[ [(Times) 200.0 0.0 true true (Tree-Build: q      =8)]
+] -46.7 MLshow
+2720 3950 M
+[ [(Times) 160.0 0.0 true true (max)]
+] -46.7 MCshow
+%
+%
+LTb 
+1500 3700 M
+[ [(Times) 200.0 0.0 true true (Force: q      =4)]
+] -46.7 MLshow
+2320 3650 M
+[ [(Times) 160.0 0.0 true true (max)]
+] -46.7 MCshow
+%
+%
+LTb 
+1500 3400 M
+[ [(Times) 200.0 0.0 true true (Force: q      =6)]
+] -46.7 MLshow
+2320 3350 M
+[ [(Times) 160.0 0.0 true true (max)]
+] -46.7 MCshow
+%
+%
+LTb 
+1500 3100 M
+[ [(Times) 200.0 0.0 true true (Force: q      =8)]
+] -46.7 MLshow
+2320 3050 M
+[ [(Times) 160.0 0.0 true true (max)]
+] -46.7 MCshow
+%
+%
+5000 1000 M
+[ [(Symbol) 240.0 0.0 true true (t)]
+] -46.7 MLshow
+5180 1000 M
+[ [(Times) 240.0 0.0 true true (=10)]
+] -46.7 MLshow
+5580 1100 M
+[ [(Times) 180.0 0.0 true true (-8)]
+] -46.7 MLshow
+%
+%
 LT0
 1000 4600 M
 400     0 V

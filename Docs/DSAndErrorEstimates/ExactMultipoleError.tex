@@ -1,4 +1,5 @@
-\documentclass[prb,aps,nobibnotes,twocolumn,doublespace,twocolumngrid,superbib]{revtex4}
+%\documentclass[prb,aps,nobibnotes,twocolumn,doublespace,twocolumngrid,superbib]{revtex4}
+\documentclass[prb,aps,nobibnotes,superbib,preprint]{revtex4}
 
 \usepackage{graphicx}
 \usepackage{amsfonts}
@@ -29,8 +30,29 @@ Quantum Chemistry code \textbf{MondoSCF}.
 
 \maketitle
 
-\section{The Multipole Acceptability Criterion (MAC)}
-Let us start by defining some useful quantities\begin{equation}
+\section{Introduction}
+
+\section{Scaling}
+
+
+\section{CONCLUSIONS}
+
+
+\section*{ACKNOWLEDGMENTS}
+
+We would like to acknowledge Tommy Sewell and Ed Kober for there advise
+and support. We would also like to thank Anders Niklasson for his help
+in preparation of this manuscript. 
+
+\bibliographystyle{apsrmp} 
+\bibliography{mondo}
+
+
+\appendix
+
+\section{Exact Error Bound for the MAC}
+Let us start by defining some useful quantities
+\begin{equation}
 \label{B1}
 \widehat{O}_{l}^{m}\left[ \mathbf{R}\right] =\frac{\left| \mathbf{R}\right| ^{l}P_{l}^{m}
 \left( \cos \theta _{\mathbf{R}}
@@ -308,7 +330,7 @@ To leading order, this can be simplified to\begin{equation}
 which bounds equation (\ref{B29B}).
 
 We can also derive an exact error bound for FMM methods. In the case of FMM methods, equation (\ref{B5}) 
-does not apply.And therefore our equations have to be modified. Starting with equation (\ref{B2}) we can 
+does not apply, therefore our equations have to be modified. Starting with equation (\ref{B2}) we can 
 show that the error can be writen as
 
 \begin{equation}
@@ -365,4 +387,29 @@ For the case where $L=L'$ and $|\mathbf{d}|= |\mathbf{d'}|$ this has a particula
 %
 %
 %
+
+\begin{figure}
+\caption{}
+{\centering \includegraphics {Error_vs_TauMAC_bin_Water512.ps} \par} 
+\label{figure:MultipoleErrorWaterC512} 
+\end{figure}
+
+\begin{figure}
+\caption{}
+{\centering \includegraphics{Error_vs_TauMAC_Water64_bin.ps} \par} 
+\label{figure:MultipoleErrorWaterQ64} 
+\end{figure}
+
+\begin{figure}
+\caption{}
+{\centering \includegraphics {Time_vs_N_water_2.ps} \par} 
+\label{figure:TimeVsNwater} 
+\end{figure}
+
+\begin{figure}
+\caption{}
+{\centering \includegraphics {Time_vs_Tau_W4096.ps} \par} 
+\label{figure:TimeVsTauWater4096} 
+\end{figure}
+
 \end{document}
