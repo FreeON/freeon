@@ -49,6 +49,7 @@ PROGRAM SForce
 !--------------------------------------
 ! Compute W=P.F.P
   CALL Get(P,TrixFile('D',Args,1))
+! Is this a bug if we don't use the extrapolated Fockian?
   CALL Get(F,TrixFile('F',Args,0))
   CALL Multiply(P,F,T1)       ! T1:=P.F
   CALL Multiply(T1,P,F)       ! F:=P.F.P
@@ -96,6 +97,7 @@ PROGRAM SForce
   ENDDO
 !--------------------------------------------------------------------------------
 ! Do some checksumming and IO 
+  CALL PPrint(SFrc,'dS/dR')
   CALL PChkSum(SFrc,'dS/dR',Proc_O=Prog)  
 ! Start this off as the first contrib to total gradient 
   CALL Put(SFrc,'GradE',Tag_O=CurGeom)

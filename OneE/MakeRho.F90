@@ -240,7 +240,7 @@ PROGRAM MakeRho
      CALL ClosePU(I)
   ENDIF
 ! Check for errors
-  IF(RelRhoErr>Thresholds%Dist*1.D3) &
+  IF(RelRhoErr>Thresholds%Dist*1.D3.AND.SCFActn/='NumForceEvaluation') &
   CALL Halt('In MakeRho, missing '//TRIM(DblToShrtChar(Two*ABS(RSumE+RSumN)))   &
            //' electrons after pruning.')
 ! Put Rho and MPs to disk

@@ -33,9 +33,9 @@ PROGRAM SCFStatus
    CALL New(Tmp2)
 !---------------------------------------------
 !  Get the density matrix 
-   IF(SCFActn=='BasisSetSwitch'.OR.SCFActn=='Restart')THEN 
-!     if switching the density matrix, 
-!     this is all that is available ...    
+   IF(SCFActn=='BasisSetSwitch')THEN 
+!     If switching the density matrix use i+1 density matrix
+!     its all that is available
       CALL Get(P,TrixFile('D',Args,1))
    ELSE
       CALL Get(P,TrixFile('D',Args,0))
@@ -51,6 +51,7 @@ PROGRAM SCFStatus
 #else
    KinE=Two*Trace(P,Tmp1)    
 #endif 
+   CALL Put(KinE,'KineticEnergy',Tag_O=SCFCycl)
 !  E_el_tot=<Vee+Vne>=Tr{P.(Vee+Vne)}
    CALL Get(Tmp1,TrixFile('J',Args,0))
 #ifdef PARALLEL
@@ -59,6 +60,7 @@ PROGRAM SCFStatus
 #else
    E_el_tot=Trace(P,Tmp1)    
 #endif
+   CALL Put(E_el_tot,'E_ElectronicTotal',Tag_O=SCFCycl)
 !  ExchE=<Kx>=Tr{P.K}
    IF(HasHF(ModelChem))THEN
       CALL Get(Tmp1,TrixFile('K',Args,0))
@@ -87,7 +89,7 @@ PROGRAM SCFStatus
 !--------------------------------------------------------
 !  Find the largest block of the delta density matrix
 !  Allows for checking between extrapolated or projected DMs
-   IF(SCFActn=='BasisSetSwitch'.OR.SCFActn=='Restart')THEN
+   IF(SCFActn=='BasisSetSwitch'.OR.SCFActn=='NumForceEvaluation')THEN
       DMax=Max(P)
    ELSE
       CALL Get(Tmp1,TrixFile('D',Args,0))
@@ -109,7 +111,7 @@ PROGRAM SCFStatus
    CALL Delete(Tmp2)
 !-----------------------------------------------------------
 !  Get DIIS Err and HOMO-LUMO Gap
-   IF(Current(1)>=1)THEN
+   IF(Current(1)>=1.AND.SCFActn/='NumForceEvaluation')THEN
       CALL Get(DIISErr,'diiserr',StatsToChar(Current))
    ELSE
       DIISErr=Zero
@@ -154,9 +156,6 @@ PROGRAM SCFStatus
                                      //TRIM(CurGeom)//']') 
       IF(SCFActn=='BasisSetSwitch')THEN
          SCFMessage=TRIM(SCFMessage)//' Basis set switch ... '       &
-                                    //' MxD = '//TRIM(DblToShrtChar(DMax)) 
-      ELSEIF(SCFActn=='Restart')THEN
-         SCFMessage=TRIM(SCFMessage)//' Restart ... '       &
                                     //' MxD = '//TRIM(DblToShrtChar(DMax)) 
       ELSE
          SCFMessage=TRIM(SCFMessage)//' <SCF> = '//TRIM(FltToMedmChar(ETot)) &

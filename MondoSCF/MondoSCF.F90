@@ -47,9 +47,9 @@ PROGRAM MondoSCF
         DO ISet=1,Ctrl%NSet
            Ctrl%Current(2)=ISet
            CALL OneSCF(Ctrl)
-           Ctrl%Current(1)=0
         ENDDO
         CALL Forces(Ctrl)
+        CALL NForce(Ctrl)
      ENDDO
   CASE(GRAD_MD)
      CALL MondoHalt(USUP_ERROR,' Look for MD in version 1.0b2. ')
@@ -64,7 +64,6 @@ PROGRAM MondoSCF
      DO ISet=1,Ctrl%NSet-1
         Ctrl%Current(2)=ISet
         CALL OneSCF(Ctrl)
-        Ctrl%Current(1)=0
      ENDDO
 !    Optimize geometry only in last basis set
      Ctrl%Current=(/0,Ctrl%NSet,CGeo/)
@@ -76,7 +75,6 @@ PROGRAM MondoSCF
      DO ISet=1,Ctrl%NSet
         Ctrl%Current(2)=ISet
         CALL OneSCF(Ctrl)
-        Ctrl%Current(1)=0
      ENDDO
      IF(Ctrl%NGeom>1)THEN
 !       Go over additional geometries at last basis set

@@ -231,6 +231,168 @@ MODULE DrvFrcs
          ENDIF
          CALL CloseHDF()
       END FUNCTION KeepStep
+
+
+    SUBROUTINE NForce(Ctrl)
+      TYPE(SCFControls)                :: Ctrl
+      TYPE(CRDS)                       :: GM,GMOLD
+      TYPE(BCSR)                       :: S,P,F,T1,T2
+      INTEGER                          :: ICyc,IGeo,IBas
+      INTEGER                          :: AtA,IX,II,IA,A1,A2,IS
+      REAL(DOUBLE),DIMENSION(2)        :: ES,ET,EJ,EN,EX,EXC
+      TYPE(DBL_VECT)                   :: FS,FT,FJ,FC,FX,FXC,FTot
+      REAL(DOUBLE),PARAMETER           :: DDelta = 1.D-3
+!------------------------------------------------------------------
+!      
+      CALL SetGlobalCtrlIndecies(Ctrl)
+      CtrlVect=SetCtrlVect(Ctrl,'NumForceEvaluation')
+      CALL OpenHDF(InfFile)
+      CALL Get(GM   ,Tag_O=CurGeom)
+      CALL Get(GMOLD,Tag_O=CurGeom)
+      CALL CloseHDF()
+!     Load globals 
+      CALL OpenHDF(InfFile)
+      CALL Get(ModelChem,'ModelChemistry',Tag_O=CurBase)
+      CALL Get(MaxAtms,  'maxatms',   Tag_O=CurBase)
+      CALL Get(MaxBlks,  'maxblks',   Tag_O=CurBase)
+      CALL Get(MaxNon0,  'maxnon0',   Tag_O=CurBase)
+      CALL Get(NBasF,    'nbasf',     Tag_O=CurBase)
+      CALL New(BSiz,NAtoms)
+      CALL New(OffS,NAtoms)
+      CALL Get(BSiz,'atsiz',          Tag_O=CurBase)
+      CALL Get(OffS,'atoff',          Tag_O=CurBase)
+      MaxBlkSize=0
+      DO II=1,NAtoms; MaxBlkSize=MAX(MaxBlkSize,BSiz%I(II)); ENDDO
+      CALL CloseHDF()
+!
+      CALL New(S)
+      CALL New(F)
+      CALL New(P)
+      CALL New(T1)
+      CALL New(T2)
+      CALL New(FS,3*NAtoms)
+      CALL New(FT,3*NAtoms)
+      CALL New(FC,3*NAtoms)
+      CALL New(FX,3*NAtoms)
+      CALL New(FXC,3*NAtoms)
+      CALL New(FTot,3*NAtoms)
+!      
+!     Get Matices for computing orthogonalizaiton term
+      CALL Get(F,TrixFile('F',OffSet_O=0,Name_O=CtrlVect(1),Stats_O=Current))
+      Ctrl%Current(1)=Ctrl%Current(1)+1
+      CALL SetGlobalCtrlIndecies(Ctrl)
+      CtrlVect=SetCtrlVect(Ctrl,'NumForceEvaluation')
+      CALL Get(P,TrixFile('D',OffSet_O=0,Name_O=CtrlVect(1),Stats_O=Current))
+!
+      DO AtA=1,NAtoms
+         DO IX=1,3
+            DO II=1,2
+!              Change the Geometry
+               IF(II==1) THEN
+                  GM%Carts%D(IX,AtA) = GMOLD%Carts%D(IX,AtA)+DDelta
+               ELSEIF(II==2) THEN
+                  GM%Carts%D(IX,AtA) = GMOLD%Carts%D(IX,AtA)-DDelta
+               ENDIF
+               CALL OpenHDF(InfFile)
+               CALL Put(GM,Tag_O=CurGeom)
+               CALL CloseHDF()
+!              Remake the Matrices
+               CALL Invoke('MakeS'  ,   CtrlVect)
+               CALL Invoke('MakeT'  ,   CtrlVect)
+               CALL Invoke('MakeRho',   CtrlVect)
+               CALL Invoke('QCTC'   ,   CtrlVect)
+               IF(HasDFT(ModelChem)) &
+               CALL Invoke('HiCu'   ,   CtrlVect)       
+               IF(HasHF(ModelChem))  &
+               CALL Invoke('ONX'    ,   CtrlVect)       
+!              Calculate the Overlap Term
+               CALL Get(S,TrixFile('S',Name_O=CtrlVect(1),Stats_O=Ctrl%Current(1:3)))
+               CALL Multiply(P,F,T1)       
+               CALL Multiply(T1,P,T2)     
+               ES(II) = -Two*Trace(T2,S)
+!              Recalculate the Energies
+               CALL Invoke('SCFstats',  CtrlVect,MPIRun_O=.TRUE.)   
+!              Get +/- values
+               CALL OpenHDF(InfFile)
+               CALL Get(ET(II), 'KineticEnergy'     ,Tag_O=IntToChar(Ctrl%Current(1)))
+               CALL Get(EJ(II), 'E_ElectronicTotal' ,Tag_O=IntToChar(Ctrl%Current(1)))
+               CALL Get(EN(II), 'E_NuclearTotal'    ,Tag_O=IntToChar(Ctrl%Current(1)))
+               IF(HasHF(ModelChem))  &
+               CALL Get(EX(II), 'Ex'      ,Tag_O=IntToChar(Ctrl%Current(1)))
+               IF(HasDFT(ModelChem)) &
+               CALL Get(EXC(II),'Exc'     ,Tag_O=IntToChar(Ctrl%Current(1)))
+               CALL CloseHDF() 
+            ENDDO
+            IA=3*(AtA-1)+IX
+            FS%D(IA)=(ES(1)-ES(2))/(Two*DDelta)
+            FT%D(IA)=(ET(1)-ET(2))/(Two*DDelta)
+            FC%D(IA)=(EJ(1)-EJ(2))/(Two*DDelta)+(EN(1)-EN(2))/(Two*DDelta)
+            FX%D(IA)=(EX(1)-EX(2))/(Two*DDelta)
+            FXC%D(IA)=(EXC(1)-EXC(2))/(Two*DDelta)
+            FTot%D(IA)=FS%D(IA)+FT%D(IA)+FC%D(IA)+FX%D(IA)+FXC%D(IA)
+
+!      WRITE(*,*)' --------------------------------------------------'
+!      WRITE(*,*)' Atom = ',AtA,' Direction = ',IX
+!      WRITE(*,*)'SForce = ',FS%D(IA)
+!      WRITE(*,*)'TForce = ',FT%D(IA)
+!      WRITE(*,*)'JForce = ',FC%D(IA)
+!      WRITE(*,*)'XForce = ',FX%D(IA)
+!      WRITE(*,*)'XCForce= ',FXC%D(IA)
+!      WRITE(*,*) ' '
+!      WRITE(*,*)'Total Force = ',FTOT%D(IA)
+!      WRITE(*,*)' --------------------------------------------------'
+!
+!           Reset geometry
+            CALL OpenHDF(InfFile)
+            CALL Put(GMOLD,Tag_O=CurGeom)
+            CALL CloseHDF()
+         ENDDO
+      ENDDO
+!     Do some checksumming and IO 
+
+!      CALL PPrint(FS,'dS/dR',Unit_O=6)
+!      CALL PPrint(FT,'dT/dR',Unit_O=6)
+!      CALL PPrint(FC,'dJ/dR',Unit_O=6)
+!      IF(HasHF(ModelChem))  &
+!      CALL PPrint(FX,'dHF/dR',Unit_O=6)
+!      IF(HasDFT(ModelChem))  &
+!      CALL PPrint(FXC,'dXC/dR',Unit_O=6)
+!
+      CALL PPrint(FS,'dS/dR')
+      CALL PPrint(FT,'dT/dR')
+      CALL PPrint(FC,'dJ/dR')
+      IF(HasHF(ModelChem))  &
+      CALL PPrint(FX,'dHF/dR')
+      IF(HasDFT(ModelChem))  &
+      CALL PPrint(FXC,'dXC/dR')
+      CALL PPrint(FTot,'dSCF/dR')
+!   
+      CALL PChkSum(FS,'dS/dR',Proc_O='NForce')
+      CALL PChkSum(FT,'dT/dR',Proc_O='NForce')
+      CALL PChkSum(FC,'dJ/dR',Proc_O='NForce')
+      IF(HasHF(ModelChem))  &
+      CALL PChkSum(FX,'dHF/dR',Proc_O='NForce')
+      IF(HasDFT(ModelChem))  &
+      CALL PChkSum(FXC,'dXC/dR',Proc_O='NForce')
+      CALL PChkSum(FTot,'dSCF/dR',Proc_O='NForce')
+
+      CALL Delete(GM)
+      CALL Delete(GMOLD)
+      CALL Delete(BSiz)
+      CALL Delete(OffS)
+      CALL Delete(S)
+      CALL Delete(F)
+      CALL Delete(P)
+      CALL Delete(T1)
+      CALL Delete(T2)
+      CALL Delete(FS)
+      CALL Delete(FT)
+      CALL Delete(FC)
+      CALL Delete(FX)
+      CALL Delete(FXC)
+      CALL Delete(FTot)
+!
+    END SUBROUTINE NForce
 !
 #ifdef DEVELOPMENT
 

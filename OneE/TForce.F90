@@ -86,6 +86,7 @@ PROGRAM TForce
   ENDDO
 !--------------------------------------------------------------------------------
 ! Do some checksumming, resumming and IO 
+  CALL PPrint(TFrc,'dT/dR')
   CALL PChkSum(TFrc,'dT/dR',Proc_O=Prog)  
 ! Sum in contribution to total force
   CALL New(Frc,3*NAtoms)

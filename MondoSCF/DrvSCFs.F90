@@ -24,8 +24,7 @@ MODULE DrvSCFs
         ELSE
            Summry=.TRUE.
         ENDIF
-        ISCF=Ctrl%Current(1)       
-        DO ICyc=ISCF,MaxSCFs
+        DO ICyc=0,MaxSCFs
            Ctrl%Current(1)=ICyc
            CALL SetGlobalCtrlIndecies(Ctrl)
            IF(ICyc==0)CALL OneEMats(Ctrl)

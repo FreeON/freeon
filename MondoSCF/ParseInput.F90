@@ -543,6 +543,7 @@ MODULE ParseInput
 !     
          IF(OptKeyQ(Inp,GRADIENTS,FORCE))THEN
             Ctrl%Grad=GRAD_ONE_FORCE
+            Ctrl%NGeom=1
          ELSEIF(OptKeyQ(Inp,DYNAMICS,MD_VERLET))THEN
             Ctrl%Grad=GRAD_MD
             Ctrl%MDC%MD_Algor=1

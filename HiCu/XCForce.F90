@@ -97,6 +97,7 @@ PROGRAM XCForce
   ENDDO
 !--------------------------------------------------------------------------------
 ! Do some checksumming, resumming and IO 
+  CALL PPrint(XCFrc,'dXC/dR')
   CALL PChkSum(XCFrc,'dXC/dR',Proc_O=Prog)  
 ! Sum in contribution to total force
   CALL New(Frc,3*NAtoms)
