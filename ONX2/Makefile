@@ -54,7 +54,7 @@ ONX2:	$(Objects)
 #
 GONX2:	$(GObjects)
 	$(LD) $(LDFLAGS) GONX2 $(GObjects) $(Libs)
-	mv GONX2 $(MONDO_EXEC)/GONX2
+	mv GONX2 $(MONDO_EXEC)/GONX
 #
 release:purge $(ReleaseFiles)
 	rm -f HRR.tar

@@ -9,6 +9,7 @@ PROGRAM GONX2
   USE Parse
   USE Macros
   USE LinAlg
+  USE Functionals
   !
 
 
@@ -34,6 +35,7 @@ PROGRAM GONX2
 !--------------------------------------------------------------------------------
   TYPE(DBL_RNK2)                 :: GradX,GradAux
   TYPE(DBL_VECT)                 :: GTmp
+  REAL(DOUBLE)                   :: KScale
 !--------------------------------------------------------------------------------
 ! Misc. variables and parameters...
 !--------------------------------------------------------------------------------
@@ -258,19 +260,20 @@ PROGRAM GONX2
   CALL PChkSum(GTmp,'dKx/dR['//TRIM(CurGeom)//']',Proc_O=Prog)  
   CALL Delete(GTmp)
   !
-  CALL DAXPY(3*NAtoms,1.0d0,GradX%D(1,1),1,GradAux%D(1,1),1)
+  KScale=ExactXScale(ModelChem)
+  CALL DAXPY(3*NAtoms,KScale,GradX%D(1,1),1,GradAux%D(1,1),1)
   CALL Put(GradAux,'gradients',Tag_O=CurGeom)
 
-  write(*,*) 'Grad Kx'
-  do i=1,natoms
-     write(*,100) i,GradX%D(:,i)
-  enddo
-
-  write(*,*) 'Grad Tot'
-  do i=1,natoms
-     write(*,100) i,GradAux%D(:,i)
-  enddo
-  100 format(I4,2X,3E24.16)
+!  write(*,*) 'Grad Kx'
+!  do i=1,natoms
+!     write(*,100) i,GradX%D(:,i)
+!  enddo
+!
+!  write(*,*) 'Grad Tot'
+!  do i=1,natoms
+!     write(*,100) i,GradAux%D(:,i)
+!  enddo
+!  100 format(I4,2X,3E24.16)
 
   CALL Delete(GradAux)
   !
