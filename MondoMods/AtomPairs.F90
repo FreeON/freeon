@@ -148,8 +148,7 @@ CONTAINS
 !
     VecA(1) = VecF(1)*GM%BoxShape%D(1,1)
     VecA(2) = VecF(1)*GM%BoxShape%D(1,2)+VecF(2)*GM%BoxShape%D(2,2)
-    VecA(3) = VecF(1)*GM%BoxShape%D(1,3)+VecF(2)*GM%BoxShape%D(2,3) &
-         + VecF(3)*GM%BoxShape%D(3,3)
+    VecA(3) = VecF(1)*GM%BoxShape%D(1,3)+VecF(2)*GM%BoxShape%D(2,3) + VecF(3)*GM%BoxShape%D(3,3)
 !
   END FUNCTION FracToAtom
 !-----------------------------------------------------------------------------
