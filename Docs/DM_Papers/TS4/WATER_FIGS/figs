@@ -14,7 +14,8 @@ plot	'ConvergedEnergies.dat'  using 1:2 title "ES" with linespoints,\
 set output "WaterTimings.eps"
 set size square 1.2, 1.6
 set xlabel "Water Molecules, N_{H_2O}"
-set ylabel "CPU Seconds per SCF cycle" -.5,0
+set ylabel "CPU Seconds per SCF Cycle" -.5,0
+set key left 
 set xrange [10:150]
 set yrange [0:1600]
 plot	'ConvergedEnergies.dat'  using 1:5 title "ES" with linespoints,\
@@ -47,7 +48,7 @@ set xrange [1:30]
 #set key 36, 0.1 box
 set key below Left samplen 2 spacing 1.0 width -4 
 set size square 1.1, 1.6 
-set xlabel "Purification cycle, N_{pur}" 0,.25 
+set xlabel "Purification Cycle, N_{pur}" 0,.25 
 set ylabel "Commutator Error" 1,0
 plot	'TS4/CommErr_0.10D-02.dat'  using 1:6 title "TRS4(10^{-3})" with linespoints,\
 	'TS4/CommErr_0.10D-03.dat'  using 1:6 title "TRS4(10^{-4})" with linespoints,\

@@ -8,7 +8,7 @@ set pointsize 1.5
 set multiplot
 set size 1.0,1.0
 set xlabel "Matrix threshold {/Symbol=20 t}"
-set ylabel "Si_{95}TiO_{192} RPB0/STO-3G total energy" 
+set ylabel "Si_{95}TiO_{192} RPB0/STO-3G Total Energy" 
 set logscale x
 #set yrange [-2278.2:-2275.9]
 set xrange [0.02:0.0002]
@@ -21,7 +21,7 @@ set origin 0.38,0.28
 set logscale x
 set logscale y
 #set yrange [0.000001:0.1]
-set xrange [0.7:0.000008]
-plot	'XeErrors.dat'  using 1:(-(-42253.20159406-$2)) title "PM" with points,\
-	'XeErrors.dat'  using 1:(-(-42253.20159406-$3)) title "TRS4" with points,\
-	'XeErrors.dat'  using 1:(10**(6.5)*$1**2) title "{/Symbol=20 t}^2*10^{xx}" with lines
+set xrange [0.002:0.000008]
+plot	'XeErrors.dat'  using 1:(-(-42253.1990-$2)) title "PM" with points,\
+	'XeErrors.dat'  using 1:(-(-42253.1990-$3)) title "TRS4" with points,\
+	'XeErrors.dat'  using 1:(10**(7)*$1**2) title "{/Symbol=20 t}^2*10^{7}" with lines
