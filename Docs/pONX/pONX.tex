@@ -1,0 +1,777 @@
+%
+%   This file is part of the APS files in the REVTeX 4 distribution.
+%   Version 4.0 of REVTeX, August 2001
+%
+%   Copyright (c) 2001 The American Physical Society.
+%
+%   See the REVTeX 4 README file for restrictions and more information.
+%
+% TeX'ing this file requires that you have AMS-LaTeX 2.0 installed
+% as well as the rest of the prerequisites for REVTeX 4.0
+%
+% See the REVTeX 4 README file
+% It also requires running BibTeX. The commands are as follows:
+%
+%  1)  latex apssamp.tex
+%  2)  bibtex apssamp
+%  3)  latex apssamp.tex
+%  4)  latex apssamp.tex
+%
+%\documentclass[prb,aps,nobibnotes,twocolumn,doublespace,twocolumngrid,superbib]{revtex4}
+%%\documentclass[twocolumn,showpacs,preprintnumbers,amsmath,amssymb]{revtex4}
+%\documentclass[preprint,showpacs,preprintnumbers,amsmath,amssymb]{revtex4}
+
+% Some other (several out of many) possibilities
+%\documentclass[preprint,aps]{revtex4}
+%\documentclass[preprint,aps,draft]{revtex4}
+%\documentclass[prb]{revtex4}% Physical Review B
+
+%%\usepackage{amsmath}
+%%\usepackage{amssymb}
+%%\usepackage{graphicx}% Include figure files
+%%\usepackage{dcolumn}% Align table columns on decimal point
+%%\usepackage{bm}% bold math
+
+%\documentclass[pre,aps,twocolumn,showpacs,twocolumngrid,superbib]{revtex4}
+%\documentclass[prl,aps,twocolumn,showkeys,twocolumngrid,superbib]{revtex4}
+\documentclass[twocolumn,showkeys,showpacs,preprintnumbers,amsmath,amssymb]{revtex4}
+
+
+\usepackage{graphicx}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{bm}
+\usepackage{alltt}
+\usepackage{fancyhdr}
+\usepackage{dcolumn} 
+
+\pagestyle{fancy}
+
+
+\def\Tr{{\rm Tr}}
+%\nofiles
+
+\begin{document}
+
+%\preprint{APS/123-QED}
+
+\title{Parallel Algorithm for the Computation of the Hartree-Fock
+       Exchange Matrix: \\ Gas phase and Periodic Parallel ONX}
+
+\author{Val\'ery Weber}
+\email{valery.weber@unifr.ch}
+\affiliation{Department of Chemistry, University of Fribourg, 1700 Fribourg, Switzerland.}%
+\author{Matt Challacombe}%
+\affiliation{Los Alamos National Laboratory, Theoretical Division, Los Alamos 87545, New Mexico, USA.}%
+
+\date{\today}% It is always \today, today,
+             %  but any date may be explicitly specified
+
+\begin{abstract}
+% Recently linear scaling has been the subject of an intense research,
+% but less attention has been made to massive parallelisation of such
+% algorithms. 
+ In this paper we present an efficient parallelization
+ of the ONX algorithm for linear computation of 
+ the Hartree-Fock exchange matrix [J. Chem. Phys. 106, 9708 (1997)]. The method
+ used is based on the equal time (ET) partitioning recently
+ introduced [J. Chem. Phys. 118, 9128 (2003) and J. Chem. Phys. 121, 6608 (2004)]. 
+ ET exploits the slow variation of the density matrix between self-consistent-field iterations
+ to achieve load balance.
+ The method is presented and some benchmark 
+ calculations are discussed for gas phase and periodic systems
+ with up to 128 processors.
+% Efficiency of the equal time partition is illustrated by several tests 
+% involving both finite and periodic systems.
+ The current parallel ONX code is able to deliver up to 77\% overall
+ efficiency for a cluster of 50-water molecules on 128 processors 
+ (2.56 processors per heavy atom) and up to 87\% for a box of 64 
+ water molecules (2 processors per heavy atom) with periodic boundary condition.
+ 
+\end{abstract}
+
+%\pacs{Valid PACS appear here}% PACS, the Physics and Astronomy
+                             % Classification Scheme.
+\keywords{Hartree-Fock Exchange matrix, Massive parallel computation, 
+          Linear scaling, Distributed Fock matrix.}
+                              %display desired
+\maketitle
+
+\section{Introduction}
+
+ Density functional theory (DFT) and its variants, 
+ the hybrid Hartree-Fock/Density Functional Theory (HF/DFT) are accurate and
+ computationally attractive. These model chemistries are routinely used
+ by conventional Gaussian-orbital quantum chemistry codes to excellent
+ advantage.
+
+ During the past decade parallel algorithms for the 
+ formation of the Fock matrix have been developed
+ ~\cite{MColvin93,TFurlani95,RHarrison96,HTakashima02}.
+ Achieving a load balance with a low communication overhead
+ is a fundamental task in parallel computing.
+ To achieve load balancing, these algorithms use complicate
+ schemes for the distribution of the density and/or Fock 
+ matrices. They also use intensive inter-processor 
+ communications. 
+ The most consuming part of an SCF cycle remains the formation
+ of the Fock matrix, even with the apparition of fast linear
+ scaling algorithms. 
+ With the advent in the development of $\mathcal{O}(N)$ methods
+ that overcome the bottlenecks encountered in conventional methods,
+ including computation of the Hartree-Fock exchange 
+ matrix~\cite{ESchwegler96,ESchwegler97,ESchwegler98A,ESchwegler99,ESchwegler00,CTymczak04b},
+ the Coulomb 
+ matrix~\cite{CWhite94B,CWhite96A,MChallacombe96,MChallacombe96B,MStrain96,
+              JPerezjorda97,MChallacombe97,CTymczak04a}, 
+ the exchange-correlation 
+ matrix~\cite{CTymczak04a,Jorda95,RStratmann96,CGuerra98,MChallacombe00A}
+ and iterative alternatives to eigensolution of the SCF 
+ equations~\cite{XLi93,MDaw93,ADaniels97,APalser98,MChallacombe99,ANiklasson02A,ANiklasson03}.
+ It is well known that linear scaling 
+ methods become more advantageous than conventional  
+ algorithms only if the system size is bigger than
+ few hundred atoms. This disadvantageous property of the linear
+ scaling, for small systems, can be overcame by the
+ parallelization of such algorithms. 
+ Parallel Fock build are available in most quantum
+ chemistry programs such as GAMESS~\cite{GAMESS},
+ Jaguar~\cite{DChasman98} and many others. 
+ The upper limit of a single processor
+ is now reached, and massively parallel and distributed
+ architectures such as workstation clusters will be 
+ more and more used in the near future for large-scale 
+ molecular calculations.
+
+ Computational methods aimed at being used in studies of 
+ chemically interesting systems or biologically relevant molecules
+ or most importantly, fractions of chemical reactions, are
+ computationally expensive. Fortunately, the computer 
+ industry has matured to a point where there is a basic parallel
+ programming model that is very widely supported: the message 
+ passing model and its main incarnation MPI~\cite{MPI}. This library
+ allows parallel programs to become portable and they may
+ also be efficiently run on many different types of platforms, 
+ including PC clusters.
+ In computational quantum chemistry, PVM~\cite{PVM}, MPI~\cite{MPI} and the 
+ global array tools~\cite{JNieplocha94,JNieplocha96} are 
+ the most widely used communication tools.
+ 
+
+
+ Three of the most computationally demanding parts in a 
+ hybrid density functional application are calculations
+ of the exchange-correlation, Coulomb and exact exchange 
+ matrices. The ${\cal O}(N)$ exchange-correlation and Coulomb matrices
+ have been efficiently parallelized through the concept of equal time
+ partition~\cite{CGan03,CGan04B}.
+ In this work we present an efficient and simple implementation 
+ of the Order N eXchange (ONX) algorithm for massive parallel computer. The method
+ is based on the equal time partitioning (ET) and is used for periodic systems 
+ as well without increasing the complexity of the code.
+
+
+ It should be pointed out that parallel $\mathcal{O}(N)$ computation
+ of the exact exchange matrix with ONX is highly irregular relative 
+ to parallel $\mathcal{O}(N^4)$ computation of the electron repulsion integrals (ERIs), 
+ the latter enables the master-slave approach to work well~\cite{RHarrison96}.
+
+ The paper is organized as follow: in the Section~\ref{Sec:Algo} the method
+ will be outlined.
+ In Section~\ref{Sec:Impl} we describe a computational implementation 
+ of parallel ONX. In Section~\ref{Sec:Disc} we discuss benchmark calculations of 
+ water clusters, endothelin and cells composed of 64 
+ H$_2$O molecules and 32 KCNS with periodic boundary conditions (PBC).    
+ In Section~\ref{Sec:Conc} we present our conclusions.
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Parallelization of the ONX algorithm}\label{Sec:Algo}
+The ONX algorithm for ${\cal O}(N)$ calculation of the exact exchange matrix
+has been fully described for gas phase as well as for periodic systems
+in Ref.~\cite{ESchwegler96,ESchwegler97,ESchwegler98A,ESchwegler99,ESchwegler00,CTymczak04b}.
+The exchange matrix element is given by
+\begin{equation}\label{Eq:Kab}
+  K_{ab}(D)=-\frac{1}{2}\sum_{\substack{\mathbf{m}\mathbf{n}\\c d}}
+                      D_{cd}(ac^\mathbf{m}|bd^\mathbf{n})_{\rm mic},
+\end{equation}
+where the indices $c$ and $d$ run over basis functions, ${\bf m}$ 
+and ${\bf n}$ over the Bravais lattice vectors and $D_{cd}$ 
+is an element of the density matrix.
+The evaluation of the two electron integrals $(ac^\mathbf{m}|bd^\mathbf{n})_{\rm mic}$
+is described elsewhere~\cite{CTymczak04b}.
+In case of gas phase calculations, the summations over 
+${\bf m}$ and ${\bf n}$ are just removed from Eq.~(\ref{Eq:Kab}).
+
+Our algorithm uses a completely distributed Exchange matrix
+build. The density matrix, initially stored on the root
+processor, is partitioned following the scheme
+proposed in the Section~\ref{Sec:Impl}. Then each sub-blocks are sent
+to their respective processors. The manipulations of the density 
+and exchange matrices are easily
+carried out with the FastMat data structure~\cite{CGan04B}.
+
+The original ONX algorithm has been slightly restructured 
+to include PBC~\cite{CTymczak04b} and to improve parallel efficiency.
+In the first step, the two distribution lists $\{ac^\mathbf{m}\}$ and
+$\{bd^\mathbf{n}\}$ are built, where $c$ and $d$ run over the rows and the
+columns of $D(p)$, respectively. The procedure for structuring the list of distributions
+for the $\{ac^\mathbf{m}\}$ pair is outlined in Fig.~\ref{Fig:List}.
+This list build mostly differs from the original version by the presence
+of the innermost loop over lattice vector $\mathbf{m}$. For
+each basis function $c$, the list $\{ac^\mathbf{m}\}$ is created and the 
+two indices $a$ and $\mathbf{m}$ are ordered by decreasing value 
+of the integral estimate $|(ac^\mathbf{m}|ac^\mathbf{m})_{\rm mic}|^{1/2}$.
+
+\begin{figure}[htbp]
+  \centering
+  \caption{\protect
+    Parallel ordering of significant distributions.
+  }\label{Fig:List}
+  \begin{equation*}
+    \begin{split}
+      &\tt          DO\,AtC\in COL(D(p))\\
+      &\tt\quad       DO\,AtA=1,NAtoms\\
+      &\tt\qquad        DO\,iCell=1,NCell\\
+      &\tt\qquad\quad     COMPUTE\,|(ac^m|ac^m)_{mic}|^{1/2}\\
+      &\tt\qquad\quad     IF(|(ac^m|ac^m)_{mic}|^{1/2}<{\tt Thresh)\,CYCLE}\\
+      &\tt\qquad\quad     ADD\,ac^m\,{\tt to}\, \{ac^m\}\\
+      &\tt\qquad        ENDDO\\
+      &\tt\quad       ENDDO\\
+      &\tt\quad       SORT\,\{ac^m\}\,by\,decreasing\,|(ac^m|ac^m)_{mic}|^{1/2}\\
+      &\tt         ENDDO
+    \end{split}
+  \end{equation*}
+\end{figure}
+
+
+In the second step, parallel ONX $K$ builds begun with the outer loops over
+the rows and columns of the local density matrix $D(p)$, 
+as shown in Fig.~\ref{Fig:ONXcore}. Next, a two-fold loop over
+the distribution lists of $\{ac^\mathbf{m}\}$ and $\{bd^\mathbf{n}\}$
+is begun in which ERIs are computed. The contraction of 
+the ERIs with the density matrix is made after the loops over the lists with the help of a powerful
+Level-2 BLAS matrix-vector multiplication subroutine (DGEMV).
+
+\begin{figure}[htbp]
+  \centering
+  \caption{\protect
+    The parallel ONX loops. 
+  }\label{Fig:ONXcore}
+  \begin{equation*}
+    \begin{split}
+%      &\tt        Send\,D(p) \\
+      &\tt        DO\,AtC\in COL(D(p)) \\
+      &\tt\quad     DO\,AtD\in ROW(D(p),AtC) \\
+      &\tt\qquad      ti=TIMER(\,) \\
+      &\tt\qquad      DO\,a,m\in\{ac^m\} \\
+      &\tt\qquad\quad   IF(SkipOut)\,EXIT  \\
+      &\tt\qquad\quad   DO\,b,n\in\{bd^n\} \\
+      &\tt\qquad\qquad    IF(SkipOut)\,EXIT  \\
+      &\tt\qquad\qquad    COMPUTE\,(ac^m|bd^n)_{mic} \\
+      &\tt\qquad\quad   ENDDO \\
+      &\tt\qquad      ENDDO \\
+      &\tt\qquad      Digest\,D\,and\,ERIs \\
+      &\tt\qquad      tf=TIMER(\,) \\
+      &\tt\qquad      Time(AtC,AtD)=tf-ti \\
+      &\tt\quad     ENDDO \\
+      &\tt         ENDDO \\
+      &\tt         Send\,Time\,to\,ROOT \\
+      &\tt         Global\,summation\,of\,K 
+    \end{split}
+  \end{equation*}
+\end{figure}
+
+ At this moment every processors, including the root, compute 
+ the lower part of the exchange sub-matrix $K(D(p))$ 
+ without any inter-processor communications. 
+ The work of each atom-block
+ $D_{ij}$ used to compute the exchange 
+ sub-matrix $K(D_{ij})$ are timed.
+ At the end of the parallel exchange build, each sub-matrices containing 
+ the timing information are send to the root processor.
+ Thus the new timing matrix will be used to partition the density 
+ matrix for the next SCF iteration.
+ The distributed exchange sub-matrices are sent to the root processor and globally 
+ summed through a binary tree based communication.
+ The strategy currently used in MondoSCF to store all the matrices on 
+ the root processor will be replace in a near future
+ by a completely distributed scheme.
+ 
+ However, to avoid excessive inter processor communications the algorithm 
+ does not use any symmetry of the ERIs. This approach
+ definitely increase the number of ERIs to compute at each Fock build,
+ but in the same time greatly simplifies the coding and avoids complicate
+ synchronization problem between processors to send/receive blocks of the 
+ density and exchange matrices. It becomes much 
+ easier to control the amount of work given to each processor.
+ At the present moment, the ERIs are evaluated accordingly to
+ the vertical recurrence relation (VRR) introduced by Obara 
+ and Saika~\cite{SObara86} and the modifications proposed by Head-Gordon
+ and Pople~\cite{MGordon88}.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Partition}
+ In this section we present the block partition used
+ throughout this work~\cite{APinar97,LRomero95}. 
+ To estimate the time needed to process each block we define
+ a non-negative cost function $\phi$ on contiguous atomic-block of
+ $D$. In our case the function $\phi$ is either the number of 
+ non-zero elements of $D$ or the time needed for the computation
+ of the exchange matrix block $K(D_{ij})$ where $D_{ij}$ is the
+ $ij$-th atomic block of the density matrix. In the following, 
+ we will not discuss more into detail the non-zero partitioning.
+ Indeed this partition leads to a very poor load balance and it is
+ only used to generate the first partition (i.e. when 
+ the timing function is not available). 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{1D Partition}
+ The first objective is to divide a 1D array task $T$ of length $M$
+ into $p=\lceil\sqrt{P}\rceil$ consecutive intervals $[r_i,r_{i+1}]$ such
+ that the $T_i$'s for
+ each block $1 \le i < p$ are equal up to a certain error
+ $\varepsilon$. In rowwise stripping the $T_i$ element is equal
+ to the sum of the cost function along the $i$-th row 
+ $T_i=\sum_j\phi_{ij}$. 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{2D Partition}
+% The matrix is first partitioned row wise into 
+% $p=\lfloor\sqrt{P}\rfloor$
+% consecutive intervals $[r_i,r_{i+1}]$, $1 \le i < p$
+% following the line as for the 1D partitioning.
+ Then each rows are partitioned columnwise in a similar way,
+ $[c_j,c_{j+1}]$, $1 \le j < q_i$ where $q_i$ is given
+ by 
+\begin{equation}
+  q_i = \left\{ \begin{array}{ll}
+    [\sqrt{P}]                    & \textrm{if $i=1$}\\
+    \lfloor(P-Q_i)/(p+1-i)\rfloor & \textrm{if $i\bmod2=0$ and $i>1$}\\
+    \lceil (P-Q_i)/(p+1-i)\rceil  & \textrm{if $i\bmod2\ne0$ and $i>1$,}
+    \end{array} \right.
+\end{equation}
+ in which $Q_i=\sum_{k=1}^{i-1}q_k$, $1 \le i < p$, $[\bullet]$ 
+ is the nearest integer function, $\lfloor\bullet\rfloor$ and $\lceil\bullet\rceil$
+ are the floor and ceiling functions respectively.
+% $q_1=|\sqrt{P}|$, $q_j=\lfloor(P-\sum_{k=1}^jq_k)/$
+% The weight function is easily obtained through $w_i=q_i p/P$.
+ 
+ Of course different approaches to partition the density matrix can be 
+ used as for example the recursive bipartitoning algorithm with
+ alternative directions by Vastenhouw and Bisseling~\cite{BVastenhouw}.
+
+\subsection{Global summation of the exchange matrices}
+ At the end of the exchange build, all processors obtain their own local
+ exchange matrices, which are stored in a FastMat~\cite{CGan04B} data
+ structure. In the FastMat data structure, all rows of the matrix 
+ are connected by a linear linked list, while each row is represented
+ by a binary search tree. This data structure has a low overhead for random
+ accesses, insertions and updates of matrix sub-blocks.
+ The global summation of the local exchange matrices to the master node is
+ an important task. To achieve good performance, a binary tree-based 
+ reduction paradigm is used~\cite{GFox88,RGeijn91}. It requires 
+ only $P-1$ communications to globally
+ sum the distributed exchange matrices to the root processor.
+ In a first step, the FastMat data structure is packed into a 
+ block compressed sparse row (BCSR) matrix
+ prior to the communications. In a second step,
+ each even node gets the incomplete BCSR matrix from the 
+ uneven node on the right and adds these two BCSR matrices together. 
+ In the next step the uneven nodes are left out and the process 
+ is repeated for the remaining nodes. This continues until the total 
+ matrix is on the root processor. 
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Implementation}\label{Sec:Impl}
+ 
+ All developments were implemented in the MondoSCF~\cite{MondoSCF} suite of
+ programs for linear scaling electronic structure theory and 
+ {\it ab initio} molecular dynamics. 
+ The code was compiled using the Portland Group F90 
+ compiler {\tt pgf90} v5.1~\cite{pgf90} with the {\tt -O1} options 
+ and with the GNU C compiler {\tt gcc} v3.2.2 using the {\tt -O1} flag
+ or with the HP fortran compiler {\tt f95} v5.5A~\cite{f95v5.5a} 
+ and the {\tt -O1} option and the Compaq C++ compiler {\tt cxx} 
+ v6.5~\cite{cxxv6.5} and the {\tt -O1} flag.
+ Timings are performed using the {\tt MPI\_WTIME} function. 
+ In some MPI distributions the internal {\tt MPI\_WTIME} 
+ routine may be very slow (e.g. globally synchronized), 
+ in this case we use the routine {\tt IPM\_timer\_get\_time} contained in 
+ the IPM timing routine library~\cite{IPM}.
+ The calculations are performed at the {\tt GOOD} or {\tt TIGHT} 
+ level accuracies~\cite{CTymczak04b}.
+ % with the 6-31G, 6-31G** and 
+ % the 6-31G*/5-11G*~\cite{CrystalLib} basis sets
+
+ The Timing for the ONX speedup is taken at the fourth SCF cycle
+ and includes loading and distributing the density matrix to all 
+ processors, building the distribution lists, calculation of $K$,
+ ET partition for the next SCF iteration, global summation of $K$
+ and the final I/O.
+
+
+\section{Results and Discussions}\label{Sec:Disc}
+
+ All calculations were carried out on a 1024-node (2048 processors) 
+ dual P4 LinuxBIOS/BProc cluster connected with Myrinet 2000 running
+ Red-Hat Linux release 9 (Shrike)~\cite{RedHat90} and a cluster of 256 
+ 4 CPU HP/Compaq Alpha-sever ES45s with the Quadrics QsNet Hight Speed Interconnect. 
+
+ For purpose of performing the scaling tests, we start the calculation 
+ with the STO-3G basis set and the {\tt GOOD} accuracy, switch to
+ the final basis set and accuracy ({\tt GOOD} or {\tt TIGHT}) using a mixed 
+ integral approach. 
+
+ We have performed Hartree-Fock parallel calculation on 
+ water clusters containing 50 and 110 molecules with 
+ the 6-31G and 6-31G** basis sets and on endothelin at the RHF/6-31G** level as well.
+ For the periodic system, we have chosen a box of 64 water molecules
+ at the 6-31G, 6-31G** and 6-31G*(O)/5-11G*(H) basis sets
+ and a cell of 32 KCNS in the $P_{bcm}$ point group as a representative 
+ test case. The basis sets for the KCNS calculations were obtained from 
+ Ref.~\cite{CrystalLib}.
+ These systems are chosen because
+ they are inhomogeneous and three-dimensional, thus posing a challenge
+ to parallel ONX.
+
+ The number of processors typically varies between 2 to 128. 
+ It is worth to mention that our partitioning scheme can be 
+ applied to any number of processors, not only power of two 
+ as long as the number of processors remains smaller or equal 
+ to the number of atom-blocks in the density matrix.
+
+\subsection{Water cluster}
+
+ The speedup obtained for the (H$_2$O)$_{50}$ 
+ and (H$_2$O)$_{110}$ clusters 
+ with different basis sets are shown in Fig.~\ref{fig:h2o_50_110}. 
+ The current partitioning scheme
+ gives an efficiency, for the 50 water molecule cluster 
+ (where the number of processors per heavy atom is $2.56$), 
+ of $72\%$ and $77\%$ with $128$ processors which 
+ corresponds to a speedup of about $93$ and $98$ for 
+ the 6-31G and 6-31G** basis sets respectively.  
+ At the same number of processors (128), the 110 water molecules gives 
+ $67\%$ and $83\%$ of efficiencies and speedups of $86$ and $106$ respectively.
+ Figure~\ref{fig:h2o_50_prop} shows the evolution of the relative speedup for
+ the exchange matrix build of
+ the (H$_2$O)$_{50}$ cluster along the SCF iterations for 
+ the 64 and 128 processors and the RHF/6-31G** level of theory. 
+ The low speedup gained from the use of the ET partitioning  
+ reflects a large change in the density matrix during the two first 
+ iterations. However, the relative speedup increases very 
+ rapidly and already at the third iteration (No. 2) reaches a stable value.
+ This relative speedup is preserved throughout the remaining SCF iterations.
+ Thus the performance of the ET is quite insensitive to the SCF cycle, prior to
+ a stabilization time.
+
+
+\begin{figure}[p]
+  \centering
+  \caption{\protect
+    Scaling of the parallel ONX on (H$_2$O)$_{50}$ 
+    and (H$_2$O)$_{110}$ with the 6-31G and 6-31G**
+    basis functions and the {\tt TIGHT} threshold.
+    Speedups are relative to 2 processors.
+  }\label{fig:h2o_50_110}
+  \begin{center}
+    \includegraphics[angle=-90,width=0.5\textwidth]{h2o_50_110}
+  \end{center}
+\end{figure}
+
+\begin{figure}[p]
+  \centering
+  \caption{\protect
+    Relative speedup of the parallel ONX on (H$_2$O)$_{50}$ with the RHF/6-31G**
+    along the SCF iterations.
+    Speedups are relative to 2 processors.
+  }\label{fig:h2o_50_prop}
+  \begin{center}
+    \includegraphics[angle=-90,width=0.5\textwidth]{h2o_50_prop}
+  \end{center}
+\end{figure}
+
+
+\subsection{Water box with PBC}
+ For the periodic systems, the result of the 64-water molecules is shown
+ in Fig.~\ref{fig:h2o_pbc_64}. The calculations are performed at the
+ RHF with a 6-31G*(O)/5-11G*(H), 6-31G and 6-31G** basis sets and the {\tt GOOD} accuracy. 
+ An efficiency of $87\%$ is observed with 128 processors, which corresponds to
+ a speedup of about $112$. Efficiencies are $75\%$ and $79\%$ for the 6-31G and 6-31G** 
+ basis sets respectively at the 128-level. The overall parallel ONX is very
+ good up to 64 processors but degrades slightly at the 128-processor level.
+
+ These performances are better compared to the (H$_2$O)$_{50}$ cluster. The 
+ improved speedup is due to the longer time spent in the
+ exchange build for the periodic cases compared 
+ to the finite cases. As the computation time spends in the innermost loop 
+ increase, due to the double summations over lattice vectors,
+ the timing function give a more accurate elapsed time for each 
+ atom-block of the density matrix.\\
+
+\begin{figure}[p]
+  \centering
+  \caption{\protect
+    Scaling of the parallel ONX on (H$_2$O)$_{64}$ PBC with the RHF/6-31G*/5-11G*,
+    the RHF/6-31G** and RHF/6-31G level of theories and the {\tt GOOD} threshold. 
+    The speedups are relative to 2 processors.
+  }\label{fig:h2o_pbc_64}
+  \begin{center}
+    \includegraphics[angle=-90,width=0.5\textwidth]{h2o_pbc_64}
+  \end{center}
+\end{figure}
+
+
+
+\subsection{Endothelin and periodic KCNS}
+Finally, we present, in Fig.~\ref{fig:Endothelin_KCNS}, speedup obtained for 
+endothelin (C$_{82}$H$_{122}$O$_{26}$N$_{20}$S$_5$) and
+for a orthorhombic supercell composed of 32 KCNS ($P_{bcm}$)
+at the RHF/6-31G** and RHF/86-511G(K)/86-311G(S)/6-311G(C,N) 
+level of theories, respectively.
+These scaling have been carried out with the {\tt GOOD} accuracy level 
+and on a Compaq machine.
+At the 128-processor level, the endothelin (133 heavy atoms) delivers 99 fold
+speedup, while the $2\times 2\times 2$ KCNS (128 atoms per simulation supercell)
+delivers 95 fold speedup. 
+
+
+\begin{figure}[p]
+  \centering
+  \caption{\protect
+    Scaling of the parallel ONX on Endothelin and periodic (KCNS)$_32$ with 
+    the RHF/6-31G** and RHF/86-511G(K)/86-311G(S)/6-311G(C,N) respectively.
+    The speedups are relative to 2 processors.
+  }\label{fig:Endothelin_KCNS}
+  \begin{center}
+    \includegraphics[angle=-90,width=0.5\textwidth]{Endothelin_KCNS}
+  \end{center}
+\end{figure}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Conclusion}\label{Sec:Conc}
+
+ We have presented a simple and efficient algorithm for 
+ the parallelization of the calculation of the exact Hartree-Fock
+ exchange. The method is based on the dynamical distribution 
+ of the density matrix to the processors. At each SCF cycle the
+ time needed to build the local exchange matrix corresponding
+ to the local density matrix on a given processor is used to
+ distribute the density matrix in the next cycle. 
+
+ The concept of ET has proven fruitful for load balancing the ONX 
+ algorithm. ET exploits the ``slow'' variation of the density matrix 
+ between SCF iterations to overcome the irregularities arising 
+ from the ${\cal O}(N)$ methods.
+
+ A finer grain partition of the density matrix (i.e. at the function level)
+ may lead to even better load balance. However, the code 
+ may become much slower due to the non-negligible overhead 
+ of the timing routine.
+
+ The overall efficiency of the ET partition ranges from 74-87\%
+ for all test cases presented in this work with the fine grained
+ (up to 2.56 processors per heavy atom) 128 processor calculations.
+ This high efficiency of the ET retains this property between geometry steps
+ in a optimization or molecular dynamics run prior
+ to few steps (usually less than 3) of stabilization of the density matrix.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{acknowledgments}
+ This work has been supported by the US Department of Energy
+ under contract ???????????? and the ASCI project.
+ The Advanced Computing Laboratory of Los
+ Alamos National Laboratory is acknowledged.
+\end{acknowledgments}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibliography{mondo_new}
+%\bibliography{pONX,mondo_new}
+\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%\begin{figure}[htbp]
+%  \centering
+%  \caption{\protect
+%    Horizontal multiple recursive decomposition.
+%  }\label{fig:part1D}
+%  \setlength{\unitlength}{5cm}
+%  \begin{picture}(1,1)
+%    \put(0,0){\line(0,1){1}}
+%    \put(0,0){\line(1,0){1}}
+%    \put(1,0){\line(0,1){1}}
+%    \put(0,1){\line(1,0){1}}
+%    \multiput(0,0.2 )(0.05,0){20} {\line(1,0){0.025}}
+%    \multiput(0,0.45)(0.05,0){20} {\line(1,0){0.025}}
+%    \multiput(0,0.75)(0.05,0){20} {\line(1,0){0.025}}
+%    \multiput(0,0.9 )(0.05,0){20} {\line(1,0){0.025}}
+%  \end{picture}
+%\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{figure}[htbp]
+ \centering
+ \caption{\protect
+   Horizontal and vertical multiple recursive decomposition.
+ }\label{fig:part2D}
+ \setlength{\unitlength}{5cm}
+ \begin{picture}(1,1)
+   \put(0,0){\line(0,1){1}}
+   \put(0,0){\line(1,0){1}}
+   \put(1,0){\line(0,1){1}}
+   \put(0,1){\line(1,0){1}}
+   %
+   \multiput(0   ,0.2 )(0.05,0   ){20} {\line(1,0){0.025}}
+   \multiput(0.2 ,0   )(0   ,0.05){ 4} {\line(0,1){0.025}}
+   \multiput(0.45,0   )(0   ,0.05){ 4} {\line(0,1){0.025}}
+   \multiput(0.9 ,0   )(0   ,0.05){ 4} {\line(0,1){0.025}}
+   %
+   \multiput(0   ,0.45)(0.05,0   ){20} {\line(1,0){0.025}}
+   \multiput(0.25,0.2 )(0   ,0.05){ 5} {\line(0,1){0.025}}
+   \multiput(0.6 ,0.2 )(0   ,0.05){ 5} {\line(0,1){0.025}}
+   \multiput(0.8 ,0.2 )(0   ,0.05){ 5} {\line(0,1){0.025}}
+   %
+   \multiput(0   ,0.85)(0.05,0   ){20} {\line(1,0){0.025}}
+   \multiput(0.35,0.45)(0   ,0.05){ 8} {\line(0,1){0.025}}
+   \multiput(0.65,0.45)(0   ,0.05){ 8} {\line(0,1){0.025}}
+   %
+   \multiput(0.15,0.85)(0   ,0.05){ 3} {\line(0,1){0.025}}
+   \multiput(0.40,0.85)(0   ,0.05){ 3} {\line(0,1){0.025}}
+   \multiput(0.75,0.85)(0   ,0.05){ 3} {\line(0,1){0.025}}
+ \end{picture}
+\end{figure}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\end{document}
+%
+% ****** End of file apssamp.tex ******
+
+%Compaq C++ V6.5-038 for Compaq Tru64 UNIX V5.1B (Rev. 2650)
+%Compiler Driver V6.5-038 (cxx) cxx Driver
+%        HP Fortran V5.5A-3548
+%        HP Fortran Compiler V5.5A-46412-48E84
+
+@misc{cxxv6.5,
+	author = {\mbox{Compaq}},
+	title = {C++ V6.5},
+	year = 2002,
+	url = {http://www.hp.com/}
+}
+
+@misc{f95v5.5a,
+	author = {\mbox{Hewlett-Packard}},
+	title = {f95 V5.5A},
+	year = 2003,
+	url = {http://www.hp.com/}
+}
+
+@book{PVM,
+  author = 	 {A. Geist and A. Beguelin and J. Dongarra and W. Jiang and R. Manchek and V. Sunderam},
+  title = 	 {PVM, parallel virtual machine: a user's guide and tutorial for networked parallel computing},
+  publisher = 	 {MIT Press},
+  year = 	 {1994},
+  address = 	 {Cambridge, Mass},
+}
+
+@Article{JNieplocha94,
+  author = 	 {J. Nieplocha and R.J. Harrison and R.J. Littlefield},
+  journal = 	 {Proc. Supercomputing},
+  year = 	 {1994},
+  volume = 	 {94},
+  pages = 	 {340},
+}
+
+@Article{JNieplocha96,
+  author = 	 {J. Nieplocha and R.J. Harrison and R.J. Littlefield},
+  journal = 	 {J. Supercomput},
+  year = 	 {1996},
+  volume = 	 {10},
+  pages = 	 {197},
+}
+
+@misc{BVastenhouw,
+  author = "Brendan Vastenhouw and Rob H. Bisseling",
+  title = "A Two-Dimensional Data Distribution Method For Parallel Sparse Matrix-Vector Multiplication",
+  url = "citeseer.ist.psu.edu/517654.html" 
+}
+
+@Article{RHarrison96,
+  author = 	 { R. J. Harrison and M. F. Guest and R. A Kendall and D. E. Bernholdt and A. T. Wong and M. Stave and 
+                  J. L. Anchell and A. C. Hess and R. J. Littlefield and G. L. Fann and J. Nieplocha and G. S. Thomas and
+                  J. L. Tilson and R. L. Shepard and A. F Wagner and I. T. Foster and E. Lusk and R. Stevens},
+  journal = 	 {J. Comput. Chem.},
+  year = 	 {1996},
+  volume = 	 {17},
+  pages = 	 {124},
+}
+
+@book{GFox88,
+  author = 	 {G. Fox and M. Johnson and G. Lyzenga and S. Otto and J. Salmon and D. Walker},
+  title = 	 {Solving Problems on Concurrent Processors},
+  publisher = 	 {Prentice Hall},
+  year = 	 {1988},
+  volume = 	 {I},
+  address = 	 {Upper Saddle River, NJ},
+}
+
+@Manual{RGeijn91,
+  author = 	 {R. A. van de Geijn},
+  title = 	 {LAPACK Working Note 29},
+  address =  {University of Tennessee},
+  year = 	 {1991},
+}
+
+@misc{IPM,
+	author = {K. Asanovic},
+	title = {Interval Performance Monitoring (IPM) package Release 2.0},
+	howpublished = {\url{http://www.icsi.berkeley.edu/~krste/IPM.html}},
+	year = 1995
+}
+
+@Inproceedings{FManne96,
+  author = {F. Manne and T. Sorevik},
+  title = {Applied Parallel Computing. Industrial Computation and Optimization. Third International Workshop, PARA'96},
+  OPTbooktitle = {},
+  year = {1996},
+  editor = {J. Wasniewski and J. Dongarra and K. Madsen and D. Olesen},
+  publisher = {Berlin, Germany: Springer-Verlag},
+  address = {Lyngby, Denmark},
+}
+
+@Article{APinar97,
+  author = 	 {A. Pinar and C. Aykanat},
+  journal = 	 {Proc. Int. Conf. High. Perform Comput. HiPC},
+  year = 	 {1997},
+  OPTvolume = 	 {},
+  pages = 	 {224}
+}
+
+@Article{GAMESS,
+  author = 	 {M. W. Schmidt and K. K. Baldridge and J. A. Boatz and S. T. Elbert and M. S. Gordon and J. H. Jensen and S. Koseki and N. Matsunaga and K. A. Nguyen and S. J. Su and T. L. Windus and M. Dupuis and J. A. Montgomery},
+  journal = 	 {J. Comput. Chem.},
+  year = 	 {1993},
+  volume = 	 {14},
+  pages = 	 {1347},
+}
+
+@Article{DChasman98,
+  author = 	 {D. Chasman and M.D. Beachy and L. Wang and R.A. Friesner},
+  journal = 	 {J. Comput. Chem.},
+  year = 	 {1998},
+  volume = 	 {19},
+  pages = 	 {1017},
+}
+
+
