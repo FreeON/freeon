@@ -22,18 +22,18 @@ MODULE Macros
       MODULE PROCEDURE Init_TIME, Init_DEBG, Init_MEMS
    END INTERFACE
 !-------------------------------------------------------------------------------
-!  Global status variables
-   INTEGER,DIMENSION(3) :: Current
-   INTEGER,DIMENSION(3) :: Previous
-   CHARACTER(LEN=3)     :: SCFCycl
-   CHARACTER(LEN=3)     :: PrvCycl
-   CHARACTER(LEN=3)     :: NxtCycl
-   CHARACTER(LEN=20)    :: SCFActn
-   CHARACTER(LEN=3)     :: CurBase
-   CHARACTER(LEN=3)     :: PrvBase
-   CHARACTER(LEN=3)     :: CurGeom
-   CHARACTER(LEN=3)     :: PrvGeom
-   CHARACTER(LEN=3)     :: NxtGeom
+!  Global status variables : take them from GlobalCharacters and GlobalScalars
+!  INTEGER,DIMENSION(3) :: Current
+!  INTEGER,DIMENSION(3) :: Previous
+!  CHARACTER(LEN=3)     :: SCFCycl
+!  CHARACTER(LEN=3)     :: PrvCycl
+!  CHARACTER(LEN=3)     :: NxtCycl
+!  CHARACTER(LEN=20)    :: SCFActn
+!  CHARACTER(LEN=3)     :: CurBase
+!  CHARACTER(LEN=3)     :: PrvBase
+!  CHARACTER(LEN=3)     :: CurGeom
+!  CHARACTER(LEN=3)     :: PrvGeom
+!  CHARACTER(LEN=3)     :: NxtGeom
 !-------------------------------------------------------------------------------
    CONTAINS
       SUBROUTINE StartUp(Args,Prog,Serial_O)
@@ -190,7 +190,8 @@ MODULE Macros
             CALL Delete(End)
          ENDIF
 #endif
-         IF(PrintFlags%Key>=DEBUG_MEDIUM)THEN
+!        IF(PrintFlags%Key>=DEBUG_MEDIUM)THEN
+         IF(PrintFlags%Key>=DEBUG_MEDIUM.OR.PrintFlags%Chk==DEBUG_CHKSUMS)THEN
             CALL Elapsed_TIME(PerfMon,'Accum',Proc_O=Prog)
             CALL PPrint(PerfMon,Prog)
          ENDIF
