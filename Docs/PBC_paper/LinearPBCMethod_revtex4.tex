@@ -544,22 +544,22 @@ and support.
 \caption{\label{table:ComToCrystal98_1} Comparison MondoSCF and Crystal98 for a Sodium Chloride test
 system}
 
-{\centering \begin{tabular}{|c:c c c l l|}
+{\centering \begin{tabular}{|llccll|}
 \hline 
 Program&
 Basis/Theory&
 \( N \)&
 \( \mathbf{k} \)&
-\( E \)&
-\( \frac{E}{N} \)\\
+Energy  &
+Energy/{\it N}\\
 \hline
 \hline 
-MondoSCF&
+MondoSCF &
 STO-3G/LDA&
 2&
 (0,0,0)&
 -610.9753547&
--305.487677\\
+-305.4876774\\
 Crystal98&
 STO-3G/LDA&
 2&
@@ -584,7 +584,7 @@ STO-3G/LDA&
 8&
 (0,0,0)&
 -2444.3583560&
--305.544795\\
+-305.54479450\\
 Crystal98&
 STO-3G/LDA&
 8&
@@ -596,13 +596,13 @@ MondoSCF&
 8&
 (0,0,0)&
 -2490.0016297&
--311.250204\\
+-311.25020371\\
 Crystal98&
 8-511G/BLYP&
 8&
 (0,0,0)&
 -2490.0013&
--311.2502 \\
+-311.25016 \\
 \hline 
 MondoSCF&
 STO-3G/LDA&
@@ -635,11 +635,11 @@ STO-3G/LDA&
 -65997.9768&
 -305.546185\\
 \hline
-Crystal98&
-STO-3G/LDA&
-2&
-(6,6,6)&
--611.09228&
+Crystal98\,\,\,\,\,\,\,&
+STO-3G/LDA\,\,&
+\,\,2\,\,&
+\,\,(6,6,6)\,\,&
+-611.09228\,\,\,\,\,\,\,\,\,\,\,&
 -305.54614\\
 \hline
 \end{tabular}\par}
@@ -651,14 +651,14 @@ STO-3G/LDA&
 \caption{\label{table:ComToCrystal98_2} Comparison MondoSCF and Crystal98 for a Magnesium Oxide test
 system}
 
-{\centering \begin{tabular}{cccccc}
+{\centering \begin{tabular}{|llccll|}
 \hline 
 Program&
 Basis/Theory&
 \( N \)&
 \( \mathbf{k} \)&
-\( E \)&
-\( \frac{E}{N} \)\\
+Energy&
+Energy/{\it N}\\
 \hline
 \hline 
 MondoSCF&
@@ -666,50 +666,50 @@ STO-3G/LDA&
 2&
 (0,0,0)&
 -268.6324805 &
-0.0 \\
+-134.3162403 \\
 Crystal98&
 STO-3G/LDA&
 2&
 (0,0,0)&
 -268.6323 &
-0.0 \\
+-134.3162 \\
 MondoSCF&
 8-61G/BLYP&
 2&
 (0,0,0)&
 -275.0909646 &
-0.0 \\
+-137.5454823 \\
 Crystal98&
 8-61G/BLYP&
 2&
 (0,0,0)&
 -275.0906 &
-0.0 \\
+-137.5453 \\
 \hline 
 MondoSCF&
 STO-3G/LDA&
 8&
 (0,0,0)&
 -1076.2137787 &
-0.0 \\
+-134.52672234 \\
 Crystal98&
 STO-3G/LDA&
 8&
 (0,0,0)&
 -1076.2138 &
-0.0 \\
+-134.52673\\
 MondoSCF&
 8-61G/BLYP&
 8&
 (0,0,0)&
 -1101.7294484 &
-0.0 \\
+-137.71618105\\
 Crystal98&
 8-61G/BLYP&
 8&
 (0,0,0)&
 -1101.7289 &
-0.0  \\
+-137.71612  \\
 \hline 
 MondoSCF&
 8-61G/BLYP&
@@ -742,10 +742,10 @@ MondoSCF&
 0.0 &
 0.0 \\
 \hline
-Crystal98&
-8-61G/BLYP&
-2&
-(6,6,6)&
+Crystal98\,\,\,\,\,\,\,&
+8-61G/BLYP\,\,&
+\,\,2\,\,&
+\,\,(6,6,6)\,\,&
 0.0 &
 0.0 \\
 \hline
@@ -758,40 +758,40 @@ Crystal98&
 \caption{\label{table:ComToCrystal98_3} Comparison MondoSCF and Crystal98 for a Diamond test
 system}
 
-{\centering \begin{tabular}{cccccc}
+{\centering \begin{tabular}{|llccll|}
 \hline 
 Program&
 Basis/Theory&
 \( N \)&
 \( \mathbf{k} \)&
-\( E \)&
-\( \frac{E}{N} \)\\
+Energy &
+Energy/{\it N}\\
 \hline
 \hline 
 MondoSCF&
 STO-3G/BLYP&
 8&
 (0,0,0)&
--300.5755 &
-0.0 \\
+-300.5754830 &
+-37.57193538 \\
 Crystal98&
 STO-3G/BLYP&
 8&
 (0,0,0)&
--300.5755109 &
-0.0 \\
+-300.5755 &
+-37.57194 \\
 MondoSCF&
 6-21G/BLYP&
 8&
 (0,0,0)&
 -303.8938328 &
-0.0 \\
+-37.98672910 \\
 Crystal98&
 6-21G/BLYP&
 8&
 (0,0,0)&
 -303.8941 &
-0.0 \\
+-37.98676 \\
 \hline 
 MondoSCF&
 6-21G/BLYP&
@@ -812,10 +812,10 @@ MondoSCF&
 0.0 &
 0.0 \\
 \hline
-Crystal98&
-6-21G/BLYP&
-8&
-(2,2,2)&
+Crystal98\,\,\,\,\,\,\,&
+6-21G/BLYP\,\,&
+\,\,8\,\,&
+\,\,(2,2,2)\,\,&
 0.0 &
 0.0 \\
 \hline
