@@ -18,7 +18,7 @@
 
 \author{C. J. Tymczak$^2$}
 \affiliation{ Theoretical Division, Los Alamos National Laboratory, Los Alamos, New Mexico 87545 }
-\author{Valery T.~Weber}
+\author{Val{\'e}ry T.~Weber}
 \affiliation{Dept.~of Chemistry, University of Fribourg, 1700 Fribourg, Switzerland}
 \author{Eric Schwegler}
 \affiliation{Lawrence Livermore National Laboratory, Livermore, California 94551}
@@ -50,7 +50,7 @@ for diamond and ice in the condensed phase. \\
 \section{INTRODUCTION}
 
 In a preceding article \cite{CTymczak04A},  methods were introduced for constructing 
-the periodic $\Gamma$-point  Coulomb and Exchange-Correlation matrix that 
+the periodic $\Gamma$-point Coulomb and Exchange-Correlation matrix that 
 achieve  a cost  scaling only linearly with system size, $N$.  In this paper, an ${\cal O}(N)$
 algorithm is presented for computation of the periodic Hartree-Fock (HF) exchange matrix at the 
 $\Gamma$-point.   The Hartree-Fock approximation is often a fast, first 
@@ -62,7 +62,7 @@ advances provide a framework for the application of both HF and HF/DFT models to
 phase systems, surfaces and wires.   
 
 To date, condensed phase HF and HF/DFT calculations have been carried out almost 
-exclusively with the {\em ab initio} solid state program {\sc CRYSTAL} \cite{RDovesi00}, 
+exclusively with the {\em ab initio} solid state program {\sc CRYSTAL} \cite{RDovesi00,KDoll01}, 
 which employs conventional  algorithms for evaluation of the 
 HF exchange matrix.  The {\sc CRYSTAL} program employs methods for ${\bf k}$-space integration, 
 which generates wavefunctions with the correct translational symmetries.   While the  
@@ -81,8 +81,8 @@ Image Convention (MIC) into the exchange kernel at the level of primitive two-el
 as described in Section \ref{gammapoint}.  Incorporation of the MIC integrals into a periodic 
 version of the {\sc ONX} algorithm \cite{ESchwegler97} for linear scaling computation of the HF 
 exchange matrix is then described in Section \ref{implementation}.  In Section \ref{validation} 
-we demonstrate convergence of the HF-MIC model chemistry to the $\bf k$-space integration 
-limit for a number of systems, and in Section \ref{scaling} we demonstrate linear scaling
+we demonstrate convergence of the HF-MIC model chemistry to the ${\bf k}$-space integration 
+limit for a number of systems, and in Section \ref{scaling} we demonstrate linear scaling 
 for both diamond and ice.  In Section \ref{discussion} we discuss these results,
 and then in Section \ref{conclusions} we summarize our results.
 
@@ -176,7 +176,7 @@ The $\Gamma$-point approximation limits {\bf k}-space sampling to just the centr
 ${\bf k} = 0$.   In the naive $\Gamma$-point limit, we take ${\bf P[ N ] } \equiv \delta_{\bf N,0} \, {\bf P} $,
 reducing Eq.~(\ref{CryEq}) to the less cumbersome relation:
 \begin{equation}
-K_{ab}=
+K_{ab}= -\frac{1}{2}
 \sum _{{\bf H G}, c d} P_{cd}
 \left(
       \phi_a    
@@ -187,25 +187,32 @@ K_{ab}=
 \right)\, .
 \label{CryEq_2}
 \end{equation}
-where we have relabeled the lattice sums.
-However, there are significant problems with this naive model,  as  the exact exchange potential, 
-symmetric in the limit of infinite summation, has been truncated.  In this case, neighboring cells
-correctly representing the exchange interaction,  have been removed, leading to a position dependent
-environment for each charge distribution.  Also, this truncation leads to an energy expression 
+where we have relabeled the lattice sums for clarity.
+However, there are two significant problems with this naive approach.
+First, the exact exchange potential, which is periodic in Eq. \ref{CryEq}, has been truncated 
+asymmetrically in Eq. \ref{CryEq_2}. Neighboring cells correctly representing the exchange interaction,  
+have been removed,  leading to an non-periodic exchange potential which varies with position of the 
+coordinates in relation to the unit cell. 
+Effectively, this leads to a position dependent environment for each charge distribution.
+And second, this truncation leads to a violation of the generalized
+exchange energy expression,
+\begin{equation}
+E_x[{\bf P}^a,{\bf P}^b] \ne E_x[{\bf P}^b,{\bf P}^a]
+\end{equation}
+where 
 \begin{equation}
 E_x[{\bf P}^a,{\bf P}^b] = {\rm Tr} \left[  {\bf P}^a \cdot {\bf K}^b  \right] \, ,
 \end{equation}
-which violates permutational symmetry of the exchange kernel; that is, in general, 
-$E_x[{\bf P}^a,{\bf P}^b] \ne E_x[{\bf P}^b,{\bf P}^a]$.   
+and the superscripts label different density matrices. 
 
-The most serious defect of  Eq.~\ref{CryEq_2} is that $E_x$  varies with position of the coordinates.  
+Let us consider the first problem, which is the most serious defect of  Eq.~\ref{CryEq_2}.
 This translational variance has a well understood analogue in classical molecular dynamics 
 \cite{NMetropolis53,MAllen90,MHloucha98}, where the arbitrary truncation of short range potentials also leads 
-to numerical artifacts in energies and forces.  In both cases, translational invariance is  restored by introducing the Minimum Image Convention (MIC), 
-which ensures that interactions are always calculated between nearest images.
+to numerical artifacts in energies and forces.  In both cases, translational invariance is  restored by introducing 
+the Minimum Image Convention (MIC), which ensures that interactions are always calculated between nearest images.
 In computation of the Hartree-Fock exchange matrix, the MIC $\Gamma$-point approximation is just
 \begin{equation}
-K_{ab}=
+K_{ab}=-\frac{1}{2}
 \sum _{{\bf H G} c d} P_{cd}
 \left(
       \phi        _a    
@@ -229,26 +236,35 @@ pq_i & =& pq_i - {\tt ANINT} \left( pq_i -{\tt SIGN}\left( \delta,pq_i\right) \r
 {\bf PQ}_{\rm MIC}&=&{\bf M} \cdot {\bf pq} 
 \end{eqnarray}
 \end{subequations}
-where $\delta \approx 10^{-15}$  is needed to avoid wrapping errors \footnote{
-This numerical $\delta$ is required to yield a consistent wrapping when distributions lie 
-exactly at the cell boundary.  In effect, this implementation changes the wrapping condition
-from $|pq_i| \ge 1$ to $|pq_i| > 1$.},   and 
-${\bf  M}$ is the $3 \times 3$ shape matrix of the unit cell, 
+where $\delta \approx 10^{-15}$  is needed to avoid wrapping errors 
+%
+\footnote{$\delta$ is required to yield a consistent wrapping when 
+distributions lie exactly at the cell boundary.  In effect, this implementation 
+changes the wrapping condition from $|pq_i| \ge 1$ to $|pq_i| > 1$.
+{\tt ANINT}($x$) rounds $x$ to the closest integer and
+{\tt SIGN}($x,y$) put the sign of $y$ on $x$.
+}, 
+and ${\bf  M}$ is the $3 \times 3$ shape matrix of the unit cell, 
 composed of the primitive lattice vectors,
 \begin{equation}
-{\bf M} = \left( {\bf a}:{\bf b}:{\bf c} \right)\, .
+{\bf M} = \left(
+\begin{array}{ccc}
+a_1 & b_1 & c_1 \\
+a_2 & b_2 & c_2 \\
+a_3 & b_3 & c_3 
+\end{array} \right)
 \end{equation}
-
 This approach is completely general, and can be used at the primitive level with any modern approach
 to computing two-electron integrals. While the MIC yields translational invariance of the
 exchange matrix, it  does not recover Exchange Kernel Permutational Symmetry (EKPS).  With greater 
 expense, we could recover the EKPS by  explicitly symmetrizing the primitive Gaussian 
 products within the kernel.  However, in the limit of large systems, where the range of the density 
-matrix becomes smaller than the system size, the  EKPS is recovered as demonstrated in Section \ref{validation}.
+matrix becomes smaller than the system size, the  EKPS is recovered as demonstrated in Section 
+\ref{validation} (note, without the MIC condition, EKPS would not be recovered in the limit of large systems).
 
 \section{Optimal damping and symmetry of the exchange kernel}
 
-For difficult, unstable SCF problems, the Optimal Damping Algorithm (ODA) of Cances \cite{ECances00} is
+For difficult, unstable SCF problems, the Optimal Damping Algorithm (ODA) of Canc{\'e}s \cite{ECances00} is
 an efficient method that guarantees convergence of the HF model.  
 However,  permutational symmetry of the exchange kernel is an implicit, simplifying assumption in formulation
 of the conventional ODA algorithm.   For small periodic systems, violation of the EKPS creates problems
@@ -278,7 +294,7 @@ for the endpoint derivatives that do not assume EKPS:
    -{\rm Tr}\left[ {\bf P}^0 {\bf F}^1 \right] 
    +2 {\rm Tr}\left[ {\bf P}^1 {\bf F}^1 \right] \, , \nonumber\\
 \end{eqnarray}
-where  ${\bf F}$ is the Fockian, $\bf T$ is the kinetic energy matrix  and $E_{\rm ne}$ is the nuclear-electrostatic energy.
+where  ${\bf F}$ is the Fockian, ${\bf T}$ is the kinetic energy matrix  and $E_{\rm ne}$ is the nuclear-electrostatic energy.
 This  modified ODA leads to the correct quadratic parameterization and guarantees convergence of the HF-MIC model.  
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -305,7 +321,7 @@ computing two-electron integrals.
 All developments  were implemented in  {\sc MondoSCF} v1.0$\alpha$9 \cite{MondoSCF}, a suite of 
 linear scaling Quantum Chemistry codes.  The code was compiled using the Portland 
 Group F90 compiler {\sc pgf90} v4.2 \cite{pgf90} with the {\tt -O1 -tp athlon} options  and with the 
-Gnu C compiler {\sc gcc} v3.2.2 using the {\tt -O1} flag.  All calculations were carried out on a 
+GNU C compiler {\sc gcc} v3.2.2 using the {\tt -O1} flag.  All calculations were carried out on a 
 1.6GHz AMD Athlon running RedHat  {\sc Linux}v9.0 \cite{RedHat90}.   
 
 \begin{table}[ht]
@@ -317,8 +333,7 @@ the primitive cell.}
 \label{MgOTable}
 \center{\begin{tabular}{lrll}
 \toprule
-Program         & $N_{\rm at}$              & Energy (au)    & Energy/$N_{\rm 
-at}$\\ 
+Program         & $N_{\rm MgO}$              & Energy (au)    & Energy/$N_{\rm MgO}$\\ 
 \colrule
 %{\sc MondoSCF}       & 2$^f$    & -274.53003     & -137.26501\\
 %{\sc CRYSTAL98}      & 2$^f$    & -288.83329$^h$ & -144.41664$^h$\\
@@ -345,10 +360,10 @@ at}$\\
 \botrule 
 \end{tabular}\\}
 \raggedright{
-{\hskip 0.330in}$^a \Gamma$-point\\
-{\hskip 0.330in}$^b$Triclinic \\
-{\hskip 0.330in}$^c$Cubic \\
-{\hskip 0.330in}$^d 8\times8\times8$ ${\bf k}$-space integration grid  \\}
+{\hskip 0.18in}$^a \Gamma$-point\\
+{\hskip 0.18in}$^b$Triclinic \\
+{\hskip 0.18in}$^c$Cubic \\
+{\hskip 0.18in}$^d 8\times8\times8$ ${\bf k}$-space integration grid  \\}
 \end{table}
 
 \begin{table}[h]
@@ -387,10 +402,10 @@ Program              &$N_{\rm at}$   & Basis         & ${\rm a}_0^{\rm \scriptsc
 \colrule
 {\sc MondoSCF}$^a$   &~64~           & ~STO-3G~      & ~3.587~          &  ~3.601~    \\
       --             &~216~          & ~STO-3G~      & ~3.582~          &  ~3.594~    \\
-{\sc CRYSTAL}$^b$  & ~2~           & ~STO-3G~      & ~3.581~          &   -- \\ 
+{\sc CRYSTAL}$^b$    & ~2~           & ~STO-3G~      & ~3.581~          &   -- \\ 
 {\sc MondoSCF}$^a$   &~64~           & ~6-21G*~      & ~3.575~          &  ~3.571~    \\
       --             &~216~          & ~6-21G*~      & ~3.571~          &  ~3.569~    \\
-{\sc CRYSTAL}$^b$  & ~2~           & ~6-21G*~      & ~3.574~          &   -- \\
+{\sc CRYSTAL}$^b$    & ~2~           & ~6-21G*~      & ~3.574~          &   -- \\
 \hline
 \botrule
 \end{tabular}\\}
