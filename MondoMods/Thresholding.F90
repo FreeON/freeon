@@ -21,7 +21,8 @@ MODULE Thresholding
 !-------------------------------------------------------------------------
 ! Intermediate thresholds
 !
-  REAL(DOUBLE), SAVE  :: MinExponent
+  REAL(DOUBLE), SAVE  :: MinRadialExponent
+  REAL(DOUBLE), SAVE  :: MinDensityExponent
   REAL(DOUBLE), SAVE  :: AtomPairDistanceThreshold  ! Atom pairs
   REAL(DOUBLE), SAVE  :: PrimPairDistanceThreshold  ! Prim pairs
   REAL(DOUBLE), SAVE  :: PenetratDistanceThreshold  ! Penetration threshold
@@ -39,8 +40,9 @@ MODULE Thresholding
          CALL Get(NExpt,'nexpt',Tag_O=CurBase)
          CALL New(Expts,NExpt)
          CALL Get(Expts,'dexpt',Tag_O=CurBase)
+         MinDensityExponent=Half*Expts%D(1)
 !        Xi_Min=Zeta*Zeta/(Zeta+Zeta)=Zeta_Min/2
-         MinExponent=Half*Expts%D(1)
+         MinRadialExponent=Half*Expts%D(1)
          CALL Delete(Expts)
 !        Set Atom-Atom thresholds
          CALL SetAtomPairThresh(Thresholds%Dist)
@@ -52,7 +54,7 @@ MODULE Thresholding
 !
      SUBROUTINE SetAtomPairThresh(Tau)
         REAL(DOUBLE),INTENT(IN) :: Tau
-        AtomPairDistanceThreshold=-LOG(Tau)/MinExponent
+        AtomPairDistanceThreshold=-LOG(Tau)/MinRadialExponent
      END SUBROUTINE SetAtomPairThresh
 !
      FUNCTION TestAtomPair(Pair)

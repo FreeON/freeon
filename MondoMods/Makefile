@@ -39,7 +39,7 @@ MModObjs =    GlobalScalars.o                                         \
               Macros.o                                                \
               HDF5Wrap.o
 #
-all:	Mods DGEMM SM 
+all:	Mods ToEll DGEMM SM 
 #
 small:	Mods
 #
@@ -60,6 +60,11 @@ CMods:
 	rm -f *~
 	ln -s /dev/null core
 	ls -l
+#
+ToEll:	EllToInclude.o
+	$(LD) $(LDFLAGS) EllInc EllToInclude.o $(LibOpts) $(F90_LIBRARIES) 
+	./EllInc
+	rm -f EllToInclude.o ./EllInc
 #
 DGEMM:	
 	$(MAKE) -C $(MONDO_DGEMMS)

@@ -147,9 +147,9 @@ MODULE McMurchie
          REAL(DOUBLE),                  INTENT(IN)  :: Omega,T
          INTEGER,                       INTENT(IN)  :: MaxL,LTot 
          REAL(DOUBLE),DIMENSION(0:MaxL),INTENT(OUT) :: AuxR
-         REAL(DOUBLE),PARAMETER                     :: Switch=22.0D0
-         INTEGER,PARAMETER                          :: LPlus=30
-         INTEGER,PARAMETER                          :: L2=10+LPlus
+         REAL(DOUBLE),PARAMETER                     :: Switch=26.0D0
+         INTEGER,PARAMETER                          :: LPlus=50
+         INTEGER,PARAMETER                          :: L2=12+LPlus
          REAL(DOUBLE),DIMENSION(0:L2)               :: F
          REAL(DOUBLE)                               :: SqrtT,ET,OneOvT,FJ,TwoT, &
                                                        OmegaJ,TwoO
