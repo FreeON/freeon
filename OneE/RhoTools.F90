@@ -119,7 +119,7 @@ CONTAINS
 !---------------------------------------------------------------------
 !  Integrate Rho
 !---------------------------------------------------------------------
-  SUBROUTINE Integrate_HGRho(Rho)
+  SUBROUTINE Integrate_HGRho(Rho,RhoSumE,RhoSumN)
     TYPE(HGRho)                      :: Rho
     INTEGER                          :: zq,iq,oq,orr,NQ,jadd,LenKet,LL
     REAL(DOUBLE)                     :: RhoSumE,RhoSumN,Expt,Weig
@@ -153,13 +153,6 @@ CONTAINS
        RhoSumN = RhoSumN + Weig
     ENDDO
 !
-    IF(ABS(RhoSumE+RhoSumN)>1.D-2) &
-       CALL Halt(' Density hosed! Rho_e = '//TRIM(DblToMedmChar(Two*RhoSumE)) &
-                              //',Rho_n = '//TRIM(DblToMedmChar(Two*RhoSumN)))
-
-!    WRITE(*,*) ' Int[Rho_E] = ',RhoSumE
-!    WRITE(*,*) ' Int[Rho_N] = ',RhoSumN   
-!    WRITE(*,*) ' Int[Rho_T] = ',RhoSumN+RhoSumE
   END SUBROUTINE Integrate_HGRho
 
 !---------------------------------------------------------------------------------------
