@@ -23,7 +23,7 @@ MOD_POSTFIX   = mod
 #
 F90          = f95
 F90_OPTIMIZE = -O4
-F90_DEBUG    = -g3 -C -check bounds -check overflow -assume gfullpath 
+#F90_DEBUG    = -g3 -C -check bounds -check overflow -assume gfullpath 
 #F_LIST       = -V -source_listing
 #F_PROF       = -pg 
 F90_MISC     = -static -fpe1 $(F_LIST) $(F_PROF) 
