@@ -3367,7 +3367,7 @@ CONTAINS
        DO I=1,3
          IF(GConstr%RatioAlpBetGam(I)>Zero) THEN
            SumIRef2=SumIRef2+Vec(3+I)
-           SumR2=SumR2+GConstr%RatioAlpBetGam(3+I)
+           SumR2=SumR2+GConstr%RatioAlpBetGam(I)
          ENDIF
        ENDDO 
      ENDIF
