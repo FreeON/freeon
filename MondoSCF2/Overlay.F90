@@ -88,7 +88,7 @@ CONTAINS
     INTEGER            :: I,K,NArg,cCLUMP,SNC,NewDex
     TYPE(CHR_VECT)     :: ArgT,ArgV
     SNC=SIZE(S%Action%C)
-#ifdef defined(PARALLEL) && !defined(MPI2)
+#ifdef PARALLEL && !MPI2
     NArg=13+SNC
     CALL New(ArgT,NArg)
     ArgT%C(1) =M%Invoking
