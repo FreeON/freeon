@@ -681,22 +681,12 @@ MODULE MemMan
          CALL Delete(A%C)
          A%Alloc=ALLOCATED_FALSE
       END SUBROUTINE Delete_ARGMT
-
-
-
-
-
-
-
-
-
-
-
-
-  SUBROUTINE New_HGRho(A,N_O,REst_O)
+!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+!
+!
+  SUBROUTINE New_HGRho(A,N_O)
     TYPE(HGRho)                     :: A
     INTEGER,OPTIONAL,DIMENSION(3)   :: N_O
-    LOGICAL,OPTIONAL                :: REst_O
 !
     IF(AllocQ(A%Alloc)) THEN
        IF(PRESENT(N_O)) THEN
@@ -721,17 +711,6 @@ MODULE MemMan
              CALL New(A%Qx   ,A%NDist)
              CALL New(A%Qy   ,A%NDist)
              CALL New(A%Qz   ,A%NDist)
-             IF(AllocQ(A%AllocRE)) THEN
-                CALL Delete(A%Est)
-                CALL New(A%Est,A%NDist)
-             ELSE
-                IF(PRESENT(REst_O)) THEN
-                   IF(REst_O) THEN
-                      A%AllocRE=ALLOCATED_TRUE
-                      CALL New(A%Est,A%NDist)
-                   ENDIF
-                ENDIF
-             ENDIF
           ENDIF
           IF(N_O(3) /= A%NCoef) THEN
              A%NCoef = N_O(3)
@@ -758,13 +737,7 @@ MODULE MemMan
        CALL New(A%Qx  ,A%NDist)
        CALL New(A%Qy  ,A%NDist)
        CALL New(A%Qz  ,A%NDist)
-       IF(PRESENT(REst_O)) THEN
-          IF(REst_O) THEN
-             A%AllocRE=ALLOCATED_TRUE
-             CALL New(A%Est,A%NDist)
-          ENDIF
-       ENDIF
-       CALL New(A%Co,A%NCoef)
+       CALL New(A%Co  ,A%NCoef)
     ENDIF
 !
   END SUBROUTINE New_HGRho
@@ -783,9 +756,6 @@ MODULE MemMan
        CALL Delete(A%Qx)
        CALL Delete(A%Qy)
        CALL Delete(A%Qz)
-       IF(AllocQ(A%AllocRE)) THEN
-          CALL Delete(A%Est)
-       ENDIF
        CALL Delete(A%Co)
     ENDIF
 !
