@@ -27,6 +27,8 @@ MODULE ParseExtraCoords
      TYPE(GeomOpt)               :: GOpt
      CHARACTER(LEN=DCL)          :: Line,LineLowCase,Atomname,chGEO
      CHARACTER(LEN=5)            :: CHAR
+     CHARACTER(LEN=4)            :: CharAux4
+     INTEGER,DIMENSION(4)        :: AtomAux4
      INTEGER                     :: I1,I2,J,NIntCs,SerNum,NConstr
      INTEGER                     :: NatmsLoc
      INTEGER                     :: NCartConstr,iCLONE
@@ -164,14 +166,28 @@ MODULE ParseExtraCoords
                 NIntCs=NIntCs+1 
                 GOpt%ExtIntCs%Def%C(NIntCs)(1:10)='STRE      ' 
          !--------------------
-                IF(INDEX(LineLowCase,'.')==0) THEN
-                  READ(LineLowCase,*) &
-                  CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1:2)
+                IF(INDEX(LineLowCase,'.')==0) THEN 
+                  IF(INDEX(LineLowCase,'cell')==0) THEN
+                    READ(LineLowCase,*) &
+                    CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1:2)
+                  ELSE
+                    READ(LineLowCase,*) &
+                    CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1:2), &
+                    CharAux4,GOpt%ExtIntCs%Cells%I(NIntCs,1:6)
+                  ENDIF
                 ELSE
-                  READ(LineLowCase,*) &
-                  CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1:2),Value
-                  GOpt%ExtIntCs%Constraint%L(NIntCs)=.TRUE.
-                  GOpt%ExtIntCs%ConstrValue%D(NIntCs)=Value*AngstromsToAu
+                  IF(INDEX(LineLowCase,'cell')==0) THEN
+                    READ(LineLowCase,*) &
+                    CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1:2),Value
+                    GOpt%ExtIntCs%Constraint%L(NIntCs)=.TRUE.
+                    GOpt%ExtIntCs%ConstrValue%D(NIntCs)=Value*AngstromsToAu
+                  ELSE
+                    READ(LineLowCase,*) &
+                    CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1:2), &
+                    CharAux4,GOpt%ExtIntCs%Cells%I(NIntCs,1:6),Value
+                    GOpt%ExtIntCs%Constraint%L(NIntCs)=.TRUE.
+                    GOpt%ExtIntCs%ConstrValue%D(NIntCs)=Value*AngstromsToAu
+                  ENDIF
                   NConstr=NConstr+1
                 ENDIF
          !--------------------
@@ -180,11 +196,23 @@ MODULE ParseExtraCoords
                 NIntCs=NIntCs+1 
                 GOpt%ExtIntCs%Def%C(NIntCs)(1:10)='BEND      ' 
                 IF(INDEX(LineLowCase,'.')==0) THEN
-                  READ(LineLowCase,*) &
-                  CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1:3)
+                  IF(INDEX(LineLowCase,'cell')==0) THEN
+                    READ(LineLowCase,*) &
+                    CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1:3)
+                  ELSE
+                    READ(LineLowCase,*) &
+                    CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1:3),&
+                    CharAux4,GOpt%ExtIntCs%Cells%I(NIntCs,1:3)
+                  ENDIF
                 ELSE
-                  READ(LineLowCase,*) &
-                  CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1:3),Value
+                  IF(INDEX(LineLowCase,'cell')==0) THEN
+                    READ(LineLowCase,*) &
+                    CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1:3),Value
+                  ELSE
+                    READ(LineLowCase,*) &
+                    CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1:3), &
+                    CharAux4,GOpt%ExtIntCs%Cells%I(NIntCs,1:3),Value
+                  ENDIF
                   GOpt%ExtIntCs%Constraint%L(NIntCs)=.TRUE.
                   GOpt%ExtIntCs%ConstrValue%D(NIntCs)=Value*DegToRad 
                   NConstr=NConstr+1
@@ -279,11 +307,23 @@ MODULE ParseExtraCoords
                 NIntCs=NIntCs+1 
                 GOpt%ExtIntCs%Def%C(NIntCs)(1:10)='TORS      ' 
                 IF(INDEX(LineLowCase,'.')==0) THEN
-                  READ(LineLowCase,*) &
-                  CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1:4)
+                  IF(INDEX(LineLowCase,'cell')==0) THEN
+                    READ(LineLowCase,*) &
+                    CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1:4)
+                  ELSE
+                    READ(LineLowCase,*) &
+                    CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1:4), &
+                    CharAux4,GOpt%ExtIntCs%Cells%I(NIntCs,1:4) 
+                  ENDIF
                 ELSE
-                  READ(LineLowCase,*) &
-                  CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1:4),Value
+                  IF(INDEX(LineLowCase,'cell')==0) THEN
+                    READ(LineLowCase,*) &
+                    CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1:4),Value
+                  ELSE
+                    READ(LineLowCase,*) &
+                    CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1:4), &
+                    CharAux4,GOpt%ExtIntCs%Cells%I(NIntCs,1:4),Value
+                  ENDIF
                   GOpt%ExtIntCs%Constraint%L(NIntCs)=.TRUE.
                   GOpt%ExtIntCs%ConstrValue%D(NIntCs)=Value*DegToRad 
                   NConstr=NConstr+1
@@ -294,41 +334,55 @@ MODULE ParseExtraCoords
                 NIntCs=NIntCs+1 
                 GOpt%ExtIntCs%Def%C(NIntCs)(1:10)='OUTP      ' 
                 IF(INDEX(LineLowCase,'.')==0) THEN
-                  READ(LineLowCase,*) &
-                  CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1:4)
+                  IF(INDEX(LineLowCase,'cell')==0) THEN
+                    READ(LineLowCase,*) &
+                    CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1:4)
+                  ELSE
+                    READ(LineLowCase,*) &
+                    CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1:4), &
+                    CharAux4,GOpt%ExtIntCs%Cells%I(NIntCs,1:4)
+                  ENDIF
                 ELSE
-                  READ(LineLowCase,*) &
-                  CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1:4),Value
+                  IF(INDEX(LineLowCase,'cell')==0) THEN
+                    READ(LineLowCase,*) &
+                    CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1:4),Value
+                  ELSE
+                    READ(LineLowCase,*) &
+                    CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1:4), &   
+                    CharAux4,GOpt%ExtIntCs%Cells%I(NIntCs,1:4),Value
+                  ENDIF
                   GOpt%ExtIntCs%Constraint%L(NIntCs)=.TRUE.
                   GOpt%ExtIntCs%ConstrValue%D(NIntCs)=Value*DegToRad 
                   NConstr=NConstr+1
                 ENDIF
          !--------------------
-         ELSE IF(INDEX(LineLowCase,'linb1')/=0) THEN 
+         ELSE IF(INDEX(LineLowCase,'linb1')/=0.OR. &
+                 INDEX(LineLowCase,'linb2')/=0) THEN 
          !--------------------
                 NIntCs=NIntCs+1 
-                GOpt%ExtIntCs%Def%C(NIntCs)(1:10)='LINB1     ' 
-                IF(INDEX(LineLowCase,'.')==0) THEN
-                  READ(LineLowCase,*) &
-                  CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1:3)
+                IF(INDEX(LineLowCase,'linb1')/=0) THEN
+                  GOpt%ExtIntCs%Def%C(NIntCs)(1:10)='LINB1     ' 
                 ELSE
-                  READ(LineLowCase,*) &
-                  CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1:3),Value
-                  GOpt%ExtIntCs%Constraint%L(NIntCs)=.TRUE.
-                  GOpt%ExtIntCs%ConstrValue%D(NIntCs)=Value*DegToRad 
-                  NConstr=NConstr+1
+                  GOpt%ExtIntCs%Def%C(NIntCs)(1:10)='LINB2     ' 
                 ENDIF
-         !--------------------
-         ELSE IF(INDEX(LineLowCase,'linb2')/=0) THEN 
-         !--------------------
-                NIntCs=NIntCs+1 
-                GOpt%ExtIntCs%Def%C(NIntCs)(1:10)='LINB2     '
                 IF(INDEX(LineLowCase,'.')==0) THEN
-                  READ(LineLowCase,*) &
-                  CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1:3)
+                  IF(INDEX(LineLowCase,'cell')==0) THEN
+                    READ(LineLowCase,*) &
+                    CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1:3)
+                  ELSE
+                    READ(LineLowCase,*) &
+                    CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1:3), &
+                    CharAux4,GOpt%ExtIntCs%Cells%I(NIntCs,1:3)
+                  ENDIF
                 ELSE
-                  READ(LineLowCase,*) &
-                  CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1:3),Value
+                  IF(INDEX(LineLowCase,'cell')==0) THEN
+                    READ(LineLowCase,*) &
+                    CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1:3),Value
+                  ELSE
+                    READ(LineLowCase,*) &
+                    CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1:3), &
+                    CharAux4,GOpt%ExtIntCs%Cells%I(NIntCs,1:3),Value
+                  ENDIF
                   GOpt%ExtIntCs%Constraint%L(NIntCs)=.TRUE.
                   GOpt%ExtIntCs%ConstrValue%D(NIntCs)=Value*DegToRad 
                   NConstr=NConstr+1
@@ -398,8 +452,8 @@ MODULE ParseExtraCoords
      CLOSE(Inp,STATUS='KEEP')
      CALL Delete(XYZ)
      CALL Delete(CConstrain)
-    !CALL PrtIntCoords(GOPt%ExtIntCs,GOpt%ExtIntCs%Value%D,&
-    !                  'chk extra ')
+   ! CALL PrtIntCoords(GOPt%ExtIntCs,GOpt%ExtIntCs%Value%D,&
+   !                   'chk extra 1',PBCDim_O=1)
    END SUBROUTINE LoadExtraCoords
 !
 !------------------------------------------------------------------
