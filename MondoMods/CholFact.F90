@@ -738,7 +738,7 @@ CONTAINS
      TYPE(DBL_VECT) :: GcScale
      CHARACTER(LEN=*):: Char
      !
-     NIntC=SIZE(B%IB,1) 
+     NIntC=SIZE(B%IB%I,1) 
      NDim=NIntC+NCart
      CALL New(IA2,NDim+1)
      CALL New(JA2,12*NIntC+NDim)
@@ -763,14 +763,14 @@ CONTAINS
      ENDDO
      DO I=1,NIntC
        DO J=1,4
-         K=B%IB(I,J)
+         K=B%IB%I(I,J)
          IF(K==0) CYCLE
          LL=3*(J-1)
          KK=ColOff+3*(K-1)
          DO JJ=1,3
            NZ=NZ+1
            JA2%I(NZ)=KK+JJ
-           AN2%D(NZ)=B%B(I,LL+JJ)
+           AN2%D(NZ)=B%B%D(I,LL+JJ)
          ENDDO
        ENDDO
        IA2%I(From+I+1)=NZ+1
@@ -813,7 +813,6 @@ CONTAINS
        IPerm%I(I)=I
        GcScale%D(I)=One
      ENDDO
-     !                
    END SUBROUTINE BMatrFact
 !
 !--------------------------------------------------------------------
@@ -957,7 +956,7 @@ CONTAINS
      INTEGER         :: I,J,K,L,JJ,KK
      INTEGER         :: NIntC,NZSpB
      !
-     NIntC=SIZE(B%IB,1)
+     NIntC=SIZE(B%IB%I,1)
      NZSpB=12*NIntC
      CALL New(ISpB,NIntC+1) 
      CALL New(JSpB2,NZSpB) 
@@ -966,7 +965,7 @@ CONTAINS
        ISpB%I(1)=1
        DO I=1,NIntC
          DO J=1,4
-           K=B%IB(I,J)
+           K=B%IB%I(I,J)
            IF(K==0) EXIT
            JJ=3*(J-1)
            KK=3*(K-1)
@@ -975,7 +974,7 @@ CONTAINS
              KK=KK+1
              JJ=JJ+1
              JSpB2%I(NZSpB)=KK
-             ASpB2%D(NZSpB)=B%B(I,JJ)
+             ASpB2%D(NZSpB)=B%B%D(I,JJ)
            ENDDO
          ENDDO
          ISpB%I(I+1)=NZSpB+1
@@ -986,7 +985,6 @@ CONTAINS
        ASpB%D(1:NZSpB)=ASpB2%D(1:NZSpB)
      CALL Delete(JSpB2)
      CALL Delete(ASpB2)
-     !
    END SUBROUTINE BtoSpB_1x1
 !
 !--------------------------------------------------------------------
@@ -1378,7 +1376,7 @@ CONTAINS
      INTEGER        :: NCart,NIntC,NZUtr,I
      !
      NCart=SIZE(CholData%ChRowPt%I)-1
-     NIntC=SIZE(B%IB,1)
+     NIntC=SIZE(B%IB%I,1)
      !
      CALL BtoSpB_1x1(B,ISpB,JSpB,ASpB)
      CALL PermCol(ISpB%I,JSpB%I,CholData%Perm%I)

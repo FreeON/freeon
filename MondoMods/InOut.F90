@@ -19,7 +19,7 @@ MODULE InOut
           Get_INT_RNK3, Get_INT_RNK4, Get_DBL_SCLR, &
           Get_DBL_VECT, Get_DBL_RNK2, Get_DBL_RNK3, &
           Get_DBL_RNK4, Get_CHR_SCLR,               &
-          Get_BMATR,    Get_Sp1x1,                  &
+          Get_Sp1x1,                                &
           Get_BondD,    Get_AtmB,                   &
           Get_CHR_VECT, Get_LOG_VECT, Get_INTC,     &
           Get_LOG_SCLR, Get_BSET,     Get_CRDS,     &
@@ -38,7 +38,7 @@ MODULE InOut
           Put_DBL_VECT, Put_DBL_RNK2, Put_DBL_RNK3, &
           Put_DBL_RNK4, Put_DBL_RNK6, Put_CHR_SCLR, &
           Put_CHR_VECT, Put_LOG_VECT,               &
-          Put_BMATR,    Put_Sp1x1,    Put_BondD,    &
+          Put_Sp1x1,    Put_BondD,                  &
           Put_AtmB,     Put_INTC,                   &
           Put_LOG_SCLR, Put_BSET,     Put_CRDS,     &
 #ifdef PARALLEL
@@ -393,6 +393,7 @@ CONTAINS
      CALL Get(A%N,                'NIntC'//TRIM(VarName),Tag_O=Tag_O)
      CALL New(A,A%N)                                           
      CALL Get(A%Atoms,            'Atoms'//TRIM(VarName),Tag_O=Tag_O)
+     CALL Get(A%Cells,            'Cells'//TRIM(VarName),Tag_O=Tag_O)
      CALL Get(A%Def,                'Def'//TRIM(VarName),Tag_O=Tag_O)
      CALL Get(A%Value,            'Value'//TRIM(VarName),Tag_O=Tag_O)
      CALL Get(A%ConstrValue,'ConstrValue'//TRIM(VarName),Tag_O=Tag_O)
@@ -416,6 +417,7 @@ CONTAINS
           CALL Put(A%N,                'NIntC'//TRIM(VarName),Tag_O=Tag_O)
           CALL Put(A%Def,                'Def'//TRIM(VarName),Tag_O=Tag_O)
           CALL Put(A%Atoms,            'Atoms'//TRIM(VarName),Tag_O=Tag_O)
+          CALL Put(A%Cells,            'Cells'//TRIM(VarName),Tag_O=Tag_O)
           CALL Put(A%Value,            'Value'//TRIM(VarName),Tag_O=Tag_O)
           CALL Put(A%ConstrValue,'ConstrValue'//TRIM(VarName),Tag_O=Tag_O)
           CALL Put(A%Active,          'Active'//TRIM(VarName),Tag_O=Tag_O)
@@ -430,57 +432,6 @@ CONTAINS
 !
 !---------------------------------------------------------------------
 !
-        SUBROUTINE Get_BMATR(A,VarName,Tag_O)
-          TYPE(BMATR),           INTENT(INOUT) :: A
-          CHARACTER(LEN=*),         INTENT(IN)    :: VarName
-          CHARACTER(LEN=*),OPTIONAL,INTENT(IN)    :: Tag_O
-          TYPE(META_DATA)                         :: Meta
-#ifdef PARALLEL 
-          IF(MyId==ROOT) THEN
-#endif 
-             Meta=SetMeta(NameTag(TRIM(VarName)//'IB',Tag_O),NATIVE_INT32,SIZE(A%IB,1)*SIZE(A%IB,2),.FALSE.)
-             CALL OpenData(Meta)
-             CALL ReadIntegerVector(Meta,A%IB)
-             CALL CloseData(Meta)
-
-             Meta=SetMeta(NameTag(TRIM(VarName)//'B',Tag_O),NATIVE_DOUBLE,SIZE(A%B,1)*SIZE(A%B,2),.FALSE.)
-             CALL OpenData(Meta)
-             CALL ReadDoubleVector(Meta,A%B)
-             CALL CloseData(Meta)
-#ifdef PARALLEL 
-          ENDIF
-          ! not supported yet. IF(InParallel)CALL Bcast(A)
-          !! STOP 'ERROR : Bcast in Get_BMatr (InOut.F90) not supported!'
-#endif 
-        END SUBROUTINE Get_BMATR
-
-        SUBROUTINE Put_BMATR(A,VarName,Tag_O)
-          TYPE(BMATR),           INTENT(INOUT) :: A
-          CHARACTER(LEN=*),         INTENT(IN)    :: VarName
-          CHARACTER(LEN=*),OPTIONAL,INTENT(IN)    :: Tag_O
-          TYPE(META_DATA)                         :: Meta
-#ifdef PARALLEL 
-          IF(MyId==ROOT) THEN
-#endif 
-             Meta=SetMeta(NameTag(TRIM(VarName)//'IB',Tag_O),NATIVE_INT32,SIZE(A%IB,1)*SIZE(A%IB,2),.FALSE.)
-             CALL OpenData(Meta)
-             CALL WriteIntegerVector(Meta,A%IB)
-             CALL CloseData(Meta)
-
-             Meta=SetMeta(NameTag(TRIM(VarName)//'B',Tag_O),NATIVE_DOUBLE,SIZE(A%B,1)*SIZE(A%B,2),.FALSE.)
-             CALL OpenData(Meta)
-             CALL WriteDoubleVector(Meta,A%B)
-             CALL CloseData(Meta)
-#ifdef PARALLEL 
-          ENDIF
-#endif 
-        END SUBROUTINE Put_BMATR
-
-
-        !-------------------------------------------------------------------------------
-
-
-        !-------------------------------------------------------------------------------
 
         SUBROUTINE Get_INT_RNK2(A,VarName,Tag_O)
           TYPE(INT_RNK2),           INTENT(INOUT) :: A
@@ -1437,15 +1388,20 @@ CONTAINS
                          CALL Put(A%NBlks,TRIM(Name)//'%NBlks')
                          CALL Put(A%NNon0,TRIM(Name)//'%NNon0')
                          CALL Put(A%RowPt,TRIM(Name)//'%RowPt',A%NAtms+1)
+#ifdef PARALLEL_CLONES
                          CALL Put(A%ColPt,TRIM(Name)//'%ColPt',A%NBlks)!,UnLimit_O=.TRUE.)
                          CALL Put(A%BlkPt,TRIM(Name)//'%BlkPt',A%NBlks)!,UnLimit_O=.TRUE.)
                          CALL Put(A%MTrix,TRIM(Name)//'%MTrix',A%NNon0)!,UnLimit_O=.TRUE.)
+#else
+                         CALL Put(A%ColPt,TRIM(Name)//'%ColPt',A%NBlks,UnLimit_O=.TRUE.)
+                         CALL Put(A%BlkPt,TRIM(Name)//'%BlkPt',A%NBlks,UnLimit_O=.TRUE.)
+                         CALL Put(A%MTrix,TRIM(Name)//'%MTrix',A%NNon0,UnLimit_O=.TRUE.)
+#endif
 !!$
-!!$            WRITE(*,*)' IN PUT, ATMS = ',A%NAtms,' Blks = ',A%NBlks,' NNon0 = ',A%NNon0
-!!$            WRITE(*,*) A%RowPt%I
-!!$            WRITE(*,*) A%ColPt%I
-!!$            WRITE(*,*) A%MTrix%D(1:A%NNon0)
-!!$
+!!$                         WRITE(*,*)' IN PUT, ATMS = ',A%NAtms,' Blks = ',A%NBlks,' NNon0 = ',A%NNon0
+!!$                         WRITE(*,*) A%RowPt%I
+!!$                         WRITE(*,*) A%ColPt%I
+!!$                         WRITE(*,*) A%MTrix%D(1:A%NNon0)
 
                          RETURN
                       ENDIF
@@ -2045,43 +2001,37 @@ CONTAINS
                     END SUBROUTINE Get_LOG_VECT
                     !-------------------------------------------------------------------------------
   SUBROUTINE Put_CellSet(CS,Name_O,Tag_O,Unlimit_O)
-    TYPE(CellSet)                        :: CS
+    TYPE(CellSet)                  :: CS
     CHARACTER(Len=*),Optional            :: Name_O
     CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Tag_O
     LOGICAL,         OPTIONAL,INTENT(IN) :: UnLimit_O
-    INTEGER                              :: Cell_Dimen
 !
-    Cell_Dimen = SIZE(CS%CellCarts%D,2)
     IF(PRESENT(Name_O))THEN
        CALL Put(CS%Radius   ,TRIM(Name_O)//'_cell_radius',Tag_O=Tag_O)
        CALL Put(CS%NCells   ,TRIM(Name_O)//'_cell_number',Tag_O=Tag_O)
-       CALL Put(Cell_Dimen  ,TRIM(Name_O)//'_cell_dimen' ,Tag_O=Tag_O)
        CALL Put(CS%CellCarts,TRIM(Name_O)//'_cell_vectors',Tag_O=Tag_O,Unlimit_O=Unlimit_O)
     ELSE
        CALL Put(CS%Radius   ,'cell_radius',Tag_O=Tag_O)
        CALL Put(CS%NCells   ,'cell_number',Tag_O=Tag_O)
-       CALL Put(Cell_Dimen  ,'cell_dimen' ,Tag_O=Tag_O)
        CALL Put(CS%CellCarts,'cell_vectors',Tag_O=Tag_O,Unlimit_O=Unlimit_O)
     ENDIF
   END SUBROUTINE Put_CellSet
 
   SUBROUTINE Get_CellSet(CS,Name_O,Tag_O)
-    TYPE(CellSet)                        :: CS
-    CHARACTER(Len=*),OPTIONAL            :: Name_O
+    TYPE(CellSet)                  :: CS
+    CHARACTER(Len=*),OPTIONAL      :: Name_O
     CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Tag_O
-    INTEGER                              :: Cell_Dimen
+    INTEGER                        :: NC
 !
     IF(PRESENT(Name_O))THEN
        CALL Get(CS%Radius   ,TRIM(Name_O)//'_cell_radius',Tag_O=Tag_O)
        CALL Get(CS%NCells   ,TRIM(Name_O)//'_cell_number',Tag_O=Tag_O)
-       CALL Get(Cell_Dimen  ,TRIM(Name_O)//'_cell_dimen' ,Tag_O=Tag_O)
-       CALL New_CellSet(CS,Cell_Dimen)
+       CALL New_CellSet(CS,CS%NCells)
        CALL Get(CS%CellCarts,TRIM(Name_O)//'_cell_vectors',Tag_O=Tag_O)
     ELSE
        CALL Get(CS%Radius   ,'cell_radius',Tag_O=Tag_O)
        CALL Get(CS%NCells   ,'cell_number',Tag_O=Tag_O)
-       CALL Get(Cell_Dimen  ,'cell_dimen' ,Tag_O=Tag_O)
-       CALL New_CellSet(CS,Cell_Dimen)
+       CALL New_CellSet(CS,CS%NCells)
        CALL Get(CS%CellCarts,'cell_vectors',Tag_O=Tag_O)
     ENDIF
   END SUBROUTINE Get_CellSet

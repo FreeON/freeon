@@ -1489,13 +1489,13 @@ CONTAINS
     !    'THE ORDER OF POLYNOMIAL EVALUATION, L = ' // XERN1 // &
     !    ' REQUESTED EXCEEDS THE HIGHEST ORDER FIT, NORD = ' // XERN2 //&
     !    ', COMPUTED BY POLFIT -- EXECUTION TERMINATED.', 8, 2)
-       CALL Halt('Order of polinomial requested is higher than N-1')
+       CALL Halt('Order of polynomial requested is higher than N-1')
        RETURN
 !C
   ! 12 CALL XERMSG ('SLATEC', 'PVALUE', &
   !     'INVALID INPUT PARAMETER.  ORDER OF POLYNOMIAL EVALUATION ' // &
   !     'REQUESTED IS NEGATIVE -- EXECUTION TERMINATED.', 2, 2)
-    12 CALL Halt('Order of polinomial requested is higher than N-1')
+    12 CALL Halt('Order of polynomial requested is negative.      ')
        RETURN
        END SUBROUTINE
 !*DECK XERCNT

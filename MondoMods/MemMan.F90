@@ -271,6 +271,8 @@ MODULE MemMan
            A%Def%C='BLANK'
          CALL New(A%Atoms,(/N,4/))
            A%Atoms%I=0
+         CALL New(A%Cells,(/N,12/))
+           A%Cells%I=0
          CALL New(A%Value,N)
            A%Value%D=Zero
          CALL New(A%Constraint,N)
@@ -290,16 +292,13 @@ MODULE MemMan
 !     
 !------------------------------------------------------
 !     
-      SUBROUTINE New_BMATR(A,N,M_O)
-         TYPE(BMATR),     INTENT(OUT) :: A
-         INTEGER,         INTENT(IN)  :: N
-         INTEGER,OPTIONAL,INTENT(IN)  :: M_O
-         INTEGER                      :: M
+      SUBROUTINE New_BMATR(A,N)
+         TYPE(BMATR) :: A
+         INTEGER     :: N
          CALL AllocChk(A%Alloc)
-         M=1; IF(PRESENT(M_O))M=M_O
-         ALLOCATE(A%IB(M:N,1:4),STAT=MemStatus)
-         ALLOCATE(A%B(M:N,1:12),STAT=MemStatus)
-         CALL IncMem(MemStatus,0,0)
+         CALL New(A%IB,(/N,4/))
+         CALL New(A%B,(/N,12/))
+         CALL New(A%BL,(/N,9/))
          A%Alloc=ALLOCATED_TRUE
       END SUBROUTINE New_BMATR
 !
@@ -906,6 +905,7 @@ MODULE MemMan
          A%N=0
          CALL Delete(A%Def)
          CALL Delete(A%Atoms)
+         CALL Delete(A%Cells)
          CALL Delete(A%Value)
          CALL Delete(A%Constraint)
          CALL Delete(A%ConstrValue)
@@ -918,11 +918,10 @@ MODULE MemMan
       END SUBROUTINE Delete_INTC
 !     
       SUBROUTINE Delete_BMATR(A)
-         TYPE(BMATR)     :: A
-         INTEGER        :: MemStatus
-         DEALLOCATE(A%IB,STAT=MemStatus)
-         DEALLOCATE(A%B,STAT=MemStatus)
-         CALL DecMem(MemStatus,0,0)
+         TYPE(BMATR)    :: A
+         CALL Delete(A%IB)
+         CALL Delete(A%B)
+         CALL Delete(A%BL)
          A%Alloc=ALLOCATED_FALSE
       END SUBROUTINE Delete_BMATR
 !     
@@ -1409,13 +1408,13 @@ MODULE MemMan
 !--------------------------------------------------------------------------
 ! Create the CellSet
 !--------------------------------------------------------------------------
-  SUBROUTINE New_CellSet(CS,NCellDim)
+  SUBROUTINE New_CellSet(CS,NCELL)
     TYPE(CellSet)                    :: CS   
-    INTEGER                          :: NCellDim
+    INTEGER                          :: NCELL
 !
-    CALL New(CS%CellCarts,(/3,NCellDim/)) 
-    CS%CellCarts%D = Zero
-    CS%Alloc       = ALLOCATED_TRUE
+    CS%NCells = NCELL
+    CALL New(CS%CellCarts,(/3,CS%NCells/)) 
+    CS%Alloc=ALLOCATED_TRUE
 !
   END SUBROUTINE New_CellSet
 !--------------------------------------------------------------------------

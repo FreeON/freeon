@@ -12,7 +12,6 @@ MODULE SetXYZ
                        Set_BCSR_EQ_BCSR,          &
                        Set_RNK2_EQ_BCSR,          &
                        Set_BCSR_EQ_RNK2,          &
-                       Set_BCSR_EQ_BMATR,         &
                        Set_DBL_VECT_EQ_BCSRColVect,&
                        Set_INTC_EQ_INTC,          &
                        Set_BMATR_EQ_BMATR,          &
@@ -207,85 +206,6 @@ MODULE SetXYZ
       END SUBROUTINE Set_RNK2_EQ_BCSR_Dim
 !
 !---------------------------------------------------------------------
-!
-      SUBROUTINE Set_BCSR_EQ_BMATR(A,B)
-         TYPE(BMATR), INTENT(INOUT) :: B        
-         TYPE(BCSR),     INTENT(INOUT) :: A        
-         INTEGER                       :: I,J,P,Q,OI,OJ,MA,NA,K,KK,M,MM,IC,K1,K2
-         INTEGER                       :: BlkPt,II,NNewBlk,NIntC,NatLoc
-         INTEGER                       :: N,N1,N2,L
-         TYPE(DBL_RNK2) :: AuxBlk
-	 TYPE(INT_VECT) :: Atoms,InvAtoms
-!
-         IF(AllocQ(A%Alloc))  &
-         CALL Delete(A)
-         CALL New(A)
-	 A%Natms=Natoms
-	 NIntC=SIZE(B%IB,1)
-!
-	 CALL New(Atoms,12)
-	 CALL New(InvAtoms,Natoms)
-         NNewBlk=0
-         BlkPt=1
-         A%RowPt%I(1)=1
-!
-         DO I=1,A%Natms
-!
-	   Atoms%I=0
-	   OI=OffS%I(I)-1
-           NatLoc=0
-	   DO J=1,3
-	     K=OI+J
-	     IF(K>NIntC) EXIT
-             DO L=1,4
-	       KK=B%IB(K,L)
-	       IF(KK==0) EXIT
-	       IF(ANY(Atoms%I(:)==KK)) CYCLE
-               NatLoc=NatLoc+1
-               Atoms%I(NatLoc)=KK
-	       InvAtoms%I(KK)=NatLoc
-	     ENDDO
-	   ENDDO
-!
-           CALL New(AuxBlk,(/3,3*NatLoc/))
-           AuxBlk%D=Zero 
-!
-	   DO J=1,3
-	     K=OI+J
-	     IF(K>NIntC) EXIT
-             DO L=1,4
-	       KK=B%IB(K,L)
-	       IF(KK==0) EXIT
-	       N=InvAtoms%I(KK)
-	       K1=3*(L-1)+1
-	       K2=3*L
-	       N1=3*(N-1)+1
-	       N2=3*N
-	       AuxBlk%D(J,N1:N2)=B%B(K,K1:K2)
-	     ENDDO
-	   ENDDO
-!
-           DO J=1,NatLoc
-	     N1=3*(J-1)+1
-	     N2=3*J
-             NNewBlk=NNewBlk+1      
-	     A%ColPt%I(NNewBlk)=Atoms%I(J) !!! serial number of atom
-	     KK=BlkPt+(J-1)*9
-	     A%BlkPt%I(NNewBlk)=KK
-             CALL BlockToBlock2(3,3,AuxBlk%D(1:3,N1:N2),A%MTrix%D(KK:))
-           ENDDO
-	   A%RowPt%I(I+1)=NNewBlk+1
-	   BlkPt=BlkPt+9*NatLoc
-	   CALL Delete(AuxBlk)
-!
-	 ENDDO
-	   A%NBlks=NNewBlk
-	   A%NNon0=NNewBlk*9
-!
-	 CALL Delete(InvAtoms)
-	 CALL Delete(Atoms)
-!
-      END SUBROUTINE Set_BCSR_EQ_BMATR
 !
 !======================================================================
 !     Transform a dense matrix (Rank 2 array) into a BCSR matrix 
@@ -861,20 +781,20 @@ MODULE SetXYZ
         TYPE(BMATR) :: A,B
         INTEGER     :: NIntC
 !
-        NIntC=SIZE(B%IB,1)
+        NIntC=SIZE(B%IB%I,1)
 !
         IF(.NOT.AllocQ(A%Alloc)) THEN
           CALL New(A,NIntC)
         ELSE
-          IF(SIZE(A%IB,1)<NIntC) THEN
+          IF(SIZE(A%IB%I,1)/=NIntC) THEN
             CALL Delete(A)
             CALL New(A,NIntC)
           ENDIF
         ENDIF
 !
-        A%IB=B%IB        
-        A%B =B%B        
-!
+        A%IB%I =B%IB%I
+        A%B%D  =B%B%D
+        A%BL%D =B%BL%D
       END SUBROUTINE  Set_BMATR_EQ_BMATR
 !
 !===============================================================
@@ -909,6 +829,7 @@ MODULE SetXYZ
          To2=Start+(To-From)
         IntCsCopy%Def%C(Start:To2)        =IntCs%Def%C(From:To)
         IntCsCopy%Atoms%I(Start:To2,1:4)  =IntCs%Atoms%I(From:To,1:4)
+        IntCsCopy%Cells%I(Start:To2,1:12) =IntCs%Cells%I(From:To,1:12)
         IntCsCopy%Value%D(Start:To2)      =IntCs%Value%D(From:To)
         IntCsCopy%Constraint%L(Start:To2) =IntCs%Constraint%L(From:To)
         IntCsCopy%ConstrValue%D(Start:To2)=IntCs%ConstrValue%D(From:To)

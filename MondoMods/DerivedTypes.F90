@@ -285,6 +285,7 @@ MODULE DerivedTypes
      INTEGER        :: N 
      TYPE(CHR_VECT) :: Def 
      TYPE(INT_RNK2) :: Atoms
+     TYPE(INT_RNK2) :: Cells
      TYPE(DBL_VECT) :: Value
      TYPE(LOG_VECT) :: Constraint
      TYPE(DBL_VECT) :: ConstrValue
@@ -548,22 +549,12 @@ MODULE DerivedTypes
 !
 !---------------------------------------------------------------
 !
-#ifdef POINTERS_IN_DERIVED_TYPES
-!
    TYPE BMATR
      INTEGER        :: Alloc     !-- Allocation key
-     INTEGER,POINTER,DIMENSION(:,:) :: IB
-     REAL(DOUBLE),POINTER,DIMENSION(:,:) :: B
+     TYPE(INT_RNK2) :: IB
+     TYPE(DBL_RNK2) :: B
+     TYPE(DBL_RNK2) :: BL
    END TYPE BMATR
-#else
-!
-   TYPE BMATR
-     INTEGER        :: Alloc     !-- Allocation key
-     INTEGER,ALLOCATABLE,DIMENSION(:,:) :: IB
-     REAL(DOUBLE),ALLOCATABLE,DIMENSION(:,:) :: B
-   END TYPE BMATR
-!
-#endif
 !
    TYPE Cholesky
      INTEGER        :: Alloc     !-- Allocation key
