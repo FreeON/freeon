@@ -29,61 +29,44 @@ include $(MONDO_COMPILER)
 include $(MONDO_HOME)/Includes/Suffixes
 include $(MONDO_HOME)/Includes/RemoveAll
 #
-Libs =  $(F90_LIBRARIES)
+all:	small 
 #
-TstObjs=Test.o
+full:	all big
 #
-ReleaseFiles=Test.x
-#
-all:	test small 
-#
-full:	all  big
-#
-pbs:	test small_pbs periodic_pbs big_pbs
-#------------------------------------------------------------------
-#       Code to parse *.ref and *.out, checking numbers for correctness
-test:	$(TstObjs)
-	$(LD) $(LDFLAGS) Test $(TstObjs) $(LibOpts) $(Libs) 
-	rm -rf Validation.log
-#------------------------------------------------------------------
 #       Run validation suite sequentialy
-serial:	small periodic big
+#
+serial:	small big
 #
 small:
-	m SiF4.inp    SiF4.out;              ./Test SiF4.out    SiF4.ref
-	m Urea.inp    Urea.out;              ./Test Urea.out    Urea.ref
-	m Water.inp   Water.out;             ./Test Water.out   Water.ref 
-	m Biotin.inp  Biotin.out;            ./Test Biotin.out  Biotin.ref
-#
-periodic:
-	m Mg0.inp          MgO.out;          ./Test MgO.out           MgO.ref
+	m Water.inp   Water.out      Water.log
+	m NH3.inp     NH3.out        NH3.log
+	m Biotin.inp  Biotin.out     Biotin.log    
+	m Diamond.inp Diamond.out    Diamond.log
+	m Na2Cl2.inp  Na2Cl2.out     Na2Cl2.log
 #
 big:	
-	m Caffiene.inp     Caffiene.out;     ./Test Caffiene.out      Caffiene.ref
-	m BetaCarotene.inp BetaCarotene.out; ./Test BetaCarotene.out  BetaCarotene.ref 
-	m Chlorophyll.inp  Chlorophyll.out;  ./Test Chlorophyll.out   Chlorophyll.ref
-	m Vancomycin.inp   Vancomycin.out;   ./Test Vancomycin.out    Vancomycin.ref
-#-----------------------------------------------------------------------------------
+	m Caffiene.inp     Caffiene.out      Caffine.log
+	m MgO.inp          MgO.out           MgO.log
+	m BetaCarotene.inp BetaCarotene.out  BetaCarotene.log
+	m Chlorophyll.inp  Chlorophyll.out;  Chlorophyll.log
+	m Vancomycin.inp   Vancomycin.out;   Vancomycin.log
+#
 #       Submit validation suite to pbs queing system 
 #
-small_pbs:
+pbs:
 	chmod u+x sub_pbs
-	./sub_pbs SiF4
-	./sub_pbs Urea 
 	./sub_pbs Water
+	./sub_pbs NH3
 	./sub_pbs Biotin
-#
-periodic_pbs:
-	chmod u+x sub_pbs
+	./sub_pbs Diamond
+	./sub_pbs Na2Cl2
 	./sub_pbs MgO
-#
-big_pbs:
 	./sub_pbs Caffiene
 	./sub_pbs BetaCarotene
 	./sub_pbs Chlorophyll
 	./sub_pbs Vancomycin
-#--------------------------------------------
-release:purge $(ReleaseFiles) 
+#
+release:  purge 
 #
 purge:	clean 
 	rm -f $(REMOVESRCE)
@@ -92,11 +75,11 @@ purge:	clean
 	rm -f *.out
 	rm -f *.log
 	rm -f *.car
-	rm -f *.xyz
+	rm -f *.xsf *.xyz *.pdb*
 #
 clean:
 	rm -f $(REMOVEMISC) $(REMOVEMODS)
-	rm -f *.o* *.pbs* *.pdb*
+	rm -f *.o* *.pbs* 
 	rm -f *.inf.ascii
 	rm -rf  core core.* core*
 	rm -f PI*

@@ -21,7 +21,7 @@ DebugAll=(MinDebug,CheckSums)
 
 SCFMethod=(RH,RH)
 ModelChem=(HF,BLYPxc) 
-BasisSets=(User2,User2)
+BasisSets=(STO-3G,User2)
 Accuracy =(Loose,Good)
 
 PBC=(T,T,T)
