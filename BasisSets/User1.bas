@@ -1,8 +1,6 @@
-Example of a "made up" basis set, CEP-31G* or
-SBKJC with an added polarization function.  
-Used by test Na2Cl2.inp.  Note that MondoSCF 
-supports two user defined basis set files, User1 and User2.
-
+Example of a "made up" basis set CEP-31G* or SBKJC with 
+an added polarization function for NA and CL.  Used by test 
+Na2Cl2.inp.  
 
  ****
  NA  0
