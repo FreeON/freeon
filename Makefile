@@ -30,16 +30,16 @@
 #
 include $(MONDO_HOME)/Includes/RemoveAll
 #
-all:	CatCpy mm s e x n 1 2 
+all:	CatCpy mm s e x 1 2 n v
 #
-clean:	cmm cs ce cx cn c1 c2
+clean:	cmm cs ce cx c1 c2 cn cv
 	rm -f $(REMOVEALL)
 	rm -f \#*
 	rm -f *~
 #
-purge:	pmm ps pe px pn p1 p2 pMisc
+purge:	pmm ps pe px p1 p2 pn pv pMisc
 #
-release: rmLegacy rmm rs re rx rn r1 r2 tarball
+release: rmLegacy rmm rs re rx r1 r2 rv rn tarball
 #
 backup:	purge rmLegacy tarball
 #
@@ -50,15 +50,14 @@ rmLegacy:
 	rm -rf ONX/MASONX
 	rm -rf ONX/PONX*
 	rm -rf ONX/SONX
-	rm -rf Inpts/DEVELOP
-	rm -rf Inpts/PROTEINS
-	rm -rf Inpts/HMX
+	rm -rf Inpts
+	rm -f  README; touch README
 #
 CatCpy:	
 	cat $(MONDO_HOME)/Includes/CopyrightNotice.txt
 	sleep 1
-#	cat $(MONDO_HOME)/README
-#	sleep 3
+	cat $(MONDO_HOME)/README
+	sleep 5
 #----------------------------------------------
 #   MondoMods
  mm:	
@@ -99,16 +98,6 @@ px:
 	$(MAKE) -i -C XForm purge
 cx:	
 	$(MAKE) -i -C XForm clean
-#----------------------------------------------
-#     Geometry optimization via Quasi Newton
- n:	
-	$(MAKE)    -C QuNew
-rn:	
-	$(MAKE) -i -C QuNew release
-pn:	
-	$(MAKE) -i -C QuNew purge
-cn:	
-	$(MAKE) -i -C QuNew clean
 #----------------------------------------------
 #      One electron routines
  1:
@@ -157,9 +146,29 @@ ph:
 ch:	
 	$(MAKE) -i -C HiCu clean
 #----------------------------------------------
+#     Geometry optimization via Quasi Newton
+ n:	
+	$(MAKE)    -C QuNew
+rn:	
+	$(MAKE) -i -C QuNew release
+pn:	
+	$(MAKE) -i -C QuNew purge
+cn:	
+	$(MAKE) -i -C QuNew clean
+#----------------------------------------------
+#     DX Visualization support
+ v:	
+	$(MAKE)    -C Vis
+rv:	
+	$(MAKE) -i -C Vis release
+pv:	
+	$(MAKE) -i -C Vis purge
+cv:	
+	$(MAKE) -i -C Vis clean
+#----------------------------------------------
 #   Cleaning of other directories 
 #
-pMisc:	pLib pWrk pInp pScr pPWD
+pMisc:	pLib pInp pScr pPWD
 #
 pLib:	
 	rm -rf $(MONDO_HOME)/Libs/*
@@ -167,12 +176,10 @@ pLib:
 pExec:	
 	rm -rf $(MONDO_HOME)/Exec/*
 #
-pWrk:	
-	$(MAKE) -i -C $(MONDO_WORK) clean
-#
 pInp:	
-	$(MAKE) -i -C $(MONDO_HOME)/Inpts/WATER    purge
-	$(MAKE) -i -C $(MONDO_HOME)/Inpts/Validate purge
+	$(MAKE) -i -C $(MONDO_HOME)/Benchmarks/PROTEINS purge
+	$(MAKE) -i -C $(MONDO_HOME)/Benchmarks/WATER purge
+	$(MAKE) -i -C $(MONDO_HOME)/Validate purge
 #
 pScr:	
 	rm  -rf $(MONDO_SCRATCH)/*.S
