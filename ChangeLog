@@ -1,3 +1,82 @@
+2004-01-27 11:09  mchalla
+
+	* SCFeqs/: DenMatMethods.F90, Makefile, P2Use.F90: Ok, this is
+	still probably not perfect, but hopefully stable.  I've added a
+	different perturbation expansion P'=P -2 P.(S-S').P followed by
+	AO-TC2 (SP2).  This should always at least yeild an AO DM with the
+	right trace.
+
+2004-01-26 11:21  vweber
+
+	* TwoE/: Gradients.m, dInt1111.F90, dInt1113.F90, dInt1131.F90,
+	dInt1133.F90, dInt1311.F90, dInt1313.F90, dInt1331.F90,
+	dInt1333.F90, dInt3111.F90, dInt3113.F90, dInt3131.F90,
+	dInt3133.F90, dInt3311.F90, dInt3313.F90, dInt3331.F90,
+	dInt3333.F90: Put back the periodic gradient.
+
+2004-01-25 23:21  nemeth
+
+	* MondoSCF2/: ControlStructures.F90, GDIIS.F90, GeomOptKeys.F90,
+	InCoords.F90, Optimizer.F90, ParseGeomOpt.F90: New input options
+	added, to control maximum allowed stepsize. Eg. MaxAngle=10.0
+	restricts angle-displacements to be smaller than 10 degree.
+	MaxStre=0.05 restricts bondlength displacements to be smaller than
+	0.05 angstroems.
+
+2004-01-23 17:37  nemeth
+
+	* QCTC/PoleTree.F90: A "`" has been deleted.
+
+2004-01-23 16:42  mchalla
+
+	* MondoSCF2/SCFs.F90: Hopefully fixed restarts.  Again.  Energy
+	should be strictly decreasing now.
+
+2004-01-23 13:55  tymczak
+
+	* ONX/NONX/ONX.F90: [no log message]
+
+2004-01-23 13:36  tymczak
+
+	* MondoMods/PrettyPrint.F90: Redid some of the Print_Force
+	subroutine
+
+2004-01-23 13:35  tymczak
+
+	* MondoMods/LinAlg.F90: On the Matrix Multiply, on Fail prints out
+	matrix allocation sizes
+
+2004-01-23 13:32  tymczak
+
+	* QCTC/: JForce.F90, PoleTree.F90: PoleTree.F90:
+	
+	    Split the boxes along the largest direction, right now
+	commented out
+	    Am testing this
+	
+	 JForce.F90:
+	    New JForce Printout
+
+2004-01-23 11:26  mchalla
+
+	* SCFeqs/P2Use.F90: Cut down the number of forced oscillating SP2
+	steps in extrapolation.  Seems to work better now.  VS:
+	-------------------------------------------------------------------
+	---
+
+2004-01-22 15:56  vweber
+
+	* OneE/MBlok.F90: Fixed an array problem.
+
+2004-01-22 15:42  tymczak
+
+	* Docs/PBC_Exchange/: LinearPBCExchange.ps,
+	Diamond_Energy_vs_a.dat, Timing_Diamond_ONX.dat: [no log message]
+
+2004-01-22 09:26  mchalla
+
+	* ChangeLog: [no log message]
+
 2004-01-21 11:33  vweber
 
 	* OneE/: MakeRho.F90, ParaMakeRho.F90: Minor changes.
