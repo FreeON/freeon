@@ -1,16 +1,38 @@
 **************************************************
-This is an alpha release of MondoSCF.  It is not
-perfect.  Please send your bug reports and 
+This is an alpha release of MondoSCF.  It is far 
+from perfect.  Please send your bug reports and 
 suggestions for improvements to MChalla@LANL.Gov 
 with the subject "MONDO_BUGS".  
 
-KNOWN:
+Find an example .cshrc file in MONDO/Scripts/CSHRC
+Find example inputs in MONDO/Validate
+Find compiler flags in MONDO/Includes/CompilerSpecifics.X.Y
 
-o The F90 ONX code for exact exchange is not 100%
-  Matrix builds may be slow, and forces incorrect
+To make MondoSCF, set up your .cshrc.  Edit your
+CompilerSpecifics file.  Go the the main directory
+and type "make all".  To invoke MondoSCF, you type
+"m x.inp", or "m x.inp y.out", or "m x.inp y.out z.log"
+
+Short cuts for making and changing to different 
+directories may be found in MONDO/Scripts/MondoSetUp 
+and in the main Makefile.  You do not have the main
+MondoSCF source.  You have reprocessed little postfix
+files, eg *.f90 *.f *.c.  Be careful not to issue 
+purge commands with these files, as purge will delete
+your source.  This goes also for "make backup"
+
+KNOWN PROBLEMS:
+
+o No documentation.
+
+o The F90 ONX code for exact exchange is not stable.
+  Currently, matrix builds only work under Intel or 
+  AMD Linux. Matrix builds may be slow and forces 
+  incorrect.  
 
 o Periodic boundary conditions with small exponent
-  ~1.D-2 basis sets may result in instabilities
+  ~1.D-2 basis sets may result in instabilities.
+  Periodics do not work yet with exact exchange.
 
 o Clean up of scratch files less than perfect.
   Want to "mk pScr" after big runs to clean scratch.
