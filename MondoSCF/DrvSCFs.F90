@@ -592,8 +592,7 @@ MODULE DrvSCFs
 !
    CONVF=1000.D0*JtoHartree/C_Avogadro
    CONVF2=1000.D0*JtoHartree/C_Avogadro/AngstromsToAU
-!  LJCutOff=28.D0 !!! in Bohrs
-   LJCutOff=56.D0 !!! in Bohrs
+   LJCutOff=14.D0 !!! in Angstroms
    CurG=IntToChar(Ctrl%Current(3)) !!! Current Geom
 !
    IF(Ctrl%Grad==GRAD_NO_GRAD) THEN
@@ -625,11 +624,11 @@ MODULE DrvSCFs
 !
 !mm_coul=0.d0
 !call put(mm_coul,'mm_coul',Tag_O=CurG)
-  IF(MMOnly()) Then
-    CALL MM_COULOMBENERGY(Ctrl)
-    CALL GET(MM_COUL,'MM_COUL',Tag_O=CurG)
-    MM_COUL=MM_COUL/CONVF
-  ENDIF
+ IF(MMOnly()) Then
+   CALL MM_COULOMBENERGY(Ctrl)
+   CALL GET(MM_COUL,'MM_COUL',Tag_O=CurG)
+   MM_COUL=MM_COUL/CONVF
+ ENDIF
 !
 ! Do MM Covalent terms
 !
@@ -641,34 +640,41 @@ MODULE DrvSCFs
        E_LJ_EXCL=Zero
        E_C_EXCL=Zero
 !
+! Convert coordinates into Angstroms
+!
+  GMLoc%Carts%D=GMLoc%Carts%D/AngstromsToAU
+#ifdef PERIODIC
+  GMLoc%PBC%BoxShape=GMLoc%PBC%BoxShape/AngstromsToAU
+#endif
+!
      IF(CalcMMForce) THEN
        CALL New(GrdMM,(/3,MMNatms/))
        GrdMM%D(:,:)=Zero
 !
-  GMLoc%Carts%D=GMLoc%Carts%D/AngstromsToAU
          CALL Bond_Energy(EBond,GMLoc%Carts%D,GradLoc=GrdMM)
          CALL Angle_Energy(EAngle,GMLoc%Carts%D,GradLoc=GrdMM)
          CALL Torsion_Energy(ETorsion,GMLoc%Carts%D,GradLoc=GrdMM)
          CALL OutOfPlane_Energy(EOutOfPlane,GMLoc%Carts%D,GradLoc=GrdMM)
 !
-  GMLoc%Carts%D=AngstromsToAU*GMLoc%Carts%D
          CALL ENERGY_LENNARD_JONES(GMLoc,ELJ,LJCutOff,GrdMM)
          CALL EXCL(GMLoc,E_LJ_EXCL,E_C_EXCL,GrdMM)
 !
      ELSE
 !
-  GMLoc%Carts%D=GMLoc%Carts%D/AngstromsToAU
           CALL Bond_Energy(EBond,GMLoc%Carts%D)
           CALL Angle_Energy(EAngle,GMLoc%Carts%D)
           CALL Torsion_Energy(ETorsion,GMLoc%Carts%D)
           CALL OutOfPlane_Energy(EOutOfPlane,GMLoc%Carts%D)
 !
-  GMLoc%Carts%D=AngstromsToAU*GMLoc%Carts%D
           CALL ENERGY_LENNARD_JONES(GMLoc,ELJ,LJCutOff)
           CALL EXCL(GMLoc,E_LJ_EXCL,E_C_EXCL)
 !
      ENDIF
 !
+  GMLoc%Carts%D=AngstromsToAU*GMLoc%Carts%D
+#ifdef PERIODIC
+  GMLoc%PBC%BoxShape=AngstromsToAU*GMLoc%PBC%BoxShape
+#endif
    IF(CalcMMForce) THEN
 !
 ! Convert MM _gradients_ into atomic units and add the rest of forces
