@@ -29,6 +29,7 @@ MODULE PrettyPrint
                        Print_HGRHO
    END INTERFACE
    INTERFACE PChkSum   
+      MODULE PROCEDURE Print_CheckSum_DBL_VECT
       MODULE PROCEDURE Print_CheckSum_BCSR
       MODULE PROCEDURE Print_CheckSum_HGRho
 #ifdef PARALLEL 
@@ -639,6 +640,53 @@ MODULE PrettyPrint
 !      
 !===============================================================
 !
+     SUBROUTINE Print_CheckSum_DBL_VECT(A,Name,Unit_O,Proc_O)
+        TYPE(DBL_VECT), INTENT(IN)           :: A
+        REAL(DOUBLE)                         :: Chk
+        CHARACTER(LEN=*)                     :: Name
+        INTEGER,         OPTIONAL,INTENT(IN) :: Unit_O
+        CHARACTER(LEN=*),OPTIONAL            :: Proc_O
+        INTEGER                              :: I,PU
+        CHARACTER(LEN=DEFAULT_CHR_LEN)       :: ChkStr
+        IF(PrintFlags%Key/=DEBUG_MAXIMUM)RETURN
+!--------------------------------------------------------------------------
+!       Compute check sum
+        Chk=Zero
+        DO I=1,SIZE(A%D)
+           Chk=Chk+A%D(I)*A%D(I)
+        ENDDO
+        Chk=SQRT(Chk) 
+#ifdef PARALLEL
+        IF(MyID==ROOT)THEN
+#endif
+!--------------------------------------------------------------------------
+!          Generate check string
+           IF(PRESENT(Proc_O).AND.PrintFlags%Fmt/=DEBUG_MMASTYLE)THEN
+              ChkStr=ProcessName(Proc_O)//TRIM(Name) &
+                   //' check sum = '//TRIM(DblToChar(Chk))
+           ELSEIF(PrintFlags%Fmt/=DEBUG_MMASTYLE)THEN
+              ChkStr=TRIM(Name)//' check sum = '//TRIM(DblToChar(Chk))
+           ELSEIF(PRESENT(Proc_O).AND.PrintFlags%Fmt==DEBUG_MMASTYLE)THEN
+              ChkStr='(* '//TRIM(Proc_O)//' *)'//'ChkSum'//TRIM(Name)       &
+                   //' = '//TRIM(FltToChar(FRACTION(Chk))) &
+                   //'*2^('//TRIM(IntToChar(EXPONENT(Chk)))//');'
+           ELSEIF(PrintFlags%Fmt==DEBUG_MMASTYLE)THEN
+              ChkStr='ChkSum'//TRIM(Name)//' = '//TRIM(FltToChar(FRACTION(Chk))) &
+                   //'*2^('//TRIM(IntToChar(EXPONENT(Chk)))//');'
+           ELSE 
+              CALL Halt(' Logic error in Print_CheckSum_BCSR')
+           ENDIF
+!--------------------------------------------------------------------------
+!          Write check string
+           PU=OpenPU(Unit_O=Unit_O)
+           WRITE(PU,'(1x,A)')TRIM(ChkStr)
+           CALL ClosePU(PU)
+#ifdef PARALLEL
+        ENDIF
+#endif
+   END SUBROUTINE Print_CheckSum_DBL_VECT
+
+
      SUBROUTINE Print_CheckSum_BCSR(A,Name,Proc_O,Unit_O)
         TYPE(BCSR), INTENT(IN)               :: A
         REAL(DOUBLE)                         :: Chk
@@ -647,16 +695,20 @@ MODULE PrettyPrint
         CHARACTER(LEN=*),OPTIONAL            :: Proc_O
         INTEGER                              :: I,PU
         CHARACTER(LEN=DEFAULT_CHR_LEN)       :: ChkStr
+!--------------------------------------------------------------------------
         IF(PrintFlags%Key/=DEBUG_MAXIMUM)RETURN
+!--------------------------------------------------------------------------
+!       Compute check sum
         Chk=Zero
         DO I=1,A%NNon0
            Chk=Chk+A%MTrix%D(I)*A%Mtrix%D(I)
         ENDDO
-!        Chk=SQRT(Chk) avoid this to maintain F77 complience
+        Chk=SQRT(Chk) 
 #ifdef PARALLEL
         IF(MyID==ROOT)THEN
 #endif
-!           CALL OpenASCII(OutFile,Out)
+!--------------------------------------------------------------------------
+!          Create check string
            IF(PRESENT(Proc_O).AND.PrintFlags%Fmt/=DEBUG_MMASTYLE)THEN
               ChkStr=ProcessName(Proc_O)//TRIM(Name) &
                    //' matrix check sum = '//TRIM(DblToChar(Chk))
@@ -672,6 +724,8 @@ MODULE PrettyPrint
            ELSE 
               CALL Halt(' Logic error in Print_CheckSum_BCSR')
            ENDIF
+!--------------------------------------------------------------------------
+!          Write check string
            PU=OpenPU(Unit_O=Unit_O)
            WRITE(PU,'(1x,A)')TRIM(ChkStr)
            CALL ClosePU(PU)
@@ -698,8 +752,7 @@ MODULE PrettyPrint
       ENDDO
       DotPrd=Reduce(Chk)
       IF(MyID==ROOT)THEN
-!         Chk=SQRT(DotPrd) ! maintain F77 complience for now ...
-         Chk=DotPrd
+         Chk=SQRT(DotPrd) 
          IF(PRESENT(Proc_O).AND.PrintFlags%Fmt/=DEBUG_MMASTYLE)THEN
             ChkStr=ProcessName(Proc_O)//TRIM(Name) &
                  //' matrix check sum = '//TRIM(DblToChar(Chk))
