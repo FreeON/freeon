@@ -111,12 +111,10 @@ c1:
 #----------------------------------------------
 #     Two electron directories
 #
-#     ONX is temporarily disabled...
-#  
- 2:	q   h #o
+ 2:	q   h  o
 r2:	rq rh  ro
-c2:	cq ch #co
-p2:	ph pq #po
+c2:	cq ch  co
+p2:	ph pq  po
 #----------------------------------------------
 #     ONX
  o:	
