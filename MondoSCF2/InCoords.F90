@@ -412,8 +412,8 @@ CONTAINS
      W=W/RW
      CosPhiU=DOT_PRODUCT(U,W)
      CosPhiV=DOT_PRODUCT(V,-W)
-     SinPhiU=SQRT(One-CosPhiU*CosPhiU)
-     SinPhiV=SQRT(One-CosPhiV*CosPhiV)
+     SinPhiU=SQRT(ABS(One-CosPhiU*CosPhiU))
+     SinPhiV=SQRT(ABS(One-CosPhiV*CosPhiV))
      SinPhiU2=SinPhiU*SinPhiU
      SinPhiV2=SinPhiV*SinPhiV
      IF(Conv*ASIN(SinPhiU)<TorsCrit.OR.Conv*ASIN(SinPhiV)<TorsCrit) THEN
@@ -3221,7 +3221,7 @@ CONTAINS
      !
      CALL BMatrix(XYZ,IntCs,B,PBCDim,LinCrit,TorsLinCrit)
      CALL CleanBConstr(IntCs,B,NatmsLoc)
-  !  CALL CleanBLConstr(XYZ,IntCs,B,PBCDim)
+!    CALL CleanBLConstr(XYZ,IntCs,B,PBCDim)
 write(*,*) 'B%BL hardwired to zero'
 B%BL%D=Zero
      !
