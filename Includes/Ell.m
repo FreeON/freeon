@@ -1,2 +1,2 @@
- HGEll=            5 ;
- SPEll=            5 ;
+ HGEll=           5 ;
+ SPEll=           5 ;
