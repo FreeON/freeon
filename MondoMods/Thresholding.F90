@@ -16,6 +16,7 @@ MODULE Thresholding
 !-------------------------------------------------------------------------
 ! Intermediate thresholds
 !
+  INTEGER,SAVE        :: MinRadialAngSym
   REAL(DOUBLE), SAVE  :: MinRadialExponent
   REAL(DOUBLE), SAVE  :: MinDensityExponent
   REAL(DOUBLE), SAVE  :: AtomPairDistanceThreshold  ! Atom pairs
@@ -26,18 +27,22 @@ MODULE Thresholding
 !    Set and load global threholding parameters
 !====================================================================================================
      SUBROUTINE SetThresholds(CurBase)
-         INTEGER          :: NExpt
+         INTEGER          :: NExpt,Lndx
          TYPE(DBL_VECT)   :: Expts
          CHARACTER(LEN=*) :: CurBase
 !        Get the primary thresholds
          CALL Get(Thresholds,Tag_O=CurBase)
 !        Get distribution exponents
          CALL Get(NExpt,'nexpt',Tag_O=CurBase)
+         CALL Get(Lndx ,'lndex',Tag_O=CurBase)
          CALL New(Expts,NExpt)
          CALL Get(Expts,'dexpt',Tag_O=CurBase)
          MinDensityExponent=Half*Expts%D(1)
 !        Xi_Min=Zeta*Zeta/(Zeta+Zeta)=Zeta_Min/2
          MinRadialExponent=Half*Expts%D(1)
+!        L_min = Lnsx/2
+         MinRadialAngSym = Lndx
+!        Dlete Exponents
          CALL Delete(Expts)
 !        Set Atom-Atom thresholds
          CALL SetAtomPairThresh(Thresholds%Dist)
@@ -45,13 +50,43 @@ MODULE Thresholding
          CALL SetPrimPairThresh(Thresholds%Dist)
      END SUBROUTINE SetThresholds
 !====================================================================================================
-!    Set the Atom Pair Distance Threshhold: Zeta_Min*|A-B|^2 > -Log(Tau)
+!    Set the Atom Pair Distance Threshhold: 
 !====================================================================================================
      SUBROUTINE SetAtomPairThresh(Tau)
-        REAL(DOUBLE),INTENT(IN) :: Tau
-        AtomPairDistanceThreshold=-LOG(Tau)/MinRadialExponent
-     END SUBROUTINE SetAtomPairThresh
+       INTEGER                         :: J,L
+       REAL(DOUBLE),INTENT(IN)         :: Tau
+       REAL(DOUBLE)                    :: RMIN,RMAX,F0,F1,R,FUN,RErr
 !
+       RMIN = SQRT(-LOG(Tau)/MinRadialExponent)
+       RMAX = 10.D0*RMIN
+!
+       F0 = AsymHGTF(MinRadialAngSym+1,MinRadialExponent,RMIN)
+       F1 = AsymHGTF(MinRadialAngSym+1,MinRadialExponent,RMAX)
+       IF(F1>Tau) THEN
+          R = RMAX
+          GOTO 100
+       ENDIF
+!
+       R = Half*(RMIN+RMAX)
+       DO J=1,200
+          FUN = AsymHGTF(MinRadialAngSym+1,MinRadialExponent,R)-Tau
+          IF(FUN < Zero) THEN
+             RMAX = R
+          ELSEIF(FUN > Zero) THEN
+             RMIN = R
+          ENDIF
+          RErr = ABS(R-Half*(RMIN+RMAX))
+          R = Half*(RMIN+RMAX) 
+          IF(RErr < 1.D-8) GOTO 100
+       ENDDO
+       CALL MondoHalt(-100,'Overlap did not converge in 200 iterations')
+100    CONTINUE
+       AtomPairDistanceThreshold=R*R
+!
+     END SUBROUTINE SetAtomPairThresh
+!====================================================================================================
+!    Test the Distance for atom pair
+!====================================================================================================
      FUNCTION TestAtomPair(Pair)
         LOGICAL                   :: TestAtomPair
         TYPE(AtomPair)            :: Pair
@@ -90,16 +125,18 @@ MODULE Thresholding
         IF(PRESENT(ExpSwitch_O)) &
            PenetratDistanceThreshold=MIN(PenetratDistanceThreshold,ExpSwitch_O)
      END SUBROUTINE SetPenetrationThresh
-!
+!====================================================================================================
+!    
+!====================================================================================================
      FUNCTION GaussianExtent(Zeta,Amp)
         REAL(DOUBLE),INTENT(IN) :: Zeta,Amp
         REAL(DOUBLE)            :: GaussianExtent
         GaussianExtent=SQRT(MAX(1.D-10,PenetratDistanceThreshold+Amp)/Zeta)
      END FUNCTION GaussianExtent
-!===================================================================================
+!===================================================================================================
 !     Recursive bisection to determine largest extent for this distribution
 !     outside of which its contribution to the density and gradient is less than Tau
-!===================================================================================
+!===================================================================================================
      FUNCTION Extent(Ell,Zeta,HGTF,Tau,Digits_O,ExtraEll_O,Potential_O) RESULT (R)
        INTEGER                         :: Ell,ExtraEll
        REAL(DOUBLE)                    :: Zeta,Tau
