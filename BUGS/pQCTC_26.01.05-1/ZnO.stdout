@@ -1,0 +1,139 @@
+Sender: LSF System <lsf@qscd2>
+Subject: Job 222893: </users/valeryw/MONDO/Validate/ZnO.lsf> Done
+
+Job </users/valeryw/MONDO/Validate/ZnO.lsf> was submitted from host <qscfe1> by user <valeryw>.
+Job was executed on host(s) <16*qscd2>, in queue <smallq>, as user <valeryw>.
+                            <32*qscd4>
+                            <16*qscd7>
+</users/valeryw> was used as the home directory.
+</users/valeryw/MONDO/Validate> was used as the working directory.
+Started at Wed Jan 26 07:46:32 2005
+Results reported at Wed Jan 26 07:48:16 2005
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time   :   2911.00 sec.
+    Max Memory :       897 MB
+
+The output (if any) follows:
+
+Wed Jan 26 07:46:29: rms_rid=full.771551;rms_alloc=4*qsc[92-95,138-145,248-251]
+QUEUE: smallq
+  -- interactive and batch small jobs  This is the default queue.
+DEFAULT LIMITS:
+ RUNLIMIT                
+ 240.0 min of qscd0      
+MAXIMUM LIMITS:
+ RUNLIMIT                 PROCLIMIT               
+ 600.0 min of qscd0       4 4 128
+SHARE_INFO_FOR: smallq/
+ USER/GROUP   SHARES  PRIORITY STRTD RSV CPU_TIME RUN_TIME HIST_RTIME COMM_RTIME
+support        5000      9.08     5    0      7.1      0.5     490.7       60.0
+allnc-asci    40000      0.86    96    0  47124.4    832.0   45603.0      960.0
+institution   35000      0.42   792   16  87196.3   2365.3   75643.7     6784.0
+adwp          25000      0.25    15    0  51987.5     50.9   99209.9      180.0
+
+mkdir: cannot create /scratch2/valeryw/MondoScratch/ZnO.
+/scratch2/valeryw/MondoScratch/ZnO: File exists
+  InputFile = /users/valeryw/MONDO/Validate/ZnO.inp
+  OutputFile= /users/valeryw/MONDO/Validate/ZnO_15394188.out
+ WE look forDebugAll
+ WE look forAccuracy
+ We look for Loose F
+ We look for Good T
+ We look for Tight F
+ We look for VeryTight F
+ WE look forSCFMethod
+ We look for SDMM F
+ We look for PM F
+ We look for TC2 F
+ We look for TC4 F
+ We look for TRS4 F
+ We look for RH T
+ WE look forSCFConvergence
+ WE look forModelChem
+ We look for Periodic
+ We look for FracCoord
+ MakeRho : Pruned Rho   :: dNel = -.12D+04, kept 0% of distributions.
+ MakeRho : Moments      :: <r> = (-.12D+04, -.12D+04, -.12D+04), <r^2> = -.45D+0
+ 5
+Err: Nq must be greater than 1!
+Err: Nq must be greater than 1!
+Err: Nq must be greater than 1!
+Err: Nq must be greater than 1!
+Err: Nq must be greater than 1!
+Err: Nq must be greater than 1!
+Err: Nq must be greater than 1!
+Err: Nq must be greater than 1!
+Err: Nq must be greater than 1!
+Err: Nq must be greater than 1!
+Err: Nq must be greater than 1!
+Err: Nq must be greater than 1!
+Err: Nq must be greater than 1!
+Err: Nq must be greater than 1!
+Err: Nq must be greater than 1!
+Err: Nq must be greater than 1!
+Err: Nq must be greater than 1!
+Err: Nq must be greater than 1!
+Err: Nq must be greater than 1!
+Err: Nq must be greater than 1!
+Err: Nq must be greater than 1!
+Err: Nq must be greater than 1!
+Err: Nq must be greater than 1!
+Err: Nq must be greater than 1!
+Err: Nq must be greater than 1!
+Err: Nq must be greater than 1!
+Err: Nq must be greater than 1!
+Err: Nq must be greater than 1!
+Err: Nq must be greater than 1!
+Err: Nq must be greater than 1!
+Err: Nq must be greater than 1!
+Err: Nq must be greater than 1!
+Err: Nq must be greater than 1!
+Err: Nq must be greater than 1!
+Err: Nq must be greater than 1!
+Err: Nq must be greater than 1!
+Err: Nq must be greater than 1!
+Err: Nq must be greater than 1!
+Err: Nq must be greater than 1!
+Err: Nq must be greater than 1!
+Err: Nq must be greater than 1!
+Err: Nq must be greater than 1!
+Err: Nq must be greater than 1!
+Err: Nq must be greater than 1!
+Err: Nq must be greater than 1!
+Err: Nq must be greater than 1!
+Err: Nq must be greater than 1!
+Err: Nq must be greater than 1!
+Err: Nq must be greater than 1!
+Err: Nq must be greater than 1!
+Err: Nq must be greater than 1!
+Err: Nq must be greater than 1!
+Err: Nq must be greater than 1!
+Err: Nq must be greater than 1!
+Err: Nq must be greater than 1!
+Err: Nq must be greater than 1!
+Err: Nq must be greater than 1!
+Err: Nq must be greater than 1!
+Err: Nq must be greater than 1!
+Err: Nq must be greater than 1!
+Err: Nq must be greater than 1!
+Err: Nq must be greater than 1!
+Err: Nq must be greater than 1!
+Err: Nq must be greater than 1!
+ Unknown error: < prun -n 64 /scratch2/valeryw/MondoExec/QCTC ZnO_15394188 Guess
+ EqCore 0 1 1 0 1 1>
+  
+  To have no errors 
+  Would be life without meaning 
+  No struggle, no joy 
+  
+Termination of MondoSCF

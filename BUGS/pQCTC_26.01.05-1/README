@@ -1,0 +1,9 @@
+This is a parallel ZnO PBC calculation. It crashes in the first QCTC
+call (qscfe1 with 64 procs) because Guess=Core. 
+
+Setting:
+  1) modules          3) fortran_5.5A.5   5) emacs_20.7
+  2) CXX_default      4) MPI_64bit_R6
+
+SV 26.01.05
+------------------------------------------------------------------
