@@ -493,9 +493,9 @@ CONTAINS
 !
    SUBROUTINE Plot_1x1(IA,JA,Name,NatmsLoc)
       INTEGER,DIMENSION(:) :: IA,JA
-      CHARACTER(LEN=*) :: Name
-      INTEGER :: I,K
-      INTEGER          :: NatmsLoc
+      CHARACTER(LEN=*)     :: Name
+      INTEGER              :: I,K
+      INTEGER              :: NatmsLoc
       !
       CALL OpenASCII(TRIM(Name)//'_PlotFile_1',Plt,NewFile_O=.TRUE.)
       DO I=1,NAtmsLoc
@@ -1842,6 +1842,96 @@ CONTAINS
        mask(node) = 1
      end do
    end subroutine rootls
+!
+!--------------------------------------------------------------------
+!
+   SUBROUTINE AddMat_1x1(IA,JA,AN,IB,JB,BN,IC,JC,CN,N,M)
+     ! addition of two NxM matrices
+     INTEGER,DIMENSION(:)      :: IA,JA,IB,JB
+     REAL(DOUBLE),DIMENSION(:) :: AN,BN
+     INTEGER                   :: I,J,K,L,N,M,NZC
+     TYPE(INT_VECT)            :: IC,JC,JC1
+     TYPE(DBL_VECT)            :: CN
+     !
+     CALL New(IC,N+1)
+     NZC=IA(N+1)-1 + IB(N+1)-1
+     CALL New(JC1,NZC)
+     !
+     CALL AddSymb(IA,JA,IB,JB,N,M,IC%I,JC1%I)
+     !
+     NZC=IC%I(N+1)-1 
+     CALL New(JC,NZC)
+     JC%I(1:NZC)=JC1%I(1:NZC)
+     CALL Delete(JC1)
+     CALL New(CN,NZC)
+     !
+     CALL AddNum(iA,jA,AN,iB,jB,BN,N,M,iC%I,jC%I,CN%D)
+   END SUBROUTINE AddMat_1x1
+!
+!--------------------------------------------------------------------
+!
+   SUBROUTINE AddSymb(IA,JA,IB,JB,N,M,IC,JC)
+     ! symbolic addition of two NxM matrices
+     INTEGER,DIMENSION(:) :: IA,JA,IB,JB,IC,JC
+     TYPE(INT_VECT)       :: IX
+     INTEGER              :: N,M,IP,I,J,IAA,IAB,JP,IBA,IBB
+     !
+     CALL New(IX,M) 
+     !
+     IP=1
+     IX%I=0
+     DO 50 I=1,N
+       IC(I)=IP
+       IAA=IA(I)
+       IAB=IA(I+1)-1
+       IF(IAB<IAA) GO TO 30
+       DO 20 JP=IAA,IAB
+         J=JA(JP)
+         JC(IP)=J
+         IP=IP+1
+       20 IX%I(J)=I
+       30 IBA=IB(I)
+       IBB=IB(I+1)-1
+       IF(IBB<IBA) GO TO 50
+       DO 40 JP=IBA,IBB
+         J=JB(JP)
+         IF(IX%I(J)==I) GO TO 40
+         JC(IP)=J
+         IP=IP+1
+       40 CONTINUE
+     50 CONTINUE
+       IC(N+1)=IP 
+     !
+     CALL Delete(IX)
+   END SUBROUTINE AddSymb
+!
+!--------------------------------------------------------------------
+!
+   SUBROUTINE AddNum(iA,jA,sA,iB,jB,sB,N,M,iC,jC,sC)
+     !numerical addition of two NxM, 1x1 blocked matrices
+     INTEGER,DIMENSION(:)      :: iA,jA,iB,jB,iC,jC
+     REAL(DOUBLE),DIMENSION(:) :: sA,sB,sC
+     TYPE(DBL_VECT)            :: W
+     INTEGER                   :: N,M,I,J,K
+     !
+     CALL New(W,M)
+     DO 100 I=1,N
+       DO 200 K=iC(I),iC(I+1)-1
+         W%D(jC(K))=Zero 
+       200     CONTINUE
+       DO 300 K=iA(I),iA(I+1)-1
+         W%D(jA(K))=sA(K)
+       300     CONTINUE
+       DO 400 K=iB(I),iB(I+1)-1
+         J=jB(K)
+         W%D(J)=W%D(J)+sB(K)
+       400     CONTINUE
+       DO 500 K=iC(I),iC(I+1)-1
+         sC(K)=W%D(jC(K))
+       500     CONTINUE
+     100  CONTINUE
+     CALL Delete(W)
+   END SUBROUTINE AddNum
 !
 !--------------------------------------------------------------------
 !
