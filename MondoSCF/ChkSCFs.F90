@@ -141,42 +141,41 @@ MODULE ChkSCFs
          ConvQ_ETot=ABS((ETotA-ETotB)/ETotB)
          ConvQ_DMax=ABS((DMaxA-DMaxB)/DMaxB)
          ConvQ_DIIS=ABS((DIISA-DIISB)/DIISB)
-!         WRITE(*,*)' ConvQ_DIIS = ',ConvQ_DIIS,' ConvQ_DMAX = ',ConvQ_DMAX
+         WRITE(*,*)' ConvQ_DIIS = ',ConvQ_DIIS,' ConvQ_DMAX = ',ConvQ_DMAX
 !        Could happen ...
          IF(ConvQ_ETot<1.D-14)THEN
             ConvergedQ=.TRUE.
             WRITE(*,*)' Met Convergence criteria A '
          ENDIF
 !        Check to see if convergence is in an asymptotic regime
-         IF(DIISB<1.D-2.AND.DMAXB<1.D-2)THEN
+         WRITE(*,*)' DIISB = ',DIISB
+         WRITE(*,*)' DMAXB = ',DMAXB
+         IF(DIISB<1.D-2.AND.DMAXB<5.D-1)THEN
 !           Look for non-decreasing error due to incomplete numerics
             IF(ConvQ_DIIS<7.D-1.AND.ConvQ_DMax<7.D-1.AND.ICyc>2)THEN                
+
+                     WRITE(*,*)' ConvQ_DIIS = ',ConvQ_DIIS
+                     WRITE(*,*)' ConvQ_DMAX = ',ConvQ_DMAX
+                     WRITE(*,*)' DIIS I     = ',DIISA
+                     WRITE(*,*)' DIIS I+1   = ',DIISB
+                     WRITE(*,*)' DMAX I     = ',DMAXA
+                     WRITE(*,*)' DMAX I+1   = ',DMAXB
+
+
                IF(DIISB>DIISA.AND.DMAXB>DMAXA)THEN
                   DoubleChk=DoubleChk+1              
                   WRITE(*,*)' DOUBLE CHECK = ',DoubleChk
                   IF(DoubleChk==1)THEN
                      ConvergedQ=.TRUE.
                      WRITE(*,*)' Met Convergence criteria B: DIIS/DMAX increase.'
-!                     WRITE(*,*)' ConvQ_DIIS = ',ConvQ_DIIS
-!                     WRITE(*,*)' ConvQ_DMAX = ',ConvQ_DMAX
-!                     WRITE(*,*)' DIIS I     = ',DIISA
-!                     WRITE(*,*)' DIIS I+1   = ',DIISB
-!                     WRITE(*,*)' DMAX I     = ',DMAXA
-!                     WRITE(*,*)' DMAX I+1   = ',DMAXB
                   ENDIF
                ENDIF
             ENDIF
 !           Look for convergence stall-outs 
-            IF(ConvQ_DIIS<7.D-2.AND.ConvQ_DMAX<7.D-2)THEN
+            IF(ConvQ_DIIS<9.D-2.AND.ConvQ_DMAX<9.D-2)THEN
                DoubleChk=DoubleChk+1              
                IF(DoubleChk==1)THEN
                   WRITE(*,*)' Met Convergence criteria C: DIIS/DMAX stall out.'
-!                  WRITE(*,*)' ConvQ_DIIS = ',ConvQ_DIIS
-!                  WRITE(*,*)' ConvQ_DMAX = ',ConvQ_DMAX
-!                  WRITE(*,*)' DIIS I     = ',DIISA
-!                  WRITE(*,*)' DIIS I+1   = ',DIISB
-!                  WRITE(*,*)' DMAX I     = ',DMAXA
-!                  WRITE(*,*)' DMAX I+1   = ',DMAXB
                   ConvergedQ=.TRUE.
                ENDIF
             ENDIF 
