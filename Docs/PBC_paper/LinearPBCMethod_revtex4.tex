@@ -37,9 +37,9 @@
 \begin{abstract}
 Linear scaling quantum chemical methods for Density Functional Theory are extended to the condensed 
 phase at the $\Gamma$-point.  For the two-electron Coulomb matrix, this is achieved with a tree-code 
-algorithm for fast Coulomb summation [J.~Chem.~Phys., {\bf 106}, 5526 (1997)], together with  multipole representation 
-of the crystal field [J.~Chem.~Phys., {\bf 107}, 10131 (1997)].   A periodic version of the hierarchical cubature 
-algorithm [J.~Chem.~Phys., {\bf 113}, 10037 (2000)], which builds a telescoping adaptive grid for numerical 
+algorithm for fast Coulomb summation [J.~Chem.~Phys.~{\bf 106}, 5526 (1997)], together with  multipole representation 
+of the crystal field [J.~Chem.~Phys.~{\bf 107}, 10131 (1997)].   A periodic version of the hierarchical cubature 
+algorithm [J.~Chem.~Phys.~{\bf 113}, 10037 (2000)], which builds a telescoping adaptive grid for numerical 
 integration of the exchange-correlation matrix, is shown to be efficient when the problem is posed as integration over 
 the unit cell.  Commonalities between the Coulomb and exchange-correlation algorithms are discussed, with an emphasis on 
 achieving linear scaling through the use of modern data structures.  With these developments, convergence of the 
@@ -60,14 +60,14 @@ Linear scaling construction of the Fockian and control of error is demonstrated 
 
 \section{INTRODUCTION}
 
-Quantum chemical methods that  employ Gaussian Type Atomic Orbitals (GTAOs) 
+Quantum chemical methods that  employ Gaussian-Type Atomic Orbitals (GTAOs) 
 offer a number of advantages in materials science.  First, because they are local basis functions, it is possible 
-to achieve a linear scaling cost with system size for insulating systems.  Secondly,  almost all one and two
-electron integrals involving GTAOs are analytic, enabling the rapid evaluation of expectation values involving 
-complicated operators often involved in response properties \cite{MHonda91,THelgaker92,PStephens94}.
+to achieve a linear scaling cost with system size for insulating systems.  Secondly,  almost all one- and two-electron 
+integrals involving GTAOs are analytic, enabling the rapid evaluation of expectation values involving 
+complicated operators that are often involved in the computation of response properties \cite{MHonda91,THelgaker92,PStephens94}.
 The {\sc DALTON} quantum chemical program \cite{dalton} is a premier example of this capability, 
 offering a wide range of electric and magnetic molecular response properties.   
-The ability to treat core-states analytically also opens the ability to move beyond the pseudopotential 
+The ability to treat core-states analytically also opens the ability to go  beyond the pseudopotential 
 approximation in computation of relativistic effects with the four-component Dirac-Hartree-Fock \cite{JLaerdahl97,IGrant00} 
 and Dirac-Kohn-Sham \cite{TYanai01} theories.  Perhaps most important though, the exact Hartree-Fock (HF) exchange
 may be computed efficiently with a GTAO basis set.  In addition to providing a reference for 
@@ -91,17 +91,16 @@ well developed quantum chemical methods for the analytic computation of response
 to bear on large solid state problems. 
 
 This paper is organized as follows:  In Section~\ref{pbcintro},  periodic boundary conditions and the $\Gamma$-point 
-approximation are introduced, and the avoidance linear dependencies is discussed. Next, in 
-Section \ref{datastruct}, the relationship between the numerical error estimates and data structures that underly the 
+approximation are introduced. Next, in Section \ref{datastruct}, the relationship between the numerical error estimates and data structures that underly the 
 fast linear scaling algorithms for computation of the Coulomb and exchange-correlation matrix are outlined.  
 In Section~\ref{coulombsums}, we extend previous work on the Niboer and De Wette \cite{BNijboer57,BNijboer58a}  lattice sum 
-method to linear scaling computation of quantum Coulomb sums tin-foil boundaries.  Then, in in Section~\ref{hicu}, 
+method to linear scaling computation of quantum Coulomb sums and  tin-foil boundaries.  Then, in Section~\ref{hicu}, 
 ${\cal O}(N)$ methods for computing the GTAO-based  exchange-correlation matrix are presented. 
 In Section~\ref{implement} we discuss the implementation of these developments in the {\sc  MondoSCF} \cite{MondoSCF} suite
 of linear scaling quantum chemistry codes.  In Section~\ref{validate}, comparison of the $\Gamma$-point results
 is made with those obtained with {\sc CRYSTAL98} using ${\bf k}$-space integration for NaCl and MgO.  Next, 
 in Section~\ref{scale}, linear scaling is demonstrated for construction of the diamond Fock matrix at the RBLYP/6-21G*  
-level of theory.     Finally, we present our conclusions in Section~\ref{conclude}.
+level of theory.     Finally, in Section~\ref{conclude}, we present our conclusions. 
 
 \section{periodic boundary conditions, linear scaling and basis sets}\label{pbcintro}
 
@@ -142,7 +141,7 @@ become
 S_{ab}=\sum _{\mathbf{R},\mathbf{R}'}\int _{V_{\rm UC}}\, d{\mathbf{r}}\, 
 \phi _{a}({\mathbf{r}+\mathbf{R}})\phi _{b}({\mathbf{r}+\mathbf{R}'})
 \end{equation}
-in the periodic $\Gamma$-point regime.  However, this formalism can brought into a form 
+in the periodic $\Gamma$-point regime.  However, this formalism can be  brought into a form 
 more closely related to its quantum chemical counterpart via the transformation,
 \begin{equation}
 \sum_{\bf R} \int_{V_{\rm UC}} d {\bf r} f({\bf r+R}) \rightarrow \int_{V_\infty} d {\bf r} f({\bf r}),
@@ -208,10 +207,8 @@ Both QCTC and HiCu are homeomorphic, involving $k$-d tree representation of the 
 In our implementations, $k$-d trees are doubly linked lists with axis aligned bounding boxes (AABBs) 
 delimiting the spatial {\em extent} of each node and its children.    This scheme is similar to
 well developed technologies for ray tracing and data base searches, allowing fast 
-${\cal O}({\rm lg} N)$ {\em range queries} of overlapping components through AABB intersection tests 
-%\cite{}. 
+${\cal O}({\rm lg} N)$ {\em range queries} of overlapping components through AABB intersection tests \cite{MGomez99}. 
 In the case of QCTC, this fast look up constitutes the penetration acceptability criterion (PAC) 
-%\cite{}, 
 which identifies spatial clusters or agglomerations, $\rho_Q$, of the density that may be accurately 
 represented via a multipole approximation due to the absence of charge-charge penetration effects.  
 
@@ -226,7 +223,7 @@ For each primitive bra distribution $\rho_{ab}$, a fast range query is performed
 representation of the total density, leading to an on the fly partition of near-field (NF) and far-field (FF) 
 interactions in construction of the gas phase Coulomb matrix which may be written 
 \begin{eqnarray}
-J_{ab} &=& \sum_{Q\in \rm FF} \sum_l \sum_m O^l_m[\rho_{ab}] \sum_{l'} \sum_{m'} M^{l+l'}_{m+m'} O^{l'}_{m'}[\rho_Q] 
+J_{ab} &=& \sum_{Q\in \rm FF} \sum_l (-1)^l \sum_m O^l_m[\rho_{ab}] \sum_{l'} \sum_{m'} M^{l+l'}_{m+m'} O^{l'}_{m'}[\rho_Q] 
 \nonumber \\
 &+& \sum_{q\in \rm NF} \int d {\bf r} \int d {\bf r'} \rho_{ab} ({\bf r}) \left|{\bf r}-{\bf r'} \right|^{-1}
 \rho_q({\bf r})  \, ,
@@ -256,7 +253,7 @@ cube-tree is composed of a Cartesian non-product integration rule with the grid 
 The cube-tree is constructed iteratively through recursive bisection of the primary volume (the root AABB), using 
 exact error bounds to achieve arbitrary precision of the integrated density and its gradients.   As the cube-tree 
 is extended, AABB intersection tests are performed while traversing the rho-tree,  avoiding parts of the density 
-that do not overlap with that portion of the grid.  Upon construction of the grid,  the inverse procedure is
+that do not overlap with that portion of the grid.  Upon construction of the grid,  the reverse procedure is
  carried out;  
 for each primitive distribution, the cube-tree is walked selecting only overlapping portions of the grid via the AABB 
 intersection test.
@@ -288,7 +285,7 @@ where
 \begin{equation}
 C_q=\sum_{lmn} \left|d_{lmn}\right| K^3 \left[ 2^{l+m+n} ~ l! m! n! ~ \zeta^{l+m+n}_q \right]^{1/2} ,
 \end{equation}
-the constant $K=1.09$ and  
+the constant $K=1.09$, and  
 \begin{equation}
 \widetilde \zeta_q = 
 \begin{cases}
@@ -340,10 +337,10 @@ critical.
 
 In the $\Gamma$-point approximation, elements of the periodic Coulomb matrix are 
 \begin{eqnarray}
-J_{ab}&=&\frac{1}{2}\int _{V_{\rm UC}} d{\mathbf{r}}  \int 
+J_{ab}&=&\int _{V_{\rm UC}} d{\mathbf{r}}  \int 
 d{\mathbf{r}'}{\rho _{ab}\left( {\mathbf{r}}\right) {\left| \mathbf{r}-\mathbf{r}'\right| }^{-1}
 \rho_{\rm tot}\left( \mathbf{r}'\right) } \\
-&=& \frac{1}{2}\sum _{\mathbf{R}}\int\int
+&=&\sum _{\mathbf{R}}\int\int
 d{\mathbf{r}}\, d{\mathbf{r}'}{\rho _{ab}^{\scriptscriptstyle \infty}\left( {\mathbf{r}}\right)  
 {\left| \mathbf{r}-\mathbf{r}'\right| }^{-1} \rho^{\scriptscriptstyle \infty}_{\rm tot}
 \left( {\mathbf{r}'}+{\mathbf{R}}\right) }
@@ -537,16 +534,13 @@ Because the distributions and density both involve a double sum over lattice vec
 there will be a large number of atom-atom pairs that do not overlap with $V_\Box$.  A similar situation is 
 encountered in the gas phase for parallel versions of HiCu \cite{CGan03}, where each processor has a small, 
 local cube-tree that may overlap only a few of the many possible atom-atom pairs.  
-The solution to this problem  again comes from the ray tracing literature, in the form of a modified ray-AABB 
-\cite{MGomez99} and sphere-AABB test \cite{GGems}.  
+The solution to this problem  again comes from the ray tracing literature, in the form of a modified ray-AABB \cite{MGomez99} and sphere-AABB test \cite{GGems}.  
 %     ! Modified Miguel Gomez' Ray-AABB test (Gamasutra '99) to work for Cylinder-AABB
 %     ! for Ray=Point, uses A Simple Method for Box-Sphere Intersection Testing, Graphics Gems,  pp. 247-250
 The ray-AABB test has been modified into a cylinder-AABB test, where the radius of the cylinder
 is a maximal overlap extent of the atom-atom pair.  In the case of a same center atom-atom pair,
 it is of course more appropriate to employ a sphere-AABB test.  In both cases, overlap
 between the HiCu integration volume and atom-atom pairs is established with a negligible prefactor when using these tests.
-
-
 
 \begin{table}
 \caption{Comparison of {\sc CRYSTAL98} and {\sc MondoSCF} $\Gamma$-point calculations on  NaCl at the 
@@ -596,7 +590,7 @@ $ ^g$Cubic  \\
 \newpage
 
 \begin{table}
-\caption{Convergence of the$\Gamma$-point super-cell approximation for MgO, computed with {\sc MondoSCF} 
+\caption{Convergence of the $\Gamma$-point super-cell approximation for MgO, computed with {\sc MondoSCF} 
           at the RBLYP/8-61G/8-51G level of theory.}
 \label{MgOGammaPt}
 \center{
@@ -655,10 +649,10 @@ Gnu C compiler {\sc gcc} v3.2.2 using the {\tt -O1} flag.  All calculations were
 Thresholds controlling the cost to accuracy ratio of HiCu and QCTC
 are set by the accuracy levels {\tt LOOSE}, {\tt GOOD} and {\tt TIGHT},
 which have been empirically chosen to deliver 4-5, 6-7 and 8-9 digits,  respectively,
-of relative accuracy in the energy.  Values of these thresholds are listed in Appendix A of Ref.~[\onlinecite{CTymczak04b}].
+of relative accuracy in the energy.  Values of these thresholds are listed in Appendix B of Ref.~[\onlinecite{CTymczak04b}].
 The unmodified two-electron threshold $\tau_{\rm \scriptscriptstyle 2E}$ sets the 
 overlap extent $R^o_p$ in Eq.~(\ref{OverlapExtent}) and the penetration extent $R^p_q$ in Eq.~(\ref{PotentialExtent}),
-both of which control the PAC.  As explained in Ref.~\cite{CTymczak04c}, the threshold $\tau_{\rm \scriptscriptstyle MAC}$
+both of which control the PAC.  As explained in Ref.~[\onlinecite{CTymczak04c}], the threshold $\tau_{\rm \scriptscriptstyle MAC}$
 controlling the MAC is set as $\tau_{\rm \scriptscriptstyle MAC}=10^2 \tau_{\rm \scriptscriptstyle 2E}$.  
 The HiCu threshold $\tau_{\rm \scriptscriptstyle HICU}$ likewise sets two sub-thresholds.  The
 overlap extent $R^o_p$ in Eq.~(\ref{OverlapExtent}), defining accuracy of the density on the grid, is set using 
@@ -666,7 +660,7 @@ $10^{-1} \tau_{\rm \scriptscriptstyle HICU}$ ($\tau_\rho$ in Ref.~[\onlinecite{M
 target relative error defining accuracy of the HiCu grid is just $\tau_{\rm \scriptscriptstyle HICU}$ 
 ($\tau_r$ in Ref.~[\onlinecite{MChallacombe00A}]).  
 It should be pointed out that of all the thresholding schemes, those governing HiCu are the least conservative;
-It is a simple (and not too expensive) matter to simply tighten the HiCu threshold if intermediate accuracies
+it is a simple (and not too expensive) matter to simply tighten the HiCu threshold if intermediate accuracies
 are required. 
 
 The multipole interaction and contraction code used by QCTC in the near/far-field partition has been 
@@ -674,7 +668,7 @@ highly optimized by symbolic manipulation and factorization, using real arithmet
 7'th order in the calculation of ${\bf J}^{\rm In}$. The computation of ${\bf J}^{\rm PFF}$ 
 employs a general code for multipole contraction, allowing expansion through $p=64$.
 Eigensolution of the self-consistent-field equations has been used throughout, with the corresponding
-matrix and distribution thresholds given Appendix A of Ref.~[\onlinecite{CTymczak04b}].
+matrix and distribution thresholds given Appendix B of Ref.~[\onlinecite{CTymczak04b}].
 All calculations were performed with $C_1$ (no) symmetry, and all results are reported in atomic units.
 %
 % Figure 4
@@ -714,7 +708,7 @@ Next, in Table~\ref{NaClGammaPt}, convergence of the supercell $\Gamma$-point ap
 is demonstrated for NaCl with the STO-3G basis set and the restricted local density approximation.
 Then, in Table~\ref{MgOGammaPt}, convergence of the supercell $\Gamma$-point approximation
 to the  ${\bf k}$-space integration result is demonstrated for MgO, using the 8-61G\cite{CBS:861G:MgO} basis set for 
-magnesium,the 8-51G\cite{CBS:861G:MgO} basis set for the oxygen, and the restricted BLYP functional.
+magnesium, the 8-51G\cite{CBS:861G:MgO} basis set for the oxygen, and the restricted BLYP functional.
 The primitive lattice coordinates for these systems are given in Ref.~[\onlinecite{PBCCoordinates}].
 
 Finally, in Table~\ref{DiamondGammaPt}, convergence of the supercell $\Gamma$-point approximation is shown for
@@ -756,9 +750,9 @@ error control for diamond, allowing calculations up to 512 atoms at the RBLYP/6-
 early onset of linear scaling has been enabled by the use of modern data structures such as the $k$-d tree, together with 
 reliable error estimates for the Gaussian extent.  These algorithms have been parallelized \cite{CGan03,CGan04B}, demonstrating
 high efficiencies up to 128 processors, and have been used recently to determine the $T=0$K equation of state for 
-pentaerythritol tetranitrate \cite{CGan04A} at the RPBE/6-31G** level of theory, with a {\tt GOOD} accuracy level.
+pentaerythritol tetranitrate \cite{CGan04A} at the RPBE/6-31G** level of theory and  a {\tt GOOD} accuracy level.
 
-While this contribution has focused on demonstrating linear scaling for diamond system, 
+While this contribution has focused on demonstrating linear scaling for diamond, 
 the methods presented here work for slabs and wires as well, using methods for computation 
 of the two- and one-dimensional the $\cal M$ tensor outlined in Appendix \ref{calMTen}.
 Our experience has shown that, for the same number of atoms, these lower dimensional systems 
@@ -799,7 +793,7 @@ and
 %=\frac{\Gamma \left( l+\frac{1}{2}\right) -\Gamma 
 %\left( l+\frac{1}{2},\beta ^{2}r^{2}\right) }{\Gamma \left( l+\frac{1}{2}\right) \, r^{l+1}}
 \end{equation}
-where $\gamma$ is the incomplete gamma function \cite{MAbramowitz87} and \( \beta  \) is a parameter controling the 
+where $\Gamma$ is the gamma function,  $\gamma$ is the incomplete gamma function \cite{MAbramowitz87} and \( \beta  \) is a parameter controlling the 
 partition.  With this separation of length scales, the lattice sum defining the multipole interaction tensor, ${\cal M}^{m}_{l}$, 
 may be expressed as 
 %
@@ -829,14 +823,14 @@ Following  CWHG, this expression can be further developed into real and reciproc
 \nonumber\\
 &&\sum _{\mathbf{G}\neq \left\{ \emptyset \right\} }\, \left| \mathbf{G}\right| ^{l-2}e^{-\frac{\pi ^{2}\left|
  \mathbf{G}\right| ^{2}}{\beta ^{2}}}\widetilde{P_{l}}^{m}\left( \cos \theta _{\mathbf{G}}
-\right) e^{im\phi _{\mathbf{G}}} \, .
+\right) e^{im\phi _{\mathbf{G}}} \, ,
 \nonumber\\
 \label{C4}
 \end{eqnarray}
-Where $\mathbf{G}$ are reciprical lattice vectors.
+where $\mathbf{G}$ are reciprocal lattice vectors.
 With an appropriate choice of \( \beta \sim \sqrt{\pi }/\left( V_{\rm UC}\right) ^{\frac{1}{3}} \),
 and summing terms from smallest to largest, the periodic multipole interaction tensor can be computed
-to high precision given an accurate representation of the incomplete gamma function.  In 
+to high precision assuming an accurate representation of the incomplete gamma function.  In 
 previous work by CWHG, the upward recursion
 \begin{equation}
 \label{C5}
@@ -863,7 +857,7 @@ S_{n}=\left( \frac{\Gamma \left( \frac{1}{2}\right) }{\Gamma \left( n+\frac{3}{2
 are simply pretabulated. This version of the gamma function is both easy to program and precise, even
 for large values of \( x \) or \( m \). 
 
-In one dimension, \( {\cal M} \) can be computed analytically as 
+In one dimension, the \( {\cal M} \) tensor can be computed analytically as 
 \begin{eqnarray}
 {\cal M}^{m}_{l} & = & 
 \frac{\widetilde{P}_{l}^{m}\left( \cos \theta _{0} \right) e^{im\phi _{0}}}{a_{0}^{l+1}}
@@ -882,9 +876,9 @@ e^{im\left( \phi _{0}+\pi \right) }}{a_{0}^{l+1}}
 %
 where \( a_{0} \), \( \theta _{0} \) and \( \phi _{0} \) are the
 initial box dimension and angles which are independent of the summation, and 
-$\zeta (l+1)$ is the Riemann zeta function.
+$\zeta$ is the Riemann zeta function \cite{MAbramowitz87}.
 
-In two dimensions, the Fourier integrals for the calculation of \( {\cal M} \)
+In two dimensions, the Fourier integrals for the calculation of the \( {\cal M} \) tensor
 become more complicated. Taking the limit as the box dimension in the non-periodic
 direction  goes to infinity (the $z$ direction in the following), we obtain from Eq.~\ref{C4} 
 \begin{eqnarray}
