@@ -1,0 +1,21 @@
+<BeginTitle>
+Butane
+<EndTitle>
+
+<BeginOptions>
+Mechanics=(MM)
+Opt=StpDesc
+Accuracy =(VeryTight)
+DebugAll=(MinDebug)
+Geometry=(InAngstroms,NoOrder)
+<EndOptions>
+
+<BeginGeometry>
+<EndGeometry>
+
+<BeGIN_MM_filenames>
+validation_opls
+bALAmmPBC.seq
+bALAmm.crd
+<END_MM_filenames>
+
