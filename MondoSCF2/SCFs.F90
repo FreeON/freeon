@@ -939,16 +939,16 @@ CALL Delete(AuxLatF)
 !!$       DO I=1,3
 !!$          WRITE(*,*) (G%Clone(iCLONE)%PBC%LatFrc%D(I,J),J=1,3)
 !!$       ENDDO
-       DO I=1,G%Clone(iCLONE)%PBC%Dimen
-         DO J=1,G%Clone(iCLONE)%PBC%Dimen
-           DO iATS=1,G%Clone(iCLONE)%NAtms
-             G%Clone(iCLONE)%PBC%LatFrc%D(I,J)= &
-             G%Clone(iCLONE)%PBC%LatFrc%D(I,J)+ &
-             G%Clone(iCLONE)%Gradients%D(I,iATS)* &
-             G%Clone(iCLONE)%BoxCarts%D(J,iATS)
-           ENDDO
-         ENDDO
-       ENDDO
+     ! DO I=1,G%Clone(iCLONE)%PBC%Dimen
+     !   DO J=1,G%Clone(iCLONE)%PBC%Dimen
+     !     DO iATS=1,G%Clone(iCLONE)%NAtms
+     !       G%Clone(iCLONE)%PBC%LatFrc%D(I,J)= &
+     !       G%Clone(iCLONE)%PBC%LatFrc%D(I,J)+ &
+     !       G%Clone(iCLONE)%Gradients%D(I,iATS)* &
+     !       G%Clone(iCLONE)%BoxCarts%D(J,iATS)
+     !     ENDDO
+     !   ENDDO
+     ! ENDDO
        CALL Put(G%Clone(iCLONE)%PBC%LatFrc,'latfrc',Tag_O=chGEO)
 !      Close the group
        CALL CloseHDFGroup(HDF_CurrentID)
