@@ -2422,7 +2422,7 @@ CONTAINS
          CALL Delete(IEq) 
        ENDDO
      ELSE
-       CALL PrepCells(XYZ,AtNum%I,PBCDim,XYZRepl,AtNumRepl, &
+       CALL PrepCells(XYZ,AtNum%I,0,XYZRepl,AtNumRepl, &
                       Cells,CellEq,IEq)
        CALL PrtXYZ(AtNumRepl%I,XYZRepl%D,TRIM(PWDPath)//'Back.xyz',&
                    Title)
