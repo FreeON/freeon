@@ -53,7 +53,7 @@ LMNDex[L_, M_, N_] := LBegin[L + M + N] + N*(2*(L + M + N) - N + 3)/2 + M;
 
 IntegralClass[Ell_List] := Ell[[2]]*(Ell[[2]] + 1)/2 + Ell[[1]] + 1;
 
-Classes = { {2, 2}};
+Classes = { {1,1}};
 CType[1] = "S";
 CType[2] = "SP";
 CType[3] = "P";
@@ -91,7 +91,6 @@ KetHRR[a_List,b_List,c_List,d_List]:=Module[{p, CD, c1, d1,adex,cdex,c1dex},
 					       v1=ToExpression[StringJoin["MBarNu",ToString[adex],"v",ToString[c1dex],"w"]];
                                                v2=ToExpression[StringJoin["MBarNu",ToString[adex],"v",ToString[cdex],"w"]];
                                                v1+CD*v2 
-					       (*					       X[adex,c1dex]+CD X[adex,cdex] *)
                                               ,
                                                Return[KetHRR[a,b,c1,d1]+CD KetHRR[a,b,c,d1]]
                                                ]
@@ -118,58 +117,86 @@ Get[StringJoin[MondoHome,"/MMA/Format.m"]];
 Get[StringJoin[MondoHome,"/MMA/Optimize.m"]];
 
 SetOptions[Optimize,OptimizeVariable->{V,Array},OptimizeTimes->True];
-(*,OptimizeFunction->True,OptimizeTimes->True,OptimizePlus->True];,OptimizeCoefficients->True];
-
-OptimizeNull->X,
-
-  *)
 SetOptions[FortranAssign,AssignOptimize->True,AssignMaxSize->400,AssignBreak->{132," & \n          "},AssignTemporary->{W,Array}];
-
 SetOptions[OpenWrite, PageWidth -> 200];
 
 (* PUT THE TRANSFORMATIONS TO FILE *)
 
-FileName="HRR.Inc";
-Print[" Openned ",FileName];
-OpenWrite[FileName];
-
-oList={" "->"","u"->"(","v"->",","w"->")","x1"->"CDx","y1"->"CDy","z1"->"CDz","x2"->"ABx","y2"->"ABy","z2"->"ABz"};
-IList={};
+PunchHRRClass[FileName_,ic_,jc_,kc_,lc_]:=Module[{oList,IList,Kount,a,b,c,d},
+						 imin = Classes[[ic, 1]]; imax = Classes[[ic, 2]];
+						 jmin = Classes[[jc, 1]]; jmax = Classes[[jc, 2]];
+						 kmin = Classes[[kc, 1]]; kmax = Classes[[kc, 2]];
+						 lmin = Classes[[lc, 1]]; lmax = Classes[[lc, 2]];
+						 oList={" "->"","u"->"(","v"->",","w"->")","x1"->"CDx","y1"->"CDy","z1"->"CDz","x2"->"ABx","y2"->"ABy","z2"->"ABz"};
+						 IList={};
+						 Kount = 0;
+                                                 Do[Do[Do[Do[
+                                                 Do[Do[Do[Do[
+                                                             Kount = Kount + 1;
+                                                             a = {lx[i], my[i], nz[i]};
+                                                             b = {lx[j], my[j], nz[j]};
+                                                             c = {lx[k], my[k], nz[k]};
+                                                             d = {lx[l], my[l], nz[l]};
+                                                             IList=Append[IList,HRR[a,b,c,d]];
+                                                             oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["I(",ToString[i],",",ToString[j],",",ToString[k],",",ToString[l],")"]];
+                                                ,{i,LBegin[il],LEnd[il]}]
+                                                ,{j,LBegin[jl],LEnd[jl]}]
+                                                ,{k,LBegin[kl],LEnd[kl]}]
+                                                ,{l,LBegin[ll],LEnd[ll]}]
+                                                ,{il,imin,imax}]
+                                                ,{jl,jmin,jmax}]
+                                                ,{kl,kmin,kmax}]
+                                                ,{ll,lmin,lmax}];
+                                                Write[FileName,FortranAssign[o,IList,AssignReplace->oList]];
+                                               ];
 
 Do[Do[Do[Do[
-           imin = Classes[[ic, 1]]; imax = Classes[[ic, 2]];
-           jmin = Classes[[jc, 1]]; jmax = Classes[[jc, 2]];
-           kmin = Classes[[kc, 1]]; kmax = Classes[[kc, 2]];
-           lmin = Classes[[lc, 1]]; lmax = Classes[[lc, 2]];           
-           ijklType=1000*IntegralClass[Classes[[ic]]]+100*IntegralClass[Classes[[jc]]]+10*IntegralClass[Classes[[kc]]]+IntegralClass[Classes[[lc]]];
-           Print["(", CType[IntegralClass[Classes[[ic]]]], ",",
-                      CType[IntegralClass[Classes[[jc]]]], "|",
-                      CType[IntegralClass[Classes[[kc]]]], ",",
-                      CType[IntegralClass[Classes[[lc]]]], ")"];
-           Kount = 0; 
-           Do[Do[Do[Do[
-           Do[Do[Do[Do[
-                       Kount = Kount + 1;
-                       a = {lx[i], my[i], nz[i]};
-                       b = {lx[j], my[j], nz[j]};
-                       c = {lx[k], my[k], nz[k]};
-                       d = {lx[l], my[l], nz[l]};
-                       IList=Append[IList,HRR[a,b,c,d]];
-                       oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["I(",ToString[i],",",ToString[j],",",ToString[k],",",ToString[l],")"]];
-           ,{i,LBegin[il],LEnd[il]}]
-           ,{j,LBegin[jl],LEnd[jl]}]
-           ,{k,LBegin[kl],LBegin[kl]}]
-           ,{l,LBegin[ll],LBegin[ll]}]
-           ,{il,imin,imax}]
-           ,{jl,jmin,jmax}]
-           ,{kl,kmin,kmax}]
-           ,{ll,lmin,lmax}]                  
+	    imin = Classes[[ic, 1]]; imax = Classes[[ic, 2]];
+	    jmin = Classes[[jc, 1]]; jmax = Classes[[jc, 2]];
+	    kmin = Classes[[kc, 1]]; kmax = Classes[[kc, 2]];
+	    lmin = Classes[[lc, 1]]; lmax = Classes[[lc, 2]];
+            ijklType=1000*IntegralClass[Classes[[ic]]]
+                     +100*IntegralClass[Classes[[jc]]]
+                      +10*IntegralClass[Classes[[kc]]]
+	                 +IntegralClass[Classes[[lc]]];
+	   Subroutine=StringJoin["HRR",ToString[ijklType],".F90"];
+	   WS[String_]:=WriteString[Subroutine,"      ",String,"\n"];
+	   Print[" Openned ",Subroutine];
+	   OpenWrite[Subroutine];
+	   WriteString[Subroutine,"      SUBROUTINE HRR",ToString[ijklType],"(AOff,BOff,COff,DOff,ABx,ABy,ABz,CDx,CDy,CDz) \n"];
+	   WS["  USE TwoEGlobals  ! Avoiding copy in copy out since 1990"];
+	   WS["  INTEGER :: AOff,BOff,COff,DOff"];
+	   WS["  REAL(DOUBLE) :: ABx,ABy,ABz,CDx,CDy,CDz "];
+           PunchHRRClass[Subroutine,ic,jc,kc,lc];
+	   (*
+	   Kab=Pcd (ac|bd} 
+	   Kac=Pbd (ab|cd} 
+	    *)
+	   WS["! We will just do the re-indexing in a cheezy way, untill we get it right, then hardwire into explicit code "];
+	   WS["! K(1:ABlk,1:CBlk)=P(1:BBlk,1:DBlk)*ERI(1:DBlk,1:BBlk,1:ABlk,1:CBlk)--Kac=Pbd (ab|cd)"];
+	   WS[                    "         ACount=AOff"];  
+	   WriteString[Subroutine,"         DO IA=",ToString[LBegin[imin]],",",ToString[LEnd[imax]]," \n"];
+	   WS[                    "            ACount=ACount+1"];  
+	   WS[                    "            BCount=BOff"];  
+	   WriteString[Subroutine,"            DO IB=",ToString[LBegin[jmin]],",",ToString[LEnd[jmax]]," \n"];
+	   WS[                    "               BCount=BCount+1"];  
+	   WS[                    "               BCount=COff"];  
+	   WriteString[Subroutine,"               DO IC=",ToString[LBegin[kmin]],",",ToString[LEnd[kmax]]," \n"];
+	   WS[                    "                  CCount=CCount+1"];  
+	   WS[                    "                  DCount=DOff"];  
+	   WriteString[Subroutine,"                  DO ID=",ToString[LBegin[lmin]],",",ToString[LEnd[lmax]]," \n"];
+	   WS[                    "                     DCount=DCount+1"];  
+           WS[                    "                     ERI(DCount,BCount,ACount,CCount)=I(IA,IB,IC,ID)  "];
+           WS["          ENDDO "];
+           WS["       ENDDDO "];
+           WS["    ENDDO "];
+           WS["  ENDDO 	 "];
+
+           WS[StringJoin["  END SUBROUTINE HRR",ToString[ijklType]]];
+           Close[Subroutine];
+           Print[" Closed ",Subroutine];
 ,{ic,1,LC}]
 ,{jc,1,LC}]
 ,{kc,1,LC}]
 ,{lc,1,LC}];
 
-Write[FileName,FortranAssign[o,IList,AssignReplace->oList]];
-
-Close[FileName];          
-Print[" Closed ",FileName];
