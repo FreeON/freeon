@@ -46,7 +46,7 @@ MODULE JGen
          DO AtB=1,NAtoms
             IF(SetAtomPair(GM,BS,AtA,AtB,Pair)) THEN
                NAB = Pair%NA*Pair%NB
-               IF(AtB<=AtA)THEN
+               IF(AtB<=AtA)THEN              
 !              Compute only the lower triangle of symmetric J
 #ifdef PERIODIC
                   Bx = Pair%B(1)
@@ -203,7 +203,7 @@ MODULE JGen
                          CALL SetKet(Prim,PExtent)
 #ifdef PERIODIC
 !                        Fold primative back into the unit cell
-                         CALL AtomCyclic(GM,Prim%P)
+!                         CALL AtomCyclic(GM,Prim%P)
                          PTmp=Prim%P
 !                        Sum over cells
                          DO NC=1,CSMM1%NCells
