@@ -112,7 +112,13 @@ PROGRAM MakeRho
            !CALL Delete(BlkP)
            !CALL Put(DMat,TrixFile('DPrime'//TRIM(Args%C%C(4)),Args,0))
         ELSEIF(SCFActn=='DensityPrime')THEN
+           !write(*,*) TRIM(Args%C%C(1))
+           !write(*,*) TRIM(Args%C%C(2))
+           !write(*,*) TRIM(Args%C%C(3))
+           !write(*,*) TRIM(Args%C%C(4))
+           !write(*,*) TRIM(Args%C%C(5))
            CALL Get(Dmat,TrixFile('DPrime'//TRIM(Args%C%C(3)),Args,0))
+           !CALL Get(Dmat,TrixFile('DPrime'//TRIM(Args%C%C(4)),Args,0))
         ELSEIF(SCFActn/='Core')THEN
            ! Default, stupid.
            CALL Get(Dmat,TrixFile('D',Args,0))

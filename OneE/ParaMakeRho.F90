@@ -109,7 +109,8 @@ PROGRAM ParaMakeRho
         !CALL Get(Dmat,TrixFile('DPrime'//TRIM(Args%C%C(4)),Args,0)) !vw
      ELSEIF(SCFActn=='DensityPrime') THEN                            !vw
         ! this should not be used, it is set in SCFs.                !vw
-        CALL Get(Dmat,TrixFile('DPrime'//TRIM(Args%C%C(4)),Args,0))  !vw
+        CALL Get(Dmat,TrixFile('DPrime'//TRIM(Args%C%C(3)),Args,0))  !vw
+        !CALL Get(Dmat,TrixFile('DPrime'//TRIM(Args%C%C(4)),Args,0))  !vw
      ELSEIF(SCFActn/='Core')THEN
         CALL Get(Dmat,TrixFile('D',Args,0))
      ENDIF
