@@ -35,3 +35,118 @@
       VRR0(4,9)=QCy*VRR0(4,4)+WQy*VRR1(4,4)
       VRR0(4,10)=V(5)+V(9)+V(11)+QCz*VRR0(4,4)+WQz*VRR1(4,4)
 END SUBROUTINE VRRp0d0
+SUBROUTINE MVRRp0d0(IXYZ,LBS,LKS,VS0,VS1,LBR,LKR,VR1)
+USE DerivedTypes
+USE VScratchB
+USE GlobalScalars
+IMPLICIT NONE
+INTEGER IXYZ,LBS,LKS,LBR,LKR
+REAL(DOUBLE) VS0(LBS,LKS),VS1(LBS,LKS),VR1(LBR,LKR)
+SELECT CASE(IXYZ)
+CASE(1)
+VS0(2,5)=QCx*VS0(2,2)+WQx*VS1(2,2)-r1x2E*VR1(2,2)&
+   +r1x2E*(VS0(2,1)-ZxZpE*VS1(2,1))&
+   +HfxZpE*VS1(1,2)
+VS0(2,6)=QCx*VS0(2,3)+WQx*VS1(2,3)-r1x2E*VR1(2,3)&
+   +HfxZpE*VS1(1,3)
+VS0(2,7)=QCy*VS0(2,3)+WQy*VS1(2,3)&
+   +r1x2E*(VS0(2,1)-ZxZpE*VS1(2,1))
+VS0(2,8)=QCx*VS0(2,4)+WQx*VS1(2,4)-r1x2E*VR1(2,4)&
+   +HfxZpE*VS1(1,4)
+VS0(2,9)=QCy*VS0(2,4)+WQy*VS1(2,4)
+VS0(2,10)=QCz*VS0(2,4)+WQz*VS1(2,4)&
+   +r1x2E*(VS0(2,1)-ZxZpE*VS1(2,1))
+VS0(3,5)=QCx*VS0(3,2)+WQx*VS1(3,2)-r1x2E*VR1(3,2)&
+   +r1x2E*(VS0(3,1)-ZxZpE*VS1(3,1))
+VS0(3,6)=QCx*VS0(3,3)+WQx*VS1(3,3)-r1x2E*VR1(3,3)
+VS0(3,7)=QCy*VS0(3,3)+WQy*VS1(3,3)&
+   +r1x2E*(VS0(3,1)-ZxZpE*VS1(3,1))&
+   +HfxZpE*VS1(1,3)
+VS0(3,8)=QCx*VS0(3,4)+WQx*VS1(3,4)-r1x2E*VR1(3,4)
+VS0(3,9)=QCy*VS0(3,4)+WQy*VS1(3,4)&
+   +HfxZpE*VS1(1,4)
+VS0(3,10)=QCz*VS0(3,4)+WQz*VS1(3,4)&
+   +r1x2E*(VS0(3,1)-ZxZpE*VS1(3,1))
+VS0(4,5)=QCx*VS0(4,2)+WQx*VS1(4,2)-r1x2E*VR1(4,2)&
+   +r1x2E*(VS0(4,1)-ZxZpE*VS1(4,1))
+VS0(4,6)=QCx*VS0(4,3)+WQx*VS1(4,3)-r1x2E*VR1(4,3)
+VS0(4,7)=QCy*VS0(4,3)+WQy*VS1(4,3)&
+   +r1x2E*(VS0(4,1)-ZxZpE*VS1(4,1))
+VS0(4,8)=QCx*VS0(4,4)+WQx*VS1(4,4)-r1x2E*VR1(4,4)
+VS0(4,9)=QCy*VS0(4,4)+WQy*VS1(4,4)
+VS0(4,10)=QCz*VS0(4,4)+WQz*VS1(4,4)&
+   +r1x2E*(VS0(4,1)-ZxZpE*VS1(4,1))&
+   +HfxZpE*VS1(1,4)
+CASE(2)
+VS0(2,5)=QCx*VS0(2,2)+WQx*VS1(2,2)&
+   +r1x2E*(VS0(2,1)-ZxZpE*VS1(2,1))&
+   +HfxZpE*VS1(1,2)
+VS0(2,6)=QCx*VS0(2,3)+WQx*VS1(2,3)&
+   +HfxZpE*VS1(1,3)
+VS0(2,7)=QCy*VS0(2,3)+WQy*VS1(2,3)-r1x2E*VR1(2,3)&
+   +r1x2E*(VS0(2,1)-ZxZpE*VS1(2,1))
+VS0(2,8)=QCx*VS0(2,4)+WQx*VS1(2,4)&
+   +HfxZpE*VS1(1,4)
+VS0(2,9)=QCy*VS0(2,4)+WQy*VS1(2,4)-r1x2E*VR1(2,4)
+VS0(2,10)=QCz*VS0(2,4)+WQz*VS1(2,4)&
+   +r1x2E*(VS0(2,1)-ZxZpE*VS1(2,1))
+VS0(3,5)=QCx*VS0(3,2)+WQx*VS1(3,2)&
+   +r1x2E*(VS0(3,1)-ZxZpE*VS1(3,1))
+VS0(3,6)=QCx*VS0(3,3)+WQx*VS1(3,3)
+VS0(3,7)=QCy*VS0(3,3)+WQy*VS1(3,3)-r1x2E*VR1(3,3)&
+   +r1x2E*(VS0(3,1)-ZxZpE*VS1(3,1))&
+   +HfxZpE*VS1(1,3)
+VS0(3,8)=QCx*VS0(3,4)+WQx*VS1(3,4)
+VS0(3,9)=QCy*VS0(3,4)+WQy*VS1(3,4)-r1x2E*VR1(3,4)&
+   +HfxZpE*VS1(1,4)
+VS0(3,10)=QCz*VS0(3,4)+WQz*VS1(3,4)&
+   +r1x2E*(VS0(3,1)-ZxZpE*VS1(3,1))
+VS0(4,5)=QCx*VS0(4,2)+WQx*VS1(4,2)&
+   +r1x2E*(VS0(4,1)-ZxZpE*VS1(4,1))
+VS0(4,6)=QCx*VS0(4,3)+WQx*VS1(4,3)
+VS0(4,7)=QCy*VS0(4,3)+WQy*VS1(4,3)-r1x2E*VR1(4,3)&
+   +r1x2E*(VS0(4,1)-ZxZpE*VS1(4,1))
+VS0(4,8)=QCx*VS0(4,4)+WQx*VS1(4,4)
+VS0(4,9)=QCy*VS0(4,4)+WQy*VS1(4,4)-r1x2E*VR1(4,4)
+VS0(4,10)=QCz*VS0(4,4)+WQz*VS1(4,4)&
+   +r1x2E*(VS0(4,1)-ZxZpE*VS1(4,1))&
+   +HfxZpE*VS1(1,4)
+CASE(3)
+VS0(2,5)=QCx*VS0(2,2)+WQx*VS1(2,2)&
+   +r1x2E*(VS0(2,1)-ZxZpE*VS1(2,1))&
+   +HfxZpE*VS1(1,2)
+VS0(2,6)=QCx*VS0(2,3)+WQx*VS1(2,3)&
+   +HfxZpE*VS1(1,3)
+VS0(2,7)=QCy*VS0(2,3)+WQy*VS1(2,3)&
+   +r1x2E*(VS0(2,1)-ZxZpE*VS1(2,1))
+VS0(2,8)=QCx*VS0(2,4)+WQx*VS1(2,4)&
+   +HfxZpE*VS1(1,4)
+VS0(2,9)=QCy*VS0(2,4)+WQy*VS1(2,4)
+VS0(2,10)=QCz*VS0(2,4)+WQz*VS1(2,4)-r1x2E*VR1(2,4)&
+   +r1x2E*(VS0(2,1)-ZxZpE*VS1(2,1))
+VS0(3,5)=QCx*VS0(3,2)+WQx*VS1(3,2)&
+   +r1x2E*(VS0(3,1)-ZxZpE*VS1(3,1))
+VS0(3,6)=QCx*VS0(3,3)+WQx*VS1(3,3)
+VS0(3,7)=QCy*VS0(3,3)+WQy*VS1(3,3)&
+   +r1x2E*(VS0(3,1)-ZxZpE*VS1(3,1))&
+   +HfxZpE*VS1(1,3)
+VS0(3,8)=QCx*VS0(3,4)+WQx*VS1(3,4)
+VS0(3,9)=QCy*VS0(3,4)+WQy*VS1(3,4)&
+   +HfxZpE*VS1(1,4)
+VS0(3,10)=QCz*VS0(3,4)+WQz*VS1(3,4)-r1x2E*VR1(3,4)&
+   +r1x2E*(VS0(3,1)-ZxZpE*VS1(3,1))
+VS0(4,5)=QCx*VS0(4,2)+WQx*VS1(4,2)&
+   +r1x2E*(VS0(4,1)-ZxZpE*VS1(4,1))
+VS0(4,6)=QCx*VS0(4,3)+WQx*VS1(4,3)
+VS0(4,7)=QCy*VS0(4,3)+WQy*VS1(4,3)&
+   +r1x2E*(VS0(4,1)-ZxZpE*VS1(4,1))
+VS0(4,8)=QCx*VS0(4,4)+WQx*VS1(4,4)
+VS0(4,9)=QCy*VS0(4,4)+WQy*VS1(4,4)
+VS0(4,10)=QCz*VS0(4,4)+WQz*VS1(4,4)-r1x2E*VR1(4,4)&
+   +r1x2E*(VS0(4,1)-ZxZpE*VS1(4,1))&
+   +HfxZpE*VS1(1,4)
+CASE DEFAULT
+WRITE(*,*) 'STOP IN MVRRp0d0'
+STOP
+END SELECT
+END SUBROUTINE MVRRp0d0

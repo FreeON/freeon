@@ -66,3 +66,220 @@
       VRR0(4,19)=V(12)+V(24)+V(26)+QCz*VRR0(4,9)+WQz*VRR1(4,9)
       VRR0(4,20)=2.D0*V(28)-2.D0*V(29)+QCz*VRR0(4,10)+HfxZpE*VRR1(1,10)+WQz*VRR1(4,10)
 END SUBROUTINE VRRp0f0
+SUBROUTINE MVRRp0f0(IXYZ,LBS,LKS,VS0,VS1,LBR,LKR,VR1)
+USE DerivedTypes
+USE VScratchB
+USE GlobalScalars
+IMPLICIT NONE
+INTEGER IXYZ,LBS,LKS,LBR,LKR
+REAL(DOUBLE) VS0(LBS,LKS),VS1(LBS,LKS),VR1(LBR,LKR)
+SELECT CASE(IXYZ)
+CASE(1)
+VS0(2,11)=QCx*VS0(2,5)+WQx*VS1(2,5)-r1x2E*VR1(2,5)&
+   +2D0*r1x2E*(VS0(2,2)-ZxZpE*VS1(2,2))&
+   +HfxZpE*VS1(1,5)
+VS0(2,12)=QCx*VS0(2,6)+WQx*VS1(2,6)-r1x2E*VR1(2,6)&
+   +r1x2E*(VS0(2,3)-ZxZpE*VS1(2,3))&
+   +HfxZpE*VS1(1,6)
+VS0(2,13)=QCy*VS0(2,6)+WQy*VS1(2,6)&
+   +r1x2E*(VS0(2,2)-ZxZpE*VS1(2,2))
+VS0(2,14)=QCy*VS0(2,7)+WQy*VS1(2,7)&
+   +2D0*r1x2E*(VS0(2,3)-ZxZpE*VS1(2,3))
+VS0(2,15)=QCx*VS0(2,8)+WQx*VS1(2,8)-r1x2E*VR1(2,8)&
+   +r1x2E*(VS0(2,4)-ZxZpE*VS1(2,4))&
+   +HfxZpE*VS1(1,8)
+VS0(2,16)=QCx*VS0(2,9)+WQx*VS1(2,9)-r1x2E*VR1(2,9)&
+   +HfxZpE*VS1(1,9)
+VS0(2,17)=QCy*VS0(2,9)+WQy*VS1(2,9)&
+   +r1x2E*(VS0(2,4)-ZxZpE*VS1(2,4))
+VS0(2,18)=QCz*VS0(2,8)+WQz*VS1(2,8)&
+   +r1x2E*(VS0(2,2)-ZxZpE*VS1(2,2))
+VS0(2,19)=QCz*VS0(2,9)+WQz*VS1(2,9)&
+   +r1x2E*(VS0(2,3)-ZxZpE*VS1(2,3))
+VS0(2,20)=QCz*VS0(2,10)+WQz*VS1(2,10)&
+   +2D0*r1x2E*(VS0(2,4)-ZxZpE*VS1(2,4))
+VS0(3,11)=QCx*VS0(3,5)+WQx*VS1(3,5)-r1x2E*VR1(3,5)&
+   +2D0*r1x2E*(VS0(3,2)-ZxZpE*VS1(3,2))
+VS0(3,12)=QCx*VS0(3,6)+WQx*VS1(3,6)-r1x2E*VR1(3,6)&
+   +r1x2E*(VS0(3,3)-ZxZpE*VS1(3,3))
+VS0(3,13)=QCy*VS0(3,6)+WQy*VS1(3,6)&
+   +r1x2E*(VS0(3,2)-ZxZpE*VS1(3,2))&
+   +HfxZpE*VS1(1,6)
+VS0(3,14)=QCy*VS0(3,7)+WQy*VS1(3,7)&
+   +2D0*r1x2E*(VS0(3,3)-ZxZpE*VS1(3,3))&
+   +HfxZpE*VS1(1,7)
+VS0(3,15)=QCx*VS0(3,8)+WQx*VS1(3,8)-r1x2E*VR1(3,8)&
+   +r1x2E*(VS0(3,4)-ZxZpE*VS1(3,4))
+VS0(3,16)=QCx*VS0(3,9)+WQx*VS1(3,9)-r1x2E*VR1(3,9)
+VS0(3,17)=QCy*VS0(3,9)+WQy*VS1(3,9)&
+   +r1x2E*(VS0(3,4)-ZxZpE*VS1(3,4))&
+   +HfxZpE*VS1(1,9)
+VS0(3,18)=QCz*VS0(3,8)+WQz*VS1(3,8)&
+   +r1x2E*(VS0(3,2)-ZxZpE*VS1(3,2))
+VS0(3,19)=QCz*VS0(3,9)+WQz*VS1(3,9)&
+   +r1x2E*(VS0(3,3)-ZxZpE*VS1(3,3))
+VS0(3,20)=QCz*VS0(3,10)+WQz*VS1(3,10)&
+   +2D0*r1x2E*(VS0(3,4)-ZxZpE*VS1(3,4))
+VS0(4,11)=QCx*VS0(4,5)+WQx*VS1(4,5)-r1x2E*VR1(4,5)&
+   +2D0*r1x2E*(VS0(4,2)-ZxZpE*VS1(4,2))
+VS0(4,12)=QCx*VS0(4,6)+WQx*VS1(4,6)-r1x2E*VR1(4,6)&
+   +r1x2E*(VS0(4,3)-ZxZpE*VS1(4,3))
+VS0(4,13)=QCy*VS0(4,6)+WQy*VS1(4,6)&
+   +r1x2E*(VS0(4,2)-ZxZpE*VS1(4,2))
+VS0(4,14)=QCy*VS0(4,7)+WQy*VS1(4,7)&
+   +2D0*r1x2E*(VS0(4,3)-ZxZpE*VS1(4,3))
+VS0(4,15)=QCx*VS0(4,8)+WQx*VS1(4,8)-r1x2E*VR1(4,8)&
+   +r1x2E*(VS0(4,4)-ZxZpE*VS1(4,4))
+VS0(4,16)=QCx*VS0(4,9)+WQx*VS1(4,9)-r1x2E*VR1(4,9)
+VS0(4,17)=QCy*VS0(4,9)+WQy*VS1(4,9)&
+   +r1x2E*(VS0(4,4)-ZxZpE*VS1(4,4))
+VS0(4,18)=QCz*VS0(4,8)+WQz*VS1(4,8)&
+   +r1x2E*(VS0(4,2)-ZxZpE*VS1(4,2))&
+   +HfxZpE*VS1(1,8)
+VS0(4,19)=QCz*VS0(4,9)+WQz*VS1(4,9)&
+   +r1x2E*(VS0(4,3)-ZxZpE*VS1(4,3))&
+   +HfxZpE*VS1(1,9)
+VS0(4,20)=QCz*VS0(4,10)+WQz*VS1(4,10)&
+   +2D0*r1x2E*(VS0(4,4)-ZxZpE*VS1(4,4))&
+   +HfxZpE*VS1(1,10)
+CASE(2)
+VS0(2,11)=QCx*VS0(2,5)+WQx*VS1(2,5)&
+   +2D0*r1x2E*(VS0(2,2)-ZxZpE*VS1(2,2))&
+   +HfxZpE*VS1(1,5)
+VS0(2,12)=QCx*VS0(2,6)+WQx*VS1(2,6)&
+   +r1x2E*(VS0(2,3)-ZxZpE*VS1(2,3))&
+   +HfxZpE*VS1(1,6)
+VS0(2,13)=QCy*VS0(2,6)+WQy*VS1(2,6)-r1x2E*VR1(2,6)&
+   +r1x2E*(VS0(2,2)-ZxZpE*VS1(2,2))
+VS0(2,14)=QCy*VS0(2,7)+WQy*VS1(2,7)-r1x2E*VR1(2,7)&
+   +2D0*r1x2E*(VS0(2,3)-ZxZpE*VS1(2,3))
+VS0(2,15)=QCx*VS0(2,8)+WQx*VS1(2,8)&
+   +r1x2E*(VS0(2,4)-ZxZpE*VS1(2,4))&
+   +HfxZpE*VS1(1,8)
+VS0(2,16)=QCx*VS0(2,9)+WQx*VS1(2,9)&
+   +HfxZpE*VS1(1,9)
+VS0(2,17)=QCy*VS0(2,9)+WQy*VS1(2,9)-r1x2E*VR1(2,9)&
+   +r1x2E*(VS0(2,4)-ZxZpE*VS1(2,4))
+VS0(2,18)=QCz*VS0(2,8)+WQz*VS1(2,8)&
+   +r1x2E*(VS0(2,2)-ZxZpE*VS1(2,2))
+VS0(2,19)=QCz*VS0(2,9)+WQz*VS1(2,9)&
+   +r1x2E*(VS0(2,3)-ZxZpE*VS1(2,3))
+VS0(2,20)=QCz*VS0(2,10)+WQz*VS1(2,10)&
+   +2D0*r1x2E*(VS0(2,4)-ZxZpE*VS1(2,4))
+VS0(3,11)=QCx*VS0(3,5)+WQx*VS1(3,5)&
+   +2D0*r1x2E*(VS0(3,2)-ZxZpE*VS1(3,2))
+VS0(3,12)=QCx*VS0(3,6)+WQx*VS1(3,6)&
+   +r1x2E*(VS0(3,3)-ZxZpE*VS1(3,3))
+VS0(3,13)=QCy*VS0(3,6)+WQy*VS1(3,6)-r1x2E*VR1(3,6)&
+   +r1x2E*(VS0(3,2)-ZxZpE*VS1(3,2))&
+   +HfxZpE*VS1(1,6)
+VS0(3,14)=QCy*VS0(3,7)+WQy*VS1(3,7)-r1x2E*VR1(3,7)&
+   +2D0*r1x2E*(VS0(3,3)-ZxZpE*VS1(3,3))&
+   +HfxZpE*VS1(1,7)
+VS0(3,15)=QCx*VS0(3,8)+WQx*VS1(3,8)&
+   +r1x2E*(VS0(3,4)-ZxZpE*VS1(3,4))
+VS0(3,16)=QCx*VS0(3,9)+WQx*VS1(3,9)
+VS0(3,17)=QCy*VS0(3,9)+WQy*VS1(3,9)-r1x2E*VR1(3,9)&
+   +r1x2E*(VS0(3,4)-ZxZpE*VS1(3,4))&
+   +HfxZpE*VS1(1,9)
+VS0(3,18)=QCz*VS0(3,8)+WQz*VS1(3,8)&
+   +r1x2E*(VS0(3,2)-ZxZpE*VS1(3,2))
+VS0(3,19)=QCz*VS0(3,9)+WQz*VS1(3,9)&
+   +r1x2E*(VS0(3,3)-ZxZpE*VS1(3,3))
+VS0(3,20)=QCz*VS0(3,10)+WQz*VS1(3,10)&
+   +2D0*r1x2E*(VS0(3,4)-ZxZpE*VS1(3,4))
+VS0(4,11)=QCx*VS0(4,5)+WQx*VS1(4,5)&
+   +2D0*r1x2E*(VS0(4,2)-ZxZpE*VS1(4,2))
+VS0(4,12)=QCx*VS0(4,6)+WQx*VS1(4,6)&
+   +r1x2E*(VS0(4,3)-ZxZpE*VS1(4,3))
+VS0(4,13)=QCy*VS0(4,6)+WQy*VS1(4,6)-r1x2E*VR1(4,6)&
+   +r1x2E*(VS0(4,2)-ZxZpE*VS1(4,2))
+VS0(4,14)=QCy*VS0(4,7)+WQy*VS1(4,7)-r1x2E*VR1(4,7)&
+   +2D0*r1x2E*(VS0(4,3)-ZxZpE*VS1(4,3))
+VS0(4,15)=QCx*VS0(4,8)+WQx*VS1(4,8)&
+   +r1x2E*(VS0(4,4)-ZxZpE*VS1(4,4))
+VS0(4,16)=QCx*VS0(4,9)+WQx*VS1(4,9)
+VS0(4,17)=QCy*VS0(4,9)+WQy*VS1(4,9)-r1x2E*VR1(4,9)&
+   +r1x2E*(VS0(4,4)-ZxZpE*VS1(4,4))
+VS0(4,18)=QCz*VS0(4,8)+WQz*VS1(4,8)&
+   +r1x2E*(VS0(4,2)-ZxZpE*VS1(4,2))&
+   +HfxZpE*VS1(1,8)
+VS0(4,19)=QCz*VS0(4,9)+WQz*VS1(4,9)&
+   +r1x2E*(VS0(4,3)-ZxZpE*VS1(4,3))&
+   +HfxZpE*VS1(1,9)
+VS0(4,20)=QCz*VS0(4,10)+WQz*VS1(4,10)&
+   +2D0*r1x2E*(VS0(4,4)-ZxZpE*VS1(4,4))&
+   +HfxZpE*VS1(1,10)
+CASE(3)
+VS0(2,11)=QCx*VS0(2,5)+WQx*VS1(2,5)&
+   +2D0*r1x2E*(VS0(2,2)-ZxZpE*VS1(2,2))&
+   +HfxZpE*VS1(1,5)
+VS0(2,12)=QCx*VS0(2,6)+WQx*VS1(2,6)&
+   +r1x2E*(VS0(2,3)-ZxZpE*VS1(2,3))&
+   +HfxZpE*VS1(1,6)
+VS0(2,13)=QCy*VS0(2,6)+WQy*VS1(2,6)&
+   +r1x2E*(VS0(2,2)-ZxZpE*VS1(2,2))
+VS0(2,14)=QCy*VS0(2,7)+WQy*VS1(2,7)&
+   +2D0*r1x2E*(VS0(2,3)-ZxZpE*VS1(2,3))
+VS0(2,15)=QCx*VS0(2,8)+WQx*VS1(2,8)&
+   +r1x2E*(VS0(2,4)-ZxZpE*VS1(2,4))&
+   +HfxZpE*VS1(1,8)
+VS0(2,16)=QCx*VS0(2,9)+WQx*VS1(2,9)&
+   +HfxZpE*VS1(1,9)
+VS0(2,17)=QCy*VS0(2,9)+WQy*VS1(2,9)&
+   +r1x2E*(VS0(2,4)-ZxZpE*VS1(2,4))
+VS0(2,18)=QCz*VS0(2,8)+WQz*VS1(2,8)-r1x2E*VR1(2,8)&
+   +r1x2E*(VS0(2,2)-ZxZpE*VS1(2,2))
+VS0(2,19)=QCz*VS0(2,9)+WQz*VS1(2,9)-r1x2E*VR1(2,9)&
+   +r1x2E*(VS0(2,3)-ZxZpE*VS1(2,3))
+VS0(2,20)=QCz*VS0(2,10)+WQz*VS1(2,10)-r1x2E*VR1(2,10)&
+   +2D0*r1x2E*(VS0(2,4)-ZxZpE*VS1(2,4))
+VS0(3,11)=QCx*VS0(3,5)+WQx*VS1(3,5)&
+   +2D0*r1x2E*(VS0(3,2)-ZxZpE*VS1(3,2))
+VS0(3,12)=QCx*VS0(3,6)+WQx*VS1(3,6)&
+   +r1x2E*(VS0(3,3)-ZxZpE*VS1(3,3))
+VS0(3,13)=QCy*VS0(3,6)+WQy*VS1(3,6)&
+   +r1x2E*(VS0(3,2)-ZxZpE*VS1(3,2))&
+   +HfxZpE*VS1(1,6)
+VS0(3,14)=QCy*VS0(3,7)+WQy*VS1(3,7)&
+   +2D0*r1x2E*(VS0(3,3)-ZxZpE*VS1(3,3))&
+   +HfxZpE*VS1(1,7)
+VS0(3,15)=QCx*VS0(3,8)+WQx*VS1(3,8)&
+   +r1x2E*(VS0(3,4)-ZxZpE*VS1(3,4))
+VS0(3,16)=QCx*VS0(3,9)+WQx*VS1(3,9)
+VS0(3,17)=QCy*VS0(3,9)+WQy*VS1(3,9)&
+   +r1x2E*(VS0(3,4)-ZxZpE*VS1(3,4))&
+   +HfxZpE*VS1(1,9)
+VS0(3,18)=QCz*VS0(3,8)+WQz*VS1(3,8)-r1x2E*VR1(3,8)&
+   +r1x2E*(VS0(3,2)-ZxZpE*VS1(3,2))
+VS0(3,19)=QCz*VS0(3,9)+WQz*VS1(3,9)-r1x2E*VR1(3,9)&
+   +r1x2E*(VS0(3,3)-ZxZpE*VS1(3,3))
+VS0(3,20)=QCz*VS0(3,10)+WQz*VS1(3,10)-r1x2E*VR1(3,10)&
+   +2D0*r1x2E*(VS0(3,4)-ZxZpE*VS1(3,4))
+VS0(4,11)=QCx*VS0(4,5)+WQx*VS1(4,5)&
+   +2D0*r1x2E*(VS0(4,2)-ZxZpE*VS1(4,2))
+VS0(4,12)=QCx*VS0(4,6)+WQx*VS1(4,6)&
+   +r1x2E*(VS0(4,3)-ZxZpE*VS1(4,3))
+VS0(4,13)=QCy*VS0(4,6)+WQy*VS1(4,6)&
+   +r1x2E*(VS0(4,2)-ZxZpE*VS1(4,2))
+VS0(4,14)=QCy*VS0(4,7)+WQy*VS1(4,7)&
+   +2D0*r1x2E*(VS0(4,3)-ZxZpE*VS1(4,3))
+VS0(4,15)=QCx*VS0(4,8)+WQx*VS1(4,8)&
+   +r1x2E*(VS0(4,4)-ZxZpE*VS1(4,4))
+VS0(4,16)=QCx*VS0(4,9)+WQx*VS1(4,9)
+VS0(4,17)=QCy*VS0(4,9)+WQy*VS1(4,9)&
+   +r1x2E*(VS0(4,4)-ZxZpE*VS1(4,4))
+VS0(4,18)=QCz*VS0(4,8)+WQz*VS1(4,8)-r1x2E*VR1(4,8)&
+   +r1x2E*(VS0(4,2)-ZxZpE*VS1(4,2))&
+   +HfxZpE*VS1(1,8)
+VS0(4,19)=QCz*VS0(4,9)+WQz*VS1(4,9)-r1x2E*VR1(4,9)&
+   +r1x2E*(VS0(4,3)-ZxZpE*VS1(4,3))&
+   +HfxZpE*VS1(1,9)
+VS0(4,20)=QCz*VS0(4,10)+WQz*VS1(4,10)-r1x2E*VR1(4,10)&
+   +2D0*r1x2E*(VS0(4,4)-ZxZpE*VS1(4,4))&
+   +HfxZpE*VS1(1,10)
+CASE DEFAULT
+WRITE(*,*) 'STOP IN MVRRp0f0'
+STOP
+END SELECT
+END SUBROUTINE MVRRp0f0
