@@ -453,7 +453,138 @@ SUBROUTINE HrrBra(U,T,x,y,z,N,LenBi,LenBf,NumK,IType)
     T(I,100,J)=U(I,74,J)+z*U(I,46,J)+z*U(I,46,J)+z*z*U(I,25,J)+z*U(I,46,J)+z*z*U(I,25,J)+z*z*U(I,25,J)+z*z*z*U(I,10,J)
    ENDDO
    ENDDO
+ CASE ( 103)
+   DO J=1,NumK
+   DO I=1,N
+    T(I,1,J)=U(I,2,J)+x*U(I,1,J)
+    T(I,2,J)=U(I,3,J)+y*U(I,1,J)
+    T(I,3,J)=U(I,4,J)+z*U(I,1,J)
+   ENDDO
+   ENDDO
+ CASE ( 102)
+   DO J=1,NumK
+   DO I=1,N
+    T(I,1,J)=U(I,1,J)
+    T(I,2,J)=U(I,3,J)+x*U(I,2,J)
+    T(I,3,J)=U(I,4,J)+y*U(I,2,J)
+    T(I,4,J)=U(I,5,J)+z*U(I,2,J)
+   ENDDO
+   ENDDO
+ CASE ( 501)
+   DO J=1,NumK
+   DO I=1,N
+    T(I,1,J)=U(I,1,J)
+    T(I,2,J)=U(I,4,J)
+    T(I,3,J)=U(I,2,J)
+    T(I,4,J)=U(I,5,J)
+    T(I,5,J)=U(I,6,J)
+    T(I,6,J)=U(I,3,J)
+    T(I,7,J)=U(I,7,J)
+    T(I,8,J)=U(I,8,J)
+    T(I,9,J)=U(I,9,J)
+   ENDDO
+   ENDDO
+ CASE ( 203)
+   DO J=1,NumK
+   DO I=1,N
+    T(I,1,J)=U(I,2,J)+x*U(I,1,J)
+    T(I,2,J)=U(I,3,J)+y*U(I,1,J)
+    T(I,3,J)=U(I,4,J)+z*U(I,1,J)
+    T(I,4,J)=U(I,8,J)+x*U(I,5,J)
+    T(I,5,J)=U(I,9,J)+y*U(I,5,J)
+    T(I,6,J)=U(I,11,J)+z*U(I,5,J)
+    T(I,7,J)=U(I,9,J)+x*U(I,6,J)
+    T(I,8,J)=U(I,10,J)+y*U(I,6,J)
+    T(I,9,J)=U(I,12,J)+z*U(I,6,J)
+    T(I,10,J)=U(I,11,J)+x*U(I,7,J)
+    T(I,11,J)=U(I,12,J)+y*U(I,7,J)
+    T(I,12,J)=U(I,13,J)+z*U(I,7,J)
+   ENDDO
+   ENDDO
+ CASE ( 502)
+   DO J=1,NumK
+   DO I=1,N
+    T(I,1,J)=U(I,1,J)
+    T(I,2,J)=U(I,7,J)+x*U(I,4,J)
+    T(I,3,J)=U(I,8,J)+y*U(I,4,J)
+    T(I,4,J)=U(I,10,J)+z*U(I,4,J)
+    T(I,5,J)=U(I,12,J)
+    T(I,6,J)=U(I,25,J)+x*U(I,19,J)
+    T(I,7,J)=U(I,26,J)+y*U(I,19,J)
+    T(I,8,J)=U(I,29,J)+z*U(I,19,J)
+    T(I,9,J)=U(I,2,J)
+    T(I,10,J)=U(I,8,J)+x*U(I,5,J)
+    T(I,11,J)=U(I,9,J)+y*U(I,5,J)
+    T(I,12,J)=U(I,11,J)+z*U(I,5,J)
+    T(I,13,J)=U(I,13,J)
+    T(I,14,J)=U(I,26,J)+x*U(I,20,J)
+    T(I,15,J)=U(I,27,J)+y*U(I,20,J)
+    T(I,16,J)=U(I,30,J)+z*U(I,20,J)
+    T(I,17,J)=U(I,14,J)
+    T(I,18,J)=U(I,27,J)+x*U(I,21,J)
+    T(I,19,J)=U(I,28,J)+y*U(I,21,J)
+    T(I,20,J)=U(I,31,J)+z*U(I,21,J)
+    T(I,21,J)=U(I,3,J)
+    T(I,22,J)=U(I,10,J)+x*U(I,6,J)
+    T(I,23,J)=U(I,11,J)+y*U(I,6,J)
+    T(I,24,J)=U(I,12,J)+z*U(I,6,J)
+    T(I,25,J)=U(I,15,J)
+    T(I,26,J)=U(I,29,J)+x*U(I,22,J)
+    T(I,27,J)=U(I,30,J)+y*U(I,22,J)
+    T(I,28,J)=U(I,32,J)+z*U(I,22,J)
+    T(I,29,J)=U(I,16,J)
+    T(I,30,J)=U(I,30,J)+x*U(I,23,J)
+    T(I,31,J)=U(I,31,J)+y*U(I,23,J)
+    T(I,32,J)=U(I,33,J)+z*U(I,23,J)
+    T(I,33,J)=U(I,17,J)
+    T(I,34,J)=U(I,32,J)+x*U(I,24,J)
+    T(I,35,J)=U(I,33,J)+y*U(I,24,J)
+    T(I,36,J)=U(I,34,J)+z*U(I,24,J)
+   ENDDO
+   ENDDO
+ CASE ( 205)
+   DO J=1,NumK
+   DO I=1,N
+    T(I,1,J)=U(I,2,J)+x*U(I,1,J)
+    T(I,2,J)=U(I,18,J)+x*U(I,15,J)+x*U(I,15,J)+x*x*U(I,14,J)
+    T(I,3,J)=U(I,3,J)+y*U(I,1,J)
+    T(I,4,J)=U(I,19,J)+y*U(I,15,J)+x*U(I,16,J)+x*y*U(I,14,J)
+    T(I,5,J)=U(I,20,J)+y*U(I,16,J)+y*U(I,16,J)+y*y*U(I,14,J)
+    T(I,6,J)=U(I,4,J)+z*U(I,1,J)
+    T(I,7,J)=U(I,21,J)+z*U(I,15,J)+x*U(I,17,J)+x*z*U(I,14,J)
+    T(I,8,J)=U(I,22,J)+z*U(I,16,J)+y*U(I,17,J)+y*z*U(I,14,J)
+    T(I,9,J)=U(I,23,J)+z*U(I,17,J)+z*U(I,17,J)+z*z*U(I,14,J)
+    T(I,10,J)=U(I,8,J)+x*U(I,5,J)
+    T(I,11,J)=U(I,33,J)+x*U(I,27,J)+x*U(I,27,J)+x*x*U(I,24,J)
+    T(I,12,J)=U(I,9,J)+y*U(I,5,J)
+    T(I,13,J)=U(I,34,J)+y*U(I,27,J)+x*U(I,28,J)+x*y*U(I,24,J)
+    T(I,14,J)=U(I,35,J)+y*U(I,28,J)+y*U(I,28,J)+y*y*U(I,24,J)
+    T(I,15,J)=U(I,11,J)+z*U(I,5,J)
+    T(I,16,J)=U(I,37,J)+z*U(I,27,J)+x*U(I,30,J)+x*z*U(I,24,J)
+    T(I,17,J)=U(I,38,J)+z*U(I,28,J)+y*U(I,30,J)+y*z*U(I,24,J)
+    T(I,18,J)=U(I,40,J)+z*U(I,30,J)+z*U(I,30,J)+z*z*U(I,24,J)
+    T(I,19,J)=U(I,9,J)+x*U(I,6,J)
+    T(I,20,J)=U(I,34,J)+x*U(I,28,J)+x*U(I,28,J)+x*x*U(I,25,J)
+    T(I,21,J)=U(I,10,J)+y*U(I,6,J)
+    T(I,22,J)=U(I,35,J)+y*U(I,28,J)+x*U(I,29,J)+x*y*U(I,25,J)
+    T(I,23,J)=U(I,36,J)+y*U(I,29,J)+y*U(I,29,J)+y*y*U(I,25,J)
+    T(I,24,J)=U(I,12,J)+z*U(I,6,J)
+    T(I,25,J)=U(I,38,J)+z*U(I,28,J)+x*U(I,31,J)+x*z*U(I,25,J)
+    T(I,26,J)=U(I,39,J)+z*U(I,29,J)+y*U(I,31,J)+y*z*U(I,25,J)
+    T(I,27,J)=U(I,41,J)+z*U(I,31,J)+z*U(I,31,J)+z*z*U(I,25,J)
+    T(I,28,J)=U(I,11,J)+x*U(I,7,J)
+    T(I,29,J)=U(I,37,J)+x*U(I,30,J)+x*U(I,30,J)+x*x*U(I,26,J)
+    T(I,30,J)=U(I,12,J)+y*U(I,7,J)
+    T(I,31,J)=U(I,38,J)+y*U(I,30,J)+x*U(I,31,J)+x*y*U(I,26,J)
+    T(I,32,J)=U(I,39,J)+y*U(I,31,J)+y*U(I,31,J)+y*y*U(I,26,J)
+    T(I,33,J)=U(I,13,J)+z*U(I,7,J)
+    T(I,34,J)=U(I,40,J)+z*U(I,30,J)+x*U(I,32,J)+x*z*U(I,26,J)
+    T(I,35,J)=U(I,41,J)+z*U(I,31,J)+y*U(I,32,J)+y*z*U(I,26,J)
+    T(I,36,J)=U(I,42,J)+z*U(I,32,J)+z*U(I,32,J)+z*z*U(I,26,J)
+   ENDDO
+   ENDDO
  CASE DEFAULT
+   WRITE(*,*) 'IType =',IType
    CALL Halt('Illegal IType in HrrBra')
  END SELECT
  END SUBROUTINE HrrBra
