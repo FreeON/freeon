@@ -223,7 +223,7 @@ MODULE DrvSCFs
          RemoveFile=TRIM(RemCur)//'.D'                                
          CALL SYSTEM('/bin/rm -f  '//RemoveFile)
          IF(CCyc>0)THEN
-            RemoveFile=TRIM(RemCur)//'.OrthoD'                                
+            RemoveFile=TRIM(RemPrv)//'.OrthoD'                                
             CALL SYSTEM('/bin/rm -f  '//RemoveFile)
             RemoveFile=TRIM(RemCur)//'.F_DIIS'                                
             CALL SYSTEM('/bin/rm -f  '//RemoveFile)
