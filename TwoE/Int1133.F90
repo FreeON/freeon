@@ -6,19 +6,26 @@
       USE GlobalScalars
       USE GammaF2
       USE ONX2DataType
-      IMPLICIT REAL(DOUBLE) (V,W)
+      IMPLICIT REAL(DOUBLE) (A,I,V,W)
       INTEGER        :: LBra,LKet
       REAL(DOUBLE)   :: PrmBufB(5,LBra),PrmBufK(5,LKet)
       TYPE(AtomInfo) :: ACInfo,BDInfo
-      REAL(DOUBLE),DIMENSION(0:2) :: AuxR
-      REAL(DOUBLE),DIMENSION(1,10) :: MBarN
       REAL(DOUBLE),DIMENSION(1,1,4,4) :: I
       REAL(DOUBLE)  :: Zeta,Eta,r1xZpE,HfxZpE,r1x2E,r1x2Z,ExZpE,ZxZpE,Omega,Up,Uq,Upq
       REAL(DOUBLE)  :: Ax,Ay,Az,Bx,By,Bz,Cx,Cy,Cz,Dx,Dy,Dz,Qx,Qy,Qz,Px,Py,Pz,Wx,Wy,Wz
       REAL(DOUBLE)  :: QCx,QCy,QCz,PAx,PAy,PAz,PQx,PQy,PQz,WPx,WPy,WPz,WQx,WQy,WQz   
       REAL(DOUBLE)  :: T,ET,TwoT,InvT,SqInvT
       INTEGER       :: J,K,L
-      MBarN=0.0d0
+      I1Bar1=Zero
+      I1Bar2=Zero
+      I1Bar3=Zero
+      I1Bar4=Zero
+      I1Bar5=Zero
+      I1Bar6=Zero
+      I1Bar7=Zero
+      I1Bar8=Zero
+      I1Bar9=Zero
+      I1Bar10=Zero
       Ax=ACInfo%Atm1X
       Ay=ACInfo%Atm1Y
       Az=ACInfo%Atm1Z
@@ -78,59 +85,47 @@
             T=Omega*(PQx*PQx+PQy*PQy+PQz*PQz)
             IF(T<Gamma_Switch)THEN
               L=AINT(T*Gamma_Grid)
-              V1=One
-              V2=-Two*Omega
               ET=EXP(-T)
               TwoT=Two*T
               W2=(F2_0(L)+T*(F2_1(L)+T*(F2_2(L)+T*(F2_3(L)+T*F2_4(L)))))
               W1=+3.333333333333333D-01*(TwoT*W2+ET)
               W0=TwoT*W1+ET
-              AuxR(0)=V1*W0
-              V1=V2*V1
-              AuxR(1)=V1*W1
-              V1=V2*V1
-              AuxR(2)=V1*W2
+              AuxR0=Upq*W0
+              AuxR1=Upq*W1
+              AuxR2=Upq*W2
             ELSE
               InvT=One/T
               SqInvT=DSQRT(InvT)
-              AuxR(0)=+8.862269254527580D-01*SqInvT
+              AuxR0=+8.862269254527580D-01*Upq*SqInvT
               SqInvT=SqInvT*InvT
-              AuxR(1)=+4.431134627263790D-01*SqInvT
+              AuxR1=+4.431134627263790D-01*Upq*SqInvT
               SqInvT=SqInvT*InvT
-              AuxR(2)=+6.646701940895685D-01*SqInvT
+              AuxR2=+6.646701940895685D-01*Upq*SqInvT
             ENDIF
-            V1=Upq*AuxR(0)
-            V2=QCx*V1
-            V3=Upq*AuxR(1)
-            V4=V3*WQx
-            MBarN(1,1)=V1+MBarN(1,1)
-            MBarN(1,2)=V2+V4+MBarN(1,2)
-            MBarN(1,3)=V1+MBarN(1,3)
-            MBarN(1,4)=V1+MBarN(1,4)
-            W1=QCx*(V2+V4)+r1x2E*(V1-V3*ZxZpE)
-            W2=MBarN(1,5)+WQx*(QCx*V3+WQx*Upq*AuxR(2))
-            MBarN(1,5)=W1+W2
-            MBarN(1,6)=V2+V4+MBarN(1,6)
-            MBarN(1,7)=V1+MBarN(1,7)
-            MBarN(1,8)=V2+V4+MBarN(1,8)
-            MBarN(1,9)=V1+MBarN(1,9)
-            MBarN(1,10)=V1+MBarN(1,10)
+            V1=AuxR0*QCx
+            V2=AuxR1*WQx
+            I1Bar1=AuxR0+I1Bar1
+            I1Bar2=V1+V2+I1Bar2
+            I1Bar3=AuxR0+I1Bar3
+            I1Bar4=AuxR0+I1Bar4
+            W1=QCx*(V1+V2)+WQx*(AuxR1*QCx+AuxR2*WQx)
+            W2=r1x2E*(AuxR0-AuxR1*ZxZpE)+I1Bar5
+            I1Bar5=W1+W2
+            I1Bar6=V1+V2+I1Bar6
+            I1Bar7=AuxR0+I1Bar7
+            I1Bar8=V1+V2+I1Bar8
+            I1Bar9=AuxR0+I1Bar9
+            I1Bar10=AuxR0+I1Bar10
          ENDDO ! (M0| loop
       ENDDO ! |N0) loop
       ! HRR 
-      V1=MBarN(1,2)
-      V2=MBarN(1,3)
-      V3=MBarN(1,6)
-      V4=MBarN(1,4)
-      V5=MBarN(1,8)
-      V6=MBarN(1,9)
-      I(1,1,2,2)=CDx*V1+MBarN(1,5)
-      I(1,1,3,2)=CDx*V2+V3
-      I(1,1,4,2)=CDx*V4+V5
-      I(1,1,2,3)=CDy*V1+V3
-      I(1,1,3,3)=CDy*V2+MBarN(1,7)
-      I(1,1,4,3)=CDy*V4+V6
-      I(1,1,2,4)=CDz*V1+V5
-      I(1,1,3,4)=CDz*V2+V6
-      I(1,1,4,4)=CDz*V4+MBarN(1,10)
+      I(1,1,2,2)=CDx*I1Bar2+I1Bar5
+      I(1,1,3,2)=CDx*I1Bar3+I1Bar6
+      I(1,1,4,2)=CDx*I1Bar4+I1Bar8
+      I(1,1,2,3)=CDy*I1Bar2+I1Bar6
+      I(1,1,3,3)=CDy*I1Bar3+I1Bar7
+      I(1,1,4,3)=CDy*I1Bar4+I1Bar9
+      I(1,1,2,4)=CDz*I1Bar2+I1Bar8
+      I(1,1,3,4)=CDz*I1Bar3+I1Bar9
+      I(1,1,4,4)=I1Bar10+CDz*I1Bar4
    END SUBROUTINE Int1133

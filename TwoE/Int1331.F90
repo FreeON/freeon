@@ -6,19 +6,32 @@
       USE GlobalScalars
       USE GammaF2
       USE ONX2DataType
-      IMPLICIT REAL(DOUBLE) (V,W)
+      IMPLICIT REAL(DOUBLE) (A,I,V,W)
       INTEGER        :: LBra,LKet
       REAL(DOUBLE)   :: PrmBufB(5,LBra),PrmBufK(5,LKet)
       TYPE(AtomInfo) :: ACInfo,BDInfo
-      REAL(DOUBLE),DIMENSION(0:2) :: AuxR
-      REAL(DOUBLE),DIMENSION(4,4) :: MBarN
       REAL(DOUBLE),DIMENSION(1,4,4,1) :: I
       REAL(DOUBLE)  :: Zeta,Eta,r1xZpE,HfxZpE,r1x2E,r1x2Z,ExZpE,ZxZpE,Omega,Up,Uq,Upq
       REAL(DOUBLE)  :: Ax,Ay,Az,Bx,By,Bz,Cx,Cy,Cz,Dx,Dy,Dz,Qx,Qy,Qz,Px,Py,Pz,Wx,Wy,Wz
       REAL(DOUBLE)  :: QCx,QCy,QCz,PAx,PAy,PAz,PQx,PQy,PQz,WPx,WPy,WPz,WQx,WQy,WQz   
       REAL(DOUBLE)  :: T,ET,TwoT,InvT,SqInvT
       INTEGER       :: J,K,L
-      MBarN=0.0d0
+      I1Bar1=Zero
+      I2Bar1=Zero
+      I3Bar1=Zero
+      I4Bar1=Zero
+      I1Bar2=Zero
+      I2Bar2=Zero
+      I3Bar2=Zero
+      I4Bar2=Zero
+      I1Bar3=Zero
+      I2Bar3=Zero
+      I3Bar3=Zero
+      I4Bar3=Zero
+      I1Bar4=Zero
+      I2Bar4=Zero
+      I3Bar4=Zero
+      I4Bar4=Zero
       Ax=ACInfo%Atm1X
       Ay=ACInfo%Atm1Y
       Az=ACInfo%Atm1Z
@@ -78,78 +91,68 @@
             T=Omega*(PQx*PQx+PQy*PQy+PQz*PQz)
             IF(T<Gamma_Switch)THEN
               L=AINT(T*Gamma_Grid)
-              V1=One
-              V2=-Two*Omega
               ET=EXP(-T)
               TwoT=Two*T
               W2=(F2_0(L)+T*(F2_1(L)+T*(F2_2(L)+T*(F2_3(L)+T*F2_4(L)))))
               W1=+3.333333333333333D-01*(TwoT*W2+ET)
               W0=TwoT*W1+ET
-              AuxR(0)=V1*W0
-              V1=V2*V1
-              AuxR(1)=V1*W1
-              V1=V2*V1
-              AuxR(2)=V1*W2
+              AuxR0=Upq*W0
+              AuxR1=Upq*W1
+              AuxR2=Upq*W2
             ELSE
               InvT=One/T
               SqInvT=DSQRT(InvT)
-              AuxR(0)=+8.862269254527580D-01*SqInvT
+              AuxR0=+8.862269254527580D-01*Upq*SqInvT
               SqInvT=SqInvT*InvT
-              AuxR(1)=+4.431134627263790D-01*SqInvT
+              AuxR1=+4.431134627263790D-01*Upq*SqInvT
               SqInvT=SqInvT*InvT
-              AuxR(2)=+6.646701940895685D-01*SqInvT
+              AuxR2=+6.646701940895685D-01*Upq*SqInvT
             ENDIF
-            V1=Upq*AuxR(0)
-            V2=PAx*V1
-            V3=Upq*AuxR(1)
-            V4=V3*WPx
-            V5=PAy*V1
-            V6=V3*WPy
-            V7=PAz*V1
-            V8=V3*WPz
-            V9=HfxZpE*V3
-            V10=V2+V4
-            V11=PAx*V3
-            V12=Upq*AuxR(2)
-            V13=V12*WPx
-            V14=V11+V13
-            V15=V5+V6
-            V16=PAy*V3
-            V17=V12*WPy
-            V18=V16+V17
-            V19=V7+V8
-            V20=PAz*V3
-            V21=V12*WPz
-            V22=V20+V21
-            MBarN(1,1)=V1+MBarN(1,1)
-            MBarN(2,1)=V2+V4+MBarN(2,1)
-            MBarN(3,1)=V5+V6+MBarN(3,1)
-            MBarN(4,1)=V7+V8+MBarN(4,1)
-            MBarN(1,2)=QCx*V1+V3*WQx+MBarN(1,2)
-            MBarN(2,2)=QCx*V10+V9+V14*WQx+MBarN(2,2)
-            MBarN(3,2)=QCx*V15+V18*WQx+MBarN(3,2)
-            MBarN(4,2)=QCx*V19+V22*WQx+MBarN(4,2)
-            MBarN(1,3)=V1+MBarN(1,3)
-            MBarN(2,3)=QCy*V10+V14*WQy+MBarN(2,3)
-            MBarN(3,3)=QCy*V15+V9+V18*WQy+MBarN(3,3)
-            MBarN(4,3)=QCy*V19+V22*WQy+MBarN(4,3)
-            MBarN(1,4)=V1+MBarN(1,4)
-            MBarN(2,4)=QCz*V10+V14*WQz+MBarN(2,4)
-            MBarN(3,4)=QCz*V15+V18*WQz+MBarN(3,4)
-            MBarN(4,4)=QCz*V19+V9+V22*WQz+MBarN(4,4)
+            V1=AuxR0*PAx
+            V2=AuxR1*WPx
+            V3=AuxR0*PAy
+            V4=AuxR1*WPy
+            V5=AuxR0*PAz
+            V6=AuxR1*WPz
+            V7=AuxR1*HfxZpE
+            V8=V1+V2
+            V9=AuxR1*PAx
+            V10=AuxR2*WPx
+            V11=V10+V9
+            V12=V3+V4
+            V13=AuxR1*PAy
+            V14=AuxR2*WPy
+            V15=V13+V14
+            V16=V5+V6
+            V17=AuxR1*PAz
+            V18=AuxR2*WPz
+            V19=V17+V18
+            I1Bar1=AuxR0+I1Bar1
+            I2Bar1=V1+V2+I2Bar1
+            I3Bar1=V3+V4+I3Bar1
+            I4Bar1=V5+V6+I4Bar1
+            I1Bar2=AuxR0*QCx+AuxR1*WQx+I1Bar2
+            I2Bar2=V7+QCx*V8+V11*WQx+I2Bar2
+            I3Bar2=QCx*V12+V15*WQx+I3Bar2
+            I4Bar2=QCx*V16+V19*WQx+I4Bar2
+            I1Bar3=AuxR0+I1Bar3
+            I2Bar3=QCy*V8+V11*WQy+I2Bar3
+            I3Bar3=QCy*V12+V7+V15*WQy+I3Bar3
+            I4Bar3=QCy*V16+V19*WQy+I4Bar3
+            I1Bar4=AuxR0+I1Bar4
+            I2Bar4=QCz*V8+V11*WQz+I2Bar4
+            I3Bar4=QCz*V12+V15*WQz+I3Bar4
+            I4Bar4=QCz*V16+V7+V19*WQz+I4Bar4
          ENDDO ! (M0| loop
       ENDDO ! |N0) loop
       ! HRR 
-      V1=MBarN(1,2)
-      V2=MBarN(1,3)
-      V3=MBarN(1,4)
-      I(1,2,2,1)=ABx*V1+MBarN(2,2)
-      I(1,3,2,1)=ABy*V1+MBarN(3,2)
-      I(1,4,2,1)=ABz*V1+MBarN(4,2)
-      I(1,2,3,1)=ABx*V2+MBarN(2,3)
-      I(1,3,3,1)=ABy*V2+MBarN(3,3)
-      I(1,4,3,1)=ABz*V2+MBarN(4,3)
-      I(1,2,4,1)=ABx*V3+MBarN(2,4)
-      I(1,3,4,1)=ABy*V3+MBarN(3,4)
-      I(1,4,4,1)=ABz*V3+MBarN(4,4)
+      I(1,2,2,1)=ABx*I1Bar2+I2Bar2
+      I(1,3,2,1)=ABy*I1Bar2+I3Bar2
+      I(1,4,2,1)=ABz*I1Bar2+I4Bar2
+      I(1,2,3,1)=ABx*I1Bar3+I2Bar3
+      I(1,3,3,1)=ABy*I1Bar3+I3Bar3
+      I(1,4,3,1)=ABz*I1Bar3+I4Bar3
+      I(1,2,4,1)=ABx*I1Bar4+I2Bar4
+      I(1,3,4,1)=ABy*I1Bar4+I3Bar4
+      I(1,4,4,1)=ABz*I1Bar4+I4Bar4
    END SUBROUTINE Int1331

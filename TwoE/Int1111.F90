@@ -6,19 +6,17 @@
       USE GlobalScalars
       USE GammaF0
       USE ONX2DataType
-      IMPLICIT REAL(DOUBLE) (V,W)
+      IMPLICIT REAL(DOUBLE) (A,I,V,W)
       INTEGER        :: LBra,LKet
       REAL(DOUBLE)   :: PrmBufB(5,LBra),PrmBufK(5,LKet)
       TYPE(AtomInfo) :: ACInfo,BDInfo
-      REAL(DOUBLE),DIMENSION(0:0) :: AuxR
-      REAL(DOUBLE),DIMENSION(1,1) :: MBarN
       REAL(DOUBLE),DIMENSION(1,1,1,1) :: I
       REAL(DOUBLE)  :: Zeta,Eta,r1xZpE,HfxZpE,r1x2E,r1x2Z,ExZpE,ZxZpE,Omega,Up,Uq,Upq
       REAL(DOUBLE)  :: Ax,Ay,Az,Bx,By,Bz,Cx,Cy,Cz,Dx,Dy,Dz,Qx,Qy,Qz,Px,Py,Pz,Wx,Wy,Wz
       REAL(DOUBLE)  :: QCx,QCy,QCz,PAx,PAy,PAz,PQx,PQy,PQz,WPx,WPy,WPz,WQx,WQy,WQz   
       REAL(DOUBLE)  :: T,ET,TwoT,InvT,SqInvT
       INTEGER       :: J,K,L
-      MBarN=0.0d0
+      I1Bar1=Zero
       Ax=ACInfo%Atm1X
       Ay=ACInfo%Atm1Y
       Az=ACInfo%Atm1Z
@@ -81,11 +79,11 @@
             ELSE
               InvT=One/T
               SqInvT=DSQRT(InvT)
-              AuxR(0)=+8.862269254527580D-01*SqInvT
+              AuxR0=+8.862269254527580D-01*Upq*SqInvT
             ENDIF
-            MBarN(1,1)=MBarN(1,1)+Upq*AuxR(0)
+            I1Bar1=AuxR0+I1Bar1
          ENDDO ! (M0| loop
       ENDDO ! |N0) loop
       ! HRR 
-      I(1,1,1,1)=MBarN(1,1)
+      I(1,1,1,1)=I1Bar1
    END SUBROUTINE Int1111

@@ -26,7 +26,7 @@
 !    a suite of programs for linear scaling electronic structure theory and
 !    ab initio molecular dynamics", and given appropriate citation.  
 !------------------------------------------------------------------------------
-!    Author: Matt Challacombe
+!    Author: Matt Challacombe and Valery "wheels" Weber
 !    WRITE EXPLICIT CODE FOR COMPUTATION OF THE ECP ANGULAR INTEGRALS OF THE 
 !    FIRST KIND, OMEGA(LAMBDA,I,J,K)
 !------------------------------------------------------------------------------
@@ -80,7 +80,8 @@ VRR[a_List,c_List,m_]:=Module[{p,q,PA,QC,WP,WQ,one,two,a1,a2,c1,c2,Ai1,Ci1,CiO2z
                               p=Position[a,Max[a]][[1, 1]];
                               q=Position[c,Max[c]][[1, 1]];
                               If[a[[p]]<0 || c[[p]]< 0,Return[0]];                                        
-                              If[a[[p]]==0 && c[[p]]==0,Return[SSSS[m]]];                                        
+                              If[a[[p]]==0 && c[[p]]==0,
+                                 Return[ToExpression[StringJoin["AuxR",ToString[m]]]]];                                        
 			      If[a[[p]]>c[[q]],
 			        (* Taking down ell on bra side *)
 			         If[p == 1, one = {1, 0, 0}; two={2,0,0}; PA=PAx; WP=WPx; ];
@@ -123,7 +124,7 @@ VRR[a_List,c_List,m_]:=Module[{p,q,PA,QC,WP,WQ,one,two,a1,a2,c1,c2,Ai1,Ci1,CiO2z
                               If[ b[[pb]]==0 && d[[pd]]==0,
                                  adex=LMNDex[a[[1]],a[[2]],a[[3]]];
                                  cdex=LMNDex[c[[1]],c[[2]],c[[3]]];
-                                 Return[MBarN[adex,cdex]]
+                                 Return[ToExpression[StringJoin["I",ToString[adex],"Bar",ToString[cdex]]]];
                                 ];
 			      (* Recursion *)
 			      If[b[[pb]]==MaxEll,(* Taking down ell on b *)
@@ -171,12 +172,9 @@ PunchVRRClass[FileName_,BraEll_,KetEll_]:=Module[{oList,IList,Kount,a,c},
                                                        a = {lx[i], my[i], nz[i]};
                                                        c = {lx[k], my[k], nz[k]};
                                                        IList=Append[IList,VRR[a,c,0]+o[Kount]];
-						       MBarString=StringJoin["MBarN(",ToString[i],",",ToString[k],")"];
+						       MBarString=StringJoin["I",ToString[i],"Bar",ToString[k]];
                                                        oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->MBarString];
-                                                       sList=Append[sList,StringJoin["SSSS(",ToString[i-1+k-1],")"]-> \
-                                                                          StringJoin["Upq*AuxR(",ToString[i-1+k-1],")"]];
                                                  ,{i,1,LEnd[BraEll]}],{k,1,LEnd[KetEll]}];
-						 oList=Join[oList,sList];
                                                  Write[FileName,FortranAssign[o,IList,AssignReplace->oList]];
 ];                                                ;
 
@@ -201,15 +199,13 @@ Gammas[EllTot_]:=Module[{LSt,LSt2,GSt,GSt1,GFlt,GammAss},
                                 WS["  L=AINT(T*Gamma_Grid)"];			
          If[EllTot==1,
 	    Print[" EllTot= ",EllTot];
-                     WS[StringJoin["  AuxR(0)=",FStr[0]]];
-                     WS[StringJoin["  AuxR(1)=",FStr[1]]];
+                     WS[StringJoin["  AuxR0=Upq*",FStr[0]]];
+                     WS[StringJoin["  AuxR1=Upq*",FStr[1]]];
 
             ];
           If[EllTot>1,
              LSt=ToString[EllTot];
 
-                     WS["  V1=One"];
-                     WS["  V2=-Two*Omega"];
                      WS["  ET=EXP(-T)"];
                      WS["  TwoT=Two*T"];
           WS[StringJoin["  W",LSt,"=",FStr[LTot]]];
@@ -220,8 +216,7 @@ Gammas[EllTot_]:=Module[{LSt,LSt2,GSt,GSt1,GFlt,GammAss},
                            ,{L,EllTot,2,-1}];
                      WS["  W0=TwoT*W1+ET"];
                          Do[GSt=ToString[L];
-          WS[StringJoin["  AuxR(",GSt,")=V1*W",GSt,""]];
-                            If[L<LTot,WS[StringJoin["  V1=V2*V1"]]];
+          WS[StringJoin["  AuxR",GSt,"=Upq*W",GSt,""]];
                            ,{L,0,EllTot}];
             ]; 
 
@@ -230,7 +225,7 @@ Gammas[EllTot_]:=Module[{LSt,LSt2,GSt,GSt1,GFlt,GammAss},
                      WS["  SqInvT=DSQRT(InvT)"];
                          Do[GSt=ToString[L];
 
-           WS[StringJoin["  AuxR(",GSt,")=",GammAss[L],"*SqInvT"]];
+           WS[StringJoin["  AuxR",GSt,"=",GammAss[L],"*Upq*SqInvT"]];
 
 If[L<LTot,WS[StringJoin["  SqInvT=SqInvT*InvT"]]];
                            ,{L,0,EllTot}];
@@ -269,7 +264,6 @@ PunchHRRClass[FileName_,ic_,jc_,kc_,lc_]:=Module[{oList,IList,Kount,a,b,c,d},
                                                 ,{jl,jmin,jmax}]
                                                 ,{kl,kmin,kmax}]
                                                 ,{ll,lmin,lmax}];
-						 Print[IList];
                                                 Write[FileName,FortranAssign[o,IList,AssignReplace->oList]];
                                                ];
 
@@ -295,15 +289,12 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_]:=Block[{WS,LBra,LKet,BKTyp
 
 	   WS["USE ONX2DataType"];
 
-           WS["IMPLICIT REAL(DOUBLE) (V,W)"];
+           WS["IMPLICIT REAL(DOUBLE) (A,I,V,W)"];
            WS["INTEGER        :: LBra,LKet"];
            WS["REAL(DOUBLE)   :: PrmBufB(5,LBra),PrmBufK(5,LKet)"];
 	   WS["TYPE(AtomInfo) :: ACInfo,BDInfo"];
 	   LenBra=LEnd[LBra];
            LenKet=LEnd[LKet];
-           WS[StringJoin["REAL(DOUBLE),DIMENSION(0:",ToString[LBra+LKet],") :: AuxR"]];
-           WS[StringJoin["REAL(DOUBLE),DIMENSION(",ToString[LenBra],",",ToString[LenKet],") :: MBarN"]];
-
 
            WS[StringJoin["REAL(DOUBLE),DIMENSION(",ToString[LEnd[IMax]],",", \
                                                    ToString[LEnd[JMax]],",",
@@ -317,8 +308,9 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_]:=Block[{WS,LBra,LKet,BKTyp
 
            WS["INTEGER       :: J,K,L"];
 
-           WS["MBarN=0.0d0"];
-
+           Do[Do[
+                 WS[StringJoin["I",ToString[i],"Bar",ToString[k],"=Zero"]];
+            ,{i,1,LEnd[LBra]}],{k,1,LEnd[LKet]}];
 
   WS["Ax=ACInfo%Atm1X"];
   WS["Ay=ACInfo%Atm1Y"];
