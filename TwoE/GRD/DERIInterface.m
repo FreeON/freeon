@@ -98,30 +98,19 @@ Do[Do[Do[Do[
    lmin = Classes[[lc, 1]]; lmax = Classes[[lc, 2]];
 
 
-
-    WS[StringJoin["CASE(",ToString[ijklType],")"]];
-(*    WS[StringJoin[" write(*,*) '",ToString[ijklType],"'"]]; *)
-
     If[IntegralClass[Classes[[ic]]]>=IntegralClass[Classes[[jc]]],
     itype=IntegralClass[Classes[[ic]]];
     jtype=IntegralClass[Classes[[jc]]];
     braswitch=0;
-    ,
-    jtype=IntegralClass[Classes[[ic]]];
-    itype=IntegralClass[Classes[[jc]]];
-    braswitch=1;
-    ];
 
 
     If[IntegralClass[Classes[[kc]]]>=IntegralClass[Classes[[lc]]],
     ktype=IntegralClass[Classes[[kc]]];
     ltype=IntegralClass[Classes[[lc]]];
     ketswitch=0;
-    ,
-    ltype=IntegralClass[Classes[[kc]]];
-    ktype=IntegralClass[Classes[[lc]]];
-    ketswitch=1;
-    ];
+
+
+    WS[StringJoin["CASE(",ToString[ijklType],")"]];
 
 
     If[itype*100+jtype>=ktype*100+ltype,
@@ -139,93 +128,41 @@ Do[Do[Do[Do[
 
     Print["braketswitch ",braketswitch," braswitch ",braswitch," ketswitch ",ketswitch," ijkl ",itype,jtype,ktype,ltype];
 
-          ijklType=1000000*itype \
-                  + 10000*jtype \
-	          +  100*ktype \
-	          +     ltype;
-
+          ijklType=1000000*itype+10000*jtype+100*ktype+ltype;
 
 
                   ArgString1="";
                   ArgString2="";
                   ArgString3="";
                   ArgString4="";
-                  ArgString5="";
-                  ArgString6="";
-                  ArgString7="";
-                  ArgString8="";
 
                   If[braketswitch==0,
                       ArgString1="ACAtmPair(iFAC)%SP%Cst(1,1),ACAtmPair(iFAC)%SP%L, & \n";
                       ArgString2="                  BDAtmPair(iFBD)%SP%Cst(1,1),BDAtmPair(iFBD)%SP%L, & \n";
                       ArgString3="                  ACAtmPair(iFAC)%SP%AtmInfo,BDAtmPair(iFBD)%SP%AtmInfo, & \n ";
-                      If[braswitch==0,
-                          ArgString4="                 OffSet%A  ,1             ";
-                          ArgString5="                 OffSet%C-1,NBFA*NBFB     ";
-                          If[ketswitch==0,
-                               ArgString6="                 OffSet%B-1,NBFA          ";
-                               ArgString7="                 OffSet%D-1,NBFA*NBFB*NBFC";
-                               ArgString8="                 1,4,7,10";
-                          ,
-                               ArgString6="                 OffSet%D-1,NBFA*NBFB*NBFC";
-                               ArgString7="                 OffSet%B-1,NBFA          ";
-                               ArgString8="                 1,4,10,7";
-                          ];
-                      ,
-                          ArgString4="                 OffSet%C-1,NBFA*NBFB     ";
-                          ArgString5="                 OffSet%A  ,1             ";
-                          If[ketswitch==0,
-                               ArgString6="                 OffSet%B-1,NBFA          ";
-                               ArgString7="                 OffSet%D-1,NBFA*NBFB*NBFC";
-                               ArgString8="                 4,1,7,10";
-                          ,
-                               ArgString6="                 OffSet%D-1,NBFA*NBFB*NBFC";
-                               ArgString7="                 OffSet%B-1,NBFA          ";
-                               ArgString8="                 4,1,10,7";
-                          ];
-                      ];
                   ,
                       ArgString1="BDAtmPair(iFBD)%SP%Cst(1,1),BDAtmPair(iFBD)%SP%L, & \n";
                       ArgString2="                  ACAtmPair(iFAC)%SP%Cst(1,1),ACAtmPair(iFAC)%SP%L, & \n";
                       ArgString3="                  BDAtmPair(iFBD)%SP%AtmInfo,ACAtmPair(iFAC)%SP%AtmInfo, & \n ";                  
-                      If[ketswitch==0,
-                         ArgString4="                 OffSet%B-1,NBFA          ";
-                         ArgString5="                 OffSet%D-1,NBFA*NBFB*NBFC";
-                         If[braswitch==0,
-                            ArgString6="                 OffSet%A  ,1             ";
-                            ArgString7="                 OffSet%C-1,NBFA*NBFB     ";
-                            ArgString8="                 7,10,1,4";
-                         ,
-                            ArgString6="                 OffSet%C-1,NBFA*NBFB     ";
-                            ArgString7="                 OffSet%A  ,1             ";
-                            ArgString8="                 7,10,4,1";
-                         ];
-                      ,
-                         ArgString4="                 OffSet%D-1,NBFA*NBFB*NBFC";
-                         ArgString5="                 OffSet%B-1,NBFA          ";
-                         If[braswitch==0,
-                            ArgString6="                 OffSet%A  ,1             ";
-                            ArgString7="                 OffSet%C-1,NBFA*NBFB     ";
-                            ArgString8="                 10,7,1,4";
-                         ,
-                            ArgString6="                 OffSet%C-1,NBFA*NBFB     ";
-                            ArgString7="                 OffSet%A  ,1             ";
-                            ArgString8="                 10,7,4,1";
-                         ];
-                      ];
                   ];
 
                   ArgString=StringJoin[ArgString1,ArgString2,ArgString3, \
-                                       ArgString4,", & \n ",ArgString5,", & \n ", \
-                                       ArgString6,", & \n ",ArgString7,", & \n ", \
-                                       ArgString8,",NIntBlk,GMc%PBC,C(1)"];
+                  "                 OA,LDA,OB,LDB,OC,LDC,OD,LDD,GOA,GOB,GOC,GOD,NIntBlk,GMc%PBC,C(1)"];
 
 
 
                   WS[StringJoin["  CALL dIntB",ToString[ijklType],"(",ArgString,")"]];
 
                   WS[StringJoin["  LocNInt=",ToString[12*(LEnd[imax]-LBegin[imin]+1)*(LEnd[jmax]-LBegin[jmin]+1)* \
-                                                      (LEnd[kmax]-LBegin[kmin]+1)*(LEnd[lmax]-LBegin[lmin]+1)]]];
+                                                (LEnd[kmax]-LBegin[kmin]+1)*(LEnd[lmax]-LBegin[lmin]+1)]]];
+
+    ,
+    (* WS[StringJoin[" stop '",ToString[ijklType],"'"]]; *)
+    ]; (* endif Ketswitch *)
+    ,
+    (* WS[StringJoin[" stop '",ToString[ijklType],"'"]]; *)
+    ]; (* endif Braswitch *)
+
 
 ,{ic,1,LC}]
 ,{jc,1,LC}]
@@ -235,7 +172,7 @@ Do[Do[Do[Do[
 Print["We have ",LC*LC*LC*LC," integrals."];
 
 WS["CASE DEFAULT"];
-WS["   WRITE(*,*) 'We are in DERIInterface2.Inc'"];
+WS["   WRITE(*,*) 'We are in dERIInterfaceB.Inc'"];
 WS["   WRITE(*,*) 'IntType=',IntType"];
 WS["   STOP 'MISS AN INTEGRAL'"];
 WS["END SELECT"];
@@ -247,7 +184,7 @@ Print[" Closed ",FileName];
 (* GENERATE INTERFACE FOR THE LIST *)
 
 
-FileName="DERIListInterface2.Inc";
+FileName="dERIListInterfaceB.Inc";
 
 SetOptions[OpenWrite, PageWidth -> 200];
 
