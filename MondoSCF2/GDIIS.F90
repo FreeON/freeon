@@ -368,7 +368,7 @@ CONTAINS
      ! Calculate new values of internals by fitting
      !
      CALL DisplFit(IntCs,IntCGrads%D,IntCValues%D,GHess,GCoordCtrl,&
-                   Displ,PWDPath,SCRPath,NCart,MaxMem,iGEO)
+                   Displ,PWDPath,SCRPath,NCart,MaxMem,iGEO,.FALSE.)
      !
      CALL Delete(VectX)
      CALL Delete(IntCGrads) 
@@ -381,14 +381,15 @@ CONTAINS
 !
 !---------------------------------------------------------------------
 !
-   SUBROUTINE LocalWeight(LWeight,Weights,IntCs,NCart,SCRPath)
+   SUBROUTINE LocalWeight(LWeight,Weights,IntCs,NCart,SCRPath,USQ_O)
      REAL(DOUBLE),DIMENSION(:,:) :: LWeight,Weights
      CHARACTER(LEN=*)            :: SCRPath
-     TYPE(INT_VECT)              :: IGi,JGi
+     TYPE(INT_VECT)              :: IGi,JGi,IGiT1,JGiT1,IGiT2,JGiT2
      INTEGER                     :: NCart,NZ,I,J,K1,K2,L1,L2,NMem
      REAL(DOUBLE)                :: Weight,X1,X2,Y
      TYPE(INTC)                  :: IntCs
-     TYPE(DBL_VECT)              :: Vect1
+     TYPE(DBL_VECT)              :: Vect1,AGi,AGiT1,AGiT2
+     REAL(DOUBLE),DIMENSION(:,:),OPTIONAL :: USQ_O
      ! 
      ! Calculate Topology (connectivity) of internal coordinates
      ! 
@@ -396,7 +397,25 @@ CONTAINS
      CALL New(Vect1,IntCs%N)
      I=MAX(IntCs%N,NMem)
      !
-     CALL GetPattern(SCRPath,IntCs%N,NCart,IGi,JGi)
+     IF(PRESENT(USQ_O)) THEN
+       K1=SIZE(USQ_O,1)
+       CALL New(IGi,K1+1)
+       CALL New(JGi,K1*K1)
+       CALL New(AGi,K1*K1)
+       NZ=0
+       IGi%I(1)=1 
+       DO I=1,K1
+         DO J=1,K1
+           NZ=NZ+1
+           AGi%D(NZ)=USQ_O(I,J)
+           JGi%I(NZ)=J
+         ENDDO
+         IGi%I(I+1)=NZ+1
+       ENDDO
+       CALL ThreshMatr(IGi,JGi,AGi,1.D-7)
+     ELSE
+       CALL GetPattern(SCRPath,IntCs%N,NCart,IGi,JGi)
+     ENDIF
      !
      ! Calculate RMS gradients for all internal coordinates
      ! touching a specific internal coord at a specific geometry
@@ -410,6 +429,7 @@ CONTAINS
          NZ=0
          DO K1=IGi%I(J),IGi%I(J+1)-1
            L1=JGi%I(K1)
+         ! IF(J==L1) CYCLE
            IF(.NOT.IntCs%Active%L(L1)) CYCLE
            NZ=NZ+1
            Vect1%D(NZ)=Weights(L1,I)
@@ -420,6 +440,7 @@ CONTAINS
            Weight=Weight+Vect1%D(K1)
          ENDDO
          IF(NZ/=0) THEN
+         ! LWeight(J,I)=Weights(J,I)+Weight/DBLE(NZ)
            LWeight(J,I)=Weight/DBLE(NZ)
          ELSE
            LWeight(J,I)=Weights(J,I)
@@ -428,6 +449,7 @@ CONTAINS
      ENDDO
      ! 
      CALL Delete(Vect1)
+     IF(PRESENT(USQ_O)) CALL Delete(AGi)
      CALL Delete(JGi)
      CALL Delete(IGi)
    END SUBROUTINE LocalWeight
@@ -471,59 +493,201 @@ CONTAINS
 !---------------------------------------------------------------------
 !
    SUBROUTINE DisplFit(IntCs,IntCGrads,IntCValues,GHess,GCoordCtrl,&
-                       Displ,Path,SCRPath,NCart,MaxMem,iGEO)
+                       Displ,Path,SCRPath,NCart,MaxMem,iGEO,DoMix)
      TYPE(INTC)                 :: IntCs
      REAL(DOUBLE),DIMENSION(:)  :: Displ
      REAL(DOUBLE),DIMENSION(:,:):: IntCGrads,IntCValues
-     TYPE(DBL_RNK2)             :: FittedHess,Weights,LWeight,ABC,ABC1
-     TYPE(DBL_RNK2)             :: Variance
      INTEGER                    :: I,J,NIntC,NDim,iGEO,MaxMem
-     INTEGER                    :: NCart
+     INTEGER                    :: NCart,NT
      CHARACTER(LEN=*)           :: Path,SCRPath
      CHARACTER(LEN=DCL)         :: Path2
      TYPE(Hessian)              :: GHess
      TYPE(CoordCtrl)            :: GCoordCtrl
-     TYPE(DBL_VECT)             :: Range 
+     TYPE(DBL_VECT)             :: DisplT
+     TYPE(DBL_RNK2)             :: IntCGradsT,IntCValuesT,FittedHessT
+     TYPE(DBL_RNK2)             :: WeightsT,LWeightT,ABCT,ABC1T
+     TYPE(DBL_RNK2)             :: VarianceT,RangeT,UMat,USQ
+     TYPE(INTC)                 :: IntCsT
+     LOGICAL                    :: DoMix
      !
      NIntC=IntCs%N   
      NDim=SIZE(IntCGrads,2)
+     IF(DoMix) THEN
+       NT=NDim
+       CALL New(UMat,(/NIntC,NT/))
+       CALL UnitaryTR(IntCGrads,IntCValues,UMat,USQ,NT)
+     ELSE
+       NT=NIntC
+     ENDIF
      Path2=TRIM(Path)//'_'//TRIM(IntToChar(IGEO))
-     CALL New(FittedHess,(/NIntC,NDim/))
-     CALL New(Weights,(/NIntC,NDim/))
-     CALL New(LWeight,(/NIntC,NDim/))
-     CALL New(ABC1,(/NIntC,3/))
-     CALL New(ABC,(/NIntC,3/))
-     CALL New(Variance,(/NIntC,2/))
-     CALL New(Range,NIntC)
+     !
+     CALL New(ABCT,(/NT,3/))
+     CALL New(ABC1T,(/NT,3/))
+     CALL New(DisplT,NT)
+     CALL New(FittedHessT,(/NT,NDim/))
+     CALL New(WeightsT,(/NT,NDim/))
+     CALL New(VarianceT,(/NT,2/))
+     CALL New(RangeT,(/NT,2/))
+     CALL New(IntCGradsT,(/NT,NDim/))
+     CALL New(IntCValuesT,(/NT,NDim/))
+     CALL New(LWeightT,(/NT,NDim/))
+     CALL New(IntCsT,NT)
      !
      CALL PrepareData(IntCValues,IntCs)
      IntCs%PredGrad%D=Zero
-     CALL InitialABC(ABC1%D,IntCs,GHess)
-     ABC%D=ABC1%D
-     CALL PrepPrimW(Weights%D,IntCGrads,IntCs)
-  !  CALL InvertWeight(Weights%D,LWeight%D)
-     CALL LQFit(IntCValues,IntCGrads,Weights%D,IntCs,ABC1%D, &
-                Variance%D,Range%D,-One,MaxMem,.FALSE.)
-     CALL CalcHessian(FittedHess%D,IntCValues,ABC1%D)
-     CALL SecondWeight(Weights%D,FittedHess%D)
-     CALL LocalWeight(LWeight%D,Weights%D,IntCs,NCart,SCRPath)
-  !  CALL InvertWeight(LWeight%D,LWeight%D)
-     CALL LQFit(IntCValues,IntCGrads,LWeight%D,IntCs,ABC%D, &
-                Variance%D,Range%D,-One,MaxMem,.TRUE.,ABC1_O=ABC1%D)
-     CALL DoPredict(ABC%D,IntCValues,IntCGrads,IntCs, &
-                    Variance%D,Path2)
-  !  CALL PrtFitM(IntCValues,IntCGrads,ABC%D,IntCs,Path2)
-     CALL CleanDispl(IntCValues,IntCs,Displ,Range%D, &
+     IF(DoMix) THEN
+       ABC1T%D(:,1)=Zero
+       ABC1T%D(:,2)=One 
+       ABC1T%D(:,3)=Zero
+       ABCT%D=ABC1T%D
+       IntCsT%Active%L=.TRUE.
+       CALL DGEMM_TNc(NT,NIntC,NDim,One,Zero, &
+   	     UMat%D,IntCGrads,IntCGradsT%D)
+       CALL DGEMM_TNc(NT,NIntC,NDim,One,Zero, &
+   	     UMat%D,IntCValues,IntCValuesT%D)
+     ELSE
+       IntCValuesT%D=IntCValues
+       IntCGradsT%D=IntCGrads
+       CALL SetEq(IntCs,IntCsT,1,NT,1)
+       CALL InitialABC(ABC1T%D,IntCs,GHess)
+     ENDIF
+     !
+     CALL PrepPrimW(WeightsT%D,IntCGradsT%D,IntCsT)
+     CALL LQFit(IntCValuesT%D,IntCGradsT%D,WeightsT%D,IntCsT,ABC1T%D, &
+                VarianceT%D,RangeT%D,Zero,MaxMem,.FALSE.)
+     CALL CalcHessian(FittedHessT%D,IntCValuesT%D,ABC1T%D)
+     CALL SecondWeight(WeightsT%D,FittedHessT%D)
+     IF(DoMix) THEN
+       CALL LocalWeight(LWeightT%D,WeightsT%D,IntCsT,NCart, &
+                        SCRPath,USQ_O=USQ%D)
+     ELSE
+       CALL LocalWeight(LWeightT%D,WeightsT%D,IntCsT,NCart,SCRPath)
+     ENDIF
+     CALL LQFit(IntCValuesT%D,IntCGradsT%D,LWeightT%D,IntCsT,ABCT%D, &
+                VarianceT%D,RangeT%D,Zero,MaxMem,.TRUE.)
+     CALL DoPredict(ABCT%D,IntCValuesT%D,IntCGradsT%D,IntCsT, &
+                    VarianceT%D,RangeT%D,Path2)
+     CALL CleanRange(DisplT%D,RangeT%D,IntCsT%PredVal%D, &
+                     IntCValuesT%D(:,NDim),NDim)
+     IntCsT%PredVal%D=IntCValuesT%D(:,NDim)+DisplT%D
+   ! CALL PrtFitM(IntCValuesT%D,IntCGradsT%D,ABCT%D,IntCsT,Path2)
+     IF(DoMix) THEN
+       CALL BackToPrims(IntCValues,IntCs,DisplT%D,UMat%D,Displ)
+     ELSE
+       IntCs%PredVal%D=IntCsT%PredVal%D
+       Displ=DisplT%D
+     ENDIF
+     CALL CleanDispl(IntCValues,IntCs,Displ, &
                      GCoordCtrl%MaxStre,GCoordCtrl%MaxAngle) 
      !
-     CALL Delete(Range)
-     CALL Delete(Variance)
-     CALL Delete(FittedHess)
-     CALL Delete(Weights)
-     CALL Delete(LWeight)
-     CALL Delete(ABC)
-     CALL Delete(ABC1)
+     IF(DoMix) THEN
+       CALL Delete(UMat)
+       CALL Delete(USQ)
+     ENDIF
+     CALL Delete(FittedHessT)
+     CALL Delete(WeightsT)
+     CALL Delete(IntCsT)
+     CALL Delete(DisplT)
+     CALL Delete(VarianceT)
+     CALL Delete(RangeT)
+     CALL Delete(ABC1T)
+     CALL Delete(ABCT)
+     CALL Delete(IntCGradsT)
+     CALL Delete(IntCValuesT)
+     CALL Delete(LWeightT)
    END SUBROUTINE DisplFit
+!
+!---------------------------------------------------------------------
+!
+   SUBROUTINE CleanRange(DisplT,RangeT,PredVal,Values,NDim)
+     REAL(DOUBLE),DIMENSION(:)   :: DisplT,PredVal,Values
+     REAL(DOUBLE),DIMENSION(:,:) :: RangeT
+     REAL(DOUBLE)                :: Range,Range1,Range2,Displ
+     INTEGER                     :: I,NT,NDim
+     !
+     NT=SIZE(DisplT)
+     DO I=1,NT
+       Range1=RangeT(I,1)
+       Range2=RangeT(I,2)
+       Range=Range2-Range1
+     ! IF(NDim==2) Range=Two*Range
+       Displ=DisplT(I)
+       IF(Range1-PredVal(I)>Range) THEN
+         PredVal(I)=Range1-Range  
+       ELSE IF(PredVal(I)-Range2>Range) THEN
+         PredVal(I)=Range2+Range  
+       ENDIF
+       DisplT(I)=PredVal(I)-Values(I) 
+     ENDDO
+   END SUBROUTINE CleanRange
+!
+!---------------------------------------------------------------------
+!
+   SUBROUTINE BackToPrims(IntCValues,IntCs,DisplT,UMat,Displ)
+     REAL(DOUBLE),DIMENSION(:)   :: Displ,DisplT
+     REAL(DOUBLE),DIMENSION(:,:) :: UMat,IntCValues
+     TYPE(INTC)                  :: IntCs,IntCsT
+     INTEGER                     :: NDim,NIntC,J,NT
+     !
+     NIntC=SIZE(UMat,1)
+     NT=SIZE(UMat,2)
+     NDim=SIZE(IntCValues,2)
+     CALL DGEMM_NNc(NIntC,NT,1,One,Zero, &
+		     UMat,DisplT,Displ)
+     IntCs%PredVal%D=IntCValues(:,NDim)+Displ
+   END SUBROUTINE BackToPrims
+!
+!---------------------------------------------------------------------
+!
+   SUBROUTINE UnitaryTR(IntCGrads,IntCValues,UMat,USQ,NT)
+     REAL(DOUBLE),DIMENSION(:,:) :: IntCGrads,IntCvalues
+     TYPE(DBL_RNK2)              :: UMatS,UMatSQ,UMat,UMat2,USQ
+     INTEGER                     :: I,J,NDim,NIntC,NT,INFO
+     !
+     NIntC=SIZE(IntCGrads,1)     
+     NDim=SIZE(IntCGrads,2)     
+     CALL New(UMatS,(/NDim,NDim/))
+     CALL New(UMatSQ,(/NDim,NT/))
+     !
+     CALL DGEMM_TNc(NDim,NIntC,NDim,One,Zero, &
+		     IntCGrads,IntCGrads,UmatS%D)
+     CALL SetDSYEVWork(NDim)
+       BLKVECT%D=UMatS%D
+       CALL DSYEV('V','U',NDim,BLKVECT%D,BIGBLOK,BLKVALS%D, &
+       BLKWORK%D,BLKLWORK,INFO)
+       IF(INFO/=SUCCEED) &
+       CALL Halt('DSYEV hosed in UnitaryTR. INFO='&
+                  //TRIM(IntToChar(INFO)))
+       I=0
+       UMatSQ%D=Zero
+       DO J=NDim,1,-1
+         IF(BLKVALS%D(J)/BLKVALS%D(NDim)>1.D-7.AND.I<NT) THEN
+           I=I+1
+           UMatSQ%D(:,I)=BLKVECT%D(:,J)
+         ENDIF
+         IF(I==NT) EXIT
+       ENDDO
+     CALL UnSetDSYEVWork()
+     !
+     CALL DGEMM_NNc(NIntC,NDim,NT,One,Zero, &
+		     IntCGrads,UMatSQ%D,UMat%D)
+     NT=I
+     DO J=1,NT
+       UMat%D(:,J)=UMat%D(:,J)/SQRT(DOT_PRODUCT(UMat%D(:,J),UMat%D(:,J)))
+     ENDDO
+     CALL New(USQ,(/NT,NT/))
+     CALL DGEMM_TNc(NT,NIntC,NT,One,Zero,UMat%D,UMat%D,USQ%D)
+     !
+     CALL New(UMat2,(/NIntC,NT/))
+     UMat2%D(:,1:NT)=UMat%D(:,1:NT)
+     CALL Delete(UMat)
+     CALL New(UMat,(/NIntC,NT/))
+     UMat%D=UMat2%D
+     CALL Delete(UMat2)
+     !
+     CALL Delete(UMatS)
+     CALL Delete(UMatSQ)
+   END SUBROUTINE UnitaryTR
 !
 !---------------------------------------------------------------------
 !
@@ -606,10 +770,9 @@ CONTAINS
 !
 !---------------------------------------------------------------------
 !
-   SUBROUTINE CleanDispl(IntCValues,IntCs,Displ,Range, &
-                         MaxStre,MaxAngle) 
+   SUBROUTINE CleanDispl(IntCValues,IntCs,Displ,MaxStre,MaxAngle) 
      REAL(DOUBLE),DIMENSION(:,:) :: IntCValues
-     REAL(DOUBLE),DIMENSION(:)   :: Displ,Range
+     REAL(DOUBLE),DIMENSION(:)   :: Displ
      TYPE(INTC)                  :: IntCs
      INTEGER                     :: NIntC,NDim,I,J,I1
      REAL(DOUBLE)                :: MaxStre,MaxAngle
@@ -632,8 +795,6 @@ CONTAINS
        !
        CALL CtrlDispl(IntCs%Def%C(I),Displ(I),One,MaxStre,MaxAngle)
        I1=1
-     ! Range=MAXVAL(IntCValues(I,I1:NDim))-MINVAL(IntCValues(I,I1:NDim))
-       CALL CtrlRange(Displ(I),Range(I),NDim)
        IntCs%PredVal%D(I)=IntCValues(I,NDim)+Displ(I)
        IF(IntCs%Def%C(I)(1:4)=='STRE') THEN
          CALL ChkStreLim(IntCValues(I,NDim),IntCs%PredVal%D(I),0.3D0)
@@ -644,8 +805,9 @@ CONTAINS
 !---------------------------------------------------------------------
 !
    SUBROUTINE DoPredict(ABC,IntCValues,IntCGrads,IntCs, &
-                        Variance,Path)
+                        Variance,Range,Path)
      REAL(DOUBLE),DIMENSION(:,:) :: ABC,IntCValues,IntCGrads,Variance
+     REAL(DOUBLE),DIMENSION(:,:) :: Range
      TYPE(INTC)                  :: IntCs
      INTEGER                     :: NIntC,NDim,I,J
      TYPE(DBL_VECT)              :: VectX,VectY
@@ -672,14 +834,14 @@ CONTAINS
          CYCLE
        ENDIF
        CALL Predict(ABC(I,1),ABC(I,2),ABC(I,3), &
-                    VectX%D(NDim),VectY%D(NDim),IntCs%PredVal%D(I), &
-                    IntCs%PredGrad%D(I),Variance(I,:))
+                    VectX%D,VectY%D,IntCs%PredVal%D(I), &
+                    IntCs%PredGrad%D(I),Variance(I,:),Range(I,:))
      !
      ENDDO 
      CALL Delete(VectX)
      CALL Delete(VectY)
-    !CALL PrtPred(IntCs,IntCValues,IntCGrads, &
-    !             IntCs%PredVal%D,IntCs%PredGrad%D,Path)
+   ! CALL PrtPred(IntCs,IntCValues,IntCGrads, &
+   !              IntCs%PredVal%D,IntCs%PredGrad%D,Path)
    END SUBROUTINE DoPredict
 !
 !---------------------------------------------------------------------
@@ -696,6 +858,8 @@ CONTAINS
          DO J=1,NIntC
            X=Weights(J,I)/(ABS(Hessian(J,I))+1.D-20)      
            Weights(J,I)=X
+         ! X=Weights(J,I)/(Hessian(J,I)**2+1.D-20)      
+         ! Weights(J,I)=SQRT(X)
          ENDDO
      ENDDO
    END SUBROUTINE SecondWeight
@@ -725,15 +889,15 @@ CONTAINS
      REAL(DOUBLE),DIMENSION(:,:) :: IntCValues,IntCGrads,Weights,ABC
      REAL(DOUBLE),DIMENSION(:,:),OPTIONAL :: ABC1_O
      REAL(DOUBLE),DIMENSION(:,:) :: Variance
-     REAL(DOUBLE)                :: MaxX,MinX,Chi2V,EPS
+     REAL(DOUBLE)                :: MaxX,MinX,Chi2V,EPS,X
      TYPE(INTC)                  :: IntCs
      INTEGER                     :: NIntC,NDim,NDim2,I,J,NDeg,NDeg1,I1
      INTEGER                     :: IStart
      TYPE(DBL_VECT)              :: RMSErr,VectX,VectY
      INTEGER                     :: MaxDeg,NS,MaxMem
-     TYPE(DBL_VECT)              :: Work,VectFit1
+     TYPE(DBL_VECT)              :: Work,VectFit1,VectFitB
      TYPE(INT_VECT)              :: IWork
-     REAL(DOUBLE),DIMENSION(:)   :: Range  
+     REAL(DOUBLE),DIMENSION(:,:) :: Range  
      LOGICAL                     :: DoReOrd
      !
      NIntC=SIZE(IntCValues,1) 
@@ -744,16 +908,16 @@ CONTAINS
      CALL New(VectX,NDim)
      CALL New(VectY,NDim)
      CALL New(VectFit1,NDim)
+     CALL New(VectFitB,NDim)
      !
      MaxDeg=2
      NS=MaxDeg+1
      CALL SetDSYEVWork(NS)
-     CALL New(Work,3*NDim*NS+2*NS*NS)
+     CALL New(Work,4*NDim*NS+2*NS*NS)
      CALL New(IWork,NDim)
      !
      DO I=1,NIntC
        MaxDeg=2
-       IntCs%PredVal%D(I)=Zero
        IF(.NOT.IntCs%Active%L(I)) CYCLE
        DO J=1,NDim 
          VectX%D(J)=IntCValues(I,J) 
@@ -763,28 +927,46 @@ CONTAINS
        MinX=MINVAL(VectX%D)
        MaxX=MAXVAL(VectX%D)
        IF(MaxX-MinX<1.D-6) THEN
-         Range(I)=MaxX-MinX
+         Range(I,1)=MinX
+         Range(I,2)=MaxX
          CYCLE  
        ENDIF
        !
     !  IF(DoReOrd.AND.NDim>=MaxMem) THEN
     !  IF(DoReOrd) THEN
+    !    X=ABS(VectX%D(NDim)-VectX%D(NDim-1))
     !    CALL QTest(VectX%D,VectY%D,RMSErr%D,Work%D,IWork%I,NDim,IStart)
-    !    Range(I)=MAXVAL(VectX%D(IStart:NDim))-MINVAL(VectX%D(IStart:NDim))
+    !    Range(I,2)=MINVAL(VectX%D(IStart:NDim))
+    !    Range(I,2)=MAXVAL(VectX%D(IStart:NDim))
     !  ELSE
+       ! IStart=MAX(1,NDim-2)
+       ! Range(I,1)=MINVAL(VectX%D(IStart:NDim))
+       ! Range(I,2)=MAXVAL(VectX%D(IStart:NDim))
+         Range(I,1)=MinX
+         Range(I,2)=MaxX
          IStart=1
-         Range(I)=MaxX-MinX
     !  ENDIF
        ! invert to get weights
        DO J=NDim,IStart,-1
          RMSErr%D(J)=One/(RMSErr%D(J)+1.D-20)
        ENDDO
+       RMSErr%D=RMSErr%D/SUM(RMSErr%D)
+       !
+       VectFit1%D=Zero
+       IF(PRESENT(ABC1_O)) THEN
+         DO J=NDim,IStart,-1
+           X=VectX%D(J)
+           VectFit1%D(J)=ABC1_O(I,1)+ABC1_O(I,2)*X+ABC1_O(I,3)*X*X
+         ENDDO
+       ENDIF
+       CALL FilterBow(VectX%D(IStart:NDim),VectY%D(IStart:NDim),MaxDeg)
        CALL BasicFit(VectX%D(IStart:NDim),VectY%D(IStart:NDim), &
                      RMSErr%D(IStart:NDim),MaxDeg,Work%D,EPS,Chi2V, &
                      ABC(I,:),Variance(I,:),NDeg,NDim-IStart+1, &
-                     VectFit1%D(IStart:NDim)) 
+                     VectFitB%D(IStart:NDim),VectFit1%D(IStart:NDim)) 
      ENDDO
      !
+     CALL Delete(VectFitB)
      CALL Delete(VectFit1)
      CALL Delete(RMSErr)
      CALL Delete(VectX)
@@ -799,30 +981,34 @@ CONTAINS
    SUBROUTINE QTest(VectX,VectY,RMSErr,Work,IWork,NDim,IStart)
      REAL(DOUBLE),DIMENSION(:) :: VectX,VectY,RMSErr,Work
      INTEGER,DIMENSION(:)      :: IWork
-     INTEGER                   :: IStart,NDim,NDim2,I,J
+     INTEGER                   :: IStart,NDim,NDim2,NDim3,I,J
      REAL(DOUBLE)              :: Q,QTab,Range
      !
      IStart=1
      IF(NDim<3) RETURN
      CALL ReorderN(RMSErr,IWork,NDim)
      NDim2=2*NDim
+     NDim3=3*NDim
+     ! fill old arrays in work-s by new order
      DO I=1,NDim
        J=IWork(I) 
        Work(I)=RMSErr(J) 
        Work(NDim+I)=VectX(J) 
        Work(NDim2+I)=VectY(J) 
      ENDDO
+     ! reorder original arrays
      DO J=1,NDim  
        RMSErr(J)=Work(J)
        VectX(J)=Work(NDim+J)
        VectY(J)=Work(NDim2+J)
+      !Work(J)=LOG(Work(J))
      ENDDO
      !
-     Range=RMSErr(1)-RMSErr(NDim)        
+     Range=Work(1)-Work(NDim)        
      QTab=QTest90(MIN(10,NDim))
      DO I=NDim-1,2,-1
-       Q=(RMSErr(I-1)-RMSErr(I))/Range
-       IF(Q>QTab) THEN
+       Q=(Work(I-1)-Work(I))/Range
+       IF(ABS(Q)>QTab) THEN
          IStart=I
          EXIT
        ENDIF
@@ -879,11 +1065,12 @@ CONTAINS
 !------------------------------------------------------------------
 !
    SUBROUTINE BasicFit(VectX,VectY,RMSErr,MaxDegIn,Work,EPS,Chi2V, &
-                       Params,Variance,NDeg,NDim,VectFit1)  
+                       Params,Variance,NDeg,NDim,VectFitB,VectFit1)  
      ! arrays for output 
      INTEGER       :: MaxDegIn,MaxDeg,NDeg,NDim,I,II,J,NS,NDimNS
      REAL(DOUBLE)  :: VectX(:),VectY(:),RMSErr(:)
-     REAL(DOUBLE)  :: Params(:),Variance(:),Work(:),VectFit1(:)
+     REAL(DOUBLE)  :: Params(:),Variance(:),Work(:)
+     REAL(DOUBLE)  :: VectFitB(:),VectFit1(:)
      REAL(DOUBLE)  :: X0,Y0,EPS,Chi2V,Det
      REAL(DOUBLE)  :: LastX,LastX2,LastY,LastY2
      INTEGER       :: I1,I2,I3,I4,I5,I6,I7,I8,I9,IStart
@@ -901,8 +1088,8 @@ CONTAINS
          Params=Zero
          Variance=Zero
          NS=MaxDeg+1
-         CALL Chi2Fit(VectX,VectY,RMSErr,Work(1:NDim),Work(NDim+1:), &
-                    MaxDeg,NDeg,Params,Chi2V,EPS)
+         CALL Chi2Fit(VectX,VectY,RMSErr,Work(1:NDim),VectFitB, &
+                      Work(NDim+1:),MaxDeg,NDeg,Params,Chi2V,EPS)
          MaxDeg=NDeg
          IF(MaxDeg==2.AND.ABS(Params(3))>1.D-6) THEN 
            X0=-Params(2)/(Two*Params(3))
@@ -936,22 +1123,23 @@ CONTAINS
        I5=I4+NS*NS
        BIGBLOK=NS
        BLKLWORK=MAX(1,3*BIGBLOK)
-       CALL CalcVariance(Params,Work(I1:I2),VectX,VectY, &
-                         NDim,MaxDeg,Work(I2+1:I3), &
-                         Work(I3+1:I4),Work(I4+1:I5),Variance, &
-                         BLKVECT%D(1:NS,1:NS),BLKVALS%D(1:NS), &
-                         BLKWORK%D(1:NS))
+     ! CALL CalcVariance(Params,Work(I1:I2),VectX,VectY,RMSErr, &
+     !                   VectFit1,NDim,MaxDeg,Work(I2+1:I3), &
+     !                   Work(I3+1:I4),Work(I4+1:I5),Variance, &
+     !                   BLKVECT%D(1:NS,1:NS),BLKVALS%D(1:NS), &
+     !                   BLKWORK%D(1:NS))
    END SUBROUTINE BasicFit
 !
 !---------------------------------------------------------------------
 !
-   SUBROUTINE CalcVariance(Params,VectFit,VectX,VectY, &
-                           NDim,MaxDeg,Design,S,Covar,Variance, &
-                           BLKVECT2,BLKVALS2,BLKWORK2)
+   SUBROUTINE CalcVariance(Params,VectFit,VectX,VectY,RMSErr, &
+                           VectFit1,NDim,MaxDeg,Design,S,Covar, &
+                           Variance,BLKVECT2,BLKVALS2,BLKWORK2)
      INTEGER      :: NDim,MaxDeg,NS
-     REAL(DOUBLE) :: VectX(1:NDim),VectY(1:NDim)
-     REAL(DOUBLE) :: Design(NDim,MaxDeg+1),Params(MaxDeg+1),Variance(2)
-     REAL(DOUBLE) :: VectFit(NDim)
+     REAL(DOUBLE) :: VectX(:),VectY(:),RMSErr(:)
+     REAL(DOUBLE) :: Params(:),Variance(:)
+     REAL(DOUBLE) :: VectFit(:),VectFit1(:)
+     REAL(DOUBLE) :: Design(NDim,MaxDeg+1)
      REAL(DOUBLE) :: Covar(MaxDeg+1,MaxDeg+1),S(MaxDeg+1,MaxDeg+1)
      INTEGER      :: I,J,ISign,INFO
      REAL(DOUBLE) :: Vect(3),Jacobian(3),EigMax,TolAbs,X,MeanDev
@@ -959,10 +1147,10 @@ CONTAINS
      REAL(DOUBLE) :: BLKVECT2(MaxDeg+1,MaxDeg+1)
      REAL(DOUBLE) :: BLKVALS2(MaxDeg+1),BLKWORK2(MaxDeg+1)
      !
-   ! IF(VectY(NDim)*VectY(NDim-1)<Zero) THEN
-   !   Variance=Zero
-   !   RETURN
-   ! ENDIF
+     IF(VectY(NDim)*VectY(NDim-1)<Zero) THEN
+       Variance=Zero
+       RETURN
+     ENDIF
      NS=MaxDeg+1
      IF(NS==3) THEN
        OneO2C2=One/(Two*Params(3)*Params(3)+1.D-20)
@@ -974,8 +1162,10 @@ CONTAINS
      ENDIF
      !
      DO J=1,NDim 
-      !X=VectY(J)**2+1.D-10
-       X=VectFit(J)**2+1.D-10
+      !X=VectFit(J)**2+1.D-10
+       X=ABS(VectFit(J)-VectY(J))+1.D-10
+      !X=ABS(0.1D0*VectY(J))+1.D-10
+      !X=X*RMSErr(J)
        Design(J,1)=One/X
      ENDDO
      DO J=1,NDim
@@ -994,6 +1184,9 @@ CONTAINS
                 //TRIM(IntToChar(INFO)))
      EigMax=Zero
      DO I=1,NS ; EigMax=MAX(EigMax,BLKVALS2(I)) ; ENDDO
+     !
+   ! IF(EigMax<1.D-5) RETURN
+     !
      TolAbs=EigMax*1.D-5 
      Covar=Zero
      DO I=1,NS
@@ -1028,12 +1221,14 @@ CONTAINS
 !
 !---------------------------------------------------------------------
 !
-   SUBROUTINE FilterBow(VectX,VectY,MinX,MaxX,MaxDeg)
+   SUBROUTINE FilterBow(VectX,VectY,MaxDeg)
      REAL(DOUBLE),DIMENSION(:) :: VectX,VectY
      REAL(DOUBLE)              :: X,X1,X2,MinX,MaxX,Range,Delta
      INTEGER                   :: MaxDeg,I,NDim,II
      !
      NDim=SIZE(VectX)
+     MinX=MINVAL(VectX)
+     MaxX=MAXVAL(VectX)
      Delta=0.25D0*(MaxX-MinX)
      X1=MinX+Delta
      X2=X1+Delta+Delta
@@ -1147,12 +1342,17 @@ CONTAINS
 !
 !---------------------------------------------------------------------
 !
-   SUBROUTINE Predict(A,B,C,LastX,LastY,FitVal,PredGrad,Variance)
+   SUBROUTINE Predict(A,B,C,VectX,VectY,FitVal,PredGrad,Variance,Range)
      REAL(DOUBLE)              :: A,B,C,FitVal,PredGrad,Variance(2)
+     REAL(DOUBLE),DIMENSION(:) :: VectX,VectY
+     REAL(DOUBLE)              :: Range(2)
      REAL(DOUBLE)              :: Det,TwoC,X1,X2,G1,G2,X0,Y0,G0
      REAL(DOUBLE)              :: LastX,LastY
-     INTEGER                   :: I,J
+     INTEGER                   :: I,J,NDim
      !
+     NDim=SIZE(VectX)
+     LastX=VectX(NDim)
+     LastY=VectY(NDim)
      TwoC=Two*C
      Det=B*B-4.D0*A*C
      IF(ABS(C)>1.D-6) THEN !!! quadratic fit
@@ -1182,6 +1382,9 @@ CONTAINS
            B=-B
            A=LastY-B*LastX
            FitVal=LastX-LastY/B
+           I=MAX(1,NDim-2)
+           Range(1)=MINVAL(VectX(I:NDim))
+           Range(2)=MAXVAL(VectX(I:NDim))
          ! FitVal=(-A)/B
          ! FitVal=FitVal+SIGN(Variance(2),FitVal-LastX)
          ENDIF
@@ -1241,12 +1444,13 @@ CONTAINS
 !
 !---------------------------------------------------------------------
 !
-   SUBROUTINE Chi2Fit(VectX,VectY,RMSErr,VectFit,Work, &
+   SUBROUTINE Chi2Fit(VectX,VectY,RMSErr,VectFit,VectFitB,Work, &
                       MaxDegIn,NDeg,Coeffs,Chi2V,EPSIn)
-     REAL(DOUBLE),DIMENSION(:) :: VectX,VectY,RMSErr,VectFit,Work
+     REAL(DOUBLE),DIMENSION(:) :: VectX,VectY,RMSErr,Work
+     REAL(DOUBLE),DIMENSION(:) :: VectFitB,VectFit
      REAL(DOUBLE),DIMENSION(:) :: Coeffs
      REAL(DOUBLE),DIMENSION(3) :: Coeffs1
-     REAL(DOUBLE)              :: Chi2V,Chi2V1,EPSIn,EPS,X0
+     REAL(DOUBLE)              :: Chi2V,Chi2V1,EPSIn,EPS,EPS1,X0,F
      INTEGER                   :: MaxDegIn,MaxDeg,NDeg,NDeg1
      INTEGER                   :: NDim,II,I,L,IErr
      !
@@ -1268,9 +1472,11 @@ CONTAINS
          CALL PCOEF(L,X0,Coeffs,Work)
          CALL Chi2Value(VectX,VectY,RMSErr,VectFit,Chi2V)
          IF(EPSIn==Zero.AND.II==1.AND.MaxDegIn>1) THEN
+           VectFitB=VectFit
            Coeffs1=Coeffs
            Chi2V1=Chi2V
            NDeg1=NDeg
+           EPS1=EPS
            EPS=Zero
            MaxDeg=1
            CYCLE
@@ -1281,8 +1487,13 @@ CONTAINS
      IF(IErr/=1) CALL Halt('Error in Polinomial fit '// &
        'in Subroutine Chi2Fit, IErr= '//IntToChar(IErr))
      IF(EPSIn==Zero.AND.MaxDegIn>1) THEN
-       IF(Chi2V1<0.90D0*Chi2V) THEN
+       F=EPS**2/EPS1**2
+       II=MIN(NDim-1,30)
+       IF(F>FTest95D(II)) THEN
+      !IF(Chi2V1<0.90D0*Chi2V) THEN
+         VectFit=VectFitB 
          Chi2V=Chi2V1 
+         EPS=EPS1
          NDeg=NDeg1
          Coeffs=Coeffs1
        ENDIF

@@ -609,11 +609,11 @@ CONTAINS
    !     ENDIF
    !   ENDIF
    ! ENDIF
-     IF(.NOT.(FoundHBond.OR.FoundMetLig.OR.&
-        LonelyAtom)) THEN
-       DoExclude=.TRUE.
-       RETURN
-     ENDIF
+ !   IF(.NOT.(FoundHBond.OR.FoundMetLig.OR.&
+ !      LonelyAtom)) THEN
+ !     DoExclude=.TRUE.
+ !     RETURN
+ !   ENDIF
    END SUBROUTINE BondExcl
 !
 !----------------------------------------------------------------
@@ -1530,8 +1530,8 @@ CONTAINS
          VectIntAux%D=IntCValSt%D-IntCs%Value%D
          CALL MapAngleDispl(IntCs,VectIntAux%D) 
          IF(IRep<RepMax) THEN
-           IF(ABS(MAXVAL(VectIntAux%D))>GCoordCtrl%MaxAngle.OR. &
-              ABS(MINVAL(VectIntAux%D))>GCoordCtrl%MaxStre) THEN
+           IF(ABS(MAXVAL(VectIntAux%D))>1.01D0*GCoordCtrl%MaxAngle.OR. &
+              ABS(MINVAL(VectIntAux%D))>1.01D0*GCoordCtrl%MaxStre) THEN
              DoRepeat=.TRUE.
              CYCLE
            ENDIF
@@ -3445,12 +3445,12 @@ CONTAINS
      HAtm=0
      IF(NJJ1/=1.AND.NJJ2/=1) RETURN
      IF((NJJ1==1.AND.HasLigand(NJJ2))) THEN
-       HasHBond=HasAttached(AtNum,Top12%I,JJ1)
-      !HasHBond=.TRUE.
+      !HasHBond=HasAttached(AtNum,Top12%I,JJ1)
+       HasHBond=.TRUE.
        HAtm=JJ1
      ELSE IF((NJJ2==1.AND.HasLigand(NJJ1))) THEN
-       HasHBond=HasAttached(AtNum,Top12%I,JJ2)
-      !HasHBond=.TRUE.
+      !HasHBond=HasAttached(AtNum,Top12%I,JJ2)
+       HasHBond=.TRUE.
        HAtm=JJ2
      ENDIF
    END FUNCTION HasHBond
@@ -5613,14 +5613,14 @@ CONTAINS
 !-------------------------------------------------------------------
 !
    SUBROUTINE CtrlRange(Displ,Range,NDim)
-     REAL(DOUBLE) :: Displ,Range,StepMax
+     REAL(DOUBLE) :: Displ,Range(:),StepMax
      INTEGER      :: NDim
      !
    ! IF(NDim<=3) THEN
    !   StepMax=2.D0*Range
    !  !StepMax=Range
    ! ELSE 
-       StepMax=Range
+       StepMax=Range(2)
    ! ENDIF
      IF(ABS(Displ)>StepMax) Displ=SIGN(StepMax,Displ)
    END SUBROUTINE CtrlRange

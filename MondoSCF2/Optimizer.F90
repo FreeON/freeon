@@ -336,9 +336,7 @@ CONTAINS
     chGEO=IntToChar(cGEO)
     AL=C%Opts%AccuracyLevels(cBAS)
     ! Store the current minimum energies ...
-    DO iCLONE=1,C%Geos%Clones
-       Energies(iCLONE)=C%Geos%Clone(iCLONE)%ETotal
-    ENDDO
+    Energies(:)=C%Geos%Clone(:)%ETotal
     ! Temp Carts variable to allow backtracking of wrapped coordinates
     RMSGrad=Zero
     MAXGrad=Zero
@@ -448,9 +446,7 @@ CONTAINS
     ! Keep geometry
     CALL GeomArchive(cBAS,cGEO,C%Nams,C%Sets,C%Geos)    
     ! Store the current minimum energies ...
-    DO iCLONE=1,C%Geos%Clones
-       Energies(iCLONE)=C%Geos%Clone(iCLONE)%ETotal
-    ENDDO
+    Energies(:)=C%Geos%Clone(:)%ETotal
   END FUNCTION SteepStep
 !
 !------------------------------------------------------------------
@@ -1192,7 +1188,7 @@ CONTAINS
      !
      GD%Init    = 3
      IF(GOptimizer==GRAD_BiSect_OPT) THEN
-       GD%MaxMem  = 5
+       GD%MaxMem  = 7
      ELSE
        GD%MaxMem  = 3
      ENDIF
