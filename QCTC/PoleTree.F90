@@ -132,7 +132,7 @@ MODULE PoleTree
             IF(.NOT.LeftQ%Leaf)   LeftQ%Ell=SPell
             IF(.NOT.RightQ%Leaf) RightQ%Ell=SPell
 !           Compute the multipole strength [O^P_(L+1)]^(2/(2+L))
-            P%Strength=Unsold1(SPEll+1,P%C,P%S)**UnsoldExp
+            P%Strength=Unsold1(0,SPEll+1,P%C,P%S)**UnsoldExp
          ELSE
 !           Keep on truckin ...
             CALL MakePoleTree(P%Descend)
