@@ -1392,7 +1392,7 @@ CONTAINS
      IF(iGEO==1) THEN
        GMLoc%LatticeOnly=.TRUE.
        IF(GOpt%GConvCrit%FixedAtomsFirst) GMLoc%LatticeOnly=.FALSE.
-       GMLoc%AltCount=1
+       GMLoc%AltCount=0
      ENDIF
      !
      CALL OpenASCII(OutFile,Out)
@@ -2030,20 +2030,17 @@ CONTAINS
      CALL GradConv(GOpt%GOptStat,GOpt%GConvCrit,GOpt%Constr)
      IF(.NOT.GOpt%GConvCrit%Alternate) RETURN
      !
+     AltCount=AltCount+1
      IF(LatticeOnly) THEN
        LatticeOnly=(GOpt%GOptStat%LMaxCGrad>GOpt%GConvCrit%Grad).AND. &
-                   (AltCount<GOpt%GConvCrit%MaxLattice)
-       IF(LatticeOnly) THEN
-         AltCount=AltCount+1
-       ELSE
+                   (AltCount<=GOpt%GConvCrit%MaxLattice)
+       IF(.NOT.LatticeOnly) THEN
          AltCount=1
        ENDIF
      ELSE
        LatticeOnly=(GOpt%GOptStat%MaxCGrad<GOpt%GConvCrit%Grad).OR. &
                    (AltCount>GOpt%GConvCrit%MaxAtoms)
-       IF(.NOT.LatticeOnly) THEN
-         AltCount=AltCount+1
-       ELSE
+       IF(LatticeOnly) THEN
          AltCount=1
        ENDIF
      ENDIF
