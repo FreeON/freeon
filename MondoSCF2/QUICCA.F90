@@ -1869,6 +1869,7 @@ CONTAINS
        DO J=1,NCart ; CartGrad%D(J)=RefGrad(J,I) ; ENDDO
        CALL CartRNK1ToCartRNK2(Carts%D,XYZAux%D)
        !
+       CALL TotalLattGrad(XYZAux%D,PBCDim,CartGrad%D)
        CALL CleanConstrCart(XYZAux%D,PBCDim,CartGrad%D,GOpt,SCRPath)
        IF(GOpt%TrfCtrl%DoTranslOff) THEN
          DO J=1,NCart-9 ; AuxGrad%D(J)=CartGrad%D(J) ; ENDDO
@@ -1886,6 +1887,42 @@ CONTAINS
      CALL Delete(Carts)
      CALL Delete(XYZAux)
    END SUBROUTINE CleanPastGrads
+!
+!-------------------------------------------------------------------
+!
+   SUBROUTINE TotalLattGrad(XYZAux,PBCDim,CartGrad)
+     REAL(DOUBLE),DIMENSION(:,:) :: XYZAux
+     REAL(DOUBLE),DIMENSION(:)   :: CartGrad
+     REAL(DOUBLE)                :: BoxShape(3,3),InvBoxSh(3,3)
+     REAL(DOUBLE)                :: Vect1(3),Vect2(3),LattGrad(9)
+     INTEGER                     :: PBCDim,I,J,NatmsLoc,NCart
+     INTEGER                     :: ALPHA,BETA,IA
+     !
+     IF(PBCDim==0) RETURN
+     NatmsLoc=SIZE(XYZAux,2)
+     NCart=3*NatmsLoc
+     !
+     DO I=1,3
+       BoxShape(1:3,I)=XYZAux(1:3,NatmsLoc-3+I)
+     ENDDO 
+     InvBoxSh=InverseMatrix(BoxShape)
+     DO I=1,9 ; LattGrad(I)=CartGrad(NCart-9+I) ; ENDDO
+     !
+     DO I=1,NatmsLoc-3
+       Vect1=XYZAux(1:3,I)
+       CALL DGEMM_NNc(3,3,1,One,Zero,InvBoxSh,Vect1,Vect2)
+       J=3*(I-1)
+       IA=0
+       DO ALPHA=1,3
+         DO BETA=1,3
+           IA=IA+1
+           LattGrad(IA)=LattGrad(IA)+CartGrad(J+ALPHA)*Vect2(BETA)
+         ENDDO
+       ENDDO
+     ENDDO
+     DO I=1,9 ; CartGrad(NCart-9+I)=LattGrad(I) ; ENDDO
+     !
+   END SUBROUTINE TotalLattGrad
 !
 !-------------------------------------------------------------------
 !

@@ -684,6 +684,7 @@ CONTAINS
      CALL GetLattGrads(IntCL,CartGrad%D, &
                        XYZ,Gopt%LattIntC%Grad%D,PBCDim)
    ! CALL SYMMSTRESS(CartGrad%D(NCart-8),XYZ,PBCDim)
+     CALL TotalLattGrad(XYZ,PBCDim,CartGrad%D)
      CALL CleanConstrCart(XYZ,PBCDim,CartGrad%D,GOpt,SCRPath)
      CALL New(Carts,NCart)
      CALL CartRNK2ToCartRNK1(Carts%D,XYZ)

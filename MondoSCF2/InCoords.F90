@@ -2515,7 +2515,7 @@ CONTAINS
      CALL Delete(DReqAct) 
      !
      IF(ABS(MaxDispl)>Crit) DoRepeat=.TRUE.
-   ! IF(Rigid>0.10D0) DoRepeat=.TRUE.
+     IF(Rigid>0.20D0) DoRepeat=.TRUE.
      IF(Print2) THEN
        WRITE(*,*) 'Rigidity= ',Rigid
        WRITE(Out,*) 'Rigidity= ',Rigid
