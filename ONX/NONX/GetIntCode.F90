@@ -4,6 +4,7 @@
     INTEGER           :: LTot,TBra,TKet,IntCodeV,IntCodeC
     INTEGER           :: TB,TK
     LOGICAL           :: Explicit
+
     IF(LTot.GT.2) THEN
       Explicit=.FALSE.
       RETURN
@@ -20,12 +21,36 @@
     IF(TKet.eq.0302) TK=0202
     IntCodeC = TBra*10000+TKet
     IntCodeV = TB*10000+TK
-    
-    IF (IntCodeC.eq.02010301) Explicit=.FALSE.
-    IF (IntCodeC.eq.03010201) Explicit=.FALSE.
-    IF (IntCodeC.eq.03010301) Explicit=.FALSE.
-    IF (IntCodeC.eq.01010601) Explicit=.FALSE.
-    IF (IntCodeC.eq.06010101) Explicit=.FALSE.
+!
+! L=1 exceptions
+!
+!    IF (IntCodeC.eq.03010101) Explicit=.FALSE.
+!    IF (IntCodeC.eq.01010301) Explicit=.FALSE.
+!
+! L=2 exceptions
+!
+!    IF (IntCodeC.eq.02010301) Explicit=.FALSE.
+!    IF (IntCodeC.eq.03010201) Explicit=.FALSE.
+!    IF (IntCodeC.eq.03010301) Explicit=.FALSE.
+!    IF (IntCodeC.eq.06010101) Explicit=.FALSE.
+!    IF (IntCodeC.eq.01010601) Explicit=.FALSE.
+!
+! L=3 exceptions
+!
+    IF (IntCodeC.eq.02020201) Explicit=.FALSE.
+    IF (IntCodeC.eq.02010202) Explicit=.FALSE.
+!
+! L=4 exceptions
+!
+    IF (IntCodeC.eq.02020202) Explicit=.FALSE.
+    IF (IntCodeC.eq.03020202) Explicit=.FALSE.
+    IF (IntCodeC.eq.02020302) Explicit=.FALSE.
+    IF (IntCodeC.eq.03020302) Explicit=.FALSE.
+    IF (IntCodeC.eq.03030202) Explicit=.FALSE.
+    IF (IntCodeC.eq.02020303) Explicit=.FALSE.
+    IF (IntCodeC.eq.03030302) Explicit=.FALSE.
+    IF (IntCodeC.eq.03020303) Explicit=.FALSE.
+    IF (IntCodeC.eq.03030303) Explicit=.FALSE.
 
   END SUBROUTINE GetIntCode
   

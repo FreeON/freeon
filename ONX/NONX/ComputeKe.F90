@@ -207,40 +207,42 @@ SUBROUTINE ComputeKe(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,Drv,SubInd,BfnInd)
                     CALL Int2121(ISL,IntCodeC,CBra,CKet,DB%DisBuf%D(IBD),  &
                                  DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D,IB%W2%D)
 !                  CASE (10001010)  
-!                    CALL Int2122()
+!                    CALL Int2122()    3
                   CASE (02020101)  
                     CALL Int2211(ISL,IntCodeC,CBra,CKet,DB%DisBuf%D(IBD),  &
                                  DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D,IB%W2%D)
 !                  CASE (10101000)  
-!                    CALL Int2221()
+!                    CALL Int2221()    3
 !                  CASE (10101010) 
-!                    CALL Int2222()
-!                  CASE (00002200)
-!                    CALL Int1161()
+!                    CALL Int2222()    4
+                  CASE (01010601)
+                    CALL Int1161(ISL,IntCodeC,CBra,CKet,DB%DisBuf%D(IBD),  &
+                                 DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D,IB%W2%D)
 !                  CASE (00002210)
-!                    CALL Int1162()
+!                    CALL Int1162()    3
 !                  CASE (00002222)
-!                    CALL Int1166()
+!                    CALL Int1166()    4
 !                  CASE (10002200)
-!                    CALL Int2161()
+!                    CALL Int2161()    3
 !                  CASE (10002210)
-!                    CALL Int2162()
+!                    CALL Int2162()    4
 !                  CASE (10102200)
-!                    CALL Int2261()
-!                  CASE (22000000)
-!                    CALL Int6111()
+!                    CALL Int2261()    4
+                  CASE (06010101)
+                    CALL Int6111(ISL,IntCodeC,CBra,CKet,DB%DisBuf%D(IBD),  &
+                                 DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D,IB%W2%D)
 !                  CASE (22001000)
-!                    CALL Int6121()
+!                    CALL Int6121()    3
 !                  CASE (22001010)
-!                    CALL Int6122()
+!                    CALL Int6122()    4
 !                  CASE (22002200)
-!                    CALL Int6161()
+!                    CALL Int6161()    4
 !                  CASE (22100000)
-!                    CALL Int6211()
+!                    CALL Int6211()    3
 !                  CASE (22101000)
-!                    CALL Int6221()
+!                    CALL Int6221()    4
 !                  CASE (22220000)
-!                    CALL Int6611()
+!                    CALL Int6611()    4
                   CASE DEFAULT
                     WRITE(*,*) "IntCode=",IntCodeV
                     CALL Halt(' Illegal integral type in ONX:ComputeKe')
