@@ -341,7 +341,7 @@ MODULE PBCFarField
       ENDDO
 !
       DO L=SPEll,FFEll
-         PL  = CQ*BDist**DBLE(L)
+         PL  = CQ*(Two*BDist)**DBLE(L)
          FAC = PL/((MinRadius-Two*BDist)*MinRadius**DBLE(L+1))
          IF(FAC .LT. PFFTau) THEN
             ML1 = L
