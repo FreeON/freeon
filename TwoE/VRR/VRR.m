@@ -230,7 +230,7 @@ MakeList=MakeString;
 RelsList=RelsString;
 
 MakeList=StringJoin["VRRObjs=",MakeList];
-RelsList=StringJoin["VRRRels=",RelsList]; 
+RelsList=StringJoin["ReleaseFiles=",RelsList]; 
 
 (**************** Print out the Makefile ************************)
 

@@ -72,7 +72,7 @@ VRRs0i0.o\
 VRRs0j0.o\
 VRRs0p0.o
 #
-VRRRels=VRRd0d0.x\
+ReleaseFiles=VRRd0d0.x\
 VRRd0f0.x\
 VRRd0g0.x\
 VRRd0h0.x\
