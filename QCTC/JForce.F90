@@ -296,7 +296,7 @@ PROGRAM JForce
   ENDIF
   CALL Delete(TotJFrc)
 #endif
-  CALL PChkSum(JFrc,'dXC/dR',Proc_O=Prog)  
+  CALL PChkSum(JFrc,'dJ/dR',Proc_O=Prog)  
 ! Sum in contribution to total force
   DO AtA=1,NAtoms
      A1=3*(AtA-1)+1
