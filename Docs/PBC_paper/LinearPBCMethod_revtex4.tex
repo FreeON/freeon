@@ -264,151 +264,111 @@ individual distributions.  While resolving individual primitives forgoes well de
 integral evaluation of contracted functions, it allows for the early onset of linear scaling even for dense systems 
 such as diamond. 
 
-In the case of HiCu, two seperate $k$-d tree structures are used.  The rho-tree holds the electron density,
-while the cube-tree contains a hierarchical grid for integration of the exchange-correlation potential.  The grid 
-is composed of a Cartesian non-product integration rule on each node, with the gridpoints enclosed by the AABB.
-The cube-tree is constructed iteratively through recusrive bisection of the primary volume (the root AABB), using 
-exact error bounds to achieve arbitrary accuracy of the integrated density and its gradients.   As the cube-tree 
-is built, AABB intersection tests are performed while traversing the rho-tree,  winowing out parts of the density 
-that do not overlap with that portion of the integration grid.  With the cube-tree completed and the exchange-correlation
-evaluated on the grid, the inverse procedure is carried out;  for each primitive distribution, the cube-tree 
-is walked selecting only overlaping portions of the grid via the AABB intersection test.
 
-\pagebreak
+\newpage
+\newpage
+
+
+In the case of HiCu, two seperate $k$-d tree structures are used.  The rho-tree holds the electron density,
+while the cube-tree contains a hierarchical grid for integration of the exchange-correlation potential.  Each node of the 
+cube-tree is composed of a Cartesian non-product integration rule with the gridpoints enclosed by it's AABB.
+The cube-tree is constructed iteratively through recusrive bisection of the primary volume (the root AABB), using 
+exact error bounds to achieve arbitrary precision of the integrated density and its gradients.   As the cube-tree 
+is extended, AABB intersection tests are performed while traversing the rho-tree,  avoiding parts of the density 
+that do not overlap with that portion of the grid.  Upon construction of the grid,  the inverse procedure is carried out;  
+for each primitive distribution, the cube-tree is walked selecting only overlaping portions of the grid via the AABB 
+intersection test.
+
 
 For both of these fast algorithms, the trade off between efficiency and accuracy is controled by the AABB,  which in turn 
 depends on the the extent or range $R$ of a primitive Gaussian distribution, $\rho_q$, beyond which it is assumed to 
 have negglibible influence.  Of coarse, negglible depends on the use to which the distribution is put, as will become 
 obvious in the following. 
 
-Both HiCu and QCTC employ a Hermite Guassian representation of distributions
+Both HiCu and QCTC employ a Hermite Guassian (HG) representation of distributions
 \begin{equation}
 \rho_q ({\bf r}) = \sum_{lmn} d_{lmn} \Lambda^q_{lmn}({\bf r}),
 \end{equation}
 where 
 \begin{equation}
-\Lambda^q_{lmn}({\bf r}) = \frac{\partial^{l+m+n} }{\partial Q^l_x \partial Q^m_y \partial Q^n_z} e^{-\zeta_q ({\bf r}-{\bf Q})}.
+\Lambda^q_{lmn}({\bf r}) = \frac{\partial^{l+m+n} }{\partial Q^l_x \partial Q^m_y \partial Q^n_z} e^{-\zeta_q ({\bf r}-{\bf Q})^2}.
 \end{equation}
-which provides an intermediate with elements of the density matrix subsumed in the coefficients $d_{lmn}$, and allows
+which provides an intermediate with elements of the density matrix folded  into the coefficients $d_{lmn}$, and allows
 the use of McMurchie-Davidson recurrence relations in analytic integral evaluation.   
-
-To achieve early onset linear
-scaling, the best case distribution - tree error estimate is used, based on the bound provided by Cramer's inequality:
+A simplification for this form is provided by Cramer's inequality \cite{}, yeilding a 
+bound for the behavior of a HG distribution: 
 \begin{equation}
-\rho_q ({\bf r})  \leq C_q e^{ -\widetilde \zeta_q ({\bf r -Q})^2 }  
+\rho_q ({\bf r})  \leq C_q e^{ -\widetilde \zeta_q ({\bf r -Q})^2 },  
 \end{equation}
 where
 \begin{equation}
 C_q=\sum_{lmn} \left|d_{lmn}\right| K^3 \left[ 2^{l+m+n} ~ l! m! n! ~ \zeta^{l+m+n}_q \right]^{1/2} ,
 \end{equation}
-$K=1.09$ and 
-
-\pagebreak
-
+the constant $K=1.09$ and  
 \begin{equation}
 \widetilde \zeta_q = 
 \begin{cases}
 \zeta_q   & l+m+n= 0 \\
-\frac{1}{2} \zeta_q   & {\rm else}
+\frac{1}{2} \zeta_q   & {\rm otherwise.}
 \end{cases}
 \end{equation}
-With the behavior of the Gaussian primitive rigorously bounded and simply represented by an $s$-type
-Gaussian, it is simple to compute its extent.  In the case of HiCu, the overlap extent of a distribution 
-$R^{\rm o}_q$, is the 
-the range at which numerical evaluation of $\rho_q$ at a point results in a contribution less than $\tau$, 
-\begin{equation}
-C_q e^{ -\widetilde \zeta_q R^2_{\rm o} }  = \tau
-\end{equation}
 
+\newpage
+\newpage
+
+In the case of HiCu, the overlap extent $R^{\rm o}_q$ is used, guaranteeing that beyond this range 
+numerical evaluation of the distribution $\rho_q$ yeilds an accumulation less than $\tau$;
+\begin{equation}
+C_q e^{ -\widetilde \zeta_q (R^{\rm o} _q)^2 }  = \tau .
+\end{equation}
+For QCTC,  errors in the electrostatic potential due to penetration errors must be controlled. 
+For this purpose, the penetration extent $R^{\rm p}_q$  found by solving 
 \begin{equation}
 C_q \int \left[ \left(\pi/{\widetilde \zeta_q} \right)^{3/2} 
-\delta({ r})  - e^{ -\widetilde \zeta_q {r}^2 } \right] \left|{ r}-{ R_{\rm p}} \right|^{-1} {\rm d} r = \tau
+\delta({ r})  - e^{ -\widetilde \zeta_q {r}^2 } \right] \left|{ r}-{ R^{\rm p}_q} \right|^{-1} {\rm d} r = \tau ,
 \end{equation}
+is introduced.  In both HiCu and QCTC, the density-tree is constructed by recursively splitting the largest
+box dimension, untill each primitive has been resolved.  Then the primitive AABBs are computed from their
+extents and merged recursively up the tree.  For HiCu, this is all there is to it, but for QCTC multipole
+moments are also translated to a common center and recursively merged up the tree.  Also, when computing 
+matrix elements of $\bf J$, the primitive bra AABB is computed with using $R^{\rm o}_q$, while  $R^{\rm p}_q$ are 
+used to construct AABBs of the density-tree.
 
+\newpage
+\newpage
 
+\begin{figure}
 
+\caption{\label{figure:ReplicateCells} Regions which contribute to the Coulomb
+matrix: $V_{cell}$ is the simulation cell which is periodically replicated, $V_{in}$ in the interior 
+region where the Coulomb matrix inner lattice sum is calculated, $V_{out}$ is the remaining region which 
+contributes to the Coulomb matrix which is calculated using the ewald like summation of the interaction
+temsor (see Appendix A) and $S_{\infty}$ is the surface at infinity which contributes a
+shape dependent potential to the Coulomb matrix}
 
-These employ the use of the Axis Aligned Bounding Box (AABB) tests to dynamically determine the
-course of traversal; if the boxes touch, the tree is descened while if they a
-
-box - tree interactions.  
-In the case of HiCu, a hierarchical grid of Cartesian cubature rules is constructed through 
-recusion.  Each node in the integration tree is a box, which interacts with 
-
-
-
-
-Over the last 10 years, two hierarchical multipole methods have evolved for solving the
-Quantum Coulomb problem: methods related to the continous fast multipole method (CFMM) \cite{}
-and methods related to the Quantum Chemical Tree Code (QCTC) \cite{}.   The CFMM related methods 
-employ worst case box-box error estimates and are ${\cal O}(N)$ with an error that increases
-as $N{1/6}$, or ${\cal O}(N {\rm lg} N)$ with a constant error \cite{}.  The QCTC like 
-algorithms employ a best case distribution-box error estimate and are ${\cal O}(N {\rm lg} N)$ 
-with a fixed error.  The efficiency of both methods depends significantly on the error estimates
-used to control both penetration errors and errors in the multipole expansion.  In the case of 
-QCTC, these error estimates are checked with a high frequency as the tree is traversed, 
-
-
-
-
+{\centering \includegraphics{RepCell_2.ps} \par}
+\end{figure}
 
 \section{Periodic Quantum Coulomb Sums}
-\commentout{
-historic N log N
-  
-diff between FMM and TREECODE
-worstcase error
-more powerfull error estimates and data structures
 
-Advantages of multipole approximation
-PERIODIC, Nighbor DW
-}
-
-Over the last 10 years, two hierarchical multipole methods have evolved for solving the
-Quantum Coulomb problem: methods related to the continous fast multipole method (CFMM) \cite{}
-and methods related to the Quantum Chemical Tree Code (QCTC) \cite{}.   The CFMM related methods 
-employ worst case box-box error estimates and are ${\cal O}(N)$ with an error that increases
-as $N{1/6}$, or ${\cal O}(N {\rm lg} N)$ with a constant error \cite{}.  The QCTC like 
-algorithms employ a best case distribution-box error estimate and are ${\cal O}(N {\rm lg} N)$ 
-with a fixed error.  The efficiency of both methods depends significantly on the error estimates
-used to control both penetration errors and errors in the multipole expansion.  In the case of 
-QCTC, these error estimates are checked with a high frequency as the tree is traversed, 
+Under the gamma point approximation, elements of the periodic Coulomb matrix are 
+\begin{eqnarray}
+J_{ab}&=&\frac{1}{2}\int _{V_{\rm UC}} d{\mathbf{r}}  \int _{V_{\infty }} 
+d{\mathbf{r}'}{\rho _{ab}\left( {\mathbf{r}}\right) {\left| \mathbf{r}-\mathbf{r}'\right| }^{-1}
+\rho_{\rm tot}\left( \mathbf{r}'\right) } \\
+&=& \frac{1}{2}\sum _{\mathbf{R}}\int _{V_{\infty }}\int _{V_{\infty }} 
+d{\mathbf{r}}\, d{\mathbf{r}'}{\rho _{ab}^{\scriptscriptstyle \infty}\left( {\mathbf{r}}\right)  
+{\left| \mathbf{r}-\mathbf{r}'\right| }^{-1} \rho^{\scriptscriptstyle \infty}_{\rm tot}\left( {\mathbf{r}'}+{\mathbf{R}}\right) }
+\nonumber 
+\end{eqnarray}
+where $rho_{\rm tot}$ is the total, periodic density including both electronic and nuclear terms.  
 
 
 
-Both methods can be extended to periodic boundary conditions 
-
-
-
-
-
-
-In order to calculate the coulomb matrix efficiently, we transform
-the two-electron Coulomb integrals into integrals over all space with
-local distributions via Periodic Localization transformation  and equations (\ref{rho_pbc})
-and (\ref{rho_pbc_ab}), 
-
-\begin{equation}
-J_{ab}^{PBC}  =  \frac{1}{2}\int _{V_{cell}}\int _{V_{\infty }}\, d{\mathbf{r}}\, 
-d{\mathbf{r}'}\frac{\rho _{ab}^{PBC}\left( {\mathbf{r}}\right) \: 
-\rho ^{PBC}\left( \mathbf{r}'\right) }{\left| \mathbf{r}-\mathbf{r}'\right| }
-\nonumber
-\end{equation}
-\begin{equation}
-\,\,\,\,\,\,\,\,\,\,\,
-\,\,\,\,\,\,\,\,\,\,\,
-\,\,\,
-= \frac{1}{2}\sum _{\mathbf{R}'}\int _{V_{\infty }}\int _{V_{\infty }}\, 
-d{\mathbf{r}}\, d{\mathbf{r}'}\frac{\rho _{ab}^{loc}\left( {\mathbf{r}}\right) \: 
-\rho ^{loc}\left( {\mathbf{r}'}+{\mathbf{R}'}\right) }{\left| \mathbf{r}-\mathbf{r}'
-\right| }
-\\
-\label{Jab_pbc2} 
-\end{equation}
 However, this is still a long ranged integral. Let us separate the
 Coulomb integral into three pieces 
 \begin{equation}
-J_{ab}^{PBC}=J_{ab}^{QCTC}+J_{ab}^{PFF}+J_{ab}^{EC}
+J_{ab}^{PBC}=J_{ab}^{PNF}+J_{ab}^{PFF}+J_{ab}^{EC}
 \label{Jab_sum}
 \end{equation}
 where 
@@ -1188,17 +1148,7 @@ shown is the HiCu cube in which we do the exchange-correlation integrals}
 %
 %
 %
-\begin{figure}
 
-\caption{\label{figure:ReplicateCells} Regions which contribute to the Coulomb
-matrix: $V_{cell}$ is the simulation cell which is periodically replicated, $V_{in}$ in the interior 
-region where the Coulomb matrix inner lattice sum is calculated, $V_{out}$ is the remaining region which 
-contributes to the Coulomb matrix which is calculated using the ewald like summation of the interaction
-temsor (see Appendix A) and $S_{\infty}$ is the surface at infinity which contributes a
-shape dependent potential to the Coulomb matrix}
-
-{\centering \includegraphics{RepCell_2.ps} \par}
-\end{figure}
 %
 %
 %
