@@ -1,0 +1,81 @@
+#LyX 1.1 created this file. For more info see http://www.lyx.org/
+\lyxformat 2.16
+\textclass revtex
+\options aps,manuscript
+\language default
+\inputencoding latin1
+\fontscheme default
+\graphics default
+\paperfontsize default
+\spacing single 
+\papersize Default
+\paperpackage a4
+\use_geometry 0
+\use_amsmath 0
+\paperorientation portrait
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\defskip medskip
+\quotes_language english
+\quotes_times 2
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+
+\layout Title
+
+
+\series bold 
+Linear 
+\series default 
+s
+\series bold 
+caling Gaussian orbital 
+\series default 
+m
+\series bold 
+ethods for the ab initio simulation of periodic systems
+\layout Author
+
+C.J.
+ Tymczak and Matt Challacombe
+\layout Address
+
+Theoretical Division, Los Alamos National Laboratory, Los Alamos, New Mexico
+ 87545
+\layout Date
+
+
+\latex latex 
+
+\backslash 
+today{}
+\layout Abstract
+
+Periodic boundary conditions have been implemented in the linear scaling
+ Quantum Chemistry code MondoSCF.
+ For the two-electron Coulomb matrix, this has been achieved with an exact
+ multipole expansion of the long range Coulomb field.
+ This yields a spherically summed boundary condition that is easily transformed
+ to tinfoil boundary conditions.
+ In order to achieve linear scaling of the short range Coulomb field, a
+ Quantum Chemical Tree Code (QCTC) is used.
+ Periodic boundary conditions have also been incorporated into calculations
+ of the local exchange-correlation matrix.
+ A Hierarchical Cubature (HiCu), pure Cartesian adaptive grid is used.
+ This method achieves linear scaling through the use of advanced data structures
+ (k-d trees) that maximally exploits locality of the density.
+ Finally, the current capabilities of MondoSCF for condensed phases will
+ be demonstrated.
+\layout Standard
+
+
+\latex latex 
+
+\backslash 
+vfill
+\layout Description
+
+LA-UR-0000
+\the_end

@@ -1,0 +1,3328 @@
+#LyX 1.1 created this file. For more info see http://www.lyx.org/
+\lyxformat 2.16
+\textclass article
+\language default
+\inputencoding default
+\fontscheme default
+\graphics default
+\paperfontsize default
+\spacing single 
+\papersize Default
+\paperpackage a4
+\use_geometry 0
+\use_amsmath 0
+\paperorientation portrait
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\defskip medskip
+\quotes_language english
+\quotes_times 2
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+
+\layout Title
+
+
+\series bold 
+Linear scaling computation of the Fock matrix VI.
+ Gaussian orbital methods for DFT simulation of periodic systems
+\layout Author
+
+C.J.
+ Tymczak and Matt Challacombe
+\layout Address
+
+Theoretical Division, Los Alamos National Laboratory, Los Alamos, New Mexico
+ 87545
+\layout Abstract
+
+Periodic boundary conditions have been implemented in the linear scaling
+ Quantum Chemistry code 
+\series bold 
+MondoSCF
+\series default 
+.
+ For the two-electron Coulomb matrix, this has been achieved with an exact
+ multipole expansion of the long range Coulomb field.
+ This yields a spherically summed boundary condition that is easily transformed
+ to Ewald boundary conditions.
+ In order to achieve linear scaling of the local Coulomb field, a Quantum
+ Chemical Tree Code (QCTC) is used.
+ Periodic boundary conditions have also been incorporated into calculations
+ of the local exchange-correlation matrix.
+ A Hierarchical Cubature (HiCu), pure Cartesian adaptive grid is used.
+ This method achieves linear scaling through the use of advanced data structures
+ (k-d trees) that maximally exploits locality of the density.
+ Finally, the current capabilities of MondoSCF for large condensed phases
+ will be demonstrated.
+\layout Standard
+
+
+\latex latex 
+
+\backslash 
+vfill
+\backslash 
+vfill
+\backslash 
+vfill
+\series bold 
+\latex default 
+ LA-UR-5555
+\series default 
+\latex latex 
+ 
+\backslash 
+eject
+\layout Section
+
+INTRODUCTION
+\layout Standard
+
+Periodic Boundary Conditions are often essential to employ when simulating
+ bulk behavior in solids or liquids 
+\begin_inset LatexCommand \cite{Allen90}
+
+\end_inset 
+
+.
+ We have implemented Periodic boundary conditions into the linear scaling
+ Quantum Chemistry code 
+\series bold 
+MondoSCF
+\series default 
+ 
+\begin_inset LatexCommand \cite{Challacombe96,Challacombe97,Challacombe99}
+
+\end_inset 
+
+.
+ For the one electron matrices this has been achieved by a re-summation
+ over periodic cell images, which because of locality leads to an efficient
+ calculation of the one electron integrals.
+ For the two-electron Coulomb matrix, this has been achieved with an exact
+ multipole expansion of the long range Coulomb field 
+\begin_inset LatexCommand \cite{White94,Challacombe97b}
+
+\end_inset 
+
+.
+ This yields a spherically summed boundary condition that is easily transformed
+ to Ewald boundary conditions 
+\begin_inset LatexCommand \cite{Redlack72,Redlack75}
+
+\end_inset 
+
+.
+ In order to achieve linear scaling of the local Coulomb field, a Quantum
+ Chemical Tree Code (QCTC) is used [ref].
+ We have also incorporated Periodic boundary conditions into calculations
+ of the local exchange-correlation matrix.
+ A Hierarchical Cubature (HiCu), pure Cartesian adaptive grid is used.
+ This method achieves linear scaling through the use of advanced data structures
+ (k-d trees) that maximally exploits locality of the density, and allows
+ for an efficient treatment of the periodic effects [ref].
+ Next, we show the capabilities of MondoSCF for three test condensed phases
+ , Sodium Cloride, Magnesium Oxide and Carbon in the diamond and graphite
+ structures.
+ We then compare these results to the periodic Gaussian code 
+\series bold 
+Crystal98
+\series default 
+ [ref].
+
+\series bold 
+ 
+\series default 
+Next we demonstrate the utility of the code on very large systems such as
+ zeolite.
+ Finally we give some conclusion concerning the accuracy and utility of
+ MondoSCF and future research directions.
+\layout Section
+
+THEORY
+\layout Subsection
+
+One-Electron Matrices
+\layout Subsubsection
+
+The overlap matrix
+\layout Standard
+
+The first step in including periodic boundary conditions into our linear
+ scaling code is to determine the minimal modifications to the one-electron
+ integrals needed to obtain this.
+ We incorporate periodic boundary conditions into our linear scaling method
+ by modifying the integrals.
+ Consider the non-periodic overlap matrix
+\layout Standard
+
+
+\begin_inset Formula \begin{equation}
+\label{Sab_norm}
+S_{ab}=\int _{V_{\infty }}\, d{\mathbf{x}}\, \phi _{a}({\mathbf{x}})\phi _{b}({\mathbf{x}})
+\end{equation}
+
+\end_inset 
+
+ where 
+\begin_inset Formula \( \{\phi _{a}(x),\phi _{b}(x)\} \)
+\end_inset 
+
+ are the atomic orbitals (LCAO) at atom 
+\begin_inset Formula \( a \)
+\end_inset 
+
+ and atom 
+\begin_inset Formula \( b \)
+\end_inset 
+
+ and 
+\begin_inset Formula \( V_{\infty } \)
+\end_inset 
+
+ is the integration over all space.
+ In the periodic case this is replaced by [ref],
+\layout Standard
+
+
+\begin_inset Formula \begin{equation}
+\label{Sab_pbc1}
+S_{ab}^{PBC}=\sum _{\mathbf{R},\mathbf{R}'}\int _{V_{cell}}\, d{\mathbf{x}}\, \phi _{a}({\mathbf{x}+R})\phi _{b}({\mathbf{x}+R'})
+\end{equation}
+
+\end_inset 
+
+where, 
+\begin_inset Formula \( V_{cell} \)
+\end_inset 
+
+ is the integration over the simulation cell, and 
+\begin_inset Formula \( \{\mathbf{R},\mathbf{R}'\} \)
+\end_inset 
+
+ are the brava lattice vectors, this is illustrated in figure 
+\begin_inset LatexCommand \ref{figure: SimCell}
+
+\end_inset 
+
+, where 
+\begin_inset Formula \( \left\{ {\mathbf{a},\mathbf{b},\mathbf{c}}\right\}  \)
+\end_inset 
+
+ are the primitive lattice vectors.
+ Because of the locality of the atomic orbitals, we can remove the double
+ sum over lattice vectors to get
+\layout Standard
+
+
+\begin_inset Formula \begin{equation}
+\label{Sab_pbc2}
+S_{ab}^{PBC}=\sum _{\mathbf{R}}\int _{V_{\infty }}\, d{\mathbf{x}}\, \phi _{a}({\mathbf{x}})\phi _{b}({\mathbf{x}+R})
+\end{equation}
+
+\end_inset 
+
+We will use this Periodic Localization transformation (PL) repeatedly in
+ what follows.
+ Let us also present some useful definitions:
+\layout Standard
+
+
+\begin_inset Formula \begin{equation}
+\label{rho_loc}
+\rho ^{loc}({\mathbf{x}})=\sum _{\mathbf{R}}\sum _{ab}{\mathbf{P}}_{ab}\phi _{a}({\mathbf{x}})\phi _{b}({\mathbf{x}+R})
+\end{equation}
+
+\end_inset 
+
+and because of periodicity,
+\layout Standard
+
+
+\begin_inset Formula \begin{equation}
+\label{rho_pbc}
+\rho ^{PBC}({\mathbf{x}})=\sum _{\mathbf{R}}\, \rho ^{loc}({\mathbf{x}+R})
+\end{equation}
+
+\end_inset 
+
+We also define:
+\begin_inset Formula \begin{equation}
+\label{rho_loc_ab}
+\rho _{ab}^{loc}({\mathbf{x}})=\sum _{\mathbf{R}}\phi _{a}({\mathbf{x}})\phi _{b}({\mathbf{x}+R})
+\end{equation}
+
+\end_inset 
+
+
+\layout Standard
+
+
+\begin_inset Formula \begin{equation}
+\label{rho_pbc_ab}
+\rho _{ab}^{PBC}({\mathbf{x}})=\sum _{R}\, \rho _{ab}^{loc}({\mathbf{x}+R})
+\end{equation}
+
+\end_inset 
+
+Which allows us to rewrite the overlap matrix matrix
+\layout Standard
+
+
+\begin_inset Formula \begin{equation}
+\label{Sab_pbc_3}
+S_{ab}^{PBC}=\int _{V_{\infty }}\, d{\mathbf{x}}\, \rho ^{loc}_{ab}({\mathbf{x}})
+\end{equation}
+
+\end_inset 
+
+
+\layout Subsubsection
+
+The Kinetic Energy Matrix
+\layout Standard
+
+The Kinetic energy matrix for the non-periodic case is given by [ref]
+\layout Standard
+
+
+\begin_inset Formula \begin{equation}
+\label{Tab}
+T_{ab}=-\frac{1}{2}\int _{V_{\infty }}\, d{\mathbf{x}}\, \phi _{a}({\mathbf{x}})\nabla ^{2}\phi _{b}({\mathbf{x}})
+\end{equation}
+
+\end_inset 
+
+Incorporating the PL transformation, we can rewrite this integral for the
+ periodic case as,
+\begin_inset Formula \begin{equation}
+\label{Tab_pbc}
+T^{PBC}_{ab}=-\frac{1}{2}\sum _{\mathbf{R}}\int _{V_{\infty }}\, d{\mathbf{x}}\, \phi _{a}({\mathbf{x}+R})\nabla ^{2}\phi _{b}({\mathbf{x}})
+\end{equation}
+
+\end_inset 
+
+
+\layout Subsection
+
+The Two-Electron matrices
+\layout Subsubsection
+
+The Coulomb matrix
+\layout Standard
+
+We can transform the two-electron Coulomb integrals into integrals over
+ all space with local distributions via PL transformation and equations
+ (
+\begin_inset LatexCommand \ref{rho_pbc}
+
+\end_inset 
+
+) and (
+\begin_inset LatexCommand \ref{rho_pbc_ab}
+
+\end_inset 
+
+) [ref], 
+\begin_inset Formula \begin{eqnarray}
+J_{ab}^{PBC} & = & \frac{1}{2}\int _{V_{cell}}\int _{V_{\infty }}\, d{\mathbf{x}}\, d{\mathbf{x}'}\frac{\rho _{ab}^{PBC}\left( {\mathbf{x}}\right) \: \rho ^{PBC}\left( \mathbf{x}'\right) }{\left| \mathbf{x}-\mathbf{x}'\right| }\begin{array}{c}
+\\
+
+\end{array}\label{Jab_pbc1} \\
+ & = & \frac{1}{2}\sum _{\mathbf{R}'}\int _{V_{\infty }}\int _{V_{\infty }}\, d{\mathbf{x}}\, d{\mathbf{x}'}\frac{\rho _{ab}^{loc}\left( {\mathbf{x}}\right) \: \rho ^{loc}\left( {\mathbf{x}'}+{\mathbf{R}'}\right) }{\left| \mathbf{x}-\mathbf{x}'\right| }\begin{array}{c}
+\\
+
+\end{array}\label{Jab_pbc2} 
+\end{eqnarray}
+
+\end_inset 
+
+let us separate the Coulomb integral into 
+\begin_inset Formula \[
+J_{ab}^{PBC}=J_{ab}^{QCTC}+J_{ab}^{PFF}+J_{ab}^{EC}\]
+
+\end_inset 
+
+where 
+\begin_inset Formula \begin{eqnarray}
+J_{ab}^{QCTC} & = & \frac{1}{2}\sum _{{\mathbf{R}'}\in V_{in}}\, \int _{V_{\infty }}\, \int _{V_{\infty }}\, d{\mathbf{x}}\, d{\mathbf{x}'}\frac{\rho _{ab}^{loc}\left( {\mathbf{x}}\right) \: \rho ^{loc}\left( {\mathbf{x}'+\mathbf{R}'}\right) }{\left| \mathbf{x}-\mathbf{x}'\right| }\begin{array}{c}
+\\
+
+\end{array}\label{Jqctc} \\
+J_{ab}^{PFF} & = & \frac{1}{2}\sum _{{\mathbf{R}'}\in V_{\infty }-V_{in}}\, \int _{V_{\infty }}\, \int _{V_{\infty }}\, d{\mathbf{x}}\, d{\mathbf{x}'}\frac{\rho _{ab}^{loc}\left( {\mathbf{x}}\right) \: \rho ^{loc}\left( {\mathbf{x}'+\mathbf{R}'}\right) }{\left| \mathbf{x}-\mathbf{x}'\right| }\begin{array}{c}
+\\
+
+\end{array}\label{Jpff} \\
+J_{ab}^{EC} & = & \frac{1}{2}\sum _{{\mathbf{R}'}\in S_{\infty }}\, \int _{V_{\infty }}\, \int _{S_{\infty }}\, d{\mathbf{x}}\, d{\mathbf{x}'}\frac{\rho _{ab}^{loc}\left( {\mathbf{x}}\right) \: \rho ^{loc}\left( {\mathbf{x}'+\mathbf{R}'}\right) }{\left| \mathbf{x}-\mathbf{x}'\right| }\begin{array}{c}
+\\
+
+\end{array}\label{Jec} 
+\end{eqnarray}
+
+\end_inset 
+
+and 
+\begin_inset Formula \( V_{in} \)
+\end_inset 
+
+ is the volume which contains the inner cells, 
+\begin_inset Formula \( V_{\infty } \)
+\end_inset 
+
+ is the total volume and 
+\begin_inset Formula \( S_{\infty } \)
+\end_inset 
+
+ is the surface at infinity which contributes a shape dependent potential
+ to the center cell, which are depicted in figure 
+\begin_inset LatexCommand \ref{figure: ReplicateCells}
+
+\end_inset 
+
+.
+ Let us now define each term.
+\layout Subsubsection
+
+The Quantum Chemical Tree Code: The direct Coulomb matrix
+\layout Standard
+
+In-order to achieve linear scaling, we use a quantum chemical tree code
+ [ref] to compute the integral in equation (
+\begin_inset LatexCommand \ref{Jqctc}
+
+\end_inset 
+
+).
+ This requires that we replace the integrals in equation (
+\begin_inset LatexCommand \ref{Jqctc}
+
+\end_inset 
+
+) with the approximate spherical multipole expansion to order 
+\begin_inset Formula \( L \)
+\end_inset 
+
+ and 
+\begin_inset Formula \( L' \)
+\end_inset 
+
+, 
+\begin_inset Formula \[
+\frac{1}{2}\int _{V_{\infty }}\, d{\mathbf{x}}\, d{\mathbf{x}'}\frac{\rho _{ab}^{loc}\left( {\mathbf{x}}\right) \: \rho ^{loc}\left( {\mathbf{x}'}\right) }{\left| \mathbf{x}-\mathbf{x}'\right| }\approx \frac{1}{2}\sum _{\left\langle i\right\rangle }\int _{V_{\infty }}\, d{\mathbf{x}}\, d{\mathbf{x}'}\frac{\rho _{ab}^{loc}\left( {\mathbf{x}}\right) \: \Lambda ^{\left\langle i\right\rangle }\left( {\mathbf{x}'}\right) }{\left| \mathbf{x}-\mathbf{x}'\right| }\qquad \qquad \qquad \qquad \]
+
+\end_inset 
+
+
+\begin_inset Formula \begin{equation}
+\label{QCTC}
++\frac{1}{2}\sum _{\left\langle j\neq i\right\rangle }\sum _{l=0}^{L}\, \sum _{l'=0}^{L'}\, \sum _{m=-l}^{l}\, \sum _{m'=-l'}^{l'}\, \left( -1\right) ^{l}\, \rho _{l}^{m}[{\mathbf{P}}]\, M_{l+l'}^{m+m'}[{\mathbf{P}-\mathbf{Q}}]\, \Lambda _{l'}^{\left\langle j\right\rangle ,m'}[{\mathbf{Q}}]\qquad 
+\end{equation}
+
+\end_inset 
+
+where
+\layout Standard
+
+
+\begin_inset Formula \begin{eqnarray}
+\rho _{l}^{m}\left[ {\mathbf{P}}\right]  & = & \int _{V_{\infty }}\, d{\mathbf{x}}\, O_{l}^{m}\left[ {\mathbf{r}-\mathbf{P}}\right] \rho _{ab}^{loc}\left( {\mathbf{x}}\right) \begin{array}{c}
+\\
+
+\end{array}\label{sp_rho_ab} \\
+\Lambda ^{\left\langle j\right\rangle ,m}_{l}\left[ {\mathbf{Q}}\right]  & = & \int _{V_{\infty }}\, d{\mathbf{x}}\, O_{l}^{m}\left[ {\mathbf{r}-\mathbf{Q}}\right] \Lambda ^{\left\langle j\right\rangle }\left( {\mathbf{x}}\right) \begin{array}{c}
+\\
+
+\end{array}\label{sp_rho_loc} 
+\end{eqnarray}
+
+\end_inset 
+
+and
+\layout Standard
+
+
+\begin_inset Formula \begin{eqnarray}
+O_{l}^{m}\left[ {\mathbf{R}}\right]  & = & \frac{\left| {\mathbf{R}}\right| ^{l}P_{l}^{m}\left( \cos \left( \theta _{\mathbf{R}}\right) \right) \, e^{-im\phi _{\mathbf{R}}}}{\left( l+m\right) !}\begin{array}{c}
+\\
+
+\end{array}\label{sp_mult_O} \\
+M_{l}^{m}\left[ {\mathbf{R}}\right]  & = & \frac{\left( l-m\right) !\, P_{l}^{m}\left( \cos \left( \theta _{\mathbf{R}}\right) \right) \, e^{-im\phi _{\mathbf{R}}}}{\left| {\mathbf{R}}\right| ^{l+1}}\begin{array}{c}
+\\
+
+\end{array}\label{sp_mult_M} 
+\end{eqnarray}
+
+\end_inset 
+
+and 
+\begin_inset Formula \( \left\langle i\right\rangle  \)
+\end_inset 
+
+ and 
+\begin_inset Formula \( \left\langle j\neq i\right\rangle  \)
+\end_inset 
+
+ are the sums over distributions determined from the density tree.
+ In reference [ref] we give a derivation of the exact error bound we use
+ to compute these integrals in the QCTC algorithm which leads to excellent
+ control over the error.
+\layout Subsubsection
+
+The Periodic Far Field Coulomb matrix
+\layout Standard
+
+To obtain the periodic far field correction to the matrix elements we replace
+ the integral in equation (
+\begin_inset LatexCommand \ref{Jpff}
+
+\end_inset 
+
+) with the multipole sum [ref]
+\layout Standard
+
+
+\begin_inset Formula \begin{eqnarray}
+J_{ab}^{PFF} & = & \frac{1}{2}\sum _{{\mathbf{R}'}\in V_{\infty }-V_{in}}\, \int _{V_{\infty }}\, d{\mathbf{x}}\, d{\mathbf{x}'}\frac{\rho _{ab}^{loc}\left( {\mathbf{x}}\right) \: \rho ^{loc}\left( {\mathbf{x}'+\mathbf{R}'}\right) }{\left| \mathbf{x}-\mathbf{x}'\right| }\begin{array}{c}
+\\
+
+\end{array}\label{jpff_2} \\
+ & = & \frac{1}{2}\sum _{{\mathbf{R}'}\in V_{\infty }-V_{in}}\, \sum _{l=0}^{L}\, \sum _{l'=0}^{L'}\, \sum _{m=-l}^{l}\, \sum _{m'=-l'}^{l'}\, \left( -1\right) ^{l}\, \rho _{l}^{m}[{\mathbf{P}}]\, M_{l+l'}^{m+m'}[{\mathbf{P}-\mathbf{Q}}]\, \rho _{l'}^{m'}[{\mathbf{Q}+\mathbf{R}'}]\begin{array}{c}
+\\
+
+\end{array}\label{sp_jpff} 
+\end{eqnarray}
+
+\end_inset 
+
+which setting 
+\begin_inset Formula \( P=R_{0} \)
+\end_inset 
+
+ and 
+\begin_inset Formula \( Q=R_{0}-R' \)
+\end_inset 
+
+ we can rewrite as
+\begin_inset Formula \begin{equation}
+\label{sp_jpff_2}
+J_{ab}^{PFF}=\frac{1}{2}\sum _{l=0}^{L}\, \sum _{l'=0}^{L'}\, \sum _{m=-l}^{l}\, \sum _{m'=-l'}^{l'}\, \left( -1\right) ^{l}\, \rho _{l}^{m}[{\mathbf{R}_{0}}]\, {\cal M}_{l+l'}^{m+m'}\, \rho _{l'}^{m'}[{\mathbf{R}_{0}}]
+\end{equation}
+
+\end_inset 
+
+where
+\layout Standard
+
+
+\begin_inset Formula \begin{equation}
+\label{ScriptM}
+{\cal M}_{l}^{m}=\sum _{{\mathbf{R}'}\in V_{\infty }-V_{in}}\, M_{l}^{m}[\mathbf{R}]
+\end{equation}
+
+\end_inset 
+
+which for 
+\begin_inset Formula \( l<3 \)
+\end_inset 
+
+ is a conditional summation.
+ In appendix A we describe an efficient method which allow us calculate
+ these conditional summations.
+ In the next section we describe the corrections to the Coulomb matrix which
+ allow us to obtain Ewald boundary conditions so that we can compare directly
+ to 
+\series bold 
+Crystal98
+\series default 
+.
+ Figure 
+\begin_inset LatexCommand \ref{figure: ErrorPFF}
+
+\end_inset 
+
+ shows the error of the energy as we increase the Inner box sums for 
+\begin_inset Formula \( L=8,16 \)
+\end_inset 
+
+ for a sodium cloride test system, as can be seen we obtain very rapid convergen
+ce.
+\layout Subsubsection
+
+The Ewald Correction matrix
+\layout Standard
+
+The correction to the Coulomb matrix is strongly dependent on how the periodic
+ multipole tensor is summed.
+ If the matrix is a spherically ordered lattice sum, then the connection
+ between the spherically ordered potential and the Ewald potential is 
+\begin_inset LatexCommand \cite{Redlack72}
+
+\end_inset 
+
+, 
+\begin_inset Formula \begin{equation}
+\label{EW_pot}
+\Phi _{Ew}\left( \mathbf{x}\right) =\Phi _{ss}\left( \mathbf{x}\right) -\frac{4\pi }{3}{\left( \mathbf{x}-\mathbf{R}_{0}\right) \cdot \mathbf{D}}+\frac{2\pi }{3}Q
+\end{equation}
+
+\end_inset 
+
+in terms of the matrix elements of 
+\begin_inset Formula \( J_{ab}^{PBC} \)
+\end_inset 
+
+ this gives the corrections
+\begin_inset Formula \begin{eqnarray}
+J_{ab}^{EC} & = & \int _{V_{\infty }}\, d{\mathbf{x}}\, \rho ^{loc}_{ab}\left( {\mathbf{x}}\right) \left\{ \frac{2\pi }{3}Q-\frac{4\pi }{3}\left( \mathbf{x}-\mathbf{R}_{0}\right) \cdot \mathbf{D}\right\} \begin{array}{c}
+\\
+
+\end{array}\label{Jab_ec} \\
+ & = & \frac{2\pi }{3}Q\, S_{ab}^{PBC}-\frac{4\pi }{3}\mathbf{d}_{ab}\cdot \mathbf{D}\label{Jab_ec_2} 
+\end{eqnarray}
+
+\end_inset 
+
+where
+\layout Standard
+
+
+\begin_inset Formula \begin{eqnarray}
+{\mathbf{d}}_{ab} & = & \int _{V_{\infty }}\, d{\mathbf{x}}\, \left( \mathbf{x}-\mathbf{R}_{0}\right) \rho ^{loc}_{ab}\left( \mathbf{x}\right) \begin{array}{c}
+\\
+
+\end{array}\label{dab} \\
+{\mathbf{D}} & = & \int _{V_{\infty }}\, d{\mathbf{x}}\, \left( \mathbf{x}-\mathbf{R}_{0}\right) \rho ^{loc}\left( \mathbf{x}\right) \begin{array}{c}
+\\
+
+\end{array}\label{D} \\
+Q & = & \int _{V_{\infty }}\, d{\mathbf{x}}\, \left( \mathbf{x}-\mathbf{R}_{0}\right) ^{2}\rho ^{loc}\left( \mathbf{x}\right) \begin{array}{c}
+\\
+
+\end{array}\label{Q} 
+\end{eqnarray}
+
+\end_inset 
+
+are the dipole and quadrapole moments.
+ In appendix B we give a short derivation of these terms
+\layout Subsubsection
+
+The exchange correlation matrix
+\layout Standard
+
+To calculate the exchange correlation matrix in the periodic case, we take
+ advantage of the periodicity of the functions being integrated and the
+ locality of the basis functions [ref],
+\layout Standard
+
+
+\begin_inset Formula \begin{eqnarray}
+K_{ab}^{PBC} & = & \int _{V_{cell}}\, d\mathbf{x}\, \rho _{ab}^{PBC}\left( \mathbf{x}\right) \: V_{xc}\left( \rho ^{PBC}\left( \mathbf{x}\right) \right) \begin{array}{c}
+\\
+
+\end{array}\label{Kab_pbc_1} \\
+ & = & \int _{V_{HiCu}}\, d\mathbf{x}\, \rho _{ab}^{PBC}\left( \mathbf{x}\right) \: V_{xc}\left( \rho ^{PBC}\left( \mathbf{x}\right) \right) \begin{array}{c}
+\\
+
+\end{array}\label{Kab_pbc_2} \\
+ & = & \sum _{RR'}\int _{V_{HiCu}}\, d\mathbf{x}\, \phi _{a}(\mathbf{x}+R)\phi _{b}(\mathbf{x}+R')\, V_{xc}\left( \sum _{R''}\, \rho ^{loc}\left( \mathbf{x}+R''\right) \right) \begin{array}{c}
+\\
+
+\end{array}\label{Kab_pbc_3} 
+\end{eqnarray}
+
+\end_inset 
+
+where 
+\begin_inset Formula \( V_{HiCu} \)
+\end_inset 
+
+ is the cubic region shown in figure 
+\begin_inset LatexCommand \ref{figure: SimCell}
+
+\end_inset 
+
+.
+ This transformation is allowable because of the periodicity of the function,
+ and it is ideally suited for the method we use to calculate our exchange-correl
+ation matrix, which is based on a 
+\begin_inset Quotes eld
+\end_inset 
+
+Gaussian quadrature
+\begin_inset Quotes erd
+\end_inset 
+
+ integration of a rectangular region.
+ To calculate the exchange correlation matrix in periodic system we need
+ to use equation (
+\begin_inset LatexCommand \ref{Kab_pbc_3}
+
+\end_inset 
+
+).
+ This could be prohibitively expensive because of the double sum if not
+ for the locality of the HiCu grid.
+ We have determined that the the computational cost increases by about a
+ factor of two.
+ This is achieved by splitting the problem into two steps
+\layout Itemize
+
+First, we calculate the exchange-correlation potential on the HiCu grid
+ using the periodically summed local density 
+\begin_inset Formula \( \rho ^{loc}\left( \mathbf{x}\right)  \)
+\end_inset 
+
+, because of the k-d tree structure of the density this is not computationally
+ expensive.
+\layout Itemize
+
+Next, we directly calculate the integral of equation (
+\begin_inset LatexCommand \ref{Kab_pbc_3}
+
+\end_inset 
+
+), where we obtain significant increase in efficacy by exploiting the localizati
+on of the atomic orbitals.
+ 
+\layout Section
+
+RESULTS
+\layout Subsection
+
+Verification
+\layout Standard
+
+Table 
+\begin_inset LatexCommand \ref{table:ComToCrystal98_1}
+
+\end_inset 
+
+-
+\begin_inset LatexCommand \ref{table:ComToCrystal98_3}
+
+\end_inset 
+
+ displays our results for several test systems, Sodium Cloride, Magnesium
+ oxide , Diamond and Graphite.
+ We chose these systems because they are well studied and form a distributions
+ of the many bounding mechanisms which are possible, from Ionic to covallent
+ [ref].
+\layout Subsubsection
+
+Sodium Cloride
+\layout Standard
+
+Table 
+\begin_inset LatexCommand \ref{table:ComToCrystal98_1}
+
+\end_inset 
+
+ shows our results for the total energy for Sodium Cloride as compared to
+ results obtained from 
+\series bold 
+Crystal98
+\series default 
+.
+ We test this system in two different cell geometries, one cubic and the
+ other orthorombic.
+ Also we use three different basis sets STO-3G, 3-21G and 6-31G**.
+ We only use the Slater-Dirac functional because of convergence issues with
+ 
+\series bold 
+Crystal98
+\series default 
+.
+ We obtain excellent agreement with 
+\series bold 
+Crystal98
+\series default 
+ to the accuracy of there results, however, 
+\series bold 
+MondoSCF
+\series default 
+ is capable of obtaining very precise results, beyond the capacity of 
+\series bold 
+Crystal98
+\series default 
+ because we do not use fitting functions in the calculations of the Coulomb
+ or the exchange-correlation energies.
+ 
+\layout Subsubsection
+
+Magnesium Oxide
+\layout Standard
+
+Table 
+\begin_inset LatexCommand \ref{table:ComToCrystal98_2}
+
+\end_inset 
+
+ shows our results for the total energy for Magnesium Oxide as compared
+ to results obtained from 
+\series bold 
+Crystal98
+\series default 
+.
+ Because of the high degree of Ionic bounding in this system, 
+\series bold 
+Crystal98
+\series default 
+ does substantially better then for sodium Cloride.
+ This allows for a much closer scrutiny of the energies then for the previous
+ system.
+ Again, we obtain excellent agreement with 
+\series bold 
+Crystal98 
+\series default 
+for three different basis sets to within the accuracy of these results.
+\layout Subsubsection
+
+Diamond and Graphite
+\layout Standard
+
+Table 
+\begin_inset LatexCommand \ref{table:ComToCrystal98_3}
+
+\end_inset 
+
+ shows our results for the total energy for Diamond and Graphite as compared
+ to results obtained from 
+\series bold 
+Crystal98
+\series default 
+.
+\layout Subsection
+
+Scaling
+\layout Standard
+
+For testing of linear scaling, we us a set of dense molecular nitrogen systems
+ obtained from molecular dynamics simulations.
+ Figure 
+\begin_inset LatexCommand \ref{figure:DenseNitrogen}
+
+\end_inset 
+
+ shows a Iso-surface potential plot for the largest test system, a dense
+ gas of 100 
+\begin_inset Formula \( N_{2} \)
+\end_inset 
+
+ nitrogen molecules.
+ The electronic iso-surface is at a density of 0.4, and the colors represent
+ the Coulomb potential projected upon this surface, yellow being positive
+ and blue being negative.
+ Figure 
+\begin_inset LatexCommand \ref{figure: Scaling_Matrix_Build}
+
+\end_inset 
+
+ shows our scaling results of the dense nitrogen periodic system for both
+ the 
+\begin_inset Formula \( J_{QCTC} \)
+\end_inset 
+
+ and 
+\begin_inset Formula \( K_{xc} \)
+\end_inset 
+
+ matrix builds for two different error thresholds.
+ Figure 
+\begin_inset LatexCommand \ref{figure:Scaling_Diag}
+
+\end_inset 
+
+ also shows scaling results, for these same system and thresholds, for the
+ overlap matrix inverter and the density matrix calculator.
+ Even in this dense periodic system, linear scaling commences very early,
+ around twenty molecules.
+ Also, we mention the fact that the crossover for linear scaling for the
+ density matrix solver, as opposed to the eigen-solver, is around 50 molecules
+ even for these small basis set systems.
+ 
+\layout Subsection
+
+Zeolite
+\layout Section
+
+CONCLUSIONS
+\layout Standard
+
+Periodic Boundary Conditions are often essential to employ when simulating
+ bulk behavior in solids or liquids.
+ We have implemented Periodic boundary conditions into the linear scaling
+ Quantum Chemistry code 
+\series bold 
+MondoSCF
+\series default 
+.
+ For the one electron matrices this has been achieved by a re-summation
+ over periodic cell images, which because of locality leads to an efficient
+ calculation of the one electron integrals.
+ For the two-electron Coulomb matrix, this has been achieved with an exact
+ multipole expansion of the long range Coulomb field.
+ This yields a spherically summed boundary condition that is easily transformed
+ to Ewald boundary conditions.
+ In order to achieve linear scaling of the local Coulomb field, a Quantum
+ Chemical Tree Code (QCTC) is used.
+ We have also incorporated Periodic boundary conditions into calculations
+ of the local exchange-correlation matrix.
+ A Hierarchical Cubature (HiCu), pure Cartesian adaptive grid is used.
+ This method achieves linear scaling through the use of advanced data structures
+ (k-d trees) that maximally exploits locality of the density, and allows
+ for an efficient treatment of the periodic effects.
+ Next, we show the capabilities of MondoSCF for three test condensed phases
+ , Sodium Cloride, Magnesium Oxide and Carbon in the Diamond and graphite
+ structures.
+ We then compare these results to the periodic Gaussian code 
+\series bold 
+Crystal98.
+ 
+\series default 
+Next we demonstrate the utility of the code on very large systems such as
+ zeolite.
+ Finally we give some conclusion concerning the accuracy and utility of
+ MondoSCF and future research directions.
+\layout Section*
+
+ACKNOWLEDGMENTS
+\layout Standard
+
+We would like to acknowledge Tommy Sewell and Ed Kober for there advise
+ and support.
+ 
+\layout Standard
+
+
+\latex latex 
+
+\backslash 
+eject
+\layout Standard
+
+
+\begin_inset LatexCommand \BibTeX[plain]{../Bibs/GaussianPapers}
+
+\end_inset 
+
+
+\layout Standard
+
+
+\latex latex 
+
+\backslash 
+eject
+\layout Section*
+\start_of_appendix 
+Computation of the 
+\begin_inset Formula \( {\cal M} \)
+\end_inset 
+
+ Tensor
+\layout Standard
+
+Following the work of Nijboer-De Wette 
+\begin_inset LatexCommand \cite{Nijboer57,Nijboer58a}
+
+\end_inset 
+
+.
+ We start by first partitioning  
+\layout Standard
+
+
+\begin_inset Formula \begin{equation}
+\frac{1}{r^{l+1}}={\cal G}_{l}\left( \beta ,r\right) +{\cal F}_{l}\left( \beta ,r\right) 
+\end{equation}
+
+\end_inset 
+
+where
+\layout Standard
+
+
+\begin_inset Formula \begin{equation}
+{\cal G}_{l}\left( \beta ,r\right) =\frac{\Gamma \left( l+\frac{1}{2},\beta ^{2}r^{2}\right) }{\Gamma \left( l+\frac{1}{2}\right) \, r^{l+1}}
+\end{equation}
+
+\end_inset 
+
+and
+\begin_inset Formula \begin{equation}
+{\cal F}_{l}\left( \beta ,r\right) =\frac{\gamma \left( l+\frac{1}{2},\beta ^{2}r^{2}\right) }{\Gamma \left( l+\frac{1}{2}\right) \, r^{l+1}}=\frac{\Gamma \left( l+\frac{1}{2}\right) -\Gamma \left( l+\frac{1}{2},\beta ^{2}r^{2}\right) }{\Gamma \left( l+\frac{1}{2}\right) \, r^{l+1}}
+\end{equation}
+
+\end_inset 
+
+where 
+\begin_inset Formula \( \beta  \)
+\end_inset 
+
+ is a parameter which controls the convergence.
+ This allows the lattice sum to be partitioned into rapidly convergent real
+ and reciprocal space terms 
+\layout Standard
+
+
+\begin_inset Formula \begin{eqnarray}
+{\cal M}^{m}_{l} & = & \sum _{{\mathbf{R}'}\in V_{\infty }-V_{in}}\, M_{l}^{m}[\mathbf{R}]\begin{array}{c}
+\\
+
+\end{array}\nonumber \\
+ & = & \sum _{{\mathbf{R}'}\in V_{\infty }-V_{in}}\, \left( l-m\right) !\, P_{l}^{m}\left( \cos \left( \theta _{\mathbf{R}}\right) \right) e^{im\phi _{\mathbf{R}}}\, \left\{ {\cal G}_{l}\left( \beta ,\left| \mathbf{R}\right| \right) +{\cal F}_{l}\left( \beta ,\left| \mathbf{R}\right| \right) \right\} \begin{array}{c}
+\\
+
+\end{array}\nonumber \\
+ & = & \sum _{{\mathbf{R}'}\in V_{\infty }-V_{in}}\, \left( l-m\right) !\, P_{l}^{m}\left( \cos \left( \theta _{\mathbf{R}}\right) \right) e^{im\phi _{\mathbf{R}}}\, {\cal G}_{l}\left( \beta ,\left| \mathbf{R}\right| \right) \begin{array}{c}
+\\
+
+\end{array}\nonumber \\
+ & - & \sum _{{\mathbf{R}'}\in V_{in}}\, \left( l-m\right) !\, P_{l}^{m}\left( \cos \left( \theta _{\mathbf{R}}\right) \right) e^{im\phi _{\mathbf{R}}}{\cal F}_{l}\left( \beta ,\left| \mathbf{R}\right| \right) \begin{array}{c}
+\\
+
+\end{array}\nonumber \\
+ & + & \frac{4\pi ^{\frac{3}{2}}(\frac{i}{2})^{l}}{V_{cell}\Gamma \left( l+\frac{1}{2}\right) }\sum _{\mathbf{G}\neq \left\{ \emptyset \right\} }\, \left| \mathbf{G}\right| ^{l-2}e^{-\frac{\pi ^{2}\left| \mathbf{G}\right| ^{2}}{\beta ^{2}}}\, \left( l-m\right) !\, P_{l}^{m}\left( \cos \left( \theta _{\mathbf{G}}\right) \right) e^{im\phi _{\mathbf{G}}}
+\end{eqnarray}
+
+\end_inset 
+
+With an appropriate choice of 
+\begin_inset Formula \( \beta \sim \sqrt{\pi }/\left( V_{cell}\right) ^{\frac{1}{3}} \)
+\end_inset 
+
+ the periodic multipole interaction tensor can be computed.
+ The only potential problem is the computation of the incomplete gamma functions.
+ Previous approaches attempted to compute this function by the upward recurrence
+ relation
+\layout Standard
+
+
+\begin_inset Formula \begin{equation}
+\Gamma \left( m+1,\, x\right) =m\Gamma \left( m,\, x\right) +x^{m}e^{-x}
+\end{equation}
+
+\end_inset 
+
+which is started by
+\layout Standard
+
+
+\begin_inset Formula \begin{equation}
+\label{erfc}
+\Gamma \left( \frac{1}{2},\, x\right) =\sqrt{\pi }\, {\rm erfc}\left( \sqrt{x}\right) 
+\end{equation}
+
+\end_inset 
+
+however, this leads a numerical instability in the calculation.
+ For large values of 
+\begin_inset Formula \( x \)
+\end_inset 
+
+ and 
+\begin_inset Formula \( m \)
+\end_inset 
+
+ the calculation of the gamma function can quickly lose precision.
+ We can remove this problem by analytically summing the gamma function,
+ collecting terms, and then rewriting the gamma function as
+\begin_inset Formula \begin{equation}
+\Gamma \left( m+\frac{1}{2},\, x\right) =\Gamma \left( m+\frac{1}{2}\right) \left\{ {\rm erfc}\left( \sqrt{x}\right) +\sqrt{\frac{x}{\pi }}\sum _{n=0}^{m-1}(S_{n}\, x\, e^{-\frac{x}{n}})^{n}\right\} 
+\end{equation}
+
+\end_inset 
+
+where
+\layout Standard
+
+
+\begin_inset Formula \begin{equation}
+\label{SN}
+S_{n}=\left( \frac{\Gamma \left( \frac{1}{2}\right) }{\Gamma \left( n+\frac{3}{2}\right) }\right) ^{\frac{1}{max(n,1)}}
+\end{equation}
+
+\end_inset 
+
+Which are tabulated beforehand.
+ We find that this version of the gamma function is both easy to program
+ and numerically very precise, even at large 
+\begin_inset Formula \( x \)
+\end_inset 
+
+ or 
+\begin_inset Formula \( m \)
+\end_inset 
+
+.
+ Table 
+\begin_inset LatexCommand \ref{table:CubicMlm}
+
+\end_inset 
+
+ shows the matrix coefficients calculated for different cell shapes.
+ We have also computed the 
+\begin_inset Formula \( {\cal M} \)
+\end_inset 
+
+ tensor in one and two dimensions.
+ The 
+\begin_inset Formula \( {\cal M} \)
+\end_inset 
+
+ tensor in one dimension can be computed analytically
+\layout Standard
+
+
+\begin_inset Formula \begin{eqnarray*}
+{\cal M}^{m}_{l} & = & \sum _{{\mathbf{R}'}\in V_{\infty }-V_{in}}\, M_{l}^{m}[\mathbf{R}]\\
+ & = & \sum _{{\mathbf{R}'}\in V_{\infty }-V_{in}}\, \left( l-m\right) !\, P_{l}^{m}\left( \cos \left( \theta _{\mathbf{R}}\right) \right) e^{im\phi _{\mathbf{R}}}\, \left\{ \frac{1}{r^{l+1}}\right\} \\
+ & = & \frac{\left( l-m\right) !\, P_{l}^{m}\left( \cos \left( \theta _{0}\right) \right) e^{im\phi _{0}}}{a_{0}^{l+1}}\left\{ \sum _{n=n_{0}}^{\infty }\frac{1}{n^{l+1}}\right\} \\
+ & = & \frac{\left( l-m\right) !\, P_{l}^{m}\left( \cos \left( \theta _{0}\right) \right) e^{im\phi _{0}}}{a_{o}^{l+1}}\left\{ \zeta (l+1)-\sum _{n=1}^{n_{0}-1}\frac{1}{n^{l+1}}\right\} 
+\end{eqnarray*}
+
+\end_inset 
+
+where 
+\begin_inset Formula \( a_{0} \)
+\end_inset 
+
+, 
+\begin_inset Formula \( \theta _{0} \)
+\end_inset 
+
+ and 
+\begin_inset Formula \( \phi _{0} \)
+\end_inset 
+
+ are the intial box dimension and angles which are independent of the summation.
+ In two dimension, the foureier integrals for the calculation of 
+\begin_inset Formula \( {\cal M} \)
+\end_inset 
+
+ tensor become a lot more complicated, therefore we have chosen to use the
+ three dimensional formula's and obtain the two dimensional moments via
+ numerical integration, where we take the limit as the nonperiodic direction
+ goes to infinity,
+\layout Standard
+
+
+\begin_inset Formula \begin{eqnarray*}
+{\cal M}^{m}_{l} & = & \sum _{{\mathbf{R}'}\in V_{\infty }-V_{in}}\, \left( l-m\right) !\, P_{l}^{m}\left( \cos \left( \theta _{\mathbf{R}}\right) \right) e^{im\phi _{\mathbf{R}}}\, {\cal G}_{l}\left( \beta ,\left| \mathbf{R}\right| \right) \\
+ & - & \sum _{{\mathbf{R}'}\in V_{in}}\, \left( l-m\right) !\, P_{l}^{m}\left( \cos \left( \theta _{\mathbf{R}}\right) \right) e^{im\phi _{\mathbf{R}}}{\cal F}_{l}\left( \beta ,\left| \mathbf{R}\right| \right) \\
+ & + & \frac{4\pi ^{\frac{3}{2}}(\frac{i}{2})^{l}}{V_{cell}\Gamma \left( l+\frac{1}{2}\right) }\sum _{\mathbf{G}\neq \left\{ \emptyset \right\} }\, \left| \mathbf{G}\right| ^{l-2}e^{-\frac{\pi ^{2}\left| \mathbf{G}\right| ^{2}}{\beta ^{2}}}\, \left( l-m\right) !\, P_{l}^{m}\left( \cos \left( \theta _{\mathbf{G}}\right) \right) e^{im\phi _{\mathbf{G}}}\\
+ & \Rightarrow  & \\
+ & = & \sum _{{\mathbf{R}'}\in V_{\infty }-V_{in}}\, \left( l-m\right) !\, P_{l}^{m}\left( \cos \left( \theta _{\mathbf{R}}\right) \right) e^{im\phi _{\mathbf{R}}}\, {\cal G}_{l}\left( \beta ,\left| \mathbf{R}\right| \right) \\
+ & - & \sum _{{\mathbf{R}'}\in V_{in}}\, \left( l-m\right) !\, P_{l}^{m}\left( \cos \left( \theta _{\mathbf{R}}\right) \right) e^{im\phi _{\mathbf{R}}}{\cal F}_{l}\left( \beta ,\left| \mathbf{R}\right| \right) \\
+ & + & \frac{4\pi ^{\frac{3}{2}}(\frac{i}{2})^{l}}{A_{cell}\Gamma \left( l+\frac{1}{2}\right) }\: \sum _{\mathbf{G}\neq \left\{ \emptyset \right\} }\, \int _{-\infty }^{\infty }\: dG_{z}\: \left| \mathbf{G}\right| ^{l-2}e^{-\frac{\pi ^{2}\left| \mathbf{G}\right| ^{2}}{\beta ^{2}}}\, \left( l-m\right) !\, P_{l}^{m}\left( \cos \left( \theta _{\mathbf{G}}\right) \right) e^{im\phi _{\mathbf{G}}}
+\end{eqnarray*}
+
+\end_inset 
+
+where 
+\begin_inset Formula \( A_{cell} \)
+\end_inset 
+
+ is the area of the cell along the nonperiodic direction.
+ We have found that we can obtain the 
+\begin_inset Formula \( {\cal M} \)
+\end_inset 
+
+ tensor matrix elements to 8-10 digets of accuracy with this technique.
+\layout Section*
+
+Computation of the Dipole and Quadrapole Corrections 
+\layout Standard
+
+Following the work of Redlack and Grindley 
+\begin_inset LatexCommand \cite{Redlack72}
+
+\end_inset 
+
+ we show the corrections needed inorder to obtain ewald boundry conditions.
+ These corrections exist in both two and three directions and are due the
+ the field induced in the box from the surface at infinity, 
+\begin_inset Formula \( S_{\infty } \)
+\end_inset 
+
+.
+ For three dimensions, 
+\layout Standard
+
+
+\begin_inset Formula \begin{equation}
+\label{BN}
+\Phi _{S_{\infty }}({\mathbf{x}})=\sum _{{\mathbf{R}'}\in S_{\infty }}\, \int _{V_{\infty }}\: d{\mathbf{x}'}\frac{\rho ^{loc}\left( {\mathbf{x}'+\mathbf{R}'}\right) }{\left| \mathbf{x}-\mathbf{x}'\right| }
+\end{equation}
+
+\end_inset 
+
+which if we write this as a multipole expansion
+\begin_inset Formula \begin{equation}
+\label{BN}
+\Phi _{S_{\infty }}({\mathbf{x}})=\sum _{{\mathbf{R}'}\in S_{\infty }}\, \left[ \frac{{\mathbf{p}}\cdot \left( {\mathbf{x}-\mathbf{R}'}\right) }{\left| {\mathbf{x}-\mathbf{R}'}\right| ^{3}}+\frac{1}{2}\sum _{i,j}Q_{ij}\frac{\left( {\mathbf{x}-\mathbf{R}'}\right) _{i}\left( {\mathbf{x}-\mathbf{R}'}\right) _{j}}{\left| \left( {\mathbf{x}-\mathbf{R}'}\right) \right| ^{5}}+\ldots \right] 
+\end{equation}
+
+\end_inset 
+
+where 
+\begin_inset Formula \( {\mathbf{p}} \)
+\end_inset 
+
+ and 
+\begin_inset Formula \( Q_{ij} \)
+\end_inset 
+
+ are the dipole and quaripole moments of 
+\begin_inset Formula \( \rho ^{loc}\left( {\mathbf{x}}\right)  \)
+\end_inset 
+
+ .
+ Both the dipole and the quadripole terms contribute to the potential in
+ the cell, the dipole directly and the quaripole conditionally.
+ Upon summation over the surface, the dipole and quadripole contributions
+ become
+\begin_inset Formula \[
+\Phi ^{3D}_{S_{\infty }}({\mathbf{x}})=-\frac{4\pi }{3V_{cell}}{\mathbf{p}}\cdot \left( {\mathbf{x}-\mathbf{R}'}\right) +\frac{2\pi }{3V_{cell}}\left( Q_{11}+Q_{22}+Q_{33}\right) .\]
+
+\end_inset 
+
+For two dimensions only the dipole contributes to the potential within the
+ cell as
+\layout Standard
+
+
+\begin_inset Formula \[
+\Phi ^{2D}_{S_{\infty }}(z)=-\frac{2\pi }{A_{cell}}p_{z}\, \left( z-R'_{z}\right) \]
+
+\end_inset 
+
+
+\layout Standard
+
+
+\latex latex 
+
+\backslash 
+eject
+\layout Standard
+
+\begin_float tab 
+\layout Caption
+
+
+\begin_inset LatexCommand \label{table:ComToCrystal98_1}
+
+\end_inset 
+
+ Comparison of Sodium Cloride test systems to Crystal98
+\layout Standard
+\added_space_bottom 0.3cm \align center \LyXTable
+multicol5
+13 6 0 0 -1 -1 -1 -1
+1 1 0 0
+1 0 0 0
+1 0 0 0
+1 0 0 0
+1 0 0 0
+1 0 0 0
+1 1 0 0
+1 0 0 0
+1 0 0 0
+1 0 0 0
+1 0 0 0
+1 0 0 0
+1 1 0 0
+8 1 0 "" ""
+8 1 0 "" ""
+8 1 0 "" ""
+8 1 0 "" ""
+8 1 0 "" ""
+8 1 1 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+
+System
+\newline 
+Basis
+\newline 
+Functional
+\newline 
+Cell (A)
+\newline 
+Program
+\newline 
+Energy (Hartree)
+\newline 
+NaCl
+\newline 
+STO-3G
+\newline 
+Slater-Dirac
+\newline 
+
+\begin_inset Formula \( \left\{ \begin{array}{c}
+\left| a\right| =\left| b\right| =\left| c\right| =3.974\\
+\alpha =\frac{\pi }{3},\beta =\frac{\pi }{3},N=2
+\end{array}\right\}  \)
+\end_inset 
+
+
+\newline 
+MondoSCF
+\newline 
+
+\begin_inset Formula \( -610.9751176 \)
+\end_inset 
+
+
+\newline 
+
+\newline 
+
+\newline 
+
+\newline 
+
+\begin_inset Formula \( \begin{array}{c}
+\\
+
+\end{array} \)
+\end_inset 
+
+
+\newline 
+Crystal98
+\newline 
+
+\begin_inset Formula \( -610.972 \)
+\end_inset 
+
+
+\newline 
+
+\newline 
+STO-6G
+\newline 
+Slater-Dirac
+\newline 
+
+\begin_inset Formula \( \begin{array}{c}
+\\
+
+\end{array} \)
+\end_inset 
+
+
+\newline 
+MondoSCF
+\newline 
+
+\newline 
+
+\newline 
+
+\newline 
+
+\newline 
+
+\begin_inset Formula \( \begin{array}{c}
+\\
+
+\end{array} \)
+\end_inset 
+
+
+\newline 
+Crystal98
+\newline 
+
+\newline 
+
+\newline 
+STO-3G**
+\newline 
+Slater-Dirac
+\newline 
+
+\begin_inset Formula \( \begin{array}{c}
+\\
+
+\end{array} \)
+\end_inset 
+
+
+\newline 
+MondoSCF
+\newline 
+
+\newline 
+
+\newline 
+
+\newline 
+
+\newline 
+
+\begin_inset Formula \( \begin{array}{c}
+\\
+
+\end{array} \)
+\end_inset 
+
+
+\newline 
+Crystal98
+\newline 
+
+\newline 
+NaCl
+\newline 
+STO-3G
+\newline 
+Slater-Dirac
+\newline 
+
+\begin_inset Formula \( \left\{ \begin{array}{c}
+\left| a\right| =\left| b\right| =\left| c\right| =5.630\\
+\alpha =\frac{\pi }{2},\beta =\frac{\pi }{2},N=8
+\end{array}\right\}  \)
+\end_inset 
+
+
+\newline 
+MondoSCF
+\newline 
+
+\begin_inset Formula \( -2444.3583560 \)
+\end_inset 
+
+
+\newline 
+
+\newline 
+
+\newline 
+
+\newline 
+
+\begin_inset Formula \( \begin{array}{c}
+\\
+
+\end{array} \)
+\end_inset 
+
+
+\newline 
+Crystal98
+\newline 
+
+\begin_inset Formula \( -2444.358 \)
+\end_inset 
+
+
+\newline 
+
+\newline 
+STO-6G
+\newline 
+Slater-Dirac
+\newline 
+
+\begin_inset Formula \( \begin{array}{c}
+\\
+
+\end{array} \)
+\end_inset 
+
+
+\newline 
+MondoSCF
+\newline 
+
+\newline 
+
+\newline 
+
+\newline 
+
+\newline 
+
+\begin_inset Formula \( \begin{array}{c}
+\\
+
+\end{array} \)
+\end_inset 
+
+
+\newline 
+Crystal98
+\newline 
+
+\newline 
+
+\newline 
+STO-3G**
+\newline 
+Slater-Dirac
+\newline 
+
+\begin_inset Formula \( \begin{array}{c}
+\\
+
+\end{array} \)
+\end_inset 
+
+
+\newline 
+MondoSCF
+\newline 
+
+\newline 
+
+\newline 
+
+\newline 
+
+\newline 
+
+\begin_inset Formula \( \begin{array}{c}
+\\
+
+\end{array} \)
+\end_inset 
+
+
+\newline 
+Crystal98
+\newline 
+
+\end_float 
+\begin_float tab 
+\layout Caption
+
+
+\begin_inset LatexCommand \label{table:ComToCrystal98_2}
+
+\end_inset 
+
+ Comparison of MgO test systems to Crystal98
+\layout Standard
+\align center \LyXTable
+multicol5
+13 6 0 0 -1 -1 -1 -1
+1 1 0 0
+1 0 0 0
+1 0 0 0
+1 0 0 0
+1 0 0 0
+1 0 0 0
+1 1 0 0
+1 0 0 0
+1 0 0 0
+1 0 0 0
+1 0 0 0
+1 0 0 0
+1 1 0 0
+8 1 0 "" ""
+8 1 0 "" ""
+8 1 0 "" ""
+8 1 0 "" ""
+8 1 0 "" ""
+8 1 1 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+
+System
+\newline 
+Basis
+\newline 
+Functional
+\newline 
+Cell (A)
+\newline 
+Program
+\newline 
+Energy (Hartree)
+\newline 
+MgO
+\newline 
+STO-3G
+\newline 
+Slater-Dirac
+\newline 
+
+\begin_inset Formula \( \left\{ \begin{array}{c}
+\left| a\right| =\left| b\right| =\left| c\right| =2.9777\\
+\alpha =\frac{\pi }{3},\beta =\frac{\pi }{3},N=2
+\end{array}\right\}  \)
+\end_inset 
+
+
+\newline 
+MondoSCF
+\newline 
+
+\begin_inset Formula \( -268.6324824 \)
+\end_inset 
+
+
+\newline 
+
+\newline 
+
+\newline 
+
+\newline 
+
+\begin_inset Formula \( \begin{array}{c}
+\\
+
+\end{array} \)
+\end_inset 
+
+
+\newline 
+Crystal98
+\newline 
+
+\begin_inset Formula \( -268.6323 \)
+\end_inset 
+
+
+\newline 
+
+\newline 
+STO-6G
+\newline 
+Slater-Dirac
+\newline 
+
+\begin_inset Formula \( \begin{array}{c}
+\\
+
+\end{array} \)
+\end_inset 
+
+
+\newline 
+MondoSCF
+\newline 
+
+\begin_inset Formula \( -269.384298 \)
+\end_inset 
+
+9
+\newline 
+
+\newline 
+
+\newline 
+
+\newline 
+
+\begin_inset Formula \( \begin{array}{c}
+\\
+
+\end{array} \)
+\end_inset 
+
+
+\newline 
+Crystal98
+\newline 
+
+\newline 
+
+\newline 
+STO-3G**
+\newline 
+Slater-Dirac
+\newline 
+
+\begin_inset Formula \( \begin{array}{c}
+\\
+
+\end{array} \)
+\end_inset 
+
+
+\newline 
+MondoSCF
+\newline 
+
+\newline 
+
+\newline 
+
+\newline 
+
+\newline 
+
+\begin_inset Formula \( \begin{array}{c}
+\\
+
+\end{array} \)
+\end_inset 
+
+
+\newline 
+Crystal98
+\newline 
+
+\newline 
+MgO
+\newline 
+STO-3G
+\newline 
+Slater-Dirac
+\newline 
+
+\begin_inset Formula \( \left\{ \begin{array}{c}
+\left| a\right| =\left| b\right| =\left| c\right| =4.2112\\
+\alpha =\frac{\pi }{3},\beta =\frac{\pi }{3},N=2
+\end{array}\right\}  \)
+\end_inset 
+
+
+\newline 
+MondoSCF
+\newline 
+
+\begin_inset Formula \( -1076.2137742 \)
+\end_inset 
+
+
+\newline 
+
+\newline 
+
+\newline 
+
+\newline 
+
+\begin_inset Formula \( \begin{array}{c}
+\\
+
+\end{array} \)
+\end_inset 
+
+
+\newline 
+Crystal98
+\newline 
+
+\begin_inset Formula \( -1076.2138 \)
+\end_inset 
+
+
+\newline 
+
+\newline 
+STO-6G
+\newline 
+Slater-Dirac
+\newline 
+
+\begin_inset Formula \( \begin{array}{c}
+\\
+
+\end{array} \)
+\end_inset 
+
+
+\newline 
+MondoSCF
+\newline 
+
+\newline 
+
+\newline 
+
+\newline 
+
+\newline 
+
+\begin_inset Formula \( \begin{array}{c}
+\\
+
+\end{array} \)
+\end_inset 
+
+
+\newline 
+Crystal98
+\newline 
+
+\newline 
+
+\newline 
+STO-3G**
+\newline 
+Slater-Dirac
+\newline 
+
+\begin_inset Formula \( \begin{array}{c}
+\\
+
+\end{array} \)
+\end_inset 
+
+
+\newline 
+MondoSCF
+\newline 
+
+\newline 
+
+\newline 
+
+\newline 
+
+\newline 
+
+\begin_inset Formula \( \begin{array}{c}
+\\
+
+\end{array} \)
+\end_inset 
+
+
+\newline 
+Crystal98
+\newline 
+
+\end_float 
+\layout Standard
+
+\begin_float tab 
+\layout Caption
+
+
+\begin_inset LatexCommand \label{table:ComToCrystal98_3}
+
+\end_inset 
+
+ Comparison of Carbon test systems to Crystal98
+\layout Standard
+\align center \LyXTable
+multicol5
+13 6 0 0 -1 -1 -1 -1
+1 1 0 0
+1 0 0 0
+1 0 0 0
+1 0 0 0
+1 0 0 0
+1 0 0 0
+1 1 0 0
+1 0 0 0
+1 0 0 0
+1 0 0 0
+1 0 0 0
+1 0 0 0
+1 1 0 0
+8 1 0 "" ""
+8 1 0 "" ""
+8 1 0 "" ""
+8 1 0 "" ""
+8 1 0 "" ""
+8 1 1 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+
+System
+\newline 
+Basis
+\newline 
+Functional
+\newline 
+Cell (A)
+\newline 
+Program
+\newline 
+Energy (Hartree)
+\newline 
+Diamond
+\newline 
+STO-3G
+\newline 
+Slater-Dirac
+\newline 
+
+\begin_inset Formula \( \left\{ \begin{array}{c}
+\left| a\right| =\left| b\right| =\left| c\right| =\\
+\alpha =\frac{\pi }{2},\beta =\frac{\pi }{2},N=8
+\end{array}\right\}  \)
+\end_inset 
+
+
+\newline 
+MondoSCF
+\newline 
+
+\newline 
+
+\newline 
+
+\newline 
+
+\newline 
+
+\begin_inset Formula \( \begin{array}{c}
+\\
+
+\end{array} \)
+\end_inset 
+
+
+\newline 
+Crystal98
+\newline 
+
+\newline 
+
+\newline 
+STO-6G
+\newline 
+Slater-Dirac
+\newline 
+
+\begin_inset Formula \( \begin{array}{c}
+\\
+
+\end{array} \)
+\end_inset 
+
+
+\newline 
+MondoSCF
+\newline 
+
+\newline 
+
+\newline 
+
+\newline 
+
+\newline 
+
+\begin_inset Formula \( \begin{array}{c}
+\\
+
+\end{array} \)
+\end_inset 
+
+
+\newline 
+Crystal98
+\newline 
+
+\newline 
+
+\newline 
+3-21G
+\newline 
+Slater-Dirac
+\newline 
+
+\begin_inset Formula \( \begin{array}{c}
+\\
+
+\end{array} \)
+\end_inset 
+
+
+\newline 
+MondoSCF
+\newline 
+
+\newline 
+
+\newline 
+
+\newline 
+
+\newline 
+
+\begin_inset Formula \( \begin{array}{c}
+\\
+
+\end{array} \)
+\end_inset 
+
+
+\newline 
+Crystal98
+\newline 
+
+\newline 
+Graphite
+\newline 
+STO-3G
+\newline 
+Slater-Dirac
+\newline 
+
+\begin_inset Formula \( \left\{ \begin{array}{c}
+\left| a\right| =\left| b\right| =\left| c\right| =\\
+\alpha =\frac{\pi }{2},\beta =\frac{\pi }{2},N=6
+\end{array}\right\}  \)
+\end_inset 
+
+
+\newline 
+MondoSCF
+\newline 
+
+\newline 
+
+\newline 
+
+\newline 
+
+\newline 
+
+\begin_inset Formula \( \begin{array}{c}
+\\
+
+\end{array} \)
+\end_inset 
+
+
+\newline 
+Crystal98
+\newline 
+
+\newline 
+
+\newline 
+3-21G
+\newline 
+Slater-Dirac
+\newline 
+
+\begin_inset Formula \( \begin{array}{c}
+\\
+
+\end{array} \)
+\end_inset 
+
+
+\newline 
+MondoSCF
+\newline 
+
+\newline 
+
+\newline 
+
+\newline 
+
+\newline 
+
+\begin_inset Formula \( \begin{array}{c}
+\\
+
+\end{array} \)
+\end_inset 
+
+
+\newline 
+Crystal98
+\newline 
+
+\newline 
+
+\newline 
+6-31G**
+\newline 
+Slater-Dirac
+\newline 
+
+\begin_inset Formula \( \begin{array}{c}
+\\
+
+\end{array} \)
+\end_inset 
+
+
+\newline 
+MondoSCF
+\newline 
+
+\newline 
+
+\newline 
+
+\newline 
+
+\newline 
+
+\begin_inset Formula \( \begin{array}{c}
+\\
+
+\end{array} \)
+\end_inset 
+
+
+\newline 
+Crystal98
+\newline 
+
+\end_float 
+\begin_float tab 
+\layout Caption
+
+
+\begin_inset LatexCommand \label{table: ConvegOfNaCl}
+
+\end_inset 
+
+ Total energy per atom for the sodium cloride system for increasing system
+ size
+\layout Standard
+\align center \LyXTable
+multicol5
+8 3 0 0 -1 -1 -1 -1
+1 1 0 0
+1 0 0 0
+1 0 0 0
+1 0 0 0
+1 0 0 0
+1 0 0 0
+1 0 0 0
+1 1 0 0
+8 1 0 "" ""
+8 1 0 "" ""
+8 1 1 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+
+System Size (
+\begin_inset Formula \( N) \)
+\end_inset 
+
+
+\newline 
+Energy (
+\begin_inset Formula \( E \)
+\end_inset 
+
+)
+\newline 
+
+\begin_inset Formula \( \frac{E}{N} \)
+\end_inset 
+
+
+\newline 
+
+\begin_inset Formula \( \, \, 2^{\dagger } \)
+\end_inset 
+
+
+\newline 
+
+\begin_inset Formula \( -610.975117 \)
+\end_inset 
+
+
+\newline 
+
+\begin_inset Formula \( -305.487559 \)
+\end_inset 
+
+
+\newline 
+
+\begin_inset Formula \( 8 \)
+\end_inset 
+
+
+\newline 
+
+\begin_inset Formula \( -2444.35835 \)
+\end_inset 
+
+
+\newline 
+
+\begin_inset Formula \( -305.544794 \)
+\end_inset 
+
+
+\newline 
+
+\begin_inset Formula \( \, \, 16^{\dagger } \)
+\end_inset 
+
+
+\newline 
+
+\begin_inset Formula \( -4888.70023 \)
+\end_inset 
+
+
+\newline 
+
+\begin_inset Formula \( -305.543765 \)
+\end_inset 
+
+
+\newline 
+
+\begin_inset Formula \( \, \, 54^{\dagger } \)
+\end_inset 
+
+
+\newline 
+
+\begin_inset Formula \( -16499.4900 \)
+\end_inset 
+
+
+\newline 
+
+\begin_inset Formula \( -305.546111 \)
+\end_inset 
+
+
+\newline 
+
+\begin_inset Formula \( 64 \)
+\end_inset 
+
+
+\newline 
+
+\begin_inset Formula \( -19554.9556 \)
+\end_inset 
+
+
+\newline 
+
+\begin_inset Formula \( -305.546181 \)
+\end_inset 
+
+
+\newline 
+
+\begin_inset Formula \( \, \, 128^{\dagger } \)
+\end_inset 
+
+
+\newline 
+
+\begin_inset Formula \( -39109.9115 \)
+\end_inset 
+
+
+\newline 
+
+\begin_inset Formula \( -305.546184 \)
+\end_inset 
+
+
+\newline 
+
+\begin_inset Formula \( 216 \)
+\end_inset 
+
+
+\newline 
+
+\begin_inset Formula \( -65997.9768 \)
+\end_inset 
+
+
+\newline 
+
+\begin_inset Formula \( -305.546185 \)
+\end_inset 
+
+
+\end_float 
+
+\begin_inset Formula \(  \)
+\end_inset 
+
+
+\begin_float tab 
+\layout Caption
+
+
+\begin_inset LatexCommand \label{table:CubicMlm}
+
+\end_inset 
+
+ 
+\begin_inset Formula \( {\cal M}_{l}^{m} \)
+\end_inset 
+
+ for a cubic simulation cell 
+\begin_inset Formula \( \left\{ \left| a\right| =1,\left| b\right| =1,\left| c\right| =1,\alpha =\frac{\pi }{2},\beta =\frac{\pi }{2}\right\}  \)
+\end_inset 
+
+ and an ortho-rombic simulation cell 
+\begin_inset Formula \( \left\{ \left| a\right| =1,\left| b\right| =1,\left| c\right| =1,\alpha =\frac{2\pi }{3},\beta =\frac{2\pi }{3}\right\}  \)
+\end_inset 
+
+ where the central cell is substracted.
+\layout Standard
+\added_space_top 0.3cm \added_space_bottom 0.3cm \align center \LyXTable
+multicol5
+30 6 1 0 -1 -1 -1 -1
+1 1 0 0
+0 1 0 0
+0 0 0 0
+0 0 0 0
+1 0 0 0
+0 0 0 0
+0 0 0 0
+1 0 0 0
+0 0 0 0
+0 0 0 0
+1 0 0 0
+0 0 0 0
+0 0 0 0
+0 0 0 0
+1 0 0 0
+0 0 0 0
+0 0 0 0
+0 0 0 0
+0 0 0 0
+1 0 0 0
+0 0 0 0
+0 0 0 0
+0 0 0 0
+0 0 0 0
+1 0 0 0
+0 0 0 0
+0 0 0 0
+0 0 0 0
+0 0 0 0
+0 1 0 0
+8 1 1 "" ""
+8 0 1 "" ""
+8 0 1 "" ""
+8 1 0 "" ""
+8 1 1 "" ""
+8 0 1 "" ""
+1 8 1 1 0 0 0 "" ""
+2 2 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+1 8 1 1 0 0 0 "" ""
+2 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 2 1 1 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+
+
+\newline 
+Cubic 
+\newline 
+ 
+\newline 
+Ortho-rombic
+\newline 
+
+\begin_inset Formula \( \: \:  \)
+\end_inset 
+
+
+\begin_inset Formula \( l \)
+\end_inset 
+
+
+\begin_inset Formula \( \: \:  \)
+\end_inset 
+
+
+\newline 
+
+\begin_inset Formula \( \:  \)
+\end_inset 
+
+
+\begin_inset Formula \( m \)
+\end_inset 
+
+
+\begin_inset Formula \( \:  \)
+\end_inset 
+
+
+\newline 
+
+\begin_inset Formula \( \qquad \qquad  \)
+\end_inset 
+
+
+\begin_inset Formula \( \quad  \)
+\end_inset 
+
+
+\begin_inset Formula \( {\cal M}^{m}_{l} \)
+\end_inset 
+
+
+\begin_inset Formula \( \qquad  \)
+\end_inset 
+
+
+\begin_inset Formula \( \qquad  \)
+\end_inset 
+
+
+\begin_inset Formula \( \quad  \)
+\end_inset 
+
+
+\newline 
+
+\begin_inset Formula \( \: \:  \)
+\end_inset 
+
+
+\begin_inset Formula \( l \)
+\end_inset 
+
+
+\begin_inset Formula \( \: \:  \)
+\end_inset 
+
+
+\newline 
+
+\begin_inset Formula \( \:  \)
+\end_inset 
+
+
+\begin_inset Formula \( m \)
+\end_inset 
+
+
+\begin_inset Formula \( \:  \)
+\end_inset 
+
+
+\newline 
+
+\begin_inset Formula \( \qquad  \)
+\end_inset 
+
+
+\begin_inset Formula \( \qquad  \)
+\end_inset 
+
+
+\begin_inset Formula \( \quad  \)
+\end_inset 
+
+
+\begin_inset Formula \( {\cal M}^{m}_{l} \)
+\end_inset 
+
+
+\begin_inset Formula \( \qquad  \)
+\end_inset 
+
+
+\begin_inset Formula \( \qquad  \)
+\end_inset 
+
+
+\begin_inset Formula \( \quad  \)
+\end_inset 
+
+
+\newline 
+4
+\newline 
+0
+\newline 
+0.3095492436410130D+01
+\newline 
+4
+\newline 
+0
+\newline 
+0.8832776225626217D+00 
+\newline 
+
+\newline 
+4
+\newline 
+0.1547746218205053D+02
+\newline 
+
+\newline 
+3
+\newline 
+0.3122857982921809D+01 
+\newline 
+6
+\newline 
+0
+\newline 
+0.4796724494609411D+01
+\newline 
+6
+\newline 
+0
+\newline 
+-0.3501580359498343D+02
+\newline 
+
+\newline 
+4
+\newline 
+-0.3357707146226664D+02
+\newline 
+
+\newline 
+3
+\newline 
+0.4332984629874099D+02
+\newline 
+
+\newline 
+
+\newline 
+
+\newline 
+
+\newline 
+6
+\newline 
+-0.6740542192034350D+03
+\newline 
+8
+\newline 
+0
+\newline 
+0.4276164638449980D+03
+\newline 
+8
+\newline 
+0
+\newline 
+0.1394780314659910D+03
+\newline 
+
+\newline 
+4
+\newline 
+0.4276164638450001D+03 
+\newline 
+
+\newline 
+3
+\newline 
+0.4931293093807656D+03
+\newline 
+
+\newline 
+8
+\newline 
+0.2779507014992490D+05 
+\newline 
+
+\newline 
+6
+\newline 
+0.4931293093807656D+03
+\newline 
+10
+\newline 
+0
+\newline 
+0.3337055302939225D+04
+\newline 
+10
+\newline 
+0
+\newline 
+0.1760026471909184D+03
+\newline 
+
+\newline 
+4
+\newline 
+-0.7341521666466320D+04
+\newline 
+
+\newline 
+3
+\newline 
+0.3422448296725441D+02
+\newline 
+
+\newline 
+8
+\newline 
+-0.1248058683299270D+06
+\newline 
+
+\newline 
+6
+\newline 
+-0.5324080077525265D+03
+\newline 
+
+\newline 
+
+\newline 
+
+\newline 
+
+\newline 
+9
+\newline 
+0.1105450799842411D+05
+\newline 
+12
+\newline 
+0
+\newline 
+0.3533770670774835D+06
+\newline 
+12
+\newline 
+0
+\newline 
+0.3441656356582020D+06
+\newline 
+
+\newline 
+4
+\newline 
+0.2089749967040276D+06
+\newline 
+
+\newline 
+3
+\newline 
+-0.2988963294769746D+06
+\newline 
+
+\newline 
+8
+\newline 
+0.2086201911558935D+07
+\newline 
+
+\newline 
+6
+\newline 
+0.1981829408275373D+07
+\newline 
+
+\newline 
+12
+\newline 
+0.3193240788535041D+09
+\newline 
+
+\newline 
+9
+\newline 
+0.1399645778709430D+07
+\newline 
+
+\newline 
+
+\newline 
+
+\newline 
+
+\newline 
+12
+\newline 
+0.4855992637030970D+09
+\newline 
+14
+\newline 
+0
+\newline 
+0.7186127463179821D+07
+\newline 
+14
+\newline 
+0
+\newline 
+-0.1057046901404442D+08
+\newline 
+
+\newline 
+4
+\newline 
+-0.9239306738374122D+07
+\newline 
+
+\newline 
+3
+\newline 
+-0.1094473082593862D+08
+\newline 
+
+\newline 
+8
+\newline 
+-0.5851560934303580D+08 
+\newline 
+
+\newline 
+6
+\newline 
+0.7172818259530190D+07
+\newline 
+
+\newline 
+12
+\newline 
+-0.2243098358149698D+10
+\newline 
+
+\newline 
+9
+\newline 
+0.1166548139252476D+09
+\newline 
+
+\newline 
+
+\newline 
+
+\newline 
+
+\newline 
+12
+\newline 
+-0.3299496399383880D+10
+\newline 
+16
+\newline 
+0
+\newline 
+0.1168988444587698D+10
+\newline 
+16
+\newline 
+0
+\newline 
+-0.1553204312146170D+09
+\newline 
+
+\newline 
+4
+\newline 
+0.5469289478144757D+09
+\newline 
+
+\newline 
+3
+\newline 
+0.2790914628186657D+09
+\newline 
+
+\newline 
+8
+\newline 
+0.2661931236843469D+10
+\newline 
+
+\newline 
+6
+\newline 
+0.1592904788101633D+10
+\newline 
+
+\newline 
+12
+\newline 
+0.5130698388451003D+11
+\newline 
+
+\newline 
+9
+\newline 
+0.9241099613788853D+10
+\newline 
+
+\newline 
+16
+\newline 
+0.1540161278003348D+14 
+\newline 
+
+\newline 
+12
+\newline 
+0.8723232135625955D+11 
+\newline 
+
+\newline 
+
+\newline 
+
+\newline 
+
+\newline 
+15
+\newline 
+0.3299919999077370D+10
+\end_float 
+\begin_float fig 
+\layout Caption
+
+
+\begin_inset LatexCommand \label{figure: SimCell}
+
+\end_inset 
+
+ Simulation cell and interior region.
+\layout Standard
+\align center 
+
+\begin_inset Figure size 370 360
+file UnitCell.eps
+flags 15
+
+\end_inset 
+
+
+\end_float 
+\begin_float fig 
+\layout Caption
+
+
+\begin_inset LatexCommand \label{figure: ReplicateCells}
+
+\end_inset 
+
+ Regions which contribute to the Coulomb Matrix
+\layout Standard
+\align center 
+
+\begin_inset Figure size 400 360
+file RepCell.eps
+flags 15
+
+\end_inset 
+
+
+\end_float 
+\layout Standard
+
+\begin_float fig 
+\layout Caption
+
+
+\begin_inset LatexCommand \label{figure: ErrorPFF}
+
+\end_inset 
+
+ Error in the Periodic Far Field Approximation with increasing inner box
+ size
+\layout Standard
+\align center 
+
+\begin_inset Figure size 654 470
+file ErrorPFF_InnerBox.eps
+width 3 110.00
+flags 15
+
+\end_inset 
+
+
+\end_float 
+\begin_float fig 
+\layout Caption
+
+
+\begin_inset LatexCommand \label{figure:DenseNitrogen}
+
+\end_inset 
+
+ Iso-surface potential of a 100 molecule Dense Nitrogen system
+\layout Standard
+\align center 
+
+\begin_inset Figure size 476 420
+file N2.eps
+width 3 80.00
+height 3 50.00
+flags 15
+
+\end_inset 
+
+
+\end_float 
+\begin_float fig 
+\layout Caption
+
+
+\begin_inset LatexCommand \label{figure: Scaling_Matrix_Build}
+
+\end_inset 
+
+ Scaling Results for the matrix builds 
+\begin_inset Formula \( J_{QCTC} \)
+\end_inset 
+
+ and 
+\begin_inset Formula \( K_{xc} \)
+\end_inset 
+
+ for the dense molecular nitrogen periodic system.
+\end_float 
+\begin_float fig 
+\layout Caption
+
+
+\begin_inset LatexCommand \label{figure:Scaling_Diag}
+
+\end_inset 
+
+ Scaling results for the overlap matrix inverter and the density matrix
+ solver.
+ 
+\end_float 
+\begin_float fig 
+\layout Caption
+
+
+\begin_inset LatexCommand \label{figure: Iso_zeolite}
+
+\end_inset 
+
+ Iso-surface plot of zeolite.
+\end_float 
+\the_end
