@@ -739,9 +739,16 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_,Needs_]:=Block[{WS,LBra,LKe
            WS["      FPQx = PQx*PBC%InvBoxSh%D(1,1)+PQy*PBC%InvBoxSh%D(1,2)+PQz*PBC%InvBoxSh%D(1,3)"];
            WS["      FPQy = PQy*PBC%InvBoxSh%D(2,2)+PQz*PBC%InvBoxSh%D(2,3)"];
            WS["      FPQz = PQz*PBC%InvBoxSh%D(3,3)"];
-           WS["      IF(PBC%AutoW%I(1)==1) FPQx = FPQx-ANINT(ANINT(FPQx*1d9)*1d-9)"];
+
+           WS["      IF(PBC%AutoW%I(1)==1) FPQx=FPQx-DNINT(FPQx-SIGN(1.D0,FPQx)*1.D-14)"];
+           WS["      IF(PBC%AutoW%I(2)==1) FPQy=FPQy-DNINT(FPQy-SIGN(1.D0,FPQy)*1.D-14)"];
+           WS["      IF(PBC%AutoW%I(3)==1) FPQz=FPQz-DNINT(FPQz-SIGN(1.D0,FPQz)*1.D-14)"];
+
+(*         WS["      IF(PBC%AutoW%I(1)==1) FPQx = FPQx-ANINT(ANINT(FPQx*1d9)*1d-9)"];
            WS["      IF(PBC%AutoW%I(2)==1) FPQy = FPQy-ANINT(ANINT(FPQy*1d9)*1d-9)"];
-           WS["      IF(PBC%AutoW%I(3)==1) FPQz = FPQz-ANINT(ANINT(FPQz*1d9)*1d-9)"];
+           WS["      IF(PBC%AutoW%I(3)==1) FPQz = FPQz-ANINT(ANINT(FPQz*1d9)*1d-9)"]; *)
+
+
 (*           WS["     IF(PBC%AutoW%I(1)==1) THEN"];
            WS["         Dum = FPQx-ANINT(FPQx)"];
            WS["         IF(ABS(Dum)-0.5d0 > 1d-10) FPQx = Dum"];
@@ -753,10 +760,10 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_,Needs_]:=Block[{WS,LBra,LKe
            WS["     IF(PBC%AutoW%I(3)==1) THEN"];
            WS["         Dum = FPQz-ANINT(FPQz)"];
            WS["         IF(ABS(Dum)-0.5d0 > 1d-10) FPQz = Dum"];
-           WS["     ENDIF"];
+           WS["     ENDIF"]; *)
            WS["      PQx  = FPQx*PBC%BoxShape%D(1,1)+FPQy*PBC%BoxShape%D(1,2)+FPQz*PBC%BoxShape%D(1,3)"];
            WS["      PQy  = FPQy*PBC%BoxShape%D(2,2)+FPQz*PBC%BoxShape%D(2,3)"];
-           WS["      PQz  = FPQz*PBC%BoxShape%D(3,3)"];*)
+           WS["      PQz  = FPQz*PBC%BoxShape%D(3,3)"];
            WS["!"];
 
 

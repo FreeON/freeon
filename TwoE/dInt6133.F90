@@ -721,9 +721,12 @@
             FPQx = PQx*PBC%InvBoxSh%D(1,1)+PQy*PBC%InvBoxSh%D(1,2)+PQz*PBC%InvBoxSh%D(1,3)
             FPQy = PQy*PBC%InvBoxSh%D(2,2)+PQz*PBC%InvBoxSh%D(2,3)
             FPQz = PQz*PBC%InvBoxSh%D(3,3)
-            IF(PBC%AutoW%I(1)==1) FPQx = FPQx-ANINT(ANINT(FPQx*1d9)*1d-9)
-            IF(PBC%AutoW%I(2)==1) FPQy = FPQy-ANINT(ANINT(FPQy*1d9)*1d-9)
-            IF(PBC%AutoW%I(3)==1) FPQz = FPQz-ANINT(ANINT(FPQz*1d9)*1d-9)
+            IF(PBC%AutoW%I(1)==1) FPQx=FPQx-DNINT(FPQx-SIGN(1.D0,FPQx)*1.D-14)
+            IF(PBC%AutoW%I(2)==1) FPQy=FPQy-DNINT(FPQy-SIGN(1.D0,FPQy)*1.D-14)
+            IF(PBC%AutoW%I(3)==1) FPQz=FPQz-DNINT(FPQz-SIGN(1.D0,FPQz)*1.D-14)
+            PQx  = FPQx*PBC%BoxShape%D(1,1)+FPQy*PBC%BoxShape%D(1,2)+FPQz*PBC%BoxShape%D(1,3)
+            PQy  = FPQy*PBC%BoxShape%D(2,2)+FPQz*PBC%BoxShape%D(2,3)
+            PQz  = FPQz*PBC%BoxShape%D(3,3)
       !
             WPx = -Eta*PQx*r1xZpE
             WPy = -Eta*PQy*r1xZpE

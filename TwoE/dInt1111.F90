@@ -2,7 +2,7 @@
 ! COMPUTES THE INTEGRAL CLASS (S S|S S) 
 ! ---------------------------------------------------------- 
    SUBROUTINE dInt1111(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, & 
-                              OA,LDA,OB,LDB,OC,LDC,OD,LDD,GOA,GOB,GOC,GOD,NINT,PBC,dI) 
+                              OA,LDA,OB,LDB,OC,LDC,OD,LDD,GOA,GOB,GOC,GOD,NINT,PBC,dI)!,dII) 
       USE DerivedTypes
       USE VScratch
       USE GlobalScalars
@@ -14,7 +14,7 @@
       REAL(DOUBLE)   :: PrmBufB(7,LBra),PrmBufK(7,LKet)
       TYPE(SmallAtomInfo) :: ACInfo,BDInfo
       TYPE(PBCInfo) :: PBC
-      REAL(DOUBLE) :: dI(NINT,12)
+      REAL(DOUBLE) :: dI(NINT,12)!,dII(*)
       REAL(DOUBLE)  :: Zeta,Eta,r1xZpE,HfxZpE,r1x2E,r1x2Z,ExZpE,ZxZpE,Omega,Up,Uq,Upq
       REAL(DOUBLE)  :: Ax,Ay,Az,Bx,By,Bz,Cx,Cy,Cz,Dx,Dy,Dz,Qx,Qy,Qz,Px,Py,Pz
       REAL(DOUBLE)  :: QCx,QCy,QCz,PAx,PAy,PAz,PQx,PQy,PQz,WPx,WPy,WPz,WQx,WQy,WQz   
@@ -108,11 +108,9 @@
             FPQx = PQx*PBC%InvBoxSh%D(1,1)+PQy*PBC%InvBoxSh%D(1,2)+PQz*PBC%InvBoxSh%D(1,3)
             FPQy = PQy*PBC%InvBoxSh%D(2,2)+PQz*PBC%InvBoxSh%D(2,3)
             FPQz = PQz*PBC%InvBoxSh%D(3,3)
-
-            IF(PBC%AutoW%I(1)==1) FPQx = FPQx-ANINT(ANINT(FPQx*1d9)*1d-9)
-            IF(PBC%AutoW%I(2)==1) FPQy = FPQy-ANINT(ANINT(FPQy*1d9)*1d-9)
-            IF(PBC%AutoW%I(3)==1) FPQz = FPQz-ANINT(ANINT(FPQz*1d9)*1d-9)
-
+            IF(PBC%AutoW%I(1)==1) FPQx=FPQx-DNINT(FPQx-SIGN(1.D0,FPQx)*1.D-14)
+            IF(PBC%AutoW%I(2)==1) FPQy=FPQy-DNINT(FPQy-SIGN(1.D0,FPQy)*1.D-14)
+            IF(PBC%AutoW%I(3)==1) FPQz=FPQz-DNINT(FPQz-SIGN(1.D0,FPQz)*1.D-14)
             PQx  = FPQx*PBC%BoxShape%D(1,1)+FPQy*PBC%BoxShape%D(1,2)+FPQz*PBC%BoxShape%D(1,3)
             PQy  = FPQy*PBC%BoxShape%D(2,2)+FPQz*PBC%BoxShape%D(2,3)
             PQz  = FPQz*PBC%BoxShape%D(3,3)
@@ -149,6 +147,8 @@
       I1Bar3=RawI1Bar3+I1Bar3
       RawI1Bar4=AuxR0*QCz+AuxR1*WQz
       I1Bar4=RawI1Bar4+I1Bar4
+
+
             Ia4Bar1=Ia4Bar1+Alpha*RawI4Bar1
             Ia3Bar1=Ia3Bar1+Alpha*RawI3Bar1
             Ia2Bar1=Ia2Bar1+Alpha*RawI2Bar1
@@ -159,6 +159,8 @@
             Ic1Bar4=Ic1Bar4+Gamma*RawI1Bar4
             Ic1Bar3=Ic1Bar3+Gamma*RawI1Bar3
             Ic1Bar2=Ic1Bar2+Gamma*RawI1Bar2
+
+
          ENDDO ! (M0| loop
       ENDDO ! |N0) loop
       ! HRR 
@@ -172,6 +174,9 @@
       W1=-Ia2Bar1-Ib2Bar1
       W2=-Ic1Bar2+dI(OffSet,CrtSet10)-V(1)
       dI(OffSet,CrtSet10)=W1+W2
+
+!dII(OffSet)=dII(OffSet)+ PBC%InvBoxSh%D(1,1)*((Ax-Dx)*Ia2Bar1 + (Cx-Dx)*Ic1Bar2 + (Bx-Dx)*(Ib2Bar1+V(1)))
+
       dI(OffSet,CrtSet2)=Ia3Bar1+dI(OffSet,CrtSet2)
       dI(OffSet,CrtSet5)=Ib3Bar1+dI(OffSet,CrtSet5)+V(2)
       dI(OffSet,CrtSet8)=Ic1Bar3+dI(OffSet,CrtSet8)
