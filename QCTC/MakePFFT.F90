@@ -43,9 +43,7 @@ PROGRAM MakePFFT
      CALL MondoHalt(0,'MaxELL > FFELL Halting in CalculatePFFT')
   ENDIF
 ! Calculate and Store the Tensors  
-  WRITE(*,*) 'Making Tensor'
   CALL CalculatePFFT(MaxEll,GM,Args)
-  WRITE(*,*) 'Done'
 ! Delete
   CALL Delete(GM)
   CALL Delete(Args)
