@@ -10,7 +10,6 @@ MODULE MondoPoles
    USE Thresholding 
    USE BoundingBox
    USE McMurchie
-   USE Globals
    IMPLICIT NONE
 !=================================================================================================
 !  Hierarchical density node
@@ -474,7 +473,7 @@ MODULE MondoPoles
              Line='L = '//TRIM(IntToChar(L))//' M = '//TRIM(IntToChar(M)) &
                   //' Cq = '//TRIM(DblToShrtChar(Cpp)) &
                   //' Sq = '//TRIM(DblToShrtChar(Spp))
-             WRITE(*,*)TRIM(Line)
+             WRITE(*,*) TRIM(Line)
           ENDDO
        ENDDO
     ELSEIF(IPre == 1) THEN
@@ -502,7 +501,9 @@ MODULE MondoPoles
              Line='L = '//TRIM(IntToChar(L))//' M = '//TRIM(IntToChar(M)) &
                   //' Cq = '//TRIM(DblToChar(Cpp)) &
                   //' Sq = '//TRIM(DblToChar(Spp))
-             WRITE(*,*)TRIM(Line)
+             IF(.NOT. (Cpp == Zero .AND. Spp == Zero)) THEN
+                WRITE(*,*)TRIM(Line)
+             ENDIF
           ENDDO
        ENDDO
     ENDIF
