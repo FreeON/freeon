@@ -1,3 +1,354 @@
+2003-01-14 13:53  mchalla
+
+	* MondoMods/Makefile: Oopps, debug was on.
+
+2003-01-14 13:52  mchalla
+
+	* Validate/MgO.inp: fixed guess.
+
+2003-01-14 13:10  mchalla
+
+	* Includes/Suffixes: Ok, now problem with CPPINCLUDE is fixed.
+
+2003-01-14 12:59  mchalla
+
+	* Includes/Suffixes: Now includes CPP directives in C compiler
+	flags.
+
+2003-01-14 12:57  mchalla
+
+	* ONX/NONX/ONX_PBC_1.F90: Changed to support the new front end. 
+	Currently untested!!!
+
+2003-01-14 12:56  mchalla
+
+	* SCFeqs/: DIIS.F90, RHeqs.F90, SCFStatus.F90: Modified to support
+	the new front end.  In particular extensive tagging of quantities
+	like the exchange energy etc has been removed. Activate with
+	-DPARALLEL_CLONES
+
+2003-01-14 12:54  mchalla
+
+	* HiCu/: CubeTree.F90, HiCu.F90, ParaHiCu.F90, XCForce.F90:
+	Modified to support the new front end.	Activate with
+	-DPARALLEL_CLONES
+
+2003-01-14 12:53  mchalla
+
+	* OneE/: MakeRho.F90, MakeS.F90, MakeT.F90, ParaMakeRho.F90,
+	SForce.F90, TForce.F90: Updated to support new front end.  Activate
+	with -DPARALLEL_CLONES
+
+2003-01-14 12:52  mchalla
+
+	* QCTC/: JForce.F90, JGen.F90, MakePFFT.F90, Makefile,
+	PBCFarField.F90, PFFTensor.F90, QCTC.F90: Updated to support the
+	new front end.	Activate with -DPARALLEL_CLONES.  The paradigm is
+	moving towards a single set of lattice vectors (cellset) for each
+	basis set and cell shape, not every geometry!!!
+
+2003-01-14 12:49  mchalla
+
+	* MondoMods/: AtomPairs.F90, DerivedTypes.F90, FastMat.F90,
+	GlobalScalars.F90, InOut.F90, Macros.F90, MatFunk.F90, MemMan.F90,
+	MondoMPI.F90, PBC.F90, Parse.F90, PrettyPrint.F90,
+	ProcessControl.F90: Modified to support new front end in MondoSCF2
+	(use -DPARALLEL_CLONES to activate)
+
+2003-01-14 12:42  mchalla
+
+	* MondoSCF2/: ControlStructures.F90, Makefile, Massage.F90,
+	MgO.inp, Optimizer.F90, Overlay.F90, ParseInput.F90,
+	ParseParallel.F90, ParsePeriodic.F90, PeriodicKeys.F90,
+	PunchHDF.F90, SCFs.F90, Water.inp, Water_clones.inp: [no log
+	message]
+
+2003-01-10 12:56  mchalla
+
+	* MondoSCF2/: ControlStructures.F90, Macros.F90, Makefile,
+	MondoSCF.F90, Optimizer.F90, Overlay.F90, ParallelKeys.F90,
+	ParseBasis.F90, ParseGeometries.F90, ParseInput.F90,
+	ParseParallel.F90, ParsePeriodic.F90, PunchHDF.F90, SCFs.F90: [no
+	log message]
+
+2003-01-04 16:04  mchalla
+
+	* MondoSCF2/: ControlStructures.F90, Convergence.F90,
+	GeometryKeys.F90, GetPID.C, Macros.F90, Makefile, Massage.F90,
+	MgO.inp, MondoSCF.F90, Optimizer.F90, OptionKeys.F90, Overlay.F90,
+	ParallelKeys.F90, ParseBasis.F90, ParseCommands.F90,
+	ParseDynamics.F90, ParseGeometries.F90, ParseInput.F90,
+	ParseOptimiser.F90, ParseOptions.F90, ParseParallel.F90,
+	ParsePeriodic.F90, PeriodicKeys.F90, PrintParsed.F90, PunchHDF.F90,
+	SCFKeys.F90, SCFs.F90, Spawn.C, Thresholds.F90, Water.inp,
+	ZippyQuote.F90: New front end, with a few example files of the new
+	input format.
+
+2002-12-19 22:15  nemeth
+
+	* MondoSCF/GeomOpt.F90: False threshold reading for mm fixed.
+
+2002-12-19 22:03  nemeth
+
+	* MondoSCF/GeomOpt.F90: [no log message]
+
+2002-12-19 22:00  nemeth
+
+	* MondoSCF/ParseInput.F90: Additional options for geometry parsing:
+	NoRotOff, NoTranslOff.
+
+2002-12-19 19:25  nemeth
+
+	* MondoSCF/ParsingKeys.F90: New keys for GeomOpt added.
+
+2002-12-19 19:14  nemeth
+
+	* MondoMods/InCoords.F90: Some experimentation with GDIIS.
+
+2002-12-19 19:11  nemeth
+
+	* MondoMods/DerivedTypes.F90: Some new keys added to GeOpCtrl.
+
+2002-12-19 16:53  tymczak
+
+	* Docs/DSAndErrorEstimates/: DSEE.lyx, DSEE.ps, DSEE.tex,
+	Error_AllNodes_Water512.dat, Error_AllNodes_Water512.ps,
+	Error_vs_TauMAC_bin_Water512.dat, Error_vs_TauMAC_Water512.dat,
+	Error_vs_TauMAC_bin_Water512.ps, Error_vs_TauMAC_Water512.ps: New
+	Version
+
+2002-12-19 16:51  tymczak
+
+	* Docs/PBC_paper/Timing_sto3g_321g.ps: [no log message]
+
+2002-12-19 16:50  tymczak
+
+	* Docs/PBC_paper/: LinearPBCMethod.lyx, LinearPBCMethod.ps,
+	LinearPBCMethod.tex, PFFMultipoles_water.dat: New Version
+
+2002-12-17 17:29  nemeth
+
+	* MondoSCF/GeomOpt.F90: Projecting out rotations and translations
+	from cartesian gradients and displacements. Mostly important for
+	optimization in Cartesian PBC optimization.
+
+2002-12-17 16:57  nemeth
+
+	* MondoSCF/GeomOpt.F90: [no log message]
+
+2002-12-17 14:37  ckgan
+
+	* MondoMods/InOut.F90: No Bcast for Get_Chr_vect.
+
+2002-12-17 13:25  nemeth
+
+	* MondoMods/InCoords.F90: Periodic fixed with new optimizer.
+
+2002-12-16 23:46  nemeth
+
+	* MondoSCF/GeomOpt.F90: [no log message]
+
+2002-12-16 23:45  nemeth
+
+	* MondoMods/InCoords.F90: Periodics with GDIIS and stpdesc in
+	Cartesian OK.
+
+2002-12-16 17:59  nemeth
+
+	* MondoMods/InCoords.F90: Fixed MAX(arg1,arg2,arg3) and getting
+	intc when nintc==0.
+
+2002-12-16 17:45  nemeth
+
+	* MondoSCF/MDIO.F90: 0.0.0D0 has been changed to 0.0D0
+
+2002-12-16 17:37  tymczak
+
+	* QCTC/PBCFarField.F90: Fixed a bug with the FarField Contraction
+
+2002-12-16 17:34  tymczak
+
+	* QCTC/NukE.F90: Ghost Functions
+
+2002-12-16 17:33  tymczak
+
+	* QCTC/MondoPoles.F90: New Unsold1 and FudgeFactorial
+
+2002-12-16 17:31  tymczak
+
+	* QCTC/PoleTree.F90: New Unsold1 is implimented
+
+2002-12-16 17:30  tymczak
+
+	* QCTC/MakePFFT.F90: [no log message]
+
+2002-12-16 17:29  tymczak
+
+	* QCTC/JForce.F90: Fixed some Bugs in MMech Stuff
+
+2002-12-16 15:08  nemeth
+
+	* Validate/: Water-intc.inp, Water-intc.ref: [no log message]
+
+2002-12-16 13:45  nemeth
+
+	* Validate/bALAmm-constr.ref: [no log message]
+
+2002-12-16 12:44  nemeth
+
+	* MondoSCF/GeomOpt.F90: [no log message]
+
+2002-12-16 12:31  nemeth
+
+	* Validate/bALAmm-constr.inp: [no log message]
+
+2002-12-16 11:26  nemeth
+
+	* MondoMods/InOut.F90: Modification in get_intc.
+
+2002-12-15 01:05  nemeth
+
+	* QCTC/QCTC.F90, MondoMods/PrettyPrint.F90: [no log message]
+
+2002-12-15 00:41  nemeth
+
+	* QCTC/JForce.F90: Read appropriate rho for MM calculations.
+
+2002-12-15 00:40  nemeth
+
+	* OneE/MakeRho.F90: Read appropriate rho for MM calculation.
+
+2002-12-15 00:39  nemeth
+
+	* MondoSCF/ParseInput.F90: Do not check guess for MM calculation.
+
+2002-12-15 00:30  nemeth
+
+	* Validate/bALAmm.inp: [no log message]
+
+2002-12-15 00:30  nemeth
+
+	* Validate/bALAmm.ref: VeryTight optimization of bALA. Hopefully
+	it'll become even better as we go down the road...
+
+2002-12-14 19:36  nemeth
+
+	* QCTC/JForce.F90: [no log message]
+
+2002-12-14 19:24  nemeth
+
+	* MondoMods/InCoords.F90: [no log message]
+
+2002-12-14 18:04  nemeth
+
+	* MondoSCF/ParseInput.F90: [no log message]
+
+2002-12-14 16:54  nemeth
+
+	* MondoMods/InCoords.F90, MondoSCF/GeomOpt.F90: [no log message]
+
+2002-12-14 16:38  nemeth
+
+	* MondoSCF/ParsingKeys.F90, QCTC/JForce.F90: [no log message]
+
+2002-12-14 16:31  nemeth
+
+	* MondoSCF/: DrvSCFs.F90, GeomOpt.F90: [no log message]
+
+2002-12-14 16:25  nemeth
+
+	* MondoMods/SetEq.F90: set eq for intc introduced
+
+2002-12-14 16:24  nemeth
+
+	* MondoMods/PrettyPrint.F90: printing of pdb files changed
+
+2002-12-14 16:09  nemeth
+
+	* MondoMods/MemMan.F90: [no log message]
+
+2002-12-14 16:05  nemeth
+
+	* MondoMods/InOut.F90: crds type changed by adding two new arrays
+
+2002-12-14 15:57  nemeth
+
+	* MondoMods/InOut.F90: put_intc and get_intc modified.
+
+2002-12-14 15:23  nemeth
+
+	* MondoMods/InCoords.F90: [no log message]
+
+2002-12-14 15:01  nemeth
+
+	* MondoMods/DerivedTypes.F90: Modifications related to geometry
+	optimization. Two new arrays in CRDS to contain MM atom types and
+	atom names explicitely, now mainly for printing.
+
+2002-12-12 13:40  ckgan
+
+	* HiCu/ParaHiCu.F90: Solutions of bisection search is stored in an
+	array.
+
+2002-12-12 13:04  mchalla
+
+	* MondoMods/GlobalScalars.F90: Default HGEll and SPEll set to 5.
+
+2002-12-12 12:08  ckgan
+
+	* QCTC/PBCFarField.F90: Only MyID==ROOT can Print_Periodic. This is
+	to avoid binary output in *.out when lots of procs are used.
+
+2002-12-12 12:03  ckgan
+
+	* MondoMods/PrettyPrint.F90: Only MyID==ROOT can Print_CellSet.
+	This is to avoid binary output in *.out when lots of procs are
+	used.
+
+2002-12-12 11:58  tymczak
+
+	* ONX/NONX/Makefile_GAS_1: Backup of the Makefile for Gas Phase
+
+2002-12-12 11:44  ckgan
+
+	* MondoMods/InOut.F90: OnAll_O=.TRUE. for BcastBCSR. Needed for the
+	recent DBCSR changes in SForce.F90.
+
+2002-12-12 11:42  ckgan
+
+	* OneE/SForce.F90: DBCSR is used. Parallel matrix-matrix multiply
+	is used.
+
+2002-12-12 11:35  ckgan
+
+	* SCFeqs/DenMatMethods.F90: Undo the previous changes made by CJ.
+	DM_PARALLEL should not longer used.
+
+2002-12-12 11:24  tymczak
+
+	* SCFeqs/DenMatMethods.F90: There is a bug in the PARALLEL stuff
+	DenMatMethods.F90:
+	
+		IF(MyId==ROOT) &
+		   CALL SpectralBounds(F,Fmin,Fmax)
+	
+	is unprotected by ifdef's I rewrote it as
+	
+	#ifdef DM_PARALLEL	IF(MyId==ROOT) CALL
+	SpectralBounds(F,Fmin,Fmax) #else   CALL
+	SpectralBounds(F,Fmin,Fmax) #endif
+	
+	HOPE this is OK CJ
+
+2002-12-11 17:33  ckgan
+
+	* SCFeqs/DenMatMethods.F90: Remove MyId error for serial. A trivial
+	fix.
+
+2002-12-11 16:39  mchalla
+
+	* ChangeLog: [no log message]
+
 2002-12-11 16:37  mchalla
 
 	* QCTC/LibQCTC/: ERIGlobals.F90, Makefile: Big whoops in
@@ -108,6 +459,13 @@
 2002-12-04 15:11  mchalla
 
 	* Scripts/MondoSetUp: Use the new alpha dgemms.
+
+2002-12-04 15:10  mchalla
+
+	* PHiPAC/runs/Alpha/PHiPAC_dgemm/src/: Makefile, mm_double_NN_1.c,
+	mm_double_NN_c.c, mm_double_NT_1.c, mm_double_NT_c.c,
+	mm_double_TN_1.c, mm_double_TN_c.c, mm_double_TT_1.c,
+	mm_double_TT_c.c: New semi optimized dgemms.
 
 2002-12-04 14:31  nemeth
 
