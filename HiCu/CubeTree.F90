@@ -213,38 +213,45 @@ MODULE CubeTree
 #endif 
 !        Compute the exact cubature error for the density 
       END SUBROUTINE SplitCube
-#ifdef OLDSPLIT
+#ifdef NEWSPLIT
 !===============================================================================
-!    Matts old max split that tries to follow the largest integration error
+!    New max split that tries to follow the largest integration error
+!    if the cube aspect ratio isn't too bad
 !===============================================================================
-     FUNCTION MaxSplit(Cube) RESULT(ISplit)
-        TYPE(CubeNode), POINTER   :: Cube
-        REAL(DOUBLE),DIMENSION(3) :: DD,MaxVar
-        REAL(DOUBLE)              :: Q,MaxDir
-        INTEGER                   :: J,ISplit
-!--------------------------------------------------------------
-        IF(SUM(Cube%Box%Half(1:3))>1.D0)THEN
-           ISplit=MOD(Cube%Box%Tier,3)+1 
-        ELSE
-           Q=2.D0
-           DD=Zero
-           DO J=1,NGrid
-              DD(1)=MAX(DD(1),ABS(Cube%Vals(J,3)))
-              DD(2)=MAX(DD(2),ABS(Cube%Vals(J,4)))
-              DD(3)=MAX(DD(3),ABS(Cube%Vals(J,5)))
-           ENDDO
-           MaxDir=Zero
-           DO J=1,3
-              MaxVar(J)=DD(J)*(Two*Cube%Box%Half(J))**Q
-              MaxDir=MAX(MaxDir,MaxVar(J))
-           ENDDO
-           DO J=1,3         
-               IF(ABS(MaxDir-MaxVar(J))<1.D-8)THEN
-                  ISplit=J
-                  EXIT
-               ENDIF
-            ENDDO
-        ENDIF
+    FUNCTION MaxSplit(Cube) RESULT(ISplit)
+       TYPE(CubeNode), POINTER   :: Cube
+       REAL(DOUBLE)              :: MaxDim,MinDim,LinDim 
+       REAL(DOUBLE),DIMENSION(3) :: DD,MaxVar
+       REAL(DOUBLE)              :: Q,MaxDir
+       INTEGER                   :: I,J,ISplit
+       MaxDim = -1.0D0
+       MinDim =  1D10
+       DO I = 1, 3
+         LinDim = Cube%Box%BndBox(I,2)-Cube%Box%BndBox(I,1)
+         MinDim=MIN(MinDim,LinDim)
+         IF(LinDim > MaxDim) THEN
+           MaxDim = LinDim
+           ISplit = I
+         ENDIF
+       ENDDO
+       IF(MaxDim/MinDim>Three)RETURN
+       DD=Zero
+       DO J=1,NGrid
+          DD(1)=MAX(DD(1),ABS(Cube%Vals(J,3)))
+          DD(2)=MAX(DD(2),ABS(Cube%Vals(J,4)))
+          DD(3)=MAX(DD(3),ABS(Cube%Vals(J,5)))
+       ENDDO
+       MaxDir=Zero
+       DO J=1,3
+          MaxVar(J)=DD(J)*Cube%Box%Half(J)**2
+          MaxDir=MAX(MaxDir,MaxVar(J))
+       ENDDO
+       DO J=1,3         
+          IF(ABS(MaxDir-MaxVar(J))<1.D-8)THEN
+             ISplit=J
+             EXIT
+          ENDIF
+       ENDDO
      END FUNCTION MaxSplit
 #else
 !===============================================================================
