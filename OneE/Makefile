@@ -92,7 +92,7 @@ clean:
 	ln -s /dev/null core
 	ls -l
 #
-MakeU.o  : UBlok.o                $(MONDO_LIB)/libMondoMods.a
+#MakeU.o  : UBlok.o                $(MONDO_LIB)/libMondoMods.a
 MakeS.o  : SBlok.o                $(MONDO_LIB)/libMondoMods.a
 MakeT.o  : TBlok.o                $(MONDO_LIB)/libMondoMods.a
 MakeRho.o: RhoBlok.o  RhoTools.o  $(MONDO_LIB)/libMondoMods.a

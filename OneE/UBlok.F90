@@ -21,6 +21,15 @@ MODULE ECPBlock
        1, 5,10,10, 5, 1, 0,    &
        1, 6,15,20,15, 6, 1 /),(/7,7/))
   !---------------------------------------------------------------------
+  ! PARAMETERS FOR RADIAL INTEGRATION 
+    INTEGER,PARAMETER                         :: NPts=32
+    INTEGER,PARAMETER                         :: Infty=10
+    INTEGER                                   :: IPts,IWts
+    REAL(DOUBLE),PARAMETER                    :: Tau=1D-18
+    REAL(DOUBLE)                              :: Discriminator
+    REAL(DOUBLE),DIMENSION(1:NPts,1:Infty)    :: Points,Weights
+    REAL(DOUBLE),DIMENSION(1:NPts)            :: XA,XB,EX
+    INCLUDE "QQuad.Inc"
 CONTAINS  !
   FUNCTION UBlock(BS,GM,Pair) RESULT(UVck)
     TYPE(BSET)                              :: BS
@@ -43,16 +52,16 @@ CONTAINS  !
     ! Static work arrays; dimensions defined in MondoMods/GlobalScalars
     REAL(DOUBLE),DIMENSION(0:HGEll,1:HGLen) :: Omega1
     REAL(DOUBLE),DIMENSION(0:HGEll,0:HGEll+ECPEll) :: Keew1
-    REAL(DOUBLE),DIMENSION(0:PrjEll+BFEll,-PrjEll:PrjEll,1:BFLen) :: OmegaA,OmegaB
-    REAL(DOUBLE),DIMENSION(0:PrjEll+BFEll,0:PrjEll+BFEll,0:PrjEll+ECPEll) :: Keew2
+    REAL(DOUBLE),DIMENSION(0:2*PrjEll,0:BFEll+PrjEll,1:HGLen) :: OmegaA,OmegaB
+    REAL(DOUBLE),DIMENSION(0:PrjEll+BFEll,0:PrjEll+BFEll,0:HGEll+ECPEll) :: Keew2
     TYPE(DBL_RNK2) :: d
     !--------------------------------------------------------------------------------------------------
     KA   = Pair%KA
     KB   = Pair%KB
     NBFA = Pair%NA
     NBFB = Pair%NB
-    
-!    CALL New(d,(/NBFA,NBFB/))
+
+    CALL New(d,(/NBFA,NBFB/))
 
     Ax = Pair%A(1)
     Ay = Pair%A(2)
@@ -77,10 +86,11 @@ CONTAINS  !
           BCz=Bz-Cz
           AC2=(ACx**2+ACy**2+ACz**2)
           BC2=(BCx**2+BCy**2+BCz**2)
-          AC=SQRT(AC2)
-          BC=SQRT(BC2)
           ! Some testing of overlaps
+!          IF(AC2+BC2<AtomPairDistanceThreshold)THEN
           IF(.TRUE.)THEN
+             AC=SQRT(AC2)
+             BC=SQRT(BC2)
              ! Go over basis functions for this atom-atom blok
              DO CFA=1,BS%NCFnc%I(KA)           
                 IndexA=CFBlokDex(BS,CFA,KA)
@@ -97,105 +107,36 @@ CONTAINS  !
                       DO PFB=1,BS%NPFnc%I(CFB,KB)        
                          ZetaA=BS%Expnt%D(PFA,CFA,KA)
                          ZetaB=BS%Expnt%D(PFB,CFB,KB)
-                         ZetaAB=ZetaA+ZetaB
                          ZzAC2=ZetaA*AC2
                          ZzBC2=ZetaB*BC2
-                         Px=(zetaA*Ax+zetaB*Bx)/ZetaAB
-                         Py=(zetaA*Ay+zetaB*By)/ZetaAB
-                         Pz=(zetaA*Az+zetaB*Bz)/ZetaAB
-                         Kx=Px-Cx
-                         Ky=Py-Cy
-                         Kz=Pz-Cz
-                         Kappa=Two*ZetaAB*SQRT(Kx*Kx+Ky*Ky+Kz*Kz)
-                         Gauss=EXP(-ZzAC2-ZzBC2)
-                         ! Type one angular integrals, including 4 Pi and with mu terms summed
-                         CALL AngularOne(MaxLA+MaxLB,Kx,Ky,Kz,Omega1) 
-!                         WRITE(*,*)' Omega = ',Omega1(0:MaxLA+MaxLB,1:LenAB)
-                         ! Go over primitives in the unprojected, type one integrals
-                         DO PFC=1,BS%NTyp1PF%I(KC)
-                            ! Here is the type 1 primitive contraction coefficient,
-                            CC=BS%Typ1CCo%D(PFC,KC)
-                            ! the exponent, 
-                            ZetaC=BS%Typ1Exp%D(PFC,KC)
-                            ! and the radial "ell" value of the primitive Gaussian ECP
-                            ECPGL=BS%Typ1Ell%I(PFC,KC)
-!                            WRITE(*,33)'a',Ax,Ay,Az
-!                            WRITE(*,33)'b',Bx,By,Bz
-!                            WRITE(*,33)'c',Cx,Cy,Cz
-!                            WRITE(*,44)'A',ZetaA
-!                            WRITE(*,44)'B',ZetaB
-!                            WRITE(*,44)'C',ZetaC
-!                            WRITE(*,*)' EllC = ',ECPGL,';'
-!33                          format(1x,A1,' = {',F20.10,', ',F20.10,', ',F20.10,'};')
-!44                          format(1x,'Zeta',A1,' = ',F20.10,';')
-                            ! Compute type one radial integrals
-                            Alpha=ZetaA+ZetaB+ZetaC
-                            CALL RadialOne(MaxLA+MaxLB,MaxLA+MaxLB+ECPGL,Alpha,Kappa,ZzAC2+ZzBC2,Keew1)
-!                            WRITE(*,*)' Keew1 = ',Keew1(0:MaxLA+MaxLB,MaxLA+MaxLB+ECPGL)
-                            ! Go over basis function symmetries
-                            IA=IndexA
-                            DO LMNA=StartLA,StopLA
-                               LA=BS%LxDex%I(LMNA)
-                               MA=BS%LyDex%I(LMNA) 
-                               NA=BS%LzDex%I(LMNA)
-                               EllA=LA+MA+NA
-                               CA=BS%CCoef%D(LMNA,PFA,CFA,KA)
-                               IA=IA+1
-                               IB=IndexB
-                               DO LMNB=StartLB,StopLB
-                                  LB=BS%LxDex%I(LMNB)
-                                  MB=BS%LyDex%I(LMNB) 
-                                  NB=BS%LzDex%I(LMNB)
-                                  EllB=LB+MB+NB
-                                  CB=BS%CCoef%D(LMNB,PFB,CFB,KB)
-                                  IB=IB+1
+                         IF(ZzAC2+ZzBC2<2.D2)THEN !PrimPairDistanceThreshold)THEN
+!                         IF(.TRUE.)THEN
+                            ZetaAB=ZetaA+ZetaB
+                            Px=(zetaA*Ax+zetaB*Bx)/ZetaAB
+                            Py=(zetaA*Ay+zetaB*By)/ZetaAB
+                            Pz=(zetaA*Az+zetaB*Bz)/ZetaAB
+                            Kx=Px-Cx
+                            Ky=Py-Cy
+                            Kz=Pz-Cz
+                            Kappa=Two*ZetaAB*SQRT(Kx*Kx+Ky*Ky+Kz*Kz)
+                            Gauss=EXP(-ZzAC2-ZzBC2)
+                            ! Type one angular integrals, including 4 Pi and with mu terms summed
+                            CALL AngularOne(MaxLA+MaxLB,Kx,Ky,Kz,Omega1) 
+                            ! Go over primitives in the unprojected, type one integrals
+                            DO PFC=1,BS%NTyp1PF%I(KC)
+                               ! Here is the type 1 primitive contraction coefficient,
+                               CC=BS%Typ1CCo%D(PFC,KC)
+                               ! the exponent, 
+                               ZetaC=BS%Typ1Exp%D(PFC,KC)
+                               ! and the radial "ell" value of the primitive Gaussian ECP
+                               ECPGL=BS%Typ1Ell%I(PFC,KC)
 
-!                                  WRITE(*,*)'EllA = {',LA,', ',MA,', ',NA,'};'
-!                                  WRITE(*,*)'EllB = {',LB,', ',MB,', ',NB,'};'
+!IF(ZetaA==0.01D0.and.zetab==0.01D0)then
 
-                                  ECP(IA,IB)=ECP(IA,IB) &
-                                       +CA*CB*CC*ECPOneSum(LA,MA,NA,LB,MB,NB,ECPGL,         &
-                                        ACx,ACy,ACz,BCx,BCy,BCz,Omega1,Keew1) 
-
-!                                  TMP=ECPOneSum(LA,MA,NA,LB,MB,NB,ECPGL, &
-!                                       ACx,ACy,ACz,BCx,BCy,BCz,Omega1,Keew1) 
-!                                  WRITE(*,*)' Type1 = ',Tmp
-
-                               ENDDO
-                            ENDDO
-                         ENDDO
-!                         STOP
-                         ! Loop on ECP projector symmetries 
-                         DO ProjL=0,BS%ProjEll%I(KC)
-                            ! Go over primitives in the projected, type two integrals
-                            DO PFC=1,BS%NTyp2PF%I(ProjL,KC)                     
-                               ! Here is the type 2 primitive contraction coefficient,
-                               CC=BS%Typ2CCo%D(PFC,ProjL,KC)
-                               ! the corresponding exponent, 
-                               ZetaC=BS%Typ2Exp%D(PFC,ProjL,KC)     
-                               ! and the radial "ell" value of the ECP primitive 
-                               ECPGL=BS%Typ2Ell%I(PFC,ProjL,KC)
-                               ! Compute the type two radial integrals                            
+                               ! Compute type one radial integrals
                                Alpha=ZetaA+ZetaB+ZetaC
-                               KappaA=Two*ZetaA*AC
-                               KappaB=Two*ZetaB*BC
-
-!                            WRITE(*,33)'a',Ax,Ay,Az
-!                            WRITE(*,33)'b',Bx,By,Bz
-!                            WRITE(*,33)'c',Cx,Cy,Cz
-!                            WRITE(*,44)'A',ZetaA
-!                            WRITE(*,44)'B',ZetaB
-!                            WRITE(*,44)'C',ZetaC
-!                            WRITE(*,*)' EllC = ',ECPGL,';'
-!33                          format(1x,A1,' = {',F20.10,', ',F20.10,', ',F20.10,'};')
-!44                          format(1x,'Zeta',A1,' = ',F20.10,';')
-
-
-                               CALL RadialTwo(ProjL+MaxLA,ProjL+MaxLB,MaxLA+MaxLB+ECPGL, &
-                                    Alpha,ZzAC2,KappaA,ZzBC2,KappaB,Keew2) 
-                               ! Compute the type two angular integrals
-                               CALL AngularTwo(ProjL,MaxLA,KAx,KAy,KAz,OmegaA)
-                               CALL AngularTwo(ProjL,MaxLB,KBx,KBy,KBz,OmegaB)
+                               CALL RadialOne(MaxLA+MaxLB,MaxLA+MaxLB+ECPGL,Alpha,Kappa,ZzAC2+ZzBC2,Keew1)
+                               !                            WRITE(*,*)' Keew1 = ',Keew1(0:MaxLA+MaxLB,MaxLA+MaxLB+ECPGL)
                                ! Go over basis function symmetries
                                IA=IndexA
                                DO LMNA=StartLA,StopLA
@@ -213,18 +154,140 @@ CONTAINS  !
                                      EllB=LB+MB+NB
                                      CB=BS%CCoef%D(LMNB,PFB,CFB,KB)
                                      IB=IB+1
-                                     ECP(IA,IB)=ECP(IA,IB)+CA*CB*CC &
-                                         *ECPTwoSum(LA,MA,NA,LB,MB,NB,ProjL,ECPGL,   &
-                                          ACx,ACy,ACz,BCx,BCy,BCz,OmegaA,OmegaB,Keew2) 
+
+!IF(IA==3.AND.IB==1)THEN
+!                               WRITE(*,33)'a',Ax,Ay,Az
+!                               WRITE(*,33)'b',Bx,By,Bz
+!                               WRITE(*,33)'c',Cx,Cy,Cz
+!                               WRITE(*,44)'A',ZetaA
+!                               WRITE(*,44)'B',ZetaB
+!                               WRITE(*,44)'C',ZetaC
+!                               WRITE(*,*)' EllC = ',ECPGL,';'
+!33                             format(1x,A1,' = {',F20.10,', ',F20.10,', ',F20.10,'};')
+!44                             format(1x,'Zeta',A1,' = ',F20.10,';')
+!                                     WRITE(*,*)'EllA = {',LA,', ',MA,', ',NA,'};'
+!                                     WRITE(*,*)'EllB = {',LB,', ',MB,', ',NB,'};'
 !                                     WRITE(*,*)' CA = ',CA
 !                                     WRITE(*,*)' CB = ',CB
 !                                     WRITE(*,*)' CC = ',CC
-!                                     WRITE(*,*)' ECPTwoSum = ',ECPTwoSum(LA,MA,NA,LB,MB,NB,ProjL,ECPGL, &
-!                                           ACx,ACy,ACz,BCx,BCy,BCz,OmegaA,OmegaB,Keew2)
+!                                    WRITE(*,*)' LMNA = ',LA,MA,NA
+!                                    WRITE(*,*)' LMNB = ',LB,MB,NB
+                                     ECP(IA,IB)=ECP(IA,IB) &
+                                          +CA*CB*CC*ECPOneSum(LA,MA,NA,LB,MB,NB,ECPGL,         &
+                                          -ACx,-ACy,-ACz,-BCx,-BCy,-BCz,Omega1,Keew1) 
+
+!                                     Tmp=ECPOneSum(LA,MA,NA,LB,MB,NB,ECPGL,         &
+!                                          ACx,ACy,ACz,BCx,BCy,BCz,Omega1,Keew1) 
+!                                     WRITE(*,*)' ONESUM = ',Tmp*CA*CB*CC
+!ENDIF
+
+                                     IF(ABS(ECP(IA,IB))>1D3)THEN
+                                        WRITE(*,*)'1 ZZs = ',ZZAC2,ZZBC2
+                                        WRITE(*,*)' ECP = ',ECP(IA,IB)
+
+                                        WRITE(*,33)'a',Ax,Ay,Az
+                                        WRITE(*,33)'b',Bx,By,Bz
+                                        WRITE(*,33)'c',Cx,Cy,Cz
+                                        WRITE(*,44)'A',ZetaA
+                                        WRITE(*,44)'B',ZetaB
+                                        WRITE(*,44)'C',ZetaC
+                                        WRITE(*,*)' EllC = ',ECPGL,';'
+33                                      format(1x,A1,' = {',F20.10,', ',F20.10,', ',F20.10,'};')
+44                                      format(1x,'Zeta',A1,' = ',F20.10,';')
+                                        WRITE(*,*)'EllA = {',LA,', ',MA,', ',NA,'};'
+                                        WRITE(*,*)'EllB = {',LB,', ',MB,', ',NB,'};'
+
+                                        STOP
+                                     ENDIF
+
+
+!                                     TMP=ECPOneSum(LA,MA,NA,LB,MB,NB,ECPGL, &
+!                                          ACx,ACy,ACz,BCx,BCy,BCz,Omega1,Keew1) 
+!                                     WRITE(*,*)' CA = ',CA
+!                                     WRITE(*,*)' CB = ',CB
+!                                     WRITE(*,*)' CC = ',CC
+!                                     WRITE(*,*)' Type1 = ',Tmp,TMP*CA*CB*CC
+                                     
                                   ENDDO
                                ENDDO
+!                               ENDIF
                             ENDDO
-                         ENDDO
+                            !                         STOP
+                            ! Loop on ECP projector symmetries 
+                            DO ProjL=0,BS%ProjEll%I(KC)
+                               ! Go over primitives in the projected, type two integrals
+                               DO PFC=1,BS%NTyp2PF%I(ProjL,KC)                     
+                                  ! Here is the type 2 primitive contraction coefficient,
+                                  CC=BS%Typ2CCo%D(PFC,ProjL,KC)
+                                  ! the corresponding exponent, 
+                                  ZetaC=BS%Typ2Exp%D(PFC,ProjL,KC)     
+                                  ! and the radial "ell" value of the ECP primitive 
+                                  ECPGL=BS%Typ2Ell%I(PFC,ProjL,KC)
+                                  ! Compute the type two radial integrals                            
+                                  Alpha=ZetaA+ZetaB+ZetaC
+                                  ! Gaussian prefactor check
+                                  KappaA=Two*ZetaA*AC
+                                  KappaB=Two*ZetaB*BC
+#ifdef MAXDEBUG2
+                                  IF(ZetaA==1D-1.AND.ZetaB==1D-1.AND.CC>1D-10)THEN !.AND.ZetaC==1D-1)THEN
+                                   WRITE(*,33)'a',Ax,Ay,Az
+                                   WRITE(*,33)'b',Bx,By,Bz
+                                   WRITE(*,33)'c',Cx,Cy,Cz
+                                   WRITE(*,44)'A',ZetaA
+                                   WRITE(*,44)'B',ZetaB
+                                   WRITE(*,44)'C',ZetaC
+                                   WRITE(*,*)' EllC = ',ECPGL,';'
+!                                  33 format(1x,A1,' = {',F20.10,', ',F20.10,', ',F20.10,'};')
+!                                  44 format(1x,'Zeta',A1,' = ',F20.10,';')
+#endif
+                                  CALL RadialTwo(CC,ProjL+MaxLA,ProjL+MaxLB,MaxLA+MaxLB+ECPGL, &
+                                       Alpha,ZzAC2,KappaA,ZzBC2,KappaB,Keew2) 
+                                   ! Compute the type two angular integrals
+                                  CALL AngularTwo(ProjL,MaxLA,ACx,ACy,ACz,OmegaA)
+                                  CALL AngularTwo(ProjL,MaxLB,BCx,BCy,BCz,OmegaB)
+                                  ! Go over basis function symmetries
+                                  IA=IndexA
+                                  DO LMNA=StartLA,StopLA
+                                     LA=BS%LxDex%I(LMNA)
+                                     MA=BS%LyDex%I(LMNA) 
+                                     NA=BS%LzDex%I(LMNA)
+                                     EllA=LA+MA+NA
+                                     CA=BS%CCoef%D(LMNA,PFA,CFA,KA)
+                                     IA=IA+1
+                                     IB=IndexB
+                                     DO LMNB=StartLB,StopLB
+                                        LB=BS%LxDex%I(LMNB)
+                                        MB=BS%LyDex%I(LMNB) 
+                                        NB=BS%LzDex%I(LMNB)
+                                        EllB=LB+MB+NB
+                                        CB=BS%CCoef%D(LMNB,PFB,CFB,KB)
+                                        IB=IB+1
+#ifdef MAXDEBUG2
+                                        WRITE(*,*)'EllA = {',LA,', ',MA,', ',NA,'};'
+                                        WRITE(*,*)'EllB = {',LB,', ',MB,', ',NB,'};'
+                                        WRITE(*,*)' CA = ',CA
+                                        WRITE(*,*)' CB = ',CB
+                                        WRITE(*,*)' CC = ',CC
+#endif
+                                        ECP(IA,IB)=ECP(IA,IB)+CA*CB*CC &
+                                             *ECPTwoSum(CC,  LA,MA,NA,LB,MB,NB,ProjL,ECPGL,   &
+                                             -ACx,-ACy,-ACz,-BCx,-BCy,-BCz,OmegaA,OmegaB,Keew2) 
+                                        
+                                        IF(ABS(ECP(IA,IB))>1D4)THEN
+                                           WRITE(*,*)' CCC = ',CA*CB*CC
+                                           WRITE(*,*)'2 ZZs = ',ZZAC2,ZZBC2
+                                           STOP
+                                        ENDIF
+
+!                                        Tmp=ECPTwoSum(CC,  LA,MA,NA,LB,MB,NB,ProjL,ECPGL,   &
+!                                             -ACx,-ACy,-ACz,-BCx,-BCy,-BCz,OmegaA,OmegaB,Keew2) 
+!                                        WRITE(*,*)IA,IB,' twosum = ',tmp,ECP(IA,IB)
+                                     ENDDO
+                                  ENDDO
+!                                  ENDIF
+                               ENDDO
+                            ENDDO
+                         ENDIF
                       ENDDO
                    ENDDO
                 ENDDO
@@ -233,10 +296,16 @@ CONTAINS  !
        ENDIF
     ENDDO
     
-!    D%d=ECP
-!    CALL PPrint(d,"D",Unit_O=6)
-!    CALL Delete(D)
-!   STOP
+    D%d=ECP
+    DO Ia=1,Pair%NA
+       DO ib=1,Pair%NB
+          IF(ABS(D%D(Ia,ib))<1D-6)ECP(ia,ib)=0
+       ENDDO
+    ENDDO
+   
+    CALL PPrint(d,"D",Unit_O=6)
+    CALL Delete(D)
+!    STOP
     UVck = BlockToVect(Pair%NA,Pair%NB,ECP)
   END FUNCTION UBlock
 
@@ -245,7 +314,7 @@ CONTAINS  !
          ProjL,Emm,Lambda,LambdaA,LambdaB,AlphabetL, &
          a,b,c,d,e,f,ABCDEF, lll,vvv
     REAL(DOUBLE) :: ACx,ACy,ACz,BCx,BCy,BCz,V1, &
-         BinA,BinB,BinC,BinD,BinE,BinF
+         BinA,BinB,BinC,BinD,BinE,BinF,Prim
     REAL(DOUBLE),DIMENSION(0:,1:) :: O
     REAL(DOUBLE),DIMENSION(0:,0:) :: Q
 
@@ -266,31 +335,34 @@ CONTAINS  !
     V1=Zero
     EllAB=LA+MA+NA+LB+MB+NB
     DO a=0,LA
-       BinA=ACx**(LA-a)*Binomial(LA,a)
+       BinA=ACx**(LA-a)*Binomial(a,LA)
        DO b=0,MA
-          BinB=BinA*ACy**(MA-b)*Binomial(MA,b)
+          BinB=BinA*ACy**(MA-b)*Binomial(b,MA)
           DO c=0,NA
-             BinC=BinB*ACz**(NA-c)*Binomial(NA,c)
+             BinC=BinB*ACz**(NA-c)*Binomial(c,NA)
              DO d=0,LB
-                BinD=BinC*BCx**(LB-d)*Binomial(LB,d)
+                BinD=BinC*BCx**(LB-d)*Binomial(d,LB)
                 DO e=0,MB
-                   BinE=BinD*BCy**(MB-e)*Binomial(MB,e)
+                   BinE=BinD*BCy**(MB-e)*Binomial(e,MB)
                    DO f=0,NB
-                      BinF=BinE*BCz**(NB-f)*Binomial(NB,f)
+                      BinF=BinE*BCz**(NB-f)*Binomial(f,NB)
                       ! All the funny indexing ...
                       AlphabetL=a+b+c+d+e+f+ECPGL
                       ABCDEF=LMNDex(a+d,b+e,c+f)
                       !->
                       DO Lambda=0,EllAB
                          V1=V1+BinF*Q(Lambda,AlphabetL)*O(Lambda,ABCDEF)
-!IF(LA==LB)THEN
+                         Prim=BinF*Q(Lambda,AlphabetL)*O(Lambda,ABCDEF)
+!IF(ABS(Prim)>1D-10)THEN
+!IF(LA+MA+NA==0.AND.NB==1.AND.ABS(Prim)>1D-10)THEN
+!                         WRITE(*,*)' abcdef = ',a,b,c,d,e,f   
 !                         WRITE(*,*)Lambda,AlphabetL,ABCDEF
 !                         WRITE(*,*)' BinF = ',BinF 
 !                         WRITE(*,*)' O = ',O(Lambda,ABCDEF)
 !                         WRITE(*,*)' Q = ',Q(Lambda,AlphabetL)
 !ENDIF
                       ENDDO
-                      !<-
+!                     !<-
                    ENDDO
                 ENDDO
              ENDDO 
@@ -300,15 +372,19 @@ CONTAINS  !
     V1=V1*FourPi
   END FUNCTION ECPOneSum
 
-  FUNCTION ECPTwoSum(LA,MA,NA,LB,MB,NB,ProjL,ECPGL,ACx,ACy,ACz,BCx,BCy,BCz,OA,OB,Q) RESULT(V2)
+  FUNCTION ECPTwoSum(CC,LA,MA,NA,LB,MB,NB,ProjL,ECPGL,ACx,ACy,ACz,BCx,BCy,BCz,OA,OB,Q) RESULT(V2)
     INTEGER :: LA,MA,NA,LB,MB,NB,ECPGL,EllAB,  &
          ProjL,Emm,LambdaA,LambdaB,AlphabetL, &
          a,b,c,d,e,f,LMNabc,LMNdef
     REAL(DOUBLE) :: ACx,ACy,ACz,BCx,BCy,BCz,V2, &
-         BinA,BinB,BinC,BinD,BinE,BinF
+         BinA,BinB,BinC,BinD,BinE,BinF,         CC
 
-    REAL(DOUBLE),DIMENSION(0:,-ProjL:,1:) :: OA,OB
+    REAL(DOUBLE),DIMENSION(0:,0:,1:) :: OA,OB
     REAL(DOUBLE),DIMENSION(0:,0:,0:) :: Q
+
+
+!WRITE(*,*)'============================================================================='
+!WRITE(*,*)' ProjL = ',ProjL
 !
     ACx=ACx+1D-100
     ACy=ACy+1D-100
@@ -320,31 +396,42 @@ CONTAINS  !
     V2=Zero
     EllAB=LA+MA+NA+LB+MB+NB
     DO a=0,LA
-       BinA=ACx**(LA-a)*Binomial(LA,a)
+       BinA=ACx**(LA-a)*Binomial(a,LA)
        DO b=0,MA
-          BinB=BinA*ACy**(MA-b)*Binomial(MA,b)
+          BinB=BinA*ACy**(MA-b)*Binomial(b,MA)
           DO c=0,NA
-             BinC=BinB*ACz**(NA-c)*Binomial(NA,c)
+             BinC=BinB*ACz**(NA-c)*Binomial(c,NA)
              LMNabc=LMNDex(a,b,c)
              DO d=0,LB
-                BinD=BinC*BCx**(LB-d)*Binomial(LB,d)
+                BinD=BinC*BCx**(LB-d)*Binomial(d,LB)
                 DO e=0,MB
-                   BinE=BinD*BCy**(MB-e)*Binomial(MB,e)
+                   BinE=BinD*BCy**(MB-e)*Binomial(e,MB)
                    DO f=0,NB
                       LMNdef=LMNDex(d,e,f)
                       AlphabetL=a+b+c+d+e+f+ECPGL
-                      BinF=BinE*BCz**(NB-f)*Binomial(NB,f)
+                      BinF=BinE*BCz**(NB-f)*Binomial(f,NB)
                       ! Contract the type two (projected) contribution
-!WRITE(*,*)'============================================================================='
-!WRITE(*,*)' ProjL = ',ProjL
                       DO LambdaA=0,ProjL+a+b+c
                          DO LambdaB=0,ProjL+d+e+f
-                            DO Emm=-ProjL,ProjL
+                            DO Emm=0,2*ProjL
                                V2=V2+BinF*OA(Emm,LambdaA,LMNabc)*OB(Emm,LambdaB,LMNdef)*Q(LambdaA,LambdaB,AlphabetL) 
 
-!WRITE(*,*)'A ',Emm,LambdaA,LMNabc,OA(Emm,LambdaA,LMNabc)
-!WRITE(*,*)'B ',Emm,LambdaB,LMNdef,OB(Emm,LambdaB,LMNdef)
-!WRITE(*,*)'R ',LambdaA,LambdaB,AlphabetL,Q(LambdaA,LambdaB,AlphabetL) 
+#ifdef MAXDEBUG2
+!IF(NA==2.AND.NB==0)THEN
+!ENDIF
+!IF(NA==2.AND.NB==2.AND.c==2.AND.f==2)THEN
+   WRITE(*,30)'A ',Emm,LambdaA,LMNabc,OA(Emm,LambdaA,LMNabc),c,ACz**(NA-c),Binomial(c,NA)
+   WRITE(*,30)'B ',Emm,LambdaB,LMNdef,OB(Emm,LambdaB,LMNdef),f,BCz**(NB-f),Binomial(f,NB)
+30 format(A2,' m = ',I2,' L = ',I2,' LMN = ',I2,' O = ',F12.6,' c/f = ',I2,' A/BCz = ',F12.6,' Bin = ',F12.6)
+  IF(ABS(BinF*OA(Emm,LambdaA,LMNabc)*OB(Emm,LambdaB,LMNdef)*Q(LambdaA,LambdaB,AlphabetL))>1D-5)THEN
+   WRITE(*,31)'NA',NA,C,ACz,Binomial(C,NA)
+   WRITE(*,31)'NB',NB,F,BCz,Binomial(f,NB)
+31 format(A2,I2,I2,' ZZ = ',F20.10,' Bin = ',F20.10)
+   WRITE(*,32)Emm,LambdaA,LambdaB,AlphabetL,BinF*OA(Emm,LambdaA,LMNabc)*OB(Emm,LambdaB,LMNdef),Q(LambdaA,LambdaB,AlphabetL),cc*V2*FourPi
+32 format(' Emm = ',I2,' LA = ',I2,' LB = ',I2,' N = ',I2,' AA = ',F14.8,' QQ = ',F14.8,', CC*V2 = ',F14.8)
+ENDIF
+!ENDIF
+#endif
 
                             ENDDO
                          ENDDO
@@ -358,6 +445,7 @@ CONTAINS  !
     ENDDO
     V2=V2*FourPi
   END FUNCTION ECPTwoSum
+
 
   SUBROUTINE AngularOne(Ell,X,Y,Z,O) 
     INTEGER                       :: Ell,  l,lmn
@@ -378,7 +466,6 @@ CONTAINS  !
     CASE DEFAULT
        CALL Halt(' No explicit code for case Ell = '//TRIM(IntToChar(Ell))//' in AngularOne.')
     END SELECT
-
 !    DO L=0,Ell
 !       DO LMN=1,LHGTF(Ell)
 !          WRITE(*,*)L,LMN,' Omega = ',O(L,LMN)
@@ -387,12 +474,11 @@ CONTAINS  !
   END SUBROUTINE AngularOne
 
   SUBROUTINE AngularTwo(ProjL,Ell,X,Y,Z,O)
-    INTEGER                                    :: ProjL,Ell,Index
-    REAL(DOUBLE)                               :: X,Y,Z,Kx,Ky,Kz,K
-    REAL(DOUBLE), DIMENSION(0:,-ProjL:,1:)     :: O
+    INTEGER                               :: ProjL,Ell,Index
+    REAL(DOUBLE)                          :: X,Y,Z,Kx,Ky,Kz,K
+    REAL(DOUBLE), DIMENSION(0:,0:,1:)     :: O
 
-!    integer :: L,P,LMN
-
+    integer :: L,P,LMN,M,N,Lambda
     K=SQRT(X**2+Y**2+Z**2)
     IF(K/=Zero)THEN
        Kx=X/K
@@ -401,7 +487,7 @@ CONTAINS  !
     ELSE
        Kx=Zero
        Ky=Zero
-       Kz=Zero
+       Kz=One
     ENDIF
     Index=100*Ell+ProjL
     SELECT CASE(Index)
@@ -409,56 +495,64 @@ CONTAINS  !
     CASE DEFAULT
        CALL Halt(' No explicit code for case Ell = '//TRIM(IntToChar(Ell))//' in AngularTwo.')
     END SELECT
-!    DO L=0,Ell
+!    WRITE(*,*)'------------------------------------------------------'
+!    DO Lambda=0,Ell
 !       DO P=-ProjL,ProjL
-!          DO LMN=1,LHGTF(Ell)
-!              WRITE(*,*)L,P,LMN,' Omega = ',O(L,P,LMN)
+!          DO L=0,Ell
+!             DO M=0,Ell-L
+!                DO N=0,Ell-L-M
+!                   LMN=LMNDex(L,M,N)
+!                   WRITE(*,22)lambda,ProjL,P,L,M,N,Kx,Ky,Kz
+!22                 format(' Print[omega[',I2,",",I2,",",I3,",",I3,",",I3,",",I3, &
+!                          ']/.{Kx->',F20.10,',Ky->',F20.10,',Kz->',F20.10,'}]')
+!                   WRITE(*,*)' Print[" omega = "',O(P+ProjL,L,LMN),'];'
+!                ENDDO
+!             ENDDO
 !           ENDDO
 !        ENDDO
 !     ENDDO
   END SUBROUTINE AngularTwo
 
   SUBROUTINE RadialOne(Ell,N,Alpha,K,ZAC2pZBC2,Q)
-    INTEGER,PARAMETER                      :: NPts=10000
-    INTEGER                                :: Ell,Ehn,N,I,Lambda
+    INTEGER                                :: Ell,Ehn,N,I,Lambda,IGrid
     REAL(DOUBLE)                           :: K,Alpha,ZAC2pZBC2,R,Delta,Left,Rhgt,Cntr,DistToZero,AlphaInv
-    REAL(DOUBLE),DIMENSION(1:NPts,0:BFEll) :: M
-    REAL(DOUBLE),DIMENSION(1:NPts)         :: KV,EX,RV
+    REAL(DOUBLE),DIMENSION(1:NPts,0:HGEll) :: M
     REAL(DOUBLE),DIMENSION(0:,0:)          :: Q
     !
-    IF(K==Zero)THEN
+    IF(K<1D-8)THEN
        Q=Zero
        AlphaInv=One/Alpha
        ! Only values with Lambda=0 survive
        Q(0,0)=Half*SQRT(Pi*AlphaInv)
        Q(0,1)=Half*AlphaInv
-       DO Ehn=2,N-1
+       DO Ehn=1,N-1
           Q(0,Ehn+1)=Half*AlphaInv*DBLE(Ehn)*Q(0,Ehn-1)
        ENDDO
     ELSE
-       DistToZero=-LOG(1D-10)
-       Left=MAX(Zero,(K-SQRT(K**2+4D0*Alpha*DistToZero))/(Two*Alpha))
-       Rhgt=(K+SQRT(K**2+4D0*Alpha*DistToZero))/(Two*Alpha)
-       Delta=(Rhgt-Left)/(NPts)
-       DO I=1,NPts
-          R=Left+I*Delta
-          RV(I)=R
-          KV(I)=K*R
-          EX(I)=EXP(-Alpha*R*R)
-       ENDDO
-       DO Lambda=0,Ell
-          CALL BesselM(Lambda,NPts,ZAC2pZBC2,KV,M(1,Lambda))
-       ENDDO
-       DO Ehn=0,N
-          DO Lambda=0,Ell
-             Q(Lambda,Ehn)=Zero
-             DO I=1,NPts
-                Q(Lambda,Ehn)=Q(Lambda,Ehn)+M(I,Lambda)*EX(I)*RV(I)**(Ehn)
-                !             WRITE(*,*)I,RV(I),M(I,Lambda)*EX(I)*RV(I)**(Two+Ehn)
+       Discriminator=4D0*Alpha*(ZAC2pZBC2+LOG(Tau))
+       IF(K**2<Discriminator)THEN
+          Q=Zero
+       ELSE
+          Rhgt=(K+SQRT(K**2-Discriminator))/(Two*Alpha)
+          IGrid=CEILING(Rhgt)
+          IF(IGrid>Infty)THEN
+             WRITE(*,*)' Rhgt = ',Rhgt
+             STOP
+          ENDIF
+          DO I=1,NPts
+             XA(I)=K*Points(I,IGrid)
+             EX(I)=EXP(-Alpha*Points(I,IGrid)**2)
+          ENDDO
+          CALL BesselM(Ell,NPts,ZAC2pZBC2,XA,M)
+          DO Ehn=0,N
+             DO Lambda=0,Ell
+                Q(Lambda,Ehn)=Zero
+                DO I=NPts,1,-1
+                   Q(Lambda,Ehn)=Q(Lambda,Ehn)+Weights(I,IGrid)*M(I,Lambda)*EX(I)*Points(I,IGrid)**(Ehn)
+                ENDDO
              ENDDO
           ENDDO
-       ENDDO
-       Q=Delta*Q
+       ENDIF
     ENDIF
 !    write(*,*)'=============================================================='
 !    write(*,*)' Ell = ',Ell,' N = ',N
@@ -469,106 +563,127 @@ CONTAINS  !
 !    ENDDO
   END SUBROUTINE RadialOne
 
-  SUBROUTINE RadialTwo(EllA,EllB,N,Alpha,ZAC2,Ka,ZBC2,Kb,Q)
-    INTEGER,PARAMETER                         :: NPts=10000
-    INTEGER                                   :: EllA,EllB,N,LambdaA,LambdaB,I,Ehn
-    REAL(DOUBLE),DIMENSION(0:,0:,0:)          :: Q
-    REAL(DOUBLE),DIMENSION(1:NPts,0:BFEll)    :: MA,MB
-    REAL(DOUBLE),DIMENSION(1:NPts)            :: XA,XB,EX,RV
-    REAL(DOUBLE)                              :: ZAC2,ZBC2,R,Delta,Ka,Kb,Alpha,Left,Rhgt,Cntr,KaKb,DistToZero
-    !
-    DistToZero=-LOG(1D-10)
-    KaKb=(Ka+Kb)
-    Left=MAX(Zero,(KaKb-SQRT(KaKb**2+4D0*Alpha*DistToZero))/(Two*Alpha))
-    Rhgt=(KaKb+SQRT(KaKb**2+4D0*Alpha*DistToZero))/(Two*Alpha)
-    Delta=(Rhgt-Left)/(NPts)
-    DO I=1,NPts
-       R=Left+I*Delta
-       RV(I)=R
-       XA(I)=KA*R
-       XB(I)=KB*R
-       EX(I)=EXP(-Alpha*R*R)
-    ENDDO
-    DO LambdaA=0,EllA
-       CALL BesselM(LambdaA,NPts,ZAC2,XA,MA(1,LambdaA))
-    ENDDO
-    DO LambdaB=0,EllB
-       CALL BesselM(LambdaB,NPts,ZBC2,XB,MB(1,LambdaB))
-    ENDDO
+  SUBROUTINE RadialTwo(CC,EllA,EllB,N,Alpha,ZAC2,Ka,ZBC2,Kb,Q)
+    REAL(DOUBLE),DIMENSION(1:NPts,0:BFEll+PrjEll) :: MA,MB
+    INTEGER                                       :: EllA,EllB,N,LambdaA,LambdaB,I,Ehn,IGrid
+    REAL(DOUBLE),DIMENSION(0:,0:,0:)              :: Q
+    REAL(DOUBLE)                                 :: ZAC2,ZBC2,R,Delta,Ka,Kb,Alpha,AlphaInv, &
+                                                     Left,Rhgt,Cntr,KaKb,DistToZero,CC
+    !--------------------------------------------------------------------------------------------------------------
+    IF(ABS(Ka)<1D-8.AND.ABS(Kb)<1D-8)THEN
+       Q=Zero
+       AlphaInv=One/Alpha
+       ! Only values with LambdaA==LambdaB==0 accrue
+       Q(0,0,0)=Half*SQRT(Pi*AlphaInv)
+       Q(0,0,1)=Half*AlphaInv
+       DO Ehn=1,N-1
+          Q(0,0,Ehn+1)=Half*AlphaInv*DBLE(Ehn)*Q(0,0,Ehn-1)
+       ENDDO
+    ELSE
+       KaKb=(Ka+Kb)
+       Discriminator=4D0*Alpha*(ZAC2+ZBC2+LOG(Tau))
+       IF(KaKb**2<Discriminator)THEN
+          Q=Zero
+       ELSE
+          Rhgt=(KaKb+SQRT(KaKb**2-Discriminator))/(Two*Alpha)
+          IGrid=CEILING(Rhgt)
+!          WRITE(*,*)' IGRID = ',IGRID
+          IF(IGrid>Infty)THEN
+             WRITE(*,*)' Rhgt = ',Rhgt
+             STOP
+          ENDIF
+          DO I=1,NPts
+             XA(I)=KA*Points(I,IGrid)
+             XB(I)=KB*Points(I,IGrid)
+             EX(I)=EXP(-Alpha*Points(I,IGrid)**2)
+          ENDDO
+          CALL BesselM(EllA,NPts,ZAC2,XA,MA)
+          CALL BesselM(EllB,NPts,ZBC2,XB,MB)
+          DO Ehn=0,N
+             DO LambdaA=0,EllA
+                DO LambdaB=0,EllB
+                   Q(LambdaA,LambdaB,Ehn)=Zero
+                   ! Accrue the integral from small to large
+                   DO I=NPts,1,-1
+                      Q(LambdaA,LambdaB,Ehn)=Q(LambdaA,LambdaB,Ehn)+Weights(I,IGrid)*MA(I,LambdaA)*MB(I,LambdaB)*EX(I)*Points(I,IGrid)**(Ehn)
+!                      IF(IGRID==1)THEN
+!                      WRITE(*,44)I,Points(I),MA(I,LambdaA),MB(I,LambdaB),EX(I)
+!                      ENDIF
+!44                    format(I3,5(3x,D20.10))
+
+                   ENDDO
+                ENDDO
+             ENDDO
+          ENDDO
+       ENDIF
+    ENDIF
+#ifdef MAXDEBUG2
+    IF(IGRID==1)THEN
+    write(*,*)'=============================================================='
+    WRITE(*,*)' KA = ',KA,' KB = ',KB,' Alpha = ',Alpha
+    WRITE(*,*)' ZZABC2 = ',ZAC2+ZBC2
+    write(*,*)' Ell = ',EllA,' EllB = ',EllB,' N = ',N
     DO Ehn=0,N
        DO LambdaA=0,EllA
           DO LambdaB=0,EllB
-             Q(LambdaA,LambdaB,Ehn)=Zero
-             DO I=1,NPts
-                Q(LambdaA,LambdaB,Ehn)=Q(LambdaA,LambdaB,Ehn)+MA(I,LambdaA)*MB(I,LambdaB)*EX(I)*RV(I)**(Ehn)
-!                WRITE(*,*)RV(I),MA(I,LambdaA)*MB(I,LambdaB)*EX(I)*RV(I)**(Ehn)
-             ENDDO
+             WRITE(*,*)Ehn,LambdaA,LambdaB,' Q = ',Q(LambdaA,LambdaB,Ehn)
           ENDDO
        ENDDO
     ENDDO
-    Q=Delta*Q
-!    write(*,*)'=============================================================='
-!    write(*,*)' Ell = ',EllA,' EllB = ',EllB,' N = ',N
-!    DO Ehn=0,N
-!       DO LambdaA=0,EllA
-!          DO LambdaB=0,EllB
-!             WRITE(*,*)Ehn,LambdaA,LambdaB,' Q = ',Q(LambdaA,LambdaB,Ehn)
-!          ENDDO
-!       ENDDO
-!    ENDDO
+    ENDIF
+#endif
   END SUBROUTINE RadialTwo
 
   SUBROUTINE BesselM(L,NPts,G2,X,M)
-    INTEGER                        :: L,NPts,I
-    REAL(DOUBLE),DIMENSION(1:NPts) :: M,X
-    REAL(DOUBLE)                   :: G2,EPlus,EMnus,X2,ThreeX2,FifteenX3
+    INTEGER                            :: L,NPts,I,J
+    REAL(DOUBLE),DIMENSION(1:NPts)     :: X
+    REAL(DOUBLE),DIMENSION(1:NPts,0:L) :: M
+    REAL(DOUBLE)                       :: G2,EPlus,EMnus,TwoJMnsOne
     SELECT CASE(L)         
     CASE(0)       
        DO I=1,NPts
           IF(X(I)==Zero)THEN
-             M(I)=One
+             M(I,0)=One
           ELSE
              EPlus=Exp( X(I)-G2)
              EMnus=Exp(-X(I)-G2)
-             M(I)=Half*(EPlus-EMnus)/X(I)
+             M(I,0)=Half*(EPlus-EMnus)/X(I)
           ENDIF
        ENDDO
     CASE(1)
        DO I=1,NPts
           IF(X(I)==Zero)THEN
-             M(I)=Zero
+             M(I,0)=One
+             M(I,1)=Zero
           ELSE
              EPlus=Exp( X(I)-G2)
              EMnus=Exp(-X(I)-G2)
-             M(I)=Half*(EPlus*(X(I)-One)+EMnus*(X(I)+One))/(X(I)*X(I))
-          ENDIF
-       ENDDO
-    CASE(2)
-       DO I=1,NPts
-          IF(X(I)==Zero)THEN
-             M(I)=Zero
-          ELSE
-             X2=X(I)*X(I)
-             EPlus=Exp( X(I)-G2)
-             EMnus=Exp(-X(I)-G2)
-             ThreeX2=Three+X2
-             M(I)=Half*(EPlus*(ThreeX2-Three*X(I))+EMnus*(ThreeX2+Three*X(I)))/(X(I)*X2)
-          ENDIF
-       ENDDO
-    CASE(3)
-       DO I=1,NPts 
-          IF(X(I)==Zero)THEN
-             M(I)=Zero
-          ELSE
-             X2=X(I)*X(I)
-             EPlus=Exp( X(I)-G2)
-             EMnus=Exp(-X(I)-G2)
-             FifteenX3=(1.5D1+X2)*X(I)
-             M(I)=Half*(EPlus*(FifteenX3-6.D0*X2-1.5D1)+EMnus*(FifteenX3+6.D0*X2+1.5D1))/(X2*X2)
+             M(I,0)=Half*(EPlus-EMnus)/X(I)
+             M(I,1)=Half*(EPlus*(X(I)-One)+EMnus*(X(I)+One))/(X(I)*X(I))
           ENDIF
        ENDDO
     CASE DEFAULT
-       CALL Halt(' No code for case L = '//TRIM(IntToChar(L))//' in BesselM.')
+       DO I=1,NPts
+          IF(X(I)==Zero)THEN
+             M(I,0)=One
+             M(I,1)=Zero
+          ELSE
+             EPlus=Exp( X(I)-G2)
+             EMnus=Exp(-X(I)-G2)
+             M(I,0)=Half*(EPlus-EMnus)/X(I)
+             M(I,1)=Half*(EPlus*(X(I)-One)+EMnus*(X(I)+One))/(X(I)*X(I))
+          ENDIF
+       ENDDO
+       DO J=2,L
+          TwoJMnsOne=DBLE(2*J-1)
+          DO I=1,NPts          
+             IF(X(I)==Zero)THEN
+                M(I,J)=Zero
+             ELSE
+                M(I,J)=M(I,J-2)-TwoJMnsOne*M(I,J-1)/X(I)
+             ENDIF
+          ENDDO
+       ENDDO
     END SELECT
 !    WRITE(*,*)' ======================================================'
 !    WRITE(*,*)' Ell = ',l,' Ell = ',l,' Ell = ',l,' Ell = ',l

@@ -103,7 +103,7 @@ PROGRAM MakeU
      CALL Filter(T1,U)
      Thresholds%Trix = Thresholds%Trix*1.D2
      CALL Put(T1,TrixFile('U',Args))
-     !     CALL PPrint( T1,'U',Unit_O=6)
+     CALL PPrint( T1,'U',Unit_O=6)
      !-----------------------------------------------------------
      ! Printing
      CALL PChkSum(T1,'U',Prog)
