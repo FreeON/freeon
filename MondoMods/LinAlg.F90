@@ -1691,6 +1691,7 @@ MODULE LinAlg
          INTEGER                                 :: I,IG,J,L,JP,P,Q,MA,MN, &
                                                     IStrtA,IStopA,IStrtB,IStopB
 !---------------------------------------------------------------------------------
+         Op=Zero
          Dot_GENERIC=Zero
          DO I=1,ANAtms
             IG=I+OffStA
