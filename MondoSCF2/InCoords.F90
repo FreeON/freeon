@@ -5194,6 +5194,10 @@ return
      HasAttached=.FALSE.
      Conv=180.D0/PI
      JJE=0
+     IF(Top12(JJ1,1)==0) THEN
+       HasAttached=.TRUE.
+       RETURN
+     ENDIF
      DO J=1,Top12(JJ1,1)
        JJE=Top12(JJ1,J+1)
        K=AtNum(JJE)
