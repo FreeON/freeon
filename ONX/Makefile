@@ -13,6 +13,7 @@ release:clean
                Drivers GDrivers VRRm ONX SONX MASONX
 #
 purge:	clean
+	make -C NONX purge
 #
 clean:
 	cd VRR        ; $(MAKE) -i clean
