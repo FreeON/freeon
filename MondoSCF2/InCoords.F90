@@ -1996,10 +1996,10 @@ CONTAINS
        RMSD=1.D+9
        !
        DO IStep=1,GBackTrf%MaxIt_CooTrf
-        !IF(PRESENT(iGEO_O)) THEN
-        !  CALL PrtBackTrf(AtNum,ActCarts%D,PBCDim,PWDPath, &
-        !                  IRep,IStep,iGEO_O)
-        !ENDIF
+         IF(GTrfCtrl%PrtBackTr.AND.PRESENT(iGEO_O)) THEN
+           CALL PrtBackTrf(AtNum,ActCarts%D,PBCDim,PWDPath, &
+                           IRep,IStep,iGEO_O)
+         ENDIF
          !
          CALL INTCValue(IntCs,ActCarts%D,PBCDim, &
                         BackLinCrit,BackTLinCrit)
@@ -5201,13 +5201,15 @@ return
      DO J=1,Top12(JJ1,1)
        JJE=Top12(JJ1,J+1)
        K=AtNum(JJE)
-     ! IF(HasLigand(K)) THEN
+       IF(HasLigand(K)) THEN
+           HasAttached=.TRUE.
+       ELSE
          CALL BEND(XYZ(1:3,JJE),XYZ(1:3,JJ1),XYZ(1:3,JJ2),Value_O=Value)
          IF((ABS(Value-PI)*Conv < LinCrit)) THEN
            HasAttached=.TRUE.
            EXIT  
          ENDIF
-     ! ENDIF
+       ENDIF
      ENDDO 
    END FUNCTION HasAttached
 !
