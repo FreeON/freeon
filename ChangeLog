@@ -1,4 +1,4 @@
-2004-01-10 07:46  mchalla
+
 
 	* SCFeqs/ODA.F90: Ok, NOW this works.	Works parallel,
 	atomic-orbital or orthogonal!!
@@ -269,13 +269,22 @@
 
 2003-12-17 11:21  mchalla
 
-	* TwoE/: Gradients.m, Int1111.F90, Int3111.F90, Int3131.F90,
-	Int3311.F90, Int3331.F90, Int3333.F90, Integrals.m, Makefile,
-	VScratch.F90, dInt1111.F90, dInt3111.F90, dInt3131.F90,
-	dInt3311.F90, dInt3331.F90, dInt3333.F90: Latest installment of
-	integrals code.  All temporary variables now use the scratch V(*)
-	array dimensioned in VScratch.F90.  This may need to get lengthened
-	when we go to F functions.
+	* MONDO/TwoE/Gradients.m, MONDO/TwoE/Int1111.F90,
+	MONDO/TwoE/Int3111.F90, MONDO/TwoE/Int3131.F90,
+	MONDO/TwoE/Int3311.F90, MONDO/TwoE/Int3331.F90,
+	MONDO/TwoE/Int3333.F90, MONDO/TwoE/Integrals.m,
+	MONDO/TwoE/Makefile, MONDO/TwoE/VScratch.F90,
+	MONDO/TwoE/dInt1111.F90, MONDO/TwoE/dInt3111.F90,
+	MONDO/TwoE/dInt3131.F90, MONDO/TwoE/dInt3311.F90,
+	MONDO/TwoE/dInt3331.F90, MONDO/TwoE/dInt3333.F90, TwoE/Gradients.m,
+	TwoE/Int1111.F90, TwoE/Int3111.F90, TwoE/Int3131.F90,
+	TwoE/Int3311.F90, TwoE/Int3331.F90, TwoE/Int3333.F90,
+	TwoE/Integrals.m, TwoE/Makefile, TwoE/VScratch.F90,
+	TwoE/dInt1111.F90, TwoE/dInt3111.F90, TwoE/dInt3131.F90,
+	TwoE/dInt3311.F90, TwoE/dInt3331.F90, TwoE/dInt3333.F90: Latest
+	installment of integrals code.	All temporary variables now use the
+	scratch V(*) array dimensioned in VScratch.F90.  This may need to
+	get lengthened when we go to F functions.
 
 2003-12-16 18:36  nemeth
 
@@ -312,8 +321,12 @@
 
 2003-12-12 16:28  mchalla
 
-	* TwoE/: Gradients.m, dInt1111.F90, dInt3111.F90, dInt3131.F90,
-	dInt3311.F90, dInt3331.F90, dInt3333.F90: New gradients code.  Hope
+	* MONDO/TwoE/Gradients.m, MONDO/TwoE/dInt1111.F90,
+	MONDO/TwoE/dInt3111.F90, TwoE/Gradients.m, TwoE/dInt1111.F90,
+	TwoE/dInt3111.F90, MONDO/TwoE/dInt3131.F90,
+	MONDO/TwoE/dInt3311.F90, MONDO/TwoE/dInt3331.F90,
+	MONDO/TwoE/dInt3333.F90, TwoE/dInt3131.F90, TwoE/dInt3311.F90,
+	TwoE/dInt3331.F90, TwoE/dInt3333.F90: New gradients code.  Hope
 	your fuckin happy now V.
 
 2003-12-12 14:57  vweber
@@ -322,7 +335,8 @@
 
 2003-12-12 13:59  mchalla
 
-	* TwoE/Gradients.m: Intermediate effort to stop V-man's bitching.
+	* MONDO/TwoE/Gradients.m, TwoE/Gradients.m: Intermediate effort to
+	stop V-man's bitching.
 
 2003-12-12 12:13  nemeth
 
@@ -334,7 +348,7 @@
 
 2003-12-12 10:37  vweber
 
-	* TwoE/Gradients.m: [no log message]
+	* MONDO/TwoE/Gradients.m, TwoE/Gradients.m: [no log message]
 
 2003-12-12 10:07  mchalla
 
@@ -355,11 +369,17 @@
 
 2003-12-12 09:18  vweber
 
-	* TwoE/: Gradients.m, DERIInterface.m: Minor changes.
+	* MONDO/TwoE/Gradients.m, TwoE/Gradients.m,
+	MONDO/TwoE/DERIInterface.m, TwoE/DERIInterface.m: Minor changes.
 
 2003-12-11 16:33  vweber
 
-	* TwoE/: DERIInterface.m, Gradients.m: Minor changes.
+	* MONDO/TwoE/DERIInterface.m, MONDO/TwoE/Gradients.m,
+	TwoE/DERIInterface.m, TwoE/Gradients.m: Minor changes.
+
+2003-12-11 15:25  ckgan
+
+	* Docs/PETN_paper/: petn_2d.eps, petn.tex: Accepted version.
 
 2003-12-11 15:25  ckgan
 
@@ -367,9 +387,13 @@
 
 2003-12-11 14:58  vweber
 
-	* TwoE/: Gradients.m, Makefile, dInt1111.F90, dInt3111.F90,
-	dInt3131.F90, dInt3311.F90, dInt3331.F90, dInt3333.F90: Some minor
-	modifications.
+	* MONDO/TwoE/Gradients.m, MONDO/TwoE/Makefile,
+	MONDO/TwoE/dInt1111.F90, MONDO/TwoE/dInt3111.F90,
+	MONDO/TwoE/dInt3131.F90, MONDO/TwoE/dInt3311.F90,
+	MONDO/TwoE/dInt3331.F90, MONDO/TwoE/dInt3333.F90, TwoE/Gradients.m,
+	TwoE/Makefile, TwoE/dInt1111.F90, TwoE/dInt3111.F90,
+	TwoE/dInt3131.F90, TwoE/dInt3311.F90, TwoE/dInt3331.F90,
+	TwoE/dInt3333.F90: Some minor modifications.
 
 2003-12-11 13:38  mchalla
 
@@ -452,8 +476,13 @@
 
 2003-12-03 15:22  mchalla
 
-	* TwoE/: Gradient.m, Gradients.m, dInt1111.F90, dInt3111.F90,
-	dInt3131.F90, dInt3311.F90, dInt3331.F90, dInt3333.F90: 
+	* MONDO/TwoE/Gradient.m, MONDO/TwoE/Gradients.m,
+	MONDO/TwoE/dInt1111.F90, MONDO/TwoE/dInt3111.F90,
+	MONDO/TwoE/dInt3131.F90, MONDO/TwoE/dInt3311.F90,
+	MONDO/TwoE/dInt3331.F90, MONDO/TwoE/dInt3333.F90, TwoE/Gradient.m,
+	TwoE/Gradients.m, TwoE/dInt1111.F90, TwoE/dInt3111.F90,
+	TwoE/dInt3131.F90, TwoE/dInt3311.F90, TwoE/dInt3331.F90,
+	TwoE/dInt3333.F90: 
 	Very first attempt at explicit gradients code!
 	
 	Party people, pump it UP!!
@@ -532,15 +561,23 @@
 
 2003-11-19 11:31  vweber
 
-	* TwoE/: Int1111.F90, Int3111.F90, Int3131.F90, Int3311.F90,
-	Int3331.F90, Int3333.F90, Integrals.m: Int(...)=Int(...)+... add
-	the PBC integrals up.
+	* MONDO/TwoE/Int1111.F90, MONDO/TwoE/Int3111.F90,
+	MONDO/TwoE/Int3131.F90, MONDO/TwoE/Int3311.F90,
+	MONDO/TwoE/Int3331.F90, MONDO/TwoE/Int3333.F90, TwoE/Int1111.F90,
+	TwoE/Int3111.F90, TwoE/Int3131.F90, TwoE/Int3311.F90,
+	TwoE/Int3331.F90, TwoE/Int3333.F90, MONDO/TwoE/Integrals.m,
+	TwoE/Integrals.m: Int(...)=Int(...)+... add the PBC integrals up.
 
 2003-11-19 11:16  vweber
 
-	* TwoE/: Int1111.F90, Int3111.F90, Int3131.F90, Int3311.F90,
-	Int3331.F90, Int3333.F90, Integrals.m, Makefile,
-	ShellPairStruct.F90: onx seems to be invariant now!
+	* MONDO/TwoE/Int1111.F90, MONDO/TwoE/Int3111.F90,
+	MONDO/TwoE/Int3131.F90, TwoE/Int1111.F90, TwoE/Int3111.F90,
+	TwoE/Int3131.F90, MONDO/TwoE/Int3311.F90, MONDO/TwoE/Int3331.F90,
+	MONDO/TwoE/Int3333.F90, MONDO/TwoE/Integrals.m,
+	MONDO/TwoE/Makefile, MONDO/TwoE/ShellPairStruct.F90,
+	TwoE/Int3311.F90, TwoE/Int3331.F90, TwoE/Int3333.F90,
+	TwoE/Integrals.m, TwoE/Makefile, TwoE/ShellPairStruct.F90: onx
+	seems to be invariant now!
 
 2003-11-17 17:11  nemeth
 
@@ -578,7 +615,8 @@
 
 2003-11-12 11:49  vweber
 
-	* TwoE/: ERIInterface.m, Integrals.m: minor modifications
+	* MONDO/TwoE/ERIInterface.m, MONDO/TwoE/Integrals.m,
+	TwoE/ERIInterface.m, TwoE/Integrals.m: minor modifications
 
 2003-11-12 11:31  nemeth
 
@@ -596,7 +634,9 @@
 
 2003-11-06 22:34  vweber
 
-	* TwoE/: ERIInterface.m, Gradient.m, Integrals.m: ---
+	* MONDO/TwoE/ERIInterface.m, MONDO/TwoE/Gradient.m,
+	MONDO/TwoE/Integrals.m, TwoE/ERIInterface.m, TwoE/Gradient.m,
+	TwoE/Integrals.m: ---
 
 2003-11-06 14:01  nemeth
 
@@ -626,7 +666,12 @@
 
 2003-11-04 19:49  vweber
 
-	* TwoE/: Integrals.m, ERIInterface.m: ---
+	* MONDO/TwoE/Integrals.m, TwoE/Integrals.m,
+	MONDO/TwoE/ERIInterface.m, TwoE/ERIInterface.m: ---
+
+2003-11-03 21:08  ckgan
+
+	* Docs/Bib/mondo.bib: [no log message]
 
 2003-11-03 21:08  ckgan
 
@@ -634,22 +679,43 @@
 
 2003-11-03 16:26  vweber
 
-	* TwoE/: ERIInterface.m, Gradient.m: ERI interface + gradient
+	* MONDO/TwoE/ERIInterface.m, TwoE/ERIInterface.m,
+	MONDO/TwoE/Gradient.m, TwoE/Gradient.m: ERI interface + gradient
 	generator (not yet ready)
 
 2003-10-31 16:06  vweber
 
-	* TwoE/: Int1111.F90, Int1113.F90, Int1131.F90, Int1133.F90,
-	Int1311.F90, Int1313.F90, Int1331.F90, Int1333.F90, Int3111.F90,
-	Int3113.F90, Int3131.F90, Int3133.F90, Int3311.F90, Int3313.F90,
-	Int3331.F90, Int3333.F90, Integrals.m: some corrections
+	* MONDO/TwoE/Int1111.F90, MONDO/TwoE/Int1113.F90,
+	MONDO/TwoE/Int1131.F90, TwoE/Int1111.F90, TwoE/Int1113.F90,
+	TwoE/Int1131.F90, MONDO/TwoE/Int1133.F90, MONDO/TwoE/Int1311.F90,
+	MONDO/TwoE/Int1313.F90, MONDO/TwoE/Int1331.F90,
+	MONDO/TwoE/Int1333.F90, MONDO/TwoE/Int3111.F90,
+	MONDO/TwoE/Int3113.F90, MONDO/TwoE/Int3131.F90,
+	MONDO/TwoE/Int3133.F90, MONDO/TwoE/Int3311.F90,
+	MONDO/TwoE/Int3313.F90, MONDO/TwoE/Int3331.F90,
+	MONDO/TwoE/Int3333.F90, MONDO/TwoE/Integrals.m, TwoE/Int1133.F90,
+	TwoE/Int1311.F90, TwoE/Int1313.F90, TwoE/Int1331.F90,
+	TwoE/Int1333.F90, TwoE/Int3111.F90, TwoE/Int3113.F90,
+	TwoE/Int3131.F90, TwoE/Int3133.F90, TwoE/Int3311.F90,
+	TwoE/Int3313.F90, TwoE/Int3331.F90, TwoE/Int3333.F90,
+	TwoE/Integrals.m: some corrections
 
 2003-10-31 13:12  mchalla
 
-	* TwoE/: Int1111.F90, Int1113.F90, Int1131.F90, Int1133.F90,
-	Int1311.F90, Int1313.F90, Int1331.F90, Int1333.F90, Int3111.F90,
-	Int3113.F90, Int3131.F90, Int3133.F90, Int3311.F90, Int3313.F90,
-	Int3331.F90, Int3333.F90, Integrals.m: [no log message]
+	* MONDO/TwoE/Int1111.F90, MONDO/TwoE/Int1113.F90,
+	MONDO/TwoE/Int1131.F90, MONDO/TwoE/Int1133.F90,
+	MONDO/TwoE/Int1311.F90, MONDO/TwoE/Int1313.F90,
+	MONDO/TwoE/Int1331.F90, MONDO/TwoE/Int1333.F90,
+	MONDO/TwoE/Int3111.F90, MONDO/TwoE/Int3113.F90,
+	MONDO/TwoE/Int3131.F90, MONDO/TwoE/Int3133.F90,
+	MONDO/TwoE/Int3311.F90, MONDO/TwoE/Int3313.F90, TwoE/Int1111.F90,
+	TwoE/Int1113.F90, TwoE/Int1131.F90, TwoE/Int1133.F90,
+	TwoE/Int1311.F90, TwoE/Int1313.F90, TwoE/Int1331.F90,
+	TwoE/Int1333.F90, TwoE/Int3111.F90, TwoE/Int3113.F90,
+	TwoE/Int3131.F90, TwoE/Int3133.F90, TwoE/Int3311.F90,
+	TwoE/Int3313.F90, MONDO/TwoE/Int3331.F90, MONDO/TwoE/Int3333.F90,
+	MONDO/TwoE/Integrals.m, TwoE/Int3331.F90, TwoE/Int3333.F90,
+	TwoE/Integrals.m: [no log message]
 
 2003-10-31 10:02  mchalla
 
@@ -668,19 +734,28 @@
 
 2003-10-29 11:45  mchalla
 
-	* TwoE/: Int1113.F90, Int1131.F90, Int1133.F90, Int1313.F90,
-	Int1331.F90, Int1333.F90, Int3113.F90, Int3131.F90, Int3133.F90,
-	Int3313.F90, Int3331.F90, Int3333.F90, Integrals.m: fixed symmetry
-	bug, i think.
+	* MONDO/TwoE/Int1113.F90, MONDO/TwoE/Int1131.F90,
+	MONDO/TwoE/Int1133.F90, MONDO/TwoE/Int1313.F90,
+	MONDO/TwoE/Int1331.F90, MONDO/TwoE/Int1333.F90,
+	MONDO/TwoE/Int3113.F90, MONDO/TwoE/Int3131.F90,
+	MONDO/TwoE/Int3133.F90, TwoE/Int1113.F90, TwoE/Int1131.F90,
+	TwoE/Int1133.F90, TwoE/Int1313.F90, TwoE/Int1331.F90,
+	TwoE/Int1333.F90, TwoE/Int3113.F90, TwoE/Int3131.F90,
+	TwoE/Int3133.F90, MONDO/TwoE/Int3313.F90, MONDO/TwoE/Int3331.F90,
+	MONDO/TwoE/Int3333.F90, MONDO/TwoE/Integrals.m, TwoE/Int3313.F90,
+	TwoE/Int3331.F90, TwoE/Int3333.F90, TwoE/Integrals.m: fixed
+	symmetry bug, i think.
 
 2003-10-29 10:33  vweber
 
-	* TwoE/ShellPairStruct.F90: Added a struct.
+	* MONDO/TwoE/ShellPairStruct.F90, TwoE/ShellPairStruct.F90: Added a
+	struct.
 
 2003-10-29 10:31  mchalla
 
-	* TwoE/: Int3313.F90, Int3333.F90, Integrals.m: Got rid of null
-	problem...
+	* MONDO/TwoE/Int3313.F90, MONDO/TwoE/Int3333.F90,
+	MONDO/TwoE/Integrals.m, TwoE/Int3313.F90, TwoE/Int3333.F90,
+	TwoE/Integrals.m: Got rid of null problem...
 
 2003-10-28 12:30  mchalla
 
@@ -688,34 +763,72 @@
 
 2003-10-28 11:56  mchalla
 
-	* TwoE/: Int1111.F90, Int1113.F90, Int1131.F90, Int1133.F90,
-	Int1311.F90, Int1313.F90, Int1331.F90, Int1333.F90, Int3111.F90,
-	Int3113.F90, Int3131.F90, Int3133.F90, Int3311.F90, Int3313.F90,
-	Int3331.F90, Int3333.F90, Integrals.m: [no log message]
+	* MONDO/TwoE/Int1111.F90, MONDO/TwoE/Int1113.F90,
+	MONDO/TwoE/Int1131.F90, MONDO/TwoE/Int1133.F90,
+	MONDO/TwoE/Int1311.F90, MONDO/TwoE/Int1313.F90,
+	MONDO/TwoE/Int1331.F90, MONDO/TwoE/Int1333.F90, TwoE/Int1111.F90,
+	TwoE/Int1113.F90, TwoE/Int1131.F90, TwoE/Int1133.F90,
+	TwoE/Int1311.F90, TwoE/Int1313.F90, TwoE/Int1331.F90,
+	TwoE/Int1333.F90, MONDO/TwoE/Int3111.F90, MONDO/TwoE/Int3113.F90,
+	MONDO/TwoE/Int3131.F90, MONDO/TwoE/Int3133.F90,
+	MONDO/TwoE/Int3311.F90, MONDO/TwoE/Int3313.F90,
+	MONDO/TwoE/Int3331.F90, MONDO/TwoE/Int3333.F90,
+	MONDO/TwoE/Integrals.m, TwoE/Int3111.F90, TwoE/Int3113.F90,
+	TwoE/Int3131.F90, TwoE/Int3133.F90, TwoE/Int3311.F90,
+	TwoE/Int3313.F90, TwoE/Int3331.F90, TwoE/Int3333.F90,
+	TwoE/Integrals.m: [no log message]
 
 2003-10-28 09:59  vweber
 
-	* TwoE/: Int1111.F90, Int1113.F90, Int1131.F90, Int1133.F90,
-	Int1311.F90, Int1313.F90, Int1331.F90, Int1333.F90, Int3111.F90,
-	Int3113.F90, Int3131.F90, Int3133.F90, Int3311.F90, Int3313.F90,
-	Int3331.F90, Int3333.F90, Integrals.m: Modified the input ouput to
-	the subroutine.
+	* MONDO/TwoE/Int1111.F90, TwoE/Int1111.F90, MONDO/TwoE/Int1113.F90,
+	TwoE/Int1113.F90, MONDO/TwoE/Int1131.F90, TwoE/Int1131.F90,
+	MONDO/TwoE/Int1133.F90, MONDO/TwoE/Int1311.F90, TwoE/Int1133.F90,
+	TwoE/Int1311.F90, MONDO/TwoE/Int1313.F90, TwoE/Int1313.F90,
+	MONDO/TwoE/Int1331.F90, MONDO/TwoE/Int1333.F90, TwoE/Int1331.F90,
+	TwoE/Int1333.F90, MONDO/TwoE/Int3111.F90, TwoE/Int3111.F90,
+	MONDO/TwoE/Int3113.F90, MONDO/TwoE/Int3131.F90,
+	MONDO/TwoE/Int3133.F90, TwoE/Int3113.F90, TwoE/Int3131.F90,
+	TwoE/Int3133.F90, MONDO/TwoE/Int3311.F90, TwoE/Int3311.F90,
+	MONDO/TwoE/Int3313.F90, MONDO/TwoE/Int3331.F90, TwoE/Int3313.F90,
+	TwoE/Int3331.F90, MONDO/TwoE/Int3333.F90, TwoE/Int3333.F90,
+	MONDO/TwoE/Integrals.m, TwoE/Integrals.m: Modified the input ouput
+	to the subroutine.
 
 2003-10-27 11:01  mchalla
 
-	* TwoE/: Int1111.F90, Int1113.F90, Int1131.F90, Int1133.F90,
-	Int1311.F90, Int1313.F90, Int1331.F90, Int1333.F90, Int3111.F90,
-	Int3113.F90, Int3131.F90, Int3133.F90, Int3311.F90, Int3313.F90,
-	Int3331.F90, Int3333.F90, Integrals.m: Not perfect, but the right
-	numbers?
+	* MONDO/TwoE/Int1111.F90, MONDO/TwoE/Int1113.F90,
+	MONDO/TwoE/Int1131.F90, MONDO/TwoE/Int1133.F90,
+	MONDO/TwoE/Int1311.F90, MONDO/TwoE/Int1313.F90,
+	MONDO/TwoE/Int1331.F90, MONDO/TwoE/Int1333.F90,
+	MONDO/TwoE/Int3111.F90, MONDO/TwoE/Int3113.F90,
+	MONDO/TwoE/Int3131.F90, MONDO/TwoE/Int3133.F90,
+	MONDO/TwoE/Int3311.F90, MONDO/TwoE/Int3313.F90,
+	MONDO/TwoE/Int3331.F90, MONDO/TwoE/Int3333.F90, TwoE/Int1111.F90,
+	TwoE/Int1113.F90, TwoE/Int1131.F90, TwoE/Int1133.F90,
+	TwoE/Int1311.F90, TwoE/Int1313.F90, TwoE/Int1331.F90,
+	TwoE/Int1333.F90, TwoE/Int3111.F90, TwoE/Int3113.F90,
+	TwoE/Int3131.F90, TwoE/Int3133.F90, TwoE/Int3311.F90,
+	TwoE/Int3313.F90, TwoE/Int3331.F90, TwoE/Int3333.F90,
+	MONDO/TwoE/Integrals.m, TwoE/Integrals.m: Not perfect, but the
+	right numbers?
 
 2003-10-24 16:14  mchalla
 
-	* TwoE/: Int1111.F90, Int1113.F90, Int1131.F90, Int1133.F90,
-	Int1311.F90, Int1313.F90, Int1331.F90, Int1333.F90, Int3111.F90,
-	Int3113.F90, Int3131.F90, Int3133.F90, Int3311.F90, Int3313.F90,
-	Int3331.F90, Int3333.F90, Integrals.m: Integrals are no longer
-	resummed.
+	* MONDO/TwoE/Int1111.F90, MONDO/TwoE/Int1113.F90,
+	MONDO/TwoE/Int1131.F90, MONDO/TwoE/Int1133.F90,
+	MONDO/TwoE/Int1311.F90, MONDO/TwoE/Int1313.F90,
+	MONDO/TwoE/Int1331.F90, MONDO/TwoE/Int1333.F90,
+	MONDO/TwoE/Int3111.F90, MONDO/TwoE/Int3113.F90,
+	MONDO/TwoE/Int3131.F90, MONDO/TwoE/Int3133.F90,
+	MONDO/TwoE/Int3311.F90, MONDO/TwoE/Int3313.F90,
+	MONDO/TwoE/Int3331.F90, MONDO/TwoE/Int3333.F90,
+	MONDO/TwoE/Integrals.m, TwoE/Int1111.F90, TwoE/Int1113.F90,
+	TwoE/Int1131.F90, TwoE/Int1133.F90, TwoE/Int1311.F90,
+	TwoE/Int1313.F90, TwoE/Int1331.F90, TwoE/Int1333.F90,
+	TwoE/Int3111.F90, TwoE/Int3113.F90, TwoE/Int3131.F90,
+	TwoE/Int3133.F90, TwoE/Int3311.F90, TwoE/Int3313.F90,
+	TwoE/Int3331.F90, TwoE/Int3333.F90, TwoE/Integrals.m: Integrals are
+	no longer resummed.
 
 2003-10-24 12:51  mchalla
 
@@ -723,13 +836,25 @@
 
 2003-10-24 12:49  mchalla
 
-	* TwoE/: HRR.Inc, HRR.m, HRR.nb, Int1111.F90, Int1113.F90,
-	Int1131.F90, Int1133.F90, Int1311.F90, Int1313.F90, Int1331.F90,
-	Int1333.F90, Int3111.F90, Int3113.F90, Int3131.F90, Int3133.F90,
-	Int3311.F90, Int3313.F90, Int3331.F90, Int3333.F90, Integrals.m,
-	Makefile, ShellPairStruct.F90: This is a new try at a two electron
-	integrals library.  Note that Int1111.F90 (SS|SS) is messed up, and
-	should be done by hand anyway...
+	* MONDO/TwoE/HRR.Inc, MONDO/TwoE/HRR.m, TwoE/HRR.Inc, TwoE/HRR.m,
+	MONDO/TwoE/HRR.nb, TwoE/HRR.nb, MONDO/TwoE/Int1111.F90,
+	MONDO/TwoE/Int1113.F90, MONDO/TwoE/Int1131.F90,
+	MONDO/TwoE/Int1133.F90, MONDO/TwoE/Int1311.F90,
+	MONDO/TwoE/Int1313.F90, MONDO/TwoE/Int1331.F90,
+	MONDO/TwoE/Int1333.F90, MONDO/TwoE/Int3111.F90, TwoE/Int1111.F90,
+	TwoE/Int1113.F90, TwoE/Int1131.F90, TwoE/Int1133.F90,
+	TwoE/Int1311.F90, TwoE/Int1313.F90, TwoE/Int1331.F90,
+	TwoE/Int1333.F90, TwoE/Int3111.F90, MONDO/TwoE/Int3113.F90,
+	MONDO/TwoE/Int3131.F90, MONDO/TwoE/Int3133.F90,
+	MONDO/TwoE/Int3311.F90, MONDO/TwoE/Int3313.F90,
+	MONDO/TwoE/Int3331.F90, MONDO/TwoE/Int3333.F90,
+	MONDO/TwoE/Integrals.m, MONDO/TwoE/Makefile,
+	MONDO/TwoE/ShellPairStruct.F90, TwoE/Int3113.F90, TwoE/Int3131.F90,
+	TwoE/Int3133.F90, TwoE/Int3311.F90, TwoE/Int3313.F90,
+	TwoE/Int3331.F90, TwoE/Int3333.F90, TwoE/Integrals.m,
+	TwoE/Makefile, TwoE/ShellPairStruct.F90: This is a new try at a two
+	electron integrals library.  Note that Int1111.F90 (SS|SS) is
+	messed up, and should be done by hand anyway...
 
 2003-10-17 18:41  ckgan
 
@@ -751,7 +876,8 @@
 
 2003-10-15 09:19  mchalla
 
-	* TwoE/: HRR.m, HRR.nb: [no log message]
+	* MONDO/TwoE/HRR.m, MONDO/TwoE/HRR.nb, TwoE/HRR.m, TwoE/HRR.nb: [no
+	log message]
 
 2003-10-14 16:15  nemeth
 
@@ -799,12 +925,12 @@
 
 2003-10-03 16:42  mchalla
 
-	* TwoE/HRR.Inc: [no log message]
+	* MONDO/TwoE/HRR.Inc, TwoE/HRR.Inc: [no log message]
 
 2003-10-03 15:27  mchalla
 
-	* TwoE/HRR.m: Optimized HRR code is getting close.  Need to add
-	subroutine generation for high ell.
+	* MONDO/TwoE/HRR.m, TwoE/HRR.m: Optimized HRR code is getting
+	close.	Need to add subroutine generation for high ell.
 
 2003-10-03 12:46  nemeth
 
@@ -839,7 +965,7 @@
 
 2003-10-02 10:37  mchalla
 
-	* TwoE/HRR.m: [no log message]
+	* MONDO/TwoE/HRR.m, TwoE/HRR.m: [no log message]
 
 2003-10-01 18:52  nemeth
 
@@ -920,7 +1046,7 @@
 
 2003-09-26 14:12  mchalla
 
-	* TwoE/HRR.nb: [no log message]
+	* MONDO/TwoE/HRR.nb, TwoE/HRR.nb: [no log message]
 
 2003-09-26 12:59  vweber
 
@@ -938,7 +1064,8 @@
 
 2003-09-25 13:31  mchalla
 
-	* TwoE/HRR.nb: First try at some symbolic HRR action.
+	* MONDO/TwoE/HRR.nb, TwoE/HRR.nb: First try at some symbolic HRR
+	action.
 
 2003-09-25 12:21  ckgan
 
@@ -5521,7 +5648,27 @@
 	* MondoMods/GlobalScalars.F90: FFELL has been moved to
 	MondoPoles.F90
 
+<<<<<<< ChangeLog
 2002-11-04 13:23  nemeth
+
+	* MondoSCF/ParseInput.F90: [no log message]
+
+2002-11-04 12:19  nemeth
+
+	* MondoSCF/DrvFrcs.F90: [no log message]
+
+2002-11-04 11:37  nemeth
+
+	* MondoSCF/: ParsingKeys.F90, SCFLocals.F90: [no log message]
+
+2002-11-04 11:29  nemeth
+
+	* MondoSCF/ParseInput.F90: [no log message]
+
+2002-11-04 11:16  nemeth
+=======
+2002-11-04 13:23  nemeth
+>>>>>>> 1.90
 
 	* MondoSCF/ParseInput.F90: [no log message]
 
@@ -6019,14 +6166,27 @@
 
 	* QCTC/: MakePFFT.F90, PBCFarField.F90, PFFTensor.F90: Fixed Bugs
 
+<<<<<<< ChangeLog
+2002-10-17 21:20  nemeth
+=======
 2002-10-17 21:20  nemeth
 
+	* Dynamo/dynamo.F90: [no log message]
+>>>>>>> 1.90
+
+<<<<<<< ChangeLog
 	* Dynamo/dynamo.F90: [no log message]
 
 2002-10-17 21:15  nemeth
 
 	* MondoSCF/DrvSCFs.F90, MondoSCF/DrvFrcs.F90,
 	MondoMods/InCoords.F90: [no log message]
+=======
+2002-10-17 21:15  nemeth
+
+	* MondoSCF/DrvSCFs.F90, MondoSCF/DrvFrcs.F90,
+	MondoMods/InCoords.F90: [no log message]
+>>>>>>> 1.90
 
 2002-10-17 21:10  nemeth
 
@@ -7544,6 +7704,7 @@
 
 2002-06-17 15:32  mchalla
 
+<<<<<<< ChangeLog
 	* MondoSCF/DrvFrcs.F90, MondoSCF/SCFLocals.F90, QuNew/NewStep.F90:
 	Problem in gradients due to adding a tag to CRDS data type fixed. 
 	This ment shifting Cur->Nxt and Prv->Cur in NewStep and using
@@ -7557,6 +7718,28 @@
 2002-06-14 14:20  mchalla
 
 	* ChangeLog: [no log message]
+=======
+	* MondoSCF/DrvFrcs.F90, MondoSCF/SCFLocals.F90, QuNew/NewStep.F90:
+	Problem in gradients due to adding a tag to CRDS data type fixed. 
+	This ment shifting Cur->Nxt and Prv->Cur in NewStep and using
+	NoAdvance in setting the control vector before invoking new step,
+	to make sure that the correct geometry is available in NewStep.
+>>>>>>> 1.90
+
+2002-06-14 20:41  nemeth
+
+<<<<<<< ChangeLog
+	* Dynamo/dynamo.F90, MondoMods/Macros.F90, MondoMods/Mechanics.F90,
+	MondoMods/SpecFun.F90, MondoSCF/ParseInput.F90: Began fighting
+	against QM/MM lack of #ifdef MMech, but then gave up when I hit
+	MakeRho, which appears now intractable.  Opting instead to hard
+	wire QMOnly etc in Mechanics.F90 in the case that MMech is not
+=======
+	* Dynamo/dynamo.F90: Correction needed for QM-MM case, introduced.
+
+2002-06-14 14:20  mchalla
+
+	* ChangeLog: [no log message]
 
 2002-06-14 13:56  mchalla
 
@@ -7565,6 +7748,7 @@
 	against QM/MM lack of #ifdef MMech, but then gave up when I hit
 	MakeRho, which appears now intractable.  Opting instead to hard
 	wire QMOnly etc in Mechanics.F90 in the case that MMech is not
+>>>>>>> 1.90
 	defined.
 
 2002-06-14 13:53  mchalla
