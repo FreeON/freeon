@@ -43,6 +43,506 @@ MODULE ParallelQCTC
 
 CONTAINS
 
+  SUBROUTINE NukE_ENPart(GM_Loc)
+    TYPE(CRDS),  INTENT(IN)  :: GM_Loc
+    INTEGER :: NProc,NAtoms
+    CALL New(BegAtInd,NPrc-1,0)
+    CALL New(EndAtInd,NPrc-1,0)
+    NProc = NPrc
+    NAtoms = GM_Loc%NAtms
+    CALL ENPart(NProc,NAtoms,BegAtInd,EndAtInd)
+  END SUBROUTINE NukE_ENPart
+
+  RECURSIVE SUBROUTINE TraverseTree(P,UnitNum)
+    TYPE(PoleNode),POINTER :: P,Left,Right
+    INTEGER :: UnitNum
+
+    IF(P%Leaf) THEN
+      WRITE(UnitNum,*) 'Bdex = ',P%Bdex
+      WRITE(UnitNum,*) 'Edex = ',P%Edex
+      WRITE(UnitNum,*) 'Zeta = ',P%Zeta
+      WRITE(UnitNum,*) 'Ell = ',P%Ell
+      WRITE(UnitNum,*) 'NQ = ',P%NQ
+      WRITE(UnitNum,*) 'Co = ',P%Co(:)
+      WRITE(UnitNum,*) 'S = ',P%S(:)
+      WRITE(UnitNum,*) 'C = ',P%C(:)
+      WRITE(UnitNum,*) 'Strength = ',P%Strength
+      WRITE(UnitNum,*) 'DMax2 = ',P%DMax2
+      WRITE(UnitNum,*) 'Tier = ',P%Box%Tier
+      WRITE(UnitNum,*) 'BndBox = ',P%Box%BndBox(1:3,1:2)
+      ! WRITE(UnitNum,*) 'Number = ',P%Box%Number
+      WRITE(UnitNum,*) 'half = ',P%Box%half
+      WRITE(UnitNum,*) 'center = ',P%Box%center
+    ELSE
+      Left => P%Descend
+      Right => P%Descend%Travrse
+      CALL TraverseTree(Left,UnitNum)
+      CALL TraverseTree(Right,UnitNum)
+    ENDIF
+  END SUBROUTINE TraverseTree
+
+  SUBROUTINE ParaRhoToPoleTree
+    ALLOCATE(PA1(0:NPrc-1),PA2(0:NPrc-1))
+    CALL MakeTree1
+    CALL BuildLocalTrees
+    CALL ConcatTrees
+    DO CurrentTier = BranchTier-1, 0, -1
+      CALL MakePoleTree(PR1)
+    ENDDO
+    PR1%Ell = SPEll
+    PoleRoot => PR1
+  END SUBROUTINE ParaRhoToPoleTree
+
+  SUBROUTINE ConcatTrees
+    RunPointer = -1
+    CALL SetLink(PR1)
+  END SUBROUTINE ConcatTrees
+
+  RECURSIVE SUBROUTINE SetLink(P)
+    TYPE(PoleNode),POINTER :: P,Left,Right
+    IF(P%Box%Tier == BranchTier-1) THEN
+      DEALLOCATE(P%Descend%Travrse)
+      DEALLOCATE(P%Descend)
+      RunPointer = RunPointer + 1
+      P%Descend => PA2(RunPointer)%Ptr
+ 
+      RunPointer = RunPointer + 1
+      P%Descend%Travrse => PA2(RunPointer)%Ptr
+    ELSE
+      Left => P%Descend
+      Right => P%Descend%Travrse
+      CALL SetLink(Left)
+      CALL SetLink(Right)
+    ENDIF
+  END SUBROUTINE SetLink
+
+  SUBROUTINE BuildLocalTrees
+    TYPE(PoleNode),POINTER :: TP
+    INTEGER :: I,J,IErr,SendTo,RecvFr,ActIntRec,ActDblRec
+    INTEGER,ALLOCATABLE :: SF(:),Dest(:),NodesNumArr(:),IntNumArr(:),DblNumArr(:)
+    INTEGER,DIMENSION(MPI_STATUS_SIZE) :: IntStatus
+    INTEGER,DIMENSION(MPI_STATUS_SIZE) :: DblStatus
+
+    MaxTier = BranchTier
+    CALL NewPoleNode(PA2(MyID)%Ptr,BranchTier)
+    TP => PA2(MyID)%Ptr
+    TP%Bdex = PA1(MyID)%Ptr%Bdex
+    TP%Edex = PA1(MyID)%Ptr%Edex
+    TP%NQ = TP%Edex - TP%Bdex + 1
+    CALL SplitPole(TP)
+    DO CurrentTier = MaxTier,BranchTier, -1
+      CALL MakePoleTree(TP)
+    ENDDO
+
+    IntNum = 0
+    DblNum = 0
+    NodesVisit = 0
+    CALL FindSize(TP)
+
+    ALLOCATE(IntArr(IntNum))
+    ALLOCATE(DblArr(DblNum))
+
+    CALL PackTree(TP)
+
+    IF(IntNum /= IntIndex) THEN
+      STOP 'ERR: Missing integer during packing!'
+    ENDIF
+    IF(DblNum /= DblIndex) THEN
+      STOP 'ERR: Missing doubles during packing!'
+    ENDIF
+    IF(NodesVisit /= NodesVisit1) THEN
+      STOP 'ERR: Missing nodes ?'
+    ENDIF
+
+    ALLOCATE(SF(0:NPrc-1),Dest(0:NPrc-1))
+    ALLOCATE(NodesNumArr(0:NPrc-1),IntNumArr(0:NPrc-1),DblNumArr(0:NPrc-1))
+
+    ! WRITE(*,*) 'MyID = ',MyID, ', NodesVisit = ',NodesVisit, ', IntNum = ',IntNum,', DblNum = ',DblNum
+    CALL MPI_AllGather(NodesVisit,1,MPI_INTEGER,NodesNumArr(0),1,MPI_INTEGER,MONDO_COMM,IErr)
+    CALL MPI_AllGather(IntNum,1,MPI_INTEGER,IntNumArr(0),1,MPI_INTEGER,MONDO_COMM,IErr)
+    CALL MPI_AllGather(DblNum,1,MPI_INTEGER,DblNumArr(0),1,MPI_INTEGER,MONDO_COMM,IErr)
+    CALL MPI_AllReduce(IntNum,GIntNum,1,MPI_INTEGER,MPI_MAX,MONDO_COMM,IErr)
+    CALL MPI_AllReduce(DblNum,GDblNum,1,MPI_INTEGER,MPI_MAX,MONDO_COMM,IErr)
+    ! WRITE(*,*) 'MyID = ',MyID, ', GIntNum = ',GIntNum, ', GDblNum = ',GDblNum
+#ifdef DIAG_QCTC
+    IF(MyID == 0) THEN
+       CALL OpenASCII(OutFile,Out)
+       WRITE(*,'(A,F10.5)') 'int space(MB) for tree pack = ',GIntNum*4.0D-6
+       WRITE(*,'(A,F10.5)') 'dbl space(MB) for tree pack = ',GDblNum*8.0D-6
+       WRITE(Out,'(A,F10.5)') 'int space(MB) for tree pack = ',GIntNum*4.0D-6
+       WRITE(Out,'(A,F10.5)') 'dbl space(MB) for tree pack = ',GDblNum*8.0D-6
+       CLOSE(Out,STATUS='KEEP')
+    ENDIF
+#endif
+    
+    IF(MyID == 1) THEN
+      ! WRITE(*,*) 'NodesNumArr = ',NodesNumArr(:)
+    ENDIF
+    
+    ALLOCATE(RecIntArr(GIntNum))
+    ALLOCATE(RecDblArr(GDblNum))
+
+    DO I = 1, NPrc-1
+      DO J = 0, NPrc-1
+        SendTo = MODULO(J+I,NPrc)
+        Dest(J) = SendTo
+        SF(J) = 0
+      ENDDO
+      DO J = 0, NPrc-1
+        IF(SF(J) == 0 .AND. SF(Dest(J)) == 0) THEN
+          SF(J) = 1
+          SF(Dest(J)) = 2
+        ENDIF
+      ENDDO
+      SendTo = MODULO(MyID+I,NPrc)
+      RecvFr = MODULO(MyID-I,NPrc)
+      IF(SF(MyID) == 1) THEN
+        CALL MPI_Send(IntArr(1),IntNum,MPI_INTEGER,SendTo,MyID,MONDO_COMM,IErr)
+        CALL MPI_Send(DblArr(1),DblNum,MPI_DOUBLE_PRECISION,SendTo,MyID,MONDO_COMM,IErr)
+
+        CALL MPI_Recv(RecIntArr(1),GIntNum,MPI_INTEGER,RecvFr,RecvFr,MONDO_COMM,IntStatus,IErr) 
+        CALL MPI_Recv(RecDblArr(1),GDblNum,MPI_DOUBLE_PRECISION,RecvFr,RecvFr,MONDO_COMM,DblStatus,IErr) 
+        CALL MPI_Get_Count(IntStatus,MPI_INTEGER,ActIntRec,IErr)
+        CALL MPI_Get_Count(DblStatus,MPI_DOUBLE_PRECISION,ActDblRec,IErr)
+        IF(ActIntRec /= IntNumArr(RecvFr)) STOP 'ERR: 1: Missing int while receiving ?'
+        IF(ActDblRec /= DblNumArr(RecvFr)) STOP 'ERR: 1: Missing dbl while receiving ?'
+
+        CALL CopyTree(RecvFr)
+        IF(IntIndex /= IntNumArr(RecvFr)) STOP 'ERR: should be the same!'
+        IF(DblIndex /= DblNumArr(RecvFr)) STOP 'ERR: should be the same!'
+        IF(NodesVisit /= NodesNumArr(RecvFr)) STOP 'ERR: should be the same!'
+        
+        
+      ELSE
+        CALL MPI_Recv(RecIntArr(1),GIntNum,MPI_INTEGER,RecvFr,RecvFr,MONDO_COMM,IntStatus,IErr) 
+        CALL MPI_Recv(RecDblArr(1),GDblNum,MPI_DOUBLE_PRECISION,RecvFr,RecvFr,MONDO_COMM,DblStatus,IErr) 
+        CALL MPI_Get_Count(IntStatus,MPI_INTEGER,ActIntRec,IErr)
+        CALL MPI_Get_Count(DblStatus,MPI_DOUBLE_PRECISION,ActDblRec,IErr)
+        IF(ActIntRec /= IntNumArr(RecvFr)) STOP 'ERR: 1: Missing int while receiving ?'
+        IF(ActDblRec /= DblNumArr(RecvFr)) STOP 'ERR: 1: Missing dbl while receiving ?'
+
+        CALL CopyTree(RecvFr)
+        IF(IntIndex /= IntNumArr(RecvFr)) STOP 'ERR: should be the same!'
+        IF(DblIndex /= DblNumArr(RecvFr)) STOP 'ERR: should be the same!'
+        IF(NodesVisit /= NodesNumArr(RecvFr)) STOP 'ERR: should be the same!'
+
+        CALL MPI_Send(IntArr(1),IntNum,MPI_INTEGER,SendTo,MyID,MONDO_COMM,IErr)
+        CALL MPI_Send(DblArr(1),DblNum,MPI_DOUBLE_PRECISION,SendTo,MyID,MONDO_COMM,IErr)
+      ENDIF
+    ENDDO
+
+    DEALLOCATE(RecIntArr)
+    DEALLOCATE(RecDblArr)
+    DEALLOCATE(IntArr)
+    DEALLOCATE(DblArr)
+
+  END SUBROUTINE BuildLocalTrees
+
+  SUBROUTINE CopyTree(I)
+    INTEGER :: I
+
+    NodesVisit = 0
+    IntIndex = 0
+    DblIndex = 0
+    CALL RecurCopy(PA2(I)%Ptr)
+  END SUBROUTINE CopyTree
+ 
+  RECURSIVE SUBROUTINE RecurCopy(P)
+    TYPE(PoleNode),POINTER :: P
+    INTEGER :: SizeofSP,SizeofCo
+
+    NodesVisit = NodesVisit + 1
+    IntIndex = IntIndex + 1
+    IF(RecIntArr(IntIndex) == 100) THEN
+      CALL NewPoleNode(P,0)
+      P%Leaf = .TRUE.
+
+      P%Bdex = RecIntArr(IntIndex + 1)
+      IntIndex = IntIndex + 1
+      P%Edex = RecIntArr(IntIndex + 1)
+      IntIndex = IntIndex + 1
+      P%NQ = RecIntArr(IntIndex + 1)
+      IntIndex = IntIndex + 1
+      P%Ell = RecIntArr(IntIndex + 1)
+      IntIndex = IntIndex + 1
+      P%Box%Tier = RecIntArr(IntIndex + 1)
+      IntIndex = IntIndex + 1
+
+      P%Zeta = RecDblArr(DblIndex + 1)
+      DblIndex = DblIndex + 1
+      P%Strength = RecDblArr(DblIndex + 1) 
+      DblIndex = DblIndex + 1 
+      P%DMax2 = RecDblArr(DblIndex + 1)
+      DblIndex = DblIndex + 1 
+      P%Box%BndBox(1:3,1) = RecDblArr(DblIndex+1:DblIndex+3)
+      DblIndex = DblIndex + 3
+      P%Box%BndBox(1:3,2) = RecDblArr(DblIndex+1:DblIndex+3)
+      DblIndex = DblIndex + 3
+      P%Box%Center(1:3) = RecDblArr(DblIndex+1:DblIndex+3)
+      DblIndex = DblIndex + 3 
+      P%Box%Half(1:3) = RecDblArr(DblIndex+1:DblIndex+3)
+      DblIndex = DblIndex + 3 
+
+      SizeofCo = LHGTF(P%Ell)
+      ALLOCATE(P%Co(1:SizeofCo))
+      P%Co(1:SizeofCo) = RecDblArr(DblIndex+1:DblIndex+SizeofCo)
+      DblIndex = DblIndex + SizeofCo
+
+      SizeofSP = LSP(P%Ell)+1
+      ALLOCATE(P%S(0:SizeofSP-1))
+      ALLOCATE(P%C(0:SizeofSP-1))
+      P%C(0:SizeofSP-1) = RecDblArr(DblIndex+1:DblIndex+SizeofSP)
+      DblIndex = DblIndex + SizeofSP
+      
+      P%S(0:SizeofSP-1) = RecDblArr(DblIndex+1:DblIndex+SizeofSP)
+      DblIndex = DblIndex + SizeofSP
+      NULLIFY(P%Descend)
+      NULLIFY(P%Travrse)
+    ELSE
+      IF(RecIntArr(IntIndex) /= 200) STOP 'ERR: Leaf-node troubles!'
+      CALL NewPoleNode(P,0)
+      P%Leaf = .FALSE.
+
+      P%Bdex = RecIntArr(IntIndex + 1)
+      IntIndex = IntIndex + 1
+      P%Edex = RecIntArr(IntIndex + 1)
+      IntIndex = IntIndex + 1
+      P%NQ = RecIntArr(IntIndex + 1)
+      IntIndex = IntIndex + 1
+      P%Ell = RecIntArr(IntIndex + 1)
+      IntIndex = IntIndex + 1
+      P%Box%Tier = RecIntArr(IntIndex + 1)
+      IntIndex = IntIndex + 1
+
+      P%Zeta = RecDblArr(DblIndex + 1)
+      DblIndex = DblIndex + 1
+      P%Strength = RecDblArr(DblIndex + 1) 
+      DblIndex = DblIndex + 1 
+      P%DMax2 = RecDblArr(DblIndex + 1)
+      DblIndex = DblIndex + 1 
+      P%Box%BndBox(1:3,1) = RecDblArr(DblIndex+1:DblIndex+3)
+      DblIndex = DblIndex + 3
+      P%Box%BndBox(1:3,2) = RecDblArr(DblIndex+1:DblIndex+3)
+      DblIndex = DblIndex + 3
+      P%Box%Center(1:3) = RecDblArr(DblIndex+1:DblIndex+3)
+      DblIndex = DblIndex + 3 
+      P%Box%Half(1:3) = RecDblArr(DblIndex+1:DblIndex+3)
+      DblIndex = DblIndex + 3 
+
+      SizeofSP = LSP(SPEll+MaxUEll)+1 !!!
+      ALLOCATE(P%S(0:SizeofSP-1))
+      ALLOCATE(P%C(0:SizeofSP-1))
+      P%C(0:SizeofSP-1) = RecDblArr(DblIndex+1:DblIndex+SizeofSP)
+      DblIndex = DblIndex + SizeofSP
+      
+      P%S(0:SizeofSP-1) = RecDblArr(DblIndex+1:DblIndex+SizeofSP)
+      DblIndex = DblIndex + SizeofSP
+
+      CALL RecurCopy(P%Descend)
+      CALL RecurCopy(P%Descend%Travrse)
+    ENDIF
+  END SUBROUTINE RecurCopy
+
+  SUBROUTINE PackTree(P)
+    TYPE(PoleNode),POINTER :: P
+    NodesVisit1 = 0
+    IntIndex = 0
+    DblIndex = 0
+    CALL RecurPack(P)
+  END SUBROUTINE PackTree
+
+  RECURSIVE SUBROUTINE RecurPack(P)
+    TYPE(PoleNode),POINTER :: P,Left,Right
+    INTEGER :: SizeofCo,SizeofSP
+
+    NodesVisit1 = NodesVisit1 + 1
+
+    IF(P%Leaf) THEN
+      IntArr(IntIndex + 1) = 100
+      IntIndex = IntIndex + 1
+      IntArr(IntIndex + 1) = P%Bdex
+      IntIndex = IntIndex + 1
+      IntArr(IntIndex + 1) = P%Edex
+      IntIndex = IntIndex + 1
+      IntArr(IntIndex + 1) = P%NQ
+      IntIndex = IntIndex + 1
+      IntArr(IntIndex + 1) = P%Ell
+      IntIndex = IntIndex + 1
+      IntArr(IntIndex + 1) = P%Box%Tier
+      IntIndex = IntIndex + 1
+
+      DblArr(DblIndex + 1) = P%Zeta
+      DblIndex = DblIndex + 1
+      DblArr(DblIndex + 1) = P%Strength
+      DblIndex = DblIndex + 1 
+      DblArr(DblIndex + 1) = P%DMax2
+      DblIndex = DblIndex + 1 
+      DblArr(DblIndex+1:DblIndex+3) = P%Box%BndBox(1:3,1)
+      DblIndex = DblIndex + 3
+      DblArr(DblIndex+1:DblIndex+3) = P%Box%BndBox(1:3,2)
+      DblIndex = DblIndex + 3
+      DblArr(DblIndex+1:DblIndex+3) = P%Box%Center(1:3)
+      DblIndex = DblIndex + 3 
+      DblArr(DblIndex+1:DblIndex+3) = P%Box%Half(1:3)
+      DblIndex = DblIndex + 3 
+
+      SizeofCo = LHGTF(P%Ell)
+      DblArr(DblIndex+1:DblIndex+SizeofCo) = P%Co(1:SizeofCo)
+      DblIndex = DblIndex + SizeofCo
+
+      SizeofSP = LSP(P%Ell)+1
+      DblArr(DblIndex+1:DblIndex+SizeofSP) = P%C(0:SizeofSP-1)
+      DblIndex = DblIndex + SizeofSP
+      
+      DblArr(DblIndex+1:DblIndex+SizeofSP) = P%S(0:SizeofSP-1)
+      DblIndex = DblIndex + SizeofSP
+    ELSE
+      IntArr(IntIndex + 1) = 200
+      IntIndex = IntIndex + 1
+
+      IntArr(IntIndex + 1) = P%Bdex
+      IntIndex = IntIndex+1
+      IntArr(IntIndex + 1) = P%Edex
+      IntIndex = IntIndex+1
+      IntArr(IntIndex + 1) = P%NQ
+      IntIndex = IntIndex+1
+      IntArr(IntIndex + 1) = P%Ell
+      IntIndex = IntIndex+1
+      IntArr(IntIndex + 1) = P%Box%Tier
+      IntIndex = IntIndex+1
+
+      DblArr(DblIndex + 1) = P%Zeta
+      DblIndex = DblIndex + 1
+      DblArr(DblIndex + 1) = P%Strength
+      DblIndex = DblIndex + 1 
+      DblArr(DblIndex + 1) = P%DMax2
+      DblIndex = DblIndex + 1 
+      DblArr(DblIndex+1:DblIndex+3) = P%Box%BndBox(1:3,1)
+      DblIndex = DblIndex + 3
+      DblArr(DblIndex+1:DblIndex+3) = P%Box%BndBox(1:3,2)
+      DblIndex = DblIndex + 3
+      DblArr(DblIndex+1:DblIndex+3) = P%Box%Center(1:3)
+      DblIndex = DblIndex + 3 
+      DblArr(DblIndex+1:DblIndex+3) = P%Box%Half(1:3)
+      DblIndex = DblIndex + 3 
+
+      SizeofSP = LSP(SPEll+MaxUEll)+1 !!!
+      
+      DblArr(DblIndex+1:DblIndex+SizeofSP) = P%C(0:SizeofSP-1)
+      DblIndex = DblIndex + SizeofSP
+      
+      DblArr(DblIndex+1:DblIndex+SizeofSP) = P%S(0:SizeofSP-1)
+      DblIndex = DblIndex + SizeofSP
+
+      Left => P%Descend
+      Right => P%Descend%Travrse
+      CALL RecurPack(Left)
+      CALL RecurPack(Right)
+    ENDIF
+      
+  END SUBROUTINE RecurPack
+
+  RECURSIVE SUBROUTINE FindSize(P)
+    TYPE(PoleNode),POINTER :: P,Left,Right
+    INTEGER :: SizeofCo,SizeofSP
+
+    NodesVisit = NodesVisit + 1
+    IF(P%Leaf) THEN
+      IntNum = IntNum + 5 + 1
+      SizeofCo = Size(P%Co)
+      IF(SizeofCo /= LHGTF(P%Ell)) THEN
+        STOP 'ERR: Leaf: SizeofCo is wrong!'
+      ENDIF
+      SizeofSP = Size(P%S)
+      IF(SizeofSP /= (LSP(P%Ell)+1)) THEN
+        STOP 'ERR: Leaf: SizeofSP is wrong!'
+      ENDIF
+      DblNum = DblNum + 15 + SizeofCo + SizeofSP + SizeofSP
+    ELSE
+
+      IntNum = IntNum + 5 + 1
+      SizeofSP = Size(P%S)
+      IF(SizeofSP /= (LSP(SPEll+MaxUEll)+1)) THEN
+        WRITE(*,*) 'SizeofSP = ',SizeofSP, ', (LSP(SPEll+MaxUEll)+1) = ',(LSP(SPEll+MaxUEll)+1)
+        STOP 'ERR: Non-leaf: SizeofSP is wrong!'
+      ENDIF
+      
+      !!! 
+
+      DblNum = DblNum + 15 + SizeofSP + SizeofSP
+      Left => P%Descend
+      Right => P%Descend%Travrse
+      CALL FindSize(Left)
+      CALL FindSize(Right)
+    ENDIF
+  END SUBROUTINE FindSize
+
+  SUBROUTINE MakeTree1
+    PoleNodes = 0
+    MaxTier = 0
+    RunPointer = -1
+    CALL NewPoleNode(PR1,0)
+    PR1%Bdex = 1
+    PR1%Edex = Rho%NDist
+    PR1%NQ = Rho%NDist
+    BranchTier = NINT(LOG(NPrc*1.0D0)/LOG(2.0D0))
+    IF(2.0D0**BranchTier /= NPrc) THEN
+      STOP 'ERR: Check NPrc!'
+    ENDIF
+    CALL SplitPole1(PR1)
+  END SUBROUTINE MakeTree1
+
+  RECURSIVE SUBROUTINE SplitPole1(P)
+    TYPE(PoleNode),POINTER :: P, Left,Right
+    IF(P%NQ == 1) THEN
+      STOP  'Err: Nq must be greater than 1!'
+    ELSE
+      IF(P%Box%Tier == BranchTier) THEN
+        RunPointer = RunPointer + 1
+        PA1(RunPointer)%Ptr => P
+      ELSE
+        CALL NewPoleNode(P%Descend,P%Box%Tier+1)
+        CALL NewPoleNode(P%Descend%Travrse,P%Box%Tier+1)
+        Left => P%Descend
+        Right => P%Descend%Travrse
+        CALL SplitPoleBox(P,Left,Right)
+        CALL SplitPole1(Left)
+        CALL SplitPole1(Right)
+        CALL NewSPArrays(P)
+      ENDIF
+    ENDIF
+  END SUBROUTINE SplitPole1
+
+  SUBROUTINE CheckInBox(GMLoc)
+    REAL(DOUBLE) :: Dist
+    INTEGER :: I,NQ,iq,iadd,zq,TotNQ
+    REAL(DOUBLE),DIMENSION(3) :: PQ
+    TYPE(CRDS) :: GMLoc
+    LOGICAL :: Fail
+
+    RootBDist = ZERO
+    TotNQ = 0
+    DO zq = 1, Rho%NExpt
+      NQ = Rho%NQ%I(zq)
+      DO iq = 1, NQ
+        TotNQ = TotNQ + 1
+        iadd = Rho%OffQ%I(zq) + iq
+        PQ(1) = Rho%Qx%D(iadd)-GMLoc%PBC%CellCenter%D(1)
+        PQ(2) = Rho%Qy%D(iadd)-GMLoc%PBC%CellCenter%D(2)
+        PQ(3) = Rho%Qz%D(iadd)-GMLoc%PBC%CellCenter%D(3)
+        
+        Dist = SQRT(PQ(1)*PQ(1)+PQ(2)*PQ(2)+PQ(3)*PQ(3))
+        IF(Dist > RootBDist) THEN
+          RootBDist = Dist
+        ENDIF
+      ENDDO 
+
+    ENDDO
+#ifdef DIAG_QCTC
+    WRITE(*,*) 'EN partition: TotNQ = ',TotNQ, ', RootBDist = ',RootBDist
+#endif
+    CALL ENPart(NPrc,TotNQ,BegNQInd,EndNQInd)
+  END SUBROUTINE CheckInBox
 
   ! count number of primitives
   SUBROUTINE EBBCountJBlock(Count,Pair,PoleRoot)
@@ -309,7 +809,9 @@ CONTAINS
         WasteCost = WasteCost + (MaxCost-VTm%D(I))
       ENDDO
       Imbalance = WasteCost/(NV*MaxCost)
+#ifdef DIAG_QCTC
       write(*,*) 'Predicted Imbalance is ', Imbalance
+#endif
       CALL Put(NPrc,'QLineLoc')
       CALL Put(XYZ,'QETDir')
       CALL Put(POS,'QETRoot')

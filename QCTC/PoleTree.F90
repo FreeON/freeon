@@ -15,6 +15,7 @@ MODULE PoleTree
 !----------------------------------------------------------------------------------
 !  Globals
    TYPE(PoleNode), POINTER               :: PoleRoot ! Root of the pole tree 
+   TYPE(PoleNode), POINTER               :: PR1
    INTEGER                               :: PoleNodes
    INTEGER                               :: RhoLevel
    INTEGER                               :: CurrentTier
@@ -39,8 +40,10 @@ MODULE PoleTree
         RhoLevel=0
         MaxTier=0
 !       Initialize the root node
+        
         CALL NewPoleNode(PoleRoot,0)
-        CALL NewSPArrays(PoleRoot)
+        ! CALL NewSPArrays(PoleRoot)
+        
         PoleRoot%Bdex=1
         PoleRoot%Edex=Rho%NDist
         PoleRoot%NQ=Rho%NDist
@@ -62,6 +65,7 @@ MODULE PoleTree
 !--------------------------------------------------------------
          IF(Node%NQ==1)THEN
             CALL FillRhoLeaf(Node)
+            CALL NewSPArrays(Node)
          ELSE 
 !           Allocate new children 
             CALL NewPoleNode(Node%Descend,Node%Box%Tier+1)
@@ -75,8 +79,9 @@ MODULE PoleTree
             CALL SplitPole(Left)
             CALL SplitPole(Right)
 !           Allocate multipole arrays
-            CALL NewSPArrays(Left)
-            CALL NewSPArrays(Right)
+            ! CALL NewSPArrays(Left)
+            ! CALL NewSPArrays(Right)
+            CALL NewSPArrays(Node)
          ENDIF
        END SUBROUTINE SplitPole
 !=================================================================================

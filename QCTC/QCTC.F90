@@ -105,6 +105,12 @@ PROGRAM QCTC
   CALL MultipoleSetUp()
 ! Build the global PoleTree representation of the total density
   CALL Elapsed_Time(TimeMakeTree,'Init')
+#ifdef PARALLEL
+  CALL ParaRhoToPoleTree
+#else
+  CALL RhoToPoleTree
+#endif
+
   CALL RhoToPoleTree
   CALL Elapsed_TIME(TimeMakeTree,'Accum')
 #ifdef PARALLEL
