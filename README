@@ -39,7 +39,39 @@ o Document and check in.
 o Drivers for TS and dynamics.
 o Big apps and talk for ACS 2001
 !==========================================================================================
-<<<<<<< README
+o MondoMods
+ - AtomPairs:   Added an extra distance to New_CellSet_sphere to take into account
+  	        atoms at the corners of the cell. Takes into account the size and shape
+	        of the box
+ - PBC:         Fixed New_CellSet_spher and New_CellSet_Cube. Now the Lattice vectors need
+ 	        to be called threw to make CellSet. Also Added the Logical Funtion IJKTest
+o MondoSCF
+ - ParseInput:  Added the functionality to turn the Periodicd on in any direction 
+	        {On-X,On-Y,On-Z,On-XY,On-XZ,On-YZ,On-XYZ}
+ - ParsingKeys: Added the Keys for {On-X,On-Y,On-Z,On-XY,On-XZ,On-YZ,On-XYZ}
+o OneE  
+ - RhoBlock:    Removed the Atom,State,Primative sysmetiztion factors, this was incorrect
+o QCTC
+ - Makefile:    Modified to include the New Moduales
+ - Moments/:    Subdirectory that includes the Include files (HGTFToCarts.inc, HGTFToSP.inc) 
+	        plus the matematica Programs which generates them.
+ - MakeDJ:      MaxL = 16: Now calls a CalQRho(rho) which calculate the Cartesisan Multipole 
+	        tensor  
+ - JBlok:       Added in the Calculation of the Cartesian Multipole Correction to the Matrix 
+	        elemets. Took the MD2TRR,SetBraBlok,BraEst calculation out of the cell sum, 
+	        which was an error. Added some logic (Dimen) so that CTraxBraKet and 
+	        QTraxBraKet will only be done in the correct dimensional system.
+
+ - Multipoles:  Originally MMoments, split this into Multipole.F90 and Moments.F90
+	        Multipoles can now be done in box shape or size, now longer read the file 
+	        Multipoles_Cube.dat, but generated them. Still needs work in one and two 
+	        dimensions
+ - Moments:     NEW Moduale, two classes (Spherical) SpMoments and (Cartesian) QMoments.
+ - MMML:        Fortran90 Vesion of MMML_OLD.F, not completed
+ - MMML_OLD:    Matts Multipole Manipultion Library, in F77
+
+ - MMA/Moments: Added a new directory with symbolics for the multipole moments.
+!==========================================================================================
 MC Change log 12/4/00
 
 o  HiCu
