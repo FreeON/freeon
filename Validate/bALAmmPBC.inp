@@ -9,6 +9,8 @@ Mechanics=(MM)
 Accuracy =(VeryTight)
 DebugAll=(MaxDebug)
 Geometry=(InAngstroms,NoOrder)
+PFFLayers=1
+PFFMaxEll=20
 Periodic=(On-XYZ,AtomWrap,AngFormat,FracCoord)
 <EndOptions>
 
