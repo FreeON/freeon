@@ -1,0 +1,33 @@
+<BeginTitle>
+Urea 
+External Reference #s:
+RBLYPxc/STO-3G  -222.0998 27663
+   <SCF>     = -.222 0998 27 0520597D+03   
+RBLYPxc/3-21G   -223.93784 1078
+RBLYPxc/6-31G** -225.19940 9453 
+<EndTitle>
+
+<BeginOptions>
+Charge=0
+Multiplicity=1
+Guess=SuperPos
+SCFMethod=(RH)
+BasisSets=(STO-3G)
+ModelChem=(BLYPxc)
+Accuracy =(Tight)
+DebugAll =(MaxDebug)
+Geometry=(InAngstroms)
+<EndOptions>
+
+<BeginGeometry>
+H   -0.707   -1.226    1.618
+H    0.457    0.052    1.712
+N   -0.171   -0.509    1.173
+H    0.360    0.842   -1.712
+H    1.060    1.226   -0.175
+O   -1.060   -0.982   -0.822
+N    0.438    0.672   -0.729
+C   -0.297   -0.302   -0.155
+<EndGeometry>
+
+
