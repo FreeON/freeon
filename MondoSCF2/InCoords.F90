@@ -1372,6 +1372,7 @@ CONTAINS
        !
        IF(DoRepeat) THEN
          VectIntAux%D=VectIntReq%D-IntCValSt%D  
+         CALL MapAngleDispl(IntCs,VectIntAux%D)
          CALL CutOffDispl(VectIntAux%D,IntCs, &
                      GCoordCtrl%MaxStre,GCoordCtrl%MaxAngle,Fact_O=Half)
          VectIntReq%D=IntCValSt%D+VectIntAux%D
