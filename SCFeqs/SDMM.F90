@@ -34,8 +34,8 @@ PROGRAM SDMM
                                     Diff,LShift,ENew,CnvgQ,DeltaNQ,DeltaPQ,MinDeltaPQ,   &
                                     FixedPoint,NumPot,DenPot,OldPoint,NewE,OldE,DeltaE,DeltaEQ, &
                                     OldDeltaEQ,OldDeltaPQ,OldDeltaE
-  REAL(DOUBLE),PARAMETER         :: ThreshAmp=1.D0
-  INTEGER                        :: I,J,ICG,NCG,IPur,NPur,OnExit
+  REAL(DOUBLE),PARAMETER         :: ThreshAmp=1.D1
+  INTEGER                        :: I,J,ICG,NCG,IPur,NPur,OnExit,MinPQCount
   LOGICAL                        :: Present,FixedUVW,ToExit
   CHARACTER(LEN=2)               :: Cycl,NxtC
   CHARACTER(LEN=20)              :: ItAnounce
@@ -47,6 +47,7 @@ PROGRAM SDMM
   CALL StartUp(Args,Prog)
   Cycl=IntToChar(Args%I%I(1))
   NxtC=IntToChar(Args%I%I(1)+1)
+
 #ifdef PARALLEL
 !-----------------------------------------------------------------------
 ! Repartion based on previous matrices structure
@@ -93,6 +94,7 @@ PROGRAM SDMM
   NCG=0
   OnExit=0
   OldPoint=BIG_DBL
+  OldE=Zero
   DO ICG=0,12
      NCG=NCG+1
 !
@@ -140,7 +142,12 @@ PROGRAM SDMM
 !
      IF(C==Zero.AND.D==Zero)THEN
         IF(ICG<5)THEN 
-           WRITE(*,*)' Warning: exiting CG loop in SDMM with c=0, d=0 '
+           CALL OpenASCII(OutFile,Out)
+           CALL PrintProtectL(Out)
+           WRITE(Out,*)' Warning: exiting CG loop in SDMM with c=0, d=0 '
+           WRITE(*  ,*)' Warning: exiting CG loop in SDMM with c=0, d=0 '
+           CALL PrintProtectR(Out)
+           CLOSE(UNIT=Out,STATUS='KEEP')
         ENDIF
         EXIT
      ELSEIF(d==Zero)THEN
@@ -149,7 +156,12 @@ PROGRAM SDMM
         Discrim=C*C-Three*B*D
         Denom=Three*D
         IF(Discrim<Zero)THEN 
-           WRITE(*,*)'Warning: Complex solution in SDMM Line Minimization '
+           CALL OpenASCII(OutFile,Out)
+           CALL PrintProtectL(Out)
+           WRITE(Out,*)'Warning: Complex solution in SDMM Line Minimization '
+           WRITE(*  ,*)'Warning: Complex solution in SDMM Line Minimization '
+           CALL PrintProtectR(Out)
+           CLOSE(UNIT=Out,STATUS='KEEP')
            EXIT
         ENDIF
         SqDis=DSQRT(Discrim)
@@ -196,6 +208,7 @@ PROGRAM SDMM
      CALL Multiply(P,F,T2)              ! T2=P.F    
      CALL Filter(T3,T2)                 ! T3=Filter[P.F]
 !
+     OldE=NewE
      NewE=Trace(T3)                     ! Tr{P.F}
 !-----------------------------------------------------------------------------
 !    PRINT CONVERGENCE STATS IF REQUESTED
@@ -214,16 +227,18 @@ PROGRAM SDMM
 !-----------------------------------------------------------------------------
 !    CHECK FOR MINIMIZATION CONVERGENCE
 !
-!    Convergence inflection
-!          
-     IF(NINT(OldPoint/ABS(OldPoint))/=NINT(FixedPoint/ABS(FixedPoint)) &
-        .AND.NCG/=1.AND.OnExit==0)THEN
-!       Do 1 more cycle for good measure
-        OnExit=NCG+1
-     ENDIF
-     IF(OnExit==NCG)EXIT
+!    Ditching exit criteria. Logic not robust enough...
 !
-     OldPoint=FixedPoint
+!    Detect convergence inflection
+!     IF(NINT(OldPoint/ABS(OldPoint))/=NINT(FixedPoint/ABS(FixedPoint)) &
+!        .AND.NCG/=1.AND.OnExit==0)THEN
+!       Do a few more cycles for good measure
+!        OnExit=NCG+3
+!     ENDIF
+!     IF(OnExit==NCG)EXIT
+!     OldPoint=FixedPoint
+!    Detect convergence non-minimification 
+!     IF(NCG>5.AND.ABS(OldE)>ABS(NewE))EXIT
 !-----------------------------------------------------------------------------
 !    GRADIENT EVALUATION
 !
@@ -262,6 +277,7 @@ PROGRAM SDMM
    OldDeltaN=1.D20
    OldDeltaP=1.D20
    MinDeltaPQ=1.D20
+   MinPQCount=1
    NPur=0
    FixedUVW=.FALSE.
    DO J=0,40
@@ -319,32 +335,37 @@ PROGRAM SDMM
 !     CHECK CONVERGENCE
       ToExit=.FALSE.
 !     Test when in the asymptotic regime
-      IF(DeltaEQ<Thresholds%ETol*1.D1.AND.NPur>3)THEN
+!      IF(DeltaEQ<Thresholds%ETol*1.D1.AND.
+IF(NPur>6)THEN
          CALL OpenASCII(OutFile,Out)
-!        Check for non-decreasing /P
 !         WRITE(*,*)' DeltaPQ = ',DeltaPQ
-         IF(DeltaP>OldDeltaP.AND.MinDeltaPQ<1.D-1)THEN
-!             WRITE(*,*)' DeltaP = ',DeltaP
-!             WRITE(*,*)' OldDP  = ',OldDeltaP
-!             WRITE(*,*)' SDMM EXIT 0 '
-             ToExit=.TRUE.
-          ENDIF
-!         Check for low digit rebound in the energy
-          IF(NewE-OldE>Zero)THEN
-!             WRITE(*,*)' SDMM EXIT 1 '
-             ToExit=.TRUE.
-          ENDIF
+!         WRITE(*,*)' MinDeltaPQ = ',MinDeltaPQ
+         IF(DeltaP<60.D0*Thresholds%Trix)THEN
+!            WRITE(*,*)' DeltaP = ',DeltaP,60.D0*Thresholds%Trix
+!            Check for non-decreasing /P
+             IF(DeltaP>OldDeltaP)THEN
+!                WRITE(*,*)' DeltaP = ',DeltaP
+!                WRITE(*,*)' OldDP  = ',OldDeltaP
+                WRITE(*,*)' SDMM EXIT 0 '
+                ToExit=.TRUE.
+              ENDIF
+!             Check for low digit rebound in the energy
+!              IF(NewE-OldE>Zero)THEN
+!                 WRITE(*,*)' SDMM EXIT 1 '
+!                 ToExit=.TRUE.
+!              ENDIF
+         ENDIF
 !         Check for density matrix stall out 
           IF(DeltaPQ<1.D-3)THEN
-!             WRITE(*,*)' SDMM EXIT 2, DeltaPQ = ',DeltaPQ
+             WRITE(*,*)' SDMM EXIT 2, DeltaPQ = ',DeltaPQ
              ToExit=.TRUE.
           ENDIF
 !         Check for exceeding target accuracies
-          IF(DeltaEQ<Thresholds%ETol*1.D-2.AND. &
-             DeltaP<Thresholds%DTol*5.D-2)THEN
-             ToExit=.TRUE.
+!          IF(DeltaEQ<Thresholds%ETol*1.D-2.AND. &
+!             DeltaP<Thresholds%DTol*1.D-2)THEN
+!             ToExit=.TRUE.
 !             WRITE(*,*)' SDMM EXIT 4 ',DeltaEQ,DeltaP
-          ENDIF
+!          ENDIF
           CLOSE(Out)
       ENDIF
 !     Updtate previous cycle values
@@ -413,8 +434,9 @@ PROGRAM SDMM
 !
 !=============================================================================
 !  Renormalization
-!   Fact=DBLE(NEl)/TrP
-!   CALL Multiply(P,Fact)
+!
+   Fact=DBLE(NEl)/TrP
+   CALL Multiply(P,Fact)
 !-----------------------------------------------------------------------------
 !  IO for the orthogonal P 
 !
