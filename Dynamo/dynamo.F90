@@ -39,17 +39,17 @@ CONTAINS
 !-------------------------------------------------------------- 
 !
 #ifdef MMech
-   SUBROUTINE COULOMB_EXCL(NATOMS,E_C_EXCL,InfFile,Cur)
+   SUBROUTINE COULOMB_EXCL(Natoms,E_C_EXCL,InfFile,Cur)
 !
 ! Calculate Coulomb exclusion for MM and QMMM calculations
-! MM_NATOMS and MM geometry must be used
+! MM_Natoms and MM geometry must be used
 !
      IMPLICIT NONE
      CHARACTER(LEN=DEFAULT_CHR_LEN) :: InfFile
      REAL(DOUBLE) :: E_C_EXCL12,E_C_EXCL13,E_C_EXCL14,E_C_EXCL
      TYPE(INT_VECT) :: ATMMARK
      TYPE(CRDS) :: GM_MM 
-     INTEGER :: I,J,K,L,M,N,NATOMS,NMAX12,NMAX13,NMAX14
+     INTEGER :: I,J,K,L,M,N,Natoms,NMAX12,NMAX13,NMAX14
      TYPE(DBL_VECT)    :: CHARGE14
      TYPE(INT_RNK2)    :: TOP12,TOP13,TOP14
      CHARACTER(LEN=3)  :: Cur
@@ -59,17 +59,17 @@ CONTAINS
 !   
      CALL OpenHDF(InfFile)
 !
-     GM_MM%NAtms=NATOMS
-     CALL NEW(GM_MM)
-     CALL NEW(ATMMARK,NATOMS)
-     CALL NEW(CHARGE14,NATOMS)
+     GM_MM%NAtms=Natoms
+     CALL New(GM_MM)
+     CALL New(ATMMARK,Natoms)
+     CALL New(CHARGE14,Natoms)
 !
      CALL Get(NMAX12,'NMAX12')
      CALL Get(NMAX13,'NMAX13')
      CALL Get(NMAX14,'NMAX14')
-     CALL NEW(TOP12,(/NATOMS,NMAX12/))
-     CALL NEW(TOP13,(/NATOMS,NMAX13/))
-     CALL NEW(TOP14,(/NATOMS,NMAX14/))
+     CALL New(TOP12,(/Natoms,NMAX12/))
+     CALL New(TOP13,(/Natoms,NMAX13/))
+     CALL New(TOP14,(/Natoms,NMAX14/))
 !
      IF(HasQM()) THEN
        CALL Get(ATMMARK,'ATMMARK')
@@ -93,24 +93,24 @@ CONTAINS
 !!
 !!test data got from HDF
 !      write(*,*) 'coordinates test'
-!     do i=1,natoms
+!     do i=1,Natoms
 !      write(*,200) I,GM_MM%Carts%D(1:3,I)/AngstromsToAU 
 !200   format(I5,3F12.6)
 !     enddo
 !      write(*,*) 'charges, ch14 eps14'
-!     do i=1,natoms
+!     do i=1,Natoms
 !      write(*,200) I,GM_MM%AtNum%D(I),CHARGE14%D(I)
 !     enddo
 !      write(*,*) 'top12 '
-!     do i=1,natoms
+!     do i=1,Natoms
 !      write(*,300) I,TOP12%I(I,1:NMAX12) 
 !     enddo
 !      write(*,*) 'top13 '
-!     do i=1,natoms
+!     do i=1,Natoms
 !      write(*,300) I,TOP13%I(I,1:NMAX13) 
 !     enddo
 !      write(*,*) 'top14 '
-!     do i=1,natoms
+!     do i=1,Natoms
 !      write(*,300) I,TOP14%I(I,1:NMAX14) 
 !     enddo
 !300  format(I5,20I4)
@@ -127,7 +127,7 @@ CONTAINS
 !
 ! bond terms
 !
-     DO I=1,NATOMS
+     DO I=1,Natoms
        IF(ATMMARK%I(I)==0) THEN
        XI=GM_MM%Carts%D(1,I)
        YI=GM_MM%Carts%D(2,I)
@@ -154,7 +154,7 @@ CONTAINS
 !
 ! angle terms
 !
-     DO I=1,NATOMS
+     DO I=1,Natoms
        IF(ATMMARK%I(I)==0) THEN
        XI=GM_MM%Carts%D(1,I)
        YI=GM_MM%Carts%D(2,I)
@@ -181,7 +181,7 @@ CONTAINS
 !
 ! dihedral terms
 !
-     DO I=1,NATOMS
+     DO I=1,Natoms
        IF(ATMMARK%I(I)==0) THEN
        XI=GM_MM%Carts%D(1,I)
        YI=GM_MM%Carts%D(2,I)
@@ -235,17 +235,17 @@ CONTAINS
 !
 !--------------------------------------------------------
 !
-   SUBROUTINE LJ_EXCL(NATOMS,E_LJ_EXCL,InfFile,Cur)
+   SUBROUTINE LJ_EXCL(Natoms,E_LJ_EXCL,InfFile,Cur)
 !
 ! Calculate the Lennard-Jones exclusion for MM and QMMM calculations
-! MM_NATOMS and MM geometry must be used
+! MM_Natoms and MM geometry must be used
 !
      IMPLICIT NONE
      CHARACTER(LEN=DEFAULT_CHR_LEN) :: InfFile
      REAL(DOUBLE) :: E_LJ_EXCL12,E_LJ_EXCL13,E_LJ_EXCL14,E_LJ_EXCL
      TYPE(INT_VECT) :: ATMMARK
      TYPE(CRDS) :: GM_MM 
-     INTEGER :: I,J,K,L,M,N,NATOMS,NMAX12,NMAX13,NMAX14
+     INTEGER :: I,J,K,L,M,N,Natoms,NMAX12,NMAX13,NMAX14
      TYPE(DBL_VECT)    :: LJEPS14,LJEPS,LJRAD
      TYPE(INT_RNK2)    :: TOP12,TOP13,TOP14
      CHARACTER(LEN=3)  :: Cur
@@ -256,19 +256,19 @@ CONTAINS
 !   
      CALL OpenHDF(InfFile)
 !
-     GM_MM%NAtms=NATOMS
-     CALL NEW(GM_MM)
-     CALL NEW(ATMMARK,NATOMS)
-     CALL NEW(LJEPS,NATOMS)
-     CALL NEW(LJEPS14,NATOMS)
-     CALL NEW(LJRAD,NATOMS)
+     GM_MM%NAtms=Natoms
+     CALL New(GM_MM)
+     CALL New(ATMMARK,Natoms)
+     CALL New(LJEPS,Natoms)
+     CALL New(LJEPS14,Natoms)
+     CALL New(LJRAD,Natoms)
 !
      CALL Get(NMAX12,'NMAX12')
      CALL Get(NMAX13,'NMAX13')
      CALL Get(NMAX14,'NMAX14')
-     CALL NEW(TOP12,(/NATOMS,NMAX12/))
-     CALL NEW(TOP13,(/NATOMS,NMAX13/))
-     CALL NEW(TOP14,(/NATOMS,NMAX14/))
+     CALL New(TOP12,(/Natoms,NMAX12/))
+     CALL New(TOP13,(/Natoms,NMAX13/))
+     CALL New(TOP14,(/Natoms,NMAX14/))
 !
      IF(HasQM()) THEN
        CALL Get(ATMMARK,'ATMMARK')
@@ -292,24 +292,24 @@ CONTAINS
 !!
 !!test data got from HDF
 !      write(*,*) 'coordinates test'
-!     do i=1,natoms
+!     do i=1,Natoms
 !      write(*,200) I,GM_MM%Carts%D(1:3,I)/AngstromsToAU 
 !200   format(I5,3F12.6)
 !     enddo
 !      write(*,*) 'charges, ch14 eps14'
-!     do i=1,natoms
+!     do i=1,Natoms
 !      write(*,200) I,LJEPS%D(I),LJEPS14%D(I)
 !     enddo
 !      write(*,*) 'top12 '
-!     do i=1,natoms
+!     do i=1,Natoms
 !      write(*,300) I,TOP12%I(I,1:NMAX12) 
 !     enddo
 !      write(*,*) 'top13 '
-!     do i=1,natoms
+!     do i=1,Natoms
 !      write(*,300) I,TOP13%I(I,1:NMAX13) 
 !     enddo
 !      write(*,*) 'top14 '
-!     do i=1,natoms
+!     do i=1,Natoms
 !      write(*,300) I,TOP14%I(I,1:NMAX14) 
 !     enddo
 !300  format(I5,20I4)
@@ -326,7 +326,7 @@ CONTAINS
 !
 ! bond terms
 !
-     DO I=1,NATOMS
+     DO I=1,Natoms
        IF(ATMMARK%I(I)==0) THEN
        XI=GM_MM%Carts%D(1,I)
        YI=GM_MM%Carts%D(2,I)
@@ -356,7 +356,7 @@ CONTAINS
 !
 ! angle terms
 !
-     DO I=1,NATOMS
+     DO I=1,Natoms
        IF(ATMMARK%I(I)==0) THEN
        XI=GM_MM%Carts%D(1,I)
        YI=GM_MM%Carts%D(2,I)
@@ -386,7 +386,7 @@ CONTAINS
 !
 ! dihedral terms
 !
-     DO I=1,NATOMS
+     DO I=1,Natoms
        IF(ATMMARK%I(I)==0) THEN
        XI=GM_MM%Carts%D(1,I)
        YI=GM_MM%Carts%D(2,I)
@@ -445,57 +445,59 @@ CONTAINS
    END SUBROUTINE LJ_EXCL
 !-------------------------------------------------------------- 
 !
-   SUBROUTINE ENERGY_LENNARD_JONES(ELJ,ISet,BOXSIZE)
+   SUBROUTINE ENERGY_LENNARD_JONES(ELJ,ISet,BoxSize,Grad_Loc)
 !
    IMPLICIT NONE
-   INTEGER :: ISET,NBOX,NATOMS,NX,NY,NZ
-   REAL(DOUBLE) :: BXMIN,BYMIN,BZMIN,BOXSIZE
-   INTEGER :: IX,IY,IZ,IORD,IORDD
+   INTEGER :: ISET,NBox,Natoms,NX,NY,NZ
+   REAL(DOUBLE) :: BXMIN,BYMIN,BZMIN,BoxSize
+   INTEGER :: IX,IY,IZ,IOrd,IOrdD
    INTEGER :: I1,I2,JJ1,JJ2,IXD,IYD,IZD
    REAL(DOUBLE) :: X1,Y1,Z1,X2,Y2,Z2,R1,R2,R12,R6,Q1,Q2
-   TYPE(INT_VECT) :: BOXI,BOXJ,ATMMARK
+   TYPE(INT_VECT) :: BoxI,BoxJ,ATMMARK
    TYPE(CRDS) :: GM_Loc
-   TYPE(DBL_VECT) :: LJEPS,LJRAD
-   REAL(DOUBLE) :: ELJ       
+   TYPE(DBL_VECT) :: LJEPS,LJRAD,DVect
+   TYPE(DBL_RNK2),OPTIONAL :: Grad_Loc
+   REAL(DOUBLE) :: ELJ,r12_2,Pref1,Pref2
 !
    CALL OpenHDF(InfFile)
 !
-! boxsize is in angstroems
+! BoxSize is in angstroems
 !
 ! get MM or QMMM atom coordinates as stored in GM_Loc
 ! get ATMMARK to distinguish between QM and MM atoms
 ! get LJEPS%D : LJ epsilon
 ! get LJRAD%D : LJ radii of atoms
-! calculate and get BOXI and BOXJ for a certain box size, then
-! sum up LJ contributions within boxes and between 
-! neighbouring boxes
+! calculate and get BoxI and BoxJ for a certain Box size, then
+! sum up LJ contributions within Boxes and between 
+! neighbouring Boxes
 !
    CALL Get(GM_Loc,'GM_MM'//TRIM(IntToChar(ISet)))
-   NATOMS=GM_Loc%Natms
+   Natoms=GM_Loc%Natms
 !
-     CALL New(ATMMARK,NATOMS)
+     CALL New(ATMMARK,Natoms)
    IF(HasQM()) THEN
      CALL Get(ATMMARK,'ATMMARK')
    ELSE 
      ATMMARK%I(:)=0 !!! all MM atoms
    ENDIF
 !
-   CALL New(LJEPS,NATOMS)
-   CALL New(LJRAD,NATOMS)
+   CALL New(DVect,3)
+   CALL New(LJEPS,Natoms)
+   CALL New(LJRAD,Natoms)
    CALL Get(LJEPS,'LJEPS')
    CALL Get(LJRAD,'LJRAD') 
 !
    GM_Loc%Carts%D(:,:)=GM_Loc%Carts%D(:,:)/AngstromsToAU !!! work with angstroems here
 !
-! Now calculate distributions of atoms in the boxes
+! Now calculate distributions of atoms in the Boxes
 !
-   CALL SORT_INTO_BOX1(BOXSIZE,GM_Loc%Carts%D,NATOMS,NX,NY,NZ,BXMIN,BYMIN,BZMIN)
+   CALL SORT_INTO_Box1(BoxSize,GM_Loc%Carts%D,Natoms,NX,NY,NZ,BXMIN,BYMIN,BZMIN)
 !
-   NBOX=NX*NY*NZ
-   CALL NEW(BOXI,NBOX+1)
-   CALL NEW(BOXJ,NATOMS)
+   NBox=NX*NY*NZ
+   CALL New(BoxI,NBox+1)
+   CALL New(BoxJ,Natoms)
 !
-   CALL SORT_INTO_BOX2(BOXSIZE,GM_Loc%Carts%D,NATOMS,NX,NY,NZ,BXMIN,BYMIN,BZMIN,BOXI,BOXJ)
+   CALL SORT_INTO_Box2(BoxSize,GM_Loc%Carts%D,Natoms,NX,NY,NZ,BXMIN,BYMIN,BZMIN,BoxI,BoxJ)
 !
 ! Calculate LJ energy
 !
@@ -505,18 +507,15 @@ CONTAINS
    DO IX=1,NX   
    DO IY=1,NY   
 !
-! indices of central and neighboring boxes
+! indices of central and neighboring Boxes
 !
-       IORD=NX*NY*(IZ-1)+NY*(IX-1)+IY
+       IOrd=NX*NY*(IZ-1)+NY*(IX-1)+IY
 !
-     DO I1=BOXI%I(IORD),BOXI%I(IORD+1)-1
-       JJ1=BOXJ%I(I1)
-        X1=GM_Loc%Carts%D(1,JJ1)
-        Y1=GM_Loc%Carts%D(2,JJ1)
-        Z1=GM_Loc%Carts%D(3,JJ1)
+     DO I1=BoxI%I(IOrd),BoxI%I(IOrd+1)-1
+       JJ1=BoxJ%I(I1)
         R1=LJRAD%D(JJ1)
         Q1=LJEPS%D(JJ1)
-! second atom may come from central or neigbouring boxes 
+! second atom may come from central or neigbouring Boxes 
 ! and must be an MM atom, LJ is not calculated for QM-QM pairs
      DO IZD=-1,1
        IF(IZ+IZD>0 .AND. IZ+IZD<=NZ) THEN
@@ -525,19 +524,27 @@ CONTAINS
      DO IYD=-1,1
        IF(IY+IYD>0 .AND. IY+IYD<=NY) THEN
 !
-       IORDD=NX*NY*(IZ-1+IZD)+NY*(IX-1+IXD)+IY+IYD
-         DO I2=BOXI%I(IORDD),BOXI%I(IORDD+1)-1
-           JJ2=BOXJ%I(I2)
+       IOrdD=NX*NY*(IZ-1+IZD)+NY*(IX-1+IXD)+IY+IYD
+         DO I2=BoxI%I(IOrdD),BoxI%I(IOrdD+1)-1
+           JJ2=BoxJ%I(I2)
+       IF(JJ1>JJ2) CYCLE !!!! do not count twice
          IF(ATMMARK%I(JJ2)==0) THEN
-           X2=GM_Loc%Carts%D(1,JJ2)
-           Y2=GM_Loc%Carts%D(2,JJ2)
-           Z2=GM_Loc%Carts%D(3,JJ2)
            R2=LJRAD%D(JJ2)
            Q2=LJEPS%D(JJ2)
-           R12=SQRT((X1-X2)**2+(Y1-Y2)**2+(Z1-Z2)**2)
+           DVect%D(:)=GM_Loc%Carts%D(:,JJ1)-GM_Loc%Carts%D(:,JJ2)
+           r12_2=DOT_PRODUCT(DVect%D,DVect%D)                
+           R12=SQRT(r12_2)
            IF(R12>0.001D0) THEN
+! calculate energy contribution
              R6=(R1*R2/R12)**6
-             ELJ=ELJ+Q1*Q2*R6*(R6-One)
+             Pref1=R6*Q1*Q2
+             ELJ=ELJ+Pref1*(R6-One)
+! calculate gradient contribution
+             IF(PRESENT(Grad_Loc)) THEN
+           Pref2=Six*PREF1*(One-Two*R6)/r12_2
+           Grad_Loc%D(:,JJ1)=Grad_Loc%D(:,JJ1)+Pref2*DVect%D(:)
+           Grad_Loc%D(:,JJ2)=Grad_Loc%D(:,JJ2)-Pref2*DVect%D(:)
+             ENDIF
            ENDIF
          ENDIF
          ENDDO
@@ -557,17 +564,17 @@ CONTAINS
 !
 ! All interactions have been counted twice
 !
-   ELJ=ELJ/Two
-   write(*,*) 'elj in dynamo= ',elj
+!  write(*,*) 'elj in dynamo= ',elj
 !
    CALL CloseHDF()
 !
    CALL Delete(GM_Loc)
    CALL Delete(ATMMARK)
+   CALL Delete(DVect)
    CALL Delete(LJEPS)
    CALL Delete(LJRAD)
-   CALL Delete(BOXI)
-   CALL Delete(BOXJ)
+   CALL Delete(BoxI)
+   CALL Delete(BoxJ)
 !
    END SUBROUTINE ENERGY_LENNARD_JONES
 !
