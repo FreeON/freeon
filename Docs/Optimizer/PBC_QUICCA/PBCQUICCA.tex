@@ -350,18 +350,25 @@ as the direct-sum of $B'^{(klm)(k'l'm')}$ matrices:
 B' = \oplus_{k,l,m,k',l',m'=-\infty}^{\infty} B'^{(klm)(k'l'm')} ,
 \end{equation}
 where the cell indices $(klm)$ refer to the internal coordinate
-cell, while $(k'l'm')$ refers to the Cartesian cell.
+cell, while $(k'l'm')$ refer to the Cartesian cell.
+
 $B'$ should be such, that for any $\delta X'$ displacement vector
 the corresponding $\delta \phi^{(klm)}$ internal coordinate
 displacements will be the same for any $(klm)$ internal coordinate
-cell.
-In order to satisfy this condition, the offdiagonal $(klm)/=(k'l'm')$
+cell. And, when multiplying the row-vector of internal coordinate 
+displacements $\delta \phi^{(klm)}$ with the generalized inverse
+of $B'$, the resulting $\delta X'$ displacements should also
+replect the translational symmetry of the crystal.
+
+In order to satisfy these conditions, the offdiagonal 
+($(k,l,m)/=(k',l',m')$)
 elements of $B'$ must be set to zero:
 \begin{equation} \label{kronecker}
-B'^{(klm)(k'l'm')} = \delta_{kk'} \delta_{ll'} \delta_{mm'} B'^{(klm)} ,
+B'^{(klm)(k'l'm')} = \delta_{(klm),(k'l'm')} B'^{(klm)} ,
 \end{equation}
-with $\delta_{kk'}$, $\delta_{ll'}$ and $\delta_{mm'}$
-being the Kronecker-delta and
+with $\delta_{(klm),(k'l'm')}$ being one only when the primed
+and unprimed cell-indices refer to the same cell, otherwise 
+it equals to zero.
 $B'^{(klm)}$ must be defined similarly as in Eqn. \ref{latsum2}:
 \begin{equation} \label{latsum4}
 B'^{(klm)}_{i} =
@@ -370,13 +377,15 @@ B^{(000)(k_{ij}l_{ij}m_{ij})}_{ia_{ij}}
 ] \oplus B^{(klm)(A)}_{i} \oplus B^{(klm)(B)}_{i} 
 \oplus B^{(klm)(C)}_{i} .
 \end{equation}
-Furthermore, to satisfy the above condition, 
+Furthermore, to satisfy the above conditions, 
 the matrix $B^{(klm)(A)}$ must take the form
 \begin{equation} \label{matba}
 B^{(klm)(A)} = \frac{1}{k} B^{(000)(A)} .
 \end{equation}
 Similar definitions must hold for $B^{(klm)(B)}$ and
 $B^{(klm)(C)}$. 
+With these definitions, the $B'$ matrix satisfies all
+required conditions.
 
 The advantage of the new $B'$ representation over $B$ is the fact
 that $B'$ is block-diagonal in terms of the $(klm)(k'l'm')$
@@ -385,12 +394,41 @@ of $B'$ easily allowes for the calculation of the generalized
 inverse of $B'$, that is called $A'$, while the old representation,
 $B$, does not posess this advantage. Clearly, $A'$ can be calculated
 by a block-wise inversion of $B'$, while this block-wise inversion
-cannot be used to $B$.
+does not apply to $B$.
 
-Even tough previous derivations by Kudin {\it et.al} \cite{KKudin01} 
-end up in practically the same
-result for the effective $B$ matrix ($B'^{(000)}$) 
-(in a different derivation process),
+In order to check the transformation of an internal
+coordinate displacement 
+$\delta \phi^{(klm)}=\delta \phi^{(000)}$ into 
+Cartesian $\delta X'^{(klm)}$
+representation, the generalized inverse of $B'{(klm)}$ 
+can be written as
+\begin{equation}
+A'^{(klm)} = D {\left({B'^{(000)}}^t B'^{(000)}\right)}^{-1} D D^{-1} {B'^{(000)}}^t ,
+\end{equation}
+where $D$ is a diagonal matrix of linear size $3N+9$, with one in the
+diagonal positions except for the last $9$ columns, where it takes
+$k$, $l$ or $m$ referring to the matrices $B^{(klm)(A)}$, 
+$B^{(klm)(B)}$ and $B^{(klm)(C)}$, respectively.
+The corresponding $X'^{(klm)}$ displacement is then given by
+\begin{equation}
+\delta X'^{(klm)} = D \delta \varphi^{(000)} ,
+\end{equation}
+where $\delta \varphi^{(000)}$ is the same for all $(klm)$ cells and
+is given by
+\begin{equation}
+\delta \varphi^{(000)} = 
+{\left({B'^{(000)}}^t B'^{(000)}\right)}^{-1} {B'^{(000)}}^t 
+\delta \phi^{(000)}.
+\end{equation}
+Thus, it is clear, that the dependence of $X'^{(klm)}$ on the
+lattice indices $(klm)$ is correct and is in correspondence with
+Eqn. \ref{newx}, as required from $A'$. Consequently, $B'$ and $A'$
+obey the required symmetry conditions as they should.
+
+Even though previous derivations by Kudin {\it et.al} \cite{KKudin01} 
+end up in the same
+effective $B$ ($B'^{(000)}$) matrix elements
+(after a different derivation process),
 we have found it important to justify the use of
 $A'^{(000)}$, the generalized inverse of $B'^{(000)}$, as
 the effective $A$ matrix of the crystal.
