@@ -553,6 +553,9 @@ CONTAINS
        DO II=1,G%Clone(1)%NAtms; MaxBlkSize=MAX(MaxBlkSize,BSiz%I(II)); ENDDO
        ! Set temporary geometries
        GTmp(iCLONE)%NAtms=G%Clone(iCLONE)%NAtms
+       ! vwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvw>>>
+       GTmp(iCLONE)%NLagr = 0
+       ! vwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvw<<<
        CALL New_CRDS(GTmp(iCLONE))
        GTmp(iCLONE)%AbCarts%D=G%Clone(iCLONE)%AbCarts%D
        ! Get the density matrix for this clone
@@ -566,13 +569,26 @@ CONTAINS
        DO IX=1,3
           DO II=1,2
              DO iCLONE=1,G%Clones
+                !
+                ! Move the atom.
                 IF(II==1) THEN
                    G%Clone(iCLONE)%AbCarts%D(IX,AtA)=GTmp(iCLONE)%AbCarts%D(IX,AtA)+DDelta
                 ELSEIF(II==2) THEN
                    G%Clone(iCLONE)%AbCarts%D(IX,AtA)=GTmp(iCLONE)%AbCarts%D(IX,AtA)-DDelta
                 ENDIF
              ENDDO
+             !
              CALL GeomArchive(cBAS,cGEO,N,B,G)    
+             ! vwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvw>>>
+             ! Move back the atom.
+             DO iCLONE=1,G%Clones
+                IF(II==1) THEN
+                   G%Clone(iCLONE)%AbCarts%D(IX,AtA)=GTmp(iCLONE)%AbCarts%D(IX,AtA)
+                ELSEIF(II==2) THEN
+                   G%Clone(iCLONE)%AbCarts%D(IX,AtA)=GTmp(iCLONE)%AbCarts%D(IX,AtA)
+                ENDIF
+             ENDDO
+             ! vwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvw<<<
              CALL Invoke('ONX',N,S,M)
              DO iCLONE=1,G%Clones
                 ! Load globals 
@@ -593,9 +609,17 @@ CONTAINS
           IA=3*(AtA-1)+IX
           DO iCLONE=1,G%Clones
              FX(iCLONE,IA)=(EX(iCLONE,1)-EX(iCLONE,2))/(Two*DDelta)
+#ifdef NGONX_INFO!vwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvw
+             write(*,*) 'FX(',AtA,IX,')=',FX(iCLONE,IA)
+#endif!vwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvw
           ENDDO
        ENDDO
     ENDDO
+#ifdef NGONX_INFO!vwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvw
+    DO iCLONE=1,G%Clones
+       WRITE(*,'(A,I3,A,E20.12)') ' Total XForce(',iCLONE,') =',SUM(FX(iCLONE,:))
+    ENDDO
+#endif!vwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvw
    ! Add in the forces to the global gradient and put back to HDF
     HDFFileID=OpenHDF(N%HFile)
     DO iCLONE=1,G%Clones
