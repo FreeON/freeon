@@ -99,6 +99,92 @@ CONTAINS
        ENDDO
        IF(CF12.GT.SIZE(AtmPair)) STOP 'Increase the size of -AtmPair-'
      END SUBROUTINE GetAtomPair
-   END MODULE GetAtomPairMod
+
+     SUBROUTINE GetAdrB(I,J,Ind,A,E_O)
+!----------------------------------------------------------------------
+!H Finds the CSR address corresponding to the dense matrix index pair.
+!H Assumes that the collumn index array is in order (binary search)
+!H Inputs:
+!H   I     = row index of dense matrix
+!H   J     = collumn index of dense matrix
+!H   IType = 0 halt if element not found
+!H         = 1 return index 0 if not found
+!H   A     = A sparse matrix
+!H   E_O   = 0 call Halt if I cant find the address
+!H         = 1 return Ind=0 if I cant find the address
+!H Outputs:
+!H   Ind   = sparse matrix index corresponding to (I,J)
+!----------------------------------------------------------------------
+    IMPLICIT NONE
+    INTEGER,INTENT(IN)          :: I,J
+    INTEGER,INTENT(OUT)         :: Ind
+    TYPE(BCSR),INTENT(IN)       :: A
+    INTEGER,OPTIONAL,INTENT(IN) :: E_O
+    INTEGER                     :: iMid,iBgn,iEnd,Err
+    iBgn=A%RowPt%I(I)
+    iEnd=A%RowPt%I(I+1)-1
+    Ind=0
+    Err=0
+    IF (PRESENT(E_O)) Err=E_O
+    SELECT CASE (Err)
+    CASE (0)
+1000   CONTINUE
+       iMid=(iEnd+iBgn)/2
+       IF (A%ColPt%I(iMid)==J) GOTO 2000
+       IF (iBgn>=iEnd) THEN
+          WRITE(*,*) "I=",I," J=",J
+          CALL Halt(' Matrix element not found in ONX:GetAdrB')
+       ENDIF
+       IF (A%ColPt%I(iMid)>J) THEN
+          iEnd=iMid-1
+       ELSE
+          iBgn=iMid+1
+       ENDIF
+       GOTO 1000
+2000   CONTINUE
+       Ind=iMid
+    CASE (1)
+3000   CONTINUE
+       iMid=(iEnd+iBgn)/2
+       IF (A%ColPt%I(iMid)==J) GOTO 4000
+       IF (iBgn>=iEnd) RETURN
+       IF (A%ColPt%I(iMid)>J) THEN
+          iEnd=iMid-1
+       ELSE
+          iBgn=iMid+1
+       ENDIF
+       GOTO 3000
+4000   CONTINUE
+       Ind=iMid
+    CASE DEFAULT
+       CALL Halt(' Illegal switch in ONX:GetAdrB')
+    END SELECT
+  END SUBROUTINE GetAdrB
+
+
+  SUBROUTINE GetColIdx(At,D,ColIdx)
+!H---------------------------------------------------------------------------------
+!H SUBROUTINE GetColIdx(At,D,ColIdx)
+!H
+!H---------------------------------------------------------------------------------
+    !
+    IMPLICIT NONE
+    !-------------------------------------------------------------------
+    INTEGER       , INTENT(IN ) :: At
+    TYPE(BCSR)    , INTENT(IN ) :: D
+    TYPE(INT_VECT), INTENT(OUT) :: ColIdx
+    !-------------------------------------------------------------------
+    INTEGER                     :: Ci
+    !-------------------------------------------------------------------
+    !
+    CALL INT_VECT_EQ_INT_SCLR(NAtoms,ColIdx%I(1),0)
+    !
+    DO Ci=D%RowPt%I(At),D%RowPt%I(At+1)-1
+       ColIdx%I(D%ColPt%I(Ci))=Ci
+    ENDDO
+    !
+  END SUBROUTINE GetColIdx
+
+END MODULE GetAtomPairMod
    
    

@@ -9,8 +9,8 @@ SUBROUTINE IntSSSS5(PrmBufB,LBra,PrmBufK,LKet,C,PBC)
 ! Distribution buffer stuff
 !--------------------------------------------------------------------------------
   INTEGER :: LBra,LKet
-  REAL(DOUBLE) :: PrmBufB(5,LBra)
-  REAL(DOUBLE) :: PrmBufK(5,LKet)
+  REAL(DOUBLE) :: PrmBufB(7,LBra)
+  REAL(DOUBLE) :: PrmBufK(7,LKet)
   REAL(DOUBLE) :: C(1)
 !--------------------------------------------------------------------------------
 ! Temporary space for computing 2-e integrals

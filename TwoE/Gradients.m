@@ -229,29 +229,26 @@ PunchVRRClass[FileName_,BraEll_,KetEll_]:=Module[{oList,IList,Kount,a,c},
                                                  sList={};
 						 Kount = 0;
                                                  Do[Do[
-                                                       If[lx[i]+my[i]+nz[i]+lx[k]+my[k]+nz[k]<=BraEll+KetEll+1,
-                                                       Kount = Kount + 1;
-                                                       a = {lx[i], my[i], nz[i]};
-                                                       c = {lx[k], my[k], nz[k]};
-							  (*
-                                                       IList=Append[IList,VRR[a,c,0]+o[Kount]];
-						       MBarString=StringJoin["I",ToString[i],"Bar",ToString[k]];
-                                                       oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->MBarString];
-							   *)
+         If[lx[i]+my[i]+nz[i]+lx[k]+my[k]+nz[k]<=BraEll+KetEll+1,
+         Kount = Kount + 1;
+         a = {lx[i], my[i], nz[i]};
+         c = {lx[k], my[k], nz[k]};
+  	  (*
+         IList=Append[IList,VRR[a,c,0]+o[Kount]];
+         MBarString=StringJoin["I",ToString[i],"Bar",ToString[k]];
+         oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->MBarString];
+  	   *)
 
 
-						       RawString=StringJoin["RawI",ToString[i],"Bar",ToString[k]];
-						       dMBarString  =StringJoin["I",ToString[i],"Bar",ToString[k]];
+         RawString=StringJoin["RawI",ToString[i],"Bar",ToString[k]];
+         dMBarString  =StringJoin["I",ToString[i],"Bar",ToString[k]];
 
-                                                       IList=Append[IList,VRR[a,c,0]];
-                                                       oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->RawString];
+         IList=Append[IList,VRR[a,c,0]];
+         oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->RawString];
 
-                                                       Kount=Kount+1;
-                                                       IList=Append[IList,o[Kount]+o[Kount-1]];
-                                                       oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->dMBarString];
-
-
-
+         Kount=Kount+1;
+         IList=Append[IList,o[Kount]+o[Kount-1]];
+         oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->dMBarString];
                                                        ];
                                                  ,{i,1,LEnd[BraEll+1]}];
                                                  ,{k,1,LEnd[KetEll+1]}];
@@ -401,37 +398,41 @@ PunchHRRClass[FileName_,ic_,jc_,kc_,lc_]:=Module[{oList,IList,Kount,a,b,c,d},
 
                                               Do[ 
 
-                                                  plus={0,0,0}; plus[[cart]]=+1;
-                                                  mnus={0,0,0}; mnus[[cart]]=-1;
+           plus={0,0,0}; plus[[cart]]=+1;
+           mnus={0,0,0}; mnus[[cart]]=-1;
 
-						  TmpA=dHRR["F","a",a+plus,b,c,d]- a[[cart]]  HRR[a+mnus,b,c,d];
-						  TmpB=dHRR["F","b",a,b+plus,c,d]- b[[cart]]  HRR[a,b+mnus,c,d];
-						  TmpC=dHRR["F","c",a,b,c+plus,d]- c[[cart]]  HRR[a,b,c+mnus,d];
+ 	  TmpA=dHRR["F","a",a+plus,b,c,d]- a[[cart]]  HRR[a+mnus,b,c,d];
+ 	  TmpB=dHRR["F","b",a,b+plus,c,d]- b[[cart]]  HRR[a,b+mnus,c,d];
+ 	  TmpC=dHRR["F","c",a,b,c+plus,d]- c[[cart]]  HRR[a,b,c+mnus,d];
 
-						  (* TmpD=dHRR["F","c",a,b,c,d+plus]- d[[cart]]  HRR[a,b,c,d+mnus]; *)
+ 	  (* TmpD=dHRR["F","c",a,b,c,d+plus]- d[[cart]]  HRR[a,b,c,d+mnus]; *)
 
-						  TmpD=-(TmpA+TmpB+TmpC);
+ 	  TmpD=-(TmpA+TmpB+TmpC);
 
-                                                  CffSetA=ToExpression[StringJoin["CrtSet",ToString[0+cart]]];
-                                                  CffSetB=ToExpression[StringJoin["CrtSet",ToString[3+cart]]];
-                                                  CffSetC=ToExpression[StringJoin["CrtSet",ToString[6+cart]]];
-                                                  CffSetD=ToExpression[StringJoin["CrtSet",ToString[9+cart]]];
+           CffSetA=ToExpression[StringJoin["CrtSet",ToString[0+cart]]];
+           CffSetB=ToExpression[StringJoin["CrtSet",ToString[3+cart]]];
+           CffSetC=ToExpression[StringJoin["CrtSet",ToString[6+cart]]];
+           CffSetD=ToExpression[StringJoin["CrtSet",ToString[9+cart]]];
 
-                                                  Kount = Kount + 1;
-                                                  IList=Append[IList,TmpA+dI[OffSet,CffSetA]];
-                                                  oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["dI(OffSet,",ToString[CffSetA],")"]];
+           Kount = Kount + 1;
+(*           IList=Append[IList,TmpA+dI[OffSet,CffSetA]];*)
+           IList=Append[IList,TmpA];
+           oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["dI(OffSet,",ToString[CffSetA],")"]];
 
-                                                  Kount = Kount + 1;
-                                                  IList=Append[IList,TmpB+dI[OffSet,CffSetB]];
-                                                  oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["dI(OffSet,",ToString[CffSetB],")"]];
+           Kount = Kount + 1;
+(*           IList=Append[IList,TmpB+dI[OffSet,CffSetB]];*)
+           IList=Append[IList,TmpB];
+           oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["dI(OffSet,",ToString[CffSetB],")"]];
 
-                                                  Kount = Kount + 1;
-                                                  IList=Append[IList,TmpC+dI[OffSet,CffSetC]];
-                                                  oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["dI(OffSet,",ToString[CffSetC],")"]];
+           Kount = Kount + 1;
+(*           IList=Append[IList,TmpC+dI[OffSet,CffSetC]];*)
+           IList=Append[IList,TmpC];
+           oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["dI(OffSet,",ToString[CffSetC],")"]];
 
-                                                  Kount = Kount + 1;
-                                                  IList=Append[IList,TmpD+dI[OffSet,CffSetD]];
-                                                  oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["dI(OffSet,",ToString[CffSetD],")"]];
+           Kount = Kount + 1;
+(*           IList=Append[IList,TmpD+dI[OffSet,CffSetD]];*)
+           IList=Append[IList,TmpD];
+           oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["dI(OffSet,",ToString[CffSetD],")"]];
 
 
 ,{cart,1,3}]; 

@@ -25,11 +25,6 @@
       INTEGER       :: OffSet,GOA,GOB,GOC,GOD
       INTEGER       :: OA,LDA,OB,LDB,OC,LDC,OD,LDD,J,K,L
       REAL(DOUBLE)  :: FPQx,FPQy,FPQz
-
-
-      !write(*,*) 'in dint1111'
-
-
       CrtSet1=GOA
       CrtSet2=GOA+1
       CrtSet3=GOA+2
@@ -169,22 +164,22 @@
       V(2)=ABy*Ib1Bar1
       V(3)=ABz*Ib1Bar1
       OffSet=(OA+0)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+0)*LDD !=ZippyForPres
-      dI(OffSet,CrtSet1)=Ia2Bar1+dI(OffSet,CrtSet1)
-      dI(OffSet,CrtSet4)=Ib2Bar1+dI(OffSet,CrtSet4)+V(1)
-      dI(OffSet,CrtSet7)=Ic1Bar2+dI(OffSet,CrtSet7)
+      dI(OffSet,CrtSet1)=Ia2Bar1
+      dI(OffSet,CrtSet4)=Ib2Bar1+V(1)
+      dI(OffSet,CrtSet7)=Ic1Bar2
       W1=-Ia2Bar1-Ib2Bar1
-      W2=-Ic1Bar2+dI(OffSet,CrtSet10)-V(1)
+      W2=-Ic1Bar2-V(1)
       dI(OffSet,CrtSet10)=W1+W2
-      dI(OffSet,CrtSet2)=Ia3Bar1+dI(OffSet,CrtSet2)
-      dI(OffSet,CrtSet5)=Ib3Bar1+dI(OffSet,CrtSet5)+V(2)
-      dI(OffSet,CrtSet8)=Ic1Bar3+dI(OffSet,CrtSet8)
+      dI(OffSet,CrtSet2)=Ia3Bar1
+      dI(OffSet,CrtSet5)=Ib3Bar1+V(2)
+      dI(OffSet,CrtSet8)=Ic1Bar3
       W1=-Ia3Bar1-Ib3Bar1
-      W2=-Ic1Bar3+dI(OffSet,CrtSet11)-V(2)
+      W2=-Ic1Bar3-V(2)
       dI(OffSet,CrtSet11)=W1+W2
-      dI(OffSet,CrtSet3)=Ia4Bar1+dI(OffSet,CrtSet3)
-      dI(OffSet,CrtSet6)=Ib4Bar1+dI(OffSet,CrtSet6)+V(3)
-      dI(OffSet,CrtSet9)=Ic1Bar4+dI(OffSet,CrtSet9)
+      dI(OffSet,CrtSet3)=Ia4Bar1
+      dI(OffSet,CrtSet6)=Ib4Bar1+V(3)
+      dI(OffSet,CrtSet9)=Ic1Bar4
       W1=-Ia4Bar1-Ib4Bar1
-      W2=-Ic1Bar4+dI(OffSet,CrtSet12)-V(3)
+      W2=-Ic1Bar4-V(3)
       dI(OffSet,CrtSet12)=W1+W2
    END SUBROUTINE dInt1111

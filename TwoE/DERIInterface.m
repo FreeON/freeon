@@ -314,11 +314,11 @@ Do[Do[
    ArgString=StringJoin[ArgString1,ArgString2,ArgString3, \
              ArgString4,",",ArgString5,",", \
              ToString[(LEnd[imax]-LBegin[imin]+1)^2*(LEnd[jmax]-LBegin[jmin]+1)^2], \
-             ",GM%PBC,C(1)"];
+             ",1,4,7,10,GM%PBC,C(1)"]; (* 1,4,7,10 -> THIS IS NOT RIGHT, BUT DOES NOT MATTER*)
 
    WS[StringJoin["  CALL dInt",ToString[ijklType],"(",ArgString,")"]];
 
-   WS[StringJoin["  LocNInt=",ToString[12*(LEnd[imax]-LBegin[imin]+1)^2*(LEnd[jmax]-LBegin[jmin]+1)^2]]];
+(*   WS[StringJoin["  LocNInt=",ToString[12*(LEnd[imax]-LBegin[imin]+1)^2*(LEnd[jmax]-LBegin[jmin]+1)^2]]]; *)
 
 ,{ic,1,LC}]
 ,{jc,1,LC}];

@@ -225,6 +225,8 @@ Do[Do[Do[Do[
 Print["We have ",LC*LC*LC*LC," integrals."];
 
 WS["CASE DEFAULT"];
+WS["   WRITE(*,*) 'We are in ERIInterface.Inc'"];
+WS["   WRITE(*,*) 'IntType=',IntType"];
 WS["   STOP 'MISS AN INTEGRAL'"];
 WS["END SELECT"];
 
@@ -313,6 +315,8 @@ Do[Do[
 Print["We have ",LC*LC," integrals."];
 
 WS["CASE DEFAULT"];
+WS["   WRITE(*,*) 'We are in ERIListInterface.Inc'"];
+WS["   WRITE(*,*) 'IntType=',IntType"];
 WS["   STOP 'MISS AN INTEGRAL'"];
 WS["END SELECT"];
 
