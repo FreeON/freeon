@@ -1960,17 +1960,27 @@ CONTAINS
                      ' on file '//TRIM(FileName)//'.') 
               END SUBROUTINE OpenASCII
 
+
               !-------------------------------------------------------------------------------
               SUBROUTINE Put_CHR_VECT(A,VarName,Tag_O)
                 INTEGER                              :: I,N,II,NN
                 TYPE(CHR_VECT) :: A
                 CHARACTER(LEN=*),         INTENT(IN) :: VarName
                 CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Tag_O
-                INTEGER,DIMENSION(DEFAULT_CHR_LEN)   :: B  !=ICHAR(' ')
                 TYPE(META_DATA)                      :: Meta
+
+#ifdef OLD_CHR_VECT
+                INTEGER,DIMENSION(DEFAULT_CHR_LEN)   :: B  !=ICHAR(' ')
+#else
+                INTEGER,ALLOCATABLE :: B(:)
+                INTEGER :: RunInd,BufSize
+#endif
+
 #ifdef PARALLEL
                 IF(MyId==ROOT)THEN
 #endif
+
+#ifdef OLD_CHR_VECT
                    NN=SIZE(A%C)
                    DO II = 1, NN
                       N=LEN(A%C(II))
@@ -1981,7 +1991,38 @@ CONTAINS
                          CALL OpenData(Meta,.TRUE.)
                          CALL WriteIntegerVector(Meta,B)
                          CALL CloseData(Meta)
-                      ENDDO
+                   ENDDO
+#else
+                   NN = SIZE(A%C)
+                   BufSize = 1
+                   DO II = 1, NN
+                     N = LEN(TRIM(A%C(II)))
+                     IF(N>DEFAULT_CHR_LEN) CALL Halt('Static strings overrun in Put_CHR_VECT')
+                     BufSize = BufSize + N + 1
+                   ENDDO
+                   
+                   ALLOCATE(B(BufSize))
+                   RunInd = 1
+                   B(RunInd) = NN
+                   RunInd = RunInd + 1
+                   DO II = 1, NN
+                     N = LEN(TRIM(A%C(II)))
+                     DO I = 1, N
+                       B(RunInd) = ICHAR(A%C(II)(I:I))
+                       RunInd = RunInd + 1
+                     ENDDO
+                     B(RunInd) = -1000
+                     RunInd = RunInd + 1
+                   ENDDO
+                   IF(BufSize /= RunInd - 1) STOP 'ERR: Index problem in Put_CHR_VECT !'
+                   CALL Put(BufSize,NameTag(VarName,TRIM(IntToChar(0))//TRIM(Tag_O)))
+                   Meta=SetMeta(NameTag(VarName,TRIM(IntToChar(1))// &
+                        TRIM(Tag_O)),NATIVE_INT32,BufSize,.FALSE.)
+                   CALL OpenData(Meta,.TRUE.)
+                   CALL WriteIntegerVector(Meta,B)
+                   CALL CloseData(Meta)
+                   DEALLOCATE(B)
+#endif
 #ifdef PARALLEL
                    ENDIF
 #endif
@@ -1993,21 +2034,64 @@ CONTAINS
                    TYPE(CHR_VECT),           INTENT(INOUT) :: A
                    CHARACTER(LEN=*),         INTENT(IN)    :: VarName
                    CHARACTER(LEN=*),OPTIONAL,INTENT(IN)    :: Tag_O
+#ifdef OLD_CHR_VECT
                    INTEGER,DIMENSION(DEFAULT_CHR_LEN)      :: B !=ICHAR(' ')
+#else
+                   INTEGER,ALLOCATABLE :: B(:)
+                   INTEGER :: RunInd,StrInd,StrLen,BufSize
+                   CHARACTER(LEN=DCL) :: TEMP
+#endif
                    TYPE(META_DATA)                         :: Meta
+
+#ifdef OLD_CHR_VECT
+#else
+                   CALL Get(BufSize,NameTag(VarName,TRIM(IntToChar(0))//TRIM(Tag_O)))
+#endif
+
 #ifdef PARALLEL 
+
                    IF(MyId==ROOT)THEN
 #endif 
+
+#ifdef OLD_CHR_VECT
                       NN=SIZE(A%C)
                       DO II = 1, NN
-                         N=LEN(A%C(II))
-                         IF(N>DEFAULT_CHR_LEN) CALL Halt('Static strings overrun in Get_CHR_VECT')
-                         Meta=SetMeta(NameTag(VarName,TRIM(IntToChar(II))//TRIM(Tag_O)),NATIVE_INT32,N,.FALSE.)
-                         CALL OpenData(Meta)
-                         CALL ReadIntegerVector(Meta,B)
-                         CALL CloseData(Meta)
-                         DO I=1,N; A%C(II)(I:I)=CHAR(B(I)); ENDDO
-                         ENDDO
+                        N=LEN(A%C(II))
+                        IF(N>DEFAULT_CHR_LEN) CALL Halt('Static strings overrun in Get_CHR_VECT')
+                        Meta=SetMeta(NameTag(VarName,TRIM(IntToChar(II))//TRIM(Tag_O)),NATIVE_INT32,N,.FALSE.)
+
+                        CALL OpenData(Meta)
+                        CALL ReadIntegerVector(Meta,B(1))
+                        CALL CloseData(Meta)
+                        DO I=1,N; A%C(II)(I:I)=CHAR(B(I)); ENDDO
+                      ENDDO
+#else
+                      NN = SIZE(A%C)
+                      Meta=SetMeta(NameTag(VarName,TRIM(IntToChar(1))//TRIM(Tag_O)),NATIVE_INT32,BufSize,.FALSE.)
+                      CALL OpenData(Meta)
+                      ALLOCATE(B(BufSize))
+                      CALL ReadIntegerVector(Meta,B(1))
+                      IF(NN /= B(1)) STOP 'ERR: SIZE problem in Get_CHR_VECT'
+                      RunInd = 2
+                      DO II = 1, NN
+                        TEMP = ' '
+                        StrInd = 1
+                        DO 
+                          IF(B(RunInd) == -1000) THEN
+                            RunInd = RunInd + 1
+                            EXIT
+                          ELSE
+                            TEMP(StrInd:StrInd) = CHAR(B(RunInd))
+                            StrInd = StrInd + 1
+                            RunInd = RunInd+1
+                          ENDIF
+                        ENDDO
+                        A%C(II) = TEMP
+                      ENDDO
+                      IF(BufSize /= RunInd -1 ) STOP 'ERR: Index problem in Get_CHR_VECT'
+                      DEALLOCATE(B)
+#endif
+
 #ifdef PARALLEL 
                       ENDIF       
                       ! not supported yet. IF(InParallel)CALL Bcast(A)
