@@ -17,9 +17,9 @@
        Periodic Boundary Conditions for Exact Exchange}
 
 \author{C. J. Tymczak}
-\author{Matt Challacombe}
-\author{Eric Schwegler}
 \author{Valery Weber}
+\author{Eric Schwegler}
+\author{Matt Challacombe}
 
 \affiliation{Theoretical Division, Los Alamos National Laboratory, Los Alamos,
 New Mexico 87545 }
@@ -47,7 +47,7 @@ condensed matter electronic structure community. Now because of the accuracy obt
 the hybrid functionals, it has become very desirable to include exact exchange into
 existing condensed matter electronic structure algorithms. 
 However, most of these calculations make use of ${\bf k}$-space integrations to 
-deal with the periodicity of the system [ref]. But this is not an ideal situation 
+deal with the periodicity of the system [ref]. However, this is not an ideal situation 
 for linear scaling algorithms, where we would like to remove the need for doing
 ${\bf k}$-space integrations altogether by increasing the system size. 
 However, when Gamma point only is attempted for exact exchange, a 
@@ -59,10 +59,11 @@ limit as particle number increases.
 In the proceeding sections we will first briefly review the Hartree
 Foch equations of motion. Next, we will illuminate the problem that exist
 for the calculation of the exchange matrix in the limit of the Gamma point for
-periodic systems. We then give a solution to this problem. Next, we verify that
+periodic systems. We then give a solution to this problem, and then we verify that
 the exchange matrix is correct in the limit of large systems as compared to a large 
 ${\bf k}$-space calculation done with {\bf Crystal98}. 
-And finally, we verify that the exchange matrix build is indeed linear scaling.
+And finally, we verify that the exchange matrix build is indeed linear scaling
+for the dense diamond system.
 
 \section{The Hartree Fock Equations}
 Within the Hatree fock approcimation we define the total energy as [ref]
@@ -70,29 +71,30 @@ Within the Hatree fock approcimation we define the total energy as [ref]
 E = Tr[{\bf P} \, {\bf F}]+ E_{nn}
 \label{HFEnergy}
 \end{equation}
-where
+where the Fockian is defined as,
 \begin{equation}
 {\bf F} = 2 {\bf T}+2 {\bf V}_{en}+{\bf J}_{ee}+{\bf K}_x
 \label{Fockian}
 \end{equation}
-and also,
+
 \begin{eqnarray}
 {\bf T}      & : & \,{\rm kinectic \, energy \, matrix} \nonumber \\
 {\bf V}_{en} & : & \,{\rm electron-nuclear \, coulomb \, matrix} \nonumber \\
 {\bf J}_{ee} & : & \,{\rm electron-electron \, coulomb \, matrix} \nonumber \\
 {\bf K}_{x}  & : & \,{\rm exchange \, matrix} \nonumber \\
-{E}_{nn}  & : & \,{\rm nuclear-nuclear \, energy} \nonumber \\ 
+{E}_{nn}  & : & \,{\rm nuclear-nuclear \, repulsion \, energy} \nonumber \\ 
 \label{Defin}
 \end{eqnarray}
-and we solve for the density matrix, ${\bf P}$, via the eigen-equation 
-and we solve for the density matrix, ${\bf P}$, via the eigen-equation 
+We solve for the density matrix, ${\bf P}$, via the eigen-equation 
 \begin{equation}
 {\bf F} {\bf P} = \epsilon {\bf P}
 \label{DenMat}
 \end{equation}
+nd iterate on equation (\ref{Fockian}) until self-cosistancy is reached.
 
 \section{The Exchange matrix}
-The exchange matrix calculated withing a LCAO basis, including $k$-space, is [ref] 
+The exchange matrix calculated withing a LCAO basis set, including $k$-space, 
+is define as [ref] 
 \begin{equation}
 K_{ab}=\sum _{\mathbf{hgn}\,\,cd} \int
 {{\phi _{a}(\mathbf{r}) 
@@ -101,13 +103,15 @@ P_{cd}[{\mathbf{n}}]\,
 \phi _{b+{\bf n}}(\mathbf{r'})
 \phi _{d+{\bf n}+{\bf g}} ( \mathbf{r'})} \over {|{\bf r}-{\bf r'}|}} 
 \label{CryEq}
-\end{equation}
+\end{equation}a
+where {\bf h},{\bf g}, and {\bf n} are the sum over bravi lattice vectors and $a-d$ are
+the atom center basis functions. 
 Let us consider two case; First let us consider the Gamma point, then in this case
 \begin{equation}
 P_{cd}[{\mathbf{n}}] \rightarrow P_{cd}[{0}]\, \delta _{{\mathbf{n},0}}
 \label{NoN}
 \end{equation}
-Which allows us to write equation (\ref{CryEq}) as
+Which allows us to rewrite equation (\ref{CryEq}) as
 \begin{equation}
 K_{ab}=\sum _{\mathbf{hg}\,\,cd} \int
 {{\phi _{a}(\mathbf{r}) 
@@ -121,13 +125,13 @@ However this is still not correct. Consider  figure \ref{figure:ExchangeRegion} 
 are depicting the exchange interaction of atom $a$ with all its neighbors. Equation
 (\ref{NoNKab}) is the exchange interaction of atom $a$ with the central cell (gray region) in
 figure \ref{figure:ExchangeRegion}, however, this neglects the exchange interaction 
-between neighboring cells, and also the exchange matrix is not translationally invariant.
+between neighboring cells. This leads to an exchange matrix which is  not translationally invariant.
 We could fix this by summing over the infinite set of lattice vectors ${\bf n}$, 
 and this leads to a translationally invariant exchange matrix, but these integrals do not converge. 
 Referring to figure \ref{figure:ExchangeRegion} we can see a simple fix to this problem. When 
 we calculate the exchange matrix elements for atom $a$, include exchanges only within region
 defined by the volume centered about atom $a$ (the red box in figure \ref{figure:ExchangeRegion}).
-This leads to both a convergent exchange matrix, and also a  translationally invariant one.
+This gives both a convergent exchange matrix, and also a  translationally invariant one.
 We do this by defining  a Minimum Image Distance (MID) condition, which is similiar to what is done
 in Molecular Dynamics for the force on an atom due to neighboring cells [ref], 
 
@@ -141,7 +145,8 @@ P_{cd} \,
 \phi _{d+{\bf g}}( \mathbf{r'})]} \over {|{\bf r}-{\bf r'}|}} 
 \label{MinImageKab}
 \end{equation}
-where $\cal MID$ is a function which shifts the distributions to there nearest images.
+where $\cal MID$ is a function which shifts the distributions to there nearest image.
+
 The problem with the ${\bf k}$-space convergence, which is extreme for the Gamma point, 
 will also exist for any finite set of lattice vectors ${\bf n}$. Consider 
 figure \ref{figure:ExchangeRegion_k111} where we show the regions that atom $a$ exchanges with
@@ -177,7 +182,7 @@ textbf{MondoSCF} quantum chemistry code, even up to 512 carbon atoms.
 
 
 \section{CONCLUSIONS}
-
+We have shown a consistent derivation for the exact exchange integrals at the $\Gamma$-point. 
 
 \section*{ACKNOWLEDGMENTS}
 
@@ -222,7 +227,7 @@ $ ^g$Cubic  \\
 \end{table}
 
 \begin{figure}
-\caption{Simulation cell and its brava lattice vectors.}
+\caption{Unit cell and its brava lattice vectors.}
 \label{figure:SimCell}
 {\centering \includegraphics{UnitCell_2.ps} \par}
 \end{figure}
@@ -250,7 +255,7 @@ $ ^g$Cubic  \\
 for the dense diamond periodic system up to 512 atoms using the
 {\bf Crystal98} basis set 6-21G* \cite{C98Basis}.}
 \label{figure:Scaling_Matrix_Build}
-{\centering \includegraphics{UnitCell_2.ps} \par} 
+{\centering \includegraphics{blank.ps} \par} 
 \end{figure}
 %
 %
@@ -259,7 +264,7 @@ for the dense diamond periodic system up to 512 atoms using the
 \caption{ Energy per carbon atom for the dense diamond
 periodic system up to 512 atoms using the {\bf Crystal98} basis set 6-21G* \cite{C98Basis}.}
 \label{figure:EnergyPerN}
-{\centering \includegraphics{UnitCell_2.ps} \par} 
+{\centering \includegraphics{blank.ps} \par} 
 \end{figure}
 %
 %
@@ -268,7 +273,7 @@ periodic system up to 512 atoms using the {\bf Crystal98} basis set 6-21G* \cite
 \caption{ Relative Error per carbon atom for the dense diamond
 periodic system up to 512 atoms using the {\bf Crystal98} basis set 6-21G* \cite{C98Basis}.}
 \label{figure:ErrorPerN}
-{\centering \includegraphics{UnitCell_2.ps} \par} 
+{\centering \includegraphics{blank.ps} \par} 
 \end{figure}
 
 
