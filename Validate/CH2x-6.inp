@@ -3,30 +3,30 @@ Polyacetilene geometry optimization with fixed lattice vectors
 in STO-3G basis
 <EndTitle>
 
-MPIInvoke="prun"
-MPIProcFlag="-n"
-MPIProcessors=8
-MPISpatialProc=8
-M#PIMachineFlag="--nper"
-M#PIMachineFile="2"
 
 <BeginOptions>
+MPIInvoke="mpiun"
+MPIProcFlag="-np"
+MPIProcessors=8
+MPISpatialProc=8
+MPIMachineFlag="--nper"
+MPIMachineFile="2"
+
 Charge=0
 Multiplicity=1
-Clones=1
+
 Grad=(Optimize,PrimInt,BiSect,NoGDIIS)
-DebugAll=(MaxDebug,CheckSums,MaxGeOp)
+DebugAll=(MinDebug,CheckSums)
 Guess=SuperPos
 SCFMethod=(TC2)
 BasisSets=(STO-3G-SPLIT)
 ModelChem=(HF)
-Accuracy =(tight)
-Geometry=(InAngstroms,NoOrder)
+Accuracy =(good)
+SCFConvergence=(DIIS)
+
 PBC=(T,F,F)
-Periodic=(AtomCoord)
-Periodic=(PFFOverRide,AtomCoord)
 PFFMaxEll=16
-PFFLayers=2
+Periodic=(AtomCoord)
 
 <EndOptions>
 

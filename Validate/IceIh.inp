@@ -1,28 +1,33 @@
-<BeginTitle>
-    Ice 1h-H2O-[P63/MMC] Goto, A.;Hondoh, T.;Mae, S.(1990)
-<EndTitle>
+Ice 1h-H2O-[P63/MMC] Goto, A.;Hondoh, T.;Mae, S.(1990)
 
 <BeginOptions>
-Charge=0
 
 MPIInvoke="mpirun"
-MPIProcessors=16
+MPIProcessors=4
 MPIProcFlag="-np"
-MPISpatialProc=16
+MPISpatialProc=4
 MPIMachineFlag="--nper"
 MPIMachineFile="2"
 
+Charge=0
 Multiplicity=1
+
 Guess=Superpos
-Grad=(Optimize,PrimInt,NoBackTr,BiSect,NoGDIIS)
-DebugAll=(MaxDebug,CheckSums,MaxGeOp)
-SCFMethod=(TC2)
-BasisSets=(STO-2G-SPLIT)
-ModelChem=(HF) 
-Accuracy =(good)
-Geometry=(InAngstroms,NoOrder) 
-Periodic=(AtomCoord)
+OutPut=XYZ
+Grad=(Optimize,PrimInt,NoGDIIS,BiSect,HBondOnly,NoFragmConnect,NonCovBend,NonCovTors)
+DebugAll=(MinDebug,CheckSums)
+
+SCFMethod=(TC2,TC2)
+BasisSets=(STO-2G-SPLIT,3-21G-SPLIT)
+ModelChem=(HF,B3LYP)
+Accuracy =(Loose,Good)
+SCFConvergence=(ODA,DIIS)
+
 PBC=(T,T,T)
+Periodic=(AtomCoord)
+RatioABC 1.0 1.0 -1.0
+RatioAlpBetGam 1.0 1.0 -1.0
+
 <EndOptions>
 
 <BeginPeriodic>
