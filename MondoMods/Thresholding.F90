@@ -71,59 +71,61 @@ MODULE Thresholding
         ELSE
            TestAtomPair = .TRUE.
            IF(PRESENT(Box_O)) &
-              TestAtomPair=TestBoxPairOverlap(Pair,Box_O)
+              TestAtomPair=BoxPairOverlap(Pair,Box_O)
         ENDIF
      END FUNCTION TestAtomPair
-
-     FUNCTION TestBoxPairOverlap(Pair,Box)
-        LOGICAL                   :: TestBoxPairOverlap
-        TYPE(AtomPair)            :: Pair
-        TYPE(BBox),OPTIONAL       :: Box
-        REAL(DOUBLE)              :: PrBxSeprtn,PairExtent,PairHlfWdt
-        REAL(DOUBLE),DIMENSION(3) :: PairMidPnt,PairUntVct, &
-                                     PairBoxVct,PrBxUntVct
-!----------------------------------------------------------------
-!        TestBoxPairOverlap=.TRUE.
-!        RETURN
-
-!       Midpoint vector of AB
-        PairMidPnt=(Pair%A+Pair%B)*Half
-!       Distance from Box center to line midpoint
-        PairBoxVct=Box%Center-PairMidPnt
-!       If pair and box are not sepertated, return with overlap=true
-        PrBxSeprtn=SQRT(PairBoxVct(1)**2+PairBoxVct(2)**2+PairBoxVct(3)**2)
-        IF(PrBxSeprtn==Zero)THEN
-           TestBoxPairOverlap=.TRUE.
-           RETURN
-        ENDIF
-!       Pair box unit vector
-        PrBxUntVct=PairBoxVct/PrBxSeprtn
-!       Max extent of atom pair from the line AB 
-        IF(ABS(Pair%AB2)<1D-20)THEN
-!          Line is a point: Exp[-MinZab*R^2]<Tau
-           PairExtent=SQRT(PrimPairDistanceThreshold/MinZab)
-           PairHlfWdt=Zero
-           PairUntVct=Zero
-        ELSE
-!          Exp[-MinXab*|A-B|^2]*Exp[-MinZab*R^2]<Tau
-           PairExtent=SQRT(MAX(Zero,(PrimPairDistanceThreshold-MinXab*Pair%AB2/MinZab)))
-           PairUntVct=(Pair%A-Pair%B)*Half
-!          Half length (width) of AB
-           PairHlfWdt=SQRT(PairUntVct(1)**2+PairUntVct(2)**2+PairUntVct(3)**2)
-!          AB Unit vector
-           PairUntVct=PairUntVct/PairHlfWdt
-        ENDIF
-!       Check for line box overlap
-        TestBoxPairOverlap=.FALSE.
-        IF(ABS(PairBoxVct(1))-PairExtent*ABS(PrBxUntVct(1)) > &
-          +Box%Half(1)+PairHlfWdt*ABS(PairUntVct(1)))RETURN
-        IF(ABS(PairBoxVct(2))-PairExtent*ABS(PrBxUntVct(2)) > &
-          +Box%Half(2)+PairHlfWdt*ABS(PairUntVct(2)))RETURN
-        IF(ABS(PairBoxVct(3))-PairExtent*ABS(PrBxUntVct(3)) > &
-          +Box%Half(3)+PairHlfWdt*ABS(PairUntVct(3)))RETURN
-!       Could use some tests invovling cross products here...
-        TestBoxPairOverlap=.TRUE.
-     END FUNCTION TestBoxPairOverlap
+     !==================================================================================================
+     ! Modified Miguel Gomez' Ray-AABB test (Gamasutra '99) to work for Cylinder-AABB
+     ! for Ray=Point, uses A Simple Method for Box-Sphere Intersection Testing, Graphics Gems, pp. 247-250
+     !==================================================================================================
+     FUNCTION BoxPairOverlap(Pair,Box)
+       LOGICAL                   :: BoxPairOverlap
+       TYPE(AtomPair)            :: Pair
+       TYPE(BBox),OPTIONAL       :: Box
+       REAL(DOUBLE)              :: Ext,R,LMag,HL,d,s
+       REAL(DOUBLE),DIMENSION(3) :: RayAB,LHat,T,THat,TMag
+       !----------------------------------------------------------------
+       BoxPairOverlap=.FALSE.
+       IF(Pair%AB2>1.D-20)THEN ! This is the Cylinder-Box test
+          ! Solve  Exp[-MinXab*|A-B|^2]*Exp[-MinZab*Ext^2]<Tau
+          Ext=SQRT(MAX(Zero,(PrimPairDistanceThreshold-MinXab*Pair%AB2)/MinZab))
+          ! Ray from A to B
+          RayAB=Pair%A-Pair%B
+          ! Length of RayAB
+          LMag=SQRT(RayAB(1)**2+RayAB(2)**2+RayAB(3))
+          ! AB unit vector
+          LHat=RayAB/LMag
+          ! Half length
+          HL=Half*LMag
+          ! Distance from Box center to RayAB midpoint
+          T=Box%Center-(Pair%A+Pair%B)*Half
+          TMag=SQRT(T(1)**2+T(2)**2+T(3)**2)
+          ! Unit vector in direction T
+          THat=T/TMag
+          ! Recompute T to change test from Ray-Box to Cylinder-Box
+          T=THat*MAX(Zero,TMag-Ext)
+          ! Seperating axis tests
+          DO I=1,3
+             IF(ABS(T(I))>Box%Half(I)+HL*ABS(LHat(I)))RETURN
+          ENDDO
+          ! Cross product tests
+          r=Box%Half(2)*ABS(LHat(3))+Box%Half(3)*ABS(LHat(2))
+          IF(ABS(T(2)*LHat(3)-T(3)*LHat(2))>r)RETURN
+          r=Box%Half(1)*ABS(LHat(3))+Box%Half(3)*ABS(LHat(1))
+          IF(ABS(T(3)*LHat(1)-T(1)*LHat(3))>r)RETURN
+          r=Box%Half(1)*ABS(LHat(2))+Box%Half(2)*ABS(LHat(1))
+          IF(ABS(T(1)*LHat(2)-T(2)*LHat(1))>r)RETURN
+       ELSE ! Sphere-AABB from Graphics Gems
+          d=Zero
+          DO I=1,3
+             IF(Pair%A(I)<Box%BndBox(I,1))d=d+(Pair%A(I)-Box%BndBox(I,1))**2
+             IF(Pair%A(I)>Box%BndBox(I,2))d=d+(Pair%A(I)-Box%BndBox(I,2))**2
+          ENDDO
+          ! PrimPairDistanceThreshold is the squared radius of the sphere
+          IF(d>PrimPairDistanceThreshold)RETURN
+       ENDIF
+       BoxPairOverlap=.TRUE.
+     END FUNCTION BoxPairOverlap
 !====================================================================================================
 !    Secondary thresholding of primitive pairs using current
 !    value of Xab and Exp[-Xab |A-B|^2] = Tau
