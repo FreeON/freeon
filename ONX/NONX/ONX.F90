@@ -511,15 +511,21 @@ PROGRAM ONX
   !
   ! Save on disc.
   IF(SCFActn=='StartResponse'.OR.SCFActn=='FockPrimeBuild')THEN
-     CALL Put(K,TrixFile('KPrime'//TRIM(Args%C%C(3)),Args,0))
-     CALL PChkSum(K,'Kx'//TRIM(Args%C%C(3))//'['//TRIM(SCFCycl)//']',Prog)
-     CALL PPrint( K,'Kx'//TRIM(Args%C%C(3))//'['//TRIM(SCFCycl)//']')
-     CALL Plot(   K,'Kx'//TRIM(Args%C%C(3))//'['//TRIM(SCFCycl)//']')
+     CALL New(T1)
+     CALL Filter(T1,K,Thresholds%Trix*1.D-2)
+     CALL Put(T1,TrixFile('KPrime'//TRIM(Args%C%C(4)),Args,0))
+     CALL PChkSum(T1,'Kx'//TRIM(Args%C%C(4))//'['//TRIM(SCFCycl)//']',Prog)
+     CALL PPrint( T1,'Kx'//TRIM(Args%C%C(4))//'['//TRIM(SCFCycl)//']')
+     CALL Plot(   T1,'Kx'//TRIM(Args%C%C(4))//'['//TRIM(SCFCycl)//']')
+     CALL Delete(T1)
   ELSE
-     CALL Put(K,TrixFile('K',Args,0))
-     CALL PChkSum(K,'Kx['//TRIM(SCFCycl)//']',Prog)
-     CALL PPrint( K,'Kx['//TRIM(SCFCycl)//']')
-     CALL Plot(   K,'Kx['//TRIM(SCFCycl)//']')
+     CALL New(T1)
+     CALL Filter(T1,K,Thresholds%Trix*1.D-2)
+     CALL Put(T1,TrixFile('K',Args,0))
+     CALL PChkSum(T1,'Kx['//TRIM(SCFCycl)//']',Prog)
+     CALL PPrint( T1,'Kx['//TRIM(SCFCycl)//']')
+     CALL Plot(   T1,'Kx['//TRIM(SCFCycl)//']')
+     CALL Delete(T1)
   ENDIF
   !
 !--------------------------------------------------------------------------------
