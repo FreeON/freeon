@@ -357,6 +357,7 @@ CONTAINS
      TYPE(INT_RNK2)         :: Aux
      CHARACTER(LEN=*)       :: Char
      !
+     WRITE(6,*) Char
      CALL ISp1x1ToFull(GcSRowPt,GcSColPt,GcSMTrix,N,M,Aux)
      DO I=1,N
        WRITE(6,100) (Aux%I(I,J),J=1,M) 
@@ -943,7 +944,6 @@ CONTAINS
        CALL Delete(JSpBt) 
        CALL Delete(ASpBt) 
      ENDIF
-     !
    END SUBROUTINE GetGc
 !
 !--------------------------------------------------------------------
@@ -954,38 +954,51 @@ CONTAINS
      TYPE(DBL_VECT)  :: ASpB
      TYPE(INT_VECT)  :: JSpB2
      TYPE(DBL_VECT)  :: ASpB2
-     INTEGER         :: I,J,K,L,JJ,KK
+     INTEGER         :: I,J,K,L,JJ,KK,NCart
      INTEGER         :: NIntC,NZSpB
      !
      NIntC=SIZE(B%IB%I,1)
-     NZSpB=12*NIntC
+     NZSpB=(12+9)*NIntC
      CALL New(ISpB,NIntC+1) 
      CALL New(JSpB2,NZSpB) 
      CALL New(ASpB2,NZSpB) 
-       NZSpB=0
-       ISpB%I(1)=1
-       DO I=1,NIntC
-         DO J=1,4
-           K=B%IB%I(I,J)
-           IF(K==0) EXIT
-           JJ=3*(J-1)
-           KK=3*(K-1)
-           DO L=1,3
-             NZSpB=NZSpB+1 
-             KK=KK+1
-             JJ=JJ+1
-             JSpB2%I(NZSpB)=KK
-             ASpB2%D(NZSpB)=B%B%D(I,JJ)
-           ENDDO
+     NZSpB=0
+     ISpB%I(1)=1
+     DO I=1,NIntC
+       DO J=1,4
+         K=B%IB%I(I,J)
+         IF(K==0) EXIT
+         JJ=3*(J-1)
+         KK=3*(K-1)
+         DO L=1,3
+           NZSpB=NZSpB+1 
+           KK=KK+1
+           JJ=JJ+1
+           JSpB2%I(NZSpB)=KK
+           ASpB2%D(NZSpB)=B%B%D(I,JJ)
          ENDDO
-         ISpB%I(I+1)=NZSpB+1
        ENDDO
+       !
+       ! Copy lattice part (B%BL)
+       !
+       IF(B%BLI%I(I)/=0) THEN
+         NCart=B%BLI%I(I)
+         DO J=1,9
+           NZSpB=NZSpB+1 
+           JSpB2%I(NZSpB)=NCart+J
+           ASpB2%D(NZSpB)=B%BL%D(I,J)
+         ENDDO
+       ENDIF
+       ISpB%I(I+1)=NZSpB+1
+     ENDDO
      CALL New(JSpB,NZSpB) 
      CALL New(ASpB,NZSpB) 
        JSpB%I(1:NZSpB)=JSpB2%I(1:NZSpB)
        ASpB%D(1:NZSpB)=ASpB2%D(1:NZSpB)
      CALL Delete(JSpB2)
      CALL Delete(ASpB2)
+     ! 
+     CALL ThreshMatr(ISpB,JSpB,ASpB,1.D-8)
    END SUBROUTINE BtoSpB_1x1
 !
 !--------------------------------------------------------------------

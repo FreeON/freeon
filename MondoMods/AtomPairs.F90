@@ -442,7 +442,45 @@ CONTAINS
        ENDIF
     ENDDO
   END FUNCTION CellCenter
-!-------------------------------------------------------------------------------
+!
+!--------------------------------------------------------------------
+!
+  SUBROUTINE BoxParsToCart(Vec,BoxShape)
+    REAL(DOUBLE),DIMENSION(6)   :: Vec
+    REAL(DOUBLE),DIMENSION(3,3) :: BoxShape
+    BoxShape=Zero
+    BoxShape(1,1)=Vec(1)
+    BoxShape(1,2)=Vec(2)*COS(Vec(6))
+    BoxShape(2,2)=Vec(2)*SIN(Vec(6))
+    BoxShape(1,3)=Vec(3)*COS(Vec(5))
+    BoxShape(2,3)=(Vec(2)*Vec(3)*COS(Vec(4)) &
+                  -BoxShape(1,2)*BoxShape(1,3))/BoxShape(2,2) 
+    BoxShape(3,3)=SQRT(Vec(3)**2-BoxShape(1,3)**2-BoxShape(2,3)**2) 
+  END SUBROUTINE BoxParsToCart
+!
+!--------------------------------------------------------------------
+!
+  SUBROUTINE CalcBoxPars(Vec,BoxShape)
+    REAL(DOUBLE),DIMENSION(6)  :: Vec
+    REAL(DOUBLE),DIMENSION(3)  :: VecA,VecB,VecC,VecCr
+    REAL(DOUBLE),DIMENSION(:,:):: BoxShape
+    !
+    Vec(1)=SQRT(DOT_PRODUCT(BoxShape(1:3,1),BoxShape(1:3,1)))
+    Vec(2)=SQRT(DOT_PRODUCT(BoxShape(1:3,2),BoxShape(1:3,2)))
+    Vec(3)=SQRT(DOT_PRODUCT(BoxShape(1:3,3),BoxShape(1:3,3)))
+    VecA=BoxShape(1:3,1)/Vec(1)
+    VecB=BoxShape(1:3,2)/Vec(2)
+    VecC=BoxShape(1:3,3)/Vec(3)
+    Vec(4)=DOT_PRODUCT(VecB,VecC)
+    Vec(5)=DOT_PRODUCT(VecC,VecA)
+    Vec(6)=DOT_PRODUCT(VecA,VecB)
+    Vec(4)=ACOS(Vec(4)) 
+    Vec(5)=ACOS(Vec(5)) 
+    Vec(6)=ACOS(Vec(6)) 
+  END SUBROUTINE CalcBoxPars
+!
+!--------------------------------------------------------------------
+!
   SUBROUTINE MakeGMPeriodic(GM,WP_O)
     TYPE(CRDS)                     :: GM
     INTEGER                        :: K

@@ -268,7 +268,7 @@ MODULE MemMan
          CALL AllocChk(A%Alloc)
          A%N=N
          CALL New(A%Def,N)
-           A%Def%C='BLANK'
+           A%Def%C(:)(1:10)='BLANK     '
          CALL New(A%Atoms,(/N,4/))
            A%Atoms%I=0
          CALL New(A%Cells,(/N,12/))
@@ -298,6 +298,7 @@ MODULE MemMan
          CALL AllocChk(A%Alloc)
          CALL New(A%IB,(/N,4/))
          CALL New(A%B,(/N,12/))
+         CALL New(A%BLI,N)
          CALL New(A%BL,(/N,9/))
          A%Alloc=ALLOCATED_TRUE
       END SUBROUTINE New_BMATR
@@ -566,6 +567,7 @@ MODULE MemMan
          CALL New(A%Gradients,(/3,A%NAtms/))
          CALL New(A%AbCarts,(/3,A%NAtms/))
          CALL New(A%Displ,(/3,A%NAtms/))
+         CALL New(A%PBCDispl)
          CALL New(A%IntCs,IntCPerAtom*A%NAtms)
         !CALL New(A%IntCs,A%IntCs%N)
          CALL New(A%AtmB,A%NAtms,0)
@@ -922,6 +924,7 @@ MODULE MemMan
          CALL Delete(A%IB)
          CALL Delete(A%B)
          CALL Delete(A%BL)
+         CALL Delete(A%BLI)
          A%Alloc=ALLOCATED_FALSE
       END SUBROUTINE Delete_BMATR
 !     
@@ -956,6 +959,7 @@ MODULE MemMan
          CALL Delete(A%Gradients)
          CALL Delete(A%AbCarts)
          CALL Delete(A%Displ)
+         CALL Delete(A%PBCDispl)
          CALL Delete(A%IntCs)
          CALL Delete(A%Bond)
          CALL Delete(A%AtmB)

@@ -17,6 +17,7 @@ MODULE SetXYZ
                        Set_BMATR_EQ_BMATR,          &
                        Set_Chol_EQ_Chol,          &
                        Set_BONDDATA_EQ_BONDDATA,  &
+                       Set_PBCInfo_EQ_PBCInfo,    &
 #ifdef PARALLEL
                        Set_DBCSR_EQ_BCSR,         &
                        Set_BCSR_EQ_DBCSR,         &
@@ -34,6 +35,35 @@ MODULE SetXYZ
 !======================================================================
 !    Set Vector to
 !======================================================================
+!
+!--------------------------------------------------------------------
+!
+     SUBROUTINE Set_PBCInfo_EQ_PBCInfo(PBCNew,PBCOld)
+       TYPE(PBCInfo) :: PBCNew,PBCOld
+       !
+       IF(.NOT.AllocQ(PBCNew%Alloc)) CALL Halt('PBCNew needs to be allocated.')
+       PBCNew%Dimen=PBCOld%Dimen
+       PBCNew%PFFMaxEll=PBCOld%PFFMaxEll
+       PBCNew%PFFMaxLay=PBCOld%PFFMaxLay
+       PBCNew%PFFOvRide=PBCOld%PFFOvRide
+       PBCNew%AtomW=PBCOld%AtomW
+       PBCNew%InVecForm=PBCOld%InVecForm
+       PBCNew%InAtomCrd=PBCOld%InAtomCrd
+       PBCNew%Translate=PBCOld%Translate
+       PBCNew%CellVolume=PBCOld%CellVolume
+       PBCNew%Epsilon=PBCOld%Epsilon
+       PBCNew%DipoleFAC=PBCOld%DipoleFAC
+       PBCNew%QupoleFAC=PBCOld%QupoleFAC
+       PBCNew%AutoW%I=PBCOld%AutoW%I
+       PBCNew%CellCenter%D=PBCOld%CellCenter%D
+       PBCNew%TransVec%D=PBCOld%TransVec%D
+       PBCNew%BoxShape%D=PBCOld%BoxShape%D
+       PBCNew%InvBoxSh%D=PBCOld%InvBoxSh%D
+       PBCNew%LatFrc%D=PBCOld%LatFrc%D
+     END SUBROUTINE Set_PBCInfo_EQ_PBCInfo
+!
+!--------------------------------------------------------------------
+!
      SUBROUTINE VecToAng(PBC,A,B,C,Alpha,Beta,Gamma)
         TYPE(PBCInfo)               :: PBC
         REAL(DOUBLE)                :: A,B,C,Alpha,Beta,Gamma

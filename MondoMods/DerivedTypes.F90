@@ -335,6 +335,7 @@ MODULE DerivedTypes
 !
       TYPE(DBL_RNK2)   :: AbCarts   !-- Absolute, unwrapped coordinates
       TYPE(DBL_RNK2)   :: Displ     !-- Displaced Cartesian geometry
+      TYPE(PBCInfo)    :: PBCDispl  !-- Displaced Periodic Information
 !     Internal coordinates related arrays
       TYPE(INTC)       :: IntCs
       TYPE(BONDDATA)   :: Bond
@@ -553,6 +554,7 @@ MODULE DerivedTypes
      INTEGER        :: Alloc     !-- Allocation key
      TYPE(INT_RNK2) :: IB
      TYPE(DBL_RNK2) :: B
+     TYPE(INT_VECT) :: BLI
      TYPE(DBL_RNK2) :: BL
    END TYPE BMATR
 !
