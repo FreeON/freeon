@@ -20,9 +20,9 @@ MODULE ParseInPut
    USE Functionals
    USE Overlay
    USE AtomPairs
+   USE InCoords    
 #ifdef MMech
    USE Dynamo    
-   USE InCoords    
    USE Mechanics 
 #endif
    IMPLICIT NONE

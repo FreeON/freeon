@@ -17,6 +17,7 @@ MODULE DrvFrcs
   USE InOut
   USE AtomPairs
   USE LinALg
+  USE InCoords
   IMPLICIT NONE 
   CONTAINS
 !========================================================================================
@@ -875,16 +876,22 @@ MODULE DrvFrcs
 !
 ! Initialize file for geometry updates     
 !
+#ifdef MMech
      IF(CBas==1.OR.MMOnly())THEN
        CALL OpenASCII(GeoFile,Geo,NewFile_O=.TRUE.)
        CLOSE(UNIT=Geo,STATUS='KEEP')
      ENDIF
+#else
+     IF(CBas==1)THEN
+       CALL OpenASCII(GeoFile,Geo,NewFile_O=.TRUE.)
+       CLOSE(UNIT=Geo,STATUS='KEEP')
+     ENDIF
+#endif
 !
 #ifdef MMech
      IF(MMOnly()) THEN
          CALL GeOpNew(Ctrl)
      ELSE
-#endif
 !
 !    Optimize geometry for each basis set
 !
@@ -893,8 +900,16 @@ MODULE DrvFrcs
          CALL SetGlobalCtrlIndecies(Ctrl)
          CALL GeOpNew(Ctrl)
        ENDDO
-#ifdef MMech
      ENDIF
+#else
+!
+!    Optimize geometry for each basis set
+!
+       DO ISet=1,Ctrl%NSet
+         Ctrl%Current=(/0,ISet,CGeo/)
+         CALL SetGlobalCtrlIndecies(Ctrl)
+         CALL GeOpNew(Ctrl)
+       ENDDO
 #endif
   END SUBROUTINE OptimizeNew
 !------------------------------------------------------------
