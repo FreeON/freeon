@@ -36,11 +36,9 @@ PROGRAM MakeU
   CHARACTER(LEN=5),PARAMETER :: Prog='MakeU'
   !--------------------------------------- 
   ! Start up macro
-
   CALL StartUp(Args,Prog,Serial_O=.FALSE.)
   !----------------------------------------------
   ! Get basis set and geometry
-
   CALL Get(BS,Tag_O=CurBase)
   CALL Get(GM,Tag_O=CurGeom)
   !---------------------------------------------- 
@@ -78,7 +76,6 @@ PROGRAM MakeU
 #else
               U%MTrix%D(R:R+NN-1)=SBlok(BS,Pair)
 #endif
-
               U%ColPt%I(P)=AtB
               U%BlkPt%I(P)=R
               R=R+NN 
@@ -106,6 +103,7 @@ PROGRAM MakeU
      CALL Filter(T1,U)
      Thresholds%Trix = Thresholds%Trix*1.D2
      CALL Put(T1,TrixFile('U',Args))
+     !     CALL PPrint( T1,'U',Unit_O=6)
      !-----------------------------------------------------------
      ! Printing
      CALL PChkSum(T1,'U',Prog)
@@ -113,7 +111,6 @@ PROGRAM MakeU
      CALL Plot(   T1,'U')
      !------------------------------------------------------------
      ! Tidy up
-
      CALL Delete(U)
      CALL Delete(T1)
      CALL Delete(BS)
