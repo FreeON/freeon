@@ -1,0 +1,15 @@
+Mondo version: 2004-12-09 14:21
+Compiled on zinc with NAG.
+
+SCF convergence problem on CH2_8 in HF/3-21G/tight.
+
+CJ has fixed the same problem on CH2_6, hower his fix does not seem
+to work on CH2_8. Attached files have been calculated 
+on zinc on a single processor.
+
+Something is really strange in SCF, see how SCF energy blows up.
+Even if one exchanges DIIS to ODA, the same thing happens.
+
+K.N. 12/9/04
+--------------------------------------------------------------------
+
