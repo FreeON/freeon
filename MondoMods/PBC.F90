@@ -183,9 +183,9 @@ MODULE CellSets
           DO K = -N(3),N(3)
              IF(IJKTest(I,J,K,M(1),M(2),M(3))) THEN
                 NCELL = NCELL+1
-                X  = I*MAT(1,1)
-                Y  = I*MAT(1,2)+J*MAT(2,2)
-                Z  = I*MAT(1,3)+J*MAT(2,3)+K*MAT(3,3)
+                X  = I*MAT(1,1)+J*MAT(1,2)+K*MAT(1,3)
+                Y  = I*MAT(2,1)+J*MAT(2,2)+K*MAT(2,3)
+                Z  = I*MAT(3,1)+J*MAT(3,2)+K*MAT(3,3)
                 CS%CellCarts%D(1,NCELL)= X
                 CS%CellCarts%D(2,NCELL)= Y
                 CS%CellCarts%D(3,NCELL)= Z
@@ -220,9 +220,9 @@ MODULE CellSets
     DO I=-IXM,IXM
        DO J=-IYM,IYM
           DO K=-IZM,IZM
-             X  = I*MAT(1,1)
-             Y  = I*MAT(1,2)+J*MAT(2,2)
-             Z  = I*MAT(1,3)+J*MAT(2,3)+K*MAT(3,3)
+             X  = I*MAT(1,1)+J*MAT(1,2)+K*MAT(1,3)
+             Y  = I*MAT(2,1)+J*MAT(2,2)+K*MAT(2,3)
+             Z  = I*MAT(3,1)+J*MAT(3,2)+K*MAT(3,3)
              R = SQRT(X*X+Y*Y+Z*Z)
              IF(R .LE. Radius) THEN
                 NCELL = NCELL+1
@@ -237,9 +237,9 @@ MODULE CellSets
     DO I=-IXM,IXM
        DO J=-IYM,IYM
           DO K=-IZM,IZM
-             X  = I*MAT(1,1)
-             Y  = I*MAT(1,2)+J*MAT(2,2)
-             Z  = I*MAT(1,3)+J*MAT(2,3)+K*MAT(3,3)
+             X  = I*MAT(1,1)+J*MAT(1,2)+K*MAT(1,3)
+             Y  = I*MAT(2,1)+J*MAT(2,2)+K*MAT(2,3)
+             Z  = I*MAT(3,1)+J*MAT(3,2)+K*MAT(3,3)
              R = SQRT(X*X+Y*Y+Z*Z)
              IF(R .LE. Radius) THEN
                 NCELL = NCELL+1
