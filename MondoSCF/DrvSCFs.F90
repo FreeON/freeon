@@ -93,6 +93,9 @@ MODULE DrvSCFs
 !         ENDIF
          CALL Invoke('P2Use',CtrlVect,MPIRun_O=.TRUE.)
          CALL Invoke('MakeRho',CtrlVect)
+#ifdef PARALLEL
+         CALL Invoke('ParaMakeRho',CtrlVect,MPIRun_O=.TRUE.)
+#endif
          CALL CleanScratch(Ctrl,'CleanLastGeom')
       ELSEIF(Ctrl%Rest)THEN
 !        Restart from a previous density
