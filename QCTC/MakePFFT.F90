@@ -25,8 +25,6 @@ PROGRAM MakePFFT
   REAL(DOUBLE)                   :: DDelta,Rad,AtoAU
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg
   CHARACTER(LEN=8),PARAMETER     :: Prog='MakePFFT'
-!
-  REAL(DOUBLE),DIMENSION(3,3)    :: DivCV
 !-------------------------------------------------------------------------------- 
 ! Start up macro
   CALL StartUp(Args,Prog)
@@ -64,7 +62,7 @@ PROGRAM MakePFFT
 !    Delete
      CALL Delete(TenC)
      CALL Delete(TenS)  
-     CALL Delete(dTenC)
+     CALL Delete(dTenC) 
      CALL Delete(dTenS)
   ENDIF
 ! Delete

@@ -19,8 +19,8 @@ MODULE QCTCThresholds
       SUBROUTINE SetLocalThresholds(Tau)
          REAL(DOUBLE) :: Tau
 !        Penetration Acceptability Criterion (PAC) threshold
-         TauPAC=Tau 
+         TauPAC=Tau*1D0
 !        Multipole Acceptability Criterion (MAC) threshold
-         TauMAC=Tau*1D2
+         TauMAC=Tau*1D1
       END SUBROUTINE SetLocalThresholds
 END MODULE
