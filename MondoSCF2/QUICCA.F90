@@ -852,7 +852,7 @@ CONTAINS
                 RangeT%D,NDegsT%I,Zero,.FALSE.)
      CALL DoPredict(ABCT%D,IntCValuesT%D,IntCGradsT%D,IntCsT, &
                     NDegsT%I,Path2,RangeT%D)
-     CALL CleanRange(DisplT%D,RangeT%D,IntCsT%PredVal%D, &
+     CALL CleanRange(DisplT%D,RangeT%D,IntCs%Def%C,IntCsT%PredVal%D, &
                      IntCValuesT%D(:,NDim),NDim)
      IntCsT%PredVal%D=IntCValuesT%D(:,NDim)+DisplT%D
      ! set up constraints
@@ -881,14 +881,22 @@ CONTAINS
 !
 !---------------------------------------------------------------------
 !
-   SUBROUTINE CleanRange(DisplT,RangeT,PredVal,Values,NDim)
-     REAL(DOUBLE),DIMENSION(:)   :: DisplT,PredVal,Values
-     REAL(DOUBLE),DIMENSION(:,:) :: RangeT
-     REAL(DOUBLE)                :: Range,Range1,Range2,Displ,X
-     INTEGER                     :: I,NT,NDim
+   SUBROUTINE CleanRange(DisplT,RangeT,IntCDef,PredVal,Values,NDim)
+     REAL(DOUBLE),DIMENSION(:)     :: DisplT,PredVal,Values
+     REAL(DOUBLE),DIMENSION(:,:)   :: RangeT
+     CHARACTER(LEN=*),DIMENSION(:) :: IntCDef
+     REAL(DOUBLE)                  :: Range,Range1,Range2,Displ,X
+     INTEGER                       :: I,NT,NDim
      !
      NT=SIZE(DisplT)
      DO I=1,NT
+       DisplT(I)=PredVal(I)-Values(I) 
+      !IF(IntCDef(I)(1:6)=="STRE_A".OR. &
+      !   IntCDef(I)(1:6)=="STRE_B".OR. &
+      !   IntCDef(I)(1:6)=="STRE_C".OR. &
+      !   IntCDef(I)(1:5)=="ALPHA".OR. &
+      !   IntCDef(I)(1:4)=="BETA".OR. &
+      !   IntCDef(I)(1:5)=="GAMMA") CYCLE 
        Range1=RangeT(I,1)
        Range2=RangeT(I,2)
        Range=Range2-Range1
@@ -1247,8 +1255,8 @@ CONTAINS
          ! range is too small for fitting.
          ! Control over stepsize is going to be modified to
          ! standard DiagHess range (0.3 a.u.)
-         Range(I,1)=VectX%D(NDim)-0.15D0
-         Range(I,2)=VectX%D(NDim)+0.15D0
+         Range(I,1)=VectX%D(NDim)-0.30D0
+         Range(I,2)=VectX%D(NDim)+0.30D0
          ABC(I,1)=VectY%D(NDim)-ABC(I,2)*VectX%D(NDim)
          NDegs(I)=1      
          CYCLE  
@@ -1804,6 +1812,70 @@ CONTAINS
      ! Check gradients of translation and rotation
      !
    END SUBROUTINE GrdConvrgd
+!
+!----------------------------------------------------------------------
+!
+   SUBROUTINE LatticeFit(SRStruct,RefStruct,RefGrad,XYZ,PBCDim, &
+                         GOpt,Print,SCRPath,PWDPath,iGEO)
+     REAL(DOUBLE),DIMENSION(:,:) :: SRStruct,RefStruct,RefGrad,XYZ
+     INTEGER                     :: Print,PBCDim,iGEO
+     TYPE(INTC)                  :: IntC_L
+     CHARACTER(LEN=*)            :: SCRPath,PWDPath
+     TYPE(DBL_RNK2)              :: IntCValues,IntCGrads
+     TYPE(GeomOpt)               :: GOpt
+     INTEGER                     :: NatmsLoc,NCart,I,J
+     TYPE(DBL_VECT)              :: PredVals,Displ,VectCart
+     REAL(DOUBLE),DIMENSION(3,3) :: InvBoxSh,BoxShape
+     REAL(DOUBLE),DIMENSION(3)   :: CartAux
+     !
+     NatmsLoc=SIZE(XYZ,2)
+     NCart=3*NatmsLoc
+     CALL LatticeINTC(IntC_L,PBCDim)
+     CALL New(VectCart,NCart)
+     CALL CollectINTCPast(RefStruct,RefGrad,IntCValues,IntCGrads, &
+                          IntC_L,GOpt,SCRPath,Print,PBCDim)
+     CALL DisplFit(IntC_L,IntCGrads%D,IntCValues%D,GOpt%Hessian, &
+                GOpt%CoordCtrl,PredVals,Displ,PWDPath,SCRPath,NCart, &
+                iGEO)
+     !
+     DO I=1,3
+       BoxShape(1:3,I)=XYZ(1:3,NatmsLoc-3+I)
+     ENDDO
+     InvBoxSh=InverseMatrix(BoxShape)
+     !
+     ! Convert to Fractionals
+     !
+     DO I=1,NatmsLoc-3
+       CALL DGEMM_NNc(3,3,1,One,Zero,InvBoxSh,XYZ(1:3,I),CartAux)
+       XYZ(:,I)=CartAux
+     ENDDO
+     !
+     ! Calculate new lattice vectors
+     !
+     IntC_L%Constraint%L=.TRUE.
+     DO I=1,IntC_L%N
+       IntC_L%ConstrValue%D(I)=PredVals%D(I)
+     ENDDO
+     CALL SetFixedLattice(VectCart%D,IntC_L)
+     !
+     ! Convert fractionals back to Cartesians
+     !
+     DO I=1,3
+       BoxShape(1:3,I)=XYZ(1:3,NatmsLoc-3+I)
+     ENDDO
+     !
+     DO I=1,NatmsLoc-3
+       CALL DGEMM_NNc(3,3,1,One,Zero,BoxShape,XYZ(1:3,I),CartAux)
+       XYZ(:,I)=CartAux
+     ENDDO
+     !
+     CALL Delete(VectCart)
+     CALL Delete(PredVals)
+     CALL Delete(Displ)
+     CALL Delete(IntCValues)
+     CALL Delete(IntCGrads)
+     CALL Delete(IntC_L)
+   END SUBROUTINE LatticeFit
 !
 !----------------------------------------------------------------------
 !

@@ -240,6 +240,11 @@ MODULE ControlStructures
      REAL(DOUBLE)                       :: MaxAngle
      REAL(DOUBLE)                       :: MaxStre
   END TYPE CoordCtrl
+  
+  TYPE LattInfo
+    REAL(DOUBLE),DIMENSION(6)           :: Grad
+    REAL(DOUBLE),DIMENSION(6)           :: Displ
+  END TYPE LattInfo
 
   TYPE GeomOpt
      INTEGER                         :: Optimizer
@@ -254,6 +259,7 @@ MODULE ControlStructures
      TYPE(Constr)                    :: Constr
      TYPE(GDIIS)                     :: GDIIS
      TYPE(INTC)                      :: ExtIntCs
+     TYPE(LattInfo)                  :: LattIntC
   END TYPE GeomOpt
 
   TYPE RespOpts

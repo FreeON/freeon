@@ -2378,7 +2378,6 @@ CONTAINS
      REAL(DOUBLE),DIMENSION(9,9) :: P
      REAL(DOUBLE)                :: Fact,Norm
      !
-     !
      !The lines below refer to a situation, where 
      ! all coordinates of the lattice vectors are allowed to change
      ! while still maintaining a no-rotation framework 
@@ -3413,13 +3412,13 @@ CONTAINS
      !
      CALL BMatrix(XYZ,IntCs,B,PBCDim,LinCrit,TorsLinCrit)
      CALL SetEq(BS,B)
-     IF(DoCleanCol) THEN
+!    IF(DoCleanCol) THEN
        CALL CleanBConstr(IntCs,B,NatmsLoc)
-       CALL CleanBLConstr(XYZ,IntCs,B,PBCDim)
-     ENDIF
-     CALL CleanBLRot(XYZ,IntCs,B,PBCDim)
-!write(*,*) 'B%BL hardwired to zero'
-!B%BL%D=Zero
+!      CALL CleanBLConstr(XYZ,IntCs,B,PBCDim)
+!    ENDIF
+!    CALL CleanBLRot(XYZ,IntCs,B,PBCDim)
+write(*,*) 'B%BL hardwired to zero'
+B%BL%D=Zero
      !
      CALL BtoSpB_1x1(B,ISpB,JSpB,ASpB)
      !
@@ -3749,6 +3748,7 @@ CONTAINS
      IntCs%Active%L=.FALSE.
      NCoinc=0
      DO I=1,IntCs%N
+       IF(IntCsE%Def%C(I)(1:5)=="BLANK") CYCLE
        DO J=1,IntCsE%N
          IF(IntCsE%Constraint%L(J)) THEN
            IF(IntCsE%Def%C(J)(1:8)==IntCs%Def%C(I)(1:8)) THEN
@@ -6939,6 +6939,12 @@ return
      Fact=One
      IF(PRESENT(Fact_O)) Fact=Fact_O
      DO I=1,IntCs%N
+       IF(IntCs%Def%C(I)(1:6)=="STRE_A".OR. &
+          IntCs%Def%C(I)(1:6)=="STRE_B".OR. &
+          IntCs%Def%C(I)(1:6)=="STRE_C".OR. &
+          IntCs%Def%C(I)(1:5)=="ALPHA".OR. &
+          IntCs%Def%C(I)(1:4)=="BETA".OR. &
+          IntCs%Def%C(I)(1:5)=="GAMMA") CYCLE
        CALL CtrlDispl(IntCs%Def%C(I),Displ(I),Fact, &
                       StreCritIn,AngleCritIn)
      ENDDO
@@ -7404,5 +7410,33 @@ return
 !
 !-------------------------------------------------------------------
 !
+   SUBROUTINE GetLattGrads(CartGrad,XYZ,LattGrad,PBCDim)
+     REAL(DOUBLE),DIMENSION(:)   :: CartGrad,LattGrad
+     REAL(DOUBLE),DIMENSION(:,:) :: XYZ
+     INTEGER                     :: NCart,NatmsLoc,NCoinc,NDim,PBCDim
+     TYPE(INTC)                  :: IntCs
+     TYPE(DBL_RNK2)              :: AL,BL
+     !
+     IF(PBCDim==0) THEN
+       LattGrad=Zero
+       RETURN
+     ENDIF
+     NatmsLoc=SIZE(XYZ,2)
+     ! 
+     CALL LatticeINTC(IntCs,PBCDim)
+     IntCs%Constraint%L=.TRUE.
+     CALL LatticeConstrAB(XYZ,IntCs,PBCDim,AL,BL,NCoinc)
+     IF(PBCDim==1) NDim=1
+     IF(PBCDim==2) NDim=3
+     IF(PBCDim==3) NDim=6
+     IF(NCoinc/=NDim) CALL Halt('NCoinc/=NDim in GetLattGrads')
+     LattGrad=Zero
+     CALL DGEMM_NNc(NCoinc,9,1,One,Zero,AL%D,CartGrad,LattGrad(1:NCoinc))
+     CALL Delete(IntCs)
+     CALL Delete(AL)
+     CALL Delete(BL)
+   END SUBROUTINE GetLattGrads
+!
+!-------------------------------------------------------------------
+!
    END MODULE InCoords
-
