@@ -1,8 +1,205 @@
+2005-02-02 21:04  nemeth
+
+	* MondoSCF2/QUICCA.F90: Totalgrad is commented out.
+
+2005-02-02 01:13  nemeth
+
+	* MondoSCF2/QUICCA.F90: Indices corrected for previous check-in.
+
+2005-02-01 22:50  nemeth
+
+	* MondoSCF2/: InCoords.F90, Optimizer.F90, QUICCA.F90: Energy total
+	derivatives added. This improves convergence when tight accuracy is
+	required.
+
+2005-01-27 18:37  nemeth
+
+	* MondoSCF2/: InCoords.F90, Optimizer.F90, QUICCA.F90, SCFs.F90:
+	Som reorganization of the optimizer so that the constraint forces
+	are not put onto disk. This allowes a correct full relaxation after
+	a few steps with constraints.
+
+2005-01-27 09:48  tymczak
+
+	* MondoSCF2/SCFs.F90: Rearanged thing is Force() such that if the
+	forces are printed out, they are not modified by anything that Kro
+	does
+	
+	CJ
+
+2005-01-26 08:09  vweber
+
+	* BUGS/pQCTC_26.01.05-1/: README, ZnO.inp, ZnO.stdout,
+	ZnO_15394188.out: Parallel QCTC doesn't like so much Guess=Core.
+
+2005-01-26 07:57  vweber
+
+	* OneE/: BlokTrPdM.F90, MForce.F90, Makefile: Added dipole
+	gradients for IR intensity.
+
+2005-01-20 07:48  vweber
+
+	* ONX2/: HONX.F90, HONXComputD2K.F90: Small step toward analytic
+	exchange hessian.
+
+2005-01-20 05:56  vweber
+
+	* Validate/h2o_nfreq.inp: An example with frequency calculation.
+
+2005-01-20 05:55  vweber
+
+	* MondoSCF2/: MondoSCF.F90, Optimizer.F90, OptionKeys.F90,
+	ParseOptions.F90: This is a first step toward frequencies and
+	thermostat calculations in Mondo.  With Grad=(NumFreq) it computes
+	the numerical hessian by differenciation of the analytical
+	gradients. It requires 3N+1 SCF and Grad evaluations.  Then the
+	rotations and translations are removed from the weighted hessian
+	and the freqs computed. Freqs are used to compute thermo.
+	quantities.  Actualy, the code does not supporte: atoms, linear
+	molecules and molecules with to much symmetry (only in thermostat).
+	It also needs testing for PBC.	We also need the dipole moment
+	derivative to compute IR and Raman intensities.
+
+2005-01-18 23:13  nemeth
+
+	* Validate/: IceIh_LatticeOpt.inp, IceIh_LatticeOpt.ref: A lattice
+	only optimization of ice, all fractional coordinates are held fixed
+	while lattice parameters change via internal coordinates.
+
+2005-01-18 22:25  nemeth
+
+	* MondoSCF2/: GeomOptKeys.F90, InCoords.F90, Optimizer.F90,
+	ParseExtraCoords.F90, ParseGeomOpt.F90, QUICCA.F90: A new version
+	of the optimizer. Lattice only optimization can be carried out in
+	terms of all standard selected internal coordinates when putting "
+	C" at the end of each Cartesian/fractional lines in the input file.
+	For PBC systems " C" will constrain FRACTIONAL coordinates, while
+	for gas phase molecules " C" constraines CARTESIAN coordinates.
+
+2005-01-14 03:12  vweber
+
+	* BUGS/LatFrc_10.01.05-1/: MgO_cube_K_Opt.inp.gz,
+	MgO_cube_K_Opt_15395849.out.gz, README: Added K optimization. the
+	value of the energy is about 4D-8 above the min energy obtained
+	with the scan!!!
+
+2005-01-11 13:41  nemeth
+
+	* MondoSCF2/InCoords.F90: Fix an ordering problem in the lattice
+	derivatives part of the B matrix that was introduced in the
+	previous check-in.
+
+2005-01-10 18:43  nemeth
+
+	* MondoSCF2/InCoords.F90: A bug fixed in the lattice B matrix.
+
+2005-01-10 13:21  nemeth
+
+	* BUGS/InCoords_24.12.04-1/FIX/: tmp-.inp, tmp-_22754.out: The
+	recent version of the code fixes this bug.
+
+2005-01-10 10:46  vweber
+
+	* BUGS/LatFrc_10.01.05-1/: MgO_cube1.inp.gz,
+	MgO_cube1_10922295.out.gz, MgO_cube2.inp.gz,
+	MgO_cube2_1053530.out.gz, MgO_cube3.inp.gz,
+	MgO_cube3_11196851.out.gz, MgO_cube4.inp.gz,
+	MgO_cube4_626464.out.gz, MgO_cube5.inp.gz,
+	MgO_cube5_14824461.out.gz, MgO_cube6.inp.gz,
+	MgO_cube6_15772003.out.gz, MgO_cube7.inp.gz,
+	MgO_cube7_15778828.out.gz, README: Reported the problem with LatFrc
+	for 3D-periodic systems.
+
+2005-01-08 11:06  nemeth
+
+	* Validate/: MgO-3D.inp, MgO-3D.ref: A 3D MgO crystal, simultaneous
+	optimization of lattice and atomic positions.
+
+2005-01-07 21:08  nemeth
+
+	* MondoSCF2/InCoords.F90: There is a bug in the selection of
+	internal coordinates that cross the cell boundary. Now the safe
+	version is checked in that allowes all internals which touch the
+	central cell.
+
+2005-01-06 17:49  nemeth
+
+	* Validate/: MgO-2D.inp, MgO-2D.ref: 2D MgO crystal, simultaneous
+	optimization of lattice and atomic positions.
+
+2005-01-06 16:03  nemeth
+
+	* MondoSCF2/QUICCA.F90: Filtering of data points is set back to no
+	filtering.
+
+2005-01-06 14:41  nemeth
+
+	* MondoSCF2/SCFs.F90: Total vs partial derivative for lattice
+	forces. MgO example of Valery and several other examples made it
+	clear that the code provides the total derivative, so it is set
+	back here as it should be.
+
+2005-01-06 12:15  nemeth
+
+	* MondoSCF2/Optimizer.F90: A printing bug fixed.
+
+2005-01-06 10:41  nemeth
+
+	* Validate/: IceIh.inp, IceIh.ref: Simultaneous lattice/atomic pos.
+	IceIh optimization with latest optimizer, with NoBackTr.
+
+2005-01-06 10:38  nemeth
+
+	* Validate/: Urea.inp, Urea.ref: Simultaneous lattice/atomic
+	positions optimization of Urea with the latest version of the
+	optimizer.
+
+2005-01-06 07:26  vweber
+
+	* ONX2/ONX2List.F90: [no log message]
+
+2005-01-06 07:25  vweber
+
+	* ONX2/: HONX.F90, HONXComputD2K.F90, Makefile: Small update for
+	the analytical XHessian.
+
+2005-01-05 11:30  nemeth
+
+	* MondoSCF2/SCFs.F90: Lattice gradients are modified according to
+	Bucko-Angyan to be total derivatives of the energy according to
+	lattice vector components, instead of being partial derivatives.
+
+2005-01-04 09:52  vweber
+
+	* Docs/pONX/: Endo/Endothelin.dat.gz, Endo/Endothelin_KCNS.agr.gz,
+	Endo/Endothelin_KCNS.dat.gz, Endo/Timing.m.gz, Endo/h2o_pbc.par.gz,
+	KCNS/KCNS.dat.gz, KCNS/Timing.m.gz, h2o_50_110/h2o_50_110.agr.gz,
+	h2o_50_110/h2o_50_110.dat.gz, h2o_50_110/h2o_50_110.par.gz,
+	h2o_PBC/h2o_pbc.dat.gz, h2o_PBC/h2o_pbc.par.gz,
+	h2o_PBC/h2o_pbc_64.agr.gz: [no log message]
+
+2005-01-04 04:31  vweber
+
+	* Docs/pONX/pONX.tex: [no log message]
+
+2005-01-04 04:05  vweber
+
+	* Docs/Bib/mondo_new.bib: [no log message]
+
+2005-01-03 10:35  vweber
+
+	* Docs/pONX/: Endothelin_KCNS.ps, Makefile, h2o_50_110.ps,
+	h2o_50_prop.ps, h2o_pbc_64.ps, pONX.tex: [no log message]
+
+2005-01-03 04:37  vweber
+
+	* SCFeqs/P2Use.F90: Removed NPrc times the same messages.
+
 2005-01-02 13:06  mchalla
 
-	* Docs/: Bib/mondo_new.bib, DM_Papers/PERT_4/Makefile,
-	DM_Papers/PERT_4/SPRT.ps, DM_Papers/PERT_4/SPRT.tex: [no log
-	message]
+	* Docs/Bib/mondo_new.bib, Docs/DM_Papers/PERT_4/Makefile,
+	Docs/DM_Papers/PERT_4/SPRT.ps, Docs/DM_Papers/PERT_4/SPRT.tex,
+	ChangeLog: [no log message]
 
 2005-01-01 08:38  vweber
 
@@ -13,6 +210,13 @@
 	* MondoSCF2/SCFs.F90: Fixed the problem with the lower part of the
 	numerical exchange lattice grad.
 
+2004-12-24 07:29  vweber
+
+	* BUGS/InCoords_24.12.04-1/: README, tmp-.inp, tmp-_27045.log,
+	tmp-_27045.out, tmp-_27045.xyz: Halt in InCoords (K<DimU in
+	GetPBCProj.) during GeoOpt of CH3CO2-.	P2Use may need some work to
+	produce right guesses for charged systems.
+
 2004-12-24 07:14  vweber
 
 	* Validate/: AcO-.inp, AcO-.ref: Report successful run of CH3CO2-.
@@ -21,6 +225,20 @@
 
 	* Validate/: NO+.inp, NO+.ref: This is a calculation with a total
 	charge +1 and it works!
+
+2004-12-23 10:35  vweber
+
+	* BUGS/QCTC_23.12.04-1/: README, he.inp, he_31683.log,
+	he_31683.out: Report a nice crash in QCTC, ie single He atom
+	calculation!
+
+2004-12-23 03:18  vweber
+
+	* BUGS/pQCTC_23.12.04-1/: MeOH_128.inp, MeOH_128.stdout,
+	MeOH_128_1435212.log, MeOH_128_1435212.out, MeOH_64.inp,
+	MeOH_64.stdout, MeOH_64_928695.log, MeOH_64_928695.out, README:
+	Report crash in parallel QCTC during basis set switch on qscfe1. 
+	Bombed in redistribute_fastmat.
 
 2004-12-22 04:56  vweber
 
