@@ -33,9 +33,9 @@ geometry optimization algorithms. The new alternative is based on
 fitting gradient surfaces in terms of curvilinear 
 internal coordinates and 
 determining the roots of the fitted surface. Due to the efficient 
-vibrational decoupling of the curvilinear coordinates the 3N-dimesional
+vibrational decoupling of the curvilinear coordinates the 3N-dimensional
 optimization problem splits into a quasi non-interacting
-set of approximately 3N one-dimensional optimization problems, 
+set of ${\cal{O}}(N)$ one-dimensional optimization problems, 
 similarly to the self-consistent mean-field concepts of physics.
 This allows for robust, linear scaling implementation of geometry optimizers.
 }
@@ -105,7 +105,9 @@ coordinates do not provide the same clear progression.
 \caption{
 \small  
 Progression of gradients on a valence angle bending coordinate of
-ammonia. The optimization was started from near planar geometry, i.e.
+ammonia. Energies and forces were obtained by the PBE 
+density functional model in STO-3G basis set.
+The optimization was started from near planar geometry, i.e.
 from the vicinity of a transition state, and converged to a local 
 minimum of the potential energy surface. The numbers in the picture
 indicate the sequence of optimization steps. The dashed line represents
@@ -148,7 +150,11 @@ harmonic potential energy surface.
 The success of Hessian update schemes is based on, that for geometry 
 optimization a reasonable estimate of the Hessian 
 is enough to bring the molecule to a local optimum by 
-quasi-Newton steps. 
+quasi-Newton steps. It is important to note, that while the knowledge
+of the exact Hessian leads to quadratically convergent optimization
+in the Newton scheme, updated Hessians exibit only superlinear
+convergence during quasi-Newton optimizations
+\cite{RFletcher,fogarasi_diaghess}.
 
 The updated Hessian matrices require ${\cal{O}}(N^{2})$ storage, thus
 their use becomes a computational bottleneck for large molecules.
@@ -187,7 +193,8 @@ only in recent developments
 \section{A new concept}
 In the present article we introduce a new concept 
 to molecular geometry optimization. We call this approach the
-Optimization through Gradient Curve Fitting (OGCF) technique. 
+Extrapolation of Fitted Internal coordinate
+Gradients for the localization of Extrema (EFIGE).
 This new approach is very simple
 to implement, scales fully linearly with system size 
 and is very efficient for both small and large molecules.
@@ -356,6 +363,11 @@ curve fitting technique. The analysis of Wales {\it et.al.}
 \cite{Wales_saddlepoint}
 gives a numerical insight into the problems of controlling
 convergence to a minimum without an accurate Hessian.
+Even with the knowledge of modern Hessian update techniques, such 
+as BFGS \cite{RFletcher} there is no strict garantee to converge into
+a minimum, instead of a transition state. The only certain source
+of determining whether an extremal point of the potential energy surface
+is minimum, is the exact Hessian \cite{fogarasi_diaghess}.
 
 \subsection{Initial steps}
 In the very first step of the optimization,
@@ -393,7 +405,8 @@ accounted for. However, it is easy to avoid this case by properly
 setting up the internal coordinate recognitions.
 
 \section{Performance}
-The performance of this initial implementation of the OGCF optimizer
+\subsection{Baker's test set}
+The performance of this initial implementation of the EFIGE optimizer
 has been tested on a 
 series of small molecules, called Baker's test set \cite{bakerstest}.
 At convergence, the maximum remaining Cartesian
@@ -411,11 +424,24 @@ Ref. \cite{bakerstest}.
 Table \ref{Bakers_test} lists all the test results
 in order to convince
 the reader, that our new concept of geometry optimization
-works as well on small molecules as the best implementations
+works just as good or even better on small molecules 
+as the best implementations
 of traditional algorithms.
-We expect further improvement by the application of combined    
-internal coordinates, such as the natural internal ones or the 
-delocalized ones. 
+
+In four cases (ACHTAR10,ACANIL01,Pterin and Menthone), our 
+EFIGE optimizer proved to be somewhat slower than the best traditional
+techniques. This happened due to geometrical redundancies, which are
+typical for the application of a redundant set of primitive internal
+coordinates. As a consequence of this redundancy, the iterative
+back-transformation could not accurately set the required displacements,
+and some coordinates have been set farther from their predicted optimum 
+value, instead of getting closer to them, as intended.
+A cure of this problem could be the application of 
+combined internal coordinates, such as the natural internal ones 
+\cite{Pulay_natural_internals} or the 
+delocalized ones \cite{Baker_deloc_1}, which exibit
+smaller amount of conflict between coordinates. 
+
 Note, that our results have been achieved without any use
 of traditional convergence acceleration algorithms, such as 
 geometric DIIS \cite{Pulay_GDIIS}, which are standard tools of
@@ -423,14 +449,15 @@ traditional optimizers \cite{Farkas_GDIIS}. Furthermore,
 no application of the so-called line-search (see e.g. Ref. \cite{bakken}
 and refs. therein) took place in our calculations.
 
+
 \begin{table}[h]
 %\squeezetable
 \caption{
 Geometry optimization steps of small molecules (upto 30 atoms)
-of the Baker's test set. Calculations have been carried out 
+of Baker's test set. Calculations have been carried out 
 with the Hartree-Fock model in STO-3G basis set.
-All calculations have been carried out using local primitive
-internal coordinates. In addition to them the ones made
+All calculations have been used local primitive
+internal coordinates. The calculations 
 by Bakken {\it et.al.} used extra redundant coordinates \cite{bakken}.
 }
 \label{Bakers_test}
@@ -438,7 +465,7 @@ by Bakken {\it et.al.} used extra redundant coordinates \cite{bakken}.
 \toprule
 Molecule               & Present  & Bakken & Eckert  & Lindh &  Baker  \\
          & work & {\it{et al.}} & {\it{et al.}} & {\it{et al.}} &    \\
-         &(OGCF) &  \cite{bakken} &  \cite{eckert} & \cite{lindh} &  \cite{bakerstest} \\
+         &(EFIGE) &  \cite{bakken} &  \cite{eckert} & \cite{lindh} &  \cite{bakerstest} \\
 \colrule
 Water                  &   4    &   4    &    4    &    4   &   6     \\
 Ammonia                &   4    &   5    &    6    &    5   &   6     \\
@@ -483,7 +510,9 @@ to implement then any traditional alternatives.
 This allowes the fast and efficient 
 extension of geometry optimization 
 to large molecules, where scaling issues are important.
-In order to illustrate the performance of our optimizer on large
+
+\subsection{Order and rate of convergence}
+For an illustration of the performance of our optimizer on large
 molecules, we show the convergence of the molecular total energy
 during the course of the optimization of a 257 atom
 fragment of Protein Kinase A, in Figs. \ref{logn-logde} 
@@ -493,7 +522,7 @@ all other atoms have been allowed to move.
 The optimizations have been carried out 
 using MondoSCF \cite{MondoSCF}, a linear scaling electronic structure
 program system, the PBE density functional model and 
-STO-2G basis set, with 0.1 milliHartree resolution of the energies.
+STO-2G basis set, with $1\times10^{-4}$ Hartree resolution of the energies.
 The convergence was smooth with minor jumps in the energy.
 
 Iterative processes are characterized by the order, $n$
@@ -505,9 +534,13 @@ For the convergence of the energy this reads:
 with $E_{opt}$ being the optimum energy and $E_{i}$ the energy
 at the $i$-th geometry.
 A first order convergence is typical for the bulk of the optimization
-of larger molecules. For smaller molecules, like the ones of Baker's
-test set, the order of convergence is between linear and quadratic,
-with an acceleration towards convergence. Note, that in the case
+of larger molecules. This is also the maximum, quasi-Newton techniques 
+can offer. We have achived this performance without any Hessian
+matrix update.
+For smaller molecules, like the ones of Baker's
+test set, the order of convergence is between linear and quadratic
+(superlinear), with an acceleration towards convergence.
+Note, that in the case
 of first order convergence the rate of the convergence is still
 smaller than one, which results in decreasing error.
 \begin{figure}[h]
@@ -532,8 +565,8 @@ $E_{opt}$ is the optimum energy.
 \caption{
 \small  
 Relative errors of the energy show linear improvement.
-Thus, the convergence is of first order. Higher order
-convergence can be expected only beyond the milliHartree
+Thus, the convergence is of first order. Better, superlinear
+convergence can be expected only beyond the $1\times10^{-4}$ Hartree
 energy resolution for this molecular size.
 \label{order-of-conv}
 }
@@ -541,7 +574,7 @@ energy resolution for this molecular size.
 
 \section{Summary}
 In this article we have presented a new concept
-to the optimization of molecular structures.
+for the optimization of molecular structures.
 We have shown, that internal coordinates representing chemical 
 entities can efficiently be optimized, without
 ever accounting for explicite vibrational couplings, as traditional
