@@ -1591,7 +1591,7 @@ CONTAINS
            IntCDispl%D=VectIntAux%D
          ENDIF
          !
-         CALL CutOffDispl(IntCDispl%D,IntCs,1.D-2,1.D-2)
+         CALL CutOffDispl(IntCDispl%D,IntCs,1.D-1,1.D-1)
          CALL MapAngleDispl(IntCs,IntCDispl%D) 
          !
          ! Check convergence on constraints
