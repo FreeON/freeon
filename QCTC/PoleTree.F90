@@ -34,28 +34,24 @@ MODULE PoleTree
    USE Parse
    USE InOut
    USE Macros
-   USE Thresholding
+   USE QCTCThresholds
    USE BoundingBox
    USE MondoPoles
    IMPLICIT NONE
 !----------------------------------------------------------------------------------
-!  Global parameters
-!
-!  Global scalars
-   INTEGER            :: PoleNodes,RhoLevel,MaxTier,NTier
-   REAL(DOUBLE)       :: MaxAmp,MiniumExp
-!----------------------------------------------------------------------------------
-!  Global density in array form
-!
+!  Globals
+   TYPE(PoleNode), POINTER               :: PoleRoot  ! Root of the pole tree 
+   INTEGER                               :: PoleNodes
+   INTEGER                               :: RhoLevel
+   INTEGER                               :: CurrentTier
+   INTEGER                               :: MaxTier
+   INTEGER                               :: NElecDist
    INTEGER,     DIMENSION(:),Allocatable :: Qdex      
    INTEGER,     DIMENSION(:),Allocatable :: Cdex
    INTEGER,     DIMENSION(:),Allocatable :: Ldex
    REAL(DOUBLE),DIMENSION(:),Allocatable :: RList      
    REAL(DOUBLE),DIMENSION(:),Allocatable :: Zeta
-   REAL(DOUBLE),DIMENSION(:),Allocatable :: Amp
-!----------------------------------------------------------------------------------
-!  Global Rho trees
-   TYPE(PoleNode), POINTER :: PoleRoot  ! Root of the tree 
+   REAL(DOUBLE),DIMENSION(:),Allocatable :: Ext
 !-----------!
    CONTAINS !
 !=================================================================================
@@ -69,53 +65,20 @@ MODULE PoleTree
         RhoLevel=0
 !       Initialize the root node
         CALL NewPoleNode(PoleRoot,0)
-        CALL InitPoleRoot
+        PoleRoot%Bdex=1
+        PoleRoot%Edex=Rho%NDist
+        PoleRoot%NQ=Rho%NDist
 !       Convert the density into a 3-D BinTree
         CALL SplitPole(PoleRoot)
 !       Make PoleTree tier by tier, recuring up from the bottom
-        DO NTier=MaxTier,0,-1         
+        DO CurrentTier=MaxTier,0,-1         
            CALL MakePoleTree(PoleRoot) 
         ENDDO
         CALL Print_PoleNode(PoleRoot,'Root')
       END SUBROUTINE RhoToPoleTree
-!==========================================================================
+!=====================================================================================
 !
-!==========================================================================
-      RECURSIVE SUBROUTINE MakePoleTree(Node)
-         TYPE(PoleNode) :: Node
-!--------------------------------------------------------------
-         IF(Node%Box%Tier<NTier.AND.(.NOT.Node%Leaf))THEN
-            CALL MakePoleTree(Node%Descend)
-            CALL MakePoleTree(Node%Descend%Travrse)
-         ELSEIF(Node%Box%Tier==NTier)THEN
-            IF(Node%Leaf)THEN
-               Node%C=Zero; Node%S=Zero
-               CALL HGToSP(Node)
-            ELSE            
-               Node%C=Zero; Node%S=Zero
-!              Translation from left Q to P center
-               CALL XLate(Node%Descend,Node)
-!              Translation from right Q to P center
-               CALL XLate(Node%Descend%Travrse,Node)
-            ENDIF
-         ENDIF
-     END SUBROUTINE MakePoleTree
-!===============================================================================
-!     
-!===============================================================================
-      SUBROUTINE InitPoleRoot
-         PoleRoot%Bdex=1
-         PoleRoot%Edex=Rho%NDist
-         PoleRoot%NQ=Rho%NDist
-!        Get the Bounding Box for PoleRoot
-         CALL NewRhoBox(PoleRoot)
-!        Set the largest range (smallest exponent) of the roots BB
-         PoleRoot%Zeta=Rho%Expt%D(1)
-         MiniumExp=Rho%Expt%D(1)
-     END SUBROUTINE InitPoleRoot
-!===================================================================
-!
-!===================================================================
+!=====================================================================================
       RECURSIVE SUBROUTINE SplitPole(Node)
          TYPE(PoleNode), POINTER :: Node,Left,Right
 !--------------------------------------------------------------
@@ -133,12 +96,52 @@ MODULE PoleTree
 !           Recur
             CALL SplitPole(Left)
             CALL SplitPole(Right)
-!           Min exponent
-            Node%Zeta=MIN(Left%Zeta,Right%Zeta)
-!           Max distance to the BBox surface squared
-            Node%D2=Node%Box%Half(1)**2+Node%Box%Half(2)**2+Node%Box%Half(3)**2+1.D-16
          ENDIF
        END SUBROUTINE SplitPole
+!=================================================================================
+!     
+!=================================================================================
+      RECURSIVE SUBROUTINE MakePoleTree(P)
+         TYPE(PoleNode)         :: P
+         TYPE(PoleNode),POINTER :: LeftQ,RightQ
+         INTEGER                :: K
+!--------------------------------------------------------------
+         IF(P%Box%Tier==CurrentTier.AND.P%Leaf)THEN
+            P%C=Zero
+            P%S=Zero
+            CALL HGToSP(P)
+         ELSEIF(P%Leaf)THEN
+            RETURN
+         ELSEIF(P%Box%Tier==CurrentTier)THEN 
+            P%C=Zero 
+            P%S=Zero
+            LeftQ=>P%Descend
+            RightQ=>P%Descend%Travrse
+!           Compute new nodes BBox (could use smart center construction to minimize MAC)
+            DO K=1,3
+               P%Box%BndBox(K,1)=MIN(LeftQ%Box%BndBox(K,1),RightQ%Box%BndBox(K,1))
+               P%Box%BndBox(K,2)=MAX(LeftQ%Box%BndBox(K,2),RightQ%Box%BndBox(K,2))
+            ENDDO
+            P%Box%Half(:)=Half*(P%Box%BndBox(:,2)-P%Box%BndBox(:,1))
+            P%Box%Center(:)=Half*(P%Box%BndBox(:,2)+P%Box%BndBox(:,1))
+            P%Zeta=MIN(LeftQ%Zeta,RightQ%Zeta)
+!           Zero extended accumulators
+            Cx=Zero
+            Sx=Zero
+!           Translation 
+            CALL XLate(LeftQ,P)
+            CALL XLate(RightQ,P)
+!           Copy lower portion of accumulators into nodes
+            P%C(0:SPLen)=Cx(0:SPLen)
+            P%S(0:SPLen)=Sx(0:SPLen)
+!           Compute the multipole strength [O^P_(L+1)]^(2/(2+L))
+            P%Strength=UnsoldO(SPEll+1,Cx,Sx)**(Two/(Two+DBLE(SPEll)))          
+         ELSE
+!           Keep on truckin ...
+            CALL MakePoleTree(P%Descend)
+            CALL MakePoleTree(P%Descend%Travrse)
+         ENDIF
+     END SUBROUTINE MakePoleTree
 !=====================================================================================
 !
 !=====================================================================================
@@ -155,37 +158,28 @@ MODULE PoleTree
          NQ=E-B+1
          IF(NQ/=1.OR.B/=E)CALL Halt('Bad Logic in FillRhoLeaf ')
          KQ=Qdex(B)
-         KC=Cdex(KQ)
-         Node%Box%Center(1)=Rho%Qx%D(KQ)
-         Node%Box%Center(2)=Rho%Qy%D(KQ)
-         Node%Box%Center(3)=Rho%Qz%D(KQ)
          Node%Zeta=Zeta(KQ)
          Node%Ell=Ldex(KQ)
+!        Set and inflate this nodes BBox
+         Node%Box%BndBox(1,:)=Rho%Qx%D(KQ)
+         Node%Box%BndBox(2,:)=Rho%Qy%D(KQ)
+         Node%Box%BndBox(3,:)=Rho%Qz%D(KQ)
+         Node%Box=ExpandBox(Node%Box,Ext(KQ))
+!        Allocate and fill HGTF coefficients
          LMNLen=LHGTF(Node%Ell)
          ALLOCATE(Node%Co(1:LMNLen),STAT=Status)
          CALL IncMem(Status,0,LMNLen)
+         KC=Cdex(KQ)
          Node%Co(1:LMNLen)=Rho%Co%D(KC:KC+LMNLen-1)
-         Node%Bdex=MAX(0,KQ-SUM(Rho%NQ%I(1:Rho%NExpt-1)))
-!         IF(Node%Bdex>0) &
-!         WRITE(*,*)SUM(Rho%NQ%I(1:Rho%NExpt-1)),KQ,' B = ',Node%Bdex,' Co = ',Node%Co(1)
-
-
-!IF(Node%Zeta>100.D0)Node%Co=Zero
-
-!WRITE(77,*)'test2['//TRIM(IntToChar(B))//']={qx->'//TRIM(DblToMMAChar(Node%Box%Center(1))) &
-!                                         //',qy->'//TRIM(DblToMMAChar(Node%Box%Center(2))) &
-!                                         //',qz->'//TRIM(DblToMMAChar(Node%Box%Center(3))) &
-!                                         //',zq->'//TRIM(DblToMMAChar(Node%Zeta))          &
-!                                         //',qco->'//TRIM(DblToMMAChar(Node%Co(1)))//'};'
-
-
+!        Mark node to identify nuclear self interaction
+         Node%Bdex=MAX(0,KQ-NElecDist)
       END SUBROUTINE FillRhoLeaf
 !==========================================================================
 !     Initialize a new PoleNode
 !==========================================================================
       SUBROUTINE NewPoleNode(Node,Level)
          TYPE(PoleNode), POINTER   :: Node
-         INTEGER                  :: Level,I,Status        
+         INTEGER                   :: Level,I,Status        
          ALLOCATE(Node,STAT=Status)
          IF(Status/=SUCCEED)CALL Halt(' Node ALLOCATE failed in NewPoleNode ')
          Node%Leaf=.False.
@@ -203,30 +197,6 @@ MODULE PoleTree
          Node%S(0:SPLen)=Zero
          Node%C(0:SPLen)=Zero
       END SUBROUTINE NewPoleNode
-!================================================================================
-!     New RhoBox
-!================================================================================
-      SUBROUTINE NewRhoBox(Node)
-         TYPE(PoleNode), POINTER :: Node
-         INTEGER                :: J,I,IQ
-         REAL(DOUBLE)           :: Test
-         Node%Zeta=1.D12
-         Node%Box%BndBox(:,1)= 1.D12
-         Node%Box%BndBox(:,2)=-1.D12
-         DO J=Node%Bdex,Node%Edex 
-            IQ=Qdex(J)
-            Node%Box%BndBox(1,1)=Min(Node%Box%BndBox(1,1),Rho%Qx%D(IQ))
-            Node%Box%BndBox(1,2)=Max(Node%Box%BndBox(1,2),Rho%Qx%D(IQ))
-            Node%Box%BndBox(2,1)=Min(Node%Box%BndBox(2,1),Rho%Qy%D(IQ))
-            Node%Box%BndBox(2,2)=Max(Node%Box%BndBox(2,2),Rho%Qy%D(IQ))
-            Node%Box%BndBox(3,1)=Min(Node%Box%BndBox(3,1),Rho%Qz%D(IQ))
-            Node%Box%BndBox(3,2)=Max(Node%Box%BndBox(3,2),Rho%Qz%D(IQ))
-         ENDDO
-!        New sides
-         Node%Box%Half(:)=Half*(Node%Box%BndBox(:,2)-Node%Box%BndBox(:,1))
-!        New center
-         Node%Box%Center(:)=Half*(Node%Box%BndBox(:,2)+Node%Box%BndBox(:,1))
-      END SUBROUTINE NewRhoBox
 !================================================================================
 !     Bisection   
 !================================================================================
@@ -276,15 +246,13 @@ MODULE PoleTree
 !        Counters
          Left%NQ=Left%Edex-Left%Bdex+1
          Right%NQ=Right%Edex-Right%Bdex+1
-!        Find optimal boxes
-         CALL NewRhoBox(Left)
-         CALL NewRhoBox(Right)
       END SUBROUTINE SplitPoleBox
 !========================================================================================
 !     ALLOCATE and read in the density, initalize global lists 
 !========================================================================================
       SUBROUTINE InitRhoAux
-         INTEGER      :: z,oq,or,iq,jq,NQ,Q,Ell,Status,I,IOS,LMNLen
+         INTEGER      :: z,oq,or,iq,jq,NQ,Q,Ell,Status,I,IOS,LMNLen,CD,QD
+         REAL(DOUBLE) :: ZE,EX
 !-------------------------------------------------------------
 !        ALLOCATE global lists
          ALLOCATE(Qdex(1:Rho%NDist),STAT=Status)
@@ -297,29 +265,42 @@ MODULE PoleTree
          CALL IncMem(Status,0,Rho%NDist)
          ALLOCATE(Zeta(1:Rho%NDist),STAT=Status)
          CALL IncMem(Status,0,Rho%NDist)
-         ALLOCATE(Amp(1:Rho%NDist),STAT=Status)
+         ALLOCATE(Ext(1:Rho%NDist),STAT=Status)
          CALL IncMem(Status,0,Rho%NDist)
 !        Fill the global indeces
          IQ=1
-         JQ=1
-         MaxAmp=Zero
-         DO z=1,Rho%NExpt!,Rho%NExpt
-            oq  =Rho%OffQ%I(z)   
-            or  =Rho%OffR%I(z)   
-            Ell =Rho%Lndx%I(z)   
+         DO z=1,Rho%NExpt
+            oq =Rho%OffQ%I(z)   
+            or =Rho%OffR%I(z)   
+            Ell=Rho%Lndx%I(z)   
+            ZE =Rho%Expt%D(z)
             LMNLen=LHGTF(Ell)
-            NQ  =Rho%NQ%I(z)
-            DO Q=1,NQ
-               Qdex(IQ)=oq+Q
-               Cdex(oq+Q)=or+(Q-1)*LMNLen +1 
-               Zeta(oq+Q)=Rho%Expt%D(z)
-               Ldex(oq+Q)=Ell
-               IQ=IQ+1
-               JQ=JQ+LMNLen
+            DO Q=1,Rho%NQ%I(z)
+               QD=oq+Q
+               CD=or+(Q-1)*LMNLen+1
+               IF(z==Rho%NExpt)THEN
+                  Ex=1.D-10
+               ELSE
+                 EX=Extent(Ell,ZE,Rho%Co%D(CD:CD+LMNLen-1),TauPAC,Potential_O=.TRUE.)
+!                 WRITE(33,*)'EX = ',EX,Extent(Ell,ZE,Rho%Co%D(CD:CD+LMNLen-1),TauPAC)
+               ENDIF
+!              Threshold out distributions with zero extent 
+               IF(EX>Zero)THEN
+                  Qdex(IQ)=QD
+                  Cdex(QD)=CD
+                  Ext( QD)=EX
+                  Zeta(QD)=ZE
+                  Ldex(QD)=Ell
+                  IQ=IQ+1
+               ENDIF
             ENDDO
-         ENDDO     
-!        Redefine NDist to exclude nuclear charges
+         ENDDO        
+!        Recompute the number of distributions
          Rho%NDist=IQ-1
+!        Number of distributions excluding nuclei (used for
+!        identifiying nuclear selfinteraction, note that nuclei
+!        must be in correct order for this to work...)
+         NElecDist=SUM(Rho%NQ%I(1:Rho%NExpt-1))
        END SUBROUTINE InitRhoAux
 !========================================================================================
 !     Delete globals associated with the array representation of the density
@@ -335,7 +316,7 @@ MODULE PoleTree
          CALL DecMem(Status,Rho%NDist,0)
          DEALLOCATE(Zeta,STAT=Status)
          CALL DecMem(Status,0,Rho%NDist)
-         DEALLOCATE(Amp,STAT=Status)
+         DEALLOCATE(Ext,STAT=Status)
          CALL DecMem(Status,0,Rho%NDist)
          DEALLOCATE(RList,STAT=Status) 
          CALL DecMem(Status,0,Rho%NDist)

@@ -222,7 +222,6 @@ MODULE JGen
                          PBox%BndBox(:,1)=Prim%P
                          PBox%BndBox(:,2)=Prim%P
                          PBox=ExpandBox(PBox,PExtent)
-!                         DP2=(PStrength/TauMAC)**(Two/(Two+DBLE(SPEll)))
 !                        Zero the Accumulators
                          HGKet=Zero
                          SPKetC=Zero
@@ -239,6 +238,7 @@ MODULE JGen
                             Prim%P(1)=Px+CSMM1%CellCarts%D(1,NC)
                             Prim%P(2)=Py+CSMM1%CellCarts%D(2,NC)
                             Prim%P(3)=Pz+CSMM1%CellCarts%D(3,NC)
+                            PBox%Center(:)=Prim%P(:) !<<<<<<<<<<<<<<<????????????
 !                           Walk the walk
                             CALL JWalk(PoleRoot)
                          ENDDO

@@ -41,6 +41,7 @@ PROGRAM QCTC
   USE Globals
   USE AtomPairs
   USE BraBloks
+  USE QCTCThresholds
   USE PoleTree
   USE PBCFarField
   USE JGen
@@ -63,6 +64,8 @@ PROGRAM QCTC
   CALL NewBraBlok(BS)
 ! Get the Density for Poletree
   CALL Get(Rho,'Rho',Args,0)
+! Set thresholds local to QCTC (for PAC and MAC)
+  CALL SetLocalThresholds(Thresholds%TwoE)
 ! Initialize the auxiliary density arrays
   CALL InitRhoAux
 ! Setup global arrays for computation of multipole tensors
