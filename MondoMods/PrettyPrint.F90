@@ -42,8 +42,7 @@ MODULE PrettyPrint
 
 
    CHARACTER(LEN=DEFAULT_CHR_LEN) :: String
-   CHARACTER(LEN=12),PARAMETER    :: CheckEq=' CheckSum  = '
-   CHARACTER(LEN=12),PARAMETER    :: RhoSumE=' Integrate = '
+   CHARACTER(LEN=13),PARAMETER    :: CheckEq=' CheckSum  = '
    CONTAINS 
       SUBROUTINE TimeStamp(Mssg,Enter_O)
          CHARACTER(LEN=*),INTENT(IN) :: Mssg
@@ -366,6 +365,8 @@ MODULE PrettyPrint
         INTEGER,         OPTIONAL,INTENT(IN) :: Unit_O
         CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: FileName_O
         CHARACTER(LEN=DEFAULT_CHR_LEN)       :: Mssg
+
+RETURN
 !
         PU=OpenPU(FileName_O=FileName_O,Unit_O=Unit_O)
 !
@@ -435,30 +436,23 @@ MODULE PrettyPrint
 ! Print the CellSet
 !--------------------------------------------------------------------------
   SUBROUTINE Print_CellSet(CS,Name,Proc_O,Unit_O)
-    TYPE(CellSet)                    :: CS
-    CHARACTER(LEN=*),OPTIONAL        :: Proc_O
-    CHARACTER(LEN=*)                 :: Name
-    INTEGER,OPTIONAL                 :: Unit_O
-    INTEGER                          :: PU 
-    CHARACTER(LEN=2*DEFAULT_CHR_LEN) :: CellStr
-!
-    IF(.NOT. AllocQ(CS%Alloc)) THEN
-       CALL Halt(' Cells are  not allocated in Print_CellSet')
-    ENDIF
-    PU=OpenPU(Unit_O=Unit_O)
-!
-    IF(PRESENT(Proc_O)) THEN
-       IF(PrintFlags%Key > DEBUG_MINIMUM) THEN
-          CellStr=ProcessName(Proc_O)//'Number of Cells in '//TRIM(Name)//' = '//TRIM(IntToChar(CS%NCells))
-       ENDIF
-    ELSE
-       IF(PrintFlags%Key > DEBUG_MINIMUM) THEN
-          CellStr='Number of Cells in '//TRIM(Name)//' = '//TRIM(IntToChar(CS%NCells))
-       ENDIF
-    ENDIF
-    WRITE(PU,'(1x,A)')TRIM(CellStr)
-    CALL ClosePU(PU)
-!
+     TYPE(CellSet)                    :: CS
+     CHARACTER(LEN=*),OPTIONAL        :: Proc_O
+     CHARACTER(LEN=*)                 :: Name
+     INTEGER,OPTIONAL                 :: Unit_O
+     INTEGER                          :: PU 
+     CHARACTER(LEN=2*DEFAULT_CHR_LEN) :: CellStr
+!-----------------------------------------------------------------------------------------
+     IF(PrintFlags%Key<DEBUG_MAXIMUM.OR.CS%NCells==1)RETURN
+     IF(.NOT. AllocQ(CS%Alloc))CALL Halt(' Cells not allocated in Print_CellSet')
+     PU=OpenPU(Unit_O=Unit_O)
+     IF(PRESENT(Proc_O)) THEN
+        CellStr=ProcessName(Proc_O)//'Cells in '//TRIM(Name)//' = '//TRIM(IntToChar(CS%NCells))
+     ELSE
+        CellStr='Cells in '//TRIM(Name)//' = '//TRIM(IntToChar(CS%NCells))
+     ENDIF
+     WRITE(PU,*)TRIM(CellStr)
+     CALL ClosePU(PU)
   END SUBROUTINE Print_CellSet
 #endif   
 !----------------------------------------------------------------PRINT COORDINATES
@@ -875,8 +869,8 @@ MODULE PrettyPrint
     INTEGER,         OPTIONAL,INTENT(IN) :: Unit_O
     CHARACTER(LEN=*),OPTIONAL            :: Proc_O
     INTEGER                              :: PU,I,L,M,N,LMN,jadd,zq,iq,oq,orr,Ell,LenKet,NQ
-    REAL(DOUBLE)                         :: Chk,RSum,Expt
-    CHARACTER(LEN=2*DEFAULT_CHR_LEN)     :: ChkStr1,ChkStr2
+    REAL(DOUBLE)                         :: Chk,Expt
+    CHARACTER(LEN=2*DEFAULT_CHR_LEN)     :: ChkStr1
 !----------------------------------------------------------------------------------------
     IF(PrintFlags%Key/=DEBUG_MAXIMUM.AND. &
        PrintFlags%Chk/=DEBUG_CHKSUMS)RETURN
@@ -899,43 +893,22 @@ MODULE PrettyPrint
        ENDDO
     ENDDO
 !
-    RSum = Zero
-    DO zq = 1,A%NExpt-1
-       Expt   = A%Expt%D(zq)
-       oq     = A%OffQ%I(zq)
-       orr    = A%OffR%I(zq)
-       Ell    = A%Lndx%I(zq) 
-       LenKet = LHGTF(Ell)
-       DO iq = 1,A%NQ%I(zq)
-          jadd = orr+(iq-1)*LenKet+1
-          RSum = RSum+A%Co%D(jadd)*((Pi/Expt)**ThreeHalves)
-       ENDDO
-    ENDDO
-!
     PU=OpenPU(Unit_O=Unit_O)
     IF(PRESENT(Proc_O).AND.PrintFlags%Fmt/=DEBUG_MMASTYLE)THEN
        ChkStr1=ProcessName(Proc_O)//TRIM(Name)//CheckEq//TRIM(DblToChar(Chk))
-       ChkStr2=ProcessName(Proc_O)//TRIM(Name)//RhoSumE//TRIM(DblToChar(RSum))
     ELSEIF(PrintFlags%Fmt/=DEBUG_MMASTYLE)THEN
        ChkStr1=TRIM(Name)//CheckEq//TRIM(DblToChar(Chk))
-       ChkStr2=TRIM(Name)//RhoSumE//TRIM(DblToChar(RSum))
     ELSEIF(PRESENT(Proc_O).AND.PrintFlags%Fmt==DEBUG_MMASTYLE)THEN
        ChkStr1='(* '//TRIM(Proc_O)//' *)'//'ChkSum'//TRIM(Name)       &
                    //' = '//TRIM(FltToChar(FRACTION(Chk))) &
                    //'*2^('//TRIM(IntToChar(EXPONENT(Chk)))//');'
-       ChkStr1='(* '//TRIM(Proc_O)//' *)'//'RhoSum'//TRIM(Name)       &
-                   //' = '//TRIM(FltToChar(FRACTION(RSum))) &
-                   //'*2^('//TRIM(IntToChar(EXPONENT(RSum)))//');'
     ELSEIF(PrintFlags%Fmt==DEBUG_MMASTYLE)THEN
        ChkStr1='ChkSum'//TRIM(Name)//' = '//TRIM(FltToChar(FRACTION(Chk))) &
                       //'*2^('//TRIM(IntToChar(EXPONENT(Chk)))//');'
-       ChkStr2='RhoSum'//TRIM(Name)//' = '//TRIM(FltToChar(FRACTION(RSum))) &
-                      //'*2^('//TRIM(IntToChar(EXPONENT(RSum)))//');'
     ELSE 
        CALL Halt(' Logic error in Print_CheckSum_HGRho')
     ENDIF
     WRITE(PU,'(1x,A)')TRIM(ChkStr1)
-    WRITE(PU,'(1x,A)')TRIM(ChkStr2)
     CALL ClosePU(PU)
 !
   END SUBROUTINE Print_CheckSum_HGRho
@@ -1064,20 +1037,29 @@ MODULE PrettyPrint
 !========================================================================================
 !     Print Out the Cartesian Multipoles
 !========================================================================================
-  SUBROUTINE Print_CMPoles(A,Name,Unit_O)
+  SUBROUTINE Print_CMPoles(A,Proc_O,Unit_O)
     TYPE(CMPoles)                    :: A
-    CHARACTER(LEN=*)                 :: Name   
+    CHARACTER(LEN=*),OPTIONAL        :: Proc_O
     INTEGER,OPTIONAL                 :: Unit_O
     INTEGER                          :: PU
     INTEGER                          :: I,J
-    CHARACTER(LEN=DEFAULT_CHR_LEN)   :: Strng
-!
+    REAL(DOUBLE)                     :: TrQ
+    CHARACTER(LEN=DEFAULT_CHR_LEN)   :: Mssg
+!-------------------------------------------------------------------------------------
     IF(.NOT. AllocQ(A%Alloc)) THEN
-       CALL Halt(' Mutipoles not allocated in PPrint_CMPoles')
+       CALL Halt(' Multipoles not allocated in PPrint_CMPoles')
     ENDIF
-    Strng = TRIM(Name)// ' Mutipoles:'
-!
+    TrQ=A%QPole%D(1)+A%QPole%D(2)+A%QPole%D(3)
+    Mssg=ProcessName(Proc_O,'Moments')                  &
+        //'<r> = ('//TRIM(DblToShrtChar(A%DPole%D(1)))  &
+        //', '//TRIM(DblToShrtChar(A%DPole%D(2)))       &
+        //', '//TRIM(DblToShrtChar(A%DPole%D(3)))       &
+        //'), <r^2> = '//TRIM(DblToShrtChar(TrQ))
     PU=OpenPU(Unit_O=Unit_O)
+    WRITE(PU,*)TRIM(Mssg)
+    CALL ClosePU(PU)
+!
+#ifdef CJsStuff
     WRITE(PU,10)
     WRITE(PU,11) Strng
     WRITE(PU,12) 
@@ -1087,14 +1069,13 @@ MODULE PrettyPrint
     WRITE(PU,14)
     WRITE(PU,20) A%QPole%D(4),A%QPole%D(5),A%QPole%D(6)
     WRITE(PU,10)
-    CALL ClosePU(PU)
-!
 10  FORMAT(54('='))
 11  FORMAT(1x,A54)
 12  FORMAT(6x,' p(x) ',12x,' p(y) ',12x,' p(z) ')
 13  FORMAT(6x,'q(x*x)',12x,'q(y*y)',12x,'q(z*z)')
 14  FORMAT(6x,'q(x*y)',12x,'q(x*z)',12x,'q(y*z)')
 20  FORMAT(1x,D15.8,3x,D15.8,3x,D15.8)
+#endif
 !
   END SUBROUTINE Print_CMPoles
 !---------------------------------------------------------------------

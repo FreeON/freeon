@@ -1357,11 +1357,6 @@ MODULE InOut
          TYPE(TOLS),               INTENT(IN) :: NGLCT
          CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Tag_O
          CHARACTER(LEN=DEFAULT_CHR_LEN)       :: Tag
-         IF(PRESENT(Tag_O))THEN
-            Tag='_'//TRIM(Tag_O)
-         ELSE
-            Tag=''
-         ENDIF 
          CALL Put(NGLCT%Cube,'cubeneglect',Tag_O=Tag_O)
          CALL Put(NGLCT%Trix,'trixneglect',Tag_O=Tag_O)
          CALL Put(NGLCT%Dist,'distneglect',Tag_O=Tag_O)
@@ -1526,60 +1521,23 @@ MODULE InOut
 100 CALL Halt('IO Error '//TRIM(IntToChar(IOS))//' in Put_HGRho.')
   END SUBROUTINE Put_HGRho
 !========================================================================================
-! Allocate the Multipoles
+! Get Cartesian multipoles
 !========================================================================================
-  SUBROUTINE Get_CMPoles(A,Name,Args,SCFCycle)
+  SUBROUTINE Get_CMPoles(A,Tag_O)
     TYPE(CMPoles)                    :: A
-    TYPE(ARGMT)                      :: Args
-    INTEGER                          :: SCFCycle,IOS,I
-    REAL(DOUBLE)                     :: Dummy
-    CHARACTER(LEN=*)                 :: Name 
-    CHARACTER(LEN=DEFAULT_CHR_LEN)   :: FileName
-    LOGICAL                          :: Exists
-!
-    FileName=TrixFile(Name,Args,SCFCycle)
-    INQUIRE(FILE=FileName,EXIST=Exists)
-    IF(Exists) THEN
-       OPEN(UNIT=Seq,FILE=FileName,STATUS='OLD',FORM='UNFORMATTED',ACCESS='SEQUENTIAL')
-    ELSE
-       CALL Halt(' Get_CMPoles could not find '//TRIM(FileName))
-    ENDIF
-    CALL New_CMPoles(A)
-!
-    READ(UNIT=Seq,Err=100,IOSTAT=IOS) (A%DPole%D(I),I=1,3)
-    READ(UNIT=Seq,Err=100,IOSTAT=IOS) (A%QPole%D(I),I=1,6)
-!   
-    CLOSE(UNIT=Seq,STATUS='KEEP')
-    RETURN
-100 CALL Halt('IO Error '//TRIM(IntToChar(IOS))//' in Get_CMPoles.')
-!
+    CHARACTER(LEN=*),OPTIONAL        :: Tag_O
+    IF(.NOT.AllocQ(A%Alloc))CALL New_CMPoles(A)
+    CALL Get(A%DPole,'dipole',Tag_O=Tag_O)
+    CALL Get(A%QPole,'quadrupole',Tag_O=Tag_O)
   END SUBROUTINE Get_CMPoles
 !========================================================================================
-! Delete the Multipoles
+! Put Cartesian multipoles
 !========================================================================================
-  SUBROUTINE Put_CMPoles(A,Name,Args,SCFCycle)
+  SUBROUTINE Put_CMPoles(A,Tag_O)
     TYPE(CMPoles)                    :: A
-    TYPE(ARGMT)                      :: Args
-    INTEGER                          :: SCFCycle,IOS,I
-    REAL(DOUBLE)                     :: Dummy
-    CHARACTER(LEN=*)                 :: Name 
-    CHARACTER(LEN=DEFAULT_CHR_LEN)   :: FileName
-    LOGICAL                          :: Exists
-!
-    FileName=TrixFile(Name,Args,SCFCycle)
-    INQUIRE(FILE=FileName,EXIST=Exists)
-    IF(Exists) THEN
-       OPEN(UNIT=Seq,FILE=FileName,STATUS='REPLACE',FORM='UNFORMATTED',ACCESS='SEQUENTIAL')
-    ELSE
-       OPEN(UNIT=Seq,FILE=FileName,STATUS='NEW',FORM='UNFORMATTED',ACCESS='SEQUENTIAL')
-    ENDIF
-!
-    WRITE(UNIT=Seq,Err=100,IOSTAT=IOS) (A%DPole%D(I),I=1,3)
-    WRITE(UNIT=Seq,Err=100,IOSTAT=IOS) (A%QPole%D(I),I=1,6)
-!   
-    CLOSE(UNIT=Seq,STATUS='KEEP')
-    RETURN
-100 CALL Halt('IO Error '//TRIM(IntToChar(IOS))//' in Get_CMPoles.')
+    CHARACTER(LEN=*),OPTIONAL        :: Tag_O
+    CALL Put(A%DPole,'dipole',Tag_O=Tag_O)
+    CALL Put(A%QPole,'quadrupole',Tag_O=Tag_O)
   END SUBROUTINE Put_CMPoles
 !------------------------------------------------------------------
 !     Open an ASCII file   
