@@ -144,8 +144,24 @@ PROGRAM DIIS
          ELSE
            CALL FunkOnSqMat(N,Inverse,B%D,BInv%D,EigenThresh_O=EigThresh)
          ENDIF
+
+#ifdef TRAP_DIIS_BUG
+         CALL OpenASCII(OutFile,Out)
+         WRITE(Out,*)' Done with FunkOnSqMat'
+         CLOSE(Out)
+#endif
          CALL UnSetDSYEVWork()
+#ifdef TRAP_DIIS_BUG
+         CALL OpenASCII(OutFile,Out)
+         WRITE(Out,*)' About to DGEMV '
+         CLOSE(Out)
+#endif
          CALL DGEMV('N',N,N,One,BInv%D,N,V%D,1,Zero,DIISCo%D,1)
+#ifdef TRAP_DIIS_BUG
+         CALL OpenASCII(OutFile,Out)
+         WRITE(Out,*)' Done with DGEMV '
+         CLOSE(Out)
+#endif
          CALL Delete(V)
          CALL Delete(BInv)
 #ifdef PARALLEL
@@ -166,9 +182,19 @@ PROGRAM DIIS
       DIISCo%D(1)=One-Damp
       DIISCo%D(2)=Damp
    ENDIF
+#ifdef TRAP_DIIS_BUG
+   CALL OpenASCII(OutFile,Out)
+   WRITE(Out,*)' About to do some IO '
+   CLOSE(Out)
+#endif
 !-------------------------------------------------------------------------------------
 !  IO
    CALL Put(DIISErr,'diiserr',Tag_O='_'//TRIM(CurGeom)//'_'//TRIM(CurBase)//'_'//TRIM(SCFCycl))
+#ifdef TRAP_DIIS_BUG
+   CALL OpenASCII(OutFile,Out)
+   WRITE(Out,*)' Just put the diiserr '
+   CLOSE(Out)
+#endif
    IF(PrintFlags%Key>=DEBUG_MEDIUM)THEN
       DO I=1,N-2
          IF(MOD(I,4)==0)THEN
@@ -182,37 +208,120 @@ PROGRAM DIIS
 #ifdef PARALLEL
       IF(MyId==ROOT)THEN
 #endif
+
+
+#ifdef TRAP_DIIS_BUG
+   CALL OpenASCII(OutFile,Out)
+   WRITE(Out,*)' About to write a message '
+   CLOSE(Out)
+#endif
+
          CALL OpenASCII(OutFile,Out)
          CALL PrintProtectL(Out)
          IF(PrintFlags%Key==DEBUG_MAXIMUM) &
-         WRITE(*,*)TRIM(Mssg)
          WRITE(Out,*)TRIM(Mssg)
          CALL PrintProtectR(Out)
          CLOSE(Out)
+
+#ifdef TRAP_DIIS_BUG
+   CALL OpenASCII(OutFile,Out)
+   WRITE(Out,*)' wrote the message '
+   CLOSE(Out)
+#endif
+
+
 #ifdef PARALLEL
       ENDIF
 #endif
   ENDIF
+#ifdef TRAP_DIIS_BUG
+  CALL OpenASCII(OutFile,Out)
+  WRITE(Out,*)' Begining DIIS extrapolation ' 
+  CLOSE(Out)
+#endif
 !-------------------------------------------------------------------------------------
 ! Extrapolation or damping 
   CALL Multiply(F,DIISCo%D(N-1))     
+#ifdef TRAP_DIIS_BUG
+  CALL OpenASCII(OutFile,Out)
+  WRITE(Out,*)' Multiply 1'
+  CLOSE(Out)
+#endif
   I0=N-2
   DO I=ISCF-1,M,-1
      IF(DoDIIS==0)THEN
+#ifdef TRAP_DIIS_BUG
+        CALL OpenASCII(OutFile,Out)
+        WRITE(Out,*)' Getting F_DIIS ',Args,I-ISCF
+        CLOSE(Out)
+#endif
         CALL Get(Tmp1,TrixFile('F_DIIS',Args,I-ISCF))
+#ifdef TRAP_DIIS_BUG
+        CALL OpenASCII(OutFile,Out)
+        WRITE(Out,*)' Done getting F_DIIS'
+        CLOSE(Out)
+#endif
      ELSE
+#ifdef TRAP_DIIS_BUG
+        CALL OpenASCII(OutFile,Out)
+        WRITE(Out,*)' Getting OrthoF ',I-ISCF
+        CLOSE(Out)
+#endif
         CALL Get(Tmp1,TrixFile('OrthoF',Args,I-ISCF))
+#ifdef TRAP_DIIS_BUG
+        CALL OpenASCII(OutFile,Out)
+        WRITE(Out,*)' Done getting OrthoF '
+        CLOSE(Out)
+#endif
      ENDIF
+
      CALL Multiply(Tmp1,DIISCo%D(I0))
+#ifdef TRAP_DIIS_BUG
+     CALL OpenASCII(OutFile,Out)
+     WRITE(Out,*)' Done with mult of DIISCo'
+     CLOSE(Out)
+#endif
+
      CALL Add(F,Tmp1,E)
+#ifdef TRAP_DIIS_BUG
+  CALL OpenASCII(OutFile,Out)
+  WRITE(Out,*)' Multiply 1'
+  CLOSE(Out)
+#endif
      IF(I==M)THEN
+#ifdef TRAP_DIIS_BUG
+        CALL OpenASCII(OutFile,Out)
+        WRITE(Out,*)' Filtering ...'
+        CLOSE(Out)
+#endif
 !       Only filter the end product
         CALL Filter(F,E)
+#ifdef TRAP_DIIS_BUG
+        CALL OpenASCII(OutFile,Out)
+        WRITE(Out,*)' Done with filter '
+        CLOSE(Out)
+#endif
      ELSE
+#ifdef TRAP_DIIS_BUG
+        CALL OpenASCII(OutFile,Out)
+        WRITE(Out,*)'Setting eq '
+        CLOSE(Out)
+#endif
         CALL SetEq(F,E)
+#ifdef TRAP_DIIS_BUG
+        CALL OpenASCII(OutFile,Out)
+        WRITE(Out,*)' Done with seteq '
+        CLOSE(Out)
+#endif
      ENDIF
      I0=I0-1
   ENDDO
+#ifdef TRAP_DIIS_BUG
+  CALL OpenASCII(OutFile,Out)
+  WRITE(Out,*)' Done with extrapolation '
+  CLOSE(Out)
+#endif
+
 !-------------------------------------------------------------------------------------
 !  IO for the orthogonal, extrapolated F 
    CALL Put(F,TrixFile('F_DIIS',Args,0)) 
