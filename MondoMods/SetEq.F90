@@ -16,6 +16,8 @@ MODULE SetXYZ
                        Set_BCSR_EQ_BMATR,         &
                        Set_DBL_VECT_EQ_BCSRColVect,&
                        Set_INTC_EQ_INTC,          &
+                       Set_BMATR_EQ_BMATR,          &
+                       Set_Chol_EQ_Chol,          &
 #endif
 #ifdef PARALLEL
                        Set_DBCSR_EQ_BCSR,         &
@@ -63,17 +65,20 @@ MODULE SetXYZ
       SUBROUTINE Set_DBL_VECT_EQ_BCSRColVect(A,B)
         TYPE(BCSR) :: B
         TYPE(DBL_VECT) :: A
-        INTEGER :: I,J,K,L,II,KK
-          KK=0
-        DO I=1,Natoms  
-              L=B%BlkPt%I(I)
-              II=0
-            DO K=1,BSiz%I(I)
-              II=II+1
-              KK=KK+1
-              A%D(KK)=B%MTrix%D(L-1+II)
-            ENDDO
-        ENDDO
+        INTEGER :: I,J,K,L,II,KK,M
+        DO II=1,B%Natms
+	  DO I=B%RowPt%I(II),B%RowPt%I(II+1)-1
+	  IF(B%ColPt%I(I)==1) THEN
+	    J=II
+	    K=OffS%I(J)
+	    L=BSiz%I(J)
+	    KK=B%BlkPt%I(I)
+	    DO M=1,L
+	      A%D(K+M-1)=B%MTrix%D(KK+M-1)
+	    ENDDO 
+	  ENDIF
+	  ENDDO
+	ENDDO
       END SUBROUTINE Set_DBL_VECT_EQ_BCSRColVect
 !======================================================================
 !     Copy a BCSR matrix
@@ -172,86 +177,118 @@ MODULE SetXYZ
 #endif
       END SUBROUTINE Set_RNK2_EQ_BCSR
 !
-! Fill in quasi-sparse BMATR into a sparse blocked form.
+!---------------------------------------------------------------------
 !
-      SUBROUTINE Set_BCSR_EQ_BMATR(B,A,NCart,Transpose)
-         TYPE(BMATR), INTENT(INOUT) :: A        
-         TYPE(BCSR),     INTENT(INOUT) :: B        
-         INTEGER                       :: I,J,P,Q,OI,OJ,MA,NA,K,KK,M,MM,IC
-         INTEGER                       :: BMSIZE
-         INTEGER,OPTIONAL              :: NCart
-         TYPE(DBL_RNK2) :: BlockBM
-         LOGICAL,OPTIONAL :: Transpose
+      SUBROUTINE Set_RNK2_EQ_BCSR_Dim(B,A,Dim)
+        TYPE(BCSR) :: A
+        TYPE(DBL_RNK2) :: B
+        INTEGER :: Dim,I,J,K,L,KK,NDimS,M,N,MM,NN,II
+! Dim: # of real atoms
 !
-         IF(.NOT.PRESENT(Transpose)) Transpose=.FALSE.
+        IF(AllocQ(B%Alloc).AND.SIZE(B%D,1)/=Dim) CALL Delete(B)
+        IF(.NOT.AllocQ(B%Alloc)) CALL New(B,(/Dim,Dim/))
+        B%D=Zero
 !
-         IF(AllocQ(B%Alloc))  &
-         CALL Delete(B)
-         CALL New(B)
-         BMSIZE=SIZE(A%IB,1)
-         IF(.NOT.PRESENT(NCart)) NCart=BMSIZE
-         MM=MAXVAL(BSiz%I)
-         CALL New(BlockBM,(/MM,MM/))
-         P=1
-         Q=1
-         OI=0
-         B%RowPt%I(1)=1 
-         DO I=1,NAtoms
-            OJ=0
-            MA=BSiz%I(I) 
-            DO J=1,NAtoms
-               IF(OJ+1>NCart) EXIT
-               NA=BSiz%I(J)
-!
-! Now fill MAxNA block starting at (OI+1,OJ+1) of non-sparse representation
-!
-               BlockBM%D=Zero
-                  IC=0
-!
-             IF(Transpose) THEN
-               DO K=1,NA
-                  KK=OJ+K
-                  IF(KK>BMSIZE) EXIT
-                  DO M=1,12
-                    MM=A%IB(KK,M)
-                    IF(MM>OI .AND. MM<=OI+MA) THEN
-                      IC=IC+1
-                      BlockBM%D(MM-OI,K)=A%B(KK,M)
-                    ENDIF
-                  ENDDO
-               ENDDO
-             ELSE
-               DO K=1,MA
-                  KK=OI+K
-                  IF(KK>BMSIZE) EXIT
-                  DO M=1,12
-                    MM=A%IB(KK,M)
-                    IF(MM>OJ .AND. MM<=OJ+NA) THEN
-                      IC=IC+1
-                      BlockBM%D(K,MM-OJ)=A%B(KK,M)
-                    ENDIF
-                  ENDDO
-               ENDDO
-             ENDIF
-!
-                 IF(IC/=0) THEN
-               CALL BlockToBlock2(MA,NA,BlockBM%D,B%MTrix%D(Q:))
-               B%BlkPt%I(P)=Q
-               B%ColPt%I(P)=J               
-               Q=Q+MA*NA
-               P=P+1
-                 ENDIF
-!
-               OJ=OJ+NA
+        DO I=1,A%Natms
+              IF(OffS%I(I)>Dim) EXIT
+          DO J=A%RowPt%I(I),A%RowPt%I(I+1)-1
+            L=A%ColPt%I(J)
+            IF(OffS%I(L)>Dim) CYCLE
+            KK=A%BlkPt%I(J)
+            II=0
+            DO M=1,BSiz%I(L) 
+              MM=OffS%I(L)-1+M
+              DO N=1,BSiz%I(I) 
+                NN=OffS%I(I)-1+N
+                II=II+1
+                B%D(MM,NN)=A%MTrix%D(KK-1+II)
+              ENDDO
             ENDDO
-            OI=OI+MA
-            B%RowPt%I(I+1)=P
-         ENDDO
-         B%NAtms=NAtoms
-         B%NBlks=P-1
-         B%NNon0=Q-1
-         CALL Delete(BlockBM)
+          ENDDO
+        ENDDO
+      END SUBROUTINE Set_RNK2_EQ_BCSR_Dim
+!
+!---------------------------------------------------------------------
+!
+      SUBROUTINE Set_BCSR_EQ_BMATR(A,B)
+         TYPE(BMATR), INTENT(INOUT) :: B        
+         TYPE(BCSR),     INTENT(INOUT) :: A        
+         INTEGER                       :: I,J,P,Q,OI,OJ,MA,NA,K,KK,M,MM,IC,K1,K2
+         INTEGER                       :: BlkPt,II,NNewBlk,NIntC,NatLoc
+         INTEGER                       :: N,N1,N2,L
+         TYPE(DBL_RNK2) :: AuxBlk
+	 TYPE(INT_VECT) :: Atoms,InvAtoms
+!
+         IF(AllocQ(A%Alloc))  &
+         CALL Delete(A)
+         CALL New(A)
+	 A%Natms=Natoms
+	 NIntC=SIZE(B%IB,1)
+!
+	 CALL New(Atoms,12)
+	 CALL New(InvAtoms,Natoms)
+         NNewBlk=0
+         BlkPt=1
+         A%RowPt%I(1)=1
+!
+         DO I=1,A%Natms
+!
+	   Atoms%I=0
+	   OI=OffS%I(I)-1
+           NatLoc=0
+	   DO J=1,3
+	     K=OI+J
+	     IF(K>NIntC) EXIT
+             DO L=1,4
+	       KK=B%IB(K,L)
+	       IF(KK==0) EXIT
+	       IF(ANY(Atoms%I(:)==KK)) CYCLE
+               NatLoc=NatLoc+1
+               Atoms%I(NatLoc)=KK
+	       InvAtoms%I(KK)=NatLoc
+	     ENDDO
+	   ENDDO
+!
+           CALL New(AuxBlk,(/3,3*NatLoc/))
+           AuxBlk%D=Zero 
+!
+	   DO J=1,3
+	     K=OI+J
+	     IF(K>NIntC) EXIT
+             DO L=1,4
+	       KK=B%IB(K,L)
+	       IF(KK==0) EXIT
+	       N=InvAtoms%I(KK)
+	       K1=3*(L-1)+1
+	       K2=3*L
+	       N1=3*(N-1)+1
+	       N2=3*N
+	       AuxBlk%D(J,N1:N2)=B%B(K,K1:K2)
+	     ENDDO
+	   ENDDO
+!
+           DO J=1,NatLoc
+	     N1=3*(J-1)+1
+	     N2=3*J
+             NNewBlk=NNewBlk+1      
+	     A%ColPt%I(NNewBlk)=Atoms%I(J) !!! serial number of atom
+	     KK=BlkPt+(J-1)*9
+	     A%BlkPt%I(NNewBlk)=KK
+             CALL BlockToBlock2(3,3,AuxBlk%D(1:3,N1:N2),A%MTrix%D(KK:))
+           ENDDO
+	   A%RowPt%I(I+1)=NNewBlk+1
+	   BlkPt=BlkPt+9*NatLoc
+	   CALL Delete(AuxBlk)
+!
+	 ENDDO
+	   A%NBlks=NNewBlk
+	   A%NNon0=NNewBlk*9
+!
+	 CALL Delete(InvAtoms)
+	 CALL Delete(Atoms)
+!
       END SUBROUTINE Set_BCSR_EQ_BMATR
+!
 !======================================================================
 !     Transform a dense matrix (Rank 2 array) into a BCSR matrix 
 !======================================================================
@@ -315,6 +352,7 @@ MODULE SetXYZ
       END SUBROUTINE BlockToBlock2
 !
       SUBROUTINE Set_BCSR_EQ_VECT(B,A)
+	! turn column vector into sparse matrix (BCSR) form
          TYPE(DBL_VECT), INTENT(INOUT) :: A        
          TYPE(BCSR),     INTENT(INOUT) :: B        
          INTEGER                       :: I,J,P,Q,OI,OJ,MA,NA
@@ -768,6 +806,45 @@ MODULE SetXYZ
 !
 !===============================================================
 !
+      SUBROUTINE  Set_BMATR_EQ_BMATR(A,B)
+        TYPE(BMATR) :: A,B
+        INTEGER     :: NIntC
+!
+        NIntC=SIZE(B%IB,1)
+!
+        IF(.NOT.AllocQ(A%Alloc)) THEN
+          CALL New(A,NIntC)
+        ELSE
+          IF(SIZE(A%IB,1)<NIntC) THEN
+            CALL Delete(A)
+            CALL New(A,NIntC)
+          ENDIF
+        ENDIF
+!
+        A%IB=B%IB        
+        A%B =B%B        
+!
+      END SUBROUTINE  Set_BMATR_EQ_BMATR
+!
+!===============================================================
+!
+      SUBROUTINE Set_Chol_EQ_Chol(A,B)
+        TYPE(Cholesky) :: A,B
+        INTEGER :: NCart,ChNon0
+        NCart=SIZE(B%Perm%I)
+        ChNon0=B%ChRowPt%I(NCart+1)-1
+        IF(.NOT.AllocQ(A%Alloc)) CALL New(A,NCart,ChNon0)
+        A%GcScale%D=B%GcScale%D
+        A%ChFact%D=B%ChFact%D
+        A%ChDiag%D=B%ChDiag%D
+        A%Perm%I=B%Perm%I
+        A%IPerm%I=B%IPerm%I
+        A%ChRowPt%I=B%ChRowPt%I
+        A%ChColPt%I=B%ChColPt%I
+      END SUBROUTINE Set_Chol_EQ_Chol
+!
+!===============================================================
+!
       SUBROUTINE Set_INTC_EQ_INTC(Intcs,IntcsCopy,From,To,Start)
 !
         TYPE(INTC) :: Intcs,IntcsCopy
@@ -783,6 +860,7 @@ MODULE SetXYZ
         IntCsCopy%Atoms(Start:To2,1:4) =IntCs%Atoms(From:To,1:4)
         IntCsCopy%Value(Start:To2)     =IntCs%Value(From:To)
         IntCsCopy%Constraint(Start:To2)=IntCs%Constraint(From:To)
+        IntCsCopy%ConstrValue(Start:To2)=IntCs%ConstrValue(From:To)
         IntCsCopy%Active(Start:To2)    =IntCs%Active(From:To)
 !
       END SUBROUTINE Set_INTC_EQ_INTC
