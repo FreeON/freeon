@@ -1,0 +1,28 @@
+
+These are single point and force calculations of 3D periodic (MgO)_4 
+with different lattice parameter A. I used HF/DIIS/Tight with 
+the MgO_C98-SPLIT.bas. These are parallel calculations, but 
+the problem remains with serial.
+ 
+The error:
+The zero lattice gradient does not correspond the minimum
+of the energy. I could see that only for 3D-periodic systems and
+I got also the same thing for a 2x2x2 supercell.
+=======================================================
+(MgO)_4 tight,crystal basis set
+  A           E           dE/dA
+4.150 -1098.41440285 -0.0555793407
+4.250 -1098.44874370 -0.0263157353
+4.300 -1098.45757865 -0.0125683742
+4.350 -1098.46156232  0.0005221943
+4.375 -1098.46188081  0.0068133229 <<< min(E)
+4.400 -1098.46115515  0.0129289292
+4.450 -1098.45676869  0.0246320509
+=======================================================
+ 
+Setting:
+ Calculations done on Q.
+ Compiled with
+  1) modules  2) CXX_default  3) fortran_5.5A.5  4) MPI_64bit_R6
+
+SV 10.01.05
