@@ -10,6 +10,7 @@ PROGRAM FockNGrueven
   USE SetXYZ
   USE LinAlg
   USE Functionals
+  USE McMurchie
 #ifdef PARALLEL
   USE MondoMPI
 #endif
@@ -20,18 +21,18 @@ PROGRAM FockNGrueven
   TYPE(BCSR)                     :: F,V,T,J,K,X,Tmp1 
 #endif
   TYPE(ARGMT)                    :: Args
-  REAL(DOUBLE)                   :: KScale
+  TYPE(CRDS)                     :: GM
+  TYPE(BSET)                     :: BS
+  REAL(DOUBLE)                   :: KScale,E_NukeNuke
   INTEGER                        :: ISCF
   CHARACTER(LEN=2)               :: Cycl
-  CHARACTER(LEN=DEFAULT_CHR_LEN) :: XFile,Mssg
+  CHARACTER(LEN=DEFAULT_CHR_LEN) :: XFile,DevFile,Mssg
   CHARACTER(LEN=12),PARAMETER    :: Prog='FockNGrueven'
   LOGICAL                        :: Present,ExchangeShift
 !------------------------------------------------------------------ 
   CALL StartUp(Args,Prog,Serial_O=.FALSE.)
   ISCF=Args%I%I(1)
   Cycl=IntToChar(ISCF)
-
-!
   CALL New(F)
   CALL New(Tmp1)
 ! Start with the Coulomb matrix
@@ -64,6 +65,44 @@ PROGRAM FockNGrueven
         CALL SetEq(F,Tmp1)
      ENDIF
      CALL Delete(K)
+  ELSE
+     IF(PrintFlags%Int==DEBUG_INTEGRAL)THEN
+        ! This is a full dump run, with output of all matrices
+        ! and integrals into the development directory MMA/SCFDev     
+        CALL GetEnv('MONDO_HOME',DevFile)
+        DevFile=TRIM(DevFile)//'/SCFeqs/MMA/SCFDev/scf.in'
+        WRITE(*,*)' DUMP TAKEN IN ',DevFile
+        CALL OpenASCII(DevFile,Tmp,NewFile_O=.TRUE.)
+        ! Get basis set and geometry
+        CALL Get(BS,Tag_O="1")
+        CALL Get(GM,Tag_O="1")
+        CALL Get(E_NukeNuke,'E_NuclearTotal')
+        WRITE(Tmp,*)' (* All matrices are in an orthogonal rep *)'
+        WRITE(Tmp,*)' NBasF  = ',NBasF,';'
+        WRITE(Tmp,*)' NEl    = ',NEl,';'
+        WRITE(Tmp,*)' ENukeNuke = ',E_NukeNuke,';'
+        PrintFlags%Fmt=DEBUG_MMASTYLE
+        PrintFlags%Mat=DEBUG_MATRICES
+        ! Get and pprint the ao-orthog transformation matrix
+        XFile=TrixFile('X',Args)
+        INQUIRE(FILE=XFile,EXIST=Present)
+        IF(Present)THEN
+           CALL Get(X,XFile)                ! X =S^{-1/2}
+           CALL PPrint(X,'X',FileName_O=DevFile,Unit_O=Tmp)
+        ELSE
+           CALL Get(X,TrixFile('ZT',Args))  ! X =Z^t=L^{-t}           
+           CALL PPrint(X,'ZT',FileName_O=DevFile,Unit_O=Tmp)
+           CALL Get(X,TrixFile('Z',Args))   ! X =Z=L^{-1}           
+           CALL PPrint(X,'Z',FileName_O=DevFile,Unit_O=Tmp)
+        ENDIF
+        ! Print the core Hamiltonian
+        CALL PPrint(F,'h',FileName_O=DevFile,Unit_O=Tmp)
+        ! Print the two-electron integrals
+        CALL PrintIntegrals(BS%NASym,2*BS%NASym,4*BS%NASym, &
+                         BS%LMNLen,BS%LMNLen**4,BS,GM,3,Tmp) 
+        CLOSE(UNIT=Tmp,STATUS='KEEP')
+        STOP ! Done for good and all
+     ENDIF
   ENDIF
 !
   CALL Put(F,TrixFile('F',Args,0))
