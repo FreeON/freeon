@@ -1,3 +1,100 @@
+2003-11-10 12:58  mchalla
+
+	* SCFeqs/MMA/SCFDev/Cr2_6-31G_STANTON.nb: Fock mixing convergence
+	forcing
+
+2003-11-06 22:34  vweber
+
+	* TwoE/: ERIInterface.m, Gradient.m, Integrals.m: ---
+
+2003-11-06 14:01  nemeth
+
+	* MondoSCF2/GDIIS.F90: The printing of pictures is commented out.
+
+2003-11-06 13:58  nemeth
+
+	* MondoSCF2/: ControlStructures.F90, GDIIS.F90, Hessian.F90,
+	InCoords.F90, Makefile, Optimizer.F90: A new version of the
+	internal coordinate optimizer, with quadratic fit. Note, that the
+	subroutines should be cleaned since a lot of subroutines are left
+	from experimental versions, which are not used any more. This
+	version ran through Baker's test set with tight in a reasonably
+	small number of steps, very close to the latest literature results.
+	It also runs well on kinase reactants.
+
+2003-11-06 13:45  nemeth
+
+	* MondoMods/: Makefile, Slatec.F90: A new module, Slatec added.
+	This module contains subroutines from the Slatec collection of
+	NetLib (www.netlib.org).
+
+2003-11-05 13:27  tymczak
+
+	* MondoMods/PrettyPrint.F90: better Formate for Print_TIME with the
+	BareBones option
+
+2003-11-04 19:49  vweber
+
+	* TwoE/: Integrals.m, ERIInterface.m: ---
+
+2003-11-03 21:08  ckgan
+
+	* Docs/Bib/mondo.bib: [no log message]
+
+2003-11-03 16:26  vweber
+
+	* TwoE/: ERIInterface.m, Gradient.m: ERI interface + gradient
+	generator (not yet ready)
+
+2003-10-31 16:06  vweber
+
+	* TwoE/: Int1111.F90, Int1113.F90, Int1131.F90, Int1133.F90,
+	Int1311.F90, Int1313.F90, Int1331.F90, Int1333.F90, Int3111.F90,
+	Int3113.F90, Int3131.F90, Int3133.F90, Int3311.F90, Int3313.F90,
+	Int3331.F90, Int3333.F90, Integrals.m: some corrections
+
+2003-10-31 13:12  mchalla
+
+	* TwoE/: Int1111.F90, Int1113.F90, Int1131.F90, Int1133.F90,
+	Int1311.F90, Int1313.F90, Int1331.F90, Int1333.F90, Int3111.F90,
+	Int3113.F90, Int3131.F90, Int3133.F90, Int3311.F90, Int3313.F90,
+	Int3331.F90, Int3333.F90, Integrals.m: [no log message]
+
+2003-10-31 10:02  mchalla
+
+	* OneE/: UBlok.F90, MMA/QQuad128.Inc: Default is 128 quadrature
+	points.  This is maybe overkill, but should help tracking geometry
+	optimization issues with ECPs.
+
+2003-10-29 14:49  tymczak
+
+	* Docs/Bib/mondo_new.bib: i
+
+2003-10-29 14:28  tymczak
+
+	* Docs/Bib/mondo_new.bib: I edited threw mondo.bib and remover the
+	double entries, hopefullly all of them
+
+2003-10-29 11:45  mchalla
+
+	* TwoE/: Int1113.F90, Int1131.F90, Int1133.F90, Int1313.F90,
+	Int1331.F90, Int1333.F90, Int3113.F90, Int3131.F90, Int3133.F90,
+	Int3313.F90, Int3331.F90, Int3333.F90, Integrals.m: fixed symmetry
+	bug, i think.
+
+2003-10-29 10:33  vweber
+
+	* TwoE/ShellPairStruct.F90: Added a struct.
+
+2003-10-29 10:31  mchalla
+
+	* TwoE/: Int3313.F90, Int3333.F90, Integrals.m: Got rid of null
+	problem...
+
+2003-10-28 12:30  mchalla
+
+	* ChangeLog: [no log message]
+
 2003-10-28 11:56  mchalla
 
 	* TwoE/: Int1111.F90, Int1113.F90, Int1131.F90, Int1133.F90,
