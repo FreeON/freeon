@@ -21,7 +21,7 @@ Periodic=(18,AtomCoord)
 <EndOptions>
 
 <BeginPeriodic>
- 2.000  0.0 0.0     0.0  0.0  0.0
+ 2.000  0.0 0.0   0.0  0.0  0.0
 <EndPeriodic>
 
 <BeginGeometry>
