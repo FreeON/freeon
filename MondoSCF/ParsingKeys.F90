@@ -157,9 +157,11 @@ MODULE ParsingKeys
 !
    CHARACTER(LEN=11), PARAMETER :: TRAN_COM     ='CenterAtoms'
 !
-   CHARACTER(LEN=7),  PARAMETER :: EPSILON      ='Epsilon'
    CHARACTER(LEN=10), PARAMETER :: PFFMXELL     ='PFFMaxEll'
    CHARACTER(LEN=10), PARAMETER :: PFFMXLAY     ='PFFLayers'
+   CHARACTER(LEN=12), PARAMETER :: PFFOVRDE     ='PFFOverRide'
+!
+   CHARACTER(LEN=7),  PARAMETER :: EPSILON      ='Epsilon'
 #endif
 !-------------------------------------------------  
 !  Parsing keys for <Options.BasisSets=>
