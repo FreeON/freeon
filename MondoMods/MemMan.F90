@@ -244,6 +244,7 @@ MODULE MemMan
          CALL New(A%AtNum,A%NAtms)
          CALL New(A%Carts,(/3,A%NAtms/))
          A%Alloc=ALLOCATED_TRUE
+         A%ETotal=Zero
       END SUBROUTINE New_CRDS
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !     
