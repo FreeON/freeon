@@ -6394,7 +6394,7 @@ return
       !CALL AngleGen(I,Angle,NAngle,RefBonds,NDimens,XYZ,AtmB,Bond,TOPS)
        CALL FullAngleGen(I,Angle,NAngle,AtmB,Bond,TOPS,IEq)
        CALL OutPGen(I,OutP,NOutP,RefBonds,NDimens, &
-                    XYZ,AtmB,Bond,TOPS)
+                    XYZ,AtmB,Bond,TOPS,IEq)
      ENDDO
      CALL Delete(BondScore)
      CALL UnSetDSYEVWork()
@@ -6406,10 +6406,10 @@ return
 !----------------------------------------------------------------------
 !
    SUBROUTINE OutPGen(IAt,OutP,NOutP,RefBonds,NDimens, &
-                      XYZ,AtmB,Bond,TOPS)
+                      XYZ,AtmB,Bond,TOPS,IEq)
      INTEGER                       :: IAt,I,J,K,L,NOutP,NDimens
      TYPE(OUTPDATA)                :: OutP
-     INTEGER,DIMENSION(:)          :: RefBonds
+     INTEGER,DIMENSION(:)          :: RefBonds,IEq
      REAL(DOUBLE),DIMENSION(:,:)   :: XYZ
      REAL(DOUBLE)                  :: D,DMax
      TYPE(ATOMBONDS)               :: AtmB
@@ -6467,7 +6467,7 @@ return
      DO I=1,NOutP
        I1=OutP%IJKL%I(3,I)
        I2=OutP%IJKL%I(4,I)
-       IF(I1>I2) THEN
+       IF(IEq(I1)>IEq(I2)) THEN
          OutP%IJKL%I(3,I)=I2
          OutP%IJKL%I(4,I)=I1
        ENDIF
@@ -6993,13 +6993,18 @@ return
      CALL New(BondF,K)
      K=0
      DO I=1,II
-       IF(.NOT.HasCentralCell(I,IFrag%I,JFrag%I,IEq)) CYCLE
-       DO J=1,II
+       DO J=I+1,II
          IF(I==J) CYCLE
          ! connect only to central cell
          CALL ClosestAtms(M,N,I,J,IFrag%I,JFrag%I, &
                           CenterFrag%D,XYZ)
-         IF(ANY(Cells(N,1:3)>1).OR.ANY(Cells(N,1:3)<-1)) CYCLE 
+         IF(HasCentralCell(I,IFrag%I,JFrag%I,IEq)) THEN
+           IF(ANY(Cells(N,1:3)>1).OR.ANY(Cells(N,1:3)<-1)) CYCLE 
+         ELSE IF(HasCentralCell(J,IFrag%I,JFrag%I,IEq)) THEN
+           IF(ANY(Cells(M,1:3)>1).OR.ANY(Cells(M,1:3)<-1)) CYCLE 
+         ELSE
+           CYCLE
+         ENDIF
          K=K+1
          Vect=XYZ(1:3,M)-XYZ(1:3,N)
          Length=SQRT(DOT_PRODUCT(Vect,Vect))
