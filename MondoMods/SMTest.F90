@@ -1,14 +1,7 @@
-!
-!--  This source code is part of the MondoSCF suite of 
-!--  linear scaling electronic structure codes.  
-!
-!--  Matt Challacombe
-!--  Los Alamos National Laboratory
-!--  Copyright 2000, The University of California
-!
 !    COMPUTES THE MIN AND MAX (PREFETCHED) MFLOP RATE OF THE SMALL MATRIX 
 !    DGEMM LIBRARIES CREATED BY PHiPAC FOR VAROUS BLOCK SIZES AND THE CURRENT PLATFORM.
-!
+!    Author: Matt Challacombe
+!-------------------------------------------------------------------------
 PROGRAM SMTest
   USE DerivedTypes
   USE GlobalScalars

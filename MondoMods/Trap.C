@@ -1,12 +1,6 @@
 /*
-!--  This source code is part of the MondoSCF suite of 
-!--  linear scaling electronic structure codes.  
-!
-!--  Matt Challacombe
-!--  Los Alamos National Laboratory
-!--  Copyright 1999, The University of California
-!
-!    ROUTINE TO GENERATE A TRACE BACK
+    ROUTINE TO GENERATE A TRACE BACK
+    Author:  Matt Challacombe
 */
 #include <stdio.h>
 #include <stdlib.h>

@@ -1,16 +1,3 @@
-!
-!--  This source code is part of the MondoSCF suite of 
-!--  linear scaling electronic structure codes.  
-!
-!--  Matt Challacombe
-!--  Los Alamos National Laboratory
-!--  Copyright 1999, The University of California
-!
-!
-!    NOTE DIFFERENCES BETWEEN DERIVED TYPES, EG. INT_VECT, WHICH INCLUDE
-!    AUXILIARY INFO SUCH AS ARRAY BOUNDS, AND THE ARRAYS THEMSELVES GIVEN
-!    BY THE FULLER NAME, EG. INT_VECTOR, WHICH SPECIFIES THE ARRAY ONLY.
-!
 MODULE MondoMPI
    USE DerivedTypes  
    USE GlobalScalars
@@ -20,6 +7,10 @@ MODULE MondoMPI
    USE MemMan
    IMPLICIT NONE   
 #ifdef PARALLEL
+!    NOTE DIFFERENCES BETWEEN DERIVED TYPES, EG. INT_VECT, WHICH INCLUDE
+!    AUXILIARY INFO SUCH AS ARRAY BOUNDS, AND THE ARRAYS THEMSELVES GIVEN
+!    BY THE FULLER NAME, EG. INT_VECTOR, WHICH SPECIFIES THE ARRAY ONLY.
+!
    INTEGER,SAVE :: MONDO_COMM=MPI_COMM_WORLD
    INTERFACE BCast          ! Wrappers for MPI_BCAST
       MODULE PROCEDURE BCast_DBL_SCLR, BCast_DBL_VECT,  BCast_DBL_RNK2, &

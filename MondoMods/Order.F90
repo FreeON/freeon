@@ -1,13 +1,6 @@
-!--  This source code is part of the MondoSCF suite of 
-!--  linear scaling electronic structure codes.  
 !
-!--  Matt Challacombe
-!--  Los Alamos National Laboratory
-!--  Copyright 1999, The University of California
-!
-!    HEURISTIC ORDERING VIA SPACE FILLING CURVES AND 
-!    GRAPH THEORETICAL ENVELOPE REDUCTION VIA REVERSE CUTHILL MCKEE
-!
+!    SORTING AND ORDERING (VIA SPACE FILLING CURVES)
+!    Author: Matt Challacombe
 MODULE Order
    USE DerivedTypes
    USE GlobalCharacters

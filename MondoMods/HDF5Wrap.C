@@ -1,11 +1,6 @@
 /*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
-/*--  This source code is part of the MondoSCF suite of                      */ 
-/*--  linear scaling electronic structure codes.                             */
-/*--  Matt Challacombe                                                       */
-/*--  Los Alamos National Laboratory                                         */
-/*--  Copyright 200, The University of California                            */
-/*                                                                           */
 /*    F90 interface to the C HDF5 API                                        */
+/*    Author: Matt Challacombe                                               */
 /*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
 #include <stdio.h>
 #include <stdlib.h>  

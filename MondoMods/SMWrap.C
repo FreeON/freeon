@@ -1,15 +1,11 @@
-/*----------------------------------------------------------------------------------
-!--  This source code is part of the MondoSCF suite of 
-!--  linear scaling electronic structure codes.  
-!
-!--  Matt Challacombe
-!--  Los Alamos National Laboratory
-!--  Copywrite 2000, The University of California
-!
-------------------------------------------------------------------------------------*/
-/* C wrapper for the PHiPAC DGEMM routine mm_double_NN_1.  
-   Computes C(M,N)=A(M,K).B(K,M)+beta*C(M,N) */
-
+/*------------------------------------------------------------------*/
+/*    C wrappers for PHiPAC DGEMMs                                  */
+/*    Author: Matt Challacombe                                      */
+/*------------------------------------------------------------------*/
+/*
+   C wrapper for the PHiPAC DGEMM routine mm_double_NN_1.  
+   Computes C(M,N)=A(M,K).B(K,M)+beta*C(M,N) 
+*/
 extern void mm_double_NN_1(int,int,int,double*,double*,double*,int,int,int,double);
 void dgemm_nn_(int* M, int* K,int* N,double* beta,double* A,double* B,double* C)
 {mm_double_NN_1(*N,*K,*M,B,A,C,*K,*M,*M,*beta);}

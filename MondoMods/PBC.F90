@@ -1,13 +1,5 @@
-!
-!--  This source code is part of the MondoSCF suite of 
-!--  linear scaling electronic structure codes.  
-!
-!--  Matt Challacombe and  C. J. Tymczak
-!--  Los Alamos National Laboratory
-!--  Copyright 2000, The University of California
-!
-!    TYPE CellSet and Assoicated Functions
-!
+!    ROUTINES FOR THE IMPLIMENTATION OF PERIODIC BOUNDARY CONDITIONS
+!    Author: C.J. Tymczak
 MODULE CellSets
   USE DerivedTypes
   USE GlobalScalars

@@ -1,10 +1,6 @@
-!--  This source code is part of the MondoSCF suite of 
-!--  linear scaling electronic structure codes.  
-!
-!--  Matt Challacombe
-!--  Los Alamos National Laboratory
-!--  Copyright 1999, The University of California
-!
+!  MODULE FOR SPARSE BLOCKED LINEAR ALGEBRA
+!  Author:  Matt Challacombe
+!--------------------------------------------------
 MODULE COMMON_DEBUG
    USE DerivedTypes
    IMPLICIT NONE

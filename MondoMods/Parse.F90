@@ -1,14 +1,6 @@
-!
-!--  This source code is part of the MondoSCF suite of 
-!--  linear scaling electronic structure codes.  
-!
-!--  Matt Challacombe
-!--  Los Alamos National Laboratory
-!--  Copyright 1999, The University of California
-!
-!
 !    PARSING AND CHARACTER MANIPULATION ROUTINES FOR MONDOSCF
-!
+!    Author: Matt Challacombe
+!-----------------------------------------------------------------------
 MODULE Parse
    USE DerivedTypes
    USE GlobalScalars   
