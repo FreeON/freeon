@@ -766,7 +766,7 @@ END SUBROUTINE Excl_LIST14
       TYPE(INTC) :: IntCs
       TYPE(BMATR):: B
 !
-      thresh_B=1.d-8
+      thresh_B=GeOpCtrl%BMatThrsh
 !
 !     IF(PrintFlags%GeOp==DEBUG_GEOP) THEN
 !       CALL INTCValue(IntCs,XYZ)
@@ -1205,7 +1205,7 @@ END SUBROUTINE Excl_LIST14
         BB(:)=Zero
         RETURN
 !
-1030 format(' i-j-k or j-k-l is colinear (no torsion possIBBle), this row of the B matrix will be deleted.')
+1030 format(' i-j-k or j-k-l is colinear (no torsion possibble), this row of the B matrix will be deleted.')
 !
       END SUBROUTINE TORS
 !
@@ -1822,6 +1822,7 @@ SUBROUTINE GetIntCs(XYZ,NatmsLoc,InfFile,IntCs,NIntC,Refresh)
       INTEGER :: NIntC,NIntC_Cov,NIntC_VDW,NIntC_Extra,NNew,Nintc_New
       INTEGER :: I,J,K,Refresh,NatmsLoc,II,ILast
       INTEGER :: I1,I2,I3,I4,NMax12,NLinB,NtorsLinb
+      INTEGER :: NStreGeOp,NBendGeOp,NLinBGeOp,NOutPGeOp,NTorsGeOp
       TYPE(INT_VECT) :: MMAtNum,LinAtom,MarkLinb
       TYPE(DBL_VECT) :: NuclCharge,AuxVect
       TYPE(INT_RNK2) :: LinBBridge,Top12
@@ -2024,6 +2025,28 @@ SUBROUTINE GetIntCs(XYZ,NatmsLoc,InfFile,IntCs,NIntC,Refresh)
         CALL Put(AuxVect,'Constraints'//TRIM(CurGeom))
       CALL Delete(AuxVect)
 !
+! Count number of different internal coord types
+!
+      NStreGeOp=0;NBendGeOp=0;NLinBGeOp=0;NOutPGeOp=0;NTorsGeOp=0
+        DO I=1,NIntC
+           IF(IntCs%Def(I)(1:4)=='STRE') THEN
+             NStreGeOp=NStreGeOp+1
+           ELSE IF(IntCs%Def(I)(1:4)=='BEND') THEN
+             NBendGeOp=NBendGeOp+1
+           ELSE IF(IntCs%Def(I)(1:4)=='LINB') THEN
+             NLinBGeOp=NLinBGeOp+1
+           ELSE IF(IntCs%Def(I)(1:4)=='OUTP') THEN
+             NOutPGeOp=NOutPGeOp+1
+           ELSE IF(IntCs%Def(I)(1:4)=='TORS') THEN
+             NTorsGeOp=NTorsGeOp+1
+           ENDIF
+        ENDDO
+      CALL Put(NStreGeOp,'NStreGeOp')
+      CALL Put(NBendGeOp,'NBendGeOp')
+      CALL Put(NLinBGeOp,'NLinBGeOp')
+      CALL Put(NOutPGeOp,'NOutPGeOp')
+      CALL Put(NTorsGeOp,'NTorsGeOp')
+!
 ! Save current internals to HDF
 !
 !     CALL Put(NIntC,'NIntC')
@@ -2166,6 +2189,18 @@ END SUBROUTINE BENDValue
       XK%D=XKin
       XL%D=XLin
 !
+! Check for linearity
+!
+      V1%D=XI%D-XJ%D
+      V2%D=XJ%D-XK%D
+      SUM=ABS(DOT_PRODUCT(V1%D,V2%D))
+      IF(Sum<1.D-6) CALL Halt('Linearity in TorsValue')
+!
+      V1%D=XL%D-XK%D
+      V2%D=XK%D-XJ%D
+      SUM=ABS(DOT_PRODUCT(V1%D,V2%D))
+      IF(Sum<1.D-6) CALL Halt('Linearity in TorsValue')
+!
 ! Translate, so that XK be in the origin
 !
       XI%D=XI%D-XK%D 
@@ -2204,13 +2239,6 @@ END SUBROUTINE BENDValue
       XJ%D=V2%D
       CALL DGEMM_NNc(3,3,1,One,Zero,Rot%D,XL%D,V2%D)
       XL%D=V2%D
-!
-! Check for linearity
-!
-      IF(ABS(XI%D(1)) < 1.D-6 .AND. &
-         ABS(XI%D(2)) < 1.D-6) CALL Halt('Atoms too cloose to each other in TorsValue')
-      IF(ABS(XL%D(1)) < 1.D-6 .AND. &
-         ABS(XL%D(2)) < 1.D-6) CALL Halt('Atoms too cloose to each other in TorsValue')
 !
 ! Now, calculate torsional angle
 !
@@ -2724,20 +2752,20 @@ END SUBROUTINE CoordTrf
 !
 !-------------------------------------------------------
 !
-    SUBROUTINE GDIIS(CurGeom,GMLoc)
+    SUBROUTINE GDIIS(GMLoc)
     IMPLICIT NONE
     TYPE(CRDS)     :: GMLoc
     INTEGER        :: I,J,K,L,GDIISMemoryIn,DimGDIIS,IGeom,DimOverl
-    INTEGER        :: SRMemory,RefMemory
-    INTEGER        :: LastStruct,ILow,NCart,GDIISMemory,GDIISMaxMem
-    INTEGER        :: CurGeom
-    INTEGER        :: INFO,II 
+    INTEGER        :: SRMemory,RefMemory,CartGradMemory
+    INTEGER        :: LastStruct,ILow,NCart,GDIISMemory
+    INTEGER        :: INFO,NewDim 
     TYPE(DBL_RNK2) :: SRDispl,AMat,EigVect,SRStruct,ActCarts
+    TYPE(DBL_RNK2) :: RefGrad
     TYPE(DBL_RNK2) :: AuxStruct,RefStruct
-    TYPE(DBL_VECT) :: Coeffs,AuxVect,ScaleFact,EigVal
+    TYPE(DBL_VECT) :: Coeffs,AuxVect,AuxVect2,ScaleFact,EigVal
     TYPE(INT_VECT) :: Selection
     CHARACTER(LEN=DEFAULT_CHR_LEN) :: GMTag
-    REAL(DOUBLE)                   :: Sum,S1,S2,GDIISThresh
+    REAL(DOUBLE)                   :: Sum,S1,S2
     REAL(DOUBLE)                   :: Eig
     REAL(DOUBLE)                   :: SumX,SumY,SumZ
 !
@@ -2745,17 +2773,22 @@ END SUBROUTINE CoordTrf
 ! Input GMLoc contains the actual geometry
 ! CurGeom is set to the last (simple relaxation) structure
 !
-    CALL Get(SRMemory,'SRMemory')
-    CALL Get(RefMemory,'RefMemory')
-    CALL Get(GDIISMaxMem,'GDIISMaxMem')
-    CALL Get(GDIISThresh,'GDIISThresh')
-    NCart=3*GMLoc%Natms
-    DimGDIIS=NCart   !!! later dimension may become NIntC
-    IF(SRMemory/=RefMemory) CALL Halt('SRMemory/=RefMemory in GDIIS')
-    GDIISMemory=SRMemory
-write(*,*) 'GDIISMemory got= ',GDIISMemory
-write(*,*) 'curgeom= ',curgeom
-write(*,*) 'gdiismemory= ',gdiismemory
+      CALL Get(SRMemory,'SRMemory')
+      CALL Get(RefMemory,'RefMemory')
+      CALL Get(CartGradMemory,'CartGradMemory')
+      NCart=3*GMLoc%Natms
+      DimGDIIS=NCart   !!! later dimension may become NIntC
+      IF(SRMemory/=RefMemory) CALL Halt('SRMemory/=RefMemory in GDIIS')
+      IF(SRMemory/=CartGradMemory) CALL Halt('SRMemory/=CartGradMemory in GDIIS')
+      GDIISMemory=SRMemory
+write(*,*) 'GDIISMemory= ',GDIISMemory
+!
+      IF(PrintFlags%GeOp==DEBUG_GEOP) THEN
+        CALL OpenAscii(OutFile,Out)
+        WRITE(Out,*) 'GDIISMemory= ',GDIISMemory
+        WRITE(*,*) 'GDIISMemory= ',GDIISMemory
+        CLOSE(Unit=Out,STATUS='KEEP')
+      ENDIF
 !
     GMTag=''
 #ifdef MMech
@@ -2765,170 +2798,219 @@ write(*,*) 'gdiismemory= ',gdiismemory
 ! Get Displacements from geometries, stored in HDF
 ! and fill them into SRDispl columns.
 !
-    CALL New(SRDispl,(/DimGDIIS,GDIISMemory/))
-    CALL New(SRStruct,(/DimGDIIS,GDIISMemory/))
-    CALL New(RefStruct,(/DimGDIIS,GDIISMemory/))
-    SRStruct%D=Zero
+      CALL New(SRDispl,(/DimGDIIS,GDIISMemory/))
+      CALL New(SRStruct,(/DimGDIIS,GDIISMemory/))
+      CALL New(RefStruct,(/DimGDIIS,GDIISMemory/))
+      CALL New(RefGrad,(/DimGDIIS,GDIISMemory/))
+      SRStruct%D=Zero
 !
 ! Get recent Ref and SR structures
 !
-    CALL New(Auxvect,DimGDIIS)
-    DO IGeom=1,GDIISMemory
-      CALL Get(AuxVect,'SR'//TRIM(IntToChar(IGeom)))
-      SRStruct%D(:,IGeom)=AuxVect%D
-      CALL Get(AuxVect,'Ref'//TRIM(IntToChar(IGeom)))
-      RefStruct%D(:,IGeom)=AuxVect%D
-    ENDDO
-    CALL Delete(AuxVect)
-!
-call pprint(SRStruct%D,'SRStruct 1',unit_o=6)
-call pprint(RefStruct%D,'RefStruct 1',unit_o=6)
+      CALL New(Auxvect,DimGDIIS)
+      DO IGeom=1,GDIISMemory
+        CALL Get(AuxVect,'SR'//TRIM(IntToChar(IGeom)))
+        SRStruct%D(:,IGeom)=AuxVect%D
+        CALL Get(AuxVect,'Ref'//TRIM(IntToChar(IGeom)))
+        RefStruct%D(:,IGeom)=AuxVect%D
+        CALL Get(AuxVect,'CartGrad'//TRIM(IntToChar(IGeom)))
+        RefGrad%D(:,IGeom)=AuxVect%D
+      ENDDO
+      CALL Delete(AuxVect)
 !
 ! Get simple relaxation displacements ('error vectors')
+! and normalize them!
 !
-    DO I=1,GDIISMemory    
-      SRDispl%D(:,I)=SRStruct%D(:,I)-RefStruct%D(:,I)
-    ENDDO
- call pprint(SRDispl%D,'SRDispl',unit_o=6)
+      DO I=1,GDIISMemory    
+        SRDispl%D(:,I)=SRStruct%D(:,I)-RefStruct%D(:,I)
+      ENDDO
 !
 ! Now calculate overlap ('A' matrix). 
 ! Presently only non-sparse representation is available
 !
-    CALL New(AMat,(/GDIISMemory,GDIISMemory/))
+      CALL New(AMat,(/GDIISMemory,GDIISMemory/))
 !
-    CALL DGEMM_TNc(GDIISMemory,DimGDIIS,GDIISMemory,One,Zero,  &
+      CALL DGEMM_TNc(GDIISMemory,DimGDIIS,GDIISMemory,One,Zero,  &
 		   SRDispl%D,SRDispl%D,AMat%D)
- call pprint(AMat%D,'AMat',unit_o=6)
 !
 ! Now, calculate eigenvalues and eigenvectors of Overlap
 !
-    CALL New(EigVal,GDIISMemory)
-    CALL New(EigVect,(/GDIISMemory,GDIISMemory/))
-    EigVect%D=Zero
-    EigVal%D=Zero
+      CALL New(EigVal,GDIISMemory)
+      CALL New(EigVect,(/GDIISMemory,GDIISMemory/))
+      EigVect%D=Zero
+      EigVal%D=Zero
 !
-    CALL SetDSYEVWork(GDIISMemory)
+        CALL SetDSYEVWork(GDIISMemory)
 !
-      BLKVECT%D=AMat%D
-      CALL DSYEV('V','U',GDIISMemory,BLKVECT%D,BIGBLOK,BLKVALS%D, &
-        BLKWORK%D,BLKLWORK,INFO)
-      IF(INFO/=SUCCEED) &
-      CALL Halt('DSYEV hosed in RotationsOff. INFO='&
+        BLKVECT%D=AMat%D
+        CALL DSYEV('V','U',GDIISMemory,BLKVECT%D,BIGBLOK,BLKVALS%D, &
+          BLKWORK%D,BLKLWORK,INFO)
+        IF(INFO/=SUCCEED) &
+        CALL Halt('DSYEV hosed in RotationsOff. INFO='&
                    //TRIM(IntToChar(INFO)))
- CALL PPrint(BLKVECT,'eigenvectors',Unit_O=6)
-!CALL DGEMM_TNc(3,3,3,One,Zero,BLKVECT%D,Theta%D,Theta2%D)
-!CALL DGEMM_NNc(3,3,3,One,Zero,Theta2%D,BLKVECT%D,Theta%D)
- CALL PPrint(BLKVALS,'eigenvalues',Unit_O=6)
 !
-! Select out SVD subspace
+! Pre-GDIIS coeffs
 !
-      CALL New(Selection,GDIISMemory)
-      CALL RecognEigPattern(BLKVALS%D,Selection%I)
-        II=0
-      DO I=1,GDIISMemory
-        Eig=BLKVALS%D(I)*Sum
-        IF(Selection%I(I)==1.AND.II<=GDIISMaxMem) THEN
-          II=II+1
-          EigVect%D(:,II)=BLKVECT%D(:,I)
-          EigVal%D(II)=BLKVALS%D(I)
-        ENDIF
-      ENDDO
-      CALL Delete(Selection)
-write(*,*) 'ii = ',II,' thresh= ',GDIISThresh,' GDIISMaxMem= ',GDIISMaxMem
-call pprint(eigvect,'eigvect',unit_o=6)
+        CALL New(AuxVect,GDIISMemory)
+        CALL New(AuxVect2,GDIISMemory)
+        CALL New(Selection,GDIISMemory)
+        Selection%I=1
 !
-! Now, unitary transform SR and Ref structures and SRDispl
+write(*,*) 'blockvals0= ',BLKVALS%D
+BLKVALS%D=BLKVALS%D+0.1D0
+            SumX=Zero
+        DO I=1,GDIISMemory
+            Sum=Zero
+          DO J=1,GDIISMemory
+            Sum=Sum+BLKVECT%D(J,I)
+          ENDDO
+            SumX=MAX(SumX,ABS(Sum))
+            AuxVect%D(I)=Sum
+            AuxVect2%D(I)=SQRT(BLKVALS%D(I))/ABS(Sum)
+write(*,*) i,' sum= ',sum
+        ENDDO
+write(*,*) 'trust radii= ',AuxVect2%D
+!
+! Filtering
+!
+            SumX=Zero
+        DO I=1,GDIISMemory
+	  Sum=AuxVect%D(I)
+          IF(ABS(Sum)>5.D-6) THEN
+            AuxVect%D(I)=One/Sum
+          ELSE
+            Selection%I(I)=0
+          ENDIF
+!         IF(ABS(BLKVALS%D(I))<1.D-4) Selection%I(I)=0
+          SumX=MAX(SumX,ABS(BLKVALS%D(I)))
+        ENDDO
+write(*,*) 'maximum eigenvalue= ',SumX
+!
+! Do Pre-GDIIS linear combination coeffs
+!
+write(*,*) 'blockvals1= ',blkvals%d
+        DO I=1,GDIISMemory
+          Sum=AuxVect%D(I)
+          BLKVECT%D(:,I)=Sum*BLKVECT%D(:,I)
+          SumX=Sum*BLKVALS%D(I)*Sum
+          IF(Selection%I(I)==1) THEN
+            BLKVALS%D(I)=One/SumX
+          ELSE
+            BLKVALS%D(I)=1.D-99 
+          ENDIF
+        ENDDO
+write(*,*) 'blockvals2= ',blkvals%d
+!
+! Select out SVD subspace for final GDIIS
+!
+        CALL GDIISSelect(BLKVALS%D,Selection%I)
+        CALL Delete(AuxVect2)
+!
+          NewDim=0
+        DO I=1,GDIISMemory
+          IF(Selection%I(I)==1) THEN
+            NewDim=NewDim+1
+            EigVect%D(:,NewDim)=BLKVECT%D(:,I)
+            EigVal%D(NewDim)=BLKVALS%D(I)
+          ENDIF
+        ENDDO
+        CALL Delete(Selection)
+        CALL Delete(AuxVect)
+!
+      CALL UnSetDSYEVWork()
+!
+! Now, unitary transform SR and Ref structures and RefGrad
 ! to get the basis for new GDIIS steps
 !
-      CALL New(AuxStruct,(/DimGDIIS,II/))
+        CALL New(AuxStruct,(/DimGDIIS,NewDim/))
 !
-        CALL DGEMM_NNc(DimGDIIS,GDIISMemory,II,One,Zero,  &
-          SRDispl%D(:,1:GDIISMemory),EigVect%D(:,1:II),AuxStruct%D)
-        SRDispl%D(:,1:II)=AuxStruct%D
+          CALL DGEMM_NNc(DimGDIIS,GDIISMemory,NewDim,One,Zero,  &
+            SRStruct%D(:,1:GDIISMemory),EigVect%D(:,1:NewDim),AuxStruct%D)
+          SRStruct%D(:,1:NewDim)=AuxStruct%D
 !
-        CALL DGEMM_NNc(DimGDIIS,GDIISMemory,II,One,Zero,  &
-          RefStruct%D(:,1:GDIISMemory),EigVect%D(:,1:II),AuxStruct%D)
-        RefStruct%D(:,1:II)=AuxStruct%D
+          CALL DGEMM_NNc(DimGDIIS,GDIISMemory,NewDim,One,Zero,  &
+            RefStruct%D(:,1:GDIISMemory),EigVect%D(:,1:NewDim),AuxStruct%D)
+          RefStruct%D(:,1:NewDim)=AuxStruct%D
 !
-        DO I=1,II
-          SRDispl%D(:,I)=SRStruct%D(:,I)-RefStruct%D(:,I)
-        ENDDO
- CALL PPrint(SRStruct,'orthogonalized SRStruct',Unit_O=6)
-!call pprint(AMat,'orthogonalized overlap')
-!call DGEMM_TNc(II,DimGDIIS,II,One,Zero,  &
-!   SRDispl%D(:,1:II),SRDispl%D(:,1:II),AMat%D(1:II,1:II))
-!call pprint(AMat%D,'AMat',unit_o=6)
+          CALL DGEMM_NNc(DimGDIIS,GDIISMemory,NewDim,One,Zero,  &
+            RefGrad%D(:,1:GDIISMemory),EigVect%D(:,1:NewDim),AuxStruct%D)
+          RefGrad%D(:,1:NewDim)=AuxStruct%D
 !
+          DO I=1,NewDim
+            SRDispl%D(:,I)=SRStruct%D(:,I)-RefStruct%D(:,I)
+          ENDDO
 !
 ! Calculate GDIIS Coeffs
 !
-        CALL New(Coeffs,II)
-        CALL New(AuxVect,GDIISMemory)
-        AuxVect%D=One  
-        CALL DGEMM_TNc(II,GDIISMemory,1,One,Zero,  &
-          EigVect%D(:,1:II),AuxVect%D,Coeffs%D)
-        CALL Delete(AuxVect)
-        DO I=1,II
-          Coeffs%D(I)=Coeffs%D(I)/EigVal%D(I)
-        ENDDO
-call PPrint(coeffs,'coeffs aft inv mult',Unit_O=6)
-      CALL Delete(AuxStruct)
+          CALL New(Coeffs,NewDim)
+          DO I=1,NewDim
+            Coeffs%D(I)=EigVal%D(I)
+write(*,*) i,' coeffs= ',coeffs%d(i)
+          ENDDO
+!
+        CALL Delete(AuxStruct)
 !
 ! Rescale coeffs to get a sum of One.
 !
-      Sum=Zero
-      DO I=1,II ; Sum=Sum+Coeffs%D(I) ; ENDDO
-      Sum=One/Sum
-      Coeffs%D=Sum*Coeffs%D
+        Sum=Zero
+        DO I=1,NewDim ; Sum=Sum+Coeffs%D(I) ; ENDDO
+        Sum=One/Sum
+        Coeffs%D=Sum*Coeffs%D
+do i=1,NewDim
+write(*,*) i,'final coeffs= ',coeffs%d(i)
+enddo
 !
-    CALL UnSetDSYEVWork()
+! Calc transformed Cartesian gradients at new Ref geometry
+! and put them into HDF
 !
-write(*,*) 'coeffs 1= '
-write(*,*) (Coeffs%D(i),i=1,II)
+        CALL New(AuxVect2,DimGDIIS)
+            AuxVect2%D=Zero
+          DO I=1,NewDim
+            AuxVect2%D=AuxVect2%D+Coeffs%D(I)*RefGrad%D(:,I)
+          ENDDO
+          CALL Put(AuxVect2,'GradE',Tag_O=CurGeom//'GDIIS')
+        CALL Delete(AuxVect2)
 !
 ! Calculate new geometry, linearcombine previous steps 
 !
-    CALL New(AuxVect,DimGDIIS)
+        CALL New(AuxVect,DimGDIIS)
 !
-      AuxVect%D=Zero
-    DO I=1,II
-      AuxVect%D=AuxVect%D+Coeffs%D(I)*SRStruct%D(:,I)
-    ENDDO
-!
-! Project out translations and rotations from GDIIS step
-!
-    AuxVect%D=AuxVect%D-RefStruct%D(:,II) 
-    CALL CartRNK1ToCartRNK2(RefStruct%D(:,II),GMLoc%Carts%D)
-    CALL TranslsOff(AuxVect%D)
-    CALL RotationsOff(AuxVect%D,GMLoc%Carts%D)
+            AuxVect%D=Zero
+          DO I=1,NewDim
+            AuxVect%D=AuxVect%D+Coeffs%D(I)*SRStruct%D(:,I)
+          ENDDO
 !
 ! Fill new geometry into GM array
 !
-    CALL CartRNK1ToCartRNK2(AuxVect%D,GMLoc%Carts%D,.TRUE.)
+          CALL CartRNK1ToCartRNK2(AuxVect%D,GMLoc%Carts%D)
 !
-! Save unitary transformed structures
+! Save unitary transformed structures and gradients
 !
-      CALL Put(0,'SrMemory')
-      CALL Put(0,'RefMemory')
-    DO I=1,II
-      AuxVect%D=SRStruct%D(:,I)
-      CALL PutSRStep(Vect_O=AuxVect,Tag_O='SR')
-      AuxVect%D=RefStruct%D(:,I)
-      CALL PutSRStep(Vect_O=AuxVect,Tag_O='Ref')
-    ENDDO
+          CALL Put(0,'SrMemory')
+          CALL Put(0,'RefMemory')
+          CALL Put(0,'CartGradMemory')
+!         CALL Put(0,'IntGradMemory')
+          DO I=1,NewDim
+            AuxVect%D=SRStruct%D(:,I)
+            CALL PutSRStep(Vect_O=AuxVect,Tag_O='SR')
+            AuxVect%D=RefStruct%D(:,I)
+            CALL PutSRStep(Vect_O=AuxVect,Tag_O='Ref')
+            AuxVect%D=RefGrad%D(:,I)
+            CALL PutSRStep(Vect_O=AuxVect,Tag_O='CartGrad')
+          ENDDO
 !
-    CALL Delete(AuxVect)
-call prtxyz(GMLoc%Carts%D,Title_O='Final Carts.')
+!call prtxyz(GMLoc%Carts%D,Title_O='Final Carts.')
 !
 ! Tidy up
 !
-    CALL Delete(Coeffs)
-    CALL Delete(EigVal)
-    CALL Delete(EigVect)
-    CALL Delete(AMat)
-    CALL Delete(SRStruct)
-    CALL Delete(RefStruct)
-    CALL Delete(SRDispl)
+      CALL Delete(AuxVect)
+      CALL Delete(Coeffs)
+      CALL Delete(EigVal)
+      CALL Delete(EigVect)
+      CALL Delete(AMat)
+      CALL Delete(RefGrad)
+      CALL Delete(RefStruct)
+      CALL Delete(SRStruct)
+      CALL Delete(SRDispl)
 !
     END SUBROUTINE GDIIS
 !
@@ -3196,7 +3278,7 @@ call prtxyz(GMLoc%Carts%D,Title_O='Final Carts.')
       TYPE(DBL_VECT) :: VectCartAux,VectIntAux
       TYPE(DBL_VECT) :: VectCartAux2,VectIntAux2
       TYPE(DBL_RNK2) :: FullB,FullBt,FullGcInv
-      REAL(DOUBLE)   :: DiffMax,RMSD,TrixThresh
+      REAL(DOUBLE)   :: DiffMax,RMSD
       REAL(DOUBLE)   :: GrdTrfCrit,MaxGradDiff,Sum
       INTEGER        :: NCart,I,II,J,NIntC
       INTEGER        :: MaxIt_GrdTrf,NatmsLoc
@@ -3204,14 +3286,14 @@ call prtxyz(GMLoc%Carts%D,Title_O='Final Carts.')
 !
       CALL OpenASCII(OutFile,Out)
 !
-      TrixThresh=1.D-8
-      GrdTrfCrit=TrixThresh*1.D0 !!! For Gradient transformation
-      MaxIt_GrdTrf=10
+! Iteration control parameters
+!
+      GrdTrfCrit  =GeOpCtrl%GrdTrfCrit !!! For Gradient transformation
+      MaxIt_GrdTrf=GeOpCtrl%MaxIt_GrdTrf
+      MaxGradDiff =GeOpCtrl%MaxGradDiff
       NatmsLoc=SIZE(XYZ,2)
       NIntC=SIZE(IntCs%Def)
       NCart=3*NatmsLoc        
-      MaxGradDiff=10000.D0
-!     MaxGradDiff=0.5D0
 !
       CALL New(FullB,(/NIntC,NCart/))
       CALL New(FullBt,(/NCart,NIntC/))
@@ -3353,17 +3435,18 @@ call prtxyz(GMLoc%Carts%D,Title_O='Final Carts.')
     LOGICAL                   :: DoIterate
     TYPE(INT_VECT)            :: MMAtNum
 !
-      CALL Get(NConstr,'NConstraints')
-      CALL Get(NCartConstr,'NCartConstr')
-      CooTrfCrit=1.D-3 !!! For Backtransformation
-      MaxIt_CooTrf=30
       NatmsLoc=SIZE(XYZ,2)
       NCart=3*NatmsLoc   
       NIntC=SIZE(IntCs%Def)
-      MaxCartDiff=0.5D0  !!! In atomic units. No larger cartesian displacements in a back-trf step are allowed
-      DistRefresh=MaxCartDiff*0.75D0
-      ConstrMaxCrit=CooTrfCrit*1.D-2 !!! Convrgn criterium on constrts
-      RMSCrit=0.90D0 !!! at least 10 percent decrease in RMS at a step
+!
+! iteration control parameters
+!
+      CooTrfCrit   = GeOpCtrl%CooTrfCrit 
+      MaxIt_CooTrf = GeOpCtrl%MaxIt_CooTrf
+      MaxCartDiff  = GeOpCtrl%MaxCartDiff
+      DistRefresh  = GeOpCtrl%DistRefresh
+      ConstrMaxCrit= GeOpCtrl%ConstrMaxCrit
+      RMSCrit      = GeOpCtrl%RMSCrit
 !
 ! Refresh B matrix during iterative back-trf, if displacements are too large?
 !
@@ -3391,8 +3474,11 @@ call prtxyz(GMLoc%Carts%D,Title_O='Final Carts.')
 !
 ! The required new value of internal coordinates
 !
+!call PrtIntCoords(IntCs,IntCs%Value,'old internals  ')
+!call PrtIntCoords(IntCs,VectInt,'required change')
       VectIntReq%D=VectInt+IntCs%Value
       CALL MapBackAngle(IntCs,NIntC,VectIntReq%D) 
+!call PrtIntCoords(IntCs,VectIntReq%D,'required ones  ')
 !
 !initialization of new Cartesians
 !
@@ -3546,8 +3632,8 @@ call prtxyz(GMLoc%Carts%D,Title_O='Final Carts.')
 !
 ! Final internal coordinates
 !
-      CALL INTCValue(IntCs,XYZ)
-      CALL PrtIntCoords(IntCs,IntCs%Value,'Final Internals')
+!     CALL INTCValue(IntCs,XYZ)
+!     CALL PrtIntCoords(IntCs,IntCs%Value,'Final Internals')
 !
 ! Tidy up
 !
@@ -3700,7 +3786,7 @@ call prtxyz(GMLoc%Carts%D,Title_O='Final Carts.')
 !
 ! Calculate center of Mass (Masses are unit here)
 !
-      CALL CenterOfMass(XYZ,CMX,CMY,CMZ)
+      CALL CenterOfMass(CMX,CMY,CMZ,XYZ_O=XYZ)
 !
 ! Mass centered Cartesians
 !
@@ -4244,8 +4330,9 @@ END SUBROUTINE ChkBendToLinB
 !
         NIntC=SIZE(IntCs%Def)
         NDim=SIZE(Displ%D)
-        DoInternals=.FALSE.
-        IF(NDim==NIntC) DoInternals=.TRUE.
+        DoInternals=GeOpCtrl%DoInternals
+        IF(NDim/=NIntC.AND.DoInternals) &
+            Call Halt('Dimensionality error in SetConstraint')
 !
 ! Get values of constraints from HDF
 !
@@ -4377,23 +4464,31 @@ END SUBROUTINE ChkBendToLinB
           ConstrRMS<ConstrRMSOld*RMSCrit) 
         ENDIF
 !
-        DoIterate=(DiffMax>CooTrfCrit.AND.IStep<=MaxIt_CooTrf)
+        DoIterate=(DiffMax>CooTrfCrit.AND.IStep<=MaxIt_CooTrf.AND. &
+                   RMSD<RMSDOld*RMSCrit)
         DoIterate=DoIterate.AND.ConvConstr
 !
       END SUBROUTINE BackTrfConvg
 !
 !----------------------------------------------------------------------
-      SUBROUTINE PrtXYZ(XYZ,PrtU_O,Title_O)
+      SUBROUTINE PrtXYZ(XYZ,Title_O,PrtU_O,Convert_O)
         REAL(DOUBLE),DIMENSION(:,:) :: XYZ
+        TYPE(DBL_RNK2)              :: XYZPrint
         INTEGER,OPTIONAL            :: PrtU_O
         INTEGER                     :: I,J,NatmsLoc,PrtU
         TYPE(INT_VECT)              :: MMAtNum
         TYPE(DBL_VECT)              :: NuclCharge
+        REAL(DOUBLE)                :: Sum
         CHARACTER(LEN=*),OPTIONAL   :: Title_O
+        LOGICAL                     :: Opened,Exist
+        LOGICAL,OPTIONAL            :: Convert_O    
 !
         NatmsLoc=SIZE(XYZ,2)
-        PrtU=6
-        IF(PRESENT(PrtU_O)) PrtU=PrtU_O
+        PrtU=6 
+        IF(PRESENT(PrtU_O)) THEN
+          PrtU=PrtU_O
+!         CALL OpenAscii('coords',PrtU)
+        ENDIF
         CALL New(MMAtNum,NatmsLoc) 
 !
 #ifdef MMech
@@ -4412,26 +4507,43 @@ END SUBROUTINE ChkBendToLinB
           CALL Delete(NuclCharge)
 #endif
 !
+        CALL New(XYZPrint,(/3,NatmsLoc/))
+          XYZPrint%D=XYZ
+          IF(PRESENT(Convert_O)) THEN
+            IF(Convert_O) THEN
+              Sum=One/AngstromsToAu
+              XYZPrint%D=Sum*XYZPrint%D
+            ENDIF
+          ENDIF
+!
         WRITE(PrtU,*) NatmsLoc
           IF(PRESENT(Title_O)) WRITE(PrtU,*) Title_O
         DO I=1,NatmsLoc
-          WRITE(PrtU,100) MMAtNum%I(I),XYZ(1:3,I)
+          WRITE(PrtU,100) MMAtNum%I(I),XYZPrint%D(1:3,I)
         ENDDO
 100     FORMAT(I4,3X,3F12.6)
 !
+        CALL Delete(XYZPrint) 
         CALL Delete(MMAtNum) 
+!       CLOSE(PrtU,STATUS='KEEP')
 !
       END SUBROUTINE PrtXYZ
 !----------------------------------------------------------------------
       SUBROUTINE PutSRStep(XYZ_O,Vect_O,Tag_O)
         INTEGER                              :: IGeom,NCart
+        INTEGER                              :: NatmsLoc,J,I
         REAL(DOUBLE),DIMENSION(:,:),OPTIONAL :: XYZ_O
         TYPE(DBL_VECT),OPTIONAL              :: Vect_O
+        REAL(DOUBLE)                         :: CMX,CMY,CMZ
         TYPE(DBL_VECT)                       :: AuxVect
         CHARACTER(LEN=*),OPTIONAL            :: Tag_O
         INTEGER                              :: GDIISMemory
         INTEGER                              :: SRMemory
         INTEGER                              :: RefMemory
+        INTEGER                              :: CartGradMemory
+        INTEGER                              :: IntGradMemory
+        TYPE(DBL_VECT)                       :: Vect
+        TYPE(DBL_RNK2)                       :: XYZ 
 !
 ! Increment GDIISMemory
 !
@@ -4448,22 +4560,45 @@ END SUBROUTINE ChkBendToLinB
           IGeom=RefMemory
           CALL Put(RefMemory,'RefMemory')
         ENDIF
-!write(*,*) TRIM(Tag_O),IGeom
+!
+        IF(PRESENT(Tag_O).AND.TRIM(Tag_O)=='CartGrad') THEN
+          CALL Get(CartGradMemory,'CartGradMemory')
+          CartGradMemory=CartGradMemory+1
+          IGeom=CartGradMemory
+          CALL Put(CartGradMemory,'CartGradMemory')
+        ENDIF
+!
+!       IF(PRESENT(Tag_O).AND.TRIM(Tag_O)=='IntGrad') THEN
+!         CALL Get(IntGradMemory,'IntGradMemory')
+!         IntGradMemory=IntGradMemory+1
+!         IGeom=IntGradMemory
+!         CALL Put(IntGradMemory,'IntGradMemory')
+!       ENDIF
 !
         IF(PRESENT(XYZ_O)) THEN
 !
-          NCart=3*SIZE(XYZ_O,2)
+          NatmsLoc=SIZE(XYZ_O,2)
+          NCart=3*NatmsLoc
+          CALL New(XYZ,(/3,NatmsLoc/))
+          XYZ%D=XYZ_O
+!!!!        CALL CenterOfMass(CMX,CMY,CMZ,XYZ_O=XYZ%D,Move_O=.TRUE.)
 !
 ! Put Geometry of simple relaxation set into HDF, for GDIIS.
 !
-          CALL New(AuxVect,NCart)
-            CALL CartRNK2ToCartRNK1(AuxVect%D,XYZ_O)
-            CALL Put(AuxVect,TRIM(Tag_O)//TRIM(IntToChar(IGeom)))
-          CALL Delete(AuxVect)
+            CALL New(AuxVect,NCart)
+              CALL CartRNK2ToCartRNK1(AuxVect%D,XYZ%D)
+              CALL Put(AuxVect,TRIM(Tag_O)//TRIM(IntToChar(IGeom)))
+            CALL Delete(AuxVect)
+          CALL Delete(XYZ)
 !
         ELSE IF(PRESENT(Vect_O)) THEN
 !
-          CALL Put(Vect_O,TRIM(Tag_O)//TRIM(IntToChar(IGeom)))
+          NCart=SIZE(Vect_O%D)
+          CALL New(Vect,NCart)
+          Vect%D=Vect_O%D
+!!!!      CALL CenterOfMass(CMX,CMY,CMZ,Vect_O=Vect%D,Move_O=.TRUE.)
+            CALL Put(Vect,TRIM(Tag_O)//TRIM(IntToChar(IGeom)))
+          CALL Delete(Vect)
 !
         ELSE
 !
@@ -4474,24 +4609,60 @@ END SUBROUTINE ChkBendToLinB
       END SUBROUTINE PutSRStep
 !----------------------------------------------------------------------
 !
-      SUBROUTINE CenterOfMass(XYZ,CX,CY,CZ)
-        REAL(DOUBLE),DIMENSION(:,:) :: XYZ
+      SUBROUTINE CenterOfMass(CX,CY,CZ,XYZ_O,Vect_O,Move_O)
+        REAL(DOUBLE),DIMENSION(:,:),OPTIONAL :: XYZ_O
+        REAL(DOUBLE),DIMENSION(:)  ,OPTIONAL :: Vect_O
         REAL(DOUBLE)                :: CX,CY,CZ
-        INTEGER                     :: I,NatmsLoc
+        INTEGER                     :: I,J,NCart,NatmsLoc
+        LOGICAL,OPTIONAL            :: Move_O
 !
-        NatmsLoc=SIZE(XYZ,2)
+        IF((PRESENT(XYZ_O).AND.PRESENT(Vect_O)) .OR. &
+           (.NOT.PRESENT(XYZ_O).AND..NOT.PRESENT(Vect_O))) THEN
+          CALL Halt('Inappropriate input in CenterOfMass')
+        ENDIF
 !
-          CX=Zero
-          CY=Zero
-          CZ=Zero
-        DO I=1,NatmsLoc
-          CX=CX+XYZ(1,I) 
-          CY=CY+XYZ(2,I) 
-          CZ=CZ+XYZ(3,I) 
-        ENDDO
-        CX=CX/DBLE(NatmsLoc)
-        CY=CY/DBLE(NatmsLoc)
-        CZ=CZ/DBLE(NatmsLoc)
+            CX=Zero
+            CY=Zero
+            CZ=Zero
+        IF(PRESENT(XYZ_O)) THEN
+          NatmsLoc=SIZE(XYZ_O,2)
+          DO I=1,NatmsLoc
+            CX=CX+XYZ_O(1,I) 
+            CY=CY+XYZ_O(2,I) 
+            CZ=CZ+XYZ_O(3,I) 
+          ENDDO
+        ELSE IF(PRESENT(Vect_O)) THEN
+          NatmsLoc=SIZE(Vect_O)/3
+          NCart=3*NatmsLoc
+          DO I=1,NatmsLoc
+            J=(I-1)*3
+            CX=CX+Vect_O(J+1) 
+            CY=CY+Vect_O(J+2) 
+            CZ=CZ+Vect_O(J+3) 
+          ENDDO
+        ENDIF
+          CX=CX/DBLE(NatmsLoc)
+          CY=CY/DBLE(NatmsLoc)
+          CZ=CZ/DBLE(NatmsLoc)
+!
+! Move coordinates into Center of Mass?
+!
+        IF(PRESENT(Move_O)) THEN
+          IF(Move_O) THEN
+            IF(PRESENT(XYZ_O)) THEN
+              XYZ_O(1,:)=XYZ_O(1,:)-CX
+              XYZ_O(2,:)=XYZ_O(2,:)-CY
+              XYZ_O(3,:)=XYZ_O(3,:)-CZ
+            ELSE IF(PRESENT(Vect_O)) THEN
+              DO I=1,NatmsLoc
+                J=(I-1)*3
+                Vect_O(J+1)=Vect_O(J+1)-CX
+                Vect_O(J+2)=Vect_O(J+2)-CY
+                Vect_O(J+3)=Vect_O(J+3)-CZ
+              ENDDO
+            ENDIF
+          ENDIF
+        ENDIF
 !
       END SUBROUTINE CenterOfMass
 !
@@ -4567,82 +4738,227 @@ END SUBROUTINE ChkBendToLinB
 !
 !------------------------------------------------------------------
 !
-      SUBROUTINE RecognEigPattern(EigVals,Selection)
+      SUBROUTINE GDIISSelect(EigVals,Selection)
         REAL(DOUBLE),DIMENSION(:) :: EigVals
         INTEGER,     DIMENSION(:) :: Selection
-        REAL(DOUBLE)              :: Sum,DWidth,LowLim,GapWidth
-        INTEGER                   :: I,J,NDim,NDomain,IDom
+        REAL(DOUBLE)              :: Sum,GapWidth,MeanWidth,RMSWidth
+        REAL(DOUBLE)              :: MaxEig,MinEig
+        INTEGER                   :: I,J,K,L,NDim,LastDomain
+        INTEGER                   :: GDIISBandWidth
+        INTEGER                   :: MinDomCount    
         TYPE(DBL_VECT)            :: AuxVect
-        TYPE(INT_VECT)            :: CountDom,MarkDom
+        TYPE(INT_VECT)            :: Ordered,Domain,DomainCount
+        REAL(DOUBLE)              :: GDIISMaxMem
 !
-! To select out the GDIIS subspace, current criterium is
-! a gap in the logarithmic scale of the scaled eigenvalues 
-! of 2 orders of magnitude or more
-! Total range of selected spectral part may not be wider than
-! 2 orders of magnitude
+        GDIISMaxMem=GeOpCtrl%GDIISMaxMem
+        GDIISBandWidth=GeOpCtrl%GDIISBandWidth 
+        MinDomCount=GeOpCtrl%GDIISMinDomCount
 !
-        GapWidth=2.3D0
-          DWidth=2.D0
         NDim=SIZE(EigVals)
         I=SIZE(Selection)
-        IF(NDim/=I) CALL Halt('Dimensionality error in RecognEigPattern')
+        IF(NDim/=I.OR.NDim==0) THEN
+          CALL Halt('Dimensionality error in GDIISSelect')
+        ENDIF
+!
         CALL New(AuxVect,NDim)
-        CALL New(CountDom,NDim)
-        CountDom%I=0
-        CALL New(MarkDom,NDim)
-        MarkDom%I=0
+        CALL New(Ordered,NDim)
+        CALL New(Domain,NDim)
+        CALL New(DomainCount,NDim)
+write(*,*) 'SElection in ',selection 
 !
-        Sum=Zero
-        DO I=1,NDim ; SUM=MAX(Sum,ABS(BLKVALS%D(I))) ; ENDDO    
-        Sum=One/Sum
-write(*,*) 'scaled eigenvals= ',Sum*BLKVALS%D
+! Put eigenvalues onto a logarithmic scale
 !
-        DO I=1,NDim
-          AuxVect%D(I)=DLOG10(Sum*ABS(BLKVALS%D(I)))
-        ENDDO
-write(*,*) 'LOG scaled eigenvals= ',AuxVect%D
+          DO I=1,NDim
+            AuxVect%D(I)=DLOG10(ABS(EigVals(I)))
+          ENDDO
+write(*,*) 'log10= ',AuxVect%D
 !
-! set up domain structure
+! Form ordered set with lowest log10 first
 !
-        NDomain=1
-        LowLim=AuxVect%D(1)
-        MarkDom%I(1)=1
-        CountDom%I(1)=1
-        DO I=2,NDim
-          IF(AuxVect%D(I)-AuxVect%D(I-1)>GapWidth .OR. &
-             AuxVect%D(I)>LowLim+DWidth) THEN
-               NDomain=NDomain+1 
-               LowLim=AuxVect%D(I)
-          ENDIF
-          MarkDom%I(I)=NDomain
-          CountDom%I(NDomain)=CountDom%I(NDomain)+1
-        ENDDO
+          DO I=1,NDim
+            Ordered%I(I)=I 
+          ENDDO
+          DO I=2,NDim
+          DO J=2,NDim-I+2
+            K=Ordered%I(J)
+            L=Ordered%I(J-1)
+            IF(AuxVect%D(K)<AuxVect%D(L)) THEN
+              Ordered%I(J)=L
+              Ordered%I(J-1)=K
+            ENDIF
+          ENDDO
+          ENDDO
+do i=1,ndim
+write(*,*) i,'ordered ',AuxVect%D(ordered%i(i))
+enddo
 !
-! Now, scan domains and use the most populated one
+! Calculate average spectral distance and fluctuation
 !
-        IDom=1
-        DO I=1,NDomain
-          IF(CountDom%I(I)>=CountDom%I(IDom)) IDom=I
-        ENDDO
+            MeanWidth=Zero
+            J=0
+          DO I=2,NDim
+            K=Ordered%I(I)
+            L=Ordered%I(I-1)
+            IF(Selection(K)/=1.OR.Selection(L)/=1) CYCLE 
+            J=J+1
+            MeanWidth=MeanWidth+AuxVect%D(K)-AuxVect%D(L)
+          ENDDO
+write(*,*) 'MeanWidth1= ',MeanWidth,J
+            IF(J>0) THEN
+              MeanWidth=MeanWidth/DBLE(J)
+            ELSE
+              MeanWidth=1.D99
+            ENDIF
 !
-        Selection(:)=0
-        DO I=1,NDim
-!         IF(MarkDom%I(I)==IDom) Selection(I)=1
-          IF(AuxVect%D(I)>-7.D0) Selection(I)=1
-        ENDDO
-        IF(NDim>1 .AND. &
-         AuxVect%D(NDim)-AuxVect%D(NDim-1) > GapWidth) Selection(NDim)=0
+            RMSWidth=Zero
+          DO I=2,NDim
+            K=Ordered%I(I)
+            L=Ordered%I(I-1)
+            IF(Selection(K)/=1.OR.Selection(L)/=1) CYCLE 
+            RMSWidth=RMSWidth+(MeanWidth-(AuxVect%D(K)-AuxVect%D(L)))**2
+          ENDDO
+            IF(J>0) THEN
+              RMSWidth=SQRT(RMSWidth/DBLE(J))
+            ELSE
+              RMSWidth=1.D99
+            ENDIF
+write(*,*) 'MeanWidth= ',MeanWidth,J
+write(*,*) 'RMSWidth= ',RMSWidth
 !
-write(*,*) 'ndomain= ',ndomain
-write(*,*) 'markdom= ',MarkDom%I
-write(*,*) 'countdom= ',CountDom%I
+! First, group log10-s into domains
+!
+            Domain%I(1)=1 
+            DomainCount%I=0 
+          DO I=2,NDim
+            K=Ordered%I(I)
+            L=Ordered%I(I-1)
+            IF(AuxVect%D(K)-AuxVect%D(L)>MeanWidth+1.01D0*RMSWidth) THEN
+              Domain%I(I)=Domain%I(I-1)+1
+            ELSE
+              Domain%I(I)=Domain%I(I-1)
+            ENDIF
+              K=Domain%I(I)
+              DomainCount%I(K)=DomainCount%I(K)+1
+          ENDDO
+              LastDomain=Domain%I(NDim)
+write(*,*) 'domain= ',domain%I
+              K=Ordered%I(NDim)
+              L=Ordered%I(NDim-1)
+!         IF(LastDomain>1) THEN
+!           IF(AuxVect%D(K)-AuxVect%D(L)>0.9D0) THEN
+!             IF(DomainCount%I(LastDomain)==1) LastDomain=LastDomain-1
+!           ENDIF
+!         ENDIF
+write(*,*) 'lastdomain= ',lastdomain
+!
+! Find maximum coefficient in LastDomain
+!
+          MaxEig=-1.D99
+          DO I=1,NDim
+            K=Ordered%I(I)
+            IF(Domain%I(I)/=LastDomain) CYCLE
+            MaxEig=MAX(MaxEig,AuxVect%D(K))
+          ENDDO
+write(*,*) 'maxeig= ',maxeig,'GDIISBandWidth= ',GDIISBandWidth
+!
+          Selection(:)=0
+!
+          J=0
+          DO I=1,NDim
+             K=Ordered%I(I)
+             IF(Domain%I(I)/=LastDomain) CYCLE
+write(*,*) i,'pair ',AuxVect%D(K),Domain%I(K)
+            IF(AuxVect%D(K)>MaxEig-GDIISBandWidth) THEN   
+              J=J+1
+              Selection(K)=1
+            ENDIF
+            IF(J>=GDIISMaxMem) EXIT
+          ENDDO
 write(*,*) 'selection= ',selection
 !
-        CALL Delete(CountDom)        
-        CALL Delete(MarkDom)        
+1000    CONTINUE
+!        
+        CALL Delete(DomainCount)
+        CALL Delete(Domain)        
+        CALL Delete(Ordered)        
         CALL Delete(AuxVect)        
 !
-      END SUBROUTINE RecognEigPattern
+      END SUBROUTINE GDIISSelect
+!
+!----------------------------------------------------------------
+!
+      SUBROUTINE GDIISSave(DimGDIIS,EtotCurr,EtotPrev)
+        INTEGER                :: I,J,IGeom,SRMemory,RefMemory
+        INTEGER                :: GDIISMemory,DimGDIIS,CartGradMemory
+        TYPE(DBL_VECT)         :: Auxvect
+        REAL(DOUBLE)           :: EtotCurr,EtotPrev
+!
+        IF(GeOpCtrl%ActStep<=GeOpCtrl%GDIISInit) RETURN
+!
+        CALL New(Auxvect,DimGDIIS)
+!
+! If step was unsuccesful restore last succesful state of 
+! GDIIS reference space
+!
+        IF(EtotCurr>EtotPrev.AND.GeOpCtrl%ActStep/=GeOpCtrl%GDIISInit) THEN  
+!
+          CALL Get(SRMemory,'SRMemory'//'SAVE')
+          CALL Get(RefMemory,'RefMemory'//'SAVE')
+          CALL Get(CartGradMemory,'CartGradMemory'//'SAVE')
+          IF(SRMemory/=RefMemory) THEN
+            CALL Halt('SRMemory/=RefMemory in GDIISSave')
+          ENDIF
+          IF(SRMemory/=CartGradMemory) THEN
+            CALL Halt('SRMemory/=CartGradMemory in GDIISSave')
+          ENDIF
+          GDIISMemory=SRMemory
+!
+          CALL Put(SRMemory,'SRMemory')
+          CALL Put(RefMemory,'RefMemory')
+          CALL Put(CartGradMemory,'CartGradMemory')
+          DO IGeom=1,GDIISMemory
+            CALL Get(AuxVect,'SR'//TRIM(IntToChar(IGeom))//'SAVE')
+            CALL Put(AuxVect,'SR'//TRIM(IntToChar(IGeom)))
+            CALL Get(AuxVect,'Ref'//TRIM(IntToChar(IGeom))//'SAVE')
+            CALL Put(AuxVect,'Ref'//TRIM(IntToChar(IGeom)))
+            CALL Get(AuxVect,'CartGrad'//TRIM(IntToChar(IGeom))//'SAVE')
+            CALL Put(AuxVect,'CartGrad'//TRIM(IntToChar(IGeom)))
+          ENDDO
+!
+        ELSE 
+!
+! Get recent Ref and SR structures
+!
+          CALL Get(SRMemory,'SRMemory')
+          CALL Get(RefMemory,'RefMemory')
+          CALL Get(CartGradMemory,'CartGradMemory')
+          IF(SRMemory/=RefMemory) THEN
+            CALL Halt('SRMemory/=RefMemory in GDIISSave')
+          ENDIF
+          IF(SRMemory/=CartGradMemory) THEN
+            CALL Halt('SRMemory/=CartGradMemory in GDIISSave')
+          ENDIF
+          GDIISMemory=SRMemory
+!
+          CALL Put(SRMemory,'SRMemory'//'SAVE')
+          CALL Put(RefMemory,'RefMemory'//'SAVE')
+          CALL Put(CartGradMemory,'CartGradMemory'//'SAVE')
+          DO IGeom=1,GDIISMemory
+            CALL Get(AuxVect,'SR'//TRIM(IntToChar(IGeom)))
+            CALL Put(AuxVect,'SR'//TRIM(IntToChar(IGeom))//'SAVE')
+            CALL Get(AuxVect,'Ref'//TRIM(IntToChar(IGeom)))
+            CALL Put(AuxVect,'Ref'//TRIM(IntToChar(IGeom))//'SAVE')
+            CALL Get(AuxVect,'CartGrad'//TRIM(IntToChar(IGeom)))
+            CALL Put(AuxVect,'CartGrad'//TRIM(IntToChar(IGeom))//'SAVE')
+          ENDDO
+!
+        ENDIF
+!
+        CALL Delete(AuxVect)
+!
+      END SUBROUTINE GDIISSave
+!
+!----------------------------------------------------------------
 !
 END MODULE InCoords
 
