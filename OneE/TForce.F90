@@ -101,6 +101,13 @@ PROGRAM TForce
         ENDIF
      ENDDO
   ENDDO
+!
+!
+!
+  WRITE(*,*) 'LatFrc_T'
+  DO I=1,3
+     WRITE(*,*) (LatFrc_T%D(I,J),J=1,3) 
+  ENDDO
 !--------------------------------------------------------------------------------
 #ifdef PARALLEL
   TotFrcComp = 3*NAtoms
