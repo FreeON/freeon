@@ -1,21 +1,22 @@
-      SUBROUTINE AddDis(Num,KLng,I1,I2,iPrm,iDis,iMom,SchT,
+      SUBROUTINE AddDis(Num,NT,KLng,I1,I2,iPrm,iDis,iMom,SchT,
      &                  BfnT,BufT,VecT,
      &                  TmpBuf,PrmBuf,DisBuf,BfnBuf,VecBuf,
      >                  Ctmp,Stmp,CBuf,SBuf)
       IMPLICIT REAL*8 (a-h,o-z)
       INCLUDE "pmonx.inc"
-      REAL*8 SchT(Num),VecT(3,Num)
-      REAL*8 TmpBuf(MXB,MXCNT*MXCNT+MInfo,Num)
+      INTEGER Num,NT,iPrm,iDis
+      INTEGER BfnT(500),BufT(Num)
+      INTEGER BfnBuf(Num)
+      REAL*8 SchT(Num)
+      REAL*8 VecT(3,NT)
+      REAL*8 TmpBuf(MXB,MXCNT*MXCNT+MInfo,NT)
+      REAL*8 Ctmp(0:LenS,Len0*Len0,NT)
+      REAL*8 Stmp(0:LenS,Len0*Len0,NT)
       REAL*8 PrmBuf(MXB,KLng+MInfo,Num)
       REAL*8 DisBuf(Num),VecBuf(3,Num)
-      REAL*8 Ctmp(0:LenS,Len0*Len0,Num)
-      REAL*8 Stmp(0:LenS,Len0*Len0,Num)
       REAL*8 CBuf(0:I1,I2,Num)
       REAL*8 SBuf(0:I1,I2,Num)
       REAL*8 Etmp(MXB)
-      INTEGER Num,iPrm,iDis
-      INTEGER BfnT(500),BufT(Num)
-      INTEGER BfnBuf(Num) 
 
       DO I=1,MXB
          Etmp(I)=0.0D0

@@ -249,8 +249,8 @@ SUBROUTINE ONXBuf(BSc,GMc,BSp,GMp,LenF,NameBuf)
         I1=Ltot*(Ltot+3)/2
         I2=Leng(IType)*Leng(KType)
         N=BufT%I(2,i)
-       
-        CALL AddDis(N,KLng,I1,I2,iPrm,iDis,iMom,SchT%D(1,i),           &
+
+        CALL AddDis(N,iB-1,KLng,I1,I2,iPrm,iDis,iMom,SchT%D(1,i),      &
                     BfnT%I(1),BufT%I(3,i),VecT%D(1,1),TmpBuf%D(1,1,1), &
                     PrmBuf%D(iPrm),DisBuf%D(iDis),BfnBuf%I(iDis),      &
                     VecBuf%D(1,iDis),Ctmp%D(0,1,1),Stmp%D(0,1,1),      &
