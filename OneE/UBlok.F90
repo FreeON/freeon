@@ -61,7 +61,7 @@ CONTAINS  !
     NBFA = Pair%NA
     NBFB = Pair%NB
 
-    CALL New(d,(/NBFA,NBFB/))
+!    CALL New(d,(/NBFA,NBFB/))
 
     Ax = Pair%A(1)
     Ay = Pair%A(2)
@@ -296,15 +296,15 @@ CONTAINS  !
        ENDIF
     ENDDO
     
-    D%d=ECP
-    DO Ia=1,Pair%NA
-       DO ib=1,Pair%NB
-          IF(ABS(D%D(Ia,ib))<1D-6)ECP(ia,ib)=0
-       ENDDO
-    ENDDO
-   
-    CALL PPrint(d,"D",Unit_O=6)
-    CALL Delete(D)
+!    D%d=ECP
+!    DO Ia=1,Pair%NA
+!       DO ib=1,Pair%NB
+!          IF(ABS(D%D(Ia,ib))<1D-6)ECP(ia,ib)=0
+!       ENDDO
+!    ENDDO
+!   
+!    CALL PPrint(d,"D",Unit_O=6)
+!    CALL Delete(D)
 !    STOP
     UVck = BlockToVect(Pair%NA,Pair%NB,ECP)
   END FUNCTION UBlock
