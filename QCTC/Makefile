@@ -61,24 +61,24 @@ purge:	CQCTC CJFrc cmma
 #
 QCTC:	$(QCTCObjs)
 	$(LD) $(LDFLAGS) QCTC $(QCTCObjs) $(LibOpts) $(F90_LIBRARIES) 
-	mv QCTC $(MONDO_HOME)/Exec/QCTC
+	mv QCTC $(MONDO_EXEC)/QCTC
 #
 JFrc:	$(JFrcObjs)
 	$(LD) $(LDFLAGS) JForce $(JFrcObjs) $(LibOpts) $(F90_LIBRARIES) 
-	mv JForce $(MONDO_HOME)/Exec/JForce
+	mv JForce $(MONDO_EXEC)/JForce
 #
 CQCTC:
 	rm -f $(REMOVEMISC) $(REMOVEMODS)
 	rm -f \#*
 	rm -f *~
-	rm -f $(MONDO_HOME)/Exec/QCTC
+	rm -f $(MONDO_EXEC)/QCTC
 	ls 
 #
 CJFrc:
 	rm -f $(REMOVEMISC) $(REMOVEMODS)
 	rm -f \#*
 	rm -f *~
-	rm -f $(MONDO_HOME)/Exec/JForce
+	rm -f $(MONDO_EXEC)/JForce
 	ls 
 #
 mma:	ctrax hgtosp hgtrax 

@@ -156,7 +156,7 @@ MODULE DrvFrcs
          INTEGER            :: KeepStep
          TYPE(SCFControls)  :: Ctrl
          TYPE(CRDS)         :: GM
-         REAL(DOUBLE)       :: StepSz,E0,E1,RelErrE,EUncert,RMSGrad,MAXGrad
+         REAL(DOUBLE)       :: StepSz,E0,E1,ET,RelErrE,EUncert,RMSGrad,MAXGrad
          LOGICAL            :: RelCnvrgd,RMSCnvrgd,MAXCnvrgd
          CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg
 !---------------------------------------------------------------------------
@@ -174,16 +174,17 @@ MODULE DrvFrcs
 !        Check for decreasing energies and need for backtracking
          RelErrE=(E1-E0)/ABS(E0)
 !        Check for convergence
-         RelCnvrgd=RelErrE<1D1*ETol(Ctrl%AccL(CBas))
-         RMSCnvrgd=RMSGrad<1D3*ETol(Ctrl%AccL(CBas))
-         MAXCnvrgd=MAXGrad<1D3*ETol(Ctrl%AccL(CBas))
+         ET=ETol(Ctrl%AccL(CBas))
+         RelCnvrgd=RelErrE<1D2*ET
+         RMSCnvrgd=RMSGrad<1D4*ET
+         MAXCnvrgd=MAXGrad<1D4*ET
          IF(RelCnvrgd.AND.RMSCnvrgd.AND.MAXCnvrgd)THEN
             KeepStep=-1
             Mssg='Converged: dE = '//TRIM(DblToShrtChar(RelErrE)) &
               //', RMS = '//TRIM(DblToShrtChar(RMSGrad)) &
               //', MAX = '//TRIM(DblToShrtChar(MAXGrad)) &
               //', Step = '//TRIM(DblToShrtChar(StepSz))
-         ELSEIF(RelErrE<Zero)THEN
+          ELSEIF(RelErrE<Zero)THEN
 !           If energy is going down, keep taking unit steps
             StepSz=One 
 !           Dont back track

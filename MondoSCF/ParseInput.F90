@@ -67,6 +67,7 @@ MODULE ParseInput
          CALL GetEnv('PWD',MONDO_PWD)
          CALL GetEnv('MONDO_HOME',MONDO_HOME)
          CALL GetEnv('MONDO_SCRATCH',MONDO_SCRATCH)
+         CALL GetEnv('MONDO_EXEC',MONDO_EXEC)
          CALL GetEnv('MONDO_HOST',MONDO_HOST)
          CALL GetEnv('MONDO_MACH',MONDO_MACH)
          CALL GetEnv('MONDO_SYST',MONDO_SYST)
@@ -80,7 +81,7 @@ MODULE ParseInput
          MONDO_PWD=TRIM(MONDO_PWD)//'/'
          MONDO_HOME=TRIM(MONDO_HOME)//'/'
          MONDO_SCRATCH=TRIM(MONDO_SCRATCH)//'/'
-         MONDO_EXEC=TRIM(MONDO_HOME)//'Exec/'
+         MONDO_EXEC=TRIM(MONDO_EXEC)//'/'
          PROCESS_ID=IntToChar(GetPID())
 !------------------------------------------------------------------------------------------------
 !        Determine input and output names with full paths        
@@ -160,7 +161,7 @@ MODULE ParseInput
       77 FORMAT(A1,A1,                                                   &
          ' __    __                 _       ____________ ______ ',A1,    &
          '|  \  /  |               | |     /       /    |      |',A1,    & 
-         "|   \/   | ___  _ __   __| | ___/   ____/   __|  |---'",A1,    &
+         "|   \/   | ___  _ __   __| | ___/   ____/   __|  |==='",A1,    &
          "|        |/ _ \| '_ \ / _  |/ _ \____  \   (__|  ____|",A1,    &
          '|  |\/|  | (_) | | | | (_| | (_) )     /\     |  |    ',A1,    &
          '|__|  |__|\___/|_| |_|\____|\___/_____/  \____|__|    ',A1,A1, &
@@ -511,14 +512,18 @@ MODULE ParseInput
          IF(.NOT.OptIntQ(Inp,MULTIPLICITY,GM%Multp)) &
             CALL MondoHalt(PRSE_ERROR,MULTIPLICITY//' Not found in input.')
 !----------------------------------------------------------------------------------------- 
-!        Parse <OPTIONS> for <Grad>
+!        Parse <OPTIONS> for <Grad=>
 !     
          IF(OptKeyQ(Inp,GRADIENTS,FORCE))THEN
             Ctrl%Grad=GRAD_ONE_FORCE
          ELSEIF(OptKeyQ(Inp,DYNAMICS,MD_VERLET))THEN
             Ctrl%Grad=GRAD_VERLET_MD
          ELSEIF(OptKeyQ(Inp,OPTIMIZATION,OPT_QUNEW))THEN
-            Ctrl%Grad=GRAD_QNEW_OPT
+            IF(OptKeyQ(Inp,OPTIMIZATION,OPT_ONE_BASE))THEN
+               Ctrl%Grad=GRAD_QNEW_ONE_OPT
+            ELSE
+               Ctrl%Grad=GRAD_QNEW_OPT
+            ENDIF
             IF(.NOT.OptIntQ(Inp,MAX_STEPS,Ctrl%NGeom))THEN
                Ctrl%NGeom=500
             ENDIF
@@ -541,6 +546,23 @@ MODULE ParseInput
                Ctrl%MDVar(1)=1.D-2
             ENDIF
             Ctrl%MDVar(2)=One
+         ENDIF
+!----------------------------------------------------------------------------------------- 
+!        Parse <OPTIONS> for <Extrap=>
+!     
+         IF(OptKeyQ(Inp,EXTRAPOLATE,EXTRAP_NO_EXTRAP))THEN
+            Ctrl%Extrap=EXTRAP_GEOM_RSTRT
+         ELSEIF(OptKeyQ(Inp,EXTRAPOLATE,EXTRAP_PROJECT))THEN
+            Ctrl%Extrap=EXTRAP_GEOM_PRJCT
+         ELSE
+            Ctrl%Extrap=EXTRAP_GEOM_INTRP
+         ENDIF
+!----------------------------------------------------------------------------------------- 
+!        Parse <OPTIONS> for <Vis=>
+         IF(OptKeyQ(Inp,VISUALIZE,VIS_RHOPOT))THEN
+            Ctrl%Vis=VIS_DX_RHOPOT
+         ELSE
+            Ctrl%Vis=VIS_DX_NO_VIS
          ENDIF
 #ifdef PERIODIC
 !-------------------------------------------------
@@ -1574,6 +1596,7 @@ MODULE ParseInput
 !        If using a guess of AO density superposition, check to see
 !        if the first basis set is minimial. If not, insert one. 
 !
+#ifdef LEGACY
          IF(INDEX(Base(1)%BName,'STO')==0.AND.Ctrl%SuperP)THEN
             CALL New(Types,Ctrl%NSet)
             Types%I(1:Ctrl%NSet)=Base(1:Ctrl%NSet)%BType
@@ -1590,6 +1613,11 @@ MODULE ParseInput
                Ctrl%BName(I)=Base(I)%BName
             ENDDO               
          ENDIF
+#else
+            DO I=1,Ctrl%NSet
+               Ctrl%BName(I)=Base(I)%BName
+            ENDDO               
+#endif
 !----------------------------------------------
 !         Allocate a temp basis set
 !

@@ -73,7 +73,7 @@ MODULE MatFunk
             Mn=MIN(Mn,ABS(BLKVALS%D(I)))
          ENDDO
          CondA=Mx/Mn
-         String=" Cond# = "//TRIM(DblToShrtChar(CondA)) &
+         String="Cond# = "//TRIM(DblToShrtChar(CondA)) &
              //', MIN(E) = '//TRIM(DblToShrtChar(Mn))
          IF(PRESENT(Prog_O))THEN
             String=ProcessName(Prog_O)//TRIM(String)

@@ -46,23 +46,23 @@ all:	MakeS MakeT MakeRho SForce TForce
 #
 MakeS:	 $(ObjsS)
 	 $(LD) $(LDFLAGS) MakeS $(ObjsS) $(LibOpts) $(Libs) 
-	 mv MakeS $(MONDO_HOME)/Exec/MakeS
+	 mv MakeS $(MONDO_EXEC)/MakeS
 #
 MakeT:	 $(ObjsT)
 	 $(LD) $(LDFLAGS) MakeT $(ObjsT) $(LibOpts) $(Libs) 
-	 mv MakeT $(MONDO_HOME)/Exec/MakeT
+	 mv MakeT $(MONDO_EXEC)/MakeT
 #
 MakeRho: $(ObjsR)
 	 $(LD) $(LDFLAGS) MakeRho $(ObjsR) $(LibOpts) $(Libs) 
-	 mv MakeRho $(MONDO_HOME)/Exec/MakeRho
+	 mv MakeRho $(MONDO_EXEC)/MakeRho
 #
 SForce: $(ObjSF)
 	$(LD) $(LDFLAGS) SForce $(ObjSF) $(LibOpts) $(Libs)
-	mv SForce $(MONDO_HOME)/Exec/SForce
+	mv SForce $(MONDO_EXEC)/SForce
 #
 TForce:	$(ObjTF)
 	$(LD) $(LDFLAGS) TForce $(ObjTF) $(LibOpts) $(Libs)
-	mv TForce $(MONDO_HOME)/Exec/TForce
+	mv TForce $(MONDO_EXEC)/TForce
 #
 release:clean $(ReleaseFiles) 
 #
@@ -73,11 +73,11 @@ clean:
 	rm -f $(REMOVEMISC) $(REMOVEMODS)
 	rm -f \#*
 	rm -f *~
-	rm -f $(MONDO_HOME)/Exec/MakeS
-	rm -f $(MONDO_HOME)/Exec/MakeT
-	rm -f $(MONDO_HOME)/Exec/MakeRho
-	rm -f $(MONDO_HOME)/Exec/SForce
-	rm -f $(MONDO_HOME)/Exec/TForce
+	rm -f $(MONDO_EXEC)/MakeS
+	rm -f $(MONDO_EXEC)/MakeT
+	rm -f $(MONDO_EXEC)/MakeRho
+	rm -f $(MONDO_EXEC)/SForce
+	rm -f $(MONDO_EXEC)/TForce
 	ln -s /dev/null core
 	ls -l
 #

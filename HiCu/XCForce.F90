@@ -96,17 +96,12 @@ PROGRAM XCForce
   ENDDO
 !--------------------------------------------------------------------------------
 ! Do some checksumming, resumming and IO 
-!--------------------------------------------------------------------------------
-  CALL PChkSum(XCFrc,'XCForce')  
-! for tmp debuging ...
-!  CALL PPrint(XCFrc,'XCForce',Unit_O=6)
-!  CALL PPrint(XCFrc,'XCForce')
+  CALL PChkSum(XCFrc,'dDFT/dR',Proc_O=Prog)  
 ! Sum in contribution to total force
   CALL New(Frc,3*NAtoms)
   CALL Get(Frc,'GradE',Tag_O=CurGeom)
   Frc%D=Frc%D+XCFrc%D
   CALL Put(Frc,'GradE',Tag_O=CurGeom)
-  CALL PChkSum(Frc,'GradE')  
 !--------------------------------------------------------------------------------
 ! Tidy up
 !--------------------------------------------------------------------------------
@@ -116,5 +111,8 @@ PROGRAM XCForce
   CALL Delete(Frc)
   CALL Delete(XCFrc)
   CALL DeleteBraBlok(Gradients_O=.TRUE.)
+! didn't count flops, any accumulation is residual
+! from matrix routines
+  PerfMon%FLOP=Zero 
   CALL ShutDown(Prog)
 END PROGRAM XCForce

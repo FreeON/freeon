@@ -39,6 +39,7 @@ MODULE PrettyPrint
 
 
    CHARACTER(LEN=DEFAULT_CHR_LEN) :: String
+   CHARACTER(LEN=12),PARAMETER    :: CheckEq=' CheckSum = '
    CONTAINS 
       SUBROUTINE TimeStamp(Mssg,Enter_O)
          CHARACTER(LEN=*),INTENT(IN) :: Mssg
@@ -58,9 +59,8 @@ MODULE PrettyPrint
          ELSEIF(Enter)THEN
             WRITE(Out,'(A)')'<<'//TRIM(Mssg)//' '//DDay//' @ '//HMS//'>>'
          ELSE
-            WRITE(Out,'(A)')' - - - - - - - - done '//DDay//' @ '//HMS//' - - - - - - - - '
-!            WRITE(Out,22)
-!            22 FORMAT(72('-'))
+            WRITE(Out,'(A)')'>>---------------------------------------- done ' &
+                            //DDay//' @ '//HMS
          ENDIF
          CLOSE(UNIT=Out,STATUS='KEEP')
       END SUBROUTINE TimeStamp
@@ -634,8 +634,10 @@ MODULE PrettyPrint
         CHARACTER(LEN=*),OPTIONAL            :: Proc_O
         INTEGER                              :: I,PU
         CHARACTER(LEN=DEFAULT_CHR_LEN)       :: ChkStr
-        IF(PrintFlags%Key/=DEBUG_MAXIMUM)RETURN
-!--------------------------------------------------------------------------
+!----------------------------------------------------------------------------------------
+        IF(PrintFlags%Key/=DEBUG_MAXIMUM.AND. &
+           PrintFlags%Chk/=DEBUG_CHKSUMS)RETURN
+!---------------------------------------------------------------------------------------   
 !       Compute check sum
         Chk=Zero
         DO I=1,SIZE(A%D)
@@ -649,9 +651,9 @@ MODULE PrettyPrint
 !          Generate check string
            IF(PRESENT(Proc_O).AND.PrintFlags%Fmt/=DEBUG_MMASTYLE)THEN
               ChkStr=ProcessName(Proc_O)//TRIM(Name) &
-                   //' check sum = '//TRIM(DblToChar(Chk))
+                   //CheckEq//TRIM(DblToChar(Chk))
            ELSEIF(PrintFlags%Fmt/=DEBUG_MMASTYLE)THEN
-              ChkStr=TRIM(Name)//' check sum = '//TRIM(DblToChar(Chk))
+              ChkStr=TRIM(Name)//CheckEq//TRIM(DblToChar(Chk))
            ELSEIF(PRESENT(Proc_O).AND.PrintFlags%Fmt==DEBUG_MMASTYLE)THEN
               ChkStr='(* '//TRIM(Proc_O)//' *)'//'ChkSum'//TRIM(Name)       &
                    //' = '//TRIM(FltToChar(FRACTION(Chk))) &
@@ -681,9 +683,10 @@ MODULE PrettyPrint
         CHARACTER(LEN=*),OPTIONAL            :: Proc_O
         INTEGER                              :: I,PU
         CHARACTER(LEN=DEFAULT_CHR_LEN)       :: ChkStr
-!--------------------------------------------------------------------------
-        IF(PrintFlags%Key/=DEBUG_MAXIMUM)RETURN
-!--------------------------------------------------------------------------
+!----------------------------------------------------------------------------------------
+        IF(PrintFlags%Key/=DEBUG_MAXIMUM.AND. &
+           PrintFlags%Chk/=DEBUG_CHKSUMS)RETURN
+!---------------------------------------------------------------------------------------   
 !       Compute check sum
         Chk=Zero
         DO I=1,A%NNon0
@@ -697,9 +700,9 @@ MODULE PrettyPrint
 !          Create check string
            IF(PRESENT(Proc_O).AND.PrintFlags%Fmt/=DEBUG_MMASTYLE)THEN
               ChkStr=ProcessName(Proc_O)//TRIM(Name) &
-                   //' matrix check sum = '//TRIM(DblToChar(Chk))
+                   //CheckEq//TRIM(DblToChar(Chk))
            ELSEIF(PrintFlags%Fmt/=DEBUG_MMASTYLE)THEN
-              ChkStr=TRIM(Name)//' matrix check sum = '//TRIM(DblToChar(Chk))
+              ChkStr=TRIM(Name)//' matrix '//CheckEq//TRIM(DblToChar(Chk))
            ELSEIF(PRESENT(Proc_O).AND.PrintFlags%Fmt==DEBUG_MMASTYLE)THEN
               ChkStr='(* '//TRIM(Proc_O)//' *)'//'ChkSum'//TRIM(Name)       &
                    //' = '//TRIM(FltToChar(FRACTION(Chk))) &
@@ -731,7 +734,10 @@ MODULE PrettyPrint
       CHARACTER(LEN=*)          :: Name
       CHARACTER(LEN=DEFAULT_CHR_LEN) :: ChkStr
       INTEGER :: I,PU
-      IF(PrintFlags%Key/=DEBUG_MAXIMUM)RETURN
+!----------------------------------------------------------------------------------------
+    IF(PrintFlags%Key/=DEBUG_MAXIMUM.AND. &
+       PrintFlags%Chk/=DEBUG_CHKSUMS)RETURN
+!---------------------------------------------------------------------------------------   
       Chk=Zero
       DO I=1,A%NNon0
          Chk=Chk+A%MTrix%D(I)*A%Mtrix%D(I)
@@ -741,9 +747,9 @@ MODULE PrettyPrint
          Chk=SQRT(DotPrd) 
          IF(PRESENT(Proc_O).AND.PrintFlags%Fmt/=DEBUG_MMASTYLE)THEN
             ChkStr=ProcessName(Proc_O)//TRIM(Name) &
-                 //' matrix check sum = '//TRIM(DblToChar(Chk))
+                 //CheckEq//TRIM(DblToChar(Chk))
          ELSEIF(PrintFlags%Fmt/=DEBUG_MMASTYLE)THEN
-            ChkStr=TRIM(Name)//' matrix check sum = '//TRIM(DblToChar(Chk))
+            ChkStr=TRIM(Name)//CheckEq//TRIM(DblToChar(Chk))
          ELSEIF(PRESENT(Proc_O).AND.PrintFlags%Fmt==DEBUG_MMASTYLE)THEN
             ChkStr='(* '//TRIM(Proc_O)//' *)'//TRIM(Name)       &
                  //'ChkSum = '//TRIM(FltToChar(FRACTION(Chk))) &
@@ -769,13 +775,14 @@ MODULE PrettyPrint
     INTEGER                              :: PU,I,L,M,N,LMN,jadd,zq,iq,oq,orr,Ell,LenKet
     REAL(DOUBLE)                         :: Chk
     CHARACTER(LEN=2*DEFAULT_CHR_LEN)     :: ChkStr
-    IF(PrintFlags%Key/=DEBUG_MAXIMUM)RETURN
-    Chk=Zero
-!   
+!----------------------------------------------------------------------------------------
+    IF(PrintFlags%Key/=DEBUG_MAXIMUM.AND. &
+       PrintFlags%Chk/=DEBUG_CHKSUMS)RETURN
+!---------------------------------------------------------------------------------------   
     IF(.NOT. AllocQ(A%Alloc)) THEN
        CALL Halt(' Density not allocated in Print_CheckSum_HGRho')
     ENDIF
-!
+    Chk=Zero
     DO zq=1,A%NExpt-1
        oq =A%OffQ%I(zq)
        orr=A%OffR%I(zq)
@@ -790,9 +797,9 @@ MODULE PrettyPrint
     ENDDO
 !
     IF(PRESENT(Proc_O).AND.PrintFlags%Fmt/=DEBUG_MMASTYLE)THEN
-       ChkStr=ProcessName(Proc_O)//TRIM(Name)//' matrix check sum = '//TRIM(DblToChar(Chk))
+       ChkStr=ProcessName(Proc_O)//TRIM(Name)//CheckEq//TRIM(DblToChar(Chk))
     ELSEIF(PrintFlags%Fmt/=DEBUG_MMASTYLE)THEN
-       ChkStr=TRIM(Name)//' matrix check sum = '//TRIM(DblToChar(Chk))
+       ChkStr=TRIM(Name)//CheckEq//TRIM(DblToChar(Chk))
     ELSEIF(PRESENT(Proc_O).AND.PrintFlags%Fmt==DEBUG_MMASTYLE)THEN
        ChkStr='(* '//TRIM(Proc_O)//' *)'//'ChkSum'//TRIM(Name)       &
                    //' = '//TRIM(FltToChar(FRACTION(Chk))) &
@@ -1024,22 +1031,26 @@ MODULE PrettyPrint
 !---------------------------------------------------------------------
 !
 !---------------------------------------------------------------------
-  FUNCTION ProcessName(Proc,Misc_O) RESULT (Tag)
-    CHARACTER(LEN=*)           :: Proc
+  FUNCTION ProcessName(Proc_O,Misc_O) RESULT (Tag)
+    CHARACTER(LEN=*), OPTIONAL :: Proc_O
     CHARACTER(LEN=*), OPTIONAL :: Misc_O
-    CHARACTER(LEN=20)          :: Tag
-    CHARACTER(LEN=20)          :: Name
-    CHARACTER(LEN=3 ),PARAMETER:: Colon =","
-    CHARACTER(LEN=4 ),PARAMETER:: Colons=" :: "
-    IF(PRESENT(Misc_O))THEN
-       Name=TRIM(ADJUSTL(TRIM(Proc)))//Colon//TRIM(Misc_O)
-       Name(18:20)=":: "
+    CHARACTER(LEN=24)          :: Tag
+    CHARACTER(LEN=24)          :: Name
+    CHARACTER(LEN=24),PARAMETER:: Blks=""                    
+    CHARACTER(LEN=1), PARAMETER:: Colon =","
+    CHARACTER(LEN=4), PARAMETER:: Colons=" :: "
+    IF(PRESENT(Proc_O).AND.PRESENT(Misc_O))THEN
+       Name=TRIM(ADJUSTL(TRIM(Proc_O)))//Colon//TRIM(Misc_O)
+       Name(22:24)=":: "
+       Tag=Name
+    ELSEIF(PRESENT(Proc_O))THEN
+       Name=TRIM(ADJUSTL(TRIM(Proc_O)))
+       Name(22:24)=":: "
        Tag=Name
     ELSE
-       Name=TRIM(ADJUSTL(TRIM(Proc)))
-       Name(18:20)=":: "
-       Tag=Name
+       Tag=Blks
     ENDIF
+
   END FUNCTION ProcessName
 !---------------------------------------------------------------------
 !
@@ -1050,7 +1061,8 @@ MODULE PrettyPrint
     INTEGER, OPTIONAL                       :: Unit_O
     REAL(DOUBLE)                            :: Elapsed_CPUS,Elapsed_WALL,FLOPS
     LOGICAL, OPTIONAL                       :: BareBones_O
-    CHARACTER(LEN=DEFAULT_CHR_LEN)          :: Mssg,Proc
+    CHARACTER(LEN=DEFAULT_CHR_LEN)          :: Proc
+    CHARACTER(LEN=DEFAULT_CHR_LEN*2)        :: Mssg
     INTEGER                                 :: PU
 !------------------------------------------------------------------------------------
 #ifdef PARALLEL
@@ -1103,30 +1115,30 @@ MODULE PrettyPrint
           IF(Elapsed_CPUS/=Zero)THEN
 #ifdef PARALLEL
              Mssg=ProcessName(TRIM(Proc))//'CPU (Sec,MFLOPS) = (' &
-                  //TRIM(DblToMedmChar(Elapsed_CPUS))//', '     &
+                  //TRIM(DblToShrtChar(Elapsed_CPUS))//', '     &
                   //TRIM(IntToChar(MFlops(FLOPS,Elapsed_CPUS))) &
-                  //'), WALL (Sec,MFLOPS) = ('                  &
-                  //TRIM(DblToMedmChar(Elapsed_Wall))//', '     &
+                  //'),'//RTRN//ProcessName()//' WALL(Sec,MFLOPS) = ('                  &
+                  //TRIM(DblToShrtChar(Elapsed_Wall))//', '     &
                   //TRIM(IntToChar(MFlops(FLOPS,Elapsed_Wall))) &
                   //'), NProc = '//TRIM(IntToChar(NPrc))
 #else
              Mssg=ProcessName(TRIM(Proc))//'CPU (Sec,MFLOPS) = (' &
-                  //TRIM(DblToMedmChar(Elapsed_CPUS))//', '     &
+                  //TRIM(DblToShrtChar(Elapsed_CPUS))//', '     &
                   //TRIM(IntToChar(MFlops(FLOPS,Elapsed_CPUS))) &
-                  //'), WALL (Sec,MFLOPS) = ('                  &
-                  //TRIM(DblToMedmChar(Elapsed_Wall))//', '     &
+                  //'),'//RTRN//ProcessName()//' WALL(Sec,MFLOPS) = ('                  &
+                  //TRIM(DblToShrtChar(Elapsed_Wall))//', '     &
                   //TRIM(IntToChar(MFlops(FLOPS,Elapsed_Wall))) &
                   //')'
 #endif
           ELSE
 #ifdef PARALLEL
              Mssg=ProcessName(TRIM(Proc))//'WALL (Sec,MFLOPS) = (' &
-                  //TRIM(DblToMedmChar(Elapsed_Wall))//', '      &
+                  //TRIM(DblToShrtChar(Elapsed_Wall))//', '      &
                   //TRIM(IntToChar(MFlops(FLOPS,Elapsed_Wall)))  &
                   //'), NProc = '//TRIM(IntToChar(NPrc))
 #else
              Mssg=ProcessName(TRIM(Proc))//'WALL (Sec,MFLOPS) = (' &
-                  //TRIM(DblToMedmChar(Elapsed_Wall))//', '      &
+                  //TRIM(DblToShrtChar(Elapsed_Wall))//', '      &
                   //TRIM(IntToChar(MFlops(FLOPS,Elapsed_Wall)))  &
                   //')'
 #endif
@@ -1135,24 +1147,24 @@ MODULE PrettyPrint
           IF(Elapsed_CPUS>Zero)THEN
 #ifdef PARALLEL
              Mssg=ProcessName(TRIM(Proc))//'CPU Sec = '   &
-                  //TRIM(DblToMedmChar(Elapsed_CPUS))   &
+                  //TRIM(DblToShrtChar(Elapsed_CPUS))   &
                   //', WALL (Sec) = '                   &
-                  //TRIM(DblToMedmChar(Elapsed_Wall))   &
+                  //TRIM(DblToShrtChar(Elapsed_Wall))   &
                   //', NProc = '//TRIM(IntToChar(NPrc))
 #else
              Mssg=ProcessName(TRIM(Proc))//'CPU Sec = '  &
-                  //TRIM(DblToMedmChar(Elapsed_CPUS))  &
+                  //TRIM(DblToShrtChar(Elapsed_CPUS))  &
                   //', WALL Sec = '                    &
-                  //TRIM(DblToMedmChar(Elapsed_Wall))   
+                  //TRIM(DblToShrtChar(Elapsed_Wall))   
 #endif
           ELSE
 #ifdef PARALLEL
              Mssg=ProcessName(TRIM(Proc))//'WALL Sec = '  &
-                  //TRIM(DblToMedmChar(Elapsed_Wall))      &
+                  //TRIM(DblToShrtChar(Elapsed_Wall))      &
                   //', NProc = '//TRIM(IntToChar(NPrc))
 #else
              Mssg=ProcessName(TRIM(Proc))//'WALL (Sec) = '  &
-                  //TRIM(DblToMedmChar(Elapsed_Wall))
+                  //TRIM(DblToShrtChar(Elapsed_Wall))
 #endif
           ENDIF
        ENDIF
@@ -1201,7 +1213,7 @@ MODULE PrettyPrint
                   //',  DeAllocs='//TRIM(IntToChar(A%DeAllocs))            &
                   //', '//TRIM(IntToChar(A%MemTab ))                       &
                   //' bytes are presently allocated.'//Rtrn                    &
-                  //Blanks(1:L+3)//' A max of '//TRIM(IntToChar(A%MaxMem)) &
+                  //ProcessName()//' A max of '//TRIM(IntToChar(A%MaxMem)) &
                   //' bytes were allocated.'
              PU=OpenPU(Unit_O=Unit_O) 
              WRITE(PU,*)Mssg 
@@ -1223,7 +1235,7 @@ MODULE PrettyPrint
             //',  DeAllocs='//TRIM(IntToChar(A%DeAllocs))            &
             //', '//TRIM(IntToChar(A%MemTab ))                       &
             //' bytes are presently allocated.'//Rtrn                &
-            //Blanks(1:20)//' A max of '//TRIM(IntToChar(A%MaxMem))  &
+            //ProcessName()//' A max of '//TRIM(IntToChar(A%MaxMem))  &
             //' bytes were allocated.'
        WRITE(PU,*)TRIM(Mssg)
        CALL PrintProtectR(PU)

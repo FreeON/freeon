@@ -91,6 +91,9 @@ PROGRAM QCTC
   CALL Delete(BS)
   CALL Delete(GM)
   CALL Delete(Args)
+! didn't count flops, any accumulation is residual
+! from matrix routines
+  PerfMon%FLOP=Zero 
 ! Shutdown 
   CALL ShutDown(Prog)
 END PROGRAM QCTC

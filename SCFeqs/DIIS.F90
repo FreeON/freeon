@@ -28,7 +28,7 @@ PROGRAM PulayDIIS
    INTEGER                        :: I,J,K,N,ISCF,JSCF,KSCF
    CHARACTER(LEN=2)               :: Cycl,NxtC
    CHARACTER(LEN=9),PARAMETER     :: Prog='PulayDIIS'
-   CHARACTER(LEN=2*DEFAULT_CHR_LEN) :: Mssg
+   CHARACTER(LEN=3*DEFAULT_CHR_LEN) :: Mssg
    LOGICAL                        :: Present
 !------------------------------------------------------------------ 
 !
@@ -51,16 +51,6 @@ PROGRAM PulayDIIS
 !  Create a new error vector E=[F_(i+1),P_i]
 !
    CALL Get(F,TrixFile('OrthoF',Args,0))    ! the orthogonalized Fock matrix 
-   
-!   Turn off DIIS
-!   CALL Put(F,TrixFile('F_DIIS',Args,0))    ! the orthogonalized Fock matrix 
-!   CALL Put(One,'diiserr',Tag_O='_'//TRIM(CurGeom)//'_'//TRIM(CurBase)//'_'//TRIM(SCFCycl))
-!   CALL ShutDown(Prog)
-!
-
-
-
-
    CALL Get(P,TrixFile('OrthoD',Args,0))    ! the orthogonalized Density matrix
    CALL Multiply(F,P,E)  
    CALL Multiply(P,F,E,-One)
@@ -106,7 +96,7 @@ PROGRAM PulayDIIS
      V%D(N)=One
      CALL SetDSYEVWork(N)
      BInv%D=Zero
-     IF(PrintFlags%Key>=DEBUG_MEDIUM)THEN
+     IF(PrintFlags%Key>DEBUG_MEDIUM)THEN
         CALL FunkOnSqMat(N,Inverse,B%D,BInv%D,EigenThresh_O=EigThresh, &
                          PrintCond_O=.TRUE.,Prog_O=Prog)
      ELSE
@@ -127,24 +117,29 @@ PROGRAM PulayDIIS
    IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
       CALL OpenASCII(OutFile,Out)
       CALL PrintProtectL(Out)
-      Mssg=ProcessName(Prog)//' DIISErr = '//TRIM(DblToMedmChar(DIISErr))
+      Mssg=ProcessName(Prog)//'DIISErr = '//TRIM(DblToShrtChar(DIISErr))
       WRITE(*,*)TRIM(Mssg)
       WRITE(Out,*)TRIM(Mssg)
-      Mssg=ProcessName(Prog)//' DIISCo = '
+      Mssg=ProcessName(Prog)//'DIISCo = '
       DO I=1,ISCF-1
-         Mssg=TRIM(Mssg)//' '//TRIM(DblToMedmChar(DIISCo%D(I)))//','
+         IF(MOD(I,4)==0)THEN
+            Mssg=TRIM(Mssg)//RTRN//ProcessName() &
+               //'          '//TRIM(DblToShrtChar(DIISCo%D(I)))//','
+         ELSE
+            Mssg=TRIM(Mssg)//' '//TRIM(DblToShrtChar(DIISCo%D(I)))//','
+         ENDIF
       ENDDO
-      Mssg=TRIM(Mssg)//' '//TRIM(DblToMedmChar(DIISCo%D(ISCF)))
+      Mssg=TRIM(Mssg)//' '//TRIM(DblToShrtChar(DIISCo%D(ISCF)))
       WRITE(*,*)TRIM(Mssg)
       WRITE(Out,*)TRIM(Mssg)
       CALL PrintProtectR(Out)
       CLOSE(Out)
   ENDIF
 !--------------------------------------------------------------------------------
-   IF(ISCF==1)THEN
+   IF(ISCF<=1)THEN
 !    Damping on the first cycle
-     C0=0.95D0
-     C1=0.05D0
+     C0=0.9D0 
+     C1=0.1D0
      CALL Multiply(F,C1)
      CALL Get(Tmp1,TrixFile('OrthoF',Args,-1))
      CALL Multiply(Tmp1,C0)

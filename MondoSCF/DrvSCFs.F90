@@ -32,8 +32,8 @@ MODULE DrvSCFs
            CALL SCFCycle(Ctrl)          
            IF(ConvergedQ(Ctrl))THEN
               IF(Summry)CALL SCFSummry(Ctrl)
+              CALL CleanScratch(Ctrl,'CleanOnConverge')
               Ctrl%Previous=Ctrl%Current
-
               RETURN
            ENDIF
            Ctrl%Previous=Ctrl%Current
@@ -51,7 +51,7 @@ MODULE DrvSCFs
       CALL DensityBuild(Ctrl)
       CALL FockBuild(Ctrl)
       CALL SolveSCF(Ctrl)
-!      CALL CleanScratch(Ctrl)
+      CALL CleanScratch(Ctrl)
     END SUBROUTINE SCFCycle
 !==========================================================================
 !   Build a density by hook or by crook
@@ -60,17 +60,16 @@ MODULE DrvSCFs
       TYPE(SCFControls)    :: Ctrl
       LOGICAL,PARAMETER    :: DensityProject=.FALSE.
 !---------------------------------------------------------------------------------------
-!WRITE(*,*)' A PREVIOUS = ',Ctrl%Previous
-!WRITE(*,*)' A CURRENT =  ',Ctrl%Current
-      IF(CCyc==0.AND.CBas==PBas.AND.CGeo/=1)THEN
-         IF(DensityProject)THEN
+      IF(CCyc==0.AND.CBas==PBas.AND.CGeo/=1.AND. &
+         Ctrl%Extrap>EXTRAP_GEOM_RSTRT)THEN
+         IF(Ctrl%Extrap==EXTRAP_GEOM_PRJCT)THEN
 !           Projection of density matrix between geometries
             CALL LogSCF(Ctrl%Current,'Geometry projection from configuration #' &
                                    //TRIM(PrvGeom)//' to configuration# ' &
                                    //TRIM(CurGeom)//'.')
 !           Create density from last SCF 
             CtrlVect=SetCtrlVect(Ctrl,'Project')
-         ELSE
+         ELSEIF(Ctrl%Extrap==EXTRAP_GEOM_INTRP)THEN
 !           Extrapolation of density matrix between geometries
             CALL LogSCF(Ctrl%Current,'Geometry extrapolation from configuration #' &
                                    //TRIM(PrvGeom)//' to configuration# ' &
@@ -82,6 +81,7 @@ MODULE DrvSCFs
          ENDIF
          CALL Invoke('P2Use',CtrlVect)
          CALL Invoke('MakeRho',CtrlVect)
+         CALL CleanScratch(Ctrl,'CleanLastGeom')
       ELSEIF(CCyc==0.AND.CBas/=PBas)THEN
 !        Basis set switch
          CALL LogSCF(Ctrl%Current,'Switching basis sets from ' &
@@ -89,9 +89,6 @@ MODULE DrvSCFs
                                 //TRIM(Ctrl%BName(CBas))//'.')
 !        Create density from last SCFs DM (ICyc+1)
          Ctrl%Previous(1)=Ctrl%Previous(1)+1
-!WRITE(*,*)' B PREVIOUS = ',Ctrl%Previous
-!WRITE(*,*)' B CURRENT =  ',Ctrl%Current
-
          CtrlVect=SetCtrlVect(Ctrl,'BasisSetSwitch')
          CALL Invoke('MakeRho',CtrlVect)
      ELSEIF(CCyc==0.AND.CBas==1.AND.CGeo==1)THEN
@@ -212,35 +209,50 @@ MODULE DrvSCFs
               //TRIM(CurBase)//'_Cycl#' &
               //TRIM(PrvCycl)
          RemoveFile=TRIM(RemCur)//'.Rho'                                
-         CALL SYSTEM('/bin/rm '//RemoveFile)
+         CALL SYSTEM('/bin/rm -f  '//RemoveFile)
          RemoveFile=TRIM(RemCur)//'.J'                                
-         CALL SYSTEM('/bin/rm '//RemoveFile)
+         CALL SYSTEM('/bin/rm -f  '//RemoveFile)
          IF(HasDFT(Modl))THEN
             RemoveFile=TRIM(RemCur)//'.Kxc'                                
-            CALL SYSTEM('/bin/rm '//RemoveFile)
+            CALL SYSTEM('/bin/rm -f  '//RemoveFile)
          ENDIF
          IF(HasHF(Modl))THEN
             RemoveFile=TRIM(RemCur)//'.K'                                
-            CALL SYSTEM('/bin/rm '//RemoveFile)
+            CALL SYSTEM('/bin/rm -f  '//RemoveFile)
          ENDIF
          RemoveFile=TRIM(RemCur)//'.D'                                
-         CALL SYSTEM('/bin/rm '//RemoveFile)
+         CALL SYSTEM('/bin/rm -f  '//RemoveFile)
          IF(CCyc>0)THEN
             RemoveFile=TRIM(RemCur)//'.OrthoD'                                
-            CALL SYSTEM('/bin/rm '//RemoveFile)
+            CALL SYSTEM('/bin/rm -f  '//RemoveFile)
             RemoveFile=TRIM(RemCur)//'.F_DIIS'                                
-            CALL SYSTEM('/bin/rm '//RemoveFile)
+            CALL SYSTEM('/bin/rm -f  '//RemoveFile)
             RemoveFile=TRIM(RemPrv)//'.F'                                
-            CALL SYSTEM('/bin/rm '//RemoveFile)
+            CALL SYSTEM('/bin/rm -f  '//RemoveFile)
          ENDIF
-      ELSEIF(Action=='CleanLastBase')THEN
-         RemoveFile=TRIM(ScrName)//'*'//'Base#'//TRIM(PrvBase)//'*' 
-         WRITE(*,*)' Remove = ',RemoveFile
-         CALL SYSTEM('/bin/rm '//RemoveFile)  
+      ELSEIF(Action=='CleanOnConverge')THEN
+         RemoveFile=TRIM(ScrName)//'*.E' 
+         CALL SYSTEM('/bin/rm -f  '//RemoveFile)  
+         RemoveFile=TRIM(ScrName)//'*.OrthoF' 
+!         CALL SYSTEM('/bin/rm -f  '//RemoveFile)  
+!         RemoveFile=TRIM(ScrName)//'*.F' 
+         CALL SYSTEM('/bin/rm -f  '//RemoveFile)  
+         IF(Ctrl%Method(Ctrl%Current(2))==SDMM_R_SCF)THEN
+            RemoveFile=TRIM(ScrName)//'*.Z' 
+            CALL SYSTEM('/bin/rm -f  '//RemoveFile)  
+            RemoveFile=TRIM(ScrName)//'*.ZT' 
+            CALL SYSTEM('/bin/rm -f  '//RemoveFile)  
+         ELSE
+            RemoveFile=TRIM(ScrName)//'*.X' 
+            CALL SYSTEM('/bin/rm -f  '//RemoveFile)  
+         ENDIF
+!         RemoveFile=TRIM(ScrName)//'*.S' 
+!         CALL SYSTEM('/bin/rm -f  '//RemoveFile)  
+         RemoveFile=TRIM(ScrName)//'*.T' 
+         CALL SYSTEM('/bin/rm -f  '//RemoveFile)  
       ELSEIF(Action=='CleanLastGeom')THEN
          RemoveFile=TRIM(ScrName) //'_Geom#'//TRIM(PrvGeom)//'*' 
-         WRITE(*,*)' Remove = ',RemoveFile
-         CALL SYSTEM('/bin/rm '//RemoveFile) 
+         CALL SYSTEM('/bin/rm -f  '//RemoveFile) 
       ENDIF
     END SUBROUTINE CleanScratch
 !========================================================================================

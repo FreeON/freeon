@@ -145,6 +145,8 @@ PROGRAM MakeS
   CALL Delete(BS)
   CALL Delete(GM)
   CALL DeleteBraBlok()
+! didn't count flops, any accumulation is residual
+! from matrix routines
+  PerfMon%FLOP=Zero 
   CALL ShutDown(Prog)
-!
 END PROGRAM MakeS

@@ -18,6 +18,7 @@ MODULE ParsingConstants
    CHARACTER(LEN=8),  PARAMETER :: DBG_MEDIUM   ='MedDebug'
    CHARACTER(LEN=8),  PARAMETER :: DBG_MAXIMUM  ='MaxDebug'
    CHARACTER(LEN=8),  PARAMETER :: DBG_MATRICES ='MatDebug'
+   CHARACTER(LEN=8),  PARAMETER :: DBG_CHKSUMS  ='ChekSums'
    CHARACTER(LEN=8),  PARAMETER :: DBG_PRT_SETS ='BasisSet'
    CHARACTER(LEN=8),  PARAMETER :: DBG_PRT_INTS ='PrintInt'
    CHARACTER(LEN=8),  PARAMETER :: DBG_PRT_RHO  ='PrintRho'
@@ -28,12 +29,13 @@ MODULE ParsingConstants
 !------------------------------------------------- 
    INTEGER,           PARAMETER :: DEBUG_NONE    =038108  ! Nothing
    INTEGER,           PARAMETER :: DEBUG_MINIMUM =138408  ! Timing and memory (Default)
-   INTEGER,           PARAMETER :: DEBUG_MEDIUM  =285082  ! + check sums, sparsity, thresholds
+   INTEGER,           PARAMETER :: DEBUG_MEDIUM  =285082  ! + sparsity, thresholds
+   INTEGER,           PARAMETER :: DEBUG_CHKSUMS =414234  ! + check sums
    INTEGER,           PARAMETER :: DEBUG_MAXIMUM =420942  ! + intermediate values
-   INTEGER,           PARAMETER :: DEBUG_MATRICES=382842  ! Print Matrices
-   INTEGER,           PARAMETER :: DEBUG_DENSITY =390485  ! Print Density
-   INTEGER,           PARAMETER :: DEBUG_BASISSET=409843  ! Print Basis sets
-   INTEGER,           PARAMETER :: DEBUG_INTEGRAL=485583  ! Print Integrals
+   INTEGER,           PARAMETER :: DEBUG_MATRICES=482842  ! Print Matrices
+   INTEGER,           PARAMETER :: DEBUG_DENSITY =490485  ! Print Density
+   INTEGER,           PARAMETER :: DEBUG_BASISSET=509843  ! Print Basis sets
+   INTEGER,           PARAMETER :: DEBUG_INTEGRAL=585583  ! Print Integrals
    INTEGER,           PARAMETER :: PLOT_MATRICES =608948  ! Plot Matrices
    INTEGER,           PARAMETER :: DEBUG_MMASTYLE=848423  ! Print in Mathematica style
    INTEGER,           PARAMETER :: DEBUG_FLTSTYLE=480484  ! Print in float style

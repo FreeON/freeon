@@ -95,11 +95,7 @@ PROGRAM SForce
   ENDDO
 !--------------------------------------------------------------------------------
 ! Do some checksumming and IO 
-!--------------------------------------------------------------------------------
-  CALL PChkSum(SFrc,'SForce')  
-! for temp debuging....
-!  CALL PPrint(SFrc,'SForce',Unit_O=6)
-!  CALL PPrint(SFrc,'SForce')
+  CALL PChkSum(SFrc,'dS/dR',Proc_O=Prog)  
 ! Start this off as the first contrib to total gradient 
   CALL Put(SFrc,'GradE',Tag_O=CurGeom)
 !--------------------------------------------------------------------------------

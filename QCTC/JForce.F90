@@ -103,11 +103,7 @@ PROGRAM JForce
   JFrc%D=Two*JFrc%D
 !--------------------------------------------------------------------------------
 ! Do some checksumming, resumming and IO 
-!--------------------------------------------------------------------------------
-  CALL PChkSum(JFrc,'JForce')  
-! for temp debuging....
-!  CALL PPrint(JFrc,'JForce',Unit_O=6)
-!  CALL PPrint(JFrc,'JForce')
+  CALL PChkSum(JFrc,'JForce',Proc_O=Prog)  
 ! Sum in contribution to total force
   CALL New(Frc,3*NAtoms)
   CALL Get(Frc,'GradE',Tag_O=CurGeom)
@@ -122,5 +118,8 @@ PROGRAM JForce
   CALL Delete(Frc)
   CALL Delete(JFrc)
   CALL DeleteBraBlok(Gradients_O=.TRUE.)
+! didn't count flops, any accumulation is residual
+! from matrix routines
+  PerfMon%FLOP=Zero 
   CALL ShutDown(Prog)
 END PROGRAM JForce

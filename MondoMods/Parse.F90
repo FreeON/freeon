@@ -527,6 +527,15 @@ MODULE Parse
          FltToChar=ADJUSTL(FltToChar)
      END FUNCTION FltToChar
 !------------------------------------------------------------------
+!     Convert a float into a character string
+!
+      FUNCTION FltToMedmChar(D)
+         REAL(DOUBLE),INTENT(IN)         :: D
+         CHARACTER(LEN=INTERNAL_FLT_LEN) :: FltToMedmChar
+         WRITE(UNIT=FltToMedmChar,FMT='(F18.8)')D
+         FltToMedmChar=ADJUSTL(FltToMedmChar)
+     END FUNCTION FltToMedmChar
+!------------------------------------------------------------------
 !     Convert a double into a medium character string
 !
       FUNCTION DblToMedmChar(D)

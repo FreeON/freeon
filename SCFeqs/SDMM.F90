@@ -233,7 +233,7 @@ PROGRAM SDMM
 !-----------------------------------------------------------------------------
 !    PRINT CONVERGENCE STATS IF REQUESTED
 !
-     IF(PrintFlags%Key>DEBUG_MINIMUM)THEN
+     IF(PrintFlags%Key>DEBUG_MEDIUM)THEN
         Mssg=ProcessName(Prog,'CG '//TRIM(IntToChar(NCG))) &
            //'Tr(P.F) = '//TRIM(DblToMedmChar(NewE))       &
            //', %Non0= '//TRIM(IntToChar(PcntPNon0)) &
@@ -407,20 +407,24 @@ PROGRAM SDMM
 #ifdef PARALLEL
     IF(MyId==ROOT)THEN
 #endif
-!       IF(PrintFlags%Key>DEBUG_MINIMUM)THEN
+       IF(PrintFlags%Key>DEBUG_MINIMUM)THEN
           CALL OpenASCII(OutFile,Out)
           CALL PrintProtectL(Out)
           Mssg=ProcessName(Prog)//TRIM(IntToChar(NCG))//' CG, and ' &
                 //TRIM(IntToChar(NPur))//' purification steps taken.'
-          WRITE(*,*)TRIM(Mssg)
+          IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
+             WRITE(*,*)TRIM(Mssg)
+          ENDIF
           WRITE(Out,*)TRIM(Mssg)
           Mssg=ProcessName(Prog)//'MAX(/\P) = '//TRIM(DblToShrtChar(DeltaP))//', ' &
                 //'|Tr(P)-NEl| = '//TRIM(DblToShrtChar(DeltaN))//' .'
-          WRITE(*,*)TRIM(Mssg)
+          IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
+             WRITE(*,*)TRIM(Mssg)
+          ENDIF
           WRITE(Out,*)TRIM(Mssg)
           CALL PrintProtectR(Out)
           CLOSE(UNIT=Out,STATUS='KEEP')
-!       ENDIF
+       ENDIF
 #ifdef PARALLEL
    ENDIF
 #endif
@@ -437,7 +441,6 @@ PROGRAM SDMM
 !  IO for the orthogonal P 
 !
    CALL Put(P,'CurrentOrthoD',CheckPoint_O=.TRUE.)   
-   CALL PChkSum(P,'OrthoP['//TRIM(NxtCycl)//']',Prog,Unit_O=6)
    CALL Put(P,TrixFile('OrthoD',Args,1))
    CALL PChkSum(P,'OrthoP['//TRIM(NxtCycl)//']',Prog)
    CALL PPrint( P,'OrthoP['//TRIM(NxtCycl)//']')

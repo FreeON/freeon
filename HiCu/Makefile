@@ -58,17 +58,17 @@ clean:	CHC CXF
 #-----------------------------------------------------------------------
 HC:	$(HObjs)
 	$(LD) $(LDFLAGS) HiCu $(HObjs) $(LibOpts) $(F90_LIBRARIES)
-	mv HiCu $(MONDO_HOME)/Exec
+	mv HiCu $(MONDO_EXEC)
 #
 CHC:	
-	rm -f $(MONDO_HOME)/Exec/HiCu
+	rm -f $(MONDO_EXEC)/HiCu
 #-----------------------------------------------------------------------
 XF:     $(XFObjs)
 	$(LD) $(LDFLAGS) XCForce $(XFObjs) $(LibOpts) $(F90_LIBRARIES)
-	mv XCForce $(MONDO_HOME)/Exec
+	mv XCForce $(MONDO_EXEC)
 #
 CXF:
-	rm -f $(MONDO_HOME)/Exec/XCForce
+	rm -f $(MONDO_EXEC)/XCForce
 #-----------------------------------------------------------------------
 VR:	$(VObjs)
 	$(LD) $(LDFLAGS) VRho $(VObjs) $(LibOpts) $(F90_LIBRARIES)

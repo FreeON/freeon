@@ -52,19 +52,18 @@ clean:
 	rm -f $(REMOVEMISC) $(REMOVEMODS)
 	rm -f \#*
 	rm -f *~
-	rm -f $(MONDO_HOME)/Exec/BFGSHess
-	rm -f $(MONDO_HOME)/Exec/NewStep
-	rm -f $(MONDO_HOME)/Exec/QuGrad
+	rm -f $(MONDO_EXEC)/BFGSHess
+	rm -f $(MONDO_EXEC)/NewStep
 	ln -s /dev/null core
 	ls -l 
 #
 Hess:	$(HessObjs)
 	$(LD) $(LDFLAGS) BFGSHess $(HessObjs) $(LibOpts) $(Libs)
-	mv BFGSHess $(MONDO_HOME)/Exec/BFGSHess
+	mv BFGSHess $(MONDO_EXEC)/BFGSHess
 #
 New:	$(NewObjs)
 	$(LD) $(LDFLAGS) NewStep $(NewObjs) $(LibOpts) $(Libs)
-	mv NewStep $(MONDO_HOME)/Exec/NewStep
+	mv NewStep $(MONDO_EXEC)/NewStep
 #
 BFGSHess.o:	$(MONDO_HOME)/Libs/libMondoMods.a
 

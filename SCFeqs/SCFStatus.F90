@@ -89,8 +89,6 @@ PROGRAM SCFStatus
 !  Allows for checking between extrapolated or projected DMs
    DMax=1.D10
    IF(SCFActn/='BasisSetSwitch')THEN
-!      WRITE(*,*)' D0 = ',TrixFile('D',Args,0)
-!      WRITE(*,*)' D1 = ',TrixFile('D',Args,1)
       CALL Get(Tmp1,TrixFile('D',Args,0))
       CALL Get(Tmp2,TrixFile('D',Args,1))
       CALL Multiply(Tmp1,-One)
@@ -122,10 +120,10 @@ PROGRAM SCFStatus
    SCFMessage=""
    IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
 !     Fancy output
-      SCFMessage='===== SCFCycle #'//TRIM(SCFCycl)                          &
+      SCFMessage=RTRN//'= = = = = SCFCycle #'//TRIM(SCFCycl)                          &
                                  //', Basis #'//TRIM(CurBase)               &
                               //', Geometry #'//TRIM(CurGeom)               &
-               //' ====='//RTRN                    
+               //' = = = = ='//RTRN//RTRN                    
 !     Add in gap if RH
       IF(Gap/=Zero)                                                         &
          SCFMessage=TRIM(SCFMessage)                                        &
@@ -148,12 +146,14 @@ PROGRAM SCFStatus
                //'       <DFT>   = '//TRIM(DblToMedmChar(Exc))//RTRN         
 !     Last but not least, total SCF energy
       SCFMessage=TRIM(SCFMessage)                                           &
-               //'       <SCF>   = '//TRIM(DblToChar(ETot))
+               //'       <SCF>   = '//TRIM(FltToMedmChar(ETot))//RTRN
    ELSEIF(PrintFlags%Key>=DEBUG_NONE)THEN
-      SCFMessage='['//TRIM(SCFCycl)//','//TRIM(CurBase)//','                &
-                //TRIM(CurGeom)//']: <SCF> = '//TRIM(DblToChar(ETot))   &
-                    //' dD = '//TRIM(DblToShrtChar(DMax))
-!     Add in DIIS error 
+      SCFMessage=ProcessName(Prog,'['//TRIM(SCFCycl)//','  &
+                                     //TRIM(CurBase)//','  &
+                                     //TRIM(CurGeom)//']') &
+                //'<SCF> = '//TRIM(FltToMedmChar(ETot))     &
+                //', dD = '//TRIM(DblToShrtChar(DMax))
+!     Add in DIIS error
       IF(DIISErr/=Zero)                                                     &
          SCFMessage=TRIM(SCFMessage)                                        &
                //', DIIS = '//TRIM(DblToShrtChar(DIISErr))

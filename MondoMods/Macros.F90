@@ -252,6 +252,13 @@ MODULE Macros
               A%Mat=DEBUG_NONE
            ENDIF
 
+           IF(OptKeyQ(Inp,TRIM(Prog),  DBG_CHKSUMS).OR. &
+              OptKeyQ(Inp,GLOBAL_DEBUG,DBG_CHKSUMS))THEN
+              A%Chk=DEBUG_CHKSUMS
+           ELSE
+              A%Chk=DEBUG_NONE
+           ENDIF
+
            IF(OptKeyQ(Inp,TRIM(Prog),  DBG_MMA_STYLE).OR.     &
               OptKeyQ(Inp,GLOBAL_DEBUG,DBG_MMA_STYLE) )THEN
               A%Fmt=DEBUG_MMASTYLE

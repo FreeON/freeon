@@ -139,6 +139,9 @@ PROGRAM MakeT
   CALL Delete(BS)
   CALL Delete(GM)
   CALL Delete(MD)
+! didn't count flops, any accumulation is residual
+! from matrix routines
+  PerfMon%FLOP=Zero 
   CALL ShutDown(Prog)
 !
 END PROGRAM MakeT

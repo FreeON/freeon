@@ -85,6 +85,9 @@ PROGRAM HaiKu
   CALL Delete(T1)
   CALL Delete(BS)
   CALL Delete(GM)
+! didn't count flops, any accumulation is residual
+! from matrix routines
+  PerfMon%FLOP=Zero 
 ! Shutdown 
   CALL ShutDown(Prog)
 END PROGRAM HaiKu 

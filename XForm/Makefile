@@ -50,18 +50,18 @@ clean:
 	rm -f $(REMOVEMISC) $(REMOVEMODS)
 	rm -f \#*
 	rm -f *~
-	rm -f $(MONDO_HOME)/Exec/AInv
-	rm -f $(MONDO_HOME)/Exec/LowdinO
+	rm -f $(MONDO_EXEC)/AInv
+	rm -f $(MONDO_EXEC)/LowdinO
 	ln -s /dev/null core
 	ls -l 
 #
 Blk:	$(BlkAInvObjs)
 	$(LD) $(LDFLAGS) AInv $(BlkAInvObjs) $(LibOpts) $(Libs)
-	mv AInv $(MONDO_HOME)/Exec/AInv
+	mv AInv $(MONDO_EXEC)/AInv
 #
 Lwd:	$(LowdinOObjs)
 	$(LD) $(LDFLAGS) LowdinO $(LowdinOObjs) $(LibOpts) $(Libs)
-	mv LowdinO $(MONDO_HOME)/Exec/LowdinO
+	mv LowdinO $(MONDO_EXEC)/LowdinO
 #
 LowdinO.o:	$(MONDO_HOME)/Libs/libMondoMods.a
 BlokAInv.o:	$(MONDO_HOME)/Libs/libMondoMods.a

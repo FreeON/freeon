@@ -346,9 +346,11 @@ PROGRAM BlokAInv
   PerfMon%FLOP=PerfMon%Flop*Two
 !
   CALL Elapsed_TIME(PerfMon,'Accum')
-  CALL PPrint(PerfMon,Prog,Unit_O=6)  
+  IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
+     CALL PPrint(PerfMon,Prog)  
+     CALL PPrint(PerfMon,Prog,Unit_O=6)  
+  ENDIF
 !
-!#ifdef SPATIAL_THRESHOLDING 
   IF(TEST_AINV)THEN
 !
 !    Consistency check
@@ -363,29 +365,27 @@ PROGRAM BlokAInv
      CALL Add(T1,T2,A)
      Mx0=Max(A)
 !
-     Mssg=     'Max(Z^t.A.Z-I)='//TRIM(DblToShrtChar(Mx0))                 &
-        //', DistanceThreshold='//TRIM(DblToShrtChar(AInvDistanceThresh))  &
-        //', Thresholds%Trix='//TRIM(DblToShrtChar(Thresholds%Trix))
+     IF(AInvDistanceThresh/=Zero)THEN     
+        Mssg='Max(Z^t.A.Z-I)='//TRIM(DblToShrtChar(Mx0))                 &
+           //', DistThrsh='//TRIM(DblToShrtChar(AInvDistanceThresh))  &
+           //', TrixThrsh='//TRIM(DblToShrtChar(Thresholds%Trix))
+     ELSE
+        Mssg='Max(Z^t.A.Z-I)='//TRIM(DblToShrtChar(Mx0))                 &
+           //', TrixThrsh='//TRIM(DblToShrtChar(Thresholds%Trix))
+     ENDIF
 !
      IF(Mx0>1.D2*Thresholds%Trix)THEN
         CALL Halt('In BlokAInv, failed test: '//TRIM(Mssg))
-     ELSE
-        Mssg=Prog//' :: '//TRIM(Mssg)
+     ELSEIF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
+        Mssg=ProcessName(Prog)//TRIM(Mssg)
         WRITE(*,*)TRIM(Mssg)
         CALL OpenASCII(OutFile,Out)
         CALL PrintProtectL(Out)
         WRITE(Out,*)TRIM(Mssg)
         CALL PrintProtectR(Out)
         CLOSE(UNIT=Out,STATUS='KEEP')
-!
-!        CALL GetEnv('MONDO_WORK',AInvFile)
-!        AInvFile=TRIM(AInvFile)//'/AInv.dat'
-!        CALL OpenASCII(AInvFile,35)
-!        WRITE(35,*)NAtoms,ZBlksPreFilter,ZBlksPostFilter,Mx0
-!        CLOSE(35)
-      ENDIF
+     ENDIF
    ENDIF
-!#endif
 !
 !  Put Z and ZT to disk
 !  
@@ -394,7 +394,7 @@ PROGRAM BlokAInv
 !
 !  Debug
 !
-   CALL PChkSum(Z,'Z',Prog)
+   CALL PChkSum(Z,'Z',Proc_O=Prog)
    CALL PPrint(Z,'Z')
    CALL Plot(Z,'Z')
 !

@@ -55,7 +55,7 @@ release:clean $(ReleaseFiles)
 #
 vis:	$(VisDXObjs) 
 	$(LD) $(LDFLAGS) PotMapRho $(VisDXObjs) $(MisObjs) $(LibOpts)  $(F90_LIBRARIES) 
-	mv PotMapRho $(MONDO_HOME)/Exec/PotMapRho
+	mv PotMapRho $(MONDO_EXEC)/PotMapRho
 #
 purge:	clean
 	rm -f $(REMOVESRCE)
@@ -64,5 +64,5 @@ clean:
 	rm -f $(REMOVEMISC) $(REMOVEMODS)
 	rm -f \#*
 	rm -f *~
-	rm -f $(MONDO_HOME)/Exec/PotMapRho
+	rm -f $(MONDO_EXEC)/PotMapRho
 	ls 

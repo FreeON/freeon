@@ -5,14 +5,13 @@
 #
 chmod u+x  $MONDO_HOME/Scripts/*
 #
-#
 # expand user's path
 #
-setenv PATH ${PATH}:${MONDO_HOME}/Scripts:${MONDO_HOME}/Exec
+setenv PATH ${PATH}:${MONDO_HOME}/Scripts:${MONDO_EXEC}
 #
 # aliasing 
 #
-alias m   ${MONDO_HOME}/Exec/MondoSCF
+alias m   ${MONDO_EXEC}/MondoSCF
 alias ma  ${MAKE} -C ${MONDO_HOME} all 
 alias mk  ${MAKE} -C ${MONDO_HOME} $1
 #
@@ -30,7 +29,7 @@ alias go    'cd ${MONDO_HOME}/ONX;       ls -l; pwd'
 alias g1    'cd ${MONDO_HOME}/OneE;      ls -l; pwd'
 alias gx    'cd ${MONDO_HOME}/XForm;     ls -l; pwd'
 alias gn    'cd ${MONDO_HOME}/QuNew;     ls -l; pwd'
-alias gv    'cd ${MONDO_HOME}/Vis;       ls -l; pwd'
+alias gv    'cd ${MONDO_HOME}/VisDX;     ls -l; pwd'
 alias gd    'cd ${MONDO_DGEMMS};         ls -l; pwd'
 #
 # Set environmental varaibles

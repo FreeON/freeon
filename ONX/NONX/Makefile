@@ -27,16 +27,16 @@ Libs =  $(F90_LIBRARIES) $(LAPACK) -lVRR
 
 NONX:	$(Objects1)
 	$(LD) $(LDFLAGS) NONX $(Objects1) $(LibOpts) $(Libs)
-	mv NONX $(MONDO_HOME)/Exec/ONX
+	mv NONX $(MONDO_EXEC)/ONX
 
 XForce: $(Objects2)
 	$(LD) $(LDFLAGS) XForce $(Objects2) $(LibOpts) $(Libs)
-	mv XForce $(MONDO_HOME)/Exec/XForce
+	mv XForce $(MONDO_EXEC)/XForce
 
 clean:	
 	rm -f $(REMOVEALL)
 	rm -f \#*
 	rm -f *~
-	rm -f $(MONDO_HOME)/Exec/ONX
-	rm -f $(MONDO_HOME)/Exec/XForce
+	rm -f $(MONDO_EXEC)/ONX
+	rm -f $(MONDO_EXEC)/XForce
 	ls

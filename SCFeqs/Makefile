@@ -54,43 +54,43 @@ clean:
 	rm -f $(REMOVEMISC) $(REMOVEMODS)
 	rm -f \#*
 	rm -f *~
-	rm -f $(MONDO_HOME)/Exec/SDMM
-	rm -f $(MONDO_HOME)/Exec/P2Use
-	rm -f $(MONDO_HOME)/Exec/FBuild
-	rm -f $(MONDO_HOME)/Exec/RHeqs
-	rm -f $(MONDO_HOME)/Exec/SCFstats
-	rm -f $(MONDO_HOME)/Exec/DIIS
-	rm -f $(MONDO_HOME)/Exec/ToDev
+	rm -f $(MONDO_EXEC)/SDMM
+	rm -f $(MONDO_EXEC)/P2Use
+	rm -f $(MONDO_EXEC)/FBuild
+	rm -f $(MONDO_EXEC)/RHeqs
+	rm -f $(MONDO_EXEC)/SCFstats
+	rm -f $(MONDO_EXEC)/DIIS
+	rm -f $(MONDO_EXEC)/ToDev
 	ln -s /dev/null core
 	ls -l
 #
 Stat:	$(Stat_Objs)
 	$(LD) $(LDFLAGS) SCFstats $(Stat_Objs) $(LibOpts) $(F90_LIBRARIES) 
-	mv SCFstats $(MONDO_HOME)/Exec/SCFstats
+	mv SCFstats $(MONDO_EXEC)/SCFstats
 #
 Gues:	$(Gues_Objs)
 	$(LD) $(LDFLAGS) P2Use $(Gues_Objs) $(LibOpts) $(F90_LIBRARIES) $(LAPACK)
-	mv P2Use $(MONDO_HOME)/Exec/P2Use
+	mv P2Use $(MONDO_EXEC)/P2Use
 #
 SDMM:	$(SDMM_Objs)
 	$(LD) $(LDFLAGS) SDMM $(SDMM_Objs) $(LibOpts) $(F90_LIBRARIES) $(LAPACK)
-	mv SDMM $(MONDO_HOME)/Exec/SDMM
+	mv SDMM $(MONDO_EXEC)/SDMM
 #
 RHEq:	$(RHEq_Objs)
 	$(LD) $(LDFLAGS) RHeqs $(RHEq_Objs) $(LibOpts) $(F90_LIBRARIES) $(LAPACK)
-	mv RHeqs $(MONDO_HOME)/Exec/RHeqs 
+	mv RHeqs $(MONDO_EXEC)/RHeqs 
 #
 FBuild:	$(FBuild_Objs)
 	$(LD) $(LDFLAGS) FBuild $(FBuild_Objs) $(LibOpts) $(F90_LIBRARIES) 
-	mv FBuild $(MONDO_HOME)/Exec/FBuild
+	mv FBuild $(MONDO_EXEC)/FBuild
 #
 DIIS:	$(DIIS_Objs)
 	$(LD) $(LDFLAGS) DIIS $(DIIS_Objs) $(LibOpts) $(F90_LIBRARIES) $(LAPACK)
-	mv DIIS $(MONDO_HOME)/Exec/DIIS
+	mv DIIS $(MONDO_EXEC)/DIIS
 #
 Dev:	$(Dev_Objs)
 	$(LD) $(LDFLAGS) ToDev $(Dev_Objs) $(LibOpts) $(F90_LIBRARIES) 
-	mv ToDev $(MONDO_HOME)/Exec/ToDev
+	mv ToDev $(MONDO_EXEC)/ToDev
 #
 DIIS.o:		            $(MONDO_HOME)/Libs/libMondoMods.a
 FBuild.o:	            $(MONDO_HOME)/Libs/libMondoMods.a

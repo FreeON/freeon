@@ -39,7 +39,7 @@ clean:	cmm cs ce cx c1 cn c2 cv
 #
 purge:	pmm ps pe px p1 pn p2 pv pMisc
 #
-release: rmLegacy rmm rs re rx r1 rn r2 rv tarball
+release: rmLegacy swREADME rmm rs re rx r1 rn r2 rv tarball
 #
 backup:	purge rmLegacy tarball
 #
@@ -51,13 +51,15 @@ rmLegacy:
 	rm -rf ONX/PONX*
 	rm -rf ONX/SONX
 	rm -rf Inpts
+
+swREADME:
 	rm -f  README; cp $(MONDO_HOME)/Includes/ALPHA_RELEASE README
 #
 CatCpy:	
 	cat $(MONDO_HOME)/Includes/CopyrightNotice.txt
 	sleep 1
 	cat $(MONDO_HOME)/README
-	sleep 15
+	sleep 2
 #----------------------------------------------
 #   MondoMods
  mm:	

@@ -397,6 +397,7 @@ MODULE DerivedTypes
 !
    TYPE DEBG                                       
       INTEGER :: Key  !-- Debug level
+      INTEGER :: Chk  !-- Debug check sums
       INTEGER :: Mat  !-- Debug matrices      
       INTEGER :: Set  !-- Debug basis set
       INTEGER :: Int  !-- Debug integrals

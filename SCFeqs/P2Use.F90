@@ -27,13 +27,16 @@ PROGRAM P2Use
 #else
   TYPE(BCSR)  & 
 #endif
-                                :: P,T0,T1,T2
+                                :: S,P,T0,T1,T2
   TYPE(DBL_RNK2)                :: BlkP
-  REAL(DOUBLE)                  :: TrP,Fact,ECount,DensityDev
-  INTEGER                       :: I,J,AtA,Q,R,KA,NBFA
+  REAL(DOUBLE)                  :: Scale,TrP,Fact,ECount, &
+                                   MxDelP,DensityDev
+  INTEGER                       :: I,J,AtA,Q,R,KA,NBFA, &
+                                   NPur,PcntPNon0
   CHARACTER(LEN=2)              :: Cycl
-  CHARACTER(LEN=5),PARAMETER    :: Prog='P2Use'
   LOGICAL                       :: Present
+  CHARACTER(LEN=DEFAULT_CHR_LEN):: Mssg,BName
+  CHARACTER(LEN=5),PARAMETER    :: Prog='P2Use'
 !--------------------------------------- 
 ! Start up macro
 !
@@ -55,10 +58,10 @@ PROGRAM P2Use
      CALL New(T1)
      CALL New(T2)
      CALL Get(T0,TrixFile('S',Args,Stats_O=Previous))
-     CALL Get(T1,TrixFile('S',Args,Stats_O=Current))
-     CALL Multiply(T1,-One)
+     CALL Get(S,TrixFile('S',Args,Stats_O=Current))
+     CALL Multiply(S,-One)
 !    dS=Sp-Sc 
-     CALL Add(T1,T0,T2)        
+     CALL Add(S,T0,T2)        
 !    Get previous density matrix 
      CALL Get(P,TrixFile('D',Args,-1))     
 !    P.dS
@@ -70,13 +73,78 @@ PROGRAM P2Use
      CALL Add(T0,P,T1)
 !    Check for normalization in corrected DP
      CALL Filter(P,T1)
-     CALL Get(T0,TrixFile('S',Args,Stats_O=Current))
-!    The following is clumsy.  Should have better diagonal only renormalization
-!    followed by a purify....
-     ECount=Trace(T0,P)
-     DensityDev=DBLE(Nel)-Two*ECount
-!    Renormalize corrected density matrix 
-     CALL Multiply(P,DBLE(NEl)/(Two*ECount))
+     CALL Multiply(S,-One)
+     NPur=0
+     DO I=1,40
+        NPur=NPur+1
+!       P.S
+        CALL Multiply(P,S,T1)
+!       P.S.P.S
+        CALL Multiply(T1,T1,T0)
+!       P.S.P
+        CALL Multiply(T1,P,T2)
+!       P.S.P.S.P
+        CALL Multiply(T0,P,T1)
+!       3*P.S.P
+        CALL Multiply(T2,Three)
+!       -2.P.S.P.S.P
+        CALL Multiply(T1,-Two)
+!       P[i+1]=3*Pi.S.Pi-2.Pi.S.Pi.S.Pi
+        CALL Add(T2,T1,T0)
+!       DeltaP
+        CALL Multiply(P,-One)
+        CALL Add(P,T0,T1)
+        MxDelP=MAX(T1)
+        CALL Filter(P,T0)
+        ECount=Trace(S,P)
+        DensityDev=DBLE(Nel)-Two*ECount
+#ifdef PARALLEL
+        IF(MyId==ROOT)THEN
+#endif
+          IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
+              CALL OpenASCII(OutFile,Out)
+              CALL PrintProtectL(Out)
+              PcntPNon0=INT(1.D2*DBLE(P%NNon0)/DBLE(NBasF*NBasF))
+              Mssg=ProcessName(Prog,'Pure '//TRIM(IntToChar(NPur)))            &
+                             //'Tr(P)-NEl= '//TRIM(DblToShrtChar(DensityDev))  &
+                             //', %Non0= '//TRIM(IntToChar(PcntPNon0))         &
+                             //', MAX(/P) = '//TRIM(DblToShrtChar(MxDelP)) 
+            WRITE(*,*)TRIM(Mssg)
+            WRITE(Out,*)TRIM(Mssg)
+            CALL PrintProtectR(Out)
+            CLOSE(UNIT=Out,STATUS='KEEP')
+         ENDIF
+#ifdef PARALLEL
+      ENDIF
+#endif
+        IF(DensityDev<1.D-7)EXIT
+     ENDDO
+
+#ifdef PARALLEL
+    IF(MyId==ROOT)THEN
+#endif
+       IF(PrintFlags%Key>DEBUG_MINIMUM)THEN
+          CALL OpenASCII(OutFile,Out)
+          CALL PrintProtectL(Out)
+          Mssg=ProcessName(Prog)//TRIM(IntToChar(NPur))//' purification steps taken.'
+          IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
+             WRITE(*,*)TRIM(Mssg)
+          ENDIF
+          WRITE(Out,*)TRIM(Mssg)
+          Mssg=ProcessName(Prog)//'MAX(/\P) = '//TRIM(DblToShrtChar(MxDelP))//', ' &
+                //'|Tr(P)-NEl| = '//TRIM(DblToShrtChar(DensityDev))//' .'
+          IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
+             WRITE(*,*)TRIM(Mssg)
+          ENDIF
+          WRITE(Out,*)TRIM(Mssg)
+          CALL PrintProtectR(Out)
+          CLOSE(UNIT=Out,STATUS='KEEP')
+       ENDIF
+#ifdef PARALLEL
+   ENDIF
+#endif
+
+
   ELSE
      IF(SCFActn=='Restart')THEN
        CALL Get(P,'CurrentOrthoD',CheckPoint_O=.TRUE.)   
@@ -85,17 +153,25 @@ PROGRAM P2Use
 !      Get previous geometries orthogonal density matrix 
        CALL Get(P,TrixFile('OrthoD',Args,-1))     
      ELSE
-!      Compute a diagonal guess as the superposition of atomic lewis 
-!      structure occupancies--works only for minimal (STO) basis sets
-       DO I=1,NAtoms
-          CALL FillPBlok(BSiz%I(I),GM%AtNum%I(I),BlkP%D(:,I))
-       ENDDO
-       CALL SetToI(P,BlkP)
-!      Check for the correct elctron count
-       TrP=Trace(P)
-       IF(ABS(TrP-DBLE(NEl/Two))>1.D-10) &
-          CALL Halt(' In P2Use, TrP = '//TRIM(DblToChar(TrP)))
-       CALL Delete(BlkP)
+       CALL Get(BName,'bsetname',CurBase)
+       IF(INDEX(BName,'STO')/=0)THEN
+!         Compute a diagonal guess as the superposition of atomic lewis 
+!         structure occupancies--works only for minimal (STO) basis sets
+          DO I=1,NAtoms
+             CALL FillPBlok(BSiz%I(I),GM%AtNum%I(I),BlkP%D(:,I))
+          ENDDO
+          CALL SetToI(P,BlkP)
+!         Check for the correct elctron count
+          TrP=Trace(P)
+          IF(ABS(TrP-DBLE(NEl/Two))>1.D-10) &
+             CALL Halt(' In P2Use, TrP = '//TRIM(DblToChar(TrP)))
+          CALL Delete(BlkP)
+        ELSE
+!         Evenly wheigted diagonal guess (better than core ;)
+          CALL SetToI(P)
+          Scale=Half*DBLE(NEl)/DBLE(NBasF)
+          CALL Multiply(P,Scale)
+        ENDIF
      ENDIF
      CALL New(T0)
      CALL New(T1)

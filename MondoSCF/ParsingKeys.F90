@@ -61,25 +61,52 @@ MODULE ParsingKeys
    CHARACTER(LEN=9),  PARAMETER :: MSI_FORMAT   ='MSIFormat'
    CHARACTER(LEN=10), PARAMETER :: XMOL_FORMAT  ='XMolFormat'
 !--------------------------------------------------------
-!  Options involving force evaluations
-!
-   INTEGER, PARAMETER           :: GRAD_NO_GRAD   = 1000001 ! Do no gradeints evaluation
-!  <Options.Grad=>  
-   CHARACTER(LEN=4),  PARAMETER :: GRADIENTS      ='Grad'
-   CHARACTER(LEN=5 ), PARAMETER :: FORCE          ='Force'
-   INTEGER, PARAMETER           :: GRAD_ONE_FORCE = 1084814 ! Perform one force evaluation
+!  Options involving force evaluations:  <Options.Grad=>  
+   CHARACTER(LEN=4),  PARAMETER :: GRADIENTS        ='Grad'
+!  Do no gradeints evaluation
+   INTEGER, PARAMETER           :: GRAD_NO_GRAD   = 1000001 
+!  Perform one force evaluation
+   CHARACTER(LEN=5 ), PARAMETER :: FORCE            ='Force'
+   INTEGER, PARAMETER           :: GRAD_ONE_FORCE   = 1084814 
 !  <Options.Opt=>
-   CHARACTER(LEN=3),  PARAMETER :: OPTIMIZATION   ='Opt'
-   CHARACTER(LEN=5),  PARAMETER :: OPT_QUNEW      ='QuNew'
-   CHARACTER(LEN=2),  PARAMETER :: OPT_TSTATE     ='TS'
-   INTEGER, PARAMETER           :: GRAD_QNEW_OPT  = 3489343 ! Perform quasi-newton geometry optimization
-   INTEGER, PARAMETER           :: GRAD_TS_SEARCH = 3577711 ! Perform a gradients only transition state search.
+   CHARACTER(LEN=3),  PARAMETER :: OPTIMIZATION     ='Opt'
+   CHARACTER(LEN=5),  PARAMETER :: OPT_QUNEW        ='QuNew'
+   CHARACTER(LEN=7),  PARAMETER :: OPT_ONE_BASE     ='OneBase'
+   CHARACTER(LEN=2),  PARAMETER :: OPT_TSTATE       ='TS'
+!  Perform quasi-newton geometry optimization for each basis set in turn
+   INTEGER, PARAMETER           :: GRAD_QNEW_OPT    = 3489343 
+!  Perform quasi-newton geometry optimization for last basis in sequence
+   INTEGER, PARAMETER           :: GRAD_QNEW_ONE_OPT= 3498345
+!  Perform a gradients only transition state search.
+   INTEGER, PARAMETER           :: GRAD_TS_SEARCH   = 3577711 
 !  <Options.MD=>
    CHARACTER(LEN=2),  PARAMETER :: DYNAMICS       ='MD'
    CHARACTER(LEN=6),  PARAMETER :: MD_VERLET      ='Verlet'
    CHARACTER(LEN=5),  PARAMETER :: MAX_STEPS      ='Steps'
    CHARACTER(LEN=8),  PARAMETER :: MD_TIME_STEP   ='TimeStep' 
-   INTEGER, PARAMETER           :: GRAD_VERLET_MD = 6413123 ! Perform verlet dynamics
+!  Perform verlet dynamics
+   INTEGER, PARAMETER           :: GRAD_VERLET_MD = 6413123 
+!--------------------------------------------------------------------------------------
+!  Options for density extrapolation between geometries: <Options.Extrap=>  
+   CHARACTER(LEN=6),  PARAMETER :: EXTRAPOLATE      ='Extrap'
+   CHARACTER(LEN=8),  PARAMETER :: EXTRAP_NO_EXTRAP ='NoExtrap'
+   INTEGER, PARAMETER           :: EXTRAP_GEOM_RSTRT=1000001
+!  Use orthogonalization transformations to project a new DM
+   CHARACTER(LEN=4),  PARAMETER :: EXTRAP_PROJECT   ='Proj'
+   INTEGER, PARAMETER           :: EXTRAP_GEOM_PRJCT=4850283
+!  Compute a correction to the new DM using interpolation
+   CHARACTER(LEN=6),  PARAMETER :: EXTRAP_INTERP    ='Interp'
+   INTEGER, PARAMETER           :: EXTRAP_GEOM_INTRP=8688341
+!--------------------------------------------------------
+!  Options for visualization (VisDX): <Options.Vis=>  
+   CHARACTER(LEN=3),  PARAMETER :: VISUALIZE        ='Vis'
+!  Do no visualization
+   INTEGER, PARAMETER           :: VIS_DX_NO_VIS    = 1000001 
+   CHARACTER(LEN=6),  PARAMETER :: VIS_RHOPOT       ='RhoPot'
+   CHARACTER(LEN=7),  PARAMETER :: VIS_ONE_BASE     ='OneBase'
+   CHARACTER(LEN=8),  PARAMETER :: VIS_EACH_BASE    ='EachBase'
+!  Create density and potential on a grid for use with OpenDX
+   INTEGER, PARAMETER           :: VIS_DX_RHOPOT    = 4234234 
 #ifdef PERIODIC
 
 !  Parsing keys for <Options.Periodic=>
