@@ -459,12 +459,10 @@ relations, as in Eqs.~(\ref{eq:commutators2})-(\ref{eq:commutators4}). The appli
 DDIS algorithm to acceleration of higher order CPSCF equations is developed further in Section \ref{DDIIS}.
 
 At self-consistency, the conditions given in Section \ref{SelfConsistency} have been met, and it is then 
-appropriate to compute response properties.   In general, we can use the $N+1$ rule,
+appropriate to compute response properties.   In general, we can use the expectation value 
 \begin{equation}
-%E^{(\gamma)} = \gamma^{-1} Tr(D^{(\gamma-1)} H^{(1)}), \label{Np1Rule}
 E^{(\gamma)} = 2 (\gamma-1)! Tr(D^{(\gamma-1)} h^{(1)}), \label{Np1Rule}
 \end{equation}
-%{\bf V: if we use a Taylor expansion of the energy then $\gamma^{-1}$ must be removed.}
 where in the case of polarization we have the (hyper)polarizabilities $\alpha_{ab}=-2\Tr[D^a\mu_b]$, 
 $\beta_{abc}=-4\Tr[D^{ab}\mu_c]$ or $\gamma_{abcd}=-12\Tr[D^{abc}\mu_d]$.
 %({\bf THIS DOESN'T LOOK RIGHT.  IS THERE A NORMALIZTION THING HERE??}).  
@@ -545,9 +543,8 @@ the error $|\Tr[\X^0_{i}]-N_e| + |\Tr[\X^{a}_{i}]| + \ldots$, or
 the change $|\X^{a\ldots}_{i+1}-\X^{a\ldots}_{i}|$, or the change in the response, 
 becomes less than the matrix truncation threshold $\tau$, below which 
 atom-atom blocks are dropped as described in Ref.~\onlinecite{ANiklasson03}.
-
-{\bf NOT SURE THAT THE PRECEEDING LOGIC JIVES WITH ANDERS MODIFIED DESCRIPTION OF TC2,
-IN WHICH ALTERNATING PURIFICATIONS ARE TAKEN WHEN THE TRACE DIFFERENCE IS SMALL}.
+{\bf [M: The preceeding logic does not match Ander's modified TC2, given in his most recent paper, 
+in which alternating projections are taken when the trace difference is small.]}
 
 \newpage
 
@@ -616,7 +613,7 @@ in the following sections. {\bf [M: Is this the only real benifit of these equat
 the ones give by Anders?  I didn't really follow your arguments about coupling and mixing]}
 
 The first and second order energy corrections are well known, cooresponding simply to expectation
-values as in Eq.~\ref{}.  Beyond second order, the $2 n+1$ rule offers valuable alternatives. 
+values as in Eq.~\ref{Np1Rule}.  Beyond second order, the $2 n+1$ rule offers valuable alternatives. 
 Specifically, the third order non-orthogonal contribution is 
 \begin{align}
 %  \begin{split}
@@ -652,6 +649,9 @@ Eq. \eqref{eq:2n+1 third order}. The number of matrix-matrix multiplies can be f
 if one uses an orthogonal representations of the matrices. [{\bf M: If this is really true,
 then again, what is the f-ing point of non-orthogonal? }]
 
+
+\newpage
+
 \section{RESULTS} \label{RESULTS}
 
 We have implemented these methods in the MondoSCF suite of linear scaling quantum chemistry 
@@ -665,21 +665,26 @@ $\tau=10^{-5}$, as well as other numerical thresholds detailed in Ref.~\onlineci
 which deliver 6 digits of relative accuracy in the total energy.  The {\tt TIGHT} option
 involves the matrix threshold $\tau=10^{-6}$ and delivers 8 digits of relative accuracy
 in the total energy.  
+{\bf [M: Could also use some brief discussion about convergence criteria used in the DDIIS]}.
+
 
 Calculations were carried out on a single Intel Xeon 2.4GHz processor 
 running RedHat Linux 8.0 and  executables compiled
 with Portland Group Fortran Compiler pgf90 4.0-2 \cite{PGF90}.
 
+All results are reported in atomic units.
+
+\newpage
+
 \subsection{One dimensional water chains}
 
-\begin{table}[t]
+\begin{table}[h]
   \centering
   \caption{\protect
-    Longitudinal polarizability $\alpha_{zz}$
-    for different water chain lengths with the 6-31G basis set
-    and {\tt GOOD} and {\tt TIGHT} accuracies (See text) and the results obtained with
-    the GAMESS quantum chemistry package \cite{gamess} with the 6-31G. 
-    All the results are in $[a.u.]$.
+{\bf [M: Why are we not listing GAMESS values to the same number of digits as MondoSCF numbers?]}
+    The longitudinal polarizability, $\alpha_{zz}$, for water chains at the RHF/6-31G level
+    of theory, computed with {\sc MondoSCF} using {\tt GOOD} and {\tt TIGHT} numerical thresholds, 
+   and also with the {\sc GAMESS} quantum chemistry package \cite{gamess}.
   }\label{tab:Alpha_1D_Values}
   \begin{tabular}{cccc}
     \toprule
@@ -699,15 +704,13 @@ with Portland Group Fortran Compiler pgf90 4.0-2 \cite{PGF90}.
   \end{tabular}
 \end{table}
 
-
-\begin{table}
+\begin{table}[h]
   \centering
   \caption{\protect
-    Longitudinal first hyperpolarizability $\beta_{zzz}$
-    for different water chain lengths with the 6-31G basis set
-    and {\tt GOOD} and {\tt TIGHT} accuracies (See text) and the results obtained with
-    the GAMESS quantum chemistry package \cite{gamess} with the 6-31G. 
-    All the results are in $[a.u.]$.
+    The longitudinal first hyperpolarizability, $\beta_{zzz}$,
+    for water chains at the RHF/6-31G level of theory, computed with 
+    {\sc MondoSCF} using {\tt GOOD} and {\tt TIGHT} numerical thresholds, 
+    and also with the {\sc GAMESS} quantum chemistry package \cite{gamess}.
   }\label{tab:Beta_1D_Values}
   \begin{tabular}{ccccc}
     \toprule
@@ -728,14 +731,14 @@ with Portland Group Fortran Compiler pgf90 4.0-2 \cite{PGF90}.
   \end{tabular}
 \end{table}
 
-\begin{table}
+\begin{table}[h]
   \centering
   \caption{\protect
-    Longitudinal second hyperpolarizability $\gamma_{zzzz}$
-    for different water chain lengths with the 6-31G basis set
-    and {\tt GOOD} and {\tt TIGHT} accuracies (See text) and the results obtained with
-    the GAMESS quantum chemistry package \cite{gamess} with the 6-31G. 
-    All the results are in $[a.u.]$.
+{\bf [M: Here, we really need another coloumn, using 2N+1 rule and GOOD thresholding]}
+    The longitudinal second hyperpolarizability, $\gamma_{zzzz}$,
+    for water chains at the RHF/6-31G level of theory, computed with 
+    {\sc MondoSCF} using {\tt GOOD} and {\tt TIGHT} numerical thresholds, 
+    and also with the {\sc GAMESS} quantum chemistry package \cite{gamess}.
   }\label{tab:Gamma_1D_Values}
   \begin{tabular}{ccccc}
     \toprule
@@ -756,125 +759,22 @@ with Portland Group Fortran Compiler pgf90 4.0-2 \cite{PGF90}.
   \end{tabular}
 \end{table}
 
-We have computed the (hyper)polarizabilities $\alpha_{zz}$, 
-$\beta_{zzz}$ and $\gamma_{zzzz}$ of water oligomers containing
-up to 20 water molecules. These calculations have been carried out at
-both the RHF/6-31G level of theory and at the {\tt GOOD} and {\tt TIGHT} thresholding parameters 
-that control precision of the linear scaling algorithms.
-The static properties of water chains have been evaluated
-by using the same geometry as Otto {\em et al.} \cite{POtto99}. 
-Our data is compared to polarizabilities calculated with the GAMESS quantum 
-chemistry package \cite{gamess} at the RHF/6-31G level of theory.  We also
-present the results obtained with the density matrix based 2n+1 rule previously introduced.
+Perturbed Projection has been used to compute the (hyper)polarizabilities $\alpha_{zz}$, 
+$\beta_{zzz}$ and $\gamma_{zzzz}$ of linear water chains up to (H$_2$O)$_{20}$. 
+These calculations have been carried out with {\sc MondoSCF} at the RHF/6-31G level of theory using 
+both the {\tt GOOD} and {\tt TIGHT} thresholding parameters that control precision of the 
+linear scaling algorithms \cite{}, as well as with the conventional algorithms implemented
+in the {\sc GAMESS} quantum chemistry package \cite{gamess}.  These static properties have 
+been evaluated at the geometries given by Otto {\em et al.}~\cite{POtto99}.    
+The {\sc MondoSCF} results have been obtained both as expectation values, given by Eq.~(\ref{Np1Rule}), 
+and using the non-orthogonal density matrix 2n+1 rules given in 
+Eqs.~(\ref{eq:2n+1 third order}-\ref{eq:2n+1 fourth order}).
 
-\subsubsection{Numerical stability}
-
-{\bf IT WOULD BE GREAT TO HAVE MORE DISCUSSION IN LIGHT OF ORDER OF ERROR PROPIGATION
-IN THE N+1 VS 2N+1 RULES.  ARE THEY REALLY THE SAME?? SHOULD THEY BE?  HIGHER ORDER
-USED BY N+1 GETS THRESHOLDED LESS BECAUSE RESPONSE FUNCTION IS SHIFTED UP, BUT 2N+1
-RULE HAS BETTER ERROR PROPIGATION. I KNOW THIS IS SUBTLE, BUT WORTH A GOOD DISCUSSION.}
-
-To investigate the numerical stability we compare the data calculated
-with a {\tt TIGHT} numerical threshold ($10^{-6}$) with the polarizabilities
-calculated using a {\tt GOOD} numerical threshold ($10^{-5}$). 
-In tables \ref{tab:Alpha_1D_Values}-\ref{tab:Gamma_1D_Values} we find that
-only 1-2 significant digit altered by reducing the threshold by two orders 
-of magnitude. 
-
-For example, a calculation of $(H_2O)_5$ with the {\tt VERYTIGHT} numerical threshold ($10^{-7}$) 
-gives the following polarizabilities $\alpha_{zz}=6.822602\,a.u.$, $\beta_{zzz}=-19.892464\,a.u.$ and
-$\gamma_{zzzz}=1168.95479\,a.u.$. We can conclude that the thresholds 
-{\tt GOOD} and {\tt TIGHT} give approximatively 3-4 and 5-6 
-correct digits respectivelly independently of the order of the response calculated.
-
-The calculations of the first and second hyperpolarizabilities with the help of
-the density matrix based $2n+1$ rule (See Tables \ref{tab:Beta_1D_Values} and \ref{tab:Gamma_1D_Values}) 
-give about the same number of digit as the explicit calculations (i.e. 5-6 digits).
+\newpage
 
 \subsection{Linear scaling: 3D water clusters}
 
-In Fig \ref{fig:Gamma_scaling} the total CPU time for 
-the fifth CPSCF cycle (including build time
-for $\F^{abc}$, iterative construction of $\D^{abc}$ and all intermadiate
-steps including the congruence tranformation) for the third
-order is shown for the RHF/6-31G and RHF/6-31G** levels of
-theory and at both the {\tt GOOD} and {\tt TIGHT} thresholding parameter 
-sets that control precision of the linear scaling algorithms, corresponding 
-to matrix thresholds of $10^{-5}$ and $10^{-6}$, respectively. The convergence
-of the CPSCF equations is typically achived in about 10 cycles, independent of the
-cluster size, basis set, matrix threshold or order of the response calculated.
-
-The 3D water clusters show an early onset of linear scaling for accurate
-basis set, low thresholds and high order response.
-Thus, the second order response shows a linear scaling
-onset as early as the first order response e.g. about 70 water molecules at
-the RHF/6-31G level of theory and {\tt GOOD} threshold. In the case of the third order
-response, the $\mathcal{O}(N)$ behavior comes to light at about 90 water 
-molecules for the small basis set (6-31G) and {\tt GOOD}. 
-%To appreciate the difference in computational time between each order,
-%we have plotted in Figure \ref{fig:Mix_scaling} the total CPU time for the
-%first, second and third order CPSCF cycle at the RHF/6-31G level of theory and {\tt TIGHT}. 
-In the linear scaling regime, we can observe a timing ratio, relatively to first order, 
-of $1.5$ and $2.2$ for the second and third order respectively.
-
-\subsubsection{Exponential decay}
-Figure \ref{fig:Superposition_Decay} shows the superposition 
-of the magnitude of density matrix derivative atom-atom blocks up to 
-third order as a function of atom-atom distance when perturbed by 
-a static electric field. 
-The density responses matrices show an exponential decay as a function
-of the internuclear distance, however the decay is slower and the locality
-becomes lower for the higher order response functions.
-Therefore, we find a later onset for the linear scaling for the higher order
-responses. 
-\\
-\\
-We can also see that the elements of the density matrix derivatives are shifted up
-from $D^0$ as their order increases. Thus, it might be possible to use a bigger threshold
-for higher order DM derivative without affecting the accuracy of the calculations.
-The use of this kind of hierachical thresholds would certainly speed up the calculation
-of higher order response whereas keeping the same level of accuracy.
-
-\subsubsection{Onset of linear scaling}
-
-{\bf I THINK THE FOLLOWING DISCUSION IS WEAK, AND THERE ARE TOO MANY FIGURES HERE.
-THE ISSUE OF DECAY AND LOCALITY IS DIFFERENT THAN THAT OF NORMALIZATION/MAGNITUDE.
-SO $D^xxx$ REALLY SEEMS SHIFTED UP FROM $D^0$.  IF WE SCALE DOWN, WE HAVE CLOSE TO $D^0$.
-THIS SCALING COULD BE INCORPORATED INTO A RENORMALIZED THRESHOLD (ALTHOUGH WE DON"T
-HAVE TO DO IT).  THIS REALLY NEEDS MORE THOUGHT AND ANALYSIS.  AGAIN, I THINK WE HAVE
-TO MANY FIGURES IN THE FOLLOWING.}
-\\
-{\bf V: removed a couple of figs.}
-
-To analyse more into detail the linear scaling behavior of the third order
-response, we have plotted in Figs. \ref{fig:Gamma_QCTC_Timing}-\ref{fig:Gamma_ONX_Timing} 
-the CPU time for the three most consuming parts of a CPSCF step, i.e. the Coulomb matrix, 
-the perturbed density matrix build and the exchange matrix respectively. 
-The dominating critical part of each calculation is found to scale linearly
-in computational complexity for each individual subset of the computation. 
-
-In case of the Coulomb build Figure \ref{fig:Gamma_QCTC_Timing}, 
-the linear scaling arises as early as 30 water molecules for the 
-{\tt GOOD} threshold and about 50 molecules for the
-{\tt TIGHT} threshold. As we use a localized basis function the 
-Hermite-Gaussian density can be built in a $\mathcal{O}(N)$ fashion.
-
-In the perturbed density build, the $\mathcal{O}(N)$ behavior is obtained
-between 70 to 110 water molecules depending on the threshold 
-Figure~\ref{fig:Gamma_TC2R_Timing}. The $\mathcal{O}(N)$ scaling results 
-from the fact that the matrix multiplications, in the purification
-scheme, always happen as $\X^{abc}_i\X^{0}_i$ or $\X^{ab}_i\X^{c}_i$
-which is a dense matrix multiply by a sparser matrix.
-
-In the case of the Hartree-Fock exchange build, the $N$-scaling
-behavior arises between 70 to 90 H$_2$O molecules Figure~\ref{fig:Gamma_ONX_Timing}.
-The construction of the exchange matrix exploits the locality of the
-density matrix derivative to achive the ${\cal O}(N)$ scaling.
-The matrix build is dominated by a linear term, mainly the evaluation of the ERIs, 
-which has a high prefactor, thus masking the non-linear terms arising from the dense
-matrix manipulations.
-
-\begin{figure}[t]
+\begin{figure}[h]
   \caption{\protect
     Total CPU time of the fifth third order CPSCF iteration for
     the water cluster sequence with the 6-31G and 6-31G** 
@@ -886,7 +786,7 @@ matrix manipulations.
   \resizebox*{3.6in}{!}{\includegraphics[angle=-90.00]{Gamma_h2o3D_6-31G_6-31Gss_G_T}}
 \end{figure}
 
-\begin{figure}[t]
+\begin{figure}[h]
   \caption{\protect
     QCTC CPU time of the fifth CPSCF iteration of third order for
     the water cluster sequence with the 6-31G and 6-31G** 
@@ -898,7 +798,7 @@ matrix manipulations.
   \resizebox*{3.6in}{!}{\includegraphics[angle=-90.00]{Gamma_QCTC_T}}
 \end{figure}
 
-\begin{figure}[t]
+\begin{figure}[h]
   \caption{\protect
     TC2 CPU time of the fifth CPSCF iteration of third order for
     the water cluster sequence with the 6-31G and 6-31G** 
@@ -910,7 +810,7 @@ matrix manipulations.
   \resizebox*{3.6in}{!}{\includegraphics[angle=-90.00]{Gamma_TC2R_T}}
 \end{figure}
 
-\begin{figure}[t]
+\begin{figure}[h]
   \caption{\protect
     ONX CPU time of the fifth CPSCF iteration of third order for
     the water cluster sequence with the 6-31G and 6-31G** 
@@ -922,39 +822,106 @@ matrix manipulations.
   \resizebox*{3.6in}{!}{\includegraphics[angle=-90.00]{Gamma_ONX_T}}
 \end{figure}
 
+
+\begin{figure}[h]
+  \caption{\bf [M: Maybe we should include this figure.  I kinda like it]}
+  \resizebox*{3.6in}{!}{\includegraphics[angle=-90.00]{Mix_h2o3D_6-31G_T.ps}}
+\end{figure}
+
+Linear scaling computation of the RHF/6-31G and RHF/6-31G** second hyperpolarizability,
+achieved with Perturbed Projection, is shown for three-dimensional water clusters 
+in Fig~\ref{fig:Gamma_scaling}.  These timings are the total CPU time for the fifth CPSCF cycle, 
+including build time for $\F^{abc}$ ({\sc ONX} and {\sc QCTC}), 
+iterative construction of $\D^{abc}$ (Perturbed Projection via {\sc TC2}) and all intermadiate
+steps including the congruence tranformation and {\bf [M: Is the following true??] 
+property evaluation via the evaluation of expectation values as in Eq.~(\ref{Np1Rule})}.
+A breakdown of the domminant contributions to these totals are given
+in Figs~\ref{fig:Gamma_QCTC_Timing}-\ref{fig:Gamma_ONX_Timing}, which show timings for Coulomb 
+summation ({\sc QCTC}), Perturbed Projection ({\sc TC2}), and excact exchange ({\sc ONX}).
+
 \begin{figure}[t]
   \caption{\protect
     Superposition of the magnitudes of the RHF/6-31G density matrix
     derivative elements $D_{cd}$, $D^{x}_{cd}$, $D^{xx}_{cd}$ and $D^{xxx}_{cd}$
     along the $x$ axis with the separation of basis function centers
-    for the $\rm (H_2O)_{150}$ water cluster. The density matrix 
+    for $\rm (H_2O)_{150}$. The density matrix 
     derivatives have been converged to within {\tt TIGHT} (e.g. 
-    matrix threshold of $10^{-6}$ $[a.u.]$).
+    a matrix threshold $\tau=10^{-6}$ $[a.u.]$).
   }\label{fig:Superposition_Decay}
   \resizebox*{3.6in}{!}{\includegraphics[angle=-90.00]{DMix_40pts}}
 \end{figure}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Summary and Conclusion}
- We have proposed and demonstrated a linear scaling self
- consistent scheme for high order response properties.
- The scheme solves the coupled perturbed self consistent field 
- equation by the perturbed projection method. We have also shown
- that the perturbed projection method can be expended to high
- order (e.g. up to 10-th order in the present paper).
+Figure \ref{fig:Superposition_Decay} shows the magnitude of atom-atom blocks of density matrix derivatives
+up to third order as a function of atom-atom distance when perturbed by a static electric field. 
+The density response shows an approximate exponential decay as a function of internuclear distance, 
+however the rate of decay slows with increasing order of the response.  We also note that, within
+our convention of normalization, Eqs.~(\ref{}), the magnitude of the response functions are shifted
+up with each order in the perturbation.
 
-We have presented a simple and efficient algorithm for solution 
-of the coupled-perturbed self-consistent-field (CPSCF) equations 
-in the context of spectral projection and static
-electric polarizabilities. Unique features of the perturbed 
-projection algorithm include linear scaling, simplicity, numerical 
-stability and quadratic convergence in computation of the derivative
-density matrices.
+\newpage
 
-We have shown that the density matrix response is local 
-upon {\em global} electric perturbation, corresponding to an approximate 
-exponential decay of matrix elements. A similar exponential decay
+\section{Discussion}
+
+In our current formulation, the increase in magnitude and reduction of locality in elements of the 
+response function makes achieving linear scaling more difficult with increasing order in perturbation. 
+Nevertheless, linear scaling is achieved at the HF level of theory up to fourth order (i.e.~$\gamma^{abcd}$) 
+in the total energy for three-dimensional systems and  non-trivial basis sets.  At fourth order,
+Perturbed Projection and exact exchange were the dominant costs in solving the CPSCF equations,
+as shown in Figs~\ref{}-\ref{}.  For the fourth order Perturbed Projection, $N$-scaling is achieved 
+between 70 to 110 water molecules, depending on $\tau$.  Despite a nearly dense $D^{abc}$, the 
+dominant work in its construction always involves multiplication with matrices that are significantly 
+more sparse, as $\X^{abc}_i\X^{0}_i$ or $\X^{ab}_i\X^{c}_i$.   Likewise, $N$-scaling is achieved between 
+70 to 90 water molecules for construction of the Hartree-Fock exchange contribution.  In this case, 
+the approximate decay of the density matrix still leads to linear scaling through ordered skip out lists,
+as described in Ref.~\onlinecite{ESchwegler97}.  In both cases, the increase in response function magnitude
+is equivalent to tightening numerical thresholds, which increases the cost and delays the onset of linear
+scaling. 
+
+In principle, the evaluation of properties via expectation values, Eq.~(\ref{Np1Rule}), will involve
+a different accumulation of errors relative to the $2n+1$ rule, Eqs.~(\ref{}-\ref{}). {\bf [M: It
+would be great to have another coloumn for $\gamma$ at good computed at good so we can have this 
+conversation.  Certainly, for N=5, the 2N+1 TIGHT results appear more accurate relative to VERYTIGHT.
+How this plays out for GOOD and larger N is the question!]}.  
+
+To investigate the numerical stability we compare the data calculated
+with a {\tt TIGHT} numerical threshold ($10^{-6}$) with the polarizabilities
+calculated using a {\tt GOOD} numerical threshold ($10^{-5}$). 
+In tables \ref{tab:Alpha_1D_Values}-\ref{tab:Gamma_1D_Values} we find that
+only 1-2 significant digit altered by reducing the threshold by two orders 
+of magnitude. 
+
+For example, a calculation of $(H_2O)_5$ with the {\tt VERYTIGHT} numerical threshold ($10^{-7}$) 
+gives the following polarizabilities $\alpha_{zz}=6.822602\,a.u.$, $\beta_{zzz}=-19.892464\,a.u.$ and
+$\gamma_{zzzz}=1168.95479\,a.u.$. {\bf [M: The reason these numbers don't help is the
+system is so small, we can't really see how error propigates with TIGHT, so we need GOOD 
+with 2N+1 to larger systems]}.  We can conclude that the thresholds 
+{\tt GOOD} and {\tt TIGHT} give approximatively 3-4 and 5-6 
+correct digits respectivelly independently of the order of the response calculated.
+
+The calculations of the first and second hyperpolarizabilities with the help of
+the density matrix based $2n+1$ rule (See Tables \ref{tab:Beta_1D_Values} and \ref{tab:Gamma_1D_Values}) 
+give about the same number of digit as the explicit calculations (i.e. 5-6 digits).
+{\bf [M:I'm not sure this is right.  We need to see 2N+1 GOOD results.]}.
+
+{\bf [M: We postpone further discussion about thresholding etc here untill we see what the GOOD 2N+1 results look like]}.
+
+\newpage
+
+\section{Conclusion}
+We have extended the Perturbed Projection method for computation of 
+the Coupled Pertrubed Self-Consistent-Field equations through higher order, 
+and demonstrated linear scaling and error control through fourth order for 
+three-dimensional systems and non-trivial basis sets.   In addition to 
+achieving linear scaling,  Perturbed Projection for the computation of 
+higher order response functions is quadratically convergent, simple to 
+implement and numerically stable. 
+
+We have shown that the density matrix response through fourth order is local 
+upon a {\em global} electric perturbation, corresponding to an approximate 
+exponential decay of matrix elements.  However, this locality decreases with
+increasing order. {\bf [M: And here we postpone further discussion unitill
+we have the GOOD results]}.
+ A similar exponential decay
 in the first order response corresponding to the {\em local} nuclear 
 displacement has previously been demonstrated by Ochsenfeld and 
 Head-Gordon \cite{Ochsenfeld97}. These key observations are expected to
@@ -985,27 +952,6 @@ electronic g-tensor.
  All the numerical computations have been
  performed on computing resources located at this facility.
 \end{acknowledgments}
-
-\begin{table}[h]
-  \caption{Accuracy goals and corresponding thresholds that 
-           control precision of the {\sc MondoSCF} linear 
-	   scaling algorithms.}
-  \label{TableOfThresholds}
-  \center{
-    \begin{tabular}{lllll}
-      \toprule
-      Accuracy  &  $\tau_{\rm \scriptscriptstyle MTRIX} $ & $\tau_{\rm \scriptscriptstyle ----}$ &
-      $\tau_{\rm \scriptscriptstyle D}$ & $\tau_{\rm \scriptscriptstyle RESP}$ \\
-      \colrule
-  {\tt LOOSE}     & $10^{-4}$ & $10^{-ii}$  & $10^{-2}$  & $10^{-4}$ \\
-  {\tt GOOD}      & $10^{-5}$ & $10^{-ii}$  & $10^{-3}$ & $10^{-5}$ \\
-  {\tt TIGHT}     & $10^{-6}$ & $10^{-ii}$ & $10^{-4}$ & $10^{-6}$ \\
-  {\tt VERYTIGHT} & $10^{-7}$ & $10^{-ii}$ & $10^{-5}$ & $10^{-7}$ \\
-      \botrule
-  \end{tabular}
-  }
-\end{table}
-
 
 
 \bibliography{Response3}
