@@ -15,9 +15,6 @@ release:clean
 purge:	clean
 #
 clean:
-#	cd MakeTables ; $(MAKE) -i clean
-#	cd PONXMults  ; $(MAKE) -i clean
-#	cd PONX       ; $(MAKE) -i clean
 	cd VRR        ; $(MAKE) -i clean
 	cd NONX       ; $(MAKE) -i clean
 	cd GDrivers   ; $(MAKE) -i clean
