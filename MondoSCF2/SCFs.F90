@@ -853,7 +853,7 @@ CONTAINS
     INTEGER            :: cBAS,cGEO,K,I,J,iATS,iCLONE
     CHARACTER(LEN=DCL) :: chGEO,chBAS    
     REAL(DOUBLE)       :: GradVal
-TYPE(DBL_RNK2) :: AuxLatF
+    TYPE(DBL_RNK2)     :: AuxLatF
     !----------------------------------------------------------------------------!
     CALL New(S%Action,1)
     ! Initialize the force vector in HDF, clone by clone
@@ -892,6 +892,8 @@ TYPE(DBL_RNK2) :: AuxLatF
 !
        CALL Invoke('XCForce',N,S,M)
 !
+       HDFFileID=OpenHDF(N%HFile)
+       HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(1)))
        CALL Get(G%Clone(1)%PBC%LatFrc,'latfrc',Tag_O=chGEO)
        G%Clone(1)%PBC%LatFrc%D=AuxLatF%D
        CALL Put(G%Clone(1)%PBC%LatFrc,'latfrc',Tag_O=chGEO)
@@ -900,6 +902,7 @@ TYPE(DBL_RNK2) :: AuxLatF
        CALL Delete(AuxLatF)
        CALL NLATTFORCE_XC(cBAS,cGEO,G,B,N,S,M)
 #else
+!       CALL NLATTFORCE_XC(cBAS,cGEO,G,B,N,S,M)
        CALL Invoke('XCForce',N,S,M)
 #endif
     ENDIF
