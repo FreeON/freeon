@@ -17,7 +17,7 @@ d3   14.9771172490D0 14.9771172490D0 14.9771172490D0  90.0D0   90.0D0   90.0D0
 <EndPeriodic>
 
 <BeGIN_MM_filenames>
-validation.opls
+validation_opls
 bALAmmPBC.seq
 bALAmmPBC.crd
 <END_MM_filenames>

@@ -18,7 +18,7 @@ d3   12.42956925D0 12.42956925D0 12.42956925D0 90.0D0   90.0D0   90.0D0
 <EndPeriodic>
 
 <BeGIN_MM_filenames>
-validation.opls
+validation_opls
 Water64mm.seq
 Water64mm.crd
 <END_MM_filenames>

@@ -17,7 +17,7 @@ d3   3.0D0  3.0D0  3.0D0  90.0D0   90.0D0     90.0D0
 <EndPeriodic>
 
 <Begin_MM_filenames>
-validation.opls
+validation_opls
 MgOmm.seq
 MgOmm.crd
 <End_MM_filenames>
