@@ -27,13 +27,14 @@ MOD_POSTFIX   = mod
 #
 F90          = pgf90
 #
-F90_OPTIMIZE = -O2 -tp px -pc 64 
+F90_OPTIMIZE = -O1
+#               -tp px -pc 64 
 #              -Mvect=smallvect:16 -Munroll -Mnoframe \
 #              -Mcache_align -Mnoonetrip -Mr8intrinsics -Minfo=all 
 #
 #F90_DEBUG    = -g -C -Mbounds -Minfo=all -Minform=inform -Mchkptr 
 #
-F_LIST        = -Mlist 
+#F_LIST        = -Mlist 
 #
 #F_PROF       = -Mprof=lines
 #
@@ -42,7 +43,6 @@ F90_MISC     = $(F_LIST) $(F_PROF)
 F90_INCLUDE  = -I$(MONDO_HOME)/Includes/               \
                -I$(MONDO_HOME)/MondoMods               \
                -I/usr/local/include                    \
-               -I$(MONDO_HOME)/MondoMods/MMA/Functions 
 #              -I$(MPI_INC) 
 #
 F90_FLAGS   = $(F90_MISC) $(F90_OPTIMIZE) $(F90_DEBUG) $(F90_INCLUDE)
