@@ -1,3 +1,85 @@
+2004-04-15 13:20  tymczak
+
+	* MondoSCF2/: ParsePeriodic.F90, SCFs.F90: [no log message]
+
+2004-04-15 13:14  tymczak
+
+	* MondoSCF2/SCFs.F90: Lots OF Changes Hopefully everything will
+	hang together
+	
+	New SCFActn--> RestartBasisSwitch New SubR   --> SameBasisSameGeom
+	Determines if we have the same Basis Set, Same Lattices or Same
+	Coordinates
+	
+	DONE BEFORE OneEMats
+
+2004-04-15 13:11  tymczak
+
+	* MondoSCF2/SCFKeys.F90: New Key--RestartBasisSwitch
+
+2004-04-15 13:10  tymczak
+
+	* MondoSCF2/Response.F90: Mored the Opt Out in Responce.F90
+
+2004-04-15 13:09  tymczak
+
+	* MondoSCF2/ParseInput.F90: [no log message]
+
+2004-04-15 13:09  tymczak
+
+	* MondoSCF2/ParsePeriodic.F90: Reparsing of Periodics Works
+
+2004-04-15 13:09  tymczak
+
+	* MondoSCF2/ParseGeometries.F90: Reparseing of Geometry Works
+
+2004-04-15 13:06  tymczak
+
+	* ONX/NONX/ONX.F90: New SCFActn
+
+2004-04-15 13:05  tymczak
+
+	* MondoSCF2/OptionKeys.F90: New Options
+
+2004-04-15 13:04  tymczak
+
+	* MondoSCF2/MondoSCF.F90: Started to Organize the Scan and MD
+	functions
+
+2004-04-15 13:03  tymczak
+
+	* MondoSCF2/ControlStructures.F90: Added Logicals to Stat type
+
+2004-04-15 12:59  tymczak
+
+	* OneE/: MakeRho.F90, MakeS.F90, ParaMakeRho.F90: New SCFActn
+
+2004-04-15 12:58  tymczak
+
+	* SCFeqs/ODA.F90: [no log message]
+
+2004-04-15 12:57  tymczak
+
+	* SCFeqs/SCFStatus.F90: SCFActn changes
+
+2004-04-15 12:56  tymczak
+
+	* SCFeqs/DenMatMethods.F90: New AOSP2
+	
+	Turned Off the Density increase stuff, for now
+
+2004-04-15 12:55  tymczak
+
+	* SCFeqs/P2Use.F90: New P2Use:Uses Case
+
+2004-04-15 12:54  tymczak
+
+	* MondoMods/InOut.F90: [no log message]
+
+2004-04-15 09:46  mchalla
+
+	* ChangeLog: [no log message]
+
 2004-04-14 17:38  nemeth
 
 	* MondoSCF2/Optimizer.F90: Max number of backtracking steps is set
