@@ -809,14 +809,18 @@ MODULE PrettyPrint
              PrintFlags%Chk/=DEBUG_CHKSUMS)RETURN
 !---------------------------------------------------------------------------------------   
 !       Compute check sum
+#ifdef PARALLEL
+        IF(MyID==ROOT)THEN
+#endif
         Chk=Zero
         DO I=1,A%NNon0
            Chk=Chk+A%MTrix%D(I)*A%Mtrix%D(I)
         ENDDO
         Chk=SQRT(Chk) 
-#ifdef PARALLEL
-        IF(MyID==ROOT)THEN
-#endif
+!#ifdef PARALLEL
+!        IF(MyID==ROOT)THEN
+!#endif
+
 !          Create check string
            ChkStr=CheckSumString(Chk,Name,Proc_O)
 !          Write check string

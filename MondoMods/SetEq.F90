@@ -18,9 +18,6 @@ MODULE SetXYZ
                        Set_RNK2_EQ_DBCSR,         &
                        Set_DBCSR_EQ_DBCSR,        &
 #endif
-#ifdef PARALLEL_DEVELOPMENT
-                       Set_BCSR_EQ_FastMat,        &
-#endif
                        Set_INT_VECT_EQ_INT_SCLR,  &  
                        Set_DBL_VECT_EQ_DBL_SCLR,  &
                        Set_INT_VECT_EQ_INT_VECT,  &
@@ -30,76 +27,6 @@ MODULE SetXYZ
    EXTERNAL bcsr_to_dens
    CONTAINS
 !
-#ifdef PARALLEL_DEVELOPMENT
-!======================================================================
-!
-!======================================================================
-   SUBROUTINE Set_BCSR_EQ_FastMat(B,A)
-      TYPE(FastMat),POINTER :: A,C
-      TYPE(SRST),POINTER    :: S
-      TYPE(BCSR)            :: B
-      INTEGER               :: P,Q,I,J,OI,OJ,NA,MA
-!---------------------------------------------------------------------
-      IF(AllocQ(B%Alloc))CALL Delete(B)
-      IF(A%Alloc/=ALLOCATED_SKIP_POINTERS_ON)THEN
-         CALL Warn(' Skip pointers not set in Set_BCSR_EQ_FastMat ')
-!        CALL SetSkipPntrs_FastMat(A)
-      ENDIF
-      CALL New(B)
-      P=1
-      Q=1
-      OI=0
-      B%RowPt%I(1)=1 
-      C=>A
-      DO WHILE(ASSOCIATED(C))
-         I=C%Row
-         S=>C%RowRoot
-         OJ=0
-         MA=BSiz%I(I) 
-         DO WHILE(ASSOCIATED(S%Left).OR.ASSOCIATED(S%Right))
-            IF(ASSOCIATED(S%Left))THEN
-               S=>S%Left
-            ELSEIF(ASSOCIATED(S%Right))THEN
-               S=>S%Right
-            ENDIF
-            IF(S%L==S%R)THEN
-               J=S%L
-               NA=BSiz%I(J)
-               CALL BlockToBlock(MA,NA,OI,OJ,S%MTrix,B%MTrix%D(Q:))
-               B%BlkPt%I(P)=Q
-               B%ColPt%I(P)=J               
-               Q=Q+MA*NA
-               P=P+1
-               B%RowPt%I(I+1)=P
-               OJ=OJ+NA
-            ENDIF
-         ENDDO
-         OI=OI+MA
-         C=>C%Next
-      ENDDO
-      B%NAtms=NAtoms
-      B%NBlks=P-1
-      B%NNon0=Q-1
-    END SUBROUTINE Set_BCSR_EQ_FastMat
-!======================================================================
-!
-!======================================================================
-    RECURSIVE SUBROUTINE SetSkipPtrs_SRST(A,B)
-      TYPE(SRST),POINTER :: A,B
-!----------------------------------------------------------------------
-      IF(ASSOCIATED(A%Left).AND.ASSOCIATED(A%Right))THEN
-         CALL SetSkipPtrs_SRST(A%Left,A%Right)
-         CALL SetSkipPtrs_SRST(A%Right,B)
-      ELSEIF(ASSOCIATED(A%Left))THEN 
-         CALL SetSkipPtrs_SRST(A%Left,B)
-      ELSEIF(ASSOCIATED(A%Right))THEN
-         CALL SetSkipPtrs_SRST(A%Right,B)
-      ELSEIF(A%R<B%L)THEN
-         A%Right=>B
-      ENDIF
-    END SUBROUTINE SetSkipPtrs_SRST
-!
-#endif
 
 #ifdef PERIODIC
      SUBROUTINE VecToAng(PBC,A,B,C,Alpha,Beta,Gamma)

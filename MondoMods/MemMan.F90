@@ -15,9 +15,6 @@ MODULE MemMan
 #ifdef PARALLEL 
                        New_DBCSR,    New_MPI_INDX, &
 #endif    
-#ifdef PARALLEL_DEVELOPMENT
-                       New_FastMat,New_SRST,       &
-#endif
                        New_BCSR,     New_BSET,     &
                        New_ARGMT,    New_HGRho,    &
                        New_DBuf,     New_IBuf,     &
@@ -34,9 +31,6 @@ MODULE MemMan
 #ifdef PARALLEL 
                        Delete_DBCSR,    Delete_MPI_INDX, &
 #endif    
-!#ifdef PARALLEL_DEVELOPMENT
-!                       Delete_FastMat, Delete_SRST,     &
-!#endif
                        Delete_BCSR,     Delete_BSET,     &
                        Delete_ARGMT,    Delete_HGRho,    &
                        Delete_DBuf,     Delete_IBuf,     &
@@ -58,8 +52,7 @@ MODULE MemMan
    INTEGER, PARAMETER     :: ALLOCATED_TEMP =19347
    INTEGER, PARAMETER     :: ALLOCATED_FALSE=STATUS_FALSE
 !------------------------------------------------------------------------
-!  Global stuff for fast matrix accounting
-   INTEGER :: SRSTCount
+
    CONTAINS 
 
       SUBROUTINE SetBig_INT_VECT(A)
@@ -262,12 +255,19 @@ MODULE MemMan
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !     
 !
-      SUBROUTINE New_BCSR(A,N_O)
+      SUBROUTINE New_BCSR(A,N_O,OnAll_O)
          TYPE(BCSR),INTENT(INOUT)             :: A
          INTEGER,OPTIONAL,DIMENSION(3)        :: N_O
+         LOGICAL,OPTIONAL                     :: OnAll_O
+         LOGICAL                              :: OnAll
+         IF(PRESENT(OnAll_O))THEN
+            OnAll=OnAll_O
+         ELSE
+            OnAll=.FALSE.
+         ENDIF
          CALL AllocChk(A%Alloc)
 #ifdef PARALLEL
-         IF(MyId==ROOT)THEN
+         IF(MyId==ROOT.OR.OnAll)THEN
 #endif
             IF(PRESENT(N_O))THEN
                A%NAtms=N_O(1)
@@ -341,45 +341,6 @@ MODULE MemMan
          CALL New(A%Blks,A%NBlks)
          CALL New(A%Disp,A%NBlks)
       END SUBROUTINE New_MPI_INDX
-#endif
-#ifdef PARALLEL_DEVELOPMENT 
-!----------------------------------------------------------------------------
-!     Allocate a new Search Tree Sparse Row Block 
-!
-      SUBROUTINE New_SRST(A,L,R,T)
-         TYPE(SRST),POINTER :: A
-         INTEGER             :: L,R,T
-         ALLOCATE(A,STAT=MemStatus)
-         IF(MemStatus/=SUCCEED) &
-            CALL Halt(' ALLOCATE failed in New_SRST ')
-         A%L=L
-         A%R=R
-         A%Tier=T
-         A%Number=SRSTCount
-         NULLIFY(A%Left)
-         NULLIFY(A%Right)
-      END SUBROUTINE New_SRST
-!----------------------------------------------------------------------------
-!     Allocate a new Search Tree Block Sparse Matrix
-!
-      SUBROUTINE New_FastMat(A,Row,Cols_O)
-         TYPE(FastMat),POINTER         :: A
-         INTEGER                       :: Row
-         INTEGER,OPTIONAL,DIMENSION(2) :: Cols_O                       
-         INTEGER,DIMENSION(2)          :: Cols
-         INTEGER                       :: I
-         IF(ASSOCIATED(A)) & 
-            CALL Halt(' Logic error in New_FastMat, row alread allocated ')             
-         IF(PRESENT(Cols_O))THEN
-            Cols=Cols_O
-         ELSE
-            Cols=(/1,NAtoms/)
-         ENDIF
-         ALLOCATE(A,STAT=MemStatus)
-         IF(MemStatus/=SUCCEED) &
-            CALL Halt('ALLOCATE failed in New_STBSM')
-         CALL New_SRST(A%RowRoot,Cols(1),Cols(2),0)
-      END SUBROUTINE New_FastMat
 #endif
 !----------------------------------------------------------------------------
 !     Allocate a basis set

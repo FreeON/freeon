@@ -43,15 +43,15 @@ MODULE Order
    END INTERFACE
    CONTAINS
 
-!      FUNCTION RANDOM_INT(Limits)
-!         INTEGER                :: RANDOM_INT
-!         INTEGER, DIMENSION(2)  :: Limits
-!         REAL(DOUBLE)           :: Delta
-!         REAL(DOUBLE), EXTERNAL :: Random
-!         Delta=DBLE(Limits(2)-Limits(1)+1)
-!         RANDOM_INT=Limits(1)+INT(Delta*Random())
-!         RANDOM_INT=Limits(1)+INT(Delta*RAND())
-!      END FUNCTION RANDOM_INT
+       FUNCTION RANDOM_INT(Limits)
+          INTEGER                :: RANDOM_INT
+          INTEGER, DIMENSION(2)  :: Limits
+          REAL(DOUBLE)           :: Delta
+          REAL(DOUBLE), EXTERNAL :: Random
+          Delta=DBLE(Limits(2)-Limits(1)+1)
+          RANDOM_INT=Limits(1)+INT(Delta*Random())
+          !! RANDOM_INT=Limits(1)+INT(Delta*RAND())
+       END FUNCTION RANDOM_INT
 
       FUNCTION RANDOM_DBL(Limits)
          REAL(DOUBLE)              :: RANDOM_DBL
@@ -60,20 +60,23 @@ MODULE Order
          REAL(DOUBLE), EXTERNAL    :: Random
          Delta=Limits(2)-Limits(1)+0.0D0
          RANDOM_DBL=Limits(1)+Delta*Random()
-!         RANDOM_DBL=Limits(1)+Delta*Rand()
+         !! RANDOM_DBL=Limits(1)+Delta*Rand()
       END FUNCTION RANDOM_DBL
 
-      FUNCTION RANDOM_INT(Limits)
-         INTEGER               :: RANDOM_INT,Delta
-         INTEGER, SAVE         :: JRan=10408
-         INTEGER, DIMENSION(2) :: Limits
-         INTEGER, PARAMETER    :: Im=259200,Ia=7141,Ic=54773
-         JRan=MOD(JRan*Ia+Ic,Im)
-         Delta=Limits(2)-Limits(1)+1
-         RANDOM_INT=Limits(1)+(Delta*JRan)/Im
-         IF(RANDOM_INT>Limits(2).OR.RANDOM_INT<Limits(1)) &
-            CALL Halt(' Limits hosed in RANDOM_INT ')
-      END FUNCTION RANDOM_INT
+! the following function is buggy
+!     FUNCTION RANDOM_INT(Limits)
+!        INTEGER               :: RANDOM_INT,Delta
+!        INTEGER, SAVE         :: JRan=10408
+!        INTEGER, DIMENSION(2) :: Limits
+!        INTEGER, PARAMETER    :: Im=259200,Ia=7141,Ic=54773
+!        JRan=MOD(JRan*Ia+Ic,Im)
+!        Delta=Limits(2)-Limits(1)+1
+!        RANDOM_INT=Limits(1)+(Delta*JRan)/Im
+!        IF(RANDOM_INT>Limits(2).OR.RANDOM_INT<Limits(1)) &
+!           CALL Halt(' Limits hosed in RANDOM_INT ')
+!     END FUNCTION RANDOM_INT
+
+
 !--------------------------------------------------------------
 !    F90 wrapper for SFCOrder77, which circumvents the lack
 !    of INTEGER(KIND=8) (INTEGER*8) support for cheazy 
