@@ -461,6 +461,8 @@ CONTAINS
     !-------------------------------------------------------------------
     REAL(DOUBLE)                :: N
     CHARACTER(LEN=1)            :: Chr1,Chr2,Chr3
+    LOGICAL, SAVE               :: Switching=.FALSE.
+    LOGICAL, SAVE               :: Switch=.FALSE.
     !-------------------------------------------------------------------
     !
     Chr1=TRIM(Args%C%C(3)(1:1))
@@ -473,6 +475,18 @@ CONTAINS
     !
     MM=MM+1
     N=Trace(P)
+    !write(*,*) 'N',N,' Ne',Ne,' abs=',ABS(N-Ne)
+    IF(ABS(N-Ne).LT.1.00D-3.OR.Switching) THEN
+       Switching=.TRUE.
+       IF(Switch) THEN
+          N=Ne+1.00D-3
+          Switch=.FALSE.
+       ELSE
+          N=Ne-1.00D-3
+          Switch=.TRUE.
+       ENDIF
+       !write(*,*) 'Switching',Switching,N
+    ENDIF
     !
     SELECT CASE(RespOrder)
     CASE(1)
@@ -718,7 +732,7 @@ CONTAINS
     TYPE( BCSR)  , INTENT(INOUT) :: P1_1,P2_1,P3_1,Tmp1,Tmp2,Tmp3
 #endif
     REAL(DOUBLE) , INTENT(IN   ) :: N,Ne
-    ! Daaa = {Dabc,X0} + {Daa,Da}
+    ! Daaa = {Daaa,X0} + {Daa,Da}
     ! D0*Daaa+Daaa*D0
     CALL Multiply(P0,P3_1,Tmp1)
     CALL Multiply(P3_1,P0,Tmp2)
@@ -822,6 +836,307 @@ CONTAINS
   END SUBROUTINE Order3_ABB
   !
   !
+  SUBROUTINE Order4(P0,P1_1,P2_1,P3_1,P4_1,Tmp1,Tmp2,Tmp3,N,Ne)
+#ifdef PARALLEL
+    TYPE(DBCSR)  , INTENT(INOUT) :: P0
+    TYPE(DBCSR)  , INTENT(INOUT) :: P1_1,P2_1,P3_1,P4_1,Tmp1,Tmp2,Tmp3
+#else
+    TYPE( BCSR)  , INTENT(INOUT) :: P0
+    TYPE( BCSR)  , INTENT(INOUT) :: P1_1,P2_1,P3_1,P4_1,Tmp1,Tmp2,Tmp3
+#endif
+    REAL(DOUBLE) , INTENT(IN   ) :: N,Ne
+    ! Daaaa = {Daaaa,X0} + {Daaa,Da} + Daa*Daa
+    ! D0*Daaaa+Daaaa*D0
+    CALL Multiply(P0,P4_1,Tmp1)
+    CALL Multiply(P4_1,P0,Tmp2)
+    CALL Add(Tmp1,Tmp2,Tmp3)
+    ! Da*Daaa
+    CALL Multiply(P1_1,P3_1,Tmp2)
+    CALL Add(Tmp2,Tmp3,Tmp1)
+    ! Daaa*Da
+    CALL Multiply(P3_1,P1_1,Tmp2)
+    CALL Add(Tmp1,Tmp2,Tmp3)
+    ! Daa*Daa
+    CALL Multiply(P2_1,P2_1,Tmp2)
+    CALL Add(Tmp3,Tmp2,Tmp1)
+    IF(N.GE.Ne) THEN
+       CALL Filter(P4_1,Tmp1)
+    ELSE
+       CALL Multiply(Tmp1,-One)
+       CALL Multiply(P4_1,Two)
+       CALL Add(P4_1,Tmp1,Tmp2)
+       CALL Filter(P3_1,Tmp2)
+    ENDIF
+  END SUBROUTINE Order4
+  !
+  !
+  SUBROUTINE Order5(P0,P1_1,P2_1,P3_1,P4_1,P5_1,Tmp1,Tmp2,Tmp3,N,Ne)
+#ifdef PARALLEL
+    TYPE(DBCSR)  , INTENT(INOUT) :: P0
+    TYPE(DBCSR)  , INTENT(INOUT) :: P1_1,P2_1,P3_1,P4_1,P5_1,Tmp1,Tmp2,Tmp3
+#else
+    TYPE( BCSR)  , INTENT(INOUT) :: P0
+    TYPE( BCSR)  , INTENT(INOUT) :: P1_1,P2_1,P3_1,P4_1,P5_1,Tmp1,Tmp2,Tmp3
+#endif
+    REAL(DOUBLE) , INTENT(IN   ) :: N,Ne
+    ! D5 = {D5,X0} + {D4,D1} + {D3,D2}
+    ! D0*D5+D5*D0
+    CALL Multiply(P0,P5_1,Tmp1)
+    CALL Multiply(P5_1,P0,Tmp2)
+    CALL Add(Tmp1,Tmp2,Tmp3)
+    ! D1*D4
+    CALL Multiply(P1_1,P4_1,Tmp2)
+    CALL Add(Tmp2,Tmp3,Tmp1)
+    ! D4*D1
+    CALL Multiply(P4_1,P1_1,Tmp2)
+    CALL Add(Tmp1,Tmp2,Tmp3)
+    ! D2*D3
+    CALL Multiply(P2_1,P3_1,Tmp2)
+    CALL Add(Tmp2,Tmp3,Tmp1)
+    ! D3*D2
+    CALL Multiply(P3_1,P2_1,Tmp2)
+    CALL Add(Tmp1,Tmp2,Tmp3)
+    IF(N.GE.Ne) THEN
+       CALL Filter(P5_1,Tmp3)
+    ELSE
+       CALL Multiply(Tmp3,-One)
+       CALL Multiply(P5_1,Two)
+       CALL Add(P5_1,Tmp3,Tmp2)
+       CALL Filter(P5_1,Tmp2)
+    ENDIF
+  END SUBROUTINE Order5
+  !
+  !
+  SUBROUTINE Order6(P0,P1_1,P2_1,P3_1,P4_1,P5_1,P6_1,Tmp1,Tmp2,Tmp3,N,Ne)
+#ifdef PARALLEL
+    TYPE(DBCSR)  , INTENT(INOUT) :: P0
+    TYPE(DBCSR)  , INTENT(INOUT) :: P1_1,P2_1,P3_1,P4_1,P5_1,P6_1,Tmp1,Tmp2,Tmp3
+#else
+    TYPE( BCSR)  , INTENT(INOUT) :: P0
+    TYPE( BCSR)  , INTENT(INOUT) :: P1_1,P2_1,P3_1,P4_1,P5_1,P6_1,Tmp1,Tmp2,Tmp3
+#endif
+    REAL(DOUBLE) , INTENT(IN   ) :: N,Ne
+    ! D6 = {D6,X0} + {D5,D1} + {D4,D2} + D3*D3
+    ! D0*D6+D6*D0
+    CALL Multiply(P0,P6_1,Tmp1)
+    CALL Multiply(P6_1,P0,Tmp2)
+    CALL Add(Tmp1,Tmp2,Tmp3)
+    ! D1*D5
+    CALL Multiply(P1_1,P5_1,Tmp2)
+    CALL Add(Tmp2,Tmp3,Tmp1)
+    ! D5*D1
+    CALL Multiply(P5_1,P1_1,Tmp2)
+    CALL Add(Tmp1,Tmp2,Tmp3)
+    ! D2*D4
+    CALL Multiply(P2_1,P4_1,Tmp2)
+    CALL Add(Tmp2,Tmp3,Tmp1)
+    ! D4*D2
+    CALL Multiply(P4_1,P2_1,Tmp2)
+    CALL Add(Tmp1,Tmp2,Tmp3)
+    ! D3*D3
+    CALL Multiply(P3_1,P3_1,Tmp2)
+    CALL Add(Tmp2,Tmp3,Tmp1)
+    IF(N.GE.Ne) THEN
+       CALL Filter(P6_1,Tmp1)
+    ELSE
+       CALL Multiply(Tmp1,-One)
+       CALL Multiply(P6_1,Two)
+       CALL Add(P6_1,Tmp1,Tmp2)
+       CALL Filter(P6_1,Tmp2)
+    ENDIF
+  END SUBROUTINE Order6
+  !
+  !
+  SUBROUTINE Order7(P0,P1_1,P2_1,P3_1,P4_1,P5_1,P6_1,P7_1,Tmp1,Tmp2,Tmp3,N,Ne)
+#ifdef PARALLEL
+    TYPE(DBCSR)  , INTENT(INOUT) :: P0
+    TYPE(DBCSR)  , INTENT(INOUT) :: P1_1,P2_1,P3_1,P4_1,P5_1,P6_1,P7_1,Tmp1,Tmp2,Tmp3
+#else
+    TYPE( BCSR)  , INTENT(INOUT) :: P0
+    TYPE( BCSR)  , INTENT(INOUT) :: P1_1,P2_1,P3_1,P4_1,P5_1,P6_1,P7_1,Tmp1,Tmp2,Tmp3
+#endif
+    REAL(DOUBLE) , INTENT(IN   ) :: N,Ne
+    ! D7 = {D7,X0} + {D6,D1} + {D5,D2} + {D4,D3}
+    ! D0*D7+D7*D0
+    CALL Multiply(P0,P7_1,Tmp1)
+    CALL Multiply(P7_1,P0,Tmp2)
+    CALL Add(Tmp1,Tmp2,Tmp3)
+    ! D1*D6
+    CALL Multiply(P1_1,P6_1,Tmp2)
+    CALL Add(Tmp2,Tmp3,Tmp1)
+    ! D6*D1
+    CALL Multiply(P6_1,P1_1,Tmp2)
+    CALL Add(Tmp1,Tmp2,Tmp3)
+    ! D2*D5
+    CALL Multiply(P2_1,P5_1,Tmp2)
+    CALL Add(Tmp2,Tmp3,Tmp1)
+    ! D5*D2
+    CALL Multiply(P5_1,P2_1,Tmp2)
+    CALL Add(Tmp1,Tmp2,Tmp3)
+    ! D3*D4
+    CALL Multiply(P3_1,P4_1,Tmp2)
+    CALL Add(Tmp2,Tmp3,Tmp1)
+    ! D4*D3
+    CALL Multiply(P4_1,P3_1,Tmp2)
+    CALL Add(Tmp1,Tmp2,Tmp3)
+    IF(N.GE.Ne) THEN
+       CALL Filter(P7_1,Tmp3)
+    ELSE
+       CALL Multiply(Tmp3,-One)
+       CALL Multiply(P7_1,Two)
+       CALL Add(P7_1,Tmp3,Tmp2)
+       CALL Filter(P7_1,Tmp2)
+    ENDIF
+  END SUBROUTINE Order7
+  !
+  !
+  SUBROUTINE Order8(P0,P1_1,P2_1,P3_1,P4_1,P5_1,P6_1,P7_1,P8_1,Tmp1,Tmp2,Tmp3,N,Ne)
+#ifdef PARALLEL
+    TYPE(DBCSR)  , INTENT(INOUT) :: P0
+    TYPE(DBCSR)  , INTENT(INOUT) :: P1_1,P2_1,P3_1,P4_1,P5_1,P6_1,P7_1,P8_1,Tmp1,Tmp2,Tmp3
+#else
+    TYPE( BCSR)  , INTENT(INOUT) :: P0
+    TYPE( BCSR)  , INTENT(INOUT) :: P1_1,P2_1,P3_1,P4_1,P5_1,P6_1,P7_1,P8_1,Tmp1,Tmp2,Tmp3
+#endif
+    REAL(DOUBLE) , INTENT(IN   ) :: N,Ne
+    ! D8 = {D8,X0} + {D7,D1} + {D6,D2} + {D5,D3} + D4*D4
+    ! D0*D8+D8*D0
+    CALL Multiply(P0,P8_1,Tmp1)
+    CALL Multiply(P8_1,P0,Tmp2)
+    CALL Add(Tmp1,Tmp2,Tmp3)
+    ! D1*D7
+    CALL Multiply(P1_1,P7_1,Tmp2)
+    CALL Add(Tmp2,Tmp3,Tmp1)
+    ! D7*D1
+    CALL Multiply(P7_1,P1_1,Tmp2)
+    CALL Add(Tmp1,Tmp2,Tmp3)
+    ! D2*D6
+    CALL Multiply(P2_1,P6_1,Tmp2)
+    CALL Add(Tmp2,Tmp3,Tmp1)
+    ! D6*D2
+    CALL Multiply(P6_1,P2_1,Tmp2)
+    CALL Add(Tmp1,Tmp2,Tmp3)
+    ! D3*D5
+    CALL Multiply(P3_1,P5_1,Tmp2)
+    CALL Add(Tmp2,Tmp3,Tmp1)
+    ! D5*D3
+    CALL Multiply(P5_1,P3_1,Tmp2)
+    CALL Add(Tmp1,Tmp2,Tmp3)
+    ! D4*D4
+    CALL Multiply(P4_1,P4_1,Tmp2)
+    CALL Add(Tmp2,Tmp3,Tmp1)
+    IF(N.GE.Ne) THEN
+       CALL Filter(P8_1,Tmp1)
+    ELSE
+       CALL Multiply(Tmp1,-One)
+       CALL Multiply(P8_1,Two)
+       CALL Add(P8_1,Tmp1,Tmp2)
+       CALL Filter(P8_1,Tmp2)
+    ENDIF
+  END SUBROUTINE Order8
+  !
+  !
+  SUBROUTINE Order9(P0,P1_1,P2_1,P3_1,P4_1,P5_1,P6_1,P7_1,P8_1,P9_1,Tmp1,Tmp2,Tmp3,N,Ne)
+#ifdef PARALLEL
+    TYPE(DBCSR)  , INTENT(INOUT) :: P0
+    TYPE(DBCSR)  , INTENT(INOUT) :: P1_1,P2_1,P3_1,P4_1,P5_1,P6_1,P7_1,P8_1,P9_1,Tmp1,Tmp2,Tmp3
+#else
+    TYPE( BCSR)  , INTENT(INOUT) :: P0
+    TYPE( BCSR)  , INTENT(INOUT) :: P1_1,P2_1,P3_1,P4_1,P5_1,P6_1,P7_1,P8_1,P9_1,Tmp1,Tmp2,Tmp3
+#endif
+    REAL(DOUBLE) , INTENT(IN   ) :: N,Ne
+    ! D9 = {D9,X0} + {D8,D1} + {D7,D2} + {D6,D3} + {D5,D4}
+    ! D0*D9+D9*D0
+    CALL Multiply(P0,P9_1,Tmp1)
+    CALL Multiply(P9_1,P0,Tmp2)
+    CALL Add(Tmp1,Tmp2,Tmp3)
+    ! D1*D8
+    CALL Multiply(P1_1,P8_1,Tmp2)
+    CALL Add(Tmp2,Tmp3,Tmp1)
+    ! D8*D1
+    CALL Multiply(P8_1,P1_1,Tmp2)
+    CALL Add(Tmp1,Tmp2,Tmp3)
+    ! D2*D7
+    CALL Multiply(P2_1,P7_1,Tmp2)
+    CALL Add(Tmp2,Tmp3,Tmp1)
+    ! D7*D2
+    CALL Multiply(P7_1,P2_1,Tmp2)
+    CALL Add(Tmp1,Tmp2,Tmp3)
+    ! D3*D6
+    CALL Multiply(P3_1,P6_1,Tmp2)
+    CALL Add(Tmp2,Tmp3,Tmp1)
+    ! D6*D3
+    CALL Multiply(P6_1,P3_1,Tmp2)
+    CALL Add(Tmp1,Tmp2,Tmp3)
+    ! D4*D5
+    CALL Multiply(P4_1,P5_1,Tmp2)
+    CALL Add(Tmp2,Tmp3,Tmp1)
+    ! D5*D4
+    CALL Multiply(P5_1,P4_1,Tmp2)
+    CALL Add(Tmp1,Tmp2,Tmp3)
+    IF(N.GE.Ne) THEN
+       CALL Filter(P9_1,Tmp3)
+    ELSE
+       CALL Multiply(Tmp3,-One)
+       CALL Multiply(P9_1,Two)
+       CALL Add(P9_1,Tmp3,Tmp2)
+       CALL Filter(P9_1,Tmp2)
+    ENDIF
+  END SUBROUTINE Order9
+  !
+  !
+  SUBROUTINE Order10(P0,P1_1,P2_1,P3_1,P4_1,P5_1,P6_1,P7_1,P8_1,P9_1,P10_1,Tmp1,Tmp2,Tmp3,N,Ne)
+#ifdef PARALLEL
+    TYPE(DBCSR)  , INTENT(INOUT) :: P0
+    TYPE(DBCSR)  , INTENT(INOUT) :: P1_1,P2_1,P3_1,P4_1,P5_1,P6_1,P7_1,P8_1,P9_1,P10_1,Tmp1,Tmp2,Tmp3
+#else
+    TYPE( BCSR)  , INTENT(INOUT) :: P0
+    TYPE( BCSR)  , INTENT(INOUT) :: P1_1,P2_1,P3_1,P4_1,P5_1,P6_1,P7_1,P8_1,P9_1,P10_1,Tmp1,Tmp2,Tmp3
+#endif
+    REAL(DOUBLE) , INTENT(IN   ) :: N,Ne
+    ! D10 = {D10,X0} + {D9,D1} + {D8,D2} + {D7,D3} + {D6,D4} + D5*D5
+    ! D0*D10+D10*D0
+    CALL Multiply(P0,P10_1,Tmp1)
+    CALL Multiply(P10_1,P0,Tmp2)
+    CALL Add(Tmp1,Tmp2,Tmp3)
+    ! D1*D9
+    CALL Multiply(P1_1,P9_1,Tmp2)
+    CALL Add(Tmp2,Tmp3,Tmp1)
+    ! D9*D1
+    CALL Multiply(P9_1,P1_1,Tmp2)
+    CALL Add(Tmp1,Tmp2,Tmp3)
+    ! D2*D8
+    CALL Multiply(P2_1,P8_1,Tmp2)
+    CALL Add(Tmp2,Tmp3,Tmp1)
+    ! D8*D2
+    CALL Multiply(P8_1,P2_1,Tmp2)
+    CALL Add(Tmp1,Tmp2,Tmp3)
+    ! D3*D7
+    CALL Multiply(P3_1,P7_1,Tmp2)
+    CALL Add(Tmp2,Tmp3,Tmp1)
+    ! D7*D3
+    CALL Multiply(P7_1,P3_1,Tmp2)
+    CALL Add(Tmp1,Tmp2,Tmp3)
+    ! D4*D6
+    CALL Multiply(P4_1,P6_1,Tmp2)
+    CALL Add(Tmp2,Tmp3,Tmp1)
+    ! D6*D4
+    CALL Multiply(P6_1,P4_1,Tmp2)
+    CALL Add(Tmp1,Tmp2,Tmp3)
+    ! D5*D5
+    CALL Multiply(P5_1,P5_1,Tmp2)
+    CALL Add(Tmp2,Tmp3,Tmp1)
+    IF(N.GE.Ne) THEN
+       CALL Filter(P10_1,Tmp1)
+    ELSE
+       CALL Multiply(Tmp1,-One)
+       CALL Multiply(P10_1,Two)
+       CALL Add(P10_1,Tmp1,Tmp2)
+       CALL Filter(P10_1,Tmp2)
+    ENDIF
+  END SUBROUTINE Order10
+  !
+  !
   SUBROUTINE PutXFormPrim(Prog,Args,PPrm,Z,Tmp)
 !H---------------------------------------------------------------------------------
 !H SUBROUTINE PutXFormPrim(Prog,Args,PPrm,Z,Tmp)
@@ -881,10 +1196,10 @@ CONTAINS
     !-------------------------------------------------------------------
     TYPE(BCSR ), INTENT(INOUT) :: F,FPrm1_1,FPrm1_2,FPrm1_3,FPrm2_1,FPrm2_2,FPrm2_3,FPrm3
 #ifdef PARALLEL
-    TYPE(DBCSR), INTENT(  OUT) :: P,PPrm1_1,PPrm1_2,PPrm1_3,PPrm2_1,PPrm2_2,PPrm2_3,PPrm3
+    TYPE(DBCSR), INTENT(INOUT) :: P,PPrm1_1,PPrm1_2,PPrm1_3,PPrm2_1,PPrm2_2,PPrm2_3,PPrm3
     TYPE(DBCSR)                :: Tmp
 #else
-    TYPE(BCSR ), INTENT(  OUT) :: P,PPrm1_1,PPrm1_2,PPrm1_3,PPrm2_1,PPrm2_2,PPrm2_3,PPrm3
+    TYPE(BCSR ), INTENT(INOUT) :: P,PPrm1_1,PPrm1_2,PPrm1_3,PPrm2_1,PPrm2_2,PPrm2_3,PPrm3
     TYPE(BCSR )                :: Tmp,tmp2
 #endif
     INTEGER    , INTENT(IN   ) :: RespOrder
@@ -951,12 +1266,10 @@ CONTAINS
        CALL Multiply(PPrm2_1,Coeff)
        !
        IF(Chr1.EQ.Chr2.AND.Chr1.EQ.Chr3) THEN
-          ! A.EQ.B.EQ.C
           ! PPrm3_1 <-> aaa
           ! PPrm2_1 <-> aa
           ! PPrm1_1 <-> a
        ELSEIF(Chr1.EQ.Chr2.AND.Chr1.NE.Chr3) THEN
-          ! A.EQ.B.NE.C
           ! PPrm3_1 <-> aac
           ! PPrm2_1 <-> aa
           ! PPrm2_2 <-> ac
@@ -968,7 +1281,6 @@ CONTAINS
           CALL SetEq(PPrm2_2,FPrm2_2)
           CALL Multiply(PPrm2_2,Coeff)
        ELSEIF(Chr1.NE.Chr2.AND.Chr2.EQ.Chr3) THEN
-          ! A.NE.B.EQ.C
           ! PPrm3_1 <-> abb
           ! PPrm2_1 <-> ab
           ! PPrm2_3 <-> bb
@@ -980,7 +1292,6 @@ CONTAINS
           CALL SetEq(PPrm2_3,FPrm2_3)
           CALL Multiply(PPrm2_3,Coeff)
        ELSEIF(Chr1.NE.Chr2.AND.Chr1.NE.Chr3.AND.Chr2.NE.Chr3) THEN
-          ! A.NE.B.NE.C
           ! PPrm3_1 <-> abc
           ! PPrm2_1 <-> ab
           ! PPrm2_2 <-> ac

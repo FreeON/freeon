@@ -35,9 +35,9 @@ PROGRAM DDIIS
   IMPLICIT NONE
   !-------------------------------------------------------------------
 #ifdef PARALLEL
-  TYPE(BCSR )                      :: F,P,EPrm,Tmp1,TmpFPrm
-  TYPE(BCSR )                      :: PPrm1_1,PPrm1_2,PPrm1_3,PPrm2_1,PPrm2_2,PPrm2_3,PPrm3_1
-  TYPE(BCSR )                      :: FPrm1_1,FPrm1_2,FPrm1_3,FPrm2_1,FPrm2_2,FPrm2_3,FPrm3_1
+  TYPE(DBCSR)                      :: F,P,EPrm,Tmp1,TmpFPrm
+  TYPE(DBCSR)                      :: PPrm1_1,PPrm1_2,PPrm1_3,PPrm2_1,PPrm2_2,PPrm2_3,PPrm3_1
+  TYPE(DBCSR)                      :: FPrm1_1,FPrm1_2,FPrm1_3,FPrm2_1,FPrm2_2,FPrm2_3,FPrm3_1
 #else
   TYPE(BCSR )                      :: F,P,EPrm,Tmp1,TmpFPrm
   TYPE(BCSR )                      :: PPrm1_1,PPrm1_2,PPrm1_3,PPrm2_1,PPrm2_2,PPrm2_3,PPrm3_1
@@ -69,6 +69,7 @@ PROGRAM DDIIS
   INTEGER     , PARAMETER          :: DEFAULF_START     = 1
   !-------------------------------------------------------------------
   !type(DBL_RNK2) :: BTmp
+  integer :: ierr
   !
   ! Initial setup.
   CALL StartUp(Args,Prog,Serial_O=.FALSE.)
@@ -86,8 +87,8 @@ PROGRAM DDIIS
   ! Get the directions.
   Chr1=TRIM(Args%C%C(3)(1:1))
   SELECT CASE(RespOrder)
-  CASE(1);Chr2=''                    ;Chr3=''
-  CASE(2);Chr2=TRIM(Args%C%C(3)(2:2));Chr3=''
+  CASE(1);Chr2=' '                   ;Chr3=' '
+  CASE(2);Chr2=TRIM(Args%C%C(3)(2:2));Chr3=' '
   CASE(3);Chr2=TRIM(Args%C%C(3)(2:2));Chr3=TRIM(Args%C%C(3)(3:3))
   CASE DEFAULT; CALL Halt('Response order unknown! RespOrder='//TRIM(IntToChar(RespOrder)))
   END SELECT
@@ -253,7 +254,7 @@ PROGRAM DDIIS
         ! PPrm1_1 <-> a
         CALL Get(LastCPSCFCycle,'lastcpscfcycle'//TRIM(Args%C%C(3)(1:1)))
         CALL Get(FPrm1_1,TrixFile('OrthoFPrime'//TRIM(Args%C%C(3)(1:1)), &
-             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+             &   Args,LastCPSCFCycle-Args%I%I(1)))
         CALL Get(PPrm1_1,TrixFile('OrthoDPrime'//TRIM(Args%C%C(3)(1:1)), &
              &   Args,LastCPSCFCycle-Args%I%I(1)))
      ELSE
@@ -262,13 +263,13 @@ PROGRAM DDIIS
         ! PPrm1_2 <-> b
         CALL Get(LastCPSCFCycle,'lastcpscfcycle'//TRIM(Args%C%C(3)(1:1)))
         CALL Get(FPrm1_1,TrixFile('OrthoFPrime'//TRIM(Args%C%C(3)(1:1)), &
-             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+             &   Args,LastCPSCFCycle-Args%I%I(1)))
         CALL Get(PPrm1_1,TrixFile('OrthoDPrime'//TRIM(Args%C%C(3)(1:1)), &
              &   Args,LastCPSCFCycle-Args%I%I(1)))
         !
         CALL Get(LastCPSCFCycle,'lastcpscfcycle'//TRIM(Args%C%C(3)(2:2)))
         CALL Get(FPrm1_2,TrixFile('OrthoFPrime'//TRIM(Args%C%C(3)(2:2)), &
-             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+             &   Args,LastCPSCFCycle-Args%I%I(1)))
         CALL Get(PPrm1_2,TrixFile('OrthoDPrime'//TRIM(Args%C%C(3)(2:2)), &
              &   Args,LastCPSCFCycle-Args%I%I(1)))
      ENDIF
@@ -285,15 +286,15 @@ PROGRAM DDIIS
         ! PPrm1_1 <-> a
         CALL Get(LastCPSCFCycle,'lastcpscfcycle'//TRIM(Args%C%C(3)(1:1)))
         CALL Get(FPrm1_1,TrixFile('OrthoFPrime'//TRIM(Args%C%C(3)(1:1)), &
-             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+             &   Args,LastCPSCFCycle-Args%I%I(1)))
         CALL Get(PPrm1_1,TrixFile('OrthoDPrime'//TRIM(Args%C%C(3)(1:1)), &
-             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+             &   Args,LastCPSCFCycle-Args%I%I(1)))
         !
         CALL Get(LastCPSCFCycle,'lastcpscfcycle'//TRIM(Args%C%C(3)(1:2)))
         CALL Get(FPrm2_1,TrixFile('OrthoFPrime'//TRIM(Args%C%C(3)(1:2)), &
-             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+             &   Args,LastCPSCFCycle-Args%I%I(1)))
         CALL Get(PPrm2_1,TrixFile('OrthoDPrime'//TRIM(Args%C%C(3)(1:2)), &
-             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+             &   Args,LastCPSCFCycle-Args%I%I(1)))
      ELSEIF(Chr1.EQ.Chr2.AND.Chr1.NE.Chr3) THEN
         ! A.EQ.B.NE.C
         ! PPrm3_1 <-> aac
@@ -303,27 +304,27 @@ PROGRAM DDIIS
         ! PPrm1_3 <-> c
         CALL Get(LastCPSCFCycle,'lastcpscfcycle'//TRIM(Args%C%C(3)(1:1)))
         CALL Get(FPrm1_1,TrixFile('OrthoFPrime'//TRIM(Args%C%C(3)(1:1)), &
-             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+             &   Args,LastCPSCFCycle-Args%I%I(1)))
         CALL Get(PPrm1_1,TrixFile('OrthoDPrime'//TRIM(Args%C%C(3)(1:1)), &
-             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+             &   Args,LastCPSCFCycle-Args%I%I(1)))
         !
         CALL Get(LastCPSCFCycle,'lastcpscfcycle'//TRIM(Args%C%C(3)(3:3)))
         CALL Get(FPrm1_3,TrixFile('OrthoFPrime'//TRIM(Args%C%C(3)(3:3)), &
-             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+             &   Args,LastCPSCFCycle-Args%I%I(1)))
         CALL Get(PPrm1_3,TrixFile('OrthoDPrime'//TRIM(Args%C%C(3)(3:3)), &
-             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+             &   Args,LastCPSCFCycle-Args%I%I(1)))
         !
         CALL Get(LastCPSCFCycle,'lastcpscfcycle'//TRIM(Args%C%C(3)(1:2)))
         CALL Get(FPrm2_1,TrixFile('OrthoFPrime'//TRIM(Args%C%C(3)(1:2)), &
-             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+             &   Args,LastCPSCFCycle-Args%I%I(1)))
         CALL Get(PPrm2_1,TrixFile('OrthoDPrime'//TRIM(Args%C%C(3)(1:2)), &
-             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+             &   Args,LastCPSCFCycle-Args%I%I(1)))
         !
         CALL Get(LastCPSCFCycle,'lastcpscfcycle'//TRIM(Args%C%C(3)(2:3)))
         CALL Get(FPrm2_2,TrixFile('OrthoFPrime'//TRIM(Args%C%C(3)(2:3)), &
-             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+             &   Args,LastCPSCFCycle-Args%I%I(1)))
         CALL Get(PPrm2_2,TrixFile('OrthoDPrime'//TRIM(Args%C%C(3)(2:3)), &
-             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+             &   Args,LastCPSCFCycle-Args%I%I(1)))
      ELSEIF(Chr1.NE.Chr2.AND.Chr2.EQ.Chr3) THEN
         ! A.NE.B.EQ.C
         ! PPrm3_1 <-> abb
@@ -333,27 +334,27 @@ PROGRAM DDIIS
         ! PPrm1_2 <-> b
         CALL Get(LastCPSCFCycle,'lastcpscfcycle'//TRIM(Args%C%C(3)(1:1)))
         CALL Get(FPrm1_1,TrixFile('OrthoFPrime'//TRIM(Args%C%C(3)(1:1)), &
-             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+             &   Args,LastCPSCFCycle-Args%I%I(1)))
         CALL Get(PPrm1_1,TrixFile('OrthoDPrime'//TRIM(Args%C%C(3)(1:1)), &
-             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+             &   Args,LastCPSCFCycle-Args%I%I(1)))
         !
         CALL Get(LastCPSCFCycle,'lastcpscfcycle'//TRIM(Args%C%C(3)(2:2)))
         CALL Get(FPrm1_2,TrixFile('OrthoFPrime'//TRIM(Args%C%C(3)(2:2)), &
-             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+             &   Args,LastCPSCFCycle-Args%I%I(1)))
         CALL Get(PPrm1_2,TrixFile('OrthoDPrime'//TRIM(Args%C%C(3)(2:2)), &
-             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+             &   Args,LastCPSCFCycle-Args%I%I(1)))
         !
         CALL Get(LastCPSCFCycle,'lastcpscfcycle'//TRIM(Args%C%C(3)(1:2)))
         CALL Get(FPrm2_1,TrixFile('OrthoFPrime'//TRIM(Args%C%C(3)(1:2)), &
-             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+             &   Args,LastCPSCFCycle-Args%I%I(1)))
         CALL Get(PPrm2_1,TrixFile('OrthoDPrime'//TRIM(Args%C%C(3)(1:2)), &
-             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+             &   Args,LastCPSCFCycle-Args%I%I(1)))
         !
         CALL Get(LastCPSCFCycle,'lastcpscfcycle'//TRIM(Args%C%C(3)(2:3)))
         CALL Get(FPrm2_3,TrixFile('OrthoFPrime'//TRIM(Args%C%C(3)(2:3)), &
-             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+             &   Args,LastCPSCFCycle-Args%I%I(1)))
         CALL Get(PPrm2_3,TrixFile('OrthoDPrime'//TRIM(Args%C%C(3)(2:3)), &
-             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+             &   Args,LastCPSCFCycle-Args%I%I(1)))
      ELSEIF(Chr1.NE.Chr2.AND.Chr1.NE.Chr3.AND.Chr2.NE.Chr3) THEN
         ! A.NE.B.NE.C
         ! PPrm3_1 <-> abc
@@ -365,39 +366,39 @@ PROGRAM DDIIS
         ! PPrm1_3 <-> c
         CALL Get(LastCPSCFCycle,'lastcpscfcycle'//TRIM(Args%C%C(3)(1:1)))
         CALL Get(FPrm1_1,TrixFile('OrthoFPrime'//TRIM(Args%C%C(3)(1:1)), &
-             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+             &   Args,LastCPSCFCycle-Args%I%I(1)))
         CALL Get(PPrm1_1,TrixFile('OrthoDPrime'//TRIM(Args%C%C(3)(1:1)), &
-             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+             &   Args,LastCPSCFCycle-Args%I%I(1)))
         !
         CALL Get(LastCPSCFCycle,'lastcpscfcycle'//TRIM(Args%C%C(3)(2:2)))
         CALL Get(FPrm1_2,TrixFile('OrthoFPrime'//TRIM(Args%C%C(3)(2:2)), &
-             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+             &   Args,LastCPSCFCycle-Args%I%I(1)))
         CALL Get(PPrm1_2,TrixFile('OrthoDPrime'//TRIM(Args%C%C(3)(2:2)), &
-             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+             &   Args,LastCPSCFCycle-Args%I%I(1)))
         !
         CALL Get(LastCPSCFCycle,'lastcpscfcycle'//TRIM(Args%C%C(3)(3:3)))
         CALL Get(FPrm1_3,TrixFile('OrthoFPrime'//TRIM(Args%C%C(3)(3:3)), &
-             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+             &   Args,LastCPSCFCycle-Args%I%I(1)))
         CALL Get(PPrm1_3,TrixFile('OrthoDPrime'//TRIM(Args%C%C(3)(3:3)), &
-             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+             &   Args,LastCPSCFCycle-Args%I%I(1)))
         !
         CALL Get(LastCPSCFCycle,'lastcpscfcycle'//TRIM(Args%C%C(3)(1:2)))
         CALL Get(FPrm2_1,TrixFile('OrthoFPrime'//TRIM(Args%C%C(3)(1:2)), &
-             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+             &   Args,LastCPSCFCycle-Args%I%I(1)))
         CALL Get(PPrm2_1,TrixFile('OrthoDPrime'//TRIM(Args%C%C(3)(1:2)), &
-             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+             &   Args,LastCPSCFCycle-Args%I%I(1)))
         !
         CALL Get(LastCPSCFCycle,'lastcpscfcycle'//TRIM(Args%C%C(3)(1:1))//TRIM(Args%C%C(3)(3:3)))
         CALL Get(FPrm2_2,TrixFile('OrthoFPrime'//TRIM(Args%C%C(3)(1:1))//TRIM(Args%C%C(3)(3:3)), &
-             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+             &   Args,LastCPSCFCycle-Args%I%I(1)))
         CALL Get(PPrm2_2,TrixFile('OrthoDPrime'//TRIM(Args%C%C(3)(1:1))//TRIM(Args%C%C(3)(3:3)), &
-             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+             &   Args,LastCPSCFCycle-Args%I%I(1)))
         !
         CALL Get(LastCPSCFCycle,'lastcpscfcycle'//TRIM(Args%C%C(3)(2:3)))
         CALL Get(FPrm2_3,TrixFile('OrthoFPrime'//TRIM(Args%C%C(3)(2:3)), &
-             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+             &   Args,LastCPSCFCycle-Args%I%I(1)))
         CALL Get(PPrm2_3,TrixFile('OrthoDPrime'//TRIM(Args%C%C(3)(2:3)), &
-             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+             &   Args,LastCPSCFCycle-Args%I%I(1)))
      ELSE
         CALL Halt('Response: unknown symmetry <'//Chr1//Chr2//Chr3//'>.')
      ENDIF
@@ -561,7 +562,6 @@ PROGRAM DDIIS
      !
   CASE DEFAULT; CALL Halt('Response order unknown! RespOrder='//TRIM(IntToChar(RespOrder)))
   END SELECT
-
   !
   ! Deallocate local arrays.
   CALL Delete(F)
