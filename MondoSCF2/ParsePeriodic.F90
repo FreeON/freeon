@@ -248,12 +248,7 @@ CONTAINS
     TYPE(PBCInfo)       :: PBC
     INTEGER             :: I,J,K,NLvec,NTvec
 !   CalculatetheBoxVolume
-    PBC%CellVolume=One
-    DO I=1,3
-       IF(PBC%AutoW%I(I)==1)THEN
-          PBC%CellVolume=PBC%CellVolume*PBC%BoxShape%D(I,I)
-       ENDIF
-    ENDDO
+    PBC%CellVolume=ABS(CellVolume(PBC%BoxShape%D,PBC%AutoW%I))
 !   Calculate dipole and quadripole factors
     IF(PBC%Dimen<2)THEN
        PBC%DipoleFAC=Zero
