@@ -38,7 +38,7 @@ MODULE dXCBlok
        INTEGER                                  :: I,J,K,MaxLA,MaxLB,IA,IB,  &
                                                    LMNA,LMNB,LA,LB,MA,MB,    &
                                                    NA,NB,LAB,MAB,NAB,LMN,    &
-                                                   EllA,EllB,EllAB,LenAB
+                                                   EllA,EllB,EllAB,LenAB,NC
 !-------------------------------------------------------------------------------------- 
        Prim%A=Pair%A
        Prim%B=Pair%B
@@ -72,6 +72,17 @@ MODULE dXCBlok
              Prim%ZB=BS%Expnt%D(PFB,CFB,KB)
              Prim%Zeta=Prim%ZA+Prim%ZB
              Prim%Xi=Prim%ZA*Prim%ZB/Prim%Zeta
+!
+#ifdef PERIODIC
+             CALL SetKxcCell(GM,Prim%Ell,Prim%ZA,Prim%ZB,ExtraEll_O=2) 
+             DO NC=1,CS_Kxc%NCells
+                Prim%A   = Pair%A + CS_Kxc%CellCarts%D(1:3,NC)
+                Prim%B   = Pair%B + CS_Kxc%CellCarts%D(4:6,NC)
+                Prim%AB2 = (Prim%A(1)-Prim%B(1))**2 &
+                         + (Prim%A(2)-Prim%B(2))**2 &
+                         + (Prim%A(3)-Prim%B(3))**2
+#endif
+!
              IF(TestPrimPair(Prim%Xi,Prim%AB2))THEN
                 Prim%PFA=PFA 
                 Prim%PFB=PFB
@@ -94,7 +105,7 @@ MODULE dXCBlok
                       DO K=1,3
                          PExtent=MAX(PExtent,Extent(EllAB,Prim%Zeta,  &
                                      Pab*dHGBra%D(1:LenAB,IA,IB,K),   &
-                                     TauRho,ExtraEll_O=1))
+                                     TauRho,ExtraEll_O=2))
                       ENDDO
                    ENDDO
                 ENDDO
@@ -127,6 +138,9 @@ MODULE dXCBlok
                 ENDIF
 !---------------------------------------------------------------------------
              ENDIF 
+#ifdef PERIODIC
+             ENDDO
+#endif
           ENDDO 
           ENDDO
        ENDDO
