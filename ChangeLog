@@ -1,3 +1,75 @@
+2004-02-03 12:43  mchalla
+
+	* MondoSCF2/SCFs.F90: Small tweak to convergence parameters.
+
+2004-02-02 21:25  vweber
+
+	* Docs/DM_Papers/PERT_3/: Alpha_All.eps, Alpha_Decay_Z_6-31G.eps,
+	Alpha_h2o3D_6-31G_6-31Gss_G_T_t.eps, Beta_All.eps,
+	Beta_h2o3D_6-31G_6-31Gss_G_T_t.eps, Gamma_All.eps,
+	Gamma_h2o3D_6-31G_6-31Gss_G_T_t.eps, Makefile,
+	Mix_h2o3D_6-31G_6-31Gss_G_T_t.eps, Response3.bib, Response3.tex:
+	The new paper.
+
+2004-02-01 15:56  vweber
+
+	* ONX/NONX/ONX.F90: Rm DJ tresholding.
+
+2004-02-01 15:54  vweber
+
+	* SCFeqs/CPSCFStatus.F90: Added parallel for 2n+1 rule.
+
+2004-01-30 23:11  vweber
+
+	* OneE/: MBlok.F90, MakeM.F90: Clean up + initialization of the MD
+	array.
+
+2004-01-30 22:10  vweber
+
+	* SCFeqs/Makefile: Added the new module.
+
+2004-01-30 22:10  vweber
+
+	* SCFeqs/: CPSCFStatus.F90, DenMatResponse.F90, FBuild.F90,
+	TC2Response.F90: New module+ reorder TC2 + 2n+1 rule for second
+	order + minor changes.
+
+2004-01-30 22:07  vweber
+
+	* MondoSCF2/SCFs.F90: Minor changes.
+
+2004-01-30 22:03  vweber
+
+	* MondoSCF2/Response.F90: Minor changes.
+
+2004-01-30 09:13  mchalla
+
+	* Includes/CompilerSpecifics.AMDLinux.PG: Slightly modified to work
+	with myrinet on the zinc cluster.
+
+2004-01-29 14:11  vweber
+
+	* ONX2/Makefile: Added CPPMISC = #-DGTRESH
+
+2004-01-29 14:09  vweber
+
+	* ONX2/: GONX2.F90, GONX2ComputDK.F90, Makefile, ONX2.F90,
+	ONX2ComputK.F90, ONX2DataType.F90, ONX2List.F90: Added atom-block
+	tresholding for gradient, needs -DGTHRES at this moment.
+
+2004-01-28 16:22  nemeth
+
+	* MondoMods/Slatec.F90: Returning to old Slatec, new was not
+	working on Q.
+
+2004-01-28 15:23  nemeth
+
+	* MondoMods/Slatec.F90: An "END" is replaced by "END FUNCTION".
+
+2004-01-28 09:16  mchalla
+
+	* ChangeLog: [no log message]
+
 2004-01-28 09:13  mchalla
 
 	* SCFeqs/P2Use.F90: Yet another minor fix; more carefull testing of
