@@ -1,25 +1,39 @@
 <BeginTitle>
-STO-3G Hartree-Fock
-Graphite (2 atoms)
-loose:  <SCF> = -74.27655454
-good:   <SCF> = -74.27641914
-tight:  <SCF> = -74.27642777
-vtight: <SCF> = -74.27642883
+
+  STO-3G/HF Graphite (2 atoms)
+
+  loose:  <SCF> = -74.27655454
+  good:   <SCF> = -74.27641914
+  tight:  <SCF> = -74.27642777
+  vtight: <SCF> = -74.27642883
+
 <EndTitle>
 
 <BeginOptions>
+
 Charge=0
 Multiplicity=1
+
+DebugAll=(MinDebug,CheckSums)
+
+DIISDamp=0.5
 Guess=SuperPos
+
 SCFMethod=(RH)
 BasisSets=(STO-3G)
 ModelChem=(HF) 
-Accuracy =(good)
-DebugAll =(MinDebug,CheckSums)
-Geometry=(InAnstroms,NoOrder) 
-Periodic=(FracCoord)
+Accuracy=(Loose)
+
 PBC=(T,T,F)
-DIISDamp=0.5
+Periodic=(FracCoord)
+
+MPIInvoke="mpirun"
+MPIProcessors=2
+MPIProcFlag="-np"
+MPISpatialProc=2
+MPIMachineFlag="-machinefile"
+MPIMachineFile="$PBS_NODEFILE"
+
 <EndOptions>
 
 

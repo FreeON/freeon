@@ -38,17 +38,17 @@ full:	all big
 serial:	small big
 #
 small:
-	m Water.inp   Water.out      Water.log
-	m NH3.inp     NH3.out        NH3.log
-	m Biotin.inp  Biotin.out     Biotin.log    
-	m Diamond.inp Diamond.out    Diamond.log
-	m Na2Cl2.inp  Na2Cl2.out     Na2Cl2.log
+	m Water.inp         Water.out         Water.log
+	m NH3.inp           NH3.out           NH3.log
+	m Biotin.inp        Biotin.out        Biotin.log    
+        m Graphite.inp      Graphite.out      Graphite.log
+	m Na2Cl2.inp        Na2Cl2.out        Na2Cl2.log
 	m PeroxideCycle.inp PeroxideCycle.out PeroxideCycle.log
 	m Histidine.inp     Histidine.out     Histidine.log 
 #
 big:	
 	m Caffiene.inp     Caffiene.out      Caffine.log
-	m MgO.inp          MgO.out           MgO.log
+	m Diamond.inp      Diamond.out       Diamond.log
 	m BetaCarotene.inp BetaCarotene.out  BetaCarotene.log
 	m Chlorophyll.inp  Chlorophyll.out;  Chlorophyll.log
 	m Vancomycin.inp   Vancomycin.out;   Vancomycin.log
@@ -60,11 +60,11 @@ pbs:
 	./sub_pbs Water         1
 	./sub_pbs NH3           1
 	./sub_pbs Biotin        1
+	./sub_pbs Graphite      1
 	./sub_pbs Diamond       1
 	./sub_pbs Na2Cl2        1
 	./sub_pbs PeroxideCycle 1
 	./sub_pbs Histidine     1
-	./sub_pbs MgO           1
 	./sub_pbs Caffiene      1
 	./sub_pbs BetaCarotene  1
 	./sub_pbs Chlorophyll   1
@@ -77,11 +77,11 @@ pbs_parallel:
 	./sub_pbs Water         2
 #	./sub_pbs NH3           6 # Unless scratch is globally available, this will fail
 	./sub_pbs Biotin        4
+	./sub_pbs Graphite      2
 	./sub_pbs Diamond       4
 	./sub_pbs Na2Cl2        2
 	./sub_pbs PeroxideCycle 2
 	./sub_pbs Histidine     4
-	./sub_pbs MgO           2
 	./sub_pbs Caffiene      4
 	./sub_pbs BetaCarotene  8
 	./sub_pbs Chlorophyll   8
