@@ -31,9 +31,9 @@ dvi:	latex
 
 latex:
 	latex Response3
-	bibtex Response3
-	latex Response3
-	bibtex Response3
+#	bibtex Response3
+#	latex Response3
+#	bibtex Response3
 	latex Response3
 
 spell:
