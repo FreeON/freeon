@@ -22,7 +22,7 @@ MODULE PFFTen
   CHARACTER(LEN=7),PARAMETER          :: Cube112='Cube112'
   CHARACTER(LEN=7),PARAMETER          :: Cube122='Cube122'
   CHARACTER(LEN=7),PARAMETER          :: Cube222='Cube222'
-CONTAINS
+CONTAINS  
 !========================================================================================
 ! 
 !========================================================================================
@@ -117,59 +117,41 @@ CONTAINS
     INTEGER                           :: I,J,L,M,LM,NC
     TYPE(CellSet)                     :: CS, CSMM
     TYPE(DBL_VECT)                    :: TenC,TenS
-    REAL(DOUBLE),DIMENSION(3,3)       :: RecpLatVec,LatVec
     TYPE(CRDS)                        :: GM
     TYPE(ARGMT)                       :: Args
 !-------------------------------------------------------------------------------------!
 !
-!   Get The Lattice and Reciprocal Lattice Vectors
+!   Number of Inner Boxes
 !
     TenC%D=Zero
     TenS%D=Zero
-    DO I = 1,3
-       DO J = 1,3
-          RecpLatVec(I,J) = GM%PBC%InvBoxSh%D(J,I)
-          LatVec(I,J)     = GM%PBC%BoxShape%D(I,J)
-       ENDDO
-    ENDDO
-!
-!   Number of Inner Boxes
-!
     NC = (CS%NCells-1)/2
 !
-!   One Dimension: Right
+!   One Dimension: Lef and Right
 !
     IF(GM%PBC%AutoW%I(1)==1) THEN
-       CALL IrRegular(MaxL,LatVec(1,1),Zero,Zero)
+       CALL IrRegular(MaxL, GM%PBC%BoxShape%D(1,1),Zero,Zero)
+       TenC%D = Cpq
+       CALL IrRegular(MaxL,-GM%PBC%BoxShape%D(1,1),Zero,Zero)
+       TenC%D = TenC%D+Cpq
     ELSEIF(GM%PBC%AutoW%I(2)==1) THEN
-       CALL IrRegular(MaxL,Zero,LatVec(2,2),Zero)
+       CALL IrRegular(MaxL,Zero, GM%PBC%BoxShape%D(2,2),Zero)
+       TenC%D = Cpq
+       CALL IrRegular(MaxL,Zero,-GM%PBC%BoxShape%D(2,2),Zero)
+       TenC%D = TenC%D+Cpq
     ELSEIF(GM%PBC%AutoW%I(3)==1) THEN      
-       CALL IrRegular(MaxL,Zero,Zero,LatVec(3,3))
+       CALL IrRegular(MaxL,Zero,Zero, GM%PBC%BoxShape%D(3,3))
+       TenC%D = Cpq
+       CALL IrRegular(MaxL,Zero,Zero,-GM%PBC%BoxShape%D(3,3))
+       TenC%D = TenC%D+Cpq
     ENDIF
     DO L=1,MaxL
        DO M = 0,L
           LM = LTD(L)+M
-          TenC%D(LM) = Cpq(LM)*RZeta(L+1,NC)
+          TenC%D(LM) = TenC%D(LM)*RZeta(L+1,NC)
        ENDDO
     ENDDO
 !
-!   One Dimension: Left
-!
-    IF(GM%PBC%AutoW%I(1)==1) THEN
-       CALL IrRegular(MaxL,-LatVec(1,1),Zero,Zero)
-    ELSEIF(GM%PBC%AutoW%I(2)==1) THEN
-       CALL IrRegular(MaxL,Zero,-LatVec(2,2),Zero)
-    ELSEIF(GM%PBC%AutoW%I(3)==1) THEN      
-       CALL IrRegular(MaxL,Zero,Zero,-LatVec(3,3))
-    ENDIF
-    NC = (CS%NCells-1)/2
-    DO L=1,MaxL
-       DO M = 0,L
-          LM = LTD(L)+M
-          TenC%D(LM) =  TenC%D(LM) + Cpq(LM)*RZeta(L+1,NC)
-       ENDDO
-    ENDDO
-    !
   END SUBROUTINE MakeTensor1D
 !========================================================================================
 ! Calculate the PFFTensor 2D
@@ -211,15 +193,16 @@ CONTAINS
 !   Two Dimension
 !
     LSwitch  = 10
-    LenScale = GM%PBC%CellVolume**(Half)
+    LenScale = 6.0D0!GM%PBC%CellVolume**(Half)
     Rmax     = Rmin+LenScale*(One/Accuracy)**(One/DBLE(LSwitch))
-    BetaSq   = 0.25D0/(LenScale)**2
+    BetaSq   = One/(LenScale)**2
+    LSwitch  = MIN(MaxL,LSwitch)
 !           
 !   Sum the Real Space
 !
     DO
-       CALL New_CellSet_Sphere(CSMM,GM%PBC%AutoW%I,LatVec,Rmin)
-       IF(CSMM%NCells .GT. 500000) THEN
+       CALL New_CellSet_Sphere(CSMM,GM%PBC%AutoW%I,LatVec,Rmax)
+       IF(CSMM%NCells .GT. 50000) THEN
           Rmax = 0.99*Rmax
           CALL Delete_CellSet(CSMM)
        ELSE
@@ -366,7 +349,7 @@ CONTAINS
 !
     TenC%D=Zero
     TenS%D=Zero
-    Accuracy = 1.D-14
+    Accuracy = 1.D-12
     Rmin     = SQRT(CS%CellCarts%D(1,1)**2+CS%CellCarts%D(2,1)**2+CS%CellCarts%D(3,1)**2)
 !
 !   Get The Lattice and Reciprocal Lattice Vectors
@@ -383,7 +366,8 @@ CONTAINS
     LSwitch  = 10
     LenScale = GM%PBC%CellVolume**(One/Three)
     Rmax     = Rmin+LenScale*(One/Accuracy)**(One/DBLE(LSwitch))
-    BetaSq   = 0.25D0/(LenScale)**2
+    BetaSq   = One/(LenScale)**2
+    LSwitch  = MIN(MaxL,LSwitch)
 !           
 !   Sum the Real Space
 !
@@ -690,5 +674,7 @@ CONTAINS
     RZeta = RZeta - RSum
     !
   END FUNCTION RZeta
+!
+!
 END MODULE PFFTen
 
