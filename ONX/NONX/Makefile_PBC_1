@@ -33,7 +33,7 @@ all: NONX XForce
 
 Objects1 = ONXParameters.o ONXMemory.o ContractionScaling.o MatFilter.o \
            InitExchangeMatrix.o Sizes.o Stats.o DisOrder_PBC_1.o MemInit_PBC_1.o \
-           Contract.o HRRBra.o HRRKet.o \
+           Contract.o HrrBra.o HrrKet.o \
            VRRl.o RGen1C.o CCDriver.o VRRDriver.o \
            RangeOfDensity.o VRRs.o QuickSortDis.o PutDis.o \
            RangeOfExchange.o ONX_PBC_1.o \
@@ -43,7 +43,7 @@ Objects1 = ONXParameters.o ONXMemory.o ContractionScaling.o MatFilter.o \
 
 Objects2 = ONXParameters.o ONXMemory.o ContractionScaling.o        \
            Sizes.o Stats.o MemInit.o GradONX.o Contract.o          \
-           HRRBra.o HRRKet.o VRRl.o RGen1C.o CCDriver.o            \
+           HrrBra.o HrrKet.o VRRl.o RGen1C.o CCDriver.o            \
            VRRDriver.o DisOrderGrad.o RangeOfDensity.o VRRs.o      \
            QuickSortDis.o PutDis.o GDLoader.o \
            GDrivers.o ComputeXForce.o ContractG.o RGen.o           \
@@ -52,7 +52,7 @@ Objects2 = ONXParameters.o ONXMemory.o ContractionScaling.o        \
 
 ReleaseFiles=ONXParameters.x ONXMemory.x ContractionScaling.x MatFilter.x \
              InitExchangeMatrix.x Sizes.x Stats.x MemInit.x \
-             ONX.x GradONX.x Contract.x HRRBra.x HRRKet.x \
+             ONX.x GradONX.x Contract.x HrrBra.x HrrKet.x \
              VRRl.x RGen1C.x CCDriver.x VRRDriver.x \
              DisOrder.x RangeOfDensity.x VRRs.x QuickSortDis.x PutDis.x \
              RangeOfExchange.x \
