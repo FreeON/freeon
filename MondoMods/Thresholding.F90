@@ -241,7 +241,7 @@ MODULE Thresholding
            R=Erf_Switch/SqZ
            RETURN
         ENDIF
-        !WRITE(*,*)'=-=========================================='
+!        WRITE(*,*)'=-=========================================='
         ! Ok, within resolution--do root finding...
         DelR=Erf_Switch/SqZ
         BisR=Zero
@@ -258,8 +258,8 @@ MODULE Thresholding
            ENDIF           
            Val=Ec/R
            CTest=(Val-NewTau)/Tau
-           !WRITE(*,33)R,DelR,X,CTest; 33 format(5(2x,D12.6))
-           IF(ABS(CTest)<1D-4)THEN
+!           WRITE(*,33)R,DelR,X,CTest; 33 format(5(2x,D12.6))
+           IF(ABS(CTest)<1D-3)THEN
               ! Converged
               RETURN           
            ELSEIF(DelR<1D-40)THEN
