@@ -559,45 +559,23 @@ MODULE PrettyPrint
 !                Print XYZ format
                  Mssg=IntToChar(GM%NAtms)
                  WRITE(PU,*)TRIM(Mssg)
-!                 Mssg='Geom #'//TRIM(IntToChar(GM%Confg)) &
-!                    //', <SCF> = '//TRIM(FltToMedmChar(GM%ETotal))
-!                 WRITE(PU,*)TRIM(Mssg)
-                 Mssg = TRIM('FINAL HEAT OF FORMATION = ')//TRIM(FltToMedmChar(Zero)) 
+                 Mssg='Geom #'//TRIM(IntToChar(GM%Confg)) &
+                    //', <SCF> = '//TRIM(FltToMedmChar(GM%ETotal))
                  WRITE(PU,*)TRIM(Mssg)
-!
                  AA=One/AngstromsToAU
                  DO I=1,GM%NAtms
-                     Mssg=Ats(INT(GM%AtNum%D(I)))                         &  !!!! correct only for integer charged QM atoms
-                       //'   '//FltToChar(GM%Carts%D(1,I)*AA)    &
-                       //'   '//FltToChar(GM%Carts%D(2,I)*AA)    &
-                       //'   '//FltToChar(GM%Carts%D(3,I)*AA) 
-                     WRITE(PU,*)TRIM(Mssg)
-                 ENDDO
-                 WRITE(PU,*)' OK, GET READY FOR A SILLY NUMBER OF EXTRA COORDINATES TO DRAG AROUND...'
-                 WRITE(PU,*)
-                 WRITE(PU,*)" HERE ARE THE ABS CARTS "
-                 DO I=1,GM%NAtms
-                     Mssg=Ats(INT(GM%AtNum%D(I)))                   &  !!!! correct only for integer charged QM atoms
-                       //'   '//FltToChar(GM%AbCarts%D(1,I)*AA)    &
-                       //'   '//FltToChar(GM%AbCarts%D(2,I)*AA)    &
-                       //'   '//FltToChar(GM%AbCarts%D(3,I)*AA) 
-                     WRITE(PU,*)TRIM(Mssg)
-                 ENDDO
-                 WRITE(PU,*)" HERE ARE THE ABS BOX CARTS "
-                 DO I=1,GM%NAtms
-                     Mssg=Ats(INT(GM%AtNum%D(I)))                   &  !!!! correct only for integer charged QM atoms
-                       //'   '//FltToChar(GM%AbBoxCarts%D(1,I)*AA)    &
-                       //'   '//FltToChar(GM%AbBoxCarts%D(2,I)*AA)    &
-                       //'   '//FltToChar(GM%AbBoxCarts%D(3,I)*AA) 
-                     WRITE(PU,*)TRIM(Mssg)
-                 ENDDO
-                 WRITE(PU,*)" HERE ARE THE ABS BOX CARTS "
-                 DO I=1,GM%NAtms
-                     Mssg=Ats(INT(GM%AtNum%D(I)))                   &  !!!! correct only for integer charged QM atoms
-                       //'   '//FltToChar(GM%AbBoxCarts%D(1,I)*AA)    &
-                       //'   '//FltToChar(GM%AbBoxCarts%D(2,I)*AA)    &
-                       //'   '//FltToChar(GM%AbBoxCarts%D(3,I)*AA) 
-                     WRITE(PU,*)TRIM(Mssg)
+                    IF(GM%CConstrain%I(I)==1)THEN
+                       Mssg=Ats(INT(GM%AtNum%D(I)))                         &  !!!! correct only for integer charged QM atoms
+                            //'   '//DblToMedmChar(GM%Carts%D(1,I)*AA)    &
+                            //'   '//DblToMedmChar(GM%Carts%D(2,I)*AA)    &
+                            //'   '//DblToMedmChar(GM%Carts%D(3,I)*AA)//'  C '
+                    ELSE
+                       Mssg=Ats(INT(GM%AtNum%D(I)))                         &  !!!! correct only for integer charged QM atoms
+                            //'   '//DblToMedmChar(GM%Carts%D(1,I)*AA)    &
+                            //'   '//DblToMedmChar(GM%Carts%D(2,I)*AA)    &
+                            //'   '//DblToMedmChar(GM%Carts%D(3,I)*AA)
+                    ENDIF
+                    WRITE(PU,*)TRIM(Mssg)
                  ENDDO
               ELSEIF(PrintGeom_O=='PDB')THEN
 !                Print PDB format
