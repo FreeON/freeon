@@ -57,7 +57,7 @@ PROGRAM MakePFFT
      dTenC%D=Zero
      dTenS%D=Zero
 !    Calculate
-     CALL CalculateDivPFFT(MaxEll,GM,Args,CSS,dTenC,dTenS)
+     CALL CalculateDivPFFT(MaxEll,GM,Args,CS_IN,dTenC,dTenS)
 !    Put them to HDF
      CALL Put(dTenC,'dPFFTensorC')
      CALL Put(dTenS,'dPFFTensorS')
