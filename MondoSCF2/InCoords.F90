@@ -3133,7 +3133,9 @@ CONTAINS
      CALL BMatrix(XYZ,IntCs,B,PBCDim, &
                   GCoordCtrl%LinCrit,GCoordCtrl%TorsLinCrit)
      CALL CleanBConstr(IntCs,B,NatmsLoc)
-     CALL CleanBLConstr(XYZ,IntCs,B,PBCDim)
+   ! CALL CleanBLConstr(XYZ,IntCs,B,PBCDim)
+write(*,*) 'B%BL%D=0 : hardwired constraints on the lattice params.'
+B%BL%D=Zero
      !
      CALL BtoSpB_1x1(B,ISpB,JSpB,ASpB)
      !
