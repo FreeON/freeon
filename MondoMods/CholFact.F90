@@ -856,10 +856,10 @@ CONTAINS
      !
      ! This routine carries out symbolic multiplication of C = A*B
      !
+     INTEGER      :: NP,NQ,NR
      INTEGER      :: IA(NP+1),JA(*)
      INTEGER      :: IB(NQ+1),JB(*) 
      INTEGER      :: IC(NP+1),JC(*) 
-     INTEGER      :: NP,NQ,NR
      INTEGER      :: I,J,K,L          
      INTEGER      :: IP,IAA,IAB,JP,IBA,IBB,KP
      TYPE(INT_VECT):: IX
