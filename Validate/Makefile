@@ -50,6 +50,7 @@ test:	$(TstObjs)
 serial:	small big
 #
 small:
+        m Mg0.inp     MgO.out;               ./Test MgO.out     MgO.ref
 	m SiF4.inp    SiF4.out;              ./Test SiF4.out    SiF4.ref
 	m Urea.inp    Urea.out;              ./Test Urea.out    Urea.ref
 	m Water.inp   Water.out;             ./Test Water.out   Water.ref 
@@ -65,6 +66,7 @@ big:
 #
 small_pbs:
 	chmod u+x sub_pbs
+        ./sub_pbs MgO
 	./sub_pbs SiF4
 	./sub_pbs Urea 
 	./sub_pbs Water
