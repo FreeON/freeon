@@ -83,6 +83,19 @@ CONTAINS
 !====================================================================================
 !
 !====================================================================================
+       SUBROUTINE HGToSP_Direct(L,PiZ,HGCo,LenHGTF,C,S,LenSP) 
+          INTEGER                    :: L,LenHGTF,LenSP
+          REAL(DOUBLE)               :: PiZ
+          REAL(DOUBLE),DIMENSION(1:LenHGTF) :: HGCo      
+          REAL(DOUBLE),DIMENSION(0:LenSP) :: C,S
+          REAL(DOUBLE),DIMENSION(20) :: W
+          SELECT CASE(L)
+          INCLUDE 'HGToSP.Inc'
+          CASE DEFAULT
+             CALL Halt('Bad logic in HGToSP_Direct, time to remake HGToSP.Inc')
+          END SELECT
+       END SUBROUTINE HGToSP_Direct
+!====================================================================================
        SUBROUTINE HGToSP_Gen(L,PiZ,HGCo,C,S) 
           INTEGER                    :: L
           REAL(DOUBLE)               :: PiZ

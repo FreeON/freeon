@@ -158,8 +158,8 @@ MODULE JGen
                                                    StartLB,StopLA,StopLB
        INTEGER                                  :: I,J,MaxLA,MaxLB,IA,IB,LMNA, &
                                                    LMNB,LA,LB,MA,MB,NA,NB,LAB, &
-                                                   MAB,NAB,LM,LMN,Ell,EllA,    &
-                                                   EllB,NC,L,M,LenHGTF
+                                                   MAB,NAB,LM,LMN,SumEll,EllA,    &
+                                                   EllB,NC,L,M,LenHGTF,LenSP
 !------------------------------------------------------------------------------- 
        JBlk=Zero
        KA=Pair%KA
@@ -207,12 +207,15 @@ MODULE JGen
                          DO LMNB=StartLB,StopLB
                             IB=IB+1
                             EllB=BS%LxDex%I(LMNB)+BS%LyDex%I(LMNB)+BS%LzDex%I(LMNB)       
-                            LenHGTF=LHGTF(EllA+EllB)
+                            SumEll = EllA+EllB
+                            LenHGTF=LHGTF(SumEll)
 !                           Extent (for PAC)
-                            EX=Extent(EllA+EllB,Prim%Zeta,HGBra%D(1:LenHGTF,IA,IB),TauPAC,ExtraEll_O=0,Potential_O=.TRUE.)
+                            EX=Extent(SumEll,Prim%Zeta,HGBra%D(1:LenHGTF,IA,IB),TauPAC,ExtraEll_O=0,Potential_O=.TRUE.)
                             PExtent=MAX(PExtent,EX)
 !                           Strength (for MAC)
-                            CALL HGToSP(Prim%Zeta,EllA+EllB,HGBra%D(1:LenHGTF,IA,IB),SPBraC,SPBraS)!
+                            ! CALL HGToSP(Prim%Zeta,EllA+EllB,HGBra%D(1:LenHGTF,IA,IB),SPBraC,SPBraS)
+                            CALL HGToSP_Direct(SumEll,(Pi/Prim%Zeta)**(ThreeHalves),HGBra%D(1,IA,IB),LenHGTF,SPBraC(0),SPBraS(0),LSP(SumEll))
+                            
                             PStrength = Zero
                             DO L=0,EllA+EllB
                                PStrength = PStrength+FudgeFactorial(L,SPEll+1)*Unsold0(L,SPBraC,SPBraS)
@@ -258,14 +261,17 @@ MODULE JGen
                             DO LMNB=StartLB,StopLB
                                IB=IB+1
                                EllB=BS%LxDex%I(LMNB)+BS%LyDex%I(LMNB)+BS%LzDex%I(LMNB)
-                               Ell=EllA+EllB
+                               SumEll=EllA+EllB
+                               LenHGTF=LHGTF(SumEll)
+                               LenSP=LSP(SumEll)
 !                              Near field
-                               DO LMN=1,LHGTF(Ell)
+                               DO LMN=1,LenHGTF
                                   JBlk(IA,IB)=JBlk(IA,IB)+Phase%D(LMN)*HGBra%D(LMN,IA,IB)*HGKet(LMN)
                                ENDDO
 !                              Far field
-                               CALL HGToSP(Prim%Zeta,Ell,HGBra%D(:,IA,IB),SPBraC,SPBraS)
-                               DO LM=0,LSP(Ell)
+                               ! CALL HGToSP(Prim%Zeta,SumEll,HGBra%D(:,IA,IB),SPBraC,SPBraS)
+                               CALL HGToSP_Direct(SumEll,(Pi/Prim%Zeta)**(ThreeHalves),HGBra%D(1,IA,IB),LenHGTF,SPBraC(0),SPBraS(0),LenSP)
+                               DO LM=0,LenSP
                                   JBlk(IA,IB)=JBlk(IA,IB)+SPBraC(LM)*SPKetC(LM)+SPBraS(LM)*SPKetS(LM)
                                ENDDO
                             ENDDO
