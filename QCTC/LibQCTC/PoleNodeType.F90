@@ -13,9 +13,8 @@ MODULE PoleNodeType
      INTEGER                               :: Ell      ! Ell type
      REAL(DOUBLE)                          :: Zeta     ! Minimum exponent in this node
      REAL(DOUBLE)                          :: Strength ! Strength of the Pole
-     REAL(DOUBLE)                          :: DMax2    ! (Max distance)^2 from node center to DBox 
+     REAL(DOUBLE)                          :: DMax2    ! (Max distance)^2 from node center to dist
      TYPE(BBox)                            :: Box      ! Bounding Box of distribution (for PAC)
-     TYPE(BBox)                            :: DBox     ! Bounding Box of distribution centers (for MAC)
      TYPE(PoleNode),POINTER                :: Descend  ! Next node in tree descent
      TYPE(PoleNode),POINTER                :: Travrse  ! Next node in tree traversal
 #ifdef POINTERS_IN_DERIVED_TYPES
