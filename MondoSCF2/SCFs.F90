@@ -227,7 +227,7 @@ CONTAINS
     ENDIF
 !   Archive and Check Status
     CALL StateArchive(N,S)
-    SCF_STATUS=ConvergedQ(cSCF,cBAS,N,S,O,G,ETot,DMax,DIIS,IConAls,CPSCF_O)
+    SCF_STATUS=ConvergedQ(cSCF,cBAS,cGEO,N,S,O,G,ETot,DMax,DIIS,IConAls,CPSCF_O)
     S%Previous%I=S%Current%I
     IF(SCF_STATUS==DID_CONVERGE) SCFCycle=.TRUE.
 !
@@ -235,7 +235,7 @@ CONTAINS
   !===============================================================================
   !
   !===============================================================================
-  FUNCTION ConvergedQ(cSCF,cBAS,N,S,O,G,ETot,DMax,DIIS,IConAls,CPSCF_O)
+  FUNCTION ConvergedQ(cSCF,cBAS,cGEO,N,S,O,G,ETot,DMax,DIIS,IConAls,CPSCF_O)
     TYPE(FileNames)             :: N
     TYPE(State)                 :: S
     TYPE(Options)               :: O
@@ -243,16 +243,16 @@ CONTAINS
     TYPE(Parallel)              :: M
     TYPE(DBL_RNK2)              :: ETot,DMax,DIIS
     LOGICAL,OPTIONAL            :: CPSCF_O
-    LOGICAL                     :: DoCPSCF,DoDIIS,DoODA,RebuildPostODA
+    LOGICAL                     :: DoCPSCF,DoDIIS,DoODA,RebuildPostODA,DoingMD
     LOGICAL                     :: ALogic,BLogic,CLogic,DLogic,ELogic,A2Logic, &
                                    GLogic,QLogic,ILogic,OLogic,FLogic
-    INTEGER                     :: cSCF,cBAS,iGEO,iCLONE
+    INTEGER                     :: cSCF,cBAS,cGEO,iGEO,iCLONE
     REAL(DOUBLE)                :: DIISA,DIISB,DDIIS,DIISQ,       &
          DETOT,ETOTA,ETOTB,ETOTQ,ETEST, &
          DDMAX,DMAXA,DMAXB,DMAXQ,DTEST,ETOTO,ODAQ
     INTEGER,DIMENSION(G%Clones) :: Converged
-    INTEGER                     :: ConvergedQ,iSCF,IConAls
-    CHARACTER(LEN=DCL)            :: chGEO
+    INTEGER                     :: ConvergedQ,iSCF,IConAls,MinSCF,MaxSCF
+    CHARACTER(LEN=DCL)          :: chGEO
     !----------------------------------------------------------------------------!
     !
     IF(PRESENT(CPSCF_O)) THEN
@@ -374,6 +374,16 @@ CONTAINS
        HDFFileID=OpenHDF(N%HFile)
        DO iCLONE=1,G%Clones
           HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
+          ! Determine SCF if restarting MD
+          MinSCF = O%MinSCF
+          MaxSCF = O%MaxSCF
+          CALL Get(DoingMD,'DoingMD')
+          IF(DoingMD) THEN
+             IF(cGEO .LE. 1) THEN
+                MinSCF = 10
+                MaxSCF = 11
+             ENDIF
+          ENDIF
           ! Gather convergence parameters
           CALL Get(Etot%D(cSCF,iCLONE),'Etot')
           CALL Get(DMax%D(cSCF,iCLONE),'DMax')
@@ -511,11 +521,11 @@ CONTAINS
           ConvergedQ=MIN(ConvergedQ,Converged(iCLONE))
        ENDDO
 !
-       IF(cSCF .LT. O%MinSCF) THEN
+       IF(cSCF .LT. MinSCF) THEN
           ConvergedQ=NOT_CONVERGE
           Mssg = " "
        ENDIF
-       IF(cSCF .GE. O%MaxSCF) THEN
+       IF(cSCF .GE. MaxSCF) THEN
           ConvergedQ=DID_CONVERGE
           Mssg = "Forced SCF convergence"
        ENDIF
