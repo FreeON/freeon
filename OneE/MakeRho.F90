@@ -48,6 +48,7 @@ PROGRAM MakeRho
   IF(HasMM())THEN
      CALL Get(GM_MM,Tag_O='GM_MM'//CurGeom)
   ENDIF
+! CALL Print_CRDS(GM_MM,Unit_O=6)
 !---------------------------------------------------------------
   IF(HasQM())THEN
 #endif
@@ -230,7 +231,15 @@ PROGRAM MakeRho
 #ifdef PERIODIC
 #ifdef WRAPDIST
   ! Fold the Distributions back into the Cell
-  CALL Fold_Rho(GM,Rho)
+#ifdef MMech
+  IF(HasMM()) THEN
+    IF(HasQM()) CALL Fold_Rho(GM_MM,Rho)
+  ELSE
+#endif
+    CALL Fold_Rho(GM,Rho)
+#ifdef MMech
+  ENDIF
+#endif
 #endif
 #endif
   ! Prune negligible distributions from the electronic density
@@ -386,6 +395,7 @@ PROGRAM MakeRho
        CALL Put_HGRho(Rho2,'Rho',Args,0) 
   ENDIF
   CALL PChkSum(Rho2,'Rho',Prog)
+! CALL Print_HGRho(Rho2,'Rho2',Unit_O=6)
   ! Tidy up
 #ifdef MMech
   IF(HasMM()) THEN

@@ -607,8 +607,6 @@ MODULE ParseInPut
 !----------------------------------------------------------------------------
 ! Parse for periodic options and lattice vectors
 !
-         PBC_On=.FALSE.
-         CALL Put(PBC_On,'PBCOn')
 #ifdef PERIODIC
          CALL ParsePeriodic(Ctrl,GM)
 #endif
@@ -2030,14 +2028,12 @@ MODULE ParseInPut
 !     GM_MM%InAu = .FALSE. !!! for MM
       GM_MM%Carts%D(:,:) = ATMCRD(:,:)
 !
-        PBC_On=.FALSE.
-        CALL Put(PBC_On,'PBCOn')
 #ifdef PERIODIC
         CALL ParsePeriodic(Ctrl,GM_MM)
 #endif
 !
 !     GM_MM%InAu = .TRUE. !!! for MM
-      IF(.NOT.PBC_On) GM_MM%Carts%D = AngstromsToAu*GM_MM%Carts%D
+!     IF(.NOT.PBC_On) GM_MM%Carts%D = AngstromsToAu*GM_MM%Carts%D
       GM_MM%Nkind = NTYPES
       GM_MM%AtMss%D(:) = ATMMAS(:)
       GM_MM%AtNum%D(:) = ATMCHG(:)
@@ -2094,7 +2090,7 @@ MODULE ParseInPut
 !
 #ifdef PERIODIC
 !
-            IF(PBC_On) THEN
+!           IF(PBC_On) THEN !------------------------PBC
 !
 !           Convert to AU and ComPute Fractioan and Atomic Coordinates
 !
@@ -2122,7 +2118,10 @@ MODULE ParseInPut
                ENDIF
             ENDDO
 !
-            ENDIF
+!            ENDIF !------------------------PBC
+#else
+! Convert MM input
+        IF(.NOT.GM_MM%InAU) GM_MM%Carts%D = GM_MM%Carts%D*AngstromsToAU
 #endif
 !
 ! Print out MM coordinates into outPut file
@@ -2851,46 +2850,9 @@ SUBROUTINE ParsePeriodic(Ctrl,GMLoc)
             GMLoc%PBC%Epsilon = 1.D32
          ENDIF
 !---------------------------------------------------------------------------- 
-!
-! Check, whether Periodic option is on
-!
-         AuxChar=PBOUNDRY
-         Call LowCase(AuxChar)
-         REWIND(UNIT=Inp)
-         DO 
-           READ(Inp,DEFAULT_CHR_FMT,END=1)Line
-           LineLowCase = Line
-           Call LowCase(LineLowCase)
-           IF(INDEX(TRIM(LineLowCase),TRIM(AuxChar))/=0) GO TO 2
-         ENDDO
-      1  CONTINUE
-         PBC_On=.FALSE. 
-         CALL Put(PBC_On,'PBCOn')
-!        RETURN
-         GO TO 3
-      2  CONTINUE
-         PBC_On=.TRUE. 
-         CALL Put(PBC_On,'PBCOn')
-      3  CONTINUE
-!-------------------------------------------------------------
 !        Parse <PERIODIC> for Lattice Vectors
 !
          CALL ParsePeriodic_MONDO(Ctrl,GMLoc)
-!
-!----------------------------------------------------------------------------
-!
-!     CALL OpenHDF(InfFile)
-!        IF(HasMM()) THEN
-!          CALL Put(GMLoc,Tag_O='GM_MM'//CurG)
-!        ELSE
-!          CALL Put(GMLoc,Tag_O=CurG)
-!        ENDIF
-!     CALL CloseHDF()
-!
-!     CLOSE(Inp)
-!     CLOSE(Out)
-!
-!---------------------------------------------------------------------------- 
 !
 END SUBROUTINE ParsePeriodic
 #endif

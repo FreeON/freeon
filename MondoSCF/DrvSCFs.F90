@@ -618,7 +618,7 @@ MODULE DrvSCFs
 ! Temporary for PBC
 !
 #ifdef PERIODIC
-  IF(PBC_On) THEN
+! IF(PBC_On) THEN
      CALL OpenASCII(OutFile,Out)
        write(out,*) 'E_MM_Coulomb    TOTAL= ',MM_COUL,' KJ/mol'
        write(*,*) 'E_MM_Coulomb    TOTAL= ',MM_COUL,' KJ/mol'
@@ -627,7 +627,7 @@ MODULE DrvSCFs
        write(*,*) 'E_MM_Coulomb    TOTAL= ',MM_COUL,' Hartree'
      CLOSE(Out)
     RETURN
-  ENDIF
+! ENDIF
 #endif
 !
 ! Do MM Covalent terms
