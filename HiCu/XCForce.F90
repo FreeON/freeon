@@ -107,9 +107,6 @@ PROGRAM XCForce
   Frc%D=Frc%D+XCFrc%D
   CALL Put(Frc,'GradE',Tag_O=CurGeom)
   CALL PChkSum(Frc,'GradE')  
-! for tmp debuging ...
-  CALL PPrint(Frc,'Total Force',Unit_O=6)
-  CALL PPrint(Frc,'Total Force')
 !--------------------------------------------------------------------------------
 ! Tidy up
 !--------------------------------------------------------------------------------

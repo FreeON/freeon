@@ -118,7 +118,6 @@ MODULE CubeTree
                   //', Pts/Atom = '//TRIM(IntToChar(PtsPerAtom))
                CALL OpenASCII(OutFile,Out)         
                WRITE(*,*)TRIM(Mssg)
-               WRITE(Out,*)' IXact = ',IXact
                WRITE(Out,*)TRIM(Mssg)
                CLOSE(Out)
             ENDIF
