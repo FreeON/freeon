@@ -212,54 +212,54 @@ MODULE MDynamics
 !      Add Header
        IF(iGEO==1) THEN
           Line = "##################################################"
-          WRITE(Out,'a128') Line
+          WRITE(Out,97) Line
           Line = "# MD Clone No. = "//TRIM(IntToChar(iCLONE))
-          WRITE(Out,'a128') Line
+          WRITE(Out,97) Line
           Line = "# MD Atoms No. = "//TRIM(IntToChar(C%Geos%Clone(iCLONE)%NAtms))
-          WRITE(Out,'a128') Line
+          WRITE(Out,97) Line
           IF(    C%Dyns%MDAlgorithm==VERLET_MD_AL) THEN
              Line = "# MD Algorithm = Verlet"
           ELSEIF(C%Dyns%MDAlgorithm==GEAR_MD_AL) THEN
              Line = "# MD Algorithm = Gear"
           ENDIF
-          WRITE(Out,'a128') Line
+          WRITE(Out,97) Line
           Line = "# MD Time Step = "//TRIM(DblToMedmChar(C%Dyns%DTime))
-          WRITE(Out,'a128') Line
+          WRITE(Out,97) Line
           Line = "# MD Max Step  = "//TRIM(IntToChar(C%Dyns%MDMaxSteps))
-          WRITE(Out,'a128') Line
+          WRITE(Out,97) Line
           IF(C%Dyns%Velcty_Scaling) THEN
           ELSE
              Line = "# Velocity     : Scaling is Off"
-             WRITE(Out,'a128') Line
+             WRITE(Out,97) Line
           ENDIF
           IF(C%Dyns%Const_Temp) THEN
           ELSE
              Line = "# Temperature  : Scaling is Off"
-             WRITE(Out,'a128') Line
+             WRITE(Out,97) Line
           ENDIF
           IF(C%Dyns%Const_Press) THEN
           ELSE
              Line = "# Volume       : Scaling is Off"
-             WRITE(Out,'a128') Line
+             WRITE(Out,97) Line
           ENDIF
           IF(C%Dyns%Parallel_Rep) THEN
           ELSE
              Line = "# *** Parallel Replicates are Off ***"
-             WRITE(Out,'a128') Line
+             WRITE(Out,97) Line
           ENDIF
           Line = "##################################################"
-          WRITE(Out,'a128') Line
+          WRITE(Out,97) Line
           WRITE(Out,*)
        ENDIF
 !      Add MD Timestep Configuration
        Line = "----------------------------------------------"//TRIM(IntToChar(iGEO))// &
               "----------------------------------------------"
-       WRITE(Out,'a128') Line
-       WRITE(Out,'(a18,F16.10)') "MD Time        = ",MDTime%D(iCLONE)
-       WRITE(Out,'(a18,F16.10)') "MD Kinetic     = ",MDKin%D(iCLONE)
-       WRITE(Out,'(a18,F16.10)') "MD Potential   = ",MDEPot%D(iCLONE)
-       WRITE(Out,'(a18,F16.10)') "MD Total       = ",MDEtot%D(iCLONE)
-       WRITE(Out,'(a18,F16.10)') "MD Temperature = ",MDTemp%D(iCLONE)
+       WRITE(Out,97) Line
+       WRITE(Out,98) "MD Time        = ",MDTime%D(iCLONE)
+       WRITE(Out,98) "MD Kinetic     = ",MDKin%D(iCLONE)
+       WRITE(Out,98) "MD Potential   = ",MDEPot%D(iCLONE)
+       WRITE(Out,98) "MD Total       = ",MDEtot%D(iCLONE)
+       WRITE(Out,98) "MD Temperature = ",MDTemp%D(iCLONE)
        DO iATS=1,C%Geos%Clone(iCLONE)%NAtms
           WRITE(Out,99) TRIM(C%Geos%Clone(iCLONE)%AtNam%C(iATS)),  &
                         Carts0%D(1:3,iATS,iCLONE),   &
@@ -272,6 +272,8 @@ MODULE MDynamics
 !!$       ENDDO
        CLOSE(Out)
     ENDDO
+97  FORMAT(a128)
+98  FORMAT(a18,F16.10)
 99  FORMAT(a3,6(1x,F14.8))
   END SUBROUTINE OutputMD
 !--------------------------------------------------------------
