@@ -32,10 +32,9 @@ PROGRAM GONX2
   TYPE(CRDS)                     :: GMp
   TYPE(ARGMT)                    :: Args
   TYPE(INT_VECT)                 :: Stat
-
-
+!--------------------------------------------------------------------------------
   TYPE(DBL_RNK2)   :: GradX,GradAux
-
+  TYPE(DBL_VECT)   :: GTmp
 !--------------------------------------------------------------------------------
 ! Misc. variables and parameters...
 !--------------------------------------------------------------------------------
@@ -44,9 +43,10 @@ PROGRAM GONX2
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: InFile,RestartHDF
   CHARACTER(LEN=*),PARAMETER     :: Prog='GONX2'
 !--------------------------------------------------------------------------------
-
   TYPE(CList2), DIMENSION(:), POINTER :: ListC,ListD
+!--------------------------------------------------------------------------------
 
+  integer :: i
 
 
 #ifdef PARALLEL
@@ -96,24 +96,14 @@ PROGRAM GONX2
   !
   !
   WRITE(*,*) '-------- We are in GONX2 --------'
+  !
+  
+!!$  write(*,*) 'Geo In'
+!!$  do i=1,natoms
+!!$     write(*,100) i,GMc%Carts%D(:,i)
+!!$  enddo
 
 
-!!$  write(*,*) '1x',GMc%Carts%D(1,1)
-!!$  write(*,*) '1y',GMc%Carts%D(2,1)
-!!$  write(*,*) '1z',GMc%Carts%D(3,1)
-!!$  write(*,*) '2x',GMc%Carts%D(1,2)
-!!$  write(*,*) '2y',GMc%Carts%D(2,2)
-!!$  write(*,*) '2z',GMc%Carts%D(3,2)
-!!$  write(*,*) '3x',GMc%Carts%D(1,3)
-!!$  write(*,*) '3y',GMc%Carts%D(2,3)
-!!$  write(*,*) '3z',GMc%Carts%D(3,3)
-
-!!$  GMc%Carts%D(1,1)
-!!$  GMc%Carts%D(2,1)
-!!$  GMc%Carts%D(3,1)
-!!$  GMc%Carts%D(1,2)
-!!$  GMc%Carts%D(2,2)
-!  GMc%Carts%D(3,NAtoms)=GMc%Carts%D(3,NAtoms)+1.D-3
 
 !!$  SELECT CASE(SCFActn)
 !!$  !IF(SCFActn=='StartResponse'.OR.SCFActn=='FockPrimeBuild')THEN
@@ -155,6 +145,9 @@ PROGRAM GONX2
 !#endif
   !
   !
+  !
+  !------------------------------------------------
+  ! Allocate the list(s) and get the buffer sizes.
   WRITE(*,*) 'allocate List'
 !#ifdef PARALLEL
 !  Time1 = MPI_WTIME()
@@ -164,6 +157,7 @@ PROGRAM GONX2
 !#else
   CALL CPU_TIME(Time1)
   CALL AllocList(ListC,NAtoms)
+  CALL GetBufferSize(GMc,BSc)
   CALL CPU_TIME(Time2)
 !#endif
   WRITE(*,*) 'allocate List: ok',Time2-Time1
@@ -217,10 +211,10 @@ PROGRAM GONX2
   CALL CPU_TIME(Time2)
 !#endif
   !TmKx = Time2-Time1
-!!$  WRITE(*,*) 'DKx:ok',Time2-Time1
+  WRITE(*,*) 'DKx:ok',Time2-Time1
 
-  write(*,*) GradX%D
-  write(*,*) 'sum(GradX%D)=',sum(GradX%D)
+  !write(*,*) GradX%D
+  !write(*,*) 'SUM(GradX%D)=',SUM(GradX%D)
 
   !
   !------------------------------------------------
@@ -258,25 +252,55 @@ PROGRAM GONX2
   !------------------------------------------------
   !
   CALL New(GradAux,(/3,NAtoms/))
-
+  CALL DBL_VECT_EQ_DBL_SCLR(3*NAtoms,GradAux%D(1,1),0.0d0)
+!#ifdef PARALLEL
+!  CALL MPI_REDUCE(GradX%D(1,1),GradAux%D(1,1),3*NAtoms,MPI_DOUBLE_PRECISION, &
+!       &          MPI_SUM,ROOT,MONDO_COMM,IErr)
+!  CALL Get(GradX,'gradients',Tag_O=CurGeom)
+!#else
   !CALL Get(GradAux,'gradients',Tag_O=chGEO)
   CALL Get(GradAux,'gradients',Tag_O=CurGeom)
-  GradAux%D=GradX%D+GradAux%D     
-  !CALL Put(GradAux,'gradients',Tag_O=chGEO)
+!#endif
+  !
+  CALL New(GTmp,3*NAtoms)
+  CALL CartRNK2ToCartRNK1(GTmp%D,GradX%D)
+  CALL PChkSum(GTmp,'dKx/dR',Proc_O=Prog)  
+  CALL Delete(GTmp)
+  !
+  CALL DAXPY(3*NAtoms,1.0d0,GradX%D(1,1),1,GradAux%D(1,1),1)
   CALL Put(GradAux,'gradients',Tag_O=CurGeom)
 
-!!$  write(*,*) GradAux%D
-!!$  write(*,*) 'sum(GradAux%D)=',sum(GradAux%D)
+  write(*,*) 'Grad Kx'
+  do i=1,natoms
+     write(*,100) i,GradX%D(:,i)
+  enddo
 
-  CALL Delete(GradX  )
+  write(*,*) 'Grad Tot'
+  do i=1,natoms
+     write(*,100) i,GradAux%D(:,i)
+  enddo
+  100 format(I4,2X,3E24.16)
+
   CALL Delete(GradAux)
-
-
   !
-  CALL Delete(BSc   )
-  CALL Delete(GMc   )
-  CALL Delete(BSp   )
-  CALL Delete(GMp   )
+  !
+  !------------------------------------------------
+  !
+
+
+!!$  write(*,*) 'Geo Out'
+!!$  do i=1,natoms
+!!$     write(*,100) i,GMc%Carts%D(:,i)
+!!$  enddo
+!!$  100 format(I4,2X,3E20.12)
+
+
+  CALL Delete(GradX)
+  !
+  CALL Delete(BSc)
+  CALL Delete(GMc)
+  CALL Delete(BSp)
+  CALL Delete(GMp)
   !
   CALL ShutDown(Prog)
   !

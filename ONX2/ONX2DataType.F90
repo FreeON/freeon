@@ -86,6 +86,37 @@ MODULE ONX2DataType
   END TYPE ShellPair
 #endif
 
+  INTEGER :: MaxFuncPerAtmBlk=0
+  INTEGER :: MaxShelPerAtmBlk=0
+
+CONTAINS
+  !
+  SUBROUTINE GetBufferSize(GM,BS)
+    TYPE(CRDS), INTENT(IN) :: GM
+    TYPE(BSET), INTENT(IN) :: BS
+    INTEGER :: ISize,I
+    !
+    MaxFuncPerAtmBlk=0
+    MaxShelPerAtmBlk=0
+    !
+    DO I=1,MAXVAL(GM%AtTyp%I(1:NAtoms))
+       MaxFuncPerAtmBlk=MAX(MaxFuncPerAtmBlk,BS%BfKnd%I(I))
+       MaxShelPerAtmBlk=MAX(MaxShelPerAtmBlk,BS%NCFnc%I(I))
+    ENDDO
+    !
+    write(*,*) 'max',MAXVAL(GM%AtTyp%I(1:NAtoms)), &
+         & ' MaxFuncPerAtmBlk',MaxFuncPerAtmBlk, &
+         & ' MaxShelPerAtmBlk',MaxShelPerAtmBlk
+
+!!$    !write(*,*) 'size C=',12*isize**4
+!!$    if(CS_OUT%NCells.GT.SIZE(ACAtmPair)) then
+!!$       write(*,*) 'size(ACAtmPair)',size(ACAtmPair),'.LT.',CS_OUT%NCells
+!!$       STOP 'Incrase the size of ACAtmPair and BDAtmPair'
+!!$    endif
+
+
+  END SUBROUTINE GetBufferSize
+
 END MODULE ONX2DataType
 
 

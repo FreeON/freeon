@@ -66,7 +66,6 @@ CONTAINS
     ! GradX = Dcd*(ac(R)|bd(R'))'*Dab
     !
     !-------------------------------------------------------------------
-
     TYPE(BCSR)                 , INTENT(INout) :: D
     TYPE(DBL_RNK2)             , INTENT(INOUT) :: GradX
     TYPE(CList2) , DIMENSION(:), POINTER       :: ListC,ListD
@@ -81,43 +80,33 @@ CONTAINS
     INTEGER                    :: CFAC,CFBD
     INTEGER                    :: Off,Ind
     REAL(DOUBLE)               :: Dcd
-    REAL(DOUBLE), DIMENSION(460992) :: C    ! this should be declarated somewhere
-    REAL(DOUBLE), DIMENSION(200   ) :: Work ! Size of a density block
-
+    !-------------------------------------------------------------------
+    REAL(DOUBLE), DIMENSION(12*MaxFuncPerAtmBlk**4) :: C
+    REAL(DOUBLE), DIMENSION(   MaxFuncPerAtmBlk**2) :: Work
+    TYPE(AtomPrG), DIMENSION(  MaxShelPerAtmBlk**2*CS_OUT%NCells) :: ACAtmPair,BDAtmPair
+    !-------------------------------------------------------------------
     INTEGER      :: LocNInt
     REAL(DOUBLE) :: NInts
     !-------------------------------------------------------------------
-    TYPE(AtomPrG), DIMENSION(100) :: ACAtmPair,BDAtmPair  ! this should be declarated somewhere
-    TYPE(ONX2OffSt) :: OffSet
+    TYPE(ONX2OffSt)               :: OffSet
     !-------------------------------------------------------------------
     REAL(DOUBLE), EXTERNAL :: DGetAbsMax
     REAL(DOUBLE), EXTERNAL :: DDOT
     !-------------------------------------------------------------------
-    INTEGER :: ACR,BDR,IXYZ,NIntBlk,Indx
-    REAL(DOUBLE) :: TmpGradA,TmpGradC,TmpGradB
-
-    integer :: MaxCont,IntType
-    real(DOUBLE) :: time1,time2,SumInt
-    integer :: iint ,isize,i
+    INTEGER                :: ACR,BDR,IXYZ,NIntBlk,Indx,SumInt
+    REAL(DOUBLE)           :: TmpGradA,TmpGradC,TmpGradB,TmpGradD
     !REAL(DOUBLE), PARAMETER :: ThresholdTwoE=-1.0D-15
-    REAL(DOUBLE), PARAMETER :: ThresholdTwoE=1.0D-12
+    REAL(DOUBLE), PARAMETER :: ThresholdTwoE=-1.0D-12
     !-------------------------------------------------------------------
-    type(bcsr) :: tmp,tmp2
-    integer :: iii
+    real(double) :: MaxInt
+    integer :: MaxCont,IntType
+    integer :: iint ,isize,i,iii
+
+    integer, dimension(NAtoms) :: BCol
+    TYPE(INT_VECT) :: BColIdx
+
     !
     NULLIFY(AtAListTmp,AtAList,AtBListTmp,AtBList)
-    !
-    !CALL Print_BCSR(D,'D['//TRIM(SCFCycl)//']',Unit_O=6)
-
-!!$    CALL New(tmp)
-!!$    CALL New(tmp2)
-!!$    CALL XPose(D,Tmp)
-!!$    CALL Add(Tmp,D,Tmp2)
-!!$    CALL Multiply(Tmp2,0.5d0)
-!!$    CALL SetEq(D,Tmp2)
-!!$    CALL Delete(Tmp)
-!!$    CALL Delete(Tmp2)
-
     !
     !Simple check Simple check Simple check Simple check
     isize=0
@@ -136,6 +125,16 @@ CONTAINS
     !write(*,*) 'CS_OUT%NCells=',CS_OUT%NCells
     !Simple check Simple check Simple check Simple check
     !
+    !CALL multiply(D,2.0d0)
+    !CALL Print_BCSR(D,'Density matrix',Unit_O=6)
+    !CALL multiply(D,0.5d0)
+
+
+    !write(*,*) 'atd(14)', D%ColPt%I(D%RowPt%I(14):D%RowPt%I(14+1)-1)
+    !stop
+
+    CALL New(BColIdx,Natoms)
+
     SumInt=0.0d0
     MaxCont=0
     iint=0
@@ -154,15 +153,28 @@ CONTAINS
        ! Get AtA List.
        AtAListTmp=>ListC(AtC)%GoList
        !
+!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
        DO ci=D%RowPt%I(AtC),D%RowPt%I(AtC+1)-1 ! Run over AtD
-          AtD = D%ColPt%I(ci)
-          iPtrD= D%BlkPt%I(ci)
+          AtD=D%ColPt%I(ci)
+          iPtrD=D%BlkPt%I(ci)
+
+!vw       DO AtD=1,NAtoms
+!vw          CALL GetAdrB(AtC,AtD,Ind,D,1)
+!vw          write(*,*) 'AtC=',AtC,' AtD=',AtD,' Ind=',Ind
+!vw          IF(Ind.GT.0) THEN
+!vw          iPtrD=D%BlkPt%I(Ind)
+          !write(*,*) 'D',D%MTrix%D(iPtrD:iPtrD+NBFC*NBFD-1)
+!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
           KD=GM%AtTyp%I(AtD)
           NBFD=BS%BfKnd%I(KD)
           BDAtmInfo%Atm2X=GM%Carts%D(1,AtD)
           BDAtmInfo%Atm2Y=GM%Carts%D(2,AtD)
           BDAtmInfo%Atm2Z=GM%Carts%D(3,AtD)
           BDAtmInfo%K2=KD
+
+          !write(*,*) 'Info',KC,KD,NBFC,NBFD
+          !write(*,*) GM%Carts%D(:,AtC),GM%Carts%D(:,AtD)
           !
           ! Get max of the block density matrix.
           Dcd=DGetAbsMax(NBFC*NBFD,D%MTrix%D(iPtrD))
@@ -178,6 +190,7 @@ CONTAINS
           !
           DO ! Run over AtA
              AtA=AtAList%Atom
+!old           DO AtA=1,NAtoms
              KA=GM%AtTyp%I(AtA)
              NBFA=BS%BfKnd%I(KA)
              !
@@ -190,11 +203,6 @@ CONTAINS
              ACAtmInfo%Atm1X=GM%Carts%D(1,AtA)
              ACAtmInfo%Atm1Y=GM%Carts%D(2,AtA)
              ACAtmInfo%Atm1Z=GM%Carts%D(3,AtA)
-
-!!$             write(*,*) 'Ax',GM%Carts%D(1,AtA)
-!!$             write(*,*) 'Ay',GM%Carts%D(2,AtA)
-!!$             write(*,*) 'Az',GM%Carts%D(3,AtA)
-
              ACAtmInfo%K1=KA
              !
              ACAtmInfo%Atm12X=ACAtmInfo%Atm1X-ACAtmInfo%Atm2X
@@ -206,188 +214,122 @@ CONTAINS
              !
              AtBList=>AtBListTmp
              !
+             !BCol=0
+             !do iii=D%RowPt%I(AtA),D%RowPt%I(AtA+1)-1
+             !   BCol(D%ColPt%I(iii))=iii
+             !enddo
+             
+             CALL GetColIdx(AtA,D,BColIdx)
+             
              DO ! Run over AtB
                 AtB=AtBList%Atom 
+!old            DO AtB=1,NAtoms
                 !
-                CALL GetAdrB(AtA,AtB,Ind,D,1)
-                IF(Ind.EQ.0) GOTO 10
-                iPtrD2 = D%BlkPt%I(Ind)
-                !
-                BDAtmInfo%NCell=GetNonNeglCell(AtBList,AtAList%SqrtInt(1),ThresholdTwoE)
+!vw             CALL GetAdrB(AtA,AtB,Ind,D,1)
+                !Ind=BCol(AtB)
+                Ind=BColIdx%I(AtB)
+                IF(Ind.GT.0) THEN ! Skip out if no density matrix element.
+                   iPtrD2 = D%BlkPt%I(Ind)
+                   !
+                   BDAtmInfo%NCell=GetNonNeglCell(AtBList,AtAList%SqrtInt(1),ThresholdTwoE)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!! SKIP OUT SKIP OUT SKIP OUT SKIP OUT SKIP OUT !!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                !
-                KB=GM%AtTyp%I(AtB)
-                NBFB=BS%BfKnd%I(KB)
-                !
-                BDAtmInfo%Atm1X=GM%Carts%D(1,AtB)
-                BDAtmInfo%Atm1Y=GM%Carts%D(2,AtB)
-                BDAtmInfo%Atm1Z=GM%Carts%D(3,AtB)
-                BDAtmInfo%K1=KB
-                !
-                BDAtmInfo%Atm12X=BDAtmInfo%Atm1X-BDAtmInfo%Atm2X
-                BDAtmInfo%Atm12Y=BDAtmInfo%Atm1Y-BDAtmInfo%Atm2Y
-                BDAtmInfo%Atm12Z=BDAtmInfo%Atm1Z-BDAtmInfo%Atm2Z
-                !
-                ! Get atom pair for BD.
-                CALL GetAtomPairG(BDAtmInfo,AtBList,BDAtmPair,BS,CS_OUT)
-                !
-                NIntBlk=NBFA*NBFB*NBFC*NBFD
-                !
-!if(.not.(ata==1.and.atb==1.and.atc==1.and.atd==1)) goto 10
-
-!if(.not.(ata==2.and.atb==2.and.atc==1.and.atd==1)) goto 10
-!if(.not.(ata==3.and.atb==3.and.atc==1.and.atd==1)) goto 10
-
-!if(.not.(ata==2.and.atb==1.and.atc==2.and.atd==1)) goto 10
-!if(.not.(ata==3.and.atb==1.and.atc==3.and.atd==1)) goto 10
-
-!if(.not.(ata==2.and.atb==2.and.atc==2.and.atd==1)) goto 10
-!if(.not.(ata==3.and.atb==3.and.atc==3.and.atd==1)) goto 10
-
-!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-!if(.not.(ata==1.and.atb==2.and.atc==2.and.atd==1)) goto 10
-!if(.not.(ata==1.and.atb==3.and.atc==3.and.atd==1)) goto 10
-!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
-!if(.not.(ata==3.and.atb==1.and.atc==1.and.atd==1)) goto 10
-
-
-!if(.not.(ata==1.and.atb==2.and.atc==1.and.atd==1)) goto 10
-!if(.not.(ata==1.and.atb==1.and.atc==2.and.atd==1)) goto 10
-!if(.not.(ata==1.and.atb==1.and.atc==1.and.atd==2)) goto 10
-!if(.not.(ata==2.and.atb==2.and.atc==1.and.atd==1)) goto 10
-!if(.not.(ata==2.and.atb==1.and.atc==2.and.atd==1)) goto 10
-!if(.not.(ata==2.and.atb==1.and.atc==1.and.atd==2)) goto 10
-!if(.not.(ata==2.and.atb==2.and.atc==2.and.atd==1)) goto 10
-!if(.not.(ata==2.and.atb==2.and.atc==1.and.atd==2)) goto 10
-!if(.not.(ata==2.and.atb==1.and.atc==2.and.atd==2)) goto 10
-!if(.not.(ata==1.and.atb==2.and.atc==2.and.atd==2)) goto 10
-!if(.not.(ata==2.and.atb==2.and.atc==2.and.atd==2)) goto 10
-
-!                write(*,*) 'NIntBlk',NIntBlk!,'ACR',ACAtmInfo%NCell
-!                write(*,*) 'AtA',AtA,' AtB',AtB,' AtC',AtC,' AtD',AtD
-                
-                CALL DBL_VECT_EQ_DBL_SCLR(12*NIntBlk,C(1),0.0d0)
-                !C=0.0d0 !TO REMOVE
-                
-                !c(NIntBlk+1:)=1000000d0
-
-                !
-                CFAC=0
+                   !
+                   KB=GM%AtTyp%I(AtB)
+                   NBFB=BS%BfKnd%I(KB)
+                   !
+                   BDAtmInfo%Atm1X=GM%Carts%D(1,AtB)
+                   BDAtmInfo%Atm1Y=GM%Carts%D(2,AtB)
+                   BDAtmInfo%Atm1Z=GM%Carts%D(3,AtB)
+                   BDAtmInfo%K1=KB
+                   !
+                   BDAtmInfo%Atm12X=BDAtmInfo%Atm1X-BDAtmInfo%Atm2X
+                   BDAtmInfo%Atm12Y=BDAtmInfo%Atm1Y-BDAtmInfo%Atm2Y
+                   BDAtmInfo%Atm12Z=BDAtmInfo%Atm1Z-BDAtmInfo%Atm2Z
+                   !
+                   ! Get atom pair for BD.
+                   CALL GetAtomPairG(BDAtmInfo,AtBList,BDAtmPair,BS,CS_OUT)
+                   !
+                   NIntBlk=NBFA*NBFB*NBFC*NBFD
+                   !
+                   CALL DBL_VECT_EQ_DBL_SCLR(12*NIntBlk,C(1),0.0d0)
+                   !C=BIG_DBL
+                   !
+                   CFAC=0
 !!!!!!!!!!!!!!!!!!!!
-                DO ACR=1,ACAtmInfo%NCell
+                   DO ACR=1,ACAtmInfo%NCell
 !!!!!!!!!!!!!!!!!!!!
-                OffSet%A=1
-                DO CFA=1,BS%NCFnc%I(KA) ! Run over blkfunc on A
-                   OffSet%C=1
-                   DO CFC=1,BS%NCFnc%I(KC) ! Run over blkfunc on C
-                      CFAC=CFAC+1
-                      MaxCont=MAX(MaxCont,ACAtmPair(CFAC)%SP%L)
-                      CFBD=0
+                   OffSet%A=1
+                   DO CFA=1,BS%NCFnc%I(KA) ! Run over blkfunc on A
+                      OffSet%C=1
+                      DO CFC=1,BS%NCFnc%I(KC) ! Run over blkfunc on C
+                         CFAC=CFAC+1
+                         MaxCont=MAX(MaxCont,ACAtmPair(CFAC)%SP%L)
+                         CFBD=0
 !!!!!!!!!!!!!!!!!!!!!!!!!!
-                      DO BDR=1,BDAtmInfo%NCell
+                         DO BDR=1,BDAtmInfo%NCell
 !!!!!!!!!!!!!!!!!!!!!!!!!!
-                      OffSet%B=1
-                      DO CFB=1,BS%NCFnc%I(KB) ! Run over blkfunc on B
-                         OffSet%D=1
-                         DO CFD=1,BS%NCFnc%I(KD) ! Run over blkfunc on D
-                            CFBD=CFBD+1
-                            !
-                            ! Compute integral type.
-                            IntType=ACAtmPair(CFAC)%SP%IntType*10000+BDAtmPair(CFBD)%SP%IntType
-                            !
-
+                         OffSet%B=1
+                         DO CFB=1,BS%NCFnc%I(KB) ! Run over blkfunc on B
+                            OffSet%D=1
+                            DO CFD=1,BS%NCFnc%I(KD) ! Run over blkfunc on D
+                               CFBD=CFBD+1
+                               !
+                               ! Compute integral type.
+                               IntType=ACAtmPair(CFAC)%SP%IntType*10000+BDAtmPair(CFBD)%SP%IntType
+                               !
 !if(IntType.ne.1010101) goto 20
 !if(IntType.ne.3010101.and.IntType.ne.1030101.and.IntType.ne.1010301.and.IntType.ne.1010103) goto 20
-
 !if(IntType.ne.3030101.and.IntType.ne.3010301.and.IntType.ne.3010103.and. &
 !&  IntType.ne.1030301.and.IntType.ne.1030103.and.IntType.ne.1010303) goto 20
-
 !if(IntType.ne.3030101.and.IntType.ne.1010303) goto 20
-
 !>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 !if(IntType.ne.3030101) goto 20
 !<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
 !if(IntType.ne.1030303.and.IntType.ne.3010303.and.IntType.ne.3030103.and.IntType.ne.3030301) goto 20
 !if(IntType.ne.3030303) goto 20
-
-
 !if(IntType.ne.3010101) goto 20
 !if(IntType.ne.1010103) goto 20
 !if(IntType.ne.1030101) goto 20
-                            !write(*,*) 'IntType',IntType,NIntBlk
-                            ! The integral interface.
-
-!write(*,*) 'out',C(NIntBlk-7)
-                            INCLUDE 'DERIInterface.Inc'
-                            !---------------------------------------------------------
-!!$                            CALL dInt1111_(ACAtmPair(CFAC)%SP%Cst(1,1),ACAtmPair(CFAC)%SP%L, & 
-!!$                                 BDAtmPair(CFBD)%SP%Cst(1,1),BDAtmPair(CFBD)%SP%L, & 
-!!$                                 ACAtmPair(CFAC)%SP%AtmInfo,BDAtmPair(CFBD)%SP%AtmInfo, & 
-!!$                                 OffSet%A  ,1             , & 
-!!$                                 OffSet%C-1,NBFA*NBFB     , & 
-!!$                                 OffSet%B-1,NBFA          , & 
-!!$                                 OffSet%D-1,NBFA*NBFB*NBFC,NIntBlk,GM%PBC,C(1))
-!!$
-!!$                            CALL dInt1111(ACAtmPair(CFAC)%SP%Cst(1,1),ACAtmPair(CFAC)%SP%L, & 
-!!$                                 BDAtmPair(CFBD)%SP%Cst(1,1),BDAtmPair(CFBD)%SP%L, & 
-!!$                                 ACAtmPair(CFAC)%SP%AtmInfo,BDAtmPair(CFBD)%SP%AtmInfo, & 
-!!$                                 OffSet%A  ,1             , & 
-!!$                                 OffSet%C-1,NBFA*NBFB     , & 
-!!$                                 OffSet%B-1,NBFA          , & 
-!!$                                 OffSet%D-1,NBFA*NBFB*NBFC,1,4,7,10,NIntBlk,GM%PBC,C(1))
-
-!!$                            write(*,100) 'C( 1)',C( 1),'C( 2)',C( 2),'C( 3)',C( 3)
-!!$                            write(*,100) 'C( 4)',C( 4),'C( 5)',C( 5),'C( 6)',C( 6)
-!!$                            write(*,100) 'C( 7)',C( 7),'C( 8)',C( 8),'C( 9)',C( 9)
-!!$                            100 format(5X,4(2X,A,E20.12))
-                            !---------------------------------------------------------
-                            !
-20 continue
-                            NInts=NInts+DBLE(LocNInt)
-                            OffSet%D=OffSet%D+BS%LStop%I(CFD,KD)-BS%LStrt%I(CFD,KD)+1
-                         ENDDO ! End blkfunc on D
-                         OffSet%B=OffSet%B+BS%LStop%I(CFB,KB)-BS%LStrt%I(CFB,KB)+1
-                      ENDDO ! End blkfunc on B
+                               !write(*,*) 'IntType',IntType,NIntBlk
+                               ! The integral interface.
+                               INCLUDE 'DERIInterface.Inc'
+                               !INCLUDE 'dERIInclude.Inc'
+                               !
+                               NInts=NInts+DBLE(LocNInt)
+                               OffSet%D=OffSet%D+BS%LStop%I(CFD,KD)-BS%LStrt%I(CFD,KD)+1
+                            ENDDO ! End blkfunc on D
+                            OffSet%B=OffSet%B+BS%LStop%I(CFB,KB)-BS%LStrt%I(CFB,KB)+1
+                         ENDDO ! End blkfunc on B
 !!!!!!!!!!!!!!!!!!!!!!!!!!
-                      ENDDO
+                         ENDDO
 !!!!!!!!!!!!!!!!!!!!!!!!!!
-                      OffSet%C=OffSet%C+BS%LStop%I(CFC,KC)-BS%LStrt%I(CFC,KC)+1
-                   ENDDO ! End blkfunc on C
-                   OffSet%A=OffSet%A+BS%LStop%I(CFA,KA)-BS%LStrt%I(CFA,KA)+1
-                ENDDO ! End blkfunc on A
+                         OffSet%C=OffSet%C+BS%LStop%I(CFC,KC)-BS%LStrt%I(CFC,KC)+1
+                      ENDDO ! End blkfunc on C
+                      OffSet%A=OffSet%A+BS%LStop%I(CFA,KA)-BS%LStrt%I(CFA,KA)+1
+                   ENDDO ! End blkfunc on A
 !!!!!!!!!!!!!!!!!!!!!!!!!!
-                ENDDO
+                   ENDDO
 !!!!!!!!!!!!!!!!!!!!!!!!!!
 
-                !write(*,*) C(NIntBlk-7)
-
-
-!                CALL PrintMatrix(C(           1),NBFA*NBFB,NBFC*NBFD,2,TEXT_O='Int Ax matrix')
-!!$                CALL PrintMatrix(C(   NIntBlk+1),NBFA*NBFB,NBFC*NBFD,2,TEXT_O='Int Ay matrix')
-!!$                CALL PrintMatrix(C( 2*NIntBlk+1),NBFA*NBFB,NBFC*NBFD,2,TEXT_O='Int Az matrix')
-
-!                CALL PrintMatrix(C( 3*NIntBlk+1),NBFA*NBFB,NBFC*NBFD,2,TEXT_O='Int Bx matrix')
-!!$                CALL PrintMatrix(C( 4*NIntBlk+1),NBFA*NBFB,NBFC*NBFD,2,TEXT_O='Int By matrix')
-!!$                CALL PrintMatrix(C( 5*NIntBlk+1),NBFA*NBFB,NBFC*NBFD,2,TEXT_O='Int Bz matrix')
-
-!                CALL PrintMatrix(C( 6*NIntBlk+1),NBFA*NBFB,NBFC*NBFD,2,TEXT_O='Int Cx matrix')
-!!$                CALL PrintMatrix(C( 7*NIntBlk+1),NBFA*NBFB,NBFC*NBFD,2,TEXT_O='Int Cy matrix')
-!!$                CALL PrintMatrix(C( 8*NIntBlk+1),NBFA*NBFB,NBFC*NBFD,2,TEXT_O='Int Cz matrix')
-
-!                CALL PrintMatrix(C( 9*NIntBlk+1),NBFA*NBFB,NBFC*NBFD,2,TEXT_O='Int Dx matrix')
-!!$                CALL PrintMatrix(C(10*NIntBlk+1),NBFA*NBFB,NBFC*NBFD,2,TEXT_O='Int Dy matrix')
-!!$                CALL PrintMatrix(C(11*NIntBlk+1),NBFA*NBFB,NBFC*NBFD,2,TEXT_O='Int Dz matrix')       
-
-!!$                write(*,*) NIntBlk,NBFA*NBFB*NBFC*NBFD
-!!$                do iii=1,NBFA*NBFB*NBFC*NBFD
-!!$                   if(abs(C(iii)).gt.1d-10)write(*,'(2X,I4,2X,E25.16)') iii,C(iii)
-!!$                enddo
-!!$                write(*,*) 'trace',sum(abs(C(1:NIntBlk)))
-!!$                write(*,*) ''
+!!$                   if(ata==2.and.atb==2.and.atc==2.and.atd==2) then
+!!$                      write(*,*) NIntBlk,NBFA*NBFB*NBFC*NBFD
+!!$                      do iii=1,NBFA*NBFB*NBFC*NBFD
+!!$                         if(abs(C(iii)).gt.1d-10)write(*,'(2X,I4,2X,E25.16)') iii,C(iii)
+!!$                         maxint=MAX(maxint,abs(c(iii)))
+!!$                      enddo
+!!$                      write(*,*) 'trace',sum(abs(C(1:NIntBlk))),' maxint',sqrt(maxint)
+!!$                      write(*,*) ''
+!!$                   endif
+!!$                   if(ata==atb.and.atc==atd) then
+!!$                      maxint=0.0d0
+!!$                      do iii=1,NBFA*NBFB*NBFC*NBFD*12
+!!$                         !if(abs(C(iii)).gt.1d-10)write(*,'(2X,I4,2X,E25.16)') iii,C(iii)
+!!$                         maxint=MAX(maxint,abs(c(iii)))
+!!$                      enddo
+!!$                      write(*,'(A,4I3,2X,E25.16)') ' maxint',AtA,AtC,AtB,AtD,sqrt(maxint)
+!!$                   endif
 !!$                do iii=3*NIntBlk+1,3*NIntBlk+NIntBlk
 !!$                   if(abs(C(iii)).gt.1d-10)write(*,'(2X,I4,2X,E25.16)') iii,C(iii)
 !!$                enddo
@@ -402,75 +344,69 @@ CONTAINS
 !!$                   if(abs(C(iii)).gt.1d-10)write(*,'(2X,I4,2X,E25.16)') iii,C(iii)
 !!$                enddo
 !!$                write(*,*) 'trace',sum(abs(C(9*NIntBlk+1:9*NIntBlk+NIntBlk)))
-
 !!$                write(*,*) ''
 !!$                do iii=9*NIntBlk+1,9*NIntBlk+NIntBlk
 !!$                   if(abs(C(iii)).gt.1d-10)write(*,'(2X,I4,2X,E25.16)') iii,C(iii)
 !!$                enddo
 
-                !
-                ! Compute the exchange-forces.
-                DO IXYZ=1,3
                    !
-                   ! AtA
+                   ! Compute the exchange-forces.
 
-                   !if(ixyz.eq.1)CALL PrintMatrix(D%MTrix%D(iPtrD),NBFC,NBFD,2,TEXT_O='Int Dx matrix')
+                   !if(.not.(ata==14.or.atb==14.or.atc==14.or.atd==14)) goto 20
 
-                   Indx=(IXYZ-1)*NIntBlk+1
-                   CALL DGEMV('N',NBFA*NBFB,NBFC*NBFD,1.0d0,C(Indx), &
-                        &     NBFA*NBFB,D%MTrix%D(iPtrD),1,0.0d0, &
-                        &     Work(1),1)
-!!$                   
-!!$                   if(ixyz.eq.1)write(*,*) 'Sum(Work)',Sum(abs(Work(1:NBFA*NBFB)))
-!!$                   if(ixyz.eq.1) then
-!!$                      write(*,*) ''
-!!$                      do iii=1,NBFA*NBFB
-!!$                         !if(abs(work(iii)).gt.1d-10)write(*,'(2X,I4,2X,E25.16)') iii,work(iii)
-!!$                         write(*,'(2X,I4,2X,E25.16)') iii,work(iii)
-!!$                      enddo
-!!$                   endif
-!!$                   
-!!$                   if(ixyz.eq.1)CALL PrintMatrix(D%MTrix%D(iPtrD2),NBFA,NBFB,2,TEXT_O='Int D matrix')
+                   DO IXYZ=1,3
+                      !old work=BIG_DBL
+                      !
+                      ! AtA
+                      !if(ixyz.eq.1)CALL PrintMatrix(D%MTrix%D(iPtrD),NBFC,NBFD,2,TEXT_O='Int Dx matrix')
+                      Indx=(IXYZ-1)*NIntBlk+1
+                      CALL DGEMV('N',NBFA*NBFB,NBFC*NBFD,1.0d0,C(Indx), &
+                           &     NBFA*NBFB,D%MTrix%D(iPtrD),1,0.0d0,    &
+                           &     Work(1),1)
+                      TmpGradA=-DDOT(NBFA*NBFB,D%MTrix%D(iPtrD2),1,Work(1),1)
+                      GradX%D(IXYZ,AtA)=GradX%D(IXYZ,AtA)+TmpGradA
+                      !write(*,'(A,2X,E24.16)') 'Grad=',TmpGradA
+
+                      !old work=BIG_DBL
+                      !
+                      ! AtC
+                      Indx=(3+IXYZ-1)*NIntBlk+1
+                      CALL DGEMV('N',NBFA*NBFB,NBFC*NBFD,1.0d0,C(Indx), &
+                           &     NBFA*NBFB,D%MTrix%D(iPtrD),1,0.0d0,    &
+                           &     Work(1),1)
+                      TmpGradC=-DDOT(NBFA*NBFB,D%MTrix%D(iPtrD2),1,Work(1),1)
+                      GradX%D(IXYZ,AtC)=GradX%D(IXYZ,AtC)+TmpGradC
+
+                      !old work=BIG_DBL
+                      !
+                      ! AtB
+                      Indx=(6+IXYZ-1)*NIntBlk+1
+                      CALL DGEMV('N',NBFA*NBFB,NBFC*NBFD,1.0d0,C(Indx), &
+                           &     NBFA*NBFB,D%MTrix%D(iPtrD),1,0.0d0,    &
+                           &     Work(1),1)
+                      TmpGradB=-DDOT(NBFA*NBFB,D%MTrix%D(iPtrD2),1,Work(1),1)
+                      GradX%D(IXYZ,AtB)=GradX%D(IXYZ,AtB)+TmpGradB
+                      !
+                      ! AtD
+                      !Indx=(9+IXYZ-1)*NIntBlk+1
+                      !CALL DGEMV('N',NBFA*NBFB,NBFC*NBFD,-1.0d0,C(Indx), &
+                      !     &     NBFA*NBFB,D%MTrix%D(iPtrD),1,0.0d0, &
+                      !     &     Work(1),1)
+                      !TmpGradD=-DDOT(NBFA*NBFB,D%MTrix%D(iPtrD2),1,Work(1),1)
+                      !GradX%D(IXYZ,AtD)=GradX%D(IXYZ,AtD)+TmpGradD
+                      GradX%D(IXYZ,AtD)=GradX%D(IXYZ,AtD)-(TmpGradA+TmpGradC+TmpGradB)
+         !if(ata==1.and.atb==1.and.atc==1.and.atd==1)write(*,*)'TmpGrad',TmpGradA,TmpGradB,TmpGradC
+         !if(ata==6.or.atb==6.or.atc==6.or.atd==6)write(*,'(A,2X,E24.16)')'Grad',GradX%D(1,6)
+!                 if(ata==6.or.atb==6.or.atc==6.or.atd==6)then
+!                    if(ixyz==1)write(*,'(A,2X,E24.16,4I4)')'Grad',Gradx%D(1,6),AtA,AtB,AtC,AtD
+!                 endif
+
+                   ENDDO
+                   !
+20 continue
                    
-                   !GradX%D(IXYZ,AtA)=GradX%D(IXYZ,AtA)+ &
-                   !     &            DDOT(NBFA*NBFB,D%MTrix%D(iPtrD2),1,Work(1),1)
-                   TmpGradA=-DDOT(NBFA*NBFB,D%MTrix%D(iPtrD2),1,Work(1),1)
-                   
-!!$                   if(ixyz.eq.1)write(*,*) 'TmpGradA=',TmpGradA
-
-                   GradX%D(IXYZ,AtA)=GradX%D(IXYZ,AtA)+TmpGradA
                    !
-                   ! AtC
-                   Indx=(3+IXYZ-1)*NIntBlk+1
-                   CALL DGEMV('N',NBFA*NBFB,NBFC*NBFD,1.0d0,C(Indx), &
-                        &     NBFA*NBFB,D%MTrix%D(iPtrD),1,0.0d0, &
-                        &     Work(1),1)
-                   !GradX%D(IXYZ,AtC)=GradX%D(IXYZ,AtC)+ &
-                   !     &            DDOT(NBFA*NBFB,D%MTrix%D(iPtrD2),1,Work(1),1)
-                   TmpGradC=-DDOT(NBFA*NBFB,D%MTrix%D(iPtrD2),1,Work(1),1)
-                   GradX%D(IXYZ,AtC)=GradX%D(IXYZ,AtC)+TmpGradC
-                   !
-                   ! AtB
-                   Indx=(6+IXYZ-1)*NIntBlk+1
-                   CALL DGEMV('N',NBFA*NBFB,NBFC*NBFD,1.0d0,C(Indx), &
-                        &     NBFA*NBFB,D%MTrix%D(iPtrD),1,0.0d0, &
-                        &     Work(1),1)
-                   !GradX%D(IXYZ,AtB)=GradX%D(IXYZ,AtB)+ &
-                   !     &            DDOT(NBFA*NBFB,D%MTrix%D(iPtrD2),1,Work(1),1)
-                   TmpGradB=-DDOT(NBFA*NBFB,D%MTrix%D(iPtrD2),1,Work(1),1)
-                   GradX%D(IXYZ,AtB)=GradX%D(IXYZ,AtB)+TmpGradB
-                   !
-                   ! AtD
-                   !Indx=(9+IXYZ-1)*NIntBlk+1
-                   !CALL DGEMV('N',NBFA*NBFB,NBFC*NBFD,-1.0d0,C(Indx), &
-                   !     &     NBFA*NBFB,D%MTrix%D(iPtrD),1,0.0d0, &
-                   !     &     Work(1),1)
-                   !GradX%D(IXYZ,AtD)=GradX%D(IXYZ,AtD)+ &
-                   !     &            DDOT(NBFA*NBFB,D%MTrix%D(iPtrD2),1,Work(1),1)
-                   GradX%D(IXYZ,AtD)=GradX%D(IXYZ,AtD)-(TmpGradA+TmpGradC+TmpGradB)
-                ENDDO
-                !
-10 continue
+                ENDIF ! Skip out if no density matrix element.
                 !
                 IF(.NOT.ASSOCIATED(AtBList%AtmNext)) EXIT
                 AtBList=>AtBList%AtmNext
@@ -480,9 +416,14 @@ CONTAINS
              AtAList=>AtAList%AtmNext
           ENDDO ! End AtA
           !
+!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+!vw          ENDIF
+!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
        ENDDO ! End AtD
        !
     ENDDO ! End AtC
+    !
+    CALL Delete(BColIdx)
     !
   END SUBROUTINE ComputDK
   !
@@ -526,6 +467,10 @@ CONTAINS
        ! Then we add the PBC's to have the right interatomic distance.
        R12=(AtmInfo%Atm12X-RX)**2+(AtmInfo%Atm12Y-RY)**2+(AtmInfo%Atm12Z-RZ)**2
        !
+
+       !write(*,*) 'R12',R12
+
+
        DO CF1=1,BS%NCFnc%I(AtmInfo%K1)
           MinL1=BS%ASymm%I(1,CF1,AtmInfo%K1)
           MaxL1=BS%ASymm%I(2,CF1,AtmInfo%K1)
@@ -580,8 +525,8 @@ CONTAINS
                       AtmPair(CF12)%SP%Cst(2,IJ)=(Z1*AtmInfo%Atm1X+Z2*(AtmInfo%Atm2X+RX))*InvExpt
                       AtmPair(CF12)%SP%Cst(3,IJ)=(Z1*AtmInfo%Atm1Y+Z2*(AtmInfo%Atm2Y+RY))*InvExpt
                       AtmPair(CF12)%SP%Cst(4,IJ)=(Z1*AtmInfo%Atm1Z+Z2*(AtmInfo%Atm2Z+RZ))*InvExpt
-                      !AtmPair(CF12)%SP%Cst(5,IJ)=5.914967172796D0*EXP(-XiR12)*InvExpt* &
-                      AtmPair(CF12)%SP%Cst(5,IJ)=5.914967172796D0*EXPInv(XiR12)*InvExpt* &
+                      AtmPair(CF12)%SP%Cst(5,IJ)=5.914967172796D0*EXP(-XiR12)*InvExpt* &
+                      !AtmPair(CF12)%SP%Cst(5,IJ)=5.914967172796D0*EXPInv(XiR12)*InvExpt* &
                            &                     BS%CCoef%D(StopL1,I1,CF1,AtmInfo%K1)* &
                            &                     BS%CCoef%D(StopL2,I2,CF2,AtmInfo%K2)
                       !
@@ -661,6 +606,30 @@ CONTAINS
     ENDDO
     !
   END FUNCTION GetNonNeglCell
+  !
+  !
+  SUBROUTINE GetColIdx(At,D,ColIdx)
+!H---------------------------------------------------------------------------------
+!H SUBROUTINE GetColIdx(At,D,ColIdx)
+!H
+!H---------------------------------------------------------------------------------
+    !
+    IMPLICIT NONE
+    !-------------------------------------------------------------------
+    INTEGER       , INTENT(IN ) :: At
+    TYPE(BCSR)    , INTENT(IN ) :: D
+    TYPE(INT_VECT), INTENT(OUT) :: ColIdx
+    !-------------------------------------------------------------------
+    INTEGER                     :: Ci
+    !-------------------------------------------------------------------
+    !
+    CALL INT_VECT_EQ_INT_SCLR(NAtoms,ColIdx%I(1),0)
+    !
+    DO Ci=D%RowPt%I(At),D%RowPt%I(At+1)-1
+       ColIdx%I(D%ColPt%I(Ci))=Ci
+    ENDDO
+    !
+  END SUBROUTINE GetColIdx
   !
   !
 END MODULE GONX2ComputDK
