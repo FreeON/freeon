@@ -313,15 +313,17 @@ CONTAINS
 !H---------------------------------------------------------------------------------
 !H SUBROUTINE FockPrimGuess(F,FPrim,P,PPrim)
 !H  Set the FockPrim guess for TC2R.
-!H
+!H  This routine can be improved.
 !H---------------------------------------------------------------------------------
     IMPLICIT NONE
     !-------------------------------------------------------------------
     TYPE(BCSR ), INTENT(INOUT) :: F,FPrim
 #ifdef PARALLEL
     TYPE(DBCSR), INTENT(  OUT) :: P,PPrim
+    TYPE(DBCSR)                :: Tmp
 #else
     TYPE(BCSR ), INTENT(  OUT) :: P,PPrim
+    TYPE(BCSR )                :: Tmp
 #endif
     !-------------------------------------------------------------------
     REAL(DOUBLE)             :: Fmin,Fmax,DF,Coeff
@@ -348,7 +350,12 @@ CONTAINS
     Call SetEq(PPrim,FPrim)
     CALL Add(PPrim,-Fmax)
     CALL Multiply(PPrim,-Coeff)  ! PPrim = -(I*F_max-FPrim)/DF = -X1
-    CALL Add(PPrim,P,PPrim)      ! PPrim = PPrim+P = X0-X1
+    !
+    CALL New(Tmp)
+    CALL Add(P,PPrim,Tmp)        ! Tmp = PPrim+P = X0-X1
+    CALL SetEq(PPrim,Tmp)        ! PPrim = Tmp = X0-X1
+    CALL Delete(Tmp)
+    !
     CALL Multiply(PPrim,-One)    ! PPrim = -PPrim = X1-X0
     !
   END SUBROUTINE FockPrimGuess
@@ -536,6 +543,7 @@ CONTAINS
   END FUNCTION CnvrgChckPrim
   !  
   !
+#ifdef TC2R_EIGENVAL
   SUBROUTINE PLOT_ERROR_WITH_BOXES(Eig,NBrBox,Name)
     TYPE(DBL_VECT)               :: Eig
     INTEGER         , INTENT(IN) :: NBrBox
@@ -586,6 +594,7 @@ CONTAINS
    9   FORMAT('plot [0 : ',I12,' ] ',I12,', \\')
   10   FORMAT('                    ',I12,', \\')
   END SUBROUTINE PLOT_ERROR_WITH_BOXES
+#endif
   !
   !
 END PROGRAM TC2R
