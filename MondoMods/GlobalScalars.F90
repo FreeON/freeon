@@ -62,7 +62,7 @@ MODULE GlobalScalars
 !   
    INTEGER,      PARAMETER :: HGEll=5
    INTEGER,      PARAMETER :: SPEll=5
-   INTEGER,      PARAMETER :: FFEll=30
+   INTEGER,      PARAMETER :: FFEll=32
    INTEGER,      PARAMETER :: SPEll2=2*SPell
    INTEGER,      PARAMETER :: FFEll2=2*FFell
    INTEGER,      PARAMETER :: HGLen=(HGEll+1)*(HGEll+2)*(HGEll+3)/6
