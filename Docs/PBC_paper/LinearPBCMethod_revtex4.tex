@@ -8,21 +8,26 @@
 \newcommand{\commentoutB}[1]{}
 %\renewcommand{\thefootnote}{\fnsymbol{footnote}}
 
-\commentoutA{\documentclass[prb,aps,nobibnotes,twocolumn,doublespace,twocolumngrid,superbib,showpacs]{revtex4}}
-\commentoutB{\documentclass[prb,aps,nobibnotes,twocolumn,doublespace,twocolumngrid,superbib,showpacs.preprint]{revtex4}}
+
+\commentoutA{\documentclass[prl,aps,nobibnotes,twocolumn,doublespace,twocolumngrid,superbib,showpacs]{revtex4}}
+\commentoutB{\documentclass[prl,aps,nobibnotes,superbib,showpacs,preprint]{revtex4}}
 
 \usepackage{graphicx}
 \usepackage{amsfonts}
 \usepackage{amsmath}
 \usepackage{bm}
 \usepackage{alltt}
+\usepackage{dcolumn} 
+\usepackage{graphicx}
+\makeatletter 
+\makeatother
 
 \begin{document}
 
 \date{\today}
 
 \title{Linear scaling computation of the Fock matrix VII.  \\
-       Periodic Density Functional Theory a the $\Gamma$-point.}
+       Periodic Density Functional Theory at the $\Gamma$-point.}
 
 \author{C.J. Tymczak}
 \affiliation{Theoretical Division, Los Alamos National Laboratory, Los Alamos, New Mexico 87545 }
@@ -94,8 +99,7 @@ This paper is organized as follows:  In Section~\ref{pbcintro},  periodic bounda
 approximation are introduced, and the avoidance linear dependencies is discused. Next, in 
 Section \ref{datastruct}, the relationship between the numerical error estimates and data structures that underly the 
 fast linear scaling algorithms for computation of the Coulomb and exchange-correlation matrix are outlined.  
-In Section~\ref{coulombsums}, we extend previous work on the Niboer and De Wette 
-\cite{BNijboer57,BNijboer58a} lattice sum 
+In Section~\ref{coulombsums}, we extend previous work on the Niboer and De Wette \cite{BNijboer57,BNijboer58a}  lattice sum 
 method to linear scaling computation of quantum Coulomb sums tin-foil boundaries.  Then, in in Section~\ref{hicu}, 
 ${\cal O}(N)$ methods for computing the GTAO-based  exchange-correlation matrix are presented. 
 In Section~\ref{implement} we discuss the implementation of these developments in the {\sc  MondoSCF} \cite{MondoSCF} suite
@@ -215,51 +219,40 @@ In the case of QCTC, this fast look up constitutes the penetration acceptability
 %\cite{}, 
 which identifies spatial clusters or agglomerations, $\rho_Q$, of the density that may be accurately 
 represented via a multipole approximation due to the absence of charge-charge penetration effects.  
-%
-% Changed From Here
-%
-For accepted agglomerations a second test, the multipole acceptability criterion (MAC),
-is performed to check translation errors in the multipole  expansion. This second test is critical
-to the overall accuracy of the Coulomb matrix build. Because of this, 
-in Ref.~[\onlinecite{CTymczak04c}] a new more accurate MAC is developed. This new MAC has several advantages
-over commonly used MAC's.
-%\cite{} 
-First, it takes into account the decay of the multipole interaction; Second, it takes into account the weight of 
-the distribution within the agglomeration; Third, it correctly takes into account the angular momentum type of the 
-primative gaussian distributions; And finally, and most importent, if is always an exact bound to the multipole 
-translation error. 
-%
-%
-%
-For each primitive bra distribution, this fast range query is performed on the $k$-d tree 
+
+For accepted clusters a second test, the multipole acceptability criterion (MAC), is performed to 
+check translation errors in the multipole  expansion. This second test is critical to the overall accuracy of 
+the Coulomb matrix build.  We have recently developed a new MAC in Ref.~[\onlinecite{CTymczak04c}] that  has several 
+advantages.  First, it takes into account the magnitude or weight of the distribution within 
+the cluster.    Second, it correctly takes into account the angular symmetry  of the primative Gaussian distributions.   
+Third and most important, it  is always an exact bound to the translation error.   
+
+For each primitive bra distribution $\rho_{ab}$, a fast range query is performed on the $k$-d tree 
 representation of the total density, leading to an on the fly partition of near-field (NF) and far-field (FF) 
-interactions in construction of the gas phase Coulomb matrix,
+interactions in construction of the gas phase Coulomb matrix which may be written 
 \begin{eqnarray}
 J_{ab} &=& \sum_{Q\in \rm FF} \sum_l \sum_m O^l_m[\rho_{ab}] \sum_{l'} \sum_{m'} M^{l+l'}_{m+m'} O^{l'}_{m'}[\rho_Q] 
 \nonumber \\
 &+& \sum_{q\in \rm NF} \int d {\bf r} \int d {\bf r'} \rho_{ab} ({\bf r}) \left|{\bf r}-{\bf r'} \right|^{-1}
-\rho_q({\bf r}) 
+\rho_q({\bf r})  \, ,
 \end{eqnarray}
 where $M^l_m$ is the irregular solid harmonic interaction tensor, $O^l_m[f]=\int d{\bf r} O^l_m({\bf r}) f({\bf r})$
 is a moment of the regular solid harmonic, 
 %
-$Q$ runs over the  highest possible nodes in the density-tree as determined by PAC and MAC and 
-$q$ runs on the left over near-field primitive distributions in the density.
-The QCTC near/far-field partition pushes the multipole approximation to the limit, employing a  new   
-error estimates that depend on the magnitude and extent of both bra and ket \cite{CTymczak04c} 
-and allowing tree traversal to the resolution of primitive distributions.  
-%\cite{}
+$Q$ runs over the  highest possible nodes in the density-tree consistent with the PAC and MAC, and 
+$q$ runs on leftover near-field primitive distributions in the density.
+See Refs.~[\onlinecite{MChallacombe97,MChallacombe97D}] for further details on this representation.
 
-While resolving individual primitives forgoes well developed technologies for the 
-integral evaluation of contracted functions, it accelerates the onset of linear scaling through the early
-clustering of close distributions.
+A fundamental difference between QCTC and FMM based methods is that QCTC pushes the near/far-field partition to  the limit,  
+employing the PAC and MAC best case error estimates to resolve individual primitive distributions.  
+On the other hand, FMM based methods employ static, worst case error estimates.  
+While recuring down the density tree to the level of individual primitives precludes well developed technologies 
+for the integral evaluation of contracted functions, it accelerates the onset of linear scaling through early clustering.
 
 The Quantum Chemical Tree Code generally employs the total density, which simplifies the code, allows 
-electrostatic screening in MAC error estimates 
-%\cite{} 
-and provides charge neutrality, an essential
+electrostatic screening in MAC error estimates and provides charge neutrality, an essential
 feature for periodic calculations.  Thus, the Coulomb matrix employed here includes the electron-nuclear terms;
-${\bf J} \equiv {\bf J} + {\bf V}_{\rm en}$.
+${\bf J} \equiv {\bf J}_{\rm ee} + {\bf V}_{\rm en}$.
 
 In the case of HiCu, two separate $k$-d tree structures are used.  The rho-tree holds the electron density,
 while the cube-tree contains a hierarchical grid for integration of the exchange-correlation potential.  Each 
@@ -275,11 +268,11 @@ intersection test.
 
 For both of these fast algorithms, the trade off between efficiency and accuracy is controlled by the AABB,  
 which in turn 
-depends on the the extent or range $R_q$ of a primitive Gaussian distribution $\rho_q$, beyond which it is assumed to 
-have negligible influence.  Of coarse, negligible depends on the use to which the distribution is put, as will become 
+depends on the the extent or range $R_q$ of a primitive Gaussian distribution $\rho_q$, beyond which it is assumed to be
+negligible.  Of course, negligible depends on the use to which the distribution is put, as will become 
 obvious in the following. 
 
-Both HiCu and QCTC employ the Hermite Gaussian representation of distributions
+Both HiCu and QCTC employ the Hermite Gaussian representation of distributions \cite{GAhmadi95}
 \begin{equation}
 \rho_q ({\bf r}) = \sum_{lmn} d_{lmn} \Lambda^q_{lmn}({\bf r}),
 \end{equation}
@@ -289,11 +282,9 @@ where
 e^{-\zeta_q ({\bf r}-{\bf Q})^2}.
 \end{equation}
 This representation provides an intermediate form into which elements of the density matrix may be folded, and allows
-the use of McMurchie-Davidson recurrence relations 
-\cite{LMcmurchie78} 
+the use of McMurchie-Davidson recurrence relations  \cite{LMcmurchie78} 
 in analytic integral evaluation and density evaluation.
-For this form,  Cramer's inequality 
-%\cite{} 
+For this form,  Cramer's inequality \cite{} 
 provides a bound for the behavior of a Hermite-Gaussian distribution: 
 \begin{equation}
 \rho_q ({\bf r})  \leq C_q e^{ -\widetilde \zeta_q ({\bf r -Q})^2 },  
@@ -313,9 +304,9 @@ the constant $K=1.09$ and
 
 
 For HiCu, the overlap extent $R^{\rm o}_q$ is used, beyond which numerical evaluation of the 
-distribution $\rho_q$ yields an accumulation less than $\tau$;
+distribution $\rho_q$ yields an accumulation less than $\tau_{\rm \scriptscriptstyle ov}$;
 \begin{equation}
-C_q e^{ -\widetilde \zeta_q (R^{\rm o} _q)^2 }  = \tau .
+C_q e^{ -\widetilde \zeta_q (R^{\rm o} _q)^2 }  = \tau_{\rm \scriptscriptstyle ov} .
 \end{equation}
 For QCTC,  errors in the electrostatic potential due to penetration errors must be considered.
 For this purpose, the penetration extent $R^{\rm p}_q$ is introduced, satisfying the equation 
@@ -329,12 +320,12 @@ In both HiCu and QCTC, the density-tree is constructed by recursively splitting 
 box dimension, until each primitive has been resolved.  Then the primitive AABBs are computed from their
 extents and merged recursively back up the tree.  For HiCu, this is all there is to it, but for QCTC multipole
 moments are also translated to a common center and recursively merged up the tree.  Also, when computing 
-matrix elements of $\bf J$, the primitive bra AABB is computed with $R^{\rm o}_q$, while  $R^{\rm p}_q$ are 
+matrix elements of $\bf J$, the primitive bra AABB is computed with $R^{\rm o}_q$, while the  $R^{\rm p}_q$ are 
 used to construct AABBs of the density-tree.
 
 In Fig.~1, differences between the penetration and overlap extent are shown for a diffuse $s$-type
-Gaussian.  For large extents, such as those encountered in a static FMM-type error bound, the two extents are 
-equivalent.  However, with aggressive use of the multipole approximation as in QCTC, the distinction becomes
+Gaussian.  For large extents, such as those encountered in a static FMM-type error bound, the two extents behave
+in a similar way.  However, with aggressive use of the multipole approximation as in QCTC, the distinction becomes
 critical. 
 
 %
@@ -370,42 +361,36 @@ main approaches to handling this summation:  Multipole expansion of the Ewald po
 or Ewald-like summation of the multipole expansion. Expansion of the Ewald potential yields  
 tin foil (TF) boundary conditions, requires reciprocal and real space summation with every ${\bf J}$ build, 
 and scales as $O(N^{3/2})$.  An alternative is the Ewald-like summation of the multipole interaction tensor,
-which was first described by Nijboer and De Wette (NDW) 
-%\cite{} 
-and later reviewed and extended by us 
-%\cite{}
-to lattice summation of the irregular solid harmonic multipole interaction tensor. 
-This Ewald-like summation is taken over the periodic far field, $V_{\rm PFF}$, which is direct lattice summation 
-excluding 
-an inner region, $V_{\rm in}$, surrounding the unit cell.  This inner region has been subtracted to avoid penetration
-errors and to guarantee convergence of the multipole expansion.  Because the summed interaction tensors are cheaply 
-precomputed and reused, the cost of Coulomb summation over the PFF scales as as ${\cal O}(N p^2)$, where $p$ is the 
-order 
-of the multipole expansion.  With this feature, achieving $N$-scaling periodic quantum Coulomb sums involves the 
-contributions
+which was first described by Nijboer and De Wette (NDW) \cite{BNijboer57,BNijboer58a} and later reviewed and extended 
+by Challacombe, White and Head-Gordon \cite{MChallacombe97D} to lattice summation of the irregular solid harmonic multipole interaction tensor. 
+This Ewald-like summation is taken over the periodic far field, $V_{\rm PFF}$, and is equivalent to a  direct lattice summation (not a true Ewald sum) 
+excluding an inner region, $V_{\rm In}$, surrounding the unit cell.  This inner region has been subtracted to avoid penetration
+errors and to guarantee convergence of the multipole expansion. 
+With the summed interaction tensors cheaply precomputed and reused, the cost of Coulomb summation over the PFF 
+scales as as ${\cal O}(N p^2)$, where $p$ is the order of the multipole expansion.  With this partition,  the  $N$-scaling periodic quantum Coulomb sums 
+involve the contributions
 \begin{equation}
-{\bf J} = {\bf J}^{\rm in} + {\bf J}^{\rm PFF} + {\bf J}^{\rm TF} \, ,
+{\bf J} = {\bf J}^{\rm In} + {\bf J}^{\rm PFF} + {\bf J}^{\rm TF} \, ,
 \end{equation}
-corresponding to the three separate regions shown in Fig.~2.   Here, ${\bf J}^{\rm in}$ is computed using 
+corresponding to the three separate regions shown in Fig.~2.   Here, ${\bf J}^{\rm In}$ is computed using 
 the fast ${\cal O}(N {\rm lg} N)$ QCTC algorithm outlined previously in Section~\ref{datastruct}. Construction of 
-${\bf J}^{\rm PFF}$ 
-will be developed in the following section, while in Section~\ref{tinfoil} the term ${\bf J}^{\rm TF}$ necessary to 
-introduce tin-foil boundary conditions is detailed.
+${\bf J}^{\rm PFF}$ will be developed in the following section, while in Section~\ref{tinfoil} the term ${\bf J}^{\rm TF}$, necessary to 
+introduce tin-foil boundary conditions, is detailed.
 %
 % Figure 2
 %
 \begin{figure}
 \includegraphics{Regions.eps}
 \caption{Schematic of the regions contributing to $N$-scaling summation of the Coulomb matrix.
-The inner cells that make up $V_{\rm in}$ provide a buffer region that guarantees convergence of the multipole 
+The inner cells that make up $V_{\rm In}$ provide a buffer region that guarantees convergence of the multipole 
 expansion of Coulomb interactions between the unit cell and all cells in $V_{\rm PFF}$.  The
 periodic far-field region, $V_{\rm PFF}$, is the spherically ordered lattice extending
-to infinity but excluding $V_{\rm in}$.  For large cells and/or high order multipole 
-expansions, $V_{\rm in}$ includes just the unit cell and its nearest 27 neighbors.  In fast multipole
-method notation this corresponds to a well-separated index of unity.  However, for smaller cells and/or lower 
-order multipole expansions, $V_{\rm in}$ tends to a spherical distribution of cells surrounding the unit cell.   
-Direct summation over $V_{\rm PFF}$ leads to charges at the infinite surface  $S_{\infty}$, which must be
-be canceled by tin-foil (conducting) boundary conditions to achieve equivalence with Ewald summation.}
+to infinity but excluding $V_{\rm In}$.  For large cells and/or high order multipole 
+expansions, $V_{\rm In}$ includes just the unit cell's 27 nearest neighbors.  In FMM  notation this corresponds to WS=1.  
+However, for smaller cells and/or lower order multipole expansions, $V_{\rm In}$ tends to a spherical distribution of 
+cells surrounding the unit cell.   Direct summation over $V_{\rm PFF}$ leads to charges at the infinite surface  
+$S_{\infty}$, which must be be canceled by tin-foil (conducting) boundary conditions to achieve equivalence with 
+Ewald summation.}
 \label{regions}
 \end{figure}
 
@@ -422,8 +407,9 @@ involves charge distributions that are well separated with respect to both penet
 convergence of multipole expansion errors, as outlined in Fig.~2 and discussed in the following. 
 
 With these conditions, and assuming the unit cell is centered at the origin, the bipolar multipole expansion 
-employing the regular and irregular solid harmonics, $O^l_m$ and $M^l_m$ respectively, 
+employing the regular and irregular solid harmonics, $O^l_m$ and $M^l_m$ respectively is 
 \begin{eqnarray}
+\label{bipolar}
 {| {\bf r}-{\bf r}'+{\bf R}|}^{-1} &\approx&
 \sum^p_{l=0} (-1)^{l}  \,
 \sum^p_{l'=0} \Bigl[
@@ -432,16 +418,16 @@ employing the regular and irregular solid harmonics, $O^l_m$ and $M^l_m$ respect
 \sum^{l'}_{m=-l'} 
 O^{m}_{l}({\bf r})
             \,M^{m+m'}_{l+l'}({\bf R})
-            \,O^{m'}_{l'}({\bf r}')  \Bigr] , \nonumber
+            \,O^{m'}_{l'}({\bf r}')  \Bigr] \, . \nonumber
 \end{eqnarray}
-may be inserted into Eq.~(\ref{PFFOne}) yielding
+Inserting Eq.~(\ref{bipolar}) into into Eq.~(\ref{PFFOne}) yields
 \begin{eqnarray}
 J_{ab}^{\rm PFF}& =&\sum _{{\bf R}\in {\rm PFF}} \sum^p_{l=0} (-1)^{l}  \, \sum^p_{l'=0} \sum^{l}_{m=-l} 
 \Bigl(  \\
 &&
 \sum^{l'}_{m=-l'} 
 O_{l}^{m}\left[ \rho^\infty_{ab}\right]\,M^{m+m'}_{l+l'}({\bf R}) \, O_{l'}^{m'}\left[ \rho^\infty_{\rm tot}\right] 
-\Bigr) ,  \nonumber
+\Bigr) \, .  \nonumber
 \end{eqnarray}
 This expression decouples the complexity of $\rho^\infty_{ab}$ from $\rho^\infty_{\rm tot}$
 through the precomputed multipole moments
@@ -450,13 +436,14 @@ $O_{l}^{m}\left[ \rho^\infty_{ab}\right]
 and 
 $O_{l}^{m}\left[ \rho^\infty_{\rm tot}\right] =\int  d\mathbf{r}\, {O}_{l}^{m} \left( \mathbf{r}\right) \, 
 \rho^\infty_{\rm tot} \left( \mathbf{r}\right)$.
-Following Nijboer and De Wette, we introduce the effective multipole interaction tensor 
+Following Nijboer and De Wette \cite{BNijboer57,BNijboer58a,MChallacombe97D}, we introduce the effective multipole 
+interaction tensor 
 \begin{equation}
 {\cal M}^{m}_l=\sum_{{\bf R}\in V_{\rm PFF} } M^m_l({\bf R}) \;,
 \end{equation}
 which can be efficiently computed on the fly for each new lattice, both to high accuracy and to high order (large $p$) 
-using the new methods detailed in Appendix~\ref{calMTen}.  With this simplification,  the 
-${\cal O}(p^2 N)$  working equation 
+using the new methods detailed in Appendix~\ref{calMTen}.  Note that this is a direct sum of the interaction tensor, 
+and is {\em not} equivalent to Ewald summation.  Nevertheless, with this simplification,  the ${\cal O}(p^2 N)$  working equation 
 \begin{equation}
 \label{WorkingPFF}
 J_{ab}^{\rm PFF}= \sum^p_{l=0} \sum^{l}_{m=-l} O_{l}^{m}\left[ \rho^\infty_{ab}\right] {\cal J}^m_l \;,
@@ -469,34 +456,28 @@ is obtained, where the intermediate tensor
 is cheaply precomputed at the start of each Coulomb build.
 
 
-Because Eq.~(\ref{WorkingPFF}) is inexpensive, our strategy is to define a minimal buffer region, $V_{\rm in}$,
- sufficient 
-to control penetration errors, subtracting effort from the computation of $J^{\rm in}$ via QCTC and replacing
-it with cheaper, multipole work in the computation of $J^{\rm PFF}$.  To this end, a fixed inner region $V_{\rm in}$ 
+Because Eq.~(\ref{WorkingPFF}) is inexpensive, our strategy is to define a minimal buffer region, $V_{\rm In}$, sufficient 
+to control penetration errors, subtracting effort from the computation of $J^{\rm In}$ via QCTC and replacing
+it with cheaper, multipole work in the computation of $J^{\rm PFF}$.  To this end, a fixed inner region $V_{\rm In}$ 
 is constructed 
 from neighboring cells that have simple Gaussian overlap with the unit cell, defined by the radius $R^{o}$.  
 As explained in Section~\ref{datastruct}, for the relatively large distances considered at this level the differences 
 between the
 penetration and overlap extent are negligible. 
-With $V_{\rm in}$ fixed, the precision of ${\bf J}^{\rm PFF}$ is controlled entirely by the expansion order $p$.  
-In general $p \gtrsim 20$ will be much higher than the expansion order ($\sim 5$) employed by QCTC in computation of 
-${\bf J}^{\rm in}$.  
-With QCTC accuracy is controlled on the fly by the MAC and PAC, establishing a dynamic near/far-field partition, while 
-computation of ${\bf J}^{\rm PFF}$ involves a static, worst case error dominated by the multipole expansion.  
+With $V_{\rm In}$ fixed, the precision of ${\bf J}^{\rm PFF}$ is controlled entirely by the expansion order $p$.  
+In general $p$ will be much higher than the expansion order ($\sim 5$) employed by QCTC in computation of 
+${\bf J}^{\rm In}$.  With QCTC accuracy is controlled on the fly by the MAC and PAC, establishing a dynamic near/far-field partition, while 
+computation of ${\bf J}^{\rm PFF}$ involves a static, worst-case error dominated by the multipole expansion.  
 This static error is controlled by using the FMM-like error bound, 
 \begin{equation}
+\label{FMMError}
 \frac{ 2^{p} {\cal C}^2 \,{d}_{\rm max}^{p+1}}
 {({R}^o)^{p+1}\left| {R}^o -2 \, {d}_{\rm max} \right| } 
 \leq \tau_{\rm \scriptscriptstyle MAC} \;,
 \end{equation}
-where $d_{\rm max}$ is the maximum translational distance, ${\cal C}$ is the Asymtotic Uns{\"o}ld weight of the total density
-and $\tau_{MAC}$ is the threshold controlling the precision of the calculation.
-This expression is developed in Ref.~\onlinecite{CTymczak04c},
-stemming from our new error bounds for the tree-code MAC that is both cheap and sensitive to the particulars
-of the expansion, including magnitude of the charges etc, which is captured by the  Asymtotic Uns{\"o}ld weight 
-${\cal C}$.  Because ${\cal C}$ will fluctuate slightly with the density between self-consistent-field cycles, so to will the
-expansion order~$p$.  
-
+to set the appropriate expansion order $p$.  In Eq.~(\ref{FMMError}),  $d_{\rm max}$ is the maximum translational distance, 
+${\cal C}$ is the asymtotic Uns{\"o}ld weight of the total density and $\tau_{\rm \scriptscriptstyle MAC}$ is the threshold controlling the 
+translation errors. See Ref.~\onlinecite{CTymczak04c} for development of this expression  and further explenation of these parameters.
 
 \subsection{Tin-Foil Boundary Conditions}\label{tinfoil}
 
@@ -505,7 +486,7 @@ to achieve equivalence with Ewald summation.   Achieving this equivalence is mor
 semantic, since without tin-foil boundary conditions matrix elements lack translational
 invariance and often incur dramatic charge sloshing instabilities.   The correction is 
 strongly dependent on ordering of the direct sum; as the Nijboer and De Wette 
-summation corresponds to spherical summation due to symmetry of the real/reciprocal space
+method corresponds to spherical summation due to symmetry of the real/reciprocal space
 partition, the appropriate correction is \cite{Redlack72} 
 \begin{equation}
 \Phi _{\rm Ew}\left( \mathbf{r}\right) =\Phi _{\rm SS}\left( \mathbf{r}\right) + 
@@ -513,7 +494,7 @@ partition, the appropriate correction is \cite{Redlack72}
 {3V_{\rm UC}} \left(  Q - 2 \, {\bf r } \cdot \mathbf{D} \right),
 \label{EW_pot}
 \end{equation}
-where ${\bf D}$ is the system dipole moment and $Q$ is trace of the system quadrupole, and 
+where ${\bf D}$ is the system dipole moment, $Q$ is trace of the system quadrupole and 
 we have assumed origin centering, 
 The tin-foil correction to the Coulomb matrix is then 
 \begin{equation}
@@ -528,81 +509,43 @@ dipole moment of the distribution $\rho^\infty_{ab}$.
 %
 \begin{figure} 
 \includegraphics{BoxUC.eps}
-\caption{Transformation between the rectangular integration volume $V_\Box$ employed by 
-HiCu and the unit cell with volume $V_{\rm UC}$, described by the vectors {\bf a}, 
-{\bf b} and {\bf c}.}
+\caption{Transformation between  the unit cell with volume  $V_{\rm UC}$ (described by the primitive lattice vectors {\bf a}, {\bf b} and {\bf c}) 
+and the rectangular integration volume $V_\Box$ employed by HiCu.}
 \label{boxuc}
 \end{figure}
-
 
 \section{Periodic exchange-correlation} \label{hicu}
 
 The HiCu algorithm is ideally suited for periodic boundary conditions, 
 as the unit-cell $V_{\rm UC}$ can be simply transformed into an equivalent rectangular 
-integration domain $V_\Box$ which is the cube-tree's AABB.  These volumes,
-shown in Fig.~3,  are equivalent due to full periodicity of the distributions 
-and the density. The integration is then simply,
+integration domain $V_\Box$ that is the cube-tree's AABB.  These volumes,
+shown in Fig.~3,  are equivalent due to full periodicity of both  distributions 
+and density. The integration is then simply
 %
 \begin{equation}
-K_{ab} = \int _{V_{\Box}}\, d\mathbf{r}\, \rho_{ab}^{\infty}({\bf r}) V_{xc}(\rho^{\infty}_{tot};{\bf r})
+K^{\rm xc}_{ab} = \int _{V_{\Box}}\, d\mathbf{r}\, \rho_{ab}({\bf r}) v_{\rm \scriptscriptstyle xc}\left[\rho;{\bf r} \right]
 \label{Kxc_pbc_0}
 \end{equation}
+While we have written Eq.~\ref{Kxc_pbc_0} in terms of the exchange-correlation for simplicity, in practice 
+HiCu employs the Pople, Gill and Johnson formulation \cite{JPople92}. 
 %
-However, because the distributions and density involve a double sum over 
-lattice vectors, there will be a large number of atom-atom pairs that do not overlap
-with $V_\Box$.  A similar situation is encountered in the gas phase for parallel versions 
-of HiCu \cite{CGan03}, where each processor has a small, local cube-tree that may 
-overlap only a few of the many possible atom-atom pairs.  
 
-The solution again comes from the ray tracing literature, in the form of a modified 
-ray-AABB \cite{MGomez99} and sphere-AABB test \cite{GGems}.  
+Because the distributions and density both involve a double sum over lattice vectors, 
+there will be a large number of atom-atom pairs that do not overlap with $V_\Box$.  A similar situation is 
+encountered in the gas phase for parallel versions of HiCu \cite{CGan03}, where each processor has a small, 
+local cube-tree that may overlap only a few of the many possible atom-atom pairs.  
+The solution to this problem  again comes from the ray tracing literature, in the form of a modified ray-AABB \cite{MGomez99} and sphere-AABB test \cite{GGems}.  
 %     ! Modified Miguel Gomez' Ray-AABB test (Gamasutra '99) to work for Cylinder-AABB
 %     ! for Ray=Point, uses A Simple Method for Box-Sphere Intersection Testing, Graphics Gems,  pp. 247-250
 The ray-AABB test has been modified into a cylinder-AABB test, where the radius of the cylinder
 is a maximal overlap extent of the atom-atom pair.  In the case of a same center atom-atom pair,
-it is of coarse more appropriate to employ a sphere-AABB test.  In both cases, overlap
-between the HiCu integration volume and atom-atom pairs is established with a negligible prefactor.
-\commentout{
-To calculate the DFT exchange correlation matrix in the periodic case,
-we take advantage of the periodicity of the functions being integrated
-and the locality of the basis functions \cite{Gill92},
-%
-\begin{eqnarray}
-K_{ab}^{PBC} &=& \int _{V_{cell}}\, d\mathbf{r}\, \rho_{ab}^{PBC}({\bf r})
-\frac{\delta E}{\delta \rho^{PBC}} \nonumber\\
-&+&\nabla  \rho_{ab}^{PBC}({\bf r}) \cdot \nabla \rho^{PBC}({\bf r})
-\frac{\delta E}{\delta  \nabla \rho^{PBC}}
-\label{Kxc_pbc_0}
-\end{eqnarray}
-%
-But because of the periodicity and locality of the density 
-\begin{equation}
-V_{cell} \rightarrow V_{HiCu}
-\end{equation}
-%
-where \( V_{HiCu} \) is the cubic region shown in Fig.~3.
-This transformation is ideally suited for the method we use to calculate
-our exchange-correlation matrix, which is based on a Cartesian ``Gaussian
-quadrature'' integration of a rectangular region. To calculate the
-exchange correlation matrix in periodic system we need to use equation
-(\ref{Kxc_pbc_0}), where the integration region id $V_{HiCu}$. 
-This could be prohibitively expensive because of
-the double sum (do to $\rho_{ab}^{PBC}$) if not for the locality of the HiCu grid. 
-We have determined that the the computational cost increases by about a factor of two.
-This is achieved by splitting the problem into two steps:
-First, we calculate the exchange-correlation potential on the HiCu
-grid using the periodically summed local density \( \rho ^{loc}\left( \mathbf{r}\right)  \),
-because of the k-d tree structure of the density this is not computationally
-expensive.
-Next, we directly calculate the integral of equation (\ref{Kxc_pbc_0}),
-where we obtain significant increase in efficacy by exploiting the
-localization of the atomic orbitals. 
-}
+it is of course more appropriate to employ a sphere-AABB test.  In both cases, overlap
+between the HiCu integration volume and atom-atom pairs is established with a negligible prefactor when using these tests.
 
 \begin{table}
 \caption{Comparison of {\sc CRYSTAL} and {\sc MondoSCF} $\Gamma$-point calculations on  NaCl at the 
 8-511/8-631G/BLYP level of theory at a {\tt TIGHT} accuracy level. The lattice coordinates for 
-$N_{\rm at}=2$ and 8 are  are given in Ref.~[\cite{PBCCoordinates}].}
+$N_{\rm at}=2$ and 8 are  are given in Ref.~[\onlinecite{PBCCoordinates}].}
 \label{NaCl8511}
 \center{
 \begin{tabular}{lcll}
@@ -621,7 +564,7 @@ $ ^g$Cubic
 
 \begin{table}
 \caption{Convergence of the $\Gamma$-point super-cell approximation with {\sc MondoSCF} to 
-         $k$-space integration with {\sc CRYSATAL} for NaCl at the STO-3G/LDA level
+         $k$-space integration with {\sc CRYSTAL} for NaCl at the STO-3G/LDA level
          of theory at a {\tt TIGHT} accuracy level.}\label{NaClGammaPt}
 \center{
 \begin{tabular}{lcll}
@@ -649,9 +592,9 @@ $ ^g$Cubic  \\
 
 \begin{table}
 \caption{Convergence of the$\Gamma$-point super-cell approximation with {\sc MondoSCF} to 
-         $k$-space integration with {\sc CRYSATAL} for MgO at the 8-61G/8-51G/BLYP
+         $k$-space integration with {\sc CRYSTAL} for MgO at the 8-61G/8-51G/BLYP
          level of theory at a {\tt TIGHT} accuracy level. The lattice coordinates for 
-	 $N_{\rm at}=2$ and 8 are from Ref.~[\cite{PBCCoordinates}].}
+	 $N_{\rm at}=2$ and 8 are from Ref.~[\onlinecite{PBCCoordinates}].}
 \label{MgOGammaPt}
 \center{
 \begin{tabular}{lrll}
@@ -677,7 +620,7 @@ $ ^g$Cubic  \\
 \begin{table}
 \caption{Convergence of the $\Gamma$-point super-cell approximation for Diamond, 
          computed with {\sc MondoSCF} at the 6-21G*/BLYP level of theory at a {\tt GOOD} accuracy level. The  
-         lattice coordinates for $N_{\rm at}=8$ are from Ref.~[\cite{PBCCoordinates}].}
+         lattice coordinates for $N_{\rm at}=8$ are from Ref.~[\onlinecite{PBCCoordinates}].}
 \label{DiamondGammaPt}
 \center{
 \begin{tabular}{rll}
@@ -708,7 +651,7 @@ Gnu C compiler {\sc gcc} v3.2.2 using the {\tt -O1} flag.  All calculations were
 
 The multipole interaction and contraction code used by QCTC in the near/far-field partition has been 
 highly optimized by symbolic manipulation and factorization, using real arithmetic and expansions through
-7'th order in the calculation of ${\bf J}^{\rm in}$. The computation of ${\bf J}^{\rm PFF}$ 
+7'th order in the calculation of ${\bf J}^{\rm In}$. The computation of ${\bf J}^{\rm PFF}$ 
 employs a general code for multipole contraction, allowing expansion through $p=64$.
 Eigensolution of the self-consistent-field equations has been used throughout, with the corresponding
 matrix thresholds and other thresholds given in Table \ref{Table:AccurLevels}.  
