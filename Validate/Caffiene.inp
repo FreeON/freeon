@@ -7,10 +7,9 @@ Multiplicity=1
 DebugAll=(MinDebug,CheckSums)
 Guess=SuperPos
 Opt=(QuNew,OneBase)
-Extrap=Interp
 SCFMethod=(RH,RH)
 BasisSets=(STO-3G,6-31G**)
-ModelChem=(BLYPxc,BLYPxc)
+ModelChem=(HF,BLYPxc)
 Accuracy=(Loose,Loose)
 Geometry=(InAngstroms,NoOrder)
 <EndOptions>

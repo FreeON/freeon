@@ -7,11 +7,10 @@ Charge=0
 Multiplicity=1
 DebugAll=(MinDebug,CheckSums)
 Guess=SuperPos
-CGCycles=14
 DIISDamp=0.05
-SCFMethod=(SDMM,SDMM)
+SCFMethod=(SP2,TS4)
 BasisSets=(STO-2G,3-21G)
-ModelChem=(BLYPxc,BLYPxc)
+ModelChem=(HF,B3LYP/VWN3)
 Accuracy =(Loose,Good)
 Geometry =(InAngstroms,NoOrder)
 <EndOptions>

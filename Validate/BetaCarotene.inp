@@ -6,9 +6,9 @@ Charge=0
 Guess=SuperPos
 Multiplicity=1
 DebugAll =(MinDebug,CheckSums)
-SCFMethod=(SDMM,SDMM)
+SCFMethod=(SP2,SP4)
 BasisSets=(STO-2G,3-21G)
-ModelChem=(BLYPxc,BLYPxc)
+ModelChem=(HF,PBE0)
 Accuracy =(Loose,Good)
 Geometry =(InAngstroms,NoOrder)
 <EndOptions>

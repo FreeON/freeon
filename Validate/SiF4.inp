@@ -9,9 +9,9 @@ DebugAll=(MinDebug,CheckSums)
 DIISDamp=0.4
 Guess=SuperPos
 SCFMethod=(RH,RH)
-BasisSets=(STO-2G,6-31G**)
-ModelChem=(PW91xc,PW91xc)
-Accuracy =(Loose,Tight)
+BasisSets=(STO-3G,6-31G**)
+ModelChem=(HF,PBE0)
+Accuracy =(Good,Tight)
 Geometry=(InAngstroms,NoOrder)
 <EndOptions>
 

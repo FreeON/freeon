@@ -7,434 +7,610 @@
 |  |\/|  | (_) | | | | (_| | (_) )     /\     |  |    
 |__|  |__|\___/|_| |_|\____|\___/_____/  \____|__|    
 
- Version 1.0 alpha 1                                  
+ Version 1.0 alpha 4                                  
  A program suite for O(N) SCF theory and ab initio MD 
- Matt Challacombe, Eric Schwegler,                    
- C.J. Tymczak and Chee Kwan Gan                       
- Los Alamos National Laboratory                       
+ Matt Challacombe, Eric Schwegler, C.J. Tymczak,      
+ Chee Kwan Gan, Karoly Nemeth and Anders Niklasson    
+ Los Alamos National Laboratory (LA-CC 01-2)          
  Copywrite 2001, University of California.            
 
- Compliled for AMDLinux.PG, executing on zinc21
+ Compiled for AMDLinux.PG, executing on zinc24
  a i686 machine running Linux 2.4.2-2
 
               ** Caffine **                                                                                                     
   
-<<Starting MondoSCF 10/28/01 @ 15:35:01>>
- HDF file :: /scratch/mchalla/Caffiene_6266.hdf
+<<Starting MondoSCF 09/29/02 @ 16:32:30>>
+========================================================================
+ Internal representation of the geometry:
+ Geometry originally in Angstroms has been converted to AU.
+ Geometry has not been reordered.
+ Number of electrons = 102
+------------------------------------------------------------------------
+ 1   c    0.00000000D+00   0.00000000D+00   0.00000000D+00
+ 2   c    -.39160603D+01   0.97216953D+00   0.21990363D+01
+ 3   c    -.43656639D+01   -.14708871D+01   0.27405373D+01
+ 4   c    -.26393803D+01   -.34152262D+01   0.19373471D+01
+ 5   c    -.72520502D+01   0.93114358D+00   0.43643033D+01
+ 6   c    0.13238475D+01   -.43968821D+01   -.32144239D+00
+ 7   c    -.12627905D+01   0.44599990D+01   0.31019852D+00
+ 8   c    -.79875316D+01   -.36993087D+01   0.51634495D+01
+ 9   n    -.60503357D+00   -.25566859D+01   0.62353399D+00
+ 10   n    -.17013014D+01   0.17170806D+01   0.84283669D+00
+ 11   n    -.66442388D+01   -.15024455D+01   0.40933544D+01
+ 12   n    -.55812868D+01   0.24714592D+01   0.32614781D+01
+ 13   o    0.18012112D+01   0.55236691D+00   -.12612220D+01
+ 14   o    -.29169243D+01   -.57478284D+01   0.23168419D+01
+ 15   h    -.87091235D+01   0.15040329D+01   0.52427235D+01
+ 16   h    0.17168161D+01   -.55718571D+01   0.97774423D+00
+ 17   h    0.66750791D+00   -.52743575D+01   -.17434423D+01
+ 18   h    0.28114776D+01   -.35123581D+01   -.79839033D+00
+ 19   h    -.97424823D+00   0.53305769D+01   0.18534810D+01
+ 20   h    0.17020762D+00   0.46409025D+01   -.75594709D+00
+ 21   h    -.27060498D+01   0.51494655D+01   -.50501037D+00
+ 22   h    -.94571526D+01   -.31387026D+01   0.60288117D+01
+ 23   h    -.84618150D+01   -.48141525D+01   0.38386571D+01
+ 24   h    -.69083847D+01   -.45593419D+01   0.63117793D+01
+========================================================================
+ Current HDF file :: /scratch/mchalla/Caffiene_20644.hdf
+
  PROGRAM OF CALCULATIONS:
 
   A restricted Roothaan-Hall solution of the SCF using
-  a loose accuracy level STO-3G and the B88x/LYPc model.
+  a loose accuracy level, STO-3G and the HFx model.
  
 
   Followed by a  restricted Roothaan-Hall solution of the SCF using
-  a loose accuracy level6-31Gss and the B88x/LYPc model.
+  a loose accuracy level,6-31Gss and the B88x/LYPc model.
  
 
- MakeS                :: S CheckSum = 0.1064092010541785D+02
- LowdinO              :: X CheckSum = 0.1204323948832424D+02
- MakeT                :: T CheckSum = 0.7608690659569413D+02
- P2Use                :: P[0] CheckSum = 0.1565042480758136D+02
- MakeRho              :: Rho CheckSum = 0.8951812805827832D+03
- QCTC                 :: J[0] CheckSum = 0.1131676569499743D+03
- HiCu                 :: Kxc[0] CheckSum = 0.1153506188530538D+02
- FockNGrueven         :: F[0] CheckSum = 0.5033658692946068D+02
- FockNGrueven         :: OrthoF[0] CheckSum = 0.4609058091724712D+02
- RHEqs                :: OrthoP[1] CheckSum = 0.7141428425314802D+01
- RHEqs                :: P[1] CheckSum = 0.6278394900492851D+01
- SCFStatus : [0,1,1]  :: <SCF> = -644.98005978, dD = 0.35D+01
- MakeRho              :: Rho CheckSum = 0.8011855083067454D+03
- QCTC                 :: J[1] CheckSum = 0.1148832094726356D+03
- HiCu                 :: Kxc[1] CheckSum = 0.1148591918946676D+02
- FockNGrueven         :: F[1] CheckSum = 0.5205742737432473D+02
- FockNGrueven         :: OrthoF[1] CheckSum = 0.4755593793983346D+02
- PulayDIIS            :: F_DIIS[1] CheckSum = 0.4651777021665606D+02
- RHEqs                :: OrthoP[2] CheckSum = 0.7141428426132750D+01
- RHEqs                :: P[2] CheckSum = 0.6338407029073109D+01
- SCFStatus : [1,1,1]  :: <SCF> = -670.63953910, dD = 0.28D+00, DIIS = 0.94D-02
- MakeRho              :: Rho CheckSum = 0.8028013793212207D+03
- QCTC                 :: J[2] CheckSum = 0.1146978294339461D+03
- HiCu                 :: Kxc[2] CheckSum = 0.1149015395774149D+02
- FockNGrueven         :: F[2] CheckSum = 0.5181018406427663D+02
- FockNGrueven         :: OrthoF[2] CheckSum = 0.4741981663511914D+02
- PulayDIIS            :: F_DIIS[2] CheckSum = 0.4743280525823544D+02
- RHEqs                :: OrthoP[3] CheckSum = 0.7141428427029479D+01
- RHEqs                :: P[3] CheckSum = 0.6344942311303543D+01
- SCFStatus : [2,1,1]  :: <SCF> = -670.97682477, dD = 0.13D+00, DIIS = 0.25D-02
- MakeRho              :: Rho CheckSum = 0.8040265839463773D+03
- QCTC                 :: J[3] CheckSum = 0.1146052672691231D+03
- HiCu                 :: Kxc[3] CheckSum = 0.1149564975810278D+02
- FockNGrueven         :: F[3] CheckSum = 0.5172931951973390D+02
- FockNGrueven         :: OrthoF[3] CheckSum = 0.4733752007694832D+02
- PulayDIIS            :: F_DIIS[3] CheckSum = 0.4738385789970898D+02
- RHEqs                :: OrthoP[4] CheckSum = 0.7141428428056755D+01
- RHEqs                :: P[4] CheckSum = 0.6345428957701833D+01
- SCFStatus : [3,1,1]  :: <SCF> = -670.98071554, dD = 0.11D+00, DIIS = 0.28D-02
- MakeRho              :: Rho CheckSum = 0.8038990079629846D+03
- QCTC                 :: J[4] CheckSum = 0.1146219672755882D+03
- HiCu                 :: Kxc[4] CheckSum = 0.1149325835015237D+02
- FockNGrueven         :: F[4] CheckSum = 0.5173742274003422D+02
- FockNGrueven         :: OrthoF[4] CheckSum = 0.4735464385783924D+02
- PulayDIIS            :: F_DIIS[4] CheckSum = 0.4735649671970361D+02
- RHEqs                :: OrthoP[5] CheckSum = 0.7141428426709604D+01
- RHEqs                :: P[5] CheckSum = 0.6344454085929631D+01
- SCFStatus : [4,1,1]  :: <SCF> = -670.99091105, dD = 0.50D-01, DIIS = 0.17D-02
- MakeRho              :: Rho CheckSum = 0.8038422624871002D+03
- QCTC                 :: J[5] CheckSum = 0.1146280947863077D+03
- HiCu                 :: Kxc[5] CheckSum = 0.1149265456763470D+02
- FockNGrueven         :: F[5] CheckSum = 0.5174515997507126D+02
- FockNGrueven         :: OrthoF[5] CheckSum = 0.4735709772000774D+02
- PulayDIIS            :: F_DIIS[5] CheckSum = 0.4735430813805741D+02
- RHEqs                :: OrthoP[6] CheckSum = 0.7141428425402615D+01
- RHEqs                :: P[6] CheckSum = 0.6344524578574751D+01
- SCFStatus : [5,1,1]  :: <SCF> = -670.99605652, dD = 0.17D-01, DIIS = 0.41D-03
- MakeRho              :: Rho CheckSum = 0.8038476995229081D+03
- QCTC                 :: J[6] CheckSum = 0.1146317534344297D+03
- HiCu                 :: Kxc[6] CheckSum = 0.1149277601640219D+02
- FockNGrueven         :: F[6] CheckSum = 0.5174839119977403D+02
- FockNGrueven         :: OrthoF[6] CheckSum = 0.4736058955936636D+02
- PulayDIIS            :: F_DIIS[6] CheckSum = 0.4735672298811688D+02
- RHEqs                :: OrthoP[7] CheckSum = 0.7141428425375722D+01
- RHEqs                :: P[7] CheckSum = 0.6344521512035438D+01
- SCFStatus : [6,1,1]  :: <SCF> = -670.99690495, dD = 0.66D-02, DIIS = 0.18D-03
- MakeRho              :: Rho CheckSum = 0.8038509340902598D+03
- QCTC                 :: J[7] CheckSum = 0.1146293724881130D+03
- HiCu                 :: Kxc[7] CheckSum = 0.1149283246249422D+02
- FockNGrueven         :: F[7] CheckSum = 0.5174599019623719D+02
- FockNGrueven         :: OrthoF[7] CheckSum = 0.4735864962364300D+02
- PulayDIIS            :: F_DIIS[7] CheckSum = 0.4735791352443020D+02
- RHEqs                :: OrthoP[8] CheckSum = 0.7141428425328071D+01
- RHEqs                :: P[8] CheckSum = 0.6344508306380680D+01
- SCFStatus : [7,1,1]  :: <SCF> = -670.99816406, dD = 0.22D-02, DIIS = 0.64D-04
- MakeRho              :: Rho CheckSum = 0.8038525543434068D+03
- QCTC                 :: J[8] CheckSum = 0.1146289207881838D+03
- HiCu                 :: Kxc[8] CheckSum = 0.1149284194169313D+02
- FockNGrueven         :: F[8] CheckSum = 0.5174556169207917D+02
- FockNGrueven         :: OrthoF[8] CheckSum = 0.4735824312914645D+02
- PulayDIIS            :: F_DIIS[8] CheckSum = 0.4735815338840996D+02
- RHEqs                :: OrthoP[9] CheckSum = 0.7141428425324176D+01
- RHEqs                :: P[9] CheckSum = 0.6344535184951551D+01
- SCFStatus : [8,1,1]  :: <SCF> = -670.99809412, dD = 0.93D-03, DIIS = 0.20D-04
- MakeRho              :: Rho CheckSum = 0.8038533581835172D+03
- QCTC                 :: J[9] CheckSum = 0.1146288409742273D+03
- HiCu                 :: Kxc[9] CheckSum = 0.1149284223530587D+02
- FockNGrueven         :: F[9] CheckSum = 0.5174547391076494D+02
- FockNGrueven         :: OrthoF[9] CheckSum = 0.4735817447145731D+02
- PulayDIIS            :: F_DIIS[9] CheckSum = 0.4735818140722909D+02
- RHEqs                :: OrthoP[10] CheckSum = 0.7141428425318089D+01
- RHEqs                :: P[10] CheckSum = 0.6344545244504126D+01
- SCFStatus : [9,1,1]  :: <SCF> = -670.99818537, dD = 0.41D-03, DIIS = 0.82D-05
- MakeS                :: S CheckSum = 0.2643985347835801D+02
- LowdinO              :: X CheckSum = 0.8408095671967362D+02
- MakeT                :: T CheckSum = 0.8500570936912288D+02
- MakeRho              :: Rho CheckSum = 0.8038534898118116D+03
- QCTC                 :: J[0] CheckSum = 0.1197434470104642D+03
- HiCu                 :: Kxc[0] CheckSum = 0.1804640179954299D+02
- FockNGrueven         :: F[0] CheckSum = 0.6173939872200985D+02
- FockNGrueven         :: OrthoF[0] CheckSum = 0.5724569360136436D+02
- RHEqs                :: OrthoP[1] CheckSum = 0.7141428428542841D+01
- RHEqs                :: P[1] CheckSum = 0.5439049511393980D+01
+ MakeS                :: S CheckSum  = 0.1064092010541785D+02
+ MakeS                :: CPU Sec = 0.70D-01, WALL Sec = 0.70D-01
+ LowdinO              :: X CheckSum  = 0.1204323948832424D+02
+ LowdinO              :: CPU Sec = 0.30D-01, WALL Sec = 0.50D-01
+ MakeT                :: T CheckSum  = 0.7608690659569413D+02
+ MakeT                :: CPU Sec = 0.50D-01, WALL Sec = 0.50D-01
+ P2Use                :: P[0] CheckSum  = 0.1565042480758136D+02
+ P2Use                :: CPU (Sec,MFLOPS) = (0.10D-01, 93),
+                         WALL(Sec,MFLOPS) = (0.10D-01, 93)
+ MakeRho              :: Rho CheckSum  = 0.8951812805827832D+03
+ MakeRho              :: CPU Sec = 0.68D+00, WALL Sec = 0.68D+00
+ QCTC                 :: J[0] CheckSum  = 0.1131676585437736D+03
+ QCTC                 :: CPU Sec = 0.13D+02, WALL Sec = 0.13D+02
+ ONX                  :: Kx[0] CheckSum  = 0.1705498569597007D+02
+ ONX                  :: CPU Sec = 0.67D+01, WALL Sec = 0.67D+01
+ FockNGrueven         :: F[0] CheckSum  = 0.5618637504323521D+02
+ FockNGrueven         :: OrthoF[0] CheckSum  = 0.5151855690098061D+02
+ FockNGrueven         :: CPU (Sec,MFLOPS) = (0.20D-01, 89),
+                         WALL(Sec,MFLOPS) = (0.20D-01, 89)
+ RHEqs                :: OrthoP[1] CheckSum  = 0.7141428427588254D+01
+ RHEqs                :: P[1] CheckSum  = 0.6767246612344409D+01
+ RHEqs                :: CPU (Sec,MFLOPS) = (0.60D-01, 31),
+                         WALL(Sec,MFLOPS) = (0.60D-01, 31)
+ SCFStatus : [0,1,1]  :: <SCF> = -633.64993981, dD = 0.33D+01
+ SCFStatus            :: CPU (Sec,MFLOPS) = (0.10D-01, 5),
+                         WALL(Sec,MFLOPS) = (0.10D-01, 5)
+ MakeRho              :: Rho CheckSum  = 0.8171989599286198D+03
+ MakeRho              :: CPU Sec = 0.73D+00, WALL Sec = 0.73D+00
+ QCTC                 :: J[1] CheckSum  = 0.1145754951993332D+03
+ QCTC                 :: CPU Sec = 0.14D+02, WALL Sec = 0.14D+02
+ ONX                  :: Kx[1] CheckSum  = 0.1780362721647735D+02
+ ONX                  :: CPU Sec = 0.78D+01, WALL Sec = 0.78D+01
+ FockNGrueven         :: F[1] CheckSum  = 0.5793143620573041D+02
+ FockNGrueven         :: OrthoF[1] CheckSum  = 0.5280846262705141D+02
+ FockNGrueven         :: CPU (Sec,MFLOPS) = (0.20D-01, 94),
+                         WALL(Sec,MFLOPS) = (0.20D-01, 94)
+ DIIS                 :: F_DIIS[1] CheckSum  = 0.5176205259172555D+02
+ DIIS                 :: CPU (Sec,MFLOPS) = (0.40D-01, 51),
+                         WALL(Sec,MFLOPS) = (0.40D-01, 51)
+ RHEqs                :: OrthoP[2] CheckSum  = 0.7141428427581679D+01
+ RHEqs                :: P[2] CheckSum  = 0.6665007651228628D+01
+ RHEqs                :: CPU (Sec,MFLOPS) = (0.50D-01, 37),
+                         WALL(Sec,MFLOPS) = (0.50D-01, 37)
+ SCFStatus : [1,1,1]  :: <SCF> = -666.36553660, dD = 0.12D+00, DIIS = 0.15D-01
+ SCFStatus            :: CPU (Sec,MFLOPS) = (0.10D-01, 5),
+                         WALL(Sec,MFLOPS) = (0.10D-01, 5)
+ MakeRho              :: Rho CheckSum  = 0.8151263000610397D+03
+ MakeRho              :: CPU Sec = 0.73D+00, WALL Sec = 0.73D+00
+ QCTC                 :: J[2] CheckSum  = 0.1145454224177051D+03
+ QCTC                 :: CPU Sec = 0.14D+02, WALL Sec = 0.14D+02
+ ONX                  :: Kx[2] CheckSum  = 0.1780911522166359D+02
+ ONX                  :: CPU Sec = 0.75D+01, WALL Sec = 0.76D+01
+ FockNGrueven         :: F[2] CheckSum  = 0.5786524783501064D+02
+ FockNGrueven         :: OrthoF[2] CheckSum  = 0.5279119173926664D+02
+ FockNGrueven         :: CPU (Sec,MFLOPS) = (0.20D-01, 93),
+                         WALL(Sec,MFLOPS) = (0.20D-01, 93)
+ DIIS                 :: F_DIIS[2] CheckSum  = 0.5277422534448719D+02
+ DIIS                 :: CPU (Sec,MFLOPS) = (0.40D-01, 52),
+                         WALL(Sec,MFLOPS) = (0.40D-01, 52)
+ RHEqs                :: OrthoP[3] CheckSum  = 0.7141428427016018D+01
+ RHEqs                :: P[3] CheckSum  = 0.6360900408021240D+01
+ RHEqs                :: CPU (Sec,MFLOPS) = (0.60D-01, 31),
+                         WALL(Sec,MFLOPS) = (0.60D-01, 31)
+ SCFStatus : [2,1,1]  :: <SCF> = -666.87731273, dD = 0.29D+00, DIIS = 0.11D-01
+ SCFStatus            :: CPU (Sec,MFLOPS) = (0.10D-01, 5),
+                         WALL(Sec,MFLOPS) = (0.10D-01, 5)
+ MakeRho              :: Rho CheckSum  = 0.8065709836466764D+03
+ MakeRho              :: CPU Sec = 0.74D+00, WALL Sec = 0.74D+00
+ QCTC                 :: J[3] CheckSum  = 0.1146294414805157D+03
+ QCTC                 :: CPU Sec = 0.13D+02, WALL Sec = 0.13D+02
+ ONX                  :: Kx[3] CheckSum  = 0.1781903649189899D+02
+ ONX                  :: CPU Sec = 0.73D+01, WALL Sec = 0.73D+01
+ FockNGrueven         :: F[3] CheckSum  = 0.5790432917620325D+02
+ FockNGrueven         :: OrthoF[3] CheckSum  = 0.5286965140585241D+02
+ FockNGrueven         :: CPU (Sec,MFLOPS) = (0.10D-01, 184),
+                         WALL(Sec,MFLOPS) = (0.10D-01, 184)
+ DIIS                 :: F_DIIS[3] CheckSum  = 0.5286799781230073D+02
+ DIIS                 :: CPU (Sec,MFLOPS) = (0.50D-01, 42),
+                         WALL(Sec,MFLOPS) = (0.50D-01, 42)
+ RHEqs                :: OrthoP[4] CheckSum  = 0.7141428426860082D+01
+ RHEqs                :: P[4] CheckSum  = 0.6334295411285123D+01
+ RHEqs                :: CPU (Sec,MFLOPS) = (0.60D-01, 31),
+                         WALL(Sec,MFLOPS) = (0.60D-01, 31)
+ SCFStatus : [3,1,1]  :: <SCF> = -667.46831728, dD = 0.60D-01, DIIS = 0.22D-02
+ SCFStatus            :: CPU (Sec,MFLOPS) = (0.10D-01, 5),
+                         WALL(Sec,MFLOPS) = (0.10D-01, 5)
+ MakeRho              :: Rho CheckSum  = 0.8053772051597707D+03
+ MakeRho              :: CPU Sec = 0.72D+00, WALL Sec = 0.72D+00
+ QCTC                 :: J[4] CheckSum  = 0.1146035505864911D+03
+ QCTC                 :: CPU Sec = 0.13D+02, WALL Sec = 0.13D+02
+ ONX                  :: Kx[4] CheckSum  = 0.1781738066262724D+02
+ ONX                  :: CPU Sec = 0.73D+01, WALL Sec = 0.73D+01
+ FockNGrueven         :: F[4] CheckSum  = 0.5786126260006949D+02
+ FockNGrueven         :: OrthoF[4] CheckSum  = 0.5285155073254015D+02
+ FockNGrueven         :: CPU (Sec,MFLOPS) = (0.20D-01, 92),
+                         WALL(Sec,MFLOPS) = (0.20D-01, 92)
+ DIIS                 :: F_DIIS[4] CheckSum  = 0.5285865941264527D+02
+ DIIS                 :: CPU (Sec,MFLOPS) = (0.50D-01, 43),
+                         WALL(Sec,MFLOPS) = (0.50D-01, 43)
+ RHEqs                :: OrthoP[5] CheckSum  = 0.7141428425383076D+01
+ RHEqs                :: P[5] CheckSum  = 0.6324633923106443D+01
+ RHEqs                :: CPU (Sec,MFLOPS) = (0.50D-01, 37),
+                         WALL(Sec,MFLOPS) = (0.60D-01, 31)
+ SCFStatus : [4,1,1]  :: <SCF> = -667.49439565, dD = 0.26D-01, DIIS = 0.65D-03
+ SCFStatus            :: CPU (Sec,MFLOPS) = (0.10D-01, 5),
+                         WALL(Sec,MFLOPS) = (0.10D-01, 5)
+ MakeRho              :: Rho CheckSum  = 0.8050877462895452D+03
+ MakeRho              :: CPU Sec = 0.73D+00, WALL Sec = 0.73D+00
+ QCTC                 :: J[5] CheckSum  = 0.1146164830399844D+03
+ QCTC                 :: CPU Sec = 0.13D+02, WALL Sec = 0.13D+02
+ ONX                  :: Kx[5] CheckSum  = 0.1781684531762091D+02
+ ONX                  :: CPU Sec = 0.74D+01, WALL Sec = 0.74D+01
+ FockNGrueven         :: F[5] CheckSum  = 0.5787339826653160D+02
+ FockNGrueven         :: OrthoF[5] CheckSum  = 0.5286243461286644D+02
+ FockNGrueven         :: CPU (Sec,MFLOPS) = (0.20D-01, 92),
+                         WALL(Sec,MFLOPS) = (0.20D-01, 92)
+ DIIS                 :: F_DIIS[5] CheckSum  = 0.5286468075920818D+02
+ DIIS                 :: CPU (Sec,MFLOPS) = (0.50D-01, 45),
+                         WALL(Sec,MFLOPS) = (0.50D-01, 45)
+ RHEqs                :: OrthoP[6] CheckSum  = 0.7141428425311827D+01
+ RHEqs                :: P[6] CheckSum  = 0.6320806632277613D+01
+ RHEqs                :: CPU (Sec,MFLOPS) = (0.50D-01, 37),
+                         WALL(Sec,MFLOPS) = (0.50D-01, 37)
+ SCFStatus : [5,1,1]  :: <SCF> = -667.49729491, dD = 0.15D-01, DIIS = 0.34D-03
+ SCFStatus            :: CPU (Sec,MFLOPS) = (0.10D-01, 5),
+                         WALL(Sec,MFLOPS) = (0.10D-01, 5)
+ MakeRho              :: Rho CheckSum  = 0.8050030690596278D+03
+ MakeRho              :: CPU Sec = 0.72D+00, WALL Sec = 0.72D+00
+ QCTC                 :: J[6] CheckSum  = 0.1146191649948049D+03
+ QCTC                 :: CPU Sec = 0.13D+02, WALL Sec = 0.13D+02
+ ONX                  :: Kx[6] CheckSum  = 0.1781677105928124D+02
+ ONX                  :: CPU Sec = 0.73D+01, WALL Sec = 0.73D+01
+ FockNGrueven         :: F[6] CheckSum  = 0.5787658614009520D+02
+ FockNGrueven         :: OrthoF[6] CheckSum  = 0.5286439523771337D+02
+ FockNGrueven         :: CPU (Sec,MFLOPS) = (0.10D-01, 184),
+                         WALL(Sec,MFLOPS) = (0.10D-01, 184)
+ DIIS                 :: F_DIIS[6] CheckSum  = 0.5286669299147602D+02
+ DIIS                 :: CPU (Sec,MFLOPS) = (0.60D-01, 39),
+                         WALL(Sec,MFLOPS) = (0.60D-01, 39)
+ RHEqs                :: OrthoP[7] CheckSum  = 0.7141428425251721D+01
+ RHEqs                :: P[7] CheckSum  = 0.6318181154416877D+01
+ RHEqs                :: CPU (Sec,MFLOPS) = (0.60D-01, 31),
+                         WALL(Sec,MFLOPS) = (0.60D-01, 31)
+ SCFStatus : [6,1,1]  :: <SCF> = -667.49802701, dD = 0.11D-01, DIIS = 0.13D-03
+ SCFStatus            :: CPU (Sec,MFLOPS) = (0.10D-01, 5),
+                         WALL(Sec,MFLOPS) = (0.10D-01, 5)
+ MakeRho              :: Rho CheckSum  = 0.8049321037256191D+03
+ MakeRho              :: CPU Sec = 0.73D+00, WALL Sec = 0.73D+00
+ QCTC                 :: J[7] CheckSum  = 0.1146223874728015D+03
+ QCTC                 :: CPU Sec = 0.13D+02, WALL Sec = 0.13D+02
+ ONX                  :: Kx[7] CheckSum  = 0.1781661538241117D+02
+ ONX                  :: CPU Sec = 0.74D+01, WALL Sec = 0.74D+01
+ FockNGrueven         :: F[7] CheckSum  = 0.5787987892467069D+02
+ FockNGrueven         :: OrthoF[7] CheckSum  = 0.5286701322183424D+02
+ FockNGrueven         :: CPU (Sec,MFLOPS) = (0.20D-01, 92),
+                         WALL(Sec,MFLOPS) = (0.20D-01, 92)
+ DIIS                 :: F_DIIS[7] CheckSum  = 0.5286700182163630D+02
+ DIIS                 :: CPU (Sec,MFLOPS) = (0.70D-01, 35),
+                         WALL(Sec,MFLOPS) = (0.70D-01, 35)
+ RHEqs                :: OrthoP[8] CheckSum  = 0.7141428425253768D+01
+ RHEqs                :: P[8] CheckSum  = 0.6318111262423924D+01
+ RHEqs                :: CPU (Sec,MFLOPS) = (0.60D-01, 31),
+                         WALL(Sec,MFLOPS) = (0.60D-01, 31)
+ SCFStatus : [7,1,1]  :: <SCF> = -667.49818955, dD = 0.10D-02, DIIS = 0.24D-04
+ SCFStatus            :: CPU (Sec,MFLOPS) = (-.55D-17, 0),
+                         WALL(Sec,MFLOPS) = (0.10D-01, 5)
+ Normal SCF convergence.
+ MakeS                :: S CheckSum  = 0.2643985347835801D+02
+ MakeS                :: CPU Sec = 0.23D+00, WALL Sec = 0.23D+00
+ ... ning Warning  Warning  Warning Wa ...
+Illconditioning detected in MakeS: Cond(S)=0.12D+05
+ LowdinO              :: X CheckSum  = 0.8408095671967362D+02
+ LowdinO              :: CPU Sec = 0.18D+01, WALL Sec = 0.18D+01
+ MakeT                :: T CheckSum  = 0.8500570936912288D+02
+ MakeT                :: CPU Sec = 0.19D+00, WALL Sec = 0.19D+00
+ MakeRho              :: Rho CheckSum  = 0.8049298846343309D+03
+ MakeRho              :: CPU Sec = 0.73D+00, WALL Sec = 0.73D+00
+ QCTC                 :: J[0] CheckSum  = 0.1197786401018848D+03
+ QCTC                 :: CPU Sec = 0.34D+02, WALL Sec = 0.34D+02
+ HiCu                 :: Kxc[0] CheckSum  = 0.1803719865497951D+02
+ HiCu                 :: CPU Sec = 0.31D+02, WALL Sec = 0.31D+02
+ FockNGrueven         :: F[0] CheckSum  = 0.6180005692807557D+02
+ FockNGrueven         :: OrthoF[0] CheckSum  = 0.5720012060369933D+02
+ FockNGrueven         :: CPU (Sec,MFLOPS) = (0.20D+00, 352),
+                         WALL(Sec,MFLOPS) = (0.20D+00, 352)
+ RHEqs                :: OrthoP[1] CheckSum  = 0.7141428428542850D+01
+ RHEqs                :: P[1] CheckSum  = 0.5472644231749366D+01
+ RHEqs                :: CPU (Sec,MFLOPS) = (0.16D+01, 43),
+                         WALL(Sec,MFLOPS) = (0.16D+01, 43)
  SCFStatus : [0,2,1]  :: Basis set switch ...  MxD = 0.15D+01
- MakeRho              :: Rho CheckSum = 0.1202615419273452D+04
- QCTC                 :: J[1] CheckSum = 0.1194352653349857D+03
- HiCu                 :: Kxc[1] CheckSum = 0.1802037611487161D+02
- FockNGrueven         :: F[1] CheckSum = 0.6151460586838172D+02
- FockNGrueven         :: OrthoF[1] CheckSum = 0.5702482761913572D+02
- PulayDIIS            :: F_DIIS[1] CheckSum = 0.5717810601621932D+02
- RHEqs                :: OrthoP[2] CheckSum = 0.7141428428542849D+01
- RHEqs                :: P[2] CheckSum = 0.5400694767782369D+01
- SCFStatus : [1,2,1]  :: <SCF> = -679.87069651, dD = 0.52D-01, DIIS = 0.12D-02
- MakeRho              :: Rho CheckSum = 0.1201280469282198D+04
- QCTC                 :: J[2] CheckSum = 0.1195307583509089D+03
- HiCu                 :: Kxc[2] CheckSum = 0.1801046772612771D+02
- FockNGrueven         :: F[2] CheckSum = 0.6161645107370187D+02
- FockNGrueven         :: OrthoF[2] CheckSum = 0.5698264956330670D+02
- PulayDIIS            :: F_DIIS[2] CheckSum = 0.5697286422964559D+02
- RHEqs                :: OrthoP[3] CheckSum = 0.7141428428542812D+01
- RHEqs                :: P[3] CheckSum = 0.5380956039730880D+01
- SCFStatus : [2,2,1]  :: <SCF> = -679.89527088, dD = 0.56D-01, DIIS = 0.54D-03
- MakeRho              :: Rho CheckSum = 0.1198935918028414D+04
- QCTC                 :: J[3] CheckSum = 0.1195751130505478D+03
- HiCu                 :: Kxc[3] CheckSum = 0.1800756030667431D+02
- FockNGrueven         :: F[3] CheckSum = 0.6161492425604045D+02
- FockNGrueven         :: OrthoF[3] CheckSum = 0.5704809279470749D+02
- PulayDIIS            :: F_DIIS[3] CheckSum = 0.5699459642136252D+02
- RHEqs                :: OrthoP[4] CheckSum = 0.7141428428542872D+01
- RHEqs                :: P[4] CheckSum = 0.5365409191212638D+01
- SCFStatus : [3,2,1]  :: <SCF> = -679.88257861, dD = 0.51D-01, DIIS = 0.81D-03
- MakeRho              :: Rho CheckSum = 0.1199224083759600D+04
- QCTC                 :: J[4] CheckSum = 0.1195911690212426D+03
- HiCu                 :: Kxc[4] CheckSum = 0.1800793262579011D+02
- FockNGrueven         :: F[4] CheckSum = 0.6167662956962669D+02
- FockNGrueven         :: OrthoF[4] CheckSum = 0.5698876294204435D+02
- PulayDIIS            :: F_DIIS[4] CheckSum = 0.5699482657151041D+02
- RHEqs                :: OrthoP[5] CheckSum = 0.7141428428542801D+01
- RHEqs                :: P[5] CheckSum = 0.5369648248368448D+01
- SCFStatus : [4,2,1]  :: <SCF> = -679.89726596, dD = 0.19D-01, DIIS = 0.30D-03
- MakeRho              :: Rho CheckSum = 0.1199247238877227D+04
- QCTC                 :: J[5] CheckSum = 0.1195701032191129D+03
- HiCu                 :: Kxc[5] CheckSum = 0.1800891872363325D+02
- FockNGrueven         :: F[5] CheckSum = 0.6163948212560560D+02
- FockNGrueven         :: OrthoF[5] CheckSum = 0.5700321503500843D+02
- PulayDIIS            :: F_DIIS[5] CheckSum = 0.5699795450875649D+02
- RHEqs                :: OrthoP[6] CheckSum = 0.7141428428542868D+01
- RHEqs                :: P[6] CheckSum = 0.5368190125802189D+01
- SCFStatus : [5,2,1]  :: <SCF> = -679.90177055, dD = 0.81D-02, DIIS = 0.12D-03
- MakeRho              :: Rho CheckSum = 0.1199236513730510D+04
- QCTC                 :: J[6] CheckSum = 0.1195785479649369D+03
- HiCu                 :: Kxc[6] CheckSum = 0.1800732366365451D+02
- FockNGrueven         :: F[6] CheckSum = 0.6165038710561412D+02
- FockNGrueven         :: OrthoF[6] CheckSum = 0.5699702418695667D+02
- PulayDIIS            :: F_DIIS[6] CheckSum = 0.5699796348814957D+02
- RHEqs                :: OrthoP[7] CheckSum = 0.7141428428542875D+01
- RHEqs                :: P[7] CheckSum = 0.5368408076750523D+01
- SCFStatus : [6,2,1]  :: <SCF> = -679.90181141, dD = 0.30D-02, DIIS = 0.44D-04
- SForce               :: dS/dR CheckSum = 0.8164120008714686D+00
- TForce               :: dT/dR CheckSum = 0.3129176241144430D+01
- MakeRho              :: Rho CheckSum = 0.1199231182152771D+04
- JForce               :: dJ/dR CheckSum = 0.2283973853520492D+01
- XCForce              :: dXC/dR CheckSum = 0.1405299714500547D+01
- MakeS                :: S CheckSum = 0.2624451914155970D+02
- LowdinO              :: X CheckSum = 0.8178235697668005D+02
- MakeT                :: T CheckSum = 0.8487139600715895D+02
- P2Use                :: P[0] CheckSum = 0.5374393465097944D+01
- MakeRho              :: Rho CheckSum = 0.1198143538658709D+04
- QCTC                 :: J[0] CheckSum = 0.1193900986336718D+03
- HiCu                 :: Kxc[0] CheckSum = 0.1783608794437022D+02
- FockNGrueven         :: F[0] CheckSum = 0.6140942576443536D+02
- FockNGrueven         :: OrthoF[0] CheckSum = 0.5668741045372648D+02
- RHEqs                :: OrthoP[1] CheckSum = 0.7141428428542803D+01
- RHEqs                :: P[1] CheckSum = 0.5368279606244651D+01
- SCFStatus : [0,2,2]  :: <SCF> = -679.99619743, dD = 0.67D-01
- MakeRho              :: Rho CheckSum = 0.1197895033711166D+04
- QCTC                 :: J[1] CheckSum = 0.1195510789877525D+03
- HiCu                 :: Kxc[1] CheckSum = 0.1781816192374875D+02
- FockNGrueven         :: F[1] CheckSum = 0.6155458672411084D+02
- FockNGrueven         :: OrthoF[1] CheckSum = 0.5662830236276530D+02
- PulayDIIS            :: F_DIIS[1] CheckSum = 0.5666919092611574D+02
- RHEqs                :: OrthoP[2] CheckSum = 0.7141428428542848D+01
- RHEqs                :: P[2] CheckSum = 0.5366703480952492D+01
- SCFStatus : [1,2,2]  :: <SCF> = -680.03469930, dD = 0.22D-01, DIIS = 0.64D-03
- MakeRho              :: Rho CheckSum = 0.1197997502484784D+04
- QCTC                 :: J[2] CheckSum = 0.1195237262370431D+03
- HiCu                 :: Kxc[2] CheckSum = 0.1782427331139293D+02
- FockNGrueven         :: F[2] CheckSum = 0.6153338596050759D+02
- FockNGrueven         :: OrthoF[2] CheckSum = 0.5664738711200343D+02
- PulayDIIS            :: F_DIIS[2] CheckSum = 0.5664959701481280D+02
- RHEqs                :: OrthoP[3] CheckSum = 0.7141428428542868D+01
- RHEqs                :: P[3] CheckSum = 0.5371288739956594D+01
- SCFStatus : [2,2,2]  :: <SCF> = -680.04931816, dD = 0.23D-01, DIIS = 0.18D-03
- MakeRho              :: Rho CheckSum = 0.1198317294490122D+04
- QCTC                 :: J[3] CheckSum = 0.1194525327400921D+03
- HiCu                 :: Kxc[3] CheckSum = 0.1782977981551393D+02
- FockNGrueven         :: F[3] CheckSum = 0.6146542081046960D+02
- FockNGrueven         :: OrthoF[3] CheckSum = 0.5666194165780392D+02
- PulayDIIS            :: F_DIIS[3] CheckSum = 0.5665509199086268D+02
- RHEqs                :: OrthoP[4] CheckSum = 0.7141428428542879D+01
- RHEqs                :: P[4] CheckSum = 0.5368536677510938D+01
- SCFStatus : [3,2,2]  :: <SCF> = -680.04852986, dD = 0.19D-01, DIIS = 0.35D-03
- MakeRho              :: Rho CheckSum = 0.1198203026147218D+04
- QCTC                 :: J[4] CheckSum = 0.1194812686395167D+03
- HiCu                 :: Kxc[4] CheckSum = 0.1782740584782394D+02
- FockNGrueven         :: F[4] CheckSum = 0.6149330589938650D+02
- FockNGrueven         :: OrthoF[4] CheckSum = 0.5665196417589077D+02
- PulayDIIS            :: F_DIIS[4] CheckSum = 0.5665376509777640D+02
- RHEqs                :: OrthoP[5] CheckSum = 0.7141428428542885D+01
- RHEqs                :: P[5] CheckSum = 0.5367821337212416D+01
- SCFStatus : [4,2,2]  :: <SCF> = -680.05203029, dD = 0.32D-02, DIIS = 0.47D-04
- MakeRho              :: Rho CheckSum = 0.1198143017859796D+04
- QCTC                 :: J[5] CheckSum = 0.1194914702289646D+03
- HiCu                 :: Kxc[5] CheckSum = 0.1782726290475288D+02
- FockNGrueven         :: F[5] CheckSum = 0.6150335853471346D+02
- FockNGrueven         :: OrthoF[5] CheckSum = 0.5665462663975619D+02
- PulayDIIS            :: F_DIIS[5] CheckSum = 0.5665407725931052D+02
- RHEqs                :: OrthoP[6] CheckSum = 0.7141428428542886D+01
- RHEqs                :: P[6] CheckSum = 0.5368188715636059D+01
- SCFStatus : [5,2,2]  :: <SCF> = -680.05177870, dD = 0.18D-02, DIIS = 0.24D-04
- MakeRho              :: Rho CheckSum = 0.1198161045784913D+04
- QCTC                 :: J[6] CheckSum = 0.1194882692848519D+03
- HiCu                 :: Kxc[6] CheckSum = 0.1782734782458972D+02
- FockNGrueven         :: F[6] CheckSum = 0.6150016702408062D+02
- FockNGrueven         :: OrthoF[6] CheckSum = 0.5665426256517368D+02
- PulayDIIS            :: F_DIIS[6] CheckSum = 0.5665437374279355D+02
- RHEqs                :: OrthoP[7] CheckSum = 0.7141428428542942D+01
- RHEqs                :: P[7] CheckSum = 0.5368124654279088D+01
- SCFStatus : [6,2,2]  :: <SCF> = -680.05160521, dD = 0.11D-02, DIIS = 0.11D-04
- MakeRho              :: Rho CheckSum = 0.1198169475771982D+04
- QCTC                 :: J[7] CheckSum = 0.1194868794622029D+03
- HiCu                 :: Kxc[7] CheckSum = 0.1782732684857260D+02
- FockNGrueven         :: F[7] CheckSum = 0.6149903581976080D+02
- FockNGrueven         :: OrthoF[7] CheckSum = 0.5665330462608849D+02
- PulayDIIS            :: F_DIIS[7] CheckSum = 0.5665408320936121D+02
- RHEqs                :: OrthoP[8] CheckSum = 0.7141428428542865D+01
- RHEqs                :: P[8] CheckSum = 0.5368345953345236D+01
- SCFStatus : [7,2,2]  :: <SCF> = -680.05150348, dD = 0.13D-02, DIIS = 0.14D-04
- MakeRho              :: Rho CheckSum = 0.1198168393469750D+04
- QCTC                 :: J[8] CheckSum = 0.1194872029102051D+03
- HiCu                 :: Kxc[8] CheckSum = 0.1782733779317607D+02
- FockNGrueven         :: F[8] CheckSum = 0.6149897626240779D+02
- FockNGrueven         :: OrthoF[8] CheckSum = 0.5665390148075360D+02
- PulayDIIS            :: F_DIIS[8] CheckSum = 0.5665409108016680D+02
- RHEqs                :: OrthoP[9] CheckSum = 0.7141428428542831D+01
- RHEqs                :: P[9] CheckSum = 0.5368314902567074D+01
- SCFStatus : [8,2,2]  :: <SCF> = -680.05130451, dD = 0.59D-03, DIIS = 0.61D-05
- MakeRho              :: Rho CheckSum = 0.1198167254790912D+04
- QCTC                 :: J[9] CheckSum = 0.1194878757278910D+03
- HiCu                 :: Kxc[9] CheckSum = 0.1782732560772120D+02
- FockNGrueven         :: F[9] CheckSum = 0.6149997615494456D+02
- FockNGrueven         :: OrthoF[9] CheckSum = 0.5665377338464717D+02
- PulayDIIS            :: F_DIIS[9] CheckSum = 0.5665398714188567D+02
- RHEqs                :: OrthoP[10] CheckSum = 0.7141428428542878D+01
- RHEqs                :: P[10] CheckSum = 0.5368323454350718D+01
- SCFStatus : [9,2,2]  :: <SCF> = -680.05145584, dD = 0.41D-03, DIIS = 0.60D-05
- SForce               :: dS/dR CheckSum = 0.8003723241793777D+00
- TForce               :: dT/dR CheckSum = 0.2956261521939755D+01
- MakeRho              :: Rho CheckSum = 0.1198165069494418D+04
- JForce               :: dJ/dR CheckSum = 0.2327764310863719D+01
- XCForce              :: dXC/dR CheckSum = 0.1359911654800585D+01
- QuNew : Descent   #2 :: dE= -.22D-03, Grms= 0.83D-02, Gmax= 0.17D+00, Xrms= 0.83D-02, Xmax= 0.17D+00
- MakeS                :: S CheckSum = 0.2615194877920764D+02
- LowdinO              :: X CheckSum = 0.8107901367414165D+02
- MakeT                :: T CheckSum = 0.8484570190183902D+02
- P2Use                :: P[0] CheckSum = 0.5366096966816014D+01
- MakeRho              :: Rho CheckSum = 0.1197894828706861D+04
- QCTC                 :: J[0] CheckSum = 0.1194170093507473D+03
- HiCu                 :: Kxc[0] CheckSum = 0.1775457362259273D+02
- FockNGrueven         :: F[0] CheckSum = 0.6135534967632052D+02
- FockNGrueven         :: OrthoF[0] CheckSum = 0.5660054971897555D+02
- RHEqs                :: OrthoP[1] CheckSum = 0.7141428428542915D+01
- RHEqs                :: P[1] CheckSum = 0.5357220452879691D+01
- SCFStatus : [0,2,3]  :: <SCF> = -680.06088915, dD = 0.31D-01
- MakeRho              :: Rho CheckSum = 0.1197839459952153D+04
- QCTC                 :: J[1] CheckSum = 0.1194556356459855D+03
- HiCu                 :: Kxc[1] CheckSum = 0.1775318657179870D+02
- FockNGrueven         :: F[1] CheckSum = 0.6139768905385196D+02
- FockNGrueven         :: OrthoF[1] CheckSum = 0.5659145733618834D+02
- PulayDIIS            :: F_DIIS[1] CheckSum = 0.5659774884213208D+02
- RHEqs                :: OrthoP[2] CheckSum = 0.7141428428542848D+01
- RHEqs                :: P[2] CheckSum = 0.5362035295705535D+01
- SCFStatus : [1,2,3]  :: <SCF> = -680.07195855, dD = 0.18D-01, DIIS = 0.27D-03
- MakeRho              :: Rho CheckSum = 0.1197946536518066D+04
- QCTC                 :: J[2] CheckSum = 0.1194301851914432D+03
- HiCu                 :: Kxc[2] CheckSum = 0.1775410605610464D+02
- FockNGrueven         :: F[2] CheckSum = 0.6136628861954641D+02
- FockNGrueven         :: OrthoF[2] CheckSum = 0.5660099898193025D+02
- PulayDIIS            :: F_DIIS[2] CheckSum = 0.5660001228078548D+02
- RHEqs                :: OrthoP[3] CheckSum = 0.7141428428542842D+01
- RHEqs                :: P[3] CheckSum = 0.5361396510564823D+01
- SCFStatus : [2,2,3]  :: <SCF> = -680.06824228, dD = 0.77D-02, DIIS = 0.62D-04
- MakeRho              :: Rho CheckSum = 0.1198001971913704D+04
- QCTC                 :: J[3] CheckSum = 0.1194279370028817D+03
- HiCu                 :: Kxc[3] CheckSum = 0.1775410550267525D+02
- FockNGrueven         :: F[3] CheckSum = 0.6136912032669258D+02
- FockNGrueven         :: OrthoF[3] CheckSum = 0.5659492813728718D+02
- PulayDIIS            :: F_DIIS[3] CheckSum = 0.5659876270999432D+02
- RHEqs                :: OrthoP[4] CheckSum = 0.7141428428542836D+01
- RHEqs                :: P[4] CheckSum = 0.5361530063173225D+01
- SCFStatus : [3,2,3]  :: <SCF> = -680.06721158, dD = 0.38D-02, DIIS = 0.11D-03
- MakeRho              :: Rho CheckSum = 0.1197970842337851D+04
- QCTC                 :: J[4] CheckSum = 0.1194303351944828D+03
- HiCu                 :: Kxc[4] CheckSum = 0.1775421220638770D+02
- FockNGrueven         :: F[4] CheckSum = 0.6136861802410996D+02
- FockNGrueven         :: OrthoF[4] CheckSum = 0.5659875901308368D+02
- PulayDIIS            :: F_DIIS[4] CheckSum = 0.5659869982173547D+02
- RHEqs                :: OrthoP[5] CheckSum = 0.7141428428542852D+01
- RHEqs                :: P[5] CheckSum = 0.5361689192524096D+01
- SCFStatus : [4,2,3]  :: <SCF> = -680.06811571, dD = 0.17D-02, DIIS = 0.38D-04
- MakeRho              :: Rho CheckSum = 0.1197963198245866D+04
- QCTC                 :: J[5] CheckSum = 0.1194305654685803D+03
- HiCu                 :: Kxc[5] CheckSum = 0.1775415310645424D+02
- FockNGrueven         :: F[5] CheckSum = 0.6136797627076704D+02
- FockNGrueven         :: OrthoF[5] CheckSum = 0.5659913168025115D+02
- PulayDIIS            :: F_DIIS[5] CheckSum = 0.5659893786814620D+02
- RHEqs                :: OrthoP[6] CheckSum = 0.7141428428542883D+01
- RHEqs                :: P[6] CheckSum = 0.5361603261241105D+01
- SCFStatus : [5,2,3]  :: <SCF> = -680.06882099, dD = 0.68D-03, DIIS = 0.60D-04
- MakeRho              :: Rho CheckSum = 0.1197968731590689D+04
- QCTC                 :: J[6] CheckSum = 0.1194306770837232D+03
- HiCu                 :: Kxc[6] CheckSum = 0.1775410556390103D+02
- FockNGrueven         :: F[6] CheckSum = 0.6136905825090659D+02
- FockNGrueven         :: OrthoF[6] CheckSum = 0.5659828619061668D+02
- PulayDIIS            :: F_DIIS[6] CheckSum = 0.5659873002727386D+02
- RHEqs                :: OrthoP[7] CheckSum = 0.7141428428542903D+01
- RHEqs                :: P[7] CheckSum = 0.5361731463648816D+01
- SCFStatus : [6,2,3]  :: <SCF> = -680.06813388, dD = 0.64D-03, DIIS = 0.25D-04
- MakeRho              :: Rho CheckSum = 0.1197970036472258D+04
- QCTC                 :: J[7] CheckSum = 0.1194296833452352D+03
- HiCu                 :: Kxc[7] CheckSum = 0.1775422060524650D+02
- FockNGrueven         :: F[7] CheckSum = 0.6136780182695886D+02
- FockNGrueven         :: OrthoF[7] CheckSum = 0.5659895089523638D+02
- PulayDIIS            :: F_DIIS[7] CheckSum = 0.5659878737382962D+02
- RHEqs                :: OrthoP[8] CheckSum = 0.7141428428542824D+01
- RHEqs                :: P[8] CheckSum = 0.5361661028628738D+01
- SCFStatus : [7,2,3]  :: <SCF> = -680.06867316, dD = 0.32D-03, DIIS = 0.23D-04
- SForce               :: dS/dR CheckSum = 0.7975981929719943D+00
- TForce               :: dT/dR CheckSum = 0.2955541832518012D+01
- MakeRho              :: Rho CheckSum = 0.1197970447961246D+04
- JForce               :: dJ/dR CheckSum = 0.2323100153879236D+01
- XCForce              :: dXC/dR CheckSum = 0.1359305264295316D+01
- QuNew : Descent   #3 :: dE= -.25D-04, Grms= 0.31D-02, Gmax= 0.98D-01, Xrms= 0.28D-02, Xmax= 0.75D-01
- MakeS                :: S CheckSum = 0.2607198487752685D+02
- LowdinO              :: X CheckSum = 0.7985752688662365D+02
- MakeT                :: T CheckSum = 0.8482232924470048D+02
- P2Use                :: P[0] CheckSum = 0.5359732580103221D+01
- MakeRho              :: Rho CheckSum = 0.1197659687583390D+04
- QCTC                 :: J[0] CheckSum = 0.1193623243038451D+03
- HiCu                 :: Kxc[0] CheckSum = 0.1768713689065332D+02
- FockNGrueven         :: F[0] CheckSum = 0.6122822716574436D+02
- FockNGrueven         :: OrthoF[0] CheckSum = 0.5654443245424030D+02
- RHEqs                :: OrthoP[1] CheckSum = 0.7141428428542862D+01
- RHEqs                :: P[1] CheckSum = 0.5357064249033129D+01
- SCFStatus : [0,2,4]  :: <SCF> = -680.07137783, dD = 0.17D-01
- MakeRho              :: Rho CheckSum = 0.1197814419262075D+04
- QCTC                 :: J[1] CheckSum = 0.1193919414021107D+03
- HiCu                 :: Kxc[1] CheckSum = 0.1768574914555812D+02
- FockNGrueven         :: F[1] CheckSum = 0.6125701652897352D+02
- FockNGrueven         :: OrthoF[1] CheckSum = 0.5654723012830100D+02
- PulayDIIS            :: F_DIIS[1] CheckSum = 0.5654525775474119D+02
- RHEqs                :: OrthoP[2] CheckSum = 0.7141428428542824D+01
- RHEqs                :: P[2] CheckSum = 0.5357477768791511D+01
- SCFStatus : [1,2,4]  :: <SCF> = -680.07170646, dD = 0.34D-02, DIIS = 0.11D-03
- MakeRho              :: Rho CheckSum = 0.1197858411482880D+04
- QCTC                 :: J[2] CheckSum = 0.1193823889482045D+03
- HiCu                 :: Kxc[2] CheckSum = 0.1768610300945923D+02
- FockNGrueven         :: F[2] CheckSum = 0.6124754006934429D+02
- FockNGrueven         :: OrthoF[2] CheckSum = 0.5654671440433374D+02
- PulayDIIS            :: F_DIIS[2] CheckSum = 0.5654658690850167D+02
- RHEqs                :: OrthoP[3] CheckSum = 0.7141428428542912D+01
- RHEqs                :: P[3] CheckSum = 0.5357575635138655D+01
- SCFStatus : [2,2,4]  :: <SCF> = -680.07035493, dD = 0.69D-02, DIIS = 0.58D-04
- MakeRho              :: Rho CheckSum = 0.1197877551785062D+04
- QCTC                 :: J[3] CheckSum = 0.1193739536759322D+03
- HiCu                 :: Kxc[3] CheckSum = 0.1768653436703528D+02
- FockNGrueven         :: F[3] CheckSum = 0.6123880290653440D+02
- FockNGrueven         :: OrthoF[3] CheckSum = 0.5654626967901478D+02
- PulayDIIS            :: F_DIIS[3] CheckSum = 0.5654640204330752D+02
- RHEqs                :: OrthoP[4] CheckSum = 0.7141428428542888D+01
- RHEqs                :: P[4] CheckSum = 0.5357449812123610D+01
- SCFStatus : [3,2,4]  :: <SCF> = -680.07029671, dD = 0.40D-02, DIIS = 0.96D-04
- MakeRho              :: Rho CheckSum = 0.1197874818122980D+04
- QCTC                 :: J[4] CheckSum = 0.1193767995756798D+03
- HiCu                 :: Kxc[4] CheckSum = 0.1768629277241971D+02
- FockNGrueven         :: F[4] CheckSum = 0.6124160093679164D+02
- FockNGrueven         :: OrthoF[4] CheckSum = 0.5654580135661740D+02
- PulayDIIS            :: F_DIIS[4] CheckSum = 0.5654633097724721D+02
- RHEqs                :: OrthoP[5] CheckSum = 0.7141428428542857D+01
- RHEqs                :: P[5] CheckSum = 0.5357604499698359D+01
- SCFStatus : [4,2,4]  :: <SCF> = -680.07027315, dD = 0.67D-03, DIIS = 0.49D-04
- MakeRho              :: Rho CheckSum = 0.1197882569769058D+04
- QCTC                 :: J[5] CheckSum = 0.1193757935523685D+03
- HiCu                 :: Kxc[5] CheckSum = 0.1768638275128037D+02
- FockNGrueven         :: F[5] CheckSum = 0.6124067144702703D+02
- FockNGrueven         :: OrthoF[5] CheckSum = 0.5654599754727264D+02
- PulayDIIS            :: F_DIIS[5] CheckSum = 0.5654635037292536D+02
- RHEqs                :: OrthoP[6] CheckSum = 0.7141428428542810D+01
- RHEqs                :: P[6] CheckSum = 0.5357713300668490D+01
- SCFStatus : [5,2,4]  :: <SCF> = -680.07060053, dD = 0.16D-02, DIIS = 0.42D-04
- SForce               :: dS/dR CheckSum = 0.7866811397385768D+00
- TForce               :: dT/dR CheckSum = 0.2881899858005076D+01
- MakeRho              :: Rho CheckSum = 0.1197895109157123D+04
- JForce               :: dJ/dR CheckSum = 0.2301225928486944D+01
- XCForce              :: dXC/dR CheckSum = 0.1351769950888792D+01
- QuNew : Converged #4 :: dE= -.28D-05, Grms= 0.22D-02, Gmax= 0.90D-01, Xrms= 0.18D-02, Xmax= 0.41D-01
->-Succesfull MondoSCF run 10/28/01 @ 16:58:42-<
+ SCFStatus            :: CPU (Sec,MFLOPS) = (0.30D-01, 12),
+                         WALL(Sec,MFLOPS) = (0.30D-01, 12)
+ MakeRho              :: Rho CheckSum  = 0.1202434258309198D+04
+ MakeRho              :: CPU Sec = 0.32D+01, WALL Sec = 0.32D+01
+ QCTC                 :: J[1] CheckSum  = 0.1194208581589476D+03
+ QCTC                 :: CPU Sec = 0.77D+02, WALL Sec = 0.77D+02
+ HiCu                 :: Kxc[1] CheckSum  = 0.1803648731925172D+02
+ HiCu                 :: CPU Sec = 0.50D+02, WALL Sec = 0.50D+02
+ FockNGrueven         :: F[1] CheckSum  = 0.6144578050698243D+02
+ FockNGrueven         :: OrthoF[1] CheckSum  = 0.5715944253152090D+02
+ FockNGrueven         :: CPU (Sec,MFLOPS) = (0.19D+00, 371),
+                         WALL(Sec,MFLOPS) = (0.19D+00, 371)
+ DIIS                 :: F_DIIS[1] CheckSum  = 0.5718908079563794D+02
+ DIIS                 :: CPU (Sec,MFLOPS) = (0.20D+00, 354),
+                         WALL(Sec,MFLOPS) = (0.21D+00, 337)
+ RHEqs                :: OrthoP[2] CheckSum  = 0.7141428428542838D+01
+ RHEqs                :: P[2] CheckSum  = 0.5417065104167533D+01
+ RHEqs                :: CPU (Sec,MFLOPS) = (0.16D+01, 43),
+                         WALL(Sec,MFLOPS) = (0.16D+01, 43)
+ SCFStatus : [1,2,1]  :: <SCF> = -679.80537116, dD = 0.78D-01, DIIS = 0.22D-02
+ SCFStatus            :: CPU (Sec,MFLOPS) = (0.40D-01, 12),
+                         WALL(Sec,MFLOPS) = (0.40D-01, 12)
+ MakeRho              :: Rho CheckSum  = 0.1201703522979695D+04
+ MakeRho              :: CPU Sec = 0.32D+01, WALL Sec = 0.32D+01
+ QCTC                 :: J[2] CheckSum  = 0.1194916604347679D+03
+ QCTC                 :: CPU Sec = 0.77D+02, WALL Sec = 0.77D+02
+ HiCu                 :: Kxc[2] CheckSum  = 0.1801992368989184D+02
+ HiCu                 :: CPU Sec = 0.49D+02, WALL Sec = 0.49D+02
+ FockNGrueven         :: F[2] CheckSum  = 0.6156659541469281D+02
+ FockNGrueven         :: OrthoF[2] CheckSum  = 0.5702129393528209D+02
+ FockNGrueven         :: CPU (Sec,MFLOPS) = (0.20D+00, 352),
+                         WALL(Sec,MFLOPS) = (0.20D+00, 352)
+ DIIS                 :: F_DIIS[2] CheckSum  = 0.5697917717816379D+02
+ DIIS                 :: CPU (Sec,MFLOPS) = (0.23D+00, 309),
+                         WALL(Sec,MFLOPS) = (0.23D+00, 309)
+ RHEqs                :: OrthoP[3] CheckSum  = 0.7141428428542901D+01
+ RHEqs                :: P[3] CheckSum  = 0.5387679265541384D+01
+ RHEqs                :: CPU (Sec,MFLOPS) = (0.16D+01, 43),
+                         WALL(Sec,MFLOPS) = (0.16D+01, 43)
+ SCFStatus : [2,2,1]  :: <SCF> = -679.90541906, dD = 0.96D-01, DIIS = 0.90D-03
+ SCFStatus            :: CPU (Sec,MFLOPS) = (0.40D-01, 12),
+                         WALL(Sec,MFLOPS) = (0.40D-01, 12)
+ MakeRho              :: Rho CheckSum  = 0.1198961739555456D+04
+ MakeRho              :: CPU Sec = 0.32D+01, WALL Sec = 0.32D+01
+ QCTC                 :: J[3] CheckSum  = 0.1195535065802783D+03
+ QCTC                 :: CPU Sec = 0.77D+02, WALL Sec = 0.77D+02
+ HiCu                 :: Kxc[3] CheckSum  = 0.1800281775311371D+02
+ HiCu                 :: CPU Sec = 0.49D+02, WALL Sec = 0.49D+02
+ FockNGrueven         :: F[3] CheckSum  = 0.6157255921201098D+02
+ FockNGrueven         :: OrthoF[3] CheckSum  = 0.5704142494616280D+02
+ FockNGrueven         :: CPU (Sec,MFLOPS) = (0.19D+00, 371),
+                         WALL(Sec,MFLOPS) = (0.19D+00, 371)
+ DIIS                 :: F_DIIS[3] CheckSum  = 0.5698288400486727D+02
+ DIIS                 :: CPU (Sec,MFLOPS) = (0.26D+00, 276),
+                         WALL(Sec,MFLOPS) = (0.26D+00, 276)
+ RHEqs                :: OrthoP[4] CheckSum  = 0.7141428428542928D+01
+ RHEqs                :: P[4] CheckSum  = 0.5364924940019037D+01
+ RHEqs                :: CPU (Sec,MFLOPS) = (0.16D+01, 43),
+                         WALL(Sec,MFLOPS) = (0.16D+01, 43)
+ SCFStatus : [3,2,1]  :: <SCF> = -679.86920547, dD = 0.98D-01, DIIS = 0.13D-02
+ SCFStatus            :: CPU (Sec,MFLOPS) = (0.40D-01, 12),
+                         WALL(Sec,MFLOPS) = (0.50D-01, 10)
+ MakeRho              :: Rho CheckSum  = 0.1198989657323312D+04
+ MakeRho              :: CPU Sec = 0.32D+01, WALL Sec = 0.32D+01
+ QCTC                 :: J[4] CheckSum  = 0.1196324465149682D+03
+ QCTC                 :: CPU Sec = 0.77D+02, WALL Sec = 0.77D+02
+ HiCu                 :: Kxc[4] CheckSum  = 0.1800815017830782D+02
+ HiCu                 :: CPU Sec = 0.49D+02, WALL Sec = 0.49D+02
+ FockNGrueven         :: F[4] CheckSum  = 0.6171009917060658D+02
+ FockNGrueven         :: OrthoF[4] CheckSum  = 0.5699710400491236D+02
+ FockNGrueven         :: CPU (Sec,MFLOPS) = (0.20D+00, 352),
+                         WALL(Sec,MFLOPS) = (0.20D+00, 352)
+ DIIS                 :: F_DIIS[4] CheckSum  = 0.5699126990927610D+02
+ DIIS                 :: CPU (Sec,MFLOPS) = (0.30D+00, 241),
+                         WALL(Sec,MFLOPS) = (0.30D+00, 241)
+ RHEqs                :: OrthoP[5] CheckSum  = 0.7141428428542858D+01
+ RHEqs                :: P[5] CheckSum  = 0.5369045340855198D+01
+ RHEqs                :: CPU (Sec,MFLOPS) = (0.16D+01, 43),
+                         WALL(Sec,MFLOPS) = (0.16D+01, 43)
+ SCFStatus : [4,2,1]  :: <SCF> = -679.90887320, dD = 0.23D-01, DIIS = 0.41D-03
+ SCFStatus            :: CPU (Sec,MFLOPS) = (0.40D-01, 12),
+                         WALL(Sec,MFLOPS) = (0.40D-01, 12)
+ MakeRho              :: Rho CheckSum  = 0.1199242390545720D+04
+ MakeRho              :: CPU Sec = 0.32D+01, WALL Sec = 0.32D+01
+ QCTC                 :: J[5] CheckSum  = 0.1195684910639517D+03
+ QCTC                 :: CPU Sec = 0.77D+02, WALL Sec = 0.77D+02
+ HiCu                 :: Kxc[5] CheckSum  = 0.1801008478853888D+02
+ HiCu                 :: CPU Sec = 0.50D+02, WALL Sec = 0.50D+02
+ FockNGrueven         :: F[5] CheckSum  = 0.6163944557932830D+02
+ FockNGrueven         :: OrthoF[5] CheckSum  = 0.5699614929804478D+02
+ FockNGrueven         :: CPU (Sec,MFLOPS) = (0.20D+00, 352),
+                         WALL(Sec,MFLOPS) = (0.20D+00, 352)
+ DIIS                 :: F_DIIS[5] CheckSum  = 0.5699409860164700D+02
+ DIIS                 :: CPU (Sec,MFLOPS) = (0.34D+00, 215),
+                         WALL(Sec,MFLOPS) = (0.34D+00, 215)
+ RHEqs                :: OrthoP[6] CheckSum  = 0.7141428428542861D+01
+ RHEqs                :: P[6] CheckSum  = 0.5368844127435557D+01
+ RHEqs                :: CPU (Sec,MFLOPS) = (0.16D+01, 43),
+                         WALL(Sec,MFLOPS) = (0.16D+01, 43)
+ SCFStatus : [5,2,1]  :: <SCF> = -679.92008963, dD = 0.14D-01, DIIS = 0.19D-03
+ SCFStatus            :: CPU (Sec,MFLOPS) = (0.40D-01, 12),
+                         WALL(Sec,MFLOPS) = (0.40D-01, 12)
+ MakeRho              :: Rho CheckSum  = 0.1199234172422240D+04
+ MakeRho              :: CPU Sec = 0.32D+01, WALL Sec = 0.32D+01
+ QCTC                 :: J[6] CheckSum  = 0.1195688860126821D+03
+ QCTC                 :: CPU Sec = 0.77D+02, WALL Sec = 0.77D+02
+ HiCu                 :: Kxc[6] CheckSum  = 0.1800909718716410D+02
+ HiCu                 :: CPU Sec = 0.49D+02, WALL Sec = 0.49D+02
+ FockNGrueven         :: F[6] CheckSum  = 0.6163886414951357D+02
+ FockNGrueven         :: OrthoF[6] CheckSum  = 0.5699342897893784D+02
+ FockNGrueven         :: CPU (Sec,MFLOPS) = (0.20D+00, 352),
+                         WALL(Sec,MFLOPS) = (0.20D+00, 352)
+ DIIS                 :: F_DIIS[6] CheckSum  = 0.5699426987295416D+02
+ DIIS                 :: CPU (Sec,MFLOPS) = (0.39D+00, 190),
+                         WALL(Sec,MFLOPS) = (0.39D+00, 190)
+ RHEqs                :: OrthoP[7] CheckSum  = 0.7141428428542813D+01
+ RHEqs                :: P[7] CheckSum  = 0.5367771904905329D+01
+ RHEqs                :: CPU (Sec,MFLOPS) = (0.16D+01, 43),
+                         WALL(Sec,MFLOPS) = (0.16D+01, 43)
+ SCFStatus : [6,2,1]  :: <SCF> = -679.91835631, dD = 0.53D-02, DIIS = 0.67D-04
+ SCFStatus            :: CPU (Sec,MFLOPS) = (0.50D-01, 10),
+                         WALL(Sec,MFLOPS) = (0.50D-01, 10)
+ Normal SCF convergence.
+ SForce               :: dS/dR CheckSum  = 0.8149770457680788D+00
+ SForce               :: CPU (Sec,MFLOPS) = (0.99D+00, 71),
+                         WALL(Sec,MFLOPS) = (0.99D+00, 71)
+ TForce               :: dT/dR CheckSum  = 0.3127261901327392D+01
+ TForce               :: CPU Sec = 0.47D+00, WALL Sec = 0.47D+00
+ MakeRho              :: Rho CheckSum  = 0.1199164392148525D+04
+ MakeRho              :: CPU Sec = 0.32D+01, WALL Sec = 0.32D+01
+ JForce               :: Frc after dJ/dR added CheckSum  = 0.1785982942731146D+01
+ JForce               :: CPU Sec = 0.17D+03, WALL Sec = 0.17D+03
+ XCForce              :: dXC/dR CheckSum  = 0.1398715543107583D+01
+ XCForce              :: CPU Sec = 0.14D+03, WALL Sec = 0.14D+03
+ BFGSHess             :: CPU Sec = 0.10D-01, WALL Sec = 0.10D-01
+ NewStep              :: CPU Sec = 0.10D-01, WALL Sec = 0.20D-01
+ MakeS                :: S CheckSum  = 0.2622427253771832D+02
+ MakeS                :: CPU Sec = 0.23D+00, WALL Sec = 0.23D+00
+ ... ning Warning  Warning  Warning Wa ...
+Illconditioning detected in MakeS: Cond(S)=0.11D+05
+ LowdinO              :: X CheckSum  = 0.8197304643836669D+02
+ LowdinO              :: CPU Sec = 0.18D+01, WALL Sec = 0.18D+01
+ MakeT                :: T CheckSum  = 0.8486616708894880D+02
+ MakeT                :: CPU Sec = 0.19D+00, WALL Sec = 0.19D+00
+ P2Use                :: P[0] CheckSum  = 0.5597165344214452D+01
+ P2Use                :: CPU (Sec,MFLOPS) = (0.17D+00, 414),
+                         WALL(Sec,MFLOPS) = (0.17D+00, 414)
+ MakeRho              :: Rho CheckSum  = 0.1200628116636326D+04
+ MakeRho              :: CPU Sec = 0.32D+01, WALL Sec = 0.32D+01
+ QCTC                 :: J[0] CheckSum  = 0.1192945117387258D+03
+ QCTC                 :: CPU Sec = 0.77D+02, WALL Sec = 0.77D+02
+ HiCu                 :: Kxc[0] CheckSum  = 0.1782827089923884D+02
+ HiCu                 :: CPU Sec = 0.50D+02, WALL Sec = 0.50D+02
+ FockNGrueven         :: F[0] CheckSum  = 0.6128313698227055D+02
+ FockNGrueven         :: OrthoF[0] CheckSum  = 0.5668925497447157D+02
+ FockNGrueven         :: CPU (Sec,MFLOPS) = (0.19D+00, 371),
+                         WALL(Sec,MFLOPS) = (0.19D+00, 371)
+ RHEqs                :: OrthoP[1] CheckSum  = 0.7141428428542863D+01
+ RHEqs                :: P[1] CheckSum  = 0.5361265005261721D+01
+ RHEqs                :: CPU (Sec,MFLOPS) = (0.16D+01, 44),
+                         WALL(Sec,MFLOPS) = (0.16D+01, 44)
+ SCFStatus : [0,2,2]  :: <SCF> = -679.66222957, dD = 0.34D+00
+ SCFStatus            :: CPU (Sec,MFLOPS) = (0.50D-01, 10),
+                         WALL(Sec,MFLOPS) = (0.50D-01, 10)
+ MakeRho              :: Rho CheckSum  = 0.1197691763167801D+04
+ MakeRho              :: CPU Sec = 0.32D+01, WALL Sec = 0.32D+01
+ QCTC                 :: J[1] CheckSum  = 0.1195773433675726D+03
+ QCTC                 :: CPU Sec = 0.77D+02, WALL Sec = 0.77D+02
+ HiCu                 :: Kxc[1] CheckSum  = 0.1779751748583764D+02
+ HiCu                 :: CPU Sec = 0.49D+02, WALL Sec = 0.49D+02
+ FockNGrueven         :: F[1] CheckSum  = 0.6154993873922135D+02
+ FockNGrueven         :: OrthoF[1] CheckSum  = 0.5661783786138906D+02
+ FockNGrueven         :: CPU (Sec,MFLOPS) = (0.19D+00, 371),
+                         WALL(Sec,MFLOPS) = (0.19D+00, 371)
+ DIIS                 :: F_DIIS[1] CheckSum  = 0.5667447139703042D+02
+ DIIS                 :: CPU (Sec,MFLOPS) = (0.20D+00, 354),
+                         WALL(Sec,MFLOPS) = (0.20D+00, 354)
+ RHEqs                :: OrthoP[2] CheckSum  = 0.7141428428542837D+01
+ RHEqs                :: P[2] CheckSum  = 0.5364064542052997D+01
+ RHEqs                :: CPU (Sec,MFLOPS) = (0.16D+01, 44),
+                         WALL(Sec,MFLOPS) = (0.16D+01, 44)
+ SCFStatus : [1,2,2]  :: <SCF> = -680.05847487, dD = 0.13D-01, DIIS = 0.52D-03
+ SCFStatus            :: CPU (Sec,MFLOPS) = (0.50D-01, 10),
+                         WALL(Sec,MFLOPS) = (0.50D-01, 10)
+ MakeRho              :: Rho CheckSum  = 0.1197882846998096D+04
+ MakeRho              :: CPU Sec = 0.32D+01, WALL Sec = 0.32D+01
+ QCTC                 :: J[2] CheckSum  = 0.1195291212773887D+03
+ QCTC                 :: CPU Sec = 0.77D+02, WALL Sec = 0.77D+02
+ HiCu                 :: Kxc[2] CheckSum  = 0.1780182861066395D+02
+ HiCu                 :: CPU Sec = 0.49D+02, WALL Sec = 0.49D+02
+ FockNGrueven         :: F[2] CheckSum  = 0.6150249291907263D+02
+ FockNGrueven         :: OrthoF[2] CheckSum  = 0.5663035469192913D+02
+ FockNGrueven         :: CPU (Sec,MFLOPS) = (0.20D+00, 352),
+                         WALL(Sec,MFLOPS) = (0.20D+00, 352)
+ DIIS                 :: F_DIIS[2] CheckSum  = 0.5664294210247488D+02
+ DIIS                 :: CPU (Sec,MFLOPS) = (0.22D+00, 323),
+                         WALL(Sec,MFLOPS) = (0.22D+00, 323)
+ RHEqs                :: OrthoP[3] CheckSum  = 0.7141428428542873D+01
+ RHEqs                :: P[3] CheckSum  = 0.5364656635014985D+01
+ RHEqs                :: CPU (Sec,MFLOPS) = (0.16D+01, 44),
+                         WALL(Sec,MFLOPS) = (0.16D+01, 44)
+ SCFStatus : [2,2,2]  :: <SCF> = -680.06181900, dD = 0.21D-01, DIIS = 0.30D-03
+ SCFStatus            :: CPU (Sec,MFLOPS) = (0.40D-01, 12),
+                         WALL(Sec,MFLOPS) = (0.40D-01, 12)
+ MakeRho              :: Rho CheckSum  = 0.1198290734048911D+04
+ MakeRho              :: CPU Sec = 0.32D+01, WALL Sec = 0.32D+01
+ QCTC                 :: J[3] CheckSum  = 0.1194562244059966D+03
+ QCTC                 :: CPU Sec = 0.77D+02, WALL Sec = 0.77D+02
+ HiCu                 :: Kxc[3] CheckSum  = 0.1780807952736237D+02
+ HiCu                 :: CPU Sec = 0.48D+02, WALL Sec = 0.48D+02
+ FockNGrueven         :: F[3] CheckSum  = 0.6143971389254487D+02
+ FockNGrueven         :: OrthoF[3] CheckSum  = 0.5663100071951529D+02
+ FockNGrueven         :: CPU (Sec,MFLOPS) = (0.20D+00, 352),
+                         WALL(Sec,MFLOPS) = (0.20D+00, 352)
+ DIIS                 :: F_DIIS[3] CheckSum  = 0.5663960542314461D+02
+ DIIS                 :: CPU (Sec,MFLOPS) = (0.26D+00, 276),
+                         WALL(Sec,MFLOPS) = (0.26D+00, 276)
+ RHEqs                :: OrthoP[4] CheckSum  = 0.7141428428542849D+01
+ RHEqs                :: P[4] CheckSum  = 0.5368483861869132D+01
+ RHEqs                :: CPU (Sec,MFLOPS) = (0.16D+01, 44),
+                         WALL(Sec,MFLOPS) = (0.16D+01, 44)
+ SCFStatus : [3,2,2]  :: <SCF> = -680.06342543, dD = 0.23D-01, DIIS = 0.26D-03
+ SCFStatus            :: CPU (Sec,MFLOPS) = (0.40D-01, 12),
+                         WALL(Sec,MFLOPS) = (0.40D-01, 12)
+ MakeRho              :: Rho CheckSum  = 0.1198209842551230D+04
+ MakeRho              :: CPU Sec = 0.32D+01, WALL Sec = 0.32D+01
+ QCTC                 :: J[4] CheckSum  = 0.1194578928311357D+03
+ QCTC                 :: CPU Sec = 0.76D+02, WALL Sec = 0.76D+02
+ HiCu                 :: Kxc[4] CheckSum  = 0.1780762032008724D+02
+ HiCu                 :: CPU Sec = 0.47D+02, WALL Sec = 0.47D+02
+ FockNGrueven         :: F[4] CheckSum  = 0.6143017980730016D+02
+ FockNGrueven         :: OrthoF[4] CheckSum  = 0.5664490643010750D+02
+ FockNGrueven         :: CPU (Sec,MFLOPS) = (0.20D+00, 352),
+                         WALL(Sec,MFLOPS) = (0.20D+00, 352)
+ DIIS                 :: F_DIIS[4] CheckSum  = 0.5664109402892193D+02
+ DIIS                 :: CPU (Sec,MFLOPS) = (0.30D+00, 241),
+                         WALL(Sec,MFLOPS) = (0.30D+00, 241)
+ RHEqs                :: OrthoP[5] CheckSum  = 0.7141428428542848D+01
+ RHEqs                :: P[5] CheckSum  = 0.5365964737696038D+01
+ RHEqs                :: CPU (Sec,MFLOPS) = (0.16D+01, 44),
+                         WALL(Sec,MFLOPS) = (0.16D+01, 44)
+ SCFStatus : [4,2,2]  :: <SCF> = -680.06136438, dD = 0.84D-02, DIIS = 0.12D-03
+ SCFStatus            :: CPU (Sec,MFLOPS) = (0.40D-01, 12),
+                         WALL(Sec,MFLOPS) = (0.40D-01, 12)
+ MakeRho              :: Rho CheckSum  = 0.1198160865731877D+04
+ MakeRho              :: CPU Sec = 0.32D+01, WALL Sec = 0.32D+01
+ QCTC                 :: J[5] CheckSum  = 0.1194706150395261D+03
+ QCTC                 :: CPU Sec = 0.76D+02, WALL Sec = 0.76D+02
+ HiCu                 :: Kxc[5] CheckSum  = 0.1780740294772212D+02
+ HiCu                 :: CPU Sec = 0.48D+02, WALL Sec = 0.48D+02
+ FockNGrueven         :: F[5] CheckSum  = 0.6144901430830727D+02
+ FockNGrueven         :: OrthoF[5] CheckSum  = 0.5663940998504616D+02
+ FockNGrueven         :: CPU (Sec,MFLOPS) = (0.19D+00, 371),
+                         WALL(Sec,MFLOPS) = (0.19D+00, 371)
+ DIIS                 :: F_DIIS[5] CheckSum  = 0.5664045263331958D+02
+ DIIS                 :: CPU (Sec,MFLOPS) = (0.34D+00, 215),
+                         WALL(Sec,MFLOPS) = (0.34D+00, 215)
+ RHEqs                :: OrthoP[6] CheckSum  = 0.7141428428542830D+01
+ RHEqs                :: P[6] CheckSum  = 0.5367293546632919D+01
+ RHEqs                :: CPU (Sec,MFLOPS) = (0.16D+01, 44),
+                         WALL(Sec,MFLOPS) = (0.16D+01, 44)
+ SCFStatus : [5,2,2]  :: <SCF> = -680.06323608, dD = 0.33D-02, DIIS = 0.33D-04
+ SCFStatus            :: CPU (Sec,MFLOPS) = (0.40D-01, 12),
+                         WALL(Sec,MFLOPS) = (0.40D-01, 12)
+ Normal SCF convergence.
+ SForce               :: dS/dR CheckSum  = 0.7864690609379226D+00
+ SForce               :: CPU (Sec,MFLOPS) = (0.99D+00, 71),
+                         WALL(Sec,MFLOPS) = (0.99D+00, 71)
+ TForce               :: dT/dR CheckSum  = 0.2879520987123422D+01
+ TForce               :: CPU Sec = 0.46D+00, WALL Sec = 0.46D+00
+ MakeRho              :: Rho CheckSum  = 0.1198186584304757D+04
+ MakeRho              :: CPU Sec = 0.32D+01, WALL Sec = 0.32D+01
+ JForce               :: Frc after dJ/dR added CheckSum  = 0.1404236570862100D+01
+ JForce               :: CPU Sec = 0.17D+03, WALL Sec = 0.17D+03
+ XCForce              :: dXC/dR CheckSum  = 0.1330473607976177D+01
+ XCForce              :: CPU Sec = 0.14D+03, WALL Sec = 0.14D+03
+ QuNew : Descent   #2 :: dE= -.21D-03, Grms= 0.81D-02, Gmax= 0.17D+00, Xrms= 0.81D-02, Xmax= 0.17D+00, Step= 0.10D+01
+ BFGSHess             :: CPU Sec = 0.30D-01, WALL Sec = 0.30D-01
+ NewStep              :: CPU Sec = 0.10D-01, WALL Sec = 0.10D-01
+ MakeS                :: S CheckSum  = 0.2613200753854988D+02
+ MakeS                :: CPU Sec = 0.23D+00, WALL Sec = 0.23D+00
+ ... ning Warning  Warning  Warning Wa ...
+Illconditioning detected in MakeS: Cond(S)=0.11D+05
+ LowdinO              :: X CheckSum  = 0.8148418858736298D+02
+ LowdinO              :: CPU Sec = 0.18D+01, WALL Sec = 0.18D+01
+ MakeT                :: T CheckSum  = 0.8483946329823608D+02
+ MakeT                :: CPU Sec = 0.19D+00, WALL Sec = 0.19D+00
+ P2Use                :: P[0] CheckSum  = 0.5385697727443341D+01
+ P2Use                :: CPU (Sec,MFLOPS) = (0.17D+00, 414),
+                         WALL(Sec,MFLOPS) = (0.17D+00, 414)
+ MakeRho              :: Rho CheckSum  = 0.1197975395636008D+04
+ MakeRho              :: CPU Sec = 0.32D+01, WALL Sec = 0.32D+01
+ QCTC                 :: J[0] CheckSum  = 0.1193781531401019D+03
+ QCTC                 :: CPU Sec = 0.76D+02, WALL Sec = 0.76D+02
+ HiCu                 :: Kxc[0] CheckSum  = 0.1773744631765367D+02
+ HiCu                 :: CPU Sec = 0.48D+02, WALL Sec = 0.48D+02
+ FockNGrueven         :: F[0] CheckSum  = 0.6129129466826968D+02
+ FockNGrueven         :: OrthoF[0] CheckSum  = 0.5658688058681330D+02
+ FockNGrueven         :: CPU (Sec,MFLOPS) = (0.19D+00, 371),
+                         WALL(Sec,MFLOPS) = (0.19D+00, 371)
+ RHEqs                :: OrthoP[1] CheckSum  = 0.7141428428542856D+01
+ RHEqs                :: P[1] CheckSum  = 0.5362252457846850D+01
+ RHEqs                :: CPU (Sec,MFLOPS) = (0.16D+01, 44),
+                         WALL(Sec,MFLOPS) = (0.16D+01, 44)
+ SCFStatus : [0,2,3]  :: <SCF> = -680.05977990, dD = 0.13D+00
+ SCFStatus            :: CPU (Sec,MFLOPS) = (0.40D-01, 12),
+                         WALL(Sec,MFLOPS) = (0.40D-01, 12)
+ MakeRho              :: Rho CheckSum  = 0.1197960259382770D+04
+ MakeRho              :: CPU Sec = 0.32D+01, WALL Sec = 0.32D+01
+ QCTC                 :: J[1] CheckSum  = 0.1194234311640402D+03
+ QCTC                 :: CPU Sec = 0.76D+02, WALL Sec = 0.76D+02
+ HiCu                 :: Kxc[1] CheckSum  = 0.1773350919111100D+02
+ HiCu                 :: CPU Sec = 0.48D+02, WALL Sec = 0.48D+02
+ FockNGrueven         :: F[1] CheckSum  = 0.6132264648592893D+02
+ FockNGrueven         :: OrthoF[1] CheckSum  = 0.5659088242023858D+02
+ FockNGrueven         :: CPU (Sec,MFLOPS) = (0.20D+00, 352),
+                         WALL(Sec,MFLOPS) = (0.20D+00, 352)
+ DIIS                 :: F_DIIS[1] CheckSum  = 0.5658763740596530D+02
+ DIIS                 :: CPU (Sec,MFLOPS) = (0.20D+00, 354),
+                         WALL(Sec,MFLOPS) = (0.20D+00, 354)
+ RHEqs                :: OrthoP[2] CheckSum  = 0.7141428428542806D+01
+ RHEqs                :: P[2] CheckSum  = 0.5360916559351042D+01
+ RHEqs                :: CPU (Sec,MFLOPS) = (0.16D+01, 44),
+                         WALL(Sec,MFLOPS) = (0.16D+01, 44)
+ SCFStatus : [1,2,3]  :: <SCF> = -680.08672600, dD = 0.65D-02, DIIS = 0.20D-03
+ SCFStatus            :: CPU (Sec,MFLOPS) = (0.40D-01, 12),
+                         WALL(Sec,MFLOPS) = (0.40D-01, 12)
+ MakeRho              :: Rho CheckSum  = 0.1198006647126001D+04
+ MakeRho              :: CPU Sec = 0.32D+01, WALL Sec = 0.32D+01
+ QCTC                 :: J[2] CheckSum  = 0.1194203598950388D+03
+ QCTC                 :: CPU Sec = 0.76D+02, WALL Sec = 0.76D+02
+ HiCu                 :: Kxc[2] CheckSum  = 0.1773431776219563D+02
+ HiCu                 :: CPU Sec = 0.48D+02, WALL Sec = 0.48D+02
+ FockNGrueven         :: F[2] CheckSum  = 0.6132611821606702D+02
+ FockNGrueven         :: OrthoF[2] CheckSum  = 0.5658486429932804D+02
+ FockNGrueven         :: CPU (Sec,MFLOPS) = (0.19D+00, 371),
+                         WALL(Sec,MFLOPS) = (0.19D+00, 371)
+ DIIS                 :: F_DIIS[2] CheckSum  = 0.5658272393259441D+02
+ DIIS                 :: CPU (Sec,MFLOPS) = (0.23D+00, 309),
+                         WALL(Sec,MFLOPS) = (0.23D+00, 309)
+ RHEqs                :: OrthoP[3] CheckSum  = 0.7141428428542895D+01
+ RHEqs                :: P[3] CheckSum  = 0.5364571022543522D+01
+ RHEqs                :: CPU (Sec,MFLOPS) = (0.16D+01, 44),
+                         WALL(Sec,MFLOPS) = (0.16D+01, 44)
+ SCFStatus : [2,2,3]  :: <SCF> = -680.08918103, dD = 0.87D-02, DIIS = 0.95D-04
+ SCFStatus            :: CPU (Sec,MFLOPS) = (0.50D-01, 10),
+                         WALL(Sec,MFLOPS) = (0.50D-01, 10)
+ Normal SCF convergence.
+ SForce               :: dS/dR CheckSum  = 0.7904068983575635D+00
+ SForce               :: CPU (Sec,MFLOPS) = (0.98D+00, 71),
+                         WALL(Sec,MFLOPS) = (0.98D+00, 71)
+ TForce               :: dT/dR CheckSum  = 0.2892482332166864D+01
+ TForce               :: CPU Sec = 0.46D+00, WALL Sec = 0.46D+00
+ MakeRho              :: Rho CheckSum  = 0.1198138805410659D+04
+ MakeRho              :: CPU Sec = 0.32D+01, WALL Sec = 0.32D+01
+ JForce               :: Frc after dJ/dR added CheckSum  = 0.1398596406732106D+01
+ JForce               :: CPU Sec = 0.17D+03, WALL Sec = 0.17D+03
+ XCForce              :: dXC/dR CheckSum  = 0.1349782295385033D+01
+ XCForce              :: CPU Sec = 0.14D+03, WALL Sec = 0.14D+03
+ QuNew : Converged #3 :: dE= -.38D-04, Grms= 0.26D-02, Gmax= 0.74D-01, Xrms= 0.25D-02, Xmax= 0.68D-01, Step= 0.10D+01
+>-Successful MondoSCF run 09/29/02 @ 17:25:42-<
