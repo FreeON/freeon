@@ -305,8 +305,12 @@ MODULE JGen
 #endif
 !                        Initialize <KET|
                          CALL SetKet(Prim,PExtent)
+!
 !                        WRAP the center of Phi_A(r) Phi_B(r+R) back into the box
-                         CALL AtomCyclic(GM,Prim%P)
+!                        wrapping has to be turned off for now inorder for the
+!                        lattice forces to be correct
+!                        CALL AtomCyclic(GM,Prim%P)
+!
                          PTmp(1)=Prim%P(1)
                          PTmp(2)=Prim%P(2)
                          PTmp(3)=Prim%P(3)
