@@ -1,4 +1,4 @@
-#------------------------------------------------------------------------------
+#############################################################################
 #--  This source code is part of the MondoSCF suite of programs for 
 #    linear scaling electronic structure theory and ab initio molecular 
 #    dynamics.
@@ -28,43 +28,28 @@
 #    e.g. in the form "These calculations have been performed using MondoSCF, 
 #    a suite of programs for linear scaling electronic structure theory and
 #    ab initio molecular dynamics", and given appropriate citation.
-#------------------------------------------------------------------------------
+#############################################################################
 include $(MONDO_COMPILER)
 include $(MONDO_HOME)/Includes/Suffixes
 include $(MONDO_HOME)/Includes/RemoveAll
-
-CPPOPTS=
-
+#
 Libs =  $(F90_LIBRARIES) $(LAPACK)
-
+#
 HessObjs = BFGSMisc.o BFGSHess.o  
-
 NewObjs  = NewStep.o
-
-GradObjs = QuGrad2.o
-
-TestObjs = Hessian.o
-
-All:	Hess New Grad
-
-Hess:	$(HessObjs)
-	$(LD) $(LDFLAGS) BFGSHess $(HessObjs) $(LibOpts) $(Libs)
-	mv BFGSHess $(MONDO_HOME)/Exec/BFGSHess
-
-New:	$(NewObjs)
-	$(LD) $(LDFLAGS) NewStep $(NewObjs) $(LibOpts) $(Libs)
-	mv NewStep $(MONDO_HOME)/Exec/NewStep
-
-Grad:	$(GradObjs)
-	$(LD) $(LDFLAGS) QuGrad $(GradObjs) $(LibOpts) $(Libs)
-	mv QuGrad $(MONDO_HOME)/Exec/QuGrad
-
-Test:	$(TestObjs)
-	$(LD) $(LDFLAGS) Test $(TestObjs) $(LibOpts) $(Libs)
-#	mv QuGrad $(MONDO_HOME)/Exec/QuGrad
-
+#
+ReleaseFiles=BFGSMisc.x BFGSHess.x NewStep.x
+#
+all:	Hess New
+#
+release:clean $(ReleaseFiles)
+	rm -rf OLD
+#
+purge:	clean 
+	rm -f $(REMOVESRCE)
+#
 clean:
-	rm -f $(REMOVEALL)
+	rm -f $(REMOVEMISC) $(REMOVEMODS)
 	rm -f \#*
 	rm -f *~
 	rm -f $(MONDO_HOME)/Exec/BFGSHess
@@ -72,6 +57,14 @@ clean:
 	rm -f $(MONDO_HOME)/Exec/QuGrad
 	ln -s /dev/null core
 	ls -l 
-
+#
+Hess:	$(HessObjs)
+	$(LD) $(LDFLAGS) BFGSHess $(HessObjs) $(LibOpts) $(Libs)
+	mv BFGSHess $(MONDO_HOME)/Exec/BFGSHess
+#
+New:	$(NewObjs)
+	$(LD) $(LDFLAGS) NewStep $(NewObjs) $(LibOpts) $(Libs)
+	mv NewStep $(MONDO_HOME)/Exec/NewStep
+#
 BFGSHess.o:	$(MONDO_HOME)/Libs/libMondoMods.a
 
