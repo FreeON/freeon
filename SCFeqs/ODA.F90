@@ -27,6 +27,8 @@ PROGRAM ODA
   LOGICAL                        :: Present,HasECPs
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg,MatFile
   CHARACTER(LEN=3),PARAMETER     :: Prog='ODA'
+  REAL(DOUBLE)                   :: TrP0T,TrP1T,TrP0F0,TrP1F1,TrP0F1,TrP1F0, &
+                                    TrP0K1,TrP0K0,TrP1K0,TrP1K1
   !-------------------------------------------------------------------------
 #ifdef PARALLEL
   CALL StartUp(Args,Prog,SERIAL_O=.FALSE.)
@@ -50,7 +52,13 @@ PROGRAM ODA
   CALL Get(FTilde,TrixFile('F',Args,-1))  
   CALL Get(P,TrixFile('D',Args,0))
   CALL Get(F,TrixFile('F',Args,0))  
+! Get Kinectic Energy and ECPs
   CALL Get(T,TrixFile('T',Args))
+  IF(HasECPs) THEN
+     CALL Get(T1,TrixFile('U',Args))
+     CALL Add(T,T1,T2)
+     CALL SetEq(T,T2)
+  ENDIF
 ! Calculate Exchange Asymmetry
 !!$  IF(HasHF(ModelChem)) THEN
 !!$     CALL Get(K0,TrixFile('K',Args,-1))
@@ -75,67 +83,40 @@ PROGRAM ODA
   ENDIF
 ! Compute the Endpoint energies and Derivatives
 #ifdef PARALLEL
-! e0
-  e0 = Enuc0
+! Compute the Traces
   CALL Multiply(PTilde,T,T1)
-  e0 = e0 + Trace(T1)
+  TrP0T = Trace(T1)
+  CALL Multiply(P,T,T1)
+  TrP1T = Trace(T1)
   CALL Multiply(PTilde,FTilde,T1)
-  e0 = e0 + Trace(T1) 
+  TrP0F0 = Trace(T1)
+  CALL Multiply(P,FTilde,T1)
+  TrP1F0 = Trace(T1)
+  CALL Multiply(PTilde,F,T1)
+  TrP0F1 = Trace(T1)
+  CALL Multiply(P,F,T1)
+  TrP1F1 = Trace(T1)
   IF(HasDFT(ModelChem)) THEN
      CALL Multiply(PTilde,K0,T1)
-     e0 = e0 + Exc0 - Trace(T1)
-  ENDIF
-! e1
-  e1 = Enuc1
-  CALL Multiply(P,T,T1)
-  e1 = e1 + Trace(T1)
-  CALL Multiply(P,F,T1)
-  e1 = e1 + Trace(T1) 
-  IF(HasDFT(ModelChem)) THEN
+     TrP0K0 = Trace(T1)
      CALL Multiply(P,K1,T1)
-     e1 = e1 + Exc1 - Trace(T1)
-  ENDIF
-! e0p
-  e0p =  Enuc1-Enuc0
-  CALL Multiply(P,T,T1)
-  e0p = e0p + Trace(T1)
-  CALL Multiply(PTilde,T,T1)
-  e0p = e0p - Trace(T1)
-  CALL Multiply(P,FTilde,T1)
-  e0p = e0p + Trace(T1)
-  CALL Multiply(PTilde,F,T1)
-  e0p = e0p + Trace(T1)
-  CALL Multiply(PTilde,FTilde,T1)
-  e0p = e0p - Two*Trace(T1)
-! e1p
-  e1p =  Enuc1-Enuc0
-  CALL Multiply(P,T,T1)
-  e1p = e1p + Trace(T1)
-  CALL Multiply(PTilde,T,T1)
-  e1p = e1p - Trace(T1)
-  CALL Multiply(P,FTilde,T1)
-  e0p = e0p - Trace(T1)
-  CALL Multiply(PTilde,F,T1)
-  e0p = e0p - Trace(T1)
-  CALL Multiply(P,F,T1)
-  e0p = e0p + Two*Trace(T1)
-! add xc 
-  IF(HasDFT(ModelChem)) THEN
-     CALL Multiply(P,K0,T1)
-     e0p = e0p + Trace(T1)
-     e1p = e1p + Trace(T1)
+     TrP1K1 = Trace(T1)
      CALL Multiply(PTilde,K1,T1)
-     e0p = e0p - Trace(T1)
-     e1p = e1p - Trace(T1)
+     TrP0K1 = Trace(T1)
+     CALL Multiply(P,K0,T1)
+     TrP1K0 = Trace(T1)
+  ENDIF  
+  e0  = TrP0T+TrP0F0+Enuc0
+  e1  = TrP1T+TrP1F1+Enuc1
+  e0p = Enuc1-Enuc0+TrP1T-TrP0T+TrP1F0+TrP0F1-Two*TrP0F0
+  e1p = Enuc1-Enuc0+TrP1T-TrP0T+Two*TrP1F1-TrP1F0-TrP0F1
+  IF(HasDFT(ModelChem)) THEN
+     e0  = e0  + Exc0 - TrP0K0
+     e1  = e1  + Exc1 - TrP1K1
+     e0p = e0p + TrP1K0-TrP0K1
+     e1p = e1p + TrP1K0-TrP0K1
   ENDIF
 #else
-! Check For ECP's and Add to T
-  CALL Get(HasECPs,'hasecps',Tag_O=CurBase)
-  IF(HasECPs) THEN
-     CALL Get(T1,TrixFile('U',Args))
-     CALL Add(T,T1,T2)
-     CALL SetEq(T,T2)
-  ENDIF
 ! Avoid assumption of two electron integral symmetry which may be lost 
 ! in the case of small cell PBC HF and also due to excesive thresholding. 
   e0  = Trace(PTilde,T)+Trace(PTilde,FTilde) + Enuc0
@@ -143,8 +124,8 @@ PROGRAM ODA
   e0p = Enuc1-Enuc0+Trace(P,T)-Trace(PTilde,T)+Trace(P,FTilde)+Trace(PTilde,F)-Two*Trace(PTilde,FTilde)
   e1p = Enuc1-Enuc0+Trace(P,T)-Trace(PTilde,T)+Two*Trace(P,F)-Trace(P,FTilde)-Trace(PTilde,F)
   IF(HasDFT(ModelChem)) THEN
-     e0  = e0 + Exc0 - Trace(PTilde,K0)
-     e1  = e1 + Exc1 - Trace(P,K1)
+     e0  = e0  + Exc0 - Trace(PTilde,K0)
+     e1  = e1  + Exc1 - Trace(P,K1)
      e0p = e0p + (Trace(P,K0)-Trace(PTilde,K1))
      e1p = e1p + (Trace(P,K0)-Trace(PTilde,K1))
   ENDIF
