@@ -1,11 +1,11 @@
 #!/bin/sh
-dbx90 $MONDO_HOME/Exec/$1  -I$MONDO_HOME/ONX \
+dbx90 $MONDO_HOME/Exec/$1  -I$MONDO_HOME/ONX/PONX  \
                            -I$MONDO_HOME/MondoMods \
-                           -I$MONDO_HOME/MondoSCF \
-                           -I$MONDO_HOME/OneE \
-                           -I$MONDO_HOME/SolveSCF \
-                           -I$MONDO_HOME/QCTC \
-                           -I$MONDO_HOME/QCTC/VMD
+                           -I$MONDO_HOME/MondoSCF  \
+                           -I$MONDO_HOME/OneE      \
+                           -I$MONDO_HOME/SolveSCF  \
+                           -I$MONDO_HOME/QCTC      \
+                           -I$MONDO_HOME/HiCu      \
                        $2
 
  
