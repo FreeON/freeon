@@ -187,7 +187,7 @@ UFrc%D=Two*UFrc%D
   DO AtA=1,NAtoms
      A1=3*(AtA-1)+1
      A2=3*AtA
-     WRITE(*,11)AtA,UFrc%D(A1:A2)
+!     WRITE(*,11)AtA,UFrc%D(A1:A2)
      11 format(I3," ",3(F10.5," "))
      GM%Gradients%D(1:3,AtA)=GM%Gradients%D(1:3,AtA)+UFrc%D(A1:A2)
   ENDDO
