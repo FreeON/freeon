@@ -129,8 +129,9 @@ MODULE BlokTrPdJ
 !                  Initialize <KET|
                    CALL SetKet(Prim,PExtent)
 #ifdef PERIODIC
-!                  Fold The Primative Back into the BOX
+!                  Fold primative back into the unit cell
                    CALL AtomCyclic(GM,Prim%P)
+!
                    PTmp=Prim%P
 !                  Sum over cells
                    DO NC=1,CS_IN%NCells
@@ -178,7 +179,7 @@ MODULE BlokTrPdJ
                          DO LMNB=StartLB,StopLB  
                             IB=IB+1                      
                             DO K=1,3
-                               dJ(IA,IB,K)=dJ(IA,IB,K) + CTraxFF(Prim,dHGBra%D(:,IA,IB,K))                           
+                               dJ(IA,IB,K)=dJ(IA,IB,K) + CTraxFF_Grad(Prim,dHGBra%D(:,IA,IB,K)) 
                             ENDDO
                          ENDDO
                       ENDDO
@@ -260,7 +261,7 @@ MODULE BlokTrPdJ
 !      Add in the Far Field, Dipole and Quadripole Correction
        IF(GM%PBC%Dimen>0) THEN
           DO K=1,3
-             Vct(K)=Vct(K)+CTraxFF(Prim,dHGBra%D(:,1,1,K))
+             Vct(K)=Vct(K)+CTraxFF_Grad(Prim,dHGBra%D(:,1,1,K))
           ENDDO
        ENDIF
 #else
