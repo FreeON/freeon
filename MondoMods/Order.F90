@@ -386,6 +386,117 @@ MODULE TravelMan
 
 END MODULE TravelMan
 
+!---------------------------------------------------------------------------
+MODULE AnnealMap
+  USE PrettyPrint
+  IMPLICIT NONE
+  INTEGER,PRIVATE::NCity
+CONTAINS
+!---------------------------------------------------------------------------
+  SUBROUTINE TableAnneal(RCoor,NCityV,TravO)
+    TYPE(DBL_RNK2)::RCoor
+    INTEGER(INT8),ALLOCATABLE::CityRank(:)
+    TYPE(INT_VECT)::TravO
+    TYPE(INT_RNK3)::AnnealKey
+    INTEGER::Imax,IntVect(3),NCityV,I,J,K,LinDim,LM1,ReadNCity,M,Rank,IndexInt
+    REAL(DOUBLE)::Ratio,RMin(3),Diff,MaxDiff
+    INTEGER,PARAMETER::ReadU=30
+    TYPE(INT_VECT)::ReadTravO
+   
+  
+    NCity = NCityV
+    CALL OpenASCII('Final_TravO.dat',ReadU,OldFileQ_O=.TRUE.,Rewind_O=.TRUE.)
+    Read(ReadU,*) ReadNCity
+    WRITE(*,*) 'TableAnneal, ReadNCity = ',ReadNCity
+    LinDim = NINT(ReadNCity**(1.0d0/3.0d0))
+    WRITE(*,*) 'LinDim = ', LinDim
+    IF(LinDim*LinDim*LinDim /= ReadNCity) THEN
+      STOP 'Error: Cube root problem in TableAnneal!'
+    ENDIF
+    LM1 = LinDim-1
+    WRITE(*,*) 'LinDim = ', LinDim, ', Lm1=', LM1
+    CALL New(AnnealKey,(/LM1,LM1,LM1/),(/0,0,0/))
+    CALL New(ReadTravO,ReadNCity)
+
+    Read(ReadU,*) (ReadTravO%I(I),I=1,ReadNCity)
+!   WRITE(*,*) (ReadTravO%I(I),I=1,ReadNCity)
+    IndexInt = 0
+    DO I = 0,LM1
+      DO J = 0, LM1
+        DO K = 0, LM1
+          IndexInt = IndexInt + 1
+          Rank = 0
+          DO M = 1, ReadNCity
+            IF(ReadTravO%I(M) == IndexInt) THEN
+              Rank = M
+              EXIT
+            ENDIF
+          ENDDO
+          IF(Rank < 1 .OR. Rank > ReadNCity) THEN
+            WRITE(*,*) 'IndexInt = ',IndexInt
+            WRITE(*,*) 'Rank = ',Rank
+            STOP 'Error: Some serious problem in inverse mapping!'
+          ENDIF
+          AnnealKey%I(K,J,I) = Rank
+        ENDDO
+      ENDDO
+    ENDDO
+  
+    DO I = 0,LM1
+      DO J = 0, LM1
+        DO K = 0, LM1
+!         WRITE(*,*) 'AnnealKey',K,J,I,AnnealKey%I(K,J,I)
+        ENDDO
+      ENDDO
+    ENDDO
+    CLOSE(ReadU)
+  
+    RMin(1) = Big_DBL
+    RMin(2) = Big_DBL
+    RMin(3) = Big_DBL
+    DO I = 1, NCity
+      DO J = 1,3
+        RMin(J) = DMin1(RMin(J),RCoor%D(J,I))
+      ENDDO
+      TravO%I(I) = I
+    ENDDO
+    ! any -ve value for MaxDiff is okay, since we deal with the 1st quadrant
+    MaxDiff = -1.0D0 
+    DO I = 1,NCity
+      DO J = 1,3
+        Diff = RCoor%D(J,I)-RMin(J)
+        MaxDiff = DMax1(MaxDiff,Diff)
+      ENDDO
+    ENDDO
+    RATIO = (LinDim*1.D0)/MaxDiff
+    IMax = -Big_Int
+    ALLOCATE(CityRank(1:NCity))
+    DO I = 1,NCity
+      DO J = 1, 3
+        ! IntVect(J) = DNINT( (RCoor%D(J,I)-RMin(J))*Ratio)
+        IntVect(J) =  (RCoor%D(J,I)-RMin(J))*Ratio ! truncate the fraction part.
+        IMax = Max(IMax,IntVect(J))
+        IF(IntVect(J) == LinDim) THEN
+          IntVect(J) = IntVect(J)-1
+        ENDIF
+        IF(IntVect(J) < 0 .OR. IntVect(J) .GE. LinDim) THEN
+          WRITE(*,*) 'IntVect',j, ' =',IntVect(j)
+          STOP 'ERROR: An error has occured! array bound problem'
+        ENDIF
+      ENDDO
+      CityRank(I) = AnnealKey%I(IntVect(1),IntVect(2),IntVect(3))
+!     WRITE(*,*) 'CityRank',I, ' =', CityRank(I)
+    ENDDO
+    IF(IMax /= LinDim) THEN
+      STOP 'ERROR: Numerical accuracy problem in TableAnneal!'
+    ENDIF
+    CALL I8Sort(CityRank,TravO%I,NCity,2)
+    CALL Delete(AnnealKey)
+    CALL Delete(ReadTravO)
+
+  END SUBROUTINE TableAnneal
+END MODULE AnnealMap
+
 
 MODULE Order
    USE DerivedTypes
@@ -394,7 +505,8 @@ MODULE Order
    USE GlobalObjects
    USE ProcessControl
    USE MemMan
-   USE TravelMan
+   USE TravelMan ; USE AnnealMap
+   USE Parse
    IMPLICIT NONE
    INTERFACE Sort
       MODULE PROCEDURE Sort_DBL_INT,Sort_INT_INT, Sort_INT_VECT
@@ -425,11 +537,6 @@ MODULE Order
          INTEGER(INT8)            :: Interleave
        END FUNCTION Interleave
    END INTERFACE
-   INTEGER, PARAMETER     :: SFC_NONE   =3480481
-   INTEGER, PARAMETER     :: SFC_PEANO  =5308208
-   INTEGER, PARAMETER     :: SFC_HILBERT=4808471
-   INTEGER, PARAMETER     :: SFC_RANDOM =5058108
-   INTEGER, PARAMETER     :: SFC_TRAVEL =2505811
    CONTAINS
 !
 !      FUNCTION RANDOM_INT(Limits)
@@ -505,6 +612,8 @@ MODULE Order
              ZCoor%D(I) = R%D(3,I)
            ENDDO
            CALL Anneal(XCoor,YCoor,ZCoor,N,Point)
+        ELSEIF(SFC_KEY==SFC_TABLETRAV)THEN
+          CALL TableAnneal(R,N,Point)
         ELSE
            CALL MondoHalt(-100,'Bad SFC_Key in SFCOrder')
         ENDIF
