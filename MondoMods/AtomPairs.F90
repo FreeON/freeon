@@ -152,7 +152,7 @@ CONTAINS
     ELSE
        Radius = Two*MaxAtomDist(GM) + SQRT(AtomPairDistanceThreshold)
     ENDIF
-    CALL New_CellSet_Sphere(CS,GM%PBC%AutoW,GM%PBC%BoxShape,Radius)
+    CALL New_CellSet_Sphere(CS,GM%PBC%AutoW%I,GM%PBC%BoxShape%D,Radius)
     CALL Sort_CellSet(CS)
 !
   END SUBROUTINE SetCellNumber
@@ -163,9 +163,9 @@ CONTAINS
     TYPE(CRDS)                 :: GM
     REAL(DOUBLE),DIMENSION(3)  :: VecA,VecF
 
-    VecF(1) = VecA(1)*GM%PBC%InvBoxSh(1,1) + VecA(2)*GM%PBC%InvBoxSh(1,2) + VecA(3)*GM%PBC%InvBoxSh(1,3)
-    VecF(2) = VecA(1)*GM%PBC%InvBoxSh(2,1) + VecA(2)*GM%PBC%InvBoxSh(2,2) + VecA(3)*GM%PBC%InvBoxSh(2,3)
-    VecF(3) = VecA(1)*GM%PBC%InvBoxSh(3,1) + VecA(2)*GM%PBC%InvBoxSh(3,2) + VecA(3)*GM%PBC%InvBoxSh(3,3)
+    VecF(1) = VecA(1)*GM%PBC%InvBoxSh%D(1,1) + VecA(2)*GM%PBC%InvBoxSh%D(1,2) + VecA(3)*GM%PBC%InvBoxSh%D(1,3)
+    VecF(2) = VecA(1)*GM%PBC%InvBoxSh%D(2,1) + VecA(2)*GM%PBC%InvBoxSh%D(2,2) + VecA(3)*GM%PBC%InvBoxSh%D(2,3)
+    VecF(3) = VecA(1)*GM%PBC%InvBoxSh%D(3,1) + VecA(2)*GM%PBC%InvBoxSh%D(3,2) + VecA(3)*GM%PBC%InvBoxSh%D(3,3)
 
   END FUNCTION AtomToFrac
 !-------------------------------------------------------------------------------
@@ -175,9 +175,9 @@ CONTAINS
     TYPE(CRDS)                 :: GM
     REAL(DOUBLE),DIMENSION(3)  :: VecA,VecF
 
-    VecA(1) = VecF(1)*GM%PBC%BoxShape(1,1) + VecF(2)*GM%PBC%BoxShape(1,2) + VecF(3)*GM%PBC%BoxShape(1,3)
-    VecA(2) = VecF(1)*GM%PBC%BoxShape(2,1) + VecF(2)*GM%PBC%BoxShape(2,2) + VecF(3)*GM%PBC%BoxShape(2,3)
-    VecA(3) = VecF(1)*GM%PBC%BoxShape(3,1) + VecF(2)*GM%PBC%BoxShape(3,2) + VecF(3)*GM%PBC%BoxShape(3,3)
+    VecA(1) = VecF(1)*GM%PBC%BoxShape%D(1,1) + VecF(2)*GM%PBC%BoxShape%D(1,2) + VecF(3)*GM%PBC%BoxShape%D(1,3)
+    VecA(2) = VecF(1)*GM%PBC%BoxShape%D(2,1) + VecF(2)*GM%PBC%BoxShape%D(2,2) + VecF(3)*GM%PBC%BoxShape%D(2,3)
+    VecA(3) = VecF(1)*GM%PBC%BoxShape%D(3,1) + VecF(2)*GM%PBC%BoxShape%D(3,2) + VecF(3)*GM%PBC%BoxShape%D(3,3)
 
   END FUNCTION FracToAtom
 !-------------------------------------------------------------------------------
@@ -190,7 +190,7 @@ CONTAINS
     REAL(DOUBLE),PARAMETER     :: MDelt = 1.D-12
 
     DO I=1,3
-       IF(GM%PBC%AutoW(I)) THEN
+       IF(GM%PBC%AutoW%I(I)==1) THEN
           DO 
              IF(VecF(I) > (One+MDelt)) THEN
                 VecF(I) = VecF(I) - One
@@ -227,25 +227,20 @@ CONTAINS
     TYPE(CRDS)                         :: G
     REAL(DOUBLE),DIMENSION(3,G%NAtms) :: BoxCarts
     INTEGER        :: I
-    !--------------------------------------------------------------------------------!
-    ! First account for unwrapped dimensions
-    G%Carts%D=G%AbCarts%D
-    ! Check for no wrapping at all
-    IF(G%PBC%Dimen==0)RETURN
-    ! Generate fractional coordinates from unwrapped coordinates
-    DO I=1,G%NAtms
-       BoxCarts(:,I)=AtomToFrac(G,G%AbCarts%D(:,I))
-    ENDDO
-    ! Wrap fractional coordinates
+!   Check for no wrapping at all
+    IF(G%PBC%Dimen==0) RETURN
+!   Wrap fractional coordinates
     IF(G%PBC%AtomW) THEN
+!      Wrap Atom coordinates
+       DO I=1,G%NAtms
+          CALL AtomCyclic(G,BoxCarts(:,I))
+       ENDDO
+!      Wrap Fractional coordinates
        DO I=1,G%NAtms
           CALL FracCyclic(G,BoxCarts(:,I))
        ENDDO
     ENDIF
-    ! Here are the wrapped coordinates
-    DO I=1,G%NAtms
-       G%Carts%D(:,I)=FracToAtom(G,BoxCarts(:,I))
-    ENDDO
+!
   END SUBROUTINE WrapAtoms
 !===================================================================================
 !
@@ -254,10 +249,8 @@ CONTAINS
     TYPE(CRDS)                 :: GM
     INTEGER                    :: I
     DO I=1,GM%NAtms
-       ! Only compute fracts from unwrapped ab carts:
+!      Compute fracts from Carts:
        GM%BoxCarts%D(:,I) = AtomToFrac(GM,GM%Carts%D(:,I))
-       ! This appears to be an incorrect algorithm why would we wrap AbBoxCarts????
-       GM%AbBoxCarts%D(:,I) = AtomToFrac(GM,GM%AbCarts%D(:,I))
     ENDDO
   END SUBROUTINE CalFracCarts
 !===================================================================================
@@ -266,12 +259,9 @@ CONTAINS
   SUBROUTINE  CalAtomCarts(GM)
     TYPE(CRDS)                 :: GM
     INTEGER                    :: I
-!   Generate the Atomic Coordinates
     DO I=1,GM%NAtms
-       ! Only wrap carts
+!      Only wrap carts
        GM%Carts%D(:,I)   = FracToAtom(GM,GM%BoxCarts%D(:,I))
-       ! This appears to be an incorrect algorithm: Why would we wrap AbCarts????
-       GM%AbCarts%D(:,I) = FracToAtom(GM,GM%AbBoxCarts%D(:,I))
     ENDDO
   END SUBROUTINE CalAtomCarts
 !===================================================================================
@@ -287,10 +277,9 @@ CONTAINS
 !   Tranaslate The Atoms
 !
     DO I=1,GM%NAtms
-       GM%Carts%D(:,I)      = GM%Carts%D(:,I)      + ATvec(:)
-       GM%AbCarts%D(:,I)    = GM%AbCarts%D(:,I)    + ATvec(:)
-       GM%BoxCarts%D(:,I)   = GM%BoxCarts%D(:,I)   + FTvec(:)
-       GM%AbBoxCarts%D(:,I) = GM%AbBoxCarts%D(:,I) + FTvec(:)
+       GM%Carts%D(:,I)      = GM%Carts%D(:,I)    + ATvec(:)
+       GM%AbCarts%D(:,I)    = GM%AbCarts%D(:,I)  + ATvec(:)
+       GM%BoxCarts%D(:,I)   = GM%BoxCarts%D(:,I) + FTvec(:)
     ENDDO
 !
   END SUBROUTINE Translate
@@ -305,7 +294,7 @@ CONTAINS
 
     InFracBox = .TRUE.
     DO I=1,3
-       IF(GM%PBC%AutoW(I)) THEN
+       IF(GM%PBC%AutoW%I(I)==1) THEN
           IF(VecF(I) < zero .OR. VecF(I) > one) THEN
              InFracBox = .FALSE.
              RETURN
@@ -339,7 +328,7 @@ CONTAINS
 !  
     NRgn = 0
     DO K=1,3
-       IF(GM%PBC%AutoW(K)) NRgn(K) = 1
+       IF(GM%PBC%AutoW%I(K)==1) NRgn(K) = 1
     ENDDO
 !
     MinImageDist = 1.D16
@@ -364,12 +353,12 @@ CONTAINS
     REAL(DOUBLE),DIMENSION(3)   :: A,B,C
     !
     MaxBoxDim = Zero
-    A(:) = GM%PBC%BoxShape(:,1)+GM%PBC%BoxShape(:,2)+GM%PBC%BoxShape(:,3)
-    B(:) = GM%PBC%BoxShape(:,1)+GM%PBC%BoxShape(:,2)-GM%PBC%BoxShape(:,3)
-    C(:) = GM%PBC%BoxShape(:,1)-GM%PBC%BoxShape(:,2)-GM%PBC%BoxShape(:,3)
+    A(:) = GM%PBC%BoxShape%D(:,1)+GM%PBC%BoxShape%D(:,2)+GM%PBC%BoxShape%D(:,3)
+    B(:) = GM%PBC%BoxShape%D(:,1)+GM%PBC%BoxShape%D(:,2)-GM%PBC%BoxShape%D(:,3)
+    C(:) = GM%PBC%BoxShape%D(:,1)-GM%PBC%BoxShape%D(:,2)-GM%PBC%BoxShape%D(:,3)
 
     DO I=1,3
-       IF(.NOT. GM%PBC%AutoW(I)) THEN
+       IF(GM%PBC%AutoW%I(I)==0) THEN
          A(I) = Zero
          B(I) = Zero
          C(I) = Zero
@@ -392,8 +381,8 @@ CONTAINS
     DO At=1,GM%NAtms
        Dist = Zero
        DO I=1,3
-          IF(GM%PBC%AutoW(I)) THEN
-             Dist = Dist+(GM%Carts%D(I,At)-GM%PBC%CellCenter(I))**2
+          IF(GM%PBC%AutoW%I(I)==1) THEN
+             Dist = Dist+(GM%Carts%D(I,At)-GM%PBC%CellCenter%D(I))**2
           ENDIF
        ENDDO
        MaxAtomDist = MAX(MaxAtomDist,SQRT(Dist))
@@ -435,7 +424,7 @@ CONTAINS
     LatF=Zero
     DO I=1,3
        DO J=1,3
-          IF(GM%PBC%AutoW(I).AND.GM%PBC%AutoW(J)) THEN
+          IF(GM%PBC%AutoW%I(I)==1 .AND. GM%PBC%AutoW%I(J)==1) THEN
              LatF(I,J)= nlm(I)*F(J)
           ENDIF
        ENDDO
@@ -462,8 +451,8 @@ CONTAINS
     IF(WP(1)) THEN
        GM%PBC%CellVolume = One
        DO K=1,3
-          IF(GM%PBC%AutoW(K)) THEN
-             GM%PBC%CellVolume = GM%PBC%CellVolume*GM%PBC%BoxShape(K,K)
+          IF(GM%PBC%AutoW%I(K)==1) THEN
+             GM%PBC%CellVolume = GM%PBC%CellVolume*GM%PBC%BoxShape%D(K,K)
           ENDIF
        ENDDO
 !      Calculate the Dipole and Quadripole Factors
@@ -483,7 +472,7 @@ CONTAINS
     ENDIF
 !   Calculate The Inverse of BoxShape  InvBoxSh = [BoxShape]^(-1)
     IF(WP(2)) THEN
-       GM%PBC%InvBoxSh = InverseMatrix(GM%PBC%BoxShape)
+       GM%PBC%InvBoxSh%D = InverseMatrix(GM%PBC%BoxShape%D)
     ENDIF
 !   Calculate Atom Positions
     IF(WP(3)) THEN
