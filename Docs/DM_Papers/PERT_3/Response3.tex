@@ -170,7 +170,7 @@ densities are demonstrated.
  an algorithm for derivatives up to third order in the density matrix.
  Thereafter, we derive a density matrix analogy to Wigner's 2n+1
  rule for nonorthogonal representations. We also briefly discuss the
- self consistent acceleration technique by Weber and ... . In the next section,
+ self consistent acceleration technique by Weber and Daul \cite{Weber_2003} . In the next section,
  we first show the saturation of the hyperpolarizabilities up to fourth order
  for a series of 1D chain of water molecules. Thereafter, we demonstrate
  linear scaling computation of the higher order electric response properties
@@ -197,10 +197,11 @@ The total energy of a molecule in a homogenous electric field may
 be developed in a Taylor expansion as
 \begin{equation}
   \begin{split}
-    E_{\rm tot}(\E)= E_{\rm tot}(0) & +\sum_a\mu_a\E^a\\
-    &+\frac{1}{2!}\sum_{ab}\alpha_{ab}\E^a\E^b\\
-    &+\frac{1}{3!}\sum_{abc}\beta_{abc}\E^a\E^b\E^c\\
-    &+\frac{1}{4!}\sum_{abcd}\gamma_{abcd}\E^a\E^b\E^c\E^d\\
+    E_{\rm tot}(\E)= E_{\rm tot}(0) 
+    &-\sum_a\mu_a\E^a\\
+    &-\frac{1}{2!}\sum_{ab}\alpha_{ab}\E^a\E^b\\
+    &-\frac{1}{3!}\sum_{abc}\beta_{abc}\E^a\E^b\E^c\\
+    &-\frac{1}{4!}\sum_{abcd}\gamma_{abcd}\E^a\E^b\E^c\E^d\\
     &+\dots,
   \end{split}
 \end{equation}
@@ -382,46 +383,51 @@ up to fourth order....
 
 
 \begin{equation}
-\begin{split}
-  E^{abc}=\frac{1}{6}\Tr(&[\D^a,\D^0]\D^b\F^c+[\D^a,\D^0]\D^c\F^b+\\
-                        &[\D^c,\D^0]\D^a\F^b+[\D^c,\D^0]\D^b\F^a+\\
-                        &[\D^b,\D^0]\D^a\F^c+[\D^b,\D^0]\D^c\F^a)
-\end{split}
+  E^{abc}=\frac{1}{6}P(a,b,c)\Tr([\D^a,\D^0]\D^b\F^c)
 \end{equation}
 
 
-\begin{equation}
-\begin{split}
-E^{abcd}=\frac{1}{24}\Tr(&[P^{ab},P] P^c F^d +[P^a,P](P^{bc} F^d + P^b F^{cd})+\\
-                         &[P^{ab},P] P^d F^c +[P^a,P](P^{bd} F^c + P^b F^{dc})+\\
-                         &[P^{ac},P] P^b F^d +[P^a,P](P^{cb} F^d + P^c F^{bd})+\\
-                         &[P^{ac},P] P^d F^b +[P^a,P](P^{cd} F^b + P^c F^{db})+\\
-                         &[P^{ad},P] P^b F^c +[P^a,P](P^{db} F^c + P^d F^{bc})+\\
-                         &[P^{ad},P] P^c F^b +[P^a,P](P^{dc} F^b + P^d F^{cb})+\\
-%
-                         &[P^{ba},P] P^c F^d +[P^b,P](P^{ac} F^d + P^a F^{cd})+\\
-                         &[P^{ba},P] P^d F^c +[P^b,P](P^{ad} F^c + P^a F^{dc})+\\
-                         &[P^{bc},P] P^a F^d +[P^b,P](P^{ca} F^d + P^c F^{ad})+\\
-                         &[P^{bc},P] P^d F^a +[P^b,P](P^{cd} F^a + P^c F^{da})+\\
-                         &[P^{bd},P] P^a F^c +[P^b,P](P^{da} F^c + P^d F^{ac})+\\
-                         &[P^{bd},P] P^c F^a +[P^b,P](P^{dc} F^a + P^d F^{ca})+\\
-%
-                         &[P^{ca},P] P^b F^d +[P^c,P](P^{ab} F^d + P^a F^{bd})+\\
-                         &[P^{ca},P] P^d F^b +[P^c,P](P^{ad} F^b + P^a F^{db})+\\
-                         &[P^{cb},P] P^a F^d +[P^c,P](P^{ba} F^d + P^b F^{ad})+\\
-                         &[P^{cb},P] P^d F^a +[P^c,P](P^{bd} F^a + P^b F^{da})+\\
-                         &[P^{cd},P] P^a F^b +[P^c,P](P^{da} F^b + P^d F^{ab})+\\
-                         &[P^{cd},P] P^b F^a +[P^c,P](P^{db} F^a + P^d F^{ba})+\\
-%
-                         &[P^{da},P] P^b F^c +[P^d,P](P^{ab} F^c + P^a F^{bc})+\\
-                         &[P^{da},P] P^c F^b +[P^d,P](P^{ac} F^b + P^a F^{cb})+\\
-                         &[P^{db},P] P^a F^c +[P^d,P](P^{ba} F^c + P^b F^{ac})+\\
-                         &[P^{db},P] P^c F^a +[P^d,P](P^{bc} F^a + P^b F^{ca})+\\
-                         &[P^{dc},P] P^a F^b +[P^d,P](P^{ca} F^b + P^c F^{ab})+\\
-                         &[P^{dc},P] P^b F^a +[P^d,P](P^{cb} F^a + P^c F^{ba}))\\
-\end{split}
-\end{equation}
-OR A LITTLE BIT SHORTER
+%\begin{equation}
+%\begin{split}
+%  E^{abc}=\frac{1}{6}\Tr(&[\D^a,\D^0]\D^b\F^c+[\D^a,\D^0]\D^c\F^b+\\
+%                        &[\D^c,\D^0]\D^a\F^b+[\D^c,\D^0]\D^b\F^a+\\
+%                        &[\D^b,\D^0]\D^a\F^c+[\D^b,\D^0]\D^c\F^a)
+%\end{split}
+%\end{equation}
+
+
+%\begin{equation}
+%\begin{split}
+%E^{abcd}=\frac{1}{24}\Tr(&[P^{ab},P] P^c F^d +[P^a,P](P^{bc} F^d + P^b F^{cd})+\\
+%                         &[P^{ab},P] P^d F^c +[P^a,P](P^{bd} F^c + P^b F^{dc})+\\
+%                         &[P^{ac},P] P^b F^d +[P^a,P](P^{cb} F^d + P^c F^{bd})+\\
+%                         &[P^{ac},P] P^d F^b +[P^a,P](P^{cd} F^b + P^c F^{db})+\\
+%                         &[P^{ad},P] P^b F^c +[P^a,P](P^{db} F^c + P^d F^{bc})+\\
+%                         &[P^{ad},P] P^c F^b +[P^a,P](P^{dc} F^b + P^d F^{cb})+\\
+%%
+%                         &[P^{ba},P] P^c F^d +[P^b,P](P^{ac} F^d + P^a F^{cd})+\\
+%                         &[P^{ba},P] P^d F^c +[P^b,P](P^{ad} F^c + P^a F^{dc})+\\
+%                         &[P^{bc},P] P^a F^d +[P^b,P](P^{ca} F^d + P^c F^{ad})+\\
+%                         &[P^{bc},P] P^d F^a +[P^b,P](P^{cd} F^a + P^c F^{da})+\\
+%                         &[P^{bd},P] P^a F^c +[P^b,P](P^{da} F^c + P^d F^{ac})+\\
+%                         &[P^{bd},P] P^c F^a +[P^b,P](P^{dc} F^a + P^d F^{ca})+\\
+%%
+%                         &[P^{ca},P] P^b F^d +[P^c,P](P^{ab} F^d + P^a F^{bd})+\\
+%                         &[P^{ca},P] P^d F^b +[P^c,P](P^{ad} F^b + P^a F^{db})+\\
+%                         &[P^{cb},P] P^a F^d +[P^c,P](P^{ba} F^d + P^b F^{ad})+\\
+%                         &[P^{cb},P] P^d F^a +[P^c,P](P^{bd} F^a + P^b F^{da})+\\
+%                         &[P^{cd},P] P^a F^b +[P^c,P](P^{da} F^b + P^d F^{ab})+\\
+%                         &[P^{cd},P] P^b F^a +[P^c,P](P^{db} F^a + P^d F^{ba})+\\
+%%
+%                         &[P^{da},P] P^b F^c +[P^d,P](P^{ab} F^c + P^a F^{bc})+\\
+%                         &[P^{da},P] P^c F^b +[P^d,P](P^{ac} F^b + P^a F^{cb})+\\
+%                         &[P^{db},P] P^a F^c +[P^d,P](P^{ba} F^c + P^b F^{ac})+\\
+%                         &[P^{db},P] P^c F^a +[P^d,P](P^{bc} F^a + P^b F^{ca})+\\
+%                         &[P^{dc},P] P^a F^b +[P^d,P](P^{ca} F^b + P^c F^{ab})+\\
+%                         &[P^{dc},P] P^b F^a +[P^d,P](P^{cb} F^a + P^c F^{ba}))\\
+%\end{split}
+%\end{equation}
+%OR A LITTLE BIT SHORTER
 \begin{equation}
   \begin{split}
     E^{abcd}=&\frac{1}{24}P(a,b,c,d) \\
@@ -446,8 +452,8 @@ OR A LITTLE BIT SHORTER
 \section{Examples}
 To demonstrate the ability, accuracy, numerical stability and efficiency 
 of the algorithm we present
-the solution of the 10th order UPSCF equation for the $\rm C_{60}$ and for one 
-dimensional water chains. 
+the solution of the 10th order UPSCF (Uncoupled Perturbed SCF) 
+equation for the $\rm C_{60}$ and for one dimensional water chains. 
 Then the CPSCF equations are solved up to third order for the one dimensional 
 water chains and the results obtained are compared with the 2n+1 rule presented 
 above and with GAMESS calculations \cite{gamess}. We have also performed polarizabilities
@@ -467,21 +473,48 @@ ANDERS SHOULD ADD SOMETHING HERE.
 %  E = E_0 + c*E_1 + c^2*E_2 + ... Notice the normalization!
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%E_0 = -7.670708473752996e+02
-%E_1 = 2.251802168662369e-04
-%E_2 = -1.597303245389245e+02
-%E_3 =  0.01534242806479
-%E_4 = -5.153706364564264e+03
-%E_5 = 6.47764050142314
-%E_6 = -1.040662128065626e+06
-%E_7 = 2.479122388545994e+03
-%E_8 = -2.998400302212920e+08
-%E_9 = 1.090458924062816e+06
+%E_0  = -7.670708473752996e+02
+%E_1  = 2.251802168662369e-04
+%E_2  = -1.597303245389245e+02
+%E_3  =  0.01534242806479
+%E_4  = -5.153706364564264e+03
+%E_5  = 6.47764050142314
+%E_6  = -1.040662128065626e+06
+%E_7  = 2.479122388545994e+03
+%E_8  = -2.998400302212920e+08
+%E_9  = 1.090458924062816e+06
 %E_10 = -1.042224929618979e+11
 
 %I assume the polarizability is given by (Pol  =  - E_N/N!)
-To show the simplicity of the method, we have computed the electric response up to the 10-th order
-for a c60.
+
+
+To show the simplicity of the method, we have computed 
+the electric response up to the 10-th order for a c60.
+
+\begin{table}[t]
+  \centering
+  \caption{\protect
+    Polarizabilites along the $z$ axis of C$_{60}$ up to 10-th order via UPSCF equations.
+    The calculations have been done at the HF/6-31G level of 
+    theory and the {\tt GOOD} thresholding.
+  }\label{tab:C60_Values}
+  \begin{tabular}{cc}
+    \toprule
+    Order & Polarizabilities $[a.u.]$\\
+    \hline
+     1 &    0.2251 ($-$3)\\
+     2 & $-$0.1597 (3)   \\
+     3 &    0.1534 ($-$1)\\
+     4 & $-$0.5153 (4)   \\
+     5 &    0.6477 (1)   \\
+     6 & $-$0.1040 (7)   \\
+     7 &    0.2479 (4)   \\
+     8 & $-$0.2998 (9)   \\
+     9 &    0.1090 (7)   \\
+    10 & $-$0.1042 (12)  \\
+    \botrule
+  \end{tabular}
+\end{table}
 
 
 
@@ -501,6 +534,8 @@ that control precision of the linear scaling algorithms.
 The static properties of water chains have been evaluated
 by using the same geometry as Otto et al \cite{POtto00}. We also
 present the results obtained with the density matrix based 2n+1 rule.
+We also draw comparison with the results obtained with the GAMESS 
+quantum chemistry package \cite{gamess} at the RHF/6-31G level of theory.
 
 
 Figures (\ref{fig:Alpha_1D},\ref{fig:Beta_1D},\ref{fig:Gamma_1D})
@@ -655,27 +690,30 @@ Tables (\ref{tab:Alpha_1D_Values},\ref{tab:Beta_1D_Values},\ref{tab:Gamma_1D_Val
 \end{table}
 
 
+
 \subsection{Linear scaling: 3D water clusters}
-
-
-Figure \ref{fig:Superposition_Decay} shows the superposition 
-of the magnitude of density matrix derivative atom-atom blocks up to 
-third order as a function of atom-atom distance when perturbed by 
-a static electric field.
 
 3D water clusters show an early onset of linear scaling for accurate
 basis set and low thresholds and higher order response.
 
-The density responses matrices show an exponential decay as a function
-of the internuclear distance, however the decay is slower and the locality
-becomes lower for the higher order response functions.
-Therefor, we find a later onset for the linear scaling for the higher order
-responses.
 
 Calculations have been carried out at both the RHF/6-31G and RHF/6-31G** levels of
 theory and at both the {\tt GOOD} and {\tt TIGHT} thresholding parameter 
 sets that control precision of the linear scaling algorithms, corresponding 
 to matrix thresholds of $10^{-5}$ and $10^{-6}$, respectively.
+
+
+
+\subsection{Exponential decay}
+Figure \ref{fig:Superposition_Decay} shows the superposition 
+of the magnitude of density matrix derivative atom-atom blocks up to 
+third order as a function of atom-atom distance when perturbed by 
+a static electric field. 
+The density responses matrices show an exponential decay as a function
+of the internuclear distance, however the decay is slower and the locality
+becomes lower for the higher order response functions.
+Therefor, we find a later onset for the linear scaling for the higher order
+responses. 
 
 
 
@@ -780,8 +818,6 @@ to matrix thresholds of $10^{-5}$ and $10^{-6}$, respectively.
 
 
 
-\subsection{Exponential decay}
-
 \begin{figure}[t]
   \caption{\protect
     WE MAY REMOVE THIS!
@@ -845,8 +881,9 @@ to matrix thresholds of $10^{-5}$ and $10^{-6}$, respectively.
  We have proposed and demonstrated a linear scaling self
  consistent scheme for high order response properties.
  The scheme solves the coupled perturbed self consistent field 
- equation by the perturbed projection method.
-
+ equation by the perturbed projection method. We have also shown
+ that the perturbed projection method can be expended to high
+ order (e.g. up to 10-th order in the present paper).
 
 We have presented a simple and efficient algorithm for solution 
 of the coupled-perturbed self-consistent-field (CPSCF) equations 
@@ -854,7 +891,7 @@ in the context of spectral projection and static
 electric polarizabilities. Unique features of the perturbed 
 projection algorithm include linear scaling, simplicity, numerical 
 stability and quadratic convergence in computation of the derivative
-density matrix.
+density matrices.
 
 We have shown that the density matrix response is local 
 upon {\em global} electric perturbation, corresponding to an approximate 
@@ -871,11 +908,6 @@ well as other electronic structure programs.
 Convergence of the CPSCF equations for these systems (water cluster ...)
 are typically achived in about 10 cycles, independent of cluster size, basis set,
 matrix threshold or order of the response calculated.
-
-% It is applied to the computation
-% of the first and second electric hyperpolarizabilities of three
-% dimensional water clusters. Linear scaling and locality of the response
-% densities are demonstrated. 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
