@@ -9,10 +9,9 @@ Guess=SuperPos
 SCFMethod=(SDMM,SDMM)
 BasisSets=(STO-3G,3-21G)
 ModelChem=(BLYPxc,BLYPxc)
-Accuracy =(Good,Good)
+Accuracy =(Loose,Good)
 DebugAll=(MaxDebug)
-Geometry=(InAngstroms,HOrder)
-BlokAInv=(NoTest,1.D3)
+Geometry=(InAngstroms)
 <EndOptions>
 
 <BeginGeometry>

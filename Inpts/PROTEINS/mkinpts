@@ -1,5 +1,9 @@
 gunzip XYZ/*
 
+cat template_inp         >  Endothelin.inp
+cat XYZ/Endothelin.xyz   >> Endothelin.inp
+cat end_inp              >> Endothelin.inp
+
 cat template_inp         >  ChyInh2.inp
 cat XYZ/ChyInh2.xyz      >> ChyInh2.inp
 cat end_inp              >> ChyInh2.inp

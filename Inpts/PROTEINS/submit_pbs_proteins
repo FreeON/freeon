@@ -1,8 +1,8 @@
-./sub_pbs Conotoxin      17
+./sub_pbs Endothelin     18
 ./sub_pbs ChyInh2        19
 ./sub_pbs CytB562        20
 ./sub_pbs Lysozyme       21
-./sub_pbs Interleukin    22
-./sub_pbs FibroblastGF   23
+#./sub_pbs Interleukin    22
+#./sub_pbs FibroblastGF   23
 #./sub_pbs TyrPhos        23
 #./sub_pbs HIVProtease    24
