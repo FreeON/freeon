@@ -398,7 +398,7 @@ Linear scaling is achieved for insulating systems through the dropping (filterin
 below a numerical threshold ($\sim 10^{-5}-10^{-6}$).  At SCF convergence the TC2 algorithm generates a polynomial sequence 
 defining the ground state projector, from which the derivative density matrices are directly obtained.
 
-As with other approaches, solution of the CPSCF equations commences with a guess at the 
+Having solved the groundstate SCF equations, solution of the CPSCF equations commences with a guess at the 
 derivative density, followed by computation of the derivative Fockian.  At the $n^{\rm th}$ 
 CPSCF cycle, the $N^{\rm th}$ order derivative Fockian is 
 \begin{equation}
@@ -443,42 +443,27 @@ through $4^{th}$ order.
 
 \newpage
 
-\subsubsection{Response Functions from Perturbed Projection}\label{ResponseFunctions}
+\subsubsection{Perturbed Projection}\label{ResponseFunctions}
 
-Perturbed projection is based on purification projections for the 
-construction of the density matrix. To calculate the
-density matrix derivatives directly from the relation in Eq.\ (\ref{DDeriv1})
-is not possible because the discontinuity of the Heaviside step function $\theta$.
-The new density matrix perturbation theory by Niklasson and Challacombe
-\cite{ANiklasson04} avoids the discontinuity problem
-by dividing the perturbation expansion in sequential steps of 
-purification projections, where perturbations are performed exactly, or to 
-any order, at each projection level. The perturbed projection method yields
-an explicit and rapidly convergent recursive construction of
-the density matrix response. This is in contrast to previous suggestions for
-solving the CPSCF equations with N-scaling complexity through implicit
-formulations, where the density matrix derivatives are given as solutions
-to commuting operator equations of Sylvester type 
+Although a number of analytic, asymptotically discontinous representations exist for the Heaviside 
+step function $\theta$, direct variation of these forms as in Eq.~(\ref{DDeriv1}) is problematic.  
+Alternatively, purification leads to (typically a very high order) polynomial representation of the projector, 
+which can be simply differentiated.   However, {\bf HERE WE SHOULD EXPLAIN MORE ABOUT WHY THAT IS A BAD
+IDEA. MEMORY, NUMERICAL STABILITY.  ETC.  SHOULD HAVE A REFERENCE AND COMMENT HERE TO TCHEBYSCHEV POLYNOMIALS 
+HEAD-GORDON ET AL'S PAPER, AND WHY TC2 LIKE METHODS ARE BETTER THAN A FULL POLYNOMIAL REPRESENTATION}).  
+While also based on purification, Perturbed Projection involves recursive construction of response functions, 
+provided by the recently developed Density Matrix Perturbation Theory of Niklasson and Challacombe \cite{ANiklasson04}.
+In this approach, each order of the response is collected upon perturbative expansion of the purification polynomial,   
+leading to explicit, recursive formulae for construction of density matrix derivatives.
+This is in contrast to implicit proposed algorithms for $N$-scaling solution of the CPSCF equations with implicit formulations, 
+wherein density matrix derivatives are obtained as solutions to commuting operator equations of Sylvester type 
 \cite{Ochsenfeld97,Helgaker_2001}.
 
-
-%\subsubsection{Recursive algorithm for the density matrix derivatives}
-For clarity we here give an explicit example of the calculation
-of the density matrix derivative up to second order. The recursive
-algorithm below was introduced in ref.\ \cite{ANiklasson04}.
-
-Let $\F(\E)$ be the Fockian in Eq.\ \eqref{FockianTaylor} up to second order
-$$
-\F(\E)=\F^0+\sum_a\F^a\E^a+\frac{1}{2}\sum_{ab}\F^{ab}\E^a\E^b.
-$$
-The density matrix derivatives, given by Eq. \eqref{DDeriv}, can be
-calculated by perturbed projection with the following algorithm (up to second order):
-\begin{enumerate}
-\item 
-  The starting matrix guess initiating the sequence are obtained from $\F^0$,
-  and $\F^{a\ldots}$ by appropriately
-  compressing their spectrum into the domain of convergence
-  \cite{ANiklasson02A} using
+Sufficient to compute fourth order properties with the $2 N+1$ rule presented in 
+Section \ref{Wigner2Np1}, Perturbed Projection is outlined in the following for computation of the second order 
+response function:  With the Fockians $\F^0$, $\F^a$,  and $\F^{ab}$ in hand,  the purification sequence is
+prepared by appropriatley compressing their spectrum into the domain of  convergence
+\cite{ANiklasson02A} using
   \begin{align}
     \X^0_{0}&=\frac{\F_{max}-\F^0}{\F_{max}-\F_{min}} \\
     \intertext{and}
@@ -486,7 +471,9 @@ calculated by perturbed projection with the following algorithm (up to second or
   \end{align}
   where $\F_{min}$ and $\F_{max}$ are approximate upper and lower 
   bounds of the eigenvalues of $\F^0$.
-\item Perturbed projections are then applied:\\
+
+
+Perturbed projections are then applied:\\
   If $\Tr[\X^0_{i}]\ge N_e$ then (for $i = 0,1,\ldots$)
 \\
 \\
@@ -513,7 +500,7 @@ calculated by perturbed projection with the following algorithm (up to second or
     \end{split}
   \end{align}
 
-\item The recursion of the perturbed projection sequence is
+The recursion of the perturbed projection sequence is
   stopped at convergence, which is reached when the error
   $|\Tr[\X^0_{i}]-N_e| + |\Tr[\X^{a}_{i}]| + \ldots$, or 
   the change $|\X^{a\ldots}_{i+1}-\X^{a\ldots}_{i}|$,
@@ -522,8 +509,6 @@ calculated by perturbed projection with the following algorithm (up to second or
   \D^{a...} = N!\lim_{i\rightarrow\infty} \X_i^{a...}.
 \end{equation}
 %{\bf Here it is important that we have the right normalization!}
-
-\end{enumerate}
 
 
 
