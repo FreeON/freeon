@@ -110,6 +110,9 @@ c1:
 	$(MAKE) -i -C OneE clean
 #----------------------------------------------
 #     Two electron directories
+#
+#     ONX is temporarily disabled...
+#  
  2:	q   h #o
 r2:	rq rh  ro
 c2:	cq ch #co
