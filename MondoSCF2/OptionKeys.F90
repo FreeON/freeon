@@ -69,7 +69,7 @@ MODULE OptionKeys
   ! Approximate diagonal Hessian in internal coordinates
   CHARACTER(LEN=13),  PARAMETER :: GRAD_APPRX_HESS   ='ApproxHessian'
   ! Coordinate types for gradient operations
-  CHARACTER(LEN=9),   PARAMETER  :: GRAD_INTERNALS   ='Internals'
+  CHARACTER(LEN=7),   PARAMETER  :: GRAD_INTERNALS   ='PrimInt'
   INTEGER,            PARAMETER  :: GRAD_INTS_OPT    =83458086
   CHARACTER(LEN=9),   PARAMETER  :: GRAD_CARTESIAN   ='Cartesian'
   INTEGER,            PARAMETER  :: GRAD_CART_OPT    =34243945
