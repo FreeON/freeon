@@ -73,7 +73,10 @@ CONTAINS
     integer :: iii
     !-------------------------------------------------------------------
     !
+    IF(.NOT. C%POpt%Resp%StcAlpha) RETURN
+    !-------------------------------------------------------------------
     ! Save last SCF cycle number.
+
     CALL Save_LastCPSCFCycleNbr(C,'lastscfcycle')
     !
     !-------------------------------------------------------------------
@@ -96,9 +99,6 @@ CONTAINS
     !-------------------------------------------------------------------
     ! LINEAR RESPONSE LINEAR RESPONSE LINEAR RESPONSE LINEAR RESPONSE L
     !-------------------------------------------------------------------
-    !
-    ! Check if we need to compute a Response.
-    IF(.NOT.C%POpt%Resp%StcAlpha) RETURN
     !
     CALL New(C%Stat%Action,4)
     !
