@@ -783,24 +783,7 @@ MODULE PrettyPrint
 #ifdef PARALLEL
         IF(MyID==ROOT)THEN
 #endif
-!--------------------------------------------------------------------------
-!          Generate check string
-           IF(PRESENT(Proc_O).AND.PrintFlags%Fmt/=DEBUG_MMASTYLE)THEN
-              ChkStr=ProcessName(Proc_O)//TRIM(Name) &
-                   //CheckEq//TRIM(DblToChar(Chk))
-           ELSEIF(PrintFlags%Fmt/=DEBUG_MMASTYLE)THEN
-              ChkStr=TRIM(Name)//CheckEq//TRIM(DblToChar(Chk))
-           ELSEIF(PRESENT(Proc_O).AND.PrintFlags%Fmt==DEBUG_MMASTYLE)THEN
-              ChkStr='(* '//TRIM(Proc_O)//' *)'//'ChkSum'//TRIM(Name)       &
-                   //' = '//TRIM(FltToChar(FRACTION(Chk))) &
-                   //'*2^('//TRIM(IntToChar(EXPONENT(Chk)))//');'
-           ELSEIF(PrintFlags%Fmt==DEBUG_MMASTYLE)THEN
-              ChkStr='ChkSum'//TRIM(Name)//' = '//TRIM(FltToChar(FRACTION(Chk))) &
-                   //'*2^('//TRIM(IntToChar(EXPONENT(Chk)))//');'
-           ELSE 
-              CALL Halt(' Logic error in Print_CheckSum_BCSR')
-           ENDIF
-!--------------------------------------------------------------------------
+           ChkStr=CheckSumString(Chk,Name,Proc_O)
 !          Write check string
            PU=OpenPU(Unit_O=Unit_O)
            WRITE(PU,'(1x,A)')TRIM(ChkStr)
@@ -814,7 +797,7 @@ MODULE PrettyPrint
 !----------------------------------------------------------------------------------------
       SUBROUTINE Print_CheckSum_BCSR(A,Name,Proc_O,Unit_O)
         TYPE(BCSR), INTENT(IN)               :: A
-        REAL(DOUBLE)                         :: Chk,BlockError
+        REAL(DOUBLE)                         :: Chk
         CHARACTER(LEN=*)                     :: Name
         INTEGER,         OPTIONAL,INTENT(IN) :: Unit_O
         CHARACTER(LEN=*),OPTIONAL            :: Proc_O
@@ -831,87 +814,20 @@ MODULE PrettyPrint
            Chk=Chk+A%MTrix%D(I)*A%Mtrix%D(I)
         ENDDO
         Chk=SQRT(Chk) 
-#ifdef PERIODIC
-!---------------------------------------------------------------------------------------   
-!       Compute the Diagonal Block Error
-        BlockError=Zero
-!!$        DO AtA=1,A%NAtms
-!!$           DO P = A%RowPt%I(AtA),A%RowPt%I(AtA+1)-1
-!!$              AtB = A%ColPt%I(P)
-!!$              R   = A%BlkPt%I(P)
-!!$              IF(AtA == A%NAtms .AND. AtB == A%NAtms) THEN
-!!$                 RN = A%NNon0
-!!$              ELSE
-!!$                 RN = A%BlkPt%I(P+1)-1
-!!$              ENDIF
-!!$              IF(AtA == AtB) THEN 
-!!$                 NA = SQRT(DBLE(RN-R+1))
-!!$                 DO I = 1,NA
-!!$                    DO J=1,NA
-!!$                       K1 = (J-1)+NA*(I-1)
-!!$                       K2 = (I-1)+NA*(J-1)
-!!$                       BlockError = BlockError + (A%MTrix%D(R+K1)-A%MTrix%D(R+K2))**2
-!!$                    ENDDO
-!!$                 ENDDO
-!!$              ENDIF
-!!$           ENDDO
-!!$        ENDDO
-!!$        BlockError = SQRT(BlockError/DBLE(A%NAtms))
-#endif
-!
 #ifdef PARALLEL
         IF(MyID==ROOT)THEN
 #endif
-!--------------------------------------------------------------------------
 !          Create check string
-           IF(PRESENT(Proc_O).AND.PrintFlags%Fmt/=DEBUG_MMASTYLE)THEN
-              ChkStr=ProcessName(Proc_O)//TRIM(Name) &
-                   //CheckEq//TRIM(DblToChar(Chk))
-           ELSEIF(PrintFlags%Fmt/=DEBUG_MMASTYLE)THEN
-              ChkStr=TRIM(Name)//' matrix '//CheckEq//TRIM(DblToChar(Chk))
-           ELSEIF(PRESENT(Proc_O).AND.PrintFlags%Fmt==DEBUG_MMASTYLE)THEN
-              ChkStr='(* '//TRIM(Proc_O)//' *)'//'ChkSum'//TRIM(Name)       &
-                   //' = '//TRIM(FltToChar(FRACTION(Chk))) &
-                   //'*2^('//TRIM(IntToChar(EXPONENT(Chk)))//');'
-           ELSEIF(PrintFlags%Fmt==DEBUG_MMASTYLE)THEN
-              ChkStr='ChkSum'//TRIM(Name)//' = '//TRIM(FltToChar(FRACTION(Chk))) &
-                   //'*2^('//TRIM(IntToChar(EXPONENT(Chk)))//');'
-           ELSE 
-              CALL Halt(' Logic error in Print_CheckSum_BCSR')
-           ENDIF
-!--------------------------------------------------------------------------
+           ChkStr=CheckSumString(Chk,Name,Proc_O)
 !          Write check string
            PU=OpenPU(Unit_O=Unit_O)
            WRITE(PU,'(1x,A)')TRIM(ChkStr)
            CALL ClosePU(PU)
-#ifdef PERIODIC
-!--------------------------------------------------------------------------
-!          Create BlockError string
-           IF(PRESENT(Proc_O).AND.PrintFlags%Fmt/=DEBUG_MMASTYLE)THEN
-              ChkStr=ProcessName(Proc_O)//TRIM(Name) &
-                   //' BlokError = '//TRIM(DblToChar(BlockError))
-           ELSEIF(PrintFlags%Fmt/=DEBUG_MMASTYLE)THEN
-              ChkStr=TRIM(Name)//' matrix '//' BlokError = '//TRIM(DblToChar(BlockError))
-           ELSEIF(PRESENT(Proc_O).AND.PrintFlags%Fmt==DEBUG_MMASTYLE)THEN
-              ChkStr='(* '//TRIM(Proc_O)//' *)'//'BlockError'//TRIM(Name)       &
-                   //' = '//TRIM(FltToChar(FRACTION(BlockError))) &
-                   //'*2^('//TRIM(IntToChar(EXPONENT(BlockError)))//');'
-           ELSEIF(PrintFlags%Fmt==DEBUG_MMASTYLE)THEN
-              ChkStr='BlockError'//TRIM(Name)//' = '//TRIM(FltToChar(FRACTION(BlockError))) &
-                   //'*2^('//TRIM(IntToChar(EXPONENT(BlockError)))//');'
-           ELSE 
-              CALL Halt(' Logic error in Print_CheckSum_BCSR')
-           ENDIF
-!--------------------------------------------------------------------------
-!          Write BlockError string
-!           PU=OpenPU(Unit_O=Unit_O)
-!           WRITE(PU,'(1x,A)')TRIM(ChkStr)
-!           CALL ClosePU(PU)
-#endif
 #ifdef PARALLEL
         ENDIF
 #endif
       END SUBROUTINE Print_CheckSum_BCSR
+
 !----------------------------------------------------------------------------------------
 !
 !----------------------------------------------------------------------------------------   
@@ -937,21 +853,8 @@ MODULE PrettyPrint
       DotPrd=Reduce(Chk)
       IF(MyID==ROOT)THEN
          Chk=SQRT(DotPrd) 
-         IF(PRESENT(Proc_O).AND.PrintFlags%Fmt/=DEBUG_MMASTYLE)THEN
-            ChkStr=ProcessName(Proc_O)//TRIM(Name) &
-                 //CheckEq//TRIM(DblToChar(Chk))
-         ELSEIF(PrintFlags%Fmt/=DEBUG_MMASTYLE)THEN
-            ChkStr=TRIM(Name)//CheckEq//TRIM(DblToChar(Chk))
-         ELSEIF(PRESENT(Proc_O).AND.PrintFlags%Fmt==DEBUG_MMASTYLE)THEN
-            ChkStr='(* '//TRIM(Proc_O)//' *)'//TRIM(Name)       &
-                 //'ChkSum = '//TRIM(FltToChar(FRACTION(Chk))) &
-                 //'*2^('//TRIM(IntToChar(EXPONENT(Chk)))//');'
-         ELSEIF(PrintFlags%Fmt==DEBUG_MMASTYLE)THEN
-            ChkStr=TRIM(Name)//'ChkSum = '//TRIM(FltToChar(FRACTION(Chk))) &
-                 //'*2^('//TRIM(IntToChar(EXPONENT(Chk)))//');'
-         ELSE 
-            CALL Halt(' Logic error in Print_CheckSum_DBCSR')
-         ENDIF
+         ! Create check string
+         ChkStr=CheckSumString(Chk,Name,Proc_O)
          PU=OpenPU(Unit_O=Unit_O)
          WRITE(PU,'(1x,A)')ChkStr
          CALL ClosePU(PU)
@@ -968,7 +871,7 @@ MODULE PrettyPrint
     CHARACTER(LEN=*),OPTIONAL            :: Proc_O
     INTEGER                              :: PU,I,L,M,N,LMN,jadd,zq,iq,oq,orr,Ell,LenKet,NQ
     REAL(DOUBLE)                         :: Chk,Expt
-    CHARACTER(LEN=2*DEFAULT_CHR_LEN)     :: ChkStr1
+    CHARACTER(LEN=2*DEFAULT_CHR_LEN)     :: ChkStr
 !----------------------------------------------------------------------------------------
     IF(PrintFlags%Key/=DEBUG_MAXIMUM.AND. &
        PrintFlags%Chk/=DEBUG_CHKSUMS)RETURN
@@ -990,26 +893,34 @@ MODULE PrettyPrint
           ENDDO
        ENDDO
     ENDDO
-!
+    ! Create check string
+    ChkStr=CheckSumString(Chk,Name,Proc_O)
     PU=OpenPU(Unit_O=Unit_O)
-    IF(PRESENT(Proc_O).AND.PrintFlags%Fmt/=DEBUG_MMASTYLE)THEN
-       ChkStr1=ProcessName(Proc_O)//TRIM(Name)//CheckEq//TRIM(DblToChar(Chk))
-    ELSEIF(PrintFlags%Fmt/=DEBUG_MMASTYLE)THEN
-       ChkStr1=TRIM(Name)//CheckEq//TRIM(DblToChar(Chk))
-    ELSEIF(PRESENT(Proc_O).AND.PrintFlags%Fmt==DEBUG_MMASTYLE)THEN
-       ChkStr1='(* '//TRIM(Proc_O)//' *)'//'ChkSum'//TRIM(Name)       &
-                   //' = '//TRIM(FltToChar(FRACTION(Chk))) &
-                   //'*2^('//TRIM(IntToChar(EXPONENT(Chk)))//');'
-    ELSEIF(PrintFlags%Fmt==DEBUG_MMASTYLE)THEN
-       ChkStr1='ChkSum'//TRIM(Name)//' = '//TRIM(FltToChar(FRACTION(Chk))) &
-                      //'*2^('//TRIM(IntToChar(EXPONENT(Chk)))//');'
-    ELSE 
-       CALL Halt(' Logic error in Print_CheckSum_HGRho')
-    ENDIF
-    WRITE(PU,'(1x,A)')TRIM(ChkStr1)
+    WRITE(PU,'(1x,A)')TRIM(ChkStr)
     CALL ClosePU(PU)
-!
   END SUBROUTINE Print_CheckSum_HGRho
+
+
+  FUNCTION CheckSumString(Chk,Name,Proc_O) RESULT(ChkStr)
+    REAL(DOUBLE)                         :: Chk
+    CHARACTER(LEN=*)                     :: Name
+    CHARACTER(LEN=*),OPTIONAL            :: Proc_O
+    CHARACTER(LEN=DEFAULT_CHR_LEN)       :: ChkStr
+    IF(PRESENT(Proc_O).AND.PrintFlags%Fmt/=DEBUG_MMASTYLE)THEN
+       ChkStr=ProcessName(Proc_O)//TRIM(Name)//CheckEq//TRIM(DblToChar(Chk))
+    ELSEIF(PrintFlags%Fmt/=DEBUG_MMASTYLE)THEN
+       ChkStr=TRIM(Name)//CheckEq//TRIM(DblToChar(Chk))
+    ELSEIF(PRESENT(Proc_O).AND.PrintFlags%Fmt==DEBUG_MMASTYLE)THEN
+       ChkStr='(* '//TRIM(Proc_O)//' *)'//'ChkSum'//TRIM(Name)       &
+            //' = '//TRIM(FltToChar(FRACTION(Chk))) &
+            //'*2^('//TRIM(IntToChar(EXPONENT(Chk)))//');'
+    ELSEIF(PrintFlags%Fmt==DEBUG_MMASTYLE)THEN
+       ChkStr='ChkSum'//TRIM(Name)//' = '//TRIM(FltToChar(FRACTION(Chk))) &
+            //'*2^('//TRIM(IntToChar(EXPONENT(Chk)))//');'
+    ELSE 
+       CALL Halt(' Logic error in Print_CheckSum_BCSR')
+    ENDIF
+  END FUNCTION CheckSumString
 !========================================================================================
 !     Print Out the Density 
 !========================================================================================
