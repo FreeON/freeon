@@ -108,6 +108,7 @@ MODULE PBCFarField
 !!$      WRITE(*,*)
 !!$      WRITE(*,*) 'GM%PBC%Dimen  = ',GMLoc%PBC%Dimen 
 !!$      WRITE(*,*) 'MaxEll        = ',MaxEll
+!!$      WRITE(*,*) 'SPELL         = ',SPEll
 !!$      WRITE(*,*) 'MaxLay        = ',Layers
 !!$      WRITE(*,*) 'CS_IN%NCells  = ',CS_IN%NCells
 !!$      WRITE(*,*) 'CS_OUT%NCells = ',CS_OUT%NCells
@@ -134,9 +135,7 @@ MODULE PBCFarField
       REAL(DOUBLE), DIMENSION(1:)      :: HGBra
       TYPE(CRDS)                       :: GMLoc
 !
-      CtraxFF   = Zero   
-      PFFBraC%D = Zero
-      PFFBraS%D = Zero
+      CTraxFF   = Zero   
 !
 !     Transform <Bra| coefficients from HG to SP
 !
@@ -151,8 +150,10 @@ MODULE PBCFarField
             CTraxFF = CTraxFF + PFFKetC%D(LM)*TenRhoC%D(LM)+PFFKetS%D(LM)*TenRhoS%D(LM)
          ENDDO
       ELSE
+         PFFBraC%D = Zero 
+         PFFBraS%D = Zero 
          CALL Regular(MaxELL,PQ(1),PQ(2),PQ(3))
-         CALL XLate77(MaxELL,Prim%Ell,PFFBraC%D,PFFBraS%D,Cpq,Spq,PFFKetC%D,PFFKetS%D)
+         CALL XLate77(MaxEll,Prim%Ell,PFFBraC%D,PFFBraS%D,Cpq,Spq,PFFKetC%D,PFFKetS%D)
          DO LM = 0,LSP(MaxEll)
             CTraxFF = CTraxFF + PFFBraC%D(LM)*TenRhoC%D(LM)+PFFBraS%D(LM)*TenRhoS%D(LM)
          ENDDO
@@ -190,8 +191,6 @@ MODULE PBCFarField
       TYPE(CRDS)                       :: GMLoc
 ! 
       CtraxFF_Grad = Zero   
-      PFFBraC%D    = Zero
-      PFFBraS%D    = Zero
 !
 !     Transform <Bra| coefficients from HG to SP
 !
@@ -206,6 +205,8 @@ MODULE PBCFarField
             CTraxFF_Grad = CTraxFF_Grad + PFFKetC%D(LM)*TenRhoC%D(LM)+PFFKetS%D(LM)*TenRhoS%D(LM)
          ENDDO
       ELSE
+         PFFBraC%D = Zero 
+         PFFBraS%D = Zero 
          CALL Regular(MaxELL,PQ(1),PQ(2),PQ(3))
          CALL XLate77(MaxELL,Prim%Ell,PFFBraC%D,PFFBraS%D,Cpq,Spq,PFFKetC%D,PFFKetS%D)
          DO LM = 0,LSP(MaxEll)
@@ -237,38 +238,20 @@ MODULE PBCFarField
 !   Print out Periodic Info
 !----------------------------------------------------------------------------------------------  
     SUBROUTINE Print_Periodic(GMLoc,Prog,Unit_O)
-      CHARACTER(LEN=*)    :: Prog
-      CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg
-      INTEGER,OPTIONAL    :: Unit_O
-      INTEGER             :: Unit
-      TYPE(CRDS)          :: GMLoc
-      REAL(DOUBLE)        :: Layers
-!      IF(GMLoc%PBC%Dimen==0.OR.PrintFlags%Key<=DEBUG_MINIMUM)RETURN
-
+      INTEGER,OPTIONAL                :: Unit_O
+      INTEGER                         :: Unit
+      TYPE(CRDS)                      :: GMLoc
+      CHARACTER(LEN=*)                :: Prog
+      CHARACTER(LEN=DEFAULT_CHR_LEN)  :: Mssg
+      REAL(DOUBLE)                    :: Layers
+!
 #ifdef PARALLEL
   IF(MyID == ROOT) THEN
 #endif
       Unit=OpenPU(Unit_O=Unit_O)
-      Mssg=ProcessName(Prog,TRIM(IntToChar(GMLoc%PBC%Dimen))//'-D periodics') &
-         //'MxL = '//TRIM(IntToChar(MaxEll))                                  &
-         //', PAC Cells = '//TRIM(IntToChar(CS_OUT%NCells))                   &
-         //', MAC Cells = '//TRIM(IntToChar(CS_IN%NCells))                    
-      WRITE(Unit,*)TRIM(Mssg)
-      Mssg=ProcessName(Prog,'FF Energy')//'<FF> = '//TRIM(DblToChar(E_PFF))
-      WRITE(Unit,*)TRIM(Mssg)
-
-#ifdef LDJFLDJFLDJF
-!
-      IF(PRESENT(Unit_O)) THEN
-         Unit=Unit_O
-      ELSE
-         Unit=Out
-      ENDIF
-!     
       Layers = SQRT(CS_IN%CellCarts%D(1,1)**2+CS_IN%CellCarts%D(2,1)**2+CS_IN%CellCarts%D(3,1)**2)/MaxBoxDim(GMLoc)
-
-
-
+!
+      IF(PrintFlags%Key == DEBUG_MAXIMUM) THEN
          IF(GMLoc%PBC%Dimen > 0) THEN
             CALL OpenASCII(OutFile,Unit)  
             WRITE(Unit,100)
@@ -283,7 +266,20 @@ MODULE PBCFarField
             WRITE(Unit,107)       
             CLOSE(Unit)
          ENDIF
+      ELSEIF(PrintFlags%Key > DEBUG_MINIMUM) THEN
+         Mssg=ProcessName(Prog,TRIM(IntToChar(GMLoc%PBC%Dimen))//'-D periodics')   &
+              //'MxL = '//TRIM(IntToChar(MaxEll))                                  &
+              //', PAC Cells = '//TRIM(IntToChar(CS_OUT%NCells))                   &
+              //', MAC Cells = '//TRIM(IntToChar(CS_IN%NCells))                    
+         WRITE(Unit,*)TRIM(Mssg)
+         Mssg=ProcessName(Prog,'FF Energy')//'<FF> = '//TRIM(DblToChar(E_PFF))
+         WRITE(Unit,*)TRIM(Mssg)
       ENDIF
+      CALL ClosePU(Unit)
+#ifdef PARALLEL
+   ENDIF
+#endif
+!
 100   FORMAT('========================================Periodic Information======================================')
 101   FORMAT(' MaxEll             = ',I3,'     Dimension = ',I2)
 102   FORMAT(' Dipole Moment      = (',F12.6,',',F12.6,',',F12.6,')')
@@ -294,13 +290,6 @@ MODULE PBCFarField
 105   FORMAT(' Correction to the Energy:')
 106   FORMAT('   PFF = ',E14.6,'  Dipole = ',E14.6)
 107   FORMAT('=========================================END======================================================')
-#endif
-
-      CALL ClosePU(Unit)
-#ifdef PARALLEL
-  ENDIF
-#endif
-
 !
     END SUBROUTINE Print_Periodic
 !========================================================================================
@@ -372,23 +361,27 @@ MODULE PBCFarField
       TYPE(CRDS)                            :: GMLoc
       INTEGER                               :: L,LP,ML1
       REAL(DOUBLE)                          :: Radius,Dist
-      REAL(DOUBLE)                          :: PL,OL,FAC,NL,OLDist
+      REAL(DOUBLE)                          :: PL,OL,FAC,NL,OL1,OL2,CQ
       REAL(DOUBLE)                          :: PFFTau
 !
-      PFFTau = TauMAC
-      ML1=FFELL+1
+      PFFTau = 100*TauMAC
+      ML1    = FFELL+1
 !
-      Radius=SQRT(RDist**2-BDist**2)
-!
+      Radius=RDist-BDist
       IF(BDist > Radius) THEN
-         CALL Halt('BDist > Radius increase PFFMaxLay')
+         CALL Halt('BDist Greater Then Radius increase PFFMaxLay')
       ENDIF
 !
-      OLDist = (Unsold1(FFEll,RhoC%D,RhoS%D))**(One/DBLE(FFEll))
-      Dist   = MAX(BDist,OLDist)
+      CQ=Zero
+      OL2 = Unsold1(HGEll+1,FFELL,RhoC%D,RhoS%D)
+      DO L=0,FFELL-1
+         OL1 = Unsold0(L,RhoC%D,RhoS%D)
+         CQ=MAX(CQ,OL1/BDist**DBLE(L))
+      ENDDO
+!
       DO L   = GMLoc%PBC%PFFMaxEll,FFELL
-         PL  = Dist**DBLE(L)
-         FAC = PL/(Radius**(DBLE(L+1)))
+         PL  = CQ*BDist**DBLE(L)
+         FAC = PL/(Radius*RDist**(DBLE(L)))
          IF(FAC .LT. PFFTau) THEN
             ML1 = L
             EXIT
@@ -396,16 +389,15 @@ MODULE PBCFarField
       ENDDO
 !
       CALL OpenASCII(OutFile,Out)  
-      IF(GM%PBC%PFFOvRide) THEN
+      IF(GMLoc%PBC%PFFOvRide) THEN
          WRITE(Out,990) ML1
 !         WRITE(*,990) ML1
       ELSE
          MaxEll = ML1
          IF(MaxEll > FFELL) THEN
             WRITE(Out,991)
-!            WRITE(*,991)
             MaxEll = FFELL
-         ENDIF
+         ENDIF      
       ENDIF
       CLOSE(Out)
 !
@@ -427,110 +419,4 @@ MODULE PBCFarField
 !
 #endif
 END MODULE PBCFarField
-!!$!========================================================================================
-!!$! Calculate the Box Bounds Needed for the Direct Sum
-!!$!========================================================================================
-!!$  SUBROUTINE BoxBounds(GMLoc)
-!!$    INTEGER                          :: I
-!!$    INTEGER                          :: IRmin,IRmax
-!!$    REAL(DOUBLE)                     :: Radius
-!!$    TYPE(CRDS)                       :: GMLoc
-!!$!        
-!!$    IF(GMLoc%PBC%Dimen==0) THEN
-!!$       IRmin = 1
-!!$       IRmax = 1
-!!$    ELSEIF(GMLoc%PBC%Dimen==1) THEN
-!!$       IRmin = 3
-!!$       IRmax = MAX(  50,CS_OUT%NCells+1)
-!!$    ELSEIF(GMLoc%PBC%Dimen==2) THEN
-!!$       IRmin = 9
-!!$       IRmax = MAX( 500,CS_OUT%NCells+1)
-!!$    ELSEIF(GMLoc%PBC%Dimen==3) THEN
-!!$       IRmin = 27
-!!$       IRmax = MAX(5000,CS_OUT%NCells+1)
-!!$    ENDIF
-!!$!
-!!$!   Generate the Cells for the Inner Box
-!!$!  
-!!$    Radius = RDist
-!!$    CALL New_CellSet_Sphere(CS_IN,GMLoc%PBC%AutoW,GMLoc%PBC%BoxShape,Radius)
-!!$!
-!!$!   Rescale the box size  so that the box is within the bounds of IRmin and IRmax
-!!$!
-!!$    IF(CS_IN%NCells < IRmin) THEN
-!!$       DO I=1,1000
-!!$          Radius = 1.001D0*Radius
-!!$          CALL Delete_CellSet(CS_IN)
-!!$          CALL New_CellSet_Sphere(CS_IN,GMLoc%PBC%AutoW,GMLoc%PBC%BoxShape,Radius)
-!!$          IF(CS_IN%NCells > IRmin) THEN
-!!$             EXIT
-!!$          ENDIF
-!!$       ENDDO
-!!$       RDist = Radius
-!!$       RETURN
-!!$    ELSEIF(CS_IN%NCells > IRMax) THEN
-!!$       DO I=1,1000
-!!$          Radius = 0.999D0*Radius
-!!$          CALL Delete_CellSet(CS_IN)
-!!$          CALL New_CellSet_Sphere(CS_IN,GMLoc%PBC%AutoW,GMLoc%PBC%BoxShape,Radius)
-!!$          IF(CS_IN%NCells < IRmax) THEN
-!!$             EXIT
-!!$          ENDIF
-!!$       ENDDO
-!!$       RDist = Radius
-!!$       RETURN
-!!$    ENDIF
-!!$    RDist = Radius
-!!$!
-!!$  END SUBROUTINE BoxBounds
-!!$!========================================================================================
-!!$! Calculate the Box Bounds Needed for the Direct Sum
-!!$!========================================================================================
-!!$  SUBROUTINE CalMPB(Q,GMLoc) 
-!!$    TYPE(PoleNode)                   :: Q
-!!$    INTEGER                          :: I,J,K,LP
-!!$    REAL(DOUBLE)                     :: Px,Py,Pz,O_FFEll,NFac,Dist,Mx,My,Mz
-!!$    REAL(DOUBLE)                     :: Radius
-!!$    TYPE(CRDS)                       :: GMLoc
-!!$!
-!!$!   PAC Distance (From PoleRoot)
-!!$!
-!!$    Px=Half*(Q%Box%BndBox(1,2)-Q%Box%BndBox(1,1))
-!!$    Py=Half*(Q%Box%BndBox(2,2)-Q%Box%BndBox(2,1))   
-!!$    Pz=Half*(Q%Box%BndBox(3,2)-Q%Box%BndBox(3,1))
-!!$    PACDist = SQRT(Px*Px+Py*Py+Pz*Pz)
-!!$!
-!!$!   MAC Distance
-!!$!
-!!$    LP      = 0
-!!$    MACDist = Zero
-!!$    DO I=-1,1
-!!$       DO J=-1,1
-!!$          DO K=-1,1
-!!$             Mx = DBLE(I)*BOXDist(1)
-!!$             My = DBLE(J)*BOXDist(2)
-!!$             Mz = DBLE(K)*BOXDist(3)
-!!$             IF(.NOT. GMLoc%PBC%AutoW(1)) Mx = Zero
-!!$             IF(.NOT. GMLoc%PBC%AutoW(2)) My = Zero
-!!$             IF(.NOT. GMLoc%PBC%AutoW(3)) Mz = Zero
-!!$             CALL Regular(MaxELL,Mx,My,Mz)
-!!$             CALL XLate77(MaxELL,MaxELL,FarFC,FarFS,Cpq,Spq,RhoC%D,RhoS%D)
-!!$!
-!!$             O_FFEll  = Unsold2(MaxEll-2,MaxELL,FarFC,FarFS)
-!!$             NFac     = FudgeFactorial(LP,MaxELL)
-!!$             Dist     = (NFac*O_FFEll/TauMAC)**(One/DBLE(MaxELL+LP+1))
-!!$             MACDist  = MAX(MACDist,Dist)
-!!$!
-!!$          ENDDO
-!!$       ENDDO
-!!$    ENDDO
-!!$!
-!!$!   BOX Distance
-!!$!
-!!$    BDist = SQRT(BOXDist(1)**2+BOXDist(2)**2+BOXDist(3)**2)
-!!$!
-!!$!   Total Distance
-!!$!
-!!$    RDist = MAX(PACDist,SQRT(MACDIst**2+BDist**2))
-!!$!
-!!$  END SUBROUTINE CalMPB
+
