@@ -2650,20 +2650,23 @@ CONTAINS
 !---------------------------------------------------------------------
 !
    SUBROUTINE RefreshBMatInfo(IntCs,XYZ,GTrfCtrl,GCoordCtrl,&
-                              Print,SCRPath,DoCleanB)
+                              Print,SCRPath,DoCleanB,Gi_O)
      TYPE(INTC)                   :: IntCs
      TYPE(Cholesky)               :: CholData
      TYPE(CoordCtrl)              :: GCoordCtrl
      TYPE(TrfCtrl)                :: GTrfCtrl
      REAL(DOUBLE),DIMENSION(:,:)  :: XYZ
-     INTEGER                      :: NatmsLoc,NCart,NIntC
+     INTEGER                      :: NatmsLoc,NCart,NIntC,NZ
      TYPE(BMATR)                  :: B
      INTEGER                      :: Print
-     LOGICAL                      :: Print2,DoCleanB
+     LOGICAL                      :: Print2,DoCleanB,DoGi
      CHARACTER(LEN=*)             :: SCRPath
-     TYPE(INT_VECT)               :: ISpB,JSpB
-     TYPE(DBL_VECT)               :: ASpB
+     TYPE(INT_VECT)               :: ISpB,JSpB,ISpBt,JSpBt
+     TYPE(DBL_VECT)               :: ASpB,ASpBt
+     LOGICAL,OPTIONAL             :: Gi_O
      !
+     DoGi=.FALSE.
+     IF(PRESENT(Gi_O)) DoGi=Gi_O
      NatmsLoc=SIZE(XYZ,2)
      NCart=3*NatmsLoc
      NIntC=SIZE(IntCs%Def%C)
@@ -2677,8 +2680,22 @@ CONTAINS
      !
      CALL WriteBMATR(ISpB,JSpB,ASpB,TRIM(SCRPath)//'B')
      !
-     CALL CholFact(ISpB,JSpB,ASpB,NCart,NIntC, &
-                   CholData,Print2,Shift_O=1.D-6)
+     IF(DoGi) THEN
+       NZ=SIZE(JSpB%I)
+       CALL New(ISpBt,NCart+1)
+       CALL New(JSpBt,NZ)
+       CALL New(ASpBt,NZ)
+       CALL TransPose1x1(ISpB%I,JSpB%I,ASpB%D,NIntC,NCart, &
+                         ISpBt%I,JSpBt%I,ASpBt%D,'full')
+       CALL CholFact(ISpBt,JSpBt,ASpBt,NIntC,NCart, &
+                     CholData,Print2,Shift_O=1.D-6)
+       CALL Delete(ISpBt)
+       CALL Delete(JSpBt)
+       CALL Delete(ASpBt)
+     ELSE
+       CALL CholFact(ISpB,JSpB,ASpB,NCart,NIntC, &
+                     CholData,Print2,Shift_O=1.D-6)
+     ENDIF
      CALL WriteChol(CholData,TRIM(SCRPath)//'CholFact')
      !
      CALL Delete(CholData)
@@ -5739,6 +5756,30 @@ CONTAINS
      ENDDO
      !
    END SUBROUTINE SetBackToRefs
+!
+!-------------------------------------------------------------------
+! 
+   SUBROUTINE IntCsConstr(IntCs,IntCsX,DoReturn)
+     TYPE(INTC) :: IntCs,IntCsX
+     INTEGER    :: I,J,NC
+     LOGICAL    :: DoReturn
+     !
+     DoReturn=.FALSE.
+     NC=0
+     DO I=1,IntCs%N
+       IF(IntCs%Constraint%L(I)) NC=NC+1
+     ENDDO
+     IF(NC==0) DoReturn=.TRUE.
+     IF(DoReturn) RETURN
+     CALL New(IntCsX,NC)
+     NC=0
+     DO I=1,IntCs%N
+       IF(IntCs%Constraint%L(I)) THEN
+         NC=NC+1
+         CALL Set_INTC_EQ_INTC(Intcs,IntcsX,I,I,NC)
+       ENDIF
+     ENDDO
+   END SUBROUTINE IntCsConstr
 !
 !-------------------------------------------------------------------
 ! 

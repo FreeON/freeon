@@ -568,7 +568,11 @@ CONTAINS
        IF(iGEO>iGEOst) CALL BackTrack(iBAS,iGEO,C,BPrev%I,BCur%I)
        CALL Force(iBAS,iGEO,C%Nams,C%Opts,C%Stat, &
                   C%Geos,C%Sets,C%MPIs)
-     ! CALL PrintClones(IGeo,C%Nams,C%Geos)
+       !
+       ! Project out TR, Rot and Constraints from the Cartesian gradients
+       !
+       CALL ProjectGrads(C)
+       CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
        !
        ! Loop over all clones and modify geometries.
        !
@@ -678,9 +682,6 @@ CONTAINS
      !
      CALL New(CartGrad,NCart)
      CALL CartRNK2ToCartRNK1(CartGrad%D,GradIn)
-     CALL CleanConstrGrad(CartGrad%D,GOpt%ExtIntCs)
-     CALL TranslsOff(CartGrad%D,Print2)
-     CALL RotationsOff(CartGrad%D,XYZ,Print2)
      !
      CALL GetCGradMax(CartGrad%D,NCart,GOpt%GOptStat%IMaxCGrad,&
                       GOpt%GOptStat%MaxCGrad)
@@ -1172,54 +1173,6 @@ CONTAINS
 !
 !---------------------------------------------------------------
 !
-   SUBROUTINE PrintClones(IStep,Nams,Geos)
-     TYPE(FileNames)    :: Nams
-     TYPE(Geometries)   :: Geos
-     INTEGER            :: IStep,NatmsLoc,NClones,iCLONE,I
-     CHARACTER(LEN=DCL) :: FileName
-     TYPE(DBL_RNK2)     :: XYZ,Vects
-     TYPE(DBL_VECT)     :: AtNum
-     REAL(DOUBLE)       :: Dist,Sum
-     ! 
-     ! The whole set of clones is going to be printed in a single file.
-     ! All clones will be seen by a single view of the resulting file.
-     ! 
-     NClones=Geos%Clones
-     NatmsLoc=0
-     DO iCLONE=1,NClones
-       NatmsLoc=NatmsLoc+Geos%Clone(iCLONE)%Natms
-     ENDDO
-     !
-     CALL New(XYZ,(/3,NatmsLoc/))
-     CALL New(Vects,(/3,NatmsLoc/))
-     CALL New(AtNum,NatmsLoc)
-     !
-     NatmsLoc=0
-     Sum=Zero
-     Dist=7.D0
-     DO iCLONE=1,NClones
-       Sum=(iCLONE-1)*Dist
-       DO I=1,Geos%Clone(iCLONE)%Natms
-         NatmsLoc=NatmsLoc+1
-         AtNum%D(NatmsLoc)=Geos%Clone(iCLONE)%AtNum%D(I)
-         XYZ%D(1:2,NatmsLoc)=Geos%Clone(iCLONE)%AbCarts%D(1:2,I)
-         XYZ%D(3,NatmsLoc)=Geos%Clone(iCLONE)%AbCarts%D(3,I)+Sum
-         Vects%D(3,NatmsLoc)=Geos%Clone(iCLONE)%Gradients%D(3,I)
-       ENDDO
-     ENDDO
-     !
-     FileName=TRIM(Nams%SCF_NAME)//'.Clones.xyz'
-     !
-     CALL PrtXYZ(Atnum%D,XYZ%D,FileName,&
-                 'Step='//TRIM(IntToChar(IStep)),Vects_O=Vects%D)
-     !
-     CALL Delete(AtNum)
-     CALL Delete(XYZ)
-     CALL Delete(Vects)
-   END SUBROUTINE PrintClones
-!
-!-------------------------------------------------------------------
-!
    SUBROUTINE OptSingleMol(GOpt,Nams,Opts, &
                            GMLoc,Convgd,iGEO,iCLONE)
      TYPE(GeomOpt)        :: GOpt
@@ -1294,8 +1247,8 @@ CONTAINS
      INTEGER         :: AccL,NatmsLoc
      REAL(DOUBLE)    :: GCrit
      !
-   ! GCrit=GTol(AccL)
-     GCrit=3.D-4
+     GCrit=GTol(AccL)
+   ! GCrit=3.D-4
      !
      GConv%MaxGeOpSteps=MAX(3*NatmsLoc,600)
      GConv%Grad= GCrit
@@ -1469,27 +1422,81 @@ CONTAINS
 !
 !-------------------------------------------------------------------
 !
-   SUBROUTINE CleanConstrGrad(CartGrad,IntCs_Extra)
-     TYPE(INTC)                :: IntCs_Extra
-     REAL(DOUBLE),DIMENSION(:) :: CartGrad
-     INTEGER                   :: NIntC,I,JJ,J
+   SUBROUTINE CleanConstrGrad(XYZ,CartGrad,GOpt,SCRPath)
+     TYPE(INTC)                 :: IntCs,IntCsX
+     REAL(DOUBLE),DIMENSION(:)  :: CartGrad
+     TYPE(GeomOpt)              :: GOpt
+     REAL(DOUBLE),DIMENSION(:,:):: XYZ
+     INTEGER                    :: Print
+     CHARACTER(LEN=*)           :: SCRPath
+     TYPE(Cholesky)             :: CholData
+     TYPE(INT_VECT)             :: ISpB,JSpB
+     TYPE(DBL_VECT)             :: ASpB
+     TYPE(DBL_VECT)             :: CartA1,IntA1,IntA2,IntA3,IntA4
+     INTEGER                    :: II,I,JJ,J,NCart,MaxStep
+     LOGICAL                    :: DoReturn
+     REAL(DOUBLE)               :: Tol,Fact
+     CHARACTER(LEN=DCL)         :: Messg
      !
-     NIntC=IntCs_Extra%N    
-     DO I=1,NIntC
-       IF(IntCs_Extra%Constraint%L(I)) THEN 
-         JJ=IntCs_Extra%Atoms%I(I,1)
-         IF(IntCs_Extra%Def%C(I)(1:5)=='CARTX') THEN
-           J=3*(JJ-1)+1
-           CartGrad(J)=Zero   
-         ELSE IF(IntCs_Extra%Def%C(I)(1:5)=='CARTY') THEN
-           J=3*(JJ-1)+2
-           CartGrad(J)=Zero   
-         ELSE IF(IntCs_Extra%Def%C(I)(1:5)=='CARTZ') THEN
-           J=3*(JJ-1)+3
-           CartGrad(J)=Zero   
-         ENDIF
-       ENDIF
-     ENDDO
+     ! Generate INTC of Constraints
+     !
+     MaxStep=20
+     Tol=1.D-8
+     CALL IntCsConstr(GOpt%ExtIntCs,IntCsX,DoReturn)
+     IF(DoReturn) RETURN
+     !
+     IntCsX%Constraint%L=.FALSE.
+     IntCsX%Active%L=.TRUE.
+     NCart=SIZE(CartGrad)
+     !
+     CALL New(CartA1,NCart)
+     CALL New(IntA1,IntCsX%N)
+     CALL New(IntA2,IntCsX%N)
+     CALL New(IntA3,IntCsX%N)
+     CALL New(IntA4,IntCsX%N)
+     !
+     CALL RefreshBMatInfo(IntCsX,XYZ,GOpt%TrfCtrl,GOpt%CoordCtrl, &
+                          Print,SCRPath,.TRUE.,Gi_O=.TRUE.)
+     CALL GetBMatInfo(SCRPath,ISpB,JSpB,ASpB,CholData)
+     !
+     CALL CALC_BxVect(ISpB,JSpB,ASpB,IntA1%D,CartGrad)
+     IntA2%D=Zero
+     DO II=1,MaxStep 
+       CALL CALC_BxVect(ISpB,JSpB,ASpB,IntA2%D,CartA1%D,Trp_O=.TRUE.)
+       CALL CALC_BxVect(ISpB,JSpB,ASpB,IntA3%D,CartA1%D)
+       IntA3%D=IntA1%D-IntA3%D
+       CALL CALC_GcInvCartV(CholData,IntA3%D,IntA4%D)
+       IntA2%D=IntA2%D+IntA4%D 
+       Fact=DOT_PRODUCT(IntA4%D,IntA4%D)
+       Fact=SQRT(Fact/DBLE(IntCsX%N))
+       IF(Fact<Tol) EXIT
+     ENDDO 
+     IF(Fact>Tol) THEN
+       Messg='WARNING! '// &
+             'Unsuccesful projection of constraint forces, Fact= '// &
+              TRIM(DblToChar(Fact))//' Tol= '//TRIM(DblToChar(Tol))
+       WRITE(*,*) Messg
+       WRITE(Out,*) Messg
+     ENDIF
+     CALL CALC_BxVect(ISpB,JSpB,ASpB,IntA2%D,CartA1%D,Trp_O=.TRUE.)
+     !
+     Fact=DOT_PRODUCT(CartGrad,CartA1%D)/DOT_PRODUCT(CartGrad,CartGrad)
+     Fact=Fact*100.D0
+     WRITE(*,100) Fact
+     WRITE(Out,100) Fact
+     100 FORMAT('Percentage of Constraint Force That is Projected Out= ',F6.2)
+     CartGrad=CartGrad-CartA1%D
+     !
+     CALL Delete(IntCsX)
+     CALL Delete(IntA4)
+     CALL Delete(IntA3)
+     CALL Delete(IntA2)
+     CALL Delete(IntA1)
+     CALL Delete(CartA1)
+     CALL Delete(ISpB)
+     CALL Delete(JSpB)
+     CALL Delete(ASpB)
+     CALL Delete(CholData)
    END SUBROUTINE CleanConstrGrad
 !
 !-------------------------------------------------------------------
@@ -1866,6 +1873,33 @@ CONTAINS
        ENDIF
      ENDDO
    END SUBROUTINE PrepBiSect
+!
+!-------------------------------------------------------------------
+!
+   SUBROUTINE ProjectGrads(C)
+     TYPE(Controls)            :: C
+     INTEGER                   :: iCLONE,NCart
+     CHARACTER(LEN=DCL)        :: SCRPath
+     LOGICAL                   :: Print2
+     TYPE(DBL_VECT)            :: CartGrad
+     !
+     NCart=3*SIZE(C%Geos%Clone(1)%AbCarts%D,2)
+     Print2= C%Opts%PFlags%GeOp>=DEBUG_GEOP_MAX
+     CALL New(CartGrad,NCart)
+     CALL OpenASCII(OutFile,Out)
+     DO iCLONE=1,C%Geos%Clones
+       SCRPath  =TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)// &
+                 '.'//TRIM(IntToChar(iCLONE))
+       CALL CartRNK2ToCartRNK1(CartGrad%D,C%Geos%Clone(iCLONE)%Gradients%D)
+       CALL TranslsOff(CartGrad%D,Print2)
+       CALL RotationsOff(CartGrad%D,C%Geos%Clone(iCLONE)%AbCarts%D,Print2)
+       CALL CleanConstrGrad(C%Geos%Clone(iCLONE)%AbCarts%D, &
+                            CartGrad%D,C%GOpt,SCRPath)
+       CALL CartRNK1ToCartRNK2(CartGrad%D,C%Geos%Clone(iCLONE)%Gradients%D)
+     ENDDO
+     CLOSE(Out,STATUS='KEEP')
+     CALL Delete(CartGrad)
+   END SUBROUTINE ProjectGrads
 !
 !-------------------------------------------------------------------
 !
