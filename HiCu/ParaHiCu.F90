@@ -1,4 +1,4 @@
-! Parallel HiCu  --- author: Chee K. Gan (25 June 2002)
+! Parallel HiCu  --- author: Chee K. Gan (2002 June 25)
 MODULE ParallelHiCu
 
 #ifdef PARALLEL 
@@ -26,17 +26,62 @@ MODULE ParallelHiCu
   TYPE(DBL_RNK2)::RepLCoor,RepRCoor ! Coordinates of the repartitioned boxes
   INTEGER::NVol                     ! number of the bounding boxes
   REAL(DOUBLE)::MyLeavesTm          ! time to create all leaves in a subvolume
-  TYPE(DBL_VECT)::VolLeavesTm       ! the array to store MyLeavesTm
   REAL(DOUBLE)::VolTm               ! total time to work on a subvolume
-  TYPE(DBL_VECT)::TmNode            ! the array to stor VolTm
+  TYPE(DBL_VECT)::TmNode            ! the array to store VolTm
   REAL(DOUBLE)::BoxPoint(6)
-  INTEGER,PARAMETER::LCoor_T=26,RCoor_T=27,Time_T=28,LeavesTm_T=29
   REAL(DOUBLE)::TotExc
-   
+
+  TYPE VaryLengLs
+    INTEGER,POINTER,DIMENSION(:) :: Ls
+  END TYPE VaryLengLs
+  INTEGER :: NumOfDist
+  INTEGER,ALLOCATABLE :: NewQdex(:),NewCdex(:),NewLdex(:)
+  REAL(DOUBLE),ALLOCATABLE :: NewRList(:),NewExt(:),NewZeta(:),NewX(:),&
+    NewY(:),NewZ(:),NewCo(:)
+  TYPE(BBox) :: GRhoBBox,LocalRhoBBox
+  REAL(DOUBLE) :: GRhoBBoxVol
+
 !===============================================================================
   CONTAINS
 !===============================================================================
 
+!===============================================================================
+  SUBROUTINE ParaInitRho(Args)
+    TYPE(ARGMT)               :: Args
+    INTEGER :: IErr,I
+
+    CALL InitRho(Args)
+    CALL GetLocalBoundingBox()
+    !! now get the Global bounding box
+    CALL MPI_AllReduce(LocalRhoBBox%BndBox(1,1),GRhoBBox%BndBox(1,1),&
+           3,MPI_DOUBLE_PRECISION,MPI_MIN,MPI_COMM_WORLD,IErr)
+    CALL MPI_AllReduce(LocalRhoBBox%BndBox(1,2),GRhoBBox%BndBox(1,2),&
+           3,MPI_DOUBLE_PRECISION,MPI_MAX,MPI_COMM_WORLD,IErr)
+    GRhoBBoxVol = 1.0D0
+    DO I = 1, 3
+      GRhoBBoxVol = GRhoBBoxVol*(GRhoBBox%BndBox(I,2)-GRhoBBox%BndBox(I,1))
+    ENDDO
+    IF(MyID == 0) THEN
+      WRITE(*,*) 'MyID = ', MyID,', GRhoBBox = ',GRhoBBox%BndBox(1:3,1),GRhoBBox%BndBox(1:3,2), ', GRhoBBoxVol = ',GRhoBBoxVol
+    ENDIF
+    CALL AlignNodes()
+  END SUBROUTINE ParaInitRho
+
+!===============================================================================
+  RECURSIVE FUNCTION CountRhoLeafNode(RhoTreeNode)
+    TYPE(RhoNode), POINTER :: RhoTreeNode
+    INTEGER:: CountRhoLeafNode
+    CountRhoLeafNode = 0
+    IF(RhoTreeNode%Leaf) THEN
+      CountRhoLeafNode = 1
+    ELSE
+      CountRhoLeafNode = CountRhoLeafNode(RhoTreeNode%Descend) + &
+                         CountRhoLeafNode(RhoTreeNode%Descend%Travrse)
+    ENDIF
+  END FUNCTION CountRhoLeafNode
+  
+
+!===============================================================================
   SUBROUTINE GetBBox()
     LOGICAL::Exist
     INTEGER::Power2(0:31),SmallN,PIndex,CIndex,Stage,DirInt,I,J
@@ -44,36 +89,14 @@ MODULE ParallelHiCu
     
 
     NVol = NPrc
-    ! WRITE(*,*) 'MyID = ', MyID, ', NVol = ', NVol
     CALL New(LCoor,(/3,NVol/))
     CALL New(RCoor,(/3,NVol/))
 
-#undef USE_BEGEND
-
-#ifdef USE_BEGEND
-    INQUIRE(FILE='BegEnd.dat',EXIST=Exist)
-#else
     INQUIRE(FILE='LineLoc.dat',EXIST=Exist)
-#endif
 
     IF(Exist) THEN
-#ifdef USE_BEGEND
-      IF(MyID == 0) THEN
-        WRITE(*,*) 'BegEnd.dat exists. It is going to be opened..'
-        OPEN(UNIT=53,FILE='BegEnd.dat',FORM='formatted',Status='unknown')
-        READ(53,*) NVol
-        IF(NVol /= NPrc) THEN
-          WRITE(*,*) 'NVol = ',NVol, ',  NPrc = ',NPrc
-          STOP 'ERROR: BegEnd.dat -- NVol is not equal to NPrc!'
-        ENDIF
-        READ(53,*) LCoor%D(1:3,1:NVol)
-        READ(53,*) RCoor%D(1:3,1:NVol)
-        CLOSE(53)
-      ENDIF
-#else
       IF(MyID == 0) THEN
         WRITE(*,*) 'LineLoc.dat exists. It is going to be opened..'
-        OPEN(UNIT=53,FILE='DirInt.dat',FORM='formatted',Status='unknown')
         OPEN(UNIT=54,FILE='LineLoc.dat',FORM='formatted',Status='unknown')
         READ(54,*) NVol
         IF(NVol /= NPrc) THEN
@@ -83,11 +106,10 @@ MODULE ParallelHiCu
         READ(54,*) LCoor%D(1:3,1)
         READ(54,*) RCoor%D(1:3,1)
 
-#define UseRhoBox
-#ifdef UseRhoBox
-        LCoor%D(1:3,1) = RhoRoot%Box%BndBox(1:3,1)
-        RCoor%D(1:3,1) = RhoRoot%Box%BndBox(1:3,2)
-#endif
+        !! LCoor%D(1:3,1) = RhoRoot%Box%BndBox(1:3,1)
+        !! RCoor%D(1:3,1) = RhoRoot%Box%BndBox(1:3,2)
+        LCoor%D(1:3,1) = GRhoBBox%BndBox(1:3,1)
+        RCoor%D(1:3,1) = GRhoBBox%BndBox(1:3,2)
 
         Power2(0) = 1
         DO I = 1, 31
@@ -106,7 +128,6 @@ MODULE ParallelHiCu
             LCoor%D(1:3,CIndex) = LCoor%D(1:3,PIndex)
             RCoor%D(1:3,CIndex) = RCoor%D(1:3,PIndex)
 
-            READ(53,*) DirInt
             READ(54,*) DirInt
             READ(54,*) x2
             RCoor%D(DirInt,PIndex) = x2
@@ -127,13 +148,15 @@ MODULE ParallelHiCu
         CLOSE(53)
         CLOSE(54)
       ENDIF
-#endif
     ELSE
       ! assign the first box
       IF(MyID == 0) THEN
-        WRITE(*,*) 'BegEnd.dat does not exists.'
-        LCoor%D(1:3,1) = RhoRoot%Box%BndBox(1:3,1)
-        RCoor%D(1:3,1) = RhoRoot%Box%BndBox(1:3,2)
+        WRITE(*,*) 'LineLoc.dat does not exist.'
+
+        ! use the GRhoBBox information rather than RhoRoot 
+        ! because RhoRoot is not assigned yet
+        LCoor%D(1:3,1) = GRhoBBox%BndBox(1:3,1)
+        RCoor%D(1:3,1) = GRhoBBox%BndBox(1:3,2)
         CALL Get_SubVol(LCoor,RCoor,NVol)
       ENDIF
     ENDIF
@@ -141,25 +164,600 @@ MODULE ParallelHiCu
   END SUBROUTINE GetBBox
 
 !===============================================================================
+  SUBROUTINE GetNewLocalRhoBoundingBox()
+    INTEGER :: I,KQ,J
+    TYPE(BBox) :: NodeBox
+    DO I = 1, NumOfDist
+      KQ = NewQdex(I)
+      NodeBox%BndBox(1:3,1) = (/NewX(KQ),NewY(KQ),NewZ(KQ)/)
+      NodeBox%BndBox(1:3,2) = (/NewX(KQ),NewY(KQ),NewZ(KQ)/)
+      NodeBox=ExpandBox(NodeBox,NewExt(KQ))
+      IF(I == 1) THEN
+        LocalRhoBBox%BndBox(1:3,1:2) = NodeBox%BndBox(1:3,1:2)
+      ELSE
+        DO J = 1, 3
+          LocalRhoBBox%BndBox(J,1) = Min(LocalRhoBBox%BndBox(J,1),NodeBox%BndBox(J,1))
+          LocalRhoBBox%BndBox(J,2) = Max(LocalRhoBBox%BndBox(J,2),NodeBox%BndBox(J,2))
+        ENDDO
+      ENDIF
+    ENDDO
+    LocalRhoBBox%Half(1:3) = (LocalRhoBBox%BndBox(1:3,2)-LocalRhoBBox%BndBox(1:3,1))*Half
+    LocalRhoBBox%Center(1:3) = (LocalRhoBBox%BndBox(1:3,2)+LocalRhoBBox%BndBox(1:3,1))*Half
+    CALL AlignNodes()
+    !! write(*,*) 'Finding out what new rho bounding box is : MyID = ', MyID, 'LocalRhoBBox = ',LocalRhoBBox%BndBox(1:3,1),LocalRhoBBox%BndBox(1:3,2)
+    CALL AlignNodes()
+
+  END SUBROUTINE GetNewLocalRhoBoundingBox
+
+!===============================================================================
+  SUBROUTINE GetLocalBoundingBox()
+    INTEGER :: NDist,I,KQ,J
+    TYPE(BBox) :: NodeBox
+
+    NDist = Rho%NDist
+    DO I = 1, NDist !! run through all distributions
+      KQ = QDex(I) !! KQ is the index of a distribution
+      NodeBox%BndBox(1:3,1) = (/Rho%Qx%D(KQ),Rho%Qy%D(KQ),Rho%Qz%D(KQ)/)
+      NodeBox%BndBox(1:3,2) = (/Rho%Qx%D(KQ),Rho%Qy%D(KQ),Rho%Qz%D(KQ)/)
+      NodeBox=ExpandBox(NodeBox,Ext(KQ))
+      IF(I == 1) THEN
+        LocalRhoBBox%BndBox(1:3,1:2) = NodeBox%BndBox(1:3,1:2)
+      ELSE
+        DO J = 1, 3
+          LocalRhoBBox%BndBox(J,1) = Min(LocalRhoBBox%BndBox(J,1),NodeBox%BndBox(J,1))
+          LocalRhoBBox%BndBox(J,2) = Max(LocalRhoBBox%BndBox(J,2),NodeBox%BndBox(J,2))
+        ENDDO
+      ENDIF
+    ENDDO
+    LocalRhoBBox%Half(1:3) = (LocalRhoBBox%BndBox(1:3,2)-LocalRhoBBox%BndBox(1:3,1))*Half
+    LocalRhoBBox%Center(1:3) = (LocalRhoBBox%BndBox(1:3,2)+LocalRhoBBox%BndBox(1:3,1))*Half
+    !! CALL AlignNodes()
+    !! write(*,*) 'MyID = ', MyID, 'LocalRhoBBox = ',LocalRhoBBox%BndBox(1:3,1),LocalRhoBBox%BndBox(1:3,2)
+    CALL AlignNodes()
+  END SUBROUTINE GetLocalBoundingBox
+
+!===============================================================================
   SUBROUTINE SendBBox()
-    INTEGER::I,IErr
+    INTEGER::I,IErr,NumDbl
     REAL(DOUBLE)::DblArr(3)
     INTEGER,DIMENSION(MPI_STATUS_SIZE)::Status
-    IF(MyID == ROOT) THEN
-      DO I = 1, NPrc-1
-        DblArr(1:3) = LCoor%D(1:3,I+1)
-        CALL MPI_Send(DblArr(1),3,MPI_DOUBLE_PRECISION,I,LCoor_T,MPI_COMM_WORLD,IErr)
-        DblArr(1:3) = RCoor%D(1:3,I+1)
-        CALL MPI_Send(DblArr(1),3,MPI_DOUBLE_PRECISION,I,RCoor_T,MPI_COMM_WORLD,IErr)
-      ENDDO
-    ELSE
-      CALL MPI_Recv(DblArr(1),3,MPI_DOUBLE_PRECISION,0,LCoor_T,MPI_COMM_WORLD,Status,IErr)
-      LCoor%D(1:3,1) = DblArr(1:3)
-      CALL MPI_Recv(DblArr(1),3,MPI_DOUBLE_PRECISION,0,RCoor_T,MPI_COMM_WORLD,Status,IErr)
-      RCoor%D(1:3,1) = DblArr(1:3)
-    ENDIF
-  END SUBROUTINE SendBBox
 
+    NumDbl = 3*NPrc
+    CALL MPI_BCast(LCoor%D(1,1),NumDbl,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,IErr)
+    CALL MPI_BCast(RCoor%D(1,1),NumDbl,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,IErr)
+
+  END SUBROUTINE SendBBox
+    
+!===============================================================================
+  SUBROUTINE DistDist()
+    INTEGER :: Tot,FloatDblIndex,ActIntRecvAmt,ActDblRecvAmt,&
+      DblSendBufIndex,IntSendBufIndex,IntAmtRecv,DblAmtRecv,&
+      SendTo,RecvFrom,CD,DistIndex,EllFillIndex,CoFillIndex,NumOfCo,&
+      GIntSendMaxSize,GDblSendMaxSize,IntSendToOthers,DblSendToOthers,&
+      I,KQ,NDist,J,Ell,LMNLen,Amt,LocalIntSendMaxSize,LocalDblSendMaxSize,IErr
+    TYPE(BBox) :: NodeBox
+    REAL(DOUBLE) :: BoxL(3),BoxU(3),QBL(3),QBU(3)
+    TYPE(INT_VECT) :: CoToSend,IntToSend,IndexToSend,DblToSend,&
+      TotIntSendFromProc,TotDblSendFromProc
+    TYPE(VaryLengLs),ALLOCATABLE :: HeadArr(:)
+    INTEGER,ALLOCATABLE :: IntSendBuf(:),IntRecvBuf(:),SF(:),Dest(:)
+    REAL(DOUBLE),ALLOCATABLE :: DblSendBuf(:),DblRecvBuf(:)
+    INTEGER,DIMENSION(MPI_STATUS_SIZE) :: IntStatus
+    INTEGER,DIMENSION(MPI_STATUS_SIZE) :: DblStatus
+    REAL(DOUBLE) :: StartTm,EndTm,TotTm
+    
+    StartTm = MPI_Wtime()
+    IF(MyID == 0) THEN
+      WRITE(*,*) 'DistDist is entered...'
+    ENDIF
+
+    IF(MyID == 0) THEN
+      !! WRITE(*,*) 'Cube Box info:'
+      DO I = 1, NPrc
+        !! WRITE(*,*) 'Proc = ', I, ', LCoor%D(1:3,I) = ',LCoor%D(1:3,I),', RCoor%D(1:3,I) = ', RCoor%D(1:3,I)
+      ENDDO
+    ENDIF
+    
+    CALL New(IndexToSend,NPrc,0)
+    CALL New(CoToSend,NPrc,0)
+    CALL New(IntToSend,NPrc,0)
+    CALL New(DblToSend,NPrc,0)
+    
+    IndexToSend%I(0:NPrc-1) = 0
+    CoToSend%I(0:NPrc-1) = 0
+    IntToSend%I(0:NPrc-1) = 0
+    DblToSend%I(0:NPrc-1) = 0
+
+
+    NDist = Rho%NDist
+    DO I = 1, NDist
+      KQ = QDex(I)
+      NodeBox%BndBox(1:3,1) = (/Rho%Qx%D(KQ),Rho%Qy%D(KQ),Rho%Qz%D(KQ)/)
+      NodeBox%BndBox(1:3,2) = (/Rho%Qx%D(KQ),Rho%Qy%D(KQ),Rho%Qz%D(KQ)/)
+      NodeBox=ExpandBox(NodeBox,Ext(KQ))
+      !! Distribution box obtained
+      !! write(*,*) 'Distribution with index KQ = ',KQ, ' is to be inserted.'
+      DO J = 0, NPrc-1
+        BoxL(1:3) = LCoor%D(1:3,J+1)
+        BoxU(1:3) = RCoor%D(1:3,J+1)
+        QBL(1:3) = NodeBox%BndBox(1:3,1)
+        QBU(1:3) = NodeBox%BndBox(1:3,2)
+        IF(QBU(1) <= BoxL(1) .OR. QBL(1) >= BoxU(1) .OR. &
+           QBU(2) <= BoxL(2) .OR. QBL(2) >= BoxU(2) .OR. &
+           QBU(3) <= BoxL(3) .OR. QBL(3) >= BoxU(3)) THEN
+          !! do nothing, no intersection
+        ELSE
+          !! Put KQ into the list
+          !! first go the pointer that has is pointing to J
+          !! write(*,*) 'Distribution with index KQ = ',KQ, ' is to be inserted.'
+          !! J is the proc to send
+          IndexToSend%I(J) = IndexToSend%I(J) + 1
+          IntToSend%I(J) = IntToSend%I(J) + 1 !! Ell 
+          Ell = Ldex(KQ)
+          LMNLen = LHGTF(Ell)
+          CoToSend%I(J) = CoToSend%I(J) + LMNLen
+          DblToSend%I(J) = DblToSend%I(J) + 5 + LMNLen !! x,y,z,zeta,extent,co
+        ENDIF
+      ENDDO
+    ENDDO
+    !! allocate memory
+    ALLOCATE(HeadArr(0:NPrc-1))
+    CALL AlignNodes()
+    DO I = 0, NPrc-1
+      Amt = IndexToSend%I(I) + 1
+      ALLOCATE(HeadArr(I)%LS(Amt))
+    ENDDO
+    CALL AlignNodes()
+    IndexToSend%I(0:NPrc-1) = 0
+    DO I = 1, NDist
+      KQ = QDex(I)
+      NodeBox%BndBox(1:3,1) = (/Rho%Qx%D(KQ),Rho%Qy%D(KQ),Rho%Qz%D(KQ)/)
+      NodeBox%BndBox(1:3,2) = (/Rho%Qx%D(KQ),Rho%Qy%D(KQ),Rho%Qz%D(KQ)/)
+      NodeBox=ExpandBox(NodeBox,Ext(KQ))
+      !! Distribution box obtained
+      DO J = 0, NPrc-1
+        BoxL(1:3) = LCoor%D(1:3,J+1)
+        BoxU(1:3) = RCoor%D(1:3,J+1)
+        QBL(1:3) = NodeBox%BndBox(1:3,1)
+        QBU(1:3) = NodeBox%BndBox(1:3,2)
+        IF(QBU(1) <= BoxL(1) .OR. QBL(1) >= BoxU(1) .OR. &
+           QBU(2) <= BoxL(2) .OR. QBL(2) >= BoxU(2) .OR. &
+           QBU(3) <= BoxL(3) .OR. QBL(3) >= BoxU(3)) THEN
+          !! do nothing, no intersection
+        ELSE
+          !! Put KQ into the list
+          !! first go the pointer that has is pointing to J
+          !! write(*,*) 'Distribution with index KQ = ',KQ, ' is to be inserted.'
+          !! J is the proc to send
+          IndexToSend%I(J) = IndexToSend%I(J) + 1
+          HeadArr(J)%LS(IndexToSend%I(J)) = I
+        ENDIF
+      ENDDO
+    ENDDO
+    CALL AlignNodes()
+    IF(MyID == 0) THEN
+      !! write(*,*) 'MyID = ',MyID, ' done with storing indices'
+    ENDIF
+    CALL AlignNodes()
+    
+    !! LocalIntSendMaxSize and LocalDblSendMaxSize determine the sizes of the send buffers
+    LocalIntSendMaxSize = 0
+    LocalDblSendMaxSize = 0
+    DO I = 0, NPrc-1
+      IF(I == MyID) Cycle
+      LocalIntSendMaxSize = Max(LocalIntSendMaxSize,IntToSend%I(I)+1) !! 1 for dummy
+      LocalDblSendMaxSize = Max(LocalDblSendMaxSize,DblToSend%I(I)+1) !! 1 for dummy
+    ENDDO
+    CALL AlignNodes()
+    !! write(*,*) 'MyID = ',MyID, ', LocalIntSendMaxSize=',LocalIntSendMaxSize,' ,LocalDblSendMaxSize = ',LocalDblSendMaxSize
+    CALL AlignNodes()
+    !! GIntSendMaxSize and GDblSendMaxSize determine the sizes of the receive buffers. Of course
+    !! this may be smaller on some processors, but for simplicity we assume it is the same for all.
+    CALL MPI_AllReduce(LocalIntSendMaxSize,GIntSendMaxSize,1,MPI_INTEGER,MPI_MAX,MPI_COMM_WORLD,IErr)
+    CALL MPI_AllReduce(LocalDblSendMaxSize,GDblSendMaxSize,1,MPI_INTEGER,MPI_MAX,MPI_COMM_WORLD,IErr)
+    !! 
+    IF(MyID == 0) THEN
+      write(*,*) 'MyID = ',MyID, ', GIntSendMaxSize=',GIntSendMaxSize,' ,GDblSendMaxSize = ',GDblSendMaxSize
+    ENDIF
+    IntSendToOthers = 0
+    DblSendToOthers = 0
+    DO I = 0, NPrc-1
+      IF(I == MyID) Cycle
+      IntSendToOthers = IntSendToOthers + IntToSend%I(I)
+      DblSendToOthers = DblSendToOthers + DblToSend%I(I)
+    ENDDO
+    !! write(*,*) 'MYID = ',MyID,', IntSendToOthers = ',IntSendToOthers,', DblSendToOthers = ',DblSendToOthers
+    CALL New(TotIntSendFromProc,NPrc,0)
+    CALL New(TotDblSendFromProc,NPrc,0)
+    CALL MPI_GATHER(IntSendToOthers,1,MPI_INTEGER,TotIntSendFromProc%I(0),1,MPI_INTEGER,0,MPI_COMM_WORLD,IErr)
+    CALL MPI_GATHER(DblSendToOthers,1,MPI_INTEGER,TotDblSendFromProc%I(0),1,MPI_INTEGER,0,MPI_COMM_WORLD,IErr)
+    IF(MyID == 0) THEN
+      !! WRITE(*,*) 'Gather on MyID = 0, TotIntSendFromProc%I(0:NPrc-1) = ',TotIntSendFromProc%I(0:NPrc-1)
+      !! WRITE(*,*) 'Gather on MyID = 0, TotDblSendFromProc%I(0:NPrc-1) = ',TotDblSendFromProc%I(0:NPrc-1)
+      Tot = 0
+      DO I = 0, NPrc-1
+       Tot = Tot + TotIntSendFromProc%I(I)
+      ENDDO
+      WRITE(*,*) 'Gather on MyID = 0, total number of Int to pass around is ',Tot
+      Tot = 0  
+      DO I = 0, NPrc-1
+        Tot = Tot + TotDblSendFromProc%I(I)
+      ENDDO
+      WRITE(*,*) 'Gather on MyID = 0, total number of Dbl to pass around is ',Tot
+    ENDIF
+
+    !! allocate memory enough for packing and sending
+    ALLOCATE(IntSendBuf(LocalIntSendMaxSize),DblSendBuf(LocalDblSendMaxSize))
+    ALLOCATE(IntRecvBuf(GIntSendMaxSize),DblRecvBuf(GDblSendMaxSize))
+
+    !! allocate all arrays for unpacking.
+    DO I = 0, NPrc-1
+      CALL MPI_Reduce(IndexToSend%I(I),NumOfDist,1,MPI_INTEGER,MPI_SUM,I,MPI_COMM_WORLD,IErr)
+      CALL MPI_Reduce(CoToSend%I(I),NumOfCo,1,MPI_INTEGER,MPI_SUM,I,MPI_COMM_WORLD,IErr)
+    ENDDO
+    !! WRITE(*,*) 'MyID = ', MyID, ', NumOfDist = ',NumOfDist, ', NumOfCo = ',NumOfCo
+    ALLOCATE(NewQdex(NumOfDist))
+    ALLOCATE(NewCdex(NumOfDist))
+    ALLOCATE(NewLdex(NumOfDist))
+
+    ALLOCATE(NewExt(NumOfDist))
+    ALLOCATE(NewZeta(NumOfDist))
+    ALLOCATE(NewX(NumOfDist))
+    ALLOCATE(NewY(NumOfDist))
+    ALLOCATE(NewZ(NumOfDist))
+    ALLOCATE(NewCo(NumOfCo))
+
+    !! Fill in with the local data
+    EllFillIndex = 0
+    CoFillIndex = 0
+    DO I = 1, IndexToSend%I(MyID)
+      EllFillIndex = EllFillIndex + 1
+      DistIndex = HeadArr(MyID)%Ls(EllFillIndex)
+      KQ = Qdex(DistIndex) !! absolute distribution index in Rho
+      Ell = Ldex(KQ) 
+      NewLdex(EllFillIndex) = Ell
+      NewX(EllFillIndex) = Rho%Qx%D(KQ)
+      NewY(EllFillIndex) = Rho%Qy%D(KQ)
+      NewZ(EllFillIndex) = Rho%Qz%D(KQ)
+      NewExt(EllFillIndex) = Ext(KQ)
+      NewZeta(EllFillIndex) = Zeta(KQ)
+      LMNLen = LHGTF(Ell)
+      CD = Cdex(KQ)
+      NewCdex(EllFillIndex) = CoFillIndex+1
+      NewCo(CoFillIndex+1:CoFillIndex+LMNLen) = Rho%Co%D(CD:CD+LMNLen-1)
+      CoFillIndex = CoFillIndex + LMNLen
+    ENDDO
+    !! write(*,*) 'MyID = ',MyID, ', EllFillIndex = ',EllFillIndex,', CoFillIndex = ',CoFillIndex, ', IndexToSend%I(MyID) = ', IndexToSend%I(MyID), ', CoToSend%I(MyID) = ', CoToSend%I(MyID)
+
+    IntAmtRecv = GIntSendMaxSize
+    DblAmtRecv = GDblSendMaxSize
+    
+    ALLOCATE(SF(0:NPrc-1),Dest(0:NPrc-1))
+    DO I = 1, NPrc-1
+      DO J = 0, NPrc-1
+        SendTo = Modulo(J+I,NPrc)
+        Dest(J) = SendTo
+        SF(J) = 0
+      ENDDO
+      DO J = 0, NPrc-1
+        IF(SF(J) == 0 .AND. SF(Dest(J)) == 0) THEN
+          SF(J) = 1
+          SF(Dest(J)) = 2
+        ENDIF
+      ENDDO
+      SendTo = Modulo(MyID+I,NPrc)
+      RecvFrom = Modulo(MyID-I,NPrc)
+      IF(SF(MyID) == 1) THEN
+        !! packing int
+        IntSendBufIndex = 0
+        DblSendBufIndex = 0
+        DO J = 1, IndexToSend%I(SendTo)
+          IntSendBufIndex = IntSendBufIndex + 1
+          DistIndex = HeadArr(SendTo)%Ls(IntSendBufIndex)  
+          KQ = Qdex(DistIndex)
+          Ell = Ldex(KQ)
+          IntSendBuf(IntSendBufIndex) = Ell
+          DblSendBuf(DblSendBufIndex+1:DblSendBufIndex+3) = (/Rho%Qx%D(KQ),Rho%Qy%D(KQ),Rho%Qz%D(KQ)/)
+          DblSendBufIndex = DblSendBufIndex + 3 + 1
+          DblSendBuf(DblSendBufIndex) = Zeta(KQ)
+          DblSendBufIndex = DblSendBufIndex+1
+          DblSendBuf(DblSendBufIndex) = Ext(KQ)
+          LMNLen = LHGTF(Ell)
+          CD = Cdex(KQ)
+          DblSendBuf(DblSendBufIndex+1:DblSendBufIndex+LMNLen) = Rho%Co%D(CD:CD+LMNLen-1)
+          DblSendBufIndex = DblSendBufIndex + LMNLen
+        ENDDO
+        IF(IntToSend%I(SendTo) /= IntSendBufIndex &
+           .OR. DblToSend%I(SendTo) /= DblSendBufIndex) THEN
+          WRITE(*,*) 'MyID = ',MyID, ', IntToSend%I(SendTo) = ',IntToSend%I(SendTo), ', IntSendBufIndex = ',IntSendBufIndex
+          WRITE(*,*) 'DblToSend%I(SendTo) = ', DblToSend%I(SendTo),', DblSendBufIndex = ',DblSendBufIndex
+          STOP 'ERR: The numbers should the same!'
+        ENDIF
+        IntSendBufIndex = IntSendBufIndex + 1
+        DblSendBufIndex = DblSendBufIndex + 1
+        IntSendBuf(IntSendBufIndex) = 100000
+        DblSendBuf(DblSendBufIndex) = 100000.0D0 
+        CALL MPI_Send(IntSendBuf(1),IntSendBufIndex,MPI_INTEGER,SendTo,MyID,MPI_COMM_WORLD,IErr)
+        CALL MPI_Send(DblSendBuf(1),DblSendBufIndex,MPI_DOUBLE_PRECISION,SendTo,MyID,MPI_COMM_WORLD,IErr)
+
+        !! receiving
+        CALL MPI_Recv(IntRecvBuf(1),GIntSendMaxSize,MPI_INTEGER,RecvFrom,RecvFrom,MPI_COMM_WORLD,IntStatus,IErr)
+        CALL MPI_Get_Count(IntStatus,MPI_INTEGER,ActIntRecvAmt,IErr)
+        CALL MPI_Recv(DblRecvBuf(1),GDblSendMaxSize,MPI_DOUBLE_PRECISION,RecvFrom,RecvFrom,MPI_COMM_WORLD,DblStatus,IErr)
+        CALL MPI_Get_Count(DblStatus,MPI_DOUBLE_PRECISION,ActDblRecvAmt,IErr)
+        !! unpacking.
+        FloatDblIndex = 0 
+        DO J = 1, ActIntRecvAmt-1
+          EllFillIndex = EllFillIndex+1
+          Ell = IntRecvBuf(J)
+          LMNLen = LHGTF(Ell)
+          NewLdex(EllFillIndex) = Ell
+          FloatDblIndex = FloatDblIndex+1
+          NewX(EllFillIndex) = DblRecvBuf(FloatDblIndex)
+          FloatDblIndex = FloatDblIndex+1
+          NewY(EllFillIndex) = DblRecvBuf(FloatDblIndex)
+          FloatDblIndex = FloatDblIndex+1
+          NewZ(EllFillIndex) = DblRecvBuf(FloatDblIndex)
+          FloatDblIndex = FloatDblIndex+1
+          NewZeta(EllFillIndex) = DblRecvBuf(FloatDblIndex)
+          FloatDblIndex = FloatDblIndex+1
+          NewExt(EllFillIndex) = DblRecvBuf(FloatDblIndex)
+          NewCdex(EllFillIndex) = CoFillIndex+1
+          NewCo(CoFillIndex+1:CoFillIndex+LMNLen) = DblRecvBuf(FloatDblIndex+1:FloatDblIndex+LMNLen)
+          FloatDblIndex = FloatDblIndex + LMNLen
+          CoFillIndex = CoFillIndex + LMNLen
+        ENDDO
+
+      ELSE
+        CALL MPI_Recv(IntRecvBuf(1),GIntSendMaxSize,MPI_INTEGER,RecvFrom,RecvFrom,MPI_COMM_WORLD,IntStatus,IErr)
+        CALL MPI_Get_Count(IntStatus,MPI_INTEGER,ActIntRecvAmt,IErr)
+        CALL MPI_Recv(DblRecvBuf(1),GDblSendMaxSize,MPI_DOUBLE_PRECISION,RecvFrom,RecvFrom,MPI_COMM_WORLD,DblStatus,IErr)
+        CALL MPI_Get_Count(DblStatus,MPI_DOUBLE_PRECISION,ActDblRecvAmt,IErr)
+        !! unpacking.
+        FloatDblIndex = 0 
+        DO J = 1, ActIntRecvAmt-1
+          EllFillIndex = EllFillIndex+1
+          Ell = IntRecvBuf(J)
+          LMNLen = LHGTF(Ell)
+          NewLdex(EllFillIndex) = Ell
+          FloatDblIndex = FloatDblIndex+1
+          NewX(EllFillIndex) = DblRecvBuf(FloatDblIndex)
+          FloatDblIndex = FloatDblIndex+1
+          NewY(EllFillIndex) = DblRecvBuf(FloatDblIndex)
+          FloatDblIndex = FloatDblIndex+1
+          NewZ(EllFillIndex) = DblRecvBuf(FloatDblIndex)
+          FloatDblIndex = FloatDblIndex+1
+          NewZeta(EllFillIndex) = DblRecvBuf(FloatDblIndex)
+          FloatDblIndex = FloatDblIndex+1
+          NewExt(EllFillIndex) = DblRecvBuf(FloatDblIndex)
+          NewCdex(EllFillIndex) = CoFillIndex+1
+          NewCo(CoFillIndex+1:CoFillIndex+LMNLen) = DblRecvBuf(FloatDblIndex+1:FloatDblIndex+LMNLen)
+          FloatDblIndex = FloatDblIndex + LMNLen
+          CoFillIndex = CoFillIndex + LMNLen
+        ENDDO
+        
+        !! packing int
+        IntSendBufIndex = 0
+        DblSendBufIndex = 0
+        DO J = 1, IndexToSend%I(SendTo)
+          IntSendBufIndex = IntSendBufIndex + 1
+          DistIndex = HeadArr(SendTo)%Ls(IntSendBufIndex)  
+          KQ = Qdex(DistIndex)
+          Ell = Ldex(KQ)
+          IntSendBuf(IntSendBufIndex) = Ell
+          DblSendBuf(DblSendBufIndex+1:DblSendBufIndex+3) = (/Rho%Qx%D(KQ),Rho%Qy%D(KQ),Rho%Qz%D(KQ)/)
+          DblSendBufIndex = DblSendBufIndex + 4
+          DblSendBuf(DblSendBufIndex) = Zeta(KQ)
+          DblSendBufIndex = DblSendBufIndex+1
+          DblSendBuf(DblSendBufIndex) = Ext(KQ)
+          LMNLen = LHGTF(Ell)
+          CD = Cdex(KQ)
+          DblSendBuf(DblSendBufIndex+1:DblSendBufIndex+LMNLen) = Rho%Co%D(CD:CD+LMNLen-1)
+          DblSendBufIndex = DblSendBufIndex + LMNLen
+        ENDDO
+        IF(IntToSend%I(SendTo) /= IntSendBufIndex &
+           .OR. DblToSend%I(SendTo) /= DblSendBufIndex) THEN
+          WRITE(*,*) 'MyID = ',MyID, ', IntToSend%I(SendTo) = ',IntToSend%I(SendTo), ', IntSendBufIndex = ',IntSendBufIndex
+          WRITE(*,*) 'DblToSend%I(SendTo) = ', DblToSend%I(SendTo),', DblSendBufIndex = ',DblSendBufIndex
+          STOP 'ERR: The numbers should the same!'
+        ENDIF
+        IntSendBufIndex = IntSendBufIndex + 1
+        DblSendBufIndex = DblSendBufIndex + 1
+        IntSendBuf(IntSendBufIndex) = 100000
+        DblSendBuf(DblSendBufIndex) = 100000.0D0 
+        CALL MPI_Send(IntSendBuf(1),IntSendBufIndex,MPI_INTEGER,SendTo,MyID,MPI_COMM_WORLD,IErr)
+        CALL MPI_Send(DblSendBuf(1),DblSendBufIndex,MPI_DOUBLE_PRECISION,SendTo,MyID,MPI_COMM_WORLD,IErr)
+
+      ENDIF
+    ENDDO
+    DO I = 1, NumOfDist
+      NewQdex(I) = I
+    ENDDO
+
+    !! WRITE(*,*) 'MyID = ',MyID, ' NumOfDist = ', NumOfDist, ', EllFillIndex = ',EllFillIndex, ', NumOfCo = ', NumOfCo,', CoFillIndex = ',CoFillIndex
+    IF(NumOfDist /= EllFillIndex) STOP 'ERR: NumOfDist /= EllFillIndex!'
+    IF(NumOfCo /= CoFillIndex) STOP 'ERR: NumOfCo /= CoFillIndex!'
+    CALL AlignNodes()
+    IF(MyID == 0) THEN
+      WRITE(*,*) 'MyID = ',MyID, ' end of DistDist.'
+    ENDIF
+    CALL Delete(IndexToSend)
+    CALL Delete(CoToSend)
+    CALL Delete(IntToSend)
+    CALL Delete(DblToSend)
+    CALL Delete(TotIntSendFromProc)
+    CALL Delete(TotDblSendFromProc)
+    DEALLOCATE(IntSendBuf,DblSendBuf)
+    DEALLOCATE(IntRecvBuf,DblRecvBuf)
+    DEALLOCATE(SF,Dest)
+    DO I = 0, NPrc-1
+      DEALLOCATE(HeadArr(I)%LS)
+    ENDDO
+    DEALLOCATE(HeadArr)
+    CALL DeleteRho
+    CALL AlignNodes()
+    EndTm = MPI_Wtime()
+    TotTm = EndTm - StartTm
+    IF(MyID == ROOT) THEN
+      WRITE(*,*) 'Total time to do DistDist is ', TotTm
+    ENDIF
+  END SUBROUTINE DistDist
+
+!===============================================================================
+  SUBROUTINE ParaRhoToTree()
+    INTEGER :: I
+
+    RhoNodes = 0
+    RhoLevel = 0
+    CALL NewRhoNode(RhoRoot,0)
+    CALL ParaInitRhoRoot()
+    ALLOCATE(NewRList(NumOfDist))
+    CALL ParaSplitRho(RhoRoot)
+
+    CALL GetNewLocalRhoBoundingBox()
+
+    DEALLOCATE(NewX,NewY,NewZ,NewLdex,NewQdex,NewExt,NewZeta,NewCo,NewCdex,NewRList)
+    DO CurrentTier = RhoLevel,0,-1
+      CALL MergeRhoBBox(RhoRoot)
+    ENDDO
+    !! WRITE(*,*) 'After merging: MyID = ',MyID, 'RhoRoot%Box%BndBox(1:3,1) = ',RhoRoot%Box%BndBox(1:3,1), ' RhoRoot%Box%BndBox(1:3,2) = ', RhoRoot%Box%BndBox(1:3,2)
+    DO I = 1, 3
+      IF(ABS(RhoRoot%Box%BndBox(I,1)-LocalRhoBBox%BndBox(I,1)) > 1.0D-10) THEN
+        WRITE(*,*) 'L: Rho Bounding Box dimension is not consistent!'
+        STOP
+      ENDIF
+      IF(ABS(RhoRoot%Box%BndBox(I,2)-LocalRhoBBox%BndBox(I,2)) > 1.0D-10) THEN
+        WRITE(*,*) 'R: Rho Bounding Box dimension is not consistent!'
+        STOP
+      ENDIF
+    ENDDO
+
+  END SUBROUTINE ParaRhoToTree
+
+!===================================================================
+!     Recursively partition the density into a 4-D BinTree 
+!===================================================================
+  RECURSIVE SUBROUTINE ParaSplitRho(Node)
+    TYPE(RhoNode), POINTER :: Node,Left,Right
+    IF(Node%NQ==1)THEN 
+      CALL ParaFillRhoLeaf(Node)
+    ELSE 
+      ! Allocate new children 
+      CALL NewRhoNode(Node%Descend,Node%Box%Tier+1)
+      CALL NewRhoNode(Node%Descend%Travrse,Node%Box%Tier+1)
+      ! Set links
+      Node%Descend%Travrse%Travrse=>Node%Travrse
+      Left=>Node%Descend
+      Right=>Node%Descend%Travrse
+      CALL ParaSplitRhoBox(Node,Left,Right)
+      ! Recur
+      CALL ParaSplitRho(Left)
+      CALL ParaSplitRho(Right)
+    ENDIF
+  END SUBROUTINE ParaSplitRho
+
+!===============================================================================
+  ! Orthogonal Recusive Bisection   
+  SUBROUTINE ParaSplitRhoBox(Node,Left,Right)
+    TYPE(RhoNode), POINTER :: Node,Left,Right
+    REAL(DOUBLE)           :: Section
+    INTEGER                :: B,E,N,ISplit,Split,I,J,k
+    ! Indexing
+    J=0
+    B=Node%Bdex
+    E=Node%Edex
+    N=E-B+1
+    ! Choose direction to section
+    ISplit=Mod(Node%Box%Tier,4)+1
+    IF(ISplit==1)THEN
+      ! Split X dir
+      DO I=B,E
+        J=J+1
+        K=NewQdex(I)
+        NewRList(J)=NewX(K)
+      ENDDO
+    ELSEIF(ISplit==2)THEN
+      ! Split on Y dir
+      DO I=B,E
+        J=J+1
+        K=NewQdex(I)
+        NewRList(J)=NewY(K)
+      ENDDO
+    ELSEIF(ISplit==3)THEN
+      ! Split on Z dir
+      DO I=B,E
+        J=J+1
+        K=NewQdex(I)
+        NewRList(J)=NewZ(K)
+      ENDDO
+    ELSEIF(ISplit==4)THEN
+      ! Split on box size 
+      DO I=B,E
+        J=J+1
+        K=NewQdex(I)
+        NewRList(J)=NewExt(K)
+      ENDDO
+    ENDIF
+    ! Sort
+    CALL DblIntSort77(N,NewRList,NewQdex(B:E),2)
+    ! Orthogonal recursive bisection (ORB)
+    Section   =NewRList(1)+Half*(NewRList(N)-NewRList(1))
+    ! Split     =BinarySearch(N,NewRList,Section)
+    Split     =N/2
+    Left%Bdex =B
+    Right%Edex=E
+    IF(Split==1)THEN 
+      Split=2
+      Left%Edex =Min(B,B+Split-2)
+      Right%Bdex=Min(B+Split-1,E)
+    ELSE
+      Left%Edex =B+Split-2 
+      Right%Bdex=B+Split-1 
+    ENDIF
+    ! Set counters
+    Left%NQ=Left%Edex-Left%Bdex+1
+    Right%NQ=Right%Edex-Right%Bdex+1
+  END SUBROUTINE ParaSplitRhoBox
+
+!===============================================================================
+!     Fill leaf nodes with data
+!===============================================================================
+  SUBROUTINE ParaFillRhoLeaf(Node)
+    TYPE(RhoNode), POINTER :: Node
+    INTEGER   :: I,IQ,IC,J,K,KQ,KC,L,B,E,N,NQ,NC,LMNLen,LTmp,Status        
+    REAL(DOUBLE) :: RhoSum
+    ! Set leaf logical
+    Node%Leaf=.True.
+    ! Boundaries in the ordered lists
+    B=Node%Bdex
+    E=Node%Edex
+    NQ=E-B+1
+    IF(NQ/=1.OR.B/=E)  &
+       CALL Halt('Bad Logic in FillRhoLeaf ')
+    ! Filler up...        
+    KQ=NewQdex(B)
+    KC=NewCdex(KQ)
+    Node%Ell=NewLdex(KQ)
+    Node%Zeta=NewZeta(KQ)
+    Node%Extent=NewExt(KQ)
+    Node%Qx=NewX(KQ)
+    Node%Qy=NewY(KQ)
+    Node%Qz=NewZ(KQ)
+    ! Allocate HGTF coefficients array
+    LMNLen=LHGTF(Node%Ell)
+    ALLOCATE(Node%Co(1:LMNLen),STAT=Status)
+    CALL IncMem(Status,0,LMNLen)
+    ! Transfer data in
+    Node%Co(1:LMNLen)=NewCo(KC:KC+LMNLen-1)
+  END SUBROUTINE ParaFillRhoLeaf
+
+!===============================================================================
+  SUBROUTINE ParaInitRhoRoot()
+    RhoRoot%Bdex = 1
+    RhoRoot%Edex = NumOfDist
+    RhoRoot%NQ = NumOfDist
+  END SUBROUTINE ParaInitRhoRoot
+  
 !===============================================================================
   SUBROUTINE WorkBBox(Kxc)
     TYPE(BBox) :: WBox
@@ -171,43 +769,29 @@ MODULE ParallelHiCu
     TYPE(BCSR)             :: Kxc
 #endif
     
-    WBox%BndBox(1:3,1) = LCoor%D(1:3,1)
-    WBox%BndBox(1:3,2) = RCoor%D(1:3,1)
+    WBox%BndBox(1:3,1) = LCoor%D(1:3,MyID+1)
+    WBox%BndBox(1:3,2) = RCoor%D(1:3,MyID+1)
+    
     CALL CalCenterAndHalf(WBox)
     TmBegM = MPI_WTime()
+    IF(MyID == 0) THEN
+      WRITE(*,*) 'Calling GridGen...'
+    ENDIF
     CALL GridGen(WBox,SubVolRho,SubVolExc)
-    MyLeavesTm = LeavesTmCount(CubeRoot)
-    CALL MakeKxc(Kxc,CubeRoot)
-    TmEndM = MPI_WTime()
-    VolTm = TmEndM-TmBegM
     TotRho = Reduce(SubVolRho)
     TotExc = Reduce(SubVolExc)
     IF(MyID == ROOT) THEN
       WRITE(*,*) 'TotRho = ',TotRho
       WRITE(*,*) 'TotExc = ',TotExc
     ENDIF
-  END SUBROUTINE WorkBBox
-
-!===============================================================================
-  SUBROUTINE CollectLeavesTime()
-    INTEGER::I,IErr
-    INTEGER,DIMENSION(MPI_STATUS_SIZE)::Status
-
+    MyLeavesTm = LeavesTmCount(CubeRoot)
     IF(MyID == 0) THEN
-      CALL New(VolLeavesTm,NPrc)
-      VolLeavesTm%D(1) = MyLeavesTm
-      DO I = 1, NPrc-1
-        CALL MPI_Recv(VolLeavesTm%D(I+1),1,MPI_DOUBLE_PRECISION,I,LeavesTm_T,MPI_COMM_WORLD,Status,IErr)
-      ENDDO
-      OPEN(unit=53,file='VolLeavesTm.dat',status='unknown')
-      DO I = 1, NPrc
-        WRITE(53,*) I, VolLeavesTm%D(I)
-      ENDDO
-      CLOSE(53)
-    ELSE
-      CALL MPI_Send(MyLeavesTm,1,MPI_DOUBLE_PRECISION,0,LeavesTm_T,MPI_COMM_WORLD,IErr)
+      WRITE(*,*) 'GridGen is done. Calling MakeKxc...'
     ENDIF
-  END SUBROUTINE CollectLeavesTime
+    CALL MakeKxc(Kxc,CubeRoot)
+    TmEndM = MPI_WTime()
+    VolTm = TmEndM-TmBegM
+  END SUBROUTINE WorkBBox
 
 !===============================================================================
   SUBROUTINE RepartitionVol()
@@ -215,22 +799,32 @@ MODULE ParallelHiCu
     LOGICAL::Busy
     TYPE(DBL_VECT)::RepLeavesTm
     INTEGER::SmallN,I,J,Ierr,RootFindIter,Stage,PIndex,CIndex,DirInt
-    REAL(DOUBLE)::x0,x1,f0,f1,x2,f2,oldf2,LinDim,MaxDim,OldVol,ThisVol,&
+    REAL(DOUBLE)::DIFF,x0,x1,f0,f1,x2,f2,oldf2,LinDim,MaxDim,OldVol,ThisVol,&
       AbsSum,LocalLeavesTm,LeavesTmInside,OrigLeafTm,NewVol
     INTEGER::Power2(0:31)
     REAL(DOUBLE),PARAMETER::RootTau=1.0D-4
-    REAL(DOUBLE)::StartTm,EndTm,TotTm
+    REAL(DOUBLE)::StartTm,EndTm,TotTm,AllLeavesTm
+    REAL(DOUBLE),PARAMETER::TauBeg=1.0D-5,TauEnd=1.0D-4
+    REAL(DOUBLE) :: lnTauBeg,lnTauEnd,lnTauH,lnTau
+    TYPE(DBL_VECT) :: TauArr
+    
+
     StartTm = MPI_Wtime()
 
     CALL New(RepLCoor,(/3,NVol/))
     CALL New(RepRCoor,(/3,NVol/))
     CALL New(RepLeavesTm,NVol)
 
+    AllLeavesTm = Reduce(MyLeavesTm)
+
     Busy = .TRUE.
     IF(MyID == 0) THEN
-      RepLCoor%D(1:3,1) = RhoRoot%Box%BndBox(1:3,1)
-      RepRCoor%D(1:3,1) = RhoRoot%Box%BndBox(1:3,2)
-      RepLeavesTm%D(1) = Sum(VolLeavesTm%D(:))
+      write(*,*) 'RhoRoot Box  ',RhoRoot%Box%BndBox(1:3,1),RhoRoot%Box%BndBox(1:3,2)
+      write(*,*) 'GRhoBBox   Box  ',GRhoBBox%BndBox(1:3,1),GRhoBBox%BndBox(1:3,2)
+      RepLCoor%D(1:3,1) = GRhoBBox%BndBox(1:3,1)
+      RepRCoor%D(1:3,1) = GRhoBBox%BndBox(1:3,2)
+      !! RepLeavesTm%D(1) = Sum(VolLeavesTm%D(:))
+      RepLeavesTm%D(1) = AllLeavesTm
       WRITE(*,*) 'The total leave times is ',RepLeavesTm%D(1)
       NewVol = 1.0D0
       DO I = 1, 3
@@ -248,8 +842,32 @@ MODULE ParallelHiCu
         WRITE(*,*) 'NVol is not a power of 2!'
         STOP 
       ENDIF
+
+#undef REGULA_FALSI
+#ifdef REGULA_FALSI
+      WRITE(*,*) 'REGULA_FALSI is defined!'
+#else
+      WRITE(*,*) 'REGULA_FALSI is not defined. Bisection search is used.'
+      WRITE(*,*) 'TauBeg = ',TauBeg,' ,TauEnd = ', TauEnd
+#endif
+
+#ifdef REGULA_FALSI
+#else
+      CALL New(TauArr,SmallN)
+      IF(SmallN == 1) THEN
+        TauArr%D(1) = TauBeg
+      ELSE
+        lnTauBeg = Log(TauBeg)
+        lnTauEnd = Log(TauEnd)
+        lnTauH = (lnTauEnd - lnTauBeg)/(SmallN-1.0D0)
+        DO I  = 1, SmallN
+          lnTau = lnTauBeg + (I-1)*lnTauH
+          TauArr%D(I) = EXP(lnTau)
+          WRITE(*,*) 'TauArr%D(Stage=',I,')=',TauArr%D(I)
+        ENDDO
+      ENDIF
+#endif
   
-      OPEN(unit=53,FILE='DirInt.dat',form='formatted',status='unknown')
       OPEN(unit=54,FILE='LineLoc.dat',form='formatted',status='unknown')
       WRITE(54,*) NVol
       WRITE(54,*) RepLCoor%D(1:3,1)
@@ -272,7 +890,6 @@ MODULE ParallelHiCu
               DirInt = I
             ENDIF
           ENDDO
-          WRITE(53,*) DirInt
           WRITE(54,*) DirInt
   
           OrigLeafTm = RepLeavesTm%D(PIndex)
@@ -282,6 +899,9 @@ MODULE ParallelHiCu
           f1 =  0.50D0
   
           RootFindIter = 0
+
+
+#ifdef REGULA_FALSI
           f2 = 1000.0D0
           DO 
             RootFindIter = RootFindIter + 1
@@ -320,9 +940,46 @@ MODULE ParallelHiCu
               ENDIF
             ENDIF
           ENDDO
+#else
+          !! bisection
+          DO 
+            RootFindIter = RootFindIter + 1
+            IF(RootFindIter > 100) THEN
+              WRITE(*,*) 'Stage = ',Stage,', PIndex = ',PIndex,', CIndex =',CIndex
+              WRITE(*,*) 'ERROR: Regula-falsi does not converged.'
+              STOP
+            ENDIF
+            x2 = (x0+x1)/2.0D0
+            RepRCoor%D(DirInt,PIndex) = x2
+            !! copy the coordinates of RepLCoor and RepRCoor to define a box
+            BoxPoint(1:3) = RepLCoor%D(1:3,PIndex)
+            BoxPoint(4:6) = RepRCoor%D(1:3,PIndex)
+            CALL MPI_BCast(BoxPoint(1),6,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,IErr)
+            LocalLeavesTm = CalLeavesTm(BoxPoint)
+            LeavesTmInside = Reduce(LocalLeavesTm)
+            f2 = LeavesTmInside*1.0D0/(OrigLeafTm*1.0D0)-0.5D0
+            IF(ABS(f2) < TauArr%D(Stage)) THEN
+              !! WRITE(*,*) 'RootFindIter = ',RootFindIter,', f2 = ',f2
+              WRITE(54,*) x2
+              RepLCoor%D(DirInt,CIndex) = x2
+              RepLeavesTm%D(PIndex) = LeavesTmInside
+              RepLeavesTm%D(CIndex) = OrigLeafTm - LeavesTmInside
+              EXIT
+            ELSE
+              !! WRITE(*,*) 'RootFindIter = ',RootFindIter,', f2 = ',f2
+              IF(f2*f0 < 0.0D0) THEN
+                x1 = x2; f1 = f2
+              ELSE
+                x0 = x2; f0 = f2
+              ENDIF
+            ENDIF
+          ENDDO
+                   
+#endif
+
         ENDDO
       ENDDO
-      CLOSE(UNIT=53)
+      CLOSE(54)
       
       OPEN(unit=53,FILE='LeafTmInVol.dat',form='formatted',status='unknown')
       DO I = 1, NVol
@@ -335,46 +992,36 @@ MODULE ParallelHiCu
   
       !! check the volume before and after are the same
       OldVol = ZERO
-      OPEN(unit=53,FILE='RepartionVol.dat',form='formatted',status='unknown')
       DO I = 1, NVol
         ThisVol = 1.0D0
         DO J = 1, 3
           ThisVol = ThisVol*(RCoor%D(J,I)-LCoor%D(J,I))
         ENDDO
-        WRITE(53,*) I, ThisVol
         OldVol = OldVol + ThisVol
       ENDDO
-      CLOSE(53)
   
       NewVol = ZERO
       DO I = 1, NVol
         ThisVol = 1.0D0
         DO J = 1, 3
-          ThisVol = ThisVol*(RepRCoor%D(J,I)-RepLCoor%D(J,I))
-        ENDDO
-        NewVol = NewVol + ThisVol
-      ENDDO
-      WRITE(*,*) 'OldVol = ',OldVol, ', NewVol = ', NewVol
-      WRITE(*,*) 'DIFF = ',NewVol-OldVol
-      ! WRITE to a file: unit=53 is used.
-      open(unit=53,file='BegEnd.dat',form='formatted',status='unknown')
-      WRITE(53,*) NVol
-    
-      !! check for the positive definiteness 
-      DO I = 1, NVol
-        DO J = 1, 3
           LinDim = RepRCoor%D(J,I)-RepLCoor%D(J,I)
+          !! check for the positive definiteness 
           IF(LinDim <= 0) THEN
             WRITE(*,*) 'LinDim is non-positive!'
             WRITE(*,*) 'LinDim = ',LinDim
             WRITE(*,*) 'Box = ',I, ',  Direction = ',J
             STOP
           ENDIF
+          ThisVol = ThisVol*LinDim
         ENDDO
+        NewVol = NewVol + ThisVol
       ENDDO
-      WRITE(53,*) RepLCoor%D(1:3,1:NVol)
-      WRITE(53,*) RepRCoor%D(1:3,1:NVol)
-      CLOSE(53)
+      DIFF = NewVol-OldVol
+      WRITE(*,*) 'OldVol = ',OldVol, ', NewVol = ', NewVol
+      WRITE(*,*) 'DIFF = ',DIFF
+      IF(ABS(DIFF) > 1.0D-2) THEN
+        STOP 'ERR: DIFF in Vol (RepartionVol) is wrong!'
+      ENDIF
     ELSE
       DO 
         CALL MPI_BCast(BoxPoint(1),6,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,IErr)
@@ -388,6 +1035,12 @@ MODULE ParallelHiCu
         LeavesTmInside = Reduce(LocalLeavesTm)
       ENDDO
     ENDIF
+#ifdef REGULA_FALSI
+#else
+    IF(MyID == 0) THEN
+      CALL Delete(TauArr)
+    ENDIF
+#endif
     CALL Delete(RepLCoor)
     CALL Delete(RepRCoor)
     CALL Delete(RepLeavesTm)
@@ -507,16 +1160,11 @@ MODULE ParallelHiCu
     INTEGER,DIMENSION(MPI_STATUS_SIZE)::Status
 
     CALL New(TmNode,NPrc)
+    CALL MPI_Gather(VolTm,1,MPI_DOUBLE_PRECISION,TmNode%D(1),1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,IErr)
     IF(MyID == 0) THEN
-      TmNode%D(1) = VolTm
-      DO I = 1, NPrc-1
-        CALL MPI_Recv(TmNode%D(I+1),1,MPI_DOUBLE_PRECISION,I,Time_T,MPI_COMM_WORLD,Status,IErr)
-      ENDDO
       DO I = 0, NPrc-1
-        WRITE(*,*) 'Time on node = '//TRIM(IntToChar(I))//' is ',TmNode%D(I+1)
+        !! WRITE(*,*) 'Time on node = '//TRIM(IntToChar(I))//' is ',TmNode%D(I+1)
       ENDDO
-    ELSE
-      CALL MPI_Send(VolTm,1,MPI_DOUBLE_PRECISION,0,Time_T,MPI_COMM_WORLD,Status,IErr)
     ENDIF
     
   END SUBROUTINE CollectTime
@@ -543,11 +1191,20 @@ MODULE ParallelHiCu
 !===============================================================================
   FUNCTION AtomRad(Z)
     REAL(DOUBLE)::Z,AtomRad,TableAtomRad(200)
+    Logical :: AtomExists
 
     !! Values are obtained from Slater, JCP 41 (1964) 3199
     TableAtomRad(1) = 0.25*AngstromsToAU
+    TableAtomRad(6) = 0.70*AngstromsToAU
+    TableAtomRad(7) = 0.65*AngstromsToAU
     TableAtomRad(8) = 0.60*AngstromsToAU
-    IF(ABS(Z-1.0D0) > 1.0E-10 .AND. ABS(Z-8.0D0) > 1.0E-10) THEN
+    AtomExists = .FALSE.
+    AtomExists = AtomExists .OR. ABS(Z-1.0D0) < 1.0D-10
+    AtomExists = AtomExists .OR. ABS(Z-6.0D0) < 1.0D-10
+    AtomExists = AtomExists .OR. ABS(Z-7.0D0) < 1.0D-10
+    AtomExists = AtomExists .OR. ABS(Z-8.0D0) < 1.0D-10
+    IF(.NOT. AtomExists) THEN
+      WRITE(*,*) 'Z = ', Z
       WRITE(*,*) 'ERROR: Atom radius for this Z has not been set yet!'
       STOP
     ENDIF

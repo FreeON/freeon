@@ -305,8 +305,13 @@ MODULE RhoTree
             Open(UNIT=Seq,FILE=TrixFile('Rho',Args,1),STATUS='OLD', &
                  FORM='UNFORMATTED',ACCESS='SEQUENTIAL')
          ELSE
+#ifdef PARALLEL
+            Open(UNIT=Seq,FILE=TrixFile('Rho'//IntToChar(MyID),Args,0),STATUS='OLD', &
+                 FORM='UNFORMATTED',ACCESS='SEQUENTIAL')
+#else
             Open(UNIT=Seq,FILE=TrixFile('Rho',Args,0),STATUS='OLD', &
                  FORM='UNFORMATTED',ACCESS='SEQUENTIAL')
+#endif
          ENDIF
          Read(UNIT=Seq,Err=202,IOSTAT=IOS)Rho%NExpt,Rho%NDist,Rho%NCoef
          CALL New(Rho%NQ  ,Rho%NExpt)

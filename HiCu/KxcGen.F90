@@ -81,7 +81,10 @@ MODULE KxcGen
             ENDDO
 #else
 #ifdef PARALLEL_DEVELOPMENT
-            CALL AddFASTMATBlok(Kxc,AtA,AtB,KxcBlock(Pair,CubeRoot))
+            !! use TestAtomPair..
+            IF(TestAtomPair(Pair,CubeRoot%Box)) THEN
+              CALL AddFASTMATBlok(Kxc,AtA,AtB,KxcBlock(Pair,CubeRoot))
+            ENDIF
 #else
             Kxc%MTrix%D(R:R+NAB-1)=KxcBlock(Pair,CubeRoot)
 #endif

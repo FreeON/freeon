@@ -30,6 +30,10 @@ PROGRAM HaiKu
 #endif
   IMPLICIT NONE
   TYPE(ARGMT)                 :: Args
+#ifdef PARALLEL
+  INTEGER::I
+  REAL(DOUBLE) :: StartTm,EndTm,TotTm,CumuTm
+#endif
 #ifdef PARALLEL_DEVELOPMENT
   TYPE(FastMat),POINTER       :: Kxc
 #else
@@ -102,7 +106,17 @@ PROGRAM HaiKu
 ! Begin local performance accumulator for grid generation
   CALL Elapsed_Time(TimeRhoToGrid,'Init')
 ! Create the RhoTree (a 4-D BinTree)
+#ifdef PARALLEL
+  !! read in distributions, figure out the root bounding box
+  CALL ParaInitRho(Args)
+  CALL GetBBox()
+  CALL AlignNodes()
+  CALL SendBBox()
+  CALL DistDist()
+  CALL ParaRhoToTree()
+#else
   CALL RhoToTree(Args)
+#endif
 ! CALL New(Kxc)
 #ifdef PARALLEL_DEVELOPMENT
   CALL New_FASTMAT(Kxc,0,(/0,0/))
@@ -111,15 +125,9 @@ PROGRAM HaiKu
 #endif
   CALL NewBraBlok(BS)
 #ifdef PARALLEL 
-  ! get bounding boxes from static partitioning or read from a file
-  CALL GetBBox()
-  !! Root node send bounding boxes to each processor
-  CALL SendBBox()
-  ! Every proc chews on a subvolume
   CALL WorkBBOx(Kxc)
   CALL CollectTime()
   CALL CalImbalance()
-  CALL CollectLeavesTime()
   CALL RepartitionVol()
 #else
 ! Generate the CubeTree (a 3-D BinTree) 
@@ -180,7 +188,7 @@ PROGRAM HaiKu
   CALL Plot(   T1,'Kxc['//TRIM(SCFCycl)//']')
 
 #ifdef PARALLEL_DEVELOPMENT
-  CALL Delete_FASTMAT(Kxc)
+  CALL Delete_FastMat1(Kxc)
 #else
   CALL Delete(Kxc)
 #endif

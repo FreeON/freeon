@@ -1,3 +1,4 @@
+#undef USE_LEAF_COUNT
 MODULE CubeTree
    USE DerivedTypes
    USE GlobalScalars   
@@ -204,12 +205,18 @@ MODULE CubeTree
 #ifdef PARALLEL 
          EndWTime = MPI_Wtime()
          Left%LayGridCost = EndWTime - StartWTime
+#ifdef USE_LEAF_COUNT
+         Left%LayGridCost = 1.0D0
+#endif
          StartWTime = MPI_Wtime()
 #endif 
          CALL LayGrid(Right)
 #ifdef PARALLEL 
          EndWTime = MPI_Wtime()
          Right%LayGridCost = EndWTime - StartWTime
+#ifdef USE_LEAF_COUNT
+         Right%LayGridCost = 1.0D0
+#endif
 #endif 
 !        Compute the exact cubature error for the density 
       END SUBROUTINE SplitCube
