@@ -56,7 +56,7 @@ PROGRAM MakePFFT
      CALL New(dTenS,(/LSP(2*MaxEll),3,3/),(/0,1,1/))
      dTenC%D=Zero
      dTenS%D=Zero
-!    Calculate
+!    Calculate the derivative Tensors
      CALL CalculateDivPFFT(MaxEll,GM,Args,CS_IN,dTenC,dTenS)
 !    Put them to HDF
      CALL Put(dTenC,'dPFFTensorC')
@@ -77,61 +77,75 @@ PROGRAM MakePFFT
   CALL ShutDown(Prog)
 !
 END PROGRAM MakePFFT
-!!$
-!!$!***********    
+!!$     LM = LTD(2)
 !!$     IF(.TRUE.) THEN
-!!$     CALL New(BoxShape,(/3,3/))
-!!$     CALL New(CSS,CS_IN%NCells)
-!!$     DDelta = 1.D-6 
-!!$!    Initialize CS
-!!$     BoxShape%D=GM%PBC%BoxShape%D
-!!$     dTenC%D=Zero
-!!$     dTenS%D=Zero
-!!$     DO K=1,CS_IN%NCells
-!!$        CS_IN%CellCarts%D(:,K) = AtomToFrac(GM,CS_IN%CellCarts%D(:,K))
-!!$     ENDDO
-!!$!    Calculate the tensors numerically
-!!$     DO I=1,1
-!!$        DO J=1,1
-!!$           IF(GM%PBC%AutoW%I(I)==1 .AND. GM%PBC%AutoW%I(J)==1) THEN
-!!$              GM%PBC%BoxShape%D(I,J) = BoxShape%D(I,J) + DDelta
-!!$              GM%PBC%InvBoxSh%D      = InverseMatrix(GM%PBC%BoxShape%D)
-!!$              GM%PBC%CellVolume      = ABS(CellVolume(GM%PBC%BoxShape%D,GM%PBC%AutoW%I))
-!!$              WRITE(*,*) GM%PBC%BoxShape%D(I,J)
-!!$              WRITE(*,*) 'Vol = ',GM%PBC%CellVolume
-!!$              
-!!$              DO K=1,CS_IN%NCells
-!!$                 CSS%CellCarts%D(:,K) = FracToAtom(GM,CS_IN%CellCarts%D(:,K))
-!!$              ENDDO
-!!$!
-!!$              CALL CalculatePFFT(MaxEll,GM,Args,CSS,TenC,TenS)
-!!$              dTenC%D(:,I,J) = TenC%D(:)
-!!$              dTenS%D(:,I,J) = TenS%D(:)
-!!$!
-!!$              GM%PBC%BoxShape%D(I,J) = BoxShape%D(I,J) - DDelta  
-!!$              GM%PBC%InvBoxSh%D      = InverseMatrix(GM%PBC%BoxShape%D)
-!!$              GM%PBC%CellVolume      = ABS(CellVolume(GM%PBC%BoxShape%D,GM%PBC%AutoW%I))
-!!$              WRITE(*,*) GM%PBC%BoxShape%D(I,J)
-!!$              WRITE(*,*) 'Vol = ',GM%PBC%CellVolume
-!!$              DO K=1,CS_IN%NCells
-!!$                 CSS%CellCarts%D(:,K) = FracToAtom(GM,CS_IN%CellCarts%D(:,K))
-!!$              ENDDO
-!!$!
-!!$              CALL CalculatePFFT(MaxEll,GM,Args,CSS,TenC,TenS)
-!!$              dTenC%D(:,I,J) = (TenC%D(:)-dTenC%D(:,I,J))/(Two*DDelta)
-!!$              dTenS%D(:,I,J) = (TenS%D(:)-dTenS%D(:,I,J))/(Two*DDelta)
-!!$           ENDIF
-!!$        ENDDO
-!!$     ENDDO
-!!$!
-!!$     GM%PBC%BoxShape%D = BoxShape%D
-!!$     GM%PBC%InvBoxSh%D = InverseMatrix(GM%PBC%BoxShape%D)
-!!$     GM%PBC%CellVolume = ABS(CellVolume(GM%PBC%BoxShape%D,GM%PBC%AutoW%I))
-!!$     DO K=1,CS_IN%NCells
-!!$        CSS%CellCarts%D(:,K) = FracToAtom(GM,CS_IN%CellCarts%D(:,K))
-!!$     ENDDO
-!!$!
-!!$     CALL Print_SP(4,dTenC%D(:,1,1),dTenS%D(:,1,1),Tag_O='LatFrc(1,1)',Pre_O='Long')
-!!$!
+!!$        CALL CalculateDivPFFT(MaxEll,GM,Args,CS_IN,dTenC,dTenS)
+!!$        CALL Print_SP(4,dTenC%D(:,1,1),dTenS%D(:,1,1),Tag_O='dTen(1,1)',Pre_O='Long')
+!!$        WRITE(*,*) 'dTenC(L=2,M=2)'
+!!$        DO I=1,3
+!!$           WRITE(*,*) (dTenC%D(LM,I,J),J=1,3)
+!!$        ENDDO        
+!!$        WRITE(*,*) 'dTenS(L=2,M=2)'
+!!$        DO I=1,3
+!!$           WRITE(*,*) (dTenS%D(LM,I,J),J=1,3)
+!!$        ENDDO  
 !!$     ENDIF
-!!$!********
+!!$!
+!!$     IF(.TRUE.) THEN
+!!$        CALL New(BoxShape,(/3,3/))
+!!$        CALL New(CSS,CS_IN%NCells)
+!!$        DDelta = 1.D-6 
+!!$!       Initialize CS
+!!$        BoxShape%D=GM%PBC%BoxShape%D
+!!$        dTenC%D=Zero
+!!$        dTenS%D=Zero
+!!$        DO K=1,CS_IN%NCells
+!!$           CS_IN%CellCarts%D(:,K) = AtomToFrac(GM,CS_IN%CellCarts%D(:,K))
+!!$        ENDDO
+!!$!       Calculate the tensors numerically
+!!$        
+!!$        DO I=1,3
+!!$           DO J=1,3
+!!$              IF(GM%PBC%AutoW%I(I)==1 .AND. GM%PBC%AutoW%I(J)==1) THEN
+!!$                 WRITE(*,*) 'I,J = ',I,J
+!!$                 GM%PBC%BoxShape%D(I,J) = BoxShape%D(I,J) + DDelta
+!!$                 GM%PBC%InvBoxSh%D      = InverseMatrix(GM%PBC%BoxShape%D)
+!!$                 GM%PBC%CellVolume      = ABS(CellVolume(GM%PBC%BoxShape%D,GM%PBC%AutoW%I))
+!!$!                 
+!!$                 DO K=1,CS_IN%NCells
+!!$                    CSS%CellCarts%D(:,K) = FracToAtom(GM,CS_IN%CellCarts%D(:,K))
+!!$                 ENDDO
+!!$!
+!!$                 CALL CalculatePFFT(MaxEll,GM,Args,CSS,TenC,TenS)
+!!$                 dTenC%D(:,I,J) = TenC%D(:)
+!!$                 dTenS%D(:,I,J) = TenS%D(:)
+!!$!
+!!$                 GM%PBC%BoxShape%D(I,J) = BoxShape%D(I,J) - DDelta  
+!!$                 GM%PBC%InvBoxSh%D      = InverseMatrix(GM%PBC%BoxShape%D)
+!!$                 GM%PBC%CellVolume      = ABS(CellVolume(GM%PBC%BoxShape%D,GM%PBC%AutoW%I))
+!!$                 DO K=1,CS_IN%NCells
+!!$                    CSS%CellCarts%D(:,K) = FracToAtom(GM,CS_IN%CellCarts%D(:,K))
+!!$                 ENDDO
+!!$!
+!!$                 CALL CalculatePFFT(MaxEll,GM,Args,CSS,TenC,TenS)
+!!$                 dTenC%D(:,I,J) = (TenC%D(:)-dTenC%D(:,I,J))/(Two*DDelta)
+!!$                 dTenS%D(:,I,J) = (TenS%D(:)-dTenS%D(:,I,J))/(Two*DDelta)
+!!$                 
+!!$                 GM%PBC%BoxShape%D(I,J) = BoxShape%D(I,J) 
+!!$                 GM%PBC%InvBoxSh%D      = InverseMatrix(GM%PBC%BoxShape%D)
+!!$                 GM%PBC%CellVolume      = ABS(CellVolume(GM%PBC%BoxShape%D,GM%PBC%AutoW%I))
+!!$
+!!$              ENDIF
+!!$           ENDDO
+!!$        ENDDO
+!!$        CALL Print_SP(4,dTenC%D(:,1,1),dTenS%D(:,1,1),Tag_O='dTen(1,1)',Pre_O='Long')
+!!$        WRITE(*,*) 'dTenC(L=2,M=2)'
+!!$        DO I=1,3
+!!$           WRITE(*,*) (dTenC%D(LM,I,J),J=1,3)
+!!$        ENDDO
+!!$        WRITE(*,*) 'dTenS(L=2,M=2)'
+!!$        DO I=1,3
+!!$           WRITE(*,*) (dTenS%D(LM,I,J),J=1,3)
+!!$        ENDDO  
+!!$     ENDIF
+!!$     IF(.TRUE.) STOP

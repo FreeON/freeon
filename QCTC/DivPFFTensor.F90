@@ -96,7 +96,7 @@ CONTAINS
     REAL(DOUBLE)                      :: Rmin,RMAX,Accuracy,LenScale,SUM,FacC,FacS
 !
     INTEGER                           :: NDiv
-    REAL(DOUBLE)                      :: LenMax,Delt,IntFac
+    REAL(DOUBLE)                      :: LenMax,Delt,IntFac,MCFac,MSFac
 !
     REAL(DOUBLE),DIMENSION(3)         :: Vec,DCFac,DSFac
     REAL(DOUBLE),DIMENSION(3,3)       :: RecpLatVec,LatVec,DivVol
@@ -110,6 +110,7 @@ CONTAINS
     dTenS%D=Zero
     Accuracy = 1.D-14
     Rmin     = SQRT(CS%CellCarts%D(1,1)**2+CS%CellCarts%D(2,1)**2+CS%CellCarts%D(3,1)**2)
+    DivVol = DivCellVolume(GM%PBC%BoxShape%D,GM%PBC%AutoW%I)
 !
 !   Get The Lattice and Reciprocal Lattice Vectors
 !
@@ -119,7 +120,6 @@ CONTAINS
           LatVec(I,J)     = GM%PBC%BoxShape%D(I,J)
        ENDDO
     ENDDO
-    DivVol = DivCellVolume(GM%PBC%BoxShape%D,GM%PBC%AutoW%I)
 !
 !   Two Dimension
 !
@@ -209,27 +209,84 @@ CONTAINS
                    LM = LTD(L)+M
                    DO I=1,3
                       DO J=1,3
-                         DO K=1,3
-                            IF(GM%PBC%AutoW%I(I)==1 .AND. GM%PBC%AutoW%I(J)==1) THEN
-                               dTenC%D(LM,I,J)=dTenC%D(LM,I,J) + PQ(I)*RecpLatVec(K,J)*(CFac*DCpq(LM,K)+ DCFac(K)*Cpq(LM)) &
-                                                               - PQ(I)*RecpLatVec(K,J)*(SFac*DSpq(LM,K)+ DSFac(K)*Spq(LM))
-                               dTenS%D(LM,I,J)=dTenS%D(LM,I,J) + PQ(I)*RecpLatVec(K,J)*(SFac*DCpq(LM,K)+ DSFac(K)*Cpq(LM)) &
-                                                               + PQ(I)*RecpLatVec(K,J)*(CFac*DSpq(LM,K)+ DCFac(K)*Spq(LM))
-                            ENDIF
-                         ENDDO
+                         IF(GM%PBC%AutoW%I(I)==1 .AND. GM%PBC%AutoW%I(J)==1) THEN
+                            DO K=1,3 
+                                  dTenC%D(LM,I,J)=dTenC%D(LM,I,J) + PQ(I)*RecpLatVec(K,J)*(CFac*DCpq(LM,K)+ DCFac(K)*Cpq(LM)) &
+                                                                  - PQ(I)*RecpLatVec(K,J)*(SFac*DSpq(LM,K)+ DSFac(K)*Spq(LM))
+                                  dTenS%D(LM,I,J)=dTenS%D(LM,I,J) + PQ(I)*RecpLatVec(K,J)*(SFac*DCpq(LM,K)+ DSFac(K)*Cpq(LM)) &
+                                                                  + PQ(I)*RecpLatVec(K,J)*(CFac*DSpq(LM,K)+ DCFac(K)*Spq(LM))
+                            ENDDO
+                         ENDIF
                       ENDDO
                    ENDDO
+                   MCFac = (Cpq(LM)*CFac-Spq(LM)*SFac)/GM%PBC%CellVolume
+                   MSFac = (Spq(LM)*CFac+Cpq(LM)*SFac)/GM%PBC%CellVolume 
                    DO I=1,3
-                      IF(GM%PBC%AutoW%I(I)==1) THEN
-                         dTenC%D(LM,I,I)=dTenC%D(LM,I,I) + (Cpq(LM)*CFac-Spq(LM)*SFac)/GM%PBC%BoxShape%D(I,I)
-                         dTenS%D(LM,I,I)=dTenS%D(LM,I,I) + (Spq(LM)*CFac+Cpq(LM)*SFac)/GM%PBC%BoxShape%D(I,I)
-                      ENDIF
+                      DO J=1,3
+                         IF(GM%PBC%AutoW%I(I)==1 .AND. GM%PBC%AutoW%I(J)==1) THEN
+                            dTenC%D(LM,I,J)=dTenC%D(LM,I,J) + DivVol(I,J)*MCFac
+                            dTenS%D(LM,I,J)=dTenS%D(LM,I,J) + DivVol(I,J)*MSFac
+                         ENDIF
+                      ENDDO
                    ENDDO
                 ENDDO
              ENDDO
           ENDIF
        ENDDO
+    ENDDO    
+    CALL Delete_CellSet(CSMM)
+!
+!   Add in the k=0 piece for the L=2 multipoles (Zero in 3D)
+!
+    DO I=1,3
+       IF(GM%PBC%AutoW%I(I)==0) THEN
+          PQ(:) = Zero
+          PQ(I) = 1.D-10
+          Rad   = SQRT(PQ(1)*PQ(1)+PQ(2)*PQ(2)+PQ(3)*PQ(3))
+          L     = 2
+          CALL DIrRegular(L,PQ(1),PQ(2),PQ(3))
+          CFac  = Half*Delt*FT_FScriptC_3D(L,ExpFac,Rad)/GM%PBC%CellVolume
+          SFac  = Half*Delt*FT_FScriptS_3D(L,ExpFac,Rad)/GM%PBC%CellVolume       
+          DCFac = Half*Delt*DFT_FScriptC_3D(L,ExpFac,PQ(1),PQ(2),PQ(3))/GM%PBC%CellVolume
+          DSFac = Half*Delt*DFT_FScriptS_3D(L,ExpFac,PQ(1),PQ(2),PQ(3))/GM%PBC%CellVolume
+          DO M = 0,L
+             LM = LTD(L)+M
+             MCFac = (Cpq(LM)*CFac-Spq(LM)*SFac)/GM%PBC%CellVolume
+             MSFac = (Spq(LM)*CFac+Cpq(LM)*SFac)/GM%PBC%CellVolume 
+             DO J=1,3
+                DO K=1,3
+                   IF(GM%PBC%AutoW%I(J)==1 .AND. GM%PBC%AutoW%I(K)==1) THEN
+                      dTenC%D(LM,J,K)=dTenC%D(LM,J,K) + DivVol(J,K)*MCFac
+                      dTenS%D(LM,J,K)=dTenS%D(LM,J,K) + DivVol(J,K)*MSFac
+                   ENDIF
+                ENDDO
+             ENDDO
+          ENDDO
+          PQ(:) = Zero
+          PQ(I) = -1.D-10
+          Rad   = SQRT(PQ(1)*PQ(1)+PQ(2)*PQ(2)+PQ(3)*PQ(3))
+          L     = 2
+          CALL DIrRegular(L,PQ(1),PQ(2),PQ(3))
+          CFac  = Half*Delt*FT_FScriptC_3D(L,ExpFac,Rad)/GM%PBC%CellVolume
+          SFac  = Half*Delt*FT_FScriptS_3D(L,ExpFac,Rad)/GM%PBC%CellVolume       
+          DCFac = Half*Delt*DFT_FScriptC_3D(L,ExpFac,PQ(1),PQ(2),PQ(3))/GM%PBC%CellVolume
+          DSFac = Half*Delt*DFT_FScriptS_3D(L,ExpFac,PQ(1),PQ(2),PQ(3))/GM%PBC%CellVolume
+          DO M = 0,L
+             LM = LTD(L)+M
+             MCFac = (Cpq(LM)*CFac-Spq(LM)*SFac)/GM%PBC%CellVolume
+             MSFac = (Spq(LM)*CFac+Cpq(LM)*SFac)/GM%PBC%CellVolume 
+             DO J=1,3
+                DO K=1,3
+                   IF(GM%PBC%AutoW%I(J)==1 .AND. GM%PBC%AutoW%I(K)==1) THEN
+                      dTenC%D(LM,J,K)=dTenC%D(LM,J,K) + DivVol(J,K)*MCFac
+                      dTenS%D(LM,J,K)=dTenS%D(LM,J,K) + DivVol(J,K)*MSFac
+                   ENDIF
+                ENDDO
+             ENDDO
+          ENDDO
+       ENDIF
     ENDDO
+    CALL Delete_CellSet(CSMM)
 !  
 !   Substract the inner boxes
 !
@@ -269,7 +326,7 @@ CONTAINS
     TYPE(CellSet)                     :: CS, CSMM
     REAL(DOUBLE),DIMENSION(3)         :: PQ,FPQ
     REAL(DOUBLE)                      :: CFac,SFac,BetaSq,Rad,RadSq,ExpFac
-    REAL(DOUBLE)                      :: Rmin,RMAX,Accuracy,LenScale,FacC,FacS
+    REAL(DOUBLE)                      :: Rmin,RMAX,Accuracy,LenScale,FacC,FacS,MCFac,MSFac
     REAL(DOUBLE),DIMENSION(3)         :: Vec,DCFac,DSFac
     REAL(DOUBLE),DIMENSION(3,3)       :: RecpLatVec,LatVec,DivVol
     TYPE(CRDS)                        :: GM
@@ -282,6 +339,7 @@ CONTAINS
     dTenS%D=Zero
     Accuracy = 1.D-12
     Rmin     = SQRT(CS%CellCarts%D(1,1)**2+CS%CellCarts%D(2,1)**2+CS%CellCarts%D(3,1)**2)
+    DivVol = DivCellVolume(GM%PBC%BoxShape%D,GM%PBC%AutoW%I)
 !
 !   Get The Lattice and Reciprocal Lattice Vectors
 !
@@ -291,14 +349,13 @@ CONTAINS
           LatVec(I,J)     = GM%PBC%BoxShape%D(I,J)
        ENDDO
     ENDDO
-    DivVol = DivCellVolume(GM%PBC%BoxShape%D,GM%PBC%AutoW%I)
 !
 !   Three Dimension
 !
     LSwitch  = 10
     LenScale = GM%PBC%CellVolume**(One/Three)
     Rmax     = Rmin+LenScale*(One/Accuracy)**(One/DBLE(LSwitch))
-    BetaSq   = One/(LenScale)**2
+    BetaSq  = One/(LenScale)**2
     LSwitch  = MIN(MaxL,LSwitch)
 !           
 !   Sum the Real Space
@@ -379,13 +436,13 @@ CONTAINS
                                                          + PQ(I)*RecpLatVec(K,J)*(CFac*DSpq(LM,K)+ DCFac(K)*Spq(LM))
                       ENDDO
                    ENDDO
-                ENDDO
-                FacC =  (Cpq(LM)*CFac-Spq(LM)*SFac)/GM%PBC%CellVolume
-                FacS =  (Spq(LM)*CFac+Cpq(LM)*SFac)/GM%PBC%CellVolume   
+                ENDDO   
+                MCFac = (Cpq(LM)*CFac-Spq(LM)*SFac)/GM%PBC%CellVolume
+                MSFac = (Spq(LM)*CFac+Cpq(LM)*SFac)/GM%PBC%CellVolume 
                 DO I=1,3
                    DO J=1,3
-                      dTenC%D(LM,I,J)=dTenC%D(LM,I,I) + FacC*DivVol(I,J)
-                      dTenS%D(LM,I,J)=dTenS%D(LM,I,I) + FacS*DivVol(I,J)
+                      dTenC%D(LM,I,J)=dTenC%D(LM,I,J) + DivVol(I,J)*MCFac
+                      dTenS%D(LM,I,J)=dTenS%D(LM,I,J) + DivVol(I,J)*MSFac
                    ENDDO
                 ENDDO
              ENDDO

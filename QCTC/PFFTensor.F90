@@ -366,7 +366,7 @@ CONTAINS
     LSwitch  = 10
     LenScale = GM%PBC%CellVolume**(One/Three)
     Rmax     = Rmin+LenScale*(One/Accuracy)**(One/DBLE(LSwitch))
-    BetaSq   = One/(LenScale)**2
+    BetaSq  = One/(LenScale)**2
     LSwitch  = MIN(MaxL,LSwitch)
 !           
 !   Sum the Real Space
