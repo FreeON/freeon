@@ -70,10 +70,22 @@ MODULE Thresholding
         LOGICAL                   :: TestBoxPairOverlap
         TYPE(AtomPair)            :: Pair
         TYPE(BBox),OPTIONAL       :: Box
-        REAL(DOUBLE)              :: PairExtent,PairHlfWdt
+        REAL(DOUBLE)              :: PrBxSeprtn,PairExtent,PairHlfWdt
         REAL(DOUBLE),DIMENSION(3) :: PairMidPnt,PairUntVct, &
                                      PairBoxVct,PrBxUntVct
 !----------------------------------------------------------------
+!       Midpoint vector of AB
+        PairMidPnt=(Pair%A+Pair%B)*Half
+!       Distance from Box center to line midpoint
+        PairBoxVct=Box%Center-PairMidPnt
+!       If pair and box are not sepertated, return with overlap=true
+        PrBxSeprtn=SQRT(PairBoxVct(1)**2+PairBoxVct(2)**2+PairBoxVct(3)**2)
+        IF(PrBxSeprtn==Zero)THEN
+           TestBoxPairOverlap=.TRUE.
+           RETURN
+        ENDIF
+!       Pair box unit vector
+        PrBxUntVct=PairBoxVct/PrBxSeprtn
 !       Max extent of atom pair from the line AB 
         IF(ABS(Pair%AB2)<1D-20)THEN
 !          Line is a point: Exp[-MinZab*R^2]<Tau
@@ -89,12 +101,6 @@ MODULE Thresholding
 !          AB Unit vector
            PairUntVct=PairUntVct/PairHlfWdt
         ENDIF
-!       Midpoint vector of AB
-        PairMidPnt=(Pair%A+Pair%B)*Half
-!       Distance from Box center to line midpoint
-        PairBoxVct=Box%Center-PairMidPnt
-!       Pair box unit vector
-        PrBxUntVct=PairBoxVct/SQRT(PairBoxVct(1)**2+PairBoxVct(2)**2+PairBoxVct(3)**2)
 !       Check for line box overlap
         TestBoxPairOverlap=.FALSE.
         IF(ABS(PairBoxVct(1))-PairExtent*ABS(PrBxUntVct(1)) > &
