@@ -66,13 +66,13 @@ big:
 #
 small_pbs:
 	chmod u+x sub_pbs
-	./sub_pbs MgO
 	./sub_pbs SiF4
 	./sub_pbs Urea 
 	./sub_pbs Water
 	./sub_pbs Biotin
 #
 big_pbs:
+	./sub_pbs MgO
 	./sub_pbs Caffiene
 	./sub_pbs BetaCarotene
 	./sub_pbs Chlorophyll
