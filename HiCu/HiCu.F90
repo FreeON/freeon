@@ -27,10 +27,10 @@ PROGRAM HaiKu
   TYPE(TIME)                  :: TimeRhoToGrid,TimeGridToMat
   REAL(DOUBLE)                :: Electrons
   CHARACTER(LEN=3)            :: SCFCycle
-  CHARACTER(LEN=15),PARAMETER :: Prog='HiCu           '
-  CHARACTER(LEN=15),PARAMETER :: Sub1='HiCu.RhoTree   ' 
-  CHARACTER(LEN=15),PARAMETER :: Sub2='HiCu.GridGen   ' 
-  CHARACTER(LEN=15),PARAMETER :: Sub3='HiCu.MakeKxc   ' 
+  CHARACTER(LEN=4),PARAMETER  :: Prog='HiCu'
+  CHARACTER(LEN=12),PARAMETER :: Sub1='HiCu.RhoTree' 
+  CHARACTER(LEN=12),PARAMETER :: Sub2='HiCu.GridGen' 
+  CHARACTER(LEN=12),PARAMETER :: Sub3='HiCu.MakeKxc' 
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg 
 !---------------------------------------------------------------------------------------
 ! Macro the start up
