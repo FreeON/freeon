@@ -34,7 +34,7 @@ MODULE NuklarE
        NukE=Zero 
        DO At=1,NAtoms
 !         Initialize |BRA>
-          HGBra(1)=-GM%AtNum%I(At)*(NuclearExpnt/Pi)**(ThreeHalves)
+          HGBra(1) =-GM%AtNum%I(At)*(NuclearExpnt/Pi)**(ThreeHalves)
           SPBraC(0)=-GM%AtNum%I(At)
           Prim%Ell=0
           Prim%P=GM%Carts%D(:,At)
