@@ -24,12 +24,19 @@ MODULE TreeWalk
        REAL(DOUBLE)   :: E
 !---------------------------------------------
 !      Zero <KET| accumulators
-       HGKet=Zero
-       SPKetC=Zero
-       SPKetS=Zero
+       ! HGKet=Zero
+       ! SPKetC=Zero
+       ! SPKetS=Zero
+       CALL DBL_VECT_EQ_DBL_SCLR(HGLen,HGKet(1),Zero)
+       CALL DBL_VECT_EQ_DBL_SCLR(SPLen+1,SPKetC(0),Zero)
+       CALL DBL_VECT_EQ_DBL_SCLR(SPLen+1,SPKetS(0),Zero)
 !      Set global BBox for this primitive
-       PBox%BndBox(:,1)=P%P
-       PBox%BndBox(:,2)=P%P
+       PBox%BndBox(1,1)=P%P(1)
+       PBox%BndBox(2,1)=P%P(2)
+       PBox%BndBox(3,1)=P%P(3)
+       PBox%BndBox(1,2)=P%P(1)
+       PBox%BndBox(2,2)=P%P(2)
+       PBox%BndBox(3,2)=P%P(3)
 !      Expand this BBox from zero to the correct extent
        PBox=ExpandBox(PBox,E)
     END SUBROUTINE SetKet
