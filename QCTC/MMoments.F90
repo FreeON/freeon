@@ -292,7 +292,7 @@ CONTAINS
 !
     DO zq=1,Rho%NExpt
        NQ    = Rho%NQ%I(zq)
-       Zeta  = (Rho%Expt%D(zq))**(-threehalf)
+       Zeta  = (Rho%Expt%D(zq))**(-threehalves)
        OffQ  = Rho%OffQ%I(zq)
        OffR  = Rho%OffR%I(zq)
 !
@@ -407,7 +407,7 @@ CONTAINS
     Px   = Qx-MM_Rho%CenterX
     Py   = Qy-MM_Rho%CenterY
     Pz   = Qz-MM_Rho%CenterZ
-    Zeta = Pi3*Expt**(-ThreeHalf)
+    Zeta = Pi3*Expt**(-ThreeHalves)
 !
     LQ    = LBra
     LP    = BigL-LQ

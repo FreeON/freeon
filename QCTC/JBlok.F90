@@ -65,15 +65,13 @@ CONTAINS
     MaxLMN      = BS%LMNLen
     TwoENeglect = Thresholds%TwoE
 !   
-    CALL NewBlock(KA,KB,NBFA,NBFB,BS)
-!     
     DO CFA=1,BS%NCFnc%I(KA)                       ! Loop over contracted function A
        MaxLA=BS%ASymm%I(2,CFA,KA) 
-       StartIA = IBloDex(BS,CFA,KA)+1
+       StartIA = CFBlokDex(BS,CFA,KA)+1
        StopIA  = StartIA + BS%LStop%I(CFA,KA)-BS%LStrt%I(CFA,KA)
        DO CFB=1,BS%NCFnc%I(KB)                    ! Loop over contracted function B
           MaxLB=BS%ASymm%I(2,CFB,KB)
-          StartIB = IBloDex(BS,CFB,KB)+1
+          StartIB = CFBlokDex(BS,CFB,KB)+1
           StopIB  = StartIB + BS%LStop%I(CFB,KB)-BS%LStrt%I(CFB,KB)
 !
           LBra   = MaxLA+MaxLB
@@ -109,22 +107,15 @@ CONTAINS
                       PBx=Px-Bx
                       PBy=Py-By
                       PBz=Pz-Bz 
-!
-                      CALL MD2TRR(BS%NASym,0,MaxLA,MaxLB,EtaAB,MD%D, &
-                                  PAx,PBx,PAy,PBy,PAz,PBz) 
-!
-!                     Calculate the Primative
-!
-                      CALL GetPrimative(CFA,PFA,KA,CFB,PFB,KB,ExpAB,BS,MD)
-!
-!                     Calculate the Estimate
-!
+!                     McMurchie-Davidson 2 term coefficients
+                      CALL MD2TRR(BS%NASym,0,MaxLA,MaxLB,EtaAB,MD%D,PAx,PBx,PAy,PBy,PAz,PBz) 
+!                     Primitive coefficients in a HG representationj
+                      CALL SetBraBlok(CFA,PFA,KA,CFB,PFB,KB,ExpAB,BS,MD,Phase_O=.TRUE.)
+!                     Integral estimates (calculation should definately be moved out of inner loop!) 
                       CALL BraEst(StartIA,StopIA,StartIB,StopIB,LBra,XiAB,BraEstimate)
-!
-!                     Calculate the Direct Contribution
-!
+!                     Direct Contribution
                       HGKet%D = Zero
-                      Tol     = TwoENeglect/MAX(1.D-32,ExpAB*BraEstimate)
+                      Tol     = TwoENeglect/MAX(1.D-32,BraEstimate)
                       DO zq=1,Rho%NExpt
                          NQ = Rho%NQ%I(zq)
                          IF(NQ /= 0) THEN
@@ -139,6 +130,9 @@ CONTAINS
                             INCLUDE 'VMD/VMDBlok.Inc'
                          ENDIF
                       ENDDO
+
+!                      WRITE(*,*)' CFA = ',CFA,' CFB = ',CFB,' PFA = ',PFA,' PFB = ',PFB
+!                      WRITE(*,*)' HGKet = ',HGKet%D(1:LenBra)
 !
 !                     Update the Matrix Block
 !
@@ -154,22 +148,23 @@ CONTAINS
 !
 !                  Calculate the Multipole Contribution to the Matrix Element
 !
-                   Px=(XiA*Ax+XiB*Bx)
-                   Py=(XiA*Ay+XiB*By)
-                   Pz=(XiA*Az+XiB*Bz)
-                   PAx=Px-Ax
-                   PAy=Py-Ay
-                   PAz=Pz-Az
-                   PBx=Px-Bx
-                   PBy=Py-By
-                   PBz=Pz-Bz 
+!                  >>>>>>>>> WHY WOULD YOU DO THIS TWICE CJ ????????
 !
-                   CALL MD2TRR(BS%NASym,0,MaxLA,MaxLB,EtaAB,MD%D, &
-                               PAx,PBx,PAy,PBy,PAz,PBz) 
+!                   Px=(XiA*Ax+XiB*Bx)
+!                   Py=(XiA*Ay+XiB*By)
+!                   Pz=(XiA*Az+XiB*Bz)
+!                   PAx=Px-Ax
+!                   PAy=Py-Ay
+!                   PAz=Pz-Az
+!                   PBx=Px-Bx
+!                   PBy=Py-By
+!                   PBz=Pz-Bz 
 !
+!
+!                   CALL MD2TRR(BS%NASym,0,MaxLA,MaxLB,EtaAB,MD%D,PAx,PBx,PAy,PBy,PAz,PBz) 
 !                  Calculate the  the Primative
 !
-                   CALL GetPrimative(CFA,PFA,KA,CFB,PFB,KB,ExpAB,BS,MD)
+!                   CALL GetPrimative(CFA,PFA,KA,CFB,PFB,KB,ExpAB,BS,MD)
 !
 !                  Contract the Primative MM  with the density MM
 !
@@ -191,7 +186,6 @@ CONTAINS
 #endif
 !
     JVck = BlockToVect(NBFA,NBFB,JBlk)
-    CALL DeleteBlock()
 !
   END FUNCTION JBlok
 !------------------------------------------------------------------------------
@@ -225,10 +219,6 @@ CONTAINS
 #endif
     TwoENeglect = Thresholds%TwoE
     BraEstimate = Rho%Est%D(oqA+AtA)
-    CALL New(AuxRfun,2,-1)
-    CALL New(Rfun,(/2,2,2/),(/-1,-1,-1/))
-    CALL New(HGKet,1)
-    CALL New(HGBra,(/1,1,1/))
 !
 #ifdef PERIODIC
 !
@@ -308,7 +298,6 @@ CONTAINS
 !   Reset
 !
     Rho%Co%D(orA+AtA) = CoefA
-    CALL DeleteBlock()
   END FUNCTION VBlok
 !--------------------------------------------------------------
 ! Estimate the Integrals from the Primative Distributions
@@ -316,9 +305,9 @@ CONTAINS
   SUBROUTINE BraEst(StartIA,StopIA,StartIB,StopIB,LBra,Zeta,BraEstimate)
     INTEGER                      :: StartIA,StopIA,StartIB,StopIB,LBra
     INTEGER                      :: IA,IB,LenBra,L
-    REAL(DOUBLE)                 :: Zeta,Upp,BraEstimate,Est
+    REAL(DOUBLE)                 :: Zeta,SqUpp,BraEstimate,Est
 !
-    Upp    = Sqrt2Pi5x2*(Zeta**(-FiveHalf))
+    SqUpp    = Sqrt2Pi5x2*Zeta**(-FiveFourths)
     LenBra = LHGTF(LBra)
 !
 !   Generate The R Function
@@ -334,7 +323,7 @@ CONTAINS
           BraEstimate = MAX(BraEstimate,Est)
        ENDDO
     ENDDO
-    BraEstimate =Upp*BraEstimate
+    BraEstimate =SqUpp*BraEstimate
   END SUBROUTINE BraEst
 END MODULE JBlock
 

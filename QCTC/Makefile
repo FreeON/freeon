@@ -9,6 +9,8 @@ include $(MONDO_COMPILER)
 include $(MONDO_HOME)/Includes/Suffixes
 include $(MONDO_HOME)/Includes/RemoveAll
 
+EXTRA_INCLUDES= -I$(MONDO_HOME)/MondoMods/MMA/Functions 
+
 JObjs =  MultipoleLib.o MMoments.o JBlok.o MakeDJ.o 
 
 all:	MD QCTC

@@ -19,6 +19,7 @@ PROGRAM MakeDJ
   USE Macros
   USE LinAlg
   USE AtomPairs
+  USE BraKetBloks
   USE JBlock
   USE MMoments
 #ifdef PARALLEL
@@ -44,35 +45,25 @@ PROGRAM MakeDJ
   CHARACTER(LEN=6),PARAMETER :: Prog='MakeDJ'
 !---------------------------------------------- 
 ! Start up macro
-!
   CALL StartUp(Args,Prog)
-!----------------------------------------------
 ! Get basis set and geometry
-!
   CALL Get(BS,Tag_O=CurBase)
   CALL Get(GM,Tag_O=CurGeom)
-!----------------------------------------------
 ! Get the Density 
-!----------------------------------------------
   CALL Get_HGRho(Rho,'Rho',Args,0,.TRUE.)
-!---------------------------------------------- 
 ! Allocations 
-!
   CALL New(MD,(/3,BS%NASym,BS%NASym,2*BS%NASym/),(/1,0,0,0/))
+  CALL NewBraKetBlok(BS)
   CALL New(Jmat)
+!
 #ifdef PERIODIC
 !-----------------------------------------------
 ! Calculate the Number of Cells
-!-----------------------------------------------
   CALL SetCellNumber(GM)
-!-----------------------------------------------
 ! Set Up the Multipoles  
-!-----------------------------------------------
   MaxL = 32
   CALL MMSetup(MaxL,GM,Rho)
-!-----------------------------------------------
 ! Calculate the Multipoles for Rho
-!-----------------------------------------------
   CALL CalMMRho(Rho)
 #endif
 !----------------------------------------------
@@ -161,22 +152,22 @@ PROGRAM MakeDJ
 ! Printing
 !
   IF(iSwitch==0) THEN
-     CALL PChkSum(JMat,'V_ne',Prog)
-     CALL PPrint(Jmat,'V_ne')
+     CALL PChkSum(JMat,'Vne',Prog)
+     CALL PPrint(Jmat,'Vne')
   ELSEIF(iSwitch==1) THEN
-     CALL PChkSum(JMat,'V_ee+V_ne',Prog)
-     CALL PPrint(Jmat,'V_ee+V_ne')
+     CALL PChkSum(JMat,'Vte['//TRIM(SCFCycl)//']',Prog)
+     CALL PPrint( JMat,'Vte['//TRIM(SCFCycl)//']')
+     CALL Plot(   JMat,'Vte['//TRIM(SCFCycl)//']')
   ELSEIF(iSwitch==2) THEN
-     CALL PChkSum(JMat,'Delta V_ee',Prog)
-     CALL PPrint(Jmat,'Delta V_ee')
+     CALL PChkSum(JMat,'DeltaVee',Prog)
+     CALL PPrint(Jmat,'DeltaVee')
   ENDIF
-
-
 !---------------------------------------------------
 ! Tidy up
 ! 
   CALL Delete(Jmat)
   CALL Delete(T1)
+  CALL DeleteBraKetBlok()
   CALL Delete_HGRho(Rho)
   CALL Delete(BS)
   CALL Delete(GM)

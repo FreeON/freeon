@@ -10,6 +10,8 @@ include $(MONDO_HOME)/Includes/Suffixes
 include $(MONDO_HOME)/Includes/RemoveAll
 include VMDObjs 
 
+EXTRA_INCLUDES= -I$(MONDO_HOME)/MondoMods/MMA/Functions 
+
 all:	$(VObjectFiles)
 	$(AR) $(ARFLAGS) MD.a $(?:.f=.o)
 	$(RANLIB) MD.a 
