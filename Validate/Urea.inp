@@ -5,13 +5,21 @@
 <BeginOptions>
 Charge=0
 Multiplicity=1
+
 Clones=1
+
+MPIInvoke="mpirun"
+MPIProcessors=8
+MPIProcFlag="-np"
+MPISpatialProc=8
+MPIMachineFlag="--nper"
+MPIMachineFile="2"
+
 Grad=(Optimize,PrimInt,NoBackTr,BiSect,NoGDIIS)
-SCFConvergence=(DIIS)
-DebugAll=(MinDebug,CheckSums)
+DebugAll=(MaxDebug,MaxGeOp)
 Guess=SuperPos
-SCFMethod=(RH)
-BasisSets=(STO-2G-SPLIT)
+SCFMethod=(TC2)
+BasisSets=(STO-3G-SPLIT)
 ModelChem=(HF)
 Accuracy =(good)
 Geometry=(InAngstroms,NoOrder)
