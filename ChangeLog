@@ -1,3 +1,12 @@
+2004-01-10 07:46  mchalla
+
+	* SCFeqs/ODA.F90: Ok, NOW this works.	Works parallel,
+	atomic-orbital or orthogonal!!
+
+2004-01-09 15:42  mchalla
+
+	* ChangeLog: [no log message]
+
 2004-01-09 15:39  mchalla
 
 	* MondoSCF2/: OptionKeys.F90, SCFs.F90: Improved SCF convergence
