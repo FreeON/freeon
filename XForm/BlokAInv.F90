@@ -23,8 +23,8 @@ PROGRAM BlokAInv
 #ifdef SPATIAL_THRESHOLDING
   TYPE(BCSR)          :: T1,T2
 #endif 
-#ifdef EXTREME_DEBUG
-  TYPE(DBL_RNK2)      :: DnsD1,DnsD2,DnsD3,DnsZ1,DnsZ2,DnsZ3,B,C
+#ifdef FIND_CONDA
+  TYPE(DBL_RNK2)      :: B,C
 #endif
   TYPE(BSET)          :: BS
   TYPE(CRDS)          :: GM
@@ -48,10 +48,6 @@ PROGRAM BlokAInv
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg
   CHARACTER(LEN=8),&
            PARAMETER  :: Prog='BlokAInv'
-
-#ifdef EXTREME_DEBUG
-  CHARACTER(LEN=DEFAULT_CHR_LEN) :: AInvFile
-#endif
 !-----------------------------------------------------------------------------------------------------------
 ! Start up macro
 !
@@ -89,11 +85,19 @@ PROGRAM BlokAInv
   ENDIF
   
 #endif
+
+
 !
 ! Allocations 
 !
   CALL New(A)
   CALL Get(A,TrixFile('S',Args))
+
+#ifdef LEVEL_SHIFT
+! Level shift
+  CALL Add(A,1.D-3)
+#endif
+
 #ifdef FIND_CONDA
   CALL New(B,(/NBasF,NBasF/))
   CALL New(C,(/NBasF,NBasF/))
