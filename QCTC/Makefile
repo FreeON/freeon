@@ -29,7 +29,7 @@ include $(MONDO_COMPILER)
 include $(MONDO_HOME)/Includes/Suffixes
 include $(MONDO_HOME)/Includes/RemoveAll
 #
-CPPMISC = -DEXPLICIT_SOURCE
+CPPMISC =-DEXPLICIT_SOURCE
 #
 EXTRA_INCLUDES= -I$(MONDO_HOME)/QCTC/MMA/CTraX   \
                 -I$(MONDO_HOME)/QCTC/MMA/HGToSP  \

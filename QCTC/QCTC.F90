@@ -23,9 +23,9 @@ PROGRAM QCTC
   USE NuklarE
 #ifdef PARALLEL
   USE MondoMPI
-  TYPE(DBCSR)                :: J,S,T1,P
+  TYPE(DBCSR)                :: J,T1,T2
 #else
-  TYPE(BCSR)                 :: J,S,T1,P
+  TYPE(BCSR)                 :: J,T1,T2
 #endif
   REAL(DOUBLE)               :: E_Nuc_Tot
   TYPE(TIME)                 :: TimeMakeJ
@@ -40,7 +40,11 @@ PROGRAM QCTC
   CALL NewBraBlok(BS)
 ! Get multipoles and density
   CALL Get(RhoPoles,SCFCycl)
-  CALL Get(Rho,'Rho',Args,0)
+  IF(SCFActn=='InkFok')THEN
+     CALL Get(Rho,'DeltaRho',Args,0)
+  ELSE  
+     CALL Get(Rho,'Rho',Args,0)
+  ENDIF
 ! Set thresholds local to QCTC (for PAC and MAC)
   CALL SetLocalThresholds(Thresholds%TwoE)
 ! Initialize the auxiliary density arrays
@@ -66,27 +70,32 @@ PROGRAM QCTC
   CALL Elapsed_Time(TimeMakeJ,'Init')
   CALL MakeJ(J)
   CALL Elapsed_TIME(TimeMakeJ,'Accum')
-! Put J to disk
-  CALL Filter(T1,J)
-  IF(Args%C%C(2)=='Core')THEN
-     CALL Put(T1,TrixFile('V',Args))
+  IF(SCFActn=='InkFok')THEN
+!    Add in correction if incremental J build
+     CALL New(T1)
+     CALL New(T2)
+     CALL Get(T1,TrixFile('J',Args,-1))
+     CALL Add(T1,J,T2)
+     CALL Filter(T1,T2)
+     CALL Delete(T2)
   ELSE
-     CALL Put(T1,TrixFile('J',Args,0))
+     CALL Filter(T1,J)
   ENDIF
-! Compute the nuclear-total electrostatic energy
-  E_Nuc_Tot=NukE()
-  CALL Put(E_Nuc_Tot,'enn+ene',Tag_O=SCFCycl)
+! Put J to disk
+  CALL Put(T1,TrixFile('J',Args,0))
+! Compute the nuclear-total electrostatic energy in O(N Lg N)
+  IF(SCFActn=='InkFok')THEN
+     CALL Get(E_Nuc_Tot,'E_NuclearTotal',Tag_O=PrvCycl)
+     E_Nuc_Tot=E_Nuc_Tot+NukE()
+  ELSE     
+     E_Nuc_Tot=NukE()
+  ENDIF
+  CALL Put(E_Nuc_Tot,'E_NuclearTotal',Tag_O=SCFCycl)
 !---------------------------------------------------------------
 ! Printing
-  IF(Args%C%C(2)=='Core')THEN
-     CALL PChkSum(T1,'V',Prog)
-     CALL PPrint( T1,'V')
-     CALL Plot(   T1,'V')
-  ELSE
-     CALL PChkSum(T1,'J['//TRIM(SCFCycl)//']',Prog)
-     CALL PPrint( T1,'J['//TRIM(SCFCycl)//']')
-     CALL Plot(   T1,'J['//TRIM(SCFCycl)//']')
-  ENDIF
+  CALL PChkSum(T1,'J['//TRIM(SCFCycl)//']',Prog)
+  CALL PPrint( T1,'J['//TRIM(SCFCycl)//']')
+  CALL Plot(   T1,'J['//TRIM(SCFCycl)//']')
 ! 
 !  WRITE(*,*) 'NukE[',TRIM(SCFCycl),'] = ',E_Nuc_Tot
 #ifdef PERIODIC
