@@ -1,15 +1,8 @@
-!
-!--  This source code is part of the MondoSCF suite of 
-!--  linear scaling electronic structure codes.  
-!
-!--  Matt Challacombe
-!--  Los Alamos National Laboratory
-!--  Copyright 2000, The University of California
-!
 !    COMPUTE THE INCOMPLETE INVERSE CHOLESKY FACTOR 
-!    OF THE OVERLAP MATRIX Z=S^(-L) USING BENZI AND TUMAS AINV
-!
-!
+!    OF THE OVERLAP MATRIX Z=S^(-L) USING BENZI AND TUMAS 
+!    BLOCKED AINV
+!    Author: Matt Challacombe
+!-----------------------------------------------------------------
 PROGRAM BlokAInv
   USE DerivedTypes
   USE GlobalScalars
@@ -38,7 +31,6 @@ PROGRAM BlokAInv
   TYPE(DBL_RNK2) :: P
   REAL(DOUBLE) :: Op,Mx0,B2Norm
   REAL(DOUBLE), EXTERNAL :: DDOT
-  REAL(DOUBLE), DIMENSION(10,10) :: T
   CHARACTER(LEN=8),PARAMETER                :: Prog='BlokAInv'
 #ifdef EXTREME_PRINT_DEBUG
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: ZIChar,ZJChar,AIChar, AJChar
