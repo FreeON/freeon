@@ -12,6 +12,9 @@ MODULE SetXYZ
                        Set_BCSR_EQ_BCSR,          &
                        Set_RNK2_EQ_BCSR,          &
                        Set_BCSR_EQ_RNK2,          &
+#ifdef MMech
+                       Set_BCSR_EQ_BMATR,         &
+#endif
 #ifdef PARALLEL
                        Set_DBCSR_EQ_BCSR,         &
                        Set_BCSR_EQ_DBCSR,         &
@@ -148,6 +151,62 @@ MODULE SetXYZ
          ENDIF
 #endif
       END SUBROUTINE Set_RNK2_EQ_BCSR
+!
+! Fill in quasi-sparse BMATR into a sparse blocked form.
+!
+      SUBROUTINE Set_BCSR_EQ_BMATR(B,A)
+         TYPE(BMATR), INTENT(INOUT) :: A        
+         TYPE(BCSR),     INTENT(INOUT) :: B        
+         INTEGER                       :: I,J,P,Q,OI,OJ,MA,NA,K,KK,M,MM,IC
+         TYPE(DBL_RNK2) :: BlockBM
+         IF(AllocQ(B%Alloc))  &
+         CALL Delete(B)
+         CALL New(B)
+         MM=MAXVAL(BSiz%I)
+         CALL New(BlockBM,(/MM,MM/))
+         P=1
+         Q=1
+         OI=0
+         B%RowPt%I(1)=1 
+         DO I=1,NAtoms
+            OJ=0
+            MA=BSiz%I(I) 
+            DO J=1,NAtoms
+               NA=BSiz%I(J)
+!
+! Now fill MAxNA block starting at (OI+1,OJ+1) of non-sparse representation
+!
+               BlockBM%D=Zero
+                  IC=0
+               DO K=1,MA
+                  KK=OI+K
+                  DO M=1,12
+                    MM=A%IB(KK,M)
+                    IF(MM>OJ .AND. MM<=OJ+NA) THEN
+                      IC=IC+1
+                      BlockBM%D(K,MM-OJ)=A%B(KK,M)
+                    ENDIF
+                  ENDDO
+               ENDDO
+!
+                 IF(IC/=0) THEN
+                   CALL BlockToBlock2(MA,NA,BlockBM%D,B%MTrix%D(Q:))
+                   B%BlkPt%I(P)=Q
+                   B%ColPt%I(P)=J               
+                   Q=Q+MA*NA
+                   P=P+1
+                   B%RowPt%I(I+1)=P
+                 ENDIF
+!
+               OJ=OJ+NA
+            ENDDO
+            OI=OI+MA
+         ENDDO
+         B%NAtms=NAtoms
+         B%NBlks=P-1
+         B%NNon0=Q-1
+         CALL Delete(BlockBM)
+      END SUBROUTINE Set_BCSR_EQ_BMATR
 !======================================================================
 !     Transform a dense matrix (Rank 2 array) into a BCSR matrix 
 !======================================================================
@@ -195,7 +254,21 @@ MODULE SetXYZ
             ENDDO
          ENDDO
       END SUBROUTINE BlockToBlock
+!
+      SUBROUTINE BlockToBlock2(M,N,A,B)
+         IMPLICIT NONE
+         INTEGER,                     INTENT(IN)    :: M,N
+         REAL(DOUBLE),DIMENSION(:,:), INTENT(IN)    :: A
+         REAL(DOUBLE),DIMENSION(M,N), INTENT(INOUT) :: B
+         INTEGER                                    :: I,J
 
+         DO J=1,N
+            DO I=1,M
+               B(I,J)=A(I,J)
+            ENDDO
+         ENDDO
+      END SUBROUTINE BlockToBlock2
+!
       SUBROUTINE Set_BCSR_EQ_VECT(B,A)
          TYPE(DBL_VECT), INTENT(INOUT) :: A        
          TYPE(BCSR),     INTENT(INOUT) :: B        
