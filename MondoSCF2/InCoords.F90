@@ -647,8 +647,9 @@ CONTAINS
 !
 !----------------------------------------------------------------
 !
-   SUBROUTINE DefineIntCoos(XYZ,AtNum,IntCs,NIntC,Cells,IEq, &
-                            GCoordCtrl,Bond,AtmB,TOPS, &
+   SUBROUTINE DefineIntCoos(XYZ,AtNum,IntCs,NIntC, &
+                            Cells,IEq,GCoordCtrl, &
+                            Bond,AtmB,TOPS, &
                             ArchMem_O,HFileIn_O,iCLONE_O,iGEO_O)
      !
      ! This routine defines internal coordinates
@@ -667,14 +668,13 @@ CONTAINS
      CHARACTER(LEN=*),OPTIONAL      :: HFileIn_O
      INTEGER,OPTIONAL               :: iCLONE_O,iGEO_O,ArchMem_O
      INTEGER                        :: MaxBonds
-     INTEGER,DIMENSION(:)           :: AtNum
+     INTEGER,DIMENSION(:,:)         :: Cells
+     INTEGER,DIMENSION(:)           :: AtNum,IEq
      TYPE(CoordCtrl)                :: GCoordCtrl
      TYPE(TOPOLOGY)                 :: TOPS
      TYPE(IntCBox)                  :: Box
      TYPE(ANGLEDATA)                :: Angle
      TYPE(OUTPDATA)                 :: OutP 
-     INTEGER,DIMENSION(:,:)         :: Cells
-     INTEGER,DIMENSION(:)           :: IEq   
      !
      NIntC=0
      NTorsion=0
@@ -683,9 +683,9 @@ CONTAINS
      CALL IntCBoxes(XYZ,Box)
      !
      CALL BondingScheme(XYZ,AtNum,1,AtmBCov,BondCov,TOPS, &
-                        Box,GCoordCtrl)
+                        Box,GCoordCtrl,Cells,IEq)
      CALL BondingScheme(XYZ,AtNum,2,AtmBVDW,BondVDW,TOPS, &
-                        Box,GCoordCtrl)
+                        Box,GCoordCtrl,Cells,IEq)
      CALL MergeBonds(BondCov,BondVDW,BondTot)
      CALL SortBonds(NatmsLoc,AtmBTot,BondTot)
      CALL Set_BONDDATA_EQ_BONDDATA(Bond,BondTot)
@@ -694,14 +694,14 @@ CONTAINS
    ! IF(PRESENT(HFileIn_O).AND.PRESENT(iCLONE_O).AND.&
    !    PRESENT(iGEO_O).AND.PRESENT(ArchMem_O)) THEN
    !   CALL ArchiveTop(TOPS,ArchMem_O, &
-   !                   BondTot,AtmBTot,HFileIn_O,iCLONE_O,iGEO_O)
+   !                  BondTot,AtmBTot,HFileIn_O,iCLONE_O,iGEO_O)
    ! ENDIF
      !
      ! Now define bond angles and torsions
      !
-     CALL AngleList(AtmBTot,BondTot,TOPS,XYZ,Angle,OutP)
+     CALL AngleList(AtmBTot,BondTot,TOPS,XYZ,Angle,OutP,Cells,IEq)
      CALL TorsionList(NatmsLoc,TOPS%Tot12,BondTot%IJ,XYZ, &
-                      AtNum,TorsionIJKL,NTorsion)
+                      AtNum,TorsionIJKL,NTorsion,IEq)
      !
      ! Fill Data into IntCs
      !
@@ -824,7 +824,7 @@ CONTAINS
 !----------------------------------------------------------------
 !
    SUBROUTINE TorsionList(NatmsLoc,Top12,BondIJ,XYZ, &
-                          AtNum,TorsionIJKL,NTorsion)
+                          AtNum,TorsionIJKL,NTorsion,IEq)
      IMPLICIT NONE
      INTEGER                     :: NatmsLoc,I,I1,I2
      INTEGER                     :: N1,N2,J,J1,J2,NBond
@@ -838,7 +838,7 @@ CONTAINS
      REAL(DOUBLE)                :: Crit,Alph1,Alph2,Sum,PIHalf
      REAL(DOUBLE)                :: Sum1,Sum2
      INTEGER,DIMENSION(1:4)      :: Atoms
-     INTEGER,DIMENSION(:)        :: AtNum
+     INTEGER,DIMENSION(:)        :: AtNum,IEq
      !    
      PIHalf=PI*Half
     !SelectTors=.FALSE.
@@ -897,7 +897,11 @@ CONTAINS
      !
      CALL New(TorsionIJKL,(/4,NTorsion/))
      DO I=1,NTorsion
-       DO J=1,4 ; TorsionIJKL%I(J,I)=TorsionIJKLAux%I(J,I) ; ENDDO
+       IF(IEq(TorsionIJKLAux%I(1,I))<IEq(TorsionIJKLAux%I(4,I))) THEN
+         DO J=1,4 ; TorsionIJKL%I(J,I)=TorsionIJKLAux%I(J,I) ; ENDDO
+       ELSE
+         DO J=1,4 ; TorsionIJKL%I(5-J,I)=TorsionIJKLAux%I(J,I) ; ENDDO
+       ENDIF
      ENDDO
      CALL Delete(TorsionIJKLAux)
    END SUBROUTINE TorsionList
@@ -916,10 +920,6 @@ CONTAINS
      !        =3 : Do not refresh definitions, use the one from HDF
      !        =4 : Refresh/generate only the covalent coordinates
      !        =5 : only the extra coordinates from input
-     ! WARNING! In the present version 
-     ! bending -> linear bending transitions are 
-     ! always checked and refreshed
-     ! Later, check also linear bending -> bending transitions !
      ! 
      IMPLICIT NONE
      TYPE(INTC)                  :: IntCs,IntC_Bas,IntC_VDW
@@ -944,6 +944,7 @@ CONTAINS
      INTEGER                     :: NLinBGeOp,NOutPGeOp,NTorsGeOp
      TYPE(INT_VECT)              :: AtNum,AtNumRepl
      TYPE(INT_RNK2)              :: Top12
+     TYPE(INT_RNK3)              :: CellEq
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
      TYPE(TOPOLOGY)              :: TOPS
      TYPE(IntCBox)               :: Box
@@ -952,8 +953,6 @@ CONTAINS
      TYPE(INT_RNK2)              :: Cells
      !
      NatmsLoc=SIZE(XYZ,2)
-     IF(AllocQ(IntCs%Alloc)) CALL Delete(IntCs)
-     !
      NIntC_Bas=0
      NIntC_VDW=0
      !
@@ -962,19 +961,18 @@ CONTAINS
        AtNum%I(I)=INT(AtNumIn(I))
      ENDDO
      !
-     CALL PrepCells(XYZ,AtNum%I,PBCDim,XYZRepl,AtNumRepl,Cells,IEq)
+     CALL PrepCells(XYZ,AtNum%I,PBCDim,XYZRepl,AtNumRepl, &
+                    Cells,CellEq,IEq)
      !
      IF(Refresh==1) THEN !!! Total refresh
        IF(PRESENT(HFileIn_O).AND.PRESENT(iCLONE_O)) THEN
          CALL DefineIntCoos(XYZRepl%D,AtNumRepl%I,IntC_Bas,NIntC_Bas, &
-                            Cells%I,IEq%I, &
-                            CtrlCoord,Bond,AtmB,TOPS,ArchMem_O=ArchMem,&
-                            HFileIn_O=HFileIn_O,iCLONE_O=iCLONE_O, &
-                            iGEO_O=iGEO_O)
+                            Cells%I,IEq%I,CtrlCoord,Bond,AtmB,TOPS, &
+                            ArchMem_O=ArchMem,HFileIn_O=HFileIn_O, &
+                            iCLONE_O=iCLONE_O,iGEO_O=iGEO_O)
        ELSE
          CALL DefineIntCoos(XYZRepl%D,AtNumRepl%I,IntC_Bas,NIntC_Bas, &
-                            Cells%I,IEq%I, &
-                            CtrlCoord,Bond,AtmB,TOPS)
+                            Cells%I,IEq%I,CtrlCoord,Bond,AtmB,TOPS)
        ENDIF
        !
        ! Check for bending - lin.bending transions
@@ -994,6 +992,7 @@ CONTAINS
      ENDIF
      !
      CALL Delete(Cells)
+     CALL Delete(CellEq)
      CALL Delete(IEq)
      CALL Delete(XYZRepl)
      CALL Delete(AtNumRepl)
@@ -1063,7 +1062,7 @@ CONTAINS
      CtrlCoord%NTors=NTorsGeOp
      !
      CALL Delete(AtNum)
-    !CALL PrtIntCoords(IntCs,IntCs%Value%D,'GetIntC Internals')
+   ! CALL PrtIntCoords(IntCs,IntCs%Value%D,'GetIntC Internals',PBCDim_O=PBCDim)
    END SUBROUTINE GetIntCs
 !
 !-------------------------------------------------------------------
@@ -1135,49 +1134,58 @@ CONTAINS
      INTEGER,DIMENSION(:,:)      :: Cells
      INTEGER,DIMENSION(:)        :: IEq  
      TYPE(INT_VECT)              :: Sort
-     INTEGER                     :: I,I1,I2,J1,J,K,L,N,II
+     INTEGER                     :: I,I1,I2,J1,J,K,L,N,II,M
      INTEGER,DIMENSION(3)        :: Cell1
      INTEGER,DIMENSION(4)        :: DotProds
+     LOGICAL                     :: DOCycle,DOAllow,DoTest
      !
      CALL New(Sort,IntCs%N)
      Sort%I=0
      !
      II=0
      DO I=1,IntCs%N
-      !DotProds=1000000
-      !DO J=1,4
-      !  I1=IntCs%Atoms%I(I,J)
-      !  IF(I1/=0) THEN
-      !    Cell1=Cells(I1,1:3)  
-      !  ELSE
-      !    EXIT 
-      !  ENDIF
-      !  DotProds(J)=DOT_PRODUCT(Cell1,Cell1)     
-      !ENDDO
-      !IF(.NOT.(ANY(DotProds==0))) CYCLE
        I1=IntCs%Atoms%I(I,1)
-       IF(I1/=0) THEN
-         Cell1=Cells(I1,1:3)  
-       ELSE
-         CYCLE
+       DO J=2,4
+         K=IntCs%Atoms%I(I,J)
+         IF(K==0) EXIT
+         I2=K
+       ENDDO 
+       IF(I2/=0) THEN
+         Cell1=Cells(I1,1:3)-Cells(I2,1:3)
+         K=DOT_PRODUCT(Cell1,(/1,1,1/))
+         IF(K==0) K=DOT_PRODUCT(Cell1,(/1,1,0/))
+         IF(K==0) K=DOT_PRODUCT(Cell1,(/1,0,1/))
+         IF(K>0) THEN
+           M=I1
+           N=I2
+         ELSE
+           M=I2
+           N=I1
+         ENDIF
+         IF(ANY(Cells(M,1:3)/=0)) CYCLE
        ENDIF
-       J1=DOT_PRODUCT(Cell1,Cell1)
-       IF(J1/=0) THEN
-         CYCLE !!!see phi(T1,T2,T3,T4) -> phi(T1-T1,T2-T1,T3-T1,T4-T1)
-       ENDIF
+       !
+      !DoAllow=.FALSE.
+      !DO J=1,4
+      !  K=IntCs%Atoms%I(I,J)
+      !  IF(K==0) EXIT
+      !  IF(ALL(Cells(K,1:3)==0)) DoAllow=.TRUE.
+      !ENDDO
+      !IF(.NOT.DoAllow) CYCLE
+       !
        II=II+1
        Sort%I(I)=1
        !
        IntCs%Cells%I(I,1:12)=0    
        DO J=1,4
-         N=IntCs%Atoms%I(I,J)
-         IF(N==0) Exit
-         IntCs%Atoms%I(I,J)=IEq(N)
+         I1=IntCs%Atoms%I(I,J)
+         IF(I1==0) Exit
+         IntCs%Atoms%I(I,J)=IEq(I1)
          K=(J-1)*3+1
          L=K+2
-         IntCs%Cells%I(I,K:L)=Cells(N,1:3)
+         IntCs%Cells%I(I,K:L)=Cells(I1,1:3)
        ENDDO
-    ENDDO
+     ENDDO
      !
      CALL New(IntCs2,II)
      II=0
@@ -1191,18 +1199,19 @@ CONTAINS
      CALL New(IntCs,II)
      CALL Set_INTC_EQ_INTC(IntCs2,IntCs,1,II,1)
      CALL Delete(IntCs2)
-     !
      CALL Delete(Sort)
    END SUBROUTINE CleanPBCIntCs
 !
 !-------------------------------------------------------------------
 !
-   SUBROUTINE PrepCells(XYZ,AtNum,PBCDim,XYZBig,AtNumRepl,Cells,IEq,Dir_O)
+   SUBROUTINE PrepCells(XYZ,AtNum,PBCDim,XYZBig,AtNumRepl, &
+                        Cells,CellEq,IEq,Dir_O)
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
      TYPE(INT_VECT)              :: IEq,AtNumRepl
      INTEGER,DIMENSION(:)        :: AtNum
      TYPE(INT_RNK2)              :: Cells
-     REAL(DOUBLE)                :: NDim
+     TYPE(INT_RNK3)              :: CellEq
+     INTEGER                     :: NDim
      REAL(DOUBLE)                :: XTrans,YTrans,ZTrans
      INTEGER                     :: NatmsLoc,I,J,II,NA,NB,NC
      INTEGER                     :: NCells,IA,IB,IC,PBCDim
@@ -1214,26 +1223,31 @@ CONTAINS
      ! Grow a layer of 16 a.u. (appr. 8 A) around central cell
      ! To be able to model far reaching internal coordinates
      !
-     IF(NatmsLoc==0) THEN
-       CALL Halt('No atoms in prepcell.')
-     ELSE IF(NatmsLoc==1) THEN
-        NDim=2
-     ELSE IF(NatmsLoc>1) THEN
-        NDim=1
-     ENDIF
+    !IF(NatmsLoc==0) THEN
+    !  CALL Halt('No atoms in prepcell.')
+    !ELSE IF(NatmsLoc==1) THEN
+    !   NDim=2
+    !ELSE IF(NatmsLoc>1) THEN
+    !   NDim=1
+    !ENDIF
+     NDim=2
+     !
+     CALL New(CellEq,(/NDim,NDim,NDim/),M_O=(/-NDim,-NDim,-NDim/))
+     CellEq%I=0
+     !
      NA=0 ; NB=0 ; NC=0
      IF(PBCDim>0)  NA=NDim
      IF(PBCDim>1)  NB=NDim
      IF(PBCDim>2)  NC=NDim
      IF(PRESENT(Dir_O)) THEN
        IF(Dir_O=='A') THEN
-         NB=0 ; NC=0
+         NA=1 ; NB=0 ; NC=0
        ENDIF
        IF(Dir_O=='B') THEN
-         NA=0 ; NC=0
+         NA=0 ; NB=1 ; NC=0
        ENDIF
        IF(Dir_O=='C') THEN
-         NA=0 ; NB=0
+         NA=0 ; NB=0 ; NC=1
        ENDIF
      ENDIF
      !
@@ -1246,6 +1260,7 @@ CONTAINS
      CALL New(XYZBig,(/3,NCells*NatmsLoc/))
      !
      II=0
+     CellEq%I(0,0,0)=II+1
      DO I=1,NatmsLoc 
        II=II+1
        XYZBig%D(1:3,II)=XYZ(1:3,I) 
@@ -1260,6 +1275,7 @@ CONTAINS
        DO IB=-NB,NB
          DO IC=-NC,NC
            IF(IA==0.AND.IB==0.AND.IC==0) CYCLE
+           CellEq%I(IA,IB,IC)=II+1
            DO I=1,NatmsLoc
              XTrans=IA*XYZ(1,NatmsLoc+1)+&
                    IB*XYZ(1,NatmsLoc+2)+IC*XYZ(1,NatmsLoc+3)
@@ -1618,7 +1634,7 @@ CONTAINS
        CALL Halt('MixMat missing from the CALL of InternalToCart.')
      ENDIF
      DoRepeat=.FALSE.
-     RepMax=5 
+     RepMax=1 
      !
      ! Auxiliary arrays
      !
@@ -1942,6 +1958,7 @@ CONTAINS
      TYPE(DBL_RNK2)              :: XYZRepl
      TYPE(INT_VECT)              :: IEq,AtNum,AtNumRepl
      TYPE(INT_RNK2)              :: Cells
+     TYPE(INT_RNK3)              :: CellEq
      LOGICAL                     :: PrtLVect
      CHARACTER(LEN=1)            :: Dir
      !
@@ -1955,12 +1972,13 @@ CONTAINS
      ENDDO
      !
      IF(PBCDim>0) THEN
-       DO I=1,3
+       DO I=1,4
          IF(I==1) Dir='A'
          IF(I==2) Dir='B'
          IF(I==3) Dir='C'
+         IF(I==4) Dir='T'
          CALL PrepCells(XYZ,AtNum%I,PBCDim,XYZRepl, &
-                        AtNumRepl,Cells,IEq,Dir_O=Dir)
+                        AtNumRepl,Cells,CellEq,IEq,Dir_O=Dir)
          IF(PrtLVect) THEN
            CALL PrtXYZ(AtNumRepl%I,XYZRepl%D,TRIM(PWDPath)//Dir//'Back.xyz',&
                        Title,XYZL_O=XYZ)
@@ -1971,15 +1989,18 @@ CONTAINS
          CALL Delete(XYZRepl) 
          CALL Delete(AtNumRepl) 
          CALL Delete(Cells) 
+         CALL Delete(CellEq) 
          CALL Delete(IEq) 
        ENDDO
      ELSE
-       CALL PrepCells(XYZ,AtNum%I,PBCDim,XYZRepl,AtNumRepl,Cells,IEq)
+       CALL PrepCells(XYZ,AtNum%I,PBCDim,XYZRepl,AtNumRepl, &
+                      Cells,CellEq,IEq)
        CALL PrtXYZ(AtNumRepl%I,XYZRepl%D,TRIM(PWDPath)//'Back.xyz',&
                    Title)
        CALL Delete(XYZRepl) 
        CALL Delete(AtNumRepl) 
        CALL Delete(Cells) 
+       CALL Delete(CellEq) 
        CALL Delete(IEq) 
      ENDIF
      !
@@ -2131,7 +2152,7 @@ CONTAINS
      ENDDO
      !      
      111 FORMAT(I7,2X,A8,2X,4I5,2X,F12.6,L5,F12.6,L5)
-     112 FORMAT(17X,4(3I2,2X))
+     112 FORMAT(15X,4(3I2,2X))
      222 FORMAT(I7,2X,A8,2X,4I5,2X,3F12.6,L5,F12.6,L5)
      !
    END SUBROUTINE PrtIntCoords
@@ -3943,7 +3964,7 @@ B%BL%D=Zero
        READ(99,33) Char 
      ENDDO
      IF(PRESENT(XYZL_O)) THEN
-       WRITE(99,*) NatmsLoc+3
+       WRITE(99,*) NatmsLoc+3+1
      ELSE
        WRITE(99,*) NatmsLoc 
      ENDIF
@@ -3960,6 +3981,7 @@ B%BL%D=Zero
      !
      IF(PRESENT(XYZL_O)) THEN
        NatmsLoc=SIZE(XYZL_O,2)-3
+         WRITE(99,200) Zero,Zero,Zero
        DO I=1,3         
          WRITE(99,200) XYZL_O(1:3,NatmsLoc+I)/AngstromsToAu
        ENDDO 
@@ -4628,7 +4650,7 @@ return
      CALL DSYEV('V','U',3,BLKVECT%D,BIGBLOK,BLKVALS%D, &
      BLKWORK%D,BLKLWORK,INFO)
      IF(INFO/=SUCCEED) &
-     CALL Halt('DSYEV hosed in SortNonCov2. INFO='&
+     CALL Halt('DSYEV hosed in D3Bonds. INFO='&
                 //TRIM(IntToChar(INFO)))
      EigVects=BLKVECT%D
      EigVals=BLKVALS%D
@@ -5523,13 +5545,14 @@ return
 !---------------------------------------------------------------------
 !
    SUBROUTINE BondingScheme(XYZ,AtNum,IntSet,AtmB,Bond,TOPS, &
-                            Box,GCoordCtrl)
+                            Box,GCoordCtrl,Cells,IEq)
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
-     INTEGER,DIMENSION(:)        :: AtNum
+     INTEGER,DIMENSION(:)        :: AtNum,IEq
      INTEGER                     :: IntSet 
      TYPE(BONDDATA)              :: Bond,BondF,Bond1
-     TYPE(ATOMBONDS)             :: AtmB
+     TYPE(ATOMBONDS)             :: AtmB,AtmBF
      TYPE(TOPOLOGY)              :: TOPS
+     INTEGER,DIMENSION(:,:)      :: Cells
      TYPE(IntCBox)               :: Box 
      TYPE(CoordCtrl)             :: GCoordCtrl
      TYPE(DBL_VECT)              :: CritRad
@@ -5561,7 +5584,7 @@ return
      IF(IntSet==1) THEN
        DoRepeat=.FALSE.
        CALL BondList(XYZ,AtNum,IntSet,Box,Bond,TOPS, &
-                     CritRad,HbondMax,DoRepeat)
+                     CritRad,HbondMax,DoRepeat,IEq)
        CALL SortBonds(NatmsLoc,AtmB,Bond)
        CALL Topology_12(AtmB,TOPS%Cov12)
        CALL Topology_13(NatmsLoc,TOPS%Cov12,TOPS%Cov13)
@@ -5572,7 +5595,7 @@ return
        DO I=1,6
          DoRepeat=.FALSE.
          CALL BondList(XYZ,AtNum,IntSet,Box,Bond1,TOPS, &
-                       CritRad,HBondMax,DoRepeat)
+                       CritRad,HBondMax,DoRepeat,IEq)
          IF(DoRepeat) THEN
            CALL Delete(Bond1)
          ELSE
@@ -5581,18 +5604,25 @@ return
          IF(I==6.AND.DoRepeat) CALL Halt('The 6th attempt of recognizing bonds to lonely atoms failed.')
        ENDDO
        !
-       CALL VDWTop(TOPS%Tot12,TOPS%Cov12,Bond1%IJ)
-       CALL ConnectFragments(XYZ,AtNum,BondF,TOPS)
+       CALL VDWTop(TOPS%Tot12,TOPS%Cov12,Bond1%IJ,Bond1%N)
+       CALL ConnectFragments(XYZ,AtNum,BondF,TOPS,Cells,IEq)
+       !
+       CALL SortBonds(NatmsLoc,AtmBF,BondF)
+       CALL SortNonCov2(AtNum,XYZ,BondF,AtmBF)
+       CALL Delete(AtmBF)
+       !
        CALL MergeBonds(Bond1,BondF,Bond)
        CALL Delete(Bond1)
        CALL Delete(BondF)
        CALL Delete(TOPS%Tot12)
        !
+     ! CALL SortBonds(NatmsLoc,AtmB,Bond)
+     ! CALL SortNonCov2(AtNum,XYZ,Bond,AtmB)
+     ! CALL Delete(AtmB)
+       !
        CALL SortBonds(NatmsLoc,AtmB,Bond)
-       CALL SortNonCov2(AtNum,XYZ,Bond,AtmB)
-       CALL Delete(AtmB)
-       CALL SortBonds(NatmsLoc,AtmB,Bond)
-       CALL VDWTop(TOPS%Tot12,TOPS%Cov12,Bond%IJ)
+       !
+       CALL VDWTop(TOPS%Tot12,TOPS%Cov12,Bond%IJ,Bond%N)
        CALL Topology_13(NatmsLoc,TOPS%Tot12,TOPS%Tot13)
        CALL Topology_14(NatmsLoc,TOPS%Tot12,TOPS%Tot14)
        CALL Excl_List(NatmsLoc,TOPS%Tot12,TOPS%Tot13,TOPS%Tot14, &
@@ -5604,14 +5634,14 @@ return
 !--------------------------------------------------------
 !
    SUBROUTINE BondList(XYZ,AtNum,IntSet,Box,Bond,TOPS, &
-                       CritRad,HBondMax,DoRepeat)
+                       CritRad,HBondMax,DoRepeat,IEq)
      IMPLICIT NONE
      INTEGER                     :: I,J,NatmsLoc,NBond
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
      TYPE(BONDDATA)              :: Bond
      TYPE(IntCBox)               :: Box
      TYPE(TOPOLOGY)              :: TOPS
-     INTEGER,DIMENSION(:)        :: AtNum
+     INTEGER,DIMENSION(:)        :: AtNum,IEq
      TYPE(DBL_VECT)              :: CritRad,CritRadMod 
      TYPE(INT_VECT)              :: Neighbors
      REAL(DOUBLE)                :: R12,R12_2,CritDist,HBondMax
@@ -5694,7 +5724,11 @@ return
                                  NBondEst=NBondEst+DDim
                                ENDIF 
                                NBond=NBond+1
-                               Bond%IJ%I(1:2,NBond)=(/JJ1,JJ2/)
+                               IF(IEq(JJ1)<IEq(JJ2)) THEN
+                                 Bond%IJ%I(1:2,NBond)=(/JJ1,JJ2/)
+                               ELSE
+                                 Bond%IJ%I(1:2,NBond)=(/JJ2,JJ1/)
+                               ENDIF
                                Bond%Length%D(NBond)=R12
                                Neighbors%I(JJ1)=Neighbors%I(JJ1)+1
                                Neighbors%I(JJ2)=Neighbors%I(JJ2)+1
@@ -5729,12 +5763,13 @@ return
                  ENDIF
                ENDDO
                IF(IntSet==2) THEN
-                 IF(Neighbors%I(JJ1)==0) THEN
-                   DoRepeat=.TRUE.
-                   CritRadMod%D(JJ1)=1.2D0*CritRadMod%D(JJ1)
-                 ELSE
+               !!! lonely atoms will be treated in connectfragments
+               ! IF(Neighbors%I(JJ1)==0) THEN 
+               !   DoRepeat=.TRUE.
+               !   CritRadMod%D(JJ1)=1.2D0*CritRadMod%D(JJ1)
+               ! ELSE
                    EXIT  
-                 ENDIF
+               ! ENDIF
                ELSE
                  EXIT
                ENDIF
@@ -5795,6 +5830,7 @@ return
      !
      DO II=1,NatmsLoc
        IN12=Top12%I(II,1)
+       IF(IN12==0) CYCLE
        DO J=1,IN12
          JJ=Top12%I(II,J+1)
          JN12=Top12%I(JJ,1)
@@ -6152,7 +6188,7 @@ return
 !
 !--------------------------------------------------------
 !
-   SUBROUTINE VDWTop(TopVDW,Top12,BondIJ)
+   SUBROUTINE VDWTop(TopVDW,Top12,BondIJ,NBond)
      TYPE(INT_RNK2) :: Top12,TopVDW,BondIJ,TopVDWNew
      TYPE(INT_VECT) :: Addition
      INTEGER        :: NatmsLoc,NBond,I,J,Dim2,AddDim,I1,I2,II1,II2
@@ -6161,7 +6197,6 @@ return
      Dim2=SIZE(Top12%I,2)
      CALL New(TopVDW,(/NatmsLoc,Dim2/))
      TopVDW%I=Top12%I
-     NBond=SIZE(BondIJ%I,2)
      CALL New(Addition,NatmsLoc)
      !
      Addition%I=0
@@ -6199,17 +6234,19 @@ return
 !
 !---------------------------------------------------------------------
 !
-   SUBROUTINE AngleList(AtmB,Bond,TOPS,XYZ,Angle,OutP)
+   SUBROUTINE AngleList(AtmB,Bond,TOPS,XYZ,Angle,OutP,Cells,IEq)
      TYPE(BONDDATA)              :: Bond
      TYPE(ATOMBONDS)             :: AtmB
      TYPE(TOPOLOGY)              :: TOPS
      TYPE(ANGLEDATA)             :: Angle
      TYPE(OUTPDATA)              :: OutP 
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
+     INTEGER     ,DIMENSION(:,:) :: Cells
      TYPE(INT_VECT)              :: BondScore
      INTEGER,DIMENSION(3)        :: RefBonds
      INTEGER                     :: I,J,K,L,NAngle,NatmsLoc,AllBond
      INTEGER                     :: I1,I2,I3,NDimens,NOutP
+     INTEGER,DIMENSION(:)        :: IEq
      !
      CALL SetDSYEVWork(3)
      NatmsLoc=SIZE(XYZ,2)
@@ -6228,12 +6265,14 @@ return
      CALL ScoreBond(BondScore%I,Bond)
      DO I=1,NatmsLoc
        IF(TOPS%Tot12%I(I,1)==0) THEN
+         IF(ANY(Cells(I,1:3)>1).OR.ANY(Cells(I,1:3)<-1)) CYCLE
          CALL Halt('Atom not bound at '//TRIM(IntToChar(I))//' .')
        ENDIF
        CALL AnglesRef(RefBonds,NDimens,BondScore%I,I,XYZ,AtmB,Bond)
       !CALL AngleGen(I,Angle,NAngle,RefBonds,NDimens,XYZ,AtmB,Bond,TOPS)
-       CALL FullAngleGen(I,Angle,NAngle,AtmB,Bond,TOPS)
-       CALL OutPGen(I,OutP,NOutP,RefBonds,NDimens,XYZ,AtmB,Bond,TOPS)
+       CALL FullAngleGen(I,Angle,NAngle,AtmB,Bond,TOPS,IEq)
+       CALL OutPGen(I,OutP,NOutP,RefBonds,NDimens, &
+                    XYZ,AtmB,Bond,TOPS)
      ENDDO
      CALL Delete(BondScore)
      CALL UnSetDSYEVWork()
@@ -6244,7 +6283,8 @@ return
 !
 !----------------------------------------------------------------------
 !
-   SUBROUTINE OutPGen(IAt,OutP,NOutP,RefBonds,NDimens,XYZ,AtmB,Bond,TOPS)
+   SUBROUTINE OutPGen(IAt,OutP,NOutP,RefBonds,NDimens, &
+                      XYZ,AtmB,Bond,TOPS)
      INTEGER                       :: IAt,I,J,K,L,NOutP,NDimens
      TYPE(OUTPDATA)                :: OutP
      INTEGER,DIMENSION(:)          :: RefBonds
@@ -6354,13 +6394,14 @@ return
 !
 !-------------------------------------------------------------------
 !
-   SUBROUTINE FullAngleGen(IAt,Angle,NAngle,AtmB,Bond,TOPS)
+   SUBROUTINE FullAngleGen(IAt,Angle,NAngle,AtmB,Bond,TOPS,IEq)
      INTEGER                :: IAt,I,J,K,L,NAngle
      TYPE(ANGLEDATA)        :: Angle
      TYPE(ATOMBONDS)        :: AtmB
      TYPE(BONDDATA)         :: Bond 
      TYPE(TOPOLOGY)         :: TOPS
      INTEGER                :: B1,B2,I1B1,I2B1,I1B2,I2B2,II1,II2,TopDim
+     INTEGER,DIMENSION(:)   :: IEq
      !
      DO J=1,AtmB%Count%I(IAt)
        B1=AtmB%Bonds%I(IAt,J)
@@ -6384,7 +6425,7 @@ return
          IF(ANY(TOPS%Tot12%I(II1,2:TopDim+1)==II2)) CYCLE
          NAngle=NAngle+1
          Angle%IJK%I(2,NAngle)=IAt
-         IF(II1<II2) THEN
+         IF(IEq(II1)<IEq(II2)) THEN
            Angle%IJK%I(1,NAngle)=II1
            Angle%IJK%I(3,NAngle)=II2
          ELSE
@@ -6559,9 +6600,11 @@ return
        Tag=TRIM(IntToChar(iGEO-I))
        CALL Get(Bond2,'Bond',Tag)
        CALL Get(AtmB2,'AtmB',Tag)
-       CALL MergeBondSets(Bond,Bond2,AtmB,AtmB2)
-       CALL Delete(AtmB)
-       CALL SortBonds(NatmsLoc,AtmB,Bond)
+       IF(Bond2%N>0) THEN
+         CALL MergeBondSets(Bond,Bond2,AtmB,AtmB2)
+         CALL Delete(AtmB)
+         CALL SortBonds(NatmsLoc,AtmB,Bond)
+       ENDIF
        !
        CALL Delete(Bond2)
        CALL Delete(AtmB2)
@@ -6731,7 +6774,7 @@ return
 !
 !-------------------------------------------------------------------
 ! 
-   SUBROUTINE ConnectFragments(XYZ,AtNum,BondF,TOPS)
+   SUBROUTINE ConnectFragments(XYZ,AtNum,BondF,TOPS,Cells,IEq)
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
      TYPE(TOPOLOGY)              :: TOPS
      TYPE(INT_VECT)              :: ITop,JTop,Perm,IPerm
@@ -6740,11 +6783,14 @@ return
      TYPE(DBL_VECT)              :: ATop
      TYPE(DBL_RNK2)              :: CenterFrag
      INTEGER                     :: NZ,NAtmsLoc,I,J,II,K,L,M,N
-     INTEGER                     :: ColMax
-     INTEGER,DIMENSION(:)        :: AtNum
+     INTEGER                     :: ColMax,ISt,IStN
+     INTEGER,DIMENSION(:)        :: AtNum,IEq
+     INTEGER,DIMENSION(:,:)      :: Cells
      TYPE(BONDDATA)              :: BondF
-     REAL(DOUBLE),DIMENSION(3)   :: Vect  
+     REAL(DOUBLE),DIMENSION(3)   :: Vect
      REAL(DOUBLE)                :: Length
+     INTEGER,DIMENSION(3)        :: CellAux2
+     LOGICAL                     :: DoC,Longer
      ! 
      ! Calculate sparse topology matrix
      ! 
@@ -6817,24 +6863,34 @@ return
      !
      ! Connect fragments
      !
+     IF(II>1) THEN
+       WRITE(*,*) 'NUMBER OF FRAGMENTS OBSERVED= ',II
+       WRITE(Out,*) 'NUMBER OF FRAGMENTS OBSERVED= ',II
+     ENDIF
      K=(II*II-II)/2
      CALL New(BondF,K)
      K=0
      DO I=1,II
-       DO J=I+1,II
+       IF(.NOT.HasCentralCell(I,IFrag%I,JFrag%I,IEq)) CYCLE
+       DO J=1,II
+         IF(I==J) CYCLE
+         ! connect only to central cell
+         CALL ClosestAtms(M,N,I,J,IFrag%I,JFrag%I, &
+                          CenterFrag%D,XYZ)
+         IF(ANY(Cells(N,1:3)>1).OR.ANY(Cells(N,1:3)<-1)) CYCLE 
          K=K+1
-       ! M=Center%I(I)
-       ! N=Center%I(J)
-       ! V1(1:3)=XYZ(1:3,M)-XYZ(1:3,N)
-       ! Length=SQRT(DOT_PRODUCT(V1,V1))
-         CALL ClosestAtms(M,N,I,J,IFrag%I,JFrag%I,CenterFrag%D,XYZ)
          Vect=XYZ(1:3,M)-XYZ(1:3,N)
          Length=SQRT(DOT_PRODUCT(Vect,Vect))
-         BondF%IJ%I(1:2,K)=(/M,N/)
+         IF(IEq(M)<IEq(N)) THEN
+           BondF%IJ%I(1:2,K)=(/M,N/)
+         ELSE
+           BondF%IJ%I(1:2,K)=(/N,M/)
+         ENDIF
          BondF%Length%D(K)=Length
          BondF%Type%C(K)(1:4)='Frag'
        ENDDO
      ENDDO
+     BondF%N=K
      !
      CALL Delete(CenterFrag)
      CALL Delete(FragID)
@@ -6850,7 +6906,25 @@ return
 !
 !-------------------------------------------------------------------
 ! 
-   SUBROUTINE ClosestAtms(MM,NN,II,JJ,IFrag,JFrag,CenterFrag,XYZ)
+   FUNCTION HasCentralCell(II,IFrag,JFrag,IEq)
+     LOGICAL :: HasCentralCell
+     INTEGER :: II,I,J
+     INTEGER,DIMENSION(:) :: IFrag,JFrag,IEq
+     !
+     HasCentralCell=.FALSE.
+     DO I=IFrag(II),IFrag(II+1)-1
+       J=JFrag(I)
+       IF(IEq(J)==J) THEN
+         HasCentralCell=.TRUE.
+         EXIT
+       ENDIF
+     ENDDO
+   END FUNCTION HasCentralCell
+!
+!-------------------------------------------------------------------
+! 
+   SUBROUTINE ClosestAtms(MM,NN,II,JJ,IFrag,JFrag, &
+                          CenterFrag,XYZ)
      INTEGER                     :: II,JJ,M,N,I,J,MaxIt,It,K,L
      INTEGER                     :: MMOld,NNOld,MM,NN
      INTEGER,DIMENSION(:)        :: IFrag,JFrag

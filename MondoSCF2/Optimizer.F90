@@ -728,7 +728,7 @@ CONTAINS
      !
      IF(Print==DEBUG_GEOP_MAX) THEN
        CALL PrtIntCoords(IntCs,IntCs%Value%D,&
-                         'Internals at step #'//TRIM(IntToChar(iGEO)))
+           'Internals at step #'//TRIM(IntToChar(iGEO)),PBCDim_O=PBCDim)
        IF(PBCDim>0) CALL PrtPBCs(XYZ)
      ENDIF
      !
