@@ -1,0 +1,71 @@
+<BeginTitle>
+ Gallacher, A.C.;Pinkerton, A.A. (1992)
+ Phase Transition 38, 127-220
+ A redetermination of monoclinic gamma-sulfur
+    CSD ENTRY 66517ICS
+<EndTitle>
+
+<BeginOptions>
+Charge=0
+
+MPIInvoke="mpirun"
+MPIProcessors=8 
+MPIProcFlag="-np"
+MPISpatialProc=8 
+MPIMachineFlag="--nper"
+MPIMachineFile="2"
+
+Multiplicity=1
+Guess=SuperPos
+Grad=(Optimize,PrimInt,NoBackTr,BiSect,NoGDIIS)
+DebugAll=(MaxDebug,CheckSums,MaxGeOp)
+SCFMethod=(RH)
+BasisSets=(STO-3G-SPLIT)
+ModelChem=(PBExc) 
+Accuracy =(good)
+Geometry=(InAngstroms,NoOrder) 
+Periodic=(AtomCoord)
+PBC=(T,T,T)
+<EndOptions>
+
+<BeginPeriodic>
+  8.4550  13.0520   9.2670  90.00 124.89  90.00     
+<EndPeriodic>
+
+<BeginGeometry>  
+  S       1.112       8.540       6.269
+  S       1.711       5.492       7.379
+  S       6.127       7.270       0.243
+  S       0.248       4.218       6.720
+  S      -0.608       8.540       5.133
+  S       0.255       4.218       4.682
+  S      -1.207       5.492       4.023
+  S      -0.322       7.270       3.558
+  S       2.043       4.512       1.333
+  S       1.443       7.560       0.222
+  S      -2.972       5.782       7.359
+  S       2.906       8.834       0.882
+  S       3.762       4.512       2.468
+  S       2.899       8.834       2.919
+  S       4.361       7.560       3.579
+  S       3.476       5.782       4.043
+  S      -3.031       2.638       5.316
+  S       3.535       2.638       6.086
+  S       6.186      10.414       2.286
+  S      -0.381      10.414       1.515
+  S      -1.765      12.647       5.474
+  S      -3.143      11.393       6.304
+  S      -1.907       1.386       6.462
+  S       3.646      11.393       5.097
+  S       2.269      12.647       5.928
+  S       2.411       1.386       4.940
+  S       4.919       0.405       2.128
+  S       6.297       1.659       1.297
+  S       5.061      11.666       1.139
+  S      -0.492       1.659       2.504
+  S       0.885       0.405       1.673
+  S       0.743      11.666       2.661
+<EndGeometry>
+
+
+
