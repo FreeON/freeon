@@ -89,7 +89,13 @@ PROGRAM P2Use
         CALL Delete(BlkP)
      ELSE
         CALL SetToI(P)
+#ifdef PARALLEL
+  IF(MyID == ROOT) THEN
+#endif
         CALL Warn('Attempting to use density superpostion with a non STO basis set. Going for scaled I.')
+#ifdef PARALLEL
+  ENDIF
+#endif
         CALL Multiply(P,DBLE(NEl)/DBLE(2*NBasF))
         TrP=Trace(P)
         IF(ABS(TrP-DBLE(NEl/Two))>1.D-10) CALL Warn(' In P2Use, TrP = '//TRIM(DblToChar(TrP)))
