@@ -31,6 +31,7 @@ MODULE PrettyPrint
                        Print_MEMS,       Print_TIME,      &
                        Print_HGRho
    END INTERFACE
+!
    INTERFACE PChkSum   
       MODULE PROCEDURE Print_CheckSum_DBL_VECT
       MODULE PROCEDURE Print_CheckSum_BCSR
@@ -600,9 +601,6 @@ MODULE PrettyPrint
      2 FORMAT(72('-'))
      3 FORMAT(72('='))
      END SUBROUTINE Print_CRDS
-
-
-
 !-----------------------------------------------------------------------------
 !    Print a BCSR matrix
 !
@@ -759,8 +757,7 @@ MODULE PrettyPrint
 !
 !    Print Check Sums
 !      
-!===============================================================
-!
+!==================================================================
    SUBROUTINE Print_CheckSum_DBL_VECT(A,Name,Unit_O,Proc_O)
         TYPE(DBL_VECT), INTENT(IN)           :: A
         REAL(DOUBLE)                         :: Chk
@@ -811,17 +808,18 @@ MODULE PrettyPrint
 !----------------------------------------------------------------------------------------
 !
 !----------------------------------------------------------------------------------------
-     SUBROUTINE Print_CheckSum_BCSR(A,Name,Proc_O,Unit_O)
+      SUBROUTINE Print_CheckSum_BCSR(A,Name,Proc_O,Unit_O)
         TYPE(BCSR), INTENT(IN)               :: A
-        REAL(DOUBLE)                         :: Chk
+        REAL(DOUBLE)                         :: Chk,BlockError
         CHARACTER(LEN=*)                     :: Name
         INTEGER,         OPTIONAL,INTENT(IN) :: Unit_O
         CHARACTER(LEN=*),OPTIONAL            :: Proc_O
-        INTEGER                              :: I,PU
+        INTEGER                              :: I,J,PU,AtA,AtB,P,R,RN,NA,K1,K2
         CHARACTER(LEN=DEFAULT_CHR_LEN)       :: ChkStr
+        REAL(DOUBLE),DIMENSION(5,5)          :: Temp
 !----------------------------------------------------------------------------------------
         IF(PrintFlags%Key/=DEBUG_MAXIMUM.AND. &
-           PrintFlags%Chk/=DEBUG_CHKSUMS)RETURN
+             PrintFlags%Chk/=DEBUG_CHKSUMS)RETURN
 !---------------------------------------------------------------------------------------   
 !       Compute check sum
         Chk=Zero
@@ -829,6 +827,32 @@ MODULE PrettyPrint
            Chk=Chk+A%MTrix%D(I)*A%Mtrix%D(I)
         ENDDO
         Chk=SQRT(Chk) 
+!---------------------------------------------------------------------------------------   
+!       Compute the Block Error
+        BlockError=Zero
+        DO AtA=1,A%NAtms
+           DO P = A%RowPt%I(AtA),A%RowPt%I(AtA+1)-1
+              AtB = A%ColPt%I(P)
+              R   = A%BlkPt%I(P)
+              IF(AtA == A%NAtms .AND. AtB == A%NAtms) THEN
+                 RN = A%NNon0
+              ELSE
+                 RN = A%BlkPt%I(P+1)-1
+              ENDIF
+              IF(AtA == AtB) THEN 
+                 NA = SQRT(DBLE(RN-R+1))
+                 DO I = 1,NA
+                    DO J=1,NA
+                       K1 = (J-1)+NA*(I-1)
+                       K2 = (I-1)+NA*(J-1)
+                       BlockError = BlockError + (A%MTrix%D(R+K1)-A%MTrix%D(R+K2))**2
+                    ENDDO
+                 ENDDO
+              ENDIF
+           ENDDO
+        ENDDO
+        BlockError = SQRT(BlockError/DBLE(A%NAtms))
+!
 #ifdef PARALLEL
         IF(MyID==ROOT)THEN
 #endif
@@ -854,11 +878,35 @@ MODULE PrettyPrint
            PU=OpenPU(Unit_O=Unit_O)
            WRITE(PU,'(1x,A)')TRIM(ChkStr)
            CALL ClosePU(PU)
+!--------------------------------------------------------------------------
+!          Create BlockError string
+           IF(PRESENT(Proc_O).AND.PrintFlags%Fmt/=DEBUG_MMASTYLE)THEN
+              ChkStr=ProcessName(Proc_O)//TRIM(Name) &
+                   //' BlokError = '//TRIM(DblToChar(BlockError))
+           ELSEIF(PrintFlags%Fmt/=DEBUG_MMASTYLE)THEN
+              ChkStr=TRIM(Name)//' matrix '//' BlokError = '//TRIM(DblToChar(BlockError))
+           ELSEIF(PRESENT(Proc_O).AND.PrintFlags%Fmt==DEBUG_MMASTYLE)THEN
+              ChkStr='(* '//TRIM(Proc_O)//' *)'//'BlockError'//TRIM(Name)       &
+                   //' = '//TRIM(FltToChar(FRACTION(BlockError))) &
+                   //'*2^('//TRIM(IntToChar(EXPONENT(BlockError)))//');'
+           ELSEIF(PrintFlags%Fmt==DEBUG_MMASTYLE)THEN
+              ChkStr='BlockError'//TRIM(Name)//' = '//TRIM(FltToChar(FRACTION(BlockError))) &
+                   //'*2^('//TRIM(IntToChar(EXPONENT(BlockError)))//');'
+           ELSE 
+              CALL Halt(' Logic error in Print_CheckSum_BCSR')
+           ENDIF
+!--------------------------------------------------------------------------
+!          Write BlockError string
+           PU=OpenPU(Unit_O=Unit_O)
+           WRITE(PU,'(1x,A)')TRIM(ChkStr)
+           CALL ClosePU(PU)
 #ifdef PARALLEL
         ENDIF
 #endif
    END SUBROUTINE Print_CheckSum_BCSR
-   
+!----------------------------------------------------------------------------------------
+!
+!----------------------------------------------------------------------------------------
 #ifdef PARALLEL
    SUBROUTINE Print_CheckSum_DBCSR(A,Name,Proc_O,Unit_O)
       TYPE(DBCSR), INTENT(IN)   :: A
@@ -1120,6 +1168,105 @@ MODULE PrettyPrint
 #endif
 !
   END SUBROUTINE Print_CMPoles
+!========================================================================================
+! Print The Gradients
+!========================================================================================
+  SUBROUTINE Print_Force(GM,Frc,Name,FileName_O,Unit_O,Fmat_O)
+    TYPE(CRDS)                     :: GM
+    TYPE(DBL_VECT)                 :: Frc
+    CHARACTER(LEN=*)               :: Name
+    CHARACTER(LEN=*),OPTIONAL      :: FileName_O
+    INTEGER,OPTIONAL               :: Unit_O,Fmat_O
+    INTEGER                        :: AtA,A1,PU,Fmat
+!
+    IF(Present(Fmat_O)) THEN
+       Fmat=Fmat_O
+    ELSE
+       Fmat=0
+    ENDIF
+!
+    IF(Fmat==0) THEN
+       IF(PrintFlags%Key/=DEBUG_MAXIMUM) RETURN
+       PU=OpenPU(FileName_O,Unit_O)
+       WRITE(PU,32) TRIM(Name)
+       DO AtA = 1,NAtoms
+          A1 = 3*(AtA-1)+1
+          WRITE(PU,36) AtA,Frc%D(A1:A1+2)
+       ENDDO
+       CALL ClosePU(PU)
+    ELSEIF(Fmat==1) THEN
+       PU=OpenPU(FileName_O,Unit_O)
+       WRITE(PU,33)
+       WRITE(PU,32) TRIM(Name)
+       WRITE(PU,34)
+       WRITE(PU,33) 
+       DO AtA = 1,NAtoms
+          A1 = 3*(AtA-1)+1
+          WRITE(PU,35) AtA,GM%AtNum%I(AtA),Frc%D(A1:A1+2)
+       ENDDO
+       WRITE(PU,33) 
+       CALL ClosePU(PU)
+    ELSEIF(Fmat==2) THEN
+       PU=OpenPU(FileName_O,Unit_O)
+       WRITE(PU,42)
+       WRITE(PU,32) TRIM(Name)
+       WRITE(PU,40)
+       WRITE(PU,42) 
+       DO AtA = 1,NAtoms
+          A1 = 3*(AtA-1)+1
+          WRITE(PU,41) AtA,GM%AtNum%I(AtA),GM%Carts%D(1:3,AtA),Frc%D(A1:A1+2)
+       ENDDO
+       WRITE(PU,42) 
+       CALL ClosePU(PU)
+    ENDIF
+!
+32  FORMAT(1X,A)
+33  FORMAT(54('-'))
+34  FORMAT('  Atom      Z                Forces (au) ')
+35  FORMAT(' ',I4,'     ',I3,3(2X,F11.8))
+36  FORMAT(I4,3(2X,F16.12))
+!
+40  FORMAT('  Atom      Z                Positions(au)                           Forces (au) ')
+41  FORMAT(' ',I4,'     ',I3,6(2X,F11.8))
+42  FORMAT(95('-'))
+!
+  END SUBROUTINE Print_Force
+!========================================================================================
+! Print The Gradients
+!========================================================================================
+  SUBROUTINE Print_CheckSum_Force(Frc,Name,Proc_O,Unit_O)
+    TYPE(DBL_VECT)                 :: Frc
+    CHARACTER(LEN=*)               :: Name
+    CHARACTER(LEN=*),OPTIONAL      :: Proc_O
+    INTEGER,OPTIONAL               :: Unit_O
+    INTEGER                        :: AtA,A1,PU
+    REAL(DOUBLE)                   :: FX,FY,FZ,ChkF
+    CHARACTER(LEN=DEFAULT_CHR_LEN) :: ChkStr
+!
+    IF(PrintFlags%Key/=DEBUG_MAXIMUM .AND. PrintFlags%Chk/=DEBUG_CHKSUMS) RETURN
+!
+    FX = Zero
+    FY = Zero
+    FZ = Zero
+    DO AtA = 1,NAtoms
+       A1 = 3*(AtA-1)+1
+       FX = FX+Frc%D(A1)
+       FY = FY+Frc%D(A1+1)
+       FZ = FZ+Frc%D(A1+2)
+    ENDDO
+    ChkF = SQRT(FX*FX+FY*FY+FZ*FZ)
+!
+    IF(PRESENT(Proc_O)) THEN
+       ChkStr=ProcessName(Proc_O)//TRIM(Name)// " ForceSum = " //TRIM(DblToChar(ChkF))
+    ELSE          
+       ChkStr=TRIM(Name)// " ForceSum = " //TRIM(DblToChar(ChkF))
+    ENDIF
+!
+    PU=OpenPU(Unit_O=Unit_O)
+    WRITE(PU,'(1x,A)') ChkStr
+    CALL ClosePU(PU)
+!
+  END SUBROUTINE Print_CheckSum_Force
 !---------------------------------------------------------------------
 !
 !---------------------------------------------------------------------
