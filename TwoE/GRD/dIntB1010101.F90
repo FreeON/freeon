@@ -111,6 +111,16 @@ SUBROUTINE dIntB1010101(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
               SqInvT=SqInvT*InvT
               VRR(1,1,1)=+4.431134627263790D-01*Upq*SqInvT
             ENDIF
+            ! Generating (p0|s0)^(0)
+            VRR(2,1,0)=PAx*VRR(1,1,0)+WPx*VRR(1,1,1) 
+            VRR(3,1,0)=PAy*VRR(1,1,0)+WPy*VRR(1,1,1) 
+            VRR(4,1,0)=PAz*VRR(1,1,0)+WPz*VRR(1,1,1) 
+            ! Generating (s0|p0)^(0)
+            VRR(1,2,0)=QCx*VRR(1,1,0)+WQx*VRR(1,1,1)
+            VRR(1,3,0)=QCy*VRR(1,1,0)+WQy*VRR(1,1,1)
+            VRR(1,4,0)=QCz*VRR(1,1,0)+WQz*VRR(1,1,1)
+            ! Contracting ... 
+            CALL CNTRCTG1111(VRR,HRR,Alpha,HRRA,Beta,HRRB,Gamma,HRRC)
          ENDDO ! (M0| loop
       ENDDO ! |N0) loop
       ! Dont need to generate (s,0|s,s)
@@ -122,13 +132,35 @@ SUBROUTINE dIntB1010101(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
          !K = 1
          CDOffSet=(OC+1-1)*LDC+(OD+L-1)*LDD
          ! Generating (s',s|1,L)  and (s,s'|1,L)
-         CALL BraHRR66ab(NINT,LDA,LDB,OA,OB,GOA,GOB,CDOffSet,HRR(1,1,L),&
+         CALL BraHRR11ab(NINT,LDA,LDB,OA,OB,GOA,GOB,CDOffSet,HRR(1,1,L),&
                           HRRA(1,1,L),HRRB(1,1,L),GRADIENTS(1,1))
          ! Generating (s,s|1_x,L)  and (s,s|1,L_x)
-         CALL BraHRR66cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,0,HRRC(1,2,L),GRADIENTS(1,1))
+         CALL BraHRR11cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,0,HRRC(1,2,L),GRADIENTS(1,1))
          ! Generating (s,s|1_y,L)  and (s,s|1,L_y)
-         CALL BraHRR66cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,1,HRRC(1,3,L),GRADIENTS(1,1))
+         CALL BraHRR11cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,1,HRRC(1,3,L),GRADIENTS(1,1))
          ! Generating (s,s|1_z,L)  and (s,s|1,L_z)
-         CALL BraHRR66cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,2,HRRC(1,4,L),GRADIENTS(1,1))
+         CALL BraHRR11cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,2,HRRC(1,4,L),GRADIENTS(1,1))
       ENDDO 
     END SUBROUTINE dIntB1010101
+    SUBROUTINE CNTRCTG1111(VRR,HRR,Alpha,HRRA,Beta,HRRB,Gamma,HRRC)
+      USE DerivedTypes
+      USE VScratchB
+      REAL(DOUBLE)  :: Alpha,Beta,Gamma
+      REAL(DOUBLE), DIMENSION(1,1,1) :: HRR 
+      REAL(DOUBLE), DIMENSION(4,1,1) :: HRRA,HRRB 
+      REAL(DOUBLE), DIMENSION(1,4,1) :: HRRC 
+      REAL(DOUBLE)  :: VRR(4,4,0:1)
+      HRR(1,1,1)=HRR(1,1,1)+VRR(1,1,0)
+      HRRA(1,1,1)=HRRA(1,1,1)+Alpha*VRR(1,1,0)
+      HRRB(1,1,1)=HRRB(1,1,1)+Beta*VRR(1,1,0)
+      HRRC(1,1,1)=HRRC(1,1,1)+Gamma*VRR(1,1,0)
+      HRRC(1,2,1)=HRRC(1,2,1)+Gamma*VRR(1,2,0)
+      HRRC(1,3,1)=HRRC(1,3,1)+Gamma*VRR(1,3,0)
+      HRRC(1,4,1)=HRRC(1,4,1)+Gamma*VRR(1,4,0)
+      HRRA(2,1,1)=HRRA(2,1,1)+Alpha*VRR(2,1,0)
+      HRRB(2,1,1)=HRRB(2,1,1)+Beta*VRR(2,1,0)
+      HRRA(3,1,1)=HRRA(3,1,1)+Alpha*VRR(3,1,0)
+      HRRB(3,1,1)=HRRB(3,1,1)+Beta*VRR(3,1,0)
+      HRRA(4,1,1)=HRRA(4,1,1)+Alpha*VRR(4,1,0)
+      HRRB(4,1,1)=HRRB(4,1,1)+Beta*VRR(4,1,0)
+    END SUBROUTINE CNTRCTG1111

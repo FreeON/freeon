@@ -118,6 +118,41 @@ SUBROUTINE dIntB3010101(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
               SqInvT=SqInvT*InvT
               VRR(1,1,2)=+6.646701940895685D-01*Upq*SqInvT
             ENDIF
+            ! Generating (p0|s0)^(1)
+            VRR(2,1,1)=PAx*VRR(1,1,1)+WPx*VRR(1,1,2) 
+            VRR(3,1,1)=PAy*VRR(1,1,1)+WPy*VRR(1,1,2) 
+            VRR(4,1,1)=PAz*VRR(1,1,1)+WPz*VRR(1,1,2) 
+            ! Generating (p0|s0)^(0)
+            VRR(2,1,0)=PAx*VRR(1,1,0)+WPx*VRR(1,1,1) 
+            VRR(3,1,0)=PAy*VRR(1,1,0)+WPy*VRR(1,1,1) 
+            VRR(4,1,0)=PAz*VRR(1,1,0)+WPz*VRR(1,1,1) 
+            ! Generating (d0|s0)^(0)
+            VRR(5,1,0)=PAx*VRR(2,1,0)+r1x2Z*(VRR(1,1,0)-ExZpE*VRR(1,1,1))+WPx*VRR(2,1,1)
+            VRR(6,1,0)=PAx*VRR(3,1,0)+WPx*VRR(3,1,1)
+            VRR(7,1,0)=PAy*VRR(3,1,0)+r1x2Z*(VRR(1,1,0)-ExZpE*VRR(1,1,1))+WPy*VRR(3,1,1)
+            VRR(8,1,0)=PAx*VRR(4,1,0)+WPx*VRR(4,1,1)
+            VRR(9,1,0)=PAy*VRR(4,1,0)+WPy*VRR(4,1,1)
+            VRR(10,1,0)=PAz*VRR(4,1,0)+r1x2Z*(VRR(1,1,0)-ExZpE*VRR(1,1,1))+WPz*VRR(4,1,1)
+            ! Generating (s0|p0)^(1)
+            VRR(1,2,1)=QCx*VRR(1,1,1)+WQx*VRR(1,1,2)
+            VRR(1,3,1)=QCy*VRR(1,1,1)+WQy*VRR(1,1,2)
+            VRR(1,4,1)=QCz*VRR(1,1,1)+WQz*VRR(1,1,2)
+            ! Generating (s0|p0)^(0)
+            VRR(1,2,0)=QCx*VRR(1,1,0)+WQx*VRR(1,1,1)
+            VRR(1,3,0)=QCy*VRR(1,1,0)+WQy*VRR(1,1,1)
+            VRR(1,4,0)=QCz*VRR(1,1,0)+WQz*VRR(1,1,1)
+            ! Generating (p0|p0)^(0)
+            VRR(2,2,0)=QCx*VRR(2,1,0)+HfxZpE*VRR(1,1,1)+WQx*VRR(2,1,1) 
+            VRR(2,3,0)=QCy*VRR(2,1,0)+WQy*VRR(2,1,1) 
+            VRR(2,4,0)=QCz*VRR(2,1,0)+WQz*VRR(2,1,1) 
+            VRR(3,2,0)=QCx*VRR(3,1,0)+WQx*VRR(3,1,1) 
+            VRR(3,3,0)=QCy*VRR(3,1,0)+HfxZpE*VRR(1,1,1)+WQy*VRR(3,1,1) 
+            VRR(3,4,0)=QCz*VRR(3,1,0)+WQz*VRR(3,1,1) 
+            VRR(4,2,0)=QCx*VRR(4,1,0)+WQx*VRR(4,1,1) 
+            VRR(4,3,0)=QCy*VRR(4,1,0)+WQy*VRR(4,1,1) 
+            VRR(4,4,0)=QCz*VRR(4,1,0)+HfxZpE*VRR(1,1,1)+WQz*VRR(4,1,1) 
+            ! Contracting ... 
+            CALL CNTRCTG3111(VRR,HRR,Alpha,HRRA,Beta,HRRB,Gamma,HRRC)
          ENDDO ! (M0| loop
       ENDDO ! |N0) loop
       ! Dont need to generate (p,0|s,s)
@@ -129,13 +164,62 @@ SUBROUTINE dIntB3010101(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
          !K = 1
          CDOffSet=(OC+1-1)*LDC+(OD+L-1)*LDD
          ! Generating (p',s|1,L)  and (p,s'|1,L)
-         CALL BraHRR21ab(NINT,LDA,LDB,OA,OB,GOA,GOB,CDOffSet,HRR(1,1,L),&
+         CALL BraHRR31ab(NINT,LDA,LDB,OA,OB,GOA,GOB,CDOffSet,HRR(1,1,L),&
                           HRRA(1,1,L),HRRB(1,1,L),GRADIENTS(1,1))
          ! Generating (p,s|1_x,L)  and (p,s|1,L_x)
-         CALL BraHRR21cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,0,HRRC(1,2,L),GRADIENTS(1,1))
+         CALL BraHRR31cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,0,HRRC(1,2,L),GRADIENTS(1,1))
          ! Generating (p,s|1_y,L)  and (p,s|1,L_y)
-         CALL BraHRR21cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,1,HRRC(1,3,L),GRADIENTS(1,1))
+         CALL BraHRR31cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,1,HRRC(1,3,L),GRADIENTS(1,1))
          ! Generating (p,s|1_z,L)  and (p,s|1,L_z)
-         CALL BraHRR21cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,2,HRRC(1,4,L),GRADIENTS(1,1))
+         CALL BraHRR31cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,2,HRRC(1,4,L),GRADIENTS(1,1))
       ENDDO 
     END SUBROUTINE dIntB3010101
+    SUBROUTINE CNTRCTG3111(VRR,HRR,Alpha,HRRA,Beta,HRRB,Gamma,HRRC)
+      USE DerivedTypes
+      USE VScratchB
+      REAL(DOUBLE)  :: Alpha,Beta,Gamma
+      REAL(DOUBLE), DIMENSION(4,1,1) :: HRR 
+      REAL(DOUBLE), DIMENSION(10,1,1) :: HRRA,HRRB 
+      REAL(DOUBLE), DIMENSION(4,4,1) :: HRRC 
+      REAL(DOUBLE)  :: VRR(10,4,0:2)
+      HRR(1,1,1)=HRR(1,1,1)+VRR(1,1,0)
+      HRRA(1,1,1)=HRRA(1,1,1)+Alpha*VRR(1,1,0)
+      HRRB(1,1,1)=HRRB(1,1,1)+Beta*VRR(1,1,0)
+      HRRC(1,1,1)=HRRC(1,1,1)+Gamma*VRR(1,1,0)
+      HRRC(1,2,1)=HRRC(1,2,1)+Gamma*VRR(1,2,0)
+      HRRC(1,3,1)=HRRC(1,3,1)+Gamma*VRR(1,3,0)
+      HRRC(1,4,1)=HRRC(1,4,1)+Gamma*VRR(1,4,0)
+      HRR(2,1,1)=HRR(2,1,1)+VRR(2,1,0)
+      HRRA(2,1,1)=HRRA(2,1,1)+Alpha*VRR(2,1,0)
+      HRRB(2,1,1)=HRRB(2,1,1)+Beta*VRR(2,1,0)
+      HRRC(2,1,1)=HRRC(2,1,1)+Gamma*VRR(2,1,0)
+      HRRC(2,2,1)=HRRC(2,2,1)+Gamma*VRR(2,2,0)
+      HRRC(2,3,1)=HRRC(2,3,1)+Gamma*VRR(2,3,0)
+      HRRC(2,4,1)=HRRC(2,4,1)+Gamma*VRR(2,4,0)
+      HRR(3,1,1)=HRR(3,1,1)+VRR(3,1,0)
+      HRRA(3,1,1)=HRRA(3,1,1)+Alpha*VRR(3,1,0)
+      HRRB(3,1,1)=HRRB(3,1,1)+Beta*VRR(3,1,0)
+      HRRC(3,1,1)=HRRC(3,1,1)+Gamma*VRR(3,1,0)
+      HRRC(3,2,1)=HRRC(3,2,1)+Gamma*VRR(3,2,0)
+      HRRC(3,3,1)=HRRC(3,3,1)+Gamma*VRR(3,3,0)
+      HRRC(3,4,1)=HRRC(3,4,1)+Gamma*VRR(3,4,0)
+      HRR(4,1,1)=HRR(4,1,1)+VRR(4,1,0)
+      HRRA(4,1,1)=HRRA(4,1,1)+Alpha*VRR(4,1,0)
+      HRRB(4,1,1)=HRRB(4,1,1)+Beta*VRR(4,1,0)
+      HRRC(4,1,1)=HRRC(4,1,1)+Gamma*VRR(4,1,0)
+      HRRC(4,2,1)=HRRC(4,2,1)+Gamma*VRR(4,2,0)
+      HRRC(4,3,1)=HRRC(4,3,1)+Gamma*VRR(4,3,0)
+      HRRC(4,4,1)=HRRC(4,4,1)+Gamma*VRR(4,4,0)
+      HRRA(5,1,1)=HRRA(5,1,1)+Alpha*VRR(5,1,0)
+      HRRB(5,1,1)=HRRB(5,1,1)+Beta*VRR(5,1,0)
+      HRRA(6,1,1)=HRRA(6,1,1)+Alpha*VRR(6,1,0)
+      HRRB(6,1,1)=HRRB(6,1,1)+Beta*VRR(6,1,0)
+      HRRA(7,1,1)=HRRA(7,1,1)+Alpha*VRR(7,1,0)
+      HRRB(7,1,1)=HRRB(7,1,1)+Beta*VRR(7,1,0)
+      HRRA(8,1,1)=HRRA(8,1,1)+Alpha*VRR(8,1,0)
+      HRRB(8,1,1)=HRRB(8,1,1)+Beta*VRR(8,1,0)
+      HRRA(9,1,1)=HRRA(9,1,1)+Alpha*VRR(9,1,0)
+      HRRB(9,1,1)=HRRB(9,1,1)+Beta*VRR(9,1,0)
+      HRRA(10,1,1)=HRRA(10,1,1)+Alpha*VRR(10,1,0)
+      HRRB(10,1,1)=HRRB(10,1,1)+Beta*VRR(10,1,0)
+    END SUBROUTINE CNTRCTG3111
