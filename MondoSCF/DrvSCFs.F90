@@ -590,36 +590,34 @@ MODULE DrvSCFs
 
    SUBROUTINE MM_ENERG(Ctrl)
    IMPLICIT NONE
-   TYPE(Scfcontrols) :: Ctrl
+   TYPE(ScfControls) :: Ctrl
    TYPE(CRDS) :: GMLoc
    REAL(DOUBLE)       :: MM_COUL,CONVF,E_C_EXCL,E_LJ_EXCL
    REAL(DOUBLE)       :: EELECT,ELJ,CONVF2,ETOTMM
    REAL(DOUBLE)       :: EBond,EAngle,ETorsion,EOutOfPlane
    REAL(DOUBLE)       :: LJCutOff
-   CHARACTER(LEN=6)   :: CurG
    TYPE(DBL_RNK2)     :: GrdMM
    TYPE(DBL_VECT)     :: GrdToT,GrdAux,GrdToTInt
    INTEGER :: I,J,I1,I2,MMNatms
-   LOGICAL :: CalcMMForce
+   LOGICAL            :: CalcMMForce
 !
-   Call InitMMech()
+      Call InitMMech()
 !
-   CONVF=1000.D0*JtoHartree/C_Avogadro
-   CONVF2=1000.D0*JtoHartree/C_Avogadro/AngstromsToAU
-   LJCutOff=10.D0 !!! in Angstroms
-   CurG=IntToChar(Ctrl%Current(3)) !!! Current Geom
+      CONVF=1000.D0*JtoHartree/C_Avogadro
+      CONVF2=1000.D0*JtoHartree/C_Avogadro/AngstromsToAU
+      LJCutOff=10.D0 !!! in Angstroms
+!     CurG=IntToChar(Ctrl%Current(3)) !!! Current Geom
 !
-   IF(Ctrl%Grad==GRAD_NO_GRAD) THEN
-     CalcMMForce=.FALSE.
-   ELSE
-     CalcMMForce=.TRUE.
-   ENDIF
+      IF(Ctrl%Grad==GRAD_NO_GRAD) THEN
+        CalcMMForce=.FALSE.
+      ELSE
+        CalcMMForce=.TRUE.
+      ENDIF
 !
 ! Load MM data
 !
-!  CALL GET(MMNatms,'natomsGM_MM'//CurG)
-   CALL GET(GMLoc,'GM_MM'//CurG)
-   MMNatms=GMLoc%Natms
+      CALL GET(GMLoc,'GM_MM'//CurGeom)
+      MMNatms=GMLoc%Natms
 !
 ! Initialize and Zero GrdMM for the case MMOnly
 ! (this initial gradient gets read by jforce later)
@@ -627,7 +625,7 @@ MODULE DrvSCFs
       IF(MMonly()) THEN
         CALL New(GrdAux,3*MMNatms)
         GrdAux%D(:)=Zero
-          CALL Put(GrdAux,'GradE',Tag_O=CurG)
+          CALL Put(GrdAux,'GradE',Tag_O=CurGeom)
         CALL Delete(GrdAux)
       ENDIF
 !
@@ -636,147 +634,145 @@ MODULE DrvSCFs
 ! MM CoulombEnergy is calculated here only for case MMOnly 
 ! Otherwise it is calculated in QCTC and put into HDF later
 !
-! mm_coul=0.d0
-! call put(mm_coul,'mm_coul',Tag_O=CurG)
- IF(MMOnly()) Then
-   CALL MM_CoulombEnergy(Ctrl)
-   CALL GET(MM_COUL,'MM_COUL',Tag_O=CurG)
-   MM_COUL=MM_COUL/CONVF
- ENDIF
+      IF(MMOnly()) Then
+        CALL MM_CoulombEnergy(Ctrl)
+        CALL GET(MM_COUL,'MM_COUL',Tag_O=CurGeom)
+        MM_COUL=MM_COUL/CONVF
+      ENDIF
 !
 ! Do MM Covalent terms
 !
-       EBond=Zero
-       EAngle=Zero
-       ETorsion=Zero
-       EOutOfPlane=Zero
-       ELJ=Zero
-       E_LJ_EXCL=Zero
-       E_C_EXCL=Zero
+      EBond=Zero
+      EAngle=Zero
+      ETorsion=Zero
+      EOutOfPlane=Zero
+      ELJ=Zero
+      E_LJ_EXCL=Zero
+      E_C_EXCL=Zero
 !
 ! Convert coordinates into Angstroms
 !
-  GMLoc%Carts%D=GMLoc%Carts%D/AngstromsToAU
+      GMLoc%Carts%D=GMLoc%Carts%D/AngstromsToAU
 #ifdef PERIODIC
-  GMLoc%PBC%BoxShape=GMLoc%PBC%BoxShape/AngstromsToAU
-  GMLoc%AbCarts%D=GMLoc%AbCarts%D/AngstromsToAU
-  GMLoc%AbBoxCarts%D=GMLoc%AbBoxCarts%D/AngstromsToAU
+      GMLoc%PBC%BoxShape=GMLoc%PBC%BoxShape/AngstromsToAU
+      GMLoc%AbCarts%D=GMLoc%AbCarts%D/AngstromsToAU
+      GMLoc%AbBoxCarts%D=GMLoc%AbBoxCarts%D/AngstromsToAU
 #endif
 !
-     IF(CalcMMForce) THEN
-       CALL New(GrdMM,(/3,MMNatms/))
-       GrdMM%D(:,:)=Zero
-!
-         CALL Bond_Energy(EBond,GMLoc%Carts%D,GradLoc=GrdMM)
-         CALL Angle_Energy(EAngle,GMLoc%Carts%D,GradLoc=GrdMM)
-         CALL Torsion_Energy(ETorsion,GMLoc%Carts%D,GradLoc=GrdMM)
-         CALL OutOfPlane_Energy(EOutOfPlane,GMLoc%Carts%D,GradLoc=GrdMM)
-!
-         CALL ENERGY_LENNARD_JONES(GMLoc,ELJ,LJCutOff,GrdMM)
-         CALL EXCL(GMLoc,E_LJ_EXCL,E_C_EXCL,GrdMM)
-!
-     ELSE
-!
-          CALL Bond_Energy(EBond,GMLoc%Carts%D)
-          CALL Angle_Energy(EAngle,GMLoc%Carts%D)
-          CALL Torsion_Energy(ETorsion,GMLoc%Carts%D)
-          CALL OutOfPlane_Energy(EOutOfPlane,GMLoc%Carts%D)
-!
-          CALL ENERGY_LENNARD_JONES(GMLoc,ELJ,LJCutOff)
-          CALL EXCL(GMLoc,E_LJ_EXCL,E_C_EXCL)
-!
-     ENDIF
-!
-  GMLoc%Carts%D=AngstromsToAU*GMLoc%Carts%D
+      IF(CalcMMForce) THEN
+        CALL New(GrdMM,(/3,MMNatms/))
+        GrdMM%D(:,:)=Zero
+!   
+          CALL Bond_Energy(EBond,GMLoc%Carts%D,GradLoc=GrdMM)
+          CALL Angle_Energy(EAngle,GMLoc%Carts%D,GradLoc=GrdMM)
+          CALL Torsion_Energy(ETorsion,GMLoc%Carts%D,GradLoc=GrdMM)
+          CALL OutOfPlane_Energy(EOutOfPlane,GMLoc%Carts%D,GradLoc=GrdMM)
+!   
+          CALL ENERGY_LENNARD_JONES(GMLoc,ELJ,LJCutOff,GrdMM)
+          CALL EXCL(GMLoc,E_LJ_EXCL,E_C_EXCL,GrdMM)
+!   
+      ELSE
+!   
+           CALL Bond_Energy(EBond,GMLoc%Carts%D)
+           CALL Angle_Energy(EAngle,GMLoc%Carts%D)
+           CALL Torsion_Energy(ETorsion,GMLoc%Carts%D)
+           CALL OutOfPlane_Energy(EOutOfPlane,GMLoc%Carts%D)
+!   
+           CALL ENERGY_LENNARD_JONES(GMLoc,ELJ,LJCutOff)
+           CALL EXCL(GMLoc,E_LJ_EXCL,E_C_EXCL)
+!   
+      ENDIF
+!   
+      GMLoc%Carts%D=AngstromsToAU*GMLoc%Carts%D
 #ifdef PERIODIC
-  GMLoc%PBC%BoxShape=AngstromsToAU*GMLoc%PBC%BoxShape
-  GMLoc%AbCarts%D=AngstromsToAU*GMLoc%AbCarts%D
-  GMLoc%AbBoxCarts%D=AngstromsToAU*GMLoc%AbBoxCarts%D
+      GMLoc%PBC%BoxShape=AngstromsToAU*GMLoc%PBC%BoxShape
+      GMLoc%AbCarts%D=AngstromsToAU*GMLoc%AbCarts%D
+      GMLoc%AbBoxCarts%D=AngstromsToAU*GMLoc%AbBoxCarts%D
 #endif
-   IF(CalcMMForce) THEN
+      IF(CalcMMForce) THEN
 !
 ! Convert MM _gradients_ into atomic units and add the rest of forces
 !
-     CALL New(GrdTot,3*MMNatms)
-     CALL Get(GrdTot,'GradE',Tag_O=CurG)
+      CALL New(GrdTot,3*MMNatms)
+      CALL Get(GrdTot,'GradE',Tag_O=CurGeom)
 ! 
-     DO I=1,MMNatms
-       I1=3*(I-1)+1
-       I2=I1+2   
-       GrdTot%D(I1:I2)=GrdTot%D(I1:I2)+KJPerMolPerAngstToHPerBohr*GrdMM%D(1:3,I)
-     ENDDO
+      DO I=1,MMNatms
+        I1=3*(I-1)+1
+        I2=I1+2   
+        GrdTot%D(I1:I2)=GrdTot%D(I1:I2)+KJPerMolPerAngstToHPerBohr*GrdMM%D(1:3,I)
+      ENDDO
 !
-       CALL Put(GrdTot,'GradE',Tag_O=CurG)
+      CALL Put(GrdTot,'GradE',Tag_O=CurGeom)
 !
 ! print forces in KJ/mol/A or H/Bohr
 !
-     CALL Print_Force(GMLoc,GrdTot,'GrdTot in au ')
-     GrdTot%D(:)=GrdTot%D(:)/KJPerMolPerAngstToHPerBohr
-     CALL Print_Force(GMLoc,GrdTot,'GrdTot in KJ/mol/A')
-     GrdTot%D(:)=GrdTot%D(:)*KJPerMolPerAngstToHPerBohr
+      CALL Print_Force(GMLoc,GrdTot,'GrdTot in au ')
+      GrdTot%D(:)=GrdTot%D(:)/KJPerMolPerAngstToHPerBohr
+      CALL Print_Force(GMLoc,GrdTot,'GrdTot in KJ/mol/A')
+      GrdTot%D(:)=GrdTot%D(:)*KJPerMolPerAngstToHPerBohr
 !
-     CALL Delete(GMLoc)
-     CALL Delete(GrdTot)
-     CALL Delete(GrdMM)
+      CALL Delete(GMLoc)
+      CALL Delete(GrdTot)
+      CALL Delete(GrdMM)
 !
-   ENDIF
+    ENDIF
 !
-       CALL OpenASCII(OutFile,Out)
+    CALL OpenASCII(OutFile,Out)
 !
-         write(out,*) 'MM Energies in KJ/mol:'
-         write(out,*) 'EBond= ',EBond
-         write(out,*) 'EAngle= ',EAngle
-         write(out,*) 'ETorsion= ',ETorsion
-         write(out,*) 'EOutOfPlane= ',EOutOfPlane
-         write(out,*) 'E_Lennard_Jones    TOTAL= ',ELJ
-         write(out,*) 'E_Lennard_Jones EXCLUDED= ',E_LJ_EXCL
-         write(out,*) 'E_Lennard_Jones         = ',ELJ-E_LJ_EXCL
-       IF(MMOnly()) Then
-         write(out,*) 'E_MM_Coulomb    TOTAL= ',MM_COUL
-         write(out,*) 'E_MM_Coulomb EXCLUDED= ',E_C_EXCL
-         write(out,*) 'E_MM_Coulomb         = ',MM_COUL-E_C_EXCL
-         ETOTMM=MM_COUL+EBond+EAngle+ETorsion+EOutOfPlane+ELJ-E_LJ_EXCL-E_C_EXCL
-       write(out,*) 'E_Total= ',ETOTMM
-       ENDIF
+      WRITE(OUT,*) 'MM Energies in KJ/mol:'
+      WRITE(OUT,*) 'EBond= ',EBond
+      WRITE(OUT,*) 'EAngle= ',EAngle
+      WRITE(OUT,*) 'ETorsion= ',ETorsion
+      WRITE(OUT,*) 'EOutOfPlane= ',EOutOfPlane
+      WRITE(OUT,*) 'E_Lennard_Jones    TOTAL= ',ELJ
+      WRITE(OUT,*) 'E_Lennard_Jones EXCLUDED= ',E_LJ_EXCL
+      WRITE(OUT,*) 'E_Lennard_Jones         = ',ELJ-E_LJ_EXCL
+    IF(MMOnly()) Then
+      WRITE(OUT,*) 'E_MM_Coulomb    TOTAL= ',MM_COUL
+      WRITE(OUT,*) 'E_MM_Coulomb EXCLUDED= ',E_C_EXCL
+      WRITE(OUT,*) 'E_MM_Coulomb         = ',MM_COUL-E_C_EXCL
+      ETOTMM=MM_COUL+EBond+EAngle+ETorsion+EOutOfPlane+ELJ-E_LJ_EXCL-E_C_EXCL
+      WRITE(OUT,*) 'E_Total= ',ETOTMM
+    ENDIF
 !
 ! convert covalent energies into atomic unit
 !
-         EBond=EBond*CONVF
-         EAngle=EAngle*CONVF
-         ETorsion=ETorsion*CONVF
-         EOutOfPlane=EOutOfPlane*CONVF
-         ELJ=ELJ*CONVF
-         MM_COUL=MM_COUL*CONVF
-         E_LJ_EXCL=E_LJ_EXCL*CONVF
-         E_C_EXCL=E_C_EXCL*CONVF
+    EBond=EBond*CONVF
+    EAngle=EAngle*CONVF
+    ETorsion=ETorsion*CONVF
+    EOutOfPlane=EOutOfPlane*CONVF
+    ELJ=ELJ*CONVF
+    MM_COUL=MM_COUL*CONVF
+    E_LJ_EXCL=E_LJ_EXCL*CONVF
+    E_C_EXCL=E_C_EXCL*CONVF
 !
-         write(out,*) 
-         write(out,*) 'MM Energies in atomic unit:'
-         write(out,*) 'EBond= ',EBond
-         write(out,*) 'EAngle= ',EAngle
-         write(out,*) 'ETorsion= ',ETorsion
-         write(out,*) 'EOutOfPlane= ',EOutOfPlane
-         write(out,*) 'E_Lennard_Jones    TOTAL= ',ELJ
-         write(out,*) 'E_Lennard_Jones EXCLUDED= ',E_LJ_EXCL
-         write(out,*) 'E_Lennard_Jones         = ',ELJ-E_LJ_EXCL
-       IF(MMOnly()) Then
-         write(out,*) 'E_MM_Coulomb    TOTAL= ',MM_COUL
-         write(out,*) 'E_MM_Coulomb EXCLUDED= ',E_C_EXCL
-         write(out,*) 'E_MM_Coulomb         = ',MM_COUL-E_C_EXCL
-	 ETOTMM=MM_COUL+EBond+EAngle+ETorsion+EOutOfPlane+ELJ-E_LJ_EXCL-E_C_EXCL
-         write(out,*) 'E_Total= ',ETOTMM
-	 CALL Put(ETOTMM,'ETot',StatsToChar(Ctrl%Current))
-       ENDIF
-	!
-       CALL PUT(EBond,'MM_EBond',Tag_O=CurG)
-       CALL PUT(EAngle,'MM_EAngle',Tag_O=CurG)
-       CALL PUT(ETorsion,'MM_ETorsion',Tag_O=CurG)
-       CALL PUT(EOutOfPlane,'MM_EOutOfPlane',Tag_O=CurG)
-       CALL PUT(ELJ,'MM_ELJ',Tag_O=CurG)
-       CALL PUT(E_LJ_EXCL,'E_LJ_EXCL',Tag_O=CurG)
-       CALL PUT(E_C_EXCL,'E_C_EXCL',Tag_O=CurG)
+      WRITE(OUT,*) 
+      WRITE(OUT,*) 'MM Energies in atomic unit:'
+      WRITE(OUT,*) 'EBond= ',EBond
+      WRITE(OUT,*) 'EAngle= ',EAngle
+      WRITE(OUT,*) 'ETorsion= ',ETorsion
+      WRITE(OUT,*) 'EOutOfPlane= ',EOutOfPlane
+      WRITE(OUT,*) 'E_Lennard_Jones    TOTAL= ',ELJ
+      WRITE(OUT,*) 'E_Lennard_Jones EXCLUDED= ',E_LJ_EXCL
+      WRITE(OUT,*) 'E_Lennard_Jones         = ',ELJ-E_LJ_EXCL
+    IF(MMOnly()) Then
+      WRITE(OUT,*) 'E_MM_Coulomb    TOTAL= ',MM_COUL
+      WRITE(OUT,*) 'E_MM_Coulomb EXCLUDED= ',E_C_EXCL
+      WRITE(OUT,*) 'E_MM_Coulomb         = ',MM_COUL-E_C_EXCL
+      ETOTMM=MM_COUL+EBond+EAngle+ETorsion+EOutOfPlane+ELJ-E_LJ_EXCL-E_C_EXCL
+      WRITE(OUT,*) 'E_Total= ',ETOTMM
+      CALL Put(ETOTMM,'ETot',StatsToChar(Ctrl%Current))
+    ENDIF
 !
-CLOSE(UNIT=Out,STATUS='KEEP')
+    CLOSE(UNIT=Out,STATUS='KEEP')
+!
+      CALL PUT(EBond,'MM_EBond',Tag_O=CurGeom)
+      CALL PUT(EAngle,'MM_EAngle',Tag_O=CurGeom)
+      CALL PUT(ETorsion,'MM_ETorsion',Tag_O=CurGeom)
+      CALL PUT(EOutOfPlane,'MM_EOutOfPlane',Tag_O=CurGeom)
+      CALL PUT(ELJ,'MM_ELJ',Tag_O=CurGeom)
+      CALL PUT(E_LJ_EXCL,'E_LJ_EXCL',Tag_O=CurGeom)
+      CALL PUT(E_C_EXCL,'E_C_EXCL',Tag_O=CurGeom)
 !
 END SUBROUTINE MM_ENERG
 #endif

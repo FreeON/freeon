@@ -43,6 +43,7 @@ WRITE(*,*)' INITed '
 !
   Ctrl%Current=(/0,1,1/)
   Ctrl%Previous=(/0,1,1/)
+  CALL SetGlobalCtrlIndecies(Ctrl)
 !
 ! Parse input
   CALL ParseInp(Ctrl)  
@@ -67,6 +68,8 @@ WRITE(*,*)' INITed '
      CALL CALC_GRAD_MD(Ctrl)
   CASE(GRAD_QNEW_OPT)
      CALL CALC_GRAD_QNEW_OPT(Ctrl)
+  CASE(GRAD_STPDESC_OPT)
+     CALL OptimizeNew(Ctrl)
   CASE(GRAD_QNEW_ONE_OPT)
      CALL CALC_GRAD_QNEW_ONE_OPT(Ctrl)
   CASE(GRAD_TS_SEARCH)

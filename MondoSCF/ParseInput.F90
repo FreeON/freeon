@@ -72,11 +72,12 @@ MODULE ParseInPut
          EndIf
 #endif
 #ifdef MMech
-         CALL ParseIntCoo(Ctrl)
          If(HasMM()) Then
            CALL ParseMM(Ctrl)
          EndIf
 #endif
+!
+         CALL ParseIntCoo(Ctrl)
 !
          CALL ParseThresholds(Ctrl)
 !
@@ -2342,14 +2343,21 @@ MODULE ParseInPut
 ! rewritten such, that mistypings be recognized,
 ! current version may die with core dump if this is not done,
 ! and improper inPut occures.
+! WARNING! Constraint values must be given in Angstroems and Degrees
 !
       IMPLICIT NONE
       TYPE(SCFControls)          :: Ctrl
       CHARACTER(LEN=DEFAULT_CHR_LEN)  :: Line,LineLowCase,Atomname
-      TYPE(INTC) :: IntC_Extra
-      CHARACTER(LEN=5) :: CHAR
-      INTEGER :: I1,I2,J,NIntC_Extra
-      REAL(DOUBLE) :: V
+      CHARACTER(LEN=DEFAULT_CHR_LEN)  :: GMTag
+      TYPE(INTC)                  :: IntC_Extra
+      CHARACTER(LEN=5)            :: CHAR
+      INTEGER                     :: I1,I2,J,NIntC_Extra,SerNum
+      REAL(DOUBLE)                :: V,Value,DegToRad
+      TYPE(CRDS)                  :: GMLoc
+!
+      CALL OpenASCII(InpFile,Inp)
+!
+      DegToRad=PI/180.D0
 !
       CALL OpenASCII(InpFile,Inp)
       CALL OpenASCII(OutFile,Out)
@@ -2374,9 +2382,11 @@ MODULE ParseInPut
            INDEX(LineLowCase,'tors')/=0.OR.&
            INDEX(LineLowCase,'outp')/=0.OR.&
            INDEX(LineLowCase,'linb1')/=0.OR.&
-           INDEX(LineLowCase,'linb2')/=0.OR.&
-           INDEX(LineLowCase,'cart')/=0  &  !!! cartesian constr.
-        ) NIntC_Extra=NIntC_Extra+1 
+           INDEX(LineLowCase,'linb2')/=0) THEN
+           NIntC_Extra=NIntC_Extra+1 
+        ELSE IF(INDEX(LineLowCase,'cart')/=0) THEN
+           NIntC_Extra=NIntC_Extra+3 
+        ENDIF
 !
         IF(INDEX(LineLowCase,'end_add_internals')/=0) GO TO 2
       ENDDO
@@ -2385,8 +2395,19 @@ MODULE ParseInPut
 !
       IF(NIntC_Extra==0) THEN
         CALL Put(NIntC_Extra,'NIntC_Extra')
-	GO TO 500
+        CLOSE(Inp,STATUS='KEEP')
+	RETURN   
       ENDIF
+!
+! Get GM array
+!
+        GMTag=''
+#ifdef MMech
+      IF(HasMM()) THEN
+        GMTag='GM_MM'
+      ENDIF
+#endif
+      CALL Get(GMLoc,Tag_O=TRIM(GMTag)//CurGeom)
 !
 ! Generate an addition to the IntC set!
 !
@@ -2409,11 +2430,13 @@ MODULE ParseInPut
                IntC_Extra%DEF(NIntC_Extra)='STRE ' 
 !--------------------
                IF(INDEX(LineLowCase,'.')==0) THEN
-READ(LineLowCase,*) CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:2)
+                 READ(LineLowCase,*) &
+                 CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:2)
                ELSE
-READ(LineLowCase,*) CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:2),&
-IntC_Extra%Value(NIntC_Extra)
+                 READ(LineLowCase,*) &
+                 CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:2),Value
                  IntC_Extra%Constraint(NIntC_Extra)=.TRUE.
+                 IntC_Extra%Value(NIntC_Extra)=Value*AngstromsToAu
                ENDIF
 !--------------------
         ELSE IF(INDEX(LineLowCase,'bend')/=0) THEN 
@@ -2421,11 +2444,13 @@ IntC_Extra%Value(NIntC_Extra)
                NIntC_Extra=NIntC_Extra+1 
                IntC_Extra%DEF(NIntC_Extra)='BEND ' 
                IF(INDEX(LineLowCase,'.')==0) THEN
-READ(LineLowCase,*) CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:3)
+                 READ(LineLowCase,*) &
+                 CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:3)
                ELSE
-READ(LineLowCase,*) CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:3),&
-IntC_Extra%Value(NIntC_Extra)
+                 READ(LineLowCase,*) &
+                 CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:3),Value
                  IntC_Extra%Constraint(NIntC_Extra)=.TRUE.
+                 IntC_Extra%Value(NIntC_Extra)=Value*DegToRad 
                ENDIF
 !--------------------
         ELSE IF(INDEX(LineLowCase,'tors')/=0) THEN 
@@ -2433,11 +2458,13 @@ IntC_Extra%Value(NIntC_Extra)
                NIntC_Extra=NIntC_Extra+1 
                IntC_Extra%DEF(NIntC_Extra)='TORS ' 
                IF(INDEX(LineLowCase,'.')==0) THEN
-READ(LineLowCase,*) CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:4)
+                 READ(LineLowCase,*) &
+                 CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:4)
                ELSE
-READ(LineLowCase,*) CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:4),&
-IntC_Extra%Value(NIntC_Extra)
+                 READ(LineLowCase,*) &
+                 CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:4),Value
                  IntC_Extra%Constraint(NIntC_Extra)=.TRUE.
+                 IntC_Extra%Value(NIntC_Extra)=Value*DegToRad 
                ENDIF
 !--------------------
         ELSE IF(INDEX(LineLowCase,'outp')/=0) THEN 
@@ -2445,11 +2472,13 @@ IntC_Extra%Value(NIntC_Extra)
                NIntC_Extra=NIntC_Extra+1 
                IntC_Extra%DEF(NIntC_Extra)='OUTP ' 
                IF(INDEX(LineLowCase,'.')==0) THEN
-READ(LineLowCase,*) CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:4)
+                 READ(LineLowCase,*) &
+                 CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:4)
                ELSE
-READ(LineLowCase,*) CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:4),&
-IntC_Extra%Value(NIntC_Extra)
+                 READ(LineLowCase,*) &
+                 CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:4),Value
                  IntC_Extra%Constraint(NIntC_Extra)=.TRUE.
+                 IntC_Extra%Value(NIntC_Extra)=Value*DegToRad 
                ENDIF
 !--------------------
         ELSE IF(INDEX(LineLowCase,'linb1')/=0) THEN 
@@ -2457,11 +2486,13 @@ IntC_Extra%Value(NIntC_Extra)
                NIntC_Extra=NIntC_Extra+1 
                IntC_Extra%DEF(NIntC_Extra)='LINB1' 
                IF(INDEX(LineLowCase,'.')==0) THEN
-READ(LineLowCase,*) CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:3)
+                 READ(LineLowCase,*) &
+                 CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:3)
                ELSE
-READ(LineLowCase,*) CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:3),&
-IntC_Extra%Value(NIntC_Extra)
+                 READ(LineLowCase,*) &
+                 CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:3),Value
                  IntC_Extra%Constraint(NIntC_Extra)=.TRUE.
+                 IntC_Extra%Value(NIntC_Extra)=Value*DegToRad 
                ENDIF
 !--------------------
         ELSE IF(INDEX(LineLowCase,'linb2')/=0) THEN 
@@ -2469,31 +2500,41 @@ IntC_Extra%Value(NIntC_Extra)
                NIntC_Extra=NIntC_Extra+1 
                IntC_Extra%DEF(NIntC_Extra)='LINB2'
                IF(INDEX(LineLowCase,'.')==0) THEN
-READ(LineLowCase,*) CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:3)
+                 READ(LineLowCase,*) &
+                 CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:3)
                ELSE
-READ(LineLowCase,*) CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:3),&
-IntC_Extra%Value(NIntC_Extra)
+                 READ(LineLowCase,*) &
+                 CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:3),Value
                  IntC_Extra%Constraint(NIntC_Extra)=.TRUE.
+                 IntC_Extra%Value(NIntC_Extra)=Value*DegToRad 
                ENDIF
 !--------------------
         ELSE IF(INDEX(LineLowCase,'cart')/=0) THEN
 !--------------------
-               NIntC_Extra=NIntC_Extra+1 
-               IntC_Extra%DEF(NIntC_Extra)='CART ' 
-READ(LineLowCase,*) CHAR,Atomname
-               DO J=1,104
-                  IF(TRIM(Atomname)==Ats(J))THEN
-                     IntC_Extra%ATOMS(NIntC_Extra,1)=J
-                     EXIT
-                  ENDIF
-               ENDDO
+               IntC_Extra%DEF(NIntC_Extra+1)='CARTX' 
+               IntC_Extra%DEF(NIntC_Extra+2)='CARTY' 
+               IntC_Extra%DEF(NIntC_Extra+3)='CARTZ' 
 !
-               IF(INDEX(LineLowCase,'.')==0) THEN
-READ(LineLowCase,*) CHAR,IntC_Extra%ATOMS(NIntC_Extra,1)
-               ELSE
-READ(LineLowCase,*) CHAR,IntC_Extra%ATOMS(NIntC_Extra,1)
-                 IntC_Extra%Constraint(NIntC_Extra)=.TRUE.
-               ENDIF
+                 READ(LineLowCase,*) CHAR,SerNum  
+!
+               IntC_Extra%ATOMS(NIntC_Extra+1,1)=SerNum
+               IntC_Extra%ATOMS(NIntC_Extra+2,1)=SerNum
+               IntC_Extra%ATOMS(NIntC_Extra+3,1)=SerNum
+!
+               IntC_Extra%Constraint(NIntC_Extra+1)=.TRUE.
+               IntC_Extra%Constraint(NIntC_Extra+2)=.TRUE.
+               IntC_Extra%Constraint(NIntC_Extra+3)=.TRUE.
+!
+               IntC_Extra%Value(NIntC_Extra+1)=GMLoc%Carts%D(1,Sernum)
+               IntC_Extra%Value(NIntC_Extra+2)=GMLoc%Carts%D(2,Sernum)
+               IntC_Extra%Value(NIntC_Extra+3)=GMLoc%Carts%D(3,Sernum)
+!
+                 NIntC_Extra=NIntC_Extra+3 
+!
+!               IF(INDEX(LineLowCase,'.')==0) THEN
+!READ(LineLowCase,*) CHAR,IntC_Extra%ATOMS(NIntC_Extra,1)
+!               ELSE
+!               ENDIF
 !--------------------
         ELSE 
 ! dont do anything with non-conform lines
@@ -2509,12 +2550,14 @@ READ(LineLowCase,*) CHAR,IntC_Extra%ATOMS(NIntC_Extra,1)
         CALL Put(NIntC_Extra,'NIntC_Extra')
         CALL Put(IntC_Extra,'IntC_Extra')
 !
-      Do i=1,NIntC_Extra
-        write(*,200) IntC_Extra%Def(i),IntC_Extra%Atoms(i,1:4),IntC_Extra%Value(i),IntC_Extra%Constraint(i)
-      EndDo
-200   format(A5,2X,4I4,F12.6,L6)
+        CALL PrtIntCoords(IntC_Extra,IntC_Extra%Value, &
+          'Extra Internals & Constraints')
 !
       CALL Delete(IntC_Extra)
+      CALL Delete(GMLoc)
+!
+500   CONTINUE
+      CLOSE(Inp,STATUS='KEEP')
 !
 500   CONTINUE
       CLOSE(Out,STATUS='KEEP')
