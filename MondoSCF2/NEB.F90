@@ -122,7 +122,7 @@ CONTAINS
        ENDIF
        IF(I==G%Clones)THEN
           UPp=.FALSE.
-       ELSEIF(I==G%Clones)THEN
+       ELSE
           UPp=G%Clone(I+1)%ETotal>G%Clone(I)%ETotal
        ENDIF
        IF(UPm.NEQV.UPp)THEN 
