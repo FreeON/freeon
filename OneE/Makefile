@@ -1,4 +1,4 @@
-#------------------------------------------------------------------------------
+##############################################################################
 #--  This code is part of the MondoSCF suite of programs for linear scaling 
 #    electronic structure theory and ab initio molecular dynamics.
 #
@@ -24,7 +24,7 @@
 #    e.g. in the form "These calculations have been performed using MondoSCF, 
 #    a suite of programs for linear scaling electronic structure theory and
 #    ab initio molecular dynamics", and given appropriate citation.  
-#------------------------------------------------------------------------------
+##############################################################################
 include $(MONDO_COMPILER)
 include $(MONDO_HOME)/Includes/Suffixes
 include $(MONDO_HOME)/Includes/RemoveAll
@@ -35,7 +35,12 @@ ObjsS = SBlok.o     MakeS.o
 ObjsT = TBlok.o     MakeT.o 
 ObjsR = RhoBlok.o RhoTools.o  MakeRho.o 
 ObjSF = BlokTrWdS.o SForce.o 
-ObjTF = BlokTrPdT.o TForce.o 
+ObjTF = BlokTrPdT.o TForce.o
+
+ReleaseFiles = SBlok.x MakeS.x TBlok.x MakeT.x  \
+               RhoBlok.x RhoTools.x  MakeRho.x  \
+               BlokTrWdS.x SForce.x BlokTrPdT.x \
+               TForce.x 
 #
 all:	MakeS MakeT MakeRho SForce TForce
 #
@@ -59,8 +64,13 @@ TForce:	$(ObjTF)
 	$(LD) $(LDFLAGS) TForce $(ObjTF) $(LibOpts) $(Libs)
 	mv TForce $(MONDO_HOME)/Exec/TForce
 #
+release:clean $(RleaseFiles) 
+#
+purge:	clean
+	rm -f $(REMOVESRCE)
+#
 clean:
-	rm -f $(REMOVEALL)
+	rm -f $(REMOVEMISC) $(REMOVEMODS)
 	rm -f \#*
 	rm -f *~
 	rm -f $(MONDO_HOME)/Exec/MakeS

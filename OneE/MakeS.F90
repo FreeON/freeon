@@ -1,13 +1,6 @@
-!
-!--  This source code is part of the MondoSCF suite of 
-!--  linear scaling electronic structure codes.  
-!
-!--  Matt Challacombe and  C. J. Tymczak
-!--  Los Alamos National Laboratory
-!--  Copyright 2000, The University of California
-!
 !    COMPUTE THE OVERLAP MATRIX S
-!
+!    Authors: Matt Challacombe and C.J. Tymczak
+!------------------------------------------------------------
 PROGRAM MakeS
   USE DerivedTypes
   USE GlobalScalars

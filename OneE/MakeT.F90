@@ -1,13 +1,6 @@
-!
-!--  This source code is part of the MondoSCF suite of 
-!--  linear scaling electronic structure codes.  
-!
-!--  Matt Challacombe and  C. J. Tymczak
-!--  Los Alamos National Laboratory
-!--  Copyright 2000, The University of California
-!
-!    COMPUTE THE Kintic Energy Matrix
-!
+!    COMPUTE THE KINETIC ENERGY MATRIX
+!    Author: Matt Challacombe and C.J. Tymczak
+!----------------------------------------------------------------------
 PROGRAM MakeT
   USE DerivedTypes
   USE GlobalScalars
