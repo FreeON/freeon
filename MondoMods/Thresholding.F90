@@ -97,7 +97,7 @@ MODULE Thresholding
            PairUntVct=Zero
         ELSE
 !          Exp[-MinXab*|A-B|^2]*Exp[-MinZab*R^2]<Tau
-           PairExtent=Four*PrimPairDistanceThreshold/Pair%AB2
+           PairExtent=MAX(Zero,(PrimPairDistanceThreshold-MinXab*Pair%AB2/MinZab))
            PairUntVct=(Pair%A-Pair%B)*Half
 !          Half length (width) of AB
            PairHlfWdt=SQRT(PairUntVct(1)**2+PairUntVct(2)**2+PairUntVct(3)**2)
