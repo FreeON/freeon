@@ -141,7 +141,7 @@ multipole acceptability criteria which is used in many applications is the, and
 which we use as an illustration of the problems associated with using error estimates not error bounds, is the 
 {\it opening criteria},
 \begin{equation}
-\varepsilon_{oc} \approx {|{\bf d}_{max}| \over |{\bf R}_a - {\bf R}_{box}|}
+\varepsilon_{oc} \approx \frac{ \left| {\bf d}_{max} \right| }{ \left| {\bf R}_a - {\bf R}_{box} \right|}
 \label{OpenCri}
 \end{equation} 
 However, this suffers from several severe problems: 
@@ -172,7 +172,8 @@ Us{\"o}ld operator
 \left| {\cal O}_{l}^{m}
 \left[ \mathbf{R}\right] \right|^{2}}
 \end{equation}
-Which allows us to rewrite the error bound as
+Which we will refer to as the Us{\"o}ld weight of the distributions in the box. 
+Using this definition allows us to rewrite the error bound as,
 %
 %
 \begin{equation}
@@ -189,14 +190,15 @@ where
 \begin{equation}
 n\left[ l,l'\right] =\sqrt{2} \frac{(l+l')!}{l!\, l'!}
 \end{equation}
-To continue with the main points of our derivation, it can be shown
+To continue with the main points of our derivation, we can show that
 \begin{equation}
-{\cal O}_{l}[\left| \mathbf{R}\right| ]\leq C \left| \mathbf{d}_{max}\right| ^{l}
+{\cal O}_{l}[\left| \mathbf{R}\right| ]\leq {\cal C} \left| \mathbf{d}_{max}\right| ^{l}
 \label{Cbound}
 \end{equation}
-Where C is tabulated beforehand. Using equation (\ref{Cbound}) allows us to write our error bound in its final form
+Where we refer to ${\cal C}$ as the asymptotic Uns{\"o}ld weight, and  is tabulated beforehand. 
+Using equation (\ref{Cbound}) allows us to write our error bound in its final form
 \begin{equation}
-\varepsilon \left( l_{0}\right) \leq \frac{1}{2}\frac{C \,{\cal O}_{l_{0}}\left[\left| 
+\varepsilon \left( l_{0}\right) \leq \frac{1}{2}\frac{{\cal C} \,{\cal O}_{l_{0}}\left[\left| 
 \mathbf{R}_a\right| 
 \right] \, n\left[ l_{0},L_{max}+1\right] \, \left| \mathbf{d}_{max}\right| ^{L_{max}+1}}{
 \left| \left| 
@@ -210,7 +212,22 @@ ii) It takes into account the weight of the distribution within the box,
 iii) It takes into account the angular momentum type of the distributions,
 iv) When $|R_a - R_{box}| \rightarrow |{\bf d}_{max}|$ it correctly bounds the error. 
 %
-It is possible to continue this analysis to include the multipole error made within the fast multipole algorithm. 
+It is possible to continue this analysis to include the multipole error made within the fast multipole algorithm, 
+but in this case we are contracting distributions ion two different boxes. Making the Assumption that $L=L'=L_{max}$ we
+can write the fast multipole error as
+\begin{equation}
+\varepsilon_{FMM} \leq 
+\frac{1}{2} \frac{{\cal C}_{box_1} {\cal C}_{box_2} 
+\left| \left| \mathbf{d}_{max_1}\right| +  \left| \mathbf{d}_{max_2}\right| \right|^{L_{max}+1}}
+{\left|\mathbf{R_{box_1}}-\mathbf{R_{box_2}}\right|^{L_{max}+1}
+\left|\left|\mathbf{R}_{box_1}-\mathbf{R}_{box_2} \right|-\left| 
+ \mathbf{d}_{max_1}\right| -  \left| \mathbf{d}_{max_2}\right|
+\right|}
+\label{FMM_EB}
+\end{equation}
+where ${\bf R}_{box_1}$ and ${\bf R}_{box_2}$ are the centers of,
+${\bf d}_{max_1}$ and ${\bf d}_{max_2}$ are the sizes of, and
+${\cal C}_{box_1}$ and ${\cal C}_{box_2}$ asymptotic Uns{\"o}ld weight of the distributions within  box 1 and box 2.
 
 \section{RESULTS}
 
@@ -266,7 +283,7 @@ in preparation of this manuscript.
 
 \appendix
 
-\section{Exact Error Bound for the MAC}
+\section{Derivation of the Exact Error Bound}
 Let us start by defining some useful quantities
 \begin{equation}
 \label{B1}
@@ -432,7 +449,7 @@ within our error expression. Let us consider the limit of
 \label{B19}
 \lim _{l\rightarrow \infty }\left\{ {\cal O}_{l}[\rho ;\left| \mathbf{P}\right| ]\right\} ^{1/l}
 \end{equation}
- Considering the density as a sum of delta functions with arbitrary
+Considering the density as a sum of delta functions with arbitrary
 weights. 
 
 \begin{equation}
@@ -609,37 +626,44 @@ For the case where $L=L'$ and $|\mathbf{d}|= |\mathbf{d'}|$ this has a particula
 %
 %
 \begin{figure}
-\caption{}
+\caption{A set of $N$ distributions in a box and the distribution $a$.}
 {\centering \includegraphics {MultInBox.ps} \par} 
 \label{figure:MultInBox} 
 \end{figure}
 
 \begin{figure}
-\caption{}
+\caption{The boxes and sub-boxes that distribution $a$ interacts with, and the dipictation of the
+organization of the multipole the tree}
 {\centering \includegraphics {TreeInBox.ps} \par} 
 \label{figure:TreeInBox} 
 \end{figure}
 
 \begin{figure}
-\caption{}
+\caption{A contour plot of the binned error calculated on each visited node of the multipole tree for a 
+512 molecule classical water system which includes 125 image cells.
+The red line is the $\tau=Error$ line}
 {\centering \includegraphics {Error_vs_TauMAC_bin_Water512.ps} \par} 
 \label{figure:MultipoleErrorWaterC512} 
 \end{figure}
 
 \begin{figure}
-\caption{}
+\caption{A contour plot of the binned error calculated on each visited node of the multipole tree for a 
+64 molecule quantum water system using the STO-3G basis set and which includes 125 image cells.
+The red line is the $\tau=Error$ line}
 {\centering \includegraphics{Error_vs_TauMAC_Water64_bin.ps} \par} 
 \label{figure:MultipoleErrorWaterQ64} 
 \end{figure}
 
 \begin{figure}
-\caption{}
+\caption{The time to both build the multipole tree, and calculate the force for every particle, for 
+a classicle water system  with 125 image cell at a tolerance of $\tau=10^{-8}$ and $L_{max}=(4,6,8)$.}
 {\centering \includegraphics {Time_vs_N_water_2.ps} \par} 
 \label{figure:TimeVsNwater} 
 \end{figure}
 
 \begin{figure}
-\caption{}
+\caption{The time to calculate the force for every particle which decreasing tolerace for  $L_{max}=(4,5,6,7)$ for
+a 4096 molecule  classical water system with 125 image cells.}
 {\centering \includegraphics {Time_vs_Tau_W4096.ps} \par} 
 \label{figure:TimeVsTauWater4096} 
 \end{figure}
