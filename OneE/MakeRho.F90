@@ -53,6 +53,7 @@ PROGRAM MakeRho
 !----------------------------------------------
   CALL Get(BS,Tag_O=CurBase)
   CALL Get(GM,Tag_O=CurGeom)
+  CALL NewBraKetBlok(BS)
 !----------------------------------------------
 ! Set up the appropriate action
 !----------------------------------------------
