@@ -103,7 +103,7 @@ CONTAINS
     INTEGER                    :: I,J,K,L,N,NC,NK,NP,NS,MinL,MaxL,KFound
     !-------------------------------------------------------------------------!
     ! Allocate temporary set
-    BS%LMNLen=MaxAsymt
+    BS%LMNLen=LHGTF(MaxAsymt)
     BS%NCtrt=MaxCntrx
     BS%NPrim=MaxPrmtv
     BS%NAtms=G%NAtms
