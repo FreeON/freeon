@@ -150,7 +150,7 @@ MODULE PrettyPrint
          ENDIF
          IF(InParallel)THEN
             DO I=0,NPrc-1
-               CALL AlignNodes()         
+               CALL AlignNodes()
                IF(MyId==I)THEN
                   PU=OpenPU(FileName_O,Unit_O)              
                   Id=IntToChar(MyId)
@@ -454,7 +454,7 @@ MODULE PrettyPrint
      CHARACTER(LEN=*),OPTIONAL        :: Proc_O
      CHARACTER(LEN=*)                 :: Name
      INTEGER,OPTIONAL                 :: Unit_O
-     INTEGER                          :: PU 
+     INTEGER                          :: PU
      CHARACTER(LEN=2*DEFAULT_CHR_LEN) :: CellStr
 !-----------------------------------------------------------------------------------------
      IF(PrintFlags%Key<DEBUG_MAXIMUM.OR.CS%NCells==1)RETURN
@@ -495,7 +495,7 @@ MODULE PrettyPrint
 !
 !           Mssg='Configuration #'//TRIM(IntToChar(GM%Confg))
 !           IF(GM%ETotal/=BIG_DBL)THEN
-!              Mssg='Escf['//TRIM(IntToChar(GM%Confg))//']='//TRIM(DblToChar(GM%ETotal)) 
+!              Mssg='Escf['//TRIM(IntToChar(GM%Confg))//']='//TRIM(DblToChar(GM%ETotal))
 !              WRITE(PU,*)TRIM(Mssg)
 !              Mssg='Grms['//TRIM(IntToChar(GM%Confg))//']='//TRIM(DblToShrtChar(GM%GradRMS)) 
 !              WRITE(PU,*)TRIM(Mssg)
@@ -526,11 +526,35 @@ MODULE PrettyPrint
                       AuxChar='    '
                     ENDIF
                     Mssg=Ats(INT(GM%AtNum%D(I)))                         &  !!!! correct only for integer charged QM atoms
-                           //'   '//DblToMedmChar(GM%Carts%D(1,I)*AA)    &
-                           //'   '//DblToMedmChar(GM%Carts%D(2,I)*AA)    &
-                           //'   '//DblToMedmChar(GM%Carts%D(3,I)*AA)//TRIM(AuxChar)
+                           //'   '//FltToMedmChar(GM%Carts%D(1,I)*AA)    &
+                           //'   '//FltToMedmChar(GM%Carts%D(2,I)*AA)    &
+                           //'   '//FltToMedmChar(GM%Carts%D(3,I)*AA)//TRIM(AuxChar)
                     WRITE(PU,*)TRIM(Mssg)
                  ENDDO
+              ELSE IF (PrintGeom_O=='XSF') THEN
+	      ! NJH: Print XSF format for XCrysden
+	      ! NJH: Only does a single configuration correctly for now
+	      ! NJH: Needs future hooks in Optimizer to produce animation files
+                 AA=One/AngstromsToAU
+                 IF(GM%PBC%Dimen/=0)THEN
+		    Mssg='CRYSTAL'
+                    WRITE(PU,22)Mssg
+		    Mssg='PRIMVEC'
+                    WRITE(PU,22)Mssg
+                    ! Cell Vectors
+                    WRITE(Mssg,*) GM%PBC%BoxShape%D(1,1) , GM%PBC%BoxShape%D(1,2) , GM%PBC%BoxShape%D(1,3)
+                    WRITE(PU,22)Mssg
+                    WRITE(Mssg,*) GM%PBC%BoxShape%D(2,1) , GM%PBC%BoxShape%D(2,2) , GM%PBC%BoxShape%D(2,3)
+                    WRITE(PU,22)Mssg
+                    WRITE(Mssg,*) GM%PBC%BoxShape%D(3,1) , GM%PBC%BoxShape%D(3,2) , GM%PBC%BoxShape%D(3,3)
+                    WRITE(PU,22)Mssg
+                 ENDIF
+		 Mssg='PRIMCOORD'
+                 WRITE(PU,22)Mssg
+		 WRITE(PU,*) GM%NAtms , 1
+                 DO I=1,GM%NAtms
+		    WRITE(PU,*) GM%AtNum%D,(GM%Carts%D(K,I)*AA,K=1,3)
+		 ENDDO
               ELSEIF(PrintGeom_O=='PDB')THEN
 !                Print PDB format
                  AA=One/AngstromsToAU
@@ -551,14 +575,14 @@ MODULE PrettyPrint
               ENDIF
            ELSEIF(PrintFlags%Fmt==DEBUG_MMASTYLE)THEN
 !             Print MMA format
-              Mssg=' NAtoms = '//IntToChar(GM%NAtms)//';'                  
+              Mssg=' NAtoms = '//IntToChar(GM%NAtms)//';'
               WRITE(PU,*)TRIM(Mssg)
               WRITE(PU,*)'(* Coordinates are in AU *)'
               DO I=1,GM%NAtms
                  Mssg='R['//TRIM(IntToChar(I))//']={'           &
                           //DblToMMAChar(GM%Carts%D(1,I))//','  &
                           //DblToMMAChar(GM%Carts%D(2,I))//','  &
-                          //DblToMMAChar(GM%Carts%D(3,I))//'};'  
+                          //DblToMMAChar(GM%Carts%D(3,I))//'};'
                  WRITE(PU,*)TRIM(Mssg)
               ENDDO
            ELSE
@@ -627,7 +651,7 @@ MODULE PrettyPrint
         ENDIF
 #endif
      END SUBROUTINE Print_BCSR
-#ifdef PARALLEL 
+#ifdef PARALLEL
 !-----------------------------------------------------------------------------
 !    Print a DBCSR matrix
 !
