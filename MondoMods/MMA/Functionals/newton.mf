@@ -1,0 +1,97 @@
+        program newton
+        implicit double precision(a-h,o-z)
+        double precision jac
+        logical fconv,xconv
+        integer dim
+        dimension x(<*
+SetOptions[FortranAssign,AssignToArray->{x}];
+
+      (***** General problem formulation. *****)
+
+       (* Input equations in variables x[i]. *)
+
+       f = { Sin[x[1] x[2]^2] - 1, Exp[ Cos[x[1]/x[2]] ] - 1 };
+
+(* Input initial values - must the same dimension as f. *)
+
+                   init = {.5,.5};
+
+         (***** End of required input. *****)
+
+dim = Length[f];    vars = Array[x,dim];    dim *>)
+        dimension jac(<* dim *>,<* dim *>),ipiv(<* dim *>)
+        dimension f(<* dim *>),xnew(<* dim *>)
+        data dim/<* dim *>/
+c
+c       Specify convergence criteria and maximum number of iterations.
+c
+        data maxit/30/,relerr/1.d-10/,abserr/1.d-10/,fmaxerr/5.d-9/
+<* (***** Assign initial values to x. *****)
+
+FortranAssign[x,init] *>
+        do 10 i = 1,dim
+            xnew(i) = x(i)
+10      continue
+        do 20 k = 1,maxit
+<* (***** Calculate Jacobian Matrix. *****)
+
+FortranAssign[jac,Outer[D,f,vars]]
+*>
+<* FortranAssign[f,f] *>
+c
+c       LU decomposition of Jacobian matrix.
+c
+            call dgetrf(dim,dim,jac,dim,ipiv,info)
+c
+c       Linear solution routine overwriting f with solution.
+c
+            call dgetrs('No transpose',dim,1,jac,dim,ipiv,f,dim,info)
+c
+c       Update solution and error indicators.
+c
+            fconv = .true.
+            xconv = .true.
+            xmaxdiff = 0.d0
+            xmax = 0.d0
+            do 30 i = 1,dim
+                xnew(i) = x(i) - f(i)
+                if (abs(f(i)).gt.fmaxerr) then
+                    fconv = .false.
+                endif
+                xnewabs = abs(xnew(i))
+                if (xnewabs.gt.xmax) then
+                    xmax = xnewabs
+                endif
+                xdiff = abs(xnewabs - abs(x(i)))
+                if (xdiff.gt.xmaxdiff) then
+                    xmaxdiff = xdiff
+                endif
+30          continue
+            do 40 i = 1,dim
+                x(i) = xnew(i)
+40          continue
+            if (xmaxdiff.gt.(relerr*xmax+abserr)) then
+                xconv = .false.
+            endif
+c
+c       Test if convergence criteria are satisfied.
+c
+            if (fconv.and.xconv) then
+                goto 50
+            else
+                if (k.eq.maxit) then
+                    write(*,100) k
+                endif
+            endif
+20      continue
+c
+c       Output solution vector.
+c
+50      do 60 i = 1,dim
+            write(*,*) x(i)
+60      continue
+100     format('Newton scheme did not converge after ',
+     &  i2,' iterations')
+        stop
+        end
+

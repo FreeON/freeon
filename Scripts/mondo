@@ -1,0 +1,2 @@
+#!/bin/sh
+${MONDO_HOME}/Exec/MondoSCF $1 $2 $3

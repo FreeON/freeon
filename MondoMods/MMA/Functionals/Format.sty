@@ -1,0 +1,39 @@
+% Define page layout
+
+% The following are U.K. LaTeX settings and should be changed for U.S.
+% paper formats.
+
+\textheight=22cm
+\textwidth=16cm
+\topmargin=0cm
+\oddsidemargin=0.cm
+\evensidemargin=0.cm
+
+% These are corresponding U.S. settings commented out.
+
+% \textheight 8.in
+% \textwidth 6.5 in
+
+% Define the font to print Mathematica commands \mmafont
+\newfont{\mmafont}{cmtt12}
+
+% Define the macro to print Mathematica commands \mma{}
+\newcommand{\mma}[1]{{\mmafont #1}}
+
+% Define mathematical symbols
+\font\bbb=msbm10
+\def\real{\hbox{\bbb R}}
+\def\natural{\hbox{\bbb N}}
+\def\integer{\hbox{\bbb Z}}
+\def\rational{\hbox{\bbb Q}}
+\def\complex{\hbox{\bbb C}}
+
+\def\quotes{{\tt "}}
+
+% define bold greek letters for math mode
+% usage:: ${\bmit \eta }$
+
+\font\bitgrfont=cmmib10
+\textfont9=\bitgrfont
+\def\bmit{\fam=9}
+\mathchardef\eta="7111

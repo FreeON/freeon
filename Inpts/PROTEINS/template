@@ -1,0 +1,22 @@
+Title:
+MONDO Protein
+
+Options:
+Geom=InAngst 
+MaxSiz=Gigantor
+Multip=1 
+Guess=Ortho
+SCF=(LNV,DIIS)
+MaxSCF=12
+MaxCG =7
+MaxPur=14
+OvlpExpts=45
+TrixExpts=45
+MultExpts=57
+TwoEExpts=67
+DTolExpts=23
+ETolExpts=35
+Basis=(STO-2G,STO-3G)
+Print=(Coords,Basis,Timing,Sparsity,Thresh)
+                                                                        
+$geom

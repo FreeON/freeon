@@ -1,0 +1,24 @@
+setenv PGI /home/usr/local/pgi
+setenv NAG /home/usr/local/NAG
+set path = ( $path $PGI/linux86/bin $NAG /usr/local/bin  ) 
+
+setenv LM_LICENSE_FILE /home/usr/local/lmgrd/license.dat
+
+setenv PLATFORM        IntelLinux.NAG
+#setenv PLATFORM        IntelLinux.PG
+#setenv PLATFORM        IntelLinux.LAHEY
+
+setenv HDF_HOME        /home/JoeUser/HDF5
+setenv HDF_BIN         $HDF_HOME/bin
+setenv HDF_INC         $HDF_HOME/include
+setenv HDF_LIB         $HDF_HOME/lib
+setenv LD_LIBRARY_PATH $HDF_LIB
+setenv LD_RUN_PATH     $HDF_LIB
+
+setenv MONDO_HOME    /home/JoeUser/MONDO
+setenv MONDO_INC     $MONDO_HOME/Includes
+setenv MONDO_SCRATCH $MONDO_HOME/Scratch
+setenv MONDO_WORK    $MONDO_HOME/Inpts/DEVELOP
+
+source $MONDO_HOME/Scripts/MondoSetUp
+

@@ -1,0 +1,12 @@
+rm -f $1.pbs
+echo "#!/bin/tcsh "                                   >  $1.pbs
+echo "#PBS -l nodes=zinc15:ppn=4"                     >> $1.pbs
+echo "#PBS -joe -N MONDO_$1"                          >> $1.pbs
+echo "rm $MONDO_SCRATCH/$1*"                          >> $1.pbs
+echo "cd `pwd`"                                       >> $1.pbs
+#echo 'gmpiconf $PBS_NODEFILE'                        >> $1.pbs
+echo "$MONDO_HOME/Exec/MondoSCF $1"                   >> $1.pbs
+#echo "cp $MONDO_SCRATCH/$1*.SCALING_RESULTS `pwd`"   >> $1.pbs
+echo "rm $MONDO_SCRATCH/$1* "                         >> $1.pbs
+chmod u+x $1.pbs
+qsub $1.pbs

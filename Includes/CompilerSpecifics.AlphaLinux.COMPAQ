@@ -1,0 +1,117 @@
+#---------------------------------------------------------------
+# PREPROCESSOR OPTIONS: 
+#
+CPP=/lib/cpp -P -C
+CPPINCLUDE=-I/usr/local/include
+CPPOPTS=
+#-DPARALLEL 
+#-DNONBLOCKING
+#---------------------------------------------------------------
+# C Compiler and options
+#
+CC        =  gcc
+#CDEBUG    = -g
+COPTIMIZE = -ffast-math -fexpensive-optimizations -fomit-frame-pointer -O4
+CFLAGS = $(CMISC) $(COPTIMIZE) $(CDEBUG) $(CPPOPTS)
+#---------------------------------------------------------------
+# Fortran postfixes for compiler peculiarities
+#
+LIST_POSTFIX  = l
+F77_POSTFIX   = f
+F90_POSTFIX   = f90
+MOD_POSTFIX   = mod
+#---------------------------------------------------------------
+# Fortran Compilers, options and include files
+#
+F77       = fort  -f77rtl -static
+F90       = fort  -static
+#
+#FUL_OPT   =  -tune host -O5 -math_library fast
+#
+F77_OPTIMIZE = $(FUL_OPT)
+F90_OPTIMIZE = $(FUL_OPT)
+#
+#F77_DEBUG    = -g -C -check_bounds -check overflow
+F90_DEBUG    = -g -C -check_bounds -check overflow
+#
+F_LIST        = 
+#-V 
+#-source_listing
+#
+#F_PROF       = -p
+#---------------------------------------------------------------------
+#
+F77_MISC     = $(F_LIST) $(F_PROF) -i4 -assume no2underscores
+F90_MISC     = $(F_LIST) $(F_PROF) -i4 -assume no2underscores -std90 
+#
+F77_INCLUDE  = -I$(MONDO_HOME)/Includes/  \
+               -I$(MONDO_HOME)/Gammas/   -I/usr/local/include 
+#-I$(MPI_INC) \
+
+F90_INCLUDE  = -I$(MONDO_HOME)/Includes/ \
+               -I$(MONDO_HOME)/MondoMods -I/usr/local/include \
+               -I$(MONDO_HOME)/MondoMods/FUNCTIONS
+#
+#-I$(MPI_INC) \
+#
+#
+F77_FLAGS   = $(F77_MISC) $(F77_OPTIMIZE) $(F77_DEBUG) $(F77_INCLUDE)
+F90_FLAGS   = $(F90_MISC) $(F90_OPTIMIZE) $(F90_DEBUG) $(F90_INCLUDE)
+#---------------------------------------------------------------
+# LINK/LOADER DIRECTIVES
+#
+LD        = $(F90) 
+LDMISC    = $(F_PROF)
+LDFLAGS   = $(LDMISC) -o 
+#---------------------------------------------------------------
+# ARCHIVAL STUFF
+#
+AR      = ar
+ARFLAGS = -rcv
+RANLIB  = ranlib
+#---------------------------------------------------------------
+# DIRECTORIES TO SUSS FOR LIBRARIES
+#
+LibOpts=-L$(MONDO_HOME)/Libs -L/usr/local/lib 
+#-L$(HDF_LIB) -L$(MPI_LIB) -L$(LAPACK_LIB)
+#-------------------------------------------------------------------------------------
+# MPI LIBRARIES
+#
+# How MPICH was configured for debuging :
+#
+# How MPICH was configured for production:
+#
+#  ROLAND STUMPH's additions:
+#
+#MPI_LIBS= -lmpich
+#MPI_LIBS=-lmpich -L/usr/local/myrinet/lib -lgm 
+#---------------------------------------------------------------------
+#  HDF Libraries with compression and jpeg libs, 
+#  needs f2c as it the fort77 version (unable to compile native
+#  source under linux so far)
+#
+HDF=-lmfhdf -ldf -ljpeg -lz  
+#-------------------------------------------------------------------------
+#  The generic libs needed by most of the programs.  The F77 MondoMisc is 
+#  being phased out in favor of the F90 MondoMods.
+#
+Libraries     = -lMondoMisc $(HDF) 
+F77_LIBRARIES = Libraries 
+F90_LIBRARIES = -lMondoMods $(MPI_LIBS) $(HDF) 
+#--------------------------------------------------------------------------
+#  'Nuff said
+#
+LAPACK = -llapack -lblas 
+#---------------------------------------------------------------------------
+#  Define main__ if needed to link libf2c
+#
+#MAIN__=MAIN.o
+#---------------------------------------------------------------------------
+#  Deletion list
+#
+REMOVEALL77 = *.$(LIST_POSTFIX)  core *.o a.out fort.* 
+REMOVEALL90 = *.$(LIST_POSTFIX) *.f *.f90 *.mod core *.o a.out fort.*              
+REMOVEALL   = $(REMOVEALL77)
+#
+
+

@@ -1,0 +1,97 @@
+%% 
+%% Template of the Machine Specifications File
+%% 
+%% This file specifies various parameters for the search script.  Lines
+%% beginning with "%" are comments and are ignored by the search script.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+path_PHiPAC =/n/srv5/mchalla/Desktop/PHiPAC.gamma
+
+%% This parameter specifies the full path name for the directory where
+%% PHiPAC is installed.
+
+verbosity = 10
+
+%% This sets the verbosity level of the console output from the search
+%% scripts.  Currently supported levels range from 0 (minimal feedback) to
+%% 7 (a verbal diarrhea, for debugging purposes only).  A value of 2 is
+%% suitable for a normal run of the search script.
+
+% NO_ACTION
+
+%% If the "NO_ACTION" parameter is set, all Unix commands are not
+%% executed (use this with the "verbosity" parameter for debugging).
+
+
+num_single_prec_registers = 32
+num_double_prec_registers = 16
+L1_cache_size = 16384
+L2_cache_size = 524288
+% L3_cache_size = 2097152
+
+%% The "num_single_prec_registers" and "num_double_prec_registers"
+%% parameters specify the number of single precision and
+%% double precision floating point registers respectively.
+%% The "L1_cache_size", "L2_cache_size" and "L3_cache_size" parameters
+%% specify the sizes (in bytes) of the level-1, level-2 and level-3
+%% data caches of the machine that is running the search script.
+%% If the machine running the search script has only level-1 cache,
+%% then the "L2_cache_size" parameter may be omitted, and likewise for
+%% the "L3_cache_size" parameter if the machine has only level-2 cache.
+%% 
+%% (WARNING: Setting incorrect values for these parameters give
+%% absolutely meaningless search results!  Make sure these values are
+%% correct before running the search script.)
+
+compiler = gcc
+
+%% The "compiler" parameter specifies the path name of the ANSI-C
+%% compiler to be used.  Additional options to be passed to the
+%% compiler may be specified; for instance, a compiler that supports
+%% different standards of the C language may be given
+%% the option that specifies ANSI-C conformance.  These additional
+%% options are given every time the compiler is called.  Therefore,
+%% code-optimization options should not be specified here; instead,
+%% these options should be listed in the file specified by the 
+%% "compiler_options_file" parameter.
+
+
+generator_opts = 
+
+%% Any additional options to be passed to the generator (besides those
+%% controlled by the search script itself) can be given through the
+%% "generator_opts" parameter.  These additional options are given
+%% every time the code generator is called.  For a normal run of the
+%% search script, no additional generator options is necessary.
+
+
+timer_args = -t-comp -o 10 -i-auto -i-min-t 0.01 -i-min-m 1000
+
+%% The "timer_args" parameter specifies any options to be passed to the
+%% timer program for benchmarking.  At present the supported IPM/RPRF
+%% options are the following.
+%% -t-comp	: turns on timer call overhead compensation; this
+%% 		  should normally be used, but it will add more noise
+%% 		  if the timing environment is noisy
+%% -o <count>	: explicitly sets the outer loop count to <count>
+%% -i <count>	: explicitly sets the inner loop count to <count>
+%% -i-auto	: enables automatic setting of the inner loop count;
+%% 		  this is controlled by the two optional arguments
+%% 		  -i-min-t <min-time> and -i-min-m <multiplier>
+%% 		  described below.
+%% -i-min-t <min-time>
+%% -i-min-m <multiplier>: the inner loop count is set to a value that
+%% 			  ensures that the measured interval (after
+%% 			  any -t-comp correction) is at least
+%% 			  <min-time>, and the interval is also at
+%% 			  least <multiplier> times the machine's timer
+%% 			  resolution
+%% 
+%% Set the "timer_args" parameter to
+%% 	"-t-comp -o 10 -i-auto -i-min-t 0.01 -i-min-m 1000"
+%% for a normal run of the search script.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

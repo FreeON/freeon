@@ -1,0 +1,111 @@
+#---------------------------------------------------------------
+# Preprocessor
+#
+CPP=/lib/cpp -P -C
+CPPINCLUDE=-I$(MONDO_INC) -I$(HDF_INC) -I/usr/local/include
+CPPOPTS=
+#-DPERIODIC
+#-DPARALLEL 
+#---------------------------------------------------------------
+# C Compiler and options
+#
+CC=cc
+COPTIMIZE = -O3
+CMISC = -mips4 -64
+#CDEBUG = -g3 -C -fullwarn
+CFLAGS = $(CMISC) $(COPTIMIZE) $(CDEBUG) $(CPPOPTS)
+#---------------------------------------------------------------
+# Fortran postfixes for compiler peculiarities
+#
+LIST_POSTFIX  = L
+F77_POSTFIX   = f
+F90_POSTFIX   = f90
+MOD_POSTFIX   = MOD
+#---------------------------------------------------------------
+# Fortran Compilers, options and include files
+#
+F77       = f77
+F90       = f90
+F90_NO_MPI= f90
+#
+FUL_OPT   = -O3
+#fast=ip27 -OPT:IEEE_arithmetic=3
+
+#F77_OPTIMIZE = $(FUL_OPT)
+#F90_OPTIMIZE = $(FUL_OPT)
+
+F77_DEBUG    = -g3
+F90_DEBUG    = -g3 -C 
+#-DEBUG:trap_uninitialized=ON -trapuv
+
+F_LIST        = -listing 
+F_PROF        = 
+
+F77_MISC     = $(F_LIST) $(F_PROF) -mips4 -64 -extend_source
+F90_MISC     = $(F_LIST) $(F_PROF) -mips4 -64 -extend_source
+
+F77_INCLUDE  = -I$(MONDO_HOME)/Includes/ -I$(MPI_INC) \
+               -I$(MONDO_HOME)/Gammas/   -I/usr/local/include 
+               
+F90_INCLUDE  = -I$(MONDO_HOME)/Includes/ -I$(MONDO_HOME)/MondoMods \
+               -I/usr/local/include      -I$(MONDO_HOME)/MondoMods/FUNCTIONS -I$(MPI_INC) 
+
+F77_FLAGS   = $(F77_MISC) $(F77_OPTIMIZE) $(F77_DEBUG) $(F77_INCLUDE)
+F90_FLAGS   = $(F90_MISC) $(F90_OPTIMIZE) $(F90_DEBUG) $(F90_INCLUDE)
+#---------------------------------------------------------------
+# Loader
+#
+LD =$(F90)
+LDFLAGS = -v -mips4 -64 -o 
+#---------------------------------------------------------------
+# ARCHIVE  
+#
+AR = ar
+ARFLAGS = -lruvs
+RANLIB = /bin/true
+#---------------------------------------------------------------
+# LIBRARY DEFINITIONS
+#
+# Where the libraries are 
+#
+LibOpts=-L$(MONDO_HOME)/Libs -L$(HDF_LIB) -L/usr/local/lib -L$(MPI_LIB) 
+# -L$(PAL_ROOT)/lib64 
+#-------------------------------------------------------------------------------------
+#  VAMPIR LIBRARY
+#
+#VAMP=-lVT
+#-------------------------------------------------------------------------------------
+#  MPI Library
+#
+MPI=$(VAMP) -lmpi
+#-------------------------------------------------------------------------------------
+#  HDF5 Libraries with compression and jpeg libs:
+#  How HDF5 was configured for production:
+#  setenv CC "cc -64"
+#  ./configure --prefix=$HDF_HOME --enable-production --disable-debug
+#  How HDF5 was configured for debuging:
+#  setenv CC "cc -g -64"
+#  ./configure --prefix=$HDF_HOME --disable-production
+#  could go with either: --disable-static --disable-shared
+HDF=-lhdf5 -lz
+#-------------------------------------------------------------------------------------
+#  The generic libs needed by most of the programs.  The F77 MondoMisc is 
+#  being phased out in favor of the F90 MondoMods.
+#
+#  'Nuff said
+#
+#LAPACK = -lcomplib.sgimath -lftn  
+LAPACK = -lscs -lftn 
+#LAPACK = -llapack -lblas $(F77Libs) 
+#
+#
+#
+Libraries     = -lMondoMisc $(LAPACK) $(HDF) 
+F77_LIBRARIES = Libraries 
+F90_LIBRARIES = -lMondoMods $(LAPACK) $(MPI) $(HDF) $(SS)
+F90_LIBRARIES_NO_MPI = $(F90_LIBRARIES)
+#
+#  Deletion list
+#
+REMOVEALL = *.$(LIST_POSTFIX) *.f90 *.mod core *.o a.out fort.*  *~ \#* 
+REMOVEALL90 = *.o *.$(LIST_POSTFIX) *.f90 *.f *.mod core a.out fort.* 

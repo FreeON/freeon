@@ -1,0 +1,11 @@
+        double precision function f(x)
+        double precision x
+<*  (***** Function Definition *****)
+
+    f = D[(Sin[x] + Cos[x]) Cot[x],x];
+
+    (***** FORTRAN Translation *****)
+
+    FortranAssign[f,f]  *>
+        return
+        end

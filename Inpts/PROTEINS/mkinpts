@@ -1,0 +1,39 @@
+gunzip XYZ/*
+
+cat template             >  ChyInh2.in
+cat XYZ/ChyInh2.xyz      >> ChyInh2.in
+cat end                  >> ChyInh2.in
+
+cat template             >  CytB562.in
+cat XYZ/CytB562.xyz       >> CytB562.in
+cat end                  >> CytB562.in
+
+cat template             >  HIVProtease.in
+cat XYZ/HIVProtease.xyz  >> HIVProtease.in
+cat end                  >> HIVProtease.in
+
+cat template             >  Lysozyme.in
+cat XYZ/Lysozyme.xyz     >> Lysozyme.in
+cat end                  >> Lysozyme.in
+
+cat template             >  Lysozyme.in
+cat XYZ/Lysozyme.xyz     >> Lysozyme.in
+cat end                  >> Lysozyme.in
+
+cat template             >  Conotoxin.in
+cat XYZ/Conotoxin.xyz      >> Conotoxin.in
+cat end                  >> Conotoxin.in
+
+cat template             >  FibroblastGF.in
+cat XYZ/FibroblastGF.xyz >> FibroblastGF.in
+cat end                  >> FibroblastGF.in
+
+cat template             >  Interleukin.in
+cat XYZ/Interleukin.xyz  >> Interleukin.in
+cat end                  >> Interleukin.in
+
+cat template             >  TyrPhos.in
+cat XYZ/TyrPhos.xyz      >> TyrPhos.in
+cat end                  >> TyrPhos.in
+
+gzip XYZ/*

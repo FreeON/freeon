@@ -1,0 +1,13 @@
+        subroutine sub(x,y,z)
+        double precision x,y(<* yarray = Array[y,2];
+ylength = Length[yarray] *>),z(<* ylength *>)
+<*
+    (***** Mathematica definition *****)
+
+    expr = yarray^2 - f /@ Table[x^i,{i,ylength}];
+
+    (***** FORTRAN Translation *****)
+
+    FortranAssign[z,expr,AssignToArray->{y}]  *>
+        return
+        end

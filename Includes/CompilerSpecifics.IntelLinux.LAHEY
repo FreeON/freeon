@@ -1,0 +1,114 @@
+#---------------------------------------------------------------
+# PREPROCESSOR OPTIONS: 
+#
+CPP=/lib/cpp -P -C
+CPPINCLUDE=-I$(MONDO_INC) -I$(HDF_INC) -I/usr/local/include
+#
+# PREPROCESSING OPTIONS: 
+CPPOPTS=-DPOINTERS_IN_DERIVED_TYPES
+#-DPARALLEL 
+#---------------------------------------------------------------
+# C Compiler and options
+#
+CC         =  gcc
+#CDEBUG    = -g
+COPTIMIZE  = -O1
+CFLAGS     = $(COPTIMIZE) $(CDEBUG) $(CPPOPTS)
+#
+#---------------------------------------------------------------
+# Fortran postfixes for compiler peculiarities
+#
+LIST_POSTFIX  = lst
+F77_POSTFIX   = f
+F90_POSTFIX   = f90
+MOD_POSTFIX   = mod
+#
+#---------------------------------------------------------------
+# Fortran Compilers, options and include files
+#
+F90           = lf95
+#
+F90_OPTIMIZE  = --o1
+#
+#F90_DEBUG    = -g -chk -trace --trap diou -li
+#
+F_LIST        = -lst 
+#
+#F_PROF       = 
+#
+F90_MISC     = $(F_LIST) $(F_PROF) --quiet
+#
+F90_INCLUDE  = -I$(MONDO_HOME)/Includes/ \
+               -I$(MONDO_HOME)/MondoMods -I/usr/local/include \
+               -I$(MONDO_HOME)/MondoMods/FUNCTIONS
+#
+#-I$(MPI_INC) \
+#
+F90_FLAGS   = $(F90_MISC) $(F90_OPTIMIZE) $(F90_DEBUG) $(F90_INCLUDE)
+#
+#---------------------------------------------------------------
+# LINK/LOADER DIRECTIVES
+#
+LD          = $(F90) 
+#
+LDMISC      = $(F_PROF) 
+#
+LDFLAGS     = $(LDMISC) -o 
+#
+#---------------------------------------------------------------
+# ARCHIVAL STUFF
+#
+AR      = ar
+ARFLAGS = -rcv
+RANLIB  = ranlib
+#---------------------------------------------------------------
+# DIRECTORIES TO SUSS FOR LIBRARIES
+#
+LibOpts=-L$(MONDO_HOME)/Libs -L/usr/local/lib -L$(HDF_LIB) 
+#       -L$(LAPACK_LIB)
+#       -L$(MPI_LIB) 
+#
+#-------------------------------------------------------------------------------------
+# MPI LIBRARIES
+#
+# How MPICH was configured for debuging :
+#
+#./configure -memdebug -device=ch_p4 -cc=gcc -clinker=gcc -fc=pgf77 -f90=pgf90 -fortnames=UNDERSCORE --disable-c++
+#
+# How MPICH was configured for production:
+#
+#               -cflags="-ffast-math -fexpensive-optimizations -fomit-frame-pointer -O3"
+#               -fflags="-O2 -tp p6 -pc 64"
+#
+#  additions:
+#
+# -comm=shared -fortnames=UNDERSCORE -noromio --noc++ -nompe 
+#
+#MPI_LIBS= -lmpich
+#MPI_LIBS=-lmpich -L/usr/local/myrinet/lib -lgm 
+#
+#---------------------------------------------------------------------
+#  HDF5 Libraries with compression and jpeg libs. 
+#  How HDF5 was configured for production:
+#  ./configure --prefix=$HDF_HOME --enable-production --disable-debug
+#  How HDF5 was configured for debuging:
+#  setenv CFLAGS -g
+#  ./configure --prefix=$HDF_HOME --disable-production
+#   -j -l2 for parallel GNU make on dual SMP
+#  could go with either: --disable-static --disable-shared
+#
+HDF_LIBS=-lhdf5 -ljpeg -lz 
+#
+#-------------------------------------------------------------------------
+#  The generic libs needed by most of the programs.  The F77 MondoMisc is 
+#  being phased out in favor of the F90 MondoMods.
+#
+F90_LIBRARIES = -lMondoMods $(MPI_LIBS) $(HDF_LIBS) 
+#
+#--------------------------------------------------------------------------
+#  'Nuff said
+#
+LAPACK = -llapack_LAHEY -lblas_LAHEY
+#
+#---------------------------------------------------------------------------
+

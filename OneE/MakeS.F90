@@ -1,0 +1,152 @@
+!
+!--  This source code is part of the MondoSCF suite of 
+!--  linear scaling electronic structure codes.  
+!
+!--  Matt Challacombe and  C. J. Tymczak
+!--  Los Alamos National Laboratory
+!--  Copyright 2000, The University of California
+!
+!    COMPUTE THE OVERLAP MATRIX S
+!
+PROGRAM MakeS
+  USE DerivedTypes
+  USE GlobalScalars
+  USE GlobalCharacters
+  USE InOut
+  USE PrettyPrint
+  USE MemMan
+  USE Parse
+  USE Macros
+  USE LinAlg
+  USE AtomPairs
+  USE OverlapBlock
+#ifdef PARALLEL
+  USE MondoMPI
+#endif
+  IMPLICIT NONE
+#ifdef PARALLEL
+  TYPE(DBCSR)         :: S,T1
+#else
+  TYPE(BCSR)          :: S,T1
+#endif
+#ifdef PERIODIC 
+  LOGICAL             :: NotMakeBlock
+  INTEGER             :: NC
+  REAL(DOUBLE)        :: Bx,By,Bz
+#endif
+  TYPE(AtomPair)      :: Pair
+!
+  TYPE(BSET)          :: BS
+  TYPE(CRDS)          :: GM
+  TYPE(DBL_RNK4)      :: MD
+!
+  TYPE(ARGMT)         :: Args
+  INTEGER             :: P,R,AtA,AtB,NN                          
+  CHARACTER(LEN=5),PARAMETER :: Prog='MakeS'
+!--------------------------------------- 
+! Start up macro
+!
+  CALL StartUp(Args,Prog)
+!----------------------------------------------
+! Get basis set and geometry
+!
+  CALL Get(BS,Tag_O=CurBase)
+  CALL Get(GM,Tag_O=CurGeom)
+!---------------------------------------------- 
+! Allocations 
+!
+  CALL New(MD,(/3,BS%NASym,BS%NASym,2*BS%NASym/),(/1,0,0,0/))
+  CALL New(S)
+#ifdef PERIODIC
+!-----------------------------------------------
+! Calculate the Number of Cells
+!
+  CALL SetCellNumber(GM)
+#endif
+!-----------------------------------------------
+! Initialize the matrix and associated indecies
+!
+  P=1; R=1; S%RowPt%I(1)=1
+  CALL SetEq(S%MTrix,Zero)
+!-----------------------------------------------
+! Main loops
+!
+#ifdef PARALLEL
+  S%NAtms=0
+  DO AtA=Beg%I(MyId),End%I(MyId)
+     S%NAtms=S%NAtms+1  
+#else
+  S%NAtms=NAtoms
+  DO AtA=1,NAtoms
+#endif
+     DO AtB=1,NAtoms
+        IF(SetAtomPair(GM,BS,AtA,AtB,Pair)) THEN
+           NN = Pair%NA*Pair%NB
+#ifdef PERIODIC
+           Bx = Pair%B(1)
+           By = Pair%B(2)           
+           Bz = Pair%B(3)
+           NotMakeBlock = .TRUE.
+           DO NC = 1,CS%NCells
+              Pair%B(1) = Bx+CS%CellCarts%D(1,NC)
+              Pair%B(2) = By+CS%CellCarts%D(2,NC)
+              Pair%B(3) = Bz+CS%CellCarts%D(3,NC)
+              Pair%AB2  = (Pair%A(1)-Pair%B(1))**2 &
+                        + (Pair%A(2)-Pair%B(2))**2 &
+                        + (Pair%A(3)-Pair%B(3))**2
+              IF(TestAtomPair(Pair)) THEN
+                 S%MTrix%D(R:R+NN-1)=S%MTrix%D(R:R+NN-1)+SBlok(BS,MD,Pair)
+                 NotMakeBlock = .FALSE.
+              ENDIF
+           ENDDO
+#else
+           S%MTrix%D(R:R+NN-1)=SBlok(BS,MD,Pair)
+#endif
+
+           S%ColPt%I(P)=AtB
+           S%BlkPt%I(P)=R
+           R=R+NN 
+           P=P+1 
+#ifdef PARALLEL           
+           S%RowPt%I(S%NAtms+1)=P
+           IF(R>MaxNon0Node.OR.P>MaxBlksNode)THEN
+              WRITE(*,*)' MyId = ',MyId,MaxBlksNode,MaxNon0Node
+              WRITE(*,*)' MyId = ',MyId,' P = ',P,' R = ',R
+              CALL Halt(' DBCSR dimensions blown in MakeS ')
+           ENDIF
+#else  
+           S%RowPt%I(AtA+1)=P        
+           IF(R>MaxNon0.OR.P>MaxBlks) &
+                CALL Halt(' BCSR dimensions blown in MakeS ')
+#endif
+#ifdef PERIODIC
+           IF(NotMakeBlock) &
+                CALL Halt(' Making a Zero Block in MakeS ')
+#endif
+        ENDIF
+     ENDDO
+  ENDDO
+  S%NBlks=P-1
+  S%NNon0=R-1
+!------------------------------------------------------------
+! Put S to disk
+!  
+  CALL Filter(T1,S)
+  CALL Put(T1,TrixFile('S',Args),BlksName_O='nsi',Non0Name_O='nsm')
+!-----------------------------------------------------------
+! Printing
+!
+  CALL PChkSum(T1,'S',Prog)
+  CALL PPrint( T1,'S')
+  CALL Plot(   T1,'S')
+!------------------------------------------------------------
+! Tidy up
+! 
+  CALL Delete(S)
+  CALL Delete(T1)
+  CALL Delete(BS)
+  CALL Delete(GM)
+  CALL Delete(MD)
+  CALL ShutDown(Prog)
+!
+END PROGRAM MakeS

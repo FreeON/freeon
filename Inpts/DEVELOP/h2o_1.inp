@@ -1,0 +1,36 @@
+<BeginTitle>
+Water Cluster Timing Input #1
+(H2O)_10: E(RHF/3-21G)=-755.996705138
+<EndTitle>
+
+<BeginOptions>
+MPIRun="/usr/local/mpich-1.1.2_PG_SHMEM/bin/mpirun -np 4"
+Charge=0
+Multiplicity=1
+Guess=SuperPos
+SCFMethod=(RH,       ,RH)
+BasisSets=(STO-3G  ,STO-3G)
+ModelChem=(Slater  ,Slater)
+Accuracy =(Good    ,Good)
+DebugAll =(MaxDebug)
+Geometry=(InAngstroms)
+<EndOptions>
+
+<BeginGeometry>
+O       0.000000     0.000000     0.105800
+H       0.783000     0.000000    -0.423200
+H      -0.783000     0.000000    -0.423200
+<NextGeometry>
+O       0.000000     0.000000     0.105800
+H       0.783000     0.000000    -0.443200
+H      -0.783000     0.000000    -0.443200
+<NextGeometry>
+O       0.000000     0.000000     0.105800
+H       0.783000     0.000000    -0.463200
+H      -0.783000     0.000000    -0.463200
+<NextGeometry>
+O       0.000000     0.000000     0.105800
+H       0.783000     0.000000    -0.483200
+H      -0.783000     0.000000    -0.483200
+<EndGeometry>
+

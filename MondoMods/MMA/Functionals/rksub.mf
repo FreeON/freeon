@@ -1,0 +1,27 @@
+        subroutine evalf(f,q,p)
+        implicit double precision (a-h,o-z)
+        dimension q(<* 
+
+(***** Input degrees of freedom (dimension/2) *****)
+
+                      d = 3;
+
+        (***** End of required input *****)
+
+(* Ensure that arrays are protected form N during translation. *)
+
+SetOptions[FortranAssign,AssignToArray->{q,p}];
+
+(* Automatically evaluate variables and n-body Hamiltonian *)
+
+qvars = Array[q,d];    pvars = Array[p,d];
+H = pvars.pvars/2 + 1/Sqrt[qvars.qvars];
+d *>),p(<* d *>),f(<* 2 d *>)
+<* (***** Calculate derivatives of the Hamiltonian. *****)
+
+FortranAssign[
+    f, 
+    Flatten[{Outer[D,{H},pvars],- Outer[D,{H},qvars]}]
+] *>
+        return
+        end

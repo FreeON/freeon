@@ -1,0 +1,9 @@
+mkinpts
+sub_lsf Crambin 
+sub_lsf FibroblastGF
+sub_lsf Interleukin
+sub_lsf TyrPhos
+sub_lsf ChyInh2
+sub_lsf CytB562
+sub_lsf HIVProtease
+sub_lsf Lysozyme

@@ -1,0 +1,7 @@
+        main example
+        real x,y
+        x = 1.
+        y = <* D[x^x Sin[x],x] *>
+        write(*,*) y
+        stop
+        end

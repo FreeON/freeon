@@ -1,0 +1,88 @@
+Things in MondoSCF have changed.  Following is a partial list of what happened:
+
+o Almost all legacy F77 code has been removed
+
+o The BlokAInv code is now working (very well!) in F90, allowing 
+  sparse linear algebra for O(N) calculations.
+
+o Much legacy code has been trimmed from the source tree.  Backup
+  tarballs take up much less space.
+
+o I've added the PHiPAC directory for optimizing small matrix DGEMMs
+  An environmental variable is set at login which picks an 
+  optimized set of DGEMMs for your machine.  This speeds up the 
+  linear algebra quite a bit.   Only works for LINUX at this point.
+
+o You will want to redo some of your .cshrc file.  See the example
+  in Scripts/CSHRC
+
+o The makefiles have been redone.  See the main makefile and
+  the MONDO/Scripts/MondoSetUp file for short cuts.  For example,
+  you can now make just a few directories at a time using the
+  same "abreviations" you used for going places:
+
+  $ mk mm q 
+
+  makes both MondoMods and QCTC, in that order.
+
+  $ mk cmm cq
+
+  will clean those directories, but will not remove the associated libraries.
+
+  $ mk pmm pq 
+
+  will purge those directories, removing the libraries and any .Inc files that
+  can be recomputed from other code, as for example VRhoMD.F90 in HiCu.
+  This is really a usefull and powerfull utility that will save you lots of time.
+
+o I've added a Thresholding module in MondoMods.  This should now be a unified
+  place to collect all methods related to thresholding atom pairs, primitive pairs,
+  evaluation of density outside a box (penetration criteria),  exact exchange thresholding,
+  etc, etc.  Please consolidate your thresholds in here!
+
+o Any Mathematica files should now go in an appropriate subdirectory called MMA
+  in the relavent directory.  For example, the notebook that generates special functions
+  is now in MONDO/MondoMods/MMA/Functions.  
+
+============================================================================================
+We need to get this code clean, working and validated soon.  Following are todo lists for
+developers.  Please feel free to add to my todo list, and to update this file
+in the CVS tree thereafter.  Also, as you accomplish your goals, please remove them from your 
+todo list and update this file in the CVS tree. 
+
+Matt:
+o Fix triangular degeneracies w/PBCs in HiCu/KxcGen etc
+o Write up new BlokAInv w/Michele and Mirek
+o Get SDMM to work for hard problems (eg. pure DFT)
+o Make sure parallel LinAlg still works
+o Rewrite QCTC with k-d trees
+o Profile/tune PBC and Gradients code
+o Talk for NC Nano-Bio
+o Validate code with G98 and Crystal98
+o Create a benchmark directory with validation scripts
+o Get working under IntelLinux.ABSOFT, AIX.XLF, True64.COMPAQ
+o Parallelization 
+o Documentation
+o Interface with OpenDX for isosurfacing and movies
+
+CJ:
+o Get pure DFT PBC working and validated
+o PBC scaling runs for HiCu, LinAlg and short write up
+o QCTC
+o Write up linear scaling and PBC
+o Talk for ACS 2001
+o Code for multipole tensors with arb PBCs
+o New density matrix guesser/minimizers
+
+Eric:  
+o Get ONX working again
+o Eliminate QChem stuff like KonK2L etc
+o F90ify and consolidate flavors of ONX, Gammas, etc
+o Gradients of exact K
+o Periodics of exact K
+o Parallel exact K
+o Talk for ACS 2001
+
+Mike:
+o Gradients of pure DFT
+

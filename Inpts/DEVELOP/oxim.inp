@@ -1,0 +1,64 @@
+<BeginTitle>
+Water Cluster Timing Input #1
+(H2O)_10: E(RHF/3-21G)=-755.996705138
+<EndTitle>
+
+<BeginOptions>
+MPIRun="/usr/local/mpich-1.1.2_PG_SHMEM/bin/mpirun -np 4"
+Charge=0
+Multiplicity=1
+Guess=Restart
+SuperPos
+InfoFile="/ice/mchalla/MONDO/Scratch/oxim.16986.inf"
+SCFMethod=(RH      ,RH)
+BasisSets=(STO-3G  ,STO-3G)
+ModelChem=(Slater  ,Slater)
+Accuracy =(Good    ,Good)
+DebugAll =(MaxDebug,BasisSet)
+Geometry =(MSIFormat,InAngstroms,NoOrder,AutoWrap) 
+<EndOptions>
+
+<BeginGeometry>
+input file for discover                                                  26.1140
+!DATE Mon Apr 24 09:54:47 2000                                                  
+C1       2.867700293    1.185933021   -9.083590215 OXIM 1      c=      C   0.200
+H1       2.288754031    2.007778920   -8.638429557 OXIM 1      hc      H   0.127
+N2       4.088144478    0.981507511   -8.774193776 OXIM 1      n=      N  -0.343
+O3       4.863646645    0.041319228   -9.215440520 OXIM 1      oh      O  -0.381
+H3       5.290987673   -0.365581822   -8.421250338 OXIM 1      ho      H   0.424
+C        0.744076193   -1.102707353  -10.111501947 OXIM 1      c=      C   0.046
+N        1.051641779    0.089300517   -9.865662347 OXIM 1      n=      N  -0.343
+O        2.289053157    0.461773910  -10.068685820 OXIM 1      o       O   0.016
+HC1      1.571481023   -1.710085926  -10.448114752 OXIM 1      hc      H   0.127
+HC2     -0.251024680   -1.524944572  -10.000110840 OXIM 1      hc      H   0.127
+end                                                                             
+end                                                                             
+input file for discover                                                  27.5407
+!DATE Mon Apr 24 09:54:52 2000                                                  
+C1       2.904966623    1.008784087   -8.976735865 OXIM 1      c=      C   0.200
+H1       2.186861885    1.794900332   -8.652754647 OXIM 1      hc      H   0.127
+N2       4.163242453    1.134235780   -8.653045609 OXIM 1      n=      N  -0.343
+O3       4.931992445    0.166181920   -9.053753852 OXIM 1      oh      O  -0.381
+H3       5.508974142    0.439967529   -9.776620285 OXIM 1      ho      H   0.424
+C        0.403132652   -0.639666600  -10.676090269 OXIM 1      c=      C   0.046
+N        1.122372926   -0.148260058   -9.797963490 OXIM 1      n=      N  -0.343
+O        2.391807079    0.067536580   -9.857547745 OXIM 1      o       O   0.016
+HC1      0.732200682   -0.922263797  -11.684613550 OXIM 1      hc      H   0.127
+HC2     -0.651448647   -0.857595034  -10.481493439 OXIM 1      hc      H   0.127
+end                                                                             
+end                                                                             
+input file for discover                                                  33.8128
+!DATE Mon Apr 24 09:54:58 2000                                                  
+C1       2.758835652    0.469496270   -8.729921673 OXIM 1      c=      C   0.200
+H1       2.098587217    0.515833875   -7.884282805 OXIM 1      hc      H   0.127
+N2       4.013582661    0.460982558   -8.482049126 OXIM 1      n=      N  -0.343
+O3       4.934082713    0.541137848   -9.431082924 OXIM 1      oh      O  -0.381
+H3       4.443720126    0.636444582  -10.259389252 OXIM 1      ho      H   0.424
+C        0.923245791   -0.925576110  -10.186519873 OXIM 1      c=      C   0.046
+N        1.054666499    0.360949143  -10.157991574 OXIM 1      n=      N  -0.343
+O        2.272405757    0.605936912  -10.001998785 OXIM 1      o       O   0.016
+HC1      1.673515431   -1.683929900   -9.917238266 OXIM 1      hc      H   0.127
+HC2     -0.013097026   -1.398200065  -10.400528022 OXIM 1      hc      H   0.127
+end                                                                             
+end                                                                             
+<EndGeometry>

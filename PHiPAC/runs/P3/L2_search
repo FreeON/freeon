@@ -1,0 +1,51 @@
+%% 
+%% Template of the L2 Search Parameters File
+%% 
+%% This file specifies various parameters that controls the L2 search
+%% scripts.  Lines beginning with "%" are comments and are ignored.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Controls of the L2 Search Space %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% The L2 Search_space is the following:
+%% 	L2_Block_Ratios_space
+%% 
+%% L2_Block_Ratios_space consists of all triplets (m_ratio,k_ratio,n_ratio)
+%% that will be used to compute the L2 blocking sizes (m2,k2,n2).  It is
+%% the following direct product:
+%%      {m_ratios} X {k_ratios} X {n_ratios}
+
+
+%% (1) Controls of the L2_Block_Ratios_space
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+m_ratios = 0.75, 1.0, 1.25
+k_ratios = 0.75, 1.0, 1.25
+n_ratios = 0.75, 1.0, 1.25
+
+%% These parameters specify the corresponding factors in the
+%% L2_Block_Ratios_space.  Given the optimal L0 blocking sizes
+%% (m0,k0,n0) and an L2 block ratio triplet
+%% (m_ratio,k_ratio,n_ratio), the L2 blocking sizes (m2,k2,n2) are computed
+%% as follows.  From the size of the L2 data cache, the largest value of
+%% the size S is computed such that the three matrices A, B and C will
+%% all fit within "fill_cache_percentage" percent of the L2 cache
+%% if they are S X S square matrices.  Then
+%% m2, k2, n2 are computed as the largest integers for which the L2 blocked
+%% matrix (m2*m1*m0, k2*k1*k0, n2*n1*n0) is within
+%% (m_ratio*S, k_ratio*S, n_ratio*S).
+
+fill_cache_percentage = 80
+
+%% The "fill_cache_percentage" value is the
+%% percentage of the L3 data cache to be filled for computing the L2
+%% blocking sizes.  If this is set to 100, the sizes of the L2 blocked
+%% matrices will be chosen so that as much of the cache size is filled
+%% as possible.  A value of 80 is suitable for a normal run of the
+%% search script.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+

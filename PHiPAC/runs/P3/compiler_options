@@ -1,0 +1,22 @@
+%% 
+%% Template of the Compiler-Options Specification File
+%% 
+%% 
+%% This file specifies the optimization options for the compiler that
+%% the search script should try.
+%% 
+%% Each line specifies a combination of options.  The format for each
+%% line is
+%% 	tag:	options_string
+%% where "tag" is a tag-suffix appended to the output file of that
+%% compiler/option combination, "options_string" is the list of compiler
+%% options to be passed to that compiler.  Lines beginning with "%" are
+%% comments and are ignored by the search script.  It is usual to specify
+%% just one (or two) combination(s) of compiler optimization options for
+%% a search.
+
+CC: -O1
+CC: -O2
+CC: -O3
+
+

@@ -1,0 +1,4 @@
+echo $1
+gunzip $1.pdb.gz
+babel -ipdb $1.pdb  -oxyz $1.xyz
+gzip $1.pdb
