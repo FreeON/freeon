@@ -165,10 +165,25 @@ MODULE DrvSCFs
       IF(Ctrl%Method(CBas)==RH_R_SCF)THEN
          CALL LogSCF(Current,'Solving SCF equations with Roothann-Hall')
          CALL Invoke('RHeqs',CtrlVect)
-      ELSE
+      ELSEIF(Ctrl%Method(CBas)==SDMM_R_SCF) THEN
          CALL LogSCF(Current,'Solving SCF equations with SDMM')
          CALL Invoke('SDMM',CtrlVect,MPIRun_O=.TRUE.) 
+      ELSEIF(Ctrl%Method(CBas)==PM_R_SCF) THEN
+         CALL LogSCF(Current,'Solving SCF equations with PM')
+         CALL Invoke('PM',CtrlVect,MPIRun_O=.TRUE.) 
+      ELSEIF(Ctrl%Method(CBas)==SP2_R_SCF) THEN
+         CALL LogSCF(Current,'Solving SCF equations with SP2')
+         CALL Invoke('SP2',CtrlVect,MPIRun_O=.TRUE.) 
+      ELSEIF(Ctrl%Method(CBas)==SP4_R_SCF) THEN
+         CALL LogSCF(Current,'Solving SCF equations with SP4')
+         CALL Invoke('SP4',CtrlVect,MPIRun_O=.TRUE.) 
+      ELSEIF(Ctrl%Method(CBas)==NT4_R_SCF) THEN
+         CALL LogSCF(Current,'Solving SCF equations with NT4')
+         CALL Invoke('NT4',CtrlVect,MPIRun_O=.TRUE.) 
+      ELSE
+         CALL MondoHalt(99,'No Method Chosen')
       ENDIF
+!
       CALL Invoke('SCFstats',CtrlVect,MPIRun_O=.TRUE.)                                     
     END SUBROUTINE SolveSCF
 !========================================================================================
