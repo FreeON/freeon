@@ -1261,6 +1261,8 @@ CONTAINS
                 LOGICAL                                 :: Exists,LimitsQ
                 LOGICAL                                 :: Bcast
 
+
+
                 IF(PRESENT(Bcast_O)) THEN
                    Bcast = Bcast_O
                 ELSE
@@ -1274,6 +1276,7 @@ CONTAINS
                          CALL Get(A%NAtms,TRIM(Name)//'%NAtms')
                          CALL Get(A%NBlks,TRIM(Name)//'%NBlks')
                          CALL Get(A%NNon0,TRIM(Name)//'%NNon0')
+
                          IF(AllocQ(A%Alloc))THEN
                             LimitsQ=.NOT.                   &
                                  (A%NAtms<=SIZE(A%RowPt%I)).AND. &
@@ -1287,6 +1290,7 @@ CONTAINS
                          ELSE
                             CALL New(A,(/A%NAtms,A%NBlks,A%NNon0/))
                          ENDIF
+!
                          CALL Get(A%RowPt,TRIM(Name)//'%RowPt')
                          CALL Get(A%ColPt,TRIM(Name)//'%ColPt')
                          CALL Get(A%BlkPt,TRIM(Name)//'%BlkPt')
@@ -1296,6 +1300,12 @@ CONTAINS
                             CALL BcastBCSR(A)
                          ENDIF
 #endif
+!!$
+!!$                         WRITE(*,*)' IN GET, ATMS = ',A%NAtms,' Blks = ',A%NBlks,' NNon0 = ',A%NNon0
+!!$                         WRITE(*,*)A%RowPt%I
+!!$                         WRITE(*,*)A%ColPt%I
+!!$                         WRITE(*,*) A%MTrix%D(1:A%NNon0)
+
                          RETURN
                       ENDIF
                    ENDIF
@@ -1436,6 +1446,12 @@ CONTAINS
                          CALL Put(A%BlkPt,TRIM(Name)//'%BlkPt',A%NBlks,UnLimit_O=.TRUE.)
                          CALL Put(A%MTrix,TRIM(Name)//'%MTrix',A%NNon0,UnLimit_O=.TRUE.)
 #endif
+!!$
+!!$                         WRITE(*,*)' IN PUT, ATMS = ',A%NAtms,' Blks = ',A%NBlks,' NNon0 = ',A%NNon0
+!!$                         WRITE(*,*) A%RowPt%I
+!!$                         WRITE(*,*) A%ColPt%I
+!!$                         WRITE(*,*) A%MTrix%D(1:A%NNon0)
+
                          RETURN
                       ENDIF
                    ENDIF

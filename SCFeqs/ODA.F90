@@ -28,7 +28,7 @@ PROGRAM ODA
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg,MatFile
   CHARACTER(LEN=3),PARAMETER     :: Prog='ODA'
   REAL(DOUBLE)                   :: TrP0T,TrP1T,TrP0F0,TrP1F1,TrP0F1,TrP1F0, &
-                                    TrP0K1,TrP0K0,TrP1K0,TrP1K1
+                                    TrP0K1,TrP0K0,TrP1K0,TrP1K1,EASM
   !-------------------------------------------------------------------------
 #ifdef PARALLEL
   CALL StartUp(Args,Prog,SERIAL_O=.FALSE.)
@@ -54,20 +54,34 @@ PROGRAM ODA
   CALL Get(F,TrixFile('F',Args,0))  
 ! Get Kinectic Energy and ECPs
   CALL Get(T,TrixFile('T',Args))
+  CALL Get(HasECPs,'hasecps',Tag_O=CurBase)
   IF(HasECPs) THEN
      CALL Get(T1,TrixFile('U',Args))
      CALL Add(T,T1,T2)
      CALL SetEq(T,T2)
   ENDIF
 ! Calculate Exchange Asymmetry
-!!$  IF(HasHF(ModelChem)) THEN
-!!$     CALL Get(K0,TrixFile('K',Args,-1))
-!!$     CALL Get(K1,TrixFile('K',Args,0))
-!!$     CALL OpenASCII(OutFile,Out)
-!!$     WRITE(Out,'(a18,D10.5)') " Tr[P0*K1-P1*K0] = ",ABS(Trace(PTilde,K1)-Trace(P,K0))/ABS(Trace(P,K1))
-!!$     WRITE(*  ,'(a18,D10.5)') " Tr[P0*K1-P1*K0] = ",ABS(Trace(PTilde,K1)-Trace(P,K0))/ABS(Trace(P,K1))
-!!$     CLOSE(Out)
-!!$  ENDIF
+  IF(PrintFlags%Key==DEBUG_MAXIMUM) THEN
+     IF(HasHF(ModelChem)) THEN
+        CALL Get(K0,TrixFile('K',Args,-1))
+        CALL Get(K1,TrixFile('K',Args,0))
+        CALL OpenASCII(OutFile,Out)
+#ifdef PARALLEL
+        CALL Multiply(PTilde,K1,T1)
+        TrP0K1 =  Trace(T1)
+        CALL Multiply(P,K0,T1)
+        TrP1K0 =  Trace(T1)
+        EASM   =  ABS(TrP0K1-TrP1K0)/ABS(TrP0K1+TrP1K0)
+#else
+        TrP0K1 =  Trace(PTilde,K1)
+        TrP1K0 =  Trace(P,K0)
+        EASM   =  ABS(TrP0K1-TrP1K0)/ABS(TrP0K1+TrP1K0)
+#endif
+        WRITE(Out,'(a18,D11.5)') " Tr[P0*K1-P1*K0] = ",EASM
+        WRITE(*  ,'(a18,D11.5)') " Tr[P0*K1-P1*K0] = ",EASM
+        CLOSE(Out)
+     ENDIF
+  ENDIF
 ! Get Energies: E_nuc and E_xc and K_xc matrices
   Current(1)=Current(1)-1
   CALL Get(Enuc0,'E_NuclearTotal',StatsToChar(Current))
@@ -139,7 +153,7 @@ PROGRAM ODA
   IF(ABS(d3)<1D-6.OR.c3*c3-3*b3*d3<Zero)THEN
      L=-Half*b3/c3
      L1=One-L
-     EMin=a3+b3*L+c3*L**2
+     EMin=a3+b3*L+c3*L**2+d3*L**3
   ELSE
      LMns=MAX(Zero,MIN(One,(-c3-SQRT(c3*c3-3*b3*d3))/(3*d3)))
      LPls=MAX(Zero,MIN(One,(-c3+SQRT(c3*c3-3*b3*d3))/(3*d3)))
@@ -157,7 +171,7 @@ PROGRAM ODA
   ! End point checks
   IF(L<=Zero.OR.L>One)THEN
      IF(e0<e1)THEN
-        L=1.D-6
+        L=0.001
         L1=One-L
         EMin=a3+b3*L+c3*L**2
      ELSE
