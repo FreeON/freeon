@@ -1676,10 +1676,10 @@ CONTAINS
        RMSD=1.D+9
        !
        DO IStep=1,GBackTrf%MaxIt_CooTrf
-         IF(PRESENT(iGEO_O)) THEN
-           CALL PrtBackTrf(AtNum,ActCarts%D,PBCDim,PWDPath, &
-                           IRep,IStep,iGEO_O)
-         ENDIF
+        !IF(PRESENT(iGEO_O)) THEN
+        !  CALL PrtBackTrf(AtNum,ActCarts%D,PBCDim,PWDPath, &
+        !                  IRep,IStep,iGEO_O)
+        !ENDIF
          !
          ! Get B and refresh values of internal coords
          !
