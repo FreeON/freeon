@@ -97,7 +97,7 @@ MODULE ParseGeomOpt
        GOpt%CoordCtrl%VDWFact=1.0D0 !default value
      ELSE
      ! GOpt%CoordCtrl%VDWFact=GOpt%CoordCtrl%VDWFact*One !default value
-       GOpt%CoordCtrl%VDWFact=GOpt%CoordCtrl%VDWFact*0.8 !default value
+     ! GOpt%CoordCtrl%VDWFact=GOpt%CoordCtrl%VDWFact*0.8 !default value
      ENDIF
      !
      ! Parse for Maximum angle and maximum bondlength displacements
