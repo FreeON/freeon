@@ -205,7 +205,8 @@ Do[Do[Do[Do[
 
                   WS[StringJoin["  CALL Int",ToString[ijklType],"(",ArgString,")"]];
 
-                  WS[StringJoin["  LocNInt=",ToString[(LEnd[imax]-LBegin[imin]+1)^2*(LEnd[jmax]-LBegin[jmin]+1)^2]]];
+                  WS[StringJoin["  LocNInt=",ToString[(LEnd[imax]-LBegin[imin]+1)*(LEnd[jmax]-LBegin[jmin]+1)* \
+                                                      (LEnd[kmax]-LBegin[kmin]+1)*(LEnd[lmax]-LBegin[lmin]+1)]]];
 
 ,{ic,1,LC}]
 ,{jc,1,LC}]

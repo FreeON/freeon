@@ -54,9 +54,9 @@ LMNDex[L_, M_, N_] := LBegin[L + M + N] + N*(2*(L + M + N) - N + 3)/2 + M;
 IntegralClass[Ell_List] := Ell[[2]]*(Ell[[2]] + 1)/2 + Ell[[1]] + 1;
 
 (* Minimal 
-
- *)
    Classes = { {0,0},{1,1}} 
+ *)
+   Classes = { {0,0},{1,1},{2,2},{3,3}} 
 
 (* Maximal 
    Classes = { {0,0},{0,1},{1,1},{2,2},{3,3}}
@@ -173,6 +173,7 @@ SetAttributes[MBarN,NHoldAll];
 
 (* PUT THE TRANSFORMATIONS TO FILE *)
 
+
 PunchVRRClass[FileName_,BraEll_,KetEll_]:=Module[{oList,IList,Kount,a,c},
 						 oList={" "->""};
 						 IList={};
@@ -188,6 +189,7 @@ PunchVRRClass[FileName_,BraEll_,KetEll_]:=Module[{oList,IList,Kount,a,c},
                                                  ,{i,1,LEnd[BraEll]}],{k,1,LEnd[KetEll]}];
                                                  Write[FileName,FortranAssign[o,IList,AssignReplace->oList]];
 ];                                                ;
+
 
 PunchGammas[Subroutine_,LTot_]:=Block[{WS,FStr,Gammas},
 
@@ -260,10 +262,10 @@ PunchHRRClass[FileName_,ic_,jc_,kc_,lc_]:=Module[{oList,IList,Kount,a,b,c,d},
                                                              d = {lx[l], my[l], nz[l]};
                                                              IList=Append[IList,HRR[a,b,c,d]];
                                                              oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->                     \
-                                                                                StringJoin["I((OA+",ToString[i-LBegin[il]+1],")*LDA",     \
-                                                                                            "+(OB+",ToString[j-LBegin[jl]+1],")*LDB",     \
-                                                                                            "+(OC+",ToString[k-LBegin[kl]+1],")*LDC",     \
-                                                                                            "+(OD+",ToString[l-LBegin[ll]+1],")*LDD)"]];
+                                                                                StringJoin["I((OA+",ToString[i-LBegin[il]],")*LDA",     \
+                                                                                            "+(OB+",ToString[j-LBegin[jl]],")*LDB",     \
+                                                                                            "+(OC+",ToString[k-LBegin[kl]],")*LDC",     \
+                                                                                            "+(OD+",ToString[l-LBegin[ll]],")*LDD)"]];
 
                                                 ,{i,LBegin[il],LEnd[il]}]
                                                 ,{j,LBegin[jl],LEnd[jl]}]
@@ -301,7 +303,7 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_]:=Block[{WS,LBra,LKet,BKTyp
            WS["IMPLICIT REAL(DOUBLE) (A,I,V,W)"];
            WS["INTEGER        :: LBra,LKet"];
            WS["REAL(DOUBLE)   :: PrmBufB(5,LBra),PrmBufK(5,LKet)"];
-	   WS["TYPE(AtomInfo) :: ACInfo,BDInfo"];
+	   WS["TYPE(SmallAtomInfo) :: ACInfo,BDInfo"];
 	   LenBra=LEnd[LBra];
            LenKet=LEnd[LKet];
 
@@ -409,6 +411,12 @@ RelsList="TwoERels= \\ \n";
 
 Do[Do[Do[Do[
 
+
+   If[IntegralClass[Classes[[ic]]]>=IntegralClass[Classes[[jc]]]&& \
+      IntegralClass[Classes[[kc]]]>=IntegralClass[Classes[[lc]]]&& \
+      IntegralClass[Classes[[ic]]]*100+IntegralClass[Classes[[jc]]]>= \
+      IntegralClass[Classes[[kc]]]*100+IntegralClass[Classes[[lc]]],
+
             CommentLine=StringJoin["(",CType[IntegralClass[Classes[[ic]]]]," ", \
                                        CType[IntegralClass[Classes[[jc]]]],"|", \
                                        CType[IntegralClass[Classes[[kc]]]]," ", \
@@ -422,10 +430,12 @@ Do[Do[Do[Do[
 	    kmin = Classes[[kc, 1]]; kmax = Classes[[kc, 2]];
 	    lmin = Classes[[lc, 1]]; lmax = Classes[[lc, 2]];
 
-            ijklType=1000*IntegralClass[Classes[[ic]]] \
-                     +100*IntegralClass[Classes[[jc]]] \
-                      +10*IntegralClass[Classes[[kc]]] \
-	                 +IntegralClass[Classes[[lc]]];
+            ijklType=1000000*IntegralClass[Classes[[ic]]] \
+                      +10000*IntegralClass[Classes[[jc]]] \
+                        +100*IntegralClass[Classes[[kc]]] \
+	                    +IntegralClass[Classes[[lc]]];
+
+Print["ijklType=",ijklType," i=",IntegralClass[Classes[[ic]]]," j=",IntegralClass[Classes[[jc]]]," k=",IntegralClass[Classes[[kc]]]," l=",IntegralClass[Classes[[lc]]]];
 
 	   Subroutine=StringJoin["Int",ToString[ijklType],".F90"];
 
@@ -466,6 +476,8 @@ Do[Do[Do[Do[
 
            Close[Subroutine];
            Print[" Closed ",Subroutine];
+
+     ];
 
 ,{ic,1,LC}]
 ,{jc,1,LC}]
