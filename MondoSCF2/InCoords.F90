@@ -2484,63 +2484,42 @@ CONTAINS
      !
    END SUBROUTINE CartToInternal
 !
-!---------------------------------------------------------------------
+!------------------------------------------------------------------
 !
    SUBROUTINE InternalToCart(XYZ,IntCs,VectInt,Print, &
-       CtrlBackTrf,CtrlTrf,CtrlCoord,CtrlConstr,SCRPath)
+       GBackTrf,GTrfCtrl,GCoordCtrl,GConstr,SCRPath)
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
      REAL(DOUBLE),DIMENSION(:) :: VectInt
-     TYPE(DBL_VECT)            :: GcScale 
      TYPE(DBL_VECT)            :: VectCart
      TYPE(DBL_VECT)            :: VectCartAux,VectIntAux
-     TYPE(DBL_VECT)            :: VectCartAux2,VectIntAux2
+     TYPE(DBL_VECT)            :: VectCartAux2
      TYPE(DBL_VECT)            :: VectIntReq
      TYPE(DBL_RNK2)            :: ActCarts
-     REAL(DOUBLE)              :: DiffMax,RMSD,RMSDOld,TrixThresh
-     REAL(DOUBLE)              :: CooTrfCrit,MaxCartDiff,Sum
-     REAL(DOUBLE)              :: DistRefresh
-     REAL(DOUBLE)              :: SumX,SumY,SumZ
+     REAL(DOUBLE)              :: DiffMax,RMSD,RMSDOld
+     REAL(DOUBLE)              :: Sum
      REAL(DOUBLE)              :: ConstrMax,ConstrRMS
      REAL(DOUBLE)              :: ConstrRMSOld
      REAL(DOUBLE)              :: ConstrMaxCrit,RMSCrit
      INTEGER                   :: NCart,I,IStep,J,NIntC,NConstr
-     INTEGER                   :: MaxIt_CooTrf,NatmsLoc
+     INTEGER                   :: NatmsLoc
      INTEGER                   :: NCartConstr
      TYPE(INTC)                :: IntCs
      TYPE(BMATR)               :: B
      LOGICAL                   :: RefreshB,RefreshAct
-     LOGICAL                   :: DoIterate,Print2
+     LOGICAL                   :: DoIterate
      TYPE(Cholesky)            :: CholData
-     TYPE(BackTrf)             :: CtrlBackTrf
-     TYPE(Constr)              :: CtrlConstr
-     TYPE(TrfCtrl)             :: CtrlTrf
-     TYPE(CoordCtrl)           :: CtrlCoord
+     TYPE(BackTrf)             :: GBackTrf
+     TYPE(Constr)              :: GConstr
+     TYPE(TrfCtrl)             :: GTrfCtrl
+     TYPE(CoordCtrl)           :: GCoordCtrl
      CHARACTER(LEN=*)          :: SCRPath
-     LOGICAL                   :: DoClssTrf
-     REAL(DOUBLE)              :: LinCrit
-     INTEGER                   :: ThreeAt(1:3),Print
+     LOGICAL                   :: DoClssTrf,Print2
+     INTEGER                   :: Print
      !
      NatmsLoc=SIZE(XYZ,2)
      NCart=3*NatmsLoc   
-     IF(AllocQ(IntCs%Alloc)) THEN
-       NIntC=SIZE(IntCs%Def)
-     ELSE
-       NIntC=0
-     ENDIF
-     !
-     ! iteration control parameters
-     !
-     CooTrfCrit   = CtrlBackTrf%CooTrfCrit 
-     MaxIt_CooTrf = CtrlBackTrf%MaxIt_CooTrf
-     MaxCartDiff  = CtrlBackTrf%MaxCartDiff
-     DistRefresh  = CtrlBackTrf%DistRefresh
-     RMSCrit      = CtrlBackTrf%RMSCrit
-     ConstrMaxCrit= CtrlConstr%ConstrMaxCrit
-     NCartConstr  = CtrlConstr%NCartConstr
-     DoClssTrf    = CtrlTrf%DoClssTrf
-     ThreeAt      = CtrlTrf%ThreeAt
-     LinCrit      = CtrlCoord%LinCrit
-     Print2       = Print>=DEBUG_GEOP_MAX
+     NIntC=SIZE(IntCs%Def)
+     Print2= Print>=DEBUG_GEOP_MAX
      !
      ! Refresh B matrix during iterative back-trf?
      !
@@ -2550,12 +2529,10 @@ CONTAINS
      ! Auxiliary arrays
      !
      CALL New(ActCarts,(/3,NatmsLoc/))
-     !
      CALL New(VectCart,NCart)
      CALL New(VectCartAux,NCart)
      CALL New(VectCartAux2,NCart)
      CALL New(VectIntAux,NIntC)
-     CALL New(VectIntAux2,NIntC)
      CALL New(VectIntReq,NIntC)
      !
      ! The required new value of internal coordinates
@@ -2563,10 +2540,7 @@ CONTAINS
      VectIntReq%D=VectInt
      CALL MapBackAngle(IntCs,NIntC,VectIntReq%D) 
      !
-     ! Calc values of internals in atomic unit, and add displacement,
-     ! which is stored in VectInt. Then convert into Sparse matrx repr.
-     !
-     CALL INTCValue(IntCs,XYZ,LinCrit)
+     CALL INTCValue(IntCs,XYZ,GCoordCtrl%LinCrit)
      !
      !initialization of new Cartesians
      !
@@ -2581,29 +2555,28 @@ CONTAINS
      ! Internal --> Cartesian transformation
      !
      IF(Print>=DEBUG_GEOP_MIN) THEN
-       WRITE(*,*) 'Iterative back-transformation,'//&
-                  'No. Int. Coords= ',NIntC
-       WRITE(Out,*) 'Iterative back-transformation,'//&
-                    ' No. Int. Coords= ',NIntC
+       WRITE(*,450) NIntC
+       WRITE(Out,450) NIntC
      ENDIF
+     450 FORMAT('Iterative back-transformation, No. Int. Coords=',I7)
      !
-     ConstrMax=ConstrMaxCrit*10.D0
+     ConstrMax=GConstr%ConstrMaxCrit*10.D0
      ConstrRMS=1.D0
      ConstrRMSOld=2.D0
      RMSD=1.D+9
      !
-     DO IStep=1,MaxIt_CooTrf
+     DO IStep=1,GBackTrf%MaxIt_CooTrf
        !
        ! Get B and refresh values of internal coords
        !
        IF(IStep==0) THEN
          CALL GetBMatInfo(SCRPath,NIntC,B,CholData)
        ELSE IF(RefreshB.AND.RefreshAct) THEN
-         CALL RefreshBMatInfo(IntCs,ActCarts%D,DoClssTrf, &
-                              Print,LinCrit,ThreeAt,SCRPath)
+         CALL RefreshBMatInfo(IntCs,ActCarts%D,GTrfCtrl%DoClssTrf, &
+                   Print,GCoordCtrl%LinCrit,GTrfCtrl%ThreeAt,SCRPath)
          CALL GetBMatInfo(SCRPath,NIntC,B,CholData)
        ELSE
-         CALL INTCValue(IntCs,ActCarts%D,LinCrit)
+         CALL INTCValue(IntCs,ActCarts%D,GCoordCtrl%LinCrit)
        ENDIF
        !
        ! Calculate difference between required and actual internals
@@ -2613,7 +2586,7 @@ CONTAINS
        !
        ! Check convergence on constraints
        !
-       IF(CtrlConstr%NConstr/=0) THEN
+       IF(GConstr%NConstr/=0) THEN
          ConstrRMSOld=ConstrRMS
          CALL ConstrConv(IntCs,VectIntAux%D,ConstrMax,ConstrRMS)
        ENDIF
@@ -2634,22 +2607,23 @@ CONTAINS
        ! of Cartesian constraints,
        ! or when sparse, approximate GcInv is available only.
        !
-       IF(CtrlTrf%DoTranslOff) &
+       IF(GTrfCtrl%DoTranslOff) &
          CALL TranslsOff(VectCartAux2%D,Print2)
-       IF(CtrlTrf%DoRotOff) &
+       IF(GTrfCtrl%DoRotOff) &
          CALL RotationsOff(VectCartAux2%D,ActCarts%D,Print2)
        !
        ! Check convergence
        !
        RMSDOld=RMSD
-       CALL ScaleDispl(VectCartAux2%D,MaxCartDiff,DiffMax,RMSD) 
-       IF(.NOT.CtrlConstr%DoLagr) THEN
-         CALL SetCartConstr(VectCartAux2%D,IntCs,NCartConstr)
+       CALL ScaleDispl(VectCartAux2%D,GBackTrf%MaxCartDiff, &
+                       DiffMax,RMSD) 
+       IF(.NOT.GConstr%DoLagr) THEN
+         CALL SetCartConstr(VectCartAux2%D,IntCs,GConstr%NCartConstr)
        ENDIF
        !
        ! Refresh B matrix?  
        !
-       IF(DiffMax>DistRefresh) THEN
+       IF(DiffMax>GBackTrf%DistRefresh) THEN
          RefreshAct=.TRUE.
        ELSE
          RefreshAct=.FALSE.
@@ -2668,10 +2642,9 @@ CONTAINS
        ENDIF
        210  FORMAT('Step= ',I3,'   Max_DX= ',F12.6,'  X_RMSD= ',F12.6)
        !      
-       CALL BackTrfConvg(DoIterate,DiffMax,CooTrfCrit, &
-         RMSD,RMSDOld,RMSCrit,ConstrMax,ConstrMaxCrit, &
-         ConstrRMS,ConstrRMSOld,CtrlConstr%NConstr, &
-         MaxIt_CooTrf,MaxCartDiff,IStep,RefreshAct)
+       CALL BackTrfConvg(GConstr,GBackTrf, &
+         DoIterate,DiffMax,RMSD,RMSDOld,ConstrMax, &
+         ConstrRMS,ConstrRMSOld,IStep,RefreshAct)
        !
        IF(DoIterate) THEN
          IF(RefreshB.AND.RefreshAct) CALL DeleteBMatInfo(B,CholData)
@@ -2680,7 +2653,7 @@ CONTAINS
        ENDIF
      ENDDO          
      !
-     IF(IStep>=MaxIt_CooTrf) THEN
+     IF(IStep>=GBackTrf%MaxIt_CooTrf) THEN
        IF(RMSD>0.01D0) THEN
          CALL Halt('Iterative backtransformation did not converge')
        ENDIF
@@ -2708,13 +2681,12 @@ CONTAINS
      !
      ! Final internal coordinates
      !
-     !CALL INTCValue(IntCs,XYZ,LinCrit)
+     !CALL INTCValue(IntCs,XYZ,GCoordCtrl%LinCrit)
      !CALL PrtIntCoords(IntCs,IntCs%Value,'Final Internals')
      !
      ! Tidy up
      !
      CALL Delete(VectIntReq)
-     CALL Delete(VectIntAux2)
      CALL Delete(VectIntAux)
      CALL Delete(VectCartAux2)
      CALL Delete(VectCartAux)
@@ -3205,7 +3177,8 @@ CONTAINS
 !
 !-------------------------------------------------------
 !
-   SUBROUTINE SetConstraint(IntCs,XYZ,Displ,LinCrit,NConstr,DoInternals)
+   SUBROUTINE SetConstraint(IntCs,XYZ,Displ,LinCrit,NConstr, &
+                            DoInternals)
      TYPE(INTC)     :: IntCs
      INTEGER        :: I,J,NIntC,LastIntcGeom,NDim,JJ,NConstr
      TYPE(DBL_VECT) :: Displ
@@ -3213,7 +3186,6 @@ CONTAINS
      REAL(DOUBLE)   :: LinCrit
      LOGICAL        :: DoInternals
      !
-
      IF(NConstr==0)RETURN
      IF(AllocQ(IntCs%Alloc)) THEN
        NIntC=SIZE(IntCs%Def)
@@ -3331,44 +3303,46 @@ CONTAINS
 !
 !-------------------------------------------------------
 !
-   SUBROUTINE BackTrfConvg(DoIterate,DiffMax,CooTrfCrit, &
-     RMSD,RMSDOld,RMSCrit,ConstrMax,ConstrMaxCrit, &
-     ConstrRMS,ConstrRMSOld,NConstr, &
-     MaxIt_CooTrf,MaxCartDiff,IStep,RefreshAct)
+   SUBROUTINE BackTrfConvg(GConstr,GBackTrf, &
+     DoIterate,DiffMax,RMSD,RMSDOld,ConstrMax, &
+     ConstrRMS,ConstrRMSOld,IStep,RefreshAct)
      !
-     REAL(DOUBLE) :: DiffMax,CooTrfCrit,RMSD,RMSDOld,RMSCrit
-     REAL(DOUBLE) :: ConstrMax,ConstrMaxCrit,ConstrRMS
-     REAL(DOUBLE) :: ConstrRMSOld,MaxCartDiff            
-     INTEGER      :: NConstr,MaxIt_CooTrf,IStep
+     REAL(DOUBLE) :: DiffMax,RMSD,RMSDOld
+     REAL(DOUBLE) :: ConstrMax,ConstrRMS
+     REAL(DOUBLE) :: ConstrRMSOld
+     INTEGER      :: IStep
      LOGICAL      :: DoIterate,RefreshAct
      LOGICAL      :: ConvConstr
+     TYPE(Constr) :: GConstr
+     TYPE(BackTrf):: GBackTrf
      !
      DoIterate=.TRUE.
      ConvConstr=.TRUE.
      !
-     IF(NConstr/=0) THEN
+     IF(GConstr%NConstr/=0) THEN
        IF(IStep>1) THEN
-         ConvConstr=(ConstrMax<ConstrMaxCrit.OR. &
-           (ConstrRMS>ConstrRMSOld*RMSCrit.AND.Istep>5)) 
+         ConvConstr=(ConstrMax<GConstr%ConstrMaxCrit.OR. &
+           (ConstrRMS>ConstrRMSOld*GBackTrf%RMSCrit.AND.Istep>5)) 
        ELSE
          ConvConstr=.FALSE.
        ENDIF
      ENDIF
      !
-     DoIterate=(DiffMax>CooTrfCrit)
-     IF(RMSD>RMSDOld*RMSCrit) THEN 
-       IF(DiffMax<MaxCartDiff*RMSCrit.AND.IStep>10) THEN
+     DoIterate=(DiffMax>GBackTrf%CooTrfCrit)
+     IF(RMSD>RMSDOld*GBackTrf%RMSCrit) THEN 
+       IF(DiffMax<GBackTrf%MaxCartDiff*GBackTrf%RMSCrit &
+          .AND.IStep>10) THEN
          DoIterate=.FALSE.
        ELSE 
          RefreshAct=.TRUE.
        ENDIF
      ENDIF
      DoIterate=DoIterate.OR.(.NOT.ConvConstr)
-     DoIterate=(DoIterate.AND.IStep<=MaxIt_CooTrf)
+     DoIterate=(DoIterate.AND.IStep<=GBackTrf%MaxIt_CooTrf)
      !
    END SUBROUTINE BackTrfConvg
 !
-!----------------------------------------------------------------------
+!----------------------------------------------------------------
 !
    SUBROUTINE CenterOfMass(CX,CY,CZ,XYZ_O,Vect_O,Move_O)
      REAL(DOUBLE),DIMENSION(:,:),OPTIONAL :: XYZ_O
