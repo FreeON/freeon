@@ -15,6 +15,7 @@ PROGRAM MakePFFT
   USE LinAlg
   USE BraBloks
   USE PFFTen
+  USE AtomPairs
 !
   TYPE(TIME)                     :: TimePFFT
   TYPE(CRDS)                     :: GM
