@@ -1,0 +1,193 @@
+\documentclass[prl,aps,preprint,superbib,12pt]{revtex4}
+%\documentclass[12pt]{article}
+\oddsidemargin 2 cm
+\topmargin -1 cm
+\textwidth 14 cm
+\textheight 22.0 cm
+
+\usepackage{graphics}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{bm}
+\usepackage{alltt}
+\usepackage{fancyhdr}
+\newcommand{\bms}[1]{{\boldsymbol #1}}
+\renewcommand{\thefootnote}{\fnsymbol{footnote}}
+
+\begin{document}
+%\pagestyle{empty}
+
+\section{Manual to Using the QUICCA Optimizer in MONDO}
+
+\subsection{Default operation}
+The input line to turn on the default options of the QUICCA optimizer
+looks like:
+\begin{itemize}
+\item[{\tt Grad}]{\tt =(Optimize,PrimInt,NoBackTr,BiSect,NoGDIIS) }
+\end{itemize}
+
+\noindent
+The meaning of these options is the following:
+\begin{itemize}
+\item[{\tt Optimize}] : Find a local minimum on the potential energy surface of the actual molecule
+\item[{\tt PrimInt}] : Use primitive internal coordinates to carry out the optimization
+\item[{\tt NoBackTr}] : Do NOT do any energy-based backtracking during
+the optimization. The lack of this input-option automatically
+turns on the backtracking.
+\item[{\tt BiSect}] : This option turns on the QUICCA optimizer. An alternative of it is DiagHess, a simpler optimizer that uses a very rough 
+diagonal Hessian.
+\item[{\tt NoGDIIS}] : Disables Cartesian geometric-DIIS. The lack of this 
+option turns on GDIIS. The use of Cartesian coordinates based 
+GDIIS is not recommended.
+\end{itemize}
+ 
+\subsection{Constraints}
+
+For gas phase molecules, constraints can be applied to 
+Cartesian position, internal coordinates as well as to their 
+combinations.
+\\
+For crystals, constraints can be applied to fractional coordinates,
+lattice parameters, internal coordinates and to their combinations.
+
+\subsubsection{Cartesian/fractional constraints}
+The input file contains Cartesian or fractional coordinates of atoms.
+If putting " C " at the end of the line that contains the coordinates
+of a certain atom the coordinate will be frozen during the optimization.
+\\
+E.g. the line
+\\
+{\tt N    3.500  -0.500   0.000 C}
+\\
+has the meaning of keeping a "N" atom in the Cartesian position
+of "3.500  -0.500   0.000" during the optimization. 
+\\
+The same line, when
+being part of a crystal structure definition, means that
+the fractional coordinates of the same "N" atom will be kept fixed
+while the absolute Cartesian position is allowed to change as the 
+lattice parameters change. This is independent from whether 
+the input is given in "AtomCoord" or "FracCoord".
+
+\subsubsection{Input section for other constraints}
+To define other types of constraints the input section
+\\
+{\tt <BEGIN\_ADD\_INTERNALS>} and {\tt <END\_ADD\_INTERNALS>}
+\\
+must be defined, similar to {\tt <BeginGeometry>} and
+{\tt <EndGeometry>}.
+
+\subsubsection{Constraining lattice parameters}
+An example of how to constrain lattice parameters is given
+below. All these extra input lines must be entered between
+\\
+{\tt <BEGIN\_ADD\_INTERNALS>} and {\tt <END\_ADD\_INTERNALS>}
+\\
+The meaning of the following lines
+\\
+{\tt STRE\_A 12.6}
+\\
+{\tt STRE\_B 18.9}
+\\
+{\tt STRE\_B 10.3}
+\\
+{\tt ALPHA 120.0}
+\\
+{\tt BETA  96.0}
+\\
+{\tt GAMMA 106.0}
+\\
+is that the length of the lattice vectors A, B and C is constrained to
+be 12.6, 18.9 and 10.3 respectively. Also, the lattice angles ALPHA, BETA
+and GAMMA are constrained to be 120.0, 96.0 and 106.0.
+\\
+Lattice constraints can be applied to only a few or all lattice parameters,
+in an arbitrary combination.
+
+\subsubsection{Constraining internal coordinates}
+The constraints on internal coordinates are very similar to those
+on the lattice parameters.
+Internal coordinate constraints can be defined for the following types of coordinates:
+STRE (stretching), BEND (bending), TORS (torsion), OUTP (out-of-plane), LINB 
+(linear bending).
+Definitions of the constraits must also be placed between the lines of
+{\tt <BEGIN\_ADD\_INTERNALS>} and {\tt <END\_ADD\_INTERNALS>}.
+\\
+For example
+\\
+{\tt STRE 15 26 1.3} 
+\\
+means that the streching coordinate between atoms 15 and 26 must take 
+the value of 1.3 angstroems at the end of the optimization.
+Other constraints like
+\\
+{\tt BEND 72 89 31   122.4}
+\\
+{\tt TORS 72 89 31 21  95.7}
+\\
+{\tt OUTP  1 25 65 43  0.15}
+\\
+{\tt LINB  1 5 16  8  180.0}
+\\
+have similar meaning: the BEND of atoms 72 89 31 (central atom 89) 
+must become 122.4 degrees,
+the TORS of atoms 72 89 31 21 (central bond between 89 and 31) must 
+become 95.7, the OUTP of 1 25 65 43 (with 25 as the central atom, 
+and 1 as the 'apex' atom) must become 0.15 degrees,
+the LINB of 1 5 16 (5 is the central atom) must take the value of 180 degrees
+in the plane defined by atoms 8 16 and 5, after the 1 5 16 angle is projected 
+onto this plane.
+
+Note that if the above definitions of internal coordinates are entered
+without any constraint value (the last number) then they will be used as 
+a flexible internal coordinate during the optimization.
+
+\subsubsection{Constraining individual Cartesian components}
+Individual components of the Cartesian coordinates can be constrained 
+exactly the same way as internal coordinates, by using the labels
+CARTX, CARTY, CARTZ. Eg.
+\\
+CARTX 34 1145.98
+\\
+will constrain the X component of the atom 34 to 1145.98 angstroems.
+
+\subsection{Recognition of weak bonds}
+Weak bonds, such as the Van der Waals bonds can be recognized difficultly,
+because it is not clear in what situation they should be used and in what 
+not.
+The Van der Waals radii of atoms are used in a careful way in the default 
+recognition algorithm, meaning that they are scaled dow to reduce the occurance
+of overly large number of internal coordinates.
+However, in cases when the molecule or crystal has a very large structural
+contribution from Van der Waals interaction (eg. sulphure crystal) it is recommended to increase the Van der Waals radii of atoms for the internal coordinate 
+recognition. This can be done by using the option {\tt VDWFact}.
+Eg. 
+\\
+{\tt VDWFact=1.25}
+\\ 
+multiplies the values of default VDW radii by 1.25 . The factor 1.25 activates 
+the full length of tabulated atomic Van der Waals radii to be applied.
+The default VDW radii values are smaller to avoid the formation of an unnecessarily dense connectivity network.
+
+\subsection{Stepsize control}
+The options "MaxStre" and "MaxBend" allow external control over the maximum
+stepsize during an internal coordinate optimization.
+Eg.
+\\
+{\tt MaxStre=0.1} 
+\\
+sets the maximum allowed stepsize to 0.1 angstroems on stretches,
+while
+\\
+{\tt MaxBend=5.0}
+\\
+sets the maximum allowed stepsize on BEND, TORS, OUTP and LINB-s of the 
+molecule to 5.0 degrees.
+
+
+
+
+
+
+\end{document}
+
