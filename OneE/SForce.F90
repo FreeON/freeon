@@ -163,8 +163,8 @@ PROGRAM SForce
 !!$  ENDDO
 !!$  CLOSE(Out)
 ! Do some checksumming and IO 
-  CALL PChkSum(SFrc,'dS/dR',Proc_O=Prog)  
-  CALL PChkSum(LatFrc_S,'dLat_S/dR',Proc_O=Prog)  
+  CALL PChkSum(SFrc,    'dS/dR',Proc_O=Prog)  
+  CALL PChkSum(LatFrc_S,'LFrcS',Proc_O=Prog)  
 ! Start this off as the first contrib to total gradient 
   DO AtA=1,NAtoms
      A1=3*(AtA-1)+1
