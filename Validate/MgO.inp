@@ -12,8 +12,8 @@ BasisSets=(STO-3G,STO-3G)
 ModelChem=(BLYPxc,PBE0) 
 Accuracy =(loose,good)
 Geometry=(InAU,NoOrder) 
-PFFMaxEll=16
 PFFLayers=1
+PFFMaxEll=16
 Periodic=(On-XYZ,AtomWrap,AngFormat,FracCoord,CenterAtoms)
 <EndOptions>
 
