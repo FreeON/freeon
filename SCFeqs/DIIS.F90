@@ -63,18 +63,18 @@ PROGRAM DIIS
    CALL Get(P,TrixFile('OrthoD',Args,0))    ! the orthogonal density matrix
    CALL Multiply(F,P,E)  
    CALL Multiply(P,F,E,-One)
-!  We didnt filter E for obvious reasons 
+!  We dont filter E for obvious reasons 
    CALL Put(E,TrixFile('E',Args,0))
 !  The DIIS Error 
    DIISErr=SQRT(Dot(E,E))/DBLE(NBasF)
-!  Build the B matrix
-   IF(ISCF>1)THEN
+!  Build the B matrix if on second SCF cycle (starting from 0)
+!  and if pure damping flag is not on (DIISDimension=0)
+   IF(ISCF>1.AND.BMax/=0)THEN
       N=MIN(ISCF+1,BMax+1)
       M=MAX(1,ISCF-BMax+1)
       CALL New(B,(/N,N/))
 !-------------------------------------------------------------------------------------
 !     Check for charge sloshing
-
       CALL Get(DMax,'DMax',StatsToChar(Previous))
       IF(DMax>1.D-1.AND.ISCF>5)THEN
          Sloshed=.TRUE.
@@ -102,8 +102,8 @@ PROGRAM DIIS
                DeltaDPj=MP(1)%DPole%D-MP(2)%DPole%D
                DeltaQPj=MP(1)%QPole%D-MP(2)%QPole%D
 !              Add in Sellers anti charge sloshing terms
-               Sellers=0.1D0*DOT_PRODUCT(DeltaDPi,DeltaDPj) &
-                      +0.1D0*DOT_PRODUCT(DeltaQPi,DeltaQPj)
+               Sellers=1D-1*DOT_PRODUCT(DeltaDPi,DeltaDPj) &
+                      +1D-1*DOT_PRODUCT(DeltaQPi,DeltaQPj)
                B%D(I,J)=B%D(I,J)+Sellers
             ENDIF
             B%D(J,I)=B%D(I,J)

@@ -105,7 +105,6 @@ PROGRAM RHEqs
   CALL Plot(sP,'OrthoP['//TRIM(NxtCycl)//']')
 !---------------------------------------------------
 !
-!
   XFile=TrixFile('X',Args)
   INQUIRE(FILE=XFile,EXIST=Present)
   IF(Present)THEN
@@ -119,7 +118,6 @@ PROGRAM RHEqs
      CALL Multiply(sTmp1,sX,sP)          ! F=Z.P_Orthog.Z^t
   ENDIF
   CALL Filter(sTmp1,sP)                  ! T1 =P_AO=Filter[Z.P_Orthog.Z^t]
-!
   CALL Put(sTmp1,TrixFile('D',Args,1))
   CALL PChkSum(sTmp1,'P['//TRIM(NxtCycl)//']',Prog)
   CALL PPrint(sTmp1,'P['//TRIM(NxtCycl)//']')
@@ -127,7 +125,8 @@ PROGRAM RHEqs
 !----------------------------------------------
   CALL Delete(sX)
   CALL Delete(sP)
+  CALL Delete(sTmp1)
   CALL ShutDown(Prog)
-END PROGRAM ! RHEqs
+END PROGRAM  RHEqs
 
 

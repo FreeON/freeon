@@ -72,7 +72,7 @@ PROGRAM SCFStatus
       ExchE=Zero
    ENDIF
 !  Get E_nuc_tot =<Vnn+Vne> 
-   CALL Get(E_nuc_tot,'enn+ene',Tag_O=SCFCycl)
+   CALL Get(E_nuc_tot,'E_NuclearTotal',Tag_O=SCFCycl)
 !  Get the exchange correlation energy
    IF(HasDFT(ModelChem))THEN      
       CALL Get(Exc,'Exc',Tag_O=SCFCycl)

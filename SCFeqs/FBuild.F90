@@ -33,58 +33,33 @@ PROGRAM FockNGrueven
 !
   CALL New(F)
   CALL New(Tmp1)
-  IF(Args%C%C(2)=='Core')THEN
-     CALL Get(V,TrixFile('V',Args))                        ! V=V_{Nuc-El}
-     CALL Get(T,TrixFile('T',Args))                        ! T=T_{Kinetic}
-     CALL Add(V,T,F)                                       ! F=F_CoreH=V+T
-     CALL Delete(V)
-     CALL Delete(T)
-  ELSEIF(Args%C%C(2)=='InkFok')THEN
-!     CALL Get(J,TRIM(SCFName)//'_Cyc'//TRIM(Cycl)//'.DeltaJ') ! J=J_Coulomb[/\P]
-!     CALL Get(K,TRIM(SCFName)//'_Cyc'//TRIM(Cycl)//'.DeltaK') ! K=K_Exchange[/\P]
-     CALL Add(J,K,F)                                          ! F=/\F[/\P]
-     CALL Delete(J)
-     CALL Delete(K)
-  ELSE
-     CALL Get(J,TrixFile('J',Args,0))                      ! J=J_Coulomb[Rho_Total(Nuc+El)]
-     CALL Get(T,TrixFile('T',Args))                        ! T=T_{Kinetic}
-     CALL Add(J,T,F)                                       ! F=J+T    
-     CALL Delete(T)
-     CALL Delete(J)
-     CALL New(K)
-     IF(HasHF(ModelChem).AND.HasDFT(ModelChem))THEN
-        CALL Get(K,TrixFile('K',Args,0))                      ! K=K_hf
-        KScale=ExactXScale(ModelChem)
-        CALL Multiply(K,KScale)                               ! K=KScale*K_hf
-        CALL Add(F,K,Tmp1)                                    ! F=J+T+K
-        CALL Get(K,TrixFile('Kxc',Args,0))                    ! K=K_xc
-        CALL Add(K,Tmp1,F)                                    ! F=J+T+KShift*K_hf+K_xc
-     ELSEIF(HasHF(ModelChem))THEN
-        CALL Get(K,TrixFile('K',Args,0))                      ! K=K_hf
-        CALL Add(F,K,Tmp1)                                    ! F=J+T+K_hf
-        CALL SetEq(F,Tmp1)
-     ELSEIF(HasDFT(ModelChem))THEN
-        CALL Get(K,TrixFile('Kxc',Args,0))                    ! K=K_{xc}
-        CALL Add(K,F,Tmp1)                                    ! F=J+T+K_xc
-        CALL SetEq(F,Tmp1)
-     ENDIF
-     CALL Delete(K)
+  CALL Get(J,TrixFile('J',Args,0))                      ! J=J_Coulomb[Rho_Total(Nuc+El)]
+  CALL Get(T,TrixFile('T',Args))                        ! T=T_{Kinetic}
+  CALL Add(J,T,F)                                       ! F=J+T    
+  CALL Delete(T)
+  CALL Delete(J)
+  CALL New(K)
+  IF(HasHF(ModelChem).AND.HasDFT(ModelChem))THEN
+     CALL Get(K,TrixFile('K',Args,0))                      ! K=K_hf
+     KScale=ExactXScale(ModelChem)
+     CALL Multiply(K,KScale)                               ! K=KScale*K_hf
+     CALL Add(F,K,Tmp1)                                    ! F=J+T+K
+     CALL Get(K,TrixFile('Kxc',Args,0))                    ! K=K_xc
+     CALL Add(K,Tmp1,F)                                    ! F=J+T+KShift*K_hf+K_xc
+  ELSEIF(HasHF(ModelChem))THEN
+     CALL Get(K,TrixFile('K',Args,0))                      ! K=K_hf
+     CALL Add(F,K,Tmp1)                                    ! F=J+T+K_hf
+     CALL SetEq(F,Tmp1)
+  ELSEIF(HasDFT(ModelChem))THEN
+     CALL Get(K,TrixFile('Kxc',Args,0))                    ! K=K_{xc}
+     CALL Add(K,F,Tmp1)                                    ! F=J+T+K_xc
+     CALL SetEq(F,Tmp1)
   ENDIF
-  IF(Args%C%C(2)=='InkFok')THEN
-!     CALL Put(F,TRIM(SCFName)//'_Cyc'//TRIM(Cycl)//'.DeltaF', &
-!              BlksName_O='nfi'//TRIM(Cycl),                   &
-!              Non0Name_O='nfm'//TRIM(Cycl))
-!     CALL PChkSum(F,'DeltaF',Prog)
-!     CALL PPrint( F,'DeltaF')
-!     CALL Plot(   F,'DeltaF')
-  ELSE
-     CALL Put(F,TrixFile('F',Args,0),       &
-              BlksName_O='nfi'//TRIM(Cycl), &
-              Non0Name_O='nfm'//TRIM(Cycl))
-     CALL PChkSum(F,'F['//TRIM(Cycl)//']',Prog)
-     CALL PPrint( F,'F['//TRIM(Cycl)//']')
-     CALL Plot(   F,'F['//TRIM(Cycl)//']')
-  ENDIF
+  CALL Delete(K)
+!  CALL Put(F,TrixFile('F',Args,0))
+!  CALL PChkSum(F,'F['//TRIM(Cycl)//']',Prog)
+!  CALL PPrint( F,'F['//TRIM(Cycl)//']')
+!  CALL Plot(   F,'F['//TRIM(Cycl)//']')
 !----------------------------------------------
 !
   XFile=TrixFile('X',Args)
@@ -100,23 +75,12 @@ PROGRAM FockNGrueven
      CALL Multiply(Tmp1,X,F)          ! F=Z^t.F_AO.Z
   ENDIF
   CALL Filter(Tmp1,F)                 ! T1 =F_Orthog=Filter[Z^t.F_AO.Z]
-!--------------------------------------------------------------------
-! 
 !
-  IF(Args%C%C(2)=='InkFok')THEN
-     CALL Put(Tmp1,TrixFile('OrthoDeltaF',Args,0)) 
-     CALL PChkSum(Tmp1,'OrthoDeltaF',Prog)
-     CALL PPrint(Tmp1,'OrthoDeltaF')
-     CALL Plot(Tmp1,'OrthoDeltaF')
-  ELSE
-     CALL Put(Tmp1,TrixFile('OrthoF',Args,0)) 
-     CALL PChkSum(Tmp1,'OrthoF['//TRIM(SCFCycl)//']',Prog)
-     CALL PPrint(Tmp1,'OrthoF['//TRIM(SCFCycl)//']')
-     CALL Plot(Tmp1,'OrthoF_'//TRIM(SCFCycl))
-  ENDIF
-!--------------------------------
+  CALL Put(Tmp1,TrixFile('OrthoF',Args,0)) 
+  CALL PChkSum(Tmp1,'OrthoF['//TRIM(SCFCycl)//']',Prog)
+  CALL PPrint(Tmp1,'OrthoF['//TRIM(SCFCycl)//']')
+  CALL Plot(Tmp1,'OrthoF_'//TRIM(SCFCycl))
 ! Tidy up
-!
   CALL Delete(F)
   CALL Delete(Tmp1)
   CALL ShutDown(Prog)
