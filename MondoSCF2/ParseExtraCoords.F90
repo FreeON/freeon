@@ -251,6 +251,7 @@ MODULE ParseExtraCoords
      CALL MergeConstr(GOpt%ExtIntCs,XYZ%D,CConstrain%I, &
                       NIntCs,NConstr,NCartConstr)
      CALL ReNumbIntC(GOpt%ExtIntCs,CConstrain%I) 
+     CALL ReOrdIntC(GOpt%ExtIntCs,NIntCs)
      !
      GOpt%ExtIntCs%N=NIntCs
      GOpt%CoordCtrl%NExtra=NIntCs
@@ -261,6 +262,40 @@ MODULE ParseExtraCoords
      CALL Delete(XYZ)
      CALL Delete(CConstrain)
    END SUBROUTINE LoadExtraCoords
+!
+!------------------------------------------------------------------
+!
+   SUBROUTINE ReOrdIntC(IntCs,NIntC)
+     TYPE(INTC)           :: IntCs
+     INTEGER              :: NIntC,I,J
+     INTEGER,DIMENSION(4) :: Atoms
+     !
+     DO I=1,NIntC
+       IF(IntCs%Def%C(I)(1:4)=='STRE') THEN
+         Atoms(1:2)=IntCs%Atoms%I(I,1:2)
+         IF(Atoms(1)>Atoms(2)) THEN
+           DO J=1,2 ; IntCs%Atoms%I(I,J)=Atoms(3-J) ; ENDDO
+         ENDIF
+       ELSE IF(IntCs%Def%C(I)(1:4)=='BEND'.OR. &
+               IntCs%Def%C(I)(1:4)=='LINB') THEN
+         Atoms(1:3)=IntCs%Atoms%I(I,1:3)
+         IF(Atoms(1)>Atoms(3)) THEN
+           DO J=1,3 ; IntCs%Atoms%I(I,J)=Atoms(4-J) ; ENDDO
+         ENDIF
+       ELSE IF(IntCs%Def%C(I)(1:4)=='TORS') THEN
+          Atoms(1:4)=IntCs%Atoms%I(I,1:4)
+          IF(Atoms(2)>Atoms(3)) THEN
+            DO J=1,4 ; IntCs%Atoms%I(I,J)=Atoms(5-J) ; ENDDO
+          ENDIF
+       ELSE IF(IntCs%Def%C(I)(1:4)=='OUTP') THEN
+          Atoms(1:4)=IntCs%Atoms%I(I,1:4)
+          IF(Atoms(3)>Atoms(4)) THEN
+            IntCs%Atoms%I(I,3)=Atoms(4)
+            IntCs%Atoms%I(I,4)=Atoms(3)
+          ENDIF
+       ENDIF
+     ENDDO 
+   END SUBROUTINE ReOrdIntC
 !
 !------------------------------------------------------------------
 !

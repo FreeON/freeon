@@ -609,11 +609,11 @@ CONTAINS
    !     ENDIF
    !   ENDIF
    ! ENDIF
-    !IF(.NOT.(FoundHBond.OR.FoundMetLig.OR.&
-    !   LonelyAtom)) THEN
-    !  DoExclude=.TRUE.
-    !  RETURN
-    !ENDIF
+     IF(.NOT.(FoundHBond.OR.FoundMetLig.OR.&
+        LonelyAtom)) THEN
+       DoExclude=.TRUE.
+       RETURN
+     ENDIF
    END SUBROUTINE BondExcl
 !
 !----------------------------------------------------------------
@@ -3412,21 +3412,41 @@ CONTAINS
 !
 !------------------------------------------------------------------
 !
-   FUNCTION HasHBond(NJJ1,NJJ2,JJ1,JJ2,HAtm) 
+   FUNCTION HasHBond(Top12,AtNum,NJJ1,NJJ2,JJ1,JJ2,HAtm) 
      LOGICAL              :: HasHBond
+     TYPE(INT_RNK2)       :: Top12
+     INTEGER,DIMENSION(:) :: AtNum
      INTEGER              :: NJJ1,NJJ2,JJ1,JJ2,HAtm
      !
      HasHBond=.FALSE.
      HAtm=0
      IF(NJJ1/=1.AND.NJJ2/=1) RETURN
      IF((NJJ1==1.AND.HasLigand(NJJ2))) THEN
-       HasHBond=.TRUE.
+       HasHBond=HasAttached(AtNum,Top12%I,JJ1)
        HAtm=JJ1
      ELSE IF((NJJ2==1.AND.HasLigand(NJJ1))) THEN
-       HasHBond=.TRUE.
+       HasHBond=HasAttached(AtNum,Top12%I,JJ2)
        HAtm=JJ2
      ENDIF
    END FUNCTION HasHBond
+!
+!---------------------------------------------------------------------
+!
+   FUNCTION HasAttached(AtNum,Top12,JJ1)
+     LOGICAL                 :: HasAttached
+     INTEGER,DIMENSION(:,:)  :: Top12
+     INTEGER,DIMENSION(:)    :: AtNum
+     INTEGER                 :: JJ1,J,K
+     !
+     HasAttached=.FALSE.
+     DO J=1,Top12(JJ1,1)
+       K=AtNum(Top12(JJ1,J+1))
+       IF(HasLigand(K)) THEN
+         HasAttached=.TRUE.
+         EXIT  
+       ENDIF
+     ENDDO 
+   END FUNCTION HasAttached
 !
 !---------------------------------------------------------------------
 !
@@ -3753,7 +3773,7 @@ CONTAINS
      HasMetal=.FALSE.
      IF(( 3<=ICharge.AND.ICharge<= 5).OR. &
         (11<=ICharge.AND.ICharge<=14).OR. & ! P included
-        (19<=ICharge.AND.ICharge<=33).OR. &
+        (19<=ICharge.AND.ICharge<=34).OR. &
         (37<=ICharge.AND.ICharge<=52).OR. &
         (55<=ICharge.AND.ICharge<=84).OR. &
         (87<=ICharge.AND.ICharge<=113)) THEN
@@ -4415,7 +4435,7 @@ CONTAINS
        CALL Excl_List(NatmsLoc,TOPS%Cov12,TOPS%Cov13,TOPS%Cov14, &
                       TOPS%CovExcl)
      ELSE
-       DO I=1,2
+       DO I=1,6
          DoRepeat=.FALSE.
          CALL BondList(XYZ,AtNum,IntSet,Box,Bond,TOPS, &
                        CritRad,HBondMax,DoRepeat)
@@ -4424,7 +4444,7 @@ CONTAINS
          ELSE
            EXIT
          ENDIF
-         IF(I==2.AND.DoRepeat) CALL Halt('The repeated attempt of recognizing bonds to lonely atoms failed.')
+         IF(I==6.AND.DoRepeat) CALL Halt('The 6th attempt of recognizing bonds to lonely atoms failed.')
        ENDDO
        CALL SortBonds(NatmsLoc,AtmB,Bond)
        CALL SortNonCov2(AtNum,XYZ,Bond,AtmB)
@@ -4505,7 +4525,8 @@ CONTAINS
                              IF(IntSet==2) THEN
                                FoundMetLig=HasMetLig(JJ1,JJ2,NJJ1,NJJ2) 
                                LonelyAtom=HasLonelyAtm(TOPS%Cov12,JJ1,JJ2,LAtm)
-                               FoundHBond=HasHBond(NJJ1,NJJ2,JJ1,JJ2,HAtm)
+                               FoundHBond=HasHBond(TOPS%Cov12,AtNum, &
+                                            NJJ1,NJJ2,JJ1,JJ2,HAtm)
                                CALL BondExcl(JJ1,JJ2,NJJ1,NJJ2,TOPS, &
                                              FoundHBond,FoundMetLig,&
                                              LonelyAtom,DoExclude)
@@ -5072,8 +5093,8 @@ CONTAINS
 !
 !----------------------------------------------------------------------
 !
-   SUBROUTINE OutPGen(I,OutP,NOutP,RefBonds,NDimens,XYZ,AtmB,Bond,TOPS)
-     INTEGER                       :: I,J,K,L,NOutP,NDimens
+   SUBROUTINE OutPGen(IAt,OutP,NOutP,RefBonds,NDimens,XYZ,AtmB,Bond,TOPS)
+     INTEGER                       :: IAt,I,J,K,L,NOutP,NDimens
      TYPE(OUTPDATA)                :: OutP
      INTEGER,DIMENSION(:)          :: RefBonds
      REAL(DOUBLE),DIMENSION(:,:)   :: XYZ
@@ -5084,15 +5105,15 @@ CONTAINS
      TYPE(INT_VECT)                :: Mark
      INTEGER                       :: NDim,IBonds(3),I1,I2,IM
      !
-     IF(NDimens==2.AND.TOPS%Tot12%I(I,1)>2) THEN
-       NDim=AtmB%Count%I(I)
+     IF(NDimens==2.AND.TOPS%Tot12%I(IAt,1)>2) THEN
+       NDim=AtmB%Count%I(IAt)
        CALL New(Mark,NDim)
        Mark%I=0
        IBonds=0
        DO L=1,3   
          DMax=1.D99
          DO J=1,NDim
-           K=AtmB%Bonds%I(I,J)
+           K=AtmB%Bonds%I(IAt,J)
            D=Bond%Length%D(K) 
            IF(D<DMax.AND.Mark%I(J)==0) THEN
              IBonds(L)=K
@@ -5107,7 +5128,7 @@ CONTAINS
        DO L=1,3
          I1=Bond%IJ%I(1,IBonds(L))
          I2=Bond%IJ%I(2,IBonds(L))
-         IF(I1==I) THEN
+         IF(I1==IAt) THEN
            IBonds(L)=I2
          ELSE
            IBonds(L)=I1
@@ -5115,21 +5136,29 @@ CONTAINS
        ENDDO
        !
        NOutP=NOutP+1
-       OutP%IJKL%I(2,NOutP)=I
+       OutP%IJKL%I(2,NOutP)=IAt
        OutP%IJKL%I(1,NOutP)=IBonds(1)
        OutP%IJKL%I(3,NOutP)=IBonds(2)
        OutP%IJKL%I(4,NOutP)=IBonds(3)
        NOutP=NOutP+1
-       OutP%IJKL%I(2,NOutP)=I
+       OutP%IJKL%I(2,NOutP)=IAt
        OutP%IJKL%I(1,NOutP)=IBonds(3)
        OutP%IJKL%I(3,NOutP)=IBonds(1)
        OutP%IJKL%I(4,NOutP)=IBonds(2)
        NOutP=NOutP+1
-       OutP%IJKL%I(2,NOutP)=I
+       OutP%IJKL%I(2,NOutP)=IAt
        OutP%IJKL%I(1,NOutP)=IBonds(2)
        OutP%IJKL%I(3,NOutP)=IBonds(3)
        OutP%IJKL%I(4,NOutP)=IBonds(1)
      ENDIF
+     DO I=1,NOutP
+       I1=OutP%IJKL%I(3,I)
+       I2=OutP%IJKL%I(4,I)
+       IF(I1>I2) THEN
+         OutP%IJKL%I(3,I)=I2
+         OutP%IJKL%I(4,I)=I1
+       ENDIF
+     ENDDO
    END SUBROUTINE OutPGen
 !
 !---------------------------------------------------------------------

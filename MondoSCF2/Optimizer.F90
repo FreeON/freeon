@@ -740,7 +740,7 @@ CONTAINS
        IF(iGEO<2) THEN
          CALL DiagHess(GOpt%CoordCtrl,GOpt%Hessian,Grad,Displ, &
                        IntCs,AtNum,iGEO,XYZ)
-       ! CALL CutOffDispl(Displ%D,IntCs)
+         CALL CutOffDispl(Displ%D,IntCs)
        ! CALL RedundancyOff(Displ%D,SCRPath,Print)
        ! CALL PrepBiSect(Grad%D,IntCs,Displ)
        ELSE
@@ -1591,26 +1591,6 @@ CONTAINS
        RestartBas=.TRUE.
      ENDIF  
    END SUBROUTINE DoRestartBas
-!
-!-------------------------------------------------------------------
-!
-   SUBROUTINE CutOffDispl(Displ,IntCs)
-     REAL(DOUBLE),DIMENSION(:) :: Displ
-     REAL(DOUBLE)              :: Sum,A,B,R2,D2,DA,DB
-     TYPE(INTC)                :: IntCs
-     INTEGER                   :: I,NIntC
-     ! at this point it is supposed, that IntCs%Value%D holds
-     ! the actual values of internals
-     NIntC=IntCs%N    
-     DO I=1,NIntC
-       Sum=Displ(I)
-       IF(IntCs%Def%C(I)(1:4)=='STRE') THEN
-         IF(ABS(Sum)>0.30D0) Displ(I)=SIGN(0.30D0,Sum)
-       ELSE
-         IF(ABS(Sum)>0.30D0) Displ(I)=SIGN(0.30D0,Sum)
-       ENDIF
-     ENDDO
-   END SUBROUTINE CutOffDispl
 !
 !-------------------------------------------------------------------
 !
