@@ -1,4 +1,4 @@
-SUBROUTINE Int6111(N,IntCode,CBra,CKet,DisBufB,PrmBufB,DB,IB,SB,C,U)
+SUBROUTINE Int6111(N,IntCode,CBra,CKet,DisBufB,PrmBufB,DB,IB,SB,C,U,PBC)
  USE DerivedTypes
  USE GlobalScalars
  USE PrettyPrint
@@ -11,13 +11,18 @@ SUBROUTINE Int6111(N,IntCode,CBra,CKet,DisBufB,PrmBufB,DB,IB,SB,C,U)
  REAL(DOUBLE)  :: r1xZpE,ZpE,Rkk,r1xZ,r1x2Z,rpxZ
  REAL(DOUBLE)  :: PAx,PAy,PAz,PQx,PQy,PQz
  REAL(DOUBLE)  :: QBx,QBy,QBz,WQx,WQy,WQz
- REAL(DOUBLE)  :: Wx,Wy,Wz,WPx,WPy,WPz
+ REAL(DOUBLE)  :: WPx,WPy,WPz,Wx,Wy,Wz
  REAL(DOUBLE)  :: T1,T2,T3,T4,TwoT
  REAL(DOUBLE)  :: R1,R2,R3,R4,R5,R6,R7,R8,R9
  REAL(DOUBLE)  :: G0,G1,G2,G3,G4,G5,G6,G7,G8,ET
  REAL(DOUBLE)  :: Ts0,Ts1,r1xE,r1x2E,rpxE,r1x2ZE
  INTEGER       :: I,J,K,ME,MG,l
  INTEGER       :: I0,I1,I2
+!------------------------------------
+! Periodic Variables
+!------------------------------------
+ TYPE(PBCInfo) :: PBC
+ REAL(DOUBLE)  :: FPQx,FPQy,FPQz
  IF(N.EQ.0) RETURN
  C=0.0D0
  Cx=DisBufB( 8)
@@ -62,21 +67,29 @@ SUBROUTINE Int6111(N,IntCode,CBra,CKet,DisBufB,PrmBufB,DB,IB,SB,C,U)
  rpxZ   = Eta*r1xZpE
  rpxE   = Zeta*r1xZpE
  Rkk  = Up*Uq*DSQRT(r1xZpE)
- PAx = Px-Cx
- PAy = Py-Cy
- PAz = Pz-Cz
- Wx  = (Zeta*Px+EtaQx)*r1xZpE
- Wy  = (Zeta*Py+EtaQy)*r1xZpE
- Wz  = (Zeta*Pz+EtaQz)*r1xZpE
- WPx = Wx-Px
- WPy = Wy-Py
- WPz = Wz-Pz
- WQx = Wx - Qx
- WQy = Wy - Qy
- WQz = Wz - Qz
+ PAx = Px - Cx
+ PAy = Py - Cy
+ PAz = Pz - Cz
  PQx = Px - Qx
  PQy = Py - Qy
  PQz = Pz - Qz
+#ifdef PERIODIC
+ FPQx = PQx*PBC%InvBoxSh(1,1) + PQy*PBC%InvBoxSh(1,2) + PQz*PBC%InvBoxSh(1,3)
+ FPQy = PQy*PBC%InvBoxSh(2,2) + PQz*PBC%InvBoxSh(2,3)
+ FPQz = PQz*PBC%InvBoxSh(3,3)
+ IF(PBC%AutoW(1)) FPQx = FPQx-ANINT(FPQx)
+ IF(PBC%AutoW(2)) FPQy = FPQy-ANINT(FPQy)
+ IF(PBC%AutoW(3)) FPQz = FPQz-ANINT(FPQz)
+ PQx  = FPQx*PBC%BoxShape(1,1)+FPQy*PBC%BoxShape(1,2) + FPQz*PBC%BoxShape(1,3)
+ PQy  = FPQy*PBC%BoxShape(2,2)+FPQz*PBC%BoxShape(2,3)
+ PQz  = FPQz*PBC%BoxShape(3,3)
+#endif
+ WPx = -Eta*PQx*r1xZpE
+ WPy = -Eta*PQy*r1xZpE
+ WPz = -Eta*PQz*r1xZpE
+ WQx = Zeta*PQx*r1xZpE
+ WQy = Zeta*PQy*r1xZpE
+ WQz = Zeta*PQz*r1xZpE
  T1=(PQx*PQx+PQy*PQy+PQz*PQz)*Zeta*Eta*r1xZpE
  INCLUDE "RGen2.Inc"
  U(1)=R1                                                          

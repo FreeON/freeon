@@ -1,4 +1,4 @@
-SUBROUTINE Int1111(N,IntCode,CBra,CKet,DisBufB,PrmBufB,DB,IB,SB,C,U)
+SUBROUTINE Int1111(N,IntCode,CBra,CKet,DisBufB,PrmBufB,DB,IB,SB,C,U,PBC)
   USE DerivedTypes
   USE GlobalScalars
   USE GammaF0
@@ -25,10 +25,15 @@ SUBROUTINE Int1111(N,IntCode,CBra,CKet,DisBufB,PrmBufB,DB,IB,SB,C,U)
 ! Misc. internal variables
 !--------------------------------------------------------------------------------
   INTEGER       :: I,J,K,MG,M
-  INTEGER       :: I0,I1
-
+  INTEGER       :: I0,I1 
+!--------------------------------------------------------------------------------
+! Periodic Variables
+!--------------------------------------------------------------------------------
+  TYPE(PBCInfo) :: PBC
+  REAL(DOUBLE)  :: FPQx,FPQy,FPQz
+!
   IF(N.EQ.0) RETURN
-
+!
   DO I=1,N
     I0 = SB%SLPrm%I(I)
     C(I)=0.0D0
@@ -45,6 +50,17 @@ SUBROUTINE Int1111(N,IntCode,CBra,CKet,DisBufB,PrmBufB,DB,IB,SB,C,U)
         PQx  = PrmBufB(2,K)-Qx
         PQy  = PrmBufB(3,K)-Qy
         PQz  = PrmBufB(4,K)-Qz
+#ifdef PERIODIC
+        FPQx = PQx*PBC%InvBoxSh(1,1)+PQy*PBC%InvBoxSh(1,2)+PQz*PBC%InvBoxSh(1,3)
+        FPQy = PQy*PBC%InvBoxSh(2,2)+PQz*PBC%InvBoxSh(2,3)
+        FPQz = PQz*PBC%InvBoxSh(3,3)
+        IF(PBC%AutoW(1)) FPQx = FPQx-ANINT(FPQx)
+        IF(PBC%AutoW(2)) FPQy = FPQy-ANINT(FPQy)
+        IF(PBC%AutoW(3)) FPQz = FPQz-ANINT(FPQz)
+        PQx  = FPQx*PBC%BoxShape(1,1)+FPQy*PBC%BoxShape(1,2)+FPQz*PBC%BoxShape(1,3)
+        PQy  = FPQy*PBC%BoxShape(2,2)+FPQz*PBC%BoxShape(2,3)
+        PQz  = FPQz*PBC%BoxShape(3,3)
+#endif
         Up   = PrmBufB(5,K)
         r1xZpE = 1.0D0/(Zeta+Eta)
         T1=(PQx*PQx+PQy*PQy+PQz*PQz)*Zeta*Eta*r1xZpE
