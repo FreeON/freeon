@@ -1061,7 +1061,7 @@ MODULE PrettyPrint
        IF(FLOPS>Zero)THEN
           IF(Elapsed_CPUS/=Zero)THEN
 #ifdef PARALLEL
-             Mssg=ProcessName(Proc)//'CPU (Sec,MFLOPS) = (' &
+             Mssg=ProcessName(TRIM(Proc))//'CPU (Sec,MFLOPS) = (' &
                   //TRIM(DblToMedmChar(Elapsed_CPUS))//', '     &
                   //TRIM(IntToChar(MFlops(FLOPS,Elapsed_CPUS))) &
                   //'), WALL (Sec,MFLOPS) = ('                  &
@@ -1069,7 +1069,7 @@ MODULE PrettyPrint
                   //TRIM(IntToChar(MFlops(FLOPS,Elapsed_Wall))) &
                   //'), NProc = '//TRIM(IntToChar(NPrc))
 #else
-             Mssg=ProcessName(Proc)//'CPU (Sec,MFLOPS) = (' &
+             Mssg=ProcessName(TRIM(Proc))//'CPU (Sec,MFLOPS) = (' &
                   //TRIM(DblToMedmChar(Elapsed_CPUS))//', '     &
                   //TRIM(IntToChar(MFlops(FLOPS,Elapsed_CPUS))) &
                   //'), WALL (Sec,MFLOPS) = ('                  &
@@ -1079,12 +1079,12 @@ MODULE PrettyPrint
 #endif
           ELSE
 #ifdef PARALLEL
-             Mssg=ProcessName(Proc)//'WALL (Sec,MFLOPS) = (' &
+             Mssg=ProcessName(TRIM(Proc))//'WALL (Sec,MFLOPS) = (' &
                   //TRIM(DblToMedmChar(Elapsed_Wall))//', '      &
                   //TRIM(IntToChar(MFlops(FLOPS,Elapsed_Wall)))  &
                   //'), NProc = '//TRIM(IntToChar(NPrc))
 #else
-             Mssg=ProcessName(Proc)//'WALL (Sec,MFLOPS) = (' &
+             Mssg=ProcessName(TRIM(Proc))//'WALL (Sec,MFLOPS) = (' &
                   //TRIM(DblToMedmChar(Elapsed_Wall))//', '      &
                   //TRIM(IntToChar(MFlops(FLOPS,Elapsed_Wall)))  &
                   //')'
@@ -1093,24 +1093,24 @@ MODULE PrettyPrint
        ELSE
           IF(Elapsed_CPUS>Zero)THEN
 #ifdef PARALLEL
-             Mssg=ProcessName(Proc)//'CPU Sec = '   &
+             Mssg=ProcessName(TRIM(Proc))//'CPU Sec = '   &
                   //TRIM(DblToMedmChar(Elapsed_CPUS))   &
                   //', WALL (Sec) = '                   &
                   //TRIM(DblToMedmChar(Elapsed_Wall))   &
                   //', NProc = '//TRIM(IntToChar(NPrc))
 #else
-             Mssg=ProcessName(Proc)//'CPU Sec = '  &
+             Mssg=ProcessName(TRIM(Proc))//'CPU Sec = '  &
                   //TRIM(DblToMedmChar(Elapsed_CPUS))  &
                   //', WALL Sec = '                    &
                   //TRIM(DblToMedmChar(Elapsed_Wall))   
 #endif
           ELSE
 #ifdef PARALLEL
-             Mssg=ProcessName(Proc)//'WALL Sec = '  &
+             Mssg=ProcessName(TRIM(Proc))//'WALL Sec = '  &
                   //TRIM(DblToMedmChar(Elapsed_Wall))      &
                   //', NProc = '//TRIM(IntToChar(NPrc))
 #else
-             Mssg=ProcessName(Proc)//'WALL (Sec) = '  &
+             Mssg=ProcessName(TRIM(Proc))//'WALL (Sec) = '  &
                   //TRIM(DblToMedmChar(Elapsed_Wall))
 #endif
           ENDIF
