@@ -61,7 +61,6 @@ MODULE DrvFrcs
          Mssg = '     Nuclear gradients for geometry #'//TRIM(CurGeom)//Rtrn
          CALL Print_Force(GM,Frc,Mssg,FileName_O,Unit_O,Fmat_O=2)
          Mssg = 'Nuclear gradients for geometry #'//TRIM(CurGeom)
-         CALL Print_CheckSum_Force(Frc,Mssg,Unit_O=Unit_O)
 !        Tidy
          CALL Delete(Frc)
       ENDIF
@@ -408,7 +407,6 @@ MODULE DrvFrcs
             ENDDO
          ENDDO
 !        Do some checksumming and IO 
-         CALL Print_Force(GMOLD,FTot,'   dSCF/dR')
          CALL PChkSum(FTot,'dSCF/dR',Proc_O='NForce')
       ENDIF
 !

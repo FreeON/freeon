@@ -107,12 +107,10 @@ PROGRAM JForce
   JFrc%D=Two*JFrc%D
 !--------------------------------------------------------------------------------
 ! Do some checksumming, resumming and IO 
-  CALL PPrint(JFrc,'dJ/dR')
+!  CALL PPrint(JFrc,'dJ/dR')
   CALL PChkSum(JFrc,'dJ/dR',Proc_O=Prog)  
 ! Print The JForce
   CALL Print_Force(GM,JFrc,' dJ/dR ')
-  CALL Print_CheckSum_Force(JFrc,' dJ/dR ')
-!  IF(.TRUE.) STOP
 ! Sum in contribution to total force
   CALL New(Frc,3*NAtoms)
   CALL Get(Frc,'GradE',Tag_O=CurGeom)

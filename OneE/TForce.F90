@@ -97,11 +97,10 @@ PROGRAM TForce
   ENDDO
 !--------------------------------------------------------------------------------
 ! Do some checksumming, resumming and IO 
-  CALL PPrint(TFrc,'dT/dR')
+!  CALL PPrint(TFrc,'dT/dR')
   CALL PChkSum(TFrc,'dT/dR',Proc_O=Prog)  
 ! Print The TForce
   CALL Print_Force(GM,TFrc,' dT/dR ')
-  CALL Print_CheckSum_Force(TFrc,' dT/dR ')
 ! Sum in contribution to total force
   CALL New(Frc,3*NAtoms)
   CALL Get(Frc,'GradE',Tag_O=CurGeom)
