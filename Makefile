@@ -60,6 +60,9 @@ rmLegacy:
 	rm -rf Dynamo
 	rm -rf Bader
 	rm -rf Docs
+	rm -rf TwoE
+	rm -rf LibTwoE
+	rm -rf IntCoo
 	rm -rf ChangeLog*
 #
 swREADME:
