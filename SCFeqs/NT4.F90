@@ -47,7 +47,6 @@ PROGRAM DMP_NT4 ! Density matrix purification, NT4 variation
   CALL SetEq(Pold,P)    
   ! Do NT4 iterations
   DO I=1,100 
-     CALL SetVarThresh(MM)
      CALL NT4(P,Tmp1,Tmp2,Tmp3,Ne,MM)
      IF(CnvrgChck(Prog,I,Ne,MM,F,P,POld,Tmp1,Tmp2))EXIT
   ENDDO

@@ -42,7 +42,7 @@ PM_Objs    = FillPBlok.o PM.o   DenMatMethods.o
 #
 Gues_Objs  = FillPBlok.o P2Use.o 
 Stat_Objs  = SCFStatus.o          
-RHEq_Objs  = RHeqs.o              
+RHEq_Objs  = RHeqs.o  DenMatMethods.o
 FBuild_Objs= FBuild.o                   
 DIIS_Objs  = DIIS.o               
 Dev_Objs   = ToDev.o  

@@ -11,8 +11,7 @@ MODULE DenMatMethods
   USE LinAlg
   IMPLICIT NONE
   REAL(DOUBLE)            :: TrP,TrP2,TrP3,TrP4
-  REAL(DOUBLE),PARAMETER  :: Alpha_min=1.00D-2
-  REAL(DOUBLE),PARAMETER  :: GrowFac  =1.50D0
+  REAL(DOUBLE) :: CurThresh
 CONTAINS
 !--------------------------------------------------------------
 !
@@ -33,6 +32,7 @@ CONTAINS
        CLOSE(Out)
     ENDIF
     CLOSE(Inp)
+    CALL SetVarThresh()
   END SUBROUTINE SussTrix
 !--------------------------------------------------------------
 !
@@ -73,15 +73,19 @@ CONTAINS
 !--------------------------------------------------------------
 !
 !--------------------------------------------------------------
-  SUBROUTINE SetVarThresh(MM)
-    INTEGER :: MM
-    REAL(DOUBLE),SAVE :: OldThresh=0.D0
-    IF(OldThresh==0D0)THEN
-       OldThresh=Thresholds%Trix
-       Thresholds%Trix=Alpha_min*Thresholds%Trix
-    ElSE
-       Thresholds%Trix=MIN((GrowFac**MM)*Alpha_min*OldThresh,OldThresh)
+  SUBROUTINE SetVarThresh(MM_O)
+    INTEGER,OPTIONAL  :: MM_O
+    INTEGER           :: MM
+    REAL(DOUBLE),SAVE :: OldThresh=0D0
+    RETURN
+    IF(PRESENT(MM_O))THEN
+       MM=MM_O
+    ELSE
+       MM=0
     ENDIF
+    IF(OldThresh==0D0)OldThresh=Thresholds%Trix
+    Thresholds%Trix=MIN(0.05D0*1.093D0**MM,One)*OldThresh
+    CurThresh=OldThresh
   END SUBROUTINE SetVarThresh
 !--------------------------------------------------------------
 !
@@ -89,8 +93,9 @@ CONTAINS
   FUNCTION CnvrgChck(Prog,NPur,Ne,MM,F,P,POld,Tmp1,Tmp2)
     LOGICAL              :: CnvrgChck
     TYPE(BCSR)           :: F,P,POld,Tmp1,Tmp2
-    REAL(DOUBLE)         :: Ne,Energy,AbsErrP,AveErrP,L2ErrP,TwoNP,N2F,  &
-         AbsErrE,RelErrE,AveErrE,MaxCommErr,L2CommErr
+    REAL(DOUBLE)         :: Ne,Energy,AbsErrP,FNormErrP,TwoNP,N2F,  &
+         AbsErrE,RelErrE,AveErrE,MaxCommErr,FNormCommErr
+    REAL(DOUBLE),DIMENSION(2) :: CErr
     REAL(DOUBLE),SAVE    :: OldE,OldAEP
     INTEGER              :: MM,PNon0,NPur
     CHARACTER(LEN=*)     :: Prog
@@ -105,8 +110,7 @@ CONTAINS
      CALL Multiply(Pold,-One)
      CALL Add(Pold,P,Tmp1)
      AbsErrP=ABS(Max(Tmp1)+1.D-20)
-     AveErrP=OneNorm(Tmp1)/DBLE(PNon0)
-     L2ErrP=TwoNorm(Tmp1)/TwoNorm(P)
+     FNormErrP=FNorm(Tmp1)
      ! Energy errors
 #ifdef PARALLEL
      CALL Multiply(P,F,Tmp1)
@@ -119,13 +123,14 @@ CONTAINS
      ! Convergence check
      CnvrgChck=.FALSE.
      ! Absolute convergence test
-     IF(RelErrE<Thresholds%ETol*1D-2.AND. &
-        AbsErrP<Thresholds%DTol*1D-1)THEN
-        CnvrgChck=.TRUE.
-        CnvrgCmmnt='Met dE/dP goals'
-     ENDIF
+!     IF(RelErrE<Thresholds%ETol*1D-2.AND. &
+!        AbsErrP<Thresholds%DTol*1D-1)THEN
+!        CnvrgChck=.TRUE.
+!        CnvrgCmmnt='Met dE/dP goals'
+!     ENDIF
      ! Test in the asymptotic regime for stall out
-     IF(RelErrE<Thresholds%ETol)THEN
+     IF(RelErrE<1D1*Thresholds%Trix**2)THEN
+!    IF(RelErrE<Thresholds%ETol)THEN
         ! Check for increasing /P
         IF(AbsErrP>OldAEP)THEN
            CnvrgChck=.TRUE.
@@ -137,8 +142,16 @@ CONTAINS
            CnvrgCmmnt='Hit dE increase'
         ENDIF
      ENDIF
-!     IF(NPur<99)CnvrgChck=.FALSE.
-
+!
+!     IF(NPur<40)CnvrgChck=.FALSE.
+!     CALL OpenASCII('CommErr_'//TRIM(DblToShrtChar(Thresholds%Trix))//'.dat',77)
+!     CALL OpenASCII('CommErr_'//TRIM(DblToShrtChar(CurThresh))//'.dat',77)
+!     CErr=CommutatorErrors(F,P)
+!     WRITE(77,22)NPur,Thresholds%Trix,AbsErrP,FNormErrP,CErr(1),CErr(2), &
+!                 100.D0*DBLE(P%NNon0)/DBLE(NBasF*NBasF)
+!     22 FORMAT(I3,8(1x,F20.14))
+!     CLOSE(77)
+!
      ! Updtate previous cycle values
      OldE=Energy
      OldAEP=AbsErrP
@@ -162,6 +175,9 @@ CONTAINS
 #ifdef PARALLEL
      ENDIF
 #endif
+     ! Set thresholding for next cycle
+     CALL SetVarThresh(MM)
+     ! Look for convergence
      IF(.NOT.CnvrgChck)THEN
         CALL SetEq(Pold,P)
         RETURN
@@ -170,13 +186,13 @@ CONTAINS
      CALL NormTrace(P,Tmp2,Tmp1,Ne,1)
      MM=MM+1
      ! Commutator [F,P] 
-     N2F=TwoNorm(F)
+     N2F=FNorm(F)
      CALL Multiply(F,P,Tmp1)
      CALL Multiply(P,F,POld)
      CALL Multiply(POld,-One)
      CALL Add(Tmp1,POld,F) 
      MM=MM+2
-     L2CommErr=TwoNorm(F)/N2F
+     FNormCommErr=FNorm(F)
      MaxCommErr=Max(F)
      ! Print summary stats
 #ifdef PARALLEL
@@ -185,7 +201,6 @@ CONTAINS
         IF(PrintFlags%Key>DEBUG_MINIMUM)THEN
            CALL OpenASCII(OutFile,Out)
            CALL PrintProtectL(Out)
-
            Mssg=ProcessName(Prog,CnvrgCmmnt) &
                 //'Tr{FP}='//TRIM(DblToChar(Energy)) &
                 //', dNel = '//TRIM(DblToShrtChar(Two*ABS(Trace(P)-Ne))) 
@@ -208,10 +223,10 @@ CONTAINS
               WRITE(*,*)TRIM(Mssg)
            ENDIF
            WRITE(Out,*)TRIM(Mssg)
-           Mssg=ProcessName(Prog,'Rel L2  errors') &
-                //'dE='//TRIM(DblToShrtChar(RelErrE))//', '                &
-                //'dP='//TRIM(DblToShrtChar(L2ErrP))//', '                 &
-                //'[F,P]='//TRIM(DblToShrtChar(L2CommErr))
+           Mssg=ProcessName(Prog) &
+                //'Rel dE='//TRIM(DblToShrtChar(RelErrE))//', '                &
+                //'||dP||_F='//TRIM(DblToShrtChar(FNormErrP))//', '              &
+                //'||[F,P]||_F='//TRIM(DblToShrtChar(FNormCommErr))
            IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
               WRITE(*,*)TRIM(Mssg)
            ENDIF
@@ -223,6 +238,23 @@ CONTAINS
      ENDIF
 #endif
    END FUNCTION CnvrgChck
+
+   FUNCTION CommutatorErrors(F,P) RESULT(CErrs)
+     REAL,DIMENSION(2) :: CErrs
+     TYPE(BCSR)        :: F,P,T1,T2,T3
+     CALL New(T1)
+     CALL New(T2)
+     CALL New(T3)
+     CALL Multiply(F,P,T1)
+     CALL Multiply(P,F,T2)
+     CALL Multiply(T2,-One)
+     CALL Add(T1,T2,T3)
+     CErrs(1)=MAX(T3)
+     CErrs(2)=FNorm(T3)
+     CALL Delete(T1)
+     CALL Delete(T2)
+     CALL Delete(T3)
+   END FUNCTION CommutatorErrors
 !----------------------------------------------------------------------------
 !
 !

@@ -51,7 +51,6 @@ PROGRAM DMP_SP2 ! Density matrix purification, SP2 variation
   CALL SetEq(Pold,P)    
   ! Do SP2 iterations
   DO I=1,100
-     CALL SetVarThresh(MM)
      CALL SP2(P,Tmp1,Tmp2,Ne,MM)
      IF(CnvrgChck(Prog,I,Ne,MM,F,P,POld,Tmp1,Tmp2))EXIT
   ENDDO

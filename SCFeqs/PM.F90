@@ -45,8 +45,7 @@ PROGRAM DMP_PM ! Density matrix purification, PM variation
   CALL SetEq(Pold,P)    
   ! Do PM iterations
   DO I=1,100 
-     CALL SetVarThresh(MM)
-     CALL PM2(P,Tmp1,Tmp2,Tmp3,MM)
+      CALL PM2(P,Tmp1,Tmp2,Tmp3,MM)
 !     CALL PM1(P,Tmp1,Tmp2,Tmp3,Tmp4,Ne,MM)
      IF(CnvrgChck(Prog,I,Ne,MM,F,P,POld,Tmp1,Tmp2))EXIT
   ENDDO
