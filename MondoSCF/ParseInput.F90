@@ -1,7 +1,7 @@
 !    PARSING MODULE
 !    Authors: Matt Challacombe, C.J. Tymczak
 !----------------------------------------------------------------------------
-MODULE ParseInput
+MODULE ParseInPut
    USE DerivedTypes
    USE GlobalScalars
    USE GlobalObjects
@@ -23,6 +23,7 @@ MODULE ParseInput
 #ifdef MMech
    USE Dynamo    
    USE IntCoo    
+   USE Mechanics 
 #endif
    IMPLICIT NONE
    INTEGER                    :: I,ILoc,NLoc,NOpts
@@ -31,7 +32,7 @@ MODULE ParseInput
    CHARACTER(LEN=8)           :: CCrd
    CONTAINS
 !============================================================================
-!     Parse the input and create proto-HDF file
+!     Parse the inPut and create proto-HDF file
 !============================================================================
       SUBROUTINE ParseInp(Ctrl)
          Implicit None
@@ -40,13 +41,16 @@ MODULE ParseInput
          TYPE(SCFControls), INTENT(INOUT) :: Ctrl
 !
 !        Read comand line, environement variables, create file names, init files etc
-         CALL ParseCmndLine(Ctrl)
+         CALL ParseCmndLine(Ctrl) !!! This opens HDF for main program
 #ifdef MMech
          CALL ParseMech(Ctrl)
+         CALL OpenHDF(InfFile)
+         Call InitMMech()
+         CALL CloseHDF()
 #endif
          CALL ParseGrad(Ctrl)
 #ifdef MMech
-         If(Ctrl%Mechanics(2)) Then
+         If(HasQM()) Then
 #endif
 !        Read geometry and lattice variables, reorder, rescale etc  
          CALL ParseGeometry(Ctrl)  
@@ -54,15 +58,17 @@ MODULE ParseInput
          CALL ParseBaseSets(Ctrl) 
 !        Read in the SCF options
          CALL ParseMethods(Ctrl)
-!   Call ParseAcc(Ctrl)
 #ifdef MMech
          EndIf
 #endif
 !
 #ifdef MMech
-         If(Ctrl%Mechanics(1)) Then
-           Call ParseMM(Ctrl)
+         CALL ParseIntCoo(Ctrl)
+!
+         If(HasMM()) Then
+           CALL ParseMM(Ctrl)
          EndIf
+!
 #endif
 !
 ! Parse accuracy
@@ -113,9 +119,9 @@ MODULE ParseInput
          MONDO_EXEC=TRIM(MONDO_EXEC)//'/'
          PROCESS_ID=IntToChar(GetPID())
 !----------------------------------------------------------------------------
-!        Determine input and output names with full paths        
+!        Determine inPut and outPut names with full paths        
          InpFile=TRIM(MONDO_PWD)//TRIM(Args%C%C(1))
-!        Determine if input file has a '.' in it.  If so, create SCF name 
+!        Determine if inPut file has a '.' in it.  If so, create SCF name 
 !        from string up to the '.'
          DotDex=INDEX(Args%C%C(1),'.')
          IF(DotDex==0)THEN
@@ -172,17 +178,17 @@ MODULE ParseInput
 !----------------------------------------------------------------------------
 !        Initialize and open info file 
 !
-         CALL Put(InpFile,'inputfile')
+         CALL Put(InpFile,'inPutfile')
          CALL Put(InfFile,'infofile')
          CALL Put(LogFile,'logfile')
-         CALL Put(OutFile,'outputfile')
+         CALL Put(OutFile,'outPutfile')
 !        Initialize ASCII files
          CALL OpenASCII(OutFile,Out,NewFile_O=.TRUE.)
          CALL OpenASCII(LogFile,LgF,NewFile_O=.TRUE.)
          CLOSE(UNIT=Out,STATUS='KEEP')
          CLOSE(UNIT=LgF,STATUS='KEEP')
 !----------------------------------------------------------------------------
-!        Write banner and title to output file
+!        Write banner and title to outPut file
 !
          CALL OpenASCII(InpFile,Inp)
          CALL OpenASCII(OutFile,Out)
@@ -210,7 +216,7 @@ MODULE ParseInput
          WRITE(Out,*)TRIM(Mssg)
          WRITE(*,*)
          WRITE(Out,*)
-!        Parse for title, put to output file
+!        Parse for title, Put to outPut file
          CALL Align(BEGIN_TITLE,Inp)
          K=1
          DO I=1,1000
@@ -218,11 +224,11 @@ MODULE ParseInput
             IF(INDEX(Line,END_TITLE)/=0)GOTO 2
             WRITE(Out,DEFAULT_CHR_FMT)Line
          ENDDO
-      1  CALL MondoHalt(PRSE_ERROR,' Found no <EndTitle> in input file '//TRIM(InpFile))
+      1  CALL MondoHalt(PRSE_ERROR,' Found no <EndTitle> in inPut file '//TRIM(InpFile))
       2  CONTINUE
          WRITE(Out,*)' '
 !         CALL PrintProtectR(Out)
-!        Close input and output
+!        Close inPut and outPut
          CLOSE(UNIT=Inp,STATUS='KEEP')
          CLOSE(UNIT=Out,STATUS='KEEP')
 !        TimeStamp
@@ -234,7 +240,7 @@ MODULE ParseInput
          CALL OpenASCII(InpFile,Inp)
          IF(.NOT.OptCharQ(Inp,MPI_OPTION,MPILine))          & 
             CALL Halt(' mpi invokation command not found. ' &
-                    //' Check input for option '            &
+                    //' Check inPut for option '            &
                     //TRIM(MPI_OPTION))
          CLOSE(UNIT=Inp,STATUS='KEEP')
          CALL LineToChars(MPILine,TmpChars)
@@ -261,6 +267,15 @@ MODULE ParseInput
             PrintFlags%Set=DEBUG_NONE
          ENDIF                       
          CLOSE(UNIT=Inp,STATUS='KEEP')
+!
+! Parse options for Population Analylsis
+!
+         CALL OpenASCII(InpFile,Inp)
+           IF(OptKeyQ(Inp,POPULATION_ANALYSIS,OPT_MULLIKEN)) THEN
+             Ctrl%PopAnalysis=OPT_MULLIKEN
+           ENDIF
+         CLOSE(UNIT=Inp,STATUS='KEEP')
+!
 !----------------------------------------------------------------------------
 !        Tidy up 
 !
@@ -282,7 +297,7 @@ MODULE ParseInput
         CHARACTER(LEN=BASESET_CHR_LEN)   :: BName   
         CHARACTER(LEN=2*DEFAULT_CHR_LEN) :: Mssg
 !----------------------------------------------------------------------------
-        ! Open input file
+        ! Open inPut file
         CALL OpenASCII(OutFile,Out)
         CALL PrintProtectL(Out)
         WRITE(Out,*)'Current HDF file :: ',TRIM(Ctrl%Info)
@@ -321,7 +336,7 @@ MODULE ParseInput
               Accuracy='  a very tight accuracy level, '      
            ENDIF
 #ifdef MMech
-       IF(Ctrl%Mechanics(2)) THEN
+       IF(HasQM()) THEN
 #endif
               IF(Ctrl%Method(I)==SDMM_R_SCF)THEN
                  Method='restricted simplified density matrix minimization using '
@@ -361,7 +376,7 @@ MODULE ParseInput
 !----------------------------------------------------------------------------
 !        Open info file
          CALL OpenHDF(InfFile)
-!        Open input file
+!        Open inPut file
          CALL OpenASCII(InpFile,Inp) 
 !
 !        Parse <OPTIONS.SCF>
@@ -569,7 +584,7 @@ MODULE ParseInput
       SUBROUTINE ParseGeometry(Ctrl)
          TYPE(SCFControls),INTENT(INOUT) :: Ctrl
          TYPE(CRDS)                      :: GM
-         INTEGER                         :: I,J,K,NKind,NUnPEl,QMCHARGE
+         INTEGER                         :: I,J,K,NKind,NUnPEl,QMCharge
          LOGICAL                         :: ReOrder,HilbertOrder
          CHARACTER(LEN=2)                :: At
          CHARACTER(LEN=DEFAULT_CHR_LEN)  :: Line
@@ -578,7 +593,7 @@ MODULE ParseInput
 !
          CALL OpenHDF(InfFile)
 !----------------------------------------------------------------------------
-!        Open input file for parsing
+!        Open inPut file for parsing
 !
          CALL OpenASCII(InpFile,Inp)
 !----------------------------------------------------------------------------
@@ -601,15 +616,15 @@ MODULE ParseInput
             CALL MondoHalt(PRSE_ERROR,'Unrecognized ordering.')
          ENDIF
 !---------------------------------------------------------------------------- 
-!        Parse <OPTIONS> for <TOT_CHARGE> and <MULTIPLICITY>  
+!        Parse <OPTIONS> for <TOT_Charge> and <MULTIPLICITY>  
 !
-         IF(.NOT.OptIntQ(Inp,TOTAL_CHARGE,QMCHARGE)) THEN
-            CALL MondoHalt(PRSE_ERROR,TOTAL_CHARGE//' Not found in input.')
+         IF(.NOT.OptIntQ(Inp,TOTAL_Charge,QMCharge)) THEN
+            CALL MondoHalt(PRSE_ERROR,TOTAL_Charge//' Not found in inPut.')
          ELSE
-            GM%TotCh=DBLE(QMCHARGE)
+            GM%TotCh=DBLE(QMCharge)
          ENDIF
          IF(.NOT.OptIntQ(Inp,MULTIPLICITY,GM%Multp)) &
-            CALL MondoHalt(PRSE_ERROR,MULTIPLICITY//' Not found in input.')
+            CALL MondoHalt(PRSE_ERROR,MULTIPLICITY//' Not found in inPut.')
 !
 !---------------------------------------------------------------------------- 
 !        Parse <OPTIONS> for <Extrap=>
@@ -694,7 +709,7 @@ MODULE ParseInput
             GM%PBC%AtomW=.FALSE.
          ENDIF
 !----------------------------------------------------------------------------
-!        Input Type on the BoxShape Vectors
+!        InPut Type on the BoxShape Vectors
 !
          IF(OptKeyQ(Inp,PBOUNDRY,LVF_VEC)) THEN
             GM%PBC%InVecForm=.TRUE.
@@ -708,7 +723,7 @@ MODULE ParseInput
          ENDIF
 
 !----------------------------------------------------------------------------
-!        Input Type on the Coordinates, Atomic or Fractional
+!        InPut Type on the Coordinates, Atomic or Fractional
 !
          IF(OptKeyQ(Inp,PBOUNDRY,CRT_ATOM)) THEN
             GM%PBC%InAtomCrd=.TRUE.
@@ -721,7 +736,7 @@ MODULE ParseInput
             GM%PBC%InAtomCrd=.TRUE.
          ENDIF
 !-------------------------------------------------------------
-!        Intput Type of Translation
+!        IntPut Type of Translation
 !
          IF(OptKeyQ(Inp,PBOUNDRY,TRAN_COM)) THEN
             GM%PBC%Translate = .TRUE.
@@ -731,9 +746,9 @@ MODULE ParseInput
             GM%PBC%Trans_COM = .FALSE.
          ENDIF
 !-------------------------------------------------------------
-!        Intput permability
+!        IntPut permability
 !
-         IF(.NOT. OptDblQ(Inp,EPSILON,GM%PBC%Epsilon)) THEN
+         IF(.NOT. OptDblQ(Inp,EpsILON,GM%PBC%Epsilon)) THEN
             GM%PBC%Epsilon = 1.D32
          ENDIF
 #endif
@@ -767,6 +782,7 @@ MODULE ParseInput
          CHARACTER(LEN=DEFAULT_CHR_LEN)  :: Line, LineLowCase
          LOGICAL                         :: LastConfig
 !---------------------------------------------------------------------------- 
+!
 !        Find number of atoms and atom types
 !
          CALL AlignLowCase('begingeometry',Inp)
@@ -828,11 +844,11 @@ MODULE ParseInput
             CALL ReorderCoordinates(GM)
 !           Determine the number of atom types (kinds)
 !           Do this AFTER possible reodering or it will mess up the basis set.
-!           NOTE: Should recompute basis for EACH geometry.  Things are quite
+!           NOTE: Should recomPute basis for EACH geometry.  Things are quite
 !           messed up at present.  Need to really clean house on front end.
             CALL FindKind(GM)
 #ifdef PERIODIC
-!           Convert to AU and Compute Fractioan and Atomic Coordinates  
+!           Convert to AU and ComPute Fractioan and Atomic Coordinates  
             IF(GM%PBC%InAtomCrd) THEN
                IF(.NOT.GM%InAU) THEN 
                   GM%Carts%D    = GM%Carts%D*AngstromsToAU 
@@ -856,7 +872,7 @@ MODULE ParseInput
             ENDIF
 #endif
 !
-!           Compute spin coordinates
+!           ComPute spin coordinates
             CALL SpinCoords(GM) 
 !           Determine a bounding box for the system
             GM%BndBox%D=SetBox(GM%Carts)
@@ -868,8 +884,10 @@ MODULE ParseInput
                ENDIF
             ENDDO
 #endif
-!           Output the coordinates
+!           OutPut the coordinates
+         CALL OpenHDF(InfFile)
             CALL Put(GM,Tag_O=TRIM(IntToChar(NumGeom)))
+         CALL CloseHDF()
 !           Print the coordinates
             IF(PrintFlags%Key>DEBUG_NONE) CALL PPrint(GM)
 !            CALL PPrint(GM,'Graphite_98.xyz',6,'XYZ')
@@ -885,21 +903,24 @@ MODULE ParseInput
                CALL MondoHalt(PRSE_ERROR,'Only the initial Geometry should be supplied for MD or Opt')
             ENDIF
          ENDIF
+         CALL OpenHDF(InfFile)
          CALL Put(NumGeom,'NumberOfGeometries')
+         CALL CloseHDF()
          NAtoms=GM%NAtms
 
 !---------------------------------------------------------------------------- 
 !        Finish up
          CALL Delete(GM)
-!        CLOSE(UNIT=Inp,STATUS='KEEP') !!!! it's done above, was done even before
-         CALL Put(Ctrl%NGeom,'nconfig') !!! currently only one MM geom
-!        CALL CloseHDF()
+         CLOSE(UNIT=Inp,STATUS='KEEP') 
+         CALL OpenHDF(InfFile)
+         CALL Put(Ctrl%NGeom,'nconfig') 
+         CALL CloseHDF()
          CALL PPrint(MemStats,'ParseGeometry')
          RETURN
 !
 1        CALL Halt('While parsing '//TRIM(InpFile)//', failed to find '     &
                    //TRIM(END_GEOMETRY)//'. You may be missing blank '  &
-                   //'line at the end of the input file.')
+                   //'line at the end of the inPut file.')
       END SUBROUTINE ParseCoordinates_MONDO
 !---------------------------------------------------------------------------- 
 !
@@ -918,6 +939,7 @@ MODULE ParseInput
 !---------------------------------------------------------------------------- 
 !        Find number of atoms and atom types
 !
+         CALL OpenHDF(InfFile)
          CALL Align(BEGIN_GEOMETRY,Inp)
          READ(Inp,DEFAULT_CHR_FMT,END=1)Line
          READ(Inp,DEFAULT_CHR_FMT,END=1)Line
@@ -987,11 +1009,11 @@ MODULE ParseInput
 !           Convert to AU
             IF(.NOT.GM%InAU) &
                GM%Carts%D=GM%Carts%D*AngstromsToAU
-!           Compute spin coordinates
+!           ComPute spin coordinates
             CALL SpinCoords(GM) 
 !           Determine a bounding box for the system
             GM%BndBox%D=SetBox(GM%Carts)
-!           Output the coordinates
+!           OutPut the coordinates
             CALL Put(GM,Tag_O=IntToChar(Ctrl%NGeom))
             CALL Put(Ctrl%NGeom,'NumberOfGeometries')
             IF(LastConfig)EXIT
@@ -1007,7 +1029,7 @@ MODULE ParseInput
          RETURN
        1 CALL Halt('While parsing '//TRIM(InpFile)//', failed to find '     &
                    //TRIM(END_GEOMETRY)//'. \n  You may be missing blank '  &
-                   //'line at the end of the input file.')
+                   //'line at the end of the inPut file.')
 !
       END SUBROUTINE ParseCoordinates_XMOL
 !
@@ -1025,6 +1047,7 @@ MODULE ParseInput
 !---------------------------------------------------------------------------- 
 !        Find number of atoms and atom types
 !
+         CALL OpenHDF(InfFile)
          CALL Align(BEGIN_GEOMETRY,Inp)
          NAtoms=0
          DO 
@@ -1095,13 +1118,13 @@ MODULE ParseInput
 !           Convert to AU
             IF(.NOT.GM%InAU) &
                GM%Carts%D=GM%Carts%D*AngstromsToAU
-!           Compute spin coordinates
+!           ComPute spin coordinates
             CALL SpinCoords(GM) 
 !           Determine a bounding box for the system
             GM%BndBox%D=SetBox(GM%Carts)
-!           Compute nuclear-nuclear repulsion energy
+!           ComPute nuclear-nuclear repulsion energy
 !            GM%ENucN=ENukeNuke(GM)
-!           Output the coordinates
+!           OutPut the coordinates
 !            CALL OpenASCII(OutFile,Out)
 !            CALL PPrint(GM)            
 !            CLOSE(Out)
@@ -1121,7 +1144,7 @@ MODULE ParseInput
          RETURN
 1        CALL Halt('While parsing '//TRIM(InpFile)//', failed to find '     &
                    //TRIM(END_GEOMETRY)//'. You may be missing blank '  &
-                   //'line at the end of the input file.')
+                   //'line at the end of the inPut file.')
 !
       END SUBROUTINE ParseCoordinates_MSI
 #ifdef PERIODIC
@@ -1132,6 +1155,8 @@ MODULE ParseInput
         TYPE(SCFControls),INTENT(INOUT) :: Ctrl
         TYPE(CRDS)                      :: GM
         INTEGER                         :: NLvec,NTvec,I,J,K
+!
+        CALL OpenHDF(InfFile)
 !
         NLvec = 0
         NTvec = 0
@@ -1237,6 +1262,8 @@ MODULE ParseInput
         GM%PBC%InvBoxSh(2,3)=-GM%PBC%BoxShape(2,3)/(GM%PBC%BoxShape(2,2)*GM%PBC%BoxShape(3,3))
         GM%PBC%InvBoxSh(3,3)=One/GM%PBC%BoxShape(3,3)
 !
+      CALL CloseHDF()
+!
       END SUBROUTINE ParsePeriodic_MONDO
 !============================================================================
 !
@@ -1290,7 +1317,7 @@ MODULE ParseInput
         RETURN
 1       CALL Halt('While parsing '//TRIM(InpFile)//', failed to find '     &
                    //TRIM(END_PERIODIC)//'. You may be missing blank '  &
-                   //'line at the end of the input file.')
+                   //'line at the end of the inPut file.')
 !
       END SUBROUTINE GetLatVec
 !============================================================================
@@ -1381,7 +1408,7 @@ MODULE ParseInput
         RETURN
 1       CALL Halt('While parsing '//TRIM(InpFile)//', failed to find '     &
                    //TRIM(END_PERIODIC)//'. You may be missing blank '  &
-                   //'line at the end of the input file.')
+                   //'line at the end of the inPut file.')
 !
       END SUBROUTINE GetLatAng
 !============================================================================
@@ -1430,29 +1457,53 @@ MODULE ParseInput
 !============================================================================
 !
 !============================================================================
-      SUBROUTINE FindKind(GM) 
-         TYPE(CRDS)     :: GM
+      SUBROUTINE FindKind(GMLoc) 
+         TYPE(CRDS)     :: GMLoc
          TYPE(INT_VECT) :: Kinds
          INTEGER        :: I,J,K
 !----------------------------------------------------------------------------
-         CALL New(Kinds,GM%NAtms)
-         GM%NKind=1
-         Kinds%I(1)=GM%AtNum%D(1)
-         DO I=2,GM%NAtms
-            DO J=1,GM%NKind
-               IF(Kinds%I(J)==GM%AtNum%D(I))GOTO 3
+         CALL New(Kinds,GMLoc%NAtms)
+         GMLoc%NKind=1
+         Kinds%I(1)=GMLoc%AtNum%D(1)
+         DO I=2,GMLoc%NAtms
+            DO J=1,GMLoc%NKind
+               IF(Kinds%I(J)==INT(GMLoc%AtNum%D(I)))GOTO 3
             ENDDO
-            GM%NKind=GM%NKind+1
-            Kinds%I(GM%NKind)=GM%AtNum%D(I)
+            GMLoc%NKind=GMLoc%NKind+1
+            Kinds%I(GMLoc%NKind)=INT(GMLoc%AtNum%D(I))
          3 CONTINUE
          ENDDO
-         DO K=1,GM%NKind
-            DO I=1,GM%NAtms
-               IF(Kinds%I(K)==GM%AtNum%D(I))GM%AtTyp%I(I)=K
+         DO K=1,GMLoc%NKind
+            DO I=1,GMLoc%NAtms
+               IF(Kinds%I(K)==INT(GMLoc%AtNum%D(I)))GMLoc%AtTyp%I(I)=K
            ENDDO
          ENDDO
          CALL Delete(Kinds)
       END SUBROUTINE FindKind
+!
+      SUBROUTINE FindKindD(GMLoc) 
+         TYPE(CRDS)     :: GMLoc
+         TYPE(DBL_VECT) :: Kinds
+         INTEGER        :: I,J,K
+!----------------------------------------------------------------------------
+         CALL New(Kinds,GMLoc%NAtms)
+         GMLoc%NKind=1
+         Kinds%D(1)=GMLoc%AtNum%D(1)
+         DO I=2,GMLoc%NAtms
+            DO J=1,GMLoc%NKind
+               IF((Kinds%D(J)-GMLoc%AtNum%D(I))<1.D-5)GOTO 3
+            ENDDO
+            GMLoc%NKind=GMLoc%NKind+1
+            Kinds%D(GMLoc%NKind)=GMLoc%AtNum%D(I)
+         3 CONTINUE
+         ENDDO
+         DO K=1,GMLoc%NKind
+            DO I=1,GMLoc%NAtms
+               IF((Kinds%D(K)-GMLoc%AtNum%D(I))<1.D-5)GMLoc%AtTyp%I(I)=K
+           ENDDO
+         ENDDO
+         CALL Delete(Kinds)
+      END SUBROUTINE FindKindD
 !
 
 !============================================================================
@@ -1486,12 +1537,12 @@ MODULE ParseInput
          Box(:,2)=-1.D8
          DO J=1,SIZE(Carts%D,2)
             Box(:,1)=MIN(Box(:,1),Carts%D(:,J))
-            Box(:,2)=MAX(Box(:,2),Carts%D(:,J))
+            Box(:,2)=Max(Box(:,2),Carts%D(:,J))
          ENDDO
        IF(PRESENT(Carts2)) THEN
          DO J=1,SIZE(Carts2%D,2)
             Box(:,1)=MIN(Box(:,1),Carts2%D(:,J))
-            Box(:,2)=MAX(Box(:,2),Carts2%D(:,J))
+            Box(:,2)=Max(Box(:,2),Carts2%D(:,J))
          ENDDO
        ENDIF
       END FUNCTION SetBox
@@ -1571,7 +1622,7 @@ MODULE ParseInput
 !----------------------------------------------------------------------------
 !        Open infofile
          CALL OpenHDF(InfFile)
-!        Parse basis sets from input file
+!        Parse basis sets from inPut file
          CALL OpenASCII(InpFile,Inp) 
 !        Parse <OPTIONS.BASIS_SETS>
          Ctrl%NSet=0
@@ -1647,11 +1698,11 @@ MODULE ParseInput
 !           Open basis set file 
             IF(Base(ISet)%BType==0) &
                CALL MondoHalt(-9999,' Basis set # '//TRIM(IntToChar(ISet)) &
-                                     //' Undefined in input!')
+                                     //' Undefined in inPut!')
             BasFile=TRIM(MONDO_HOME)//'BasisSets/' &
                   //TRIM(CSets(2,Base(ISet)%BType))//BasF
             CALL OpenASCII(BasFile,Bas,Rewind_O=.TRUE.)
-            IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
+            IF(PrintFlags%Key==DEBUG_MaxIMUM)THEN
                CALL PPrint('Base('//TRIM(IntToChar(ISet))       &
                         //')%BName   = '//TRIM(Base(ISet)%BName))
                CALL PPrint('Opening BasFile = '//TRIM(BasFile))
@@ -1695,11 +1746,11 @@ MODULE ParseInput
                     101 CONTINUE
                         BS%NCFnc%I(NK)=NC
                         BS%NPFnc%I(NC,NK)=NP
-                        BS%NCtrt=MAX(BS%NCtrt,NC)
-                        BS%NPrim=MAX(BS%NPrim,NP)
+                        BS%NCtrt=Max(BS%NCtrt,NC)
+                        BS%NPrim=Max(BS%NPrim,NP)
                         MinL=BS%ASymm%I(1,NC,NK)
                         MaxL=BS%ASymm%I(2,NC,NK)
-                        BS%NAsym=MAX(BS%NAsym,MaxL)
+                        BS%NAsym=Max(BS%NAsym,MaxL)
                          DO NP=1,BS%NPFnc%I(NC,NK)
                            READ(Bas,DEFAULT_CHR_FMT,END=99)Line
                            N=MaxL-MinL+2
@@ -1739,7 +1790,7 @@ MODULE ParseInput
             CALL Delete(Base(I))
          ENDDO
          CALL Put(Ctrl%NSet,'NumberOfSets')
-         IF(PrintFlags%Key==DEBUG_MAXIMUM)  &
+         IF(PrintFlags%Key==DEBUG_MaxIMUM)  &
             CALL PPrint(MemStats,'ParseBaseSets')
          CALL CloseHDF()
       END SUBROUTINE ParseBaseSets
@@ -1825,7 +1876,7 @@ MODULE ParseInput
          TYPE(CRDS)                   :: GM
          INTEGER                      :: NA,NK,NC,Stride
 !----------------------------------------------------------------------------
-!        Get the geometry and compute matrix dimensions and bloking indecies
+!        Get the geometry and comPute matrix dimensions and bloking indecies
 !
          CALL Get(GM,Tag_O='1')
          CALL New(BSiz_2,GM%NAtms)
@@ -1854,17 +1905,39 @@ MODULE ParseInput
         Implicit None
         TYPE(SCFControls)          :: Ctrl
         TYPE(CRDS)                 :: GM_MM,GM
+        INTEGER :: II
         REAL(DOUBLE)               :: sum,dx,dy,dz,dd
         CHARACTER(LEN=DEFAULT_CHR_LEN) :: OPLS_DATABASE,MM_COORDS,MM_SEQ
         CHARACTER(LEN=DEFAULT_CHR_LEN)  :: Line, LineLowCase
         CHARACTER(LEN=DEFAULT_CHR_LEN)  :: QMMM_DATA
-        TYPE(INT_VECT) :: ATMMARK,ACTIVE_BOND,ACTIVE_ANGLE
-        TYPE(INT_VECT) :: ACTIVE_DIHEDRAL,ACTIVE_IMPROPER
+        TYPE(INT_VECT) :: ATMMARK,Active_Bond,Active_Angle
+        TYPE(INT_VECT) :: MMAtNum
+        TYPE(INT_VECT) :: Active_Torsion,Active_OutOfPlane
+        TYPE(INT_VECT) :: GlobalQMNum
+        TYPE(DBL_VECT) :: AuxVect     
         INTEGER :: I,J,K,L,N1,N2,N3,N4
-        TYPE(DBL_VECT) :: CHARGE14,LJEPS14,LJEPS,LJRAD
+        TYPE(DBL_VECT) :: Charge14,LJEps14,LJEps,LJRAD
+        TYPE(DBL_VECT) :: BondEQ,BondFC
+        TYPE(DBL_VECT) :: AngleEQ,AngleFC
+        TYPE(DBL_VECT) :: TorsionEQ,TorsionFC
+        TYPE(DBL_VECT) :: OutOfPlaneEQ,OutOfPlaneFC
+        TYPE(INT_RNK2) :: BondIJ
+        TYPE(INT_VECT) :: OutOfPlanePeriod,TorsionPeriod
+        TYPE(INT_VECT) :: Stat
+        TYPE(DBL_VECT) :: GrdMM
+        CHARACTER(LEN=3) :: CurG
+        TYPE(INT_RNK2) :: AngleIJK,TorsionIJKL,OutOfPlaneIJKL
 !
-         CALL OpenASCII(InpFile,Inp)
-         CALL OpenASCII(OutFile,Out)
+        CALL OpenASCII(InpFile,Inp)
+        CALL OpenASCII(OutFile,Out)
+        CALL OpenHDF(Ctrl%Info)
+!
+          CALL New(Stat,3)
+          Stat%I=Ctrl%Current
+          CurG=TRIM(IntToChar(Stat%I(3)))
+          CALL Delete(Stat)
+!
+        IF(HasQM()) CALL Get(GM,Tag_O=CurG)
 !  
 ! Find names of datafiles for MM calculation
 !
@@ -1872,15 +1945,14 @@ MODULE ParseInput
            READ(Inp,DEFAULT_CHR_FMT) OPLS_DATABASE
            READ(Inp,DEFAULT_CHR_FMT) MM_SEQ
            READ(Inp,DEFAULT_CHR_FMT) MM_COORDS
-           IF(Ctrl%Mechanics(1).AND.Ctrl%Mechanics(2)) &
-              READ(Inp,DEFAULT_CHR_FMT) QMMM_DATA
+           IF(HasQM()) READ(Inp,DEFAULT_CHR_FMT) QMMM_DATA
          DO 
            READ(Inp,DEFAULT_CHR_FMT,END=1)Line
            LineLowCase = Line
            Call LowCase(LineLowCase)
            IF(INDEX(LineLowCase,'end_mm_filenames')/=0) GO TO 2
          ENDDO
-      1  CALL MondoHalt(PRSE_ERROR,' Found no <end_mm_filenames> in input file '//TRIM(InpFile))
+      1  CALL MondoHalt(PRSE_ERROR,' Found no <end_mm_filenames> in inPut file '//TRIM(InpFile))
       2  CONTINUE
 !
 ! Check whether filenames are given 
@@ -1889,11 +1961,11 @@ MODULE ParseInput
          N2 = LEN_TRIM(MM_SEQ)
          N3 = LEN_TRIM(MM_COORDS)
          N4 = LEN_TRIM(QMMM_DATA)
-         IF(N1 == 0) CALL MondoHalt(PRSE_ERROR,' Found no <opls_database> in input file '//TRIM(InpFile))
-         IF(N2 == 0) CALL MondoHalt(PRSE_ERROR,' Found no <mm_seq> in input file '//TRIM(InpFile))
-         IF(N3 == 0) CALL MondoHalt(PRSE_ERROR,' Found no <mm_coords> in input file '//TRIM(InpFile))
-         IF(Ctrl%Mechanics(1).AND.Ctrl%Mechanics(2)) THEN
-         IF(N4 == 0) CALL MondoHalt(PRSE_ERROR,' Found no <qmmmdata> in input file '//TRIM(InpFile))
+         IF(N1 == 0) CALL MondoHalt(PRSE_ERROR,' Found no <opls_database> in inPut file '//TRIM(InpFile))
+         IF(N2 == 0) CALL MondoHalt(PRSE_ERROR,' Found no <mm_seq> in inPut file '//TRIM(InpFile))
+         IF(N3 == 0) CALL MondoHalt(PRSE_ERROR,' Found no <mm_coords> in inPut file '//TRIM(InpFile))
+         IF(HasQM()) THEN
+         IF(N4 == 0) CALL MondoHalt(PRSE_ERROR,' Found no <qmmmdata> in inPut file '//TRIM(InpFile))
          ENDIF
 !
 ! Now process MM data files
@@ -1903,67 +1975,152 @@ MODULE ParseInput
       CALL COORDINATES_READ ( MM_COORDS(1:N3) )
 !
 !     CALL SORT_INTO_BOX(7.D0,ATMCRD,MM_NATOMS) !!!
-      CALL NEW(ATMMARK,MM_NATOMS)
-      CALL NEW(ACTIVE_BOND,NBONDS)
-      CALL NEW(ACTIVE_ANGLE,NANGLES)
-      CALL NEW(ACTIVE_DIHEDRAL,NDIHEDRALS)
-      CALL NEW(ACTIVE_IMPROPER,NIMPROPERS)
+      CALL New(ATMMARK,MM_NATOMS)
+      CALL New(Active_Bond,NBonds)
+      CALL New(Active_Angle,NAngles)
+      CALL New(Active_Torsion,NDIHEDRALS)
+      CALL New(Active_OutOfPlane,NImpropers)
 !
-      IF(Ctrl%Mechanics(1).AND.Ctrl%Mechanics(2)) THEN
+      IF(HasQM()) THEN
 !
-! Calling QMMMDATA_READ also modifies ATMCHG (MM charges)
+! Calling QMMMDATA_READ also modifies ATMCHG (MM Charges)
 !
-        CALL QMMMDATA_READ(QMMM_DATA,ATMMARK,ACTIVE_BOND,ACTIVE_ANGLE, &
-        ACTIVE_DIHEDRAL,ACTIVE_IMPROPER)
+        CALL QMMMDATA_READ(QMMM_DATA,ATMMARK,Active_Bond,Active_Angle, &
+        Active_Torsion,Active_OutOfPlane)
 !
       ELSE
 !
-        ATMMARK%I(1:MM_NATOMS)=1
-        ACTIVE_BOND%I(1:NBONDS)=1
-        ACTIVE_ANGLE%I(1:NANGLES)=1
-        ACTIVE_DIHEDRAL%I(1:NDIHEDRALS)=1
-        ACTIVE_IMPROPER%I(1:NIMPROPERS)=1
+        ATMMARK%I(1:MM_NATOMS)=0
+        Active_Bond%I(1:NBonds)=1
+        Active_Angle%I(1:NAngles)=1
+        Active_Torsion%I(1:NDIHEDRALS)=1
+        Active_OutOfPlane%I(1:NImpropers)=1
 !
       ENDIF
 !
-! SAVE 14 charges and Lennard-Jones parameters
-! for the calculation of exclusion energy terms
+! SAVE 14 Charges and other parameters
 !
-      CALL NEW(CHARGE14,MM_NATOMS)
-      CALL NEW(LJEPS14,MM_NATOMS)
-      CALL NEW(LJEPS,MM_NATOMS)
-      CALL NEW(LJRAD,MM_NATOMS)
-        CHARGE14%D(:)=ATMCHG14(:)
-        LJEPS14%D(:)=ATMEPS14(:)
-        LJEPS%D(:)=ATMEPS(:)
+        CALL Put(NBonds,'MM_NBond')
+        CALL Put(NAngles,'MM_NAngle')
+        CALL Put(NDihedrals,'MM_NTorsion')
+        CALL Put(NImpropers,'MM_NOutOfPlane')
+!
+      IF(NBONDS/=0) THEN
+      CALL New(BondIJ,(/2,NBONDS/))
+      CALL New(BondEQ,NBONDS)
+      CALL New(BondFC,NBONDS)
+        BondIJ%I(1,:)=BONDS(:)%I
+        BondIJ%I(2,:)=BONDS(:)%J
+        BondEQ%D(:)=BONDS(:)%EQ
+        BondFC%D(:)=BONDS(:)%FC
+        CALL Put(BondIJ,'MM_BondIJ')
+        CALL Put(BondFC,'BondFC')
+        CALL Put(BondEQ,'BondEQ')
+      CALL Delete(BondIJ)
+      CALL Delete(BondFC)
+      CALL Delete(BondEQ)
+      ENDIF
+!
+      IF(NAngles/=0) THEN
+      CALL New(AngleIJK,(/3,NAngles/))
+      CALL New(AngleEQ,NAngles)
+      CALL New(AngleFC,NAngles)
+        AngleIJK%I(1,:)=ANGLES(:)%I
+        AngleIJK%I(2,:)=ANGLES(:)%J
+        AngleIJK%I(3,:)=ANGLES(:)%K
+        AngleEQ%D(:)=ANGLES(:)%EQ
+        AngleFC%D(:)=ANGLES(:)%FC
+        CALL Put(AngleIJK,'MM_AngleIJK')
+        CALL Put(AngleEQ,'MM_AngleEQ')
+        CALL Put(AngleFC,'MM_AngleFC')
+      CALL Delete(AngleIJK)
+      CALL Delete(AngleEQ)
+      CALL Delete(AngleFC)
+      ENDIF
+!
+      IF(NDihedrals/=0) THEN
+      CALL New(TorsionIJKL,(/4,NDihedrals/))
+      CALL New(TorsionEQ,NDihedrals)
+      CALL New(TorsionFC,NDihedrals)
+      CALL New(TorsionPeriod,NDihedrals)
+        TorsionIJKL%I(1,:)=DIHEDRALS(:)%I
+        TorsionIJKL%I(2,:)=DIHEDRALS(:)%J
+        TorsionIJKL%I(3,:)=DIHEDRALS(:)%K
+        TorsionIJKL%I(4,:)=DIHEDRALS(:)%L
+        TorsionEQ%D(:)=DIHEDRALS(:)%PHASE
+        TorsionFC%D(:)=DIHEDRALS(:)%FC
+        TorsionPeriod%I(:)=DIHEDRALS(:)%PERIOD
+        CALL Put(TorsionIJKL,'MM_TorsionIJKL')
+        CALL Put(TorsionEQ,'TorsionEQ')
+        CALL Put(TorsionFC,'TorsionFC')
+        CALL Put(TorsionPeriod,'TorsionPeriod')
+      CALL Delete(TorsionIJKL)
+      CALL Delete(TorsionEQ)
+      CALL Delete(TorsionFC)
+      CALL Delete(TorsionPeriod)
+      ENDIF
+!
+      IF(NImpropers/=0) THEN
+      CALL New(OutOfPlaneIJKL,(/4,NImpropers/))
+      CALL New(OutOfPlaneEQ,NImpropers)
+      CALL New(OutOfPlaneFC,NImpropers)
+      CALL New(OutOfPlanePeriod,NImpropers)
+        OutOfPlaneIJKL%I(1,:)=Impropers(:)%I
+        OutOfPlaneIJKL%I(2,:)=Impropers(:)%J
+        OutOfPlaneIJKL%I(3,:)=Impropers(:)%K
+        OutOfPlaneIJKL%I(4,:)=Impropers(:)%L
+        OutOfPlaneEQ%D(:)=Impropers(:)%PHASE
+        OutOfPlaneFC%D(:)=Impropers(:)%FC
+        OutOfPlanePeriod%I(:)=Impropers(:)%PERIOD
+        CALL Put(OutOfPlaneIJKL,'MM_OutOfPlaneIJKL')
+        CALL Put(OutOfPlaneEQ,'OutOfPlaneEQ')
+        CALL Put(OutOfPlaneFC,'OutOfPlaneFC')
+        CALL Put(OutOfPlanePeriod,'OutOfPlanePeriod')
+      CALL Delete(OutOfPlaneIJKL)
+      CALL Delete(OutOfPlaneEQ)
+      CALL Delete(OutOfPlaneFC)
+      CALL Delete(OutOfPlanePeriod)
+      ENDIF
+!
+      CALL New(Charge14,MM_NATOMS)
+      CALL New(LJEps14,MM_NATOMS)
+      CALL New(LJEps,MM_NATOMS)
+      CALL New(LJRAD,MM_NATOMS)
+        Charge14%D(:)=ATMCHG14(:)
+        LJEps14%D(:)=ATMEps14(:)
+        LJEps%D(:)=ATMEps(:)
         LJRAD%D(:)=ATMSIG(:)
-      CALL OpenHDF(Ctrl%Info)
-        CALL PUT(CHARGE14,'CHARGE14')
-        CALL PUT(LJEPS14,'LJEPS14')
-        CALL PUT(LJEPS,'LJEPS')
-        CALL PUT(LJRAD,'LJRAD')
-      CALL CloseHDF
-      CALL DELETE(CHARGE14)
-      CALL DELETE(LJEPS14)
-      CALL DELETE(LJEPS)
-      CALL DELETE(LJRAD)
+        CALL Put(Charge14,'Charge14')
+        CALL Put(LJEps14,'LJEps14')
+        CALL Put(LJEps,'LJEps')
+        CALL Put(LJRAD,'LJRAD')
+      CALL Delete(Charge14)
+      CALL Delete(LJEps14)
+      CALL Delete(LJEps)
+      CALL Delete(LJRAD)
+!
+! Save atomic numbers of MM atoms
+!
+        CALL New(MMAtNum,MM_NATOMS)
+        MMAtNum%I=ATMNUM
+        CALL Put(MMAtNum,'MMAtNum')
+        CALL Delete(MMAtNum)
 !
 ! Calculate topology information (currently only 
-! for MM and QMMM calculations available)
+! for MM and QMMM calculations available), because
+! of lack of Bondlist for QM ones
 !
-      IF(Ctrl%Mechanics(1)) THEN
-        CALL TOPOLOGIES_MM(MM_NATOMS,NBONDS, &
-             BONDS(:)%I,BONDS(:)%J,Ctrl%Info)
-      ENDIF
+        CALL TOPOLOGIES_MM(MM_NATOMS,NBonds, &
+             Bonds(:)%I,Bonds(:)%J,Ctrl%Info)
 !
-! Calculate total MM charge
+! Calculate total MM Charge
 !
         SUM=Zero
       DO I=1,MM_NATOMS
         SUM=SUM+ATMCHG(I)
       ENDDO
         GM_MM%TotCh=SUM
-        write(*,*) 'mm total charge ',GM_MM%TotCh
+        write(*,*) 'mm total Charge ',GM_MM%TotCh
 !
       GM_MM%NAtms = MM_Natoms
        CALL New(GM_MM)
@@ -1972,41 +2129,85 @@ MODULE ParseInput
       GM_MM%Carts%D(:,:) = ATMCRD(:,:)*AngstromsToAU
       GM_MM%AtMss%D(:) = ATMMAS(:)
       GM_MM%AtNum%D(:) = ATMCHG(:)
-!     IF(Ctrl%Mechanics(2)) THEN
+!
+! Set GM_MM atomkinds
+! WARNING! In the present version, for the QM/MM case
+! kinds for the QM part are all the same!
+!
+      CALL FindKind(GM_MM)
+!
+! set boundary box
+!
       IF(HasQM()) THEN
-        CALL Get(GM,Tag_O=IntToChar(Ctrl%NGeom))
         GM_MM%BndBox%D=SetBox(GM_MM%Carts,GM%Carts)
       ELSE
         GM_MM%BndBox%D=SetBox(GM_MM%Carts)
       ENDIF
 !
-! Print out MM coorinates into output file
+! Define internal coordinates
+!
+!     CALL  DefineIntCoos(GM_MM%Natms,GM_MM%Carts%D,Ctrl%Info,1)
+!     CALL  DefineIntCoos(GM_MM%Natms,GM_MM%Carts%D,Ctrl%Info,2)
+!
+! Zero GrdMM (initial gradients) for the case MMOnly
+!
+      IF(MMonly().AND.Ctrl%Current(3)==1) THEN
+        CALL New(GrdMM,3*GM_MM%Natms)
+        GrdMM%D(:)=Zero
+          CALL Put(GrdMM,'GradE',Tag_O=CurG)
+        CALL Delete(GrdMM)
+      ENDIF
+!
+! Calculate connection between QMMM and QM atom numbers
+!
+      IF(HasQM()) THEN
+        II=0
+            CALL New(GlobalQMNum,GM%NAtms)
+            GlobalQMNum%I(:)=0 
+!
+        DO I=1,MM_Natoms
+          IF(ATMMARK%I(I)==1) THEN
+            II=II+1
+            GlobalQMNum%I(II)=I
+            CALL New(AuxVect,3)
+            AuxVect%D=GM%Carts%D(1:3,II)-GM_MM%Carts%D(1:3,I)
+            IF(DOT_PRODUCT(AuxVect%D,AuxVect%D)>0.001D0) THEN
+              CALL Halt('Order of QM atoms is not the same as the one in QMMM atomlist')
+            ENDIF
+            CALL Delete(AuxVect)
+          ENDIF
+        ENDDO
+!
+! Link atoms have a GlobalQMNum of zero.
+!
+          CALL Put(GlobalQMNum,'GlobalQMNum',N_O=GM%NAtms)
+          CALL Delete(GlobalQMNum)
+      ENDIF
+!
+! Print out MM coorinates into outPut file
 !
         WRITE(Out,*) 
-        WRITE(Out,*) 'MM system coordinates:'
+        WRITE(Out,*) 'MM system coordinates in angstroems:'
         WRITE(Out,*) 
       DO I=1,MM_Natoms
         WRITE(Out,110) I,ATMNAM(I),ATMCRD(1:3,I)
       ENDDO
 110   FORMAT(I7,2X,A8,3F12.6)
 !
-      CALL OpenHDF(Ctrl%Info)
-        CALL Put(GM_MM,Tag_O='GM_MM'//'1')
-!       IF(Ctrl%Mechanics(1).AND.Ctrl%Mechanics(2)) THEN
+        CALL Put(GM_MM,Tag_O='GM_MM'//CurG)
           IF(MM_NATOMS/=0) THEN
             CALL Put(ATMMARK,'ATMMARK',N_O=MM_NATOMS)
           ENDIF
-          IF(NBONDS/=0) CALL Put(ACTIVE_BOND,'ACTIVE_BOND',N_O=NBONDS)
-          IF(NANGLES/=0) CALL Put(ACTIVE_ANGLE,'ACTIVE_ANGLE',N_O=NANGLES)
-          IF(NDIHEDRALS/=0) CALL Put(ACTIVE_DIHEDRAL,'ACTIVE_DIHEDRAL',N_O=NDIHEDRALS)
-          IF(NIMPROPERS/=0) CALL Put(ACTIVE_IMPROPER,'ACTIVE_IMPROPER',N_O=NIMPROPERS)
-          CALL DELETE(ATMMARK)
-          CALL DELETE(ACTIVE_BOND)
-          CALL DELETE(ACTIVE_ANGLE)
-          CALL DELETE(ACTIVE_DIHEDRAL)
-          CALL DELETE(ACTIVE_IMPROPER)
-!       ENDIF
-      CALL CloseHDF()
+          IF(NBonds/=0) CALL Put(Active_Bond,'Active_Bond',N_O=NBonds)
+          IF(NAngles/=0) CALL Put(Active_Angle,'Active_Angle',N_O=NAngles)
+          IF(NDIHEDRALS/=0) CALL Put(Active_Torsion,'Active_Torsion',N_O=NDIHEDRALS)
+          IF(NImpropers/=0) CALL Put(Active_OutOfPlane,'Active_OutOfPlane',N_O=NImpropers)
+!
+          CALL Delete(ATMMARK)
+          CALL Delete(Active_Bond)
+          CALL Delete(Active_Angle)
+          CALL Delete(Active_Torsion)
+          CALL Delete(Active_OutOfPlane)
 !
 !! test coulomb energy
 !!
@@ -2023,9 +2224,11 @@ MODULE ParseInput
 !        write(*,*) 'coulomb energy= ',sum 
 !        write(out,*) 'coulomb energy= ',sum 
 !
-      CALL DELETE(GM_MM)
+      CALL Delete(GM_MM)
 !
+      CALL CloseHDF()
       CLOSE(UNIT=Out,STATUS='KEEP')
+      CLOSE(UNIT=Inp,STATUS='KEEP')
 !
       END SUBROUTINE ParseMM
 #endif
@@ -2039,7 +2242,7 @@ MODULE ParseInput
 !----------------------------------------------------------------------------
 !        Open info file
          CALL OpenHDF(InfFile)
-!        Open input file
+!        Open inPut file
          CALL OpenASCII(InpFile,Inp) 
 !
 !        Parse <OPTIONS> for QM_MM
@@ -2059,11 +2262,10 @@ MODULE ParseInput
             Ctrl%Mechanics(2) = .true.
          ENDIF
 !
-        CALL OpenHDF(InfFile)
         CALL Put(Ctrl%Mechanics(1),'Ctrl_Mechanics1')
         CALL Put(Ctrl%Mechanics(2),'Ctrl_Mechanics2')
-        CALL CLOSEHDF()
 !
+        CALL CLOSEHDF()
         CLOSE(UNIT=Inp,STATUS='KEEP')
 !
       END SUBROUTINE ParseMech
@@ -2075,7 +2277,7 @@ MODULE ParseInput
 !----------------------------------------------------------------------------
 !        Open info file
          CALL OpenHDF(InfFile)
-!        Open input file
+!        Open inPut file
          CALL OpenASCII(InpFile,Inp) 
 !        Parse <OPTIONS> for <Grad=>
 !     
@@ -2085,7 +2287,7 @@ MODULE ParseInput
          ELSEIF(OptKeyQ(Inp,DYNAMICS,MD_VERLET))THEN
             Ctrl%Grad=GRAD_MD
             Ctrl%MDC%MD_Algor=1
-            IF(.NOT. OptIntQ(Inp,MAX_STEPS,Ctrl%NGeom)) THEN
+            IF(.NOT. OptIntQ(Inp,Max_Steps,Ctrl%NGeom)) THEN
                Ctrl%NGeom=1
             ENDIF
             IF(.NOT. OptDblQ(Inp,MD_TIME_STEP,Ctrl%MDC%TimeStep)) THEN
@@ -2101,25 +2303,25 @@ MODULE ParseInput
             Ctrl%Grad=GRAD_MD
             Ctrl%MDC%MD_Algor=2
             CALL MondoHalt(PRSE_ERROR,'Predictor-Corrector Algorithmn not implimented')
-         ELSEIF(OptKeyQ(Inp,OPTIMIZATION,OPT_QUNEW))THEN
+         ELSEIF(OptKeyQ(Inp,OPTIMIZATION,OPT_QUNew))THEN
             IF(OptKeyQ(Inp,OPTIMIZATION,OPT_ONE_BASE))THEN
-               Ctrl%Grad=GRAD_QNEW_ONE_OPT
+               Ctrl%Grad=GRAD_QNew_ONE_OPT
             ELSE
-               Ctrl%Grad=GRAD_QNEW_OPT
+               Ctrl%Grad=GRAD_QNew_OPT
             ENDIF
-            IF(.NOT.OptIntQ(Inp,MAX_STEPS,Ctrl%NGeom))THEN
+            IF(.NOT.OptIntQ(Inp,Max_Steps,Ctrl%NGeom))THEN
                Ctrl%NGeom=500
             ENDIF
          ELSEIF(OptKeyQ(Inp,OPTIMIZATION,OPT_TSTATE))THEN
             Ctrl%Grad=GRAD_TS_SEARCH
-            IF(.NOT.OptIntQ(Inp,MAX_STEPS,Ctrl%NGeom))THEN
+            IF(.NOT.OptIntQ(Inp,Max_Steps,Ctrl%NGeom))THEN
                Ctrl%NGeom=500
             ENDIF
          ELSE
             Ctrl%Grad=GRAD_NO_GRAD
          ENDIF
-         IF(Ctrl%Grad>=GRAD_QNEW_OPT)THEN
-            IF(.NOT.OptIntQ(Inp,MAX_STEPS,Ctrl%NGeom))THEN
+         IF(Ctrl%Grad>=GRAD_QNew_OPT)THEN
+            IF(.NOT.OptIntQ(Inp,Max_Steps,Ctrl%NGeom))THEN
                Ctrl%NGeom=500
             ENDIF
          ENDIF
@@ -2131,17 +2333,17 @@ MODULE ParseInput
 !----------------------------------------------------------------------------
 #ifdef MMech
 !
-      SUBROUTINE QMMMDATA_READ(FILE,ATMMARK,ACTIVE_BOND,ACTIVE_ANGLE, &
-        ACTIVE_DIHEDRAL,ACTIVE_IMPROPER)
+      SUBROUTINE QMMMDATA_READ(FILE,ATMMARK,Active_Bond,Active_Angle, &
+        Active_Torsion,Active_OutOfPlane)
       IMPLICIT NONE
       INTEGER III,K,L,M,N,N4,ISUB,IRES,II,J
       CHARACTER(LEN=DEFAULT_CHR_LEN)  :: FILE
-      TYPE(INT_VECT) :: ATMMARK,ACTIVE_BOND,ACTIVE_ANGLE
-      TYPE(INT_VECT) :: ACTIVE_DIHEDRAL,ACTIVE_IMPROPER
+      TYPE(INT_VECT) :: ATMMARK,Active_Bond,Active_Angle
+      TYPE(INT_VECT) :: Active_Torsion,Active_OutOfPlane
 !
       N4 = LEN_TRIM(FILE)
 !
-! Read QM-MM distinquishing list and modified charges
+! Read QM-MM distinquishing list and modified Charges
 ! which must be zero on all QM atoms and 'scaled' for the MM ones.
 !
       OPEN(UNIT=60,FILE=FILE(1:N4),STATUS='OLD')
@@ -2158,19 +2360,19 @@ MODULE ParseInput
 700   FORMAT(10X,3X,A8,I4,2F20.10)
 750   FORMAT(I10,A8,F20.10)
 !
-! bonds
+! Bonds
 !
          READ(60,*) 
-      DO I=1,NBONDS
-       READ(60,61) II,K,L,ACTIVE_BOND%I(I)
+      DO I=1,NBonds
+       READ(60,61) II,K,L,Active_Bond%I(I)
       ENDDO
 61    Format(I10,3X,2I5,3X,I5)
 !
-! angles
+! Angles
 !
          READ(60,*) 
-      DO II=1,NANGLES
-        READ(60,62) III,I,J,K,ACTIVE_ANGLE%I(II)
+      DO II=1,NAngles
+        READ(60,62) III,I,J,K,Active_Angle%I(II)
       ENDDO
 62    Format(I10,3X,3I5,3X,I5)
 !
@@ -2178,15 +2380,15 @@ MODULE ParseInput
 !
          READ(60,*) 
       DO II=1,NDIHEDRALS
-        READ(60,81) III,I,J,K,L,ACTIVE_DIHEDRAL%I(II)
+        READ(60,81) III,I,J,K,L,Active_Torsion%I(II)
       ENDDO
 81  FORMAT(I10,3X,4I5,3X,I5,F12.4)
 !
-! impropers
+! Impropers
 !
         READ(60,*) 
-      DO II=1,NIMPROPERS
-        READ(60,81) III,I,J,K,L,ACTIVE_IMPROPER%I(II)
+      DO II=1,NImpropers
+        READ(60,81) III,I,J,K,L,Active_OutOfPlane%I(II)
       ENDDO
 !
       CLOSE(60)
@@ -2202,7 +2404,7 @@ MODULE ParseInput
 !----------------------------------------------------------------------------
 !        Open info file
          CALL OpenHDF(InfFile)
-!        Open input file
+!        Open inPut file
          CALL OpenASCII(InpFile,Inp) 
 !
 !        Parse <OPTIONS.ACCURACY> 
@@ -2227,7 +2429,7 @@ MODULE ParseInput
             DO ILoc=1,NLoc; Ctrl%AccL(Loc(ILoc))=4; ENDDO
          ENDIF
 #ifdef MMech
-         IF(Ctrl%Mechanics(2)) THEN
+         IF(HasQM()) THEN
 #endif        
            IF(NOpts>1.AND.NOpts/=Ctrl%NSet) &
               CALL MondoHalt(PRSE_ERROR,'Number of '//ACCURACY_OPTION &
@@ -2241,8 +2443,14 @@ MODULE ParseInput
 !
 !!! MMonly
 !
-         IF(Ctrl%Mechanics(1).AND..NOT.Ctrl%Mechanics(2)) THEN
-           Ctrl%NSet=1 !!!!!!!!!!!!!TEMPORARY!!!!
+         IF(MMOnly()) THEN
+           Ctrl%NSet=0 !!! number of basis sets
+!          Thrsh%Cube=Zero
+!          Thrsh%Trix=Zero
+!          Thrsh%Dist=Zero
+!          Thrsh%TwoE=Zero
+!          Thrsh%ETol=Zero
+!          Thrsh%DTol=Zero
            Thrsh%Cube=CubeNeglect(Ctrl%AccL(1))
            Thrsh%Trix=TrixNeglect(Ctrl%AccL(1))
            Thrsh%Dist=DistNeglect(Ctrl%AccL(1))
@@ -2292,5 +2500,202 @@ MODULE ParseInput
          CLOSE(UNIT=Inp,STATUS='KEEP')
          CALL CloseHDF()
       END SUBROUTINE ParseAcc
+!----------------------------------------------------------
+#ifdef MMech
+      SUBROUTINE ParseIntCoo(Ctrl)
+!
+! This subroutine parses the inPut file for
+! additional internal coordinate definitions
+! and constraints.
+! WARNING: Parsing of definitions of extra intcoos must be
+! rewritten such, that mistypings be recognized,
+! current version may die with core dump if this is not done,
+! and improper inPut occures.
+!
+      IMPLICIT NONE
+      TYPE(SCFControls)          :: Ctrl
+      CHARACTER(LEN=DEFAULT_CHR_LEN)  :: Line,LineLowCase,Atomname
+      TYPE(INTC) :: IntC_Extra
+      CHARACTER(LEN=5) :: CHAR
+      INTEGER :: I1,I2,J,NIntC_Extra
+      REAL(DOUBLE) :: V
+!
+      CALL OpenASCII(InpFile,Inp)
+      CALL OpenASCII(OutFile,Out)
+      CALL OpenHDF(InfFile)
+!
+! Find extra internal coordinates and constraints
+!
+        NIntC_Extra=0
+!
+      IF(.NOT.FindMixedCaseKey('BEGIN_ADD_INTERNALS',Inp)) THEN
+        CALL Put(NIntC_Extra,'NIntC_Extra')
+        CALL CloseHDF()
+        Close(Inp)
+        Close(Out)
+        RETURN
+      ENDIF
+!
+      CALL AlignLowCase('begin_add_internals',Inp)
+      DO 
+        READ(Inp,DEFAULT_CHR_FMT,END=1)Line
+        LineLowCase = Line
+        Call LowCase(LineLowCase)
+!
+        IF(INDEX(LineLowCase,'stre')/=0.OR.&
+           INDEX(LineLowCase,'bend')/=0.OR.&
+           INDEX(LineLowCase,'tors')/=0.OR.&
+           INDEX(LineLowCase,'outp')/=0.OR.&
+           INDEX(LineLowCase,'linb1')/=0.OR.&
+           INDEX(LineLowCase,'linb2')/=0.OR.&
+           INDEX(LineLowCase,'cart')/=0  &  !!! cartesian constr.
+        ) NIntC_Extra=NIntC_Extra+1 
+!
+        IF(INDEX(LineLowCase,'end_add_internals')/=0) GO TO 2
+      ENDDO
+   1  CALL MondoHalt(PRSE_ERROR,' Found no <end_add_internals> in inPut file '//TRIM(InpFile))
+   2  CONTINUE
+!
+      IF(NIntC_Extra==0) THEN
+        CALL Put(NIntC_Extra,'NIntC_Extra')
+        CALL CloseHDF()
+        Close(Inp)
+        Close(Out)
+        RETURN
+      ENDIF
+!
+! Generate an addition to the IntC set!
+!
+      CALL New(IntC_Extra,NIntC_Extra)
+      IntC_Extra%ATOMS=0
+      IntC_Extra%Value=Zero
+      IntC_Extra%Constraint=.FALSE.
+!
+! Parse again and fill IntC_Extra!
+!
+        NIntC_Extra=0
+      CALL AlignLowCase('begin_add_internals',Inp)
+      DO 
+        READ(Inp,DEFAULT_CHR_FMT,END=1)Line
+        LineLowCase = Line
+        Call LowCase(LineLowCase)
+!
+             IF(INDEX(LineLowCase,'stre')/=0) THEN
+               NIntC_Extra=NIntC_Extra+1 
+               IntC_Extra%DEF(NIntC_Extra)='STRE ' 
+!--------------------
+               IF(INDEX(LineLowCase,'.')==0) THEN
+READ(LineLowCase,*) CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:2)
+               ELSE
+READ(LineLowCase,*) CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:2),&
+IntC_Extra%Value(NIntC_Extra)
+                 IntC_Extra%Constraint(NIntC_Extra)=.TRUE.
+               ENDIF
+!--------------------
+        ELSE IF(INDEX(LineLowCase,'bend')/=0) THEN 
+!--------------------
+               NIntC_Extra=NIntC_Extra+1 
+               IntC_Extra%DEF(NIntC_Extra)='BEND ' 
+               IF(INDEX(LineLowCase,'.')==0) THEN
+READ(LineLowCase,*) CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:3)
+               ELSE
+READ(LineLowCase,*) CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:3),&
+IntC_Extra%Value(NIntC_Extra)
+                 IntC_Extra%Constraint(NIntC_Extra)=.TRUE.
+               ENDIF
+!--------------------
+        ELSE IF(INDEX(LineLowCase,'tors')/=0) THEN 
+!--------------------
+               NIntC_Extra=NIntC_Extra+1 
+               IntC_Extra%DEF(NIntC_Extra)='TORS ' 
+               IF(INDEX(LineLowCase,'.')==0) THEN
+READ(LineLowCase,*) CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:4)
+               ELSE
+READ(LineLowCase,*) CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:4),&
+IntC_Extra%Value(NIntC_Extra)
+                 IntC_Extra%Constraint(NIntC_Extra)=.TRUE.
+               ENDIF
+!--------------------
+        ELSE IF(INDEX(LineLowCase,'outp')/=0) THEN 
+!--------------------
+               NIntC_Extra=NIntC_Extra+1 
+               IntC_Extra%DEF(NIntC_Extra)='OUTP ' 
+               IF(INDEX(LineLowCase,'.')==0) THEN
+READ(LineLowCase,*) CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:4)
+               ELSE
+READ(LineLowCase,*) CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:4),&
+IntC_Extra%Value(NIntC_Extra)
+                 IntC_Extra%Constraint(NIntC_Extra)=.TRUE.
+               ENDIF
+!--------------------
+        ELSE IF(INDEX(LineLowCase,'linb1')/=0) THEN 
+!--------------------
+               NIntC_Extra=NIntC_Extra+1 
+               IntC_Extra%DEF(NIntC_Extra)='LINB1' 
+               IF(INDEX(LineLowCase,'.')==0) THEN
+READ(LineLowCase,*) CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:3)
+               ELSE
+READ(LineLowCase,*) CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:3),&
+IntC_Extra%Value(NIntC_Extra)
+                 IntC_Extra%Constraint(NIntC_Extra)=.TRUE.
+               ENDIF
+!--------------------
+        ELSE IF(INDEX(LineLowCase,'linb2')/=0) THEN 
+!--------------------
+               NIntC_Extra=NIntC_Extra+1 
+               IntC_Extra%DEF(NIntC_Extra)='LINB2'
+               IF(INDEX(LineLowCase,'.')==0) THEN
+READ(LineLowCase,*) CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:3)
+               ELSE
+READ(LineLowCase,*) CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:3),&
+IntC_Extra%Value(NIntC_Extra)
+                 IntC_Extra%Constraint(NIntC_Extra)=.TRUE.
+               ENDIF
+!--------------------
+        ELSE IF(INDEX(LineLowCase,'cart')/=0) THEN
+!--------------------
+               NIntC_Extra=NIntC_Extra+1 
+               IntC_Extra%DEF(NIntC_Extra)='CART ' 
+READ(LineLowCase,*) CHAR,Atomname
+               DO J=1,104
+                  IF(TRIM(Atomname)==Ats(J))THEN
+                     IntC_Extra%ATOMS(NIntC_Extra,1)=J
+                     EXIT
+                  ENDIF
+               ENDDO
+!
+               IF(INDEX(LineLowCase,'.')==0) THEN
+READ(LineLowCase,*) CHAR,IntC_Extra%ATOMS(NIntC_Extra,1)
+               ELSE
+READ(LineLowCase,*) CHAR,IntC_Extra%ATOMS(NIntC_Extra,1)
+                 IntC_Extra%Constraint(NIntC_Extra)=.TRUE.
+               ENDIF
+!--------------------
+        ELSE 
+! dont do anything with non-conform lines
+        ENDIF
+!          
+        IF(INDEX(LineLowCase,'end_add_internals')/=0) GO TO 12
+      ENDDO
+  11  CALL MondoHalt(PRSE_ERROR,' Found no <end_add_internals> in inPut file '//TRIM(InpFile))
+  12  CONTINUE
+!
+! save IntC_Extra into HDF
+!
+        CALL Put(NIntC_Extra,'NIntC_Extra')
+        CALL Put(IntC_Extra,'IntC_Extra')
+!
+      Do i=1,NIntC_Extra
+        write(*,200) IntC_Extra%Def(i),IntC_Extra%Atoms(i,1:4),IntC_Extra%Value(i),IntC_Extra%Constraint(i)
+      EndDo
+200   format(A5,2X,4I4,F12.6,L6)
+!
+      CALL Delete(IntC_Extra)
+      CALL CloseHDF()
+      Close(Inp)
+      Close(Out)
+!
+      END SUBROUTINE ParseIntCoo
+#endif
 !
 END MODULE
