@@ -24,8 +24,9 @@ MODULE BlokTrPdJ
 !=======================================================================================
 !
 !=======================================================================================
-     FUNCTION TrPdJ(Pair,P) RESULT(Vck)
+     FUNCTION TrPdJ(Pair,P,GMLoc) RESULT(Vck)
        TYPE(AtomPair)                           :: Pair
+       TYPE(CRDS)                               :: GMLoc
 !
        REAL(DOUBLE),DIMENSION(Pair%NA,Pair%NB)  :: P
        REAL(DOUBLE),DIMENSION(Pair%NA,Pair%NB,3):: dJ
@@ -168,7 +169,7 @@ MODULE BlokTrPdJ
 #ifdef PERIODIC
 !                  Calculate the FarField Multipole Contribution to the Matrix Element 
 !                  Contract the Primative MM  with the density MM
-                   IF(GM%PBC%Dimen > 0) THEN
+                   IF(GMLoc%PBC%Dimen > 0) THEN
                       IA=IndexA
                       DO LMNA=StartLA,StopLA
                          IA=IA+1                    
@@ -176,7 +177,7 @@ MODULE BlokTrPdJ
                          DO LMNB=StartLB,StopLB  
                             IB=IB+1                      
                             DO K=1,3
-                               dJ(IA,IB,K)=dJ(IA,IB,K) + CTraxFF_Grad(Prim,dHGBra%D(:,IA,IB,K)) 
+                               dJ(IA,IB,K)=dJ(IA,IB,K) + CTraxFF_Grad(Prim,dHGBra%D(:,IA,IB,K),GMLoc) 
                             ENDDO
                          ENDDO
                       ENDDO
@@ -214,7 +215,7 @@ MODULE BlokTrPdJ
 #endif
 !---------------------------------------------------------------------------------------------
 !      Initialize |dBRA>
-       NukeCo=-ABS(GMLoc%AtNum%D(At))*(NuclearExpnt/Pi)**(ThreeHalves)
+       NukeCo=-GMLoc%AtNum%D(At)*(NuclearExpnt/Pi)**(ThreeHalves)
        DO K=1,3
           dHGBra%D(1:4,1,1,K)=Zero
        ENDDO
@@ -259,7 +260,7 @@ MODULE BlokTrPdJ
 !      Add in the Far Field, Dipole and Quadripole Correction
        IF(GMLoc%PBC%Dimen>0) THEN
           DO K=1,3
-             Vct(K)=Vct(K)+CTraxFF_Grad(Prim,dHGBra%D(:,1,1,K))
+             Vct(K)=Vct(K)+CTraxFF_Grad(Prim,dHGBra%D(:,1,1,K),GMLoc)
           ENDDO
        ENDIF
 #else
