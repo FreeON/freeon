@@ -58,7 +58,8 @@ MODULE KxcGen
                         Pair%AB2  = (Pair%A(1)-Pair%B(1))**2 &
                                   + (Pair%A(2)-Pair%B(2))**2 &
                                   + (Pair%A(3)-Pair%B(3))**2
-                        IF(TestAtomPair(Pair)) THEN
+                        IF(TestAtomPair(Pair,CubeRoot%Box)) THEN
+!                        IF(TestAtomPair(Pair)) THEN
                            Kxc%MTrix%D(R:R+NAB-1)=Kxc%MTrix%D(R:R+NAB-1)+KxcBlock(Pair,CubeRoot)
                         ENDIF
                      ENDDO
