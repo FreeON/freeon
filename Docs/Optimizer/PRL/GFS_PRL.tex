@@ -297,8 +297,8 @@ exhibiting reasonably small vibrational coupling.
 \subsection{Recognition of Internal Coordinates} \label{recognition}
 
 The present implementation of QUICCA employs a redundant set of primitive internal 
-coordinates. Similar coordinate systems are used by a majority of other internal coordinate optimizers 
-\cite{GFogarasi79,GFogarasi92,JBaker93,FEckert97,HSchlegel98}.  
+coordinates. Similar coordinate systems are used by a majority of optimizers based on internal coordinates 
+\cite{GFogarasi79,GFogarasi92,FEckert97,JBaker93,HSchlegel98}.  
 The generation of these coordinates starts with the recognition of covalent bonds, 
 based on atomic Slater radii \cite{JSlater64}  multiplied by an empirical factor of 1.3. 
 Weak bonds are recognized on the basis of atomic van der Waals (VDW) radii \cite{webelements}.
@@ -357,7 +357,8 @@ optimization.  This data is now used to fit curves for each of the $N_{\rm int}$
 The choice of weight is a key factor in the behavior of the QUICCA algorithm, as it is used to prioritize 
 reliable portions of the data and to generally smooth noisy trends.  
 Originally, we considered the standard expression $w_{k}^{(i)}=(1/{g_{k}^{(i)}})^2$ for the weight 
-of the $k$-th internal coordinate at the $i$-th geometry, which is generally recommended for use in curve 
+of the $k$-th internal coordinate ($k=1,N_{int}$) at the $i$-th geometry
+($i=1,n_{fit}$), which is generally recommended for use in curve 
 fitting \cite{WPress92}.  These weights however do not 
 account for the fact that the gradient of the $k$-th internal coordinate may be small, while 
 its immediate  environment may contain large gradients indicating the possibility of large changes in the $k$-th 
@@ -750,7 +751,7 @@ of the Cartesian gradient at each step.
 In Fig.~\ref{loglogplot}, a plot of ${\rm log}_{10}{\Delta E_{i+1}}$ vs ${\rm log }_{10} {\Delta E_{i}}$ 
 is shown, demonstrating only first order convergence with a rate $f \sim 0.05$.   To examine the rate of convergence
 in greater detail, we fit the the model function $E_{i}=E_{\rm opt}+A*e^{-i * f_i}$, using  
-an 11th order polynomial to represent $f_i$.  The fitted rate of convergence shown in Fig.~\ref{convfact}
+an 10th order polynomial to represent $f_i$.  The fitted rate of convergence shown in Fig.~\ref{convfact}
 suggests that the optimization has three different phases, in accordance with Fig.~\ref{logn-logde}.
 In the first phase (steps 1-10) there is a rapid refinement of the least-optimal substructures. In the 
 second phase (steps 10-60) the absolute energy decreases less rapidly to $\sim 1$ mhartree, with the  
