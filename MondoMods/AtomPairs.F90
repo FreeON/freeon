@@ -224,22 +224,18 @@ CONTAINS
 !
 !===================================================================================
   SUBROUTINE  WrapAtoms(G)
-    TYPE(CRDS)                         :: G
-    REAL(DOUBLE),DIMENSION(3,G%NAtms) :: BoxCarts
+    TYPE(CRDS)     :: G
     INTEGER        :: I
 !   Check for no wrapping at all
     IF(G%PBC%Dimen==0) RETURN
-!   Wrap fractional coordinates
-    IF(G%PBC%AtomW) THEN
-!      Wrap Atom coordinates
-       DO I=1,G%NAtms
-          CALL AtomCyclic(G,BoxCarts(:,I))
-       ENDDO
-!      Wrap Fractional coordinates
-       DO I=1,G%NAtms
-          CALL FracCyclic(G,BoxCarts(:,I))
-       ENDDO
-    ENDIF
+!   Wrap Fractional coordinates
+    DO I=1,G%NAtms
+       CALL FracCyclic(G,G%BoxCarts%D(:,I))
+    ENDDO
+!   Wrap Atomic  coordinates 
+    DO I=1,G%NAtms
+       CALL AtomCyclic(G,G%Carts%D(:,I))
+    ENDDO
 !
   END SUBROUTINE WrapAtoms
 !===================================================================================
