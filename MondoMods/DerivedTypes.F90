@@ -235,13 +235,16 @@ MODULE DerivedTypes
       TYPE(DBL_RNK2)       :: BoxShape  !-- Box Shape Vectors
       TYPE(DBL_RNK2)       :: InvBoxSh  !-- Inverse of the Box Shape Vectors
       TYPE(DBL_RNK2)       :: BoxCarts  !-- Lattice coordinates 
+      TYPE(DBL_RNK2)       :: BoxVects  !-- Velocity Lattice coordinates 
 #endif 
 !     Atomic coordinates
       INTEGER          :: NAtms     !-- Number of atoms
       INTEGER          :: Nkind     !-- Number of atom kinds or types
       TYPE(INT_VECT)   :: AtNum     !-- Atomic number per atom      
       TYPE(INT_VECT)   :: AtTyp     !-- Atom type or kind per atom 
+      TYPE(DBL_VECT)   :: AtMss     !-- Atomic Mass per Atom
       TYPE(DBL_RNK2)   :: Carts     !-- Cartesian coordinates 
+      TYPE(DBL_RNK2)   :: Vects     !-- Velocity Cartesian coordinates 
    END TYPE 
 !-------------------------------------------------------------------------------------
 !  Density in a Hermite Gaussian basis
