@@ -311,56 +311,57 @@ MODULE PrettyPrint
          CALL Delete(CA)
       END SUBROUTINE Print_DBL_VECT
 !----------------------------------------------------------------PRINT BASIS SET 
-      SUBROUTINE Print_BSET(BS)
-         TYPE(BSET) :: BS
-         INTEGER :: NC,NP,MinL,MaxL
-         INTEGER :: I,J,K,L,M
-         IF(PrintFlags%Set/=DEBUG_BASISSET)RETURN
-         CALL OpenASCII(OutFile,Out)
-         CALL PrintProtectL(Out)
-         WRITE(Out,*)'Internal representation of the ', &
-                     TRIM(BS%BName),' basis set: '//Rtrn
-         DO I=1,BS%NKind
-            NC=BS%NCFnc%I(I)
-            WRITE(Out,1002)Ats(BS%Kinds%I(I)),NC
-            DO J=1,NC
-               NP=BS%NPFnc%I(J,I)
-               MinL=LBegin(BS%ASymm%I(1,J,I))
-               MaxL=LEnd(BS%ASymm%I(2,J,I))
-               IF(NP==1)THEN
-                 WRITE(Out,1103)J,NP
+      SUBROUTINE Print_BSET(BS,Unit_O)
+        TYPE(BSET) :: BS
+        INTEGER,         OPTIONAL,INTENT(IN) :: Unit_O
+        INTEGER :: NC,NP,MinL,MaxL
+        INTEGER :: I,J,K,L,M,PU
+        IF(PrintFlags%Set/=DEBUG_BASISSET)RETURN
+        PU=OpenPU(Unit_O=Unit_O)
+        CALL PrintProtectL(PU)
+        WRITE(PU,*)'Internal representation of the ', &
+             TRIM(BS%BName),' basis set: '//Rtrn
+        DO I=1,BS%NKind
+           NC=BS%NCFnc%I(I)
+           WRITE(PU,1002)Ats(BS%Kinds%I(I)),NC
+           DO J=1,NC
+              NP=BS%NPFnc%I(J,I)
+              MinL=LBegin(BS%ASymm%I(1,J,I))
+              MaxL=LEnd(BS%ASymm%I(2,J,I))
+              IF(NP==1)THEN
+                 WRITE(PU,1103)J,NP
                  IF(MaxL==1)THEN
-                    WRITE(Out,1104)
+                    WRITE(PU,1104)
                  ELSE
-                    WRITE(Out,1004)
+                    WRITE(PU,1004)
                  ENDIF
-               ELSE
-                 WRITE(Out,1003)J,NP
-                 WRITE(Out,1004)
-               ENDIF
-               WRITE(Out,1005)(ASymmTyps(L),L=MinL,MaxL)
-               DO K=1,NP
-                  WRITE(Out,1006)K,BS%Expnt%D(K,J,I), &             
-                                (BS%CCoef%D(M,K,J,I),M=MinL,MaxL)
+              ELSE
+                 WRITE(PU,1003)J,NP
+                 WRITE(PU,1004)
+              ENDIF
+              WRITE(PU,1005)(ASymmTyps(L),L=MinL,MaxL)
+              DO K=1,NP
+                 WRITE(PU,1006)K,BS%Expnt%D(K,J,I), &             
+                      (BS%CCoef%D(M,K,J,I),M=MinL,MaxL)
               ENDDO
-              WRITE(Out,*)Rtrn
-            ENDDO
+              WRITE(PU,*)Rtrn
+           ENDDO
         ENDDO
-        CALL PrintProtectR(Out)
-        CLOSE(Out)
-   1001 FORMAT(72('='))
-   1002 FORMAT(1x,A2,' has ',I2,' associated contractions,')
-   1003 FORMAT(1x,'Contraction ',I2,' involves', &
-               I2,' primitives : ')
-   1004 FORMAT(1x,'Primitive  Exponent',7x,'Normalized Coeficients')
-   1103 FORMAT(1x,'Contraction ',I2,' involves', &
-               I2,' primitive : ')
-   1104 FORMAT(1x,'Primitive  Exponent',7x,'Normalized Coeficient')
+        CALL PrintProtectR(PU)
+        CALL ClosePU(PU)
+1001    FORMAT(72('='))
+1002    FORMAT(1x,A2,' has ',I2,' associated contractions,')
+1003    FORMAT(1x,'Contraction ',I2,' involves', &
+             I2,' primitives : ')
+1004    FORMAT(1x,'Primitive  Exponent',7x,'Normalized Coeficients')
+1103    FORMAT(1x,'Contraction ',I2,' involves', &
+             I2,' primitive : ')
+1104    FORMAT(1x,'Primitive  Exponent',7x,'Normalized Coeficient')
 
-   1005 FORMAT(18x,20(12x,A3))
-   1006 FORMAT(1x,I2,6x,8(1x,D14.8))
-   1007 FORMAT(60('='))
-     END SUBROUTINE Print_BSET 
+1005    FORMAT(18x,20(12x,A3))
+1006    FORMAT(1x,I2,6x,8(1x,D14.8))
+1007    FORMAT(60('='))
+      END SUBROUTINE Print_BSET
 #ifdef PERIODIC
 !----------------------------------------------------------------PRINT PBC
 !
@@ -508,7 +509,7 @@ MODULE PrettyPrint
 !
                  AA=One/AngstromsToAU
                  DO I=1,GM%NAtms
-                     Mssg=Ats(GM%AtNum%I(I))                         &
+                     Mssg=Ats(GM%AtNum%D(I))                         &
                        //'   '//FltToChar(GM%Carts%D(1,I)*AA)    &
                        //'   '//FltToChar(GM%Carts%D(2,I)*AA)    &
                        //'   '//FltToChar(GM%Carts%D(3,I)*AA) 
@@ -528,7 +529,7 @@ MODULE PrettyPrint
                  ENDIF
 #endif                 
                  DO I=1,GM%NAtms
-                    WRITE(PU,44)I,Ats(GM%AtNum%I(I)),'UNK',1,(GM%Carts%D(K,I)*AA,K=1,3),One,Zero
+                    WRITE(PU,44)I,Ats(GM%AtNum%D(I)),'UNK',1,(GM%Carts%D(K,I)*AA,K=1,3),One,Zero
                  44 FORMAT('ATOM  ',I5,1X,A4,A4,2X,I4,4X,3F8.3,2F6.2)
                  ENDDO
                  WRITE(PU,55)
@@ -573,7 +574,7 @@ MODULE PrettyPrint
               CALL Print_PBCInfo(GM%PBC,FileName_O,Unit_O)
               PU=OpenPU(FileName_O=FileName_O,Unit_O=Unit_O)
               DO I=1,GM%NAtms
-                  Mssg=TRIM(IntToChar(I))//'   '//Ats(GM%AtNum%I(I)) &
+                  Mssg=TRIM(IntToChar(I))//'   '//Ats(GM%AtNum%D(I)) &
                     //'   '//DblToMedmChar(GM%Carts%D(1,I))          &
                     //'   '//DblToMedmChar(GM%Carts%D(2,I))          &
                     //'   '//DblToMedmChar(GM%Carts%D(3,I))           
@@ -584,7 +585,7 @@ MODULE PrettyPrint
               ENDDO
 #else
               DO I=1,GM%NAtms
-                  Mssg=TRIM(IntToChar(I))//'   '//Ats(GM%AtNum%I(I)) &
+                  Mssg=TRIM(IntToChar(I))//'   '//Ats(GM%AtNum%D(I)) &
                     //'   '//DblToMedmChar(GM%Carts%D(1,I))          &
                     //'   '//DblToMedmChar(GM%Carts%D(2,I))          &
                     //'   '//DblToMedmChar(GM%Carts%D(3,I))          
@@ -1209,7 +1210,7 @@ MODULE PrettyPrint
        WRITE(PU,33) 
        DO AtA = 1,NAtoms
           A1 = 3*(AtA-1)+1
-          WRITE(PU,35) AtA,GM%AtNum%I(AtA),Frc%D(A1:A1+2)
+          WRITE(PU,35) AtA,GM%AtNum%D(AtA),Frc%D(A1:A1+2)
        ENDDO
        WRITE(PU,33) 
        CALL ClosePU(PU)
@@ -1221,7 +1222,7 @@ MODULE PrettyPrint
        WRITE(PU,42) 
        DO AtA = 1,NAtoms
           A1 = 3*(AtA-1)+1
-          WRITE(PU,41) AtA,GM%AtNum%I(AtA),GM%Carts%D(1:3,AtA),Frc%D(A1:A1+2)
+          WRITE(PU,41) AtA,GM%AtNum%D(AtA),GM%Carts%D(1:3,AtA),Frc%D(A1:A1+2)
        ENDDO
        WRITE(PU,42) 
        CALL ClosePU(PU)
