@@ -28,9 +28,9 @@ MODULE PBCFarField
 !   Setup the PBCFarField Matrix. 
 !====================================================================================
     SUBROUTINE PBCFarFieldSetUp(FFL,Q)
-      INTEGER                         :: FFL,I,J,K,IMin,KMin,JMin,NC,LM
+      INTEGER                         :: FFL,I,J,K,NC,LM
       REAL(DOUBLE),DIMENSION(3)       :: PQ
-      REAL(DOUBLE)                    :: E_PFF,E_DP,E_QP,MACDist,PACDist,AA,BB,CC,RR,d1,d2,d3,RMIN
+      REAL(DOUBLE)                    :: E_PFF,E_DP,E_QP,MACDist,PACDist,RMIN,Volume
       REAL(DOUBLE), DIMENSION(0:FFLen):: FarFC,FarFS
       TYPE(PoleNode)                  :: Q
 !
@@ -52,7 +52,7 @@ MODULE PBCFarField
       ELSEIF(Dimen==3) THEN
          DFac = -(Four*Pi)/(Three*Volume)
          QFac = (Two*Pi)/(Three*Volume)
-      ENDIF
+      ENDIF   
 !
 !     Calculate the Center of the Cell
 !
@@ -77,17 +77,16 @@ MODULE PBCFarField
 !  
       CALL RhoToQ2(Quadripole,Dipole(1),Dipole(2),Dipole(3))
 !
-!     Calculate the Size of the Box Needed  for the Direct J
+!     Calculate the Size of the Box Needed  for the Direct J and Generate the Cells for the Inner Box
 !
-      CALL BoxBounds(IMin,JMin,KMin,MACDist,PACDist,Q)
-!
-!     Generate the Cells for the Inner Box
-!  
-      CALL New_CellSet_Cube(CSMM1,GM%BoxShape%D,(/IMin,JMin,KMin/))
+      CALL BoxBounds(Q,MACDist,PACDist,RMIN)
 !
 !     Calculate the PBC FarField Tensor
 !
-      CALL PFFTensor(IMin,JMin,KMin) 
+      CALL PFFTensor(RMIN,Volume) 
+!
+!      TensorC = Zero
+!      TensorS = Zero
 !
 !     Calculate PFF  energy
 !
@@ -115,9 +114,7 @@ MODULE PBCFarField
       WRITE(Out,*) 'CellCenterZ = ',CellCenter(3)
       WRITE(Out,*) 'Pac Dist    = ',PACDist
       WRITE(Out,*) 'Mac Dist    = ',MACDist
-      WRITE(Out,*) 'IMin        = ',IMin
-      WRITE(Out,*) 'JMin        = ',JMin
-      WRITE(Out,*) 'KMin        = ',KMin
+      WRITE(Out,*) 'Num Cells   = ',CSMM1%NCells
       WRITE(Out,*) 'D(1)        = ',Dipole(1)
       WRITE(Out,*) 'D(2)        = ',Dipole(2)
       WRITE(Out,*) 'D(3)        = ',Dipole(3)
@@ -135,9 +132,7 @@ MODULE PBCFarField
       WRITE(*,*) 'CellCenterZ = ',CellCenter(3)
       WRITE(*,*) 'Pac Dist    = ',PACDist
       WRITE(*,*) 'Mac Dist    = ',MACDist
-      WRITE(*,*) 'IMin        = ',IMin
-      WRITE(*,*) 'JMin        = ',JMin
-      WRITE(*,*) 'KMin        = ',KMin
+      WRITE(*,*) 'Num Cells   = ',CSMM1%NCells
       WRITE(*,*) 'D(1)        = ',Dipole(1)
       WRITE(*,*) 'D(2)        = ',Dipole(2)
       WRITE(*,*) 'D(3)        = ',Dipole(3)
@@ -317,20 +312,31 @@ MODULE PBCFarField
 !========================================================================================
 ! Calculate the Box Bounds Needed for the Direct Sum
 !========================================================================================
-  SUBROUTINE BoxBounds(I,J,K,MACDist,PACDist,Q) 
-    INTEGER                          :: I,J,K
+  SUBROUTINE BoxBounds(Q,MACDist,PACDist,Radius) 
+    INTEGER                          :: I,J,K,LP
     TYPE(PoleNode)                   :: Q
     REAL(DOUBLE)                     :: Px,Py,Pz,O_LP,O_FFEll,NFac,Dist,MACDist,PACDist
-    INTEGER                          :: I_PAC,J_PAC,K_PAC,I_MAC,J_MAC,K_MAC,LP
+    REAL(DOUBLE)                     :: Radd,Radius,A0,B0,C0
+!
+!   Largest distance from box center to corner
+!
+    A0 = Zero
+    B0 = Zero
+    C0 = Zero
+    DO I=1,3
+       A0 = A0 + 0.25D0*(GM%BoxShape%D(I,1)+GM%BoxShape%D(I,2)+GM%BoxShape%D(I,3))**2
+       B0 = B0 + 0.25D0*(GM%BoxShape%D(I,1)+GM%BoxShape%D(I,2)-GM%BoxShape%D(I,3))**2
+       C0 = C0 + 0.25D0*(GM%BoxShape%D(I,1)-GM%BoxShape%D(I,2)-GM%BoxShape%D(I,3))**2
+    ENDDO
+    Radd = MAX(SQRT(A0),SQRT(B0))
+    Radd = MAX(Radd,SQRT(C0))
 !
 !   PAC Distance (From PoleRoot)
 !
-    Px=Half*(Q%Box%BndBox(1,2)-Q%Box%BndBox(1,1)-GM%BoxShape%D(1,1))
-    Py=Half*(Q%Box%BndBox(2,2)-Q%Box%BndBox(2,1)-GM%BoxShape%D(2,2))   
-    Pz=Half*(Q%Box%BndBox(3,2)-Q%Box%BndBox(3,1)-GM%BoxShape%D(3,3))
-    I_PAC  = Px/GM%BoxShape%D(1,1)+1
-    J_PAC  = Py/GM%BoxShape%D(2,2)+1
-    K_PAC  = Pz/GM%BoxShape%D(3,3)+1
+    Px=Half*(Q%Box%BndBox(1,2)-Q%Box%BndBox(1,1))
+    Py=Half*(Q%Box%BndBox(2,2)-Q%Box%BndBox(2,1))   
+    Pz=Half*(Q%Box%BndBox(3,2)-Q%Box%BndBox(3,1))
+    PACDist = SQRT(Px*Px+Py*Py+Pz*Pz)
 !
 !   MAC DISTANCE
 !
@@ -342,22 +348,31 @@ MODULE PBCFarField
        Dist     = (O_LP*NFac*O_FFEll)**(One/DBLE(FFEll+LP+2))
        MACDist = MAX(MACDist,Dist)
     ENDDO
-    I_MAC  = MACDist/GM%BoxShape%D(1,1)+1
-    J_MAC  = MACDist/SQRT(GM%BoxShape%D(1,2)**2+GM%BoxShape%D(2,2)**2)+1
-    K_MAC  = MACDist/SQRT(GM%BoxShape%D(1,3)**2+GM%BoxShape%D(2,3)**2+GM%BoxShape%D(3,3)**2)+1
+    MACDist = MACDist+Radd
 !
-!   Threshold
+!   Generate the Cells for the Inner Box
+!  
+    Radius = MAX(PACDist,MACDist)
+    CALL New_CellSet_Sphere(CSMM1,GM%AutoW,GM%BoxShape%D,Radius)
+    DO 
+       IF(CSMM1%NCells .LT. 1000) THEN
+          EXIT
+       ELSE
+          Radius = 0.99*Radius
+          CALL Delete_CellSet(CSMM1)
+          CALL New_CellSet_Sphere(CSMM1,GM%AutoW,GM%BoxShape%D,Radius)
+       ENDIF
+    ENDDO
 !
-    I = MIN(4,MAX(I_PAC,I_MAC))
-    J = MIN(4,MAX(J_PAC,J_MAC))
-    K = MIN(4,MAX(K_PAC,K_MAC))
-!
-!   Impose BCs
-!
-    IF(.NOT. GM%AutoW(1)) I = 0
-    IF(.NOT. GM%AutoW(2)) J = 0
-    IF(.NOT. GM%AutoW(3)) K = 0
-    PACDist = MAX(Px,MAX(Py,Pz))
+    DO 
+       IF(CSMM1%NCells .GT. 26) THEN
+          EXIT
+       ELSE
+          Radius = 1.01*Radius
+          CALL Delete_CellSet(CSMM1)
+          CALL New_CellSet_Sphere(CSMM1,GM%AutoW,GM%BoxShape%D,Radius)
+       ENDIF
+    ENDDO
 !
   END SUBROUTINE BoxBounds
 !========================================================================================
