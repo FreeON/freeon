@@ -113,9 +113,9 @@ MODULE LinAlg
    END INTERFACE
 
    INTERFACE SetToI
-      MODULE PROCEDURE SetToI_BCSR &
+      MODULE PROCEDURE SetToI_BCSR
 #ifdef PARALLEL
-                      ,SetToI_DBCSR
+      MODULE PROCEDURE SetToI_DBCSR
 #endif
    END INTERFACE
 !------------------------------------------------------------------------
