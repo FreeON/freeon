@@ -1,27 +1,25 @@
 C------------------------------------------------------------------------------
-C--  This code is part of the MondoSCF suite of programs for linear scaling 
+C    This code is part of the MondoSCF suite of programs for linear scaling 
 C    electronic structure theory and ab initio molecular dynamics.
 C
-C--  Copyright (c) 2001, the Regents of the University of California.  
-C    This SOFTWARE has been authored by an employee or employees of the 
-C    University of California, operator of the Los Alamos National Laboratory 
-C    under Contract No. W-7405-ENG-36 with the U.S. Department of Energy.  
-C    The U.S. Government has rights to use, reproduce, and distribute this 
-C    SOFTWARE.  The public may copy, distribute, prepare derivative works 
-C    and publicly display this SOFTWARE without charge, provided that this 
-C    Notice and any statement of authorship are reproduced on all copies.  
-C    Neither the Government nor the University makes any warranty, express 
-C    or implied, or assumes any liability or responsibility for the use of 
-C    this SOFTWARE.  If SOFTWARE is modified to produce derivative works, 
-C    such modified SOFTWARE should be clearly marked, so as not to confuse 
-C    it with the version available from LANL.  The return of derivative works
-C    to the primary author for integration and general release is encouraged. 
-C    The first publication realized with the use of MondoSCF shall be
-C    considered a joint work.  Publication of the results will appear
-C    under the joint authorship of the researchers nominated by their
-C    respective institutions. In future publications of work performed
-C    with MondoSCF, the use of the software shall be properly acknowledged,
-C    e.g. in the form <<These calculations have been performed using MondoSCF, 
-C    a suite of programs for linear scaling electronic structure theory and
-C    ab initio molecular dynamics>>, and given appropriate citation.  
+C    Copyright (2004). The Regents of the University of California. This 
+C    material was produced under U.S. Government contract W-7405-ENG-36 
+C    for Los Alamos National Laboratory, which is operated by the University 
+C    of California for the U.S. Department of Energy. The U.S. Government has 
+C    rights to use, reproduce, and distribute this software.  NEITHER THE 
+C    GOVERNMENT NOR THE UNIVERSITY MAKES ANY WARRANTY, EXPRESS OR IMPLIED, 
+C    OR ASSUMES ANY LIABILITY FOR THE USE OF THIS SOFTWARE.  
+C
+C    This program is free software; you can redistribute it and/or modify 
+C    it under the terms of the GNU General Public License as published by the 
+C    Free Software Foundation; either version 2 of the License, or (at your 
+C    option) any later version. Accordingly, this program is distributed in 
+C    the hope that it will be useful, but WITHOUT ANY WARRANTY; without even 
+C    the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+C    PURPOSE. See the GNU General Public License at www.gnu.org for details.
+C
+C    While you may do as you like with this software, the GNU license requires
+C    that you clearly mark derivative software.  In addition, you are encouraged 
+C    to return derivative works to the MondoSCF group for review, and possible 
+C    disemination in future releases.
 C------------------------------------------------------------------------------
