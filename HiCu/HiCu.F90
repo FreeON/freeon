@@ -41,6 +41,7 @@ PROGRAM HaiKu
   USE Macros
   USE LinAlg
   USE Thresholding
+  USE HiCuThresholds
   USE RhoTree
   USE CubeTree
   USE Functionals
@@ -48,8 +49,7 @@ PROGRAM HaiKu
   IMPLICIT NONE
   TYPE(ARGMT)                 :: Args
   TYPE(BCSR)                  :: Kxc,T1
-  TYPE(TIME)                  :: TimeRhoToTree,TimeGridGen, &
-                                 TimeExcWalk,TimeKxcGen
+  TYPE(TIME)                  :: TimeRhoToGrid,TimeGridToMat
   REAL(DOUBLE)                :: Electrons
   CHARACTER(LEN=3)            :: SCFCycle
   CHARACTER(LEN=15),PARAMETER :: Prog='HiCu           '
@@ -69,16 +69,28 @@ PROGRAM HaiKu
 ! Calculate the Number of Cells
   CALL SetCellNumber(GM)
 #endif
-! Convert density to a 5-D BinTree
+! Set local integration thresholds 
+  CALL SetLocalThresholds(Thresholds%Cube)
+! Begin local performance accumulator for grid generation
+  CALL Elapsed_Time(TimeRhoToGrid,'Init')
+! Create the RhoTree (a 4-D BinTree)
   CALL RhoToTree(Args)
-! Generate the grid as a 3-D BinTree 
+! Generate the CubeTree (a 3-D BinTree) 
   CALL GridGen()
-! Delete the density
+  CALL Elapsed_TIME(TimeRhoToGrid,'Accum')
+  CALL PPrint(TimeRhoToGrid,Sub2)
+  CALL PPrint(TimeRhoToGrid,Sub2,Unit_O=6)
+! Delete the RhoTree
   CALL DeleteRhoTree(RhoRoot)
 ! Compute the exchange correlation matirix Kxc
   CALL New(Kxc)
   CALL NewBraBlok(BS)
+! Begin local performance accumulator for matrix generation
+  CALL Elapsed_Time(TimeGridToMat,'Init')
   CALL MakeKxc(Kxc,CubeRoot)
+  CALL Elapsed_TIME(TimeGridToMat,'Accum')
+  CALL PPrint(TimeGridToMat,Sub3)
+  CALL PPrint(TimeGridToMat,Sub3,Unit_O=6)
   CALL DeleteBraBlok()
 ! Put Kxc to disk
   CALL Filter(T1,Kxc)

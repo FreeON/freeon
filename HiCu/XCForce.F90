@@ -70,9 +70,8 @@ PROGRAM XCForce
   CALL Get(GM,CurGeom)
   CALL Get(ModelChem,'ModelChemistry',CurBase)
   NEl=GM%NElec
-! For some reason need higher accuracy for 
-! gradients.  This seems unessesary, needs fixing...
-  Thresholds%Cube=Thresholds%Cube*1.D-1
+! Set local integration thresholds 
+  CALL SetLocalThresholds(Thresholds%Cube)
 #ifdef PERIODIC
 ! Calculate the Number of Cells
   CALL SetCellNumber(GM)

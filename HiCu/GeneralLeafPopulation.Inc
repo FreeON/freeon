@@ -58,7 +58,7 @@
              ULambdaY(1)=EXP(-Z*UQy*UQy)             
              ULambdaZ(1)=EXP(-Z*UQz*UQz)             
 !            Generic Lambdas
-             DO L=2,Node%Ell ! +1
+             DO L=2,Node%Ell+1
                 L1=L-1
                 L2=L-2
                 RL2=DBLE(L2)
@@ -69,7 +69,7 @@
                 ULambdaY(L)=TwoZ*(UQy*ULambdaY(L1)-RL2*ULambdaY(L2))
                 ULambdaZ(L)=TwoZ*(UQz*ULambdaZ(L1)-RL2*ULambdaZ(L2))
              ENDDO
-             DO L=0,Node%Ell !+1
+             DO L=0,Node%Ell+1
                 LambdaX(L)=LLambdaX(L)-ULambdaX(L)
                 LambdaY(L)=LLambdaY(L)-ULambdaY(L)
                 LambdaZ(L)=LLambdaZ(L)-ULambdaZ(L)
@@ -79,12 +79,11 @@
                    DO N=0,Node%Ell-M-L
                       LMN=LMNDex(L,M,N)
                       Pop=Pop+Node%Co(LMN)*LambdaX(L)*LambdaY(M)*LambdaZ(N)
-!                      dPopX=dPopX+Node%Co(LMN)*LambdaX(L+1)*LambdaY(M)*LambdaZ(N)
-!                      dPopY=dPopY+Node%Co(LMN)*LambdaX(L)*LambdaY(M+1)*LambdaZ(N)
-!                      dPopZ=dPopZ+Node%Co(LMN)*LambdaX(L)*LambdaY(M)*LambdaZ(N+1)
+                      dPopX=dPopX-Node%Co(LMN)*LambdaX(L+1)*LambdaY(M)*LambdaZ(N)
+                      dPopY=dPopY-Node%Co(LMN)*LambdaX(L)*LambdaY(M+1)*LambdaZ(N)
+                      dPopZ=dPopZ-Node%Co(LMN)*LambdaX(L)*LambdaY(M)*LambdaZ(N+1)
                    ENDDO
                 ENDDO
-             ENDDO
-!
+             ENDDO 
 !===============================================================================
 !

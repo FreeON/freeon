@@ -4,17 +4,22 @@ MODULE CubeGrid
    IMPLICIT NONE
 !----------------------------------------------------------------------------------
 !  Cubature rules
-#ifdef RULE3
-   INCLUDE 'MMA/CubeRules/Rule3.Inc'
-#endif
 #ifdef RULE5
-!  The rule of choice
    INCLUDE 'MMA/CubeRules/Rule5.Inc'
 #endif
 #ifdef RULE7
    INCLUDE 'MMA/CubeRules/Rule7.Inc'
 #endif
-#ifdef RULE9
-   INCLUDE 'MMA/CubeRules/Rule9.Inc'
+#ifdef RULEB
+   INCLUDE 'MMA/CubeRules/RuleB.Inc'
+#endif
+#ifdef RULEC
+   INCLUDE 'MMA/CubeRules/RuleC.Inc'
+#endif
+#ifdef RULED
+   INCLUDE 'MMA/CubeRules/RuleD.Inc'
+#endif
+#ifdef RULEE
+   INCLUDE 'MMA/CubeRules/RuleE.Inc'
 #endif
 END MODULE 

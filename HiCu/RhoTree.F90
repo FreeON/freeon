@@ -1,3 +1,35 @@
+!------------------------------------------------------------------------------
+!--  This code is part of the MondoSCF suite of programs for linear scaling 
+!    electronic structure theory and ab initio molecular dynamics.
+!
+!--  Copyright (c) 2001, the Regents of the University of California.  
+!    This SOFTWARE has been authored by an employee or employees of the 
+!    University of California, operator of the Los Alamos National Laboratory 
+!    under Contract No. W-7405-ENG-36 with the U.S. Department of Energy.  
+!    The U.S. Government has rights to use, reproduce, and distribute this 
+!    SOFTWARE.  The public may copy, distribute, prepare derivative works 
+!    and publicly display this SOFTWARE without charge, provided that this 
+!    Notice and any statement of authorship are reproduced on all copies.  
+!    Neither the Government nor the University makes any warranty, express 
+!    or implied, or assumes any liability or responsibility for the use of 
+!    this SOFTWARE.  If SOFTWARE is modified to produce derivative works, 
+!    such modified SOFTWARE should be clearly marked, so as not to confuse 
+!    it with the version available from LANL.  The return of derivative works
+!    to the primary author for integration and general release is encouraged. 
+!    The first publication realized with the use of MondoSCF shall be
+!    considered a joint work.  Publication of the results will appear
+!    under the joint authorship of the researchers nominated by their
+!    respective institutions. In future publications of work performed
+!    with MondoSCF, the use of the software shall be properly acknowledged,
+!    e.g. in the form "These calculations have been performed using MondoSCF, 
+!    a suite of programs for linear scaling electronic structure theory and
+!    ab initio molecular dynamics", and given appropriate citation.  
+!------------------------------------------------------------------------------
+!    Author: Matt Challacombe
+!    BUILD A HIERARCHICAL REPRESENTATION OF THE ELECTRON DENSITY USING 
+!    THE K-D TREE DATA STRUCTURE TO ENABLE EFFICIENT RANGE QUERRIES IN 
+!    ACCESSING LOCAL PORTIONS OF THE DENSITY 
+!------------------------------------------------------------------------------
 MODULE RhoTree
    USE Derivedtypes
    USE GlobalScalars   
@@ -7,80 +39,75 @@ MODULE RhoTree
    USE InOut
    USE Macros
    USE Thresholding
+   USE HiCuThresholds
    USE BoundingBox
    USE CubeGrid
    IMPLICIT NONE
 !=================================================================================================
-!  Hierarchical density node
+!  Density node
 !=================================================================================================
    TYPE RhoNode
-      Logical                           :: Leaf     ! Is this a data containing node?
-!     Indexes USEd for tree building
-      INTEGER                           :: Bdex     ! Begining index of ORB list for this node
-      INTEGER                           :: Edex     ! ENDign index of ORB list for this node
-      INTEGER                           :: NQ       ! Number of centers
-!     Bounding box 
-      REAL(DOUBLE)                      :: ZetaMin  ! Minimum exponent in this node
-      REAL(DOUBLE)                      :: MaxAmp   ! Max amplitude in this node
-      REAL(DOUBLE)                      :: Extent   ! Penetration extent
-      TYPE(BBox)                        :: Box          
-!     Links
-      TYPE(RhoNode),            POINTER :: Travrse  ! Next node in tree traversal
-      TYPE(RhoNode),            POINTER :: Descend  ! Next node in tree descent
-!     Density 
-      INTEGER          :: Ell                       ! Ell type
-      REAL(DOUBLE)     :: Zeta
-      REAL(DOUBLE)     :: Qx
-      REAL(DOUBLE)     :: Qy
-      REAL(DOUBLE)     :: Qz
-      REAL(DOUBLE),DIMENSION(:),POINTER :: Co       ! Coefficients of the HGTF density
+      Logical                           :: Leaf         ! Is this a data containing node?
+      INTEGER                           :: Bdex         ! Begining index of ORB list for this node
+      INTEGER                           :: Edex         ! ENDign index of ORB list for this node
+      INTEGER                           :: NQ           ! Number of centers
+      REAL(DOUBLE)                      :: Extent       ! Penetration extent
+      TYPE(BBox)                        :: Box          ! Bounding box  
+      INTEGER                           :: Ell          ! Ell type
+      REAL(DOUBLE)                      :: Zeta         ! Exponent
+      REAL(DOUBLE)                      :: Qx,Qy,Qz     ! Position
+#ifdef POINTERS_IN_DERIVED_TYPES
+      REAL(DOUBLE),DIMENSION(:), &
+                            ALLOCATABLE :: Co       ! Coefficients of the HGTF density
+#else
+      REAL(DOUBLE),DIMENSION(:),POINTER :: Co           ! Coefficients of the HGTF density
+#endif
+      TYPE(RhoNode),            POINTER :: Travrse      ! Next node in tree traversal
+      TYPE(RhoNode),            POINTER :: Descend      ! Next node in tree descent
    END TYPE                                      
-!----------------------------------------------------------------------------------
-!  Global parameters
-!
-   INTEGER, Parameter :: DistPerBox=1
-!  Global scalars
-   INTEGER            :: RhoNodes,RhoLevel
-   REAL(DOUBLE)       :: MaxAmp,MiniumExp
-!----------------------------------------------------------------------------------
-!  Global density in array form
-   TYPE(HGRho)                           :: Rho
-   INTEGER,     DIMENSION(:),Allocatable :: Qdex      
-   INTEGER,     DIMENSION(:),Allocatable :: Cdex
-   INTEGER,     DIMENSION(:),Allocatable :: Ldex
-   REAL(DOUBLE),DIMENSION(:),Allocatable :: RList      
-   REAL(DOUBLE),DIMENSION(:),Allocatable :: Zeta
-   REAL(DOUBLE),DIMENSION(:),Allocatable :: Amp
-!----------------------------------------------------------------------------------
-!  Global Rho trees
-   TYPE(RhoNode), POINTER :: RhoRoot  ! Root of the tree 
+!=================================================================================================
+!  Globals 
+!=================================================================================================
+   TYPE(RhoNode), POINTER                :: RhoRoot     ! Root of the tree 
+   INTEGER                               :: RhoNodes    ! Number of nodes in the RhoTree
+   INTEGER                               :: RhoLevel    ! Number of tiers in the RhoTree
+   INTEGER                               :: CurrentTier ! Current tier for level by level addressing
+   TYPE(HGRho)                           :: Rho         ! Density 
+   INTEGER,     DIMENSION(:),Allocatable :: Qdex        ! Distribution pointer  
+   INTEGER,     DIMENSION(:),Allocatable :: Cdex        ! Coefficient pointer
+   INTEGER,     DIMENSION(:),Allocatable :: Ldex        ! Ell index
+   REAL(DOUBLE),DIMENSION(:),Allocatable :: RList       ! Bisection array  
+   REAL(DOUBLE),DIMENSION(:),Allocatable :: Zeta        ! Exponent list
+   REAL(DOUBLE),DIMENSION(:),Allocatable :: Ext         ! Extent array
 !-----------!
-   CONTAINS !<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+   CONTAINS !
 !=================================================================================
-!     
+!     Build the RhoTree from Rho in HGTF array form 
 !=================================================================================
       SUBROUTINE RhoToTree(Args)
          TYPE(ARGMT)               :: Args
          INTEGER                   :: Status,K,I
-!-------------------------------------------------------------------
+!--------------------------------------------------------------------------------
 !        Initialize the density
          CALL InitRho(Args)
-!        Possibly print the density out
-!         CALL Print_HGRho
 !        Initialize counters
          RhoNodes=0
          RhoLevel=0
 !        Initialize the root node
          CALL NewRhoNode(RhoRoot,0)
          CALL InitRhoRoot
-!        Convert the density into a 4-D BinTree
+!        Recursively partition the density into a 4-D BinTree
          CALL SplitRho(RhoRoot)
-!        Delete the density in the array structure 
+!        Recursively construct BBoxs for the RhoTree
+         DO CurrentTier=RhoLevel,0,-1
+            CALL MergeRhoBBox(RhoRoot)
+         ENDDO
+!        Delete the arrayed version of the density
          CALL DeleteRho
       END SUBROUTINE RhoToTree
 !===============================================================================
-!     
-!=======================================================================
+!     Initialize the root of the RhoTree
+!===============================================================================
       SUBROUTINE InitRhoRoot
          TYPE(DBL_RNK2) :: BndBox
          RhoRoot%Bdex=1
@@ -91,25 +118,18 @@ MODULE RhoTree
          CALL Get(BndBox,'boundingbox',CurGeom)
          RhoRoot%Box%BndBox(1:3,1:2)=BndBox%D(1:3,1:2)
          CALL Delete(BndBox)
-!        Set the largest range (smallest exponent) of the roots BB
-         RhoRoot%ZetaMin=Rho%Expt%D(1)
-         MiniumExp=Rho%Expt%D(1)
-!        Set the largest amplituded (max norm of the rho coefficients)
-         RhoRoot%MaxAmp=MaxAmp
 !        Set the center and width of the Cartesian part
          RhoRoot%Box%Half=Half*(RhoRoot%Box%BndBox(1:3,2)-RhoRoot%Box%BndBox(1:3,1))
          RhoRoot%Box%Center=Half*(RhoRoot%Box%BndBox(1:3,2)+RhoRoot%Box%BndBox(1:3,1))
-     END SUBROUTINE InitRhoRoot
+      END SUBROUTINE InitRhoRoot
 !===================================================================
-!
+!     Recursively partition the density into a 4-D BinTree 
 !===================================================================
       RECURSIVE SUBROUTINE SplitRho(Node)
          TYPE(RhoNode), POINTER :: Node,Left,Right
 !--------------------------------------------------------------
-!         CALL PrintBBox(Node%Box,Node%ZetaMin,Node%MaxAmp)
-         IF(Node%NQ<=DistPerBox)THEN
+         IF(Node%NQ==1)THEN 
             CALL FillRhoLeaf(Node)
-!            CALL CheckBounds(Node)
          ELSE 
 !           Allocate new children 
             CALL NewRhoNode(Node%Descend,Node%Box%Tier+1)
@@ -123,9 +143,9 @@ MODULE RhoTree
             CALL SplitRho(Left)
             CALL SplitRho(Right)
          ENDIF
-       END SUBROUTINE SplitRho
+      END SUBROUTINE SplitRho
 !================================================================================
-!     Bisection   
+!     Orthogonal Recusive Bisection   
 !================================================================================
       SUBROUTINE SplitRhoBox(Node,Left,Right)
          TYPE(RhoNode), POINTER :: Node,Left,Right
@@ -137,37 +157,40 @@ MODULE RhoTree
          B=Node%Bdex
          E=Node%Edex
          N=E-B+1
-!        Orthogonal direction
-         ISplit=Mod(Node%Box%Tier,5)+1
+!        Choose direction to section
+         ISplit=Mod(Node%Box%Tier,4)+1
          IF(ISplit==1)THEN
+!           Split X dir
             DO I=B,E
-               J=J+1;K=Qdex(I)
-               RList(J)=Zeta(K)
-            ENDDO
-         ELSEIF(ISplit==2)THEN
-            DO I=B,E
-               J=J+1;K=Qdex(I)
-               RList(J)=Amp(K)
-            ENDDO
-         ELSEIF(ISplit==3)THEN
-            DO I=B,E
-               J=J+1;K=Qdex(I)
+               J=J+1
+               K=Qdex(I)
                RList(J)=Rho%Qx%D(K)
             ENDDO
-         ELSEIF(ISplit==4)THEN
+         ELSEIF(ISplit==2)THEN
+!           Split on Y dir
             DO I=B,E
-               J=J+1;K=Qdex(I)
+               J=J+1
+               K=Qdex(I)
                RList(J)=Rho%Qy%D(K)
             ENDDO
-         ELSEIF(ISplit==5)THEN
+         ELSEIF(ISplit==3)THEN
+!           Split on Z dir
             DO I=B,E
-               J=J+1;K=Qdex(I)
+               J=J+1
+               K=Qdex(I)
                RList(J)=Rho%Qz%D(K)
+            ENDDO
+         ELSEIF(ISplit==4)THEN
+!           Split on box size 
+            DO I=B,E
+               J=J+1
+               K=Qdex(I)
+               RList(J)=Ext(K)
             ENDDO
          ENDIF
 !        Sort
          CALL DblIntSort77(N,RList,Qdex(B:E),2)
-!        Orthogonal RECURSIVE bisection (ORB)
+!        Orthogonal recursive bisection (ORB)
          Section   =RList(1)+Half*(RList(N)-RList(1))
 !         Split     =BinarySearch(N,RList,Section)
          Split     =N/2
@@ -181,40 +204,229 @@ MODULE RhoTree
             Left%Edex =B+Split-2 
             Right%Bdex=B+Split-1 
          ENDIF
-!        Counters
+!        Set counters
          Left%NQ=Left%Edex-Left%Bdex+1
          Right%NQ=Right%Edex-Right%Bdex+1
-!        Find optimal boxes
-         CALL NewRhoBox(Left)
-         CALL NewRhoBox(Right)
       END SUBROUTINE SplitRhoBox
 !================================================================================
-!     New RhoBox
+!     Recursively build up BBoxes for each node in the RhoTree
 !================================================================================
-      SUBROUTINE NewRhoBox(Node)
+      RECURSIVE SUBROUTINE MergeRhoBBox(Node)
+         TYPE(RhoNode)         :: Node
+         TYPE(RhoNode),POINTER :: Left,Right
+         REAL(DOUBLE)          :: Ex
+         INTEGER               :: K
+!--------------------------------------------------------------------------
+         IF(Node%Box%Tier==CurrentTier.AND.Node%Leaf)THEN
+            Node%Box%BndBox(:,1)=(/Node%Qx,Node%Qy,Node%Qz/)
+            Node%Box%BndBox(:,2)=(/Node%Qx,Node%Qy,Node%Qz/)
+            Node%Box=ExpandBox(Node%Box,Node%Extent)
+         ELSEIF(Node%Leaf)THEN
+            RETURN
+         ELSEIF(Node%Box%Tier==CurrentTier)THEN
+            Left=>Node%Descend
+            Right=>Node%Descend%Travrse
+            DO K=1,3
+               Node%Box%BndBox(K,1)=MIN(Left%Box%BndBox(K,1),Right%Box%BndBox(K,1))
+               Node%Box%BndBox(K,2)=MAX(Left%Box%BndBox(K,2),Right%Box%BndBox(K,2))
+            ENDDO
+            Node%Box%Half(:)=Half*(Node%Box%BndBox(:,2)-Node%Box%BndBox(:,1))
+            Node%Box%Center(:)=Half*(Node%Box%BndBox(:,2)+Node%Box%BndBox(:,1))
+         ELSE
+            CALL MergeRhoBBox(Node%Descend)
+            CALL MergeRhoBBox(Node%Descend%Travrse)
+         ENDIF
+      END SUBROUTINE MergeRhoBBox
+!=====================================================================================
+!     Fill leaf nodes with data
+!=====================================================================================
+      SUBROUTINE FillRhoLeaf(Node)
          TYPE(RhoNode), POINTER :: Node
-         INTEGER                :: J,I,IQ
-         REAL(DOUBLE)           :: Test
-         Node%ZetaMin=1.D12
-         Node%MaxAmp=-1.D12
-         DO I=1,3; Node%Box%BndBox(I,1)=1.D12; ENDDO
-         DO I=1,3; Node%Box%BndBox(I,2)=-1.D12; ENDDO
-         DO J=Node%Bdex,Node%Edex 
-            IQ=Qdex(J)
-            Node%ZetaMin=Min(Node%ZetaMin,Zeta(IQ))
-            Node%MaxAmp =Max(Node%MaxAmp ,Amp(IQ))
-            Node%Box%BndBox(1,1)=Min(Node%Box%BndBox(1,1),Rho%Qx%D(IQ))
-            Node%Box%BndBox(1,2)=Max(Node%Box%BndBox(1,2),Rho%Qx%D(IQ))
-            Node%Box%BndBox(2,1)=Min(Node%Box%BndBox(2,1),Rho%Qy%D(IQ))
-            Node%Box%BndBox(2,2)=Max(Node%Box%BndBox(2,2),Rho%Qy%D(IQ))
-            Node%Box%BndBox(3,1)=Min(Node%Box%BndBox(3,1),Rho%Qz%D(IQ))
-            Node%Box%BndBox(3,2)=Max(Node%Box%BndBox(3,2),Rho%Qz%D(IQ))
-         ENDDO
-!        New sides
-         Node%Box%Half(1:3)=Half*(Node%Box%BndBox(:,2)-Node%Box%BndBox(:,1))
-!        New center
-         Node%Box%Center(1:3)=Half*(Node%Box%BndBox(:,2)+Node%Box%BndBox(:,1))
-      END SUBROUTINE NewRhoBox
+         INTEGER                :: I,IQ,IC,J,K,KQ,KC,L,B,E,N,NQ,NC,LMNLen,LTmp,Status        
+         REAL(DOUBLE) :: RhoSum
+         Interface 
+            SUBROUTINE DblIntSort77(N,X,Y,Ordr)
+               USE DerivedTYPEs
+               INTEGER,                  Intent(IN)    :: N,Ordr
+               REAL(DOUBLE),DIMENSION(N),Intent(INOUT) :: X
+               INTEGER,     DIMENSION(N),Intent(INOUT) :: Y
+            END SUBROUTINE
+         END Interface
+!-------------------------------------------------------------------------------------
+!        Set leaf logical
+         Node%Leaf=.True.
+!        Boundaries in the ordered lists
+         B=Node%Bdex
+         E=Node%Edex
+         NQ=E-B+1
+!        Stupid check
+         IF(NQ/=1.OR.B/=E)  &
+            CALL Halt('Bad Logic in FillRhoLeaf ')
+!        Filler up...        
+         KQ=Qdex(B)
+         KC=Cdex(KQ)
+         Node%Ell=Ldex(KQ)
+         Node%Zeta=Zeta(KQ)
+         Node%Extent=Ext(KQ)
+         Node%Qx=Rho%Qx%D(KQ)
+         Node%Qy=Rho%Qy%D(KQ)
+         Node%Qz=Rho%Qz%D(KQ)
+!        Allocate HGTF coefficients array
+         LMNLen=LHGTF(Node%Ell)
+         ALLOCATE(Node%Co(1:LMNLen),STAT=Status)
+         CALL IncMem(Status,0,LMNLen)
+!        Transfer data in
+         Node%Co(1:LMNLen)=Rho%Co%D(KC:KC+LMNLen-1)
+      END SUBROUTINE FillRhoLeaf
+!==========================================================================
+!     Initialize a new RhoNode
+!==========================================================================
+      SUBROUTINE NewRhoNode(Node,Level)
+         TYPE(RhoNode), POINTER   :: Node
+         INTEGER                  :: Level,I,Status        
+         ALLOCATE(Node,STAT=Status)
+         IF(Status/=SUCCEED)  &
+            CALL Halt(' Node ALLOCATE failed in NewRhoNode ')
+         Node%Leaf=.False.
+         Node%Box%Tier=Level
+         RhoLevel=MAX(RhoLevel,Level)
+         Node%Box%Number=RhoNodes
+         RhoNodes=RhoNodes+1
+         NULLIFY(Node%Travrse)
+         NULLIFY(Node%Descend)
+         NULLIFY(Node%Co)
+      END SUBROUTINE NewRhoNode
+!==========================================================================
+!     Recusrively delete RhoTree
+!==========================================================================
+      RECURSIVE SUBROUTINE DeleteRhoTree(Node)
+         TYPE(RhoNode), POINTER   :: Node,Left,Right
+         INTEGER :: Status
+         IF(Node%Leaf)THEN
+            DEALLOCATE(Node%Co,STAT=Status)
+            CALL DecMem(Status,LHGTF(Node%Ell),0)
+            DEALLOCATE(Node,STAT=Status)
+            IF(Status/=SUCCEED) &
+               CALL Halt(' Leaf Node DEALLOCATE failed in DeleteRhoNode ')            
+         ELSEIF(ASSOCIATED(Node%Descend))THEN
+            CALL DeleteRhoTree(Node%Descend%Travrse)
+            IF(ASSOCIATED(Right))THEN
+               DEALLOCATE(Node%Descend%Travrse,STAT=Status)
+               IF(Status/=SUCCEED) &
+                  CALL Halt(' Left Node DEALLOCATE failed in DeleteRhoNode ')            
+               NULLIFY(Node%Descend%Travrse)
+            ENDIF
+            CALL DeleteRhoTree(Node%Descend)
+            IF(ASSOCIATED(Node%Descend))THEN
+               DEALLOCATE(Node%Descend,STAT=Status)
+               IF(Status/=SUCCEED) &
+                  CALL Halt(' Right Node DEALLOCATE failed in DeleteRhoNode ')            
+               NULLIFY(Node%Descend)
+            ENDIF
+         ENDIF
+      END SUBROUTINE DeleteRhoTree
+!========================================================================================
+!     ALLOCATE and read in the density, initalize global lists 
+!========================================================================================
+      SUBROUTINE InitRho(Args)
+         TYPE(ARGMT)  :: Args
+         INTEGER      :: z,oq,or,iq,NQ,Q,Ell,Status,I,IOS,LMNLen,QD,CD
+         REAL(DOUBLE) :: ZE,EX,Dummy
+!----------------------------------------------------------------------------------------
+!        Get the density
+         Open(UNIT=Seq,FILE=TrixFile('Rho',Args,0),STATUS='OLD', &
+              FORM='UNFORMATTED',ACCESS='SEQUENTIAL')
+         Read(UNIT=Seq,Err=202,IOSTAT=IOS)Rho%NExpt,Rho%NDist,Rho%NCoef
+         CALL New(Rho%NQ  ,Rho%NExpt)
+         CALL New(Rho%OffQ,Rho%NExpt)
+         CALL New(Rho%OffR,Rho%NExpt)
+         CALL New(Rho%Lndx,Rho%NExpt)
+         CALL New(Rho%Expt,Rho%NExpt)
+         CALL New(Rho%Qx,  Rho%NDist)
+         CALL New(Rho%Qy,  Rho%NDist)
+         CALL New(Rho%Qz,  Rho%NDist)
+         CALL New(Rho%Co,  Rho%NCoef)
+         Read(UNIT=Seq,Err=202,IOSTAT=IOS)(Rho%NQ%I  (i),i=1,Rho%NExpt)
+         Read(UNIT=Seq,Err=202,IOSTAT=IOS)(Rho%OffQ%I(i),i=1,Rho%NExpt)
+         Read(UNIT=Seq,Err=202,IOSTAT=IOS)(Rho%OffR%I(i),i=1,Rho%NExpt)
+         Read(UNIT=Seq,Err=202,IOSTAT=IOS)(Rho%Lndx%I(i),i=1,Rho%NExpt)
+         Read(UNIT=Seq,Err=202,IOSTAT=IOS)(Rho%Expt%D(i),i=1,Rho%NExpt)
+         Read(UNIT=Seq,Err=202,IOSTAT=IOS)(Rho%Qx%D  (i),i=1,Rho%NDist)
+         Read(UNIT=Seq,Err=202,IOSTAT=IOS)(Rho%Qy%D  (i),i=1,Rho%NDist)
+         Read(UNIT=Seq,Err=202,IOSTAT=IOS)(Rho%Qz%D  (i),i=1,Rho%NDist)
+         Read(UNIT=Seq,Err=202,IOSTAT=IOS)(Rho%Co%D  (i),i=1,Rho%NCoef)
+         Close(UNIT=Seq,STATUS='KEEP')
+!        ALLOCATE global arrays
+         ALLOCATE(Qdex(1:Rho%NDist),STAT=Status)
+         CALL IncMem(Status,Rho%NDist,0)
+         ALLOCATE(Cdex(1:Rho%NDist),STAT=Status)
+         CALL IncMem(Status,Rho%NDist,0)
+         ALLOCATE(Ldex(1:Rho%NDist),STAT=Status)
+         CALL IncMem(Status,Rho%NDist,0)
+         ALLOCATE(RList(1:Rho%NDist),STAT=Status)
+         CALL IncMem(Status,0,Rho%NDist)
+         ALLOCATE(Zeta(1:Rho%NDist),STAT=Status)
+         CALL IncMem(Status,0,Rho%NDist)
+         ALLOCATE(Ext(1:Rho%NDist),STAT=Status)
+         CALL IncMem(Status,0,Rho%NDist)
+!        Fill the global indeces
+         IQ=1
+         DO z=1,Rho%NExpt-1
+            oq =Rho%OffQ%I(z)   
+            or =Rho%OffR%I(z)   
+            Ell=Rho%Lndx%I(z)   
+            ZE =Rho%Expt%D(z)
+            LMNLen=LHGTF(Ell)
+            DO Q=1,Rho%NQ%I(z)
+               QD=oq+Q
+               CD=or+(Q-1)*LMNLen+1
+               EX=Extent(Ell,ZE,Rho%Co%D(CD:CD+LMNLen-1),TauRho)
+!              Threshold out distributions with zero extent 
+               IF(EX>Zero)THEN
+                  Qdex(IQ)=QD
+                  Cdex(QD)=CD
+                  Ext( QD)=EX
+                  Zeta(QD)=ZE
+                  Ldex(QD)=Ell
+                  IQ=IQ+1
+               ENDIF
+            ENDDO
+         ENDDO        
+!        Redefine NDist 
+         Rho%NDist=IQ-1
+!        Normal exit
+         RETURN
+!        Hurl on IO error
+    202  CALL Halt('Died in PutRho, IOSTAT = '//Trim(IntToChar(IOS)))
+      END SUBROUTINE InitRho
+!========================================================================================
+!     Delete globals associated with the array representation of the density
+!========================================================================================
+      SUBROUTINE DeleteRho
+         INTEGER :: Status
+         CALL Delete(Rho%NQ)
+         CALL Delete(Rho%OffQ)
+         CALL Delete(Rho%OffR)
+         CALL Delete(Rho%Lndx)
+         CALL Delete(Rho%Expt)
+         CALL Delete(Rho%Qx)
+         CALL Delete(Rho%Qy)
+         CALL Delete(Rho%Qz)
+         CALL Delete(Rho%Co)
+!        DEALLOCATE global allocatables
+         DEALLOCATE(Qdex,STAT=Status)
+         CALL DecMem(Status,Rho%NDist,0)
+         DEALLOCATE(Cdex,STAT=Status)
+         CALL DecMem(Status,Rho%NDist,0)
+         DEALLOCATE(Ldex,STAT=Status)
+         CALL DecMem(Status,Rho%NDist,0)
+         DEALLOCATE(Zeta,STAT=Status)
+         CALL DecMem(Status,0,Rho%NDist)
+         DEALLOCATE(Ext,STAT=Status)
+         CALL DecMem(Status,0,Rho%NDist)
+         DEALLOCATE(RList,STAT=Status) 
+         CALL DecMem(Status,0,Rho%NDist)
+      END SUBROUTINE DeleteRho
 !================================================================================
 !     Binary search
 !================================================================================
@@ -241,252 +453,4 @@ MODULE RhoTree
            CALL Halt(' Logical error 3 in BinarySearch ')
          ENDIF
       END FUNCTION BinarySearch
-!================================================================================
-!     Compute distance criteria for controling penetration errors
-!================================================================================
-      RECURSIVE SUBROUTINE ExpandBoxWalk(Node,Sign)
-         TYPE(RhoNode), POINTER :: Node
-         REAL(DOUBLE)           :: Extent,Sign
-!--------------------------------------------------------------------------
-         Extent=GaussianExtent(Node%ZetaMin,Node%MaxAmp)        
-         Node%Box=ExpandBox(Node%Box,Sign*Extent)
-         IF(Node%Leaf)RETURN
-         CALL ExpandBoxWalk(Node%Descend,Sign)
-         CALL ExpandBoxWalk(Node%Descend%Travrse,Sign)
-      END SUBROUTINE ExpandBoxWalk
-!=====================================================================================
-!
-!=====================================================================================
-      SUBROUTINE FillRhoLeaf(Node)
-         TYPE(RhoNode), POINTER :: Node
-         INTEGER                :: I,IQ,IC,J,K,KQ,KC,L,B,E,N,NQ,NC,LMNLen,LTmp,Status        
-         REAL(DOUBLE) :: RhoSum
-         Interface 
-            SUBROUTINE DblIntSort77(N,X,Y,Ordr)
-               USE DerivedTYPEs
-               INTEGER,                  Intent(IN)    :: N,Ordr
-               REAL(DOUBLE),DIMENSION(N),Intent(INOUT) :: X
-               INTEGER,     DIMENSION(N),Intent(INOUT) :: Y
-            END SUBROUTINE
-         END Interface
-!-------------------------------------------------------------------------------------
-!        Set leaf logical
-         Node%Leaf=.True.
-!        POINTERs to boundaries in the ordered lists
-         B=Node%Bdex
-         E=Node%Edex
-         NQ=E-B+1
-         IF(NQ/=1.OR.B/=E)  &
-            CALL Halt('Bad Logic in FillRhoLeaf ')
-         KQ=Qdex(B)
-         KC=Cdex(KQ)
-         Node%Ell=Ldex(KQ)
-         LMNLen=LHGTF(Node%Ell)
-         Node%Qx=Rho%Qx%D(KQ)
-         Node%Qy=Rho%Qy%D(KQ)
-         Node%Qz=Rho%Qz%D(KQ)
-         Node%Zeta=Zeta(KQ)
-         ALLOCATE(Node%Co(1:LMNLen),STAT=Status)
-         CALL IncMem(Status,0,LMNLen)
-         Node%Co(1:LMNLen)=Rho%Co%D(KC:KC+LMNLen-1)
-      END SUBROUTINE FillRhoLeaf
-!==========================================================================
-!     Initialize a new RhoNode
-!==========================================================================
-      SUBROUTINE NewRhoNode(Node,Level)
-         TYPE(RhoNode), POINTER   :: Node
-         INTEGER                  :: Level,I,Status        
-         ALLOCATE(Node,STAT=Status)
-         IF(Status/=SUCCEED)  &
-            CALL Halt(' Node ALLOCATE failed in NewRhoNode ')
-         Node%Leaf=.False.
-         Node%Box%Tier=Level
-         Node%Box%Number=RhoNodes
-         RhoNodes=RhoNodes+1
-         NULLIFY(Node%Travrse)
-         NULLIFY(Node%Descend)
-         NULLIFY(Node%Co)
-      END SUBROUTINE NewRhoNode
-!==========================================================================
-!     Recusrively delete the density tree
-!==========================================================================
-      RECURSIVE SUBROUTINE DeleteRhoTree(Node)
-         TYPE(RhoNode), POINTER   :: Node
-         INTEGER                  :: Level,I,LMNLen,Status        
-         IF(Node%Leaf)THEN
-            DEALLOCATE(Node%Co,STAT=Status)
-            CALL DecMem(Status,LHGTF(Node%Ell),0)
-         ELSEIF(Associated(Node%Descend))THEN
-            CALL DeleteRhoTree(Node%Descend%Travrse)
-            NULLIFY(Node%Descend%Travrse) 
-            CALL DeleteRhoTree(Node%Descend)
-            NULLIFY(Node%Descend)
-         ENDIF
-         DEALLOCATE(Node,STAT=Status)
-         IF(Status/=SUCCEED)  &
-            CALL Halt(' NODE DEALLOCATION FAILED IN DeleteRhoTree')
-      END SUBROUTINE DeleteRhoTree
-!========================================================================================
-!     ALLOCATE and read in the density, initalize global lists 
-!========================================================================================
-      SUBROUTINE InitRho(Args)
-         TYPE(ARGMT)  :: Args
-         INTEGER      :: z,oq,or,iq,NQ,Q,Ell,Status,I,IOS,LMNLen
-         REAL(DOUBLE) :: Dummy
-!----------------------------------------------------------------------------------------
-!        Get the density
-         Open(UNIT=Seq,FILE=TrixFile('Rho',Args,0),STATUS='OLD', &
-              FORM='UNFORMATTED',ACCESS='SEQUENTIAL')
-         Read(UNIT=Seq,Err=202,IOSTAT=IOS)Rho%NExpt,Rho%NDist,Rho%NCoef
-         CALL New(Rho%NQ  ,Rho%NExpt)
-         CALL New(Rho%OffQ,Rho%NExpt)
-         CALL New(Rho%OffR,Rho%NExpt)
-         CALL New(Rho%Lndx,Rho%NExpt)
-         CALL New(Rho%Expt,Rho%NExpt)
-         CALL New(Rho%Qx,  Rho%NDist)
-         CALL New(Rho%Qy,  Rho%NDist)
-         CALL New(Rho%Qz,  Rho%NDist)
-         CALL New(Rho%Co,  Rho%NCoef)
-         Read(UNIT=Seq,Err=202,IOSTAT=IOS)(Rho%NQ%I  (i),i=1,Rho%NExpt)
-         Read(UNIT=Seq,Err=202,IOSTAT=IOS)(Rho%OffQ%I(i),i=1,Rho%NExpt)
-         Read(UNIT=Seq,Err=202,IOSTAT=IOS)(Rho%OffR%I(i),i=1,Rho%NExpt)
-         Read(UNIT=Seq,Err=202,IOSTAT=IOS)(Rho%Lndx%I(i),i=1,Rho%NExpt)
-         Read(UNIT=Seq,Err=202,IOSTAT=IOS)(Rho%Expt%D(i),i=1,Rho%NExpt)
-         Read(UNIT=Seq,Err=202,IOSTAT=IOS)(Rho%Qx%D  (i),i=1,Rho%NDist)
-         Read(UNIT=Seq,Err=202,IOSTAT=IOS)(Rho%Qy%D  (i),i=1,Rho%NDist)
-         Read(UNIT=Seq,Err=202,IOSTAT=IOS)(Rho%Qz%D  (i),i=1,Rho%NDist)
-         Read(UNIT=Seq,Err=202,IOSTAT=IOS)(Rho%Co%D  (i),i=1,Rho%NCoef)
-         Close(UNIT=Seq,STATUS='KEEP')
-!-------------------------------------------------------------
-!        ALLOCATE global lists
-         ALLOCATE(Qdex(1:Rho%NDist),STAT=Status)
-         CALL IncMem(Status,Rho%NDist,0)
-         ALLOCATE(Cdex(1:Rho%NDist),STAT=Status)
-         CALL IncMem(Status,Rho%NDist,0)
-         ALLOCATE(Ldex(1:Rho%NDist),STAT=Status)
-         CALL IncMem(Status,Rho%NDist,0)
-         ALLOCATE(RList(1:Rho%NDist),STAT=Status)
-         CALL IncMem(Status,0,Rho%NDist)
-         ALLOCATE(Zeta(1:Rho%NDist),STAT=Status)
-         CALL IncMem(Status,0,Rho%NDist)
-         ALLOCATE(Amp(1:Rho%NDist),STAT=Status)
-         CALL IncMem(Status,0,Rho%NDist)
-!
-!        Fill the global indeces
-!
-         IQ=1
-         MaxAmp=Zero
-         DO z=1,Rho%NExpt-1
-            oq  =Rho%OffQ%I(z)   
-            or  =Rho%OffR%I(z)   
-            Ell =Rho%Lndx%I(z)   
-            LMNLen=LHGTF(Ell)
-            NQ  =Rho%NQ%I(z)
-            DO Q=1,NQ
-               Zeta(IQ)=Rho%Expt%D(z)
-               Qdex(IQ)=oq+Q
-               Cdex(IQ)=or+(Q-1)*LMNLen +1
-               Ldex(IQ)=Ell
-               Amp(IQ)=Zero
-               DO I=Cdex(IQ),Cdex(IQ)+LMNLen-1
-                  Amp(IQ)=Amp(IQ)+Rho%Co%D(I)**2
-               ENDDO
-               Amp(IQ)=Log(Sqrt(Amp(IQ))+1.0D-100)
-               MaxAmp=Max(MaxAmp,Amp(IQ))
-               IQ=IQ+1
-            ENDDO
-         ENDDO        
-!        Redefine NDist to exclude nuclear charges
-         Rho%NDist=IQ-1
-!        Later 
-         Return            
-!        Bomb on IO error
-    202  CALL Halt('Died in PutRho, IOSTAT = '//Trim(IntToChar(IOS)))
-      END SUBROUTINE InitRho
-!========================================================================================
-!     Delete globals associated with the array representation of the density
-!========================================================================================
-      SUBROUTINE DeleteRho
-         INTEGER :: Status
-         CALL Delete(Rho%NQ)
-         CALL Delete(Rho%OffQ)
-         CALL Delete(Rho%OffR)
-         CALL Delete(Rho%Lndx)
-         CALL Delete(Rho%Expt)
-         CALL Delete(Rho%Qx)
-         CALL Delete(Rho%Qy)
-         CALL Delete(Rho%Qz)
-         CALL Delete(Rho%Co)
-!        DEALLOCATE global allocatables
-         DEALLOCATE(Qdex,STAT=Status)
-         CALL DecMem(Status,Rho%NDist,0)
-         DEALLOCATE(Cdex,STAT=Status)
-         CALL DecMem(Status,Rho%NDist,0)
-         DEALLOCATE(Ldex,STAT=Status)
-         CALL DecMem(Status,Rho%NDist,0)
-         DEALLOCATE(Zeta,STAT=Status)
-         CALL DecMem(Status,0,Rho%NDist)
-         DEALLOCATE(Amp,STAT=Status)
-         CALL DecMem(Status,0,Rho%NDist)
-         DEALLOCATE(RList,STAT=Status) 
-         CALL DecMem(Status,0,Rho%NDist)
-      END SUBROUTINE DeleteRho
-#ifdef MULTIPLE_DIST
-!===================================================================
-!     Check RhoBox agains contents
-!===================================================================
-      SUBROUTINE CheckBounds(Node)
-         TYPE(RhoNode), POINTER :: Node
-         REAL(DOUBLE)           :: ZMin,MaxAm,AM
-         REAL(DOUBLE), Parameter :: Eps=1.D-8
-         INTEGER :: I,IQ,JQ,JC,KQ,KC,L,LQ,LMNLen
-         CALL PrintBBox(Node%Box,Node%ZetaMin,Node%MaxAmp)
-         IF(Node%Leaf)THEN
-         ZMin=1.D12
-         MaxAm=-1.D12
-         DO L=0,HGEll
-           JQ=Node%Qdex(L)
-           JC=Node%Cdex(L)
-           LMNLen=LHGTF(L)
-           DO IQ=1,Node%NEll(L)                     
-              KQ=JQ+IQ
-              KC=JC+(IQ-1)*LMNLen                   
-              ZMin=Min(ZMin,Node%Zeta(KQ))
-              Am=Zero
-              DO I=KC+1,KC+LMNLen
-                 Am=Am+Node%Co(I)**2
-              ENDDO
-              Am=Log(Sqrt(Am))
-              MaxAm=Max(MaxAm,Am)
-              Write(22,33)Node%Zeta(KQ),Am,Node%Qx(KQ),Node%Qy(KQ),Node%Qz(KQ)
-!             Tests
-           33 Format(' Z = ',F10.4,', Amp = ',F10.4,', Q = ',F10.7,', ',F10.7,', ',F10.7)
-              IF(Node%Qx(KQ)+Eps<Node%Box%BndBox(1,1).Or.Node%Qx(KQ)-Eps>Node%Box%BndBox(1,2))THEN
-                 Write(*,*)Node%Qx(KQ)<Node%Box%BndBox(1,1),Node%Qx(KQ)>Node%Box%BndBox(1,2),&
-                           Node%Box%BndBox(1,1),Node%Qx(KQ),Node%Box%BndBox(1,2)
-                 Stop 'Bounding box hosed !'
-              ENDIF
-              IF(Node%Qy(KQ)+Eps<Node%Box%BndBox(2,1).Or.Node%Qy(KQ)-Eps>Node%Box%BndBox(2,2))THEN
-                 Write(*,*)Node%Qy(KQ)<Node%Box%BndBox(2,1),Node%Qy(KQ)>Node%Box%BndBox(2,2), &
-                           Node%Box%BndBox(2,1),Node%Qy(KQ),Node%Box%BndBox(2,2)
-                 Stop 'Bounding box hosed !'
-              ENDIF
-              IF(Node%Qz(KQ)+Eps<Node%Box%BndBox(3,1).Or.Node%Qz(KQ)-Eps>Node%Box%BndBox(3,2))THEN
-                 Write(*,*)Node%Qz(KQ)<Node%Box%BndBox(3,1),Node%Qz(KQ)>Node%Box%BndBox(3,2),&
-                           Node%Box%BndBox(3,1),Node%Qz(KQ),Node%Box%BndBox(3,2)
-                 Stop 'Bounding box hosed !'
-              ENDIF 
-           ENDDO
-         ENDDO
-         IF(Node%ZetaMin>ZMin)THEN
-            Write(22,*)Node%ZetaMin,ZMin,Node%ZetaMin>ZMin
-            Stop ' zeta '
-          ENDIF
-         IF(Node%MaxAmp+Eps<MaxAm)THEN
-            Write(22,*)Node%MaxAmp,MaxAm,Node%MaxAmp<MaxAm
-            Stop ' amp '
-         ENDIF
-         ENDIF
-      END SUBROUTINE CheckBounds  
-#endif
-END Module
+END MODULE

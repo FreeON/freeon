@@ -1,3 +1,34 @@
+!------------------------------------------------------------------------------
+!--  This code is part of the MondoSCF suite of programs for linear scaling 
+!    electronic structure theory and ab initio molecular dynamics.
+!
+!--  Copyright (c) 2001, the Regents of the University of California.  
+!    This SOFTWARE has been authored by an employee or employees of the 
+!    University of California, operator of the Los Alamos National Laboratory 
+!    under Contract No. W-7405-ENG-36 with the U.S. Department of Energy.  
+!    The U.S. Government has rights to use, reproduce, and distribute this 
+!    SOFTWARE.  The public may copy, distribute, prepare derivative works 
+!    and publicly display this SOFTWARE without charge, provided that this 
+!    Notice and any statement of authorship are reproduced on all copies.  
+!    Neither the Government nor the University makes any warranty, express 
+!    or implied, or assumes any liability or responsibility for the use of 
+!    this SOFTWARE.  If SOFTWARE is modified to produce derivative works, 
+!    such modified SOFTWARE should be clearly marked, so as not to confuse 
+!    it with the version available from LANL.  The return of derivative works
+!    to the primary author for integration and general release is encouraged. 
+!    The first publication realized with the use of MondoSCF shall be
+!    considered a joint work.  Publication of the results will appear
+!    under the joint authorship of the researchers nominated by their
+!    respective institutions. In future publications of work performed
+!    with MondoSCF, the use of the software shall be properly acknowledged,
+!    e.g. in the form "These calculations have been performed using MondoSCF, 
+!    a suite of programs for linear scaling electronic structure theory and
+!    ab initio molecular dynamics", and given appropriate citation.  
+!------------------------------------------------------------------------------
+!    Author: Matt Challacombe
+!    COMPUTE THE EXCHANGE CORRELATION MATRIX $K_{xc}$ IN O(N)
+!    USING HIERARCHICAL CUBATURE INVOLVING K-D BINARY TREES
+!------------------------------------------------------------------------------
 MODULE KxcGen
   USE DerivedTypes
   USE GlobalScalars   
@@ -7,6 +38,7 @@ MODULE KxcGen
   USE McMurchie
   USE InOut
   USE Thresholding
+  USE HiCuThresholds
   USE AtomPairs
   USE BraBloks
   USE CubeTree 
@@ -169,10 +201,10 @@ MODULE KxcGen
           Prim%CFA=CFA
           Prim%CFB=CFB
           Prim%Ell=MaxLA+MaxLB
-!----------------------------------
+!-------------------------------------
           DO PFA=1,BS%NPFnc%I(CFA,KA)          
           DO PFB=1,BS%NPFnc%I(CFB,KB)
-!----------------------------------
+!-------------------------------------
              Prim%ZA=BS%Expnt%D(PFA,CFA,KA)
              Prim%ZB=BS%Expnt%D(PFB,CFB,KB)
              Prim%Zeta=Prim%ZA+Prim%ZB
@@ -182,18 +214,11 @@ MODULE KxcGen
                 Prim%PFB=PFB
 !               Set primitive values
                 MaxAmp=SetBraBlok(Prim,BS)
-!---------------------------------------------------------------------------
-                MaxAmp=LOG(MaxAmp)
-!               Evaluate this primitives Ket contribution to Kxc_ab
-                Ket=Zero
                 PBox%BndBox(1,:)=Prim%P(1)
                 PBox%BndBox(2,:)=Prim%P(2)
                 PBox%BndBox(3,:)=Prim%P(3)
-                PExtent=GaussianExtent(Prim%Zeta,MaxAmp)
-                PBox=ExpandBox(PBox,PExtent)
-!               Walk the walk
-                CALL KxcWalk(CubeRoot)
-!               Contract <Bra|Ket> bloks to compute matrix elements of Kxc
+!               Find the maximum extent of this primitive
+                PExtent=Zero
                 IA = IndexA
                 DO LMNA=StartLA,StopLA
                    IA=IA+1
@@ -201,12 +226,31 @@ MODULE KxcGen
                    EllA=BS%LxDex%I(LMNA)+BS%LyDex%I(LMNA)+BS%LzDex%I(LMNA)                         
                    DO LMNB=StartLB,StopLB
                       IB=IB+1
-                      EllB=BS%LxDex%I(LMNB)+BS%LyDex%I(LMNB)+BS%LzDex%I(LMNB)                         
-                      DO LMN=1,LHGTF(EllA+EllB)
-                         Kblk(IA,IB)=Kblk(IA,IB)+HGBra%D(LMN,IA,IB)*Ket(LMN)
-                      ENDDO
+                      EllB=BS%LxDex%I(LMNB)+BS%LyDex%I(LMNB)+BS%LzDex%I(LMNB)       
+                      PExtent=MAX(PExtent, & 
+                                  Extent(EllA+EllB,Prim%Zeta,HGBra%D(:,IA,IB),TauRho))
                    ENDDO
                 ENDDO
+                IF(PExtent>Zero)THEN
+                   PBox=ExpandBox(PBox,PExtent)
+!                  Walk the walk
+                   Ket=Zero
+                   CALL KxcWalk(CubeRoot)
+!                  Contract <Bra|Ket> bloks to compute matrix elements of Kxc
+                   IA = IndexA
+                   DO LMNA=StartLA,StopLA
+                      IA=IA+1
+                      IB=IndexB
+                      EllA=BS%LxDex%I(LMNA)+BS%LyDex%I(LMNA)+BS%LzDex%I(LMNA)                         
+                      DO LMNB=StartLB,StopLB
+                         IB=IB+1
+                         EllB=BS%LxDex%I(LMNB)+BS%LyDex%I(LMNB)+BS%LzDex%I(LMNB)                         
+                         DO LMN=1,LHGTF(EllA+EllB)
+                            Kblk(IA,IB)=Kblk(IA,IB)+HGBra%D(LMN,IA,IB)*Ket(LMN)
+                         ENDDO
+                      ENDDO
+                   ENDDO
+                ENDIF
 !---------------------------------------------------------------------------
              ENDIF
           ENDDO 

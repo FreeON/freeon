@@ -279,16 +279,18 @@ PROGRAM VectorRhoMD
       ChLMNLen=IntToChar(LHGTF(Ell))
       String(1,1)=Squish('CASE('//IntToChar(Ell)//')')
       WRITE(Out,*)(Blnk,I=1,6),TRIM(String(1,1))
-      IF(Ell/=0)THEN
+!      IF(Ell/=0)THEN
         DO K=1,3
            CALL WriteExpInv(Out,9,'LXpt'//Carts(K),'Z*(LQ'//Carts(K)//'**2)')
            CALL WriteExpInv(Out,9,'UXpt'//Carts(K),'Z*(UQ'//Carts(K)//'**2)')
            WRITE(Out,*)(Blnk,I=1,9),'LLambda'//Carts(K)//'(1)=LXpt'//Carts(K)
            WRITE(Out,*)(Blnk,I=1,9),'ULambda'//Carts(K)//'(1)=UXpt'//Carts(K)
-           WRITE(Out,*)(Blnk,I=1,9),'LLambda'//Carts(K)//'(2)=TwoZ*LQ'//Carts(K)//'*LXpt'//Carts(K)
-           WRITE(Out,*)(Blnk,I=1,9),'ULambda'//Carts(K)//'(2)=TwoZ*UQ'//Carts(K)//'*UXpt'//Carts(K)
+           IF(Ell/=0)THEN 
+              WRITE(Out,*)(Blnk,I=1,9),'LLambda'//Carts(K)//'(2)=TwoZ*LQ'//Carts(K)//'*LXpt'//Carts(K)
+              WRITE(Out,*)(Blnk,I=1,9),'ULambda'//Carts(K)//'(2)=TwoZ*UQ'//Carts(K)//'*UXpt'//Carts(K)
+           ENDIF
         ENDDO
-        DO L=3,Ell
+        DO L=3,Ell+1
            DO K=1,3
               String(1,1)='LLambda'//Carts(K)//'('//IntToChar(L)    &
                         //')=TwoZ*(LQ'//Carts(K)//'*LLambda'//Carts(K)//'('//IntToChar(L-1)   &
@@ -300,8 +302,8 @@ PROGRAM VectorRhoMD
                WRITE(Out,*)(Blnk,I=1,9),TRIM(Squish(String(2,1)))
            ENDDO
           ENDDO
-        ENDIF
-     DO L=0,Ell
+!        ENDIF
+     DO L=0,Ell+1
         String(1,1)='LambdaX('//IntToChar(L)//')=LLambdaX('//IntToChar(L)//')-ULambdaX('//IntToChar(L)//')'
         String(2,1)='LambdaY('//IntToChar(L)//')=LLambdaY('//IntToChar(L)//')-ULambdaY('//IntToChar(L)//')'
         String(3,1)='LambdaZ('//IntToChar(L)//')=LLambdaZ('//IntToChar(L)//')-ULambdaZ('//IntToChar(L)//')'
@@ -316,16 +318,29 @@ PROGRAM VectorRhoMD
               LMN=LMNDex(L,M,N)
               K=K+1
               LMND(LMN)=K
-              String(1,LMN)='Pop=Pop+LambdaX('//IntToChar(L) &
-                          //')*LambdaY('//IntToChar(M)//')*LambdaZ('//IntToChar(N) &
-                          //')*Node%Co('//IntToChar(LMN)//')'
-
+!              
+              String(1,LMN)='Co=Node%Co('//IntToChar(LMN)//')' 
+!
+              String(2,LMN)='Pop=Pop+LambdaX('//IntToChar(L) &
+                          //')*LambdaY('//IntToChar(M)//')*LambdaZ('//IntToChar(N)//')*Co'
+!
+              String(3,LMN)='dPopX=dPopX-LambdaX('//IntToChar(L+1) &
+                          //')*LambdaY('//IntToChar(M)//')*LambdaZ('//IntToChar(N)//')*Co'
+!
+              String(4,LMN)='dPopY=dPopY-LambdaX('//IntToChar(L) &
+                          //')*LambdaY('//IntToChar(M+1)//')*LambdaZ('//IntToChar(N)//')*Co'
+!
+              String(5,LMN)='dPopZ=dPopZ-LambdaX('//IntToChar(L) &
+                          //')*LambdaY('//IntToChar(M)//')*LambdaZ('//IntToChar(N+1)//')*Co'
+!
             ENDDO
          ENDDO
      ENDDO
      DO J=1,LHGTF(Ell)
         K=LMND(J)
-        WRITE(Out,*)(Blnk,I=1,9),TRIM(Squish(String(1,J)))
+        DO K=1,5
+           WRITE(Out,*)(Blnk,I=1,9),TRIM(Squish(String(K,J)))
+        ENDDO
      ENDDO
    ENDDO
    WRITE(Out,*)(Blnk,I=1,6),'END SELECT'

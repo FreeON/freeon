@@ -34,8 +34,9 @@ CPPMISC = -DRULE7 -DEXPLICIT_SOURCE
 EXTRA_INCLUDES= -I$(MONDO_HOME)/MondoMods/MMA/LookUpTables \
                 -I$(MONDO_HOME)/MondoMods/MMA/Functionals
 #
-HObjs  = Grid.o RhoTree.o CubeTree.o TreeWalk.o KxcGen.o HiCu.o 
-XFObjs = Grid.o RhoTree.o CubeTree.o TreeWalk.o dXCBlok.o XCForce.o
+CommonObjs = Grid.o Thresholds.o RhoTree.o CubeTree.o TreeWalk.o 
+HObjs      = $(CommonObjs) KxcGen.o HiCu.o 
+XFObjs     = $(CommonObjs) dXCBlok.o XCForce.o
 #
 VObjs  = VRhoMD.o 
 #
