@@ -54,7 +54,13 @@ CONTAINS
     INTEGER           :: cBAS,cGEO,iSCF
     !----------------------------------------------------------------------------!
     CALL New(C%Stat%Action,1)
-    ! Compute one-electron matrices
+    ! Determine if there was a geomety or Basis Set Change
+    CALL SameBasisSameGeom(cBAS,cGEO,C%Nams,C%Opts,C%Stat)
+    WRITE(*,*) "SameBasis = ",C%Stat%SameBasis
+    WRITE(*,*) "SameLatt  = ",C%Stat%SameLatt
+    WRITE(*,*) "SameCrds  = ",C%Stat%SameCrds
+    WRITE(*,*) "SameGeom  = ",C%Stat%SameGeom
+    ! Compute one-electron matrices   
     CALL OneEMats(cBAS,cGEO,C%Nams,C%Sets,C%Stat,C%Opts,C%MPIs)
     ! Allocate space for convergence statistics
     CALL New(ETot,(/MaxSCFs,C%Geos%Clones/),(/0,1/))
@@ -108,7 +114,7 @@ CONTAINS
     ENDIF
 !   The options...
     IF(DoCPSCF)THEN
-       CALL DensityLogic(cSCF,cBAS,cGEO,S,O,CPSCF_O=.TRUE.)
+       CALL DensityLogic(cSCF,cBAS,cGEO,N,S,O,CPSCF_O=.TRUE.)
        CALL DensityBuild(N,S,M)
        IF(cSCF.EQ.0)S%Action%C(1)=CPSCF_START_RESPONSE
        IF(cSCF.GT.0)S%Action%C(1)=CPSCF_FOCK_BUILD
@@ -169,28 +175,29 @@ CONTAINS
        IF(OptKeyQ(Inp,CONALS_OVRIDE,CONALS_DIIS)) IConAls = DIIS_CONALS
        CLOSE(Inp)
 !      Defaults
-       IF(cSCF < 1)                                    IConAls = NO_CONALS
-       IF(cBAS > 1 .AND. cSCF < 2 .AND. cGEO==1)       IConAls = NO_CONALS 
-       IF(O%ConAls(cBAS)==SMIX_CONALS    .AND. cSCF<2) IConAls = NO_CONALS
-       IF(S%Action%C(1)==SCF_GUESSEQCORE .AND. cSCF<2)  IConAls = NO_CONALS 
+       IF(cSCF < 1)                                         IConAls = NO_CONALS
+       IF(O%ConAls(cBAS)==SMIX_CONALS        .AND. cSCF<2)  IConAls = NO_CONALS
+       IF(S%Action%C(1) ==SCF_GUESSEQCORE    .AND. cSCF<2)  IConAls = NO_CONALS 
+       IF(S%Action%C(1) ==SCF_BASISSETSWITCH .AND. cSCF<2)  IConAls = NO_CONALS 
+       IF(S%Action%C(1) ==SCF_RWBSS          .AND. cSCF<2)  IConAls = NO_CONALS 
 !      Select the Case
        SELECT CASE (IConAls)
        CASE (DIIS_CONALS)
-          CALL DensityLogic(cSCF,cBAS,cGEO,S,O)
+          CALL DensityLogic(cSCF,cBAS,cGEO,N,S,O)
           CALL DensityBuild(N,S,M)
           CALL FockBuild(cSCF,cBAS,N,S,O,M)
           CALL Invoke('DIIS',N,S,M)
           CALL SolveSCF(cBAS,N,S,O,M)
           CALL Invoke('SCFstats',N,S,M)
        CASE (ODA_CONALS)
-          CALL DensityLogic(cSCF,cBAS,cGEO,S,O)
+          CALL DensityLogic(cSCF,cBAS,cGEO,N,S,O)
           CALL DensityBuild(N,S,M)
           CALL FockBuild(cSCF,cBAS,N,S,O,M)
           CALL SolveSCF(cBAS,N,S,O,M)
           CALL Invoke('ODA',N,S,M)
           IF(HasDFT(O%Models(cBAS)))THEN
 !            Rebuild non-linear KS matrix
-             CALL DensityLogic(cSCF,cBAS,cGEO,S,O)
+             CALL DensityLogic(cSCF,cBAS,cGEO,N,S,O)
              CALL DensityBuild(N,S,M)
              CALL Invoke('HiCu',N,S,M)
              CALL Invoke('FBuild',N,S,M)
@@ -198,19 +205,19 @@ CONTAINS
           CALL SolveSCF(cBAS,N,S,O,M)
           CALL Invoke('SCFstats',N,S,M)
        CASE (SMIX_CONALS)
-          CALL DensityLogic(cSCF,cBAS,cGEO,S,O)
+          CALL DensityLogic(cSCF,cBAS,cGEO,N,S,O)
           CALL DensityBuild(N,S,M)
           CALL FockBuild(cSCF,cBAS,N,S,O,M)
           CALL SolveSCF(cBAS,N,S,O,M)
           CALL Invoke('SCFstats',N,S,M)
           S%Action%C(1)='Stanton MIX'
           CALL Invoke('MIX',N,S,M)
-          CALL DensityLogic(cSCF,cBAS,cGEO,S,O)
+          CALL DensityLogic(cSCF,cBAS,cGEO,N,S,O)
           CALL DensityBuild(N,S,M)
           CALL FockBuild(cSCF,cBAS,N,S,O,M)
           CALL SolveSCF(cBAS,N,S,O,M)
        CASE (NO_CONALS)          
-          CALL DensityLogic(cSCF,cBAS,cGEO,S,O,CPSCF_O)
+          CALL DensityLogic(cSCF,cBAS,cGEO,N,S,O)
           CALL DensityBuild(N,S,M)
           CALL FockBuild(cSCF,cBAS,N,S,O,M)
           CALL SolveSCF(cBAS,N,S,O,M)
@@ -528,10 +535,9 @@ CONTAINS
     TYPE(State)    :: S
     TYPE(Parallel) :: M    
     !----------------------------------------------------------------------------!
-
-    IF(TRIM(S%Action%C(1))/=SCF_BASISSETSWITCH.AND.   &
-       TRIM(S%Action%C(1))/=SCF_DENSITY_NORMAL.AND.   &
-       TRIM(S%Action%C(1))/=CPSCF_START_RESPONSE.AND. &
+    IF(TRIM(S%Action%C(1))/=SCF_DENSITY_NORMAL   .AND. &
+       TRIM(S%Action%C(1))/=SCF_BASISSETSWITCH   .AND. &
+       TRIM(S%Action%C(1))/=CPSCF_START_RESPONSE .AND. &
        TRIM(S%Action%C(1))/=CPSCF_DENSITY_NORMAL) THEN
        CALL Invoke('P2Use',N,S,M)
     ENDIF
@@ -546,14 +552,15 @@ CONTAINS
     ENDIF
   END SUBROUTINE DensityBuild
   !===============================================================================
-
+  !
   !===============================================================================
-  SUBROUTINE DensityLogic(cSCF,cBAS,cGEO,S,O,CPSCF_O)
-    TYPE(State)      :: S
-    TYPE(Options)    :: O
-    INTEGER          :: cSCF,cBAS,cGEO,pBAS
-    LOGICAL          :: DoCPSCF
-    LOGICAL,OPTIONAL :: CPSCF_O
+  SUBROUTINE DensityLogic(cSCF,cBAS,cGEO,N,S,O,CPSCF_O)
+    TYPE(FileNames)    :: N
+    TYPE(State)        :: S
+    TYPE(Options)      :: O
+    INTEGER            :: cSCF,cBAS,cGEO,pBAS,I,J
+    LOGICAL            :: DoCPSCF
+    LOGICAL,OPTIONAL   :: CPSCF_O
     !----------------------------------------------------------------------------!
     pBAS=S%Previous%I(2)
     S%Current%I=(/cSCF,cBAS,cGEO/)
@@ -562,6 +569,7 @@ CONTAINS
     ELSE
        DoCPSCF=.FALSE.
     ENDIF
+!   Determine the Action to be Taken 
     IF(DoCPSCF)THEN
        IF(O%Guess==GUESS_EQ_DIPOLE.AND.cSCF==0)THEN
           O%Guess=0
@@ -571,28 +579,45 @@ CONTAINS
           S%Action%C(1)=CPSCF_DENSITY_NORMAL
        ENDIF
     ELSE
-       IF(O%Guess==GUESS_EQ_SUPR)THEN 
+       IF(O%Guess==GUESS_EQ_CORE)THEN
           O%Guess=0
-          S%Previous%I=S%Current%I
-          S%Action%C(1)=SCF_SUPERPOSITION
-       ELSEIF(O%Guess==GUESS_EQ_CORE)THEN
+          S%Previous%I     = S%Current%I
+          S%Action%C(1)    = SCF_GUESSEQCORE
+       ELSEIF(O%Guess==GUESS_EQ_SUPR)THEN 
           O%Guess=0
-          S%Previous%I=S%Current%I
-          S%Action%C(1)=SCF_GUESSEQCORE
+          S%Previous%I     = S%Current%I
+          S%Action%C(1)    = SCF_SUPERPOSITION
        ELSEIF(O%Guess==GUESS_EQ_RESTART)THEN
+          IF(S%SameBasis .AND. .NOT. S%SameGeom) THEN
+             O%Guess=0
+             S%Previous%I  = O%RestartState%I
+             S%Action%C(1) = SCF_EXTRAPOLATE
+          ELSEIF( .NOT. S%SameBasis) THEN
+             O%Guess=0
+             S%Previous%I  = O%RestartState%I
+             S%Action%C(1) = SCF_RWBSS
+          ELSE
+             O%Guess=0
+             S%Previous%I  = O%RestartState%I
+             S%Action%C(1) = SCF_RESTART
+          ENDIF
+       ELSEIF(S%SameBasis .AND. .NOT.S%SameGeom)THEN
           O%Guess=0
-          S%Previous%I=O%RestartState%I
-          S%Action%C(1)=SCF_RESTART
-       ELSEIF(cSCF==0.AND.cBAS==pBAS.AND.cGEO/=1)THEN
-!          S%Action%C(1)=SCF_PROJECTION
-          S%Action%C(1)=SCF_EXTRAPOLATE
-       ELSEIF(cSCF==0.AND.cBAS/=pBAS)THEN
-          S%Action%C(1)=SCF_BASISSETSWITCH
-          S%Previous%I(1)=S%Previous%I(1)+1
+          S%Action%C(1)    = SCF_EXTRAPOLATE
+       ELSEIF(.NOT. S%SameBasis .OR. pBAS /= cBAS)THEN
+          O%Guess=0
+          S%Action%C(1)    = SCF_BASISSETSWITCH
+          S%Previous%I(1)  = S%Previous%I(1)+1
        ELSE
-          S%Action%C(1)=SCF_DENSITY_NORMAL
+          O%Guess=0
+          S%Action%C(1)    = SCF_DENSITY_NORMAL
        ENDIF
     ENDIF
+    S%SameBasis=.TRUE.
+    S%SameGeom =.TRUE.
+    S%SameCrds =.TRUE.
+    S%SameLatt =.TRUE.
+!
   END SUBROUTINE DensityLogic
   !===============================================================================
   ! BUILD A FOCK MATRIX
@@ -669,8 +694,97 @@ CONTAINS
        CALL MondoHalt(99,'Unknown method key = '//TRIM(IntToChar(O%Methods(cBAS))))
     ENDIF
   END SUBROUTINE SolveSCF
-  !===============================================================================
+!---------------------------------------------------------------------------------
+!
+!---------------------------------------------------------------------------------
+  SUBROUTINE SameBasisSameGeom(cBAS,cGEO,N,O,S)
+    TYPE(FileNames)    :: N
+    TYPE(Options)      :: O
+    TYPE(State)        :: S
+    TYPE(BSET)         :: BS,BS_rs
+    TYPE(CRDS)         :: GM,GM_rs
+    REAL(DOUBLE)       :: MaxDiff
+    CHARACTER(LEN=DCL) :: chBAS,chGEO    
+    INTEGER            :: I,J,cBAS,cGEO,pBAS,pGEO
+!
+    pBAS=S%Previous%I(2)
+    pGEO=S%Previous%I(3)
+    S%Current%I=(/0,cBAS,cGEO/)
+!
+    S%SameCrds  = .TRUE.
+    S%SameLatt  = .TRUE.
+    S%SameGeom  = .TRUE.
+    S%SameBasis = .TRUE.
+!
 
+    IF(O%Guess==GUESS_EQ_RESTART) THEN
+       HDFFileID=OpenHDF(N%HFile)
+       HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(1)))
+       chBAS = IntToChar(S%Current%I(2))
+       chGEO = IntToChar(S%Current%I(3))
+       CALL Get(BS,Tag_O=chBAS)
+       CALL Get(GM,Tag_O=chGEO)
+       CALL CloseHDFGroup(HDF_CurrentID)
+       CALL CloseHDF(HDFFileID)
+!
+       HDFFileID=OpenHDF(N%RFile)
+       HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(1)))
+       chBAS = IntToChar(O%RestartState%I(2))
+       chGEO = IntToChar(O%RestartState%I(3))
+       CALL Get(BS_rs,Tag_O=chBAS)
+       CALL Get(GM_rs,Tag_O=chGEO)
+       CALL CloseHDFGroup(HDF_CurrentID)
+       CALL CloseHDF(HDFFileID)
+!
+       IF(BS%BName /= BS_rs%BName) S%SameBasis=.FALSE.
+       MaxDiff=Zero
+       DO I=1,GM%Natms
+          MaxDiff=MAX(MaxDiff,ABS(GM%Carts%D(1,I)-GM_rs%Carts%D(1,I)) + &
+               ABS(GM%Carts%D(2,I)-GM_rs%Carts%D(2,I)) + &
+               ABS(GM%Carts%D(3,I)-GM_rs%Carts%D(3,I))) 
+       ENDDO
+       IF(MaxDiff>1D-8)     S%SameCrds=.FALSE.
+       MaxDiff=Zero
+       DO I=1,3;DO J=1,3
+          MaxDiff = MAX(MaxDiff,ABS(GM%PBC%BoxShape%D(I,J)-GM_rs%PBC%BoxShape%D(I,J)))
+       ENDDO;ENDDO 
+       IF(MaxDiff>1D-8)     S%SameLatt=.FALSE.
+       IF(.NOT. S%SameCrds) S%SameGeom=.FALSE. 
+       IF(.NOT. S%SameLatt) S%SameGeom=.FALSE. 
+    ELSE
+       HDFFileID=OpenHDF(N%HFile)
+       HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(1)))
+       chBAS = IntToChar(cBAS)
+       chGEO = IntToChar(cGEO)
+       CALL Get(GM,Tag_O=chGEO)
+       CALL Get(BS,Tag_O=chBAS)
+       chBAS = IntToChar(pBAS)
+       chGEO = IntToChar(pGEO)
+       CALL Get(BS_rs,Tag_O=chBAS)
+       CALL Get(GM_rs,Tag_O=chGEO)
+       CALL CloseHDFGroup(HDF_CurrentID)
+       CALL CloseHDF(HDFFileID)
+!
+       IF(BS%BName /= BS_rs%BName) S%SameBasis=.FALSE.
+       MaxDiff=Zero
+       DO I=1,GM%Natms
+          MaxDiff=MAX(MaxDiff,ABS(GM%Carts%D(1,I)-GM_rs%Carts%D(1,I)) + &
+               ABS(GM%Carts%D(2,I)-GM_rs%Carts%D(2,I)) + &
+               ABS(GM%Carts%D(3,I)-GM_rs%Carts%D(3,I))) 
+       ENDDO
+       IF(MaxDiff>1D-8)            S%SameCrds=.FALSE.
+       MaxDiff=Zero
+       DO I=1,3;DO J=1,3
+          MaxDiff = MAX(MaxDiff,ABS(GM%PBC%BoxShape%D(I,J)-GM_rs%PBC%BoxShape%D(I,J)))
+       ENDDO;ENDDO 
+       IF(MaxDiff>1D-8)            S%SameLatt=.FALSE.
+       IF(.NOT. S%SameCrds)        S%SameGeom=.FALSE. 
+       IF(.NOT. S%SameLatt)        S%SameGeom=.FALSE. 
+    ENDIF
+!
+  END SUBROUTINE SameBasisSameGeom
+  !===============================================================================
+  !
   !===============================================================================
   SUBROUTINE OneEMats(cBAS,cGEO,N,B,S,O,M)
     TYPE(FileNames):: N
@@ -679,17 +793,31 @@ CONTAINS
     TYPE(Options)  :: O
     TYPE(Parallel) :: M
     INTEGER        :: cBAS,cGEO,pBAS
-    LOGICAL, SAVE  :: DoPFFT=.TRUE.
+    LOGICAL        :: DoPFFT
     !----------------------------------------------------------------------------!
-    pBAS=S%Previous%I(2)    
-    S%Current%I=(/0,cBAS,cGEO/)
+!
     S%Action%C(1)='OneElectronMatrices'
-    IF(pBAS/=cBAS)DoPFFT=.TRUE.
-    IF(DoPFFT)THEN
+!
+    DoPFFT = .FALSE.
+    IF(O%Guess==GUESS_EQ_CORE)     DoPFFT=.TRUE.
+    IF(O%Guess==GUESS_EQ_SUPR)     DoPFFT=.TRUE.
+    IF(O%Guess==GUESS_EQ_RESTART)  DoPFFT=.TRUE.
+    IF(.NOT. S%SameLatt)           DoPFFT=.TRUE.
+    IF(.NOT. S%SameBasis)          DoPFFT=.TRUE.
+!
+    IF(DoPFFT) THEN
+       WRITE(*,*) "Makeing PFFT"
        CALL Invoke('MakePFFT',N,S,M)
-       DoPFFT=.FALSE.
     ENDIF
-    CALL Invoke('MakeS',N,S,M)
+!
+    IF(O%Guess==GUESS_EQ_RESTART .AND.  .NOT. S%SameGeom) THEN
+       S%Action%C(1)='RestartGeomSwitch'
+       CALL Invoke('MakeS',N,S,M)
+       S%Action%C(1)='OneElectronMatrices'
+       CALL Invoke('MakeS',N,S,M)
+    ELSE
+       CALL Invoke('MakeS',N,S,M)
+    ENDIF
     IF(O%Methods(cBAS)==RH_R_SCF)THEN
        CALL Invoke('LowdinO',N,S,M)
     ELSE
@@ -950,6 +1078,7 @@ CONTAINS
     CALL Delete(OffS)
     CALL Delete(K)
   END SUBROUTINE NXForce
+!
 END MODULE SCFs
 
 
