@@ -55,7 +55,7 @@ IntegralClass[Ell_List] := Ell[[2]]*(Ell[[2]] + 1)/2 + Ell[[1]] + 1;
 (* Minimal 
    Classes = { {0,0},{1,1}} 
  *)
-   Classes = { {0,0},{1,1},{2,2}} 
+   Classes = { {0,0},{0,1},{1,1}} 
 (* Maximal 
    Classes = { {0,0},{0,1},{1,1},{2,2},{3,3}}
  *)
@@ -90,6 +90,15 @@ Do[Do[Do[Do[
                   +10000*IntegralClass[Classes[[jc]]] \
 	          +100*IntegralClass[Classes[[kc]]] \
 	          +IntegralClass[Classes[[lc]]];
+
+
+   imin = Classes[[ic, 1]]; imax = Classes[[ic, 2]];
+   jmin = Classes[[jc, 1]]; jmax = Classes[[jc, 2]];
+   kmin = Classes[[kc, 1]]; kmax = Classes[[kc, 2]];
+   lmin = Classes[[lc, 1]]; lmax = Classes[[lc, 2]];
+
+
+
     WS[StringJoin["CASE(",ToString[ijklType],")"]];
 
 
@@ -261,6 +270,7 @@ Do[Do[
    ];
 
    Print["braketswitch ",braketswitch," braswitch ",braswitch," ketswitch ",ketswitch," ijkl ",itype,jtype,ktype,ltype];
+
 
    ijklType=1000*itype+100*jtype+10*itype+jtype;
 

@@ -56,7 +56,7 @@ IntegralClass[Ell_List] := Ell[[2]]*(Ell[[2]] + 1)/2 + Ell[[1]] + 1;
 (* Minimal 
    Classes = { {0,0},{1,1}} 
  *)
-   Classes = { {0,0},{1,1}} 
+   Classes = { {0,0},{0,1},{1,1} } 
 
 (* Maximal 
    Classes = { {0,0},{0,1},{1,1},{2,2},{3,3}}
@@ -129,7 +129,7 @@ VRR[a_List,c_List,m_]:=Module[{p,q,PA,QC,WP,WQ,one,two,a1,a2,c1,c2,Ai1,Ci1,CiO2z
                               pd=Position[d,Max[d]][[1, 1]];
                               MaxEll=Max[Join[b,d]];
 			      (* Exit condition 1 *)
-                              If[ a[[pa]] < 0 || b[[pb]] < 0 || c[[pc]] < 0 || d[[pd]] < 0 ,Return[0];];                                        
+                              If[ a[[pa]] < 0 || b[[pb]] < 0 || c[[pc]] < 0 || d[[pd]] < 0 ,Return[0];]; 
 			      (* Exit condition 2 *)
                               If[ b[[pb]]==0 && d[[pd]]==0,
                                  adex=LMNDex[a[[1]],a[[2]],a[[3]]];
@@ -173,6 +173,7 @@ SetAttributes[MBarN,NHoldAll];
 
 (* PUT THE TRANSFORMATIONS TO FILE *)
 
+
 PunchVRRClass[FileName_,BraEll_,KetEll_]:=Module[{oList,IList,Kount,a,c},
 						 oList={" "->""};
 						 IList={};
@@ -185,9 +186,11 @@ PunchVRRClass[FileName_,BraEll_,KetEll_]:=Module[{oList,IList,Kount,a,c},
                                                        IList=Append[IList,VRR[a,c,0]+o[Kount]];
 						       MBarString=StringJoin["I",ToString[i],"Bar",ToString[k]];
                                                        oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->MBarString];
-                                                 ,{i,1,LEnd[BraEll]}],{k,1,LEnd[KetEll]}];
+                                                 ,{i,1,LEnd[BraEll]}];
+                                                 ,{k,1,LEnd[KetEll]}];
                                                  Write[FileName,FortranAssign[o,IList,AssignReplace->oList]];
-];                                                ;
+                                                 ];
+
 
 PunchGammas[Subroutine_,LTot_]:=Block[{WS,FStr,Gammas},
 
@@ -259,7 +262,7 @@ PunchHRRClass[FileName_,ic_,jc_,kc_,lc_]:=Module[{oList,IList,Kount,a,b,c,d},
                                                              c = {lx[k], my[k], nz[k]};
                                                              d = {lx[l], my[l], nz[l]};
                                                              IList=Append[IList,HRR[a,b,c,d]];
-                                                             oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->                     \
+                                                             oList=Append[oList,StringJoin["o(",ToString[Kount],")"]-> 
                                                                                 StringJoin["I((OA+",ToString[i-LBegin[il]],")*LDA",     \
                                                                                             "+(OB+",ToString[j-LBegin[jl]],")*LDB",     \
                                                                                             "+(OC+",ToString[k-LBegin[kl]],")*LDC",     \
@@ -285,7 +288,7 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_]:=Block[{WS,LBra,LKet,BKTyp
 (*
 
  *)
-           WriteString[Subroutine,StringJoin["   SUBROUTINE DInt",ToString[IJKL],"(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo,I, & \n", \
+           WriteString[Subroutine,StringJoin["   SUBROUTINE Int",ToString[IJKL],"(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo,I, & \n", \
                                              "                              OA,LDA,OB,LDB,OC,LDC,OD,LDD) \n"]];
 
 	   WS[String_]:=WriteString[Subroutine,"      ",String,"\n"];
@@ -315,7 +318,7 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_]:=Block[{WS,LBra,LKet,BKTyp
            WS["INTEGER       :: OA,LDA,OB,LDB,OC,LDC,OD,LDD,J,K,L"];
 
            Do[Do[
-                 WS[StringJoin["I",ToString[i],"Bar",ToString[k],"=Zero"]];
+                 WS[StringJoin["I",ToString[i],"Bar",ToString[k],"=0.0d0"]];
             ,{i,1,LEnd[LBra]}],{k,1,LEnd[LKet]}];
 
   WS["Ax=ACInfo%Atm1X"];
@@ -351,6 +354,24 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_]:=Block[{WS,LBra,LKet,BKTyp
            WS["   Qz =PrmBufK(4,J)"];
            WS["   Uq =PrmBufK(5,J)"];
 
+
+           (* Add the conversion factor for SP shell *)
+           If[IntegralClass[Classes[[kc]]]==2,
+              Print["IntegralClass[Classes[[kc]]]=",IntegralClass[Classes[[kc]]] ];
+              WS["   C1q=PrmBufK(6,J)"];
+           ];
+           If[IntegralClass[Classes[[lc]]]==2,
+              Print["IntegralClass[Classes[[lc]]]=",IntegralClass[Classes[[lc]]] ];
+              WS["   C2q=PrmBufK(7,J)"];
+           ];
+           If[IntegralClass[Classes[[kc]]]==2 && IntegralClass[Classes[[lc]]]==2,
+              Print["IntegralClass[Classes[[kc]]]=",IntegralClass[Classes[[kc]]] ];
+              Print["IntegralClass[Classes[[lc]]]=",IntegralClass[Classes[[lc]]] ];
+              WS["   C3q=PrmBufK(8,J)"];
+           ];
+
+
+
            WS["   QCx=Qx-Cx"];
            WS["   QCy=Qy-Cy"];
            WS["   QCz=Qz-Cz"];
@@ -363,6 +384,22 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_]:=Block[{WS,LBra,LKet,BKTyp
            WS["      Py  =PrmBufB(3,K)"];
            WS["      Pz  =PrmBufB(4,K)"];
            WS["      Up  =PrmBufB(5,K)"];
+
+           (* Add the conversion factor for SP shell *)
+           If[IntegralClass[Classes[[ic]]]==2,
+              Print["IntegralClass[Classes[[ic]]]=",IntegralClass[Classes[[ic]]] ];
+              WS["      C1p =PrmBufB(6,K)"];
+           ];
+           If[IntegralClass[Classes[[jc]]]==2,
+              Print["IntegralClass[Classes[[jc]]]=",IntegralClass[Classes[[jc]]] ];
+              WS["      C2p =PrmBufB(7,K)"];
+           ];
+           If[IntegralClass[Classes[[ic]]]==2 && IntegralClass[Classes[[jc]]]==2,
+              Print["IntegralClass[Classes[[ic]]]=",IntegralClass[Classes[[ic]]] ];
+              Print["IntegralClass[Classes[[jc]]]=",IntegralClass[Classes[[jc]]] ];
+              WS["      C3p =PrmBufB(8,K)"];
+           ];
+
 
            WS["      r1xZpE=One/(Zeta+Eta)"];
 	   WS["      Upq=SQRT(r1xZpE)*Up*Uq"];					   
@@ -409,6 +446,12 @@ RelsList="TwoERels= \\ \n";
 
 Do[Do[Do[Do[
 
+
+   If[IntegralClass[Classes[[ic]]]>=IntegralClass[Classes[[jc]]]&& \
+      IntegralClass[Classes[[kc]]]>=IntegralClass[Classes[[lc]]]&& \
+      IntegralClass[Classes[[ic]]]*100+IntegralClass[Classes[[jc]]]>= \
+      IntegralClass[Classes[[kc]]]*100+IntegralClass[Classes[[lc]]],
+
             CommentLine=StringJoin["(",CType[IntegralClass[Classes[[ic]]]]," ", \
                                        CType[IntegralClass[Classes[[jc]]]],"|", \
                                        CType[IntegralClass[Classes[[kc]]]]," ", \
@@ -422,12 +465,14 @@ Do[Do[Do[Do[
 	    kmin = Classes[[kc, 1]]; kmax = Classes[[kc, 2]];
 	    lmin = Classes[[lc, 1]]; lmax = Classes[[lc, 2]];
 
-            ijklType=1000*IntegralClass[Classes[[ic]]] \
-                     +100*IntegralClass[Classes[[jc]]] \
-                      +10*IntegralClass[Classes[[kc]]] \
-	                 +IntegralClass[Classes[[lc]]];
+            ijklType=1000000*IntegralClass[Classes[[ic]]] \
+                      +10000*IntegralClass[Classes[[jc]]] \
+                        +100*IntegralClass[Classes[[kc]]] \
+	                    +IntegralClass[Classes[[lc]]];
 
-	   Subroutine=StringJoin["DInt",ToString[ijklType],".F90"];
+Print["ijklType=",ijklType," i=",IntegralClass[Classes[[ic]]]," j=",IntegralClass[Classes[[jc]]]," k=",IntegralClass[Classes[[kc]]]," l=",IntegralClass[Classes[[lc]]]];
+
+	   Subroutine=StringJoin["Int",ToString[ijklType],".F90"];
 
 	   OpenWrite[Subroutine];
 	   Print[" Openned ",Subroutine];
@@ -436,8 +481,8 @@ Do[Do[Do[Do[
 
 	   WriteString[Subroutine,CommentLine]; 
 
-	   MakeList=StringJoin[MakeList,StringJoin["DInt",ToString[ijklType],".o \\ \n"]];
-           RelsList=StringJoin[RelsList,StringJoin["DInt",ToString[ijklType],".x \\ \n"]]; 
+	   MakeList=StringJoin[MakeList,StringJoin["Int",ToString[ijklType],".o \\ \n"]];
+           RelsList=StringJoin[RelsList,StringJoin["Int",ToString[ijklType],".x \\ \n"]]; 
 
            BraEll=imax+jmax;
            KetEll=kmax+lmax;
@@ -462,10 +507,12 @@ Do[Do[Do[Do[
            PunchHRRClass[Subroutine,ic,jc,kc,lc]; 
 
 
-           WS[StringJoin["END SUBROUTINE DInt",ToString[ijklType]]];
+           WS[StringJoin["END SUBROUTINE Int",ToString[ijklType]]];
 
            Close[Subroutine];
            Print[" Closed ",Subroutine];
+
+     ];
 
 ,{ic,1,LC}]
 ,{jc,1,LC}]
