@@ -269,12 +269,6 @@ CONTAINS
      HDF_CurrentID=OpenHDFGroup(HDFFileID, &
                    "Clone #"//TRIM(IntToChar(iCLONE)))
        chGEO=IntToChar(iGEO)
-       ! re-initialize space in new HDF. 
-       GMAux%NAtms=GMLoc%NAtms
-       CALL New(GMAux)
-       CALL Put(GMAux,chGEO)
-       CALL Delete(GMAux)
-       !
        CALL Put(GMLoc,chGEO)
      CALL CloseHDFGroup(HDF_CurrentID)
      CALL CloseHDF(HDFFileID)
