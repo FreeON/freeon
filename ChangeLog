@@ -1,3 +1,50 @@
+2004-10-27 14:50  nemeth
+
+	* MondoSCF2/: ControlStructures.F90, InCoords.F90, Optimizer.F90,
+	QUICCA.F90: A new update on the crystal optimizer. Default is set
+	back to constrained lattice. This version reproduces urea, iceIh,
+	Quartz, sulphure, etc results that are checked in to Validate.
+
+2004-10-26 23:52  nemeth
+
+	* Validate/: Quartz.inp, Quartz.ref: Quartz optimization with
+	constrained lattice. "ref" file contains a lot of debug info,
+	better version will be checked in later.
+
+2004-10-26 04:02  vweber
+
+	* ONX2/: GONX2ComputDK.F90, ONX2ComputK.F90: Added a check for
+	BoxShape. To be compatible with MIC and HF-stress, the lower part
+	of BoxShape and InvBoxSh MUST be zero (ie elements (2,1), (3,1) and
+	(3,2)).
+
+2004-10-22 14:45  vweber
+
+	* TwoE/VRR/: VRRg0g0.F90, VRRk0s0.F90: [no log message]
+
+2004-10-22 14:10  vweber
+
+	* Validate/Graphite.inp: test
+
+2004-10-22 11:51  nemeth
+
+	* MondoSCF2/: InCoords.F90, Optimizer.F90, QUICCA.F90: A few
+	corrections that were necessary to reproduce former results of
+	constraint optimization on IceIh and Urea, as given in Validate.
+	Also, a subroutine has been added that creates the 'missing' part
+	of the lattice forces (SYMMSTRESS) on the basis of the assumption
+	that the total lattice force does not contain components that would
+	rotate the lattice.
+
+2004-10-21 11:52  mchalla
+
+	* HiCu/XCForce.F90, MondoSCF2/SCFs.F90, OneE/SForce.F90: Valerys
+	changes
+
+2004-10-21 11:52  mchalla
+
+	* ChangeLog: [no log message]
+
 2004-10-21 11:11  mchalla
 
 	* TwoE/VRR/: VRRg0g0.F90, VRRg0h0.F90, VRRg0i0.F90, VRRg0p0.F90,
