@@ -43,6 +43,7 @@ CONTAINS
        G%Clone(I)%PBC=PBC
        CALL CalculateCoordArrays(G%Clone(I))
     ENDDO
+!   
   END SUBROUTINE LoadPeriodic
 !=========================================================================
 !
@@ -310,5 +311,200 @@ CONTAINS
        ENDDO
     ENDIF
   END SUBROUTINE CalculateCoordArrays
+!------------------------------------------------------------------------!
+!
+!------------------------------------------------------------------------!
+  SUBROUTINE ParseSuperCell(G)
+    INTEGER,DIMENSION(3)  :: SC 
+    TYPE(CRDS)            :: G
+    INTEGER               :: I,J,K,NTot
+!
+    SC(:)=0
+    IF(FindKey(SUPERC,Inp))THEN
+       DO K=1,10
+          IF(OptKeyLocQ(Inp,SUPERC,IntToChar(K),MaxSets,NLoc,Location)) THEN
+             Ntot = NLoc
+             DO I=1,NLoc
+                SC(Location(I)) = K
+             ENDDO
+          ENDIF
+       ENDDO
+    ELSE
+       SC(:)=1
+    ENDIF   
+    IF(SC(1)==0 .OR. SC(2)==0 .OR. SC(3)==0) THEN
+       CALL Halt('SupreCell Number is Incorrect')
+    ENDIF
+    G%PBC%SuperCell%I(1)=1
+    IF(G%PBC%AutoW%I(1)==1) G%PBC%SuperCell%I(1)=SC(1)
+    IF(G%PBC%AutoW%I(2)==1) G%PBC%SuperCell%I(2)=SC(2)
+    IF(G%PBC%AutoW%I(3)==1) G%PBC%SuperCell%I(3)=SC(3)
+!
+  END SUBROUTINE ParseSuperCell
+!!$!=========================================================================
+!!$!
+!!$!=========================================================================
+!!$  SUBROUTINE SuperCellGeom(G)
+!!$    TYPE(CRDS)                :: G,Gtmp
+!!$    REAL(DOUBLE)              :: SCFacX,SCFacY,SCFacZ
+!!$    INTEGER                   :: I,J,K,ISCX,ISCY,ISCZ,AT,NC
+!!$    REAL(DOUBLE),DIMENSION(3) :: RVec,IVec
+!!$!    
+!!$    IF(G%PBC%SuperCell%I(1)+G%PBC%SuperCell%I(2)+G%PBC%SuperCell%I(3)==3) RETURN
+!!$!
+!!$    ISCX = G%PBC%SuperCell%I(1)
+!!$    ISCY = G%PBC%SuperCell%I(2)
+!!$    ISCZ = G%PBC%SuperCell%I(3)
+!!$    SCFacX = DBLE(ISCX)
+!!$    SCFacY = DBLE(ISCY)    
+!!$    SCFacZ = DBLE(ISCZ)
+!!$!
+!!$    Gtmp%NAtms=G%NAtms*ISCX*ISCY*ISCZ
+!!$    CALL New(Gtmp)
+!!$    Gtmp%Nkind=G%Nkind
+!!$    Gtmp%NElec=G%NElec*ISCX*ISCY*ISCZ
+!!$    GTmp%TotCh=G%TotCh*ISCX*ISCY*ISCZ
+!!$    Gtmp%NAlph=G%NAlph*ISCX*ISCY*ISCZ
+!!$    Gtmp%NBeta=G%NBeta*ISCX*ISCY*ISCZ
+!!$    Gtmp%Multp=G%Multp
+!!$    Gtmp%InAU =G%InAU
+!!$    Gtmp%Ordrd=G%Ordrd
+!!$    Gtmp%Confg=G%Confg
+!!$    Gtmp%ETotal  =G%ETotal
+!!$    Gtmp%GradRMS =G%GradRMS
+!!$    Gtmp%GradMax =G%GradMax
+!!$    Gtmp%Unstable=G%Unstable
+!!$!    
+!!$    Gtmp%BndBox%D(1,1)= G%BndBox%D(1,1)
+!!$    Gtmp%BndBox%D(1,2)= SCFacX*G%BndBox%D(1,2)
+!!$    Gtmp%BndBox%D(2,1)= G%BndBox%D(2,1)
+!!$    Gtmp%BndBox%D(2,2)= SCFacY*G%BndBox%D(2,2)
+!!$    Gtmp%BndBox%D(3,1)= G%BndBox%D(3,1)
+!!$    Gtmp%BndBox%D(3,2)= SCFacZ*G%BndBox%D(3,2)
+!!$!
+!!$    Gtmp%PBC%Dimen     = G%PBC%Dimen
+!!$    Gtmp%PBC%PFFMaxEll = G%PBC%PFFMaxEll
+!!$    Gtmp%PBC%PFFMaxLay = G%PBC%PFFMaxLay
+!!$    Gtmp%PBC%PFFOvRide = G%PBC%PFFOvRide
+!!$    Gtmp%PBC%AtomW     = G%PBC%AtomW
+!!$    Gtmp%PBC%InVecForm = G%PBC%InVecForm 
+!!$    Gtmp%PBC%InAtomCrd = G%PBC%InAtomCrd
+!!$    Gtmp%PBC%Translate = G%PBC%Translate
+!!$!
+!!$    Gtmp%PBC%CellVolume= SCFacX*SCFacY*SCFacZ*G%PBC%CellVolume
+!!$    Gtmp%PBC%Epsilon   = G%PBC%Epsilon
+!!$    Gtmp%PBC%DipoleFAC = G%PBC%DipoleFAC/SCFacX*SCFacY*SCFacZ
+!!$    Gtmp%PBC%QupoleFAC = G%PBC%QupoleFAC/SCFacX*SCFacY*SCFacZ
+!!$!
+!!$    Gtmp%PBC%AutoW%I     = G%PBC%AutoW%I
+!!$    Gtmp%PBC%SuperCell%I = G%PBC%SuperCell%I
+!!$!
+!!$    Gtmp%PBC%CellCenter%D(1)=SCFacX*G%PBC%CellCenter%D(1)
+!!$    Gtmp%PBC%CellCenter%D(2)=SCFacY*G%PBC%CellCenter%D(2)
+!!$    Gtmp%PBC%CellCenter%D(3)=SCFacZ*G%PBC%CellCenter%D(3)
+!!$    Gtmp%PBC%TransVec%D(1)  =SCFacX*G%PBC%TransVec%D(1)
+!!$    Gtmp%PBC%TransVec%D(2)  =SCFacY*G%PBC%TransVec%D(2)
+!!$    Gtmp%PBC%TransVec%D(3)  =SCFacZ*G%PBC%TransVec%D(3)
+!!$!
+!!$    Gtmp%PBC%BoxShape%D(1:3,1)=SCFacX*G%PBC%BoxShape%D(1:3,1)
+!!$    Gtmp%PBC%BoxShape%D(1:3,2)=SCFacY*G%PBC%BoxShape%D(1:3,2)
+!!$    Gtmp%PBC%BoxShape%D(1:3,3)=SCFacZ*G%PBC%BoxShape%D(1:3,3)
+!!$    Gtmp%PBC%LatFrc%D(1:3,1)  =SCFacX*G%PBC%LatFrc%D(1:3,1)
+!!$    Gtmp%PBC%LatFrc%D(1:3,2)  =SCFacY*G%PBC%LatFrc%D(1:3,2)
+!!$    Gtmp%PBC%LatFrc%D(1:3,3)  =SCFacZ*G%PBC%LatFrc%D(1:3,3)
+!!$!
+!!$    Gtmp%PBC%InvBoxSh%D = InverseMatrix(Gtmp%PBC%BoxShape%D)
+!!$!
+!!$    NC = 0
+!!$    DO I=1,ISCX
+!!$       DO J=1,ISCY
+!!$          DO K=1,ISCZ
+!!$             RVec(1) = G%PBC%BoxShape%D(1,1)*DBLE(I-1)+G%PBC%BoxShape%D(1,2)*DBLE(J-1)+G%PBC%BoxShape%D(1,3)*DBLE(K-1)
+!!$             RVec(2) = G%PBC%BoxShape%D(2,1)*DBLE(I-1)+G%PBC%BoxShape%D(2,2)*DBLE(J-1)+G%PBC%BoxShape%D(2,3)*DBLE(K-1)
+!!$             RVec(3) = G%PBC%BoxShape%D(3,1)*DBLE(I-1)+G%PBC%BoxShape%D(3,2)*DBLE(J-1)+G%PBC%BoxShape%D(3,3)*DBLE(K-1)
+!!$             IVec(1) = DBLE(I-1)
+!!$             IVec(2) = DBLE(J-1)
+!!$             IVec(3) = DBLE(K-1)
+!!$             DO AT=1,G%NAtms
+!!$                NC = NC+1
+!!$                Gtmp%AtNum%D(NC)      = G%AtNum%D(AT)
+!!$                Gtmp%AtTyp%I(NC)      = G%AtTyp%I(AT)
+!!$                Gtmp%AtNam%C(NC)      = G%AtNam%C(AT)
+!!$                Gtmp%AtMMTyp%C(NC)    = G%AtMMTyp%C(AT)
+!!$                Gtmp%AtMss%D(NC)      = G%AtMss%D(AT)
+!!$                Gtmp%CConstrain%I(NC) = G%CConstrain%I(AT)
+!!$!
+!!$                Gtmp%Velocity%D(1:3,NC) = G%Velocity%D(1:3,AT)  
+!!$                Gtmp%Gradients%D(1:3,NC)= G%Gradients%D(1:3,AT)
+!!$!
+!!$                Gtmp%Carts%D(1:3,NC)    = G%Carts%D(1:3,AT)+RVec(1:3) 
+!!$                Gtmp%BoxCarts%D(1:3,NC) = G%BoxCarts%D(1:3,AT)+IVec(1:3) 
+!!$             ENDDO
+!!$          ENDDO
+!!$       ENDDO
+!!$    ENDDO
+!!$!
+!!$
+!!$    WRITE(*,*) 'SuperCell Option is On:'
+!!$    WRITE(*,*) 'No. Atoms in PrimCell  = ',G%NAtms
+!!$    WRITE(*,*) 'No. Atoms in SuperCell = ',Gtmp%NAtms
+!!$!
+!!$    CALL Delete(G)
+!!$    G%NAtms=Gtmp%NAtms
+!!$    CALL New(G)
+!!$
+!!$    G%Nkind=Gtmp%Nkind
+!!$    G%NElec=Gtmp%NElec
+!!$    G%TotCh=Gtmp%TotCh
+!!$    G%NAlph=Gtmp%NAlph
+!!$    G%NBeta=Gtmp%NBeta
+!!$    G%Multp=Gtmp%Multp
+!!$    G%InAU =Gtmp%InAU
+!!$    G%Ordrd=Gtmp%Ordrd
+!!$    G%Confg=Gtmp%Confg
+!!$    G%ETotal  =Gtmp%ETotal
+!!$    G%GradRMS =Gtmp%GradRMS
+!!$    G%GradMax =Gtmp%GradMax
+!!$    G%Unstable=Gtmp%Unstable
+!!$    G%BndBox%D=Gtmp%BndBox%D
+!!$!
+!!$    G%PBC%Dimen     = Gtmp%PBC%Dimen
+!!$    G%PBC%PFFMaxEll = Gtmp%PBC%PFFMaxEll
+!!$    G%PBC%PFFMaxLay = Gtmp%PBC%PFFMaxLay
+!!$    G%PBC%PFFOvRide = Gtmp%PBC%PFFOvRide
+!!$    G%PBC%AtomW     = Gtmp%PBC%AtomW
+!!$    G%PBC%InVecForm = Gtmp%PBC%InVecForm 
+!!$    G%PBC%InAtomCrd = Gtmp%PBC%InAtomCrd
+!!$    G%PBC%Translate = Gtmp%PBC%Translate
+!!$!
+!!$    G%PBC%CellVolume= Gtmp%PBC%CellVolume
+!!$    G%PBC%Epsilon   = Gtmp%PBC%Epsilon
+!!$    G%PBC%DipoleFAC = Gtmp%PBC%DipoleFAC
+!!$    G%PBC%QupoleFAC = Gtmp%PBC%QupoleFAC
+!!$!
+!!$    G%PBC%AutoW%I     = Gtmp%PBC%AutoW%I
+!!$    G%PBC%SuperCell%I = Gtmp%PBC%SuperCell%I
+!!$!
+!!$    G%PBC%CellCenter%D=Gtmp%PBC%CellCenter%D
+!!$    G%PBC%TransVec%D  =Gtmp%PBC%TransVec%D
+!!$!
+!!$    G%PBC%BoxShape%D = Gtmp%PBC%BoxShape%D
+!!$    G%PBC%InvBoxSh%D = Gtmp%PBC%InvBoxSh%D
+!!$    G%PBC%LatFrc%D   = Gtmp%PBC%LatFrc%D
+!!$!
+!!$    G%AtNum%D      = Gtmp%AtNum%D
+!!$    G%AtTyp%I      = Gtmp%AtTyp%I
+!!$    G%AtNam%C      = Gtmp%AtNam%C
+!!$    G%AtMMTyp%C    = Gtmp%AtMMTyp%C
+!!$    G%AtMss%D      = Gtmp%AtMss%D
+!!$    G%CConstrain%I = Gtmp%CConstrain%I
+!!$!
+!!$    G%Velocity%D   = Gtmp%Velocity%D 
+!!$    G%Gradients%D  = Gtmp%Gradients%D
+!!$!
+!!$    G%Carts%D      = Gtmp%Carts%D
+!!$    G%BoxCarts%D   = Gtmp%BoxCarts%D
+!!$!
+!!$  END SUBROUTINE SuperCellGeom
 !-----------------------------------------------------------------------!
 END MODULE ParsePeriodic
