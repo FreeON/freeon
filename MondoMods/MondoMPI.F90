@@ -19,7 +19,7 @@ MODULE MondoMPI
                        BCast_INT_SCLR,                                  &
                        BCast_INT_VECT, BCast_INT_RNK2,  BCast_INT_RNK3, &
                        BCast_INT_RNK4, BCast_CHR_SCLR,  BCast_LOG_SCLR, &
-                       BCast_DEBG                        
+                       BCast_DEBG, Bcast_LOG_VECT        
    END INTERFACE
    INTERFACE AllReduce   ! Wrappers for MPI_ALLREDUCE
       MODULE PROCEDURE AllReduce_DBL_SCLR,AllReduce_INT_SCLR
@@ -140,7 +140,31 @@ MODULE MondoMPI
             CALL HaltMPI(' MPI_BCAST failed in Bcast_STR',IErr)
          A=.FALSE.; IF(I==1)A=.TRUE.
       END SUBROUTINE Bcast_LOG_SCLR
+!
+!---------------------------------------------------------------------
+!
+      SUBROUTINE Bcast_LOG_VECT(A)
+         TYPE(LOG_VECT),INTENT(INOUT)            :: A
+         TYPE(INT_VECT)                          :: IA
+         INTEGER                                 :: IErr,I,N
+         N=SIZE(A%L)
+         CALL New(IA,N)
+         IA%I=0
+         DO I=1,N
+           IF(A%L(I)) IA%I(I)=1
+         ENDDO
+         CALL MPI_BCAST(IA%I,N,MPI_INTEGER,ROOT,MONDO_COMM,IErr)
+         IF(IErr/=MPI_SUCCESS) &
+            CALL HaltMPI(' MPI_BCAST failed in Bcast_LOG_VECT',IErr)
+         A%L=.FALSE.
+         DO I=1,N
+           IF(IA%I(I)==1) A%L(I)=.TRUE.
+         ENDDO
+         CALL Delete(IA)
+      END SUBROUTINE Bcast_LOG_VECT
+!
 !--------------------------------------------------------BCAST DOUBLES
+!
       SUBROUTINE Bcast_DBL_SCLR(D,Id_0)
          REAL(DOUBLE), INTENT(INOUT) :: D
          INTEGER, OPTIONAL           :: Id_0

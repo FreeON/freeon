@@ -389,25 +389,17 @@ CONTAINS
     CHARACTER(LEN=*),         INTENT(IN)    :: VarName
     CHARACTER(LEN=*),OPTIONAL,INTENT(IN)    :: Tag_O
     !
-#ifdef PARALLEL 
-    IF(MyId==ROOT) THEN
-#endif 
-    IF(AllocQ(A%Alloc)) CALL Delete(A)         
-    CALL Get(A%N,                    'N'//TRIM(VarName),Tag_O=Tag_O)
-    CALL New(A,A%N)                                           
-    CALL Get(A%Def,                'Def'//TRIM(VarName),Tag_O=Tag_O)
-    CALL Get(A%Atoms,            'Atoms'//TRIM(VarName),Tag_O=Tag_O)
-    CALL Get(A%Value,            'Value'//TRIM(VarName),Tag_O=Tag_O)
-    CALL Get(A%ConstrValue,'ConstrValue'//TRIM(VarName),Tag_O=Tag_O)
-    CALL Get(A%Active,          'Active'//TRIM(VarName),Tag_O=Tag_O)
-    CALL Get(A%PredVal,        'PredVal'//TRIM(VarName),Tag_O=Tag_O)
-    CALL Get(A%PredGrad,      'PredGrad'//TRIM(VarName),Tag_O=Tag_O)
-    CALL Get(A%InvHess,       'PredGrad'//TRIM(VarName),Tag_O=Tag_O)
-#ifdef PARALLEL 
-       ENDIF
-       !! IF(InParallel)CALL Bcast(A)
-       !! STOP 'ERROR : Bcast in Get_INTC (InOut.F90) not supported!'
-#endif 
+     IF(AllocQ(A%Alloc)) CALL Delete(A)         
+     CALL Get(A%N,                'NIntC'//TRIM(VarName),Tag_O=Tag_O)
+     CALL New(A,A%N)                                           
+     CALL Get(A%Def,                'Def'//TRIM(VarName),Tag_O=Tag_O)
+     CALL Get(A%Atoms,            'Atoms'//TRIM(VarName),Tag_O=Tag_O)
+     CALL Get(A%Value,            'Value'//TRIM(VarName),Tag_O=Tag_O)
+     CALL Get(A%ConstrValue,'ConstrValue'//TRIM(VarName),Tag_O=Tag_O)
+     CALL Get(A%Active,          'Active'//TRIM(VarName),Tag_O=Tag_O)
+     CALL Get(A%PredVal,        'PredVal'//TRIM(VarName),Tag_O=Tag_O)
+     CALL Get(A%PredGrad,      'PredGrad'//TRIM(VarName),Tag_O=Tag_O)
+     CALL Get(A%InvHess,       'PredGrad'//TRIM(VarName),Tag_O=Tag_O)
   END SUBROUTINE Get_INTC
 
      !-------------------------------------------------------------------------------
@@ -418,10 +410,10 @@ CONTAINS
        CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Tag_O
        !
        IF(A%N<=0) RETURN
-#ifdef PARALLEL 
-       IF(MyId==ROOT)THEN
-#endif 
-          CALL Put(A%N,                    'N'//TRIM(VarName),Tag_O=Tag_O)
+!#ifdef PARALLEL 
+!       IF(MyId==ROOT)THEN
+!#endif 
+          CALL Put(A%N,                'NIntC'//TRIM(VarName),Tag_O=Tag_O)
           CALL Put(A%Def,                'Def'//TRIM(VarName),Tag_O=Tag_O)
           CALL Put(A%Atoms,            'Atoms'//TRIM(VarName),Tag_O=Tag_O)
           CALL Put(A%Value,            'Value'//TRIM(VarName),Tag_O=Tag_O)
@@ -430,9 +422,9 @@ CONTAINS
           CALL Put(A%PredVal,        'PredVal'//TRIM(VarName),Tag_O=Tag_O)
           CALL Put(A%PredGrad,      'PredGrad'//TRIM(VarName),Tag_O=Tag_O)
           CALL Put(A%InvHess,       'PredGrad'//TRIM(VarName),Tag_O=Tag_O)
-#ifdef PARALLEL 
-       ENDIF       
-#endif 
+!#ifdef PARALLEL 
+!       ENDIF       
+!#endif 
 
         END SUBROUTINE Put_INTC
 !
@@ -1989,6 +1981,7 @@ CONTAINS
                       CHARACTER(LEN=*),         INTENT(IN) :: VarName
                       CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Tag_O
                       TYPE(INT_VECT)                       :: ILog
+                      TYPE(META_DATA)                      :: Meta
 #ifdef PARALLEL 
                       IF(MyId==ROOT)THEN
 #endif 
@@ -1999,11 +1992,10 @@ CONTAINS
                             ILog%I(I)=0
                             IF(A%L(I)) ILog%I(I)=1
                          ENDDO
-                         IF(PRESENT(Tag_O)) THEN
-                           CALL Put_INT_VECT(ILog,VarName//Tag_O)
-                         ELSE
-                           CALL Put_INT_VECT(ILog,VarName)
-                         ENDIF
+                         Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_INT32,NN)
+                         CALL OpenData(Meta,.TRUE.)
+                         CALL WriteIntegerVector(Meta,ILog%I)
+                         CALL CloseData(Meta)
                          CALL Delete(ILog)
 #ifdef PARALLEL 
                       ENDIF
@@ -2022,11 +2014,11 @@ CONTAINS
 #endif 
                          NN=SIZE(A%L)
                          CALL New(ILog,NN)
-                         IF(PRESENT(Tag_O)) THEN
-                           CALL Get_INT_VECT(ILog,VarName,Tag_O)
-                         ELSE
-                           CALL Get_INT_VECT(ILog,VarName)
-                         ENDIF
+                         Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_INT32, &
+                              SIZE(ILog%I,1),.FALSE.)
+                         CALL OpenData(Meta)
+                         CALL ReadIntegerVector(Meta,ILog%I)
+                         CALL CloseData(Meta)
                          DO I = 1, NN
                             IF(ILog%I(I)==1) Then
                                A%L(I) = .TRUE.
@@ -2034,15 +2026,13 @@ CONTAINS
                                A%L(I) = .FALSE.
                             ENDIF
                          ENDDO
-                         CALL Delete(ILog)
+                        CALL Delete(ILog)
 #ifdef PARALLEL 
                       ENDIF
+                      IF(InParallel) CALL Bcast(A)
 #endif 
                     END SUBROUTINE Get_LOG_VECT
                     !-------------------------------------------------------------------------------
-
-
-
   SUBROUTINE Put_CellSet(CS,Name_O,Tag_O,Unlimit_O)
     TYPE(CellSet)                  :: CS
     CHARACTER(Len=*),Optional            :: Name_O
