@@ -14,23 +14,36 @@ CPPMISC = -DEXPLICIT_SOURCE
 EXTRA_INCLUDES= -I$(MONDO_HOME)/MondoMods/MMA/Functions  \
                 -I$(MONDO_HOME)/QCTC/MMA/Moments
 #
-QCTCObjs=XLate.o CTraX.o Globals.o MondoPoles.o PoleTree.o JGen.o NukE.o QCTC.o  
+QCTCObjs=XLate.o CTraX.o Globals.o MondoPoles.o PoleTree.o JGen.o NukE.o QCTC.o
+GObjs=XLate.o CTraX.o Globals.o MondoPoles.o PoleTree.o GradJGen.o GradNukE.o GradQCTC.o
 #
-all:	QCTC
+all:	QCTC GradQCTC
 #
-clean:	CQCTC cmma
+clean:	CQCTC cmma CGQCTC
 #
-purge:	CQCTC cmma 
+purge:	CQCTC cmma CGQCTC
 #
 QCTC:	$(QCTCObjs)
 	$(LD) $(LDFLAGS) QCTC $(QCTCObjs) $(LibOpts) $(F90_LIBRARIES) 
 	mv QCTC $(MONDO_HOME)/Exec/QCTC
+#
+GradQCTC:	$(GObjs)
+	$(LD) $(LDFLAGS) GradQCTC $(GObjs) $(LibOpts) $(F90_LIBRARIES) 
+	mv GradQCTC $(MONDO_HOME)/Exec/GradQCTC
 #
 CQCTC:
 	rm -f $(REMOVEALL)
 	rm -f \#*
 	rm -f *~
 	rm -f $(MONDO_HOME)/Exec/QCTC
+	ls 
+#
+#
+CGQCTC:
+	rm -f $(REMOVEALL)
+	rm -f \#*
+	rm -f *~
+	rm -f $(MONDO_HOME)/Exec/GradQCTC
 	ls 
 #
 mma:	ctrax hgtosp pac md3trr
