@@ -1,3 +1,67 @@
+2003-12-10 16:47  mchalla
+
+	* Docs/DM_Papers/PERT_2/: Alpha_h2o3D_6-31G_G_T_t.eps,
+	Alpha_h2o3D_6-31Gss_G_T_t.eps, DPrimeZ_150_6-31G.eps, Makefile,
+	Response2.bib, Response2.tex: Valery's new paper on O(N) response.
+
+2003-12-10 16:44  mchalla
+
+	* MondoSCF2/SCFs.F90: EXTRAPOLATION IS NOW THE DEFAULT, PLEASE
+	REPORT ANY BUGS TO MATT AND ANDERS!
+
+2003-12-10 16:43  mchalla
+
+	* SCFeqs/P2Use.F90: New Anders Extrapolation scheme!
+
+2003-12-10 14:09  vweber
+
+	* ONX2/: IntSSSS.F90, Makefile, ONX2.F90, ONX2ComputK.F90,
+	ONX2DataType.F90, PartDrv.F90: Parallel version.
+
+2003-12-08 14:38  nemeth
+
+	* MondoMods/CholFact.F90: 'CART' coords have been forgotten from
+	topology list for internal-coordinates.  Fixed now.
+
+2003-12-04 15:38  nemeth
+
+	* MondoSCF2/SCFs.F90: Allowing more SCF steps for 'SCF hit DIIS &
+	DP increase...'.
+
+2003-12-04 14:42  tymczak
+
+	* Docs/: PBC_Exchange/LinearPBCExchange.tex,
+	PBC_paper/LinearPBCMethod_revtex4.tex: [no log message]
+
+2003-12-04 12:17  tymczak
+
+	* Docs/PBC_Exchange/LinearPBCExchange.tex: [no log message]
+
+2003-12-04 11:34  tymczak
+
+	* Docs/Bib/: mondo_new.bib, mondo_new.bib: [no log message]
+
+2003-12-04 11:33  tymczak
+
+	* Docs/PBC_Exchange/LinearPBCExchange.tex: Fixed some citations
+
+2003-12-03 18:32  nemeth
+
+	* MondoSCF2/: GDIIS.F90, InCoords.F90, Optimizer.F90,
+	ParseExtraCoords.F90: A modification in the numbering of internal
+	coords (%Atoms). Recognition of non-covalent bonds is restricted
+	now to the case of h-bond, metal-ligand interactions, and
+	lonely-atoms. This should work in general, except the case of
+	systems of weakly interacting fragments. For them an input option
+	should be added, to make recognition of interfragment bonds
+	available. Control of bracketing is slightly modified, it is
+	grouped now for stre, bend and tors groups with 15, 20 and 25%
+	bracketing.
+
+2003-12-03 15:23  mchalla
+
+	* ChangeLog: [no log message]
+
 2003-12-03 15:22  mchalla
 
 	* TwoE/: Gradient.m, Gradients.m, dInt1111.F90, dInt3111.F90,
