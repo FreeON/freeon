@@ -464,7 +464,7 @@ and 3-21G, and two different theory levels, SlaterDirac and B3LYP
 of there results, however, \textbf{MondoSCF} is capable of obtaining
 very precise results, beyond the capacity of \textbf{Crystal98} because
 we do not use fitting functions in the calculations of the Coulomb
-or the exchange-correlation energies. Also,in Table \ref{table: ConvegOfNaCl}
+or the exchange-correlation energies. Also,in Table \ref{table:ConvegOfNaCl}
 we show the convergence of the energy per atom of a Sodium Cloride
 test system for increasing system size. This shows convergence with
 system size, and is akin to k-space integration. 
@@ -541,149 +541,106 @@ and support.
 % 
 %
 \begin{table*}
-\caption{\label{table:ComToCrystal98_1} Comparison of Sodium Chloride test
-systems to Crystal98}
+\caption{\label{table:ComToCrystal98_1} Comparison MondoSCF and Crystal98 for a Sodium Chloride test
+system}
 
-{\centering \begin{tabular}{|c|c|c|c|c|c|}
+{\centering \begin{tabular}{|c:c c c l l|}
 \hline 
-System&
-Basis&
-Functional&
-Cell (A)&
 Program&
-Energy (Hartree)\\
-\hline
-\hline 
-NaCl&
-STO-3G&
-Slater-Dirac&
-\( \left\{ \begin{array}{c}
-\left| a\right| =\left| b\right| =\left| c\right| =3.9739401\\
-\alpha =\frac{\pi }{3},\beta =\frac{\pi }{3},N=2
-\end{array}\right\}  \)&
-MondoSCF&
-\( -610.9753547 \)\\
-\hline 
-&
-&
-&
-\( \begin{array}{c}
-\\
-
-\end{array} \)&
-Crystal98&
-\( -610.9754 \)\\
-\hline 
-&
-3-21G&
-BLYP&
-\( \begin{array}{c}
-\\
-
-\end{array} \)&
-MondoSCF&
-\( -619.3141936 \)\\
-\hline 
-&
-&
-&
-\( \begin{array}{c}
-\\
-
-\end{array} \)&
-Crystal98&
-\\
-\hline
-\hline 
-NaCl&
-STO-3G&
-Slater-Dirac&
-\( \left\{ \begin{array}{c}
-\left| a\right| =\left| b\right| =\left| c\right| =5.6200000\\
-\alpha =\frac{\pi }{2},\beta =\frac{\pi }{2},N=8
-\end{array}\right\}  \)&
-MondoSCF&
-\( -2444.3583560 \)\\
-\hline 
-&
-&
-&
-\( \begin{array}{c}
-\\
-
-\end{array} \)&
-Crystal98&
-\( -2444.358 \)\\
-\hline 
-&
-3-21G&
-BLYP&
-\( \begin{array}{c}
-\\
-
-\end{array} \)&
-MondoSCF&
-\( -2478.1517235 \)\\
-\hline 
-&
-&
-&
-\( \begin{array}{c}
-\\
-
-\end{array} \)&
-Crystal98&
-\\
-\hline
-\end{tabular}\par}
-\vspace{0.3cm}
-\end{table*}
-%
-%
-%
-\begin{table*}
-
-\caption{\label{table:ConvegOfNaCl} Total energy per atom for sodium chloride
-for increasing system size for the STO-3G/SlaterDirac system.}
-
-{\centering \begin{tabular}{|c|c|c|}
-\hline 
-System Size (\( N) \)&
-Energy (\( E \))&
+Basis/Theory&
+\( N \)&
+\( \mathbf{k} \)&
+\( E \)&
 \( \frac{E}{N} \)\\
 \hline
 \hline 
-\( \, \, 2^{\dagger } \)&
-\( -610.975117 \)&
-\( -305.487559 \)\\
+MondoSCF&
+STO-3G/LDA&
+2&
+(0,0,0)&
+-610.9753547&
+-305.487677\\
+Crystal98&
+STO-3G/LDA&
+2&
+(0,0,0)&
+-610.9754&
+-305.4877\\
+MondoSCF&
+8-511G/BLYP&
+2&
+(0,0,0)&
+-622.3910114&
+-311.1955057\\
+Crystal98&
+8-511G/BLYP&
+2&
+(0,0,0)&
+-622.3911&
+-311.1955\\
 \hline 
-\( 8 \)&
-\( -2444.35835 \)&
-\( -305.544794 \)\\
+MondoSCF&
+STO-3G/LDA&
+8&
+(0,0,0)&
+-2444.3583560&
+-305.544795\\
+Crystal98&
+STO-3G/LDA&
+8&
+(0,0,0)&
+-2444.358&
+-305.5447\\
+MondoSCF&
+8-511G/BLYP&
+8&
+(0,0,0)&
+-2490.0016297&
+-311.250204\\
+Crystal98&
+8-511G/BLYP&
+8&
+(0,0,0)&
+-2490.0013&
+-311.2502 \\
 \hline 
-\( \, \, 16^{\dagger } \)&
-\( -4888.70023 \)&
-\( -305.543765 \)\\
-\hline 
-\( \, \, 54^{\dagger } \)&
-\( -16499.4900 \)&
-\( -305.546111 \)\\
-\hline 
-\( 64 \)&
-\( -19554.9556 \)&
-\( -305.546181 \)\\
-\hline 
-\( \, \, 128^{\dagger } \)&
-\( -39109.9115 \)&
-\( -305.546184 \)\\
-\hline 
-\( 216 \)&
-\( -65997.9768 \)&
-\( -305.546185 \)\\
+MondoSCF&
+STO-3G/LDA&
+16&
+(0,0,0)&
+-4888.70023&
+-303.543765\\
+MondoSCF&
+STO-3G/LDA&
+54&
+(0,0,0)&
+-16499.4900&
+-305.546111\\
+MondoSCF&
+STO-3G/LDA&
+64&
+(0,0,0)&
+-19554.9556&
+-305.546181\\
+MondoSCF&
+STO-3G/LDA&
+128&
+(0,0,0)&
+-39109.9115&
+-305.546184\\
+MondoSCF&
+STO-3G/LDA&
+216&
+(0,0,0)&
+-65997.9768&
+-305.546185\\
 \hline
-\hline
-\multicolumn{2}{|c|}{{\bf Crystal98}} &
-\( -305.54614 \)\\
+Crystal98&
+STO-3G/LDA&
+2&
+(6,6,6)&
+-611.09228&
+-305.54614\\
 \hline
 \end{tabular}\par}
 \end{table*}
@@ -691,192 +648,177 @@ Energy (\( E \))&
 %
 %
 \begin{table*}
+\caption{\label{table:ComToCrystal98_2} Comparison MondoSCF and Crystal98 for a Magnesium Oxide test
+system}
 
-\caption{\label{table:ComToCrystal98_2} Comparison of MgO test systems to
-Crystal98}
-
-{\centering \begin{tabular}{|c|c|c|c|c|c|}
+{\centering \begin{tabular}{cccccc}
 \hline 
-System&
-Basis&
-Functional&
-Cell (A)&
 Program&
-Energy (Hartree)\\
-\hline
-\hline 
-MgO&
-STO-3G&
-Slater-Dirac&
-\( \left\{ \begin{array}{c}
-\left| a\right| =\left| b\right| =\left| c\right| =2.9777681\\
-\alpha =\frac{\pi }{3},\beta =\frac{\pi }{3},N=2
-\end{array}\right\}  \)&
-MondoSCF&
-\( -268.6324805 \)\\
-\hline 
-&
-&
-&
-\( \begin{array}{c}
-\\
-
-\end{array} \)&
-Crystal98&
-\( -268.6323 \)\\
-\hline 
-&
-3-21G&
-BLYP&
-\( \begin{array}{c}
-\\
-
-\end{array} \)&
-MondoSCF&
-\( -273.6929852 \)\\
-\hline 
-&
-&
-&
-\( \begin{array}{c}
-\\
-
-\end{array} \)&
-Crystal98&
-\\
-\hline
-\hline 
-MgO&
-STO-3G&
-Slater-Dirac&
-\( \left\{ \begin{array}{c}
-\left| a\right| =\left| b\right| =\left| c\right| =4.2112000 \\
-\alpha =\frac{\pi }{3},\beta =\frac{\pi }{3},N=2
-\end{array}\right\}  \)&
-MondoSCF&
-\( -1076.2137787 \)\\
-\hline 
-&
-&
-&
-\( \begin{array}{c}
-\\
-
-\end{array} \)&
-Crystal98&
-\( -1076.2138 \)\\
-\hline 
-&
-3-21G&
-BLYP&
-\( \begin{array}{c}
-\\
-
-\end{array} \)&
-MondoSCF&
-\( -1096.1329162 \)\\
-\hline 
-&
-&
-&
-\( \begin{array}{c}
-\\
-
-\end{array} \)&
-Crystal98&
-\\
-\hline
-\end{tabular}\par}
-\end{table*}
-%
-%
-%
-\begin{table*}
-
-\caption{\label{table:ConvegOfMgO} Total energy per atom for Magnesium Oxide
-for increasing system size for the STO-3G/BLYPxc system}
-
-{\centering \begin{tabular}{|c|c|c|}
-\hline
-System Size (\( N) \)&
-Energy (\( E \))&
-\( \frac{E}{N} \)\\
-\hline
-\hline
-\end{tabular}\par}
-\end{table*}
-%
-%
-%
-\begin{table*}
-
-\caption{\label{table:ComToCrystal98_3} Comparison of Carbon test systems
-to Crystal98}
-
-{\centering \begin{tabular}{|c|c|c|c|c|c|}
-\hline 
-System&
-Basis&
-Functional&
-Cell (A)&
-Program&
-Energy (Hartree)\\
-\hline
-\hline 
-Diamond&
-STO-3G&
-BLYP&
-\( \left\{ \begin{array}{c}
-\left| a\right| =\left| b\right| =\left| c\right| =3.5700000 \\
-\alpha =\frac{\pi }{2},\beta =\frac{\pi }{2},N=8
-\end{array}\right\}  \)&
-MondoSCF&
-\(-300.57539253 \)
-\\
-\hline 
-&
-&
-&
-\( \begin{array}{c}
-\\ 
-
-\end{array} \)&
-Crystal98&
-\( 0 \)\\
-\hline
-&
-3-21G&
-BLYP&
-&
-MondoSCF&
-\(-302.55031745 \)
-\\
-\hline
-&
-&
-&
-&
-Crystal98&
-\( 0 \)
-\\
-\hline
-\end{tabular}\par}
-\end{table*}
-%
-%
-%
-\begin{table*}
-
-\caption{\label{table:ConvegOfDia} Total energy per atom for Diamond
-for increasing system size for the STO-3G/BLYPxc system}
-
-{\centering \begin{tabular}{|c|c|c|}
-\hline
-System Size (\( N) \)&
-Energy (\( E \))&
+Basis/Theory&
+\( N \)&
+\( \mathbf{k} \)&
+\( E \)&
 \( \frac{E}{N} \)\\
 \hline
 \hline 
+MondoSCF&
+STO-3G/LDA&
+2&
+(0,0,0)&
+-268.6324805 &
+0.0 \\
+Crystal98&
+STO-3G/LDA&
+2&
+(0,0,0)&
+-268.6323 &
+0.0 \\
+MondoSCF&
+8-61G/BLYP&
+2&
+(0,0,0)&
+-275.0909646 &
+0.0 \\
+Crystal98&
+8-61G/BLYP&
+2&
+(0,0,0)&
+-275.0906 &
+0.0 \\
+\hline 
+MondoSCF&
+STO-3G/LDA&
+8&
+(0,0,0)&
+-1076.2137787 &
+0.0 \\
+Crystal98&
+STO-3G/LDA&
+8&
+(0,0,0)&
+-1076.2138 &
+0.0 \\
+MondoSCF&
+8-61G/BLYP&
+8&
+(0,0,0)&
+-1101.7294484 &
+0.0 \\
+Crystal98&
+8-61G/BLYP&
+8&
+(0,0,0)&
+-1101.7289 &
+0.0  \\
+\hline 
+MondoSCF&
+8-61G/BLYP&
+16&
+(0,0,0)&
+0.0 &
+0.0 \\
+MondoSCF&
+8-61G/BLYP&
+54&
+(0,0,0)&
+0.0 &
+0.0 \\
+MondoSCF&
+8-61G/BLYP&
+64&
+(0,0,0)&
+0.0 &
+0.0 \\
+MondoSCF&
+8-61G/BLYP&
+128&
+(0,0,0)&
+0.0 &
+0.0 \\
+MondoSCF&
+8-61G/BLYP&
+216&
+(0,0,0)&
+0.0 &
+0.0 \\
+\hline
+Crystal98&
+8-61G/BLYP&
+2&
+(6,6,6)&
+0.0 &
+0.0 \\
+\hline
+\end{tabular}\par}
+\end{table*}
+%
+%
+%
+\begin{table*}
+\caption{\label{table:ComToCrystal98_3} Comparison MondoSCF and Crystal98 for a Diamond test
+system}
+
+{\centering \begin{tabular}{cccccc}
+\hline 
+Program&
+Basis/Theory&
+\( N \)&
+\( \mathbf{k} \)&
+\( E \)&
+\( \frac{E}{N} \)\\
+\hline
+\hline 
+MondoSCF&
+STO-3G/BLYP&
+8&
+(0,0,0)&
+-300.5755 &
+0.0 \\
+Crystal98&
+STO-3G/BLYP&
+8&
+(0,0,0)&
+-300.5755109 &
+0.0 \\
+MondoSCF&
+6-21G/BLYP&
+8&
+(0,0,0)&
+-303.8938328 &
+0.0 \\
+Crystal98&
+6-21G/BLYP&
+8&
+(0,0,0)&
+-303.8941 &
+0.0 \\
+\hline 
+MondoSCF&
+6-21G/BLYP&
+64&
+(0,0,0)&
+0.0 &
+0.0 \\
+MondoSCF&
+6-21G/BLYP&
+216&
+(0,0,0)&
+0.0 &
+0.0 \\
+MondoSCF&
+6-21G/BLYP&
+512&
+(0,0,0)&
+0.0 &
+0.0 \\
+\hline
+Crystal98&
+6-21G/BLYP&
+8&
+(2,2,2)&
+0.0 &
+0.0 \\
+\hline
 \end{tabular}\par}
 \end{table*}
 %
