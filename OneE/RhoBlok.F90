@@ -10,23 +10,30 @@ CONTAINS
 !--------------------------------------------------------------
 ! Add nuclear centers to the density
 !--------------------------------------------------------------
-  SUBROUTINE AddNukes(GM,Rho)
-    TYPE(CRDS)                 :: GM
-    TYPE(HGRho)                :: Rho
-    INTEGER                    :: IA,Iq,Ir
-    REAL(DOUBLE)               :: DDelta
+  SUBROUTINE AddNukes(GM,Rho,IOff_O)
+    TYPE(CRDS)                    :: GM
+    TYPE(HGRho)                   :: Rho
+    INTEGER                       :: IA,Iq,Ir,IOffQ,IOffR
+    INTEGER,DIMENSION(2),OPTIONAL :: IOff_O
+    REAL(DOUBLE)                  :: DDelta
 !---------------------------------------------------
-!   Initialize the Nuclear centers and Constants
-!
+    ! Initialize the Nuclear centers and Constants
     DDelta = Half*(Rho%Expt%D(Rho%NExpt)/Pi)**(ThreeHalves)
-!
-    DO IA = 1,NAtoms
-       Iq = Rho%OffQ%I(Rho%NExpt)+IA
-       Ir = Rho%OffR%I(Rho%NExpt)+IA
-       Rho%Qx%D(Iq)    = GM%Carts%D(1,IA)
-       Rho%Qy%D(Iq)    = GM%Carts%D(2,IA)
-       Rho%Qz%D(Iq)    = GM%Carts%D(3,IA)
-       Rho%Co%D(Ir)  = (-GM%AtNum%I(IA))*DDelta
+    IF(PRESENT(IOff_O))THEN
+       IOffQ=IOff_O(1)
+       IOffR=IOff_O(2)
+    ELSE
+       IOffQ=Rho%OffQ%I(Rho%NExpt)
+       IOffR=Rho%OffR%I(Rho%NExpt)
+    ENDIF
+
+    DO IA = 1,GM%Natms       
+       Iq=IOffQ+IA
+       Ir=IOffR+IA
+       Rho%Qx%D(Iq)=GM%Carts%D(1,IA)
+       Rho%Qy%D(Iq)=GM%Carts%D(2,IA)
+       Rho%Qz%D(Iq)=GM%Carts%D(3,IA)
+       Rho%Co%D(Ir)=-GM%AtNum%D(IA)*DDelta
     ENDDO
   END SUBROUTINE AddNukes
 !--------------------------------------------------------------
