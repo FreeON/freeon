@@ -118,7 +118,7 @@ MODULE BlokTrPdJ
                          DO L=0,EllAB
                             PStrength = PStrength+FudgeFactorial(L,SPEll+1)*Unsold0(L,SPBraC,SPBraS)
                          ENDDO
-                         PStrength = (PStrength/TauMAC)**(Two/DBLE(SPEll+2))
+                         PStrength = (PStrength/TauMAC)**(Two/DBLE(SPEll+2))  
                          IF(DP2 < PStrength) THEN
                             DP2   = PStrength
                          ENDIF
@@ -129,18 +129,21 @@ MODULE BlokTrPdJ
                          ENDDO
                       ENDDO
                    ENDDO
-                ENDDO
+                ENDDO 
                 DP2=MIN(1.D10,DP2)
 !-----------------------------------------------------------------------------------------
                 IF(PExtent>Zero .AND. DP2 > Zero)THEN ! Evaluate this primitives Ket contribution
 !                  Initialize <KET|
                    CALL SetKet(Prim,PExtent)
+!                  WRAP the center of Phi_A(r) Phi_B(r+R) back into the box
+!                   CALL AtomCyclic(GMLoc,Prim%P) 
+!                  Initialize
                    HGKet_L(:,:)  = Zero
                    SPKetC_L(:,:) = Zero
                    SPKetS_L(:,:) = Zero
                    PTmp=Prim%P
 !                  Sum over cells
-                   DO NC=1,CS_IN%NCells
+                   DO NC=1,CS_IN%NCells 
                       Prim%P=PTmp+CS_IN%CellCarts%D(:,NC) 
                       PBox%Center=Prim%P
 !                     Calculate the fractional coordinates
@@ -194,7 +197,7 @@ MODULE BlokTrPdJ
                             IB=IB+1                      
                             DO K=1,3
                                KI = K
-                               dJ(IA,IB,KI) = dJ(IA,IB,KI)+CTraxFF_Grad(Prim,dHGBra%D(:,IA,IB,K),GMLoc) 
+                               dJ(IA,IB,KI) = dJ(IA,IB,KI)+CTraxFF(Prim,dHGBra%D(:,IA,IB,K),GMLoc) 
                             ENDDO
                          ENDDO
                       ENDDO
@@ -235,7 +238,7 @@ MODULE BlokTrPdJ
                             IB=IB+1                      
                             DO K=1,3
                                KI = K+3
-                               dJ(IA,IB,KI) = dJ(IA,IB,KI)+CTraxFF_Grad(Prim,dHGBra%D(:,IA,IB,K),GMLoc)  
+                               dJ(IA,IB,KI) = dJ(IA,IB,KI)+CTraxFF(Prim,dHGBra%D(:,IA,IB,K),GMLoc)  
                             ENDDO
                          ENDDO
                       ENDDO
@@ -245,10 +248,10 @@ MODULE BlokTrPdJ
                    DO LMNA=StartLA,StopLA
                       IA=IA+1
                       IB=IndexB
-                      EllA=BS%LxDex%I(LMNA)+BS%LyDex%I(LMNA)+BS%LzDex%I(LMNA)                         
+                      EllA=BS%LxDex%I(LMNA)+BS%LyDex%I(LMNA)+BS%LzDex%I(LMNA)
                       DO LMNB=StartLB,StopLB
                          IB=IB+1
-                         EllB=BS%LxDex%I(LMNB)+BS%LyDex%I(LMNB)+BS%LzDex%I(LMNB)                         
+                         EllB=BS%LxDex%I(LMNB)+BS%LyDex%I(LMNB)+BS%LzDex%I(LMNB)
                          Ell=EllA+EllB+1
                          SPLenEll=LSP(Ell)
                          HGLenEll=LHGTF(Ell)
@@ -259,11 +262,10 @@ MODULE BlokTrPdJ
                                IF(GMLoc%PBC%AutoW%I(I)==1 .AND. GMLoc%PBC%AutoW%I(K)==1) THEN
                                   DO LMN=1,HGLenEll
                                      dJ(IA,IB,KI)=dJ(IA,IB,KI)+Phase%D(LMN)*dHGBra%D(LMN,IA,IB,K)*HGKet_L(LMN,I)
-                                  ENDDO  
+                                  ENDDO
                                   DO LM=0,SPLenEll
                                      dJ(IA,IB,KI)=dJ(IA,IB,KI)+SPBraC(LM)*SPKetC_L(LM,I)+SPBraS(LM)*SPKetS_L(LM,I)
                                   ENDDO
-                                  dJ(IA,IB,KI) = dJ(IA,IB,KI)+CTraxFF_LF(Prim,dHGBra%D(:,IA,IB,K),GMLoc,I) 
                                ENDIF
                             ENDDO
                          ENDDO
@@ -330,7 +332,7 @@ MODULE BlokTrPdJ
 !         Set atomic "primitive"
           Prim%P=PTmp+CS_IN%CellCarts%D(:,NC)
 !         Calculate the fractional coordinates
-          nlm =  AtomToFrac(GMLoc,CS_IN%CellCarts%D(:,NC))
+          nlm = AtomToFrac(GMLoc,CS_IN%CellCarts%D(:,NC))
 !         Store the Old Stuff
           HGKet_old(1:HGLenEll)  = HGKet(1:HGLenEll)
           SPKetC_old(0:SPLenEll) = SPKetC(0:SPLenEll)
@@ -347,7 +349,6 @@ MODULE BlokTrPdJ
 !      Reset the Atomic Coordinates
        Prim%P=PTmp
 !      Init bra xforms
-
        Vck=Zero
        DO K=1,3
           DO LMN=1,HGLenEll
@@ -361,7 +362,7 @@ MODULE BlokTrPdJ
 !      Add in the Far Field, Dipole and Quadripole Correction
        IF(GMLoc%PBC%Dimen>0) THEN
           DO K=1,3
-             Vck(K)=Vck(K)+CTraxFF_Grad(Prim,dHGBra%D(:,1,1,K),GMLoc)
+             Vck(K)=Vck(K)+CTraxFF(Prim,dHGBra%D(:,1,1,K),GMLoc)
           ENDDO
        ENDIF
 !      Inner Sum Nuc Box Force
@@ -376,7 +377,6 @@ MODULE BlokTrPdJ
                 DO LM=0,SPLenEll
                    Vck(KI)=Vck(KI)+SPBraC(LM)*SPKetC_L(LM,I)+SPBraS(LM)*SPKetS_L(LM,I)
                 ENDDO
-                Vck(KI) = Vck(KI)+CTraxFF_LF(Prim,dHGBra%D(:,1,1,K),GMLoc,I) 
              ENDIF
           ENDDO
        ENDDO    
