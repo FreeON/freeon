@@ -904,7 +904,7 @@ CONTAINS
      REAL(DOUBLE),DIMENSION(1:3) :: XI,XJ,XK
      REAL(DOUBLE),DIMENSION(1:12),OPTIONAL:: BB1,BB2
      INTEGER                     :: I,J,K,L,M,N
-     REAL(DOUBLE)                :: Sum    
+     REAL(DOUBLE)                :: Sum,ValChk,Prefact
      REAL(DOUBLE),OPTIONAL       :: Value1,Value2
      TYPE(DBL_VECT)              :: VectIJ,VectJK,VectA,VectAA,A,AA 
      LOGICAL                     :: Active
@@ -948,27 +948,33 @@ CONTAINS
      ! generate point a, and the corresponding matrix element of B
      !
      A%D=XJ+VectA%D
+     CALL TORSValue(XI,A%D,XJ,XK,0.D0,ValChk,Active)
+     Prefact=SIGN(One,ValChk)
      IF(PRESENT(BB1)) THEN
        CALL TORS(XI,A%D,XJ,XK,BB1,Active)
        BB1(4:6)=BB1(4:6)+BB1(7:9)
        BB1(7:9)=BB1(10:12)
        BB1(10:12)=Zero
+       BB1=Prefact*BB1
      ENDIF
      IF(PRESENT(Value1)) THEN
-       CALL TORSValue(XI,A%D,XJ,XK,0.D0,Value1,Active)
+       Value1=Prefact*ValChk
      ENDIF
      !
      ! generate point aa, and the corresponding matrix element of B
      !
      AA%D=XJ+VectAA%D
+     CALL TORSValue(XI,AA%D,XJ,XK,0.D0,ValChk,Active)
+     Prefact=SIGN(One,ValChk)
      IF(PRESENT(BB2)) THEN
        CALL TORS(XI,AA%D,XJ,XK,BB2,Active)
        BB2(4:6)=BB2(4:6)+BB2(7:9)
        BB2(7:9)=BB2(10:12)
        BB2(10:12)=Zero
+       BB2=Prefact*BB2
      ENDIF
      IF(PRESENT(Value2)) THEN
-       CALL TORSValue(XI,AA%D,XJ,XK,0.D0,Value2,Active)
+       Value2=ValChk
      ENDIF
      !
      CALL Delete(VectIJ)
@@ -2518,15 +2524,15 @@ CONTAINS
      CALL New(VectIntAux2,NIntC)
      CALL New(VectIntReq,NIntC)
      !
+     ! The required new value of internal coordinates
+     !
+     VectIntReq%D=VectInt
+     CALL MapBackAngle(IntCs,NIntC,VectIntReq%D) 
+     !
      ! Calc values of internals in atomic unit, and add displacement,
      ! which is stored in VectInt. Then convert into Sparse matrx repr.
      !
      CALL INTCValue(IntCs,XYZ,LinCrit)
-     !
-     ! The required new value of internal coordinates
-     !
-     VectIntReq%D=VectInt+IntCs%Value
-     CALL MapBackAngle(IntCs,NIntC,VectIntReq%D) 
      !
      !initialization of new Cartesians
      !

@@ -522,7 +522,8 @@ CONTAINS
      !
      ! Calculate new geometry 
      !
-     CALL NewStructure(GOpt,GMLoc,Displ,IntCs,SCRPath,Print)
+     CALL NewStructure(Print,GOpt%BackTrf,GOpt%TrfCtrl,GOpt%CoordCtrl, &
+       GOpt%Constr,SCRPath,GMLoc,Displ,IntCs)
      CALL Delete(Displ)
      !
      ! Check convergence
@@ -655,15 +656,21 @@ CONTAINS
 !
 !-------------------------------------------------------
 !
-   SUBROUTINE NewStructure(GOpt,GMLoc,Displ,IntCs,SCRPath,Print)
-     TYPE(GeomOpt)                  :: GOpt
+   SUBROUTINE NewStructure(Print,GBackTrf,GTrfCtrl,GCoordCtrl, &
+     GConstr,SCRPath,GMLoc,Displ,IntCs)
+     LOGICAL                        :: Print
+     TYPE(BackTrf)                  :: GBackTrf
+     TYPE(TrfCtrl)                  :: GTrfCtrl
+     TYPE(CoordCtrl)                :: GCoordCtrl
+     TYPE(Constr)                   :: GConstr
+     CHARACTER(LEN=*)               :: SCRPath
      TYPE(CRDS)                     :: GMLoc
      TYPE(INTC)                     :: IntCs
      INTEGER                        :: I,J,II,NDim,NIntc
      INTEGER                        :: NatmsLoc,NCart,InitGDIIS
      TYPE(DBL_VECT)                 :: Displ
-     LOGICAL                        :: DoInternals,Print
-     CHARACTER(LEN=*)               :: SCRPath
+     LOGICAL                        :: DoInternals
+     REAL(DOUBLE)                   :: LinCrit
      !
      ! In the present version there is no line search, only GDIIS
      !
@@ -671,7 +678,8 @@ CONTAINS
      NCart=3*NatmsLoc   
      NDim =SIZE(Displ%D)
      NIntC =SIZE(IntCs%Def)
-     DoInternals=GOpt%TrfCtrl%DoInternals
+     LinCrit=GCoordCtrl%LinCrit
+     DoInternals=GTrfCtrl%DoInternals
      IF(NIntC/=NDim.AND.DoInternals) &
          CALL Halt('Dimensionality error in NewStructure.')
      !
@@ -679,9 +687,10 @@ CONTAINS
      ! displacements
      !
      IF(DoInternals) THEN 
-       CALL InternalToCart(GMLoc%AbCarts%D,IntCs,Displ%D, &
-         Print,GOpt%BackTrf,GOpt%TrfCtrl,GOpt%CoordCtrl, &
-         GOpt%Constr,SCRPath)
+       CALL INTCValue(IntCs,GMLoc%AbCarts%D,LinCrit)
+       IntCs%Value=IntCs%Value+Displ%D
+       CALL InternalToCart(GMLoc%AbCarts%D,IntCs,IntCs%Value, &
+         Print,GBackTrf,GTrfCtrl,GCoordCtrl,GConstr,SCRPath)
      ELSE
        CALL CartRNK1ToCartRNK2(Displ%D,GMLoc%AbCarts%D,.TRUE.)
      ENDIF
@@ -1203,10 +1212,12 @@ CONTAINS
        !
        CALL GDIISArch(Nams,iCLONE,XYZ_O=GMLoc%AbCarts%D,Tag_O='SR')
        !
-       IF((.NOT.NoGDIIS).AND.( &
-          (IGeo>InitGDIIS.AND.GDIISOn).OR.GRestart)) THEN
-         CALL GeoDIIS(GMLoc%AbCarts%D,GOpt,Nams,iCLONE, &
-           Print,SCRPath,InitGDIIS)
+       IF(.NOT.GOpt%GOptStat%GeOpConvgd) THEN
+         IF((.NOT.NoGDIIS).AND.( &
+            (IGeo>InitGDIIS.AND.GDIISOn).OR.GRestart)) THEN
+           CALL GeoDIIS(GMLoc%AbCarts%D,GOpt,Nams,iCLONE, &
+             Print,SCRPath,InitGDIIS)
+         ENDIF
        ENDIF
      CLOSE(Out,STATUS='KEEP')
      !--------------------------------------------
@@ -1222,10 +1233,10 @@ CONTAINS
    SUBROUTINE SetHessian(Hess)
      TYPE(Hessian) :: Hess
      Hess%Stre = 0.50D0   
-     Hess%Bend = 0.20D0
-     Hess%LinB = 0.20D0
-     Hess%OutP = 0.10D0 
-     Hess%Tors = 0.10D0 
+     Hess%Bend = 0.30D0
+     Hess%LinB = 0.30D0
+     Hess%OutP = 0.25D0 
+     Hess%Tors = 0.25D0 
    END SUBROUTINE SetHessian
 !
 !-------------------------------------------------------------------
