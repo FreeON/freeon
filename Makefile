@@ -30,7 +30,7 @@
 #
 include $(MONDO_HOME)/Includes/RemoveAll
 #
-all:	CatCpy mm s e 1 2 #d #v 
+all:	CatCpy mm s e 1 2 t #d #v 
 #
 clean:	cmm cs ce c1 c2 cd cv 
 	rm -f $(REMOVEALL)
@@ -140,6 +140,16 @@ po2:
 	$(MAKE) -i -C ONX2 purge
 co2:	
 	$(MAKE) -i -C ONX2 clean 
+#----------------------------------------------
+#     TwoE
+ t:	
+	$(MAKE)    -C TwoE
+rt:	
+	$(MAKE) -i -C TwoE release
+pt:	
+	$(MAKE) -i -C TwoE purge
+ct:	
+	$(MAKE) -i -C TwoE clean 
 #----------------------------------------------
 #     QCTC 
  q:	
