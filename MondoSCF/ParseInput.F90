@@ -51,7 +51,7 @@ MODULE ParseInput
          TYPE(ARGMT)                    :: Args
          INTEGER                        :: I,K,L,DotDex
          INTEGER,EXTERNAL               :: GetPID
-         CHARACTER(LEN=DEFAULT_CHR_LEN) :: Line,MPILine,GenFile,OldInfo         
+         CHARACTER(LEN=DEFAULT_CHR_LEN) :: Line,MPILine,GenFile,OldInfo ,Mssg        
          CHARACTER(LEN=DEFAULT_CHR_LEN), &
                    PARAMETER            :: Soft='-s'
          CHARACTER(LEN=DEFAULT_CHR_LEN), &
@@ -67,6 +67,11 @@ MODULE ParseInput
          CALL GetEnv('PWD',MONDO_PWD)   
          CALL GetEnv('MONDO_HOME',MONDO_HOME)
          CALL GetEnv('MONDO_SCRATCH',MONDO_SCRATCH)
+         CALL GetEnv('MONDO_HOST',MONDO_HOST)
+         CALL GetEnv('MONDO_MACH',MONDO_MACH)
+         CALL GetEnv('MONDO_SYST',MONDO_SYST)
+         CALL GetEnv('MONDO_VRSN',MONDO_VRSN)
+         CALL GetEnv('MONDO_PLAT',MONDO_PLAT)
          IF(LEN(TRIM(MONDO_HOME))==0)CALL MondoHalt(PRSE_ERROR,' $(MONDO_HOME) not set.')
          IF(LEN(TRIM(MONDO_SCRATCH))==0)CALL MondoHalt(PRSE_ERROR,' $(MONDO_SCRATCH) not set.')
 !------------------------------------------------------------------------------------------------
@@ -88,29 +93,31 @@ MODULE ParseInput
          ELSE
             SCF_NAME=Args%C%C(1)(1:DotDex-1)//'_'//TRIM(PROCESS_ID)
          ENDIF
+         ScrName=TRIM(MONDO_SCRATCH)//TRIM(SCF_NAME)
+         PWDName=TRIM(MONDO_PWD)//TRIM(SCF_NAME)
 !        Create user defined or implicit file names
          IF(Args%NC==1)THEN
-            OutFile=TRIM(MONDO_PWD)//TRIM(SCF_NAME)//OutF 
-            LogFile=TRIM(MONDO_PWD)//TRIM(SCF_NAME)//LogF
-            GeoFile=TRIM(MONDO_PWD)//TRIM(SCF_NAME)//GeoF
+            OutFile=TRIM(PWDName)//OutF 
+            LogFile=TRIM(PWDName)//LogF
+            GeoFile=TRIM(PWDName)//GeoF
          ELSEIF(Args%NC==2)THEN
             OutFile=TRIM(MONDO_PWD)//TRIM(Args%C%C(2))
-            LogFile=TRIM(MONDO_PWD)//TRIM(SCF_NAME)//LogF
-            GeoFile=TRIM(MONDO_PWD)//TRIM(SCF_NAME)//GeoF
+            LogFile=TRIM(PWDName)//LogF
+            GeoFile=TRIM(PWDName)//GeoF
          ELSEIF(Args%NC==3)THEN
             OutFile=TRIM(MONDO_PWD)//TRIM(Args%C%C(2))
             LogFile=TRIM(MONDO_PWD)//TRIM(Args%C%C(3))
-            GeoFile=TRIM(MONDO_PWD)//TRIM(SCF_NAME)//GeoF
+            GeoFile=TRIM(PWDName)//GeoF
          ELSEIF(Args%NC==4)THEN
             OutFile=TRIM(MONDO_PWD)//TRIM(Args%C%C(2))
             LogFile=TRIM(MONDO_PWD)//TRIM(Args%C%C(3))
             GeoFile=TRIM(MONDO_PWD)//TRIM(Args%C%C(4))
          ENDIF
 !        Name the HDF5 info file
-         InfFile=TRIM(MONDO_SCRATCH)//TRIM(SCF_NAME)//InfF                
+         InfFile=TRIM(PWDName)//InfF                
 !        Set SCF and InfoFile names
          Ctrl%Info=InfFile
-         Ctrl%Name=TRIM(MONDO_SCRATCH)//TRIM(SCF_NAME)
+         Ctrl%Name=TRIM(SCF_NAME)
 !------------------------------------------------------------------------------------
 !        Check for a restart; link old HDF5 to new one if restarting
 !
@@ -135,8 +142,8 @@ MODULE ParseInput
          CALL OpenHDF(InfFile)
          CALL Put(InpFile,'inputfile')
          CALL Put(InfFile,'infofile')
-         CALL Put(OutFile,'outputfile')
          CALL Put(LogFile,'logfile')
+         CALL Put(OutFile,'outputfile')
 !        Initialize ASCII files
          CALL OpenASCII(OutFile,Out,NewFile_O=.TRUE.)
          CALL OpenASCII(LogFile,LgF,NewFile_O=.TRUE.)
@@ -155,7 +162,7 @@ MODULE ParseInput
       77 FORMAT(A1,A1,                                                   &
          ' __    __                 _       ____________ ______ ',A1,    &
          '|  \  /  |               | |     /       /    |      |',A1,    & 
-         '|   \/   | ___  _ __   __| | ___/   ____/   __|  |--- ',A1,    &
+         "|   \/   | ___  _ __   __| | ___/   ____/   __|  |---'",A1,    &
          "|        |/ _ \| '_ \ / _  |/ _ \____  \   (__|  ____|",A1,    &
          '|  |\/|  | (_) | | | | (_| | (_) )     /\     |  |    ',A1,    &
          '|__|  |__|\___/|_| |_|\____|\___/_____/  \____|__|    ',A1,A1, &
@@ -165,6 +172,14 @@ MODULE ParseInput
          ' C.J. Tymczak and Chee Kwan Gan                       ',A1,    &
          ' Los Alamos National Laboratory                       ',A1,    & 
          ' Copywrite 2001, University of California.            ',A1)
+!        Write information on host, platform, etc
+         Mssg='Compliled for '//TRIM(MONDO_PLAT)//', executing on '//TRIM(MONDO_HOST) &
+           //Rtrn//' a '//TRIM(MONDO_MACH)//' machine'//' running '//TRIM(MONDO_SYST) &
+           //' '//TRIM(MONDO_VRSN)       
+         WRITE(*,*)TRIM(Mssg)
+         WRITE(Out,*)TRIM(Mssg)
+         WRITE(*,*)
+         WRITE(Out,*)
 !        Parse for title, put to output file
          CALL Align(BEGIN_TITLE,Inp)
          K=1
