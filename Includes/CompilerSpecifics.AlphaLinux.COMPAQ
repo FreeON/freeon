@@ -3,7 +3,8 @@
 #
 CPP=/lib/cpp -P -C -traditional
 CPPINCLUDE=-I$(MONDO_INC) -I$(HDF_INC) -I/usr/local/include
-CPPOPTS=-DPOINTERS_IN_DERIVED_TYPES -DPERIODIC
+CPPOPTS=-DPOINTERS_IN_DERIVED_TYPES 
+#-DPERIODIC
 #-DPARALLEL 
 #-DNONBLOCKING
 #---------------------------------------------------------------
@@ -25,13 +26,13 @@ MOD_POSTFIX   = mod
 #
 F90       = fort  
 #
-F90_OPTIMIZE =  -tune host -O5 -math_library fast
+F90_OPTIMIZE = -tune host -O5 -math_library fast    
 #
-#F90_DEBUG    = -g -C -check_bounds -check overflow
+#F90_DEBUG    = -O0 -g2 -C -check_bounds -check bounds  -check overflow -assume gfullpath 
 #
 F_LIST        = #-V -source_listing
 #
-#F_PROF       = -pg
+#F_PROF       = -pg 
 #
 F90_MISC     = -static $(F_LIST) $(F_PROF) 
 #
@@ -88,7 +89,7 @@ F90_LIBRARIES = -lMondoMods $(MPI_LIBS) $(HDF_LIBS)
 #--------------------------------------------------------------------------
 #  'Nuff said
 #
-LAPACK = -llapack_ALPHA -lblas_ALPHA 
+LAPACK = -lcxml -lcpml #-llapack_ALPHA -lblas_ALPHA 
 #---------------------------------------------------------------------------
 
 
