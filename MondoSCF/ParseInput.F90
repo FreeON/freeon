@@ -379,7 +379,7 @@ MODULE ParseInput
          IF(OptKeyLocQ(Inp,MODEL_OPTION,MODEL_PBExc,MaxSets,NLoc,Loc))THEN
              NOpts=NOpts+NLoc
              DO ILoc=1,NLoc; Ctrl%Model(Loc(ILoc))=PURE_PBE_GGA; ENDDO
-         ENDIF       
+         ENDIF
 !        Pure BLYP GGA exchange-correlation 
          IF(OptKeyLocQ(Inp,MODEL_OPTION,MODEL_BLYPxc,MaxSets,NLoc,Loc))THEN
              NOpts=NOpts+NLoc
@@ -418,8 +418,9 @@ MODULE ParseInput
 !-------------------------------------------------------------------------------
 !        Parse <OPTIONS.ACCURACY> 
 !
-         Ctrl%AccL=2 ! Default is "good"         
+         Ctrl%AccL=2 ! Default is "good"    
          NOpts=0
+!
          IF(OptKeyLocQ(Inp,ACCURACY_OPTION,ACCURACY_CHEEZY,MaxSets,NLoc,Loc))THEN
             NOpts=NOpts+NLoc
             DO ILoc=1,NLoc; Ctrl%AccL(Loc(ILoc))=1; ENDDO
@@ -612,55 +613,42 @@ MODULE ParseInput
 !------------------------------------------------------
 !        To wrap or not to wrap atoms into the box
 !
-         IF(GM%AutoW(1) .OR. GM%AutoW(2) .OR. GM%AutoW(3)) THEN
-            IF(OptKeyQ(Inp,PBOUNDRY,ATOMW_ON)) THEN
-               GM%AtomW=.TRUE.
-            ELSEIF(OptKeyQ(Inp,PBOUNDRY,ATOMW_OFF)) THEN
-               GM%AtomW=.FALSE.
-            ELSE
-               CALL OpenASCII(OutFile,Out)
-               WRITE(Out,*) '** Atom-Wrap at default value => (AtomWrap-Off) **'
-               CLOSE(UNIT=Out,STATUS='KEEP')
-               GM%AtomW=.FALSE.
-            ENDIF
-         ELSE               
+         IF(OptKeyQ(Inp,PBOUNDRY,ATOMW_ON)) THEN
+            GM%AtomW=.TRUE.
+         ELSEIF(OptKeyQ(Inp,PBOUNDRY,ATOMW_OFF)) THEN
+            GM%AtomW=.FALSE.
+         ELSE
+            CALL OpenASCII(OutFile,Out)
+            WRITE(Out,*) '** Atom-Wrap at default value => (AtomWrap-Off) **'
+            CLOSE(UNIT=Out,STATUS='KEEP')
             GM%AtomW=.FALSE.
          ENDIF
 !------------------------------------------------------
 !        Input Type on the BoxShape Vectors
 !
-         IF(GM%AutoW(1) .OR. GM%AutoW(2) .OR. GM%AutoW(3)) THEN
-            IF(OptKeyQ(Inp,PBOUNDRY,LVF_VEC)) THEN
-               GM%InVecForm=.TRUE.
-            ELSEIF(OptKeyQ(Inp,PBOUNDRY,LVF_ANG)) THEN
-               GM%InVecForm=.FALSE.
-            ELSE
-               CALL OpenASCII(OutFile,Out)
-               WRITE(Out,*) '** Lattice Vector Format at default value => (Vector Format) **'
-               CLOSE(UNIT=Out,STATUS='KEEP')
-               GM%InVecForm=.TRUE.
-            ENDIF
+         IF(OptKeyQ(Inp,PBOUNDRY,LVF_VEC)) THEN
+            GM%InVecForm=.TRUE.
+         ELSEIF(OptKeyQ(Inp,PBOUNDRY,LVF_ANG)) THEN
+            GM%InVecForm=.FALSE.
          ELSE
+            CALL OpenASCII(OutFile,Out)
+            WRITE(Out,*) '** Lattice Vector Format at default value => (Vector Format) **'
+            CLOSE(UNIT=Out,STATUS='KEEP')
             GM%InVecForm=.TRUE.
          ENDIF
 !------------------------------------------------------
 !        Input Type on the Coordinates, Atomic or Fractional
 !
-         IF(GM%AutoW(1) .OR. GM%AutoW(2) .OR. GM%AutoW(3)) THEN
-            IF(OptKeyQ(Inp,PBOUNDRY,CRT_ATOM)) THEN
-               GM%InAtomCrd=.TRUE.
-            ELSEIF (OptKeyQ(Inp,PBOUNDRY,CRT_FRAC)) THEN
-               GM%InAtomCrd=.FALSE.
-            ELSE
-               CALL OpenASCII(OutFile,Out)
-               WRITE(Out,*) '** Coodinate Format at default value => (Atomic Coord) **'
-               CLOSE(UNIT=Out,STATUS='KEEP')
-               GM%InAtomCrd=.TRUE.
-            ENDIF
+         IF(OptKeyQ(Inp,PBOUNDRY,CRT_ATOM)) THEN
+            GM%InAtomCrd=.TRUE.
+         ELSEIF (OptKeyQ(Inp,PBOUNDRY,CRT_FRAC)) THEN
+            GM%InAtomCrd=.FALSE.
          ELSE
+            CALL OpenASCII(OutFile,Out)
+            WRITE(Out,*) '** Coodinate Format at default value => (Atomic Coord) **'
+            CLOSE(UNIT=Out,STATUS='KEEP')
             GM%InAtomCrd=.TRUE.
          ENDIF
-!
 #endif
 !-------------------------------------------------
 !        Parse <OPTIONS> for <GEOMETRY> format
@@ -1257,6 +1245,7 @@ MODULE ParseInput
         CHARACTER(LEN=DEFAULT_CHR_LEN)  :: Line
         REAL(DOUBLE),PARAMETER          :: DegToRad =  1.745329251994329576923D-2
         REAL(DOUBLE),DIMENSION(3)       :: Vec,Ang
+        REAL(DOUBLE)                    :: AngAB,AngAC,AngBC,Error
 !
         DO 
            READ(Inp,DEFAULT_CHR_FMT,END=1) Line
@@ -1297,10 +1286,20 @@ MODULE ParseInput
                  GM%BoxShape%D(2,2)=Vec(2)*SIN(DegToRad*Ang(3))
 !
                  GM%BoxShape%D(1,3)=Vec(3)*COS(DegToRad*Ang(2))
-                 GM%BoxShape%D(2,3)=Vec(3)*COS(DegToRad*Ang(1))*SIN(DegToRad*Ang(3))
+                 GM%BoxShape%D(2,3)=(Vec(2)*Vec(3)*COS(DegToRad*Ang(1)) &
+                                    -GM%BoxShape%D(1,2)*GM%BoxShape%D(1,3))/ GM%BoxShape%D(2,2)
                  GM%BoxShape%D(3,3)=SQRT(Vec(3)**2-GM%BoxShape%D(1,3)**2-GM%BoxShape%D(2,3)**2)
+!
+                 AngAB = ACOS(GM%BoxShape%D(1,1)*GM%BoxShape%D(1,2)/(Vec(1)*Vec(2)))/DegToRad
+                 AngAC = ACOS(GM%BoxShape%D(1,1)*GM%BoxShape%D(1,3)/(Vec(1)*Vec(3)))/DegToRad
+                 AngBC = GM%BoxShape%D(1,2)*GM%BoxShape%D(1,3)+GM%BoxShape%D(2,2)*GM%BoxShape%D(2,3)
+                 AngBC = ACOS(AngBC/(Vec(2)*Vec(3)))/DegToRad
+                 Error = ABS(AngAB-Ang(3))+ABS(AngAC-Ang(2))+ ABS(AngBC-Ang(1))
+                 IF(Error .GT. 1.D-6 ) THEN
+                    CALL MondoHalt(PRSE_ERROR,'Angles Are Inccorect')
+                 ENDIF
               ELSE
-                 CALL MondoHalt(PRSE_ERROR,'Need to Supply (d1,d2,or d3)')
+                 CALL MondoHalt(PRSE_ERROR,'Need to Supply The lattice vectors')
               ENDIF
            ELSE
               EXIT
