@@ -56,7 +56,9 @@ IntegralClass[Ell_List] := Ell[[2]]*(Ell[[2]] + 1)/2 + Ell[[1]] + 1;
 (* Minimal 
    Classes = { {0,0},{1,1}} 
  *)
-   Classes = { {0,0},{1,1} } 
+
+
+   Classes = { {0,0},{1,1},{2,2}}
 
 (* Maximal 
    Classes = { {0,0},{0,1},{1,1},{2,2},{3,3}}
@@ -496,14 +498,11 @@ WSI["SELECT CASE(IntType)"];
 
 Do[Do[Do[Do[
 
-
-	    (*
    If[IntegralClass[Classes[[ic]]]>=IntegralClass[Classes[[jc]]]&& \
       IntegralClass[Classes[[kc]]]>=IntegralClass[Classes[[lc]]]&& \
       IntegralClass[Classes[[ic]]]*100+IntegralClass[Classes[[jc]]]>= \
       IntegralClass[Classes[[kc]]]*100+IntegralClass[Classes[[lc]]],
 
-      *)
             CommentLine=StringJoin["(",CType[IntegralClass[Classes[[ic]]]]," ", \
                                        CType[IntegralClass[Classes[[jc]]]],"|", \
                                        CType[IntegralClass[Classes[[kc]]]]," ", \
@@ -578,7 +577,7 @@ Print["ijklType=",ijklType," i=",IntegralClass[Classes[[ic]]]," j=",IntegralClas
            Close[Subroutine];
            Print[" Closed ",Subroutine];
 
-	     (*     ]; *)
+	       ]; 
 
 ,{ic,1,LC}]
 ,{jc,1,LC}]
