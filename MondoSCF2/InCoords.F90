@@ -6257,8 +6257,7 @@ return
      !
      CALL New(CritRad,NatmsLoc)
      CALL New(StRad,NatmsLoc)
-   ! DO IntSet=1,3
-     DO IntSet=1,1
+     DO IntSet=1,3
        IF(IntSet==1) THEN
          N=SIZE(SLRadii,1)
          Fact=1.3D0 !!! Scaling factor for Slater Radii
