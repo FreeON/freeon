@@ -335,9 +335,13 @@ MODULE PBCFarField
 !
 !     First, Determint the Distance to the Nearest Cell in the CellSet CS_inf-CS_IN 
 !
-      Radius = 1.25*CS_IN%Radius
-      CALL New_CellSet_Sphere(CStmp,GMLoc%PBC%AutoW%I,GMLoc%PBC%BoxShape%D,Radius) 
+      Radius = Zero
+      DO NC=1,CS_IN%NCells
+         PQ(:) = CS_IN%CellCarts%D(:,NC)
+         Radius = MAX(Radius,SQRT(PQ(1)**2+PQ(2)**2+PQ(3)**2))
+      ENDDO
 !
+      CALL New_CellSet_Sphere(CStmp,GMLoc%PBC%AutoW%I,GMLoc%PBC%BoxShape%D,1.25D0*Radius) 
       MinRadius = 1.D16
       DO NC=1,CStmp%NCells
          PQ(:) = CStmp%CellCarts%D(:,NC)
