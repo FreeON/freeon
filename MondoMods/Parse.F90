@@ -498,8 +498,8 @@ MODULE Parse
 !
       FUNCTION DblToMedmChar(D)
          REAL(DOUBLE),INTENT(IN)         :: D
-         CHARACTER(LEN=11) :: DblToMedmChar
-         WRITE(UNIT=DblToMedmChar,FMT='(D11.5)')D
+         CHARACTER(LEN=14) :: DblToMedmChar
+         WRITE(UNIT=DblToMedmChar,FMT='(D14.8)')D
          DblToMedmChar=ADJUSTL(DblToMedmChar)
      END FUNCTION DblToMedmChar
 !------------------------------------------------------------------
