@@ -13,11 +13,15 @@ release:clean
                GDrivers VRRm ONX SONX MASONX
 #
 purge:	clean
-	make -C NONX purge
-	rm -rf Drivers/*.binary
+#vw	make -C NONX purge
+	cd VRR        ; $(MAKE) -i clean #vw
+	cd NONX       ; $(MAKE) -i clean #vw
+	cd MakeTables ; $(MAKE) -i clean #vw
+	cd Drivers    ; rm -f *.binary   #vw
+#vw	rm -rf Drivers/*.binary
 #
 clean:
-	cd VRR        ; $(MAKE) -i clean
+#vw	cd VRR        ; $(MAKE) -i clean
 	cd NONX       ; $(MAKE) -i clean
 #	cd MakeTables ; $(MAKE) -i clean
 #	cd Drivers    ; rm -f *.binary
