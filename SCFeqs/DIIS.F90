@@ -163,7 +163,7 @@ PROGRAM DIIS
         CALL DGEMV('N',N,N,One,BInv%D,N,V%D,1,Zero,DIISCo%D,1)
 #ifdef TRAP_DIIS_BUG
         CALL OpenASCII(OutFile,Out)
-        WRITE(Out,*)' Done with DGEMV '
+        WRITE(Out,*)' Dowith DGEMV '
         CLOSE(Out)
 #endif
         CALL Delete(V)
@@ -258,78 +258,22 @@ PROGRAM DIIS
 #endif
   I0=N-2
   DO I=ISCF-1,M,-1
-     IF(DoDIIS==0)THEN
-#ifdef TRAP_DIIS_BUG
-        CALL OpenASCII(OutFile,Out)
-        WRITE(Out,*)' Getting F_DIIS ',Args,I-ISCF
-        CLOSE(Out)
-#endif
-        CALL Get(Tmp1,TrixFile('F_DIIS',Args,I-ISCF))
-#ifdef TRAP_DIIS_BUG
-        CALL OpenASCII(OutFile,Out)
-        WRITE(Out,*)' Done getting F_DIIS'
-        CLOSE(Out)
-#endif
-     ELSE
-#ifdef TRAP_DIIS_BUG
-        CALL OpenASCII(OutFile,Out)
-        WRITE(Out,*)' Getting OrthoF ',I-ISCF
-        CLOSE(Out)
-#endif
+!     IF(DoDIIS==0)THEN
+!        CALL Get(Tmp1,TrixFile('F_DIIS',Args,I-ISCF))
+!     ELSE
         CALL Get(Tmp1,TrixFile('OrthoF',Args,I-ISCF))
-#ifdef TRAP_DIIS_BUG
-        CALL OpenASCII(OutFile,Out)
-        WRITE(Out,*)' Done getting OrthoF '
-        CLOSE(Out)
-#endif
-     ENDIF
-
+!     ENDIF
      CALL Multiply(Tmp1,DIISCo%D(I0))
-#ifdef TRAP_DIIS_BUG
-     CALL OpenASCII(OutFile,Out)
-     WRITE(Out,*)' Done with mult of DIISCo'
-     CLOSE(Out)
-#endif
-
      CALL Add(F,Tmp1,E)
-#ifdef TRAP_DIIS_BUG
-     CALL OpenASCII(OutFile,Out)
-     WRITE(Out,*)' Multiply 1'
-     CLOSE(Out)
-#endif
      IF(I==M)THEN
-#ifdef TRAP_DIIS_BUG
-        CALL OpenASCII(OutFile,Out)
-        WRITE(Out,*)' Filtering ...'
-        CLOSE(Out)
-#endif
-        !       Only filter the end product
-        CALL Filter(F,E)
-#ifdef TRAP_DIIS_BUG
-        CALL OpenASCII(OutFile,Out)
-        WRITE(Out,*)' Done with filter '
-        CLOSE(Out)
-#endif
-     ELSE
-#ifdef TRAP_DIIS_BUG
-        CALL OpenASCII(OutFile,Out)
-        WRITE(Out,*)'Setting eq '
-        CLOSE(Out)
-#endif
+        ! Only filter the end product
         CALL SetEq(F,E)
-#ifdef TRAP_DIIS_BUG
-        CALL OpenASCII(OutFile,Out)
-        WRITE(Out,*)' Done with seteq '
-        CLOSE(Out)
-#endif
+!        CALL Filter(F,E)
+     ELSE
+        CALL SetEq(F,E)
      ENDIF
      I0=I0-1
   ENDDO
-#ifdef TRAP_DIIS_BUG
-  CALL OpenASCII(OutFile,Out)
-  WRITE(Out,*)' Done with extrapolation '
-  CLOSE(Out)
-#endif
   !-------------------------------------------------------------------------------------
   !  IO for the orthogonal, extrapolated F 
   CALL Put(F,TrixFile('F_DIIS',Args,0)) 
