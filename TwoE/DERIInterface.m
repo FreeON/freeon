@@ -208,7 +208,7 @@ Do[Do[Do[Do[
 
                   ArgString=StringJoin[ArgString1,ArgString2,ArgString3, \
                                        ArgString4,", & \n ",ArgString5,", & \n ",\
-                                       ArgString6,", & \n ",ArgString7,",GM%PBC,C(1)"];
+                                       ArgString6,", & \n ",ArgString7,",NIntBlk,GM%PBC,C(1)"];
 
 
 
@@ -300,7 +300,7 @@ Do[Do[
 
 
    ArgString=StringJoin[ArgString1,ArgString2,ArgString3, \
-             ArgString4,",",ArgString5,",GM%PBC,C(1)"];
+             ArgString4,",",ArgString5,",NIntBlk,GM%PBC,C(1)"];
 
 
    WS[StringJoin["  CALL dInt",ToString[ijklType],"(",ArgString,")"]];

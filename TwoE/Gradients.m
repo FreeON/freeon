@@ -500,7 +500,8 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_,Needs_]:=Block[{WS,LBra,LKe
 	   If[LBra+LKet==1,
               WS["USE GammaF0"];
               WS["USE GammaF1"];,
-              WS[StringJoin["USE GammaF",ToString[LBra+LKet]]]];
+              WS[StringJoin["USE GammaF",ToString[LBra+LKet]]];
+              WS[StringJoin["USE GammaF",ToString[LBra+LKet+1]]]];
 
            WS["IMPLICIT REAL(DOUBLE) (A,I,V,W)"];
            WS["INTEGER        :: LBra,LKet,NINT"];
