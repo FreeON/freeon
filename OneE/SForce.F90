@@ -132,19 +132,6 @@ PROGRAM SForce
         ENDIF
      ENDDO
   ENDDO
-!
-!
-!
-  WRITE(*,*) 'S'
-  DO AtA=1,NAtoms
-     A1=3*(AtA-1)+1
-     A2=3*AtA
-     WRITE(*,'(I3,2x,3(D23.16,2X))') AtA,SFrc%D(A1:A2)
-  END DO
-  WRITE(*,*) 
-  DO I=1,3
-     WRITE(*,*) (LatFrc_S%D(I,J),J=1,3) 
-  ENDDO
 !--------------------------------------------------------------------------------
 #ifdef PARALLEL
   TotFrcComp = 3*NAtoms

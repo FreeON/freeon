@@ -101,19 +101,6 @@ PROGRAM TForce
         ENDIF
      ENDDO
   ENDDO
-!
-!
-!
-  WRITE(*,*) 'T'
-  DO AtA=1,NAtoms
-     A1=3*(AtA-1)+1
-     A2=3*AtA
-     WRITE(*,'(I3,2x,3(D23.16,2X))') AtA,TFrc%D(A1:A2)
-  ENDDO
-  WRITE(*,*) 
-  DO I=1,3
-     WRITE(*,*) (LatFrc_T%D(I,J),J=1,3) 
-  ENDDO
 !--------------------------------------------------------------------------------
 #ifdef PARALLEL
   TotFrcComp = 3*NAtoms
