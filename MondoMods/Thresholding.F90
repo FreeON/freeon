@@ -53,8 +53,9 @@ MODULE Thresholding
          DO L=1,NExpt
             MaxRadialAngSym=MAX(MaxRadialAngSym,Lndx%I(L))
          ENDDO
-!        Dlete Exponents
+!        Delete Exponents
          CALL Delete(Expts)
+         CALL Delete(Lndx)
 !        Set Atom-Atom thresholds
          CALL SetAtomPairThresh(Thresholds%Dist,CurBase,Prog)
 !        Set Prim-Prim thresholds
@@ -73,6 +74,7 @@ MODULE Thresholding
        REAL(DOUBLE)                    :: Norm
 !
        CALL Get(BS,Tag_O=CurBase)
+       IF(ABDistanceThreshold%Alloc == ALLOCATED_TRUE) CALL Delete(ABDistanceThreshold)
        CALL New(ABDistanceThreshold,(/BS%NKind,BS%NKind/))
 !
        DO KA=1,BS%NKind
@@ -123,6 +125,7 @@ MODULE Thresholding
        CHARACTER(LEN=*)                :: Prog
        INTEGER                         :: L
 !
+       IF(PrimPairDistanceThreshold%Alloc == ALLOCATED_TRUE) CALL Delete(PrimPairDistanceThreshold) 
        CALL New(PrimPairDistanceThreshold,MaxRadialAngSym,0)
        DO L = 0,MaxRadialAngSym
           PrimPairDistanceThreshold%D(L) = -LOG(Tau)
