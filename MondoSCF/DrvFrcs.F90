@@ -41,9 +41,9 @@ MODULE DrvFrcs
         CALL LogSCF(Current,' Evaluating forces ')
         CtrlVect=SetCtrlVect(Ctrl,'ForceEvaluation')
 !       The non-orthogonal response    
-        CALL Invoke('SForce',CtrlVect)
+        CALL Invoke('SForce',CtrlVect,MPIRun_O=.TRUE.)
 !       Kinetic energy piece
-        CALL Invoke('TForce',CtrlVect)
+        CALL Invoke('TForce',CtrlVect,MPIRun_O=.TRUE.)
 !       Build a density with last DM
         CALL Invoke('MakeRho',CtrlVect)
 !       Coulomb part
