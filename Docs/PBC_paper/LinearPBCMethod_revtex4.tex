@@ -206,7 +206,6 @@ of these particulars first, before addressing their extension to periodic bounda
 Also, the current version of QCTC is quite different from previous descriptions \cite{MChallacombe96B}, and deserves some
 introduction.  
 
-
 Both QCTC and HiCu are homeomorphic, involving $k$-d tree representation of the density.  
 In our implementations, $k$-d trees are doubly linked lists with axis aligned bounding boxes (AABBs) 
 containing the spatial {\em extent} of each node and its children.    This scheme is similar to
@@ -215,12 +214,24 @@ ${\cal O}({\rm lg} N)$ {\em range queries} of overlapping components through AAB
 %\cite{}. 
 In the case of QCTC, this fast look up constitutes the penetration acceptability criterion (PAC) 
 %\cite{}, 
-which identifies
-spatial clusters or agglomerations, $\rho_Q$, of the density that may be accurately represented via a multipole 
-approximation due to the absence of charge-charge penetration effects.  For accepted agglomerations a second test, 
-the multipole acceptability criterion (MAC), is performed to check translation errors in the multipole 
-expansion. 
-%\cite{}.  
+which identifies spatial clusters or agglomerations, $\rho_Q$, of the density that may be accurately 
+represented via a multipole approximation due to the absence of charge-charge penetration effects.  
+%
+% Changed From Here
+%
+For accepted agglomerations a second test, the multipole acceptability criterion (MAC),
+is performed to check translation errors in the multipole  expansion. This second test is critical
+to the overall accuracy of the Coulomb matrix build. Because of this, 
+in Ref.~[\onlinecite{CTymczak04c}] a new more accurate MAC is developed. This new MAC has several advantages
+over commonly used MAC's.
+%\cite{} 
+First, it takes into account the decay of the multipole interaction; Second, it takes into account the weight of 
+the distribution within the agglomeration; Third, it correctly takes into account the angular momentum type of the 
+primative gaussian distributions; And finally, and most importent, if is always an exact bound to the multipole 
+translation error. 
+%
+%
+%
 For each primitive bra distribution, this fast range query is performed on the $k$-d tree 
 representation of the total density, leading to an on the fly partition of near-field (NF) and far-field (FF) 
 interactions in construction of the gas phase Coulomb matrix,
@@ -232,12 +243,14 @@ J_{ab} &=& \sum_{Q\in \rm FF} \sum_l \sum_m O^l_m[\rho_{ab}] \sum_{l'} \sum_{m'}
 \end{eqnarray}
 where $M^l_m$ is the irregular solid harmonic interaction tensor, $O^l_m[f]=\int d{\bf r} O^l_m({\bf r}) f({\bf r})$
 is a moment of the regular solid harmonic, 
-%\cite{}, 
+%
 $Q$ runs over the  highest possible nodes in the density-tree as determined by PAC and MAC and 
 $q$ runs on the left over near-field primitive distributions in the density.
-The QCTC near/far-field partition pushes the multipole approximation to the limit, employing a new   
+The QCTC near/far-field partition pushes the multipole approximation to the limit, employing a  new   
 error estimates that depend on the magnitude and extent of both bra and ket \cite{CTymczak04c} 
 and allowing tree traversal to the resolution of primitive distributions.  
+%\cite{}
+
 While resolving individual primitives forgoes well developed technologies for the 
 integral evaluation of contracted functions, it accelerates the onset of linear scaling through the early
 clustering of close distributions.
@@ -248,7 +261,6 @@ electrostatic screening in MAC error estimates
 and provides charge neutrality, an essential
 feature for periodic calculations.  Thus, the Coulomb matrix employed here includes the electron-nuclear terms;
 ${\bf J} \equiv {\bf J} + {\bf V}_{\rm en}$.
-
 
 In the case of HiCu, two separate $k$-d tree structures are used.  The rho-tree holds the electron density,
 while the cube-tree contains a hierarchical grid for integration of the exchange-correlation potential.  Each 
@@ -476,13 +488,14 @@ This static error is controlled by using the FMM-like error bound,
 \begin{equation}
 \frac{ 2^{p} {\cal C}^2 \,{d}_{\rm max}^{p+1}}
 {({R}^o)^{p+1}\left| {R}^o -2 \, {d}_{\rm max} \right| } 
-\leq \tau \;,
+\leq \tau_{MAC} \;,
 \end{equation}
-where $d_{\rm max}$ is the maximum translational distance, ${\cal C}$ is the Uns{\"o}ld weight of the system
-and $\tau$ is a threshold controlling the precision. This expression is developed in Ref.~\onlinecite{CTymczak04c},
-stemming from new error bounds for the tree-code MAC that are both cheap and sensitive to the particulars
-of the expansion, including magnitude of the charges etc, captured by the  Uns{\"o}ld weight ${\cal C}$.  Because 
-${\cal C}$ will fluctuate slightly with the density between self-consistent-field cycles, so to will the
+where $d_{\rm max}$ is the maximum translational distance, ${\cal C}$ is the Asymtotic Uns{\"o}ld weight of the total density
+and $\tau_{MAC}$ is the threshold controlling the precision of the calculation.
+This expression is developed in Ref.~\onlinecite{CTymczak04c},
+stemming from our new error bounds for the tree-code MAC that is both cheap and sensitive to the particulars
+of the expansion, including magnitude of the charges etc, which is captured by the  Asymtotic Uns{\"o}ld weight 
+${\cal C}$.  Because ${\cal C}$ will fluctuate slightly with the density between self-consistent-field cycles, so to will the
 expansion order~$p$.  
 
 
@@ -1004,8 +1017,9 @@ matrix elements to 8-10 digits of accuracy with this technique.
 
 There are four thresholds that control the numerical precision of the linear scaling algorithms
 in {\sc MondoSCF}.  They are the matrix threshold $\tau_{\rm \scriptscriptstyle MTRIX}$
-described in Ref.~[\onlinecite{ANiklasson03}], the two-electron threshold  $\tau_{\rm \scriptscriptstyle 2E}$ ({\tt thresh} in Ref.~[\onlinecite{ESchwegler97}]),
-the distribution threshold   $\tau_{\rm \scriptscriptstyle DIST}$ described in Ref.~[\onlinecite{CTymczak04A}],
+described in Ref.~[\onlinecite{ANiklasson03}], the two-electron threshold  $\tau_{\rm \scriptscriptstyle 2E}$ 
+({\tt thresh} in Ref.~[\onlinecite{ESchwegler97}]),
+the distribution threshold  $\tau_{\rm \scriptscriptstyle DIST}$ described in Ref. ~[\onlinecite{CTymczak04A}],
 and the HiCu threshold $\tau_{\rm \scriptscriptstyle HICU}$ used to set the exchange-correlation grid ($\tau_r$ in 
 Ref.~[\onlinecite{MChallacombe00A}]).  The threshold $\tau_{\rm \scriptscriptstyle 2E}$ also controls accuracy of the
 Coulomb matrix as discussed in Ref.~[\onlinecite{CTymczak04A}].
@@ -1020,7 +1034,8 @@ models that contain Hartree-Fock exchange.
 \center{
 \begin{tabular}{lllll}
 \toprule
-Accuracy        &  $\tau_{\rm \scriptscriptstyle MTRIX} $ & $\tau_{\rm \scriptscriptstyle 2E}$ & $\tau_{\rm \scriptscriptstyle DIST}$ & $\tau_{\rm \scriptscriptstyle HICU}$ \\ 
+Accuracy        &  $\tau_{\rm \scriptscriptstyle MTRIX} $ & $\tau_{\rm \scriptscriptstyle 2E}$ & 
+$\tau_{\rm \scriptscriptstyle DIST}$ & $\tau_{\rm \scriptscriptstyle HICU}$ \\ 
 \colrule
 {\tt LOOSE}     & $10^{-4}$ & $10^{-6}$  & $10^{-8}$  & $10^{-3}$ \\
 {\tt GOOD}      & $10^{-5}$ & $10^{-8}$  & $10^{-10}$ & $10^{-5}$ \\
