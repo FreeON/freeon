@@ -18,7 +18,7 @@ USE IntCoo
    USE symmetry
    USE elements
    USE parsing
-   USE string 
+   USE strings
    USE pdb_io 
    USE mm_system
    USE connectivity 
@@ -32,13 +32,9 @@ USE IntCoo
    USE energy_covalent
    USE energy_non_bonding
 IMPLICIT NONE
-REAL ( KIND = DP ) :: EBOND, VIRIAL, EANGLE, EDIHEDRAL, EIMPROPER
 TYPE(CRDS) :: GM_MM
 !
 CONTAINS
-!
-!-------------------------------------------------------------- 
-!
 !
 !--------------------------------------------------------
 !
@@ -69,7 +65,7 @@ CONTAINS
 !
 ! If QMMM, distinguish QM and MM atoms
 !   
-     CALL OpenHDF(InfFile)
+!    CALL OpenHDF(InfFile)
 !
      GM_Loc%NAtms=Natoms
      CALL New(GM_Loc)
@@ -116,7 +112,7 @@ CONTAINS
 !
      CONVF=e2PerAngstroemToKJPerMol
 !
-! bond, angle and dihedral terms merged
+! 12, 13 and 14 topologies merged
 !
      DO ITop=1,2
 !
@@ -192,7 +188,7 @@ CONTAINS
                ENDIF
            ENDIF
          ELSE
-       write(*,*) 'd dij= ',i,j,dij
+       write(*,*) 'd dij= ',i,j,dij,' x1= ',GM_Loc%Carts%D(1:3,i),GM_Loc%Carts%D(1:3,j) 
   Call MondoHalt(QMMM_ERROR,'Atoms are too close to each other in MM set')
          ENDIF
      ENDDO
@@ -216,7 +212,6 @@ CONTAINS
        write(*,*) 'E_C_EXCL= ',E_C_EXCL
        CALL Put(E_C_EXCL,'E_C_EXCL')
      ENDIF
-     CALL CloseHDF()
 !
    END SUBROUTINE EXCL
 !-------------------------------------------------------------- 
@@ -224,7 +219,8 @@ CONTAINS
    SUBROUTINE ENERGY_LENNARD_JONES(ELJ,ISet,BoxSize,Grad_Loc)
 !
    IMPLICIT NONE
-   INTEGER :: ISET,NBox,Natoms,NX,NY,NZ,I,J
+   INTEGER :: NBox,Natoms,NX,NY,NZ,I,J
+   CHARACTER(LEN=3)   :: ISet
    REAL(DOUBLE) :: BXMIN,BYMIN,BZMIN,BoxSize
    INTEGER :: IX,IY,IZ,IOrd,IOrdD
    INTEGER :: I1,I2,JJ1,JJ2,IXD,IYD,IZD
@@ -234,8 +230,6 @@ CONTAINS
    TYPE(DBL_VECT) :: LJEps,LJRad,DVect
    TYPE(DBL_RNK2),OPTIONAL :: Grad_Loc
    REAL(DOUBLE) :: ELJ,r12_2,Pref1,Pref2
-!
-   CALL OpenHDF(InfFile)
 !
 ! BoxSize is in angstroems
 !
@@ -247,7 +241,7 @@ CONTAINS
 ! sum up LJ contributions within Boxes and between 
 ! neighbouring Boxes
 !
-   CALL Get(GM_Loc,'GM_MM'//TRIM(IntToChar(ISet)))
+   CALL Get(GM_Loc,'GM_MM'//ISet)
    Natoms=GM_Loc%Natms
 !
      CALL New(AtmMark,Natoms)
@@ -337,9 +331,7 @@ CONTAINS
    ENDDO
    ENDDO
 !
-! All interactions have been counted twice
-!
-   CALL CloseHDF()
+!  CALL CloseHDF()
 !
    CALL Delete(GM_Loc)
    CALL Delete(AtmMark)
@@ -351,6 +343,371 @@ CONTAINS
 !
    END SUBROUTINE ENERGY_LENNARD_JONES
 !
-#endif
+!------------------------------------------------------
 !
+   SUBROUTINE Bond_Energy(EBOND,XYZ,Grad_Loc)  
+!
+   REAL(DOUBLE)  :: EBOND
+   TYPE(DBL_RNK2),OPTIONAL :: Grad_Loc
+   INTEGER            :: I,J,IB,NBond
+   LOGICAL            :: CalcGrad
+   REAL(DOUBLE)       :: D_Force,D_Bond,RIJ
+   TYPE(DBL_Vect)     :: DVect,BondFC,BondEQ
+   TYPE(INT_VECT) :: Active_Bond
+   TYPE(INT_RNK2) :: BondIJ
+   REAL(DOUBLE),DIMENSION(:,:) :: XYZ !!! must be in Angstroem !!!
+!
+   EBOND = Zero  
+   CalcGrad=PRESENT(Grad_Loc)
+!
+   CALL Get(NBond,'MM_NBond')
+   IF(NBond==0) RETURN
+!
+   CALL New(BondFC,NBond)
+   CALL New(BondEQ,NBond)
+   CALL New(BondIJ,(/2,NBond/))
+   CALL New(Active_Bond,NBond)
+   CALL Get(BondFC,'BondFC')
+   CALL Get(BondEQ,'BondEQ')
+   CALL Get(BondIJ,'MM_BondIJ')
+   CALL Get(Active_Bond,'Active_Bond')
+!
+   CALL New(DVect,3)
+!
+   DO IB = 1,NBond
+     IF(Active_Bond%I(IB)/=1) CYCLE
+!
+      I = BondIJ%I(1,IB)
+      J = BondIJ%I(2,IB)
+      DVect%D = XYZ(1:3,I)-XYZ(1:3,J)
+      RIJ  = SQRT(DOT_PRODUCT(DVect%D,DVect%D))
+      D_Bond = RIJ-BondEQ%D(IB)
+      D_Force=BondFC%D(IB)*D_Bond
+!
+! bond energy
+!
+      EBOND=EBOND+(D_Force*D_Bond)
+!
+      IF(.NOT.CalcGrad ) CYCLE
+!
+! bond gradient
+!
+      D_Force=(Two*D_Force)/RIJ
+      Grad_Loc%D(1:3,I)=Grad_Loc%D(1:3,I)+(D_Force*DVect%D)
+      Grad_Loc%D(1:3,J)=Grad_Loc%D(1:3,J)-(D_Force*DVect%D)
+!
+   END DO
+!
+   CALL Delete(Active_Bond)
+   CALL Delete(DVect)
+   CALL Delete(BondFC)
+   CALL Delete(BondEQ)
+   CALL Delete(BondIJ)
+!
+   END SUBROUTINE Bond_Energy
+!
+!-------------------------------------------------------------
+!
+   SUBROUTINE Angle_Energy(EANGLE,XYZ,Grad_Loc)
+!
+   REAL(DOUBLE) :: EANGLE
+   TYPE(DBL_RNK2),OPTIONAL :: Grad_Loc
+   TYPE(INT_RNK2) :: AngleIJK
+   INTEGER        :: NAngle,IA,I,J,K
+   LOGICAL        :: CalcGrad
+   REAL(DOUBLE) :: D_Force,D_Angle,Cos_AngleIJK,RIJ,RJK,VAngleIJK
+   TYPE(DBL_VECT) :: DVectIJ,DVectJK,FCI,FCJ,FCK
+   REAL(DOUBLE), PARAMETER :: DOT_LIMIT = 0.999999D0
+   TYPE(INT_VECT) :: ACTIVE_ANGLE
+   REAL(DOUBLE),DIMENSION(:,:) :: XYZ !!! must be in Angstroem !!!
+!
+   EANGLE = Zero   
+   CalcGrad=PRESENT(Grad_Loc)
+!
+   CALL Get(NAngle,'MM_NAngle')
+!
+   IF(NAngle==0) RETURN
+!
+   CALL New(ACTIVE_ANGLE,NAngle)
+   CALL New(AngleIJK,(/3,NAngle/))
+   CALL New(DVectIJ,3)
+   CALL New(DVectJK,3)
+   CALL New(FCI,3)
+   CALL New(FCJ,3)
+   CALL New(FCK,3)
+   CALL Get(ACTIVE_ANGLE,'ACTIVE_ANGLE')
+   CALL Get(AngleIJK,'MM_AngleIJK')
+!
+   DO IA = 1,NAngle
+!
+     IF(ACTIVE_ANGLE%I(IA)/=1) CYCLE
+!
+      I = AngleIJK%I(1,IA)
+      J = AngleIJK%I(2,IA)
+      K = AngleIJK%I(3,IA)
+!
+      DVectIJ%D=XYZ(1:3,I)-XYZ(1:3,J)
+      DVectJK%D=XYZ(1:3,K)-XYZ(1:3,J)
+!
+      RIJ=SQRT(DOT_PRODUCT(DVectIJ%D,DVectIJ%D))
+      RJK=SQRT(DOT_PRODUCT(DVectJK%D,DVectJK%D))
+!
+      DVectIJ%D=DVectIJ%D/RIJ
+      DVectJK%D=DVectJK%D/RJK
+!
+      Cos_AngleIJK=DOT_PRODUCT(DVectIJ%D,DVectJK%D)
+!
+! accuracy of cos(angle) controlled for ACOS function
+!
+      IF(DABS(Cos_AngleIJK)>0.999999D0) THEN
+        Cos_AngleIJK=SIGN(DABS(Cos_AngleIJK),Cos_AngleIJK)
+      ENDIF
+!
+      VAngleIJK=ACOS(Cos_AngleIJK)
+!
+      D_Angle=VAngleIJK-ANGLES(IA)%EQ
+      D_Force=ANGLES(IA)%FC*D_Angle
+!
+! contributions to energy
+!
+      EANGLE=EANGLE+(D_Force*D_Angle)
+!
+      IF(.NOT.CalcGrad) CYCLE
+!
+      D_Force=-Two*D_Force/SQRT(One-Cos_AngleIJK*Cos_AngleIJK)
+!
+      FCI%D=(DVectJK%D-Cos_AngleIJK*DVectIJ%D)/RIJ
+      FCK%D=(DVectIJ%D-Cos_AngleIJK*DVectJK%D)/RJK
+      FCJ%D=-(FCI%D+FCK%D)
+
+      Grad_Loc%D(1:3,I)=Grad_Loc%D(1:3,I)+D_Force*FCI%D
+      Grad_Loc%D(1:3,J)=Grad_Loc%D(1:3,J)+D_Force*FCJ%D
+      Grad_Loc%D(1:3,K)=Grad_Loc%D(1:3,K)+D_Force*FCK%D
+!
+   END DO
+!
+   CALL Delete(ACTIVE_ANGLE)
+   CALL Delete(AngleIJK)
+   CALL Delete(DVectIJ)
+   CALL Delete(DVectJK)
+   CALL Delete(FCI)
+   CALL Delete(FCJ)
+   CALL Delete(FCK)
+!
+   END SUBROUTINE Angle_Energy
+!
+!--------------------------------------------------------------------
+!
+   SUBROUTINE Torsion_Energy(ETorsion,XYZ,Grad_Loc)
+!
+   REAL(DOUBLE) :: ETorsion
+   TYPE(DBL_RNK2),OPTIONAL :: Grad_Loc
+   TYPE(INT_VECT) :: Active_Torsion
+   TYPE(DBL_VECT) :: TorsionEQ,TorsionFC
+   TYPE(INT_VECT) :: TorsionPeriod
+   TYPE(INT_RNK2) :: TorsionIJKL
+   INTEGER :: NTorsion
+   REAL(DOUBLE),DIMENSION(:,:) :: XYZ !!! must be in Angstroem !!!
+!
+   ETorsion=Zero
+   CALL Get(NTorsion,'MM_NTorsion')
+!
+   IF(NTorsion==0) RETURN 
+!
+   CALL New(TorsionIJKL,(/4,NTorsion/))
+   CALL New(Active_Torsion,NTorsion)
+   CALL New(TorsionEQ,NTorsion)
+   CALL New(TorsionFC,NTorsion)
+   CALL New(TorsionPeriod,NTorsion)
+   CALL Get(TorsionIJKL,'MM_TorsionIJKL')
+   CALL Get(Active_Torsion,'Active_Torsion')
+   CALL Get(TorsionEQ,'TorsionEQ')
+   CALL Get(TorsionFC,'TorsionFC')
+   CALL Get(TorsionPeriod,'TorsionPeriod')
+!
+   CALL TorsionalEnergy(NTorsion,TorsionIJKL,ETorsion,XYZ, &
+       Grad_Loc,Active_Torsion,TorsionEQ,TorsionFC,TorsionPeriod)
+!
+   CALL Delete(Active_Torsion)
+   CALL Delete(TorsionIJKL)
+   CALL Delete(TorsionEQ)
+   CALL Delete(TorsionFC)
+   CALL Delete(TorsionPeriod)
+!
+   END SUBROUTINE Torsion_Energy
+!
+!--------------------------------------------------------------------
+!
+   SUBROUTINE OutOfPlane_Energy(EOutOfPlane,XYZ,Grad_Loc)
+!
+   REAL(DOUBLE) :: EOutOfPlane
+   TYPE(DBL_RNK2),OPTIONAL :: Grad_Loc
+   TYPE(INT_VECT) :: Active_OutOfPlane
+   TYPE(INT_RNK2) :: OutOfPlaneIJKL
+   TYPE(DBL_VECT) :: OutOfPlaneEQ,OutOfPlaneFC
+   TYPE(INT_VECT) :: OutOfPlanePeriod
+   INTEGER :: NOutOfPlane
+   REAL(DOUBLE),DIMENSION(:,:) :: XYZ !!! must be in Angstroem !!!
+!
+   EOutOfPlane=Zero
+   CALL Get(NOutOfPlane,'MM_NOutOfPlane')
+!
+   IF(NOutOfPlane==0) RETURN 
+!
+   CALL New(OutOfPlaneIJKL,(/4,NOutOfPlane/))
+   CALL New(Active_OutOfPlane,NOutOfPlane)
+   CALL New(OutOfPlaneEQ,NOutOfPlane)
+   CALL New(OutOfPlaneFC,NOutOfPlane)
+   CALL New(OutOfPlanePeriod,NOutOfPlane)
+   CALL Get(OutOfPlaneIJKL,'MM_OutOfPlaneIJKL')
+   CALL Get(Active_OutOfPlane,'Active_OutOfPlane')
+   CALL Get(OutOfPlaneEQ,'OutOfPlaneEQ')
+   CALL Get(OutOfPlaneFC,'OutOfPlaneFC')
+   CALL Get(OutOfPlanePeriod,'OutOfPlanePeriod')
+!
+   CALL TorsionalEnergy(NOutOfPlane,OutOfPlaneIJKL,EOutOfPlane,XYZ, &
+        Grad_Loc,Active_OutOfPlane,OutOfPlaneEQ,OutOfPlaneFC,OutOfPlanePeriod)
+!
+   CALL Delete(Active_OutOfPlane)
+   CALL Delete(OutOfPlaneIJKL)
+   CALL Delete(OutOfPlaneEQ)
+   CALL Delete(OutOfPlaneFC)
+   CALL Delete(OutOfPlanePeriod)
+!
+   END SUBROUTINE OutOfPlane_Energy
+!
+!-------------------------------------------------------------
+!
+   SUBROUTINE TorsionalEnergy(NCoord,CoordIJKL,ECoord,XYZ,Grad_Loc,Active_Coord,CoordEQ,CoordFC,CoordPeriod)
+!
+   IMPLICIT NONE
+   REAL(DOUBLE) :: Energy_Coord
+   TYPE(DBL_RNK2),OPTIONAL :: Grad_Loc
+   TYPE(INT_VECT) :: Active_Coord
+   TYPE(DBL_VECT) :: CoordEQ,CoordFC
+   TYPE(INT_VECT) :: CoordPeriod
+   TYPE(INT_RNK2) :: CoordIJKL
+   INTEGER :: NCoord     
+   REAL(DOUBLE),DIMENSION(:,:) :: XYZ !!! must be in Angstroem !!!
+   INTEGER            :: ICoord,I,IFAC,J,JFAC,K,KFAC,L,LFAC
+   LOGICAL            :: CalcGrad
+   REAL(DOUBLE) :: CosNPhi,CosPhi,CosPhi2,DCos,DForce
+   REAL(DOUBLE) :: IJCOSJK,KLCOSJK,D2Cos,Fact1,Fact2,NFJKL,NFIJK
+   REAL(DOUBLE) :: ECoord,DJK
+   TYPE(DBL_VECT) :: FIJK,DVectIJ,DVectJK,DVectKL,FJKL
+   TYPE(DBL_VECT) :: DGradI,DGradJ,DGradK,DGradL
+!
+   ECoord=Zero   
+   CalcGrad=PRESENT(Grad_Loc)
+!
+   CALL New(DVectIJ,3)
+   CALL New(DVectJK,3)
+   CALL New(DVectKL,3)
+   CALL New(FIJK,3)
+   CALL New(FJKL,3)
+!
+   CALL New(DGradI,3)
+   CALL New(DGradJ,3)
+   CALL New(DGradK,3)
+   CALL New(DGradL,3)
+!
+   DO ICoord = 1,NCoord
+   IF(Active_Coord%I(ICoord)/=1) CYCLE
+!
+      I=CoordIJKL%I(1,ICoord)
+      J=CoordIJKL%I(2,ICoord)
+      K=CoordIJKL%I(3,ICoord)
+      L=CoordIJKL%I(4,ICoord)
+!
+      DVectIJ%D=XYZ(1:3,I)-XYZ(1:3,J)
+      DVectJK%D=XYZ(1:3,K)-XYZ(1:3,J)
+      DVectKL%D=XYZ(1:3,L)-XYZ(1:3,K)
+!
+      DJK=SQRT(DOT_PRODUCT(DVectJK%D,DVectJK%D))
+!
+      DVectJK%D=DVectJK%D/DJK
+!
+      IJCOSJK=DOT_PRODUCT(DVectIJ%D,DVectJK%D)
+      KLCOSJK=DOT_PRODUCT(DVectKL%D,DVectJK%D)
+!
+      FIJK%D=DVectIJ%D-IJCOSJK*DVectJK%D
+      FJKL%D=DVectKL%D-KLCOSJK*DVectJK%D
+!
+      NFIJK=SQRT(DOT_PRODUCT(FIJK%D,FIJK%D))
+      NFJKL=SQRT(DOT_PRODUCT(FJKL%D,FJKL%D))
+!
+      FIJK%D=FIJK%D/NFIJK
+      FJKL%D=FJKL%D/NFJKL
+!
+      CosPhi=DOT_PRODUCT(FIJK%D,FJKL%D)
+!
+      CosPhi=SIGN(MIN(ABS(CosPhi),1.D0),CosPhi)
+      CosPhi2=CosPhi*CosPhi
+!
+! Observe periodicity depending on hybridization of J and K
+! Use Dynamo's convention
+!
+      SELECT CASE(CoordPeriod%I(ICoord))
+      CASE(0) ; CosNPhi = One   
+                DCos    = Zero  
+                D2Cos   = Zero  
+      CASE(1) ; CosNPhi = CosPhi
+                DCos    = One    
+                D2Cos   = Zero  
+      CASE(2) ; CosNPhi = Two*CosPhi2-One
+                DCos    = Four*CosPhi
+                D2Cos   = Four  
+      CASE(3) ; CosNPhi = (Four*CosPhi2-Three)*CosPhi
+                DCos    = 12.D0*CosPhi2-Three
+                D2Cos   = 24.D0*CosPhi
+      CASE(4) ; CosNPhi =  8.D0*(CosPhi2-One)*CosPhi2+One   
+                DCos    = 16.D0*(Two*CosPhi2-One)*CosPhi
+                D2Cos   = 16.D0*(Six*CosPhi2-One)
+      CASE(5) ; CosNPhi = ((16.D0*CosPhi2-20.D0)*CosPhi2+5.D0)*CosPhi
+                DCos    = 20.D0*(Four*CosPhi2-Three)*CosPhi2+Five
+                D2Cos   = 40.D0*(8.D0*CosPhi2-Three)*CosPhi
+      CASE(6) ; CosNPhi = ((32.D0*CosPhi2-48.D0)*CosPhi2+18.D0) *CosPhi2-One
+                DCos    = (192.D0*(CosPhi2-One)*CosPhi2+36.D0) *CosPhi
+                D2Cos   =  192.D0*(Five*CosPhi2-Three)*CosPhi2 + 36.D0
+!
+      END SELECT
+!
+! Calculate energy
+!
+ECoord=ECoord+CoordFC%D(ICoord)*(One+CoordEQ%D(ICoord)*CosNPhi)
+!
+      IF(.NOT.CalcGrad) CYCLE
+!
+! Calculate force
+!
+DForce=CoordFC%D(ICoord)*CoordEQ%D(ICoord)*DCos
+!
+      Fact1=IJCOSJK/DJK
+      Fact2=KLCOSJK/DJK
+      DGradI%D=(FJKL%D-CosPhi*FIJK%D)/NFIJK
+      DGradL%D=(FIJK%D-CosPhi*FJKL%D)/NFJKL
+      DGradJ%D= DGradI%D*(Fact1-One)+Fact2*DGradL%D
+      DGradK%D=-DGradL%D*(Fact2+One)-Fact1*DGradI%D
+!
+      Grad_Loc%D(1:3,I)=Grad_Loc%D(1:3,I)+DForce*DGradI%D
+      Grad_Loc%D(1:3,J)=Grad_Loc%D(1:3,J)+DForce*DGradJ%D
+      Grad_Loc%D(1:3,K)=Grad_Loc%D(1:3,K)+DForce*DGradK%D
+      Grad_Loc%D(1:3,L)=Grad_Loc%D(1:3,L)+DForce*DGradL%D
+!
+   END DO
+!
+   CALL Delete(DVectIJ)
+   CALL Delete(DVectJK)
+   CALL Delete(DVectKL)
+   CALL Delete(FIJK)
+   CALL Delete(FJKL)
+!
+   CALL Delete(DGradI)
+   CALL Delete(DGradJ)
+   CALL Delete(DGradK)
+   CALL Delete(DGradL)
+!
+   END SUBROUTINE TorsionalEnergy
+!
+#endif
 END MODULE DYNAMO
