@@ -153,9 +153,9 @@ CONTAINS
        RhoSumN = RhoSumN + Weig
     ENDDO
 !
-    WRITE(*,*) ' Int[Rho_E] = ',RhoSumE
-    WRITE(*,*) ' Int[Rho_N] = ',RhoSumN   
-    WRITE(*,*) ' Int[Rho_T] = ',RhoSumN+RhoSumE
+!    WRITE(*,*) ' Int[Rho_E] = ',RhoSumE
+!    WRITE(*,*) ' Int[Rho_N] = ',RhoSumN   
+!    WRITE(*,*) ' Int[Rho_T] = ',RhoSumN+RhoSumE
   END SUBROUTINE Integrate_HGRho
 
 !---------------------------------------------------------------------------------------

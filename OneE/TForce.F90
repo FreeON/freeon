@@ -22,13 +22,13 @@ PROGRAM TForce
 #endif
 #ifdef PERIODIC 
   INTEGER             :: NC
-  REAL(DOUBLE)        :: Bx,By,Bz
+  REAL(DOUBLE),DIMENSION(3) :: B
 #endif
   TYPE(AtomPair)      :: Pair
   TYPE(BSET)          :: BS
   TYPE(CRDS)          :: GM
   TYPE(ARGMT)         :: Args
-  INTEGER             :: Q,R,AtA,AtB,NN,iSwitch,IStrtP,IStopP,LP,JP,MB,MA,A1,A2
+  INTEGER             :: Q,R,AtA,AtB,JP,MB,MA,NB,MN1,A1,A2
   TYPE(HGRho)         :: Rho
   TYPE(DBL_VECT)      :: TFrc,Frc
   REAL(DOUBLE)        :: TFrcChk
@@ -43,7 +43,6 @@ PROGRAM TForce
   CALL Get(BS,Tag_O=CurBase)
   CALL Get(GM,Tag_O=CurGeom)
   CALL Get(P,TrixFile('D',Args,0))
-  CALL New(Frc,3*NAtoms)
   CALL New(TFrc,3*NAtoms)
 #ifdef PERIODIC
 !-----------------------------------------------
@@ -51,42 +50,51 @@ PROGRAM TForce
 !
   CALL SetCellNumber(GM)
 #endif
-!---------------------------------------------------------------------------
+!--------------------------------------------------------------------------------
 ! TForce=2*Tr{P.dT} (Extra 2 to account for symmetry of T in the trace)
+!--------------------------------------------------------------------------------
   TFrc%D=Zero
   DO AtA=1,NAtoms
      A1=3*(AtA-1)+1
      A2=3*AtA
+     MA=BSiz%I(AtA)
      DO JP=P%RowPt%I(AtA),P%RowPt%I(AtA+1)-1
         AtB=P%ColPt%I(JP)
         IF(SetAtomPair(GM,BS,AtA,AtB,Pair))THEN
            Q=P%BlkPt%I(JP)
+           NB=BSiz%I(AtB)
+           MN1=MA*NB-1
 #ifdef PERIODIC
-           Bx = Pair%B(1)
-           By = Pair%B(2)           
-           Bz = Pair%B(3)
+           B=Pair%B
            DO NC=1,CS%NCells
-              Pair%B(1)=Bx+CS%CellCarts%D(1,NC)
-              Pair%B(2)=By+CS%CellCarts%D(2,NC)
-              Pair%B(3)=Bz+CS%CellCarts%D(3,NC)
-              Pair%AB2=(Pair%A(1)-Pair%B(1))**2+(Pair%A(2)-Pair%B(2))**2+(Pair%A(3)-Pair%B(3))**2
+              Pair%B=B+CS%CellCarts%D(:,NC)
+              Pair%AB2=(Pair%A(1)-Pair%B(1))**2  &
+                      +(Pair%A(2)-Pair%B(2))**2  &
+                      +(Pair%A(3)-Pair%B(3))**2
               IF(TestAtomPair(Pair)) THEN
-                 TFrc%D(A1:A2)=TFrc%D(A1:A2)+Four*TrPdT(BS,Pair,P%MTrix%D(Q:))
+                 TFrc%D(A1:A2)=TFrc%D(A1:A2) &
+                              +Four*TrPdT(BS,Pair,P%MTrix%D(Q:Q+MN1))
               ENDIF
            ENDDO
 #else
-           TFrc%D(A1:A2)=TFrc%D(A1:A2)+Four*TrPdT(BS,Pair,P%MTrix%D(Q:))
+           TFrc%D(A1:A2)=TFrc%D(A1:A2)  &
+                        +Four*TrPdT(BS,Pair,P%MTrix%D(Q:Q+MN1))
 #endif
         ENDIF
      ENDDO
   ENDDO
-!---------------------------------------------------------------
-! Update forces
+!--------------------------------------------------------------------------------
+! Do some checksumming, resumming and IO 
+!--------------------------------------------------------------------------------
+  CALL PChkSum(TFrc,'TForce')  
+! for tmp debuging ...
+  CALL PPrint(TFrc,'TForce',Unit_O=6)
   CALL PPrint(TFrc,'TForce')
+! Sum in contribution to total force
+  CALL New(Frc,3*NAtoms)
   CALL Get(Frc,'GradE',Tag_O=CurGeom)
   Frc%D=Frc%D+TFrc%D
   CALL Put(Frc,'GradE',Tag_O=CurGeom)
-  TFrcChk=SQRT(DOT_PRODUCT(TFrc%D,TFrc%D))
 !------------------------------------------------------------------------------
 ! Tidy up 
   CALL Delete(P)

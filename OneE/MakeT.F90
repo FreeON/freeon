@@ -125,8 +125,6 @@ PROGRAM MakeT
 !  
   CALL Filter(T2,TK)
   CALL Put(T2,TrixFile('T',Args))
-!
-! BlksName_O='nti',Non0Name_O='ntm')
 !-----------------------------------------------------------
 ! Printing
 !
