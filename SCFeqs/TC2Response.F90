@@ -171,6 +171,7 @@ CONTAINS
   !
   !
   SUBROUTINE TC2R_DMP(P,PPrim,Tmp1,Tmp2,Tmp3,Ne,MM)
+    !SUBROUTINE TC2R_DMP(P,PPrim_1,PPrim_2,PPrm2_1,PPrm2_2,PPrm3_1,Tmp1,Tmp2,Tmp3,Ne,MM,Order)
 !H---------------------------------------------------------------------------------
 !H SUBROUTINE TC2R_DMP(P,PPrim,Tmp1,Tmp2,Tmp3,Ne,MM)
 !H  This routine does the linear TC2Response scheme.
@@ -182,8 +183,9 @@ CONTAINS
     TYPE(DBCSR) , INTENT(INOUT) :: P,PPrim,Tmp1,Tmp2,Tmp3
 #else
     TYPE(BCSR ) , INTENT(INOUT) :: P,PPrim,Tmp1,Tmp2,Tmp3
+    !TYPE(BCSR ) , INTENT(INOUT) :: P,PPrim_1,PPrim_2,PPrm2_1,PPrm2_2,PPrm3_1,Tmp1,Tmp2,Tmp3
 #endif
-    REAL(DOUBLE), INTENT(IN   ) :: Ne
+    REAL(DOUBLE), INTENT(IN   ) :: Ne!,Order
     INTEGER     , INTENT(INOUT) :: MM
     !-------------------------------------------------------------------
     REAL(DOUBLE)                :: N
@@ -192,10 +194,33 @@ CONTAINS
     MM=MM+1
     N=Trace(P)
     IF(N>=Ne) THEN
+       !----------------------
        ! D3 = X0*D3 + D3*X0 + D1*D2+D2*D1;
+       ! PPrm3_1 <-> abc
+       ! PPrm2_1 <-> ac
+       ! PPrm2_2 <-> bc
+       ! PPrim_1 <-> a
+       ! PPrim_2 <-> b
+       !----------------------
+       !IF(Order.GE.3) THEN
+       !   CALL Multiply(P,PPrm3,Tmp1)    !Tmp1=P*PPrm3
+       !   CALL Multiply(PPrm3,P,Tmp2)    !Tmp2=PPrm3*P
+       !   CALL Add(Tmp1,Tmp2,Tmp3)       !Tmp3=Tmp1+Tmp2
+       !   CALL Multiply(PPrm1,PPrm2,Tmp2)!Tmp2=PPrm1*PPrm2
+       !   CALL Add(Tmp2,Tmp3,Tmp1)       !Tmp1=Tmp2+Tmp3
+       !   CALL Multiply(PPrm2,PPrm1,Tmp2)!Tmp2=PPrm2*PPrm1
+       !   CALL Add(Tmp1,Tmp2,Tmp3)       !Tmp3=Tmp1+Tmp2
+       !   !----------------------
+       !   CALL Filter(PPrm3,Tmp3)        !PPrm3=Tmp3
+       !ENDIF
        !
+       !----------------------
        ! D2 = X0*D2 + D2*X0 + D1*D1;
-       !IF(...) THEN
+       ! PPrm2_1 <-> ab
+       ! PPrim_1 <-> a
+       ! PPrim_2 <-> b
+       !----------------------
+       !IF(Order.GE.2) THEN
        !   CALL Multiply(P,PPrm2,Tmp1)    !Tmp1=P*PPrm2
        !   CALL Multiply(PPrm2,P,Tmp2)    !Tmp2=PPrm2*P
        !   CALL Add(Tmp1,Tmp2,Tmp3)       !Tmp3=Tmp1+Tmp2
@@ -204,24 +229,47 @@ CONTAINS
        !   !----------------------
        !   CALL Filter(PPrm2,Tmp2)        !PPrm2=Tmp2
        !ENDIF
+       !
        !----------------------
        ! D1 = X0*D1 + D1*X0;
+       ! PPrim_1 <-> a
+       !----------------------
        CALL Multiply(P,PPrim,Tmp1)    !Tmp1=P*PPrim
        CALL Multiply(PPrim,P,Tmp2)    !Tmp2=PPrim*P
        CALL Add(Tmp1,Tmp2,Tmp3)       !Tmp3=Tmp1+Tmp2 !PPrim=P*PPrim+PPrim*P
        !----------------------
        CALL Filter(PPrim,Tmp3)        !PPrim=Tmp3
+       !
        !----------------------
        ! X0 = X0^2;
+       !----------------------
        CALL Multiply(P,P,Tmp3)        !Tmp3=P*P
        !----------------------
        CALL Filter(P,Tmp3)            !P=Tmp3
        !----------------------
     ELSE
+       !----------------------
        ! D3 = 2*D3 - (X0*D3+D3*X0) - (D1*D2+D2*D1);
+       !----------------------
+       !IF(Order.GE.3) THEN
+       !   CALL Multiply(P,PPrm3,Tmp1)    !Tmp1=P*PPrm3
+       !   CALL Multiply(PPrm3,P,Tmp2)    !Tmp2=PPrm3*P
+       !   CALL Add(Tmp1,Tmp2,Tmp3)       !Tmp3=Tmp1+Tmp2
+       !   CALL Multiply(PPrim,PPrm2,Tmp1)!Tmp1=PPrim*PPrm2
+       !   CALL Add(Tmp1,Tmp3,Tmp2)       !Tmp2=Tmp1+Tmp3
+       !   CALL Multiply(PPrm2,PPrim,Tmp1)!Tmp1=PPrm2*PPrim
+       !   CALL Add(Tmp1,Tmp2,Tmp3)       !Tmp3=Tmp1+Tmp2
+       !   CALL Multiply(Tmp3,-One)       !Tmp3=-Tmp3
+       !   CALL Multiply(PPrm3,Two)       !PPrm3=2*PPrm3
+       !   CALL Add(PPrm3,Tmp3,Tmp1)      !Tmp1=PPrm3+Tmp3
+       !   !----------------------
+       !   CALL Filter(PPrm3,Tmp1)        !D3=Tmp1
+       !ENDIF
+       !
+       !----------------------
        ! D2 = 2*D2 - (X0*D2+D2*X0) - (D1*D1);
        !----------------------
-       !IF(...) THEN
+       !IF(Order.GE.2) THEN
        !   CALL Multiply(P,PPrm2,Tmp1)    !Tmp1=P*PPrm2
        !   CALL Multiply(PPrm2,P,Tmp2)    !Tmp2=PPrm2*P
        !   CALL Add(Tmp1,Tmp2,Tmp3)       !Tmp3=Tmp1+Tmp2
@@ -233,8 +281,10 @@ CONTAINS
        !   !----------------------
        !   CALL Filter(PPrm2,Tmp1)        !D2=Tmp1
        !ENDIF
+       !
        !----------------------
        ! D1 = 2*D1 - (X0*D1+D1*X0);      
+       !----------------------
        CALL Multiply(P,PPrim,Tmp1)    !Tmp1=P*PPrim
        CALL Multiply(PPrim,P,Tmp2)    !Tmp2=PPrim*P
        CALL Add(Tmp1,Tmp2,Tmp3)       !Tmp3=Tmp1+Tmp2
@@ -243,8 +293,10 @@ CONTAINS
        CALL Add(PPrim,Tmp3,Tmp1)      !Tmp1=PPrim+Tmp3 
        !----------------------
        CALL Filter(PPrim,Tmp1)        !D1=Tmp1
+       !
        !----------------------
        ! X0 = 2*X0-X02;
+       !----------------------
        CALL Multiply(P,P,Tmp1)        !Tmp1=P*P
        CALL Multiply(Tmp1,-One)       !Tmp1=-Tmp1
        CALL Multiply(P,Two)           !P=2*P
