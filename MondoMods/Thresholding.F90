@@ -80,6 +80,7 @@ MODULE Thresholding
      !==================================================================================================
      FUNCTION BoxPairOverlap(Pair,Box)
        LOGICAL                   :: BoxPairOverlap
+       INTEGER                   :: I
        TYPE(AtomPair)            :: Pair
        TYPE(BBox),OPTIONAL       :: Box
        REAL(DOUBLE)              :: Ext,R,LMag,HL,d,s
