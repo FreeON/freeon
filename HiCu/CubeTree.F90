@@ -17,157 +17,118 @@ MODULE CubeTree
 !  Hierarchical cubature node
 !====================================================================================
    TYPE CubeNode
-      LOGICAL                                     :: Leaf
+      LOGICAL                                 :: Leaf
 !     Intermediate values
-      INTEGER                                     :: ISplit
-      REAL(DOUBLE)                                :: IXact
-      REAL(DOUBLE),DIMENSION(3)                   :: ICube    ! 
-      REAL(DOUBLE),DIMENSION(3)                   :: ECube    ! 
+      INTEGER                                 :: ISplit
+      REAL(DOUBLE)                            :: IXact
+      REAL(DOUBLE),DIMENSION(3)               :: ICube    ! 
+      REAL(DOUBLE),DIMENSION(3)               :: ECube    ! 
 !     Bounding box 
-      TYPE(BBox)                                  :: Box          
+      TYPE(BBox)                              :: Box          
 !     Links
-      TYPE(CubeNode), POINTER                     :: Travrse  ! Next node in tree traversal
-      TYPE(CubeNode), POINTER                     :: Descend  ! Next node in tree descent
+      TYPE(CubeNode), POINTER                 :: Travrse  ! Next node in tree traversal
+      TYPE(CubeNode), POINTER                 :: Descend  ! Next node in tree descent
 !     Cubature grid
       REAL(DOUBLE),   POINTER, DIMENSION(:,:) :: Grid     ! Transformed grid
-      REAL(DOUBLE),   POINTER, DIMENSION(:)   :: Wght     ! Transformed Wght
       REAL(DOUBLE),   POINTER, DIMENSION(:,:) :: Vals     ! Values at each grid pt
+      REAL(DOUBLE),   POINTER, DIMENSION(:)   :: Wght     ! Transformed Wght
    END TYPE CubeNode
 !----------------------------------------------------------------------------------
-   INTEGER, PARAMETER :: MaxTier=100
-!  Global scalars 
-   INTEGER            :: KOpt
-   INTEGER            :: CubeNodes,CubeLevel
-   REAL(DOUBLE)       :: LocalThresh
-   REAL(DOUBLE)       :: Exc 
-!  Global arrays
-   INTEGER, DIMENSION(0:MaxTier) :: GlobalCubes 
-!  Global Types 
-   TYPE(BSET)                    :: BS 
-   TYPE(CRDS)                    :: GM 
-   TYPE(DBL_RNK4)                :: MD
+!  Global variables for statistics accumulation
+   INTEGER, PARAMETER             :: MaxTier=200     !  Maximum recursion
+   INTEGER                        :: MaxLevel        !  Current maximum recursion depth
+   INTEGER, DIMENSION(0:MaxTier)  :: GlobalCubes     !  Number of cubes per tier
+   INTEGER                        :: CubeNodes       !  Global Cube counter 
+   REAL(DOUBLE)                   :: Exc             !  Exchange correlation energy
+!  Global thresholding parameters
+   REAL(DOUBLE)                   :: TauRel          !  Relative accuracy sought in the
+                                                     !  total integrated electron density.
+   REAL(DOUBLE)                   :: TauBox          !  Local, numerically integrated 
+                                                     !  accuracy sought in electron density
+   REAL(DOUBLE)                   :: TauRho          !  Local accuracy of the electron density 
+                                                     !  evaluated at a point
+   REAL(DOUBLE),PARAMETER         :: DeltaRel=0.2D0  !  Scales TauRel to give TauBox
+   REAL(DOUBLE),PARAMETER         :: DeltaRho=1.D-2  !  Scales TauBox to give TauRho
+   REAL(DOUBLE),PARAMETER         :: ResSpan=1.D4    !  Controls span of accuracy
+   INTEGER,     PARAMETER         :: MaxRes=10       !  Intervals to divide accuracy over
+!  Global variables for current Cube
+   TYPE(BBox)                     :: Box             !  Global BBox, set to current Cube%BBox        
+   REAL(DOUBLE),DIMENSION(NGrid,3):: Grid            !  Global Grid, set to current Cube%Grid
+   REAL(DOUBLE),DIMENSION(NGrid,4):: RhoV            !  Global Vals, set to current Cube%Vals
+   REAL(DOUBLE)                   :: Pop             !  Global Pop,  set to current Cube%IXact
+!  Interpolation grid for fast evaluation of Exp[-x] and Erf[x]
+   INCLUDE 'Exp.Inc'   
+   INCLUDE 'Erf.Inc'
 !-----------!
    CONTAINS !
 !================================================================================
-!          
+!     Grid generation routine     
 !================================================================================
       SUBROUTINE GridGen(CubeRoot)
          TYPE(CubeNode), POINTER          :: CubeRoot
-         REAL(DOUBLE),PARAMETER           :: ErrorDeAmplification=2.D-1
          REAL(DOUBLE),   DIMENSION(3)     :: TotalError,LocalError,GlobalError, &
                                              RelativeError,NewCubes,OldCubes
-         REAL(DOUBLE)                     :: MaxError,BoxSep,FullPop,OldPop, &
-                                             Delta,TargtThresh
-         INTEGER, PARAMETER               :: MaxIt=50
-         REAL(DOUBLE), DIMENSION(0:MaxIt) :: MaxRelError
+         REAL(DOUBLE)                     :: MaxError,BoxSep,Delta,TargtThresh
+         REAL(DOUBLE), DIMENSION(0:MaxRes):: MaxRelError
          INTEGER                          :: I,J,K,ErrCount,PtsPerAtom
          TYPE(BBox)                       :: CubeBox    
          CHARACTER(LEN=DEFAULT_CHR_LEN)   :: Mssg     
 !---------------------------------------------------------------------------------
-!        Initialize global variables
+!        Initialize some global variables
          GlobalCubes=0
-         GlobalError=Zero       
-!        Initialize root cube
-         CALL NewCubeNode(CubeRoot,0) 
-!        Find the CubeRoots bounding box
-         FullPop=SetCubeRootBBox(CubeRoot)
-         CubeRoot%ISplit=1
-         CubeRoot%Box%Tier=0
-         CALL ExpandBoxWalk(RhoRoot,-One)
-         CubeRoot%ECube=BIG_DBL
-!        Begin generation of the hierarchical grid
+         GlobalError=Zero
+         MaxLevel=0       
+!        Set thresholding
+         TauRel=Thresholds%Cube
+!        Initialize the CubeRoot and set thresholding
+         CALL InitCubeRoot(CubeRoot)
+!        Seting parameters for grid generation with variable accuracy
          MaxRelError=BIG_DBL
-         LocalThresh=Thresholds%Cube*1.D2
-         TargtThresh=Thresholds%Cube*ErrorDeAmplification
-         Delta=(TargtThresh/LocalThresh)**(1.0D0/DBLE(MaxIt))
-         DO J=1,MaxIt
-            LocalThresh=LocalThresh*Delta
-            CALL SetPenetrationThresh(LocalThresh*1.D-2,Exp_Switch)
+         TauRel=TauRel*ResSpan
+         Delta=(One/ResSpan)**(One/DBLE(MaxRes))
+!        Begin generation of the hierarchical grid
+         DO J=1,MaxRes
+!           Target relative error
+            TauRel=TauRel*Delta
+!           Accuracy of numerically integrated density in a Cube
+            TauBox=TauRel*DeltaRel
+!           Accuracy of density at a point           
+            TauRho=TauBox*DeltaRho 
+            CALL SetPenetrationThresh(TauRho,Exp_Switch)
             CALL ExpandBoxWalk(RhoRoot,One)
             CALL GridRefine(CubeRoot)
             CALL ExpandBoxWalk(RhoRoot,-One)
+!           Compute Exc and convergence parameters
             NewCubes=CubeWalk(CubeRoot)
             PtsPerAtom=INT(DBLE(NGrid*LeafCount(CubeRoot))/DBLE(NAtoms))
-            RelativeError(1)=ABS(FullPop-NewCubes(1))/DBLE(FullPop)
-            IF(J==1)THEN
-               OldCubes=NewCubes
-            ELSE
-               Exc=NewCubes(2) 
-               RelativeError(2)=ABS((NewCubes(2)-OldCubes(2))/NewCubes(2))               
-               RelativeError(3)=ABS((NewCubes(3)-OldCubes(3))/NewCubes(3))               
-!               WRITE(*,9) LocalThresh,PtsPerAtom,RelativeError(1:3) 
-             9 FORMAT(' LocThr = ',D8.2,' Pts/Atom= ',I5,' ERRORS: Rho=',D8.2, &
-                      ' Exc=',D8.2,' Gxc=',D8.2)
+            RelativeError(1)=ABS(CubeRoot%IXact-NewCubes(1))/CubeRoot%IXact
+            Exc=NewCubes(2) 
+            RelativeError(2)=ABS((NewCubes(2)-OldCubes(2))/NewCubes(2))               
+            RelativeError(3)=ABS((NewCubes(3)-OldCubes(3))/NewCubes(3))               
+            IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
+               Mssg=ProcessName('HiCu.GridGen')                    &
+                  //'TauBox = ' //TRIM(DblToShrtChar(TauBox))      &
+                  //', <Rho> = '//TRIM(DblToMedmChar(NewCubes(1))) &
+                  //', <Exc> = '//TRIM(DblToMedmChar(Exc))         &
+                  //', Pts/Atom = '//TRIM(IntToChar(PtsPerAtom))
+               CALL OpenASCII(OutFile,Out)         
+               WRITE(*,*)TRIM(Mssg)
+               WRITE(Out,*)TRIM(Mssg)
+               CLOSE(Out)
             ENDIF
             OldCubes=NewCubes
          ENDDO
          IF(PrintFlags%Key>DEBUG_MEDIUM)THEN
+            Mssg=ProcessName('HiCu.GridGen')                            &
+                //'TauRel = '//TRIM(DblToShrtChar(TauRel))              &
+                //', RhoErr = '//TRIM(DblToShrtChar(RelativeError(1)))  &
+                //', <Exc> = '//TRIM(DblToMedmChar(Exc))         
             CALL OpenASCII(OutFile,Out)         
-            WRITE(  *,10)PtsPerAtom,LocalThresh,RelativeError(1) 
-!            WRITE(Out,10)PtsPerAtom,LocalThresh,RelativeError(1) 
+            WRITE(*,*)TRIM(Mssg)
+            WRITE(Out,*)TRIM(Mssg)
             CLOSE(Out)
-         10 FORMAT(' HiCu.GridGen     :: Pts/Atom= ',I6,' LocThr=',D8.2,', RhoErr=',D15.9)
          ENDIF
      END SUBROUTINE GridGen  
-!================================================================================
-!
-!=================================================================================
-     FUNCTION SetCubeRootBBox(CubeRoot) RESULT(FullPop)
-         TYPE(CubeNode), POINTER          :: CubeRoot
-         REAL(DOUBLE)                     :: BoxSep,Delta,NewPop,FullPop, &
-                                             RelativeError
-         REAL(DOUBLE), PARAMETER          :: PcntPop=1.D-2
-         INTEGER                          :: I,J,K,KDig
-         TYPE(BBox)                       :: CubeBox    
-         CHARACTER(LEN=DEFAULT_CHR_LEN)   :: Mssg     
-         
-         CALL SetBBox(RhoRoot%Box,CubeBox)
-         CALL SetPenetrationThresh(1.D-15)
-         CALL ExpandBoxWalk(RhoRoot,One)
-         CubeRoot%Box=ExpandBox(CubeBox,30.0D0)
-#ifdef PERIODIC
-         CALL MakeBoxPeriodic(CubeRoot%Box)
-#endif
-         CALL LayGrid(CubeRoot)
-         CubeRoot%ISplit=1
-         FullPop=CubeRoot%IXact
-!
-         BoxSep=1.0D0
-         Delta=1.0D0
-         KDig=0
-         DO J=1,1000
-          2 BoxSep=BoxSep+Delta
-            CubeRoot%Box=ExpandBox(CubeBox,BoxSep)
-#ifdef PERIODIC
-            CALL MakeBoxPeriodic(CubeRoot%Box)
-#endif
-            CALL LayGrid(CubeRoot)
-            NewPop=CubeRoot%IXact
-            RelativeError=ABS((NewPop-FullPop)/FullPop)
-            IF(RelativeError<Thresholds%Cube*PcntPop)THEN
-               IF(KDig>8)GOTO 1
-               KDig=KDig+1
-               BoxSep=BoxSep-Delta
-               Delta=Delta*1.D-1
-            ENDIF
-         ENDDO
-         Mssg='Failed to find bounding box for CubeRoot! '//Rtrn &
-            //'Integrated density in largest BBox = '            &
-            //TRIM(DblToChar(Two*CubeRoot%IXact))//Rtrn          &
-            //' Relative error = '//TRIM(DblToShrtChar(RelativeError))
-         CALL Halt(Mssg)          
-       1 CONTINUE
-!
-!         WRITE(*,*) ' Full Pop #1 = ',FullPop
-!         WRITE(*,*) ' Box Size:'
-!         WRITE(*,*) ' BndBox(xl) =',CubeRoot%Box%BndBox(1,1), &
-!                    ' BndBox(xh) =',CubeRoot%Box%BndBox(1,2)
-!         WRITE(*,*) ' BndBox(yl) =',CubeRoot%Box%BndBox(2,1), &
-!                    ' BndBox(yh) =',CubeRoot%Box%BndBox(2,2)
-!         WRITE(*,*) ' BndBox(zl) =',CubeRoot%Box%BndBox(3,1), &
-!                    ' BndBox(zh) =',CubeRoot%Box%BndBox(3,2)
-!
-      END FUNCTION SetCubeRootBBox
 !================================================================================
 !          
 !================================================================================
@@ -177,14 +138,12 @@ MODULE CubeTree
          INTEGER                 :: ISplit
 !------------------------------------------------------------------
          IF(Cube%Leaf)THEN
-!            IF(Cube%IXact<LocalThresh)THEN
-!               RETURN
-            IF(Cube%ECube(1)>LocalThresh)THEN 
+            IF(Cube%ECube(1)>TauBox)THEN 
                CALL SplitCube(Cube)
                CALL GridRefine(Cube%Descend)
                CALL GridRefine(Cube%Descend%Travrse)
             ENDIF           
-         ELSEIF(Branch(Cube))THEN
+         ELSE
             CALL GridRefine(Cube%Descend)
             CALL GridRefine(Cube%Descend%Travrse)        
          ENDIF
@@ -239,6 +198,7 @@ MODULE CubeTree
          RhoV=Zero
          Grid=Cube%Grid
          CALL SetBBox(Cube%Box,Box)
+!-------------------------------------------------------------------------
 !        Lay grid
 #ifdef PERIODIC
          BoxCenter(:) = Box%Center(:)
@@ -250,7 +210,7 @@ MODULE CubeTree
             Box%BndBox(:,1) = BoxBndLow(:)+CS%CellCarts%D(:,NC)
             Box%BndBox(:,2) = BoxBndHig(:)+CS%CellCarts%D(:,NC)        
             DO I=1,NGrid
-               Grid(:,I) = GridOld(:,I)+CS%CellCarts%D(:,NC)
+               Grid(I,:) = GridOld(I,:)+CS%CellCarts%D(NC,:)
             ENDDO
             CALL RhoOnGrid(RhoRoot)
          ENDDO
@@ -264,12 +224,12 @@ MODULE CubeTree
 !        Set grid variables
          Cube%IXact=Pop
          DO I=1,NGrid             
-            Rho(I)        =RhoV(1,I)
-            AbsGradRho2(I)=RhoV(2,I)**2+RhoV(3,I)**2+RhoV(4,I)**2
-            Cube%Vals(I,3)=RhoV(2,I)
-            Cube%Vals(I,4)=RhoV(3,I)
-            Cube%Vals(I,5)=RhoV(4,I)
-            DO J=1,3; MaxGrad(J)=Max(MaxGrad(J),ABS(RhoV(J+1,I))); ENDDO
+            Rho(I)        =RhoV(I,1)
+            AbsGradRho2(I)=RhoV(I,2)**2+RhoV(I,3)**2+RhoV(I,4)**2
+            Cube%Vals(I,3)=RhoV(I,2)
+            Cube%Vals(I,4)=RhoV(I,3)
+            Cube%Vals(I,5)=RhoV(I,4)
+            DO J=1,3; MaxGrad(J)=Max(MaxGrad(J),ABS(RhoV(I,J+1))); ENDDO
          ENDDO
 !        Evaluate Exc, dExcdRho, and dExcdAbsGradRho2 on the grid
          CALL ExcOnTheGrid(NGrid,Rho,AbsGradRho2,E,dEdRho,dEdAbsGradRho2) 
@@ -281,7 +241,6 @@ MODULE CubeTree
             Cube%ICube(1)=Cube%ICube(1)+Cube%Wght(I)*Rho(I)
             Cube%ICube(2)=Cube%ICube(2)+Cube%Wght(I)*E(I)
             Cube%ICube(3)=Cube%ICube(3)+Cube%Wght(I)*(dEdRho(I)*Rho(I)+dEdAbsGradRho2(I)*AbsGradRho2(I) )
-!            Cube%ICube(4)=Cube%ICube(4)+Cube%Wght(I)*dEdAbsGradRho2(I)*AbsGradRho2(I)
          ENDDO
          Cube%ECube(1)=ABS(Cube%IXact-Cube%ICube(1)) 
 !        Determine the optimal ordinate for bisection of this node
@@ -307,6 +266,230 @@ MODULE CubeTree
             IF(Cube%ISplit==0)CALL Halt('split logic hosed ')
          ENDIF
      END SUBROUTINE LayGrid
+!=================================================================================
+!     Sums the significant contributions (leaves) to the density at NGrid points
+!     in a Cube, and evaluates its exact contribution to the total electron count 
+!=================================================================================
+      RECURSIVE SUBROUTINE RhoOnGrid(Node)
+         TYPE(RhoNode), POINTER                     :: Node
+         REAL(DOUBLE)                               :: Tx,Ty,Tz
+         REAL(DOUBLE), DIMENSION(0:MaxEll+1)        :: LLambdaX,LLambdaY,LLambdaZ, &
+                                                       ULambdaX,ULambdaY,ULambdaZ, &
+                                                       LambdaX,LambdaY,LambdaZ
+         REAL(DOUBLE)                               :: RQx,RQy,RQz,RQ2,Z,X,W,Sgn,Xpt,Co,        &
+                                                       LQx,LQy,LQz,LQ2,UQx,UQy,UQz,UQ2,         &
+                                                       LXpt,UXpt,TwoZ,SqZ,CoFact,RL1,TmpX,TmpY, &
+                                                       LXptX,LXptY,LXptZ,UXptX,UXptY,UXptZ, pop2
+         INTEGER                                    :: I,J,IQ,IC,JQ,JC,KQ,KC,L,Ell,L1,L2,M,N,LMN,IGrid
+!-------------------------------------------------------------------------------------------------------
+         Tx=ABS(Node%Box%Center(1)-Box%Center(1))
+         IF(Tx>Node%Box%Half(1)+Box%Half(1))RETURN
+         Ty=ABS(Node%Box%Center(2)-Box%Center(2))
+         IF(Ty>Node%Box%Half(2)+Box%Half(2))RETURN
+         Tz=ABS(Node%Box%Center(3)-Box%Center(3))
+         IF(Tz>Node%Box%Half(3)+Box%Half(3))RETURN
+         IF(Node%MaxAmp+PenetratDistanceThreshold<Zero)RETURN
+         IF(Node%Leaf)THEN            
+#ifdef EXPLICIT_SOURCE           
+            INCLUDE 'ExplicitLeafPopulation.Inc'       
+            INCLUDE 'ExplicitLeafContribution.Inc'
+#else
+            INCLUDE 'GeneralLeafPopulation.Inc'       
+            INCLUDE 'GeneralLeafContribution.Inc'
+#endif
+
+         ELSE
+           CALL RhoOnGrid(Node%Descend)
+           CALL RhoOnGrid(Node%Descend%Travrse)
+         ENDIF 
+      END SUBROUTINE RhoOnGrid
+!=================================================================================
+!     Sums the significant contributions (leaves) to the density at NGrid points
+!     in a Cube, and evaluates its exact contribution to the total electron count 
+!=================================================================================
+      RECURSIVE FUNCTION PopInBox(Node) RESULT(EPop)
+         TYPE(RhoNode), POINTER                     :: Node
+         REAL(DOUBLE)                               :: Tx,Ty,Tz
+         REAL(DOUBLE), DIMENSION(0:MaxEll+1)        :: LLambdaX,LLambdaY,LLambdaZ, &
+                                                       ULambdaX,ULambdaY,ULambdaZ, &
+                                                       LambdaX,LambdaY,LambdaZ
+         REAL(DOUBLE)                               :: RQx,RQy,RQz,RQ2,Z,X,W,Sgn,Xpt,Co,              &
+                                                       LQx,LQy,LQz,LQ2,UQx,UQy,UQz,UQ2,         &
+                                                       LXpt,UXpt,TwoZ,SqZ,CoFact,RL1,TmpX,TmpY, &
+                                                       LXptX,LXptY,LXptZ,UXptX,UXptY,UXptZ,EPop
+         INTEGER                                    :: I,J,IQ,IC,JQ,JC,KQ,KC,L,Ell,L1,L2,M,N,LMN,GKount
+!-------------------------------------------------------------------------------------------------------
+         EPop=Zero
+         Tx=ABS(Node%Box%Center(1)-Box%Center(1))
+         IF(Tx>Node%Box%Half(1)+Box%Half(1))RETURN
+         Ty=ABS(Node%Box%Center(2)-Box%Center(2))
+         IF(Ty>Node%Box%Half(2)+Box%Half(2))RETURN
+         Tz=ABS(Node%Box%Center(3)-Box%Center(3))
+         IF(Tz>Node%Box%Half(3)+Box%Half(3))RETURN         
+         IF(Node%MaxAmp+PenetratDistanceThreshold<Zero)RETURN
+         IF(Node%Leaf)THEN            
+!           Intermediates for computation and thresholding of electron count contributions
+            Pop=Zero
+#ifdef EXPLICIT_SOURCE           
+            INCLUDE 'ExplicitLeafPopulation.Inc'       
+#else
+            INCLUDE 'GeneralLeafPopulation.Inc'       
+#endif
+            EPop=Pop 
+         ELSE
+            EPop=PopInBox(Node%Descend) &
+                +PopInBox(Node%Descend%Travrse)
+         ENDIF 
+      END FUNCTION PopInBox
+!=====================================================================
+!     Generate a cubature rule for the bounding box, performing 
+!     affine transformations and possible non-linear coordinate 
+!     mappings to improve convergence
+!=====================================================================
+      SUBROUTINE CubeRule(Node)
+         TYPE(CubeNode), POINTER          :: Node
+         REAL(DOUBLE)                     :: Shift,Slope
+         INTEGER                          :: I,J
+!----------------------------------------------------------------------
+!        Transform from the [-1,1]x[-1,1]x[-1,1] rule to a new box
+         DO J=1,NGrid
+            Node%Wght(J)=CubeRuleWght(J)
+         ENDDO
+         DO I=1,3
+            Shift=Half*(Node%Box%BndBox(I,2)+Node%Box%BndBox(I,1))
+            Slope=Half*(Node%Box%BndBox(I,2)-Node%Box%BndBox(I,1))
+            DO J=1,NGrid
+               Node%Grid(J,I)=Shift+CubeRuleGrid(I,J)*Slope
+               Node%Wght(J)=Node%Wght(J)*Slope               
+            ENDDO
+         ENDDO
+      END SUBROUTINE CubeRule
+!=====================================================================
+!     Find a BBox for the CubeRoot that achieves a given percent
+!     accuracy for the integrated electron density, and which changes
+!     smoothly with changes in molecular geometry.
+!=====================================================================
+      SUBROUTINE InitCubeRoot(CubeRoot)
+         TYPE(CubeNode), POINTER          :: CubeRoot
+         REAL(DOUBLE)                     :: BoxSep,Delta,MidPop,TargetError, &
+                                             REl,MidSep,BisSep,DelSep,FMid
+         INTEGER                          :: I,J,K
+         TYPE(BBox)                       :: CubeBox    
+         CHARACTER(LEN=DEFAULT_CHR_LEN)   :: Mssg     
+!------------------------------------------------------------------------         
+!        Allocate cube node
+         CALL NewCubeNode(CubeRoot,0) 
+!        A minimal BBox that just encloses nuclear centers
+         CALL SetBBox(RhoRoot%Box,CubeBox)
+!        Exact electron count for closed shell density
+         REl=Half*DBLE(NEl)
+!        Recursive bisection to determine largest BBox for CubeRoot that integrates
+!        the density to within TauRel
+         BisSep=Zero
+         DelSep=20.0D0
+         DO J=1,100
+!           Half the step size
+            DelSep=Half*DelSep
+!           New midpoint
+            MidSep=BisSep+DelSep
+!           Set the BBox over which to integrate the density,
+            CubeRoot%Box=ExpandBox(CubeBox,MidSep)
+#ifdef PERIODIC
+            CALL MakeBoxPeriodic(CubeRoot%Box)
+#endif
+!           and the cooresponding penetration distance threshold
+            PenetratDistanceThreshold=MidSep**2
+!           Expand native Rho BBox by this amount
+            CALL SetBBox(CubeRoot%Box,Box)
+!           Find the exact electron density in the expanded BBox
+            MidPop=PopInBox(RhoRoot)
+!           Achieved-target errors         
+            FMid=ABS((MidPop-REl)/REl)-TauRel
+!           Convergence test
+            IF(DelSep<TauRel*1.D1)EXIT
+!           If still to the left, increment bisection point
+            IF(FMid>Zero)BisSep=MidSep
+WRITE(*,*)' MidPop = ',MidPop
+         ENDDO
+!        MidPop is now the most accurate evaluation of the integrated density
+!        that HiCu can achieve with current thresholds.
+         CubeRoot%IXact=MidPop
+         CubeRoot%ISplit=1
+         CubeRoot%Box%Tier=0
+         CubeRoot%ECube=BIG_DBL
+      END SUBROUTINE InitCubeRoot
+!==========================================================================
+!        
+!==========================================================================
+      SUBROUTINE NewCubeNode(Node,Level)
+         TYPE(CubeNode), POINTER :: Node
+         INTEGER                 :: Level
+         INTEGER                 :: Status        
+         ALLOCATE(Node,STAT=Status)
+         IF(Status/=SUCCEED) &
+            CALL Halt(' ALLOCATE 1 FAILED IN NewCubeNode')
+         Node%Box%Tier=Level
+         Node%Box%Number=CubeNodes+1
+         CubeNodes=CubeNodes+1
+         GlobalCubes(Level)=GlobalCubes(Level)+1
+         MaxLevel=MAX(MaxLevel,Level)
+         Node%Leaf=.TRUE.
+         Node%ECube=BIG_DBL
+         NULLIFY(Node%Travrse)
+         NULLIFY(Node%Descend)
+         ALLOCATE(Node%Grid(NGrid,3),STAT=Status)
+         CALL IncMem(Status,0,3*NGrid,'HiCu.CubeTree.Node%Grid')
+         ALLOCATE(Node%Wght(NGrid),STAT=Status)
+         CALL IncMem(Status,0,NGrid,'HiCu.CubeTree.Node%Wght')
+         ALLOCATE(Node%Vals(NGrid,5),STAT=Status)
+         CALL IncMem(Status,0,5*NGrid,'HiCu.CubeTree.Node%Vals')
+      END SUBROUTINE NewCubeNode
+!==========================================================================
+!
+!==========================================================================
+      SUBROUTINE DeleteCubeGrid(Node)
+         TYPE(CubeNode), POINTER :: Node
+         INTEGER                 :: Status        
+         DEALLOCATE(Node%Grid,STAT=Status)
+         CALL DecMem(Status,0,3*NGrid)
+         DEALLOCATE(Node%Wght,STAT=Status)
+         CALL DecMem(Status,0,NGrid)
+         DEALLOCATE(Node%Vals,STAT=Status)
+         CALL DecMem(Status,0,5*NGrid)
+         NULLIFY(Node%Grid)
+         NULLIFY(Node%Wght)
+         NULLIFY(Node%Vals)
+      END SUBROUTINE DeleteCubeGrid
+!========================================================================================
+!     Compute the erf function
+!========================================================================================
+      FUNCTION ERF(W)
+         REAL(DOUBLE),INTENT(IN) :: W
+         REAL(DOUBLE)            :: ERF,X,Sgn
+         INTEGER                 :: I,J
+         Sgn=One; IF(W<0.0D0)Sgn=-One
+         X=Sgn*W
+         IF(X>Erf_Switch)THEN
+            Erf=Sgn*1.0D0
+         ELSE
+            J=AINT(X*Erf_Grid)
+            Erf=Sgn*(Erf_0(J)+X*(Erf_1(J)+X*(Erf_2(J)+X*Erf_3(J))))
+         ENDIF
+      END FUNCTION ERF
+!========================================================================================
+!     Compute the inverse exponential function, EXP(-X)
+!========================================================================================
+      FUNCTION ExpInv(X)
+         REAL(DOUBLE), INTENT(IN) :: X
+         REAL(DOUBLE)             :: EXPInv
+         INTEGER                  :: J ,I
+         IF(X.GE.Exp_Switch)THEN
+            Expinv=0.0D0
+         ELSE
+            J=AINT(X*Exp_Grid)
+            Expinv=Exp_0(J)+X*(Exp_1(J)+X*(Exp_2(J)+X*(Exp_3(J)+X*Exp_4(J))))
+         ENDIF
+      END FUNCTION ExpInv
 !================================================================================
 !     
 !================================================================================
@@ -332,20 +515,12 @@ MODULE CubeTree
          ENDIF
       END FUNCTION ErrWalk
 !================================================================================
-!          
-!================================================================================
-      FUNCTION Branch(Node)
-         TYPE(CubeNode) :: Node
-         LOGICAL        :: Branch
-         Branch=.FALSE.
-         IF(ASSOCIATED(Node%Descend)) Branch=.TRUE.
-      END FUNCTION Branch
-!================================================================================
 !     
 !================================================================================
       RECURSIVE FUNCTION LeafCount(Cube) 
          TYPE(CubeNode), POINTER    :: Cube
          INTEGER                    :: LeafCount
+         INTEGER ::X
 !--------------------------------------------------------------------------
          IF(Cube%Leaf)THEN
             LeafCount=1
@@ -353,71 +528,9 @@ MODULE CubeTree
             LeafCount=LeafCount(Cube%Descend)+LeafCount(Cube%Descend%Travrse)
          ENDIF
        END FUNCTION LeafCount
-!=====================================================================
-!     Generate a cubature rule for the bounding box, performing 
-!     affine transformations and possible non-linear coordinate 
-!     mappings to improve convergence
-!=====================================================================
-      SUBROUTINE CubeRule(Node)
-         TYPE(CubeNode), POINTER          :: Node
-         REAL(DOUBLE)                     :: Shift,Slope
-         INTEGER                          :: I,J
-!----------------------------------------------------------------------
-!        Transform from the [-1,1]x[-1,1]x[-1,1] rule to a new box
-         DO J=1,NGrid
-            Node%Wght(J)=CubeRuleWght(J)
-         ENDDO
-         DO I=1,3
-            Shift=Half*(Node%Box%BndBox(I,2)+Node%Box%BndBox(I,1))
-            Slope=Half*(Node%Box%BndBox(I,2)-Node%Box%BndBox(I,1))
-            DO J=1,NGrid
-               Node%Grid(I,J)=Shift+CubeRuleGrid(I,J)*Slope
-               Node%Wght(J)=Node%Wght(J)*Slope               
-            ENDDO
-         ENDDO
-      END SUBROUTINE CubeRule
-!==========================================================================
-!        
-!==========================================================================
-      SUBROUTINE NewCubeNode(Node,Level)
-         TYPE(CubeNode), POINTER :: Node
-         INTEGER                 :: Level
-         INTEGER                 :: Status        
-         ALLOCATE(Node,STAT=Status)
-         IF(Status/=SUCCEED) &
-            CALL Halt(' ALLOCATE 1 FAILED IN NewCubeNode')
-         Node%Box%Tier=Level
-         Node%Box%Number=CubeNodes+1
-         CubeNodes=CubeNodes+1
-         GlobalCubes(Level)=GlobalCubes(Level)+1
-         Node%Leaf=.TRUE.
-         Node%ECube=BIG_DBL
-         NULLIFY(Node%Travrse)
-         NULLIFY(Node%Descend)
-         ALLOCATE(Node%Grid(3,NGrid),STAT=Status)
-         CALL IncMem(Status,0,3*NGrid,'HiCu.CubeTree.Node%Grid')
-         ALLOCATE(Node%Wght(NGrid),STAT=Status)
-         CALL IncMem(Status,0,NGrid,'HiCu.CubeTree.Node%Wght')
-         ALLOCATE(Node%Vals(NGrid,5),STAT=Status)
-         CALL IncMem(Status,0,5*NGrid,'HiCu.CubeTree.Node%Vals')
-      END SUBROUTINE NewCubeNode
-
-      SUBROUTINE DeleteCubeGrid(Node)
-         TYPE(CubeNode), POINTER :: Node
-         INTEGER                 :: Status        
-         DEALLOCATE(Node%Grid,STAT=Status)
-         CALL DecMem(Status,0,3*NGrid)
-         DEALLOCATE(Node%Wght,STAT=Status)
-         CALL DecMem(Status,0,NGrid)
-         DEALLOCATE(Node%Vals,STAT=Status)
-         CALL DecMem(Status,0,5*NGrid)
-         NULLIFY(Node%Grid)
-         NULLIFY(Node%Wght)
-         NULLIFY(Node%Vals)
-      END SUBROUTINE DeleteCubeGrid
-!==========================================================================
-!
-!==========================================================================
+!================================================================================
+!     
+!================================================================================
       RECURSIVE SUBROUTINE PrintCubeLeaves(Node,Level_O)
          TYPE(CubeNode), POINTER       :: Node
          INTEGER :: I
@@ -436,7 +549,7 @@ MODULE CubeTree
             ENDIF
             CALL OpenASCII('Cubes.mma',Out)
             DO I=1,NGrid
-               WRITE(Out,55)Node%Grid(1:3,I)
+               WRITE(Out,55)Node%Grid(I,1:3)
 
                55 FORMAT('CubeList=Append[CubeList,Point[{', &
                        F12.6,', ',F12.6,', ',F12.6,'}]]')
@@ -480,10 +593,10 @@ MODULE CubeTree
 !
         DO I = 1,3
            IF(GM%AutoW(I)) THEN
-              IF(Box%BndBox(I,1) < 1.D-6) THEN
+              IF(Box%BndBox(I,1) < 1.D-9) THEN
                  Box%BndBox(I,1) = Zero
               ENDIF
-              IF(Box%BndBox(I,2) > GM%BoxShape%D(I,I)-1.D-6) THEN
+              IF(Box%BndBox(I,2) > GM%BoxShape%D(I,I)-1.D-9) THEN
                  Box%BndBox(I,2) = GM%BoxShape%D(I,I)
               ENDIF
            ENDIF

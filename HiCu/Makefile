@@ -24,7 +24,7 @@ clean:	CHC
 	rm -f $(REMOVEALL)
 	rm -f \#*
 	rm -f *~
-	ls -l
+	ls -lS
 #
 purge:	CHC CVR
 	rm -f $(REMOVEALL)
@@ -47,7 +47,9 @@ VR:	$(VObjs)
 CVR:	
 	rm -rf *.Inc
 
-CubeTree.o:	Grid.o                         $(MONDO_HOME)/Libs/libMondoMods.a
+CubeTree.o:	Grid.o                      \
+		GeneralLeafPopulation.Inc   \
+		GeneralLeafContribution.Inc   $(MONDO_HOME)/Libs/libMondoMods.a
 Grid.o:		MMA/CubeRules/Rule5.Inc \
                 MMA/CubeRules/Rule7.Inc        $(MONDO_HOME)/Libs/libMondoMods.a
 HiCu.o:		KxcGen.o CubeTree.o RhoTree.o  $(MONDO_HOME)/Libs/libMondoMods.a

@@ -12,6 +12,16 @@ MODULE KxcGen
   USE CubeTree 
   IMPLICIT NONE
   LOGICAL PrintFlag
+!---------------------------------------
+!
+! Global primitive 
+  TYPE(PrimPair)                           :: Prim
+
+   TYPE(BSET)                    :: BS              !  Global basis set
+   TYPE(CRDS)                    :: GM              !  Global molecular geometry
+   TYPE(DBL_RNK4)                :: MD             
+
+
 !----------!
   CONTAINS !
 !=============================================================================================
@@ -133,7 +143,6 @@ MODULE KxcGen
        TYPE(AtomPair)                           :: Pair
        TYPE(CubeNode), POINTER                  :: CubeRoot
 !
-       TYPE(PrimPair)                           :: Prim
        REAL(DOUBLE),DIMENSION(Pair%NA,Pair%NB)  :: Kblk
        REAL(DOUBLE),DIMENSION(Pair%NA*Pair%NB)  :: Kvct
        REAL(DOUBLE)                             :: ZetaA,ZetaB,EtaAB,EtaIn,    &
@@ -215,7 +224,7 @@ MODULE KxcGen
                 Prim%Extent=GaussianExtent(Prim%Z,MaxAmp)
                 Prim%Box=ExpandBox(Prim%Box,Prim%Extent)
 !               Walk the CubeTree
-                CALL PrimKxcWalk(CubeRoot,Prim)
+                CALL PrimKxcWalk(CubeRoot)!,Prim)
 !               Contract <Bra|Ket> bloks to compute matrix elements of Kxc
                 IA = IndexA
                 DO LMNA=StartLA,StopLA
@@ -240,9 +249,9 @@ MODULE KxcGen
 !====================================================================================================
 !
 !====================================================================================================
-     RECURSIVE SUBROUTINE PrimKxcWalk(Cube,Prim)
+     RECURSIVE SUBROUTINE PrimKxcWalk(Cube)!,Prim)
        TYPE(CubeNode), POINTER   :: Cube
-       TYPE(PrimPair)            :: Prim
+!       TYPE(PrimPair)            :: Prim
 !
        REAL(DOUBLE)              :: T
 !-------------------------------------------------------------------------------------
@@ -254,29 +263,32 @@ MODULE KxcGen
        IF(T>Prim%Box%Half(2)+Cube%Box%Half(2))RETURN
        T=ABS(Prim%Box%Center(3)-Cube%Box%Center(3))
        IF(T>Prim%Box%Half(3)+Cube%Box%Half(3))RETURN
-       IF(Cube%Leaf)THEN
-          CALL KxcCube(Cube,Prim)
-       ELSE
-          CALL PrimKxcWalk(Cube%Descend,Prim)
-          CALL PrimKxcWalk(Cube%Descend%Travrse,Prim)
-       ENDIF
+
+!       IF(BoxInBox(Prim%Box,Cube%Box))THEN
+          IF(Cube%Leaf)THEN
+             CALL KxcCube(Cube)!,Prim)
+          ELSE
+             CALL PrimKxcWalk(Cube%Descend)!,Prim)
+             CALL PrimKxcWalk(Cube%Descend%Travrse)!,Prim)
+          ENDIF
+!       ENDIF
      END SUBROUTINE PrimKxcWalk
 !====================================================================================================
 !
 !====================================================================================================
-     SUBROUTINE KxcCube(Cube,Prim)
+     SUBROUTINE KxcCube(Cube)!,Prim)
        TYPE(CubeNode), POINTER               :: Cube
-       TYPE(PrimPair)                        :: Prim
+!       TYPE(PrimPair)                        :: Prim
 ! 
        REAL(DOUBLE), DIMENSION(0:MaxEll+1)   :: LambdaX,LambdaY,LambdaZ
-       REAL(DOUBLE)                          :: Z,RPx,RPy,RPz,RP2,Xpt,TwoZ,  &
+       REAL(DOUBLE)                          :: Z,X,RPx,RPy,RPz,RP2,Xpt,TwoZ,  &
                                                 Co,RL1,Dist, Wght,dEdRho,    &
                                                 dEdAbsGradRho2,GradBraRhoDot,&
                                                 GradRhoX,GradRhoY,GradRhoZ,  &
                                                 PrimDist,GradPrimDistX,      &
                                                 GradPrimDistY,GradPrimDistZ 
        INTEGER                               :: IC,IQ,JC,JQ,KC,KQ,NQ,Ell,    &
-                                                I,L,M,N,L1,L2,LMN,LMNLen
+                                                I,J,L,M,N,L1,L2,LMN,LMNLen
 
        REAL(DOUBLE), DIMENSION(50) :: Gx,Gy,Gz
        REAL(DOUBLE)                :: GradX,GradY,GradZ
@@ -287,9 +299,9 @@ MODULE KxcGen
        INCLUDE 'ExplicitBraElements.Inc'
 #else
        DO I=1,NGrid
-          RPx=Cube%Grid(1,I)-Prim%P(1)
-          RPy=Cube%Grid(2,I)-Prim%P(2)
-          RPz=Cube%Grid(3,I)-Prim%P(3)
+          RPx=Cube%Grid(I,1)-Prim%P(1)
+          RPy=Cube%Grid(I,2)-Prim%P(2)
+          RPz=Cube%Grid(I,3)-Prim%P(3)
           RP2=RPx**2+RPy**2+RPz**2
           Dist=Z*RP2
           Xpt=EXP(-Prim%Z*RP2)

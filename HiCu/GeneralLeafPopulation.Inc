@@ -1,0 +1,74 @@
+!
+!            GENERAL CODE FOR COMPUTING ELECTRON POPULATION NODE BY NODE
+!
+             Z=Node%Zeta
+             TwoZ=Two*Z
+             SqZ=SQRT(Z)
+             CoFact=SqrtPi/(Two*SqZ)
+!
+             LQx=Box%BndBox(1,1)-Node%Qx
+             LQy=Box%BndBox(2,1)-Node%Qy
+             LQz=Box%BndBox(3,1)-Node%Qz
+             UQx=Box%BndBox(1,2)-Node%Qx
+             UQy=Box%BndBox(2,2)-Node%Qy
+             UQz=Box%BndBox(3,2)-Node%Qz
+             LQ2=LQx*LQx+LQy*LQy+LQz*LQz
+             UQ2=UQx*UQx+UQy*UQy+UQz*UQz
+!
+             LLambdaX(0)=-CoFact*ERF(SqZ*LQx)
+             LLambdaY(0)=-CoFact*ERF(SqZ*LQy)
+             LLambdaZ(0)=-CoFact*ERF(SqZ*LQz)
+             ULambdaX(0)=-CoFact*ERF(SqZ*UQx)
+             ULambdaY(0)=-CoFact*ERF(SqZ*UQy)
+             ULambdaZ(0)=-CoFact*ERF(SqZ*UQz)
+!
+             LLambdaX(1)=TwoZ*LQx
+             LLambdaY(1)=TwoZ*LQy
+             LLambdaZ(1)=TwoZ*LQz
+             ULambdaX(1)=TwoZ*UQx
+             ULambdaY(1)=TwoZ*UQy
+             ULambdaZ(1)=TwoZ*UQz
+!
+             DO L=2,Node%Ell
+                L1=L-1
+                L2=L-2
+                RL1=DBLE(L1)
+                LLambdaX(L)=TwoZ*(LQx*LLambdaX(L1)-RL1*LLambdaX(L2))
+                LLambdaY(L)=TwoZ*(LQy*LLambdaY(L1)-RL1*LLambdaY(L2))
+                LLambdaZ(L)=TwoZ*(LQz*LLambdaZ(L1)-RL1*LLambdaZ(L2))
+                ULambdaX(L)=TwoZ*(UQx*ULambdaX(L1)-RL1*ULambdaX(L2))
+                ULambdaY(L)=TwoZ*(UQy*ULambdaY(L1)-RL1*ULambdaY(L2))
+                ULambdaZ(L)=TwoZ*(UQz*ULambdaZ(L1)-RL1*ULambdaZ(L2))
+             ENDDO
+!
+             IF(Node%Ell>0)THEN
+                LXptX=EXP(-Z*LQx*LQx)
+                UXptX=EXP(-Z*UQx*UQx)             
+                LXptY=EXP(-Z*LQy*LQy)
+                UXptY=EXP(-Z*UQy*UQy)             
+                LXptZ=EXP(-Z*LQz*LQz)
+                UXptZ=EXP(-Z*UQz*UQz)             
+             ENDIF
+!
+             DO L=Node%Ell,1,-1
+                LLambdaX(L)=LLambdaX(L-1)*LXptX
+                LLambdaY(L)=LLambdaY(L-1)*LXptY
+                LLambdaZ(L)=LLambdaZ(L-1)*LXptZ
+                ULambdaX(L)=ULambdaX(L-1)*UXptX
+                ULambdaY(L)=ULambdaY(L-1)*UXptY
+                ULambdaZ(L)=ULambdaZ(L-1)*UXptZ
+             ENDDO
+!
+             DO L=0,Node%Ell
+                TmpX=LLambdaX(L)-ULambdaX(L)
+                DO M=0,Node%Ell-L
+                   TmpY=TmpX*(LLambdaY(M)-ULambdaY(M))
+                   DO N=0,Node%Ell-M-L
+                      LMN=LMNDex(L,M,N)
+                      Pop=Pop+TmpY*(LLambdaZ(N)-ULambdaZ(N))*Node%Co(LMN)
+                   ENDDO
+                ENDDO
+             ENDDO
+!
+!===============================================================================
+!
