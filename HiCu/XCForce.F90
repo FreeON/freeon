@@ -69,12 +69,6 @@ PROGRAM XCForce
   CALL DistDist()
   CALL ParaRhoToTree()
   CALL ParaGridGen()
-! Redue the Energy to reflect a more accurate calculation of Exc
-  CALL Get(Exc_old, 'Exc')
-  CALL Get(Etot_old,'Etot')
-  Etot = Etot_old-Exc_old+TotExc
-  CALL Put(TotExc, 'Exc')
-  CALL Put(Etot,'Etot')
 #else
 ! Convert density to a 5-D BinTree
   CALL RhoToTree(Args)
@@ -84,14 +78,13 @@ PROGRAM XCForce
   CALL MakeBoxPeriodic(WBox)
   CALL CalCenterAndHalf(WBox)
   CALL GridGen(WBox,VolRho,VolExc)
+#endif
 ! Redue the Energy to reflect a more accurate calculation of Exc
   CALL Get(Exc_old, 'Exc')
   CALL Get(Etot_old,'Etot')
-!
   Etot = Etot_old-Exc_old+Exc
   CALL Put(Exc, 'Exc')
   CALL Put(Etot,'Etot')
-#endif
 ! Delete the density
   CALL DeleteRhoTree(RhoRoot)
 ! More allocations 
@@ -158,7 +151,6 @@ PROGRAM XCForce
 ! Convert density to a 5-D BinTree
   CALL Delete(LCoor)
   CALL Delete(RCoor)
-!
   CALL ParaInitRho(Args)
   CALL GetBBox()
   CALL SendBBox()
@@ -218,34 +210,42 @@ PROGRAM XCForce
   CALL DBL_VECT_EQ_DBL_SCLR(9,TmpLatFrc_XC%D(1,1),0.0d0)
   CALL MPI_REDUCE(LatFrc_XC%D(1,1),TmpLatFrc_XC%D(1,1),9,MPI_DOUBLE_PRECISION,MPI_SUM,ROOT,MONDO_COMM,IErr)
   IF(MyID == ROOT) THEN
-     LatFrc_XC%D = LatFrc_XC%D+TmpLatFrc_XC%D 
+     LatFrc_XC%D   = TmpLatFrc_XC%D 
+  ENDIF
+  CALL DBL_VECT_EQ_DBL_SCLR(9,TmpLatFrc_XC%D(1,1),0.0d0)
+  CALL MPI_REDUCE(LatFrc_XC_S%D(1,1),TmpLatFrc_XC%D(1,1),9,MPI_DOUBLE_PRECISION,MPI_SUM,ROOT,MONDO_COMM,IErr)
+  IF(MyID == ROOT) THEN
+     LatFrc_XC_S%D = TmpLatFrc_XC%D 
   ENDIF
   CALL Delete(TmpLatFrc_XC)
+#endif
+#ifdef PARALLEL
   IF(MyID == ROOT) THEN
-!!$!    Print The Lattice Forces
-!!$     CALL OpenASCII(OutFile,Out)
-!!$     WRITE(Out,*) 'LatFrc_XC'
-!!$     WRITE(*,*)   'LatFrc_XC'
-!!$     DO I=1,3
-!!$        WRITE(Out,*) (LatFrc_XC%D(I,J),J=1,3) 
-!!$        WRITE(*,*)   (LatFrc_XC%D(I,J),J=1,3) 
-!!$     ENDDO
-!!$     WRITE(Out,*) 'LatFrc_XC_S'
-!!$     WRITE(*,*)   'LatFrc_XC_S'
-!!$     DO I=1,3
-!!$        WRITE(Out,*) (LatFrc_XC_S%D(I,J),J=1,3) 
-!!$        WRITE(*,*)   (LatFrc_XC_S%D(I,J),J=1,3) 
-!!$     ENDDO
-!!$!    Print the Forces
-!!$     WRITE(Out,*) 'XCforce'
-!!$     WRITE(*,*)   'XCForce'
-!!$     DO AtA=1,NAtoms
-!!$        A1=3*(AtA-1)+1
-!!$        A2=3*AtA
-!!$        WRITE(Out,*) XCFrc%D(A1:A2)
-!!$        WRITE(*,*) XCFrc%D(A1:A2)
-!!$     ENDDO
-!!$     CLOSE(Out)
+#endif
+!    Zero the Lower Triange
+     DO I=1,3
+        DO J=1,I-1
+           LatFrc_XC%D(I,J)   = Zero
+           LatFrc_XC_S%D(I,J) = Zero
+        ENDDO
+     ENDDO
+     IF(PrintFlags%Key==DEBUG_MAXIMUM) THEN
+!       Print The Lattice Forces
+        CALL OpenASCII(OutFile,Out)
+        WRITE(Out,*) 'LatFrc_XC'
+        WRITE(*,*)   'LatFrc_XC'
+        DO I=1,3
+           WRITE(Out,*) (LatFrc_XC%D(I,J),J=1,3) 
+           WRITE(*,*)   (LatFrc_XC%D(I,J),J=1,3) 
+        ENDDO
+        WRITE(Out,*) 'LatFrc_XC_S'
+        WRITE(*,*)   'LatFrc_XC_S'
+        DO I=1,3
+           WRITE(Out,*) (LatFrc_XC_S%D(I,J),J=1,3) 
+           WRITE(*,*)   (LatFrc_XC_S%D(I,J),J=1,3) 
+        ENDDO
+        CLOSE(Out)
+     ENDIF
 !    Sum in contribution to total force
      DO AtA=1,NAtoms
         A1=3*(AtA-1)+1
@@ -255,45 +255,10 @@ PROGRAM XCForce
 !    Sum in the J contribution to total lattice force
      LatFrc_XC%D     = LatFrc_XC%D+LatFrc_XC_S%D
      GM%PBC%LatFrc%D = GM%PBC%LatFrc%D+LatFrc_XC%D
-!    Tidy up
+!    Tidy up 
      CALL Delete(LatFrc_XC_S)
+#ifdef PARALLEL
   ENDIF
-#else
-!!$! Print The Lattice Forces
-!!$  CALL OpenASCII(OutFile,Out)
-!!$  WRITE(Out,*) 'LatFrc_XC'
-!!$  WRITE(*,*)   'LatFrc_XC'
-!!$  DO I=1,3
-!!$     WRITE(Out,*) (LatFrc_XC%D(I,J),J=1,3) 
-!!$     WRITE(*,*)   (LatFrc_XC%D(I,J),J=1,3) 
-!!$  ENDDO
-!!$  WRITE(Out,*) 'LatFrc_XC_S'
-!!$  WRITE(*,*)   'LatFrc_XC_S'
-!!$  DO I=1,3
-!!$     WRITE(Out,*) (LatFrc_XC_S%D(I,J),J=1,3) 
-!!$     WRITE(*,*)   (LatFrc_XC_S%D(I,J),J=1,3) 
-!!$  ENDDO
-!!$! Print the Forces
-!!$  WRITE(Out,*) 'XCforce'
-!!$  WRITE(*,*)   'XCForce'
-!!$  DO AtA=1,NAtoms
-!!$     A1=3*(AtA-1)+1
-!!$     A2=3*AtA
-!!$     WRITE(Out,*) XCFrc%D(A1:A2)
-!!$     WRITE(*,*) XCFrc%D(A1:A2)
-!!$  ENDDO
-!!$  CLOSE(Out)
-! Sum in contribution to total force
-  DO AtA=1,NAtoms
-     A1=3*(AtA-1)+1
-     A2=3*AtA
-     GM%Gradients%D(1:3,AtA) =  GM%Gradients%D(1:3,AtA)+XCFrc%D(A1:A2)
-  ENDDO
-! Sum in the J contribution to total lattice force
-  LatFrc_XC%D     = LatFrc_XC%D+LatFrc_XC_S%D
-  GM%PBC%LatFrc%D = GM%PBC%LatFrc%D+LatFrc_XC%D
-! Tidy up
-  CALL Delete(LatFrc_XC_S)
 #endif
 ! Do some checksumming and IO 
   CALL PChkSum(XCFrc,    'dXC/dR',Proc_O=Prog)  
