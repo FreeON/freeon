@@ -42,7 +42,7 @@ MModObjs = GlobalScalars.o GlobalCharacters.o DerivedTypes.o    \
            LinAlg.o LinAlg77.o MatFunk.o SMWrap.o SpecFun.o     \
            D1Mach.o DCSEvl.o DErf.o DErfc.o DMach.o InitDS.o    \
            Thresholding.o Functionals.o PBC.o AtomPairs.o       \
-           BoundingBox.o BraBloks.o Macros.o
+           BoundingBox.o BraBloks.o Macros.o 
 #
 MModRel  = GlobalScalars.x GlobalCharacters.x DerivedTypes.x    \
            GlobalObjects.x BasisSetParameters.x MPIInclude.x    \
