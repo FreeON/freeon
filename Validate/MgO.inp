@@ -1,5 +1,9 @@
 <BeginTitle>
         *** MgO-rhombic ***
+
+STO-3G/HF/good:    <SCF>   = -270.79309374
+8-511G/BLYP/good:  <SCF>   = -275.09425302
+8-511G/PBE0/good:  <SCF>   = -275.00209886
 <EndTitle>
 
 <BeginOptions>
@@ -7,18 +11,17 @@ Charge=0
 Multiplicity=1
 DebugAll=(MinDebug,CheckSums)
 Guess=SuperPos
-SCFMethod=(RH,RH) 
-BasisSets=(STO-3G,STO-3G)
-ModelChem=(BLYPxc,PBE0) 
-Accuracy =(loose,good)
+SCFMethod=(RH,RH,RH) 
+BasisSets=(STO-3G,Crystal,Crystal)
+ModelChem=(HF,BLYPxc,PBE0) 
+Accuracy =(good,good,good)
 Geometry=(InAngstroms,NoOrder) 
-Periodic=(On-XYZ,AtomWrap,AngFormat,FracCoord,CenterAtoms)
-PFFLayers=1
-PFFMaxEll=8
+Periodic=(FracCoord)
+PBC=(T,T,T)
 <EndOptions>
 
 <BeginPeriodic>
-aa    2.977777  2.977777  2.977777  60.00000  60.00000  60.00000
+   2.977776807  2.977776807  2.977776807  60.00000  60.00000  60.00000
 <EndPeriodic>
 
 <BeginGeometry>   
