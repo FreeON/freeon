@@ -16,7 +16,7 @@ MODULE PBCFarField
   USE PoleTree
   USE SpecFun
   USE Globals
-  USE PFFT
+  USE PFFTen
   IMPLICIT NONE
 !  
   INTEGER                             :: MaxELL
@@ -46,20 +46,31 @@ MODULE PBCFarField
 !
       CALL RhoToSP(GMLoc)
 !
+!     Calculate the MACDist, PACDist and BDist
+!
+      CALL CalMPB(Q,GMLoc)
+!
 !     Calculate the Size of the Box Needed  for the Direct J and Generate the Cells for the Inner Box
 !
-      CALL BoxBounds(Q,GMLoc)
+!!*      CALL BoxBounds(GMLoc)
 !
 !     Calculate the PBC FarField Tensor
 !
-      CALL PFFTensor(MaxELL+LP,RDist,GMLoc) 
+!!*      CALL PFFTensor(MaxELL+LP,GMLoc,Args) 
+!
+!     Get Tensors
+! 
+      CALL New(TensorC,LSP(MaxEll),0)
+      CALL New(TensorS,LSP(MaxEll),0) 
+      CALL Get(TensorC,'PFFTensorC')
+      CALL Get(TensorS,'PFFTensorS')
 !
 !     Calculate PFF  energy
 !
       E_PFF  = Zero
       FarFC  = Zero
       FarFS  = Zero
-      CALL CTraX77(MaxELL,MaxELL,PFFBraC,PFFBraS,TensorC,TensorS,RhoC,RhoS)
+      CALL CTraX77(MaxELL,MaxELL,PFFBraC,PFFBraS,TensorC%D,TensorS%D,RhoC,RhoS)
       DO LM = 0,LSP(MaxELL)
          E_PFF = E_PFF + RhoC(LM)*PFFBraC(LM)+RhoS(LM)*PFFBraS(LM)
       ENDDO
@@ -75,20 +86,20 @@ MODULE PBCFarField
          E_DP = Two*GMLoc%PBC%DipoleFAC*(RhoPoles%DPole%D(1)**2+RhoPoles%DPole%D(2)**2+RhoPoles%DPole%D(3)**2)
       ENDIF
 !
-!!$      WRITE(*,*) 'GML%PBC%Dimen = ',GMLoc%PBC%Dimen 
-!!$      WRITE(*,*) 'CS_IN%NCells  = ',CS_IN%NCells
-!!$      WRITE(*,*) 'CS_OUT%NCells = ',CS_OUT%NCells
-!!$      WRITE(*,*) 'MACDist       = ',MACDist
-!!$      WRITE(*,*) 'PACDist       = ',PACDist
-!!$      WRITE(*,*) 'BOXDist       = ',BDist
-!!$      WRITE(*,*) 'RDist         = ',RDist      
-!!$      WRITE(*,*) '|Dipole|      = ',SQRT(RhoPoles%DPole%D(1)**2+RhoPoles%DPole%D(2)**2+RhoPoles%DPole%D(3)**2)
-!!$      WRITE(*,*)
-!!$      WRITE(*,*) 'Epsilon       = ',GMLoc%PBC%Epsilon
-!!$      WRITE(*,*) 'DipoleFAC     = ',GMLoc%PBC%DipoleFAC
-!!$      WRITE(*,*) 'E_PFF         = ',E_PFF
-!!$      WRITE(*,*) 'E_DP          = ',E_DP     
-!!$      WRITE(*,*)
+      WRITE(*,*) 'GML%PBC%Dimen = ',GMLoc%PBC%Dimen 
+      WRITE(*,*) 'CS_IN%NCells  = ',CS_IN%NCells
+      WRITE(*,*) 'CS_OUT%NCells = ',CS_OUT%NCells
+      WRITE(*,*) 'MACDist       = ',MACDist
+      WRITE(*,*) 'PACDist       = ',PACDist
+      WRITE(*,*) 'BOXDist       = ',BDist
+      WRITE(*,*) 'RDist         = ',RDist      
+      WRITE(*,*) '|Dipole|      = ',SQRT(RhoPoles%DPole%D(1)**2+RhoPoles%DPole%D(2)**2+RhoPoles%DPole%D(3)**2)
+      WRITE(*,*)
+      WRITE(*,*) 'Epsilon       = ',GMLoc%PBC%Epsilon
+      WRITE(*,*) 'DipoleFAC     = ',GMLoc%PBC%DipoleFAC
+      WRITE(*,*) 'E_PFF         = ',E_PFF
+      WRITE(*,*) 'E_DP          = ',E_DP     
+      WRITE(*,*)
 !
     END SUBROUTINE PBCFarFieldSetUp
 !---------------------------------------------------------------------------------------------- 
@@ -158,11 +169,11 @@ MODULE PBCFarField
          FarFS  = Zero
          CALL Regular(MaxELL,PQ(1),PQ(2),PQ(3))
          CALL XLate77(MaxELL,MaxELL,PFFKetC,PFFKetS,Cpq,Spq,RhoC,RhoS)
-         CALL CTraX77(Prim%ELL,MaxELL,FarFC,FarFS,TensorC,TensorS,PFFKetC,PFFKetS)
+         CALL CTraX77(Prim%ELL,MaxELL,FarFC,FarFS,TensorC%D,TensorS%D,PFFKetC,PFFKetS)
       ELSE
          FarFC  = Zero
          FarFS  = Zero
-         CALL CTraX77(Prim%ELL,MaxELL,FarFC,FarFS,TensorC,TensorS,RhoC,RhoS)
+         CALL CTraX77(Prim%ELL,MaxELL,FarFC,FarFS,TensorC%D,TensorS%D,RhoC,RhoS)
       ENDIF
 !
 !     Contrax the <Bra|Ket> FF corection
@@ -216,11 +227,11 @@ MODULE PBCFarField
          FarFS  = Zero
          CALL Regular(MaxELL,PQ(1),PQ(2),PQ(3))
          CALL XLate77(MaxELL,MaxELL,PFFKetC,PFFKetS,Cpq,Spq,RhoC,RhoS)
-         CALL CTraX77(Prim%ELL,MaxELL,FarFC,FarFS,TensorC,TensorS,PFFKetC,PFFKetS)
+         CALL CTraX77(Prim%ELL,MaxELL,FarFC,FarFS,TensorC%D,TensorS%D,PFFKetC,PFFKetS)
       ELSE
          FarFC  = Zero
          FarFS  = Zero
-         CALL CTraX77(Prim%ELL,MaxELL,FarFC,FarFS,TensorC,TensorS,RhoC,RhoS)
+         CALL CTraX77(Prim%ELL,MaxELL,FarFC,FarFS,TensorC%D,TensorS%D,RhoC,RhoS)
       ENDIF
 !
 !     Contrax the <Bra|Ket> FF corection
@@ -305,11 +316,9 @@ MODULE PBCFarField
 !========================================================================================
 ! Calculate the Box Bounds Needed for the Direct Sum
 !========================================================================================
-  SUBROUTINE BoxBounds(Q,GMLoc) 
-    TYPE(PoleNode)                   :: Q
-    INTEGER                          :: I,J,K,LP
+  SUBROUTINE BoxBounds(GMLoc)
+    INTEGER                          :: I
     INTEGER                          :: IRmin,IRmax
-    REAL(DOUBLE)                     :: Px,Py,Pz,O_FFEll,NFac,Dist,Mx,My,Mz
     REAL(DOUBLE)                     :: Radius
     TYPE(CRDS)                       :: GMLoc
 !        
@@ -327,6 +336,49 @@ MODULE PBCFarField
        IRmax = MAX(5000,CS_OUT%NCells+1)
     ENDIF
 !
+!   Generate the Cells for the Inner Box
+!  
+    Radius = RDist
+    CALL New_CellSet_Sphere(CS_IN,GMLoc%PBC%AutoW,GMLoc%PBC%BoxShape,Radius)
+!
+!   Rescale the box size  so that the box is within the bounds of IRmin and IRmax
+!
+    IF(CS_IN%NCells < IRmin) THEN
+       DO I=1,1000
+          Radius = 1.001D0*Radius
+          CALL Delete_CellSet(CS_IN)
+          CALL New_CellSet_Sphere(CS_IN,GMLoc%PBC%AutoW,GMLoc%PBC%BoxShape,Radius)
+          IF(CS_IN%NCells > IRmin) THEN
+             EXIT
+          ENDIF
+       ENDDO
+       RDist = Radius
+       RETURN
+    ELSEIF(CS_IN%NCells > IRMax) THEN
+       DO I=1,1000
+          Radius = 0.999D0*Radius
+          CALL Delete_CellSet(CS_IN)
+          CALL New_CellSet_Sphere(CS_IN,GMLoc%PBC%AutoW,GMLoc%PBC%BoxShape,Radius)
+          IF(CS_IN%NCells < IRmax) THEN
+             EXIT
+          ENDIF
+       ENDDO
+       RDist = Radius
+       RETURN
+    ENDIF
+    RDist = Radius
+!
+  END SUBROUTINE BoxBounds
+!========================================================================================
+! Calculate the Box Bounds Needed for the Direct Sum
+!========================================================================================
+  SUBROUTINE CalMPB(Q,GMLoc) 
+    TYPE(PoleNode)                   :: Q
+    INTEGER                          :: I,J,K,LP
+    REAL(DOUBLE)                     :: Px,Py,Pz,O_FFEll,NFac,Dist,Mx,My,Mz
+    REAL(DOUBLE)                     :: Radius
+    TYPE(CRDS)                       :: GMLoc
+!
 !   PAC Distance (From PoleRoot)
 !
     Px=Half*(Q%Box%BndBox(1,2)-Q%Box%BndBox(1,1))
@@ -334,7 +386,7 @@ MODULE PBCFarField
     Pz=Half*(Q%Box%BndBox(3,2)-Q%Box%BndBox(3,1))
     PACDist = SQRT(Px*Px+Py*Py+Pz*Pz)
 !
-!   MAC DISTANCE
+!   MAC Distance
 !
     LP      = 0
     MACDist = Zero
@@ -359,45 +411,15 @@ MODULE PBCFarField
        ENDDO
     ENDDO
 !
-!   BOXDist
+!   BOX Distance
 !
-    BDist  = SQRT(BOXDist(1)**2+BOXDist(2)**2+BOXDist(3)**2)
+    BDist = SQRT(BOXDist(1)**2+BOXDist(2)**2+BOXDist(3)**2)
 !
-!   Generate the Cells for the Inner Box
-!  
-    Radius = MAX(PACDist,SQRT(MACDist**2+BDist**2))
-    CALL New_CellSet_Sphere(CS_IN,GMLoc%PBC%AutoW,GMLoc%PBC%BoxShape,Radius)
+!   Total Distance
 !
-!   Rescale the box size  so that the box is within the bounds of IRmin and IRmax
+    RDist = MAX(PACDist,SQRT(MACDIst**2+BDist**2))
 !
-    IF(CS_IN%NCells < IRmin) THEN
-       DO I=1,1000
-          Radius = 1.001D0*Radius
-          CALL Delete_CellSet(CS_IN)
-          CALL New_CellSet_Sphere(CS_IN,GMLoc%PBC%AutoW,GMLoc%PBC%BoxShape,Radius)
-          IF(CS_IN%NCells > IRmin) THEN
-             EXIT
-          ENDIF
-       ENDDO
-       RDist = Radius
-       CALL Sort_CellSet(CS_IN)
-       RETURN
-    ELSEIF(CS_IN%NCells > IRMax) THEN
-       DO I=1,1000
-          Radius = 0.999D0*Radius
-          CALL Delete_CellSet(CS_IN)
-          CALL New_CellSet_Sphere(CS_IN,GMLoc%PBC%AutoW,GMLoc%PBC%BoxShape,Radius)
-          IF(CS_IN%NCells < IRmax) THEN
-             EXIT
-          ENDIF
-       ENDDO
-       RDist = Radius
-       CALL Sort_CellSet(CS_IN)
-       RETURN
-    ENDIF
-    RDist = Radius
-!
-  END SUBROUTINE BoxBounds
+  END SUBROUTINE CalMPB
 !========================================================================================
 ! If QP is < TOL, do not translate
 !========================================================================================
