@@ -8,4 +8,6 @@ MODULE Globals
   TYPE(DBL_RNK4)  :: MD
   TYPE(ARGMT)     :: Args
   TYPE(HGRho)     :: Rho
+  TYPE(CMPoles)   :: RhoPoles
+!
 END MODULE Globals
