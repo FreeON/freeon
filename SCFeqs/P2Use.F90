@@ -65,16 +65,17 @@ PROGRAM P2Use
      CALL Multiply(P,T2,T1)
 !    dP=-P.dS.P
      CALL Multiply(T1,P,T0)
-!    P'=P+dP
+!    P'=P+dP Can probably come up with an extrapolation to higher order...
 !     CALL Multiply(T0,Zero)
      CALL Add(T0,P,T1)
 !    Check for normalization in corrected DP
      CALL Filter(P,T1)
      CALL Get(T0,TrixFile('S',Args,Stats_O=Current))
+!    The following is clumsy.  Should have better diagonal only renormalization
+!    followed by a purify....
      ECount=Trace(T0,P)
      DensityDev=DBLE(Nel)-Two*ECount
-!     WRITE(*,*)' Density Dev = ',DensityDev
-!    Renormalize corrected density matrix  (could purify here...)
+!    Renormalize corrected density matrix 
      CALL Multiply(P,DBLE(NEl)/(Two*ECount))
   ELSE
      IF(SCFActn=='Restart')THEN
