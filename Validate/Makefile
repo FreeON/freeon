@@ -67,6 +67,8 @@ pbs:
 	./sub_pbs Vancomycin
 #
 release:  purge 
+	rm -rf BALA-PERIODIC
+	rm -rf MgO-PERIODIC
 #
 purge:	clean 
 	rm -f $(REMOVESRCE)
