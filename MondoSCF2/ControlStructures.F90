@@ -145,12 +145,8 @@ MODULE ControlStructures
      REAL(DOUBLE)                       :: ConstrMaxCrit
      LOGICAL                            :: DoFixMM
      LOGICAL                            :: TSSearch
-     LOGICAL                            :: AeqB
-     LOGICAL                            :: AeqC
-     LOGICAL                            :: BeqC
-     LOGICAL                            :: ALPHAeqBETA
-     LOGICAL                            :: ALPHAeqGAMMA
-     LOGICAL                            :: BETAeqGAMMA
+     REAL(DOUBLE),DIMENSION(3)          :: RatioABC
+     REAL(DOUBLE),DIMENSION(3)          :: RatioAlpBetGam
   END TYPE Constr
   !
   TYPE BackTrf
@@ -182,8 +178,8 @@ MODULE ControlStructures
      LOGICAL                            :: Alternate 
      LOGICAL                            :: LatticeStart
      LOGICAL                            :: ExplLatt    
-     INTEGER                            :: MaxLattice
-     INTEGER                            :: MaxAtoms  
+     INTEGER                            :: MaxLatticeSteps
+     INTEGER                            :: MaxAtomSteps
   END TYPE GConvCrit 
   !
   TYPE GOptStat 

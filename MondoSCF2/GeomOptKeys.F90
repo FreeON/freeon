@@ -17,12 +17,8 @@ MODULE GeomOptKeys
    CHARACTER(LEN=8),  PARAMETER :: OPT_ExplLatt     ='ExplLatt'
    CHARACTER(LEN=9),  PARAMETER :: OPT_Alternate    ='Alternate'
    CHARACTER(LEN=12), PARAMETER :: OPT_LatticeStart ='LatticeStart'
-   CHARACTER(LEN=4),  PARAMETER :: OPT_AeqB         ='AeqB'
-   CHARACTER(LEN=4),  PARAMETER :: OPT_AeqC         ='AeqC'
-   CHARACTER(LEN=4),  PARAMETER :: OPT_BeqC         ='BeqC'
-   CHARACTER(LEN=11), PARAMETER :: OPT_ALPHAeqBETA  ='ALPHAeqBETA'
-   CHARACTER(LEN=12), PARAMETER :: OPT_ALPHAeqGAMMA ='ALPHAeqGAMMA'
-   CHARACTER(LEN=11), PARAMETER :: OPT_BETAeqGAMMA  ='BETAeqGAMMA'
+   CHARACTER(LEN=8),  PARAMETER :: OPT_RatioABC     ='RatioABC'
+   CHARACTER(LEN=14), PARAMETER :: OPT_RatioAlpBetGam  ='RatioAlpBetGam'
    CHARACTER(LEN=9),  PARAMETER :: OPT_DoThreeAt    ='DoThreeAt' 
    CHARACTER(LEN=8),  PARAMETER :: OPT_NoBackTr     ='NoBackTr'    
    CHARACTER(LEN=12), PARAMETER :: OPT_DoAtomBackTr ='DoAtomBackTr'
@@ -45,8 +41,8 @@ MODULE GeomOptKeys
     CHARACTER(LEN=9),  PARAMETER :: CoordType_DoNewChol='DoNewChol'
     CHARACTER(LEN=9),  PARAMETER :: CoordType_DoClssTrf='DoClssTrf'
     CHARACTER(LEN=7),  PARAMETER :: CoordType_DoFixMM='DoFixMM'
-    CHARACTER(LEN=8),  PARAMETER :: MaxAtoms='MaxAtoms'
-    CHARACTER(LEN=10), PARAMETER :: MaxLattice='MaxLattice'
+    CHARACTER(LEN=12), PARAMETER :: MaxAtomSteps='MaxAtomSteps'
+    CHARACTER(LEN=15), PARAMETER :: MaxLatticeSteps='MaxLatticeSteps'
 !-------------------------------------------------
 !  Parsing keys for <Options.StpDescInvH=>
 !

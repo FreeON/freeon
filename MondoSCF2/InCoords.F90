@@ -3310,25 +3310,65 @@ CONTAINS
 !
    SUBROUTINE SetLattValues(Vec,IntCs,GConstr)
      REAL(DOUBLE),DIMENSION(6) :: Vec
+     REAL(DOUBLE),DIMENSION(3) :: Ratio
      TYPE(INTC)                :: IntCs
-     INTEGER                   :: I
+     INTEGER                   :: I,IRef1,IRef2,IConstr(6)
      TYPE(Constr)              :: GConstr
      !
+     IConstr=0
+     IRef1=0
+     IRef2=0
      DO I=1,IntCs%N
        IF(.NOT.IntCs%Constraint%L(I)) CYCLE
-       IF(IntCs%Def%C(I)(1:6)=='STRE_A') Vec(1)=IntCs%ConstrValue%D(I)
-       IF(IntCs%Def%C(I)(1:6)=='STRE_B') Vec(2)=IntCs%ConstrValue%D(I)
-       IF(IntCs%Def%C(I)(1:6)=='STRE_C') Vec(3)=IntCs%ConstrValue%D(I)
-       IF(IntCs%Def%C(I)(1:5)=='ALPHA')  Vec(4)=IntCs%ConstrValue%D(I)
-       IF(IntCs%Def%C(I)(1:4)=='BETA')   Vec(5)=IntCs%ConstrValue%D(I)
-       IF(IntCs%Def%C(I)(1:5)=='GAMMA')  Vec(6)=IntCs%ConstrValue%D(I)
+       IF(IntCs%Def%C(I)(1:6)=='STRE_A') THEN
+         Vec(1)=IntCs%ConstrValue%D(I)
+         IF(GConstr%RatioABC(1)>Zero) IRef1=1
+       ENDIF
+       IF(IntCs%Def%C(I)(1:6)=='STRE_B') THEN
+         Vec(2)=IntCs%ConstrValue%D(I)
+         IF(GConstr%RatioABC(2)>Zero) IRef1=2
+       ENDIF
+       IF(IntCs%Def%C(I)(1:6)=='STRE_C') THEN
+         Vec(3)=IntCs%ConstrValue%D(I)
+         IF(GConstr%RatioABC(3)>Zero) IRef1=3
+       ENDIF
+       IF(IntCs%Def%C(I)(1:5)=='ALPHA') THEN
+         Vec(4)=IntCs%ConstrValue%D(I)
+         IF(GConstr%RatioABC(1)>Zero) IRef2=1
+       ENDIF
+       IF(IntCs%Def%C(I)(1:4)=='BETA') THEN
+         Vec(5)=IntCs%ConstrValue%D(I)
+         IF(GConstr%RatioABC(2)>Zero) IRef2=2
+       ENDIF
+       IF(IntCs%Def%C(I)(1:5)=='GAMMA') THEN
+         Vec(6)=IntCs%ConstrValue%D(I)
+         IF(GConstr%RatioABC(3)>Zero) IRef2=3
+       ENDIF
      ENDDO
-     IF(GConstr%AeqB) Vec(1)=Vec(2)
-     IF(GConstr%AeqC) Vec(1)=Vec(3)
-     IF(GConstr%BeqC) Vec(2)=Vec(3)
-     IF(GConstr%ALPHAeqBETA)  Vec(4)=Vec(5)
-     IF(GConstr%ALPHAeqGAMMA) Vec(4)=Vec(6)
-     IF(GConstr%BETAeqGAMMA)  Vec(5)=Vec(6)
+     IF(IRef1==0) THEN
+       DO I=1,3
+         IF(GConstr%RatioABC(I)>Zero) THEN
+           IRef1=I
+           EXIT
+         ENDIF
+       ENDDO 
+     ENDIF
+     IF(IRef2==0) THEN
+       DO I=1,3
+         IF(GConstr%RatioAlpBetGam(I)>Zero) THEN
+           IRef2=I
+           EXIT
+         ENDIF
+       ENDDO 
+     ENDIF
+     DO I=1,3
+       IF(GConstr%RatioABC(I)>Zero) THEN
+         Vec(I)=Vec(IRef1)*GConstr%RatioABC(I)/GConstr%RatioABC(IRef1)
+       ENDIF
+       IF(GConstr%RatioABC(3+I)>Zero) THEN
+         Vec(3+I)=Vec(3+IRef2)*GConstr%RatioAlpBetGam(I)/GConstr%RatioAlpBetGam(IRef2)
+       ENDIF
+     ENDDO 
    END SUBROUTINE SetLattValues
 !
 !----------------------------------------------------------------------

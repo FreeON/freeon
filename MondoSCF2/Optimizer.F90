@@ -2005,7 +2005,7 @@ CONTAINS
      INTEGER                     :: II,I,J,PBCDim,NCart,Print
      TYPE(DBL_VECT)              :: CartGrad,Carts
      CHARACTER(LEN=*)            :: SCRPath
-     INTEGER                     :: MaxLattice,MaxAtoms,AltCount
+     INTEGER                     :: MaxLatticeSteps,MaxAtomSteps,AltCount
      !
      Print2= Print>=DEBUG_GEOP_MAX
      NatmsLoc=SIZE(BoxCarts,2)
@@ -2033,13 +2033,13 @@ CONTAINS
      AltCount=AltCount+1
      IF(LatticeOnly) THEN
        LatticeOnly=(GOpt%GOptStat%LMaxCGrad>GOpt%GConvCrit%Grad).AND. &
-                   (AltCount<=GOpt%GConvCrit%MaxLattice)
+                   (AltCount<=GOpt%GConvCrit%MaxLatticeSteps)
        IF(.NOT.LatticeOnly) THEN
          AltCount=1
        ENDIF
      ELSE
        LatticeOnly=(GOpt%GOptStat%MaxCGrad<GOpt%GConvCrit%Grad).OR. &
-                   (AltCount>GOpt%GConvCrit%MaxAtoms)
+                   (AltCount>GOpt%GConvCrit%MaxAtomSteps)
        IF(LatticeOnly) THEN
          AltCount=1
        ENDIF

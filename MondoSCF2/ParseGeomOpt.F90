@@ -61,32 +61,10 @@ MODULE ParseGeomOpt
        GOpt%GConvCrit%ExplLatt=.TRUE.
      ENDIF
      !
-     ! Parse for lattice parameter equivalence constraints
+     ! Parse for lattice parameter ratios
      !
-     GOpt%Constr%AeqB=.FALSE.
-     IF(OptKeyQ(Inp,GRADIENTS,OPT_AeqB)) THEN
-       GOpt%Constr%AeqB=.TRUE.
-     ENDIF
-     GOpt%Constr%AeqC=.FALSE.
-     IF(OptKeyQ(Inp,GRADIENTS,OPT_AeqC)) THEN
-       GOpt%Constr%AeqC=.TRUE.
-     ENDIF
-     GOpt%Constr%BeqC=.FALSE.
-     IF(OptKeyQ(Inp,GRADIENTS,OPT_BeqC)) THEN
-       GOpt%Constr%BeqC=.TRUE.
-     ENDIF
-     GOpt%Constr%ALPHAeqBETA=.FALSE.
-     IF(OptKeyQ(Inp,GRADIENTS,OPT_ALPHAeqBETA)) THEN
-       GOpt%Constr%ALPHAeqBETA=.TRUE.
-     ENDIF
-     GOpt%Constr%ALPHAeqGAMMA=.FALSE.
-     IF(OptKeyQ(Inp,GRADIENTS,OPT_ALPHAeqGAMMA)) THEN
-       GOpt%Constr%ALPHAeqGAMMA=.TRUE.
-     ENDIF
-     GOpt%Constr%BETAeqGAMMA=.FALSE.
-     IF(OptKeyQ(Inp,GRADIENTS,OPT_BETAeqGAMMA)) THEN
-       GOpt%Constr%BETAeqGAMMA=.TRUE.
-     ENDIF
+     CALL FindLattRattio(OPT_RatioABC,GOpt%Constr%RatioABC)
+     CALL FindLattRattio(OPT_RatioAlpBetGam,GOpt%Constr%RatioAlpBetGam)
      !
      ! Parse for alternating lattice and atomic positions relaxation 
      !
@@ -140,11 +118,11 @@ MODULE ParseGeomOpt
      !
      ! Parse for MaxAtoms and MaxLattice for Alternating optimization
      !
-     IF(.NOT.OptIntQ(Inp,MaxAtoms,GOpt%GConvCrit%MaxAtoms)) THEN
-       GOpt%GConvCrit%MaxAtoms=10000 !default value
+     IF(.NOT.OptIntQ(Inp,MaxAtomSteps,GOpt%GConvCrit%MaxAtomSteps)) THEN
+       GOpt%GConvCrit%MaxAtomSteps=10000 !default value
      ENDIF
-     IF(.NOT.OptIntQ(Inp,MaxLattice,GOpt%GConvCrit%MaxLattice)) THEN
-       GOpt%GConvCrit%MaxLattice=1 !default value
+     IF(.NOT.OptIntQ(Inp,MaxLatticeSteps,GOpt%GConvCrit%MaxLatticeSteps)) THEN
+       GOpt%GConvCrit%MaxLatticeSteps=1 !default value
      ENDIF
      !
      !
@@ -217,5 +195,32 @@ MODULE ParseGeomOpt
      CLOSE(Inp,STATUS='KEEP')
      !
    END SUBROUTINE LoadGeomOpt
-  
+   !
+   !------------------------------------------------------------------
+   !
+   SUBROUTINE FindLattRattio(QChar,Ratio)
+     CHARACTER(LEN=DCL)             :: Line,Aux
+     CHARACTER(LEN=*)               :: QChar 
+     INTEGER                        :: J,ChLen
+     REAL(DOUBLE),DIMENSION(3)      :: Ratio
+     !
+     Ratio=-One
+     IF(FindMixedCaseKey(QChar,Inp)) THEN
+       ChLen=LEN(QChar)
+       DO J=1,LEN(Line) ; Line(J:J)=' ' ; ENDDO
+       Line=OPTIONS_BEGIN
+       CALL LowCase(Line)
+       CALL AlignLowCase(TRIM(Line),Inp)
+       DO 
+         READ(Inp,DEFAULT_CHR_FMT,END=1) Line
+         IF(INDEX(Line,QChar)/=0) THEN
+           READ(Line,*) Aux(1:ChLen),(Ratio(J),J=1,3)
+           EXIT
+         ENDIF
+         IF(INDEX(Line,OPTIONS_END)/=0) EXIT
+       ENDDO
+       1 CONTINUE
+     ENDIF
+   END SUBROUTINE FindLattRattio
+   ! 
 END MODULE ParseGeomOpt

@@ -78,22 +78,22 @@ MODULE ParseExtraCoords
          READ(Inp,DEFAULT_CHR_FMT,END=1)Line
          LineLowCase = Line
          Call LowCase(LineLowCase)
-       !
-       IF(INDEX(LineLowCase,'stre')/=0.OR.&
-          INDEX(LineLowCase,'bend')/=0.OR.&
-          INDEX(LineLowCase,'alpha')/=0.OR.&
-          INDEX(LineLowCase,'beta')/=0.OR.&
-          INDEX(LineLowCase,'gamma')/=0.OR.&
-          INDEX(LineLowCase,'tors')/=0.OR.&
-          INDEX(LineLowCase,'outp')/=0.OR.&
-          INDEX(LineLowCase,'linb1')/=0.OR.&
-          INDEX(LineLowCase,'linb2')/=0.OR.&
-          INDEX(LineLowCase,'cartx')/=0.OR.& 
-          INDEX(LineLowCase,'carty')/=0.OR.& 
-          INDEX(LineLowCase,'cartz')/=0) THEN
-          NIntCs=NIntCs+1 
-       ENDIF
-       !
+         !
+         IF(INDEX(LineLowCase,'stre')/=0.OR.&
+            INDEX(LineLowCase,'bend')/=0.OR.&
+            INDEX(LineLowCase,'alpha')/=0.OR.&
+            INDEX(LineLowCase,'beta')/=0.OR.&
+            INDEX(LineLowCase,'gamma')/=0.OR.&
+            INDEX(LineLowCase,'tors')/=0.OR.&
+            INDEX(LineLowCase,'outp')/=0.OR.&
+            INDEX(LineLowCase,'linb1')/=0.OR.&
+            INDEX(LineLowCase,'linb2')/=0.OR.&
+            INDEX(LineLowCase,'cartx')/=0.OR.& 
+            INDEX(LineLowCase,'carty')/=0.OR.& 
+            INDEX(LineLowCase,'cartz')/=0) THEN
+            NIntCs=NIntCs+1 
+         ENDIF
+         !
          IF(INDEX(LineLowCase,'end_add_internals')/=0) GO TO 2
        ENDDO
        1  CALL MondoHalt(PRSE_ERROR, &
