@@ -3110,8 +3110,7 @@
                                 ABx*(ABx*HRR(11)+&
                                 2.D0*HRR(21))+&
                                 HRR(36)
-      GRADIENT(OffSet,Cart + GOD)= GRADIENT(OffSet,Cart+GOD)&
-                                -GRADIENT(OffSet,Cart+GOA)&
+      GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+1)*LDA+(OB+0)*LDB+CDOffSet !=
@@ -3121,8 +3120,7 @@
                                 ABx*(ABx*HRR(12)+&
                                 2.D0*HRR(22))+&
                                 HRR(37)
-      GRADIENT(OffSet,Cart + GOD)= GRADIENT(OffSet,Cart+GOD)&
-                                -GRADIENT(OffSet,Cart+GOA)&
+      GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+2)*LDA+(OB+0)*LDB+CDOffSet !=
@@ -3132,8 +3130,7 @@
                                 ABx*(ABx*HRR(13)+&
                                 2.D0*HRR(23))+&
                                 HRR(38)
-      GRADIENT(OffSet,Cart + GOD)= GRADIENT(OffSet,Cart+GOD)&
-                                -GRADIENT(OffSet,Cart+GOA)&
+      GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+3)*LDA+(OB+0)*LDB+CDOffSet !=
@@ -3143,8 +3140,7 @@
                                 ABx*(ABx*HRR(14)+&
                                 2.D0*HRR(24))+&
                                 HRR(39)
-      GRADIENT(OffSet,Cart + GOD)= GRADIENT(OffSet,Cart+GOD)&
-                                -GRADIENT(OffSet,Cart+GOA)&
+      GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+4)*LDA+(OB+0)*LDB+CDOffSet !=
@@ -3154,8 +3150,7 @@
                                 ABx*(ABx*HRR(15)+&
                                 2.D0*HRR(26))+&
                                 HRR(42)
-      GRADIENT(OffSet,Cart + GOD)= GRADIENT(OffSet,Cart+GOD)&
-                                -GRADIENT(OffSet,Cart+GOA)&
+      GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+5)*LDA+(OB+0)*LDB+CDOffSet !=
@@ -3165,8 +3160,7 @@
                                 ABx*(ABx*HRR(16)+&
                                 2.D0*HRR(27))+&
                                 HRR(43)
-      GRADIENT(OffSet,Cart + GOD)= GRADIENT(OffSet,Cart+GOD)&
-                                -GRADIENT(OffSet,Cart+GOA)&
+      GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+6)*LDA+(OB+0)*LDB+CDOffSet !=
@@ -3176,8 +3170,7 @@
                                 ABx*(ABx*HRR(17)+&
                                 2.D0*HRR(28))+&
                                 HRR(44)
-      GRADIENT(OffSet,Cart + GOD)= GRADIENT(OffSet,Cart+GOD)&
-                                -GRADIENT(OffSet,Cart+GOA)&
+      GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+7)*LDA+(OB+0)*LDB+CDOffSet !=
@@ -3187,8 +3180,7 @@
                                 ABx*(ABx*HRR(18)+&
                                 2.D0*HRR(30))+&
                                 HRR(47)
-      GRADIENT(OffSet,Cart + GOD)= GRADIENT(OffSet,Cart+GOD)&
-                                -GRADIENT(OffSet,Cart+GOA)&
+      GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+8)*LDA+(OB+0)*LDB+CDOffSet !=
@@ -3198,8 +3190,7 @@
                                 ABx*(ABx*HRR(19)+&
                                 2.D0*HRR(31))+&
                                 HRR(48)
-      GRADIENT(OffSet,Cart + GOD)= GRADIENT(OffSet,Cart+GOD)&
-                                -GRADIENT(OffSet,Cart+GOA)&
+      GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+9)*LDA+(OB+0)*LDB+CDOffSet !=
@@ -3209,8 +3200,7 @@
                                 ABx*(ABx*HRR(20)+&
                                 2.D0*HRR(33))+&
                                 HRR(51)
-      GRADIENT(OffSet,Cart + GOD)= GRADIENT(OffSet,Cart+GOD)&
-                                -GRADIENT(OffSet,Cart+GOA)&
+      GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+0)*LDA+(OB+1)*LDB+CDOffSet !=
@@ -3221,8 +3211,7 @@
                                 ABx*(ABy*HRR(11)+&
                                 HRR(22))+&
                                 HRR(37)
-      GRADIENT(OffSet,Cart + GOD)= GRADIENT(OffSet,Cart+GOD)&
-                                -GRADIENT(OffSet,Cart+GOA)&
+      GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+1)*LDA+(OB+1)*LDB+CDOffSet !=
@@ -3233,8 +3222,7 @@
                                 ABx*(ABy*HRR(12)+&
                                 HRR(23))+&
                                 HRR(38)
-      GRADIENT(OffSet,Cart + GOD)= GRADIENT(OffSet,Cart+GOD)&
-                                -GRADIENT(OffSet,Cart+GOA)&
+      GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+2)*LDA+(OB+1)*LDB+CDOffSet !=
@@ -3245,8 +3233,7 @@
                                 ABx*(ABy*HRR(13)+&
                                 HRR(24))+&
                                 HRR(39)
-      GRADIENT(OffSet,Cart + GOD)= GRADIENT(OffSet,Cart+GOD)&
-                                -GRADIENT(OffSet,Cart+GOA)&
+      GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+3)*LDA+(OB+1)*LDB+CDOffSet !=
@@ -3257,8 +3244,7 @@
                                 ABx*(ABy*HRR(14)+&
                                 HRR(25))+&
                                 HRR(40)
-      GRADIENT(OffSet,Cart + GOD)= GRADIENT(OffSet,Cart+GOD)&
-                                -GRADIENT(OffSet,Cart+GOA)&
+      GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+4)*LDA+(OB+1)*LDB+CDOffSet !=
@@ -3269,8 +3255,7 @@
                                 ABx*(ABy*HRR(15)+&
                                 HRR(27))+&
                                 HRR(43)
-      GRADIENT(OffSet,Cart + GOD)= GRADIENT(OffSet,Cart+GOD)&
-                                -GRADIENT(OffSet,Cart+GOA)&
+      GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+5)*LDA+(OB+1)*LDB+CDOffSet !=
@@ -3281,8 +3266,7 @@
                                 ABx*(ABy*HRR(16)+&
                                 HRR(28))+&
                                 HRR(44)
-      GRADIENT(OffSet,Cart + GOD)= GRADIENT(OffSet,Cart+GOD)&
-                                -GRADIENT(OffSet,Cart+GOA)&
+      GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+6)*LDA+(OB+1)*LDB+CDOffSet !=
@@ -3293,8 +3277,7 @@
                                 ABx*(ABy*HRR(17)+&
                                 HRR(29))+&
                                 HRR(45)
-      GRADIENT(OffSet,Cart + GOD)= GRADIENT(OffSet,Cart+GOD)&
-                                -GRADIENT(OffSet,Cart+GOA)&
+      GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+7)*LDA+(OB+1)*LDB+CDOffSet !=
@@ -3305,8 +3288,7 @@
                                 ABx*(ABy*HRR(18)+&
                                 HRR(31))+&
                                 HRR(48)
-      GRADIENT(OffSet,Cart + GOD)= GRADIENT(OffSet,Cart+GOD)&
-                                -GRADIENT(OffSet,Cart+GOA)&
+      GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+8)*LDA+(OB+1)*LDB+CDOffSet !=
@@ -3317,8 +3299,7 @@
                                 ABx*(ABy*HRR(19)+&
                                 HRR(32))+&
                                 HRR(49)
-      GRADIENT(OffSet,Cart + GOD)= GRADIENT(OffSet,Cart+GOD)&
-                                -GRADIENT(OffSet,Cart+GOA)&
+      GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+9)*LDA+(OB+1)*LDB+CDOffSet !=
@@ -3329,8 +3310,7 @@
                                 ABx*(ABy*HRR(20)+&
                                 HRR(34))+&
                                 HRR(52)
-      GRADIENT(OffSet,Cart + GOD)= GRADIENT(OffSet,Cart+GOD)&
-                                -GRADIENT(OffSet,Cart+GOA)&
+      GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+0)*LDA+(OB+2)*LDB+CDOffSet !=
@@ -3340,8 +3320,7 @@
                                 ABy*(ABy*HRR(11)+&
                                 2.D0*HRR(22))+&
                                 HRR(38)
-      GRADIENT(OffSet,Cart + GOD)= GRADIENT(OffSet,Cart+GOD)&
-                                -GRADIENT(OffSet,Cart+GOA)&
+      GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+1)*LDA+(OB+2)*LDB+CDOffSet !=
@@ -3351,8 +3330,7 @@
                                 ABy*(ABy*HRR(12)+&
                                 2.D0*HRR(23))+&
                                 HRR(39)
-      GRADIENT(OffSet,Cart + GOD)= GRADIENT(OffSet,Cart+GOD)&
-                                -GRADIENT(OffSet,Cart+GOA)&
+      GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+2)*LDA+(OB+2)*LDB+CDOffSet !=
@@ -3362,8 +3340,7 @@
                                 ABy*(ABy*HRR(13)+&
                                 2.D0*HRR(24))+&
                                 HRR(40)
-      GRADIENT(OffSet,Cart + GOD)= GRADIENT(OffSet,Cart+GOD)&
-                                -GRADIENT(OffSet,Cart+GOA)&
+      GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+3)*LDA+(OB+2)*LDB+CDOffSet !=
@@ -3373,8 +3350,7 @@
                                 ABy*(ABy*HRR(14)+&
                                 2.D0*HRR(25))+&
                                 HRR(41)
-      GRADIENT(OffSet,Cart + GOD)= GRADIENT(OffSet,Cart+GOD)&
-                                -GRADIENT(OffSet,Cart+GOA)&
+      GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+4)*LDA+(OB+2)*LDB+CDOffSet !=
@@ -3384,8 +3360,7 @@
                                 ABy*(ABy*HRR(15)+&
                                 2.D0*HRR(27))+&
                                 HRR(44)
-      GRADIENT(OffSet,Cart + GOD)= GRADIENT(OffSet,Cart+GOD)&
-                                -GRADIENT(OffSet,Cart+GOA)&
+      GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+5)*LDA+(OB+2)*LDB+CDOffSet !=
@@ -3395,8 +3370,7 @@
                                 ABy*(ABy*HRR(16)+&
                                 2.D0*HRR(28))+&
                                 HRR(45)
-      GRADIENT(OffSet,Cart + GOD)= GRADIENT(OffSet,Cart+GOD)&
-                                -GRADIENT(OffSet,Cart+GOA)&
+      GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+6)*LDA+(OB+2)*LDB+CDOffSet !=
@@ -3406,8 +3380,7 @@
                                 ABy*(ABy*HRR(17)+&
                                 2.D0*HRR(29))+&
                                 HRR(46)
-      GRADIENT(OffSet,Cart + GOD)= GRADIENT(OffSet,Cart+GOD)&
-                                -GRADIENT(OffSet,Cart+GOA)&
+      GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+7)*LDA+(OB+2)*LDB+CDOffSet !=
@@ -3417,8 +3390,7 @@
                                 ABy*(ABy*HRR(18)+&
                                 2.D0*HRR(31))+&
                                 HRR(49)
-      GRADIENT(OffSet,Cart + GOD)= GRADIENT(OffSet,Cart+GOD)&
-                                -GRADIENT(OffSet,Cart+GOA)&
+      GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+8)*LDA+(OB+2)*LDB+CDOffSet !=
@@ -3428,8 +3400,7 @@
                                 ABy*(ABy*HRR(19)+&
                                 2.D0*HRR(32))+&
                                 HRR(50)
-      GRADIENT(OffSet,Cart + GOD)= GRADIENT(OffSet,Cart+GOD)&
-                                -GRADIENT(OffSet,Cart+GOA)&
+      GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+9)*LDA+(OB+2)*LDB+CDOffSet !=
@@ -3439,8 +3410,7 @@
                                 ABy*(ABy*HRR(20)+&
                                 2.D0*HRR(34))+&
                                 HRR(53)
-      GRADIENT(OffSet,Cart + GOD)= GRADIENT(OffSet,Cart+GOD)&
-                                -GRADIENT(OffSet,Cart+GOA)&
+      GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+0)*LDA+(OB+3)*LDB+CDOffSet !=
@@ -3451,8 +3421,7 @@
                                 ABx*(ABz*HRR(11)+&
                                 HRR(26))+&
                                 HRR(42)
-      GRADIENT(OffSet,Cart + GOD)= GRADIENT(OffSet,Cart+GOD)&
-                                -GRADIENT(OffSet,Cart+GOA)&
+      GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+1)*LDA+(OB+3)*LDB+CDOffSet !=
@@ -3463,8 +3432,7 @@
                                 ABx*(ABz*HRR(12)+&
                                 HRR(27))+&
                                 HRR(43)
-      GRADIENT(OffSet,Cart + GOD)= GRADIENT(OffSet,Cart+GOD)&
-                                -GRADIENT(OffSet,Cart+GOA)&
+      GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+2)*LDA+(OB+3)*LDB+CDOffSet !=
@@ -3475,8 +3443,7 @@
                                 ABx*(ABz*HRR(13)+&
                                 HRR(28))+&
                                 HRR(44)
-      GRADIENT(OffSet,Cart + GOD)= GRADIENT(OffSet,Cart+GOD)&
-                                -GRADIENT(OffSet,Cart+GOA)&
+      GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+3)*LDA+(OB+3)*LDB+CDOffSet !=
@@ -3487,8 +3454,7 @@
                                 ABx*(ABz*HRR(14)+&
                                 HRR(29))+&
                                 HRR(45)
-      GRADIENT(OffSet,Cart + GOD)= GRADIENT(OffSet,Cart+GOD)&
-                                -GRADIENT(OffSet,Cart+GOA)&
+      GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+4)*LDA+(OB+3)*LDB+CDOffSet !=
@@ -3499,8 +3465,7 @@
                                 ABx*(ABz*HRR(15)+&
                                 HRR(30))+&
                                 HRR(47)
-      GRADIENT(OffSet,Cart + GOD)= GRADIENT(OffSet,Cart+GOD)&
-                                -GRADIENT(OffSet,Cart+GOA)&
+      GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+5)*LDA+(OB+3)*LDB+CDOffSet !=
@@ -3511,8 +3476,7 @@
                                 ABx*(ABz*HRR(16)+&
                                 HRR(31))+&
                                 HRR(48)
-      GRADIENT(OffSet,Cart + GOD)= GRADIENT(OffSet,Cart+GOD)&
-                                -GRADIENT(OffSet,Cart+GOA)&
+      GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+6)*LDA+(OB+3)*LDB+CDOffSet !=
@@ -3523,8 +3487,7 @@
                                 ABx*(ABz*HRR(17)+&
                                 HRR(32))+&
                                 HRR(49)
-      GRADIENT(OffSet,Cart + GOD)= GRADIENT(OffSet,Cart+GOD)&
-                                -GRADIENT(OffSet,Cart+GOA)&
+      GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+7)*LDA+(OB+3)*LDB+CDOffSet !=
@@ -3535,8 +3498,7 @@
                                 ABx*(ABz*HRR(18)+&
                                 HRR(33))+&
                                 HRR(51)
-      GRADIENT(OffSet,Cart + GOD)= GRADIENT(OffSet,Cart+GOD)&
-                                -GRADIENT(OffSet,Cart+GOA)&
+      GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+8)*LDA+(OB+3)*LDB+CDOffSet !=
@@ -3547,8 +3509,7 @@
                                 ABx*(ABz*HRR(19)+&
                                 HRR(34))+&
                                 HRR(52)
-      GRADIENT(OffSet,Cart + GOD)= GRADIENT(OffSet,Cart+GOD)&
-                                -GRADIENT(OffSet,Cart+GOA)&
+      GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+9)*LDA+(OB+3)*LDB+CDOffSet !=
@@ -3559,8 +3520,7 @@
                                 ABx*(ABz*HRR(20)+&
                                 HRR(35))+&
                                 HRR(54)
-      GRADIENT(OffSet,Cart + GOD)= GRADIENT(OffSet,Cart+GOD)&
-                                -GRADIENT(OffSet,Cart+GOA)&
+      GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+0)*LDA+(OB+4)*LDB+CDOffSet !=
@@ -3571,8 +3531,7 @@
                                 ABy*(ABz*HRR(11)+&
                                 HRR(26))+&
                                 HRR(43)
-      GRADIENT(OffSet,Cart + GOD)= GRADIENT(OffSet,Cart+GOD)&
-                                -GRADIENT(OffSet,Cart+GOA)&
+      GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+1)*LDA+(OB+4)*LDB+CDOffSet !=
@@ -3583,8 +3542,7 @@
                                 ABy*(ABz*HRR(12)+&
                                 HRR(27))+&
                                 HRR(44)
-      GRADIENT(OffSet,Cart + GOD)= GRADIENT(OffSet,Cart+GOD)&
-                                -GRADIENT(OffSet,Cart+GOA)&
+      GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+2)*LDA+(OB+4)*LDB+CDOffSet !=
@@ -3595,8 +3553,7 @@
                                 ABy*(ABz*HRR(13)+&
                                 HRR(28))+&
                                 HRR(45)
-      GRADIENT(OffSet,Cart + GOD)= GRADIENT(OffSet,Cart+GOD)&
-                                -GRADIENT(OffSet,Cart+GOA)&
+      GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+3)*LDA+(OB+4)*LDB+CDOffSet !=
@@ -3607,8 +3564,7 @@
                                 ABy*(ABz*HRR(14)+&
                                 HRR(29))+&
                                 HRR(46)
-      GRADIENT(OffSet,Cart + GOD)= GRADIENT(OffSet,Cart+GOD)&
-                                -GRADIENT(OffSet,Cart+GOA)&
+      GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+4)*LDA+(OB+4)*LDB+CDOffSet !=
@@ -3619,8 +3575,7 @@
                                 ABy*(ABz*HRR(15)+&
                                 HRR(30))+&
                                 HRR(48)
-      GRADIENT(OffSet,Cart + GOD)= GRADIENT(OffSet,Cart+GOD)&
-                                -GRADIENT(OffSet,Cart+GOA)&
+      GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+5)*LDA+(OB+4)*LDB+CDOffSet !=
@@ -3631,8 +3586,7 @@
                                 ABy*(ABz*HRR(16)+&
                                 HRR(31))+&
                                 HRR(49)
-      GRADIENT(OffSet,Cart + GOD)= GRADIENT(OffSet,Cart+GOD)&
-                                -GRADIENT(OffSet,Cart+GOA)&
+      GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+6)*LDA+(OB+4)*LDB+CDOffSet !=
@@ -3643,8 +3597,7 @@
                                 ABy*(ABz*HRR(17)+&
                                 HRR(32))+&
                                 HRR(50)
-      GRADIENT(OffSet,Cart + GOD)= GRADIENT(OffSet,Cart+GOD)&
-                                -GRADIENT(OffSet,Cart+GOA)&
+      GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+7)*LDA+(OB+4)*LDB+CDOffSet !=
@@ -3655,8 +3608,7 @@
                                 ABy*(ABz*HRR(18)+&
                                 HRR(33))+&
                                 HRR(52)
-      GRADIENT(OffSet,Cart + GOD)= GRADIENT(OffSet,Cart+GOD)&
-                                -GRADIENT(OffSet,Cart+GOA)&
+      GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+8)*LDA+(OB+4)*LDB+CDOffSet !=
@@ -3667,8 +3619,7 @@
                                 ABy*(ABz*HRR(19)+&
                                 HRR(34))+&
                                 HRR(53)
-      GRADIENT(OffSet,Cart + GOD)= GRADIENT(OffSet,Cart+GOD)&
-                                -GRADIENT(OffSet,Cart+GOA)&
+      GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+9)*LDA+(OB+4)*LDB+CDOffSet !=
@@ -3679,8 +3630,7 @@
                                 ABy*(ABz*HRR(20)+&
                                 HRR(35))+&
                                 HRR(55)
-      GRADIENT(OffSet,Cart + GOD)= GRADIENT(OffSet,Cart+GOD)&
-                                -GRADIENT(OffSet,Cart+GOA)&
+      GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+0)*LDA+(OB+5)*LDB+CDOffSet !=
@@ -3690,8 +3640,7 @@
                                 ABz*(ABz*HRR(11)+&
                                 2.D0*HRR(26))+&
                                 HRR(47)
-      GRADIENT(OffSet,Cart + GOD)= GRADIENT(OffSet,Cart+GOD)&
-                                -GRADIENT(OffSet,Cart+GOA)&
+      GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+1)*LDA+(OB+5)*LDB+CDOffSet !=
@@ -3701,8 +3650,7 @@
                                 ABz*(ABz*HRR(12)+&
                                 2.D0*HRR(27))+&
                                 HRR(48)
-      GRADIENT(OffSet,Cart + GOD)= GRADIENT(OffSet,Cart+GOD)&
-                                -GRADIENT(OffSet,Cart+GOA)&
+      GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+2)*LDA+(OB+5)*LDB+CDOffSet !=
@@ -3712,8 +3660,7 @@
                                 ABz*(ABz*HRR(13)+&
                                 2.D0*HRR(28))+&
                                 HRR(49)
-      GRADIENT(OffSet,Cart + GOD)= GRADIENT(OffSet,Cart+GOD)&
-                                -GRADIENT(OffSet,Cart+GOA)&
+      GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+3)*LDA+(OB+5)*LDB+CDOffSet !=
@@ -3723,8 +3670,7 @@
                                 ABz*(ABz*HRR(14)+&
                                 2.D0*HRR(29))+&
                                 HRR(50)
-      GRADIENT(OffSet,Cart + GOD)= GRADIENT(OffSet,Cart+GOD)&
-                                -GRADIENT(OffSet,Cart+GOA)&
+      GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+4)*LDA+(OB+5)*LDB+CDOffSet !=
@@ -3734,8 +3680,7 @@
                                 ABz*(ABz*HRR(15)+&
                                 2.D0*HRR(30))+&
                                 HRR(51)
-      GRADIENT(OffSet,Cart + GOD)= GRADIENT(OffSet,Cart+GOD)&
-                                -GRADIENT(OffSet,Cart+GOA)&
+      GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+5)*LDA+(OB+5)*LDB+CDOffSet !=
@@ -3745,8 +3690,7 @@
                                 ABz*(ABz*HRR(16)+&
                                 2.D0*HRR(31))+&
                                 HRR(52)
-      GRADIENT(OffSet,Cart + GOD)= GRADIENT(OffSet,Cart+GOD)&
-                                -GRADIENT(OffSet,Cart+GOA)&
+      GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+6)*LDA+(OB+5)*LDB+CDOffSet !=
@@ -3756,8 +3700,7 @@
                                 ABz*(ABz*HRR(17)+&
                                 2.D0*HRR(32))+&
                                 HRR(53)
-      GRADIENT(OffSet,Cart + GOD)= GRADIENT(OffSet,Cart+GOD)&
-                                -GRADIENT(OffSet,Cart+GOA)&
+      GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+7)*LDA+(OB+5)*LDB+CDOffSet !=
@@ -3767,8 +3710,7 @@
                                 ABz*(ABz*HRR(18)+&
                                 2.D0*HRR(33))+&
                                 HRR(54)
-      GRADIENT(OffSet,Cart + GOD)= GRADIENT(OffSet,Cart+GOD)&
-                                -GRADIENT(OffSet,Cart+GOA)&
+      GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+8)*LDA+(OB+5)*LDB+CDOffSet !=
@@ -3778,8 +3720,7 @@
                                 ABz*(ABz*HRR(19)+&
                                 2.D0*HRR(34))+&
                                 HRR(55)
-      GRADIENT(OffSet,Cart + GOD)= GRADIENT(OffSet,Cart+GOD)&
-                                -GRADIENT(OffSet,Cart+GOA)&
+      GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
       OffSet=(OA+9)*LDA+(OB+5)*LDB+CDOffSet !=
@@ -3789,8 +3730,7 @@
                                 ABz*(ABz*HRR(20)+&
                                 2.D0*HRR(35))+&
                                 HRR(56)
-      GRADIENT(OffSet,Cart + GOD)= GRADIENT(OffSet,Cart+GOD)&
-                                -GRADIENT(OffSet,Cart+GOA)&
+      GRADIENT(OffSet,Cart + GOD)=-GRADIENT(OffSet,Cart+GOA)&
                                 -GRADIENT(OffSet,Cart+GOB)&
                                 -GRADIENT(OffSet,Cart+GOC)
     END SUBROUTINE BraHRR106cd

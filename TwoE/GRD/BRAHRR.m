@@ -253,7 +253,7 @@ Do[Do[
 
  spaces="                                ";
  oList=Append[oList,{" "->"","DV"->"_","ZP"->"","XX"->",","BB"->"(","KK"->"|","+"->"+&\n                                ",
-     "QRS"->StringJoin[" GRADIENT(OffSet,Cart+GOD)&\n",spaces,"-GRADIENT(OffSet,Cart+GOA)&\n",spaces,
+     "QRS"->StringJoin["-GRADIENT(OffSet,Cart+GOA)&\n",spaces,
                        "-GRADIENT(OffSet,Cart+GOB)&\n",spaces,"-GRADIENT(OffSet,Cart+GOC)"]}];
 
  oList=Flatten[oList];
