@@ -135,20 +135,23 @@ PROGRAM SForce
   CALL Delete(TotSFrc)
 #endif
 ! Do some checksumming and IO 
-!  CALL PPrint(SFrc,'dS/dR')
   CALL PChkSum(SFrc,'dS/dR',Proc_O=Prog)  
 ! Start this off as the first contrib to total gradient 
-  CALL Put(SFrc,'GradE',Tag_O=CurGeom)
-!
-  CALL Put(LatFrc_S,'LatFrc_S',Tag_O=CurGeom)
-  CALL Delete(LatFrc_S)
+  DO AtA=1,NAtoms
+     A1=3*(AtA-1)+1
+     A2=3*AtA
+     GM%Gradients%D(1:3,AtA) = SFrc%D(A1:A2)
+  ENDDO
+  GM%PBC%LatFrc%D = LatFrc_S%D
+  CALL Put(GM,Tag_O=CurGeom)
 !--------------------------------------------------------------------------------
 ! Tidy up 
 !--------------------------------------------------------------------------------
+  CALL Delete(SFrc)
+  CALL Delete(LatFrc_S)
   CALL Delete(P)
   CALL Delete(BS)
   CALL Delete(GM)
-  CALL Delete(SFrc)
   CALL DeleteBraBlok(Gradients_O=.TRUE.)
   CALL ShutDown(Prog)
 !

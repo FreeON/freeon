@@ -253,7 +253,7 @@ MODULE RhoTools
     REAL(DOUBLE),DIMENSION(3) :: Center
 !
 #ifdef PERIODIC
-    Center(:) = GMLoc%PBC%CellCenter(:)
+    Center(:) = GMLoc%PBC%CellCenter%D(:)
 #else
     Center(:) = Half*(GMLoc%BndBox%D(:,2)+GMLoc%BndBox%D(:,1))
 #endif
@@ -777,7 +777,6 @@ MODULE RhoTools
     ENDIF
 !
   END SUBROUTINE ParaIntegrate_HGRho
-
 #endif
 !========================================================================================
 ! Calculate the total Dipole of Rho
@@ -789,12 +788,6 @@ MODULE RhoTools
     REAL(DOUBLE)              :: RX,RY,RZ,R2,Expt
     REAL(DOUBLE),DIMENSION(3) :: Center
     TYPE(CRDS)                :: GMLoc
-!
-!#ifdef PERIODIC
-!    Center(:) = GMLoc%PBC%CellCenter(:)
-!#else
-!    Center(:) = Half*(GMLoc%BndBox%D(:,2)+GMLoc%BndBox%D(:,1))
-!#endif
 !
     MP%DPole%D = Zero
     MP%QPole%D = Zero

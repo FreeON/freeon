@@ -101,23 +101,22 @@ PROGRAM TForce
   ENDIF
   CALL Delete(TotTFrc)
 #endif
-
 ! Do some checksumming, resumming and IO 
-! CALL PPrint(TFrc,'dT/dR')
   CALL PChkSum(TFrc,'dT/dR',Proc_O=Prog)  
 ! Sum in contribution to total force
-  CALL New(Frc,3*NAtoms)
-  CALL Get(Frc,'GradE',Tag_O=CurGeom)
-  Frc%D=Frc%D+TFrc%D
-  CALL Put(Frc,'GradE',Tag_O=CurGeom)
-!
-  CALL Put(LatFrc_T,'LatFrc_T',Tag_O=CurGeom)
-  CALL Delete(LatFrc_T)
+  DO AtA=1,NAtoms
+     A1=3*(AtA-1)+1
+     A2=3*AtA
+     GM%Gradients%D(1:3,AtA) =  GM%Gradients%D(1:3,AtA)+TFrc%D(A1:A2)
+  ENDDO
+  GM%PBC%LatFrc%D = GM%PBC%LatFrc%D+LatFrc_T%D
+  CALL Put(GM,Tag_O=CurGeom)
 !------------------------------------------------------------------------------
 ! Tidy up 
+  CALL Delete(TFrc)
+  CALL Delete(LatFrc_T)
   CALL Delete(P)
   CALL Delete(BS)
   CALL Delete(GM)
-  CALL Delete(TFrc)
   CALL ShutDown(Prog)
 END PROGRAM TForce
