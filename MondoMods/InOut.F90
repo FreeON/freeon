@@ -1337,14 +1337,12 @@ MODULE InOut
 #endif
       END SUBROUTINE Get_ARGMT
 
-  SUBROUTINE Get_HGRho(A,Name,Args,SCFCycle,REst_O)
+  SUBROUTINE Get_HGRho(A,Name,Args,SCFCycle)
     TYPE(HGRho)                      :: A
     TYPE(ARGMT)                      :: Args
     INTEGER                          :: SCFCycle,IOS,I,NExpt,NDist,NCoef
-    REAL(DOUBLE)                     :: Dummy
     CHARACTER(LEN=*)                 :: Name 
     CHARACTER(LEN=DEFAULT_CHR_LEN)   :: FileName
-    LOGICAL,OPTIONAL                 :: REst_O
     LOGICAL                          :: Exists
 !   
     FileName=TrixFile(Name,Args,SCFCycle)
@@ -1358,7 +1356,7 @@ MODULE InOut
 !   Allocate Memory
 !
     READ(UNIT=Seq,Err=100,IOSTAT=IOS) NExpt,NDist,NCoef
-    CALL New_HGRho(A,(/NExpt,NDist,NCoef/),REst_O)
+    CALL New_HGRho(A,(/NExpt,NDist,NCoef/))
 !
 !   Read In the Density
 !
@@ -1370,12 +1368,7 @@ MODULE InOut
     READ(UNIT=Seq,Err=100,IOSTAT=IOS)(A%Qx%D(I)    ,I=1,A%NDist)
     READ(UNIT=Seq,Err=100,IOSTAT=IOS)(A%Qy%D(I)    ,I=1,A%NDist)
     READ(UNIT=Seq,Err=100,IOSTAT=IOS)(A%Qz%D(I)    ,I=1,A%NDist)
-    IF(PRESENT(REst_O)) THEN
-       IF(REst_O) THEN
-          READ(UNIT=Seq,Err=100,IOSTAT=IOS)(A%Est%D(I),I=1,A%NDist)
-       ENDIF
-    ENDIF
-    READ(UNIT=Seq,Err=100,IOSTAT=IOS)(A%Co%D(I) ,I=1,A%NCoef)
+    READ(UNIT=Seq,Err=100,IOSTAT=IOS)(A%Co%D(I)    ,I=1,A%NCoef)
 !
     Close(UNIT=Seq,STATUS='KEEP')
     RETURN
@@ -1384,14 +1377,13 @@ MODULE InOut
 !========================================================================================
 ! Write  the density to disk 
 !========================================================================================
-  SUBROUTINE Put_HGRho(A,Name,Args,SCFCycle,REst_O)
+  SUBROUTINE Put_HGRho(A,Name,Args,SCFCycle)
     TYPE(HGRho)                      :: A
     TYPE(ARGMT)                      :: Args
     INTEGER                          :: I,SCFCycle,IOS
     REAL(DOUBLE)                     :: Dummy
     CHARACTER(LEN=*)                 :: Name 
     CHARACTER(LEN=DEFAULT_CHR_LEN)   :: FileName
-    LOGICAL,OPTIONAL                 :: REst_O
     LOGICAL                          :: Exists
 !   
     FileName=TrixFile(Name,Args,SCFCycle)
@@ -1413,12 +1405,7 @@ MODULE InOut
     WRITE(UNIT=Seq,Err=100,IOSTAT=IOS)(A%Qx%D(I)    ,I=1,A%NDist)
     WRITE(UNIT=Seq,Err=100,IOSTAT=IOS)(A%Qy%D(I)    ,I=1,A%NDist)
     WRITE(UNIT=Seq,Err=100,IOSTAT=IOS)(A%Qz%D(I)    ,I=1,A%NDist)
-    IF(PRESENT(REst_O)) THEN
-       IF(REst_O) THEN
-          WRITE(UNIT=Seq,Err=100,IOSTAT=IOS)(A%Est%D(I),I=1,A%NDist)
-       ENDIF
-    ENDIF
-    WRITE(UNIT=Seq,Err=100,IOSTAT=IOS)(A%Co%D(I) ,I=1,A%NCoef)
+    WRITE(UNIT=Seq,Err=100,IOSTAT=IOS)(A%Co%D(I)    ,I=1,A%NCoef)
 !
     CLOSE(UNIT=Seq,STATUS='KEEP')
     RETURN
