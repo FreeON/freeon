@@ -261,7 +261,7 @@ MODULE McMurchie
             OmegaJ=TwoO*OmegaJ
          ENDDO
       END SUBROUTINE ErrInts
-
+!----------------------------------------------------------------------------------------------------------------
       SUBROUTINE PrintIntegrals(MaxL,Max2L,Max4L,MaxLMN,Max4LMN,BS,GM,pInt,iInt) 
         TYPE(CRDS) :: GM
         TYPE(BSET) :: BS
@@ -530,6 +530,264 @@ SUBROUTINE iPrint(Int,I,J,K,L,Mode,iOut)
 201 FORMAT(' (',I3,',',I3,'|',I3,',',I3,') = ',D22.16)
 301 FORMAT(1x,'Int[[',I3,',',I3,',',I3,',',I3,']] = ',F19.16,'*2^(',I3,');')
 END SUBROUTINE iPrint
+
+!----------------------------------------------------------------------------------------------------------------
+     SUBROUTINE IntegralsC(BS,GM,CS,Integrals) 
+        TYPE(CRDS)     :: GM
+        TYPE(BSET)     :: BS
+        TYPE(CellSet)  :: CS
+        TYPE(DBL_RNK4) :: Integrals
+        INTEGER :: MaxL, Max2L, Max4L, MaxLMN, Max4LMN
+        REAL(DOUBLE), DIMENSION(0:4*BS%NASym)                                        :: AuxR 
+        REAL(DOUBLE), DIMENSION(1:3,0:BS%NASym,0:BS%NASym,0:2*BS%NASym)              :: Eac,Ebd
+        REAL(DOUBLE), DIMENSION(0:4*BS%NASym,0:4*BS%NASym,0:4*BS%NASym,0:4*BS%NASym) :: MDR
+!      
+        INTEGER :: AtA,CFA,PFA,StartLA,StopLA,StrideA
+        INTEGER :: AtB,CFB,PFB,StartLB,StopLB,StrideB
+        INTEGER :: AtC,CFC,PFC,StartLC,StopLC,StrideC
+        INTEGER :: AtD,CFD,PFD,StartLD,StopLD,StrideD
+        INTEGER :: StrideAB,StrideCD
+        INTEGER :: NC1,NC2,NC3,NC4
+
+        INTEGER :: IndexC1,IndexC,IndexA1,IndexA
+        INTEGER :: IndexB1,IndexB,IndexD1,IndexD
+        INTEGER :: IndexK1,IndexK
+        INTEGER :: KC,KA,KB,KD
+        INTEGER :: MaxLA,MaxLC,MaxLB,MaxLD,LTot
+        INTEGER :: LA,MA,NA,LB,MB,NB,LC,NC,MC,LD,MD,ND
+        INTEGER :: I,IK,IA,IB,IC,ID
+        INTEGER :: LMNA,LMNB,LMNC,LMND,LAC,MAC,NAC,LBD,MBD,NBD
+        REAL(DOUBLE) :: Cx,Cy,Cz,Ax,Ay,Az
+        REAL(DOUBLE) :: Bx,By,Bz,Dx,Dy,Dz
+        REAL(DOUBLE) :: Px,Py,Pz,Qx,Qy,Qz
+        REAL(DOUBLE) :: BDx,BDy,BDz,BD2,ACx,ACy,ACz,AC2
+        REAL(DOUBLE) :: CDx,CDy,CDz,CD2,ABx,ABy,ABz,AB2
+        REAL(DOUBLE) :: PAx,PAy,PAz,PCx,PCy,PCz
+        REAL(DOUBLE) :: QBx,QBy,QBz,QDx,QDy,QDz
+        REAL(DOUBLE) :: PQx,PQy,PQz,PQ2
+        REAL(DOUBLE) :: ZetaA,ZetaB,ZetaC,ZetaD,EtaAC,RhoBD
+        REAL(DOUBLE) :: Zac,Zbd,EtaIn,RhoIn,XiBD,XiAC,ExpAC,ExpBD,W,U
+        REAL(DOUBLE) :: CA,CB,CC,CD,CCoAC,CCoBD
+!
+        MaxL    =   BS%NASym
+        Max2L   = 2*BS%NASym
+        Max4L   = 4*BS%NASym
+        MaxLMN  = BS%LMNLen
+        Max4LMN = BS%LMNLen**4
+!
+        WRITE(*,*) CS%CellCarts%D(1,7), CS%CellCarts%D(1,9)
+!
+        Integrals%D(:,:,:,:)=Zero
+        I = 0
+        IndexC1 = 0
+        DO 101  AtC=1,NAtoms
+        DO 1010 NC1=7,7!1,CS%NCells
+           Cx=GM%Carts%D(1,AtC)+CS%CellCarts%D(1,NC1)
+           Cy=GM%Carts%D(2,AtC)+CS%CellCarts%D(2,NC1)
+           Cz=GM%Carts%D(3,AtC)+CS%CellCarts%D(3,NC1)
+           KC=GM%AtTyp%I(AtC)
+           IndexD1=0
+           DO 102  AtD=1,NAtoms
+           DO 1020 NC2 = 9,9!1,CS%NCells
+              Dx=GM%Carts%D(1,AtD)+CS%CellCarts%D(1,NC2)
+              Dy=GM%Carts%D(2,AtD)+CS%CellCarts%D(2,NC2)
+              Dz=GM%Carts%D(3,AtD)+CS%CellCarts%D(3,NC2)
+              KD=GM%AtTyp%I(AtD)
+              CDx=Cx-Dx
+              CDy=Cy-Dy
+              CDz=Cz-Dz
+              CD2=CDx*CDx+CDy*CDy+CDz*CDz
+              IndexK1=0
+              IndexA1=0
+              DO 103 AtA=1,NAtoms
+!              DO 1030 NC3=8,8!1,CS%NCells
+                 Ax=GM%Carts%D(1,AtA)!+CS%CellCarts%D(1,NC3)
+                 Ay=GM%Carts%D(2,AtA)!+CS%CellCarts%D(2,NC3)
+                 Az=GM%Carts%D(3,AtA)!+CS%CellCarts%D(3,NC3)
+                 KA=GM%AtTyp%I(AtA)
+                 ACx=Ax-Cx
+                 ACy=Ay-Cy
+                 ACz=Az-Cz
+                 AC2=ACx*ACx+ACy*ACy+ACz*ACz
+                 IndexB1=0
+                 DO 104  AtB = 1,NAtoms
+!                 DO 1040 NC4=9,9!1,CS%NCells
+                    Bx=GM%Carts%D(1,AtB)!+CS%CellCarts%D(1,NC4)
+                    By=GM%Carts%D(2,AtB)!+CS%CellCarts%D(2,NC4)
+                    Bz=GM%Carts%D(3,AtB)!+CS%CellCarts%D(3,NC4)
+                    KB=GM%AtTyp%I(AtB)
+                    ABx=Ax-Bx
+                    ABy=Ay-By
+                    ABz=Az-Bz
+                    AB2=ABx*ABx+ABy*ABy+ABz*ABz
+                    BDx=Bx-Dx
+                    BDy=By-Dy
+                    BDz=Bz-Dz
+                    BD2=BDx*BDx+BDy*BDy+BDz*BDz
+                    IndexC=IndexC1
+                    DO 201 CFC=1,BS%NCFnc%I(KC)
+                       StartLC=BS%LStrt%I(CFC,KC)
+                       StopLC =BS%LStop%I(CFC,KC)
+                       StrideC=StopLC-StartLC+1
+                       MaxLC=BS%ASymm%I(2,CFC,KC)
+                       IndexD=IndexD1
+                       DO 202 CFD=1,BS%NCFnc%I(KD)
+                          StartLD=BS%LStrt%I(CFD,KD)
+                          StopLD =BS%LStop%I(CFD,KD)
+                          StrideD=StopLD-StartLD+1
+                          MaxLD=BS%ASymm%I(2,CFD,KD)
+                          StrideCD=StrideC*StrideD
+                          IndexK=IndexK1
+                          IndexA=IndexA1
+                          DO 203 CFA=1,BS%NCFnc%I(KA)
+                             StartLA=BS%LStrt%I(CFA,KA)
+                             StopLA =BS%LStop%I(CFA,KA)
+                             StrideA=StopLA-StartLA+1
+                             MaxLA=BS%ASymm%I(2,CFA,KA)
+                             IndexB=IndexB1
+                             DO 204 CFB=1,BS%NCFnc%I(KB)
+                                StartLB=BS%LStrt%I(CFB,KB)
+                                StopLB =BS%LStop%I(CFB,KB)
+                                StrideB=StopLB-StartLB+1
+                                MaxLB=BS%ASymm%I(2,CFB,KB)
+                                StrideAB=StrideA*StrideB
+                                DO 300 PFA=1,BS%NPFnc%I(CFA,KA)
+                                   DO 301 PFC=1,BS%NPFnc%I(CFC,KC)
+                                      ZetaA=BS%Expnt%D(PFA,CFA,KA)
+                                      ZetaC=BS%Expnt%D(PFC,CFC,KC)
+                                      EtaAC=ZetaA+ZetaC
+                                      ZAC  =ZetaA*ZetaC
+                                      EtaIn=1.0D0/EtaAC
+                                      XiAC =ZetaA*ZetaC*EtaIn
+                                      ExpAC=DEXP(-XiAC*AC2)
+                                      Px=(ZetaA*Ax+ZetaC*Cx)*EtaIn
+                                      Py=(ZetaA*Ay+ZetaC*Cy)*EtaIn
+                                      Pz=(ZetaA*Az+ZetaC*Cz)*EtaIn
+                                      PAx=Px-Ax
+                                      PAy=Py-Ay
+                                      PAz=Pz-Az
+                                      PCx=Px-Cx
+                                      PCy=Py-Cy
+                                      PCz=Pz-Cz
+                                      ! Compute McMurchie Davidson E coefficients for HG Primitives
+                                      CALL MD2TRR(BS%NASym,0,MaxLA,MaxLC,EtaAC,Eac,PAx,PCx,PAy,PCy,PAz,PCz)
+                                      ! CALL MD2TRRx(NASym,0,MaxLA,MaxLC,EtaAC,PAx,PCx,PAy,PCy,PAz,PCz,EACx,EACy,EACz)
+                                      DO 400 PFB=1,BS%NPFnc%I(CFB,KB)
+                                         DO 401 PFD=1,BS%NPFnc%I(CFD,KD)
+                                            ZetaB=BS%Expnt%D(PFB,CFB,KB)
+                                            ZetaD=BS%Expnt%D(PFD,CFD,KD)
+                                            RhoBD=ZetaB+ZetaD
+                                            ZBD  =ZetaB*ZetaD
+                                            RhoIn=1.0D0/RhoBD
+                                            XiBD =ZetaB*ZetaD*RhoIn
+                                            ExpBD=DEXP(-XiBD*BD2)
+                                            Qx=(ZetaB*Bx+ZetaD*Dx)*RhoIn
+                                            Qy=(ZetaB*By+ZetaD*Dy)*RhoIn
+                                            Qz=(ZetaB*Bz+ZetaD*Dz)*RhoIn
+                                            QBx=Qx-Bx
+                                            QBy=Qy-By
+                                            QBz=Qz-Bz
+                                            QDx=Qx-Dx
+                                            QDy=Qy-Dy
+                                            QDz=Qz-Dz
+                                            ! Compute McMurchie Davidson E coefficients for HG Primitives
+                                            CALL MD2TRR(BS%NASym,0,MaxLB,MaxLD,RhoBD,Ebd,QBx,QDx,QBy,QDy,QBz,QDz)
+                                            ! CALL MD2TRRx(NASym,0,QBx,QDx,QBy,QDy,QBz,QDz,EBDx,EBDy,EBDz)
+                                            PQx=Px-Qx
+                                            PQy=Py-Qy
+                                            PQz=Pz-Qz
+                                            PQ2=PQx*PQx+PQy*PQy+PQz*PQz
+                                            W=EtaAC*RhoBD/(EtaAC+RhoBD)
+                                            U=34.986836655249725693D0/(EtaAC*RhoBD*DSQRT(EtaAC+RhoBD))
+                                            LTot=MaxLA+MaxLB+MaxLC+MaxLD
+                                            CALL AuxInts(Max4L,LTot,AuxR,W,W*PQ2)
+                                            CALL MD3TRR(Max4L,LTot,MDR,AuxR,U,PQx,PQy,PQz)
+                                            I=0
+                                            IA=IndexA
+                                            DO 500 LMNA=StartLA,StopLA
+                                               IA=IA+1
+                                               LA=BS%LxDex%I(LMNA)
+                                               MA=BS%LyDex%I(LMNA)
+                                               NA=BS%LzDex%I(LMNA)
+                                               CA=BS%CCoef%D(LMNA,PFA,CFA,KA)
+                                               IB=IndexB
+                                               DO 501 LMNB=StartLB,StopLB
+                                                  IB=IB+1
+                                                  LB=BS%LxDex%I(LMNB)
+                                                  MB=BS%LyDex%I(LMNB)
+                                                  NB=BS%LzDex%I(LMNB)
+                                                  CB=BS%CCoef%D(LMNB,PFB,CFB,KB)
+                                                  IC=IndexC
+                                                  DO 502 LMNC=StartLC,StopLC
+                                                     IC=IC+1
+                                                     LC=BS%LxDex%I(LMNC)
+                                                     MC=BS%LyDex%I(LMNC)
+                                                     NC=BS%LzDex%I(LMNC)
+                                                     CC=BS%CCoef%D(LMNC,PFC,CFC,KC)
+                                                     ID=IndexD
+                                                     DO 503 LMND=StartLD,StopLD
+                                                        ID=ID+1
+                                                        LD=BS%LxDex%I(LMND)
+                                                        MD=BS%LyDex%I(LMND)
+                                                        ND=BS%LzDex%I(LMND)
+                                                        CD=BS%CCoef%D(LMND,PFD,CFD,KD)
+                                                        CCoAC=CA*CC*ExpAC
+                                                        CCoBD=CB*CD*ExpBD
+                                                        I=I+1
+                                                        DO LAC=0,LA+LC
+                                                           DO MAC=0,MA+MC
+                                                              DO NAC=0,NA+NC
+                                                                 DO LBD=0,LB+LD
+                                                                    DO MBD=0,MB+MD
+                                                                       DO NBD=0,NB+ND
+                                                                          Integrals%D(AtA,AtC,AtB,AtD)=Integrals%D(AtA,AtC,AtB,AtD)+CCoAC*CCoBD &
+!                                                                          Integrals%D(IA,IB,IC,ID)=Integrals%D(IA,IB,IC,ID)+CCoAC*CCoBD &
+                                                                               *Eac(1,LA,LC,LAC)       &
+                                                                               *Eac(2,MA,MC,MAC)       &
+                                                                               *Eac(3,NA,NC,NAC)       &
+                                                                               *Ebd(1,LB,LD,LBD)       &
+                                                                               *Ebd(2,MB,MD,MBD)       &
+                                                                               *Ebd(3,NB,ND,NBD)       &
+                                                                               *(-1.D0)**(LBD+MBD+NBD)   &
+                                                                               *MDR(LAC+LBD,MAC+MBD,NAC+NBD,0)
+                                                                       ENDDO
+                                                                    ENDDO
+                                                                 ENDDO
+                                                              ENDDO
+                                                           ENDDO
+                                                        ENDDO
+503                                                  CONTINUE
+502                                               CONTINUE
+501                                            CONTINUE
+500                                         CONTINUE
+401                                      CONTINUE
+400                                   CONTINUE
+301                                CONTINUE
+300                             CONTINUE
+                                IndexK=IndexK+StrideAB
+                                IndexB=IndexB+StrideB
+204                          CONTINUE
+                             IndexA=IndexA+StrideA
+203                       CONTINUE
+                          IndexD=IndexD+StrideD
+202                    CONTINUE
+                       IndexC=IndexC+StrideC
+201                 CONTINUE
+1040       CONTINUE
+                    IndexK1=IndexK1+BS%BFKnd%I(KA)*BS%BFKnd%I(KB)
+                    IndexB1=IndexB1+BS%BFKnd%I(KB)
+104              CONTINUE
+1030       CONTINUE
+                 IndexA1=IndexA1+BS%BFKnd%I(KA)
+103           CONTINUE
+1020       CONTINUE
+              IndexD1=IndexD1+BS%BFKnd%I(KD)
+102        CONTINUE
+1010       CONTINUE
+           IndexC1=IndexC1+BS%BFKnd%I(KC)
+101     CONTINUE
+!
+END SUBROUTINE IntegralsC
 
 
 
