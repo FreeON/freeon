@@ -35,7 +35,8 @@ MODULE BlokTrPdJ
                                                    XiAB,ExpAB,CA,CB,CC,Ov,     &
                                                    PAx,PAy,PAz,PBx,PBy,PBz,    &
                                                    MDx,MDxy,MDxyz,Amp2,MaxAmp, &
-                                                   Pab,JNorm,Tau,OmegaMin, PExtent,PStrength
+                                                   Pab,JNorm,Tau,OmegaMin,     &
+                                                   PExtent,PStrength,Ext
        INTEGER                                  :: KA,KB,CFA,CFB,PFA,PFB,AtA,ATB,    &
                                                    IndexA,IndexB,              &
                                                    StartLA,StartLB,            &
@@ -94,7 +95,7 @@ MODULE BlokTrPdJ
                 MaxAmp=SetBraBlok(Prim,BS,Gradients_O=Pair%SameAtom)
 !---------------------------------------------------------------------------------------------
 !               Compute maximal HG extent (for PAC) and Unsold esitmiate (for MAC)
-!               looping over all angular symmetries
+!               Looping over all angular symmetries and Directions
                 DP2=Zero
                 PExtent=Zero
                 IA = IndexA
@@ -108,12 +109,11 @@ MODULE BlokTrPdJ
                       Pab=P(IA,IB)
 !                     Extent (for PAC)
                       DO K=1,3
-                         PExtent=MAX(PExtent,                        &  
-                                      Extent(EllA+EllB+1,Prim%Zeta,  &
-                                             Pab*dHGBra%D(:,IA,IB,K),TauPAC))
+                         Ext = Extent(EllA+EllB+1,Prim%Zeta,Pab*dHGBra%D(:,IA,IB,K),TauPAC)
+                         PExtent=MAX(PExtent,Ext)
 !                        Strength (for MAC)
                          CALL HGToSP(Prim,Pab*dHGBra%D(:,IA,IB,K),SPBraC,SPBraS)
-                         DO L=0,EllA+EllB
+                         DO L=0,EllA+EllB+1
                             PStrength = FudgeFactorial(L,SPEll+1)*UnsoldO(L,SPBraC,SPBraS)
                             DP2       = MAX(DP2,(PStrength/TauMAC)**(Two/DBLE(SPELL+L+2)))
                          ENDDO
@@ -224,7 +224,8 @@ MODULE BlokTrPdJ
        Prim%P=GM%Carts%D(:,At)
        Prim%Zeta=NuclearExpnt
 !      Set the MAC
-       DP2=(GM%AtNum%I(At)/TauMAC)**(Two/DBLE(SPEll+2))
+       DP2=((FudgeFactorial(1,SPEll+1)*GM%AtNum%I(At))/TauMAC)**(Two/DBLE(SPEll+3))
+       DP2=MIN(1.D10,DP2)
 !      Set the PAC
        PExtent=Extent(1,NuclearExpnt,dHGBra%D(:,1,1,1),TauPAC)
 !      Initialize <KET|
