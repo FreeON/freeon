@@ -1,9 +1,11 @@
-<BeginTitle>
-
-  BetaCarotene 
-
-<EndTitle>
 <BeginOptions>
+
+MPIInvoke="mpirun"
+MPIProcessors=8
+MPIProcFlag="-np"
+MPISpatialProc=8
+MPIMachineFlag="--nper"
+MPIMachineFile="2"
 
 Charge=0
 Multiplicity=1
@@ -15,13 +17,6 @@ SCFMethod=(TC2,TC2)
 BasisSets=(STO-2G-SPLIT,3-21G-SPLIT)
 ModelChem=(HF,PBE0)
 Accuracy =(Loose,Good)
-
-MPIInvoke="mpirun"
-MPIProcessors=8
-MPIProcFlag="-np"
-MPISpatialProc=8
-MPIMachineFlag="-machinefile"
-MPIMachineFile="$PBS_NODEFILE"
 
 <EndOptions>
 

@@ -1,28 +1,23 @@
-<BeginTitle>
-
-   Vancomycin
-
-<EndTitle>
-
 <BeginOptions>
+
+MPIInvoke="mpirun"
+MPIProcessors=16
+MPIProcFlag="-np"
+MPISpatialProc=16
+MPIMachineFlag="--nper"
+MPIMachineFile="2"
+
 Charge=0
 Multiplicity=1
 
 DebugAll=(MinDebug,CheckSums)
 
 Guess=SuperPos
-SCFMethod=(TRS4)
+SCFMethod=(TC2)
 BasisSets=(STO-3G-SPLIT)
 ModelChem=(B3LYP/VWN5)
 Accuracy =(Loose)
 SCFConvergence=(DIIS)
-
-MPIInvoke="mpirun"
-MPIProcessors=8
-MPIProcFlag="-np"
-MPISpatialProc=8
-MPIMachineFlag="-machinefile"
-MPIMachineFile="$PBS_NODEFILE"
 
 <EndOptions>
 

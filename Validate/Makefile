@@ -38,40 +38,71 @@ full:	all big
 serial:	small big
 #
 small:
-	MondoSCF Ice.inp           Ice.out           Ice.log   
+	MondoSCF NO+.inp           NO+out            NO+.log
+	MondoSCF H2O.inp           H2O.out           H2O.log
+	MondoSCF AcO-.inp          AcO-.out          AcO-.log
+	MondoSCF PIce.inp          PIce.out          PIce.log
+	MondoSCF IceIh.inp         IceIh.out         IceIh.log
 	MondoSCF Steam.inp         Steam.out         Steam.log   
-	MondoSCF Water.inp         Water.out         Water.log
-	MondoSCF Urea.inp          Urea.out          Urea.log
 	MondoSCF Biotin.inp        Biotin.out        Biotin.log    
 	MondoSCF Graphite.inp      Graphite.out      Graphite.log
 	MondoSCF Peroxide.inp      Peroxide.out      Peroxide.log
 	MondoSCF Histidine.inp     Histidine.out     Histidine.log 
 big:	
+	MondoSCF Quartz.inp       Quartz.out        Quartz.log
+	MondoSCF WaterHexamer.inp WaterHexamer.out  WaterHexamer.log
+	MondoSCF BoronNitride.inp BoronNitride.out  BoronNitride.log
 	MondoSCF Caffiene.inp     Caffiene.out      Caffine.log
 	MondoSCF Diamond.inp      Diamond.out       Diamond.log
 	MondoSCF BetaCarotene.inp BetaCarotene.out  BetaCarotene.log
-	MondoSCF Chlorophyll.inp  Chlorophyll.out;  Chlorophyll.log
-	MondoSCF Vancomycin.inp   Vancomycin.out;   Vancomycin.log
+	MondoSCF Chlorophyll.inp  Chlorophyll.out   Chlorophyll.log
+	MondoSCF Vancomycin.inp   Vancomycin.out    Vancomycin.log
 #
 #       Submit serial validation suite to pbs queing system 
 #
 pbs:
 	chmod u+x sub_pbs
-	./sub_pbs Ice            1
-	./sub_pbs Steam          1
-	./sub_pbs Water          1
-	./sub_pbs Urea           1
-	./sub_pbs Biotin         1
-	./sub_pbs Graphite       1
-	./sub_pbs Peroxide       1
-	./sub_pbs Histidine      1
-	./sub_pbs Caffiene       1
-	./sub_pbs Vancomycin     1
-	./sub_pbs BetaCarotene   1
-	./sub_pbs Diamond        1
-	./sub_pbs Chlorophyll    1
+	./sub_pbs AcO-
+	./sub_pbs BetaCarotene
+	./sub_pbs Biotin
+	./sub_pbs BoronNitride
+	./sub_pbs Caffiene
+	./sub_pbs CH2x-6
+	./sub_pbs Chlorophyll
+	./sub_pbs Diamond
+	./sub_pbs Graphite
+	./sub_pbs H2O
+	./sub_pbs Histidine
+	./sub_pbs IceIh
+	./sub_pbs NH3
+	./sub_pbs NO+
+	./sub_pbs Peroxide
+	./sub_pbs PIce
+	./sub_pbs Quartz
+	./sub_pbs Steam
+	./sub_pbs Vancomycin
+	./sub_pbs WaterHexamer
+
+lfs_pink:
+	chmod u+x sub_lsf_pink
+	./sub_lfs_pink BetaCarotene   8
+	./sub_lfs_pink Biotin         4
+	./sub_lfs_pink BoronNitride   8
+	./sub_lfs_pink Caffiene       4
+	./sub_lfs_pink CH2x-6         8
+	./sub_lfs_pink Chlorophyll    8
+	./sub_lfs_pink Diamond        4
+	./sub_lfs_pink Graphite       4
+	./sub_lfs_pink Histidine      4
+	./sub_lfs_pink IceIh          4
+	./sub_lfs_pink Peroxide       2
+	./sub_lfs_pink PIce           4
+	./sub_lfs_pink Quartz         4
+	./sub_lfs_pink Steam         32
+	./sub_lfs_pink Vancomycin    16
+	./sub_lfs_pink WaterHexamer   4
 #
-release:  purge 
+legacy:	purge 
 	rm -rf BALA-PERIODIC
 	rm -rf MgO-PERIODIC
 #

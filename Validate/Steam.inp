@@ -1,19 +1,25 @@
-<BeginTitle>
-10 Molecule MD Steam, Periodic
-<EndTitle>
+(H2O)_64 steam dynamics (2 MD steps)
 
 <BeginOptions>
 
+MPIInvoke="mpirun"
+MPIProcessors=32
+MPIProcFlag="-np"
+MPISpatialProc=32
+MPIMachineFlag="--nper"
+MPIMachineFile="2"
+
 Charge=0
 Multiplicity=1
+
 DebugAll =(MinDebug,CheckSums)
+
 Guess=SuperPos
 SCFConvergence=(ODA,DIIS)
 SCFMethod=(TRS4,TRS4)
 BasisSets=(STO-2G-SPLIT,STO-3G-SPLIT) 
 ModelChem=(HF,HF)
 Accuracy =(Loose,Good)
-Geometry=InAngstroms 
 
 Grad=(MolecularDynamics)
 InitTemp=100
@@ -25,7 +31,8 @@ MinSCF=5
 MaxSCF=12
 
 PBC=(T,T,T)
-Periodic=(AtomCoords,WrapAtoms)
+Periodic=(AtomCoords)
+
 <EndOptions>
 
 <BeginPeriodic>

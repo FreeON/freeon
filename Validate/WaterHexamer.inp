@@ -1,4 +1,12 @@
 <BeginOptions>
+
+MPIInvoke="mpirun"
+MPIProcessors=4
+MPIProcFlag="-np"
+MPISpatialProc=4
+MPIMachineFlag="--nper"
+MPIMachineFile="2"
+
 Charge=0
 Multiplicity=1
 Guess=SuperPos
@@ -6,13 +14,13 @@ Guess=SuperPos
 OutPut=XYZ
 Grad=(Optimize,PrimInt,NoGDIIS,BiSect,HBondOnly,NoFragmConnect,NonCovBend,NonCovTors)
 
-OverRideSCFConvergence=DIIS
-
 DebugAll=(MaxDebug,CheckSums)
 SCFMethod=(RH)
 BasisSets=(STO-3G-SPLIT)
 ModelChem=(HF)
 Accuracy =(Tight)
+SCFConvergence=(DIIS)
+
 <EndOptions>
 
 <BeginGeometry>  

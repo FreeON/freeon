@@ -1,8 +1,12 @@
-<BeginTitle>
-boron nitride
-<EndTitle>
-
 <BeginOptions>
+
+MPIInvoke="mpirun"
+MPIProcessors=8
+MPIProcFlag="-np"
+MPISpatialProc=8
+MPIMachineFlag="--nper"
+MPIMachineFile="2"
+
 Charge=0
 Multiplicity=1
 
