@@ -26,10 +26,12 @@
 !===============================================================================
 MODULE ENERGY_COVALENT
 
+
 ! . Module declarations.
 #ifdef MMech
 USE DerivedTypes
 USE InOut 
+USE GlobalCharacters, Only: InfFile
 #endif
 USE DEFINITIONS, ONLY : DP
 USE STATUS,      ONLY : ERROR
@@ -45,9 +47,15 @@ PUBLIC :: ENERGY_ANGLE, ENERGY_BOND, ENERGY_DIHEDRAL, ENERGY_IMPROPER
 CONTAINS
 !===============================================================================
 
+#ifdef MMech
    !----------------------------------------------------
    SUBROUTINE ENERGY_ANGLE ( EANGLE, GRADIENT, HESSIAN, InfFile )
    !----------------------------------------------------
+#else         
+   !----------------------------------------------------
+   SUBROUTINE ENERGY_ANGLE ( EANGLE, GRADIENT, HESSIAN )
+   !----------------------------------------------------
+#endif
 
    ! . Scalar arguments.
    REAL ( KIND = DP ), INTENT(OUT) :: EANGLE
@@ -341,9 +349,15 @@ CONTAINS
 
    END SUBROUTINE ENERGY_ANGLE
 
+#ifdef MMech
    !----------------------------------------------------------
    SUBROUTINE ENERGY_BOND ( EBOND, VIRIAL, GRADIENT, HESSIAN, InfFile )
    !----------------------------------------------------------
+#else
+   !----------------------------------------------------------
+   SUBROUTINE ENERGY_BOND ( EBOND, VIRIAL, GRADIENT, HESSIAN )
+   !----------------------------------------------------------
+#endif
 
    ! . Scalar arguments.
    REAL ( KIND = DP ), INTENT(OUT)   :: EBOND
@@ -498,9 +512,15 @@ CONTAINS
 
    END SUBROUTINE ENERGY_BOND
 
+#ifdef MMech
    !-----------------------------------------------------------
    SUBROUTINE ENERGY_DIHEDRAL ( EDIHEDRAL, GRADIENT, HESSIAN, InfFile )
    !-----------------------------------------------------------
+#else
+   !-----------------------------------------------------------
+   SUBROUTINE ENERGY_DIHEDRAL ( EDIHEDRAL, GRADIENT, HESSIAN )
+   !-----------------------------------------------------------
+#endif
 
    ! . Scalar arguments.
    REAL ( KIND = DP ), INTENT(OUT) :: EDIHEDRAL
@@ -532,9 +552,15 @@ CONTAINS
 
    END SUBROUTINE ENERGY_DIHEDRAL
 
+#ifdef MMech
    !-----------------------------------------------------------
    SUBROUTINE ENERGY_IMPROPER ( EIMPROPER, GRADIENT, HESSIAN, InfFile )
    !-----------------------------------------------------------
+#else
+   !-----------------------------------------------------------
+   SUBROUTINE ENERGY_IMPROPER ( EIMPROPER, GRADIENT, HESSIAN )
+   !-----------------------------------------------------------
+#endif
 
    ! . Scalar arguments.
    REAL ( KIND = DP ), INTENT(OUT) :: EIMPROPER
