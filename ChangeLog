@@ -1,3 +1,116 @@
+2002-07-14 09:50  mchalla
+
+	* MondoMods/FastMat.F90: Hopefully fixed SetSRSTSkipPtrs to have a
+	bounded behavior.  Needs checking still...
+
+2002-07-12 20:33  nemeth
+
+	* SCFeqs/: SP2.F90, SP4.F90: T matrix saved into HDF to enable
+	restart.
+
+2002-07-12 20:33  nemeth
+
+	* SCFeqs/PM.F90: T matrix saved into HDF, to enable restart.
+
+2002-07-12 20:32  nemeth
+
+	* SCFeqs/NT4.F90: T matrix saved to HDF to be able to restart.
+	(Previous cheking in disappeared (?))
+
+2002-07-11 14:41  nemeth
+
+	* MondoSCF/DrvSCFs.F90: Modification removes previous *.Rho files
+	from scratch, but keeps the very last one.
+
+2002-07-11 13:24  nemeth
+
+	* Dynamo/dynamo.F90: Modification zeroes 14 charges and 14 LJ
+	eps-s, if the original charge/eps has been zeroed.
+
+2002-07-11 13:22  nemeth
+
+	* MondoSCF/MondoSCF.F90: modifications introduced in the order of
+	calculating QM/MM terms, to ensure restart from HDF and use of
+	multiple basis/accuracy.
+
+2002-07-11 10:40  tymczak
+
+	* SCFeqs/: PM.F90, SP2.F90, SP4.F90: New Version
+
+2002-07-11 10:40  tymczak
+
+	* SCFeqs/NT4.F90: New Version: Does better thresholding and Memory
+
+2002-07-11 10:23  tymczak
+
+	* SCFeqs/DenMatMethods.F90: Fixed the Memory Stuff and Other Issues
+
+2002-07-10 15:35  nemeth
+
+	* SCFeqs/: SP2.F90, SP4.F90, PM.F90: Final density matr. in
+	non-orth. basis is put into hdf now.
+
+2002-07-10 15:34  nemeth
+
+	* SCFeqs/NT4.F90: Final density in non-orth. bas. is saved into hdf
+	now.
+
+2002-07-09 17:48  ckgan
+
+	* OneE/: MakeS.F90, SBlok.F90: #ifdef PARALLEL_DEVELOPMENT stuff
+	are included. Now MakeS uses FastMatrices stuff.
+
+2002-07-09 17:45  ckgan
+
+	* MondoSCF/: DrvSCFs.F90, ParseInput.F90: DrvSCF.F90 -- MPIRun_O =
+	.TRUE. for the HiCu invocation ParseInput.F90 -- "Compliled"
+	changed to "Compiled", trivial spelling
+
+2002-07-09 17:43  ckgan
+
+	* MondoMods/FastMat.F90: module FastMatrices is in this file.
+
+2002-07-09 17:41  ckgan
+
+	* MondoMods/: DerivedTypes.F90, LinAlg.F90, Makefile, MemMan.F90,
+	Order.F90, PrettyPrint.F90, SetEq.F90: DerivedTypes.F90 - remove
+	the definition of FastMatrices LinAlg.F90 - remove useless
+	subroutines with #ifdef PARALLEL_DEVELOPMENT Makefile - added
+	FastMat stuff MemMan.F90  - remove useless subroutines with #ifdef
+	PARALLEL_DEVELOPMENT Order.F90 - RANDOM_INT is changed PrettyPrint
+	- removed a bug, only Root node can print the result.  SetEq.F90 -
+	remove useless subroutines with #ifdef PARALLEL_DEVELOPMENT
+
+2002-07-09 17:36  ckgan
+
+	* HiCu/: HiCu.F90, KxcGen.F90, ParaHiCu.F90: Parallel HiCu uses the
+	module FastMatrices.
+
+2002-07-08 16:14  nemeth
+
+	* IntCoo/IntCoo.F90: NATOMS changed to NatomsMM, not to mess up
+	with global variable; NBOX defined in SORT_INTO_BOX; characters
+	changed from uppercase to lowercase to fit better to general style.
+
+2002-07-08 16:12  nemeth
+
+	* MondoSCF/ParseInput.F90: Restart got a fix for QM and QM/MM
+	cases, tests on BAla are succesful.
+
+2002-07-08 13:41  ckgan
+
+	* HiCu/: CubeTree.F90, HiCu.F90, ParaHiCu.F90, XCForce.F90: A bug
+	(appears when -DPERIODIC is turned on) due to the bounding box is
+	fixed.
+
+2002-07-08 13:37  ckgan
+
+	* MondoMods/BoundingBox.F90: CalCenterAndHalf is added.
+
+2002-07-05 17:09  mchalla
+
+	* ChangeLog: [no log message]
+
 2002-07-05 17:03  mchalla
 
 	* HiCu/CubeTree.F90: Added a new, possibly better MAXSPLIT that
