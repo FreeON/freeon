@@ -245,7 +245,7 @@ CONTAINS
     LOGICAL,OPTIONAL            :: CPSCF_O
     LOGICAL                     :: DoCPSCF,DoDIIS,DoODA,RebuildPostODA
     LOGICAL                     :: ALogic,BLogic,CLogic,DLogic,ELogic,A2Logic, &
-                                   GLogic,QLogic,ILogic,OLogic,RLogic,FLogic
+                                   GLogic,QLogic,ILogic,OLogic,FLogic
     INTEGER                     :: cSCF,cBAS,iGEO,iCLONE
     REAL(DOUBLE)                :: DIISA,DIISB,DDIIS,DIISQ,       &
          DETOT,ETOTA,ETOTB,ETOTQ,ETEST, &
@@ -371,10 +371,10 @@ CONTAINS
        ETest=ETol(O%AccuracyLevels(cBAS))
        DTest=DTol(O%AccuracyLevels(cBAS))
 !*******
-       IF(cSCF<10)THEN
-          ConvergedQ=NOT_CONVERGE!.FALSE.
-          RETURN
-       ENDIF
+!!$       IF(cSCF<10)THEN
+!!$          ConvergedQ=NOT_CONVERGE
+!!$          RETURN
+!!$       ENDIF
 !*******
        ! Accumulate current statistics
        chGEO=IntToChar(iGEO)
@@ -465,16 +465,15 @@ CONTAINS
              IF(PrintFlags%Key==DEBUG_MAXIMUM) THEN
                 CALL OpenASCII(OutFile,Out)
                 WRITE(Out,*)' ETest  = ',ETest
-                WRITE(Out,*)' DTest  = ',DTest
+                WRITE(Out,*)' DTest  = ',DTest 
                 WRITE(Out,*)' ALogic = ',ALogic
-                WRITE(Out,*)' A2Logic = ',A2Logic
+                WRITE(Out,*)' A2Logic= ',A2Logic
                 WRITE(Out,*)' ELogic = ',ELogic
                 WRITE(Out,*)' CLogic = ',CLogic
                 WRITE(Out,*)' DLogic = ',DLogic
                 WRITE(Out,*)' QLogic = ',QLogic
                 WRITE(Out,*)' ILogic = ',ILogic
                 WRITE(Out,*)' GLogic = ',GLogic
-                WRITE(Out,*)' RLogic = ',RLogic
                 WRITE(Out,*)' FLogic = ',FLogic
                 CLOSE(Out)
              ENDIF
