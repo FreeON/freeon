@@ -41,6 +41,7 @@ SUBROUTINE Contract(N,KBra,KKet,NVRR,LngDrv,CDrv,CB,CK,C,U)
     iP  = CDrv(2,L)
     iQ  = CDrv(3,L)
     iU  = CDrv(4,L)
+
     DO I=1,N
       C(I,iC)=0.0D0
     END DO

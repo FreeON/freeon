@@ -1,10 +1,10 @@
-      SUBROUTINE HRRKet(W,BD,N,MLDis,LenB,NumB,IType)
+      SUBROUTINE HRRKet(W,BD,N,SLDis,LenB,NumB,IType)
 c----------------------------------------------------------------------
 c  Input:
 c     W      Contracted (p|q) integrals (from VRR+contraction steps)
 c     BD     Buffer of distances between ket basis functions
 c     N      Number of integrals to compute
-c     MLDis  Buffer of indexes to get the right BD info
+c     SLDis  Buffer of indexes to get the right BD info
 c     LenB   Size of the bra space present
 c     NumB   Number of (bra| locations to loop over
 c     IType  Distribution type on the |Ket)
@@ -18,7 +18,7 @@ c----------------------------------------------------------------------
       IMPLICIT NONE
       INTEGER N,LenB,NumB,IType,NN
       INTEGER I,Ioff
-      INTEGER MLDis(N)
+      INTEGER SLDis(N)
       REAL*8 W(N*LenB,*)
       REAL*8 T(36)
       REAL*8 BD(*),x,y,z
@@ -28,7 +28,7 @@ c----------------------------------------------------------------------
          RETURN
       ELSEIF(IType.EQ.0202) THEN
         DO 1010 I=1,NN
-          Ioff=MLDis(MOD(I-1,N)+1)
+          Ioff=SLDis(MOD(I-1,N)+1)
           x=BD(Ioff  )
           y=BD(Ioff+1)
           z=BD(Ioff+2)
@@ -70,7 +70,7 @@ c----------------------------------------------------------------------
          RETURN
       ELSEIF(IType.EQ.0302) THEN
         DO 1110 I=1,NN
-          Ioff=MLDis(MOD(I-1,N)+1)
+          Ioff=SLDis(MOD(I-1,N)+1)
           x=BD(Ioff  )
           y=BD(Ioff+1)
           z=BD(Ioff+2)
@@ -96,7 +96,7 @@ c----------------------------------------------------------------------
         RETURN
       ELSEIF(IType.EQ.0303) THEN
         DO 1111 I=1,NN
-          Ioff=MLDis(MOD(I-1,N)+1)
+          Ioff=SLDis(MOD(I-1,N)+1)
           x=BD(Ioff  )
           y=BD(Ioff+1)
           z=BD(Ioff+2)
@@ -124,7 +124,7 @@ c----------------------------------------------------------------------
         RETURN
       ELSEIF(IType.EQ.0602) THEN
         DO 2210 I=1,NN
-          Ioff=MLDis(MOD(I-1,N)+1)
+          Ioff=SLDis(MOD(I-1,N)+1)
           x=BD(Ioff  )
           y=BD(Ioff+1)
           z=BD(Ioff+2)
@@ -180,7 +180,7 @@ c----------------------------------------------------------------------
         RETURN
       ELSEIF(IType.EQ.0603) THEN
         DO 2211 I=1,NN
-          Ioff=MLDis(MOD(I-1,N)+1)
+          Ioff=SLDis(MOD(I-1,N)+1)
           x=BD(Ioff  )
           y=BD(Ioff+1)
           z=BD(Ioff+2)
@@ -224,7 +224,7 @@ c----------------------------------------------------------------------
         RETURN
       ELSEIF(IType.EQ.0606) THEN
         DO 2222 I=1,NN
-          Ioff=MLDis(MOD(I-1,N)+1)
+          Ioff=SLDis(MOD(I-1,N)+1)
           x=BD(Ioff  )
           y=BD(Ioff+1)
           z=BD(Ioff+2)

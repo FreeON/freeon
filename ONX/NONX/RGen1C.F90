@@ -34,7 +34,7 @@ SUBROUTINE RGen1C(LDis,iB,Kon,CD,WR,WZ,R,TBufP,TBufC)
     Qz  = TBufP%D(4,I,iB)
     Uq  = TBufP%D(5,I,iB)
     DO J=1,Kon
-      Ind=Ind+1
+      Ind    = Ind+1
       Zeta   = TBufP%D(1,J,iB)
       Px     = TBufP%D(2,J,iB)
       Py     = TBufP%D(3,J,iB)

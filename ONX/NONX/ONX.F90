@@ -1,3 +1,30 @@
+!------------------------------------------------------------------------------
+!--  This code is part of the MondoSCF suite of programs for linear scaling 
+!    electronic structure theory and ab initio molecular dynamics.
+!
+!--  Copyright (c) 2001, the Regents of the University of California.  
+!    This SOFTWARE has been authored by an employee or employees of the 
+!    University of California, operator of the Los Alamos National Laboratory 
+!    under Contract No. W-7405-ENG-36 with the U.S. Department of Energy.  
+!    The U.S. Government has rights to use, reproduce, and distribute this 
+!    SOFTWARE.  The public may copy, distribute, prepare derivative works 
+!    and publicly display this SOFTWARE without charge, provided that this 
+!    Notice and any statement of authorship are reproduced on all copies.  
+!    Neither the Government nor the University makes any warranty, express 
+!    or implied, or assumes any liability or responsibility for the use of 
+!    this SOFTWARE.  If SOFTWARE is modified to produce derivative works, 
+!    such modified SOFTWARE should be clearly marked, so as not to confuse 
+!    it with the version available from LANL.  The return of derivative works
+!    to the primary author for integration and general release is encouraged. 
+!    The first publication realized with the use of MondoSCF shall be
+!    considered a joint work.  Publication of the results will appear
+!    under the joint authorship of the researchers nominated by their
+!    respective institutions. In future publications of work performed
+!    with MondoSCF, the use of the software shall be properly acknowledged,
+!    e.g. in the form "These calculations have been performed using MondoSCF, 
+!    a suite of programs for linear scaling electronic structure theory and
+!    ab initio molecular dynamics", and given appropriate citation.  
+!------------------------------------------------------------------------------
 PROGRAM ONX
   USE DerivedTypes
   USE GlobalScalars
@@ -34,7 +61,7 @@ PROGRAM ONX
   TYPE(ARGMT)         :: Args
   TYPE(DBuf)          :: DB        ! distribution buffers
   TYPE(IBuf)          :: IB        ! 2-e eval buffers
-  TYPE(DML)           :: MB        ! distribution pointers
+  TYPE(DSL)           :: SB        ! distribution pointers
   TYPE(IDrv)          :: Drv       ! VRR/contraction drivers
   TYPE(INT_VECT)      :: NameBuf
   TYPE(INT_RNK2)      :: SubInd
@@ -51,6 +78,7 @@ PROGRAM ONX
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: InFile
   CHARACTER(LEN=5),PARAMETER     :: Prog='PONX'
 !--------------------------------------------------------------------------------
+
   CALL StartUp(Args,Prog)
   InFile=TRIM(SCFName)//'_Cyc'//TRIM(IntToChar(Args%i%i(1)))
   CALL Get(BSc,Tag_O=CurBase)
@@ -71,8 +99,8 @@ PROGRAM ONX
 !--------------------------------------------------------------------------------
   CALL RangeOfDensity(D,NameBuf)
   DO WHILE (ErrorCode/=eAOK) 
-    CALL MemInit(DB,IB,MB,Drv,BSc,BSp)
-    CALL DisOrder(BSc,GMc,BSp,GMp,DB,IB,MB,Drv,NameBuf) 
+    CALL MemInit(DB,IB,SB,Drv,BSc,BSp)
+    CALL DisOrder(BSc,GMc,BSp,GMp,DB,IB,SB,Drv,NameBuf) 
   END DO
 !--------------------------------------------------------------------------------
 ! Allocate space for the exchange matrix. The routines below make sure 
@@ -88,14 +116,14 @@ PROGRAM ONX
 !--------------------------------------------------------------------------------
 ! All set to compute the exchange matrix
 !--------------------------------------------------------------------------------
-  CALL ComputeK(BSc,GMc,BSp,GMp,D,K,DB,IB,MB,Drv)
+  CALL ComputeK(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,Drv,SubInd)
 !--------------------------------------------------------------------------------
 ! Free up some space that we dont need anymore.
 !--------------------------------------------------------------------------------
   CALL Delete(D)
   CALL Delete(DB)
   CALL Delete(IB)
-  CALL Delete(MB)
+  CALL Delete(SB)
   CALL Delete(Drv)
   CALL Delete(SubInd)
 !--------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,MB,Drv,NameBuf)  
+SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,SB,Drv,NameBuf)  
   USE DerivedTypes
   USE GlobalScalars
   USE PrettyPrint
@@ -14,12 +14,15 @@ SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,MB,Drv,NameBuf)
   TYPE(CRDS),INTENT(IN)    :: GMc,GMp   ! geometry info
   TYPE(DBuf)               :: DB        ! ONX distribution buffers
   TYPE(IBuf)               :: IB        ! ONX 2-e eval buffers
-  TYPE(DML)                :: MB        ! ONX distribution pointers
+  TYPE(DSL)                :: SB        ! ONX distribution pointers
   TYPE(IDrv)               :: Drv       ! VRR/contraction drivers
   TYPE(INT_VECT)           :: NameBuf   ! for parallel implementation
 !--------------------------------------------------------------------------------
 ! Misc. internal variables
 !--------------------------------------------------------------------------------
+  TYPE(DBL_RNK3)         :: SchT
+  TYPE(INT_RNK3)         :: BufT
+  TYPE(INT_RNK2)         :: BufN
   REAL(DOUBLE)           :: Test,VSAC
   REAL(DOUBLE)           :: ACx,ACy,ACz,AC2,x,y,z
   REAL(DOUBLE)           :: Zeta,Za,Zc,Cnt,rInt,XiAB
@@ -32,19 +35,23 @@ SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,MB,Drv,NameBuf)
   INTEGER                :: KC,NBFC,MinLC,MaxLC,KType,NKCase,IndexC
   INTEGER                :: CType,II,JJ,IJ
   INTEGER                :: iKonAC,iIKType
-  INTEGER                :: iDis,iPrm
+  INTEGER                :: iDis,iPrm, itmp
   LOGICAL                :: Found
 !--------------------------------------------------------------------------------
 ! Function calls
 !--------------------------------------------------------------------------------
   INTEGER                :: NFinal,iT
 
+  CALL New(BufN,(/DB%MAXT,DB%NPrim*DB%NPrim/))
+  CALL New(BufT,(/DB%MAXD,DB%NTypes,DB%NPrim*DB%NPrim/))
+  CALL New(SchT,(/DB%MAXD,DB%NTypes,DB%NPrim*DB%NPrim/))
+
   DB%LenCC=0
   DB%LenTC=0
   iDis=1
   iPrm=1
   Test=-10.d0*DLOG(Thresholds%Dist) 
-  MB%MLDis%I(1)=5
+  SB%SLDis%I(1)=5
   IndexC=0
   DO AtC=1,NAtoms
 #ifdef PARALLEL
@@ -62,7 +69,7 @@ SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,MB,Drv,NameBuf)
       NKCase=MaxLC-MinLC+1
       StrideC=StopLC-StartLC+1         
 
-      DB%BufN%I=0
+      BufN%I=0
       iBf=1 
       IndexA=0  
 
@@ -94,10 +101,10 @@ SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,MB,Drv,NameBuf)
         II=MAX(IndexA,IndexC)
         JJ=MIN(IndexA,IndexC)
         IJ=II*(II-1)/2+JJ 
-        DB%TBufC%D( 1,iBf)=DFLOAT(IJ)+Small
-        DB%TBufC%D( 2,iBf)=DFLOAT(IndexA)+Small
         IF(IType.GE.KType) THEN
           IKType=IType*100+KType
+          DB%TBufC%D( 1,iBf)=DFLOAT(IJ)+Small
+          DB%TBufC%D( 2,iBf)=DFLOAT(IndexA)+Small
           DB%TBufC%D( 3,iBf)=DFLOAT(IndexA)+Small
           DB%TBufC%D( 4,iBf)=DFLOAT(IndexC)+Small
           DB%TBufC%D( 5,iBf)=ACx
@@ -111,6 +118,8 @@ SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,MB,Drv,NameBuf)
           z=ACz
         ELSE 
           IKType=KType*100+IType
+          DB%TBufC%D( 1,iBf)=DFLOAT(IJ)+Small
+          DB%TBufC%D( 2,iBf)=-DFLOAT(IndexA)-Small
           DB%TBufC%D( 3,iBf)=DFLOAT(IndexC)+Small
           DB%TBufC%D( 4,iBf)=DFLOAT(IndexA)+Small
           DB%TBufC%D( 5,iBf)=-ACx
@@ -142,8 +151,8 @@ SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,MB,Drv,NameBuf)
             DB%TBufP%D(5,I0,iBf)=VSAC
             IF (CType.EQ.11) THEN
               DB%TBufP%D(6,I0,iBf)=1.0D0
-              DB%TBufP%D(7,I0,iBf)=1.0D0
-              DB%TBufP%D(8,I0,iBf)=1.0D0
+              DB%TBufP%D(7,I0,iBf)=2.0D0
+              DB%TBufP%D(8,I0,iBf)=3.0D0
             ELSEIF (CType.EQ.12.OR.CType.EQ.21) THEN
               DB%TBufP%D(6,I0,iBf)=BSc%CCoef%D(StartLA,PFA,CFA,KA) * &
                                    BSp%CCoef%D(StartLC,PFC,CFC,KC) / Cnt
@@ -179,20 +188,23 @@ SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,MB,Drv,NameBuf)
 
           IF (KonAC*KonAC*NVRR>IB%MAXI.OR.NInts>IB%MAXI) THEN
             ErrorCode=eMAXI
-            RETURN
+            GOTO 9000
           ENDIF
 
-          CALL RGen1C(2*LDis,iBf,KonAC,IB%CD%D(1,1),IB%WR,IB%WZ, &
-                      IB%W1%D(1),DB%TBufP,DB%TBufC)
+          CALL RGen1C(2*LDis,iBf,KonAC,IB%CB%D,IB%WR,IB%WZ, &
+                      IB%W1%D,DB%TBufP,DB%TBufC)
           CALL VRRs(LDis,LDis,Drv)
+
           CALL VRRl(KonAC*KonAC,NVRR,Drv%nr,Drv%ns,Drv%VLOC%I(Drv%is),  &
                     Drv%VLOC%I(Drv%is+Drv%nr),                          &
-                    IB%W2%D(1),IB%W1%D(1),IB%WR%D(1,1),IB%WZ%D(1,1))
+                    IB%W2%D,IB%W1%D,IB%WR%D,IB%WZ%D)
+
           CALL Contract(1,KonAC,KonAC,NVRR,iCL,Drv%CDrv%I(iCP+1), &
-                        IB%CD%D(1,1),IB%CD%D(1,1),IB%W1%D(1),IB%W2%D(1))
+                        IB%CB%D,IB%CB%D,IB%W1%D,IB%W2%D)
+
           IF(LDis.NE.0) THEN
-            CALL HRRKet(IB%W1%D(1),DB%TBufC%D(1,iBf),1,MB%MLDis%I(1),NLOCD2,DB%MAXC,IKType)
-            CALL HRRBra(IB%W1%D(1),IB%W2%D(1),x,y,z,1,NLOCD2,NLOCD3,NLOCD3,IKType)
+            CALL HRRKet(IB%W1%D,DB%TBufC%D(1,iBf),1,SB%SLDis%I,NLOCD2,NLOCD2,IKType)
+            CALL HRRBra(IB%W1%D,IB%W2%D,x,y,z,1,NLOCD2,NLOCD3,NLOCD3,IKType)
             rInt = DSQRT(GetAbsMax(NInts,IB%W2))
           ELSE
             rInt = DSQRT(GetAbsMax(NInts,IB%W1))
@@ -201,11 +213,7 @@ SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,MB,Drv,NameBuf)
           write(*,*) "NONX: rInt = ",rint
 
           IF(rInt>Thresholds%Dist) THEN 
-            iBf=iBf+1
-            IF (iBf>DB%MAXD) THEN
-              ErrorCode=eMAXD
-              RETURN
-            ENDIF
+            DB%TBufC%D(11,iBf)=rInt
             Found=.FALSE.
             DO I=1,DB%LenCC       ! look for the contraction type
               IF (KonAC==DB%CCode%I(I)) THEN
@@ -217,9 +225,9 @@ SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,MB,Drv,NameBuf)
             IF (.NOT.Found) THEN  ! if not found make a new CC type
               DB%LenCC=DB%LenCC+1
               iKonAC=DB%LenCC
-              IF (DB%LenCC>DB%MAXC) THEN
-                ErrorCode=eMAXC
-                RETURN
+              IF (DB%LenCC>DB%MAXK) THEN
+                ErrorCode=eMAXK
+                GOTO 9000
               END IF
               DB%CCode%I(DB%LenCC)=KonAC
             END IF
@@ -236,18 +244,23 @@ SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,MB,Drv,NameBuf)
               iIKType=DB%LenTC
               IF (DB%LenTC.GT.DB%MAXT) THEN
                 ErrorCode=eMAXT
-                RETURN
+                GOTO 9000
               END IF
               DB%TCode%I(DB%LenTC)=IKType
             END IF
-            N=DB%BufN%I(iIKType,iKonAC)+1
+            N=BufN%I(iIKType,iKonAC)+1
             IF (N>DB%MAXD) THEN
               ErrorCode=eMAXD
-              RETURN
+              GOTO 9000
             END IF
-            DB%BufN%I(iIKType,iKonAC)=N
-            DB%BufT%I(N,iIKType,iKonAC)=iBf-1
-            DB%SchT%D(N,iIKType,iKonAC)=rInt
+            BufN%I(iIKType,iKonAC)=N
+            BufT%I(N,iIKType,iKonAC)=iBf
+            SchT%D(N,iIKType,iKonAC)=rInt
+            iBf=iBf+1
+            IF (iBf>DB%MAXD) THEN
+              ErrorCode=eMAXD
+              GOTO 9000
+            ENDIF
           END IF ! rInt
         END IF ! I0
       END DO ! CFA
@@ -256,19 +269,19 @@ SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,MB,Drv,NameBuf)
 
   DO I=1,DB%LenCC
     DO J=1,DB%LenTC
-      N=DB%BufN%I(J,I)
+      N=BufN%I(J,I)
       IF (N>0) THEN
         DB%TCPop%I(J,I)=1
         IF (iDis+N*DB%MAXC>DB%MAXDis) THEN
           ErrorCode=eMAXDis
-          RETURN
+          GOTO 9000
         END IF
         IF (iPrm+N*(KonAC+MInfo)*DB%MAXP>DB%MAXPrm) THEN
           ErrorCode=eMAXPrm
-          RETURN
+          GOTO 9000
         END IF
-        CALL QuickSortDis(DB%SchT%D(1,J,I),DB%BufT%I(1,J,I),N,-2)
-        CALL PutDis(N,iDis,iPrm,I,J,IndexC,KonAC,DB)
+        CALL QuickSortDis(SchT%D(1,J,I),BufT%I(1,J,I),N,-2)
+        CALL PutDis(N,iDis,iPrm,I,J,IndexC,KonAC,BufT,DB)
       END IF
     END DO
   END DO
@@ -278,7 +291,11 @@ SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,MB,Drv,NameBuf)
   END IF
 #endif
   END DO ! Atc
-
   ErrorCode=eAOK
+  9000 CONTINUE
+  CALL Delete(BufN)
+  CALL Delete(BufT)
+  CALL Delete(SchT)
+
 END SUBROUTINE DisOrder
  
