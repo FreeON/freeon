@@ -60,7 +60,7 @@ ReleaseFiles=BlokAInv.x LowdinO.x RHeqs.x    \
              DenMatMethods.x 
 
 #
-all:	ODA MIX RStat DDIIS FBuild TC2Response Blk Lwd RHEq SP2 TS4 Stat Gues DIIS  
+all:	ODA RStat DDIIS FBuild TC2Response Blk Lwd RHEq SP2 TS4 Stat Gues DIIS  
 #
 release:clean $(ReleaseFiles)
 #

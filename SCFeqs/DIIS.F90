@@ -50,7 +50,7 @@ PROGRAM DIIS
   !  Dont allow damping above 0.5, as this is silly (DIIS would certainly work better)
   Damp=MIN(Damp,5D-1)
   !  Max number of equations to keep in DIIS 
-  IF(.NOT.OptIntQ(Inp,'DIISDimension',BMax))BMax=20
+  IF(.NOT.OptIntQ(Inp,'DIISDimension',BMax))BMax=5
   CLOSE(Inp)
   !  Allocations
   CALL New(P)
@@ -77,8 +77,8 @@ PROGRAM DIIS
   !  Build the B matrix if on second SCF cycle (starting from 0)
   !  and if pure damping flag is not on (DIISDimension=0)
   IF(DoDIIS==1)THEN
-     N=MIN(ISCF+1,BMax+1)
-     M=MAX(1,ISCF-BMax+1)
+     N=MIN(ISCF,BMax)
+     M=MAX(2,ISCF-BMax+1)
      CALL New(B,(/N,N/))
      ! Pulays most excellent B matrix
      I0=M-ISCF
