@@ -44,10 +44,6 @@ MODULE ParseInPut
          CALL ParseCmndLine(Ctrl) 
          CALL OpenHDF(InfFile)
 !
-! Read in the accuracies requested
-!
-         Call ParseAcc(Ctrl)
-!
 #ifdef MMech
          CALL ParseMech(Ctrl)
          Call InitMMech()
@@ -60,6 +56,14 @@ MODULE ParseInPut
          CALL ParseGeometry(Ctrl)  
          ! Read in the basis sets
          CALL ParseBaseSets(Ctrl) 
+#ifdef MMech
+         ENDIF               
+#endif
+         ! Read Accuracy levels
+         Call ParseAcc(Ctrl)
+#ifdef MMech
+         If(HasQM()) Then
+#endif
          ! Read in the SCF options
          CALL ParseMethods(Ctrl)
          ! Print Parsed options 
@@ -75,6 +79,7 @@ MODULE ParseInPut
 #endif
 !
          CALL ParseThresholds(Ctrl)
+!
 !
       CALL CloseHDF()
 !
@@ -593,7 +598,7 @@ MODULE ParseInPut
 !        Parse <OPTIONS> for <TOT_Charge> and <MULTIPLICITY>  
 !
          IF(.NOT.OptIntQ(Inp,TOTAL_Charge,QMCharge)) THEN
-            CALL MondoHalt(PRSE_ERROR,TOTAL_Charge//' Not found in inPut.')
+            CALL MondoHalt(PRSE_ERROR,TOTAL_Charge//' Not found in input.')
          ELSE
             GM%TotCh=DBLE(QMCharge)
          ENDIF
@@ -2734,11 +2739,11 @@ END SUBROUTINE ParsePeriodic
             DO ILoc=1,NLoc; Ctrl%AccL(Loc(ILoc))=4; ENDDO
          ENDIF
 #ifdef MMech
-         IF(HasQM()) THEN
+        IF(HasQM()) THEN
 #endif        
-           IF(NOpts>1.AND.NOpts/=Ctrl%NSet) &
-              CALL MondoHalt(PRSE_ERROR,'Number of '//ACCURACY_OPTION &
-                           //' options does not match number of Basis sets.')
+          IF(NOpts>1.AND.NOpts/=Ctrl%NSet) &
+             CALL MondoHalt(PRSE_ERROR,'Number of '//ACCURACY_OPTION &
+                          //' options does not match number of Basis sets.')
 #ifdef MMech
          ENDIF
 #endif        
