@@ -53,26 +53,22 @@ CONTAINS
                 ZetaA = BS%Expnt%D(PFA,CFA,KA)
                 ZetaB = BS%Expnt%D(PFB,CFB,KB)
                 ZetaAB= ZetaA+ZetaB 
-                XiAB  = ZetaA*ZetaB/ZetaAB
-                IF(TestPrimPair(XiAB,Pair%AB2))THEN
-                   ExpAB = EXP(-XiAB*AB2)
 !
-!                  Determine the Exponent Index
+!               Determine the Exponent Index
 !
-                   Endex=0
-                   DO IE=1,Rho%NExpt
-                      IF(ABS(ZetaAB-Rho%Expt%D(IE))<1.0D-8) THEN
-                         Endex = IE
-                         EXIT
-                      ENDIF
-                   ENDDO
-                   IF(Endex == 0) THEN
-                      CALL MondoHalt(-100,' Problem in PrimCount, No Exponent found ') 
-                   ELSE
-                      Rho%NQ%I(Endex) = Rho%NQ%I(Endex) + 1
+                Endex=0
+                DO IE=1,Rho%NExpt
+                   IF(ABS(ZetaAB-Rho%Expt%D(IE))<1.D-8) THEN
+                      Endex = IE
+                      EXIT
                    ENDIF
-!
+                ENDDO
+                IF(Endex == 0) THEN
+                   CALL MondoHalt(-100,' Problem in PrimCount, No Exponent found ') 
+                ELSE
+                   Rho%NQ%I(Endex) = Rho%NQ%I(Endex) + 1
                 ENDIF
+!
              ENDDO
           ENDDO
        ENDDO
@@ -127,138 +123,83 @@ CONTAINS
     Prim%AB2=Pair%AB2
     Prim%KA=Pair%KA
     Prim%KB=Pair%KB
-!----------------------------------
 !
     DD = VectToBlock(NBFA,NBFB,Dmat)
-! 
-    DO CFA=1,BS%NCFnc%I(KA)                          ! Loop over contracted function A 
+    DO CFA=1,BS%NCFnc%I(KA)       
        IndexA  = CFBlokDex(BS,CFA,KA)
        StartLA = BS%LStrt%I(CFA,KA)        
        StopLA  = BS%LStop%I(CFA,KA)
        MaxLA   = BS%ASymm%I(2,CFA,KA)
-       DO CFB=1,BS%NCFnc%I(KB)                       ! Loop over contracted function B
+       DO CFB=1,BS%NCFnc%I(KB)                       
           IndexB  = CFBlokDex(BS,CFB,KB)
           StartLB = BS%LStrt%I(CFB,KB)
           StopLB  = BS%LStop%I(CFB,KB)
           MaxLB   = BS%ASymm%I(2,CFB,KB)
-!----------------------------------
           Prim%CFA=CFA
           Prim%CFB=CFB
           Prim%Ell=MaxLA+MaxLB
-!----------------------------------
-          DO PFA=1,BS%NPFnc%I(CFA,KA)                ! Loops over primitives in CFA and CFB
-!----------------------------------
+          DO PFA=1,BS%NPFnc%I(CFA,KA)                ! 
              Prim%PFA=PFA 
-!----------------------------------
-             DO PFB=1,BS%NPFnc%I(CFB,KB)             ! Loops over primitives in CFB
-!----------------------------------
+             DO PFB=1,BS%NPFnc%I(CFB,KB)           
                 Prim%ZA=BS%Expnt%D(PFA,CFA,KA)
                 Prim%ZB=BS%Expnt%D(PFB,CFB,KB)
                 Prim%Zeta=Prim%ZA+Prim%ZB
                 Prim%Xi=Prim%ZA*Prim%ZB/Prim%Zeta
-                IF(TestPrimPair(Prim%Xi,Prim%AB2))THEN
-                   Prim%PFB=PFB
-!----------------------------------
+                Prim%PFB=PFB
+!--------------------------------------------------------------
 !               Set primitive values
 !               Primitive coefficients in a HG representation
-!--------------------------------------------------
-                   MaxAmp=SetBraBlok(Prim,BS)
-                   Endex = 0
-                   DO IE=1,Rho%NExpt-1
-                      IF(ABS(Prim%Zeta-Rho%Expt%D(IE))<1.0D-8) THEN
-                         Endex = IE
-                         GOTO 100
-                      ENDIF
-                   ENDDO
-100                CONTINUE
-                   IF(Endex .EQ. 0) THEN
-                      CALL MondoHalt(-100,' Problem in RhoBlok, No Exponent found ') 
+!--------------------------------------------------------------
+                MaxAmp=SetBraBlok(Prim,BS)
+                Endex = 0
+                DO IE=1,Rho%NExpt-1
+                   IF(ABS(Prim%Zeta-Rho%Expt%D(IE))<1.0D-8) THEN
+                      Endex = IE
+                      GOTO 100
                    ENDIF
+                ENDDO
+100             CONTINUE
+                IF(Endex .EQ. 0) THEN
+                   CALL MondoHalt(-100,' Problem in RhoBlok, No Exponent found ') 
+                ENDIF
 !
-                   Qndex  = OffQ%I(Endex)+1
-                   Rndex  = OffR%I(Endex)
-                   LenKet = LHGTF(Rho%Lndx%I(Endex))
+                Qndex  = OffQ%I(Endex)+1
+                Rndex  = OffR%I(Endex)
+                LenKet = LHGTF(Rho%Lndx%I(Endex))
 !
-                   OffQ%I(Endex) = OffQ%I(Endex) + 1 
-                   OffR%I(Endex) = OffR%I(Endex) + LenKet
+                OffQ%I(Endex) = OffQ%I(Endex) + 1 
+                OffR%I(Endex) = OffR%I(Endex) + LenKet
 !
-!                  Store the position of the distribution
+!               Store the position of the distribution
 !
-                   Rho%Qx%D(Qndex)=Prim%P(1)
-                   Rho%Qy%D(Qndex)=Prim%P(2)
-                   Rho%Qz%D(Qndex)=Prim%P(3)
+                Rho%Qx%D(Qndex)=Prim%P(1)
+                Rho%Qy%D(Qndex)=Prim%P(2)
+                Rho%Qz%D(Qndex)=Prim%P(3)
 !
-!                  Calculate and Store the Coefficients of the Distribution
+!               Calculate and Store the Coefficients of the Distribution
 !
-                   IA=IndexA
-                   DO LMNA=StartLA,StopLA
-                      IA=IA+1
-                      IB=IndexB
-                      LA=BS%LxDex%I(LMNA)
-                      MA=BS%LyDex%I(LMNA)
-                      NA=BS%LzDex%I(LMNA)
-                      DO LMNB=StartLB,StopLB
-                         IB=IB+1
-                         LB=BS%LxDex%I(LMNB)
-                         MB=BS%LyDex%I(LMNB)
-                         NB=BS%LzDex%I(LMNB)
-
-
-!WRITE(66,22)AtA,AtB,BS%CCoef%D(LMNA,PFA,CFA,KA),BS%CCoef%D(LMNB,PFB,CFB,KB),Prim%ZA,Prim%ZB,Prim%A,Prim%B
-!22 FORMAT('test3[',I3,',',I3,']={ca->',F10.7,',cb->',F10.7,               &
-!                       ',za->',F10.7,',zb->',F10.7,               &
-!                       ',ax->',F10.7,',ay->',F10.7,',az->',F10.7, &
-!                       ',bx->',F10.7,',by->',F10.7,',bz->',F10.7,'}; \n')
-
-
-                         DO LMN=1,LHGTF(LA+MA+NA+LB+MB+NB)
-                            Rho%Co%D(Rndex+LMN)=Rho%Co%D(Rndex+LMN)+HGBra%D(LMN,IA,IB)*DD(IA,IB)
-                         ENDDO
+                IA=IndexA
+                DO LMNA=StartLA,StopLA
+                   IA=IA+1
+                   IB=IndexB
+                   LA=BS%LxDex%I(LMNA)
+                   MA=BS%LyDex%I(LMNA)
+                   NA=BS%LzDex%I(LMNA)
+                   DO LMNB=StartLB,StopLB
+                      IB=IB+1
+                      LB=BS%LxDex%I(LMNB)
+                      MB=BS%LyDex%I(LMNB)
+                      NB=BS%LzDex%I(LMNB)
+                      DO LMN=1,LHGTF(LA+MA+NA+LB+MB+NB)
+                         Rho%Co%D(Rndex+LMN)=Rho%Co%D(Rndex+LMN)+HGBra%D(LMN,IA,IB)*DD(IA,IB)
                       ENDDO
                    ENDDO
-                ENDIF
+                ENDDO
              ENDDO
           ENDDO
        ENDDO
     ENDDO
   END SUBROUTINE RhoBlk
-!
-  SUBROUTINE Integrate_HGRho(Rho)
-    TYPE(HGRho)                      :: Rho
-    INTEGER                          :: zq,iq,oq,or,NQ,jadd,Ell,LenKet
-    REAL(DOUBLE)                     :: RhoSumE,RhoSumN,Dex
-!
-    RhoSumE = Zero
-    DO zq = 1,Rho%NExpt-1
-       Dex    = Rho%Expt%D(zq)
-       NQ     = Rho%NQ%I(zq)
-       oq     = Rho%OffQ%I(zq)
-       or     = Rho%OffR%I(zq)
-       Ell    = Rho%Lndx%I(zq) 
-       LenKet = LHGTF(Ell)
-       DO iq = 1,NQ
-          jadd = or+(iq-1)*LenKet
-          RhoSumE = RhoSumE + Rho%Co%D(jadd+1)*((Pi/Dex)**ThreeHalves)
-       ENDDO
-    ENDDO
-!
-    RhoSumN = Zero
-    zq     = Rho%NExpt
-    Dex    = Rho%Expt%D(zq)
-    NQ     = Rho%NQ%I(zq)
-    oq     = Rho%OffQ%I(zq)
-    or     = Rho%OffR%I(zq)
-    Ell    = Rho%Lndx%I(zq) 
-    LenKet = LHGTF(Ell)
-    DO iq = 1,NQ
-       jadd = or+(iq-1)*LenKet
-       RhoSumN = RhoSumN + Rho%Co%D(jadd+1)*((Pi/Dex)**ThreeHalves)
-    ENDDO
-!
-    WRITE(*,*) ' Int[Rho_E] = ',RhoSumE
-    WRITE(*,*) ' Int[Rho_N] = ',RhoSumN   
-    WRITE(*,*) ' Int[Rho_T] = ',RhoSumN+RhoSumE
-  END SUBROUTINE Integrate_HGRho
 !--------------------------------------------------------------
 ! Calculate the Number of Distributions from NQ
 !--------------------------------------------------------------
