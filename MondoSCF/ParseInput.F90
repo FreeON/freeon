@@ -444,11 +444,11 @@ MODULE ParseInput
 !==================================================================================
       SUBROUTINE ParseGeometry(Ctrl)
          TYPE(SCFControls),INTENT(INOUT) :: Ctrl
-         TYPE(CRDS)                     :: GM
-         INTEGER                        :: I,J,K,NKind,NUnPEl
-         LOGICAL                        :: ReOrder,HilbertOrder
-         CHARACTER(LEN=2)               :: At
-         CHARACTER(LEN=DEFAULT_CHR_LEN) :: Line
+         TYPE(CRDS)                      :: GM
+         INTEGER                         :: I,J,K,NKind,NUnPEl
+         LOGICAL                         :: ReOrder,HilbertOrder
+         CHARACTER(LEN=2)                :: At
+         CHARACTER(LEN=DEFAULT_CHR_LEN)  :: Line
 !----------------------------------------------
 !        Open infofile
 !
@@ -458,7 +458,7 @@ MODULE ParseInput
 !
          CALL OpenASCII(InpFile,Inp)
 !-------------------------------------------------
-!        Parse <OPTIONS> for <GEOMETRY> keys
+!        Parse <OPTIONS> for <GEOMETRY> keys 
 !
          GM%InAU=OptKeyQ(Inp,GEOMETRY,IN_AU)
          IF(OptKeyQ(Inp,GEOMETRY,NO_ORDER))THEN
@@ -506,7 +506,7 @@ MODULE ParseInput
             Ctrl%ForceAction='Force'
          ELSE
             Ctrl%ForceAction='Off'
-         ENDIF   
+         ENDIF 
 #ifdef PERIODIC
 !-------------------------------------------------
 !        Parse <OPTIONS> for <PERIODIC> keys
@@ -561,7 +561,7 @@ MODULE ParseInput
             GM%AtomW=.FALSE.
          ELSE
             CALL OpenASCII(OutFile,Out)
-            WRITE(*,*) '** Atom-Wrap at default value => (AtomWrap-On) **'
+            WRITE(Out,*) '** Atom-Wrap at default value => (AtomWrap-On) **'
             CLOSE(UNIT=Out,STATUS='KEEP')
             GM%AtomW=.TRUE.
          ENDIF
@@ -604,7 +604,7 @@ MODULE ParseInput
          ENDIF
 !
          CLOSE(UNIT=Inp,STATUS='KEEP')
-!
+!  
       END SUBROUTINE ParseGeometry
 !
 !
@@ -615,7 +615,6 @@ MODULE ParseInput
          TYPE(INT_VECT)                  :: Kinds
          REAL(DOUBLE)                    :: R,Rx,Ry,Rz
          REAL(DOUBLE),DIMENSION(3)       :: Carts,Vects
-         REAL(DOUBLE),DIMENSION(6)       :: CartsVects
          INTEGER                         :: I,J,K
          CHARACTER(LEN=2)                :: At
          CHARACTER(LEN=DEFAULT_CHR_LEN)  :: Line
@@ -667,11 +666,14 @@ MODULE ParseInput
 #ifdef PERIODIC
                   IF(GM%InAtomCrd) THEN
                      GM%Carts%D(:,NAtoms)=Carts(:)
+                     GM%Vects%D(:,NAtoms)=Zero
                   ELSE
                      GM%BoxCarts%D(:,NAtoms)=Carts(:) 
+                     GM%BoxVects%D(:,NAtoms)=Zero
                   ENDIF
 #else
                   GM%Carts%D(:,NAtoms)=Carts(:) 
+                  GM%Vects%D(:,NAtoms)=Zero
 #endif
                   DO J=1,104
                      IF(At==Ats(J))THEN
@@ -694,7 +696,7 @@ MODULE ParseInput
                      GM%Carts%D    = GM%Carts%D*AngstromsToAU
                   ENDIF
                   CALL CalFracCarts(GM)
-               ELSE
+               ELSE                  
                   CALL CalAtomCarts(GM)
                ENDIF
                IF(GM%NoTransVec) THEN
@@ -730,11 +732,7 @@ MODULE ParseInput
                   CALL MondoHalt(PRSE_ERROR,'Only the initial Geometry should be supplied')
                ENDIF
                NAtoms=NAtoms+1
-               CALL LineToGeom(Line,At,CartsVects)
-               DO I=1,3
-                  Carts(I) = CartsVects(I)
-                  Vects(I) = CartsVects(I+3)
-               ENDDO
+               CALL LineToGeom(Line,At,Carts,Vects)
 #ifdef PERIODIC
                IF(GM%InAtomCrd) THEN
                   GM%Carts%D(:,NAtoms)=Carts(:)
@@ -1224,7 +1222,7 @@ MODULE ParseInput
 !
 !===================================================================================
       SUBROUTINE  CalFracCarts(GM)
-         TYPE(CRDS)     :: GM
+         TYPE(CRDS)                 :: GM
          INTEGER                    :: I
 !
 !        Generate the Fractioanl Coordinates
