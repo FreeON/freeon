@@ -37,7 +37,7 @@ MODULE ShellPairStruct
      INTEGER :: IntType
      INTEGER :: L
      TYPE(SmallAtomInfo) :: AtmInfo
-     REAL(DOUBLE), DIMENSION(7,3000) :: Cst
+     REAL(DOUBLE), DIMENSION(7,100) :: Cst
   END TYPE ShellPair
 
   TYPE AtomPr
