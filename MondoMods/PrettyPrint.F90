@@ -509,7 +509,7 @@ MODULE PrettyPrint
 !
                  AA=One/AngstromsToAU
                  DO I=1,GM%NAtms
-                     Mssg=Ats(GM%AtNum%D(I))                         &
+                     Mssg=Ats(INT(GM%AtNum%D(I)))                         &  !!!! correct only for integer charged QM atoms
                        //'   '//FltToChar(GM%Carts%D(1,I)*AA)    &
                        //'   '//FltToChar(GM%Carts%D(2,I)*AA)    &
                        //'   '//FltToChar(GM%Carts%D(3,I)*AA) 
@@ -529,7 +529,7 @@ MODULE PrettyPrint
                  ENDIF
 #endif                 
                  DO I=1,GM%NAtms
-                    WRITE(PU,44)I,Ats(GM%AtNum%D(I)),'UNK',1,(GM%Carts%D(K,I)*AA,K=1,3),One,Zero
+                    WRITE(PU,44)I,Ats(INT(GM%AtNum%D(I))),'UNK',1,(GM%Carts%D(K,I)*AA,K=1,3),One,Zero !!!! correct only for integer charged QM atoms
                  44 FORMAT('ATOM  ',I5,1X,A4,A4,2X,I4,4X,3F8.3,2F6.2)
                  ENDDO
                  WRITE(PU,55)
@@ -574,7 +574,7 @@ MODULE PrettyPrint
               CALL Print_PBCInfo(GM%PBC,FileName_O,Unit_O)
               PU=OpenPU(FileName_O=FileName_O,Unit_O=Unit_O)
               DO I=1,GM%NAtms
-                  Mssg=TRIM(IntToChar(I))//'   '//Ats(GM%AtNum%D(I)) &
+                  Mssg=TRIM(IntToChar(I))//'   '//Ats(INT(GM%AtNum%D(I))) &  !!!! correct only for integer charged QM atoms
                     //'   '//DblToMedmChar(GM%Carts%D(1,I))          &
                     //'   '//DblToMedmChar(GM%Carts%D(2,I))          &
                     //'   '//DblToMedmChar(GM%Carts%D(3,I))           
@@ -585,7 +585,7 @@ MODULE PrettyPrint
               ENDDO
 #else
               DO I=1,GM%NAtms
-                  Mssg=TRIM(IntToChar(I))//'   '//Ats(GM%AtNum%D(I)) &
+                  Mssg=TRIM(IntToChar(I))//'   '//Ats(INT(GM%AtNum%D(I))) &   !!!! correct only for integer charged QM atoms
                     //'   '//DblToMedmChar(GM%Carts%D(1,I))          &
                     //'   '//DblToMedmChar(GM%Carts%D(2,I))          &
                     //'   '//DblToMedmChar(GM%Carts%D(3,I))          
