@@ -32,6 +32,7 @@ PROGRAM MondoSCF
   CASE(GRAD_DO_DYNAMICS)
      CALL SinglePoints(C)
      CALL DoForce(C) 
+!    CALL MDMove(C)
   CASE(GRAD_ONE_FORCE)
      CALL SinglePoints(C)
      CALL DoForce(C) 
