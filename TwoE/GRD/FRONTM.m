@@ -11,15 +11,19 @@ PunchFront[Subroutine_,ic_,jc_,kc_,lc_,IJKL_]:=Block[{WS,LBra,LKet,BKType,LenBra
            LenK=LEnd[Classes[[kc,2]]]-LBegin[Classes[[kc,1]]]+1;
            LenL=LEnd[Classes[[lc,2]]]-LBegin[Classes[[lc,1]]]+1;
 
-           BEnd=LEnd[imax+jmax+1];
-           KEnd=LEnd[kmax+lmax+1];
+           BEnd=LEnd[imax+jmax];
+           KEnd=LEnd[kmax+lmax];
+           BEnd1=LEnd[imax+jmax+1];
+           KEnd1=LEnd[kmax+lmax+1];
 
            BraMax=BEnd;
+           BraMax1=BEnd1;
            If[ic==2&&jc==2,BraMax=BraMax+LenI+LenJ];
            If[ic==2&&jc!=2,BraMax=BraMax+1];
            If[jc==2&&ic!=2,BraMax=BraMax+LenI];
 
            KetMax=KEnd;
+           KetMax1=KEnd1;
            If[kc==2&&lc==2,KetMax=KetMax+LenK+LenL];
            If[kc==2&&lc!=2,KetMax=KetMax+1];
            If[lc==2&&kc!=2,KetMax=KetMax+LenK];
@@ -27,10 +31,12 @@ PunchFront[Subroutine_,ic_,jc_,kc_,lc_,IJKL_]:=Block[{WS,LBra,LKet,BKType,LenBra
            LBra=imax+jmax;
            LKet=kmax+lmax;
 	   BKType=100*LBra+LKet;					   
-	   LenBra=LEnd[LBra+1];
-           LenKet=LEnd[LKet+1];
 
+	   LenBra=LEnd[LBra];
+           LenKet=LEnd[LKet];
 
+	   LenBra1=LEnd[LBra+1];
+           LenKet1=LEnd[LKet+1];
 
            WriteString[Subroutine,StringJoin["SUBROUTINE dIntB",ToString[IJKL],"(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &\n ",
 					     "OA,LDA,OB,LDB,OC,LDC,OD,LDD,GOA,GOB,GOC,GOD,NINT,PBC,GRADIENTS)\n "]];
@@ -59,9 +65,11 @@ PunchFront[Subroutine_,ic_,jc_,kc_,lc_,IJKL_]:=Block[{WS,LBra,LKet,BKType,LenBra
            WS["REAL(DOUBLE)  :: Zeta,Eta,Omega,Up,Uq,Upq"];
            WS["REAL(DOUBLE)  :: T,ET,TwoT,InvT,SqInvT"];
            WS["REAL(DOUBLE)  :: Alpha,Beta,Gamma"];
-           WS[StringJoin["REAL(DOUBLE), DIMENSION(",ToString[BraMax],") :: HRRTmp "]];
-           WS[StringJoin["REAL(DOUBLE), DIMENSION(",ToString[BraMax],",",ToString[KetMax],",",ToString[LEnd[lmax+1]],") :: HRR,HRRA,HRRB,HRRC "]];
-           WS[StringJoin["REAL(DOUBLE)  :: VRR(",ToString[LenBra],",",ToString[LenKet],",0:",ToString[LBra+LKet+1],")"]];
+           WS[StringJoin["REAL(DOUBLE), DIMENSION(",ToString[BraMax1],") :: HRRTmp "]];
+           WS[StringJoin["REAL(DOUBLE), DIMENSION(",ToString[BraMax],",",ToString[KetMax],",",ToString[LEnd[lmax]],") :: HRR "]];
+           WS[StringJoin["REAL(DOUBLE), DIMENSION(",ToString[BraMax1],",",ToString[KetMax],",",ToString[LEnd[lmax]],") :: HRRA,HRRB "]];
+           WS[StringJoin["REAL(DOUBLE), DIMENSION(",ToString[BraMax],",",ToString[KetMax1],",",ToString[LEnd[lmax]],") :: HRRC "]];
+           WS[StringJoin["REAL(DOUBLE)  :: VRR(",ToString[LenBra1],",",ToString[LenKet1],",0:",ToString[LBra+LKet+1],")"]];
 
            WS["INTEGER       :: OffSet,OA,LDA,GOA,OB,LDB,GOB,OC,LDC,GOC,OD,LDD,GOD,I,J,K,L"];
            WS["EXTERNAL InitDbl"];						     

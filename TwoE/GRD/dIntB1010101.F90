@@ -22,11 +22,13 @@ SUBROUTINE dIntB1010101(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
       REAL(DOUBLE)  :: T,ET,TwoT,InvT,SqInvT
       REAL(DOUBLE)  :: Alpha,Beta,Gamma
       REAL(DOUBLE), DIMENSION(4) :: HRRTmp 
-      REAL(DOUBLE), DIMENSION(4,4,4) :: HRR,HRRA,HRRB,HRRC 
+      REAL(DOUBLE), DIMENSION(1,1,1) :: HRR 
+      REAL(DOUBLE), DIMENSION(4,1,1) :: HRRA,HRRB 
+      REAL(DOUBLE), DIMENSION(1,4,1) :: HRRC 
       REAL(DOUBLE)  :: VRR(4,4,0:1)
       INTEGER       :: OffSet,OA,LDA,GOA,OB,LDB,GOB,OC,LDC,GOC,OD,LDD,GOD,I,J,K,L
       EXTERNAL InitDbl
-      CALL InitDbl(4*4,HRR(1,1,1))
+      CALL InitDbl(1*1,HRR(1,1,1))
       Ax=ACInfo%Atm1X
       Ay=ACInfo%Atm1Y
       Az=ACInfo%Atm1Z
@@ -111,19 +113,16 @@ SUBROUTINE dIntB1010101(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
             ! Generating (s0|p0)^(0)
             CALL VRRs0p0(4,4,VRR(1,1,0),VRR(1,1,1))
             ! Contracting ... 
-            CALL DBLAXPY( 16,HRR(1,1,1),       VRR(1,1,0)) 
-            CALL DBLAXPZY(16,HRRA(1,1,1),Alpha,VRR(1,1,0)) 
-            CALL DBLAXPZY(16,HRRB(1,1,1),Beta, VRR(1,1,0)) 
+            CALL DBLAXPY(1,HRR(1,1,1),VRR(1,1,0)) 
+            CALL DBLAXPZY(4,HRRA(1,1,1),Alpha,VRR(1,1,0)) 
+            CALL DBLAXPZY(4,HRRB(1,1,1),Beta, VRR(1,1,0)) 
             CALL DBLAXPZY(16,HRRC(1,1,1),Gamma,VRR(1,1,0)) 
          ENDDO ! (M0| loop
       ENDDO ! |N0) loop
-      ! Generating (s,0|s,s)
-      CALL KetHRR11(1,HRR) 
-      ! Generating (p,0|s,s)^a
-      CALL KetHRR11(1,HRRA) 
-      ! Generating (p,0|s,s)^b
-      CALL KetHRR11(1,HRRB) 
-      ! Generating (s,0|p,s)^c
+      ! Dont need to generate (s,0|s,s)
+      ! Dont need to generate (p,0|s,s)^a
+      ! Dont need to generate (p,0|s,s)^b
+      ! Dont need to generate (s,0|p,s)^c
       CALL KetHRR31(1,HRRC) 
       DO L=1,1
       
