@@ -313,7 +313,7 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_]:=Block[{WS,LBra,LKet,BKTyp
            WS[StringJoin["REAL(DOUBLE) :: I(*)"]];
 
            WS["REAL(DOUBLE)  :: Zeta,Eta,r1xZpE,HfxZpE,r1x2E,r1x2Z,ExZpE,ZxZpE,Omega,Up,Uq,Upq"];
-           WS["REAL(DOUBLE)  :: Ax,Ay,Az,Bx,By,Bz,Cx,Cy,Cz,Dx,Dy,Dz,Qx,Qy,Qz,Px,Py,Pz,Wx,Wy,Wz"];
+           WS["REAL(DOUBLE)  :: Ax,Ay,Az,Bx,By,Bz,Cx,Cy,Cz,Dx,Dy,Dz,Qx,Qy,Qz,Px,Py,Pz"];
            WS["REAL(DOUBLE)  :: QCx,QCy,QCz,PAx,PAy,PAz,PQx,PQy,PQz,WPx,WPy,WPz,WQx,WQy,WQz   "];
            WS["REAL(DOUBLE)  :: T,ET,TwoT,InvT,SqInvT,ABx,ABy,ABz,CDx,CDy,CDz"];
 
@@ -414,9 +414,9 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_]:=Block[{WS,LBra,LKet,BKTyp
            WS["      ZxZpE=Zeta*r1xZpE"];
            WS["      Omega=Eta*Zeta*r1xZpE"];
 
-           WS["      Wx=(Zeta*Px+Eta*Qx)*r1xZpE"];
-           WS["      Wy=(Zeta*Py+Eta*Qy)*r1xZpE"];
-           WS["      Wz=(Zeta*Pz+Eta*Qz)*r1xZpE"];
+           (*WS["      Wx=(Zeta*Px+Eta*Qx)*r1xZpE"];*)
+           (*WS["      Wy=(Zeta*Py+Eta*Qy)*r1xZpE"];*)
+           (*WS["      Wz=(Zeta*Pz+Eta*Qz)*r1xZpE"];*)
 
            WS["      PAx=Px-Ax"];
            WS["      PAy=Py-Ay"];
@@ -441,20 +441,28 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_]:=Block[{WS,LBra,LKet,BKTyp
            WS["      FPQx = PQx*PBC%InvBoxSh%D(1,1)+PQy*PBC%InvBoxSh%D(1,2)+PQz*PBC%InvBoxSh%D(1,3)"];
            WS["      FPQy = PQy*PBC%InvBoxSh%D(2,2)+PQz*PBC%InvBoxSh%D(2,3)"];
            WS["      FPQz = PQz*PBC%InvBoxSh%D(3,3)"];
-           WS["      IF(PBC%AutoW%I(1)==1) FPQx = FPQx-ANINT(FPQx)"];
-           WS["      IF(PBC%AutoW%I(2)==1) FPQy = FPQy-ANINT(FPQy)"];
-           WS["      IF(PBC%AutoW%I(3)==1) FPQz = FPQz-ANINT(FPQz)"];
+           WS["      IF(PBC%AutoW%I(1)==1) FPQx = FPQx-ANINT(ANINT(FPQx*1d9)*1d-9)"];
+           WS["      IF(PBC%AutoW%I(2)==1) FPQy = FPQy-ANINT(ANINT(FPQy*1d9)*1d-9)"];
+           WS["      IF(PBC%AutoW%I(3)==1) FPQz = FPQz-ANINT(ANINT(FPQz*1d9)*1d-9)"];
            WS["      PQx  = FPQx*PBC%BoxShape%D(1,1)+FPQy*PBC%BoxShape%D(1,2)+FPQz*PBC%BoxShape%D(1,3)"];
            WS["      PQy  = FPQy*PBC%BoxShape%D(2,2)+FPQz*PBC%BoxShape%D(2,3)"];
            WS["      PQz  = FPQz*PBC%BoxShape%D(3,3)"];
            WS["!"];
 
-           WS["      WPx=Wx-Px"];
-           WS["      WPy=Wy-Py"];
-           WS["      WPz=Wz-Pz"];
-           WS["      WQx=Wx-Qx"];
-           WS["      WQy=Wy-Qy"];
-           WS["      WQz=Wz-Qz"];
+
+           (*WS["      WPx=Wx-Px"];*)
+           (*WS["      WPy=Wy-Py"];*)
+           (*WS["      WPz=Wz-Pz"];*)
+           (*WS["      WQx=Wx-Qx"];*)
+           (*WS["      WQy=Wy-Qy"];*)
+           (*WS["      WQz=Wz-Qz"];*)
+
+           WS["      WPx = -Eta*PQx*r1xZpE"];
+           WS["      WPy = -Eta*PQy*r1xZpE"];
+           WS["      WPz = -Eta*PQz*r1xZpE"];
+           WS["      WQx = Zeta*PQx*r1xZpE"];
+           WS["      WQy = Zeta*PQy*r1xZpE"];
+           WS["      WQz = Zeta*PQz*r1xZpE"];
 
            WS["      T=Omega*(PQx*PQx+PQy*PQy+PQz*PQz)"];
 
@@ -467,8 +475,8 @@ PunchVRRBack[Subroutine_,BKType_]:=Block[{WS},
 ];
 
 
-MakeList="TwoEObjs= \\ \n";
-RelsList="TwoERels= \\ \n";
+MakeList="TwoEObjs= ";
+RelsList="TwoERels= ";
 
 Do[Do[Do[Do[
 
@@ -516,8 +524,8 @@ Print["ijklType=",ijklType," i=",IntegralClass[Classes[[ic]]]," j=",IntegralClas
 
 	   WriteString[Subroutine,CommentLine]; 
 
-	   MakeList=StringJoin[MakeList,StringJoin["Int",ToString[ijklType],".o \\ \n"]];
-           RelsList=StringJoin[RelsList,StringJoin["Int",ToString[ijklType],".x \\ \n"]]; 
+	   MakeList=StringJoin[MakeList,StringJoin[" \\ \n Int",ToString[ijklType],".o"]];
+           RelsList=StringJoin[RelsList,StringJoin[" \\ \n Int",ToString[ijklType],".x"]]; 
 
            BraEll=imax+jmax;
            KetEll=kmax+lmax;
@@ -555,6 +563,8 @@ Print["ijklType=",ijklType," i=",IntegralClass[Classes[[ic]]]," j=",IntegralClas
 ,{lc,1,LC}];
 
 
+MakeList=StringJoin[MakeList," \n"];
+RelsList=StringJoin[RelsList," \n"]; 
 
 (**************** Print out the Makefile ************************)
 
@@ -565,16 +575,28 @@ OpenWrite[Makefile];
 WriteString[Makefile,"include $(MONDO_COMPILER)\n"];
 WriteString[Makefile,"include $(MONDO_HOME)/Includes/Suffixes\n"];
 WriteString[Makefile,"include $(MONDO_HOME)/Includes/RemoveAll\n"];
+WriteString[Makefile,"#\n"];
 WriteString[Makefile,"CPPMISC =\n"];
+WriteString[Makefile,"#\n"];
 WriteString[Makefile,"EXTRA_INCLUDES=\n"];
+WriteString[Makefile,"#\n"];
 WriteString[Makefile,"SPObObjs=ShellPairStruct.o\n"];
+WriteString[Makefile,"#\n"];
+Print[MakeList];
+Print[RelsList];
 WriteString[Makefile,MakeList];
+WriteString[Makefile,"#\n"];
 WriteString[Makefile,RelsList];
+WriteString[Makefile,"#\n"];
 WriteString[Makefile,"all:    TwoE\n"];
+WriteString[Makefile,"#\n"];
 WriteString[Makefile,"clean:  CTwoE\n"];
-WriteString[Makefile,"purge:  clean \n","rm -f $(MONDO_LIB)/libTwoE.a\n","rm -f $(REMOVESRCE)\n"];
-WriteString[Makefile,"TwoE:   $(SPObObjs) $(TwoEObjs)\n","	$(AR) $(ARFLAGS) $(MONDO_LIB)/libTwoE.a $(?:.F90=.o)\n","	$(RANLIB) $(MONDO_LIB)/libTwoE.a\n"];
-WriteString[Makefile,"CTwoE:\n","	rm -f $(REMOVEMISC) $(REMOVEMODS)\n","	rm -f \#*\n","	rm -f *~\n","	ln -s /dev/null core\n","	ls -l\n"];
+WriteString[Makefile,"#\n"];
+WriteString[Makefile,"purge:clean \n","rm -f $(MONDO_LIB)/libTwoE.a\n","rm -f $(REMOVESRCE)\n"];
+WriteString[Makefile,"#\n"];
+WriteString[Makefile,"TwoE:$(SPObObjs) $(TwoEObjs)\n","$(AR) $(ARFLAGS) $(MONDO_LIB)/libTwoE.a $(?:.F90=.o)\n","$(RANLIB) $(MONDO_LIB)/libTwoE.a\n"];
+WriteString[Makefile,"#\n"];
+WriteString[Makefile,"CTwoE:\n","rm -f $(REMOVEMISC) $(REMOVEMODS)\n","rm -f \#*\n","rm -f *~\n","ln -s /dev/null core\n","ls -l\n"];
 
 Close[Makefile];
 

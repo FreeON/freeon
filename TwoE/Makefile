@@ -1,87 +1,40 @@
-#------------------------------------------------------------------------------
-#--  This code is part of the MondoSCF suite of programs for linear scaling 
-#    electronic structure theory and ab initio molecular dynamics.
-#
-#--  Copyright (c) 2001, the Regents of the University of California.  
-#    This SOFTWARE has been authored by an employee or employees of the 
-#    University of California, operator of the Los Alamos National Laboratory 
-#    under Contract No. W-7405-ENG-36 with the U.S. Department of Energy.  
-#    The U.S. Government has rights to use, reproduce, and distribute this 
-#    SOFTWARE.  The public may copy, distribute, prepare derivative works 
-#    and publicly display this SOFTWARE without charge, provided that this 
-#    Notice and any statement of authorship are reproduced on all copies.  
-#    Neither the Government nor the University makes any warranty, express 
-#    or implied, or assumes any liability or responsibility for the use of 
-#    this SOFTWARE.  If SOFTWARE is modified to produce derivative works, 
-#    such modified SOFTWARE should be clearly marked, so as not to confuse 
-#    it with the version available from LANL.  The return of derivative works
-#    to the primary author for integration and general release is encouraged. 
-#    The first publication realized with the use of MondoSCF shall be
-#    considered a joint work.  Publication of the results will appear
-#    under the joint authorship of the researchers nominated by their
-#    respective institutions. In future publications of work performed
-#    with MondoSCF, the use of the software shall be properly acknowledged,
-#    e.g. in the form "These calculations have been performed using MondoSCF, 
-#    a suite of programs for linear scaling electronic structure theory and
-#    ab initio molecular dynamics", and given appropriate citation.  
-#------------------------------------------------------------------------------
 include $(MONDO_COMPILER)
 include $(MONDO_HOME)/Includes/Suffixes
 include $(MONDO_HOME)/Includes/RemoveAll
 #
-CPPMISC = 
+CPPMISC =
 #
-EXTRA_INCLUDES= 
+EXTRA_INCLUDES=
 #
 SPObObjs=ShellPairStruct.o
 #
-TwoEObjs= \
-Int1111.o \
-Int3111.o \
-Int1311.o \
-Int3311.o \
-Int1131.o \
-Int3131.o \
-Int1331.o \
-Int3331.o \
-Int1113.o \
-Int3113.o \
-Int1313.o \
-Int3313.o \
-Int1133.o \
-Int3133.o \
-Int1333.o \
-Int3333.o 
-
-TwoERels= \
-Int1111.o \
-Int3111.o \
-Int1311.o \
-Int3311.o \
-Int1131.o \
-Int3131.o \
-Int1331.o \
-Int3331.o \
-Int1113.o \
-Int3113.o \
-Int1313.o \
-Int3313.o \
-Int1133.o \
-Int3133.o \
-Int1333.o \
-Int3333.o 
+TwoEObjs=  \
+	Int1111.o \
+	Int3111.o \
+	Int3311.o \
+	Int3131.o \
+	Int3331.o \
+	Int3333.o 
 #
-all:	TwoE
+TwoERels=  \
+	Int1111.x \
+	Int3111.x \
+	Int3311.x \
+	Int3131.x \
+	Int3331.x \
+	Int3333.x 
 #
-clean:	CTwoE
+all:    TwoE
 #
-purge:	clean
+clean:  CTwoE
+#
+purge:clean 
 	rm -f $(MONDO_LIB)/libTwoE.a
 	rm -f $(REMOVESRCE)
 #
-TwoE:	$(SPObObjs) $(TwoEObjs)
+TwoE:$(SPObObjs) $(TwoEObjs)
 	$(AR) $(ARFLAGS) $(MONDO_LIB)/libTwoE.a $(?:.F90=.o)
-	$(RANLIB) $(MONDO_LIB)/libTwoE.a	
+	$(RANLIB) $(MONDO_LIB)/libTwoE.a
 #
 CTwoE:
 	rm -f $(REMOVEMISC) $(REMOVEMODS)

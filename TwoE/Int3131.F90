@@ -1,38 +1,40 @@
 ! ---------------------------------------------------------- 
 ! COMPUTES THE INTEGRAL CLASS (P S|P S) 
 ! ---------------------------------------------------------- 
-   SUBROUTINE Int3131(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo,I, & 
-                              OA,LDA,OB,LDB,OC,LDC,OD,LDD) 
+   SUBROUTINE Int3131(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, & 
+                              OA,LDA,OB,LDB,OC,LDC,OD,LDD,PBC,I) 
       USE DerivedTypes
       USE GlobalScalars
-      USE ONX2DataType
+      USE ShellPairStruct
       USE GammaF2
       IMPLICIT REAL(DOUBLE) (A,I,V,W)
       INTEGER        :: LBra,LKet
       REAL(DOUBLE)   :: PrmBufB(5,LBra),PrmBufK(5,LKet)
-      TYPE(AtomInfo) :: ACInfo,BDInfo
+      TYPE(SmallAtomInfo) :: ACInfo,BDInfo
+      TYPE(PBCInfo) :: PBC
       REAL(DOUBLE) :: I(*)
       REAL(DOUBLE)  :: Zeta,Eta,r1xZpE,HfxZpE,r1x2E,r1x2Z,ExZpE,ZxZpE,Omega,Up,Uq,Upq
       REAL(DOUBLE)  :: Ax,Ay,Az,Bx,By,Bz,Cx,Cy,Cz,Dx,Dy,Dz,Qx,Qy,Qz,Px,Py,Pz,Wx,Wy,Wz
       REAL(DOUBLE)  :: QCx,QCy,QCz,PAx,PAy,PAz,PQx,PQy,PQz,WPx,WPy,WPz,WQx,WQy,WQz   
       REAL(DOUBLE)  :: T,ET,TwoT,InvT,SqInvT,ABx,ABy,ABz,CDx,CDy,CDz
       INTEGER       :: OA,LDA,OB,LDB,OC,LDC,OD,LDD,J,K,L
-      I1Bar1=Zero
-      I2Bar1=Zero
-      I3Bar1=Zero
-      I4Bar1=Zero
-      I1Bar2=Zero
-      I2Bar2=Zero
-      I3Bar2=Zero
-      I4Bar2=Zero
-      I1Bar3=Zero
-      I2Bar3=Zero
-      I3Bar3=Zero
-      I4Bar3=Zero
-      I1Bar4=Zero
-      I2Bar4=Zero
-      I3Bar4=Zero
-      I4Bar4=Zero
+      REAL(DOUBLE)  :: FPQx,FPQy,FPQz
+      I1Bar1=0.0d0
+      I2Bar1=0.0d0
+      I3Bar1=0.0d0
+      I4Bar1=0.0d0
+      I1Bar2=0.0d0
+      I2Bar2=0.0d0
+      I3Bar2=0.0d0
+      I4Bar2=0.0d0
+      I1Bar3=0.0d0
+      I2Bar3=0.0d0
+      I3Bar3=0.0d0
+      I4Bar3=0.0d0
+      I1Bar4=0.0d0
+      I2Bar4=0.0d0
+      I3Bar4=0.0d0
+      I4Bar4=0.0d0
       Ax=ACInfo%Atm1X
       Ay=ACInfo%Atm1Y
       Az=ACInfo%Atm1Z
@@ -57,6 +59,10 @@
          Qy =PrmBufK(3,J)
          Qz =PrmBufK(4,J)
          Uq =PrmBufK(5,J)
+
+!!$         write(*,*) 'Eta',Eta
+!!$         write(*,*) 'Uq',Uq
+
          QCx=Qx-Cx
          QCy=Qy-Cy
          QCz=Qz-Cz
@@ -66,6 +72,10 @@
             Py  =PrmBufB(3,K)
             Pz  =PrmBufB(4,K)
             Up  =PrmBufB(5,K)
+
+!!$            write(*,*) 'Zeta',Zeta
+!!$            write(*,*) 'Up',Up
+
             r1xZpE=One/(Zeta+Eta)
             Upq=SQRT(r1xZpE)*Up*Uq
             HfxZpE=Half/(Zeta+Eta)
@@ -74,22 +84,57 @@
             ExZpE=Eta*r1xZpE
             ZxZpE=Zeta*r1xZpE
             Omega=Eta*Zeta*r1xZpE
-            Wx=(Zeta*Px+Eta*Qx)*r1xZpE
-            Wy=(Zeta*Py+Eta*Qy)*r1xZpE
-            Wz=(Zeta*Pz+Eta*Qz)*r1xZpE
+            !Wx=(Zeta*Px+Eta*Qx)*r1xZpE
+            !Wy=(Zeta*Py+Eta*Qy)*r1xZpE
+            !Wz=(Zeta*Pz+Eta*Qz)*r1xZpE
             PAx=Px-Ax
             PAy=Py-Ay
             PAz=Pz-Az
             PQx=Px-Qx
             PQy=Py-Qy
             PQz=Pz-Qz
-            WPx=Wx-Px
-            WPy=Wy-Py
-            WPz=Wz-Pz
-            WQx=Wx-Qx
-            WQy=Wy-Qy
-            WQz=Wz-Qz
+
+            !write(*,*) 'PQx',PQx
+
+      ! Need to be improve...
+            FPQx = PQx*PBC%InvBoxSh%D(1,1)+PQy*PBC%InvBoxSh%D(1,2)+PQz*PBC%InvBoxSh%D(1,3)
+            FPQy = PQy*PBC%InvBoxSh%D(2,2)+PQz*PBC%InvBoxSh%D(2,3)
+            FPQz = PQz*PBC%InvBoxSh%D(3,3)
+            IF(PBC%AutoW%I(1)==1) FPQx = FPQx-ANINT(ANINT(FPQx*1d9)*1d-9)
+            IF(PBC%AutoW%I(2)==1) FPQy = FPQy-ANINT(ANINT(FPQy*1d9)*1d-9)
+            IF(PBC%AutoW%I(3)==1) FPQz = FPQz-ANINT(ANINT(FPQz*1d9)*1d-9)
+            PQx  = FPQx*PBC%BoxShape%D(1,1)+FPQy*PBC%BoxShape%D(1,2)+FPQz*PBC%BoxShape%D(1,3)
+            PQy  = FPQy*PBC%BoxShape%D(2,2)+FPQz*PBC%BoxShape%D(2,3)
+            PQz  = FPQz*PBC%BoxShape%D(3,3)
+
+            !write(*,*) 'PQx',PQx
+
+WPx = -Eta*PQx*r1xZpE
+WPy = -Eta*PQy*r1xZpE
+WPz = -Eta*PQz*r1xZpE
+WQx = Zeta*PQx*r1xZpE
+WQy = Zeta*PQy*r1xZpE
+WQz = Zeta*PQz*r1xZpE
+      !
+            !WPx=Wx-Px
+            !WPy=Wy-Py
+            !WPz=Wz-Pz
+
+            !WPx=-0.944862994289462d0
+            !write(*,*) 'WPx',WPx
+
+
+            !WQx=Wx-Qx
+            !WQy=Wy-Qy
+            !WQz=Wz-Qz
+
+            !WQx=0.944862994289462d0
+            !write(*,*) 'WQx',WQx
+
             T=Omega*(PQx*PQx+PQy*PQy+PQz*PQz)
+
+            !write(*,*) 'T',T
+
             IF(T<Gamma_Switch)THEN
               L=AINT(T*Gamma_Grid)
               ET=EXP(-T)
@@ -147,13 +192,37 @@
          ENDDO ! (M0| loop
       ENDDO ! |N0) loop
       ! HRR 
-      I((OA+1)*LDA+(OB+1)*LDB+(OC+1)*LDC+(OD+1)*LDD)=I2Bar2
-      I((OA+2)*LDA+(OB+1)*LDB+(OC+1)*LDC+(OD+1)*LDD)=I3Bar2
-      I((OA+3)*LDA+(OB+1)*LDB+(OC+1)*LDC+(OD+1)*LDD)=I4Bar2
-      I((OA+1)*LDA+(OB+1)*LDB+(OC+2)*LDC+(OD+1)*LDD)=I2Bar3
-      I((OA+2)*LDA+(OB+1)*LDB+(OC+2)*LDC+(OD+1)*LDD)=I3Bar3
-      I((OA+3)*LDA+(OB+1)*LDB+(OC+2)*LDC+(OD+1)*LDD)=I4Bar3
-      I((OA+1)*LDA+(OB+1)*LDB+(OC+3)*LDC+(OD+1)*LDD)=I2Bar4
-      I((OA+2)*LDA+(OB+1)*LDB+(OC+3)*LDC+(OD+1)*LDD)=I3Bar4
-      I((OA+3)*LDA+(OB+1)*LDB+(OC+3)*LDC+(OD+1)*LDD)=I4Bar4
+      I((OA+0)*LDA+OB*LDB+(OC+0)*LDC+OD*LDD)=I((OA+0)*LDA+OB*LDB+(OC+0)*LDC+OD*LDD)+I2Bar2
+      I((OA+1)*LDA+OB*LDB+(OC+0)*LDC+OD*LDD)=I((OA+1)*LDA+OB*LDB+(OC+0)*LDC+OD*LDD)+I3Bar2
+      I((OA+2)*LDA+OB*LDB+(OC+0)*LDC+OD*LDD)=I((OA+2)*LDA+OB*LDB+(OC+0)*LDC+OD*LDD)+I4Bar2
+      I((OA+0)*LDA+OB*LDB+(OC+1)*LDC+OD*LDD)=I((OA+0)*LDA+OB*LDB+(OC+1)*LDC+OD*LDD)+I2Bar3
+      I((OA+1)*LDA+OB*LDB+(OC+1)*LDC+OD*LDD)=I((OA+1)*LDA+OB*LDB+(OC+1)*LDC+OD*LDD)+I3Bar3
+      I((OA+2)*LDA+OB*LDB+(OC+1)*LDC+OD*LDD)=I((OA+2)*LDA+OB*LDB+(OC+1)*LDC+OD*LDD)+I4Bar3
+      I((OA+0)*LDA+OB*LDB+(OC+2)*LDC+OD*LDD)=I((OA+0)*LDA+OB*LDB+(OC+2)*LDC+OD*LDD)+I2Bar4
+      I((OA+1)*LDA+OB*LDB+(OC+2)*LDC+OD*LDD)=I((OA+1)*LDA+OB*LDB+(OC+2)*LDC+OD*LDD)+I3Bar4
+      I((OA+2)*LDA+OB*LDB+(OC+2)*LDC+OD*LDD)=I((OA+2)*LDA+OB*LDB+(OC+2)*LDC+OD*LDD)+I4Bar4
+
+
+
+!!$if(abs(I2Bar2).GT.1.0d-15)write(*,'(A,E22.15)') 'I2Bar2',I2Bar2
+!!$if(abs(I3Bar2).GT.1.0d-15)write(*,'(A,E22.15)') 'I3Bar2',I3Bar2
+!!$if(abs(I4Bar2).GT.1.0d-15)write(*,'(A,E22.15)') 'I4Bar2',I4Bar2
+!!$if(abs(I2Bar3).GT.1.0d-15)write(*,'(A,E22.15)') 'I2Bar3',I2Bar3
+!!$if(abs(I3Bar3).GT.1.0d-15)write(*,'(A,E22.15)') 'I3Bar3',I3Bar3
+!!$if(abs(I4Bar3).GT.1.0d-15)write(*,'(A,E22.15)') 'I4Bar3',I4Bar3
+!!$if(abs(I2Bar4).GT.1.0d-15)write(*,'(A,E22.15)') 'I2Bar4',I2Bar4
+!!$if(abs(I3Bar4).GT.1.0d-15)write(*,'(A,E22.15)') 'I3Bar4',I3Bar4
+!!$if(abs(I4Bar4).GT.1.0d-15)write(*,'(A,E22.15)') 'I4Bar4',I4Bar4
+
+!!$write(*,'(A,9I4)') 'Off', &
+!!$     & (OA+0)*LDA+OB*LDB+(OC+0)*LDC+OD*LDD, &
+!!$     & (OA+1)*LDA+OB*LDB+(OC+0)*LDC+OD*LDD, &
+!!$     & (OA+2)*LDA+OB*LDB+(OC+0)*LDC+OD*LDD, &
+!!$     & (OA+0)*LDA+OB*LDB+(OC+1)*LDC+OD*LDD, &
+!!$     & (OA+1)*LDA+OB*LDB+(OC+1)*LDC+OD*LDD, &
+!!$     & (OA+2)*LDA+OB*LDB+(OC+1)*LDC+OD*LDD, &
+!!$     & (OA+0)*LDA+OB*LDB+(OC+2)*LDC+OD*LDD, &
+!!$     & (OA+1)*LDA+OB*LDB+(OC+2)*LDC+OD*LDD, &
+!!$     & (OA+2)*LDA+OB*LDB+(OC+2)*LDC+OD*LDD
+
    END SUBROUTINE Int3131

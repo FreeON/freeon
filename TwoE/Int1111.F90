@@ -1,23 +1,25 @@
 ! ---------------------------------------------------------- 
 ! COMPUTES THE INTEGRAL CLASS (S S|S S) 
 ! ---------------------------------------------------------- 
-   SUBROUTINE Int1111(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo,I, & 
-                              OA,LDA,OB,LDB,OC,LDC,OD,LDD) 
+   SUBROUTINE Int1111(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, & 
+                              OA,LDA,OB,LDB,OC,LDC,OD,LDD,PBC,I) 
       USE DerivedTypes
       USE GlobalScalars
-      USE ONX2DataType
+      USE ShellPairStruct
       USE GammaF0
       IMPLICIT REAL(DOUBLE) (A,I,V,W)
       INTEGER        :: LBra,LKet
       REAL(DOUBLE)   :: PrmBufB(5,LBra),PrmBufK(5,LKet)
-      TYPE(AtomInfo) :: ACInfo,BDInfo
+      TYPE(SmallAtomInfo) :: ACInfo,BDInfo
+      TYPE(PBCInfo) :: PBC
       REAL(DOUBLE) :: I(*)
       REAL(DOUBLE)  :: Zeta,Eta,r1xZpE,HfxZpE,r1x2E,r1x2Z,ExZpE,ZxZpE,Omega,Up,Uq,Upq
       REAL(DOUBLE)  :: Ax,Ay,Az,Bx,By,Bz,Cx,Cy,Cz,Dx,Dy,Dz,Qx,Qy,Qz,Px,Py,Pz,Wx,Wy,Wz
       REAL(DOUBLE)  :: QCx,QCy,QCz,PAx,PAy,PAz,PQx,PQy,PQz,WPx,WPy,WPz,WQx,WQy,WQz   
       REAL(DOUBLE)  :: T,ET,TwoT,InvT,SqInvT,ABx,ABy,ABz,CDx,CDy,CDz
       INTEGER       :: OA,LDA,OB,LDB,OC,LDC,OD,LDD,J,K,L
-      I1Bar1=Zero
+      REAL(DOUBLE)  :: FPQx,FPQy,FPQz
+      I1Bar1=0.0d0
       Ax=ACInfo%Atm1X
       Ay=ACInfo%Atm1Y
       Az=ACInfo%Atm1Z
@@ -68,6 +70,17 @@
             PQx=Px-Qx
             PQy=Py-Qy
             PQz=Pz-Qz
+      ! Need to be improve...
+            FPQx = PQx*PBC%InvBoxSh%D(1,1)+PQy*PBC%InvBoxSh%D(1,2)+PQz*PBC%InvBoxSh%D(1,3)
+            FPQy = PQy*PBC%InvBoxSh%D(2,2)+PQz*PBC%InvBoxSh%D(2,3)
+            FPQz = PQz*PBC%InvBoxSh%D(3,3)
+            IF(PBC%AutoW%I(1)==1) FPQx = FPQx-ANINT(FPQx)
+            IF(PBC%AutoW%I(2)==1) FPQy = FPQy-ANINT(FPQy)
+            IF(PBC%AutoW%I(3)==1) FPQz = FPQz-ANINT(FPQz)
+            PQx  = FPQx*PBC%BoxShape%D(1,1)+FPQy*PBC%BoxShape%D(1,2)+FPQz*PBC%BoxShape%D(1,3)
+            PQy  = FPQy*PBC%BoxShape%D(2,2)+FPQz*PBC%BoxShape%D(2,3)
+            PQz  = FPQz*PBC%BoxShape%D(3,3)
+      !
             WPx=Wx-Px
             WPy=Wy-Py
             WPz=Wz-Pz
@@ -86,5 +99,5 @@
          ENDDO ! (M0| loop
       ENDDO ! |N0) loop
       ! HRR 
-      I((OA+1)*LDA+(OB+1)*LDB+(OC+1)*LDC+(OD+1)*LDD)=I1Bar1
+      I((OA+0)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+0)*LDD)=I1Bar1
    END SUBROUTINE Int1111
