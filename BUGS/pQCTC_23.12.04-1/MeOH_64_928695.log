@@ -1,0 +1,104 @@
+  prun -n 64 /scratch2/valeryw/MondoExec/MakePFFT MeOH_64_928695 OneElectronMatr
+ ices 0 1 1 0 1 1
+  prun -n 64 /scratch2/valeryw/MondoExec/MakeS MeOH_64_928695 OneElectronMatrice
+ s 0 1 1 0 1 1
+  prun -n 64 /scratch2/valeryw/MondoExec/AInv MeOH_64_928695 OneElectronMatrices
+  0 1 1 0 1 1
+  prun -n 64 /scratch2/valeryw/MondoExec/MakeT MeOH_64_928695 OneElectronMatrice
+ s 0 1 1 0 1 1
+  prun -n 64 /scratch2/valeryw/MondoExec/P2Use MeOH_64_928695 DensitySuperpositi
+ on 0 1 1 0 1 1
+  prun -n 64 /scratch2/valeryw/MondoExec/MakeRho MeOH_64_928695 DensitySuperposi
+ tion 0 1 1 0 1 1
+  prun -n 64 /scratch2/valeryw/MondoExec/QCTC MeOH_64_928695 DensitySuperpositio
+ n 0 1 1 0 1 1
+  prun -n 64 /scratch2/valeryw/MondoExec/ONX MeOH_64_928695 DensitySuperposition
+  0 1 1 0 1 1
+  prun -n 64 /scratch2/valeryw/MondoExec/FBuild MeOH_64_928695 DensitySuperposit
+ ion 0 1 1 0 1 1
+  prun -n 64 /scratch2/valeryw/MondoExec/TS4 MeOH_64_928695 DensitySuperposition
+  0 1 1 0 1 1
+  prun -n 64 /scratch2/valeryw/MondoExec/SCFstats MeOH_64_928695 DensitySuperpos
+ ition 0 1 1 0 1 1
+  prun -n 64 /scratch2/valeryw/MondoExec/MakeRho MeOH_64_928695 DensityNormal 1 
+ 1 1 0 1 1
+  prun -n 64 /scratch2/valeryw/MondoExec/QCTC MeOH_64_928695 DensityNormal 1 1 1
+  0 1 1
+  prun -n 64 /scratch2/valeryw/MondoExec/ONX MeOH_64_928695 DensityNormal 1 1 1 
+ 0 1 1
+  prun -n 64 /scratch2/valeryw/MondoExec/FBuild MeOH_64_928695 DensityNormal 1 1
+  1 0 1 1
+  prun -n 64 /scratch2/valeryw/MondoExec/DIIS MeOH_64_928695 DensityNormal 1 1 1
+  0 1 1
+  prun -n 64 /scratch2/valeryw/MondoExec/TS4 MeOH_64_928695 DensityNormal 1 1 1 
+ 0 1 1
+  prun -n 64 /scratch2/valeryw/MondoExec/SCFstats MeOH_64_928695 DensityNormal 1
+  1 1 0 1 1
+  prun -n 64 /scratch2/valeryw/MondoExec/MakeRho MeOH_64_928695 DensityNormal 2 
+ 1 1 1 1 1
+  prun -n 64 /scratch2/valeryw/MondoExec/QCTC MeOH_64_928695 DensityNormal 2 1 1
+  1 1 1
+  prun -n 64 /scratch2/valeryw/MondoExec/ONX MeOH_64_928695 DensityNormal 2 1 1 
+ 1 1 1
+  prun -n 64 /scratch2/valeryw/MondoExec/FBuild MeOH_64_928695 DensityNormal 2 1
+  1 1 1 1
+  prun -n 64 /scratch2/valeryw/MondoExec/DIIS MeOH_64_928695 DensityNormal 2 1 1
+  1 1 1
+  prun -n 64 /scratch2/valeryw/MondoExec/TS4 MeOH_64_928695 DensityNormal 2 1 1 
+ 1 1 1
+  prun -n 64 /scratch2/valeryw/MondoExec/SCFstats MeOH_64_928695 DensityNormal 2
+  1 1 1 1 1
+  prun -n 64 /scratch2/valeryw/MondoExec/MakeRho MeOH_64_928695 DensityNormal 3 
+ 1 1 2 1 1
+  prun -n 64 /scratch2/valeryw/MondoExec/QCTC MeOH_64_928695 DensityNormal 3 1 1
+  2 1 1
+  prun -n 64 /scratch2/valeryw/MondoExec/ONX MeOH_64_928695 DensityNormal 3 1 1 
+ 2 1 1
+  prun -n 64 /scratch2/valeryw/MondoExec/FBuild MeOH_64_928695 DensityNormal 3 1
+  1 2 1 1
+  prun -n 64 /scratch2/valeryw/MondoExec/DIIS MeOH_64_928695 DensityNormal 3 1 1
+  2 1 1
+  prun -n 64 /scratch2/valeryw/MondoExec/TS4 MeOH_64_928695 DensityNormal 3 1 1 
+ 2 1 1
+  prun -n 64 /scratch2/valeryw/MondoExec/SCFstats MeOH_64_928695 DensityNormal 3
+  1 1 2 1 1
+  prun -n 64 /scratch2/valeryw/MondoExec/MakeRho MeOH_64_928695 DensityNormal 4 
+ 1 1 3 1 1
+  prun -n 64 /scratch2/valeryw/MondoExec/QCTC MeOH_64_928695 DensityNormal 4 1 1
+  3 1 1
+  prun -n 64 /scratch2/valeryw/MondoExec/ONX MeOH_64_928695 DensityNormal 4 1 1 
+ 3 1 1
+  prun -n 64 /scratch2/valeryw/MondoExec/FBuild MeOH_64_928695 DensityNormal 4 1
+  1 3 1 1
+  prun -n 64 /scratch2/valeryw/MondoExec/DIIS MeOH_64_928695 DensityNormal 4 1 1
+  3 1 1
+  prun -n 64 /scratch2/valeryw/MondoExec/TS4 MeOH_64_928695 DensityNormal 4 1 1 
+ 3 1 1
+  prun -n 64 /scratch2/valeryw/MondoExec/SCFstats MeOH_64_928695 DensityNormal 4
+  1 1 3 1 1
+  prun -n 64 /scratch2/valeryw/MondoExec/MakePFFT MeOH_64_928695 OneElectronMatr
+ ices 0 2 1 4 1 1
+  prun -n 64 /scratch2/valeryw/MondoExec/MakeS MeOH_64_928695 OneElectronMatrice
+ s 0 2 1 4 1 1
+  prun -n 64 /scratch2/valeryw/MondoExec/AInv MeOH_64_928695 OneElectronMatrices
+  0 2 1 4 1 1
+  prun -n 64 /scratch2/valeryw/MondoExec/MakeT MeOH_64_928695 OneElectronMatrice
+ s 0 2 1 4 1 1
+  prun -n 64 /scratch2/valeryw/MondoExec/MakeRho MeOH_64_928695 BasisSetSwitch 0
+  2 1 5 1 1
+  prun -n 64 /scratch2/valeryw/MondoExec/QCTC MeOH_64_928695 BasisSetSwitch 0 2 
+ 1 5 1 1
+  prun -n 64 /scratch2/valeryw/MondoExec/ONX MeOH_64_928695 BasisSetSwitch 0 2 1
+  5 1 1
+  prun -n 64 /scratch2/valeryw/MondoExec/FBuild MeOH_64_928695 BasisSetSwitch 0 
+ 2 1 5 1 1
+  prun -n 64 /scratch2/valeryw/MondoExec/TS4 MeOH_64_928695 BasisSetSwitch 0 2 1
+  5 1 1
+  prun -n 64 /scratch2/valeryw/MondoExec/SCFstats MeOH_64_928695 BasisSetSwitch 
+ 0 2 1 5 1 1
+  prun -n 64 /scratch2/valeryw/MondoExec/MakeRho MeOH_64_928695 DensityNormal 1 
+ 2 1 0 2 1
+  prun -n 64 /scratch2/valeryw/MondoExec/QCTC MeOH_64_928695 DensityNormal 1 2 1
+  0 2 1
+ Unknown error: < prun -n 64 /scratch2/valeryw/MondoExec/QCTC MeOH_64_928695 Den
+ sityNormal 1 2 1 0 2 1>

@@ -1,0 +1,1816 @@
+Sender: LSF System <lsf@qscd3>
+Subject: Job 202655: </users/valeryw/MeOH/MeOH_64.lsf> Done
+
+Job </users/valeryw/MeOH/MeOH_64.lsf> was submitted from host <qscfe1> by user <valeryw>.
+Job was executed on host(s) <8*qscd3>, in queue <smallq>, as user <valeryw>.
+                            <24*qscd6>
+                            <32*qscd7>
+</users/valeryw> was used as the home directory.
+</users/valeryw/MeOH> was used as the working directory.
+Started at Wed Dec 22 15:23:33 2004
+Results reported at Wed Dec 22 17:33:49 2004
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time   : 427043.00 sec.
+    Max Memory :    229170 MB
+
+The output (if any) follows:
+
+Wed Dec 22 15:23:33: rms_rid=full.746767;rms_alloc=4*qsc[96,108,218-231];
+QUEUE: smallq
+  -- interactive and batch small jobs  This is the default queue.
+DEFAULT LIMITS:
+ RUNLIMIT                
+ 240.0 min of qscd0      
+MAXIMUM LIMITS:
+ RUNLIMIT                 PROCLIMIT               
+ 600.0 min of qscd0       4 4 128
+SHARE_INFO_FOR: smallq/
+ USER/GROUP   SHARES  PRIORITY STRTD RSV CPU_TIME RUN_TIME HIST_RTIME COMM_RTIME
+support        5000     18.03     3    0      1.9     13.4     241.3       36.0
+adwp          25000      0.59   196    0  51279.8   1438.3   40987.3     1698.7
+allnc-asci    40000      0.58   386    0  78004.6   2178.7   65005.9     3864.0
+institution   35000      0.57   197    0  78542.5     30.8   59215.3     1980.0
+
+  InputFile = /users/valeryw/MeOH/MeOH_64.inp
+  OutputFile= /users/valeryw/MeOH/MeOH_64_928695.out
+ Test1 = <loose>,  Test2 = <loose>
+ Is the same? T
+ Test1 = <loose>,  Test2 = <good>
+ Is the same? F
+ Test1 = <good>,  Test2 = <loose>
+ Is the same? F
+ Test1 = <good>,  Test2 = <good>
+ Is the same? T
+ Test1 = <tight>,  Test2 = <loose>
+ Is the same? F
+ Test1 = <tight>,  Test2 = <good>
+ Is the same? F
+ Test1 = <verytight>,  Test2 = <loose>
+ Is the same? F
+ Test1 = <verytight>,  Test2 = <good>
+ Is the same? F
+ Test1 = <sdmm>,  Test2 = <trs4>
+ Is the same? F
+ Test1 = <sdmm>,  Test2 = <trs4>
+ Is the same? F
+ Test1 = <pm>,  Test2 = <trs4>
+ Is the same? F
+ Test1 = <pm>,  Test2 = <trs4>
+ Is the same? F
+ Test1 = <tc2>,  Test2 = <trs4>
+ Is the same? F
+ Test1 = <tc2>,  Test2 = <trs4>
+ Is the same? F
+ Test1 = <tc4>,  Test2 = <trs4>
+ Is the same? F
+ Test1 = <tc4>,  Test2 = <trs4>
+ Is the same? F
+ Test1 = <trs4>,  Test2 = <trs4>
+ Is the same? T
+ Test1 = <trs4>,  Test2 = <trs4>
+ Is the same? T
+ Test1 = <rh>,  Test2 = <trs4>
+ Is the same? F
+ Test1 = <rh>,  Test2 = <trs4>
+ Is the same? F
+ Test1 = <diis>,  Test2 = <diis>
+ Is the same? T
+ Test1 = <diis>,  Test2 = <diis>
+ Is the same? T
+ Test1 = <oda>,  Test2 = <diis>
+ Is the same? F
+ Test1 = <oda>,  Test2 = <diis>
+ Is the same? F
+ Test1 = <oda-diis>,  Test2 = <diis>
+ Is the same? F
+ Test1 = <oda-diis>,  Test2 = <diis>
+ Is the same? F
+ Test1 = <diis-oda>,  Test2 = <diis>
+ Is the same? F
+ Test1 = <diis-oda>,  Test2 = <diis>
+ Is the same? F
+ Test1 = <smix>,  Test2 = <diis>
+ Is the same? F
+ Test1 = <smix>,  Test2 = <diis>
+ Is the same? F
+ Test1 = <testscf>,  Test2 = <diis>
+ Is the same? F
+ Test1 = <testscf>,  Test2 = <diis>
+ Is the same? F
+ Test1 = <hf>,  Test2 = <hf>
+ Is the same? T
+ Test1 = <hf>,  Test2 = <hf>
+ Is the same? T
+ Test1 = <slaterdirac>,  Test2 = <hf>
+ Is the same? F
+ Test1 = <slaterdirac>,  Test2 = <hf>
+ Is the same? F
+ Test1 = <xalpha>,  Test2 = <hf>
+ Is the same? F
+ Test1 = <xalpha>,  Test2 = <hf>
+ Is the same? F
+ Test1 = <pw91x>,  Test2 = <hf>
+ Is the same? F
+ Test1 = <pw91x>,  Test2 = <hf>
+ Is the same? F
+ Test1 = <pbex>,  Test2 = <hf>
+ Is the same? F
+ Test1 = <pbex>,  Test2 = <hf>
+ Is the same? F
+ Test1 = <b88x>,  Test2 = <hf>
+ Is the same? F
+ Test1 = <b88x>,  Test2 = <hf>
+ Is the same? F
+ Test1 = <vwn3xc>,  Test2 = <hf>
+ Is the same? F
+ Test1 = <vwn3xc>,  Test2 = <hf>
+ Is the same? F
+ Test1 = <vwn5xc>,  Test2 = <hf>
+ Is the same? F
+ Test1 = <vwn5xc>,  Test2 = <hf>
+ Is the same? F
+ Test1 = <pw91xc>,  Test2 = <hf>
+ Is the same? F
+ Test1 = <pw91xc>,  Test2 = <hf>
+ Is the same? F
+ Test1 = <pw91lyp>,  Test2 = <hf>
+ Is the same? F
+ Test1 = <pw91lyp>,  Test2 = <hf>
+ Is the same? F
+ Test1 = <pbexc>,  Test2 = <hf>
+ Is the same? F
+ Test1 = <pbexc>,  Test2 = <hf>
+ Is the same? F
+ Test1 = <blypxc>,  Test2 = <hf>
+ Is the same? F
+ Test1 = <blypxc>,  Test2 = <hf>
+ Is the same? F
+ Test1 = <b3lyp>,  Test2 = <hf>
+ Is the same? F
+ Test1 = <b3lyp>,  Test2 = <hf>
+ Is the same? F
+ Test1 = <b3lyp/vwn5>,  Test2 = <hf>
+ Is the same? F
+ Test1 = <b3lyp/vwn5>,  Test2 = <hf>
+ Is the same? F
+ Test1 = <pbe0>,  Test2 = <hf>
+ Is the same? F
+ Test1 = <pbe0>,  Test2 = <hf>
+ Is the same? F
+ Test1 = <x3lyp>,  Test2 = <hf>
+ Is the same? F
+ Test1 = <x3lyp>,  Test2 = <hf>
+ Is the same? F
+ Test1 = <t>,  Test2 = <t>
+ Is the same? T
+ Test1 = <t>,  Test2 = <t>
+ Is the same? T
+ Test1 = <t>,  Test2 = <t>
+ Is the same? T
+ Test1 = <f>,  Test2 = <t>
+ Is the same? F
+ Test1 = <f>,  Test2 = <t>
+ Is the same? F
+ Test1 = <f>,  Test2 = <t>
+ Is the same? F
+ Test1 = <sto-2g>,  Test2 = <sto-3g-split>
+ Is the same? F
+ Test1 = <sto-2g>,  Test2 = <6-31g**-split>
+ Is the same? F
+ Test1 = <sto-3g>,  Test2 = <sto-3g-split>
+ Is the same? F
+ Test1 = <sto-3g>,  Test2 = <6-31g**-split>
+ Is the same? F
+ Test1 = <sto-6g>,  Test2 = <sto-3g-split>
+ Is the same? F
+ Test1 = <sto-6g>,  Test2 = <6-31g**-split>
+ Is the same? F
+ Test1 = <3-21g>,  Test2 = <sto-3g-split>
+ Is the same? F
+ Test1 = <3-21g>,  Test2 = <6-31g**-split>
+ Is the same? F
+ Test1 = <3-21gsp>,  Test2 = <sto-3g-split>
+ Is the same? F
+ Test1 = <3-21gsp>,  Test2 = <6-31g**-split>
+ Is the same? F
+ Test1 = <3-21g*>,  Test2 = <sto-3g-split>
+ Is the same? F
+ Test1 = <3-21g*>,  Test2 = <6-31g**-split>
+ Is the same? F
+ Test1 = <4-22gsp>,  Test2 = <sto-3g-split>
+ Is the same? F
+ Test1 = <4-22gsp>,  Test2 = <6-31g**-split>
+ Is the same? F
+ Test1 = <6-31g>,  Test2 = <sto-3g-split>
+ Is the same? F
+ Test1 = <6-31g>,  Test2 = <6-31g**-split>
+ Is the same? F
+ Test1 = <6-31g*>,  Test2 = <sto-3g-split>
+ Is the same? F
+ Test1 = <6-31g*>,  Test2 = <6-31g**-split>
+ Is the same? F
+ Test1 = <6-31g**>,  Test2 = <sto-3g-split>
+ Is the same? F
+ Test1 = <6-31g**>,  Test2 = <6-31g**-split>
+ Is the same? F
+ Test1 = <6-31++g**>,  Test2 = <sto-3g-split>
+ Is the same? F
+ Test1 = <6-31++g**>,  Test2 = <6-31g**-split>
+ Is the same? F
+ Test1 = <6-311g**>,  Test2 = <sto-3g-split>
+ Is the same? F
+ Test1 = <6-311g**>,  Test2 = <6-31g**-split>
+ Is the same? F
+ Test1 = <6-311gbb>,  Test2 = <sto-3g-split>
+ Is the same? F
+ Test1 = <6-311gbb>,  Test2 = <6-31g**-split>
+ Is the same? F
+ Test1 = <6-311++gbb>,  Test2 = <sto-3g-split>
+ Is the same? F
+ Test1 = <6-311++gbb>,  Test2 = <6-31g**-split>
+ Is the same? F
+ Test1 = <mini>,  Test2 = <sto-3g-split>
+ Is the same? F
+ Test1 = <mini>,  Test2 = <6-31g**-split>
+ Is the same? F
+ Test1 = <midi>,  Test2 = <sto-3g-split>
+ Is the same? F
+ Test1 = <midi>,  Test2 = <6-31g**-split>
+ Is the same? F
+ Test1 = <dunninghay_sv>,  Test2 = <sto-3g-split>
+ Is the same? F
+ Test1 = <dunninghay_sv>,  Test2 = <6-31g**-split>
+ Is the same? F
+ Test1 = <dunninghay_svp>,  Test2 = <sto-3g-split>
+ Is the same? F
+ Test1 = <dunninghay_svp>,  Test2 = <6-31g**-split>
+ Is the same? F
+ Test1 = <dunning_dz>,  Test2 = <sto-3g-split>
+ Is the same? F
+ Test1 = <dunning_dz>,  Test2 = <6-31g**-split>
+ Is the same? F
+ Test1 = <dunning_dzp>,  Test2 = <sto-3g-split>
+ Is the same? F
+ Test1 = <dunning_dzp>,  Test2 = <6-31g**-split>
+ Is the same? F
+ Test1 = <dunning_tz>,  Test2 = <sto-3g-split>
+ Is the same? F
+ Test1 = <dunning_tz>,  Test2 = <6-31g**-split>
+ Is the same? F
+ Test1 = <ahlrichs_vdz>,  Test2 = <sto-3g-split>
+ Is the same? F
+ Test1 = <ahlrichs_vdz>,  Test2 = <6-31g**-split>
+ Is the same? F
+ Test1 = <ahlrichs_pvdz>,  Test2 = <sto-3g-split>
+ Is the same? F
+ Test1 = <ahlrichs_pvdz>,  Test2 = <6-31g**-split>
+ Is the same? F
+ Test1 = <ahlrichs_vtz>,  Test2 = <sto-3g-split>
+ Is the same? F
+ Test1 = <ahlrichs_vtz>,  Test2 = <6-31g**-split>
+ Is the same? F
+ Test1 = <ahlrichs_tzv>,  Test2 = <sto-3g-split>
+ Is the same? F
+ Test1 = <ahlrichs_tzv>,  Test2 = <6-31g**-split>
+ Is the same? F
+ Test1 = <wtbs>,  Test2 = <sto-3g-split>
+ Is the same? F
+ Test1 = <wtbs>,  Test2 = <6-31g**-split>
+ Is the same? F
+ Test1 = <sbkjc>,  Test2 = <sto-3g-split>
+ Is the same? F
+ Test1 = <sbkjc>,  Test2 = <6-31g**-split>
+ Is the same? F
+ Test1 = <lanl2>,  Test2 = <sto-3g-split>
+ Is the same? F
+ Test1 = <lanl2>,  Test2 = <6-31g**-split>
+ Is the same? F
+ Test1 = <sto-2g-split>,  Test2 = <sto-3g-split>
+ Is the same? F
+ Test1 = <sto-2g-split>,  Test2 = <6-31g**-split>
+ Is the same? F
+ Test1 = <sto-3g-split>,  Test2 = <sto-3g-split>
+ Is the same? T
+ Test1 = <sto-3g-split>,  Test2 = <6-31g**-split>
+ Is the same? F
+ Test1 = <sto-6g-split>,  Test2 = <sto-3g-split>
+ Is the same? F
+ Test1 = <sto-6g-split>,  Test2 = <6-31g**-split>
+ Is the same? F
+ Test1 = <3-21g-split>,  Test2 = <sto-3g-split>
+ Is the same? F
+ Test1 = <3-21g-split>,  Test2 = <6-31g**-split>
+ Is the same? F
+ Test1 = <6-31g-split>,  Test2 = <sto-3g-split>
+ Is the same? F
+ Test1 = <6-31g-split>,  Test2 = <6-31g**-split>
+ Is the same? F
+ Test1 = <6-31g**-split>,  Test2 = <sto-3g-split>
+ Is the same? F
+ Test1 = <6-31g**-split>,  Test2 = <6-31g**-split>
+ Is the same? T
+ Test1 = <user1>,  Test2 = <sto-3g-split>
+ Is the same? F
+ Test1 = <user1>,  Test2 = <6-31g**-split>
+ Is the same? F
+ Test1 = <user2>,  Test2 = <sto-3g-split>
+ Is the same? F
+ Test1 = <user2>,  Test2 = <6-31g**-split>
+ Is the same? F
+ Test1 = <user3>,  Test2 = <sto-3g-split>
+ Is the same? F
+ Test1 = <user3>,  Test2 = <6-31g**-split>
+ Is the same? F
+ Test1 = <user4>,  Test2 = <sto-3g-split>
+ Is the same? F
+ Test1 = <user4>,  Test2 = <6-31g**-split>
+ Is the same? F
+ Test1 = <user5>,  Test2 = <sto-3g-split>
+ Is the same? F
+ Test1 = <user5>,  Test2 = <6-31g**-split>
+ Is the same? F
+ Test1 = <crystal98>,  Test2 = <sto-3g-split>
+ Is the same? F
+ Test1 = <crystal98>,  Test2 = <6-31g**-split>
+ Is the same? F
+ BlokAInv               :: WALL (Sec,MFLOPS) = (0.19D+01, 58), NProc = 1
+ BlokAInv               :: Max(Z^t.A.Z-I)=0.13D-03, TrixThrsh=0.10D-03
+ MakeRho : Pruned Rho   :: dNel = 0.45D-04, kept 100% of distributions.
+ MakeRho : Moments      :: <r> = (0.49D+02, 0.66D+02, 0.57D+02), <r^2> = 0.92D+0
+ 3
+ L=           6  NCom=          32
+ To =           0 ; From =           1 ; i =           1           0
+We send       384      3288     18208  MyID 39 To   38
+We send       384      5139     28947  MyID 59 To   58
+We send       384      4986     27790  MyID 37 To   36
+We recv       384      3288     18208  MyID 38 From 39
+We recv       384      3008     15472  MyID  4 From  5
+We send       384      3008     15472  MyID  5 To    4
+We send       384      2249     11369  MyID  7 To    6
+We send       384      4647     25671  MyID  3 To    2
+We recv       384      4647     25671  MyID  2 From  3
+We send       384      6469     35581  MyID 43 To   42
+We send       384      3566     19294  MyID 29 To   28
+We send       384      6313     33801  MyID 19 To   18
+We send       384      2422     13458  MyID 31 To   30
+We recv       384      2422     13458  MyID 30 From 31
+We recv       384      7509     39469  MyID  0 From  1
+We recv       384      2249     11369  MyID  6 From  7
+We send       384      4035     22259  MyID 47 To   46
+We send       384      5479     30543  MyID 61 To   60
+We recv       384      3566     19294  MyID 28 From 29
+We recv       384      4291     22963  MyID 20 From 21
+We send       384      7509     39469  MyID  1 To    0
+We recv       384      4035     22259  MyID 46 From 47
+We send       384      6223     35007  MyID 57 To   56
+We recv       384      3684     19896  MyID 12 From 13
+We send       384      5963     33043  MyID 17 To   16
+We send       384      4291     22963  MyID 21 To   20
+We send       384      3684     19896  MyID 13 To   12
+We recv       384      5963     33043  MyID 16 From 17
+We recv       384      2494     13270  MyID 22 From 23
+We recv       384      2339     12403  MyID 14 From 15
+We send       384      2494     13270  MyID 23 To   22
+We send       384      2339     12403  MyID 15 To   14
+We send       384      8701     48633  MyID 49 To   48
+We recv       384      5139     28947  MyID 58 From 59
+We send       384      5393     30089  MyID 11 To   10
+We recv       384      6223     35007  MyID 56 From 57
+We recv       384      5393     30089  MyID 10 From 11
+We send       384      6711     37343  MyID 51 To   50
+We send       384      7213     40197  MyID 41 To   40
+We recv       384      9195     48511  MyID  8 From  9
+We send       384      6578     36258  MyID 25 To   24
+We recv       384      6711     37343  MyID 50 From 51
+We send       384      9195     48511  MyID  9 To    8
+We send       384      8513     45397  MyID 45 To   44
+We recv       384      5479     30543  MyID 60 From 61
+We recv       384      6469     35581  MyID 42 From 43
+We recv       384      6578     36258  MyID 24 From 25
+We send       384      9495     49635  MyID 63 To   62
+We send       384     10049     53893  MyID 27 To   26
+We recv       384      8513     45397  MyID 44 From 45
+We recv       384      9495     49635  MyID 62 From 63
+We recv       384     10049     53893  MyID 26 From 27
+We send       384      7454     41246  MyID  2 To    0
+We recv       384      6313     33801  MyID 18 From 19
+We recv       384      4838     24886  MyID  4 From  6
+We send       384      4838     24886  MyID  6 To    4
+We recv       384      6257     35309  MyID 32 From 33
+We send       384      6257     35309  MyID 33 To   32
+We recv       384      7267     39715  MyID 34 From 35
+We send       384      7267     39715  MyID 35 To   34
+We send       384      8325     44753  MyID  4 To    0
+We send       384     10155     56935  MyID 58 To   56
+We send       384     10189     55193  MyID 46 To   44
+ To =           2 ; From =           3 ; i =           2           0
+ To =           4 ; From =           5 ; i =           3           0
+ To =           6 ; From =           7 ; i =           4           0
+ To =           8 ; From =           9 ; i =           5           0
+ To =          10 ; From =          11 ; i =           6           0
+ To =          12 ; From =          13 ; i =           7           0
+ To =          14 ; From =          15 ; i =           8           0
+ To =          16 ; From =          17 ; i =           9           0
+ To =          18 ; From =          19 ; i =          10           0
+ To =          20 ; From =          21 ; i =          11           0
+ To =          22 ; From =          23 ; i =          12           0
+ To =          24 ; From =          25 ; i =          13           0
+ To =          26 ; From =          27 ; i =          14           0
+ To =          28 ; From =          29 ; i =          15           0
+ To =          30 ; From =          31 ; i =          16           0
+ To =          32 ; From =          33 ; i =          17           0
+ To =          34 ; From =          35 ; i =          18           0
+ To =          36 ; From =          37 ; i =          19           0
+ To =          38 ; From =          39 ; i =          20           0
+ To =          40 ; From =          41 ; i =          21           0
+ To =          42 ; From =          43 ; i =          22           0
+ To =          44 ; From =          45 ; i =          23           0
+ To =          46 ; From =          47 ; i =          24           0
+ To =          48 ; From =          49 ; i =          25           0
+ To =          50 ; From =          51 ; i =          26           0
+ To =          52 ; From =          53 ; i =          27           0
+ To =          54 ; From =          55 ; i =          28           0
+ To =          56 ; From =          57 ; i =          29           0
+ To =          58 ; From =          59 ; i =          30           0
+ To =          60 ; From =          61 ; i =          31           0
+ To =          62 ; From =          63 ; i =          32           0
+ L=           5  NCom=          16
+ To =           0 ; From =           2 ; i =           1           0
+We recv       384      7454     41246  MyID  0 From  2
+We recv       384      8701     48633  MyID 48 From 49
+We recv       384     10155     56935  MyID 56 From 58
+We send       384     11811     65303  MyID 50 To   48
+We send       384     12179     64131  MyID 62 To   60
+We send       384      6112     33916  MyID 30 To   28
+We recv       384     14339     76371  MyID 16 From 18
+We send       384     14339     76371  MyID 18 To   16
+ To =           4 ; From =           6 ; i =           2           0
+ To =           8 ; From =          10 ; i =           3           0
+ To =          12 ; From =          14 ; i =           4           0
+ To =          16 ; From =          18 ; i =           5           0
+ To =          20 ; From =          22 ; i =           6           0
+ To =          24 ; From =          26 ; i =           7           0
+ To =          28 ; From =          30 ; i =           8           0
+ To =          32 ; From =          34 ; i =           9           0
+ To =          36 ; From =          38 ; i =          10           0
+ To =          40 ; From =          42 ; i =          11           0
+ To =          44 ; From =          46 ; i =          12           0
+ To =          48 ; From =          50 ; i =          13           0
+ To =          52 ; From =          54 ; i =          14           0
+ To =          56 ; From =          58 ; i =          15           0
+ To =          60 ; From =          62 ; i =          16           0
+ L=           4  NCom=           8
+ To =           0 ; From =           4 ; i =           1           0
+We recv       384      8325     44753  MyID  0 From  4
+We recv       384      7213     40197  MyID 40 From 41
+We recv       384     11283     61755  MyID 40 From 42
+We send       384     11283     61755  MyID 42 To   40
+We send       384      9066     48522  MyID 53 To   52
+We send       384      4365     23197  MyID 55 To   54
+We recv       384     12179     64131  MyID 60 From 62
+We send       384     15197     81677  MyID 60 To   56
+We recv       384      6112     33916  MyID 28 From 30
+We send       384     10431     57507  MyID 28 To   24
+We recv       384      9066     48522  MyID 52 From 53
+We recv       384      4365     23197  MyID 54 From 55
+We recv       384     10189     55193  MyID 44 From 46
+We send       384     16566     89194  MyID 44 To   40
+We recv       384     15197     81677  MyID 56 From 60
+We recv       384     16566     89194  MyID 40 From 44
+We recv       384      4986     27790  MyID 36 From 37
+We recv       384      6402     35586  MyID 36 From 38
+We send       384     13687     74203  MyID 36 To   32
+We send       384      6402     35586  MyID 38 To   36
+We recv       384     11342     61042  MyID  8 From 10
+We recv       384      9632     51836  MyID  8 From 12
+We recv       384      5004     26888  MyID 12 From 14
+We send       384      9632     51836  MyID 12 To    8
+We send       384     11342     61042  MyID 10 To    8
+We send       384      5004     26888  MyID 14 To   12
+We recv       384      6017     31701  MyID 20 From 22
+We send       384     10449     56269  MyID 20 To   16
+We send       384      6017     31701  MyID 22 To   20
+We send       384     11793     62237  MyID 54 To   52
+ To =           8 ; From =          12 ; i =           2           0
+ To =          16 ; From =          20 ; i =           3           0
+ To =          24 ; From =          28 ; i =           4           0
+ To =          32 ; From =          36 ; i =           5           0
+ To =          40 ; From =          44 ; i =           6           0
+ To =          48 ; From =          52 ; i =           7           0
+ To =          56 ; From =          60 ; i =           8           0
+ L=           3  NCom=           4
+ To =           0 ; From =           8 ; i =           1           0
+We recv       384     10449     56269  MyID 16 From 20
+We send       384     12532     68324  MyID 26 To   24
+We recv       384     12532     68324  MyID 24 From 26
+We recv       384     11793     62237  MyID 52 From 54
+We send       384     16864     90512  MyID 52 To   48
+We recv       384     11811     65303  MyID 48 From 50
+We recv       384     16864     90512  MyID 48 From 52
+We recv       384     10431     57507  MyID 24 From 28
+We send       384     20030    110978  MyID 56 To   48
+We send       384     17765     97581  MyID  8 To    0
+We recv       384     17765     97581  MyID  0 From  8
+We send       384     21897    122181  MyID 40 To   32
+We recv       384     11362     62746  MyID 32 From 34
+We recv       384     13687     74203  MyID 32 From 36
+We recv       384     21897    122181  MyID 32 From 40
+We send       384     11362     62746  MyID 34 To   32
+ To =          16 ; From =          24 ; i =           2           0
+ To =          32 ; From =          40 ; i =           3           0
+ To =          48 ; From =          56 ; i =           4           0
+We recv       384     17514     98258  MyID 16 From 24
+ L=           2  NCom=           2
+ To =           0 ; From =          16 ; i =           1           0
+We send       384     17514     98258  MyID 24 To   16
+We recv       384     20030    110978  MyID 48 From 56
+We recv       384     29503    163727  MyID  0 From 16
+We send       384     32681    181149  MyID 48 To   32
+We send       384     29503    163727  MyID 16 To    0
+ To =          32 ; From =          48 ; i =           2           0
+ L=           1  NCom=           1
+ To =           0 ; From =          32 ; i =           1           0
+We recv       384     44737    247613  MyID  0 From 32
+We recv       384     32681    181149  MyID 32 From 48
+We send       384     44737    247613  MyID 32 To    0
+ TPara=   10.4339886000000     
+ TS4 : Pure 1           :: dE=0.10D+01, dP=0.31D+00, %Non0=0.75D+01
+ TS4 : Pure 2           :: dE=0.81D-01, dP=0.36D+00, %Non0=0.75D+01
+ TS4 : Pure 3           :: dE=0.27D-01, dP=0.48D+00, %Non0=0.75D+01
+ TS4 : Pure 4           :: dE=0.88D-02, dP=0.83D-01, %Non0=0.76D+01
+ TS4 : Pure 5           :: dE=0.11D-01, dP=0.94D-01, %Non0=0.84D+01
+ TS4 : Pure 6           :: dE=0.13D-01, dP=0.11D+00, %Non0=0.10D+02
+ TS4 : Pure 7           :: dE=0.14D-01, dP=0.12D+00, %Non0=0.14D+02
+ TS4 : Pure 8           :: dE=0.12D-01, dP=0.13D+00, %Non0=0.18D+02
+ TS4 : Pure 9           :: dE=0.85D-02, dP=0.11D+00, %Non0=0.24D+02
+ TS4 : Pure 10          :: dE=0.40D-02, dP=0.86D-01, %Non0=0.30D+02
+ TS4 : Pure 11          :: dE=0.11D-02, dP=0.49D-01, %Non0=0.33D+02
+ TS4 : Pure 12          :: dE=0.13D-03, dP=0.12D-01, %Non0=0.33D+02
+ TS4 : Pure 13          :: dE=0.34D-05, dP=0.50D-03, %Non0=0.35D+02
+ TS4 : Pure 14          :: dE=0.28D-07, dP=0.20D-03, %Non0=0.35D+02
+ TS4 : Met dE/dP goals  :: Tr{FP}=-.2196969018954464D+04, dNel = 0.45D-12
+ TS4                    :: 14 purification steps, 26 matrix multiplies
+ TS4                    :: Fractional occupation = 0.64D+00, ThrX=0.10D-03, %Non
+ 0s = 0.35D+02
+ TS4 : Max abs errors   :: dE=0.61D-04, dP=0.20D-03
+ TS4                    :: Rel dE=0.28D-07, ||dP||_F=0.51D-02
+ 
+= = = = = SCFCycle #0, Basis #1, Geometry #1 = = = = =
+
+       MaxDelD = 0.17D
+ +01
+       <T>     = 0.76864616D+04
+       <V>     = -.13751014D+05
+       <HF>
+     = -.88529382D+03
+       <SCF>   = -6949.84672855
+
+ MakeRho : Pruned Rho   :: dNel = -.86D-04, kept 100% of distributions.
+ MakeRho : Moments      :: <r> = (-.25D+02, -.62D+02, -.15D+01), <r^2> = 0.86D+0
+ 3
+ L=           6  NCom=          32
+We send       384      6098     33402  MyID 29 To   28
+ To =           0 ; From =           1 ; i =           1           0
+We send       384      4550     24466  MyID 63 To   62
+We send       384      5449     29433  MyID  3 To    2
+We send       384      5687     31963  MyID 61 To   60
+We recv       384      4550     24466  MyID 62 From 63
+We send       384      5969     32317  MyID 37 To   36
+We send       384      5903     32787  MyID 21 To   20
+We send       384      7550     42502  MyID  9 To    8
+We recv       384      6340     34064  MyID 10 From 11
+We send       384      6340     34064  MyID 11 To   10
+We send       384      7689     45293  MyID 59 To   58
+We send       384      6201     35597  MyID 35 To   34
+We send       384      8061     47569  MyID 57 To   56
+We send       384      7701     43505  MyID 43 To   42
+We recv       384      5903     32787  MyID 20 From 21
+We send       384      7300     41432  MyID 19 To   18
+We recv       384      5463     29571  MyID  0 From  1
+We send       384      7941     45229  MyID 17 To   16
+We send       384      5463     29571  MyID  1 To    0
+We send       384      6472     37824  MyID 51 To   50
+We recv       384      7701     43505  MyID 42 From 43
+We send       384      7678     43886  MyID 27 To   26
+We recv       384      7941     45229  MyID 16 From 17
+We recv       384      5449     29433  MyID  2 From  3
+We send       384      8732     50872  MyID 25 To   24
+We recv       384      7300     41432  MyID 18 From 19
+We recv       384      7678     43886  MyID 26 From 27
+We send       384      7694     44118  MyID 33 To   32
+We send       384      7121     39873  MyID 55 To   54
+We send       384      7614     42338  MyID 53 To   52
+We send       384      7117     38657  MyID 13 To   12
+We recv       384      7121     39873  MyID 54 From 55
+We recv       384      6201     35597  MyID 34 From 35
+We recv       384      7614     42338  MyID 52 From 53
+We send       384      7790     44246  MyID 45 To   44
+We recv       384      7117     38657  MyID 12 From 13
+We recv       384      5969     32317  MyID 36 From 37
+We recv       384      5687     31963  MyID 60 From 61
+We recv       384     10321     60245  MyID 40 From 41
+We recv       384      7790     44246  MyID 44 From 45
+We recv       384      6098     33402  MyID 28 From 29
+We recv       384     10114     58394  MyID 38 From 39
+We send       384      9018     48482  MyID 62 To   60
+We send       384     10321     60245  MyID 41 To   40
+We send       384      9217     51965  MyID 47 To   46
+We send       384     10540     61272  MyID 31 To   30
+We send       384     10114     58394  MyID 39 To   38
+We recv       384      9217     51965  MyID 46 From 47
+We recv       384     10540     61272  MyID 30 From 31
+We recv       384      8732     50872  MyID 24 From 25
+We send       384      9822     57390  MyID 49 To   48
+We recv       384      6472     37824  MyID 50 From 51
+We send       384     10492     59000  MyID 23 To   22
+We send       384     10241     56345  MyID 15 To   14
+We recv       384      9822     57390  MyID 48 From 49
+We recv       384     10492     59000  MyID 22 From 23
+We send       384     10848     58648  MyID  7 To    6
+We recv       384     10848     58648  MyID  6 From  7
+We send       384     10349     56465  MyID  2 To    0
+We recv       384     11708     67564  MyID  4 From  5
+We send       384     11708     67564  MyID  5 To    4
+We send       384     13463     78447  MyID 26 To   24
+We send       384     13015     73943  MyID 18 To   16
+We send       384     11003     60819  MyID 54 To   52
+We recv       384      8061     47569  MyID 56 From 57
+We recv       384      7689     45293  MyID 58 From 59
+We send       384     13953     81033  MyID 58 To   56
+We send       384     14531     84339  MyID 50 To   48
+We send       384     13227     72979  MyID 46 To   44
+We send       384     14856     85420  MyID 30 To   28
+ To =           2 ; From =           3 ; i =           2           0
+ To =           4 ; From =           5 ; i =           3           0
+ To =           6 ; From =           7 ; i =           4           0
+ To =           8 ; From =           9 ; i =           5           0
+ To =          10 ; From =          11 ; i =           6           0
+ To =          12 ; From =          13 ; i =           7           0
+ To =          14 ; From =          15 ; i =           8           0
+ To =          16 ; From =          17 ; i =           9           0
+ To =          18 ; From =          19 ; i =          10           0
+ To =          20 ; From =          21 ; i =          11           0
+ To =          22 ; From =          23 ; i =          12           0
+ To =          24 ; From =          25 ; i =          13           0
+ To =          26 ; From =          27 ; i =          14           0
+ To =          28 ; From =          29 ; i =          15           0
+ To =          30 ; From =          31 ; i =          16           0
+ To =          32 ; From =          33 ; i =          17           0
+ To =          34 ; From =          35 ; i =          18           0
+ To =          36 ; From =          37 ; i =          19           0
+ To =          38 ; From =          39 ; i =          20           0
+ To =          40 ; From =          41 ; i =          21           0
+ To =          42 ; From =          43 ; i =          22           0
+ To =          44 ; From =          45 ; i =          23           0
+ To =          46 ; From =          47 ; i =          24           0
+ To =          48 ; From =          49 ; i =          25           0
+ To =          50 ; From =          51 ; i =          26           0
+ To =          52 ; From =          53 ; i =          27           0
+ To =          54 ; From =          55 ; i =          28           0
+ To =          56 ; From =          57 ; i =          29           0
+ To =          58 ; From =          59 ; i =          30           0
+ To =          60 ; From =          61 ; i =          31           0
+ To =          62 ; From =          63 ; i =          32           0
+ L=           5  NCom=          16
+ To =           0 ; From =           2 ; i =           1           0
+We recv       384     10349     56465  MyID  0 From  2
+We recv       384     13953     81033  MyID 56 From 58
+We recv       384      9018     48482  MyID 60 From 62
+We send       384     14948     82812  MyID 60 To   56
+We recv       384     12801     72709  MyID 36 From 38
+We send       384     15946     89974  MyID 22 To   20
+We send       384     12801     72709  MyID 38 To   36
+We recv       384     10241     56345  MyID 14 From 15
+We send       384     18444    104064  MyID 14 To   12
+We recv       384     14531     84339  MyID 48 From 50
+We recv       384     14856     85420  MyID 28 From 30
+We send       384     19118    108770  MyID 28 To   24
+We recv       384     11003     60819  MyID 52 From 54
+We send       384     17002     94230  MyID 52 To   48
+We recv       384     13463     78447  MyID 24 From 26
+We recv       384     19118    108770  MyID 24 From 28
+We recv       384     14948     82812  MyID 56 From 60
+We recv       384     13424     76308  MyID 40 From 42
+We recv       384     19868    111084  MyID 40 From 44
+We recv       384     13227     72979  MyID 44 From 46
+We send       384     19868    111084  MyID 44 To   40
+We send       384     13424     76308  MyID 42 To   40
+ To =           4 ; From =           6 ; i =           2           0
+ To =           8 ; From =          10 ; i =           3           0
+ To =          12 ; From =          14 ; i =           4           0
+ To =          16 ; From =          18 ; i =           5           0
+ To =          20 ; From =          22 ; i =           6           0
+ To =          24 ; From =          26 ; i =           7           0
+ To =          28 ; From =          30 ; i =           8           0
+ To =          32 ; From =          34 ; i =           9           0
+ To =          36 ; From =          38 ; i =          10           0
+ To =          40 ; From =          42 ; i =          11           0
+ To =          44 ; From =          46 ; i =          12           0
+ To =          48 ; From =          50 ; i =          13           0
+ To =          52 ; From =          54 ; i =          14           0
+ To =          56 ; From =          58 ; i =          15           0
+ To =          60 ; From =          62 ; i =          16           0
+ L=           4  NCom=           8
+ To =           0 ; From =           4 ; i =           1           0
+We recv       384     15946     89974  MyID 20 From 22
+We send       384     19627    110287  MyID 20 To   16
+We recv       384     17002     94230  MyID 48 From 52
+We recv       384     13015     73943  MyID 16 From 18
+We recv       384     19627    110287  MyID 16 From 20
+We recv       384     18444    104064  MyID 12 From 14
+We send       384     21940    123268  MyID 12 To    8
+We recv       384      7550     42502  MyID  8 From  9
+We recv       384      9746     52874  MyID  8 From 10
+We recv       384     21940    123268  MyID  8 From 12
+We send       384      9746     52874  MyID 10 To    8
+We recv       384     25960    149292  MyID  0 From  4
+We recv       384     17873     99829  MyID  4 From  6
+We send       384     25960    149292  MyID  4 To    0
+We send       384     17873     99829  MyID  6 To    4
+We send       384     18661    104101  MyID 36 To   32
+We recv       384      7694     44118  MyID 32 From 33
+We recv       384     12411     71539  MyID 32 From 34
+We recv       384     18661    104101  MyID 32 From 36
+We send       384     12411     71539  MyID 34 To   32
+We send       384     24096    140172  MyID 56 To   48
+We send       384     28405    167521  MyID 24 To   16
+ To =           8 ; From =          12 ; i =           2           0
+ To =          16 ; From =          20 ; i =           3           0
+ To =          24 ; From =          28 ; i =           4           0
+ To =          32 ; From =          36 ; i =           5           0
+ To =          40 ; From =          44 ; i =           6           0
+ To =          48 ; From =          52 ; i =           7           0
+ To =          56 ; From =          60 ; i =           8           0
+ L=           3  NCom=           4
+ To =           0 ; From =           8 ; i =           1           0
+We send       384     28771    164319  MyID  8 To    0
+We recv       384     28771    164319  MyID  0 From  8
+We send       384     28868    166880  MyID 40 To   32
+We recv       384     28405    167521  MyID 16 From 24
+We recv       384     24096    140172  MyID 48 From 56
+We send       384     43152    249184  MyID 16 To    0
+ To =          16 ; From =          24 ; i =           2           0
+ To =          32 ; From =          40 ; i =           3           0
+ To =          48 ; From =          56 ; i =           4           0
+ L=           2  NCom=           2
+ To =           0 ; From =          16 ; i =           1           0
+We recv       384     43152    249184  MyID  0 From 16
+We send       384     38045    217473  MyID 48 To   32
+ To =          32 ; From =          48 ; i =           2           0
+ L=           1  NCom=           1
+ To =           0 ; From =          32 ; i =           1           0
+We recv       384     58087    326943  MyID  0 From 32
+We recv       384     28868    166880  MyID 32 From 40
+We recv       384     38045    217473  MyID 32 From 48
+We send       384     58087    326943  MyID 32 To    0
+ TPara=   9.16932220000000     
+ TS4 : Pure 1           :: dE=0.10D+01, dP=0.32D+00, %Non0=0.75D+01
+ TS4 : Pure 2           :: dE=0.81D-01, dP=0.37D+00, %Non0=0.75D+01
+ TS4 : Pure 3           :: dE=0.27D-01, dP=0.48D+00, %Non0=0.75D+01
+ TS4 : Pure 4           :: dE=0.90D-02, dP=0.70D-01, %Non0=0.76D+01
+ TS4 : Pure 5           :: dE=0.11D-01, dP=0.92D-01, %Non0=0.85D+01
+ TS4 : Pure 6           :: dE=0.13D-01, dP=0.11D+00, %Non0=0.11D+02
+ TS4 : Pure 7           :: dE=0.14D-01, dP=0.11D+00, %Non0=0.14D+02
+ TS4 : Pure 8           :: dE=0.12D-01, dP=0.12D+00, %Non0=0.18D+02
+ TS4 : Pure 9           :: dE=0.86D-02, dP=0.11D+00, %Non0=0.25D+02
+ TS4 : Pure 10          :: dE=0.38D-02, dP=0.78D-01, %Non0=0.30D+02
+ TS4 : Pure 11          :: dE=0.91D-03, dP=0.41D-01, %Non0=0.32D+02
+ TS4 : Pure 12          :: dE=0.90D-04, dP=0.84D-02, %Non0=0.32D+02
+ TS4 : Pure 13          :: dE=0.16D-05, dP=0.25D-03, %Non0=0.34D+02
+ TS4 : Pure 14          :: dE=0.12D-07, dP=0.21D-03, %Non0=0.34D+02
+ TS4 : Met dE/dP goals  :: Tr{FP}=-.2205040657504151D+04, dNel = 0.57D-11
+ TS4                    :: 14 purification steps, 26 matrix multiplies
+ TS4                    :: Fractional occupation = 0.64D+00, ThrX=0.10D-03, %Non
+ 0s = 0.34D+02
+ TS4 : Max abs errors   :: dE=0.26D-04, dP=0.21D-03
+ TS4                    :: Rel dE=0.12D-07, ||dP||_F=0.56D-02
+ 
+= = = = = SCFCycle #1, Basis #1, Geometry #1 = = = = =
+
+       DIISErr = 0.33D
+ -02
+       MaxDelD = 0.40D-01
+       <T>     = 0.72627774D+04
+       <V>     = 
+ -.13557687D+05
+       <HF>    = -.96501254D+03
+       <SCF>   = -7259.92247574
+
+ MakeRho : Pruned Rho   :: dNel = -.77D-04, kept 100% of distributions.
+ MakeRho : Moments      :: <r> = (-.23D+02, -.59D+02, -.36D+01), <r^2> = 0.85D+0
+ 3
+ L=           6  NCom=          32
+ To =           0 ; From =           1 ; i =           1           0
+We send       384      7492     40184  MyID  3 To    2
+We send       384      7515     43843  MyID 61 To   60
+We send       384      7875     46719  MyID 51 To   50
+We send       384      7695     44875  MyID 45 To   44
+We send       384      7759     41779  MyID 63 To   62
+We recv       384      7759     41779  MyID 62 From 63
+We send       384      7789     43477  MyID  9 To    8
+We send       384      7302     42806  MyID 19 To   18
+We send       384      8479     47267  MyID 55 To   54
+We send       384      7924     43900  MyID 21 To   20
+We send       384      7255     39143  MyID  1 To    0
+We recv       384      7789     43477  MyID  8 From  9
+We recv       384      7924     43900  MyID 20 From 21
+We recv       384      7255     39143  MyID  0 From  1
+We send       384      8474     46202  MyID 11 To   10
+We recv       384      8474     46202  MyID 10 From 11
+ To =           2 ; From =           3 ; i =           2           0
+ To =           4 ; From =           5 ; i =           3           0
+ To =           6 ; From =           7 ; i =           4           0
+ To =           8 ; From =           9 ; i =           5           0
+ To =          10 ; From =          11 ; i =           6           0
+ To =          12 ; From =          13 ; i =           7           0
+ To =          14 ; From =          15 ; i =           8           0
+ To =          16 ; From =          17 ; i =           9           0
+ To =          18 ; From =          19 ; i =          10           0
+ To =          20 ; From =          21 ; i =          11           0
+ To =          22 ; From =          23 ; i =          12           0
+ To =          24 ; From =          25 ; i =          13           0
+ To =          26 ; From =          27 ; i =          14           0
+ To =          28 ; From =          29 ; i =          15           0
+ To =          30 ; From =          31 ; i =          16           0
+ To =          32 ; From =          33 ; i =          17           0
+ To =          34 ; From =          35 ; i =          18           0
+ To =          36 ; From =          37 ; i =          19           0
+ To =          38 ; From =          39 ; i =          20           0
+ To =          40 ; From =          41 ; i =          21           0
+ To =          42 ; From =          43 ; i =          22           0
+ To =          44 ; From =          45 ; i =          23           0
+ To =          46 ; From =          47 ; i =          24           0
+ To =          48 ; From =          49 ; i =          25           0
+ To =          50 ; From =          51 ; i =          26           0
+ To =          52 ; From =          53 ; i =          27           0
+ To =          54 ; From =          55 ; i =          28           0
+ To =          56 ; From =          57 ; i =          29           0
+ To =          58 ; From =          59 ; i =          30           0
+ To =          60 ; From =          61 ; i =          31           0
+ To =          62 ; From =          63 ; i =          32           0
+ L=           5  NCom=          16
+ To =           0 ; From =           2 ; i =           1           0
+We recv       384     13939     75399  MyID  0 From  2
+ To =           4 ; From =           6 ; i =           2           0
+ To =           8 ; From =          10 ; i =           3           0
+ To =          12 ; From =          14 ; i =           4           0
+ To =          16 ; From =          18 ; i =           5           0
+ To =          20 ; From =          22 ; i =           6           0
+ To =          24 ; From =          26 ; i =           7           0
+ To =          28 ; From =          30 ; i =           8           0
+ To =          32 ; From =          34 ; i =           9           0
+ To =          36 ; From =          38 ; i =          10           0
+ To =          40 ; From =          42 ; i =          11           0
+ To =          44 ; From =          46 ; i =          12           0
+ To =          48 ; From =          50 ; i =          13           0
+ To =          52 ; From =          54 ; i =          14           0
+ To =          56 ; From =          58 ; i =          15           0
+ To =          60 ; From =          62 ; i =          16           0
+ L=           4  NCom=           8
+ To =           0 ; From =           4 ; i =           1           0
+We recv       384     31382    178594  MyID  0 From  4
+We send       384     12331     66387  MyID  7 To    6
+We send       384      7583     43411  MyID 35 To   34
+We send       384     10971     63939  MyID 49 To   48
+We send       384      7969     44341  MyID 37 To   36
+We send       384     10526     59482  MyID 47 To   46
+We send       384      7804     45220  MyID 53 To   52
+We send       384      8659     49851  MyID 43 To   42
+We recv       384      7515     43843  MyID 60 From 61
+We send       384      9187     54123  MyID 57 To   56
+We send       384      9353     55329  MyID 27 To   26
+We send       384     10058     56582  MyID 13 To   12
+We recv       384     13944     77032  MyID  8 From 10
+We recv       384     29194    164974  MyID  8 From 12
+We send       384      7951     46167  MyID 17 To   16
+We send       384     11536     65624  MyID 23 To   22
+We send       384      7822     42842  MyID 29 To   28
+We recv       384      7492     40184  MyID  2 From  3
+We send       384     13939     75399  MyID  2 To    0
+We send       384     13496     76084  MyID  5 To    4
+We send       384      8060     46712  MyID 33 To   32
+We recv       384      7875     46719  MyID 50 From 51
+We recv       384     10803     61491  MyID 38 From 39
+We recv       384     10526     59482  MyID 46 From 47
+We recv       384      8479     47267  MyID 54 From 55
+We recv       384      8659     49851  MyID 42 From 43
+We send       384     11271     61307  MyID 62 To   60
+We send       384      8212     48184  MyID 59 To   58
+We send       384      8523     49407  MyID 25 To   24
+We recv       384     10058     56582  MyID 12 From 13
+We send       384     13944     77032  MyID 10 To    8
+We recv       384      7302     42806  MyID 18 From 19
+We recv       384     11536     65624  MyID 22 From 23
+We recv       384      7822     42842  MyID 28 From 29
+We recv       384     13496     76084  MyID  4 From  5
+We recv       384      8060     46712  MyID 32 From 33
+We recv       384     13259     75435  MyID 32 From 34
+We recv       384     19099    107403  MyID 32 From 36
+We recv       384     10971     63939  MyID 48 From 49
+We send       384     10803     61491  MyID 39 To   38
+We send       384     15290     85038  MyID 46 To   44
+We recv       384      7804     45220  MyID 52 From 53
+We send       384     10355     58667  MyID 41 To   40
+We recv       384     11271     61307  MyID 60 From 62
+We send       384     16922     93898  MyID 60 To   56
+We recv       384      8212     48184  MyID 58 From 59
+We recv       384      9353     55329  MyID 26 From 27
+We send       384     12435     68911  MyID 15 To   14
+We recv       384      7951     46167  MyID 16 From 17
+We send       384     17345     98157  MyID 22 To   20
+We send       384     12581     72373  MyID 31 To   30
+We recv       384     12331     66387  MyID  6 From  7
+We recv       384      7583     43411  MyID 34 From 35
+We send       384     13259     75435  MyID 34 To   32
+We send       384     15227     88943  MyID 50 To   48
+We recv       384      7969     44341  MyID 36 From 37
+We recv       384     14225     79533  MyID 36 From 38
+We send       384     19099    107403  MyID 36 To   32
+We recv       384      7695     44875  MyID 44 From 45
+We recv       384     15290     85038  MyID 44 From 46
+We send       384     20656    114920  MyID 44 To   40
+We send       384     12940     71992  MyID 54 To   52
+We recv       384     10355     58667  MyID 40 From 41
+We send       384     14577     84325  MyID 58 To   56
+We recv       384      8523     49407  MyID 24 From 25
+We recv       384     12435     68911  MyID 14 From 15
+We send       384     12244     71008  MyID 18 To   16
+We recv       384     17345     98157  MyID 20 From 22
+We send       384     21443    121679  MyID 20 To   16
+We recv       384     12581     72373  MyID 30 From 31
+We recv       384     20868    116368  MyID  4 From  6
+We send       384     31382    178594  MyID  4 To    0
+We recv       384     15227     88943  MyID 48 From 50
+We send       384     14225     79533  MyID 38 To   36
+We recv       384     12940     71992  MyID 52 From 54
+We send       384     18306    103358  MyID 52 To   48
+We recv       384     14407     81647  MyID 40 From 42
+We recv       384     20656    114920  MyID 40 From 44
+We recv       384      9187     54123  MyID 56 From 57
+We send       384     15403     90095  MyID 26 To   24
+We send       384     22625    128761  MyID 14 To   12
+We recv       384     12244     71008  MyID 16 From 18
+We recv       384     21443    121679  MyID 16 From 20
+We send       384     16991     96087  MyID 30 To   28
+We send       384     20868    116368  MyID  6 To    4
+We recv       384     18306    103358  MyID 48 From 52
+We send       384     14407     81647  MyID 42 To   40
+We recv       384     14577     84325  MyID 56 From 58
+We recv       384     16922     93898  MyID 56 From 60
+We recv       384     15403     90095  MyID 24 From 26
+We recv       384     22625    128761  MyID 12 From 14
+We send       384     29194    164974  MyID 12 To    8
+We recv       384     16991     96087  MyID 28 From 30
+We send       384     23051    130755  MyID 28 To   24
+We recv       384     23051    130755  MyID 24 From 28
+We recv       384     27495    159627  MyID 48 From 56
+We send       384     30108    171340  MyID 40 To   32
+We send       384     27495    159627  MyID 56 To   48
+We send       384     32949    192701  MyID 24 To   16
+We send       384     37901    217329  MyID  8 To    0
+We recv       384     32949    192701  MyID 16 From 24
+ To =           8 ; From =          12 ; i =           2           0
+ To =          16 ; From =          20 ; i =           3           0
+ To =          24 ; From =          28 ; i =           4           0
+ To =          32 ; From =          36 ; i =           5           0
+ To =          40 ; From =          44 ; i =           6           0
+ To =          48 ; From =          52 ; i =           7           0
+ To =          56 ; From =          60 ; i =           8           0
+ L=           3  NCom=           4
+ To =           0 ; From =           8 ; i =           1           0
+We recv       384     37901    217329  MyID  0 From  8
+We send       384     40553    233437  MyID 48 To   32
+We send       384     46538    268102  MyID 16 To    0
+ To =          16 ; From =          24 ; i =           2           0
+ To =          32 ; From =          40 ; i =           3           0
+ To =          48 ; From =          56 ; i =           4           0
+ L=           2  NCom=           2
+ To =           0 ; From =          16 ; i =           1           0
+We recv       384     46538    268102  MyID  0 From 16
+We recv       384     30108    171340  MyID 32 From 40
+We recv       384     40553    233437  MyID 32 From 48
+We send       384     61553    345457  MyID 32 To    0
+ To =          32 ; From =          48 ; i =           2           0
+ L=           1  NCom=           1
+ To =           0 ; From =          32 ; i =           1           0
+We recv       384     61553    345457  MyID  0 From 32
+ TPara=   9.21230720000000     
+ TS4 : Pure 1           :: dE=0.10D+01, dP=0.34D+00, %Non0=0.81D+01
+ TS4 : Pure 2           :: dE=0.79D-01, dP=0.41D+00, %Non0=0.81D+01
+ TS4 : Pure 3           :: dE=0.25D-01, dP=0.49D+00, %Non0=0.81D+01
+ TS4 : Pure 4           :: dE=0.61D-03, dP=0.43D+00, %Non0=0.82D+01
+ TS4 : Pure 5           :: dE=0.22D-01, dP=0.37D+00, %Non0=0.11D+02
+ TS4 : Pure 6           :: dE=0.18D-01, dP=0.11D+00, %Non0=0.10D+02
+ TS4 : Pure 7           :: dE=0.20D-01, dP=0.12D+00, %Non0=0.13D+02
+ TS4 : Pure 8           :: dE=0.18D-01, dP=0.12D+00, %Non0=0.18D+02
+ TS4 : Pure 9           :: dE=0.11D-01, dP=0.11D+00, %Non0=0.22D+02
+ TS4 : Pure 10          :: dE=0.36D-02, dP=0.67D-01, %Non0=0.25D+02
+ TS4 : Pure 11          :: dE=0.46D-03, dP=0.18D-01, %Non0=0.26D+02
+ TS4 : Pure 12          :: dE=0.13D-04, dP=0.12D-02, %Non0=0.26D+02
+ TS4 : Pure 13          :: dE=0.26D-07, dP=0.20D-03, %Non0=0.26D+02
+ TS4 : Met dE/dP goals  :: Tr{FP}=-.2293925883084848D+04, dNel = 0.27D-11
+ TS4                    :: 13 purification steps, 23 matrix multiplies
+ TS4                    :: Fractional occupation = 0.64D+00, ThrX=0.10D-03, %Non
+ 0s = 0.26D+02
+ TS4 : Max abs errors   :: dE=0.59D-04, dP=0.20D-03
+ TS4                    :: Rel dE=0.26D-07, ||dP||_F=0.44D-02
+ 
+= = = = = SCFCycle #2, Basis #1, Geometry #1 = = = = =
+
+       DIISErr = 0.29D
+ -02
+       MaxDelD = 0.22D+00
+       <T>     = 0.72559786D+04
+       <V>     = 
+ -.13553785D+05
+       <HF>    = -.96388000D+03
+       <SCF>   = -7261.68661286
+
+ MakeRho : Pruned Rho   :: dNel = 0.11D-07, kept 100% of distributions.
+ MakeRho : Moments      :: <r> = (-.18D+02, -.44D+02, -.15D+02), <r^2> = 0.82D+0
+ 3
+ L=           6  NCom=          32
+ To =           0 ; From =           1 ; i =           1           0
+We send       384      5811     34327  MyID 25 To   24
+We send       384      5110     29978  MyID 45 To   44
+We send       384      5060     30312  MyID 59 To   58
+We send       384      6043     35751  MyID 27 To   26
+We recv       384      6277     34269  MyID  0 From  1
+We recv       384      6043     35751  MyID 26 From 27
+We send       384      4969     29565  MyID 19 To   18
+We send       384      6277     34269  MyID  1 To    0
+We send       384      5898     33874  MyID 53 To   52
+We send       384      6012     34724  MyID 41 To   40
+We send       384      6629     35985  MyID  3 To    2
+We recv       384      5898     33874  MyID 52 From 53
+We send       384      6027     35195  MyID 43 To   42
+We recv       384      6629     35985  MyID  2 From  3
+We send       384      6068     34160  MyID 37 To   36
+We send       384      8139     45179  MyID 55 To   54
+We send       384      4873     29001  MyID 61 To   60
+We send       384      7051     38055  MyID 11 To   10
+We send       384      7818     42378  MyID 29 To   28
+We send       384      7755     42807  MyID 21 To   20
+We send       384      9424     52184  MyID 13 To   12
+We send       384      5134     29698  MyID 17 To   16
+We recv       384      6068     34160  MyID 36 From 37
+We recv       384      8139     45179  MyID 54 From 55
+We recv       384      4873     29001  MyID 60 From 61
+We recv       384      5472     31188  MyID  8 From  9
+We recv       384      7818     42378  MyID 28 From 29
+We recv       384      4969     29565  MyID 18 From 19
+We recv       384      7853     44621  MyID 38 From 39
+We send       384      5472     31188  MyID  9 To    8
+We send       384      8534     49930  MyID 31 To   30
+We send       384      5843     34779  MyID 51 To   50
+We send       384      7853     44621  MyID 39 To   38
+We send       384      6233     36429  MyID 57 To   56
+We recv       384      7051     38055  MyID 10 From 11
+We recv       384      7755     42807  MyID 20 From 21
+We send       384      6579     38643  MyID 49 To   48
+We recv       384      5060     30312  MyID 58 From 59
+We recv       384      6233     36429  MyID 56 From 57
+We recv       384      6579     38643  MyID 48 From 49
+We send       384      7154     38182  MyID 63 To   62
+We send       384      9495     55103  MyID  5 To    4
+We send       384      8336     47856  MyID 23 To   22
+We recv       384      5843     34779  MyID 50 From 51
+We recv       384      7154     38182  MyID 62 From 63
+We recv       384      8336     47856  MyID 22 From 23
+We recv       384      5110     29978  MyID 44 From 45
+We recv       384      9495     55103  MyID  4 From  5
+We send       384      8909     50173  MyID 47 To   46
+We recv       384      8909     50173  MyID 46 From 47
+We recv       384      9424     52184  MyID 12 From 13
+We send       384      9314     52834  MyID 15 To   14
+We recv       384      8940     48940  MyID  6 From  7
+We send       384      8940     48940  MyID  7 To    6
+We recv       384      9314     52834  MyID 14 From 15
+We recv       384      5134     29698  MyID 16 From 17
+We send       384      8684     50912  MyID 18 To   16
+We send       384     12291     67135  MyID  2 To    0
+We send       384     11697     65193  MyID 54 To   52
+We send       384     10153     59869  MyID 58 To   56
+We send       384     10199     55359  MyID 62 To   60
+ To =           2 ; From =           3 ; i =           2           0
+ To =           4 ; From =           5 ; i =           3           0
+ To =           6 ; From =           7 ; i =           4           0
+ To =           8 ; From =           9 ; i =           5           0
+ To =          10 ; From =          11 ; i =           6           0
+ To =          12 ; From =          13 ; i =           7           0
+ To =          14 ; From =          15 ; i =           8           0
+ To =          16 ; From =          17 ; i =           9           0
+ To =          18 ; From =          19 ; i =          10           0
+ To =          20 ; From =          21 ; i =          11           0
+ To =          22 ; From =          23 ; i =          12           0
+ To =          24 ; From =          25 ; i =          13           0
+ To =          26 ; From =          27 ; i =          14           0
+ To =          28 ; From =          29 ; i =          15           0
+ To =          30 ; From =          31 ; i =          16           0
+ To =          32 ; From =          33 ; i =          17           0
+ To =          34 ; From =          35 ; i =          18           0
+ To =          36 ; From =          37 ; i =          19           0
+ To =          38 ; From =          39 ; i =          20           0
+ To =          40 ; From =          41 ; i =          21           0
+ To =          42 ; From =          43 ; i =          22           0
+ To =          44 ; From =          45 ; i =          23           0
+ To =          46 ; From =          47 ; i =          24           0
+ To =          48 ; From =          49 ; i =          25           0
+ To =          50 ; From =          51 ; i =          26           0
+ To =          52 ; From =          53 ; i =          27           0
+ To =          54 ; From =          55 ; i =          28           0
+ To =          56 ; From =          57 ; i =          29           0
+ To =          58 ; From =          59 ; i =          30           0
+ To =          60 ; From =          61 ; i =          31           0
+ To =          62 ; From =          63 ; i =          32           0
+ L=           5  NCom=          16
+ To =           0 ; From =           2 ; i =           1           0
+We recv       384     12291     67135  MyID  0 From  2
+We send       384     11239     66931  MyID 50 To   48
+We send       384     13098     72478  MyID 46 To   44
+We recv       384      8534     49930  MyID 30 From 31
+We send       384     13398     76054  MyID 30 To   28
+We send       384     13398     75906  MyID 22 To   20
+We recv       384     11697     65193  MyID 52 From 54
+We send       384     15158     85618  MyID 52 To   48
+We send       384     16216     93612  MyID 14 To   12
+We recv       384     10199     55359  MyID 60 From 62
+We send       384     13737     76841  MyID 60 To   56
+We recv       384     10153     59869  MyID 56 From 58
+We recv       384     13737     76841  MyID 56 From 60
+We recv       384     11239     66931  MyID 48 From 50
+We recv       384     15158     85618  MyID 48 From 52
+We recv       384      6012     34724  MyID 40 From 41
+We recv       384     10458     60082  MyID 40 From 42
+We recv       384      6027     35195  MyID 42 From 43
+We send       384     10458     60082  MyID 42 To   40
+We recv       384     13098     72478  MyID 44 From 46
+We recv       384     13398     76054  MyID 28 From 30
+We send       384     18329    103813  MyID 28 To   24
+ To =           4 ; From =           6 ; i =           2           0
+ To =           8 ; From =          10 ; i =           3           0
+ To =          12 ; From =          14 ; i =           4           0
+ To =          16 ; From =          18 ; i =           5           0
+ To =          20 ; From =          22 ; i =           6           0
+ To =          24 ; From =          26 ; i =           7           0
+ To =          28 ; From =          30 ; i =           8           0
+ To =          32 ; From =          34 ; i =           9           0
+ To =          36 ; From =          38 ; i =          10           0
+ To =          40 ; From =          42 ; i =          11           0
+ To =          44 ; From =          46 ; i =          12           0
+ To =          48 ; From =          50 ; i =          13           0
+ To =          52 ; From =          54 ; i =          14           0
+ To =          56 ; From =          58 ; i =          15           0
+ To =          60 ; From =          62 ; i =          16           0
+ L=           4  NCom=           8
+ To =           0 ; From =           4 ; i =           1           0
+We recv       384     13398     75906  MyID 20 From 22
+We send       384     17376     98776  MyID 20 To   16
+We recv       384      8684     50912  MyID 16 From 18
+We recv       384     17376     98776  MyID 16 From 20
+We recv       384     23732    136564  MyID  0 From  4
+We recv       384     15503     87663  MyID  4 From  6
+We send       384     23732    136564  MyID  4 To    0
+We send       384     15503     87663  MyID  6 To    4
+We recv       384     10512     58588  MyID  8 From 10
+We recv       384     22368    126632  MyID  8 From 12
+We recv       384     16216     93612  MyID 12 From 14
+We send       384     22368    126632  MyID 12 To    8
+We send       384     10512     58588  MyID 10 To    8
+We send       384     16703     93243  MyID 44 To   40
+We recv       384     16703     93243  MyID 40 From 44
+We recv       384      5430     32282  MyID 32 From 33
+We send       384      5430     32282  MyID 33 To   32
+We recv       384      5804     33804  MyID 34 From 35
+We send       384     10210     58902  MyID 34 To   32
+We send       384      5804     33804  MyID 35 To   34
+We recv       384     10210     58902  MyID 32 From 34
+We recv       384     11464     63820  MyID 36 From 38
+We send       384     15414     86570  MyID 36 To   32
+We send       384     11464     63820  MyID 38 To   36
+We recv       384      5811     34327  MyID 24 From 25
+We recv       384     10433     61661  MyID 24 From 26
+We recv       384     18329    103813  MyID 24 From 28
+We send       384     10433     61661  MyID 26 To   24
+We send       384     20121    117009  MyID 56 To   48
+ To =           8 ; From =          12 ; i =           2           0
+ To =          16 ; From =          20 ; i =           3           0
+ To =          24 ; From =          28 ; i =           4           0
+ To =          32 ; From =          36 ; i =           5           0
+ To =          40 ; From =          44 ; i =           6           0
+ To =          48 ; From =          52 ; i =           7           0
+ To =          56 ; From =          60 ; i =           8           0
+ L=           3  NCom=           4
+ To =           0 ; From =           8 ; i =           1           0
+We recv       384     15414     86570  MyID 32 From 36
+We recv       384     20121    117009  MyID 48 From 56
+We recv       384     24969    145409  MyID 16 From 24
+We recv       384     28876    165636  MyID  0 From  8
+We send       384     28876    165636  MyID  8 To    0
+We send       384     31397    180493  MyID 48 To   32
+We send       384     22314    127418  MyID 40 To   32
+We send       384     36906    213038  MyID 16 To    0
+ To =          16 ; From =          24 ; i =           2           0
+ To =          32 ; From =          40 ; i =           3           0
+ To =          48 ; From =          56 ; i =           4           0
+ L=           2  NCom=           2
+ To =           0 ; From =          16 ; i =           1           0
+We recv       384     36906    213038  MyID  0 From 16
+We recv       384     22314    127418  MyID 32 From 40
+We send       384     24969    145409  MyID 24 To   16
+We recv       384     31397    180493  MyID 32 From 48
+ To =          32 ; From =          48 ; i =           2           0
+ L=           1  NCom=           1
+ To =           0 ; From =          32 ; i =           1           0
+We send       384     50846    287534  MyID 32 To    0
+We recv       384     50846    287534  MyID  0 From 32
+ TPara=   7.91712700000000     
+ TS4 : Pure 1           :: dE=0.10D+01, dP=0.34D+00, %Non0=0.81D+01
+ TS4 : Pure 2           :: dE=0.80D-01, dP=0.41D+00, %Non0=0.81D+01
+ TS4 : Pure 3           :: dE=0.25D-01, dP=0.49D+00, %Non0=0.81D+01
+ TS4 : Pure 4           :: dE=0.85D-03, dP=0.43D+00, %Non0=0.81D+01
+ TS4 : Pure 5           :: dE=0.22D-01, dP=0.36D+00, %Non0=0.11D+02
+ TS4 : Pure 6           :: dE=0.18D-01, dP=0.11D+00, %Non0=0.10D+02
+ TS4 : Pure 7           :: dE=0.20D-01, dP=0.12D+00, %Non0=0.13D+02
+ TS4 : Pure 8           :: dE=0.18D-01, dP=0.12D+00, %Non0=0.17D+02
+ TS4 : Pure 9           :: dE=0.11D-01, dP=0.11D+00, %Non0=0.22D+02
+ TS4 : Pure 10          :: dE=0.39D-02, dP=0.74D-01, %Non0=0.25D+02
+ TS4 : Pure 11          :: dE=0.53D-03, dP=0.22D-01, %Non0=0.25D+02
+ TS4 : Pure 12          :: dE=0.17D-04, dP=0.18D-02, %Non0=0.26D+02
+ TS4 : Pure 13          :: dE=0.18D-06, dP=0.20D-03, %Non0=0.26D+02
+ TS4 : Pure 14          :: dE=0.22D-06, dP=0.20D-03, %Non0=0.25D+02
+ TS4 : Pure 15          :: dE=0.64D-07, dP=0.18D-03, %Non0=0.26D+02
+ TS4 : Met dE/dP goals  :: Tr{FP}=-.2295200390786608D+04, dNel = 0.68D-12
+ TS4                    :: 15 purification steps, 27 matrix multiplies
+ TS4                    :: Fractional occupation = 0.64D+00, ThrX=0.10D-03, %Non
+ 0s = 0.26D+02
+ TS4 : Max abs errors   :: dE=0.15D-03, dP=0.18D-03
+ TS4                    :: Rel dE=0.64D-07, ||dP||_F=0.42D-02
+ 
+= = = = = SCFCycle #3, Basis #1, Geometry #1 = = = = =
+
+       DIISErr = 0.21D
+ -03
+       MaxDelD = 0.20D-01
+       <T>     = 0.72157032D+04
+       <V>     = 
+ -.13524227D+05
+       <HF>    = -.95842203D+03
+       <SCF>   = -7266.94624447
+
+ MakeRho : Pruned Rho   :: dNel = -.30D-04, kept 100% of distributions.
+ MakeRho : Moments      :: <r> = (-.18D+02, -.43D+02, -.16D+02), <r^2> = 0.81D+0
+ 3
+ L=           6  NCom=          32
+ To =           0 ; From =           1 ; i =           1           0
+We recv       384      5619     30371  MyID  0 From  1
+We send       384      4538     26894  MyID 19 To   18
+We send       384      5619     30371  MyID  1 To    0
+We recv       384      4538     26894  MyID 18 From 19
+We recv       384      4256     25196  MyID 60 From 61
+We send       384      4256     25196  MyID 61 To   60
+We send       384      6280     36636  MyID 41 To   40
+We send       384      5442     28966  MyID 63 To   62
+We send       384      6138     33274  MyID 29 To   28
+We send       384      5466     29646  MyID  3 To    2
+We send       384      5969     34509  MyID 45 To   44
+We send       384      5984     35532  MyID 49 To   48
+We recv       384      5603     32791  MyID 56 From 57
+We send       384      4863     27503  MyID  9 To    8
+We send       384      4841     28937  MyID 25 To   24
+We send       384      4817     27569  MyID 17 To   16
+We recv       384      6138     33274  MyID 28 From 29
+We send       384      4850     29026  MyID 51 To   50
+We send       384      5603     32791  MyID 57 To   56
+We send       384      5063     29759  MyID 27 To   26
+We recv       384      4726     28254  MyID 58 From 59
+We recv       384      5466     29646  MyID  2 From  3
+We recv       384      4863     27503  MyID  8 From  9
+We recv       384      5063     29759  MyID 26 From 27
+We send       384      7636     41572  MyID 13 To   12
+We recv       384      4817     27569  MyID 16 From 17
+We send       384      4726     28254  MyID 59 To   58
+We send       384      6080     32708  MyID 11 To   10
+We recv       384      4841     28937  MyID 24 From 25
+We recv       384      7636     41572  MyID 12 From 13
+We send       384      5495     30391  MyID 21 To   20
+We recv       384      6220     34164  MyID 36 From 37
+We recv       384      4775     27783  MyID 52 From 53
+We recv       384      6080     32708  MyID 10 From 11
+We recv       384      5495     30391  MyID 20 From 21
+We send       384      6220     34164  MyID 37 To   36
+We send       384      4775     27783  MyID 53 To   52
+We recv       384      5973     33073  MyID 54 From 55
+We send       384      5973     33073  MyID 55 To   54
+We send       384      7890     43350  MyID  7 To    6
+We send       384      7828     45912  MyID 18 To   16
+We send       384      8342     48778  MyID 31 To   30
+We recv       384      8342     48778  MyID 30 From 31
+We recv       384      7506     42490  MyID 38 From 39
+We send       384      8150     47078  MyID 23 To   22
+We send       384      7506     42490  MyID 39 To   38
+We recv       384      8150     47078  MyID 22 From 23
+We recv       384      8496     49116  MyID  4 From  5
+We send       384      8496     49116  MyID  5 To    4
+We recv       384      7890     43350  MyID  6 From  7
+ To =           2 ; From =           3 ; i =           2           0
+ To =           4 ; From =           5 ; i =           3           0
+ To =           6 ; From =           7 ; i =           4           0
+ To =           8 ; From =           9 ; i =           5           0
+ To =          10 ; From =          11 ; i =           6           0
+ To =          12 ; From =          13 ; i =           7           0
+ To =          14 ; From =          15 ; i =           8           0
+ To =          16 ; From =          17 ; i =           9           0
+ To =          18 ; From =          19 ; i =          10           0
+ To =          20 ; From =          21 ; i =          11           0
+ To =          22 ; From =          23 ; i =          12           0
+ To =          24 ; From =          25 ; i =          13           0
+ To =          26 ; From =          27 ; i =          14           0
+ To =          28 ; From =          29 ; i =          15           0
+ To =          30 ; From =          31 ; i =          16           0
+ To =          32 ; From =          33 ; i =          17           0
+ To =          34 ; From =          35 ; i =          18           0
+ To =          36 ; From =          37 ; i =          19           0
+ To =          38 ; From =          39 ; i =          20           0
+ To =          40 ; From =          41 ; i =          21           0
+ To =          42 ; From =          43 ; i =          22           0
+ To =          44 ; From =          45 ; i =          23           0
+ To =          46 ; From =          47 ; i =          24           0
+ To =          48 ; From =          49 ; i =          25           0
+ To =          50 ; From =          51 ; i =          26           0
+ To =          52 ; From =          53 ; i =          27           0
+ To =          54 ; From =          55 ; i =          28           0
+ To =          56 ; From =          57 ; i =          29           0
+ To =          58 ; From =          59 ; i =          30           0
+ To =          60 ; From =          61 ; i =          31           0
+ To =          62 ; From =          63 ; i =          32           0
+ L=           5  NCom=          16
+ To =           0 ; From =           2 ; i =           1           0
+We recv       384     10608     57432  MyID  0 From  2
+We send       384      9059     54023  MyID 26 To   24
+We recv       384      8860     47072  MyID 60 From 62
+We send       384     10608     57432  MyID  2 To    0
+We recv       384      5442     28966  MyID 62 From 63
+We send       384      8860     47072  MyID 62 To   60
+We send       384     11800     67092  MyID 30 To   28
+We send       384     12385     69085  MyID 60 To   56
+We send       384     12011     68527  MyID 22 To   20
+We recv       384     10271     56927  MyID 52 From 54
+We recv       384      8747     51291  MyID 56 From 58
+We recv       384     12385     69085  MyID 56 From 60
+ To =           4 ; From =           6 ; i =           2           0
+ To =           8 ; From =          10 ; i =           3           0
+ To =          12 ; From =          14 ; i =           4           0
+ To =          16 ; From =          18 ; i =           5           0
+ To =          20 ; From =          22 ; i =           6           0
+ To =          24 ; From =          26 ; i =           7           0
+ To =          28 ; From =          30 ; i =           8           0
+ To =          32 ; From =          34 ; i =           9           0
+ To =          36 ; From =          38 ; i =          10           0
+ To =          40 ; From =          42 ; i =          11           0
+ To =          44 ; From =          46 ; i =          12           0
+ To =          48 ; From =          50 ; i =          13           0
+ To =          52 ; From =          54 ; i =          14           0
+ To =          56 ; From =          58 ; i =          15           0
+ To =          60 ; From =          62 ; i =          16           0
+ L=           4  NCom=           8
+ To =           0 ; From =           4 ; i =           1           0
+We send       384      8747     51291  MyID 58 To   56
+We send       384     10271     56927  MyID 54 To   52
+We recv       384     12011     68527  MyID 20 From 22
+We recv       384     10680     59632  MyID 36 From 38
+We send       384     14420     80832  MyID 36 To   32
+We recv       384     11800     67092  MyID 28 From 30
+We send       384     16277     92233  MyID 28 To   24
+We send       384     10680     59632  MyID 38 To   36
+We send       384     13588     76876  MyID 52 To   48
+We recv       384      9059     54023  MyID 24 From 26
+We recv       384     16277     92233  MyID 24 From 28
+We send       384     15922     90370  MyID 20 To   16
+We recv       384      7828     45912  MyID 16 From 18
+We recv       384     15922     90370  MyID 16 From 20
+We recv       384      5190     30986  MyID 32 From 33
+We recv       384      8751     50283  MyID 32 From 34
+We recv       384     14420     80832  MyID 32 From 36
+We recv       384      9188     51172  MyID  8 From 10
+We recv       384     18787    106555  MyID  8 From 12
+We recv       384     14523     83787  MyID 12 From 14
+We send       384     18787    106555  MyID 12 To    8
+We send       384      5190     30986  MyID 33 To   32
+We send       384      9188     51172  MyID 10 To    8
+We recv       384      8003     45647  MyID 14 From 15
+We send       384     14523     83787  MyID 14 To   12
+We recv       384      4575     25959  MyID 34 From 35
+We send       384      8751     50283  MyID 34 To   32
+We send       384      8003     45647  MyID 15 To   14
+We send       384      4575     25959  MyID 35 To   34
+We recv       384      5969     34509  MyID 44 From 45
+We recv       384     13026     71846  MyID 44 From 46
+We send       384     16692     93408  MyID 44 To   40
+We recv       384      6280     36636  MyID 40 From 41
+We recv       384     10476     60164  MyID 40 From 42
+We recv       384     16692     93408  MyID 40 From 44
+We recv       384      5723     33223  MyID 42 From 43
+We send       384     10476     60164  MyID 42 To   40
+We send       384      5723     33223  MyID 43 To   42
+We recv       384      8111     45511  MyID 46 From 47
+We send       384     13026     71846  MyID 46 To   44
+We recv       384      5984     35532  MyID 48 From 49
+We recv       384      9831     58907  MyID 48 From 50
+We recv       384     13588     76876  MyID 48 From 52
+We recv       384     20094    116130  MyID  0 From  4
+We send       384      8111     45511  MyID 47 To   46
+We recv       384      4850     29026  MyID 50 From 51
+We send       384      9831     58907  MyID 50 To   48
+We recv       384     13384     75800  MyID  4 From  6
+We send       384     20094    116130  MyID  4 To    0
+We send       384     13384     75800  MyID  6 To    4
+We send       384     17638    102162  MyID 56 To   48
+We send       384     21314    124406  MyID 24 To   16
+We recv       384     21314    124406  MyID 16 From 24
+We send       384     23731    136015  MyID  8 To    0
+ To =           8 ; From =          12 ; i =           2           0
+ To =          16 ; From =          20 ; i =           3           0
+ To =          24 ; From =          28 ; i =           4           0
+ To =          32 ; From =          36 ; i =           5           0
+ To =          40 ; From =          44 ; i =           6           0
+ To =          48 ; From =          52 ; i =           7           0
+ To =          56 ; From =          60 ; i =           8           0
+ L=           3  NCom=           4
+ To =           0 ; From =           8 ; i =           1           0
+We recv       384     23731    136015  MyID  0 From  8
+We send       384     21944    125832  MyID 40 To   32
+We recv       384     17638    102162  MyID 48 From 56
+We send       384     27657    159469  MyID 48 To   32
+ To =          16 ; From =          24 ; i =           2           0
+ To =          32 ; From =          40 ; i =           3           0
+ To =          48 ; From =          56 ; i =           4           0
+ L=           2  NCom=           2
+ To =           0 ; From =          16 ; i =           1           0
+We recv       384     33115    190191  MyID  0 From 16
+We send       384     33115    190191  MyID 16 To    0
+We recv       384     21944    125832  MyID 32 From 40
+We recv       384     27657    159469  MyID 32 From 48
+ To =          32 ; From =          48 ; i =           2           0
+ L=           1  NCom=           1
+ To =           0 ; From =          32 ; i =           1           0
+We send       384     45984    261236  MyID 32 To    0
+We recv       384     45984    261236  MyID  0 From 32
+ TPara=   7.17189180000000     
+ TS4 : Pure 1           :: dE=0.10D+01, dP=0.34D+00, %Non0=0.81D+01
+ TS4 : Pure 2           :: dE=0.79D-01, dP=0.41D+00, %Non0=0.81D+01
+ TS4 : Pure 3           :: dE=0.25D-01, dP=0.49D+00, %Non0=0.81D+01
+ TS4 : Pure 4           :: dE=0.79D-03, dP=0.43D+00, %Non0=0.81D+01
+ TS4 : Pure 5           :: dE=0.21D-01, dP=0.36D+00, %Non0=0.11D+02
+ TS4 : Pure 6           :: dE=0.18D-01, dP=0.11D+00, %Non0=0.10D+02
+ TS4 : Pure 7           :: dE=0.20D-01, dP=0.12D+00, %Non0=0.13D+02
+ TS4 : Pure 8           :: dE=0.18D-01, dP=0.12D+00, %Non0=0.17D+02
+ TS4 : Pure 9           :: dE=0.11D-01, dP=0.11D+00, %Non0=0.22D+02
+ TS4 : Pure 10          :: dE=0.39D-02, dP=0.74D-01, %Non0=0.25D+02
+ TS4 : Pure 11          :: dE=0.53D-03, dP=0.22D-01, %Non0=0.25D+02
+ TS4 : Pure 12          :: dE=0.17D-04, dP=0.18D-02, %Non0=0.26D+02
+ TS4 : Pure 13          :: dE=0.23D-06, dP=0.20D-03, %Non0=0.26D+02
+ TS4 : Pure 14          :: dE=0.27D-06, dP=0.21D-03, %Non0=0.25D+02
+ TS4 : Pure 15          :: dE=0.14D-06, dP=0.17D-03, %Non0=0.26D+02
+ TS4 : Pure 16          :: dE=0.14D-06, dP=0.21D-03, %Non0=0.25D+02
+ TS4 : Pure 17          :: dE=0.47D-08, dP=0.19D-03, %Non0=0.26D+02
+ TS4 : Met dE/dP goals  :: Tr{FP}=-.2294796922834349D+04, dNel = 0.11D-11
+ TS4                    :: 17 purification steps, 31 matrix multiplies
+ TS4                    :: Fractional occupation = 0.64D+00, ThrX=0.10D-03, %Non
+ 0s = 0.26D+02
+ TS4 : Max abs errors   :: dE=0.11D-04, dP=0.19D-03
+ TS4                    :: Rel dE=0.47D-08, ||dP||_F=0.40D-02
+ 
+= = = = = SCFCycle #4, Basis #1, Geometry #1 = = = = =
+
+       DIISErr = 0.74D
+ -04
+       MaxDelD = 0.26D-02
+       <T>     = 0.72131516D+04
+       <V>     = 
+ -.13521917D+05
+       <HF>    = -.95821057D+03
+       <SCF>   = -7266.97555586
+
+ Normal SCF convergence.
+ BlokAInv               :: WALL (Sec,MFLOPS) = (0.27D+02, 569), NProc = 1
+ BlokAInv               :: Max(Z^t.A.Z-I)=0.14D-04, TrixThrsh=0.10D-04
+ MakeRho : Pruned Rho   :: dNel = -.42D-04, kept 100% of distributions.
+ MakeRho : Moments      :: <r> = (-.18D+02, -.43D+02, -.16D+02), <r^2> = 0.81D+0
+ 3
+ L=           6  NCom=          32
+ To =           0 ; From =           1 ; i =           1           0
+We send       384     22567   1593725  MyID  1 To    0
+We send       384     18979   1346425  MyID 63 To   62
+We recv       384     22567   1593725  MyID  0 From  1
+We send       384     22183   1598125  MyID 61 To   60
+We send       384     22399   1594725  MyID 11 To   10
+We recv       384     22399   1594725  MyID 10 From 11
+We send       384     22475   1578275  MyID  3 To    2
+We recv       384     22475   1578275  MyID  2 From  3
+We recv       384     18979   1346425  MyID 62 From 63
+We send       384     23899   1710075  MyID 17 To   16
+We send       384     25848   1837600  MyID  9 To    8
+We send       384     26983   1941275  MyID 53 To   52
+We recv       384     23899   1710075  MyID 16 From 17
+We recv       384     25054   1790750  MyID 20 From 21
+We send       384     25054   1790750  MyID 21 To   20
+We send       384     23561   1702875  MyID 33 To   32
+We send       384     27415   1958825  MyID 55 To   54
+We recv       384     27415   1958825  MyID 54 From 55
+We send       384     25185   1812075  MyID 19 To   18
+We recv       384     25185   1812075  MyID 18 From 19
+We recv       384     25848   1837600  MyID  8 From  9
+We send       384     26292   1868400  MyID 13 To   12
+We recv       384     24052   1707850  MyID 28 From 29
+We send       384     27749   2014975  MyID 49 To   48
+We send       384     24052   1707850  MyID 29 To   28
+We recv       384     30199   2175425  MyID 42 From 43
+We send       384     30199   2175425  MyID 43 To   42
+We recv       384     28425   2031425  MyID 36 From 37
+We send       384     28425   2031425  MyID 37 To   36
+We recv       384     26292   1868400  MyID 12 From 13
+We send       384     26526   1929150  MyID 57 To   56
+We send       384     23744   1716350  MyID 59 To   58
+We recv       384     27749   2014975  MyID 48 From 49
+We recv       384     26526   1929150  MyID 56 From 57
+We send       384     31953   2296175  MyID 45 To   44
+We send       384     24505   1779425  MyID 51 To   50
+We recv       384     23744   1716350  MyID 58 From 59
+We recv       384     32081   2303175  MyID 40 From 41
+We recv       384     29041   2102175  MyID 24 From 25
+We send       384     32081   2303175  MyID 41 To   40
+We send       384     29041   2102175  MyID 25 To   24
+We send       384     29784   2159550  MyID 27 To   26
+We recv       384     29784   2159550  MyID 26 From 27
+We send       384     34088   2438050  MyID 39 To   38
+We recv       384     22183   1598125  MyID 60 From 61
+We recv       384     23561   1702875  MyID 32 From 33
+We send       384     18542   1335650  MyID 35 To   34
+We send       384     39823   2850375  MyID  5 To    4
+We recv       384     24505   1779425  MyID 50 From 51
+We recv       384     18542   1335650  MyID 34 From 35
+We recv       384     39823   2850375  MyID  4 From  5
+We recv       384     26983   1941275  MyID 52 From 53
+We send       384     42971   3081375  MyID 31 To   30
+We recv       384     42971   3081375  MyID 30 From 31
+We recv       384     40774   2918200  MyID 22 From 23
+We send       384     40774   2918200  MyID 23 To   22
+We recv       384     34088   2438050  MyID 38 From 39
+We recv       384     31953   2296175  MyID 44 From 45
+We recv       384     34675   2474575  MyID 46 From 47
+We send       384     34675   2474575  MyID 47 To   46
+We recv       384     45762   3258350  MyID  6 From  7
+We send       384     45762   3258350  MyID  7 To    6
+We recv       384     45907   3274875  MyID 14 From 15
+We send       384     45907   3274875  MyID 15 To   14
+ To =           2 ; From =           3 ; i =           2           0
+ To =           4 ; From =           5 ; i =           3           0
+ To =           6 ; From =           7 ; i =           4           0
+ To =           8 ; From =           9 ; i =           5           0
+ To =          10 ; From =          11 ; i =           6           0
+ To =          12 ; From =          13 ; i =           7           0
+ To =          14 ; From =          15 ; i =           8           0
+ To =          16 ; From =          17 ; i =           9           0
+ To =          18 ; From =          19 ; i =          10           0
+ To =          20 ; From =          21 ; i =          11           0
+ To =          22 ; From =          23 ; i =          12           0
+ To =          24 ; From =          25 ; i =          13           0
+ To =          26 ; From =          27 ; i =          14           0
+ To =          28 ; From =          29 ; i =          15           0
+ To =          30 ; From =          31 ; i =          16           0
+ To =          32 ; From =          33 ; i =          17           0
+ To =          34 ; From =          35 ; i =          18           0
+ To =          36 ; From =          37 ; i =          19           0
+ To =          38 ; From =          39 ; i =          20           0
+ To =          40 ; From =          41 ; i =          21           0
+ To =          42 ; From =          43 ; i =          22           0
+ To =          44 ; From =          45 ; i =          23           0
+ To =          46 ; From =          47 ; i =          24           0
+ To =          48 ; From =          49 ; i =          25           0
+ To =          50 ; From =          51 ; i =          26           0
+ To =          52 ; From =          53 ; i =          27           0
+ To =          54 ; From =          55 ; i =          28           0
+ To =          56 ; From =          57 ; i =          29           0
+ To =          58 ; From =          59 ; i =          30           0
+ To =          60 ; From =          61 ; i =          31           0
+ To =          62 ; From =          63 ; i =          32           0
+ L=           5  NCom=          16
+ To =           0 ; From =           2 ; i =           1           0
+We recv       384     35588   2491150  MyID  0 From  2
+We send       384     35782   2544200  MyID 10 To    8
+We send       384     35588   2491150  MyID  2 To    0
+We send       384     32749   2315025  MyID 62 To   60
+We send       384     36088   2551850  MyID 54 To   52
+We recv       384     35782   2544200  MyID  8 From 10
+We send       384     36303   2604675  MyID 18 To   16
+We recv       384     36303   2604675  MyID 16 From 18
+We recv       384     32749   2315025  MyID 60 From 62
+We send       384     36197   2601575  MyID 58 To   56
+We recv       384     33085   2378025  MyID 32 From 34
+We send       384     33085   2378025  MyID 34 To   32
+We recv       384     38271   2716225  MyID 36 From 38
+We send       384     38271   2716225  MyID 38 To   36
+We recv       384     40013   2876475  MyID 48 From 50
+We send       384     40013   2876475  MyID 50 To   48
+We recv       384     41004   2931650  MyID 40 From 42
+We send       384     41004   2931650  MyID 42 To   40
+We send       384     42639   3092175  MyID 26 To   24
+We recv       384     36088   2551850  MyID 52 From 54
+We recv       384     42639   3092175  MyID 24 From 26
+We send       384     47377   3369125  MyID 22 To   20
+We recv       384     41961   2973075  MyID 44 From 46
+We send       384     41961   2973075  MyID 46 To   44
+We send       384     47557   3394725  MyID 30 To   28
+We recv       384     36197   2601575  MyID 56 From 58
+We recv       384     47557   3394725  MyID 28 From 30
+We recv       384     47377   3369125  MyID 20 From 22
+We send       384     56159   3978725  MyID 14 To   12
+We send       384     54517   3852225  MyID  6 To    4
+ To =           4 ; From =           6 ; i =           2           0
+ To =           8 ; From =          10 ; i =           3           0
+ To =          12 ; From =          14 ; i =           4           0
+ To =          16 ; From =          18 ; i =           5           0
+ To =          20 ; From =          22 ; i =           6           0
+ To =          24 ; From =          26 ; i =           7           0
+ To =          28 ; From =          30 ; i =           8           0
+ To =          32 ; From =          34 ; i =           9           0
+ To =          36 ; From =          38 ; i =          10           0
+ To =          40 ; From =          42 ; i =          11           0
+ To =          44 ; From =          46 ; i =          12           0
+ To =          48 ; From =          50 ; i =          13           0
+ To =          52 ; From =          54 ; i =          14           0
+ To =          56 ; From =          58 ; i =          15           0
+ To =          60 ; From =          62 ; i =          16           0
+ L=           4  NCom=           8
+ To =           0 ; From =           4 ; i =           1           0
+We send       384     41952   2971750  MyID 60 To   56
+We recv       384     56159   3978725  MyID 12 From 14
+We recv       384     54517   3852225  MyID  4 From  6
+We recv       384     41952   2971750  MyID 56 From 60
+We recv       384     47128   3326350  MyID 32 From 36
+We send       384     47128   3326350  MyID 36 To   32
+We send       384     45591   3219975  MyID 52 To   48
+We recv       384     50874   3586650  MyID 40 From 44
+We send       384     50874   3586650  MyID 44 To   40
+We recv       384     45591   3219975  MyID 48 From 52
+We recv       384     51068   3615700  MyID 16 From 20
+We send       384     51068   3615700  MyID 20 To   16
+We send       384     53877   3818875  MyID 28 To   24
+We recv       384     53877   3818875  MyID 24 From 28
+We recv       384     59149   4176675  MyID  8 From 12
+We recv       384     58863   4137275  MyID  0 From  4
+We send       384     59149   4176675  MyID 12 To    8
+We send       384     58863   4137275  MyID  4 To    0
+We send       384     50400   3567500  MyID 56 To   48
+We recv       384     50400   3567500  MyID 48 From 56
+We send       384     57243   4026475  MyID 40 To   32
+We recv       384     57243   4026475  MyID 32 From 40
+We send       384     60479   4276775  MyID 24 To   16
+We recv       384     60479   4276775  MyID 16 From 24
+ To =           8 ; From =          12 ; i =           2           0
+ To =          16 ; From =          20 ; i =           3           0
+ To =          24 ; From =          28 ; i =           4           0
+ To =          32 ; From =          36 ; i =           5           0
+ To =          40 ; From =          44 ; i =           6           0
+ To =          48 ; From =          52 ; i =           7           0
+ To =          56 ; From =          60 ; i =           8           0
+ L=           3  NCom=           4
+ To =           0 ; From =           8 ; i =           1           0
+We send       384     62856   4418200  MyID  8 To    0
+We recv       384     62856   4418200  MyID  0 From  8
+We send       384     62357   4373275  MyID 48 To   32
+We recv       384     62357   4373275  MyID 32 From 48
+We send       384     68934   4825700  MyID 16 To    0
+ To =          16 ; From =          24 ; i =           2           0
+ To =          32 ; From =          40 ; i =           3           0
+ To =          48 ; From =          56 ; i =           4           0
+ L=           2  NCom=           2
+ To =           0 ; From =          16 ; i =           1           0
+We recv       384     68934   4825700  MyID  0 From 16
+We send       384     72759   5063675  MyID 32 To    0
+ To =          32 ; From =          48 ; i =           2           0
+ L=           1  NCom=           1
+ To =           0 ; From =          32 ; i =           1           0
+We recv       384     72759   5063675  MyID  0 From 32
+ TPara=   66.5895246000000     
+ TS4 : Pure 1           :: dE=0.10D+01, dP=0.93D+00, %Non0=0.66D+02
+ TS4 : Pure 2           :: dE=0.10D+01, dP=0.58D+00, %Non0=0.66D+02
+ TS4 : Pure 3           :: dE=0.83D+00, dP=0.52D+00, %Non0=0.66D+02
+ TS4 : Pure 4           :: dE=0.48D+00, dP=0.57D+00, %Non0=0.66D+02
+ TS4 : Pure 5           :: dE=0.54D+00, dP=0.52D+00, %Non0=0.67D+02
+ TS4 : Pure 6           :: dE=0.39D+00, dP=0.55D+00, %Non0=0.67D+02
+ TS4 : Pure 7           :: dE=0.38D+00, dP=0.47D+00, %Non0=0.72D+02
+ TS4 : Pure 8           :: dE=0.22D+00, dP=0.59D+00, %Non0=0.72D+02
+ TS4 : Pure 9           :: dE=0.28D+00, dP=0.47D+00, %Non0=0.84D+02
+ TS4 : Pure 10          :: dE=0.81D-01, dP=0.33D+00, %Non0=0.92D+02
+ TS4 : Pure 11          :: dE=0.46D-01, dP=0.26D+00, %Non0=0.95D+02
+ TS4 : Pure 12          :: dE=0.24D-01, dP=0.20D+00, %Non0=0.96D+02
+ TS4 : Pure 13          :: dE=0.12D-01, dP=0.15D+00, %Non0=0.97D+02
+ TS4 : Pure 14          :: dE=0.54D-02, dP=0.11D+00, %Non0=0.98D+02
+ TS4 : Pure 15          :: dE=0.14D-02, dP=0.58D-01, %Non0=0.98D+02
+ TS4 : Pure 16          :: dE=0.15D-03, dP=0.15D-01, %Non0=0.97D+02
+ TS4 : Pure 17          :: dE=0.32D-05, dP=0.93D-03, %Non0=0.96D+02
+ TS4 : Pure 18          :: dE=0.41D-08, dP=0.12D-04, %Non0=0.96D+02
+ TS4 : Pure 19          :: dE=0.14D-09, dP=0.11D-04, %Non0=0.96D+02
+ TS4 : Met dE/dP goals  :: Tr{FP}=-.2341005612266728D+04, dNel = 0.45D-12
+ TS4                    :: 19 purification steps, 34 matrix multiplies
+ TS4                    :: Fractional occupation = 0.18D+00, ThrX=0.10D-04, %Non
+ 0s = 0.96D+02
+ TS4 : Max abs errors   :: dE=0.34D-06, dP=0.11D-04
+ TS4                    :: Rel dE=0.14D-09, ||dP||_F=0.21D-03
+ 
+= = = = = SCFCycle #0, Basis #2, Geometry #1 = = = = =
+
+       MaxDelD = 0.15D
+ +01
+       <T>     = 0.73494839D+04
+       <V>     = -.13642506D+05
+       <HF>
+     = -.95183889D+03
+       <SCF>   = -7244.86083016
+
+ MakeRho : Pruned Rho   :: dNel = -.26D-07, kept 100% of distributions.
+ MakeRho : Moments      :: <r> = (-.17D+02, -.53D+02, -.93D+01), <r^2> = 0.90D+0
+ 3
+0 - MPI_RECV : Message truncated
+[0]  Aborting program !
+forrtl: error (76): IOT trap signal
+   0: __FINI_00_remove_gp_range [0x3ff81a21488]
+   1: __FINI_00_remove_gp_range [0x3ff81a2a910]
+   2: __FINI_00_remove_gp_range [0x3ff800d9c30]
+   3: __FINI_00_remove_gp_range [0x3ff800ed6d4]
+   4: __FINI_00_remove_gp_range [0x3ff80220090]
+   5: __FINI_00_remove_gp_range [0x3ff80140234]
+   6: __FINI_00_remove_gp_range [0x3ff801d21f8]
+   7: __FINI_00_remove_gp_range [0x3ffbffa0890]
+   8: __FINI_00_remove_gp_range [0x3ffbffdafe4]
+   9: __FINI_00_remove_gp_range [0x3ffbffdb250]
+  10: __FINI_00_remove_gp_range [0x3ffbffe1e34]
+  11: __FINI_00_remove_gp_range [0x3ffbffe1ee8]
+  12: $fastmatrices$redistribute_fastmat_ [FastMat.f90: 741, 0x120179770]
+  13: qctc_ [QCTC.f90: 178, 0x1200eca80]
+  14: main [for_main.c: 203, 0x1200ee7ac]
+  15: __start [0x12003b528]
+prun: /scratch2/valeryw/MondoExec/QCTC (host qsc96 process 0 pid 935966) killed by signal 6
+prun: generating backtrace for /scratch2/valeryw/MondoExec/QCTC /local/core/rms/746767/core.QCTC.qsc96.0
+Welcome to the Ladebug Debugger Version 68 (built Sep 16 2002 for Tru64 UNIX)
+------------------ 
+object file name: /scratch2/valeryw/MondoExec/QCTC 
+core file name: /local/core/rms/746767/core.QCTC.qsc96.0
+Reading symbolic information ...done
+Core file produced from executable 'QCTC'
+Thread 7 terminated at PC 0x3ff800da338 by signal ABRT
+Stack trace for thread 7
+>0  0x3ff800da338 in _sigprocmask(...) in /usr/shlib/libc.so
+#1  0x3ff800dca20 in __sigprocmask(...) in /usr/shlib/libc.so
+#2  0x3ff801d2280 in abort(...) in /usr/shlib/libc.so
+#3  0x3ff81a2ab00 in for__signal_handler(...) in /usr/local/opt/dfa55A/usr/shlib/libfor.so
+#4  0x3ff800d9c30 in __sigtramp(...) in /usr/shlib/libc.so
+#5  0x3ff800ed6d8 in __kill(...) in /usr/shlib/libc.so
+#6  0x3ff80220090 in UnknownProcedure18FromFile10(...) in /usr/shlib/libc.so
+#7  0x3ff80140234 in __tis_raise(...) in /usr/shlib/libc.so
+#8  0x3ff801d21f8 in abort(...) in /usr/shlib/libc.so
+#9  0x3ffbffa0890 in MPID_Abort(comm_ptr=Info: symbol comm_ptr is defined but not allocated (optimized away)
+<no value>, code=Info: symbol code is defined but not allocated (optimized away)
+<no value>, user=0x11fffb130="0\236¢\201ÿ\003", str=Info: no allocation applies for symbol str at the current PC
+<no value>) "adi2init.c":583
+#10 0x3ffbffdafe4 in MPIR_Errors_are_fatal(comm=0x140da4028, code=0x11fffb548) "mperror.c":91
+#11 0x3ffbffdb250 in MPIR_Error(comm=0x140da3fe0, code=14, string=0x3fffffe4e10="MPI_RECV", file=0x3ffbff98400="recv.c", line=89) "mperror.c":206
+#12 0x3ffbffe1e34 in PMPI_Recv(buf=0x1427544e0, count=108159, datatype=27, source=62, tag=62, comm=Info: no allocation applies for symbol comm at the current PC
+<no value>, status=0x11fffb5f0) "recv.c":89
+#13 0x3ffbffe1ee8 in pmpi_recv_(...) in /usr/local/opt/Compaq_MPI_64_2.6_r6/shlib/libmpi.so
+#14 0x120179770 in $fastmatrices$redistribute_fastmat() "FastMat.f90":741
+#15 0x1200eca80 in qctc() "QCTC.f90":178
+#16 0x1200ee7ac in main() "for_main.c":203
+#17 0x12003b528 in __start(...) in /scratch2/valeryw/MondoExec/QCTC
+
+Stack trace for thread 6
+#0  0x3ff8013bb28 in __syscall(...) in /usr/shlib/libc.so
+#1  0x300000b8ee0 in elan3_syscall_lwp(ctx=0x4d) "syscall_dunix.c":202
+#2  0x300000a6468 in elan3_lwp(arg=0x1401ab000) "elanlib.c":100
+
+prun: dumping elan exception state for /scratch2/valeryw/MondoExec/QCTC /local/core/rms/746767/core.QCTC.qsc96.0
+edb: cannot read memory 3e347ca84c43ca1a->3e347ca84c43ea1a from core file
+edb: cannot read exception page at 3e347ca84c43ca1a
+edb: found elan3_exceptions struct at 300400ca7f0
+edb: exceptions from '/scratch2/valeryw/MondoExec/QCTC' corefile '/local/core/rms/746767/core.QCTC.qsc96.0'
+prun: 
+ Unknown error: < prun -n 64 /scratch2/valeryw/MondoExec/QCTC MeOH_64_928695 Den
+ sityNormal 1 2 1 0 2 1>
+  
+  To have no errors 
+  Would be life without meaning 
+  No struggle, no joy 
+  
+Termination of MondoSCF
