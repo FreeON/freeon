@@ -43,7 +43,9 @@ PROGRAM QCTC
   USE BraBloks
   USE QCTCThresholds
   USE PoleTree
+#ifdef PERIODIC
   USE PBCFarField
+#endif
   USE JGen
   USE NuklarE
 #ifdef PARALLEL
