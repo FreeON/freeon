@@ -212,7 +212,8 @@ MODULE DrvSCFs
 #ifdef PERIODIC
       CALL LogSCF(Current,'Peridic Far-Field Tensor',.TRUE.)
       CtrlVect=SetCtrlVect(Ctrl,'MakingPFFT')
-      CALL Invoke('MakePFFT',CtrlVect,MPIRun_O=.TRUE.)
+      !! CALL Invoke('MakePFFT',CtrlVect,MPIRun_O=.TRUE.)
+      CALL Invoke('MakePFFT',CtrlVect)
 #endif
       CALL LogSCF(Current,'One-electron matrices.',.TRUE.)
       CtrlVect=SetCtrlVect(Ctrl,'OneElectron')
@@ -571,7 +572,8 @@ MODULE DrvSCFs
 
 #ifdef PERIODIC
        CtrlVect=SetCtrlVect(Ctrl,'MakingPFFT')
-       CALL Invoke('MakePFFT',CtrlVect,MPIRun_O=.TRUE.)
+       !! CALL Invoke('MakePFFT',CtrlVect,MPIRun_O=.TRUE.)
+       CALL Invoke('MakePFFT',CtrlVect)
 #endif
 
        IF(CalcMMForce) THEN
