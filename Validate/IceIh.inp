@@ -1,0 +1,43 @@
+<BeginTitle>
+    Ice 1h-H2O-[P63/MMC] Goto, A.;Hondoh, T.;Mae, S.(1990)
+    HF/STO-3G
+<EndTitle>
+
+<BeginOptions>
+Charge=0
+MPIInvoke="mpirun"
+MPIProcFlag="-np"
+MPIProcessors=4 
+MPISpatialProc=4 
+Multiplicity=1
+Guess=SuperPos
+Grad=(Optimize,PrimInt,NoBackTr,BiSect,NoGDIIS)
+DebugAll=(MaxDebug,CheckSums,MaxGeOp)
+SCFMethod=(RH)
+BasisSets=(User1)
+ModelChem=(HF) 
+Accuracy =(good)
+Geometry=(InAngstroms,NoOrder) 
+Periodic=(AtomCoord)
+PBC=(T,T,T)
+<EndOptions>
+
+<BeginPeriodic>
+4.511000 4.511000 7.346000 90.000000 90.000000 120.000000
+<EndPeriodic>
+
+<BeginGeometry>  
+ O    0.000   2.605   3.215
+ H    0.000   2.605   2.215
+ H    0.824   2.130   3.544
+ O    2.257   1.303   4.140
+ H    2.257   0.351   3.811
+ H    3.081   1.779   3.811
+ O    2.257   1.303   6.892
+ H    2.257   1.303   5.892
+ H    1.432   1.779   7.221
+ O    0.000   2.605   0.463
+ H    0.000   3.557   0.134
+ H   -0.824   2.130   0.134
+<EndGeometry>
+
