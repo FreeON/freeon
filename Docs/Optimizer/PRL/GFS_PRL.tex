@@ -81,8 +81,8 @@ needed, which are suitable for large molecules.
 The present paper reveals a new concept for the optimization of
 molecular geometries, which is especially suitable for the
 optimization of large molecules and performs equally well in the
-domain of small molecules, too. It can also be easily implemented
-in a linear scaling fashion.
+domain of small molecules, too. It can be easily implemented
+in a linear scaling fashion, too.
 The new concept is based on the availability of internal coordinate
 gradients for large molecules - a result of recent developments
 \cite{paizs_coordtrf1,nemeth_coordtrf1,paizs_coordtrf2,nemeth_coordtrf2,billeter_coordtrf,andzelm_coordtrf,kudin_coordtrf}.
@@ -195,9 +195,7 @@ on harmonic potential energy surfaces.
 In the process of geometry optimization the goal is to reveal the roots
 of these lines, where all gradients become zero. In order to 
 find these roots, first a few points should be determined from each
-lines, then the roots can be revealed by line-fitting. This technique
-is quadratically convergent, as long as the normal modes
-can be determined and the potential energy surface is harmonic.
+lines, then the roots can be revealed by line-fitting. 
 
 In a realistic case neither the potential energy surface is 
 harmonic, nor the normal modes are available. However, it is always
@@ -317,17 +315,6 @@ interactions as well, such as the topology offered by $G_i^2$,
 but they turned out not to provide any significant improvement in our
 test calculations so far.
 
-\subsection{Step size control}
-In case the optimizer makes an extrapolation step towards the predicted
-minimum, the length of this step is limited by the range of the
-data points used for the fit. Step sizes are limited to be smaller
-than 0.3 a.u., similar to what is used by other optimizers 
-\cite{eckert}.
-For larger molecules of more complex structure 
-it is advantageous to restrict
-the stepsize to be 0.15 a.u., instead of the usual 0.30 a.u. 
-in order to proceed more carefully.
-\cite{eckert}. 
 
 \subsection{Minimum or transition state?}
 In case the gradient curve has a negative tangent at the position
@@ -365,6 +352,32 @@ second geometry, however the cruder diagonal Hessian steps have less
 step size limitation in the second step, resulting in a slightly
 better overall performance for some of our test sets.
 
+\subsection{Step size control}
+In case the optimizer makes an extrapolation step towards the predicted
+minimum, the length of this step is limited by the range of the
+data points used for the fit. Step sizes are limited to be smaller
+than 0.3 a.u., similar to what is used by other optimizers 
+\cite{eckert}.
+For larger molecules of more complex structure 
+it is advantageous to restrict
+the stepsize to be 0.15 a.u., instead of the usual 0.30 a.u. 
+in order to proceed more carefully.
+
+\subsection{Iterative back-transformation}
+Once the predictions are made, the required new values of the internal
+coordinates are passed in to the iterative back-transformation
+(see e.g. Ref. \cite{nemeth_coordtrf1})
+to generate the new set of Cartesian coordinates. Note, that no
+redundancy projector is used in our approach to pre-process the
+required internal coordinate displacements. In case the iterative 
+back-transformation would fail, it will repeat the process with 
+half of the original
+internal coordinate displacements required. If the repeated action 
+would also fail that indicates an incomplete set of internal coordinates
+and the programm stoppes. For large molecules this can often be the case
+if hydrogen-bonds or Van-der-Waals contacts have not properly been 
+accounted for.
+
 \section{Performance}
 The performance of this initial implementation of the OGCF optimizer
 has been tested on a 
@@ -388,6 +401,10 @@ of optimization steps by at least $\pm$10\%.
 We expect further improvement by the application of combined    
 internal coordinates, such as the natural internal ones or the 
 delocalized ones. 
+Note, that our results have been achieved without any use
+of traditional convergence acceleration algorithms, such as 
+geometric DIIS \cite{Pulay_GDIIS}, which are standard tools of
+traditional optimizers \cite{Farkas_GDIIS}.
 
 \begin{table}[h]
 %\squeezetable
