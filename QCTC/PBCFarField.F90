@@ -30,7 +30,7 @@ MODULE PBCFarField
 !====================================================================================
     SUBROUTINE PBCFarFieldSetUp(Q,GMLoc)
       TYPE(PoleNode)                  :: Q
-      INTEGER                         :: I,J,K,NC,LM,LP,Layers
+      INTEGER                         :: I,J,K,NC,LM,LP
       REAL(DOUBLE),DIMENSION(3)       :: PQ
       TYPE(CRDS)                      :: GMLoc
 !
@@ -42,14 +42,14 @@ MODULE PBCFarField
       CALL Get(TensorC,'PFFTensorC')
       CALL Get(TensorS,'PFFTensorS')
 !
+!     Get CS_IN amd Number of Cells
+!
+      CALL Delete_CellSet(CS_IN)
+      CALL Get_CellSet(CS_IN,'CS_IN')
+!
 !     Calculate the Box Moments
 !
       CALL RhoToSP(GMLoc)
-!
-!     Make CS_IN
-! 
-      Layers = GMLoc%PBC%PFFMaxLay
-      CALL New_CellSet_Cube(CS_IN,GMLoc%PBC%AutoW,GMLoc%PBC%BoxShape,(/Layers,Layers,Layers/))
 !
 !     Calculate the MACDist, PACDist and BDist
 !
@@ -78,22 +78,22 @@ MODULE PBCFarField
 !
 !     Output
 !
-      WRITE(*,*) 'GM%PBC%Dimen  = ',GMLoc%PBC%Dimen 
-      WRITE(*,*) 'GM%PFFMaxEll  = ',MaxEll
-      WRITE(*,*) 'GM%PFFMaxLay  = ',Layers
-      WRITE(*,*) 'CS_IN%NCells  = ',CS_IN%NCells
-      WRITE(*,*) 'CS_OUT%NCells = ',CS_OUT%NCells
-      WRITE(*,*) 'MACDist       = ',MACDist
-      WRITE(*,*) 'PACDist       = ',PACDist
-      WRITE(*,*) 'BOXDist       = ',BDist
-      WRITE(*,*) 'RDist         = ',RDist      
-      WRITE(*,*) '|Dipole|      = ',SQRT(RhoPoles%DPole%D(1)**2+RhoPoles%DPole%D(2)**2+RhoPoles%DPole%D(3)**2)
-      WRITE(*,*)
-      WRITE(*,*) 'Epsilon       = ',GMLoc%PBC%Epsilon
-      WRITE(*,*) 'DipoleFAC     = ',GMLoc%PBC%DipoleFAC
-      WRITE(*,*) 'E_PFF         = ',E_PFF
-      WRITE(*,*) 'E_DP          = ',E_DP     
-      WRITE(*,*)
+!!$      WRITE(*,*) 'GM%PBC%Dimen  = ',GMLoc%PBC%Dimen 
+!!$      WRITE(*,*) 'GM%PFFMaxEll  = ',MaxEll
+!!$      WRITE(*,*) 'GM%PFFMaxLay  = ',GMLoc%PBC%PFFMaxLay
+!!$      WRITE(*,*) 'CS_IN%NCells  = ',CS_IN%NCells
+!!$      WRITE(*,*) 'CS_OUT%NCells = ',CS_OUT%NCells
+!!$      WRITE(*,*) 'MACDist       = ',MACDist
+!!$      WRITE(*,*) 'PACDist       = ',PACDist
+!!$      WRITE(*,*) 'BOXDist       = ',BDist
+!!$      WRITE(*,*) 'RDist         = ',RDist      
+!!$      WRITE(*,*) '|Dipole|      = ',SQRT(RhoPoles%DPole%D(1)**2+RhoPoles%DPole%D(2)**2+RhoPoles%DPole%D(3)**2)
+!!$      WRITE(*,*)
+!!$      WRITE(*,*) 'Epsilon       = ',GMLoc%PBC%Epsilon
+!!$      WRITE(*,*) 'DipoleFAC     = ',GMLoc%PBC%DipoleFAC
+!!$      WRITE(*,*) 'E_PFF         = ',E_PFF
+!!$      WRITE(*,*) 'E_DP          = ',E_DP     
+!!$      WRITE(*,*)
 !
 !!$!
 !!$!     Calculate the Size of the Box Needed  for the Direct J and Generate the Cells for the Inner Box
