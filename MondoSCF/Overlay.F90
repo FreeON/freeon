@@ -26,6 +26,8 @@ MODULE Overlay
          LOGICAL,                      OPTIONAL            :: AbsPath_O,MPIRun_O
          INTEGER                                           :: I
          CHARACTER(LEN=4*DEFAULT_CHR_LEN)                  :: Command,CmndOpts
+!
+!        CALL CloseHDF()
 
 !         IF(PRESENT(MPIRun_O))THEN
 !            CALL MWait(60.0D0) ! to live with myrinet ...
@@ -68,6 +70,9 @@ MODULE Overlay
 #ifdef PARALLEL 
          ENDIF
 #endif
+!
+      CALL OpenHDF(InfFile)
+!
       END SUBROUTINE Invoke
 !
       SUBROUTINE SerialSpawn(Command,CmndOpts,MPIRun_O,AbsPath_O)
