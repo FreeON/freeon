@@ -6,6 +6,7 @@
 !------------------------------------------------------------------------------
 MODULE TreeWalk
   USE DerivedTypes
+  USE PoleNodeType
   USE GlobalScalars   
   USE GlobalObjects
   USE ProcessControl
@@ -13,22 +14,10 @@ MODULE TreeWalk
   USE PoleTree
   USE MondoPoles 
   USE GammaFunctions
+  USE PoleGlobals
+  USE ERIGlobals
   IMPLICIT NONE
 !---------------------------------------------------------------------
-! GLOBAL ..
-  TYPE(PrimPair)                  :: Prim
-  TYPE(BBox)                      :: PBox
-  REAL(DOUBLE)                    :: DP2
-  REAL(DOUBLE)                    :: PoleSwitch
-  INTEGER                         :: At
-  REAL(DOUBLE),DIMENSION(1:HGLen) :: HGKet
-  REAL(DOUBLE),DIMENSION(0:SPLen) :: SPKetC
-  REAL(DOUBLE),DIMENSION(0:SPLen) :: SPKetS
-! WORKSPACE FOR ERI INTERMEDIATES
-  REAL(DOUBLE),DIMENSION(500)      :: R
-  REAL(DOUBLE),DIMENSION(20)       :: W
-  REAL(DOUBLE),DIMENSION(0:20)     :: AuxR,G
-!-----------
   CONTAINS  !
      SUBROUTINE SetKet(P,E)
        TYPE(PrimPair) :: P
@@ -96,6 +85,7 @@ MODULE TreeWalk
           Ell=Prim%Ell+Q%Ell
 #ifdef EXPLICIT_SOURCE
           LCode=Prim%Ell*100+Q%Ell
+          INCLUDE 'AuxInt.Inc'
           INCLUDE 'HGTraX.Inc'
 #else
           CALL AuxInts(2*HGEll,Ell,AuxR,Omega,T)
@@ -178,6 +168,7 @@ MODULE TreeWalk
           Ell=Prim%Ell+Q%Ell
 #ifdef EXPLICIT_SOURCE
           LCode=Prim%Ell*100+Q%Ell
+          INCLUDE 'AuxInt.Inc'          
           INCLUDE 'HGTraX.Inc'
 #else
           CALL AuxInts(2*HGEll,Ell,AuxR,Omega,T)

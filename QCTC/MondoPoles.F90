@@ -2,6 +2,7 @@ MODULE MondoPoles
    USE Derivedtypes
    USE GlobalScalars   
    USE GlobalObjects
+   USE PoleGlobals
    USE ProcessControl
    USE Indexing
    USE Parse
@@ -10,51 +11,14 @@ MODULE MondoPoles
    USE Thresholding 
    USE BoundingBox
    USE McMurchie
+   USE PoleNodeType
    IMPLICIT NONE
-!=================================================================================================
-!  Hierarchical density node
-!=================================================================================================
-   TYPE PoleNode
-      LOGICAL                               :: Leaf     ! Is this a data containing node?
-      INTEGER                               :: Bdex     ! Begining index of ORB list for this node
-      INTEGER                               :: Edex     ! ENDign index of ORB list for this node
-      INTEGER                               :: NQ       ! Number of centers
-      INTEGER                               :: Ell      ! Ell type
-      REAL(DOUBLE)                          :: Zeta     ! Minimum exponent in this node
-      REAL(DOUBLE)                          :: Strength ! Strength of the Pole
-      REAL(DOUBLE)                          :: DMax2    ! (Max distance)^2 from node center to DBox 
-      TYPE(BBox)                            :: Box      ! Bounding Box of distribution (for PAC)
-      TYPE(BBox)                            :: DBox     ! Bounding Box of distribution centers (for MAC)
-      TYPE(PoleNode),POINTER                :: Descend  ! Next node in tree descent
-      TYPE(PoleNode),POINTER                :: Travrse  ! Next node in tree traversal
-#ifdef POINTERS_IN_DERIVED_TYPES
-      REAL(DOUBLE),DIMENSION(:),POINTER     :: S        ! Im component of the multipole tensor
-      REAL(DOUBLE),DIMENSION(:),POINTER     :: C        ! Re component of the multipole tensor
-      REAL(DOUBLE),DIMENSION(:),POINTER     :: Co       ! Coefficients of the HGTF density
-#else
-      REAL(DOUBLE),DIMENSION(:),ALLOCATABLE :: S        ! Im component of the multipole tensor
-      REAL(DOUBLE),DIMENSION(:),ALLOCATABLE :: C        ! Re component of the multipole tensor
-      REAL(DOUBLE),DIMENSION(:),ALLOCATABLE :: Co       ! Coefficients of the HGTF density
-#endif
-   END TYPE                                      
 !=====================================================================================================
 !
 !=====================================================================================================
   INTERFACE HGToSP
      MODULE PROCEDURE HGToSP_PoleNode,HGToSP_Bra
   END INTERFACE
-!====================================================================================================
-!  Global Array intermediates for multipole computations
-!====================================================================================================
-  INTEGER,PARAMETER                            :: FFELL=64
-  INTEGER,PARAMETER                            :: FFELL2=2*FFELL
-  INTEGER,PARAMETER                            :: FFLen=FFEll*(FFEll+3)/2 
-  INTEGER,PARAMETER                            :: FFLen2=FFEll2*(FFEll2+3)/2
-!
-  REAL(DOUBLE), DIMENSION(0:2*FFEll2)          :: Factorial
-  REAL(DOUBLE), DIMENSION(0:FFEll2)            :: FactOlm0,FactMlm0,Sine,Cosine,CoFact
-  REAL(DOUBLE), DIMENSION(0:FFLen2)            :: FactOlm2,FactMlm2,ALegendreP,Spq,Cpq
-  REAL(DOUBLE), DIMENSION(0:SPEll+1,0:FFELL)   :: FudgeFactorial
 CONTAINS
 !====================================================================================
 !     Q->P
