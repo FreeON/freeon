@@ -30,16 +30,16 @@
 #
 include $(MONDO_HOME)/Includes/RemoveAll
 #
-all:	CatCpy mm ic dy s e x 1 n 2 d #v 
+all:	CatCpy mm ic dy s e 1 n 2 d #v 
 #
-clean:	cmm cic cdy cs ce cx c1 cn c2 cd cv 
+clean:	cmm cic cdy cs ce c1 cn c2 cd cv 
 	rm -f $(REMOVEALL)
 	rm -f \#*
 	rm -f *~
 #
-purge:	pmm pic pdy ps pe px p1 pn p2 pd pv pMisc  
+purge:	pmm pic pdy ps pe p1 pn p2 pd pv pMisc  
 #
-release: rmLegacy swREADME rmm rdy ric rs re rx r1 rn r2 rd rv tarball
+release: rmLegacy swREADME rmm rdy ric rs re r1 rn r2 rd rv tarball
 #
 backup:	purge rmLegacy tarball
 #
@@ -50,6 +50,7 @@ rmLegacy:
 	rm -rf ONX/MASONX
 	rm -rf ONX/PONX*
 	rm -rf ONX/SONX
+	rm -rf XForm
 	rm -rf Inpts
 	rm -rf Scratch
 	rm -rf Exec
@@ -102,7 +103,7 @@ ps:
 cs:	
 	$(MAKE) -i -C MondoSCF clean
 #----------------------------------------------
-#    Solving SCF Equantions
+#    Solving SCF Equations
  e:	
 	$(MAKE)    -C SCFeqs
 re:	
@@ -111,16 +112,6 @@ pe:
 	$(MAKE) -i -C SCFeqs purge
 ce:	
 	$(MAKE) -i -C SCFeqs clean
-#----------------------------------------------
-#    Orthogonalization transformations
- x:	
-	$(MAKE)    -C XForm
-rx:	
-	$(MAKE) -i -C XForm release
-px:	
-	$(MAKE) -i -C XForm purge
-cx:	
-	$(MAKE) -i -C XForm clean
 #----------------------------------------------
 #      One electron routines
  1:
