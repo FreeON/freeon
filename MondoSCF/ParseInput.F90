@@ -1353,10 +1353,6 @@ MODULE ParseInput
          INTEGER        :: J
 !-----------------------------------------------------------------------------------
          IF(GM%Ordrd==SFC_NONE)RETURN
-!         CALL Warn('Reordering turned off for now.  '//Rtrn// &
-!                   'Needs fix that works with multiple geometries and DM extrapolation ')
-         GM%Ordrd=SFC_NONE
-         RETURN
 !
          CALL New(Point,NAtoms)
          CALL New(DTemp,NAtoms)
