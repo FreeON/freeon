@@ -4749,6 +4749,8 @@ CONTAINS
              IF(.NOT.Found) THEN
                II1=I1
                II4=I4
+               Angle123S=Angle123
+               Angle234S=Angle234
                Found=.TRUE.
              ELSE
                IF(ABS(PiHalf-Angle123)<ABS(PiHalf-Angle123S)) THEN
