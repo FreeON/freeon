@@ -13,7 +13,7 @@
          Table(3,I)=F8_3(I)
       ENDDO
 
-      CALL GDump(8,4*(Mesh+1),F8Asymp,Table)
+      CALL GDump(8,4*(Mesh+1),Table)
 
       RETURN
       END
