@@ -238,11 +238,14 @@ MODULE MemMan
          CALL New(A%BoxShape,(/3,3/))
          CALL New(A%InvBoxSh,(/3,3/))
          CALL New(A%BoxCarts,(/3,A%NAtms/))
+         CALL New(A%BoxVects,(/3,A%NAtms/))
 #endif
          CALL New(A%BndBox,(/3,2/))
          CALL New(A%AtTyp,A%NAtms)
          CALL New(A%AtNum,A%NAtms)
+         CALL New(A%AtMss,A%NAtms)
          CALL New(A%Carts,(/3,A%NAtms/))
+         CALL New(A%Vects,(/3,A%NAtms/))
          A%Alloc=ALLOCATED_TRUE
          A%ETotal=Zero
       END SUBROUTINE New_CRDS
@@ -542,11 +545,14 @@ MODULE MemMan
          CALL Delete(A%BoxShape)
          CALL Delete(A%InvBoxSh)
          CALL Delete(A%BoxCarts)
+         CALL Delete(A%BoxVects)
 #endif 
          CALL Delete(A%BndBox)
          CALL Delete(A%AtTyp)
          CALL Delete(A%AtNum)
+         CALL Delete(A%AtMss)
          CALL Delete(A%Carts)
+         CALL Delete(A%Vects)
          A%NAtms=0
          A%Alloc=ALLOCATED_FALSE
       END SUBROUTINE Delete_CRDS 
