@@ -35,11 +35,12 @@ MODULE PotUtil
       INTEGER                         :: NC
       REAL(DOUBLE),DIMENSION(3)       :: PTmp
 #endif
+      CHARACTER(LEN=DCL) :: Name	
 !     SET THE THRESHOLDS (LOOSE)
-      TauPAC=1.D-2
-      TauMAC=1.D-2 
+      TauPAC=1.D-3
+      TauMAC=1.D-3 
 !     Get multipoles and density
-      CALL Get(RhoPoles,SCFCycl)
+      CALL Get(RhoPoles)
       CALL Get(Rho,'Rho',Args,0)
 !     Initialize the auxiliary density arrays
       CALL InitRhoAux
@@ -57,7 +58,9 @@ MODULE PotUtil
       CALL Delete(Rho)
 !     WRITE POTENTIAL TO FILE
 !     Cubes file to scratch directory (use PWD_O=.TRUE. to go to PWD)
-      CALL OpenASCII(TrixFile('PotCubes',Args),77)
+      NAME=TrixFile('PotCubes',Args)
+      WRITE(*,*)' POTENTIAL WRITTEN TO '//TRIM(NAME)	
+      CALL OpenASCII(NAME,77)
       WRITE(77,*)' object 1 class array items ',NX*NY*NZ,' data follows '
       DO I=1,Nx    
          DO J=1,Ny

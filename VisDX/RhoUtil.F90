@@ -28,6 +28,7 @@ MODULE RhoUtil
 #ifdef PERIODIC
        INTEGER                    :: NC
 #endif
+      CHARACTER(LEN=DCL) :: Name	
 !      SET DENSITY THRESHOLDS (LOOSE)
        Del=3.D-1
        TauRho=1.D-3
@@ -43,7 +44,9 @@ MODULE RhoUtil
        Ny=CEILING((Box%BndBox(2,2)-Box%BndBox(2,1))/Del)
        Nz=CEILING((Box%BndBox(3,2)-Box%BndBox(3,1))/Del)
 !      WRITE DENSITY TO FILE
-       CALL OpenASCII(TrixFile('RhoCubes',Args),66)
+       NAME=TrixFile('RhoCubes',Args)
+       WRITE(*,*)' DENSITY WRITTEN TO '//TRIM(NAME)	
+       CALL OpenASCII(NAME,66)
        WRITE(66,*)' object 1 class array items ',NX*NY*NZ,' data follows '
        DO I=1,Nx    
           DO J=1,Ny

@@ -11,6 +11,7 @@ PROGRAM VisDX
   USE RhoUtil
   USE PotUtil 
 !
+  character(len=dcl) :: name
   CHARACTER(LEN=5),PARAMETER  :: Prog='VisDX'
 !
   REAL(DOUBLE)                :: Del1
@@ -30,18 +31,10 @@ PROGRAM VisDX
 #else
   CALL Get(GM,Tag_O=CurGeom)
 #endif
-  CALL PPrint(GM,TrixFile('xyz',Args,PWD_O=.TRUE.),Geo,'XYZ')
-#ifdef PERIODIC
-! Get the Outer Cell Set
-  CALL Get_CellSet(CS_OUT,'CS_OUT'//CurBase//CurGeom)
-#endif
-!
-! Create the Surfaces
-!
+  NAME=TrixFile('pdb',Args,PWD_O=.TRUE.)
+  WRITE(*,*)' STRUCTURE WRITTEN TO '//TRIM(NAME)
+  CALL PPrint(GM,NAME)
   CALL RhoCubed(Args,Del1,Origin1,Nx1,Ny1,Nz1)
   CALL PotCubed(Args,Del1,Origin1,Nx1,Ny1,Nz1)
-!
-  CALL Delete(Args)
-! Shutdown 
   CALL ShutDown(Prog)
 END PROGRAM VisDX
