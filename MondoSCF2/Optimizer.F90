@@ -698,7 +698,7 @@ CONTAINS
                       GOpt%GOptStat%MaxCGrad,GOpt%GOptStat%ILMaxCGrad, &
                       GOpt%GOptStat%LMaxCGrad)
      !
-     CALL GradConv(GOpt%GOptStat,GOpt%GConvCrit,GOpt%Constr)
+   ! CALL GradConv(GOpt%GOptStat,GOpt%GConvCrit,GOpt%Constr)
      !
      ! Do we have to refresh internal coord defs?   
      !
@@ -2001,20 +2001,17 @@ CONTAINS
      LOGICAL                     :: LatticeOnly,Print2
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ,BoxCarts,GradIn
      REAL(DOUBLE),DIMENSION(3,3) :: BoxShapeT,XYZAux
-     REAL(DOUBLE)                :: MaxCGrad,LMaxCGrad
-     INTEGER                     :: IMaxCGrad,ILMaxCGrad
      INTEGER                     :: NatmsLoc,OldDim,NewDim,NIntCs
      INTEGER                     :: II,I,J,PBCDim,NCart,Print
      TYPE(DBL_VECT)              :: CartGrad,Carts
      CHARACTER(LEN=*)            :: SCRPath
      INTEGER                     :: MaxLattice,MaxAtoms,AltCount
      !
-     IF(.NOT.GOpt%GConvCrit%Alternate) RETURN
      Print2= Print>=DEBUG_GEOP_MAX
      NatmsLoc=SIZE(BoxCarts,2)
      NCart=3*NatmsLoc+9
      MaxLattice=1
-     MaxAtoms=1
+     MaxAtoms=100000
      !
      ! Clean gradients from input constraints
      !
@@ -2028,21 +2025,24 @@ CONTAINS
      IF(GOpt%TrfCtrl%DoRotOff) &
        CALL RotationsOff(CartGrad%D,Carts%D,Print2,PBCDim)
      CALL Delete(Carts)
-     CALL GetCGradMax(CartGrad%D,NCart,IMaxCGrad,&
-                      MaxCGrad,ILMaxCGrad,LMaxCGrad)
+     CALL GetCGradMax(CartGrad%D,NCart,GOpt%GOptStat%IMaxCGrad,&
+                      GOpt%GOptStat%MaxCGrad,GOpt%GOptStat%ILMaxCGrad, &
+                      GOpt%GOptStat%LMaxCGrad)
      CALL Delete(CartGrad)
+     CALL GradConv(GOpt%GOptStat,GOpt%GConvCrit,GOpt%Constr)
+     IF(.NOT.GOpt%GConvCrit%Alternate) RETURN
      !
      IF(LatticeOnly) THEN
-       LatticeOnly=(LMaxCGrad>GOpt%GConvCrit%Grad).AND. &
-                   (AltCount<MaxLattice)
+       LatticeOnly=(GOpt%GOptStat%LMaxCGrad>GOpt%GConvCrit%Grad).AND. &
+                   (AltCount<MaxLattice+1)
        IF(LatticeOnly) THEN
          AltCount=AltCount+1
        ELSE
          AltCount=1
        ENDIF
      ELSE
-       LatticeOnly=(MaxCGrad>GOpt%GConvCrit%Grad).AND. &
-                   (AltCount<MaxAtoms)
+       LatticeOnly=(GOpt%GOptStat%MaxCGrad<GOpt%GConvCrit%Grad).AND. &
+                   (AltCount<MaxAtoms+1)
        IF(.NOT.LatticeOnly) THEN
          AltCount=AltCount+1
        ELSE
