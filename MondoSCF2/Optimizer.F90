@@ -1683,7 +1683,7 @@ CONTAINS
    SUBROUTINE BackTrack(iBAS,iGEO,C,BPrev,BCur,DoLineS_O)
      ! Go over clones and do backtracking whenever necessary
      TYPE(Controls)   :: C
-     INTEGER          :: I,J,iBAS,iGEO,iCLONE
+     INTEGER          :: I,J,iBAS,iGEO,iCLONE,I1,I2
      INTEGER,DIMENSION(:):: BPrev,BCur
      INTEGER          :: NatmsLoc,NCart,AccL
      INTEGER          :: MaxBStep,IBStep
@@ -1691,7 +1691,7 @@ CONTAINS
      TYPE(CRDS)       :: GMOld
      LOGICAL          :: DoBackTrack,DoLineS
      LOGICAL,OPTIONAL :: DoLineS_O
-     REAL(DOUBLE)     :: EOld,ENew,MeanDist,FactN,FactO
+     REAL(DOUBLE)     :: EOld,ENew,MeanDist,FactN,FactO,Fact,MaxDist
      TYPE(DBL_VECT)   :: DistVect1,DistVect2
      TYPE(DBL_RNK2)   :: RefXYZ1
      TYPE(LOG_VECT)   :: NeedBackTr
@@ -1733,7 +1733,7 @@ CONTAINS
                   C%Geos,C%Sets,C%MPIs)
      ENDIF
      !
-     MaxBStep=4
+     MaxBStep=11
      IF(DoLineS) MaxBStep=1
      !
      DO iBStep=1,MaxBStep+1
@@ -1780,7 +1780,14 @@ CONTAINS
          CALL New(DistVect2,NCart)
          CALL CartRNK2ToCartRNK1(DistVect2%D,C%Geos%Clone(iCLONE)%Carts%D)
          DistVect2%D=DistVect2%D-DistVect1%D
-         MeanDist=SQRT(DOT_PRODUCT(DistVect2%D,DistVect2%D))/NatmsLoc
+         MeanDist=SQRT(DOT_PRODUCT(DistVect2%D,DistVect2%D))/DBLE(NatmsLoc)
+         MaxDist=Zero
+         DO I=1,NatmsLoc
+           I1=3*(I-1)+1
+           I2=3*(I-1)+3
+           Fact=SQRT(DOT_PRODUCT(DistVect2%D(I1:I2),DistVect2%D(I1:I2)))
+           MaxDist=MAX(MaxDist,Fact)
+         ENDDO 
          CALL Delete(DistVect1)
          CALL Delete(DistVect2)
          !
@@ -1788,10 +1795,11 @@ CONTAINS
          !
          IF(iBStep>1.OR.DoBackTrack) THEN  
              CALL OPENAscii(OutFile,Out)
-             WRITE(*,200) iBStep-1,EOld,ENew,MeanDist
-             WRITE(Out,200) iBStep-1,EOld,ENew,MeanDist
+             WRITE(*,200) iBStep-1,EOld,ENew,MeanDist,MaxDist
+             WRITE(Out,200) iBStep-1,EOld,ENew,MeanDist,MaxDist
            200 FORMAT('Backtr. step= ',I3,' Old Energy= ', &
-                       F14.8,' New Energy= ',F14.8,' Dist= ',F14.8)
+                       F20.6,' New Energy= ',F20.6,' Dist= ',F14.8, &
+                       'MaxDist= ',F14.8)
              CLOSE(Out,STATUS='KEEP')
          ENDIF
          !
@@ -1803,10 +1811,12 @@ CONTAINS
              !
              ! Set up new box-coordinates
              !
+             FactO=Half
+             FactN=Half
              IF(C%GOpt%GConvCrit%DoLattBackTr) THEN
                C%Geos%Clone(iCLONE)%PBC%BoxShape%D= &
-                 (C%Geos%Clone(iCLONE)%PBC%BoxShape%D+ &
-                                 GMOld%PBC%BoxShape%D)*Half
+                 (FactN*C%Geos%Clone(iCLONE)%PBC%BoxShape%D+ &
+                                 FactO*GMOld%PBC%BoxShape%D)
                CALL PBCInfoFromNewCarts(C%Geos%Clone(iCLONE)%PBC)
              ENDIF
              !
@@ -1815,7 +1825,8 @@ CONTAINS
              IF(C%GOpt%GConvCrit%DoAtomBackTr) THEN
                !
                C%Geos%Clone(iCLONE)%BoxCarts%D= &
-                 Half*(C%Geos%Clone(iCLONE)%BoxCarts%D+GMOld%BoxCarts%D)
+                 (FactN*C%Geos%Clone(iCLONE)%BoxCarts%D+&
+                  FactO*GMOld%BoxCarts%D)
                !
                DO I=1,NatmsLoc
                  CALL DGEMM_NNc(3,3,1,One,Zero, &
