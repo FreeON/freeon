@@ -268,15 +268,23 @@ MODULE MemMan
          CALL AllocChk(A%Alloc)
          A%N=N
          CALL New(A%Def,N)
-         A%Def%C='BLANK'
+           A%Def%C='BLANK'
          CALL New(A%Atoms,(/N,4/))
+           A%Atoms%I=0
          CALL New(A%Value,N)
+           A%Value%D=Zero
          CALL New(A%Constraint,N)
+           A%Constraint%L=.FALSE.
          CALL New(A%ConstrValue,N)
+           A%ConstrValue%D=Zero
          CALL New(A%Active,N)
+           A%Active%L=.FALSE.
          CALL New(A%PredVal,N)
+           A%PredVal%D=Zero
          CALL New(A%PredGrad,N)
+           A%PredGrad%D=Zero
          CALL New(A%InvHess,N)
+           A%InvHess%D=Zero
          A%Alloc=ALLOCATED_TRUE
       END SUBROUTINE New_INTC
 !     
