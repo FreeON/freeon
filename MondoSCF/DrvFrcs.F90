@@ -381,10 +381,7 @@ MODULE DrvFrcs
 !
       PTensor = Zero 
 !
-      Volume = One
-      DO I=1,3;IF(GM%AutoW(I)) Volume = Volume*GM%BoxShape%D(I,I);ENDDO
-
-
+      Volume = GM%PBC%CellVolume
       DO AtA=1,NAtoms
          A1  = 3*(AtA-1)+1
          MSS = GM%AtMss%D(AtA)
@@ -424,8 +421,6 @@ MODULE DrvFrcs
 12    FORMAT(2X,F22.16,2X,F22.16,2X,F22.16)
 !
     END SUBROUTINE NextMDGeometry
-
-
 !========================================================================================
 !
 !========================================================================================
