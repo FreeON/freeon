@@ -141,7 +141,6 @@ MODULE ControlStructures
      REAL(DOUBLE)                       :: ConstrMaxCrit
      LOGICAL                            :: DoFixMM
      LOGICAL                            :: TSSearch
-     LOGICAL                            :: DoLagr
   END TYPE Constr
   !
   TYPE BackTrf
@@ -259,6 +258,7 @@ MODULE ControlStructures
      TYPE(BackTrf)                   :: BackTrf
      TYPE(Constr)                    :: Constr
      TYPE(GDIIS)                     :: GDIIS
+     TYPE(INTC)                      :: ExtIntCs
   END TYPE GeomOpt
 
   TYPE RespOpts
