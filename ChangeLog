@@ -1,3 +1,29 @@
+2004-10-21 11:11  mchalla
+
+	* TwoE/VRR/: VRRg0g0.F90, VRRg0h0.F90, VRRg0i0.F90, VRRg0p0.F90,
+	VRRg0s0.F90, VRRh0d0.F90, VRRh0f0.F90, VRRh0g0.F90, VRRh0h0.F90,
+	VRRh0i0.F90, VRRh0p0.F90, VRRh0s0.F90, VRRi0d0.F90, VRRi0f0.F90,
+	VRRi0g0.F90, VRRi0h0.F90, VRRi0i0.F90, VRRi0p0.F90, VRRi0s0.F90,
+	VRRp0d0.F90, VRRp0f0.F90, VRRp0g0.F90, VRRp0h0.F90, VRRp0i0.F90,
+	VRRp0p0.F90, VRRp0s0.F90, VRRs0d0.F90, VRRs0f0.F90, VRRs0g0.F90,
+	VRRs0h0.F90, VRRs0i0.F90, VRRs0p0.F90: [no log message]
+
+2004-10-21 10:55  vweber
+
+	* Validate/: BN_3x3.inp, CH2x-6.inp, Urea.inp: [no log message]
+
+2004-10-21 10:46  mchalla
+
+	* TwoE/VRR/VRRg0g0.F90: [no log message]
+
+2004-10-21 10:43  mchalla
+
+	* TwoE/VRR/VRRd0d0.F90: [no log message]
+
+2004-10-20 11:52  mchalla
+
+	* ChangeLog: [no log message]
+
 2004-10-20 10:39  vweber
 
 	* OneE/TForce.F90: Parallel bugs for stress hopefully fixed.
