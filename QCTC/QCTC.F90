@@ -70,6 +70,7 @@ PROGRAM QCTC
      WRITE(Out,*)TRIM(Mssg)
      CLOSE(Out)
   ELSE
+     CALL OpenASCII(InpFile,Inp)         
      IF(OptDblQ(Inp,'TauPAC',TauPAC))THEN
        Mssg=TRIM(ProcessName('QCTC'))//' TauPAC = '//TRIM(DblToShrtChar(TauPAC))
        CALL OpenASCII(OutFile,Out)         
@@ -82,6 +83,7 @@ PROGRAM QCTC
        WRITE(Out,*)TRIM(Mssg)
        CLOSE(Out)
      ENDIF
+     CLOSE(Inp)
   ENDIF
   ! Initialize the auxiliary density arrays
   CALL InitRhoAux

@@ -78,30 +78,26 @@ PROGRAM HaiKu
      ENDIF
 #endif
   ELSE
-     IF(OptDblQ(Inp,'TauRel',TauRel))THEN
 #ifdef PARALLEL
-        IF(MyId==0)THEN
+     IF(MyId==0)THEN
 #endif
+        CALL OpenASCII(InpFile,Inp)         
+        IF(OptDblQ(Inp,'TauRel',TauRel))THEN
            Mssg=TRIM(ProcessName('HiCu'))//' TauRel = '//TRIM(DblToShrtChar(TauRel))
            CALL OpenASCII(OutFile,Out)         
            WRITE(Out,*)TRIM(Mssg)
            CLOSE(Out)
-#ifdef PARALLEL
         ENDIF
-#endif           
-     ENDIF
-     IF(OptDblQ(Inp,'TauRho',TauRho))THEN
-#ifdef PARALLEL
-        IF(MyId==0)THEN
-#endif
+        IF(OptDblQ(Inp,'TauRho',TauRho))THEN
            Mssg=TRIM(ProcessName('HiCu'))//' TauRho = '//TRIM(DblToShrtChar(TauRho))
            CALL OpenASCII(OutFile,Out)         
            WRITE(Out,*)TRIM(Mssg)
            CLOSE(Out)
-#ifdef PARALLEL
         ENDIF
-#endif
+        CLOSE(Inp)
+#ifdef PARALLEL
      ENDIF
+#endif
   ENDIF
 ! Begin local performance accumulator for grid generation
   CALL Elapsed_Time(TimeRhoToGrid,'Init')
