@@ -30,11 +30,7 @@ PROGRAM XCForce
   CHARACTER(LEN=7),PARAMETER     :: Prog='XCForce'
   CHARACTER(LEN=15),PARAMETER    :: Sub1='XCForce.RhoTree' 
   CHARACTER(LEN=15),PARAMETER    :: Sub2='XCForce.GridGen' 
-  CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg 
-#ifdef PERIODIC        
-  INTEGER                        :: NCA,NCB
-  REAL(DOUBLE),DIMENSION(3)      :: A,B
-#endif     
+  CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg    
 !---------------------------------------------------------------------------------------
 ! Macro the start up
   CALL StartUp(Args,Prog,Serial_O=.TRUE.)
@@ -46,9 +42,9 @@ PROGRAM XCForce
 ! Set local integration thresholds 
   CALL SetLocalThresholds(Thresholds%Cube*1.D-1)
 #ifdef PERIODIC
-! Calculate the Number of Cells
-  CALL SetCellNumber(GM)
-  CALL PPrint(CS_OUT,'outer sum',Prog)
+! Calculate the Number of Cells for the Grid
+  CALL SetGridCell(GM,ExtraEll_O=2)
+  CALL PPrint(CS_Grid,'CS_Grid',Prog)
 #endif
 ! Convert density to a 5-D BinTree
   CALL RhoToTree(Args)
@@ -74,24 +70,7 @@ PROGRAM XCForce
            Q=P%BlkPt%I(JP)
            NB=BSiz%I(AtB)
            MN1=MA*NB-1
-#ifdef PERIODIC
-           A=Pair%A
-           B=Pair%B
-           DO NCA=1,CS_OUT%NCells
-              Pair%A=A+CS_OUT%CellCarts%D(:,NCA)
-              DO NCB=1,CS_OUT%NCells
-                 Pair%B=B+CS_OUT%CellCarts%D(:,NCB)
-                 Pair%AB2=(Pair%A(1)-Pair%B(1))**2 &
-                         +(Pair%A(2)-Pair%B(2))**2 &
-                         +(Pair%A(3)-Pair%B(3))**2
-                 IF(TestAtomPair(Pair)) THEN
-                    XCFrc%D(A1:A2)=XCFrc%D(A1:A2)+dXC(Pair,P%MTrix%D(Q:Q+MN1))
-                 ENDIF
-              ENDDO
-           ENDDO
-#else
            XCFrc%D(A1:A2)=XCFrc%D(A1:A2)+dXC(Pair,P%MTrix%D(Q:Q+MN1))
-#endif
         ENDIF
      ENDDO
   ENDDO
