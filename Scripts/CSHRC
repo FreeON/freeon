@@ -16,13 +16,12 @@ setenv MONDO_PLAT        AMDLinux.PG
 #setenv MONDO_PLAT        IntelLinux.NAG
 #setenv MONDO_PLAT        AlphaLinux.COMPAQ
 #setenv MONDO_PLAT        SGIIrix.MIPS
-setenv MONDO_HOME         /home/joeuser/MONDO
-setenv MONDO_INC          $MONDO_HOME/Includes
-#setenv MONDO_SCRATCH      $MONDO_HOME/Scratch
-setenv MONDO_SCRATCH      /scratch/joeuser
-#setenv MONDO_EXEC         /usr/local/bin/mondo
-setenv MONDO_EXEC         $MONDO_HOME/Exec
-setenv MONDO_WORK         $MONDO_HOME/Inpts/DEVELOP
+
+setenv MONDO_HOME     	/home/joeuser/MONDO
+setenv MONDO_SCRATCH   	/scratch/
+setenv MONDO_EXEC      	/usr/local/bin/MONDO
+setenv MONDO_LIB       	/usr/local/lib/MONDO
+setenv MONDO_INC     	$MONDO_HOME/Includes
 #===============================================================
 # Set MAKE (use gnumake if your make does not support -C)
 #
@@ -33,21 +32,11 @@ setenv MAKE make
 #
 source $MONDO_HOME/Scripts/MondoSetUp
 #===============================================================
-# Set up the CVS path and editor.  Protect this if you are in
-# a parallel environment
-#
-#setenv HOST `hostname`
-#if ( $HOST == "zinc" ) then
-#setenv CVSROOT /n/srv1/mondo
-#setenv CVSEDITOR "/usr/bin/emacs -nw"
-#endif
-#===============================================================
 # Set HDF5 related direcories 
 #
 # Obtain the HDF5 libraries from http://hdf.ncsa.uiuc.edu/
 #
-setenv HDF_HOME        /home/joeuser/HDF5
-#setenv HDF_HOME       /usr/local/lib/hdf5
+setenv HDF_HOME       /usr/local/lib/hdf5
 setenv HDF_BIN         $HDF_HOME/bin
 setenv HDF_INC         $HDF_HOME/include
 setenv HDF_LIB         $HDF_HOME/lib
