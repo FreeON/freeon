@@ -473,6 +473,41 @@ MODULE DerivedTypes
       TYPE(INT_VECT) :: Blks      !-- Vector of block sizes
    END TYPE
 !
+! B-Matrix related types
+!
+#ifdef POINTERS_IN_DERIVED_TYPES
+!
+   TYPE INTC
+     INTEGER          :: Alloc     !-- Allocation key
+     CHARACTER(LEN=5),POINTER,DIMENSION(:) :: Def 
+     INTEGER,POINTER,DIMENSION(:,:) :: Atoms
+     REAL(DOUBLE),POINTER,DIMENSION(:) :: Value
+     LOGICAL,POINTER,DIMENSION(:) :: Constraint 
+   END TYPE INTC
+!
+   TYPE BMATR
+     INTEGER        :: Alloc     !-- Allocation key
+     INTEGER,POINTER,DIMENSION(:,:) :: IB
+     REAL(DOUBLE),POINTER,DIMENSION(:,:) :: B
+   END TYPE BMATR
+#else
+!
+   TYPE INTC
+     INTEGER          :: Alloc     !-- Allocation key
+     CHARACTER(LEN=5),ALLOCATABLE,DIMENSION(:) :: Def 
+     INTEGER,ALLOCATABLE,DIMENSION(:,:) :: Atoms
+     REAL(DOUBLE),ALLOCATABLE,DIMENSION(:) :: Value
+     LOGICAL,ALLOCATABLE,DIMENSION(:) :: Constraint 
+   END TYPE INTC
+!
+   TYPE BMATR
+     INTEGER        :: Alloc     !-- Allocation key
+     INTEGER,ALLOCATABLE,DIMENSION(:,:) :: IB
+     REAL(DOUBLE),ALLOCATABLE,DIMENSION(:,:) :: B
+   END TYPE BMATR
+!
+#endif
+!
 END MODULE
 
 
