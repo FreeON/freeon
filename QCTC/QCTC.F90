@@ -20,6 +20,7 @@ PROGRAM QCTC
   USE PBCFarField
   USE JGen
   USE NuklarE
+  USE ParallelQCTC
 #ifdef PARALLEL
   USE FastMatrices
 #endif
@@ -42,6 +43,7 @@ PROGRAM QCTC
   REAL(DOUBLE)                   :: MM_COUL,E_C_EXCL,CONVF  
   INTEGER                        :: I,K,UOUT !!!!
 !------------------------------------------------------------------------------- 
+  ETimer(:) = Zero
 ! Start up macro
   CALL StartUp(Args,Prog,Serial_O=.FALSE.)
 !
@@ -105,6 +107,9 @@ PROGRAM QCTC
   CALL Elapsed_Time(TimeMakeTree,'Init')
   CALL RhoToPoleTree
   CALL Elapsed_TIME(TimeMakeTree,'Accum')
+#ifdef PARALLEL
+  CALL EqualTimeSetUp()
+#endif
 ! Set the electrostatic background
   CALL PBCFarFieldSetUp(PoleRoot,GM)
 ! Delete the auxiliary density arrays
@@ -135,6 +140,7 @@ PROGRAM QCTC
     STOP 'InkFok in PARALLEL QCTC is not supported.'
   ENDIF
   CALL Redistribute_FASTMAT(J)
+  CALL ET_Part
   CALL Set_BCSR_EQ_DFASTMAT(T1,J) ! T1 is allocated in Set_BCSR...
 #else
      IF(SCFActn=='InkFok')THEN

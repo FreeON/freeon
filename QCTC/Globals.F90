@@ -9,5 +9,7 @@ MODULE Globals
   TYPE(ARGMT)     :: Args
   TYPE(HGRho)     :: Rho
   TYPE(CMPoles)   :: RhoPoles
+  INTEGER,PARAMETER :: TimerSize = 40
+  REAL(DOUBLE) :: ETimer(TimerSize)
 !
 END MODULE Globals

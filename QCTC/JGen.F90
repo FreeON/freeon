@@ -17,9 +17,15 @@ MODULE JGen
   USE PBCFarField
 #ifdef PARALLEL
   USE FastMatrices
+  USE ParallelQCTC
 #endif
   IMPLICIT NONE
   LOGICAL PrintFlag
+
+#ifdef PARALLEL
+  INTEGER :: PrIndex,AbsIndex
+#endif
+
 !-------------------------------------------------------------------------------
   CONTAINS
 !===============================================================================
@@ -48,11 +54,7 @@ MODULE JGen
       J%NAtms= NAtoms
 #endif
       ! Loop over atom pairs
-#ifdef PARALLEL
-      DO AtA=Beg%I(MyId),End%I(MyId)
-#else
       DO AtA=1,NAtoms             
-#endif
          DO AtB=1,NAtoms
             IF(SetAtomPair(GM,BS,AtA,AtB,Pair)) THEN
                NAB = Pair%NA*Pair%NB
@@ -90,6 +92,21 @@ MODULE JGen
          ENDDO
       ENDDO
 #ifdef PARALLEL
+
+      IF(PrIndex /= TotPrCount) THEN
+        WRITE(*,*) 'PrIndex = ',PrIndex
+        WRITE(*,*) 'TotPrCount = ',TotPrCount
+        STOP 'ERR: Serious counting problem I!'
+      ENDIF
+      IF(AbsIndex /= GlobalCount) THEN
+        WRITE(*,*) 'AbsIndex = ',AbsIndex
+        WRITE(*,*) 'GlobalCount = ',GlobalCount
+        STOP 'ERR: Serious counting problem II!'
+      ENDIF
+
+      DO PrIndex = 1, TotPrCount
+        ETimer(2) = ETimer(2) + PosTimePair%D(4,PrIndex)
+      ENDDO
 #else
       J%NBlks=P-1
       J%NNon0=R-1
@@ -160,6 +177,10 @@ MODULE JGen
                                                    LMNB,LA,LB,MA,MB,NA,NB,LAB, &
                                                    MAB,NAB,LM,LMN,SumEll,EllA,    &
                                                    EllB,NC,L,M,LenHGTF,LenSP
+#ifdef PARALLEL
+       REAL(DOUBLE)                             :: ZA,ZB,T1,T2
+       LOGICAL                                  :: FirstIterQ,OtherIterQ
+#endif
 !------------------------------------------------------------------------------- 
        JBlk=Zero
        KA=Pair%KA
@@ -191,6 +212,29 @@ MODULE JGen
                    Prim%Zeta=Prim%ZA+Prim%ZB
                    Prim%Xi=Prim%ZA*Prim%ZB/Prim%Zeta
                    IF(TestPrimPair(Prim%Xi,Prim%AB2))THEN
+#ifdef PARALLEL
+                      ZA = Prim%ZA
+                      ZB = Prim%ZB
+                      Prim%P=(ZA*Prim%A+ZB*Prim%B)/Prim%Zeta
+                      AbsIndex = AbsIndex + 1
+                      IF(GQLineLoc == 0) then
+                        FirstIterQ = AbsIndex >= BegPrInd%I(MyID) &
+                                  .AND.AbsIndex <= EndPrInd%I(MyID)
+                      ELSE
+                        OtherIterQ = Prim%P(1) >= LC%D(1,MyID+1) .AND. &
+                                   Prim%P(1) < RC%D(1,MyID+1) .AND. &
+                                   Prim%P(2) >= LC%D(2,MyID+1) .AND. &
+                                   Prim%P(2) < RC%D(2,MyID+1) .AND. &
+                                   Prim%P(3) >= LC%D(3,MyID+1) .AND. &
+                                   Prim%P(3) < RC%D(3,MyID+1)
+                      ENDIF
+                      IF(FirstIterQ .OR. OtherIterQ) THEN
+
+                      PrIndex = PrIndex + 1
+                      T1 = MPI_WTime()
+                      PosTimePair%D(1:3,PrIndex) = Prim%P(1:3)
+
+#endif
                       Prim%PFA=PFA 
                       Prim%PFB=PFB
                       MaxAmp=SetBraBlok(Prim,BS)
@@ -292,6 +336,12 @@ MODULE JGen
                             ENDDO
                          ENDIF
                       ENDIF
+#ifdef PARALLEL
+                      T2 = MPI_WTime()
+                      PosTimePair%D(4,PrIndex) = T2-T1
+                      ENDIF
+#endif
+
                    ENDIF !End primitive thresholding
                 ENDDO
              ENDDO

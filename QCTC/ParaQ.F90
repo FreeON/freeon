@@ -1,3 +1,5 @@
+#undef DIAG_QCTC
+
 MODULE ParallelQCTC
   USE Globals
   USE MondoMPI
@@ -10,6 +12,582 @@ MODULE ParallelQCTC
   IMPLICIT NONE
 
 #ifdef PARALLEL
+  TYPE(BBox) :: EBB_GlobalBox  ! GlobalBoundingBox
+  TYPE(BBox) :: RootBox ! Root bounding box
+  REAL(DOUBLE) :: BP(6)
+  REAL(DOUBLE),PARAMETER :: EP = 1.0D-8
+  TYPE(DBL_RNK2) :: LC,RC
+  REAL(DOUBLE) :: RootBDist
+  TYPE(INT_VECT) :: BegNQInd,EndNQInd
+  TYPE(INT_VECT) :: BegPrInd,EndPrInd
+  TYPE(INT_VECT) :: BegAtInd,EndAtInd
+  INTEGER :: BranchTier
+  TYPE PointerArray
+    TYPE(PoleNode),POINTER :: Ptr
+  END TYPE PointerArray
+  TYPE(PointerArray),ALLOCATABLE :: PA1(:),PA2(:)
+  INTEGER :: RunPointer
+  INTEGER :: NodesVisit,NodesVisit1,IntNum,DblNum
+  INTEGER :: GIntNum,GDblNum
+
+  INTEGER,ALLOCATABLE :: IntArr(:)
+  REAL(DOUBLE),ALLOCATABLE :: DblArr(:)
+  INTEGER :: IntIndex,DblIndex
+
+  INTEGER,ALLOCATABLE :: RecIntArr(:)
+  REAL(DOUBLE),ALLOCATABLE :: RecDblArr(:)
+
+  INTEGER :: TotPrCount
+  TYPE(DBL_RNK2) ::  PosTimePair
+  INTEGER :: GlobalCount,GQLineLoc
+
+CONTAINS
+
+
+  ! count number of primitives
+  SUBROUTINE EBBCountJBlock(Count,Pair,PoleRoot)
+    TYPE(AtomPair)  :: Pair
+    TYPE(PoleNode), POINTER  :: PoleRoot
+    INTEGER :: KA,KB,CFA,CFB,PFA,PFB,Count,J
+    TYPE(BBox) :: NodeBox
+    REAL(DOUBLE) :: ZA,ZB
+
+    KA = Pair%KA
+    KB = Pair%KB
+    Prim%AB2=Pair%AB2
+    Prim%A = Pair%A
+    Prim%B = Pair%B
+    Count = 0
+    DO CFA = 1, BS%NCFnc%I(KA)
+      DO CFB = 1, BS%NCFnc%I(KB)
+        DO PFA = 1, BS%NPFnc%I(CFA,KA)
+          DO PFB = 1, BS%NPFnc%I(CFB,KB)
+            Prim%ZA = BS%Expnt%D(PFA,CFA,KA)
+            Prim%ZB = BS%Expnt%D(PFB,CFB,KB)
+            Prim%Zeta = Prim%ZA + Prim%ZB
+            Prim%Xi = Prim%ZA*Prim%ZB/Prim%Zeta
+            IF(TestPrimPair(Prim%Xi,Prim%AB2)) THEN
+              ZA = Prim%ZA
+              ZB = Prim%ZB
+              Prim%P=(ZA*Prim%A+ZB*Prim%B)/Prim%Zeta
+              NodeBox%BndBox(1:3,1) = Prim%P(1:3)
+              NodeBox%BndBox(1:3,2) = Prim%P(1:3)
+              NodeBox = ExpandBox(NodeBox,EP)
+              DO J = 1, 3
+                RootBox%BndBox(J,1) = MIN(RootBox%BndBox(J,1),NodeBox%BndBox(J,1))
+                RootBox%BndBox(J,2) = MAX(RootBox%BndBox(J,2),NodeBox%BndBox(J,2))
+              ENDDO
+              Count = Count + 1
+            ENDIF
+          ENDDO
+        ENDDO
+      ENDDO
+    ENDDO
+  END SUBROUTINE EBBCountJBlock
+
+ 
+
+  ! count number of primitives in the box
+  SUBROUTINE BoxEBBPairCount(Count,Pair,PoleRoot)
+    TYPE(AtomPair)  :: Pair
+    TYPE(PoleNode), POINTER  :: PoleRoot
+    INTEGER :: KA,KB,CFA,CFB,PFA,PFB,Count,J
+    TYPE(BBox) :: NodeBox
+    REAL(DOUBLE) :: ZA,ZB
+
+    KA = Pair%KA
+    KB = Pair%KB
+    Prim%AB2=Pair%AB2
+    Prim%A = Pair%A
+    Prim%B = Pair%B
+    Count = 0
+    DO CFA = 1, BS%NCFnc%I(KA)
+      DO CFB = 1, BS%NCFnc%I(KB)
+        DO PFA = 1, BS%NPFnc%I(CFA,KA)
+          DO PFB = 1, BS%NPFnc%I(CFB,KB)
+            Prim%ZA = BS%Expnt%D(PFA,CFA,KA)
+            Prim%ZB = BS%Expnt%D(PFB,CFB,KB)
+            Prim%Zeta = Prim%ZA + Prim%ZB
+            Prim%Xi = Prim%ZA*Prim%ZB/Prim%Zeta
+            IF(TestPrimPair(Prim%Xi,Prim%AB2)) THEN
+              ZA = Prim%ZA
+              ZB = Prim%ZB
+              Prim%P=(ZA*Prim%A+ZB*Prim%B)/Prim%Zeta
+              IF(Prim%P(1) >= LC%D(1,MyID+1) .AND. Prim%P(1) < RC%D(1,MyID+1) &
+                 .AND. Prim%P(2) >= LC%D(2,MyID+1) .AND. Prim%P(2) < RC%D(2,MyID+1) &
+                 .AND. Prim%P(3) >= LC%D(3,MyID+1) .AND. Prim%P(3) < RC%D(3,MyID+1)) THEN
+                Count = Count + 1
+              ENDIF
+            ENDIF
+          ENDDO
+        ENDDO
+      ENDDO
+    ENDDO
+  END SUBROUTINE BoxEBBPairCount
+
+
+  ! equaltime partition
+  SUBROUTINE ET_Part
+    INTEGER :: NIter,I,J,IErr,NV,NS,RI,PI,CI,RootNum,Dir
+    TYPE(BBox) :: NodeBox,LBox
+    INTEGER :: P2(0:30)
+    TYPE(DBL_RNK2) :: RepLC,RepRC
+    TYPE(DBL_VECT) :: VTm,Tau
+    REAL(DOUBLE),PARAMETER :: TauB=1.0D-5,TauE=1.0D-4
+    REAL(DOUBLE) :: NewCost,TVol,OVol,NVol,Diff,TotCost,T1,T2,T3,LD,MD,PCost,x0,x1,x2,&
+                    Imbalance,MaxCost,WasteCost,f0,f1,f2,LocalT,TotLT
+    TYPE(INT_VECT) :: XYZ
+    TYPE(DBL_VECT) :: Pos
+    
+    DO I = 1, TotPrCount
+      NodeBox%BndBox(1:3,1) = (/PosTimePair%D(1,I),PosTimePair%D(2,I),PosTimePair%D(3,I)/)
+      NodeBox%BndBox(1:3,2) = (/PosTimePair%D(1,I),PosTimePair%D(2,I),PosTimePair%D(3,I)/)
+      NodeBox = ExpandBox(NodeBox,EP)
+      IF(I == 1) THEN
+        LBox%BndBox(1:3,1:2) = NodeBox%BndBox(1:3,1:2)
+      ELSE
+        DO J = 1, 3
+          LBox%BndBox(J,1) = MIN(LBox%BndBox(J,1),NodeBox%BndBox(J,1))
+          LBox%BndBox(J,2) = MAX(LBox%BndBox(J,2),NodeBox%BndBox(J,2))
+        ENDDO
+      ENDIF
+    ENDDO
+    CALL MPI_AllReduce(LBox%BndBox(1,1),EBB_GlobalBox%BndBox(1,1),&
+         3,MPI_DOUBLE_PRECISION,MPI_MIN,MONDO_COMM,IErr)
+    CALL MPI_AllReduce(LBox%BndBox(1,2),EBB_GlobalBox%BndBox(1,2),&
+         3,MPI_DOUBLE_PRECISION,MPI_MAX,MONDO_COMM,IErr)
+    IF(MyID == 0) THEN
+      DO I = 1, 3
+        Diff = ABS(EBB_GlobalBox%BndBox(I,1)-RootBox%BndBox(I,1))
+        IF(Diff > 1.0D-8) THEN
+          WRITE(*,*) 'I = ',I, ', Diff = ',Diff
+          WRITE(*,*) 'EBB_GlobalBox%BndBox(I,1) = ',EBB_GlobalBox%BndBox(I,1)
+          WRITE(*,*) 'RootBox%BndBox(I,1) = ',RootBox%BndBox(I,1)
+          STOP 'ERR: Boxes not consistent!'
+        ENDIF
+      ENDDO
+    ENDIF
+
+    P2(0) = 1
+    DO I = 1, 30
+      P2(I) = P2(I-1)*2
+    ENDDO
+
+    NV = NPrc
+    NS = NINT(LOG(NV*1.0D0)/LOG(2.0D0))
+    IF(P2(NS) /= NV) THEN
+      STOP 'ERR: In ET_Part, P2 problem!'
+    ENDIF
+
+    CALL New(RepLC,(/3,NV/))
+    CALL New(RepRC,(/3,NV/))
+    CALL New(VTm,NV)
+
+
+    TotCost = Reduce(ETimer(2))
+    IF(MyID == 0) THEN
+      RepLC%D(1:3,1) = EBB_GlobalBox%BndBox(1:3,1)
+      RepRC%D(1:3,1) = EBB_GlobalBox%BndBox(1:3,2)
+      VTm%D(1) = TotCost
+      CALL New(Tau,NS)
+      IF(NS == 1) THEN
+        Tau%D(1) = TauB
+      ELSE
+        T1 = LOG(TauB)
+        T2 = LOG(TauE)
+        DO I = 1, NS
+          T3 = T1 + (I-1.0D0)*(T2-T1)/(NS-1.0D0)
+          Tau%D(I) = EXP(T3)
+        ENDDO
+      ENDIF
+      RootNum = NV-1
+      CALL New(XYZ,RootNum)
+      CALL New(Pos,RootNum)
+      RI = 0
+      DO I = 1, NS
+        DO PI = 1, P2(I-1)
+          CI = PI + P2(I-1)
+          MD = 0.0D0
+          DO J = 1, 3
+            LD = RepRC%D(J,PI)-RepLC%D(J,PI)
+            IF(LD <= 0) THEN
+              STOP 'ERR: LD not positive!'
+            ENDIF
+            IF(LD > MD) THEN
+              MD = LD
+              Dir = J
+            ENDIF
+          ENDDO
+          RI = RI + 1
+          XYZ%I(RI) = Dir
+          RepLC%D(1:3,CI) = RepLC%D(1:3,PI)
+          RepRC%D(1:3,CI) = RepRC%D(1:3,PI)
+          PCost = VTm%D(PI)
+          x0 = RepLC%D(Dir,PI)
+          x1 = RepRC%D(Dir,PI)
+          f0 = -0.5D0
+          f1 = 0.5D0
+          NIter = 0
+          BP(1:3) = RepLC%D(1:3,PI)
+          BP(4:6) = RepRC%D(1:3,PI)
+          DO 
+            NIter = NIter + 1
+            IF(NIter > 100) THEN
+              STOP 'ERR: Too many iterations in ParaQ'
+            ENDIF
+            x2 = (x0+x1)*0.50D0
+            RepRC%D(Dir,PI) = x2
+            BP(3+Dir) = x2
+            CALL MPI_BCast(BP(1),6,MPI_DOUBLE_PRECISION,0,MONDO_COMM,IErr)
+            LocalT = CalTime()
+            TotLT = Reduce(LocalT)
+            f2 = TotLT*1.0D0/(PCost*1.0D0)-0.50D0
+            IF(ABS(f2) < Tau%D(I)) THEN
+              RepLC%D(Dir,CI) = x2
+              VTm%D(PI) = TotLT
+              VTm%D(CI) = PCost-TotLT
+              POS%D(RI) = x2
+              EXIT
+            ELSE
+              IF(f2*f0 < 0) THEN
+                x1 = x2; f1 = f2
+              ELSE
+                x0 = x2; f0 = f2
+              ENDIF
+            ENDIF
+          ENDDO
+        ENDDO
+      ENDDO
+      BP(:) = 0.0
+      CALL MPI_BCast(BP(1),6,MPI_DOUBLE_PRECISION,0,MONDO_COMM,IErr)
+
+      TVol = 1.0D0
+      DO I = 1, 3
+        LD = EBB_GlobalBox%BndBox(I,2)-EBB_GlobalBox%BndBox(I,1)
+        IF(LD <= 0) THEN
+          STOP 'ERR: LD Not positive!'
+        ENDIF
+        TVol = TVol*LD
+      ENDDO
+      OVol = TVol
+      NVol = ZERO
+      DO I = 1, NV
+        TVol = 1.0D0
+        DO J = 1, 3
+          LD = RepRC%D(J,I)-RepLC%D(J,I)
+          IF(LD <= 0) THEN
+            STOP 'ERR: LD Not positive1!'
+          ENDIF
+          TVol = TVol*LD
+        ENDDO
+        NVol = NVol + TVol
+      ENDDO
+      Diff = ABS(NVol-OVol)
+      IF(Diff > 1.0D-8) THEN
+         WRITE(*,*) 'NVol = ',NVol
+         WRITE(*,*) 'OVol = ',OVol
+         STOP 'ERR: Diff in Vol!'
+      ENDIF
+      NewCost = ZERO
+      DO I = 1, NV
+        NewCost = NewCost + VTm%D(I)
+      ENDDO
+      Diff = ABS(NewCost - TotCost)
+      IF(Diff > 1.0D-8) THEN
+        WRITE(*,*) 'TotCost = ',TotCost
+        WRITE(*,*) 'NewCost = ',NewCost
+        STOP 'ERR: Diff in TotCost!'
+      ENDIF
+      MaxCost = -10000.00
+      DO I = 1, NV
+        IF(VTm%D(I) > MaxCost) THEN
+          MaxCost = VTm%D(I)
+        ENDIF
+      ENDDO
+      WasteCost = Zero
+      DO I = 1, NV
+        WasteCost = WasteCost + (MaxCost-VTm%D(I))
+      ENDDO
+      Imbalance = WasteCost/(NV*MaxCost)
+      write(*,*) 'Predicted Imbalance is ', Imbalance
+      CALL Put(NPrc,'QLineLoc')
+      CALL Put(XYZ,'QETDir')
+      CALL Put(POS,'QETRoot')
+      CALL Delete(XYZ)
+      CALL Delete(Pos)
+      CALL Delete(Tau)
+    ELSE
+      DO 
+        CALL MPI_BCast(BP(1),6,MPI_DOUBLE_PRECISION,0,MONDO_COMM,IErr)
+        IF(SUM(ABS(BP(:))) < 1.0D-14) THEN
+          EXIT
+        ENDIF
+        LocalT = CalTime()
+        TotLT = Reduce(LocalT)
+      ENDDO
+          
+    ENDIF
+    CALL Delete(RepLC)
+    CALL Delete(RepRC)
+    CALL Delete(VTm)
+    
+  END SUBROUTINE ET_Part
+
+  FUNCTION CalTime()
+    REAL(DOUBLE) :: CubeV,OverlapV,P(3),Q(3),Ovlap(3),CalTime,LE(1:3),UE(3)
+    INTEGER :: I,KQ,J
+    TYPE(BBox) :: NodeBox
+
+
+    CalTime = 0.0D0
+    DO J = 1, TotPrCount
+      NodeBox%BndBox(1:3,1) = PosTimePair%D(1:3,J)
+      NodeBox%BndBox(1:3,2) = PosTimePair%D(1:3,J)
+      NodeBox = ExpandBox(NodeBox,EP)
+      LE(1:3) = NodeBox%BndBox(1:3,1)
+      UE(1:3) = NodeBox%BndBox(1:3,2)
+      P(1:3) = BP(1:3)
+      Q(1:3) = BP(4:6)
+      IF(UE(1) <= P(1) .OR. LE(1) >= Q(1) .OR. &
+       UE(2) <= P(2) .OR. LE(2) >= Q(2) .OR. &
+       UE(3) <= P(3) .OR. LE(3) >= Q(3)) THEN
+      ELSE
+        DO I = 1, 3
+          IF(LE(I) < P(I)) THEN
+            IF(UE(I) <= Q(I)) THEN
+              Ovlap(I) = UE(I) - P(I)
+            ELSE
+              Ovlap(I) = Q(I) - P(I)
+            ENDIF
+          ELSE
+            IF(UE(I) <= Q(I)) THEN
+               Ovlap(I) = UE(I) - LE(I)
+            ELSE
+               Ovlap(I) = Q(I) - LE(I)
+            ENDIF
+          ENDIF
+        ENDDO
+        OverlapV = Ovlap(1)*Ovlap(2)*Ovlap(3)
+        IF(OverlapV <= 0.0D0) STOP 'ERROR: OverlapV is negative!'
+        CubeV = (UE(1)-LE(1))*(UE(2)-LE(2))*(UE(3)-LE(3))
+        CalTime = CalTime + PosTimePair%D(4,J)*OverlapV/CubeV
+      ENDIF
+    ENDDO
+  END FUNCTION CalTime
+
+
+  ! initialization needed for ET
+  SUBROUTINE EqualTimeSetUp()
+    INTEGER :: MaxPrNum,Ind,ReducedTotPrCount,IErr,I,J,NV,NS,AtA,AtB,NC,PrCount,PI,CI,Dir
+    REAL(DOUBLE) :: LD,MD,x2,TVol,NewV,OldV,Diff
+    TYPE(AtomPair) :: Pair
+    REAL(DOUBLE),DIMENSION(3) :: B
+    INTEGER :: P2(0:30)
+    TYPE(INT_VECT) :: XYZ
+    TYPE(DBL_VECT) :: POS
+    TYPE(INT_VECT) :: TotPrNumArr
+    
+
+    CALL NEW(LC,(/3,NPrc/))
+    CALL NEW(RC,(/3,NPrc/))
+    P2(0) = 1
+    DO I = 1, 30
+      P2(I) = P2(I-1)*2
+    ENDDO
+    NV = NPrc
+    NS = NINT(LOG(NV*1.0D0)/LOG(2.0D0))
+    IF(P2(NS) /= NV) THEN
+      STOP 'ERR: In ET_Part, P2 problem!'
+    ENDIF
+    CALL Get(GQLineLoc,'QLineLoc')
+
+    CALL MPI_Bcast(GQLineLoc,1,MPI_INTEGER,0,MONDO_COMM,IErr)
+    IF(GQLineLoc == 0) THEN
+      CALL New(BegPrInd,NPrc-1,0)
+      CALL New(EndPrInd,NPrc-1,0)
+    ENDIF
+
+    CALL New(XYZ,NPrc-1)
+    CALL New(POS,NPrc-1)
+    CALL Get(XYZ,'QETDir')
+    CALL Get(Pos,'QETRoot')
+
+    IF(MyID == 0) THEN
+      TotPrCount = 0
+      RootBox%BndBox(1:3,1) = 1.0D+99
+      RootBox%BndBox(1:3,2) = -1.0D+99
+      DO AtA = 1, NAtoms
+        DO AtB = 1, NAtoms
+          IF(SetAtomPair(GM,BS,AtA,AtB,Pair)) THEN
+
+#ifdef PERIODIC
+            B = Pair%B
+            DO NC = 1, CS_OUT%NCells
+              Pair%B = B + CS_OUT%CellCarts%D(:,NC)
+              Pair%AB2 = (Pair%A(1)-Pair%B(1))**2+(Pair%A(2)-Pair%B(2))**2+(Pair%A(3)-Pair%B(3))**2
+              IF(TestAtomPair(Pair)) THEN
+                CALL EBBCountJBlock(PrCount,Pair,PoleRoot)
+                TotPrCount = TotPrCount + PrCount
+              ENDIF
+            ENDDO
+#endif
+          ENDIF
+        ENDDO
+      ENDDO
+      GlobalCount = TotPrCount
+#ifdef DIAG_QCTC
+      WRITE(*,*) 'Root: TotPrCount = ',TotPrCount
+#endif
+
+      LC%D(1:3,1) = RootBox%BndBox(1:3,1)
+      RC%D(1:3,1) = RootBox%BndBox(1:3,2)
+      
+
+#ifdef DIAG_QCTC
+      WRITE(*,*) 'GQLineLoc = ',GQLineLoc
+#endif
+      IF(GQLineLoc < 0) THEN
+        STOP 'ERR: GQLineLoc is negative!'
+      ELSE IF(GQLineLoc == 0) THEN
+
+        CALL ENPart(NPrc,GlobalCount,BegPrInd,EndPrInd)
+
+        DO I = 1, NS
+          DO PI = 1, P2(I-1)
+            CI = P2(I-1) + PI
+            LC%D(1:3,CI) = LC%D(1:3,PI)
+            RC%D(1:3,CI) = RC%D(1:3,PI)
+            MD = 0.0D0
+            DO J = 1, 3
+              LD = RC%D(J,PI)-LC%D(J,PI)
+              IF(LD <= 0) STOP 'ERR: Negative length!'
+              IF(LD > MD) THEN
+                MD = LD
+                Dir = J
+              ENDIF
+            ENDDO
+            x2 = (RC%D(Dir,PI)+LC%D(Dir,PI))*0.50D0
+            RC%D(Dir,PI) = x2
+            LC%D(Dir,CI) = x2
+          ENDDO
+        ENDDO
+
+      ELSE 
+        Ind = 0
+        DO I = 1, NS
+          DO PI = 1, P2(I-1)
+            CI = P2(I-1) + PI
+            LC%D(1:3,CI) = LC%D(1:3,PI)
+            RC%D(1:3,CI) = RC%D(1:3,PI)
+            Ind = Ind + 1
+            Dir = XYZ%I(Ind)
+            x2 = POS%D(Ind)
+            IF(Dir < 1 .OR. Dir > 3) STOP 'ERR: Wrong Dir'
+            RC%D(Dir,PI) = x2
+            LC%D(Dir,CI) = x2
+          ENDDO
+        ENDDO
+      ENDIF
+      TVol = 1.0D0
+      DO I = 1, 3
+        LD = RootBox%BndBox(I,2)-RootBox%BndBox(I,1)
+        TVol = LD*TVol
+      ENDDO
+      OldV = TVol
+      NewV = ZERO
+      DO I = 1, NV
+        TVol = 1.0D0
+        DO J = 1, 3
+          LD = RC%D(J,I)-LC%D(J,I)
+          IF(LD <= 0) THEN
+            STOP 'ERR: 1:  LD not positive!'
+          ENDIF
+          TVol = LD*TVol
+        ENDDO
+        NewV = NewV + TVol
+      ENDDO
+      Diff = ABS(NewV-OldV)
+      IF(Diff > 1.0D-8) THEN
+        STOP 'ERR: Vol not conserved!'
+      ENDIF
+
+    ENDIF
+    CALL MPI_Bcast(GlobalCount,1,MPI_INTEGER,0,MONDO_COMM,IErr)
+
+    IF(GQLineLoc == 0) THEN
+      CALL MPI_Bcast(BegPrInd%I(0),NPrc,MPI_INTEGER,0,MONDO_COMM,IErr)
+      CALL MPI_Bcast(EndPrInd%I(0),NPrc,MPI_INTEGER,0,MONDO_COMM,IErr)
+      TotPrCount = EndPrInd%I(MyID) - BegPrInd%I(MyID) + 1
+    ELSE
+      CALL MPI_Bcast(LC%D(1,1),3*NV,MPI_DOUBLE_PRECISION,0,MONDO_COMM,IErr)
+      CALL MPI_Bcast(RC%D(1,1),3*NV,MPI_DOUBLE_PRECISION,0,MONDO_COMM,IErr)
+  
+      TotPrCount = 0
+      DO AtA = 1, NAtoms
+        DO AtB = 1, NAtoms
+          IF(SetAtomPair(GM,BS,AtA,AtB,Pair)) THEN
+  
+#ifdef PERIODIC
+            B = Pair%B
+            DO NC = 1, CS_OUT%NCells
+              Pair%B = B + CS_OUT%CellCarts%D(:,NC)
+              Pair%AB2 = (Pair%A(1)-Pair%B(1))**2+(Pair%A(2)-Pair%B(2))**2+(Pair%A(3)-Pair%B(3))**2
+              IF(TestAtomPair(Pair)) THEN
+                CALL BoxEBBPairCount(PrCount,Pair,PoleRoot)
+                TotPrCount = TotPrCount + PrCount
+              ENDIF
+            ENDDO
+#endif
+          ENDIF
+        ENDDO
+      ENDDO
+    ENDIF
+
+    CALL New(TotPrNumArr,NPrc-1,0)
+    CALL MPI_Gather(TotPrCount,1,MPI_INTEGER,TotPrNumArr%I(0),1,MPI_INTEGER,0,MONDO_COMM,IErr)
+    ReducedTotPrCount = Reduce(TotPrCount)
+    IF(MyID == 0) THEN
+      MaxPrNum = -1
+      DO I = 0, NPrc-1
+        MaxPrNum = MAX(TotPrNumArr%I(I),MaxPrNum)
+      ENDDO
+#ifdef DIAG_QCTC
+      CALL OpenASCII(OutFile,Out)
+      WRITE(*,'(A,F10.5)') 'Max space(MB) needed for ET cost array = ',MaxPrNum*32.0D-6
+      WRITE(Out,'(A,F10.5)') 'Max space(MB) needed for ET cost array = ',MaxPrNum*32.0D-6
+      CLOSE(Out,STATUS='KEEP')
+#endif
+      IF(ReducedTotPrCount /= GlobalCount) THEN
+        STOP 'ERR: Losing Primitive pairs!' 
+      ENDIF
+    ENDIF
+    CALL Delete(TotPrNumArr)
+    CALL New(PosTimePair,(/4,TotPrCount/))
+  END SUBROUTINE EqualTimeSetUp
+  
+  SUBROUTINE ENPart(N,TotN,BegInd,EndInd)
+    INTEGER :: N,I,TotN,Num,CheckTotN
+    TYPE(INT_VECT) :: BegInd,EndInd
+
+    IF(N == 0) STOP 'ERR: N in ENPart is zero!'
+    DO I = 1, N
+      EndInd%I(I-1) = NINT((TotN*1.0D0/(N*1.0D0))*(I*1.0D0))
+    ENDDO
+    IF(EndInd%I(N-1) /= TotN) STOP 'ERR: integer problem!'
+    BegInd%I(0) = 1
+    DO I = 1, N-1
+      BegInd%I(I) = EndInd%I(I-1)+1
+    ENDDO
+    CheckTotN = 0
+    DO I = 0, N-1
+      Num = EndInd%I(I)-BegInd%I(I)+1
+      IF(Num <= 0) STOP 'ERR: too little nq to split ? '
+      CheckTotN = CheckTotN + Num
+    ENDDO
+    if(CheckTotN /= TotN) THEN
+      STOP 'ERR: missing nq ?'
+    endif
+  END SUBROUTINE ENPart
 
 #endif
 END MODULE ParallelQCTC
