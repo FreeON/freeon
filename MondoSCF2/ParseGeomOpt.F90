@@ -40,6 +40,13 @@ MODULE ParseGeomOpt
        GOpt%GDIIS%NoGDIIS=.TRUE.
      ENDIF
      !
+     ! Parse for minimization type: gradient or gradient norm
+     !
+     GOpt%DoGradNorm=.FALSE.
+     IF(OptKeyQ(Inp,GRADIENTS,OPT_GradNorm)) THEN
+       GOpt%DoGradNorm=.TRUE.
+     ENDIF
+     !
      ! Parse for energy-back-tracking
      !
      GOpt%GConvCrit%DoAtomBackTr=.TRUE.

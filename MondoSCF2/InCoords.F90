@@ -7094,7 +7094,7 @@ return
      INTEGER                     :: I1,I,J,NDim,IMax,NDimens
      ! 
      RefBonds=0     
-     CondNum1=0.01D0
+     CondNum1=0.1D0
      NDim=AtmB%Count%I(I1)
      CALL New(BondVect2,(/NDim,3/))
      CALL New(Mark,NDim)

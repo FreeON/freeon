@@ -48,7 +48,7 @@ CONTAINS
      !
      ! Do fitting in step-directions
      !
-     CALL CartFit(XYZ,Print,RefStruct%D,RefGrad%D,SRStruct%D,SRDispl%D,Path,iGEO)
+     CALL CartFit(XYZ,Print,RefStruct%D,RefGrad%D,SRStruct%D,SRDispl%D,Path,iGEO,GOpt%DoGradNorm)
     !!
     !! Calculate GDIIS-mixing
     !!
@@ -64,7 +64,7 @@ CONTAINS
 !
 !-------------------------------------------------------------------
 !
-   SUBROUTINE CartFit(XYZ,Print,RefStruct,RefGrad,SRStruct,SRDispl,Path,iGEO)
+   SUBROUTINE CartFit(XYZ,Print,RefStruct,RefGrad,SRStruct,SRDispl,Path,iGEO,DoNorm)
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
      REAL(DOUBLE),DIMENSION(:,:) :: RefStruct,RefGrad,SRStruct,SRDispl
      TYPE(DBL_VECT)              :: LastStruct,LastGrad
@@ -77,6 +77,7 @@ CONTAINS
      CHARACTER(LEN=*)            :: Path
      CHARACTER(LEN=DCL)          :: Path2
      REAL(DOUBLE)                :: X
+     LOGICAL                     :: DoNorm
      !
      NCart=SIZE(RefStruct,1)
      NMem=SIZE(RefStruct,2)
@@ -110,7 +111,7 @@ CONTAINS
      CALL LQFit(DXValues%D,DXGrads%D,LWeightT%D,IntCsT,ABCT%D, &
                 RangeT%D,NDegsT%I,Zero,.TRUE.)
      CALL DoPredict(ABCT%D,DXValues%D,DXGrads%D,IntCsT, &
-                    NDegsT%I,Path2,RangeT%D)
+                    NDegsT%I,Path2,RangeT%D,DoNorm)
      CALL CtlrCartRange(IntCsT,RangeT%D)
     !CALL PrtFitM(DXValues%D,DXGrads%D,ABCT%D,IntCsT,Path2)
      !
@@ -204,7 +205,7 @@ CONTAINS
      CALL LQFit(DXValues%D,DXGrads%D,LWeightT%D,IntCsT,ABCT%D, &
                 RangeT%D,NDegsT%I,Zero,.TRUE.)
      CALL DoPredict(ABCT%D,DXValues%D,DXGrads%D,IntCsT, &
-                    NDegsT%I,Path2,RangeT%D)
+                    NDegsT%I,Path2,RangeT%D,GOpt%DoGradNorm)
      CALL CtlrCartRange(IntCsT,RangeT%D)
     !CALL PrtFitM(DXValues%D,DXGrads%D,ABCT%D,IntCsT,Path2)
      !
@@ -802,7 +803,7 @@ CONTAINS
 !
    SUBROUTINE DisplFit(IntCs,IntCGrads,IntCValues,GHess,GCoordCtrl, &
                        PredVals,Displ,Path,SCRPath,NCart,iGEO, &
-                       MixMat_O,PrtFits_O)
+                       DoNorm,MixMat_O,PrtFits_O)
      TYPE(INTC)                 :: IntCs
      TYPE(DBL_VECT)             :: PredVals,Displ,DisplT
      REAL(DOUBLE),DIMENSION(:,:):: IntCGrads,IntCValues
@@ -818,7 +819,7 @@ CONTAINS
      TYPE(INTC)                 :: IntCsT
      TYPE(INT_VECT)             :: NDegsT   
      REAL(DOUBLE),DIMENSION(:,:),OPTIONAL:: MixMat_O
-     LOGICAL                    :: PrtFits
+     LOGICAL                    :: PrtFits,DoNorm
      LOGICAL,OPTIONAL           :: PrtFits_O
      !
      PrtFits=.FALSE.
@@ -882,7 +883,7 @@ CONTAINS
                 RangeT%D,NDegsT%I,Zero,.TRUE.)
               ! RangeT%D,NDegsT%I,Zero,.FALSE.)
      CALL DoPredict(ABCT%D,IntCValuesT%D,IntCGradsT%D,IntCsT, &
-                    NDegsT%I,Path2,RangeT%D)
+                    NDegsT%I,Path2,RangeT%D,DoNorm)
      CALL CleanRange(DisplT%D,RangeT%D,IntCs%Def%C,IntCsT%PredVal%D, &
                      IntCValuesT%D(:,NDim),NDim)
      IntCsT%PredVal%D=IntCValuesT%D(:,NDim)+DisplT%D
@@ -1164,7 +1165,8 @@ CONTAINS
 !
 !---------------------------------------------------------------------
 !
-   SUBROUTINE DoPredict(ABC,IntCValues,IntCGrads,IntCs,NDegs,Path,Range)
+   SUBROUTINE DoPredict(ABC,IntCValues,IntCGrads,IntCs,NDegs, &
+                        Path,Range,DoNorm)
      REAL(DOUBLE),DIMENSION(:,:) :: ABC,IntCValues,IntCGrads,Range
      INTEGER,DIMENSION(:)        :: NDegs
      TYPE(INTC)                  :: IntCs
@@ -1172,6 +1174,7 @@ CONTAINS
      TYPE(DBL_VECT)              :: VectX,VectY
      REAL(DOUBLE)                :: MaxX,MinX
      CHARACTER(LEN=*)            :: Path
+     LOGICAL                     :: DoNorm
      !
      NIntC=SIZE(IntCValues,1)
      NDim=SIZE(IntCValues,2)
@@ -1190,7 +1193,7 @@ CONTAINS
        MinX=MINVAL(VectX%D)
        CALL Predict(ABC(I,1),ABC(I,2),ABC(I,3),ABC(I,4), &
                     VectX%D,VectY%D,IntCs%PredVal%D(I), &
-                    IntCs%PredGrad%D(I),NDegs(I))
+                    IntCs%PredGrad%D(I),NDegs(I),DoNorm)
      !
      ENDDO 
      CALL Delete(VectX)
@@ -1645,7 +1648,7 @@ CONTAINS
 !
 !---------------------------------------------------------------------
 !
-   SUBROUTINE Predict(A,B,C,D,VectX,VectY,FitVal,PredGrad,NDeg)
+   SUBROUTINE Predict(A,B,C,D,VectX,VectY,FitVal,PredGrad,NDeg,DoNorm)
      REAL(DOUBLE)              :: A,B,C,D,FitVal,PredGrad,PredHess
      REAL(DOUBLE),DIMENSION(:) :: VectX,VectY
      REAL(DOUBLE)              :: TwoC,ThreeD
@@ -1653,23 +1656,26 @@ CONTAINS
      REAL(DOUBLE)              :: Det,AP,BP,CP,Delta,H0,Q
      REAL(DOUBLE)              :: LastX,LastY,RelErr,AbsErr,Guess
      INTEGER                   :: I,J,NDim,NDeg,IFlag
-     LOGICAL                   :: DoSearch
+     LOGICAL                   :: DoNorm
      !
      NDim=SIZE(VectX)
      LastX=VectX(NDim)
      LastY=VectY(NDim)
      TwoC=Two*C
      ThreeD=Three*D
-     DoSearch=.TRUE.
      !
      IF(NDeg==0) THEN 
        FitVal=VectX(NDim)
      ELSE IF(NDeg==1) THEN !!! linear fit
          B=SIGN(ABS(B)+1.D-16,B) !!! to handle perfectly flat surfaces
-         IF(B<Zero) THEN
-           FitVal=LastX-LastY/ABS(B)
-         ELSE
+         IF(DoNorm) THEN
            FitVal=-A/B
+         ELSE
+           IF(B<Zero) THEN
+             FitVal=LastX-LastY/ABS(B)
+           ELSE
+             FitVal=-A/B
+           ENDIF
          ENDIF
        RETURN
      ELSE IF(NDeg==2) THEN !!!! quadratic fit
