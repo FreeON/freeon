@@ -30,16 +30,16 @@
 #
 include $(MONDO_HOME)/Includes/RemoveAll
 #
-all:	CatCpy mm s e x 1 n 2 d #v 
+all:	CatCpy mm dy s e x 1 n 2 d ic #v 
 #
-clean:	cmm cs ce cx c1 cn c2 cd cv 
+clean:	cmm cs cdy ce cx c1 cn c2 cd cv cic
 	rm -f $(REMOVEALL)
 	rm -f \#*
 	rm -f *~
 #
-purge:	pmm ps pe px p1 pn p2 pd pv pMisc
+purge:	pmm ps pdy pe px p1 pn p2 pd pv pMisc pic 
 #
-release: rmLegacy swREADME rmm rs re rx r1 rn r2 rd rv tarball
+release: rmLegacy swREADME rmm rs rdy re rx r1 rn r2 rd rv ric tarball
 #
 backup:	purge rmLegacy tarball
 #
@@ -61,6 +61,26 @@ CatCpy:
 	sleep 1
 	cat $(MONDO_HOME)/README
 	sleep 2
+#----------------------------------------------
+#   IntCoo
+ ic:	
+	$(MAKE)    -C IntCoo
+ric:	
+	$(MAKE) -i -C IntCoo release
+pic:	
+	$(MAKE) -i -C IntCoo purge
+cic:	
+	$(MAKE) -i -C IntCoo clean
+#----------------------------------------------
+#   Dynamo
+ dy:	
+	$(MAKE)    -C Dynamo
+rdy:	
+	$(MAKE) -i -C Dynamo release
+pdy:	
+	$(MAKE) -i -C Dynamo purge
+cdy:	
+	$(MAKE) -i -C Dynamo clean
 #----------------------------------------------
 #   MondoMods
  mm:	
