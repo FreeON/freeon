@@ -122,6 +122,8 @@ CONTAINS
          ENDDO
       ENDDO
 
+
+sUM=0
       DO J=1,LKet ! K^2 VRR |N0) loop 
 
          Eta=PrmBufK(1,J)
@@ -186,16 +188,18 @@ CONTAINS
             PQ2y = PQy*PQy
             PQ2z = PQz*PQz
 
-            Sum=0
+!            Sum=0
             DO IGrid=1,NGrid
                U2=DEPointsSq(IGrid)
                VRRx(IGrid,0,0,0)=UThrd*EXP(-Omega*U2*PQ2x)
                VRRy(IGrid,0,0,0)=UThrd*EXP(-Omega*U2*PQ2y)
                VRRz(IGrid,0,0,0)=UThrd*EXP(-Omega*U2*PQ2z)
-               Sum=Sum+VRRx(IGrid,0,0,0)*VRRy(IGrid,0,0,0)*VRRz(IGrid,0,0,0)*DEJacobian(IGrid)
+!               Sum=Sum+VRRx(IGrid,0,0,0)*VRRy(IGrid,0,0,0)*VRRz(IGrid,0,0,0)*DEJacobian(IGrid)
                ! +Upq*EXP(-Omega*U2*(PQ2x+PQ2y+PQ2z))*DEJacobian(IGrid)
 !               WRITE(*,*)Upq*EXP(-Omega*U2*(PQ2x+PQ2y+PQ2z))*DEJacobian(IGrid)
             ENDDO
+
+!            WRITE(*,*)' Sum = ',Sum
 
             T=Omega*(PQx*PQx+PQy*PQy+PQz*PQz)
             IF(T<Gamma_Switch)THEN
@@ -207,14 +211,16 @@ CONTAINS
               AuxR0=+8.862269254527580D-01*Upq*SqInvT
             ENDIF
 
-            IF(ABS(Sum-AuxR0)>1D-12)THEN
-               WRITE(*,*)' DIFF = ',ABS(Sum-AuxR0)
-               WRITE(*,*)' Sum = ',Sum
-               WRITE(*,*)' AuxR0 = ',AuxR0
-               WRITE(*,*)' Upq = ',Upq
-               WRITE(*,*)' T = ',T
-               STOP
-            ENDIF
+!            IF(ABS(Sum-AuxR0)>1D-12)THEN
+!               WRITE(*,*)' DIFF = ',ABS(Sum-AuxR0)
+!               WRITE(*,*)' Sum = ',Sum
+!               WRITE(*,*)' AuxR0 = ',AuxR0
+!               WRITE(*,*)' Upq = ',Upq
+!               WRITE(*,*)' T = ',T
+!               STOP
+!            ENDIF
+
+#ifdef DKFLJSDFLJSDF
 
             DO M=1,MAX(EllBra,EllKet) ! ??
                WRITE(*,*)'1 M = ',M
@@ -261,16 +267,24 @@ CONTAINS
                   VRRz(IGrid,M,0,2)=QCz*VRRz(IGrid,M,0,1)+WQz*VRRz(IGrid,Mp1,0,1)+R1x2E*(VRRz(IGrid,M,0,0)-ZxZpE*VRRz(IGrid,Mp1,0,0))
                ENDDO
             ENDDO
+#endif
+
             !
             DO II=0,EllBra
                DO KK=0,EllKet
                   DO IGrid=1,NGrid
-                     HRRx(IGrid,II,0,KK,0)=HRRx(IGrid,I,0,KK,0)+VRRx(IGrid,0,II,KK)
-                     HRRy(IGrid,II,0,KK,0)=HRRy(IGrid,I,0,KK,0)+VRRy(IGrid,0,II,KK)
-                     HRRz(IGrid,II,0,KK,0)=HRRz(IGrid,I,0,KK,0)+VRRz(IGrid,0,II,KK)
+                     HRRx(IGrid,II,0,KK,0)=HRRx(IGrid,II,0,KK,0)+VRRx(IGrid,0,II,KK)
+                     HRRy(IGrid,II,0,KK,0)=HRRy(IGrid,II,0,KK,0)+VRRy(IGrid,0,II,KK)
+                     HRRz(IGrid,II,0,KK,0)=HRRz(IGrid,II,0,KK,0)+VRRz(IGrid,0,II,KK)
+
+               Sum=Sum+VRRx(IGrid,0,0,0)*VRRy(IGrid,0,0,0)*VRRz(IGrid,0,0,0)*DEJacobian(IGrid)
+
+!                     Sum=Sum+HRRx(IGrid,II,0,KK,0)*HRRy(IGrid,II,0,KK,0)*HRRz(IGrid,II,0,KK,0)*DEJacobian(IGrid)
                   ENDDO
                ENDDO
             ENDDO
+
+            WRITE(*,*)'HRR Sum = ',Sum
             !
          ENDDO ! (M0| loop
       ENDDO ! |N0) loop
@@ -327,7 +341,9 @@ CONTAINS
                   Ly=YDex(L)
                   Lz=ZDex(L)
                   OffSet=COff+(OD+L-BegD)*LDD 
-                  Offset=1
+!                  WRITE(*,*)' OffSet 1 = ',OffSet
+!                  OffSet=(OA+0)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+0)*LDD 
+!                  WRITE(*,*)' OffSet 2 = ',OffSet
                   INTGRL(OffSet)=Zero
                   DO IGrid=1,NGrid
                      INTGRL(OffSet)=INTGRL(OffSet)+HRRx(IGrid,Ix,Jx,Kx,Lx)*HRRy(IGrid,Iy,Jy,Ky,Ly)  &
