@@ -1370,6 +1370,7 @@ CONTAINS
        DoAllow=.FALSE.
        K1=1
        K2=4
+       IF(IntCs%Def%C(I)(1:4)=='LINB') K2=3
      ! IF(IntCs%Def%C(I)(1:4)=='TORS') THEN 
      !   K1=2
      !   K2=3
@@ -5156,41 +5157,53 @@ return
 !
 !------------------------------------------------------------------
 !
-   FUNCTION HasHBond(Top12,AtNum,NJJ1,NJJ2,JJ1,JJ2,HAtm) 
-     LOGICAL              :: HasHBond
-     TYPE(INT_RNK2)       :: Top12
-     INTEGER,DIMENSION(:) :: AtNum
-     INTEGER              :: NJJ1,NJJ2,JJ1,JJ2,HAtm
+   FUNCTION HasHBond(Top12,AtNum,NJJ1,NJJ2,JJ1,JJ2,HAtm,XYZ,LinCrit) 
+     LOGICAL                     :: HasHBond,HasAtt
+     REAL(DOUBLE),DIMENSION(:,:) :: XYZ
+     REAL(DOUBLE)                :: LinCrit
+     TYPE(INT_RNK2)              :: Top12
+     INTEGER,DIMENSION(:)        :: AtNum
+     INTEGER                     :: NJJ1,NJJ2,JJ1,JJ2,HAtm,JJE
      !
      HasHBond=.FALSE.
      HAtm=0
      IF(NJJ1/=1.AND.NJJ2/=1) RETURN
      IF((NJJ1==1.AND.HasLigand(NJJ2))) THEN
-      !HasHBond=HasAttached(AtNum,Top12%I,JJ1)
-       HasHBond=.TRUE.
+       HasHBond=HasAttached(AtNum,Top12%I,JJ1,JJ2,JJE,XYZ,LinCrit)
+      !HasHBond=.TRUE.
        HAtm=JJ1
      ELSE IF((NJJ2==1.AND.HasLigand(NJJ1))) THEN
-      !HasHBond=HasAttached(AtNum,Top12%I,JJ2)
-       HasHBond=.TRUE.
+       HasHBond=HasAttached(AtNum,Top12%I,JJ2,JJ1,JJE,XYZ,LinCrit)
+      !HasHBond=.TRUE.
        HAtm=JJ2
      ENDIF
    END FUNCTION HasHBond
 !
 !---------------------------------------------------------------------
 !
-   FUNCTION HasAttached(AtNum,Top12,JJ1)
-     LOGICAL                 :: HasAttached
-     INTEGER,DIMENSION(:,:)  :: Top12
-     INTEGER,DIMENSION(:)    :: AtNum
-     INTEGER                 :: JJ1,J,K
+   FUNCTION HasAttached(AtNum,Top12,JJ1,JJ2,JJE,XYZ,LinCrit)
+     LOGICAL                      :: HasAttached
+     INTEGER,DIMENSION(:,:)       :: Top12
+     REAL(DOUBLE),DIMENSION(:,:)  :: XYZ
+     INTEGER,DIMENSION(:)         :: AtNum
+     INTEGER                      :: JJ1,J,K,JJ2,JJE
+     REAL(DOUBLE)                 :: Value,Conv,LinCrit
+     !
+     ! For H-bonds: A-H...B = JJE-JJ1...JJ2
      !
      HasAttached=.FALSE.
+     Conv=180.D0/PI
+     JJE=0
      DO J=1,Top12(JJ1,1)
-       K=AtNum(Top12(JJ1,J+1))
-       IF(HasLigand(K)) THEN
-         HasAttached=.TRUE.
-         EXIT  
-       ENDIF
+       JJE=Top12(JJ1,J+1)
+       K=AtNum(JJE)
+     ! IF(HasLigand(K)) THEN
+         CALL BEND(XYZ(1:3,JJE),XYZ(1:3,JJ1),XYZ(1:3,JJ2),Value_O=Value)
+         IF((ABS(Value-PI)*Conv < LinCrit)) THEN
+           HasAttached=.TRUE.
+           EXIT  
+         ENDIF
+     ! ENDIF
      ENDDO 
    END FUNCTION HasAttached
 !
@@ -6248,7 +6261,8 @@ return
        DO I=1,6
          DoRepeat=.FALSE.
          CALL BondList(XYZ,AtNum,IntSet,Box,Bond,TOPS, &
-                       CritRad,HbondMax,DoRepeat,GConvCr,IEq)
+                       CritRad,HbondMax,GCoordCtrl%LinCrit, &
+                       DoRepeat,GConvCr,IEq)
          !
          ! Check for ionic systems
          !
@@ -6270,7 +6284,8 @@ return
        DO I=1,6
          DoRepeat=.FALSE.
          CALL BondList(XYZ,AtNum,IntSet,Box,Bond1,TOPS, &
-                       CritRad,HBondMax,DoRepeat,GConvCr,IEq)
+                       CritRad,HBondMax,GCoordCtrl%LinCrit, &
+                       DoRepeat,GConvCr,IEq)
          IF(DoRepeat) THEN
            CALL Delete(Bond1)
          ELSE
@@ -6315,7 +6330,7 @@ return
 !--------------------------------------------------------
 !
    SUBROUTINE BondList(XYZ,AtNum,IntSet,Box,Bond,TOPS, &
-                       CritRad,HBondMax,DoRepeat,GConvCr,IEq)
+                       CritRad,HBondMax,LinCrit,DoRepeat,GConvCr,IEq)
      IMPLICIT NONE
      INTEGER                     :: I,J,NatmsLoc,NBond
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
@@ -6326,7 +6341,7 @@ return
      INTEGER,DIMENSION(:)        :: AtNum,IEq
      TYPE(DBL_VECT)              :: CritRad,CritRadMod 
      TYPE(INT_VECT)              :: Neighbors
-     REAL(DOUBLE)                :: R12,R12_2,CritDist,HBondMax
+     REAL(DOUBLE)                :: R12,R12_2,CritDist,HBondMax,LinCrit
      INTEGER                     :: IZ,IX,IY,I1,I2,JJ1,JJ2
      INTEGER                     :: IORD,IORDD
      INTEGER                     :: IZD,IXD,IYD,NJJ1,NJJ2
@@ -6384,7 +6399,8 @@ return
                                FoundMetLig=HasMetLig(JJ1,JJ2,NJJ1,NJJ2)
                                LonelyAtom=HasLonelyAtm(TOPS%Cov12,JJ1,JJ2,LAtm)
                                FoundHBond=HasHBond(TOPS%Cov12,AtNum, &
-                                            NJJ1,NJJ2,JJ1,JJ2,HAtm)
+                                          NJJ1,NJJ2,JJ1,JJ2,HAtm,XYZ,&
+                                          LinCrit)
                                CALL BondExcl(JJ1,JJ2,NJJ1,NJJ2,TOPS, &
                                              FoundHBond,FoundMetLig,&
                                              LonelyAtom,DoExclude)
