@@ -16,7 +16,8 @@ links:
 ps:	latex
 	dvips  -o DMX.ps DMX
 
-pdf:	pdflatex DMX
+pdf:	
+	pdflatex DMX
 
 
 dvi:	latex
