@@ -248,7 +248,7 @@ CONTAINS
     INTEGER                     :: cSCF,cBAS,cGEO,iGEO,iCLONE
     REAL(DOUBLE)                :: DIISA,DIISB,DDIIS,DIISQ,       &
          DETOT,ETOTA,ETOTB,ETOTQ,ETEST, &
-         DDMAX,DMAXA,DMAXB,DMAXQ,DTEST,ETOTO,ODAQ
+         DDMAX,DMAXA,DMAXB,DMAXQ,DTEST,ETOTO,ODAQ,DMaxMax
     INTEGER,DIMENSION(G%Clones) :: Converged
     INTEGER                     :: ConvergedQ,iSCF,IConAls,MinSCF,MaxSCF
     CHARACTER(LEN=DCL)          :: chGEO
@@ -377,12 +377,6 @@ CONTAINS
           MinSCF = O%MinSCF
           MaxSCF = O%MaxSCF
           CALL Get(DoingMD,'DoingMD')
-          IF(DoingMD) THEN
-             IF(cGEO .LE. 1) THEN
-                MinSCF = 10
-                MaxSCF = 11
-             ENDIF
-          ENDIF
           ! Gather convergence parameters
           CALL Get(Etot%D(cSCF,iCLONE),'Etot')
           CALL Get(DMax%D(cSCF,iCLONE),'DMax')
@@ -519,6 +513,20 @@ CONTAINS
        DO iCLONE=1,G%Clones
           ConvergedQ=MIN(ConvergedQ,Converged(iCLONE))
        ENDDO
+!      Moleculr Dynamics Convergence Criteria
+       IF(DoingMD) THEN
+          DMaxMax=Zero
+          DO iCLONE=1,G%Clones
+             DMaxMax = MAX(DMax%D(cSCF,iCLONE),DMaxMax)
+          ENDDO
+          IF(DMaxMax > DTest*1.D-1) THEN
+             ConvergedQ=NOT_CONVERGE
+             Mssg = " "
+          ELSE
+             ConvergedQ=DID_CONVERGE
+             Mssg = "MD SCF convergence"
+          ENDIF
+       ENDIF
 !
        IF(cSCF .LT. MinSCF) THEN
           ConvergedQ=NOT_CONVERGE
