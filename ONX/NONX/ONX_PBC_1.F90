@@ -69,6 +69,9 @@ PROGRAM ONX
 #endif
   InFile=TRIM(ScrName)//'_Cyc'//TRIM(IntToChar(Args%i%i(1)))
   IF(SCFActn=='Restart')THEN
+!    Get the previous geometry, ASSUMING that 
+!    we are not extrapolating the DM
+     CALL Get(GMp,Tag_O=CurGeom)
 #ifdef PARALLEL_CLONES
      ! Close current group and HDF
      CALL CloseHDFGroup(H5GroupID)
@@ -83,9 +86,6 @@ PROGRAM ONX
      PrvGeom=TRIM(IntToChar(Stat%I(3)))
      HDF_CurrentID=OpenHDFGroup(HDF_CurrentID,"Clone #"//TRIM(IntToChar(MyClone)))
      CALL Get(BSp,Tag_O=PrvBase)
-!    Get the previous geometry, ASSUMING that 
-!    we are not extrapolating the DM
-     CALL Get(GMp,Tag_O=PrvGeom)
      CALL Get(BSiz,'atsiz',Tag_O=PrvBase)
      CALL Get(OffS,'atoff',Tag_O=PrvBase)
      CALL Get(NBasF,'nbasf',Tag_O=PrvBase)
