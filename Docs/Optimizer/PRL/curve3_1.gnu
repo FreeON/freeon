@@ -20,11 +20,11 @@
 #    	Send comments and requests for help to <info-gnuplot-beta@dartmouth.edu>
 #    	Send bugs, suggestions and mods to <info-gnuplot-beta@dartmouth.edu>
 #    
-# set terminal postscript eps enhanced color blacktext \
+ set terminal postscript eps enhanced color blacktext \
    dashed dashlength 2.0 linewidth 2.5 defaultplex \
    palfuncparam 2000,0.003 \
    butt "Times Roman" 30
-# set output 'curve3_1.eps'
+ set output 'curve3_1.eps'
 unset clip points
 set clip one
 unset clip two
@@ -106,11 +106,11 @@ set timefmt z "%d/%m/%y,%H:%M"
 set timefmt x2 "%d/%m/%y,%H:%M"
 set timefmt y2 "%d/%m/%y,%H:%M"
 set timefmt cb "%d/%m/%y,%H:%M"
-set xlabel "log|(E_{i} - E_{opt})/E_{opt}|" 0.000000,0.000000  font ""
+set xlabel "log_{10}|(E_{i} - E_{opt})/E_{opt}|" 0.000000,0.000000  font ""
 set x2label "" 0.000000,0.000000  font ""
 set xrange [ * : * ] noreverse nowriteback  # (currently [-10.0000:10.0000] )
 set x2range [ * : * ] noreverse nowriteback  # (currently [-10.0000:10.0000] )
-set ylabel "log|(E_{i+1} - E_{opt})/E_{opt}|" 0.000000,0.000000  font ""
+set ylabel "log_{10}|(E_{i+1} - E_{opt})/E_{opt}|" 0.000000,0.000000  font ""
 set y2label "" 0.000000,0.000000  font ""
 set yrange [ * : * ] noreverse nowriteback  # (currently [-10.0000:10.0000] )
 set y2range [ * : * ] noreverse nowriteback  # (currently [-10.0000:10.0000] )
