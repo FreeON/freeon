@@ -85,13 +85,11 @@ MODULE CellSets
        WRITE(OutU,30)
        WRITE(OutU,10) Name
        WRITE(OutU,11) CS%NCells,RMax
-!       WRITE(OutU,12) Thresholds%Dist,SQRT(Thresholds%Pair)
        WRITE(OutU,30)
     ELSEIF(PrintFlags%Key==DEBUG_MAXIMUM) THEN
        WRITE(OutU,30)
        WRITE(OutU,10) Name
        WRITE(OutU,11) CS%NCells,RMax
-!       WRITE(OutU,12) Thresholds%Dist,SQRT(Thresholds%Pair)
        IF(CS%NCells /= 0) THEN
           WRITE(OutU,20)
           WRITE(OutU,31)
@@ -111,24 +109,6 @@ MODULE CellSets
 31  FORMAT(1x,'=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=')
   END SUBROUTINE PPrint_CellSet
 !--------------------------------------------------------------------------
-! Test if Cell(N) has Coordinates (x,y,z) 
-!--------------------------------------------------------------------------
-  FUNCTION CellN_XYZ(CS,NC,X,Y,Z)
-    TYPE(CellSet)      :: CS
-    INTEGER            :: NC
-    REAL(DOUBLE)       :: X,Y,Z
-    LOGICAL            :: CellN_XYZ
-!
-    IF(ABS(CS%CellCarts%D(1,NC)-X) < 1.0D-12 .AND. &
-       ABS(CS%CellCarts%D(2,NC)-Y) < 1.0D-12 .AND. &
-       ABS(CS%CellCarts%D(3,NC)-Z) < 1.0D-12) THEN
-       CellN_XYZ = .TRUE.
-    ELSE
-       CellN_XYZ = .FALSE.
-    ENDIF
-!
-  END FUNCTION CellN_XYZ
-!--------------------------------------------------------------------------
 ! Test if a Cell in CS has Coordinates (x,y,z) 
 !--------------------------------------------------------------------------
   FUNCTION InCell_CellSet(CS,X,Y,Z)
@@ -139,7 +119,9 @@ MODULE CellSets
 !
     InCell_CellSet = .FALSE.    
     DO NC = 1,CS%NCells
-       IF(CellN_XYZ(CS,NC,X,Y,Z)) THEN
+       IF(ABS(CS%CellCarts%D(1,NC)-X) < 1.0D-12 .AND. &
+          ABS(CS%CellCarts%D(2,NC)-Y) < 1.0D-12 .AND. &
+          ABS(CS%CellCarts%D(3,NC)-Z) < 1.0D-12) THEN
           InCell_CellSet = .TRUE.
           RETURN
        ENDIF
@@ -149,36 +131,28 @@ MODULE CellSets
 !--------------------------------------------------------------------------
 ! Set up the CellSet from {-N,N} minus the Cells in {-M,M}
 !--------------------------------------------------------------------------
-  SUBROUTINE New_CellSet_Cube(CS,MAT,N,M_O)
+  SUBROUTINE New_CellSet_Cube(CS,AW,MAT,N)
     TYPE(CellSet)                        :: CS
+    LOGICAL,DIMENSION(3)                 :: AW
     REAL(DOUBLE),DIMENSION(3,3)          :: MAT
-    INTEGER,DIMENSION(3)                 :: N,M
-    INTEGER,OPTIONAL,DIMENSION(3)        :: M_O
+    INTEGER,DIMENSION(3)                 :: N
 !
     INTEGER                              :: I,J,K,NCELL
     REAL(DOUBLE)                         :: X,Y,Z
-!
-    IF(PRESENT(M_O)) THEN 
-       M = M_O
-    ELSE
-       M = 0
-    ENDIF
 !
     IF(N(1) .LT. 0) CALL Halt('N(1) is Miss Dimensioning in New_CellSet_Box')
     IF(N(2) .LT. 0) CALL Halt('N(2) is Miss Dimensioning in New_CellSet_Box')
     IF(N(3) .LT. 0) CALL Halt('N(3) is Miss Dimensioning in New_CellSet_Box')
 !
-    IF(M(1) .LT. 0) CALL Halt('M(1) is Miss Dimensioning in New_CellSet_Box')
-    IF(M(2) .LT. 0) CALL Halt('M(2) is Miss Dimensioning in New_CellSet_Box')
-    IF(M(3) .LT. 0) CALL Halt('M(3) is Miss Dimensioning in New_CellSet_Box')
+    IF(.NOT. AW(1)) N(1)=0
+    IF(.NOT. AW(2)) N(2)=0
+    IF(.NOT. AW(3)) N(3)=0
 !
     NCELL = 0
     DO I = -N(1),N(1)
        DO J = -N(2),N(2)
           DO K = -N(3),N(3)
-             IF(IJKTest(I,J,K,M(1),M(2),M(3))) THEN
-                NCELL = NCELL+1
-             ENDIF
+             NCELL = NCELL+1
           ENDDO
        ENDDO
     ENDDO
@@ -189,18 +163,18 @@ MODULE CellSets
     DO I = -N(1),N(1)
        DO J = -N(2),N(2)
           DO K = -N(3),N(3)
-             IF(IJKTest(I,J,K,M(1),M(2),M(3))) THEN
-                NCELL = NCELL+1
-                X  = I*MAT(1,1)+J*MAT(1,2)+K*MAT(1,3)
-                Y  = I*MAT(2,1)+J*MAT(2,2)+K*MAT(2,3)
-                Z  = I*MAT(3,1)+J*MAT(3,2)+K*MAT(3,3)
-                CS%CellCarts%D(1,NCELL)= X
-                CS%CellCarts%D(2,NCELL)= Y
-                CS%CellCarts%D(3,NCELL)= Z
-             ENDIF
+             NCELL = NCELL+1
+             X  = I*MAT(1,1)+J*MAT(1,2)+K*MAT(1,3)
+             Y  = I*MAT(2,1)+J*MAT(2,2)+K*MAT(2,3)
+             Z  = I*MAT(3,1)+J*MAT(3,2)+K*MAT(3,3)
+             CS%CellCarts%D(1,NCELL)= X
+             CS%CellCarts%D(2,NCELL)= Y
+             CS%CellCarts%D(3,NCELL)= Z
           ENDDO
        ENDDO
     ENDDO
+!
+    CALL Sort_CellSet(CS)
 !
   END SUBROUTINE New_CellSet_Cube
 !--------------------------------------------------------------------------
@@ -265,6 +239,8 @@ MODULE CellSets
        ENDDO
     ENDDO
 !
+    CALL Sort_CellSet(CS)
+!  
   END SUBROUTINE New_CellSet_Sphere
 !--------------------------------------------------------------------------
 ! Sort the Cells From Large R to Small R
@@ -302,29 +278,6 @@ MODULE CellSets
     CALL Delete(CCarts)
 !
   END SUBROUTINE Sort_CellSet
-!--------------------------------------------------------------------------
-! TEST if (I,J,K) > (MI,MJ,MK)
-!--------------------------------------------------------------------------
-  FUNCTION IJKTest(I,J,K,MI,MJ,MK)
-    INTEGER               :: I,J,K,MI,MJ,MK
-    LOGICAL               :: IJKTest
-!
-    IJKTest = .FALSE.
-    IF(ABS(I) .GE. MI) THEN 
-       IJKTest = .TRUE.
-       RETURN
-    ENDIF
-    IF(ABS(J) .GE. MJ) THEN
-       IJKTest = .TRUE.
-       RETURN
-    ENDIF
-    IF(ABS(K) .GE. MK) THEN
-       IJKTest = .TRUE.
-       RETURN
-    ENDIF
-!   
-  END FUNCTION IJKTest
-!
 #endif
 !
 END MODULE CellSets
