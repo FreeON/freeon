@@ -365,7 +365,7 @@ MODULE PBCFarField
 !
 !   Generate the Cells for the Inner Box
 !  
-    Radius = MAX(PACDist,SQRT(MACDist**2+BDIST**2))
+    Radius = MAX(PACDist,SQRT(MACDist**2+BDist**2))
     CALL New_CellSet_Sphere(CS_IN,GMLoc%PBC%AutoW,GMLoc%PBC%BoxShape,Radius)
 !
 !   Rescale the box size  so that the box is within the bounds of IRmin and IRmax
