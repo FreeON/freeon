@@ -80,11 +80,7 @@ purge:	clean
 	rm -f Test
 	rm -f *.out
 	rm -f *.log
-	rm -f *.geo
-	rm -f *.hdf
-	rm -f *.xyz
-	rm -f *.pdb
-	rm -f *Cubes
+	rm -f *.car
 #
 clean:
 	rm -f $(REMOVEMISC) $(REMOVEMODS)
