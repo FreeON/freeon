@@ -1150,10 +1150,6 @@ CONTAINS
        ENDDO
        MaxX=MAXVAL(VectX%D)
        MinX=MINVAL(VectX%D)
-     ! IF(MaxX-MinX<1.D-6) THEN
-     !   IntCs%PredVal%D(I)=Half*(MaxX+MinX)
-     !   CYCLE
-     ! ENDIF
        CALL Predict(ABC(I,1),ABC(I,2),ABC(I,3),ABC(I,4), &
                     VectX%D,VectY%D,IntCs%PredVal%D(I), &
                     IntCs%PredGrad%D(I),NDegs(I))
@@ -1246,13 +1242,17 @@ CONTAINS
        MinX=MINVAL(VectX%D)
        MaxX=MAXVAL(VectX%D)
        !
-     ! IF(MaxX-MinX<1.D-6) THEN
-     !   Range(I,1)=MinX
-     !   Range(I,2)=MaxX
-     !   ABC(I,:)=Zero
-     !   NDegs(I)=0      
-     !   CYCLE  
-     ! ENDIF
+       IF(MaxX-MinX<1.D-6) THEN
+         ! Do steepest descent with empirical force constants if 
+         ! range is too small for fitting.
+         ! Control over stepsize is going to be modified to
+         ! standard DiagHess range (0.3 a.u.)
+         Range(I,1)=VectX%D(NDim)-0.15D0
+         Range(I,2)=VectX%D(NDim)+0.15D0
+         ABC(I,1)=VectY%D(NDim)-ABC(I,2)*VectX%D(NDim)
+         NDegs(I)=1      
+         CYCLE  
+       ENDIF
        !
        ! invert to get weights
        DO J=1,NDim  
@@ -1623,9 +1623,7 @@ CONTAINS
      IF(NDeg==0) THEN 
        FitVal=VectX(NDim)
      ELSE IF(NDeg==1) THEN !!! linear fit
-       IF(ABS(B)<1.D-12) THEN
-         B=SIGN(ABS(B)+1.D-12,B)
-       ENDIF
+         B=SIGN(ABS(B)+1.D-16,B) !!! to handle perfectly flat surfaces
          IF(B<Zero) THEN
            FitVal=LastX-LastY/ABS(B)
          ELSE
