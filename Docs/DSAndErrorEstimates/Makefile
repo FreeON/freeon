@@ -1,19 +1,19 @@
 all: normal
 
 normal:
-	latex LinearPBCMethod_revtex4.tex
-	latex LinearPBCMethod_revtex4.tex
-	xdvi -s 2 LinearPBCMethod_revtex4
+	latex DSEE.tex
+	latex DSEE.tex
+	xdvi -s 2 DSEE
 
 new: 	clean links figs bib ps
 
 bib:	
-	latex LinearPBCMethod_revtex4.tex
-	bibtex LinearPBCMethod_revtex4
-	latex LinearPBCMethod_revtex4.tex
-	bibtex LinearPBCMethod_revtex4
-	latex LinearPBCMethod_revtex4.tex	
-	latex LinearPBCMethod_revtex4.tex	
+	latex DSEE.tex
+	bibtex DSEE
+	latex DSEE.tex
+	bibtex DSEE
+	latex DSEE.tex	
+	latex DSEE.tex	
 
 links:
 	ln -s ../../Bib/mondo.bib ./mondo.bib 
@@ -32,7 +32,7 @@ figs:
 	make -C FULL_FIGS
 
 ps:
-	dvips -o LinearPBCMethod_revtex4.ps LinearPBCMethod_revtex4
+	dvips -o DSEE.ps DSEE
 
 clean:
 	rm -rf *.log *.aux *.bbl *.blg *.dvi *~
