@@ -68,6 +68,8 @@ PROGRAM ONX
 !----------------------------------------------
   IF(SCFActn=='InkFok')THEN
      CALL Get(D,TrixFile('DeltaD',Args,0))
+  ELSEIF(SCFActn=='BasisSetSwitch')THEN
+     CALL Get(D,TrixFile('D',Args,-1))
   ELSE
      CALL Get(D,TrixFile('D',Args,0))
   ENDIF

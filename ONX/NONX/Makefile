@@ -37,7 +37,6 @@ clean:
 	rm -f $(REMOVEALL)
 	rm -f \#*
 	rm -f *~
-	rm -f $(MONDO_HOME)/Exec/NONX
+	rm -f $(MONDO_HOME)/Exec/ONX
 	rm -f $(MONDO_HOME)/Exec/XForce
 	ls
-	
