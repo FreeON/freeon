@@ -560,11 +560,15 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_,Needs_]:=Block[{WS,LBra,LKe
 	   WS["USE GlobalScalars"];
            (*WS["USE ONX2DataType"];*)
            WS["USE ShellPairStruct"];
-	   If[LBra+LKet==1,
+(*	   If[LBra+LKet==1,
               WS["USE GammaF0"];
               WS["USE GammaF1"];,
               WS[StringJoin["USE GammaF",ToString[LBra+LKet]]];
-              WS[StringJoin["USE GammaF",ToString[LBra+LKet+1]]]];
+              WS[StringJoin["USE GammaF",ToString[LBra+LKet+1]]]];*)
+
+              WS[StringJoin["USE GammaF",ToString[LBra+LKet]]];
+              WS[StringJoin["USE GammaF",ToString[LBra+LKet+1]]];
+
 
            WS["IMPLICIT REAL(DOUBLE) (A,I,W)"];
            WS["INTEGER        :: LBra,LKet,NINT"];
@@ -582,9 +586,9 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_,Needs_]:=Block[{WS,LBra,LKe
            WS["REAL(DOUBLE)  :: T,ET,TwoT,InvT,SqInvT,ABx,ABy,ABz,CDx,CDy,CDz"];
 
            WS["REAL(DOUBLE)  :: Alpha,Beta,Gamma"];
-           WS["INTEGER       :: CrtSet1,CrtSet2,CrtSet3,CrtSet4"];
-           WS["INTEGER       :: CrtSet5,CrtSet6,CrtSet7,CrtSet8"];
-           WS["INTEGER       :: CrtSet9,OffSet,GOA,GOB,GOC,GOD"];
+           WS["INTEGER       :: CrtSet1,CrtSet2,CrtSet3,CrtSet4 ,CrtSet5 ,CrtSet6"];
+           WS["INTEGER       :: CrtSet7,CrtSet8,CrtSet9,CrtSet10,CrtSet11,CrtSet12"];
+           WS["INTEGER       :: OffSet,GOA,GOB,GOC,GOD"];
            WS["INTEGER       :: OA,LDA,OB,LDB,OC,LDC,OD,LDD,J,K,L"];
            WS["REAL(DOUBLE)  :: FPQx,FPQy,FPQz"];
 
@@ -592,17 +596,17 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_,Needs_]:=Block[{WS,LBra,LKe
            WS["CrtSet2=GOA+1"];           
            WS["CrtSet3=GOA+2"];           
 
-           WS["CrtSet4=GOB+3"];           
-           WS["CrtSet5=GOB+4"];           
-           WS["CrtSet6=GOB+5"];           
+           WS["CrtSet4=GOB"];           
+           WS["CrtSet5=GOB+1"];           
+           WS["CrtSet6=GOB+2"];           
 
-           WS["CrtSet7=GOC+6"];           
-           WS["CrtSet8=GOC+7"];           
-           WS["CrtSet9=GOC+8"];           
+           WS["CrtSet7=GOC"];           
+           WS["CrtSet8=GOC+1"];           
+           WS["CrtSet9=GOC+2"];           
 
-           WS["CrtSet10=GOD+9"];           
-           WS["CrtSet11=GOD+10"];           
-           WS["CrtSet12=GOD+11"];           
+           WS["CrtSet10=GOD"];           
+           WS["CrtSet11=GOD+1"];           
+           WS["CrtSet12=GOD+2"];           
   
            ZeroNeeds[LBra,LKet,Needs];  
 
