@@ -77,8 +77,17 @@ MODULE MondoMPI
       SUBROUTINE FiniMPI()
         INTEGER                    :: IErr
         CHARACTER(LEN=*),PARAMETER :: Sub='FiniMPI'
+#ifdef MPI2
+        INTEGER                    :: PARENT, ALL
+!
+        ! Get the parent communicator 
+        CALL MPI_COMM_GET_PARENT(PARENT,IErr)
+        ! Merge the parent and current local communicators
+        CALL MPI_INTERCOMM_MERGE(PARENT,.TRUE.,ALL,IErr)
+        ! Sychronize parent and child
+        CALL MPI_BARRIER(ALL,IErr)
+#endif
         CALL MPI_FINALIZE(IErr)
-        CALL ErrChk(IErr,Sub)
       END SUBROUTINE FiniMPI
 
       FUNCTION MRank()

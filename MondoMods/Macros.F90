@@ -120,7 +120,7 @@ CONTAINS
             (/.FALSE.,.FALSE./),.TRUE.,CART_COMM,IErr)
     ENDIF
     CALL ErrChk(IErr,Sub)
-    IF(CART_COMM/=0)THEN
+    IF(CART_COMM/=MPI_COMM_NULL)THEN
        ! Find out which row (group) this PE belongs to
        CALL MPI_CART_COORDS(CART_COMM,MyId,2,Local,IErr)
        CALL ErrChk(IErr,Sub)
@@ -131,6 +131,7 @@ CONTAINS
     ! Offset the actuall clone 
     MyClone=SpaceTime%I(3)+Local(2)
     !    CALL AlignNodes('MyClone = '//TRIM(IntToChar(MyClone)))
+    !
     ! Now split into SpaceTime%I(1) rows. Each row has SpaceTime%I(2) processors
     ! parallel in the spatial domain and using MONDO_COMM as their
     ! default communicator
@@ -149,7 +150,6 @@ CONTAINS
     ! Revert back to global communicator, rank etc
     MONDO_COMM=MPI_COMM_WORLD
     MyID=MRank()    
-    CALL AlignNodes()
 #endif
     IF(HasQM()) THEN
        CALL Delete(BSiz)
@@ -175,7 +175,6 @@ CONTAINS
           CALL PPrint(PerfMon,Prog,BareBones_O=.TRUE.)
        ENDIF
     ENDIF
-    !
     IF(PrintFlags%Key==DEBUG_MAXIMUM) &
          CALL PPrint(MemStats,Prog)
     ! Now mark sucess of this program ... 
@@ -184,10 +183,10 @@ CONTAINS
     CALL CloseHDF(HDFFileID)
     ! ... shutdown MPI and print a time stamp
 #ifdef PARALLEL
-    IF(InParallel) &
-         CALL FiniMPI()
     IF(PrintFlags%Key>DEBUG_MEDIUM.AND.MyId==ROOT)  &
          CALL TimeStamp('Exiting '//TRIM(Prog),Enter_O=.FALSE.)
+    ! Shutdown MPI
+    CALL FiniMPI()
 #else
     IF(PrintFlags%Key>DEBUG_MEDIUM)  &
          CALL TimeStamp('Exiting '//TRIM(Prog),Enter_O=.FALSE.)
