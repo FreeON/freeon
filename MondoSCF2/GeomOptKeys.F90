@@ -12,7 +12,7 @@ MODULE GeomOptKeys
    CHARACTER(LEN=8),  PARAMETER :: OPT_CartDIIS     ='CartDIIS'
    CHARACTER(LEN=7),  PARAMETER :: OPT_IntDIIS      ='IntDIIS'
    CHARACTER(LEN=7),  PARAMETER :: OPT_NoGDIIS      ='NoGDIIS'
-   CHARACTER(LEN=6),  PARAMETER :: OPT_DoThreeAt    ='DoThreeAt' 
+   CHARACTER(LEN=9),  PARAMETER :: OPT_DoThreeAt    ='DoThreeAt' 
    CHARACTER(LEN=8),  PARAMETER :: OPT_NoBackTr     ='NoBackTr'
    CHARACTER(LEN=8),  PARAMETER :: OPT_NoRotOff     ='NoRotOff'
    CHARACTER(LEN=11), PARAMETER :: OPT_NoTranslOff  ='NoTranslOff'
@@ -47,7 +47,7 @@ MODULE GeomOptKeys
 !-------------------------------------------------
 !  Parsing keys for <Options.MaxAngle=> and <Options.MaxStre=>
 !
-    CHARACTER(LEN=7),  PARAMETER :: MaxAngle='MaxAngle'
+    CHARACTER(LEN=8),  PARAMETER :: MaxAngle='MaxAngle'
     CHARACTER(LEN=7),  PARAMETER :: MaxStre='MaxStre'
 !---------------------------------------------------------
 END MODULE GeomOptKeys
