@@ -1,4 +1,4 @@
-\begin{thebibliography}{45}
+\begin{thebibliography}{47}
 \expandafter\ifx\csname natexlab\endcsname\relax\def\natexlab#1{#1}\fi
 \expandafter\ifx\csname bibnamefont\endcsname\relax
   \def\bibnamefont#1{#1}\fi
@@ -69,7 +69,7 @@
 \bibinfo{author}{\bibfnamefont{K.}~\bibnamefont{Wolinski}},
   \bibinfo{author}{\bibfnamefont{J.~F.} \bibnamefont{Hinton}},
   \bibnamefont{and} \bibinfo{author}{\bibfnamefont{P.}~\bibnamefont{Pulay}},
-  \bibinfo{journal}{J. Am. Chem. Soc.} \textbf{\bibinfo{volume}{112}}, \bibinfo{pages}{8251}
+  \bibinfo{journal}{jacs} \textbf{\bibinfo{volume}{112}}, \bibinfo{pages}{8251}
   (\bibinfo{year}{1990}).
 
 \bibitem[{\citenamefont{Gauss} \emph{et~al.}(1996)\citenamefont{Gauss, Ruud,
@@ -151,13 +151,33 @@
   \bibinfo{journal}{J. Chem. Phys.} \textbf{\bibinfo{volume}{115}},
   \bibinfo{pages}{10344} (\bibinfo{year}{2001}{\natexlab{a}}).
 
-\bibitem[{\citenamefont{Niklasson and Challacombe}(2003)}]{ANiklasson04}
+\bibitem[{\citenamefont{Niklasson and Challacombe}(2004)}]{ANiklasson04}
 \bibinfo{author}{\bibfnamefont{A.~M.~N.} \bibnamefont{Niklasson}}
   \bibnamefont{and}
   \bibinfo{author}{\bibfnamefont{M.}~\bibnamefont{Challacombe}},
   \emph{\bibinfo{title}{Density Matrix Perturbation Theory}}
-  (\bibinfo{year}{2003}), \bibinfo{note}{submitted to Phys. Rev. Let.,
-  cond-mat/0311591}.
+  (\bibinfo{year}{2004}), \bibinfo{note}{accepted to Phys. Rev. Let., LJ9425}.
+
+\bibitem[{\citenamefont{Challacombe and
+  Schwegler}(1997{\natexlab{a}})}]{Challacombe97b}
+\bibinfo{author}{\bibfnamefont{M.}~\bibnamefont{Challacombe}} \bibnamefont{and}
+  \bibinfo{author}{\bibfnamefont{E.}~\bibnamefont{Schwegler}},
+  \bibinfo{journal}{J. Chem. Phys.} \textbf{\bibinfo{volume}{106}},
+  \bibinfo{pages}{5526} (\bibinfo{year}{1997}{\natexlab{a}}).
+
+\bibitem[{\citenamefont{Schwegler} \emph{et~al.}(1997)\citenamefont{Schwegler,
+  Challacombe, and Head-Gordon}}]{ESchwegler97}
+\bibinfo{author}{\bibfnamefont{E.}~\bibnamefont{Schwegler}},
+  \bibinfo{author}{\bibfnamefont{M.}~\bibnamefont{Challacombe}},
+  \bibnamefont{and}
+  \bibinfo{author}{\bibfnamefont{M.}~\bibnamefont{Head-Gordon}},
+  \bibinfo{journal}{J. Chem. Phys.} \textbf{\bibinfo{volume}{106}},
+  \bibinfo{pages}{9708} (\bibinfo{year}{1997}).
+
+\bibitem[{\citenamefont{Challacombe}(2000{\natexlab{a}})}]{MChallacombe00A}
+\bibinfo{author}{\bibfnamefont{M.}~\bibnamefont{Challacombe}},
+  \bibinfo{journal}{J. Chem. Phys.} \textbf{\bibinfo{volume}{113}},
+  \bibinfo{pages}{10037} (\bibinfo{year}{2000}{\natexlab{a}}).
 
 \bibitem[{\citenamefont{Niklasson}(2002)}]{ANiklasson02A}
 \bibinfo{author}{\bibfnamefont{A.~M.~N.} \bibnamefont{Niklasson}},
@@ -297,30 +317,22 @@
   \bibinfo{journal}{J. Chem. Phys.} \textbf{\bibinfo{volume}{101}},
   \bibinfo{pages}{9704} (\bibinfo{year}{1994}).
 
-\bibitem[{\citenamefont{Challacombe}(2000)}]{MChallacombe00B}
+\bibitem[{\citenamefont{Challacombe}(2000{\natexlab{b}})}]{MChallacombe00B}
 \bibinfo{author}{\bibfnamefont{M.}~\bibnamefont{Challacombe}},
   \bibinfo{journal}{Comput. Phys. Commun.} \textbf{\bibinfo{volume}{128}},
-  \bibinfo{pages}{93} (\bibinfo{year}{2000}).
+  \bibinfo{pages}{93} (\bibinfo{year}{2000}{\natexlab{b}}).
 
 \bibitem[{\citenamefont{Furche}(2001)}]{Furche_2001}
 \bibinfo{author}{\bibfnamefont{F.}~\bibnamefont{Furche}}, \bibinfo{journal}{J.
   Chem. Phys.} \textbf{\bibinfo{volume}{114}}, \bibinfo{pages}{5982}
   (\bibinfo{year}{2001}).
 
-\bibitem[{\citenamefont{Challacombe and Schwegler}(1997)}]{MChallacombe97}
+\bibitem[{\citenamefont{Challacombe and
+  Schwegler}(1997{\natexlab{b}})}]{MChallacombe97}
 \bibinfo{author}{\bibfnamefont{M.}~\bibnamefont{Challacombe}} \bibnamefont{and}
   \bibinfo{author}{\bibfnamefont{E.}~\bibnamefont{Schwegler}},
   \bibinfo{journal}{J. Chem. Phys.} \textbf{\bibinfo{volume}{106}},
-  \bibinfo{pages}{5526} (\bibinfo{year}{1997}).
-
-\bibitem[{\citenamefont{Schwegler} \emph{et~al.}(1997)\citenamefont{Schwegler,
-  Challacombe, and Head-Gordon}}]{ESchwegler97}
-\bibinfo{author}{\bibfnamefont{E.}~\bibnamefont{Schwegler}},
-  \bibinfo{author}{\bibfnamefont{M.}~\bibnamefont{Challacombe}},
-  \bibnamefont{and}
-  \bibinfo{author}{\bibfnamefont{M.}~\bibnamefont{Head-Gordon}},
-  \bibinfo{journal}{J. Chem. Phys.} \textbf{\bibinfo{volume}{106}},
-  \bibinfo{pages}{9708} (\bibinfo{year}{1997}).
+  \bibinfo{pages}{5526} (\bibinfo{year}{1997}{\natexlab{b}}).
 
 \bibitem[{\citenamefont{Challacombe}
   \emph{et~al.}(2001)\citenamefont{Challacombe, Schwegler, Tymczak, Gan,
