@@ -235,26 +235,39 @@ MODULE PoleTree
 !     Bisection   
 !================================================================================
       SUBROUTINE SplitPoleBox(Node,Left,Right)
-         TYPE(PoleNode), POINTER :: Node,Left,Right
-         REAL(DOUBLE)            :: Section,MaxBox
-         INTEGER                 :: B,E,N,ISplit,Split,I,J,k
+         TYPE(PoleNode), POINTER     :: Node,Left,Right
+         REAL(DOUBLE)                :: Section,MaxBox,Extent
+         REAL(DOUBLE),DIMENSION(3)   :: MaxQL,MaxQH
+         INTEGER                     :: B,E,N,ISplit,Split,I,J,k,IS
 !--------------------------------------------------------------
 !        Indexing
          J=0
          B=Node%Bdex
          E=Node%Edex
          N=E-B+1
-!        SPlit in the Largest Direction direction
-         MaxBox=Zero
-         ISplit=Mod(Node%Box%Tier,3)+1
-
-!        DO I=1,3
-!           IF(MaxBox > Node%Box%Half(I)) THEN
-!              MaxBox = Node%Box%Half(I)
-!              ISplit = I
-!           ENDIF
-!        ENDDO
-
+!        Determine the Split in the Largest Direction 
+`        ISplit = Mod(Node%Box%Tier,3)+1
+!!$         MaxQL(1:3) = Zero         
+!!$         MaxQH(1:3) = Zero
+!!$         DO I=B,E
+!!$            K=Qdex(I)
+!!$            Extent = Ext(K)
+!!$            MaxQL(1) = MIN(Rho%Qx%D(K)-Extent,MaxQL(1))
+!!$            MaxQL(2) = MIN(Rho%Qy%D(K)-Extent,MaxQL(2))
+!!$            MaxQL(3) = MIN(Rho%Qz%D(K)-Extent,MaxQL(3))
+!!$            MaxQH(1) = MAX(Rho%Qx%D(K)+Extent,MaxQH(1))
+!!$            MaxQH(2) = MAX(Rho%Qy%D(K)+Extent,MaxQH(2))
+!!$            MaxQH(3) = MAX(Rho%Qz%D(K)+Extent,MaxQH(3))
+!!$         ENDDO
+!!$         MaxBox = Zero
+!!$         ISplit = 0
+!!$         DO IS=1,3
+!!$            IF(MaxBox < ABS(MaxQH(IS)-MaxQL(IS))) THEN
+!!$               MaxBox = ABS(MaxQH(IS)-MaxQL(IS))
+!!$               ISplit = IS
+!!$            ENDIF 
+!!$         ENDDO
+!        Split the Distibutuins
          IF(ISplit==1)THEN
             DO I=B,E
                J=J+1;K=Qdex(I)
@@ -271,7 +284,6 @@ MODULE PoleTree
                RList(J)=Rho%Qz%D(K)
             ENDDO
          ENDIF
-
 !        Sort
          CALL DblIntSort77(N,RList,Qdex(B:E),2)
 !        Orthogonal RECURSIVE bisection (ORB)

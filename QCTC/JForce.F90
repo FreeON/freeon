@@ -206,7 +206,7 @@ PROGRAM JForce
 #endif
 !--------------------------------------------------------------------------------
 ! Print The JForce
-!  CALL Print_Force(GMLoc,JFrc,'QM dJ/dR in au ')
+!  CALL Print_Force(GMLoc,JFrc,'dJ/dR in au ')
 !  JFrc%D(:)=JFrc%D(:)/KJPerMolPerAngstToHPerBohr
 !  CALL Print_Force(GMLoc,JFrc,'QM dJ/dR in KJ/mol/A ')
 !  JFrc%D(:)=JFrc%D(:)*KJPerMolPerAngstToHPerBohr
@@ -301,7 +301,7 @@ PROGRAM JForce
   DO AtA=1,NAtoms
      A1=3*(AtA-1)+1
      A2=3*AtA
-     GMLoc%Gradients%D(1:3,AtA) =  GMLoc%Gradients%D(1:3,AtA)+JFrc%D(A1:A2)
+     GMLoc%Gradients%D(1:3,AtA) = GMLoc%Gradients%D(1:3,AtA)+JFrc%D(A1:A2)
   ENDDO
   GMLoc%PBC%LatFrc%D = GMLoc%PBC%LatFrc%D+LatFrc_J%D
   CALL Put(GMLoc,Tag_O=CurGeom)
