@@ -149,13 +149,6 @@ CONTAINS
                 XiAB =ZetaA*ZetaB*ZetaIn
                 IF(TestPrimPair(XiAB,Pair%AB2))THEN
                    ExpAB=EXP(-XiAB*AB2)
-!                  Determine the Counting Factors
-                   IF(AEQB) THEN
-                      FacAtom = one
-                   ELSE
-                      FacAtom = two
-                   ENDIF
-                   ExpAB = FacAtom*ExpAB
 !
 !                  Determine the Indexs
 !
