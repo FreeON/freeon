@@ -279,8 +279,6 @@ CONTAINS
        DO zq = 1,Rho%NExpt
           IF(MaxL < Rho%Lndx%I(zq)) MaxL = Rho%Lndx%I(zq)
        ENDDO
-       CALL New(AuxRfun,2*MaxL,-1)
-       CALL New(Rfun,(/2*MaxL,2*MaxL,2*MaxL/),(/-1,-1,-1/))
 !
        DO zq = 1,Rho%NExpt
           NQ     = Rho%NQ%I(zq)
