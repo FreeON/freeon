@@ -1,3 +1,12 @@
+2005-03-19 13:46  mchalla
+
+	* OneE/UForce.F90: PBC ECP forces working now, but not the ECP
+	lattice forces (yet).
+
+2005-03-19 13:22  mchalla
+
+	* ChangeLog: [no log message]
+
 2005-03-19 13:20  mchalla
 
 	* QCTC/: JForce.F90, QCTC.F90: Fixed CJ bug.  Reset to previous
