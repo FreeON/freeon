@@ -1,21 +1,21 @@
-<BeginTitle>
 STO-3G
 Ref. : (RHF) = -126.995883659
 MONDO: <SCF> = -126.99588373
-<EndTitle>
 
 <BeginOptions>
+
 Charge=1
 Multiplicity=1
-Clones=1
-DebugAll=(MaxDebug,CheckSums)
+
+DebugAll=(MinDebug,CheckSums)
+
 Guess=SuperPos
 SCFMethod=(TRS4)
 BasisSets=(STO-3G-SPLIT)
 ModelChem=(HF)
 Accuracy =(verytight)
-Geometry=(InAngstroms,NoOrder)
 SCFConvergence=(DIIS)
+
 <EndOptions>
 
 <BeginGeometry>

@@ -1,4 +1,3 @@
-<BeginTitle>
  MONDO:
 Frequencies= 2171.0366 4142.8791 4392.9252
                Q               ln(Q)
@@ -32,21 +31,21 @@ Frequencies= 2171.0366 4142.8791 4392.9252
  VIB.      64.006    64.006    64.005     0.026     0.026     0.003
  TOTAL     71.443    73.922    15.717    24.969    33.283   195.220
 
-<EndTitle>
-
 <BeginOptions>
-Grad=(NumFreq)
+
 Charge=0
 Multiplicity=1
-Clones=1
-DebugAll=(MinDebug)
+
+Grad=(NumFreq)
+DebugAll=(MinDebug,CheckSums)
+
 Guess=SuperPos
 SCFMethod=(RH)
 BasisSets=(STO-3G-SPLIT)
 ModelChem=(HF)
 Accuracy =(verytight)
-Geometry=(InAngstroms,NoOrder)
 SCFConvergence=(DIIS)
+
 <EndOptions>
 
 <BeginGeometry>
