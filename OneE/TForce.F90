@@ -83,7 +83,7 @@ PROGRAM TForce
                  TFrc%D(A1:A2) = TFrc%D(A1:A2) + Two*F_nlm(1:3)
 !                Lattice Forces
                  nlm        = AtomToFrac(GM,Pair%A)
-                 LatFrc_T%D = LatFrc_T%D - Two*LaticeForce(GM,nlm,F_nlm)
+                 LatFrc_T%D = LatFrc_T%D + Two*LaticeForce(GM,nlm,F_nlm)
               ENDIF
               Pair%A=A+CS_OUT%CellCarts%D(:,NC)
               Pair%B=B
@@ -104,16 +104,16 @@ PROGRAM TForce
 !
 !
 !
-!!$  WRITE(*,*) 'T'
-!!$  DO AtA=1,NAtoms
-!!$     A1=3*(AtA-1)+1
-!!$     A2=3*AtA
-!!$     WRITE(*,'(I3,2x,3(D23.16,2X))') AtA,TFrc%D(A1:A2)
-!!$  ENDDO
-!!$  WRITE(*,*) 
-!!$  DO I=1,3
-!!$     WRITE(*,*) (LatFrc_T%D(I,J),J=1,3) 
-!!$  ENDDO
+  WRITE(*,*) 'T'
+  DO AtA=1,NAtoms
+     A1=3*(AtA-1)+1
+     A2=3*AtA
+     WRITE(*,'(I3,2x,3(D23.16,2X))') AtA,TFrc%D(A1:A2)
+  ENDDO
+  WRITE(*,*) 
+  DO I=1,3
+     WRITE(*,*) (LatFrc_T%D(I,J),J=1,3) 
+  ENDDO
 !--------------------------------------------------------------------------------
 #ifdef PARALLEL
   TotFrcComp = 3*NAtoms
