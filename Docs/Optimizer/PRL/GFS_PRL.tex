@@ -296,17 +296,28 @@ with the $k$-th internal coordinate, i.e. which are in the spacial
 vicinity of the $k$-th coordinate. 
 $H_{ll}^{}$ is an estimate
 of the diagonal matrix element of the Hessian for the $l$-th 
-internal coordinate. $H_{ll}^{i}$ is calculated as the local tangent
-of the gradient curve of a primary fit. 
-This primary fit is done for each internal coordinates with 
-the weights $w{'}_{k}^{(i)} = 1/g_{k}^{(i)2}$ usual to 
-estimate relative errors.
+internal coordinate. In present applications $H_{ll}^{i}$ took
+the value of $0.5$ a.u. for stretches, $0.2$ a.u. 
+for bendings, linear bending 
+and out-of-planes and $0.1$ a.u. for torsions. These values equal
+to those used to provide an initial guess for the Hessian in
+Hessian update techniques.
+
+As an alternative, $H_{ll}^{i}$ can be approximated
+as the local tangent of the gradient curve of a primary fit. 
+This primary fit can be done with 
+the weights $w{'}_{k}^{(i)} = 1/g_{k}^{(i)2}$, usual to 
+estimate relative errors. However, when the internal coordinate values
+span only a very small range, there will be a large uncertainty on the
+estimated Hessian, which usually results in delayed convergence. 
+For this reason we prefer to work with the cruder but more stable
+estimates of $H_{ll}^{i}$. 
 
 The statistical F-test is used to decide about the order of the fit,
 as implemented in the fitting program \cite{slatec}.
 So far no higher than cubic fit has been considered. The roots
 of the fitted curves can be found analytically. In practice,
-almost exclusively linear fit was recommended by the F-test during
+exclusively linear fit was recommended by the F-test during
 the test calculations.
 
 The topology matrix, neded to determine which internal coordinates
@@ -346,14 +357,12 @@ gives a numerical insight into the problems of controlling
 convergence to a minimum without an accurate Hessian.
 
 \subsection{Initial steps}
-In the first two steps of the optimization
-process a scaled internal coordinate steepest descent step is used
+In the very first step of the optimization,
+a scaled internal coordinate steepest descent step is used
 with the usual diagonal Hessian estimates of
 0.5 a.u. for stretchings, 0.2 a.u. for bendings and 0.1 a.u.
-for torsions. The use of the OGCF optimizer could start in the
-second geometry, however the cruder diagonal Hessian steps have less
-step size limitation in the second step, resulting in a slightly
-better overall performance for some of our test sets.
+for torsions. This initial step is equivalent with the one
+traditional optimizers use.
 
 \subsection{Step size control}
 In case the optimizer makes an extrapolation step towards the predicted
@@ -408,7 +417,9 @@ delocalized ones.
 Note, that our results have been achieved without any use
 of traditional convergence acceleration algorithms, such as 
 geometric DIIS \cite{Pulay_GDIIS}, which are standard tools of
-traditional optimizers \cite{Farkas_GDIIS}.
+traditional optimizers \cite{Farkas_GDIIS}. Furthermore, 
+no application of the so-called line-search (see e.g. Ref. \cite{bakken}
+and refs. therein) took place in our calculations.
 
 \begin{table}[h]
 %\squeezetable
@@ -436,29 +447,29 @@ Hydroxysulphane        &   7    &   7    &    7    &    8   &   8     \\
 Benzene                &   2    &   3    &    3    &    3   &   4     \\
 Methylamine            &   4    &   4    &    5    &    5   &   6     \\
 Ethanol                &   5    &   4    &    5    &    5   &   6     \\
-Acetone                &   5    &   4    &    5    &    5   &   6     \\
+Acetone                &   4    &   4    &    5    &    5   &   6     \\
 Disilyl ether          &   9    &   8    &    9    &   11   &   8     \\
 1,3,5-trisilacycl.     &   6    &   9    &    6    &    8   &   8     \\
-Benzaldehyde           &   4    &   4    &    5    &    5   &   6     \\
+Benzaldehyde           &   5    &   4    &    5    &    5   &   6     \\
 1,3-difluorobenz.      &   4    &   4    &    5    &    5   &   5     \\
 1,3,5-trifluorob.      &   3    &   4    &    4    &    4   &   5     \\
 Neopentane             &   5    &   4    &    4    &    5   &   5     \\
 Furan                  &   6    &   5    &    6    &    7   &   8     \\
 Naphtalene             &   6    &   5    &    6    &    6   &   5     \\
-1,5-difluoronapht.     &   6    &   5    &    6    &    6   &   6     \\
-2-hydroxibicyclop.     &   8    &   9    &    9    &   10   &  15     \\
-ACHTAR10               &   9    &   8    &    9    &    8   &  12     \\
+1,5-difluoronapht.     &   7    &   5    &    6    &    6   &   6     \\
+2-hydroxibicyclop.     &   7    &   9    &    9    &   10   &  15     \\
+ACHTAR10               &  11    &   8    &    9    &    8   &  12     \\
 ACANIL01               &  11    &   7    &    8    &    8   &   8     \\
-Benzidine              &   8    &   9    &    7    &   10   &   9     \\
-Pterin                 &  14    &   8    &    9    &    9   &  10     \\
-Difuropirazine         &   7    &   6    &    7    &    7   &   9     \\
+Benzidine              &   7    &   9    &    7    &   10   &   9     \\
+Pterin                 &  12    &   8    &    9    &    9   &  10     \\
+Difuropirazine         &   6    &   6    &    7    &    7   &   9     \\
 Mesityl oxide          &   5    &   5    &    6    &    6   &   7     \\
 Histidine              &  10    &  16    &   14    &   20   &  19     \\
-Dimethylpenthane       &   7    &   9    &   10    &   10   &  12     \\
+Dimethylpenthane       &   8    &   9    &   10    &   10   &  12     \\
 Caffeine               &   7    &   6    &    7    &    7   &  12     \\
-Menthone               &  16    &  12    &   10    &   14   &  13     \\
+Menthone               &  14    &  12    &   10    &   14   &  13     \\
 \colrule
-Total                  & 193    & 185    &  196    &  215   & 240     \\
+Total                  & 190    & 185    &  196    &  215   & 240     \\
 \botrule
 \end{tabular}
 \end{table}
