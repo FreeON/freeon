@@ -143,7 +143,7 @@ FillPBlok.o:	            $(MONDO_LIB)/libMondoMods.a
 RHeqs.o:		    $(MONDO_LIB)/libMondoMods.a
 SCFStatus.o:                $(MONDO_LIB)/libMondoMods.a
 SDMM.o:		            $(MONDO_LIB)/libMondoMods.a
-SP2.o:                      $(MONDO_LIB)/libMondoMods.a
+SP2.o:         DenMatMethods.o  $(MONDO_LIB)/libMondoMods.a
 SP4.o:                      $(MONDO_LIB)/libMondoMods.a
 TS4.o:                      $(MONDO_LIB)/libMondoMods.a
 PM.o:                       $(MONDO_LIB)/libMondoMods.a

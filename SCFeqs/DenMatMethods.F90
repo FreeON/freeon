@@ -13,14 +13,14 @@ MODULE DenMatMethods
   REAL(DOUBLE)            :: TrP,TrP2,TrP3,TrP4
   REAL(DOUBLE) :: CurThresh
 CONTAINS
-!--------------------------------------------------------------
-!
-!--------------------------------------------------------------
+!-------------------------------------------------------------------------------
+
+!-------------------------------------------------------------------------------
   SUBROUTINE SussTrix(TrixName,Prog)
     CHARACTER(LEN=*) :: TrixName,Prog
     CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg
     REAL(DOUBLE)     :: Trix
-!--------------------------------------------------------------
+!-------------------------------------------------------------------------------
     ! Check for thresholds overide 
     CALL OpenASCII(InpFile,Inp)         
     IF(OptDblQ(Inp,TrixName,Trix))THEN
@@ -34,15 +34,19 @@ CONTAINS
     CLOSE(Inp)
     CALL SetVarThresh()
   END SUBROUTINE SussTrix
-!--------------------------------------------------------------
-!
-!--------------------------------------------------------------
+!-------------------------------------------------------------------------------
+
+!-------------------------------------------------------------------------------
   SUBROUTINE PutXForm(Prog,Args,P,Z,Tmp1)
+#ifdef DM_PARALLEL
+    TYPE(DBCSR)       :: P,Z,Tmp1
+#else
+    TYPE(BCSR)       :: P,Z,Tmp1
+#endif
     CHARACTER(LEN=*) :: Prog
     TYPE(ARGMT)      :: Args
-    TYPE(BCSR)       :: P,Z,Tmp1
     LOGICAL          :: Present
-!----------------------------------------------------------
+!-------------------------------------------------------------------------------
     ! IO for the orthogonal P
     CALL Put(P,'CurrentOrthoD',CheckPoint_O=.TRUE.)
     CALL Put(P,TrixFile('OrthoD',Args,1))
@@ -70,9 +74,9 @@ CONTAINS
     CALL PPrint(Tmp1,'P['//TRIM(NxtCycl)//']')
     CALL Plot(Tmp1,'P_'//TRIM(NxtCycl))
   END SUBROUTINE PutXForm
-!--------------------------------------------------------------
-!
-!--------------------------------------------------------------
+!-------------------------------------------------------------------------------
+
+!-------------------------------------------------------------------------------
   SUBROUTINE SetVarThresh(MM_O)
     INTEGER,OPTIONAL  :: MM_O
     INTEGER           :: MM
@@ -87,14 +91,18 @@ CONTAINS
     Thresholds%Trix=MIN(0.05D0*1.093D0**MM,One)*OldThresh
     CurThresh=OldThresh
   END SUBROUTINE SetVarThresh
-!--------------------------------------------------------------
-!
-!--------------------------------------------------------------
+!-------------------------------------------------------------------------------
+
+!-------------------------------------------------------------------------------
   FUNCTION CnvrgChck(Prog,NPur,Ne,MM,F,P,POld,Tmp1,Tmp2)
     LOGICAL              :: CnvrgChck
+#ifdef DM_PARALLEL
+    TYPE(DBCSR)          :: F,P,POld,Tmp1,Tmp2
+#else
     TYPE(BCSR)           :: F,P,POld,Tmp1,Tmp2
+#endif
     REAL(DOUBLE)         :: Ne,Energy,AbsErrP,FNormErrP,TwoNP,N2F,  &
-         AbsErrE,RelErrE,AveErrE,MaxCommErr,FNormCommErr,PNon0
+         AbsErrE,RelErrE,AveErrE,MaxCommErr,FNormCommErr,PNon0,TraceP
 
     REAL(DOUBLE),DIMENSION(2) :: CErr
     REAL(DOUBLE),SAVE    :: OldE,OldAEP
@@ -134,7 +142,6 @@ CONTAINS
         CALL Delete(dP)
 #endif
 
-
      IF(NPur==0)THEN
         OldE=BIG_DBL
         OldAEP=BIG_DBL
@@ -146,7 +153,7 @@ CONTAINS
      AbsErrP=ABS(Max(Tmp1)+1.D-20)
      FNormErrP=FNorm(Tmp1)
      ! Energy errors
-#ifdef PARALLEL
+#ifdef DM_PARALLEL
      CALL Multiply(P,F,Tmp1)
      Energy=Trace(Tmp1)    
 #else
@@ -176,7 +183,15 @@ CONTAINS
            CnvrgCmmnt='Hit dE increase'
         ENDIF
      ENDIF
-!
+
+#ifdef DM_PARALLEL
+     CALL BCast(CnvrgChck)
+#endif
+
+
+
+
+
 !     IF(NPur<35)CnvrgChck=.FALSE.
 !     CALL OpenASCII('CommErr_'//TRIM(DblToShrtChar(Thresholds%Trix))//'.dat',77)
 !     CALL OpenASCII('CommErr_'//TRIM(DblToShrtChar(CurThresh))//'.dat',77)
@@ -185,7 +200,7 @@ CONTAINS
 !                 100.D0*DBLE(P%NNon0)/DBLE(NBasF*NBasF)
 !     22 FORMAT(I3,8(1x,F20.14))
 !     CLOSE(77)
-!
+
      ! Updtate previous cycle values
      OldE=Energy
      OldAEP=AbsErrP
@@ -194,7 +209,7 @@ CONTAINS
           //'dE='//TRIM(DblToShrtChar(RelErrE))                 &
           //', dP='//TRIM(DblToShrtChar(AbsErrP))               &
           //', %Non0='//TRIM(DblToShrtChar(PNon0))              
-#ifdef PARALLEL
+#ifdef DM_PARALLEL
      IF(MyId==ROOT)THEN
 #endif
         IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
@@ -205,7 +220,7 @@ CONTAINS
            CALL PrintProtectR(Out)
            CLOSE(UNIT=Out,STATUS='KEEP')
         ENDIF
-#ifdef PARALLEL
+#ifdef DM_PARALLEL
      ENDIF
 #endif
      ! Set thresholding for next cycle
@@ -230,7 +245,8 @@ CONTAINS
      MaxCommErr=Max(F)
 #endif
      ! Print summary stats
-#ifdef PARALLEL
+     TraceP = Trace(P)
+#ifdef DM_PARALLEL
      IF(MyId==ROOT)THEN
 #endif
         IF(PrintFlags%Key>DEBUG_MINIMUM)THEN
@@ -238,7 +254,7 @@ CONTAINS
            CALL PrintProtectL(Out)
            Mssg=ProcessName(Prog,CnvrgCmmnt) &
                 //'Tr{FP}='//TRIM(DblToChar(Energy)) &
-                //', dNel = '//TRIM(DblToShrtChar(Two*ABS(Trace(P)-Ne))) 
+                //', dNel = '//TRIM(DblToShrtChar(Two*ABS(TraceP-Ne))) 
            IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
               WRITE(*,*)TRIM(Mssg)
            ENDIF
@@ -281,7 +297,7 @@ CONTAINS
            CALL PrintProtectR(Out)
            CLOSE(UNIT=Out,STATUS='KEEP')
         ENDIF
-#ifdef PARALLEL
+#ifdef DM_PARALLEL
      ENDIF
 #endif
    END FUNCTION CnvrgChck
@@ -302,15 +318,19 @@ CONTAINS
      CALL Delete(T2)
      CALL Delete(T3)
    END FUNCTION CommutatorErrors
-!----------------------------------------------------------------------------
-!
-!
-!----------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
+
+
+!-------------------------------------------------------------------------------
     SUBROUTINE SP2(P,P2,Tmp1,Norm,MMMs)
+#ifdef DM_PARALLEL
+      TYPE(DBCSR)   :: P,P2,Tmp1
+#else
       TYPE(BCSR)   :: P,P2,Tmp1
+#endif
       REAL(DOUBLE) :: Norm,CR
       INTEGER      :: MMMs
-!----------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
       CALL Multiply(P,P,P2)             ! The only multiplication is a square
       MMMs=MMMs+1
       TrP=Trace(P)
@@ -324,15 +344,15 @@ CONTAINS
          CALL Filter(P,Tmp1)
       ENDIF
     END SUBROUTINE SP2
-!----------------------------------------------------------------------------
-!
-!----------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
+
+!-------------------------------------------------------------------------------
     SUBROUTINE SP4(P,P2,Tmp1,Tmp2,Norm,MMMs)
       TYPE(BCSR)                     :: P,P2,Tmp1,Tmp2
       REAL(DOUBLE)                   :: CR,Norm,Gt,Gn,G,Thresh_old
       INTEGER                        :: MMMs
       REAL(DOUBLE)                   :: EPS = 1.D-12
-!----------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
       CALL Multiply(P,P,P2)
       MMMs = MMMs+1
       TrP  = Trace(P)
@@ -379,15 +399,15 @@ CONTAINS
         ENDIF
      ENDIF
    END SUBROUTINE SP4
-!----------------------------------------------------------------------------
-!
-!----------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
+
+!-------------------------------------------------------------------------------
    SUBROUTINE TS4(P,P2,Tmp1,Tmp2,Norm,MMMs)
      TYPE(BCSR)                     :: P,P2,Tmp1,Tmp2
      REAL(DOUBLE)                   :: CR,Norm,Gt,Gn,G,Coeff
      INTEGER                        :: MMMs
      REAL(DOUBLE)                   :: EPS = 1.D-12
-!----------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
      CALL Multiply(P,P,P2)    
      MMMs = MMMs+1
      TrP  = Trace(P)
@@ -425,15 +445,15 @@ CONTAINS
         ENDIF
      ENDIF
    END SUBROUTINE TS4
-!----------------------------------------------------------------------------
-!
-!----------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
+
+!-------------------------------------------------------------------------------
    SUBROUTINE PM1(P,P2,P3,Tmp1,Tmp2,Norm,MMMs)
      TYPE(BCSR)                     :: P,P2,P3,Tmp1,Tmp2
      REAL(DOUBLE)                   :: CR,Norm,Coeff
      INTEGER                        :: MMMs
      REAL(DOUBLE)                   :: EPS = 1.D-8
-!----------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
      CALL Multiply(P,P,P2)                   
      MMMs=MMMs+1
      CALL Filter(Tmp1,P2)
@@ -473,7 +493,7 @@ CONTAINS
      REAL(DOUBLE)  :: c,u,v,w,TrP1
      INTEGER       :: MMMs
      LOGICAL,SAVE  :: FixedUVW=.FALSE.
-!----------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
       CALL Multiply(P,P,Tmp1) 
       MMMs=MMMs+1
       CALL Filter(P2,Tmp1)    
@@ -508,12 +528,17 @@ WRITE(*,*)' C = ',C
       CALL Add(Tmp1,P3,P2) !     P[J+1] = u*P[J] + v*P[J].P[J] + w*P[J].P[J].P[J]
       CALL Filter(P,P2)    !     P=Filter[P[N+1,I+1]]
    END SUBROUTINE PM2
-!----------------------------------------------------------------------------
-!
-!
-!----------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
+
+
+!-------------------------------------------------------------------------------
     SUBROUTINE FockGuess(F,P,Norm,Order)
+#ifdef DM_PARALLEL
+      TYPE(DBCSR)                    :: P
+      TYPE(BCSR),INTENT(IN)          :: F
+#else
       TYPE(BCSR)                     :: F,P
+#endif
       REAL(DOUBLE)                   :: Fmin,Fmax,DF,Coeff,Mu,Lmbd1,  &
                                         Lmbd2,Norm
       INTEGER                        :: Order
@@ -534,9 +559,14 @@ WRITE(*,*)' C = ',C
         TYPE(INT_VECT)                 :: IWork
         INTEGER                        :: LWORK,LIWORK,Info
 #endif
-!----------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !     Estimate spectral bounds 
-      CALL SpectralBounds(F,Fmin,Fmax)
+      IF(MyId==ROOT) &
+        CALL SpectralBounds(F,Fmin,Fmax)
+#ifdef DM_PARALLEL
+      CALL BCast(FMin)
+      CALL BCast(FMax)
+#endif
 !     Set up the Density Matrix
      IF(Order==1) THEN
          Call SetEq(P,F)
@@ -595,13 +625,13 @@ WRITE(*,*)' C = ',C
          CALL MondoHalt(99,'Wrong Order in FockGuess')
       ENDIF
     END SUBROUTINE FockGuess
-!---------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 ! Estimate spectral bounds via Gersgorin approximation, [F_min-F_max].
-!---------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !   S(R) = Sum_R,C { ABS(F(R,C) }
 !   F_max = Max_R { F(R,R) + S(R) - ABS(F(R,R)) }
 !   F_min = Min_R { F(R,R) - S(R) + ABS(F(R,R)) }
-!---------------------------------------------------------------------
+!-------------------------------------------------------------------------------
       SUBROUTINE SpectralBounds(F,F_min,F_max)
         TYPE(BCSR)       :: F
         INTEGER          :: I,R,J,M,Col,Blk,N,C,Check
@@ -622,7 +652,7 @@ WRITE(*,*)' C = ',C
         TYPE(DBL_VECT)                 :: EigenV,Work
         TYPE(INT_VECT)                 :: IWork
         INTEGER                        :: LWORK,LIWORK,Info
-!--------------------------------------------------------------------
+!-------------------------------------------------------------------------------
         CALL New(dF,(/NBasF,NBasF/))
         CALL SetEq(dF,F)
         CALL New(EigenV,NBasF)
@@ -674,14 +704,18 @@ WRITE(*,*)' C = ',C
         ENDDO
 #endif
       END SUBROUTINE SpectralBounds
-!----------------------------------------------------------------------------
-!
-!----------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
+
+!-------------------------------------------------------------------------------
    SUBROUTINE NormTrace(P,P2,Tmp1,Norm,Order)
+#ifdef DM_PARALLEL
+     TYPE(DBCSR)    :: P,P2,Tmp1
+#else
      TYPE(BCSR)    :: P,P2,Tmp1
+#endif
      REAL(DOUBLE)  :: Norm,CR,C1,C2
      INTEGER       :: Order
-!----------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
      IF(Order==0) THEN
         TrP  = Trace(P)
         CR   = Norm/TrP
@@ -702,27 +736,27 @@ WRITE(*,*)' C = ',C
         CALL MondoHalt(99,'Wrong Order in NormTrace')
      ENDIF
    END SUBROUTINE NormTrace
-!----------------------------------------------------------------------------
-!
-!
-!----------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
+
+
+!-------------------------------------------------------------------------------
    SUBROUTINE CalculateDegen(Norm,Degen,Occpan)
      REAL(DOUBLE)                 :: Norm,Degen,Occpan
-!
+
      Degen     = ((Norm-TrP2)**3)/((TrP2-TrP3)*(Norm-Two*TrP2+TrP3))
      Occpan    = Two*(TrP2-TrP3)/(Norm-TrP2)  
-!
+
    END SUBROUTINE CalculateDegen
-!----------------------------------------------------------------------------
-!
-!
-!----------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
+
+
+!-------------------------------------------------------------------------------
 #ifdef BROKEN_GAP
    SUBROUTINE CalculateGap(F,P,Norm,lumo_occ,Gap)
      TYPE(BCSR)                   :: F,P
      REAL(DOUBLE)                 :: Norm,Gap,lumo_occ
      REAL(DOUBLE)                 :: TrFP,TrFP2,TrFP3
-!
+
      CALL Multiply(P,P,P2)
      CALL Multiply(P,P2,P3)
      TrFP  = Trace(F,P)
@@ -730,9 +764,9 @@ WRITE(*,*)' C = ',C
      TrFP3 = Trace(F,P3)    
 ! 
      lumo_occ = Half + Half*Sqrt(ABS(One-Two*Norm+Two*TrP2)) 
-!
+
      Gap      = -(TrFP - Three*TrFP2 + Two*TrFP2)/(lumo_occ*(lumo_occ-One)*(Two*lumo_occ-One))
-!
+
    END SUBROUTINE CalculateGap
 #endif
 END MODULE DenMatMethods

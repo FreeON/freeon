@@ -1,9 +1,9 @@
-!----------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !                         May 13th 2002
 ! Anders M. N. Niklasson: "Expansion Algorithm for the Density Matrix".
 ! Constructs the density matrix from the Hamiltonian in terms of a
 ! trace correcting purification expansion with 2nd order purifications.
-!----------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 PROGRAM DMP_SP2 ! Density matrix purification, SP2 variation
   USE DerivedTypes
   USE GlobalScalars
@@ -17,18 +17,27 @@ PROGRAM DMP_SP2 ! Density matrix purification, SP2 variation
   USE LinAlg
   USE DenMatMethods
   IMPLICIT NONE
+#ifdef DM_PARALLEL
+  TYPE(DBCSR)                     :: F,P,Pold,Tmp1,Tmp2
+  TYPE(BCSR)                      :: F_BCSR
+#else
   TYPE(BCSR)                     :: F,P,Pold,Tmp1,Tmp2
-!-------------------------------------------------------------------------------------
+#endif
+!-------------------------------------------------------------------------------
 ! Trace Setting SP2
-!-------------------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
   TYPE(ARGMT)                    :: Args
   REAL(DOUBLE)                   :: Ne
   INTEGER                        :: I,MM
   LOGICAL                        :: Present
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg,FFile
   CHARACTER(LEN=3),PARAMETER     :: Prog='SP2'
-!-------------------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
+#ifdef DM_PARALLEL
+  CALL StartUp(Args,Prog,SERIAL_O=.FALSE.)
+#else
   CALL StartUp(Args,Prog)
+#endif
   ! Suss for matrix threshold overide
   CALL SussTrix('SPTwoTrix',Prog)  
   CALL New(F)
@@ -47,7 +56,13 @@ PROGRAM DMP_SP2 ! Density matrix purification, SP2 variation
   MM=0                        
   Ne=Half*DBLE(NEl)    
   ! Guess P from F
+#ifdef DM_PARALLEL
+  CALL SetEq(F_BCSR,F)
+  CALL FockGuess(F_BCSR,P,Ne,1)
+  CALL Delete(F_BCSR)
+#else
   CALL FockGuess(F,P,Ne,1)
+#endif
   CALL SetEq(Pold,P)    
   ! Do SP2 iterations
   DO I=1,100
@@ -64,7 +79,3 @@ PROGRAM DMP_SP2 ! Density matrix purification, SP2 variation
   CALL Delete(Tmp2)
   CALL ShutDown(Prog)
 END PROGRAM DMP_SP2
-
-
-
-
