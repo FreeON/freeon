@@ -982,7 +982,7 @@ CONTAINS
        ! also for long range torsions!
        !
        CALL ChkBendToLinB(IntC_Bas,XYZRepl%D,AtNumRepl%I, &
-                          CtrlCoord,TOPS)
+                          CtrlCoord,TOPS,IEq%I)
        CALL CleanPBCIntCs(IntC_Bas,Cells%I,IEq%I)
        NIntC_Bas=IntC_Bas%N
    !   CALL LatticeINTC(IntC_L,PBCDim)
@@ -1137,44 +1137,64 @@ CONTAINS
      INTEGER,DIMENSION(:,:)      :: Cells
      INTEGER,DIMENSION(:)        :: IEq  
      TYPE(INT_VECT)              :: Sort
-     INTEGER                     :: I,I1,I2,J1,J,K,L,N,II,M
-     INTEGER,DIMENSION(3)        :: Cell1
+     INTEGER                     :: I,I1,I2,J,K,L,N,II,M
+     INTEGER                     :: K1,K2,J1,J2
+     INTEGER,DIMENSION(3)        :: Cell1,Tr
      INTEGER,DIMENSION(4)        :: DotProds
-     LOGICAL                     :: DOCycle,DOAllow,DoTest
+     LOGICAL                     :: DOAllow,AllCentral
+     !
+     ! Later, to avoid choices on tors and angles and filters
+     ! a sparse overlap matrix based filtering would be advantageous
+     ! here
      !
      CALL New(Sort,IntCs%N)
      Sort%I=0
      !
      II=0
      DO I=1,IntCs%N
-       I1=IntCs%Atoms%I(I,1)
-       DO J=2,4
+       DoAllow=.FALSE.
+       K1=1
+       K2=4
+       IF(IntCs%Def%C(I)(1:4)=='LINB') K2=3
+       Tr=0
+       DO J=K1,K2
          K=IntCs%Atoms%I(I,J)
          IF(K==0) EXIT
-         I2=K
-       ENDDO 
-       IF(I2/=0) THEN
-         Cell1=Cells(I1,1:3)-Cells(I2,1:3)
-         K=DOT_PRODUCT(Cell1,(/1,1,1/))
-         IF(K==0) K=DOT_PRODUCT(Cell1,(/1,1,0/))
-         IF(K==0) K=DOT_PRODUCT(Cell1,(/1,0,1/))
-         IF(K>0) THEN
-           M=I1
-           N=I2
+         IF(ALL(Cells(K,1:3)==0)) THEN
+           DoAllow=.TRUE.
          ELSE
-           M=I2
-           N=I1
+           IF(Cells(K,1)<Tr(1)) Tr(1)=Cells(K,1)
+           IF(Cells(K,2)<Tr(2)) Tr(2)=Cells(K,2)
+           IF(Cells(K,3)<Tr(3)) Tr(3)=Cells(K,3)
          ENDIF
-         IF(ANY(Cells(M,1:3)/=0)) CYCLE
-       ENDIF
+       ENDDO
+       IF(.NOT.DoAllow) CYCLE
        !
-      !DoAllow=.FALSE.
-      !DO J=1,4
-      !  K=IntCs%Atoms%I(I,J)
-      !  IF(K==0) EXIT
-      !  IF(ALL(Cells(K,1:3)==0)) DoAllow=.TRUE.
-      !ENDDO
-      !IF(.NOT.DoAllow) CYCLE
+       IF(ANY(Tr<0)) THEN
+         IntCs%Cells%I(I,1:12)=0    
+         DO J=K1,K2
+           K=IntCs%Atoms%I(I,J)
+           IF(K==0) EXIT
+           J1=3*(J-1)+1
+           J2=J1+2
+           ! translate coordinate to positive space eighth
+           IntCs%Cells%I(I,J1:J2)=Cells(K,1:3)-Tr
+         ENDDO
+         !
+         DoAllow=.TRUE.
+         DO J=K1,K2
+           K=IntCs%Atoms%I(I,J)
+           IF(K==0) EXIT
+           J1=3*(J-1)+1
+           J2=J1+2
+           IF(ALL(IntCs%Cells%I(I,J1:J2)==0)) THEN
+             DoAllow=.FALSE.
+             EXIT
+           ENDIF
+         ENDDO
+         IF(DoAllow.AND.(Tr(1)/=0.OR.Tr(2)/=0)) DoAllow=.FALSE.
+         IF(.NOT.DoAllow) CYCLE
+       ENDIF
        !
        II=II+1
        Sort%I(I)=1
@@ -1620,7 +1640,7 @@ CONTAINS
      TYPE(DBL_VECT)             :: VectCartAux2,VectIntAux2,IntCDispl
      TYPE(DBL_VECT)             :: VectIntReq
      TYPE(DBL_VECT)             :: ValSt
-     TYPE(DBL_RNK2)             :: ActCarts
+     TYPE(DBL_RNK2)             :: ActCarts,RotCarts
      REAL(DOUBLE)               :: DiffMax,RMSD,RMSDOld
      REAL(DOUBLE)               :: Sum,ConstrMax,ConstrRMS,Fact,Crit
      REAL(DOUBLE)               :: ConstrRMSOld,ConstrMaxCrit,RMSCrit
@@ -1711,10 +1731,10 @@ CONTAINS
        RMSD=1.D+9
        !
        DO IStep=1,GBackTrf%MaxIt_CooTrf
-        !IF(PRESENT(iGEO_O)) THEN
-        !  CALL PrtBackTrf(AtNum,ActCarts%D,PBCDim,PWDPath, &
-        !                  IRep,IStep,iGEO_O)
-        !ENDIF
+         IF(PRESENT(iGEO_O)) THEN
+           CALL PrtBackTrf(AtNum,ActCarts%D,PBCDim,PWDPath, &
+                           IRep,IStep,iGEO_O)
+         ENDIF
          !
          ! Get B and refresh values of internal coords
          !
@@ -1739,7 +1759,7 @@ CONTAINS
          ENDIF
          !
          CALL MapAngleDispl(IntCs,IntCDispl%D) 
-!CALL PrtIntCoords(IntCs,IntCDispl%D,'IntCDispl%D',PBCDim_O=PBCDim)
+CALL PrtIntCoords(IntCs,IntCDispl%D,'IntCDispl%D',PBCDim_O=PBCDim)
          !
          IF(RefreshB.AND.RefreshAct) THEN
            CALL RefreshBMatInfo(IntCs,ActCarts%D,GTrfCtrl, &
@@ -1871,6 +1891,25 @@ CONTAINS
      ! Fill new Cartesians into XYZ  
      !
      XYZ=ActCarts%D
+     !
+     ! rotate lattice back to standard orientation
+     !
+     IF(PBCDim>0) THEN
+       CALL New(RotCarts,(/3,NatmsLoc+1/))
+       DO J=1,NatmsLoc ; RotCarts%D(1:3,J)=XYZ(1:3,J) ; ENDDO
+       RotCarts%D(1:3,NatmsLoc+1)=Zero
+       GTrfCtrl%ThreeAt(1)=NatmsLoc+1
+       GTrfCtrl%ThreeAt(2)=NatmsLoc-3+1
+       GTrfCtrl%ThreeAt(3)=NatmsLoc-3+2
+       CALL CALC_XYZRot(RotCarts%D,GTrfCtrl%ThreeAt,&
+                        .FALSE.,GTrfCtrl%TranslAt1, &
+                        GTrfCtrl%RotAt2ToX,GTrfCtrl%RotAt3ToXY, &
+                        DoCopy_O=.TRUE.)
+       DO J=1,NatmsLoc ; XYZ(1:3,J)=RotCarts%D(1:3,J) ; ENDDO
+       XYZ(2:3,NatmsLoc-3+1)=Zero
+       XYZ(3,NatmsLoc-3+2)=Zero
+       CALL Delete(RotCarts)
+     ENDIF
      !
      ! Tidy up
      !
@@ -2260,8 +2299,8 @@ CONTAINS
      ! In the standard version A is along X, B in XY, C general
      ! thus projection of rotation is very simple
      !
-     DCarts(2:3)=Zero
-     DCarts(6)=Zero
+    !DCarts(2:3)=Zero
+    !DCarts(6)=Zero
    END SUBROUTINE PBCRotOff
 !
 !----------------------------------------------------------
@@ -2595,11 +2634,11 @@ CONTAINS
 !
 !--------------------------------------------------------------------
 !
-   SUBROUTINE ChkBendToLinB(IntCs,XYZ,AtNum,CtrlCoord,TOPS)
+   SUBROUTINE ChkBendToLinB(IntCs,XYZ,AtNum,CtrlCoord,TOPS,IEq)
      TYPE(INTC)                  :: IntCs,IntC_New
      INTEGER                     :: NIntC,Nintc_New
      TYPE(TOPOLOGY)              :: TOPS
-     TYPE(INT_VECT)              :: LinAtom,MarkLinb,MarkLongR
+     TYPE(INT_VECT)              :: LinAtom,MarkLinb
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
      INTEGER,DIMENSION(:)        :: AtNum
      REAL(DOUBLE)                :: Value,Value2,Conv
@@ -2608,6 +2647,7 @@ CONTAINS
      TYPE(INT_RNK2)              :: LinBBridge
      TYPE(CoordCtrl)             :: CtrlCoord
      REAL(DOUBLE),DIMENSION(3)   :: AuxXYZ
+     INTEGER,DIMENSION(:)        :: IEq
      !
      ! Now check for bending -> linear bending transitions
      !
@@ -2668,8 +2708,6 @@ CONTAINS
      ! Check for possible cases of long-range torsion
      !
      CALL Delete(MarkLinB)
-     CALL New(MarkLongR,NIntC)
-     MarkLongR%I=0
      DO I=1,NIntC
        IF(IntCs%Def%C(I)(1:5)=='LINB1') THEN
          I1=IntCs%Atoms%I(I,1)
@@ -2683,18 +2721,14 @@ CONTAINS
          ENDIF
          CALL LinB(XYZ(1:3,I1),XYZ(1:3,I2),XYZ(1:3,I3),AuxXYZ,L,&
            Value1=IntCs%Value%D(I),Value2=IntCs%Value%D(I+1))  
-         MarkLongR%I(I)=1 
-         MarkLongR%I(I+1)=1 
        ENDIF
      ENDDO 
      !
      ! Now recognize colinear atoms of the molecule and 
      ! introduce long-range torsions. 
      !
-     CALL LongRangeIntC(CtrlCoord,TOPS%Tot12,IntCs,NIntC, &
-                        XYZ,MarkLongR,AtNum)
+     CALL LongRangeIntC(CtrlCoord,TOPS%Tot12,IntCs,XYZ,AtNum,IEq)
      !
-     CALL Delete(MarkLongR)
    END SUBROUTINE ChkBendToLinB    
 !
 !-------------------------------------------------------
@@ -3296,8 +3330,8 @@ B%BL%D=Zero
          ! Treatment for lattice rotation here:
          ! Observe that A is along X, B is in XY plane, C is general 
          !
-         B%BL%D(I,2:3)=Zero
-         B%BL%D(I,6)=Zero
+        !B%BL%D(I,2:3)=Zero
+        !B%BL%D(I,6)=Zero
        ENDIF 
      ENDDO
    END SUBROUTINE CleanBLConstr
@@ -3659,16 +3693,17 @@ B%BL%D=Zero
 !---------------------------------------------------------------------
 !
    SUBROUTINE CALC_XYZRot(XYZ,ThreeAt,Linearity, &
-                          TranslAt1,RotAt2ToX,RotAt3ToXY)
+                          TranslAt1,RotAt2ToX,RotAt3ToXY,DoCopy_O)
      REAL(DOUBLE),DIMENSION(:,:)  :: XYZ
      REAL(DOUBLE),DIMENSION(3)    :: TranslAt1
      REAL(DOUBLE),DIMENSION(3,3)  :: RotAt2ToX,RotAt3ToXY
-     TYPE(DBL_RNK2)  :: XYZRot
-     TYPE(DBL_VECT)  :: Vect1,Vect2,Vect3
-     TYPE(DBL_RNK2)  :: Rot
-     INTEGER         :: I,J,NatmsLoc,NMax12
-     INTEGER         :: At1,At2,At3,ThreeAt(1:3)
-     LOGICAL         :: Linearity
+     TYPE(DBL_RNK2)   :: XYZRot
+     TYPE(DBL_VECT)   :: Vect1,Vect2,Vect3
+     TYPE(DBL_RNK2)   :: Rot
+     INTEGER          :: I,J,NatmsLoc,NMax12
+     INTEGER          :: At1,At2,At3,ThreeAt(1:3)
+     LOGICAL          :: Linearity
+     LOGICAL,OPTIONAL :: DoCopy_O
      !
      ! Subroutine to calculate rotation matrices of reference systems
      !
@@ -3725,6 +3760,16 @@ B%BL%D=Zero
        Vect1%D(3)=One 
        CALL Rotate(Vect1%D,Vect3%D,Rot%D)
        RotAt3ToXY=Rot%D
+       DO I=1,NatmsLoc
+         Vect1%D=XYZRot%D(:,I)
+         CALL DGEMM_NNc(3,3,1,One,Zero,Rot%D,Vect1%D,XYZRot%D(:,I))
+       ENDDO
+     ENDIF
+     !
+     IF(PRESENT(DoCopy_O)) THEN
+       IF(DoCopy_O) THEN
+         XYZ=XYZRot%D 
+       ENDIF
      ENDIF
      !
      CALL Delete(XYZRot)
@@ -4157,11 +4202,10 @@ B%BL%D=Zero
 ! 
 !-------------------------------------------------------------------
 !
-   SUBROUTINE LongRangeIntC(CtrlCoord,Top12,IntCs,NIntC, &
-                            XYZ,MarkLongR,AtNum)
+   SUBROUTINE LongRangeIntC(CtrlCoord,Top12,IntCs,XYZ,AtNum,IEq)
      TYPE(INTC)                  :: IntCs,IntC_New
      INTEGER                     :: NIntC,NIntc_New
-     TYPE(INT_VECT)              :: LinAtom,MarkLongR,LinCenter
+     TYPE(INT_VECT)              :: LinAtom,LinCenter
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
      REAL(DOUBLE)                :: Value,Conv,Dist12
      INTEGER                     :: I1,I2,I3,I4,NMax12,NLinB,NtorsLinb
@@ -4171,25 +4215,24 @@ B%BL%D=Zero
      TYPE(INT_RNK2)              :: LinBBridge,Top12
      TYPE(CoordCtrl)             :: CtrlCoord
      LOGICAL                     :: RepeatChk,DoVdW,Found,AllTors
-     INTEGER,DIMENSION(:)        :: AtNum
+     INTEGER,DIMENSION(:)        :: AtNum,IEq
      !
      AllTors=.FALSE.
      Conv=180.D0/PI
-     NIntC=SIZE(IntCs%Def%C)
      NatmsLoc=SIZE(Top12%I,1)
      !
      NMax12=SIZE(Top12%I,2)-1
      !
-     CALL NEW(LinBBridge,(/2,NIntc/))
+     CALL NEW(LinBBridge,(/2,IntCs%N/))
      CALL NEW(LinAtom,NatmsLoc)
-     CALL NEW(LinCenter,NatmsLoc)
+     CALL NEW(LinCenter,IntCs%N)
      LinBBridge%I=0
      LinAtom%I=0
      LinCenter%I=0
      NLinB=0
-     DO I=1,NIntc
-       IF(IntCs%Def%C(I)(1:5)=='LINB1'.OR.MarkLongR%I(I)/=0) THEN   
-         IF(LinAtom%I(IntCs%Atoms%I(I,1))/=0) CYCLE
+     DO I=1,IntCs%N
+       IF(IntCs%Def%C(I)(1:5)=='LINB1') THEN   
+        !IF(LinAtom%I(IntCs%Atoms%I(I,1))/=0) CYCLE
          NLinB=NLinB+1 
          I1=IntCs%Atoms%I(I,1)
          I2=IntCs%Atoms%I(I,2)
@@ -4204,7 +4247,12 @@ B%BL%D=Zero
          ! go on right, then define torsions
          I1=LinBBridge%I(2,NLinB)
          I2=LinBBridge%I(1,NLinB)
-        !DO III=1,NIntC
+        !
+        ! WARNING! The few lines below that have been commented out
+        ! refere to the treatment of molecules like H2C=C=C=C=CH2
+        ! they are supposed to find very long range torsions
+        !
+        !DO III=1,IntCs%N
         !  RepeatChk=.FALSE.
         !  DO J=1,Top12%I(I2,1)
         !    I3=Top12%I(I2,1+J) 
@@ -4224,7 +4272,7 @@ B%BL%D=Zero
         !!
         !I1=LinBBridge%I(1,NLinB)
         !I2=LinBBridge%I(2,NLinB)
-        !DO III=1,NIntC
+        !DO III=1,IntCs%N
         !  RepeatChk=.FALSE.
         !  DO J=1,Top12%I(I2,1)
         !    I3=Top12%I(I2,1+J) 
@@ -4260,8 +4308,9 @@ B%BL%D=Zero
      !
      ! Now generate the INTCs for the new torsions
      !
-     NIntc_New=NIntC+NTorsLinB+NStreLinB+NBendLinB
+     NIntc_New=IntCs%N+NTorsLinB+NStreLinB+NBendLinB
      CALL New(IntC_New,NIntc_New)
+     NIntC=IntCs%N
      CALL Set_INTC_EQ_INTC(IntCs,IntC_New,1,NIntC,1)
      !
      ! torsions
@@ -4292,7 +4341,7 @@ B%BL%D=Zero
                I1=II1
                I4=II4
                NIntC=NIntC+1
-               IntC_New%Def%C(NIntC)(1:10)='TORS      '
+               IntC_New%Def%C(NIntC)(1:10)='TORSL     '
                IntC_New%Atoms%I(NIntC,1)=I1
                IntC_New%Atoms%I(NIntC,2)=I2
                IntC_New%Atoms%I(NIntC,3)=I3
@@ -4310,7 +4359,7 @@ B%BL%D=Zero
          I4=II4
          IF(Found) THEN
            NIntC=NIntC+1
-           IntC_New%Def%C(NIntC)(1:10)='TORS      '
+           IntC_New%Def%C(NIntC)(1:10)='TORSL     '
            IntC_New%Atoms%I(NIntC,1)=I1
            IntC_New%Atoms%I(NIntC,2)=I2
            IntC_New%Atoms%I(NIntC,3)=I3
@@ -5747,6 +5796,9 @@ return
                                LonelyAtom=HasLonelyAtm(TOPS%Cov12,JJ1,JJ2,LAtm)
                                FoundHBond=HasHBond(TOPS%Cov12,AtNum, &
                                             NJJ1,NJJ2,JJ1,JJ2,HAtm)
+if(ieq(jj1)==4.and.ieq(jj2)==8.or.ieq(jj1)==8.and.ieq(jj2)==4) then
+if(FoundHBond) write(*,*) 'foundh= ',ieq(jj1),ieq(jj2),jj1,jj2
+endif
                                CALL BondExcl(JJ1,JJ2,NJJ1,NJJ2,TOPS, &
                                              FoundHBond,FoundMetLig,&
                                              LonelyAtom,DoExclude)

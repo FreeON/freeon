@@ -957,6 +957,7 @@ CONTAINS
      !
      CALL CutOffDispl(Displ%D,IntCs, &
                       GOpt%CoordCtrl%MaxStre,GOpt%CoordCtrl%MaxAngle)
+   ! CALL CutOffDispl(Displ%D,IntCs,0.1D0,0.1D0)
      CALL RedundancyOff(Displ%D,SCRPath,Print)  
    ! CALL POffHardGc(IntCs,XYZ,PBCDim,Displ%D,SCRPath,Print2)
      ! 
@@ -1279,8 +1280,8 @@ GradNew%D(J,NatmsNew+K)=Zero
        ENDDO
      ENDDO
      ! ensure proper orientation of (numerical) forces
-     GradNew%D(2:3,NatmsNew+1)=Zero
-     GradNew%D(3,NatmsNew+2)=Zero
+   ! GradNew%D(2:3,NatmsNew+1)=Zero
+   ! GradNew%D(3,NatmsNew+2)=Zero
      CALL Delete(RefXYZ1)
      AtNumNew%D(NatmsNew+1:NatmsNew+3)=Zero
      CALL ConvertToXYZRef(XYZNew%D,RefXYZ%D,GMLoc%PBC%Dimen)

@@ -485,12 +485,12 @@ CONTAINS
        ICount=IGeom-IStart+1
        CALL Get(PBC,Tag_O=TRIM(IntToChar(IGeom)))
        !!!!
-       WRITE(*,*) 'WARNING! Hardwired cleaning of lattice forces in CollectPast'
-       WRITE(Out,*) 'WARNING! Hardwired cleaning of lattice forces in CollectPast'
-         PBC%LatFrc%D(2:3,1)=Zero
-         PBC%LatFrc%D(3,2)=Zero
-         CALL Put(PBC,Tag_O=TRIM(IntToChar(IGeom)))
-       !!!!
+!       WRITE(*,*) 'WARNING! Hardwired cleaning of lattice forces in CollectPast'
+!       WRITE(Out,*) 'WARNING! Hardwired cleaning of lattice forces in CollectPast'
+!         PBC%LatFrc%D(2:3,1)=Zero
+!         PBC%LatFrc%D(3,2)=Zero
+!         CALL Put(PBC,Tag_O=TRIM(IntToChar(IGeom)))
+!       !!!!
        L=NCartS
        DO K=1,3
          DO J=1,3
