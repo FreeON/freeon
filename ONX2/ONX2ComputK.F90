@@ -95,7 +95,7 @@ CONTAINS
     ! Kab = Dcd*(ac(R)|bd(R'))
     !
     !-------------------------------------------------------------------
-    TYPE(BCSR)                 , INTENT(IN   ) :: D
+    TYPE(BCSR)                 , INTENT(INout) :: D
     TYPE(BCSR)                 , INTENT(INOUT) :: Kx
     TYPE(CList2) , DIMENSION(:), POINTER       :: ListC,ListD
     TYPE(CRDS)                 , INTENT(IN   ) :: GM
@@ -130,6 +130,9 @@ CONTAINS
     !-------------------------------------------------------------------
     !
     NULLIFY(AtAListTmp,AtAList,AtBListTmp,AtBList)
+!!$    do iint=1,size(D%MTrix%D)
+!!$    D%MTrix%D(iint)=dble(iint)
+!!$    enddo
     !
     !Simple check Simple check Simple check Simple check
     isize=0
@@ -140,16 +143,13 @@ CONTAINS
           STOP 'Incrase the size of C'
        ENDIF
     enddo
-
     write(*,*) 'size C=',isize**4
-
     if(CS_OUT%NCells.GT.SIZE(ACAtmPair)) then
        write(*,*) 'size(ACAtmPair)',size(ACAtmPair),'.LT.',CS_OUT%NCells
        STOP 'Incrase the size of ACAtmPair and BDAtmPair'
     endif
+    write(*,*) 'CS_OUT%NCells=',CS_OUT%NCells
     !Simple check Simple check Simple check Simple check
-
-
     !
     SumInt=0.0d0
     MaxCont=0
@@ -240,6 +240,7 @@ CONTAINS
                 AtB=AtBList%Atom 
                 !
                 !if(AtB.eq.1.and.AtA.eq.2) then
+!                if(AtB.eq.1.and.AtD.eq.1.and.AtA.eq.2.and.AtC.eq.2) then
                 IF(AtB.LE.AtA) THEN ! Symmetry of the K matrix
                    !
                    !Skip out |Dcd|*sqrt(ac(0)|ac(0))*sqrt(bd(R')|bd(R'))<Thresh
@@ -315,8 +316,24 @@ CONTAINS
                                ! Compute integral type.
                                IntType=ACAtmPair(CFAC)%SP%IntType*10000+BDAtmPair(CFBD)%SP%IntType
                                !
+!!$                 if(IntType==3010101) then
+!!$                 if(ata==2.and.atb==2.and.atc==2.and.atd==2.and. &
+!!$                      & ATAList%CellIdx(ACR)==9.and.AtBList%CellIdx(BDR)==8) then
+                 !   write(*,*) 'IntType',IntType
                                ! The integral interface.
                                INCLUDE 'ERIInterface.Inc'
+!!$                               write(*,'(2(A,E22.12))') &
+!!$                                    &     'ACR',CS_OUT%CellCarts%D(1,ATAList%CellIdx(ACR)), &
+!!$                                    &     'BDR',CS_OUT%CellCarts%D(1,AtBList%CellIdx(BDR))
+!!$                               write(*,'(10I4)') AtA,AtB,AtC,AtD,CFA,CFB,CFC,CFD, &
+!!$                                    &            ATAList%CellIdx(ACR),AtBList%CellIdx(BDR)
+!!$                               write(*,*) ''  
+
+                  !write(*,*) 'C(6)',C(6)
+                 !        stop
+!!$                 endif
+!!$                 endif
+
                                !
                                NInts=NInts+DBLE(LocNInt)
                                OffSet%D=OffSet%D+BS%LStop%I(CFD,KD)-BS%LStrt%I(CFD,KD)+1
@@ -333,12 +350,17 @@ CONTAINS
 !!!!!!!!!!!!!!!!!!!!
                    ENDDO
 !!!!!!!!!!!!!!!!!!!!
-                   !CALL PrintMatrix(C(1),NBFA*NBFB,NBFC*NBFD,2,TEXT_O='Int matrix')
+                   !write(*,*) 'C(6)',C(6)
+!                   write(*,'(4I4)') AtA,AtB,AtC,AtD
+!                   CALL PrintMatrix(C(1),NBFA*NBFB,NBFC*NBFD,2,TEXT_O='Int matrix')
+!!$                   write(*,*) ''
+!                   stop
+
                    !CALL PrintMatrix(C(1),1,NBFA*NBFB*NBFC*NBFD,3,TEXT_O='Int matrix')
                    !CALL PrintMatrix(D%MTrix%D(iPtrD),NBFC,NBFD,2,TEXT_O='D matrix')
-#ifdef ONX2_DBUG
-                   WRITE(*,'(A,E22.15,4I4)') ' MaxInt=',MAXVAL(C(1:NBFA*NBFB*NBFC*NBFD)),AtA,AtC,AtB,AtD
-#endif
+!#ifdef ONX2_DBUG
+!                   WRITE(*,'(A,E22.15,4I4)') ' MaxInt=',MAXVAL(C(1:NBFA*NBFB*NBFC*NBFD)),AtA,AtC,AtB,AtD
+!#endif
                    !
                    ! Digest the block of integral.
                    CALL DGEMV('N',NBFA*NBFB,NBFC*NBFD,-1.0d0,C(1), &
@@ -350,7 +372,7 @@ CONTAINS
                    !
                 ENDIF
                 !
-!             endif
+!                endif
                 !
                 IF(.NOT.ASSOCIATED(AtBList%AtmNext)) EXIT
                 AtBList=>AtBList%AtmNext
@@ -371,6 +393,9 @@ CONTAINS
     WRITE(*,'(A,I4)') ' Max Prim =',INT(SQRT(DBLE(MaxCont)))
     WRITE(*,*) '-------------------------------------'
 !#endif
+
+!!$    CALL Print_BCSR(Kx,'Kx',UNIT_O=6)
+!!$    CALL Print_BCSR(D,'D',UNIT_O=6)
     !
   END SUBROUTINE ComputK
   !
@@ -423,7 +448,6 @@ CONTAINS
     ! dbuging
     AtmPair(:)%SP%IntType=BIG_INT
     !
-    
     CF12=0
     DO iCell=1,AtmInfo%NCell
        Cell=List%CellIdx(iCell)
@@ -690,7 +714,7 @@ CONTAINS
     TYPE(ANode2) , POINTER               :: AtAList,AtAListTmp,NodeA
     TYPE(AtomInfo)                       :: ACAtmInfo
     INTEGER                              :: AtA,AtC,KA,KC,CFA,CFC,iCell,CFAC
-    INTEGER                              :: NCell,I,IntType,LocNInt
+    INTEGER                              :: NCell,I,IntType,LocNInt,NBFA,NBFC
     REAL(DOUBLE)                         :: RInt,AC2,NInts
     !-------------------------------------------------------------------
     TYPE(AtomPr) , DIMENSION(50)         :: ACAtmPair ! this should be declared somewhere
@@ -723,7 +747,7 @@ CONTAINS
     DO AtC=1,NAtoms ! Run over AtC
        !
        KC=GM%AtTyp%I(AtC)
-       !
+       NBFC=BS%BfKnd%I(KC)
        ACAtmInfo%Atm2X=GM%Carts%D(1,AtC)
        ACAtmInfo%Atm2Y=GM%Carts%D(2,AtC)
        ACAtmInfo%Atm2Z=GM%Carts%D(3,AtC)
@@ -732,7 +756,7 @@ CONTAINS
        DO AtA=1,NAtoms ! Run over AtA
           !
           KA=GM%AtTyp%I(AtA)
-          !
+          NBFA=BS%BfKnd%I(KA)
           ACAtmInfo%Atm1X=GM%Carts%D(1,AtA)
           ACAtmInfo%Atm1Y=GM%Carts%D(2,AtA)
           ACAtmInfo%Atm1Z=GM%Carts%D(3,AtA)
@@ -766,7 +790,6 @@ CONTAINS
              !
              ! Initialize some cell variables.
              RInt=0.0d0
-             !
              !C=BIG_DBL !TO REMOVE
              !
              DO CFAC=1,BS%NCFnc%I(KA)*BS%NCFnc%I(KC) ! Run over blkfunc on A,C
@@ -774,10 +797,28 @@ CONTAINS
                 ! Compute integral type.
                 IntType=ACAtmPair(CFAC)%SP%IntType
                 !
+                CALL DBL_VECT_EQ_DBL_SCLR(NBFA*NBFA*NBFC*NBFC,C(1),0.0d0) !I need less zeroing!
+                !
+
+!if(AtA.eq.2.and.AtC.eq.1) then
                 ! The integral interface.
                 INCLUDE 'ERIListInterface.Inc'
                 !
                 RInt=MAX(RInt,DGetAbsMax(LocNInt,C(1)))
+
+!!$if(IntType==301)then
+!!$   if(abs(C(1)).GT.1.0d-15)write(*,'(A,E22.15,5I4)') 'x',C(1),AtA,AtC,AtA,AtC,iCell
+!!$   if(abs(C(2)).GT.1.0d-15)write(*,'(A,E22.15,5I4)') 'y',C(2),AtA,AtC,AtA,AtC,iCell
+!!$   if(abs(C(3)).GT.1.0d-15)write(*,'(A,E22.15,5I4)') 'z',C(3),AtA,AtC,AtA,AtC,iCell
+!!$   if(abs(C(4)).GT.1.0d-15)write(*,'(A,E22.15,5I4)') 'x',C(4),AtA,AtC,AtA,AtC,iCell
+!!$   if(abs(C(5)).GT.1.0d-15)write(*,'(A,E22.15,5I4)') 'y',C(5),AtA,AtC,AtA,AtC,iCell
+!!$   if(abs(C(6)).GT.1.0d-15)write(*,'(A,E22.15,5I4)') 'z',C(6),AtA,AtC,AtA,AtC,iCell
+!!$   if(abs(C(7)).GT.1.0d-15)write(*,'(A,E22.15,5I4)') 'x',C(7),AtA,AtC,AtA,AtC,iCell
+!!$   if(abs(C(8)).GT.1.0d-15)write(*,'(A,E22.15,5I4)') 'y',C(8),AtA,AtC,AtA,AtC,iCell
+!!$   if(abs(C(9)).GT.1.0d-15)write(*,'(A,E22.15,5I4)') 'z',C(9),AtA,AtC,AtA,AtC,iCell
+!!$endif
+!
+!endif
 #ifdef ONX2_DBUG
                 WRITE(*,'(2(A,E22.15),2(A,I6))') 'RInt',RInt,' RIntLocal',DGetAbsMax(LocNInt,C(1)), &
                      &    ' LocNInt',LocNInt,' IntType',IntType
@@ -838,6 +879,7 @@ CONTAINS
     WRITE(*,*) '-------------------------------------'
 !#endif
     !
+    !stop 'make list'
   END SUBROUTINE MakeList
   !
   !
