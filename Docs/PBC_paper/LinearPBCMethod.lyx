@@ -1,7 +1,7 @@
 #LyX 1.1 created this file. For more info see http://www.lyx.org/
-\lyxformat 2.16
+\lyxformat 218
 \textclass article
-\language default
+\language english
 \inputencoding default
 \fontscheme default
 \graphics default
@@ -27,15 +27,15 @@
 
 \series bold 
 Linear scaling computation of the Fock matrix VI.
- Gaussian orbital methods for DFT simulation of periodic systems
+ Gaussian orbital methods for simulation of periodic systems
 \layout Author
 
 C.J.
- Tymczak and Matt Challacombe
+ Tymczak, Matt Challacombe and Eric Schwegler
 \layout Address
 
 Theoretical Division, Los Alamos National Laboratory, Los Alamos, New Mexico
- 87545
+ 87545 
 \layout Abstract
 
 Periodic boundary conditions have been implemented in the linear scaling
@@ -51,8 +51,9 @@ MondoSCF
  In order to achieve linear scaling of the local Coulomb field, a Quantum
  Chemical Tree Code (QCTC) is used.
  Periodic boundary conditions have also been incorporated into calculations
- of the local exchange-correlation matrix.
- A Hierarchical Cubature (HiCu), pure Cartesian adaptive grid is used.
+ of the local exchange-correlation matrix and the exact-exchange matrix.
+ A Hierarchical Cubature (HiCu), pure Cartesian adaptive grid is used for
+ the local exchange-correlation matrix.
  This method achieves linear scaling through the use of advanced data structures
  (k-d trees) that maximally exploits locality of the density.
  Finally, the current capabilities of MondoSCF for large condensed phases
@@ -81,15 +82,15 @@ eject
 INTRODUCTION
 \layout Standard
 
-Periodic Boundary Conditions are often essential to employ when simulating
- bulk behavior in solids or liquids 
+When simulating bulk behavior in solids or liquids, Periodic Boundary Conditions
+ (PBC) are often essential to employ 
 \begin_inset LatexCommand \cite{Allen90}
 
 \end_inset 
 
 .
- We have implemented Periodic boundary conditions into the linear scaling
- Quantum Chemistry code 
+ Therefore, we have implemented Periodic boundary conditions into the linear
+ scaling Quantum Chemistry code 
 \series bold 
 MondoSCF
 \series default 
@@ -99,18 +100,19 @@ MondoSCF
 \end_inset 
 
 .
- For the one electron matrices this has been achieved by a re-summation
- over periodic cell images, which because of locality leads to an efficient
- calculation of the one electron integrals.
- For the two-electron Coulomb matrix, this has been achieved with an exact
- multipole expansion of the long range Coulomb field 
-\begin_inset LatexCommand \cite{White97, Challacombe97}
+ For the one electron matrix this has been achieved by a re-summation over
+ periodic cell images, which because of locality leads to an efficient calculati
+on of the one electron matices.
+ For the two electron matrices various methods are employed.
+ For the two-electron Coulomb matrix, we achieve this via an exact multipole
+ expansion of the long range Coulomb field 
+\begin_inset LatexCommand \cite{White94,Challacombe97b}
 
 \end_inset 
 
 .
  This yields a spherically summed boundary condition that is easily transformed
- to Ewald boundary conditions 
+ to Ewald boundary condition 
 \begin_inset LatexCommand \cite{Redlack72,Redlack75}
 
 \end_inset 
@@ -118,25 +120,24 @@ MondoSCF
 .
  In order to achieve linear scaling of the local Coulomb field, a Quantum
  Chemical Tree Code (QCTC) is used [ref].
- We have also incorporated Periodic boundary conditions into calculations
- of the local exchange-correlation matrix.
- A Hierarchical Cubature (HiCu), pure Cartesian adaptive grid is used.
+ For the calculations of the local exchange-correlation matrix, a Hierarchical
+ Cubature (HiCu), pure Cartesian adaptive grid is used.
  This method achieves linear scaling through the use of advanced data structures
  (k-d trees) that maximally exploits locality of the density, and allows
  for an efficient treatment of the periodic effects [ref].
- Next, we show the capabilities of MondoSCF for three test condensed phases
- , Sodium Cloride, Magnesium Oxide and Carbon in the diamond and graphite
- structures.
+ And finally we exploit the locallity of the basis functions to calculate
+ the exact exchange matrix.
+ 
+\layout Standard
+
+To demonstrate the capabilities of MondoSCF, we show results for three test
+ condensed phases, Sodium Cloride, Magnesium Oxide and Carbon in the diamond
+ structure.
  We then compare these results to the periodic Gaussian code 
 \series bold 
 Crystal98
 \series default 
- 
-\begin_inset LatexCommand \cite{Cry98}
-
-\end_inset 
-
-.
+ [ref].
 
 \series bold 
  
@@ -147,13 +148,7 @@ Next we demonstrate the utility of the code on very large systems such as
  MondoSCF and future research directions.
 \layout Section
 
-THEORY
-\layout Subsection
-
 One-Electron Matrices
-\layout Subsubsection
-
-The overlap matrix
 \layout Standard
 
 The first step in including periodic boundary conditions into our linear
@@ -167,7 +162,7 @@ The first step in including periodic boundary conditions into our linear
 
 \begin_inset Formula \begin{equation}
 \label{Sab_norm}
-S_{ab}=\int _{V_{\infty }}\, d{\mathbf{x}}\, \phi _{a}({\mathbf{x}})\phi _{b}({\mathbf{x}})
+S_{ab}=\int _{V_{\infty }}\, d{\mathbf{r}}\, \phi _{a}({\mathbf{r}})\phi _{b}({\mathbf{r}})
 \end{equation}
 
 \end_inset 
@@ -195,7 +190,7 @@ S_{ab}=\int _{V_{\infty }}\, d{\mathbf{x}}\, \phi _{a}({\mathbf{x}})\phi _{b}({\
 
 \begin_inset Formula \begin{equation}
 \label{Sab_pbc1}
-S_{ab}^{{\rm PBC}}=\sum _{\mathbf{R},\mathbf{R}'}\int _{V_{cell}}\, d{\mathbf{x}}\, \phi _{a}({\mathbf{x}+\mathbf{R}})\phi _{b}({\mathbf{x}+\mathbf{R}'})
+S_{ab}^{PBC}=\sum _{\mathbf{R},\mathbf{R}'}\int _{V_{cell}}\, d{\mathbf{r}}\, \phi _{a}({\mathbf{r}+\mathbf{R}})\phi _{b}({\mathbf{r}+\mathbf{R}'})
 \end{equation}
 
 \end_inset 
@@ -217,11 +212,7 @@ where,
 \begin_inset Formula \( \left\{ {\mathbf{a},\mathbf{b},\mathbf{c}}\right\}  \)
 \end_inset 
 
- are the primitive lattice vectors and 
-\begin_inset Formula \( {\mathbf{R}}=n{\mathbf{a}}+m{\mathbf{b}}+l{\mathbf{c}} \)
-\end_inset 
-
- .
+ are the primitive lattice vectors.
  Because of the locality of the atomic orbitals, we can remove the double
  sum over lattice vectors to get
 \layout Standard
@@ -229,20 +220,20 @@ where,
 
 \begin_inset Formula \begin{equation}
 \label{Sab_pbc2}
-S_{ab}^{{\rm PBC}}=\sum _{\mathbf{R}}\int _{V_{\infty }}\, d{\mathbf{x}}\, \phi _{a}({\mathbf{x}})\phi _{b}({\mathbf{x}+\mathbf{R}})
+S_{ab}^{PBC}=\sum _{\mathbf{R}}\int _{V_{\infty }}\, d{\mathbf{r}}\, \phi _{a}({\mathbf{r}})\phi _{b}({\mathbf{r}+\mathbf{R}})
 \end{equation}
 
 \end_inset 
 
-We will use this Periodic Localization transformation (PL) repeatedly in
+We will use this Periodic Localization Transformation (PLT) repeatedly in
  what follows.
- Let us also present some useful definitions:
+ Let us present some useful definitions:
 \layout Standard
 
 
 \begin_inset Formula \begin{equation}
 \label{rho_loc}
-\rho ^{{\rm loc}}({\mathbf{x}})=\sum _{\mathbf{R}}\sum _{ab}{\mathbf{P}}_{ab}\phi _{a}({\mathbf{x}})\phi _{b}({\mathbf{x}+\mathbf{R}})
+\rho ^{loc}({\mathbf{r}})=\sum _{\mathbf{R}}\sum _{ab}{\mathbf{P}}_{ab}\phi _{a}({\mathbf{r}})\phi _{b}({\mathbf{r}+\mathbf{R}})
 \end{equation}
 
 \end_inset 
@@ -253,7 +244,7 @@ and because of periodicity,
 
 \begin_inset Formula \begin{equation}
 \label{rho_pbc}
-\rho ^{{\rm PBC}}({\mathbf{x}})=\sum _{\mathbf{R}}\, \rho ^{{\rm loc}}({\mathbf{x}+\mathbf{R}})
+\rho ^{PBC}({\mathbf{r}})=\sum _{\mathbf{R}}\, \rho ^{loc}({\mathbf{r}+\mathbf{R}})
 \end{equation}
 
 \end_inset 
@@ -261,7 +252,7 @@ and because of periodicity,
 We also define:
 \begin_inset Formula \begin{equation}
 \label{rho_loc_ab}
-\rho _{ab}^{{\rm loc}}({\mathbf{x}})=\sum _{\mathbf{R}}\phi _{a}({\mathbf{x}})\phi _{b}({\mathbf{x}+\mathbf{R}})
+\rho _{ab}^{loc}({\mathbf{r}})=\sum _{\mathbf{R}}\phi _{a}({\mathbf{r}})\phi _{b}({\mathbf{r}+\mathbf{R}})
 \end{equation}
 
 \end_inset 
@@ -272,60 +263,45 @@ We also define:
 
 \begin_inset Formula \begin{equation}
 \label{rho_pbc_ab}
-\rho _{ab}^{{\rm PBC}}({\mathbf{x}})=\sum _{\mathbf{R}}\, \rho _{ab}^{{\rm loc}}({\mathbf{x}+\mathbf{R}})
+\rho _{ab}^{PBC}({\mathbf{r}})=\sum _{\mathbf{R}}\, \rho _{ab}^{loc}({\mathbf{r}+\mathbf{R}})
 \end{equation}
 
 \end_inset 
 
-Which allows us to rewrite the overlap matrix matrix
+Which allows us to rewrite the overlap matrix as
 \layout Standard
 
 
 \begin_inset Formula \begin{equation}
 \label{Sab_pbc_3}
-S_{ab}^{{\rm PBC}}=\int _{V_{\infty }}\, d{\mathbf{x}}\, \rho ^{{\rm loc}}_{ab}({\mathbf{x}})
+S_{ab}^{PBC}=\int _{V_{\infty }}\, d{\mathbf{r}}\, \rho ^{loc}_{ab}({\mathbf{r}}).
 \end{equation}
 
 \end_inset 
 
-
-\layout Subsubsection
-
-The Kinetic Energy Matrix
-\layout Standard
-
-The Kinetic energy matrix for the non-periodic case is given by [ref]
+Finally, we can rewrite the kinectic energy matrix as
 \layout Standard
 
 
-\begin_inset Formula \begin{equation}
-\label{Tab}
-T_{ab}=-\frac{1}{2}\int _{V_{\infty }}\, d{\mathbf{x}}\, \phi _{a}({\mathbf{x}})\nabla ^{2}\phi _{b}({\mathbf{x}})
-\end{equation}
-
-\end_inset 
-
-Incorporating the PL transformation, we can rewrite this integral for the
- periodic case as,
 \begin_inset Formula \begin{equation}
 \label{Tab_pbc}
-T^{{\rm PBC}}_{ab}=-\frac{1}{2}\sum _{\mathbf{R}}\int _{V_{\infty }}\, d{\mathbf{x}}\, \phi _{a}({\mathbf{x}+\mathbf{R}})\nabla ^{2}\phi _{b}({\mathbf{x}})
+T^{PBC}_{ab}=-\frac{1}{2}\sum _{\mathbf{R}}\int _{V_{\infty }}\, d{\mathbf{r}}\, \phi _{a}({\mathbf{r}+\mathbf{R}})\nabla ^{2}\phi _{b}({\mathbf{r}})
 \end{equation}
 
 \end_inset 
 
 
-\layout Subsection
+\layout Section
 
 The Two-Electron matrices
-\layout Subsubsection
+\layout Subsection
 
 The Coulomb matrix
 \layout Standard
 
-We can transform the two-electron Coulomb integrals into integrals over
- all space with local distributions via PL transformation and equations
- (
+In order to calculate the coulomb matix effiencintly, we transform the two-elect
+ron Coulomb integrals into integrals over all space with local distributions
+ via PLT transformation and equations (
 \begin_inset LatexCommand \ref{rho_pbc}
 
 \end_inset 
@@ -335,13 +311,13 @@ We can transform the two-electron Coulomb integrals into integrals over
 
 \end_inset 
 
-), 
+) [ref], 
 \begin_inset Formula \begin{eqnarray}
-J_{ab}^{{\rm PBC}} & = & \frac{1}{2}\int _{V_{cell}}\int _{V_{\infty }}\, d{\mathbf{x}}\, d{\mathbf{x}'}\frac{\rho _{ab}^{{\rm PBC}}\left( {\mathbf{x}}\right) \: \rho ^{{\rm PBC}}\left( \mathbf{x}'\right) }{\left| \mathbf{x}-\mathbf{x}'\right| }\begin{array}{c}
+J_{ab}^{PBC} & = & \frac{1}{2}\int _{V_{cell}}\int _{V_{\infty }}\, d{\mathbf{r}}\, d{\mathbf{r}'}\frac{\rho _{ab}^{PBC}\left( {\mathbf{r}}\right) \: \rho ^{PBC}\left( \mathbf{r}'\right) }{\left| \mathbf{r}-\mathbf{r}'\right| }\begin{array}{c}
 \\
 
 \end{array}\label{Jab_pbc1} \\
- & = & \frac{1}{2}\sum _{\mathbf{R}'}\int _{V_{\infty }}\int _{V_{\infty }}\, d{\mathbf{x}}\, d{\mathbf{x}'}\frac{\rho _{ab}^{{\rm loc}}\left( {\mathbf{x}}\right) \: \rho ^{{\rm loc}}\left( {\mathbf{x}'}+{\mathbf{R}'}\right) }{\left| \mathbf{x}-\mathbf{x}'\right| }\begin{array}{c}
+ & = & \frac{1}{2}\sum _{\mathbf{R}'}\int _{V_{\infty }}\int _{V_{\infty }}\, d{\mathbf{r}}\, d{\mathbf{r}'}\frac{\rho _{ab}^{loc}\left( {\mathbf{r}}\right) \: \rho ^{loc}\left( {\mathbf{r}'}+{\mathbf{R}'}\right) }{\left| \mathbf{r}-\mathbf{r}'\right| }\begin{array}{c}
 \\
 
 \end{array}\label{Jab_pbc2} 
@@ -349,23 +325,24 @@ J_{ab}^{{\rm PBC}} & = & \frac{1}{2}\int _{V_{cell}}\int _{V_{\infty }}\, d{\mat
 
 \end_inset 
 
-let us separate the Coulomb integral into 
+However, this is still a long ranged intergral.
+ Let us separate the Coulomb integral into three pieces 
 \begin_inset Formula \[
-J_{ab}^{{\rm PBC}}=J_{ab}^{{\rm QCTC}}+J_{ab}^{{\rm PFF}}+J_{ab}^{{\rm EC}}\]
+J_{ab}^{PBC}=J_{ab}^{QCTC}+J_{ab}^{PFF}+J_{ab}^{EC}\]
 
 \end_inset 
 
 where 
 \begin_inset Formula \begin{eqnarray}
-J_{ab}^{{\rm QCTC}} & = & \frac{1}{2}\sum _{{\mathbf{R}'}\in V_{in}}\, \int _{V_{\infty }}\, \int _{V_{\infty }}\, d{\mathbf{x}}\, d{\mathbf{x}'}\frac{\rho _{ab}^{{\rm loc}}\left( {\mathbf{x}}\right) \: \rho ^{{\rm loc}}\left( {\mathbf{x}'+\mathbf{R}'}\right) }{\left| \mathbf{x}-\mathbf{x}'\right| }\begin{array}{c}
+J_{ab}^{QCTC} & = & \frac{1}{2}\sum _{{\mathbf{R}'}\in V_{in}}\, \int _{V_{\infty }}\, \int _{V_{\infty }}\, d{\mathbf{r}}\, d{\mathbf{r}'}\frac{\rho ^{loc}_{ab}\left( {\mathbf{r}}\right) \: \rho ^{loc}\left( {\mathbf{r}'+\mathbf{R}'}\right) }{\left| \mathbf{r}-\mathbf{r}'\right| }\begin{array}{c}
 \\
 
 \end{array}\label{Jqctc} \\
-J_{ab}^{{\rm PFF}} & = & \frac{1}{2}\sum _{{\mathbf{R}'}\in V_{\infty }-V_{in}}\, \int _{V_{\infty }}\, \int _{V_{\infty }}\, d{\mathbf{x}}\, d{\mathbf{x}'}\frac{\rho _{ab}^{{\rm loc}}\left( {\mathbf{x}}\right) \: \rho ^{{\rm loc}}\left( {\mathbf{x}'+\mathbf{R}'}\right) }{\left| \mathbf{x}-\mathbf{x}'\right| }\begin{array}{c}
+J_{ab}^{PFF} & = & \frac{1}{2}\sum _{{\mathbf{R}'}\in V_{\infty }-V_{in}}\, \int _{V_{\infty }}\, \int _{V_{\infty }}\, \mathbf{Q}d{\mathbf{r}}\, d{\mathbf{r}'}\frac{\rho _{ab}^{loc}\left( {\mathbf{r}}\right) \: \rho ^{loc}\left( {\mathbf{r}'+\mathbf{R}'}\right) }{\left| \mathbf{r}-\mathbf{r}'\right| }\begin{array}{c}
 \\
 
 \end{array}\label{Jpff} \\
-J_{ab}^{{\rm EC}} & = & \frac{1}{2}\sum _{{\mathbf{R}'}\in S_{\infty }}\, \int _{V_{\infty }}\, \int _{S_{\infty }}\, d{\mathbf{x}}\, d{\mathbf{x}'}\frac{\rho _{ab}^{{\rm loc}}\left( {\mathbf{x}}\right) \: \rho ^{{\rm loc}}\left( {\mathbf{x}'+\mathbf{R}'}\right) }{\left| \mathbf{x}-\mathbf{x}'\right| }\begin{array}{c}
+J_{ab}^{EC} & = & \frac{1}{2}\sum _{{\mathbf{R}'}\in S_{\infty }}\, \int _{V_{\infty }}\, \int _{S_{\infty }}\, d{\mathbf{r}}\, d{\mathbf{r}'}\frac{\rho _{ab}^{loc}\left( {\mathbf{r}}\right) \: \rho ^{loc}\left( {\mathbf{r}'+\mathbf{R}'}\right) }{\left| \mathbf{r}-\mathbf{r}'\right| }\begin{array}{c}
 \\
 
 \end{array}\label{Jec} 
@@ -373,7 +350,7 @@ J_{ab}^{{\rm EC}} & = & \frac{1}{2}\sum _{{\mathbf{R}'}\in S_{\infty }}\, \int _
 
 \end_inset 
 
-and 
+ and 
 \begin_inset Formula \( V_{in} \)
 \end_inset 
 
@@ -387,13 +364,13 @@ and
 
  is the surface at infinity which contributes a shape dependent potential
  to the center cell.
- This is shown in detail in figure 
+ This is depicted in figure 
 \begin_inset LatexCommand \ref{figure: ReplicateCells}
 
 \end_inset 
 
 .
- 
+ Let us now define and discuss the calculation of each terms.
 \layout Subsubsection
 
 The Quantum Chemical Tree Code: The direct Coulomb matrix
@@ -419,50 +396,81 @@ In-order to achieve linear scaling, we use a quantum chemical tree code
 \begin_inset Formula \( L' \)
 \end_inset 
 
-, 
+,
 \begin_inset Formula \[
-\frac{1}{2}\int _{V_{\infty }}\, d{\mathbf{x}}\, d{\mathbf{x}'}\frac{\rho _{ab}^{{\rm loc}}\left( {\mathbf{x}}\right) \: \rho ^{{\rm loc}}\left( {\mathbf{x}'}\right) }{\left| \mathbf{x}-\mathbf{x}'\right| }\approx \frac{1}{2}\sum _{\left\langle i\right\rangle }\int _{V_{\infty }}\, d{\mathbf{x}}\, d{\mathbf{x}'}\frac{\rho _{ab}^{{\rm loc}}\left( {\mathbf{x}}\right) \: \Lambda ^{\left\langle i\right\rangle }\left( {\mathbf{x}'}\right) }{\left| \mathbf{x}-\mathbf{x}'\right| }\qquad \qquad \qquad \qquad \]
+\frac{1}{2}\sum _{{\mathbf{R}'}\in V_{in}}\int _{V_{\infty }}\, d{\mathbf{r}}\, d{\mathbf{r}'}\frac{\rho _{ab}^{loc}\left( {\mathbf{r}}\right) \: \rho ^{loc}\left( {\mathbf{r}'+\mathbf{R}'}\right) }{\left| \mathbf{r}-\mathbf{r}'\right| }\approx \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \begin{array}{c}
+\\
+
+\end{array}\]
+
+\end_inset 
+
+
+\begin_inset Formula \[
+\frac{1}{2}\sum _{\mathbf{R}}\sum _{\mathbf{R}'\in V_{in}}\sum _{\left\langle i\right\rangle }\int _{V_{\infty }}\, d{\mathbf{r}}\, d{\mathbf{r}'}\frac{\phi _{a}({\mathbf{r}})\phi _{b}({\mathbf{r}+\mathbf{R}})\: \Lambda ^{\left\langle i\right\rangle }\left( {\mathbf{r}'+\mathbf{R}'}\right) }{\left| \mathbf{r}-\mathbf{r}'\right| }\qquad \qquad \qquad \begin{array}{c}
+\\
+
+\end{array}\]
 
 \end_inset 
 
 
 \begin_inset Formula \begin{equation}
 \label{QCTC}
-+\frac{1}{2}\sum _{\left\langle j\neq i\right\rangle }\sum _{l=0}^{L}\, \sum _{l'=0}^{L'}\, \sum _{m=-l}^{l}\, \sum _{m'=-l'}^{l'}\, \left( -1\right) ^{l}\, \rho _{l}^{m}[{\mathbf{P}}]\, M_{l+l'}^{m+m'}[{\mathbf{P}-\mathbf{Q}}]\, \Lambda _{l'}^{\left\langle j\right\rangle ,m'}[{\mathbf{Q}}]\qquad 
++\frac{1}{2}\sum _{\mathbf{R}}\sum _{\mathbf{R}'\in V_{in}}\sum _{l=0}^{L}\, \sum _{l'=0}^{L'}\, \sum _{m=-l}^{l}\, \sum _{m'=-l'}^{l'}\, \left( -1\right) ^{l}\, \rho _{ab,l}^{m}\left[ \mathbf{Q}(\mathbf{R})\right] \, M_{l+l'}^{m+m'}[\mathbf{Q}-\mathbf{P}-\mathbf{R}']\, \widetilde{\Lambda }_{l'}^{m'}[\mathbf{P}]\begin{array}{c}
+\\
+
+\end{array}
 \end{equation}
 
 \end_inset 
 
-where 
-\begin_inset Formula \( L \)
-\end_inset 
-
- is the maxium expansion pole, 
-\begin_inset Formula \( \left\langle i\right\rangle  \)
-\end_inset 
-
- and 
-\begin_inset Formula \( \left\langle j\neq i\right\rangle  \)
-\end_inset 
-
- are the sums over distributions determined from the density tree and,
+ where
 \layout Standard
 
 
-\begin_inset Formula \begin{eqnarray}
-\rho _{l}^{m}\left[ {\mathbf{P}}\right]  & = & \int _{V_{\infty }}\, d{\mathbf{x}}\, O_{l}^{m}\left[ {\mathbf{r}-\mathbf{P}}\right] \rho _{ab}^{{\rm loc}}\left( {\mathbf{x}}\right) \begin{array}{c}
-\\
-
-\end{array}\label{sp_rho_ab} \\
-\Lambda ^{\left\langle j\right\rangle ,m}_{l}\left[ {\mathbf{Q}}\right]  & = & \int _{V_{\infty }}\, d{\mathbf{x}}\, O_{l}^{m}\left[ {\mathbf{r}-\mathbf{Q}}\right] \Lambda ^{\left\langle j\right\rangle }\left( {\mathbf{x}}\right) \begin{array}{c}
-\\
-
-\end{array}\label{sp_rho_loc} 
-\end{eqnarray}
+\begin_inset Formula \begin{equation}
+\label{sp_rho_ab}
+\rho _{ab,l}^{m}\left[ \mathbf{Q}(\mathbf{R})\right] =\int _{V_{\infty }}\, d{\mathbf{x}}\, O_{l}^{m}\left[ \mathbf{r}-\mathbf{Q}(\mathbf{R})\right] \phi _{a}({\mathbf{r}})\phi _{b}({\mathbf{r}+\mathbf{R}}),
+\end{equation}
 
 \end_inset 
 
 
+\begin_inset Formula \( \Lambda ^{\left\langle i\right\rangle } \)
+\end_inset 
+
+ are the set of distributions of the local density which overlap 
+\begin_inset Formula \( \phi _{a}({\mathbf{r}})\phi _{b}({\mathbf{r}+\mathbf{R}}) \)
+\end_inset 
+
+ (therefore these integrals must be done explicitely) , 
+\begin_inset Formula \( \mathbf{Q}(\mathbf{R}) \)
+\end_inset 
+
+ is the center of the distribution 
+\begin_inset Formula \( \phi _{a}({\mathbf{r}})\phi _{b}({\mathbf{r}+\mathbf{R}}) \)
+\end_inset 
+
+, 
+\begin_inset Formula \( \widetilde{\Lambda }^{\left\langle j\right\rangle } \)
+\end_inset 
+
+are the set of distributuions of the local density which do not overlap
+ 
+\begin_inset Formula \( \phi _{a}({\mathbf{r}})\phi _{b}({\mathbf{r}+\mathbf{R}}) \)
+\end_inset 
+
+, are organized on a tree, allow us to achieve linear scaling, and 
+\begin_inset Formula \begin{equation}
+\label{sp_rho_loc}
+\widetilde{\Lambda }^{m}_{l}\left[ \mathbf{P}\right] =\sum _{\left\langle j\neq i\right\rangle }\int _{V_{\infty }}\, d{\mathbf{x}}\, O_{l}^{m}\left[ {\mathbf{r}-\mathbf{P}}\right] \widetilde{\Lambda }^{\left\langle j\right\rangle }\left( {\mathbf{x}}\right) 
+\end{equation}
+
+\end_inset 
+
+are the multipoles of these densities.
+ The multipoles are are defined as
 \layout Standard
 
 
@@ -479,9 +487,13 @@ M_{l}^{m}\left[ {\mathbf{R}}\right]  & = & \frac{\left( l-m\right) !\, P_{l}^{m}
 
 \end_inset 
 
-In reference [ref] we give a derivation of an exact error bound we use to
- compute these integrals in the QCTC algorithm, and we show that this leads
- to excellent control over the error.
+ In Appendix A we give a short derivation of the overlap, or penetration
+ error bound that we use and a more detail analyisis will be given in refference
+ [ref].
+ In Appendix B we also give a short derivation of the multipole error bound
+ that we use, where also a more detailed analyisis will be given in reference
+ [ref].
+ 
 \layout Subsubsection
 
 The Periodic Far Field Coulomb matrix
@@ -497,44 +509,24 @@ To obtain the periodic far field correction to the matrix elements we replace
 \layout Standard
 
 
-\begin_inset Formula \begin{equation}
-\label{jpff_2}
-J_{ab}^{{\rm PFF}}=\frac{1}{2}\sum _{{\mathbf{R}'}\in V_{\infty }-V_{in}}\, \int _{V_{\infty }}\, d{\mathbf{x}}\, d{\mathbf{x}'}\frac{\rho _{ab}^{{\rm loc}}\left( {\mathbf{x}}\right) \: \rho ^{{\rm loc}}\left( {\mathbf{x}'+\mathbf{R}'}\right) }{\left| \mathbf{x}-\mathbf{x}'\right| }\qquad \qquad \qquad \qquad \qquad \qquad \qquad 
-\end{equation}
+\begin_inset Formula \begin{eqnarray}
+J_{ab}^{PFF} & = & \frac{1}{2}\sum _{{\mathbf{R}'}\in V_{\infty }-V_{in}}\, \int _{V_{\infty }}\, d{\mathbf{x}}\, d{\mathbf{x}'}\frac{\rho _{ab}^{loc}\left( {\mathbf{x}}\right) \: \rho ^{loc}\left( {\mathbf{x}'+\mathbf{R}'}\right) }{\left| \mathbf{x}-\mathbf{x}'\right| }\begin{array}{c}
+\\
+
+\end{array}\label{jpff_2} \\
+ & = & \frac{1}{2}\sum _{{\mathbf{R}}\in V_{\infty }-V_{in}}\, \sum _{l=0}^{L}\, \sum _{l'=0}^{L'}\, \sum _{m=-l}^{l}\, \sum _{m'=-l'}^{l'}\label{sp_jpff} \\
+ &  & \qquad \left( -1\right) ^{l}\, \rho _{ab,l}^{m}[{\mathbf{R}_{0}}]\, M_{l+l'}^{m+m'}[{\mathbf{R}}]\, \rho _{loc,l'}^{m'}[{\mathbf{R}_{0}}]
+\end{eqnarray}
 
 \end_inset 
 
-
-\layout Standard
-
-
-\begin_inset Formula \begin{equation}
-\label{InBoxError}
-=\frac{1}{2}\sum _{{\mathbf{R}'}\in V_{\infty }-V_{in}}\, \sum _{l=0}^{L}\, \sum _{l'=0}^{L'}\, \sum _{m=-l}^{l}\, \sum _{m'=-l'}^{l'}\, \left( -1\right) ^{l}\, \rho _{l}^{m}[{\mathbf{P}}]\, M_{l+l'}^{m+m'}[{\mathbf{P}-\mathbf{Q}}]\, \rho _{l'}^{m'}[{\mathbf{Q}+\mathbf{R}'}]
-\end{equation}
-
+where 
+\begin_inset Formula \( \mathbf{R}_{0} \)
 \end_inset 
 
-which setting 
-\begin_inset Formula \( P=R_{0} \)
-\end_inset 
-
- and 
-\begin_inset Formula \( Q=R_{0}-R' \)
-\end_inset 
-
- we can rewrite as
-\begin_inset Formula \begin{equation}
-\label{sp_jpff_2}
-J_{ab}^{{\rm PFF}}=\frac{1}{2}\sum _{l=0}^{L}\, \sum _{l'=0}^{L'}\, \sum _{m=-l}^{l}\, \sum _{m'=-l'}^{l'}\, \left( -1\right) ^{l}\, \rho _{l}^{m}[{\mathbf{R}_{0}}]\, {\cal M}_{l+l'}^{m+m'}\, \rho _{l'}^{m'}[{\mathbf{R}_{0}}]
-\end{equation}
-
-\end_inset 
-
-where
-\layout Standard
-
-
+ is an arbitrary point in the simulation cell (usually the center of the
+ cell).
+ Let us define
 \begin_inset Formula \begin{equation}
 \label{ScriptM}
 {\cal M}_{l}^{m}=\sum _{{\mathbf{R}'}\in V_{\infty }-V_{in}}\, M_{l}^{m}[\mathbf{R}]
@@ -542,16 +534,67 @@ where
 
 \end_inset 
 
-which for 
-\begin_inset Formula \( l<3 \)
+Which allow us to rewrite
+\begin_inset Formula \begin{equation}
+\label{sp_jpff_2}
+J_{ab}^{PFF}=\frac{1}{2}\sum _{l=0}^{L}\, \sum _{l'=0}^{L'}\, \sum _{m=-l}^{l}\, \sum _{m'=-l'}^{l'}\, \left( -1\right) ^{l}\, \rho _{ab,l}^{m}[{\mathbf{Q}}]\, {\cal M}_{l+l'}^{m+m'}\, \rho _{loc,l'}^{m'}[{\mathbf{Q}}]
+\end{equation}
+
 \end_inset 
 
- is a conditional summation.
- In appendix A we describe an efficient method which allows us to calculate
+ For 
+\begin_inset Formula \( l=1 \)
+\end_inset 
+
+ and 
+\begin_inset Formula \( 2 \)
+\end_inset 
+
+ euqtion (
+\begin_inset LatexCommand \ref{ScriptM}
+
+\end_inset 
+
+) is a conditional summation.
+ In Appendix C we describe an efficient method which allow us calculate
  these conditional summations.
- In the next section we describe the corrections to the Coulomb matrix which
- allow us to obtain Ewald boundary conditions so that we can compare directly
- to methods that use ewald summation such as 
+ The only task remaining is to determine the region of the inner box summation
+ or the multipole order 
+\begin_inset Formula \( L \)
+\end_inset 
+
+ which we have to expand to.
+ Using equation (? ) from refernce [ref] we obtain for the error bound
+\begin_inset Formula \[
+\tau \leq \frac{{\cal O}_{L+1}\left[ \mathbf{R}_{0}\right] }{\left| \left| \mathbf{R}_{max}\right| ^{2}-\left| \mathbf{d}_{max}\right| ^{2}\right| ^{\frac{L+2}{2}}}\]
+
+\end_inset 
+
+where 
+\begin_inset Formula \( \mathbf{d}_{max} \)
+\end_inset 
+
+ is the distance from farthest distibution in the simulation cell to 
+\begin_inset Formula \( \mathbf{R}_{0} \)
+\end_inset 
+
+, and 
+\begin_inset Formula \( \mathbf{R}_{max} \)
+\end_inset 
+
+ is the distance to the nearest cell in the sum in equation (
+\begin_inset LatexCommand \ref{ScriptM}
+
+\end_inset 
+
+).
+ 
+\layout Standard
+
+In the next section we describe the corrections to the Coulomb matrix which
+ allow us to obtain Ewald boundary conditions inorder to obtain translational
+ invariance in the matrix elements, and also allows us to compare directly
+ to 
 \series bold 
 Crystal98
 \series default 
@@ -561,61 +604,24 @@ Crystal98
 
 \end_inset 
 
- shows the error of the energy as we increase the Inner box sums for 
-\begin_inset Formula \( L=8,16 \)
+ shows the error of the energy as we increase 
+\begin_inset Formula \( L \)
 \end_inset 
 
- for a sodium cloride test system, as can be seen we obtain very rapid convergen
-ce.
- Inorder to calculate the size needed for the inner box sum, we borrow a
- formula from reffernence 
-\begin_inset LatexCommand \cite{Tymczak02}
-
+ from 
+\begin_inset Formula \( 4 \)
 \end_inset 
 
-.
- 
-\layout Standard
-
-
-\begin_inset Formula \begin{equation}
-\label{InBoxError}
-\left| \mathbf{R}-\mathbf{Q}\right| \geq \left\{ \frac{O_{L+1}\left[ \mathbf{Q}\right] \: N(l_{max},L+1)}{\tau }\right\} ^{\frac{1}{l_{max}+L+2}}
-\end{equation}
-
+ to 
+\begin_inset Formula \( 64 \)
 \end_inset 
 
-where 
-\begin_inset Formula \( \mathbf{Q} \)
+ for two different inner cell sums for a classical system of 
+\begin_inset Formula \( 64 \)
 \end_inset 
 
- is a refference point in the box, 
-\begin_inset Formula \( l_{max} \)
-\end_inset 
-
- is the maxium angular momentum, and
-\layout Standard
-
-
-\begin_inset Formula \begin{equation}
-\label{WhatIsO}
-O_{l}\left[ \mathbf{Q}\right] =\sqrt{\sum _{m=0}^{l}\left( l-m\right) !\, \left( l+m\right) !\left[ \left( C^{m}_{l}(\mathbf{Q})\right) ^{2}+\left( S^{m}_{l}(\mathbf{Q})\right) ^{2}\right] }
-\end{equation}
-
-\end_inset 
-
-
-\layout Standard
-
-
-\begin_inset Formula \begin{equation}
-\label{BigN}
-N\left[ l_{p},l_{q}\right] =\frac{\sum _{m_{p}m_{q}}\frac{\left( l_{p}+l_{q}-m_{p}-m_{q}\right) !}{\left( l_{p}+m_{p}\right) !\left( l_{q}+m_{q}\right) !}}{\sum _{m_{p}}\frac{\left( l_{p}-m_{p}\right) !}{\left( l_{p}+m_{p}\right) !}\sum _{m_{q}}\frac{\left( l_{q}-m_{q}\right) !}{\left( l_{q}+m_{q}\right) !}}
-\end{equation}
-
-\end_inset 
-
-
+ water molecules.
+ As can be seen we obtain very rapid convergence.
 \layout Subsubsection
 
 The Ewald Correction matrix
@@ -632,22 +638,22 @@ The correction to the Coulomb matrix is strongly dependent on how the periodic
 , 
 \begin_inset Formula \begin{equation}
 \label{EW_pot}
-\Phi _{{\rm Ew}}\left( \mathbf{x}\right) =\Phi _{ss}\left( \mathbf{x}\right) -\frac{4\pi }{3}{\left( \mathbf{x}-\mathbf{R}_{0}\right) \cdot \mathbf{D}}+\frac{2\pi }{3}Q
+\Phi _{Ew}\left( \mathbf{x}\right) =\Phi _{ss}\left( \mathbf{x}\right) -\frac{4\pi }{3}{\left( \mathbf{x}-\mathbf{R}_{0}\right) \cdot \mathbf{D}}+\frac{2\pi }{3}Q
 \end{equation}
 
 \end_inset 
 
 in terms of the matrix elements of 
-\begin_inset Formula \( J_{ab}^{{\rm PBC}} \)
+\begin_inset Formula \( J_{ab}^{PBC} \)
 \end_inset 
 
  this gives the corrections
 \begin_inset Formula \begin{eqnarray}
-J_{ab}^{{\rm EC}} & = & \int _{V_{\infty }}\, d{\mathbf{x}}\, \rho ^{{\rm loc}}_{ab}\left( {\mathbf{x}}\right) \left\{ \frac{2\pi }{3}Q-\frac{4\pi }{3}\left( \mathbf{x}-\mathbf{R}_{0}\right) \cdot \mathbf{D}\right\} \begin{array}{c}
+J_{ab}^{EC} & = & \int _{V_{\infty }}\, d{\mathbf{x}}\, \rho ^{loc}_{ab}\left( {\mathbf{x}}\right) \left\{ \frac{2\pi }{3}Q-\frac{4\pi }{3}\left( \mathbf{x}-\mathbf{R}_{0}\right) \cdot \mathbf{D}\right\} \begin{array}{c}
 \\
 
 \end{array}\label{Jab_ec} \\
- & = & \frac{2\pi }{3}Q\, S_{ab}^{{\rm PBC}}-\frac{4\pi }{3}\mathbf{d}_{ab}\cdot \mathbf{D}\label{Jab_ec_2} 
+ & = & \frac{2\pi }{3}Q\, S_{ab}^{PBC}-\frac{4\pi }{3}\mathbf{d}_{ab}\cdot \mathbf{D}\label{Jab_ec_2} 
 \end{eqnarray}
 
 \end_inset 
@@ -674,36 +680,28 @@ Q & = & \int _{V_{\infty }}\, d{\mathbf{x}}\, \left( \mathbf{x}-\mathbf{R}_{0}\r
 \end_inset 
 
 are the dipole and quadrapole moments.
- In appendix B we give a short derivation of these terms.
-\layout Subsubsection
+ In appendix B we give a short derivation of these terms
+\layout Subsection
 
-The exchange correlation matrix
+The DFT exchange correlation matrix
 \layout Standard
 
-To calculate the exchange correlation matrix in the periodic case, we take
- advantage of the periodicity of the functions being integrated and the
- locality of the basis functions [ref],
-\layout Standard
-
-
-\begin_inset Include \include{}
-
-\end_inset 
-
-
+To calculate the DFT exchange correlation matrix in the periodic case, we
+ take advantage of the periodicity of the functions being integrated and
+ the locality of the basis functions [ref],
 \layout Standard
 
 
 \begin_inset Formula \begin{eqnarray}
-K_{ab}^{{\rm PBC}} & = & \int _{V_{{\rm cell}}}\, d\mathbf{x}\, \rho _{ab}^{{\rm PBC}}\left( \mathbf{x}\right) \: V_{xc}\left( \rho ^{{\rm PBC}}\left( \mathbf{x}\right) \right) \begin{array}{c}
+K_{ab}^{PBC} & = & \int _{V_{cell}}\, d\mathbf{x}\, \rho _{ab}^{PBC}\left( \mathbf{x}\right) \: V_{xc}\left( \rho ^{PBC}\left( \mathbf{x}\right) \right) \begin{array}{c}
 \\
 
 \end{array}\label{Kab_pbc_1} \\
- & = & \int _{V_{{\rm HiCu}}}\, d\mathbf{x}\, \rho _{ab}^{\{PBC}\left( \mathbf{x}\right) \: V_{xc}\left( \rho ^{PBC}\left( \mathbf{x}\right) \right) \begin{array}{c}
+ & = & \int _{V_{HiCu}}\, d\mathbf{x}\, \rho _{ab}^{PBC}\left( \mathbf{x}\right) \: V_{xc}\left( \rho ^{PBC}\left( \mathbf{x}\right) \right) \begin{array}{c}
 \\
 
 \end{array}\label{Kab_pbc_2} \\
- & = & \sum _{\mathbf{RR}'}\int _{V_{{\rm HiCu}}}\, d\mathbf{x}\, \phi _{a}(\mathbf{x}+\mathbf{R})\phi _{b}(\mathbf{x}+\mathbf{R}')\, V_{xc}\left( \sum _{\mathbf{R}''}\, \rho ^{{\rm loc}}\left( \mathbf{x}+\mathbf{R}''\right) \right) \begin{array}{c}
+ & = & \sum _{RR'}\int _{V_{HiCu}}\, d\mathbf{x}\, \phi _{a}(\mathbf{x}+R)\phi _{b}(\mathbf{x}+R')\, V_{xc}\left( \sum _{R''}\, \rho ^{loc}\left( \mathbf{x}+R''\right) \right) \begin{array}{c}
 \\
 
 \end{array}\label{Kab_pbc_3} 
@@ -712,7 +710,7 @@ K_{ab}^{{\rm PBC}} & = & \int _{V_{{\rm cell}}}\, d\mathbf{x}\, \rho _{ab}^{{\rm
 \end_inset 
 
 where 
-\begin_inset Formula \( V_{{\rm HiCu}} \)
+\begin_inset Formula \( V_{HiCu} \)
 \end_inset 
 
  is the cubic region shown in figure 
@@ -723,7 +721,7 @@ where
 .
  This transformation is allowable because of the periodicity of the function,
  and it is ideally suited for the method we use to calculate our exchange-correl
-ation matrix, which is based on a 
+ation matrix, which is based on a cartesian 
 \begin_inset Quotes eld
 \end_inset 
 
@@ -748,7 +746,7 @@ Gaussian quadrature
 
 First, we calculate the exchange-correlation potential on the HiCu grid
  using the periodically summed local density 
-\begin_inset Formula \( \rho ^{{\rm loc}}\left( \mathbf{x}\right)  \)
+\begin_inset Formula \( \rho ^{loc}\left( \mathbf{x}\right)  \)
 \end_inset 
 
 , because of the k-d tree structure of the density this is not computationally
@@ -763,10 +761,10 @@ Next, we directly calculate the integral of equation (
 ), where we obtain significant increase in efficacy by exploiting the localizati
 on of the atomic orbitals.
  
-\layout Section
-
-RESULTS
 \layout Subsection
+
+The exact exchange matrix
+\layout Section
 
 Verification
 \layout Standard
@@ -856,7 +854,7 @@ Crystal98
 for three different basis sets to within the accuracy of these results.
 \layout Subsubsection
 
-Diamond and Graphite
+Diamond
 \layout Standard
 
 Table 
@@ -870,7 +868,7 @@ Table
 Crystal98
 \series default 
 .
-\layout Subsection
+\layout Section
 
 Scaling
 \layout Standard
@@ -980,7 +978,7 @@ eject
 \layout Standard
 
 
-\begin_inset LatexCommand \BibTeX[plain]{GaussianPapers}
+\begin_inset LatexCommand \BibTeX[plain]{../Bibs/GaussianPapers}
 
 \end_inset 
 
@@ -993,7 +991,193 @@ eject
 \backslash 
 eject
 \layout Section*
-\start_of_appendix 
+
+
+\latex latex 
+
+\backslash 
+center{
+\latex default 
+Appendix A
+\latex latex 
+}
+\layout Subsection*
+
+The Penetration Acceptibility Criterion (PAC)
+\layout Standard
+
+Let us consider a generized distribution centered at 
+\begin_inset Formula \( \mathbf{P} \)
+\end_inset 
+
+
+\layout Standard
+
+
+\begin_inset Formula \[
+\rho _{\mathbf{P}}\left( \mathbf{r}\right) =\sum _{l+m+n=L}d_{lmn}\Lambda ^{\mathbf{P}}_{lmn}\left( \mathbf{r}\right) \]
+
+\end_inset 
+
+where
+\layout Standard
+
+
+\begin_inset Formula \[
+\Lambda ^{\mathbf{P}}_{lmn}\left( \mathbf{r}\right) =\left( x-P_{x}\right) ^{l}\left( y-P_{y}\right) ^{m}\left( z-P_{z}\right) ^{n}\exp \left( -\xi _{\mathbf{P}}\left( \mathbf{x}-\mathbf{P}\right) ^{2}\right) \]
+
+\end_inset 
+
+Using Cramer's Inequality we can show
+\begin_inset Formula \[
+\rho _{\mathbf{P}}\left( \mathbf{r}\right) =\sum _{lmn}d_{lmn}\Lambda ^{\mathbf{P}}_{lmn}\left( \mathbf{r}\right) \leq C_{\mathbf{P}}\exp \left( -\widetilde{\xi }_{\mathbf{P}}\left( \mathbf{x}-\mathbf{P}\right) ^{2}\right) \]
+
+\end_inset 
+
+where
+\layout Standard
+
+
+\begin_inset Formula \[
+C_{\mathbf{P}}=\sum _{lmn}\left| d_{lmn}\right| \sqrt{l!\, m!\, n!\, \left( 2\, \widetilde{\xi }_{\mathbf{P}}\right) ^{l+m+n}}\]
+
+\end_inset 
+
+
+\begin_inset Formula \[
+\widetilde{\xi }_{\mathbf{P}}=\left\{ \begin{array}{c}
+\xi _{\mathbf{P}}\\
+\xi _{\mathbf{P}}/2
+\end{array}\right. \begin{array}{c}
+\quad L=0\\
+\quad {\rm otherwise}
+\end{array}\]
+
+\end_inset 
+
+This allow us to treat all distributions as if they where s-type gausians,
+ which allows us to easilly calculate the penetration error as,
+\layout Standard
+
+
+\begin_inset Formula \[
+\left( \frac{\pi }{\widetilde{\xi }_{\mathbf{P}}}\right) ^{\frac{3}{2}}\left( \frac{\pi }{\widetilde{\xi }_{\mathbf{Q}}}\right) ^{\frac{3}{2}}\frac{C_{\mathbf{P}}C_{\mathbf{Q}}}{\left| \mathbf{P}-\mathbf{Q}\right| }{\rm erfc}\left( \sqrt{\frac{\widetilde{\xi }_{\mathbf{P}}\widetilde{\xi }_{\mathbf{Q}}}{\widetilde{\xi }_{\mathbf{P}}+\widetilde{\xi }_{\mathbf{Q}}}}\left| \mathbf{P}-\mathbf{Q}\right| \right) \geq \tau \]
+
+\end_inset 
+
+
+\layout Section*
+
+
+\latex latex 
+
+\backslash 
+center{
+\latex default 
+Appendix B
+\latex latex 
+}
+\latex default 
+ 
+\layout Subsection*
+
+The Multipole Acceptibility Criterion (MAC)
+\layout Standard
+
+Let us start with the exact expansion of the coulomb intergral into the
+ multipole basis
+\begin_inset Formula \[
+\frac{1}{2}\sum _{l=0}^{L}\, \sum _{l'=0}^{L'}\, \sum _{m=-l}^{l}\, \sum _{m'=-l'}^{l'}\, \left( -1\right) ^{l}\, \rho _{ab,l}^{m}[{\mathbf{P}}]\, M_{l+l'}^{m+m'}[{\mathbf{P}-\mathbf{Q}}]\, \Lambda ^{m'}_{l'}[{\mathbf{Q}}]\]
+
+\end_inset 
+
+Let us now assume that the primitive distributiion is of a single algular
+ momentum type, 
+\layout Standard
+
+
+\begin_inset Formula \[
+\rho _{ab,l}^{m}[{\mathbf{P}}]=\rho _{ab,l}^{m}[{\mathbf{P}}]\delta _{l\, l_{p}}\]
+
+\end_inset 
+
+which gives us
+\begin_inset Formula \[
+\frac{1}{2}\sum _{l'=0}^{L'}\, \sum _{m=-l_{p}}^{l_{p}}\, \sum _{m'=-l'}^{l'}\, \left( -1\right) ^{l}\, \rho _{ab,l_{p}}^{m}[{\mathbf{P}}]\, M_{l_{p}+l'}^{m+m'}[{\mathbf{P}-\mathbf{Q}}]\, \Lambda ^{m'}_{l'}[{\mathbf{Q}}]\]
+
+\end_inset 
+
+The error in the calculation then is
+\begin_inset Formula \[
+\varepsilon _{l_{p}}=\left| \frac{1}{2}\sum _{l'=L'+1}^{\infty }\, \sum _{m=-l_{p}}^{l_{p}}\, \sum _{m'=-l'}^{l'}\, \left( -1\right) ^{l}\, \rho _{ab,l_{p}}^{m}[{\mathbf{P}}]\, M_{l_{p}+l'}^{m+m'}[{\mathbf{P}-\mathbf{Q}}]\, \Lambda ^{m'}_{l'}[{\mathbf{Q}}]\right| \]
+
+\end_inset 
+
+First let us define
+\begin_inset Formula \[
+{\cal O}_{l}\left[ \left| \mathbf{r}\right| \right] =\sqrt{\sum _{m}(l-m)!(l+m)!\left| O_{l}^{m}(\mathbf{r})\right| ^{2}}=\left| \mathbf{r}\right| ^{l}\sqrt{\sum _{m}\frac{(l-m)!}{(l+m)!}\left| P_{l}^{m}(\mathbf{r})\right| ^{2}}\approx \left| \mathbf{r}\right| ^{l}\geq 0\]
+
+\end_inset 
+
+Let us rewrite the error bound as
+\layout Standard
+
+
+\begin_inset Formula \begin{eqnarray*}
+\varepsilon _{l_{p}} & \leq  & \left| \frac{1}{2}\sum _{l'=L'+1}^{\infty }\, \sum _{m=-l_{p}}^{l_{p}}\, \sum _{m'=-l'}^{l'}\, \rho _{ab,l_{p}}^{m}[{\mathbf{P}}]\, M_{l_{p}+l'}^{m+m'}[{\mathbf{P}-\mathbf{Q}}]\, \Lambda ^{m'}_{l'}[{\mathbf{Q}}]\right| \\
+ & \leq  & \frac{1}{2}\sum _{l'=L'+1}^{\infty }\, \sum _{m=-l_{p}}^{l_{p}}\, \sum _{m'=-l'}^{l'}\, \frac{(l_{p}+l'-m_{p}-m')!}{(l_{p}+m_{p})!(l'+m')!}\\
+ &  & \qquad \qquad \left| \frac{\int \, d^{3}\mathbf{r}\, \rho _{ab}(\mathbf{r})\left| \mathbf{r}-\mathbf{P}\right| ^{l_{p}}\, P_{l_{p}}^{m_{p}}[{\mathbf{P}}]\, P_{l_{p}+l'}^{m+m'}[{\mathbf{P}-\mathbf{Q}}]\int \, d^{3}\mathbf{r}\, \Lambda (\mathbf{r})\left| \mathbf{r}-\mathbf{Q}\right| ^{l'}\, P_{l'}^{m'}[{\mathbf{Q}}]}{\left| \mathbf{P}-\mathbf{Q}\right| ^{l_{p}+l'+1}}\right| 
+\end{eqnarray*}
+
+\end_inset 
+
+which we can rewrite as
+\begin_inset Formula \begin{eqnarray*}
+\varepsilon _{l_{p}} & \leq  & \frac{1}{2}\sum _{l'=L'+1}^{\infty }\, \sum _{m=-l_{p}}^{l_{p}}\, \sum _{m'=-l'}^{l'}\, \frac{(l_{p}+l'-m_{p}-m')!}{(l_{p}-m_{p})!(l'-m')!}\\
+ &  & \left| \frac{\int \, d^{3}\mathbf{r}\, \rho _{ab}(\mathbf{r})\left| \mathbf{r}-\mathbf{P}\right| ^{l_{p}}\, \frac{(l_{p}-m_{p})!}{(l_{p}+m_{p})!}P_{l_{p}}^{m_{p}}[{\mathbf{P}}]\, P_{l_{p}+l'}^{m+m'}[{\mathbf{P}-\mathbf{Q}}]\int \, d^{3}\mathbf{r}\, \Lambda (\mathbf{r})\left| \mathbf{r}-\mathbf{Q}\right| ^{l'}\, \frac{(l'-m')!}{(l'+m')!}P_{l'}^{m'}[{\mathbf{Q}}]}{\left| \mathbf{P}-\mathbf{Q}\right| ^{l_{p}+l'+1}}\right| \\
+ & \leq  & \frac{1}{2}\sum _{l'=L'+1}^{\infty }\, \sum _{m=-l_{p}}^{l_{p}}\, \sum _{m'=-l'}^{l'}\, \frac{(l_{p}+l'-m_{p}-m')!}{(l_{p}-m_{p})!(l'-m')!}\\
+ &  & \frac{\left| \int \, d^{3}\mathbf{r}\, \rho _{ab}(\mathbf{r})\left| \mathbf{r}-\mathbf{P}\right| ^{l_{p}}\, \frac{(l_{p}-m_{p})!}{(l_{p}+m_{p})!}P_{l_{p}}^{m_{p}}[{\mathbf{P}}]\right| \left| P_{l_{p}+l'}^{m+m'}[{\mathbf{P}-\mathbf{Q}}]\right| \left| \int \, d^{3}\mathbf{r}\, \Lambda (\mathbf{r})\left| \mathbf{r}-\mathbf{Q}\right| ^{l'}\, \frac{(l'-m')!}{(l'+m')!}P_{l'}^{m'}[{\mathbf{Q}}]\right| }{\left| \mathbf{P}-\mathbf{Q}\right| ^{l_{p}+l'+1}}
+\end{eqnarray*}
+
+\end_inset 
+
+using the inequalities
+\layout Standard
+
+
+\begin_inset Formula \[
+\begin{array}{c}
+\left| \mathbf{a}\cdot \mathbf{b}\right| \leq \left| \mathbf{a}\right| \left| \mathbf{b}\right| \\
+\left| P_{l}^{m}(\mathbf{R})\right| \leq 1\\
+\sum _{m}\frac{(l-m)!}{(l+m)!}\left| \mathbf{r}\right| ^{l}\, P^{m}_{l}(\mathbf{r})\leq \sqrt{\sum \frac{(l-m)!}{(l+m)!}\left| \mathbf{r}\right| ^{2l}\, \left| P^{m}_{l}(\mathbf{r})\right| ^{2}}={\cal O}_{l}[\left| \mathbf{r}\right| ]
+\end{array}\]
+
+\end_inset 
+
+this gives us
+\begin_inset Formula \begin{eqnarray*}
+\varepsilon _{l_{p}} & \leq  & \frac{1}{2}\sum _{l'=L'+1}^{\infty }\, \sum _{m=-l_{p}}^{l_{p}}\, \sum _{m'=-l'}^{l'}\, \frac{(l_{p}+l'-m_{p}-m')!}{(l_{p}-m_{p})!(l'-m')!}\\
+ &  & \frac{\left| \sum _{m_{p}'}\int \, d^{3}\mathbf{r}\, \rho _{ab}(\mathbf{r})\left| \mathbf{r}-\mathbf{P}\right| ^{l_{p}}\, \frac{(l_{p}-m'_{p})!}{(l_{p}+m'_{p})!}P_{l_{p}}^{m'_{p}}[{\mathbf{P}}]\right| \left| \sum _{m''}\int \, d^{3}\mathbf{r}\, \Lambda (\mathbf{r})\left| \mathbf{r}-\mathbf{Q}\right| ^{l'}\, \frac{(l'-m'')!}{(l'+m'')!}P_{l'}^{m''}[{\mathbf{Q}}]\right| }{\left| \mathbf{P}-\mathbf{Q}\right| ^{l_{p}+l'+1}}\\
+ & \leq  & \frac{1}{2}\sum _{l'=L'+1}^{\infty }\, \sum _{m=-l_{p}}^{l_{p}}\, \sum _{m'=-l'}^{l'}\, \frac{(l_{p}+l'-m_{p}-m')!}{(l_{p}-m_{p})!(l'-m')!}\frac{{\cal O}_{l_{p}}[\mathbf{P},\, \rho ]\, {\cal O}_{l'}[\mathbf{Q},\, \Lambda ]}{\left| \mathbf{P}-\mathbf{Q}\right| ^{l_{p}+l'+1}}\\
+ & \leq  & \frac{1}{2}\sum _{l=L+1}^{\infty }\frac{{\cal O}_{l_{p}}[\mathbf{P},\, \rho ]\, {\cal N}[l_{p},l]\, {\cal O}_{l}[\mathbf{Q},\, \Lambda ]}{\left| \mathbf{P}-\mathbf{Q}\right| ^{l_{p}+l+1}}
+\end{eqnarray*}
+
+\end_inset 
+
+
+\layout Section*
+
+
+\latex latex 
+
+\backslash 
+center{
+\latex default 
+Appendix C
+\latex latex 
+}
+\layout Subsection*
+
 Computation of the 
 \begin_inset Formula \( {\cal M} \)
 \end_inset 
@@ -1027,14 +1211,14 @@ where
 
 \end_inset 
 
-
+and
 \begin_inset Formula \begin{equation}
 {\cal F}_{l}\left( \beta ,r\right) =\frac{\gamma \left( l+\frac{1}{2},\beta ^{2}r^{2}\right) }{\Gamma \left( l+\frac{1}{2}\right) \, r^{l+1}}=\frac{\Gamma \left( l+\frac{1}{2}\right) -\Gamma \left( l+\frac{1}{2},\beta ^{2}r^{2}\right) }{\Gamma \left( l+\frac{1}{2}\right) \, r^{l+1}}
 \end{equation}
 
 \end_inset 
 
-and 
+where 
 \begin_inset Formula \( \beta  \)
 \end_inset 
 
@@ -1061,7 +1245,7 @@ and
 \\
 
 \end{array}\nonumber \\
- & + & \frac{4\pi ^{\frac{3}{2}}(\frac{i}{2})^{l}}{V_{cell}\Gamma \left( l+\frac{1}{2}\right) }\sum _{\mathbf{G}}\left| \mathbf{G}\right| ^{l-2}e^{-\frac{\pi ^{2}\left| \mathbf{G}\right| ^{2}}{\beta ^{2}}}\, \left( l-m\right) !\, P_{l}^{m}\left( \cos \left( \theta _{\mathbf{G}}\right) \right) e^{im\phi _{\mathbf{G}}}
+ & + & \frac{4\pi ^{\frac{3}{2}}(\frac{i}{2})^{l}}{V_{cell}\Gamma \left( l+\frac{1}{2}\right) }\sum _{\mathbf{G}\neq \left\{ \emptyset \right\} }\, \left| \mathbf{G}\right| ^{l-2}e^{-\frac{\pi ^{2}\left| \mathbf{G}\right| ^{2}}{\beta ^{2}}}\, \left( l-m\right) !\, P_{l}^{m}\left( \cos \left( \theta _{\mathbf{G}}\right) \right) e^{im\phi _{\mathbf{G}}}
 \end{eqnarray}
 
 \end_inset 
@@ -1118,12 +1302,12 @@ where
 
 \begin_inset Formula \begin{equation}
 \label{SN}
-S_{n}=\left( \frac{\Gamma \left( \frac{1}{2}\right) }{\Gamma \left( n+\frac{3}{2}\right) }\right) ^{\frac{1}{max(n,1)}},
+S_{n}=\left( \frac{\Gamma \left( \frac{1}{2}\right) }{\Gamma \left( n+\frac{3}{2}\right) }\right) ^{\frac{1}{max(n,1)}}
 \end{equation}
 
 \end_inset 
 
-and are tabulated beforehand.
+Which are tabulated beforehand.
  We find that this version of the gamma function is both easy to program
  and numerically very precise, even at large 
 \begin_inset Formula \( x \)
@@ -1153,12 +1337,12 @@ and are tabulated beforehand.
 \layout Standard
 
 
-\begin_inset Formula \begin{eqnarray}
+\begin_inset Formula \begin{eqnarray*}
 {\cal M}^{m}_{l} & = & \sum _{{\mathbf{R}'}\in V_{\infty }-V_{in}}\, M_{l}^{m}[\mathbf{R}]\\
  & = & \sum _{{\mathbf{R}'}\in V_{\infty }-V_{in}}\, \left( l-m\right) !\, P_{l}^{m}\left( \cos \left( \theta _{\mathbf{R}}\right) \right) e^{im\phi _{\mathbf{R}}}\, \left\{ \frac{1}{r^{l+1}}\right\} \\
  & = & \frac{\left( l-m\right) !\, P_{l}^{m}\left( \cos \left( \theta _{0}\right) \right) e^{im\phi _{0}}}{a_{0}^{l+1}}\left\{ \sum _{n=n_{0}}^{\infty }\frac{1}{n^{l+1}}\right\} \\
- & = & \frac{\left( l-m\right) !\, P_{l}^{m}\left( \cos \left( \theta _{0}\right) \right) e^{im\phi _{0}}}{a_{o}^{l+1}}\left\{ \zeta (l+1)-\sum _{n=1}^{n_{0}-1}\frac{1}{n^{l+1}}\right\} \label{1D_M_ten} 
-\end{eqnarray}
+ & = & \frac{\left( l-m\right) !\, P_{l}^{m}\left( \cos \left( \theta _{0}\right) \right) e^{im\phi _{0}}}{a_{o}^{l+1}}\left\{ \zeta (l+1)-\sum _{n=1}^{n_{0}-1}\frac{1}{n^{l+1}}\right\} 
+\end{eqnarray*}
 
 \end_inset 
 
@@ -1181,26 +1365,19 @@ where
 
  tensor become a lot more complicated, therefore we have chosen to use the
  three dimensional formula's and obtain the two dimensional moments via
- a numerical integration, which is achieved by taking as the nonperiodic
- direction goes to infinity,
+ numerical integration, where we take the limit as the nonperiodic direction
+ goes to infinity,
 \layout Standard
-
-
-\begin_inset Formula \begin{eqnarray}
-{\cal M}^{m}_{l} & = & \sum _{{\mathbf{R}'}\in V_{\infty }-V_{in}}\, \left( l-m\right) !\, P_{l}^{m}\left( \cos \left( \theta _{\mathbf{R}}\right) \right) e^{im\phi _{\mathbf{R}}}\, {\cal G}_{l}\left( \beta ,\left| \mathbf{R}\right| \right) \\
- & - & \sum _{{\mathbf{R}'}\in V_{in}}\, \left( l-m\right) !\, P_{l}^{m}\left( \cos \left( \theta _{\mathbf{R}}\right) \right) e^{im\phi _{\mathbf{R}}}{\cal F}_{l}\left( \beta ,\left| \mathbf{R}\right| \right) \\
- & + & \frac{4\pi ^{\frac{3}{2}}(\frac{i}{2})^{l}}{V_{cell}\Gamma \left( l+\frac{1}{2}\right) }\sum _{\mathbf{G}}\left| \mathbf{G}\right| ^{l-2}e^{-\frac{\pi ^{2}\left| \mathbf{G}\right| ^{2}}{\beta ^{2}}}\, \left( l-m\right) !\, P_{l}^{m}\left( \cos \left( \theta _{\mathbf{G}}\right) \right) e^{im\phi _{\mathbf{G}}}\\
- & 
-\end{eqnarray}
-
-\end_inset 
 
 
 \begin_inset Formula \begin{eqnarray*}
 {\cal M}^{m}_{l} & = & \sum _{{\mathbf{R}'}\in V_{\infty }-V_{in}}\, \left( l-m\right) !\, P_{l}^{m}\left( \cos \left( \theta _{\mathbf{R}}\right) \right) e^{im\phi _{\mathbf{R}}}\, {\cal G}_{l}\left( \beta ,\left| \mathbf{R}\right| \right) \\
  & - & \sum _{{\mathbf{R}'}\in V_{in}}\, \left( l-m\right) !\, P_{l}^{m}\left( \cos \left( \theta _{\mathbf{R}}\right) \right) e^{im\phi _{\mathbf{R}}}{\cal F}_{l}\left( \beta ,\left| \mathbf{R}\right| \right) \\
- & + & \frac{4\pi ^{\frac{3}{2}}(\frac{i}{2})^{l}}{A_{cell}\Gamma \left( l+\frac{1}{2}\right) }\\
- &  & \qquad \sum _{\mathbf{G}}\int _{-\infty }^{\infty }\: dG_{z}\: \left| \mathbf{G}\right| ^{l-2}e^{-\frac{\pi ^{2}\left| \mathbf{G}\right| ^{2}}{\beta ^{2}}}\, \left( l-m\right) !\, P_{l}^{m}\left( \cos \left( \theta _{\mathbf{G}}\right) \right) e^{im\phi _{\mathbf{G}}}
+ & + & \frac{4\pi ^{\frac{3}{2}}(\frac{i}{2})^{l}}{V_{cell}\Gamma \left( l+\frac{1}{2}\right) }\sum _{\mathbf{G}\neq \left\{ \emptyset \right\} }\, \left| \mathbf{G}\right| ^{l-2}e^{-\frac{\pi ^{2}\left| \mathbf{G}\right| ^{2}}{\beta ^{2}}}\, \left( l-m\right) !\, P_{l}^{m}\left( \cos \left( \theta _{\mathbf{G}}\right) \right) e^{im\phi _{\mathbf{G}}}\\
+ & \Rightarrow  & \\
+ & = & \sum _{{\mathbf{R}'}\in V_{\infty }-V_{in}}\, \left( l-m\right) !\, P_{l}^{m}\left( \cos \left( \theta _{\mathbf{R}}\right) \right) e^{im\phi _{\mathbf{R}}}\, {\cal G}_{l}\left( \beta ,\left| \mathbf{R}\right| \right) \\
+ & - & \sum _{{\mathbf{R}'}\in V_{in}}\, \left( l-m\right) !\, P_{l}^{m}\left( \cos \left( \theta _{\mathbf{R}}\right) \right) e^{im\phi _{\mathbf{R}}}{\cal F}_{l}\left( \beta ,\left| \mathbf{R}\right| \right) \\
+ & + & \frac{4\pi ^{\frac{3}{2}}(\frac{i}{2})^{l}}{A_{cell}\Gamma \left( l+\frac{1}{2}\right) }\: \sum _{\mathbf{G}\neq \left\{ \emptyset \right\} }\, \int _{-\infty }^{\infty }\: dG_{z}\: \left| \mathbf{G}\right| ^{l-2}e^{-\frac{\pi ^{2}\left| \mathbf{G}\right| ^{2}}{\beta ^{2}}}\, \left( l-m\right) !\, P_{l}^{m}\left( \cos \left( \theta _{\mathbf{G}}\right) \right) e^{im\phi _{\mathbf{G}}}
 \end{eqnarray*}
 
 \end_inset 
@@ -1217,6 +1394,17 @@ where
  tensor matrix elements to 8-10 digets of accuracy with this technique.
 \layout Section*
 
+
+\latex latex 
+
+\backslash 
+center{
+\latex default 
+Appendix D
+\latex latex 
+}
+\layout Subsection*
+
 Computation of the Dipole and Quadrapole Corrections 
 \layout Standard
 
@@ -1226,7 +1414,7 @@ Following the work of Redlack and Grindley
 \end_inset 
 
  we show the corrections needed inorder to obtain ewald boundry conditions.
- These corrections exist in both two and three dimensions and are due the
+ These corrections exist in both two and three directions and are due the
  the field induced in the box from the surface at infinity, 
 \begin_inset Formula \( S_{\infty } \)
 \end_inset 
@@ -1268,10 +1456,8 @@ where
  the cell, the dipole directly and the quaripole conditionally.
  Upon summation over the surface, the dipole and quadripole contributions
  become
-\begin_inset Formula \begin{equation}
-\label{BN}
-\Phi ^{{3D}}_{S_{\infty }}({\mathbf{x}})=-\frac{4\pi }{3V_{{\rm cell}}}{\mathbf{p}}\cdot \left( {\mathbf{x}-\mathbf{R}'}\right) +\frac{2\pi }{3V_{{\rm cell}}}\left( Q_{11}+Q_{22}+Q_{33}\right) .
-\end{equation}
+\begin_inset Formula \[
+\Phi ^{3D}_{S_{\infty }}({\mathbf{x}})=-\frac{4\pi }{3V_{cell}}{\mathbf{p}}\cdot \left( {\mathbf{x}-\mathbf{R}'}\right) +\frac{2\pi }{3V_{cell}}\left( Q_{11}+Q_{22}+Q_{33}\right) .\]
 
 \end_inset 
 
@@ -1280,15 +1466,12 @@ For two dimensions only the dipole contributes to the potential within the
 \layout Standard
 
 
-\begin_inset Formula \begin{equation}
-\label{BN}
-\Phi ^{{\rm 2D}}_{S_{\infty }}(z)=-\frac{2\pi }{A_{{\rm cell}}}p_{z}\, \left( z-R'_{z}\right) 
-\end{equation}
+\begin_inset Formula \[
+\Phi ^{2D}_{S_{\infty }}(z)=-\frac{2\pi }{A_{cell}}p_{z}\, \left( z-R'_{z}\right) \]
 
 \end_inset 
 
-Interestingly, for the method that we have chosen to sum our multipole tensor
- in two-dimensions, this correction is automatically included.
+
 \layout Standard
 
 
@@ -1308,125 +1491,97 @@ eject
 
  Comparison of Sodium Cloride test systems to Crystal98
 \layout Standard
-\added_space_bottom 0.3cm \align center \LyXTable
-multicol5
-13 6 0 0 -1 -1 -1 -1
-1 1 0 0
-1 0 0 0
-1 0 0 0
-1 0 0 0
-1 0 0 0
-1 0 0 0
-1 1 0 0
-1 0 0 0
-1 0 0 0
-1 0 0 0
-1 0 0 0
-1 0 0 0
-1 1 0 0
-8 1 0 "" ""
-8 1 0 "" ""
-8 1 0 "" ""
-8 1 0 "" ""
-8 1 0 "" ""
-8 1 1 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
+\added_space_bottom 0.3cm \align center 
+
+\begin_inset  Tabular
+<lyxtabular version="2" rows="13" columns="6">
+<features rotate="false" islongtable="false" endhead="0" endfirsthead="0" endfoot="0" endlastfoot="0">
+<column alignment="center" valignment="top" leftline="true" rightline="false" width="" special="">
+<column alignment="center" valignment="top" leftline="true" rightline="false" width="" special="">
+<column alignment="center" valignment="top" leftline="true" rightline="false" width="" special="">
+<column alignment="center" valignment="top" leftline="true" rightline="false" width="" special="">
+<column alignment="center" valignment="top" leftline="true" rightline="false" width="" special="">
+<column alignment="center" valignment="top" leftline="true" rightline="true" width="" special="">
+<row topline="true" bottomline="true" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
 
 System
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Basis
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Functional
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Cell (A)
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Program
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Energy (Hartree)
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 NaCl
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 STO-3G
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Slater-Dirac
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( \left\{ \begin{array}{c}
 \left| a\right| =\left| b\right| =\left| c\right| =3.974\\
@@ -1435,21 +1590,56 @@ Slater-Dirac
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 MondoSCF
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( -610.9751176 \)
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( \begin{array}{c}
 \\
@@ -1458,21 +1648,58 @@ MondoSCF
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Crystal98
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( -610.972 \)
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 STO-6G
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Slater-Dirac
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( \begin{array}{c}
 \\
@@ -1481,17 +1708,51 @@ Slater-Dirac
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 MondoSCF
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
 
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( \begin{array}{c}
 \\
@@ -1500,17 +1761,53 @@ MondoSCF
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Crystal98
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
 
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 STO-3G**
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Slater-Dirac
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( \begin{array}{c}
 \\
@@ -1519,17 +1816,51 @@ Slater-Dirac
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 MondoSCF
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
 
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="true" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( \begin{array}{c}
 \\
@@ -1538,17 +1869,54 @@ MondoSCF
 \end_inset 
 
 
-\newline 
-Crystal98
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
+
+Crystal98
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 NaCl
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 STO-3G
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Slater-Dirac
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( \left\{ \begin{array}{c}
 \left| a\right| =\left| b\right| =\left| c\right| =5.630\\
@@ -1557,21 +1925,56 @@ Slater-Dirac
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 MondoSCF
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( -2444.3583560 \)
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( \begin{array}{c}
 \\
@@ -1580,21 +1983,58 @@ MondoSCF
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Crystal98
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( -2444.358 \)
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 STO-6G
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Slater-Dirac
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( \begin{array}{c}
 \\
@@ -1603,17 +2043,51 @@ Slater-Dirac
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 MondoSCF
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
 
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( \begin{array}{c}
 \\
@@ -1622,17 +2096,53 @@ MondoSCF
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Crystal98
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
 
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 STO-3G**
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Slater-Dirac
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( \begin{array}{c}
 \\
@@ -1641,17 +2151,51 @@ Slater-Dirac
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 MondoSCF
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
 
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="true" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( \begin{array}{c}
 \\
@@ -1660,16 +2204,32 @@ MondoSCF
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Crystal98
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset 
+
 
 \end_float 
+\layout Standard
 
-\latex latex 
-
-\backslash 
-eject
 \begin_float tab 
 \layout Caption
 
@@ -1680,125 +2240,97 @@ eject
 
  Comparison of MgO test systems to Crystal98
 \layout Standard
-\align center \LyXTable
-multicol5
-13 6 0 0 -1 -1 -1 -1
-1 1 0 0
-1 0 0 0
-1 0 0 0
-1 0 0 0
-1 0 0 0
-1 0 0 0
-1 1 0 0
-1 0 0 0
-1 0 0 0
-1 0 0 0
-1 0 0 0
-1 0 0 0
-1 1 0 0
-8 1 0 "" ""
-8 1 0 "" ""
-8 1 0 "" ""
-8 1 0 "" ""
-8 1 0 "" ""
-8 1 1 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
+\align center 
+
+\begin_inset  Tabular
+<lyxtabular version="2" rows="13" columns="6">
+<features rotate="false" islongtable="false" endhead="0" endfirsthead="0" endfoot="0" endlastfoot="0">
+<column alignment="center" valignment="top" leftline="true" rightline="false" width="" special="">
+<column alignment="center" valignment="top" leftline="true" rightline="false" width="" special="">
+<column alignment="center" valignment="top" leftline="true" rightline="false" width="" special="">
+<column alignment="center" valignment="top" leftline="true" rightline="false" width="" special="">
+<column alignment="center" valignment="top" leftline="true" rightline="false" width="" special="">
+<column alignment="center" valignment="top" leftline="true" rightline="true" width="" special="">
+<row topline="true" bottomline="true" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
 
 System
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Basis
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Functional
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Cell (A)
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Program
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Energy (Hartree)
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 MgO
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 STO-3G
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Slater-Dirac
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( \left\{ \begin{array}{c}
 \left| a\right| =\left| b\right| =\left| c\right| =2.9777\\
@@ -1807,21 +2339,56 @@ Slater-Dirac
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 MondoSCF
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( -268.6324824 \)
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( \begin{array}{c}
 \\
@@ -1830,21 +2397,58 @@ MondoSCF
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Crystal98
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( -268.6323 \)
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 STO-6G
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Slater-Dirac
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( \begin{array}{c}
 \\
@@ -1853,21 +2457,56 @@ Slater-Dirac
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 MondoSCF
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( -269.384298 \)
 \end_inset 
 
 9
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( \begin{array}{c}
 \\
@@ -1876,17 +2515,53 @@ MondoSCF
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Crystal98
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
 
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 STO-3G**
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Slater-Dirac
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( \begin{array}{c}
 \\
@@ -1895,17 +2570,51 @@ Slater-Dirac
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 MondoSCF
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
 
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="true" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( \begin{array}{c}
 \\
@@ -1914,17 +2623,54 @@ MondoSCF
 \end_inset 
 
 
-\newline 
-Crystal98
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
+
+Crystal98
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 MgO
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 STO-3G
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Slater-Dirac
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( \left\{ \begin{array}{c}
 \left| a\right| =\left| b\right| =\left| c\right| =4.2112\\
@@ -1933,21 +2679,56 @@ Slater-Dirac
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 MondoSCF
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( -1076.2137742 \)
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( \begin{array}{c}
 \\
@@ -1956,21 +2737,58 @@ MondoSCF
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Crystal98
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( -1076.2138 \)
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 STO-6G
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Slater-Dirac
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( \begin{array}{c}
 \\
@@ -1979,17 +2797,51 @@ Slater-Dirac
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 MondoSCF
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
 
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( \begin{array}{c}
 \\
@@ -1998,17 +2850,53 @@ MondoSCF
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Crystal98
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
 
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 STO-3G**
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Slater-Dirac
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( \begin{array}{c}
 \\
@@ -2017,17 +2905,51 @@ Slater-Dirac
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 MondoSCF
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
 
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="true" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( \begin{array}{c}
 \\
@@ -2036,16 +2958,30 @@ MondoSCF
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Crystal98
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset 
+
 
 \end_float 
-
-\latex latex 
-
-\backslash 
-eject
 \layout Standard
 
 \begin_float tab 
@@ -2058,125 +2994,97 @@ eject
 
  Comparison of Carbon test systems to Crystal98
 \layout Standard
-\align center \LyXTable
-multicol5
-13 6 0 0 -1 -1 -1 -1
-1 1 0 0
-1 0 0 0
-1 0 0 0
-1 0 0 0
-1 0 0 0
-1 0 0 0
-1 1 0 0
-1 0 0 0
-1 0 0 0
-1 0 0 0
-1 0 0 0
-1 0 0 0
-1 1 0 0
-8 1 0 "" ""
-8 1 0 "" ""
-8 1 0 "" ""
-8 1 0 "" ""
-8 1 0 "" ""
-8 1 1 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
+\align center 
+
+\begin_inset  Tabular
+<lyxtabular version="2" rows="13" columns="6">
+<features rotate="false" islongtable="false" endhead="0" endfirsthead="0" endfoot="0" endlastfoot="0">
+<column alignment="center" valignment="top" leftline="true" rightline="false" width="" special="">
+<column alignment="center" valignment="top" leftline="true" rightline="false" width="" special="">
+<column alignment="center" valignment="top" leftline="true" rightline="false" width="" special="">
+<column alignment="center" valignment="top" leftline="true" rightline="false" width="" special="">
+<column alignment="center" valignment="top" leftline="true" rightline="false" width="" special="">
+<column alignment="center" valignment="top" leftline="true" rightline="true" width="" special="">
+<row topline="true" bottomline="true" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
 
 System
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Basis
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Functional
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Cell (A)
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Program
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Energy (Hartree)
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Diamond
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 STO-3G
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Slater-Dirac
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( \left\{ \begin{array}{c}
 \left| a\right| =\left| b\right| =\left| c\right| =\\
@@ -2185,17 +3093,51 @@ Slater-Dirac
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 MondoSCF
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
 
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( \begin{array}{c}
 \\
@@ -2204,17 +3146,53 @@ MondoSCF
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Crystal98
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
 
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 STO-6G
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Slater-Dirac
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( \begin{array}{c}
 \\
@@ -2223,17 +3201,51 @@ Slater-Dirac
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 MondoSCF
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
 
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( \begin{array}{c}
 \\
@@ -2242,17 +3254,53 @@ MondoSCF
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Crystal98
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
 
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 3-21G
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Slater-Dirac
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( \begin{array}{c}
 \\
@@ -2261,17 +3309,51 @@ Slater-Dirac
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 MondoSCF
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
 
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="true" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( \begin{array}{c}
 \\
@@ -2280,17 +3362,54 @@ MondoSCF
 \end_inset 
 
 
-\newline 
-Crystal98
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
+
+Crystal98
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Graphite
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 STO-3G
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Slater-Dirac
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( \left\{ \begin{array}{c}
 \left| a\right| =\left| b\right| =\left| c\right| =\\
@@ -2299,17 +3418,51 @@ Slater-Dirac
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 MondoSCF
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
 
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( \begin{array}{c}
 \\
@@ -2318,17 +3471,53 @@ MondoSCF
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Crystal98
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
 
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 3-21G
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Slater-Dirac
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( \begin{array}{c}
 \\
@@ -2337,17 +3526,51 @@ Slater-Dirac
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 MondoSCF
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
 
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( \begin{array}{c}
 \\
@@ -2356,17 +3579,53 @@ MondoSCF
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Crystal98
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
 
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 6-31G**
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Slater-Dirac
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( \begin{array}{c}
 \\
@@ -2375,17 +3634,51 @@ Slater-Dirac
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 MondoSCF
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
 
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="true" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( \begin{array}{c}
 \\
@@ -2394,16 +3687,32 @@ MondoSCF
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Crystal98
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset 
+
 
 \end_float 
+\layout Standard
 
-\latex latex 
-
-\backslash 
-eject
 \begin_float tab 
 \layout Caption
 
@@ -2415,194 +3724,326 @@ eject
  Total energy per atom for the sodium cloride system for increasing system
  size
 \layout Standard
-\align center \LyXTable
-multicol5
-8 3 0 0 -1 -1 -1 -1
-1 1 0 0
-1 0 0 0
-1 0 0 0
-1 0 0 0
-1 0 0 0
-1 0 0 0
-1 0 0 0
-1 1 0 0
-8 1 0 "" ""
-8 1 0 "" ""
-8 1 1 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
+\align center 
+
+\begin_inset  Tabular
+<lyxtabular version="2" rows="8" columns="3">
+<features rotate="false" islongtable="false" endhead="0" endfirsthead="0" endfoot="0" endlastfoot="0">
+<column alignment="center" valignment="top" leftline="true" rightline="false" width="" special="">
+<column alignment="center" valignment="top" leftline="true" rightline="false" width="" special="">
+<column alignment="center" valignment="top" leftline="true" rightline="true" width="" special="">
+<row topline="true" bottomline="true" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
 
 System Size (
 \begin_inset Formula \( N) \)
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Energy (
 \begin_inset Formula \( E \)
 \end_inset 
 
 )
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( \frac{E}{N} \)
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( \, \, 2^{\dagger } \)
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( -610.975117 \)
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( -305.487559 \)
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( 8 \)
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( -2444.35835 \)
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( -305.544794 \)
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( \, \, 16^{\dagger } \)
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( -4888.70023 \)
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( -305.543765 \)
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( \, \, 54^{\dagger } \)
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( -16499.4900 \)
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( -305.546111 \)
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( 64 \)
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( -19554.9556 \)
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( -305.546181 \)
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( \, \, 128^{\dagger } \)
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( -39109.9115 \)
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( -305.546184 \)
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="true" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( 216 \)
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( -65997.9768 \)
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( -305.546185 \)
 \end_inset 
 
 
+\end_inset 
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset 
+
+
 \end_float 
+\layout Standard
 
-\latex latex 
-
-\backslash 
-eject
 \begin_float tab 
 \layout Caption
 
@@ -2625,234 +4066,70 @@ eject
 
  where the central cell is substracted.
 \layout Standard
-\added_space_top 0.3cm \added_space_bottom 0.3cm \align center \LyXTable
-multicol5
-30 6 1 0 -1 -1 -1 -1
-1 1 0 0
-0 1 0 0
-0 0 0 0
-0 0 0 0
-1 0 0 0
-0 0 0 0
-0 0 0 0
-1 0 0 0
-0 0 0 0
-0 0 0 0
-1 0 0 0
-0 0 0 0
-0 0 0 0
-0 0 0 0
-1 0 0 0
-0 0 0 0
-0 0 0 0
-0 0 0 0
-0 0 0 0
-1 0 0 0
-0 0 0 0
-0 0 0 0
-0 0 0 0
-0 0 0 0
-1 0 0 0
-0 0 0 0
-0 0 0 0
-0 0 0 0
-0 0 0 0
-0 1 0 0
-8 1 1 "" ""
-8 0 1 "" ""
-8 0 1 "" ""
-8 1 0 "" ""
-8 1 1 "" ""
-8 0 1 "" ""
-1 8 1 1 0 0 0 "" ""
-2 2 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-1 8 1 1 0 0 0 "" ""
-2 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 2 1 1 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
+\added_space_top 0.3cm \added_space_bottom 0.3cm \align center 
 
+\begin_inset  Tabular
+<lyxtabular version="2" rows="30" columns="6">
+<features rotate="false" islongtable="true" endhead="0" endfirsthead="0" endfoot="0" endlastfoot="0">
+<column alignment="center" valignment="top" leftline="true" rightline="true" width="" special="">
+<column alignment="center" valignment="top" leftline="false" rightline="true" width="" special="">
+<column alignment="center" valignment="top" leftline="false" rightline="true" width="" special="">
+<column alignment="center" valignment="top" leftline="true" rightline="false" width="" special="">
+<column alignment="center" valignment="top" leftline="true" rightline="true" width="" special="">
+<column alignment="center" valignment="top" leftline="false" rightline="true" width="" special="">
+<row topline="true" bottomline="true" newpage="false">
+<cell multicolumn="1" alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="2" alignment="left" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Cubic 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="1" alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
  
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="2" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Ortho-rombic
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="false" bottomline="true" newpage="false">
+<cell multicolumn="0" alignment="left" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( \: \:  \)
 \end_inset 
@@ -2866,7 +4143,13 @@ Ortho-rombic
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( \:  \)
 \end_inset 
@@ -2880,7 +4163,13 @@ Ortho-rombic
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( \qquad \qquad  \)
 \end_inset 
@@ -2906,7 +4195,13 @@ Ortho-rombic
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( \: \:  \)
 \end_inset 
@@ -2920,7 +4215,13 @@ Ortho-rombic
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( \:  \)
 \end_inset 
@@ -2934,7 +4235,13 @@ Ortho-rombic
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 
 \begin_inset Formula \( \qquad  \)
 \end_inset 
@@ -2964,348 +4271,1372 @@ Ortho-rombic
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="false" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 4
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 0
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 0.3095492436410130D+01
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 4
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 0
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 0.8832776225626217D+00 
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="false" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 4
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 0.1547746218205053D+02
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 3
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 0.3122857982921809D+01 
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 6
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 0
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 0.4796724494609411D+01
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 6
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 0
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 -0.3501580359498343D+02
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="false" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 4
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 -0.3357707146226664D+02
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 3
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 0.4332984629874099D+02
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="false" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 6
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 -0.6740542192034350D+03
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 8
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 0
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 0.4276164638449980D+03
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 8
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 0
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 0.1394780314659910D+03
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="false" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 4
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 0.4276164638450001D+03 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 3
-\newline 
-0.4931293093807656D+03
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
+
+0.4931293093807656D+03
+\end_inset 
+</cell>
+</row>
+<row topline="false" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 8
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 0.2779507014992490D+05 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 6
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 0.4931293093807656D+03
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 10
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 0
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 0.3337055302939225D+04
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 10
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 0
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 0.1760026471909184D+03
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="false" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 4
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 -0.7341521666466320D+04
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 3
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 0.3422448296725441D+02
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="false" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 8
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 -0.1248058683299270D+06
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 6
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 -0.5324080077525265D+03
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="false" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 9
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 0.1105450799842411D+05
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 12
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 0
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 0.3533770670774835D+06
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 12
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 0
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 0.3441656356582020D+06
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="false" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 4
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 0.2089749967040276D+06
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 3
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 -0.2988963294769746D+06
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="false" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 8
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 0.2086201911558935D+07
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 6
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 0.1981829408275373D+07
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="false" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 12
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 0.3193240788535041D+09
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 9
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 0.1399645778709430D+07
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="false" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 12
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 0.4855992637030970D+09
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 14
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 0
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 0.7186127463179821D+07
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 14
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 0
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 -0.1057046901404442D+08
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="false" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 4
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 -0.9239306738374122D+07
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 3
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 -0.1094473082593862D+08
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="false" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 8
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 -0.5851560934303580D+08 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 6
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 0.7172818259530190D+07
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="false" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 12
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 -0.2243098358149698D+10
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 9
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 0.1166548139252476D+09
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="false" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 12
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 -0.3299496399383880D+10
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 16
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 0
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 0.1168988444587698D+10
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 16
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 0
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 -0.1553204312146170D+09
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="false" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 4
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 0.5469289478144757D+09
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 3
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 0.2790914628186657D+09
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="false" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 8
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 0.2661931236843469D+10
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 6
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 0.1592904788101633D+10
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="false" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 12
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 0.5130698388451003D+11
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 9
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 0.9241099613788853D+10
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="false" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 16
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 0.1540161278003348D+14 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 12
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 0.8723232135625955D+11 
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="false" bottomline="true" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 15
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="false" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 0.3299919999077370D+10
+\end_inset 
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset 
+
+
 \end_float 
+\layout Standard
+
 
 \latex latex 
 
 \backslash 
 eject
+\layout Standard
+
 \begin_float fig 
 \layout Caption
 
@@ -3326,6 +5657,8 @@ flags 15
 
 
 \end_float 
+\layout Standard
+
 \begin_float fig 
 \layout Caption
 
@@ -3356,15 +5689,21 @@ flags 15
 
 \end_inset 
 
- Error in the Periodic Far Field Approximation with increasing inner box
- size
+ Error in the Periodic Far Field approximation with increasing 
+\begin_inset Formula \( \mathbf{L}_{max} \)
+\end_inset 
+
+ for two different inner cell sums for 
+\begin_inset Formula \( 64 \)
+\end_inset 
+
+ molecules of water.
 \layout Standard
 \align center 
 
-\begin_inset Figure size 654 470
-file ErrorPFF_InnerBox.eps
-width 3 110.00
-flags 15
+\begin_inset Figure size 510 370
+file PFFMultipoles_water.ps
+flags 5
 
 \end_inset 
 
@@ -3384,14 +5723,16 @@ flags 15
 
 \begin_inset Figure size 476 420
 file N2.eps
-width 3 80.00
-height 3 50.00
+width 3 80
+height 3 50
 flags 15
 
 \end_inset 
 
 
 \end_float 
+\layout Standard
+
 \begin_float fig 
 \layout Caption
 
@@ -3410,6 +5751,8 @@ flags 15
 
  for the dense molecular nitrogen periodic system.
 \end_float 
+\layout Standard
+
 \begin_float fig 
 \layout Caption
 
@@ -3422,6 +5765,8 @@ flags 15
  solver.
  
 \end_float 
+\layout Standard
+
 \begin_float fig 
 \layout Caption
 
