@@ -843,12 +843,13 @@ CONTAINS
     TYPE(Parallel)     :: M
     TYPE(BasisSets)    :: B
     INTEGER            :: cBAS,cGEO,K,J,iATS,iCLONE
-    CHARACTER(LEN=DCL) :: chGEO    
+    CHARACTER(LEN=DCL) :: chGEO,chBAS    
     REAL(DOUBLE)       :: GradVal
     !----------------------------------------------------------------------------!
     CALL New(S%Action,1)
     ! Initialize the force vector in HDF, clone by clone
     chGEO=IntToChar(cGEO)
+    chBAS=IntToChar(cBAS)
     DO iCLONE=1,G%Clones
        G%Clone(iCLONE)%Gradients%D=BIG_DBL
        G%Clone(iCLONE)%GradRMS=&
@@ -871,11 +872,19 @@ CONTAINS
 #ifdef NLATTFORCE    
     ! Coulomb part
     CALL Invoke('JForce',N,S,M)
+!
+    O%Thresholds(cBAS)%TwoE=O%Thresholds(cBAS)%TwoE*1.D-4
+    CALL Put(O%Thresholds(cBAS),chBAS)
     CALL NLATTFORCE_J(cBAS,cGEO,G,B,N,S,M)
+    O%Thresholds(cBAS)%TwoE=O%Thresholds(cBAS)%TwoE*1.D4
+    CALL Put(O%Thresholds(cBAS),chBAS)
+!
     ! Exact Hartree-Fock exchange component
     IF(HasHF(O%Models(cBas)))THEN
-       CALL Invoke('GONX',N,S,M)       
+       CALL Invoke('GONX',N,S,M)    
+!   
        CALL NLATTFORCE_X(cBAS,cGEO,G,B,N,S,M)
+!
     ENDIF
 #else
     ! Coulomb part
@@ -974,6 +983,7 @@ CONTAINS
 !   
     DDelta = 1.D-3
     DO iCLONE=1,G%Clones
+
        chGEO=IntToChar(cGEO)
        chBAS=IntToChar(cBAS)
        chSCF=IntToChar(S%Current%I(1))
