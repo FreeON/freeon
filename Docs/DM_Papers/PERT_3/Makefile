@@ -21,7 +21,7 @@ pdf:	ps
 
 
 dvi:	latex
-	xdvi +8 -s 2 Response3 &
+	xdvi  -s 2 Response3 &
 
 latex:
 	latex Response3
