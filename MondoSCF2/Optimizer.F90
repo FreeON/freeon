@@ -770,11 +770,11 @@ CONTAINS
        CALL RedundancyOff(Displ%D,SCRPath,Print)
      CASE(GRAD_BiSect_OPT) 
        IF(iGEO<2) THEN
-         CALL DiagHess(GOpt%CoordCtrl,GOpt%Hessian,Grad,Displ, &
-                       IntCs,AtNum,iGEO,XYZ)
-         CALL CutOffDispl(Displ%D,IntCs)
-         CALL RedundancyOff(Displ%D,SCRPath,Print)
-       ! CALL PrepBiSect(Grad%D,IntCs,Displ)
+       ! CALL DiagHess(GOpt%CoordCtrl,GOpt%Hessian,Grad,Displ, &
+       !               IntCs,AtNum,iGEO,XYZ)
+       ! CALL CutOffDispl(Displ%D,IntCs)
+       ! CALL RedundancyOff(Displ%D,SCRPath,Print)
+         CALL PrepBiSect(Grad%D,IntCs,Displ)
        ELSE
          CALL GeoDIIS(XYZ,GOpt%Constr,GOpt%BackTrf, &
            GOpt%GrdTrf,GOpt%TrfCtrl,GOpt%CoordCtrl,GOpt%GDIIS, &
@@ -1686,19 +1686,24 @@ CONTAINS
      DO I=1,NIntC
        IF(IntCs%Def(I)(1:4)=='STRE') THEN
        ! D=RANDOM_DBL((/-DStre,DStre/))
-         D=DStre
+       ! D=DStre
+         D=Grad(I)/1.D0
        ELSE IF(IntCs%Def(I)(1:4)=='TORS') THEN
        ! D=RANDOM_DBL((/-DTors,DTors/))
-         D=DTors
+       ! D=DTors
+         D=Grad(I)/0.2D0
        ELSE IF(IntCs%Def(I)(1:4)=='OUTP') THEN
        ! D=RANDOM_DBL((/-DOutP,DOutP/))
-         D=DOutP
+       ! D=DOutP
+         D=Grad(I)/0.3D0
        ELSE IF(HasAngle(IntCs%Def(I))) THEN
        ! D=RANDOM_DBL((/-DAngle,DAngle/))
-         D=DAngle
+       ! D=DAngle
+         D=Grad(I)/0.3D0
        ELSE
        ! D=RANDOM_DBL((/-DStre,DStre/))
-         D=DStre
+       ! D=DStre
+         D=Grad(I)/1.D0
        ENDIF
        IF(ABS(Grad(I))>Tol) THEN
          Displ%D(I)=SIGN(ABS(D),-Grad(I))

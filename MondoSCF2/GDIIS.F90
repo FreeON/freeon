@@ -478,6 +478,7 @@ CONTAINS
                       FitVal,PredGrad,Path)
      INTEGER                   :: iGEO,I,NDim,NIntC
      TYPE(INTC)                :: IntCs
+     REAL(DOUBLE)                :: Conv
      REAL(DOUBLE),DIMENSION(:,:) :: IntCValues,IntCGrads
      REAL(DOUBLE),DIMENSION(:) :: FitVal,PredGrad
      CHARACTER(LEN=*)          :: Path
@@ -486,8 +487,14 @@ CONTAINS
      OPEN(UNIT=91,FILE=TRIM(Path)//'Pred_'// &
           TRIM(IntToChar(IGEO)),STATUS='UNKNOWN')
      DO I=1,NIntC
-       WRITE(91,12) I,IntCs%Def(I)(1:5),IntCValues(I,NDim), &
-                    IntCGrads(I,NDim),FitVal(I),PredGrad(I)
+       IF(HasAngle(IntCs%Def(I))) THEN
+         Conv=180.D0/PI
+       ELSE
+         Conv=One/AngstromsToAu
+       ENDIF
+       WRITE(91,12) I,IntCs%Def(I)(1:5),Conv*IntCValues(I,NDim), &
+                    IntCGrads(I,NDim),Conv*FitVal(I),PredGrad(I)
+       
      ENDDO
      12 FORMAT(I3,2X,A5,2X,3F12.6,F20.6)
      CLOSE(91)
@@ -520,9 +527,9 @@ CONTAINS
                                     Conv*VectX(J),A+B*VectX(J)
        ENDDO
          WRITE(*,11) iGEO+1,iGEO+1,Conv*VectX(NDim),VectY(NDim), &
-                                   Conv*FitVal,PredGrad
+                                   Conv*FitVal,A+B*FitVal
          WRITE(91,11) iGEO+1,iGEO+1,Conv*VectX(NDim),VectY(NDim), &
-                                    Conv*FitVal,PredGrad
+                                    Conv*FitVal,A+B*FitVal
        11 FORMAT(I3,2X,I3,2X,5F20.8)
      CLOSE(91)
    END SUBROUTINE PrtFits
@@ -839,14 +846,14 @@ CONTAINS
              MinG1=ABS(VectY(J))
              IF(MinG1<MinG) MinG=MinG1
            ENDDO
+         ! PredGrad=Zero
          ! PredGrad=-SIGN(MinG,VectY(NDim))/Two
          ! PredGrad=-VectY(NDim)/Two
-           PredGrad=Zero
+           PredGrad=-VectY(NDim)/4.D0
            !
            IF(B<Zero) THEN
              B=-B
              A=VectY(NDim)-B*VectX(NDim)
-         !   PredGrad=-VectY(NDim)/Two
            ENDIF
            !
            FitVal=(PredGrad-A)/B
@@ -1275,10 +1282,10 @@ CONTAINS
          IF(ABS(X1-X2)<1.D-6) CYCLE
          B=(G1-G2)/(X1-X2) ; A=G1-B*X1
          IF(B>Zero) THEN  ! basin of minimum
-           FitVal=-A/B
-           PredGrad=Zero
+         ! PredGrad=Zero
          ! PredGrad=-VectY(NMem)/Two
-         ! FitVal=(PredGrad-A)/B
+           PredGrad=-VectY(NMem)/4.D0
+           FitVal=(PredGrad-A)/B
            RETURN
          ELSE             ! basin of maximum
            CYCLE
