@@ -702,9 +702,10 @@ CONTAINS
      CALL Delete(Carts)
      !
      CALL GetCGradMax(CartGrad%D,NCart,GOpt%GOptStat%IMaxCGrad,&
-                      GOpt%GOptStat%MaxCGrad)
+                      GOpt%GOptStat%MaxCGrad,GOpt%GOptStat%ILMaxCGrad, &
+                      GOpt%GOptStat%LMaxCGrad)
      !
-     CALL GradConv(GOpt%GOptStat,GOpt%GConvCrit,GOpt%Constr,GOpt%LattIntC%Grad)
+     CALL GradConv(GOpt%GOptStat,GOpt%GConvCrit,GOpt%Constr)
      !
      ! Do we have to refresh internal coord defs?   
      !
@@ -777,16 +778,14 @@ CONTAINS
 !
 !--------------------------------------------------------------------
 !
-   SUBROUTINE GradConv(CtrlStat,GConvCr,CtrlConstr,LattGrad)
+   SUBROUTINE GradConv(CtrlStat,GConvCr,CtrlConstr)
      TYPE(GOptStat)             :: CtrlStat
      TYPE(Constr)               :: CtrlConstr
      TYPE(GConvCrit)            :: GConvCr    
-     REAL(DOUBLE),DIMENSION(6)  :: LattGrad,AbsGrad
-     INTEGER                    :: J
+     INTEGER                    :: J,N
      !
-     DO J=1,6 ; AbsGrad(J)=ABS(LattGrad(J)) ; ENDDO
      CtrlStat%GeOpConvgd=(CtrlStat%MaxCGrad<GConvCr%Grad).AND. &
-                         (MAXVAL(AbsGrad)<GConvCr%Grad)
+                         (CtrlStat%LMaxCGrad<GConvCr%Grad)
    END SUBROUTINE GradConv
 !
 !--------------------------------------------------------------------
@@ -1053,7 +1052,7 @@ CONTAINS
      !                      
      INTEGER                    :: I,J,K,L
      INTEGER                    :: NCart,NIntC,NatmsLoc
-     REAL(DOUBLE)               :: RMSGrad,MaxGrad,MaxCGrad
+     REAL(DOUBLE)               :: RMSGrad,MaxGrad,MaxCGrad,LMaxCGrad
      REAL(DOUBLE)               :: RMSGradNoConstr,MaxGradNoConstr
      REAL(DOUBLE)               :: Etot,Sum,Fact
      !                      
@@ -1063,7 +1062,9 @@ CONTAINS
      INTEGER                    :: MaxOutP,MaxTors
      !                      
      INTEGER                    :: IMaxGrad,IMaxCGrad,IMaxGradNoConstr
+     INTEGER                    :: ILMaxCGrad
      LOGICAL                    :: GradConv
+     CHARACTER(LEN=4)           :: ALatt
      !
      NIntC=IntCs%N      
      NatmsLoc=SIZE(XYZ,2)
@@ -1073,9 +1074,11 @@ CONTAINS
      RMSGradNoConstr=CtrlStat%RMSGradNoConstr
      MaxGrad=CtrlStat%MaxGrad
      MaxCGrad=CtrlStat%MaxCGrad
+     LMaxCGrad=CtrlStat%LMaxCGrad
      MaxGradNoConstr=CtrlStat%MaxGradNoConstr
      IMaxGrad=CtrlStat%IMaxGrad
      IMaxCGrad=CtrlStat%IMaxCGrad
+     ILMaxCGrad=CtrlStat%ILMaxCGrad
      IMaxGradNoConstr=CtrlStat%IMaxGradNoConstr
      !
      IF(PBCDim>0) THEN
@@ -1174,6 +1177,17 @@ CONTAINS
      WRITE(*,420) RMSGrad
      WRITE(Out,410) MaxGrad,IntCs%Atoms%I(IMaxGrad,1:4)
      WRITE(Out,140) MaxCGrad,IMaxCGrad
+     IF(ILMaxCGrad==NatmsLoc-2) THEN
+       ALatt='   A' 
+     ELSE IF(ILMaxCGrad==NatmsLoc-1) THEN
+       ALatt='   B' 
+     ELSE
+       ALatt='   C' 
+     ENDIF
+     IF(PBCDim>0) THEN
+       WRITE(*,145) LMaxCGrad,ALAtt
+       WRITE(Out,145) LMaxCGrad,ALAtt
+     ENDIF
      WRITE(Out,420) RMSGrad
      IF(CtrlConstr%NConstr/=0) THEN
        WRITE(*,510) MaxGradNoConstr, &
@@ -1215,6 +1229,7 @@ CONTAINS
 401 FORMAT('                    Total Energy = ',F20.8)
 410 FORMAT('                   Max intl Grad = ',F12.6,' between atoms ',4I4)
 140 FORMAT('     Max Unconstrained Cart Grad = ',F12.6,'      on atom  ',4I4)
+145 FORMAT('     Max Unconstrained Latt Grad = ',F12.6,'      on vect  ',A4)
 420 FORMAT('                   RMS intl Grad = ',F12.6)
 510 FORMAT('Max Grad on Unconstrained Coords = ',F12.6,' between atoms ',4I4)
 520 FORMAT('RMS Grad on Unconstrained Coords = ',F12.6)
@@ -1575,11 +1590,12 @@ CONTAINS
 !
 !---------------------------------------------------------------------
 !
-   SUBROUTINE GetCGradMax(CartGrad,NCart,IMaxCGrad,MaxCGrad)
+   SUBROUTINE GetCGradMax(CartGrad,NCart,IMaxCGrad,MaxCGrad, &
+                          ILMaxCGrad,LMaxCGrad)
      REAL(DOUBLE),DIMENSION(:) :: CartGrad
      REAL(DOUBLE),DIMENSION(3) :: Vect    
-     REAL(DOUBLE)              :: MaxCGrad,Sum
-     INTEGER                   :: Nat,NCart,I,I1,I2,IMaxCGrad
+     REAL(DOUBLE)              :: MaxCGrad,Sum,LMaxCGrad
+     INTEGER                   :: Nat,NCart,I,I1,I2,IMaxCGrad,ILMaxCGrad
      !
      IMaxCGrad=1   
      MaxCGrad=Zero
@@ -1592,6 +1608,18 @@ CONTAINS
        IF(Sum>MaxCGrad) THEN
          IMaxCGrad=I
           MaxCGrad=Sum
+       ENDIF
+     ENDDO
+     !
+     LMaxCGrad=Zero
+     DO I=Nat-2,Nat
+       I1=3*(I-1)+1
+       I2=I1+2
+       Vect=CartGrad(I1:I2)
+       Sum=SQRT(DOT_PRODUCT(Vect,Vect))
+       IF(Sum>LMaxCGrad) THEN
+         ILMaxCGrad=I
+          LMaxCGrad=Sum
        ENDIF
      ENDDO
    END SUBROUTINE GetCGradMax
