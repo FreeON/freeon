@@ -741,7 +741,7 @@ CONTAINS
     CALL Invoke('JForce',N,S,M)
     ! Exact Hartree-Fock exchange component
     IF(HasHF(O%Models(cBas)))THEN
-       !CALL NXForce(cBAS,cGEO,N,G,B,S,M)
+    !   CALL NXForce(cBAS,cGEO,N,G,B,S,M)
     !  CALL Invoke('XForce',N,S,M)
        CALL Invoke('GONX',N,S,M)
     ENDIF
@@ -787,7 +787,9 @@ CONTAINS
           IF(G%Clone(iCLONE)%CConstrain%I(iATS)==0)THEN
              DO J=1,3
                 GradVal=G%Clone(iCLONE)%Gradients%D(J,iATS)
-                G%Clone(iCLONE)%GradRMS=G%Clone(iCLONE)%GradRMS+GradVal
+                !If I remember well rms=\sqrt{\frac{\sum_{i=1}^N x_i^2}{N}}
+                G%Clone(iCLONE)%GradRMS=G%Clone(iCLONE)%GradRMS+GradVal**2
+                !old G%Clone(iCLONE)%GradRMS=G%Clone(iCLONE)%GradRMS+GradVal
                 G%Clone(iCLONE)%GradMax=MAX(G%Clone(iCLONE)%GradMax,ABS(GradVal))
              ENDDO
           ENDIF
@@ -795,7 +797,11 @@ CONTAINS
        ! Put the zeroed forces back ...
        ! ... and close the group
        CALL CloseHDFGroup(HDF_CurrentID)
-       G%Clone(iCLONE)%GradRMS=SQRT(G%Clone(iCLONE)%GradRMS)/DBLE(3*G%Clone(iCLONE)%NAtms)
+       !
+       !If I remember well rms=\sqrt{\frac{\sum_{i=1}^N x_i^2}{N}}
+       G%Clone(iCLONE)%GradRMS=SQRT(G%Clone(iCLONE)%GradRMS/DBLE(3*G%Clone(iCLONE)%NAtms))
+       !old G%Clone(iCLONE)%GradRMS=SQRT(G%Clone(iCLONE)%GradRMS)/DBLE(3*G%Clone(iCLONE)%NAtms)
+       !
     ENDDO
     ! Now close the HDF file ..
     CALL CloseHDF(HDFFileID)
