@@ -33,6 +33,7 @@ MODULE ParseExtraCoords
      INTEGER                     :: NatmsLoc
      INTEGER                     :: NCartConstr,iCLONE
      REAL(DOUBLE)                :: V,Value,DegToRad
+     REAL(DOUBLE)                :: InvBoxSh(3,3),Vect1(3),Vect2(3)
      TYPE(DBL_RNK2)              :: XYZ 
      TYPE(INT_VECT)              :: CConstrain
      TYPE(CRDS)                  :: GMLoc
@@ -405,9 +406,15 @@ MODULE ParseExtraCoords
                 GOpt%ExtIntCs%Constraint%L(NIntCs+3)=.TRUE.
                   NConstr=NConstr+3
          !!!! supposing that constraints are the same for all clones
-                GOpt%ExtIntCs%ConstrValue%D(NIntCs+1)=XYZ%D(1,SerNum)
-                GOpt%ExtIntCs%ConstrValue%D(NIntCs+2)=XYZ%D(2,SerNum)
-                GOpt%ExtIntCs%ConstrValue%D(NIntCs+3)=XYZ%D(3,SerNum)
+                Vect1=XYZ%D(1:3,SerNum)
+                IF(Geos%Clone(1)%PBC%Dimen>0) THEN 
+                  InvBoxSh=InverseMatrix(Geos%Clone(1)%PBC%BoxShape%D)
+                  CALL DGEMM_NNc(3,3,1,One,Zero,InvBoxSh,Vect1,Vect2)
+                  Vect1=Vect2
+                ENDIF
+                GOpt%ExtIntCs%ConstrValue%D(NIntCs+1)=Vect1(1)
+                GOpt%ExtIntCs%ConstrValue%D(NIntCs+2)=Vect1(2)
+                GOpt%ExtIntCs%ConstrValue%D(NIntCs+3)=Vect1(3)
          !
                 NIntCs=NIntCs+3 
                 NCartConstr=NCartConstr+3
@@ -442,6 +449,8 @@ MODULE ParseExtraCoords
      ! Then, renumber atoms in IntCs by exclusion of Rigid atoms
      !
      CALL MergeConstr(GOpt%ExtIntCs,XYZ%D,CConstrain%I, &
+                      Geos%Clone(1)%PBC%BoxShape%D, &
+                      Geos%Clone(1)%PBC%Dimen, &
                       NIntCs,NConstr,NCartConstr)
      CALL ReNumbIntC(GOpt%ExtIntCs,CConstrain%I) 
      CALL ReOrdIntC(GOpt%ExtIntCs,NIntCs)
@@ -496,13 +505,15 @@ MODULE ParseExtraCoords
 !
 !------------------------------------------------------------------
 !
-   SUBROUTINE MergeConstr(IntCs,XYZ,CConstrain,&
+   SUBROUTINE MergeConstr(IntCs,XYZ,CConstrain,BoxShape,PBCDim, &
                           NIntCs,NConstr,NCartConstr)
      TYPE(INTC)                  :: IntCs,IntC_New
      INTEGER,DIMENSION(:)        :: CConstrain
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
+     REAL(DOUBLE)                :: BoxShape(3,3),InvBoxSh(3,3)
+     REAL(DOUBLE)                :: Vect1(3),Vect2(3)
      INTEGER                     :: NIntCs,NConstr,NCartConstr
-     INTEGER                     :: I,NNewC,NatmsLoc
+     INTEGER                     :: I,NNewC,NatmsLoc,PBCDim
      !
      NatmsLoc=SIZE(XYZ,2)
      NNewC=0
@@ -532,9 +543,15 @@ MODULE ParseExtraCoords
          IntC_New%Constraint%L(NNewC+2)=.TRUE.
          IntC_New%Constraint%L(NNewC+3)=.TRUE.
          !
-         IntC_New%ConstrValue%D(NNewC+1)=XYZ(1,I)
-         IntC_New%ConstrValue%D(NNewC+2)=XYZ(2,I)
-         IntC_New%ConstrValue%D(NNewC+3)=XYZ(3,I)
+         Vect1=XYZ(1:3,I)
+         IF(PBCDim>0) THEN 
+           InvBoxSh=InverseMatrix(BoxShape)
+           CALL DGEMM_NNc(3,3,1,One,Zero,InvBoxSh,Vect1,Vect2)
+           Vect1=Vect2
+         ENDIF
+         IntC_New%ConstrValue%D(NNewC+1)=Vect1(1) 
+         IntC_New%ConstrValue%D(NNewC+2)=Vect1(2) 
+         IntC_New%ConstrValue%D(NNewC+3)=Vect1(3) 
          NNewC=NNewC+3
        ENDIF
      ENDDO

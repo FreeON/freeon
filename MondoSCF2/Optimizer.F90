@@ -695,9 +695,9 @@ CONTAINS
      ! first constraints, then the rest.
      !
      CALL CartRNK2ToCartRNK1(CartGrad%D,GradIn)
-     CALL GetLattGrads(IntCL,CartGrad%D(NCart-8:NCart), &
+     CALL GetLattGrads(IntCL,CartGrad%D, &
                        XYZ,Gopt%LattIntC%Grad%D,PBCDim)
-   ! CALL SYMMSTRESS(CartGrad%D(NCart-8:NCart),XYZ,PBCDim)
+   ! CALL SYMMSTRESS(CartGrad%D(NCart-8),XYZ,PBCDim)
      CALL CleanConstrCart(XYZ,PBCDim,CartGrad%D,GOpt,SCRPath)
      CALL New(Carts,NCart)
      CALL CartRNK2ToCartRNK1(Carts%D,XYZ)
@@ -729,11 +729,11 @@ CONTAINS
                     'optimizer has not found any internal coordinates.')
      ENDIF
      IF(IntCs%N/=0) THEN
-       CALL INTCValue(IntCs,XYZ, &
+       CALL INTCValue(IntCs,XYZ,PBCDim, &
                       GOpt%CoordCtrl%LinCrit,GOpt%CoordCtrl%TorsLinCrit)
        CALL New(IntOld,IntCs%N)
        IntOld%D=IntCs%Value%D
-       CALL INTCValue(IntCL,XYZ,GOpt%CoordCtrl%LinCrit, &
+       CALL INTCValue(IntCL,XYZ,PBCDim,GOpt%CoordCtrl%LinCrit, &
                       GOpt%CoordCtrl%TorsLinCrit)
        CALL New(LatOld,IntCL%N)
        IF(IntCL%N>0) LatOld%D=IntCL%Value%D
@@ -842,11 +842,11 @@ CONTAINS
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ,RefXYZ
      TYPE(PBCFits)               :: PBCFit
      CHARACTER(LEN=*)            :: SCRPath,PWDPath,HFileIn
-     TYPE(DBL_VECT)              :: Displ,RefPoints,PredVals,LatticeW
+     TYPE(DBL_VECT)              :: Displ,RefPoints,PredVals
      TYPE(DBL_RNK2)              :: SRStruct,RefStruct,RefGrad,SRDispl
      TYPE(DBL_RNK2)              :: IntCValues,IntCGrads,MixMat
      TYPE(INT_VECT)              :: ISpB,JSpB
-     TYPE(DBL_VECT)              :: ASpB,Volumes
+     TYPE(DBL_VECT)              :: ASpB
      TYPE(DBL_RNK2)              :: FullB
      INTEGER                     :: I,J,NatmsLoc,NDim,NDimAux,NMem
      INTEGER                     :: HDFFileID,NCart,NMix
@@ -871,8 +871,6 @@ CONTAINS
        RefGrad%D(J,NDim)=CartGrad(J)
      ENDDO
      !
-     CALL PrepExtraW(PBCDim,LatticeW,Volumes,RefGrad%D,RefStruct%D)
-     !
      CALL CollectINTCPast(RefStruct%D,RefGrad%D,IntCValues,IntCGrads, &
                           IntCs,GOpt,SCRPath,Print,PBCDim)
      !
@@ -890,11 +888,11 @@ CONTAINS
       !CALL UnitaryTR(IntCs,IntCGrads%D,IntCValues%D,MixMat,NMix)
        CALL DisplFit(IntCs,IntCGrads%D,IntCValues%D,GOpt%Hessian, &
                   GOpt%CoordCtrl,PredVals,Displ,PWDPath,SCRPath,NCart, &
-                  iGEO,LatticeW%D,Volumes%D,MixMat_O=MixMat%D)
+                  iGEO,MixMat_O=MixMat%D)
      ELSE
        CALL DisplFit(IntCs,IntCGrads%D,IntCValues%D,GOpt%Hessian, &
                   GOpt%CoordCtrl,PredVals,Displ,PWDPath,SCRPath,NCart, &
-                  iGEO,LatticeW%D,Volumes%D)
+                  iGEO)
      ENDIF
      !
    ! CALL CleanConstrIntc(Displ%D,XYZ,GOpt%ExtIntCs,SCRPath,&
@@ -921,14 +919,6 @@ CONTAINS
        CALL Delete(MixMat)
      ENDIF
      ! 
-     ! Now, add correction by optimization of lattice only,
-     ! while fractional coordinates of the atoms are fixed
-     ! 
-     IF(GOpt%GConvCrit%UnCoupleLatt.AND.PBCDim>0) THEN
-       CALL LatticeFit(SRStruct%D,RefStruct%D,RefGrad%D,XYZ,PBCDim, &
-                       PBCFit,GOpt,Print,SCRPath,PWDPath,iGEO)
-     ENDIF
-     ! 
      ! Now, add fitting along correlation coordinates
      ! 
  !   IF(NDim>2) THEN
@@ -951,8 +941,6 @@ CONTAINS
      CALL Delete(PredVals)
      CALL Delete(RefPoints)
      CALL Delete(Displ)
-     CALL Delete(LatticeW)
-     CALL Delete(Volumes)
    END SUBROUTINE RelaxBiSect
 !
 !-------------------------------------------------------
@@ -973,7 +961,7 @@ CONTAINS
      CALL New(Displ,IntCs%N)
      CALL New(RefPoints,IntCs%N)
      !
-     CALL INTCValue(IntCs,XYZ, &
+     CALL INTCValue(IntCs,XYZ,PBCDim, &
                     GOpt%CoordCtrl%LinCrit,GOpt%CoordCtrl%TorsLinCrit)
      RefPoints%D=IntCs%Value%D
      !
@@ -1094,7 +1082,7 @@ CONTAINS
      IMaxGradNoConstr=CtrlStat%IMaxGradNoConstr
      !
      IF(PBCDim>0) THEN
-       CALL INTCValue(IntCL,XYZ,CtrlCoord%LinCrit,CtrlCoord%TorsLinCrit)
+       CALL INTCValue(IntCL,XYZ,PBCDim,CtrlCoord%LinCrit,CtrlCoord%TorsLinCrit)
        LattIntC%Displ%D=Zero
        DO J=1,IntCL%N
          LattIntC%Displ%D(J)=IntCL%Value%D(J)-LatOld%D(J)
@@ -1128,7 +1116,7 @@ CONTAINS
      !
      ! Size of internal coordinate changes
      !
-     CALL INTCValue(IntCs,XYZ,CtrlCoord%LinCrit,CtrlCoord%TorsLinCrit)
+     CALL INTCValue(IntCs,XYZ,PBCDim,CtrlCoord%LinCrit,CtrlCoord%TorsLinCrit)
      IntOld%D=IntCs%Value%D-IntOld%D
      CALL MapAngleDispl(IntCs,IntOld%D)
      MaxStre=0
@@ -1544,8 +1532,8 @@ CONTAINS
      !
      TrfC%DoTranslOff=.TRUE.
      TrfC%DoRotOff=.TRUE.
-     IF(GConstr%NCartConstr>=3) TrfC%DoTranslOff=.FALSE.
-     IF(GConstr%NCartConstr>=4.AND.Dimen==0) TrfC%DoRotOff=.FALSE.
+     IF(GConstr%NCartConstr>0) TrfC%DoTranslOff=.FALSE.
+     IF(GConstr%NCartConstr>0.AND.Dimen==0) TrfC%DoRotOff=.FALSE.
      !
      IF(CoordC%CoordType/=CoordType_Cartesian) THEN
        TrfC%DoInternals=.TRUE.

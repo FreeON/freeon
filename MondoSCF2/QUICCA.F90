@@ -159,7 +159,7 @@ CONTAINS
      NCart=3*NatmsLoc
      CALL New(LastIntCVals,IntCs%N)
      CALL New(LastIntCGrads,IntCs%N)
-     CALL INTCValue(IntCs,XYZ,GOpt%CoordCtrl%LinCrit, &
+     CALL INTCValue(IntCs,XYZ,PBCDim,GOpt%CoordCtrl%LinCrit, &
                     GOpt%CoordCtrl%TorsLinCrit)
      LastIntCVals%D=IntCs%Value%D
      CALL SetBackToRefs(LastIntCVals%D,IntCs,RefPoints)
@@ -655,7 +655,7 @@ CONTAINS
        CALL RedundancyOff(VectI%D,SCRPath,Print,Messg_O='Q IntC Grads')
      ! CALL POffHardGc(IntCs,XYZAux%D,PBCDim,VectI%D,SCRPath,Print2)
        IntCGrads%D(:,I)=VectI%D
-       CALL INTCValue(IntCs,XYZAux%D,GOpt%CoordCtrl%LinCrit, &
+       CALL INTCValue(IntCs,XYZAux%D,PBCDim,GOpt%CoordCtrl%LinCrit, &
                       GOpt%CoordCtrl%TorsLinCrit)
        IntCValues%D(:,I)=IntCs%Value%D
      ENDDO
@@ -670,78 +670,23 @@ CONTAINS
 !
 !----------------------------------------------------------------------
 !
-   SUBROUTINE CollectPBCPast(RefStruct,RefGrad,IntCValues,IntCGrads, &
-                              IntCs,GOpt,PBCDim)
-     REAL(DOUBLE),DIMENSION(:,:)  :: RefStruct,RefGrad
-     TYPE(DBL_RNK2)               :: XYZAux,IntCGrads,IntCValues
-     TYPE(DBL_VECT)               :: VectC,VectI,VectCG,VectX
-     INTEGER                      :: NMem,NatmsLoc,NCart
-     INTEGER                      :: I,J,PBCDim
-     TYPE(INTC)                   :: IntCs
-     TYPE(GeomOpt)                :: GOpt 
-     !
-     NMem=SIZE(RefStruct,2)
-     IF(NMem/=SIZE(RefGrad,2)) CALL Halt('Dim err in CollectPBCPast')
-     NCart=SIZE(RefStruct,1)
-     NatmsLoc=NCart/3
-     IF(NCart/=3*NatmsLoc) CALL Halt('Dim err 2 in CollectPBCPast')
-     !
-     CALL New(XYZAux,(/3,NatmsLoc/))
-     CALL New(VectC,NCart)
-     CALL New(VectCG,NCart)
-     CALL New(VectX,NMem)
-     !
-     CALL New(IntCGrads,(/IntCs%N,NMem/))
-     CALL New(IntCValues,(/IntCs%N,NMem/))
-     CALL New(VectI,IntCs%N)
-     !
-     ! Calculate IntC gradients using the latest IntC-s     
-     !
-     DO I=1,NMem
-       DO J=1,NCart
-         VectC%D(J)=RefStruct(J,I)
-         VectCG%D(J)=RefGrad(J,I)
-       ENDDO
-       CALL CartRNK1ToCartRNK2(VectC%D,XYZAux%D)
-       !
-       CALL GetLattGrads(IntCs,VectCG%D(NCart-8:NCart),XYZAux%D, &
-                         VectI%D,PBCDim)
-       IntCGrads%D(:,I)=VectI%D
-       !
-       CALL INTCValue(IntCs,XYZAux%D,GOpt%CoordCtrl%LinCrit, &
-                      GOpt%CoordCtrl%TorsLinCrit)
-       IntCValues%D(:,I)=IntCs%Value%D
-     ENDDO
-   ! CALL GrdConvrgd(GOpt%GOptStat,IntCs,VectI%D)
-     !
-     CALL Delete(VectX)
-     CALL Delete(VectI) 
-     CALL Delete(VectC) 
-     CALL Delete(VectCG) 
-     CALL Delete(XYZAux) 
-   END SUBROUTINE CollectPBCPast
-!
-!---------------------------------------------------------------------
-!
    SUBROUTINE LocalWeight(LWeight,Weights,IntCs,NCart,SCRPath, &
-                          ExtraW,USQ_O)
+                          USQ_O)
      REAL(DOUBLE),DIMENSION(:,:) :: LWeight,Weights
      CHARACTER(LEN=*)            :: SCRPath
      TYPE(INT_VECT)              :: IGi,JGi,IGiT1,JGiT1,IGiT2,JGiT2
      INTEGER                     :: NCart,NZ,I,J,K1,K2,L1,L2,NMem
      INTEGER                     :: NPBC
-     REAL(DOUBLE)                :: Weight,X1,X2,Y,W,WSum
+     REAL(DOUBLE)                :: Weight,X1,X2,Y,W
      TYPE(INTC)                  :: IntCs
      TYPE(DBL_VECT)              :: Vect1,AGi,AGiT1,AGiT2
      REAL(DOUBLE),DIMENSION(:,:),OPTIONAL :: USQ_O
-     REAL(DOUBLE),DIMENSION(:)   :: ExtraW
      ! 
      ! Calculate Topology (connectivity) of internal coordinates
      ! 
      NMem=SIZE(LWeight,2)
      CALL New(Vect1,IntCs%N)
      I=MAX(IntCs%N,NMem)
-     WSum=SUM(ExtraW)
      !
      IF(PRESENT(USQ_O)) THEN
        K1=SIZE(USQ_O,1)
@@ -791,14 +736,7 @@ CONTAINS
          ELSE
            LWeight(J,I)=Weights(J,I)
          ENDIF
-         IF(HasLattice(IntCs%Def%C(J))) THEN
-           LWeight(J,I)=ExtraW(I)
-         ENDIF
        ENDDO
-      !W=EXP(ExtraW(I)/(WSum+1.D-10))
-      !DO J=1,IntCs%N ; LWeight(J,I)=W*LWeight(J,I) ; ENDDO
-      !W=ExtraW(I)
-      !DO J=1,IntCs%N ; LWeight(J,I)=LWeight(J,I)+W ; ENDDO
      ENDDO
      ! 
      CALL Delete(Vect1)
@@ -860,11 +798,10 @@ CONTAINS
 !
    SUBROUTINE DisplFit(IntCs,IntCGrads,IntCValues,GHess,GCoordCtrl, &
                        PredVals,Displ,Path,SCRPath,NCart,iGEO, &
-                       ExtraW,Volumes,MixMat_O,PrtFits_O)
+                       MixMat_O,PrtFits_O)
      TYPE(INTC)                 :: IntCs
      TYPE(DBL_VECT)             :: PredVals,Displ,DisplT
      REAL(DOUBLE),DIMENSION(:,:):: IntCGrads,IntCValues
-     REAL(DOUBLE),DIMENSION(:)  :: ExtraW,Volumes
      INTEGER                    :: I,J,NIntC,NDim,iGEO
      INTEGER                    :: NCart,NT
      CHARACTER(LEN=*)           :: Path,SCRPath
@@ -927,15 +864,15 @@ CONTAINS
        ABCT%D=ABC1T%D
      ENDIF
      !
-     CALL PrepPrimW(WeightsT%D,IntCGradsT%D,IntCsT,ExtraW,Volumes)
+     CALL PrepPrimW(WeightsT%D,IntCGradsT%D,IntCsT)
      CALL CalcHessian(FittedHessT%D,ABC1T%D)
      CALL SecondWeight(WeightsT%D,FittedHessT%D)
      IF(PRESENT(MixMat_O)) THEN
        CALL LocalWeight(LWeightT%D,WeightsT%D,IntCsT,NCart, &
-                        SCRPath,ExtraW,USQ_O=USQ%D)
+                        SCRPath,USQ_O=USQ%D)
      ELSE
        CALL LocalWeight(LWeightT%D,WeightsT%D,IntCsT,NCart, &
-                        SCRPath,ExtraW)
+                        SCRPath)
      ENDIF
      CALL LQFit(IntCValuesT%D,IntCGradsT%D,LWeightT%D,IntCsT,ABCT%D, &
               ! RangeT%D,NDegsT%I,Zero,.TRUE.)
@@ -1493,22 +1430,20 @@ CONTAINS
 !
 !---------------------------------------------------------------------
 !
-   SUBROUTINE PrepPrimW(Weights,IntCGrads,IntCs,ExtraW,Volumes)
+   SUBROUTINE PrepPrimW(Weights,IntCGrads,IntCs)
      REAL(DOUBLE),DIMENSION(:,:) :: Weights,IntCGrads
-     REAL(DOUBLE),DIMENSION(:)   :: ExtraW,Volumes
      TYPE(INTC)                  :: IntCs
-     REAL(DOUBLE)                :: X,W
+     REAL(DOUBLE)                :: X
      INTEGER                     :: NIntC,NDim,I,J
      !
      NIntC=SIZE(IntCGrads,1)
      NDim=SIZE(IntCGrads,2)
      !
      DO I=1,NDim
-       W=ExtraW(I)/Volumes(I)
        DO J=1,NIntC
          IF(IntCs%Active%L(J)) THEN
            X=IntCGrads(J,I)
-           Weights(J,I)=X*X !+W
+           Weights(J,I)=X*X 
          ELSE
            Weights(J,I)=1.D99
          ENDIF
@@ -1904,220 +1839,6 @@ CONTAINS
      ! Check gradients of translation and rotation
      !
    END SUBROUTINE GrdConvrgd
-!
-!----------------------------------------------------------------------
-!
-   SUBROUTINE LatticeFit(SRStruct,RefStruct,RefGrad,XYZ,PBCDim, &
-                         PBCFit,GOpt,Print,SCRPath,PWDPath,iGEO)
-     REAL(DOUBLE),DIMENSION(:,:) :: SRStruct,RefStruct,RefGrad,XYZ
-     INTEGER                     :: Print,PBCDim,iGEO
-     TYPE(INTC)                  :: IntC_L
-     CHARACTER(LEN=*)            :: SCRPath,PWDPath
-     TYPE(DBL_RNK2)              :: IntCValues,IntCGrads
-     TYPE(DBL_RNK2)              :: PBCRefStr,PBCRefGrd
-     TYPE(PBCFits)               :: PBCFit
-     TYPE(GeomOpt)               :: GOpt
-     INTEGER                     :: NatmsLoc,NCart,I,J,NDim
-     TYPE(DBL_VECT)              :: PredVals,Displ,VectCart,ExtraW
-     TYPE(DBL_VECT)              :: LatticeW,Volumes
-     REAL(DOUBLE),DIMENSION(3,3) :: InvBoxSh,BoxShape
-     REAL(DOUBLE),DIMENSION(3)   :: CartAux1,CartAux2
-     REAL(DOUBLE)                :: StreCrit,AngleCrit
-     !
-     IF(.NOT.DoLatticeFit(GOpt,iGEO)) RETURN
-     CALL StepPBCFit(PBCFit,RefStruct,RefGrad)
-     CALL GetPBCMem(PBCFit,PBCRefStr,PBCRefGrd,ExtraW)
-     !
-     NDim=SIZE(PBCRefStr%D,2)
-     NatmsLoc=SIZE(XYZ,2)
-     NCart=3*NatmsLoc
-     CALL LatticeINTC(IntC_L,PBCDim,DoVolume_O=.TRUE.)
-     CALL New(VectCart,NCart)
-     CALL CollectPBCPast(PBCRefStr%D,PBCRefGrd%D,IntCValues,IntCGrads, &
-                         IntC_L,GOpt,PBCDim)
-
-     CALL PrepExtraW(PBCDim,LatticeW,Volumes,PBCRefGrd%D,PBCRefStr%D)
-     !
-     CALL RefreshBMatInfo(IntC_L,XYZ,GOpt%TrfCtrl,GOpt%GConvCrit, &
-                    GOpt%CoordCtrl%LinCrit,GOpt%CoordCtrl%TorsLinCrit,&
-                    PBCDim,Print,SCRPath,DoCleanCol_O=.FALSE.)
-     !
-     CALL DisplFit(IntC_L,IntCGrads%D,IntCValues%D,GOpt%Hessian, &
-                GOpt%CoordCtrl,PredVals,Displ,PWDPath,SCRPath,NCart, &
-                iGEO,ExtraW%D,Volumes%D)
-   ! CALL INTCValue(IntC_L,XYZ,GOpt%CoordCtrl%LinCrit, &
-   !                GOpt%CoordCtrl%TorsLinCrit)
-   ! CALL New(Displ,IntC_L%N) 
-   ! CALL New(PredVals,IntC_L%N) 
-   ! DO J=1,6
-   !   PredVals%D(J)=IntCValues%D(J,NDim)-0.5D0*IntCGrads%D(J,NDim)
-   ! ENDDO
-     !
-     StreCrit=0.15D0*AngstromsToAu
-     AngleCrit=1.0D0*PI/180.D0
-     CALL CutOffDispl(Displ%D,IntC_L,StreCrit,AngleCrit)
-                    ! GOpt%CoordCtrl%MaxStre,GOpt%CoordCtrl%MaxAngle)
-     DO J=1,6
-       PredVals%D(J)=IntCValues%D(J,NDim)+Displ%D(J)
-     ENDDO
-     !
-     CALL SetLattValues(PredVals%D(1:6),GOpt%ExtIntCs)
-     !
-     DO I=1,3
-       BoxShape(1:3,I)=XYZ(1:3,NatmsLoc-3+I)
-     ENDDO
-     InvBoxSh=InverseMatrix(BoxShape)
-     !
-     ! Convert to Fractionals
-     !
-     DO I=1,NatmsLoc-3
-       CartAux1=XYZ(1:3,I)
-       CALL DGEMM_NNc(3,3,1,One,Zero,InvBoxSh,CartAux1,CartAux2)
-       XYZ(:,I)=CartAux2
-     ENDDO
-     !
-     ! Calculate new lattice vectors
-     !
-     IntC_L%Constraint%L=.TRUE.
-     DO I=1,IntC_L%N
-       IntC_L%ConstrValue%D(I)=PredVals%D(I)
-     ENDDO
-     CALL SetFixedLattice(VectCart%D,IntC_L)
-     XYZ(1:3,NatmsLoc-2)=VectCart%D(NCart-8:NCart-6) 
-     XYZ(1:3,NatmsLoc-1)=VectCart%D(NCart-5:NCart-3) 
-     XYZ(1:3,NatmsLoc  )=VectCart%D(NCart-2:NCart) 
-     !
-     ! Convert fractionals back to Cartesians
-     !
-     DO I=1,3
-       BoxShape(1:3,I)=XYZ(1:3,NatmsLoc-3+I)
-     ENDDO
-     !
-     DO I=1,NatmsLoc-3
-       CartAux1=XYZ(:,I)
-       CALL DGEMM_NNc(3,3,1,One,Zero,BoxShape,CartAux1,CartAux2)
-       XYZ(:,I)=CartAux2
-     ENDDO
-     !
-     CALL Delete(VectCart)
-     CALL Delete(PredVals)
-     CALL Delete(Displ)
-     CALL Delete(IntCValues)
-     CALL Delete(IntCGrads)
-     CALL Delete(IntC_L)
-     CALL Delete(PBCRefStr)
-     CALL Delete(PBCRefGrd)
-     CALL Delete(ExtraW)
-     CALL Delete(LatticeW)
-     CALL Delete(Volumes)
-   END SUBROUTINE LatticeFit
-!
-!----------------------------------------------------------------------
-!
-   LOGICAL FUNCTION DoLatticeFit(GOpt,iGEO)
-     TYPE(GeomOpt)               :: GOpt
-     INTEGER                     :: iGEO,J
-     REAL(DOUBLE),DIMENSION(6)   :: AbsGrad
-     !
-     IF(GOpt%GConvCrit%AlternLatt) THEN    
-       DoLatticeFit=.FALSE.
-       DO J=1,6 ; AbsGrad(J)=ABS(GOpt%LattIntC%Grad%D(J)) ; ENDDO
-     ! IF(GOpt%GOptStat%MaxCGrad<GOpt%GConvCrit%Grad) THEN 
-       IF(GOpt%GOptStat%MaxCGrad<GOpt%GConvCrit%Grad.OR. &
-          MAXVAL(AbsGrad)>5.D0*GOpt%GOptStat%MaxCGrad) THEN
-         ! 
-         DoLatticeFit=.TRUE.
-       ENDIF
-       GOpt%GConvCrit%DoLattStep=.NOT.DoLatticeFit
-     ELSE
-       DoLatticeFit=.TRUE.
-     ENDIF
-     !
-     ! Increment iGEOStart to the next geometry
-     ! No data from previos lattice values will be used to determine 
-     ! atomic positions at new lattice
-     !
-     IF(GOpt%GConvCrit%AlternLatt) THEN
-       IF(DoLatticeFit) GOpt%GDIIS%iGEOStart=iGEO+1
-     ENDIF
-   END FUNCTION 
-!
-!----------------------------------------------------------------------
-!
-   SUBROUTINE StepPBCFit(PBCFit,RefStruct,RefGrad)
-     TYPE(PBCFits)               :: PBCFit
-     REAL(DOUBLE),DIMENSION(:,:) :: RefStruct,RefGrad
-     INTEGER                     :: I,J,NDim,NCart
-     !
-     NDim=SIZE(RefGrad,2)
-     NCart=SIZE(RefGrad,1)
-     DO I=MIN(PBCFit%ActMem,PBCFit%MaxMem-1),1,-1
-       PBCFit%AWeights%D(I+1)=PBCFit%AWeights%D(I) 
-       PBCFit%PBCGrads%D(:,I+1)=PBCFit%PBCGrads%D(:,I) 
-       PBCFit%PBCValues%D(:,I+1)=PBCFit%PBCValues%D(:,I) 
-     ENDDO 
-       PBCFit%AWeights%D(1)= &
-         ! DOT_PRODUCT(RefGrad(1:NCart-9,NDim),RefGrad(1:NCart-9,NDim))
-         ! DOT_PRODUCT(RefGrad(:,NDim),RefGrad(:,NDim))
-           DOT_PRODUCT(RefGrad(NCart-8:NCart,NDim),RefGrad(NCart-8:NCart,NDim))
-     DO J=1,9
-       PBCFit%PBCGrads%D(J,1)=RefGrad(NCart-9+J,NDim) 
-       PBCFit%PBCValues%D(J,1)=RefStruct(NCart-9+J,NDim) 
-     ENDDO
-     PBCFit%ActMem=MIN(PBCFit%ActMem+1,PBCFit%MaxMem)
-     ! 
-   END SUBROUTINE StepPBCFit
-!
-!----------------------------------------------------------------------
-!
-   SUBROUTINE GetPBCMem(PBCFit,PBCRefStr,PBCRefGrd,ExtraW)
-     TYPE(PBCFits)  :: PBCFit
-     TYPE(DBL_RNK2) :: PBCRefStr,PBCRefGrd
-     TYPE(DBL_VECT) :: ExtraW
-     INTEGER        :: I,J
-     !
-     CALL New(PBCRefStr,(/9,PBCFit%ActMem/))
-     CALL New(PBCRefGrd,(/9,PBCFit%ActMem/))
-     CALL New(ExtraW,PBCFit%ActMem)
-     DO I=1,PBCFit%ActMem
-       ExtraW%D(PBCFit%ActMem+1-I)=&
-         DOT_PRODUCT(PBCFit%PBCGrads%D(:,I),PBCFit%PBCGrads%D(:,I))
-       DO J=1,9
-         PBCRefStr%D(J,PBCFit%ActMem+1-I)=PBCFit%PBCValues%D(J,I)
-         PBCRefGrd%D(J,PBCFit%ActMem+1-I)=PBCFit%PBCGrads%D(J,I)
-       ENDDO
-     ENDDO
-   END SUBROUTINE GetPBCMem
-!
-!----------------------------------------------------------------------
-!
-   SUBROUTINE PrepExtraW(PBCDim,LatticeW,Volumes,RefGrad,RefStruct)
-     REAL(DOUBLE),DIMENSION(:,:) :: RefGrad,RefStruct
-     REAL(DOUBLE)                :: BoxShape(3,3)
-     TYPE(DBL_VECT)              :: LatticeW,Volumes
-     INTEGER                     :: I,J,NDim,PBCDim,NCart,AutoW(3)
-     !
-     NDim=SIZE(RefGrad,2)
-     NCart=SIZE(RefGrad,1)
-     CALL New(LatticeW,NDim)
-     CALL New(Volumes,NDim)
-     IF(PBCDim==1) AutoW=(/1,0,0/)
-     IF(PBCDim==2) AutoW=(/1,1,0/)
-     IF(PBCDim==3) AutoW=(/1,1,1/)
-     IF(PBCDim>0) THEN
-       DO I=1,NDim
-         LatticeW%D(I)= &
-         DOT_PRODUCT(RefGrad(NCart-8:NCart,I),RefGrad(NCart-8:NCart,I))
-         BoxShape(1:3,1)=RefStruct(NCart-8:NCart-6,I)
-         BoxShape(1:3,2)=RefStruct(NCart-5:NCart-3,I)
-         BoxShape(1:3,3)=RefStruct(NCart-2:NCart,I)
-         Volumes%D(I)=ABS(CellVolume(BoxShape,AutoW))
-       ENDDO
-     ELSE
-       LatticeW%D=Zero
-       Volumes%D=One 
-     ENDIF
-   END SUBROUTINE PrepExtraW
 !
 !----------------------------------------------------------------------
 !

@@ -57,28 +57,6 @@ MODULE ParseGeomOpt
        GOpt%GConvCrit%DoAtomBacktr=.FALSE.
      ENDIF
      !
-     ! Parse for Sequencial optimization: 
-     ! first atomic positions then lattice, and repeat
-     !
-     GOpt%GConvCrit%AlternLatt=.FALSE.
-     IF(OptKeyQ(Inp,GRADIENTS,OPT_AlternLatt)) THEN
-       GOpt%GConvCrit%AlternLatt=.TRUE.
-     ENDIF
-     !
-     ! Do Uncouple lattice?
-     !
-     GOpt%GConvCrit%UnCoupleLatt=.FALSE.
-     IF(OptKeyQ(Inp,GRADIENTS,OPT_UnCoupleLatt)) THEN
-       GOpt%GConvCrit%UnCoupleLatt=.TRUE.
-     ENDIF
-     !
-     ! Explicit lattice: Use expicite lattice coordinates,
-     !
-     GOpt%GConvCrit%ExplLatt=.FALSE.
-     IF(OptKeyQ(Inp,GRADIENTS,OPT_ExplLatt)) THEN
-       GOpt%GConvCrit%ExplLatt=.TRUE.
-     ENDIF
-     !
      ! Parse for projecting out rotations and translations
      ! from geometry displacements.
      !
@@ -103,7 +81,8 @@ MODULE ParseGeomOpt
      ! Parse for Maximum angle and maximum bondlength displacements
      !
      IF(.NOT.OptDblQ(Inp,MaxAngle,GOpt%CoordCtrl%MaxAngle)) THEN
-       GOpt%CoordCtrl%MaxAngle=Two*PI !default value
+      !GOpt%CoordCtrl%MaxAngle=Two*PI !default value
+       GOpt%CoordCtrl%MaxAngle=10.D0*PI/180.D0  !default value
       !IF(PBCDim==3) THEN
       !  GOpt%CoordCtrl%MaxAngle=5.D0*PI/180.D0
       !ELSE
