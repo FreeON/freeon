@@ -41,6 +41,7 @@ ReleaseFiles=BlokAInv.x Lowdin.x
 all:	Blk Lwd
 #
 release:clean $(RELEASEFILES)
+	rm -rf OLD
 #
 purge:	clean
 	rm -f $(REMOVESRCE)
