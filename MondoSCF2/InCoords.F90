@@ -14,474 +14,10 @@ MODULE InCoords
    USE AInv   
    USE CholFactor
    USE ControlStructures
-!
-IMPLICIT NONE
+   !
+   IMPLICIT NONE
 !
 CONTAINS
-!--------------------------------------------------------------
-!
-   SUBROUTINE Topology_12(NatmsLoc,NBond,BondI,BondJ,Top12,Tag)
-     !
-     ! Set up a table which shows the atom numbers of Atoms 
-     ! connected to a certain atom by the input bonds (Topology mtr)
-     ! Here, the generation of the Topology mtr is based on input list
-     ! of bonds
-     !
-     IMPLICIT NONE
-     TYPE(INT_RNK2)             :: Top12
-     TYPE(INT_RNK2)             :: Top12_2
-     INTEGER                    :: I,J,K,L,N,M,II,JJ,NI,NJ
-     INTEGER                    :: NBond,NatmsLoc,NMax12
-     INTEGER,DIMENSION(1:NBond) :: BondI,BondJ
-     CHARACTER(LEN=*)           :: Tag
-     !
-     NMax12=5
-     CALL New(Top12,(/NatmsLoc,NMax12+1/))
-     Top12%I(:,:)=0 
-     !
-     DO I=1,NBond
-       !
-       II=BondI(I)
-       JJ=BondJ(I)
-       NI=Top12%I(II,1)
-       NJ=Top12%I(JJ,1)
-       !
-       ! check matrix Size, increase Size if necessary
-       !
-       IF(NI>=NMax12 .OR. NJ>=NMax12) THEN
-         NMax12=NMax12+5
-         CALL New(Top12_2,(/NatmsLoc,NMax12+1/))
-         Top12_2%I(1:NatmsLoc,1:NMax12+1)=0 
-         Top12_2%I(1:NatmsLoc,1:NMax12+1-5)=&
-                            Top12%I(1:NatmsLoc,1:NMax12+1-5)
-         CALL Delete(Top12)
-         CALL New(Top12,(/NatmsLoc,NMax12+1/))
-         Top12%I(:,:)=Top12_2%I(:,:)
-         CALL Delete(Top12_2)
-       ENDIF
-       !
-       IF(NI/=0) THEN
-       DO M=1,NI         
-         IF(Top12%I(II,M+1)==JJ) THEN
-           EXIT
-         ELSE
-           Top12%I(II,1)=NI+1
-           Top12%I(II,1+(NI+1))=JJ
-           EXIT
-         ENDIF
-       ENDDO 
-       ELSE
-           Top12%I(II,1)=NI+1
-           Top12%I(II,1+(NI+1))=JJ
-       ENDIF
-       !
-       IF(NJ/=0) THEN
-       DO M=1,NJ         
-         IF(Top12%I(JJ,M+1)==II) THEN
-           EXIT
-         ELSE
-           Top12%I(JJ,1)=NJ+1
-           Top12%I(JJ,1+(NJ+1))=II
-           EXIT
-         ENDIF
-       ENDDO 
-       ELSE
-           Top12%I(JJ,1)=NJ+1
-           Top12%I(JJ,1+(NJ+1))=II
-       ENDIF
-       !
-     ENDDO
-     !
-     CALL WriteINT_RNK2(Top12%I,TRIM(Tag)//'Top12')
-   END SUBROUTINE Topology_12 
-!
-!--------------------------------------------------------------
-!
-   SUBROUTINE Topology_13(NatmsLoc,Top12,Top13,Tag)
-     ! Set up a table which shows the atom numbers of Atoms 
-     ! being second neighbours of a certain atom.
-     !
-     IMPLICIT NONE
-     TYPE(INT_RNK2)  :: Top12
-     TYPE(INT_RNK2)  :: Top13
-     TYPE(INT_RNK2)  :: Top13_2
-     INTEGER         :: I,J,K,L,N,M,II,JJ,NI,NJ,NatmsLoc
-     INTEGER         :: NMax13,NMax12,KK,IN12,JN12
-     CHARACTER(LEN=*):: Tag
-     !
-     NMax12=Size(Top12%I,2)-1
-     !
-     NMax13=30
-     K=NMax13+1
-     CALL New(Top13,(/NatmsLoc,K/))
-     Top13%I(1:NatmsLoc,1:NMax13+1)=0 
-     !
-     DO II=1,NatmsLoc
-       IN12=Top12%I(II,1)
-       DO J=1,IN12
-         JJ=Top12%I(II,J+1)
-         JN12=Top12%I(JJ,1)
-         DO K=1,JN12
-         KK=Top12%I(JJ,K+1)
-           IF(II/=KK) THEN
-             !    
-             NI=Top13%I(II,1)
-             !    
-             !   check matrix Size, increase Size if necessary
-             !    
-             IF(NI>=NMax13) THEN
-               NMax13=NMax13+30
-               CALL New(Top13_2,(/NatmsLoc,NMax13+1/))
-               Top13_2%I(1:NatmsLoc,1:NMax13+1)=0 
-               Top13_2%I(1:NatmsLoc,1:NMax13+1-30)=&
-                                       Top13%I(1:NatmsLoc,1:NMax13+1-30)
-               CALL Delete(Top13)
-               CALL New(Top13,(/NatmsLoc,NMax13+1/))
-               Top13%I(1:NatmsLoc,1:NMax13+1)=&
-                                        Top13_2%I(1:NatmsLoc,1:NMax13+1)
-               CALL Delete(Top13_2)
-             ENDIF
-             IF(NI/=0) THEN
-               IF(ANY(Top13%I(II,2:NI+1)==KK)) THEN
-                 CYCLE
-               ELSE
-                 Top13%I(II,1)=NI+1
-                 Top13%I(II,1+(NI+1))=KK
-               ENDIF
-             ELSE
-                 Top13%I(II,1)=NI+1
-                 Top13%I(II,1+(NI+1))=KK
-             ENDIF
-           ENDIF !!! II/=KK
-         ENDDO !!!! KK
-       ENDDO !!!! JJ
-     ENDDO !!!! II
-     !
-     CALL WriteINT_RNK2(Top13%I,TRIM(Tag)//'Top13')
-   END SUBROUTINE Topology_13 
-!
-!--------------------------------------------------------------
-!
-   SUBROUTINE Topology_14(NatmsLoc,Top12,Top14,Tag)
-     ! Set up a table which shows the atom numbers of Atoms 
-     ! being second neighbours of a certain atom.
-     !
-     IMPLICIT NONE
-     TYPE(INT_RNK2)         :: Top12
-     TYPE(INT_RNK2)         :: Top14
-     TYPE(INT_RNK2)         :: Top14_2
-     INTEGER                :: I,J,K,L,N,M,II,JJ,NI,NJ,KK,LL
-     INTEGER                :: NatmsLoc,NMax14,NMax12,IN12,JN12,KN12
-     CHARACTER(LEN=*)       :: Tag
-     !
-     NMax12=Size(Top12%I,2)-1
-     !
-     NMax14=30
-     K=NMax14+1
-     CALL New(Top14,(/NatmsLoc,K/))
-     Top14%I(1:NatmsLoc,1:NMax14+1)=0 
-     !
-     DO II=1,NatmsLoc
-       IN12=Top12%I(II,1)
-       DO J=1,IN12
-         JJ=Top12%I(II,J+1)
-         JN12=Top12%I(JJ,1)
-         DO K=1,JN12
-           KK=Top12%I(JJ,K+1)
-           IF(II/=KK) THEN
-             KN12=Top12%I(KK,1)
-             DO L=1,KN12
-               LL=Top12%I(KK,L+1)
-               IF(JJ/=LL.AND.II/=LL) THEN
-                 !
-                 NI=Top14%I(II,1)
-                 !
-                 ! check matrix Size, increase Size if necessary
-                 !
-                 IF(NI>=NMax14) THEN
-                   NMax14=NMax14+30
-                   CALL New(Top14_2,(/NatmsLoc,NMax14+1/))
-                   Top14_2%I(1:NatmsLoc,1:NMax14+1)=0 
-                   Top14_2%I(1:NatmsLoc,1:NMax14+1-30)=&
-                                 Top14%I(1:NatmsLoc,1:NMax14+1-30)
-                   CALL Delete(Top14)
-                   CALL New(Top14,(/NatmsLoc,NMax14+1/))
-                   Top14%I(1:NatmsLoc,1:NMax14+1)=&
-                                 Top14_2%I(1:NatmsLoc,1:NMax14+1)
-                   CALL Delete(Top14_2)
-                 ENDIF
-                 !        
-                 IF(NI/=0) THEN
-                   IF(ANY(Top14%I(II,2:NI+1)==LL)) THEN
-                     CYCLE
-                   ELSE
-                     Top14%I(II,1)=NI+1
-                     Top14%I(II,1+(NI+1))=LL
-                   ENDIF
-                 ELSE
-                     Top14%I(II,1)=NI+1
-                     Top14%I(II,1+(NI+1))=LL
-                 ENDIF
-                 !
-               ENDIF !!! II/=LL and JJ/=LL
-             ENDDO !!! LL
-           ENDIF !!! II/=KK
-         ENDDO !!!! KK
-       ENDDO !!!! JJ
-     ENDDO !!!! II
-     !
-     CALL WriteINT_RNK2(Top14%I,TRIM(Tag)//'Top14')
-   END SUBROUTINE Topology_14 
-!
-!--------------------------------------------------------------
-!
-   SUBROUTINE SORT_INTO_Box1(BoxSize,XYZ,NatmsLoc, &
-                       NX,NY,NZ,BXMIN,BYMIN,BZMIN)
-     !
-     ! sort the Atoms of a molecule into Boxes
-     !
-     IMPLICIT NONE
-     INTEGER :: I,J,JJ,NX,NY,NZ,NBox,IX,IY,IZ,IORD,IADD,NatmsLoc
-     REAL(DOUBLE) :: BoxSize,VBIG,XYZ(1:3,NatmsLoc)
-     REAL(DOUBLE) :: BXMIN,BXMax,BYMIN,BYMax,BZMIN,BZMax
-     !
-     CALL BoxBorders(XYZ,BXMIN,BXMax,BYMIN,BYMax,BZMIN,BZMax)
-     !
-     NX=INT((BXMax-BXMIN)/BoxSize)+1
-     NY=INT((BYMax-BYMIN)/BoxSize)+1
-     NZ=INT((BZMax-BZMIN)/BoxSize)+1
-     NBox=NX*NY*NZ
-     !
-   END SUBROUTINE SORT_INTO_Box1
-!
-!--------------------------------------------------------------
-!
-   SUBROUTINE SORT_INTO_Box2(BoxSize,XYZ,NatmsLoc, &
-     NX,NY,NZ,BXMIN,BYMIN,BZMIN,BoxI1,BoxJ1,ISet)
-     !
-     ! BoxI(I) : contains the ordering (box) number of the 
-     !           first atom of the I-th Box (like in sparse row-wise)
-     ! BoxJ(J) : gives the original serial number of the atom desribed 
-     !           by the J-th ordering number
-     ! XYZ: contains Cartesian coordinates of Atoms
-     ! BoxSize: linear Box Size
-     !
-     IMPLICIT NONE
-     INTEGER,OPTIONAL :: ISET 
-     TYPE(INT_VECT)   :: BoxI,BoxJ
-     TYPE(INT_RNK2)   :: ISign
-     TYPE(INT_RNK3)   :: BoxCounter 
-     REAL(DOUBLE)     :: BoxSize,VBIG
-     REAL(DOUBLE)     :: BXMIN,BXMax,BYMIN,BYMax,BZMIN,BZMax
-     INTEGER          :: IORD,IADD,NatmsLoc
-     INTEGER          :: I,J,JJ,NX,NY,NZ,NBox,IX,IY,IZ
-     REAL(DOUBLE),DIMENSION(:,:)  :: XYZ
-     TYPE(INT_VECT),OPTIONAL      :: BoxI1,BoxJ1
-     !
-     VBIG=1.D+90 
-     NBox=NX*NY*NZ
-     CALL New(BoxI,NBox+1)
-     CALL New(BoxJ,NatmsLoc)
-     CALL New(ISign,(/2,NatmsLoc/))
-     CALL New(BoxCounter,(/NX,NY,NZ/))
-     BoxCounter%I(1:NX,1:NY,1:NZ)=0
-     BoxI%I(1:NBox+1)=0
-     !
-     ! Count number of atoms in the box
-     !
-     DO I=1,NatmsLoc
-       IX=INT((XYZ(1,I)-BXMIN)/BoxSize)+1
-       IY=INT((XYZ(2,I)-BYMIN)/BoxSize)+1
-       IZ=INT((XYZ(3,I)-BZMIN)/BoxSize)+1
-       IORD=NX*NY*(IZ-1)+NY*(IX-1)+IY !order parameter: ZXY
-       BoxCounter%I(IX,IY,IZ)=BoxCounter%I(IX,IY,IZ)+1
-       ISign%I(1,I)=IORD
-       ISign%I(2,I)=BoxCounter%I(IX,IY,IZ) 
-     ENDDO
-     !     
-     ! Count pointers to individual Boxes within array A
-     !     
-     BoxI%I(1)=1
-     DO IZ=1,NZ
-     DO IX=1,NX
-     DO IY=1,NY
-       IORD=NX*NY*(IZ-1)+NY*(IX-1)+IY
-       BoxI%I(IORD+1)=BoxI%I(IORD)+BoxCounter%I(IX,IY,IZ)
-     ENDDO
-     ENDDO
-     ENDDO
-     !
-     ! Set up contents of Boxes as represented in A, sparse row-wise
-     !
-     DO I=1,NatmsLoc
-       IORD=ISign%I(1,I)
-       IADD=ISign%I(2,I)
-       BoxJ%I(BoxI%I(IORD)-1+IADD)=I
-     ENDDO
-     !
-     IF(PRESENT(BoxI1)) THEN
-       BoxI1%I(:)=BoxI%I(:)
-     ENDIF
-     IF(PRESENT(BoxJ1)) THEN
-       BoxJ1%I(:)=BoxJ%I(:)
-     ENDIF
-     !
-     CALL Delete(ISign)
-     CALL Delete(BoxCounter)
-     CALL Delete(BoxI)
-     CALL Delete(BoxJ)
-   END SUBROUTINE SORT_INTO_Box2
-!
-!----------------------------------------------------------------
-!
-   SUBROUTINE Topologies_MM(NatmsLoc,NBond,BondI,BondJ,SCR)
-     !
-     ! Set up a table which shows the atom numbers of Atoms 
-     ! connected to a certain atom by the input bonds (Topology mtr)
-     ! Here, the generation of the Topology mtr is based 
-     ! EXCLUSIVELY on input list of bonds
-     ! WARNING! This subroutine is mainly used to set up the
-     ! topology files necessary for the calculation of 
-     ! MM exclusion energies!!!
-     !
-     IMPLICIT NONE
-     TYPE(INT_RNK2)                 :: Top12,Top13,Top14
-     TYPE(INT_RNK2)                 :: Top_Excl,Top_Excl14
-     INTEGER                        :: NBond,NatmsLoc
-     INTEGER,DIMENSION(1:NBond)     :: BondI,BondJ
-     CHARACTER(LEN=DCL)             :: PathName
-     CHARACTER(LEN=*)               :: SCR
-     !
-     PathName=TRIM(SCR)//'MM'
-     CALL Topology_12(NatmsLoc,NBond,BondI,BondJ,Top12,PathName)
-     CALL Topology_13(NatmsLoc,Top12,Top13,PathName)
-     CALL Topology_14(NatmsLoc,Top12,Top14,PathName)
-     CALL Excl_List(NatmsLoc,Top12,Top13,Top14,Top_Excl,PathName)
-     CALL Delete(Top_Excl)
-     CALL Excl_List14(NatmsLoc,Top12,Top13,Top14,Top_Excl14,PathName)
-     CALL Delete(Top_Excl14)
-     CALL Delete(Top12)
-     CALL Delete(Top13)
-     CALL Delete(Top14)
-   END SUBROUTINE Topologies_MM
-!
-!----------------------------------------------------------------
-!
-   SUBROUTINE Excl_List(NatmsLoc,Top12,Top13,Top14,Top_Excl,Tag)
-     !
-     ! This subroutine merges Topological information
-     ! to get the list for Exclusion energy calculation
-     !
-     IMPLICIT NONE
-     TYPE(INT_RNK2)          :: Top_Excl_Out,Top12,Top13,Top14
-     TYPE(INT_RNK2)          :: Top_Excl,Top_New
-     CHARACTER(LEN=*)        :: Tag
-     INTEGER                 :: NatmsLoc,NMax12,NMax13,NMax14
-     INTEGER                 :: NMax_Excl,NNew,NOLD
-     INTEGER                 :: NMax_Excl_Out,I,J,K,KK,JJ
-     !
-     NMax12=Size(Top12%I,2)-1
-     NMax13=Size(Top13%I,2)-1
-     NMax14=Size(Top14%I,2)-1
-     !
-     ! Initialize Top_Excl
-     !
-     NMax_Excl=NMax12+NMax13+NMax14
-     CALL New(Top_Excl,(/NatmsLoc,NMax_Excl+1/))
-     Top_Excl%I(:,:)=0
-     Top_Excl%I(1:NatmsLoc,1:NMax12+1)=Top12%I(1:NatmsLoc,1:NMax12+1)
-     !
-     ! Now merge Topologies, in order to avoid double counting in 
-     ! Exclusion energies
-     !
-     NMax_Excl_Out=0
-     DO I=1,NatmsLoc
-       !
-       NNew=0
-       NOLD=Top_Excl%I(I,1)
-       DO J=1,Top13%I(I,1)
-         JJ=Top13%I(I,J+1)
-         IF(ANY(Top_Excl%I(I,2:NOLD+1)==JJ)) THEN
-           CYCLE
-         ELSE
-           NNew=NNew+1
-           Top_Excl%I(I,NOLD+1+NNew)=JJ
-         ENDIF
-       ENDDO 
-       NNew=NOLD+NNew
-       Top_Excl%I(I,1)=NNew
-       IF(NMax_Excl_Out<NNew) NMax_Excl_Out=NNew
-       !
-       NNew=0
-       NOLD=Top_Excl%I(I,1)
-       DO J=1,Top14%I(I,1)
-         JJ=Top14%I(I,J+1)
-         IF(ANY(Top_Excl%I(I,2:NOLD+1)==JJ)) THEN
-           CYCLE
-         ELSE
-           NNew=NNew+1
-           Top_Excl%I(I,NOLD+1+NNew)=JJ
-         ENDIF
-       ENDDO 
-       NNew=NOLD+NNew
-       Top_Excl%I(I,1)=NNew
-       IF(NMax_Excl_Out<NNew) NMax_Excl_Out=NNew
-       !
-     ENDDO 
-     CALL WriteINT_RNK2(Top_Excl%I,TRIM(Tag)//'TOP_Excl')
-   END SUBROUTINE Excl_LIST 
-!
-!----------------------------------------------------------------
-!
-   SUBROUTINE Excl_List14(NatmsLoc,Top12,Top13,Top14,Top_Excl,Tag)
-     !
-     ! This subroutine merges Topological information
-     ! to get the list for Exclusion energy calculation
-     ! of Atoms in 14 distance. From the Top14 list
-     ! Top13 and Top12 occurences must be filtered out
-     !
-     IMPLICIT NONE
-     TYPE(INT_RNK2)          :: Top_Excl_Out,Top12,Top13,Top14
-     TYPE(INT_RNK2)          :: Top_Excl,Top_New
-     CHARACTER(LEN=*)        :: Tag
-     INTEGER                 :: NatmsLoc,NMax12,NMax13,NMax14
-     INTEGER                 :: NMax_Excl,NNew,NOLD
-     INTEGER                 :: NMax_Excl_Out,I,J,K,KK,JJ,NExcl,N12,N13
-     !
-     NMax12=Size(Top12%I,2)-1
-     NMax13=Size(Top13%I,2)-1
-     NMax14=Size(Top14%I,2)-1
-     !
-     ! Initialize Top_Excl to the Size of Top14 and to zero 
-     !
-     NMax_Excl=NMax14
-     CALL New(Top_Excl,(/NatmsLoc,NMax_Excl+1/))
-     Top_Excl%I=0
-     !
-     ! Now merge Topologies, in order to avoid double counting in 
-     ! Exclusion energies
-     !
-     NMax_Excl_Out=0
-     DO I=1,NatmsLoc
-       DO J=1,Top14%I(I,1)
-         NExcl=Top_Excl%I(I,1)
-         N12=Top12%I(I,1)
-         N13=Top13%I(I,1)
-         JJ=Top14%I(I,J+1)
-         IF(ANY(Top_Excl%I(I,2:NExcl+1)==JJ).OR. &
-            ANY(Top12%I(I,2:N12+1)==JJ).OR. & 
-            ANY(Top13%I(I,2:N13+1)==JJ)  ) THEN
-           CYCLE
-         ELSE
-           Top_Excl%I(I,1)=NExcl+1
-           Top_Excl%I(I,NExcl+2)=JJ
-         ENDIF
-       ENDDO 
-         NExcl=Top_Excl%I(I,1)
-       IF(NMax_Excl_Out<NExcl) NMax_Excl_Out=NExcl
-     ENDDO 
-     CALL WriteINT_RNK2(Top_Excl%I,TRIM(Tag)//'TOP_Excl14')
-   END SUBROUTINE Excl_List14 
 !
 !----------------------------------------------------------------
 !
@@ -788,11 +324,10 @@ CONTAINS
      IF(PRESENT(Value_O)) THEN
        Sum=DOT_PRODUCT(UxW,VxW)/(SinPhiU*SinPhiV)
        IF(ABS(Sum)>One-1.D-8) THEN
-         Value_O=PI
-       ELSE
-         Value_O=ACOS(Sum)
+         Sum=SIGN(One-1.D-8,Sum)
        ENDIF
-       Sum=DOT_PRODUCT(W,UxV)
+         Value_O=ACOS(Sum)
+       Sum=DOT_PRODUCT(W,UxV) ! orientation of torsion
        IF(ABS(Sum)>1.D-8) THEN
          Value_O=SIGN(Value_O,Sum)
        ENDIF
@@ -917,126 +452,61 @@ CONTAINS
 !
 !----------------------------------------------------------------
 !
-   SUBROUTINE DefineIntCoos(NatmsLoc,XYZ,AtNum,IntSet,Refresh, &
-                            IntCs,NIntC,CtrlCoord,SCRPath)
+   SUBROUTINE DefineIntCoos(XYZ,AtNum,IntCs,NIntC,GCoordCtrl,TOPS,&
+                            HFileIn_O,iCLONE_O,iGEO_O)
      !
      ! This routine defines internal coordinates
      ! being used in geometry manipulations.
      ! They may be STRE, BEND, TORS, OutP and LINB1&LINB2 -s.
-     ! right now the complete set of primitive internals 
-     ! is defd. only.
-     ! IntSet=1 : defines internal coords which will be present
-     !            for a long (entire) course of the optimization
-     ! IntSet=2 : defines more temporary coordinates, coming
-     !            from more temporary VdW interactions
      !
      IMPLICIT NONE
-     INTEGER :: I,J,N,NatmsLoc,NBond,NIntC,IntSet
-     INTEGER :: NMax_Excl,NMax12,ILast,NOutP,NHAngle
-     REAL(DOUBLE),DIMENSION(1:3,1:NatmsLoc) :: XYZ
-     TYPE(INT_RNK2) :: BondIJ 
-     TYPE(INT_RNK2) :: AngleIJK,TorsionIJKL,OutPIJKL,HAngleIJKL
-     INTEGER        :: NX,NY,NZ,NBOX,NAngle,NTorsion,NLinb,Refresh
-     REAL(DOUBLE)   :: BXMIN,BYMIN,BZMIN,BoxSize,Fact,Value
-     TYPE(DBL_VECT) :: CritRad,BondLength   
-     TYPE(INT_RNK2) :: Top12,Top13,Top14,Top_Excl,Top_VDW
+     INTEGER                        :: I,J,N,NatmsLoc,NIntC
+     INTEGER                        :: ILast
+     TYPE(INT_RNK2)                 :: TorsionIJKL
+     INTEGER                        :: NTorsion
+     REAL(DOUBLE),DIMENSION(:,:)    :: XYZ
      TYPE(INTC)                     :: IntCs
-     TYPE(INT_VECT)                 :: BoxI,BoxJ,HBondCenter
-     TYPE(INT_VECT)                 :: HBondMark
+     TYPE(ATOMBONDS)                :: AtmBCov,AtmBVDW,AtmBTot
+     TYPE(BONDDATA)                 :: BondCov,BondVDW,BondTot
+     CHARACTER(LEN=*),OPTIONAL      :: HFileIn_O
+     INTEGER,OPTIONAL               :: iCLONE_O,iGEO_O
+     INTEGER                        :: MaxBonds
      INTEGER,DIMENSION(:)           :: AtNum
-     TYPE(CoordCtrl)                :: CtrlCoord
-     CHARACTER(LEN=*)               :: SCRPath
-     CHARACTER(LEN=1)               :: LongRangeTag
-     LOGICAL                        :: HBondOnly
-     TYPE(CHR_VECT)                 :: AngleMark
+     TYPE(CoordCtrl)                :: GCoordCtrl
+     TYPE(TOPOLOGY)                 :: TOPS
+     TYPE(IntCBox)                  :: Box
+     TYPE(ANGLEDATA)                :: Angle
+     TYPE(OUTPDATA)                 :: OutP 
      !
      NIntC=0
-     NBond=0
-     NAngle=0
      NTorsion=0
-     NOutP=0
-     NHAngle=0
+     MaxBonds=20 ! initial value
+     NatmsLoc=SIZE(XYZ,2)
      !
-     ! first sort atoms into boxes      
+     CALL New(BondCov,NatmsLoc*MaxBonds)
+     CALL New(BondVDW,NatmsLoc*MaxBonds)
      !
-     BoxSize=2.5D0*AngstromsToAU !in A
-     CALL SORT_INTO_Box1(BoxSize,XYZ,NatmsLoc,&
-                     NX,NY,NZ,BXMIN,BYMIN,BZMIN)
+     CALL IntCBoxes(XYZ,Box)
      !
-     NBox=NX*NY*NZ
-     CALL New(BoxI,NBox+1)
-     CALL New(BoxJ,NatmsLoc)
-     CALL New(HBondCenter,NatmsLoc)
-     HBondCenter%I=0
+     CALL BondingScheme(XYZ,AtNum,1,AtmBCov,BondCov,TOPS,Box,GCoordCtrl)
+     CALL BondingScheme(XYZ,AtNum,2,AtmBVDW,BondVDW,TOPS,Box,GCoordCtrl)
+     CALL MergeBonds(BondCov,BondVDW,BondTot)
+     CALL SortBonds(NatmsLoc,AtmBTot,BondTot)
      !
-     CALL SORT_INTO_Box2(BoxSize,XYZ,NatmsLoc,&
-                     NX,NY,NZ,BXMIN,BYMIN,BZMIN,BoxI,BoxJ)
-     !
-     !now define bonding scheme, based on Slater or Van der Waals radii
-     !
-     IF(IntSet==1) THEN
-       N=SIZE(SLRadii,1)
-       CALL New(CritRad,N)
-       Fact=1.3D0 !!! Scaling factor for Slater Radii
-       CritRad%D=Fact*SLRadii*AngstromsToAU
-       HBondOnly=.FALSE.
-     ELSE
-       N=SIZE(VDWRadii,1)
-       CALL New(CritRad,N)
-       Fact=CtrlCoord%VDWFact !!! Scaling factor for VDW Radii
-       CritRad%D=Fact*VDWRadii*AngstromsToAU
-      !HBondOnly=.TRUE.
-       HBondOnly=.FALSE.
-     ENDIF
-     !
-     CALL BondList(NatmsLoc,XYZ,NBond,AtNum,SCRPath,IntSet, &
-                   BoxI,BoxJ,NBox,NX,NY,NZ,CritRad,HBondOnly, &
-                   CtrlCoord%DoSelect,HBondMark,BondLength, &
-                   BondIJ,HBondCenter%I)
-     !
-     IF(IntSet==1) THEN
-       !
-       ! Now define covalent topology matrices
-       !
-       CALL Topology_12(NatmsLoc,NBond,BondIJ%I(1,1:NBond),&
-         BondIJ%I(2,1:NBond),Top12,SCRPath)
-       CALL Topology_13(NatmsLoc,Top12,Top13,SCRPath)
-       CALL Topology_14(NatmsLoc,Top12,Top14,SCRPath)
-       CALL Excl_List(NatmsLoc,Top12,Top13,Top14,Top_Excl,SCRPath)
-       CALL Delete(Top_Excl)
-       CALL Delete(Top14)
-       CALL Delete(Top13)
-     ELSE
-       !
-       CALL SortNonCov(NatmsLoc,AtNum,NBond,SCRPath, &
-                       HBondMark,BondIJ,BondLength)
-     ! CALL ShortestHBonds(NatmsLoc,AtNum,NBond,SCRPath, &
-     !                     HBondMark,BondIJ,BondLength)
+     IF(PRESENT(HFileIn_O).AND.PRESENT(iCLONE_O).AND.&
+        PRESENT(iGEO_O)) THEN
+       CALL ArchiveTop(TOPS,BondTot,AtmBTot,HFileIn_O,iCLONE_O,iGEO_O)
      ENDIF
      !
      ! Now define bond angles and torsions
      !
-     IF(IntSet==1) THEN
-       CALL AngleList(NatmsLoc,Top12,AngleIJK,NAngle,AtNum,BondIJ, &
-                      NBond,HBondMark%I,HBondCenter%I,.FALSE.)
-       CALL TorsionList(NatmsLoc,Top12,BondIJ,XYZ, &
-                        TorsionIJKL,NTorsion,HBondMark)
-       CALL OutPList(XYZ,Top12,CtrlCoord%OutPCrit,NOutP,OutPIJKL)
-     ELSE
-       CALL ReadINT_RNK2(Top12,TRIM(SCRPath)//'Top12',I,J)
-         NMax12=J-1
-       CALL VDWTop(Top12,BondIJ)
-       CALL AngleList(NatmsLoc,Top12,AngleIJK,NAngle,AtNum,BondIJ, &
-                      NBond,HBondMark%I,HBondCenter%I,.TRUE.)
-       CALL TorsionList(NatmsLoc,Top12,BondIJ,XYZ, &
-                        TorsionIJKL,NTorsion,HBondMark)
-      !CALL HBondAngles(NatmsLoc,Top12,HAngleIJKL,NHAngle, &
-      !                 BondIJ,NBond,AngleMark,HBondMark%I,AtNum)
-     ENDIF
+     CALL AngleList(AtmBTot,BondTot,TOPS,XYZ,Angle,OutP)
+     CALL TorsionList(NatmsLoc,TOPS%Tot12,BondTot%IJ,XYZ, &
+                      TorsionIJKL,NTorsion)
      !
      ! Fill Data into IntCs
      !
-     NIntC=NBond+NAngle+NTorsion+NOutP+NHAngle
+     NIntC=BondTot%N+Angle%N+NTorsion+OutP%N
      IF(NIntC/=0) THEN          
        CALL New(IntCs,NIntC)
        IntCs%Def='     '
@@ -1046,406 +516,119 @@ CONTAINS
        IntCs%Constraint=.FALSE.
        IntCs%ConstrValue=Zero   
        !
-       DO I=1,NBond
-         IntCs%Def(I)='STRE '
-         IntCs%Atoms(I,1:2)=BondIJ%I(1:2,I)
+         ILast=0
+       DO I=1,BondTot%N
+         IntCs%Def(ILast+I)='STRE '
+         IntCs%Atoms(ILast+I,1:2)=BondTot%IJ%I(1:2,I)
        ENDDO
-         ILast=NBond
-       DO I=1,NAngle
+         ILast=BondTot%N
+       DO I=1,Angle%N
          IntCs%Def(ILast+I)='BEND '
-         IntCs%Atoms(ILast+I,1:3)=AngleIJK%I(1:3,I)
+         IntCs%Atoms(ILast+I,1:3)=Angle%IJK%I(1:3,I)
        ENDDO
-         ILast=NBond+NAngle
+         ILast=ILast+Angle%N
        DO I=1,NTorsion
          IntCs%Def(ILast+I)='TORS '
          IntCs%Atoms(ILast+I,1:4)=TorsionIJKL%I(1:4,I)
        ENDDO
-       ILast=NBond+NAngle+NTorsion
-       DO I=1,NOutP
+       ILast=ILast+NTorsion
+       DO I=1,OutP%N
          IntCs%Def(ILast+I)='OUTP '
-         IntCs%Atoms(ILast+I,1:4)=OutPIJKL%I(1:4,I)
+         IntCs%Atoms(ILast+I,1:4)=OutP%IJKL%I(1:4,I)
        ENDDO
-     ! ILast=NBond+NAngle+NTorsion+NOutP
-     ! DO I=1,NHAngle
-     !   IntCs%Def(ILast+I)(1:5)=AngleMark%C(I)(1:5)
-     !   IntCs%Atoms(ILast+I,1:4)=HAngleIJKL%I(1:4,I)
-     ! ENDDO
-!      ! Put FCType
-!      IF(IntSet==1) THEN
-!        IntCs%FCType(:)='C' ! Covalent bonding scheme
-!      ELSE IF(IntSet==2) THEN
-!        J=0
-!        DO I=1,NIntC
-!          IF(IntCs%Def(I)(1:4)=='STRE') THEN
-!!!!!!!!!!!! take more care to the marks
-!            IF(HBondMark%I(I)==1) THEN
-!              IntCs%FCType(I)='H' ! true H-bond  
-!            ELSE
-!              IntCs%FCType(I)='V' ! Van der Waals
-!            ENDIF
-!         !ELSE IF(HasAngle(IntCs%Def(I))) THEN
-!          ENDIF
-!        ENDDO
-!      ELSE
-!        IntCs%FCType(:)=' '
-!      ENDIF
      ENDIF
      !
      ! tidy up
-     IF(IntSet==1) CALL Delete(OutPIJKL)
-     IF(IntSet==2) THEN
-      !CALL Delete(HAngleIJKL)
-      !CALL Delete(AngleMark)
-     ENDIF
-     CALL Delete(HBondMark)
+     !
      CALL Delete(TorsionIJKL)
-     CALL Delete(AngleIJK)
-     CALL Delete(CritRad)
-     CALL Delete(BondLength)
-     CALL Delete(BondIJ)
-     CALL Delete(BoxI)
-     CALL Delete(BoxJ)
      !
      ! Check for bending - lin.bending transions
      ! also for long range torsions!
      !
-     IF(IntSet==1) THEN
-       LongRangeTag='C'
-     ELSE
-       LongRangeTag='V'
-     ENDIF
-     IF(Refresh/=5) CALL ChkBendToLinB(IntCs,NIntC,XYZ,AtNum, &
-       HBondCenter,CtrlCoord,SCRPath,LongRangeTag)
-     CALL Delete(Top12)
-     CALL Delete(HBondCenter)
+     CALL ChkBendToLinB(IntCs,NIntC,XYZ,AtNum,GCoordCtrl,TOPS)
      !
+     CALL Delete(AtmBTot)
+     CALL Delete(AtmBCov)
+     CALL Delete(AtmBVDW)
+     CALL Delete(BondTot)
+     CALL Delete(BondCov)
+     CALL Delete(BondVDW)
+     CALL Delete(Box)
+     CALL Delete(Angle)
+     CALL Delete(OutP)
    END SUBROUTINE DefineIntCoos
-!
-!--------------------------------------------------------
-!
-   SUBROUTINE VDWTop(Top12,BondIJ)
-     TYPE(INT_RNK2) :: Top12,BondIJ,Top12New
-     TYPE(INT_VECT) :: Addition
-     INTEGER        :: NatmsLoc,NBond,I,J,Dim2,AddDim,I1,I2,II1,II2
-     !
-     NatmsLoc=SIZE(Top12%I,1)
-     Dim2=SIZE(Top12%I,2)
-     NBond=SIZE(BondIJ%I,2)
-     CALL New(Addition,NatmsLoc)
-     !
-     Addition%I=0
-     DO I=1,NBond    
-       I1=BondIJ%I(1,I)
-       I2=BondIJ%I(2,I)
-       Addition%I(I1)=Addition%I(I1)+1
-       Addition%I(I2)=Addition%I(I2)+1
-     ENDDO
-     AddDim=MAXVAL(Addition%I)
-     !
-     CALL New(Top12New,(/NatmsLoc,Dim2+AddDim/))
-     Top12New%I=0
-     DO I=1,NatmsLoc
-       DO J=1,Dim2 ; Top12New%I(I,J)=Top12%I(I,J) ; ENDDO
-     ENDDO
-     DO I=1,NBond
-       I1=BondIJ%I(1,I)
-       I2=BondIJ%I(2,I)
-       II1=Top12New%I(I1,1)+1
-       Top12New%I(I1,1)=II1
-       Top12New%I(I1,II1+1)=I2
-       II2=Top12New%I(I2,1)+1
-       Top12New%I(I2,1)=II2
-       Top12New%I(I2,II2+1)=I1
-     ENDDO
-     !
-     CALL Delete(Top12)
-     CALL New(Top12,(/NatmsLoc,Dim2+AddDim/))
-     Top12%I=Top12New%I
-     !
-     CALL Delete(Top12New)
-     CALL Delete(Addition)
-   END SUBROUTINE VDWTop
-!
-!--------------------------------------------------------
-!
-   SUBROUTINE BondList(NatmsLoc,XYZ,NBond,AtNum,SCRPath,IntSet, &
-          BoxI,BoxJ,NBox,NX,NY,NZ,CritRad,HBondOnly,DoSelect, &
-          HBondMark,BondLength,BondIJ,HBondCenter)
-     IMPLICIT NONE
-     INTEGER                     :: I,J,NatmsLoc,NBond
-     REAL(DOUBLE),DIMENSION(:,:) :: XYZ
-     TYPE(DBL_VECT)              :: CritRad !!! VdW or Slater Radii
-     REAL(DOUBLE)                :: R12,R12_2,CritDist,HBondMax
-     INTEGER                     :: IZ,IX,IY,I1,I2,JJ1,JJ2
-     INTEGER                     :: NBOX,IORD,IORDD
-     INTEGER                     :: IZD,IXD,IYD,NX,NY,NZ,NJJ1,NJJ2
-     INTEGER                     :: NMax12,JJ,IntSet,IDimExcl,NBondEst
-     INTEGER                     :: IDim14,IDim12,IDim13
-     LOGICAL                     :: HBondOnly
-     LOGICAL                     :: FillBondIJ
-     TYPE(INT_RNK2)              :: BondIJ,BondIJAux
-     TYPE(DBL_VECT)              :: DVect,BondLength,BondLengthAux
-     INTEGER,DIMENSION(:)        :: AtNum,HBondCenter
-     TYPE(INT_VECT)              :: BoxI,BoxJ,HBondMark,HBondMarkAux
-     TYPE(INT_RNK2)              :: Top_Excl,Top12,Top13,Top14
-     CHARACTER(LEN=*)            :: SCRPath
-     LOGICAL                     :: FoundHBond,FoundMetLig,DoSelect
-     LOGICAL                     :: LonelyAtom,DoExclude
-     !     
-     NBondEst=NatmsLoc*20 ! estimate
-     NBond=NBondEst
-     CALL New(BondIJAux,(/2,NBond/))
-     CALL New(BondLengthAux,NBond)
-     CALL New(HBondMarkAux,NBond)
-     HBondMarkAux%I=0
-     !
-     HBondMax=2.60D0*AngstromsToAu ! in Au 
-     !
-     IF(IntSet==2) THEN
-       CALL ReadINT_RNK2(Top_Excl,TRIM(SCRPath)//'TOP_Excl',I,J)
-       IF(I/=NatmsLoc) CALL Halt('Dimension error in BondList.')
-       CALL ReadINT_RNK2(Top12,TRIM(SCRPath)//'Top12',I,J)
-       IF(I/=NatmsLoc) CALL Halt('Dimension error in BondList.')
-       CALL ReadINT_RNK2(Top14,TRIM(SCRPath)//'Top14',I,J)
-       IF(I/=NatmsLoc) CALL Halt('Dimension error in BondList.')
-       CALL ReadINT_RNK2(Top13,TRIM(SCRPath)//'Top13',I,J)
-       IF(I/=NatmsLoc) CALL Halt('Dimension error in BondList.')
-       !
-     ENDIF
-     !     
-     CALL New(DVect,3)
-     !
-     !  Go through all boxes and their neighbours
-     !
-     NBond=0
-     DO IZ=1,NZ
-       DO IX=1,NX
-         DO IY=1,NY
-           ! absolute index of a box
-           IOrd=NX*NY*(IZ-1)+NY*(IX-1)+IY
-           DO I1=BoxI%I(IOrd),BoxI%I(IOrd+1)-1
-             JJ1=BoxJ%I(I1) !!! atom in central box
-             NJJ1=AtNum(JJ1)
-             ! second atom may come from central or neigbouring Boxes
-             !and must be an MM atom,LJ is not calculated for QM-QMpairs
-             DO IZD=-1,1
-               IF(IZ+IZD>0 .AND. IZ+IZD<=NZ) THEN
-                 DO IXD=-1,1
-                   IF(IX+IXD>0 .AND. IX+IXD<=NX) THEN
-                     DO IYD=-1,1
-                       IF(IY+IYD>0 .AND. IY+IYD<=NY) THEN
-                         IOrdD=NX*NY*(IZ-1+IZD)+NY*(IX-1+IXD)+IY+IYD
-                         DO I2=BoxI%I(IOrdD),BoxI%I(IOrdD+1)-1
-                           JJ2=BoxJ%I(I2) !!! second atom
-                           NJJ2=AtNum(JJ2)
-                           FoundHBond=.FALSE.
-                           FoundMetLig=.FALSE.
-                           LonelyAtom=.FALSE.
-                           IF(JJ2<=JJ1) CYCLE !!!avoid double counting
-                           IF(HasMetal(NJJ1).OR.HasMetal(NJJ2)) THEN
-                             IF(HasLigand(NJJ1).OR.HasLigand(NJJ2)) THEN
-                               FoundMetLig=.TRUE.
-                             ELSE
-                               CYCLE
-                             ENDIF
-                           ENDIF
-                           IF(IntSet==2) THEN
-                             LonelyAtom=(Top12%I(JJ1,1)==0.OR.&
-                                         Top12%I(JJ2,1)==0)
-                             IF(NJJ1==1.OR.NJJ2==1) THEN 
-                               FoundHBond=HasHBond(NJJ1,NJJ2)
-                             ENDIF
-                             IF(LonelyAtom) FoundHBond=.TRUE.!for filter
-                             CALL BondExcl(JJ1,JJ2,NJJ1,NJJ2, &
-                                           Top_Excl,Top12,Top13,Top14,&
-                                           FoundHBond,FoundMetLig,&
-                                           LonelyAtom,DoExclude)
-                             IF(DoExclude) CYCLE
-                           ENDIF
-                           IF(FoundHBond.AND..NOT.LonelyAtom) THEN
-                             CritDist=HBondMax
-                           ELSE
-                             CritDist=CritRad%D(NJJ1)+CritRad%D(NJJ2)
-                           ENDIF
-                           DVect%D(:)=XYZ(:,JJ1)-XYZ(:,JJ2)
-                           R12_2=DOT_PRODUCT(DVect%D,DVect%D)
-                           R12=SQRT(R12_2)
-                           IF(R12<CritDist) THEN
-                             IF(NBond+1>NBondEst) THEN
-                               CALL MoreBondArray(BondIJAux,BondLengthAux,&
-                                    HBondMarkAux,NBondEst,NatmsLoc)
-                             ENDIF 
-                             NBond=NBond+1
-                             IF(FoundHBond) THEN
-                               IF(NJJ1==1) THEN
-                                 HBondCenter(JJ1)=1
-                               ELSE
-                                 HBondCenter(JJ2)=1
-                               ENDIF
-                             ENDIF
-                             BondIJAux%I(1,NBond)=JJ1
-                             BondIJAux%I(2,NBond)=JJ2
-                             BondLengthAux%D(NBond)=R12
-                             IF(FoundHBond) THEN
-                               HBondMarkAux%I(NBond)=1
-                             ENDIF
-                           ENDIF
-                         ENDDO
-                       ENDIF
-                     ENDDO
-                   ENDIF
-                 ENDDO
-               ENDIF
-             ENDDO
-           ENDDO !!! central box atoms
-         ENDDO
-       ENDDO
-     ENDDO !!! ends on central box indices
-     !
-     CALL New(BondIJ,(/2,NBond/))
-     CALL New(BondLength,NBond)
-     CALL New(HBondMark,NBond)
-     DO I=1,NBond
-       BondIJ%I(1:2,I)=BondIJAux%I(1:2,I)
-       BondLength%D(I)=BondLengthAux%D(I)
-       HBondMark%I(I)=HBondMarkAux%I(I)
-     ENDDO
-     ! tidy up
-     CALL Delete(BondIJAux)      
-     CALL Delete(BondLengthAux)      
-     CALL Delete(HBondMarkAux)      
-     CALL Delete(DVect)      
-     IF(IntSet==2) THEN
-       CALL Delete(Top_Excl)
-       CALL Delete(Top12)
-       CALL Delete(Top13)
-       CALL Delete(Top14)
-     ENDIF
-   END SUBROUTINE BondList
 !
 !----------------------------------------------------------------
 !
-   SUBROUTINE BondExcl(JJ1,JJ2,NJJ1,NJJ2,TopExcl,Top12,Top13,Top14, &
+   SUBROUTINE ScoreBond(BondScore,Bond)
+     TYPE(BONDDATA)       :: Bond
+     INTEGER,DIMENSION(:) :: BondScore
+     INTEGER              :: I
+     !
+     IF(SIZE(BondScore)/=Bond%N) CALL Halt('Dimension error in ScoreBond')
+     BondScore=1
+     DO I=1,Bond%N
+       IF(Bond%Type%C(I)(1:5)=='HBond') BondScore(I)=BondScore(I)+1
+       IF(Bond%Type%C(I)(1:6)=='MetLig') BondScore(I)=BondScore(I)+1
+       IF(Bond%LonelyAtom%I(I)==1) BondScore(I)=BondScore(I)+1
+     ENDDO
+   END SUBROUTINE ScoreBond
+!
+!----------------------------------------------------------------
+!
+   SUBROUTINE BondExcl(JJ1,JJ2,NJJ1,NJJ2,TOPS, &
                        FoundHBond,FoundMetLig,LonelyAtom,DoExclude)
      INTEGER             :: JJ1,JJ2,NJJ1,NJJ2
+     TYPE(TOPOLOGY)      :: TOPS
      INTEGER             :: IDimExcl,IDim12,IDim13,IDim14
-     TYPE(INT_RNK2)      :: TopExcl,Top12,Top13,Top14 
      LOGICAL             :: FoundHBond,FoundMetLig,LonelyAtom,DoExclude
      !
-     IDimExcl=TopExcl%I(JJ1,1)
+     IDimExcl=TOPS%CovExcl%I(JJ1,1)
      DoExclude=.FALSE.
-     IF(ANY(TopExcl%I(JJ1,2:1+IDimExcl)==JJ2) &
+     IF(ANY(TOPS%CovExcl%I(JJ1,2:1+IDimExcl)==JJ2) &
        .AND.IDimExcl/=0) THEN
        IF(.NOT.(FoundHBond.OR.FoundMetLig)) THEN
          DoExclude=.TRUE.
          RETURN
        ELSE
-         IDim12=Top12%I(JJ1,1)
-         IDim13=Top13%I(JJ1,1)
-         IF(ANY(Top12%I(JJ1,2:1+IDim12)==JJ2) &
-           .OR.ANY(Top13%I(JJ1,2:1+IDim13)==JJ2)) THEN
+         IDim12=TOPS%Cov12%I(JJ1,1)
+         IDim13=TOPS%Cov13%I(JJ1,1)
+         IF(ANY(TOPS%Cov12%I(JJ1,2:1+IDim12)==JJ2) &
+           .OR.ANY(TOPS%Cov13%I(JJ1,2:1+IDim13)==JJ2)) THEN
            DoExclude=.TRUE.
            RETURN
          ENDIF
-         IDim14=Top14%I(JJ1,1)
+         IDim14=TOPS%Cov14%I(JJ1,1)
          IF(.NOT. &
-           (ANY(Top14%I(JJ1,2:1+IDim14)==JJ2) &
+           (ANY(TOPS%Cov14%I(JJ1,2:1+IDim14)==JJ2) &
            .AND.IDim14/=0)) THEN
            DoExclude=.TRUE.
            RETURN
          ENDIF
        ENDIF
      ENDIF
-     IF(.NOT.(FoundHBond.OR.FoundMetLig.OR.&
-        LonelyAtom)) THEN
-       DoExclude=.TRUE.
-       RETURN
-     ENDIF
+    !IF(.NOT.(FoundHBond.OR.FoundMetLig.OR.&
+    !   LonelyAtom)) THEN
+    !  DoExclude=.TRUE.
+    !  RETURN
+    !ENDIF
    END SUBROUTINE BondExcl
 !
 !----------------------------------------------------------------
 !
-   SUBROUTINE MoreBondArray(BondIJ,BondLength,HBondMark,NBond,NatmsLoc)
-     TYPE(INT_RNK2)     :: BondIJ,BOndIJ2
-     TYPE(DBL_VECT)     :: BondLength,BondLength2
-     TYPE(INT_VECT)     :: HBondMark,HBondMark2
-     INTEGER            :: I,J,NBond,NBondNew,NatmsLoc
+   SUBROUTINE MoreBondArray(Bond,DimNew,DimOld)
+     TYPE(BondDATA)     :: Bond,Bond2
+     INTEGER            :: DimNew,DimOld   
      !
-     CALL New(BondIJ2,(/2,NBond/))
-     CALL New(BondLength2,NBond)
-     CALL New(HBondMark2,NBond)
-     HBondMark2%I=0
-     BondIJ2%I=BondIJ%I
-     BondLength2%D=BondLength%D
-     HBondMark%I=HBondMark2%I
-     CALL Delete(BondIJ)
-     CALL Delete(BondLength)
-     CALL Delete(HBondMark)
-     !
-     NBondNew=NBond+NatmsLoc*10 
-     CALL New(BondIJ,(/2,NBondNew/))
-     CALL New(BondLength,NBondNew)
-     CALL New(HBondMark,NBondNew)
-     DO I=1,NBond
-       BondIJ%I(1:2,I)=BondIJ2%I(1:2,I)
-       BondLength%D(I)=BondLength2%D(I)
-       HBondMark%I(I)=HBondMark2%I(I)
-     ENDDO 
-     !
-     CALL Delete(BondIJ2) 
-     CALL Delete(BondLength2) 
-     CALL Delete(HBondMark2) 
+     CALL Set_BONDDATA_EQ_BONDDATA(Bond2,Bond, &
+                                   NewDim_O=DimNew,OldDim_O=DimOld)
+     CALL Delete(Bond)
+     CALL New(Bond,DimNew)
+     CALL Set_BONDDATA_EQ_BONDDATA(Bond,Bond2)
+     CALL Delete(Bond2)
    END SUBROUTINE MoreBondArray
 !
 !----------------------------------------------------------------
-!
-   SUBROUTINE OutPList(XYZ,Top12,OutPCrit,NOutP,OutPIJKL)
-     REAL(DOUBLE),DIMENSION(:,:) :: XYZ
-     TYPE(INT_RNK2)              :: Top12,OutPIJKL,OutPIJKL2
-     INTEGER                     :: NatmsLoc,NOutP,I,J
-     INTEGER                     :: I1,I2,I3,I4
-     REAL(DOUBLE)                :: A1,A2,A3,A,Conv,OutPCrit,AngleSum
-     !
-     NatmsLoc=SIZE(XYZ,2)
-     Conv=180.D0/Pi
-     NOutP=0
-     DO I=1,NatmsLoc
-       IF(Top12%I(I,1)==3) NOutP=NOutP+3
-      !IF(Top12%I(I,1)>=3) NOutP=NOutP+3
-     ENDDO
-     CALL New(OutPIJKL2,(/4,NOutP/))
-     !
-     NOutP=0
-     DO I=1,NatmsLoc
-      !IF(Top12%I(I,1)>=3) THEN
-       IF(Top12%I(I,1)==3) THEN
-         I1=I
-         CALL OutPSelect(I1,Top12,XYZ,I2,I3,I4,AngleSum)
-         IF(ABS(AngleSum*Conv-360.D0)<OutPCrit) THEN
-           OutPIJKL2%I(1,NOutP+1)=I2
-           OutPIJKL2%I(2,NOutP+1)=I1
-           OutPIJKL2%I(3,NOutP+1)=I3
-           OutPIJKL2%I(4,NOutP+1)=I4
-           !
-           OutPIJKL2%I(1,NOutP+2)=I3
-           OutPIJKL2%I(2,NOutP+2)=I1
-           OutPIJKL2%I(3,NOutP+2)=I2
-           OutPIJKL2%I(4,NOutP+2)=I4
-           !
-           OutPIJKL2%I(1,NOutP+3)=I4
-           OutPIJKL2%I(2,NOutP+3)=I1
-           OutPIJKL2%I(3,NOutP+3)=I2
-           OutPIJKL2%I(4,NOutP+3)=I3
-           NOutP=NOutP+3
-         ENDIF
-       ENDIF
-     ENDDO
-     CALL New(OutPIJKL,(/4,NOutP/))
-     OutPIJKL%I(1:4,1:NOutP)=OutPIJKL2%I(1:4,1:NOutP)
-     CALL Delete(OutPIJKL2)
-   END SUBROUTINE OutPList
-!
-!-------------------------------------------------
 !
    SUBROUTINE VDWFilter(BondIJ,NBond,Top_Excl)
      IMPLICIT NONE
@@ -1474,29 +657,27 @@ CONTAINS
 !------------------------------------------------------------
 !
    SUBROUTINE TorsionList(NatmsLoc,Top12,BondIJ,XYZ, &
-                           TorsionIJKL,NTorsion,HBondMark)
+                           TorsionIJKL,NTorsion)
      !
      IMPLICIT NONE
-     INTEGER              :: NatmsLoc,I,I1,I2,N1,N2,J,J1,J2,NBond
-     INTEGER              :: NTorsion
-     INTEGER              :: I1Num,I2Num,JJ,I3,N3,JJ1,JJ2,NTIni
-     TYPE(INT_VECT)       :: HBondMark
-     TYPE(INT_RNK2)       :: Top12   
-     TYPE(INT_RNK2)       :: BondIJ  
-     TYPE(INT_RNK2)       :: TorsionIJKL,TorsionIJKLAux
-     LOGICAL              :: DoSelect
+     INTEGER                     :: NatmsLoc,I,I1,I2
+     INTEGER                     :: N1,N2,J,J1,J2,NBond
+     INTEGER                     :: NTorsion
+     INTEGER                     :: I1Num,I2Num,JJ,I3,N3,JJ1,JJ2,NTIni
+     TYPE(INT_RNK2)              :: Top12   
+     TYPE(INT_RNK2)              :: BondIJ  
+     TYPE(INT_RNK2)              :: TorsionIJKL,TorsionIJKLAux
+     LOGICAL                     :: SelectTors
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
      REAL(DOUBLE)                :: Crit,Alph1,Alph2,Sum,PIHalf
      REAL(DOUBLE)                :: Sum1,Sum2
      INTEGER,DIMENSION(1:4)      :: Atoms
      !    
      PIHalf=PI*Half
-     !DoSelect=.FALSE.
-      DoSelect=.TRUE.
+     SelectTors=.TRUE.
      NBond=SIZE(BondIJ%I,2)
      NTorsion=0
      DO I=1,NBond
-      !IF(HBondMark%I(I)/=0) CYCLE
        I1=BondIJ%I(1,I)
        I2=BondIJ%I(2,I)
        N1=Top12%I(I1,1)
@@ -1508,7 +689,6 @@ CONTAINS
      !    
      NTorsion=0
      DO I=1,NBond 
-      !IF(HBondMark%I(I)/=0) CYCLE
        I1=BondIJ%I(1,I)
        I2=BondIJ%I(2,I)
        N1=Top12%I(I1,1)
@@ -1524,7 +704,7 @@ CONTAINS
          DO J2=1,N2
            JJ2=Top12%I(I2,J2+1)
            IF(JJ1==JJ2.OR.JJ1==I2.OR.JJ2==I1) CYCLE
-           IF(DoSelect) THEN
+           IF(SelectTors) THEN
              CALL BEND(XYZ(1:3,I1),XYZ(1:3,I2),XYZ(1:3,JJ2), &
                        Value_O=Alph2)
              Sum2=ABS(Alph2-PiHalf)/DBLE(Top12%I(JJ2,1)+1)
@@ -1538,9 +718,8 @@ CONTAINS
              TorsionIJKLAux%I(1:4,NTorsion)=(/JJ1,I1,I2,JJ2/)
            ENDIF
          ENDDO
-        !IF(DoSelect.AND.NTIni/=NTorsion) EXIT
        ENDDO
-       IF(DoSelect.AND.Atoms(1)/=0) THEN
+       IF(SelectTors.AND.Atoms(1)/=0) THEN
          NTorsion=NTorsion+1
          TorsionIJKLAux%I(1:4,NTorsion)=Atoms(1:4)
        ENDIF
@@ -1555,209 +734,9 @@ CONTAINS
 !
 !-----------------------------------------------------------------------
 !
-   SUBROUTINE AngleList(NatmsLoc,Top12,AngleIJK,NAngle,AtNum,BondIJ, &
-                        NBond,HBondMark,HBondCenter,DoVDW)
-     !
-     ! this routine generates bond-angles associated with WDV bonds
-     !
-     IMPLICIT NONE
-     INTEGER              :: NatmsLoc,I,I1,I2,N1,N2,J,J1,J2,NBond,NAngle
-     INTEGER              :: JJ,II1,II2,K,IC,ICC,NDim,N,IC2
-     INTEGER,DIMENSION(:) :: AtNum,HBondMark,HBondCenter
-     TYPE(INT_RNK2)       :: Top12   
-     TYPE(INT_RNK2)       :: AngleIJK,AngleIJKAux
-     TYPE(INT_RNK2)       :: BondIJ
-     TYPE(INT_VECT)       :: Sign
-     LOGICAL              :: DoVDW
-     !    
-     CALL New(Sign,NatmsLoc)
-     Sign%I=0
-     NAngle=0
-     DO I=1,NBond
-       I1=BondIJ%I(1,I)
-       I2=BondIJ%I(2,I)
-       N1=Top12%I(I1,1)
-       N2=Top12%I(I2,1)
-      !IF(HBondMark(I)==0) THEN
-         NAngle=NAngle+N1+N2
-      !ENDIF
-     ENDDO
-     !    
-     CALL New(AngleIJKAux,(/3,NAngle/))
-     !    
-     NAngle=0
-     DO I=1,NBond
-      !IF(HBondMark(I)/=0) CYCLE
-       I1=BondIJ%I(1,I)
-       I2=BondIJ%I(2,I)
-       N1=Top12%I(I1,1)
-       N2=Top12%I(I2,1)
-       DO JJ=1,2
-         IF(JJ==1) THEN
-           IC=I1
-           NDim=N1
-           ICC=I2
-         ELSE
-           IC=I2
-           NDim=N2
-           ICC=I1
-         ENDIF
-         IF(Sign%I(IC)==0) THEN
-           DO J1=1,NDim
-             II1=Top12%I(IC,J1+1)
-             DO J2=J1+1,NDim
-               II2=Top12%I(IC,J2+1)
-               IF(DoVDW.AND.(II1/=ICC.AND.II2/=ICC)) CYCLE
-               IF(HBondCenter(II1)/=0.OR.HBondCenter(II2)/=0) CYCLE
-               NAngle=NAngle+1
-               AngleIJKAux%I(1,NAngle)=II1
-               AngleIJKAux%I(2,NAngle)=IC
-               AngleIJKAux%I(3,NAngle)=II2
-             ENDDO
-           ENDDO
-           Sign%I(IC)=1
-         ENDIF
-       ENDDO
-     ENDDO
-     !
-     CALL New(AngleIJK,(/3,NAngle/))
-     DO I=1,NAngle
-       DO J=1,3 ; AngleIJK%I(J,I)=AngleIJKAux%I(J,I) ; ENDDO
-     ENDDO
-     CALL Delete(Sign)
-     CALL Delete(AngleIJKAux)
-   END SUBROUTINE AngleList
-!
-!----------------------------------------------------------------------
-!
-   SUBROUTINE HBondAngles(NatmsLoc,Top12,AngleIJKL,NAngle, &
-                    BondIJ,NBond,AngleMark,HBondMark,AtNum)
-     !
-     ! this routine generates bond-angles associated with WDV bonds
-     !
-     IMPLICIT NONE
-     INTEGER              :: NatmsLoc,I,I1,I2,N1,N2,J,J1,J2,NBond,NAngle
-     INTEGER              :: JJ,II1,II2,K,IC,ICC,NDim,N,IC2
-     INTEGER              :: III1,III2,III,ICN
-     INTEGER,DIMENSION(:) :: AtNum,HBondMark
-     TYPE(INT_RNK2)       :: Top12   
-     TYPE(INT_RNK2)       :: AngleIJKL,AngleIJKLAux
-     TYPE(INT_RNK2)       :: BondIJ
-     TYPE(INT_VECT)       :: Sign
-     TYPE(CHR_VECT)       :: AngleMark,AngleMarkAux
-     !    
-     CALL New(Sign,NatmsLoc)
-     Sign%I=0
-     NAngle=0
-     DO I=1,NBond
-       I1=BondIJ%I(1,I)
-       I2=BondIJ%I(2,I)
-       N1=Top12%I(I1,1)
-       N2=Top12%I(I2,1)
-       IF(HBondMark(I)/=0) THEN
-         NAngle=NAngle+4+N1+N2
-       ENDIF
-     ENDDO
-     !    
-     CALL New(AngleIJKLAux,(/4,NAngle/))
-     AngleIJKLAux%I=0
-     CALL New(AngleMarkAux,NAngle)
-     !    
-     NAngle=0
-     DO I=1,NBond
-       IF(HBondMark(I)==0) CYCLE
-       I1=BondIJ%I(1,I)
-       I2=BondIJ%I(2,I)
-       N1=Top12%I(I1,1)
-       N2=Top12%I(I2,1)
-       IF(AtNum(I1)==1) THEN
-         II1=I2
-         IC=I1
-       ELSE
-         II1=I1
-         IC=I2
-       ENDIF
-       IF(Sign%I(IC)/=0) CYCLE
-       II2=0 
-       DO J=1,Top12%I(IC,1)
-         II2=Top12%I(IC,1+J)
-         IF(II2/=II1) EXIT 
-       ENDDO
-       IF(II2==II1.OR.II2==0) CALL Halt('II2 error in HBondAngles')
-       !
-       DO JJ=1,2
-         IF(JJ==1) THEN
-           ICN=II1
-           ICC=II2
-           III1=0
-         ELSE
-           ICN=II2
-           ICC=II1
-           III2=0
-         ENDIF
-         DO J=1,Top12%I(ICN,1)
-           III=Top12%I(ICN,1+J)
-           IF(III/=IC.AND.III/=ICC) THEN
-             NAngle=NAngle+1
-             AngleIJKLAux%I(1,NAngle)=III
-             AngleIJKLAux%I(2,NAngle)=ICN
-             AngleIJKLAux%I(3,NAngle)=ICC
-             AngleMarkAux%C(NAngle)(1:5)='BEND '
-             IF(JJ==1) THEN
-               IF(III1==0) THEN
-                 III1=III
-               ELSE
-                 IF(AtNum(III)>AtNum(III1)) III1=III
-               ENDIF
-             ELSE
-               IF(III2==0) THEN
-                 III2=III
-               ELSE
-                 IF(III/=III1.AND.AtNum(III)>AtNum(III2)) III2=III
-               ENDIF
-             ENDIF
-           ENDIF
-         ENDDO
-       ENDDO
-       !
-       IF(III1/=0.AND.III2/=0) THEN
-         NAngle=NAngle+1
-         AngleIJKLAux%I(1,NAngle)=III1
-         AngleIJKLAux%I(2,NAngle)=II1
-         AngleIJKLAux%I(3,NAngle)=II2
-         AngleIJKLAux%I(4,NAngle)=III2
-         AngleMarkAux%C(NAngle)(1:5)='TORS '
-       ENDIF
-       NAngle=NAngle+1
-       AngleIJKLAux%I(1,NAngle)=II1
-       AngleIJKLAux%I(2,NAngle)=IC
-       AngleIJKLAux%I(3,NAngle)=II2
-       AngleIJKLAux%I(4,NAngle)=III2
-       AngleMarkAux%C(NAngle)(1:5)='LINB1'
-       NAngle=NAngle+1
-       AngleIJKLAux%I(1,NAngle)=II1
-       AngleIJKLAux%I(2,NAngle)=IC
-       AngleIJKLAux%I(3,NAngle)=II2
-       AngleIJKLAux%I(4,NAngle)=III2
-       AngleMarkAux%C(NAngle)(1:5)='LINB2'
-       Sign%I(IC)=1
-     ENDDO
-     !
-     CALL New(AngleIJKL,(/4,NAngle/))
-     CALL New(AngleMark,NAngle)
-     DO I=1,NAngle
-       DO J=1,4 ; AngleIJKL%I(J,I)=AngleIJKLAux%I(J,I) ; ENDDO
-       AngleMark%C(I)=AngleMarkAux%C(I)
-     ENDDO
-     CALL Delete(Sign)
-     CALL Delete(AngleIJKLAux)
-     CALL Delete(AngleMarkAux)
-   END SUBROUTINE HBondAngles
-!
-!----------------------------------------------------------------------
-!
    SUBROUTINE GetIntCs(XYZ,AtNumIn,IntCs,NIntC,Refresh,& 
-                       SCRPath,CtrlCoord,CtrlConstr)
+                       SCRPath,CtrlCoord,CtrlConstr,TOPS, &
+                       HFileIn_O,iCLONE_O,iGEO_O)
      !
      ! This subroutine constructs the IntCs array, which holds
      ! definitions of internal coordinates to be used in the 
@@ -1773,7 +752,7 @@ CONTAINS
      ! Later, check also linear bending -> bending transitions !
      ! 
      IMPLICIT NONE
-     TYPE(INTC)                  :: IntCs,IntC_Cov,IntC_VDW
+     TYPE(INTC)                  :: IntCs,IntC_Bas,IntC_VDW
      TYPE(INTC)                  :: IntC_Extra,IntC_New
      TYPE(INTC)                  :: IntC_Cart
      CHARACTER(LEN=*)            :: SCRPath
@@ -1781,9 +760,11 @@ CONTAINS
      TYPE(Constr)                :: CtrlConstr
      LOGICAL                     :: DoFixMM
      REAL(DOUBLE),DIMENSION(:)   :: AtNumIn
-     INTEGER                     :: NIntC,NIntC_Cov,NIntC_VDW
+     CHARACTER(LEN=*),OPTIONAL   :: HFileIn_O
+     INTEGER,OPTIONAL            :: iCLONE_O,iGEO_O
+     INTEGER                     :: NIntC,NIntC_Bas,NIntC_VDW
      INTEGER                     :: NIntC_Extra,NNew,Nintc_New
-     INTEGER                     :: NIntC_Cart
+     INTEGER                     :: NIntC_Cart,MaxBonds
      INTEGER                     :: I,J,K,Refresh,NatmsLoc,II,ILast,III
      INTEGER                     :: I1,I2,I3,I4,NMax12
      INTEGER                     :: NStreGeOp,NBendGeOp
@@ -1791,6 +772,10 @@ CONTAINS
      TYPE(INT_VECT)              :: AtNum
      TYPE(INT_RNK2)              :: Top12
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
+     TYPE(BONDDATA)              :: BondCov,BondVDW
+     TYPE(ATOMBONDS)             :: AtmBCov,AtmBVDW 
+     TYPE(TOPOLOGY)              :: TOPS
+     TYPE(IntCBox)               :: Box
      !
      NatmsLoc=SIZE(XYZ,2)
      !
@@ -1801,42 +786,25 @@ CONTAINS
        AtNum%I(I)=INT(AtNumIn(I))
      ENDDO
      !
-     IF(Refresh==1) Then !!! Total refresh
-       !define covalent bonding scheme
-            CALL DefineIntCoos(NatmsLoc,XYZ,AtNum%I,1,Refresh, &
-                               IntC_Cov,NIntC_Cov,CtrlCoord,SCRPath)
-       !define Van der Waals bonding scheme
-            CALL DefineIntCoos(NatmsLoc,XYZ,AtNum%I,2,Refresh, &
-                               IntC_VDW,NIntC_VDW,CtrlCoord,SCRPath)
-       !
-     ELSE IF(Refresh==2) THEN !!! refresh VDW terms
-       !
-       ! Refresh only the VDW terms
-       !
-       CALL ReadIntCs(IntC_Cov,TRIM(SCRPath)//'IntC_Cov')
-       NIntC_Cov=SIZE(IntC_Cov%Def)
-       CALL DefineIntCoos(NatmsLoc,XYZ,AtNum%I,2,Refresh, &
-                            IntC_VDW,NIntC_VDW,CtrlCoord,SCRPath)
-       !
-     ELSE IF(Refresh==3) THEN !!! no refresh, get everything from disk
-       CALL ReadIntCs(IntC_Cov,TRIM(SCRPath)//'IntC_Cov')
-       CALL ReadIntCs(IntC_VDW,TRIM(SCRPath)//'IntC_VDW')
-       NIntC_Cov=SIZE(IntC_Cov%Def)
-       NIntC_VDW=SIZE(IntC_VDW%Def)
-       !
-     ELSE IF(Refresh==4) THEN !!! covalent bonds only
-       CALL DefineIntCoos(NatmsLoc,XYZ,AtNum%I,1,Refresh, &
-                          IntC_Cov,NIntC_Cov,CtrlCoord,SCRPath)
-       NIntC_VDW=0 
-       !
+     IF(Refresh==1) THEN !!! Total refresh
+       IF(PRESENT(HFileIn_O).AND.PRESENT(iCLONE_O)) THEN
+         CALL DefineIntCoos(XYZ,AtNum%I,IntC_Bas,NIntC_Bas,CtrlCoord,&
+                            TOPS,HFileIn_O=HFileIn_O,iCLONE_O=iCLONE_O,&
+                            iGEO_O=iGEO_O)
+       ELSE
+         CALL DefineIntCoos(XYZ,AtNum%I,IntC_Bas,NIntC_Bas,CtrlCoord,&
+                            TOPS)
+       ENDIF
      ELSE IF(Refresh==5) THEN !!! use only extra coords from input
-       NIntC_Cov=0 
+       NIntC_Bas=0 
        NIntC_VDW=0 
+     ELSE
+       CALL Halt('Unknown Refresh option in GetIntCs') 
      ENDIF
      !
      ! Save Covalent and VDW Terms onto disk
      !
-     CALL WriteIntCs(IntC_Cov,TRIM(SCRPath)//'IntC_Cov')
+     CALL WriteIntCs(IntC_Bas,TRIM(SCRPath)//'IntC_Bas')
      CALL WriteIntCs(IntC_VDW,TRIM(SCRPath)//'IntC_VDW')  
      !
      ! Get extra internal coordinates and constraints
@@ -1847,17 +815,17 @@ CONTAINS
      !
      ! Merge INTC arrays
      !
-     CtrlCoord%NCov=NIntC_Cov
-     NIntC=NIntC_Cov+NIntC_VDW+NIntC_Extra+NIntC_Cart
+     CtrlCoord%NCov=NIntC_Bas
+     NIntC=NIntC_Bas+NIntC_VDW+NIntC_Extra+NIntC_Cart
      !
      CALL New(IntCs,NIntC)
      !
      ILast=0
-     IF(NIntC_Cov/=0) THEN
-       CALL Set_INTC_EQ_INTC(IntC_Cov,IntCs,1,NIntC_Cov,ILast+1)
-       CALL Delete(IntC_Cov)
+     IF(NIntC_Bas/=0) THEN
+       CALL Set_INTC_EQ_INTC(IntC_Bas,IntCs,1,NIntC_Bas,ILast+1)
+       CALL Delete(IntC_Bas)
      ENDIF
-       ILast=NIntC_Cov
+       ILast=NIntC_Bas
      IF(NIntC_VDW/=0) THEN 
        CALL Set_INTC_EQ_INTC(IntC_VDW,IntCs,1,NIntC_VDW,ILast+1)
        CALL Delete(IntC_VDW)
@@ -1876,7 +844,7 @@ CONTAINS
      ENDIF
      !
      IF(.NOT.(NIntC==0.OR.NIntC_Extra==0.OR.Refresh==5)) THEN
-       CALL CleanINTC(IntCs,NIntC,NIntC_Cov,NIntC_VDW,NIntC_Extra)
+       CALL CleanINTC(IntCs,NIntC,NIntC_Bas,NIntC_VDW,NIntC_Extra)
      ENDIF             
      !
      ! Set active all internal coords defd so far.
@@ -2937,21 +1905,18 @@ CONTAINS
 !
 !--------------------------------------------------------------------
 !
-   SUBROUTINE ChkBendToLinB(IntCs,NIntC,XYZ,AtNum,HBondCenter, &
-                            CtrlCoord,SCRPath,LongRangeTag)
+   SUBROUTINE ChkBendToLinB(IntCs,NIntC,XYZ,AtNum,CtrlCoord,TOPS)
      TYPE(INTC)                  :: IntCs,IntC_New
      INTEGER                     :: NIntC,Nintc_New
+     TYPE(TOPOLOGY)              :: TOPS
      TYPE(INT_VECT)              :: LinAtom,MarkLinb,MarkLongR
-     TYPE(INT_VECT)              :: HBondCenter
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
      INTEGER,DIMENSION(:)        :: AtNum
      REAL(DOUBLE)                :: Value,Conv
      INTEGER                     :: I1,I2,I3,I4,NMax12,NLinB,NtorsLinb
      INTEGER                     :: I,J,K,L,NatmsLoc
-     TYPE(INT_RNK2)              :: LinBBridge,Top12
+     TYPE(INT_RNK2)              :: LinBBridge
      TYPE(CoordCtrl)             :: CtrlCoord
-     CHARACTER(LEN=*)            :: SCRPath
-     CHARACTER(LEN=1)            :: LongRangeTag
      !
      ! Now check for bending -> linear bending transitions
      !
@@ -2959,7 +1924,6 @@ CONTAINS
      NatmsLoc=SIZE(XYZ,2)
      CALL New(MarkLinB,NIntC)
      Conv=180.D0/PI
-     CALL ReadINT_RNK2(Top12,TRIM(SCRPath)//'Top12',I,J)
      !
      MarkLinB%I=0
           NLinB=0
@@ -2970,7 +1934,7 @@ CONTAINS
          I3=IntCs%Atoms(I,3) 
          CALL BEND(XYZ(1:3,I1),XYZ(1:3,I2),XYZ(1:3,I3),Value_O=Value)
          IF((ABS(Value-PI)*Conv < CtrlCoord%LinCrit)) THEN  
-           IF(Top12%I(I2,1)>2) THEN
+           IF(TOPS%Tot12%I(I2,1)>2) THEN
              IntCs%Active(I)=.FALSE.
              CYCLE
            ENDIF
@@ -2992,7 +1956,7 @@ CONTAINS
          IF(MarkLinB%I(I)==0) THEN
            CALL Set_INTC_EQ_INTC(IntCs,IntC_New,I,I,NLinB+I)
          ELSE
-           CALL FindLinBRef(XYZ,IntCs%Atoms(I,1:4),Top12%I)
+           CALL FindLinBRef(XYZ,IntCs%Atoms(I,1:4),TOPS%Tot12%I)
            CALL Set_INTC_EQ_INTC(IntCs,IntC_New,I,I,NLinB+I)
            IntC_New%Def(NLinB+I)='LINB1'
            NLinB=NLinB+1
@@ -3023,20 +1987,16 @@ CONTAINS
            Value1=IntCs%Value(I),Value2=IntCs%Value(I+1))  
          MarkLongR%I(I)=1 
          MarkLongR%I(I+1)=1 
-      !ELSE IF(IntCs%Def(I)(1:5)=='BEND') THEN
-      !  I2=IntCs%Atoms(I,2)
-      !  IF(HBondCenter%I(I2)/=0) MarkLongR%I(I)=1 
        ENDIF
      ENDDO 
      !
      ! Now recognize colinear atoms of the molecule and 
      ! introduce long-range torsions. 
      !
-     CALL LongRangeIntC(CtrlCoord,SCRPath,Top12,IntCs,NIntC, &
-                        XYZ,MarkLongR,LongRangeTag,AtNum)
+     CALL LongRangeIntC(CtrlCoord,TOPS%Tot12,IntCs,NIntC, &
+                        XYZ,MarkLongR,AtNum)
      !
      CALL Delete(MarkLongR)
-     CALL Delete(Top12)
    END SUBROUTINE ChkBendToLinB    
 !
 !-------------------------------------------------------
@@ -3470,9 +2430,10 @@ CONTAINS
 !
 !-------------------------------------------------------------------
 !
-   SUBROUTINE GetMixedBMat(IntCs,XYZ,GTrfCtrl,GCoordCtrl, &
+   SUBROUTINE GetMixedBMat(IntCs,XYZ,GTrfCtrl,GCoordCtrl,TOPS, &
                            NCartConstr,Print,SCRPath,DoConstr)
      TYPE(INTC)                   :: IntCs
+     TYPE(TOPOLOGY)               :: TOPS
      TYPE(Cholesky)               :: CholData
      TYPE(CoordCtrl)              :: GCoordCtrl
      TYPE(TrfCtrl)                :: GTrfCtrl
@@ -3487,7 +2448,6 @@ CONTAINS
      TYPE(INT_VECT)               :: ISpB1,ISpB2,JSpB1,JSpB2,IGc1,JGc1
      TYPE(INT_VECT)               :: ISpBMix,JSpBMix
      TYPE(DBL_VECT)               :: ASpB1,ASpB2,ASpBMix,AGc1
-     TYPE(INT_RNK2)               :: Top12
      TYPE(DBL_RNK2)               :: XYZWork
      !
      NatmsLoc=SIZE(XYZ,2)
@@ -3495,13 +2455,12 @@ CONTAINS
      NIntC=SIZE(IntCs%Def)
      Print2=(Print>=DEBUG_GEOP_MAX)
      !
-     CALL ReadINT_RNK2(Top12,TRIM(SCRPath)//'Top12',I,J)
      NMax12=J-1
      CALL New(XYZWork,(/3,NatmsLoc/))
      XYZWork%D=XYZ
      !
      ! Find two reference systems
-     CALL ThreeAtoms(XYZWork%D,IntCs,Top12, &
+     CALL ThreeAtoms(XYZWork%D,IntCs,TOPS%Tot12, &
                      GTrfCtrl%ThreeAt,GTrfCtrl%Linearity)
        At1=GTrfCtrl%ThreeAt(1)
        At2=GTrfCtrl%ThreeAt(2)
@@ -3511,10 +2470,10 @@ CONTAINS
        GTrfCtrl%ThreeAt_2(2)=At2
        GTrfCtrl%ThreeAt_2(3)=At3
      ELSE
-       Top12%I(At1,:)=0
-       Top12%I(At2,:)=0
-       Top12%I(At3,:)=0
-       CALL ThreeAtoms(XYZWork%D,IntCs,Top12, &
+       TOPS%Tot12%I(At1,:)=0
+       TOPS%Tot12%I(At2,:)=0
+       TOPS%Tot12%I(At3,:)=0
+       CALL ThreeAtoms(XYZWork%D,IntCs,TOPS%Tot12, &
                        GTrfCtrl%ThreeAt_2,GTrfCtrl%Linearity)
      ENDIF
      CALL CALC_XYZRot(XYZWork%D,GTrfCtrl%ThreeAt,&
@@ -3580,7 +2539,6 @@ CONTAINS
      CALL Delete(ASpB2)
      CALL Delete(B)
      CALL Delete(XYZWork)
-     CALL Delete(Top12)
      CALL Delete(InvP)
      CALL Delete(Perm)
      !
@@ -4004,43 +2962,6 @@ CONTAINS
      ENDDO
    END SUBROUTINE CleanB
 !
-!--------------------------------------------------------------------
-!
-   SUBROUTINE WriteINT_RNK2(Top,FileName)
-     INTEGER,DIMENSION(:,:) :: Top
-     CHARACTER(LEN=*)       :: FileName
-     INTEGER                :: NDim1,NDim2
-     !
-     NDim1=SIZE(Top,1)
-     NDim2=SIZE(Top,2)
-     !
-     OPEN(File=FileName,Unit=99,FORM='UNFORMATTED',STATUS='UNKNOWN')
-     REWIND(99)
-     WRITE(99) NDim1,NDim2 
-     WRITE(99) Top
-     CLOSE(Unit=99,STATUS='KEEP')
-   END SUBROUTINE WriteINT_RNK2
-!
-!-------------------------------------------------------------------
-!
-   SUBROUTINE ReadINT_RNK2(Top,FileName,NDim1,NDim2)
-     TYPE(INT_RNK2)         :: Top
-     CHARACTER(LEN=*)       :: FileName
-     INTEGER                :: NDim1,NDim2
-     LOGICAL                :: Exists
-     !
-     INQUIRE(File=FileName,EXIST=Exists)
-     IF(.NOT.Exists) &
-       CALL Halt('File does not exist error in ReadINT_RNK2 for '// &
-                  FileName)
-     OPEN(File=FileName,Unit=99,FORM='UNFORMATTED',STATUS='UNKNOWN')
-       REWIND(99)
-       READ(99) NDim1,NDim2 
-       CALL New(Top,(/NDim1,NDim2/))
-       READ(99) Top%I
-     CLOSE(Unit=99,STATUS='KEEP')
-   END SUBROUTINE ReadINT_RNK2
-!
 !-------------------------------------------------------------------
 !
    SUBROUTINE PrtXYZ(AtNum,XYZ,FileName,Title,Vects_O)
@@ -4196,8 +3117,8 @@ CONTAINS
 ! 
 !-------------------------------------------------------------------
 !
-   SUBROUTINE LongRangeIntC(CtrlCoord,SCRPath,Top12,IntCs,NIntC, &
-                            XYZ,MarkLongR,LongRangeTag,AtNum)
+   SUBROUTINE LongRangeIntC(CtrlCoord,Top12,IntCs,NIntC, &
+                            XYZ,MarkLongR,AtNum)
      TYPE(INTC)                  :: IntCs,IntC_New
      INTEGER                     :: NIntC,NIntc_New
      TYPE(INT_VECT)              :: LinAtom,MarkLongR,LinCenter
@@ -4209,8 +3130,6 @@ CONTAINS
      INTEGER                     :: NStreLinb,NBendLinb,JJ,IC,IEx
      TYPE(INT_RNK2)              :: LinBBridge,Top12
      TYPE(CoordCtrl)             :: CtrlCoord
-     CHARACTER(LEN=*)            :: SCRPath
-     CHARACTER(LEN=1)            :: LongRangeTag
      LOGICAL                     :: RepeatChk,DoVdW,Found
      INTEGER,DIMENSION(:)        :: AtNum
      !
@@ -4304,55 +3223,6 @@ CONTAINS
      CALL New(IntC_New,NIntc_New)
      CALL Set_INTC_EQ_INTC(IntCs,IntC_New,1,NIntC,1)
      !
-     ! stretches
-     !
-  !  DO I=1,NLinB
-  !    NIntC=NIntC+1
-  !    I1=LinBBridge%I(1,I)
-  !    I2=LinBBridge%I(2,I)
-  !    IntC_New%Def(NIntC)='STRE '
-  !    IntC_New%FCType(NIntC)=LongRangeTag
-  !    IntC_New%Atoms(NIntC,1)=I1
-  !    IntC_New%Atoms(NIntC,2)=I2
-  !    IntC_New%Atoms(NIntC,3)=0 
-  !    IntC_New%Atoms(NIntC,4)=0 
-  !    IntC_New%Constraint(NIntC)=.FALSE.
-  !    IntC_New%ConstrValue(NIntC)=Zero   
-  !    IntC_New%Active(NIntC)=.TRUE. 
-  !  ENDDO
-  !  !
-  !  ! bendings 
-  !  !
-  !  DO I=1,NLinB
-  !    I1=LinBBridge%I(1,I)
-  !    I2=LinBBridge%I(2,I)
-  !    DO JJ=1,2
-  !      IF(JJ==1) THEN
-  !        IC=I1
-  !        IEx=I2
-  !      ELSE
-  !        IC=I2
-  !        IEx=I1
-  !      ENDIF
-  !      DO J=1,Top12%I(IC,1)
-  !        I3=Top12%I(IC,J+1)
-  !        IF(I3==IEx) CYCLE
-  !        IF(LinCenter%I(I)==I3) CYCLE
-  !        IF(Top12%I(I3,1)==0) CYCLE
-  !        NIntC=NIntC+1
-  !        IntC_New%Def(NIntC)='BEND '
-  !        IntC_New%FCType(NIntC)=LongRangeTag
-  !        IntC_New%Atoms(NIntC,1)=I3
-  !        IntC_New%Atoms(NIntC,2)=IC
-  !        IntC_New%Atoms(NIntC,3)=IEx
-  !        IntC_New%Atoms(NIntC,4)=0  
-  !        IntC_New%Constraint(NIntC)=.FALSE.
-  !        IntC_New%ConstrValue(NIntC)=Zero   
-  !        IntC_New%Active(NIntC)=.TRUE. 
-  !      ENDDO
-  !    ENDDO
-  !  ENDDO
-     !
      ! torsions
      !
      DO I=1,NLinB
@@ -4384,7 +3254,6 @@ CONTAINS
        IF(Found) THEN
          NIntC=NIntC+1
          IntC_New%Def(NIntC)(1:5)='TORS '
-         IntC_New%FCType(NIntC)=LongRangeTag
          IntC_New%Atoms(NIntC,1)=I1
          IntC_New%Atoms(NIntC,2)=I2
          IntC_New%Atoms(NIntC,3)=I3
@@ -4404,7 +3273,6 @@ CONTAINS
      CALL Delete(LinCenter)
      CALL Delete(LinAtom)
      CALL Delete(LinBBridge)
-     !
    END SUBROUTINE LongRangeIntC
 !
 !----------------------------------------------------------------------
@@ -4609,291 +3477,172 @@ CONTAINS
 !
 !------------------------------------------------------------------
 !
-   FUNCTION HasHBond(NJJ1,NJJ2) 
+   FUNCTION HasLonelyAtm(Top12,JJ1,JJ2,LAtm)
+     LOGICAL HasLonelyAtm
+     TYPE(INT_RNK2) :: Top12
+     INTEGER        :: LAtm,JJ1,JJ2
+     !
+     IF(Top12%I(JJ1,1)==0) THEN
+       HasLonelyAtm=.TRUE.
+       LAtm=JJ1
+     ELSE IF(Top12%I(JJ2,1)==0) THEN
+       HasLonelyAtm=.TRUE.
+       LAtm=JJ2
+     ELSE
+       HasLonelyAtm=.FALSE.
+       LAtm=0  
+     ENDIF
+   END FUNCTION HasLonelyAtm
+!
+!------------------------------------------------------------------
+!
+   FUNCTION HasHBond(NJJ1,NJJ2,JJ1,JJ2,HAtm) 
      LOGICAL              :: HasHBond
-     INTEGER              :: NJJ1,NJJ2,JJ1,JJ2
+     INTEGER              :: NJJ1,NJJ2,JJ1,JJ2,HAtm
      !
      HasHBond=.FALSE.
+     HAtm=0
+     IF(NJJ1/=1.AND.NJJ2/=1) RETURN
      IF((NJJ1==1.AND.HasLigand(NJJ2))) THEN
        HasHBond=.TRUE.
+       HAtm=JJ1
      ELSE IF((NJJ2==1.AND.HasLigand(NJJ1))) THEN
        HasHBond=.TRUE.
+       HAtm=JJ2
      ENDIF
    END FUNCTION HasHBond
 !
-!------------------------------------------------------------------
+!---------------------------------------------------------------------
 !
-   SUBROUTINE ShortestHBonds(NatmsLoc,AtNum,NBond,SCRPath, &
-                             HBondMark,BondIJ,BondLength)
-     ! This subroutine selects out those H-bonds, which are most close
-     ! to linearity from the set of all local H-bonds.
-     INTEGER,DIMENSION(:)   :: AtNum    
-     INTEGER                :: NatmsLoc,NBond,I,J,J1,J2,NI1,NI2,MaxHBond
-     INTEGER                :: NBondNew,I1,I2,IB1,IB2,ISelect1,ISelect2
-     INTEGER                :: K,L,M,N,L1,L2
-     TYPE(INT_RNK2)         :: BondIJ,BondIJNew,HBondList,Top12
-     TYPE(INT_VECT)         :: CountHBonds,HBondMark,HBondMarkNew
-     TYPE(INT_VECT)         :: EraseBond,DeActivate
-     TYPE(DBL_VECT)         :: BondLength,BondLengthNew
-     REAL(DOUBLE)           :: DistMin,D1,D2,D12
-     CHARACTER(LEN=*)       :: SCRPath
+   SUBROUTINE SortNonCov2(AtNum,XYZ,Bond,AtmB)
+     TYPE(BONDDATA)              :: Bond,BondNew
+     TYPE(ATOMBONDS)             :: AtmB
+     INTEGER                     :: NatmsLoc
+     TYPE(INT_VECT)              :: AllowBond,BondScore
+     TYPE(DBL_RNK2)              :: BondVect2
+     TYPE(DBL_VECT)              :: BondVect3,Ordered
+     INTEGER,DIMENSION(:)        :: AtNum
+     REAL(DOUBLE),DIMENSION(:,:) :: XYZ  
+     REAL(DOUBLE)                :: Dist,DistK
+     REAL(DOUBLE)                :: CondNumb1,CondNumb2
+     INTEGER                     :: NBondNew,MaxBonds
+     INTEGER                     :: I,J,K,L,I1,I2,NDim
      !
-     CALL ReadINT_RNK2(Top12,TRIM(SCRPath)//'Top12',I,J)
-     MaxHBond=50
-     CALL New(CountHBonds,NatmsLoc)
-     CALL New(HBondList,(/NatmsLoc,MaxHBond/))
-     CALL New(BondIJNew,(/2,NBond/))
-     CALL New(HBondMarkNew,NBond)
-     CALL New(BondLengthNew,NBond)
-     CALL New(DeActivate,NBond)
-     DeActivate%I=0
+     MaxBonds=30
+     CondNumb1=0.5D0
+     CondNumb2=0.8D0
+     NatmsLoc=SIZE(XYZ,2)
      !
-     ! Fill Non-H-bonds into new array
-     !
-     NBondNew=0
-     DO I=1,NBond
-       IF(HBondMark%I(I)==0) THEN
-         NBondNew=NBondNew+1
-         BondIJNew%I(1:2,NBondNew)=BondIJ%I(1:2,I)
-         HBondMarkNew%I(NBondNew)=HBondMark%I(I)
-         BondLengthNew%D(NBondNew)=BondLength%D(I)
-       ENDIF
-     ENDDO
-     !
-     CountHBonds%I=0
-     HBondList%I=0
-     DO I=1,NBond
-       I1=BondIJ%I(1,I)
-       I2=BondIJ%I(2,I)
-       NI1=AtNum(I1)
-       NI2=AtNum(I2)
-       IF(HBondMark%I(I)==1) THEN
-         IF(NI1==1) THEN
-           CountHBonds%I(I1)=CountHBonds%I(I1)+1
-           IF(CountHBonds%I(I1)>MaxHBond) &
-             CALL Halt('Dimension error in ShortestHBonds')
-           HBondList%I(I1,CountHBonds%I(I1))=I
-         ENDIF
-         IF(NI2==1) THEN
-           CountHBonds%I(I2)=CountHBonds%I(I2)+1
-           IF(CountHBonds%I(I2)>MaxHBond) &
-             CALL Halt('Dimension error in ShortestHBonds')
-           HBondList%I(I2,CountHBonds%I(I2))=I
-         ENDIF
-       ENDIF
-     ENDDO
-     !
-     ! Filter H-H bonds
-     !
-     CALL New(EraseBond,MaxHBond)
-     DO I=1,NatmsLoc
-       K=CountHBonds%I(I)
-       IF(K>=3) THEN
-         M=0
-         N=0
-         EraseBond%I=0
-         DO J=1,K
-           L=HBondList%I(I,J)
-           L1=BondIJ%I(1,L)
-           L2=BondIJ%I(2,L)
-           IF(L1/=I) THEN
-             IF(AtNum(L1)/=1) THEN
-               M=M+1 
-             ELSE
-               N=N+1 
-               EraseBond%I(J)=1
-             ENDIF
-           ELSE
-             IF(AtNum(L2)/=1) THEN
-               M=M+1 
-             ELSE
-               N=N+1 
-               EraseBond%I(J)=1
-             ENDIF
-           ENDIF
-         ENDDO 
-         IF(M>=2.AND.N/=0) THEN
-           DO J=1,K
-             IF(EraseBond%I(J)==1) THEN
-               DeActivate%I(HBondList%I(I,J))=1
-             ENDIF
-           ENDDO
-         ENDIF
-       ENDIF
-     ENDDO
-     DO I=1,NatmsLoc
-       EraseBond%I=0
-       K=CountHBonds%I(I)
-       L=0
-       DO J=1,K
-         IF(DeActivate%I(HBondList%I(I,J))/=1) THEN
-           L=L+1
-           EraseBond%I(L)=HBondList%I(I,J) 
-         ENDIF
-       ENDDO 
-       CountHBonds%I(I)=L
-       DO J=1,MaxHBond ; HBondList%I(I,J)=EraseBond%I(J) ; ENDDO
-     ENDDO
-     CALL Delete(EraseBond)
-     !
-     DO I=1,NatmsLoc
-       IF(CountHBonds%I(I)/=0) THEN
-         ISelect1=HBondList%I(I,1)
-         DistMin=BondLength%D(Iselect1)
-         ISelect2=0
-         IF(Top12%I(I,1)==0.AND.HBondList%I(I,2)/=0) THEN
-           ISelect2=HBondList%I(I,2)
-           DistMin=DistMin+BondLength%D(Iselect2)
-         ENDIF
-         DO J1=1,CountHBonds%I(I)
-           IB1=HBondList%I(I,J1)
-           D1=BondLength%D(IB1)
-           IF(Top12%I(I,1)==0) THEN
-             DO J2=J1+1,CountHBonds%I(I)
-               IB2=HBondList%I(I,J2)
-               D2=BondLength%D(IB2)
-               D12=D1+D2
-               IF(DistMin>D12) THEN
-                 DistMin=D12
-                 ISelect1=IB1
-                 ISelect2=IB2
-               ENDIF
-             ENDDO
-           ELSE
-             IF(DistMin>D1) THEN
-               DistMin=D1
-               ISelect1=IB1
-             ENDIF
-           ENDIF
-         ENDDO
-         NBondNew=NBondNew+1
-         BondIJNew%I(1:2,NBondNew)=BondIJ%I(1:2,ISelect1)
-         HBondMarkNew%I(NBondNew)=HBondMark%I(ISelect1)
-         BondLengthNew%D(NBondNew)=BondLength%D(ISelect1)
-         IF(ISelect2/=0) THEN
-           NBondNew=NBondNew+1
-           BondIJNew%I(1:2,NBondNew)=BondIJ%I(1:2,ISelect2)
-           HBondMarkNew%I(NBondNew)=HBondMark%I(ISelect2)
-           BondLengthNew%D(NBondNew)=BondLength%D(ISelect2)
-         ENDIF
-       ENDIF  
-     ENDDO
-     !
-     CALL Delete(BondIJ)
-     CALL Delete(HBondMark)
-     CALL Delete(BondLength)
-     NBond=NBondNew
-     CALL New(BondIJ,(/2,NBond/))
-     CALL New(HBondMark,NBond)
-     CALL New(BondLength,NBond)
-     DO I=1,NBond
-       BondIJ%I(1:2,I)=BondIJNew%I(1:2,I)
-       HBondMark%I(I)=HBondMarkNew%I(I)
-       BondLength%D(I)=BondLengthNew%D(I)
-     ENDDO
-     !
-     CALL Delete(DeActivate)
-     CALL Delete(Top12)
-     CALL Delete(HBondList)
-     CALL Delete(CountHBonds)
-     CALL Delete(BondIJNew)
-     CALL Delete(HBondMarkNew)
-     CALL Delete(BondLengthNew)
-   END SUBROUTINE ShortestHBonds
-!
-!------------------------------------------------------------------
-!
-   SUBROUTINE SortNonCov(NatmsLoc,AtNum,NBond,SCRPath, &
-                   HBondMark,BondIJ,BondLength)
-     INTEGER                :: NatmsLoc,NBond
-     TYPE(INT_VECT)         :: HBondMark,HBondMarkNew
-     TYPE(INT_VECT)         :: BondCount,AllowBond
-     TYPE(INT_RNK2)         :: BondIJ,BondIJNew,AtmBonds
-     TYPE(DBL_VECT)         :: BondLength,BondLengthNew
-     INTEGER,DIMENSION(:)   :: AtNum
-     CHARACTER(LEN=*)       :: SCRPath
-     TYPE(DBL_VECT)         :: MinLength
-     REAL(DOUBLE)           :: Dist,DistK,DistFact
-     INTEGER                :: I,J,K,I1,I2,NBondNew,MaxBonds
-     !
-     MaxBonds=50
-     DistFact=1.15D0
-     CALL New(AllowBond,NBond)
-     CALL New(MinLength,NatmsLoc)
-     CALL New(BondCount,NatmsLoc)
-     CALL New(AtmBonds,(/NatmsLoc,MaxBonds/))
-     AtmBonds%I=0
-     BondCount%I=0
-     MinLength%D=Zero
-     DO I=1,NBond
-       I1=BondIJ%I(1,I)
-       I2=BondIJ%I(2,I)
-       BondCount%I(I1)=BondCount%I(I1)+1
-       BondCount%I(I2)=BondCount%I(I2)+1
-       AtmBonds%I(I1,BondCount%I(I1))=I
-       AtmBonds%I(I2,BondCount%I(I2))=I
-     ENDDO
-     !
-     DO I=1,NatmsLoc
-       IF(BondCount%I(I)==0) THEN
-         MinLength%D(I)=Zero
-         CYCLE
-       ENDIF
-       Dist=BondLength%D(AtmBonds%I(I,1))
-       DO J=1,BondCount%I(I)
-         K=AtmBonds%I(I,J) 
-         DistK=BondLength%D(K)
-         IF(DistK<Dist) THEN
-           Dist=DistK
-         ENDIF
-       ENDDO
-       MinLength%D(I)=Dist
-     ENDDO
+     CALL New(AllowBond,Bond%N)
+     CALL New(BondScore,Bond%N)
+     CALL ScoreBond(BondScore%I,Bond)
      !
      AllowBond%I=1
-     DO I=1,NatmsLoc
-       Dist=MinLength%D(I)*DistFact
-       DO J=1,BondCount%I(I)
-         K=AtmBonds%I(I,J) 
-         IF(BondLength%D(K)>Dist) THEN
-           AllowBond%I(K)=0
-         ENDIF
+     DO I1=1,NatmsLoc
+       NDim=AtmB%Count%I(I1)
+       IF(NDim==0) CYCLE
+       CALL New(BondVect2,(/NDim,3/))
+       CALL New(BondVect3,NDim)
+       CALL New(Ordered,NDim)
+       CALL D3Bonds(I1,XYZ,BondVect2%D,BondScore%I,AtmB,Bond)
+       BondVect3%D=Zero
+       DO J=1,3
+         DO K=1,NDim 
+           BondVect3%D(K)=BondVect3%D(K)+BondVect2%D(K,J)**2
+         ENDDO
        ENDDO
+       Dist=One/SUM(BondVect3%D)
+       BondVect3%D=Dist*BondVect3%D
+       DO K=1,NDim 
+         Ordered%D(K)=DBLE(K)+0.1D0
+       ENDDO
+       CALL Reorder(BondVect3%D,Ordered%D)
+       Dist=Zero
+       DO J=NDim,1,-1
+         K=INT(Ordered%D(J))
+         L=AtmB%Bonds%I(I1,K)
+         IF(Dist>CondNumb2) THEN
+           AllowBond%I(L)=0
+         ENDIF
+         Dist=Dist+BondVect3%D(J)
+       ENDDO
+       CALL Delete(Ordered)
+       CALL Delete(BondVect3)
+       CALL Delete(BondVect2)
      ENDDO
      !
      NBondNew=SUM(AllowBond%I)
-     CALL New(BondIJNew,(/2,NBondNew/))
-     CALL New(BondLengthNew,NBondNew)
-     CALL New(HBondMarkNew,NBondNew)
+     CALL New(BondNew,NBondNew)
      NBondNew=0
-     DO I=1,NBond
+     DO I=1,Bond%N
        IF(AllowBond%I(I)==1) THEN
          NBondNew=NBondNew+1
-         BondIJNew%I(1:2,NBondNew)=BondIJ%I(1:2,I)
-         BondLengthNew%D(NBondNew)=BondLength%D(I)
-         HBondMarkNew%I(NBondNew)=HBondMark%I(I)
+         CALL Set_Bond_EQ_Bond(BondNew,NBondNew,Bond,I)
        ENDIF
      ENDDO
      !
-     CALL Delete(BondIJ)
-     CALL Delete(BondLength)
-     CALL Delete(HBondMark)
-     NBond=NBondNew
-     CALL New(BondIJ,(/2,NBond/))
-     CALL New(BondLength,NBond)
-     CALL New(HBondMark,NBond)
-     BondIJ%I=BondIJNew%I
-     BondLength%D=BondLengthNew%D
-     HBondMarkNew%I=HBondMarkNew%I 
-     !
-     CALL Delete(HBondMarkNew)
-     CALL Delete(BondLengthNew)
-     CALL Delete(BondIJNew)
+     CALL Delete(Bond)
+     CALL Set_BONDDATA_EQ_BONDDATA(Bond,BondNew)
+     CALL Delete(BondNew)
      CALL Delete(AllowBond)
-     CALL Delete(BondCount)
-     CALL Delete(AtmBonds)
-     CALL Delete(MinLength)
-   END SUBROUTINE SortNonCov
+     CALL Delete(BondScore)
+   END SUBROUTINE SortNonCov2
+!
+!----------------------------------------------------------------------
+!
+   SUBROUTINE D3Bonds(I1,XYZ,BondVect2,BondScore,AtmB,Bond,Eig_O)
+     TYPE(BONDDATA)                     :: Bond
+     TYPE(ATOMBONDS)                    :: AtmB
+     REAL(DOUBLE),DIMENSION(:,:)        :: XYZ,BondVect2
+     INTEGER,DIMENSION(:)               :: BondScore     
+     TYPE(DBL_RNK2)                     :: BondVect
+     REAL(DOUBLE),DIMENSION(3,3)        :: Matr,EigVects
+     REAL(DOUBLE),DIMENSION(3)          :: EigVals    
+     REAL(DOUBLE)                       :: Dist
+     REAL(DOUBLE),DIMENSION(3),OPTIONAL :: Eig_O  
+     INTEGER                            :: NDim,I,J,K,I1,II1,II2,Info
+     !
+     NDim=AtmB%Count%I(I1)
+     CALL New(BondVect,(/NDim,3/))
+     CALL SetDSYEVWork(3)
+     DO J=1,NDim
+       K=AtmB%Bonds%I(I1,J)
+       II1=Bond%IJ%I(1,K)
+       II2=Bond%IJ%I(2,K)
+       Dist=DBLE(BondScore(K))/Bond%Length%D(K)**3
+       BondVect%D(J,1:3)=Dist*(XYZ(1:3,II1)-XYZ(1:3,II2))
+     ENDDO
+     !
+     CALL DGEMM_TNc(3,NDim,3,One,Zero,BondVect%D,BondVect%D,Matr)
+     BLKVECT%D=Matr
+     CALL DSYEV('V','U',3,BLKVECT%D,BIGBLOK,BLKVALS%D, &
+     BLKWORK%D,BLKLWORK,INFO)
+     IF(INFO/=SUCCEED) &
+     CALL Halt('DSYEV hosed in SortNonCov2. INFO='&
+                //TRIM(IntToChar(INFO)))
+     EigVects=BLKVECT%D
+     EigVals=BLKVALS%D
+     !
+     CALL DGEMM_NNc(NDim,3,3,One,Zero,BondVect%D,EigVects,BondVect2)
+     !
+     DO J=1,3 ; EigVals(J)=ABS(EigVals(J)) ; ENDDO
+     EigVals=EigVals/MAXVAL(EigVals) 
+     IF(PRESENT(Eig_O)) THEN
+       Eig_O=EigVals
+     ENDIF
+     ! 
+     ! Weight directions
+     ! 
+     DO J=1,3
+       Dist=SQRT(ABS(EigVals(J)))
+       DO K=1,NDim 
+         BondVect2(K,J)=Dist*BondVect2(K,J) 
+       ENDDO
+     ENDDO
+     !
+     CALL Delete(BondVect)
+     CALL UnSetDSYEVWork()
+   END SUBROUTINE D3Bonds
 !
 !---------------------------------------------------------------------
 !
@@ -5584,6 +4333,1181 @@ CONTAINS
      CALL Delete(VectDeloc)
    END SUBROUTINE DelocP
 !
+!---------------------------------------------------------------------
+!
+   SUBROUTINE Resize_INT_RNK2(Matrix,Dim1New_O,Dim2New_O)
+     TYPE(INT_RNK2)   :: Matrix,Matrix2
+     INTEGER,OPTIONAL :: Dim1New_O,Dim2New_O
+     INTEGER          :: Dim1Old,Dim2Old,Dim1New,Dim2New,I,J
+     !
+     Dim1Old=SIZE(Matrix%I,1)
+     Dim2Old=SIZE(Matrix%I,2)
+     Dim1New=Dim1Old
+     Dim2New=Dim2Old
+     IF(PRESENT(Dim1New_O)) Dim1New=Dim1New_O
+     IF(PRESENT(Dim2New_O)) Dim2New=Dim2New_O
+     !
+     CALL New(Matrix2,(/Dim1New,Dim2New/))
+     Matrix2%I=0   
+     DO J=1,Dim2Old
+       DO I=1,Dim1Old
+         Matrix2%I(I,J)=Matrix%I(I,J) 
+       ENDDO
+     ENDDO
+     CALL Delete(Matrix)
+     CALL New(Matrix,(/Dim1New,Dim2New/))
+     Matrix%I=Matrix2%I
+     CALL Delete(Matrix2)
+   END SUBROUTINE Resize_INT_RNK2
+!
+!---------------------------------------------------------------------
+!
+   SUBROUTINE Reorder(VectX,VectY)
+     REAL(DOUBLE),DIMENSION(:) :: VectX,VectY
+     REAL(DOUBLE)              :: X1,X2,Y1,Y2
+     INTEGER                   :: I,J,NDim
+     ! order set by increasing x
+     NDim=SIZE(VectX)
+     DO I=1,NDim-1
+       DO J=1,NDim-I
+         X1=VectX(J)
+         X2=VectX(J+1)
+         Y1=VectY(J)
+         Y2=VectY(J+1)
+         IF(X1>X2) THEN
+           VectX(J)=X2
+           VectX(J+1)=X1
+           VectY(J)=Y2
+           VectY(J+1)=Y1
+         ENDIF
+       ENDDO
+     ENDDO
+   END SUBROUTINE Reorder
+!
+!---------------------------------------------------------------------
+!
+   SUBROUTINE SortBonds(NatmsLoc,AtmB,Bond)
+     TYPE(BondDATA) :: Bond
+     TYPE(ATOMBONDS):: AtmB
+     INTEGER        :: NatmsLoc,I,I1,I2,MaxBonds
+     !
+     MaxBonds=20
+     IF(AllocQ(AtmB%Alloc)) THEN
+       CALL Delete(AtmB)
+     ENDIF
+     CALL New(AtmB,NatmsLoc,MaxBonds)
+     AtmB%N1=NatmsLoc
+     AtmB%Count%I=0
+     AtmB%Bonds%I=0
+     AtmB%Atoms%I=0
+     DO I=1,Bond%N
+       I1=Bond%IJ%I(1,I)
+       I2=Bond%IJ%I(2,I)
+       AtmB%Count%I(I1)=AtmB%Count%I(I1)+1
+       AtmB%Count%I(I2)=AtmB%Count%I(I2)+1
+       IF(AtmB%Count%I(I1)>MaxBonds.OR.AtmB%Count%I(I2)>MaxBonds) THEN
+         CALL Resize_INT_RNK2(AtmB%Bonds,Dim2New_O=MaxBonds+10)
+         CALL Resize_INT_RNK2(AtmB%Atoms,Dim2New_O=MaxBonds+10)
+         MaxBonds=MaxBonds+10
+       ENDIF
+       AtmB%Bonds%I(I1,AtmB%Count%I(I1))=I
+       AtmB%Atoms%I(I1,AtmB%Count%I(I1))=I2
+       !
+       AtmB%Bonds%I(I2,AtmB%Count%I(I2))=I
+       AtmB%Atoms%I(I2,AtmB%Count%I(I2))=I1
+     ENDDO
+     AtmB%N2=MaxBonds
+   END SUBROUTINE SortBonds
+!
+!---------------------------------------------------------------------
+!
+   SUBROUTINE IntCBoxes(XYZ,Box)
+     REAL(DOUBLE),DIMENSION(:,:) :: XYZ
+     TYPE(IntCBox)               :: Box
+     INTEGER                     :: NatmsLoc
+     REAL(DOUBLE)                :: BXMIN,BYMIN,BZMIN
+     REAL(DOUBLE)                :: BoxSize
+     !
+     NatmsLoc=SIZE(XYZ,2)
+     BoxSize=3.0D0*AngstromsToAU !in A
+     CALL SORT_INTO_Box1(BoxSize,XYZ,NatmsLoc,&
+                         Box%NX,Box%NY,Box%NZ,BXMIN,BYMIN,BZMIN)
+     !
+     Box%N=Box%NX*Box%NY*Box%NZ
+     CALL New(Box%I,Box%N+1)
+     CALL New(Box%J,NatmsLoc)
+     !
+     CALL SORT_INTO_Box2(BoxSize,XYZ,NatmsLoc,Box%NX,Box%NY,Box%NZ,&
+                         BXMIN,BYMIN,BZMIN,Box%I,Box%J)
+   END SUBROUTINE IntCBoxes
+!
+!---------------------------------------------------------------------
+!
+   SUBROUTINE BondingScheme(XYZ,AtNum,IntSet,AtmB,Bond,TOPS,Box,&
+                            GCoordCtrl)
+     REAL(DOUBLE),DIMENSION(:,:) :: XYZ
+     INTEGER,DIMENSION(:)        :: AtNum
+     INTEGER                     :: IntSet 
+     TYPE(BONDDATA)              :: Bond
+     TYPE(ATOMBONDS)             :: AtmB
+     TYPE(TOPOLOGY)              :: TOPS
+     TYPE(IntCBox)               :: Box 
+     TYPE(CoordCtrl)             :: GCoordCtrl
+     TYPE(DBL_VECT)              :: CritRad
+     REAL(DOUBLE)                :: Fact  
+     INTEGER                     :: I,J,N,NatmsLoc
+     !
+     !now define bonding scheme, based on Slater or Van der Waals radii
+     !
+     NatmsLoc=SIZE(XYZ,2)
+     IF(IntSet==1) THEN
+       N=SIZE(SLRadii,1)
+       CALL New(CritRad,NatmsLoc)
+       Fact=1.3D0 !!! Scaling factor for Slater Radii
+       DO I=1,NatmsLoc
+         CritRad%D(I)=Fact*SLRadii(AtNum(I))*AngstromsToAU
+       ENDDO
+     ELSE
+       N=SIZE(VDWRadii,1)
+       CALL New(CritRad,NatmsLoc)
+       Fact=GCoordCtrl%VDWFact !!! Scaling factor for VDW Radii
+       DO I=1,NatmsLoc
+         CritRad%D(I)=Fact*VDWRadii(AtNum(I))*AngstromsToAU
+       ENDDO
+     ENDIF
+     !
+     IF(IntSet==1) THEN
+       CALL BondList(XYZ,AtNum,IntSet,Box,Bond,TOPS,CritRad)
+       CALL SortBonds(NatmsLoc,AtmB,Bond)
+       CALL Topology_12(AtmB,TOPS%Cov12)
+       CALL Topology_13(NatmsLoc,TOPS%Cov12,TOPS%Cov13)
+       CALL Topology_14(NatmsLoc,TOPS%Cov12,TOPS%Cov14)
+       CALL Excl_List(NatmsLoc,TOPS%Cov12,TOPS%Cov13,TOPS%Cov14, &
+                      TOPS%CovExcl)
+     ELSE
+       CALL BondList(XYZ,AtNum,IntSet,Box,Bond,TOPS,CritRad)
+       CALL SortBonds(NatmsLoc,AtmB,Bond)
+       CALL SortNonCov2(AtNum,XYZ,Bond,AtmB)
+       CALL Delete(AtmB)
+       CALL SortBonds(NatmsLoc,AtmB,Bond)
+       CALL VDWTop(TOPS%Tot12,TOPS%Cov12,Bond%IJ)
+       CALL Topology_13(NatmsLoc,TOPS%Tot12,TOPS%Tot13)
+       CALL Topology_14(NatmsLoc,TOPS%Tot12,TOPS%Tot14)
+       CALL Excl_List(NatmsLoc,TOPS%Tot12,TOPS%Tot13,TOPS%Tot14, &
+                      TOPS%TotExcl)
+     ENDIF
+     CALL Delete(CritRad)
+   END SUBROUTINE BondingScheme
+!
+!--------------------------------------------------------
+!
+   SUBROUTINE BondList(XYZ,AtNum,IntSet,Box,Bond,TOPS,CritRad)
+     IMPLICIT NONE
+     INTEGER                     :: I,J,NatmsLoc,NBond
+     REAL(DOUBLE),DIMENSION(:,:) :: XYZ
+     TYPE(BONDDATA)              :: Bond
+     TYPE(IntCBox)               :: Box
+     TYPE(TOPOLOGY)              :: TOPS
+     INTEGER,DIMENSION(:)        :: AtNum
+     TYPE(DBL_VECT)              :: CritRad !!! VdW or Slater Radii
+     REAL(DOUBLE)                :: R12,R12_2,CritDist,HBondMax
+     INTEGER                     :: IZ,IX,IY,I1,I2,JJ1,JJ2
+     INTEGER                     :: IORD,IORDD
+     INTEGER                     :: IZD,IXD,IYD,NJJ1,NJJ2
+     INTEGER                     :: NMax12,JJ,IntSet,IDimExcl,NBondEst
+     INTEGER                     :: IDim14,IDim12,IDim13
+     INTEGER                     :: HAtm,LAtm,DDim,NBondOld
+     INTEGER                     :: IChk
+     REAL(DOUBLE),DIMENSION(3)   :: DVect
+     LOGICAL                     :: FoundHBond,FoundMetLig
+     LOGICAL                     :: LonelyAtom,DoExclude
+     !     
+     NBondEst=Bond%N
+     NBond=NBondEst
+     NatmsLoc=SIZE(XYZ,2)
+     HAtm=0
+     !
+     HBondMax=2.40D0*AngstromsToAu ! in Au 
+     !
+     !  Go through all boxes and their neighbours
+     !
+     NBond=0
+     DO IZ=1,Box%NZ
+       DO IX=1,Box%NX
+         DO IY=1,Box%NY
+           ! absolute index of a box
+           IOrd=Box%NX*Box%NY*(IZ-1)+Box%NY*(IX-1)+IY
+           NBondOld=NBond
+           DO I1=Box%I%I(IOrd),Box%I%I(IOrd+1)-1
+             JJ1=Box%J%I(I1) !!! atom in central box
+             NJJ1=AtNum(JJ1)
+             DO IChk=1,NatmsLoc
+               ! second atom may come from central or neigbouring Boxes
+               !and must be an MM atom,LJ is not calculated for QM-QMpairs
+               DO IZD=-1,1
+                 IF(IZ+IZD>0 .AND. IZ+IZD<=Box%NZ) THEN
+                   DO IXD=-1,1
+                     IF(IX+IXD>0 .AND. IX+IXD<=Box%NX) THEN
+                       DO IYD=-1,1
+                         IF(IY+IYD>0 .AND. IY+IYD<=Box%NY) THEN
+                           IOrdD=Box%NX*Box%NY*(IZ-1+IZD)+&
+                                 Box%NY*(IX-1+IXD)+IY+IYD
+                           DO I2=Box%I%I(IOrdD),Box%I%I(IOrdD+1)-1
+                             JJ2=Box%J%I(I2) !!! second atom
+                             NJJ2=AtNum(JJ2)
+                             FoundHBond=.FALSE.
+                             FoundMetLig=.FALSE.
+                             LonelyAtom=.FALSE.
+                             IF(JJ2<=JJ1) CYCLE !!!avoid double counting
+                             IF(IntSet==2) THEN
+                               FoundMetLig=HasMetLig(JJ1,JJ2,NJJ1,NJJ2) 
+                               LonelyAtom=HasLonelyAtm(TOPS%Cov12,JJ1,JJ2,LAtm)
+                               FoundHBond=HasHBond(NJJ1,NJJ2,JJ1,JJ2,HAtm)
+                               CALL BondExcl(JJ1,JJ2,NJJ1,NJJ2,TOPS, &
+                                             FoundHBond,FoundMetLig,&
+                                             LonelyAtom,DoExclude)
+                               IF(DoExclude) CYCLE
+                             ENDIF
+                             IF(FoundHBond.AND..NOT.LonelyAtom) THEN
+                               CritDist=HBondMax
+                             ELSE
+                               CritDist=CritRad%D(JJ1)+CritRad%D(JJ2)
+                             ENDIF
+                             DVect(:)=XYZ(:,JJ1)-XYZ(:,JJ2)
+                             R12_2=DOT_PRODUCT(DVect,DVect)
+                             R12=SQRT(R12_2)
+                             IF(R12<CritDist) THEN
+                               IF(NBond+1>NBondEst) THEN
+                                 DDim=NatmsLoc*10
+                                 CALL MoreBondArray(Bond,NBondEst+DDim, &
+                                                    NBondEst)
+                                 NBondEst=NBondEst+DDim
+                               ENDIF 
+                               NBond=NBond+1
+                               Bond%IJ%I(1:2,NBond)=(/JJ1,JJ2/)
+                               Bond%Length%D(NBond)=R12
+                               !
+                               IF(IntSet==1) THEN
+                                 Bond%Type%C(NBond)(1:3)='COV'
+                               ELSE
+                                 Bond%Type%C(NBond)(1:3)='VDW'
+                               ENDIF
+                               Bond%HBExtraSN%I(NBond)=0    
+                               Bond%HBExtraNC%I(NBond)=0    
+                               Bond%LonelyAtom%I(NBond)=0    
+                               IF(FoundHBond.AND..NOT.LonelyAtom) THEN
+                                 Bond%Type%C(NBond)(1:5)='HBond'
+                                 IF(TOPS%Cov12%I(HAtm,1)==1) THEN
+                                   Bond%HBExtraSN%I(NBond)=HAtm 
+                                   Bond%HBExtraNC%I(NBond)=AtNum(HAtm)
+                                 ENDIF
+                               ENDIF
+                               IF(LonelyAtom) THEN
+                                 Bond%LonelyAtom%I(NBond)=1    
+                               ENDIF
+                               IF(FoundMetLig) THEN
+                                 Bond%Type%C(NBond)(1:6)='MetLig'
+                               ENDIF
+                             ENDIF
+                           ENDDO
+                         ENDIF
+                       ENDDO
+                     ENDIF
+                   ENDDO
+                 ENDIF
+               ENDDO
+               IF(IntSet==2) THEN
+                 IF(NBondOld==NBond.AND.TOPS%Cov12%I(JJ1,1)==0) THEN
+                   CritRad%D(JJ1)=1.2D0*CritRad%D(JJ1)
+                 ELSE
+                   EXIT  
+                 ENDIF
+               ELSE
+                 EXIT
+               ENDIF
+             ENDDO !!! IChk for checking LonelyAtoms
+           ENDDO !!! central box atoms
+         ENDDO
+       ENDDO
+     ENDDO !!! ends on central box indices
+     !
+     ! Compress Bond
+     !
+     CALL MoreBondArray(Bond,NBond,NBond)
+   END SUBROUTINE BondList
+!
+!--------------------------------------------------------------
+!
+   SUBROUTINE Topology_12(AtmB,Top12)
+     TYPE(ATOMBONDS):: AtmB
+     TYPE(INT_RNK2) :: Top12
+     INTEGER        :: I,J,NatmsLoc,MaxDim
+     !
+     NatmsLoc=SIZE(AtmB%Count%I)
+     MaxDim=MAXVAL(AtmB%Count%I)
+     CALL New(Top12,(/NatmsLoc,MaxDim+1/))
+     Top12%I=0
+     DO I=1,NatmsLoc
+       Top12%I(I,1)=AtmB%Count%I(I)
+       DO J=1,AtmB%Count%I(I)
+         Top12%I(I,J+1)=AtmB%Atoms%I(I,J)
+       ENDDO 
+     ENDDO 
+   END SUBROUTINE Topology_12
+!
+!--------------------------------------------------------------
+!
+   SUBROUTINE Topology_13(NatmsLoc,Top12,Top13)
+     ! Set up a table which shows the atom numbers of Atoms 
+     ! being second neighbours of a certain atom.
+     !
+     IMPLICIT NONE
+     TYPE(INT_RNK2)  :: Top12
+     TYPE(INT_RNK2)  :: Top13
+     TYPE(INT_RNK2)  :: Top13_2
+     INTEGER         :: I,J,K,L,N,M,II,JJ,NI,NJ,NatmsLoc
+     INTEGER         :: NMax13,NMax12,KK,IN12,JN12
+     !
+     NMax12=Size(Top12%I,2)-1
+     !
+     NMax13=30
+     K=NMax13+1
+     CALL New(Top13,(/NatmsLoc,K/))
+     Top13%I(1:NatmsLoc,1:NMax13+1)=0 
+     !
+     DO II=1,NatmsLoc
+       IN12=Top12%I(II,1)
+       DO J=1,IN12
+         JJ=Top12%I(II,J+1)
+         JN12=Top12%I(JJ,1)
+         DO K=1,JN12
+         KK=Top12%I(JJ,K+1)
+           IF(II/=KK) THEN
+             !    
+             NI=Top13%I(II,1)
+             !    
+             !   check matrix Size, increase Size if necessary
+             !    
+             IF(NI>=NMax13) THEN
+               NMax13=NMax13+30
+               CALL New(Top13_2,(/NatmsLoc,NMax13+1/))
+               Top13_2%I(1:NatmsLoc,1:NMax13+1)=0 
+               Top13_2%I(1:NatmsLoc,1:NMax13+1-30)=&
+                                       Top13%I(1:NatmsLoc,1:NMax13+1-30)
+               CALL Delete(Top13)
+               CALL New(Top13,(/NatmsLoc,NMax13+1/))
+               Top13%I(1:NatmsLoc,1:NMax13+1)=&
+                                        Top13_2%I(1:NatmsLoc,1:NMax13+1)
+               CALL Delete(Top13_2)
+             ENDIF
+             IF(NI/=0) THEN
+               IF(ANY(Top13%I(II,2:NI+1)==KK)) THEN
+                 CYCLE
+               ELSE
+                 Top13%I(II,1)=NI+1
+                 Top13%I(II,1+(NI+1))=KK
+               ENDIF
+             ELSE
+                 Top13%I(II,1)=NI+1
+                 Top13%I(II,1+(NI+1))=KK
+             ENDIF
+           ENDIF !!! II/=KK
+         ENDDO !!!! KK
+       ENDDO !!!! JJ
+     ENDDO !!!! II
+   END SUBROUTINE Topology_13 
+!
+!--------------------------------------------------------------
+!
+   SUBROUTINE Topology_14(NatmsLoc,Top12,Top14)
+     ! Set up a table which shows the atom numbers of Atoms 
+     ! being second neighbours of a certain atom.
+     !
+     IMPLICIT NONE
+     TYPE(INT_RNK2)         :: Top12
+     TYPE(INT_RNK2)         :: Top14
+     TYPE(INT_RNK2)         :: Top14_2
+     INTEGER                :: I,J,K,L,N,M,II,JJ,NI,NJ,KK,LL
+     INTEGER                :: NatmsLoc,NMax14,NMax12,IN12,JN12,KN12
+     !
+     NMax12=Size(Top12%I,2)-1
+     !
+     NMax14=30
+     K=NMax14+1
+     CALL New(Top14,(/NatmsLoc,K/))
+     Top14%I(1:NatmsLoc,1:NMax14+1)=0 
+     !
+     DO II=1,NatmsLoc
+       IN12=Top12%I(II,1)
+       DO J=1,IN12
+         JJ=Top12%I(II,J+1)
+         JN12=Top12%I(JJ,1)
+         DO K=1,JN12
+           KK=Top12%I(JJ,K+1)
+           IF(II/=KK) THEN
+             KN12=Top12%I(KK,1)
+             DO L=1,KN12
+               LL=Top12%I(KK,L+1)
+               IF(JJ/=LL.AND.II/=LL) THEN
+                 !
+                 NI=Top14%I(II,1)
+                 !
+                 ! check matrix Size, increase Size if necessary
+                 !
+                 IF(NI>=NMax14) THEN
+                   NMax14=NMax14+30
+                   CALL New(Top14_2,(/NatmsLoc,NMax14+1/))
+                   Top14_2%I(1:NatmsLoc,1:NMax14+1)=0 
+                   Top14_2%I(1:NatmsLoc,1:NMax14+1-30)=&
+                                 Top14%I(1:NatmsLoc,1:NMax14+1-30)
+                   CALL Delete(Top14)
+                   CALL New(Top14,(/NatmsLoc,NMax14+1/))
+                   Top14%I(1:NatmsLoc,1:NMax14+1)=&
+                                 Top14_2%I(1:NatmsLoc,1:NMax14+1)
+                   CALL Delete(Top14_2)
+                 ENDIF
+                 !        
+                 IF(NI/=0) THEN
+                   IF(ANY(Top14%I(II,2:NI+1)==LL)) THEN
+                     CYCLE
+                   ELSE
+                     Top14%I(II,1)=NI+1
+                     Top14%I(II,1+(NI+1))=LL
+                   ENDIF
+                 ELSE
+                     Top14%I(II,1)=NI+1
+                     Top14%I(II,1+(NI+1))=LL
+                 ENDIF
+                 !
+               ENDIF !!! II/=LL and JJ/=LL
+             ENDDO !!! LL
+           ENDIF !!! II/=KK
+         ENDDO !!!! KK
+       ENDDO !!!! JJ
+     ENDDO !!!! II
+   END SUBROUTINE Topology_14 
+!
+!--------------------------------------------------------------
+!
+   SUBROUTINE SORT_INTO_Box1(BoxSize,XYZ,NatmsLoc, &
+                       NX,NY,NZ,BXMIN,BYMIN,BZMIN)
+     !
+     ! sort the Atoms of a molecule into Boxes
+     !
+     IMPLICIT NONE
+     INTEGER :: I,J,JJ,NX,NY,NZ,NBox,IX,IY,IZ,IORD,IADD,NatmsLoc
+     REAL(DOUBLE) :: BoxSize,VBIG,XYZ(1:3,NatmsLoc)
+     REAL(DOUBLE) :: BXMIN,BXMax,BYMIN,BYMax,BZMIN,BZMax
+     !
+     CALL BoxBorders(XYZ,BXMIN,BXMax,BYMIN,BYMax,BZMIN,BZMax)
+     !
+     NX=INT((BXMax-BXMIN)/BoxSize)+1
+     NY=INT((BYMax-BYMIN)/BoxSize)+1
+     NZ=INT((BZMax-BZMIN)/BoxSize)+1
+     NBox=NX*NY*NZ
+     !
+   END SUBROUTINE SORT_INTO_Box1
+!
+!--------------------------------------------------------------
+!
+   SUBROUTINE SORT_INTO_Box2(BoxSize,XYZ,NatmsLoc, &
+     NX,NY,NZ,BXMIN,BYMIN,BZMIN,BoxI1,BoxJ1,ISet)
+     !
+     ! BoxI(I) : contains the ordering (box) number of the 
+     !           first atom of the I-th Box (like in sparse row-wise)
+     ! BoxJ(J) : gives the original serial number of the atom desribed 
+     !           by the J-th ordering number
+     ! XYZ: contains Cartesian coordinates of Atoms
+     ! BoxSize: linear Box Size
+     !
+     IMPLICIT NONE
+     INTEGER,OPTIONAL :: ISET 
+     TYPE(INT_VECT)   :: BoxI,BoxJ
+     TYPE(INT_RNK2)   :: ISign
+     TYPE(INT_RNK3)   :: BoxCounter 
+     REAL(DOUBLE)     :: BoxSize,VBIG
+     REAL(DOUBLE)     :: BXMIN,BXMax,BYMIN,BYMax,BZMIN,BZMax
+     INTEGER          :: IORD,IADD,NatmsLoc
+     INTEGER          :: I,J,JJ,NX,NY,NZ,NBox,IX,IY,IZ
+     REAL(DOUBLE),DIMENSION(:,:)  :: XYZ
+     TYPE(INT_VECT),OPTIONAL      :: BoxI1,BoxJ1
+     !
+     VBIG=1.D+90 
+     NBox=NX*NY*NZ
+     CALL New(BoxI,NBox+1)
+     CALL New(BoxJ,NatmsLoc)
+     CALL New(ISign,(/2,NatmsLoc/))
+     CALL New(BoxCounter,(/NX,NY,NZ/))
+     BoxCounter%I(1:NX,1:NY,1:NZ)=0
+     BoxI%I(1:NBox+1)=0
+     !
+     ! Count number of atoms in the box
+     !
+     DO I=1,NatmsLoc
+       IX=INT((XYZ(1,I)-BXMIN)/BoxSize)+1
+       IY=INT((XYZ(2,I)-BYMIN)/BoxSize)+1
+       IZ=INT((XYZ(3,I)-BZMIN)/BoxSize)+1
+       IORD=NX*NY*(IZ-1)+NY*(IX-1)+IY !order parameter: ZXY
+       BoxCounter%I(IX,IY,IZ)=BoxCounter%I(IX,IY,IZ)+1
+       ISign%I(1,I)=IORD
+       ISign%I(2,I)=BoxCounter%I(IX,IY,IZ) 
+     ENDDO
+     !     
+     ! Count pointers to individual Boxes within array A
+     !     
+     BoxI%I(1)=1
+     DO IZ=1,NZ
+     DO IX=1,NX
+     DO IY=1,NY
+       IORD=NX*NY*(IZ-1)+NY*(IX-1)+IY
+       BoxI%I(IORD+1)=BoxI%I(IORD)+BoxCounter%I(IX,IY,IZ)
+     ENDDO
+     ENDDO
+     ENDDO
+     !
+     ! Set up contents of Boxes as represented in A, sparse row-wise
+     !
+     DO I=1,NatmsLoc
+       IORD=ISign%I(1,I)
+       IADD=ISign%I(2,I)
+       BoxJ%I(BoxI%I(IORD)-1+IADD)=I
+     ENDDO
+     !
+     IF(PRESENT(BoxI1)) THEN
+       BoxI1%I(:)=BoxI%I(:)
+     ENDIF
+     IF(PRESENT(BoxJ1)) THEN
+       BoxJ1%I(:)=BoxJ%I(:)
+     ENDIF
+     !
+     CALL Delete(ISign)
+     CALL Delete(BoxCounter)
+     CALL Delete(BoxI)
+     CALL Delete(BoxJ)
+   END SUBROUTINE SORT_INTO_Box2
+!
+!----------------------------------------------------------------
+!
+  !SUBROUTINE Topologies_MM(NatmsLoc,NBond,BondI,BondJ,SCR)
+  !  !
+  !  ! Set up a table which shows the atom numbers of Atoms 
+  !  ! connected to a certain atom by the input bonds (Topology mtr)
+  !  ! Here, the generation of the Topology mtr is based 
+  !  ! EXCLUSIVELY on input list of bonds
+  !  ! WARNING! This subroutine is mainly used to set up the
+  !  ! topology files necessary for the calculation of 
+  !  ! MM exclusion energies!!!
+  !  !
+  !  IMPLICIT NONE
+  !  TYPE(INT_RNK2)                 :: Top12,Top13,Top14
+  !  TYPE(INT_RNK2)                 :: Top_Excl,Top_Excl14
+  !  INTEGER                        :: NBond,NatmsLoc
+  !  INTEGER,DIMENSION(1:NBond)     :: BondI,BondJ
+  !  CHARACTER(LEN=DCL)             :: PathName
+  !  CHARACTER(LEN=*)               :: SCR
+  !  !
+  !  PathName=TRIM(SCR)//'MM'
+  !  CALL Topology_12(NatmsLoc,NBond,BondI,BondJ,Top12,PathName)
+  !  CALL Topology_13(NatmsLoc,Top12,Top13,PathName)
+  !  CALL Topology_14(NatmsLoc,Top12,Top14,PathName)
+  !  CALL Excl_List(NatmsLoc,Top12,Top13,Top14,Top_Excl,PathName)
+  !  CALL Delete(Top_Excl)
+  !  CALL Excl_List14(NatmsLoc,Top12,Top13,Top14,Top_Excl14)
+  !  CALL Delete(Top_Excl14)
+  !  CALL Delete(Top12)
+  !  CALL Delete(Top13)
+  !  CALL Delete(Top14)
+  !END SUBROUTINE Topologies_MM
+!
+!----------------------------------------------------------------
+!
+   SUBROUTINE Excl_List(NatmsLoc,Top12,Top13,Top14,Top_Excl)
+     !
+     ! This subroutine merges Topological information
+     ! to get the list for Exclusion energy calculation
+     !
+     IMPLICIT NONE
+     TYPE(INT_RNK2)          :: Top_Excl_Out,Top12,Top13,Top14
+     TYPE(INT_RNK2)          :: Top_Excl,Top_New
+     INTEGER                 :: NatmsLoc,NMax12,NMax13,NMax14
+     INTEGER                 :: NMax_Excl,NNew,NOLD
+     INTEGER                 :: NMax_Excl_Out,I,J,K,KK,JJ
+     !
+     NMax12=Size(Top12%I,2)-1
+     NMax13=Size(Top13%I,2)-1
+     NMax14=Size(Top14%I,2)-1
+     !
+     ! Initialize Top_Excl
+     !
+     NMax_Excl=NMax12+NMax13+NMax14
+     CALL New(Top_Excl,(/NatmsLoc,NMax_Excl+1/))
+     Top_Excl%I(:,:)=0
+     Top_Excl%I(1:NatmsLoc,1:NMax12+1)=Top12%I(1:NatmsLoc,1:NMax12+1)
+     !
+     ! Now merge Topologies, in order to avoid double counting in 
+     ! Exclusion energies
+     !
+     NMax_Excl_Out=0
+     DO I=1,NatmsLoc
+       !
+       NNew=0
+       NOLD=Top_Excl%I(I,1)
+       DO J=1,Top13%I(I,1)
+         JJ=Top13%I(I,J+1)
+         IF(ANY(Top_Excl%I(I,2:NOLD+1)==JJ)) THEN
+           CYCLE
+         ELSE
+           NNew=NNew+1
+           Top_Excl%I(I,NOLD+1+NNew)=JJ
+         ENDIF
+       ENDDO 
+       NNew=NOLD+NNew
+       Top_Excl%I(I,1)=NNew
+       IF(NMax_Excl_Out<NNew) NMax_Excl_Out=NNew
+       !
+       NNew=0
+       NOLD=Top_Excl%I(I,1)
+       DO J=1,Top14%I(I,1)
+         JJ=Top14%I(I,J+1)
+         IF(ANY(Top_Excl%I(I,2:NOLD+1)==JJ)) THEN
+           CYCLE
+         ELSE
+           NNew=NNew+1
+           Top_Excl%I(I,NOLD+1+NNew)=JJ
+         ENDIF
+       ENDDO 
+       NNew=NOLD+NNew
+       Top_Excl%I(I,1)=NNew
+       IF(NMax_Excl_Out<NNew) NMax_Excl_Out=NNew
+     ENDDO 
+   END SUBROUTINE Excl_LIST 
+!
+!----------------------------------------------------------------
+!
+   SUBROUTINE Excl_List14(NatmsLoc,Top12,Top13,Top14,Top_Excl)
+     !
+     ! This subroutine merges Topological information
+     ! to get the list for Exclusion energy calculation
+     ! of Atoms in 14 distance. From the Top14 list
+     ! Top13 and Top12 occurences must be filtered out
+     !
+     IMPLICIT NONE
+     TYPE(INT_RNK2)          :: Top_Excl_Out,Top12,Top13,Top14
+     TYPE(INT_RNK2)          :: Top_Excl,Top_New
+     INTEGER                 :: NatmsLoc,NMax12,NMax13,NMax14
+     INTEGER                 :: NMax_Excl,NNew,NOLD
+     INTEGER                 :: NMax_Excl_Out,I,J,K,KK,JJ,NExcl,N12,N13
+     !
+     NMax12=Size(Top12%I,2)-1
+     NMax13=Size(Top13%I,2)-1
+     NMax14=Size(Top14%I,2)-1
+     !
+     ! Initialize Top_Excl to the Size of Top14 and to zero 
+     !
+     NMax_Excl=NMax14
+     CALL New(Top_Excl,(/NatmsLoc,NMax_Excl+1/))
+     Top_Excl%I=0
+     !
+     ! Now merge Topologies, in order to avoid double counting in 
+     ! Exclusion energies
+     !
+     NMax_Excl_Out=0
+     DO I=1,NatmsLoc
+       DO J=1,Top14%I(I,1)
+         NExcl=Top_Excl%I(I,1)
+         N12=Top12%I(I,1)
+         N13=Top13%I(I,1)
+         JJ=Top14%I(I,J+1)
+         IF(ANY(Top_Excl%I(I,2:NExcl+1)==JJ).OR. &
+            ANY(Top12%I(I,2:N12+1)==JJ).OR. & 
+            ANY(Top13%I(I,2:N13+1)==JJ)  ) THEN
+           CYCLE
+         ELSE
+           Top_Excl%I(I,1)=NExcl+1
+           Top_Excl%I(I,NExcl+2)=JJ
+         ENDIF
+       ENDDO 
+         NExcl=Top_Excl%I(I,1)
+       IF(NMax_Excl_Out<NExcl) NMax_Excl_Out=NExcl
+     ENDDO 
+   END SUBROUTINE Excl_List14 
+!
+!--------------------------------------------------------
+!
+   SUBROUTINE VDWTop(TopVDW,Top12,BondIJ)
+     TYPE(INT_RNK2) :: Top12,TopVDW,BondIJ,TopVDWNew
+     TYPE(INT_VECT) :: Addition
+     INTEGER        :: NatmsLoc,NBond,I,J,Dim2,AddDim,I1,I2,II1,II2
+     !
+     NatmsLoc=SIZE(Top12%I,1)
+     Dim2=SIZE(Top12%I,2)
+     CALL New(TopVDW,(/NatmsLoc,Dim2/))
+     TopVDW%I=Top12%I
+     NBond=SIZE(BondIJ%I,2)
+     CALL New(Addition,NatmsLoc)
+     !
+     Addition%I=0
+     DO I=1,NBond    
+       I1=BondIJ%I(1,I)
+       I2=BondIJ%I(2,I)
+       Addition%I(I1)=Addition%I(I1)+1
+       Addition%I(I2)=Addition%I(I2)+1
+     ENDDO
+     AddDim=MAXVAL(Addition%I)
+     !
+     CALL New(TopVDWNew,(/NatmsLoc,Dim2+AddDim/))
+     TopVDWNew%I=0
+     DO I=1,NatmsLoc
+       DO J=1,Dim2 ; TopVDWNew%I(I,J)=TopVDW%I(I,J) ; ENDDO
+     ENDDO
+     DO I=1,NBond
+       I1=BondIJ%I(1,I)
+       I2=BondIJ%I(2,I)
+       II1=TopVDWNew%I(I1,1)+1
+       TopVDWNew%I(I1,1)=II1
+       TopVDWNew%I(I1,II1+1)=I2
+       II2=TopVDWNew%I(I2,1)+1
+       TopVDWNew%I(I2,1)=II2
+       TopVDWNew%I(I2,II2+1)=I1
+     ENDDO
+     !
+     CALL Delete(TopVDW)
+     CALL New(TopVDW,(/NatmsLoc,Dim2+AddDim/))
+     TopVDW%I=TopVDWNew%I
+     !
+     CALL Delete(TopVDWNew)
+     CALL Delete(Addition)
+   END SUBROUTINE VDWTop
+!
+!---------------------------------------------------------------------
+!
+   SUBROUTINE AngleList(AtmB,Bond,TOPS,XYZ,Angle,OutP)
+     TYPE(BONDDATA)              :: Bond
+     TYPE(ATOMBONDS)             :: AtmB
+     TYPE(TOPOLOGY)              :: TOPS
+     TYPE(ANGLEDATA)             :: Angle
+     TYPE(OUTPDATA)              :: OutP 
+     REAL(DOUBLE),DIMENSION(:,:) :: XYZ
+     TYPE(INT_VECT)              :: BondScore
+     INTEGER,DIMENSION(3)        :: RefBonds
+     INTEGER                     :: I,J,K,L,NAngle,NatmsLoc,AllBond
+     INTEGER                     :: I1,I2,I3,NDimens,NOutP
+     !
+     NatmsLoc=SIZE(XYZ,2)
+     NAngle=0
+     DO I=1,NatmsLoc
+       AllBond=AtmB%Count%I(I)
+       NAngle=NAngle+AllBond*(AllBond-1)/2
+     ENDDO
+     CALL New(Angle,NAngle)
+     CALL New(OutP,3*NatmsLoc)
+     !
+     NAngle=0
+     NOutP=0
+     !
+     CALL New(BondScore,Bond%N)
+     CALL ScoreBond(BondScore%I,Bond)
+     DO I=1,NatmsLoc
+       IF(TOPS%Tot12%I(I,1)==0) THEN
+         CALL Halt('Atom not bound at '//TRIM(IntToChar(I))//' .')
+       ENDIF
+       CALL AnglesRef(RefBonds,NDimens,BondScore%I,I,XYZ,AtmB,Bond)
+      !CALL AngleGen(I,Angle,NAngle,RefBonds,NDimens,XYZ,AtmB,Bond,TOPS)
+       CALL FullAngleGen(I,Angle,NAngle,AtmB,Bond,TOPS)
+       CALL OutPGen(I,OutP,NOutP,RefBonds,NDimens,XYZ,AtmB,Bond,TOPS)
+     ENDDO
+     CALL Delete(BondScore)
+     !
+     Angle%N=NAngle
+     OutP%N=NOutP
+   END SUBROUTINE AngleList
+!
+!----------------------------------------------------------------------
+!
+   SUBROUTINE OutPGen(I,OutP,NOutP,RefBonds,NDimens,XYZ,AtmB,Bond,TOPS)
+     INTEGER                       :: I,J,K,L,NOutP,NDimens
+     TYPE(OUTPDATA)                :: OutP
+     INTEGER,DIMENSION(:)          :: RefBonds
+     REAL(DOUBLE),DIMENSION(:,:)   :: XYZ
+     REAL(DOUBLE)                  :: D,DMax
+     TYPE(ATOMBONDS)               :: AtmB
+     TYPE(BONDDATA)                :: Bond
+     TYPE(TOPOLOGY)                :: TOPS
+     TYPE(INT_VECT)                :: Mark
+     INTEGER                       :: NDim,IBonds(3),I1,I2,IM
+     !
+     IF(NDimens==2.AND.TOPS%Tot12%I(I,1)>2) THEN
+       NDim=AtmB%Count%I(I)
+       CALL New(Mark,NDim)
+       Mark%I=0
+       IBonds=0
+       DO L=1,3   
+         DMax=1.D99
+         DO J=1,NDim
+           K=AtmB%Bonds%I(I,J)
+           D=Bond%Length%D(K) 
+           IF(D<DMax.AND.Mark%I(J)==0) THEN
+             IBonds(L)=K
+             DMax=D
+             IM=J
+           ENDIF 
+         ENDDO 
+         Mark%I(IM)=1
+       ENDDO 
+       CALL Delete(Mark)
+       !
+       DO L=1,3
+         I1=Bond%IJ%I(1,IBonds(L))
+         I2=Bond%IJ%I(2,IBonds(L))
+         IF(I1==I) THEN
+           IBonds(L)=I2
+         ELSE
+           IBonds(L)=I1
+         ENDIF
+       ENDDO
+       !
+       NOutP=NOutP+1
+       OutP%IJKL%I(2,NOutP)=I
+       OutP%IJKL%I(1,NOutP)=IBonds(1)
+       OutP%IJKL%I(3,NOutP)=IBonds(2)
+       OutP%IJKL%I(4,NOutP)=IBonds(3)
+       NOutP=NOutP+1
+       OutP%IJKL%I(2,NOutP)=I
+       OutP%IJKL%I(1,NOutP)=IBonds(3)
+       OutP%IJKL%I(3,NOutP)=IBonds(1)
+       OutP%IJKL%I(4,NOutP)=IBonds(2)
+       NOutP=NOutP+1
+       OutP%IJKL%I(2,NOutP)=I
+       OutP%IJKL%I(1,NOutP)=IBonds(2)
+       OutP%IJKL%I(3,NOutP)=IBonds(3)
+       OutP%IJKL%I(4,NOutP)=IBonds(1)
+     ENDIF
+   END SUBROUTINE OutPGen
+!
+!---------------------------------------------------------------------
+!
+   SUBROUTINE AngleGen(I,Angle,NAngle,RefBonds,NDimens, &
+                       XYZ,AtmB,Bond,TOPS)
+     TYPE(ANGLEDATA)             :: Angle
+     TYPE(ATOMBONDS)             :: AtmB
+     TYPE(BONDDATA)              :: Bond
+     TYPE(TOPOLOGY)              :: TOPS
+     REAL(DOUBLE),DIMENSION(:,:) :: XYZ
+     INTEGER,DIMENSION(3)        :: RefBonds,RefAtms1,RefAtms2
+     INTEGER                     :: I,J,K,L,NAngle,NDimens
+     INTEGER                     :: B1,B2,I1B1,I2B1,I1B2,I2B2
+     INTEGER                     :: TopDim,II1,II2
+     !                         
+     CALL AtmsRef1(RefAtms1,I,RefBonds,NDimens,Bond,AtmB)
+     DO B1=1,TOPS%Tot12%I(I,1)
+       II1=TOPS%Tot12%I(I,B1+1)
+       CALL AtmsRef2(RefAtms2,RefAtms1,XYZ,I,II1)
+       DO B2=1,3
+         II2=RefAtms2(B2)
+         !
+         IF(II2==0.OR.II2==II1) CYCLE
+         TopDim=TOPS%Tot12%I(II1,1)
+         IF(ANY(TOPS%Tot12%I(II1,2:TopDim+1)==II2)) CYCLE
+         IF(ANY(RefAtms1(1:3)==II1).AND.II2>II1) CYCLE
+         !
+         NAngle=NAngle+1
+         Angle%IJK%I(2,NAngle)=I
+         IF(II1<II2) THEN
+           Angle%IJK%I(1,NAngle)=II1
+           Angle%IJK%I(3,NAngle)=II2
+         ELSE
+           Angle%IJK%I(1,NAngle)=II2
+           Angle%IJK%I(3,NAngle)=II1
+         ENDIF
+         !
+       ENDDO
+     ENDDO
+   END SUBROUTINE AngleGen
+!
+!-------------------------------------------------------------------
+!
+   SUBROUTINE FullAngleGen(IAt,Angle,NAngle,AtmB,Bond,TOPS)
+     INTEGER                :: IAt,I,J,K,L,NAngle
+     TYPE(ANGLEDATA)        :: Angle
+     TYPE(ATOMBONDS)        :: AtmB
+     TYPE(BONDDATA)         :: Bond 
+     TYPE(TOPOLOGY)         :: TOPS
+     INTEGER                :: B1,B2,I1B1,I2B1,I1B2,I2B2,II1,II2
+     !
+     DO J=1,AtmB%Count%I(IAt)
+       B1=AtmB%Bonds%I(IAt,J)
+       I1B1=Bond%IJ%I(1,B1)
+       I2B1=Bond%IJ%I(2,B1)
+       IF(I1B1==IAt) THEN
+         II1=I2B1
+       ELSE
+         II1=I1B1
+       ENDIF
+       DO K=J+1,AtmB%Count%I(IAt)
+         B2=AtmB%Bonds%I(IAt,K) 
+         I1B2=Bond%IJ%I(1,B2)
+         I2B2=Bond%IJ%I(2,B2)
+         IF(I1B2==IAt) THEN
+           II2=I2B2
+         ELSE
+           II2=I1B2
+         ENDIF
+         NAngle=NAngle+1
+         Angle%IJK%I(2,NAngle)=IAt
+         IF(II1<II2) THEN
+           Angle%IJK%I(1,NAngle)=II1
+           Angle%IJK%I(3,NAngle)=II2
+         ELSE
+           Angle%IJK%I(1,NAngle)=II2
+           Angle%IJK%I(3,NAngle)=II1
+         ENDIF
+       ENDDO 
+     ENDDO 
+   END SUBROUTINE FullAngleGen
+!
+!-------------------------------------------------------------------
+!
+   SUBROUTINE AtmsRef1(RefAtms1,I,RefBonds,NDimens,Bond,AtmB)
+     TYPE(ATOMBONDS)      :: AtmB
+     TYPE(BONDDATA)       :: Bond
+     INTEGER,DIMENSION(3) :: RefAtms1,RefBonds
+     INTEGER              :: B2,L,I1B2,I2B2,I,II2,NDimens,NRef
+     RefAtms1=0
+     NRef=0
+     DO B2=1,3
+       L=RefBonds(B2)
+       IF(L==0) CYCLE
+       L=AtmB%Bonds%I(I,L)
+       I1B2=Bond%IJ%I(1,L)
+       I2B2=Bond%IJ%I(2,L)
+       IF(I1B2==I) THEN
+         II2=I2B2
+       ELSE
+         II2=I1B2
+       ENDIF
+       NRef=NRef+1
+       RefAtms1(B2)=II2
+       IF(NDimens<=2.AND.NRef==1) EXIT
+     ENDDO
+   END SUBROUTINE AtmsRef1
+!
+!--------------------------------------------------------------------
+!
+   SUBROUTINE AtmsRef2(RefAtms2,RefAtms1,XYZ,I,II1)
+     INTEGER,DIMENSION(3)        :: RefAtms2,RefAtms1
+     REAL(DOUBLE),DIMENSION(:,:) :: XYZ
+     REAL(DOUBLE),DIMENSION(3)   :: Vect1,Vect2,Vect3,CrossProds
+     INTEGER                     :: I,II1,II2,B2,IMin
+     !
+     RefAtms2=RefAtms1
+     CrossProds=Zero
+     Vect1=XYZ(:,II1)-XYZ(:,I)
+     DO B2=1,3
+       II2=RefAtms2(B2)
+       IF(II2==0) CYCLE
+       Vect2=XYZ(:,II2)-XYZ(:,I)
+       Vect2=vect2/SQRT(DOT_PRODUCT(Vect2,Vect2))
+       CALL CROSS_PRODUCT(Vect1,Vect2,Vect3) 
+       CrossProds(B2)=DOT_PRODUCT(Vect3,Vect3)
+     ENDDO
+     IMin=1
+     DO B2=2,3
+       IF(CrossProds(B2)<CrossProds(IMin)) IMin=B2
+     ENDDO
+     RefAtms2(IMin)=0
+   END SUBROUTINE AtmsRef2
+!
+!---------------------------------------------------------------------
+!
+   SUBROUTINE AnglesRef(RefBonds,NDimens,BondScore,I1,XYZ,AtmB,Bond)
+     REAL(DOUBLE),DIMENSION(:,:) :: XYZ
+     INTEGER     ,DIMENSION(:)   :: BondScore
+     INTEGER     ,DIMENSION(3)   :: RefBonds 
+     REAL(DOUBLE),DIMENSION(3)   :: EigVals
+     TYPE(BONDDATA)              :: Bond
+     TYPE(ATOMBONDS)             :: AtmB 
+     TYPE(DBL_RNK2)              :: BondVect2
+     TYPE(INT_VECT)              :: Mark       
+     REAL(DOUBLE)                :: AMax,D,CondNum1
+     INTEGER                     :: I1,I,J,NDim,IMax,NDimens
+     ! 
+     RefBonds=0     
+     CondNum1=0.01D0
+     NDim=AtmB%Count%I(I1)
+     CALL New(BondVect2,(/NDim,3/))
+     CALL New(Mark,NDim)
+     Mark%I=0
+     CALL D3Bonds(I1,XYZ,BondVect2%D,BondScore,AtmB,Bond,Eig_O=EigVals)
+     NDimens=3
+     DO I=1,3
+       IF(EigVals(I)<CondNum1) THEN
+         NDimens=NDimens-1
+         CYCLE
+       ENDIF
+       AMax=Zero
+       IMax=0
+       DO J=1,NDim
+         D=ABS(BondVect2%D(J,I))
+         IF(D>AMax.AND.Mark%I(J)==0) THEN
+           AMax=D 
+           IMax=J
+         ENDIF
+       ENDDO
+       RefBonds(I)=IMax  
+       Mark%I(IMax)=1
+     ENDDO
+     CALL Delete(Mark)
+     CALL Delete(BondVect2)
+   END SUBROUTINE AnglesRef
+!
+!---------------------------------------------------------------------
+!
+   SUBROUTINE MergeBonds(BondCov,BondVDW,BondTot)
+     TYPE(BONDDATA)  :: BondCov,BondVDW,BondTot
+     INTEGER         :: NTot,NCov
+     INTEGER         :: I,J,K,L
+     !
+     NTot=BondCov%N+BondVDW%N
+     CALL New(BondTot,NTot)
+     BondTot%N=NTot
+     DO I=1,BondCov%N
+       CALL Set_Bond_EQ_Bond(BondTot,I,BondCov,I)
+     ENDDO
+     K=BondCov%N
+     DO I=1,BondVDW%N
+       CALL Set_Bond_EQ_Bond(BondTot,K+I,BondVDW,I)
+     ENDDO
+   END SUBROUTINE MergeBonds
+!
+!---------------------------------------------------------------------
+!
+   SUBROUTINE MergeAtmB(AtmBCov,AtmBVDW,NCov,AtmBTot)   
+     TYPE(ATOMBONDS) :: AtmBCov,AtmBVDW,AtmBTot 
+     INTEGER         :: NatmsLoc,I,J,K,MaxB,NCov
+     !
+     NatmsLoc=SIZE(AtmBCov%Count%I)
+     AtmBTot%N1=NatmsLoc
+     CALL New(AtmBTot%Count,NatmsLoc)
+     DO I=1,NatmsLoc
+       AtmBTot%Count%I(I)=AtmBCov%Count%I(I)+AtmBVDW%Count%I(I)
+     ENDDO
+     MaxB=MAXVAL(AtmBTot%Count%I)
+     CALL New(AtmBTot%Bonds,(/NatmsLoc,MaxB/))
+     CALL New(AtmBTot%Atoms,(/NatmsLoc,MaxB/))
+     AtmBTot%Bonds%I=0
+     DO I=1,NatmsLoc
+       K=AtmBCov%Count%I(I)
+       DO J=1,K
+         AtmBTot%Bonds%I(I,J)=AtmBCov%Bonds%I(I,J)
+         AtmBTot%Atoms%I(I,J)=AtmBCov%Atoms%I(I,J)
+       ENDDO
+       DO J=1,AtmBVDW%Count%I(I)
+         AtmBTot%Bonds%I(I,K+J)=NCov+AtmBVDW%Bonds%I(I,J)
+         AtmBTot%Atoms%I(I,K+J)=NCov+AtmBVDW%Atoms%I(I,J)
+       ENDDO
+     ENDDO
+   END SUBROUTINE MergeAtmB
+!
+!---------------------------------------------------------------------
+!
+   SUBROUTINE ArchiveTop(TOPS,Bond,AtmB,HFileIn,iCLONE,iGEO)
+     TYPE(TOPOLOGY)      :: TOPS
+     TYPE(BONDDATA)      :: Bond,Bond2
+     TYPE(ATOMBONDS)     :: AtmB,AtmB2
+     CHARACTER(LEN=*)    :: HFileIn
+     INTEGER             :: iCLONE,iGEO,HDFFileID
+     INTEGER             :: I,J,NZ,IBack,NatmsLoc
+     CHARACTER(LEN=DCL)  :: Tag
+     !
+     IBack=MIN(4,iGEO-1)
+     NatmsLoc=SIZE(AtmB%Count%I)
+     HDFFileID=OpenHDF(HFileIn)
+     HDF_CurrentID= &
+       OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
+     !
+     Tag=TRIM(IntToChar(iGEO))
+     CALL Put(Bond,'Bond'//Tag)
+     CALL Put(AtmB,'AtmB'//Tag)
+     !
+     DO I=1,IBack
+       Tag=TRIM(IntToChar(iGEO-I))
+       CALL Get(Bond2,'Bond'//Tag)
+       CALL Get(AtmB2,'AtmB'//Tag)
+       CALL MergeBondSets(Bond,Bond2,AtmB,AtmB2)
+       CALL Delete(AtmB)
+       CALL SortBonds(NatmsLoc,AtmB,Bond)
+       !
+       CALL Delete(Bond2)
+       CALL Delete(AtmB2)
+     ENDDO
+     !
+     IF(IBack/=0) THEN   
+       CALL Delete(TOPS%Tot12)
+       CALL Delete(TOPS%Tot13)
+       CALL Delete(TOPS%Tot14)
+       CALL Delete(TOPS%TotExcl)
+       CALL Topology_12(AtmB,TOPS%Tot12)
+       CALL Topology_13(NatmsLoc,TOPS%Tot12,TOPS%Tot13)
+       CALL Topology_14(NatmsLoc,TOPS%Tot12,TOPS%Tot14)
+       CALL Excl_List(NatmsLoc,TOPS%Tot12,TOPS%Tot13,TOPS%Tot14, &
+                      TOPS%TotExcl)
+     ENDIF
+     !
+     CALL CloseHDFGroup(HDF_CurrentID)
+     CALL CloseHDF(HDFFileID)
+   END SUBROUTINE ArchiveTop
+! 
+!---------------------------------------------------------------------
+!
+   SUBROUTINE MergeBondSets(Bond,Bond2,AtmB,AtmB2)
+     TYPE(BONDDATA) :: Bond,Bond2,BondNew,BondM
+     TYPE(ATOMBONDS):: AtmB,AtmB2
+     TYPE(INT_VECT) :: AllAtms,BondMark
+     INTEGER        :: NatmsLoc,NNew,K,L,I,J
+     ! 
+     NatmsLoc=AtmB2%N1
+     CALL New(AllAtms,NatmsLoc)
+     AllAtms%I=0
+     CALL New(BondNew,Bond2%N)
+     CALL New(BondMark,Bond2%N)
+     BondMark%I=0
+     !
+     NNew=0
+     DO I=1,NatmsLoc
+       DO J=1,AtmB%Count%I(I)
+         L=AtmB%Atoms%I(I,J)
+         AllAtms%I(L)=1 
+       ENDDO 
+       !
+       DO J=1,AtmB2%Count%I(I)
+         L=AtmB2%Atoms%I(I,J)
+         IF(AllAtms%I(L)==0) THEN
+           K=AtmB2%Bonds%I(I,J)
+           IF(BondMark%I(K)==0) THEN
+             NNew=NNew+1
+             BondMark%I(K)=1
+             CALL Set_Bond_EQ_Bond(BondNew,NNew,Bond2,K)
+           ENDIF
+         ENDIF
+       ENDDO 
+       !
+       DO J=1,AtmB%Count%I(I)
+         L=AtmB%Atoms%I(I,J)
+         AllAtms%I(L)=0 
+       ENDDO 
+     ENDDO
+     BondNew%N=NNew
+     IF(NNew/=0) THEN
+       CALL MergeBonds(Bond,BondNew,BondM)
+       CALL Delete(Bond)
+       CALL Set_BONDDATA_EQ_BONDDATA(Bond,BondM)
+       CALL Delete(BondM)      
+     ENDIF
+     CALL Delete(BondMark)      
+     CALL Delete(BondNew)      
+     CALL Delete(AllAtms)      
+   END SUBROUTINE MergeBondSets
+! 
 !---------------------------------------------------------------------
 !
    END MODULE InCoords
