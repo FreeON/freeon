@@ -1016,10 +1016,36 @@ MODULE MemMan
          INTEGER :: BytesPerDbl
          BytesPerDbl=8
       END FUNCTION BytesPerDbl
+!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+!! ckgan: added NewBCSR and DeleteBCSR because all procs need that.
+      SUBROUTINE NewBCSR(A,N_O)
+         TYPE(BCSR),INTENT(INOUT)             :: A
+         INTEGER,OPTIONAL,DIMENSION(3)        :: N_O
+         CALL AllocChk(A%Alloc)
+            IF(PRESENT(N_O))THEN
+               A%NAtms=N_O(1)
+               A%NBlks=N_O(2)
+               A%NNon0=N_O(3)
+            ELSE
+               A%NAtms=NAtoms! MaxAtms
+               A%NBlks=MaxBlks
+               A%NNon0=MaxNon0
+            ENDIF
+            CALL New(A%RowPt,A%NAtms+1)
+            CALL New(A%ColPt,A%NBlks  )
+            CALL New(A%BlkPt,A%NBlks  )
+            CALL New(A%MTrix,A%NNon0  )
+            A%Alloc=ALLOCATED_TRUE
+      END SUBROUTINE NewBCSR
+      SUBROUTINE DeleteBCSR(A)
+         TYPE(BCSR),INTENT(INOUT)       :: A
+            CALL Delete(A%RowPt)
+            CALL Delete(A%ColPt)
+            CALL Delete(A%BlkPt)
+            CALL Delete(A%MTrix)
+            A%NAtms=0
+            A%NBlks=0
+            A%NNon0=0
+            A%Alloc=ALLOCATED_FALSE
+      END SUBROUTINE DeleteBCSR
 END MODULE
-
-
-
-
-
-
