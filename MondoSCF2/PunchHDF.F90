@@ -177,12 +177,12 @@ CONTAINS
 !      Store the CellSets
        CALL Put(CS_IN ,'CS_IN' ,Tag_O=IntToChar(cBAS))
        CALL Put(CS_OUT,'CS_OUT',Tag_O=IntToChar(cBAS))
-       ! Close this clones group
+!      Close this clones group
        CALL CloseHDFGroup(HDF_CurrentID)
-       ! And free memory for the the lattice vectors 
+!      And free memory for the the lattice vectors 
        CALL Delete(CS_IN%CellCarts)
        CALL Delete(CS_OUT%CellCarts)
-       ! And unset the nuclear charges in the case of ECPs
+!      And unset the nuclear charges in the case of ECPs
        IF(B%BSets(iCLONE,cBAS)%HasECPs) &
           CALL UnSetAtomCharges(G%Clone(iCLONE),B%BSets(iCLONE,cBAS))
     ENDDO
@@ -253,9 +253,20 @@ CONTAINS
     REAL(DOUBLE), OPTIONAL    :: Rad_O
     REAL(DOUBLE)              :: AtomPairThresh,Radius
     INTEGER                   :: IL
-    INTEGER,PARAMETER         :: MaxCell=5000
+    INTEGER                   :: MaxCell
 !------------------------------------------------------------------------------
 !   CS_OUT
+    MaxCell=1
+    IF(G%PBC%Dimen==0) THEN
+       MaxCell=1
+    ELSEIF(G%PBC%Dimen==1) THEN
+       MaxCell=20
+    ELSEIF(G%PBC%Dimen==2) THEN
+       MaxCell=300
+    ELSEIF(G%PBC%Dimen==3) THEN
+       MaxCell=5000
+    ENDIF
+!
     IF(PRESENT(Rad_O)) THEN
        Radius = Rad_O
     ELSE
