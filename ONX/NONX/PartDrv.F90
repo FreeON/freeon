@@ -110,6 +110,8 @@ CONTAINS
 !H SUBROUTINE PDrv_Initialize(AFastMat,Name,PartN,Args,PartS_O,FirstPartS_O,PFix_O,CheckPoint_O)
 !H
 !H---------------------------------------------------------------------------------
+    USE Parse
+    !
     IMPLICIT NONE
     !-------------------------------------------------------------------
     TYPE(FASTMAT)             , POINTER    :: AFastMat
@@ -129,15 +131,30 @@ CONTAINS
     Basis = Args%I%I(2)
     Geom  = Args%I%I(3)
     !
+    ! Open Input File
+    CALL OpenASCII(InpFile,Inp)  
+    !
     ! Initialize semi-global variables.
-    IsFirst = Cycl.LE.0.AND.Basis.LE.1!.AND.Geom.LE.1
+    IF(OptKeyQ(Inp,'Guess','Core')) THEN
+       !We use a Core Guess.
+       IsFirst = Cycl.LE.1.AND.Basis.LE.1!.AND.Geom.LE.1
+    ELSE
+       !We do not use a Core Guess.
+       IsFirst = Cycl.LE.0.AND.Basis.LE.1!.AND.Geom.LE.1
+    ENDIF
     !
 #ifdef PARTDRV_DBUG
-    WRITE(*,*) 'Cycl',Cycl
-    WRITE(*,*) 'Basis',Basis
-    WRITE(*,*) 'Geom',Geom
-    WRITE(*,*) 'IsFirst',IsFirst
+    IF(MYID.EQ.ROOT) THEN
+       WRITE(*,*) 'Cycl',Cycl
+       WRITE(*,*) 'Basis',Basis
+       WRITE(*,*) 'Geom',Geom
+       WRITE(*,*) 'IsFirst',IsFirst
+       WRITE(*,*) 'Do we use Core Guess? ',OptKeyQ(Inp,'Guess','Core')! OptKeyQ(Inp,GUESS_OPTION,GUESS_CORE)
+    ENDIF
 #endif
+    !
+    !Close the Input file.
+    CLOSE(Inp)
     !
     IF(PRESENT(FirstPartS_O)) THEN
        FirstPartS = FirstPartS_O
