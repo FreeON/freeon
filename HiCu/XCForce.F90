@@ -19,21 +19,21 @@ PROGRAM XCForce
   USE Functionals
   USE dXCBlok
   IMPLICIT NONE
-  TYPE(ARGMT)                 :: Args
-  TYPE(BCSR)                  :: P
-  TYPE(TIME)                  :: TimeRhoToTree,TimeGridGen
-  TYPE(DBL_VECT)              :: XCFrc,Frc
-  TYPE(AtomPair)              :: Pair
-  REAL(DOUBLE)                :: Electrons,XCFrcChk
-  INTEGER                     :: AtA,AtB,MA,NB,MN1,A1,A2,JP,Q
-  CHARACTER(LEN=3)            :: SCFCycle
-  CHARACTER(LEN=15),PARAMETER :: Prog='XCForce        '
-  CHARACTER(LEN=15),PARAMETER :: Sub1='XCForce.RhoTree' 
-  CHARACTER(LEN=15),PARAMETER :: Sub2='XCForce.GridGen' 
+  TYPE(ARGMT)                    :: Args
+  TYPE(BCSR)                     :: P
+  TYPE(TIME)                     :: TimeRhoToTree,TimeGridGen
+  TYPE(DBL_VECT)                 :: XCFrc,Frc
+  TYPE(AtomPair)                 :: Pair
+  REAL(DOUBLE)                   :: Electrons,XCFrcChk
+  INTEGER                        :: AtA,AtB,MA,NB,MN1,A1,A2,JP,Q
+  CHARACTER(LEN=3)               :: SCFCycle
+  CHARACTER(LEN=15),PARAMETER    :: Prog='XCForce        '
+  CHARACTER(LEN=15),PARAMETER    :: Sub1='XCForce.RhoTree' 
+  CHARACTER(LEN=15),PARAMETER    :: Sub2='XCForce.GridGen' 
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg 
 #ifdef PERIODIC        
-  INTEGER                     :: NCA,NCB
-  REAL(DOUBLE),DIMENSION(3)   :: A,B
+  INTEGER                        :: NCA,NCB
+  REAL(DOUBLE),DIMENSION(3)      :: A,B
 #endif     
 !---------------------------------------------------------------------------------------
 ! Macro the start up
