@@ -353,6 +353,11 @@ CONTAINS
     IF(MyId==ROOT)THEN
 #endif
        CALL OpenASCII(InpFile,Inp)
+       IF(OptKeyQ(Inp,GLOBAL_DEBUG,DBG_PRT_INTS))THEN
+          A%Int=DEBUG_INTEGRAL
+       ELSE
+          A%Int=DEBUG_NONE
+       ENDIF
        IF(OptKeyQ(Inp,TRIM(Prog)  ,DBG_NONE).OR.         &
             OptKeyQ(Inp,GLOBAL_DEBUG,DBG_NONE) )THEN
           A%Key=DEBUG_NONE
@@ -382,7 +387,6 @@ CONTAINS
        ELSE
           A%Chk=DEBUG_NONE
        ENDIF
-
        IF(OptKeyQ(Inp,TRIM(Prog),  DBG_MMA_STYLE).OR.     &
             OptKeyQ(Inp,GLOBAL_DEBUG,DBG_MMA_STYLE) )THEN
           A%Fmt=DEBUG_MMASTYLE
