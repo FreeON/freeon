@@ -10,11 +10,13 @@ Accuracy =(VeryTight)
 DebugAll=(MaxDebug)
 Geometry=(InAngstroms,NoOrder)
 BlokAInv=(Test,1.D20)
+PFFLayers=2
+PFFMaxEll=20
 Periodic=(On-XYZ,AtomWrap,AngFormat,FracCoord)
 <EndOptions>
 
 <BeginPeriodic>
-d3   12.42956925D0 12.42956925D0 12.42956925D0 90.0D0   90.0D0   90.0D0
+d3   12.42956925D0 12.42956925D0 12.42956925D0  90.0D0   90.0D0   90.0D0
 <EndPeriodic>
 
 <BeGIN_MM_filenames>

@@ -9,6 +9,8 @@ Mechanics=(MM)
 Accuracy =(VeryTight)
 DebugAll =(MaxDebug)
 Geometry=(InAnstroms,NoOrder) 
+PFFLayers=2
+PFFMaxEll=8
 Periodic=(On-XYZ,AtomWrap,AngFormat,FracCoord)
 <EndOptions>
 
@@ -21,5 +23,6 @@ validation_opls
 MgOmm.seq
 MgOmm.crd
 <End_MM_filenames>
+
 
 
