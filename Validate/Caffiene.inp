@@ -10,7 +10,7 @@ Opt=(QuNew,OneBase)
 Extrap=Interp
 SCFMethod=(RH,RH)
 BasisSets=(STO-3G,6-31G**)
-ModelChem=(HF,BLYPxc)
+ModelChem=(BLYPxc,BLYPxc)
 Accuracy=(Loose,Loose)
 Geometry=(InAngstroms,NoOrder)
 <EndOptions>

@@ -6,11 +6,10 @@
 Charge=0
 Multiplicity=1
 DebugAll=(MinDebug,CheckSums)
-SDMM=MaxDebug
 Guess=SuperPos
 SCFMethod=(SDMM)
 BasisSets=(STO-3G)
-ModelChem=(BLYPxc)
+ModelChem=(PBExc)
 Accuracy =(Loose)
 Geometry =(InAngstroms,NoOrder)
 <EndOptions>

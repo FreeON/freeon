@@ -7,12 +7,11 @@ Charge=0
 Multiplicity=1
 DebugAll=(MinDebug,CheckSums)
 DIISDamp=0.4
-PulayDIIS=MaxDebug
 Guess=SuperPos
-SCFMethod=(RH,RH,RH)
-BasisSets=(STO-2G,6-31G**,6-31G**)
-ModelChem=(HF,HF,B3LYP/VWN3)
-Accuracy =(Loose,Loose,Tight)
+SCFMethod=(RH,RH)
+BasisSets=(STO-2G,6-31G**)
+ModelChem=(PW91xc,PW91xc)
+Accuracy =(Loose,Tight)
 Geometry=(InAngstroms,NoOrder)
 <EndOptions>
 

@@ -1,20 +1,17 @@
 <BeginTitle>
-
-     ** Biotin **
-
+             ** Biotin **
 <EndTitle>
 
 <BeginOptions>
 Charge=0
 Multiplicity=1
 DebugAll=(MinDebug,CheckSums)
-HiCu=MaxDebug
 Guess=SuperPos
 DIISDamp=0.3
-SCFMethod=(RH,RH,RH)
-BasisSets=(STO-2G,3-21G,3-21G)
-ModelChem=(HF,HF,PBE0)
-Accuracy =(Loose,Good,Good)
+SCFMethod=(RH,RH)
+BasisSets=(STO-2G,3-21G)
+ModelChem=(PW91xc,PW91xc)
+Accuracy =(Loose,Good)
 Geometry=(InAngstroms)
 <EndOptions>
 
