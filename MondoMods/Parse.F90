@@ -237,8 +237,9 @@ MODULE Parse
                K1=J-1+S1
                S2=SCAN(Line(K1:L),Delimiters)            
                K2=K1-2+S2
-!               WRITE(*,*)' S1 = ',S1,' S2 = ',S2,' Line = <',TRIM(Line(K1:K2)),'>'
+               WRITE(*,*)' S1 = ',S1,' S2 = ',S2,' Line = <',TRIM(Line(K1:K2)),'>'
                Dbl=CharToDbl(TRIM(Line(K1:K2)))
+               WRITE(*,*)' Dbl = ',Dbl
                OptDblQ=.TRUE.
                RETURN
             ENDIF
@@ -520,14 +521,22 @@ MODULE Parse
          READ(UNIT=C,FMT=INTERNAL_INT_FMT)CharToInt
      END FUNCTION CharToInt
 !------------------------------------------------------------------
-!     Convert a character string into a double
+!     Convert a character string into a double or DBLE(integer)
 !
       FUNCTION CharToDbl(C)
          CHARACTER(LEN=*),INTENT(IN) :: C
          REAL(DOUBLE)                :: CharToDbl
-         READ(UNIT=C,FMT=INTERNAL_DBL_FMT)CharToDbl
+         INTEGER                     :: TempInt
+         IF(SCAN(C,'.')==0)THEN
+           ! Maybe its an integer, lets try that ...
+           READ(UNIT=C,FMT=INTERNAL_INT_FMT)TempInt
+           ! Now cast to double
+           CharToDbl=DBLE(TempInt)
+         ELSE
+           ! Some sort of decimal, go for the DBL_FMT
+            READ(UNIT=C,FMT=INTERNAL_DBL_FMT)CharToDbl
+         ENDIF
      END FUNCTION CharToDbl
-
 !------------------------------------------------------------------
 !     Convert an integer into a character string
 !
