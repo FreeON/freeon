@@ -61,6 +61,9 @@ else if ( "$MONDO_PLAT" == "SGIIrix.MIPS" ) then
 else if ( "$MONDO_PLAT" == "AlphaLinux.Compaq" ) then
      setenv MONDO_COMPILER ${MONDO_HOME}/Includes/CompilerSpecifics.AlphaLinux.COMPAQ
      setenv MONDO_DGEMMS ${MONDO_HOME}/PHiPAC/runs/P3/PHiPAC_dgemm/src 
+else if ( "$MONDO_PLAT" == "True64.COMPAQ" ) then
+     setenv MONDO_COMPILER ${MONDO_HOME}/Includes/CompilerSpecifics.True64.COMPAQ
+     setenv MONDO_DGEMMS ${MONDO_HOME}/PHiPAC/runs/P3/PHiPAC_dgemm/src 
 endif
 
 
