@@ -47,6 +47,8 @@ MODULE ControlStructures
      INTEGER                        :: DMPOrder
      INTEGER                        :: MinSCF
      INTEGER                        :: MaxSCF
+!
+     REAL(DOUBLE)                   :: Pressure
   END TYPE Options
 
   TYPE Dynamics
@@ -268,7 +270,8 @@ MODULE ControlStructures
   TYPE GeomOpt
      INTEGER                         :: Optimizer
      LOGICAL                         :: DoGradNorm
-     LOGICAL                         :: Pictures  
+     LOGICAL                         :: Pictures 
+     REAL(DOUBLE)                    :: Pressure
      TYPE(CoordCtrl)                 :: CoordCtrl
      TYPE(TrfCtrl)                   :: TrfCtrl
      TYPE(Hessian)                   :: Hessian
