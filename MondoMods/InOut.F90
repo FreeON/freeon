@@ -129,9 +129,9 @@ MODULE InOut
          IF(MyId==ROOT)THEN
 #endif
             STATUS=HDF5CloseFile(FileID)
-            IF(FileID==FAIL) &
+            IF(STATUS==FAIL) &
             CALL Halt(' Failed to close an HDF file with FileID=' &
-                      //'<'//TRIM(IntToChar(FileID))//'>.') 
+                      //'<'//TRIM(IntToChar(FileID))//'>. ') 
 #ifdef PARALLEL
          ENDIF
 #endif  

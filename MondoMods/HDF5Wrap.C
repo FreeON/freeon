@@ -89,7 +89,8 @@ int hdf5closefile_(int* FileID)
 #endif
 #endif
    stat=H5Fclose(fid);
-   if(stat==-1){printf("HDF5CloseFile: Could not close FileID= %d \n",*FileID);}
+   if(stat==-1){STATUS=stat; return STATUS;}
+   /*printf("HDF5CloseFile: Could not close FileID= %d \n",*FileID);}*/
    stat=H5close();
 #ifdef debug_interface
 #ifdef debug_all
