@@ -57,6 +57,7 @@ MODULE Parse
 !     Determine if an option has a defined key set.
 !======================================================================
       FUNCTION OptCharQ(Unit,Option,Char)
+         IMPLICIT NONE
          INTEGER,         INTENT(IN)    :: Unit
          CHARACTER(LEN=*),INTENT(IN)    :: Option
          CHARACTER(LEN=DEFAULT_CHR_LEN) :: Line,LCLine,Char,OptLC
@@ -65,23 +66,32 @@ MODULE Parse
          LOGICAL                        :: OptCharQ
          REWIND(Unit)
          OptLC=Option
-         CALL LowCase(OptLC)
-         LD=LEN(Delimeters)-1 ! to avoid the blank!
+
+
+
+
+!        CALL LowCase(OptLC)
+         LD=LEN(Delimiters)-1 ! to avoid the blank!
          DO 
            READ(Unit,DEFAULT_CHR_FMT,END=1)Line
            LCLine=Line
-           CALL LowCase(LCLine)
-           IF(INDEX(LCLine,TRIM(OptLC))/=0)THEN
+!          CALL LowCase(LCLine)
+           IF(INDEX(LCLine,TRIM(OptLC))/=0) THEN
+
+
+              WRITE(*,'(A,A)') 'LCLine is ',TRIM(LCLine)
+              WRITE(*,'(A,A)') 'OptLC is ',TRIM(OptLC)
+              CALL LowCase(LCLine)
               J=1
               L=LEN(TRIM(LCLine))   
               DO N=1,L
-                 S1=SCAN(LCLine(J:L),Delimeters(1:LD))
+                 S1=SCAN(LCLine(J:L),Delimiters(1:LD))
                  K1=J-1+S1
-                 S2=SCAN(LCLine(K1+1:L),Delimeters(1:LD))
+                 S2=SCAN(LCLine(K1+1:L),Delimiters(1:LD))
                  IF(S1==0)RETURN
                  K2=K1+S2
                  IF(K1==K2)K2=L
-                 IF(K2==L.AND.SCAN(LCLine(K2:K2),Delimeters(1:LD))==0)THEN
+                 IF(K2==L.AND.SCAN(LCLine(K2:K2),Delimiters(1:LD))==0)THEN
                     Mns1=0
                  ELSE
                     Mns1=-1
@@ -110,12 +120,14 @@ MODULE Parse
 !     Determine if an option has a defined key set.
 !
       FUNCTION OptKeyQ(Unit,Option,Key)
-         
+         IMPLICIT NONE
          INTEGER,         INTENT(IN)    :: Unit
          CHARACTER(LEN=*),INTENT(IN)    :: Option,Key
          CHARACTER(LEN=DEFAULT_CHR_LEN) :: Line,OptLC
          LOGICAL                        :: OptKeyQ
          REWIND(Unit)
+
+
          OptLC=Option
          CALL LowCase(OptLC)
          DO 
@@ -155,7 +167,7 @@ MODULE Parse
                S1=SCAN(Line(J:L),Numbers)
                IF(S1==0)GOTO 1
                K1=J-1+S1
-               S2=SCAN(Line(K1:L),Delimeters)            
+               S2=SCAN(Line(K1:L),Delimiters)            
                K2=K1-2+S2
 !               WRITE(*,*)' S1 = ',S1,' S2 = ',S2,' Line = <',TRIM(Line(K1:K2)),'>'
                Int=CharToInt(TRIM(Line(K1:K2)))
@@ -190,7 +202,7 @@ MODULE Parse
                S1=SCAN(Line(J:L),Numbers)
                IF(S1==0)GOTO 1
                K1=J-1+S1
-               S2=SCAN(Line(K1:L),Delimeters)            
+               S2=SCAN(Line(K1:L),Delimiters)            
                K2=K1-2+S2
 !               WRITE(*,*)' S1 = ',S1,' S2 = ',S2,' Line = <',TRIM(Line(K1:K2)),'>'
                Dbl=CharToDbl(TRIM(Line(K1:K2)))
@@ -202,7 +214,7 @@ MODULE Parse
       END FUNCTION OptDblQ
 !-----------------------------------------------------------------------
 !     Determine if a key marked _ON BOTH SIDES_ 
-!     by delimeters exists in a line
+!     by Delimiters exists in a line
 !
       FUNCTION KeyQ(Line,Key)
          CHARACTER(LEN=*),INTENT(IN)    :: Line,Key
@@ -222,13 +234,13 @@ MODULE Parse
          M=LEN(TRIM(TmpKey))
 !         WRITE(*,*)' TmpKey = <',TmpKey(1:M),'>'
          DO N=1,L
-            S1=SCAN(TmpLine(J:L),Delimeters)
+            S1=SCAN(TmpLine(J:L),Delimiters)
             K1=J-1+S1
-            S2=SCAN(TmpLine(K1+1:L),Delimeters)
+            S2=SCAN(TmpLine(K1+1:L),Delimiters)
             IF(S1==0)RETURN
             K2=K1+S2
             IF(K1==K2)K2=L
-            IF(K2==L.AND.SCAN(TmpLine(K2:K2),Delimeters)==0)THEN
+            IF(K2==L.AND.SCAN(TmpLine(K2:K2),Delimiters)==0)THEN
                Mns1=0
             ELSE
                Mns1=-1
@@ -269,7 +281,7 @@ MODULE Parse
          NN=0
          Loc=0
          OptKeyLocQ=.FALSE. 
-         LD=LEN(Delimeters)-1 ! to avoid the blank!
+         LD=LEN(Delimiters)-1 ! to avoid the blank!
          DO 
            READ(Unit,DEFAULT_CHR_FMT,END=1)Line
            LCLine=Line
@@ -279,13 +291,13 @@ MODULE Parse
               J=1
               L=LEN(TRIM(LCLine))   
               DO V=1,L
-                 S1=SCAN(LCLine(J:L),Delimeters(1:LD))
+                 S1=SCAN(LCLine(J:L),Delimiters(1:LD))
                  K1=J-1+S1
-                 S2=SCAN(LCLine(K1+1:L),Delimeters(1:LD))
+                 S2=SCAN(LCLine(K1+1:L),Delimiters(1:LD))
                  IF(S1==0)RETURN
                  K2=K1+S2
                  IF(K1==K2)K2=L
-                 IF(K2==L.AND.SCAN(LCLine(K2:K2),Delimeters(1:LD))==0)THEN
+                 IF(K2==L.AND.SCAN(LCLine(K2:K2),Delimiters(1:LD))==0)THEN
                     Mns1=0
                  ELSE
                     Mns1=-1
@@ -388,7 +400,7 @@ MODULE Parse
             S1A=SCAN(TmpLine(J:S1B),Lower)
             S1=S1B
             K1=J-1+S1
-            S2=SCAN(TmpLine(K1:L),Delimeters)            
+            S2=SCAN(TmpLine(K1:L),Delimiters)            
             K2=K1-2+S2
             J=K2+1
 !            WRITE(*,*)' S1A = ',S1A,' S1B = ',S1B,' J = ',J,' L = ',L
@@ -413,12 +425,13 @@ MODULE Parse
          DO I=1,N
             S1=SCAN(Line(J:L),Numbers)
             K1=J-1+S1
-            S2=SCAN(Line(K1:L),Delimeters)            
+            S2=SCAN(Line(K1:L),Delimiters)            
             K2=K1-2+S2
             Ints(I)=CharToInt(TRIM(Line(K1:K2)))
             J=K2+1
          ENDDO    
       END SUBROUTINE LineToInts
+
 !------------------------------------------------------------------
 !     Convert a character string into a vector of character strings
 !
@@ -473,6 +486,7 @@ MODULE Parse
 112      FORMAT(' K1 = ',I3,' S1 = ',I3,' K2 = ',I3, &
                 ' S2 = ',I3,'J = ',I3,' Chars = <',A,'>')
       END SUBROUTINE LineToChars
+
 !------------------------------------------------------------------
 !     Convert a character string into an integer
 !
@@ -489,6 +503,7 @@ MODULE Parse
          REAL(DOUBLE)                :: CharToDbl
          READ(UNIT=C,FMT=INTERNAL_DBL_FMT)CharToDbl
      END FUNCTION CharToDbl
+
 !------------------------------------------------------------------
 !     Convert an integer into a character string
 !
