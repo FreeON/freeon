@@ -5,25 +5,23 @@
 <BeginOptions>
 Charge=0
 Multiplicity=1
-DebugAll=(MinDebug,CheckSums)
+DebugAll=(MaxDebug,CheckSums)
 Guess=SuperP
 SCFMethod=(RH,RH) 
 BasisSets=(STO-3G,STO-3G)
 ModelChem=(BLYPxc,PBE0) 
 Accuracy =(loose,good)
-Geometry=(InAU,NoOrder) 
-PFFLayers=1
+Geometry=(InAngstroms,NoOrder) 
+PFFLayers=2
 PFFMaxEll=16
 Periodic=(On-XYZ,AtomWrap,AngFormat,FracCoord,CenterAtoms)
 <EndOptions>
 
 <BeginPeriodic>
-aa    3.000000  3.000000  3.000000  90.00000  90.00000  90.00000
+aa    2.977777  2.977777  2.977777  60.00000  60.00000  60.00000
 <EndPeriodic>
 
 <BeginGeometry>   
 MG    0.000000  0.000000  0.000000  
 O     0.500000  0.500000  0.500000  
 <EndGeometry>
-
-aa    2.977777  2.977777  2.977777  60.00000  60.00000  60.00000
