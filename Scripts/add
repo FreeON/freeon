@@ -1,0 +1,7 @@
+#!/bin/sh
+cvs diff   $MONDO_HOME/$1/$2
+sleep 3
+cvs add    $MONDO_HOME/$1/$2
+cvs update $MONDO_HOME/$1/$2
+cvs commit $MONDO_HOME/$1/$2
+
