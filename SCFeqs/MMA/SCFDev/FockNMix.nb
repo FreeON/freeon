@@ -1,0 +1,360 @@
+(************** Content-type: application/mathematica **************
+                     CreatedBy='Mathematica 4.2'
+
+                    Mathematica-Compatible Notebook
+
+This notebook can be used with any Mathematica-compatible
+application, such as Mathematica, MathReader or Publicon. The data
+for the notebook starts with the line containing stars above.
+
+To get the notebook into a Mathematica-compatible application, do
+one of the following:
+
+* Save the data starting with the line of stars above into a file
+  with a name ending in .nb, then open the file inside the
+  application;
+
+* Copy the data starting with the line of stars above to the
+  clipboard, then use the Paste menu command inside the application.
+
+Data for notebooks contains only printable 7-bit ASCII and can be
+sent directly in email or through ftp in text mode.  Newlines can be
+CR, LF or CRLF (Unix, Macintosh or MS-DOS style).
+
+NOTE: If you modify the data for this notebook not in a Mathematica-
+compatible application, you must delete the line below containing
+the word CacheID, otherwise Mathematica-compatible applications may
+try to use invalid cache data.
+
+For more information on notebooks and Mathematica-compatible 
+applications, contact Wolfram Research:
+  web: http://www.wolfram.com
+  email: info@wolfram.com
+  phone: +1-217-398-0700 (U.S.)
+
+Notebook reader applications are available free of charge from 
+Wolfram Research.
+*******************************************************************)
+
+(*CacheID: 232*)
+
+
+(*NotebookFileLineBreakTest
+NotebookFileLineBreakTest*)
+(*NotebookOptionsPosition[     13227,        300]*)
+(*NotebookOutlinePosition[     14167,        329]*)
+(*  CellTagsIndexPosition[     14123,        325]*)
+(*WindowFrame->Normal*)
+
+
+
+Notebook[{
+Cell[BoxData[{
+    \(\($MinPrecision = 32;\)\), "\n", 
+    \(\($MaxPrecision = 32;\)\n\), "\[IndentingNewLine]", 
+    \(\(trace[m_List] := Sum[m[\([i, i]\)], {i, Length[m]}];\)\), "\n", 
+    \(\(mdot[x_List, y_List] := 
+        Flatten[x] . Flatten[y];\)\n\), "\[IndentingNewLine]", 
+    \(\(ClearAll[Int];\)\), "\[IndentingNewLine]", 
+    \(\(NBasF = 58;\)\), "\[IndentingNewLine]", 
+    \(\(Int = 
+        Table[Table[
+            Table[Table[
+                0, {NBasF}], {NBasF}], {NBasF}], {NBasF}];\)\), "\
+\[IndentingNewLine]", 
+    \(\(<< /n/scratch/mchalla/MONDO/SCFeqs/MMA/SCFDev/Cr2_6-31G.in;\)\
+\[IndentingNewLine]\[IndentingNewLine] (*\[IndentingNewLine]ClearAll[Int]; \n
+      NBasF = 7; \n
+      Int = Table[
+          Table[Table[
+              Table[0, {NBasF}], {NBasF}], {NBasF}], {NBasF}]; \n\(\(\(\(\(\(<< \
+\(\(/\)\(n\)\)/scratch\)/mchalla\)/MONDO\)/SCFeqs\)/MMA\)/SCFDev\)/STO - 
+        2  G_Water . in;\ *) \), "\n", 
+    \(\)}], "Input"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+    \(DensityMatrix[F_List] := 
+      Block[{}, 
+        ES = Eigensystem[F]; \[IndentingNewLine]es1 = 
+          ES[\([1]\)]; \[IndentingNewLine]es2 = 
+          ES[\([2]\)]; \[IndentingNewLine]c = 
+          es2[\([Ordering[es1]]\)]; \[IndentingNewLine]P = 
+          Table[Table[0, {i, NBasF}], {j, NBasF}]; \[IndentingNewLine]Do[
+          Do[Do[P[\([i, j]\)] = 
+                P[\([i, j]\)] + c[\([k, i]\)]*c[\([k, j]\)], {i, 1, 
+                NBasF}], {j, 1, NBasF}], {k, 1, 
+            NEl/2}]; \[IndentingNewLine]P]\n\), "\[IndentingNewLine]", 
+    \(TC2[F_List] := 
+      Block[{X}, 
+        ev = Eigenvalues[F]; \[IndentingNewLine]ev = 
+          Sort[ev]; \[IndentingNewLine]emin = 
+          Min[ev]; \[IndentingNewLine]emax = Max[ev]; \[IndentingNewLine]e0 = 
+          Sum[ev[i], {i, 1, 
+              NEl/2}]; \[IndentingNewLine]X = \((emax*IdentityMatrix[NBasF] - 
+                F)\)/\((emax - emin)\); \[IndentingNewLine]Do[
+          X2 = X . X; \[IndentingNewLine]n = 
+            2*trace[X]; \[IndentingNewLine]If[n > NEl, X = X2, 
+            X = 2\ X - X2];, {k, 1, 50}]; \[IndentingNewLine]Re[
+          X]]\n\), "\[IndentingNewLine]", 
+    \(PRT[F0_List, F1_List] := 
+      Block[{X0, X1, D0, D1}, 
+        ev = Eigenvalues[F0]; \[IndentingNewLine]ev = 
+          Sort[ev]; \[IndentingNewLine]F0min = 
+          Min[ev]; \[IndentingNewLine]F0max = 
+          Max[ev]; \[IndentingNewLine]ev = 
+          Eigenvalues[F1]; \[IndentingNewLine]ev = 
+          Sort[ev]; \[IndentingNewLine]F1min = 
+          Min[ev]; \[IndentingNewLine]F1max = 
+          Max[ev]; \[IndentingNewLine] (*\ \
+\(===\)\(===\)\(===\)\(===\)\(===\)\(===\)\(===\)\(===\)\(===\)\(===\)\(===\)\
+\(===\)\(===\)\(===\)\(===\)\(===\)\(===\)\(===\)\(===\)\(===\)\(===\)\(===\)\
+\(===\)\(===\)\(===\)\(===\)\(\[Equal]\)*) \[IndentingNewLine]X0 = \((F0max*
+                  IdentityMatrix[NBasF] - F0)\)/\((F0max - 
+                F0min)\); \[IndentingNewLine]X1 = \((F0max*
+                  IdentityMatrix[NBasF] - F1)\)/\((F0max - 
+                F0min)\); \[IndentingNewLine]D0 = 
+          X1 - X0; \[IndentingNewLine]Do[
+          X02 = X0 . X0; \[IndentingNewLine]n = 
+            2*trace[X0]; \[IndentingNewLine]If[
+            n > NEl, \[IndentingNewLine]\ \ \ D0 = 
+              X0 . D0 + D0 . X0; \[IndentingNewLine]\ \ \ X0 = X02;, 
+            D0 = 
+              2*D0 - \((X0 . D0 + D0 . X0)\); \[IndentingNewLine]\ \ \ X0 = 
+              2\ X0 - X02];\[IndentingNewLine], {k, 1, 
+            50}]; \[IndentingNewLine] (*\ \(===\)\(===\)\(===\)\(===\)\(===\)\
+\(===\)\(===\)\(===\)\(===\)\(===\)\(===\)\(===\)\(===\)\(===\)\(===\)\(===\)\
+\(===\)\(===\)\(===\)\(===\)\(===\)\(===\)\(===\)\(===\)*) \[IndentingNewLine]\
+X0 = \((F1max*IdentityMatrix[NBasF] - F0)\)/\((F1max - 
+                F1min)\); \[IndentingNewLine]X1 = \((F1max*
+                  IdentityMatrix[NBasF] - F1)\)/\((F1max - 
+                F1min)\); \[IndentingNewLine]D1 = 
+          X1 - X0; \[IndentingNewLine]Do[
+          X12 = X1 . X1; \[IndentingNewLine]\ \ \ \ n = 
+            2*trace[X1]; \t\[IndentingNewLine]\ \ \ If[
+            n > NEl, \[IndentingNewLine]\ \ \ \ \ \ \ \ D1 = 
+              X1 . D1 + D1 . X1; \[IndentingNewLine]\ \ \ \ \ \ \ \ X1 = 
+              X12;, D1 = 
+              2*D1 - \((X1 . D1 + 
+                    D1 . X1)\); \[IndentingNewLine]\ \ \ \ \ \ \ \ X1 = 
+              2\ X1 - X12];\[IndentingNewLine], {k, 1, 
+            50}]; \[IndentingNewLine]{X0, X1, D0, 
+          D1}]\n\), "\[IndentingNewLine]", 
+    \(\(ClearAll[JK];\)\), "\n", 
+    \(JK = 
+      Compile[{{n, _Integer}, {p, _Real, 2}, {int, _Real, 4}}, 
+        Module[{i, j, k, l}, 
+          2\ Table[
+                Table[Sum[
+                    p[\([k, l]\)]*int[\([i, j, k, l]\)], {k, 1, n}, {l, 1, 
+                      n}], {i, n}], {j, 1, n}] - 
+            Table[Table[
+                Sum[p[\([k, l]\)]*int[\([i, k, j, l]\)], {k, 1, n}, {l, 1, 
+                    n}], {i, n}], {j, 1, n}]]]\n\), "\[IndentingNewLine]", 
+    \(FMin[h_List, F0_List, F1_List, P0_List, P1_List, R0_List, R1_List] := 
+      Block[{a, b, c, 
+          lmbd}, \[IndentingNewLine]e0 = \((1/2)\) 
+            trace[\((h + F0)\) . P0]; \[IndentingNewLine]e1 = \((1/2)\) 
+            trace[\((h + F1)\) . P1]; \[IndentingNewLine]ep0 = \((1/2)\) 
+            trace[\((F1 - F0)\) . P0 + \((F0 + h)\) . 
+                  R0]; \[IndentingNewLine]ep1 = \((1/2)\) 
+            trace[\((F1 - F0)\) . \((P1 + R1)\) + \((F1 + h)\) . 
+                  R1]; \[IndentingNewLine]y1 = 
+          e1 - e0 - ep0; \[IndentingNewLine]y2 = 
+          ep1 - ep0; \[IndentingNewLine]a = ep0; \[IndentingNewLine]b = 
+          3\ y1 - y2; \[IndentingNewLine]c = \(-2\)\ y1 + 
+            y2; \[IndentingNewLine]l1 = \((\(-b\) + Sqrt[b*b - 3*a*c])\)/\((3*
+                c)\); \[IndentingNewLine]l2 = \((\(-b\) - 
+                Sqrt[b*b - 3*a*c])\)/\((3*c)\); \[IndentingNewLine]If[l1 > 1, 
+          l1 = 1]; \[IndentingNewLine]If[l1 < 0, 
+          l1 = 0]; \[IndentingNewLine]If[l2 > 1, 
+          l2 = 1]; \[IndentingNewLine]If[l2 < 0, 
+          l2 = 0]; \[IndentingNewLine]en1 = 
+          e0 + a*l1 + b*l1^2 + c*l1^3; \[IndentingNewLine]en2 = 
+          e0 + a*l2 + b*l2^2 + c*l2^3; \[IndentingNewLine]If[en1 < en2, 
+          lmbd = l1, lmbd = l2]; \[IndentingNewLine]\ lmbd]\), "\n", 
+    \(\)}], "Input"],
+
+Cell[BoxData[
+    TagBox[\(CompiledFunction[{n, p, int}, 
+        Module[{i, j, k, l}, 
+          2\ Table[
+                Table[\[Sum]\+\(k = 1\)\%n\(\[Sum]\+\(l = 1\)\%n 
+                          p\[LeftDoubleBracket]k, 
+                          l\[RightDoubleBracket]\ int\[LeftDoubleBracket]i, 
+                          j, k, l\[RightDoubleBracket]\), {i, n}], {j, 1, 
+                  n}] - Table[
+              Table[\[Sum]\+\(k = 1\)\%n\(\[Sum]\+\(l = 1\)\%n 
+                        p\[LeftDoubleBracket]k, 
+                        l\[RightDoubleBracket]\ int\[LeftDoubleBracket]i, k, 
+                        j, l\[RightDoubleBracket]\), {i, n}], {j, 1, n}]], 
+        "-CompiledCode-"]\),
+      False,
+      Editable->False]], "Output"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+    \(\(lmnd = 0;\)\), "\[IndentingNewLine]", 
+    \(\(hx = X . h . X;\)\), "\n", 
+    \(\(P = TC2[hx];\)\), "\n", 
+    \(\(Pao = X . P . X;\)\), "\n", 
+    \(\(Fao = h + JK[NBasF, Pao, Int];\)\), "\n", 
+    \(\(F[0] = X . Fao . X;\)\), "\n", 
+    \(Do[\[IndentingNewLine]P0 = TC2[F[k - 1]]; \[IndentingNewLine]Pao0 = 
+        X . P0 . X; \[IndentingNewLine]en = 
+        trace[P0 . \((hx + F[k - 1])\)] + ENukeNuke; \[IndentingNewLine]Print[
+        k, "\< lamnbda = \>", lmnd, "\< Ehf = \>", 
+        N[en, 32]]; \[IndentingNewLine]F[k] = 
+        X . \((h + JK[NBasF, Pao0, Int])\) . 
+          X; \[IndentingNewLine]Expansion = 
+        PRT[F[k - 1], F[k]]; \[IndentingNewLine]P0 = 
+        Expansion[\([1]\)]; \[IndentingNewLine]P1 = 
+        Expansion[\([2]\)]; \[IndentingNewLine]R0 = 
+        Expansion[\([3]\)]; \[IndentingNewLine]R1 = 
+        Expansion[\([4]\)]; \[IndentingNewLine] \
+(*\[IndentingNewLine]Print["\<R0 = \>", 
+          MatrixForm[R0]]; \[IndentingNewLine]Print["\<R1 = \>", 
+          MatrixForm[R1]];\[IndentingNewLine]*) \[IndentingNewLine]lmnd = 
+        FMin[hx, F[k - 1], F[k], P0, P1, R0, R1]; \[IndentingNewLine]F[
+          k] = \((1 - lmnd)\)*F[k - 1] + lmnd*F[k];\[IndentingNewLine], {k, 
+        10}]\[IndentingNewLine]\), "\n", 
+    \(\)}], "Input"],
+
+Cell[BoxData[
+    InterpretationBox[\(1\[InvisibleSpace]"lamnbda = "\[InvisibleSpace]0\
+\[InvisibleSpace]" Ehf = "\[InvisibleSpace]\(-68.94861047699897`\)\),
+      SequenceForm[ 1, "lamnbda = ", 0, " Ehf = ", -68.948610476998965],
+      Editable->False]], "Print"],
+
+Cell[BoxData[
+    InterpretationBox[\(2\[InvisibleSpace]"lamnbda = "\[InvisibleSpace]1\
+\[InvisibleSpace]" Ehf = "\[InvisibleSpace]\(-73.06209841748995`\)\),
+      SequenceForm[ 2, "lamnbda = ", 1, " Ehf = ", -73.062098417489949],
+      Editable->False]], "Print"],
+
+Cell[BoxData[
+    InterpretationBox[\(3\[InvisibleSpace]"lamnbda = \
+"\[InvisibleSpace]0.9979218816266607`\[InvisibleSpace]" Ehf = "\
+\[InvisibleSpace]\(-72.71403241997892`\)\),
+      SequenceForm[ 
+      3, "lamnbda = ", 0.99792188162666073, " Ehf = ", -72.714032419978921],
+      Editable->False]], "Print"],
+
+Cell[BoxData[
+    InterpretationBox[\(4\[InvisibleSpace]"lamnbda = "\[InvisibleSpace]1\
+\[InvisibleSpace]" Ehf = "\[InvisibleSpace]\(-72.73882545540144`\)\),
+      SequenceForm[ 4, "lamnbda = ", 1, " Ehf = ", -72.73882545540144],
+      Editable->False]], "Print"],
+
+Cell[BoxData[
+    InterpretationBox[\(5\[InvisibleSpace]"lamnbda = \
+"\[InvisibleSpace]0.9999849887293715`\[InvisibleSpace]" Ehf = "\
+\[InvisibleSpace]\(-72.73627142589598`\)\),
+      SequenceForm[ 
+      5, "lamnbda = ", 0.99998498872937147, " Ehf = ", -72.736271425895978],
+      Editable->False]], "Print"],
+
+Cell[BoxData[
+    InterpretationBox[\(6\[InvisibleSpace]"lamnbda = \
+"\[InvisibleSpace]0.9999982951964977`\[InvisibleSpace]" Ehf = "\
+\[InvisibleSpace]\(-72.73598066413346`\)\),
+      SequenceForm[ 
+      6, "lamnbda = ", 0.99999829519649774, " Ehf = ", -72.735980664133464],
+      Editable->False]], "Print"],
+
+Cell[BoxData[
+    InterpretationBox[\(7\[InvisibleSpace]"lamnbda = \
+"\[InvisibleSpace]0.9999988769518398`\[InvisibleSpace]" Ehf = "\
+\[InvisibleSpace]\(-72.73578993769237`\)\),
+      SequenceForm[ 
+      7, "lamnbda = ", 0.99999887695183975, " Ehf = ", -72.735789937692374],
+      Editable->False]], "Print"],
+
+Cell[BoxData[
+    InterpretationBox[\(8\[InvisibleSpace]"lamnbda = \
+"\[InvisibleSpace]0.9999995334257308`\[InvisibleSpace]" Ehf = "\
+\[InvisibleSpace]\(-72.73571082622186`\)\),
+      SequenceForm[ 
+      8, "lamnbda = ", 0.99999953342573078, " Ehf = ", -72.735710826221862],
+      Editable->False]], "Print"],
+
+Cell[BoxData[
+    InterpretationBox[\(9\[InvisibleSpace]"lamnbda = \
+"\[InvisibleSpace]0.9999997967627554`\[InvisibleSpace]" Ehf = "\
+\[InvisibleSpace]\(-72.73567639302038`\)\),
+      SequenceForm[ 
+      9, "lamnbda = ", 0.99999979676275541, " Ehf = ", -72.735676393020384],
+      Editable->False]], "Print"],
+
+Cell[BoxData[
+    InterpretationBox[\(10\[InvisibleSpace]"lamnbda = \
+"\[InvisibleSpace]0.9999999127506207`\[InvisibleSpace]" Ehf = "\
+\[InvisibleSpace]\(-72.73566160363151`\)\),
+      SequenceForm[ 
+      10, "lamnbda = ", 0.99999991275062072, " Ehf = ", -72.735661603631513],
+      Editable->False]], "Print"]
+}, Open  ]]
+},
+FrontEndVersion->"4.2 for X",
+ScreenRectangle->{{0, 1920}, {0, 1200}},
+WindowSize->{1159, 1112},
+WindowMargins->{{250, Automatic}, {Automatic, -11}},
+PrintingPageRange->{Automatic, Automatic},
+PrintingOptions->{"PaperSize"->{612, 792},
+"PaperOrientation"->"Portrait",
+"PostScriptOutputFile":>FrontEnd`FileName[{$RootDirectory, "n", "scratch", \
+"mchalla", "MONDO", "OneE", "MMA"}, "Untitled-2.ps", CharacterEncoding -> \
+"iso8859-1"],
+"Magnification"->1}
+]
+
+(*******************************************************************
+Cached data follows.  If you edit this Notebook file directly, not
+using Mathematica, you must remove the line containing CacheID at
+the top of  the file.  The cache data will then be recreated when
+you save this file from within Mathematica.
+*******************************************************************)
+
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+
+(*NotebookFileOutline
+Notebook[{
+Cell[1754, 51, 963, 21, 283, "Input"],
+
+Cell[CellGroupData[{
+Cell[2742, 76, 5388, 100, 1243, "Input"],
+Cell[8133, 178, 751, 15, 77, "Output"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+Cell[8921, 198, 1304, 25, 427, "Input"],
+Cell[10228, 225, 264, 4, 23, "Print"],
+Cell[10495, 231, 264, 4, 23, "Print"],
+Cell[10762, 237, 309, 6, 23, "Print"],
+Cell[11074, 245, 263, 4, 23, "Print"],
+Cell[11340, 251, 309, 6, 23, "Print"],
+Cell[11652, 259, 309, 6, 23, "Print"],
+Cell[11964, 267, 309, 6, 23, "Print"],
+Cell[12276, 275, 309, 6, 23, "Print"],
+Cell[12588, 283, 309, 6, 23, "Print"],
+Cell[12900, 291, 311, 6, 23, "Print"]
+}, Open  ]]
+}
+]
+*)
+
+
+
+(*******************************************************************
+End of Mathematica Notebook file.
+*******************************************************************)
+
