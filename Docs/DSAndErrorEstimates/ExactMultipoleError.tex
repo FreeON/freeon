@@ -45,8 +45,10 @@ falls of as one over the distance. Examples range from  the astrophysical simula
 of galaxies, to the condensed matter simulations of large water clusters. 
 In both case the interation potential falls of with one over the distance, 
 leading to  {\cal O}($N^2$) with system size. Several algorithm's have been developed to
-overcome this limitation such as the Ewald method [ref], Particle Mesh Ewald (PME) [ref], the
-Fast Multipole Method (FMM) and the multipole tree-codes (MTC) [ref]. 
+overcome this limitation such as the Ewald method \cite{DFincham94}, 
+Particle Mesh Ewald (PME) \cite{luty:94}, 
+the Fast Multipole Method (FMM) \cite{Singh93,shimada:94,singer:95a}
+and the multipole tree-codes (MTC) \cite{Salmon94}. 
 Of specific interest are the multipole tree-code methods. 
 Tree-codes have several important advantages over other methods [ref]. i) they are easy to parallize.
 ii) they allow easy and accurte calculation of the energies and the forces. iii) Periodic boundary
@@ -74,8 +76,7 @@ greatly improves the accuracy for classical simulations
 
 Consider Figure {\ref{figure:MultInBox}} where we show a set of point distributions in a box, and a 
 refference distribution , $a$, which we want to calculate the interaction with. The nieve way would
- be to 
-interact distibution $a$ with all the other distributions in the box, but this scales with the 
+be to interact distibution $a$ with all the other distributions in the box, but this scales with the 
 number of distributions in the box. A better way would be to calculate the multipoles (we use 
 spherical multipoles [ref]) of the set of distributions in the box at the center of the box, and 
 then interact distibution $a$ with the multipoles via
@@ -458,6 +459,11 @@ For the case where $L=L'$ and $|\mathbf{d}|= |\mathbf{d'}|$ this has a particula
 %
 %
 %
+\begin{figure}
+\caption{}
+{\centering \includegraphics {MultInBox.ps} \par} 
+\label{figure:MultInBox} 
+\end{figure}
 
 \begin{figure}
 \caption{}
