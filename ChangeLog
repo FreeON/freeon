@@ -1,3 +1,172 @@
+2004-04-24 22:56  nemeth
+
+	* Docs/Optimizer/PRL/: curve2_1.eps, curve2_1.gnu: [no log message]
+
+2004-04-24 22:48  nemeth
+
+	* Docs/Optimizer/PRL/: GFS_PRL.tex, mondo_new.bib: [no log message]
+
+2004-04-24 22:40  nemeth
+
+	* Docs/Optimizer/PRL/: GFS_PRL.tex, mondo_new.bib: A new version of
+	the optimizer paper, with more details on the convergence issue.
+
+2004-04-24 20:33  nemeth
+
+	* Docs/Optimizer/PRL/: convfact.eps, convfact.gnu: [no log message]
+
+2004-04-24 19:52  nemeth
+
+	* Docs/Optimizer/PRL/: convfact.eps, convfact.gnu: [no log message]
+
+2004-04-24 18:48  nemeth
+
+	* Docs/Optimizer/PRL/: curve2_1.eps, curve2_1.gnu, curve2_1.eps,
+	curve2_1.gnu: [no log message]
+
+2004-04-24 18:44  nemeth
+
+	* Docs/Optimizer/PRL/log-log: [no log message]
+
+2004-04-24 18:39  nemeth
+
+	* Docs/Optimizer/PRL/: RMSCartData.eps, RMSCartData.gnu,
+	MaxCartData, MaxCartData.eps, MaxCartData.gnu: [no log message]
+
+2004-04-24 18:01  nemeth
+
+	* Docs/Optimizer/PRL/: R263loglog.gnu, RMSloglog.eps: New pictures
+	to optimizer paper.
+
+2004-04-23 09:36  vweber
+
+	* ONX2/ONX2ComputK.F90: [no log message]
+
+2004-04-23 07:35  vweber
+
+	* ONX2/: GONX2.F90, GONX2ComputDK.F90, IntSSSS.F90, ONX2.F90,
+	ONX2ComputK.F90, ONX2List.F90: Fixed a problem in onx2list when
+	testing for AC distance, the problem affected only periodic
+	exch+grad.  Improved the skip out in the innermost loop for both
+	gonx and onx, only for periodic.
+
+2004-04-22 22:27  nemeth
+
+	* Docs/Optimizer/PRL/GFS_PRL.tex: Matt's recent changes on the
+	optimizer paper.
+
+2004-04-22 17:00  nemeth
+
+	* Docs/Optimizer/PRL/Let.tex: A letter to JCP added.
+
+2004-04-22 16:30  tymczak
+
+	* Docs/DSAndErrorEstimates/ExactMultipoleError.tex: [no log
+	message]
+
+2004-04-22 14:57  nemeth
+
+	* Docs/Optimizer/PRL/GFS_PRL.tex: N^1/3 is modified to 1/3N.
+
+2004-04-22 14:42  nemeth
+
+	* Docs/Optimizer/PRL/: R263logdata2.eps, RMSCartData.eps: Updating
+	pictures according to latest optimization steps.
+
+2004-04-22 12:17  mchalla
+
+	* Docs/Optimizer/PRL/: GFS_PRL.tex, Makefile, mondo_new.bib,
+	prl.ps, prl.ps: [no log message]
+
+2004-04-22 11:43  mchalla
+
+	* Docs/Optimizer/PRL/GFS_PRL.tex: [no log message]
+
+2004-04-22 06:49  vweber
+
+	* Docs/DM_Papers/PERT_3/Response3.tex: [no log message]
+
+2004-04-22 05:24  vweber
+
+	* Docs/DM_Papers/PERT_3/Response3.tex: [no log message]
+
+2004-04-21 16:25  tymczak
+
+	* Docs/DSAndErrorEstimates/: Error_vs_TauMAC_Water64_bin.ps,
+	Error_vs_TauMAC_bin_Water512.ps, ExactMultipoleError.ps,
+	ExactMultipoleError.tex, MultInBox.fig, MultInBox.ps,
+	Time_vs_N_water_2.ps, Time_vs_Tau_W4096.ps, TreeInBox.fig,
+	TreeInBox.ps: [no log message]
+
+2004-04-21 14:47  nemeth
+
+	* MondoSCF2/SCFs.F90: Gradients on constrained atoms are set to
+	zero after NEB force puts up forces on these atoms.
+
+2004-04-21 12:29  nemeth
+
+	* Docs/Optimizer/PRL/: MaxCartDatap83, MaxCartDatap83.eps,
+	MaxCartDatap83.gnu: Grads set to log10 now.
+
+2004-04-21 12:11  nemeth
+
+	* Docs/Optimizer/PRL/: MaxCartDatap83, MaxCartDatap83.eps,
+	MaxCartDatap83.gnu, R263logdatap83, R263logdatap83.eps: New
+	pictures about most recent energies and maximum Cartesian grads.
+
+2004-04-21 09:51  vweber
+
+	* TwoE/dInt1111.F90: [no log message]
+
+2004-04-21 08:58  vweber
+
+	* TwoE/: dInt1111.F90, dInt3111.F90, dInt3131.F90, dInt3311.F90,
+	dInt3331.F90, dInt3333.F90, dInt6111.F90, dInt6131.F90,
+	dInt6133.F90, dInt6161.F90, dInt6311.F90, dInt6331.F90,
+	dInt6333.F90, dInt6361.F90, Gradients.m, dInt6611.F90,
+	dInt6631.F90, dInt6661.F90: [no log message]
+
+2004-04-21 03:53  vweber
+
+	* TwoE/: dInt1111.F90, dInt3111.F90, dInt3131.F90, dInt3311.F90,
+	dInt3331.F90, dInt3333.F90, dInt6111.F90, dInt6131.F90,
+	dInt6133.F90, dInt6161.F90, dInt6311.F90, dInt6331.F90,
+	dInt6333.F90, Gradients.m, dInt6361.F90, dInt6611.F90,
+	dInt6631.F90, dInt6661.F90: Added new CJ  wrapping.
+
+2004-04-20 17:19  nemeth
+
+	* Docs/Optimizer/PRL/: RMSCartData64.eps, RMSCartData64.gnu: New
+	gradient picture added.
+
+2004-04-20 13:15  nemeth
+
+	* Docs/Optimizer/PRL/: GFS_PRL.tex, mondo_new.bib: Reference to the
+	reactant structure added.
+
+2004-04-20 10:25  vweber
+
+	* Docs/DM_Papers/PERT_3/Response3.tex: Added amn values.
+
+2004-04-19 23:53  nemeth
+
+	* Docs/Optimizer/PRL/mondo_new.bib: [no log message]
+
+2004-04-19 22:53  nemeth
+
+	* Docs/Optimizer/PRL/: R263_2_1p.gnu, R263logdatap64.eps: New
+	pictures added to optimizer paper.
+
+2004-04-19 16:14  tymczak
+
+	* Docs/PBC_Exchange/: Diamond_En_vs_a.ps, LinearPBCExchange.tex,
+	Timing_Diamond_ONX.ps, Timing_pIce_ONX_1.ps, pIce_En_vs_a.ps: [no
+	log message]
+
+2004-04-19 10:36  mchalla
+
+	* ChangeLog: [no log message]
+
 2004-04-19 10:26  mchalla
 
 	* MondoSCF2/SCFs.F90: [no log message]
@@ -14664,7 +14833,7 @@
 	Scripts/nag_dbx, Scripts/pgf_dbx, Scripts/sgi_dbx,
 	Scripts/sgi_dbx2, XForm/BlokAInv.F90, XForm/LowdinO.F90,
 	XForm/Makefile, XForm/OLD/BlokOpsDns.F90, XForm/OLD/DGEMMS.F90,
-	XForm/OLD/DenseAInv.F90: New, restructured and improved MondoSCF
+	XForm/OLD/DenseAInv.F90: Initial revision
 
 2000-10-30 12:54  mondo
 
@@ -14877,5 +15046,5 @@
 	Scripts/nag_dbx, Scripts/pgf_dbx, Scripts/sgi_dbx,
 	Scripts/sgi_dbx2, XForm/BlokAInv.F90, XForm/LowdinO.F90,
 	XForm/Makefile, XForm/OLD/BlokOpsDns.F90, XForm/OLD/DGEMMS.F90,
-	XForm/OLD/DenseAInv.F90: Initial revision
+	XForm/OLD/DenseAInv.F90: New, restructured and improved MondoSCF
 
