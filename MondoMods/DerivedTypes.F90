@@ -366,6 +366,7 @@ MODULE DerivedTypes
       TYPE(ATOMBONDS)  :: AtmB
       TYPE(PBCFits)    :: PBCFit    !-- Points used for Lattice fit 
       LOGICAL          :: LatticeOnly
+      INTEGER          :: AltCount   
    END TYPE 
 !-------------------------------------------------------------------------------------
 !  Cartesian Multipoles of the Density
