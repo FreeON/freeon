@@ -24,7 +24,7 @@ PROGRAM ODA
                                     DIISErr,Enuc0,Enuc1,Exc0,Exc1
   REAL(DOUBLE)                   :: Tmp1,Tmp2,Tmp3,Tmp4,alph
   INTEGER                        :: I,iSCF
-  LOGICAL                        :: Present
+  LOGICAL                        :: Present,HasECPs
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg,MatFile
   CHARACTER(LEN=3),PARAMETER     :: Prog='ODA'
   !-------------------------------------------------------------------------
@@ -52,14 +52,14 @@ PROGRAM ODA
   CALL Get(F,TrixFile('F',Args,0))  
   CALL Get(T,TrixFile('T',Args))
 ! Calculate Exchange Asymmetry
-  IF(HasHF(ModelChem)) THEN
-     CALL Get(K0,TrixFile('K',Args,-1))
-     CALL Get(K1,TrixFile('K',Args,0))
-     CALL OpenASCII(OutFile,Out)
-     WRITE(Out,'(a18,D10.5)') " Tr[P0*K1-P1*K0] = ",ABS(Trace(PTilde,K1)-Trace(P,K0))/ABS(Trace(P,K1))
-     WRITE(*  ,'(a18,D10.5)') " Tr[P0*K1-P1*K0] = ",ABS(Trace(PTilde,K1)-Trace(P,K0))/ABS(Trace(P,K1))
-     CLOSE(Out)
-  ENDIF
+!!$  IF(HasHF(ModelChem)) THEN
+!!$     CALL Get(K0,TrixFile('K',Args,-1))
+!!$     CALL Get(K1,TrixFile('K',Args,0))
+!!$     CALL OpenASCII(OutFile,Out)
+!!$     WRITE(Out,'(a18,D10.5)') " Tr[P0*K1-P1*K0] = ",ABS(Trace(PTilde,K1)-Trace(P,K0))/ABS(Trace(P,K1))
+!!$     WRITE(*  ,'(a18,D10.5)') " Tr[P0*K1-P1*K0] = ",ABS(Trace(PTilde,K1)-Trace(P,K0))/ABS(Trace(P,K1))
+!!$     CLOSE(Out)
+!!$  ENDIF
 ! Get Energies: E_nuc and E_xc and K_xc matrices
   Current(1)=Current(1)-1
   CALL Get(Enuc0,'E_NuclearTotal',StatsToChar(Current))
@@ -129,8 +129,15 @@ PROGRAM ODA
      e1p = e1p - Trace(T1)
   ENDIF
 #else
-  ! Avoid assumption of two electron integral symmetry which may be lost 
-  ! in the case of small cell PBC HF and also due to excesive thresholding. 
+! Check For ECP's and Add to T
+  CALL Get(HasECPs,'hasecps',Tag_O=CurBase)
+  IF(HasECPs) THEN
+     CALL Get(T1,TrixFile('U',Args))
+     CALL Add(T,T1,T2)
+     CALL SetEq(T,T2)
+  ENDIF
+! Avoid assumption of two electron integral symmetry which may be lost 
+! in the case of small cell PBC HF and also due to excesive thresholding. 
   e0  = Trace(PTilde,T)+Trace(PTilde,FTilde) + Enuc0
   e1  = Trace(P,T)     +Trace(P,F)           + Enuc1
   e0p = Enuc1-Enuc0+Trace(P,T)-Trace(PTilde,T)+Trace(P,FTilde)+Trace(PTilde,F)-Two*Trace(PTilde,FTilde)
@@ -194,16 +201,14 @@ PROGRAM ODA
 ! Compute PTilde_N=(1-L)*PTilde_(N-1)+L*P_N, then put bto disk
   CALL Multiply(P,L)
   CALL Multiply(PTilde,L1)
-  CALL Add(P,PTilde,T1)
-  CALL Filter(T2,T1)
+  CALL Add(P,PTilde,T2)
   CALL Put(T2,TrixFile('D',Args,0))
   CALL Put(T2,'CurrentDM',CheckPoint_O=.TRUE.)
   CALL PChkSum(T2,'Pao['//TRIM(NxtCycl)//']',Prog)
 ! Compute FTilde_N ~ (1-L)*FTilde_(N-1)+L*F_N
   CALL Multiply(F,L)
   CALL Multiply(FTilde,L1)
-  CALL Add(F,FTilde,T1)
-  CALL Filter(T3,T1) 
+  CALL Add(F,FTilde,T3)
   CALL Put(T3,TrixFile('F',Args,0)) 
   CALL PChkSum(T3,'Fao['//TRIM(NxtCycl)//']',Prog)
 !----------------------------------------------------------------------
@@ -235,8 +240,7 @@ PROGRAM ODA
      CALL Get(P,TrixFile('OrthoD',Args,0))   
      CALL Multiply(P,L)
      CALL Multiply(PTilde,L1)
-     CALL Add(P,PTilde,T2)
-     CALL Filter(T1,T2)
+     CALL Add(P,PTilde,T1)
      CALL PChkSum(T1,'Por['//TRIM(NxtCycl)//']',Prog)
      CALL Put(T1,TrixFile('OrthoD',Args,0))
      CALL SetEq(PTilde,T1)
@@ -259,8 +263,7 @@ PROGRAM ODA
   CALL Multiply(P,L)
   CALL Multiply(PTilde,L1)
   CALL Add(P,PTilde,T1)
-  CALL Filter(T2,T1)
-  CALL Put(T2,TrixFile('J',Args,0))
+  CALL Put(T1,TrixFile('J',Args,0))
 ! KTilde_N = (1-L)*KTilde_(N-1)+L*K_N
   IF(HasHF(ModelChem))THEN
      CALL Get(PTilde,TrixFile('K',Args,-1))
@@ -268,8 +271,7 @@ PROGRAM ODA
      CALL Multiply(P,L)
      CALL Multiply(PTilde,L1)
      CALL Add(P,PTilde,T1)
-     CALL Filter(T2,T1)
-     CALL Put(T2,TrixFile('K',Args,0))
+     CALL Put(T1,TrixFile('K',Args,0))
   ENDIF
 ! ENucTotTilde_N = (1-L)*ENucTotTilde_(N-1)+L*ENucTotTilde_N
   ENucTotTilde=L*Enuc1+L1*Enuc0
