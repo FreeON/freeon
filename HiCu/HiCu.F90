@@ -159,20 +159,14 @@ PROGRAM HaiKu
 ! Put Exc to Info
 #ifdef PARALLEL
   IF(MyID == 0) THEN
-#ifdef PARALLEL_CLONES    
+    ! REALLY UNFORTUNATE NAMING HERE (TotExc) REQUIRING DUPLICATE LOGIC<<<<
     CALL Put(TotExc,'Exc')
-#else
-    CALL Put(TotExc,'Exc',Tag_O=SCFCycl)
-#endif
+    CALL Put(TotExc,'Exc',StatsToChar(Current))
   ENDIF
 #else
-#ifdef PARALLEL_CLONES    
-  CALL Put(Exc,'Exc')
-#else
-  CALL Put(Exc,'Exc',Tag_O=SCFCycl)
+    CALL Put(Exc,'Exc')
+    CALL Put(Exc,'Exc',StatsToChar(Current))
 #endif
-#endif
-
 ! Printing
   CALL PChkSum(T1,'Kxc['//TRIM(SCFCycl)//']',Prog)
   CALL PPrint( T1,'Kxc['//TRIM(SCFCycl)//']')
