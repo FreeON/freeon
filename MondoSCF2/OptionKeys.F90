@@ -76,34 +76,37 @@ MODULE OptionKeys
   !------------------------------------------------------------------------------
   ! Options:Restart=
   CHARACTER(LEN=*),  PARAMETER :: RESTART_OPTION     ='Restart'   
-  CHARACTER(LEN=*),  PARAMETER :: RESTART_NEWGEOM    ='ParseGeom'
-  CHARACTER(LEN=*), PARAMETER :: RESTART_TC2PERT    ='TC2Perturb'
-  CHARACTER(LEN=*), PARAMETER :: TC2PERT_OLDFOCK    ='OldFockMat'
+  CHARACTER(LEN=*),  PARAMETER :: RESTART_NEWGEOM    ='ReParse'
+  CHARACTER(LEN=*),  PARAMETER :: RESTART_TC2PERT    ='TC2Perturb'
+  CHARACTER(LEN=*),  PARAMETER :: TC2PERT_OLDFOCK    ='OldFockMat'
   !------------------------------------------------------------------------------
   ! Options:InkFok=
   CHARACTER(LEN=*),  PARAMETER :: INKFOCK_OPTION     ='InkFok'
   CHARACTER(LEN=*),  PARAMETER :: INKFOCK_ON         ='On'
   !------------------------------------------------------------------------------
   ! Options:Grad=  
-  CHARACTER(LEN=*),   PARAMETER :: GRADIENTS         ='Grad'
+  CHARACTER(LEN=*),   PARAMETER  :: GRADIENTS         ='Grad'
   ! Do no gradeint evaluation
-  INTEGER,            PARAMETER :: GRAD_NO_GRAD      = 1000001 
+  INTEGER,            PARAMETER  :: GRAD_NO_GRAD      = 1000001 
   ! Perform one force evaluation, with print out of the forces
-  CHARACTER(LEN=*),   PARAMETER :: GRAD_FORCE        ='OneForce'
-  INTEGER,            PARAMETER :: GRAD_ONE_FORCE    = 1084814 
+  CHARACTER(LEN=*),   PARAMETER  :: GRAD_FORCE        ='OneForce'
+  INTEGER,            PARAMETER  :: GRAD_ONE_FORCE    = 1084814 
+  ! Scan from Geometry 1 to Geometry 2
+  CHARACTER(LEN=*),   PARAMETER  :: GRAD_SCAN         ='Scan'
+  INTEGER,            PARAMETER  :: GRAD_DO_SCAN      = 1666666 
   ! Geometry optimization
-  CHARACTER(LEN=*),   PARAMETER :: GRAD_OPTIMIZE     ='Optimize'
-  INTEGER,            PARAMETER :: GRAD_GO_DOWNHILL  = 3489343 
+  CHARACTER(LEN=*),   PARAMETER  :: GRAD_OPTIMIZE     ='Optimize'
+  INTEGER,            PARAMETER  :: GRAD_GO_DOWNHILL  = 3489343 
   ! Molecular dynamics 
-  CHARACTER(LEN=*),   PARAMETER :: GRAD_DYNAMICS     = 'MD'      
-  INTEGER,            PARAMETER :: GRAD_DO_DYNAMICS  = 6413123 
+  CHARACTER(LEN=*),   PARAMETER  :: GRAD_DYNAMICS     = 'MD'      
+  INTEGER,            PARAMETER  :: GRAD_DO_DYNAMICS  = 6413123 
   ! Transition state
-  CHARACTER(LEN=*),   PARAMETER :: GRAD_TS_SEARCH    ='TSSearch'
-  INTEGER,            PARAMETER :: GRAD_TS_SEARCH_NEB= 3577711 
+  CHARACTER(LEN=*),   PARAMETER  :: GRAD_TS_SEARCH    ='TSSearch'
+  INTEGER,            PARAMETER  :: GRAD_TS_SEARCH_NEB= 3577711 
   ! GDIIS 
-  CHARACTER(LEN=*),   PARAMETER :: GRAD_GDIIS        ='GDIIS'
+  CHARACTER(LEN=*),   PARAMETER  :: GRAD_GDIIS        ='GDIIS'
   ! Approximate diagonal Hessian in internal coordinates
-  CHARACTER(LEN=*),  PARAMETER :: GRAD_APPRX_HESS   ='ApproxHessian'
+  CHARACTER(LEN=*),  PARAMETER   :: GRAD_APPRX_HESS   ='ApproxHessian'
   ! Coordinate types for gradient operations
   CHARACTER(LEN=*),   PARAMETER  :: GRAD_INTERNALS   ='PrimInt'
   INTEGER,            PARAMETER  :: GRAD_INTS_OPT    =83458086
