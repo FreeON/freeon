@@ -15,7 +15,7 @@ CONTAINS
     TYPE(Geometries)   :: G
     TYPE(BasisSets)    :: B
     TYPE(Parallel)     :: M
-    INTEGER            :: I,J
+    INTEGER            :: I,J,ITmp
     CHARACTER(LEN=DCL) :: MFile,NodeFile
 #ifdef PARALLEL
     !-------------------------------------------------------------------------!  
@@ -44,8 +44,9 @@ CONTAINS
           ! get the file name
           CALL GETENV(M%MachFile(2:),MFile)
           M%MachFile=MFile
-       ELSE
        ENDIF
+    ELSEIF(OptIntQ(Inp,MPI_MACHINE_FILE,ITmp))THEN
+       M%MachFile=IntToChar(ITmp)
     ELSE
        M%MachFile=" "
     ENDIF
