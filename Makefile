@@ -27,23 +27,32 @@
 ##############################################################################
 #    MAIN MAKEFILE FOR MONDOSCF
 ##############################################################################
+#
 include $(MONDO_HOME)/Includes/RemoveAll
 #
 all:	CatCpy mm s e x n 1 2 
-#
-release:rmm rs re rx rn r1 r2 rmDJ tarball
-#
-backup:	purge tarball
-#
-rmDJ:
-	rm -rf DirectJ
-#
-purge:	pmm ps pe px pn p1 p2 pMisc
 #
 clean:	cmm cs ce cx cn c1 c2
 	rm -f $(REMOVEALL)
 	rm -f \#*
 	rm -f *~
+#
+purge:	pmm ps pe px pn p1 p2 pMisc
+#
+release: rmLegacy rmm rs re rx rn r1 r2 tarball
+#
+backup:	purge rmLegacy tarball
+#
+rmLegacy:
+	rm -rf DirectJ
+	rm -rf ONX/GMEONX
+	rm -rf ONX/GSONX
+	rm -rf ONX/MASONX
+	rm -rf ONX/PONX*
+	rm -rf ONX/SONX
+	rm -rf Inpts/DEVELOP
+	rm -rf Inpts/PROTEINS
+	rm -rf Inpts/HMX
 #
 CatCpy:	
 	cat $(MONDO_HOME)/Includes/CopyrightNotice.txt
