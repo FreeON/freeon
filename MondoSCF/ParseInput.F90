@@ -41,6 +41,7 @@ MODULE ParseInput
          CALL ParseMethods(Ctrl)
 !        Print Parsed options
          CALL ParsePrint(Ctrl)
+!
       END SUBROUTINE ParseInp
 !============================================================================
 !     Parce The Command Lines
@@ -531,7 +532,7 @@ MODULE ParseInput
          ELSEIF(OptKeyQ(Inp,GEOMETRY,TABLETRAV_ORDER))THEN
          GM%Ordrd=SFC_TABLETRAV
          ELSE
-            GM%Ordrd=SFC_NONE
+            CALL MondoHalt(PRSE_ERROR,'Unrecognized ordering.')
          ENDIF
 !---------------------------------------------------------------------------- 
 !        Parse <OPTIONS> for <TOT_CHARGE> and <MULTIPLICITY>  
@@ -682,6 +683,7 @@ MODULE ParseInput
             CLOSE(UNIT=Out,STATUS='KEEP')
             GM%PBC%InVecForm=.TRUE.
          ENDIF
+
 !----------------------------------------------------------------------------
 !        Input Type on the Coordinates, Atomic or Fractional
 !
@@ -694,6 +696,22 @@ MODULE ParseInput
             WRITE(Out,*) '** Coodinate Format at default value => (Atomic Coord) **'
             CLOSE(UNIT=Out,STATUS='KEEP')
             GM%PBC%InAtomCrd=.TRUE.
+         ENDIF
+!-------------------------------------------------------------
+!        Intput Type of Translation
+!
+         IF(OptKeyQ(Inp,PBOUNDRY,TRAN_COM)) THEN
+            GM%PBC%Translate = .TRUE.
+            GM%PBC%Trans_COM = .TRUE.
+         ELSE
+            GM%PBC%Translate = .FALSE.
+            GM%PBC%Trans_COM = .FALSE.
+         ENDIF
+!-------------------------------------------------------------
+!        Intput permability
+!
+         IF(.NOT. OptDblQ(Inp,EPSILON,GM%PBC%Epsilon)) THEN
+            GM%PBC%Epsilon = 1.D32
          ENDIF
 #endif
 !----------------------------------------------------------------------------
@@ -788,7 +806,7 @@ MODULE ParseInput
 !           Convert to AU and Compute Fractioan and Atomic Coordinates  
             IF(GM%PBC%InAtomCrd) THEN
                IF(.NOT.GM%InAU) THEN 
-                  GM%Carts%D    = GM%Carts%D*AngstromsToAU
+                  GM%Carts%D    = GM%Carts%D*AngstromsToAU 
                ENDIF
                CALL CalFracCarts(GM)
             ELSE
@@ -797,10 +815,10 @@ MODULE ParseInput
                CALL CalAtomCarts(GM)
             ENDIF
 !
-            IF(GM%PBC%NoTransVec) THEN
+            IF(GM%PBC%Trans_COM) THEN
                CALL CalTransVec(GM)
             ENDIF
-!           CALL Translate(GM)
+            CALL Translate(GM,GM%PBC%TransVec)
             CALL WrapAtoms(GM)
 #else
 !           Convert to AU
@@ -825,17 +843,22 @@ MODULE ParseInput
             CALL Put(GM,Tag_O=IntToChar(NumGeom))
 !           Print the coordinates
             IF(PrintFlags%Key>DEBUG_NONE) CALL PPrint(GM)
-!           Exit
+!            CALL PPrint(GM,'Graphite_98.xyz',6,'XYZ')
+!            IF(.TRUE.) STOP
+!           Exit 
             IF(LastConfig)EXIT
          ENDDO
 !
-         IF(Ctrl%Grad .NE.  GRAD_ONE_FORCE)THEN
-            IF(NumGeom > 1) THEN
+         IF(Ctrl%Grad == GRAD_ONE_FORCE .OR. Ctrl%Grad == GRAD_NO_GRAD) THEN
+            Ctrl%NGeom = NumGeom
+         ELSE
+            IF(NumGeom .GT. 1) THEN
                CALL MondoHalt(PRSE_ERROR,'Only the initial Geometry should be supplied for MD or Opt')
             ENDIF
          ENDIF
          CALL Put(NumGeom,'NumberOfGeometries')
          NAtoms=GM%NAtms
+
 !---------------------------------------------------------------------------- 
 !        Finish up
          CALL Delete(GM)
@@ -1106,18 +1129,23 @@ MODULE ParseInput
               CALL MondoHalt(PRSE_ERROR,'No Lattice Vectors where supplied')
            ENDIF
         ENDIF
+!--------------------------------------------------------------
+!       Logic for the Translate and Lattice Vector
 !
-        IF(NTvec == 0) THEN
-           GM%PBC%NoTransVec=.TRUE.
-        ELSEIF(NTvec == 1) THEN
-           GM%PBC%NoTransVec=.FALSE.
-        ELSE
-           CALL MondoHalt(PRSE_ERROR,'Number of Translate Vectors is Incorrect')
+        IF(.NOT. GM%PBC%Trans_COM) THEN
+           IF(NTvec == 0) THEN
+              GM%PBC%Translate = .FALSE.
+           ELSEIF(NTvec == 1) THEN
+              GM%PBC%Translate = .TRUE.
+           ELSE
+              CALL MondoHalt(PRSE_ERROR,'Number of Translate Vectors is Incorrect')
+           ENDIF
         ENDIF
-!
+!--------------------------------------------------------------
         IF(NLvec .LT. GM%PBC%Dimen) THEN
            CALL MondoHalt(PRSE_ERROR,'Number of Lattice Vectors is Incorrect')      
         ENDIF
+
 !---------------------------------------------------------------------------- 
 !       Convert the lattice and translate vectors to AU 
 !
@@ -1137,12 +1165,18 @@ MODULE ParseInput
 !----------------------------------------------------------------------------
 !       Calculate the Dipole and Quadripole Factors
 !
-        IF(GM%PBC%Dimen < 3) THEN
+        IF(GM%PBC%Dimen < 2) THEN
            GM%PBC%DipoleFAC = Zero
            GM%PBC%QupoleFAC = Zero
+        ELSEIF(GM%PBC%Dimen ==2) THEN
+           GM%PBC%DipoleFAC = (Four*Pi/GM%PBC%CellVolume)*(One/(GM%PBC%Epsilon+One)) 
+           GM%PBC%QupoleFAC =  Zero
+           IF(ABS(GM%PBC%DipoleFAC) .LT. 1.D-14) GM%PBC%DipoleFAC = Zero
         ELSEIF(GM%PBC%Dimen ==3) THEN
-           GM%PBC%DipoleFAC = -(Four*Pi)/(Three*GM%PBC%CellVolume)
-           GM%PBC%QupoleFAC = (Two*Pi)/(Three*GM%PBC%CellVolume)
+           GM%PBC%DipoleFAC = -(Four*Pi/GM%PBC%CellVolume)*(One/Three - One/(Two*GM%PBC%Epsilon+One)) 
+           GM%PBC%QupoleFAC =  (Two*Pi/GM%PBC%CellVolume)*(One/Three - One/(Two*GM%PBC%Epsilon+One)) 
+           IF(ABS(GM%PBC%DipoleFAC) .LT. 1.D-14) GM%PBC%DipoleFAC = Zero
+           IF(ABS(GM%PBC%QupoleFAC) .LT. 1.D-14) GM%PBC%QupoleFAC = Zero
         ENDIF
 !----------------------------------------------------------------------------
 !       Calculate the Cell Center
@@ -1324,42 +1358,12 @@ MODULE ParseInput
 !============================================================================
 !
 !============================================================================
-      SUBROUTINE  CalFracCarts(GM)
-         TYPE(CRDS)                 :: GM
-         INTEGER                    :: I
-!
-!        Generate the Fractioanl Coordinates
-!
-         DO I=1,GM%NAtms
-            GM%BoxCarts%D(:,I) = AtomToFrac(GM,GM%Carts%D(:,I))
-            GM%BoxVects%D(:,I) = AtomToFrac(GM,GM%Vects%D(:,I))
-         ENDDO
-!
-       END SUBROUTINE CalFracCarts
-!============================================================================
-!
-!============================================================================
-      SUBROUTINE  CalAtomCarts(GM)
-        TYPE(CRDS)                 :: GM
-        INTEGER                    :: I
-!
-!       Generate the Atomic Coordinates
-!
-        DO I=1,GM%NAtms
-           GM%Carts%D(:,I)   = FracToAtom(GM,GM%BoxCarts%D(:,I))
-           GM%Vects%D(:,I)   = FracToAtom(GM,GM%BoxVects%D(:,I))
-        ENDDO
-!
-      END SUBROUTINE CalAtomCarts
-!============================================================================
-!
-!============================================================================
       SUBROUTINE  CalTransVec(GM)
-        TYPE(CRDS)                 :: GM
-        REAL(DOUBLE),DIMENSION(3)  :: CMVec
-        INTEGER                    :: I
+        TYPE(CRDS)                  :: GM
+        REAL(DOUBLE),DIMENSION(1:3) :: CMVec
+        INTEGER                     :: I
 !
-        CMVec=Zero
+        CMVec(:)=Zero
         DO I=1,GM%NAtms
            CMVec(:) = CMVec(:)+GM%BoxCarts%D(:,I)
         ENDDO
@@ -1371,38 +1375,6 @@ MODULE ParseInput
         ENDDO
 !
       END SUBROUTINE CalTransVec
-!============================================================================
-!
-!============================================================================
-      SUBROUTINE  Translate(GM)
-        TYPE(CRDS)                 :: GM
-        REAL(DOUBLE),DIMENSION(3)  :: ATvec,FTvec
-!
-        ATvec(:) = GM%PBC%TransVec(:)
-        FTvec(:) = AtomToFrac(GM,ATvec(:))
-!
-!       Tranaslate The Atoms
-!
-        DO I=1,GM%NAtms
-           GM%Carts%D(:,I)    = GM%Carts%D(:,I) + ATvec(:)
-           GM%BoxCarts%D(:,I) = GM%BoxCarts%D(:,I) + FTvec(:)
-        ENDDO
-!
-      END SUBROUTINE Translate
-!============================================================================
-!
-!============================================================================
-      SUBROUTINE  WrapAtoms(GM)
-        TYPE(CRDS)     :: GM
-!
-        IF(GM%PBC%AtomW) THEN
-           DO I=1,GM%NAtms
-              CALL FracCyclic(GM,GM%BoxCarts%D(:,I))
-              CALL AtomCyclic(GM,GM%Carts%D(:,I))
-           ENDDO
-        ENDIF
-!
-      END SUBROUTINE WrapAtoms
 #endif
 !============================================================================
 !

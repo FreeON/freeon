@@ -43,6 +43,7 @@ PROGRAM MakeRho
   REAL(DOUBLE)              :: DistThresh,RSumE,RSumN,RelRhoErr
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg1,Mssg2,RestartHDF
   CHARACTER(LEN=7),PARAMETER :: Prog='MakeRho'
+  REAL(DOUBLE),DIMENSION(10,10) :: DD
 !----------------------------------------------
 ! Start up macro
 !----------------------------------------------
@@ -121,91 +122,91 @@ PROGRAM MakeRho
 ! Main loops: First pass calculates the size.
 !             Second pass calculates the density
 !---------------------------------------------------
-!    Initailize  NQ
-     Rho%NQ%I = 0
-     IF(SCFActn/='InkFok')Rho%NQ%I(Rho%NExpt)=NAtoms
-!    Loop over atoms and count primatives
-     DO AtA=1,NAtoms
-        Pbeg = Dmat%RowPt%I(AtA)
-        Pend = Dmat%RowPt%I(AtA+1)-1
-        DO P = Pbeg,Pend
-           AtB = Dmat%ColPt%I(P)
-           IF(SetAtomPair(GM,BS,AtA,AtB,Pair)) THEN
+! Initailize  NQ
+  Rho%NQ%I = 0
+  IF(SCFActn/='InkFok')Rho%NQ%I(Rho%NExpt)=NAtoms
+! Loop over atoms and count primatives
+  DO AtA=1,NAtoms
+     Pbeg = Dmat%RowPt%I(AtA)
+     Pend = Dmat%RowPt%I(AtA+1)-1
+     DO P = Pbeg,Pend
+        AtB = Dmat%ColPt%I(P)
+        IF(SetAtomPair(GM,BS,AtA,AtB,Pair)) THEN
 #ifdef PERIODIC                 
-              B = Pair%B
-              DO NC = 1,CS_OUT%NCells
-                 Pair%B = B+CS_OUT%CellCarts%D(:,NC)
-                 Pair%AB2  = (Pair%A(1)-Pair%B(1))**2 &
-                           + (Pair%A(2)-Pair%B(2))**2 &
-                           + (Pair%A(3)-Pair%B(3))**2
-                 IF(TestAtomPair(Pair)) THEN
-                    CALL PrimCount(BS,Pair,Rho)
-                 ENDIF
-              ENDDO
+           B = Pair%B
+           DO NC = 1,CS_OUT%NCells
+              Pair%B = B+CS_OUT%CellCarts%D(:,NC)
+              Pair%AB2  = (Pair%A(1)-Pair%B(1))**2 &
+                   + (Pair%A(2)-Pair%B(2))**2 &
+                   + (Pair%A(3)-Pair%B(3))**2
+              IF(TestAtomPair(Pair)) THEN
+                 CALL PrimCount(BS,Pair,Rho)
+              ENDIF
+           ENDDO
 #else
-              CALL PrimCount(BS,Pair,Rho)
+           CALL PrimCount(BS,Pair,Rho)
 #endif
-           ENDIF
-        ENDDO
+        ENDIF
      ENDDO
-!    Calculate NDist and NCoef from NQ and Lndx
-     NDist = CalNDist(Rho)
-     NCoef = CalNCoef(Rho)
-!    Initailize  OffQ,OffR and RhoCo
-     Rho%OffQ%I=CalOffQ(Rho)
-     Rho%OffR%I=CalOffR(Rho)
-!    Re-allocate the density
-     CALL New_HGRho(Rho,(/NExpt,NDist,NCoef/))
-!    Initailize  RhoCo and First
-     First = .TRUE.
-     Rho%Co%D=zero
+  ENDDO
+! Calculate NDist and NCoef from NQ and Lndx
+  NDist = CalNDist(Rho)
+  NCoef = CalNCoef(Rho)
+! Initailize  OffQ,OffR and RhoCo
+  Rho%OffQ%I=CalOffQ(Rho)
+  Rho%OffR%I=CalOffR(Rho)
+! Re-allocate the density
+  CALL New_HGRho(Rho,(/NExpt,NDist,NCoef/))
+! Initailize  RhoCo and First
+  First = .TRUE.
+  Rho%Co%D=zero
 !-----------------------------------------------------
-!    Loop over atoms and calculate the electronic 
-!    density
+! Loop over atoms and calculate the electronic 
+! density
 !
-     DO AtA=1,NAtoms
-        Pbeg = Dmat%RowPt%I(AtA)
-        Pend = Dmat%RowPt%I(AtA+1)-1
-        DO P = Pbeg,Pend
-           AtB = Dmat%ColPt%I(P)
-           R   = Dmat%BlkPt%I(P)
-           IF(SetAtomPair(GM,BS,AtA,AtB,Pair)) THEN
-#ifdef PERIODIC                 
-              B = Pair%B
-              DO NC = 1,CS_OUT%NCells
-                 Pair%B = B+CS_OUT%CellCarts%D(:,NC)
-                 Pair%AB2  = (Pair%A(1)-Pair%B(1))**2 &
-                           + (Pair%A(2)-Pair%B(2))**2 &
-                           + (Pair%A(3)-Pair%B(3))**2
-                 IF(TestAtomPair(Pair)) THEN
-                    NN = Pair%NA*Pair%NB
-                    CALL RhoBlk(BS,MD,Dmat%MTrix%D(R:R+NN-1),Pair,First,Rho)
-                 ENDIF
-              ENDDO
+  DO AtA=1,NAtoms
+     Pbeg = Dmat%RowPt%I(AtA)
+     Pend = Dmat%RowPt%I(AtA+1)-1
+     DO P = Pbeg,Pend
+        AtB = Dmat%ColPt%I(P)
+        R   = Dmat%BlkPt%I(P)
+        IF(SetAtomPair(GM,BS,AtA,AtB,Pair)) THEN 
+#ifdef PERIODIC                      
+           B = Pair%B
+           DO NC = 1,CS_OUT%NCells
+              Pair%B = B+CS_OUT%CellCarts%D(:,NC)
+              Pair%AB2  = (Pair%A(1)-Pair%B(1))**2 &
+                   + (Pair%A(2)-Pair%B(2))**2 &
+                   + (Pair%A(3)-Pair%B(3))**2
+              IF(TestAtomPair(Pair)) THEN
+                 NN = Pair%NA*Pair%NB
+                 CALL RhoBlk(BS,MD,Dmat%MTrix%D(R:R+NN-1),Pair,First,Rho)
+              ENDIF
+           ENDDO
 #else
-              NN = Pair%NA*Pair%NB
-              CALL RhoBlk(BS,MD,Dmat%MTrix%D(R:R+NN-1),Pair,First,Rho)
+           NN = Pair%NA*Pair%NB
+           CALL RhoBlk(BS,MD,Dmat%MTrix%D(R:R+NN-1),Pair,First,Rho)
 #endif
-           ENDIF
-        ENDDO
-     ENDDO 
-!---------------------------------------------------
-!    Add in the density for the nuclear centers
+        ENDIF
+     ENDDO
+  ENDDO
+!--------------------------------------------------------
+! Add in the density for the nuclear centers
 !
-     IF(SCFActn/='InkFok')CALL AddNukes(GM,Rho)
-#ifdef PERIODIC
+  IF(SCFActn/='InkFok')CALL AddNukes(GM,Rho)
+!--------------------------------------------------------
+#ifdef PERIODIC 
 !-----------------------------------------------------------
 !  Fold the Distributions back into the Cell
 !
-!  CALL Fold_Rho(GM,Rho)
+  CALL Fold_Rho(GM,Rho)
 #endif
-!--------------------------------------------------------
 ! Prune negligible distributions from density
   CALL Prune_Rho(Thresholds%Dist,Rho,Rho2) 
 ! Compute integrated electron and nuclear densities
   CALL Integrate_HGRho(Rho2,RSumE,RSumN)
 ! Calculate dipole and quadrupole moments
-  CALL CalRhoPoles(MP,GM,RHo2)
+  CALL CalRhoPoles(MP,GM,Rho2)
 ! Format output for pruning and multipole stats
   IF(SCFActn=='InkFok')THEN
      Mssg1=ProcessName(Prog,'InkFok')
@@ -239,10 +240,10 @@ PROGRAM MakeRho
      WRITE(I,*)TRIM(Mssg2)
      CALL ClosePU(I)
   ENDIF
-! Check for errors
+! Check for error
   IF(RelRhoErr>Thresholds%Dist*1.D3.AND.SCFActn/='NumForceEvaluation') &
-  CALL Halt('In MakeRho, missing '//TRIM(DblToShrtChar(Two*ABS(RSumE+RSumN)))   &
-           //' electrons after pruning.')
+       CALL Halt('In MakeRho, missing '//TRIM(DblToShrtChar(Two*ABS(RSumE+RSumN)))   &
+       //' electrons after pruning.')
 ! Put Rho and MPs to disk
   IF(SCFActn=='ForceEvaluation')THEN
      CALL Put_HGRho(Rho2,'Rho',Args,1) 

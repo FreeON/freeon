@@ -44,15 +44,21 @@ WRITE(*,*)' INITed '
 ! Decide about forces
   SELECT CASE(Ctrl%Grad)
   CASE(GRAD_ONE_FORCE)
-     DO IGeo=1,Ctrl%NGeom
-        Ctrl%Current(3)=IGeo
-        DO ISet=1,Ctrl%NSet
-           Ctrl%Current(2)=ISet
-           CALL OneSCF(Ctrl)
-        ENDDO
-        CALL Forces(Ctrl)
-        CALL NForce(Ctrl)
+!    Loop first over basis sets 
+     DO ISet=1,Ctrl%NSet
+        Ctrl%Current=(/0,ISet,1/)
+        CALL OneSCF(Ctrl)
      ENDDO
+!    Calculate the Force (last basis set)
+     CALL Forces(Ctrl)
+!    Go over additional geometries at last basis set
+     IF(Ctrl%NGeom>1)THEN
+        DO IGeo=2,Ctrl%NGeom
+           Ctrl%Current=(/0,Ctrl%NSet,IGeo/)
+           CALL OneSCF(Ctrl)
+           CALL Forces(Ctrl)
+        ENDDO
+     ENDIF
   CASE(GRAD_MD)
      CALL MondoHalt(USUP_ERROR,' Look for MD in version 1.0b2. ')
   CASE(GRAD_QNEW_OPT)
