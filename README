@@ -38,10 +38,18 @@ o Drivers for minimization and dynamics.
 o Big apps and talk for ACS 2001
 !==========================================================================================
 MC Change log 12/12/00
+
+o  MondoMods/DerivedTypes,InOut &
+   MondoSCF/ParseInput:  Added %ETol and %DTol to type TOLS. 
+
+o  MONDO/ONX/PONX/pmonx.inc: Doubled the size of buffers.
+
+o  MondoMods/Parse:  Added 3 more digits to DblToMedmChar
+
 o  SCFeqs
  - SDMM:        SDMM now uses the Parser-Manopopulis purification scheme instead of 
                 McWeeny purification.  Works now on "hard" problems like coordinated
-                metals etc.
+                metals etc. Uses Thresholds%ETol and %DTol to halt convergence.
  - MMA/SCFDev/new.m:  This is a MMA file that mirrors the methods now in SDMM.  Also allows
                 the use of PM parameters in the CG minimization, although this was found
                 to be less advantageous than retaining the original McWeeny based objective
