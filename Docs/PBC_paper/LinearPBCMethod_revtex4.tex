@@ -57,98 +57,48 @@ phases will be demonstrated.
 \footnotetext[2]{Preprint LA-UR-03-7723.}
 
 \section{INTRODUCTION}
-In recent years several successful methods for the calculating the electronic structure of
-molecular or condensed matter systems have been developed,
-for example Hatree-Fock \cite{slater,CRoothaan51}, Density Functional theory 
-\cite{hohen,KohnSham65} or Configuration interaction \cite{Choudhury79}. 
-All these methods attempt to solve for the electronic structure via
-the many-body quantum problem to within some consistent approximation scheme.
-For complex molecular or condensed matter 
-system, where chemical reactions are of central importance, these electronic structure
-method are essential. Unfortunately, most electronic structure quantum chemistry codes
-scale very poorly with system size due to the need to diagonalize the Hamiltonian,
-which scales $O(N^3)$ 
-This severely limits the systems sizes 
-that these codes can address. Therefore, it has become increasing important for
-the development of quantum chemistry codes which scale linearly with increasing 
-system size, and several quantum chemistry codes of this type are in 
-development 
-\cite{SGoedecker94,MChallacombe96,Canning96,Briggs96,EHernandez96,Scuseria99,ANiklasson02B}. 
-However, for reasons of simplicity most of these quantum 
-chemistry codes have yet to incorporate periodic boundary conditions.
-Unfortunately many
-technically important systems can only be addressed within a condensed phase environment,
-where surface effects have been removed \cite{MAllen90}. Therefore, the inclusion of 
-periodic boundary conditions into existing linear scaling quantum chemistry
-codes is essential. 
 
-We have implemented periodic boundary conditions into the linear scaling
-quantum chemistry code {\sc MondoSCF}\cite{MondoSCF}.
-For the one electron matrix this has been achieved by a re-summation
-over periodic cell images, which because of locality leads to an efficient
-calculation of the one electron matrices. For the two electron matrices
-various methods are employed. For the two-electron Coulomb matrix,
-we achieve this via an exact multi-pole expansion of the long range
-Coulomb field \cite{White94,Challacombe97}. This yields a spherically
-summed boundary condition that is easily transformed into the Ewald boundary
-condition \cite{Redlack72,Redlack75}. In order to achieve linear
-scaling of the local Coulomb field, a Quantum Chemical Tree Code (QCTC)
-is used \cite{MWarren93,MWarren95a,JSalmon94,MChallacombe96A}. For the calculations of the 
-local exchange-correlation matrix, a Hierarchical Cubature (HiCu), pure 
-Cartesian adaptive grid
-is used. This method achieves linear scaling through the use of advanced
-data structures (k-d trees) that maximally exploits locality of the
-density, and allows for an efficient treatment of the periodic effects
-\cite{Bentley79}. All {\sc MondoSCF} calculations are done at the gamma-point.
-This is because the main focus of the {\sc MondoSCF} linear scaling quantum chemistry
-code is large systems, where for insulators k-space integrations become unnecessary 
-\cite{Nunes94}.
+Recently, quantum chemical methods for gas phase Density Functional Theory (DFT) 
+have been developed which scale linearly with system size, $N$.  In this contribution, 
+these methods are extended to periodic boundary conditions at the $\Gamma$-point.  
 
+Quantum chemical methods typically employ Gaussian Type Atomic Orbitals (GTAOs), 
+which offer a number of advantages. First, because they are local basis functions, it is possible 
+to achieve linear scaling in insulating systems for both construction of the effective Hamiltonian 
+or Fockian, as well as for solution of the density matrix.  Secondly,  almost all one and two electron integrals 
+involving GTAOs are analytic, enabling the 
+rapid evaluation of expectation values involving complicated operators often involved in response properties.
+The {\sc DALTON} quantum chemical program \cite{dalton} is a premier example of this capability, 
+offering a wide range of electric and magnetic molecular response properties.   
+The ability to treat core-states analytically also opens the ability to move beyond the pseudopotential 
+approximation in computation of relativistic effects with the four-component Dirac-Hartree-Fock \cite{dirac} 
+and Dirac-Kohn-Sham \cite{rel4d} theories.  Perhaps most important though, the exact Hartree-Fock (HF) exchange
+may be computed efficiently with a GTAO basis set.  In addition to providing a reference for 
+correlated wavefunction methods \cite{}, the exact HF exchange is central to hybrid HF/DFT models \cite{}.
 
-To demonstrate and validate the capabilities of {\sc MondoSCF}, we show results for 
-three condensed phase systems, Sodium Chloride, Magnesium Oxide 
-and Carbon in the diamond structure. We then compare these results to the periodic
-Gaussian code {\sc CRYSTAL} \cite{Crystal98}. Next we demonstrate that
-the code achieves {\it true} linear scaling for the dense periodic diamond system 
-up to 512 atoms in the unit cell.
-%
-% Example system
-%
-%To show the full capabilities of {\sc MondoSCF} we calculate the surface reconstruction
-%of the Silicon (111) surface with a step.
-%
-Finally we give some conclusion concerning the accuracy and utility of {\sc MondoSCF}
-and future research directions.
+With periodic linear scaling quantum chemical algorithms, it is possible to begin bridging the gap between 
+methods developed for small molecule chemistry and large scale problems in the solid state.  Together with the 
+results presented here, $ {\cal O}(N)$ methods for solving the Self-Consistent-Field equations \cite{} and 
+linear scaling algorithms for computing the periodic HF exchange \cite{CTymczak04B}, it is now possible
+to perform condensed phase  HF/DFT calculations on systems larger than 500 atoms with a single processor.
+In addition, with the advent of linear scaling density matrix perturbation theory \cite{ANiklasson04,VWeber04},
+well developed quantum chemical methods for the analytic computation of response properties may be brought
+to bear on large solid state problems. 
 
-\commentout{
+This paper is organized as follows:  In Section~\ref{pbcintro},  periodic boundary conditions and the $\Gamma$-point 
+approximation are introduced, and the avoidance linear dependencies is discused. Next, in 
+Section \ref{datastruct}, the relationship between the numerical error estimates and data structures that underly the 
+fast linear scaling algorithms for computation of the Coulomb and exchange-correlation matrix are outlined.  
+In Section~\ref{coulombsums}, we extend previous work on the Niboer and De Wette \cite{} lattice sum 
+method to linear scaling computation of quantum Coulomb sums tin-foil boundaries.  Then, in in Section~\ref{hicu}, 
+${\cal O}(N)$ methods for computing the GTAO-based  exchange-correlation matrix are presented. 
+In Section~\ref{implement} we discuss the implementation of these developments in the {\sc  MondoSCF} \cite{MondoSCF} suite
+of linear scaling quantum chemistry codes.  In Section~\ref{validate}, comparison of the $\Gamma$-point results
+is made with those obtained with {\sc CRYSTAL98} using $\bf k$-space integration for NaCl and MgO.  Next, 
+in Section~\ref{scale}, linear scaling is demonstrated for construction of the diamond Fock matrix at the RBLYP/6-21G* 
+level of theory.     Finally, we present our conclusions in Section~\ref{conclude}.
 
-\section{The Kohn-Sham Equations}
-
-Following the seminary work of Kohn and Sham\cite{KohnSham65}, we start with the KS single 
-particle equation
-\begin{equation}
-H \phi_{i}({\bf r})  = \epsilon_i \phi_{i}({\bf r})
-\end{equation}
-where the effective Hamiltonian is
-\begin{equation}
-H = -{\nabla}^{2}+ V_{ext}({\bf r}) + J[\rho({\bf r})] + K_{xc}[\rho({\bf r})]
-\end{equation}
-and
-\begin{equation}
- \rho({\bf r}) = \sum_{i=1}^{N_{el}} | \phi_{i}({\bf r}) |^2
-\end{equation}
-\begin{equation}
- J[\rho({\bf r})] = \int d{\bf r'} {\rho({\bf r}) \over |{\bf r}-{\bf r'}|},
-\end{equation}
-and the exchange correlation potential can be calculated from several approximate
-functionals
-\cite{Becke93,Hertwig97,Bauschlicher95,Adamo00}. In what follows we will 
-discuss the calculation of each of the terms in the Hamiltonian 
-and how they are calculated in the non-orthogonal Gaussian basis
-with the inclusion of periodic boundary conditions.
-}
-
-\section{periodic boundary conditions, linear scaling and basis sets}
+\section{periodic boundary conditions, linear scaling and basis sets}\label{pbcintro}
 
 In the conventional implementations of periodic boundary conditions, the 
 Bloch functions 
@@ -234,7 +184,7 @@ criteria, they are often due to the use of basis sets designed for gas phase cal
 unit cells.  
 
 These considerations and others are discussed by Towler in an excellent overview of Gaussian basis sets for the condensed 
-phase \cite{MTowler00}.  Also, there are at least two libraries\cite{CrystalLib,TowlerLib} of Gaussian 
+phase \cite{MTowler00}.  Also, there are at least two libraries\cite{CRYSTALLib,TowlerLib} of Gaussian 
 basis sets appropriate for materials at standard densities. For high densities though, these basis sets may 
 still encounter problems with linear dependence and sensitivity to truncation.  One solution to this problem, suggested 
 by Gr{\"u}neich and Hess \cite{AGruneich98} for even tempered basis sets, is to scale the exponents by the inverse 
@@ -389,7 +339,7 @@ critical.
 \label{extent}
 \end{figure}
 
-\section{Periodic Quantum Coulomb Sums}
+\section{Periodic Quantum Coulomb Sums}\label{coulombsums}
 
 In the $\Gamma$-point approximation, elements of the periodic Coulomb matrix are 
 \begin{eqnarray}
@@ -573,7 +523,7 @@ HiCu and the unit cell with volume $V_{\rm UC}$, described by the vectors {\bf a
 \end{figure}
 
 
-\section{Periodic exchange-correlation} 
+\section{Periodic exchange-correlation} \label{hicu}
 
 The HiCu algorithm is ideally suited for periodic boundary conditions, 
 as the unit-cell $V_{\rm UC}$ can be simply transformed into an equivalent rectangular 
@@ -639,7 +589,7 @@ localization of the atomic orbitals.
 
 \begin{table}
 \caption{Comparison of {\sc CRYSTAL} and {\sc MondoSCF} $\Gamma$-point calculations on  NaCl at the 
-8-511/8-631G/BLYP level of theory at a {\it tight} accuracy level. The lattice coordinates for 
+8-511/8-631G/BLYP level of theory at a {\tt TIGHT} accuracy level. The lattice coordinates for 
 $N_{\rm at}=2$ and 8 are  are given in Ref.~[\cite{PBCCoordinates}].}
 \label{NaCl8511}
 \center{
@@ -660,7 +610,7 @@ $ ^g$Cubic
 \begin{table}
 \caption{Convergence of the $\Gamma$-point super-cell approximation with {\sc MondoSCF} to 
          $k$-space integration with {\sc CRYSATAL} for NaCl at the STO-3G/LDA level
-         of theory at a {\it tight} accuracy level.}\label{NaClGammaPt}
+         of theory at a {\tt TIGHT} accuracy level.}\label{NaClGammaPt}
 \center{
 \begin{tabular}{lcll}
 \toprule
@@ -688,7 +638,7 @@ $ ^g$Cubic  \\
 \begin{table}
 \caption{Convergence of the$\Gamma$-point super-cell approximation with {\sc MondoSCF} to 
          $k$-space integration with {\sc CRYSATAL} for MgO at the 8-61G/8-51G/BLYP
-         level of theory at a {\it tight} accuracy level. The lattice coordinates for 
+         level of theory at a {\tt TIGHT} accuracy level. The lattice coordinates for 
 	 $N_{\rm at}=2$ and 8 are from Ref.~[\cite{PBCCoordinates}].}
 \label{MgOGammaPt}
 \center{
@@ -714,7 +664,7 @@ $ ^g$Cubic  \\
 
 \begin{table}
 \caption{Convergence of the $\Gamma$-point super-cell approximation for Diamond, 
-         computed with {\sc MondoSCF} at the 6-21G*/BLYP level of theory at a {\it good} accuracy level. The  
+         computed with {\sc MondoSCF} at the 6-21G*/BLYP level of theory at a {\tt GOOD} accuracy level. The  
          lattice coordinates for $N_{\rm at}=8$ are from Ref.~[\cite{PBCCoordinates}].}
 \label{DiamondGammaPt}
 \center{
@@ -736,7 +686,7 @@ $ ^g$Cubic  \\
 \end{table}
 
 
-\section{Implementation}
+\section{Implementation}\label{implement}
 
 All developments were implemented in a serial version of {\sc MondoSCF} v1.0$\alpha$9 \cite{MondoSCF}, a suite of 
 linear scaling Quantum Chemistry code.  The code was compiled using the Portland 
@@ -763,8 +713,7 @@ cells in $V_{\rm PFF}$ for a periodic system of 64 classical water molecules.}
 \label{ErrrorPFF}
 \end{figure}
 
-
-\section{Validation}
+\section{Validation}\label{validate}
 
 The ability of our implementation to reproduce true Ewald summation is shown in 
 Fig.~4 for a periodic system of 64 classical water molecules.
@@ -775,20 +724,20 @@ the summation proceeds from the smallest to the largest terms.
 The use of Cartesian Gaussian basis sets in many cases allows direct numerical 
 comparison of different programs, at least to within the approximations, grids, etc 
 peculiar to a code. Here, we make connection with the preeminent Gaussian orbital 
-program for periodic calculations, {\sc Crystal98}.  Calculations have been carried 
+program for periodic calculations, {\sc CRYSTAL98}.  Calculations have been carried 
 out largely with basis sets optimized for the 
-condensed phase\cite{CrystalLib}, which tend to have less diffuse valence orbitals.  
-Tables~\ref{NaCl8511}-\ref{MgOGammaPt} make a direct comparison with {\sc Crystal98} for 
-NaCl and MgO obtained with the {\sc MondoSCF} {\it tight} precision level 
+condensed phase\cite{CRYSTALLib}, which tend to have less diffuse valence orbitals.  
+Tables~\ref{NaCl8511}-\ref{MgOGammaPt} make a direct comparison with {\sc CRYSTAL98} for 
+NaCl and MgO obtained with the {\sc MondoSCF} {\tt TIGHT} precision level 
 %\footnote{This level of precision correspods to a distribution threshold $\tau_{\rm dist}=10^{-12}$,
 %a HiCu threshold $\tau_{\rm HiCu}=10^{-8}$, a QCTC threshold $\tau_{\rm QCTC} = 10^{-10}$ and
 %a $10^{-6}$ convergence in the maximum element of the density matrix.}
 %({\bf IS THIS RIGHT CJ?? OR IS IT VERYTIGHT??})
-delivering a relative precision of 10 digits in the converged total energy.  
-For the {\sc Crystal98} calculations, we used the following threshold parameters: 
+delivering a relative precision of 8-9 digits in the converged total energy.  
+For the {\sc CRYSTAL98} calculations, we used the following threshold parameters: 
 {\tt TOLDENS=10}, {\tt TOLPOT=10}, {\tt TOLGRID= 15} and {\tt BASIS=4}.   
-The {\tt BASIS} parameter determines the auxiliary functions used to fit potentials
-in {\sc Crystal98}, an approximation not used by {\sc MondoSCF}.  
+The {\tt BASIS} parameter determines the auxiliary functions used to fit the exchange-correlation potential
+in {\sc CRYSTAL98}, an approximation not used by {\sc MondoSCF}.  
 %
 
 In Table~\ref{NaCl8511}, comparison is made for $\Gamma$-point NaCl with the 8-511G\cite{CBS:8511G:Na} basis set
@@ -799,24 +748,22 @@ is demonstrated for NaCl with the STO-3G basis set and the local density approxi
 %\cite{}.
 %
 And in Table~\ref{MgOGammaPt}, convergence of the {\sc MondoSCF} supercell $\Gamma$-point approximation
-to the {\sc Crystal98} $k$-space result is demonstrated for the 8-61G\cite{CBS:861G:MgO} basis set for the Magnesium, 
+to the {\sc CRYSTAL98} $k$-space result is demonstrated for the 8-61G\cite{CBS:861G:MgO} basis set for the Magnesium, 
 the 8-51G\cite{CBS:861G:MgO} basis set for the oxygen, and the BLYP functional.
 %
 Finally, in Table~\ref{DiamondGammaPt} convergence of the supercell $\Gamma$-point approximation is shown for
-diamond, using the {\sc MondoSCF} {\it good} precision (targeting 6 digits), the BLYP functional and the
-6-21G*\cite{CBS:621G:C} basis set.  Since {\sc MondoSCF} employs 6-$d$ and 10-$f$ functions, while {\sc Crystal98} 
+diamond, using the {\sc MondoSCF} {\tt GOOD} precision (targeting 6 digits), the BLYP functional and the
+6-21G*\cite{CBS:621G:C} basis set.  Since {\sc MondoSCF} employs 6-$d$ and 10-$f$ functions, while {\sc CRYSTAL98} 
 employs 5-$d$ and 7-$f$, we were not able to make a direct comparison.
 
-
-\section{Scaling}
-
+\section{Scaling}\label{scale}
 %
 % Figure 5
 %
 \begin{figure}
 \includegraphics{Timing_Diamond_512_log.ps} 
 \caption{Computational complexity for the ${\bf J}$ and ${\bf K}_{\rm xc}$ matrix builds
-of cubic diamond at the 6-21G*/BLYP level of theory using a {\it good} (6 digit) level of precision}
+of cubic diamond at the 6-21G*/BLYP level of theory using a {\tt GOOD} (6 digit) level of precision}
 \label{Scaling_Matrix_Build}
 \end{figure}
 
@@ -832,14 +779,14 @@ of 6 digits in the total energy.}
 
 Demonstrating perfect linear scaling at the outset,  Fig.~5 shows the CPU time for 
 ${\bf J}$ and ${\bf K}_{\rm xc}$
-builds with  6-21G*/BLYP diamond at its standard density.  These timings correspond to a {\it good} level of accuracy, 
+builds with  6-21G*/BLYP diamond at its standard density.  These timings correspond to a {\tt GOOD} level of accuracy, 
 targeting 6 digits in the total energy and corresponding to the values listed in Table\ref{DiamondGammaPt}.
 Shown in Fig.~6 is the precision of the computed energies, obtained by performing a second set 
 of calculations with all thresholds reduced by an order of magnitude.
 For these calculations, the largest source of error is the numerical integration performed by HiCu, as the QCTC 
 thresholds are significantly more conservative. 
 
-\section{Conclusions}
+\section{Conclusions}\label{conclude}
 
 We have shown a systematic and efficient approach for incorporating periodic 
 boundary conditions into the linear scaling quantum chemistry code {\sc MondoSCF}.
