@@ -734,8 +734,8 @@ of 6 digits in the total energy.}
 
 Demonstrating perfect linear scaling at the outset,  Fig.~5 shows the CPU time for 
 ${\bf J}$ and ${\bf K}_{\rm xc}$
-builds with  6-21G*/BLYP diamond at its standard density.  These timings correspond to a {\tt GOOD} level of accuracy, 
-targeting 6 digits in the total energy and corresponding to the values listed in Table\ref{DiamondGammaPt}.
+builds with  6-21G*/BLYP diamond at its standard density.  These timings correspond to a {\tt GOOD} level of
+accuracy, targeting 6 digits in the total energy and corresponding to the values listed in Table\ref{DiamondGammaPt}.
 Shown in Fig.~6 is the precision of the computed energies, obtained by performing a second set 
 of calculations with all thresholds reduced by an order of magnitude.
 For these calculations, the largest source of error is the numerical integration performed by HiCu, as the QCTC 
@@ -813,18 +813,19 @@ where
 {\Gamma \left( l+\frac{1}{2}\right) \, r^{l+1}}=\frac{\Gamma \left( l+\frac{1}{2}\right) -\Gamma 
 \left( l+\frac{1}{2},\beta ^{2}r^{2}\right) }{\Gamma \left( l+\frac{1}{2}\right) \, r^{l+1}}
 \end{equation}
-and \( \beta  \) is a parameter which controls the convergence.
+and \( \beta  \) is a parameter which controls the convergence, and $\Gamma(n,r)$ is the
+incomplete gamma function \cite{GArfken01}.
 This allows the lattice sum to be partitioned into rapidly convergent
 real and reciprocal space terms, and allows us to rewrite the ${\cal M}^{m}_{l}$ as
 %
 %
 \begin{eqnarray}
-{\cal M}^{m}_{l} & = & \sum _{\mathbf{R}'\in V_{out}}\, M_{l}^{m}[\mathbf{R}]
+{\cal M}^{m}_{l} & = & \sum _{\mathbf{R}'\in V_{{\rm out}}}\, M_{l}^{m}[\mathbf{R}]
 \nonumber\\
- & = & \sum _{\mathbf{R}'\in V_{out}}\widetilde{P}_{l}^{m}\left( \cos \theta _{\mathbf{R}}
+ & = & \sum _{\mathbf{R}'\in V_{{\rm out}}}\widetilde{P}_{l}^{m}\left( \cos \theta _{\mathbf{R}}
 \right) e^{im\phi _{\mathbf{R}}}\,  {\cal G}_{l}\left( \beta ,\left| \mathbf{R}\right| \right)
 \nonumber\\
- & + & \sum _{\mathbf{R}'\in V_{out}}\widetilde{P}_{l}^{m}\left( \cos \theta _{\mathbf{R}}
+ & + & \sum _{\mathbf{R}'\in V_{{\rm out}}}\widetilde{P}_{l}^{m}\left( \cos \theta _{\mathbf{R}}
 \right) e^{im\phi _{\mathbf{R}}}\, 
 {\cal F}_{l}\left( \beta ,\left| \mathbf{R}\right| \right)
 \nonumber\\
@@ -832,11 +833,11 @@ real and reciprocal space terms, and allows us to rewrite the ${\cal M}^{m}_{l}$
 \end{eqnarray}
 which we can then partition into a real and reciprocal space summation 
 \begin{eqnarray}
-{\cal M}^{m}_{l} &=&\sum _{\mathbf{R}'\in V_{out}}\, \widetilde{P}_{l}^{m}
+{\cal M}^{m}_{l} &=&\sum _{\mathbf{R}'\in V_{{\rm out}}}\, \widetilde{P}_{l}^{m}
 \left( \cos \theta _{\mathbf{R}}\right) e^{im\phi _{\mathbf{R}}}\, {\cal G}_{l}\left( \beta ,\left|
  \mathbf{R}\right| \right) 
 \nonumber\\
-&-&\sum _{\mathbf{R}'\in V_{in}}\widetilde{P}_{l}^{m}\left( \cos 
+&-&\sum _{\mathbf{R}'\in V_{\rm in}}\widetilde{P}_{l}^{m}\left( \cos 
 \theta _{\mathbf{R}}\right) e^{im\phi _{\mathbf{R}}}{\cal F}_{l}\left( \beta ,\left| \mathbf{R}\right| 
 \right) 
 \nonumber\\
@@ -848,7 +849,7 @@ which we can then partition into a real and reciprocal space summation
 \nonumber\\
 \label{C4}
 \end{eqnarray}
-With an appropriate choice of \( \beta \sim \sqrt{\pi }/\left( V_{cell}\right) ^{\frac{1}{3}} \)
+With an appropriate choice of \( \beta \sim \sqrt{\pi }/\left( V_{\rm UC}\right) ^{\frac{1}{3}} \)
 the periodic multipole interaction tensor can be computed. The only
 potential problem is the computation of the incomplete gamma functions.
 Previous approaches attempted to compute this function by the upward
@@ -882,7 +883,7 @@ where
 \begin{equation}
 \label{SN}
 S_{n}=\left( \frac{\Gamma \left( \frac{1}{2}\right) }{\Gamma \left( n+\frac{3}{2}\right) }
-\right) ^{\frac{1}{max(n,1)}}
+\right) ^{\frac{1}{{\rm max}(n,1)}}
 \end{equation}
 Which are tabulated beforehand. We find that this version of the gamma
 function is both easy to program and numerically very precise, even
@@ -891,9 +892,9 @@ We can also compute the \( {\cal M} \) tensor in one and two dimensions.
 The \( {\cal M} \) tensor in one dimension can be computed analytically
 %
 \begin{eqnarray}
-{\cal M}^{m}_{l} & = & \sum _{{\mathbf{R}'}\in V_{out}}\, M_{l}^{m}[\mathbf{R}]
+{\cal M}^{m}_{l} & = & \sum _{{\mathbf{R}'}\in V_{{\rm out}}}\, M_{l}^{m}[\mathbf{R}]
 \nonumber\\
-& = & \sum _{{\mathbf{R}'}\in V_{out}}\, \widetilde{P}_{l}^{m}\left( \cos \left( 
+& = & \sum _{{\mathbf{R}'}\in V_{{\rm out}}}\, \widetilde{P}_{l}^{m}\left( \cos \left( 
 \theta _{\mathbf{R}}\right) \right) e^{im\phi _{\mathbf{R}}}\, \left\{ \frac{1}{r^{l+1}}\right\} 
 \nonumber\\
 \label{C7a0}
@@ -926,11 +927,11 @@ non-periodic direction goes to infinity,
 
 \begin{eqnarray}
 {\cal M}^{m}_{l} 
- & = & \sum _{{\mathbf{R}'}\in V_{out}}\, \left( l-m\right) !\, P_{l}^{m}\left( \cos 
+ & = & \sum _{{\mathbf{R}'}\in V_{{\rm out}}}\, \left( l-m\right) !\, P_{l}^{m}\left( \cos 
 \left( \theta _{\mathbf{R}}\right) \right) e^{im\phi _{\mathbf{R}}}\, {\cal G}_{l}\left( \beta ,\left| 
 \mathbf{R}\right| \right) 
 \nonumber\\
- & - & \sum _{{\mathbf{R}'}\in V_{in}}\, \left( l-m\right) !\, P_{l}^{m}\left( \cos \left( \theta _{
+ & - & \sum _{{\mathbf{R}'}\in V_{\rm in}}\, \left( l-m\right) !\, P_{l}^{m}\left( \cos \left( \theta _{
 \mathbf{R}}\right) \right) e^{im\phi _{\mathbf{R}}}{\cal F}_{l}\left( \beta ,\left| \mathbf{R}\right| \right)
 \nonumber\\
  & + & {\cal C}_2 \sum _{\mathbf{G}\neq \left\{ \emptyset \right\} }\, \int _{-\infty }^{\infty }
@@ -945,12 +946,12 @@ non-periodic direction goes to infinity,
 %
 where,
 \begin{eqnarray}
-{\cal C}_1 = \frac{4\pi ^{\frac{3}{2}}(\frac{i}{2})^{l}}{V_{cell}\Gamma \left( l+\frac{1}{2}\right) }
+{\cal C}_1 = \frac{4\pi ^{\frac{3}{2}}(\frac{i}{2})^{l}}{V_{\rm UC}\Gamma \left( l+\frac{1}{2}\right) }
 \nonumber\\
-{\cal C}_2 =  \frac{4\pi ^{\frac{3}{2}}(\frac{i}{2})^{l}}{A_{cell}\Gamma \left( l+\frac{1}{2}\right) }
+{\cal C}_2 =  \frac{4\pi ^{\frac{3}{2}}(\frac{i}{2})^{l}}{A_{\rm UC}\Gamma \left( l+\frac{1}{2}\right) }
 \label{C10p}
 \end{eqnarray}
-and \( A_{cell} \) is the area of the cell along the non-periodic
+and \( A_{UC} \) is the area of the unit cell along the non-periodic
 direction. We have found that we can obtain the \( {\cal M} \) tensor
 matrix elements to 8-10 digits of accuracy with this technique.
 
