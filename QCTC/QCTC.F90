@@ -36,6 +36,9 @@ PROGRAM QCTC
 ! Get basis set and geometry
   CALL Get(BS,Tag_O=CurBase)
   CALL Get(GM,Tag_O=CurGeom)
+! Get Dipole and Quadripole
+  CALL Get(RhoPoles,'RhoPoles',Args,0)
+  CALL PPrint(RhoPoles,'Rho',Unit_O=6)
 ! Allocations 
   CALL NewBraBlok(BS)
 ! Get the Density for Poletree
@@ -51,8 +54,9 @@ PROGRAM QCTC
 #ifdef PERIODIC
 ! Calculate the Number of Cells
   CALL SetCellNumber(GM)
+  CALL PPrint(CS_OUT,'CS_OUT',Prog)
 ! Set the electrostatic background 
-  CALL PBCFarFieldSetUp(FFEll,PoleRoot)
+  CALL PBCFarFieldSetUp(PoleRoot)
 #endif
 ! Delete the auxiliary density arrays
   CALL DeleteRhoAux
@@ -85,12 +89,19 @@ PROGRAM QCTC
      CALL PPrint( T1,'J['//TRIM(SCFCycl)//']')
      CALL Plot(   T1,'J['//TRIM(SCFCycl)//']')
   ENDIF
+! 
+!  WRITE(*,*) 'NukE[',TRIM(SCFCycl),'] = ',E_Nuc_Tot
+#ifdef PERIODIC
+! Print Periodic Info
+  CALL Print_Periodic()
+#endif
 ! Tidy up
   CALL Delete(J)
   CALL Delete(T1)
   CALL Delete(BS)
   CALL Delete(GM)
   CALL Delete(Args)
+  CALL Delete(RhoPoles)
 ! didn't count flops, any accumulation is residual
 ! from matrix routines
   PerfMon%FLOP=Zero 
