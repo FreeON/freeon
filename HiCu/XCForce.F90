@@ -223,8 +223,8 @@ PROGRAM XCForce
 !    Zero the Lower Triange
      DO I=1,3
         DO J=1,I-1
-           LatFrc_XC%D(I,J)   = 1.D8
-           LatFrc_XC_S%D(I,J) = 1.D8
+           LatFrc_XC%D(I,J)   = Zero
+           LatFrc_XC_S%D(I,J) = Zero
         ENDDO
      ENDDO
 !    Sum in contribution to total force

@@ -129,7 +129,7 @@ PROGRAM TForce
 !    Zero the Lower Triange
      DO I=1,3
         DO J=1,I-1
-           LatFrc_T%D(I,J)   = 1.D8
+           LatFrc_T%D(I,J)   = Zero
         ENDDO
      ENDDO
 !    Sum in the T contribution to total force

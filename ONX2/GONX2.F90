@@ -299,7 +299,7 @@ PROGRAM GONX2
 !    Zero the Lower Triange
      DO IXYZ=1,3
         DO JXYZ=1,IXYZ-1
-           BoxX%D(IXYZ,JXYZ) = 1.D8
+           BoxX%D(IXYZ,JXYZ) = Zero
         ENDDO
      ENDDO
      CALL DAXPY(9,KScale,BoxX%D(1,1),1,GMc%PBC%LatFrc%D(1,1),1)
