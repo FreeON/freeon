@@ -37,7 +37,7 @@ EXTRA_INCLUDES= -I$(MONDO_HOME)/QCTC/MMA/CTraX   \
                 -I$(MONDO_HOME)/OneE/
 #
 CommonObjs=XLate.o CTraX.o Globals.o MondoPoles.o Thresholds.o  \
-           PoleTree.o PBCFarField.o TreeWalk.o 
+           PoleTree.o PFFTensor.o PBCFarField.o TreeWalk.o 
 QCTCObjs=$(CommonObjs) JGen.o NukE.o QCTC.o
 JFrcObjs=$(CommonObjs) BlokTrPdJ.o JForce.o
 #
