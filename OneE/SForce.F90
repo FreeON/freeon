@@ -132,8 +132,16 @@ PROGRAM SForce
         ENDIF
      ENDDO
   ENDDO
+!
+!
+!
+  WRITE(*,*) 'LatFrc_S'
+  WRITE(*,*) 
+  DO I=1,3
+     WRITE(*,*) (LatFrc_S%D(I,J),J=1,3) 
+  ENDDO
 !--------------------------------------------------------------------------------
-#ifdef PARALLEL
+#ifdef PARALLEL   
   TotFrcComp = 3*NAtoms
   CALL New(TotSFrc,TotFrcComp)
   CALL MPI_Reduce(SFrc%D(1),TotSFrc%D(1),TotFrcComp,MPI_DOUBLE_PRECISION,MPI_SUM,0,MONDO_COMM,IErr)
