@@ -1,3 +1,4 @@
+#################################################################
 .SUFFIXES:
 .SUFFIXES:	.o .C .F .F90 .c .f .f90 .x
 #
@@ -22,8 +23,8 @@ COPY_RIGHT_C  =$(MONDO_HOME)/Includes/CopyrightBanner.C
 	rm -f $*.$(F77_POSTFIX)
 	$(CPP) $(CPPINCLUDE) $(CPPOPTS) $(CPPMISC) $*.F  $*.x
 	cp $(COPY_RIGHT_F) $*.$(F90_POSTFIX)
-	cat $*.x >> $*.$(F77_POSTFIX)
-	rm $*.x
+	cat $*.x >> $*.$(F77_POSTFIX); rm $*.x
+	$(F90) $(F77_EXTRAS) $(F90_FLAGS) $(EXTRA_INCLUDES) -c $*.$(F77_POSTFIX)
 #	rm -f $*.$(F77_POSTFIX)
 #	rm -f $*.$(LIST_POSTFIX)
 #
@@ -64,7 +65,8 @@ COPY_RIGHT_C  =$(MONDO_HOME)/Includes/CopyrightBanner.C
 	$(F90) $(F90_FLAGS) $(EXTRA_INCLUDES) -c $*.$(F90_POSTFIX)
 #
 .f.o:   
-	$(F90) $(F77_EXTRAS) $(F90_FLAGS) $(EXTRA_INCLUDES) -c $*.f
+	$(F90) $(F77_EXTRAS) $(F90_FLAGS) $(EXTRA_INCLUDES) -c $*.$(F77_POSTFIX)
 #
 .c.o:   
 	$(CC) $(CPPINCLUDE) $(CFLAGS) -c $*.c
+#################################################################
