@@ -41,56 +41,63 @@ Wolfram Research.
 
 (*NotebookFileLineBreakTest
 NotebookFileLineBreakTest*)
-(*NotebookOptionsPosition[     10038,        238]*)
-(*NotebookOutlinePosition[     10667,        260]*)
-(*  CellTagsIndexPosition[     10623,        256]*)
+(*NotebookOptionsPosition[     16526,        445]*)
+(*NotebookOutlinePosition[     17156,        467]*)
+(*  CellTagsIndexPosition[     17112,        463]*)
 (*WindowFrame->Normal*)
 
 
 
 Notebook[{
+
+Cell[CellGroupData[{
+Cell[BoxData[{
+    \(\(trace[m_List] := Sum[m[\([i, i]\)], {i, Length[m]}];\)\), "\n", 
+    \(\(mdot[x_List, y_List] := Flatten[x] . Flatten[y];\)\)}], "Input"],
+
 Cell[BoxData[
-    \(<< /usr/home/mchalla/MONDO_April_17_03/SCFeqs/MMA/SCFDev/STO-2G_Water.\
-in\)], "Input"],
+    \(General::"spell1" \(\(:\)\(\ \)\) 
+      "Possible spelling error: new symbol name \"\!\(trace\)\" is similar to \
+existing symbol \"\!\(Trace\)\"."\)], "Message"]
+}, Open  ]],
 
 Cell[BoxData[{
-    \(\(h = SetPrecision[h, 100];\)\), "\[IndentingNewLine]", 
-    \(\(X = SetPrecision[X, 100];\)\), "\[IndentingNewLine]", 
-    \(\(ENukeNuke = 
-        SetPrecision[ENukeNuke, 100];\)\), "\[IndentingNewLine]", 
-    \(Do[Do[
-        Do[Do[\ Int[i, j, k, l] = SetPrecision[Int[i, j, k, l], 100], {i, 
-              NBasF}], {j, NBasF}], {k, NBasF}], {l, NBasF}]\)}], "Input"],
+    \(\(ClearAll[Int];\)\), "\n", 
+    \(\(NBasF = 10;\)\), "\n", 
+    \(\(Int = 
+        Table[Table[
+            Table[Table[
+                0, {NBasF}], {NBasF}], {NBasF}], {NBasF}];\)\)}], "Input"],
+
+Cell[BoxData[{
+    \(\(MondoHome = Environment["\<MONDO_HOME\>"];\)\), "\n", 
+    \(\(If[MondoHome \[Equal] $FAILED, 
+        Print["\<COULD NOT FIND $MONDO_HOME! CHECK YOUR .cshrc \>"]; 
+        Abort[];];\)\)}], "Input"],
 
 Cell[BoxData[
-    \(\(trace[m_List] := Sum[m[\([i, i]\)], {i, Length[m]}];\)\)], "Input"],
+    \(\(Get[
+        StringJoin[
+          MondoHome, "\</SCFeqs/MMA/SCFDev/STO-2G_Water.in\>"]];\)\)], "Input"],
+
+Cell[BoxData[
+    \(\(\(\(WP = 32;\)\[IndentingNewLine]
+    \(h = SetPrecision[h, WP];\)\[IndentingNewLine]
+    \(X = SetPrecision[X, WP];\)\[IndentingNewLine]
+    \(ENukeNuke = SetPrecision[ENukeNuke, WP];\)\[IndentingNewLine]
+    Do[Do[
+        Do[Do[\ Int[\([i, j, k, l]\)] = 
+              SetPrecision[Int[\([i, j, k, l]\)], WP], {i, NBasF}], {j, 
+            NBasF}], {k, NBasF}], {l, NBasF}]\)\(\ \)\)\)], "Input"],
 
 Cell[BoxData[
     \(DensityMatrix[F_List] := 
-      Block[{}, \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
-\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
-\ \ \ \ \ \ \ \ ES = 
-          Eigensystem[
-            SetPrecision[F, 
-              100]]; \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
-\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
-\ \ \ \ \ \ \ \ \ \ \ es1 = 
-          ES[\([1]\)]; \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
-\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
-\ \ \ \ \ \ \ \ \ \ \ \ es2 = 
-          ES[\([2]\)]; \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
-\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
-\ \ \ \ \ \ \ \ \ \ \ \ c = 
-          es2[\([Ordering[
-                es1]]\)]; \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
-\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
-\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
-\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
-\[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
-\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
-P = Table[Table[0, {i, NBasF}], {j, 
-              NBasF}]; \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
-\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Do[\ 
+      Block[{}, \[IndentingNewLine]ES = 
+          Eigensystem[SetPrecision[F, WP]]; \[IndentingNewLine]es1 = 
+          ES[\([1]\)]; \[IndentingNewLine]es2 = 
+          ES[\([2]\)]; \[IndentingNewLine]c = 
+          es2[\([Ordering[es1]]\)]; \[IndentingNewLine]P = 
+          Table[Table[0, {i, NBasF}], {j, NBasF}]; \[IndentingNewLine]Do[
           Do[Do[P[\([i, j]\)] = 
                 P[\([i, j]\)] + c[\([k, i]\)]*c[\([k, j]\)], {i, 1, 
                 NBasF}], {j, 1, NBasF}], {k, 1, 
@@ -98,148 +105,348 @@ P = Table[Table[0, {i, NBasF}], {j,
 
 Cell[CellGroupData[{
 
+Cell[BoxData[{
+    \(\(Get[
+        StringJoin[
+          MondoHome, "\</MMA/Compile.m\>"]];\)\), "\[IndentingNewLine]", 
+    \(jk[n_Integer, p_List, int_List] := 
+      Module[{i, j, k, l}, \[IndentingNewLine]Table[
+          Table[Sum[
+              p[\([k, l]\)]*\((2  int[\([i, j, k, l]\)] - 
+                    int[\([i, k, j, l]\)])\), {k, 1, n}, {l, 1, n}], {i, 
+              n}], {j, 1, n}]]; 
+    JK = Compile[{{n_, _Integer}, {p_, _Real, 2}, {int_, _Real, 4}}, 
+        jk[n, p, int] InlineFunction \[Rule] jk]\)}], "Input"],
+
 Cell[BoxData[
-    \(\(\(\[IndentingNewLine]\)\(\(hx = X . h . X;\)\[IndentingNewLine]
-    \(px = DensityMatrix[hx];\)\[IndentingNewLine]
-    \(p = X . px . X;\)\[IndentingNewLine]
-    Do[\[IndentingNewLine]J = 
-        Table[Table[
-            Sum[\ p[\([k, l]\)]*Int[i, j, k, l], {k, 1, NBasF}, {l, 1, 
-                NBasF}], {i, NBasF}], {j, 1, NBasF}]; \[IndentingNewLine]K = 
-        Table[Table[
-            Sum[\ p[\([k, l]\)]*Int[i, k, j, l], {k, 1, NBasF}, {l, 1, 
-                NBasF}], {i, NBasF}], {j, 1, NBasF}]; \[IndentingNewLine]F = 
-        h + 2\ J - K; \[IndentingNewLine]Print[scf, "\< Ehf = \>", 
+    TagBox[\(CompiledFunction[{Pattern$9, Pattern$10, Pattern$11}, 
+        jk[n, p, int]\ InlineFunction \[Rule] jk, "-CompiledCode-"]\),
+      False,
+      Editable->False]], "Output"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+    \(\(hx = X . h . X;\)\), "\[IndentingNewLine]", 
+    \(\(px = DensityMatrix[hx];\)\), "\[IndentingNewLine]", 
+    \(\(p = X . px . X;\)\), "\[IndentingNewLine]", 
+    \(Do[\[IndentingNewLine]F = 
+        h + jk[NBasF, p, Int]; \[IndentingNewLine]Print[scf, "\< Ehf = \>", 
         N[trace[p . \((h + \ F)\)] + ENukeNuke, 32]]; \[IndentingNewLine]Fx = 
         X . F . X; \[IndentingNewLine]px = 
         DensityMatrix[Fx]; \[IndentingNewLine]p = 
-        X . px . X;\ \[IndentingNewLine], {scf, 20}]\)\)\)], "Input"],
+        X . px . X;\ \[IndentingNewLine], {scf, 20}]\)}], "Input"],
 
 Cell[BoxData[
     InterpretationBox[\(1\[InvisibleSpace]" Ehf = \
-"\[InvisibleSpace]\(-70.9234173082247113778804018582136628225140301`32\)\),
-      SequenceForm[ 1, " Ehf = ", -70.923417308224711377880401858214`32],
+"\[InvisibleSpace]\(-70.9234172815545002439224107079784029798141607`30.7566\)\
+\),
+      SequenceForm[ 1, " Ehf = ", -70.923417281554500243922410708`30.7566],
       Editable->False]], "Print"],
 
 Cell[BoxData[
     InterpretationBox[\(2\[InvisibleSpace]" Ehf = \
-"\[InvisibleSpace]\(-72.7160960173577991989418066236281323430147572`32\)\),
-      SequenceForm[ 2, " Ehf = ", -72.716096017357799198941806623628`32],
+"\[InvisibleSpace]\(-72.7160963231748667100813419344085085535110236`30.7181\)\
+\),
+      SequenceForm[ 2, " Ehf = ", -72.7160963231748667100813419344`30.7181],
       Editable->False]], "Print"],
 
 Cell[BoxData[
     InterpretationBox[\(3\[InvisibleSpace]" Ehf = \
-"\[InvisibleSpace]\(-72.7346228436807947950022720158763526753253922`32\)\),
-      SequenceForm[ 3, " Ehf = ", -72.734622843680794795002272015876`32],
+"\[InvisibleSpace]\(-72.7346231144378042064398629011001016647594568`30.7329\)\
+\),
+      SequenceForm[ 3, " Ehf = ", -72.7346231144378042064398629011`30.7329],
       Editable->False]], "Print"],
 
 Cell[BoxData[
     InterpretationBox[\(4\[InvisibleSpace]" Ehf = \
-"\[InvisibleSpace]\(-72.7355005245293959688050037305763608207567614`32\)\),
-      SequenceForm[ 4, " Ehf = ", -72.735500524529395968805003730576`32],
+"\[InvisibleSpace]\(-72.7355007930901133510613475178447576227052256`30.7335\)\
+\),
+      SequenceForm[ 4, " Ehf = ", -72.7355007930901133510613475178`30.7335],
       Editable->False]], "Print"],
 
 Cell[BoxData[
     InterpretationBox[\(5\[InvisibleSpace]" Ehf = \
-"\[InvisibleSpace]\(-72.7356240890859367424812017124173252246996955`32\)\),
-      SequenceForm[ 5, " Ehf = ", -72.735624089085936742481201712417`32],
+"\[InvisibleSpace]\(-72.7356243571976616169122694837158481322971575`30.7342\)\
+\),
+      SequenceForm[ 5, " Ehf = ", -72.7356243571976616169122694837`30.7342],
       Editable->False]], "Print"],
 
 Cell[BoxData[
     InterpretationBox[\(6\[InvisibleSpace]" Ehf = \
-"\[InvisibleSpace]\(-72.7356455169418847667396368837202750809116989`32\)\),
-      SequenceForm[ 6, " Ehf = ", -72.73564551694188476673963688372`32],
+"\[InvisibleSpace]\(-72.7356457849412236048541518348776775421525472`30.7345\)\
+\),
+      SequenceForm[ 6, " Ehf = ", -72.7356457849412236048541518349`30.7345],
       Editable->False]], "Print"],
 
 Cell[BoxData[
     InterpretationBox[\(7\[InvisibleSpace]" Ehf = \
-"\[InvisibleSpace]\(-72.7356493851682577986284272136522299737754482`32\)\),
-      SequenceForm[ 7, " Ehf = ", -72.735649385168257798628427213652`32],
+"\[InvisibleSpace]\(-72.7356496531410768601140984697793867153216329`30.7346\)\
+\),
+      SequenceForm[ 7, " Ehf = ", -72.7356496531410768601140984698`30.7346],
       Editable->False]], "Print"],
 
 Cell[BoxData[
     InterpretationBox[\(8\[InvisibleSpace]" Ehf = \
-"\[InvisibleSpace]\(-72.7356500919632287104338249016715069776016727`32\)\),
-      SequenceForm[ 8, " Ehf = ", -72.735650091963228710433824901672`32],
+"\[InvisibleSpace]\(-72.7356503599300829165787512597204451830661184`30.7347\)\
+\),
+      SequenceForm[ 8, " Ehf = ", -72.7356503599300829165787512597`30.7347],
       Editable->False]], "Print"],
 
 Cell[BoxData[
     InterpretationBox[\(9\[InvisibleSpace]" Ehf = \
-"\[InvisibleSpace]\(-72.735650221580697415135724884920687170390475`32\)\),
-      SequenceForm[ 9, " Ehf = ", -72.735650221580697415135724884921`32],
+"\[InvisibleSpace]\(-72.735650489546254551569483113032090472116276`30.7347\)\)\
+,
+      SequenceForm[ 9, " Ehf = ", -72.735650489546254551569483113`30.7347],
       Editable->False]], "Print"],
 
 Cell[BoxData[
     InterpretationBox[\(10\[InvisibleSpace]" Ehf = \
-"\[InvisibleSpace]\(-72.7356502453774832081347947557058236895583054`32\)\),
-      SequenceForm[ 10, " Ehf = ", -72.735650245377483208134794755706`32],
+"\[InvisibleSpace]\(-72.735650513342765075211938304710536540321484`30.7347\)\)\
+,
+      SequenceForm[ 10, " Ehf = ", -72.7356505133427650752119383047`30.7347],
       Editable->False]], "Print"],
 
 Cell[BoxData[
     InterpretationBox[\(11\[InvisibleSpace]" Ehf = \
-"\[InvisibleSpace]\(-72.7356502497478786958736383043344728473823724`32\)\),
-      SequenceForm[ 11, " Ehf = ", -72.735650249747878695873638304334`32],
+"\[InvisibleSpace]\(-72.7356505177131032001657122154695512351037252`30.7347\)\
+\),
+      SequenceForm[ 11, " Ehf = ", -72.7356505177131032001657122155`30.7347],
       Editable->False]], "Print"],
 
 Cell[BoxData[
     InterpretationBox[\(12\[InvisibleSpace]" Ehf = \
-"\[InvisibleSpace]\(-72.7356502505506061301635477040464496910831875`32\)\),
-      SequenceForm[ 12, " Ehf = ", -72.735650250550606130163547704046`32],
+"\[InvisibleSpace]\(-72.7356505185158188487592120476521187865923596`30.7347\)\
+\),
+      SequenceForm[ 12, " Ehf = ", -72.7356505185158188487592120477`30.7347],
       Editable->False]], "Print"],
 
 Cell[BoxData[
     InterpretationBox[\(13\[InvisibleSpace]" Ehf = \
-"\[InvisibleSpace]\(-72.735650250698050802812598540693215110591032`32\)\),
-      SequenceForm[ 13, " Ehf = ", -72.735650250698050802812598540693`32],
+"\[InvisibleSpace]\(-72.7356505186632611271362797633557667771693361`30.7347\)\
+\),
+      SequenceForm[ 13, " Ehf = ", -72.7356505186632611271362797634`30.7347],
       Editable->False]], "Print"],
 
 Cell[BoxData[
     InterpretationBox[\(14\[InvisibleSpace]" Ehf = \
-"\[InvisibleSpace]\(-72.7356502507251336400457592776746841470996395`32\)\),
-      SequenceForm[ 14, " Ehf = ", -72.735650250725133640045759277675`32],
+"\[InvisibleSpace]\(-72.7356505186903434824387298652677309899921535`30.7347\)\
+\),
+      SequenceForm[ 14, " Ehf = ", -72.7356505186903434824387298653`30.7347],
       Editable->False]], "Print"],
 
 Cell[BoxData[
     InterpretationBox[\(15\[InvisibleSpace]" Ehf = \
-"\[InvisibleSpace]\(-72.735650250730108266216480333772607328590168`32\)\),
-      SequenceForm[ 15, " Ehf = ", -72.735650250730108266216480333773`32],
+"\[InvisibleSpace]\(-72.7356505186953180123459606531002203913987075`30.7347\)\
+\),
+      SequenceForm[ 15, " Ehf = ", -72.7356505186953180123459606531`30.7347],
       Editable->False]], "Print"],
 
 Cell[BoxData[
     InterpretationBox[\(16\[InvisibleSpace]" Ehf = \
-"\[InvisibleSpace]\(-72.7356502507310220155968795371742273573595038`32\)\),
-      SequenceForm[ 16, " Ehf = ", -72.735650250731022015596879537174`32],
+"\[InvisibleSpace]\(-72.7356505186962317426224987140638971747994905`30.7347\)\
+\),
+      SequenceForm[ 16, " Ehf = ", -72.7356505186962317426224987141`30.7347],
       Editable->False]], "Print"],
 
 Cell[BoxData[
     InterpretationBox[\(17\[InvisibleSpace]" Ehf = \
-"\[InvisibleSpace]\(-72.7356502507311898549668679994312773088321331`32\)\),
-      SequenceForm[ 17, " Ehf = ", -72.735650250731189854966867999431`32],
+"\[InvisibleSpace]\(-72.7356505186963995782222492520237568366419916`30.7347\)\
+\),
+      SequenceForm[ 17, " Ehf = ", -72.735650518696399578222249252`30.7347],
       Editable->False]], "Print"],
 
 Cell[BoxData[
     InterpretationBox[\(18\[InvisibleSpace]" Ehf = \
-"\[InvisibleSpace]\(-72.7356502507312206840502369160372736806193897`32\)\),
-      SequenceForm[ 18, " Ehf = ", -72.735650250731220684050236916037`32],
+"\[InvisibleSpace]\(-72.7356505186964304065651114327732097475831186`30.7347\)\
+\),
+      SequenceForm[ 18, " Ehf = ", -72.7356505186964304065651114328`30.7347],
       Editable->False]], "Print"],
 
 Cell[BoxData[
     InterpretationBox[\(19\[InvisibleSpace]" Ehf = \
-"\[InvisibleSpace]\(-72.7356502507312263468002402401077516269568726`32\)\),
-      SequenceForm[ 19, " Ehf = ", -72.735650250731226346800240240108`32],
+"\[InvisibleSpace]\(-72.7356505186964360691702819919868227740636552`30.7347\)\
+\),
+      SequenceForm[ 19, " Ehf = ", -72.735650518696436069170281992`30.7347],
       Editable->False]], "Print"],
 
 Cell[BoxData[
     InterpretationBox[\(20\[InvisibleSpace]" Ehf = \
-"\[InvisibleSpace]\(-72.7356502507312273869459072201050144094907041`32\)\),
-      SequenceForm[ 20, " Ehf = ", -72.735650250731227386945907220105`32],
+"\[InvisibleSpace]\(-72.7356505186964371092877259559102613071333422`30.7347\)\
+\),
+      SequenceForm[ 20, " Ehf = ", -72.7356505186964371092877259559`30.7347],
+      Editable->False]], "Print"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+    \(\(d[0] = X . h . X;\)\), "\n", 
+    \(\(px = DensityMatrix[d[0]];\)\), "\n", 
+    \(\(g[0] = d[0];\)\), "\n", 
+    \(\(p = X . px . X;\)\), "\n", 
+    \(Do[F = h + jk[NBasF, p, Int]; \[IndentingNewLine]Print[
+        k, "\< Ehf = \>", 
+        N[trace[p . \((h + F)\)] + ENukeNuke, 32]]; \[IndentingNewLine]g[k] = 
+        X . F . X; \[IndentingNewLine]beta = 
+        mdot[g[k], \((g[k] - g[k - 1])\)]/
+          mdot[g[k - 1], g[k - 1]]; \[IndentingNewLine] (*\(If[
+            Mod[k, 4] \[Equal] 0, beta = 0];\)*) \[IndentingNewLine]d[k] = 
+        g[k] + beta*d[k - 1]; \[IndentingNewLine]px = 
+        DensityMatrix[d[k]]; \[IndentingNewLine]p = X . px . X;, {k, 
+        20}]\)}], "Input"],
+
+Cell[BoxData[
+    \(General::"spell1" \(\(:\)\(\ \)\) 
+      "Possible spelling error: new symbol name \"\!\(beta\)\" is similar to \
+existing symbol \"\!\(Beta\)\"."\)], "Message"],
+
+Cell[BoxData[
+    InterpretationBox[\(1\[InvisibleSpace]" Ehf = \
+"\[InvisibleSpace]\(-70.9234172815545002439224107079784029798141607`30.7566\)\
+\),
+      SequenceForm[ 1, " Ehf = ", -70.923417281554500243922410708`30.7566],
+      Editable->False]], "Print"],
+
+Cell[BoxData[
+    InterpretationBox[\(2\[InvisibleSpace]" Ehf = \
+"\[InvisibleSpace]\(-71.9289854967053458187056707690735450779559731`30.6715\)\
+\),
+      SequenceForm[ 2, " Ehf = ", -71.9289854967053458187056707691`30.6715],
+      Editable->False]], "Print"],
+
+Cell[BoxData[
+    InterpretationBox[\(3\[InvisibleSpace]" Ehf = \
+"\[InvisibleSpace]\(-72.7250135030456479291096694207368929011499128`30.7314\)\
+\),
+      SequenceForm[ 3, " Ehf = ", -72.7250135030456479291096694207`30.7314],
+      Editable->False]], "Print"],
+
+Cell[BoxData[
+    InterpretationBox[\(4\[InvisibleSpace]" Ehf = \
+"\[InvisibleSpace]\(-72.734102869526529909387780791450179905346828`30.7311\)\)\
+,
+      SequenceForm[ 4, " Ehf = ", -72.7341028695265299093877807915`30.7311],
+      Editable->False]], "Print"],
+
+Cell[BoxData[
+    InterpretationBox[\(5\[InvisibleSpace]" Ehf = \
+"\[InvisibleSpace]\(-72.735371400982644819930535939765650715826684`30.7333\)\)\
+,
+      SequenceForm[ 5, " Ehf = ", -72.7353714009826448199305359398`30.7333],
+      Editable->False]], "Print"],
+
+Cell[BoxData[
+    InterpretationBox[\(6\[InvisibleSpace]" Ehf = \
+"\[InvisibleSpace]\(-72.7355994070777183053983714672551451765171074`30.7341\)\
+\),
+      SequenceForm[ 6, " Ehf = ", -72.7355994070777183053983714673`30.7341],
+      Editable->False]], "Print"],
+
+Cell[BoxData[
+    InterpretationBox[\(7\[InvisibleSpace]" Ehf = \
+"\[InvisibleSpace]\(-72.7356411382769077513550634906203938442849902`30.7344\)\
+\),
+      SequenceForm[ 7, " Ehf = ", -72.7356411382769077513550634906`30.7344],
+      Editable->False]], "Print"],
+
+Cell[BoxData[
+    InterpretationBox[\(8\[InvisibleSpace]" Ehf = \
+"\[InvisibleSpace]\(-72.735648796005239264589348901072300487724369`30.7346\)\)\
+,
+      SequenceForm[ 8, " Ehf = ", -72.7356487960052392645893489011`30.7346],
+      Editable->False]], "Print"],
+
+Cell[BoxData[
+    InterpretationBox[\(9\[InvisibleSpace]" Ehf = \
+"\[InvisibleSpace]\(-72.7356502022812112236691161083256171593844886`30.7347\)\
+\),
+      SequenceForm[ 9, " Ehf = ", -72.7356502022812112236691161083`30.7347],
+      Editable->False]], "Print"],
+
+Cell[BoxData[
+    InterpretationBox[\(10\[InvisibleSpace]" Ehf = \
+"\[InvisibleSpace]\(-72.7356504605769471185890933576957430701781737`30.7347\)\
+\),
+      SequenceForm[ 10, " Ehf = ", -72.7356504605769471185890933577`30.7347],
+      Editable->False]], "Print"],
+
+Cell[BoxData[
+    InterpretationBox[\(11\[InvisibleSpace]" Ehf = \
+"\[InvisibleSpace]\(-72.735650508020926551741550545574508355993124`30.7347\)\)\
+,
+      SequenceForm[ 11, " Ehf = ", -72.7356505080209265517415505456`30.7347],
+      Editable->False]], "Print"],
+
+Cell[BoxData[
+    InterpretationBox[\(12\[InvisibleSpace]" Ehf = \
+"\[InvisibleSpace]\(-72.7356505167355369858508622177891593286140529`30.7347\)\
+\),
+      SequenceForm[ 12, " Ehf = ", -72.7356505167355369858508622178`30.7347],
+      Editable->False]], "Print"],
+
+Cell[BoxData[
+    InterpretationBox[\(13\[InvisibleSpace]" Ehf = \
+"\[InvisibleSpace]\(-72.7356505183362552804183985875330191029646945`30.7347\)\
+\),
+      SequenceForm[ 13, " Ehf = ", -72.7356505183362552804183985875`30.7347],
+      Editable->False]], "Print"],
+
+Cell[BoxData[
+    InterpretationBox[\(14\[InvisibleSpace]" Ehf = \
+"\[InvisibleSpace]\(-72.7356505186302784219135321662109340666468028`30.7347\)\
+\),
+      SequenceForm[ 14, " Ehf = ", -72.7356505186302784219135321662`30.7347],
+      Editable->False]], "Print"],
+
+Cell[BoxData[
+    InterpretationBox[\(15\[InvisibleSpace]" Ehf = \
+"\[InvisibleSpace]\(-72.7356505186842851511007014182395139932118459`30.7347\)\
+\),
+      SequenceForm[ 15, " Ehf = ", -72.7356505186842851511007014182`30.7347],
+      Editable->False]], "Print"],
+
+Cell[BoxData[
+    InterpretationBox[\(16\[InvisibleSpace]" Ehf = \
+"\[InvisibleSpace]\(-72.7356505186942052066413133508880378976530442`30.7347\)\
+\),
+      SequenceForm[ 16, " Ehf = ", -72.7356505186942052066413133509`30.7347],
+      Editable->False]], "Print"],
+
+Cell[BoxData[
+    InterpretationBox[\(17\[InvisibleSpace]" Ehf = \
+"\[InvisibleSpace]\(-72.7356505186960273404430692021814578473095915`30.7347\)\
+\),
+      SequenceForm[ 17, " Ehf = ", -72.7356505186960273404430692022`30.7347],
+      Editable->False]], "Print"],
+
+Cell[BoxData[
+    InterpretationBox[\(18\[InvisibleSpace]" Ehf = \
+"\[InvisibleSpace]\(-72.7356505186963620332617267129661130689652043`30.7347\)\
+\),
+      SequenceForm[ 18, " Ehf = ", -72.735650518696362033261726713`30.7347],
+      Editable->False]], "Print"],
+
+Cell[BoxData[
+    InterpretationBox[\(19\[InvisibleSpace]" Ehf = \
+"\[InvisibleSpace]\(-72.7356505186964235102394110242170713534252148`30.7347\)\
+\),
+      SequenceForm[ 19, " Ehf = ", -72.7356505186964235102394110242`30.7347],
+      Editable->False]], "Print"],
+
+Cell[BoxData[
+    InterpretationBox[\(20\[InvisibleSpace]" Ehf = \
+"\[InvisibleSpace]\(-72.7356505186964348024408289981151595835187121`30.7347\)\
+\),
+      SequenceForm[ 20, " Ehf = ", -72.7356505186964348024408289981`30.7347],
       Editable->False]], "Print"]
 }, Open  ]]
 },
 FrontEndVersion->"4.2 for X",
-ScreenRectangle->{{0, 1024}, {0, 768}},
-WindowSize->{942, 670},
-WindowMargins->{{Automatic, 36}, {Automatic, 11}}
+ScreenRectangle->{{0, 1920}, {0, 1200}},
+WindowSize->{1007, 1099},
+WindowMargins->{{0, Automatic}, {Automatic, 0}}
 ]
 
 (*******************************************************************
@@ -259,33 +466,69 @@ CellTagsIndex->{}
 
 (*NotebookFileOutline
 Notebook[{
-Cell[1754, 51, 107, 2, 27, "Input"],
-Cell[1864, 55, 391, 7, 91, "Input"],
-Cell[2258, 64, 89, 1, 27, "Input"],
-Cell[2350, 67, 1725, 29, 139, "Input"],
 
 Cell[CellGroupData[{
-Cell[4100, 100, 864, 15, 219, "Input"],
-Cell[4967, 117, 249, 4, 23, "Print"],
-Cell[5219, 123, 249, 4, 23, "Print"],
-Cell[5471, 129, 249, 4, 23, "Print"],
-Cell[5723, 135, 249, 4, 23, "Print"],
-Cell[5975, 141, 249, 4, 23, "Print"],
-Cell[6227, 147, 248, 4, 23, "Print"],
-Cell[6478, 153, 249, 4, 23, "Print"],
-Cell[6730, 159, 249, 4, 23, "Print"],
-Cell[6982, 165, 248, 4, 23, "Print"],
-Cell[7233, 171, 251, 4, 23, "Print"],
-Cell[7487, 177, 251, 4, 23, "Print"],
-Cell[7741, 183, 251, 4, 23, "Print"],
-Cell[7995, 189, 250, 4, 23, "Print"],
-Cell[8248, 195, 251, 4, 23, "Print"],
-Cell[8502, 201, 250, 4, 23, "Print"],
-Cell[8755, 207, 251, 4, 23, "Print"],
-Cell[9009, 213, 251, 4, 23, "Print"],
-Cell[9263, 219, 251, 4, 23, "Print"],
-Cell[9517, 225, 251, 4, 23, "Print"],
-Cell[9771, 231, 251, 4, 23, "Print"]
+Cell[1776, 53, 160, 2, 43, "Input"],
+Cell[1939, 57, 183, 3, 22, "Message"]
+}, Open  ]],
+Cell[2137, 63, 217, 6, 59, "Input"],
+Cell[2357, 71, 222, 4, 43, "Input"],
+Cell[2582, 77, 126, 3, 27, "Input"],
+Cell[2711, 82, 421, 8, 91, "Input"],
+Cell[3135, 92, 593, 11, 139, "Input"],
+
+Cell[CellGroupData[{
+Cell[3753, 107, 536, 11, 75, "Input"],
+Cell[4292, 120, 200, 4, 27, "Output"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+Cell[4529, 129, 532, 9, 171, "Input"],
+Cell[5064, 140, 258, 5, 23, "Print"],
+Cell[5325, 147, 259, 5, 23, "Print"],
+Cell[5587, 154, 259, 5, 23, "Print"],
+Cell[5849, 161, 259, 5, 23, "Print"],
+Cell[6111, 168, 259, 5, 23, "Print"],
+Cell[6373, 175, 259, 5, 23, "Print"],
+Cell[6635, 182, 259, 5, 23, "Print"],
+Cell[6897, 189, 259, 5, 23, "Print"],
+Cell[7159, 196, 257, 5, 23, "Print"],
+Cell[7419, 203, 260, 5, 23, "Print"],
+Cell[7682, 210, 261, 5, 23, "Print"],
+Cell[7946, 217, 261, 5, 23, "Print"],
+Cell[8210, 224, 261, 5, 23, "Print"],
+Cell[8474, 231, 261, 5, 23, "Print"],
+Cell[8738, 238, 261, 5, 23, "Print"],
+Cell[9002, 245, 261, 5, 23, "Print"],
+Cell[9266, 252, 260, 5, 23, "Print"],
+Cell[9529, 259, 261, 5, 23, "Print"],
+Cell[9793, 266, 260, 5, 23, "Print"],
+Cell[10056, 273, 261, 5, 23, "Print"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+Cell[10354, 283, 716, 14, 203, "Input"],
+Cell[11073, 299, 181, 3, 22, "Message"],
+Cell[11257, 304, 258, 5, 23, "Print"],
+Cell[11518, 311, 259, 5, 23, "Print"],
+Cell[11780, 318, 259, 5, 23, "Print"],
+Cell[12042, 325, 258, 5, 23, "Print"],
+Cell[12303, 332, 258, 5, 23, "Print"],
+Cell[12564, 339, 259, 5, 23, "Print"],
+Cell[12826, 346, 259, 5, 23, "Print"],
+Cell[13088, 353, 258, 5, 23, "Print"],
+Cell[13349, 360, 259, 5, 23, "Print"],
+Cell[13611, 367, 261, 5, 23, "Print"],
+Cell[13875, 374, 260, 5, 23, "Print"],
+Cell[14138, 381, 261, 5, 23, "Print"],
+Cell[14402, 388, 261, 5, 23, "Print"],
+Cell[14666, 395, 261, 5, 23, "Print"],
+Cell[14930, 402, 261, 5, 23, "Print"],
+Cell[15194, 409, 261, 5, 23, "Print"],
+Cell[15458, 416, 261, 5, 23, "Print"],
+Cell[15722, 423, 260, 5, 23, "Print"],
+Cell[15985, 430, 261, 5, 23, "Print"],
+Cell[16249, 437, 261, 5, 23, "Print"]
 }, Open  ]]
 }
 ]
