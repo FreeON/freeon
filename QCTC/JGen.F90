@@ -60,7 +60,6 @@ MODULE JGen
 #ifdef PERIODIC        
       INTEGER                :: NC
       REAL(DOUBLE)           :: Bx,By,Bz,MaxValue
-      LOGICAL                :: NotMakeBlock
 #endif     
 !---------------------------------------------- 
 !     Initialize the matrix and associated indecies
@@ -80,17 +79,13 @@ MODULE JGen
                   Bx = Pair%B(1)
                   By = Pair%B(2)           
                   Bz = Pair%B(3)
-                  NotMakeBlock = .TRUE.
                   DO NC=1,CS%NCells
                      Pair%B(1) = Bx+CS%CellCarts%D(1,NC)
                      Pair%B(2) = By+CS%CellCarts%D(2,NC)
                      Pair%B(3) = Bz+CS%CellCarts%D(3,NC)
-                     Pair%AB2  = (Pair%A(1)-Pair%B(1))**2 &
-                               + (Pair%A(2)-Pair%B(2))**2 &
-                               + (Pair%A(3)-Pair%B(3))**2
+                     Pair%AB2  = (Pair%A(1)-Pair%B(1))**2+(Pair%A(2)-Pair%B(2))**2+(Pair%A(3)-Pair%B(3))**2
                      IF(TestAtomPair(Pair)) THEN
                         J%MTrix%D(R:R+NAB-1)=J%MTrix%D(R:R+NAB-1)+Two*JBlock(Pair,PoleRoot)
-                        NotMakeBlock = .FALSE.
                      ENDIF
                   ENDDO
 #else
@@ -104,10 +99,6 @@ MODULE JGen
                J%RowPt%I(AtA+1)=P        
                IF(R>MaxNon0.OR.P>MaxBlks) &
                   CALL Halt(' BCSR dimensions blown in J ')
-#ifdef PERIODIC
-               IF(NotMakeBlock) &
-                  CALL Halt(' Making a Zero Block in JGen ')
-#endif
             ENDIF
          ENDDO
       ENDDO
@@ -219,18 +210,23 @@ MODULE JGen
                       SPKetC=Zero
                       SPKetS=Zero 
 #ifdef PERIODIC
+!                     Fold The Primative Back into the BOX
+                      CALL AtomCyclic(GM,Prim%P)
+!
                       Px = Prim%P(1)
                       Py = Prim%P(2)
                       Pz = Prim%P(3)
 !                     Sum over cells
                       DO NC=1,CSMM1%NCells
-!                        Wrap!!!!!!!!!!!!!
                          Prim%P(1)=Px+CSMM1%CellCarts%D(1,NC)
                          Prim%P(2)=Py+CSMM1%CellCarts%D(2,NC)
                          Prim%P(3)=Pz+CSMM1%CellCarts%D(3,NC)
 !                        Walk the walk
                          CALL JWalk(PoleRoot)
                       ENDDO
+                      Prim%P(1)=Px
+                      Prim%P(2)=Py
+                      Prim%P(3)=Pz
 #else
 !                     Walk the walk
                       CALL JWalk(PoleRoot)                        
@@ -262,12 +258,10 @@ MODULE JGen
                          DO LMNA=StartLA,StopLA
                             IA=IA+1
                             IB=IndexB
-                            EllA=BS%LxDex%I(LMNA)+BS%LyDex%I(LMNA)+BS%LzDex%I(LMNA)
                             DO LMNB=StartLB,StopLB  
                                IB=IB+1
-                               EllB=BS%LxDex%I(LMNB)+BS%LyDex%I(LMNB)+BS%LzDex%I(LMNB)
-                               Ell =EllA+EllB
-                               JBlk(IA,IB) = JBlk(IA,IB)+CTraxFF(Prim,HGBra%D(:,IA,IB))
+                               JBlk(IA,IB) = JBlk(IA,IB) + CTraxFF(Prim,HGBra%D(:,IA,IB)) &
+                                                         + CTraxQ(Prim,HGBra%D(:,IA,IB))
                             ENDDO
                          ENDDO
                       ENDIF
@@ -293,29 +287,5 @@ MODULE JGen
 #endif
        Jvct=BlockToVect(Pair%NA,Pair%NB,Jblk)
      END FUNCTION JBlock 
-!====================================================================================================
-! Function SumFun
-!====================================================================================================
-!!$     FUNCTION SumFun(LAB,LCD,D2,PQ2)
-!!$       INTEGER                    :: LAB,LCD,I,J
-!!$       REAL(DOUBLE)               :: SumFun,DFun,PQFun,D2,PQ2,DD,PQ
-!!$!
-!!$   DD = SQRT(D2)
-!!$   PQ = SQRT(PQ)
-!!$!
-!!$   DFun = Zero
-!!$   DO I=0,LAB
-!!$      DFun = DFun+One/(Factorial(SPELL+2-I)*(DD**I))
-!!$   ENDDO
-!!$!
-!!$   PQFun = Zero
-!!$   DO J=0,LCD
-!!$      QPFun = QPFun+Factorial(SPELL+1+J)/(PQ**J)
-!!$   ENDDO
-!!$!
-!!$   SumFun = (D2/PQ2)*((DBLE(SPEll+2)*DFun*QPFun)**(Two/DBLE(SPEll+2))))
-!!$!
-!!$       SumFun = One
-!!$!
-!!$     END FUNCTION SumFun
-END MODULE JGen
+   END MODULE JGen
+
