@@ -79,7 +79,7 @@ MODULE GlobalScalars
 !-------------------------------------------------  
 !  Generic true false keys
 !
-   INTEGER, PARAMETER      :: STATUS_TRUE =90575
+   INTEGER, PARAMETER      :: STATUS_TRUE =905788
    INTEGER, PARAMETER      :: STATUS_FALSE=60672
 !-------------------------------------------------  
 !  ROOT (MPI and Tree)

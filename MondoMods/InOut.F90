@@ -1161,6 +1161,10 @@ CONTAINS
                 CALL Get(BS%NPrim,'nprim',Tag_O=Tag_O)
                 CALL Get(BS%NASym,'nasym',Tag_O=Tag_O)
                 CALL Get(BS%LMNLen,'lmnlen',Tag_O=Tag_O)
+                CALL Get(BS%HasECPs,'hasecps',Tag_O=Tag_O)
+                CALL Get(BS%MxProjL,'maxprojectorell',Tag_O=Tag_O)
+                CALL Get(BS%Typ1Fnk,'numberoftype1primitives',Tag_O=Tag_O)
+                CALL Get(BS%Typ2Fnk,'numberoftype2primitives',Tag_O=Tag_O)
                 CALL New(BS)
                 CALL Get(BS%Kinds,'kind',Tag_O=Tag_O)
                 CALL Get(BS%NCFnc,'ncfuncs',Tag_O=Tag_O)
@@ -1174,7 +1178,6 @@ CONTAINS
                 CALL Get(BS%LxDex,'lxdex',Tag_O=Tag_O)
                 CALL Get(BS%LyDex,'lydex',Tag_O=Tag_O)
                 CALL Get(BS%LzDex,'lzdex',Tag_O=Tag_O)
-                CALL Get(BS%HasECPs,'hasecps',Tag_O=Tag_O)
                 IF(BS%HasECPs)THEN                   
                    CALL Get(BS%NTyp1PF,'typeoneprimitives',Tag_O=Tag_O)
                    CALL Get(BS%NTyp2PF,'typetwoprimitives',Tag_O=Tag_O)

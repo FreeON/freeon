@@ -1,4 +1,4 @@
-MODULE UBlok
+MODULE ECPBlock
   USE Parse
   USE Indexing
   USE AtomPairs
@@ -388,4 +388,4 @@ CONTAINS  !
   END FUNCTION Omega2
 #endif
 
-END MODULE UBlok
+END MODULE ECPBlock
