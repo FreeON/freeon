@@ -1,12 +1,12 @@
 #---------------------------------------------------------------
 # PREPROCESSOR OPTIONS: 
 #
-CPP=/lib/cpp -P -C
+CPP       =/lib/cpp -P -C
 CPPINCLUDE=-I$(MONDO_INC) -I$(HDF_INC) -I/usr/local/include
 #
 # PREPROCESSING OPTIONS: 
-CPPOPTS=
-#-DPARALLEL 
+CPPOPTS   =
+#           -DPARALLEL 
 #---------------------------------------------------------------
 # C Compiler and options
 #
@@ -27,7 +27,7 @@ MOD_POSTFIX   = mod
 #
 F90          = pgf90
 #
-F90_OPTIMIZE = #-O2 -tp px -pc 64 
+F90_OPTIMIZE = -O2 -tp px -pc 64 
 #              -Mvect=smallvect:16 -Munroll -Mnoframe \
 #              -Mcache_align -Mnoonetrip -Mr8intrinsics -Minfo=all 
 #
@@ -101,8 +101,7 @@ LibOpts=-L$(MONDO_HOME)/Libs -L/usr/local/lib -L$(HDF_LIB)
 HDF_LIBS=-lhdf5 -ljpeg -lz 
 #
 #-------------------------------------------------------------------------
-#  The generic libs needed by most of the programs.  The F77 MondoMisc is 
-#  being phased out in favor of the F90 MondoMods.
+#  The generic libs needed by most of the programs.  
 #
 F90_LIBRARIES = -lMondoMods $(MPI_LIBS) $(HDF_LIBS) 
 #
@@ -111,9 +110,5 @@ F90_LIBRARIES = -lMondoMods $(MPI_LIBS) $(HDF_LIBS)
 #
 LAPACK = -llapack -lblas
 #
-#---------------------------------------------------------------------------
-#  Define main__ if needed to link libf2c
-#
-#MAIN__= MAIN.o
 #---------------------------------------------------------------------------
 

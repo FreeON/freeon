@@ -24,9 +24,9 @@ MOD_POSTFIX   = MOD
 #
 F90           = f95
 #
-#F90_OPTIMIZE = -O4  -Ounroll=1 -Ounsafe 
+F90_OPTIMIZE = -O4  -Ounroll=1 -Ounsafe 
 #
-F90_DEBUG     = -C=all  -g90 -gline 
+#F90_DEBUG     = -C=all  -g90 -gline 
 #
 F90_MISC      =  -mismatch_all -u -v -Oassumed=always_contig -maxcontin=200
 #
