@@ -168,6 +168,7 @@ PROGRAM QCTC
      ENDIF
 
      CALL Put(E_Nuc_Tot,'E_NuclearTotal')
+     CALL Put(E_Nuc_Tot,'E_NuclearTotal',StatsToChar(Current))
   ENDIF 
 !-------------------------------------------------------------------------------
 ! QM calculations
