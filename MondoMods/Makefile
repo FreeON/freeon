@@ -41,7 +41,7 @@ MModObjs = GlobalScalars.o GlobalCharacters.o DerivedTypes.o    \
            Anneal.o Order.o Order77.o Random.o PrettyPrint.o McMurch.o   \
            LinAlg.o LinAlg77.o MatFunk.o SMWrap.o SpecFun.o     \
            D1Mach.o DCSEvl.o DErf.o DErfc.o DMach.o InitDS.o    \
-           Thresholding.o Functionals.o PBC.o AtomPairs.o       \
+           Mechanics.o Thresholding.o Functionals.o PBC.o AtomPairs.o       \
            BoundingBox.o BraBloks.o Macros.o 
 #
 MModRel  = GlobalScalars.x GlobalCharacters.x DerivedTypes.x    \
@@ -52,7 +52,7 @@ MModRel  = GlobalScalars.x GlobalCharacters.x DerivedTypes.x    \
            Anneal.x Order.x Order77.x Random.x PrettyPrint.x McMurch.x   \
            LinAlg.x LinAlg77.x MatFunk.x SMWrap.x SpecFun.x     \
            D1Mach.x DCSEvl.x DErf.x DErfc.x DMach.x InitDS.x    \
-           Thresholding.x Functionals.x PBC.x AtomPairs.x       \
+           Mechanics.o Thresholding.x Functionals.x PBC.x AtomPairs.x       \
            BoundingBox.x BraBloks.x Macros.x EllToInclude.x     \
            FTest.x SMTest.x  
 #
@@ -163,7 +163,7 @@ LinAlg.o: 		Thresholding.o MondoMPI.o Clock.o Order.o \
 Macros.o: 		AtomPairs.o Functionals.o InOut.o Clock.o \
 			Parse.o PrettyPrint.o ParsingConstants.o \
 			GlobalCharacters.o GlobalObjects.o GlobalScalars.o \
-			DerivedTypes.o 
+			DerivedTypes.o Mechanics.o
 #
 MatFunk.o: 		PrettyPrint.o GlobalCharacters.o GlobalScalars.o \
 			DerivedTypes.o 
@@ -219,5 +219,5 @@ SpecFun.o: 		MMA/LookUpTables/Exp.Inc \
 			DerivedTypes.o 
 #
 Thresholding.o: 	GlobalObjects.o GlobalCharacters.o GlobalScalars.o \
-			DerivedTypes.o InOut.o SpecFun.o
+			DerivedTypes.o InOut.o SpecFun.o Mechanics.o
 #------------------------------------------------------------------------------

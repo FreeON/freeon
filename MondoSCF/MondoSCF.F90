@@ -15,6 +15,9 @@ PROGRAM MondoSCF
   USE DrvFrcs
   USE ProcessControl    
   USE InOut
+#ifdef MMech
+  USE Mechanics
+#endif
 !
   IMPLICIT NONE
   TYPE(SCFControls)     :: Ctrl
@@ -38,7 +41,7 @@ WRITE(*,*)' INITed '
 ! Parse input
   CALL ParseInp(Ctrl)
 #ifdef MMech
-  Mechanics=Ctrl%Mechanics
+  MechFlag=Ctrl%Mechanics
 #endif
 !
 ! Set up the SCF or MM

@@ -10,6 +10,9 @@ MODULE Macros
    USE InOut
    USE Functionals
    USE AtomPairs
+#ifdef MMech
+   USE Mechanics
+#endif
 #ifdef PARALLEL
    USE MondoMPI
 #endif
@@ -33,8 +36,6 @@ MODULE Macros
    CHARACTER(LEN=3)     :: CurGeom
    CHARACTER(LEN=3)     :: PrvGeom
    CHARACTER(LEN=3)     :: NxtGeom
-!  Global parameter for QM/MM
-   LOGICAL,DIMENSION(2) :: Mechanics
 !-------------------------------------------------------------------------------
    CONTAINS
       SUBROUTINE StartUp(Args,Prog,Serial_O)
@@ -91,6 +92,9 @@ MODULE Macros
          ScrName=TRIM(MONDO_SCRATCH)//TRIM(Args%C%C(1))
          PWDName=TRIM(MONDO_PWD)//TRIM(Args%C%C(1))
          InfFile=TRIM(ScrName)//TRIM(InfF)
+#ifdef MMech
+         CALL InitMMech()
+#endif
 !-----------------------------------------------------------------------------
 !        Open HDF file and mark for failure
          CALL OpenHDF(TRIM(InfFile))
@@ -102,8 +106,6 @@ MODULE Macros
          CALL Get(InpFile,'inputfile')
 !        Load global scalars
 #ifdef MMech
-         CALL GET(Mechanics(1),'Ctrl_Mechanics1') 
-         CALL GET(Mechanics(2),'Ctrl_Mechanics2') 
          IF(HasQM())THEN
 #endif
             CALL Get(NEl,      'nel',           Tag_O=CurGeom)
@@ -135,12 +137,14 @@ MODULE Macros
             CALL Get(OffS,'atoff',Tag_O=CurBase)
             ! Load global value for max block size
             MaxBlkSize=0
-            DO I=1,NAtoms; MaxBlkSize=MAX(MaxBlkSize,BSiz%I(I)); ENDDO
-               ! Load global thresholding values
-               CALL SetThresholds(CurBase)
+            DO I=1,NAtoms 
+               MaxBlkSize=MAX(MaxBlkSize,BSiz%I(I)) 
+            ENDDO
+            ! Load global thresholding values
+            CALL SetThresholds(CurBase)
 #ifdef MMech
          ELSE !!! for the MMOnly case
-            CALL SetMMThresholds('1')
+            CALL SetThresholds('1')
          ENDIF
 #endif
 #ifdef PARALLEL
@@ -245,28 +249,6 @@ MODULE Macros
          A%CPUS=CPUSec()
          A%Wall=WallSec()
      END SUBROUTINE Init_TIME
-!-------------------------------------------------------------------------------
- 
-!-------------------------------------------------------------------------------
-     FUNCTION HasMM() 
-       LOGICAL :: HasMM
-       HasMM=Mechanics(1)
-     END FUNCTION HasMM
-!
-     FUNCTION HasQM() 
-       LOGICAL :: HasQM
-       HasQM=Mechanics(2)
-     END FUNCTION HasQM
-!
-     FUNCTION MMOnly() 
-       LOGICAL :: MMOnly
-       MMOnly=Mechanics(1).AND..NOT.Mechanics(2)
-     END FUNCTION MMOnly
-!
-     FUNCTION QMOnly() 
-       LOGICAL :: QMOnly
-       QMOnly=Mechanics(2).AND..NOT.Mechanics(1)
-     END FUNCTION QMOnly
 !-------------------------------------------------------------------------------
  
 !-------------------------------------------------------------------------------

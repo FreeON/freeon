@@ -10,6 +10,9 @@ MODULE Thresholding
   USE SpecFun
   USE Parse
   USE McMurchie
+#ifdef MMech
+  USE Mechanics
+#endif
 !-------------------------------------------------  
 !  Primary thresholds
    TYPE(TOLS), SAVE :: Thresholds
@@ -28,6 +31,9 @@ MODULE Thresholding
          CHARACTER(LEN=*) :: Base
 !        Get the primary thresholds
          CALL Get(Thresholds,Tag_O=Base)
+#ifdef MMech
+         IF(HasQM())THEN
+#endif
 !        Get distribution exponents
          CALL Get(NExpt,'nexpt',Tag_O=Base)
          CALL Get(Lndx ,'lndex',Tag_O=Base)
@@ -43,19 +49,10 @@ MODULE Thresholding
          CALL SetAtomPairThresh(Thresholds%Dist)
 !        Set Prim-Prim thresholds
          CALL SetPrimPairThresh(Thresholds%Dist)
-     END SUBROUTINE SetThresholds
-!===================================================
 #ifdef MMech
-     SUBROUTINE SetMMThresholds(Base)
-! this routine is a modification of SetThresholds
-         CHARACTER(LEN=*) :: Base
-         CALL Get(Thresholds,Tag_O=Base)
-         MinZab=NuclearExpnt
-         MinXab=MinZab/Four
-         CALL SetAtomPairThresh(Thresholds%Dist)
-         CALL SetPrimPairThresh(Thresholds%Dist)
-     END SUBROUTINE SetMMThresholds
+         ENDIF
 #endif
+     END SUBROUTINE SetThresholds
 !====================================================================================================
 !    Preliminary worst case thresholding at level of atom pairs
 !    Using Exp[-MinXab*|A-B|^2] = Tau 
