@@ -132,7 +132,7 @@ CONTAINS
 
     !
     ! Check the coordinates.
-    CALL GeoConflictCheck1(G)
+    CALL GeoConflictCheck(G)
     !
   END SUBROUTINE LoadCoordinates
 !
