@@ -36,7 +36,7 @@ CONTAINS
 !
 !--------------------------------------------------------
 !
-   SUBROUTINE EXCL(Natoms,Cur,InfFile,E_LJ_EXCL,E_C_EXCL,Grad_Loc)
+   SUBROUTINE EXCL(GMLoc,E_LJ_EXCL,E_C_EXCL,Grad_Loc)
 !
 ! Calculate the Coulomb and Lennard-Jones exclusion 
 ! energies and gradients for MM and QMMM calculations
@@ -45,15 +45,13 @@ CONTAINS
 ! gradients in KJ/mol/angstroem
 !
      IMPLICIT NONE
-     CHARACTER(LEN=DEFAULT_CHR_LEN) :: InfFile
      REAL(DOUBLE),OPTIONAL :: E_LJ_EXCL,E_C_EXCL
      TYPE(INT_VECT) :: AtmMark
      TYPE(CRDS) :: GMLoc 
-     INTEGER :: I,J,K,L,M,N,Natoms
+     INTEGER :: I,J,K,L,M,N
      INTEGER :: NMAX12,NMAX13,NMAX14,NMax_Excl,NMax_Excl14
      TYPE(DBL_VECT)    :: LJEps14,LJEps,LJRad,Charge14
      TYPE(INT_RNK2)    :: Top_Loc
-     CHARACTER(LEN=3)  :: Cur
      REAL(DOUBLE) :: XI,YI,ZI,XJ,YJ,ZJ,QI,QJ,CONVF,CONVF2,QI14,QJ14
      REAL(DOUBLE) :: RI,RJ,R6,DIJ,DIJ2,DIJAu,DIJ2Au,Pref1,Pref2
      REAL(DOUBLE) :: QQI,QQI14,QQJ,QQJ14
@@ -61,12 +59,12 @@ CONTAINS
      TYPE(DBL_VECT) :: DVect     
      INTEGER :: ITop
 !
-! If QMMM, distinguish QM and MM atoms
+! WARNING! Input coordinates in Bohrs!
+!
+! If QMMM, distinquish QM and MM atoms
 !   
-     GMLoc%NAtms=Natoms
-     CALL New(GMLoc)
      CALL New(DVect,3)
-     CALL New(AtmMark,Natoms)
+     CALL New(AtmMark,GMLoc%Natms)
 !
      IF(HasQM()) THEN
        CALL Get(AtmMark,'AtmMark')
@@ -78,25 +76,23 @@ CONTAINS
 ! also get 14-charges
 ! also get Topology matrices for 1-2, 1-3 and 1-4 neighbour atoms
 !
-     CALL Get(GMLoc%Carts,'cartesians',Tag_O='GM_MM'//Cur)
      IF(PRESENT(E_LJ_EXCL)) THEN
-       CALL New(LJEps,Natoms)
-       CALL New(LJEps14,Natoms)
-       CALL New(LJRad,Natoms)
+       CALL New(LJEps,GMLoc%Natms)
+       CALL New(LJEps14,GMLoc%Natms)
+       CALL New(LJRad,GMLoc%Natms)
        CALL Get(LJRad,'LJRad')
        CALL Get(LJEps,'LJEps')
        CALL Get(LJEps14,'LJEps14')
        E_LJ_EXCL=Zero
-       DO I=1,Natoms !!!later rather use scale factors
+       DO I=1,GMLoc%Natms !!!later rather use scale factors
          IF(DABS(LJEps%D(I))<1.D-5) LJEps14%D(I)=Zero
        ENDDO
      ENDIF
      IF(PRESENT(E_C_EXCL)) THEN
-       CALL Get(GMLoc%AtNum,'atomicnumbers',Tag_O='GM_MM'//Cur)
-       CALL New(CHARGE14,Natoms)
+       CALL New(CHARGE14,GMLoc%Natms)
        CALL Get(Charge14,'Charge14')
        E_C_EXCL=Zero
-       DO I=1,Natoms !!!later rather use scale factors
+       DO I=1,GMLoc%Natms !!!later rather use scale factors
          IF(DABS(GMLoc%AtNum%D(I))<1.D-5) Charge14%D(I)=Zero
        ENDDO
      ENDIF
@@ -114,17 +110,17 @@ CONTAINS
 !
      IF(ITop==1) THEN
        CALL Get(NMAX_EXCL,'NMAX_EXCL'//'MMTop')
-       CALL New(Top_Loc,(/Natoms,NMAX_EXCL+1/)) 
+       CALL New(Top_Loc,(/GMLoc%Natms,NMAX_EXCL+1/)) 
        CALL Get(Top_Loc,'TOP_EXCL'//'MMTop')
      ENDIF
 !
      IF(ITop==2) THEN
        CALL Get(NMax_Excl14,'NMAX_EXCL14'//'MMTop')
-       CALL New(Top_Loc,(/Natoms,NMax_Excl14+1/)) 
+       CALL New(Top_Loc,(/GMLoc%Natms,NMax_Excl14+1/)) 
        CALL Get(Top_Loc,'TOP_EXCL14'//'MMTop')
      ENDIF
 !
-     DO I=1,Natoms
+     DO I=1,GMLoc%Natms
        IF(PRESENT(E_LJ_EXCL)) THEN
          QI=LJEps%D(I)
          QI14=LJEps14%D(I)
@@ -193,7 +189,6 @@ CONTAINS
      CALL Delete(Top_Loc)
      ENDDO ! ITop
 !
-     CALL Delete(GMLoc)
      CALL Delete(DVect)
      CALL Delete(AtmMark)
      IF(PRESENT(E_LJ_EXCL)) THEN
@@ -228,23 +223,18 @@ CONTAINS
    TYPE(DBL_RNK2),OPTIONAL :: Grad_Loc
    REAL(DOUBLE) :: ELJ,R12_2,Pref1,Pref2
    INTEGER      :: DU,NLocBox,ILocBox,II
-   REAL(DOUBLE) :: DD
+   REAL(DOUBLE) :: DD,SUM
    TYPE(INT_RNK2):: BoxPos
    INTEGER        :: NAtomsLJCell
    TYPE(DBL_VECT) :: LJEpsLJCell,LJRadLJCell
    TYPE(INT_VECT) :: AtmMarkLJCell
    TYPE(DBL_RNK2) :: XYZLJCell
 !
-! LJCutOff is in Bohrs now
-! Cartesians are passed in Angstroems, in present version
-!
-! get MM or QMMM atom coordinates as stored in GMLoc
-! get AtmMark to distinguish between QM and MM atoms
-! get LJEps%D : LJ epsilon
-! get LJRad%D : LJ radii of atoms
-! calculate and get BoxI and BoxJ for a certain Box size, then
-! sum up LJ contributions within Boxes and between 
-! neighbouring Boxes
+! LJCutOff is in Bohrs    
+! Cartesians are passed in Bohrs, in present version
+! WARNING! Subroutines of this routine use translations by vectors 
+! expressed in Bohrs, therefore incoming coordinates should 
+! be in bohrs, as well
 !
 ! Define BoxSize, to determine how fine the division of the system
 ! into atoms will be - in Bohrs
@@ -287,6 +277,11 @@ CONTAINS
    CALL Get(LJEps,'LJEps')
    CALL New(LJRad,GMLoc%Natms)
    CALL Get(LJRad,'LJRad') 
+!
+! Rescale LJRad to atomic units
+!
+   SUM=SQRT(AngstromsToAu)
+   LJRad%D=SUM*LJRad%D
 !
 #ifdef PERIODIC
 ! Now, if periodicity is present, generate nearest neighbour images, 
@@ -380,7 +375,7 @@ enddo
                Q2=LJEpsLJCell%D(JJ2)
                DVect%D(:)=XYZLJCell%D(:,JJ1)-XYZLJCell%D(:,JJ2)
                R12_2=DOT_PRODUCT(DVect%D,DVect%D)                
-               R12=SQRT(R12_2)/AngstromsToAu
+               R12=SQRT(R12_2)
 !
                IF(R12>0.000001D0) THEN
 ! calculate energy contribution

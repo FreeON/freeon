@@ -592,7 +592,7 @@ MODULE DrvSCFs
 !
    CONVF=1000.D0*JtoHartree/C_Avogadro
    CONVF2=1000.D0*JtoHartree/C_Avogadro/AngstromsToAU
-   LJCutOff=14.D0 !!! in Angstroems
+   LJCutOff=28.D0 !!! in Angstroems
    CurG=IntToChar(Ctrl%Current(3)) !!! Current Geom
 !
    IF(Ctrl%Grad==GRAD_NO_GRAD) THEN
@@ -622,8 +622,8 @@ MODULE DrvSCFs
 ! MM coulombenergy is calculated here only for case MMOnly 
 ! Otherwise it is calculated in QCTC and put into HDF later
 !
-mm_coul=0.d0
-call put(mm_coul,'mm_coul',Tag_O=CurG)
+!mm_coul=0.d0
+!call put(mm_coul,'mm_coul',Tag_O=CurG)
    IF(MMOnly()) Then
      CALL MM_COULOMBENERGY(Ctrl)
      CALL GET(MM_COUL,'MM_COUL',Tag_O=CurG)
@@ -650,9 +650,9 @@ call put(mm_coul,'mm_coul',Tag_O=CurG)
          CALL Torsion_Energy(ETorsion,GMLoc%Carts%D,Grad_Loc=GrdMM)
          CALL OutOfPlane_Energy(EOutOfPlane,GMLoc%Carts%D,Grad_Loc=GrdMM)
 !
-         CALL ENERGY_LENNARD_JONES(GMLoc,ELJ,LJCutOff,GrdMM)
   GMLoc%Carts%D=AngstromsToAU*GMLoc%Carts%D
-         CALL EXCL(MM_Natoms,CurG,InfFile,E_LJ_EXCL,E_C_EXCL,GrdMM)
+         CALL ENERGY_LENNARD_JONES(GMLoc,ELJ,LJCutOff,GrdMM)
+         CALL EXCL(GMLoc,E_LJ_EXCL,E_C_EXCL,GrdMM)
 !
      ELSE
 !
@@ -662,9 +662,9 @@ call put(mm_coul,'mm_coul',Tag_O=CurG)
           CALL Torsion_Energy(ETorsion,GMLoc%Carts%D)
           CALL OutOfPlane_Energy(EOutOfPlane,GMLoc%Carts%D)
 !
-          CALL ENERGY_LENNARD_JONES(GMLoc,ELJ,LJCutOff)
   GMLoc%Carts%D=AngstromsToAU*GMLoc%Carts%D
-          CALL EXCL(MM_Natoms,CurG,InfFile,E_LJ_EXCL,E_C_EXCL)
+          CALL ENERGY_LENNARD_JONES(GMLoc,ELJ,LJCutOff)
+          CALL EXCL(GMLoc,E_LJ_EXCL,E_C_EXCL)
 !
      ENDIF
 !
