@@ -52,7 +52,7 @@ CONTAINS
     INTEGER           :: cBAS,cGEO,iSCF
     !----------------------------------------------------------------------------!
     ! Compute one-electron matrices
-    CALL OneEMats(cBAS,cGEO,C%Nams,C%Stat,C%Opts,C%MPIs)
+    CALL OneEMats(cBAS,cGEO,C%Nams,C%Sets,C%Stat,C%Opts,C%MPIs)
     ! Allocate space for convergence statistics
     CALL New(ETot,(/MaxSCFs,C%Geos%Clones/),(/0,1/))
     CALL New(DMax,(/MaxSCFs,C%Geos%Clones/),(/0,1/))
@@ -427,8 +427,9 @@ CONTAINS
   !===============================================================================
 
   !===============================================================================
-  SUBROUTINE OneEMats(cBAS,cGEO,N,S,O,M)
+  SUBROUTINE OneEMats(cBAS,cGEO,N,B,S,O,M)
     TYPE(FileNames):: N
+    TYPE(BasisSets):: B
     TYPE(State)    :: S
     TYPE(Options)  :: O
     TYPE(Parallel) :: M
@@ -452,7 +453,12 @@ CONTAINS
     ELSE
        CALL Invoke('AInv',N,S,M)
     ENDIF
+    ! Kinetic energy matrix T
     CALL Invoke('MakeT',N,S,M)
+    IF(B%BSets(cBAS,1)%HasECPs)THEN
+       ! Make the ECP matrix U 
+       CALL Invoke('MakeU',N,S,M)
+    ENDIF
   END SUBROUTINE OneEMats
   !===============================================================================
   !

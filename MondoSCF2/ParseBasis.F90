@@ -154,6 +154,7 @@ CONTAINS
     BS%MxProjL=0
     BS%Typ1Fnk=0
     BS%Typ2Fnk=0
+    BS%NCoreEl%D=Zero
 !   Parse basis set 
     KFound=0
     REWIND(Bas)
@@ -212,7 +213,7 @@ CONTAINS
                 ! Parse in the ECP info 
                 CALL LineToChars(Line,C)
                 BS%ProjEll%I(NK)=CharToInt(C%C(2))-1
-                BS%NCoreEl%D(NK)=CharToInt(C%C(3))
+                BS%NCoreEl%D(NK)=CharToInt(C%C(3))                
                 BS%MxProjL=MAX(BS%MxProjL,BS%ProjEll%I(NK))
                 CALL Delete(C)
                 ! Read a dummy line, something about potentials 
@@ -226,7 +227,7 @@ CONTAINS
                 DO Prim=1,BS%NTyp1PF%I(NK)
                    READ(Bas,DEFAULT_CHR_FMT,END=99)Line         
                    CALL LineToInts(Line,1,Ints)                      
-                   CALL LineToDbls(Line,N,Dbls)                      
+                   CALL LineToDbls(Line,3,Dbls)                      
                    ! Load this ECPs primitive angular symmetries, exponents and coefficients 
                    BS%Typ1Ell%I(Prim,NK)=Ints(1)
                    BS%Typ1Exp%D(Prim,NK)=Dbls(2)
@@ -244,7 +245,7 @@ CONTAINS
                    BS%Typ2Fnk=MAX(BS%Typ2Fnk,BS%NTyp2PF%I(Ell,NK))
                    DO Prim=1,BS%NTyp2PF%I(Ell,NK)
                       READ(Bas,DEFAULT_CHR_FMT,END=99)Line         
-                      CALL LineToDbls(Line,N,Dbls)                      
+                      CALL LineToDbls(Line,3,Dbls)                      
                       CALL LineToInts(Line,1,Ints)                      
                       ! Load this ECPs primitive angular symmetries, exponents and coefficients 
                       BS%Typ2Ell%I(Prim,Ell,NK)=Ints(1)
@@ -359,19 +360,46 @@ CONTAINS
        B%Typ2Exp%D(1:B%Typ2Fnk,0:B%MxProjL,1:B%NKind)=BS%Typ2Exp%D(1:B%Typ2Fnk,0:B%MxProjL,1:B%NKind)
        B%Typ2CCo%D(1:B%Typ2Fnk,0:B%MxProjL,1:B%NKind)=BS%Typ2CCo%D(1:B%Typ2Fnk,0:B%MxProjL,1:B%NKind)
     ENDIF
-    IF(B%HasECPs)THEN
-       PrintFlags%Set=DEBUG_BASISSET
-       CALL PPrint(B,Unit_O=6)
-    ENDIF
+!    IF(B%HasECPs)THEN
+!       PrintFlags%Set=DEBUG_BASISSET
+!       CALL PPrint(B,Unit_O=6)
+!    ENDIF
     ! Done with the temp BS
     BS%HasECPs=.TRUE.
     CALL Delete(BS)
     ! Compute blocking for sparse matrix methods
     CALL New(BlkSiz,B%NAtms)
     CALL New(OffSet,B%NAtms)
-    CALL BlockBuild(G,B,BlkSiz,OffSet)
+    CALL BlockBuild2(G,B,BlkSiz,OffSet)
     ParseBasisSets=.TRUE.
   END FUNCTION ParseBasisSets
+
+    SUBROUTINE BlockBuild2(G,B,BS,OS)
+      TYPE(CRDS)      :: G
+      TYPE(BSET)      :: B         
+      TYPE(INT_VECT)  :: BS,OS
+      INTEGER         :: NA,NK,NC,Stride
+      !-------------------------------------------------------------------------------------!
+      B%NBasF=0
+      ! Off set starts at 1
+      OS%I(1)=1      
+      DO NA=1,G%NAtms
+         ! Block size is total number of basis functions per atom 
+         BS%I(NA)=0
+         NK=G%AtTyp%I(NA)
+         ! Go over contracted functions
+         DO NC=1,B%NCFnc%I(NK)
+            ! Add in size of each contraction
+            Stride=B%LStop%I(NC,NK)-B%LStrt%I(NC,NK)+1
+            BS%I(NA)=BS%I(NA)+Stride
+            ! Oh yeah, accumulate basis function counter too...
+            B%NBasF=B%NBasF+Stride
+         ENDDO
+         ! Off set counter from block sizes
+         IF(NA.GE.2)OS%I(NA)=OS%I(NA-1)+BS%I(NA-1)         
+      ENDDO
+    END SUBROUTINE BlockBuild2
+
 
 
   SUBROUTINE ReNormalizePrimitives(A)

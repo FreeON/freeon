@@ -116,7 +116,7 @@ CONTAINS
           ENDDO
           CALL CloseHDF(HDFFileID)          
        ELSE       
-          WRITE(*,*)' REPARSING GEOMETRY ON RESTART!!!!'
+          !          WRITE(*,*)' REPARSING GEOMETRY ON RESTART!!!!'
           G%Clones=1
           ALLOCATE(G%Clone(1))
           CALL ParseCoordinates(GEOMETRY_BEGIN,GEOMETRY_END,G%Clone(1))

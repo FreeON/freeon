@@ -152,11 +152,14 @@ CONTAINS
     HDFFileID=OpenHDF(N%HFile)
     DO iCLONE=1,G%Clones
        G%Clone(iCLONE)%Confg=cGEO
-!      Set the correct PBC cell set list
+       ! Set the correct PBC cell set list
        CALL SetLatticeVectors(G%Clone(iCLONE),CS,B%AtomPairThresh(iCLONE,cBAS))
-!      Make sure everything is wrapped correctly
+       ! Make sure everything is wrapped correctly
        CALL WrapAtoms(G%Clone(iCLONE))
        HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
+       ! If we have ECPs, temporarily reset this geometries nuclear charges
+       IF(B%BSets(iCLONE,cBAS)%HasECPs) &
+          CALL SetAtomCharges(G%Clone(iCLONE),B%BSets(iCLONE,cBAS))
 !      Put the geometry to this group ...
        CALL Put(G%Clone(iCLONE),chGEO)
 !      ... and the corresponding lattice vectors which for now ONLY DEPEND
@@ -168,11 +171,12 @@ CONTAINS
        CALL CloseHDFGroup(HDF_CurrentID)
        ! And free memory for the the lattice vectors 
        CALL Delete(CS%CellCarts)
+       ! And unset the nuclear charges in the case of ECPs
+       IF(B%BSets(iCLONE,cBAS)%HasECPs) &
+          CALL UnSetAtomCharges(G%Clone(iCLONE),B%BSets(iCLONE,cBAS))
     ENDDO
     CALL CloseHDF(HDFFileID)
   END SUBROUTINE GeomArchive
-!
-!--------------------------------------------------------------------
 !
   SUBROUTINE GeomReArchive(N,O,G)
     TYPE(FileNames)  :: N
@@ -308,7 +312,6 @@ CONTAINS
     ENDDO
     CALL CloseHDF(HDFFileID)
   END SUBROUTINE BSetArchive
-!
 !---------------------------------------------------------------------
 !
   SUBROUTINE InitState(S,O)
@@ -361,5 +364,38 @@ CONTAINS
     ! Set initial state vector
     CALL InitState(C%Stat,C%Opts)
   END SUBROUTINE InitGlobal
+
+  SUBROUTINE SetAtomCharges(G,B)
+    TYPE(CRDS) :: G
+    TYPE(BSET) :: B
+    INTEGER    :: I
+    DO I=1,G%NAtms
+       G%AtNum%D(I)=G%AtNum%D(I)-B%NCoreEl%D(G%AtTyp%I(I))
+    ENDDO
+    G%NElec=0
+    DO I=1,G%NAtms
+       IF(G%AtNum%D(i)<105.D0) THEN
+          G%NElec=G%NElec+G%AtNum%D(I)
+       ENDIF
+    ENDDO
+    G%NElec=G%NElec-G%TotCh
+  END SUBROUTINE SetAtomCharges
+
+  SUBROUTINE UnSetAtomCharges(G,B)
+    TYPE(CRDS) :: G
+    TYPE(BSET) :: B
+    INTEGER    :: I
+    DO I=1,G%NAtms
+       G%AtNum%D(I)=G%AtNum%D(I)+B%NCoreEl%D(G%AtTyp%I(I))
+    ENDDO
+    G%NElec=0
+    DO I=1,G%NAtms
+       IF(G%AtNum%D(i)<105.D0) THEN
+          G%NElec=G%NElec+G%AtNum%D(I)
+       ENDIF
+    ENDDO
+    G%NElec=G%NElec-G%TotCh
+  END SUBROUTINE UnSetAtomCharges
+
 !
 END MODULE PunchHDF

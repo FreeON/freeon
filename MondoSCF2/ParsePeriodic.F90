@@ -25,7 +25,7 @@ CONTAINS
        CLOSE(Inp)
        RETURN
     ENDIF
-    WRITE(*,*)' reparsing periodics '
+    !    WRITE(*,*)' reparsing periodics '
     ! ... otherwise do some parsing
     CALL LoadPeriodicOptions(PBC)
     CALL LoadLattice(PBC)
