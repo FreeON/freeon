@@ -95,6 +95,7 @@ MODULE RhoUtil
       RECURSIVE FUNCTION RhoAtPoint(Node)
          USE RhoTree
          USE BoundingBox
+         REAL(DOUBLE)                               :: RhoAtPoint
          TYPE(RhoNode), POINTER                     :: Node
          REAL(DOUBLE), DIMENSION(0:HGEll+1)         :: LLambdaX,LLambdaY,LLambdaZ, &
                                                        ULambdaX,ULambdaY,ULambdaZ, &
@@ -187,7 +188,8 @@ MODULE PotUtil
 !        SET THE THRESHOLDS (LOOSE)
          TauPAC=1.D-2
          TauMAC=1.D-2 
-!        Get the Density for Poletree
+!        Get multipoles and density
+         CALL Get(RhoPoles,SCFCycl)
          CALL Get(Rho,'Rho',Arg,0)
 !        Initialize the auxiliary density arrays
          CALL InitRhoAux
