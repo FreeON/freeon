@@ -270,11 +270,6 @@ CONTAINS
                    "Clone #"//TRIM(IntToChar(iCLONE)))
        chGEO=IntToChar(iGEO)
        ! re-initialize space in new HDF. 
-       IF(O%Coordinates==GRAD_CART_OPT) THEN
-         IntCMax=1
-       ELSE
-         IntCMax=IntCPerAtom*GMLoc%NAtms
-       ENDIF
        GMAux%NAtms=GMLoc%NAtms
        CALL New(GMAux)
        CALL Put(GMAux,chGEO)

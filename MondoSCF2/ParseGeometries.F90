@@ -155,12 +155,6 @@ CONTAINS
        N=N+1
     ENDDO
     G%NAtms=N
-    IF(Coordinates==GRAD_CART_OPT) THEN
-      IntCMax=1
-    ELSE
-      IntCMax=IntCPerAtom*G%NAtms
-    ENDIF
-    G%IntCs%N=IntCMax
     N=0
     CALL New(G) ! Allocate a geometry
 !   Parse the coordinates

@@ -1428,9 +1428,8 @@ GradNew%D(J,NatmsNew+K)=Zero
        IF(AllocQ(G%Clone(iCLONE)%IntCs%Alloc)) THEN
          CALL Delete(G%Clone(iCLONE)%IntCs)
        ENDIF
-       G%Clone(iCLONE)%IntCs%N=IntCMax
+       G%Clone(iCLONE)%IntCs%N=0
        CALL New(G%Clone(iCLONE)%IntCs,G%Clone(iCLONE)%IntCs%N)
-       G%Clone(iCLONE)%IntCs%Def%C='BLANK'
      ENDDO
    END SUBROUTINE ReDefIntCs
 !
