@@ -323,6 +323,9 @@ MODULE PBCFarField
     Pz=Half*(Q%Box%BndBox(3,2)-Q%Box%BndBox(3,1))
     PACDist = SQRT(Px*Px+Py*Py+Pz*Pz)
 !
+!    IRMin = 400
+!    IRMax = 410
+!
 !   MAC DISTANCE
 !
     MACDist = Zero
@@ -350,7 +353,7 @@ MODULE PBCFarField
 !
 !   Generate the Cells for the Inner Box
 !  
-    Radius = MAX(MACDist,PACDist)
+    Radius = SQRT(MACDist*MACDist+PACDist*PACDist)
     CALL New_CellSet_Sphere(CS_IN,GM%PBC%AutoW,GM%PBC%BoxShape,Radius)
     DO 
        IF(CS_IN%NCells .LT. IRmax) THEN
