@@ -6,7 +6,7 @@ MODULE BasisSetParameters
    INTEGER, PARAMETER :: MaxPrmtv=20
    INTEGER, PARAMETER :: MaxASymt= 4
    INTEGER, PARAMETER :: MaxLTyps=10
-   INTEGER, PARAMETER :: NSupSets=30
+   INTEGER, PARAMETER :: NSupSets=31
 
    ! Element 105 is a ghost function with charge = 0. 
   
@@ -37,11 +37,11 @@ MODULE BasisSetParameters
   207.2D0,       208.9804D0,    209.0D0,       210.0D0,       222.0D0,       223.0197D0,    &
   226.0254D0,    227.0278D0,    232.03804D0,   231.03588D0,   238.029D0,     237.0482D0,    &
   244.0D0,       243.0D0,       247.0D0,       247.0D0,       251.0D0,       252.0D0,       &
-  257.0D0,       258.0D0,       259.0D0,       260.0D0,       261.0D0,       0.D0  /)
+  257.0D0,       258.0D0,       259.0D0,       260.0D0,       261.0D0,       0.D0           /)
 !
    CHARACTER(LEN=BASESET_CHR_LEN), &
      DIMENSION(2,NSupSets)     :: CSets=RESHAPE( (/        &
-     ! ALL ELECTRON BASIS SETS
+!               ALL ELECTRON BASIS SETS
                 'sto-2g          ' , 'STO-2G          ',   &  ! 1
                 'sto-3g          ' , 'STO-3G          ',   &  ! 2
                 'sto-6g          ' , 'STO-6G          ',   &  ! 3
@@ -68,12 +68,14 @@ MODULE BasisSetParameters
                 'ahlrichs_vtz    ' , 'Ahlrichs_VTZ    ',   &  ! 24
                 'ahlrichs_tzv    ' , 'Ahlrichs_TZV    ',   &  ! 25
                 'wtbs            ' , 'WTBS            ',   &  ! 26
-                ! ECP BASIS SETS
+!               ECP BASIS SETS
                 'sbkjc           ' , 'SBKJC_VDZ_ECP   ',   &  ! 27
                 'lanl2           ' , 'LANL2_DZ_ECP    ',   &  ! 28
-                ! USER DEFINED BASIS SETS
+!               USER DEFINED BASIS SETS
                 'user1           ' , 'User1           ',   &  ! 29
                 'user2           ' , 'User2           '    &  ! 30
+!               Crystal Basis Set
+                'Crystal         ' , 'Crystal98       ',   &  ! 31
                 /), (/2,NSupSets/) )
    CHARACTER(LEN=5),DIMENSION(MaxLTyps) ::  CLTyps = &
          (/'s    ','p    ','d    ','f    ','sp   ', &
