@@ -210,8 +210,7 @@ PROGRAM P2Use
               CALL Filter(dP,T2)
            ENDIF
         ENDDO
-        IF(.TRUE.)THEN
-           !        IF(ABS(dN)>1D0)THEN
+        IF(ABS(dN)>1D-1)THEN
 #ifdef PARALLEL
            IF(MyId==ROOT)THEN
 #endif
