@@ -35,7 +35,7 @@ MODULE GlobalScalars
 !-------------------------------------------------------------------------------
 !  Max Angular Symmetries (d; 4+1=5, f;5+1=6, etc [+1 for gradients])
 !   
-   INTEGER,      PARAMETER :: BFEll=3          ! Max ell for a basis function; 3 == f functions 
+   INTEGER,      PARAMETER :: BFEll=4          ! Max ell for a basis function+1; 4 == f+1 (+1 for gradients)
    INTEGER,      PARAMETER :: BFLen=(BFEll+1)*(BFEll+2)*(BFEll+3)/6 
    INTEGER,      PARAMETER :: PrjEll=3         ! Max ell for ECP related projection opperators
    INTEGER,      PARAMETER :: ECPEll=2         ! Max radial exponent in Gaussian expansions of the ECP
