@@ -1,0 +1,304 @@
+%%
+%% This is file `aps.rtx',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% revtex4.dtx  (with options: `aps')
+%% 
+%% This file is part of the APS files in the REVTeX 4 distribution.
+%% For the version number, search on the string 
+%% Original version by David Carlisle
+%% Modified by Arthur Ogawa (mailto:ogawa@teleport.com)
+%% 
+%% Copyright (c) 1999 The American Physical Society.
+%% http://publish.aps.org/revtex4/
+%% mailto:revtex4@aps.org
+%% 
+%% See the REVTeX 4 README file for restrictions and more information.
+%% 
+\NeedsTeXFormat{LaTeX2e}[1996/06/01]
+\ProvidesFile{aps.rtx}
+          [1999/09/13 v4.0beta 2 RevTeX class (DPC,AO,APS)]%FileInfo
+\ifx\undefined\REVTEX@society@ext
+ \def\@tempa{%
+  \endinput
+  \GenericWarning{I must be read in by REVTeX! (Bailing out)}%
+ }%
+ \expandafter\else
+  \def\@tempa{}%
+ \expandafter\fi\@tempa
+\def\ao{Appl.\  Opt.\ }
+\def\ap{Appl.\  Phys.\ }
+\def\apl{Appl.\ Phys.\ Lett.\ }
+\def\apj{Astrophys.\ J.\ }
+\def\bell{Bell Syst.\ Tech.\ J.\ }
+\def\jqe{IEEE J.\ Quantum Electron.\ }
+\def\assp{IEEE Trans.\ Acoust.\ Speech Signal Process.\ }
+\def\aprop{IEEE Trans.\ Antennas Propag.\ }
+\def\mtt{IEEE Trans.\ Microwave Theory Tech.\ }
+\def\iovs{Invest.\ Ophthalmol.\ Vis.\ Sci.\ }
+\def\jcp{J.\ Chem.\ Phys.\ }
+\def\jmo{J.\ Mod.\ Opt.\ }
+\def\josa{J.\ Opt.\ Soc.\ Am.\ }
+\def\josaa{J.\ Opt.\ Soc.\ Am.\ A }
+\def\josab{J.\ Opt.\ Soc.\ Am.\ B }
+\def\jpp{J.\ Phys.\ (Paris) }
+\def\nat{Nature (London) }
+\def\oc{Opt.\ Commun.\ }
+\def\ol{Opt.\ Lett.\ }
+\def\pl{Phys.\ Lett.\ }
+\def\pra{Phys.\ Rev.\ A }
+\def\prb{Phys.\ Rev.\ B }
+\def\prc{Phys.\ Rev.\ C }
+\def\prd{Phys.\ Rev.\ D }
+\def\pre{Phys.\ Rev.\ E }
+\def\prl{Phys.\ Rev.\ Lett.\ }
+\def\rmp{Rev.\ Mod.\ Phys.\ }
+\def\pspie{Proc.\ Soc.\ Photo-Opt.\ Instrum.\ Eng.\ }
+\def\sjqe{Sov.\ J.\ Quantum Electron.\ }
+\def\vr{Vision Res.\ }
+\renewenvironment{titlepage}{%
+  \let\wastwocol@sw\twocolumn@sw
+  \wastwocol@sw{\onecolumn}{\newpage}%
+  \thispagestyle{titlepage}%
+  \c@page\z@% article sets this to one not zero???
+}{%
+  \wastwocol@sw{\twocolumn}{\newpage}%
+}%
+\def\ps@titlepage{\ps@empty}%
+\def\frontmatter@abstractheading{%
+ \preprintsty@sw{%
+  \begin{center}\large\abstractname\end{center}%
+  \vspace{-1pc}%
+ }{}%
+}%
+\def\frontmatter@abstractwidth{.75\textwidth}
+\def\frontmatter@abstractfont{\small}%
+\@ifxundefined\footinbib@sw{\@booleantrue\footinbib@sw}{}%
+ \AtBeginDocument{%
+  \preprintsty@sw{%
+   \@ifxundefined\titlepage@sw{\@booleantrue\titlepage@sw}{}%
+   \def\frontmatter@abstractwidth{\textwidth}%
+   \def\frontmatter@affiliationfont{\it}%
+  }{}%
+ }%
+\def\frontmatter@authorformat{%
+ \skip@\@flushglue
+ \@flushglue\z@ plus.3\hsize\relax
+ \centering
+ \baselineskip3ex
+ \parskip\z@skip
+ \@flushglue\skip@
+}%
+\def\frontmatter@above@affiliation{\smallskip}%
+\def\frontmatter@affiliationfont{\small\it}%
+\@ifxundefined\groupauthors@sw{%
+ \clo@groupedaddress
+}{}%
+\def\frontmatter@setup{\normalfont\centering}%
+\def\frontmatter@title@produce{%
+ \begingroup\large\bfseries\@title\par\endgroup
+ \addvspace{2\baselineskip}%
+}%
+\def\frontmatter@makefnmark{\@textsuperscript{\normalfont\@thefnmark}}%
+\def\frontmatter@RRAPformat#1{%
+ \begingroup
+  \centering\parskip.5ex\relax
+  \everypar{\hbox\bgroup(\@gobble@leavemode@uppercase}%
+  \def\par{\@ifvmode{}{\unskip)\egroup\@@par}}%
+  #1\par
+ \endgroup
+}%
+\def\punct@RRAP{;\egroup\ \hbox\bgroup}%
+\def\@gobble@leavemode@uppercase#1#2{\expandafter\MakeTextUppercase}%
+\def\ps@titlepage{%
+  \def\@oddhead{%
+   \hfill
+   \produce@preprints\@preprint
+  }%
+  \let\@evenhead\@oddhead
+  \def\@oddfoot{\hfil\preprintsty@sw{\thepage}{}\hfil}%
+  \let\@evenfoot\@empty
+}%
+\def\produce@preprints#1{%
+ \preprintsty@sw{%
+  \vtop to \z@{%
+   \def\baselinestretch{1}%
+   \small
+   \let\preprint\preprint@cr
+   \halign{\hfil##\cr#1\crcr}%
+   \par
+   \vss
+  }%
+ }{}%
+}%
+\def\preprint@cr#1{#1\cr}%
+ \@ifxundefined\author@note{\def\author@note{\rtx@bibnote}}{}%
+\def\@pnumwidth{1.55em}
+\def\@tocrmarg {2.55em}
+\def\@dotsep{4.5}
+\setcounter{tocdepth}{3}
+\def\tableofcontents{%
+ \addtocontents{toc}{\string\tocdepth@munge}%
+ \print@toc{toc}%
+ \addtocontents{toc}{\string\tocdepth@restore}%
+}%
+\def\tocdepth@munge{%
+  \let\l@section@saved\l@section
+  \let\l@section\@gobble@tw@
+}%
+\def\@gobble@tw@#1#2{}%
+\def\tocdepth@restore{%
+  \let\l@section\l@section@saved
+}%
+\def\l@part#1#2{\addpenalty{\@secpenalty}%
+ \addvspace{2.25em plus\p@}%
+ \begingroup
+  \@tempdima 3em %
+  \parindent \z@ \rightskip \@pnumwidth %
+  \parfillskip -\@pnumwidth
+  {\large \bf %
+  \leavevmode %
+  #1\hfil \hb@xt@\@pnumwidth{\hss #2}}\par
+  \nobreak %
+ \endgroup
+}%
+\def\l@section#1#2{%
+ \addpenalty{\@secpenalty}%
+ \addvspace{1.0em plus\p@}%
+ \@tempdima 3.0em %
+ \begingroup
+  \parindent \z@ \rightskip \@pnumwidth
+  \parfillskip -\@pnumwidth
+  \bf %
+  \leavevmode %
+  \advance\leftskip\@tempdima %
+  \hskip -\leftskip %
+  #1\nobreak\hfil \nobreak\hb@xt@\@pnumwidth{\hss #2}\par
+ \endgroup
+}%
+\def\l@subsection{\@dottedtocline{2}{3.0em}{2.0em}}
+\def\l@subsubsection{\@dottedtocline{3}{5.0em}{1.5em}}
+\def\l@paragraph{\@dottedtocline{4}{6.5em}{1.5em}}
+\def\l@subparagraph{\@dottedtocline{5}{8.0em}{1.5em}}
+\def\listoffigures{\print@toc{lof}}%
+\def\l@figure{\@dottedtocline{1}{1.5em}{2.3em}}
+\def\listoftables{\print@toc{lot}}%
+\let\l@table\l@figure
+\appdef\appendix{%
+ \let\@hangfrom@section\@hangfrom@appendix
+ \let\@hangfroms@section\@hangfroms@appendix
+ \let\@sectioncntformat\@appendixcntformat
+}%
+\def\@hangfrom@appendix#1#2{%
+ #1\@ifempty{#2}{}{:\quad#2}%
+}%
+\def\@hangfroms@appendix#1#2{%
+ #1\appendixname\@ifempty{#2}{}{:\quad#2}%
+}%
+\def\@appendixcntformat#1{\appendixname\ \csname the#1\endcsname}%
+\@ifpackageloaded{natbib}{%
+ \bibpunct{[}{]}{,}{n}{}{,}%
+ \def\NAT@sort{2}%
+}{}%
+\def\bibsection{\section*{\refname}}%
+\def\REV@bibsetup#1{\NAT@bibsetup{\ref{LastBibItem}}}%
+\let\bibpreamble\@empty
+\def\bibfont{%
+ \bibsep\z@\relax
+ \let\NAT@bibsetup\@bibsetup
+ \let\@bibsetup\REV@bibsetup
+ \@ifxundefined\place@bibnumber{%
+  \let\@biblabel\place@bibnumber@inl
+ }{%
+  \let\@biblabel\place@bibnumber
+ }%
+ \def\newblock{\ }%
+}%
+\newenvironment{theindex}{%
+ \let\wastwocol@sw\twocolumn@sw
+ \columnseprule \z@
+ \columnsep 35\p@
+ \c@secnumdepth-\maxdimen
+ \twocolumn[%
+  \section{%
+   \indexname
+  }%
+ ]%
+ \thispagestyle{plain}%
+ \parindent\z@
+ \parskip\z@ plus.3\p@\relax
+ \let\item\@idxitem
+}{%
+ \wastwocol@sw{\clearpage}{\onecolumn}%
+}%
+\def\@idxitem{\par\hangindent 40\p@}
+\def\subitem{\par\hangindent 40\p@ \hspace*{20\p@}}
+\def\subsubitem{\par\hangindent 40\p@ \hspace*{30\p@}}
+\def\indexspace{\par \vskip 10\p@ plus5\p@ minus3\p@\relax}
+\def\journal@pra{pra}%
+\def\journal@prb{prb}%
+\def\journal@prc{prc}%
+\def\journal@prd{prd}%
+\def\journal@pre{pre}%
+\def\journal@prl{prl}%
+\def\journal@prstab{prstab}%
+\def\journal@rmp{rmp}%
+\@ifx{\@journal\journal@pra}{%
+}{}%
+\@ifx{\@journal\journal@prb}{%
+ \bibpunct{}{}{,}{s}{}{\textsuperscript{,}}%
+ \def\NAT@sort{2}%
+ \def\onlinecite#1{\begingroup\let\@cite\NAT@citenum\citealp{#1}\endgroup}%
+ \AtBeginDocument{%
+  \@ifxundefined\place@bibnumber{%
+   \def\place@bibnumber{\place@bibnumber@sup}%
+  }{}%
+ }%
+}{}%
+\@ifx{\@journal\journal@prc}{%
+}{}%
+\@ifx{\@journal\journal@prd}{%
+}{}%
+\@ifx{\@journal\journal@pre}{%
+}{}%
+\@ifx{\@journal\journal@prl}{%
+ \AtBeginDocument{%
+  \lengthcheck@sw{%
+   \Requirepackage{mathtime}%
+  }{}%
+ }%
+ \appdef\set@typesize@hook{%
+  \@ifnum{\@pointsize=10\relax}{%
+   \def\normalsize{%
+    \@setfontsize\normalsize\@xpt\@xiipt
+    \abovedisplayskip 10\p@ \@plus2\p@ \@minus5\p@
+    \belowdisplayskip \abovedisplayskip
+    \abovedisplayshortskip  \abovedisplayskip
+    \belowdisplayshortskip \abovedisplayskip
+    \let\@listi\@listI
+   }%
+  }{}%
+ }%
+ \appdef\set@pica@hook{%
+  \@ifnum{\@pointsize=10\relax}{%
+   \textheight = 55\baselineskip
+   \advance\textheight by \topskip
+  }{}%
+ }%
+}{}%
+\@ifx{\@journal\journal@prstab}{%
+}{}%
+\@ifx{\@journal\journal@rmp}{\input{\@journal\REVTEX@society@ext}}{}%
+\AtBeginDocument{%
+ \@ifxundefined\place@bibnumber{%
+  \def\place@bibnumber{\place@bibnumber@inl}%
+ }{}%
+ \@ifxundefined\@bibstyle{%
+  \def\@bibstyle{apsrev}%
+ }{}%
+}%
+\endinput
+%%
+%% End of file `aps.rtx'.

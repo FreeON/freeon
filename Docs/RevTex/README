@@ -1,0 +1,120 @@
+%% ****** Start of file README ****** %
+%%
+%%
+%%   This file is part of the APS files in the REVTeX 4 distribution.
+%%   Version 4.0 beta 2 of REVTeX, September 14, 1999.
+%%
+%%
+%%   Copyright (c) 1999 The American Physical Society.
+%%
+
+Last updated September 14, 1999
+
+This file describes the contents of this distribution of REVTeX 4.0.
+The definitive source of information about REVTeX 4 is the APS web
+page http://publish.aps.org/revtex4/.
+
+**** NOTE: This is a development set, not a release, so it represents
+**** work in progress. Many bugs present in the beta 1 release of REVTeX
+**** have been fixed, but systematic testing has not been done. This
+**** software is provided strictly for informational purposes.
+
+**** NOTE: This is a beta release. There are bugs in this release, but
+**** we believe it to be quite useable. Users of the beta package should
+**** check the REVTeX 4 web site (http://publish.aps.org/revtex4/)
+**** regularly for new releases and a list of known bugs. If you are
+**** using this beta software beyond January 1, 2000, you shouldn't be!
+
+Please report bugs (patches welcome!) to revtex4@aps.org. This beta
+release is being made to garner feedback (both positive and negative)
+and to make a fully compliant LaTeX2e version of REVTeX available (it
+is long overdue).
+
+Please note that REVTeX 4 has not yet been integrated into the APS
+production process. Thus papers that are submitted in REVTeX 4 may not
+qualify for the compuscript program (i.e., discounted page charges).
+
+Manifest
+--------
+revtex4.dtx  - The somewhat commented source file for revtex4.cls
+               and revsymb.sty.
+revtex4.cls  - The REVTeX 4 class file
+revsymb.sty  - A collection of common symbols for use outside of REVTeX.
+apsrev.bst   - A new custom-bib based BibTeX style file for use with
+               REVTeX 4
+apsrmp.bst   - A new custom-bib based BibTeX style file for use with
+               REVTeX 4 suitable for Reviews of Modern Physics with
+               author/year citations
+aps.rtx      - APS specific REVTeX 4 customizations for Phys. Rev. journals
+rmp.rtx      - REVTeX 4 customizations for Reviews of Modern Physics
+apssamp.tex  - A sample manuscript demonstrating the use of the macros
+template.aps - A template for APS authors to follow
+template.rty - A template for .rty customizations
+10pt.rtx     - For 10 pt fonts
+11pt.rtx     - For 11 pt fonts
+12pt.rtx     - For 12 pt fonts
+revtex4.ins  - A docstrip (version 2.4 or higher) file for extracting
+               revtex4.cls and revsymb.sty from the revtex4.dtx file
+revguide.tex - A short introduction to REVTeX 4
+revguide.rty - Customizations for TeX'ing revguide.tex
+revguide.pdf - A typeset form of revguide.tex.
+revtex4.pdf  - A typeset form of revtex4.dtx.
+
+Installation
+------------
+To install REVTeX 4, put revtex4.cls, aps.rtx, rmp.rtx, revsymb.sty,
+and the .bst files somewhere in your TEXINPUTS path or whereever your
+TeX software looks for input files.
+
+Credits
+-------
+The twocolumn mode of REVTeX 4 uses Frank Mittelbach's multicol.sty
+which is distributed with LaTeX2e. The APS has licensed multicol.sty
+for use in REVTeX for APS journals.
+
+David Carlisle created the initial beta version of REVTeX 4 under
+commission by the APS. Arthur Ogawa is now the developer under
+contract for subsequent development, including this beta. APS is
+the maintainer of REVTeX 4, and all bugs are our responsibility.
+Please e-mail complaints to revtex4@aps.org.
+
+Backwards compatibility
+-----------------------
+The REVTeX 4 class file has been named revtex4.cls to distinguish it
+from its predecessors. If the class file is copied to revtex.cls,
+files created with earlier versions of REVTeX should still work.
+
+LaTeX2e requirements
+--------------------
+REVTeX 4 requires LaTeX2e [1996/06/01]
+
+Recommended styles and packages
+--------------------------
+By moving to full LaTeX2e support, REVTeX users can now take advantage
+of many of the well-supported style files and packages available. Here are
+some that are particularly useful and recommended.
+
+amsfonts.sty, amssymb.sty, and amsmath.sty have many useful macros and symbols,
+and are recommended.
+
+longtable.sty for long tables
+
+hyperref.sty for hyperlinking - should work well with REVTeX 4.
+
+graphics.sty and graphicx.sty for figure inclusion - part of LaTeX2e's
+standard distribution.
+
+bm.sty for bold math
+
+Please see the REVTeX 4 documentation for more information.
+
+PDF Documentation
+-------
+This release contains the documentation in PDF format. Creating these
+PDF documents requires two packages, soon to be released on CTAN; they
+are provided in this release. They are *not* needed for running REVTeX
+itself.
+
+ltxdocext.sty - Extensions to ltxdoc.cls
+acrofont.sty  - Font package
+

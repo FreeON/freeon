@@ -1,0 +1,129 @@
+%% ****** Start of file template.aps ****** %
+%%
+%%
+%%   This file is part of the APS files in the REVTeX 4 distribution.
+%%   Version 4.0 beta 2 of REVTeX, September 14, 1999.
+%%
+%%
+%%   Copyright (c) 1999 The American Physical Society.
+%%
+%%   See the REVTeX 4 README file for restrictions and more information.
+%%
+%
+% This is a template for producing files for use with REVTEX 4.0 beta
+% Copy this file to another name and then work on that file.
+% That way, you always have this original template file to use.
+%
+% Group addresses by affiliation. Use superscriptaddress for long
+% author lists or if there are many overlapping affiliations
+% For Phys. Rev. look and feel change preprint to twocolumn
+
+\documentclass[aps,preprint,groupedaddress,showpacs]{revtex4}
+%\documentclass[aps,preprint,superscriptaddress,showpacs]{revtex4}
+%\documentclass[aps,twocolumn,groupedaddress]{revtex4}
+
+\begin{document}
+% You should use BibTeX and revtex.bst for references
+\bibliographystyle{apsrev}
+% marks overfull lines with blackboxes
+%\draft - no longer supported, use the 'draft' option instead
+
+% Use the \preprint command to place your local institutional report
+% number on the title page in preprint mode.
+% Multiple \preprint commands are allowed.
+%\preprint{}
+
+%Title of paper
+\title{}
+% Optional argument for running titles on pages
+%\title[]{}
+
+% repeat the \author .. \affiliation  etc. as needed
+% \email, \thanks, \homepage, \altaffiliation all apply to the current
+% author. Explanatory text should go in the []'s, actual e-mail
+% address or url should go in the {}'s for \email and \homepage.
+% Please use the appropriate macro for the type of information
+
+% \affiliation command applies to all authors since the last
+% \affiliation command. The \affiliation command should follow the
+% other information
+
+\author{}
+%\email[]{Your e-mail address}
+%\homepage[]{Your web page}
+%\thanks{}
+%\altaffiliation{}
+\affiliation{}
+
+%Collaboration name if desired (requires use of superscriptaddress
+%option in \documentclass). \noaffiliation is required (may also be
+%used with the \author command).
+%\collaboration{}
+%\noaffiliation
+
+\date{\today}
+
+\begin{abstract}
+% insert abstract here
+\end{abstract}
+% insert suggested PACS numbers in braces on next line
+\pacs{}
+
+%\maketitle must follow title, authors, abstract and \pacs
+\maketitle
+
+% body of paper here - Use proper section commands
+% References should be done using the \cite, \ref, and \label commands
+\section{}
+%\label{}
+\subsection{}
+\subsubsection{}
+
+% If in twocolumn mode, this environment will move to single column
+% format so that long equations can be displayed. Use
+% sparingly. Requires multicol.sty (automatically read in by the
+% twocolumn option).
+%\begin{widetext}
+% put long equation here
+%\end{widetext}
+
+% If you have acknowledgements this puts in the proper section
+%\acknowledgements
+
+% Create the reference section using BibTeX
+\bibliography{your bib file}
+
+% figures follow here or may be put into the text as floats.
+% Use the graphics or
+% graphicx packages distributed with LaTeX2e. See the LaTeX Graphics
+% Companion by Michel Goosens, Sebastian Rahtz, and Frank Mittelbach
+% for instance.
+%
+% Here is an example of the general form of a figure:
+% Fill in the caption in the braces of the \caption{} command. Put the label
+% that you will use with \ref{} command in the braces of the \label{} command.
+%
+% \begin{figure}
+% \caption{}
+% \label{}
+% \end{figure}
+
+% tables follow here or maybe be put in the text
+%
+% Here is an example of the general form of a table:
+% Fill in the caption in the braces of the \caption{} command. Put the label
+% that you will use with \ref{} command in the braces of the \label{} command.
+% Insert the column specifiers (l, r, c, d, etc.) in the empty braces of the
+% \begin{tabular}{} command.
+%
+% \begin{table}
+% \caption{}
+% \label{}
+% \begin{tabular}{}
+% \end{tabular}
+% \end{table}
+
+\end{document}
+%
+% ****** End of file template.aps ******
+
