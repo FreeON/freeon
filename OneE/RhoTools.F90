@@ -328,6 +328,7 @@ MODULE RhoTools
 !
 !   Count the number of Exponents and MAX angular symetry
 !
+    IE=0
     NExpt = 0
     CALL New(Expt,Rho_new%NDist)
     CALL New(Lndx,Rho_new%NDist)
@@ -335,7 +336,7 @@ MODULE RhoTools
        Zeta = Rho_new%Zeta%D(I)
        Ell  = Rho_new%Ell%I(I)
        DO J=1,NExpt
-          IF(ABS(Expt%D(J)-Zeta) < 1.D-10) THEN
+          IF(ABS(Expt%D(J)-Zeta) < 1.D-6) THEN
              IE = J
              GOTO 100
           ENDIF
@@ -344,7 +345,7 @@ MODULE RhoTools
        Expt%D(NExpt) = Zeta
        Lndx%I(NExpt) = Ell
 100    CONTINUE
-       Lndx%I(IE) = MAX(Lndx%I(IE),Ell)
+       IF(IE/=0)Lndx%I(IE) = MAX(Lndx%I(IE),Ell)
     ENDDO
 !
 !   Count the number of distributions per  Exponents, the number of distibutions and coefs
