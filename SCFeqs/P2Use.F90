@@ -118,7 +118,12 @@ PROGRAM P2Use
              CALL Warn(' In P2Use, TrP = '//TRIM(DblToChar(TrP)))
         CALL Delete(BlkP)
      ELSE
-        CALL Halt('Attempting to use density superpostion with a non STO basis set.  Try again!')
+        CALL SetToI(P)
+        CALL Warn('Attempting to use density superpostion with a non STO basis set. Going for scaled I.')
+        CALL Multiply(P,DBLE(NEl)/DBLE(2*NBasF))
+        TrP=Trace(P)
+        IF(ABS(TrP-DBLE(NEl/Two))>1.D-10) &
+             CALL Warn(' In P2Use, TrP = '//TRIM(DblToChar(TrP)))
      ENDIF
   ELSEIF(SCFActn=='GuessEqCore')THEN
      ! Guess == Core
