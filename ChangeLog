@@ -1,3 +1,160 @@
+2004-10-01 11:09  mchalla
+
+	* Docs/DM_Papers/PERT_3/Response3.tex: [no log message]
+
+2004-09-30 07:55  vweber
+
+	* ONX2/ONX2.F90: Fixed problem with basis set switch. BSiz, OffS
+	and NBasF were set for the previous basis, need both sets previous
+	and current for Kcc and Dpp.
+
+2004-09-28 09:57  tymczak
+
+	* Docs/MD_paper/: MD_Paper_no1.ps, MD_Paper_no1.tex: [no log
+	message]
+
+2004-09-28 06:22  vweber
+
+	* TwoE/GRD/DERIInterface.m: Added DoStress switch
+
+2004-09-28 04:49  vweber
+
+	* TwoE/GRD/: BRAHRR.m, CNTRCTG.m, FRONTM.m, GRD.m, KETHRR.m: Added
+	MMA code to compute stress integrals. HF-stress should work for s
+	function.  Now I need to add the stress-vrr to be general. Added
+	also a switch -DoStress- in GRD.m which permits to have or not the
+	stress.
+
+2004-09-27 08:53  vweber
+
+	* ONX2/GONX2.F90: [no log message]
+
+2004-09-27 07:31  vweber
+
+	* ONX2/: GONX2.F90, GONX2ComputDK.F90, ONX2ComputK.F90,
+	ONX2List.F90: Added backgroud for HH-stress evaluation and bra-ket
+	symmetry.
+
+2004-09-27 07:30  vweber
+
+	* TwoE/MSC/ShellPairStruct.F90: Added bra-ket symmetry in the
+	interface.  Added a switch in the shellpairs.
+
+2004-09-27 07:29  vweber
+
+	* TwoE/: GRD/DERIInterface.m, GRD/dERIInterfaceB.Inc,
+	INT/ERIInterface.m, INT/ERIInterfaceB.Inc,
+	INT/ERIListInterfaceB.Inc: Added bra-ket symmetry in the interface.
+
+2004-09-25 22:11  nemeth
+
+	* MondoSCF2/QUICCA.F90: Another modification, that has been left
+	out from the previous check-in.
+
+2004-09-25 17:57  nemeth
+
+	* MondoSCF2/QUICCA.F90: Extremely small range based fitting is also
+	allowed from now on. See example of T23 of Baker's, concerning
+	pyramidalisation of originally perfectly planar NH2 group.
+
+2004-09-25 13:06  mchalla
+
+	* OneE/UBlok.F90: Seems to be working for PBCs.  Fixed problems
+	with missing Gaussian overlap in radial integrals.
+
+2004-09-25 13:05  mchalla
+
+	* BasisSets/User4.bas: This is the CRYSTALized Hay-Wadt ECP basis
+	for AgCl, taken from the CRYSTAL98 test14.d12.	S:
+	-------------------------------------------------------------------
+	---
+
+2004-09-25 13:04  mchalla
+
+	* Validate/AgCl.inp: Silver chloride demo with ECPs.
+
+2004-09-24 10:34  vweber
+
+	* ONX2/: GONX2.F90, Makefile, ONX2.F90, ONX2ComputK.F90,
+	PartDrv.F90: Fixed parallel problem. The onx2 may set empty fastmat
+	rows (wanted) and this is not compatible with fastmat reduce. Added
+	a routine RmEmptyRow after computK.
+	
+	Also changed the parallel fill out stuff.
+	
+	Removed IntSSSS from Makefile, we don't need that any more.
+
+2004-09-22 16:27  tymczak
+
+	* QCTC/LibQCTC/PoleGlobals.F90: [no log message]
+
+2004-09-22 13:28  tymczak
+
+	* QCTC/Makefile: Copiles DivPFFT
+	
+	CJ
+
+2004-09-22 13:27  tymczak
+
+	* QCTC/MakePFFT.F90: 
+	Fixed Bug
+	
+	CJ
+
+2004-09-21 13:58  nemeth
+
+	* MondoSCF2/InCoords.F90: Fixed a bug in the generation of fragment
+	coordinates.
+
+2004-09-21 11:32  nemeth
+
+	* MondoSCF2/InCoords.F90: A bug fixed for in the generation of
+	fragment coordinates.
+
+2004-09-20 22:25  nemeth
+
+	* MondoSCF2/: InCoords.F90, Optimizer.F90, ParseGeomOpt.F90: A new
+	version of the optimizer. More efficient recognition of bonding
+	scheme in ionic compounds, like NaCl.
+
+2004-09-20 15:21  mchalla
+
+	* Docs/DM_Papers/PERT_3/: Makefile, Response3.tex: Just getting the
+	ball rolling on this...
+
+2004-09-20 13:26  tymczak
+
+	* HiCu/XCForce.F90: Fixed a Bug, Factor Off two
+
+2004-09-18 00:28  nemeth
+
+	* MondoSCF2/InCoords.F90: Definition and selection of long-range
+	torsions in crystals improved. Helps for IceIh, NH4Cl, etc.
+
+2004-09-17 12:42  nemeth
+
+	* MondoSCF2/InCoords.F90: Iterative backtransformation is allowed
+	to be repeated, as before, in case of too big steps.
+
+2004-09-16 23:28  nemeth
+
+	* MondoSCF2/InCoords.F90: [no log message]
+
+2004-09-16 23:15  nemeth
+
+	* MondoSCF2/InCoords.F90: Extra printing commented out.
+
+2004-09-16 23:09  nemeth
+
+	* MondoSCF2/: InCoords.F90, Optimizer.F90, PunchHDF.F90: A new
+	version of the optimizer, with improved recognition of connected
+	linear bendings (eg ice) and improved filtering of translationally
+	equivalent internal coordinates of crystals.
+
+2004-09-15 15:20  mchalla
+
+	* ChangeLog: [no log message]
+
 2004-09-15 15:19  mchalla
 
 	* OneE/UBlok.F90: Hopefully fixed code so ECPs work with PBCs!
