@@ -34,6 +34,8 @@ CPPMISC=#-DWORK_ON_DEGENERACY #-DNODIIS #-DSPATIAL_THRESHOLDING #-DFIND_CONDA
 BlkAInvObjs = BlokAInv.o  
 LowdinOObjs = LowdinO.o 
 #
+ODA_Objs   = ODA.o DenMatMethods.o
+MIX_Objs   = MIX.o DenMatMethods.o
 SDMM_Objs  = FillPBlok.o SDMM.o DenMatMethods.o
 SP2_Objs   = FillPBlok.o SP2.o  DenMatMethods.o
 SP4_Objs   = FillPBlok.o SP4.o  DenMatMethods.o
@@ -58,7 +60,7 @@ ReleaseFiles=BlokAInv.x LowdinO.x RHeqs.x    \
              DenMatMethods.x 
 
 #
-all:	RStat DDIIS FBuild TC2Response Blk Lwd RHEq SDMM SP2 SP4 TS4 PM Stat Gues DIIS  
+all:	ODA MIX RStat DDIIS FBuild TC2Response Blk Lwd RHEq SP2 TS4 Stat Gues DIIS  
 #
 release:clean $(ReleaseFiles)
 #
@@ -85,6 +87,24 @@ clean:
 	rm -f $(MONDO_EXEC)/AInv
 	rm -f $(MONDO_EXEC)/LowdinO
 	ln -s /dev/null core
+#
+#       EXTRAPOLATIONATORS
+# 
+DIIS:	$(DIIS_Objs)
+	$(LD) $(LDFLAGS) DIIS $(DIIS_Objs)  $(F90_LIBRARIES) $(LAPACK)
+	mv DIIS $(MONDO_EXEC)/DIIS
+#
+DDIIS:	$(DDIIS_Objs)
+	$(LD) $(LDFLAGS) DDIIS $(DDIIS_Objs)  $(F90_LIBRARIES) $(LAPACK)
+	mv DDIIS $(MONDO_EXEC)/DDIIS
+#
+ODA:	$(ODA_Objs)
+	$(LD) $(LDFLAGS) ODA $(ODA_Objs)  $(F90_LIBRARIES) $(LAPACK)
+	mv ODA $(MONDO_EXEC)/ODA
+
+MIX:	$(MIX_Objs)
+	$(LD) $(LDFLAGS) MIX $(MIX_Objs)  $(F90_LIBRARIES) $(LAPACK)
+	mv MIX $(MONDO_EXEC)/MIX
 #
 #	Orthogonalization transforms
 #
@@ -140,14 +160,6 @@ FBuild:	$(FBuild_Objs)
 	$(LD) $(LDFLAGS) FBuild $(FBuild_Objs)  $(F90_LIBRARIES) 
 	mv FBuild $(MONDO_EXEC)/FBuild
 #
-DIIS:	$(DIIS_Objs)
-	$(LD) $(LDFLAGS) DIIS $(DIIS_Objs)  $(F90_LIBRARIES) $(LAPACK)
-	mv DIIS $(MONDO_EXEC)/DIIS
-#
-DDIIS:	$(DDIIS_Objs)
-	$(LD) $(LDFLAGS) DDIIS $(DDIIS_Objs)  $(F90_LIBRARIES) $(LAPACK)
-	mv DDIIS $(MONDO_EXEC)/DDIIS
-#
 TC2Response:	$(TC2Response_Objs)
 	$(LD) $(LDFLAGS) TC2Response  $(TC2Response_Objs)  $(F90_LIBRARIES) $(LAPACK)
 	mv TC2Response $(MONDO_EXEC)/TC2Response
@@ -164,10 +176,11 @@ P2Use.o:	FillPBlok.o $(MONDO_LIB)/libMondoMods.a
 FillPBlok.o:	            $(MONDO_LIB)/libMondoMods.a
 RHeqs.o:		    $(MONDO_LIB)/libMondoMods.a
 SCFStatus.o:                $(MONDO_LIB)/libMondoMods.a
-SDMM.o:		            $(MONDO_LIB)/libMondoMods.a
-SP2.o:         DenMatMethods.o  $(MONDO_LIB)/libMondoMods.a
-SP4.o:                      $(MONDO_LIB)/libMondoMods.a
-TS4.o:                      $(MONDO_LIB)/libMondoMods.a
-PM.o:                       $(MONDO_LIB)/libMondoMods.a
+ODA.o:	        DenMatMethods.o $(MONDO_LIB)/libMondoMods.a
+MIX.o:	        DenMatMethods.o $(MONDO_LIB)/libMondoMods.a
+SP2.o:          DenMatMethods.o $(MONDO_LIB)/libMondoMods.a
+SP4.o:          DenMatMethods.o $(MONDO_LIB)/libMondoMods.a
+TS4.o:          DenMatMethods.o $(MONDO_LIB)/libMondoMods.a
+PM.o:           DenMatMethods.o $(MONDO_LIB)/libMondoMods.a
 LowdinO.o:		    $(MONDO_LIB)/libMondoMods.a
 BlokAInv.o:		    $(MONDO_LIB)/libMondoMods.a
