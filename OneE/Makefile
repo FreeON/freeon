@@ -64,7 +64,7 @@ TForce:	$(ObjTF)
 	$(LD) $(LDFLAGS) TForce $(ObjTF) $(LibOpts) $(Libs)
 	mv TForce $(MONDO_HOME)/Exec/TForce
 #
-release:clean $(RleaseFiles) 
+release:clean $(ReleaseFiles) 
 #
 purge:	clean
 	rm -f $(REMOVESRCE)
