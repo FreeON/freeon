@@ -44,7 +44,8 @@ MModObjs = GlobalScalars.o GlobalCharacters.o DerivedTypes.o    \
            LinAlg.o LinAlg77.o MatFunk.o AInv.o SMWrap.o SpecFun.o     \
            D1Mach.o DCSEvl.o DErf.o DErfc.o DMach.o InitDS.o    \
            Mechanics.o Thresholding.o Functionals.o PBC.o AtomPairs.o       \
-           BoundingBox.o BraBloks.o Macros.o FastMat.o InCoords.o
+           BoundingBox.o BraBloks.o Macros.o FastMat.o \
+           CholFact.o 
 #
 MModRel  = GlobalScalars.x GlobalCharacters.x DerivedTypes.x    \
            GlobalObjects.x BasisSetParameters.x MPIInclude.x    \
@@ -56,7 +57,7 @@ MModRel  = GlobalScalars.x GlobalCharacters.x DerivedTypes.x    \
            D1Mach.x DCSEvl.x DErf.x DErfc.x DMach.x InitDS.x    \
            Mechanics.x Thresholding.x Functionals.x PBC.x AtomPairs.x       \
            BoundingBox.x BraBloks.x Macros.x FastMat.x EllToInclude.x     \
-           FTest.x SMTest.x  InCoords.x
+           FTest.x SMTest.x CholFact.x InCoords.x
 #
 small:	Mods
 #
@@ -226,6 +227,9 @@ SpecFun.o: 		MMA/LookUpTables/Exp.Inc \
 Thresholding.o: 	GlobalObjects.o GlobalCharacters.o GlobalScalars.o \
 			DerivedTypes.o InOut.o SpecFun.o Mechanics.o
 #
+CholFact.o:             DerivedTypes.o GlobalScalars.o GlobalObjects.o \
+                        GlobalCharacters.o InOut.o MemMan.o  \
+                        PrettyPrint.o ParsingConstants.o  
 InCoords.o:             DerivedTypes.o GlobalScalars.o GlobalObjects.o InOut.o \
 	                MemMan.o SetEq.o ProcessControl.o PrettyPrint.o ParsingConstants.o 
 #------------------------------------------------------------------------------
