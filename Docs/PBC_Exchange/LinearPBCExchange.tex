@@ -24,12 +24,15 @@
 \affiliation{Theoretical Division, Los Alamos National Laboratory, Los Alamos,
 New Mexico 87545 }
 
+\affiliation{Larance Livermore}
+
+
 \date{\today}
 \begin{abstract}
 A translationally invariant formulation of the Hartree-Fock $\Gamma$-point approximation
 is achieved through introduction of the Minimum Image Convention.  This approximation is implemented 
 in the ONX algorithm [J.~Chem Phys, ], extending it to linear scaling computation of the periodic Hartree-Fock 
-exchange matrix.  Convergence of the $\Gamma$-point approximation to the $\bf k$-space limit is demonstrated for 
+exchange matrix.  Convergence of the $\Gamma$-point approximation to the ${\bf k}$-space limit is demonstrated for 
 magnesium oxide, ice and diamond.  True linear scaling is demonstrated for diamond and ice. 
 \end{abstract}
 
@@ -57,7 +60,7 @@ In the simulation of condensed phase systems, Gaussian basis functions have seve
 advantages.  First, they are able to sustain all electron calculations into high 
 pressure regimes where the effects of core electrons may be important. Second, they
 support the application of Hartree-Fock and the hybrid Hartree-Fock/Density Functional 
-Theory (HF/DFT) \cite{Gill92,ABecke93,ABecke93b,VBarone96,CAdammo99} through rapid, 
+Theory (HF/DFT) \cite{Gill92,Becke93,VBarone96,CAdamo99} through rapid, 
 analytic evaluation of the exact Hartree-Fock exchange matrix.  
 The Hartree-Fock approximation is often a fast, first approximation and also a starting point 
 for correlated "wavefunction" methods.  The HF/DFT level of theory is also an important next 
@@ -69,22 +72,22 @@ To date, condensed phase HF and HF/DFT calculations have been carried out almost
 exclusively with the {\em ab initio} solid state program {\sc Crystal98} \cite{} (and
 more recently {\sc Crystal03}), which employs conventional (non-direct) ${\cal O}(N^4)$ 
 algorithms for evaluation of the HF exchange matrix.  The {\sc Crystal} programs employ the
-formally (and numerically) correct $\bf k$-space integration algorithms that generate 
-wavefunctions inclusive of the necessary translational symmetries.   In the so-called $\Gamma$-point
-approximation, these symmetries are omitted, but may be regained in the limit of a large
-super-cell, or in the case of a disordered medium, simply a large cell.  With a more
-tractable formulation and asymptotic correctness in the limit of large systems, the
-$\Gamma$-point approximation represents an ideal basis for linear scaling exchange 
-algorithms.  However, preliminary studies of the naive HF $\Gamma$-point were found (by us)
-to converge to position dependent values different from the $\bf k$-space integration 
-limit.  
+formally (and numerically) correct ${\bf k}$-space integration algorithms that generate 
+wavefunctions  inclusive of the necessary translational symmetries.   In the so-called $\Gamma$-point
+approximation,  these symmetries are omitted, but may be regained in the limit of a large
+super-cell,  or in the case of a disordered medium, simply a large cell.  With a more
+tractable  formulation and asymptotic correctness in the limit of large systems, the
+$\Gamma$-point  approximation represents an ideal basis for linear scaling exchange 
+algorithms.   However, preliminary studies of the naive HF $\Gamma$-point were found (by us)
+to converge to position dependent values different from the ${\bf k}$-space integration 
+limit.   
 
 In this paper we develop a translationally invariant definition of periodic Hartree-Fock exchange 
 in the $\Gamma$-point limit.  This is accomplished through introducing a Minimum Image Convention
 into the two-electron integral algorithm, similar to the approach employed in molecular dynamics when 
 truncating short range potentials \cite{}.  We then go on to describe a modified {\sc ONX} 
 algorithm \cite{} that achieves true linear scaling with the MIC $\Gamma$-point approximation, and 
-numerical equivalence with the $\bf k$-space value in the limit of large super-cells.
+numerical equivalence with the ${\bf k}$-space value in the limit of large super-cells.
 
 %Many calculations of the electronic structure of condensed matter systems now make use
 %of the exact exchange interaction 
@@ -122,74 +125,78 @@ numerical equivalence with the $\bf k$-space value in the limit of large super-c
 
 \section{Periodic exact exchange}
 
-Extending methods involving local functions $\phi$ to the periodic regime, the Bloch functions
+In the conventional implementations of periodic boundary conditions, the 
+Bloch functions 
 \begin{equation}
-\psi^{\bf L}_c ({\bf r})
- = \sum_{\bf u}  e^{i {\bf L}\cdot{\bf u}} \phi_c ({\bf r}-{\bf u})
-\label{bloch}
+\psi^{\bf k}_a({\bf r})  =  \sum_{\bf R} e^{i {\bf k}\cdot {\bf R}} \phi_a ({\bf r}-{\bf R}),
+\label{Block}
 \end{equation}
-are employed as a primary basis having the correct translational symmetry.
-In Eq.~(\ref{bloch}), $\bf L$
-and $\bf u$ are lattice vectors, and the sum 
-formally extends over all periodic images.
+are often constructed from non-orthogonal functions local to the unit cell (UC). Here, the 
+local function
+$\phi_a$ is a Gaussian-Type Atomic Orbital (GTAO) centered on atom {\bf A}, while the 
+sum on {\bf R} runs over the Bravais lattice defined by integer translates of the primitive 
+lattice vectors {\bf a}, {\bf b} and {\bf  c}, and {\bf k} are the reciprocal 
+Bravais Lattice vectors.
+
 To date, rapid computation of the Hartree-Fock exchange interaction demands
 the analytic evaluation of two-electron integrals, which is possible when the 
-local basis functions are of Cartesian Gaussian type.  Typically, these functions have the form
+local basis functions are of Cartesian Gaussian type.  
+Typically, these functions have the form
 \begin{equation}
-\phi_c ({\bf r}) = (x-C_x)^{l_c} (y-C_y)^{m_c} (z-C_z)^{n_c}{\large e}^{-\zeta_c ({\bf r}-{\bf C})^2}
+\phi_a ({\bf r}) = (x-A_x)^{l_a} (y-A_y)^{m_a} (z-A_z)^{n_a}{\large e}^{-\zeta_a ({\bf r}-{\bf A})^2}
 \end{equation}
-where $\bf C$ is an atom center, the triad $\{l_c,m_c,n_c\}$ sets angular symmetry  
-and the exponent $\zeta_c$ is chosen to describe a 
-particular length scale. Gaussian basis functions are often contracted to approximate 
+where the triad $\{l_a,m_a,n_a\}$ sets angular symmetry  
+and the exponent $\zeta_a$ is chosen to describe a particular length scale. 
+Gaussian basis functions are often contracted to approximate 
 atomic eigenfunctions \cite{}.
  
-With periodic boundary conditions, the exact Hartree-Fock exchange matrix is \cite{MCausa88}
+With periodic boundary conditions, the exact Hartree-Fock exchange matrix in real space is \cite{MCausa88}
 \begin{equation}
-K^{\bf M}_{ab}= - \frac{1}{2}
-\sum _{{\bf L N} c d} P^{\bf L}_{cd}
+K_{ab} [{\bf G}]= - \frac{1}{2}
+\sum _{{\bf H N},c d} P_{cd}[{\bf N}]
 \left(
-      \psi        _a    
-      \psi^{\bf L}_c    
+      \phi        _a    
+      \phi^{\bf H}_c    
 {\big | }
-      \psi^{\bf M}_b    
-      \psi^{\bf N+L}_d  
+      \phi^{\bf G}_b    
+      \phi^{\bf H+N}_d  
 \right)
 \label{CryEq}
 \end{equation}
-where the two-electron integrals have been written in chemists notation:
+where the integrations over the Billion Zones has been already been taken, and 
+the two-electron integrals have been written in the notation:
 \begin{eqnarray}
-\lefteqn{
 \left(
-      \psi        _a  
-      \psi^{\bf L}_c  
+      \phi        _a  
+      \phi^{\bf H}_c  
 {\big | }
-      \psi^{\bf M}_b  
-      \psi^{\bf N+L}_d
+      \phi^{\bf G}_b  
+      \phi^{\bf H+N}_d
 \right)
-= }  \nonumber \\
-&& \qquad\qquad
+= \quad\quad\quad\quad\quad 
+ \quad\quad\quad\quad\quad  
+ \quad\quad\quad\quad\quad 
+\nonumber \\
 \iint d {\bf r} d {\bf r}'
-      \frac{
-      \psi        _a    ({\bf r}) 
-      \psi^{\bf L}_c    ({\bf r})~ 
-      \psi^{\bf M}_b    ({\bf r'})
-      \psi^{\bf N+L}_d  ({\bf r'})}
-      {\left|{\bf r}-{\bf r'}\right|} .
+\frac{{\phi_a({\bf r}) \phi_c({\bf r}+{\bf H}})\phi_b({\bf r'}+{\bf G})\phi_d({\bf r'}+{\bf H}+{\bf{N})}}
+{{\left|{\bf r}-{\bf r'}\right|}} 
+\nonumber\\
 \end{eqnarray}
 
 The formally infinite sums over lattice vectors in Eq.~(\ref{CryEq}) involve 
 many contributions that are in practice infinitesimal.  In part this is due to 
 the decay between local basis function products $\phi_a \phi_c $; the product of
-two Guassians centered at $\bf A$ and $\bf C$ decays also as a Gaussian with $|{\bf A}-{\bf C}|$. 
+two Guassians centered at ${\bf A}$ and ${\bf C}$ decays also as a Gaussian with 
+$|{\bf A}-{\bf C}|$. 
 Truncation based purely on the overlap of Gaussian basis functions is reliable and
 well controlled, leading efficiently to ${\cal O}(N)$ product terms.
 Additionally, the density matrix is known to decay exponentially 
 for non-metallic systems.  A radial cutoff $r_x$ defining the range of allowed exchange 
 interactions may be used to exploit this fall off {\em a priori} by confining summation over 
-$\bf L$ and ${\bf M}$ \cite{REuwema74,CPisani80,RDovesi80,MCausa88} to only those terms that 
+${\bf N}$ \cite{REuwema74,CPisani80,RDovesi80,MCausa88} to only those terms that 
 satisfy the imposed geometric constraints.  Radial cutoffs are also used to achieve
 $N$-scaling of the exchange matrix in gas phase calculations by limiting the allowed range 
-of atom centers $\bf C$ and $\bf D$ corresponding to matrix elements $P_{cd}$\cite{}.  
+of atom centers ${\bf C}$ and ${\bf D}$ corresponding to matrix elements $P_{cd}$\cite{}.  
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %\newpage
@@ -197,49 +204,67 @@ of atom centers $\bf C$ and $\bf D$ corresponding to matrix elements $P_{cd}$\ci
 
 \section{Exchange at the $\Gamma$-point}\label{gammapoint}
 
-The $\Gamma$-point approximation lifts translational invariance of the Bloch functions, limiting
-$\bf k$-space sampling to just the central cell; 
- $\psi^{\bf k}_c \rightarrow \delta_{\bf k,0} \sum_{\bf u} \phi_c ({\bf r}-{\bf u})$.
-With $N$-scaling algorithm, the effects of $\bf k$-space integration may be recouped 
-with increasing cell-size.  In this approximation, Eq.~(\ref{CryEq}) reduces to 
+The $\Gamma$-point approximation limits {\bf k}-space sampling to just the central cell, 
+${\bf k} = 0$. With $N$-scaling algorithm, the effects of {\bf k}-space integration may be recouped 
+with increasing cell-size. For the exact exchange matrix great care must be exercised in taking the limit
+of decreasing {\bf k}-space. To this end, and to illustrate the problems asscoiated with this limit, let
+us rewrite Eq.~(\ref{CryEq}) as 
 \begin{equation}
 K_{ab}=
-\sum _{{\bf u v} c d} P_{cd}
+\sum _{{\bf H G N} c d} P_{cd}[{\bf N}]
 \left(
-      \phi        _a    
-      \phi^{\bf u}_c    
+      \phi_a    
+      \phi^{\bf H}_c    
 {\big | }
-      \phi        _b    
-      \phi^{\bf v}_d  
+      \phi^{\bf N}_b  
+      \phi^{\bf N+G}_d  
 \right)
-\label{CryEq}
+\label{CryEq_1}
 \end{equation}
-
-However, in this approximation the exact exchange potential, symmetric in the limit of infinite 
-summation, has been asymmetrically truncated, resulting in a potential that depends on position 
-of the unit cell.  This translational variance has a well understood analogue in classical molecular 
+However, we can not evalulate this expression because for the  $\Gamma$-point approximation 
+$P_{cd}[{\bf N}]$ does not exist, we only have $P_{cd}[{\bf 0}]$. This leads us to two posibilities,
+$P_{cd}[{\bf N}] = P_{cd}$ or $P_{cd}[{\bf N}] = P_{cd} \, \delta_{\bf N 0}$. But the first 
+approximation leads to a divergent integral, so this is not correct. We are forced to consider the
+second approximation, which  gives us the integral,
+\begin{equation}
+K_{ab}=
+\sum _{{\bf H G} c d} P_{cd}[{\bf N}]
+\left(
+      \phi_a    
+      \phi^{\bf H}_c    
+{\big | }
+      \phi_b  
+      \phi^{\bf G}_d  
+\right)
+\label{CryEq_2}
+\end{equation}
+However, ther are two significant problems with this approximation. One,in this approximation the exact 
+exchange potential, symmetric in the limit of infinite summation, has been asymmetrically truncated, 
+resulting in a potential that depends on position  of the unit cell. 
+And two, the $(a \rightarrow c, b \rightarrow d)$ permutational symmetry of the exchange 
+integral is violated.  The translational non-invariance has a well understood analogue in classical molecular 
 dynamics, where the arbitrary truncation of short range potentials also leads to numerical 
 artifacts in energies and forces.  In both cases, translational invariance is restored by 
-introducing the minimum image convention (MIC), which ensures that the distance between neighboring 
+introducing the Minimum Image Convention (MIC), which ensures that the distance between neighboring 
 images is always used in computing interactions. In computation of the Hartree-Fock exchange matrix, 
 the MIC $\Gamma$-point approximation is just
 \begin{equation}
 K_{ab}=
-\sum _{{\bf u v} c d} P_{cd}
+\sum _{{\bf H G} c d} P_{cd}
 \left(
       \phi        _a    
-      \phi^{\bf u}_c    
+      \phi^{\bf H}_c    
 {\big | }
       \phi        _b    
-      \phi^{\bf v}_d  
+      \phi^{\bf G}_d  
 \right)_{\rm  MIC},
 \label{MIC}
 \end{equation}
 where the MIC condition is applied in computation of the two electron integrals
 at the contraction phase, ensuring that primitive charge distributions 
 interact consistently over a minimum distance.  In particular, if the primitive basis 
-function product $\phi_a \phi^{\bf u}_c$ is centered at $\bf P$ and the primitive product 
-$\phi_b \phi^{\bf v}_d$ is at $\bf Q$, then the minimum image convention is 
+function product $\phi_a \phi^{\bf H}_c$ is centered at ${\bf P}$ and the primitive product 
+$\phi_b \phi^{\bf C}_d$ is at ${\bf Q}$, then the minimum image convention is 
 applied to the interaction vector ${\bf PQ} \equiv {\bf P}-{\bf Q}$ using
 \begin{subequations}
 \begin{eqnarray}
@@ -248,19 +273,20 @@ pq_i & =& pq_i - {\tt ANINT} \left( pq_i \right) \\
 {\bf PQ}_{\rm MIC}&=&{\bf M} \cdot {\bf pq} 
 \end{eqnarray}
 \end{subequations}
-where ${\bf  M}$ is the $3 \times 3$ shape matrix of the unit cell 
+where ${\bf  M}$ is the $3 \times 3$ shape matrix of the unit cell, 
+composed of the primative lattice vectors,
 \begin{equation}
-{\bf M} = ?
+{\bf M} = \left( {\bf a}:{\bf b}:{\bf c} \right)
 \end{equation}
-{\bf Need to define the
-box shape matrix and give reference to standard definitions}.
 This approach is completely general, and can be used at the primitive level with any modern approach
-to computing two-electron integrals. 
+to computing two-electron integrals. Imposing this condition recovers translational invariace of the
+exchange matrix, and in the limit of a sparce density matrix it also recovers the permutational
+symmetry mentioned above.
 
 Surprisingly, this work is the first to correctly define the exact Hartree-Fock 
 exchange potential for periodic boundary conditions and the $\Gamma$-point approximation.  Moreover,
 effects related to asymmetric truncation may also manifest in methods that perform incomplete 
-$\bf k$-space sampling, and may likewise benefit from employing the Minimum Image Convention. 
+${\bf k}$-space sampling, and may likewise benefit from employing the Minimum Image Convention. 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %\newpage
@@ -294,12 +320,12 @@ programs from the {\sc MondoSCF} suite of linear scaling quantum chemistry progr
 {\sc ONX} algorithm was described in \onlinecite{}, and its extension to periodic boundary conditions
 outlined in Sections \ref{gammapoint} and \ref{implementation}.  The basic {\sc QCTC} method
 was described in Ref.~\onlinecite{} and its extension to the condensed phase described in 
-Ref.~\onlinecite{CTymczak04a}.   The linear scaling, Quartic Trace-ReSetting ({\sc TRS4}) density 
+Ref.~\onlinecite{CTymczak03a}.   The linear scaling, Quartic Trace-ReSetting ({\sc TRS4}) density 
 matrix solver has been used throughout, together with inverse congruence transformations provided
 by sparse approximate {\sc AINV} \cite{}.  
 
 Comparison is made to the Gaussian orbital periodic {\em ab initio} program {\sc Crystal98}, using
-primarily basis sets designed for the condensed phase.  See Ref.~\onlinecite{MTowlerLib} and references 
+primarily basis sets designed for the condensed phase.  See Ref.~\onlinecite{TowlerLib} and references 
 therein for details on these basis sets. 
 
 
@@ -345,7 +371,7 @@ $^i 8\times8\times8$ $\bf k$-space integration grid  \\
 \end{table}
 
 Table \ref{MgOTable} shows {\sc MondoSCF} $\Gamma$-point super-cell total energies for MgO 
-at the RHF-MIC and RHF-C98 8-511G/8-51G level of theory.  See Ref.~\cite{MTowlerLib} and 
+at the RHF-MIC and RHF-C98 8-511G/8-51G level of theory.  See Ref.~\cite{TowlerLib} and 
 references therein for details on these basis sets.  Comparison is made between RHF
 $\Gamma$-point values obtained using the {\sc Cyrstal98} program, as well as with a final value 
 approaching the $\bf k$-space integration limit for the primitive cell. 
@@ -407,7 +433,7 @@ with the most diffuse $sp$ exponent increased to 0.4, bringing the condition num
 of the overlap matrix into an acceptable range.  The computed lattice constants 
 for diamond are $3.415$\AA~for the {\sc Crystal98} calculation, $3.421$\AA~for 
 the 64 atom RHF-MIC calculation and $3.415$\AA~ for the 512 atom RHF-MIC calculation.
-{\bf In comparison, the RHF/STO-3G lattice constant reported by Dovessi et.al \cite{RDovesei80b} 
+{\bf In comparison, the RHF/STO-3G lattice constant reported by Dovessi et.al \cite{RDovesi80b} 
 is $3.59$\AA, while Euwema \cite{REuwema73} found a HF lattice constant of 3.54 using 13 
 Gaussian basis functions per atom.  This should be compared to the experimental value of $3.57$\AA.
 Thus, we are off by $0.15$\AA. }

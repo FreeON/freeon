@@ -153,28 +153,30 @@ functionals
 discuss the calculation of each of the terms in the Hamiltonian 
 and how they are calculated in the non-orthogonal Gaussian basis
 with the inclusion of periodic boundary conditions.
-
 }
 
 \section{periodic boundary conditions, linear scaling and basis sets}
 
-In conventional implementations of periodic boundary conditions, 
+In the conventional implementations of periodic boundary conditions, the 
 Bloch functions 
 \begin{equation}
-\psi_a({\bf r},{\bf k})  =  \sum_{\bf R} e^{i {\bf k}\cdot {\bf R}} \phi_a ({\bf r}-{\bf R}),
+\psi^{\bf k}_a({\bf r})  =  \sum_{\bf R} e^{i {\bf k}\cdot {\bf R}} \phi_a ({\bf r}-{\bf R}),
+\label{Block}
 \end{equation}
 are often constructed from non-orthogonal functions local to the unit cell (UC). Here, the 
 local function
 $\phi_a$ is a Gaussian-Type Atomic Orbital (GTAO) centered on atom {\bf A}, while the 
-sum on ${\bf R}$ runs over the Bravais lattice defined by integer translates of the primitive 
-lattice vectors {\bf a}, {\bf b} and {\bf  c}.   These Bloch functions (crystal orbitals)
+sum on {\bf R} runs over the Bravais lattice defined by integer translates of the primitive 
+lattice vectors {\bf a}, {\bf b} and {\bf  c}, and {\bf k} are the reciprocal 
+Bravais Lattice vectors.
+These Bloch functions (crystal orbitals)
 yield all possible translational symmetries through variation of the reciprocal lattice vector 
-${\bf k}$.     
+{\bf k}.     
 For small system sizes with high symmetry, a careful sampling of reciprocal space is required  
 for an accurate description of the periodic system.  An alternative approach to including these 
-important symmetries is to set ${\bf k}=0$ but to use a larger supercell created through 
-replication 
-and translation of the primitive unit cell.  This is the supercell $\Gamma$-point approximation, used
+important symmetries is to set ${\bf K}=0$ but to use a larger supercell created through 
+replication and translation of the primitive unit cell.  
+This is the supercell $\Gamma$-point approximation, used
 primarily for the study of defects and vacancies rather than as a replacement for 
 ${\bf k}$-space integration,
 perhaps due to the expense of conventional algorithms and slow convergence for small gap systems.
@@ -818,7 +820,7 @@ employs 5-$d$ and 7-$f$, we were not able to make a direct comparison.
 %
 \begin{figure}
 \includegraphics{Timing_Diamond_512_log.ps} 
-\caption{Computational complexity for the $\bf J$ and $\bf K_{\rm xc}$ matrix builds
+\caption{Computational complexity for the ${\bf J}$ and ${\bf K}_{\rm xc}$ matrix builds
 of cubic diamond at the 6-21G*/BLYP level of theory using a {\it good} (6 digit) level of precision}
 \label{Scaling_Matrix_Build}
 \end{figure}
@@ -834,7 +836,7 @@ of 6 digits in the total energy.}
 \end{figure}
 
 Demonstrating perfect linear scaling at the outset,  Fig.~5 shows the CPU time for 
-$\bf J$ and $\bf K_{\rm xc}$
+${\bf J}$ and ${\bf K}_{\rm xc}$
 builds with  6-21G*/BLYP diamond at its standard density.  These timings coorespond to a {\it good} level of accuracy, 
 targeting 6 digits in the total energy and corresponding to the values listed in Table\ref{DiamondGammaPt}.
 Shown in Fig.~6 is the precision of the computed energies, obtained by performing a second set 
