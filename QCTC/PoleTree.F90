@@ -85,7 +85,8 @@ MODULE PoleTree
          TYPE(PoleNode)                   :: P
          TYPE(PoleNode),POINTER           :: LeftQ,RightQ
          INTEGER                          :: K
-         REAL(DOUBLE),PARAMETER           :: UnsoldExp=Two/DBLE(SPEll+2)
+         REAL(DOUBLE),PARAMETER           :: SPEllPlus2=SPEll+2
+         REAL(DOUBLE),PARAMETER           :: UnsoldExp=Two/SPEllPlus2
 !--------------------------------------------------------------
          IF(P%Box%Tier==CurrentTier.AND.P%Leaf)THEN
             P%C=Zero
