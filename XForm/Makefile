@@ -29,7 +29,7 @@ include $(MONDO_COMPILER)
 include $(MONDO_HOME)/Includes/Suffixes
 include $(MONDO_HOME)/Includes/RemoveAll
 #
-CPPMISC=-DSPATIAL_THRESHOLDING 
+CPPMISC=-DSPATIAL_THRESHOLDING #-DFIND_CONDA
 #
 Libs =  $(F90_LIBRARIES) $(LAPACK)
 #
@@ -51,7 +51,7 @@ clean:
 	rm -f \#*
 	rm -f *~
 	rm -f $(MONDO_HOME)/Exec/AInv
-	rm -f $(MONDO_HOME)/Exec/LOrthog
+	rm -f $(MONDO_HOME)/Exec/LowdinO
 	ln -s /dev/null core
 	ls -l 
 #
