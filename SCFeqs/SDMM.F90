@@ -34,9 +34,9 @@ PROGRAM SDMM
                                     Diff,LShift,ENew,CnvgQ,DeltaNQ,DeltaPQ,   &
                                     FixedPoint,NumPot,DenPot,OldPoint,NewE,OldE,DeltaE,DeltaEQ, &
                                     OldDeltaEQ,OldDeltaPQ,OldDeltaE
-  REAL(DOUBLE),PARAMETER         :: ThreshAmp=1.D2
-  INTEGER                        :: I,J,ICG,NCG,IPur,NPur
-  LOGICAL                        :: Present,FixedUVW
+  REAL(DOUBLE),PARAMETER         :: ThreshAmp=1.D0
+  INTEGER                        :: I,J,ICG,NCG,IPur,NPur,OnExit
+  LOGICAL                        :: Present,FixedUVW,ToExit
   CHARACTER(LEN=2)               :: Cycl,NxtC
   CHARACTER(LEN=20)              :: ItAnounce
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg,FFile
@@ -91,8 +91,9 @@ PROGRAM SDMM
 !=============================================================================  
 !
   NCG=0
+  OnExit=0
   OldPoint=BIG_DBL
-  DO ICG=0,9
+  DO ICG=0,12
      NCG=NCG+1
 !
 #ifdef PARALLEL
@@ -215,7 +216,13 @@ PROGRAM SDMM
 !
 !    Convergence inflection
 !          
-     IF(NINT(OldPoint/ABS(OldPoint))/=NINT(FixedPoint/ABS(FixedPoint)).AND.NCG/=1)EXIT
+     IF(NINT(OldPoint/ABS(OldPoint))/=NINT(FixedPoint/ABS(FixedPoint)) &
+        .AND.NCG/=1.AND.OnExit==0)THEN
+!       Do 1 more cycle for good measure
+        OnExit=NCG+1
+     ENDIF
+     IF(OnExit==NCG)EXIT
+!
      OldPoint=FixedPoint
 !-----------------------------------------------------------------------------
 !    GRADIENT EVALUATION
@@ -294,7 +301,7 @@ PROGRAM SDMM
       TrP=Two*Trace(P)
       CALL Multiply(T2,-One)  
       CALL Add(T2,P,T1)                          ! T1=P[J+1]-P[J]
-      DeltaP=Max(T1)+1.D-20                      ! DeltaP=MAX(P[J+1]-P[J])
+      DeltaP=ABS(Max(T1)+1.D-20)                 ! DeltaP=MAX(P[J+1]-P[J])
       DeltaN=ABS(TrP-DBLE(NEl))+1.D-20           ! DeltaN=Tr{P}-N_El
 #ifdef PARALLEL
       CALL Multiply(P,F,T1)
@@ -308,26 +315,43 @@ PROGRAM SDMM
       DeltaEQ=ABS((NewE-OldE)/NewE)
 !-----------------------------------------------------------------------------
 !     CHECK CONVERGENCE
-!
+      ToExit=.FALSE.
 !     Test when in the asymptotic regime
       IF(DeltaEQ<Thresholds%ETol*1.D1.AND.NPur>3)THEN
-!        Check for low digit rebound in the energy
-         IF(NewE-OldE>Zero)THEN
-!            WRITE(*,*)' SDMM EXIT 1 '
-            EXIT
-         ENDIF
-!        Check for density matrix stall out 
-         IF(DeltaPQ<1.D-1)THEN
-!            WRITE(*,*)' SDMM EXIT 2, DeltaPQ = ',DeltaPQ
-            EXIT
-         ENDIF
-!        Check for exceeding target accuracies
-         IF(DeltaEQ<Thresholds%ETol*1.D-1.AND. &
-            DeltaP<Thresholds%DTol*1.D-1)THEN
-!            WRITE(*,*)' SDMM EXIT 4 '
-            EXIT
-         ENDIF
-      ENDIF  
+         CALL OpenASCII(OutFile,Out)
+!        Check for non-decreasing /P
+!         IF(DeltaP>OldDeltaP.AND.DeltaPQ<1.D-1)THEN
+!             WRITE(*,*)' DeltaP = ',DeltaP
+!             WRITE(*,*)' OldDP  = ',OldDeltaP
+!             WRITE(*,*)' SDMM EXIT 0 '
+!             WRITE(Out,*)' SDMM EXIT 0 '
+!             ToExit=.TRUE.
+!             EXIT
+!          ENDIF
+!         Check for low digit rebound in the energy
+          IF(NewE-OldE>Zero)THEN
+!             WRITE(*,*)' SDMM EXIT 1 '
+!             WRITE(Out,*)' SDMM EXIT 1 '
+             ToExit=.TRUE.
+!             EXIT
+          ENDIF
+!         Check for density matrix stall out 
+          IF(DeltaPQ<7.D-3)THEN
+!             WRITE(*,*)' SDMM EXIT 2, DeltaPQ = ',DeltaPQ
+!             WRITE(Out,*)' SDMM EXIT 2, DeltaPQ = ',DeltaPQ
+             ToExit=.TRUE.
+!             EXIT
+          ENDIF
+!         Check for exceeding target accuracies
+          IF(DeltaEQ<Thresholds%ETol*1.D-2.AND. &
+             DeltaP<Thresholds%DTol*5.D-2)THEN
+             ToExit=.TRUE.
+!             WRITE(*,*)' SDMM EXIT 4 ',DeltaEQ,DeltaP
+!             WRITE(Out,*)' SDMM EXIT 4 '
+!             EXIT
+          ENDIF
+          CLOSE(Out)
+      ENDIF
 !     Updtate previous cycle values
       OldE=NewE
       OldDeltaE=DeltaE
@@ -356,6 +380,7 @@ PROGRAM SDMM
 #ifdef PARALLEL
       ENDIF
 #endif
+      IF(ToExit)EXIT
    ENDDO
 !  Check for failure
    IF(DeltaN>1.0D-2)CALL Halt(' Convergence failure in SDMM, lost /N = ' &
