@@ -14,8 +14,9 @@ PROGRAM BlokAInv
   USE Macros
   USE LinAlg
   USE MatFunk
+  USE AtomPairs
   IMPLICIT NONE
-  TYPE(BCSR)          :: A,Z,Zt,DiagD
+  TYPE(BCSR)          :: A,Z,Zt,DiagD, B
 #ifdef EXTREME_DEBUG
   TYPE(BCSR)          :: T1,T2
   TYPE(DBL_RNK2)      :: DnsD1,DnsD2,DnsD3,DnsZ1,DnsZ2,DnsZ3
@@ -24,18 +25,24 @@ PROGRAM BlokAInv
   TYPE(CRDS)          :: GM
   TYPE(INT_VECT)      :: AiFlg,ZiFlg,ColPt,BlkPt
   TYPE(ARGMT)         :: Args
-  INTEGER :: I,J,Q,R,IDex,JDex,ZDex,ZBlk,NIJ, &
-             n,ni,msiz,strtai,stopai,strtaj,stopaj,strtzi,stopzi,nj,strtzj,stopzj,jcol,k,kdex, &
-             aiblk,ajblk,zjblk,m,ziblk,icol,zrowpt,zcolpt,zblkpt,NewBloks,EndBloks,IRow,JRow
-  TYPE(DBL_VECT) :: Blk1,Blk2
-  TYPE(DBL_RNK2) :: P
-  REAL(DOUBLE) :: Op,Mx0,B2Norm
-  REAL(DOUBLE), EXTERNAL :: DDOT
-  CHARACTER(LEN=8),PARAMETER                :: Prog='BlokAInv'
+  INTEGER             :: I,J,Q,R,IDex,JDex,ZDex,ZBlk,NIJ, &
+                         n,ni,msiz,strtai,stopai,strtaj,stopaj, &
+                         strtzi,stopzi,nj,strtzj,stopzj,jcol,k,kdex, &
+                         aiblk,ajblk,zjblk,m,ziblk,icol,zrowpt,zcolpt, & 
+                         zblkpt,NewBloks,EndBloks,IRow,JRow
+  TYPE(DBL_VECT)      :: Blk1,Blk2
+  TYPE(DBL_RNK2)      :: P,DA
+  REAL(DOUBLE)        :: Op,Mx0,B2Norm
+
+  TYPE(AtomPair)      :: Pair
+  REAL(DOUBLE), &
+             EXTERNAL :: DDOT
+  CHARACTER(LEN=8),&
+           PARAMETER  :: Prog='BlokAInv'
 #ifdef EXTREME_PRINT_DEBUG
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: ZIChar,ZJChar,AIChar, AJChar
 #endif
-!----------------------------------------------------------------------------------------------------------- 
+!-----------------------------------------------------------------------------------------------------------
 ! Start up macro
 !
   CALL StartUp(Args,Prog)
@@ -45,20 +52,25 @@ PROGRAM BlokAInv
   CALL Get(BS,Tag_O=CurBase)
   CALL Get(GM,Tag_O=CurGeom)
 !
+  AtomPairDistanceThreshold=1.D3
+!
 ! Allocations 
 !
   CALL New(Z)
   CALL New(A)
   CALL Get(A,TrixFile('S',Args))
+!
+!  PrintFlags%Mat=PLOT_MATRICES
+#ifdef USE_METIS
+  CALL MetisReorder(A)
+#endif
 ! Set global workspace for FunkOnSqMat
   CALL SetDSYEVWork(MaxBlkSize)
 ! Allocate intermediate blocks 
   CALL New(Blk1,MaxBlkSize*MaxBlkSize)
   CALL New(Blk2,MaxBlkSize*MaxBlkSize)
 ! Allocate diagonal "pivot" blocks
-  WRITE(*,*)' MaxBlkSize = ',MaxBlkSize,' NAtoms = ',NAtoms
   CALL New(P,(/MaxBlkSize*MaxBlkSize,NAtoms/))
-  WRITE(*,*)' MaxBlkSize = ',MaxBlkSize,' NAtoms = ',NAtoms
 ! Allocate coloumn flags
   CALL New(AiFlg,NAtoms); AiFlg%I=0
   CALL New(ZiFlg,NAtoms); ZiFlg%I=0
@@ -94,6 +106,8 @@ PROGRAM BlokAInv
 !
      DO JRow=1,IRow-1
 !
+        IF(SetAtomPair(GM,BS,IRow,JRow,Pair)) THEN
+
         NJ=BSiz%I(JRow)
         StrtAJ=A%RowPt%I(JRow);StopAJ=A%RowPt%I(JRow+1)-1
         StrtZJ=Z%RowPt%I(JRow);StopZJ=Z%RowPt%I(JRow+1)-1
@@ -104,6 +118,9 @@ PROGRAM BlokAInv
         Blk1%D(1:NIJ)=Zero
         DO J=StrtAJ,StopAJ
            JDex=A%ColPt%I(J)
+
+           IF(SetAtomPair(GM,BS,IRow,JDex,Pair)) THEN
+!
            IDex=ZiFlg%I(JDex)
            IF(IDex/=0)THEN                 
               ZiBlk=BlkPt%I(IDex) 
@@ -112,6 +129,9 @@ PROGRAM BlokAInv
               CALL DGEMM_NN(NJ,M,NI,One,A%MTrix%D(AjBlk),Z%MTrix%D(ZiBlk),Blk1%D)
               PerfMon%FLOP=PerfMon%FLOP+DBLE(NIJ*M)
            ENDIF
+
+           ENDIF
+
         ENDDO
 !
 !       Blk2=[P^(j-1)_j]^(-1).[P^(j-1)_i]
@@ -132,6 +152,10 @@ PROGRAM BlokAInv
 !
            DO JDex=StrtZJ,StopZJ
               JCol =ColPt%I(JDex) 
+
+              IF(SetAtomPair(GM,BS,IRow,JCol,Pair)) THEN
+
+
               ZjBlk=BlkPt%I(JDex) 
               IDex =ZiFlg%I(JCol)
               M=BSiz%I(JCol)
@@ -149,9 +173,13 @@ PROGRAM BlokAInv
                  ZBlk=ZBlk+M*NI
               ENDIF
 
+              ENDIF
+
            ENDDO
 !
         ENDIF
+!
+       ENDIF
 !
      ENDDO ! end inner loop over JRow
 !
@@ -230,9 +258,7 @@ PROGRAM BlokAInv
      N=BSiz%I(I)
      CALL FunkOnSqMat(N,SqRoot,P%D(:,I),Blk1%D)
 !    Estimated performance; 2 DGEMMS+1 DSYEV
-!
      PerfMon%FLOP=PerfMon%FLOP+DBLE((2+6)*NI**3)
-!
      P%D(1:N*N,I)=Blk1%D(1:N*N)     
   ENDDO
   CALL SetToI(DiagD,P)
@@ -251,11 +277,14 @@ PROGRAM BlokAInv
 ! Symbolic transpose only, bloks in place 
 !
   CALL XPose(Z)
+  WRITE(*,*)' N = ',NAtoms,' NZ = ',Z%NBlks
 !
 ! Final Z=P^(-1/2).Z
 !
   CALL Multiply(Z,DiagD,Zt)
   CALL Filter(Z,Zt)
+
+!  CALL Plot(Z,'Z_Metis')
 !
 ! Full transpose
 !
@@ -284,6 +313,7 @@ PROGRAM BlokAInv
   WRITE(*,*)' Mx0 = ',Mx0
 ! CALL ShutDown(Prog)
 #endif
+  WRITE(*,*)' N = ',NAtoms,' NZ = ',Z%NBlks
 !
 !  Put Z and ZT to disk
 !  
