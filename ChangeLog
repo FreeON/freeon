@@ -1,6 +1,246 @@
+2004-08-16 12:16  nemeth
+
+	* MondoSCF2/Optimizer.F90: Convergence criteria set back to AccL.
+
+2004-08-16 11:29  mchalla
+
+	* TwoE/: Compare.nb, DERIInterface.m, ERIInclude.Inc,
+	ERIInterface.m, ERIMIC.Inc, Gradients.m, HRR.nb, InitDbl.F,
+	Integrals.m, IntegralsE.m, MakefileB, dERIInclude.Inc: [no log
+	message]
+
+2004-08-16 10:46  mchalla
+
+	* Scripts/MondoSetUp: [no log message]
+
+2004-08-16 10:44  mchalla
+
+	* TwoE/: DEInts.F90, GetAtomPair.F90, Int1111.F90, Int1113.F90,
+	Int1131.F90, Int1133.F90, Int1311.F90, Int1313.F90, Int1331.F90,
+	Int1333.F90, Int3111.F90, Int3113.F90, Int3131.F90, Int3133.F90,
+	Int3311.F90, Int3313.F90, Int3331.F90, Int3333.F90, Int6111.F90,
+	Int6131.F90, Int6133.F90, Int6161.F90, Int6311.F90, Int6331.F90,
+	Int6333.F90, Int6361.F90, Int6363.F90, Int6611.F90, Int6631.F90,
+	Int6633.F90, Int6661.F90, Int6663.F90, Int6666.F90, IntSSSS.F90,
+	ShellPairStruct.F90, VScratch.F90, VScratchB.F90, dInt1111.F90,
+	dInt1113.F90, dInt1131.F90, dInt1133.F90, dInt1311.F90,
+	dInt1313.F90, dInt1331.F90, dInt1333.F90, dInt3111.F90,
+	dInt3113.F90, dInt3131.F90, dInt3133.F90, dInt3311.F90,
+	dInt3313.F90, dInt3331.F90, dInt3333.F90, dInt6111.F90,
+	dInt6131.F90, dInt6133.F90, dInt6161.F90, dInt6311.F90,
+	dInt6331.F90, dInt6333.F90, dInt6361.F90, dInt6363.F90,
+	dInt6611.F90, dInt6631.F90, dInt6633.F90, dInt6661.F90,
+	dInt6663.F90, dInt6666.F90: Removing the old TwoE libs.
+
+2004-08-13 22:38  nemeth
+
+	* TwoE/MSC/GetAtomPair.F90: The NAG compiler complained about a few
+	too long lines and shot down the compilation. Long lines now put
+	into two rows.
+
+2004-08-13 16:28  mchalla
+
+	* TwoE/GRD/: BRAHRR.m, BraHRR101.F90, BraHRR1010.F90,
+	BraHRR102.F90, BraHRR103.F90, BraHRR106.F90, BraHRR11.F90,
+	BraHRR110.F90, BraHRR12.F90, BraHRR13.F90, BraHRR16.F90,
+	BraHRR21.F90, BraHRR210.F90, BraHRR22.F90, BraHRR23.F90,
+	BraHRR26.F90, BraHRR31.F90, BraHRR310.F90, BraHRR32.F90,
+	BraHRR33.F90, BraHRR36.F90, BraHRR61.F90, BraHRR610.F90,
+	BraHRR62.F90, BraHRR63.F90, BraHRR66.F90: Fixed bug in PBC exchange
+	forces.  Was resumming already resummed values in the
+	(ab|cd')=-(a'b|cd)-(ab'|cd)-(ab|c'd) identity.	Seems to work great
+	now.
+
+2004-08-12 14:48  mchalla
+
+	* Makefile: [no log message]
+
+2004-08-12 13:56  nemeth
+
+	* BasisSets/: 3-21G.bas-SPLIT, 6-31Gss.bas-SPLIT, STO-2G.bas-SPLIT,
+	STO-3G.bas-SPLIT: A few 'splitted' basis sets added.
+
+2004-08-11 23:53  ckgan
+
+	* BasisSets/Crystal98.bas, MondoMods/BasisSetParameters.F90: Basis
+	sets for TS-1.
+
+2004-08-11 22:28  nemeth
+
+	* MondoSCF2/Optimizer.F90: Another modification to set lattice
+	forces zero for the optimizer.
+
+2004-08-11 22:05  nemeth
+
+	* MondoSCF2/InCoords.F90: Lattice parameters are hardwired to be
+	constrained, in order to make input construction easier, until
+	lattice forces get fixed.
+
+2004-08-11 22:00  nemeth
+
+	* MondoMods/MemMan.F90: Another fix for the restart.
+
+2004-08-11 18:55  nemeth
+
+	* MondoSCF2/PunchHDF.F90: Restart fixed.
+
+2004-08-11 16:11  mchalla
+
+	* MondoSCF2/PrintParsed.F90: [no log message]
+
+2004-08-11 16:08  mchalla
+
+	* TwoE/GRD/BraHRR101.F90, TwoE/GRD/BraHRR1010.F90,
+	TwoE/GRD/BraHRR102.F90, TwoE/GRD/BraHRR103.F90,
+	TwoE/GRD/BraHRR106.F90, TwoE/GRD/BraHRR110.F90,
+	TwoE/GRD/BraHRR210.F90, TwoE/GRD/BraHRR310.F90,
+	TwoE/GRD/BraHRR610.F90, TwoE/GRD/CNTRCTG.m,
+	TwoE/GRD/DERIInterface.m, TwoE/GRD/GRD.m, TwoE/GRD/Makefile,
+	TwoE/GRD/dERIInterfaceB.Inc, TwoE/GRD/dIntB10010101.F90,
+	TwoE/GRD/dIntB10010201.F90, TwoE/GRD/dIntB10010202.F90,
+	TwoE/GRD/dIntB10010301.F90, TwoE/GRD/dIntB10010302.F90,
+	TwoE/GRD/dIntB10010303.F90, TwoE/GRD/dIntB10010601.F90,
+	TwoE/GRD/dIntB10010602.F90, TwoE/GRD/dIntB10010603.F90,
+	TwoE/GRD/dIntB10010606.F90, TwoE/GRD/dIntB10011001.F90,
+	TwoE/GRD/dIntB10020101.F90, TwoE/GRD/dIntB10020201.F90,
+	TwoE/GRD/dIntB10020202.F90, TwoE/GRD/dIntB10020301.F90,
+	TwoE/GRD/dIntB10020302.F90, TwoE/GRD/dIntB10020303.F90,
+	TwoE/GRD/dIntB10020601.F90, TwoE/GRD/dIntB10020602.F90,
+	TwoE/GRD/dIntB10020603.F90, TwoE/GRD/dIntB10020606.F90,
+	TwoE/GRD/dIntB10021001.F90, TwoE/GRD/dIntB10021002.F90,
+	TwoE/GRD/dIntB10030101.F90, TwoE/GRD/dIntB10030201.F90,
+	TwoE/GRD/dIntB10030202.F90, TwoE/GRD/dIntB10030301.F90,
+	TwoE/GRD/dIntB10030302.F90, TwoE/GRD/dIntB10030303.F90,
+	TwoE/GRD/dIntB10030601.F90, TwoE/GRD/dIntB10030602.F90,
+	TwoE/GRD/dIntB10030603.F90, TwoE/GRD/dIntB10030606.F90,
+	TwoE/GRD/dIntB10031001.F90, TwoE/GRD/dIntB10031002.F90,
+	TwoE/GRD/dIntB10031003.F90, TwoE/GRD/dIntB10060101.F90,
+	TwoE/GRD/dIntB10060201.F90, TwoE/GRD/dIntB10060202.F90,
+	TwoE/GRD/dIntB10060301.F90, TwoE/GRD/dIntB10060302.F90,
+	TwoE/GRD/dIntB10060303.F90, TwoE/GRD/dIntB10060601.F90,
+	TwoE/GRD/dIntB10060602.F90, TwoE/GRD/dIntB10060603.F90,
+	TwoE/GRD/dIntB10060606.F90, TwoE/GRD/dIntB10061001.F90,
+	TwoE/GRD/dIntB10061002.F90, TwoE/GRD/dIntB10061003.F90,
+	TwoE/GRD/dIntB10061006.F90, TwoE/GRD/dIntB10100101.F90,
+	TwoE/GRD/dIntB10100201.F90, TwoE/GRD/dIntB10100202.F90,
+	TwoE/GRD/dIntB10100301.F90, TwoE/GRD/dIntB10100302.F90,
+	TwoE/GRD/dIntB10100303.F90, TwoE/GRD/dIntB10100601.F90,
+	TwoE/GRD/dIntB10100602.F90, TwoE/GRD/dIntB10100603.F90,
+	TwoE/GRD/dIntB10100606.F90, TwoE/GRD/dIntB10101001.F90,
+	TwoE/GRD/dIntB10101002.F90, TwoE/GRD/dIntB10101003.F90,
+	TwoE/GRD/dIntB10101006.F90, TwoE/GRD/dIntB10101010.F90,
+	TwoE/INT/BraHRR101.F90, TwoE/INT/BraHRR1010.F90,
+	TwoE/INT/BraHRR102.F90, TwoE/INT/BraHRR103.F90,
+	TwoE/INT/BraHRR106.F90, TwoE/INT/BraHRR110.F90,
+	TwoE/INT/BraHRR210.F90, TwoE/INT/BraHRR310.F90,
+	TwoE/INT/BraHRR610.F90, TwoE/INT/ERIInterface.m,
+	TwoE/INT/ERIInterfaceB.Inc, TwoE/INT/ERIListInterfaceB.Inc,
+	TwoE/INT/INT.m, TwoE/INT/IntB10010101.F90,
+	TwoE/INT/IntB10010201.F90, TwoE/INT/IntB10010202.F90,
+	TwoE/INT/IntB10010301.F90, TwoE/INT/IntB10010302.F90,
+	TwoE/INT/IntB10010303.F90, TwoE/INT/IntB10010601.F90,
+	TwoE/INT/IntB10010602.F90, TwoE/INT/IntB10010603.F90,
+	TwoE/INT/IntB10010606.F90, TwoE/INT/IntB10011001.F90,
+	TwoE/INT/IntB10020101.F90, TwoE/INT/IntB10020201.F90,
+	TwoE/INT/IntB10020202.F90, TwoE/INT/IntB10020301.F90,
+	TwoE/INT/IntB10020302.F90, TwoE/INT/IntB10020303.F90,
+	TwoE/INT/IntB10020601.F90, TwoE/INT/IntB10020602.F90,
+	TwoE/INT/IntB10020603.F90, TwoE/INT/IntB10020606.F90,
+	TwoE/INT/IntB10021001.F90, TwoE/INT/IntB10021002.F90,
+	TwoE/INT/IntB10030101.F90, TwoE/INT/IntB10030201.F90,
+	TwoE/INT/IntB10030202.F90, TwoE/INT/IntB10030301.F90,
+	TwoE/INT/IntB10030302.F90, TwoE/INT/IntB10030303.F90,
+	TwoE/INT/IntB10030601.F90, TwoE/INT/IntB10030602.F90,
+	TwoE/INT/IntB10030603.F90, TwoE/INT/IntB10030606.F90,
+	TwoE/INT/IntB10031001.F90, TwoE/INT/IntB10031002.F90,
+	TwoE/INT/IntB10031003.F90, TwoE/INT/IntB10060101.F90,
+	TwoE/INT/IntB10060201.F90, TwoE/INT/IntB10060202.F90,
+	TwoE/INT/IntB10060301.F90, TwoE/INT/IntB10060302.F90,
+	TwoE/INT/IntB10060303.F90, TwoE/INT/IntB10060601.F90,
+	TwoE/INT/IntB10060602.F90, TwoE/INT/IntB10060603.F90,
+	TwoE/INT/IntB10060606.F90, TwoE/INT/IntB10061001.F90,
+	TwoE/INT/IntB10061002.F90, TwoE/INT/IntB10061003.F90,
+	TwoE/INT/IntB10061006.F90, TwoE/INT/IntB10100101.F90,
+	TwoE/INT/IntB10100201.F90, TwoE/INT/IntB10100202.F90,
+	TwoE/INT/IntB10100301.F90, TwoE/INT/IntB10100302.F90,
+	TwoE/INT/IntB10100303.F90, TwoE/INT/IntB10100601.F90,
+	TwoE/INT/IntB10100602.F90, TwoE/INT/IntB10100603.F90,
+	TwoE/INT/IntB10100606.F90, TwoE/INT/IntB10101001.F90,
+	TwoE/INT/IntB10101002.F90, TwoE/INT/IntB10101003.F90,
+	TwoE/INT/IntB10101006.F90, TwoE/INT/IntB10101010.F90,
+	TwoE/INT/Makefile, TwoE/VRR/Makefile, Makefile,
+	Docs/Bib/mondo_new.bib, Docs/DM_Papers/PERT_3/Response3.tex,
+	TwoE/HRR/HRR.m, TwoE/HRR/KetHRR1510.F90, TwoE/HRR/KetHRR1515.F90,
+	TwoE/HRR/KetHRR152.F90, TwoE/HRR/KetHRR153.F90,
+	TwoE/HRR/KetHRR154.F90, TwoE/HRR/KetHRR156.F90, TwoE/HRR/Makefile:
+	[no log message]
+
+2004-08-11 12:55  nemeth
+
+	* MondoSCF2/: GDIIS.F90, InCoords.F90, Optimizer.F90,
+	ParseExtraCoords.F90, ParseGeometries.F90, PunchHDF.F90: This
+	update of the optimizer related routines allowes geometry
+	optimization in internal coordinates for periodic boundary
+	conditions. Succesful tests so far include polyacetilene, graphite,
+	diamond and urea.
+
+2004-08-11 12:28  nemeth
+
+	* MondoMods/InOut.F90: Additions to CHR10_VECT.
+
+2004-08-11 12:13  nemeth
+
+	* MondoMods/: AtomPairs.F90, CholFact.F90, DerivedTypes.F90,
+	MemMan.F90, SetEq.F90: A few modifications for the periodic
+	optimizer.
+
+2004-08-11 11:30  mchalla
+
+	* Docs/DM_Papers/PERT_3/: Alpha_h2o3D_6-31G_6-31Gss_G_T.ps,
+	Beta_h2o3D_6-31G_6-31Gss_G_T.ps, DMix_40pts.ps, Gamma_ONX_T.ps,
+	Gamma_QCTC_T.ps, Gamma_TC2R_T.ps, Gamma_h2o3D_6-31G_6-31Gss_G_T.ps,
+	Makefile, Mix_h2o3D_6-31G_T.ps, Order10.ps, Purification.ps,
+	Response3.bib, Response3.tex, Response3_04.08.04.tar.gz: [no log
+	message]
+
+2004-08-11 11:12  ckgan
+
+	* BasisSets/4-31Gs.bas: [no log message]
+
+2004-08-11 11:08  mchalla
+
+	* Docs/STRESS/: Stress.tex, Makefile: [no log message]
+
+2004-08-11 11:02  mchalla
+
+	* OneE/ParaMakeRho.F90: [no log message]
+
+2004-08-11 09:12  mchalla
+
+	* TwoE/VRR/: Makefile, VRR.m, VRRd0d0.F90, VRRd0j0.F90,
+	VRRd0k0.F90, VRRd0p0.F90, VRRd0s0.F90, VRRf0j0.F90, VRRf0k0.F90,
+	VRRg0j0.F90, VRRg0k0.F90, VRRh0j0.F90, VRRh0k0.F90, VRRi0j0.F90,
+	VRRi0k0.F90, VRRj0d0.F90, VRRj0f0.F90, VRRj0g0.F90, VRRj0h0.F90,
+	VRRj0i0.F90, VRRj0j0.F90, VRRj0k0.F90, VRRj0p0.F90, VRRj0s0.F90,
+	VRRk0d0.F90, VRRk0f0.F90, VRRk0g0.F90, VRRk0h0.F90, VRRk0i0.F90,
+	VRRk0j0.F90, VRRk0k0.F90, VRRk0p0.F90, VRRk0s0.F90, VRRp0d0.F90,
+	VRRp0j0.F90, VRRp0k0.F90, VRRp0p0.F90, VRRs0d0.F90, VRRs0j0.F90,
+	VRRs0k0.F90: [no log message]
+
+2004-08-10 17:02  ckgan
+
+	* ONX2/: GONX2.F90, ONX2.F90, ONX2ComputK.F90, GONX2ComputDK.F90:
+	MondoTimer replaced MPI_WTime.
+
+2004-08-06 10:25  tymczak
+
+	* Docs/MD_paper/: MD_Paper_no1.tex, Makefile, Outline.sxw: [no log
+	message]
+
 2004-08-05 16:27  mchalla
 
-	* Docs/MondoSCF_LICENSE_AND_LA-CC_01-02.pdf: [no log message]
+	* Docs/MondoSCF_LICENSE_AND_LA-CC_01-02.pdf, ChangeLog: [no log
+	message]
 
 2004-08-05 16:16  mchalla
 
