@@ -176,7 +176,7 @@ MemMan.o: 		ProcessControl.o GlobalObjects.o GlobalCharacters.o\
 MondoMPI.o: 		MemMan.o MPIInclude.o ProcessControl.o Parse.o \
 			GlobalObjects.o GlobalScalars.o DerivedTypes.o 
 #
-Order.o: 		Order77.o MemMan.o ProcessControl.o GlobalObjects.o \
+Order.o: 		PrettyPrint.o Order77.o MemMan.o ProcessControl.o GlobalObjects.o \
 			GlobalScalars.o GlobalCharacters.o DerivedTypes.o 
 #
 Parse.o: 		MemMan.o ProcessControl.o ParsingConstants.o \
@@ -187,7 +187,7 @@ ParsingConstants.o: 	GlobalScalars.o
 PBC.o: 			Thresholding.o PrettyPrint.o GlobalObjects.o \
 			GlobalCharacters.o GlobalScalars.o DerivedTypes.o 
 #
-PrettyPrint.o: 		Order.o InOut.o SetEq.o Parse.o Clock.o \
+PrettyPrint.o: 		InOut.o SetEq.o Parse.o Clock.o \
 			BasisSetParameters.o GlobalObjects.o GlobalScalars.o\
 			GlobalCharacters.o DerivedTypes.o 
 #
