@@ -82,7 +82,7 @@ MODULE CubeTree
          Delta=(TargtThresh/LocalThresh)**(1.0D0/DBLE(MaxIt))
          DO J=1,MaxIt
             LocalThresh=LocalThresh*Delta
-            CALL SetPenetrationThresh(LocalThresh*1.D-2)
+            CALL SetPenetrationThresh(LocalThresh*1.D-2,Exp_Switch)
             CALL ExpandBoxWalk(RhoRoot,One)
             CALL GridRefine(CubeRoot)
             CALL ExpandBoxWalk(RhoRoot,-One)
@@ -104,7 +104,7 @@ MODULE CubeTree
          IF(PrintFlags%Key>DEBUG_MEDIUM)THEN
             CALL OpenASCII(OutFile,Out)         
             WRITE(  *,10)PtsPerAtom,LocalThresh,RelativeError(1) 
-            WRITE(Out,10)PtsPerAtom,LocalThresh,RelativeError(1) 
+!            WRITE(Out,10)PtsPerAtom,LocalThresh,RelativeError(1) 
             CLOSE(Out)
          10 FORMAT(' HiCu.GridGen     :: Pts/Atom= ',I6,' LocThr=',D8.2,', RhoErr=',D15.9)
          ENDIF
@@ -177,6 +177,8 @@ MODULE CubeTree
          INTEGER                 :: ISplit
 !------------------------------------------------------------------
          IF(Cube%Leaf)THEN
+!            IF(Cube%IXact<LocalThresh)THEN
+!               RETURN
             IF(Cube%ECube(1)>LocalThresh)THEN 
                CALL SplitCube(Cube)
                CALL GridRefine(Cube%Descend)
@@ -267,7 +269,7 @@ MODULE CubeTree
             Cube%Vals(I,3)=RhoV(2,I)
             Cube%Vals(I,4)=RhoV(3,I)
             Cube%Vals(I,5)=RhoV(4,I)
-            DO J=1,3; MaxGrad(J)=Max(MaxGrad(J),RhoV(J+1,I)); ENDDO
+            DO J=1,3; MaxGrad(J)=Max(MaxGrad(J),ABS(RhoV(J+1,I))); ENDDO
          ENDDO
 !        Evaluate Exc, dExcdRho, and dExcdAbsGradRho2 on the grid
          CALL ExcOnTheGrid(NGrid,Rho,AbsGradRho2,E,dEdRho,dEdAbsGradRho2) 
@@ -283,7 +285,7 @@ MODULE CubeTree
          ENDDO
          Cube%ECube(1)=ABS(Cube%IXact-Cube%ICube(1)) 
 !        Determine the optimal ordinate for bisection of this node
-         IF(Cube%Box%Tier<2)THEN
+         IF(Cube%Box%Tier<10)THEN
             Cube%ISplit=MOD(Cube%Box%Tier,3)+1 
          ELSE
             MaxGrad=Zero

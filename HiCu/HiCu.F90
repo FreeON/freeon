@@ -43,13 +43,13 @@ PROGRAM HaiKu
 ! Get basis set, geometry, thresholds and model type
   CALL Get(BS,CurBase)
   CALL Get(GM,CurGeom)
+  CALL NewBraKetBlok(BS)
   CALL Get(ModelChem,'ModelChemistry',CurBase)
   NEl=GM%NElec
 #ifdef PERIODIC
 ! Calculate the Number of Cells
   CALL SetCellNumber(GM)
 #endif
-!
 ! Convert density to a 5-D BinTree
   CALL RhoToTree(Args)
 ! Generate the grid as a 3-D BinTree 
@@ -63,12 +63,12 @@ PROGRAM HaiKu
   CALL Put(T1,TrixFile('Kxc',Args,0))
 ! Put Exc to Info
   CALL Put(Exc,'Exc',Tag_O=SCFCycl)
-!  WRITE(*,*) 'Exc = ',Exc
 ! Printing
+
   CALL PChkSum(T1,'Kxc['//TRIM(SCFCycl)//']',Prog)
   CALL PPrint( T1,'Kxc['//TRIM(SCFCycl)//']')
   CALL Plot(   T1,'Kxc['//TRIM(SCFCycl)//']')
-!  WRITE(*,*) 'Kxc = ',Kxc%MTrix%D(1:1)
+
 ! Tidy up
   CALL Delete(Kxc)
   CALL Delete(T1)

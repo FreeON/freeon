@@ -8,7 +8,7 @@ MODULE CubeGrid
    INCLUDE 'MMA/CubeRules/Rule3.Inc'
 #endif
 #ifdef RULE5
-!  Currently the rule of choice
+!  The rule of choice
    INCLUDE 'MMA/CubeRules/Rule5.Inc'
 #endif
 #ifdef RULE7

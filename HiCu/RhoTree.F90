@@ -45,8 +45,8 @@ MODULE RhoTree
    INCLUDE 'Erf.Inc'
    INTEGER, Parameter :: DistPerBox=1
 !  Global scalars
-   INTEGER       :: RhoNodes,RhoLevel
-   REAL(DOUBLE)  :: MaxAmp,MiniumExp
+   INTEGER            :: RhoNodes,RhoLevel
+   REAL(DOUBLE)       :: MaxAmp,MiniumExp
 !----------------------------------------------------------------------------------
 !  Global density in array form
    TYPE(HGRho)                           :: Rho
@@ -280,7 +280,7 @@ MODULE RhoTree
          REAL(DOUBLE)                               :: LQx,LQy,LQz,LQ2,UQx,UQy,UQz,UQ2, &
                                                        LXpt,UXpt,TwoZ,SqZ,CoFact,RL1,TmpX,TmpY, &
                                                        LXptX,LXptY,LXptZ,UXptX,UXptY,UXptZ,Z
-         INTEGER                                    :: IQ,IC,JQ,JC,KQ,KC
+         INTEGER                                    :: IQ,IC,JQ,JC,KQ,KC,L,Ell,L1,L2,M,N,LMN
 !-------------------------------------------------------------------------------
          Tx=ABS(Node%Box%Center(1)-Box%Center(1))
          IF(Tx>Node%Box%Half(1)+Box%Half(1))RETURN
@@ -293,6 +293,69 @@ MODULE RhoTree
                CALL RhoAtAPoint(Node)
             ENDDO
             INCLUDE 'ExplicitLeafPopulation.Inc'         
+            RETURN
+!
+             Z=Node%Zeta
+             LQx=Box%BndBox(1,1)-Node%Qx
+             LQy=Box%BndBox(2,1)-Node%Qy
+             LQz=Box%BndBox(3,1)-Node%Qz
+             UQx=Box%BndBox(1,2)-Node%Qx
+             UQy=Box%BndBox(2,2)-Node%Qy
+             UQz=Box%BndBox(3,2)-Node%Qz
+             LQ2=LQx*LQx+LQy*LQy+LQz*LQz
+             UQ2=UQx*UQx+UQy*UQy+UQz*UQz
+             TwoZ=Two*Z
+             SqZ=SQRT(Z)
+             CoFact=SqrtPi/(Two*SqZ)
+             LLambdaX(0)=-CoFact*ERF(SqZ*LQx)
+             LLambdaY(0)=-CoFact*ERF(SqZ*LQy)
+             LLambdaZ(0)=-CoFact*ERF(SqZ*LQz)
+             ULambdaX(0)=-CoFact*ERF(SqZ*UQx)
+             ULambdaY(0)=-CoFact*ERF(SqZ*UQy)
+             ULambdaZ(0)=-CoFact*ERF(SqZ*UQz)
+             LLambdaX(1)=TwoZ*LQx
+             LLambdaY(1)=TwoZ*LQy
+             LLambdaZ(1)=TwoZ*LQz
+             ULambdaX(1)=TwoZ*UQx
+             ULambdaY(1)=TwoZ*UQy
+             ULambdaZ(1)=TwoZ*UQz
+             DO L=2,Node%Ell
+                L1=L-1
+                L2=L-2
+                RL1=DBLE(L1)
+                LLambdaX(L)=TwoZ*(LQx*LLambdaX(L1)-RL1*LLambdaX(L2))
+                LLambdaY(L)=TwoZ*(LQy*LLambdaY(L1)-RL1*LLambdaY(L2))
+                LLambdaZ(L)=TwoZ*(LQz*LLambdaZ(L1)-RL1*LLambdaZ(L2))
+                ULambdaX(L)=TwoZ*(UQx*ULambdaX(L1)-RL1*ULambdaX(L2))
+                ULambdaY(L)=TwoZ*(UQy*ULambdaY(L1)-RL1*ULambdaY(L2))
+                ULambdaZ(L)=TwoZ*(UQz*ULambdaZ(L1)-RL1*ULambdaZ(L2))
+             ENDDO
+             DO L=Node%Ell,1,-1
+                LLambdaX(L)=LLambdaX(L-1)*LXptX
+                LLambdaY(L)=LLambdaY(L-1)*LXptY
+                LLambdaZ(L)=LLambdaZ(L-1)*LXptZ
+                ULambdaX(L)=ULambdaX(L-1)*UXptX
+                ULambdaY(L)=ULambdaY(L-1)*UXptY
+                ULambdaZ(L)=ULambdaZ(L-1)*UXptZ
+             ENDDO
+             SqZ=SQRT(Z)
+             CoFact=SqrtPi/(Two*SqZ)
+             LLambdaX(0)=-CoFact*ERF(SqZ*LQx)
+             LLambdaY(0)=-CoFact*ERF(SqZ*LQy)
+             LLambdaZ(0)=-CoFact*ERF(SqZ*LQz)
+             ULambdaX(0)=-CoFact*ERF(SqZ*UQx)
+             ULambdaY(0)=-CoFact*ERF(SqZ*UQy)
+             ULambdaZ(0)=-CoFact*ERF(SqZ*UQz)
+             DO L=0,Node%Ell
+                TmpX=LLambdaX(L)-ULambdaX(L)
+                DO M=0,Node%Ell-L
+                   TmpY=TmpX*(LLambdaY(M)-ULambdaY(M))
+                   DO N=0,Node%Ell-M-L
+                      LMN=LMNDex(L,M,N)
+                      Pop=Pop+TmpY*(LLambdaZ(N)-ULambdaZ(N))*Node%Co(LMN)
+                   ENDDO
+                ENDDO
+             ENDDO
          ELSE
             CALL RhoOnGrid(Node%Descend)
             CALL RhoOnGrid(Node%Descend%Travrse)
@@ -316,7 +379,43 @@ MODULE RhoTree
             Grid(2,IGrid)>Node%Box%BndBox(2,2).OR. &
             Grid(3,IGrid)>Node%Box%BndBox(3,2))RETURN
          IF(Node%Leaf)THEN            
+#ifdef EXPLICIT_SOURCE
             INCLUDE 'ExplicitLeafContribution.Inc'
+#else
+            RQx=Grid(1,IGrid)-Node%Qx            
+            RQy=Grid(2,IGrid)-Node%Qy
+            RQz=Grid(3,IGrid)-Node%Qz
+            RQ2=RQx*RQx+RQy*RQy+RQz*RQz
+            Xpt=EXP(-Node%Zeta*RQ2)
+            IF(Xpt>1.D-16)THEN
+               TwoZ=Two*Node%Zeta
+               LambdaX(0)=Xpt
+               LambdaY(0)=One
+               LambdaZ(0)=One
+               LambdaX(1)=TwoZ*RQx*Xpt
+               Lambday(1)=TwoZ*RQy
+               LambdaZ(1)=TwoZ*RQz
+               DO L=2,Node%Ell+1
+                  L1=L-1
+                  L2=L-2
+                  RL1=DBLE(L1)
+                  LambdaX(L)=TwoZ*(RQx*LambdaX(L1)-RL1*LambdaX(L2))
+                  LambdaY(L)=TwoZ*(RQy*LambdaY(L1)-RL1*LambdaY(L2))
+                  LambdaZ(L)=TwoZ*(RQz*LambdaZ(L1)-RL1*LambdaZ(L2))
+               ENDDO
+               DO L=0,Node%Ell
+                  DO M=0,Node%Ell-L
+                     DO N=0,Node%Ell-M-L
+                        LMN=LMNDex(L,M,N)
+                        RhoV(1,IGrid)=RhoV(1,IGrid)+LambdaX(L  )*LambdaY(M  )*LambdaZ(N  )*Node%Co(LMN)
+                        RhoV(2,IGrid)=RhoV(2,IGrid)-LambdaX(L+1)*LambdaY(M  )*LambdaZ(N  )*Node%Co(LMN)
+                        RhoV(3,IGrid)=RhoV(3,IGrid)-LambdaX(L  )*LambdaY(M+1)*LambdaZ(N  )*Node%Co(LMN)
+                        RhoV(4,IGrid)=RhoV(4,IGrid)-LambdaX(L  )*LambdaY(M  )*LambdaZ(N+1)*Node%Co(LMN)
+                     ENDDO
+                  ENDDO
+               ENDDO
+            ENDIF
+#endif
          ELSE
             CALL RhoAtAPoint(Node%Descend)
             CALL RhoAtAPoint(Node%Descend%Travrse)

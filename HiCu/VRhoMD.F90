@@ -13,6 +13,23 @@ PROGRAM VectorRhoMD
   CHARACTER(LEN=1)                     :: ChEll,ChL,ChL1,ChL2,ChDL1
   CHARACTER(LEN=3)                     :: ChLMN,ChLMNLen
   REAL(DOUBLE) :: R
+  CHARACTER(Len=1),DIMENSION(3)        :: Carts=(/'X','Y','Z'/)
+  CHARACTER(LEN=6),DIMENSION(14)       :: Floats=(/"      ", &
+                                                   " 2.D0*", &
+                                                   " 3.D0*", &
+                                                   " 4.D0*", &
+                                                   " 5.D0*", &
+                                                   " 6.D0*", &
+                                                   " 7.D0*", &
+                                                   " 8.D0*", &
+                                                   " 9.D0*", &
+                                                   "10.D0*", &
+                                                   "11.D0*", &
+                                                   "12.D0*", &
+                                                   "13.D0*", &
+                                                   "14.D0*"/)
+
+
 !==================================================================================
 !
 !==================================================================================
@@ -39,41 +56,42 @@ PROGRAM VectorRhoMD
      String(1,1)=Squish('CASE('//IntToChar(Ell)//')')
      WRITE(Out,*)(Blnk,I=1,9),TRIM(String(1,1))
      WRITE(Out,*)(Blnk,I=1,12),'DO I=1,NGrid '
-     WRITE(Out,*)(Blnk,I=1,15),'PRx=Prim%P(1)-Cube%Grid(1,I)'
-     WRITE(Out,*)(Blnk,I=1,15),'PRy=Prim%P(2)-Cube%Grid(2,I)'
-     WRITE(Out,*)(Blnk,I=1,15),'PRz=Prim%P(3)-Cube%Grid(3,I)'
-     WRITE(Out,*)(Blnk,I=1,15),'PR2=PRx**2+PRy**2+PRz**2'
-     WRITE(Out,*)(Blnk,I=1,15),'Dist=Z*PR2'
-     WRITE(Out,*)(Blnk,I=1,15),'IF(Dist<PenetratDistanceThreshold)THEN'
+     WRITE(Out,*)(Blnk,I=1,15),'RPx=Cube%Grid(1,I)-Prim%P(1)'
+     WRITE(Out,*)(Blnk,I=1,15),'RPy=Cube%Grid(2,I)-Prim%P(2)'
+     WRITE(Out,*)(Blnk,I=1,15),'RPz=Cube%Grid(3,I)-Prim%P(3)'
+     WRITE(Out,*)(Blnk,I=1,15),'RP2=RPx**2+RPy**2+RPz**2'
+     WRITE(Out,*)(Blnk,I=1,15),'Dist=Z*RP2'
+     WRITE(Out,*)(Blnk,I=1,15),'IF(.TRUE.)THEN'
+!     WRITE(Out,*)(Blnk,I=1,15),'IF(Dist<PenetratDistanceThreshold)THEN'
      WRITE(Out,*)(Blnk,I=1,18),'Xpt=EXPInv(Dist)'
      WRITE(Out,*)(Blnk,I=1,18),'LambdaX(0)=Xpt'
-     WRITE(Out,*)(Blnk,I=1,18),'LambdaX(1)=TwoZ*PRx*Xpt'
+     WRITE(Out,*)(Blnk,I=1,18),'LambdaX(1)=TwoZ*RPx*Xpt'
      IF(Ell>=1)THEN
         DO L=2,Ell+1
            String(1,1)='LambdaX('//IntToChar(L)                 &
-                     //')=TwoZ*(PRx*LambdaX('//IntToChar(L-1)   &
+                     //')=TwoZ*(RPx*LambdaX('//IntToChar(L-1)   &
                      //')-'//DblToShrtChar(DBLE(L-1))           &
                      //'*LambdaX('//IntToChar(L-2)//'))'
            WRITE(Out,*)(Blnk,I=1,18),TRIM(Squish(String(1,1)))
         ENDDO
      ENDIF
      WRITE(Out,*)(Blnk,I=1,18),'LambdaY(0)=One'
-     WRITE(Out,*)(Blnk,I=1,18),'LambdaY(1)=TwoZ*PRy'
+     WRITE(Out,*)(Blnk,I=1,18),'LambdaY(1)=TwoZ*RPy'
      IF(Ell>=1)THEN
         DO L=2,Ell+1
            String(1,1)='LambdaY('//IntToChar(L)                 &
-                     //')=TwoZ*(PRy*LambdaY('//IntToChar(L-1)   &
+                     //')=TwoZ*(RPy*LambdaY('//IntToChar(L-1)   &
                      //')-'//DblToShrtChar(DBLE(L-1))           &
                      //'*LambdaY('//IntToChar(L-2)//'))'
            WRITE(Out,*)(Blnk,I=1,18),TRIM(Squish(String(1,1)))
         ENDDO
      ENDIF
      WRITE(Out,*)(Blnk,I=1,18),'LambdaZ(0)=One'
-     WRITE(Out,*)(Blnk,I=1,18),'LambdaZ(1)=TwoZ*PRz'
+     WRITE(Out,*)(Blnk,I=1,18),'LambdaZ(1)=TwoZ*RPz'
      IF(Ell>=1)THEN
         DO L=2,Ell+1
            String(1,1)='LambdaZ('//IntToChar(L)                 &
-                     //')=TwoZ*(PRz*LambdaZ('//IntToChar(L-1)   &
+                     //')=TwoZ*(RPz*LambdaZ('//IntToChar(L-1)   &
                      //')-'//DblToShrtChar(DBLE(L-1))               &
                      //'*LambdaZ('//IntToChar(L-2)//'))'
            WRITE(Out,*)(Blnk,I=1,18),TRIM(Squish(String(1,1)))
@@ -107,8 +125,8 @@ PROGRAM VectorRhoMD
                                      //')*LambdaZ('//IntToChar(N+1)//')'
               String(5,K)='GradBraRhoDot=GradRhoX*GradPrimDistX &'
               String(6,K)='+GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ'
-              String(7,K)='Prim%Bra('//IntToChar(LMN)//')=Prim%Bra('//IntToChar(LMN)//') & '
-              String(8,K)='+Wght*(dEdRho*PrimDist-Two*dEdAbsGradRho2*GradBraRhoDot)'
+              String(7,K)='Prim%Ket('//IntToChar(LMN)//')=Prim%Ket('//IntToChar(LMN)//') & '
+              String(8,K)='+Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)'
         WRITE(Out,*)(Blnk,I=1,18),TRIM(Squish(String(1,K)))
         WRITE(Out,*)(Blnk,I=1,18),TRIM(Squish(String(2,K)))
         WRITE(Out,*)(Blnk,I=1,18),TRIM(Squish(String(3,K)))
@@ -134,8 +152,6 @@ PROGRAM VectorRhoMD
 !==================================================================================
   CALL OpenASCII('ExplicitLeafContribution.Inc',Out,.TRUE.)
 !  WRITE(Out,*)(Blnk,I=1,9),'RhoV=Zero'
-#ifdef MULTIPLE_DIST
-#else
   WRITE(Out,*)(Blnk,I=1,6),'RQx=Grid(1,IGrid)-Node%Qx'
   WRITE(Out,*)(Blnk,I=1,6),'RQy=Grid(2,IGrid)-Node%Qy'
   WRITE(Out,*)(Blnk,I=1,6),'RQz=Grid(3,IGrid)-Node%Qz'
@@ -145,63 +161,27 @@ PROGRAM VectorRhoMD
   WRITE(Out,*)(Blnk,I=1,6),'J=AINT(X*Exp_Grid)'
   WRITE(Out,*)(Blnk,I=1,6),'Xpt=Exp_0(J)+X*(Exp_1(J)+X*(Exp_2(J)+X*(Exp_3(J)+X*Exp_4(J))))'
   WRITE(Out,*)(Blnk,I=1,6),'TwoZ=Two*Node%Zeta'
+  WRITE(Out,*)(Blnk,I=1,9),'LambdaX(0)=Xpt'
+  WRITE(Out,*)(Blnk,I=1,9),'LambdaX(1)=TwoZ*RQx*Xpt'
+  WRITE(Out,*)(Blnk,I=1,9),'LambdaY(0)=One'
+  WRITE(Out,*)(Blnk,I=1,9),'LambdaY(1)=TwoZ*RQy'
+  WRITE(Out,*)(Blnk,I=1,9),'LambdaZ(0)=One'
+  WRITE(Out,*)(Blnk,I=1,9),'LambdaZ(1)=TwoZ*RQz'
   WRITE(Out,*)(Blnk,I=1,6),'SELECT CASE(Node%Ell)'
-#endif
   DO Ell=0,MaxEll
      ChEll   =IntToChar(Ell)
      ChLMNLen=IntToChar(LHGTF(Ell))
-#ifdef MULTIPLE_DIST
-     String(1,1)=Squish('JQ=Node%Qdex('//IntToChar(Ell)//')')
-     WRITE(Out,*)(Blnk,I=1,9),TRIM(String(1,1))
-     String(1,1)=Squish('JC=Node%Cdex('//IntToChar(Ell)//')')
-     WRITE(Out,*)(Blnk,I=1,9),TRIM(String(1,1))
-     String(1,1)=Squish('IQ=1,Node%NEll('//IntToChar(Ell)//')')
-     WRITE(Out,*)(Blnk,I=1,9),'DO',Blnk,TRIM(String(1,1))
-     WRITE(Out,*)(Blnk,I=1,12),'KQ=JQ+IQ'
-     String(1,1)=Squish('KC=JC+(IQ-1)*'//IntToChar(LHGTF(Ell)))
-     WRITE(Out,*)(Blnk,I=1,12),TRIM(String(1,1))
-     WRITE(Out,*)(Blnk,I=1,12),'Z=Node%Zeta(KQ)'
-     WRITE(Out,*)(Blnk,I=1,12),'RQx=Grid(1,IGrid)-Node%Qx(KQ)'
-     WRITE(Out,*)(Blnk,I=1,12),'RQy=Grid(2,IGrid)-Node%Qy(KQ)'
-     WRITE(Out,*)(Blnk,I=1,12),'RQz=Grid(3,IGrid)-Node%Qz(KQ)'
-     WRITE(Out,*)(Blnk,I=1,12),'RQ2=RQx*RQx+RQy*RQy+RQz*RQz'
-     WRITE(Out,*)(Blnk,I=1,12),'Xpt=EXPInv(Z*RQ2)'
-     WRITE(Out,*)(Blnk,I=1,12),'TwoZ=Two*Z'
-#else
      String(1,1)=Squish('CASE('//IntToChar(Ell)//')')
      WRITE(Out,*)(Blnk,I=1,6),TRIM(String(1,1))
-#endif
-     WRITE(Out,*)(Blnk,I=1,9),'LambdaX(0)=Xpt'
-     WRITE(Out,*)(Blnk,I=1,9),'LambdaX(1)=TwoZ*RQx*Xpt'
      IF(Ell>=1)THEN
-        DO L=2,Ell+1
-           String(1,1)='LambdaX('//IntToChar(L)                 &
-                     //')=TwoZ*(RQx*LambdaX('//IntToChar(L-1)   &
-                     //')-'//DblToShrtChar(DBLE(L-1))           &
-                     //'*LambdaX('//IntToChar(L-2)//'))'
-           WRITE(Out,*)(Blnk,I=1,9),TRIM(Squish(String(1,1)))
-        ENDDO
-     ENDIF
-     WRITE(Out,*)(Blnk,I=1,9),'LambdaY(0)=One'
-     WRITE(Out,*)(Blnk,I=1,9),'LambdaY(1)=TwoZ*RQy'
-     IF(Ell>=1)THEN
-        DO L=2,Ell+1
-           String(1,1)='LambdaY('//IntToChar(L)                 &
-                     //')=TwoZ*(RQy*LambdaY('//IntToChar(L-1)   &
-                     //')-'//DblToShrtChar(DBLE(L-1))           &
-                     //'*LambdaY('//IntToChar(L-2)//'))'
-           WRITE(Out,*)(Blnk,I=1,9),TRIM(Squish(String(1,1)))
-        ENDDO
-     ENDIF
-     WRITE(Out,*)(Blnk,I=1,9),'LambdaZ(0)=One'
-     WRITE(Out,*)(Blnk,I=1,9),'LambdaZ(1)=TwoZ*RQz'
-     IF(Ell>=1)THEN
-        DO L=2,Ell+1
-           String(1,1)='LambdaZ('//IntToChar(L)                 &
-                     //')=TwoZ*(RQz*LambdaZ('//IntToChar(L-1)   &
-                     //')-'//DblToShrtChar(DBLE(L-1))               &
-                     //'*LambdaZ('//IntToChar(L-2)//'))'
-           WRITE(Out,*)(Blnk,I=1,9),TRIM(Squish(String(1,1)))
+        DO K=1,3
+           DO L=2,Ell+1
+              String(1,1)='Lambda'//Carts(K)//'('//IntToChar(L)           &
+                        //')=TwoZ*(RQ'//Carts(K)//'*Lambda'//Carts(K)     &
+                        //'('//IntToChar(L-1)//')-'//Floats(L-1)          &
+                        //'Lambda'//Carts(K)//'('//IntToChar(L-2)//'))'
+               WRITE(Out,*)(Blnk,I=1,9),TRIM(Squish(String(1,1)))
+           ENDDO
         ENDDO
      ENDIF
      K=0
