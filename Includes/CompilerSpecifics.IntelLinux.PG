@@ -7,6 +7,7 @@ CPPINCLUDE=-I$(MONDO_INC) -I$(HDF_INC) -I/usr/local/include
 # PREPROCESSING OPTIONS: 
 CPPOPTS   =
 #           -DPARALLEL 
+#           -DPERIODIC
 #---------------------------------------------------------------
 # C Compiler and options
 #
