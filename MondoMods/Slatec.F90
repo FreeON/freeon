@@ -2,6 +2,7 @@ MODULE SLATEC
 USE GlobalScalars
 USE ProcessControl
 IMPLICIT REAL(DOUBLE) (A-H,O-Z)
+IMPLICIT INTEGER (I-N)
 CONTAINS
 !
 !--------------------------------------------------------------------

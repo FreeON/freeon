@@ -231,6 +231,7 @@ MODULE Thresholding
      END FUNCTION Extent
 !====================================================================================================
 !    COMPUTE THE R THAT SATISFIES (Pi/z)^(3/2) Erfc[Sqrt[z]*R]/R < Tau 
+!    Note: Funk is its own reward; so make my funk the p-funk.
 !====================================================================================================
      FUNCTION PFunk(Zeta,Tau) RESULT(R)
         REAL(DOUBLE)  :: Tau,Zeta,SqZ,NewTau,Val,Ec,R,BisR,DelR,X,CTest
@@ -243,8 +244,10 @@ MODULE Thresholding
         IF(1D-13*SqZ/Erf_Switch>NewTau)THEN
            R=Erf_Switch/SqZ
            RETURN
+        ELSEIF(NewTau>1D20)THEN
+           R=Zero
+           RETURN
         ENDIF
-!        WRITE(*,*)'=-=========================================='
         ! Ok, within resolution--do root finding...
         DelR=Erf_Switch/SqZ
         BisR=Zero
@@ -261,7 +264,6 @@ MODULE Thresholding
            ENDIF           
            Val=Ec/R
            CTest=(Val-NewTau)/Tau
-!           WRITE(*,33)R,DelR,X,CTest; 33 format(5(2x,D12.6))
            ! Go for relative error to get smoothness, but bail if 
            ! absolute accuracy of erf interpolation is exceeded         
            IF(ABS(CTest)<1D-4.OR.Tau*ABS(CTest)<1.D-12)THEN
@@ -275,12 +277,13 @@ MODULE Thresholding
            IF(CTest>Zero)BisR=R
            DelR=Half*DelR
         ENDDO
-        CALL Halt(' Failed to converge in PFunk: Tau = '//TRIM(DblToShrtChar(NewTau))//RTRN &
-                                           //' CTest = '//TRIM(DblToShrtChar(CTest))//RTRN &
-                                           //' Zeta = '//TRIM(DblToShrtChar(Zeta))//RTRN &
-                                           //' R = '//TRIM(DblToShrtChar(R))//RTRN &
-                                           //' Ec = '//TRIM(DblToShrtChar(Ec))//RTRN &
-                                           //' dR = '//TRIM(DblToShrtChar(DelR))//RTRN &
-                                           //' SqZ*R = '//TRIM(DblToMedmChar(X)))
+        CALL Halt(' Failed to converge in P-Funk: '//RTRN & 
+                   //'Tau = '//TRIM(DblToShrtChar(NewTau))//RTRN &
+                   //' CTest = '//TRIM(DblToShrtChar(CTest))//RTRN &
+                   //' Zeta = '//TRIM(DblToShrtChar(Zeta))//RTRN &
+                   //' R = '//TRIM(DblToShrtChar(R))//RTRN &
+                   //' Ec = '//TRIM(DblToShrtChar(Ec))//RTRN &
+                   //' dR = '//TRIM(DblToShrtChar(DelR))//RTRN &
+                   //' SqZ*R = '//TRIM(DblToMedmChar(X)))
      END FUNCTION PFunk    
 END MODULE Thresholding
