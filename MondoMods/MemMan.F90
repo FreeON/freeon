@@ -11,13 +11,13 @@ MODULE MemMan
                        New_DBL_VECT, New_DBL_RNK2, &
                        New_DBL_RNK3, New_DBL_RNK4, &
                        New_DBL_RNK6, New_CHR_VECT, &
+                       New_BONDDATA, New_ATOMBONDS,&
                        New_PBCInfo,  New_CRDS,     &
 #ifdef PARALLEL 
                        New_DBCSR,    New_MPI_INDX, &
 #endif    
                        New_INTC,     New_BMATR,    &
-                       New_Chol,     New_BONDDATA, &
-                       New_ATOMBONDS,New_TOPOLOGY, &
+                       New_Chol,     New_TOPOLOGY, &
                        New_IntCBox,  New_ANGLEDATA,&
                        New_OUTPDATA, New_Sp1x1,    &
                        New_BCSR,     New_BSET,     &
@@ -34,13 +34,13 @@ MODULE MemMan
                        Delete_DBL_VECT, Delete_DBL_RNK2, &
                        Delete_DBL_RNK3, Delete_DBL_RNK4, &
                        Delete_DBL_RNK6, Delete_CHR_VECT, &
+                       Delete_BONDDATA, Delete_ATOMBONDS,&
                        Delete_PBCInfo,  Delete_CRDS,     &
 #ifdef PARALLEL 
                        Delete_DBCSR,    Delete_MPI_INDX, &
 #endif    
                        Delete_INTC,     Delete_BMATR,    &
-                       Delete_Chol,     Delete_BONDDATA, & 
-                       Delete_ATOMBONDS,Delete_TOPOLOGY, &
+                       Delete_Chol,     Delete_TOPOLOGY, &
                        Delete_IntCBox,  Delete_ANGLEDATA,&
                        Delete_OUTPDATA, Delete_Sp1x1,    &
                        Delete_BCSR,     Delete_BSET,     &
@@ -395,11 +395,19 @@ MODULE MemMan
         TYPE(ATOMBONDS) :: A
         INTEGER         :: NatmsLoc,MaxBonds
         !
+        IF(AllocQ(A%Alloc)) CALL Delete(A)
         A%N1=NatmsLoc
         A%N2=MaxBonds
         CALL New(A%Count,NatmsLoc)
         CALL New(A%Bonds,(/NatmsLoc,MaxBonds/))
         CALL New(A%Atoms,(/NatmsLoc,MaxBonds/))
+        IF(NatmsLoc/=0) THEN
+          CALL INT_VECT_EQ_INT_SCLR(NatmsLoc,A%Count%I(1),0)
+          IF(MaxBonds/=0) THEN
+            CALL INT_VECT_EQ_INT_SCLR(NatmsLoc*MaxBonds,A%Bonds%I(1,1),0)
+            CALL INT_VECT_EQ_INT_SCLR(NatmsLoc*MaxBonds,A%Atoms%I(1,1),0)
+          ENDIF
+        ENDIF
         A%Alloc=ALLOCATED_TRUE
       END SUBROUTINE New_ATOMBONDS
 !
@@ -408,6 +416,8 @@ MODULE MemMan
       SUBROUTINE Delete_ATOMBONDS(A)
         TYPE(ATOMBONDS) :: A
         !
+        A%N1=0        
+        A%N2=0        
         CALL Delete(A%Count)
         CALL Delete(A%Bonds)
         CALL Delete(A%Atoms)
@@ -448,6 +458,7 @@ MODULE MemMan
       SUBROUTINE New_BONDDATA(A,NBond)
          TYPE(BONDDATA) :: A
          INTEGER NBond,NatmsLoc
+         IF(AllocQ(A%Alloc)) CALL Delete(A)
          A%N=NBond
          CALL New(A%IJ,(/2,NBond/))
          CALL New(A%Length,NBond)
@@ -462,6 +473,7 @@ MODULE MemMan
 !
       SUBROUTINE Delete_BONDDATA(A)
          TYPE(BONDDATA) :: A
+         A%N=0       
          CALL Delete(A%IJ)
          CALL Delete(A%Length)
          CALL Delete(A%Type)
@@ -536,6 +548,8 @@ MODULE MemMan
          CALL New(A%LagrMult,A%NLagr)
          CALL New(A%LagrDispl,A%NLagr)
          CALL New(A%GradMult,A%NLagr)
+         CALL New(A%AtmB,A%NAtms,0)
+         CALL New(A%Bond,0)
          A%Alloc=ALLOCATED_TRUE
          A%ETotal=Zero
       END SUBROUTINE New_CRDS
@@ -911,6 +925,8 @@ MODULE MemMan
          CALL Delete(A%LagrMult)
          CALL Delete(A%LagrDispl)
          CALL Delete(A%GradMult)
+         CALL Delete(A%Bond)
+         CALL Delete(A%AtmB)
          A%NLagr=0
          A%NAtms=0
          A%Alloc=ALLOCATED_FALSE

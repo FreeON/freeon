@@ -804,6 +804,22 @@ MODULE SetXYZ
 !
 !===============================================================
 !
+      SUBROUTINE Set_AtmB_EQ_AtmB(A,B)
+        TYPE(ATOMBONDS) :: A,B
+        !
+        IF(.NOT.AllocQ(A%Alloc)) THEN
+          CALL New(A,B%N1,B%N2)
+        ELSE
+          CALL Delete(A)
+          CALL New(A,B%N1,B%N2)
+        ENDIF
+        A%Count%I=B%Count%I
+        A%Bonds%I=B%Bonds%I
+        A%Atoms%I=B%Atoms%I
+      END SUBROUTINE Set_AtmB_EQ_AtmB
+!
+!===============================================================
+!
       SUBROUTINE Set_BONDDATA_EQ_BONDDATA(A,B,NewDim_O,OldDim_O)
         TYPE(BONDDATA)          :: A,B
         INTEGER,OPTIONAL        :: NewDim_O,OldDim_O

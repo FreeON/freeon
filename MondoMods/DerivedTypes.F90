@@ -244,7 +244,33 @@ MODULE DerivedTypes
      TYPE(DBL_RNK2)              :: InvBoxSh   !-- Inverse of the Box Shape Vectors
      TYPE(DBL_RNK2)              :: LatFrc     !-- Lattice Forces
   END TYPE PBCInfo                               
-!----------------------------------------------------------------
+!
+!----------------------------------------------------------------------
+!
+   TYPE BONDDATA
+     INTEGER        :: Alloc     !-- Allocation key
+     INTEGER        :: N
+     TYPE(INT_RNK2) :: IJ
+     TYPE(DBL_VECT) :: Length
+     TYPE(CHR_VECT) :: Type
+     TYPE(INT_VECT) :: HBExtraSN !serial # of third atom in HBond
+     TYPE(INT_VECT) :: HBExtraNC !nuclear charge of third at in HBond
+     TYPE(INT_VECT) :: LonelyAtom   ! 1 for lonely, 0 otherwise
+   END TYPE BONDDATA
+!
+!----------------------------------------------------------------------
+!
+   TYPE ATOMBONDS
+     INTEGER        :: Alloc     !-- Allocation key
+     INTEGER        :: N1
+     INTEGER        :: N2
+     TYPE(INT_VECT) :: Count
+     TYPE(INT_RNK2) :: Bonds
+     TYPE(INT_RNK2) :: Atoms 
+   END TYPE ATOMBONDS
+!
+!----------------------------------------------------------------------
+!
 !  Coordinates
 !
    TYPE CRDS
@@ -289,6 +315,9 @@ MODULE DerivedTypes
       TYPE(DBL_VECT)   :: LagrDispl !-- Displaced Lagrange multipl.
       TYPE(DBL_VECT)   :: LagrMult  !-- Lagrange multipliers
       TYPE(DBL_VECT)   :: GradMult  !-- Gradients on LagrMult
+!     Bonding scheme for internal coordinates
+      TYPE(BONDDATA)   :: Bond
+      TYPE(ATOMBONDS)  :: AtmB
    END TYPE 
 !-------------------------------------------------------------------------------------
 !  Cartesian Multipoles of the Density
@@ -549,30 +578,6 @@ MODULE DerivedTypes
      TYPE(DBL_VECT) :: ChDiag
      TYPE(DBL_VECT) :: ChFact
    END TYPE
-!
-!----------------------------------------------------------------------
-!
-   TYPE BONDDATA
-     INTEGER        :: Alloc     !-- Allocation key
-     INTEGER        :: N
-     TYPE(INT_RNK2) :: IJ
-     TYPE(DBL_VECT) :: Length
-     TYPE(CHR_VECT) :: Type
-     TYPE(INT_VECT) :: HBExtraSN !serial # of third atom in HBond
-     TYPE(INT_VECT) :: HBExtraNC !nuclear charge of third at in HBond
-     TYPE(INT_VECT) :: LonelyAtom   ! 1 for lonely, 0 otherwise
-   END TYPE BONDDATA
-!
-!----------------------------------------------------------------------
-!
-   TYPE ATOMBONDS
-     INTEGER        :: Alloc     !-- Allocation key
-     INTEGER        :: N1
-     INTEGER        :: N2
-     TYPE(INT_VECT) :: Count
-     TYPE(INT_RNK2) :: Bonds
-     TYPE(INT_RNK2) :: Atoms 
-   END TYPE ATOMBONDS
 !
 !----------------------------------------------------------------------
 !

@@ -1318,6 +1318,8 @@ CONTAINS
                 CALL Get(GM%Gradients ,'Gradients'    ,Tag_O=Tag_O)
                 CALL Get(GM%AbCarts   ,'Abcartesians' ,Tag_O=Tag_O)
                 CALL Get(GM%Displ     ,'Displ'        ,Tag_O=Tag_O)
+                CALL Get(GM%Bond      ,'Bond'         ,Tag_O=Tag_O)
+                CALL Get(GM%AtmB      ,'AtmB'         ,Tag_O=Tag_O)
                 IF(GM%NLagr/=0) THEN
                   CALL Get(GM%LagrMult,'LagrMult',Tag_O=Tag_O)
                   CALL Get(GM%LagrDispl,'LagrDispl',Tag_O=Tag_O)
@@ -1360,6 +1362,8 @@ CONTAINS
                 CALL Put(GM%Gradients ,'Gradients'    ,Tag_O=Tag_O)
                 CALL Put(GM%AbCarts   ,'Abcartesians' ,Tag_O=Tag_O)
                 CALL Put(GM%Displ     ,'Displ'        ,Tag_O=Tag_O)
+                CALL Put(GM%Bond      ,'Bond'         ,Tag_O=Tag_O)
+                CALL Put(GM%AtmB      ,'AtmB'         ,Tag_O=Tag_O)
                 IF(GM%NLagr/=0) THEN
                   CALL Put(GM%LagrMult,'LagrMult',Tag_O=Tag_O)
                   CALL Put(GM%LagrDispl,'LagrDispl',Tag_O=Tag_O)
@@ -2149,65 +2153,78 @@ CONTAINS
 !
 !----------------------------------------------------------------
 !
-  SUBROUTINE Put_BondD(A,Tag)
+  SUBROUTINE Put_BondD(A,Name,Tag_O)
     TYPE(BONDDATA)   :: A
-    CHARACTER(LEN=*) :: Tag
+    CHARACTER(LEN=*) :: Name
+    CHARACTER(LEN=*),OPTIONAL :: Tag_O
     !
-    A%N=SIZE(A%IJ%I,2)
-    CALL Put(A%N,'N',Tag_O=Tag) 
-    CALL Put(A%IJ,'IJ',Tag_O=Tag) 
-    CALL Put(A%Length,'Length',Tag_O=Tag) 
-    CALL Put(A%Type,'Type',Tag_O=Tag) 
-    CALL Put(A%HBExtraSN,'HBExtraSN',Tag_O=Tag) 
-    CALL Put(A%HBExtraNC,'HBExtraNC',Tag_O=Tag) 
-    CALL Put(A%LonelyAtom,'LonelyAtom',Tag_O=Tag) 
+    CALL Put(A%N,TRIM(Name)//'N',Tag_O=Tag_O) 
+    IF(A%N/=0) THEN   
+      CALL Put(A%IJ,TRIM(Name)//'IJ',Tag_O=Tag_O) 
+      CALL Put(A%Length,TRIM(Name)//'Length',Tag_O=Tag_O) 
+      CALL Put(A%Type,TRIM(Name)//'Type',Tag_O=Tag_O) 
+      CALL Put(A%HBExtraSN,TRIM(Name)//'HBExtraSN',Tag_O=Tag_O) 
+      CALL Put(A%HBExtraNC,TRIM(Name)//'HBExtraNC',Tag_O=Tag_O) 
+      CALL Put(A%LonelyAtom,TRIM(Name)//'LonelyAtom',Tag_O=Tag_O) 
+    ENDIF
   END SUBROUTINE Put_BondD
 !
 !---------------------------------------------------------------
 !
-  SUBROUTINE Get_BondD(A,Tag)
+  SUBROUTINE Get_BondD(A,Name,Tag_O)
     TYPE(BONDDATA)   :: A
-    CHARACTER(LEN=*) :: Tag
+    CHARACTER(LEN=*) :: Name
+    CHARACTER(LEN=*),OPTIONAL :: Tag_O
     !
-    CALL Get(A%N,'N',Tag_O=Tag) 
+    CALL Get(A%N,TRIM(Name)//'N',Tag_O=Tag_O) 
     CALL New(A,A%N)
-    CALL Get(A%IJ,'IJ',Tag_O=Tag) 
-    CALL Get(A%Length,'Length',Tag_O=Tag) 
-    CALL Get(A%Type,'Type',Tag_O=Tag) 
-    CALL Get(A%HBExtraSN,'HBExtraSN',Tag_O=Tag) 
-    CALL Get(A%HBExtraNC,'HBExtraNC',Tag_O=Tag) 
-    CALL Get(A%LonelyAtom,'LonelyAtom',Tag_O=Tag) 
+    IF(A%N/=0) THEN   
+      CALL Get(A%IJ,TRIM(Name)//'IJ',Tag_O=Tag_O) 
+      CALL Get(A%Length,TRIM(Name)//'Length',Tag_O=Tag_O) 
+      CALL Get(A%Type,TRIM(Name)//'Type',Tag_O=Tag_O) 
+      CALL Get(A%HBExtraSN,TRIM(Name)//'HBExtraSN',Tag_O=Tag_O) 
+      CALL Get(A%HBExtraNC,TRIM(Name)//'HBExtraNC',Tag_O=Tag_O) 
+      CALL Get(A%LonelyAtom,TRIM(Name)//'LonelyAtom',Tag_O=Tag_O) 
+    ENDIF
   END SUBROUTINE Get_BondD
 !
 !---------------------------------------------------------------
 !
-  SUBROUTINE Put_AtmB(A,Tag)
+  SUBROUTINE Put_AtmB(A,Name,Tag_O)
     TYPE(ATOMBONDS)  :: A
-    CHARACTER(LEN=*) :: Tag
+    CHARACTER(LEN=*) :: Name
+    CHARACTER(LEN=*),OPTIONAL :: Tag_O
     INTEGER          :: N1,N2
     !
-    A%N1=SIZE(A%Bonds%I,1)
-    A%N2=SIZE(A%Bonds%I,2)
-    CALL Put(A%N1,'N1',Tag_O=Tag)
-    CALL Put(A%N2,'N2',Tag_O=Tag)
-    CALL Put(A%Count,'Count',Tag_O=Tag)
-    CALL Put(A%Bonds,'Bonds',Tag_O=Tag)
-    CALL Put(A%Atoms,'Atoms',Tag_O=Tag)
+    CALL Put(A%N1,TRIM(Name)//'N1',Tag_O=Tag_O)
+    CALL Put(A%N2,TRIM(Name)//'N2',Tag_O=Tag_O)
+    IF(A%N1/=0) THEN
+      CALL Put(A%Count,TRIM(Name)//'Count',Tag_O=Tag_O)
+      IF(A%N2/=0) THEN
+        CALL Put(A%Bonds,TRIM(Name)//'Bonds',Tag_O=Tag_O)
+        CALL Put(A%Atoms,TRIM(Name)//'Atoms',Tag_O=Tag_O)
+      ENDIF
+    ENDIF
   END SUBROUTINE Put_AtmB
 !
 !---------------------------------------------------------------
 !
-  SUBROUTINE Get_AtmB(A,Tag)
+  SUBROUTINE Get_AtmB(A,Name,Tag_O)
     TYPE(ATOMBONDS)  :: A
-    CHARACTER(LEN=*) :: Tag
+    CHARACTER(LEN=*) :: Name
+    CHARACTER(LEN=*),OPTIONAL :: Tag_O
     INTEGER          :: N1,N2
     !
-    CALL Get(A%N1,'N1',Tag_O=Tag)
-    CALL Get(A%N2,'N2',Tag_O=Tag)
+    CALL Get(A%N1,TRIM(Name)//'N1',Tag_O=Tag_O)
+    CALL Get(A%N2,TRIM(Name)//'N2',Tag_O=Tag_O)
     CALL New(A,A%N1,A%N2)
-    CALL Get(A%Count,'Count',Tag_O=Tag)
-    CALL Get(A%Bonds,'Bonds',Tag_O=Tag)
-    CALL Get(A%Atoms,'Atoms',Tag_O=Tag)
+    IF(A%N1/=0) THEN
+      CALL Get(A%Count,TRIM(Name)//'Count',Tag_O=Tag_O)
+      IF(A%N2/=0) THEN
+        CALL Get(A%Bonds,TRIM(Name)//'Bonds',Tag_O=Tag_O)
+        CALL Get(A%Atoms,TRIM(Name)//'Atoms',Tag_O=Tag_O)
+      ENDIF
+    ENDIF
   END SUBROUTINE Get_AtmB
 !
 !---------------------------------------------------------------
