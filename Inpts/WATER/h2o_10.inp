@@ -4,13 +4,12 @@ Water Cluster Timing Input #1
 <EndTitle>
 
 <BeginOptions>
-MPIRun="/usr/local/mpich-1.1.2_PG_SHMEM/bin/mpirun -np 4"
 Charge=0
 Multiplicity=1
 Guess=SuperPos
 SCFMethod=(SDMM)
-BasisSets=(6-31G**)
-ModelChem=(B3LYP/VWN5)
+BasisSets=(STO-3G)
+ModelChem=(BLYP)
 Accuracy =(Good)
 DebugAll=(MaxDebug)
 Geometry=(InAngstroms,HOrder)

@@ -10,7 +10,7 @@
 #========================================================================
 include $(MONDO_HOME)/Includes/RemoveAll
 #
-all:	 Env        mm  s  x  1  2  e
+all:	 Env        mm  s  x  1  2  e o
 #
 clean:	CExec cmm cs cx c1 c2 ce 
 	rm -f $(REMOVEALL)
