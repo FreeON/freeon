@@ -380,8 +380,10 @@ MODULE MemMan
          CALL New(A%GammaA,A%MAXL+1)
          CALL New(A%CB,(/A%NPrim*A%NPrim,3/))
          CALL New(A%CK,(/A%MaxInts,A%NPrim*A%NPrim,3/))
-         CALL New(A%WR,(/12,A%MaxInts*A%NPrim**4/))
-         CALL New(A%WZ,(/5,A%MaxInts*A%NPrim**4/))
+!         CALL New(A%WR,(/12,A%MaxInts*A%NPrim**4/))
+!         CALL New(A%WZ,(/5,A%MaxInts*A%NPrim**4/))
+         CALL New(A%WR,(/A%MaxInts*A%NPrim**4,12/))
+         CALL New(A%WZ,(/A%MaxInts*A%NPrim**4,5/))
          CALL New(A%GT,(/3,A%Mesh/),(/0,0/))
          CALL New(A%ET,(/3,A%Mesh/),(/0,0/))
          A%Alloc=ALLOCATED_TRUE
