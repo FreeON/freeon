@@ -5,8 +5,7 @@ MODULE PeriodicKeys
    CHARACTER(LEN=*),  PARAMETER :: PBOUNDRY     ='Periodic' 
    CHARACTER(LEN=*),  PARAMETER :: PBCWRAP      ='PBC'
 !
-   CHARACTER(LEN=*),  PARAMETER :: ATOMW_ON     ='AtomWrap'
-   CHARACTER(LEN=*), PARAMETER :: ATOMW_OFF    ='NoAtomWrap'
+   CHARACTER(LEN=10), PARAMETER :: ATOMW_OFF    ='NoAtomWrap'
 !
    CHARACTER(LEN=*),  PARAMETER :: ALAT_VEC     ='av'
    CHARACTER(LEN=*),  PARAMETER :: BLAT_VEC     ='bv'
@@ -22,8 +21,7 @@ MODULE PeriodicKeys
    CHARACTER(LEN=*), PARAMETER :: PFFMXLAY     ='PFFLayers'
    CHARACTER(LEN=*), PARAMETER :: PFFOVRDE     ='PFFOverRide'
 !
-
-   CHARACTER(LEN=*), PARAMETER :: CENTERATOMS  ='CenterAtoms'
-   CHARACTER(LEN=*),  PARAMETER :: EPSILON      ='Epsilon'
+   CHARACTER(LEN=7),  PARAMETER :: CENTERATOMS  ='CenterAtoms'
+   CHARACTER(LEN=7),  PARAMETER :: EPSILON      ='Epsilon'
 !
  END MODULE PeriodicKeys
