@@ -1,0 +1,10 @@
+1. In the G2.* files I need to add the size of the ket space in the 
+3rd column. This should be the same as the second column in G3.*
+
+2. In ComputeXForce, I call HrrKet with N1,N1 this should lead to extra 
+looping that is not needed. Eventually, the correct looping lengths should 
+be included.
+
+3. Need to add a fith column to G2 and G3 files. This will correspond to 
+the final length of the bra (in G2, not really used) and the ket (in G3).
+
