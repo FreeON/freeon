@@ -463,6 +463,7 @@ CONTAINS
        !
        ConvgdAll=1
        DO iCLONE=1,C%Geos%Clones
+         Convgd%I=0
          CALL OptSingleMol(C%GOpt,C%Nams,C%Opts,C%Sets,C%Geos, &
            C%Geos%Clone(iCLONE),Convgd%I,iGEO,iBAS,iCLONE)
          ConvgdAll=ConvgdAll*Convgd%I(iCLONE)
@@ -476,6 +477,7 @@ CONTAINS
        IF(ConvgdAll==1) EXIT
      ENDDO
      !
+     IGeo=C%Stat%Current%I(3)
      IF(IGeo>=MaxSteps) THEN
        CALL OpenASCII(OutFile,Out)
        IF(ConvgdAll/=1) THEN
@@ -566,7 +568,8 @@ CONTAINS
      !
      ! Check convergence
      !
-     CALL GeOpConv(GOpt,XYZ,ETot,IntCs,IntOld,iCLONE,iGEO)
+     CALL GeOpConv(GOpt%Constr,GOpt%GOptStat,GOpt%CoordCtrl, &
+                   GOpt%GConvCrit,XYZ,ETot,IntCs,IntOld,iCLONE,iGEO)
      !
      ! tidy up
      !
@@ -900,8 +903,12 @@ CONTAINS
 !
 !---------------------------------------------------------------
 !
-   SUBROUTINE GeOpConv(GOpt,XYZ,Etot,IntCs,IntOld,iCLONE,iGEO)
-     TYPE(GeomOpt)              :: GOpt
+   SUBROUTINE GeOpConv(CtrlConstr,CtrlStat,CtrlCoord,GConvCr, &
+                       XYZ,Etot,IntCs,IntOld,iCLONE,iGEO)
+     TYPE(GOptStat)             :: CtrlStat
+     TYPE(Constr)               :: CtrlConstr
+     TYPE(CoordCtrl)            :: CtrlCoord  
+     TYPE(GConvCrit)            :: GConvCr    
      REAL(DOUBLE),DIMENSION(:,:):: XYZ
      TYPE(INTC)                 :: IntCs
      TYPE(DBL_VECT)             :: IntOld,AuxVect
@@ -938,22 +945,22 @@ CONTAINS
      NatmsLoc=SIZE(XYZ,2)
      NCart=3*NatmsLoc
      !
-     RMSGrad=GOpt%GOptStat%RMSGrad
-     RMSGradNoConstr=GOpt%GOptStat%RMSGradNoConstr
-     MaxGrad=GOpt%GOptStat%MaxGrad
-     MaxGradNoConstr=GOpt%GOptStat%MaxGradNoConstr
-     IMaxGrad=GOpt%GOptStat%IMaxGrad
-     IMaxGradNoConstr=GOpt%GOptStat%IMaxGradNoConstr
+     RMSGrad=CtrlStat%RMSGrad
+     RMSGradNoConstr=CtrlStat%RMSGradNoConstr
+     MaxGrad=CtrlStat%MaxGrad
+     MaxGradNoConstr=CtrlStat%MaxGradNoConstr
+     IMaxGrad=CtrlStat%IMaxGrad
+     IMaxGradNoConstr=CtrlStat%IMaxGradNoConstr
      !
-     NStreGeOp=GOpt%CoordCtrl%NStre
-     NBendGeOp=GOpt%CoordCtrl%NBend
-     NLinBGeOp=GOpt%CoordCtrl%NLinB
-     NOutPGeOp=GOpt%CoordCtrl%NOutP
-     NTorsGeOp=GOpt%CoordCtrl%NTors
+     NStreGeOp=CtrlCoord%NStre
+     NBendGeOp=CtrlCoord%NBend
+     NLinBGeOp=CtrlCoord%NLinB
+     NOutPGeOp=CtrlCoord%NOutP
+     NTorsGeOp=CtrlCoord%NTors
      !
      ! Size of internal coordinate changes
      !
-     CALL INTCValue(IntCs,XYZ,GOpt%CoordCtrl%LinCrit)
+     CALL INTCValue(IntCs,XYZ,CtrlCoord%LinCrit)
      IntOld%D=IntCs%Value-IntOld%D
      CALL MapAngleDispl(IntCs,NIntC,IntOld%D)
      MaxStre=0
@@ -1002,33 +1009,29 @@ CONTAINS
      ENDDO
      RMSIntDispl=SQRT(DOT_PRODUCT(IntOld%D,IntOld%D)/DBLE(NIntC))
      !
-     GOpt%GOptStat%MaxStreDispl=MaxStreDispl
-     GOpt%GOptStat%MaxBendDispl=MaxBendDispl
-     GOpt%GOptStat%MaxLinBDispl=MaxLinBDispl
-     GOpt%GOptStat%MaxOutPDispl=MaxOutPDispl
-     GOpt%GOptStat%MaxTorsDispl=MaxTorsDispl
-     GOpt%GOptStat%RMSIntDispl =RMSIntDispl
+     CtrlStat%MaxStreDispl=MaxStreDispl
+     CtrlStat%MaxBendDispl=MaxBendDispl
+     CtrlStat%MaxLinBDispl=MaxLinBDispl
+     CtrlStat%MaxOutPDispl=MaxOutPDispl
+     CtrlStat%MaxTorsDispl=MaxTorsDispl
+     CtrlStat%RMSIntDispl =RMSIntDispl
      !
-     IF(GOpt%Constr%NConstr/=0) THEN
-       ! constraints
-       ! GOpt%GOptStat%GeOpConvgd=(RMSGradNoConstr &
-       !                      <GOpt%GConvCrit%GradCrit.AND. &
-       ! MaxGradNoConstr<GOpt%GConvCrit%GradCrit).OR. &
-       GOpt%GOptStat%GeOpConvgd=&
-                           MaxStreDispl<GOpt%GConvCrit%Stre.AND. &
-                           MaxBendDispl<GOpt%GConvCrit%Bend.AND. &
-                           MaxLinBDispl<GOpt%GConvCrit%LinB.AND. &
-                           MaxOutPDispl<GOpt%GConvCrit%OutP.AND. &
-                           MaxTorsDispl<GOpt%GConvCrit%Tors
+     IF(CtrlConstr%NConstr/=0) THEN
+       CtrlStat%GeOpConvgd=&
+                           MaxStreDispl<GConvCr%Stre.AND. &
+                           MaxBendDispl<GConvCr%Bend.AND. &
+                           MaxLinBDispl<GConvCr%LinB.AND. &
+                           MaxOutPDispl<GConvCr%OutP.AND. &
+                           MaxTorsDispl<GConvCr%Tors
      ELSE
      ! no constraints
-       GOpt%GOptStat%GeOpConvgd=RMSGrad<GOpt%GConvCrit%Grad.AND. &
-                           MaxGrad<GOpt%GConvCrit%Grad.AND. &
-                           MaxStreDispl<GOpt%GConvCrit%Stre.AND. &
-                           MaxBendDispl<GOpt%GConvCrit%Bend.AND. &
-                           MaxLinBDispl<GOpt%GConvCrit%LinB.AND. &
-                           MaxOutPDispl<GOpt%GConvCrit%OutP.AND. &
-                           MaxTorsDispl<GOpt%GConvCrit%Tors
+       CtrlStat%GeOpConvgd=RMSGrad<GConvCr%Grad.AND. &
+                           MaxGrad<GConvCr%Grad.AND. &
+                           MaxStreDispl<GConvCr%Stre.AND. &
+                           MaxBendDispl<GConvCr%Bend.AND. &
+                           MaxLinBDispl<GConvCr%LinB.AND. &
+                           MaxOutPDispl<GConvCr%OutP.AND. &
+                           MaxTorsDispl<GConvCr%Tors
      ENDIF
      !
      ! Review iterations
@@ -1046,7 +1049,7 @@ CONTAINS
      WRITE(*,420) RMSGrad
      WRITE(Out,410) MaxGrad,IntCs%Atoms(IMaxGrad,1:4)
      WRITE(Out,420) RMSGrad
-     IF(GOpt%Constr%NConstr/=0) THEN
+     IF(CtrlConstr%NConstr/=0) THEN
        WRITE(*,510) MaxGradNoConstr,IntCs%Atoms(IMaxGradNoConstr,1:4)
        WRITE(*,520) RMSGradNoConstr
        WRITE(Out,510) MaxGradNoConstr,IntCs%Atoms(IMaxGradNoConstr,1:4)
@@ -1122,31 +1125,6 @@ CONTAINS
    END SUBROUTINE SetGeOpCtrl
 !
 !---------------------------------------------------------------
-!
-   SUBROUTINE PrtCooType(Nams,GOpt)
-     TYPE(FileNames) :: Nams 
-     TYPE(GeomOpt)   :: GOpt 
-     !
-     CALL OpenASCII(OutFile,Out)
-     IF(GOpt%CoordCtrl%CoordType==CoordType_Cartesian) THEN
-       WRITE(*,*) '*****************************************'
-       WRITE(*,*) 'Geometry Optimization in Cartesian Coords'
-       WRITE(*,*) '*****************************************'
-       WRITE(Out,*) '*****************************************'
-       WRITE(Out,*) 'Geometry Optimization in Cartesian Coords'
-       WRITE(Out,*) '*****************************************'
-     ELSE IF(GOpt%CoordCtrl%CoordType==CoordType_PrimInt) THEN
-       WRITE(*,*) '****************************************'
-       WRITE(*,*) 'Geometry Optimization in Internal Coords'
-       WRITE(*,*) '****************************************'
-       WRITE(Out,*) '****************************************'
-       WRITE(Out,*) 'Geometry Optimization in Internal Coords'
-       WRITE(Out,*) '****************************************'
-     ENDIF
-     CLOSE(Out,STATUS='KEEP')
-   END SUBROUTINE PrtCooType
-!
-!--------------------------------------------------------------
 !
    SUBROUTINE PrintClones(IStep,Nams,Geos)
      TYPE(FileNames)    :: Nams
