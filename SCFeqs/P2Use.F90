@@ -262,7 +262,7 @@ PROGRAM P2Use
 !
         iGEO  = Args%I%I(3)
         DMPOrder = MIN(MAX(iGEO-2,0),DMPOrder)
-        WRITE(*,*) "DMPOrder = ", DMPOrder
+!        WRITE(*,*) "DMPOrder = ", DMPOrder
 !
         CALL DMPProj(iGEO,DMPOrder,P0,Tmp1,Tmp2)
 !
@@ -274,7 +274,7 @@ PROGRAM P2Use
 #else
      TError0 = ABS(Trace(P0,S1)-Half*DBLE(NEl))
 #endif
-     WRITE(*,*) "Trace Error = ", TError0
+!     WRITE(*,*) "Trace Error = ", TError0
 !    Initialize
      NStep = 0
      Lam   = Zero
@@ -283,16 +283,36 @@ PROGRAM P2Use
      DO 
         NStep = NStep + 1
         Lam  = Lam + DLam
-        WRITE(*,*) 'NStep = ',NStep,Lam
 !       Set Up S and P        
         CALL SetEq(Tmp1,S0)
         CALL SetEq(Tmp2,S1)
         CALL Multiply(Tmp1,One-Lam)
         CALL Multiply(Tmp2,Lam)
         CALL Add(Tmp1,Tmp2,S)
-        CALL SetEq(P,P0)
+        CALL SetEq(P,P0) 
 !
+#ifdef PARALLEL 
+        IF(MyId==ROOT)THEN
+#endif
+           Mssg=ProcessName(Prog,'AO-DMX ') &
+                //' Nstep  = '//TRIM(IntToChar(NStep)) &
+                //' Lambda = '//TRIM(DblToMedmChar(Lam))      
+           CALL OpenASCII(OutFile,Out)
+           CALL PrintProtectL(Out)
+           WRITE(*,*)TRIM(Mssg)
+           WRITE(Out,*)TRIM(Mssg)
+           CALL PrintProtectR(Out)
+           CLOSE(UNIT=Out,STATUS='KEEP')
+#ifdef PARALLEL          
+        ENDIF
+#endif
+!
+#ifdef PARALLEL
+        CALL Multiply(P,S,Tmp1)
+        TrP        = Trace(Tmp1)
+#else
         TrP        = Trace(P,S)
+#endif
         Norm_Error = TrP-Half*DBLE(NEl)
         Ipot_Error = One
 !
@@ -320,9 +340,9 @@ PROGRAM P2Use
            IF(MyId==ROOT)THEN
 #endif
               PNon0s=100.D0*DBLE(P%NNon0)/DBLE(NBasF*NBasF)
-              Mssg=ProcessName(Prog,'AO-DMX '//TRIM(IntToChar(NStep))//"-"//TRIM(IntToChar(I))) &
-                   //' dN='//TRIM(DblToShrtChar(Norm_Error)) &
-                   //', %Non0='//TRIM(DblToShrtChar(PNon0s))                  
+              Mssg=ProcessName(Prog,'AO-DMX '//TRIM(IntToChar(I))) &
+                   //' dN='//TRIM(DblToShrtChar(Norm_Error))       &
+                   //', %Non0='//TRIM(DblToShrtChar(PNon0s))              
               CALL OpenASCII(OutFile,Out)
               CALL PrintProtectL(Out)
               WRITE(*,*)TRIM(Mssg)
@@ -337,7 +357,7 @@ PROGRAM P2Use
            IF(Qstep > 4) EXIT
         ENDDO
 !
-        IF(ABS(Norm_Error) < 0.5D0) THEN
+        IF(ABS(Norm_Error) < 0.01D0) THEN
            IF(Lam > (One-1.D-14)) THEN
               EXIT
            ELSE
