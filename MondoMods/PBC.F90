@@ -199,15 +199,22 @@ MODULE CellSets
 !--------------------------------------------------------------------------
 ! Set up the set of cells out to some radius R
 !--------------------------------------------------------------------------
-  SUBROUTINE New_CellSet_Sphere(CS,AW,MAT,Radius)
+  SUBROUTINE New_CellSet_Sphere(CS,AW,MAT,Radius,Rmin_O)
     TYPE(CellSet)                        :: CS
     LOGICAL,DIMENSION(3)                 :: AW
     REAL(DOUBLE),DIMENSION(3,3)          :: MAT
-    REAL(DOUBLE)                         :: Radius
+    REAL(DOUBLE)                         :: Radius,Radius_min
+    REAL(DOUBLE),OPTIONAL                :: Rmin_O
 !
     INTEGER                              :: I,J,K
     INTEGER                              :: IXM,IYM,IZM,NCELL
     REAL(DOUBLE)                         :: X,Y,Z,Rad,R
+!
+    IF(PRESENT(Rmin_O)) THEN 
+       Radius_min = Rmin_O
+    ELSE
+       Radius_min = Zero
+    ENDIF
 !
     IXM = 0
     IYM = 0
@@ -224,7 +231,7 @@ MODULE CellSets
              Y  = I*MAT(2,1)+J*MAT(2,2)+K*MAT(2,3)
              Z  = I*MAT(3,1)+J*MAT(3,2)+K*MAT(3,3)
              R = SQRT(X*X+Y*Y+Z*Z)
-             IF(R .LE. Radius) THEN
+             IF(R .GE. Radius_min .AND. R .LT. Radius) THEN
                 NCELL = NCELL+1
              ENDIF
           ENDDO
@@ -241,7 +248,7 @@ MODULE CellSets
              Y  = I*MAT(2,1)+J*MAT(2,2)+K*MAT(2,3)
              Z  = I*MAT(3,1)+J*MAT(3,2)+K*MAT(3,3)
              R = SQRT(X*X+Y*Y+Z*Z)
-             IF(R .LE. Radius) THEN
+             IF(R .GE. Radius_min .AND. R .LT. Radius) THEN
                 NCELL = NCELL+1
                 CS%CellCarts%D(1,NCELL)= X
                 CS%CellCarts%D(2,NCELL)= Y
