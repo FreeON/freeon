@@ -1196,7 +1196,7 @@ CONTAINS
              EXIT
            ENDIF
          ENDDO
-         IF(DoAllow.AND.(Tr(1)/=0.OR.Tr(2)/=0)) DoAllow=.FALSE.
+         IF(DoAllow.AND.(Tr(2)/=0.OR.Tr(3)/=0)) DoAllow=.FALSE.
          IF(.NOT.DoAllow) CYCLE
        ENDIF
        !
