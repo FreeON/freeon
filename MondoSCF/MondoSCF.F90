@@ -37,7 +37,9 @@ WRITE(*,*)' INITed '
   CALL Init(MemStats)
 ! Parse input
   CALL ParseInp(Ctrl)
+#ifdef MMech
   Mechanics=Ctrl%Mechanics
+#endif
 !
 ! Set up the SCF or MM
   Ctrl%Current=(/0,1,1/)
