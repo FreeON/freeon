@@ -53,8 +53,8 @@ MModRel  = GlobalScalars.x GlobalCharacters.x DerivedTypes.x    \
            LinAlg.x LinAlg77.x MatFunk.x SMWrap.x SpecFun.x     \
            D1Mach.x DCSEvl.x DErf.x DErfc.x DMach.x InitDS.x    \
            Thresholding.x Functionals.x PBC.x AtomPairs.x       \
-           BoundingBox.x BraBloks.x Macros.x  EllToInclude.F90  \
-           FTest.F90 SMTest.F90         
+           BoundingBox.x BraBloks.x Macros.x EllToInclude.x     \
+           FTest.x SMTest.x
 #
 small:	Mods
 #
