@@ -25,8 +25,10 @@
 !    a suite of programs for linear scaling electronic structure theory and
 !    ab initio molecular dynamics", and given appropriate citation.  
 !------------------------------------------------------------------------------
-!    PERFORM O(Lg N) WALKS ON THE POLETREE ACCUMULATING COULOMB SUMS
 !    Author: Matt Challacombe 
+!    PERFORM O(Lg N) WALKS ON THE POLETREE REPRESENTATION OF THE TOTAL 
+!    ELECTRON DENSITY, USING THE K-D TREE DATA STRUCTURE TO APPLY THE 
+!    PENETRATION ACCESABILITY CRITERIA
 !------------------------------------------------------------------------------
 MODULE TreeWalk
   USE DerivedTypes
@@ -41,6 +43,7 @@ MODULE TreeWalk
 !---------------------------------------------------------------------
 ! GLOBAL ..
   TYPE(PrimPair)                  :: Prim
+  TYPE(BBox)                      :: PBox
   REAL(DOUBLE)                    :: DP2
   REAL(DOUBLE)                    :: PoleSwitch
   INTEGER                         :: At
@@ -62,15 +65,14 @@ MODULE TreeWalk
                                            CoTan,OneOvPQ,OneOvPQxy,RS,SQ,PQToThMnsL, &
                                            TT,TwoC,COne,SOne,CTwo,STwo,RTE,RPE,T,Upq
        INTEGER                          :: J,Ell,LCode
-#ifdef EXPLICIT_SOURCE_DIRECT
+#ifdef EXPLICIT_SOURCE
        REAL(DOUBLE)                     :: o1,o2,ET,TwoT
 #else
        INTEGER                          :: LP,MP,NP,LQ,MQ,NQ,PDex,QDex
        REAL(DOUBLE),DIMENSION(0:2*HGEll,0:2*HGEll,0:2*HGEll,0:2*HGEll) :: MDR
 #endif
 !-----------------------------------------------------------------------------------------------
-!      PAC: Exp[-W_pq PQ^2]/2 < Tau/Amp
-!
+!      PAC: 
        PQx=Prim%P(1)-Q%Box%Center(1)
        PQy=Prim%P(2)-Q%Box%Center(2)
        PQz=Prim%P(3)-Q%Box%Center(3)
@@ -78,13 +80,17 @@ MODULE TreeWalk
        RTE=Prim%Zeta*Q%Zeta
        RPE=Prim%Zeta+Q%Zeta
        Omega=RTE/RPE 
-       IF(Omega*PQ2>PoleSwitch)THEN
-!         MAC: (d_q/|PQ|)^(p+1) < Tau/Amp
-          IF(PQ2>Q%D2*DP2 .OR. Q%Leaf)THEN 
+       T=Omega*PQ2
+       IF(ABS(PQx)>PBox%Half(1)+Q%Box%Half(1).OR.  &
+          ABS(PQy)>PBox%Half(2)+Q%Box%Half(2).OR.  &
+          ABS(PQz)>PBox%Half(3)+Q%Box%Half(3).OR.  &
+          T>Gamma_Switch)THEN
+!         MAC: 
+          IF(PQ2>Q%Strength*DP2.OR.Q%Leaf)THEN 
 !            Evaluate multipoles
              Ell=Prim%Ell+Q%Ell
              LCode=100*Prim%Ell+Q%Ell
-#ifdef EXPLICIT_SOURCE_POLES
+#ifdef EXPLICIT_SOURCE
              INCLUDE "IrRegulars.Inc"
              INCLUDE "CTraX.Inc"
 #else
@@ -96,14 +102,11 @@ MODULE TreeWalk
              CALL JWalk(Q%Descend%Travrse)
           ENDIF
        ELSEIF(Q%Leaf)THEN
-!         Set up
-          T=Omega*PQ2          
-          Upq=TwoPi5x2/(RTE*SQRT(RPE))
-!         Sign inversion
           PQx=-PQx; PQy=-PQy; PQz=-PQz
+          Upq=TwoPi5x2/(RTE*SQRT(RPE))
 !         Compute a Hermite Gaussian Electron Repulsion Integral (HGERI)
           Ell=Prim%Ell+Q%Ell
-#ifdef EXPLICIT_SOURCE_DIRECT
+#ifdef EXPLICIT_SOURCE
           LCode=Prim%Ell*100+Q%Ell
           INCLUDE 'HGTraX.Inc'
 #else
@@ -140,7 +143,7 @@ MODULE TreeWalk
                                            CoTan,OneOvPQ,OneOvPQxy,RS,SQ,PQToThMnsL, &
                                            TT,TwoC,COne,SOne,CTwo,STwo,RTE,RPE,T,Upq
        INTEGER                          :: J,Ell,LCode
-#ifdef EXPLICIT_SOURCE_DIRECT
+#ifdef EXPLICIT_SOURCE
        REAL(DOUBLE)                     :: o1,o2,ET,TwoT
 #else
        INTEGER                          :: LP,MP,NP,LQ,MQ,NQ,PDex,QDex
@@ -148,27 +151,26 @@ MODULE TreeWalk
 #endif
        REAL(DOUBLE),PARAMETER           :: VTol = 1.D-6
 !---------------------------------------------------------------------------------------------------
-!      PAC: Exp[-W_Min PQ^2]/2 < Tau/Amp
+!      PAC:
        PQx=Prim%P(1)-Q%Box%Center(1)
        PQy=Prim%P(2)-Q%Box%Center(2)
        PQz=Prim%P(3)-Q%Box%Center(3)
        PQ2=PQx*PQx+PQy*PQy+PQz*PQz
-!
-       IF(Q%Leaf .AND. Q%Zeta==NuclearExpnt .AND. PQ2 < VTol) THEN
-          RETURN
-       ENDIF
-!
        RTE=Prim%Zeta*Q%Zeta
        RPE=Prim%Zeta+Q%Zeta
-       Omega=RTE/RPE
-       IF(Omega*PQ2>PoleSwitch)THEN
-!         MAC: (d_q/|PQ|)^(p+1) < Tau/Amp
-          IF(PQ2>Q%D2*DP2.OR.Q%Leaf)THEN
-             IF(PQ2==Zero)RETURN
+       Omega=RTE/RPE 
+       T=Omega*PQ2
+       IF(ABS(PQx)>PBox%Half(1)+Q%Box%Half(1).OR.  &
+          ABS(PQy)>PBox%Half(2)+Q%Box%Half(2).OR.  &
+          ABS(PQz)>PBox%Half(3)+Q%Box%Half(3).OR.  &
+                 T>Gamma_Switch) THEN
+!         MAC:
+          IF(PQ2>Q%Strength*DP2.OR.Q%Leaf)THEN
+!             IF(PQ2==Zero)RETURN
 !            Evaluate multipoles
              Ell=Prim%Ell+Q%Ell
              LCode=100*Prim%Ell+Q%Ell
-#ifdef EXPLICIT_SOURCE_POLES
+#ifdef EXPLICIT_SOURCE
              INCLUDE "IrRegulars.Inc"
              INCLUDE "CTraX.Inc"
 #else
@@ -180,19 +182,23 @@ MODULE TreeWalk
              CALL VWalk(Q%Descend%Travrse)
           ENDIF
        ELSEIF(Q%Leaf)THEN
-!         Set up
-          T=Omega*PQ2          
-          Upq=TwoPi5x2/(RTE*SQRT(RPE))
-!         Sign inversion
+!         Check for self-interaction
+          IF(Q%BDex==At)RETURN
+!
+!         or use this bit o code...
+!         IF(Q%Leaf.AND.Q%Zeta==NuclearExpnt.AND.PQ2<VTol)THEN
+!            RETURN
+!         ENDIF
+
           PQx=-PQx; PQy=-PQy; PQz=-PQz
+          Upq=TwoPi5x2/(RTE*SQRT(RPE))
 !         Compute a Hermite Gaussian Electron Repulsion Integral (HGERI)
           Ell=Prim%Ell+Q%Ell
-#ifdef EXPLICIT_SOURCE_DIRECT
+#ifdef EXPLICIT_SOURCE
           LCode=Prim%Ell*100+Q%Ell
           INCLUDE 'HGTraX.Inc'
 #else
           CALL AuxInts(2*HGEll,Ell,AuxR,Omega,T)
-
           CALL MD3TRR(2*HGEll,Ell,MDR,AuxR,Upq,PQx,PQy,PQz)
           DO LP=0,Prim%Ell
              DO MP=0,Prim%Ell-LP
