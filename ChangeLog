@@ -1,3 +1,242 @@
+2002-01-30 13:40  tymczak
+
+	* Validate/Graphite_2.inp: Graphite Test System in Two D
+
+2002-01-30 13:40  tymczak
+
+	* Validate/CarbonMonoxide.inp: Carbon Monoxide Two-Dim Test System
+
+2002-01-30 13:39  tymczak
+
+	* QCTC/PFFTensor.F90: Fixed Some Bugs Fixed two-dim by now
+	correctly integrating the Non-periodic	 direction
+
+2002-01-30 13:37  tymczak
+
+	* QCTC/PBCFarField.F90: New Function CTRax_Grad New Calculation of
+	CS_IN size (BoxSize)
+
+2002-01-30 13:36  tymczak
+
+	* QCTC/JGen.F90: [no log message]
+
+2002-01-30 13:35  tymczak
+
+	* QCTC/JForce.F90: Force CheckSUm Box Fluc Stuff
+
+2002-01-30 13:34  tymczak
+
+	* QCTC/BlokTrPdJ.F90: Calls CTrax_Grad Now
+
+2002-01-30 13:31  tymczak
+
+	* OneE/TForce.F90: New Force CheckSum Box FLucuation Stuff
+
+2002-01-30 13:31  tymczak
+
+	* OneE/SForce.F90: Force Checksum Box Flucuation Stuff
+
+2002-01-30 13:30  tymczak
+
+	* OneE/MakeRho.F90: [no log message]
+
+2002-01-30 13:28  tymczak
+
+	* MondoSCF/ParsingKeys.F90: Put In New Key: Epsilon alows for more
+	general periodic boundry conditions
+
+2002-01-30 13:26  tymczak
+
+	* MondoSCF/: MondoSCF.F90, ParseInput.F90: [no log message]
+
+2002-01-30 13:23  tymczak
+
+	* MondoSCF/DrvFrcs.F90: New NForce()
+
+2002-01-30 13:19  tymczak
+
+	* MondoMods/PrettyPrint.F90: New Checksum which sums the Forces and
+	prints out the result (Should sum to Zero) New Checksum which
+	calculates the asymetry of the Matrices
+
+2002-01-30 13:17  tymczak
+
+	* MondoMods/PBC.F90: Put in a modicied New for CellSets
+
+2002-01-30 13:16  tymczak
+
+	* MondoMods/InOut.F90: Same as DerivedTypes.F90
+
+2002-01-30 13:16  tymczak
+
+	* MondoMods/DerivedTypes.F90: Put in a logical to Traslate to COM
+	Put in Epsilon, for periodic permissivity
+
+2002-01-30 13:14  tymczak
+
+	* MondoMods/AtomPairs.F90: Removed Bugs
+
+2002-01-30 13:12  tymczak
+
+	* HiCu/XCForce.F90: Added The Box Flucuation Stuff and A Sum Force
+	Call
+
+2002-01-24 17:00  ckgan
+
+	* MondoMods/Order.F90: The module AnnealMap now use the table in
+	Final_TravO.Inc
+
+2002-01-24 16:59  ckgan
+
+	* MondoMods/Final_TravO.Inc: This table from the simulated
+	annealing is included for the first time in MONDO
+
+2002-01-24 10:39  ckgan
+
+	* MondoSCF/ParsingKeys.F90: A constant string TABLETRAV_ORDER is
+	included.
+
+2002-01-24 10:38  ckgan
+
+	* MondoSCF/ParseInput.F90: ordering using TABLETRAV_ORDER is
+	included.
+
+2002-01-24 10:37  ckgan
+
+	* MondoMods/PrettyPrint.F90: don't use the module `Order' any more!
+
+2002-01-24 10:35  ckgan
+
+	* MondoMods/ParsingConstants.F90: The constants SFC_NONE, PEANO,...
+	SCF_TableTrav have been moved from the old Order.F90 to here.
+
+2002-01-24 10:33  ckgan
+
+	* MondoMods/Order.F90: (1) Module AnnealMap included.  (2) The
+	constants SCF_NONE, SCF_PEANO, ... are deleted because they have
+	been moved to ParsingConstant.F90 (3) The calling of
+	TableAnneal(R,N,Point) is made possible because     Module
+	AnnealMap has been included.
+
+2002-01-24 10:28  ckgan
+
+	* MondoMods/Makefile: Order.o now depends on PrettyPrint.o and
+	PrettyPrint.o now does not depend on Order.o
+
+2002-01-24 09:48  ckgan
+
+	* MondoMods/LinAlg.F90: A trivial bug in SetToI is fixed.
+
+2002-01-23 09:48  schwegle
+
+	* ONX/NONX/ComputeKe.F90: Fixed a bug in the computation of the 2-e
+	scratch space memory allocation. The explicit code should use a lot
+	less memory. Before this was causing ONX to resart in the middle of
+	the calculation to allocate more memory (long run times).
+
+2002-01-18 18:27  schwegle
+
+	* ONX/NONX/: ComputeKe.F90, ComputeKg.F90, MemInit.F90: Increased
+	the size of the initial 2-e buffer space. For big systems this was
+	too small and was causing onx to compute half the exchange matrix
+	then restart with a larger buffer space... Also changed the way
+	arrays are passed in ComputeKe.F90 and ComputeKg.F90. This should
+	fix the copy in/out problem in the alpha-linux version of the code.
+
+2002-01-14 15:08  mchalla
+
+	* SCFeqs/: DIIS.F90, FBuild.F90, P2Use.F90, SCFStatus.F90: Cleaned
+	things up somewhat so code runs through with 2 proc.  Have not yet
+	tried with SDMM.  Should not impact serial code at all.
+
+2002-01-14 15:07  mchalla
+
+	* MondoMods/LinAlg.F90, MondoMods/Macros.F90, MondoMods/Makefile,
+	MondoMods/MondoMPI.F90, MondoMods/Order77.F, MondoMods/SetEq.F90,
+	OneE/MakeRho.F90, OneE/MakeT.F90, MondoSCF/DrvSCFs.F90,
+	MondoSCF/MondoSCF.F90, MondoSCF/Overlay.F90: 
+	Cleaned things up somewhat so code runs through with 2 proc.  Have
+	not yet tried with SDMM.  Should not impact serial code at all.
+
+2002-01-09 18:17  schwegle
+
+	* ONX/VRR/: Int1162.F90, Int2122.F90, Int2161.F90, Int2162.F90,
+	Int2221.F90, Int2222.F90, Int2261.F90, Int6121.F90, Int6122.F90,
+	Int6161.F90, Int6211.F90, Int6221.F90, Int6611.F90, Makefile: Added
+	more explicit integral code. This should cover everything up to L=4
+	except for integrals that involve p (not sp) basis functions. I
+	will add in the p stuff later.
+
+2002-01-09 18:14  schwegle
+
+	* ONX/NONX/: ComputeKe.F90, GetIntCode.F90: Added more explicit
+	integral code. This should cover everything up to L = 4.
+
+2002-01-08 12:31  mchalla
+
+	* MondoMods/InOut.F90, MondoMods/SetEq.F90, QCTC/QCTC.F90,
+	SCFeqs/SDMM.F90: Added small fixes to get the code to compile fully
+	with -DPARALLEL
+
+2002-01-08 11:32  mchalla
+
+	* Includes/CompilerSpecifics.AMDLinux.PG, Scripts/CSHRC: Added in
+	updated options for compile and linking with LAM MPI on ZINC.
+
+2001-12-24 16:57  mchalla
+
+	* MondoSCF/DrvFrcs.F90, MondoSCF/DrvSCFs.F90,
+	MondoSCF/MondoSCF.F90, MondoSCF/ParseInput.F90, OneE/MakeRho.F90,
+	OneE/SForce.F90, OneE/TForce.F90, HiCu/XCForce.F90,
+	QCTC/JForce.F90, SCFeqs/SCFStatus.F90: Added in code for numerical
+	evaluation of forces, and put what should be non-permanent calls to
+	numerical force routine when grad=force is invoked.  Looks like
+	there is a bug in the x-component of JFroce for periodic systems
+	(Lizard.inp with 3-21G).
+
+2001-12-20 08:39  mchalla
+
+	* MondoMods/: BraBloks.F90, Thresholding.F90: Modified thresholding
+	to have three extents.	Extent0 is worst case overestimate, but
+	cheap.	Extent1 is CJs version using envelope functions and
+	biscection.  Extent2 is Matts version using HGs.
+
+2001-12-19 09:06  mchalla
+
+	* MondoMods/BraBloks.F90: Fixed typo: L->Len.
+
+2001-12-18 13:28  mchalla
+
+	* HiCu/: KxcGen.F90, dXCBlok.F90: Now uses the extent provided by
+	brabloks.
+
+2001-12-18 13:27  mchalla
+
+	* MondoMods/: BraBloks.F90, Thresholding.F90: Added new hopefully
+	rigorous extent based on Cramer's inequality.  Computes a bigger
+	extent than previous ones (retaining these as Extent1 CJ's version
+	and Extent2 Matt's old old version). Use the new extent in BraBloks
+	to create a lumped extent (for all states) that can be used to
+	conviently check if primitive is in or outside a box (in HiCu for
+	example).  Plan is to eventually use the more sophisticated extents
+	again.
+
+2001-12-14 17:25  schwegle
+
+	* MondoMods/MemMan.F90: Made a change to the IBuf def to reorder
+	the indexes in WR and WZ.
+
+2001-12-14 17:24  schwegle
+
+	* ONX/NONX/: ComputeKg.F90, DisOrder.F90, Makefile, README,
+	RGen.F90, RGen1C.F90, VRRl.F90, vrrl.F: Converted vrrl.F to
+	VRRl.F90, also changed the order of the indexes in IB%WR and IB%WZ.
+	This needs a change in MemMan.F90 in MondoMods.
+
+2001-12-14 15:33  mchalla
+
+	* ChangeLog: [no log message]
+
 2001-12-14 15:30  mchalla
 
 	* XForm/LowdinO.F90: Put in checking of cond(S), with appropriate
@@ -43,6 +282,10 @@
 	ONX.F90, Sizes.F90, VRRs.F90: Fixed a lot of bugs and messy stuff
 	with the array dimensions in the 2-e code.
 
+2001-12-10 11:57  mchalla
+
+	* ChangeLog: [no log message]
+
 2001-12-10 11:53  mchalla
 
 	* Validate/Lizard.inp: [no log message]
@@ -59,6 +302,10 @@
 	MondoSCF/ParseInput.F90, SCFeqs/SDMM.F90, QCTC/BlokTrPdJ.F90,
 	QCTC/JGen.F90: Changed back to pre 2001-11-26 to eliminate periodic
 	instabilities and feature bloat.
+
+2001-12-07 12:17  mchalla
+
+	* ChangeLog: [no log message]
 
 2001-12-05 17:08  tymczak
 
