@@ -10,7 +10,7 @@ MODULE GeometryKeys
   CHARACTER(LEN=14), PARAMETER :: REACTANTS_END  ='<EndReactants>'
   ! Geometry=
   CHARACTER(LEN=8),  PARAMETER :: GEOMETRY          ='Geometry' 
-  CHARACTER(LEN=8),  PARAMETER :: IN_AU             ='InAu'
+  CHARACTER(LEN=8),  PARAMETER :: IN_AU             ='InAU'
   CHARACTER(LEN=6),  PARAMETER :: H_ORDER           ='HOrder'
   CHARACTER(LEN=6),  PARAMETER :: Z_ORDER           ='ZOrder'
   CHARACTER(LEN=11), PARAMETER :: RANDOM_ORDER      ='RandomOrder'

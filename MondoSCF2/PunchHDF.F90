@@ -108,7 +108,7 @@ CONTAINS
        CALL Put(BIG_DBL,'dmax')
        CALL Put(BIG_DBL,'diiserr')
        CALL Put(.TRUE.,'programfailed')
-
+#ifdef PARALLEL
        CALL Put(0,'LineLocExist')
        CALL New(ETDirArr,P%NSpace-1)
        CALL New(ETRootArr,P%NSpace-1)
@@ -118,7 +118,7 @@ CONTAINS
        CALL Put(ETRootArr,'ETRootArr')
        CALL Delete(ETDirArr)
        CALL Delete(ETRootArr)
-
+#endif
        DO I=1,LEN(FailedProgram)
           FailedProgram(I:I)='X'
        ENDDO
