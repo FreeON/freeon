@@ -46,8 +46,8 @@ ReleaseFiles = SBlok.x MakeS.x TBlok.x MakeT.x  \
 #
 all:	 MakeU MakeS MakeT MakeRho ParaMakeRho SForce TForce
 #
-MakeU:	 $(ObjsECPs)
-	 $(LD) $(LDFLAGS) MakeU $(ObjsECPs) $(F90_LIBRARIES)
+#MakeU:	 $(ObjsECPs)
+#	 $(LD) $(LDFLAGS) MakeU $(ObjsECPs) $(F90_LIBRARIES)
 #	 mv MakeU $(MONDO_EXEC)/MakeU
 #
 MakeS:	 $(ObjsS)
