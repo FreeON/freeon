@@ -138,6 +138,8 @@ MODULE ParsingKeys
    CHARACTER(LEN=10), PARAMETER :: CRT_FRAC     ='FracCoord'
 !
    CHARACTER(LEN=11), PARAMETER :: TRAN_COM     ='CenterAtoms'
+!
+   CHARACTER(LEN=7),  PARAMETER :: EPSILON      ='Epsilon'
 #endif
 !-------------------------------------------------  
 !  Parsing keys for <Options.BasisSets=>
