@@ -3266,12 +3266,14 @@ CONTAINS
 !---------------------------------------------------------------------
 !
    SUBROUTINE RefreshBMatInfo(IntCs,XYZ,GTrfCtrl,LinCrit,TorsLinCrit,&
-                              PBCDim,Print,SCRPath,DoCleanB,Gi_O)
+                             PBCDim,Print,SCRPath,DoCleanB,Gi_O,Shift_O)
      TYPE(INTC)                   :: IntCs
      TYPE(Cholesky)               :: CholData
      TYPE(TrfCtrl)                :: GTrfCtrl
      REAL(DOUBLE),DIMENSION(:,:)  :: XYZ
      REAL(DOUBLE)                 :: LinCrit,TorsLinCrit
+     REAL(DOUBLE),OPTIONAL        :: Shift_O
+     REAL(DOUBLE)                 :: Shift
      INTEGER                      :: PBCDim,I,K,L,J
      INTEGER                      :: NatmsLoc,NCart,NIntC,NZ
      TYPE(BMATR)                  :: B
@@ -3290,6 +3292,10 @@ CONTAINS
      NCart=3*NatmsLoc
      NIntC=SIZE(IntCs%Def%C)
      Print2=(Print>=DEBUG_GEOP_MAX)
+     Shift=1.D-6
+     IF(PRESENT(Shift_O)) THEN
+       Shift=Shift_O
+     ENDIF
      !
      CALL BMatrix(XYZ,IntCs,B,PBCDim,LinCrit,TorsLinCrit)
      CALL CleanBConstr(IntCs,B,NatmsLoc)
@@ -3303,10 +3309,10 @@ B%BL%D=Zero
      !
      IF(DoGi) THEN
        CALL CholFactGi(ISpB,JSpB,ASpB,NCart,NIntC, &
-                     CholData,Print2,Shift_O=1.D-6)
+                     CholData,Print2,Shift_O=Shift)
      ELSE
        CALL CholFact(ISpB,JSpB,ASpB,NCart,NIntC, &
-                     CholData,Print2,Shift_O=1.D-6)
+                     CholData,Print2,Shift_O=Shift)
      ENDIF
      CALL WriteChol(CholData,TRIM(SCRPath)//'CholFact')
      !
@@ -7343,7 +7349,8 @@ return
      !
      CALL RefreshBMatInfo(IntCsX,XYZ,GOpt%TrfCtrl,GOpt%CoordCtrl%LinCrit, &
                           GOpt%CoordCtrl%TorsLinCrit, &
-                          PBCDim,Print,SCRPath,.TRUE.,Gi_O=.TRUE.)
+                          PBCDim,Print,SCRPath,.TRUE.,Gi_O=.TRUE., &
+                          Shift_O=1.D0)
      CALL GetBMatInfo(SCRPath,ISpB,JSpB,ASpB,CholData)
      !
      CALL CALC_BxVect(ISpB,JSpB,ASpB,IntA1%D,CartGrad)
@@ -7355,7 +7362,7 @@ return
      Fact=Fact*100.D0
      WRITE(*,100) Fact
      WRITE(Out,100) Fact
-     100 FORMAT('Percentage of Constraint Force That is Projected Out= ',F6.2)
+     100 FORMAT('Percentage of Constraint Force That is Projected Out= ',F8.4)
      CartGrad=CartGrad-CartA1%D
      !
      CALL Delete(IntCsX)
