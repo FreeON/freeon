@@ -251,6 +251,8 @@ PROGRAM P2Use
 !
         iGEO  = Args%I%I(3)
         DMPOrder = MIN(MAX(iGEO-2,0),DMPOrder)
+!
+!        WRITE(*,*) "DMPOrder = ", DMPOrder
         CALL DMPProj(iGEO,DMPOrder,P,P0,Tmp1,Tmp2)
 !
      ENDIF
@@ -261,9 +263,10 @@ PROGRAM P2Use
      CALL Multiply(S1,-One)
      MaxDS = SQRT(Trace(dS,dS)) 
      ! Initial Trace Error
-     TError0  = ABS(Trace(P,S1)-Half*DBLE(NEl))
+     TError0 = ABS(Trace(P,S1)-Half*DBLE(NEl))
      !Number of Steps
-     NStep=INT(ABS(Trace(P,S1)-Half*DBLE(NEl)))/4+1
+     NStep   =INT(TError0)/4+1
+     WRITE(*,*) 'Error Trace(P,S1) = ',TError0 
      ! Purify 
      IF(MaxDS > 1.D-10) THEN
         DO N=1,NStep

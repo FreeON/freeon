@@ -42,6 +42,9 @@ CONTAINS
     CALL ParseGradients(O%NSteps,O%Coordinates,O%Grad,O%DoGDIIS,O%SteepStep)
     ! Parse for NEB options.
     CALL ParseNEB(O%RSL,O%NEBSpring,O%NEBClimb,O%EndPts,N%ReactantsFile,N%ProductsFile)
+    ! Parse SCF convergence overides and DMPOrder
+    CALL ParseSCF(O%DMPOrder,O%MinSCF,O%MaxSCF)
+    ! close
     CLOSE(UNIT=Inp,STATUS='KEEP')
   END SUBROUTINE LoadOptions
   !============================================================================
@@ -493,4 +496,29 @@ CONTAINS
        EndPts=ENDPOINTS_FROM_INP
     ENDIF    
   END SUBROUTINE ParseNEB
+  !===============================================================================================
+  !
+  !===============================================================================================
+  SUBROUTINE ParseSCF(DMPOrder,MinSCF,MaxSCF)
+    INTEGER      :: DMPOrder,MinSCF,MaxSCF
+    !  Parse for Density Matrix Projection Order: Default = 0
+    IF(.NOT. OptIntQ(Inp,Op_DMPOrder,DMPOrder)) THEN
+       DMPOrder = 0
+    ENDIF
+    ! Parse for Min and Max SCF
+    IF(.NOT. OptIntQ(Inp,Op_MinSCF,MinSCF)) THEN
+       MinSCF = 0
+    ENDIF
+    IF(.NOT. OptIntQ(Inp,Op_MaxSCF,MaxSCF)) THEN
+       MaxSCF = 256
+    ENDIF
+  END SUBROUTINE ParseSCF
+!
+!
+!
 END MODULE ParseOptions
+
+
+
+
+

@@ -56,7 +56,6 @@ MODULE MDynamics
     ELSE
 !      Give an intial Maxwell Boltzman Temp
        IF(C%Dyns%Initial_Temp) THEN
-          WRITE(*,*) "Inital Temperature = ",C%Dyns%TempInit
           CALL SetTempMaxBoltDist(C,C%Dyns%TempInit)
        ENDIF
 !      Init the Time
@@ -176,15 +175,20 @@ MODULE MDynamics
        MDEtot%D(iCLONE) = MDEpot%D(iCLONE)+MDKin%D(iCLONE)
        MDTemp%D(iCLONE)= (Two/Three)*MDKin%D(iCLONE)/DBLE(C%Geos%Clone(iCLONE)%NAtms)*HartreesToKelvin
 !
-!!$       CALL OpenASCII("EnergiesMD.dat",99)
-!!$       WRITE(99,'(F10.4,1x,F18.12,1x,F18.12,1x,F18.12)') MDTime%D(iCLONE),MDKin%D(iCLONE),MDEpot%D(iCLONE),MDEtot%D(iCLONE)
-!!$       CLOSE(99)
-!!$!
-!!$       CALL OpenASCII("PositionMD.dat",99)
-!!$       WRITE(99,'(F18.12,1x,F18.12,1x,F18.12)') Carts0%D(1:3,1,1)
-!!$       CLOSE(99) 
-!!$!
-!!$       WRITE(*,*) "Time = ",MDTime%D(iCLONE)," Temperature = ",MDTemp%D(iCLONE)
+       IF(.FALSE.) THEN
+          CALL OpenASCII("EnergiesMD.dat",99)
+          WRITE(99,'(F10.4,1x,F18.12,1x,F18.12,1x,F18.12)') MDTime%D(iCLONE),MDKin%D(iCLONE),MDEpot%D(iCLONE),MDEtot%D(iCLONE)
+          CLOSE(99)
+!
+          CALL OpenASCII("PositionMD.dat",99)
+          Dist =  (Carts0%D(1,1,1)-Carts0%D(1,2,1))**2+ &
+                  (Carts0%D(2,1,1)-Carts0%D(2,2,1))**2+ &
+                  (Carts0%D(3,1,1)-Carts0%D(3,2,1))**2
+          WRITE(99,'(F10.4,1x,F18.12)') MDTime%D(iCLONE),SQRT(Dist)
+          CLOSE(99) 
+!
+          WRITE(*,*) "Time = ",MDTime%D(iCLONE)," Temperature = ",MDTemp%D(iCLONE)
+       ENDIF
 !
     ENDDO
   END SUBROUTINE MDVerlet_NVE

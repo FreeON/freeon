@@ -46,18 +46,6 @@ CONTAINS
     ELSE
        D%TempInit       = Zero
     ENDIF
-!   Parse for Density Matrix Projection Order: Default = 0
-    IF(.NOT. OptIntQ(Inp,MD_DMPOrder,O%DMPOrder)) THEN
-       O%DMPOrder = 0
-    ENDIF
-!   Parse for Min and Max SCF
-    IF(.NOT. OptIntQ(Inp,MD_MinSCF,O%MinSCF)) THEN
-       O%MinSCF = 0
-    ENDIF
-    IF(.NOT. OptIntQ(Inp,MD_MaxSCF,O%MaxSCF)) THEN
-       O%MaxSCF = 256
-    ENDIF
-    CLOSE(UNIT=Inp,STATUS='KEEP')
 !
   END SUBROUTINE LoadDynamics
 !---------------------------------------------------------------------------------------!
