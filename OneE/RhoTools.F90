@@ -6,6 +6,7 @@ MODULE RhoTools
   USE AtomPairs
   USE BraBloks
   USE RhoBlok
+  USE AtomPairs
   IMPLICIT NONE
 CONTAINS
 !--------------------------------------------------------------
@@ -154,7 +155,41 @@ CONTAINS
     ENDDO
 !
   END SUBROUTINE Integrate_HGRho
-
+!========================================================================================
+! Calculate the total Dipole of Rho
+!========================================================================================
+  SUBROUTINE CalRhoPoles(RhoPoles,GM,Rho)
+    TYPE(CMPoles)             :: RhoPoles
+    TYPE(HGRho)               :: Rho
+    TYPE(CRDS)                :: GM
+    INTEGER                   :: zq,iq,iadd,jadd,NQ,OffQ,OffR,LQ,LenQ
+    REAL(DOUBLE)              :: RX,RY,RZ,R2,Expt
+!
+    RhoPoles%DPole%D = Zero
+    RhoPoles%QPole%D = Zero
+    DO zq=1,Rho%NExpt
+       NQ     = Rho%NQ%I(zq)
+       Expt   = Rho%Expt%D(zq)
+       OffQ   = Rho%OffQ%I(zq)
+       OffR   = Rho%OffR%I(zq)
+       LQ     = Rho%Lndx%I(zq) 
+       LenQ   = LHGTF(LQ) 
+       IF(NQ > 0) THEN
+          DO iq = 1,NQ
+             iadd = Rho%OffQ%I(zq)+iq
+             jadd = Rho%OffR%I(zq)+(iq-1)*LenQ+1
+             RX   = Rho%Qx%D(iadd)-GM%PBC%CellCenter(1)
+             RY   = Rho%Qy%D(iadd)-GM%PBC%CellCenter(2)
+             RZ   = Rho%Qz%D(iadd)-GM%PBC%CellCenter(3)
+!
+             RhoPoles%DPole%D = RhoPoles%DPole%D + CalculateDiPole(LQ,Expt,RX,RY,RZ,Rho%Co%D(jadd:jadd+LenQ+1))
+             RhoPoles%QPole%D = RhoPoles%QPole%D + CalculateQuadruPole(LQ,Expt,RX,RY,RZ,Rho%Co%D(jadd:jadd+LenQ+1)) 
+!
+          ENDDO     
+       ENDIF
+    ENDDO
+!
+  END SUBROUTINE CalRhoPoles
 !---------------------------------------------------------------------------------------
 ! Function MagnitudeDistribution
 !---------------------------------------------------------------------------------------
@@ -200,52 +235,3 @@ CONTAINS
   END FUNCTION DoubleFac
 !
 END MODULE RhoTools
-!
-!
-!!$    INTEGER             :: QAdd,RAdd,SAdd,TAdd,Or,Oq,zq,Negl,K,LMN,Ell,LenKet
-!!$    REAL(DOUBLE)        :: NEps,Chg
-!!$    TYPE(INT_VECT)      :: IOrdr
-!!$    TYPE(DBL_VECT)      :: ROrdr
-!!$    Negl=1
-!!$    SAdd=1
-!!$    TAdd=0
-!!$    Rho_out%NExpt=Rho_in%NExpt
-!!$    Rho_out%Expt%D=Rho_in%Expt%D
-!!$    DO Zq=1,Rho_in%NExpt
-!!$       Chg=(Pi/Rho_in%Expt%D(Zq))**ThreeHalves
-!!$       Oq=Rho_in%OffQ%I(Zq)
-!!$       Or=Rho_in%OffR%I(Zq)
-!!$       Ell=Rho_in%Lndx%I(Zq) 
-!!$       Rho_out%Lndx%I(Zq)=Ell 
-!!$       LenKet=LHGTF(Ell)
-!!$       CALL New(IOrdr,Rho_in%Nq%I(Zq))
-!!$       CALL New(ROrdr,Rho_in%Nq%I(Zq))
-!!$       DO Iq=1,Rho_in%Nq%I(Zq)
-!!$          QAdd=Oq+Iq
-!!$          IOrdr%I(IQ)=IQ
-!!$          ROrdr%D(IQ)=Rho_in%Co%D(QAdd)*Chg
-!!$       ENDDO
-!!$       IF(Zq<Rho_in%NExpt.AND.Rho_in%Nq%I(ZQ)>1) THEN
-!!$          CALL DblIntSort77(Rho_in%NQ%I(Zq),ROrdr%D,IOrdr%I,+2)
-!!$       ENDIF
-!!$       Rho_out%NQ%I(Zq)=0
-!!$       DO K=1,Rho_in%Nq%I(Zq)
-!!$          IF(ROrdr%D(K)>NEps/DBLE(Negl).OR.Zq==Rho_in%NExpt)THEN
-!!$             Negl=Negl+1
-!!$             Rho_out%NQ%I(Zq)=Rho_out%NQ%I(Zq)+1
-!!$             Iq=IOrdr%I(K)
-!!$             QAdd=Oq+Iq
-!!$             RAdd=Or+(Iq-1)*LenKet
-!!$             Rho_out%Qx%D(SAdd)=Rho_in%Qx%D(QAdd)
-!!$             Rho_out%Qy%D(SAdd)=Rho_in%Qy%D(QAdd)
-!!$             Rho_out%Qz%D(SAdd)=Rho_in%Qz%D(QAdd)
-!!$             DO LMN=1,LenKet
-!!$                Rho_out%Co%D(TAdd+LMN)=Rho_in%Co%D(RAdd+LMN)
-!!$             ENDDO
-!!$             SAdd=SAdd+1
-!!$             TAdd=TAdd+LenKet
-!!$          ENDIF
-!!$       ENDDO
-!!$       CALL Delete(IOrdr)
-!!$       CALL Delete(ROrdr)
-!!$    ENDDO
