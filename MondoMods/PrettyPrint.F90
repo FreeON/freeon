@@ -757,9 +757,9 @@ MODULE PrettyPrint
     INTEGER                          :: L,M,N,LMN,NPrim,iadd,jadd,zq,iq,oq,or,Ell,LenKet
     CHARACTER(LEN=DEFAULT_CHR_LEN)   :: Strng
 !   
-    RETURN
+!    RETURN
 !    PrintFlags%Rho=DEBUG_DENSITY
-    IF(PrintFlags%Rho/=DEBUG_DENSITY)RETURN
+!    IF(PrintFlags%Rho/=DEBUG_DENSITY)RETURN
 !
     IF(.NOT. AllocQ(A%Alloc)) THEN
        CALL Halt(' Density not allocated in PPrint_HGRho')
@@ -768,6 +768,7 @@ MODULE PrettyPrint
     PU=OpenPU(Unit_O=Unit_O)
 !
 !    PrintFlags%Fmt=DEBUG_MMASTYLE
+!
     IF(PrintFlags%Fmt==DEBUG_MMASTYLE) THEN
        NPrim=0
        WRITE(PU,*)'ClearAll[Rho];'
@@ -801,10 +802,9 @@ MODULE PrettyPrint
                 DO M=0,Ell-L
                 DO N=0,Ell-L-M
                    LMN=LMNDex(L,M,N)+jadd
-                   Strng=Squish('RhoSum=RhoSum+Lx['//IntToChar(L)//']*Ly['//IntToChar(M)//']*Lz['//IntToChar(N)//']' &
-                              //'*ExpRQ*'//DblToMMAChar(A%Co%D(LMN))//';')
+                   Strng=Squish('RhoSum=RhoSum+Lx['//IntToChar(L)//']*Ly['//IntToChar(M) &
+                              //']*Lz['//IntToChar(N)//']'//'*ExpRQ*'//DblToMMAChar(A%Co%D(LMN))//';')
                    WRITE(PU,*)TRIM(Strng)                    
-
                 ENDDO
                 ENDDO
                 ENDDO
@@ -812,7 +812,8 @@ MODULE PrettyPrint
           ENDIF
        ENDDO
        WRITE(PU,*)'RhoSum];'
-    ELSE
+    ENDIF
+    IF(PrintFlags%Key==DEBUG_MEDIUM .OR. PrintFlags%Key==DEBUG_MAXIMUM) THEN 
        NPrim=0
        WRITE(PU,30) Name
        WRITE(PU,31)
@@ -820,7 +821,7 @@ MODULE PrettyPrint
        WRITE(PU,33) A%NDist
        WRITE(PU,34) A%NCoef
        WRITE(PU,31)
-       IF(PrintFlags%Key==DEBUG_MAXIMUM) THEN
+       IF(PrintFlags%Key==DEBUG_MAXIMUM .AND. A%NDist .LT. 100) THEN
           DO zq=1,A%NExpt
              oq=A%OffQ%I(zq)
              or=A%OffR%I(zq)
