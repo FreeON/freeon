@@ -23,7 +23,6 @@ MODULE SetSCFs
          TYPE(SCFControls),INTENT(INOUT) :: Ctrl
          INTEGER                         :: ISet
          TYPE(INT_VECT)                  :: Stat
-         CALL OpenHDF(Ctrl%Info)         
          DO ISet=1,Ctrl%NSet
             Ctrl%Current(2)=ISet
             CSet=TRIM(IntToChar(ISet))
@@ -38,7 +37,6 @@ MODULE SetSCFs
 #endif
             CALL Delete(Base)
          ENDDO
-         CALL CloseHDF()
       END SUBROUTINE SetSCF
 !=============================================================
 !    Set BCSR matrix limits and global auxiliary arrays
