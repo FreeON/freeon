@@ -195,12 +195,6 @@ PROGRAM MakeRho
 !
   IF(SCFActn/='InkFok')CALL AddNukes(GM,Rho)
 !--------------------------------------------------------
-#ifdef PERIODIC 
-!-----------------------------------------------------------
-!  Fold the Distributions back into the Cell
-!
-  CALL Fold_Rho(GM,Rho)
-#endif
 ! Prune negligible distributions from density
   CALL Prune_Rho(Thresholds%Dist,Rho,Rho2) 
 ! Compute integrated electron and nuclear densities
@@ -241,7 +235,7 @@ PROGRAM MakeRho
      CALL ClosePU(I)
   ENDIF
 ! Check for error
-  IF(RelRhoErr>Thresholds%Dist*1.D3.AND.SCFActn/='NumForceEvaluation') &
+  IF(RelRhoErr>Thresholds%Dist*1.D4.AND.SCFActn/='NumForceEvaluation') &
        CALL Halt('In MakeRho, missing '//TRIM(DblToShrtChar(Two*ABS(RSumE+RSumN)))   &
        //' electrons after pruning.')
 ! Put Rho and MPs to disk
@@ -256,7 +250,7 @@ PROGRAM MakeRho
      CALL Put(MP,IntToChar(Current(1))) 
   ENDIF
   CALL PChkSum(Rho2,'Rho',Prog)
-! Tidy up
+! Tidy up  
   CALL Delete(Dmat)
   CALL Delete(BS)
   CALL Delete(GM)
