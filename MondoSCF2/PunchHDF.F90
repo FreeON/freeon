@@ -156,6 +156,8 @@ CONTAINS
 !      Set the correct PBC cell set list
        CALL SetLatticeVectors(G%Clone(iCLONE),B%AtomPairThresh(iCLONE,cBAS),CS_IN,CS_OUT)
 !      Make sure everything is wrapped correctly
+       G%Clone(iCLONE)%Carts%D = G%Clone(iCLONE)%AbCarts%D
+       CALL CalFracCarts(G%Clone(iCLONE))
        CALL WrapAtoms(G%Clone(iCLONE))
        HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
 !      If we have ECPs, temporarily reset this geometries nuclear charges
@@ -187,25 +189,22 @@ CONTAINS
     INTEGER          :: LastGeo,LastBas,iGEO,NCart,NatmsLoc
     CHARACTER(LEN=DCL) :: chGEO
     TYPE(CRDS)       :: GMLoc
-    TYPE(DBL_VECT)   :: GradE
     !
     !-----------------------------------------------------------------!
     ! it is supposed that the number of clones did not change at restart
     !
     NatmsLoc=G%Clone(1)%Natms
     NCart=3*NatmsLoc
-    CALL New(GradE,NCart)
     LastGeo=O%RestartState%I(3)
     LastBas=O%RestartState%I(2)
     DO iCLONE=1,G%Clones
-      ! Reachive GMLoc-s and GradE-s
+      ! Reachive GMLoc-s 
       DO iGEO=1,LastGeo
         HDFFileID=OpenHDF(N%RFile)
         HDF_CurrentID=OpenHDFGroup(HDFFileID, &
                       "Clone #"//TRIM(IntToChar(iCLONE)))
           chGEO=IntToChar(iGeo)
           CALL Get(GMLoc,chGEO)
-          IF(iGEO<LastGeo) CALL Get(GradE,'grade',Tag_O=chGEO)
         CALL CloseHDFGroup(HDF_CurrentID)
         CALL CloseHDF(HDFFileID)
         !
@@ -214,7 +213,6 @@ CONTAINS
                       "Clone #"//TRIM(IntToChar(iCLONE)))
           chGEO=IntToChar(iGEO)
           CALL Put(GMLoc,chGEO)
-          IF(iGEO<LastGeo) CALL Put(GradE,'grade',Tag_O=chGEO)
         CALL CloseHDFGroup(HDF_CurrentID)
         CALL CloseHDF(HDFFileID)
         CALL Delete(GMLoc)
@@ -234,8 +232,6 @@ CONTAINS
 !      CALL CloseHDF(HDFFileID)
 !      CALL Delete(CS)
     ENDDO
-    CALL Delete(GradE)
-    !
   END SUBROUTINE GeomReArchive
 !==============================================================================
 ! SET UP SUMMATION OF LATTICE VECTORS, ACCOUNTING FOR CELL SIZE AND SHAPE
@@ -250,15 +246,15 @@ CONTAINS
     IF(PRESENT(Rad_O)) THEN
        Radius = Rad_O
     ELSE
-        Radius = (One+1.D-14)*MaxBoxDim(G)+SQRT(AtomPairThresh)
+       Radius = (One+1.D-14)*MaxBoxDim(G)+SQRT(AtomPairThresh)
     ENDIF
 !
-    CALL New_CellSet_Sphere(CS_OUT,G%PBC%AutoW,G%PBC%BoxShape,Radius)   
+    CALL New_CellSet_Sphere(CS_OUT,G%PBC%AutoW%I,G%PBC%BoxShape%D,Radius)   
     IF(G%PBC%PFFOvRide) THEN
        IL = G%PBC%PFFMaxLay
-       CALL New_CellSet_Cube(CS_IN,G%PBC%AutoW,G%PBC%BoxShape,(/IL,IL,IL/))
+       CALL New_CellSet_Cube(CS_IN,G%PBC%AutoW%I,G%PBC%BoxShape%D,(/IL,IL,IL/))
     ELSE
-       CALL New_CellSet_Sphere(CS_IN,G%PBC%AutoW,G%PBC%BoxShape,Radius)
+       CALL New_CellSet_Sphere(CS_IN,G%PBC%AutoW%I,G%PBC%BoxShape%D,Radius)
     ENDIF
 !
     CALL Sort_CellSet(CS_IN)
