@@ -49,7 +49,7 @@ CONTAINS
     iBAS=C%Sets%NBSets
     DO iGEO=1,C%Opts%NSteps
        ! Compute new gradients
-       CALL Force(iBAS,iGEO,C%Nams,C%Opts,C%Stat,C%Geos,C%MPIs)
+       CALL Force(iBAS,iGEO,C%Nams,C%Opts,C%Stat,C%Geos,C%Sets,C%MPIs)
        IF(SteepStep(iBAS,iGEO,Energy(:,iGEO),C))THEN
           DO iCLONE=1,C%Geos%Clones
              IF(Energy(iCLONE,iGEO+1)<Energy(iCLONE,iGEO))THEN
@@ -100,7 +100,7 @@ CONTAINS
     ! Use simple Cartesian GDIIS to go down hill
     DO iGEO=1,C%Opts%NSteps
        ! Compute new gradients
-       CALL Force(iBAS,iGEO,C%Nams,C%Opts,C%Stat,C%Geos,C%MPIs)       
+       CALL Force(iBAS,iGEO,C%Nams,C%Opts,C%Stat,C%Geos,C%Sets,C%MPIs)       
        ! Convergence statistics for the gradient
        GradMax%D(iGEO)=Zero
        GradRMS%D(iGEO)=Zero
@@ -299,7 +299,7 @@ CONTAINS
        ENDIF
     ELSE
        ! Take some steps 
-       StepLength=2D0
+       StepLength=1D0
        DO iSTEP=1,MaxSTEP
           StepLength=StepLength/Two
           ! Step the absolute positions

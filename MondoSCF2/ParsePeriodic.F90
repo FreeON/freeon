@@ -36,7 +36,7 @@ CONTAINS
 !=========================================================================
   SUBROUTINE LoadPeriodicOptions(PBC)
     TYPE(PBCInfo)    :: PBC
-    INTEGER          :: I,J,MaxEll
+    INTEGER          :: I,J,NTot,MaxEll
 !-----------------------------------------------------------------------!
 !   Parse the coordinate type 
 !

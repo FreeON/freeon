@@ -1,6 +1,10 @@
 MODULE SCFs
   USE Parse
   USE InOut
+
+  USE LinAlg 
+  USE GlobalObjects
+
   USE SCFKeys
   USE Overlay
   USE SCFKeys
@@ -92,12 +96,15 @@ CONTAINS
   !===============================================================================
   ! COMPUTE AN ENERGY GRADIENT
   !===============================================================================
-  SUBROUTINE Force(cBAS,cGEO,N,O,S,G,M)
+  SUBROUTINE Force(cBAS,cGEO,N,O,S,G,B,M)
     TYPE(FileNames)  :: N
     TYPE(Options)    :: O
     TYPE(State)      :: S
     TYPE(Geometries) :: G
     TYPE(Parallel)   :: M
+
+    TYPE(BasisSets)  :: B
+
     TYPE(DBL_VECT)   :: GradE
     INTEGER          :: cBAS,cGEO,K,J,iATS,iCLONE
     CHARACTER(LEN=3) :: chGEO
@@ -130,8 +137,10 @@ CONTAINS
     ! Coulomb part
     CALL Invoke('JForce',N,S,M)
     ! Exact Hartree-Fock exchange component
-    IF(HasHF(O%Models(cBas)))  &
-         CALL Invoke('XForce',N,S,M)
+    IF(HasHF(O%Models(cBas)))THEN
+       CALL NXForce(cBAS,cGEO,N,G,B,S,M)
+       ! CALL Invoke('XForce',N,S,M)
+    ENDIF
     ! DFT exchange corrleation term
     IF(HasDFT(O%Models(cBas))) &
          CALL Invoke('XCForce',N,S,M)
@@ -152,7 +161,6 @@ CONTAINS
              K=K+3
           ENDIF
        ENDDO
-!       WRITE(*,*)' REG FORCES = ',G%Clone(iclone)%Vects%D
        ! Close the group
        CALL CloseHDFGroup(HDF_CurrentID)
        G%Clone(iCLONE)%GradRMS=SQRT(G%Clone(iCLONE)%GradRMS)/DBLE(3*G%Clone(iCLONE)%NAtms)
@@ -193,6 +201,111 @@ CONTAINS
     ! .. and clean up 
     CALL Delete(GradE)
   END SUBROUTINE Force
+  !===============================================================================
+  ! Numerically compute gradients of the exact HF exchange
+  !===============================================================================
+  SUBROUTINE NXForce(cBAS,cGEO,N,G,B,S,M)
+    TYPE(FileNames)  :: N
+    TYPE(Options)    :: O
+    TYPE(State)      :: S
+    TYPE(Geometries) :: G
+    TYPE(BasisSets)  :: B
+    TYPE(Parallel)   :: M
+    TYPE(DBL_VECT)   :: GradE
+    INTEGER          :: cBAS,cGEO,J,iATS,iCLONE
+    CHARACTER(LEN=3) :: chGEO,chBAS,chSCF
+    TYPE(BCSR),DIMENSION(G%Clones)   :: P
+    TYPE(CRDS),DIMENSION(G%Clones)   :: GTmp
+    TYPE(BCSR)                       :: K
+    REAL(DOUBLE),DIMENSION(G%Clones,G%Clone(1)%NAtms*3) :: FX
+    REAL(DOUBLE),DIMENSION(G%Clones,2)        :: EX
+    INTEGER                          :: AtA,IX,II,IA,A1,A2,IS
+    REAL(DOUBLE),PARAMETER           :: DDelta = 1.D-3
+    CHARACTER(LEN=DCL)               :: TrixName
+    !------------------------------------------------------------------------------
+    chGEO=IntToChar(cGEO)
+    chBAS=IntToChar(cBAS)
+    chSCF=IntToChar(S%Current%I(1)+1)
+    CALL New(BSiz,G%Clone(1)%NAtms)
+    CALL New(OffS,G%Clone(1)%NAtms)
+    CALL New(GradE,G%Clone(1)%NAtms*3)
+    DO iCLONE=1,G%Clones
+       ! Load globals 
+       NAToms=G%Clone(1)%NAtms
+       MaxAtms=B%MxAts(cBAS)
+       MaxBlks=B%MxN0s(cBAS)
+       MaxNon0=B%MxBlk(cBAS)
+       NBasF=B%BSets(iCLONE,cBAS)%NBasF
+       BSiz%I=B%BSiz(iCLONE,cBAS)%I
+       OffS%I=B%OffS(iCLONE,cBAS)%I
+       MaxBlkSize=0
+       DO II=1,G%Clone(1)%NAtms; MaxBlkSize=MAX(MaxBlkSize,BSiz%I(II)); ENDDO
+       ! Set temporary geometries
+       GTmp(iCLONE)%NAtms=G%Clone(iCLONE)%NAtms
+       CALL New_CRDS(GTmp(iCLONE))
+       GTmp(iCLONE)%AbCarts%D=G%Clone(iCLONE)%AbCarts%D
+       ! Get the density matrix for this clone
+       TrixName=TRIM(N%M_SCRATCH)//TRIM(N%SCF_NAME)//'_Geom#'//TRIM(chGEO)//'_Base#'//TRIM(chBAS)//'_Cycl#'//TRIM(chSCF) &
+            //'_Clone#'//TRIM(IntToChar(iCLONE))//'.D'
+       CALL Get(P(iCLONE),TrixName)
+    ENDDO
+    chSCF=IntToChar(S%Current%I(1))
+    FX=Zero
+    DO AtA=1,G%Clone(1)%NAtms
+       DO IX=1,3
+          DO II=1,2
+             DO iCLONE=1,G%Clones
+                IF(II==1) THEN
+                   G%Clone(iCLONE)%AbCarts%D(IX,AtA)=GTmp(iCLONE)%AbCarts%D(IX,AtA)+DDelta
+                ELSEIF(II==2) THEN
+                   G%Clone(iCLONE)%AbCarts%D(IX,AtA)=GTmp(iCLONE)%AbCarts%D(IX,AtA)-DDelta
+                ENDIF
+             ENDDO
+             CALL GeomArchive(cBAS,cGEO,N,B,G)    
+             CALL Invoke('ONX',N,S,M)
+             DO iCLONE=1,G%Clones
+                ! Load globals 
+                NAToms=G%Clone(1)%NAtms
+                MaxAtms=B%MxAts(cBAS)
+                MaxBlks=B%MxN0s(cBAS)
+                MaxNon0=B%MxBlk(cBAS)
+                NBasF=B%BSets(iCLONE,cBAS)%NBasF
+                BSiz%I=B%BSiz(iCLONE,cBAS)%I
+                OffS%I=B%OffS(iCLONE,cBAS)%I
+                ! Get the exact HF exchange matrix from disk
+                TrixName=TRIM(N%M_SCRATCH)//TRIM(N%SCF_NAME)//'_Geom#'//TRIM(chGEO)//'_Base#'//TRIM(chBAS)//'_Cycl#'//TRIM(chSCF) &
+                     //'_Clone#'//TRIM(IntToChar(iCLONE))//'.K'
+                CALL Get(K,TrixName)
+                EX(iCLONE,II)=Trace(P(iCLONE),K)
+             ENDDO
+          ENDDO
+          IA=3*(AtA-1)+IX
+          DO iCLONE=1,G%Clones
+             FX(iCLONE,IA)=(EX(iCLONE,1)-EX(iCLONE,2))/(Two*DDelta)
+          ENDDO
+       ENDDO
+    ENDDO
+   ! Add in the forces to the global gradient and put back to HDF
+    HDFFileID=OpenHDF(N%HFile)
+    DO iCLONE=1,G%Clones
+       HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
+       CALL Get(GradE,'GradE',Tag_O=chGEO)
+       GradE%D=GradE%D+FX(iCLONE,:)
+       CALL Put(GradE,'GradE',Tag_O=chGEO)
+       ! Close the group
+       CALL CloseHDFGroup(HDF_CurrentID)
+    ENDDO
+    CALL CloseHDF(HDFFileID)
+    DO iCLONE=1,G%Clones
+       G%Clone(iCLONE)%AbCarts%D=GTmp(iCLONE)%AbCarts%D
+       CALL Delete(GTmp(iCLONE))
+       CALL Delete(P(iCLONE))
+    ENDDO
+    CALL Delete(GradE)
+    CALL Delete(BSiz)
+    CALL Delete(OffS)
+    CALL Delete(K)
+  END SUBROUTINE NXForce
   !===============================================================================
   ! BUILD A HGTF DENSITY BY HOOK OR BY CROOK
   !===============================================================================
@@ -447,6 +560,9 @@ CONTAINS
        CLOSE(Out)
     ENDIF
   END FUNCTION ConvergedQ
+
+
+
 END MODULE SCFs
 
 
