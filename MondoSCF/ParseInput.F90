@@ -147,10 +147,8 @@ MODULE ParseInput
 !        Initialize ASCII files
          CALL OpenASCII(OutFile,Out,NewFile_O=.TRUE.)
          CALL OpenASCII(LogFile,LgF,NewFile_O=.TRUE.)
-!         CALL OpenASCII(GeoFile,Geo,NewFile_O=.TRUE.)
          CLOSE(UNIT=Out,STATUS='KEEP')
          CLOSE(UNIT=LgF,STATUS='KEEP')
-!         CLOSE(UNIT=Geo,STATUS='KEEP')
 !--------------------------------------------------------------
 !        Write banner and title to output file
 !
@@ -166,7 +164,7 @@ MODULE ParseInput
          "|        |/ _ \| '_ \ / _  |/ _ \____  \   (__|  ____|",A1,    &
          '|  |\/|  | (_) | | | | (_| | (_) )     /\     |  |    ',A1,    &
          '|__|  |__|\___/|_| |_|\____|\___/_____/  \____|__|    ',A1,A1, &
-         ' Version 1.0b1                                        ',A1,    &  
+         ' Version 1.0 alpha 1                                  ',A1,    &  
          ' A program suite for O(N) SCF theory and ab initio MD ',A1,    &
          ' Matt Challacombe, Eric Schwegler,                    ',A1,    &
          ' C.J. Tymczak and Chee Kwan Gan                       ',A1,    &
@@ -249,7 +247,7 @@ MODULE ParseInput
 !        Open input file
          CALL OpenASCII(OutFile,Out)
          CALL PrintProtectL(Out)
-         WRITE(Out,*)'HDF Info File :: ',TRIM(Ctrl%Info)
+         WRITE(Out,*)'HDF file :: ',TRIM(Ctrl%Info)
 !        Print the accuracy, method and model chemistry for each basis set
          WRITE(Out,*)'PROGRAM OF CALCULATIONS:',Rtrn
          DO I=1,Ctrl%NSet
@@ -259,19 +257,19 @@ MODULE ParseInput
                Method='restricted Roothaan-Hall solution of the SCF using '
             ENDIF
             IF(Ctrl%AccL(I)==1)THEN
-               Accuracy='  a loose accuracy level '
+               Accuracy='  a loose accuracy level'
             ELSEIF(Ctrl%AccL(I)==2)THEN
-               Accuracy='  a medium accuracy level '
+               Accuracy='  a good accuracy level'
             ELSEIF(Ctrl%AccL(I)==3)THEN
-               Accuracy='  a tight accuracy level '
+               Accuracy='  a tight accuracy level'
             ELSEIF(Ctrl%AccL(I)==4)THEN
-               Accuracy='  a very tight accuracy level '      
+               Accuracy='  a very tight accuracy level'      
             ENDIF
             Chemistry=' and the '//TRIM(FunctionalName(Ctrl%Model(I)))//' model.'
             IF(I==1)THEN
-               Mssg=' A '//TRIM(Method)//Rtrn//TRIM(Accuracy)//TRIM(Ctrl%BName(1))//TRIM(Chemistry)
+               Mssg=' A '//TRIM(Method)//Rtrn//TRIM(Accuracy)//' '//TRIM(Ctrl%BName(1))//TRIM(Chemistry)
             ELSE
-               Mssg=' Followed by a '//TRIM(Method)//Rtrn//TRIM(Accuracy) &
+               Mssg=' Followed by a  '//TRIM(Method)//Rtrn//TRIM(Accuracy) &
                    //TRIM(Ctrl%BName(I))//TRIM(Chemistry)
             ENDIF
             WRITE(Out,*)TRIM(Mssg),Rtrn
@@ -513,38 +511,37 @@ MODULE ParseInput
          IF(.NOT.OptIntQ(Inp,MULTIPLICITY,GM%Multp)) &
             CALL MondoHalt(PRSE_ERROR,MULTIPLICITY//' Not found in input.')
 !----------------------------------------------------------------------------------------- 
-!        Parse <OPTIONS> for <ForceAction>
+!        Parse <OPTIONS> for <Grad>
 !     
-         IF(OptKeyQ(Inp,FACTION,MOLDYN)) THEN
-            Ctrl%ForceAction='MolecularDynamics'
-            IF(.NOT. OptIntQ(Inp,MOLDYN_NS,Ctrl%NGeom)) THEN
-               CALL MondoHalt(PRSE_ERROR,' Number of Molecular-Dynamics Steps Not found in input.')
+         IF(OptKeyQ(Inp,GRADIENTS,FORCE))THEN
+            Ctrl%Grad=GRAD_ONE_FORCE
+         ELSEIF(OptKeyQ(Inp,DYNAMICS,MD_VERLET))THEN
+            Ctrl%Grad=GRAD_VERLET_MD
+         ELSEIF(OptKeyQ(Inp,OPTIMIZATION,OPT_QUNEW))THEN
+            Ctrl%Grad=GRAD_QNEW_OPT
+            IF(.NOT.OptIntQ(Inp,MAX_STEPS,Ctrl%NGeom))THEN
+               Ctrl%NGeom=500
             ENDIF
-            IF(Ctrl%NGeom .LT. 1) THEN               
-               CALL MondoHalt(PRSE_ERROR,' Number of Molecular-Dynamics Steps is less then One')
+         ELSEIF(OptKeyQ(Inp,OPTIMIZATION,OPT_TSTATE))THEN
+            Ctrl%Grad=GRAD_TS_SEARCH
+            IF(.NOT.OptIntQ(Inp,MAX_STEPS,Ctrl%NGeom))THEN
+               Ctrl%NGeom=500
             ENDIF
-            IF(.NOT.OptDblQ(Inp,MOLDYN_TS,Ctrl%MDControls(1))) THEN
-               Ctrl%MDControls(1) = 1.D-2
-            ENDIF
-            IF(.NOT.OptDblQ(Inp,MOLDYN_VS,Ctrl%MDControls(2))) THEN
-               Ctrl%MDControls(2) = 1.D0
-            ENDIF
-            WRITE(*,*) 'Number of Time Steps = ', Ctrl%NGeom
-            WRITE(*,*) 'Delta Time Step      = ', Ctrl%MDControls(1)
-            WRITE(*,*) 'Velocity Scaling     = ', Ctrl%MDControls(2)
-         ELSEIF(OptKeyQ(Inp,FACTION,GEOOPT)) THEN             
-            Ctrl%ForceAction='GeometryOptimization'
-            IF(.NOT. OptIntQ(Inp,GEOOPT,Ctrl%NGeom)) THEN
-               CALL MondoHalt(PRSE_ERROR,' Number of Geometry-Optimization Steps Not found in input.')
-            ENDIF
-            IF(Ctrl%NGeom .LT. 1) THEN               
-               CALL MondoHalt(PRSE_ERROR,' Number of Geometry-Optimization Steps is less then One')
-            ENDIF
-         ELSEIF(OptKeyQ(Inp,FACTION,FORCE)) THEN      
-            Ctrl%ForceAction='Force'
          ELSE
-            Ctrl%ForceAction='Off'
-         ENDIF 
+            Ctrl%Grad=GRAD_NO_GRAD
+         ENDIF
+         IF(Ctrl%Grad>=GRAD_QNEW_OPT)THEN
+            IF(.NOT.OptIntQ(Inp,MAX_STEPS,Ctrl%NGeom))THEN
+               Ctrl%NGeom=500
+            ENDIF
+         ENDIF
+         IF(Ctrl%Grad>=GRAD_VERLET_MD)THEN
+            IF(Ctrl%NGeom<1)CALL MondoHalt(PRSE_ERROR,'MD steps less than 1')
+            IF(.NOT.OptDblQ(Inp,MD_TIME_STEP,Ctrl%MDVar(1)))THEN
+               Ctrl%MDVar(1)=1.D-2
+            ENDIF
+            Ctrl%MDVar(2)=One
+         ENDIF
 #ifdef PERIODIC
 !-------------------------------------------------
 !        Parse <OPTIONS> for <PERIODIC> keys
@@ -694,8 +691,7 @@ MODULE ParseInput
 !----------------------------------------------------------------------------------------- 
 !        Parse <GEOMETRY> for coordinates
 !
-         
-         IF(Ctrl%ForceAction=='Off' .OR. Ctrl%ForceAction=='Force' ) THEN
+         IF(Ctrl%Grad<=GRAD_ONE_FORCE)THEN
             CALL Align(BEGIN_GEOMETRY,Inp)
             Ctrl%NGeom=0
             LastConfig=.FALSE.

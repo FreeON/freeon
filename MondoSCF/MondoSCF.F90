@@ -11,7 +11,6 @@ PROGRAM MondoSCF
   USE ParseInput
   USE PrettyPrint
   USE SetSCFs
-  USE ChkSCFs
   USE DrvSCFs
   USE DrvFrcs
   USE ProcessControl    
@@ -31,109 +30,48 @@ PROGRAM MondoSCF
   CALL ParseInp(Ctrl)
 ! Set up the SCF
   CALL SetSCF(Ctrl)
-! Set up the Restart
+! Set status with option for restart
   IF(Ctrl%Rest)THEN
      Begin=(/0,Ctrl%Current(2),Ctrl%Current(3)/)
   ELSE
      Begin=(/0,1,1/)
-  ENDIF     
+  ENDIF    
+  Ctrl%Current=Begin
   Ctrl%Previous=Begin
-!
-! Start with first geometry and converge 
-! the SCF for each set 
-!
-  DO IGeo=Begin(3),Ctrl%NGeom
-     DO ISet=Begin(2),Ctrl%NSet
-        DO ICyc=Begin(1),MaxSCFs
-           Ctrl%Current=(/ICyc,ISet,IGeo/)
-           IF(ICyc==0) &
-           CALL OneEMats(Ctrl)
-           CALL SCFCycle(Ctrl,Begin)
-           IF(ConvergedQ(Ctrl))GOTO 999
+  CALL SetGlobalCtrlIndecies(Ctrl)           
+! Decide about forces
+  SELECT CASE(Ctrl%Grad)
+  CASE(GRAD_ONE_FORCE)
+     DO IGeo=Begin(3),Ctrl%NGeom
+        Ctrl%Current(3)=IGeo
+        DO ISet=Begin(2),Ctrl%NSet
+           Ctrl%Current(2)=ISet
+           CALL OneSCF(Ctrl)
+           Ctrl%Previous=Ctrl%Current
         ENDDO
-        CALL MondoHalt(DRIV_ERROR,'Failed to converge SCF in ' &
-                                  //TRIM(IntToChar(MaxSCFs))   &
-                                  //' SCF iterations. ')
-999     CONTINUE
-        Begin(1) = 0
-!       Summarize SCF stats 
-        CALL SCFSummry(Ctrl) 
+        CALL Forces(Ctrl)
      ENDDO
-     Begin(2) = 1
-
-     CALL Forces(Ctrl,OutFile,Out)
-
-!    Do Action
-     SELECT CASE (Ctrl%ForceAction)
-     CASE('MolecularDynamics')
-        CALL Forces(Ctrl)
-        CALL NextMDGeometry(Ctrl)
-     CASE('GeometryOptimization')   
-!        CALL Forces(Ctrl)        
-!        CALL NextGOGeometry(Ctrl,IChk)
-     CASE('Force')
-        CALL Forces(Ctrl)
-     END SELECT
-  ENDDO
-!
+  CASE(GRAD_VERLET_MD)
+     CALL MondoHalt(USUP_ERROR,' Look for MD in version 1.0b2. ')
+  CASE(GRAD_QNEW_OPT)
+     DO ISet=Begin(2),Ctrl%NSet
+        Ctrl%Current=(/0,ISet,CGeo/)
+        CALL GeOp(Ctrl)
+     ENDDO
+  CASE(GRAD_TS_SEARCH)
+     CALL MondoHalt(USUP_ERROR,' Look for transition state optimizer in version 1.0b2.')
+  CASE(GRAD_NO_GRAD)
+!    Single points.  Loop first over basis sets...
+     DO ISet=Begin(2),Ctrl%NSet
+        Ctrl%Current(2)=ISet
+        CALL OneSCF(Ctrl)
+        Ctrl%Previous=Ctrl%Current
+     ENDDO
+!    Then over geometries at last basis set
+     DO IGeo=Begin(3),Ctrl%NGeom
+        Ctrl%Current(3)=IGeo
+        CALL OneSCF(Ctrl)
+        Ctrl%Previous=Ctrl%Current
+     ENDDO
+  END SELECT
 END PROGRAM MondoSCF
-!
-!!$  Ctrl%NGeom=50
-!!$  IGeo=Begin(2)
-!!$  Bak=1
-!!$  IChk=1
-!!$  CrntState=Ctrl%Current
-!!$  PrevState=Ctrl%Current
-!!$!  WRITE(*,*)'1 Previous',TRIM(StatsToChar(Ctrl%Previous))
-!!$  CALL OpenHDF(InfFile)
-!!$  CALL Get(GM,IntToChar(IGeo-1))
-!!$  CALL Put(GM,IntToChar(IGeo))
-!!$  CALL Put(One,'StepSize')
-!!$  CALL CloseHDF()
-!!$! Loop over geometries with the last set
-!!$  DO K=1,50
-!!$     Ctrl%Previous=PrevState
-!!$     Ctrl%Current=CrntState        
-!!$     CALL NewStep(Ctrl,IChk)
-!!$!      STOP
-!!$!------------------------------------------------
-!!$!     CALL OpenHDF(InfFile)
-!!$!     CALL Get(GM,IntToChar(IGeo-1))
-!!$!     CALL PPrint(GM,Unit_O=6,PrintGeom_O='XYZ')
-!!$!     CALL Get(GM,IntToChar(IGeo))
-!!$!     CALL PPrint(GM,Unit_O=6,PrintGeom_O='XYZ')
-!!$!     CALL CloseHDF()
-!!$!------------------------------------------------
-!!$     DO ICyc=0,20
-!!$        Ctrl%Current=(/ICyc,Ctrl%NSet,IGeo/)
-!!$        IF(ICyc==0) &
-!!$        CALL OneEMats(Ctrl)
-!!$        CALL SCFCycle(Ctrl)
-!!$        IF(ConvergedQ(Ctrl))GOTO 9999
-!!$     ENDDO
-!!$     IF(BaK==4) &
-!!$     CALL MondoHalt(DRIV_ERROR,'Failed to converge SCF in 10 SCF iterations. ')
-!!$9999 CONTINUE
-!!$     Ctrl%Previous=PrevState
-!!$     IChk=ChkStep(Ctrl,GM,Bak)
-!!$     IF(IChk==1)THEN
-!!$!       Summarize SCF stats
-!!$        CALL SCFSummry(Ctrl)
-!!$!       Increment geometry counter
-!!$        CALL OpenHDF(InfFile)
-!!$        CALL Put(One,'StepSize')
-!!$        CALL CloseHDF()
-!!$        RmAllPrv=TRIM(Ctrl%Name)//'_Geom#'//TRIM(IntToChar(IGeo-1))//'*' 
-!!$        CALL SYSTEM('/bin/rm '//TRIM(RmAllPrv))
-!!$!        CALL Invoke('ls',(/RmAllPrv/),AbsPath_O=.TRUE.)
-!!$        IGeo=IGeo+1
-!!$        PrevState=Ctrl%Current 
-!!$        CrntState=Ctrl%Current 
-!!$     ELSEIF(IChk==-1)THEN
-!!$        EXIT
-!!$     ENDIF
-!!$  ENDDO
-!!$  CALL SCFSummry(Ctrl)
-!!$END PROGRAM
-!     CALL PPrint(GM,GeoFile,Geo,'XYZ')
-!    Summarize SCF stats

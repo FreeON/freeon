@@ -8,14 +8,12 @@ MODULE SCFLocals
 !
    INTEGER,DIMENSION(3) :: Current
    INTEGER,DIMENSION(3) :: Previous
-   CHARACTER(LEN=3)     :: SCFCycl
-   CHARACTER(LEN=3)     :: PrvCycl
-   CHARACTER(LEN=3)     :: NxtCycl
-   CHARACTER(LEN=3)     :: CurBase
-   CHARACTER(LEN=3)     :: PrvBase
-   CHARACTER(LEN=3)     :: CurGeom
-   CHARACTER(LEN=3)     :: PrvGeom
-   CHARACTER(LEN=3)     :: NxtGeom
+   INTEGER              :: PCyc,CCyc,NCyc   
+   CHARACTER(LEN=3)     :: PrvCycl,CurCycl,SCFCycl,NxtCycl
+   INTEGER              :: PBas,CBas
+   CHARACTER(LEN=3)     :: PrvBase,CurBase
+   INTEGER              :: PGeo,CGeo,NGeo
+   CHARACTER(LEN=3)     :: PrvGeom,CurGeom,NxtGeom
    CHARACTER(LEN=20)    :: SCFActn
 !-----------------------------------------------------------
    INTEGER,               PARAMETER :: DCL=DEFAULT_CHR_LEN
@@ -32,7 +30,7 @@ MODULE SCFLocals
 !-------------------------------------------------  
 !  SCF Dimensions
    INTEGER, PARAMETER         :: MaxSets=10
-   INTEGER, PARAMETER         :: MaxSCFs=30
+   INTEGER, PARAMETER         :: MaxSCFs=64
 !  Clean up control
    LOGICAL, PARAMETER         :: TidyFiles=.TRUE.
 !------------------------------------------------------------------------------------------------
@@ -66,9 +64,10 @@ MODULE SCFLocals
       REAL(DOUBLE),DIMENSION(MaxSets)    :: EErr   ! Relative error in total energy
       REAL(DOUBLE),DIMENSION(0:MaxSCFs,5):: Stats  ! Statistics     
 !
-      CHARACTER(LEN=DEFAULT_CHR_LEN)     :: ForceAction 
-      CHARACTER(LEN=DEFAULT_CHR_LEN)     :: GuessMethod
-      REAL(DOUBLE),DIMENSION(2)          :: MDControls
+      INTEGER                            :: Guess
+!
+      INTEGER                            :: Grad
+      REAL(DOUBLE),DIMENSION(2)          :: MDVar
 !
    END TYPE
 !------------------------------------------------------------------------------------------------  
@@ -97,19 +96,31 @@ MODULE SCFLocals
    CHARACTER(LEN=DEFAULT_CHR_LEN),SAVE :: MPI_FLAGS
 #endif
   CONTAINS
-     SUBROUTINE SetCtrlGlobs(Ctrl)
+     SUBROUTINE SetGlobalCtrlIndecies(Ctrl)
         TYPE(SCFControls),        INTENT(IN) :: Ctrl
         Previous=Ctrl%Previous
         Current=Ctrl%Current
-        SCFCycl=TRIM(IntToChar(Current(1)))
-        PrvCycl=TRIM(IntToChar(Previous(1)))
-        NxtCycl=TRIM(IntToChar(Current(1)+1))
-        CurBase=TRIM(IntToChar(Current(2)))
-        PrvBase=TRIM(IntToChar(Previous(2)))
-        CurGeom=TRIM(IntToChar(Current(3)))
-        PrvGeom=TRIM(IntToChar(Previous(3)))
-        NxtGeom=TRIM(IntToChar(Current(3)+1))
-     END SUBROUTINE SetCtrlGlobs
+!       Set SCF cycle indecies
+        PCyc=Previous(1)
+        CCyc=Current(1)
+        NCyc=CCyc+1
+        PrvCycl=TRIM(IntToChar(PCyc))
+        CurCycl=TRIM(IntToChar(CCyc))
+        SCFCycl=TRIM(IntToChar(CCyc))
+        NxtCycl=TRIM(IntToChar(NCyc))
+!       Set basis set indecies
+        PBas=Previous(2)
+        CBas=Current(2)
+        PrvBase=TRIM(IntToChar(PBas))
+        CurBase=TRIM(IntToChar(CBas))
+!       Set geometry indecies
+        PGeo=Previous(3)
+        CGeo=Current(3)
+        NGeo=CGeo+1
+        PrvGeom=TRIM(IntToChar(PGeo))
+        CurGeom=TRIM(IntToChar(CGeo))
+        NxtGeom=TRIM(IntToChar(NGeo))
+     END SUBROUTINE SetGlobalCtrlIndecies
 !
      FUNCTION SetCtrlVect(Ctrl,Actn1_O,Actn2_O) RESULT(CVect)
         TYPE(SCFControls),        INTENT(IN) :: Ctrl
@@ -127,5 +138,6 @@ MODULE SCFLocals
                      (IntToChar(Ctrl%Previous(2))),&
                      (IntToChar(Ctrl%Previous(3))) /)              
      END FUNCTION SetCtrlVect
+!
 END MODULE
 

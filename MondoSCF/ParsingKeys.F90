@@ -5,60 +5,53 @@ MODULE ParsingKeys
 !------------------------------------------------  
 !  General keys for parsing input
 !
-   CHARACTER(LEN=15), PARAMETER :: BEGIN_GEOMETRY='<BeginGeometry>'
-   CHARACTER(LEN=14), PARAMETER :: NEXT_GEOMETRY_MONDO_DEFAULT = &
-                                                  '<NextGeometry>'
-   CHARACTER(LEN=23), PARAMETER :: BEGIN_NEXT_GEOMETRY_MSI_ARCHIVE   = &
-                                                  'input file for discover'
-   CHARACTER(LEN=3),  PARAMETER :: END_NEXT_GEOMETRY_MSI_ARCHIVE   =   &
-                                                  'end'
-   CHARACTER(LEN=13), PARAMETER :: END_GEOMETRY  ='<EndGeometry>'
+!  Title
    CHARACTER(LEN=12), PARAMETER :: BEGIN_TITLE   ='<BeginTitle>'
    CHARACTER(LEN=10), PARAMETER :: END_TITLE     ='<EndTitle>'
+!  Generic options
    CHARACTER(LEN=14), PARAMETER :: BEGIN_OPTIONS ='<BeginOptions>'
    CHARACTER(LEN=12), PARAMETER :: END_OPTIONS   ='<EndOptions>'
-   CHARACTER(LEN=15), PARAMETER :: BEGIN_INFNAME ='<BeginInfoFile>'
-   CHARACTER(LEN=13), PARAMETER :: END_INFNAME   ='<EndInfoFile>'
 #ifdef PERIODIC
+!  Periodic
    CHARACTER(LEN=19), PARAMETER :: BEGIN_PERIODIC='<BeginPeriodic>'
    CHARACTER(LEN=17), PARAMETER :: END_PERIODIC  ='<EndPeriodic>'
 #endif
-!-------------------------------------------------  
-!  Parsing keys for <Options.Charge=>
+!  Geometry
+   CHARACTER(LEN=15), PARAMETER :: BEGIN_GEOMETRY                 ='<BeginGeometry>'
+   CHARACTER(LEN=14), PARAMETER :: NEXT_GEOMETRY_MONDO_DEFAULT    ='<NextGeometry>'
+   CHARACTER(LEN=13), PARAMETER :: END_GEOMETRY                   ='<EndGeometry>'
+   CHARACTER(LEN=23), PARAMETER :: BEGIN_NEXT_GEOMETRY_MSI_ARCHIVE='input file for discover'
+   CHARACTER(LEN=3),  PARAMETER :: END_NEXT_GEOMETRY_MSI_ARCHIVE  ='end'
+!=====================================================================================
+!  Parsing keys between <BeingOptions> and <EndOptions>:
 !
+!  <Options.Charge=>
    CHARACTER(LEN=6),  PARAMETER :: TOTAL_CHARGE ='Charge' 
-!-------------------------------------------------  
-!  Parsing keys for <Options.Multiplicity=>
-!
+!  <Options.Multiplicity=>
    CHARACTER(LEN=12),  PARAMETER :: MULTIPLICITY ='Multiplicity' 
-!------------------------------------------------- -------------------------------------------------  
-!  Parsing keys for <Options.SCF=>
+!  <Options.SCF>=
    CHARACTER(LEN=9),  PARAMETER :: SCF_OPTION='SCFMethod' 
    CHARACTER(LEN=4),  PARAMETER :: SCF_SDMM  ='SDMM' 
    CHARACTER(LEN=2),  PARAMETER :: SCF_RHHF  ='RH'
    CHARACTER(LEN=6),  PARAMETER :: SCF_INKF  ='InkFok'
    CHARACTER(LEN=4),  PARAMETER :: SCF_DIIS  ='DIIS'
-!  SCF method keys
+!  SCF keys
    INTEGER, PARAMETER :: RH_R_SCF  =10982348 ! Restricted Roothaan-Hall 
    INTEGER, PARAMETER :: RH_U_SCF  =43240823 ! Unrestricted Roothaan-Hall 
    INTEGER, PARAMETER :: SDMM_R_SCF=58638502 ! Restricted Simplified Density Matrix Minimization 
    INTEGER, PARAMETER :: SDMM_U_SCF=92874018 ! Unrestricted Simplified Density Matrix Minimization 
    INTEGER, PARAMETER :: EDMM_R_SCF=48530687 ! Restricted Extrapolated Density Matrix Minimization 
    INTEGER, PARAMETER :: EDMM_U_SCF=40834070 ! Unrestricted ExtrapolatedDensity Matrix Minimization 
-!  SCF guess keys
-   INTEGER, PARAMETER :: GUESS_EQ_CORE=14334 ! Density matrix from core Hamiltonian
-   INTEGER, PARAMETER :: GUESS_EQ_SUPR=40823 ! Density matrix from superposition of 
-                                             ! spherically averaged atomic density matrices
-!-----------------------------------------------------------------------------------------------------  
-!  Parsing keys for <Options.Guess=>
+!  <Options.Guess=>
    CHARACTER(LEN=5),  PARAMETER :: GUESS_OPTION   ='Guess'
    CHARACTER(LEN=4),  PARAMETER :: GUESS_CORE     ='Core'
    CHARACTER(LEN=8),  PARAMETER :: GUESS_SUPER    ='SuperPos'
    CHARACTER(LEN=7),  PARAMETER :: GUESS_RESTART  ='Restart'
    CHARACTER(LEN=7),  PARAMETER :: RESTART_INFO   ='InfoFile'
-!---------------------------------------------------------
-!  Parsing keys for <Options.Geometry=>
-!
+!  Guess keys
+   INTEGER, PARAMETER :: GUESS_EQ_CORE=14334 ! Density matrix from core Hamiltonian
+   INTEGER, PARAMETER :: GUESS_EQ_SUPR=40823 ! Density matrix from superposition of 
+!  <Options.Geometry>=
    CHARACTER(LEN=8),  PARAMETER :: GEOMETRY     ='Geometry' 
    CHARACTER(LEN=8),  PARAMETER :: IN_AU        ='InAu'
    CHARACTER(LEN=6),  PARAMETER :: H_ORDER      ='HOrder'
@@ -67,21 +60,29 @@ MODULE ParsingKeys
    CHARACTER(LEN=7),  PARAMETER :: NO_ORDER     ='NoOrder'
    CHARACTER(LEN=9),  PARAMETER :: MSI_FORMAT   ='MSIFormat'
    CHARACTER(LEN=10), PARAMETER :: XMOL_FORMAT  ='XMolFormat'
-!-----------------------------------------------------------------------------------------------------  
-!  Parsing keys for <Options.Force=>
-   CHARACTER(LEN=11), PARAMETER :: FACTION      ='ForceAction'   
-   CHARACTER(LEN=17), PARAMETER :: MOLDYN       ='MolecularDynamics'
-   CHARACTER(LEN=20), PARAMETER :: GEOOPT       ='GeometryOptimization'
-   CHARACTER(LEN=5 ), PARAMETER :: FORCE        ='Force'
-!-----------------------------------------------------------------------------------------------------  
-!  Parsing keys for <Options.Force.MOLDYN=>
-   CHARACTER(LEN=11), PARAMETER :: MOLDYN_NS     ='MD_NumSteps' 
-   CHARACTER(LEN=11), PARAMETER :: MOLDYN_TS     ='MD_TimeStep' 
-   CHARACTER(LEN=11), PARAMETER :: MOLDYN_VS     ='MD_VelScale' 
-!---------------------------------------------------------------
-!  Parsing keys for <Options.Periodic=>
+!--------------------------------------------------------
+!  Options involving force evaluations
 !
+   INTEGER, PARAMETER           :: GRAD_NO_GRAD   = 1000001 ! Do no gradeints evaluation
+!  <Options.Grad>=
+   CHARACTER(LEN=4),  PARAMETER :: GRADIENTS      ='Grad'
+   CHARACTER(LEN=5 ), PARAMETER :: FORCE          ='Force'
+   INTEGER, PARAMETER           :: GRAD_ONE_FORCE = 1084814 ! Perform one force evaluation
+!  <Options.Opt=>
+   CHARACTER(LEN=3),  PARAMETER :: OPTIMIZATION   ='Opt'
+   CHARACTER(LEN=5),  PARAMETER :: OPT_QUNEW      ='QuNew'
+   CHARACTER(LEN=2),  PARAMETER :: OPT_TSTATE     ='TS'
+   INTEGER, PARAMETER           :: GRAD_QNEW_OPT  = 3489343 ! Perform quasi-newton geometry optimization
+   INTEGER, PARAMETER           :: GRAD_TS_SEARCH = 3577711 ! Perform a gradients only transition state search.
+!  <Options.MD=>
+   CHARACTER(LEN=2),  PARAMETER :: DYNAMICS       ='MD'
+   CHARACTER(LEN=6),  PARAMETER :: MD_VERLET      ='Verlet'
+   CHARACTER(LEN=5),  PARAMETER :: MAX_STEPS      ='Steps'
+   CHARACTER(LEN=8),  PARAMETER :: MD_TIME_STEP   ='TimeStep' 
+   INTEGER, PARAMETER           :: GRAD_VERLET_MD = 6413123 ! Perform verlet dynamics
 #ifdef PERIODIC
+
+!  Parsing keys for <Options.Periodic=>
    CHARACTER(LEN=9),  PARAMETER :: PBOUNDRY     ='Periodic' 
 !
    CHARACTER(LEN=3),  PARAMETER :: PBC_OFF      ='Off'
