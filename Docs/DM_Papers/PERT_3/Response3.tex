@@ -101,6 +101,7 @@ by a global electric field are demonstrated for the three dimensional water clus
 %However, I could not verify Eq.(31). Perhaps the idempotency relations are
 %used, but this needs to be spelled out for the reader.                     
 %  VW-I don't know if we can explain how we got that equation!!!
+%  VW-Added few comments about what is new.
 %
 %6. On the first page of Sec.IV it is stated in one place that the 2n + 1
 %rule is used and in another place that the n + 1 rule is used. Later on
@@ -282,7 +283,7 @@ be developed in a Taylor expansion series around $\E = 0$ as
    \end{gather}
 \end{subequations}
 Here $D^{a\ldots}$ denotes a density matrix derivative with respect to a field in directions $a\ldots$ 
-at $\mathcal{E} = 0$ and the factor $2$ is the occupation number. 
+at $\mathcal{E} = 0$ and the factor $2$ accounts the orbital occupation. 
 The  density matrix derivative or ``response function'' is given by 
 \begin{equation}
  \displaystyle\D^{a\ldots}=n!
@@ -440,7 +441,7 @@ step function $\theta$, direct representation (and variation) of these forms as 
 is problematic. Polynomial expansion of the step function is a alternative choice, but demands a very high 
 order and can be costly.  Specifically, polynomial expansion of $\theta$ with a $p$'th order polynomial 
 incurs a cost that is at best ${\cal O}(\sqrt{p})$ \cite{WLiang04}.  Polynomial expansion techniques,
-such as those based on the the Tchebychev polynomials, may also be plagued by Gibbs oscillations \cite{AVoter96},
+such as those based on the the Chebychev polynomials, may also be plagued by Gibbs oscillations \cite{AVoter96},
 which are high order ripples in the approximate $\theta$ due to incompleteness.
 Alternatively, recursive purification methods achieve high order representation in 
 ${\cal O}( \log p )$ \cite{ANiklasson03}.  Also, purification methods (such as TC2 and TRS4) 
@@ -560,12 +561,16 @@ A working equation is then obtained through the associated Euler-Lagrange equati
 \subsection{Density matrix formulation of Wigner's $2n+1$ rule }\label{Wigner2Np1}
 
 Wigner's $2n+1$ rule, traditionally predicated on derivatives of the wavefunction,
-yields order $2n+1$ in the energy response from $n$-th order derivatives \cite{SKarna91,SEpstein74}. 
+yields order $2n+1$ in the energy response from $n$-th order 
+derivatives \cite{SKarna91,SEpstein74}. 
 A density matrix analogue of Wigner's $2n+1$ rule for a single perturbation parameter
 was given to third order by McWeeny \cite{RMcWeeny62} and up to fourth order by 
 Niklasson and Challacombe \cite{ANiklasson04} in the orthogonal representation.  
+
 For completeness, we present non-orthogonal generalizations up to fourth order, 
-which may require less memory due to the less dense structure of non-orthogonal matrix intermediates.
+which may require less memory due to the less dense structure of non-orthogonal 
+matrix intermediates. The new formulation includes mixed perturbations and 
+accounts for self-consistency.
 
 The first and second order energy corrections are well known, corresponding simply to expectation
 values as in Eq.~(\ref{Np1Rule}).  Beyond second order, the $2 n+1$ rule offers a valuable alternative. 
@@ -581,8 +586,8 @@ The third order non-orthogonal contribution is
 where $P(a,b,c)$ stands for the permutation operator such that all
 permutations of $a$, $b$ and $c$ are made (e.g. $P(a,b,c)$ generates the sum of
 all the six terms: $(a,b,c)$, $(a,c,b)$, $(b,a,c)$, $(b,c,a)$, $(c,a,b)$ and $(c,b,a)$)
-and $[A,B]_S=ASB-BSA$ where $S$ is the overlap matrix.  Similarly,  the fourth order non-orthogonal 
-contribution is 
+and $[A,B]_S=ASB-BSA$ where $S$ is the overlap matrix.  
+Similarly, the fourth order non-orthogonal contribution is 
 \begin{align}
   \begin{split}
 %    E^{abcd} =&\frac{1}{24}\sum_{P(a,b,c,d)}\Tr[[D^{ab},D^0]_S SD^cF^d + \\ 
@@ -605,6 +610,9 @@ Eq. \eqref{eq:2n+1 third order}. The number of matrix-matrix multiplies can be f
 if one uses an orthogonal representation, but this typically involves matrix-matrix multiplies 
 with more dense intermediates.
 
+Although we have derived $2n+1$ formulaes up to fourth order in analogy with 
+the Wigner's Rayleigh-Shr\"odinger perturbation theory, we do not know if there exists a
+density matrix analogue to all orders. 
 
 \commentoutA{
 
