@@ -137,30 +137,55 @@ MODULE PFFTen
       TYPE(CRDS)           :: GM
       CHARACTER(LEN=11)    :: TensorType
       CHARACTER(LEN=120)   :: FileName
-!
-!     Read the Tensor
-!
+      INTEGER              :: K
+      INCLUDE "Majik_Kubic_WS1.Inc"		
+      INCLUDE "Majik_Kubic_WS2.Inc"		
       TensorC%D = Zero
       TensorS%D = Zero 
       IF(GM%PBC%Dimen==0) RETURN
+      ! Load Majik numbers from parameter statements	
+      IF(GM%PBC%PFFMaxLay==1)THEN
+	 K=0
+	 DO L=4,MIN(128,MaxL),2
+	    DO M=0,L,4
+	       K=K+1	
+               LM=LTD(L)+M   
+               TensorC%D(LM)=Majik1(K)
+            ENDDO
+         ENDDO
+       ELSEIF(GM%PBC%PFFMaxLay==2)THEN
+	 K=0
+	 DO L=4,MIN(128,MaxL),2
+	    DO M=0,L,4
+	       K=K+1	
+               LM=LTD(L)+M   
+               TensorC%D(LM)=Majik2(K)
+            ENDDO
+         ENDDO
+       ELSE
+	 CALL MondoHalt("Majik numbers not available for WS>2!")
+       ENDIF	
 !
-      FileName = TRIM(MONDO_HOME) // 'QCTC/PBCTensor/' // TRIM(TensorType) // ".pfft"
-      OPEN(UNIT=77,FILE=FileName,FORM='UNFORMATTED',STATUS='OLD')
-      READ(77) NumberOfRecords
-      DO I=1,NumberOfRecords
-         READ(77) L,M,TenC,TenS
-         LM = LTD(L)+M
-         TensorC%D(LM)=TenC
-         TensorS%D(LM)=TenS
-      ENDDO
+!     Read the Tensor
+!
+!
+!      FileName = TRIM(MONDO_HOME) // 'QCTC/PBCTensor/' // TRIM(TensorType) // ".pfft"
+!      OPEN(UNIT=77,FILE=FileName,FORM='UNFORMATTED',STATUS='OLD')
+!      READ(77) NumberOfRecords
+!      DO I=1,NumberOfRecords
+!!         READ(77) L,M,TenC,TenS
+!         LM = LTD(L)+M
+!         TensorC%D(LM)=TenC
+!         TensorS%D(LM)=TenS
+!      ENDDO
 !
 !     Rescale the Tensor
 !
-      DO L=0,MaxL
-         LM = LTD(L)+M
-         DO M=0,L
+      DO L=0,MaxL,2
+         DO M=0,L,4
+            LM=LTD(L)+M
             TensorC%D(LM) = TensorC%D(LM)/(Scale**(DBLE(L)+One))
-            TensorS%D(LM) = TensorS%D(LM)/(Scale**(DBLE(L)+One))
+!            TensorS%D(LM) = TensorS%D(LM)/(Scale**(DBLE(L)+One))
          ENDDO
       ENDDO
 !
