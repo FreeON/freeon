@@ -1275,27 +1275,8 @@ MODULE ParallelHiCu
 
 !===============================================================================
   FUNCTION AtomRad(Z)
-    REAL(DOUBLE)::Z,AtomRad,TableAtomRad(200)
-    Logical :: AtomExists
-
-    !! Values are obtained from Slater, JCP 41 (1964) 3199
-    TableAtomRad(1) = 0.25*AngstromsToAU
-    TableAtomRad(6) = 0.70*AngstromsToAU
-    TableAtomRad(7) = 0.65*AngstromsToAU
-    TableAtomRad(8) = 0.60*AngstromsToAU
-    TableAtomRad(12) = 1.50*AngstromsToAU
-    AtomExists = .FALSE.
-    AtomExists = AtomExists .OR. ABS(Z-1.0D0) < 1.0D-10
-    AtomExists = AtomExists .OR. ABS(Z-6.0D0) < 1.0D-10
-    AtomExists = AtomExists .OR. ABS(Z-7.0D0) < 1.0D-10
-    AtomExists = AtomExists .OR. ABS(Z-8.0D0) < 1.0D-10
-    AtomExists = AtomExists .OR. ABS(Z-12.0D0) < 1.0D-10
-    IF(.NOT. AtomExists) THEN
-      WRITE(*,*) 'Z = ', Z
-      WRITE(*,*) 'ERROR: Atom radius for this Z has not been set yet!'
-      STOP
-    ENDIF
-    AtomRad = TableAtomRad(NINT(Z))
+    REAL(DOUBLE)::Z,AtomRad 
+    AtomRad = SLRadii(NINT(Z))*AngstromsToAU
   END FUNCTION AtomRad
 
 !===============================================================================
