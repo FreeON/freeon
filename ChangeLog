@@ -1,3 +1,25 @@
+2002-06-17 15:33  mchalla
+
+	* OneE/MakeRho.F90: Added ifdef MMech to remove all QM/MM parts. 
+	Redid error analysis to be IMHO more correct, and simplified the
+	printing.  Needs to be checked for QM/MM still.
+
+2002-06-17 15:32  mchalla
+
+	* MondoSCF/DrvFrcs.F90, MondoSCF/SCFLocals.F90, QuNew/NewStep.F90:
+	Problem in gradients due to adding a tag to CRDS data type fixed. 
+	This ment shifting Cur->Nxt and Prv->Cur in NewStep and using
+	NoAdvance in setting the control vector before invoking new step,
+	to make sure that the correct geometry is available in NewStep.
+
+2002-06-14 20:41  nemeth
+
+	* Dynamo/dynamo.F90: Correction needed for QM-MM case, introduced.
+
+2002-06-14 14:20  mchalla
+
+	* ChangeLog: [no log message]
+
 2002-06-14 13:56  mchalla
 
 	* Dynamo/dynamo.F90, MondoMods/Macros.F90, MondoMods/Mechanics.F90,
