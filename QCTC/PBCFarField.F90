@@ -380,7 +380,7 @@ MODULE PBCFarField
           ENDIF
        ENDDO
        RDist = Radius
-!       CALL Sort_CellSet(CS_IN)
+       CALL Sort_CellSet(CS_IN)
        RETURN
     ELSEIF(CS_IN%NCells > IRMax) THEN
        DO I=1,1000
@@ -392,7 +392,7 @@ MODULE PBCFarField
           ENDIF
        ENDDO
        RDist = Radius
-!       CALL Sort_CellSet(CS_IN)
+       CALL Sort_CellSet(CS_IN)
        RETURN
     ENDIF
     RDist = Radius
