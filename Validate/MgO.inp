@@ -6,7 +6,7 @@
 Charge=0
 Multiplicity=1
 DebugAll=(MinDebug,CheckSums)
-Guess=SuperP
+Guess=SuperPos
 SCFMethod=(RH,RH) 
 BasisSets=(STO-3G,STO-3G)
 ModelChem=(BLYPxc,PBE0) 
