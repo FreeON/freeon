@@ -229,15 +229,20 @@ MODULE ControlStructures
      LOGICAL                            :: DoTranslOff
      LOGICAL                            :: Linearity
      INTEGER,DIMENSION(3)               :: ThreeAt
+     INTEGER,DIMENSION(3)               :: ThreeAt_2
      REAL(DOUBLE),DIMENSION(3)          :: TranslAt1
      REAL(DOUBLE),DIMENSION(3,3)        :: RotAt2ToX
      REAL(DOUBLE),DIMENSION(3,3)        :: RotAt3ToXY
+     REAL(DOUBLE),DIMENSION(3)          :: TranslAt1_2
+     REAL(DOUBLE),DIMENSION(3,3)        :: RotAt2ToX_2
+     REAL(DOUBLE),DIMENSION(3,3)        :: RotAt3ToXY_2
   END TYPE TrfCtrl
   !
   TYPE CoordCtrl
      INTEGER                            :: RefreshIn
      INTEGER                            :: Refresh
      REAL(DOUBLE)                       :: VDWFact
+     LOGICAL                            :: DoSelect
      CHARACTER(LEN=DEFAULT_CHR_LEN)     :: CoordType
      INTEGER                            :: NCov  
      INTEGER                            :: NExtra
@@ -247,11 +252,13 @@ MODULE ControlStructures
      INTEGER                            :: NOutP
      INTEGER                            :: NTors
      REAL(DOUBLE)                       :: LinCrit
+     REAL(DOUBLE)                       :: TorsLinCrit
      REAL(DOUBLE)                       :: OutPCrit
   END TYPE CoordCtrl
 
   TYPE GeomOpt
      INTEGER                         :: Optimizer
+     LOGICAL                         :: RestartBas
      TYPE(CoordCtrl)                 :: CoordCtrl
      TYPE(TrfCtrl)                   :: TrfCtrl
      TYPE(StepSize)                  :: StepSize

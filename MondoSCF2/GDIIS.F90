@@ -131,8 +131,9 @@ CONTAINS
      INTEGER                     :: NatmsLoc,NCart,NIntC,GDIISMemory
      INTEGER                     :: I,J,ThreeAt(1:3),Print
      TYPE(BMatr)                 :: B3
+     TYPE(INT_VECT)              :: ISpB3,JSpB3
+     TYPE(DBL_VECT)              :: ASpB3
      LOGICAL                     :: Linearity
-     REAL(DOUBLE)                :: LinCrit
      TYPE(DBL_RNK2)              :: DelocDispl
      TYPE(DBL_RNK2)              :: DelocSR,DelocRef
      TYPE(DBL_VECT)              :: NewDelocs,NewPrims,Displ,Coeffs
@@ -151,32 +152,36 @@ CONTAINS
      NatmsLoc=SIZE(XYZ,2)
      NCart=3*NatmsLoc
      GDIISMemory=SIZE(SRDispl,2)
-     LinCrit=CtrlCoord%LinCrit
      !
      ! Calculate three-atoms reference system
      ! and rotated structure
      !
      CALL New(XYZRot,(/3,NatmsLoc/))
      XYZRot%D=XYZ
-     CALL CALC_XYZRot(XYZRot%D,IntCs,SCRPath,ThreeAt,Linearity,&
+     CALL CALC_XYZRot(XYZRot%D,ThreeAt,Linearity,&
                       CtrlTrf%TranslAt1,CtrlTrf%RotAt2ToX, &
                       CtrlTrf%RotAt3ToXY)
      !
      ! Calculate B matrix for reference system 
      !
-     CALL BMatrix(XYZRot%D,NIntC,IntCs,B3,LinCrit,.FALSE.,ThreeAt)
+     CALL BMatrix(XYZRot%D,NIntC,IntCs,B3, &
+                  CtrlCoord%LinCrit,CtrlCoord%TorsLinCrit)
+     CALL BtoSpB_1x1(B3,ISpB3,JSpB3,ASpB3)
      !
      ! Calc Gc=B3t*B3 and its Cholesky factors
      !
-     CALL CholFact(B3,NCart,CholData3,.FALSE.,.FALSE.,ThreeAt)
+     CALL CholFact(ISpB3,JSpB3,ASpB3,NCart,NIntC, &
+                   CholData3,.FALSE.,Shift_O=0.D0)
      !
      ! Transform Cartesian structures into delocalized internals
      !
      CALL New(DelocRef,(/NCart,GDIISMemory/))
      CALL New(DelocSR,(/NCart,GDIISMemory/))
      CALL New(DelocDispl,(/NCart,GDIISMemory/))
-     CALL DelocIntValues(SRStruct,DelocSR%D,B3,CholData3,IntCs,LinCrit)
-     CALL DelocIntValues(RefStruct,DelocRef%D,B3,CholData3,IntCs,LinCrit)
+     CALL DelocIntValues(SRStruct,DelocSR%D,B3,CholData3,IntCs, &
+                         CtrlCoord%LinCrit,CtrlCoord%TorsLinCrit)
+     CALL DelocIntValues(RefStruct,DelocRef%D,B3,CholData3,IntCs, &
+                         CtrlCoord%LinCrit,CtrlCoord%TorsLinCrit)
      DelocDispl%D=DelocSR%D-DelocRef%D
      !
      ! Calculate new set of delocalized internals
@@ -191,15 +196,17 @@ CONTAINS
      ! Turn delocalized internals into primitive ints
      !
      CALL New(NewPrims,NIntC) 
-     CALL DelocToPrim(NewDelocs%D,NewPrims%D,B3,CholData3)
+     CALL DelocToPrim(NewDelocs%D,NewPrims%D, &
+                      ISpB3,JSpB3,ASpB3,CholData3)
      CALL Delete(B3)
-     CALL Delete(CholData3)
+     CALL DeleteBMatInfo(ISpB3,JSpB3,ASpB3,CholData3)
      !
-     CALL INTCValue(IntCs,XYZ,LinCrit)
+     CALL INTCValue(IntCs,XYZ,CtrlCoord%LinCrit,CtrlCoord%TorsLinCrit)
      CALL New(Displ,NIntC) 
      Displ%D=NewPrims%D-IntCs%Value
      !
-     CALL RefreshBMatInfo(IntCs,XYZ,CtrlTrf,CtrlCoord,Print,SCRPath)
+     CALL RefreshBMatInfo(IntCs,XYZ,CtrlTrf,CtrlCoord, &
+                          Print,SCRPath,.FALSE.)
      CALL InternalToCart(XYZ,IntCs,Displ%D,Print, &
        CtrlBackTrf,CtrlTrf,CtrlCoord,CtrlConstr,SCRPath)
      !
@@ -216,10 +223,11 @@ CONTAINS
 ! 
 !-------------------------------------------------------------------
 !
-   SUBROUTINE PrimIntDispl(RefStruct,SRStruct,PrimDispl,IntCs,LinCrit)
+   SUBROUTINE PrimIntDispl(RefStruct,SRStruct,PrimDispl,IntCs,&
+                           LinCrit,Torslincrit)
      TYPE(INTC)     :: IntCs
      REAL(DOUBLE),DIMENSION(:,:) :: RefStruct,SRStruct,PrimDispl
-     REAL(DOUBLE)   :: LinCrit
+     REAL(DOUBLE)   :: LinCrit,TorsLinCrit
      INTEGER        :: I,J,NCart,NIntC,GDIISMemory,NatmsLoc
      TYPE(DBL_RNK2) :: XYZTmp
      TYPE(DBL_VECT) :: RefValue,SRValue
@@ -235,10 +243,10 @@ CONTAINS
      CALL New(SRValue,NIntC)
      DO I=1,GDIISMemory
        CALL CartRNK1ToCartRNK2(RefStruct(1:NCart,I),XYZTmp%D)
-       CALL INTCValue(IntCs,XYZTmp%D,LinCrit)
+       CALL INTCValue(IntCs,XYZTmp%D,LinCrit,TorslinCrit)
        RefValue%D=IntCs%Value        
        CALL CartRNK1ToCartRNK2(SRStruct(1:NCart,I),XYZTmp%D)
-       CALL INTCValue(IntCs,XYZTmp%D,LinCrit)
+       CALL INTCValue(IntCs,XYZTmp%D,LinCrit,TorslinCrit)
        SRValue%D=IntCs%Value        
        PrimDispl(1:NIntC,I)=SRValue%D-RefValue%D
      ENDDO  
@@ -250,10 +258,12 @@ CONTAINS
 !-------------------------------------------------------------------
 !
    SUBROUTINE DelocIntValues(CartStruct,DStruct,B3,CholData3, &
-                            IntCs,LinCrit)
-     TYPE(BMatr) :: B3
+                            IntCs,LinCrit,TorslinCrit)
+     TYPE(BMatr)                 :: B3
+     TYPE(INT_VECT)              :: ISpB3,JSpB3
+     TYPE(DBL_VECT)              :: ASpB3
      REAL(DOUBLE),DIMENSION(:,:) :: CartStruct,DStruct
-     REAL(DOUBLE)                :: LinCrit
+     REAL(DOUBLE)                :: LinCrit,TorsLinCrit
      INTEGER                     :: NCart,NIntC,GDIISMemory
      INTEGER                     :: I,J,NatmsLoc
      TYPE(Cholesky)              :: CholData3
@@ -268,15 +278,17 @@ CONTAINS
      CALL New(VectInt,NIntC)
      CALL New(VectCart,NCart)
      CALL New(ActCarts,(/3,NatmsLoc/))
+     CALL BtoSpB_1x1(B3,ISpB3,JSpB3,ASpB3)
      !
      ! B3^t * PrimDispl
      !
      DO I=1,GDIISMemory
        VectCart%D=CartStruct(1:NCart,I)
        CALL CartRNK1ToCartRNK2(VectCart%D,ActCarts%D)
-       CALL INTCValue(IntCs,ActCarts%D,LinCrit)
+       CALL INTCValue(IntCs,ActCarts%D,LinCrit,TorsLinCrit)
        VectInt%D=IntCs%Value
-       CALL PrimToDeloc(VectInt%D,VectCart%D,B3,CholData3)
+       CALL PrimToDeloc(VectInt%D,VectCart%D, &
+                        ISpB3,JSpB3,ASpB3,CholData3)
        DStruct(1:NCart,I)=VectCart%D
      ENDDO
      !
@@ -446,7 +458,8 @@ CONTAINS
      DO I=1,GDIISMemory
        Vect%D=SRStruct%D(1:DimGDIIS,I)
        CALL CartRNK1ToCartRNK2(Vect%D,XYZ2%D)
-       CALL INTCValue(IntCs,XYZ2%D,GCoordCtrl%LinCrit)
+       CALL INTCValue(IntCs,XYZ2%D, &
+                      GCoordCtrl%LinCrit,GCoordCtrl%TorsLinCrit)
        PrISR%D(1:NIntC,I)=IntCs%Value
        DO J=1,NIntC 
          IF(.NOT.IntCs%Active(J)) Actives%I(J)=0
@@ -454,7 +467,8 @@ CONTAINS
        !
        Vect%D=RefStruct%D(1:DimGDIIS,I)
        CALL CartRNK1ToCartRNK2(Vect%D,XYZ2%D)
-       CALL INTCValue(IntCs,XYZ2%D,GCoordCtrl%LinCrit)
+       CALL INTCValue(IntCs,XYZ2%D, &
+                      GCoordCtrl%LinCrit,GCoordCtrl%TorsLinCrit)
        PrIRef%D(1:NIntC,I)=IntCs%Value
        DO J=1,NIntC 
          IF(.NOT.IntCs%Active(J)) Actives%I(J)=0
@@ -650,7 +664,8 @@ CONTAINS
           RangeType(I)==2) Vect%D(I)=PrISR(I,GDIISMemory)
      ENDDO
      CALL RangeBack(IntCs,RangeType,Vect%D)
-       CALL INTCValue(IntCs,XYZ,GCoordCtrl%LinCrit)
+       CALL INTCValue(IntCs,XYZ, &
+                      GCoordCtrl%LinCrit,GCoordCtrl%TorsLinCrit)
        Vect%D=Vect%D-IntCs%Value
        !CALL RedundancyOff(Vect%D,SCRPath,Print)
      IF(Print) CALL PrtIntCoords(IntCs,Vect%D,'predicted change ')

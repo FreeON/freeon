@@ -103,8 +103,8 @@ MODULE ParseGeomOpt
      !
      ! Do classical coordinate transformation? (No cartesian internals)
      !
-     !GOpt%TrfCtrl%DoClssTrf=.TRUE.
-     GOpt%TrfCtrl%DoClssTrf=.FALSE.
+     GOpt%TrfCtrl%DoClssTrf=.TRUE.
+     !GOpt%TrfCtrl%DoClssTrf=.FALSE.
      IF(OptKeyQ(Inp,GRADIENTS,CoordType_DoClssTrf)) THEN
        GOpt%TrfCtrl%DoClssTrf=.TRUE.
      ENDIF

@@ -40,7 +40,7 @@ ObjectFiles = GetPID.o Spawn.o \
               GeomOptKeys.o ParseGeomOpt.o ParseExtraCoords.o \
               ParseInput.o           \
               PunchHDF.o Overlay.o PrintParsed.o SCFKeys.o \
-              SCFs.o GDIIS.o Optimizer.o \
+              SCFs.o GDIIS.o Hessian.o Optimizer.o \
 	      ZippyQuote.o MondoSCF.o
 #
 ReleaseFiles= GlobalParsing.x OptionKeys.x ParseCommands.x ParseOptions.x \
