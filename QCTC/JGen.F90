@@ -35,7 +35,7 @@ MODULE JGen
   USE ProcessControl
   USE Indexing
   USE InOut
-  USE Thresholding
+  USE QCTCThresholds
   USE Globals
   USE AtomPairs
   USE BraBloks
@@ -154,6 +154,9 @@ MODULE JGen
                                                    PAx,PAy,PAz,PBx,PBy,PBz,    &
                                                    MDx,MDxy,MDxyz,Amp2,MaxAmp, &
                                                    Tau,OmegaMin,Px,Py,Pz
+       REAL(DOUBLE)                             :: PExtent
+       REAL(DOUBLE)                             :: PStrength
+
        INTEGER                                  :: KA,KB,CFA,CFB,PFA,PFB,      &
                                                    IndexA,IndexB,StartLA,      &
                                                    StartLB,StopLA,StopLB
@@ -165,13 +168,11 @@ MODULE JGen
        JBlk=Zero
        KA=Pair%KA
        KB=Pair%KB
-!----------------------------------
        Prim%A=Pair%A
        Prim%B=Pair%B
        Prim%AB2=Pair%AB2
        Prim%KA=Pair%KA
        Prim%KB=Pair%KB
-!----------------------------------
        IndexA=0                  
        DO CFA=1,BS%NCFnc%I(KA)    
           DO CFB=1,BS%NCFnc%I(KB) 
@@ -183,14 +184,11 @@ MODULE JGen
              StopLB  = BS%LStop%I(CFB,KB)
              MaxLA   = BS%ASymm%I(2,CFA,KA)
              MaxLB   = BS%ASymm%I(2,CFB,KB)
-!----------------------------------
              Prim%CFA=CFA             
              Prim%CFB=CFB
              Prim%Ell=MaxLA+MaxLB
-!---------------------------------- 
              DO PFA=1,BS%NPFnc%I(CFA,KA)          
                 DO PFB=1,BS%NPFnc%I(CFB,KB)
-!----------------------------------
                    Prim%ZA=BS%Expnt%D(PFA,CFA,KA)
                    Prim%ZB=BS%Expnt%D(PFB,CFB,KB)
                    Prim%Zeta=Prim%ZA+Prim%ZB
@@ -199,93 +197,99 @@ MODULE JGen
                       Prim%PFA=PFA 
                       Prim%PFB=PFB
                       MaxAmp=SetBraBlok(Prim,BS)
-!--------------------------------------------------
-!                     Evaluate this primitives Ket contribution to J_ab
-!                     Set MAC and PAC parameters
-                      Tau=Thresholds%TwoE
-                      DP2=(MaxAmp/Tau)**(Two/DBLE(SPEll+1))
-                      PoleSwitch=PFunk(Prim%Ell+PoleRoot%Ell,Tau/MaxAmp)
-!                     Zero the Accumulators
-                      HGKet=Zero
-                      SPKetC=Zero
-                      SPKetS=Zero 
-#ifdef PERIODIC
-!                     Fold The Primative Back into the BOX
-                      CALL AtomCyclic(GM,Prim%P)
-!
-                      Px = Prim%P(1)
-                      Py = Prim%P(2)
-                      Pz = Prim%P(3)
-!                     Sum over cells
-                      DO NC=1,CSMM1%NCells
-                         Prim%P(1)=Px+CSMM1%CellCarts%D(1,NC)
-                         Prim%P(2)=Py+CSMM1%CellCarts%D(2,NC)
-                         Prim%P(3)=Pz+CSMM1%CellCarts%D(3,NC)
-!                        Walk the walk
-                         CALL JWalk(PoleRoot)
-                      ENDDO
-                      Prim%P(1)=Px
-                      Prim%P(2)=Py
-                      Prim%P(3)=Pz
-#else
-!                     Walk the walk
-                      CALL JWalk(PoleRoot)                        
-#endif
-!                     Contract <Bra|Ket> bloks to compute matrix elements of J
                       IA = IndexA
                       DO LMNA=StartLA,StopLA
                          IA=IA+1
                          IB=IndexB
-                         EllA=BS%LxDex%I(LMNA)+BS%LyDex%I(LMNA)+BS%LzDex%I(LMNA)
+                         EllA=BS%LxDex%I(LMNA)+BS%LyDex%I(LMNA)+BS%LzDex%I(LMNA)                         
                          DO LMNB=StartLB,StopLB
                             IB=IB+1
-                            EllB=BS%LxDex%I(LMNB)+BS%LyDex%I(LMNB)+BS%LzDex%I(LMNB)
-                            Ell=EllA+EllB
-                            DO LMN=1,LHGTF(Ell)
-                               JBlk(IA,IB)=JBlk(IA,IB)+Phase%D(LMN)*HGBra%D(LMN,IA,IB)*HGKet(LMN)
-                            ENDDO
+                            EllB=BS%LxDex%I(LMNB)+BS%LyDex%I(LMNB)+BS%LzDex%I(LMNB)       
+!                           Extent (for PAC)
+                            PExtent=MAX(PExtent, & 
+                                        Extent(EllA+EllB,Prim%Zeta,HGBra%D(:,IA,IB),TauPAC))
+!                           Strength (for MAC)
                             CALL HGToSP(Prim,HGBra%D(:,IA,IB),SPBraC,SPBraS)
-                            DO LM=0,LSP(Ell)
-                               JBlk(IA,IB)=JBlk(IA,IB)+SPBraC(LM)*SPKetC(LM)+SPBraS(LM)*SPKetS(LM)
+                            DO L=0,EllA+EllB
+                               PStrength = FudgeFactorial(L,SPEll+1)*UnsoldO(L,SPBraC,SPBraS)
+                               DP2       = MAX(DP2,(PStrength/TauMAC)**(Two/DBLE(2+SPELL+L)))
                             ENDDO
                          ENDDO
                       ENDDO
+!                     If finite compute ...
+                      IF(PExtent>Zero.AND.PStrength>Zero)THEN
+!                        Set BBox for this primitive
+                         PBox%BndBox(:,1)=Prim%P
+                         PBox%BndBox(:,2)=Prim%P
+                         PBox=ExpandBox(PBox,PExtent)
+!                         DP2=(PStrength/TauMAC)**(Two/(Two+DBLE(SPEll)))
+!                        Zero the Accumulators
+                         HGKet=Zero
+                         SPKetC=Zero
+                         SPKetS=Zero 
 #ifdef PERIODIC
-!                     Calculate the FarField Multipole Contribution to the Matrix Element
-!                     Contract the Primative MM  with the density MM
-                      IF(Dimen > 0) THEN
+!                        Fold The Primative Back into the BOX
+                         CALL AtomCyclic(GM,Prim%P)
+!
+                         Px = Prim%P(1)
+                         Py = Prim%P(2)
+                         Pz = Prim%P(3)
+!                        Sum over cells
+                         DO NC=1,CSMM1%NCells
+                            Prim%P(1)=Px+CSMM1%CellCarts%D(1,NC)
+                            Prim%P(2)=Py+CSMM1%CellCarts%D(2,NC)
+                            Prim%P(3)=Pz+CSMM1%CellCarts%D(3,NC)
+!                           Walk the walk
+                            CALL JWalk(PoleRoot)
+                         ENDDO
+                         Prim%P(1)=Px
+                         Prim%P(2)=Py
+                         Prim%P(3)=Pz
+#else
+!                        Walk the walk
+                         CALL JWalk(PoleRoot)                        
+#endif
+!                        Contract <Bra|Ket> bloks to compute matrix elements of J
                          IA = IndexA
                          DO LMNA=StartLA,StopLA
                             IA=IA+1
                             IB=IndexB
-                            DO LMNB=StartLB,StopLB  
+                            EllA=BS%LxDex%I(LMNA)+BS%LyDex%I(LMNA)+BS%LzDex%I(LMNA)
+                            DO LMNB=StartLB,StopLB
                                IB=IB+1
-                               JBlk(IA,IB) = JBlk(IA,IB) + CTraxFF(Prim,HGBra%D(:,IA,IB)) &
-                                                         + CTraxQ(Prim,HGBra%D(:,IA,IB))
+                               EllB=BS%LxDex%I(LMNB)+BS%LyDex%I(LMNB)+BS%LzDex%I(LMNB)
+                               Ell=EllA+EllB
+                               DO LMN=1,LHGTF(Ell)
+                                  JBlk(IA,IB)=JBlk(IA,IB)+Phase%D(LMN)*HGBra%D(LMN,IA,IB)*HGKet(LMN)
+                               ENDDO
+                               CALL HGToSP(Prim,HGBra%D(:,IA,IB),SPBraC,SPBraS)
+                               DO LM=0,LSP(Ell)
+                                  JBlk(IA,IB)=JBlk(IA,IB)+SPBraC(LM)*SPKetC(LM)+SPBraS(LM)*SPKetS(LM)
+                               ENDDO
                             ENDDO
-                         ENDDO
-                      ENDIF
+                        ENDDO
+#ifdef PERIODIC
+!                       Calculate the FarField Multipole Contribution to the Matrix Element
+!                       Contract the Primative MM  with the density MM
+                        IF(Dimen > 0) THEN
+                           IA = IndexA
+                           DO LMNA=StartLA,StopLA
+                              IA=IA+1
+                              IB=IndexB
+                              DO LMNB=StartLB,StopLB  
+                                 IB=IB+1
+                                 JBlk(IA,IB) = JBlk(IA,IB) + CTraxFF(Prim,HGBra%D(:,IA,IB)) &
+                                                           + CTraxQ(Prim,HGBra%D(:,IA,IB))
+                              ENDDO
+                           ENDDO
+                        ENDIF
 #endif
+                      ENDIF                     
                    ENDIF !End primitive thresholding
                 ENDDO
              ENDDO
           ENDDO
        ENDDO
-#ifdef PERIODIC
-!
-!      Symmetize JBlk if SameAtom
-!
-!!$       IF(Pair%SameAtom) THEN   
-!!$          DO IA=1,Pair%NA
-!!$             DO IB=IA,Pair%NB
-!!$                JBlk(IA,IB) = Half*(JBlk(IA,IB)+JBlk(IB,IA))
-!!$                JBlk(IB,IA) = JBlk(IA,IB)
-!!$             ENDDO
-!!$          ENDDO
-!!$       ENDIF
-!
-#endif
        Jvct=BlockToVect(Pair%NA,Pair%NB,Jblk)
      END FUNCTION JBlock 
-   END MODULE JGen
-
+END MODULE JGen
