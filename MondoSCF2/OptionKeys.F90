@@ -1,6 +1,7 @@
 MODULE OptionKeys
   IMPLICIT NONE
   !  Generic options
+  CHARACTER(LEN=*), PARAMETER :: RSL = 'RSL'
   CHARACTER(LEN=*), PARAMETER :: OPTIONS_BEGIN      ='<BeginOptions>'
   CHARACTER(LEN=*), PARAMETER :: OPTIONS_END        ='<EndOptions>'
   ! Options:SCF=

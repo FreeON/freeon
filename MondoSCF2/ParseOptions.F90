@@ -41,7 +41,7 @@ CONTAINS
     ! Parse for gradient options.
     CALL ParseGradients(O%NSteps,O%Coordinates,O%Grad,O%DoGDIIS,O%SteepStep)
     ! Parse for NEB options.
-    CALL ParseNEB(O%NEBSpring,O%NEBClimb,O%EndPts,N%ReactantsFile,N%ProductsFile)
+    CALL ParseNEB(O%RSL,O%NEBSpring,O%NEBClimb,O%EndPts,N%ReactantsFile,N%ProductsFile)
     CLOSE(UNIT=Inp,STATUS='KEEP')
   END SUBROUTINE LoadOptions
   !============================================================================
@@ -460,12 +460,16 @@ CONTAINS
   !===============================================================================================
   !
   !===============================================================================================
-  SUBROUTINE ParseNEB(NEBSpring,NEBClimb,EndPts,ReactantsFile,ProductsFile)
+  SUBROUTINE ParseNEB(StepLength,NEBSpring,NEBClimb,EndPts,ReactantsFile,ProductsFile)
     !-----------------------------------------------------------------------------------------------
-    REAL(DOUBLE) :: NEBSpring
+    REAL(DOUBLE) :: NEBSpring,StepLength
     Logical      :: NEBClimb
     INTEGER      :: EndPts
     CHARACTER(Len=DCL) :: ReactantsFile,ProductsFile
+
+    IF(.NOT. OptDblQ(Inp, RSL, StepLength)) THEN
+      StepLength = 0.5D0
+    ENDIF
     ! Set the spring constant between NEB images
     IF(.NOT.OptDblQ(Inp,NEB_SPRING,NEBSpring))THEN
        NEBSpring=1.0

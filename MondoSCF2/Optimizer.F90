@@ -62,8 +62,10 @@ CONTAINS
     ! Print the starting coordinates and energy
     IF(C%Opts%GeomPrint=='XSF')CALL XSFPreamble(0,C%Nams%GFile,Geo)
     DO iCLONE=GBeg,GEnd
-       CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile,Geo,C%Opts%GeomPrint)
+       CALL PPrint(C%Geos%Clone(iCLONE),TRIM(C%Nams%GFile)//IntToChar(iCLONE),Geo,C%Opts%GeomPrint)
     ENDDO
+!!!
+    CALL MergePrintClones(C%Geos,C%Nams,C%Opts,GBeg,GEnd)
     iBAS=C%Sets%NBSets
     IStart=iGEO
     ! Follow the gradient downhill for NSteps
@@ -86,15 +88,18 @@ CONTAINS
              ! otherwise, it is the step number 
              gtmp=C%Geos%Clone(iCLONE)%Confg
              C%Geos%Clone%Confg=iCLONE+1
-             CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile,Geo,C%Opts%GeomPrint)
+             ! CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile,Geo,C%Opts%GeomPrint)
+             CALL PPrint(C%Geos%Clone(iCLONE),TRIM(C%Nams%GFile)//IntToChar(iCLONE),Geo,C%Opts%GeomPrint)
              C%Geos%Clone%Confg=gtmp
           ENDDO
+!!!!
        ELSE
           ! No transitions states, just good old downhill 
           IF(C%Opts%GeomPrint=='XSF') &
              CALL XSFPreamble(C%Geos%Clone(1)%Confg,C%Nams%GFile,Geo)
           DO iCLONE=1,C%Geos%Clones
-             CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile,Geo,C%Opts%GeomPrint)
+             ! CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile,Geo,C%Opts%GeomPrint)
+             CALL PPrint(C%Geos%Clone(iCLONE),TRIM(C%Nams%GFile)//IntToChar(iCLONE),Geo,C%Opts%GeomPrint)
           ENDDO
        ENDIF
        IF(ExitQ)EXIT
@@ -110,10 +115,58 @@ CONTAINS
           C%Geos%Clone(iCLONE)%AbCarts%D=C%Geos%Clone(iCLONE)%Displ%D
        ENDDO
        CALL GeomArchive(iBAS,iGEO+1,C%Nams,C%Sets,C%Geos)    
+       CALL MergePrintClones(C%Geos,C%Nams,C%Opts,GBeg,GEnd)
     ENDDO
   END SUBROUTINE SteepD
   !=====================================================================================
   !
+  SUBROUTINE MergePrintClones(Geos,Nams,Opts,GBeg,GEnd)
+    TYPE(Geometries) :: Geos
+    TYPE(FileNames)  :: Nams
+    TYPE(Options)    :: Opts
+    INTEGER          :: iCLONE,NatmsMerge,GBeg,GEnd,J,M
+    TYPE(CRDS)       :: GMMerge
+    REAL(DOUBLE),DIMENSION(3) :: CME1,CME2,TR,DIAG
+
+    NatmsMerge=Geos%Clone(GBeg)%Natms*(GEnd-GBeg+1)
+    CME1=Zero
+    CME2=Zero
+    DO J=1,Geos%Clone(GBeg)%Natms
+      CME1=CME1+Geos%Clone(GBeg)%Carts%D(1:3,J)
+      CME2=CME2+Geos%Clone(GEnd)%Carts%D(1:3,J)
+    ENDDO
+    CME1=CME1/DBLE(Geos%Clone(GBeg)%Natms)
+    CME2=CME2/DBLE(Geos%Clone(GBeg)%Natms)
+    TR=CME2-CME1
+    TR=TR/SQRT(DOT_PRODUCT(TR,TR))
+
+    ! find bounding box
+    Geos%Clone(GBeg)%BndBox%D(1:3,1) = Geos%Clone(GBeg)%Carts%D(1:3,1)
+    Geos%Clone(GBeg)%BndBox%D(1:3,2) = Geos%Clone(GBeg)%Carts%D(1:3,1)
+    DO J = 2, Geos%Clone(GBeg)%Natms
+      Geos%Clone(GBeg)%BndBox%D(1:3,1) = MIN(Geos%Clone(GBeg)%BndBox%D(1:3,1),Geos%Clone(GBeg)%Carts%D(1:3,J))
+      Geos%Clone(GBeg)%BndBox%D(1:3,2) = MAX(Geos%Clone(GBeg)%BndBox%D(1:3,2),Geos%Clone(GBeg)%Carts%D(1:3,J))
+    ENDDO
+    DIAG=Geos%Clone(GBeg)%BndBox%D(1:3,2)-Geos%Clone(GBeg)%BndBox%D(1:3,1)
+    TR=TR*SQRT(DOT_PRODUCT(DIAG,DIAG))
+     
+    GMMerge%Natms=NatmsMerge
+    CALL New(GMMerge)
+    M=0
+    DO iCLONE=GBeg,GEnd
+      DO J=1,Geos%Clone(iCLONE)%Natms
+        M=M+1
+        GMMerge%Carts%D(1:3,M)=Geos%Clone(iCLONE)%Carts%D(1:3,J)+TR*(iCLONE-1)
+        GMMerge%AbCarts%D(1:3,M)=Geos%Clone(iCLONE)%AbCarts%D(1:3,J)+TR*(iCLONE-1)
+        GMMerge%AtNum%D(M)=Geos%Clone(iCLONE)%AtNum%D(J)
+        GMMerge%AtNam%C(M)=Geos%Clone(iCLONE)%AtNam%C(J)
+      ENDDO
+    ENDDO
+    GMMerge%Confg=Geos%Clone(1)%Confg
+    CALL PPrint(GMMerge,TRIM(Nams%GFile)//'M',Geo,Opts%GeomPrint)
+    CALL Delete(GMMerge)
+  END SUBROUTINE MergePrintClones
+
   !=====================================================================================  
   SUBROUTINE GDicer(C)
     TYPE(Controls)         :: C
@@ -350,7 +403,8 @@ CONTAINS
     ENDDO
 !   Take some steps, more conservative if we are doing NEB ...
     IF(C%Opts%Grad==GRAD_TS_SEARCH_NEB)THEN
-       StepLength=0.5D0
+       ! StepLength=0.5D0
+       StepLength = C%Opts%RSL
        ! Take a step, any step
        DO iCLONE=1,C%Geos%Clones
           C%Geos%Clone(iCLONE)%AbCarts%D=Carts(iCLONE)%D-StepLength*C%Geos%Clone(iCLONE)%Gradients%D

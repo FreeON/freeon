@@ -22,6 +22,7 @@ MODULE ControlStructures
   END TYPE FileNames
 
   TYPE Options
+     REAL(DOUBLE)                   :: RSL
      INTEGER                        :: NMthds
      INTEGER                        :: NConAls
      INTEGER                        :: NModls
