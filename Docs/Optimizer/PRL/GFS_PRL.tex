@@ -8,21 +8,18 @@
 \usepackage{alltt}
 \usepackage{fancyhdr}
 \newcommand{\bms}[1]{{\boldsymbol #1}}
+\renewcommand{\thefootnote}{\fnsymbol{footnote}}
 
 %\draft
 %\tighten
 \pagestyle{fancy}
 
-
-%\eprint{LA-UR-04-1097}
-
 \begin{document}
 
 \title{
-A New View on the Geometry Optimization of Large Molecules            
-}
+A New View on the Geometry Optimization of Large Molecules\footnotemark[1]}
 
-\author{K\'aroly N\'emeth}\email{nemeth@lanl.gov}
+\author{K\'aroly N\'emeth\footnotemark[2]}
 \author{Matt Challacombe}
 
 \affiliation{Theoretical Division, Los Alamos National Laboratory, Los Alamos, NM 87545, USA}
@@ -31,7 +28,7 @@ A New View on the Geometry Optimization of Large Molecules
 
 \begin{abstract}
 {
-This communication peresents a new, efficient alternative to well established
+This article peresents a new, efficient alternative to well established
 geometry optimization algorithms. The new alternative is based on
 fitting gradient surfaces in terms of curvilinear 
 internal coordinates and 
@@ -49,12 +46,13 @@ geometry optimization, linear scaling,
 curvilinear internal coordinates, fitting
 \end{abstract}
  
-\pacs{?????????????????02.70.-c, 71.15.-m, 71.15.Dx}
 
 \maketitle
 
 \footnotetext[1]{LA-UR-04-1097}
+\footnotetext[2]{\tt KNemeth@LANL.Gov}
 
+\section{Introduction}
 The optimization of molecular structures is one of the most frequent
 tasks carried out by computational chemists. 
 Structures of large molecules have been optimized so far
@@ -75,13 +73,47 @@ paths can be determined with the help of efficient optimizers
 With the advent of linear scaling electronic structure techniques 
 \cite{Goedecker99}
 energies and gradients are available for large molecules on demanding
-levels of the theory. 
-The task of an efficient optimizer is, to reduce the number of
-expensive energy and gradient evaluations.
+levels of the theory. However, even linear scaling can have 
+a considerable computational cost on large molecules. In order to
+make the computational cost smaller, efficient optimizers are
+needed, which are suitable for large molecules.
 
+The present paper reveals a new concept for the optimization of
+molecular geometries, which is especially suitable for the
+optimization of large molecules and performs equally well in the
+domain of small molecules, too. It can also be easily implemented
+in a linear scaling fashion.
+The new concept is based on the availability of internal coordinate
+gradients for large molecules - a result of recent developments
+\cite{paizs_coordtrf1,nemeth_coordtrf1,paizs_coordtrf2,nemeth_coordtrf2,billeter_coordtrf,andzelm_coordtrf,kudin_coordtrf}.
+Our observation is that internal coordinate gradients show clear
+tendencies during the optimization process and these tendencies can be revealed
+by curve fitting in one-dimension, over internal coordinate value and gradient
+data pairs. For an illustration of this concept,
+see Fig. \ref{NH3outp6} for a typical progression of internal coordinate
+gradients. The roots of the fitted curve reveal the expected location
+of the minimum. This concept can be realized only in terms of
+internal coordinates which are representations of chemical entities, such as
+bond lengths, bond angles and torsional angles. Cartesian
+coordinates do not provide the same clear progression.
+\begin{figure}[h]
+%\resizebox*{3.5in}{!}{\includegraphics{1_6_6_Data.eps}}
+%\resizebox*{3.5in}{!}{\includegraphics{1_5_6_Data.eps}}
+\resizebox*{3.5in}{!}{\includegraphics{1_7_6_Data.eps}}
+\caption{
+\small  
+Progression of gradients on a valence angle bending coordinate of
+ammonia. The optimization was started from near planar geometry, i.e.
+from the vicinity of a transition state, and converged to a local 
+minimum of the potential energy surface. The numbers in the picture
+indicate the sequence of optimization steps.
+\label{NH3outp6}
+}
+\end{figure}
+
+\section{Traditional techniques}
 In the last three decades the so-called internal coordinate 
-geometry optimizers 
-became standard tools of structural optimization when energies 
+optimizers became standard tools of geometry optimization when energies 
 and forces are calculated by electronic structure theory 
 \cite{Pulay_natural_internals}.
 Internal coordinates describe the internal motions of molecules 
@@ -92,7 +124,7 @@ as non-linear functions of the Cartesian coordinates of atomic nuclei.
 
 An important property of these chemical internal coordinates
 is that they significantly reduce the harmonic and higher order 
-vibrational coupling, as compared to Cartesian coordinates 
+vibrational coupling, as compared to Cartesian ones 
 \cite{pulay_dynamics,Baker_deloc_1}. 
 Even if accurate harmonic force-constants are available, 
 internal coordinates are superior for geometry optimization, 
@@ -148,21 +180,23 @@ other. This problem has found a linear scaling solution
 only in recent developments 
 \cite{paizs_coordtrf1,nemeth_coordtrf1,paizs_coordtrf2,nemeth_coordtrf2,billeter_coordtrf,andzelm_coordtrf,kudin_coordtrf}. 
 
-In the present communication we introduce a fundamentally new approach
+
+\section{A new concept}
+In the present article we introduce a new concept 
 to molecular geometry optimization. We call this approach the
 Optimization through Gradient Curve Fitting (OGCF) technique. 
 This new approach is very simple
 to implement, scales fully linearly with system size 
 and is very efficient for both small and large molecules.
 
-The new algorithm is based on the simple observation that
+The new algorithm is based on the fact that
 normal mode gradients are linear functions of the normal mode values 
 on harmonic potential energy surfaces. 
 In the process of geometry optimization the goal is to reveal the roots
 of these lines, where all gradients become zero. In order to 
 find these roots, first a few points should be determined from each
 lines, then the roots can be revealed by line-fitting. This technique
-would be quadratically convergent, as long as the normal modes
+is quadratically convergent, as long as the normal modes
 can be determined and the potential energy surface is harmonic.
 
 In a realistic case neither the potential energy surface is 
@@ -186,29 +220,65 @@ serves as a new estimate for the coordinate value where the gradient
 should become zero. Repeating this fitting process can finally
 reveal a local optimum of the the potential energy surface.
 The analogy with the case of the normal modes suggests a possibility
-for quadratic convergence, as long as the rate of vibrational
+for quadratic convergence, as soon as the rate of vibrational
 coupling is small enough.
-
+It is also important to note, that the fitting process happens
+with weighted data points. The weights reflect local tensions
+of the molecule and are calculated in a simple way, as described below.
 The fitting of gradient surfaces has already been applied to 
 the parametrization of empirical
 force-fields for the case of small molecules
 \cite{force-field-fitting,force-matching}, however it 
 has not been investigated for the purpose of geometry optimization yet.
-\begin{figure}[h]
-%\resizebox*{3.5in}{!}{\includegraphics{1_6_6_Data.eps}}
-%\resizebox*{3.5in}{!}{\includegraphics{1_5_6_Data.eps}}
-\resizebox*{3.5in}{!}{\includegraphics{1_7_6_Data.eps}}
-\caption{
-\small  
-Progression of gradients on a valence angle bending coordinate of
-ammonia. The optimization was started from near planar geometry, i.e.
-from the vicinity of a transition state, and converged to a local 
-minimum of the potential energy surface. The numbers in the picture
-indicate the sequence of optimization steps.
-\label{NH3outp6}
-}
-\end{figure}
-The curves-fitting happens through 
+
+\section{Implementation}
+\subsection{Choice of internal coordinates}
+The basis of recognizing internal coordinates is the recognition
+of the bonding scheme. This is being done at each new geometry.
+The bonding scheme is recognized in a linear scaling fashion, via
+a divide-and-conquer algorithm. The topology of the bonding scheme
+is stored in a sparse matrix. These sparse matrices are summed
+up over the few most recent geometries, in order to provide
+the topology of a merged bonding scheme.
+
+Then, based on the topology matrix of the merged bonding schemes,
+all other primitive internal coordinates, such as bond angles,
+torsions, linear bendings and out-of-planes are recognized. Torsions
+are selected so that each bond will be associated with a single
+torsional coordinate.
+The merger of bonding schemes is important, since we need to
+generate internal coordinates suitable for the coordinate
+transformations of each recently passed Cartesian geometry.
+
+\subsection{Preparing the data points}
+Cartesian coordinates and the corresponding Cartesian gradients
+of the few, typically seven most recent geometries are read from 
+disk. Based on the most recent definition of the bonding scheme
+they are transformed into internal coordinate representation.
+The coordinate transformation is carried out as described in Ref.
+\cite{nemeth_coordtrf1}, while the necessary intermediate sparse
+matrices of the coordinate transformation are regenerated. This
+is a very inexpensive step, due to the extrem sparsity
+of the matrices.
+Thus the primary objects of the proposed geometry optimization
+are created. For each remembered geometry the internal coordinates
+and their gradients are now available.
+
+In order to avoid problems due to the periodicity of torsional angles,
+reference points are used, eg. the torsional angle values 
+of the most recent geometry. Each torsional angle is
+set to its periodic equivalent 
+closest to the reference point, by a 
+shift of $\pm 2\pi$, while its gradient value does not change.
+
+\subsection{Curve fitting with weights}
+At this point for each individual internal coordinate we have a set of 
+coordinate - gradient pairs, such as the one presented in 
+Fig. \ref{NH3outp6}. These data pairs indicate the progression
+of the gradient during the few most recent optimization steps.
+They are now used to fit a curve as mentioned above.
+
+The curve-fitting happens through 
 well established and robust algorithms, which are available in standard 
 computational libraries \cite{slatec}. 
 It is important to note
@@ -223,30 +293,53 @@ w_{k}^{(i)} = \left[ \sum_{l} g_{l}^{(i)} \frac{1}{|H_{ll}^{}|} g_{l}^{(i)} \rig
 \end{equation}
 where $l$ indicates the internal coordinates which have atoms in common
 with the $k$-th internal coordinate, i.e. which are in the spacial 
-vicinity of the $k$-th coordinate. $H_{ll}^{}$ is an estimate
+vicinity of the $k$-th coordinate. 
+$H_{ll}^{}$ is an estimate
 of the diagonal matrix element of the Hessian for the $l$-th 
 internal coordinate. $H_{ll}^{i}$ is calculated as the local tangent
 of the gradient curve of a primary fit. 
-%\begin{equation}
-%H_{ll}^{i} = \left . \frac{\partial g_{l}^{(i)}}{\partial r_{l}^{}} \right|_{r_{l}^{}=r_{l}^{(i)}}
-%\end{equation}
-This primary fit is done with 
+This primary fit is done for each internal coordinates with 
 the weights $w{'}_{k}^{(i)} = 1/g_{k}^{(i)2}$ usual to 
 estimate relative errors.
-The statistical F test is used to decide about the order of the fit. 
-So far no higher than quadratic fit has been considered.
 
-If the gradient curve has a negative tangent at the position
+The statistical F-test is used to decide about the order of the fit,
+as implemented in the fitting program \cite{slatec}.
+So far no higher than cubic fit has been considered. The roots
+of the fitted curves can be found analytically. In practice,
+almost exclusively linear fit was recommended by the F-test during
+the test calculations.
+
+The topology matrix, neded to determine which internal coordinates
+are neighbouring each other, is given by 
+the sparse $G_{i}=BB^{t}$ matrix that is easy to compute from the
+sparse vibrational $B$ matrix. We have considered more delocalized 
+interactions as well, such as the topology offered by $G_i^2$,
+but they turned out not to provide any significant improvement in our
+test calculations so far.
+
+\subsection{Step size control}
+In case the optimizer makes an extrapolation step towards the predicted
+minimum, the length of this step is limited by the range of the
+data points used for the fit. Step sizes are limited to be smaller
+than 0.3 a.u., similar to what is used by other optimizers 
+\cite{eckert}.
+For larger molecules of more complex structure 
+it is advantageous to restrict
+the stepsize to be 0.15 a.u., instead of the usual 0.30 a.u. 
+in order to proceed more carefully.
+\cite{eckert}. 
+
+\subsection{Minimum or transition state?}
+In case the gradient curve has a negative tangent at the position
 of the root, it is an indication for a transition state. 
-Eg. in Fig. \ref{NH3outp6}
-the tangent of the gradient curve is negative 
-in the vicinity of the planar
+Eg. in Fig. \ref{NH3outp6} the tangent of the gradient curve 
+is negative in the vicinity of the planar
 structure (structure \#1). This should be so, since the planar
 ammonia represents a transition state. The tangent of the gradient 
 curve thus offers a
 convenient tool to control convergence to minima or transition state.
 We plan to elaborate a transition state finding tool based on this 
-principle. In the present communication we restrict the discussion
+principle. In the present article we restrict the discussion
 to the localization of minima. Whenever the local tangent  
 of the gradient curve
 is negative, the optimizer moves the actual geometry away from 
@@ -258,51 +351,53 @@ however rarely occure. Combined internal coordinates, such
 as the natural internal ones \cite{Pulay_natural_internals} or the
 delocalized internal ones \cite{Baker_deloc_1} hold the possibility
 of revealing more delocalized transition states by the
-curve fitting technique.
-%Internal coordinates are redefined at each step of the optimization.
-%This is important for large molecules, since conformational
-%changes may lead to the appearence of new bonds, eg. hydrogen bridges,
-%while some other bonds may disappear.
-%for the large paper, note, that merging of topologies is 
-%necessary at this point for the sake of stable coordinate 
-%transformations.
-%
-%It is typical in one-dimensional root-finding to bracket the root of
-%the function. After the root is bracketed, usual techniques, like
-%the golden section can be applied. In the case of geometry optimization
-%the root of a varying function has to be found, since the form of
-%the gradient curve converges only at the end the optimization.
-%For this, it is advantageous to bracket the root at each step, 
-%instead of
-%going directly for it. For the purpose of bracketing $\sigma$, 
-%the standard uncertainty of the predicted root is determined. 
-%Then, an extra amount of displacement, proportional to $\sigma$
-%is used to overshoot the predicted root.
-%
-We will provide detailed information about the technology of 
-the Optimization through Gradient Curve Fitting
-technique in a forthcoming paper \cite{bisect-paper}.
+curve fitting technique. The analysis of Welsh {\it et.al.} 
+gives a numerical insight into the problems of controlling
+convergence to a minimum without an accurate Hessian.
 
+\subsection{Initial steps}
+In the first two steps of the optimization
+process a scaled internal coordinate steepest descent step is used
+with the usual diagonal Hessian estimates of
+0.5 a.u. for stretchings, 0.2 a.u. for bendings and 0.1 a.u.
+for torsions. The use of the OGCF optimizer could start in the
+second geometry, however the cruder diagonal Hessian steps have less
+step size limitation in the second step, resulting in a slightly
+better overall performance for some of our test sets.
+
+\section{Performance}
 The performance of this initial implementation of the OGCF optimizer
 has been tested on a 
 series of small molecules, called Baker's test set \cite{bakerstest}.
+At convergence, the maximum remaining Cartesian
+force vector had a length less than $3\times10^{-4}$ a.u. for each
+atom. This criterion is somewhat tighter then the original requirements
+of Ref. \cite{bakerstest}, stating the same for the Cartesian X,Y and Z
+components of the force. The energies of the optimized
+structures have been reproduced to all digits given in 
+Ref. \cite{bakerstest}.
+
 Table \ref{Bakers_test} lists all the test results
 in order to convince
-the reader, that our fundamentally new approach to geometry optimization
-works as well on small molecules as the best traditional techniques.
+the reader, that our new concept of geometry optimization
+works as well on small molecules as the best implementations
+of traditional algorithms.
+Note, that the alternative coices of the
+internal coordinate systems can easily change the number
+of optimization steps by at least $\pm$10\%.
+We expect further improvement by the application of combined    
+internal coordinates, such as the natural internal ones or the 
+delocalized ones. 
+
 \begin{table}[h]
 %\squeezetable
 \caption{
 Geometry optimization steps of small molecules (upto 30 atoms)
 of the Baker's test set. Calculations have been carried out 
 with the Hartree-Fock model in STO-3G basis set.
-At convergence, Cartesian force vectors were shorter 
-than $3\times10^{-4}$ atomic units, on all atoms. Energies have been
-reproduced to all digits of the published values 
-of Ref. \cite{bakerstest}.
-Note, that all calculations of this table used standard primitive 
-internal coordinates, except the one by Bakken \cite{bakken}, 
-which was based on the so called extra redundant coordinates.
+All calculations used standard primitive internal coordinates,
+except the one by Bakken {\it et.al.}, which used extra redundant
+ones.
 }
 \label{Bakers_test}
 \begin{tabular}{lccccc}
@@ -346,6 +441,7 @@ Total                  & 193    & 185    &  196    &  215   & 240     \\
 \botrule
 \end{tabular}
 \end{table}
+
 While retaining the same efficiency for small molecules, our technique
 is fully linear scaling as opposed to any other internal 
 coordinate optimizers reported so far. In addition, it is far simpler
@@ -357,7 +453,7 @@ In order to illustrate the performance of our optimizer on large
 molecules, we show the convergence of the molecular total energy
 during the course of the optimization of a 257 atom
 fragment of Protein Kinase A, in Figs. \ref{logn-logde} 
-and \ref{order-of-conv}. 10 periferial atoms have been 
+and \ref{order-of-conv}. Ten periferial atoms have been 
 constrained, in order to mimic the rest of the enzyme, 
 all other atoms have been allowed to move.
 The optimizations have been carried out 
@@ -365,6 +461,15 @@ using MondoSCF \cite{MondoSCF}, a linear scaling electronic structure
 program system, the PBE density functional model and 
 STO-2G basis set, with 0.1 milliHartree resolution of the energies.
 The convergence was smooth with minor jumps in the energy.
+
+Iterative processes are characterized by the order, $n$
+and the rate, $c$ of the convergence. For the convergence of the
+energy this reads:
+\begin{equation}
+\frac{|E_{i+1}-E_{opt}|}{|E_{i}-E_{opt}|^n}=c ,
+\end{equation}
+with $E_{opt}$ being the optimum energy and $E_{i}$ the energy
+at the $i$-th geometry.
 A first order convergence is typical for the bulk of the optimization
 of larger molecules. For smaller molecules, like the ones of Baker's
 test set, the order of convergence is between linear and quadratic,
@@ -397,7 +502,9 @@ energy resolution for this molecular size.
 \label{order-of-conv}
 }
 \end{figure}
-In this communication we have presented a fundamentally new approach
+
+\section{Summary}
+In this article we have presented a new concept
 to the optimization of molecular structures.
 We have shown, that internal coordinates representing chemical 
 entities can efficiently be optimized, without
@@ -410,7 +517,14 @@ Our technique can also be used
 to provide simple and accurate updates of force-fields
 for molecular dynamics simulations, based on the availability of
 quantum-mechanical forces.
-%
-%
+
+\begin{acknowledgments}
+K. N{\'e}meth gratefully acknowledges to 
+{\"{O}}. Farkas (Budapest) for 
+providing the Cartesian coordinates of the Baker's test set and to
+B.P. Uberuaga (Los Alamos) for calling our attention to Ref. 
+\cite{force-matching}.
+\end{acknowledgments}
+
 \bibliography{mondo_new}
 \end{document}
