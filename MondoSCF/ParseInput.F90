@@ -211,10 +211,11 @@ MODULE ParseInPut
          "|        |/ _ \| '_ \ / _  |/ _ \____  \   (__|  ____|",A1,    &
          '|  |\/|  | (_) | | | | (_| | (_) )     /\     |  |    ',A1,    &
          '|__|  |__|\___/|_| |_|\____|\___/_____/  \____|__|    ',A1,A1, &
-         ' Version 1.0 alpha 4                                  ',A1,    &  
+         ' Version 1.0 alpha 5                                  ',A1,    &  
          ' A program suite for O(N) SCF theory and ab initio MD ',A1,    &
          ' Matt Challacombe, Eric Schwegler, C.J. Tymczak,      ',A1,    &
-         ' Chee Kwan Gan, Karoly Nemeth and Anders Niklasson    ',A1,    &
+         ' Chee Kwan Gan, Karoly Nemeth, Anders Niklasson,      ',A1,    &
+         ' and Hugh Nymeyer                                     ',A1,    &
          ' Los Alamos National Laboratory (LA-CC 01-2)          ',A1,    & 
          ' Copyright 2001, University of California.            ',A1)
 !        Write information on host, platform, etc
@@ -2118,6 +2119,10 @@ MODULE ParseInPut
       SUBROUTINE ParseGrad(Ctrl)
          TYPE(SCFControls)          :: Ctrl
          TYPE(TOLS)                 :: Thrsh ! Thresholds
+!
+!
+         CHARACTER(LEN=DEFAULT_CHR_LEN) :: Max_Steps = 'Max_Steps'
+!
 !----------------------------------------------------------------------------
          CALL OpenASCII(OutFile,Out)
          CALL OpenASCII(InpFile,Inp)
@@ -2127,25 +2132,11 @@ MODULE ParseInPut
          IF(OptKeyQ(Inp,GRADIENTS,FORCE))THEN
             Ctrl%Grad=GRAD_ONE_FORCE
             Ctrl%NGeom=1
-         ELSEIF(OptKeyQ(Inp,DYNAMICS,MD_VERLET))THEN
+         ELSEIF(OptKeyQ(Inp,DYNAMICS,MD_VELOCITY))THEN
+            write(6,*)'Doing molecular dynamics with velocity verlet'
             Ctrl%Grad=GRAD_MD
-            Ctrl%MDC%MD_Algor=1
-            IF(.NOT. OptIntQ(Inp,Max_Steps,Ctrl%NGeom)) THEN
-               Ctrl%NGeom=1
-            ENDIF
-            IF(.NOT. OptDblQ(Inp,MD_TIME_STEP,Ctrl%MDC%TimeStep)) THEN
-               Ctrl%MDC%TimeStep    = 1.0D-2
-            ENDIF
-            IF(.NOT. OptDblQ(Inp,MD_VEL_SCALE,Ctrl%MDC%VelScaling)) THEN
-               Ctrl%MDC%VelScaling  = One
-            ENDIF
-            IF(.NOT. OptDblQ(Inp,MD_TMP_SCALE,Ctrl%MDC%TempScaling)) THEN
-               Ctrl%MDC%TempScaling = One
-            ENDIF
-         ELSEIF(OptKeyQ(Inp,DYNAMICS,MD_PRECOR))THEN
-            Ctrl%Grad=GRAD_MD
-            Ctrl%MDC%MD_Algor=2
-            CALL MondoHalt(PRSE_ERROR,'Predictor-Corrector Algorithmn not implimented')
+            Ctrl%MDC%ALGORITHM=1
+            Call ParseMD(Ctrl)
          ELSEIF(OptKeyQ(Inp,OPTIMIZATION,OPT_QUNew))THEN
             IF(OptKeyQ(Inp,OPTIMIZATION,OPT_ONE_BASE))THEN
                Ctrl%Grad=GRAD_QNew_ONE_OPT
@@ -2784,5 +2775,121 @@ END SUBROUTINE ParsePeriodic
       END SUBROUTINE ParseAcc
 !
 !---------------------------------------------------------------------
+!
+      SUBROUTINE ParseMD(Ctrl)
+!
+	IMPLICIT NONE
+!
+        TYPE(SCFControls),INTENT(INOUT)   :: Ctrl
+!
+!       Variables for Namelist input
+!
+        INTEGER                         :: IOerror
+        CHARACTER(LEN=DEFAULT_CHR_LEN)  :: INPUT_NAME
+	INTEGER                         :: CRDfreq,VELfreq,ENEfreq,RESfreq,MAX_STEPS
+	REAL(DOUBLE)                    :: DT,TEMP0,TEMP,PRES,TTAU,PTAU,TRANSfreq,ROTATfreq
+        LOGICAL                         :: REM_TRANS,REM_ROTAT,AtomWrap,CLOBBER
+        CHARACTER(LEN=DEFAULT_CHR_LEN)  :: RESTRT_IN,RESTRT_OUT,CRD_NAME,VEL_NAME,ENE_NAME
+!
+	NAMELIST /MDinputs/CRDfreq,VELfreq,ENEfreq,RESfreq,MAX_STEPS,DT,TEMP0,TEMP,PRES,TTAU,&
+                           PTAU,TRANSfreq,ROTATfreq,REM_TRANS,REM_ROTAT,AtomWrap,CLOBBER,&
+                           RESTRT_IN,RESTRT_OUT,CRD_NAME,VEL_NAME,ENE_NAME
+!
+! * * * * * * * * * * * * * * * *
+! Set Defaults
+! * * * * * * * * * * * * * * * *
+!
+        CRDfreq    = 1                                  ! freq to write coordinate file
+        VELfreq    = 1                                  ! freq to write velocity file
+        ENEfreq    = 1                                  ! freq to write energy file
+        RESfreq    = 1                                  ! freq to write restart
+        MAX_STEPS  = 50                                 ! # of integration steps
+        DT         = 0.5D0                              ! timstep in femtoseconds
+        TEMP0      = 0.0D0                              ! 0 Kelvin starting T 
+        TEMP       = 300.0D0                            ! 300 Kelvin set T
+        PRES       = 1.0D0                              ! 1 Atmosphere set pressure
+        TTAU       = 10.0                               ! thermostat coupling time (fs)
+        PTAU       = 10.0                               ! barostat coupling time (fs)
+        REM_TRANS  = .TRUE.                             ! remove CM motion  
+        REM_ROTAT  = .FALSE.                            ! remove uniform rotation 
+        TRANSfreq  = 10                                 ! remove CM motion every 10 steps
+        ROTATfreq  = 10                                 ! remove rotation every 10 steps
+        RESTRT_IN  = 'restrt_in'                        ! file to start from
+        RESTRT_OUT = 'restrt_out'                       ! file to write restrt to
+        CRD_NAME   = 'crd'                              ! file to dump coordinates to
+        VEL_NAME   = 'vel'                              ! file to dump velocities to
+        ENE_NAME   = 'ene'                              ! file to dump energies to
+        AtomWrap   = .TRUE.                             ! wrap coordinates dumped to crd file
+        CLOBBER    = .FALSE.                            ! don't overwrite existing MD files
+!
+! * * * * * * * * * * * * * * * *
+! Read Namelist Input
+! * * * * * * * * * * * * * * * *
+!
+        Open(INP_UNIT,FILE="MDinputs")
+        Read(INP_UNIT,NML=MDinputs)
+        Close(INP_UNIT)
+!
+! * * * * * * * * * * * * * * * *
+! Copy Namelist Inputs to Ctrl
+! * * * * * * * * * * * * * * * *
+!
+        Ctrl%MDC%CRDfreq    = CRDfreq
+        Ctrl%MDC%VELfreq    = VELfreq 
+        Ctrl%MDC%ENEfreq    = ENEfreq
+        Ctrl%MDC%RESfreq    = RESfreq
+        Ctrl%MDC%MAX_STEPS  = MAX_STEPS
+        Ctrl%MDC%DT         = DT
+        Ctrl%MDC%TEMP0      = TEMP0
+        Ctrl%MDC%TEMP       = TEMP
+        Ctrl%MDC%PRES       = PRES
+        Ctrl%MDC%TTAU       = TTAU
+        Ctrl%MDC%PTAU       = PTAU
+        Ctrl%MDC%REM_TRANS  = REM_TRANS
+        Ctrl%MDC%REM_ROTAT  = REM_ROTAT
+        Ctrl%MDC%TRANSfreq  = TRANSfreq
+        Ctrl%MDC%ROTATfreq  = ROTATfreq
+        Ctrl%MDC%RESTRT_IN  = RESTRT_IN
+        Ctrl%MDC%RESTRT_OUT = RESTRT_OUT
+        Ctrl%MDC%CRD_NAME   = CRD_NAME
+        Ctrl%MDC%VEL_NAME   = VEL_NAME
+        Ctrl%MDC%ENE_NAME   = ENE_NAME
+        Ctrl%MDC%AtomWrap   = AtomWrap
+        Ctrl%MDC%CLOBBER    = CLOBBER
+!
+! * * * * * * * * * * * * * * * *
+! Echo to output
+! * * * * * * * * * * * * * * * *
+!
+! Not finished yet
+!
+!
+        write(6,'(A80)')&
+    "--------------------------------------------------------------------------------"
+!        write(6,NML=MDinputs)
+!
+	write(6,'(A12 I12 (4X) A12 F12.6)')"MAX_STEPS  =",MAX_STEPS,"DT         =",DT
+	write(6,'(2(A12 I12 (4X)))')"CRDfreq    =",CRDfreq,"VELfreq    =",VELfreq
+        write(6,'(2(A12 I12 (4x)))')"ENEfreq    =",ENEfreq,"RESfreq    =",RESfreq
+	write(6,'(3(A12 X A12 (3X)))')"CRD_NAME   =",CRD_NAME, "VEL_NAME   =",VEL_NAME,&
+                                "ENE_NAME   =",ENE_NAME
+	write(6,'(A12 X A12 (3X) A12 X A12)')"RESTRT_IN  =",RESTRT_IN,"RESTRT_OUT =",RESTRT_OUT
+        write(6,'(A12 F12.6 (4X) A12 F12.6 (4X) A12 F12.6)')"TEMP0      =",TEMP0,&
+                        "TEMP       =",TEMP,"TTAU       =",TTAU
+        write(6,'(A12 F12.6 (4X) A12 F12.6)')"PRES       =",PRES,"PTAU       =",PTAU	
+!
+        write(6,'(A80)')&
+    "--------------------------------------------------------------------------------"
+!
+! * * * * * * * * * * * * * * * *
+! Convert to internal units
+! * * * * * * * * * * * * * * * *
+!
+        Ctrl%MDC%DT   = Ctrl%MDC%DT   * 1.0D-15 * SecondsToInternalTime
+        Ctrl%MDC%TTAU = Ctrl%MDC%TTAU * 1.0D-15 * SecondsToInternalTime
+        Ctrl%MDC%PTAU = Ctrl%MDC%PTAU * 1.0D-15 * SecondsToInternalTime
+
+!
+      END SUBROUTINE ParseMD
 !
 END MODULE

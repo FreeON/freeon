@@ -43,12 +43,32 @@ MODULE SCFLocals
 !------------------------------------------------------------------------------------------------
 !
    TYPE MDControls
-      INTEGER                            :: MD_Algor
-      REAL(DOUBLE)                       :: TimeStep
-      REAL(DOUBLE)                       :: VelScaling
-      REAL(DOUBLE)                       :: TempScaling
+      INTEGER                            :: ALGORITHM
+      INTEGER                            :: CRDfreq
+      INTEGER                            :: VELfreq
+      INTEGER                            :: ENEfreq
+      INTEGER                            :: RESfreq
+      INTEGER                            :: MAX_STEPS
+      REAL(DOUBLE)                       :: DT
+      REAL(DOUBLE)                       :: TEMP0
+      REAL(DOUBLE)                       :: TEMP
+      REAL(DOUBLE)                       :: PRES
+      REAL(DOUBLE)                       :: TTAU
+      REAL(DOUBLE)                       :: PTAU
+      LOGICAL                            :: REM_TRANS
+      LOGICAL                            :: REM_ROTAT
+      INTEGER                            :: TRANSfreq
+      INTEGER                            :: ROTATfreq 
+      CHARACTER(LEN=DEFAULT_CHR_LEN)     :: RESTRT_IN
+      CHARACTER(LEN=DEFAULT_CHR_LEN)     :: RESTRT_OUT
+      CHARACTER(LEN=DEFAULT_CHR_LEN)     :: CRD_NAME
+      CHARACTER(LEN=DEFAULT_CHR_LEN)     :: VEL_NAME
+      CHARACTER(LEN=DEFAULT_CHR_LEN)     :: ENE_NAME
+      LOGICAL                            :: RESTRT
+      LOGICAL                            :: AtomWrap
+      LOGICAL                            :: CLOBBER
    END TYPE MDControls
-!---------------------------------------------------------------  
+!------------------------------------------------------------------------------------------------  
 !
    TYPE OptControls
       CHARACTER(LEN=DEFAULT_CHR_LEN)     :: CoordType  

@@ -102,16 +102,6 @@ MODULE ParsingKeys
    INTEGER, PARAMETER           :: GRAD_QNEW_ONE_OPT= 3498345
 !  Perform a gradients only transition state search.
    INTEGER, PARAMETER           :: GRAD_TS_SEARCH   = 3577711 
-!  <Options.MD=>
-   CHARACTER(LEN=2),  PARAMETER :: DYNAMICS       ='MD'
-   CHARACTER(LEN=6),  PARAMETER :: MD_VERLET      ='Verlet'
-   CHARACTER(LEN=6),  PARAMETER :: MD_PRECOR      ='Precor'
-   CHARACTER(LEN=8),  PARAMETER :: MD_VEL_SCALE   ='VelScale'
-   CHARACTER(LEN=8),  PARAMETER :: MD_TMP_SCALE   ='TmpScale'
-   CHARACTER(LEN=8),  PARAMETER :: MD_TIME_STEP   ='TimeStep' 
-   CHARACTER(LEN=5),  PARAMETER :: MAX_STEPS      ='Steps'
-!  Perform dynamics
-   INTEGER, PARAMETER           :: GRAD_MD = 6413123 
 !--------------------------------------------------------------------------------------
 !  Options for density extrapolation between geometries: <Options.Extrap=>  
    CHARACTER(LEN=6),  PARAMETER :: EXTRAPOLATE      ='Extrap'
@@ -204,4 +194,57 @@ MODULE ParsingKeys
    CHARACTER(LEN=2),  PARAMETER :: pureQM  ='QM'
    CHARACTER(LEN=4),  PARAMETER :: QMandMM  ='QMMM'
 #endif 
+!--------------------------------------------------------------------------------------
+!  <Options.MD=>
+!
+!  integrator options
+!
+   CHARACTER(LEN=2),  PARAMETER :: DYNAMICS       ='MD'
+   CHARACTER(LEN=8),  PARAMETER :: MD_VELOCITY    ='VELOCITY'      ! const. E/Vol velocity verlet
+   CHARACTER(LEN=8),  PARAMETER :: MD_INPUTS      ='MDinputs'      ! restart input 
+!
+!  general control options
+!
+!   CHARACTER(LEN=2),  PARAMETER :: MD_DT          ='DT'            ! integration timestep
+!   CHARACTER(LEN=9),  PARAMETER :: MAX_STEPS      ='MAX_STEPS'     ! num. of integration steps
+!
+!  output options
+!
+!   CHARACTER(LEN=7),  PARAMETER :: MD_CRDFREQ     ='CRDfreq'       ! freq. to write coords
+!   CHARACTER(LEN=7),  PARAMETER :: MD_ENEFREQ     ='ENEfreq'       ! freq. to write energies
+!   CHARACTER(LEN=7),  PARAMETER :: MD_VELFREQ     ='VELfreq'       ! freq. to write velocities
+!   CHARACTER(LEN=7),  PARAMETER :: MD_RESFREQ     ='RESfreq'       ! freq. to write restart
+!
+!  startup options
+!
+!   CHARACTER(LEN=5),  PARAMETER :: MD_TEMP0       ='TEMP0'              ! starting temp. from Boltzmann
+! distribution (0=don't assign)
+!
+!  temperature/pressure control
+!  (not yet implemented)
+!
+!   CHARACTER(LEN=4),  PARAMETER :: MD_TEMP        ='TEMP'               ! set temperature (KELVIN)
+!   CHARACTER(LEN=4),  PARAMETER :: MD_PRES        ='PRES'               ! set pressure (ATM)
+!   CHARACTER(LEN=4),  PARAMETER :: MD_TTAU        ='TTAU'               ! temperature coupling time
+!   CHARACTER(LEN=4),  PARAMETER :: MD_PTAU        ='PTAU'               ! pressure coupling time
+!
+!  translation/rotation control
+!
+!   CHARACTER(LEN=17), PARAMETER :: MD_REM_TRANS   ='RemoveTranslation'  ! periodically remove CM translation
+!   CHARACTER(LEN=14), PARAMETER :: MD_REM_ROTAT   ='RemoveRotation'     ! periodically remove uniform rotation
+!   CHARACTER(LEN=9),  PARAMETER :: MD_TRANS_FREQ  ='TRANSfreq'          ! frequency to remove CM motion
+!   CHARACTER(LEN=9),  PARAMETER :: MD_ROTAT_FREQ  ='ROTATfreq'          ! frequency to remove rotation
+!
+!  file names
+!
+!   CHARACTER(9),  PARAMETER     :: MD_RESTRT_IN   ='RESTRT_IN'          ! restart input 
+!   CHARACTER(10), PARAMETER     :: MD_RESTRT_OUT  ='RESTRT_OUT'         ! restart output 
+!   CHARACTER(7),  PARAMETER     :: MD_CRD_OUT     ='CRD_OUT'            ! coordinate output 
+!   CHARACTER(7),  PARAMETER     :: MD_VEL_OUT     ='VEL_OUT'            ! velocity output 
+!   CHARACTER(7),  PARAMETER     :: MD_ENE_OUT     ='ENE_OUT'            ! energy output  
+!
+!  Perform dynamics
+!
+   INTEGER, PARAMETER           :: GRAD_MD = 6413123 
+!--------------------------------------------------------------------------------------
 END MODULE

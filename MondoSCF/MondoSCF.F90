@@ -16,6 +16,7 @@ PROGRAM MondoSCF
   USE GeomOpt
   USE ProcessControl    
   USE InOut
+  USE MD
 #ifdef MMech
   USE Mechanics
 #endif
@@ -66,7 +67,7 @@ WRITE(*,*)' INITed '
   CASE(GRAD_ONE_FORCE) 
      CALL CALC_GRAD_ONE_FORCE(Ctrl) 
   CASE(GRAD_MD)
-     CALL CALC_GRAD_MD(Ctrl)
+     CALL CALC_MD(Ctrl)
   CASE(GRAD_QNEW_OPT)
      CALL CALC_GRAD_QNEW_OPT(Ctrl)
   CASE(GRAD_STPDESC_OPT)
