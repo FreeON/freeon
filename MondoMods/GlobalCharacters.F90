@@ -73,7 +73,7 @@ MODULE GlobalCharacters
    CHARACTER(LEN=5), PARAMETER :: LeftParenStar='(* '//Rtrn
    CHARACTER(LEN=5), PARAMETER :: RightParenStar=Rtrn//' *)'
    CHARACTER(LEN=64), PARAMETER:: Blanks= &
-     '                                                               '
+     '                                                                '
    CHARACTER(LEN=1), PARAMETER :: Blnk=' '
    INTEGER,          PARAMETER :: IBlnk=ICHAR(Blnk)
    CHARACTER(LEN=2), PARAMETER :: Delta='/'//BakSlash
