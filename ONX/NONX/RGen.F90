@@ -1,4 +1,4 @@
-SUBROUTINE RGen(N,Ltot,CBra,CKet,CB,CK,DisBufB,PrmBufB,R,DB,IB,SB)
+SUBROUTINE RGen(N,Ltot,CBra,CKet,CB,CK,DisBufB,PrmBufB,R,DB,IB,SB,PBC)
   USE DerivedTypes
   USE GlobalScalars
   USE ONXParameters
@@ -24,14 +24,18 @@ SUBROUTINE RGen(N,Ltot,CBra,CKet,CB,CK,DisBufB,PrmBufB,R,DB,IB,SB)
   REAL(DOUBLE)  :: Zeta,Up,Px,Py,Pz
   REAL(DOUBLE)  :: Eta, Uq,Qx,Qy,Qz
   REAL(DOUBLE)  :: Cx,Cy,Cz,PQx,PQy,PQz
-  REAL(DOUBLE)  :: r1xZpE,Rkk,Tx,Ty,Tz
+  REAL(DOUBLE)  :: r1xZpE,Rkk
   REAL(DOUBLE)  :: T,T1,T2,T3,TS,TwoT,EX,GR(0:20)
 !--------------------------------------------------------------------------------
 ! Misc. internal variables
 !--------------------------------------------------------------------------------
   INTEGER       :: I,J,K,M,Ind,IG
   INTEGER       :: I0,I1,I2
-
+!--------------------------------------------------------------------------------
+! Periodic Variables
+!--------------------------------------------------------------------------------
+  TYPE(PBCInfo) :: PBC
+  REAL(DOUBLE)  :: FPQx,FPQy,FPQz
   IF(N.EQ.0) RETURN
 
   Cx=DisBufB( 8)
@@ -69,31 +73,38 @@ SUBROUTINE RGen(N,Ltot,CBra,CKet,CB,CK,DisBufB,PrmBufB,R,DB,IB,SB)
         Uq     = DB%PrmBuf%D(I1+4)
         r1xZpE = 1.0D0/(Zeta+Eta)
         Rkk    = Up*Uq*DSQRT(r1xZpE)
-        Tx     = (Zeta*Px+Eta*Qx)*r1xZpE
-        Ty     = (Zeta*Py+Eta*Qy)*r1xZpE
-        Tz     = (Zeta*Pz+Eta*Qz)*r1xZpE
-
+!
+        PQx=Px-Qx
+        PQy=Py-Qy
+        PQz=Pz-Qz
+#ifdef PERIODIC
+        FPQx = PQx*PBC%InvBoxSh(1,1)+PQy*PBC%InvBoxSh(1,2)+PQz*PBC%InvBoxSh(1,3)
+        FPQy = PQy*PBC%InvBoxSh(2,2)+PQz*PBC%InvBoxSh(2,3)
+        FPQz = PQz*PBC%InvBoxSh(3,3)
+        IF(PBC%AutoW(1)) FPQx = FPQx-ANINT(FPQx)
+        IF(PBC%AutoW(2)) FPQy = FPQy-ANINT(FPQy)
+        IF(PBC%AutoW(3)) FPQz = FPQz-ANINT(FPQz)
+        PQx  = FPQx*PBC%BoxShape(1,1)+FPQy*PBC%BoxShape(1,2)+FPQz*PBC%BoxShape(1,3)
+        PQy  = FPQy*PBC%BoxShape(2,2)+FPQz*PBC%BoxShape(2,3)
+        PQz  = FPQz*PBC%BoxShape(3,3) 
+#endif
         IB%WR%D(Ind, 1) = Px-Cx
         IB%WR%D(Ind, 2) = Qx-DB%DisBuf%D(I2+7)
         IB%WR%D(Ind, 3) = Py-Cy
         IB%WR%D(Ind, 4) = Qy-DB%DisBuf%D(I2+8)
         IB%WR%D(Ind, 5) = Pz-Cz
         IB%WR%D(Ind, 6) = Qz-DB%DisBuf%D(I2+9)
-        IB%WR%D(Ind, 7) = Tx-Px
-        IB%WR%D(Ind, 8) = Tx-Qx
-        IB%WR%D(Ind, 9) = Ty-Py
-        IB%WR%D(Ind,10) = Ty-Qy
-        IB%WR%D(Ind,11) = Tz-Pz
-        IB%WR%D(Ind,12) = Tz-Qz
+        IB%WR%D(Ind, 7) = -Eta*PQx*r1xZpE
+        IB%WR%D(Ind, 8) = Zeta*PQx*r1xZpE
+        IB%WR%D(Ind, 9) = -Eta*PQy*r1xZpE
+        IB%WR%D(Ind,10) = Zeta*PQy*r1xZpE
+        IB%WR%D(Ind,11) = -Eta*PQz*r1xZpE
+        IB%WR%D(Ind,12) = Zeta*PQz*r1xZpE
         IB%WZ%D(Ind, 1) = Half/Eta
         IB%WZ%D(Ind, 2) = Half/Zeta
         IB%WZ%D(Ind, 3) = Zeta*r1xZpE
         IB%WZ%D(Ind, 4) = Eta*r1xZpE
         IB%WZ%D(Ind, 5) = Half*r1xZpE
-
-        PQx=Px-Qx
-        PQy=Py-Qy
-        PQz=Pz-Qz
         T=(PQx*PQx+PQy*PQy+PQz*PQz)*Eta*Zeta*r1xZpE
         IF (T<Gamma_Switch)THEN 
           TwoT=2.0D0*T

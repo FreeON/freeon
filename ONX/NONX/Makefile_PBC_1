@@ -29,7 +29,7 @@ include $(MONDO_COMPILER)
 include $(MONDO_HOME)/Includes/Suffixes
 include $(MONDO_HOME)/Includes/RemoveAll
 
-all: NONX XForce
+all: NONX 
 
 Objects1 = ONXParameters.o ONXMemory.o ContractionScaling.o MatFilter.o \
            InitExchangeMatrix.o Sizes.o Stats.o DisOrder_PBC_1.o MemInit_PBC_1.o \

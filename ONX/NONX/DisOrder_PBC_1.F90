@@ -7,7 +7,7 @@ MODULE DOrder
    USE ONXMemory
    USE Stats
    IMPLICIT NONE
-   REAL(DOUBLE),DIMENSION(3) :: PBC_h,PBC_g
+   REAL(DOUBLE),DIMENSION(3) :: PBC
 !  Local buffers allocated in MemInit outside of periodic loops
    TYPE(DBL_RNK3)         :: SchT 
    TYPE(INT_RNK3)         :: BufT
@@ -83,7 +83,7 @@ MODULE DOrder
       KType=MaxLC*(MaxLC+1)/2+MinLC+1
       NKCase=MaxLC-MinLC+1
       StrideC=StopLC-StartLC+1         
-      ! Another expensive zeroing...
+!     Another expensive zeroing...
       N=SIZE(BufN%I,1)*SIZE(BufN%I,2)
       CALL INT_VECT_EQ_INT_SCLR(N,BufN%I(1,1),0)
 !      BufN%I=0
@@ -92,15 +92,15 @@ MODULE DOrder
       IndexA=0  
 
   DO AtA=1,NAtoms
-    KA=GMc%AtTyp%I(AtA)
+    KA=GMc%AtTyp%I(AtA) 
     NBFA=BSc%BfKnd%I(KA)
 #ifdef PERIODIC
-    Ax=GMc%Carts%D(1,AtA)+PBC_g(1)
-    Ay=GMc%Carts%D(2,AtA)+PBC_g(2)
-    Az=GMc%Carts%D(3,AtA)+PBC_g(3)
-    Cx=GMp%Carts%D(1,AtC)+PBC_h(1)
-    Cy=GMp%Carts%D(2,AtC)+PBC_h(2)
-    Cz=GMp%Carts%D(3,AtC)+PBC_h(3)
+    Ax=GMc%Carts%D(1,AtA)
+    Ay=GMc%Carts%D(2,AtA)
+    Az=GMc%Carts%D(3,AtA)
+    Cx=GMp%Carts%D(1,AtC)+PBC(1)
+    Cy=GMp%Carts%D(2,AtC)+PBC(2)
+    Cz=GMp%Carts%D(3,AtC)+PBC(3)
 #else
     Ax=GMc%Carts%D(1,AtA)
     Ay=GMc%Carts%D(2,AtA)

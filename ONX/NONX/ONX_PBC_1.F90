@@ -2,6 +2,9 @@ PROGRAM ONX
   USE DerivedTypes
   USE GlobalScalars
   USE GlobalCharacters
+#ifdef PERIODIC
+  USE AtomPairs
+#endif
   USE Clock
   USE InOut
   USE PrettyPrint
@@ -57,7 +60,8 @@ PROGRAM ONX
 !--------------------------------------------------------------------------------
   INTEGER                :: iSwitch,ErrorCodeTmp,OldFileID
 #ifdef PERIODIC
-  INTEGER                :: NC1,NC2
+  INTEGER                :: I,NC1,NC2,NC3
+  TYPE(CellSet)          :: CSTemp
 #endif
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: InFile,RestartHDF
   CHARACTER(LEN=3),PARAMETER     :: Prog='ONX'
@@ -122,7 +126,10 @@ PROGRAM ONX
      CALL Get(BSiz,'atsiz',Tag_O=PrvBase)
      CALL Get(OffS,'atoff',Tag_O=PrvBase)
      CALL Get(NBasF,'nbasf',Tag_O=PrvBase)
-  ENDIF
+  END IF
+!
+!
+!
   CALL Get(BSc,Tag_O=CurBase)
   CALL Get(GMc,Tag_O=CurGeom)
   CALL New(NameBuf,NAtoms)
@@ -147,9 +154,8 @@ PROGRAM ONX
 !--------------------------------------------------------------------------------
   CALL RangeOfDensity(D,NameBuf,BfnInd,DB1,BSp,GMp)
   CALL RangeOfDensity(D,NameBuf,BfnInd,DB2,BSp,GMp)
-
-     PBC_h=Zero
-     PBC_g=Zero
+!
+     PBC=Zero
 1000 CONTINUE 
 !    Have to bump both buffers 1 and 2, otherwise if buffer2 is to
 !    small, buffer 1 gets bumped infinately untill you run out of memory!
@@ -180,13 +186,14 @@ PROGRAM ONX
   CALL InitSubInd(BSc,GMc,SubInd)
 !
 #ifdef PERIODIC
+! Set up third sum
+  CALL New_CellSet_Cube(CSTemp,GMc%PBC%AutoW,GMc%PBC%BoxShape,(/1,1,1/))
 ! Periodic double sum over R and Rprime
   DO NC1=1,CS_OUT%NCells
-     PBC_h=CS_OUT%CellCarts%D(:,NC1)
-     PBC_g=Zero
+     PBC=CS_OUT%CellCarts%D(:,NC1)
      CALL DisOrder(BSc,GMc,BSp,GMp,DB1,IB,SB,Drv,NameBuf)
      DO NC2=1,CS_OUT%NCells
-        PBC_g=CS_OUT%CellCarts%D(:,NC2)
+        PBC=CS_OUT%CellCarts%D(:,NC2)
         CALL DisOrder(BSc,GMc,BSp,GMp,DB2,IB,SB,Drv,NameBuf)
 !--------------------------------------------------------------------------------
 !       All set to compute the exchange matrix
@@ -198,24 +205,22 @@ PROGRAM ONX
            GOTO 1000
         END IF
         CALL ComputeKe(BSc,GMc,BSp,GMp,D,K,DB1,DB2,IB,SB,IS,Drv,SubInd,BfnInd)
-#else
-        CALL ComputeKg(BSc,GMc,BSp,GMp,D,K,DB1,DB1,IB,SB,IS,Drv,SubInd,BfnInd)
         IF(ErrorCode/=eAOK) THEN
            CALL Delete(K)
            CALL Delete(SubInd)
            GOTO 1000
-        END IF
-        CALL ComputeKe(BSc,GMc,BSp,GMp,D,K,DB1,DB1,IB,SB,IS,Drv,SubInd,BfnInd)
-#endif
-        IF(ErrorCode/=eAOK) THEN
-          CALL Delete(K)
-          CALL Delete(SubInd)
-          GOTO 1000
         ENDIF
-#ifdef PERIODIC
      ENDDO
   ENDDO
   CALL Delete(DB2)
+#else
+  CALL ComputeKg(BSc,GMc,BSp,GMp,D,K,DB1,DB1,IB,SB,IS,Drv,SubInd,BfnInd)
+  IF(ErrorCode/=eAOK) THEN
+     CALL Delete(K)
+     CALL Delete(SubInd)
+     GOTO 1000
+  END IF
+  CALL ComputeKe(BSc,GMc,BSp,GMp,D,K,DB1,DB1,IB,SB,IS,Drv,SubInd,BfnInd)
 #endif
 !--------------------------------------------------------------------------------
 ! Free up some space that we dont need anymore.
@@ -247,6 +252,7 @@ PROGRAM ONX
   CALL PChkSum(K,'Kx['//TRIM(SCFCycl)//']',Prog)
   CALL PPrint( K,'Kx['//TRIM(SCFCycl)//']')
 !  CALL PPrint( K,'Kx['//TRIM(SCFCycl)//']',Unit_O=6)
+!  IF(.TRUE.) STOP
 !  CALL Plot(   K,'Kx['//TRIM(SCFCycl)//']')
 !--------------------------------------------------------------------------------
 ! Clean up...

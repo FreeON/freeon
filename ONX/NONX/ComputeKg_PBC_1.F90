@@ -129,8 +129,6 @@ SUBROUTINE ComputeKg(BSc,GMc,BSp,GMp,D,K,DB1,DB2,IB,SB,IS,Drv,SubInd,BfnInd)
 
 
           IF (LenKet>0) THEN
-!WRITE(*,*)'Ket ',LenKet,idKet,iPKet
-
             CALL GetSubBlk(NBFC,NBFD,StrideC,StrideD,IndexC+1,  &
                            IndexD+1,D%MTrix%D(iPtr),DA%D(1))
             Dcd=GetAbsMax(StrideC*StrideD,DA)   ! could test on the density here...
@@ -188,7 +186,7 @@ SUBROUTINE ComputeKg(BSc,GMc,BSp,GMp,D,K,DB1,DB2,IB,SB,IS,Drv,SubInd,BfnInd)
                 xNERIs=xNERIs+FLOAT(IS%L1*IS%L2*IS%L3*IS%L4*ISL)
                 CALL RGen(ISL,Ltot,CBra,CKet,IB%CB%D(1,1),IB%CK%D(1,1,1),      &
                           DB1%DisBuf%D(IBD),DB1%PrmBuf%D(IBP),IB%W1%D(1),      &
-                          DB2,IB,SB)
+                          DB2,IB,SB,GMc%PBC)
                 CALL VRRl(ISL*CBra*CKet,IS%NVRR,Drv%nr,Drv%ns,                 &
                           Drv%VLOC%I(Drv%is),                                  &
                           Drv%VLOC%I(Drv%is+Drv%nr),IB,                        &
@@ -209,11 +207,9 @@ SUBROUTINE ComputeKg(BSc,GMc,BSp,GMp,D,K,DB1,DB2,IB,SB,IS,Drv,SubInd,BfnInd)
                               IntSwitch,IB%W2%D(1),IB%W1%D(1),DA%D(1))
                   CALL Scatter(ISL,NA,NB,IndexA,SB,SubInd,DB2,IB%W2%D(1),K)          ! DB1 ? 
                 END IF
-K%NAtms=NAtoms
-!WRITE(*,*)Dot(K,K)
-
+                K%NAtms=NAtoms
+!               WRITE(*,*)Dot(K,K)
               END IF  ! ISL
-
             END DO ! I, LenBra
           END IF ! LenKet
           IndexD=IndexD+StrideD
