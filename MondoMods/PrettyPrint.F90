@@ -432,18 +432,23 @@ MODULE PrettyPrint
               WRITE(PU,444)GM%NElec
               WRITE(PU,43) 
 #ifdef PERIODIC
-              WRITE(PU,55)
-              WRITE(PU,56) GM%AutoW(1),GM%AutoW(2),GM%AutoW(3)
-              WRITE(PU,57) GM%TransVec%D(1),GM%TransVec%D(2),GM%TransVec%D(3)
-              WRITE(PU,58)  
-              WRITE(PU,59) GM%BoxShape%D(1,1),GM%BoxShape%D(2,1),GM%BoxShape%D(3,1)
-              WRITE(PU,60) GM%BoxShape%D(1,2),GM%BoxShape%D(2,2),GM%BoxShape%D(3,2)
-              WRITE(PU,61) GM%BoxShape%D(1,3),GM%BoxShape%D(2,3),GM%BoxShape%D(3,3)
-              WRITE(PU,62)  
-              DO I=1,GM%NAtms
-                 WRITE(PU,63) I, Ats(GM%AtNum%I(I)),(GM%BoxCarts%D(K,I),K=1,3)
-              ENDDO
-              WRITE(PU,43)
+              IF(GM%AutoW(1) .OR. GM%AutoW(2) .OR. GM%AutoW(3)) THEN
+                 WRITE(PU,55)
+                 WRITE(PU,56) GM%AutoW(1),GM%AutoW(2),GM%AutoW(3)
+                 WRITE(PU,57) GM%TransVec%D(1),GM%TransVec%D(2),GM%TransVec%D(3)
+                 WRITE(PU,58)  
+                 WRITE(PU,59) GM%BoxShape%D(1,1),GM%BoxShape%D(2,1),GM%BoxShape%D(3,1)
+                 WRITE(PU,60) GM%BoxShape%D(1,2),GM%BoxShape%D(2,2),GM%BoxShape%D(3,2)
+                 WRITE(PU,61) GM%BoxShape%D(1,3),GM%BoxShape%D(2,3),GM%BoxShape%D(3,3)
+                 WRITE(PU,62)  
+                 DO I=1,GM%NAtms
+                    WRITE(PU,63) I, Ats(GM%AtNum%I(I)),(GM%BoxCarts%D(K,I),K=1,3)
+                 ENDDO
+                 WRITE(PU,43)
+              ELSE
+                 WRITE(PU,64)
+                 WRITE(PU,43)
+              ENDIF
 #endif
 !           ENDIF
            CALL ClosePU(PU)
@@ -481,6 +486,7 @@ MODULE PrettyPrint
    61   FORMAT(2x,'  c  = (',D14.8,', ',D14.8,', ',D14.8,')')
    62   FORMAT(2x,' Internal representation of geometry in Fractional Coordinates: ')
    63   FORMAT(1x,I5,1x,A2,3(1x,F16.10))
+   64   FORMAT(2x,' *** Periodic is Off *** ')
      END SUBROUTINE Print_CRDS
 !-----------------------------------------------------------------------------
 !    Print a BCSR matrix
