@@ -1,3 +1,108 @@
+2002-02-28 13:30  mchalla
+
+	* SCFeqs/SDMM.F90: Fixed bug with temporary matrices in computation
+	of convergence criteria T3=P.F, not T1.
+
+2002-02-26 13:33  mchalla
+
+	* MondoMods/: DerivedTypes.F90, LinAlg.F90, MemMan.F90, SetEq.F90:
+	New Fast Matrix data structures and support routines for O(Lg N)
+	inserts, deletes, lookups, adds etc etc.
+
+2002-02-26 13:29  mchalla
+
+	* MondoMods/Thresholding.F90: Added in SQRT to calculation of
+	extent in TestBoxPairOverlap.
+
+2002-02-25 14:06  mchalla
+
+	* MondoMods/Order.F90: Fixed interface problem with Interleave.
+
+2002-02-22 13:11  tymczak
+
+	* Docs/PBC_Exchange/: PeriodicExchange.lyx, PeriodicExchange.ps,
+	PeriodicExchange.tex: [no log message]
+
+2002-02-21 14:14  tymczak
+
+	* MondoMods/PrettyPrint.F90: Error in the Diagonal Block Error for
+	the Kx matrix commented it out for now
+
+2002-02-14 15:17  mchalla
+
+	* Docs/BWR_paper/bwr.tex: Worked on title, abstract and first two
+	paragraphs
+
+2002-02-13 14:53  mchalla
+
+	* MondoMods/Thresholding.F90: Fixed bug with line-box extent
+
+2002-02-13 14:39  tymczak
+
+	* Docs/PBC_paper/: Abstract_ACS_2001.lyx, ErrorPFF_IC.eps,
+	ErrorPFF_InnerBox.eps, LinearPBCMethod.lyx, LinearPBCMethod.tex,
+	M_lm_cubic.dat, M_lm_rhombic.dat, N2.eps, NaCl_2_rombic.inp,
+	PFFEnergy.sdc, PFFapprox.dat, PFFapprox_2.dat, PFFvsDist.ps,
+	RepCell.eps, ReplicateCell.sda, UnitCell.eps, UnitCell3d.sda,
+	gaussian.bib, n2_101.eps: [no log message]
+
+2002-02-12 16:13  ckgan
+
+	* Includes/CompilerSpecifics.SGIIrix.MIPS: compiler specific file
+	for SGI machine is updated. It works on Blue Mountain.
+
+2002-02-12 14:41  ckgan
+
+	* MondoMods/Makefile: a typo error in the Makefile is fixed.
+
+2002-02-12 14:33  ckgan
+
+	* MondoMods/Anneal.F90: Anneal.F90 first makes its appearance in
+	MONDO. This module contains all subroutines for BWR ordering using
+	simulated annealing technique.
+
+2002-02-12 14:32  ckgan
+
+	* MondoMods/Makefile: Anneal.o is include in the Makefile in mm.
+
+2002-02-12 14:31  ckgan
+
+	* MondoMods/Order77.F: The Hilbert mapping has been moved to
+	Order.F90
+
+2002-02-12 14:30  ckgan
+
+	* MondoMods/Order.F90: The simulated annealing part has been moved
+	to Anneal.F90
+
+2002-02-12 11:37  mchalla
+
+	* MondoSCF/DrvFrcs.F90, OneE/SForce.F90, OneE/TForce.F90,
+	QCTC/JForce.F90: Removed call to force_checksum.
+
+2002-02-12 11:37  mchalla
+
+	* MondoMods/PrettyPrint.F90: IfDefed out force checksum routine.
+
+2002-02-12 11:35  mchalla
+
+	* MondoMods/Thresholding.F90: Commiting to leaving line-box
+	thresholding on.
+
+2002-02-12 11:33  mchalla
+
+	* HiCu/XCForce.F90: Added in line-box overlap test.  Also, revoved
+	second force checksum.
+
+2002-02-12 11:28  ckgan
+
+	* Includes/Suffixes: a trivial bug for the suffix rule for
+	Fortran77 code is fixed.
+
+2002-02-11 12:10  mchalla
+
+	* ChangeLog: [no log message]
+
 2002-02-11 11:58  mchalla
 
 	* MondoMods/Thresholding.F90: Fixed bug in LineBoxOverlap for
@@ -62,6 +167,10 @@
 	* Docs/BWR_paper/: anneal_s.eps, compare_all.eps, hilbert_s.eps,
 	morton_s.eps: add a paper bwr.tex to the repository.
 
+2002-02-01 13:51  mchalla
+
+	* ChangeLog: [no log message]
+
 2002-02-01 13:18  mchalla
 
 	* MondoSCF/ParseInput.F90: Added Karoly to the author list.  Good
@@ -71,6 +180,10 @@
 
 	* MondoMods/LinAlg.F90: Fixed bug with uninitialized value of N in
 	SetToI.  Silly me.
+
+2002-02-01 11:55  mchalla
+
+	* ChangeLog: [no log message]
 
 2002-01-30 13:40  tymczak
 
@@ -307,6 +420,10 @@
 	VRRl.F90, also changed the order of the indexes in IB%WR and IB%WZ.
 	This needs a change in MemMan.F90 in MondoMods.
 
+2001-12-14 15:33  mchalla
+
+	* ChangeLog: [no log message]
+
 2001-12-14 15:30  mchalla
 
 	* XForm/LowdinO.F90: Put in checking of cond(S), with appropriate
@@ -352,6 +469,10 @@
 	ONX.F90, Sizes.F90, VRRs.F90: Fixed a lot of bugs and messy stuff
 	with the array dimensions in the 2-e code.
 
+2001-12-10 11:57  mchalla
+
+	* ChangeLog: [no log message]
+
 2001-12-10 11:53  mchalla
 
 	* Validate/Lizard.inp: [no log message]
@@ -368,6 +489,10 @@
 	MondoSCF/ParseInput.F90, SCFeqs/SDMM.F90, QCTC/BlokTrPdJ.F90,
 	QCTC/JGen.F90: Changed back to pre 2001-11-26 to eliminate periodic
 	instabilities and feature bloat.
+
+2001-12-07 12:17  mchalla
+
+	* ChangeLog: [no log message]
 
 2001-12-05 17:08  tymczak
 
