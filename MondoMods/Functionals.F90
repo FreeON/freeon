@@ -10,7 +10,6 @@ MODULE Functionals
    USE DerivedTypes
    USE ProcessControl
    USE Parse
-   IMPLICIT REAL(DOUBLE) (A-Z)
    INTERFACE ExcOnTheGrid
       MODULE PROCEDURE ExcOnTheGrid_ClSh
    END INTERFACE
@@ -58,6 +57,9 @@ MODULE Functionals
    REAL(DOUBLE), PARAMETER :: NoNAN=1.D-30
 !  Global variable set to the current model chemistry
    INTEGER :: ModelChem
+!  Global intermediates for optimized functional forms
+   REAL(DOUBLE),DIMENSION(200) :: UTmp
+   REAL(DOUBLE),DIMENSION(100) :: VTmp
 !------------
    CONTAINS !
 !====================================================================================
