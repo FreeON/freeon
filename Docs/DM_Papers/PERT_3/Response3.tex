@@ -122,10 +122,10 @@ densities are demonstrated.
  also to response properties. In previous studies linear scaling 
  for the calculation of response properties was demonstrated for one
  dimensional linear chain systems (CHECK IT)
- \cite{Ochsenfeld_1997,Ochsenfeld_1998,chintoc}. Recently
+ \cite{Ochsenfeld97,COchsenfeld98,CYam03,CYam03a}. Recently
  a perturbed projection algorithm was proposed for low order
  response properties for which linear scaling was demonstrated
- also for three dimensional systems \cite{Weber_Niklasson_Challacombe_2004}.
+ also for three dimensional systems \cite{Weber04}.
 
  In the calculation of materials response properties within 
  Hartree-Fock or density functional theory the electronic
@@ -148,7 +148,8 @@ densities are demonstrated.
  solutions to the CPSCF equations based on unitary operations
  involving matrix exponentials. In both of these approaches, a linear 
  system of equations containing commutation relations must be solved.
- Another very interesting approach was demonstrated by Chintoc, who
+ Another very interesting approach was demonstrated by Yam and al
+ \cite{CYam03,CYam03a}, who
  derived the frequency response of one dimensional molecular chains
  by calculating the time evolution of the density matrix from
  the quantum-Liouville equation.
@@ -162,16 +163,16 @@ densities are demonstrated.
  water clusters.
 
  In this article, we present a linear scaling self consistent scheme
- for higher order response properties up fourth order in energy.
+ for higher order response properties up to fourth order in energy.
  First we give a general description through the solution of the CPSCF equations.
  Then we describe the perturbed projection approach for the calculation
  of the density matrix derivatives and present
- an algorithm for derivatives up to third order.
+ an algorithm for derivatives up to third order in the density matrix.
  Thereafter, we derive a density matrix analogy to Wigner's 2n+1
  rule for nonorthogonal representations. We also briefly discuss the
  self consistent acceleration technique by Weber and ... . In the next section,
  we first show the saturation of the hyperpolarizabilities up to fourth order
- for a series of 1D chain of water molecules. Thereafter, we demon state
+ for a series of 1D chain of water molecules. Thereafter, we demonstrate
  linear scaling computation of the higher order electric response properties
  for 3D water clusters.
 
@@ -205,7 +206,7 @@ The total energy may be developed in a Taylor expansion as
  where $\alpha_{ab}$, $\beta_{abc}$ and $\gamma_{abcd}$ are 
  the first polarizability and the first and second 
  hyperpolarizabilities respectively, $\mu_a$ is the dipole 
- moment and $\E_a$ is the electric field in direction $a$. 
+ moment and $\E^a$ is the electric field in direction $a$. 
 
 \begin{equation}
   \begin{split}
@@ -238,8 +239,8 @@ and the idempotency-like constraint \cite{Furche_2001}
   \end{gather}
 \end{subequations}
 The following schematic algorithm is a higher order generalization of the
-self consistent scheme for the solution of the CPSCF equations describe in \cite{SV} 
-based on perturbed projection:
+self consistent scheme for the solution of the CPSCF equations describe 
+in \cite{Weber04} based on perturbed projection:
 \begin{subequations}
   \begin{gather}
     F^{a}_{n}=\mu_a+J(D^{a}_n)+K(D^{a}_n) \label{FockBuild} \\
@@ -251,11 +252,13 @@ based on perturbed projection:
 %    (\F^{0}+\sum_c\E^{c}\widetilde{\F}^{c}_n+\ldots))\bigg|_{\E=0} \label{DDeriv}
   \end{gather} 
 \end{subequations}
-with starting points $D^{a\ldots}_0=0$. In step~(\ref{FockBuild}),  $F^a_n$ is constructed in
-${\cal O}(N)$ using algorithms \cite{MChallacombe97,ESchwegler97} in
-the {\sc MondoSCF} \cite{MondoSCF} suite of linear scaling quantum chemistry programs.  Next,
-Weber and Daul's DDIIS algorithm for convergence acceleration of the CPSCF equation
-\cite{Weber_2003} is used to optimize the $c_k$ coefficients in step~(\ref{DDIIS}).
+with starting points $D^{a\ldots}_0=0$. In step~(\ref{FockBuild}),  
+$F^a_n$ is constructed in ${\cal O}(N)$ using algorithms 
+\cite{MChallacombe97,ESchwegler97} in the {\sc MondoSCF} \cite{MondoSCF} 
+suite of linear scaling quantum chemistry programs.  Next,
+Weber and Daul's DDIIS algorithm for convergence acceleration 
+of the CPSCF equation \cite{Weber_2003} is used to optimize 
+the $c_k$ coefficients in step~(\ref{DDIIS}).
 
 
 The scheme solves for the self consistent density response, \\
