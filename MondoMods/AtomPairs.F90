@@ -23,7 +23,9 @@ MODULE AtomPairs
 ! Global variables
 !---------------------------------------------------------------------------
 #ifdef PERIODIC
-  TYPE(CellSet)      :: CS,CSMM1,CSMM2
+!  LOGICAL,DIMENSION(3)        :: PBCXYZ     
+!  REAL(DOUBLE),DIMENSION(3,3) :: LATVEC     
+  TYPE(CellSet)               :: CS,CSMM1,CSMM2
 #endif
 CONTAINS
 !--------------------------------------------------------------------------
@@ -102,14 +104,31 @@ CONTAINS
 #ifdef PERIODIC
 !--------------------------------------------------------------------------
 ! Set up the lattice vecters to sum over 
+! Also, Added a Factor that Takes into Account the Box Size and Shape
 !--------------------------------------------------------------------------
   SUBROUTINE SetCellNumber(GM)
     TYPE(CRDS)                     :: GM
-    CALL New_CellSet_Sphere(CS,GM,AtomPairDistanceThreshold)
+    INTEGER                        :: I
+    REAL(DOUBLE)                   :: Radius,Radd,A0,B0,C0
+!
+    A0 = Zero
+    B0 = Zero
+    C0 = Zero
+    DO I=1,3
+       A0 = A0 + (GM%BoxShape%D(I,1)+GM%BoxShape%D(I,2)+GM%BoxShape%D(I,3))**2
+       B0 = B0 + (GM%BoxShape%D(I,1)+GM%BoxShape%D(I,2)-GM%BoxShape%D(I,3))**2
+       C0 = C0 + (GM%BoxShape%D(I,1)-GM%BoxShape%D(I,2)-GM%BoxShape%D(I,3))**2
+    ENDDO
+    Radd = MAX(SQRT(A0),SQRT(B0))
+    Radd = MAX(Radd,SQRT(C0))
+!
+    Radius = Radd+AtomPairDistanceThreshold
+    CALL New_CellSet_Sphere(CS,GM%AutoW,GM%BoxShape%D,Radius)
+!
   END SUBROUTINE SetCellNumber
-!------------------------------------------------------------------------------
+!----------------------------------------------------------------------------
 !     Convert from Atomic Coordinates  to Fractional Coordinates
-!--------------------------------------------------------------------------
+!----------------------------------------------------------------------------
   FUNCTION AtomToFrac(GM,VecA) RESULT(VecF)
     TYPE(CRDS)                 :: GM
     REAL(DOUBLE),DIMENSION(3)  :: VecA,VecF
