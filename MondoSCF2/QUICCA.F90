@@ -1898,6 +1898,7 @@ CONTAINS
      INTEGER                     :: PBCDim,I,J,NatmsLoc,NCart
      INTEGER                     :: ALPHA,BETA,IA
      !
+     RETURN ! Suppose that TotalGrad is provided by default
      IF(PBCDim==0) RETURN
      NatmsLoc=SIZE(XYZAux,2)
      NCart=3*NatmsLoc
