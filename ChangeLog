@@ -1,3 +1,54 @@
+2004-03-31 16:07  tymczak
+
+	* MondoSCF2/SCFs.F90, SCFeqs/ODA.F90: [no log message]
+
+2004-03-31 16:03  tymczak
+
+	* MondoSCF2/ParseOptions.F90: 
+	SCFConvergence Options
+
+2004-03-31 16:03  tymczak
+
+	* MondoSCF2/OptionKeys.F90: Added SCF Convergence Options
+	
+	USE:
+	
+	 SCFConvergence=(DIIS,ODA,ODA-DIIS,DIIS-ODA,SMIX,TESTSCF)
+	
+	 OverRideSCFConvergence=(DIIS,ODA)
+
+2004-03-31 16:01  tymczak
+
+	* MondoSCF2/ControlStructures.F90: [no log message]
+
+2004-03-31 16:00  tymczak
+
+	* MondoMods/PrettyPrint.F90: Timing has new BareBones
+
+2004-03-31 15:59  tymczak
+
+	* MondoMods/McMurch.F90: Computes the Integral Kernal---Not Done
+
+2004-03-31 15:58  tymczak
+
+	* MondoMods/Macros.F90: Added BareBones Timing
+
+2004-03-30 22:23  nemeth
+
+	* MondoSCF2/GDIIS.F90: A contigous memory problem fixed.
+
+2004-03-30 11:01  mchalla
+
+	* Docs/Optimizer/PRL/GFS_PRL.tex: [no log message]
+
+2004-03-29 16:38  mchalla
+
+	* Docs/Optimizer/PRL/GFS_PRL.tex: [no log message]
+
+2004-03-29 10:36  mchalla
+
+	* ChangeLog: [no log message]
+
 2004-03-27 13:50  nemeth
 
 	* Docs/Optimizer/PRL/: GFS_PRL.tex, prl.ps: Another iteration on
