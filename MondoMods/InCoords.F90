@@ -1900,8 +1900,10 @@ SUBROUTINE GetIntCs(XYZ,NatmsLoc,InfFile,IntCs,NIntC,Refresh)
 ! Refresh only the VDW terms
 !
           CALL Get(NIntC_Cov,'NIntC_Cov')
-          CALL New(IntC_Cov,NIntC_Cov)
-          CALL Get(IntC_Cov,'IntC_Cov')
+          IF(NIntC_Cov/=0) THEN
+            CALL New(IntC_Cov,NIntC_Cov)
+            CALL Get(IntC_Cov,'IntC_Cov')
+          ENDIF
           CALL DefineIntCoos(NatmsLoc,XYZ,MMAtNum,InfFile,2, &
                              IntC_VDW,NIntC_VDW)
           CALL Put(NIntC_VDW,'NIntC_VDW')
@@ -1909,11 +1911,15 @@ SUBROUTINE GetIntCs(XYZ,NatmsLoc,InfFile,IntCs,NIntC,Refresh)
 !
       ELSE IF(Refresh==3) THEN !!! no refresh, get everything from HDF
           CALL Get(NIntC_Cov,'NIntC_Cov')
-          CALL New(IntC_Cov,NIntC_Cov)
-          CALL Get(IntC_Cov,'IntC_Cov')
+          IF(NIntC_Cov/=0) THEN
+            CALL New(IntC_Cov,NIntC_Cov)
+            CALL Get(IntC_Cov,'IntC_Cov')
+          ENDIF
           CALL Get(NIntC_VDW,'NIntC_VDW')
-          CALL New(IntC_VDW,NIntC_VDW)
-          CALL Get(IntC_VDW,'IntC_VDW')
+          IF(NIntC_VDW/=0) THEN
+            CALL New(IntC_VDW,NIntC_VDW)
+            CALL Get(IntC_VDW,'IntC_VDW')
+          ENDIF
 !
       ELSE IF(Refresh==4) THEN !!! refresh covalent bonds only
         CALL DefineIntCoos(NatmsLoc,XYZ,MMAtNum,InfFile,1, &
@@ -1949,7 +1955,7 @@ SUBROUTINE GetIntCs(XYZ,NatmsLoc,InfFile,IntCs,NIntC,Refresh)
         NIntC=NIntC_Cov+NIntC_VDW+NIntC_Extra
 !
         IF(AllocQ(IntCs%Alloc)) CALL Delete(IntCs)
-        CALL New(IntCs,NIntC)
+        IF(NIntC/=0) CALL New(IntCs,NIntC)
 !
           ILast=0
         IF(NIntC_Cov/=0) THEN
@@ -1970,6 +1976,8 @@ SUBROUTINE GetIntCs(XYZ,NatmsLoc,InfFile,IntCs,NIntC,Refresh)
         IF(NIntC_Cov/=0) CALL Delete(IntC_Cov)
         IF(NIntC_VDW/=0) CALL Delete(IntC_VDW)
         IF(NIntC_Extra/=0) CALL Delete(IntC_Extra)
+!
+        IF(NIntC==0) GO TO 1000
 !
 ! Now filter out repeated definitions, 
 ! which may have occured in INTC_Extra
@@ -2003,7 +2011,7 @@ SUBROUTINE GetIntCs(XYZ,NatmsLoc,InfFile,IntCs,NIntC,Refresh)
             IF(IntCs%Def(I)=='BLANK') NNew=NNew-1
           ENDDO
           CALL New(IntC_New,NNew)
-	  NNew=0    
+          NNew=0    
           DO I=1,NIntc
             IF(IntCs%Def(I)/='BLANK') THEN
               NNew=NNew+1
@@ -2017,41 +2025,39 @@ SUBROUTINE GetIntCs(XYZ,NatmsLoc,InfFile,IntCs,NIntC,Refresh)
           CALL Delete(IntC_New)
         ENDIF
 !
-      CALL Delete(MMAtNum)
-!
 ! Check for bending - lin.bending transions
 ! also for long range torsions
 !
-      CALL ChkBendToLinB(IntCs,NIntC,XYZ)
+        CALL ChkBendToLinB(IntCs,NIntC,XYZ)
 !
 ! Print actual set of internals for testing
 !
-      IF(PrintFlags%GeOp==DEBUG_GEOP) THEN
-!       CALL INTCValue(IntCs,XYZ)
-        CALL PrtIntCoords(IntCs, &
-          IntCs%Value,'internals after ChkBendToLinB')
-      ENDIF 
+        IF(PrintFlags%GeOp==DEBUG_GEOP) THEN
+!         CALL INTCValue(IntCs,XYZ)
+          CALL PrtIntCoords(IntCs, &
+            IntCs%Value,'internals after ChkBendToLinB')
+        ENDIF 
 !
 ! Set active all internal coords defd so far.
 ! 'Linear torsions will be deactivated when their value is calculated
 ! by some subroutine (eg. INTCValue).
 ! The set of active coordinates may vary during the process of optimization.
 !
-      IntCs%Active=.TRUE.
+        IF(NIntC/=0) IntCs%Active=.TRUE.
 !
 ! Save values of constraints into HDF
 !
-      IF(NIntC/=0) THEN
-        CALL New(AuxVect,NIntC)
-        AuxVect%D=IntCs%Value
-        CALL Put(Current(3),'LastIntcGeom')
-        CALL Put(AuxVect,'Constraints'//TRIM(CurGeom))
-        CALL Delete(AuxVect)
-      ENDIF
+        IF(NIntC/=0) THEN
+          CALL New(AuxVect,NIntC)
+          AuxVect%D=IntCs%Value
+          CALL Put(Current(3),'LastIntcGeom')
+          CALL Put(AuxVect,'Constraints'//TRIM(CurGeom))
+          CALL Delete(AuxVect)
+        ENDIF
 !
 ! Count number of different internal coord types
 !
-      NStreGeOp=0;NBendGeOp=0;NLinBGeOp=0;NOutPGeOp=0;NTorsGeOp=0
+        NStreGeOp=0;NBendGeOp=0;NLinBGeOp=0;NOutPGeOp=0;NTorsGeOp=0
         DO I=1,NIntC
            IF(IntCs%Def(I)(1:4)=='STRE') THEN
              NStreGeOp=NStreGeOp+1
@@ -2065,16 +2071,19 @@ SUBROUTINE GetIntCs(XYZ,NatmsLoc,InfFile,IntCs,NIntC,Refresh)
              NTorsGeOp=NTorsGeOp+1
            ENDIF
         ENDDO
-      CALL Put(NStreGeOp,'NStreGeOp')
-      CALL Put(NBendGeOp,'NBendGeOp')
-      CALL Put(NLinBGeOp,'NLinBGeOp')
-      CALL Put(NOutPGeOp,'NOutPGeOp')
-      CALL Put(NTorsGeOp,'NTorsGeOp')
+        CALL Put(NStreGeOp,'NStreGeOp')
+        CALL Put(NBendGeOp,'NBendGeOp')
+        CALL Put(NLinBGeOp,'NLinBGeOp')
+        CALL Put(NOutPGeOp,'NOutPGeOp')
+        CALL Put(NTorsGeOp,'NTorsGeOp')
 !
 ! Save current internals to HDF
 !
-!     CALL Put(NIntC,'NIntC')
-!     CALL Put(IntCs,'IntCs')
+!       CALL Put(NIntC,'NIntC')
+!       CALL Put(IntCs,'IntCs')
+!
+1000    CONTINUE
+        CALL Delete(MMAtNum)
 !
 END SUBROUTINE GetIntCs
 !-------------------------------------------------------
@@ -3762,6 +3771,7 @@ selection%i=1
       CHARACTER(LEN=*) :: CHAR   
 !
       NIntC=SIZE(IntCs%Def)
+      IF(NIntC==0) RETURN
 !
       CALL OpenAscii(OutFile,Out)
 !
@@ -4414,6 +4424,8 @@ END SUBROUTINE ChkBendToLinB
       TYPE(DBL_VECT) :: Constraints
       LOGICAL        :: DoInternals
 !
+        IF(GeOpCtrl%NConstr==0) RETURN
+!
         NIntC=SIZE(IntCs%Def)
         NDim=SIZE(Displ%D)
         DoInternals=GeOpCtrl%DoInternals
@@ -4453,7 +4465,7 @@ END SUBROUTINE ChkBendToLinB
 !
 ! Tidy up
 !
-        CALL Delete(Constraints)
+        IF(NIntC/=0) CALL Delete(Constraints)
 !
       END SUBROUTINE SetConstraint
 !
