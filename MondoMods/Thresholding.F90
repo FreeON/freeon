@@ -11,38 +11,32 @@ MODULE Thresholding
   USE McMurchie
 !-------------------------------------------------  
 !  Primary thresholds
-!
    TYPE(TOLS), SAVE :: Thresholds
 !-------------------------------------------------------------------------
 ! Intermediate thresholds
-!
-  INTEGER,SAVE        :: MinRadialAngSym
-  REAL(DOUBLE), SAVE  :: MinRadialExponent
-  REAL(DOUBLE), SAVE  :: MinDensityExponent
+  REAL(DOUBLE), SAVE  :: MinZab,MinXab
   REAL(DOUBLE), SAVE  :: AtomPairDistanceThreshold  ! Atom pairs
   REAL(DOUBLE), SAVE  :: PrimPairDistanceThreshold  ! Prim pairs
-  REAL(DOUBLE), SAVE  :: PenetratDistanceThreshold  ! Penetration threshold
   CONTAINS
 !====================================================================================================
 !    Set and load global threholding parameters
 !====================================================================================================
-     SUBROUTINE SetThresholds(CurBase)
+     SUBROUTINE SetThresholds(Base)
          INTEGER          :: NExpt,Lndx
          TYPE(DBL_VECT)   :: Expts
-         CHARACTER(LEN=*) :: CurBase
+         CHARACTER(LEN=*) :: Base
 !        Get the primary thresholds
-         CALL Get(Thresholds,Tag_O=CurBase)
+         CALL Get(Thresholds,Tag_O=Base)
 !        Get distribution exponents
-         CALL Get(NExpt,'nexpt',Tag_O=CurBase)
-         CALL Get(Lndx ,'lndex',Tag_O=CurBase)
+         CALL Get(NExpt,'nexpt',Tag_O=Base)
+         CALL Get(Lndx ,'lndex',Tag_O=Base)
          CALL New(Expts,NExpt)
-         CALL Get(Expts,'dexpt',Tag_O=CurBase)
-         MinDensityExponent=Half*Expts%D(1)
-!        Xi_Min=Zeta*Zeta/(Zeta+Zeta)=Zeta_Min/2
-         MinRadialExponent=Half*Expts%D(1)
-!        L_min = Lnsx/2
-         MinRadialAngSym = Lndx
-!        Dlete Exponents
+         CALL Get(Expts,'dexpt',Tag_O=Base)
+!        MinZab=MinZa+MinZb, MinZa=MinZb
+         MinZab=Expts%D(1)
+!        MinXab=MinZa*MinZb/(MinZa+MinZb)=MinZab/4
+         MinXab=MinZab/Four
+!        Delete Exponents
          CALL Delete(Expts)
 !        Set Atom-Atom thresholds
          CALL SetAtomPairThresh(Thresholds%Dist)
@@ -50,43 +44,14 @@ MODULE Thresholding
          CALL SetPrimPairThresh(Thresholds%Dist)
      END SUBROUTINE SetThresholds
 !====================================================================================================
-!    Set the Atom Pair Distance Threshhold: 
+!    Preliminary worst case thresholding at level of atom pairs
+!    Using Exp[-MinXab*|A-B|^2] = Tau 
 !====================================================================================================
      SUBROUTINE SetAtomPairThresh(Tau)
-       INTEGER                         :: J,L
-       REAL(DOUBLE),INTENT(IN)         :: Tau
-       REAL(DOUBLE)                    :: RMIN,RMAX,F0,F1,R,FUN,RErr
-!
-       RMIN = SQRT(-LOG(Tau)/MinRadialExponent)
-       RMAX = 10.D0*RMIN
-!
-       F0 = AsymHGTF(MinRadialAngSym+1,MinRadialExponent,RMIN)
-       F1 = AsymHGTF(MinRadialAngSym+1,MinRadialExponent,RMAX)
-       IF(F1>Tau) THEN
-          R = RMAX
-          GOTO 100
-       ENDIF
-!
-       R = Half*(RMIN+RMAX)
-       DO J=1,200
-          FUN = AsymHGTF(MinRadialAngSym+1,MinRadialExponent,R)-Tau
-          IF(FUN < Zero) THEN
-             RMAX = R
-          ELSEIF(FUN > Zero) THEN
-             RMIN = R
-          ENDIF
-          RErr = ABS(R-Half*(RMIN+RMAX))
-          R = Half*(RMIN+RMAX) 
-          IF(RErr < 1.D-8) GOTO 100
-       ENDDO
-       CALL MondoHalt(-100,'Overlap did not converge in 200 iterations')
-100    CONTINUE
-       AtomPairDistanceThreshold=R*R
-!
+        REAL(DOUBLE),INTENT(IN) :: Tau
+        AtomPairDistanceThreshold=-LOG(Tau)/MinXab
      END SUBROUTINE SetAtomPairThresh
-!====================================================================================================
-!    Test the Distance for atom pair
-!====================================================================================================
+!
      FUNCTION TestAtomPair(Pair)
         LOGICAL                   :: TestAtomPair
         TYPE(AtomPair)            :: Pair
@@ -97,15 +62,14 @@ MODULE Thresholding
         ENDIF
      END FUNCTION TestAtomPair
 !====================================================================================================
-!    Set the Primitive Pair Distance Threshhold: Xi_ab*Min*|A-B|^2 > -Log(Tau)
+!    Secondary thresholding of primitive pairs using current
+!    value of Xab and Exp[-Xab |A-B|^2] = Tau
 !====================================================================================================
      SUBROUTINE SetPrimPairThresh(Tau)
         REAL(DOUBLE),INTENT(IN) :: Tau
         PrimPairDistanceThreshold=-LOG(Tau)
      END SUBROUTINE SetPrimPairThresh
-!====================================================================================================
 !
-!====================================================================================================
      FUNCTION TestPrimPair(Xi,Dist)
         LOGICAL                :: TestPrimPair
         TYPE(AtomPair)         :: Pair
@@ -116,30 +80,91 @@ MODULE Thresholding
            TestPrimPair = .TRUE.
         ENDIF
      END FUNCTION TestPrimPair
-!====================================================================================================
-!    Compute the extent of a Gaussian with exponent Zeta and amplitude Amp:
-!    Amp*Exp[-Zeta*Extent^2] > Tau  
-!====================================================================================================
-     SUBROUTINE SetPenetrationThresh(Tau,ExpSwitch_O)
-        REAL(DOUBLE),         INTENT(IN) :: Tau
-        REAL(DOUBLE),OPTIONAL,INTENT(IN) :: ExpSwitch_O
-        PenetratDistanceThreshold=-LOG(Tau)
-        IF(PRESENT(ExpSwitch_O)) &
-           PenetratDistanceThreshold=MIN(PenetratDistanceThreshold,ExpSwitch_O)
-     END SUBROUTINE SetPenetrationThresh
-!====================================================================================================
-!    
-!====================================================================================================
-     FUNCTION GaussianExtent(Zeta,Amp)
-        REAL(DOUBLE),INTENT(IN) :: Zeta,Amp
-        REAL(DOUBLE)            :: GaussianExtent
-        GaussianExtent=SQRT(MAX(1.D-10,PenetratDistanceThreshold+LOG(Amp) )/Zeta)
-     END FUNCTION GaussianExtent
 !===================================================================================================
-!     Recursive bisection to determine largest extent for this distribution
-!     outside of which its contribution to the density and gradient is less than Tau
+!     Simple expressions to determine largest extent R for a distribution rho_LMN(R)
+!     outside of which its contribution is less than Tau (default) or outside 
+!     of which the error made using the classical potential is less than Tau (Potential option) 
 !===================================================================================================
-     FUNCTION Extent(Ell,Zeta,HGTF,Tau,Digits_O,ExtraEll_O,Potential_O) RESULT (R)
+     FUNCTION Extent(Ell,Zeta,HGTF,Tau_O,ExtraEll_O,Potential_O) RESULT (R)
+       INTEGER                         :: Ell
+       REAL(DOUBLE)                    :: Zeta
+       REAL(DOUBLE),DIMENSION(:)       :: HGTF
+       REAL(DOUBLE),OPTIONAL           :: Tau_O
+       INTEGER,OPTIONAL                :: ExtraEll_O
+       LOGICAL,OPTIONAL                :: Potential_O
+       INTEGER                         :: L,M,N,Lp,Mp,Np,LMN,ExtraEll       
+       LOGICAL                         :: Potential
+       REAL(DOUBLE)                    :: Tau,T,R,UniP,MixMax
+       REAL(DOUBLE),PARAMETER          :: K3=1.09D0**3
+       REAL(DOUBLE),DIMENSION(0:12),PARAMETER :: Fact=(/1D0,1D0,2D0,6D0,24D0,120D0,      &
+                                                        720D0,5040D0,40320D0,362880D0,   &
+                                                        3628800D0,39916800D0,479001600D0/)
+!------------------------------------------------------------------------------------------------------------------
+       IF(PRESENT(ExtraEll_O))THEN 
+          ExtraEll=ExtraEll_O
+       ELSE 
+          ExtraEll=0
+       ENDIF
+!
+       IF(PRESENT(Tau_O)) THEN
+          Tau=Tau_O
+       ELSE
+          Tau=Thresholds%Dist
+       ENDIF
+!
+       IF(PRESENT(Potential_O)) THEN
+          Potential=Potential_O
+       ELSE
+          Potential=.FALSE.
+       ENDIF
+!      Compute universal prefactor based on Cramers inequality:
+!      H_n(t) < K 2^(n/2) SQRT(n!) EXP(t^2/2), with K=1.09
+!      See papers by J.Strain on Fast Gauss Transform for details.
+       UniP=Zero
+       DO L=0,Ell
+          DO M=0,Ell-L
+             DO N=0,Ell-L-M
+                LMN=LMNDex(L,M,N)
+                MixMax=Fact(L+ExtraEll)*Fact(M)*Fact(N)
+                MixMax=MAX(MixMax,Fact(L)*Fact(M+ExtraEll)*Fact(N))
+                MixMax=MAX(MixMax,Fact(L)*Fact(M)*Fact(N+ExtraEll))
+                UniP=UniP+K3*(Two*Zeta)**(Half*DBLE(L+M+N+ExtraEll))*ABS(HGTF(LMN))*MixMax
+             ENDDO
+          ENDDO       
+       ENDDO
+       UniP=ABS(UniP)+1D-50
+!      Now just use expresions based on spherical symmetry ...
+       IF(Potential)THEN
+!         Solution gives the boundry of quantum/classical approximation
+!         to the potential: Int dr drp delta(r-R) |r-rp|^{-1} Sum_LMN rho_LMN(rp)
+          UniP=UniP*(Two*Pi/Zeta)
+          T=PFunk(0,Tau/UniP)
+          R=SQRT(Two*T/Zeta)     
+       ELSE
+!         Gaussian solution gives Sum_LMN rho_LMN(R)<=Tau
+          R=SQRT(MAX(Zero,-(Two/Zeta)*LOG(Tau/UniP)))
+       ENDIF
+     END FUNCTION Extent
+!====================================================================================================
+!    COMPUTE FUNCTIONS THAT RETURN THE ARGUMENT T TO THE GAMMA FUNCTIONS F[m,T]
+!    THAT RESULT FROM USING THE THE MULTIPOLE APPROXIMATION TO WITHIN A SPECIFIED 
+!    ERROR:  THESE FUNCTIONS GIVE T (THE PAC) FOR A GIVEN PENETRATION ERROR.
+!    SEE MMA/PAC FOR SOURCE GENERATING CODE.
+!====================================================================================================
+     FUNCTION PFunk(Ell,Ack)
+        INTEGER                    :: Ell
+        REAL(DOUBLE)               :: PFunk,X,Ack,MinAcc,MaxAcc
+        REAL(DOUBLE),DIMENSION(30) :: W
+        INCLUDE 'GammaDimensions.Inc'
+        X=-LOG(Ack)
+        INCLUDE 'PFunk.Inc'
+        PFunk=MIN(PFunk,Gamma_Switch)
+     END FUNCTION PFunk    
+!===================================================================================================
+!    Recursive bisection to determine largest extent for this distribution
+!    outside of which its contribution to the density and gradient is less than Tau
+!===================================================================================================
+     FUNCTION Extent2(Ell,Zeta,HGTF,Tau,Digits_O,ExtraEll_O,Potential_O) RESULT (R)
        INTEGER                         :: Ell,ExtraEll
        REAL(DOUBLE)                    :: Zeta,Tau
        REAL(DOUBLE),DIMENSION(:)       :: HGTF
@@ -272,13 +297,13 @@ MODULE Thresholding
           CALL MondoHalt(-100,'Potential Overlap did not converge in 200 iterations')
 200       CONTINUE                     
        ENDIF
-     END FUNCTION Extent
+     END FUNCTION Extent2
 !===================================================================================
 !     Recursive bisection to determine largest extent for this distribution, outside
 !     outside of which its contribution to the density and gradient is less than Tau
 !     Has the possible drawback of finding zeros (roots) in HG functions.  
 !===================================================================================
-      FUNCTION Extent_Old(Ell,Zeta,HGTF,Tau,Digits_O,ExtraEll_O,Potential_O) RESULT (R)
+      FUNCTION Extent1(Ell,Zeta,HGTF,Tau,Digits_O,ExtraEll_O,Potential_O) RESULT (R)
          INTEGER                         :: Ell
          REAL(DOUBLE)                    :: Zeta,Tau
          REAL(DOUBLE),DIMENSION(:)       :: HGTF
@@ -419,7 +444,7 @@ MODULE Thresholding
             ENDDO
             CALL Halt(' Faild in Extent of Potential ')
          ENDIF
-      END FUNCTION Extent_old
+       END FUNCTION Extent1
 !===================================================================================
 !    Norm*Gamma[L/2+3/2,Zeta*R*R]
 !===================================================================================
@@ -481,150 +506,5 @@ MODULE Thresholding
           AsymPot(J) = HGErr(J,0)
        ENDDO
      END FUNCTION AsymPot
-!====================================================================================================
-!     COMPUTE FUNCTIONS THAT RETURN THE ARGUMENT T TO THE GAMMA FUNCTIONS F[m,T]
-!     THAT RESULT FROM USING THE THE MULTIPOLE APPROXIMATION TO WITHIN A SPECIFIED 
-!     ERROR:  THESE FUNCTIONS GIVE T (THE PAC) FOR A GIVEN PENETRATION ERROR.
-!====================================================================================================
-     FUNCTION PFunk(Ell,Ack)
-        INTEGER                    :: Ell
-        REAL(DOUBLE)               :: PFunk,X,Ack,MinAcc,MaxAcc
-        REAL(DOUBLE),DIMENSION(30) :: W
-        INCLUDE 'GammaDimensions.Inc'
-        X=-LOG(Ack)
-        INCLUDE 'PFunk.Inc'
-        PFunk=MIN(PFunk,Gamma_Switch)
-     END FUNCTION PFunk    
-END MODULE
-!!$!===================================================================================
-!!$!     Recursive bisection to determine largest extent for this distribution
-!!$!     outside of which its contribution to the density and gradient is less than Tau
-!!$!===================================================================================
-!!$     FUNCTION Extent(LLow,LHig,LShift,Zeta,HGTF,Tau,Digits_O,Potential_O) RESULT (R)
-!!$       INTEGER                          :: LLow,LHig,LSft
-!!$       REAL(DOUBLE)                     :: Zeta,Tau
-!!$       REAL(DOUBLE),DIMENSION(:)        :: HGTF
-!!$       INTEGER,OPTIONAL                 :: Digits_O
-!!$       LOGICAL,OPTIONAL                 :: Potential_O
-!!$       REAL(DOUBLE),DIMENSION(0:HGEll):: Co,HGPot
-!!$       REAL(DOUBLE)                     :: FUN,F0,F1
-!!$       INTEGER                          :: J,L,K,M,N,LMN,SN,LL
-!!$       REAL(DOUBLE)                     :: ConvergeTo,RMIN,RMAX,R,RErr
-!!$       LOGICAL                          :: Potential
-!!$!
-!!$       IF(PRESENT(Digits_O))THEN
-!!$          ConvergeTo=10.D0**(-Digits_O)
-!!$       ELSE 
-!!$          ConvergeTo=10.D0**(-8)
-!!$       ENDIF
-!!$!
-!!$       IF(PRESENT(Potential_O)) THEN
-!!$          Potential = Potential_O
-!!$       ELSE
-!!$          Potential = .FALSE.
-!!$       ENDIF
-!!$!      Take the spherical average of HGTF coefficients      
-!!$       DO L = LLow,LHig
-!!$          Co(L)=Zero
-!!$          DO LMN=LBegin(L),LEnd(L)
-!!$             Co(L)=Co(L)+HGTF(LMN)**2
-!!$          ENDDO
-!!$          Co(L)=SQRT(Co(L))
-!!$       ENDDO
-!!$!
-!!$!      Compute extent of a Hermite Gaussian overlap
-!!$!
-!!$       IF(.NOT. Potential )THEN
-!!$          RMIN = Zero
-!!$          RMAX = SQRT(EXP_SWITCH/Zeta)
-!!$!
-!!$          F0 = Zero
-!!$          DO L = LLow,LHig
-!!$             F0 = F0 + Co(L)*AsymHGTF(L+LSft,Zeta,RMIN)
-!!$          ENDDO
-!!$          IF(F0 < Zero) THEN
-!!$             CALL MondoHalt(-100,'F0 < 0')
-!!$          ENDIF
-!!$          IF(F0 < Tau) THEN
-!!$             R = Zero
-!!$             RETURN
-!!$          ENDIF
-!!$!
-!!$          F1 = Zero
-!!$          DO L = LLow,LHig
-!!$             F1 = F1 + Co(L)*AsymHGTF(L+LSft,Zeta,RMAX)
-!!$          ENDDO
-!!$          IF(F1>Tau) THEN
-!!$             R = RMAX
-!!$             RETURN
-!!$          ENDIF
-!!$!
-!!$          R = Half*(RMIN+RMAX)
-!!$          DO J=1,200
-!!$             FUN  = Zero
-!!$             DO L = LLow,LHig       
-!!$                FUN  = FUN +Co(L)*AsymHGTF(L+LSft,Zeta,R)
-!!$             ENDDO
-!!$             FUN = FUN-Tau
-!!$             IF(FUN < Zero) THEN
-!!$                RMAX = R
-!!$             ELSEIF(FUN > Zero) THEN
-!!$                RMIN = R
-!!$             ENDIF
-!!$             RErr = ABS(R-Half*(RMIN+RMAX))
-!!$             R = Half*(RMIN+RMAX)
-!!$             IF(RErr < ConvergeTo) GOTO 100
-!!$          ENDDO
-!!$          CALL MondoHalt(-100,'Overlap did not converge in 200 iterations')
-!!$100       CONTINUE
-!!$!
-!!$!      Do a Potential overlap
-!!$!
-!!$       ELSEIF( Potential ) THEN
-!!$          RMIN = 1.D-14
-!!$          RMAX = SQRT(GAMMA_SWITCH/Zeta)
-!!$!
-!!$          F0 = Zero
-!!$          HGPot = AsymPot(LHig+LSft,Zeta,RMIN)
-!!$          DO L = LLow,LHig
-!!$             F0 = F0 + Co(L)*ABS(HGPot(L+LShift))
-!!$          ENDDO
-!!$          IF(F0 < Zero) THEN
-!!$             CALL MondoHalt(-100,'F0 < 0')
-!!$          ENDIF
-!!$          IF(F0 < Tau) THEN
-!!$             R = Zero
-!!$             RETURN
-!!$          ENDIF
-!!$!
-!!$          F1 = Zero
-!!$          HGPot = AsymPot(LHig+LSft,Zeta,RMAX)
-!!$          DO L = LLow,LHig
-!!$             F1 = F1 + Co(L)*ABS(HGPot(L+LSft))
-!!$          ENDDO
-!!$          IF(F1>Tau) THEN
-!!$             R = RMAX
-!!$             RETURN
-!!$          ENDIF
-!!$!
-!!$          R = Half*(RMIN+RMAX)
-!!$          DO J=1,200
-!!$             FUN  = Zero
-!!$             HGPot = AsymPot(LHig+LSft,Zeta,R)
-!!$             DO L = LLow,LHig
-!!$                FUN  = FUN +Co(L)*ABS(HGPot(L+LSft))
-!!$             ENDDO
-!!$             FUN = FUN-Tau
-!!$             IF(FUN < Zero) THEN
-!!$                RMAX = R
-!!$             ELSEIF(FUN > Zero) THEN
-!!$                RMIN = R
-!!$             ENDIF
-!!$             RErr = ABS(R-Half*(RMIN+RMAX))
-!!$             R = Half*(RMIN+RMAX)
-!!$             IF(RErr < ConvergeTo) GOTO 200
-!!$          ENDDO
-!!$          CALL MondoHalt(-100,'Potential Overlap did not converge in 200 iterations')
-!!$200       CONTINUE                     
-!!$       ENDIF
-!!$     END FUNCTION Extent
+
+END MODULE Thresholding

@@ -3,13 +3,14 @@ MODULE BraBloks
   USE GlobalScalars
   USE PrettyPrint
   USE McMurchie
+  USE Thresholding
 !-------------------------------------------------------------------------------
 ! Globals
 !-------------------------------------------------------------------------------
   TYPE(DBL_RNK3)  :: HGBra
   TYPE(DBL_RNK4)  :: dHGBra
   TYPE(DBL_RNK4)  :: E
-  TYPE(DBL_VECT)  :: PhFactor,Phase
+  TYPE(DBL_VECT)  :: PhFactor,Phase,HGSum
   INTEGER         :: MaxL,MaxL2,MaxLMN,MaxBF
   CONTAINS
 !-------------------------------------------------------------------------------
@@ -40,6 +41,8 @@ MODULE BraBloks
        CALL New(E,(/3,BS%NASym,BS%NASym,2*BS%NASym/),(/1,0,0,0/))
        CALL New(HGBra,(/MaxLMN,MaxBF,MaxBF/))
     ENDIF
+!   Allocate space for summed contributions
+    CALL New(HGSum,MaxLMN)
 !   Allocate and set intermediate phase factor
     CALL New(PhFactor,MaxL,0)
     DO L=0,MaxL; PhFactor%D(L)=(-One)**L; ENDDO
@@ -63,22 +66,27 @@ MODULE BraBloks
     ELSE
       CALL Delete(HGBra)
     ENDIF
+    CALL Delete(E)
+    CALL Delete(HGSum)
+    CALL Delete(Phase)
     CALL Delete(PhFactor)
   END SUBROUTINE DeleteBraBlok
 !-------------------------------------------------------------------------------
-! Generate a primative bra blok
+! Generate a primative bra blok returning its extent
 !-------------------------------------------------------------------------------
-  FUNCTION SetBraBlok(Prim,BS,SameAtom_O,Print_O,Gradients_O,K_O,KK_O) RESULT(MaxAmp)
+  FUNCTION SetBraBlok(Prim,BS,SameAtom_O,Gradients_O,Tau_O,ExtraEll_O) RESULT(Ext)
     TYPE(PrimPair)    :: Prim
     TYPE(BSET)        :: BS
-    LOGICAL, OPTIONAL :: Print_O,SameAtom_O,Gradients_O
-    INTEGER,OPTIONAL  :: K_O,KK_O
+    LOGICAL, OPTIONAL :: SameAtom_O,Gradients_O
+    REAL(DOUBLE),OPTIONAL:: Tau_O
+    INTEGER, OPTIONAL :: ExtraEll_O
+    REAL(DOUBLE)      :: Ext
     REAL(DOUBLE),DIMENSION(3) :: PA,PB
     INTEGER           :: CFA,PFA,KA,CFB,PFB,KB
-    INTEGER           :: LMNA,LA,MA,NA,LMNB,LB,MB,NB,L
+    INTEGER           :: LMNA,LA,MA,NA,LMNB,LB,MB,NB,Ell,Len
     INTEGER           :: IA,IB,LAB,MAB,NAB,LMN,MaxLA,MaxLB
     INTEGER           :: IndexA,IndexB,StartLA,StartLB,StopLA,StopLB,K
-    REAL(DOUBLE)      :: ZA,ZB,Zeta,Xi,ExpAB,CA,CB,CAB,Amp2,MaxAmp,Fx,Fy,Fz
+    REAL(DOUBLE)      :: ZA,ZB,Zeta,Xi,ExpAB,CA,CB,CAB,Amp2,Fx,Fy,Fz
 !-------------------------------------------------------------------------------
     KA=Prim%KA
     KB=Prim%KB
@@ -108,9 +116,8 @@ MODULE BraBloks
        CALL MD2TRR(BS%NASym+1,-1,MaxLA+1,MaxLB,Zeta,E%D,  &
                    PA(1),PB(1),PA(2),PB(2),PA(3),PB(3)) 
 !
-       MaxAmp   = Zero
-!
-       L=LHGTF(MaxLA+MaxLB+1)
+       Ell=MaxLA+MaxLB+1
+       Len=LHGTF(Ell)
        IA = IndexA
        DO LMNA=StartLA,StopLA
           IA=IA+1
@@ -118,7 +125,7 @@ MODULE BraBloks
           DO LMNB=StartLB,StopLB
              IB=IB+1
              DO K=1,3
-                CALL DBL_VECT_EQ_DBL_SCLR(L,dHGBra%D(1:L,IA,IB,K),Zero)
+                CALL DBL_VECT_EQ_DBL_SCLR(L,dHGBra%D(1:Len,IA,IB,K),Zero)
              ENDDO
           ENDDO
        ENDDO
@@ -137,22 +144,8 @@ MODULE BraBloks
              MB=BS%LyDex%I(LMNB)
              NB=BS%LzDex%I(LMNB)
              CAB=CA*BS%CCoef%D(LMNB,PFB,CFB,KB)
-#ifdef EXTREME_DEBUG
-!-----------------DEBUG---DEBUG---DEBUG---DEBUG---DEBUG---DEBUG---DEBUG----------------
- WRITE(77,22)LMNA,LMNB,LA,MA,NA,LB,MB,NB,  &
-            BS%CCoef%D(LMNA,PFA,CFA,KA),BS%CCoef%D(LMNB,PFB,CFB,KB), &
-            Prim%ZA,Prim%ZB,Prim%A,Prim%B
-22 FORMAT('test[',I3,',',I3,']={ la->',I2,',ma->',I2,',na->',I2,           &
-                               ',lb->',I2,',mb->',I2,',nb->',I2,           &
-                               ',ca->',F10.7,',cb->',F10.7,               &
-                               ',za->',F10.7,',zb->',F10.7,               &
-                               ',ax->',F10.7,',ay->',F10.7,',az->',F10.7, &
-                               ',bx->',F10.7,',by->',F10.7,',bz->',F10.7,'}; \n')
-#endif
-!-------------------------------------------------------------------------------
 !            Naive gradients formulae:  See Helgaker and Taylor, TCA 83, p177 (1992), 
 !            Eqs (14), (15), (18) and comments after Eq.(26): Gradients_O==Pair%SameAtom
-!
              DO LAB=0,LA+LB+1
              DO MAB=0,MA+MB
              DO NAB=0,NA+NB
@@ -188,32 +181,40 @@ MODULE BraBloks
              ENDDO;ENDDO;ENDDO;
           ENDDO
        ENDDO
-!-------------------------------------------------------------------------------
-       Amp2=Zero
+!      Compute the extent of this derivative distribution
+       Ext=Zero
        DO K=1,3
-          DO LMN=1,LHGTF(MaxLA+MaxLB+1)
-             Amp2=Amp2+dHGBra%D(LMN,IA,IB,K)**2
+          CALL DBL_VECT_EQ_DBL_SCLR(Len,HGSum%D(1:Len),Zero)
+          IA = IndexA
+          DO LMNA=StartLA,StopLA
+             IA=IA+1
+             IB=IndexB
+             DO LMNB=StartLB,StopLB
+                IB=IB+1
+                DO I=1,Len
+                   HGSum%D(I)=HGSum%D(I)+ABS(dHGBra%D(I,IA,IB,K))
+                ENDDO
+             ENDDO
           ENDDO
-          MaxAmp=MAX(MaxAmp,SQRT(Amp2))
+          Ext=MAX(Ext,Extent(Ell,Zeta,HGSum%D(1:Len),Tau_O=Tau_O,ExtraEll_O=ExtraEll_O))
        ENDDO
     ELSE
-!-------------------------------------------------------------------------------
 !      Compute McMurchie Davidson E coefficients for HG Primitives
        CALL MD2TRR(BS%NASym,0,MaxLA,MaxLB,Zeta,E%D,PA(1),PB(1),PA(2),PB(2),PA(3),PB(3)) 
 !
-       L=LHGTF(MaxLA+MaxLB)
+       Ell=MaxLA+MaxLB
+       Len=LHGTF(Ell)
        IA = IndexA
        DO LMNA=StartLA,StopLA
           IA=IA+1
           IB=IndexB
           DO LMNB=StartLB,StopLB
              IB=IB+1
-             CALL DBL_VECT_EQ_DBL_SCLR(L,HGBra%D(1:L,IA,IB),Zero)
+             CALL DBL_VECT_EQ_DBL_SCLR(Len,HGBra%D(1:Len,IA,IB),Zero)
           ENDDO
        ENDDO
-!
+       CALL DBL_VECT_EQ_DBL_SCLR(Len,HGSum%D(1:Len),Zero)
        IA = IndexA
-       MaxAmp=Zero
        DO LMNA=StartLA,StopLA
           IA=IA+1
           IB=IndexB
@@ -238,14 +239,12 @@ MODULE BraBloks
                    ENDDO
                 ENDDO
              ENDDO
-!-------------------------------------------------------------------------------
-             Amp2=Zero
-             DO LMN=1,LHGTF(MaxLA+MaxLB)
-                 Amp2=Amp2+HGBra%D(LMN,IA,IB)**2
-             ENDDO
-             MaxAmp=MAX(MaxAmp,SQRT(Amp2))
+             DO I=1,Len
+                HGSum%D(I)=HGSum%D(I)+ABS(HGBra%D(I,IA,IB))
+             ENDDO          
           ENDDO
        ENDDO
+       Ext=Extent(Ell,Zeta,HGSum%D(1:Len),Tau_O=Tau_O,ExtraEll_O=ExtraEll_O) 
     ENDIF
   END FUNCTION SetBraBlok
 END MODULE BraBloks
