@@ -2,11 +2,11 @@
 %
 % NOTE TO AIP TYPSETERS: TO CONVERT FROM TWO-COL TO PREPRINT, SWITCH
 % COMMENTOUT COMMAND FROM A TO B IE. use
-%\newcommand{\commentoutA}[1]{} 
-%\newcommand{\commentoutB}[1]{#1}
+\newcommand{\commentoutA}[1]{} 
+\newcommand{\commentoutB}[1]{#1}
 % instead of the following
-\newcommand{\commentoutA}[1]{#1}
-\newcommand{\commentoutB}[1]{}
+%\newcommand{\commentoutA}[1]{#1}
+%\newcommand{\commentoutB}[1]{}
 \renewcommand{\thefootnote}{\fnsymbol{footnote}}
 
 \commentoutA{\documentclass[prl,aps,twocolumn,showpacs,twocolumngrid,superbib]{revtex4}}
@@ -37,7 +37,7 @@
               National Laboratory,\\ Los Alamos, New Mexico 87545}
 
 
-\date{Oct 24, 2002}
+\date{Oct 31, 2002}
 
 \begin{abstract}
 Recently, early onset linear scaling computation of the
@@ -58,7 +58,7 @@ of the grid and the electron density.  In this paper we
 \commentoutA{describe {\bf Equal Time partitioning},}
 \commentoutB{describe      Equal Time partitioning,}
 which employs time measurement of the smallest sub-volumes
-(corresponding to the primitive cubature rule) to load-balance
+(corresponding to the primitive cubature rule) to load balance
 grid-work for the next self-consistent-field iteration.  After start
 up from a heuristic Center of Mass partitioning, Equal Time
 partitioning exploits smooth variation of the density and grid between
@@ -71,13 +71,13 @@ combination of a good load balance with a reduced computational
 complexity due to data parallelism.
 
 \smallskip
-\noindent{\bf Keywords}: Density Functional Theory, linear-scaling, numerical integration, Gaussian-Orbital, 
+\noindent{\bf Keywords}: Density Functional Theory, linear scaling, numerical integration, Gaussian-Orbital, 
                          hierarchical methods, adaptive grid, load balance, parallel computation
 \end{abstract}
 
 \pacs{31.15.-p; 31.15.Ew; 02.60.Jh} 
 
-%\keywords{Density Functional Theory, numerical integration, Gaussian-Orbital,linear-scaling, 
+%\keywords{Density Functional Theory, numerical integration, Gaussian-Orbital,linear scaling, 
 %          hierarchical methods, adaptive grid, load balance, parallel computation}
 
 \maketitle
@@ -153,7 +153,7 @@ structure is used to represent the adaptive grid or CubeTree. The
 electron density of the system is also represented by the $k$-d tree
 data structure, called a RhoTree.  Each node in a $k$-d tree contains
 a bounding box (BBox) that encloses the spatial data contained by it
-and its children (if the node is not a leaf-node).  Because of the
+and its children (if the node is not a leaf node).  Because of the
 hierarchical organization of data in a $k$-d tree, a search for all
 data within a given Euclidean distance (i.e., a range query) is an
 efficient $O(\log_{2}N)$ operation.
@@ -366,7 +366,7 @@ lower the threshold $\tau$ during the iterative calculations.
 \resizebox*{3.5in}{!}{\includegraphics[clip]{ET.eps}}
 \caption{A schematic diagram to illustrate the Equal Time (ET) partitioning
 scheme.  For simplicity a two-dimensional analog is used. The
-rectangles represent the bounding ``boxes'' of the leaf-nodes in a
+rectangles represent the bounding ``boxes'' of the leaf nodes in a
 CubeTree.  Different shades are used for different rectangles to
 indicate that the leaf-node times are different in general. The
 distance of the cutting line C from the left edge, $x$, is determined
@@ -387,13 +387,13 @@ we first considered distributing an equal share of grid points, naively
 reasoning that work load would be proportional to their number. 
 If we evaluated the density using conventional methods, this would 
 certainly be so.  However, this is not a reliable tack because 
-each leaf-node interacts with the RhoTree in a different way, always attempting to 
+each leaf node interacts with the RhoTree in a different way, always attempting to 
 minimize the total work load.  Also, because each interaction of a leaf 
 node with the RhoTree is so non-uniform, the simple 
 interaction counting mechanisms employed by parallel $N$-Body methods~\cite{JPilkington96,warren:92_article,Grama94_article,Warren95b,Singh93,Singh_95v27,Grama_98v24}
 are not a viable alternative.  This line of reasoning led us in the
 development of Equal Time (ET) partitioning,  which uses the elapsed
-wall time associated with Cartesian sub-volumes (here the leaf-nodes)
+wall time associated with Cartesian sub-volumes (here the leaf nodes)
 to predict a good load balance in the next iteration.
 
 In the ET partitioning of HiCu, the leaf-node time is stored along with other
@@ -414,10 +414,10 @@ threshold) divides the workload in half (see Figure
 at each level of the recursion to avoid elongated ET BBoxes which
 could lead to poorly-balanced workloads. Our decomposition always
 choses a direction which cuts along the largest box dimension, since
-the cubature rules will work best for leaf-nodes close to cubic~\cite{Stroud71}.
+the cubature rules will work best for leaf nodes close to cubic~\cite{Stroud71}.
 
 The application of ET to HiCu centers around interaction of the 
-CubeTree leaf-nodes with the RhoTree.  This implementation does not account
+CubeTree leaf nodes with the RhoTree.  This implementation does not account
 for the time taken to build each matrix element by traversing the CubeTree.
 This is because of the close homology between basis function products
 and the electron density; they visit nearly identical portions of the
@@ -427,11 +427,11 @@ and wall times, using the combined information to load balance.
 
 A working hypothesis of ET partitioning applied to HiCU is that the sum of 
 leaf-node times for the root BBox is constant irrespective of sectioning.  In
-practice this assumption is only approximately true, as the total number of leaf-nodes and
+practice this assumption is only approximately true, as the total number of leaf nodes and
 their times may fluctuate if the cutting planes are shifted. This is 
 because with each new partitioning the CubeTree will
-readjust, potentially using a different number of leaf-nodes to satisfy
-$\delta<\tau$.  Also, as the time to create each leaf-node depends on
+readjust, potentially using a different number of leaf nodes to satisfy
+$\delta<\tau$.  Also, as the time to create each leaf node depends on
 its size and position, readjustments will lead to leaf-node times that
 are somewhat different. Finally, variation of the density and hence
 the grid will occur in all but the last few SCF cycles.  All of these
@@ -707,7 +707,7 @@ X}$.  }\label{fig:CM}
 \begin{figure}[h]
 \caption{A schematic diagram to illustrate the Equal Time (ET) partitioning
 scheme.  For simplicity a two-dimensional analog is used. The
-rectangles represent the bounding ``boxes'' of the leaf-nodes in a
+rectangles represent the bounding ``boxes'' of the leaf nodes in a
 CubeTree.  Different shades are used for different rectangles to
 indicate that the leaf-node times are different in general. The
 distance of the cutting line C from the left edge, $x$, is determined
@@ -736,8 +736,7 @@ $\tau = 1.0 \times 10^{-6}$. Speedups are relative to a 2-processor
 calculation.}\label{fig:waterscaling}
 \end{figure}
 
-\pagebreak
-\pagebreak
+%\clearpage
 \pagebreak
 
 \begin{center}
