@@ -59,6 +59,7 @@ PROGRAM ODA
   CALL Get(F,TrixFile('OrthoF',Args,0))   
 #else
   CALL Get(P,TrixFile('D',Args,0))   
+!  CALL PPrint(P,'P??',Unit_O=6)
   CALL Get(F,TrixFile('F',Args,0))   
 #endif
   ! T1 = P_N-PTilde_{N-1}
@@ -75,17 +76,17 @@ PROGRAM ODA
   e0p=Two*Trace(FTilde,T1)
   e1p=Two*Trace(F,T1)
 #endif
-  ! WRITE(*,*)' e0 = ',e0
-  ! WRITE(*,*)' e1 = ',e1
-  ! WRITE(*,*)'e0p = ',e0p
-  ! WRITE(*,*)'e1p = ',e1p
+   !WRITE(*,*)' e0 = ',e0
+   !WRITE(*,*)' e1 = ',e1
+   !WRITE(*,*)'e0p = ',e0p
+   !WRITE(*,*)'e1p = ',e1p
   ! Find the mixing parameter L from the
   ! cubic E3(L)=a3+b3*L+c3*L^2+d3*L^3
   a3=e0
   b3=e0p
   c3=-3D0*e0-2D0*e0p+3D0*e1-e1p
   d3=2D0*e0+e0p-2D0*e1+e1p
-  IF(ABS(d3)<1D-6)THEN
+  IF(ABS(d3)<1D-6.OR.c3*c3-3*b3*d3<Zero)THEN
      L=-Half*b3/c3
      L1=One-L
      EMin=a3+b3*L+c3*L**2
