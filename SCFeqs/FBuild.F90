@@ -24,7 +24,7 @@ PROGRAM FockNGrueven
   TYPE(CRDS)                     :: GM
   TYPE(BSET)                     :: BS
   REAL(DOUBLE)                   :: KScale,E_NukeNuke
-  INTEGER                        :: ISCF,I
+  INTEGER                        :: ISCF,I,RespOrder
   CHARACTER(LEN=2)               :: Cycl
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: XFile,DevFile,Mssg,ResponsePostFix
   CHARACTER(LEN=12),PARAMETER    :: Prog='FockNGrueven'
@@ -37,16 +37,30 @@ PROGRAM FockNGrueven
   CALL New(Tmp1)
 
   IF(SCFActn=='StartResponse')THEN
-     ! At this moment F'=mu.
-     ResponsePostFix=TRIM(Args%C%C(3))//TRIM(Args%C%C(4))
-     CALL Get(F,TrixFile(ResponsePostFix,Args))            ! T=M_{x} or whatever...
+     RespOrder=LEN(TRIM(Args%C%C(3)))
+     SELECT CASE(RespOrder)
+     CASE(1)
+        ! At this moment F'=mu.
+        ResponsePostFix=TRIM(Args%C%C(4))//TRIM(Args%C%C(5))
+        CALL Get(F,TrixFile(ResponsePostFix,Args))            ! T=M_{x} or whatever...
+     CASE(2)!; write(*,*)'FBuild: Quadratic response'!Do nothing
+     CASE(3)!; write(*,*)'FBuild: Cubic response'!Do nothing
+     CASE DEFAULT; CALL Halt('Response order unknown! RespOrder='//TRIM(IntToChar(RespOrder)))
+     END SELECT
   ELSEIF(SCFActn=='FockPrimeBuild') THEN
+     RespOrder=LEN(TRIM(Args%C%C(3)))
      ! Start with the Coulomb matrix
-     CALL Get(J,TrixFile('JPrime'//TRIM(Args%C%C(4)),Args,0))! J=J_Coulomb[Rho_Total(Nuc+El)]
+     CALL Get(J,TrixFile('JPrime'//TRIM(Args%C%C(3)),Args,0))! J=J_Coulomb[Rho_Total(Nuc+El)]
      ! If we are doing a response calc, then we add in just the multpole matrix or whatever...
-     ResponsePostFix=TRIM(Args%C%C(3))//TRIM(Args%C%C(4))
-     CALL Get(T,TrixFile(ResponsePostFix,Args))            ! T=M_{x} or whatever...
-     CALL Add(J,T,F)                                       ! F=J+T    
+     SELECT CASE(RespOrder)
+     CASE(1)
+        ResponsePostFix=TRIM(Args%C%C(4))//TRIM(Args%C%C(5))
+        CALL Get(T,TrixFile(ResponsePostFix,Args))            ! T=M_{x} or whatever...
+        CALL Add(J,T,F)                                       ! F=J+T    
+     CASE(2); CALL SetEq(F,J)                                 ! F=J
+     CASE(3); CALL SetEq(F,J)                                 ! F=J
+     CASE DEFAULT; CALL Halt('Response order unknown! RespOrder='//TRIM(IntToChar(RespOrder)))
+     END SELECT
   ELSE
      ! Start with the Coulomb matrix
      CALL Get(J,TrixFile('J',Args,0))                      ! J=J_Coulomb[Rho_Total(Nuc+El)]
@@ -72,7 +86,7 @@ PROGRAM FockNGrueven
         ! Add in Hartree-Fock exact exchange 
         IF(SCFActn=='FockPrimeBuild') THEN
            CALL Halt('Response with DFT does not work yet.')
-           CALL Get(K,TrixFile('KPrime'//TRIM(Args%C%C(4)),Args,0))   ! K=K_hf
+           CALL Get(K,TrixFile('KPrime'//TRIM(Args%C%C(3)),Args,0))   ! K=K_hf
         ELSE
            CALL Get(K,TrixFile('K',Args,0))                           ! K=K_hf
         ENDIF
@@ -81,7 +95,8 @@ PROGRAM FockNGrueven
         CALL Add(F,K,Tmp1)                                            ! F=J+T+K
         ! Now add in exchange-correlation
         IF(SCFActn=='FockPrimeBuild') THEN
-           CALL Get(K,TrixFile('KxcPrime'//TRIM(Args%C%C(4)),Args,0)) ! K=K_xc
+           CALL Halt('Response with DFT does not work yet.')
+           CALL Get(K,TrixFile('KxcPrime'//TRIM(Args%C%C(3)),Args,0)) ! K=K_xc
         ELSE
            CALL Get(K,TrixFile('Kxc',Args,0))                         ! K=K_xc
         ENDIF
@@ -89,7 +104,7 @@ PROGRAM FockNGrueven
      ELSEIF(HasHF(ModelChem))THEN
         !  Add in Hartree-Fock exact exchange 
         IF(SCFActn=='FockPrimeBuild')THEN
-           CALL Get(K,TrixFile('KPrime'//TRIM(Args%C%C(4)),Args,0))   ! K=K_hf
+           CALL Get(K,TrixFile('KPrime'//TRIM(Args%C%C(3)),Args,0))   ! K=K_hf
         ELSE
            CALL Get(K,TrixFile('K',Args,0))                           ! K=K_hf
         ENDIF
@@ -99,7 +114,7 @@ PROGRAM FockNGrueven
         !  Add in exchange-correlation
         IF(SCFActn=='FockPrimeBuild') THEN
            CALL Halt('Response with DFT does not work yet.')
-           CALL Get(K,TrixFile('KxcPrime'//TRIM(Args%C%C(4)),Args,0)) ! K=K_xc
+           CALL Get(K,TrixFile('KxcPrime'//TRIM(Args%C%C(3)),Args,0)) ! K=K_xc
         ELSE
            CALL Get(K,TrixFile('Kxc',Args,0))                         ! K=K_{xc}
         ENDIF
@@ -149,7 +164,7 @@ PROGRAM FockNGrueven
 #endif
   ENDIF
 !
-  IF(SCFActn=='FockPrimeBuild'.OR.SCFActn=='StartResponse')THEN
+  IF(SCFActn=='FockPrimeBuild'.OR.SCFActn=='StartResponse') THEN
      !I do not need that! (vw)
      !CALL Put(F,TrixFile('FPrime'//TRIM(Args%C%C(4)),Args,0)) 
      !CALL PChkSum(F,'FPrime'//TRIM(Args%C%C(4))//'['//TRIM(SCFCycl)//']',Prog)
@@ -186,11 +201,12 @@ PROGRAM FockNGrueven
   ENDIF
   CALL Filter(Tmp1,F)                 ! T1 =F_Orthog=Filter[Z^t.F_AO.Z]
 !
-  IF(SCFActn=='FockPrimeBuild'.OR.SCFActn=='StartResponse')THEN
-     CALL Put(Tmp1,TrixFile('OrthoFPrime'//TRIM(Args%C%C(4)),Args,0)) 
-     CALL PChkSum(Tmp1,'OrthoFPrime'//TRIM(Args%C%C(4))//'['//TRIM(SCFCycl)//']',Prog)
-     CALL PPrint( Tmp1,'OrthoFPrime'//TRIM(Args%C%C(4))//'['//TRIM(SCFCycl)//']')
-     CALL Plot(   Tmp1,'OrthoFPrime'//TRIM(Args%C%C(4))//'_'//TRIM(SCFCycl))
+
+  IF(SCFActn=='FockPrimeBuild'.OR.SCFActn=='StartResponse') THEN
+     CALL Put(Tmp1,TrixFile('OrthoFPrime'//TRIM(Args%C%C(3)),Args,0)) 
+     CALL PChkSum(Tmp1,'OrthoFPrime'//TRIM(Args%C%C(3))//'['//TRIM(SCFCycl)//']',Prog)
+     CALL PPrint( Tmp1,'OrthoFPrime'//TRIM(Args%C%C(3))//'['//TRIM(SCFCycl)//']')
+     CALL Plot(   Tmp1,'OrthoFPrime'//TRIM(Args%C%C(3))//'_'//TRIM(SCFCycl))
   ELSE
      CALL Put(Tmp1,TrixFile('OrthoF',Args,0)) 
      CALL PChkSum(Tmp1,'OrthoF['//TRIM(SCFCycl)//']',Prog)

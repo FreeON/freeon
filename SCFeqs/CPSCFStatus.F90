@@ -38,7 +38,7 @@ PROGRAM CPSCFSts
   TYPE(BCSR )                      :: PPrm,T,P,Tmp1,Tmp2
 #endif
   !-------------------------------------------------------------------
-  REAL(DOUBLE)                     :: DPrimMax,DIISErr,Prop
+  REAL(DOUBLE)                     :: DPrimMax,DIISErr,Prop,TmpP
   REAL(DOUBLE)    , DIMENSION(3)   :: Tensor
   INTEGER                          :: I,iXYZ,CPSCFCycl,LastSCFCycle
   INTEGER                          :: RespOrder
@@ -64,12 +64,14 @@ PROGRAM CPSCFSts
   !
   CALL Get(GM,Tag_O=CurGeom)
   !
-  RespOrder=1
+  ! Get the response order.
+  RespOrder=LEN(TRIM(Args%C%C(3)))
   !
   SELECT CASE(RespOrder)
   CASE(1); PropName='Alpha'
-  CASE(2); PropName='Beta '
+  CASE(2); PropName='Beta'
   CASE(3); PropName='Gamma'
+  CASE DEFAULT; CALL Halt('Response order unknown! RespOrder='//TRIM(IntToChar(RespOrder)))
   END SELECT
   !
   !-------------------------------------------------------------------
@@ -90,11 +92,10 @@ PROGRAM CPSCFSts
   CASE('BasisSetSwitch','Restart')
      ! If switching the density matrix or using a previous one from 
      ! restart use i+1 density matrix--its all that is available
-     CALL Get(PPrm,TrixFile('DPrime'//TRIM(Args%C%C(4)),Args,1))
+     CALL Get(PPrm,TrixFile('DPrime'//TRIM(Args%C%C(3)),Args,1))
   CASE('StartResponse','CPSCFSolving')
-     CALL Get(PPrm,TrixFile('DPrime'//TRIM(Args%C%C(4)),Args,1))
-  CASE DEFAULT
-     CALL Halt('Do not know this argument <'//TRIM(SCFActn)//'>.')
+     CALL Get(PPrm,TrixFile('DPrime'//TRIM(Args%C%C(3)),Args,1))
+  CASE DEFAULT; CALL Halt('Do not know this argument <'//TRIM(SCFActn)//'>.')
   END SELECT
   !CALL Print_BCSR(PPrm,'PPrm',Unit_O=6)
   !
@@ -122,22 +123,19 @@ PROGRAM CPSCFSts
   DO iXYZ=1,3
      !
      ! Get Dipole Moment.
-     CALL Get(T,TrixFile(TRIM(Args%C%C(3))//Cart(iXYZ),Args))      ! T=M_{x} or whatever...
+     CALL Get(T,TrixFile(TRIM(Args%C%C(4))//Cart(iXYZ),Args))      ! T=M_{x} or whatever...
      !
      ! Compute tensor elements.
 #ifdef PARALLEL
      !old CALL Multiply(PPrm,T,Tmp1)
      !old Tensor(iXYZ)=-Two*Trace(Tmp1)
+     CALL Multiply(PPrm,T,Tmp1)
+     TmpP=Trace(Tmp1)
      SELECT CASE(RespOrder)
-     CASE(1)
-        CALL Multiply(PPrm,T,Tmp1)
-        Tensor(iXYZ)=-Two*Trace(Tmp1)
-     CASE(2)
-        CALL Multiply(PPrm,T,Tmp1)
-        Tensor(iXYZ)=-Two*Trace(Tmp1)
-     CASE(3)
-        CALL Multiply(PPrm,T,Tmp1)
-        Tensor(iXYZ)=-Two*Trace(Tmp1)
+     CASE(1); Tensor(iXYZ)=-Two*TmpP
+     CASE(2); Tensor(iXYZ)=-Four*TmpP
+     CASE(3); Tensor(iXYZ)=-12.0d0*TmpP
+     CASE DEFAULT; CALL Halt('Response order unknown! RespOrder='//TRIM(IntToChar(RespOrder)))
      END SELECT
      !
      IF(CPSCFCycl.LE.0) THEN
@@ -146,44 +144,44 @@ PROGRAM CPSCFSts
      ENDIF
 #else
      !old Tensor(iXYZ)=-Two*Trace(PPrm,T)
+     TmpP=Trace(PPrm,T)
      SELECT CASE(RespOrder)
-     CASE(1); Tensor(iXYZ)=-Two*Trace(PPrm,T)
-     CASE(2); Tensor(iXYZ)=-Two*Trace(PPrm,T)
-     CASE(3); Tensor(iXYZ)=-Two*Trace(PPrm,T)
+     CASE(1); Tensor(iXYZ)=-Two*TmpP
+     CASE(2); Tensor(iXYZ)=-Four*TmpP
+     CASE(3); Tensor(iXYZ)=-12.0d0*TmpP
+     CASE DEFAULT; CALL Halt('Response order unknown! RespOrder='//TRIM(IntToChar(RespOrder)))
      END SELECT
      !
      IF(CPSCFCycl.LE.0) MltE(iXYZ)=-Two*Trace(P,T)
 #endif
-     !new SELECT CASE(RespOrder)
-     !new CASE(1)
-     IF('X'.EQ.TRIM(Args%C%C(4))) Prop=Tensor(1)
-     IF('Y'.EQ.TRIM(Args%C%C(4))) Prop=Tensor(2)
-     IF('Z'.EQ.TRIM(Args%C%C(4))) Prop=Tensor(3)
-     IF(    'X'.NE.TRIM(Args%C%C(4)).AND.'Y'.NE.TRIM(Args%C%C(4)).AND. &
-          & 'Z'.NE.TRIM(Args%C%C(4))) THEN
+     !
+     IF('X'.EQ.TRIM(Args%C%C(5))) Prop=Tensor(1)
+     IF('Y'.EQ.TRIM(Args%C%C(5))) Prop=Tensor(2)
+     IF('Z'.EQ.TRIM(Args%C%C(5))) Prop=Tensor(3)
+     IF(    'X'.NE.TRIM(Args%C%C(5)).AND.'Y'.NE.TRIM(Args%C%C(5)).AND. &
+          & 'Z'.NE.TRIM(Args%C%C(5))) THEN
         CALL Halt('The args in CPSCFStatus is not one of X,Y or Z, args=' &
-             &    //TRIM(Args%C%C(4)))
+             &    //TRIM(Args%C%C(5)))
      ENDIF
-     !new CASE(2)
-     !new CASE(3)
-     !new END SELECT
-
   ENDDO
   !
   ! Save Prop.
   CALL Put(Prop,'Prop')
+  !write(*,*) 'Prop',Prop
   !
-#ifdef PARALLEL
-  IF(MyID.EQ.ROOT) THEN
-#endif
-     IF(CPSCFCycl.LE.0) THEN
-        WRITE(*,'(A,3E20.12)') 'MltN in a.u.',MltN(1),MltN(2),MltN(3)
-        WRITE(*,'(A,3E20.12)') 'MltE in a.u.',MltE(1),MltE(2),MltE(3)
-        WRITE(*,'(A,3E20.12)') 'MltT in a.u.',MltN(1)+MltE(1),MltN(2)+MltE(2),MltN(3)+MltE(3)
-     ENDIF
-#ifdef PARALLEL
-  ENDIF
-#endif
+!#ifdef PARALLEL
+!  IF(MyID.EQ.ROOT) THEN
+!#endif
+!     IF(CPSCFCycl.LE.0) THEN
+!        WRITE(*,'(A,3E20.12)') 'MltN in a.u.',MltN(1),MltN(2),MltN(3)
+!        WRITE(*,'(A,3E20.12)') 'MltE in a.u.',MltE(1),MltE(2),MltE(3)
+!        WRITE(*,'(A,3E20.12)') 'MltT in a.u.',MltN(1)+MltE(1), &
+!             &                                MltN(2)+MltE(2), &
+!             &                                MltN(3)+MltE(3)
+!     ENDIF
+!#ifdef PARALLEL
+!  ENDIF
+!#endif
   !-------------------------------------------------------------------
   ! Get max Density block.
   !-------------------------------------------------------------------
@@ -191,23 +189,17 @@ PROGRAM CPSCFSts
   ! Find the largest block of the delta density matrix
   ! Allows for checking between extrapolated or projected DMs
   IF(CPSCFCycl.GT.0) THEN
-     SELECT CASE(RespOrder)
-     CASE(1)
-        CALL Get(Tmp1,TrixFile('DPrime'//TRIM(Args%C%C(4)),Args,0))
-        CALL Get(Tmp2,TrixFile('DPrime'//TRIM(Args%C%C(4)),Args,1))
-     CASE(2)
-        CALL Get(Tmp1,TrixFile('DPrim2'//TRIM(Args%C%C(4)),Args,0))
-        CALL Get(Tmp2,TrixFile('DPrim2'//TRIM(Args%C%C(4)),Args,1))
-     CASE(3)
-        CALL Get(Tmp1,TrixFile('DPrim3'//TRIM(Args%C%C(4)),Args,0))
-        CALL Get(Tmp2,TrixFile('DPrim3'//TRIM(Args%C%C(4)),Args,1))
-     END SELECT
+     !write(*,*) '<'//trim(TrixFile('DPrime'//TRIM(Args%C%C(3)),Args,0))//'>'
+     !write(*,*) '<'//trim(TrixFile('DPrime'//TRIM(Args%C%C(3)),Args,1))//'>'
+     CALL Get(Tmp1,TrixFile('DPrime'//TRIM(Args%C%C(3)),Args,0))
+     CALL Get(Tmp2,TrixFile('DPrime'//TRIM(Args%C%C(3)),Args,1))
      !
      CALL Multiply(Tmp1,-One)
      CALL Add(Tmp1,Tmp2,PPrm)
      !
      ! Get Max PPrm.
      DPrimMax=Max(PPrm)
+     !write(*,*) 'DPrimMax',DPrimMax
   ELSE
      DPrimMax=BIG_DBL
   ENDIF
@@ -250,11 +242,11 @@ PROGRAM CPSCFSts
      ! Add in Tensor elements.
      CPSCFMessage=TRIM(CPSCFMessage)                                               &
           &           //'   MaxDelDPrim = '//TRIM(DblToShrtChar(DPrimMax)) //RTRN  &
-          &     //'  '//TRIM(PropName)//' '//TRIM(Args%C%C(4))//'X    = '          &
+          &     //'  '//TRIM(PropName)//' '//TRIM(Args%C%C(3))//'X    = '          &
           &           //TRIM(DblToMedmChar(Tensor(1)))//RTRN                       &
-          &     //'  '//TRIM(PropName)//' '//TRIM(Args%C%C(4))//'Y    = '          & 
+          &     //'  '//TRIM(PropName)//' '//TRIM(Args%C%C(3))//'Y    = '          & 
           &           //TRIM(DblToMedmChar(Tensor(2)))//RTRN                       &
-          &     //'  '//TRIM(PropName)//' '//TRIM(Args%C%C(4))//'Z    = '          & 
+          &     //'  '//TRIM(PropName)//' '//TRIM(Args%C%C(3))//'Z    = '          & 
           &           //TRIM(DblToMedmChar(Tensor(3)))//RTRN
      !
   ELSEIF(PrintFlags%Key>=DEBUG_NONE) THEN
@@ -264,25 +256,21 @@ PROGRAM CPSCFSts
           &           //TRIM(CurBase)//','                                         &
           &           //TRIM(CurGeom)//']') 
      !
-     CPSCFMessage=TRIM(CPSCFMessage)//'  '//TRIM(PropName)//' '                    &
-          &                               //TRIM(Args%C%C(4))//'X,'                &
-          &                               //TRIM(Args%C%C(4))//'Y,'                &
-          &                               //TRIM(Args%C%C(4))//'Z = '              &
-          &                               //TRIM(FltToShrtChar(Tensor(1)))         &
-          &                         //', '//TRIM(FltToShrtChar(Tensor(2)))         &
-          &                         //', '//TRIM(FltToShrtChar(Tensor(3)))
+     CPSCFMessage=TRIM(CPSCFMessage)//' '//TRIM(PropName)//' '                     &
+          &                              //TRIM(Args%C%C(3))//' '                  &
+          &                              //'X,Y,Z = '                              &
+          &                              //TRIM(FltToShrtChar(Tensor(1)))          &
+          &                        //', '//TRIM(FltToShrtChar(Tensor(2)))          &
+          &                        //', '//TRIM(FltToShrtChar(Tensor(3)))
      !
-     SELECT CASE(RespOrder)
-     CASE(1)
-        IF(CPSCFCycl.GT.0) &
-             & CPSCFMessage=TRIM(CPSCFMessage)//', dD1 = '//TRIM(DblToShrtChar(DPrimMax))
-     CASE(2)
-        IF(CPSCFCycl.GT.0) &
-             & CPSCFMessage=TRIM(CPSCFMessage)//', dD2 = '//TRIM(DblToShrtChar(DPrimMax))
-     CASE(3)
-        IF(CPSCFCycl.GT.0) &
-             & CPSCFMessage=TRIM(CPSCFMessage)//', dD3 = '//TRIM(DblToShrtChar(DPrimMax))
-     END SELECT
+     IF(CPSCFCycl.GT.0) THEN
+        SELECT CASE(RespOrder)
+        CASE(1); CPSCFMessage=TRIM(CPSCFMessage)//', dD1 = '//TRIM(DblToShrtChar(DPrimMax))
+        CASE(2); CPSCFMessage=TRIM(CPSCFMessage)//', dD2 = '//TRIM(DblToShrtChar(DPrimMax))
+        CASE(3); CPSCFMessage=TRIM(CPSCFMessage)//', dD3 = '//TRIM(DblToShrtChar(DPrimMax))
+        CASE DEFAULT; CALL Halt('Response order unknown! RespOrder='//TRIM(IntToChar(RespOrder)))
+        END SELECT
+     ENDIF
      !
      ! Add in DIIS error.
      IF(DIISErr/=Zero)                                                             &

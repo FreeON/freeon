@@ -35,11 +35,11 @@ PROGRAM DDIIS
   IMPLICIT NONE
   !-------------------------------------------------------------------
 #ifdef PARALLEL
-  TYPE(BCSR )                      :: F,P,EPrm,Tmp1
+  TYPE(BCSR )                      :: F,P,EPrm,Tmp1,TmpFPrm
   TYPE(BCSR )                      :: PPrm1_1,PPrm1_2,PPrm1_3,PPrm2_1,PPrm2_2,PPrm2_3,PPrm3_1
   TYPE(BCSR )                      :: FPrm1_1,FPrm1_2,FPrm1_3,FPrm2_1,FPrm2_2,FPrm2_3,FPrm3_1
 #else
-  TYPE(BCSR )                      :: F,P,EPrm,Tmp1
+  TYPE(BCSR )                      :: F,P,EPrm,Tmp1,TmpFPrm
   TYPE(BCSR )                      :: PPrm1_1,PPrm1_2,PPrm1_3,PPrm2_1,PPrm2_2,PPrm2_3,PPrm3_1
   TYPE(BCSR )                      :: FPrm1_1,FPrm1_2,FPrm1_3,FPrm2_1,FPrm2_2,FPrm2_3,FPrm3_1
 #endif
@@ -51,10 +51,12 @@ PROGRAM DDIIS
   REAL(DOUBLE)                     :: DIISErr,Damp,EigThresh
   REAL(DOUBLE)                     :: CondA,DDIISMaxCond
   INTEGER                          :: I,J,I0,J0,N,M,BMax,DoDIIS,iOffSet
-  INTEGER                          :: LastSCFCycle,CPSCFCycl,DDIISStart
+  INTEGER                          :: CPSCFCycl,DDIISStart
+  INTEGER                          :: LastSCFCycle,LastCPSCFCycle
   INTEGER                          :: DDIISBeg,DDIISEnd,DDIISCurDim
   INTEGER                          :: RespOrder
   CHARACTER(LEN=5*DEFAULT_CHR_LEN) :: Mssg
+  CHARACTER(LEN=1)                 :: Chr1,Chr2,Chr3
   CHARACTER(LEN=*), PARAMETER      :: Prog='DDIIS'
   LOGICAL                          :: IsPresent
   !-------------------------------------------------------------------
@@ -73,10 +75,22 @@ PROGRAM DDIIS
   ! 
   CPSCFCycl=Args%I%I(1)
   !
+  ! Get the response order.
+  RespOrder=LEN(TRIM(Args%C%C(3)))
+  !
   ! Get Last SCF cycle.
+  LastSCFCycle=0
+  LastCPSCFCycle=0
   CALL Get(LastSCFCycle,'lastscfcycle')
   !
-  RespOrder=1
+  ! Get the directions.
+  Chr1=TRIM(Args%C%C(3)(1:1))
+  SELECT CASE(RespOrder)
+  CASE(1);Chr2=''                    ;Chr3=''
+  CASE(2);Chr2=TRIM(Args%C%C(3)(2:2));Chr3=''
+  CASE(3);Chr2=TRIM(Args%C%C(3)(2:2));Chr3=TRIM(Args%C%C(3)(3:3))
+  CASE DEFAULT; CALL Halt('Response order unknown! RespOrder='//TRIM(IntToChar(RespOrder)))
+  END SELECT
   !
   !-------------------------------------------------------------------
   ! Parse for DDIIS options.
@@ -168,33 +182,57 @@ PROGRAM DDIIS
   CALL New(Tmp1)
   CALL New(EPrm)
   CALL New(F)
-  CALL New(FPrm1_1)
   CALL New(P)
-  CALL New(PPrm1_1)
-  IF(RespOrder.GE.2) THEN
+  SELECT CASE(RespOrder)
+  CASE(1)
+     CALL New(FPrm1_1)
+     CALL New(PPrm1_1)
+  CASE(2)
+     CALL New(FPrm1_1)
+     CALL New(PPrm1_1)
      CALL New(FPrm2_1)
      CALL New(PPrm2_1)
-     CALL New(PPrm1_2)
-  ENDIF
-  IF(RespOrder.GE.2) THEN
+     IF(Chr1.EQ.Chr2) THEN
+     ELSE
+        CALL New(FPrm1_2)
+        CALL New(PPrm1_2)
+     ENDIF
+  CASE(3)
+     CALL New(FPrm1_1)
+     CALL New(PPrm1_1)
+     CALL New(FPrm2_1)
+     CALL New(PPrm2_1)
      CALL New(FPrm3_1)
      CALL New(PPrm3_1)
-     CALL New(FPrm2_2)
-     CALL New(PPrm2_2)
-     CALL New(FPrm2_3)
-     CALL New(PPrm2_3)
-     CALL New(PPrm1_3)
-  ENDIF
+     IF(Chr1.EQ.Chr2.AND.Chr1.EQ.Chr3) THEN
+     ELSEIF(Chr1.EQ.Chr2.AND.Chr1.NE.Chr3) THEN
+        CALL New(FPrm1_3)
+        CALL New(PPrm1_3)
+        CALL New(FPrm2_2)
+        CALL New(PPrm2_2)
+     ELSEIF(Chr1.NE.Chr2.AND.Chr2.EQ.Chr3) THEN
+        CALL New(FPrm1_2)
+        CALL New(PPrm1_2)
+        CALL New(FPrm2_3)
+        CALL New(PPrm2_3)
+     ELSEIF(Chr1.NE.Chr2.AND.Chr1.NE.Chr3.AND.Chr2.NE.Chr3) THEN
+        CALL New(FPrm1_2)
+        CALL New(PPrm1_2)
+        CALL New(FPrm1_3)
+        CALL New(PPrm1_3)
+        CALL New(FPrm2_2)
+        CALL New(PPrm2_2)
+        CALL New(FPrm2_3)
+        CALL New(PPrm2_3)
+     ELSE
+        CALL Halt('Response: unknown symmetry <'//Chr1//Chr2//Chr3//'>.')
+     ENDIF
+  CASE DEFAULT; CALL Halt('Response order unknown! RespOrder='//TRIM(IntToChar(RespOrder)))
+  END SELECT
   !
   !-------------------------------------------------------------------
   ! Loading matrices.
   !-------------------------------------------------------------------
-  !
-  ! Load the orthogonal Derivative Fock matrix.
-  CALL Get(FPrm1_1,TrixFile('OrthoFPrime'//TRIM(Args%C%C(4)),Args,0))
-  !
-  ! Load the orthogonal Derivative Density matrix.
-  CALL Get(PPrm1_1,TrixFile('OrthoDPrime'//TRIM(Args%C%C(4)),Args,0))
   !
   ! Load the orthogonal GS Fock matrix.
   CALL Get(F,TrixFile('OrthoF',Args,LastSCFCycle-Args%I%I(1)))
@@ -202,35 +240,217 @@ PROGRAM DDIIS
   ! Load the orthogonal GS Density matrix.
   CALL Get(P,TrixFile('OrthoD',Args,LastSCFCycle-Args%I%I(1)))
   !
+  SELECT CASE(RespOrder)
+  CASE(1)
+     !
+     CALL Get(FPrm1_1,TrixFile('OrthoFPrime'//TRIM(Args%C%C(3)),Args,0))
+     CALL Get(PPrm1_1,TrixFile('OrthoDPrime'//TRIM(Args%C%C(3)),Args,0))
+     !
+  CASE(2)
+     !
+     IF(Chr1.EQ.Chr2) THEN
+        ! PPrm2_1 <-> aa
+        ! PPrm1_1 <-> a
+        CALL Get(LastCPSCFCycle,'lastcpscfcycle'//TRIM(Args%C%C(3)(1:1)))
+        CALL Get(FPrm1_1,TrixFile('OrthoFPrime'//TRIM(Args%C%C(3)(1:1)), &
+             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+        CALL Get(PPrm1_1,TrixFile('OrthoDPrime'//TRIM(Args%C%C(3)(1:1)), &
+             &   Args,LastCPSCFCycle-Args%I%I(1)))
+     ELSE
+        ! PPrm2_1 <-> ab
+        ! PPrm1_1 <-> a
+        ! PPrm1_2 <-> b
+        CALL Get(LastCPSCFCycle,'lastcpscfcycle'//TRIM(Args%C%C(3)(1:1)))
+        CALL Get(FPrm1_1,TrixFile('OrthoFPrime'//TRIM(Args%C%C(3)(1:1)), &
+             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+        CALL Get(PPrm1_1,TrixFile('OrthoDPrime'//TRIM(Args%C%C(3)(1:1)), &
+             &   Args,LastCPSCFCycle-Args%I%I(1)))
+        !
+        CALL Get(LastCPSCFCycle,'lastcpscfcycle'//TRIM(Args%C%C(3)(2:2)))
+        CALL Get(FPrm1_2,TrixFile('OrthoFPrime'//TRIM(Args%C%C(3)(2:2)), &
+             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+        CALL Get(PPrm1_2,TrixFile('OrthoDPrime'//TRIM(Args%C%C(3)(2:2)), &
+             &   Args,LastCPSCFCycle-Args%I%I(1)))
+     ENDIF
+     !
+     CALL Get(FPrm2_1,TrixFile('OrthoFPrime'//TRIM(Args%C%C(3)),Args,0))
+     CALL Get(PPrm2_1,TrixFile('OrthoDPrime'//TRIM(Args%C%C(3)),Args,0))
+     !
+  CASE(3)
+     !
+     IF(Chr1.EQ.Chr2.AND.Chr1.EQ.Chr3) THEN
+        ! A.EQ.B.EQ.C
+        ! PPrm3_1 <-> aaa
+        ! PPrm2_1 <-> aa
+        ! PPrm1_1 <-> a
+        CALL Get(LastCPSCFCycle,'lastcpscfcycle'//TRIM(Args%C%C(3)(1:1)))
+        CALL Get(FPrm1_1,TrixFile('OrthoFPrime'//TRIM(Args%C%C(3)(1:1)), &
+             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+        CALL Get(PPrm1_1,TrixFile('OrthoDPrime'//TRIM(Args%C%C(3)(1:1)), &
+             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+        !
+        CALL Get(LastCPSCFCycle,'lastcpscfcycle'//TRIM(Args%C%C(3)(1:2)))
+        CALL Get(FPrm2_1,TrixFile('OrthoFPrime'//TRIM(Args%C%C(3)(1:2)), &
+             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+        CALL Get(PPrm2_1,TrixFile('OrthoDPrime'//TRIM(Args%C%C(3)(1:2)), &
+             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+     ELSEIF(Chr1.EQ.Chr2.AND.Chr1.NE.Chr3) THEN
+        ! A.EQ.B.NE.C
+        ! PPrm3_1 <-> aac
+        ! PPrm2_1 <-> aa
+        ! PPrm2_2 <-> ac
+        ! PPrm1_1 <-> a
+        ! PPrm1_3 <-> c
+        CALL Get(LastCPSCFCycle,'lastcpscfcycle'//TRIM(Args%C%C(3)(1:1)))
+        CALL Get(FPrm1_1,TrixFile('OrthoFPrime'//TRIM(Args%C%C(3)(1:1)), &
+             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+        CALL Get(PPrm1_1,TrixFile('OrthoDPrime'//TRIM(Args%C%C(3)(1:1)), &
+             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+        !
+        CALL Get(LastCPSCFCycle,'lastcpscfcycle'//TRIM(Args%C%C(3)(3:3)))
+        CALL Get(FPrm1_3,TrixFile('OrthoFPrime'//TRIM(Args%C%C(3)(3:3)), &
+             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+        CALL Get(PPrm1_3,TrixFile('OrthoDPrime'//TRIM(Args%C%C(3)(3:3)), &
+             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+        !
+        CALL Get(LastCPSCFCycle,'lastcpscfcycle'//TRIM(Args%C%C(3)(1:2)))
+        CALL Get(FPrm2_1,TrixFile('OrthoFPrime'//TRIM(Args%C%C(3)(1:2)), &
+             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+        CALL Get(PPrm2_1,TrixFile('OrthoDPrime'//TRIM(Args%C%C(3)(1:2)), &
+             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+        !
+        CALL Get(LastCPSCFCycle,'lastcpscfcycle'//TRIM(Args%C%C(3)(2:3)))
+        CALL Get(FPrm2_2,TrixFile('OrthoFPrime'//TRIM(Args%C%C(3)(2:3)), &
+             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+        CALL Get(PPrm2_2,TrixFile('OrthoDPrime'//TRIM(Args%C%C(3)(2:3)), &
+             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+     ELSEIF(Chr1.NE.Chr2.AND.Chr2.EQ.Chr3) THEN
+        ! A.NE.B.EQ.C
+        ! PPrm3_1 <-> abb
+        ! PPrm2_1 <-> ab
+        ! PPrm2_3 <-> bb
+        ! PPrm1_1 <-> a
+        ! PPrm1_2 <-> b
+        CALL Get(LastCPSCFCycle,'lastcpscfcycle'//TRIM(Args%C%C(3)(1:1)))
+        CALL Get(FPrm1_1,TrixFile('OrthoFPrime'//TRIM(Args%C%C(3)(1:1)), &
+             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+        CALL Get(PPrm1_1,TrixFile('OrthoDPrime'//TRIM(Args%C%C(3)(1:1)), &
+             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+        !
+        CALL Get(LastCPSCFCycle,'lastcpscfcycle'//TRIM(Args%C%C(3)(2:2)))
+        CALL Get(FPrm1_2,TrixFile('OrthoFPrime'//TRIM(Args%C%C(3)(2:2)), &
+             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+        CALL Get(PPrm1_2,TrixFile('OrthoDPrime'//TRIM(Args%C%C(3)(2:2)), &
+             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+        !
+        CALL Get(LastCPSCFCycle,'lastcpscfcycle'//TRIM(Args%C%C(3)(1:2)))
+        CALL Get(FPrm2_1,TrixFile('OrthoFPrime'//TRIM(Args%C%C(3)(1:2)), &
+             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+        CALL Get(PPrm2_1,TrixFile('OrthoDPrime'//TRIM(Args%C%C(3)(1:2)), &
+             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+        !
+        CALL Get(LastCPSCFCycle,'lastcpscfcycle'//TRIM(Args%C%C(3)(2:3)))
+        CALL Get(FPrm2_3,TrixFile('OrthoFPrime'//TRIM(Args%C%C(3)(2:3)), &
+             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+        CALL Get(PPrm2_3,TrixFile('OrthoDPrime'//TRIM(Args%C%C(3)(2:3)), &
+             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+     ELSEIF(Chr1.NE.Chr2.AND.Chr1.NE.Chr3.AND.Chr2.NE.Chr3) THEN
+        ! A.NE.B.NE.C
+        ! PPrm3_1 <-> abc
+        ! PPrm2_1 <-> ab
+        ! PPrm2_2 <-> ac
+        ! PPrm2_3 <-> bc
+        ! PPrm1_1 <-> a
+        ! PPrm1_2 <-> b
+        ! PPrm1_3 <-> c
+        CALL Get(LastCPSCFCycle,'lastcpscfcycle'//TRIM(Args%C%C(3)(1:1)))
+        CALL Get(FPrm1_1,TrixFile('OrthoFPrime'//TRIM(Args%C%C(3)(1:1)), &
+             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+        CALL Get(PPrm1_1,TrixFile('OrthoDPrime'//TRIM(Args%C%C(3)(1:1)), &
+             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+        !
+        CALL Get(LastCPSCFCycle,'lastcpscfcycle'//TRIM(Args%C%C(3)(2:2)))
+        CALL Get(FPrm1_2,TrixFile('OrthoFPrime'//TRIM(Args%C%C(3)(2:2)), &
+             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+        CALL Get(PPrm1_2,TrixFile('OrthoDPrime'//TRIM(Args%C%C(3)(2:2)), &
+             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+        !
+        CALL Get(LastCPSCFCycle,'lastcpscfcycle'//TRIM(Args%C%C(3)(3:3)))
+        CALL Get(FPrm1_3,TrixFile('OrthoFPrime'//TRIM(Args%C%C(3)(3:3)), &
+             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+        CALL Get(PPrm1_3,TrixFile('OrthoDPrime'//TRIM(Args%C%C(3)(3:3)), &
+             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+        !
+        CALL Get(LastCPSCFCycle,'lastcpscfcycle'//TRIM(Args%C%C(3)(1:2)))
+        CALL Get(FPrm2_1,TrixFile('OrthoFPrime'//TRIM(Args%C%C(3)(1:2)), &
+             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+        CALL Get(PPrm2_1,TrixFile('OrthoDPrime'//TRIM(Args%C%C(3)(1:2)), &
+             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+        !
+        CALL Get(LastCPSCFCycle,'lastcpscfcycle'//TRIM(Args%C%C(3)(1:1))//TRIM(Args%C%C(3)(3:3)))
+        CALL Get(FPrm2_2,TrixFile('OrthoFPrime'//TRIM(Args%C%C(3)(1:1))//TRIM(Args%C%C(3)(3:3)), &
+             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+        CALL Get(PPrm2_2,TrixFile('OrthoDPrime'//TRIM(Args%C%C(3)(1:1))//TRIM(Args%C%C(3)(3:3)), &
+             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+        !
+        CALL Get(LastCPSCFCycle,'lastcpscfcycle'//TRIM(Args%C%C(3)(2:3)))
+        CALL Get(FPrm2_3,TrixFile('OrthoFPrime'//TRIM(Args%C%C(3)(2:3)), &
+             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+        CALL Get(PPrm2_3,TrixFile('OrthoDPrime'//TRIM(Args%C%C(3)(2:3)), &
+             &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+     ELSE
+        CALL Halt('Response: unknown symmetry <'//Chr1//Chr2//Chr3//'>.')
+     ENDIF
+     !
+     ! PPrm3_1 <-> abc
+     CALL Get(FPrm3_1,TrixFile('OrthoFPrime'//TRIM(Args%C%C(3)),Args,0))
+     CALL Get(PPrm3_1,TrixFile('OrthoDPrime'//TRIM(Args%C%C(3)),Args,0))
+     !
+  CASE DEFAULT; CALL Halt('Response order unknown! RespOrder='//TRIM(IntToChar(RespOrder)))
+  END SELECT
+  !
   !-------------------------------------------------------------------
   ! Build up new DDIIS error.
   !-------------------------------------------------------------------
   !
   SELECT CASE(RespOrder)
   CASE(1)
-     ! Create a new error vector E'=[F_(i+1),P_i]'     (Could be done in a better way!)
+     ! Create a new error vector E1=[F_(i+1),P_i]1     (Could be done in a better way!)
      ! PPrm1_1 <-> a
      CALL Multiply(PPrm1_1,F      ,EPrm     )  !E'=P'F
      CALL Multiply(P      ,FPrm1_1,EPrm, One)  !E'=PF'+P'F
      CALL Multiply(FPrm1_1,P      ,EPrm,-One)  !E'=F'P-(PF'+P'F)
      CALL Multiply(F      ,PPrm1_1,EPrm, One)  !E'=FP'+F'P-(PF'+P'F)
   CASE(2)
-     ! Create a new error vector E''=[F_(i+1),P_i]''   (Could be done in a better way!)
+     ! Create a new error vector E2=[F_(i+1),P_i]2   (Could be done in a better way!)
      ! PPrm2_1 <-> ab
      ! PPrm1_1 <-> a
      ! PPrm1_2 <-> b
-     CALL Multiply(PPrm2_1,F      ,EPrm     )  !Eab=Psb*F
-     CALL Multiply(PPrm1_1,FPrm1_2,EPrm, One)  !Eab=Pa*Fb
-     CALL Multiply(PPrm1_2,FPrm1_1,EPrm, One)  !Eab=Pb*Fa
-     CALL Multiply(P      ,FPrm2_1,EPrm, One)  !Eab=P*Fab
-     !
-     CALL Multiply(FPrm2_1,P      ,EPrm,-One)  !Eab=Fab*P
-     CALL Multiply(FPrm1_1,PPrm1_2,EPrm, One)  !Eab=Fa*Pb
-     CALL Multiply(FPrm1_2,PPrm1_1,EPrm, One)  !Eab=Fb*Pa
-     CALL Multiply(F      ,PPrm2_1,EPrm, One)  !Eab=F*Pab
+     IF(Chr1.EQ.Chr2) THEN
+        CALL Multiply(PPrm2_1,F      ,EPrm     )  !Eaa=Paa*F
+        CALL Multiply(PPrm1_1,FPrm1_1,EPrm, One)  !Eaa=Pa*Fa
+        CALL Multiply(P      ,FPrm2_1,EPrm, One)  !Eaa=P*Faa
+        !
+        CALL Multiply(FPrm2_1,P      ,EPrm,-One)  !Eaa=Faa*P
+        CALL Multiply(FPrm1_1,PPrm1_1,EPrm, One)  !Eaa=Fa*Pa
+        CALL Multiply(F      ,PPrm2_1,EPrm, One)  !Eaa=F*Paa
+     ELSE
+        CALL Multiply(PPrm1_1,0.5d0)
+        CALL Multiply(PPrm1_2,0.5d0)
+        !
+        CALL Multiply(PPrm2_1,F      ,EPrm     )  !Eab=Pab*F
+        CALL Multiply(PPrm1_1,FPrm1_2,EPrm, One)  !Eab=0.5*Pa*Fb
+        CALL Multiply(PPrm1_2,FPrm1_1,EPrm, One)  !Eab=0.5*Pb*Fa
+        CALL Multiply(P      ,FPrm2_1,EPrm, One)  !Eab=P*Fab
+        !
+        CALL Multiply(FPrm2_1,P      ,EPrm,-One)  !Eab=Fab*P
+        CALL Multiply(FPrm1_1,PPrm1_2,EPrm, One)  !Eab=0.5*Fa*Pb
+        CALL Multiply(FPrm1_2,PPrm1_1,EPrm, One)  !Eab=0.5*Fb*Pa
+        CALL Multiply(F      ,PPrm2_1,EPrm, One)  !Eab=F*Pab
+     ENDIF
      !
   CASE(3)
-     ! Create a new error vector E'''=[F_(i+1),P_i]''' (Could be done in a better way!)
+     ! Create a new error vector E3=[F_(i+1),P_i]3 (Could be done in a better way!)
      ! PPrm3_1 <-> abc
      ! PPrm2_1 <-> ab
      ! PPrm2_2 <-> ac
@@ -238,40 +458,170 @@ PROGRAM DDIIS
      ! PPrm1_1 <-> a
      ! PPrm1_2 <-> b
      ! PPrm1_3 <-> c
-     CALL Multiply(PPrm3_1,F      ,EPrm     )  !Eabc=Psbc*F
-     CALL Multiply(PPrm2_1,FPrm1_3,EPrm, One)  !Eabc=Pab*Fc
-     CALL Multiply(PPrm2_2,FPrm1_2,EPrm, One)  !Eabc=Pac*Fb
-     CALL Multiply(PPrm2_3,FPrm1_1,EPrm, One)  !Eabc=Pbc*Fa
-     CALL Multiply(PPrm1_1,FPrm1_3,EPrm, One)  !Eabc=Pa*Fbc
-     CALL Multiply(PPrm1_2,FPrm1_2,EPrm, One)  !Eabc=Pb*Fac
-     CALL Multiply(PPrm1_3,FPrm1_1,EPrm, One)  !Eabc=Pc*Fab
-     CALL Multiply(P      ,FPrm3_1,EPrm, One)  !Eabc=P*Fabc
+     IF(Chr1.EQ.Chr2.AND.Chr1.EQ.Chr3) THEN
+        ! A.EQ.B.EQ.C
+        ! PPrm3_1 <-> aaa
+        ! PPrm2_1 <-> aa
+        ! PPrm1_1 <-> a
+        CALL Multiply(PPrm3_1,F      ,EPrm     )  !Eaaa=Paaa*F
+        CALL Multiply(PPrm2_1,FPrm1_1,EPrm, One)  !Eaaa=Paa*Fa
+        CALL Multiply(PPrm1_1,FPrm2_1,EPrm, One)  !Eaaa=Pa*Faa
+        CALL Multiply(P      ,FPrm3_1,EPrm, One)  !Eaaa=P*Faaa
+        !
+        CALL Multiply(FPrm3_1,P      ,EPrm,-One)  !Eaaa=Faaa*P
+        CALL Multiply(FPrm2_1,PPrm1_1,EPrm, One)  !Eaaa=Faa*Pa
+        CALL Multiply(FPrm1_1,PPrm2_1,EPrm, One)  !Eaaa=Fa*Paa
+        CALL Multiply(F      ,PPrm3_1,EPrm, One)  !Eaaa=F*Paaa
+     ELSEIF(Chr1.EQ.Chr2.AND.Chr1.NE.Chr3) THEN
+        ! A.EQ.B.NE.C
+        ! PPrm3_1 <-> aac
+        ! PPrm2_1 <-> aa
+        ! PPrm2_2 <-> ac
+        ! PPrm1_1 <-> a
+        ! PPrm1_3 <-> c
+        CALL Multiply(PPrm1_1,2.0d0/3.0d0)
+        CALL Multiply(PPrm1_3,1.0d0/3.0d0)
+        CALL Multiply(FPrm1_1,2.0d0/3.0d0)
+        CALL Multiply(FPrm1_3,1.0d0/3.0d0)
+        !
+        CALL Multiply(PPrm3_1,F      ,EPrm     )  !Eaac=Paac*F
+        CALL Multiply(PPrm2_1,FPrm1_3,EPrm, One)  !Eaac=Paa*Fc
+        CALL Multiply(PPrm2_2,FPrm1_1,EPrm, One)  !Eaac=Pac*Fa
+        CALL Multiply(PPrm1_1,FPrm2_2,EPrm, One)  !Eaac=Pa*Fac
+        CALL Multiply(PPrm1_3,FPrm2_1,EPrm, One)  !Eaac=Pc*Faa
+        CALL Multiply(P      ,FPrm3_1,EPrm, One)  !Eaac=P*Faac
+        !
+        CALL Multiply(FPrm3_1,P      ,EPrm,-One)  !Eaac=Faac*P
+        CALL Multiply(FPrm2_1,PPrm1_3,EPrm, One)  !Eaac=Faa*Pc
+        CALL Multiply(FPrm2_2,PPrm1_1,EPrm, One)  !Eaac=Fac*Pa
+        CALL Multiply(FPrm1_1,PPrm2_2,EPrm, One)  !Eaac=Fa*Pac
+        CALL Multiply(FPrm1_3,PPrm2_1,EPrm, One)  !Eaac=Fc*Paa
+        CALL Multiply(F      ,PPrm3_1,EPrm, One)  !Eaac=F*Paac
+     ELSEIF(Chr1.NE.Chr2.AND.Chr2.EQ.Chr3) THEN
+        ! A.NE.B.EQ.C
+        ! PPrm3_1 <-> abb
+        ! PPrm2_1 <-> ab
+        ! PPrm2_3 <-> bb
+        ! PPrm1_1 <-> a
+        ! PPrm1_2 <-> b
+        CALL Multiply(PPrm1_1,1.0d0/3.0d0)
+        CALL Multiply(PPrm1_2,2.0d0/3.0d0)
+        CALL Multiply(FPrm1_1,1.0d0/3.0d0)
+        CALL Multiply(FPrm1_2,2.0d0/3.0d0)
+        !
+        CALL Multiply(PPrm3_1,F      ,EPrm     )  !Eabb=Pabb*F
+        CALL Multiply(PPrm2_1,FPrm1_2,EPrm, One)  !Eabb=Pab*Fb
+        CALL Multiply(PPrm2_3,FPrm1_1,EPrm, One)  !Eabb=Pbb*Fa
+        CALL Multiply(PPrm1_1,FPrm2_3,EPrm, One)  !Eabb=Pa*Fbb
+        CALL Multiply(PPrm1_2,FPrm2_1,EPrm, One)  !Eabb=Pb*Fab
+        CALL Multiply(P      ,FPrm3_1,EPrm, One)  !Eabb=P*Fabb
+        !
+        CALL Multiply(FPrm3_1,P      ,EPrm,-One)  !Eabb=Fabb*P
+        CALL Multiply(FPrm2_1,PPrm1_2,EPrm, One)  !Eabb=Fab *Pb
+        CALL Multiply(FPrm2_3,PPrm1_1,EPrm, One)  !Eabb=Fbb *Pa
+        CALL Multiply(FPrm1_1,PPrm2_3,EPrm, One)  !Eabb=Fa  *Pbb
+        CALL Multiply(FPrm1_2,PPrm2_1,EPrm, One)  !Eabb=Fb  *Pab
+        CALL Multiply(F      ,PPrm3_1,EPrm, One)  !Eabb=F   *Pabb
+     ELSEIF(Chr1.NE.Chr2.AND.Chr1.NE.Chr3.AND.Chr2.NE.Chr3) THEN
+        ! A.NE.B.NE.C
+        ! PPrm3_1 <-> abc
+        ! PPrm2_1 <-> ab
+        ! PPrm2_2 <-> ac
+        ! PPrm2_3 <-> bc
+        ! PPrm1_1 <-> a
+        ! PPrm1_2 <-> b
+        ! PPrm1_3 <-> c
+        CALL Multiply(PPrm1_1,1.0d0/3.0d0)
+        CALL Multiply(PPrm1_2,1.0d0/3.0d0)
+        CALL Multiply(PPrm1_3,1.0d0/3.0d0)
+        CALL Multiply(FPrm1_1,1.0d0/3.0d0)
+        CALL Multiply(FPrm1_2,1.0d0/3.0d0)
+        CALL Multiply(FPrm1_3,1.0d0/3.0d0)
+        !
+        CALL Multiply(PPrm3_1,F      ,EPrm     )  !Eabc=Pabc*F
+        CALL Multiply(PPrm2_1,FPrm1_3,EPrm, One)  !Eabc=Pab*Fc
+        CALL Multiply(PPrm2_2,FPrm1_2,EPrm, One)  !Eabc=Pac*Fb
+        CALL Multiply(PPrm2_3,FPrm1_1,EPrm, One)  !Eabc=Pbc*Fa
+        CALL Multiply(PPrm1_1,FPrm2_3,EPrm, One)  !Eabc=Pa*Fbc
+        CALL Multiply(PPrm1_2,FPrm2_2,EPrm, One)  !Eabc=Pb*Fac
+        CALL Multiply(PPrm1_3,FPrm2_1,EPrm, One)  !Eabc=Pc*Fab
+        CALL Multiply(P      ,FPrm3_1,EPrm, One)  !Eabc=P*Fabc
+        !
+        CALL Multiply(FPrm3_1,P      ,EPrm,-One)  !Eabc=Fabc*P
+        CALL Multiply(FPrm2_1,PPrm1_3,EPrm, One)  !Eabc=Fab*Pc
+        CALL Multiply(FPrm2_2,PPrm1_2,EPrm, One)  !Eabc=Fac*Pb
+        CALL Multiply(FPrm2_3,PPrm1_1,EPrm, One)  !Eabc=Fbc*Pa
+        CALL Multiply(FPrm1_1,PPrm2_3,EPrm, One)  !Eabc=Fa*Pbc
+        CALL Multiply(FPrm1_2,PPrm2_2,EPrm, One)  !Eabc=Fb*Pac
+        CALL Multiply(FPrm1_3,PPrm2_1,EPrm, One)  !Eabc=Fc*Pab
+        CALL Multiply(F      ,PPrm3_1,EPrm, One)  !Eabc=F*Pabc
+     ELSE
+        CALL Halt('Response: unknown symmetry <'//Chr1//Chr2//Chr3//'>.')
+     ENDIF
      !
-     CALL Multiply(FPrm3_1,P      ,EPrm,-One)  !Eabc=Fabc*P
-     CALL Multiply(FPrm2_1,PPrm1_3,EPrm, One)  !Eabc=Fab*Pc
-     CALL Multiply(FPrm2_2,PPrm1_2,EPrm, One)  !Eabc=Fac*Pb
-     CALL Multiply(FPrm2_3,PPrm1_1,EPrm, One)  !Eabc=Fbc*Pa
-     CALL Multiply(FPrm1_1,PPrm2_3,EPrm, One)  !Eabc=Fa*Pbc
-     CALL Multiply(FPrm1_2,PPrm2_2,EPrm, One)  !Eabc=Fb*Pac
-     CALL Multiply(FPrm1_3,PPrm2_1,EPrm, One)  !Eabc=Fc*Pab
-     CALL Multiply(F      ,PPrm3_1,EPrm, One)  !Eabc=F*Pabc
-     !
+  CASE DEFAULT; CALL Halt('Response order unknown! RespOrder='//TRIM(IntToChar(RespOrder)))
   END SELECT
+
   !
   ! Deallocate local arrays.
-  CALL Delete(F    )
-  CALL Delete(P    )
-  CALL Delete(PPrm1_1)
+  CALL Delete(F)
+  CALL Delete(P)
+  SELECT CASE(RespOrder)
+  CASE(1)
+     CALL Delete(FPrm1_1)
+     CALL Delete(PPrm1_1)
+  CASE(2)
+     CALL Delete(FPrm1_1)
+     CALL Delete(PPrm1_1)
+     CALL Delete(FPrm2_1)
+     CALL Delete(PPrm2_1)
+     IF(Chr1.NE.Chr2) THEN
+        CALL Delete(FPrm1_2)
+        CALL Delete(PPrm1_2)
+     ENDIF
+  CASE(3)
+     CALL Delete(FPrm1_1)
+     CALL Delete(PPrm1_1)
+     CALL Delete(FPrm2_1)
+     CALL Delete(PPrm2_1)
+     CALL Delete(FPrm3_1)
+     CALL Delete(PPrm3_1)
+     IF(Chr1.EQ.Chr2.AND.Chr1.EQ.Chr3) THEN
+     ELSEIF(Chr1.EQ.Chr2.AND.Chr1.NE.Chr3) THEN
+        CALL Delete(FPrm1_3)
+        CALL Delete(PPrm1_3)
+        CALL Delete(FPrm2_2)
+        CALL Delete(PPrm2_2)
+     ELSEIF(Chr1.NE.Chr2.AND.Chr2.EQ.Chr3) THEN
+        CALL Delete(FPrm1_2)
+        CALL Delete(PPrm1_2)
+        CALL Delete(FPrm2_3)
+        CALL Delete(PPrm2_3)
+     ELSEIF(Chr1.NE.Chr2.AND.Chr1.NE.Chr3.AND.Chr2.NE.Chr3) THEN
+        CALL Delete(FPrm1_2)
+        CALL Delete(PPrm1_2)
+        CALL Delete(FPrm1_3)
+        CALL Delete(PPrm1_3)
+        CALL Delete(FPrm2_2)
+        CALL Delete(PPrm2_2)
+        CALL Delete(FPrm2_3)
+        CALL Delete(PPrm2_3)
+     ELSE
+        CALL Halt('Response: unknown symmetry <'//Chr1//Chr2//Chr3//'>.')
+     ENDIF
+  CASE DEFAULT; CALL Halt('Response order unknown! RespOrder='//TRIM(IntToChar(RespOrder)))
+  END SELECT
   !
   ! We dont filter E' for obvious reasons .
-  CALL Put(EPrm,TrixFile('EPrime'//TRIM(Args%C%C(4)),Args,0))
+  CALL Put(EPrm,TrixFile('EPrime'//TRIM(Args%C%C(3)),Args,0))
   !
 #ifdef DDIIS_DBUG
-if(myid.eq.0) WRITE(*,*) 'Save E''=<'//TRIM(TrixFile('EPrime'//TRIM(Args%C%C(4)),Args,0))//'>'
+  if(myid.eq.0) WRITE(*,*) 'Save E''=<'//TRIM(TrixFile('EPrime'//TRIM(Args%C%C(3)),Args,0))//'>'
 #endif
   !
   ! Compute the DDIIS error.
   DIISErr=SQRT(Dot(EPrm,EPrm))/DBLE(NBasF)
+  !write(*,*) 'DIISErr',DIISErr
   !
   ! IO save DDIIS error.
   CALL Put(DIISErr,'ddiiserr')
@@ -295,15 +645,15 @@ if(myid.eq.0) WRITE(*,*) 'Save E''=<'//TRIM(TrixFile('EPrime'//TRIM(Args%C%C(4))
      I0=DDIISBeg-CPSCFCycl   ! -1!I added that.
      DO I=1,N-1
 #ifdef DDIIS_DEBUG
-        WRITE(*,*) 'Load <ei|=<'//TRIM(TrixFile('EPrime'//TRIM(Args%C%C(4)),Args,I0))//'>'
+        WRITE(*,*) 'Load <ei|=<'//TRIM(TrixFile('EPrime'//TRIM(Args%C%C(3)),Args,I0))//'>'
 #endif
-        CALL Get(Tmp1,TrixFile('EPrime'//TRIM(Args%C%C(4)),Args,I0))
+        CALL Get(Tmp1,TrixFile('EPrime'//TRIM(Args%C%C(3)),Args,I0))
         J0=I0
         DO J=I,N-1
 #ifdef DDIIS_DEBUG
-           WRITE(*,*) 'Load |ej>=<'//TRIM(TrixFile('EPrime'//TRIM(Args%C%C(4)),Args,J0))//'>'
+           WRITE(*,*) 'Load |ej>=<'//TRIM(TrixFile('EPrime'//TRIM(Args%C%C(3)),Args,J0))//'>'
 #endif
-           CALL Get(EPrm,TrixFile('EPrime'//TRIM(Args%C%C(4)),Args,J0))
+           CALL Get(EPrm,TrixFile('EPrime'//TRIM(Args%C%C(3)),Args,J0))
            B%D(I,J)=Dot(Tmp1,EPrm)
            B%D(J,I)=B%D(I,J)
            J0=J0+1
@@ -459,37 +809,16 @@ if(myid.eq.0) WRITE(*,*) 'Save E''=<'//TRIM(TrixFile('EPrime'//TRIM(Args%C%C(4))
   CALL Sort(AbsDIISCo,Idx,N-1,1)
   !
   ! Start with a matrix of diagonal zeros...
-  SELECT CASE(RespOrder)
-  CASE(1)
-     CALL SetToI(FPrm1_1)
-     CALL Multiply(FPrm1_1,Zero)
-  CASE(2)
-     CALL SetToI(FPrm2_1)
-     CALL Multiply(FPrm2_1,Zero)
-  CASE(3)
-     CALL SetToI(FPrm3_1)
-     CALL Multiply(FPrm3_1,Zero)
-  END SELECT
+  CALL New(TmpFPrm)
+  CALL SetToI(TmpFPrm)
+  CALL Multiply(TmpFPrm,Zero)
   !
   ! And do the summation
   DO I=1,N-1
-     SELECT CASE(RespOrder)
-     CASE(1)
-        CALL Get(Tmp1,TrixFile('OrthoFPrime'//TRIM(Args%C%C(4)),Args,SCFOff%I(Idx%I(I))))
-        CALL Multiply(Tmp1,DIISCo%D(Idx%I(I)))
-        CALL Add(FPrm1_1,Tmp1,EPrm)
-        CALL SetEq(FPrm1_1,EPrm)
-     CASE(2)
-        CALL Get(Tmp1,TrixFile('OrthoFPrim2'//TRIM(Args%C%C(4)),Args,SCFOff%I(Idx%I(I))))
-        CALL Multiply(Tmp1,DIISCo%D(Idx%I(I)))
-        CALL Add(FPrm2_1,Tmp1,EPrm)
-        CALL SetEq(FPrm2_1,EPrm)
-     CASE(3)
-        CALL Get(Tmp1,TrixFile('OrthoFPrim3'//TRIM(Args%C%C(4)),Args,SCFOff%I(Idx%I(I))))
-        CALL Multiply(Tmp1,DIISCo%D(Idx%I(I)))
-        CALL Add(FPrm3_1,Tmp1,EPrm)
-        CALL SetEq(FPrm3_1,EPrm)
-     END SELECT
+     CALL Get(Tmp1,TrixFile('OrthoFPrime'//TRIM(Args%C%C(3)),Args,SCFOff%I(Idx%I(I))))
+     CALL Multiply(Tmp1,DIISCo%D(Idx%I(I)))
+     CALL Add(TmpFPrm,Tmp1,EPrm)
+     CALL SetEq(TmpFPrm,EPrm)
   ENDDO
   !
   ! Deallocate local arrays.
@@ -514,33 +843,19 @@ if(myid.eq.0) WRITE(*,*) 'Save E''=<'//TRIM(TrixFile('EPrime'//TRIM(Args%C%C(4))
   ! IO for the orthogonal, extrapolated FPrim 
   !-------------------------------------------------------------------
   !
-  CALL Put(FPrm1_1,TrixFile('FPrime_DDIIS'//TRIM(Args%C%C(4)),Args,0)) 
-  CALL PChkSum(FPrm1_1,'FPrime_DDIIS'//TRIM(Args%C%C(4))//'['//TRIM(SCFCycl)//']',Prog)
-  CALL PPrint( FPrm1_1,'FPrime_DDIIS'//TRIM(Args%C%C(4))//'['//TRIM(SCFCycl)//']')
-  CALL Plot(   FPrm1_1,'FPrime_DDIIS'//TRIM(Args%C%C(4))//'_'//TRIM(SCFCycl))
+  CALL Put(TmpFPrm,TrixFile('FPrime_DDIIS'//TRIM(Args%C%C(3)),Args,0)) 
+  CALL PChkSum(TmpFPrm,'FPrime_DDIIS'//TRIM(Args%C%C(3))//'['//TRIM(SCFCycl)//']',Prog)
+  CALL PPrint( TmpFPrm,'FPrime_DDIIS'//TRIM(Args%C%C(3))//'['//TRIM(SCFCycl)//']')
+  CALL Plot(   TmpFPrm,'FPrime_DDIIS'//TRIM(Args%C%C(3))//'_'//TRIM(SCFCycl))
   !
   !-------------------------------------------------------------------
   ! Tidy up 
   !-------------------------------------------------------------------
   !
   CALL Delete(Tmp1     )
-  CALL Delete(FPrm1_1  )
+  CALL Delete(TmpFPrm  )
   CALL Delete(EPrm     )
   CALL Delete(DIISCo   )
-  IF(RespOrder.GE.2) THEN
-     CALL Delete(FPrm2_1)
-     CALL Delete(PPrm2_1)
-     CALL Delete(PPrm1_2)
-  ENDIF
-  IF(RespOrder.GE.2) THEN
-     CALL Delete(FPrm3_1)
-     CALL Delete(PPrm3_1)
-     CALL Delete(FPrm2_2)
-     CALL Delete(PPrm2_2)
-     CALL Delete(FPrm2_3)
-     CALL Delete(PPrm2_3)
-     CALL Delete(PPrm1_3)
-  ENDIF
   !
   !CALL Delete(BTmp)
   !
