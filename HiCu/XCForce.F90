@@ -86,7 +86,8 @@ PROGRAM XCForce
                  Pair%AB2=(Pair%A(1)-Pair%B(1))**2 &
                          +(Pair%A(2)-Pair%B(2))**2 &
                          +(Pair%A(3)-Pair%B(3))**2
-                 IF(TestAtomPair(Pair)) THEN
+                  IF(TestAtomPair(Pair,CubeRoot%Box)) THEN
+!                 IF(TestAtomPair(Pair)) THEN
                     F_nlm(1:3)     = dXC(Pair,P%MTrix%D(Q:Q+MN1))
                     XCFrc%D(A1:A2) = XCFrc%D(A1:A2) + F_nlm(1:3)
 !
@@ -106,11 +107,10 @@ PROGRAM XCForce
   ENDDO
 !--------------------------------------------------------------------------------
 ! Do some checksumming, resumming and IO 
-  CALL PPrint(XCFrc,'dXC/dR')
+!  CALL PPrint(XCFrc,'dXC/dR')
   CALL PChkSum(XCFrc,'dXC/dR',Proc_O=Prog)  
 ! Print The XCForce
   CALL Print_Force(GM,XCFrc,' dXC/dR ')
-  CALL Print_CheckSum_Force(XCFrc,' dXC/dR ')
 ! Sum in contribution to total force
   CALL New(Frc,3*NAtoms)
   CALL Get(Frc,'GradE',Tag_O=CurGeom)
