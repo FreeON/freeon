@@ -81,6 +81,7 @@ clean:
 	rm -f $(MONDO_EXEC)/MakeRho
 	rm -f $(MONDO_EXEC)/SForce
 	rm -f $(MONDO_EXEC)/TForce
+	rm -f $(MONDO_EXEC)/ParaMakeRho
 	ln -s /dev/null core
 	ls -l
 #
@@ -89,5 +90,3 @@ MakeT.o  : TBlok.o                $(MONDO_LIB)/libMondoMods.a
 MakeRho.o: RhoBlok.o  RhoTools.o  $(MONDO_LIB)/libMondoMods.a
 SForce.o : BlokTrWdS.o            $(MONDO_LIB)/libMondoMods.a
 TForce.o : BlokTrPdT.o            $(MONDO_LIB)/libMondoMods.a
-
-
