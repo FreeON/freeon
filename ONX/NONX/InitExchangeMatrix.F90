@@ -18,12 +18,11 @@ MODULE InitExchangeMatrix
 
   CONTAINS
 
-SUBROUTINE InitK_BCSR(BS,GM,K,NameBuf,SubInd)
+SUBROUTINE InitK_BCSR(BS,GM,K,NameBuf)
   TYPE(BSET),INTENT(IN)        :: BS
   TYPE(CRDS),INTENT(IN)        :: GM
   TYPE(BCSR),INTENT(INOUT)     :: K
   TYPE(INT_VECT),INTENT(IN)    :: NameBuf
-  TYPE(INT_RNK2),INTENT(INOUT) :: SubInd
   INTEGER                      :: AtA,KA,NBFA,CFA
   INTEGER                      :: AtB,KB,NBFB
   INTEGER                      :: StartLA,StopLA,StrideA
@@ -60,38 +59,16 @@ SUBROUTINE InitK_BCSR(BS,GM,K,NameBuf,SubInd)
   END DO ! ri
   K%RowPt%I(NRows+1)=j
 
-  IndexA1=0
-  DO AtA=1,NAtoms
-    KA=GM%AtTyp%I(AtA)
-    NBFA=BS%BfKnd%I(KA)
-    Ax=GM%Carts%D(1,AtA)
-    Ay=GM%Carts%D(2,AtA)
-    Az=GM%Carts%D(3,AtA)
-    IndexA2=0
-    DO CFA=1,BS%NCFnc%I(KA)
-      IndexA1=IndexA1+1
-      StartLA=BS%LStrt%I(CFA,KA)
-      StopLA=BS%LStop%I(CFA,KA)
-      StrideA=StopLA-StartLA+1
-      SubInd%I(1,IndexA1)=AtA
-      SubInd%I(2,IndexA1)=NBFA
-      SubInd%I(3,IndexA1)=IndexA2+1
-      IndexA2=IndexA2+StrideA
-    END DO  ! CFA
-  END DO ! AtA
-
-
 END SUBROUTINE InitK_BCSR
 
 
 #ifdef PARALLEL
 
-SUBROUTINE InitK_DBCSR(BS,GM,K,NameBuf,SubInd)
+SUBROUTINE InitK_DBCSR(BS,GM,K,NameBuf)
   TYPE(BSET),INTENT(IN)        :: BS
   TYPE(CRDS),INTENT(IN)        :: GM
   TYPE(DBCSR),INTENT(INOUT)    :: K
   TYPE(INT_VECT),INTENT(IN)    :: NameBuf
-  TYPE(INT_RNK2),INTENT(INOUT) :: SubInd
   INTEGER                      :: j,iPnt,ri,ci
   INTEGER                      :: IndexA1,IndexA2
   INTEGER                      :: AtA,KA,NBFA,CFA,StartLA,StopLA,StrideA
@@ -130,26 +107,6 @@ SUBROUTINE InitK_DBCSR(BS,GM,K,NameBuf,SubInd)
   END DO ! ri
   K%RowPt%I(NRows+1)=j  
   
-  IndexA1=0
-  DO AtA=1,NAtoms
-    KA=GM%AtTyp%I(AtA)
-    NBFA=BS%BfKnd%I(KA)
-    Ax=GM%Carts%D(1,AtA)
-    Ay=GM%Carts%D(2,AtA)
-    Az=GM%Carts%D(3,AtA)
-    IndexA2=0
-    DO CFA=1,BS%NCFnc%I(KA)
-      IndexA1=IndexA1+1
-      StartLA=BS%LStrt%I(CFA,KA)
-      StopLA=BS%LStop%I(CFA,KA)
-      StrideA=StopLA-StartLA+1
-      SubInd%I(1,IndexA1)=AtA
-      SubInd%I(2,IndexA1)=NBFA
-      SubInd%I(3,IndexA1)=IndexA2+1
-      IndexA2=IndexA2+StrideA
-    END DO  ! CFA
-  END DO ! AtA
-
 END SUBROUTINE InitK_DBCSR
 #endif
 

@@ -1,30 +1,3 @@
-!------------------------------------------------------------------------------
-!--  This code is part of the MondoSCF suite of programs for linear scaling 
-!    electronic structure theory and ab initio molecular dynamics.
-!
-!--  Copyright (c) 2001, the Regents of the University of California.  
-!    This SOFTWARE has been authored by an employee or employees of the 
-!    University of California, operator of the Los Alamos National Laboratory 
-!    under Contract No. W-7405-ENG-36 with the U.S. Department of Energy.  
-!    The U.S. Government has rights to use, reproduce, and distribute this 
-!    SOFTWARE.  The public may copy, distribute, prepare derivative works 
-!    and publicly display this SOFTWARE without charge, provided that this 
-!    Notice and any statement of authorship are reproduced on all copies.  
-!    Neither the Government nor the University makes any warranty, express 
-!    or implied, or assumes any liability or responsibility for the use of 
-!    this SOFTWARE.  If SOFTWARE is modified to produce derivative works, 
-!    such modified SOFTWARE should be clearly marked, so as not to confuse 
-!    it with the version available from LANL.  The return of derivative works
-!    to the primary author for integration and general release is encouraged. 
-!    The first publication realized with the use of MondoSCF shall be
-!    considered a joint work.  Publication of the results will appear
-!    under the joint authorship of the researchers nominated by their
-!    respective institutions. In future publications of work performed
-!    with MondoSCF, the use of the software shall be properly acknowledged,
-!    e.g. in the form "These calculations have been performed using MondoSCF, 
-!    a suite of programs for linear scaling electronic structure theory and
-!    ab initio molecular dynamics", and given appropriate citation.  
-!------------------------------------------------------------------------------
 PROGRAM ONX
   USE DerivedTypes
   USE GlobalScalars
@@ -77,7 +50,7 @@ PROGRAM ONX
 ! Misc. variables and parameters...
 !--------------------------------------------------------------------------------
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: InFile
-  CHARACTER(LEN=5),PARAMETER     :: Prog='PONX'
+  CHARACTER(LEN=5),PARAMETER     :: Prog='ONX'
 !--------------------------------------------------------------------------------
   CALL StartUp(Args,Prog)
   InFile=TRIM(SCFName)//'_Cyc'//TRIM(IntToChar(Args%i%i(1)))
@@ -113,7 +86,8 @@ PROGRAM ONX
   CALL RangeOfExchange(BSc,GMc,BSp,GMp,D,NameBuf)
   CALL New(K,(/NRows+1,NCols,NElem/))
   CALL New(SubInd,(/3,NBasF/))
-  CALL InitK(BSc,GMc,K,NameBuf,SubInd)
+  CALL InitK(BSc,GMc,K,NameBuf)
+  CALL InitSubInd(BSc,GMc,SubInd)
 !--------------------------------------------------------------------------------
 ! All set to compute the exchange matrix
 !--------------------------------------------------------------------------------

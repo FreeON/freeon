@@ -8,6 +8,8 @@
       REAL*8  W(N,NVRR),R(N,NR)
       REAL*8  WR(12,N),WZ(5,N)
 
+      IF (N.EQ.0) RETURN
+
       DO J=1,NR
         I1=SLOC(J)
         DO I=1,N

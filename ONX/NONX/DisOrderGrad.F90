@@ -1,4 +1,4 @@
-SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,SB,Drv,NameBuf)  
+SUBROUTINE DisOrderGrad(BS,GM,DB,IB,SB,Drv,NameBuf)  
   USE DerivedTypes
   USE GlobalScalars
   USE PrettyPrint
@@ -10,8 +10,8 @@ SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,SB,Drv,NameBuf)
 !--------------------------------------------------------------------------------
 ! Basis set, coordinates, ect...
 !--------------------------------------------------------------------------------
-  TYPE(BSET),INTENT(IN)    :: BSc,BSp   ! basis set info
-  TYPE(CRDS),INTENT(IN)    :: GMc,GMp   ! geometry info
+  TYPE(BSET),INTENT(IN)    :: BS        ! basis set info
+  TYPE(CRDS),INTENT(IN)    :: GM        ! geometry info
   TYPE(DBuf)               :: DB        ! ONX distribution buffers
   TYPE(IBuf)               :: IB        ! ONX 2-e eval buffers
   TYPE(DSL)                :: SB        ! ONX distribution pointers
@@ -43,11 +43,8 @@ SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,SB,Drv,NameBuf)
   INTEGER                :: NFinal,iT
 
   CALL New(BufN,(/DB%MAXT,DB%NPrim*DB%NPrim/))
-!  CALL New(BufT,(/DB%MAXD,DB%NTypes,DB%NPrim*DB%NPrim/))
-!  CALL New(SchT,(/DB%MAXD,DB%NTypes,DB%NPrim*DB%NPrim/))
   CALL New(BufT,(/DB%MAXD,DB%MAXT,DB%MAXK/))
   CALL New(SchT,(/DB%MAXD,DB%MAXT,DB%MAXK/))
-
 
   DB%LenCC=0
   DB%LenTC=0
@@ -60,14 +57,14 @@ SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,SB,Drv,NameBuf)
 #ifdef PARALLEL
     IF (NameBuf%I(AtC)==1) THEN
 #endif
-    KC=GMp%AtTyp%I(AtC)
-    NBFC=BSp%BfKnd%I(KC)
-    DO CFC=1,BSp%NCFnc%I(KC)
+    KC=GM%AtTyp%I(AtC)
+    NBFC=BS%BfKnd%I(KC)
+    DO CFC=1,BS%NCFnc%I(KC)
       IndexC=IndexC+1
-      StartLC=BSp%LStrt%I(CFC,KC)
-      StopLC=BSp%LStop%I(CFC,KC)
-      MinLC=BSp%ASymm%I(1,CFC,KC)
-      MaxLC=BSp%ASymm%I(2,CFC,KC)
+      StartLC=BS%LStrt%I(CFC,KC)
+      StopLC=BS%LStop%I(CFC,KC)
+      MinLC=BS%ASymm%I(1,CFC,KC)
+      MaxLC=BS%ASymm%I(2,CFC,KC)
       KType=MaxLC*(MaxLC+1)/2+MinLC+1
       NKCase=MaxLC-MinLC+1
       StrideC=StopLC-StartLC+1         
@@ -77,11 +74,11 @@ SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,SB,Drv,NameBuf)
       IndexA=0  
 
   DO AtA=1,NAtoms
-    KA=GMc%AtTyp%I(AtA)
-    NBFA=BSc%BfKnd%I(KA)
-    ACx=GMc%Carts%D(1,AtA)-GMp%Carts%D(1,AtC)
-    ACy=GMc%Carts%D(2,AtA)-GMp%Carts%D(2,AtC) 
-    ACz=GMc%Carts%D(3,AtA)-GMp%Carts%D(3,AtC) 
+    KA=GM%AtTyp%I(AtA)
+    NBFA=BS%BfKnd%I(KA)
+    ACx=GM%Carts%D(1,AtA)-GM%Carts%D(1,AtC)
+    ACy=GM%Carts%D(2,AtA)-GM%Carts%D(2,AtC) 
+    ACz=GM%Carts%D(3,AtA)-GM%Carts%D(3,AtC) 
     AC2=ACx*ACx+ACy*ACy+ACz*ACz    
 !
 ! Need to call something like SetAtomPair here, the problem 
@@ -89,14 +86,14 @@ SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,SB,Drv,NameBuf)
 ! dual basis sets for K.
 !
     IF (AC2.GT.Test) THEN
-      IndexA=IndexA+BSc%NCFnc%I(KA)
+      IndexA=IndexA+BS%NCFnc%I(KA)
     ELSE 
-      DO CFA=1,BSc%NCFnc%I(KA)
+      DO CFA=1,BS%NCFnc%I(KA)
         IndexA=IndexA+1
-        StartLA=BSc%LStrt%I(CFA,KA)
-        StopLA=BSc%LStop%I(CFA,KA)
-        MinLA=BSc%ASymm%I(1,CFA,KA)
-        MaxLA=BSc%ASymm%I(2,CFA,KA)
+        StartLA=BS%LStrt%I(CFA,KA)
+        StopLA=BS%LStop%I(CFA,KA)
+        MinLA=BS%ASymm%I(1,CFA,KA)
+        MaxLA=BS%ASymm%I(2,CFA,KA)
         IType=MaxLA*(MaxLA+1)/2+MinLA+1
         NICase=MaxLA-MinLA+1
         StrideA=StopLA-StartLA+1  
@@ -113,9 +110,9 @@ SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,SB,Drv,NameBuf)
           DB%TBufC%D( 5,iBf)=ACx
           DB%TBufC%D( 6,iBf)=ACy
           DB%TBufC%D( 7,iBf)=ACz
-          DB%TBufC%D( 8,iBf)=GMc%Carts%D(1,AtA)
-          DB%TBufC%D( 9,iBf)=GMc%Carts%D(2,AtA)
-          DB%TBufC%D(10,iBf)=GMc%Carts%D(3,AtA)
+          DB%TBufC%D( 8,iBf)=GM%Carts%D(1,AtA)
+          DB%TBufC%D( 9,iBf)=GM%Carts%D(2,AtA)
+          DB%TBufC%D(10,iBf)=GM%Carts%D(3,AtA)
           x=ACx
           y=ACy
           z=ACz
@@ -128,50 +125,57 @@ SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,SB,Drv,NameBuf)
           DB%TBufC%D( 5,iBf)=-ACx
           DB%TBufC%D( 6,iBf)=-ACy
           DB%TBufC%D( 7,iBf)=-ACz
-          DB%TBufC%D( 8,iBf)=GMp%Carts%D(1,AtC)
-          DB%TBufC%D( 9,iBf)=GMp%Carts%D(2,AtC)
-          DB%TBufC%D(10,iBf)=GMp%Carts%D(3,AtC)
+          DB%TBufC%D( 8,iBf)=GM%Carts%D(1,AtC)
+          DB%TBufC%D( 9,iBf)=GM%Carts%D(2,AtC)
+          DB%TBufC%D(10,iBf)=GM%Carts%D(3,AtC)
           x=-ACx
           y=-ACy
           z=-ACz
         ENDIF
 
         I0=0
-        DO PFC=1,BSp%NPFnc%I(CFC,KC)
-        DO PFA=1,BSc%NPFnc%I(CFA,KA)
-          Za=BSc%Expnt%D(PFA,CFA,KA)
-          Zc=BSp%Expnt%D(PFC,CFC,KC)
+        DO PFC=1,BS%NPFnc%I(CFC,KC)
+        DO PFA=1,BS%NPFnc%I(CFA,KA)
+          Za=BS%Expnt%D(PFA,CFA,KA)
+          Zc=BS%Expnt%D(PFC,CFC,KC)
           Zeta=Za+Zc
-          Cnt=BSc%CCoef%D(StopLA,PFA,CFA,KA)*BSp%CCoef%D(StopLC,PFC,CFC,KC)
+          Cnt=BS%CCoef%D(StopLA,PFA,CFA,KA)*BS%CCoef%D(StopLC,PFC,CFC,KC)
           VSAC=EXP(-Za*Zc/Zeta*AC2)/Zeta*Prev1*Cnt
           XiAB=Za*Zc/Zeta
           IF (TestPrimPair(XiAB,AC2)) THEN
             I0=I0+1
             DB%TBufP%D(1,I0,iBf)=Zeta
-            DB%TBufP%D(2,I0,iBf)=(Za*GMc%Carts%D(1,AtA)+Zc*GMp%Carts%D(1,AtC))/Zeta
-            DB%TBufP%D(3,I0,iBf)=(Za*GMc%Carts%D(2,AtA)+Zc*GMp%Carts%D(2,AtC))/Zeta
-            DB%TBufP%D(4,I0,iBf)=(Za*GMc%Carts%D(3,AtA)+Zc*GMp%Carts%D(3,AtC))/Zeta
+            DB%TBufP%D(2,I0,iBf)=(Za*GM%Carts%D(1,AtA)+Zc*GM%Carts%D(1,AtC))/Zeta
+            DB%TBufP%D(3,I0,iBf)=(Za*GM%Carts%D(2,AtA)+Zc*GM%Carts%D(2,AtC))/Zeta
+            DB%TBufP%D(4,I0,iBf)=(Za*GM%Carts%D(3,AtA)+Zc*GM%Carts%D(3,AtC))/Zeta
             DB%TBufP%D(5,I0,iBf)=VSAC
             IF (CType.EQ.11) THEN
               DB%TBufP%D(6,I0,iBf)=1.0D0
               DB%TBufP%D(7,I0,iBf)=1.0D0
               DB%TBufP%D(8,I0,iBf)=1.0D0
             ELSEIF (CType.EQ.12.OR.CType.EQ.21) THEN
-              DB%TBufP%D(6,I0,iBf)=BSc%CCoef%D(StartLA,PFA,CFA,KA) * &
-                                   BSp%CCoef%D(StartLC,PFC,CFC,KC) / Cnt
+              DB%TBufP%D(6,I0,iBf)=BS%CCoef%D(StartLA,PFA,CFA,KA) * &
+                                   BS%CCoef%D(StartLC,PFC,CFC,KC) / Cnt
               DB%TBufP%D(7,I0,iBf)=DB%TBufP%D(6,I0,iBf)
               DB%TBufP%D(8,I0,iBf)=DB%TBufP%D(6,I0,iBf)
             ELSEIF (CType.EQ.22) THEN
-              DB%TBufP%D(6,I0,iBf)=BSc%CCoef%D(StartLA,PFA,CFA,KA) * &
-                                   BSp%CCoef%D(StartLC,PFC,CFC,KC) / Cnt
-              DB%TBufP%D(7,I0,iBf)=BSc%CCoef%D(StartLA+1,PFA,CFA,KA) * &
-                                   BSp%CCoef%D(StartLC,PFC,CFC,KC) / Cnt
-              DB%TBufP%D(8,I0,iBf)=BSc%CCoef%D(StartLA,PFA,CFA,KA) * &
-                                   BSp%CCoef%D(StartLC+1,PFC,CFC,KC) / Cnt
+              DB%TBufP%D(6,I0,iBf)=BS%CCoef%D(StartLA,PFA,CFA,KA) * &
+                                   BS%CCoef%D(StartLC,PFC,CFC,KC) / Cnt
+              DB%TBufP%D(7,I0,iBf)=BS%CCoef%D(StartLA+1,PFA,CFA,KA) * &
+                                   BS%CCoef%D(StartLC,PFC,CFC,KC) / Cnt
+              DB%TBufP%D(8,I0,iBf)=BS%CCoef%D(StartLA,PFA,CFA,KA) * &
+                                   BS%CCoef%D(StartLC+1,PFC,CFC,KC) / Cnt
             ELSE
               WRITE(*,*) 'CType=',CType
               CALL Halt(' Illegal CType in ONX:DisOrder')
             END IF ! CType
+            IF(IType.GE.KType) THEN
+              DB%TBufP%D( 9,I0,iBf)=2.0D0*Za
+              DB%TBufP%D(10,I0,iBf)=2.0D0*Zc
+            ELSE
+              DB%TBufP%D( 9,I0,iBf)=2.0D0*Zc
+              DB%TBufP%D(10,I0,iBf)=2.0D0*Za
+            ENDIF
           END IF ! test on primitive distributions
         ENDDO ! PFA
         ENDDO ! PFC
@@ -300,5 +304,5 @@ SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,SB,Drv,NameBuf)
   CALL Delete(BufT)
   CALL Delete(SchT)
 
-END SUBROUTINE DisOrder
+END SUBROUTINE DisOrderGrad
  

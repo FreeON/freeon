@@ -7,9 +7,9 @@ SUBROUTINE RGen(N,Ltot,CBra,CKet,CB,CK,DisBufB,PrmBufB,R,DB,IB,SB)
 !--------------------------------------------------------------------------------
 ! Distribution buffer stuff
 !--------------------------------------------------------------------------------
-  TYPE(DBuf)    :: DB                             ! ONX distribution buffers
-  TYPE(IBuf)    :: IB                             ! ONX 2-e eval buffers
-  TYPE(DSL)     :: SB                             ! ONX distribution pointers
+  TYPE(DBuf),INTENT(IN)    :: DB            ! ONX distribution buffers
+  TYPE(IBuf),INTENT(INOUT) :: IB            ! ONX 2-e eval buffers
+  TYPE(DSL),INTENT(IN)     :: SB            ! ONX distribution pointers
   REAL(DOUBLE)  :: DisBufB(DB%MAXC)
   REAL(DOUBLE)  :: PrmBufB(DB%MAXP,CBra+DB%MInfo)
   REAL(DOUBLE)  :: CB(CBra,3)
@@ -29,6 +29,8 @@ SUBROUTINE RGen(N,Ltot,CBra,CKet,CB,CK,DisBufB,PrmBufB,R,DB,IB,SB)
 !--------------------------------------------------------------------------------
   INTEGER       :: I,J,K,M,Ind,IG
   INTEGER       :: I0,I1,I2
+
+  IF(N.EQ.0) RETURN
 
   Cx=DisBufB( 8)
   Cy=DisBufB( 9)

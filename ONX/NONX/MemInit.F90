@@ -17,7 +17,11 @@ SUBROUTINE MemInit(DB,IB,SB,Drv,BSc,BSp)
     DB%MAXD    = 100
     DB%MAXT    = 10
     DB%MAXK    = 10
-    DB%MAXP    = 8
+    IF (Gradient) THEN
+      DB%MAXP    = 10
+    ELSE
+      DB%MAXP    = 8
+    ENDIF
     DB%MAXC    = 11
     DB%NPrim   = MAX(BSc%NPrim,BSp%NPrim)
     DB%MInfo   = 0    
