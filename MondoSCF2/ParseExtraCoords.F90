@@ -84,6 +84,8 @@ MODULE ParseExtraCoords
             INDEX(LineLowCase,'alpha')/=0.OR.&
             INDEX(LineLowCase,'beta')/=0.OR.&
             INDEX(LineLowCase,'gamma')/=0.OR.&
+            INDEX(LineLowCase,'volm_l')/=0.OR.&
+            INDEX(LineLowCase,'area_l')/=0.OR.&
             INDEX(LineLowCase,'tors')/=0.OR.&
             INDEX(LineLowCase,'outp')/=0.OR.&
             INDEX(LineLowCase,'linb1')/=0.OR.&
@@ -477,8 +479,8 @@ MODULE ParseExtraCoords
      CLOSE(Inp,STATUS='KEEP')
      CALL Delete(XYZ)
      CALL Delete(CConstrain)
-   ! CALL PrtIntCoords(GOPt%ExtIntCs,GOpt%ExtIntCs%Value%D,&
-   !                   'chk extra 2',PBCDim_O=1)
+    !CALL PrtIntCoords(GOPt%ExtIntCs,GOpt%ExtIntCs%Value%D,&
+    !                  'chk extra 2',PBCDim_O=1)
    END SUBROUTINE LoadExtraCoords
 !
 !------------------------------------------------------------------

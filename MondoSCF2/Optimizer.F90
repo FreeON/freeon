@@ -1431,7 +1431,7 @@ CONTAINS
      REAL(DOUBLE)    :: GCrit
      !
      GCrit=GTol(AccL)
-   ! GCrit=3.D-4
+ !   GCrit=3.D-4
      !
      GConv%MaxGeOpSteps=MAX(3*NatmsLoc,600)
      GConv%Grad= GCrit
@@ -1625,7 +1625,7 @@ CONTAINS
      LOGICAL          :: DoBackTrack,DoLineS
      LOGICAL,OPTIONAL :: DoLineS_O
      REAL(DOUBLE)     :: EOld,ENew,MeanDist,FactN,FactO,Fact,MaxDist
-     REAL(DOUBLE)     :: BackTrackFact
+     REAL(DOUBLE)     :: BackTrackFact,Aux9(9)
      TYPE(DBL_VECT)   :: DistVect1,DistVect2
      TYPE(DBL_RNK2)   :: RefXYZ1
      TYPE(LOG_VECT)   :: NeedBackTr
@@ -1753,6 +1753,8 @@ CONTAINS
                C%Geos%Clone(iCLONE)%PBC%BoxShape%D= &
                  (FactN*C%Geos%Clone(iCLONE)%PBC%BoxShape%D+ &
                                  FactO*GMOld%PBC%BoxShape%D)
+               ! apply lattice constraints, e.g. fixed volume
+               CALL SetFixedLattice(Aux9,C%GOpt%ExtIntCs,C%GOpt%Constr,BoxShape_O=C%Geos%Clone(iCLONE)%PBC%BoxShape%D)
                CALL PBCInfoFromNewCarts(C%Geos%Clone(iCLONE)%PBC)
              ENDIF
              !

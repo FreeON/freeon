@@ -2527,12 +2527,13 @@ CONTAINS
      REAL(DOUBLE)     :: SumU,SumConstr,Conv,ConvC
      CHARACTER(LEN=*) :: CharU   
      INTEGER,OPTIONAL :: PBCDim_O
-     LOGICAL          :: DoPrtCells
+     LOGICAL          :: DoPrtCells,DoPrtExternal
      !
      Conv=180.D0/PI
      ConvC=One/AngstromsToAu
      NIntC=SIZE(IntCs%Def%C)
      DoPrtCells=.FALSE.
+     DoPrtExternal=.FALSE.
      IF(PRESENT(PBCDim_O)) DoPrtCells=(PBCDim_O>0)
      !
      WRITE(*,*) TRIM(CharU)
@@ -2565,14 +2566,32 @@ CONTAINS
            SUMConstr=IntCs%ConstrValue%D(I)*ConvC
          ENDIF
        ENDIF
-       WRITE(*,111) I,IntCs%Def%C(I)(1:8),IntCs%Atoms%I(I,1:4),SumU, &
-         IntCs%Constraint%L(I),SumConstr,IntCs%Active%L(I)
-       WRITE(Out,111) I,IntCs%Def%C(I)(1:8),IntCs%Atoms%I(I,1:4),SumU, &
-         IntCs%Constraint%L(I),SumConstr,IntCs%Active%L(I)
-       IF(DoPrtCells) THEN
-         IF(ANY(IntCs%Cells%I(I,1:12)/=0)) THEN
-           WRITE(*,112) IntCs%Cells%I(I,1:12)
-           WRITE(Out,112) IntCs%Cells%I(I,1:12)
+       IF(DoPrtExternal) THEN
+         IF(IntCs%Def%C(I)(1:4)=='TORS'.OR. &
+            IntCs%Def%C(I)(1:4)=='LINB'.OR. &
+            IntCs%Def%C(I)(1:4)=='OUTP') THEN
+            WRITE(Out,322) IntCs%Def%C(I)(1:8),IntCs%Atoms%I(I,1:4), &
+                           ' CELL ',IntCs%Cells%I(I,1:12),SumU 
+         ELSE IF(IntCs%Def%C(I)(1:4)=='BEND') THEN
+            WRITE(Out,422) IntCs%Def%C(I)(1:8),IntCs%Atoms%I(I,1:3), &
+                           ' CELL ',IntCs%Cells%I(I,1:9),SumU 
+         ELSE IF(IntCs%Def%C(I)(1:4)=='STRE') THEN
+            WRITE(Out,522) IntCs%Def%C(I)(1:8),IntCs%Atoms%I(I,1:2), &
+                           ' CELL ',IntCs%Cells%I(I,1:6),SumU 
+         ENDIF
+     322 FORMAT(A8,4I4,A6,12I3,F12.5)
+     422 FORMAT(A8,3I4,4X,A6,9I3,3X,F12.5)
+     522 FORMAT(A8,2I4,2X,A6,6I3,6X,F12.5)
+       ELSE
+         WRITE(*,111) I,IntCs%Def%C(I)(1:8),IntCs%Atoms%I(I,1:4),SumU, &
+           IntCs%Constraint%L(I),SumConstr,IntCs%Active%L(I)
+         WRITE(Out,111) I,IntCs%Def%C(I)(1:8),IntCs%Atoms%I(I,1:4),SumU, &
+           IntCs%Constraint%L(I),SumConstr,IntCs%Active%L(I)
+         IF(DoPrtCells) THEN
+           IF(ANY(IntCs%Cells%I(I,1:12)/=0)) THEN
+             WRITE(*,112) IntCs%Cells%I(I,1:12)
+             WRITE(Out,112) IntCs%Cells%I(I,1:12)
+           ENDIF
          ENDIF
        ENDIF
      ENDDO
@@ -3221,29 +3240,65 @@ CONTAINS
 !
 !-------------------------------------------------------------
 !
-   SUBROUTINE SetFixedLattice(VectCart,IntCs,GConstr)
+   SUBROUTINE SetFixedLattice(VectCart,IntCs,GConstr,BoxShape_O)
      REAL(DOUBLE),DIMENSION(:)   :: VectCart
      TYPE(INTC)                  :: IntCs
      INTEGER                     :: I,J,K,L,NCart
      REAL(DOUBLE),DIMENSION(3,3) :: BoxShape
+     REAL(DOUBLE),DIMENSION(3,3),OPTIONAL :: BoxShape_O
      REAL(DOUBLE),DIMENSION(6)   :: Vec
      TYPE(Constr)                :: GConstr
      !
      NCart=SIZE(VectCart)-9
-     DO I=1,3
-       K=NCart+3*(I-1)+1
-       L=K+2
-       BoxShape(1:3,I)=VectCart(K:L)
-     ENDDO
+     IF(PRESENT(BoxShape_O)) THEN
+       BoxShape=BoxShape_O    
+     ELSE
+       DO I=1,3
+         K=NCart+3*(I-1)+1
+         L=K+2
+         BoxShape(1:3,I)=VectCart(K:L)
+       ENDDO
+     ENDIF
      CALL CalcBoxPars(Vec,BoxShape)
      CALL SetLattValues(Vec,IntCs,GConstr)
      CALL BoxParsToCart(Vec,BoxShape)
-     DO I=1,3
-       K=NCart+3*(I-1)+1
-       L=K+2
-       VectCart(K:L)=BoxShape(1:3,I)
-     ENDDO
+     CALL VolumeCtrl(IntCs,BoxShape) 
+     IF(PRESENT(BoxShape_O)) THEN
+       BoxShape_O=BoxShape
+     ELSE
+       DO I=1,3
+         K=NCart+3*(I-1)+1
+         L=K+2
+         VectCart(K:L)=BoxShape(1:3,I)
+       ENDDO
+     ENDIF
    END SUBROUTINE SetFixedLattice
+!
+!--------------------------------------------------------------------
+!
+   SUBROUTINE VolumeCtrl(IntCs,BoxShape) 
+     TYPE(INTC)   :: IntCs
+     REAL(DOUBLE) :: BoxShape(3,3),Value,Fact
+     INTEGER      :: I,J
+     LOGICAL      :: Active
+     !
+     DO I=1,IntCs%N
+       IF(IntCs%Constraint%L(I)) THEN
+         IF(IntCs%Def%C(I)(1:6)=="VOLM_L") THEN
+           CALL VOLUME((/0.D0,0.D0,0.D0/),BoxShape(1:3,1), &
+             BoxShape(1:3,2),BoxShape(1:3,3),Active,Value_O=Value)
+             Fact=EXP(LOG(IntCs%ConstrValue%D(I)/Value)/3.D0)
+             BoxShape=BoxShape*Fact
+         ENDIF
+         IF(IntCs%Def%C(I)(1:6)=="AREA_L") THEN
+           CALL AREA((/0.D0,0.D0,0.D0/),BoxShape(1:3,1), &
+             BoxShape(1:3,2),Active,Value_O=Value)
+             Fact=SQRT(IntCs%ConstrValue%D(I)/Value)
+             BoxShape=BoxShape*Fact
+         ENDIF
+       ENDIF
+     ENDDO
+   END SUBROUTINE VolumeCtrl
 !
 !--------------------------------------------------------------------
 !
@@ -6047,7 +6102,7 @@ return
      REAL(DOUBLE)                :: Fact,BoxSize,MaxRadI,MaxRad
      INTEGER                     :: I,J,N,NatmsLoc,IFrags,NFrag,VDWRatio
      INTEGER                     :: MaxBonds,NBondEst,IntSet
-     LOGICAL                     :: HBondOnly
+     LOGICAL                     :: HBondOnly,DoQuit
      TYPE(INT_VECT)              :: FragID
      TYPE(IntCBox)               :: Box
      !
@@ -6078,6 +6133,7 @@ return
          CALL New(FragID,NatmsLoc)
          DO J=1,NatmsLoc ; FragID%I(J)=J ; ENDDO
          NFrag=NatmsLoc
+         DoQuit=.FALSE.
          DO IFrags=1,10000
           !Fact=(One+0.05D0*(IFrags-1))
            Fact=1.05D0**(IFrags-1)
@@ -6085,6 +6141,13 @@ return
            CALL IntCBoxes(XYZ,Box,BoxSize_O=BoxSize)
            CritRad%D=Fact*StRad%D
            !
+!write(*,*) 'bef BondList2'
+!           CALL BondList2(XYZ,AtNum,Box,BondCov,IEq,CritRad%D)  
+!write(*,*) ifrags,' aft BondList2 ',BondCov%N
+!do i=1,BondCov%N
+!write(*,*) BondCov%IJ%I(1:2,i)
+!enddo
+!stop
            CALL BondList(XYZ,AtNum,IntSet,Box,BondCov, &
                          CritRad,IEq,FragID%I,NFrag,TOPM,HBondOnly)
            CALL SortBonds(NatmsLoc,AtmB,BondCov)
@@ -6092,11 +6155,14 @@ return
            CALL SortFragments(TOPM%ITot12%I,TOPM%JTot12%I,FragID%I,NFrag)
            CALL Delete(AtmB)
            CALL Delete(Box)
+           IF(DoQuit) EXIT
            IF(NFrag/=1) THEN
              CALL Delete(TOPM%ITot12)
              CALL Delete(TOPM%JTot12)
+!            CALL Delete(BondCov)
            ELSE
-             EXIT
+exit
+             DoQuit=.TRUE.
            ENDIF
          ENDDO
          IF(NFrag/=1) CALL Halt('Fragmented system after primary recognition.')
@@ -6153,7 +6219,6 @@ return
      TYPE(INT_VECT)              :: IFrag,JFrag
      INTEGER,DIMENSION(:)        :: AtNum,IEq,FragID
      TYPE(DBL_VECT)              :: CritRad
-     TYPE(INT_VECT)              :: Neighbors
      REAL(DOUBLE)                :: R12,R12_2,CritDist
      REAL(DOUBLE)                :: OriginalRad,DeltaRep
      INTEGER                     :: IZ,IX,IY,I1,I2,JJ1,JJ2,F1,F2,NFrag
@@ -6172,8 +6237,6 @@ return
      HAtm=0
      NBondEst=Bond%N
      NBond=NBondEst
-     CALL New(Neighbors,NatmsLoc)
-     Neighbors%I=0
      MaxRepeat=1
      AtomRepeat=.FALSE.
      IF(AtomRepeat) THEN
@@ -6261,8 +6324,6 @@ return
                                Bond%IJ%I(1:2,NBond)=(/JJ2,JJ1/)
                              ENDIF
                              Bond%Length%D(NBond)=R12
-                             Neighbors%I(JJ1)=Neighbors%I(JJ1)+1
-                             Neighbors%I(JJ2)=Neighbors%I(JJ2)+1
                              !
                            ! IF(IntSet==1) THEN
                                Bond%Type%C(NBond)(1:3)='COV'
@@ -6290,7 +6351,6 @@ return
        CALL Delete(FTop)
      ENDIF
      CALL MoreBondArray(Bond,0,NBond)
-     CALL Delete(Neighbors)
    END SUBROUTINE BondList
 !
 !--------------------------------------------------------------
@@ -6377,7 +6437,10 @@ return
                              DVect(:)=XYZ(:,JJ1)-XYZ(:,JJ2)
                              R12_2=DOT_PRODUCT(DVect,DVect)
                              R12=SQRT(R12_2)
-                             DVect=One/(CritRad(JJ2)/R12)**2/R12*DVect
+                             DVect=DEXP(-Two*R12/CritRad(JJ2))*DVect/R12
+                           ! DVect=DEXP(-R12)*DVect/R12
+                           ! DVect=DEXP(-(R12/CritRad(JJ2))**2)*DVect/R12
+write(*,*) jj2,' dvect ',DVect
                              Atoms%I(ICount)=JJ2
                              DO J=1,3 ; Vects%D(ICount,J)=DVect(J) ; ENDDO
                              DO I=1,3
@@ -6392,11 +6455,19 @@ return
                    ENDDO
                  ENDIF
                ENDDO
+write(*,*) 'theta= '   
+do i=1,3
+write(*,112) theta(i,1:3)
+enddo
+112 format(3f12.6)
                ! get principal directions
                BLKVECT%D=Theta
                CALL DSYEV('V','U',3,BLKVECT%D,BIGBLOK,BLKVALS%D, &
                           BLKWORK%D,BLKLWORK,INFO)
                !
+write(*,*) 'atom= ',jj1 
+write(*,*) 'eigenvals '
+write(*,*) BLKVALS%D
                DO J=1,3 
                  IF(BLKVALS%D(J)/BLKVALS%D(3)>0.1D0) THEN
                    BLKVALS%D(J)=One/SQRT(BLKVALS%D(J))
@@ -6404,13 +6475,28 @@ return
                    BLKVALS%D(J)=Zero
                  ENDIF 
                ENDDO 
+write(*,*) 'filtered eigenvals '
+write(*,*) BLKVALS%D
                CALL DGEMM_NNc(ICount,3,3,One,Zero,Vects%D(1:icount,1:3),&
                               BLKVECT%D,Vects2%D(1:icount,1:3))
+write(*,*) 'vects'
+do i=1,icount
+write(*,111) Vects%D(i,1:3)
+enddo
+111 format(3F12.6)
+write(*,*) 'vects2'
+do i=1,icount
+write(*,111) Vects2%D(i,1:3)
+enddo
                DO I=1,ICount
                  DO J=1,3
                    Vects2%D(I,J)=Vects2%D(I,J)*BLKVALS%D(J)
                  ENDDO
                ENDDO
+write(*,*) 'eigs*vects2'
+do i=1,icount
+write(*,111) Vects2%D(i,1:3)
+enddo
                !
                ! Recognize bonds
                !
@@ -6420,8 +6506,15 @@ return
                    VectB%D(I)=VectB%D(I)+Vects2%D(I,J)**2 
                  ENDDO
                ENDDO
+write(*,*) 'weights unnormalized '
+write(*,*) VectB%D(1:icount)
                Fact=SUM(VectB%D(1:ICount))
+write(*,*) 'fact= ',fact 
                VectB%D=VectB%D/Fact
+write(*,*) 'atoms   '
+write(*,*) atoms%I(1:icount)
+write(*,*) 'weights '
+write(*,*) VectB%D(1:icount)
                !
                CALL ReorderN(VectB%D,IOrder%I,ICount) 
                J=IOrder%I(1)
@@ -6429,9 +6522,17 @@ return
                DO I=ICount-1,1,-1
                  K=IOrder%I(I)
                  L=IOrder%I(I+1)
-                 QVals%D(I+1)=ABS(LOG10(VectB%D(L))-LOG10(VectB%D(K)))/ &
-                             (ABS(LOG10(VectB%D(J))-LOG10(VectB%D(L)))+1.D-10)
+               ! QVals%D(I+1)=ABS(LOG10(VectB%D(L))-LOG10(VectB%D(K)))/ &
+               !             (ABS(LOG10(VectB%D(J))-LOG10(VectB%D(L)))+1.D-10)
+                 QVals%D(I+1)=ABS(VectB%D(L)-VectB%D(K))/ &
+                              (ABS(VectB%D(J)-VectB%D(L))+1.D-10)
                ENDDO
+write(*,*) 'ordered atoms '        
+write(*,*) (atoms%i(iorder%i(j)),j=1,icount)
+write(*,*) 'ordered VectB '        
+write(*,*) (vectb%D(iorder%i(j)),j=1,icount)
+write(*,*) 'Q-values= '
+write(*,*) qvals%D(1:icount)
                ! terminate series of bonds if next point is 
                ! droppable by Q-test
                ! and more than 50% of bonding is already described
@@ -6446,6 +6547,7 @@ return
                    EXIT
                  ENDIF
                ENDDO
+write(*,*) 'ndim= ',ndim
                !
                Q=Zero
                DO I=1,NDim
