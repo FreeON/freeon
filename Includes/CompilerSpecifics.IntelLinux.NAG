@@ -47,7 +47,7 @@ F90_FLAGS     = $(F90_MISC) $(F90_OPTIMIZE) $(F_PROF) $(F90_DEBUG) $(F90_INCLUDE
 #
 LD            = $(F90) 
 #
-LDFLAGS       =  -o 
+LDFLAGS       =  -Bstatic -o 
 #
 #---------------------------------------------------------------
 # ARCHIVAL
