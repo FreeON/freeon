@@ -12,31 +12,37 @@ PROGRAM ODA
   USE DenMatMethods
   IMPLICIT NONE
   !-------------------------------------------------------------------------------------
-
-  !-------------------------------------------------------------------------------------
   TYPE(ARGMT)                    :: Args
-  TYPE(BCSR)                     :: &
-                                    P,PTilde,F,FTilde,T1,S
+#ifdef PARALLEL
+  TYPE(DBCSR)                     ::  &
+#else
+  TYPE(BCSR)                      ::  &
+#endif
+                                    P,PTilde,F,FTilde,T1,T2,S
   REAL(DOUBLE)                   :: e0,e1,e0p,e1p,a3,b3,c3,d3,EMns,EPls,EMin, &
        LMns,LPls,L,L1,ENucTot,ENucTotTilde,ExcTilde,Exc,DIISErr
-  INTEGER                        :: I,M,iSCF
+  INTEGER                        :: I,iSCF
   LOGICAL                        :: Present
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg,MatFile
   CHARACTER(LEN=3),PARAMETER     :: Prog='ODA'
+  INTEGER,PARAMETER              :: M=-1
   !-------------------------------------------------------------------------
+#ifdef PARALLEL
+  CALL StartUp(Args,Prog,SERIAL_O=.FALSE.)
+#else
   CALL StartUp(Args,Prog)
+#endif
   iSCF=Args%I%I(1)
   ! Suss for matrix threshold overide
   CALL SussTrix('ODA',Prog)  
   ! Allocations 
   CALL New(T1)
+  CALL New(T2)
+  CALL New(S)
   CALL New(P)
   CALL New(F)
   CALL New(PTilde)
   CALL New(FTilde)
-  ! Get the previous (N-M) tilde values where M is -1
-  M=-1
-  !--------------------------------------------------------
 #ifdef OrthogonalODA  
   CALL Get(PTilde,TrixFile('OrthoD',Args,M))   
   CALL Get(FTilde,TrixFile('OrthoF',Args,M))   
@@ -44,14 +50,10 @@ PROGRAM ODA
   CALL Get(PTilde,TrixFile('D',Args,M))   
   CALL Get(FTilde,TrixFile('F',Args,M))   
 #endif
-  !--------------------------------------------------------
-!  CALL PChkSum(PTilde,'P0',Unit_O=6)
-!  CALL PChkSum(FTilde,'F0',Unit_O=6)
   Current(1)=Current(1)+M
   CALL Get(e0,'Etot',StatsToChar(Current))
   Current(1)=Current(1)-M
   ! Get the current (N) non-tilde values
-  !--------------------------------------------------------
 #ifdef OrthogonalODA  
   CALL Get(P,TrixFile('OrthoD',Args,0))   
   CALL Get(F,TrixFile('OrthoF',Args,0))   
@@ -59,20 +61,24 @@ PROGRAM ODA
   CALL Get(P,TrixFile('D',Args,0))   
   CALL Get(F,TrixFile('F',Args,0))   
 #endif
-  !--------------------------------------------------------
-!  CALL PChkSum(P,'P1',Unit_O=6)
-!  CALL PChkSum(F,'F1',Unit_O=6)
   ! T1 = P_N-PTilde_{N-1}
   CALL Multiply(PTilde,-One)
   CALL Add(PTilde,P,T1)  
   CALL Get(e1,'Etot',StatsToChar(Current))
   ! Get the previous Fock matrix F[PTilde_(N-1)]
+#ifdef PARALLEL
+  CALL Multiply(FTilde,T1,S)
+  e0p=Two*Trace(S)
+  CALL Multiply(F,T1,S)
+  e1p=Two*Trace(S)
+#else
   e0p=Two*Trace(FTilde,T1)
   e1p=Two*Trace(F,T1)
-  !WRITE(*,*)' e0 = ',e0
-  !WRITE(*,*)' e1 = ',e1
-  !WRITE(*,*)'e0p = ',e0p
-  !WRITE(*,*)'e1p = ',e1p
+#endif
+  ! WRITE(*,*)' e0 = ',e0
+  ! WRITE(*,*)' e1 = ',e1
+  ! WRITE(*,*)'e0p = ',e0p
+  ! WRITE(*,*)'e1p = ',e1p
   ! Find the mixing parameter L from the
   ! cubic E3(L)=a3+b3*L+c3*L^2+d3*L^3
   a3=e0
@@ -110,14 +116,19 @@ PROGRAM ODA
         EMin=e1
      ENDIF
   ENDIF
-  Mssg=' Mix = '//TRIM(FltToShrtChar(L))
-  Mssg=ProcessName(Prog,TRIM(Mssg))
-  Mssg=TRIM(Mssg)//" <SCF> ~ "//TRIM(FltToMedmChar(EMin))//', d3 = '//TRIM(DblToShrtChar(d3))
-  CALL OpenASCII(OutFile,Out)
-  WRITE(*,*)TRIM(Mssg)
-  WRITE(Out,*)TRIM(Mssg)
-  CLOSE(Out)
-  !  CALL Put(L,'ODAMixingParameter')
+#ifdef PARALLEL
+  IF(MyId==ROOT)THEN
+#endif
+     Mssg=' Mix = '//TRIM(FltToShrtChar(L))
+     Mssg=ProcessName(Prog,TRIM(Mssg))
+     Mssg=TRIM(Mssg)//" <SCF> ~ "//TRIM(FltToMedmChar(EMin))//', d3 = '//TRIM(DblToShrtChar(d3))
+     CALL OpenASCII(OutFile,Out)
+     WRITE(*,*)TRIM(Mssg)
+     WRITE(Out,*)TRIM(Mssg)
+     CLOSE(Out)
+#ifdef PARALLEL
+  ENDIF
+#endif
   ! PTilde_N=(1-L)*PTilde_(N-1)+L*P_N
   CALL Multiply(P,L)
   CALL Multiply(PTilde,-L1)
@@ -133,9 +144,8 @@ PROGRAM ODA
   CALL Multiply(FTilde,PTilde,T1)  
   CALL Multiply(PTilde,FTilde,T1,-One)
 #else
-  ! Compute the AO-DIIS error
   CALL Get(S,TrixFile('S',Args))     
-  ! F.P.S
+  ! Compute the AO-DIIS error
   CALL Multiply(FTilde,PTilde,T1)
   CALL Multiply(T1,S,P)
   ! F.P.S-S.P.F
@@ -168,7 +178,18 @@ PROGRAM ODA
   CALL Put(PTilde,TrixFile('D',Args,0))
   CALL PChkSum(FTilde,'For~['//TRIM(NxtCycl)//']',Prog)
   CALL PChkSum(PTilde,'Pao~['//TRIM(NxtCycl)//']',Prog)
+  IF(iSCF>1)THEN
+     ! Step on the orthogonal DM as well
+     CALL Get(PTilde,TrixFile('OrthoD',Args,M))   
+     CALL Get(P,TrixFile('OrthoD',Args,0))   
+     CALL Multiply(P,L)
+     CALL Multiply(PTilde,L1)
+     CALL Add(P,PTilde,T1)
+     CALL Put(T1,TrixFile('OrthoD',Args,0))
+  ENDIF
 #else
+  CALL Put(FTilde,TrixFile('F',Args,0)) 
+  CALL PChkSum(FTilde,'Fao~['//TRIM(NxtCycl)//']',Prog)
   ! Convert F to orthogonal representation
   INQUIRE(FILE=TrixFile('X',Args),EXIST=Present)
   IF(Present)THEN
@@ -186,7 +207,7 @@ PROGRAM ODA
   CALL PChkSum(FTilde,'For~['//TRIM(NxtCycl)//']',Prog)
   CALL PChkSum(PTilde,'Pao~['//TRIM(NxtCycl)//']',Prog)
   IF(iSCF>1)THEN
-     ! Step on the orthogonal DM as well, so that DIIS will work later
+     ! Step on the orthogonal DM as well
      CALL Get(PTilde,TrixFile('OrthoD',Args,M))   
      CALL Get(P,TrixFile('OrthoD',Args,0))   
      CALL Multiply(P,L)
