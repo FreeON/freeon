@@ -2473,7 +2473,6 @@ MODULE LinAlg
 !===========================================================================
 !     Simulated Annealing Domain Decomposition
 !===========================================================================
-
       SUBROUTINE SADD(MatrixFile)
          CHARACTER(LEN=*), INTENT(IN)        :: MatrixFile
          TYPE(INT_VECT)                      :: RowPt,ColPt,Counts,NAv
@@ -2710,39 +2709,145 @@ MODULE LinAlg
 
 #endif
 
+
+#ifdef USE_METIS
+!=============================================================================
+!     Performs P.A, where P is a permutation opperator
+!=============================================================================
+      SUBROUTINE MetisReorder(A)
+         TYPE(BCSR)     :: A
+         TYPE(INT_VECT) :: Perm,IPerm
+         TYPE(INT_VECT) :: RowPt,ColPt,NSiz
+         INTEGER        :: N,I,J,K,I1,I2,J1,J2,K1,K2,R,S     
+!                                                0 1 2 3 4 5 6 7
+         INTEGER,DIMENSION(8),PARAMETER :: Opt=(/1,3,1,1,0,1,60,2/)
+!----------------------------------------------------------------------------              
+!        Allocate CSR arrays for graph
+         CALL New(RowPt,A%NAtms+1)  
+         CALL New(ColPt,A%NBlks-A%NAtms) 
+!        Allocate permutation vectors
+         CALL New(Perm,A%NAtms)
+         CALL New(IPerm,A%NAtms)
+!----------------------------------------------------------------------------              
+!        Compute graph            
+         N=0
+         DO I=1, A%NAtms
+            RowPt%I(I)=N+1
+            DO K=A%RowPt%I(I),A%RowPt%I(I+1)-1
+               J=A%ColPt%I(K)
+               IF(I/=J)THEN
+                 N=N+1
+                 ColPt%I(N)=J
+               ENDIF
+            ENDDO
+         ENDDO
+         RowPt%I(A%NAtms+1)=N+1
+!----------------------------------------------------------------------------              
+!        Compute Metis ordering for this graph
+         CALL METIS_NodeND(A%NAtms,RowPt%I,ColPt%I,1,Opt,Perm%I,IPerm%I)
+!        tidy
+         CALL Delete(RowPt)
+         CALL Delete(ColPt)
+!----------------------------------------------------------------------------              
+!        Perform the symmetric permutation on A defined by Perm
+         CALL SymPe(A,Perm)
+!        Recompute the new BCSR blocking
+         CALL New(NSiz,A%NAtms)
+         NSiz%I=BSiz%I 
+         DO I=1,A%NAtms
+            BSiz%I(Perm%I(I))=NSiz%I(I)
+         ENDDO
+         OffS%I(1)=1
+         DO I=2,NAtoms
+            OffS%I(I)=OffS%I(I-1)+BSiz%I(I-1)
+         ENDDO      
+         CALL Delete(NSiz)
+         CALL Delete(Perm)
+         CALL Delete(IPerm)
+      END SUBROUTINE
+#endif
+!=============================================================================
+!     Performs the symetric permutation P^T.A.P, where P is in vector form 
+!=============================================================================
+      SUBROUTINE SymPe(A,P)
+         TYPE(BCSR)     :: A
+         TYPE(INT_VECT) :: P
+         TYPE(INT_VECT) :: RowPt,ColPt,BlkPt    
+         INTEGER        :: I,J,K     
+!----------------------------------------------------------------------------              
+!        Allocations
+         CALL New(RowPt,A%NAtms+1)
+         CALL New(ColPt,A%NBlks)
+         CALL New(BlkPt,A%NBlks)
+!----------------------------------------------------------------------------              
+!        Permute rows
+         DO I=1,A%NAtms
+            RowPt%I(P%I(I)+1)=A%RowPt%I(I+1)-A%RowPt%I(I)
+         ENDDO
+         RowPt%I(1)=1
+         DO I=1,A%NAtms
+            RowPt%I(I+1)=RowPt%I(I+1)+RowPt%I(I)
+         ENDDO
+!        Copy col and blk pointers        
+         J=1
+         DO I=1,A%NAtms
+            J=RowPt%I(P%I(I))
+            DO K=A%RowPt%I(I),A%RowPt%I(I+1)-1
+               ColPt%I(J)=A%ColPt%I(K)
+               BlkPt%I(J)=A%BlkPt%I(K)
+               J=J+1
+            ENDDO
+         ENDDO
+!----------------------------------------------------------------------------              
+!        Permute cols
+         DO I=1,A%NBlks
+            A%ColPt%I(I)=P%I(ColPt%I(I))
+         ENDDO
+!----------------------------------------------------------------------------              
+!        Remaining back copy
+         A%RowPt%I(1:A%NAtms+1)=RowPt%I(1:A%NAtms+1)
+         A%BlkPt%I(1:A%NBlks)=BlkPt%I(1:A%NBlks)
+!----------------------------------------------------------------------------              
+!        Clean up
+         CALL Delete(RowPt)
+         CALL Delete(ColPt)
+         CALL Delete(BlkPt)
+!
+      END SUBROUTINE SymPe
+!
     SUBROUTINE Plot_BCSR(A,Name)
        TYPE(BCSR) :: A
        CHARACTER(LEN=*) :: Name
        INTEGER :: I,K
        IF(PrintFlags%Mat/=PLOT_MATRICES)RETURN
-       CALL OpenASCII('PlotFile_1',Plt,NewFile_O=.TRUE.)
+       CALL OpenASCII(TRIM(Name)//'_PlotFile_1',Plt,NewFile_O=.TRUE.)
        DO I=1,NAtoms
           DO K=A%RowPt%I(I),A%RowPt%I(I+1)-1
              WRITE(Plt,1)I,NAtoms-A%ColPt%I(K)            
           ENDDO
        ENDDO
        CLOSE(Plt)
-       CALL OpenASCII('PlotFile_2',Plt,NewFile_O=.TRUE.)
+
+       CALL OpenASCII(TRIM(Name)//'_GnuPlotMe',Plt,NewFile_O=.TRUE.)
        WRITE(Plt,2)
        WRITE(Plt,3)TRIM(Name)//'.eps'
-       WRITE(Plt,4)NAtoms+1
-       WRITE(Plt,5)NAtoms+1
+       WRITE(Plt,4)DBLE(NAtoms+1)
+       WRITE(Plt,5)DBLE(NAtoms)
        WRITE(Plt,6); WRITE(Plt,7); WRITE(Plt,8)
-       WRITE(Plt,11)
+       WRITE(Plt,*)'set pointsize '//TRIM(FltToChar(50.D0/DBLE(NAtoms)))
+       WRITE(Plt,*)"plot '"//TRIM(Name)//"_PlotFile_1' using 1:2 notitle with points 1 "
        CLOSE(Plt)
-!       CALL SYSTEM(' gnuplot < PlotFile_2 ')
-!       CALL SYSTEM(' rm -f PlotFile_1 PlotFile_2 ')
    1   FORMAT(2(1x,I16))
    2   FORMAT('set term  postscript eps  "Times-Roman" 18')
+!   2   FORMAT('set term  jpeg transparent')
    3   FORMAT('set output "',A,'"')
-   4   FORMAT('set xrange [0 :',I12,']')
-   5   FORMAT('set yrange [0 :',I12,']')
-   6   FORMAT('set size 0.8, 1.0 ')
+   4   FORMAT('set xrange [0:',F12.3,']')
+   5   FORMAT('set yrange [-1:',F12.3,']')
+   6   FORMAT('set size square ')
    7   FORMAT('set noxtics ')
    8   FORMAT('set noytics ')
    9   FORMAT('plot [0 : ',I12,' ] ',I12,', \\')
   10   FORMAT('                    ',I12,', \\')
-  11   FORMAT("plot 'PlotFile_1' using 1:2 with points 1 ")
     END SUBROUTINE Plot_BCSR
 
       SUBROUTINE MStats(A,FileName)
