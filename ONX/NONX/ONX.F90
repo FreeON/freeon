@@ -20,11 +20,11 @@ PROGRAM ONX
   IMPLICIT NONE
 #ifdef PARALLEL
   TYPE(DBCSR)         :: D
-  TYPE(DBCSR)         :: K
+  TYPE(DBCSR)         :: K,T1,T2
   TYPE(BCSR)          :: KTotal
 #else
   TYPE(BCSR)          :: D
-  TYPE(BCSR)          :: K
+  TYPE(BCSR)          :: K,T1,T2
   INTEGER             :: MyID=0
 #endif
   TYPE(BSET)          :: BSc
@@ -129,8 +129,18 @@ PROGRAM ONX
   CALL Fillout_BCSR(BSc,GMc,K)
   CALL TrnMatBlk(BSc,GMc,K)
   CALL ONXFilter(BSc,GMc,K,NameBuf,Thresholds%Trix)
-  CALL Put(K,TrixFile('K',Args,0))!InFile,'.K')
-!
+! Add in correction if incremental K build
+  IF(SCFActn=='InkFok')THEN
+     CALL New(T1)
+     CALL New(T2)
+     CALL Get(T1,TrixFile('K',Args,-1))
+     K%NAtms=NAtoms ! never set before this...
+     CALL Add(K,T1,T2)
+     CALL Filter(K,T2)
+     CALL Delete(T1)
+     CALL Delete(T2)
+  ENDIF
+  CALL Put(K,TrixFile('K',Args,0))
   CALL PChkSum(K,'Kx['//TRIM(SCFCycl)//']',Prog)
   CALL PPrint( K,'Kx['//TRIM(SCFCycl)//']')
   CALL Plot(   K,'Kx['//TRIM(SCFCycl)//']')
