@@ -1,3 +1,25 @@
+2002-10-16 16:09  mchalla
+
+	* MondoSCF/ParseInput.F90: Change parse input to use the last
+	geometry in the old hdf file as the default geometry on restart.
+
+2002-10-16 15:19  nemeth
+
+	* OneE/MakeRho.F90, QCTC/QCTC.F90, QCTC/JForce.F90: [no log
+	message]
+
+2002-10-16 14:44  nemeth
+
+	* OneE/MakeRho.F90: [no log message]
+
+2002-10-16 12:11  tymczak
+
+	* QCTC/PBCFarField.F90: Cosmetic
+
+2002-10-16 12:08  mchalla
+
+	* ChangeLog: [no log message]
+
 2002-10-15 22:16  nemeth
 
 	* QCTC/JForce.F90: [no log message]
