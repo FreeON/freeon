@@ -388,10 +388,12 @@ endif
        CALL MPI_BCAST(RecIntArr(1),IntSize,MPI_INTEGER         ,I,MONDO_COMM,IErr)
        CALL MPI_BCAST(RecDblArr(1),DblSize,MPI_DOUBLE_PRECISION,I,MONDO_COMM,IErr)
        !Build tree
-       CALL CopyTree(I)
-       IF(IntIndex /= IntNumArr(I)) STOP 'ERR: should be the same!'
-       IF(DblIndex /= DblNumArr(I)) STOP 'ERR: should be the same!'
-       IF(NodesVisit /= NodesNumArr(I)) STOP 'ERR: should be the same!'
+       IF(MyID.NE.I) THEN
+          CALL CopyTree(I)
+          IF(IntIndex /= IntNumArr(I)) STOP 'ERR: should be the same!'
+          IF(DblIndex /= DblNumArr(I)) STOP 'ERR: should be the same!'
+          IF(NodesVisit /= NodesNumArr(I)) STOP 'ERR: should be the same!'
+       ENDIF
     ENDDO
     !VWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVW
 !!$    DO I = 1, NPrc-1
@@ -478,7 +480,6 @@ endif
     NodesVisit = 0
     IntIndex = 0
     DblIndex = 0
-    nullify(PA2(I)%Ptr)
     CALL RecurCopy(PA2(I)%Ptr)
   END SUBROUTINE CopyTree
  
