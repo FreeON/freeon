@@ -58,6 +58,10 @@ PROGRAM XCForce
   CHARACTER(LEN=15),PARAMETER :: Sub1='XCForce.RhoTree' 
   CHARACTER(LEN=15),PARAMETER :: Sub2='XCForce.GridGen' 
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg 
+#ifdef PERIODIC        
+      INTEGER                  :: NCA,NCB
+      REAL(DOUBLE)             :: Ax,Ay,Az,Bx,By,Bz
+#endif     
 !---------------------------------------------------------------------------------------
 ! Macro the start up
   CALL StartUp(Args,Prog,Serial_O=.TRUE.)
@@ -96,17 +100,39 @@ PROGRAM XCForce
         AtB=P%ColPt%I(JP)
         IF(SetAtomPair(GM,BS,AtA,AtB,Pair))THEN
            Q=P%BlkPt%I(JP)
+#ifdef PERIODIC
+           Ax = Pair%A(1)
+           Ay = Pair%A(2)
+           Az = Pair%A(3)
+           Bx = Pair%B(1)
+           By = Pair%B(2)           
+           Bz = Pair%B(3)
+           DO NCA = 1,CS%NCells
+              Pair%A(1) = Ax+CS%CellCarts%D(1,NCA)
+              Pair%A(2) = Ay+CS%CellCarts%D(2,NCA)
+              Pair%A(3) = Az+CS%CellCarts%D(3,NCA)
+              DO NCB = 1,CS%NCells
+                 Pair%B(1) = Bx+CS%CellCarts%D(1,NCB)
+                 Pair%B(2) = By+CS%CellCarts%D(2,NCB)
+                 Pair%B(3) = Bz+CS%CellCarts%D(3,NCB)
+                 Pair%AB2  = (Pair%A(1)-Pair%B(1))**2+(Pair%A(2)-Pair%B(2))**2+(Pair%A(3)-Pair%B(3))**2
+                 IF(TestAtomPair(Pair)) THEN
+                    XCFrc%D(A1:A2)=XCFrc%D(A1:A2)+dXC(Pair,P%MTrix%D(Q:))
+                 ENDIF
+              ENDDO
+           ENDDO
+#else
            XCFrc%D(A1:A2)=XCFrc%D(A1:A2)+dXC(Pair,P%MTrix%D(Q:))
+#endif
         ENDIF
      ENDDO
   ENDDO
-!  CALL PPrint(XCFrc,'XCForce',Unit_O=6)
 !---------------------------------------------------------------
 ! Update forces
+  CALL PPrint(XCFrc,'XCFrce')
   CALL Get(Frc,'GradE',Tag_O=CurGeom)
   Frc%D=Frc%D+XCFrc%D
   CALL Put(Frc,'GradE',Tag_O=CurGeom)
-!  CALL PPrint(Frc,'GradE',Unit_O=6)
 !  XCFrcChk=SQRT(DOT_PRODUCT(XCFrc%D,XCFrc%D))
 !  WRITE(*,*)' XCFrcChk = ',XCFrcChk
 !---------------------------------------------------------------
