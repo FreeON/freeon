@@ -63,6 +63,10 @@ PROGRAM ONX
   CHARACTER(LEN=3),PARAMETER     :: Prog='ONX'
 !--------------------------------------------------------------------------------
   CALL StartUp(Args,Prog)
+#ifdef PARALLEL_CLONES
+#else
+  CALL Get(CS_OUT,'CS_OUT',Tag_O=CurBase)
+#endif
   InFile=TRIM(ScrName)//'_Cyc'//TRIM(IntToChar(Args%i%i(1)))
   IF(SCFActn=='Restart')THEN
 !    Get the old information
@@ -91,14 +95,9 @@ PROGRAM ONX
   CALL Get(BSc,Tag_O=CurBase)
   CALL Get(GMc,Tag_O=CurGeom)
   CALL New(NameBuf,NAtoms)
-
-#ifdef PERIODIC
-! Calculate the number of cells
-  CALL SetCellNumber(GMc)
-#endif
-!----------------------------------------------
-! Get the Density Matrix
-!----------------------------------------------
+  !----------------------------------------------
+  ! Get the Density Matrix
+  !----------------------------------------------
   IF(SCFActn=='InkFok')THEN
      CALL Get(D,TrixFile('DeltaD',Args,0))
   ELSEIF(SCFActn=='BasisSetSwitch')THEN
