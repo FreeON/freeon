@@ -587,8 +587,6 @@ Next, we demonstrated that \textbf{MondoSCF} achieves {\it true} linear scaling
 for the Coulomb and Exchange-correlation matrix builds for
 the dense periodic diamond system.
 %
-Finally, we studied the diamond (111) surface with a step.
-%
 
 \section*{ACKNOWLEDGMENTS}
 
@@ -736,19 +734,7 @@ moments via numerical integration, where we take the limit as the
 non-periodic direction goes to infinity,
 
 \begin{eqnarray}
-{\cal M}^{m}_{l} & = & \sum _{{\mathbf{R}'}\in V_{out}}\, \left( l-m\right) !\, P_{l}^{m}
-\left( \cos \left( \theta _{\mathbf{R}}\right) \right) e^{im\phi _{\mathbf{R}}}\, {\cal G}_{l}
-\left( \beta ,\left| \mathbf{R}\right| \right) 
-\nonumber\\
- & - & \sum _{{\mathbf{R}'}\in V_{in}}\, \left( l-m\right) !\, P_{l}^{m}\left( \cos \left( 
-\theta _{\mathbf{R}}\right) \right) e^{im\phi _{\mathbf{R}}}{\cal F}_{l}\left( \beta ,\left| 
-\mathbf{R}\right| \right) 
-\nonumber\\
-& + &  {\cal C}_1 \sum _{\mathbf{G}\neq \left\{ \emptyset \right\} }\, \left| \mathbf{G}\right| ^{l-2}
-e^{-\frac{\pi ^{2}\left|
- \mathbf{G}\right| ^{2}}{\beta ^{2}}}\, {\tilde P}_{l}^{m}\left( \cos \left( \theta _{\mathbf{G}}
-\right) \right) e^{im\phi _{\mathbf{G}}}
-\nonumber\\
+{\cal M}^{m}_{l} 
  & = & \sum _{{\mathbf{R}'}\in V_{out}}\, \left( l-m\right) !\, P_{l}^{m}\left( \cos 
 \left( \theta _{\mathbf{R}}\right) \right) e^{im\phi _{\mathbf{R}}}\, {\cal G}_{l}\left( \beta ,\left| 
 \mathbf{R}\right| \right) 
@@ -789,84 +775,84 @@ functional \cite{Becke93}.}
  
 \begin{tabular}{clcll}
 \hline 
-Program&
+Prog&
 Basis/Theory&
 \( N \)&
 Energy  (au)&
 Energy/{\it N}\\
 \hline
 \hline 
-M-SCF &
+M &
 STO-3G/LDA&
 2\footnote[1]{Triclinic cell: for $N=2$, a=b=c=3.974 au, $\alpha=\beta=\gamma=60^{{\rm o}}$}&
 -610.9753547&
 -305.4876774\\
-C-98&
+C&
 STO-3G/LDA&
-2\footnotemark[1]&
+$2^a$&
 -610.9754&
 -305.4877\\
-M-SCF&
+M&
 8-511G/BLYP&
-2\footnotemark[1]&
+$2^a$&
 -622.3910114&
 -311.1955057\\
-C-98&
+C&
 8-511G/BLYP&
-2\footnotemark[1]&
+$2^a$&
 -622.3911&
 -311.1955\\
 \hline 
-M-SCF&
+M&
 STO-3G/LDA&
 8\footnote[2]{Cubic cell: for $N=8$, a=b=c=5.620 au, $\alpha=\beta=\gamma=90^{{\rm o}}$}&
 -2444.3583560&
 -305.54479450\\
-C-98&
+C&
 STO-3G/LDA&
-8\footnotemark[2]&
+$8^b$&
 -2444.358&
 -305.5447\\
-M-SCF&
+M&
 8-511G/BLYP&
-8\footnotemark[2]&
+$8^b$&
 -2490.0016297&
 -311.25020371\\
-C-98&
+C&
 8-511G/BLYP&
-8\footnotemark[2]&
+$8^b$&
 -2490.0013&
 -311.25016 \\
 \hline 
-M-SCF&
+M&
 STO-3G/LDA&
-16\footnotemark[1]&
+$16^a$&
 -4888.70023&
 -303.543765\\
-M-SCF&
+M&
 STO-3G/LDA&
-54\footnotemark[1]&
+$54^a$&
 -16499.4900&
 -305.546111\\
-M-SCF&
+M&
 STO-3G/LDA&
-64\footnotemark[2]&
+$64^b$&
 -19554.9556&
 -305.546181\\
-M-SCF&
+M&
 STO-3G/LDA&
-128\footnotemark[1]&
+$128^a$&
 -39109.9115&
 -305.546184\\
-M-SCF&
+M&
 STO-3G/LDA&
-216\footnotemark[2] &
+$216^b$ &
 -65997.9768&
 -305.546185\\
 \hline
-\,\,C-98\,\,&
+\,\,C\,\,&
 STO-3G/LDA\,\,&
-\,\,2\footnotemark[1]\,\,&
+\,\,$2^a$\,\,&
 -611.09228\,\,\,\,\,\,\,\,\,\,\,&
 -305.54614\\
 \hline
@@ -886,84 +872,84 @@ functional \cite{Becke93}.}
 
 \begin{tabular}{clcll}
 \hline 
-Program&
+Prog&
 Basis/Theory&
 \( N \)&
 Energy (au)&
 Energy/{\it N}\\
 \hline
 \hline 
-M-SCF&
+M&
 STO-3G/LDA&
 2\footnote[1]{Triclinic cell: for $N=2$, a=b=c=2.9778 au, $\alpha=\beta=\gamma=60^{{\rm o}}$}&
 -268.6324805 &
 -134.3162403 \\
-C-98&
+C&
 STO-3G/LDA&
-2\footnotemark[1]&
+$2^a$&
 -268.6323 &
 -134.3162 \\
-M-SCF&
+M&
 8-61G/BLYP&
-2\footnotemark[1]&
+$2^a$&
 -275.0909646 &
 -137.5454823 \\
-C-98&
+C&
 8-61G/BLYP&
-2\footnotemark[1]&
+$2^a$&
 -275.0906 &
 -137.5453 \\
 \hline 
-M-SCF&
+M&
 STO-3G/LDA&
 8\footnote[2]{Cubic cell: for $N=8$, a=b=c=4.2112 au, $\alpha=\beta=\gamma=90^{{\rm o}}$}&
 -1076.2137787 &
 -134.52672234 \\
-C-98&
+C&
 STO-3G/LDA&
-8\footnotemark[2]&
+$8^b$&
 -1076.2138 &
 -134.52673\\
-M-SCF&
+M&
 8-61G/BLYP&
-8\footnotemark[2]&
+$8^b$&
 -1101.7294484 &
 -137.71618105\\
-C-98&
+C&
 8-61G/BLYP&
-8\footnotemark[2]&
+$8^b$&
 -1101.7289 &
 -137.71612  \\
 \hline 
-M-SCF&
+M&
 8-61G/BLYP&
-16\footnotemark[1]&
+$16^a$&
 -2203.69044 &
 -137.730653 \\
-M-SCF&
+M&
 8-61G/BLYP&
-54\footnotemark[1]&
+$54^a$&
 -7437.79892 &
 -137.737017\\
-M-SCF&
+M&
 8-61G/BLYP&
-64\footnotemark[2]&
+$64^b$&
 -8815.21310 &
 -137.737705\\
-M-SCF&
+M&
 8-61G/BLYP&
-128\footnotemark[1]&
+$128^a$&
 -17630.4304 &
 -137.737737 \\
-M-SCF&
+M&
 8-61G/BLYP&
-216\footnotemark[2]&
+$216^b$&
 -29751.3517 &
 -137.737739 \\
 \hline
-\,\,C-98\,\,&
+\,\,C\,\,&
 8-61G/BLYP\,\,&
-\,\,2\footnotemark[1]\,\,&
+\,\,$2^a$\,\,&
 -275.47547 &
 -137.73774  \\ 
 \hline
@@ -983,57 +969,53 @@ functional \cite{Becke93}.}
 
 \begin{tabular}{clcll}
 \hline 
-Program&
+Prog&
 Basis/Theory&
 \( N \)&
 Energy (au)&
 Energy/{\it N}\\
 \hline
 \hline 
-M-SCF&
+M&
 STO-3G/BLYP&
 8\footnote[1]{Cubic cell: for $N=8$, a=b=c=3.570 au, $\alpha=\beta=\gamma=90^{{\rm o}}$}&
 -300.5754830 &
 -37.57193538 \\
-C-98&
+C&
 STO-3G/BLYP&
-8\footnotemark[1]&
+$8^a$&
 -300.5755 &
 -37.57194 \\
-M-SCF&
+M&
 6-21G/BLYP&
-8\footnotemark[1]&
+$8^a$&
 -303.8938328 &
 -37.98672910 \\
-C-98&
+C&
 6-21G/BLYP&
-8\footnotemark[1]&
+$8^a$&
 -303.8941 &
 -37.98676 \\
 \hline 
-M-SCF&
+M&
 6-21G/BLYP&
-64\footnotemark[1]&
+$64^a$&
 -2435.59119 &
 -38.0561124\\
-M-SCF&
+M&
 6-21G/BLYP&
-216\footnotemark[1]&
+$216^a$&
 -8220.76217 &
 -38.0590841 \\
 \hline
-\,\,C-98\,\,&
+\,\,C\,\,&
 6-21G/BLYP\,\,&
-\,\,8\footnotemark[1]\,\,&
+\,\,$8^a$\,\,&
 -304.4756 &
 -38.05945\\
 \hline
 \end{tabular}
 \end{table}
-%
-%
-%
-\eject
 %
 %
 %
@@ -1049,7 +1031,11 @@ shown is the HiCu cube in which we do the exchange-correlation integrals}
 \begin{figure}
 
 \caption{\label{figure:ReplicateCells} Regions which contribute to the Coulomb
-Matrix}
+matrix: $V_{cell}$ is the simulation cell which is periodically replicated, $V_{in}$ in the interior 
+region where the Coulomb matrix inner lattice sum is calculated, $V_{out}$ is the remaining region which 
+contributes to the Coulomb matrix which is calculated using the ewald like summation of the interaction
+temsor (see Appendix A) and $S_{\infty}$ is the surface at infinity which contributes a
+shape dependent potential to the Coulomb matrix}
 
 {\centering \includegraphics{RepCell_2.ps} \par}
 \end{figure}
