@@ -1,22 +1,40 @@
 <BeginTitle>
 Urea 
 External Reference #s:
-RBLYPxc/STO-3G  -222.0998 27663
-   <SCF>     = -.222 0998 27 0520597D+03   
+==================================================
+BLYPxc/STO-3G  -222.0998 27663
+  <SCF>     = -.222 0998 27 0520597D+03   
+Forces:
+1    -0.022115334   -0.029699226    0.018752434
+2     0.026624250    0.020702468    0.034586581
+3     0.024669583    0.013495712    0.054193752
+4    -0.002994326    0.007066051   -0.039695320
+5     0.031862308    0.031449284    0.016575771
+6    -0.069749767   -0.062198128   -0.060885271
+7     0.042371510    0.046871338    0.001898129
+8    -0.030668223   -0.027687498   -0.025426076
+==================================================
+   7.0080339071409981E-002
+   0.2748399329988160
+  -0.1771964215180333
+  -0.1455843001387791
+
 RBLYPxc/3-21G   -223.93784 1078
 RBLYPxc/6-31G** -225.19940 9453 
+
+
 <EndTitle>
 
 <BeginOptions>
 Charge=0
 Multiplicity=1
 Guess=SuperPos
-SCFMethod=(RH)
-BasisSets=(STO-3G)
-ModelChem=(BLYPxc)
-Accuracy =(Tight)
+SCFMethod=(RH,RH)
+BasisSets=(STO-2G,STO-3G)
+ModelChem=(BLYPxc,BLYPxc)
+Accuracy =(Loose,Tight)
 DebugAll =(MaxDebug)
-Geometry=(InAngstroms)
+Geometry=(InAngstroms,NoOrder)
 <EndOptions>
 
 <BeginGeometry>
