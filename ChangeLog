@@ -1,3 +1,26 @@
+2003-02-04 17:10  mchalla
+
+	* MondoMods/Indexing.F90, MondoMods/PrettyPrint.F90,
+	OneE/MakeRho.F90, OneE/Makefile, OneE/ParaMakeRho.F90,
+	OneE/RhoBlok.F90, OneE/RhoTools.F90: [no log message]
+
+2003-02-04 17:10  mchalla
+
+	* Includes/CompilerSpecifics.True64.COMPAQ,
+	MondoSCF2/Optimizer.F90, MondoSCF2/ParseBasis.F90,
+	MondoSCF2/ParseGeometries.F90, MondoSCF2/ParseInput.F90,
+	MondoSCF2/ParsePeriodic.F90, MondoSCF2/PunchHDF.F90,
+	SCFeqs/P2Use.F90, SCFeqs/SCFStatus.F90: Parallel code with clones
+	should now be able to restart from HDF while changing basis sets. 
+	Also added some modest geometry printing enhancements to the new
+	front end.  These changes also include C.J's new MakeRho and
+	ParaMakeRho which now work in parallel and upon restart with
+	different basis sets.
+
+2003-02-02 12:49  mchalla
+
+	* ChangeLog: [no log message]
+
 2003-02-02 12:45  mchalla
 
 	* OneE/: MakeRho.F90, Makefile, ParaMakeRho.F90, RhoBlok.F90,

@@ -599,8 +599,6 @@ MODULE PrettyPrint
                        //'   '//FltToChar(GM%AbBoxCarts%D(3,I)*AA) 
                      WRITE(PU,*)TRIM(Mssg)
                  ENDDO
-
-
               ELSEIF(PrintGeom_O=='PDB')THEN
 !                Print PDB format
                  AA=One/AngstromsToAU
@@ -655,7 +653,6 @@ MODULE PrettyPrint
               Mssg='Number of electrons = '//TRIM(IntToChar(GM%NElec))
               WRITE(PU,*)TRIM(Mssg)
               WRITE(PU,2)
-#ifdef PERIODIC
               CALL ClosePU(PU)
               CALL Print_PBCInfo(GM%PBC,FileName_O,Unit_O)
               PU=OpenPU(FileName_O=FileName_O,Unit_O=Unit_O)
@@ -664,20 +661,8 @@ MODULE PrettyPrint
                     //'   '//DblToMedmChar(GM%Carts%D(1,I))          &
                     //'   '//DblToMedmChar(GM%Carts%D(2,I))          &
                     //'   '//DblToMedmChar(GM%Carts%D(3,I))           
-!                    //'   '//DblToMedmChar(GM%BoxCarts%D(1,I))       &
-!                    //'   '//DblToMedmChar(GM%BoxCarts%D(2,I))       &
-!                    //'   '//DblToMedmChar(GM%BoxCarts%D(3,I)) 
                    WRITE(PU,*)TRIM(Mssg)
               ENDDO
-#else
-              DO I=1,GM%NAtms
-                  Mssg=TRIM(IntToChar(I))//'   '//Ats(INT(GM%AtNum%D(I))) &   !!!! correct only for integer charged QM atoms
-                    //'   '//DblToMedmChar(GM%Carts%D(1,I))          &
-                    //'   '//DblToMedmChar(GM%Carts%D(2,I))          &
-                    //'   '//DblToMedmChar(GM%Carts%D(3,I))          
-                   WRITE(PU,*)TRIM(Mssg)
-              ENDDO
-#endif
               WRITE(PU,3)
               CALL PrintProtectR(PU)
            ENDIF
