@@ -38,14 +38,12 @@ DynamoObjs = dynamo.o definitions.o constants.o files.o io_units.o status.o \
         string.o pdb_io.o mm_system.o connectivity.o sort.o mm_file_data.o\
         mm_file_io.o mm_terms.o coordinate_io.o constraint.o energy_covalent.o \
         linear_algebra.o energy_nb_full.o
-
 #
 DynamoRel = dynamo.x definitions.x constants.x files.x io_units.x status.x \
         atoms.x sequence.x symmetry.x  elements.x parsing.x\
         string.o pdb_io.x mm_system.x connectivity.x sort.x mm_file_data.x\
-        mm_file_io.x mm_terms.x coordinate_io.x constraint.o energy_covalent.o \
+        mm_file_io.x mm_terms.x coordinate_io.x constraint.x energy_covalent.x \
         linear_algebra.x energy_nb_full.x
-
 #
 small:	Dynamo
 #
@@ -54,15 +52,14 @@ all:	Dynamo
 clean:	CDynamo               
 #
 purge:	clean
-	rm -f $(MONDO_HOME)/Libs/libDynamo.a
 	rm -f $(REMOVESRCE)
 #
 release:$(DynamoRel)
 	rm -rf MMA/Functions
 #
 Dynamo:	$(DynamoObjs)
-	$(AR) $(ARFLAGS) $(MONDO_HOME)/Libs/libMondoMods.a $(?:.F90=.o)
-	$(RANLIB) $(MONDO_HOME)/Libs/libMondoMods.a	
+	$(AR) $(ARFLAGS) $(MONDO_LIB)/libMondoMods.a $(?:.F90=.o)
+	$(RANLIB) $(MONDO_LIB)/libMondoMods.a	
 #
 CDynamo:
 	rm -f $(REMOVEMISC) $(REMOVEMODS)
@@ -70,7 +67,6 @@ CDynamo:
 	rm -f *~
 	ln -s /dev/null core
 	ls -l
-#
 #---------------------------------------------------------------------------------------------
 #       DEPENDENCIES
 #
@@ -100,7 +96,4 @@ constraint.o: constants.o definitions.o files.o io_units.o linear_algebra.o stat
 linear_algebra.o: definitions.o
 energy_covalent.o: definitions.o status.o mm_terms.o atoms.o
 energy_nb_full.o: constants.o definitions.o io_units.o status.o atoms.o mm_terms.o symmetry.o
- 
-
-
 #------------------------------------------------------------------------------

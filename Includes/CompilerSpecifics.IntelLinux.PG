@@ -1,14 +1,11 @@
 #---------------------------------------------------------------
 # PREPROCESSOR OPTIONS: 
 #
-CPP       =/lib/cpp -P -C \
-                    -traditional # Need this for new RH 7.1 CPP... 
+CPP       =/lib/cpp -P -C -traditional 
 CPPINCLUDE=-I$(MONDO_INC) -I$(HDF_INC) -I/usr/local/include
 #
 # PREPROCESSING OPTIONS: 
 CPPOPTS   =  -DPERIODIC
-#CPPOPTS   = -DPERIODIC -DMMech
-#           -DPARALLEL 
 #---------------------------------------------------------------
 # C Compiler and options
 #
@@ -24,93 +21,57 @@ F77_POSTFIX   = f
 F90_POSTFIX   = f90
 MOD_POSTFIX   = mod
 #---------------------------------------------------------------
-#
 # Fortran Compilers, options and include files
 #
 F90          = pgf90
-#
 F90_OPTIMIZE = -O1 
-#
-F90_DEBUG    =  -g -C -Mbounds -Minfo=all -Minform=inform -Mchkptr -Ktrap=fp
-#
-F_LIST        = -Mlist 
-#
+#F90_DEBUG    =  -g -C -Mbounds -Minfo=all -Minform=inform -Mchkptr -Ktrap=fp
+#F_LIST        = -Mlist 
 #F_PROF       = -Mprof=lines
-#
 F90_MISC     = $(F_LIST) $(F_PROF) -Mbackslash 
-#
 F90_INCLUDE  = -I$(MONDO_HOME)/Includes/               \
                -I$(MONDO_HOME)/MondoMods               \
                -I$(MONDO_HOME)/Dynamo                  \
                -I$(MONDO_HOME)/IntCoo                  \
                -I/usr/local/include                    \
 #              -I$(MPI_INC) 
-#
 F90_FLAGS   = $(F90_MISC) $(F90_OPTIMIZE) $(F90_DEBUG) $(F90_INCLUDE)
-#
 #---------------------------------------------------------------
 # LINK/LOADER DIRECTIVES
 #
 LD          = $(F90) 
-#
-LDMISC      = $(F_PROF) -v 
-#                        -Wl,-Bstatic # make statically linked executables
-#
+LDMISC      = $(F_PROF) -v -Wl,-Bstatic # make statically linked executables
 LDFLAGS     = $(LDMISC) -o 
-#
 #---------------------------------------------------------------
-# ARCHIVAL
+# Archive
 #
 AR      = ar
 ARFLAGS = -rcv
 RANLIB  = ranlib
+#--------------------------------------------------------------------------
+# MPI libraries
 #
-#---------------------------------------------------------------
-# DIRECTORIES TO SUSS FOR LIBRARIES
+# For linking with old style MPI1 (default if only using -DPARALLEL)
+#MPI_LIBS = -lmpich -L$(GM_LIB) -lgm 
 #
-LibOpts=-L$(MONDO_HOME)/Libs -L/usr/local/lib -L$(HDF_LIB) 
-#       -L$(LAPACK_LIB)
-#       -L$(MPI_LIB) 
-#
-#-------------------------------------------------------------------------------------
-# MPI LIBRARIES
-#
-# How MPICH was configured for debuging :
-#
-#./configure -memdebug -device=ch_p4 -cc=gcc -clinker=gcc -fc=pgf77 -f90=pgf90 -fortnames=UNDERSCORE --disable-c++
-#
-# How MPICH was configured for production:
-#
-#               -cflags="-ffast-math -fexpensive-optimizations -fomit-frame-pointer -O3"
-#               -fflags="-O2 -tp p6 -pc 64"
-#
-#  ROLAND STUMPH's additions:
-#
-# -comm=shared -fortnames=UNDERSCORE -noromio --noc++ -nompe 
-#
-#MPI_LIBS= -lmpich
-#MPI_LIBS=-lmpich -L/usr/local/myrinet/lib -lgm 
+# For new style MPI2 (use -DPARALLEL -DMPI2)
+#MPI_LIBS = -L$(MPI_LIB) -llammpi++ -llammpio -lpmpi -llamf77mpi -lmpi -llam \
+#           -L$(GM_LIB) -lgm
 #---------------------------------------------------------------------
-#  HDF5 Libraries with compression and jpeg libs. 
-#  How HDF5 was configured for production:
-#  ./configure --prefix=$HDF_HOME --enable-production --disable-debug
-#  How HDF5 was configured for debuging:
-#  setenv CFLAGS -g
-#  ./configure --prefix=$HDF_HOME --disable-production
-#   -j -l2 for parallel GNU make on dual SMP
-#  could go with either: --disable-static --disable-shared
+#  HDF5 libraries with compression and jpeg libs. 
 #
-HDF_LIBS=-lhdf5 -ljpeg -lz 
+HDF_LIBS = -L$(HDF_LIB) -lhdf5 -ljpeg -lz 
+#---------------------------------------------------------------------
+#  Mondo libraries
 #
+MONDO_LIBS= -L$(MONDO_LIB) -lMondoMods
 #-------------------------------------------------------------------------
 #  The generic libs needed by most of the programs.  
 #
-F90_LIBRARIES = -lMondoMods -lDynamo $(MPI_LIBS) $(HDF_LIBS) 
-#
+F90_LIBRARIES = $(MONDO_LIBS) $(MPI_LIBS) $(HDF_LIBS) 
 #--------------------------------------------------------------------------
 #  'Nuff said
 #
-LAPACK = -llapack -lblas
-#
+LAPACK = $(LAPACK_LIB) -llapack -lblas
 #---------------------------------------------------------------------------
 

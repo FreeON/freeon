@@ -81,71 +81,71 @@ clean:
 #	Orthogonalization transforms
 #
 Blk:	$(BlkAInvObjs)
-	$(LD) $(LDFLAGS) AInv $(BlkAInvObjs) $(LibOpts) $(F90_LIBRARIES) $(LAPACK)
+	$(LD) $(LDFLAGS) AInv $(BlkAInvObjs)  $(F90_LIBRARIES) $(LAPACK)
 	mv AInv $(MONDO_EXEC)/AInv
 #
 Lwd:	$(LowdinOObjs)
-	$(LD) $(LDFLAGS) LowdinO $(LowdinOObjs) $(LibOpts) $(F90_LIBRARIES) $(LAPACK)
+	$(LD) $(LDFLAGS) LowdinO $(LowdinOObjs)  $(F90_LIBRARIES) $(LAPACK)
 	mv LowdinO $(MONDO_EXEC)/LowdinO
 #
 #       SCF Solvers
 #
 RHEq:	$(RHEq_Objs)
-	$(LD) $(LDFLAGS) RHeqs $(RHEq_Objs) $(LibOpts) $(F90_LIBRARIES) $(LAPACK)
+	$(LD) $(LDFLAGS) RHeqs $(RHEq_Objs)  $(F90_LIBRARIES) $(LAPACK)
 	mv RHeqs $(MONDO_EXEC)/RHeqs 
 #
 SDMM:	$(SDMM_Objs)
-	$(LD) $(LDFLAGS) SDMM $(SDMM_Objs) $(LibOpts) $(F90_LIBRARIES) $(LAPACK)
+	$(LD) $(LDFLAGS) SDMM $(SDMM_Objs)  $(F90_LIBRARIES) $(LAPACK)
 	mv SDMM $(MONDO_EXEC)/SDMM
 #
 SP2:	$(SP2_Objs)
-	$(LD) $(LDFLAGS) SP2  $(SP2_Objs) $(LibOpts) $(F90_LIBRARIES) $(LAPACK)
+	$(LD) $(LDFLAGS) SP2  $(SP2_Objs)  $(F90_LIBRARIES) $(LAPACK)
 	mv SP2 $(MONDO_EXEC)/SP2
 #
 SP4:	$(SP4_Objs)
-	$(LD) $(LDFLAGS) SP4  $(SP4_Objs) $(LibOpts) $(F90_LIBRARIES) $(LAPACK)
+	$(LD) $(LDFLAGS) SP4  $(SP4_Objs)  $(F90_LIBRARIES) $(LAPACK)
 	mv SP4 $(MONDO_EXEC)/SP4
 #
 NT4:	$(NT4_Objs)
-	$(LD) $(LDFLAGS) NT4  $(NT4_Objs) $(LibOpts) $(F90_LIBRARIES) $(LAPACK)
+	$(LD) $(LDFLAGS) NT4  $(NT4_Objs)  $(F90_LIBRARIES) $(LAPACK)
 	mv NT4 $(MONDO_EXEC)/NT4
 #
 PM:	$(PM_Objs)
-	$(LD) $(LDFLAGS) PM  $(PM_Objs) $(LibOpts) $(F90_LIBRARIES) $(LAPACK)
+	$(LD) $(LDFLAGS) PM  $(PM_Objs)  $(F90_LIBRARIES) $(LAPACK)
 	mv PM $(MONDO_EXEC)/PM
 #
 #	Misc
 #
 Stat:	$(Stat_Objs)
-	$(LD) $(LDFLAGS) SCFstats $(Stat_Objs) $(LibOpts) $(F90_LIBRARIES) 
+	$(LD) $(LDFLAGS) SCFstats $(Stat_Objs)  $(F90_LIBRARIES) 
 	mv SCFstats $(MONDO_EXEC)/SCFstats
 #
 Gues:	$(Gues_Objs)
-	$(LD) $(LDFLAGS) P2Use $(Gues_Objs) $(LibOpts) $(F90_LIBRARIES) $(LAPACK)
+	$(LD) $(LDFLAGS) P2Use $(Gues_Objs)  $(F90_LIBRARIES) $(LAPACK)
 	mv P2Use $(MONDO_EXEC)/P2Use
 #
 FBuild:	$(FBuild_Objs)
-	$(LD) $(LDFLAGS) FBuild $(FBuild_Objs) $(LibOpts) $(F90_LIBRARIES) 
+	$(LD) $(LDFLAGS) FBuild $(FBuild_Objs)  $(F90_LIBRARIES) 
 	mv FBuild $(MONDO_EXEC)/FBuild
 #
 DIIS:	$(DIIS_Objs)
-	$(LD) $(LDFLAGS) DIIS $(DIIS_Objs) $(LibOpts) $(F90_LIBRARIES) $(LAPACK)
+	$(LD) $(LDFLAGS) DIIS $(DIIS_Objs)  $(F90_LIBRARIES) $(LAPACK)
 	mv DIIS $(MONDO_EXEC)/DIIS
 #
 Dev:	$(Dev_Objs)
-	$(LD) $(LDFLAGS) ToDev $(Dev_Objs) $(LibOpts) $(F90_LIBRARIES) 
+	$(LD) $(LDFLAGS) ToDev $(Dev_Objs)  $(F90_LIBRARIES) 
 	mv ToDev $(MONDO_EXEC)/ToDev
 #
-DIIS.o:		            $(MONDO_HOME)/Libs/libMondoMods.a
-FBuild.o:	            $(MONDO_HOME)/Libs/libMondoMods.a
-P2Use.o:	FillPBlok.o $(MONDO_HOME)/Libs/libMondoMods.a
-FillPBlok.o:	            $(MONDO_HOME)/Libs/libMondoMods.a
-RHeqs.o:		    $(MONDO_HOME)/Libs/libMondoMods.a
-SCFStatus.o:                $(MONDO_HOME)/Libs/libMondoMods.a
-SDMM.o:		            $(MONDO_HOME)/Libs/libMondoMods.a
-SP2.o:                      $(MONDO_HOME)/Libs/libMondoMods.a
-SP4.o:                      $(MONDO_HOME)/Libs/libMondoMods.a
-NT4.o:                      $(MONDO_HOME)/Libs/libMondoMods.a
-PM.o:                       $(MONDO_HOME)/Libs/libMondoMods.a
-LowdinO.o:		    $(MONDO_HOME)/Libs/libMondoMods.a
-BlokAInv.o:		    $(MONDO_HOME)/Libs/libMondoMods.a
+DIIS.o:		            $(MONDO_LIB)/libMondoMods.a
+FBuild.o:	            $(MONDO_LIB)/libMondoMods.a
+P2Use.o:	FillPBlok.o $(MONDO_LIB)/libMondoMods.a
+FillPBlok.o:	            $(MONDO_LIB)/libMondoMods.a
+RHeqs.o:		    $(MONDO_LIB)/libMondoMods.a
+SCFStatus.o:                $(MONDO_LIB)/libMondoMods.a
+SDMM.o:		            $(MONDO_LIB)/libMondoMods.a
+SP2.o:                      $(MONDO_LIB)/libMondoMods.a
+SP4.o:                      $(MONDO_LIB)/libMondoMods.a
+NT4.o:                      $(MONDO_LIB)/libMondoMods.a
+PM.o:                       $(MONDO_LIB)/libMondoMods.a
+LowdinO.o:		    $(MONDO_LIB)/libMondoMods.a
+BlokAInv.o:		    $(MONDO_LIB)/libMondoMods.a

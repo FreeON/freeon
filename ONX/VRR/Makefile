@@ -10,8 +10,8 @@ Objects = Int1111.o Int2111.o Int1121.o Int1122.o Int2211.o Int2121.o \
           Int6221.o Int2162.o Int6122.o Int2261.o
 
 all:	$(Objects)
-	$(AR) $(ARFLAGS) $(MONDO_HOME)/Libs/libVRR.a $(?:.F90=.o)
-	$(RANLIB) $(MONDO_HOME)/Libs/libVRR.a
+	$(AR) $(ARFLAGS) $(MONDO_LIB)/libVRR.a $(?:.F90=.o)
+	$(RANLIB) $(MONDO_LIB)/libVRR.a
 
 clean:	
 	rm -f $(REMOVEALL)

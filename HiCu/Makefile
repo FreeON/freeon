@@ -58,39 +58,35 @@ clean:	CHC CXF
 	ls -lS
 #-----------------------------------------------------------------------
 HC:	$(HObjs)
-	$(LD) $(LDFLAGS) HiCu $(HObjs) $(LibOpts) $(F90_LIBRARIES)
+	$(LD) $(LDFLAGS) HiCu $(HObjs) $(F90_LIBRARIES)
 	mv HiCu $(MONDO_EXEC)
 #
 CHC:	
 	rm -f $(MONDO_EXEC)/HiCu
 #-----------------------------------------------------------------------
 XF:     $(XFObjs)
-	$(LD) $(LDFLAGS) XCForce $(XFObjs) $(LibOpts) $(F90_LIBRARIES)
+	$(LD) $(LDFLAGS) XCForce $(XFObjs) $(F90_LIBRARIES)
 	mv XCForce $(MONDO_EXEC)
 #
 CXF:
 	rm -f $(MONDO_EXEC)/XCForce
 #-----------------------------------------------------------------------
 VR:	$(VObjs)
-	$(LD) $(LDFLAGS) VRho $(VObjs) $(LibOpts) $(F90_LIBRARIES)
+	$(LD) $(LDFLAGS) VRho $(VObjs) $(F90_LIBRARIES)
 	./VRho
 	rm -rf VRho VRho.o VRho.f90
 #
 CVR:	
 	rm -rf Explicit*.Inc
 #
-ParaHiCu.o:	CubeTree.o TreeWalk.o KxcGen.o    \
-		$(MONDO_HOME)/Libs/libMondoMods.a
-CubeTree.o:	Grid.o                      \
-		GeneralLeafPopulation.Inc   \
-		GeneralLeafContribution.Inc   $(MONDO_HOME)/Libs/libMondoMods.a
-Grid.o:		MMA/CubeRules/Rule5.Inc \
-                MMA/CubeRules/Rule7.Inc        $(MONDO_HOME)/Libs/libMondoMods.a
+ParaHiCu.o:	CubeTree.o TreeWalk.o KxcGen.o $(MONDO_LIB)/libMondoMods.a
+CubeTree.o:	Grid.o GeneralLeafPopulation.Inc   \
+		GeneralLeafContribution.Inc   $(MONDO_LIB)/libMondoMods.a
+Grid.o:		MMA/CubeRules/Rule5.Inc  MMA/CubeRules/Rule7.Inc  $(MONDO_LIB)/libMondoMods.a
 HiCu.o:		KxcGen.o TreeWalk.o \
                 ParaHiCu.o CubeTree.o RhoTree.o  \
-		$(MONDO_HOME)/Libs/libMondoMods.a
-XCForce.o:	dXCBlok.o TreeWalk.o \
-		CubeTree.o RhoTree.o \
-		$(MONDO_HOME)/Libs/libMondoMods.a
-RhoTree.o:	$(MONDO_HOME)/Libs/libMondoMods.a
-VRhoMD.o:	$(MONDO_HOME)/Libs/libMondoMods.a
+		$(MONDO_LIB)/libMondoMods.a
+XCForce.o:	dXCBlok.o TreeWalk.o CubeTree.o RhoTree.o \
+		$(MONDO_LIB)/libMondoMods.a
+RhoTree.o:	$(MONDO_LIB)/libMondoMods.a
+VRhoMD.o:	$(MONDO_LIB)/libMondoMods.a

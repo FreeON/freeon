@@ -54,7 +54,7 @@ all:	vis
 release:clean $(ReleaseFiles)
 #
 vis:	$(VisDXObjs) 
-	$(LD) $(LDFLAGS) PotMapRho $(VisDXObjs) $(MisObjs) $(LibOpts)  $(F90_LIBRARIES) 
+	$(LD) $(LDFLAGS) PotMapRho $(VisDXObjs) $(MisObjs) $(F90_LIBRARIES) 
 	mv PotMapRho $(MONDO_EXEC)/PotMapRho
 #
 purge:	clean

@@ -33,7 +33,7 @@ include $(MONDO_COMPILER)
 include $(MONDO_HOME)/Includes/Suffixes
 include $(MONDO_HOME)/Includes/RemoveAll
 #
-Libs =  $(F90_LIBRARIES) $(LAPACK)
+Libs =  
 #
 HessObjs = BFGSMisc.o BFGSHess.o  
 NewObjs  = NewStep.o
@@ -58,12 +58,12 @@ clean:
 	ls -l 
 #
 Hess:	$(HessObjs)
-	$(LD) $(LDFLAGS) BFGSHess $(HessObjs) $(LibOpts) $(Libs)
+	$(LD) $(LDFLAGS) BFGSHess $(HessObjs) $(F90_LIBRARIES) $(LAPACK)
 	mv BFGSHess $(MONDO_EXEC)/BFGSHess
 #
 New:	$(NewObjs)
-	$(LD) $(LDFLAGS) NewStep $(NewObjs) $(LibOpts) $(Libs)
+	$(LD) $(LDFLAGS) NewStep $(NewObjs) $(F90_LIBRARIES) $(LAPACK)
 	mv NewStep $(MONDO_EXEC)/NewStep
 #
-BFGSHess.o:	$(MONDO_HOME)/Libs/libMondoMods.a
+BFGSHess.o:	$(MONDO_LIB)/libMondoMods.a
 

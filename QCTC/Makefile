@@ -60,11 +60,11 @@ purge:	CQCTC CJFrc cmma
 	rm -f $(REMOVESRCE)
 #
 QCTC:	$(QCTCObjs)
-	$(LD) $(LDFLAGS) QCTC $(QCTCObjs) $(LibOpts) $(F90_LIBRARIES) 
+	$(LD) $(LDFLAGS) QCTC $(QCTCObjs) $(F90_LIBRARIES) 
 	mv QCTC $(MONDO_EXEC)/QCTC
 #
 JFrc:	$(JFrcObjs)
-	$(LD) $(LDFLAGS) JForce $(JFrcObjs) $(LibOpts) $(F90_LIBRARIES) 
+	$(LD) $(LDFLAGS) JForce $(JFrcObjs) $(F90_LIBRARIES) 
 	mv JForce $(MONDO_EXEC)/JForce
 #
 CQCTC:
@@ -105,6 +105,9 @@ hgtrax:
 chgtrax:
 	$(MAKE) -i -C MMA/HGTraX clean
 #
-MPoles.o:	MMA/HGToSP/HGToSP.Inc
+# dependencies are laking here.  This needs work!
+#
+QCTC.o:		MondoPoles.o TreeWalk.o CTraX.o Globals.o Thresholds.o  $(MONDO_LIB)/libMondoMods.a
+MPoles.o:	MMA/HGToSP/HGToSP.Inc $(MONDO_LIB)/libMondoMods.a
 TreeWalk.o:	MMA/HGTraX/HGTraX.Inc \
-		MMA/CTraX/CTraX.Inc MMA/CTraX/IrRegulars.Inc
+		MMA/CTraX/CTraX.Inc MMA/CTraX/IrRegulars.Inc $(MONDO_LIB)/libMondoMods.a

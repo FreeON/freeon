@@ -42,7 +42,7 @@ MModObjs = GlobalScalars.o GlobalCharacters.o DerivedTypes.o    \
            LinAlg.o LinAlg77.o MatFunk.o AInv.o SMWrap.o SpecFun.o     \
            D1Mach.o DCSEvl.o DErf.o DErfc.o DMach.o InitDS.o    \
            Mechanics.o Thresholding.o Functionals.o PBC.o AtomPairs.o       \
-           BoundingBox.o BraBloks.o Macros.o FastMat.o
+           BoundingBox.o BraBloks.o Macros.o FastMat.o InCoords.o
 #
 MModRel  = GlobalScalars.x GlobalCharacters.x DerivedTypes.x    \
            GlobalObjects.x BasisSetParameters.x MPIInclude.x    \
@@ -54,7 +54,7 @@ MModRel  = GlobalScalars.x GlobalCharacters.x DerivedTypes.x    \
            D1Mach.x DCSEvl.x DErf.x DErfc.x DMach.x InitDS.x    \
            Mechanics.o Thresholding.x Functionals.x PBC.x AtomPairs.x       \
            BoundingBox.x BraBloks.x Macros.x FastMat.x EllToInclude.x     \
-           FTest.x SMTest.x  
+           FTest.x SMTest.x  InCoords.x
 #
 small:	Mods
 #
@@ -65,15 +65,15 @@ test:	SM F
 clean:	CMods CDGEMM CSM CF
 #
 purge:	clean
-	rm -f $(MONDO_HOME)/Libs/libMondoMods.a
+	rm -f $(MONDO_LIB)/libMondoMods.a
 	rm -f $(REMOVESRCE)
 #
 release:$(MModRel)
 	rm -rf MMA/Functions
 #
 Mods:	$(MModObjs)
-	$(AR) $(ARFLAGS) $(MONDO_HOME)/Libs/libMondoMods.a $(?:.F90=.o)
-	$(RANLIB) $(MONDO_HOME)/Libs/libMondoMods.a	
+	$(AR) $(ARFLAGS) $(MONDO_LIB)/libMondoMods.a $(?:.F90=.o)
+	$(RANLIB) $(MONDO_LIB)/libMondoMods.a	
 #
 CMods:
 	rm -f $(REMOVEMISC) $(REMOVEMODS)
@@ -81,43 +81,39 @@ CMods:
 	rm -f *~
 	ln -s /dev/null core
 	ls -l
-#
+#-------------------------------------------------------------
 ToEll:	EllToInclude.o
 	$(LD) $(LDFLAGS) EllInc EllToInclude.o $(LibOpts) $(F90_LIBRARIES) 
 	./EllInc
 	rm -f EllToInclude.o ./EllInc
-#
+#-------------------------------------------------------------
 DGEMM:	
 	$(MAKE) -C $(MONDO_DGEMMS)
-#
 CDGEMM:	
 	$(MAKE) -i -C $(MONDO_DGEMMS) clean
 	rm -f $(MONDO_HOME)/MondoMods/DGEMMs
-#
+#-------------------------------------------------------------
 SMTestObjs=  SMTest.o 
 SM:	$(SMTestObjs)
-	$(LD) $(LDFLAGS) SMTest $(SMTestObjs) $(LibOpts) $(F90_LIBRARIES) 
+	$(LD) $(LDFLAGS) SMTest $(SMTestObjs)  $(F90_LIBRARIES) 
 	./SMTest>Mods.log
 	rm -f $(SMTestObjs) ./SMTest
 	cat Mods.log
-#
 CSM:	
 	rm -f $(SMTestObjs)
 	rm -f ./SMTest
-#
+#-------------------------------------------------------------
 FTestObjs=  FTest.o 
 F:	$(FTestObjs)
-	$(LD) $(LDFLAGS) FTest $(FTestObjs) $(LibOpts) $(F90_LIBRARIES) 
-#	./FTest>>Mods.log
-#	rm -f $(FTestObjs) ./FTest
-#	cat Mods.log
-#
+	$(LD) $(LDFLAGS) FTest $(FTestObjs) $(F90_LIBRARIES) 
+	./FTest>>Mods.log
+	rm -f $(FTestObjs) ./FTest
+	cat Mods.log
 CF:	
 	rm -f $(FTestObjs)
 	rm -f ./FTest
 #---------------------------------------------------------------------------------------------
 #       DEPENDENCIES
-
 #
 AInv.o: 		PrettyPrint.o GlobalCharacters.o GlobalScalars.o \
 			DerivedTypes.o MemMan.o LinAlg.o MatFunk.o 

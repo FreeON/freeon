@@ -7,8 +7,8 @@ ObjectFiles = \
  mm_double_NN_c.o  mm_double_NT_c.o  mm_double_TN_c.o  mm_double_TT_c.o  
 #
 all:	$(ObjectFiles)
-	$(AR) $(ARFLAGS) $(MONDO_HOME)/Libs/libMondoMods.a $(?:.F90=.o)
-	$(RANLIB) $(MONDO_HOME)/Libs/libMondoMods.a	
+	$(AR) $(ARFLAGS) $(MONDO_LIB)/libMondoMods.a $(?:.F90=.o)
+	$(RANLIB) $(MONDO_LIB)/libMondoMods.a	
 #
 clean:
 	rm -f $(REMOVEMISC) $(REMOVEMODS)

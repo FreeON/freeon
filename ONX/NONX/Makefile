@@ -66,11 +66,11 @@ ReleaseFiles=ONXParameters.x ONXMemory.x ContractionScaling.x MatFilter.x \
 Libs =  $(F90_LIBRARIES) $(LAPACK) -lVRR
 #
 NONX:	$(Objects1)
-	$(LD) $(LDFLAGS) NONX $(Objects1) $(LibOpts) $(Libs)
+	$(LD) $(LDFLAGS) NONX $(Objects1) $(Libs)
 	mv NONX $(MONDO_EXEC)/ONX
 #
 XForce: $(Objects2)
-	$(LD) $(LDFLAGS) XForce $(Objects2) $(LibOpts) $(Libs)
+	$(LD) $(LDFLAGS) XForce $(Objects2) $(Libs)
 	mv XForce $(MONDO_EXEC)/XForce
 #
 release:purge $(ReleaseFiles)
