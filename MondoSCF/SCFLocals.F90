@@ -68,6 +68,8 @@ MODULE SCFLocals
 !
       CHARACTER(LEN=DEFAULT_CHR_LEN)     :: ForceAction 
       CHARACTER(LEN=DEFAULT_CHR_LEN)     :: GuessMethod
+      REAL(DOUBLE),DIMENSION(2)          :: MDControls
+!
    END TYPE
 !------------------------------------------------------------------------------------------------  
 !  Thresholds (Loose,Good,Tight,VeryTight):
