@@ -388,8 +388,7 @@ Q & = & \int _{V_{\infty }}\, d{\mathbf{x}}\, \left( \mathbf{x}-\mathbf{R}_{0}\r
 \rho ^{loc}\left( \mathbf{x}\right) 
 \label{Q} 
 \end{eqnarray}
-are the dipole and quadrapole moments. In appendix \ref{DipC} we give a short
-derivation of these terms
+are the dipole and quadrapole moments.
 
 
 \subsection{The DFT exchange correlation matrix}
@@ -532,54 +531,7 @@ and support.
 \bibliographystyle{plain}
 \bibliography{GaussianPapers}
 
-
-\appendix
-
-
-\section{Computation of the Dipole and Quadrapole Corrections }\label{DipC}
-
-Following the work of Redlack and Grindley \cite{Redlack72} we show
-the corrections needed in order to obtain Ewald boundary conditions.
-These corrections exist in both two and three directions and are due
-the the field induced in the box from the surface at infinity, \( S_{\infty } \).
-For three dimensions, 
-
-\begin{equation}
-\label{D1}
-\Phi _{S_{\infty }}({\mathbf{x}})=\sum _{{\mathbf{R}'}\in S_{\infty }}\, \int _{V_{\infty }}\: d{\mathbf{x}'}
-\frac{\rho ^{loc}\left( {\mathbf{x}'+\mathbf{R}'}\right) }{\left| \mathbf{x}-\mathbf{x}'\right| }
-\end{equation}
-which if we write this as a multipole expansion
-\begin{eqnarray}
-\Phi _{S_{\infty }}({\mathbf{x}})&=&\sum _{{\mathbf{R}'}\in S_{\infty }}\, {\biggl[} \frac{{\mathbf{p}}\cdot 
-\left( {\mathbf{x}-\mathbf{R}'}\right) }{\left| {\mathbf{x}-\mathbf{R}'}\right| ^{3}}
-\nonumber\\
-&+&\frac{1}{2}
-\sum _{i,j}Q_{ij}\frac{\left( {\mathbf{x}-\mathbf{R}'}\right) _{i}\left( {\mathbf{x}-\mathbf{R}'}
-\right) _{j}}{\left| \left( {\mathbf{x}-\mathbf{R}'}\right) \right| ^{5}}+\ldots {\biggr]}
-\nonumber\\
-\label{D2}
-\end{eqnarray}
-where \( {\mathbf{p}} \) and \( Q_{ij} \) are the dipole and quadrapole
-moments of \( \rho ^{loc}\left( {\mathbf{x}}\right)  \) . Both the
-dipole and the quadrapole terms contribute to the potential in the
-cell, the dipole directly and the quadrupole conditionally. Upon summation
-over the surface, the dipole and quadrupole contributions become\begin{equation}
-\label{D3}
-\Phi ^{3D}_{S_{\infty }}({\mathbf{x}})=-\frac{4\pi }{3V_{cell}}{\mathbf{p}}\cdot \left( {\mathbf{x}-
-\mathbf{R}'}\right) +\frac{2\pi }{3V_{cell}}\left( Q_{11}+Q_{22}+Q_{33}\right) .
-\end{equation}
-For two dimensions only the dipole contributes to the potential within
-the cell as
-
-\begin{equation}
-\label{D4}
-\Phi ^{2D}_{S_{\infty }}(z)=-\frac{2\pi }{A_{cell}}p_{z}\, \left( z-R'_{z}\right) 
-\end{equation}
-\vfill
-
 \eject
-
 
 \begin{table*}
 \caption{\label{table:ComToCrystal98_1} Comparison of Sodium Chloride test
