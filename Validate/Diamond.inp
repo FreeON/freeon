@@ -1,22 +1,31 @@
 <BeginTitle>
-    ****Diamond****
 
-STO-3G/HF/good:     <SCF>   = -298.85433467
-6-21G*/BLYP/good:   <SCF>   = -303.98984456
+    Diamond
+
+ STO-3G/HF     = -298.85433467^*
+ 8-511G/BLYP   = -303.98984456^*
+ 6-111G^&/BLYP = -303.98874742^*
+
+^* MondoSCF/Good
+^& made up basis set in User2.bas
+
 <EndTitle>
 
 <BeginOptions>
+
 Charge=0
 Multiplicity=1
+
 Guess=SuperPos
 DebugAll=(MaxDebug,CheckSums)
+
 SCFMethod=(RH,RH)
-BasisSets=(STO-3G,Crystal)
 ModelChem=(HF,BLYPxc) 
 Accuracy =(Loose,Good)
-Geometry=(InAnstroms,NoOrder) 
-Periodic=(FracCoord)
+
 PBC=(T,T,T)
+Periodic=(FracCoord)
+
 <EndOptions>
 
 <BeginPeriodic>
