@@ -263,9 +263,9 @@ CONTAINS
     IF(G%PBC%Dimen==0) THEN
        MaxCell=1
     ELSEIF(G%PBC%Dimen==1) THEN
-       MaxCell=20
+       MaxCell=50
     ELSEIF(G%PBC%Dimen==2) THEN
-       MaxCell=300
+       MaxCell=500
     ELSEIF(G%PBC%Dimen==3) THEN
        MaxCell=5000
     ENDIF
@@ -275,7 +275,7 @@ CONTAINS
     ELSE
        Radius = (One+1.D-14)*MaxBoxDim(G)+SQRT(AtomPairThresh)
     ENDIF
-    CALL New_CellSet_Sphere(CS_OUT,G%PBC%AutoW%I,G%PBC%BoxShape%D,Radius,MaxCell_O=MaxCell)   
+    CALL New_CellSet_Sphere(CS_OUT,G%PBC%AutoW%I,G%PBC%BoxShape%D,Radius,MaxCell_O=MaxCell) 
 !   CS_IN : Quick fix for now, we will need to address a much better fix, later
     IF(PRESENT(Rad_O)) THEN
        Radius = Rad_O

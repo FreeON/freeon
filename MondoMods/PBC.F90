@@ -123,6 +123,8 @@ MODULE CellSets
 !
     IF(PRESENT(MaxCell_O)) THEN
        IF(NCELL > MaxCell_O) THEN
+          WRITE(*,*) 'NCELL   = ',NCELL
+          WRITE(*,*) 'MaxCell = ',MaxCell_O
           CALL Halt('NCELL is Greater then MaxCell')
        ELSE
           CALL New_CellSet(CS,MaxCell_O)
@@ -195,6 +197,8 @@ MODULE CellSets
   !
     IF(PRESENT(MaxCell_O)) THEN
        IF(NCELL > MaxCell_O) THEN
+          WRITE(*,*) 'NCELL   = ',NCELL
+          WRITE(*,*) 'MaxCell = ',MaxCell_O
           CALL Halt('NCELL is Greater then MaxCell')
        ELSE
           CALL New_CellSet(CS,MaxCell_O)
