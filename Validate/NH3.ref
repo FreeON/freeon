@@ -1,0 +1,1066 @@
+
+
+ __    __                 _       ____________ ______ 
+|  \  /  |               | |     /       /    |      |
+|   \/   | ___  _ __   __| | ___/   ____/   __|  |==='
+|        |/ _ \| '_ \ / _  |/ _ \____  \   (__|  ____|
+|  |\/|  | (_) | | | | (_| | (_) )     /\     |  |    
+|__|  |__|\___/|_| |_|\____|\___/_____/  \____|__|    
+
+ Version 1.0 alpha 10 "Gyokuro"                       
+ A program suite for O(N) SCF theory and ab initio MD 
+ Matt Challacombe, C.J. Tymczak,                      
+ Chee Kwan Gan, Karoly Nemeth, Valery Weber,          
+ Eric Schwegler and Anders Niklasson                  
+ Los Alamos National Laboratory                       
+ LA-CC-04-086 (formerly 01-2)                         
+ Compiled for AMDLinux.PG, executing on gold
+ a i686 machine running Linux 2.4.21-27.0.1.ELsmp
+
+ Current HDF :: /scratch/nemeth/NH3_outp_12404.hdf
+<<Starting MondoSCF 02/08/05 @ 12:51:49>>
+ SCFStatus : [0,1,1]    :: <SCF> = -51.21537750, dD = 0.22D+01
+ ODA :  Mix = 1.00000   :: <SCF> = -54.03097412, d3 = 0.27D-02
+ SCFStatus : [1,1,1]    :: <SCF> = -54.03097412, dD = 0.10D+00, DIIS = 0.10D+01
+ ODA :  Mix = 0.73612   :: <SCF> = -54.03297060, d3 = -.70D-04
+ SCFStatus : [2,1,1]    :: <SCF> = -54.03296798, dD = 0.22D-01, DIIS = 0.29D-02
+ ODA :  Mix = 1.00000   :: <SCF> = -54.03413195, d3 = 0.17D-07
+ SCFStatus : [3,1,1]    :: <SCF> = -54.03413195, dD = 0.18D-01, DIIS = 0.19D-02
+ ODA :  Mix = 0.64353   :: <SCF> = -54.03420834, d3 = -.52D-07
+ SCFStatus : [4,1,1]    :: <SCF> = -54.03420834, dD = 0.26D-02, DIIS = 0.27D-03
+ ODA :  Mix = 1.00000   :: <SCF> = -54.03426390, d3 = 0.14D-07
+ SCFStatus : [5,1,1]    :: <SCF> = -54.03426390, dD = 0.20D-02, DIIS = 0.21D-03
+ Turning on DIIS
+ SCFStatus : [6,1,1]    :: <SCF> = -54.03426455, dD = 0.88D-03, DIIS = 0.16D-03
+ Normal SCF convergence.
+ Sparsity of B=  39.15 % # of SpB%NNon0        74
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+ Internals at step #1
+INTERNAL COORDINATES
+       DEFINITION       ATOMS_INVOLVED      VALUE        CONSTRAINT    ACTIVE
+      1  STRE          1    2    0    0      0.955099    F    0.000000    T
+      2  STRE          1    3    0    0      0.955099    F    0.000000    T
+      3  STRE          1    4    0    0      0.951589    F    0.000000    T
+      4  BEND          2    1    3    0    118.421597    F    0.000000    T
+      5  BEND          2    1    4    0    119.162060    F    0.000000    T
+      6  BEND          3    1    4    0    119.162060    F    0.000000    T
+      7  OUTP          4    1    2    3     17.834899    F    0.000000    T
+      8  OUTP          2    1    3    4     17.966342    F    0.000000    T
+      9  OUTP          3    1    2    4    -17.966342    F    0.000000    T
+Gradient transformation, No. Int. Coords=       9
+Grad Trf, step=   1 MaxChange=     0.113843 ChangeNorm=     0.063552
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Grad Trf, step=   3 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   3 steps
+Iterative back-transformation, No. Int. Coords=      9
+ Sparsity of B=  39.15 % # of SpB%NNon0        74
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=   1   Max_DX=     0.095635  X_RMSD=     0.037327
+Step=   2   Max_DX=     0.000606  X_RMSD=     0.000178
+Step=   3   Max_DX=     0.000032  X_RMSD=     0.000010
+Step=   4   Max_DX=     0.000004  X_RMSD=     0.000002
+ Rigidity=    2.9241393128850562E-04
+ 1 Maximum Displacement from Backtransform.=    5.2917738695050474E-02  on  2 STRE    
+Coordinate back-transformation converged in   4 steps
+       Clone =      1 GeOp step =      1 Total Energy =         -54.03426455
+                   Max intl Grad =     0.113843 between atoms    1   4   0   0
+     Max Unconstrained Cart Grad =     0.113924      on atom     4
+                   RMS intl Grad =     0.063552
+                  Max STRE Displ =     0.052918 between atoms    1   3
+                  Max BEND Displ =     0.353914 between atoms    3   1   4
+                  Max OUTP Displ =     1.483919 between atoms    4   1   2   3
+                       RMS Displ =     0.059573
+No Geometric DIIS is being done in this step.
+ P2Use : AO-DMX         ::  Nstep  = 1 Lambda = 0.10000000D+01
+ P2Use : AO-DMX 1       ::  dN=-.97D-03, %Non0=0.10D+03
+ P2Use : AO-DMX 2       ::  dN=-.34D-05, %Non0=0.10D+03
+ P2Use : AO-DMX 3       ::  dN=-.46D-10, %Non0=0.10D+03
+ SCFStatus : [0,1,2]    :: <SCF> = -54.05511211, dD = 0.44D-01
+ ODA :  Mix = 0.94603   :: <SCF> = -54.05563049, d3 = 0.21D-04
+ SCFStatus : [1,1,2]    :: <SCF> = -54.05563060, dD = 0.25D-01, DIIS = 0.10D+01
+ ODA :  Mix = 0.65574   :: <SCF> = -54.05576969, d3 = -.11D-04
+ SCFStatus : [2,1,2]    :: <SCF> = -54.05576818, dD = 0.50D-02, DIIS = 0.47D-03
+ ODA :  Mix = 1.00000   :: <SCF> = -54.05587382, d3 = -.23D-07
+ SCFStatus : [3,1,2]    :: <SCF> = -54.05587382, dD = 0.44D-02, DIIS = 0.45D-03
+ ODA :  Mix = 0.57281   :: <SCF> = -54.05587800, d3 = 0.26D-07
+ SCFStatus : [4,1,2]    :: <SCF> = -54.05587800, dD = 0.35D-03, DIIS = 0.33D-04
+ Normal SCF convergence.
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+ Internals at step #2
+INTERNAL COORDINATES
+       DEFINITION       ATOMS_INVOLVED      VALUE        CONSTRAINT    ACTIVE
+      1  STRE          1    2    0    0      1.008016    F    0.000000    T
+      2  STRE          1    3    0    0      1.008016    F    0.000000    T
+      3  STRE          1    4    0    0      1.004506    F    0.000000    T
+      4  BEND          2    1    3    0    118.588305    F    0.000000    T
+      5  BEND          2    1    4    0    118.808146    F    0.000000    T
+      6  BEND          3    1    4    0    118.808145    F    0.000000    T
+      7  OUTP          4    1    2    3     19.318818    F    0.000000    T
+      8  OUTP          3    1    2    4    -19.361058    F    0.000000    T
+      9  OUTP          2    1    3    4     19.361058    F    0.000000    T
+ Sparsity of B=  39.15 % # of SpB%NNon0        74
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Gradient transformation, No. Int. Coords=       9
+Grad Trf, step=   1 MaxChange=     0.113843 ChangeNorm=     0.063552
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Grad Trf, step=   3 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   3 steps
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Gradient transformation, No. Int. Coords=       9
+Grad Trf, step=   1 MaxChange=     0.039210 ChangeNorm=     0.021154
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   2 steps
+Iterative back-transformation, No. Int. Coords=      9
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=   1   Max_DX=     0.053286  X_RMSD=     0.020444
+Step=   2   Max_DX=     0.000567  X_RMSD=     0.000158
+Step=   3   Max_DX=     0.000019  X_RMSD=     0.000007
+Step=   4   Max_DX=     0.000015  X_RMSD=     0.000005
+Step=   5   Max_DX=     0.000015  X_RMSD=     0.000005
+ Sparsity of B=  40.74 % # of SpB%NNon0        77
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=   6   Max_DX=     0.000098  X_RMSD=     0.000030
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=   7   Max_DX=     0.000011  X_RMSD=     0.000003
+Step=   8   Max_DX=     0.000011  X_RMSD=     0.000003
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=   9   Max_DX=     0.000011  X_RMSD=     0.000003
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  10   Max_DX=     0.000011  X_RMSD=     0.000003
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  11   Max_DX=     0.000011  X_RMSD=     0.000003
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  12   Max_DX=     0.000011  X_RMSD=     0.000003
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  13   Max_DX=     0.000011  X_RMSD=     0.000003
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  14   Max_DX=     0.000011  X_RMSD=     0.000003
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  15   Max_DX=     0.000011  X_RMSD=     0.000003
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  16   Max_DX=     0.000011  X_RMSD=     0.000003
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  17   Max_DX=     0.000011  X_RMSD=     0.000003
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  18   Max_DX=     0.000011  X_RMSD=     0.000003
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  19   Max_DX=     0.000011  X_RMSD=     0.000003
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  20   Max_DX=     0.000011  X_RMSD=     0.000003
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  21   Max_DX=     0.000011  X_RMSD=     0.000003
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  22   Max_DX=     0.000011  X_RMSD=     0.000003
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  23   Max_DX=     0.000011  X_RMSD=     0.000003
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  24   Max_DX=     0.000011  X_RMSD=     0.000003
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  25   Max_DX=     0.000011  X_RMSD=     0.000003
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  26   Max_DX=     0.000011  X_RMSD=     0.000003
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  27   Max_DX=     0.000011  X_RMSD=     0.000003
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  28   Max_DX=     0.000011  X_RMSD=     0.000003
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  29   Max_DX=     0.000011  X_RMSD=     0.000003
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  30   Max_DX=     0.000011  X_RMSD=     0.000003
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  31   Max_DX=     0.000011  X_RMSD=     0.000003
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  32   Max_DX=     0.000011  X_RMSD=     0.000003
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  33   Max_DX=     0.000011  X_RMSD=     0.000003
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  34   Max_DX=     0.000011  X_RMSD=     0.000003
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  35   Max_DX=     0.000011  X_RMSD=     0.000003
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  36   Max_DX=     0.000011  X_RMSD=     0.000003
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  37   Max_DX=     0.000011  X_RMSD=     0.000003
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  38   Max_DX=     0.000011  X_RMSD=     0.000003
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  39   Max_DX=     0.000011  X_RMSD=     0.000003
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  40   Max_DX=     0.000011  X_RMSD=     0.000003
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  41   Max_DX=     0.000011  X_RMSD=     0.000003
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  42   Max_DX=     0.000011  X_RMSD=     0.000003
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  43   Max_DX=     0.000011  X_RMSD=     0.000003
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  44   Max_DX=     0.000011  X_RMSD=     0.000003
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  45   Max_DX=     0.000011  X_RMSD=     0.000003
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  46   Max_DX=     0.000011  X_RMSD=     0.000003
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  47   Max_DX=     0.000011  X_RMSD=     0.000003
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  48   Max_DX=     0.000011  X_RMSD=     0.000003
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  49   Max_DX=     0.000011  X_RMSD=     0.000003
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  50   Max_DX=     0.000011  X_RMSD=     0.000003
+Stop Coord Back-Trf, max. number of Iterations exceeded!
+Use Current Geometry!
+       Clone =      1 GeOp step =      2 Total Energy =         -54.05587800
+                   Max intl Grad =     0.039210 between atoms    1   4   0   0
+     Max Unconstrained Cart Grad =     0.039787      on atom     4
+                   RMS intl Grad =     0.021154
+                  Max STRE Displ =     0.027801 between atoms    1   4
+                  Max BEND Displ =     0.519139 between atoms    2   1   3
+                  Max OUTP Displ =     2.799433 between atoms    2   1   3   4
+                       RMS Displ =     0.040136
+No Geometric DIIS is being done in this step.
+ P2Use : AO-DMX         ::  Nstep  = 1 Lambda = 0.10000000D+01
+ P2Use : AO-DMX 1       ::  dN=-.30D-03, %Non0=0.10D+03
+ P2Use : AO-DMX 2       ::  dN=-.35D-06, %Non0=0.10D+03
+ P2Use : AO-DMX 3       ::  dN=-.48D-12, %Non0=0.10D+03
+ SCFStatus : [0,1,3]    :: <SCF> = -54.05814107, dD = 0.25D-01
+ ODA :  Mix = 0.96813   :: <SCF> = -54.05827549, d3 = -.16D-05
+ SCFStatus : [1,1,3]    :: <SCF> = -54.05827551, dD = 0.13D-01, DIIS = 0.10D+01
+ ODA :  Mix = 0.68615   :: <SCF> = -54.05830959, d3 = 0.13D-05
+ SCFStatus : [2,1,3]    :: <SCF> = -54.05830954, dD = 0.30D-02, DIIS = 0.29D-03
+ ODA :  Mix = 1.00000   :: <SCF> = -54.05833192, d3 = -.46D-06
+ SCFStatus : [3,1,3]    :: <SCF> = -54.05833192, dD = 0.28D-02, DIIS = 0.28D-03
+ ODA :  Mix = 0.61348   :: <SCF> = -54.05833360, d3 = 0.42D-06
+ SCFStatus : [4,1,3]    :: <SCF> = -54.05833359, dD = 0.51D-03, DIIS = 0.50D-04
+ Normal SCF convergence.
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+ Internals at step #3
+INTERNAL COORDINATES
+       DEFINITION       ATOMS_INVOLVED      VALUE        CONSTRAINT    ACTIVE
+      1  STRE          1    2    0    0      1.033233    F    0.000000    T
+      2  STRE          1    3    0    0      1.033233    F    0.000000    T
+      3  STRE          1    4    0    0      1.032308    F    0.000000    T
+      4  BEND          2    1    3    0    119.107444    F    0.000000    T
+      5  BEND          2    1    4    0    119.057497    F    0.000000    T
+      6  BEND          3    1    4    0    119.057495    F    0.000000    T
+      7  OUTP          4    1    2    3     16.569889    F    0.000000    T
+      8  OUTP          3    1    2    4    -16.561625    F    0.000000    T
+      9  OUTP          2    1    3    4     16.561625    F    0.000000    T
+ Sparsity of B=  39.15 % # of SpB%NNon0        74
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Gradient transformation, No. Int. Coords=       9
+Grad Trf, step=   1 MaxChange=     0.113843 ChangeNorm=     0.063552
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Grad Trf, step=   3 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   3 steps
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Gradient transformation, No. Int. Coords=       9
+Grad Trf, step=   1 MaxChange=     0.039210 ChangeNorm=     0.021154
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   2 steps
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Gradient transformation, No. Int. Coords=       9
+Grad Trf, step=   1 MaxChange=     0.007040 ChangeNorm=     0.004486
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   2 steps
+Iterative back-transformation, No. Int. Coords=      9
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=   1   Max_DX=     0.048093  X_RMSD=     0.012671
+Step=   2   Max_DX=     0.001048  X_RMSD=     0.000433
+Step=   3   Max_DX=     0.000021  X_RMSD=     0.000010
+Step=   4   Max_DX=     0.000013  X_RMSD=     0.000004
+Step=   5   Max_DX=     0.000013  X_RMSD=     0.000004
+ Sparsity of B=  40.74 % # of SpB%NNon0        77
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=   6   Max_DX=     0.000257  X_RMSD=     0.000070
+ Sparsity of B=  39.15 % # of SpB%NNon0        74
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=   7   Max_DX=     0.000031  X_RMSD=     0.000013
+Step=   8   Max_DX=     0.000031  X_RMSD=     0.000013
+ Sparsity of B=  39.15 % # of SpB%NNon0        74
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=   9   Max_DX=     0.000031  X_RMSD=     0.000013
+ Sparsity of B=  39.15 % # of SpB%NNon0        74
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  10   Max_DX=     0.000031  X_RMSD=     0.000013
+ Sparsity of B=  39.15 % # of SpB%NNon0        74
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  11   Max_DX=     0.000031  X_RMSD=     0.000013
+ Sparsity of B=  39.15 % # of SpB%NNon0        74
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  12   Max_DX=     0.000031  X_RMSD=     0.000013
+ Sparsity of B=  39.15 % # of SpB%NNon0        74
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  13   Max_DX=     0.000031  X_RMSD=     0.000013
+ Sparsity of B=  39.15 % # of SpB%NNon0        74
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  14   Max_DX=     0.000031  X_RMSD=     0.000013
+ Sparsity of B=  39.15 % # of SpB%NNon0        74
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  15   Max_DX=     0.000031  X_RMSD=     0.000013
+ Sparsity of B=  39.15 % # of SpB%NNon0        74
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  16   Max_DX=     0.000031  X_RMSD=     0.000013
+ Sparsity of B=  39.15 % # of SpB%NNon0        74
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  17   Max_DX=     0.000031  X_RMSD=     0.000013
+ Sparsity of B=  39.15 % # of SpB%NNon0        74
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  18   Max_DX=     0.000031  X_RMSD=     0.000013
+ Sparsity of B=  39.15 % # of SpB%NNon0        74
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  19   Max_DX=     0.000031  X_RMSD=     0.000013
+ Sparsity of B=  39.15 % # of SpB%NNon0        74
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  20   Max_DX=     0.000031  X_RMSD=     0.000013
+ Sparsity of B=  39.15 % # of SpB%NNon0        74
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  21   Max_DX=     0.000031  X_RMSD=     0.000013
+ Sparsity of B=  39.15 % # of SpB%NNon0        74
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  22   Max_DX=     0.000031  X_RMSD=     0.000013
+ Sparsity of B=  39.15 % # of SpB%NNon0        74
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  23   Max_DX=     0.000031  X_RMSD=     0.000013
+ Sparsity of B=  39.15 % # of SpB%NNon0        74
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  24   Max_DX=     0.000031  X_RMSD=     0.000013
+ Sparsity of B=  39.15 % # of SpB%NNon0        74
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  25   Max_DX=     0.000031  X_RMSD=     0.000013
+ Sparsity of B=  39.15 % # of SpB%NNon0        74
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  26   Max_DX=     0.000031  X_RMSD=     0.000013
+ Sparsity of B=  39.15 % # of SpB%NNon0        74
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  27   Max_DX=     0.000031  X_RMSD=     0.000013
+ Sparsity of B=  39.15 % # of SpB%NNon0        74
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  28   Max_DX=     0.000031  X_RMSD=     0.000013
+ Sparsity of B=  39.15 % # of SpB%NNon0        74
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  29   Max_DX=     0.000031  X_RMSD=     0.000013
+ Sparsity of B=  39.15 % # of SpB%NNon0        74
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  30   Max_DX=     0.000031  X_RMSD=     0.000013
+ Sparsity of B=  39.15 % # of SpB%NNon0        74
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  31   Max_DX=     0.000031  X_RMSD=     0.000013
+ Sparsity of B=  39.15 % # of SpB%NNon0        74
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  32   Max_DX=     0.000031  X_RMSD=     0.000013
+ Sparsity of B=  39.15 % # of SpB%NNon0        74
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  33   Max_DX=     0.000031  X_RMSD=     0.000013
+ Sparsity of B=  39.15 % # of SpB%NNon0        74
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  34   Max_DX=     0.000031  X_RMSD=     0.000013
+ Sparsity of B=  39.15 % # of SpB%NNon0        74
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  35   Max_DX=     0.000031  X_RMSD=     0.000013
+ Sparsity of B=  39.15 % # of SpB%NNon0        74
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  36   Max_DX=     0.000031  X_RMSD=     0.000013
+ Sparsity of B=  39.15 % # of SpB%NNon0        74
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  37   Max_DX=     0.000031  X_RMSD=     0.000013
+ Sparsity of B=  39.15 % # of SpB%NNon0        74
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  38   Max_DX=     0.000031  X_RMSD=     0.000013
+ Sparsity of B=  39.15 % # of SpB%NNon0        74
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  39   Max_DX=     0.000031  X_RMSD=     0.000013
+ Sparsity of B=  39.15 % # of SpB%NNon0        74
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  40   Max_DX=     0.000031  X_RMSD=     0.000013
+ Sparsity of B=  39.15 % # of SpB%NNon0        74
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  41   Max_DX=     0.000031  X_RMSD=     0.000013
+ Sparsity of B=  39.15 % # of SpB%NNon0        74
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  42   Max_DX=     0.000031  X_RMSD=     0.000013
+ Sparsity of B=  39.15 % # of SpB%NNon0        74
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  43   Max_DX=     0.000031  X_RMSD=     0.000013
+ Sparsity of B=  39.15 % # of SpB%NNon0        74
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  44   Max_DX=     0.000031  X_RMSD=     0.000013
+ Sparsity of B=  39.15 % # of SpB%NNon0        74
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  45   Max_DX=     0.000031  X_RMSD=     0.000013
+ Sparsity of B=  39.15 % # of SpB%NNon0        74
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  46   Max_DX=     0.000031  X_RMSD=     0.000013
+ Sparsity of B=  39.15 % # of SpB%NNon0        74
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  47   Max_DX=     0.000031  X_RMSD=     0.000013
+ Sparsity of B=  39.15 % # of SpB%NNon0        74
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  48   Max_DX=     0.000031  X_RMSD=     0.000013
+ Sparsity of B=  39.15 % # of SpB%NNon0        74
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  49   Max_DX=     0.000031  X_RMSD=     0.000013
+ Sparsity of B=  39.15 % # of SpB%NNon0        74
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  50   Max_DX=     0.000031  X_RMSD=     0.000013
+Stop Coord Back-Trf, max. number of Iterations exceeded!
+Use Current Geometry!
+       Clone =      1 GeOp step =      3 Total Energy =         -54.05833359
+                   Max intl Grad =     0.007040 between atoms    1   4   0   0
+     Max Unconstrained Cart Grad =     0.021859      on atom     1
+                   RMS intl Grad =     0.004486
+                  Max STRE Displ =     0.005549 between atoms    1   4
+                  Max BEND Displ =     1.500525 between atoms    2   1   3
+                  Max OUTP Displ =     5.533163 between atoms    2   1   3   4
+                       RMS Displ =     0.055948
+No Geometric DIIS is being done in this step.
+ P2Use : AO-DMX         ::  Nstep  = 1 Lambda = 0.10000000D+01
+ P2Use : AO-DMX 1       ::  dN=-.15D-03, %Non0=0.10D+03
+ P2Use : AO-DMX 2       ::  dN=-.37D-07, %Non0=0.10D+03
+ P2Use : AO-DMX 3       ::  dN=-.36D-14, %Non0=0.10D+03
+ SCFStatus : [0,1,4]    :: <SCF> = -54.05940048, dD = 0.66D-01
+ ODA :  Mix = 1.00000   :: <SCF> = -54.05982432, d3 = -.40D-06
+ SCFStatus : [1,1,4]    :: <SCF> = -54.05982432, dD = 0.31D-01, DIIS = 0.10D+01
+ ODA :  Mix = 0.81600   :: <SCF> = -54.05990556, d3 = 0.55D-07
+ SCFStatus : [2,1,4]    :: <SCF> = -54.05990556, dD = 0.84D-02, DIIS = 0.55D-03
+ ODA :  Mix = 1.00000   :: <SCF> = -54.05993895, d3 = 0.13D-08
+ SCFStatus : [3,1,4]    :: <SCF> = -54.05993895, dD = 0.63D-02, DIIS = 0.51D-03
+ ODA :  Mix = 0.53974   :: <SCF> = -54.05994479, d3 = -.79D-09
+ SCFStatus : [4,1,4]    :: <SCF> = -54.05994479, dD = 0.46D-03, DIIS = 0.32D-04
+ ODA :  Mix = 1.00000   :: <SCF> = -54.05995019, d3 = -.30D-09
+ SCFStatus : [5,1,4]    :: <SCF> = -54.05995019, dD = 0.27D-03, DIIS = 0.27D-04
+ Normal SCF convergence.
+ Sparsity of B=  39.15 % # of SpB%NNon0        74
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+ Internals at step #4
+INTERNAL COORDINATES
+       DEFINITION       ATOMS_INVOLVED      VALUE        CONSTRAINT    ACTIVE
+      1  STRE          1    2    0    0      1.038029    F    0.000000    T
+      2  STRE          1    3    0    0      1.038029    F    0.000000    T
+      3  STRE          1    4    0    0      1.037857    F    0.000000    T
+      4  BEND          2    1    3    0    117.606919    F    0.000000    T
+      5  BEND          2    1    4    0    118.735141    F    0.000000    T
+      6  BEND          3    1    4    0    118.735142    F    0.000000    T
+      7  OUTP          4    1    2    3     21.850994    F    0.000000    T
+      8  OUTP          3    1    2    4    -22.094787    F    0.000000    T
+      9  OUTP          2    1    3    4     22.094787    F    0.000000    T
+ Sparsity of B=  39.15 % # of SpB%NNon0        74
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Gradient transformation, No. Int. Coords=       9
+Grad Trf, step=   1 MaxChange=     0.113843 ChangeNorm=     0.063552
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Grad Trf, step=   3 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   3 steps
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Gradient transformation, No. Int. Coords=       9
+Grad Trf, step=   1 MaxChange=     0.039210 ChangeNorm=     0.021154
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   2 steps
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Gradient transformation, No. Int. Coords=       9
+Grad Trf, step=   1 MaxChange=     0.007040 ChangeNorm=     0.004486
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   2 steps
+ Sparsity of B=  39.15 % # of SpB%NNon0        74
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Gradient transformation, No. Int. Coords=       9
+Grad Trf, step=   1 MaxChange=     0.006228 ChangeNorm=     0.003881
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   2 steps
+Iterative back-transformation, No. Int. Coords=      9
+ Sparsity of B=  39.15 % # of SpB%NNon0        74
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=   1   Max_DX=     0.093823  X_RMSD=     0.024821
+Step=   2   Max_DX=     0.004099  X_RMSD=     0.001557
+Step=   3   Max_DX=     0.000196  X_RMSD=     0.000051
+Step=   4   Max_DX=     0.000043  X_RMSD=     0.000014
+Step=   5   Max_DX=     0.000028  X_RMSD=     0.000012
+ Sparsity of B=  41.80 % # of SpB%NNon0        79
+Sparsity of Gc=  32.43 % # of  Gc%NNon0       143
+Sparsity of Ch=  29.52 % # of  Ch%NNon0        62
+Step=   6   Max_DX=     0.000416  X_RMSD=     0.000142
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=   7   Max_DX=     0.000011  X_RMSD=     0.000004
+Step=   8   Max_DX=     0.000011  X_RMSD=     0.000004
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=   9   Max_DX=     0.000011  X_RMSD=     0.000004
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  10   Max_DX=     0.000011  X_RMSD=     0.000004
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  11   Max_DX=     0.000011  X_RMSD=     0.000004
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  12   Max_DX=     0.000011  X_RMSD=     0.000004
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  13   Max_DX=     0.000011  X_RMSD=     0.000004
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  14   Max_DX=     0.000011  X_RMSD=     0.000004
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  15   Max_DX=     0.000011  X_RMSD=     0.000004
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  16   Max_DX=     0.000011  X_RMSD=     0.000004
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  17   Max_DX=     0.000011  X_RMSD=     0.000004
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  18   Max_DX=     0.000011  X_RMSD=     0.000004
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  19   Max_DX=     0.000011  X_RMSD=     0.000004
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  20   Max_DX=     0.000011  X_RMSD=     0.000004
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  21   Max_DX=     0.000011  X_RMSD=     0.000004
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  22   Max_DX=     0.000011  X_RMSD=     0.000004
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  23   Max_DX=     0.000011  X_RMSD=     0.000004
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  24   Max_DX=     0.000011  X_RMSD=     0.000004
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  25   Max_DX=     0.000011  X_RMSD=     0.000004
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  26   Max_DX=     0.000011  X_RMSD=     0.000004
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  27   Max_DX=     0.000011  X_RMSD=     0.000004
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  28   Max_DX=     0.000011  X_RMSD=     0.000004
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  29   Max_DX=     0.000011  X_RMSD=     0.000004
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  30   Max_DX=     0.000011  X_RMSD=     0.000004
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  31   Max_DX=     0.000011  X_RMSD=     0.000004
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  32   Max_DX=     0.000011  X_RMSD=     0.000004
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  33   Max_DX=     0.000011  X_RMSD=     0.000004
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  34   Max_DX=     0.000011  X_RMSD=     0.000004
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  35   Max_DX=     0.000011  X_RMSD=     0.000004
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  36   Max_DX=     0.000011  X_RMSD=     0.000004
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  37   Max_DX=     0.000011  X_RMSD=     0.000004
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  38   Max_DX=     0.000011  X_RMSD=     0.000004
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  39   Max_DX=     0.000011  X_RMSD=     0.000004
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  40   Max_DX=     0.000011  X_RMSD=     0.000004
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  41   Max_DX=     0.000011  X_RMSD=     0.000004
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  42   Max_DX=     0.000011  X_RMSD=     0.000004
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  43   Max_DX=     0.000011  X_RMSD=     0.000004
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  44   Max_DX=     0.000011  X_RMSD=     0.000004
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  45   Max_DX=     0.000011  X_RMSD=     0.000004
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  46   Max_DX=     0.000011  X_RMSD=     0.000004
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  47   Max_DX=     0.000011  X_RMSD=     0.000004
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  48   Max_DX=     0.000011  X_RMSD=     0.000004
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  49   Max_DX=     0.000011  X_RMSD=     0.000004
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=  50   Max_DX=     0.000011  X_RMSD=     0.000004
+Stop Coord Back-Trf, max. number of Iterations exceeded!
+Use Current Geometry!
+       Clone =      1 GeOp step =      4 Total Energy =         -54.05995019
+                   Max intl Grad =     0.006228 between atoms    4   1   2   3
+     Max Unconstrained Cart Grad =     0.027803      on atom     1
+                   RMS intl Grad =     0.003881
+                  Max STRE Displ =     0.001773 between atoms    1   2
+                  Max BEND Displ =     1.514110 between atoms    2   1   3
+                  Max OUTP Displ =    10.904952 between atoms    2   1   3   4
+                       RMS Displ =     0.110054
+No Geometric DIIS is being done in this step.
+ P2Use : AO-DMX         ::  Nstep  = 1 Lambda = 0.10000000D+01
+ P2Use : AO-DMX 1       ::  dN=-.57D-03, %Non0=0.10D+03
+ P2Use : AO-DMX 2       ::  dN=-.85D-06, %Non0=0.10D+03
+ P2Use : AO-DMX 3       ::  dN=-.26D-11, %Non0=0.10D+03
+ SCFStatus : [0,1,5]    :: <SCF> = -54.05535174, dD = 0.13D+00
+ ODA :  Mix = 1.00000   :: <SCF> = -54.05683407, d3 = -.19D-04
+ SCFStatus : [1,1,5]    :: <SCF> = -54.05683407, dD = 0.66D-01, DIIS = 0.10D+01
+ ODA :  Mix = 0.95014   :: <SCF> = -54.05719360, d3 = -.80D-05
+ SCFStatus : [2,1,5]    :: <SCF> = -54.05719357, dD = 0.29D-01, DIIS = 0.93D-03
+ ODA :  Mix = 1.00000   :: <SCF> = -54.05730669, d3 = 0.15D-04
+ SCFStatus : [3,1,5]    :: <SCF> = -54.05730669, dD = 0.16D-01, DIIS = 0.60D-03
+ ODA :  Mix = 0.53014   :: <SCF> = -54.05731908, d3 = -.22D-04
+ SCFStatus : [4,1,5]    :: <SCF> = -54.05732514, dD = 0.28D-02, DIIS = 0.88D-04
+ ODA :  Mix = 1.00000   :: <SCF> = -54.05733906, d3 = 0.25D-08
+ SCFStatus : [5,1,5]    :: <SCF> = -54.05733906, dD = 0.14D-02, DIIS = 0.46D-04
+ Turning on DIIS
+ SCFStatus : [6,1,5]    :: <SCF> = -54.05733924, dD = 0.48D-03, DIIS = 0.25D-04
+ Normal SCF convergence.
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+ Internals at step #5
+INTERNAL COORDINATES
+       DEFINITION       ATOMS_INVOLVED      VALUE        CONSTRAINT    ACTIVE
+      1  STRE          1    2    0    0      1.039802    F    0.000000    T
+      2  STRE          1    3    0    0      1.039802    F    0.000000    T
+      3  STRE          1    4    0    0      1.039571    F    0.000000    T
+      4  BEND          2    1    3    0    119.121029    F    0.000000    T
+      5  BEND          2    1    4    0    119.810180    F    0.000000    T
+      6  BEND          3    1    4    0    119.810176    F    0.000000    T
+      7  OUTP          4    1    2    3     11.113083    F    0.000000    T
+      8  OUTP          3    1    2    4    -11.189836    F    0.000000    T
+      9  OUTP          2    1    3    4     11.189836    F    0.000000    T
+ Sparsity of B=  39.15 % # of SpB%NNon0        74
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Gradient transformation, No. Int. Coords=       9
+Grad Trf, step=   1 MaxChange=     0.113843 ChangeNorm=     0.063552
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Grad Trf, step=   3 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   3 steps
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Gradient transformation, No. Int. Coords=       9
+Grad Trf, step=   1 MaxChange=     0.039210 ChangeNorm=     0.021154
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   2 steps
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Gradient transformation, No. Int. Coords=       9
+Grad Trf, step=   1 MaxChange=     0.007040 ChangeNorm=     0.004486
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   2 steps
+ Sparsity of B=  39.15 % # of SpB%NNon0        74
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Gradient transformation, No. Int. Coords=       9
+Grad Trf, step=   1 MaxChange=     0.006228 ChangeNorm=     0.003881
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   2 steps
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Gradient transformation, No. Int. Coords=       9
+Grad Trf, step=   1 MaxChange=     0.003161 ChangeNorm=     0.002050
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   2 steps
+Iterative back-transformation, No. Int. Coords=      9
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=   1   Max_DX=     0.093954  X_RMSD=     0.023823
+Step=   2   Max_DX=     0.004010  X_RMSD=     0.001519
+Step=   3   Max_DX=     0.000192  X_RMSD=     0.000049
+Step=   4   Max_DX=     0.000025  X_RMSD=     0.000007
+Step=   5   Max_DX=     0.000010  X_RMSD=     0.000004
+Step=   6   Max_DX=     0.000010  X_RMSD=     0.000004
+ Sparsity of B=  40.74 % # of SpB%NNon0        77
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=   7   Max_DX=     0.000506  X_RMSD=     0.000131
+ Sparsity of B=  40.74 % # of SpB%NNon0        77
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=   8   Max_DX=     0.000003  X_RMSD=     0.000001
+ Rigidity=    5.4112504501202347E-03
+ 1  Repeat from CheckBigStep MaxDispl=  -10.8003678463864290  on  7 OUTP    
+Iterative back-transformation, No. Int. Coords=      9
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=   1   Max_DX=     0.046977  X_RMSD=     0.011912
+Step=   2   Max_DX=     0.001004  X_RMSD=     0.000382
+Step=   3   Max_DX=     0.000024  X_RMSD=     0.000006
+Step=   4   Max_DX=     0.000005  X_RMSD=     0.000002
+ Rigidity=    7.6612263025289170E-04
+ 2 Maximum Displacement from Backtransform.=   -5.4640360331246702  on  9 OUTP    
+Coordinate back-transformation converged in   4 steps
+       Clone =      1 GeOp step =      5 Total Energy =         -54.05733924
+                   Max intl Grad =     0.003161 between atoms    4   1   2   3
+     Max Unconstrained Cart Grad =     0.013718      on atom     1
+                   RMS intl Grad =     0.002050
+                  Max STRE Displ =     0.000537 between atoms    1   2
+                  Max BEND Displ =     0.458540 between atoms    2   1   3
+                  Max OUTP Displ =     5.464036 between atoms    2   1   3   4
+                       RMS Displ =     0.054993
+No Geometric DIIS is being done in this step.
+ P2Use : AO-DMX         ::  Nstep  = 1 Lambda = 0.10000000D+01
+ P2Use : AO-DMX 1       ::  dN=-.12D-03, %Non0=0.10D+03
+ P2Use : AO-DMX 2       ::  dN=-.32D-07, %Non0=0.10D+03
+ P2Use : AO-DMX 3       ::  dN=-.18D-14, %Non0=0.10D+03
+ SCFStatus : [0,1,6]    :: <SCF> = -54.05609481, dD = 0.64D-01
+ ODA :  Mix = 0.95433   :: <SCF> = -54.05643486, d3 = -.92D-05
+ SCFStatus : [1,1,6]    :: <SCF> = -54.05643482, dD = 0.29D-01, DIIS = 0.10D+01
+ ODA :  Mix = 1.00000   :: <SCF> = -54.05653648, d3 = -.32D-06
+ SCFStatus : [2,1,6]    :: <SCF> = -54.05653648, dD = 0.16D-01, DIIS = 0.47D-03
+ ODA :  Mix = 0.93528   :: <SCF> = -54.05655651, d3 = 0.37D-06
+ SCFStatus : [3,1,6]    :: <SCF> = -54.05655650, dD = 0.68D-02, DIIS = 0.23D-03
+ ODA :  Mix = 1.00000   :: <SCF> = -54.05656265, d3 = -.32D-06
+ SCFStatus : [4,1,6]    :: <SCF> = -54.05656265, dD = 0.38D-02, DIIS = 0.16D-03
+ ODA :  Mix = 0.93571   :: <SCF> = -54.05656396, d3 = 0.31D-06
+ SCFStatus : [5,1,6]    :: <SCF> = -54.05656395, dD = 0.19D-02, DIIS = 0.11D-03
+ Turning on DIIS
+ SCFStatus : [6,1,6]    :: <SCF> = -54.05656427, dD = 0.72D-03, DIIS = 0.96D-04
+ Normal SCF convergence.
+ Sparsity of B=  40.74 % # of SpB%NNon0        77
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+ Internals at step #6
+INTERNAL COORDINATES
+       DEFINITION       ATOMS_INVOLVED      VALUE        CONSTRAINT    ACTIVE
+      1  STRE          1    2    0    0      1.039265    F    0.000000    T
+      2  STRE          1    3    0    0      1.039265    F    0.000000    T
+      3  STRE          1    4    0    0      1.039075    F    0.000000    T
+      4  BEND          2    1    3    0    119.579569    F    0.000000    T
+      5  BEND          2    1    4    0    120.045460    F    0.000000    T
+      6  BEND          3    1    4    0    120.045452    F    0.000000    T
+      7  OUTP          4    1    2    3      5.699096    F    0.000000    T
+      8  OUTP          3    1    2    4     -5.725800    F    0.000000    T
+      9  OUTP          2    1    3    4      5.725800    F    0.000000    T
+ Sparsity of B=  39.15 % # of SpB%NNon0        74
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Gradient transformation, No. Int. Coords=       9
+Grad Trf, step=   1 MaxChange=     0.113843 ChangeNorm=     0.063552
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Grad Trf, step=   3 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   3 steps
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Gradient transformation, No. Int. Coords=       9
+Grad Trf, step=   1 MaxChange=     0.039210 ChangeNorm=     0.021154
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   2 steps
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Gradient transformation, No. Int. Coords=       9
+Grad Trf, step=   1 MaxChange=     0.007040 ChangeNorm=     0.004486
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   2 steps
+ Sparsity of B=  39.15 % # of SpB%NNon0        74
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Gradient transformation, No. Int. Coords=       9
+Grad Trf, step=   1 MaxChange=     0.006228 ChangeNorm=     0.003881
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   2 steps
+ Sparsity of B=  40.21 % # of SpB%NNon0        76
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Gradient transformation, No. Int. Coords=       9
+Grad Trf, step=   1 MaxChange=     0.003161 ChangeNorm=     0.002050
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   2 steps
+ Sparsity of B=  40.74 % # of SpB%NNon0        77
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Gradient transformation, No. Int. Coords=       9
+Grad Trf, step=   1 MaxChange=     0.001768 ChangeNorm=     0.001357
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   2 steps
+Iterative back-transformation, No. Int. Coords=      9
+ Sparsity of B=  40.74 % # of SpB%NNon0        77
+Sparsity of Gc=  31.07 % # of  Gc%NNon0       137
+Sparsity of Ch=  27.62 % # of  Ch%NNon0        58
+Step=   1   Max_DX=     0.048560  X_RMSD=     0.012790
+Step=   2   Max_DX=     0.001087  X_RMSD=     0.000419
+Step=   3   Max_DX=     0.000027  X_RMSD=     0.000007
+Step=   4   Max_DX=     0.000003  X_RMSD=     0.000001
+ Rigidity=    2.9054338945171145E-02
+ 1 Maximum Displacement from Backtransform.=    5.6651026471262647  on  8 OUTP    
+Coordinate back-transformation converged in   4 steps
+       Clone =      1 GeOp step =      6 Total Energy =         -54.05656427
+                   Max intl Grad =     0.001768 between atoms    1   3   0   0
+     Max Unconstrained Cart Grad =     0.006795      on atom     1
+                   RMS intl Grad =     0.001357
+                  Max STRE Displ =     0.001120 between atoms    1   3
+                  Max BEND Displ =     1.001081 between atoms    2   1   3
+                  Max OUTP Displ =     5.665103 between atoms    3   1   2   4
+                       RMS Displ =     0.057370
+No Geometric DIIS is being done in this step.
+ P2Use : AO-DMX         ::  Nstep  = 1 Lambda = 0.10000000D+01
+ P2Use : AO-DMX 1       ::  dN=0.41D-03, %Non0=0.10D+03
+ P2Use : AO-DMX 2       ::  dN=-.11D-02, %Non0=0.10D+03
+ P2Use : AO-DMX 3       ::  dN=-.15D-12, %Non0=0.10D+03
+ SCFStatus : [0,1,7]    :: <SCF> = -54.05587496, dD = 0.67D-01
+ ODA :  Mix = 0.94255   :: <SCF> = -54.05625006, d3 = -.75D-05
+ SCFStatus : [1,1,7]    :: <SCF> = -54.05624998, dD = 0.30D-01, DIIS = 0.10D+01
+ ODA :  Mix = 1.00000   :: <SCF> = -54.05636661, d3 = -.54D-06
+ SCFStatus : [2,1,7]    :: <SCF> = -54.05636661, dD = 0.16D-01, DIIS = 0.47D-03
+ ODA :  Mix = 0.95564   :: <SCF> = -54.05638771, d3 = 0.37D-06
+ SCFStatus : [3,1,7]    :: <SCF> = -54.05638770, dD = 0.74D-02, DIIS = 0.23D-03
+ ODA :  Mix = 1.00000   :: <SCF> = -54.05639398, d3 = -.24D-06
+ SCFStatus : [4,1,7]    :: <SCF> = -54.05639398, dD = 0.40D-02, DIIS = 0.13D-03
+ ODA :  Mix = 1.00000   :: <SCF> = -54.05639536, d3 = 0.20D-06
+ SCFStatus : [5,1,7]    :: <SCF> = -54.05639536, dD = 0.22D-02, DIIS = 0.81D-04
+ Turning on DIIS
+ SCFStatus : [6,1,7]    :: <SCF> = -54.05639565, dD = 0.76D-03, DIIS = 0.58D-04
+ Normal SCF convergence.
+ Sparsity of B=  40.74 % # of SpB%NNon0        77
+Sparsity of Gc=  31.52 % # of  Gc%NNon0       139
+Sparsity of Ch=  30.00 % # of  Ch%NNon0        63
+ Internals at step #7
+INTERNAL COORDINATES
+       DEFINITION       ATOMS_INVOLVED      VALUE        CONSTRAINT    ACTIVE
+      1  STRE          1    2    0    0      1.038145    F    0.000000    T
+      2  STRE          1    3    0    0      1.038145    F    0.000000    T
+      3  STRE          1    4    0    0      1.037997    F    0.000000    T
+      4  BEND          2    1    3    0    120.580650    F    0.000000    T
+      5  BEND          2    1    4    0    119.709686    F    0.000000    T
+      6  BEND          3    1    4    0    119.709627    F    0.000000    T
+      7  OUTP          4    1    2    3      0.061236    F    0.000000    T
+      8  OUTP          2    1    3    4      0.060697    F    0.000000    T
+      9  OUTP          3    1    2    4     -0.060697    F    0.000000    T
+     Geometry optimization of Clone # 1 converged in   7 steps.
+       Clone =      1 GeOp step =      7 Total Energy =         -54.05639565
+     Max Unconstrained Cart Grad =     0.001409      on atom     1
+Energies of final structures:
+ Clone #         Energy         
+     1      -54.0563956492
+>-Successful MondoSCF run 02/08/05 @ 12:54:41-<
