@@ -1,3 +1,21 @@
+2003-05-04 14:49  mchalla
+
+	* MondoSCF2/: ParsePeriodic.F90, SCFs.F90: Fixed bug in single
+	points with call to initclones, and also a bug in parseperiodic on
+	reparsing on restart.
+
+2003-05-03 21:38  nemeth
+
+	* MondoSCF2/: GDIIS.F90, Optimizer.F90: Two bugs fixed. One,
+	related to the use of GeomArchive in the internal coord optimizer:
+	GeomArchive was called within a loop for iCLONE. This needed
+	reorganization. The other bug was related to internal coordinate
+	GDIIS.
+
+2003-05-03 15:14  mchalla
+
+	* ChangeLog: [no log message]
+
 2003-05-03 11:12  mchalla
 
 	* MondoMods/Thresholding.F90: Declared variable I
