@@ -574,6 +574,15 @@ MODULE Parse
          FltToMedmChar=ADJUSTL(FltToMedmChar)
      END FUNCTION FltToMedmChar
 !------------------------------------------------------------------
+!     Convert a float into a character string
+!
+     FUNCTION FltToShrtChar(D)
+       REAL(DOUBLE),INTENT(IN)         :: D
+       CHARACTER(LEN=INTERNAL_FLT_LEN) :: FltToShrtChar
+       WRITE(UNIT=FltToShrtChar,FMT='(F18.5)')D
+       FltToShrtChar=ADJUSTL(FltToShrtChar)
+     END FUNCTION FltToShrtChar
+!------------------------------------------------------------------
 !     Convert a double into a medium character string
 !
       FUNCTION DblToMedmChar(D)
@@ -710,16 +719,47 @@ MODULE Parse
 !H---------------------------------------------------------------------------------
     IMPLICIT NONE
     !-------------------------------------------------------------------
-    CHARACTER(LEN=*), INTENT(IN) :: Chr
+    CHARACTER(LEN=*), INTENT(IN)   :: Chr
     !-------------------------------------------------------------------
-    INTEGER                      :: I
+    CHARACTER(LEN=DEFAULT_CHR_LEN) :: ChrTmp
+    INTEGER                        :: I
     !-------------------------------------------------------------------
     ChrCkkIfInt=.FALSE.
-    DO I=1,LEN(TRIM(Chr))
-       IF(IACHAR(Chr(I:I)).LT.IACHAR('0').OR.IACHAR(Chr(I:I)).GT.IACHAR('9')) RETURN
+    ChrTmp=TRIM(Chr)
+    DO I=1,LEN_TRIM(ChrTmp)
+       IF(IACHAR(ChrTmp(I:I)).LT.IACHAR('0').OR.IACHAR(ChrTmp(I:I)).GT.IACHAR('9')) RETURN
     ENDDO
     ChrCkkIfInt=.TRUE.
   END FUNCTION ChrCkkIfInt
+  !
+  !
+  CHARACTER(LEN=DEFAULT_CHR_LEN) FUNCTION RmBegChr(Chr,ChrToRm)
+!H---------------------------------------------------------------------------------
+!H CHARACTER(LEN=DEFAULT_CHR_LEN) FUNCTION RmBegChr(Chr,ChrToRm)
+!H  Remove the first spaces in a string.
+!H---------------------------------------------------------------------------------
+    IMPLICIT NONE
+    !-------------------------------------------------------------------
+    CHARACTER(LEN=*), INTENT(IN)           :: Chr
+    CHARACTER(LEN=*), INTENT(IN)           :: ChrToRm
+    !-------------------------------------------------------------------
+    CHARACTER(LEN=DEFAULT_CHR_LEN)         :: ChrTmp
+    INTEGER                                :: I,J
+    LOGICAL                                :: IsFirst
+    !-------------------------------------------------------------------
+    J=0
+    RmBegChr=''
+    IsFirst=.TRUE.
+    ChrTmp=TRIM(Chr)
+    DO I=1,LEN_TRIM(ChrTmp)
+       IF(.NOT.IsFirst.AND.ChrTmp(I:I).EQ.ChrToRm) EXIT
+       IF(ChrTmp(I:I).NE.ChrToRm) THEN
+          J=J+1
+          RmBegChr(J:J)=ChrTmp(I:I)
+          IsFirst=.FALSE.
+       ENDIF
+    ENDDO
+  END FUNCTION RmBegChr
   !
   !
   LOGICAL FUNCTION OptGetKeyArg(Unit,Key,Arg)
@@ -805,10 +845,14 @@ MODULE Parse
        DO iDim=1,NDim
           IF(iDim.LT.NDim) THEN
              IndxR=SCAN(Line,',')
-             Arg%C(iDim)=TRIM(Line(1:IndxR-1))
+             Arg%C(iDim)=TRIM(RmBegChr( Line(1:IndxR-1) ,' ') )
+             !Arg%C(iDim)=TRIM(RmBegSpace(Line(1:IndxR-1)))
+             !Arg%C(iDim)=TRIM(Line(1:IndxR-1))
              Line=Line(IndxR+1:)
           ELSE
-             Arg%C(iDim)=TRIM(Line(1:))
+             Arg%C(iDim)=TRIM(RmBegChr(Line(1:),' '))
+             !Arg%C(iDim)=TRIM(RmBegSpace(Line(1:)))
+             !Arg%C(iDim)=TRIM(Line(1:))
           ENDIF
           !
           ! Check for missing arguments.
@@ -834,5 +878,5 @@ MODULE Parse
   END FUNCTION OptGetKeyArg
   !
   !
-END MODULE
+END MODULE Parse
 
