@@ -221,6 +221,22 @@ In the absence of these commands, the deafult operation works, i.e.
 {\tt MaxAtoms=10000} and {\tt MaxLattice=1}.
 \end{itemize}
 
+\subsection{Symmetrization of lattice parameters}
+It usually has a convergence accelerating effect if the symmetry of the
+lattice parameters is preserved during the optimization.
+The following options serve this purpose.
+\begin{itemize}
+\item[{\tt AeqB}] : length of A and B lattice vectors should equal 
+during the optimization.
+\item[{\tt AeqC}] : similar to {\tt AeqB}, but for A and C
+\item[{\tt BeqC}] : similar to {\tt AeqB}, but for B and C
+\item[{\tt ALPHAeqBETA}] : ALPHA and BETA angles are kept the same
+\item[{\tt ALPHAeqGAMMA}] : ALPHA and GAMMA angles are kept the same
+\item[{\tt BETAeqGAMMA}] : BETA and GAMMA angles are kept the same
+\end{itemize}
+These options can arbitrarily be combined with all other options 
+available for geometry optimization.
+
 \subsection{Recognition of weak bonds}
 Weak bonds, such as the Van der Waals bonds can be recognized difficultly,
 because it is not clear in what situation they should be used and in what 
