@@ -39,6 +39,14 @@ MODULE SCFLocals
    INTEGER, PARAMETER :: SCF_OSCILATOR=10302 ! SCF is out of control (oscilating)
    INTEGER, PARAMETER :: SCF_STAGNATED=30875 ! SCF stagnated
    INTEGER, PARAMETER :: SCF_CONVERGED=42341 ! SCF converged to requested accuracy
+!------------------------------------------------------------------------------------------------
+!
+   TYPE MDControls
+      INTEGER                            :: MD_Algor
+      REAL(DOUBLE)                       :: TimeStep
+      REAL(DOUBLE)                       :: VelScaling
+      REAL(DOUBLE)                       :: TempScaling
+   END TYPE MDControls
 !------------------------------------------------------------------------------------------------  
 !  Object to control the SCF
    TYPE SCFControls
@@ -69,7 +77,7 @@ MODULE SCFLocals
       INTEGER                            :: Grad
       INTEGER                            :: Extrap
       INTEGER                            :: Vis
-      REAL(DOUBLE),DIMENSION(2)          :: MDVar
+      TYPE(MDControls)                   :: MDC
 !
    END TYPE
 !------------------------------------------------------------------------------------------------  
