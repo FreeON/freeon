@@ -56,7 +56,6 @@ PROGRAM JForce
 !-------------------------------------------------------------------------------- 
 ! Start up macro
   CALL StartUp(Args,Prog,Serial_O=.FALSE.)
-!
 #ifdef MMech
   IF(HasQM()) THEN
 !    Get basis set and geometry
@@ -95,7 +94,6 @@ PROGRAM JForce
   CALL New(P,OnAll_O=.TRUE.)
 #endif
   CALL Get(P,TrixFile('D',Args,1),BCast_O=.TRUE.)
-
 #ifdef PARALLEL
   CALL GetDistrRho('Rho',Args,1)
 #else
@@ -179,6 +177,7 @@ PROGRAM JForce
 #else
   DO AtA=1,GMLoc%Natms
 #endif
+     WRITE(*,*) 'AtA = ',AtA
      MA=BSiz%I(AtA)
      A1=3*(AtA-1)+1 
      A2=3*AtA
@@ -255,11 +254,11 @@ PROGRAM JForce
      ENDDO
 !    Dipole Correction  to the Lattice Forces
      DO I=1,3
-        IF(GM%PBC%AutoW%I(I)==1) THEN
-           LatFrc_J%D(I,I) = LatFrc_J%D(I,I)-E_DP/GMLoc%PBC%BoxShape%D(I,I)
-        ENDIF
+        LatFrc_J%D(I,I) = LatFrc_J%D(I,I)-E_DP/GMLoc%PBC%BoxShape%D(I,I)
      ENDDO
   ENDIF
+!
+!
 !!$  WRITE(*,*) 'LatFrc_J Direct+PFF+Dipole'
 !!$  DO I=1,3
 !!$     WRITE(*,*) (LatFrc_J%D(I,J),J=1,3) 
