@@ -1,3 +1,40 @@
+2004-04-19 10:26  mchalla
+
+	* MondoSCF2/SCFs.F90: [no log message]
+
+2004-04-18 23:13  nemeth
+
+	* Docs/Optimizer/PRL/GFS_PRL.tex: Picture is now included in latex
+	file.
+
+2004-04-18 23:12  nemeth
+
+	* Docs/Optimizer/PRL/kinasepicture.eps: An eps picture of the
+	kinase reactant added.
+
+2004-04-18 00:08  nemeth
+
+	* Docs/Optimizer/PRL/Makefile: [no log message]
+
+2004-04-17 23:57  nemeth
+
+	* Docs/Optimizer/PRL/GFS_PRL.tex: A small modification in the text.
+
+2004-04-17 23:52  nemeth
+
+	* Docs/Optimizer/PRL/: GFS_PRL.tex, kinasepicture.ps,
+	mondo_new.bib: A new update on the optimizer paper.
+
+2004-04-17 22:51  nemeth
+
+	* Docs/Optimizer/PRL/: R263_2_1.gnu, R263_3_1.gnu, R263logdata2,
+	R263logdata2.eps, RMSCartData, RMSCartData.eps: New files of
+	pictures added.
+
+2004-04-17 10:48  mchalla
+
+	* ChangeLog: [no log message]
+
 2004-04-16 16:15  tymczak
 
 	* Docs/: PBC_Exchange/LinearPBCExchange.tex,
