@@ -174,8 +174,8 @@ CONTAINS
 !
 !---------------------------------------------------------------------
 !
-   SUBROUTINE GDIISArch(Nams,iCLONE,XYZ_O,Vect_O,Tag_O)
-     TYPE(FileNames)                      :: Nams
+   SUBROUTINE GDIISArch(HFileIn,iCLONE,XYZ_O,Vect_O,Tag_O)
+     CHARACTER(LEN=*)                     :: HFileIn
      INTEGER                              :: iCLONE
      INTEGER                              :: IGeom,NCart
      INTEGER                              :: NatmsLoc,J,I
@@ -192,7 +192,7 @@ CONTAINS
      INTEGER                              :: IntGradMemory
      INTEGER                              :: HDFFileID
      !
-     HDFFileID=OpenHDF(Nams%HFile)
+     HDFFileID=OpenHDF(HFileIn)
      HDF_CurrentID= &
        OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
      !
