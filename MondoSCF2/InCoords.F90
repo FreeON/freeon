@@ -3035,6 +3035,10 @@ CONTAINS
          I3=IntCs%Atoms%I(I,3) 
          CALL BEND(XYZ(1:3,I1),XYZ(1:3,I2),XYZ(1:3,I3),Value_O=Value)
          IF((ABS(Value-PI)*Conv < CtrlCoord%LinCrit)) THEN  
+          !
+          ! important for rod-like molecules like H-F polymer 
+          ! to have the following lines commented out
+          !
           !IF(TOPS%Tot12%I(I2,1)>2) THEN
           ! !IntCs%Def%C(I)(1:5)='BLANK'
           !  IntCs%Active%L(I)=.FALSE.
