@@ -39,14 +39,6 @@ MODULE ParseGeomOpt
        GOpt%GDIIS%NoGDIIS=.TRUE.
      ENDIF
      !
-     ! Parse for Lagr multiplier algorithm
-     !
-    !GOpt%Constr%DoLagr=.TRUE.
-     GOpt%Constr%DoLagr=.FALSE.
-     IF(OptKeyQ(Inp,GRADIENTS,OPT_NoLagr)) THEN
-       GOpt%Constr%DoLagr=.FALSE.
-     ENDIF
-     !
      ! Parse for energy-back-tracking
      !
      GOpt%GConvCrit%DoBackTr=.True.

@@ -574,9 +574,6 @@ CONTAINS
        DO II=1,G%Clone(1)%NAtms; MaxBlkSize=MAX(MaxBlkSize,BSiz%I(II)); ENDDO
        ! Set temporary geometries
        GTmp(iCLONE)%NAtms=G%Clone(iCLONE)%NAtms
-       ! vwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvw>>>
-       GTmp(iCLONE)%NLagr = 0
-       ! vwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvw<<<
        CALL New_CRDS(GTmp(iCLONE))
        GTmp(iCLONE)%AbCarts%D=G%Clone(iCLONE)%AbCarts%D
        ! Get the density matrix for this clone

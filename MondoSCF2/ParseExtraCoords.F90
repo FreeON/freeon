@@ -26,9 +26,8 @@ MODULE ParseExtraCoords
      TYPE(Geometries)            :: Geos
      TYPE(GeomOpt)               :: GOpt
      CHARACTER(LEN=DCL)          :: Line,LineLowCase,Atomname,chGEO
-     TYPE(INTC)                  :: IntC_Extra
      CHARACTER(LEN=5)            :: CHAR
-     INTEGER                     :: I1,I2,J,NIntC_Extra,SerNum,NConstr
+     INTEGER                     :: I1,I2,J,NIntCs,SerNum,NConstr
      INTEGER                     :: NatmsLoc
      INTEGER                     :: NCartConstr,iCLONE
      REAL(DOUBLE)                :: V,Value,DegToRad
@@ -65,7 +64,7 @@ MODULE ParseExtraCoords
      !
      ! Find extra internal coordinates and constraints
      !
-     NIntC_Extra=0
+     NIntCs=0
      NConstr=0
      NCartConstr=0
      !
@@ -83,9 +82,9 @@ MODULE ParseExtraCoords
           INDEX(LineLowCase,'outp')/=0.OR.&
           INDEX(LineLowCase,'linb1')/=0.OR.&
           INDEX(LineLowCase,'linb2')/=0) THEN
-          NIntC_Extra=NIntC_Extra+1 
+          NIntCs=NIntCs+1 
        ELSE IF(INDEX(LineLowCase,'cart')/=0) THEN
-          NIntC_Extra=NIntC_Extra+3 
+          NIntCs=NIntCs+3 
        ENDIF
        !
          IF(INDEX(LineLowCase,'end_add_internals')/=0) GO TO 2
@@ -96,15 +95,11 @@ MODULE ParseExtraCoords
        !
        ! Generate an addition to the IntC set!
        !
-       CALL New(IntC_Extra,NIntC_Extra)
-       IntC_Extra%Atoms=0
-       IntC_Extra%Value=Zero
-       IntC_Extra%Constraint=.FALSE.
-       IntC_Extra%ConstrValue=Zero   
+       CALL New(GOpt%ExtIntCs,NIntCs)
        !
-       ! Parse again and fill IntC_Extra!
+       ! Parse again and fill GOpt%ExtIntCs!
        !
-       NIntC_Extra=0
+       NIntCs=0
        CALL AlignLowCase('begin_add_internals',Inp)
        DO 
          READ(Inp,DEFAULT_CHR_FMT,END=1)Line
@@ -113,127 +108,121 @@ MODULE ParseExtraCoords
          !
          IF(INDEX(LineLowCase,'stre')/=0) THEN
 
-                NIntC_Extra=NIntC_Extra+1 
-                IntC_Extra%DEF(NIntC_Extra)='STRE ' 
+                NIntCs=NIntCs+1 
+                GOpt%ExtIntCs%Def%C(NIntCs)(1:5)='STRE ' 
          !--------------------
                 IF(INDEX(LineLowCase,'.')==0) THEN
                   READ(LineLowCase,*) &
-                  CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:2)
+                  CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1:2)
                 ELSE
                   READ(LineLowCase,*) &
-                  CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:2),Value
-                  IntC_Extra%Constraint(NIntC_Extra)=.TRUE.
-                  IntC_Extra%ConstrValue(NIntC_Extra)=Value*AngstromsToAu
+                  CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1:2),Value
+                  GOpt%ExtIntCs%Constraint%L(NIntCs)=.TRUE.
+                  GOpt%ExtIntCs%ConstrValue%D(NIntCs)=Value*AngstromsToAu
                   NConstr=NConstr+1
                 ENDIF
          !--------------------
          ELSE IF(INDEX(LineLowCase,'bend')/=0) THEN 
          !--------------------
-                NIntC_Extra=NIntC_Extra+1 
-                IntC_Extra%DEF(NIntC_Extra)='BEND ' 
+                NIntCs=NIntCs+1 
+                GOpt%ExtIntCs%Def%C(NIntCs)(1:5)='BEND ' 
                 IF(INDEX(LineLowCase,'.')==0) THEN
                   READ(LineLowCase,*) &
-                  CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:3)
+                  CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1:3)
                 ELSE
                   READ(LineLowCase,*) &
-                  CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:3),Value
-                  IntC_Extra%Constraint(NIntC_Extra)=.TRUE.
-                  IntC_Extra%ConstrValue(NIntC_Extra)=Value*DegToRad 
+                  CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1:3),Value
+                  GOpt%ExtIntCs%Constraint%L(NIntCs)=.TRUE.
+                  GOpt%ExtIntCs%ConstrValue%D(NIntCs)=Value*DegToRad 
                   NConstr=NConstr+1
                 ENDIF
          !--------------------
          ELSE IF(INDEX(LineLowCase,'tors')/=0) THEN 
          !--------------------
-                NIntC_Extra=NIntC_Extra+1 
-                IntC_Extra%DEF(NIntC_Extra)='TORS ' 
+                NIntCs=NIntCs+1 
+                GOpt%ExtIntCs%Def%C(NIntCs)(1:5)='TORS ' 
                 IF(INDEX(LineLowCase,'.')==0) THEN
                   READ(LineLowCase,*) &
-                  CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:4)
+                  CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1:4)
                 ELSE
                   READ(LineLowCase,*) &
-                  CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:4),Value
-                  IntC_Extra%Constraint(NIntC_Extra)=.TRUE.
-                  IntC_Extra%ConstrValue(NIntC_Extra)=Value*DegToRad 
+                  CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1:4),Value
+                  GOpt%ExtIntCs%Constraint%L(NIntCs)=.TRUE.
+                  GOpt%ExtIntCs%ConstrValue%D(NIntCs)=Value*DegToRad 
                   NConstr=NConstr+1
                 ENDIF
          !--------------------
          ELSE IF(INDEX(LineLowCase,'outp')/=0) THEN 
          !--------------------
-                NIntC_Extra=NIntC_Extra+1 
-                IntC_Extra%DEF(NIntC_Extra)='OUTP ' 
+                NIntCs=NIntCs+1 
+                GOpt%ExtIntCs%Def%C(NIntCs)(1:5)='OUTP ' 
                 IF(INDEX(LineLowCase,'.')==0) THEN
                   READ(LineLowCase,*) &
-                  CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:4)
+                  CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1:4)
                 ELSE
                   READ(LineLowCase,*) &
-                  CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:4),Value
-                  IntC_Extra%Constraint(NIntC_Extra)=.TRUE.
-                  IntC_Extra%ConstrValue(NIntC_Extra)=Value*DegToRad 
+                  CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1:4),Value
+                  GOpt%ExtIntCs%Constraint%L(NIntCs)=.TRUE.
+                  GOpt%ExtIntCs%ConstrValue%D(NIntCs)=Value*DegToRad 
                   NConstr=NConstr+1
                 ENDIF
          !--------------------
          ELSE IF(INDEX(LineLowCase,'linb1')/=0) THEN 
          !--------------------
-                NIntC_Extra=NIntC_Extra+1 
-                IntC_Extra%DEF(NIntC_Extra)='LINB1' 
+                NIntCs=NIntCs+1 
+                GOpt%ExtIntCs%Def%C(NIntCs)(1:5)='LINB1' 
                 IF(INDEX(LineLowCase,'.')==0) THEN
                   READ(LineLowCase,*) &
-                  CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:3)
+                  CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1:3)
                 ELSE
                   READ(LineLowCase,*) &
-                  CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:3),Value
-                  IntC_Extra%Constraint(NIntC_Extra)=.TRUE.
-                  IntC_Extra%ConstrValue(NIntC_Extra)=Value*DegToRad 
+                  CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1:3),Value
+                  GOpt%ExtIntCs%Constraint%L(NIntCs)=.TRUE.
+                  GOpt%ExtIntCs%ConstrValue%D(NIntCs)=Value*DegToRad 
                   NConstr=NConstr+1
                 ENDIF
          !--------------------
          ELSE IF(INDEX(LineLowCase,'linb2')/=0) THEN 
          !--------------------
-                NIntC_Extra=NIntC_Extra+1 
-                IntC_Extra%DEF(NIntC_Extra)='LINB2'
+                NIntCs=NIntCs+1 
+                GOpt%ExtIntCs%Def%C(NIntCs)(1:5)='LINB2'
                 IF(INDEX(LineLowCase,'.')==0) THEN
                   READ(LineLowCase,*) &
-                  CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:3)
+                  CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1:3)
                 ELSE
                   READ(LineLowCase,*) &
-                  CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:3),Value
-                  IntC_Extra%Constraint(NIntC_Extra)=.TRUE.
-                  IntC_Extra%ConstrValue(NIntC_Extra)=Value*DegToRad 
+                  CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1:3),Value
+                  GOpt%ExtIntCs%Constraint%L(NIntCs)=.TRUE.
+                  GOpt%ExtIntCs%ConstrValue%D(NIntCs)=Value*DegToRad 
                   NConstr=NConstr+1
                 ENDIF
          !--------------------
          ELSE IF(INDEX(LineLowCase,'cart')/=0) THEN
          !--------------------
-                IntC_Extra%DEF(NIntC_Extra+1)='CARTX' 
-                IntC_Extra%DEF(NIntC_Extra+2)='CARTY' 
-                IntC_Extra%DEF(NIntC_Extra+3)='CARTZ' 
+                GOpt%ExtIntCs%Def%C(NIntCs+1)(1:5)='CARTX' 
+                GOpt%ExtIntCs%Def%C(NIntCs+2)(1:5)='CARTY' 
+                GOpt%ExtIntCs%Def%C(NIntCs+3)(1:5)='CARTZ' 
          !
-                  READ(LineLowCase,*) CHAR,SerNum  
+                READ(LineLowCase,*) CHAR,SerNum  
          !
-                IntC_Extra%ATOMS(NIntC_Extra+1,1)=SerNum
-                IntC_Extra%ATOMS(NIntC_Extra+2,1)=SerNum
-                IntC_Extra%ATOMS(NIntC_Extra+3,1)=SerNum
+                GOpt%ExtIntCs%Atoms%I(NIntCs+1,1)=SerNum
+                GOpt%ExtIntCs%Atoms%I(NIntCs+2,1)=SerNum
+                GOpt%ExtIntCs%Atoms%I(NIntCs+3,1)=SerNum
          !
-                IntC_Extra%Constraint(NIntC_Extra+1)=.TRUE.
-                IntC_Extra%Constraint(NIntC_Extra+2)=.TRUE.
-                IntC_Extra%Constraint(NIntC_Extra+3)=.TRUE.
+                GOpt%ExtIntCs%Constraint%L(NIntCs+1)=.TRUE.
+                GOpt%ExtIntCs%Constraint%L(NIntCs+2)=.TRUE.
+                GOpt%ExtIntCs%Constraint%L(NIntCs+3)=.TRUE.
                   NConstr=NConstr+3
          !!!! supposing that constraints are the same for all clones
-         !      DO iCLONE=1,Geos%Clones 
-                  iCLONE=1
-                  IntC_Extra%ConstrValue(NIntC_Extra+1)=&
-                       XYZ%D(1,SerNum)
-                  IntC_Extra%ConstrValue(NIntC_Extra+2)=&
-                       XYZ%D(2,SerNum)
-                  IntC_Extra%ConstrValue(NIntC_Extra+3)=&
-                       XYZ%D(3,SerNum)
-         !      ENDDO
+                GOpt%ExtIntCs%ConstrValue%D(NIntCs+1)=XYZ%D(1,SerNum)
+                GOpt%ExtIntCs%ConstrValue%D(NIntCs+2)=XYZ%D(2,SerNum)
+                GOpt%ExtIntCs%ConstrValue%D(NIntCs+3)=XYZ%D(3,SerNum)
          !
-                  NIntC_Extra=NIntC_Extra+3 
-                  NCartConstr=NCartConstr+3
+                NIntCs=NIntCs+3 
+                NCartConstr=NCartConstr+3
          !
          !               IF(INDEX(LineLowCase,'.')==0) THEN
-         ! READ(LineLowCase,*) CHAR,IntC_Extra%ATOMS(NIntC_Extra,1)
+         ! READ(LineLowCase,*) CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1)
          !               ELSE
          !               ENDIF
          !--------------------
@@ -250,67 +239,37 @@ MODULE ParseExtraCoords
        12  CONTINUE
        !
      ELSE
-       NIntC_Extra=0
-       CALL New(IntC_Extra,NIntC_Extra)
+       NIntCs=0
+       CALL New(GOpt%ExtIntCs,NIntCs)
      ENDIF !!! key for extra internals found
      ! 
      ! Fill in Cartesian constraints stored 
-     ! in Geos%Clone(iCLONE)%CConstrain%I
+     ! in Geos%Clone(1)%CConstrain%I
      ! Again, supposing that constraints are the same for all clones.
-     ! Then, renumber atoms in IntC_Extra by exclusion of Rigid atoms
+     ! Then, renumber atoms in IntCs by exclusion of Rigid atoms
      !
-     !DO iCLONE=1,Geos%Clones
-        iCLONE=1
-        CALL MergeConstr(IntC_Extra,XYZ%D,CConstrain%I, &
-                         NIntC_Extra,NConstr,NCartConstr)
-        CALL ReNumbIntC(IntC_Extra,CConstrain%I) 
-     !ENDDO
+     CALL MergeConstr(GOpt%ExtIntCs,XYZ%D,CConstrain%I, &
+                      NIntCs,NConstr,NCartConstr)
+     CALL ReNumbIntC(GOpt%ExtIntCs,CConstrain%I) 
      !
-     ! Add FCType label
-     !
-     IntC_Extra%FCType(:)='E'
-     !
-     ! Redefine size of Lagrangian arrays and save IntC_Extra to disk 
-     !
-     DO iCLONE=1,Geos%Clones
-       Geos%Clone(iCLONE)%NLagr=NConstr
-       CALL Delete(Geos%Clone(iCLONE)%LagrMult)
-       CALL Delete(Geos%Clone(iCLONE)%GradMult)
-       CALL Delete(Geos%Clone(iCLONE)%LagrDispl)
-       CALL New(Geos%Clone(iCLONE)%LagrMult,NConstr)
-       CALL New(Geos%Clone(iCLONE)%GradMult,NConstr)
-       CALL New(Geos%Clone(iCLONE)%LagrDispl,NConstr)
-       CALL WriteIntCs(IntC_Extra,TRIM(Nams%M_SCRATCH)//&
-         TRIM(Nams%SCF_NAME)//'.'//TRIM(IntToChar(iCLONE))//'IntC_Extra')
-     ENDDO
-     !
-     GOpt%CoordCtrl%NExtra=NIntC_Extra
+     GOpt%ExtIntCs%N=NIntCs
+     GOpt%CoordCtrl%NExtra=NIntCs
      GOpt%Constr%NConstr=NConstr
      GOpt%Constr%NCartConstr=NCartConstr
      !
-     !IF(NIntC_Extra>0) THEN
-     !  CALL OPENAscii(Nams%OFile,Out)
-     !  CALL PrtIntCoords(IntC_Extra,IntC_Extra%Value, &
-     !  'Extra Internals & Constraints')
-     !  CLOSE(Out,STATUS='KEEP')
-     !ENDIF
-     !
-     CALL Delete(IntC_Extra)
-     !
      CLOSE(Inp,STATUS='KEEP')
-     !
      CALL Delete(XYZ)
      CALL Delete(CConstrain)
    END SUBROUTINE LoadExtraCoords
 !
 !------------------------------------------------------------------
 !
-   SUBROUTINE MergeConstr(IntC_Extra,XYZ,CConstrain,&
-                          NIntC_Extra,NConstr,NCartConstr)
-     TYPE(INTC)                  :: IntC_Extra,IntC_New
+   SUBROUTINE MergeConstr(IntCs,XYZ,CConstrain,&
+                          NIntCs,NConstr,NCartConstr)
+     TYPE(INTC)                  :: IntCs,IntC_New
      INTEGER,DIMENSION(:)        :: CConstrain
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
-     INTEGER                     :: NIntC_Extra,NConstr,NCartConstr
+     INTEGER                     :: NIntCs,NConstr,NCartConstr
      INTEGER                     :: I,NNewC,NatmsLoc
      !
      NatmsLoc=SIZE(XYZ,2)
@@ -322,36 +281,36 @@ MODULE ParseExtraCoords
      NConstr=NConstr+NNewC
      NCartConstr=NCartConstr+NNewC
      ! fill in old intcs
-     CALL New(IntC_New,NIntC_Extra+NNewC)
-     CALL Set_INTC_EQ_INTC(IntC_Extra,IntC_New,1,NIntC_Extra,1)
+     CALL New(IntC_New,NIntCs+NNewC)
+     CALL Set_INTC_EQ_INTC(IntCs,IntC_New,1,NIntCs,1)
      ! fill in intcs related to Cartesian constraints
-     NNewC=NIntC_Extra
+     NNewC=NIntCs
      DO I=1,NatmsLoc    
        IF(CConstrain(I)==1) THEN
-         IntC_New%Def(NNewC+1)='CARTX' 
-         IntC_New%Def(NNewC+2)='CARTY' 
-         IntC_New%Def(NNewC+3)='CARTZ' 
+         IntC_New%Def%C(NNewC+1)(1:5)='CARTX' 
+         IntC_New%Def%C(NNewC+2)(1:5)='CARTY' 
+         IntC_New%Def%C(NNewC+3)(1:5)='CARTZ' 
          !
-         IntC_New%Atoms(NNewC+1:NNewC+3,1:4)=0
-         IntC_New%ATOMS(NNewC+1,1)=I
-         IntC_New%ATOMS(NNewC+2,1)=I
-         IntC_New%ATOMS(NNewC+3,1)=I
+         IntC_New%Atoms%I(NNewC+1:NNewC+3,1:4)=0
+         IntC_New%Atoms%I(NNewC+1,1)=I
+         IntC_New%Atoms%I(NNewC+2,1)=I
+         IntC_New%Atoms%I(NNewC+3,1)=I
          !
-         IntC_New%Constraint(NNewC+1)=.TRUE.
-         IntC_New%Constraint(NNewC+2)=.TRUE.
-         IntC_New%Constraint(NNewC+3)=.TRUE.
+         IntC_New%Constraint%L(NNewC+1)=.TRUE.
+         IntC_New%Constraint%L(NNewC+2)=.TRUE.
+         IntC_New%Constraint%L(NNewC+3)=.TRUE.
          !
-         IntC_New%ConstrValue(NNewC+1)=XYZ(1,I)
-         IntC_New%ConstrValue(NNewC+2)=XYZ(2,I)
-         IntC_New%ConstrValue(NNewC+3)=XYZ(3,I)
+         IntC_New%ConstrValue%D(NNewC+1)=XYZ(1,I)
+         IntC_New%ConstrValue%D(NNewC+2)=XYZ(2,I)
+         IntC_New%ConstrValue%D(NNewC+3)=XYZ(3,I)
          NNewC=NNewC+3
        ENDIF
      ENDDO
      !
-     CALL Delete(IntC_Extra)
-     NIntC_Extra=NNewC
-     CALL New(IntC_Extra,NIntC_Extra)
-     CALL Set_INTC_EQ_INTC(IntC_New,IntC_Extra,1,NIntC_Extra,1)
+     CALL Delete(IntCs)
+     NIntCs=NNewC
+     CALL New(IntCs,NIntCs)
+     CALL Set_INTC_EQ_INTC(IntC_New,IntCs,1,NIntCs,1)
      CALL Delete(IntC_New)
    END SUBROUTINE MergeConstr
 !
@@ -360,10 +319,9 @@ MODULE ParseExtraCoords
    SUBROUTINE ReNumbIntC(IntCs,CConstr) 
      TYPE(INTC)           :: IntCs
      INTEGER,DIMENSION(:) :: CConstr
-     INTEGER              :: I,J,K,NIntC,NatmsOld,NatmsNew
+     INTEGER              :: I,J,K,NatmsOld,NatmsNew
      TYPE(INT_VECT)       :: Map
      !
-     NIntC=SIZE(IntCs%Def)
      NatmsOld=SIZE(CConstr)
      NatmsNew=0
      CALL New(Map,NatmsOld)
@@ -376,11 +334,11 @@ MODULE ParseExtraCoords
        ENDIF
      ENDDO
      !
-     DO I=1,NIntC
+     DO I=1,IntCs%N
        DO J=1,4
-         K=IntCs%Atoms(I,J)
+         K=IntCs%Atoms%I(I,J)
          IF(K==0) EXIT
-         IntCs%Atoms(I,J)=Map%I(K)
+         IntCs%Atoms%I(I,J)=Map%I(K)
        ENDDO
      ENDDO
      !

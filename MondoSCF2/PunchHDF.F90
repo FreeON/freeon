@@ -333,22 +333,6 @@ CONTAINS
 !
 !-----------------------------------------------------------------
 !
-  SUBROUTINE InitLagr(Geos)
-    TYPE(Geometries) :: Geos
-    INTEGER          :: NClones,iCLONE,I,J
-    !
-    NClones=Geos%Clones
-    DO iCLONE=1,NClones
-      IF(Geos%Clone(iCLONE)%NLagr/=0) THEN
-        Geos%Clone(iCLONE)%LagrDispl%D=Zero
-        Geos%Clone(iCLONE)%LagrMult%D=Zero
-        Geos%Clone(iCLONE)%GradMult%D=Zero
-      ENDIF
-    ENDDO
-  END SUBROUTINE InitLagr
-!
-!-----------------------------------------------------------------
-!
   SUBROUTINE InitGlobal(C)
     TYPE(Controls) :: C
     !
@@ -356,8 +340,6 @@ CONTAINS
     CALL InitArchive(C%Nams)
     ! Initialize HDF files for clones
     CALL InitClones(C%Nams,C%MPIs,C%Sets,C%Geos)
-    ! Initialize Lagrange multipliers
-    CALL InitLagr(C%Geos)
     ! Do rearchivation if requested
     IF(C%Opts%Guess==GUESS_EQ_RESTART) THEN
       CALL GeomReArchive(C%Nams,C%Opts,C%Geos)
