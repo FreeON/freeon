@@ -14,11 +14,11 @@
 \paperorientation portrait
 \secnumdepth 3
 \tocdepth 3
-\paragraph_separation indent
+\paragraph_separation skip
 \defskip medskip
 \quotes_language english
 \quotes_times 2
-\papercolumns 1
+\papercolumns 2
 \papersides 1
 \paperpagestyle default
 
@@ -31,7 +31,7 @@ Linear scaling computation of the Fock matrix VI.
 \layout Author
 
 C.J.
- Tymczak, Matt Challacombe and Eric Schwegler
+ Tymczak and Matt Challacombe
 \layout Address
 
 Theoretical Division, Los Alamos National Laboratory, Los Alamos, New Mexico
@@ -58,25 +58,6 @@ MondoSCF
  (k-d trees) that maximally exploits locality of the density.
  Finally, the current capabilities of MondoSCF for large condensed phases
  will be demonstrated.
-\layout Standard
-
-
-\latex latex 
-
-\backslash 
-vfill
-\backslash 
-vfill
-\backslash 
-vfill
-\series bold 
-\latex default 
- LA-UR-5555
-\series default 
-\latex latex 
- 
-\backslash 
-eject
 \layout Section
 
 INTRODUCTION
@@ -758,26 +739,6 @@ Next, we directly calculate the integral of equation (
 ), where we obtain significant increase in efficacy by exploiting the localizati
 on of the atomic orbitals.
  
-\layout Subsection
-
-The exact exchange matrix
-\layout Standard
-
-To calculate the exact exchange correlation matrix in the periodic case,
- we take advantage of the periodicity of the functions being integrated
- and the locality of the basis functions [ref], this allows us to show that
- the exact exchange matrix can be calculated as
-\layout Standard
-
-
-\begin_inset Formula \begin{equation}
-\label{Kx_pbc}
-K_{ab}=\sum _{\mathbf{RR}'}\sum _{cd}\int d{\mathbf{r}}\, d{\mathbf{r}'}\, \frac{\phi _{a}\left( \mathbf{r}\right) \phi _{c}\left( \mathbf{r}+\mathbf{R}\right) \, P_{cd}\, \phi _{b}\left( \mathbf{r}'+\mathbf{R}'\right) \phi _{d}\left( \mathbf{r}'\right) }{\left| \mathbf{r}-\mathbf{r}'+\mathbf{R}'\right| }
-\end{equation}
-
-\end_inset 
-
-
 \layout Section
 
 Verification
@@ -2875,7 +2836,7 @@ BLYP
 
 
 \begin_inset Formula \( \left\{ \begin{array}{c}
-\left| a\right| =\left| b\right| =\left| c\right| =\\
+\left| a\right| =\left| b\right| =\left| c\right| =4.00\\
 \alpha =\frac{\pi }{2},\beta =\frac{\pi }{2},N=8
 \end{array}\right\}  \)
 \end_inset 
@@ -3294,168 +3255,6 @@ Energy (
 
 
 \end_float 
-\begin_float tab 
-\layout Caption
-
-
-\begin_inset LatexCommand \label{ConvergMgO}
-
-\end_inset 
-
-Total energy per atom for magnesium oxide system for increasing size for
- 8-511G/HF system.
- The reference Energy from Crystal98 is 
-\begin_inset Formula \( E=-137.3380172921 \)
-\end_inset 
-
-.
-\layout Standard
-
-
-\begin_inset  Tabular
-<lyxtabular version="2" rows="4" columns="3">
-<features rotate="false" islongtable="false" endhead="0" endfirsthead="0" endfoot="0" endlastfoot="0">
-<column alignment="center" valignment="top" leftline="true" rightline="false" width="" special="">
-<column alignment="center" valignment="top" leftline="true" rightline="false" width="" special="">
-<column alignment="center" valignment="top" leftline="true" rightline="true" width="" special="">
-<row topline="true" bottomline="true" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-System Size (
-\begin_inset Formula \( N) \)
-\end_inset 
-
-
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-Energy (
-\begin_inset Formula \( E \)
-\end_inset 
-
-)
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-
-\begin_inset Formula \( \frac{E}{N} \)
-\end_inset 
-
-
-\end_inset 
-</cell>
-</row>
-<row topline="true" bottomline="false" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-
-\begin_inset Formula \( 8 \)
-\end_inset 
-
-
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-
-\begin_inset Formula \( -1111.67421583 \)
-\end_inset 
-
-
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-
-\begin_inset Formula \( -138.9592770 \)
-\end_inset 
-
-
-\end_inset 
-</cell>
-</row>
-<row topline="true" bottomline="false" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-
-\begin_inset Formula \( 64 \)
-\end_inset 
-
-
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-\end_inset 
-</cell>
-</row>
-<row topline="true" bottomline="true" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-
-\begin_inset Formula \( 216 \)
-\end_inset 
-
-
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-\end_inset 
-</cell>
-</row>
-</lyxtabular>
-
-\end_inset 
-
-
-\end_float 
 \layout Standard
 
 \begin_float tab 
@@ -3484,7 +3283,7 @@ Energy (
 
 \begin_inset  Tabular
 <lyxtabular version="2" rows="30" columns="6">
-<features rotate="false" islongtable="true" endhead="0" endfirsthead="0" endfoot="0" endlastfoot="0">
+<features rotate="false" islongtable="false" endhead="0" endfirsthead="0" endfoot="0" endlastfoot="0">
 <column alignment="center" valignment="top" leftline="true" rightline="true" width="" special="">
 <column alignment="center" valignment="top" leftline="false" rightline="true" width="" special="">
 <column alignment="center" valignment="top" leftline="false" rightline="true" width="" special="">

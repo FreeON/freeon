@@ -1,51 +1,31 @@
 %% LyX 1.1 created this file.  For more info, see http://www.lyx.org/.
 %% Do not edit unless you really know what you are doing.
-\documentclass[twocolumn,english]{revtex4}
-\usepackage[T1]{fontenc}
-\usepackage{babel}
-\usepackage{graphics}
+\documentclass[prb,aps,twocolumn]{revtex4}
 
-\makeatletter
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% LyX specific LaTeX commands.
-\providecommand{\LyX}{L\kern-.1667em\lower.25em\hbox{Y}\kern-.125emX\@}
-%% Special footnote code from the package 'stblftnt.sty'
-%% Author: Robin Fairbairns -- Last revised Dec 13 1996
-\let\SF@@footnote\footnote
-\def\footnote{\ifx\protect\@typeset@protect
-    \expandafter\SF@@footnote
-  \else
-    \expandafter\SF@gobble@opt
-  \fi
-}
-\expandafter\def\csname SF@gobble@opt \endcsname{\@ifnextchar[%]
-  \SF@gobble@twobracket
-  \@gobble
-}
-\edef\SF@gobble@opt{\noexpand\protect
-  \expandafter\noexpand\csname SF@gobble@opt \endcsname}
-\def\SF@gobble@twobracket[#1]#2{}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Textclass specific LaTeX commands.
- \newcommand{\lyxaddress}[1]{
-   \par {\raggedright #1 
-   \vspace{1.4em}
-   \noindent\par}
- }
-
+\usepackage{graphicx}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{bm}
+\usepackage{alltt}
+\usepackage{dcolumn} 
+\usepackage{amsmath} 
+\usepackage{graphicx}
+\makeatletter 
 \makeatother
+
 \begin{document}
 
 \title{\textbf{Linear scaling computation of the Fock matrix VI. Gaussian
 orbital methods for simulation of periodic systems}}
 
 
-\author{C.J. Tymczak and Matt Challacombe}
+\author{C.J. Tymczak}
+\author{Matt Challacombe}
 
-\maketitle
-
-\lyxaddress{Theoretical Division, Los Alamos National Laboratory, Los Alamos,
+\affiliation{Theoretical Division, Los Alamos National Laboratory, Los Alamos,
 New Mexico 87545 }
+
+\date{\today}
 
 \begin{abstract}
 Periodic boundary conditions have been implemented in the linear scaling
@@ -63,15 +43,16 @@ data structures (k-d trees) that maximally exploits locality of the
 density. Finally, the current capabilities of MondoSCF for large condensed
 phases will be demonstrated.
 \end{abstract}
-\vfill\vfill\vfill \textbf{LA-UR-5555} \eject
 
+\maketitle
 
 \section{INTRODUCTION}
 
 When simulating bulk behavior in solids or liquids, Periodic Boundary
 Conditions (PBC) are often essential to employ \cite{Allen90}. Therefore,
 we have implemented Periodic boundary conditions into the linear scaling
-Quantum Chemistry code \textbf{MondoSCF} \cite{Challacombe96,Challacombe97,Challacombe99}.
+Quantum Chemistry code \textbf{MondoSCF} 
+\cite{Challacombe96,Challacombe97,Challacombe99}.
 For the one electron matrix this has been achieved by a re-summation
 over periodic cell images, which because of locality leads to an efficient
 calculation of the one electron matrices. For the two electron matrices
@@ -97,12 +78,6 @@ the utility of the code on very large systems such as zeolite. Finally
 we give some conclusion concerning the accuracy and utility of MondoSCF
 and future research directions.
 
-
-\section{}
-
-
-
-
 \section{One-Electron Matrices}
 
 The first step in including periodic boundary conditions into our
@@ -113,7 +88,8 @@ integrals. Consider the non-periodic overlap matrix
 
 \begin{equation}
 \label{Sab_norm}
-S_{ab}=\int _{V_{\infty }}\, d{\mathbf{r}}\, \phi _{a}({\mathbf{r}})\phi _{b}({\mathbf{r}})
+S_{ab}=\int _{V_{\infty }}\, d{\mathbf{r}}\, \phi _{a}({\mathbf{r}})\phi _{b}
+({\mathbf{r}})
 \end{equation}
  where \( \{\phi _{a}(x),\phi _{b}(x)\} \) are the atomic orbitals
 (LCAO) at atom \( a \) and atom \( b \) and \( V_{\infty } \) is
@@ -122,25 +98,29 @@ by {[}ref{]},
 
 \begin{equation}
 \label{Sab_pbc1}
-S_{ab}^{PBC}=\sum _{\mathbf{R},\mathbf{R}'}\int _{V_{cell}}\, d{\mathbf{r}}\, \phi _{a}({\mathbf{r}+\mathbf{R}})\phi _{b}({\mathbf{r}+\mathbf{R}'})
+S_{ab}^{PBC}=\sum _{\mathbf{R},\mathbf{R}'}\int _{V_{cell}}\, d{\mathbf{r}}\, 
+\phi _{a}({\mathbf{r}+\mathbf{R}})\phi _{b}({\mathbf{r}+\mathbf{R}'})
 \end{equation}
 where, \( V_{cell} \) is the integration over the simulation cell,
 and \( \{\mathbf{R},\mathbf{R}'\} \) are the brava lattice vectors,
-this is illustrated in figure \ref{figure: SimCell}, where \( \left\{ {\mathbf{a},\mathbf{b},\mathbf{c}}\right\}  \)
+this is illustrated in figure \ref{figure: SimCell}, where \( \left\{ {\mathbf{a},
+\mathbf{b},\mathbf{c}}\right\}  \)
 are the primitive lattice vectors. Because of the locality of the
 atomic orbitals, we can remove the double sum over lattice vectors
 to get
 
 \begin{equation}
 \label{Sab_pbc2}
-S_{ab}^{PBC}=\sum _{\mathbf{R}}\int _{V_{\infty }}\, d{\mathbf{r}}\, \phi _{a}({\mathbf{r}})\phi _{b}({\mathbf{r}+\mathbf{R}})
+S_{ab}^{PBC}=\sum _{\mathbf{R}}\int _{V_{\infty }}\, d{\mathbf{r}}\, \phi _{a}
+({\mathbf{r}})\phi _{b}({\mathbf{r}+\mathbf{R}})
 \end{equation}
 We will use this Periodic Localization Transformation (PLT) repeatedly
 in what follows. Let us present some useful definitions:
 
 \begin{equation}
 \label{rho_loc}
-\rho ^{loc}({\mathbf{r}})=\sum _{\mathbf{R}}\sum _{ab}{\mathbf{P}}_{ab}\phi _{a}({\mathbf{r}})\phi _{b}({\mathbf{r}+\mathbf{R}})
+\rho ^{loc}({\mathbf{r}})=\sum _{\mathbf{R}}\sum _{ab}{\mathbf{P}}_{ab}\phi _{a}
+({\mathbf{r}})\phi _{b}({\mathbf{r}+\mathbf{R}})
 \end{equation}
 and because of periodicity,
 
@@ -150,13 +130,15 @@ and because of periodicity,
 \end{equation}
 We also define:\begin{equation}
 \label{rho_loc_ab}
-\rho _{ab}^{loc}({\mathbf{r}})=\sum _{\mathbf{R}}\phi _{a}({\mathbf{r}})\phi _{b}({\mathbf{r}+\mathbf{R}})
+\rho _{ab}^{loc}({\mathbf{r}})=\sum _{\mathbf{R}}\phi _{a}({\mathbf{r}})\phi _{b}
+({\mathbf{r}+\mathbf{R}})
 \end{equation}
 
 
 \begin{equation}
 \label{rho_pbc_ab}
-\rho _{ab}^{PBC}({\mathbf{r}})=\sum _{\mathbf{R}}\, \rho _{ab}^{loc}({\mathbf{r}+\mathbf{R}})
+\rho _{ab}^{PBC}({\mathbf{r}})=\sum _{\mathbf{R}}\, \rho _{ab}^{loc}({\mathbf{r}+
+\mathbf{R}})
 \end{equation}
 Which allows us to rewrite the overlap matrix as
 
@@ -168,7 +150,8 @@ Finally, we can rewrite the kinetic energy matrix as
 
 \begin{equation}
 \label{Tab_pbc}
-T^{PBC}_{ab}=-\frac{1}{2}\sum _{\mathbf{R}}\int _{V_{\infty }}\, d{\mathbf{r}}\, \phi _{a}({\mathbf{r}+\mathbf{R}})\nabla ^{2}\phi _{b}({\mathbf{r}})
+T^{PBC}_{ab}=-\frac{1}{2}\sum _{\mathbf{R}}\int _{V_{\infty }}\, d{\mathbf{r}}\, 
+\phi _{a}({\mathbf{r}+\mathbf{R}})\nabla ^{2}\phi _{b}({\mathbf{r}})
 \end{equation}
 
 
@@ -181,90 +164,124 @@ T^{PBC}_{ab}=-\frac{1}{2}\sum _{\mathbf{R}}\int _{V_{\infty }}\, d{\mathbf{r}}\,
 In order to calculate the coulomb matrix efficiently, we transform
 the two-electron Coulomb integrals into integrals over all space with
 local distributions via PLT transformation and equations (\ref{rho_pbc})
-and (\ref{rho_pbc_ab}) {[}ref{]}, \begin{eqnarray}
-J_{ab}^{PBC} & = & \frac{1}{2}\int _{V_{cell}}\int _{V_{\infty }}\, d{\mathbf{r}}\, d{\mathbf{r}'}\frac{\rho _{ab}^{PBC}\left( {\mathbf{r}}\right) \: \rho ^{PBC}\left( \mathbf{r}'\right) }{\left| \mathbf{r}-\mathbf{r}'\right| }\begin{array}{c}
-\\
+and (\ref{rho_pbc_ab}) {[}ref{]}, 
 
-\end{array}\label{Jab_pbc1} \\
- & = & \frac{1}{2}\sum _{\mathbf{R}'}\int _{V_{\infty }}\int _{V_{\infty }}\, d{\mathbf{r}}\, d{\mathbf{r}'}\frac{\rho _{ab}^{loc}\left( {\mathbf{r}}\right) \: \rho ^{loc}\left( {\mathbf{r}'}+{\mathbf{R}'}\right) }{\left| \mathbf{r}-\mathbf{r}'\right| }\begin{array}{c}
+\begin{equation}
+J_{ab}^{PBC}  =  \frac{1}{2}\int _{V_{cell}}\int _{V_{\infty }}\, d{\mathbf{r}}\, 
+d{\mathbf{r}'}\frac{\rho _{ab}^{PBC}\left( {\mathbf{r}}\right) \: 
+\rho ^{PBC}\left( \mathbf{r}'\right) }{\left| \mathbf{r}-\mathbf{r}'\right| }
+\nonumber
+\end{equation}
+\begin{equation}
+\,\,\,\,\,\,\,\,\,\,\,
+\,\,\,\,\,\,\,\,\,\,\,
+\,\,\,
+= \frac{1}{2}\sum _{\mathbf{R}'}\int _{V_{\infty }}\int _{V_{\infty }}\, 
+d{\mathbf{r}}\, d{\mathbf{r}'}\frac{\rho _{ab}^{loc}\left( {\mathbf{r}}\right) \: 
+\rho ^{loc}\left( {\mathbf{r}'}+{\mathbf{R}'}\right) }{\left| \mathbf{r}-\mathbf{r}'
+\right| }
 \\
-
-\end{array}\label{Jab_pbc2} 
-\end{eqnarray}
+\label{Jab_pbc2} 
+\end{equation}
 However, this is still a long ranged integral. Let us separate the
-Coulomb integral into three pieces \[
-J_{ab}^{PBC}=J_{ab}^{QCTC}+J_{ab}^{PFF}+J_{ab}^{EC}\]
-where \begin{eqnarray}
-J_{ab}^{QCTC} & = & \frac{1}{2}\sum _{{\mathbf{R}'}\in V_{in}}\, \int _{V_{\infty }}\, \int _{V_{\infty }}\, d{\mathbf{r}}\, d{\mathbf{r}'}\frac{\rho ^{loc}_{ab}\left( {\mathbf{r}}\right) \: \rho ^{loc}\left( {\mathbf{r}'+\mathbf{R}'}\right) }{\left| \mathbf{r}-\mathbf{r}'\right| }\begin{array}{c}
-\\
-
-\end{array}\label{Jqctc} \\
-J_{ab}^{PFF} & = & \frac{1}{2}\sum _{{\mathbf{R}'}\in V_{\infty }-V_{in}}\, \int _{V_{\infty }}\, \int _{V_{\infty }}\, d{\mathbf{r}}\, d{\mathbf{r}'}\frac{\rho _{ab}^{loc}\left( {\mathbf{r}}\right) \: \rho ^{loc}\left( {\mathbf{r}'+\mathbf{R}'}\right) }{\left| \mathbf{r}-\mathbf{r}'\right| }\begin{array}{c}
-\\
-
-\end{array}\label{Jpff} \\
-J_{ab}^{EC} & = & \frac{1}{2}\sum _{{\mathbf{R}'}\in S_{\infty }}\, \int _{V_{\infty }}\, \int _{S_{\infty }}\, d{\mathbf{r}}\, d{\mathbf{r}'}\frac{\rho _{ab}^{loc}\left( {\mathbf{r}}\right) \: \rho ^{loc}\left( {\mathbf{r}'+\mathbf{R}'}\right) }{\left| \mathbf{r}-\mathbf{r}'\right| }\begin{array}{c}
-\\
-
-\end{array}\label{Jec} 
-\end{eqnarray}
- and \( V_{in} \) is the volume which contains the inner cells, \( V_{\infty } \)
-is the total volume and \( S_{\infty } \) is the surface at infinity
-which contributes a shape dependent potential to the center cell.
-This is depicted in figure \ref{figure: ReplicateCells}. Let us now
+Coulomb integral into three pieces 
+\begin{equation}
+J_{ab}^{PBC}=J_{ab}^{QCTC}+J_{ab}^{PFF}+J_{ab}^{EC}
+\label{Jab_sum}
+\end{equation}
+where 
+\begin{equation}
+J_{ab}^{QCTC}=\frac{1}{2}\sum _{{\mathbf{R}'}\in V_{in}}\, \int _{V_{\infty }}\, 
+\int _{V_{\infty }}\, d{\mathbf{r}}\, d{\mathbf{r}'}\frac{\rho ^{loc}_{ab}\left( {\mathbf{r}}\right)
+ \: \rho ^{loc}\left( {\mathbf{r}'+\mathbf{R}'}\right) }{\left| \mathbf{r}-\mathbf{r}'\right| }
+\label{Jqctc}
+\end{equation}
+%
+\begin{equation}
+J_{ab}^{PFF}=\frac{1}{2}\sum _{{\mathbf{R}'}\in V_{out}}\, \int _{V_{\infty }}
+\, \int _{V_{\infty }}\, d{\mathbf{r}}\, d{\mathbf{r}'}\frac{\rho _{ab}^{loc}\left( {\mathbf{r}}\right) 
+\: \rho ^{loc}\left( {\mathbf{r}'+\mathbf{R}'}\right) }{\left| \mathbf{r}-\mathbf{r}'\right| }
+\label{Jpff}
+\end{equation}
+%
+\begin{equation}
+J_{ab}^{EC}=\frac{1}{2}\sum _{{\mathbf{R}'}\in S_{\infty }}\, \int _{V_{\infty }}\, \int _{S_{\infty }}
+\, d{\mathbf{r}}\, d{\mathbf{r}'}\frac{\rho _{ab}^{loc}\left( {\mathbf{r}}\right) \: 
+\rho ^{loc}\left( {\mathbf{r}'+\mathbf{R}'}\right) }{\left| \mathbf{r}-\mathbf{r}'\right| }
+\label{Jec}
+\end{equation}
+and \( V_{in} \) is the volume which contains the inner cells, \( V_{\infty } \)
+is the total volume, \(V_{out}\) is the total volume minus \( V_{in} \), and \( S_{\infty } \) is 
+the surface at infinity which contributes a shape dependent potential to the center cell.
+This is depicted in figure \ref{figure:ReplicateCells}. Let us now
 define and discuss the calculation of each terms.
 
 
 \subsubsection{The Quantum Chemical Tree Code: The direct Coulomb matrix}
 
 In-order to achieve linear scaling, we use a quantum chemical tree
-code {[}ref{]} to compute the integral in equation (\ref{Jqctc}).
+code {[}ref{]} to compute the integrals in equation (\ref{Jqctc}).
 This requires that we replace the integrals in equation (\ref{Jqctc})
 with the approximate spherical multipole expansion to order \( L \)
-and \( L' \),\[
-\frac{1}{2}\sum _{{\mathbf{R}'}\in V_{in}}\int _{V_{\infty }}\, d{\mathbf{r}}\, d{\mathbf{r}'}\frac{\rho _{ab}^{loc}\left( {\mathbf{r}}\right) \: \rho ^{loc}\left( {\mathbf{r}'+\mathbf{R}'}\right) }{\left| \mathbf{r}-\mathbf{r}'\right| }\qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \begin{array}{c}
-\\
-
-\end{array}\]
-\[
-\approx \frac{1}{2}\sum _{\mathbf{R}}\sum _{\mathbf{R}'\in V_{in}}\sum _{\left\langle i\right\rangle }\int _{V_{\infty }}\, d{\mathbf{r}}\, d{\mathbf{r}'}\frac{\phi _{a}({\mathbf{r}})\phi _{b}({\mathbf{r}+\mathbf{R}})\: \Lambda ^{\left\langle i\right\rangle }\left( {\mathbf{r}'+\mathbf{R}'}\right) }{\left| \mathbf{r}-\mathbf{r}'\right| }\qquad \qquad \qquad \begin{array}{c}
-\\
-
-\end{array}\]
+and \( L' \),
+%
 \begin{equation}
-\label{QCTC}
-+\frac{1}{2}\sum _{\mathbf{R}}\sum _{\mathbf{R}'\in V_{in}}\sum _{l=0}^{L}\, \sum _{l'=0}^{L'}\, \sum _{m=-l}^{l}\, \sum _{m'=-l'}^{l'}\qquad \qquad \qquad \qquad \qquad \qquad \qquad \begin{array}{c}
-\\
-
-\end{array}
+\frac{1}{2}\sum _{{\mathbf{R}'}\in V_{in}}\int _{V_{\infty }}\, d{\mathbf{r}}\, 
+d{\mathbf{r}'}\frac{\rho _{ab}^{loc}\left( {\mathbf{r}}\right) \: \rho ^{loc}
+\left( {\mathbf{r}'+\mathbf{R}'}\right) }{\left| \mathbf{r}-\mathbf{r}'\right| }
+\qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad 
+\nonumber
 \end{equation}
-\[
-\, \qquad \left( -1\right) ^{l}\, {\cal O}^{m}_{l}\left[ \rho _{ab};\mathbf{Q}(\mathbf{R})\right] \, M_{l+l'}^{m+m'}[\mathbf{Q}-\mathbf{P}-\mathbf{R}']\, {\cal O}_{l}^{m}[\widetilde{\Lambda }^{\left\langle j\right\rangle };\mathbf{P}]\begin{array}{c}
-\\
-
-\end{array}\]
- where
-
+%
+\begin{equation}
+\approx \frac{1}{2}\sum _{\mathbf{R}}\sum _{\mathbf{R}'\in V_{in}}
+\sum _{\left\langle i\right\rangle }\int _{V_{\infty }}\, d{\mathbf{r}}\, 
+d{\mathbf{r}'}\frac{\phi _{a}({\mathbf{r}})\phi _{b}({\mathbf{r}+\mathbf{R}})\: 
+\Lambda ^{\left\langle i\right\rangle }\left( {\mathbf{r}'+\mathbf{R}'}\right) }
+{\left| \mathbf{r}-\mathbf{r}'\right| }\qquad \qquad \qquad 
+\nonumber
+\end{equation}
+%
+\begin{equation}
+\qquad\qquad+\frac{1}{2}\sum _{\mathbf{R}}\sum _{\mathbf{R}'\in V_{in}}\sum _{l=0}^{L}\, \sum _{l'=0}^{L'}\, 
+\sum _{m=-l}^{l}\, \sum _{m'=-l'}^{l'}\qquad \qquad \qquad \qquad \qquad  
+\nonumber
+\end{equation}
+%
+\begin{equation}
+\left( -1\right) ^{l}\, {\cal O}^{m}_{l}\left[ \rho _{ab};\mathbf{Q}(\mathbf{R})\right] 
+\, M_{l+l'}^{m+m'}[\mathbf{Q}-\mathbf{P}-\mathbf{R}']\, {\cal O}_{l}^{m}[\widetilde{\Lambda }^{\left\langle 
+j\right\rangle };\mathbf{P}]
+\label{QCTC}
+\end{equation}
+%
+where
 \begin{equation}
 \label{sp_rho_loc}
-O_{l}^{m}\left[ \rho ;\mathbf{P}\right] =\int _{V_{\infty }}\, d\mathbf{r}\, \widehat{O}_{l}^{m}\left[ \mathbf{r}-\mathbf{P}\right] \, \rho \left( \mathbf{r}\right) 
+O_{l}^{m}\left[ \rho ;\mathbf{P}\right] =\int _{V_{\infty }}\, d\mathbf{r}\, \widehat{O}_{l}^{m}
+\left[ \mathbf{r}-\mathbf{P}\right] \, \rho \left( \mathbf{r}\right) 
 \end{equation}
 \( \Lambda ^{\left\langle i\right\rangle } \) are the set of distributions
 of the local density which overlap \( \phi _{a}({\mathbf{r}})\phi _{b}({\mathbf{r}+\mathbf{R}}) \)
 (therefore these integrals must be done explicitly) , \( \mathbf{Q}(\mathbf{R}) \)
 is the center of the distribution \( \phi _{a}({\mathbf{r}})\phi _{b}({\mathbf{r}+\mathbf{R}}) \),
 \( \widetilde{\Lambda }^{\left\langle j\right\rangle } \)are the
-set of distributions of the local density which do not overlap \( \phi _{a}({\mathbf{r}})\phi _{b}({\mathbf{r}+\mathbf{R}}) \),
+set of distributions of the local density which do not overlap \( \phi _{a}({\mathbf{r}})\phi _{b}
+({\mathbf{r}+\mathbf{R}}) \),
 are organized on a tree, allow us to achieve linear scaling, and are
 the multipoles of these densities. The multipole operators are are
 defined as
 
 \begin{eqnarray}
-\widehat{O}_{l}^{m}\left[ {\mathbf{R}}\right]  & = & \frac{\left| {\mathbf{R}}\right| ^{l}P_{l}^{m}\left( \cos \left( \theta _{\mathbf{R}}\right) \right) \, e^{-im\phi _{\mathbf{R}}}}{\left( l+m\right) !}\begin{array}{c}
+\widehat{O}_{l}^{m}\left[ {\mathbf{R}}\right]  & = & \frac{\left| {\mathbf{R}}\right| ^{l}P_{l}^{m}
+\left( \cos \left( \theta _{\mathbf{R}}\right) \right) \, e^{-im\phi _{\mathbf{R}}}}{\left( l+m\right) !}
+\begin{array}{c}
 \\
 
 \end{array}\label{sp_mult_O} \\
-M_{l}^{m}\left[ {\mathbf{R}}\right]  & = & \frac{\left( l-m\right) !\, P_{l}^{m}\left( \cos \left( \theta _{\mathbf{R}}\right) \right) \, e^{-im\phi _{\mathbf{R}}}}{\left| {\mathbf{R}}\right| ^{l+1}}\begin{array}{c}
+M_{l}^{m}\left[ {\mathbf{R}}\right]  & = & \frac{\left( l-m\right) !\, P_{l}^{m}\left( \cos \left( 
+\theta _{\mathbf{R}}\right) \right) \, e^{-im\phi _{\mathbf{R}}}}{\left| {\mathbf{R}}\right| ^{l+1}}
+\begin{array}{c}
 \\
 
 \end{array}\label{sp_mult_M} 
@@ -281,32 +298,48 @@ will be given in reference {[}ref{]}.
 To obtain the periodic far field correction to the matrix elements
 we replace the integral in equation (\ref{Jpff}) with the multipole
 sum {[}ref{]}
-
+%
 \begin{eqnarray}
-J_{ab}^{PFF} & = & \frac{1}{2}\sum _{{\mathbf{R}'}\in V_{\infty }-V_{in}}\, \int _{V_{\infty }}\, d{\mathbf{x}}\, d{\mathbf{x}'}\frac{\rho _{ab}^{loc}\left( {\mathbf{x}}\right) \: \rho ^{loc}\left( {\mathbf{x}'+\mathbf{R}'}\right) }{\left| \mathbf{x}-\mathbf{x}'\right| }\begin{array}{c}
-\\
-
-\end{array}\label{jpff_2} \\
- & = & \frac{1}{2}\sum _{{\mathbf{R}}\in V_{\infty }-V_{in}}\, \sum _{l=0}^{L}\, \sum _{l'=0}^{L'}\, \sum _{m=-l}^{l}\, \sum _{m'=-l'}^{l'}\qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \label{sp_jpff} \\
- &  & \qquad \qquad \left( -1\right) ^{l}\, {\cal O}_{l}^{m}[\rho _{ab}^{loc};\mathbf{R}_{0}]\, M_{l+l'}^{m+m'}[\mathbf{R}]\, {\cal O}_{l'}^{m'}[\rho ^{loc};\mathbf{R}_{0}]
+J_{ab}^{PFF} &=& \frac{1}{2}\sum _{{\mathbf{R}'}\in V_{\infty }-V_{in}}\, \int _{V_{\infty }}
+\, d{\mathbf{x}}\, d{\mathbf{x}'}\frac{\rho _{ab}^{loc}\left( {\mathbf{x}}\right) \: \rho ^{loc}
+\left( {\mathbf{x}'+\mathbf{R}'}\right) }{\left| \mathbf{x}-\mathbf{x}'\right| } 
+\nonumber\\
+&=& \frac{1}{2}\sum _{{\mathbf{R}}\in V_{\infty }-V_{in}}\, \sum _{l=0}^{L}\, 
+\sum _{l'=0}^{L'}\, \sum _{m=-l}^{l}\, \sum _{m'=-l'}^{l'}
+\nonumber\\
+ & & \left( -1\right) ^{l}\, {\cal O}_{l}^{m}[\rho _{ab}^{loc};\mathbf{R}_{0}]
+\, M_{l+l'}^{m+m'}[\mathbf{R}]\, {\cal O}_{l'}^{m'}[\rho ^{loc};\mathbf{R}_{0}]
+\nonumber\\
+& &\label{Jpff_2} 
 \end{eqnarray}
+%
 where \( \mathbf{R}_{0} \) is an arbitrary point in the simulation
-cell (usually the center of the cell). Let us define\begin{equation}
+cell (usually the center of the cell). Let us define
+\begin{equation}
 \label{ScriptM}
 {\cal M}_{l}^{m}=\sum _{{\mathbf{R}'}\in V_{\infty }-V_{in}}\, M_{l}^{m}[\mathbf{R}]
 \end{equation}
-Which allow us to rewrite\begin{equation}
+Which allow us to rewrite
+%
+\begin{eqnarray}
+J_{ab}^{PFF} &=&\frac{1}{2}\sum _{l=0}^{L}\, \sum _{l'=0}^{L'}\, \sum _{m=-l}^{l}\, \sum _{m'=-l'}^{l'}
+\nonumber\\
+& & \left( -1\right) ^{l}\, {\cal O}_{l}^{m}[\rho _{ab}^{loc};\mathbf{R}_{0}]\,
+ {\cal M}_{l+l'}^{m+m'}\, {\cal O}_{l'}^{m'}[\rho ^{loc};\mathbf{R}_{0}]
+\nonumber\\
 \label{sp_jpff_2}
-J_{ab}^{PFF}=\frac{1}{2}\sum _{l=0}^{L}\, \sum _{l'=0}^{L'}\, \sum _{m=-l}^{l}\, \sum _{m'=-l'}^{l'}\, \left( -1\right) ^{l}\, {\cal O}_{l}^{m}[\rho _{ab}^{loc};\mathbf{R}_{0}]\, {\cal M}_{l+l'}^{m+m'}\, {\cal O}_{l'}^{m'}[\rho ^{loc};\mathbf{R}_{0}]
-\end{equation}
- For \( l=1 \) and \( 2 \) equation (\ref{ScriptM}) is a conditional
+\end{eqnarray}
+%
+For \( l=1 \) and \( 2 \) equation (\ref{ScriptM}) is a conditional
 summation. In Appendix C we describe an efficient method which allow
 us calculate these conditional summations. The only task remaining
 is to determine the region of the inner box summation or the multipole
 order \( L \) which we have to expand to. Using equation (\ref{B30})
-from Appendix B we obtain for the error bound\begin{equation}
+from Appendix B we obtain for the error bound
+\begin{equation}
 \label{Rmax}
-\tau \leq \frac{C_{\rho }\left| \mathbf{d}_{max}\right| ^{L+1}}{\left| \mathbf{R}_{max}\right| ^{L+1}\left| \left| \mathbf{R}_{max}\right| -\left| \mathbf{d}_{max}\right| \right| }
+\tau \leq \frac{C_{\rho }\left| \mathbf{d}_{max}\right| ^{L+1}}{\left| \mathbf{R}_{max}
+\right| ^{L+1}\left| \left| \mathbf{R}_{max}\right| -2\left| \mathbf{d}_{max}\right| \right| }
 \end{equation}
 where we are assuming a \( l_{0}=0 \) distribution of unit weight,
 and \( \mathbf{R}_{max} \) is the distance to the nearest cell in
@@ -327,33 +360,36 @@ convergence.
 The correction to the Coulomb matrix is strongly dependent on how
 the periodic multipole tensor is summed. If the matrix is a spherically
 ordered lattice sum, then the connection between the spherically ordered
-potential and the Ewald potential is \cite{Redlack72}, \begin{equation}
+potential and the Ewald potential is \cite{Redlack72}, 
+\begin{equation}
+\Phi _{Ew}\left( \mathbf{x}\right) =\Phi _{ss}\left( \mathbf{x}\right) -\frac{4\pi }{3}
+{\left( \mathbf{x}-\mathbf{R}_{0}\right) \cdot \mathbf{D}}+\frac{2\pi }{3}Q
 \label{EW_pot}
-\Phi _{Ew}\left( \mathbf{x}\right) =\Phi _{ss}\left( \mathbf{x}\right) -\frac{4\pi }{3}{\left( \mathbf{x}-\mathbf{R}_{0}\right) \cdot \mathbf{D}}+\frac{2\pi }{3}Q
 \end{equation}
+%
 in terms of the matrix elements of \( J_{ab}^{PBC} \) this gives
-the corrections\begin{eqnarray}
-J_{ab}^{EC} & = & \int _{V_{\infty }}\, d{\mathbf{x}}\, \rho ^{loc}_{ab}\left( {\mathbf{x}}\right) \left\{ \frac{2\pi }{3}Q-\frac{4\pi }{3}\left( \mathbf{x}-\mathbf{R}_{0}\right) \cdot \mathbf{D}\right\} \begin{array}{c}
-\\
-
-\end{array}\label{Jab_ec} \\
- & = & \frac{2\pi }{3}Q\, S_{ab}^{PBC}-\frac{4\pi }{3}\mathbf{d}_{ab}\cdot \mathbf{D}\label{Jab_ec_2} 
+the corrections
+\begin{eqnarray}
+J_{ab}^{EC} & = & \int _{V_{\infty }}\, d{\mathbf{x}}\, \rho ^{loc}_{ab}\left( {\mathbf{x}}
+\right) \left\{ \frac{2\pi }{3}Q-\frac{4\pi }{3}\left( \mathbf{x}-\mathbf{R}_{0}\right) \cdot 
+\mathbf{D}\right\}
+\nonumber\\
+ & = & \frac{2\pi }{3}Q\, S_{ab}^{PBC}-\frac{4\pi }{3}\mathbf{d}_{ab}\cdot \mathbf{D}
+\nonumber\\
+\label{Jab_ec_2} 
 \end{eqnarray}
 where
-
+%
 \begin{eqnarray}
-{\mathbf{d}}_{ab} & = & \int _{V_{\infty }}\, d{\mathbf{x}}\, \left( \mathbf{x}-\mathbf{R}_{0}\right) \rho ^{loc}_{ab}\left( \mathbf{x}\right) \begin{array}{c}
-\\
-
-\end{array}\label{dab} \\
-{\mathbf{D}} & = & \int _{V_{\infty }}\, d{\mathbf{x}}\, \left( \mathbf{x}-\mathbf{R}_{0}\right) \rho ^{loc}\left( \mathbf{x}\right) \begin{array}{c}
-\\
-
-\end{array}\label{D} \\
-Q & = & \int _{V_{\infty }}\, d{\mathbf{x}}\, \left( \mathbf{x}-\mathbf{R}_{0}\right) ^{2}\rho ^{loc}\left( \mathbf{x}\right) \begin{array}{c}
-\\
-
-\end{array}\label{Q} 
+{\mathbf{d}}_{ab} & = & \int _{V_{\infty }}\, d{\mathbf{x}}\, \left( \mathbf{x}-\mathbf{R}_{0}\right)
+ \rho ^{loc}_{ab}\left( \mathbf{x}\right)
+\label{dab} \\
+{\mathbf{D}} & = & \int _{V_{\infty }}\, d{\mathbf{x}}\, \left( \mathbf{x}-\mathbf{R}_{0}\right) 
+\rho ^{loc}\left( \mathbf{x}\right) 
+\label{D} \\
+Q & = & \int _{V_{\infty }}\, d{\mathbf{x}}\, \left( \mathbf{x}-\mathbf{R}_{0}\right) ^{2}
+\rho ^{loc}\left( \mathbf{x}\right) 
+\label{Q} 
 \end{eqnarray}
 are the dipole and quadrapole moments. In appendix D we give a short
 derivation of these terms
@@ -363,12 +399,27 @@ derivation of these terms
 
 To calculate the DFT exchange correlation matrix in the periodic case,
 we take advantage of the periodicity of the functions being integrated
-and the locality of the basis functions {[}ref{]},\[
-K_{ab}^{PBC}=\int _{V_{cell}}\, d\mathbf{x}\, \rho _{ab}^{PBC}\left( \mathbf{x}\right) \: V^{1}_{xc}\left( \rho ^{PBC}\left( \mathbf{x}\right) \right) +\nabla \rho _{ab}^{PBC}\left( \mathbf{x}\right) \cdot \nabla V^{2}_{xc}\left( \rho ^{PBC}\left( \mathbf{x}\right) \right) \]
-\begin{equation}
+and the locality of the basis functions {[}ref{]},
+%
+\begin{eqnarray}
+K_{ab}^{PBC}&=&\int _{V_{cell}}\, d\mathbf{x}\, \rho _{ab}^{PBC}\left( \mathbf{x}\right) 
+\: V^{1}_{xc}\left( \rho ^{PBC}\left( \mathbf{x}\right) \right) 
+\nonumber\\
+%
+&&\qquad\qquad+\nabla \rho _{ab}^{PBC}
+\left( \mathbf{x}\right) \cdot \nabla V^{2}_{xc}\left( \rho ^{PBC}\left( \mathbf{x}\right) \right) 
+\nonumber\\
+%
+&=&\int _{V_{HiCu}}\, d\mathbf{x}\, \rho _{ab}^{PBC}\left( \mathbf{x}\right) 
+\: V_{xc}\left( \rho ^{PBC}\left( \mathbf{x}\right) \right) 
+\nonumber\\
+%
+&&\qquad\qquad+\nabla \rho _{ab}^{PBC}
+\left( \mathbf{x}\right) \cdot \nabla V^{2}_{xc}\left( \rho ^{PBC}\left( \mathbf{x}\right) \right) 
+\nonumber\\
 \label{Kxc_pbc}
-\qquad =\int _{V_{HiCu}}\, d\mathbf{x}\, \rho _{ab}^{PBC}\left( \mathbf{x}\right) \: V_{xc}\left( \rho ^{PBC}\left( \mathbf{x}\right) \right) +\nabla \rho _{ab}^{PBC}\left( \mathbf{x}\right) \cdot \nabla V^{2}_{xc}\left( \rho ^{PBC}\left( \mathbf{x}\right) \right) 
-\end{equation}
+\end{eqnarray}
+%
 where \( V_{HiCu} \) is the cubic region shown in figure \ref{figure: SimCell}.
 This transformation is allowable because of the periodicity of the
 function, and it is ideally suited for the method we use to calculate
@@ -443,7 +494,7 @@ Figure \ref{figure: Scaling_Matrix_Build} shows our scaling results
 of diamond periodic system for both the \( J_{QCTC} \) and \( K_{xc} \)
 matrix builds for two different error thresholds and two different
 basis sets. Even in this very dense periodic system, linear scaling
-for the matrix build commences very early. Figure \ref{figure: Scaling_Diag}
+for the matrix build commences very early. Figure \ref{figure:Scaling_Diag}
 show our results for the density matrix solver (TRS4) {[}ref{]} for
 two different thresholds and basis sets. Again we see the comencement
 of linear scaling early, where we see crossover with an eigen-solver
@@ -476,47 +527,45 @@ of the code on very large systems such 256 diamond. Finally we give
 some conclusion concerning the accuracy and utility of MondoSCF and
 future research directions.
 
-
 \section*{ACKNOWLEDGMENTS}
 
 We would like to acknowledge Tommy Sewell and Ed Kober for there advise
 and support. 
 
-\eject
-
-\bibliographystyle{plain}
-\bibliography{../Bibs/GaussianPapers}
+\bibliographystyle{apsrmp}
+\bibliography{GaussianPapers}
 
 
-\eject
+\appendix
 
-
-\section*{\center{Appendix A}}
-
-
-\subsection*{The Penetration Acceptability Criterion (PAC)}
+\section{The Penetration Acceptability Criterion (PAC)}\label{PAC}
 
 Let us consider a generalized distribution centered at \( \mathbf{P} \)
 
 \begin{equation}
 \label{A1}
-\rho _{\mathbf{P}}\left( \mathbf{r}\right) =\sum _{l+m+n=L}d_{lmn}\Lambda ^{\mathbf{P}}_{lmn}\left( \mathbf{r}\right) 
+\rho _{\mathbf{P}}\left( \mathbf{r}\right) =\sum _{l+m+n=L}d_{lmn}
+\Lambda ^{\mathbf{P}}_{lmn}\left( \mathbf{r}\right) 
 \end{equation}
 where
 
 \begin{equation}
 \label{A2}
-\Lambda ^{\mathbf{P}}_{lmn}\left( \mathbf{r}\right) =\left( x-P_{x}\right) ^{l}\left( y-P_{y}\right) ^{m}\left( z-P_{z}\right) ^{n}\exp \left( -\xi _{\mathbf{P}}\left| \mathbf{x}-\mathbf{P}\right| ^{2}\right) 
+\Lambda ^{\mathbf{P}}_{lmn}\left( \mathbf{r}\right) =\left( x-P_{x}\right) ^{l}\left( y-P_{y}\right) ^{m}
+\left( z-P_{z}\right) ^{n}\exp \left( -\xi _{\mathbf{P}}\left| \mathbf{x}-\mathbf{P}\right| ^{2}\right) 
 \end{equation}
 Using Cramer's Inequality we can show\begin{equation}
 \label{A3}
-\rho _{\mathbf{P}}\left( \mathbf{r}\right) =\sum _{lmn}d_{lmn}\Lambda ^{\mathbf{P}}_{lmn}\left( \mathbf{r}\right) \leq C_{\mathbf{P}}\exp \left( -\widetilde{\xi }_{\mathbf{P}}\left| \mathbf{x}-\mathbf{P}\right| ^{2}\right) 
+\rho _{\mathbf{P}}\left( \mathbf{r}\right) =\sum _{lmn}d_{lmn}\Lambda ^{\mathbf{P}}_{lmn}\left( \mathbf{r}
+\right) \leq C_{\mathbf{P}}\exp \left( -\widetilde{\xi }_{\mathbf{P}}\left| \mathbf{x}-\mathbf{P}
+\right| ^{2}\right) 
 \end{equation}
 where
 
 \begin{equation}
 \label{A4}
-C_{\mathbf{P}}=\sum _{lmn}\left| d_{lmn}\right| \sqrt{l!\, m!\, n!\, \left( 2\, \widetilde{\xi }_{\mathbf{P}}\right) ^{l+m+n}}
+C_{\mathbf{P}}=\sum _{lmn}\left| d_{lmn}\right| \sqrt{l!\, m!\, n!\, \left( 2\, \widetilde{\xi }_{\mathbf{P}}
+\right) ^{l+m+n}}
 \end{equation}
 \begin{equation}
 \label{A5}
@@ -530,12 +579,19 @@ C_{\mathbf{P}}=\sum _{lmn}\left| d_{lmn}\right| \sqrt{l!\, m!\, n!\, \left( 2\, 
 \end{equation}
 This allow us to treat all distributions as if they where s-type Gaussian,
 which allows us to easily calculate the penetration error as,\[
-\int _{V_{\infty }}\int _{V_{\infty }}\, d{\mathbf{r}}\, d{\mathbf{r}'}\frac{C_{\mathbf{P}}\exp \left( -\widetilde{\xi }_{\mathbf{P}}\left| \mathbf{x}-\mathbf{P}\right| ^{2}\right) C_{\mathbf{Q}}\exp \left( -\widetilde{\xi }_{\mathbf{Q}}\left| \mathbf{x}-\mathbf{Q}\right| ^{2}\right) }{\left| \mathbf{r}-\mathbf{r}'\right| }\qquad \qquad \qquad \qquad \]
+\int _{V_{\infty }}\int _{V_{\infty }}\, d{\mathbf{r}}\, d{\mathbf{r}'}\frac{C_{\mathbf{P}}
+\exp \left( -\widetilde{\xi }_{\mathbf{P}}\left| \mathbf{x}-\mathbf{P}\right| ^{2}\right) 
+C_{\mathbf{Q}}\exp \left( -\widetilde{\xi }_{\mathbf{Q}}\left| \mathbf{x}-\mathbf{Q}\right| ^{2}\right) }
+{\left| \mathbf{r}-\mathbf{r}'\right| }\qquad \qquad \qquad \qquad \]
 
 
 \begin{equation}
 \label{A6}
-\qquad \qquad \qquad =\left( \frac{\pi }{\widetilde{\xi }_{\mathbf{P}}}\right) ^{\frac{3}{2}}\left( \frac{\pi }{\widetilde{\xi }_{\mathbf{Q}}}\right) ^{\frac{3}{2}}\frac{C_{\mathbf{P}}C_{\mathbf{Q}}}{\left| \mathbf{P}-\mathbf{Q}\right| }{\rm erfc}\left( \sqrt{\frac{\widetilde{\xi }_{\mathbf{P}}\widetilde{\xi }_{\mathbf{Q}}}{\widetilde{\xi }_{\mathbf{P}}+\widetilde{\xi }_{\mathbf{Q}}}}\left| \mathbf{P}-\mathbf{Q}\right| \right) \geq \tau 
+\qquad \qquad \qquad =\left( \frac{\pi }{\widetilde{\xi }_{\mathbf{P}}}\right) ^{\frac{3}{2}}
+\left( \frac{\pi }{\widetilde{\xi }_{\mathbf{Q}}}\right) ^{\frac{3}{2}}\frac{C_{\mathbf{P}}
+C_{\mathbf{Q}}}{\left| \mathbf{P}-\mathbf{Q}\right| }{\rm erfc}\left( \sqrt{\frac{\widetilde{\xi }_{\mathbf{P}}
+\widetilde{\xi }_{\mathbf{Q}}}{\widetilde{\xi }_{\mathbf{P}}+\widetilde{\xi }_{\mathbf{Q}}}}\left| \mathbf{P}
+-\mathbf{Q}\right| \right) \geq \tau 
 \end{equation}
 However, this is prohibitively expensive to evaluate for a tree code.
 Inorder to eliminate this computational expense we instead evaluate
@@ -550,38 +606,42 @@ and \( \mathbf{Q}_{max} \). Then our test simply becomes
 \end{equation}
 
 
-
-\section*{\center{Appendix B} }
-
-
-\subsection*{The Multipole Acceptability Criterion (MAC)}
+\section{The Multipole Acceptability Criterion (MAC)}\label{MAC}
 
 Let us start by defining some useful quantities\begin{equation}
 \label{B1}
-\widehat{O}_{l}^{m}\left[ \mathbf{R}\right] =\frac{\left| \mathbf{R}\right| ^{l}P_{l}^{m}\left( \cos \theta _{\mathbf{R}}\right) \, e^{-im\phi _{\mathbf{R}}}}{\left( l+m\right) !}\quad \; \; 
+\widehat{O}_{l}^{m}\left[ \mathbf{R}\right] =\frac{\left| \mathbf{R}\right| ^{l}P_{l}^{m}
+\left( \cos \theta _{\mathbf{R}}\right) \, e^{-im\phi _{\mathbf{R}}}}{\left( l+m\right) !}\quad \; \; 
 \end{equation}
 \begin{equation}
 \label{B2}
-M_{l}^{m}\left[ \mathbf{R}\right] =\frac{\left( l-m\right) !\, P_{l}^{m}\left( \cos \theta _{\mathbf{R}}\right) \, e^{-im\phi _{\mathbf{R}}}}{\left| \mathbf{R}\right| ^{l+1}}
+M_{l}^{m}\left[ \mathbf{R}\right] =\frac{\left( l-m\right) !\, P_{l}^{m}\left( \cos \theta _{\mathbf{R}}\right)
+ \, e^{-im\phi _{\mathbf{R}}}}{\left| \mathbf{R}\right| ^{l+1}}
 \end{equation}
 \begin{equation}
 \label{B3}
-{\cal O}_{l}^{m}\left[ \rho ;\mathbf{P}\right] =\int _{V_{\infty }}\, d{\mathbf{r}}\, \widehat{O}_{l}^{m}\left[ {\mathbf{r}-\mathbf{P}}\right] \, \rho \left( \mathbf{r}\right) \qquad \; \; \; 
+{\cal O}_{l}^{m}\left[ \rho ;\mathbf{P}\right] =\int _{V_{\infty }}\, d{\mathbf{r}}\, 
+\widehat{O}_{l}^{m}\left[ {\mathbf{r}-\mathbf{P}}\right] \, \rho \left( \mathbf{r}\right) \qquad \; \; \; 
 \end{equation}
 The error in the calculation in the multipole contraction (equation
 (\ref{QCTC})) is the multipoles that we do not sum\begin{equation}
 \label{B7}
-\varepsilon \left( l_{0}\right) =\left| \frac{1}{2}\sum _{l'=L'+1}^{\infty }\, \sum _{m=-l_{0}}^{l_{0}}\, \sum _{m'=-l'}^{l'}\, \left( -1\right) ^{l}\, {\cal O}_{l_{0}}^{m}[\rho _{1};\mathbf{P}]\, M_{l_{0}+l'}^{m+m'}[{\mathbf{P}-\mathbf{Q}}]\, {\cal O}_{l'}^{m'}[\rho _{2};\mathbf{Q}]\right| 
+\varepsilon \left( l_{0}\right) =\left| \frac{1}{2}\sum _{l'=L'+1}^{\infty }\, \sum _{m=-l_{0}}^{l_{0}}\, 
+\sum _{m'=-l'}^{l'}\, \left( -1\right) ^{l}\, {\cal O}_{l_{0}}^{m}[\rho _{1};
+\mathbf{P}]\, M_{l_{0}+l'}^{m+m'}[{\mathbf{P}-\mathbf{Q}}]\, {\cal O}_{l'}^{m'}[\rho _{2};\mathbf{Q}]\right| 
 \end{equation}
  Let us define for the unsold operator\[
-{\cal \widehat{O}}_{l}\left[ \left| \mathbf{P}\right| \right] =\sqrt{\sum _{m}(l-m)!(l+m)!\left| \widehat{O}_{l}^{m}\left[ \mathbf{P}\right] \right| ^{2}}\]
+{\cal \widehat{O}}_{l}\left[ \left| \mathbf{P}\right| \right] =\sqrt{\sum _{m}(l-m)!(l+m)!\left| 
+\widehat{O}_{l}^{m}\left[ \mathbf{P}\right] \right| ^{2}}\]
 \begin{equation}
 \label{B8}
-\qquad \qquad \qquad \quad =\left| \mathbf{P}\right| ^{l}\sqrt{\sum _{m}\frac{(l-m)!}{(l+m)!}\left| P_{l}^{m}(\mathbf{P})\right| ^{2}}=\left| \mathbf{P}\right| ^{l}\geq 0
+\qquad \qquad \qquad \quad =\left| \mathbf{P}\right| ^{l}\sqrt{\sum _{m}\frac{(l-m)!}{(l+m)!}
+\left| P_{l}^{m}(\mathbf{P})\right| ^{2}}=\left| \mathbf{P}\right| ^{l}\geq 0
 \end{equation}
 and similarly the unsold weights\begin{equation}
 \label{B9}
-{\cal O}_{l}[\rho ;\left| \mathbf{P}\right| ]=\sqrt{\sum _{m}(l-m)!(l+m)!\left| {\cal O}_{l}^{m}\left[ \rho ;\left| \mathbf{P}\right| \right] \right| ^{2}}
+{\cal O}_{l}[\rho ;\left| \mathbf{P}\right| ]=\sqrt{\sum _{m}(l-m)!(l+m)!\left| {\cal O}_{l}^{m}
+\left[ \rho ;\left| \mathbf{P}\right| \right] \right| ^{2}}
 \end{equation}
 Using equations (\ref{B1}), (\ref{B2}), (\ref{B3}), definition
 (\ref{B9}) and the iniqualities (ref) \begin{equation}
@@ -589,59 +649,72 @@ Using equations (\ref{B1}), (\ref{B2}), (\ref{B3}), definition
 \left| P_{l}^{m}\left( \cos \theta _{\mathbf{R}}\right) \right| \leq 1
 \end{equation}
 and\[
-\left| \mathbf{a}\cdot \mathbf{b}\right| \leq \left| \mathbf{a}\right| \left| \mathbf{b}\right| \qquad \qquad \]
+\left| \mathbf{a}\cdot \mathbf{b}\right| \leq \left| \mathbf{a}\right| \left| \mathbf{b}\right| 
+\qquad \qquad \]
 \begin{equation}
 \label{B15}
-\left| \sum _{n}a_{n}\, b_{n}\right| \leq \sqrt{\sum _{n}\left| a_{n}\right| ^{2}\sum _{n'}\left| b_{n'}\right| ^{2}}
+\left| \sum _{n}a_{n}\, b_{n}\right| \leq \sqrt{\sum _{n}\left| a_{n}\right| ^{2}\sum _{n'}
+\left| b_{n'}\right| ^{2}}
 \end{equation}
 we can rewrite this error bound, equation (\ref{B7}) very compactly
 as \begin{equation}
 \label{B17}
-\varepsilon \left( l_{0}\right) \leq \frac{1}{2}\sum _{l'=L'+1}^{\infty }\frac{{\cal O}_{l_{0}}[\rho _{1};\left| \mathbf{P}\right| ]\: N\left[ l_{0},l'\right] \: {\cal O}_{l'}[\rho _{2};\left| \mathbf{Q}\right| ]}{\left| \mathbf{P}-\mathbf{Q}\right| ^{l'+l_{0}+1}}
+\varepsilon \left( l_{0}\right) \leq \frac{1}{2}\sum _{l'=L'+1}^{\infty }\frac{{\cal O}_{l_{0}}[\rho _{1};
+\left| \mathbf{P}\right| ]\: N\left[ l_{0},l'\right] \: {\cal O}_{l'}[\rho _{2};\left| \mathbf{Q}\right| ]}
+{\left| \mathbf{P}-\mathbf{Q}\right| ^{l'+l_{0}+1}}
 \end{equation}
 where\begin{equation}
 \label{B18}
-N\left[ l,l'\right] =\sqrt{\sum _{m=-l_{0}}^{l_{0}}\, \sum _{m'=-l'}^{l'}\frac{\left[ (l_{0}+l'-(m+m'))!\right] ^{2}}{(l_{0}+m)!(l_{0}-m)!\, (l'+m')!(l'-m')!}}
+N\left[ l,l'\right] =\sqrt{\sum _{m=-l_{0}}^{l_{0}}\, \sum _{m'=-l'}^{l'}\frac{\left[ (l_{0}+l'-(m+m'))!
+\right] ^{2}}{(l_{0}+m)!(l_{0}-m)!\, (l'+m')!(l'-m')!}}
 \end{equation}
 However, we still have to eliminate the infinite sum over \( l' \)
 within our error expression. Let us consider the limit of
 
 \begin{equation}
 \label{B24}
-\lim _{l\rightarrow \infty }\left\{ {\cal O}_{l}[\rho ;\left| \mathbf{P}\right| ]\right\} ^{1/l}=\lim _{l\rightarrow \infty }\left\{ \left| c_{I}\right| \, \left| \mathbf{d}_{max}\right| ^{l}\right\} ^{1/l}=\left| \mathbf{d}_{max}\right| 
+\lim _{l\rightarrow \infty }\left\{ {\cal O}_{l}[\rho ;\left| \mathbf{P}\right| ]\right\} ^{1/l}=
+\lim _{l\rightarrow \infty }\left\{ \left| c_{I}\right| \, \left| \mathbf{d}_{max}\right| ^{l}\right\} ^{1/l}=
+\left| \mathbf{d}_{max}\right| 
 \end{equation}
 where \( \left| \mathbf{d}_{max}\right|  \)is the maximum distance
 of a distribution to the contraction center \( \left| \mathbf{P}\right|  \).
-This allows us to deterimine the upper bound to \( {\cal O}_{l}\left[ \rho _{1};\left| \mathbf{Q}\right| \right]  \).
+This allows us to deterimine the upper bound to \( {\cal O}_{l}\left[ \rho _{1};\left| \mathbf{Q}\right| 
+\right]  \).
 Analyizing equation (\ref{B24}) we can show that\begin{equation}
 \label{B28}
 {\cal O}_{l}[\rho ;\left| \mathbf{P}\right| ]\leq C_{\rho }\left| \mathbf{d}_{max}\right| ^{l}
 \end{equation}
 Where \( C_{\rho } \) can be determined from\begin{equation}
 \label{B28B}
-C_{\rho }\equiv \max \left( \frac{{\cal O}_{l}[\rho ;\left| \mathbf{P}\right| ]}{\left| \mathbf{d}_{max}\right| ^{l}}\right) 
+C_{\rho }\equiv \max \left( \frac{{\cal O}_{l}[\rho ;\left| \mathbf{P}\right| ]}{\left| \mathbf{d}_{max}
+\right| ^{l}}\right) 
 \end{equation}
  Next, analyzing the behavior of \( N\left[ l,l'\right]  \) for large
 \( l' \) we find that\begin{equation}
 \label{B26}
-N\left[ l,l'\right] \leq \alpha _{l}\frac{\left( \left( 1+l'\right) \left( 2+l'\right) \ldots \left( l+l'\right) \right) }{l!}=\alpha _{l}\frac{(l+l')!}{l!\, l'!}\equiv n\left[ l,l'\right] 
+N\left[ l,l'\right] \leq \alpha _{l}\frac{\left( \left( 1+l'\right) \left( 2+l'\right) \ldots 
+\left( l+l'\right) \right) }{l!}=\alpha _{l}\frac{(l+l')!}{l!\, l'!}\equiv n\left[ l,l'\right] 
 \end{equation}
  Using equations (\ref{B26}) and (\ref{B28}) the error bound can
 be summed to leading order to give \begin{equation}
 \label{B30}
-\varepsilon \left( l_{0}\right) \leq \frac{1}{2}\frac{{\cal O}_{l_{0}}\left[ \rho _{1};\left| \mathbf{P}\right| \right] \, n\left[ l_{0},L'+1\right] \, C_{\rho _{2}}\left| \mathbf{d}_{max}\right| ^{L'+1}}{\left| \mathbf{P}-\mathbf{Q}\right| ^{L'+1}\left| \left| \mathbf{P}-\mathbf{Q}\right| -\left| \mathbf{d}_{max}\right| \right| ^{l_{0}+1}}
+\varepsilon \left( l_{0}\right) \leq \frac{1}{2}\frac{{\cal O}_{l_{0}}\left[ \rho _{1};\left| 
+\mathbf{P}\right| \right] \, n\left[ l_{0},L'+1\right] \, C_{\rho _{2}}\left| \mathbf{d}_{max}
+\right| ^{L'+1}}{\left| \mathbf{P}-\mathbf{Q}\right| ^{L'+1}\left| \left| \mathbf{P}-\mathbf{Q}
+\right| -\left| \mathbf{d}_{max}\right| \right| ^{l_{0}+1}}
 \end{equation}
 In practice we find that \begin{equation}
 \label{B31}
-\varepsilon \left( l_{0}\right) \leq \frac{1}{2}\frac{{\cal O}_{l_{0}}\left[ \rho _{1};\left| \mathbf{P}\right| \right] \, n\left[ l_{0},L'+1\right] \, C_{\rho _{2}}\left| \mathbf{d}_{max}\right| ^{L'+1}}{\left| \left| \mathbf{P}-\mathbf{Q}\right| -\left| \mathbf{d}_{max}\right| \right| ^{L'+l_{0}+2}}
+\varepsilon \left( l_{0}\right) \leq \frac{1}{2}\frac{{\cal O}_{l_{0}}\left[ \rho _{1};\left| 
+\mathbf{P}\right| \right] \, n\left[ l_{0},L'+1\right] \, C_{\rho _{2}}\left| \mathbf{d}_{max}
+\right| ^{L'+1}}{\left| \left| \mathbf{P}-\mathbf{Q}\right| -\left| \mathbf{d}_{max}\right| 
+\right| ^{L'+l_{0}+2}}
 \end{equation}
 is easier to test for.
 
 
-\section*{\center{Appendix C}}
-
-
-\subsection*{Computation of the \protect\( {\cal M}\protect \) Tensor}
+\section{Computation of the \protect\( {\cal M}\protect \) Tensor}\label{calM}
 
 Following the work of Nijboer-De Wette \cite{Nijboer57,Nijboer58a}.
 We start by first partitioning  
@@ -654,23 +727,34 @@ where
 
 \begin{equation}
 \label{C2}
-{\cal G}_{l}\left( \beta ,r\right) =\frac{\Gamma \left( l+\frac{1}{2},\beta ^{2}r^{2}\right) }{\Gamma \left( l+\frac{1}{2}\right) \, r^{l+1}}
+{\cal G}_{l}\left( \beta ,r\right) =\frac{\Gamma \left( l+\frac{1}{2},\beta ^{2}r^{2}\right) }
+{\Gamma \left( l+\frac{1}{2}\right) \, r^{l+1}}
 \end{equation}
 \begin{equation}
 \label{C3}
-{\cal F}_{l}\left( \beta ,r\right) =\frac{\gamma \left( l+\frac{1}{2},\beta ^{2}r^{2}\right) }{\Gamma \left( l+\frac{1}{2}\right) \, r^{l+1}}=\frac{\Gamma \left( l+\frac{1}{2}\right) -\Gamma \left( l+\frac{1}{2},\beta ^{2}r^{2}\right) }{\Gamma \left( l+\frac{1}{2}\right) \, r^{l+1}}
+{\cal F}_{l}\left( \beta ,r\right) =\frac{\gamma \left( l+\frac{1}{2},\beta ^{2}r^{2}\right) }
+{\Gamma \left( l+\frac{1}{2}\right) \, r^{l+1}}=\frac{\Gamma \left( l+\frac{1}{2}\right) -\Gamma 
+\left( l+\frac{1}{2},\beta ^{2}r^{2}\right) }{\Gamma \left( l+\frac{1}{2}\right) \, r^{l+1}}
 \end{equation}
 where \( \beta  \) is a parameter which controls the convergence.
 This allows the lattice sum to be partitioned into rapidly convergent
 real and reciprocal space terms \begin{eqnarray*}
 {\cal M}^{m}_{l} & = & \sum _{\mathbf{R}'\in V_{\infty }-V_{in}}\, M_{l}^{m}[\mathbf{R}]\\
- & = & \sum _{\mathbf{R}'\in V_{\infty }-V_{in}}\widetilde{P}_{l}^{m}\left( \cos \theta _{\mathbf{R}}\right) e^{im\phi _{\mathbf{R}}}\, \left\{ {\cal G}_{l}\left( \beta ,\left| \mathbf{R}\right| \right) +{\cal F}_{l}\left( \beta ,\left| \mathbf{R}\right| \right) \right\} \qquad \qquad \qquad \qquad 
+ & = & \sum _{\mathbf{R}'\in V_{\infty }-V_{in}}\widetilde{P}_{l}^{m}\left( \cos \theta _{\mathbf{R}}
+\right) e^{im\phi _{\mathbf{R}}}\, \left\{ {\cal G}_{l}\left( \beta ,\left| \mathbf{R}\right| \right) 
++{\cal F}_{l}\left( \beta ,\left| \mathbf{R}\right| \right) \right\} \qquad \qquad \qquad \qquad 
 \end{eqnarray*}
 \[
-\qquad \; \; \; \: \: \: \, =\sum _{\mathbf{R}'\in V_{\infty }-V_{in}}\, \widetilde{P}_{l}^{m}\left( \cos \theta _{\mathbf{R}}\right) e^{im\phi _{\mathbf{R}}}\, {\cal G}_{l}\left( \beta ,\left| \mathbf{R}\right| \right) -\sum _{\mathbf{R}'\in V_{in}}\widetilde{P}_{l}^{m}\left( \cos \theta _{\mathbf{R}}\right) e^{im\phi _{\mathbf{R}}}{\cal F}_{l}\left( \beta ,\left| \mathbf{R}\right| \right) \]
+\qquad \; \; \; \: \: \: \, =\sum _{\mathbf{R}'\in V_{\infty }-V_{in}}\, \widetilde{P}_{l}^{m}
+\left( \cos \theta _{\mathbf{R}}\right) e^{im\phi _{\mathbf{R}}}\, {\cal G}_{l}\left( \beta ,\left|
+ \mathbf{R}\right| \right) -\sum _{\mathbf{R}'\in V_{in}}\widetilde{P}_{l}^{m}\left( \cos 
+\theta _{\mathbf{R}}\right) e^{im\phi _{\mathbf{R}}}{\cal F}_{l}\left( \beta ,\left| \mathbf{R}\right| \right) \]
 \begin{equation}
 \label{C4}
-+\frac{4\pi ^{\frac{3}{2}}(\frac{i}{2})^{l}}{V_{cell}\Gamma \left( l+\frac{1}{2}\right) }\sum _{\mathbf{G}\neq \left\{ \emptyset \right\} }\, \left| \mathbf{G}\right| ^{l-2}e^{-\frac{\pi ^{2}\left| \mathbf{G}\right| ^{2}}{\beta ^{2}}}\widetilde{P_{l}}^{m}\left( \cos \theta _{\mathbf{G}}\right) e^{im\phi _{\mathbf{G}}}
++\frac{4\pi ^{\frac{3}{2}}(\frac{i}{2})^{l}}{V_{cell}\Gamma \left( l+\frac{1}{2}\right) }
+\sum _{\mathbf{G}\neq \left\{ \emptyset \right\} }\, \left| \mathbf{G}\right| ^{l-2}e^{-\frac{\pi ^{2}\left|
+ \mathbf{G}\right| ^{2}}{\beta ^{2}}}\widetilde{P_{l}}^{m}\left( \cos \theta _{\mathbf{G}}
+\right) e^{im\phi _{\mathbf{G}}}
 \end{equation}
 With an appropriate choice of \( \beta \sim \sqrt{\pi }/\left( V_{cell}\right) ^{\frac{1}{3}} \)
 the periodic multipole interaction tensor can be computed. The only
@@ -694,13 +778,15 @@ function can quickly lose precision. We can remove this problem by
 analytically summing the gamma function, collecting terms, and then
 rewriting the gamma function as\begin{equation}
 \label{C7}
-\Gamma \left( m+\frac{1}{2},\, x\right) =\Gamma \left( m+\frac{1}{2}\right) \left\{ {\rm erfc}\left( \sqrt{x}\right) +\sqrt{\frac{x}{\pi }}\sum _{n=0}^{m-1}(S_{n}\, x\, e^{-\frac{x}{n}})^{n}\right\} 
+\Gamma \left( m+\frac{1}{2},\, x\right) =\Gamma \left( m+\frac{1}{2}\right) \left\{ {\rm erfc}\left( 
+\sqrt{x}\right) +\sqrt{\frac{x}{\pi }}\sum _{n=0}^{m-1}(S_{n}\, x\, e^{-\frac{x}{n}})^{n}\right\} 
 \end{equation}
 where
 
 \begin{equation}
 \label{SN}
-S_{n}=\left( \frac{\Gamma \left( \frac{1}{2}\right) }{\Gamma \left( n+\frac{3}{2}\right) }\right) ^{\frac{1}{max(n,1)}}
+S_{n}=\left( \frac{\Gamma \left( \frac{1}{2}\right) }{\Gamma \left( n+\frac{3}{2}\right) }
+\right) ^{\frac{1}{max(n,1)}}
 \end{equation}
 Which are tabulated beforehand. We find that this version of the gamma
 function is both easy to program and numerically very precise, even
@@ -709,14 +795,19 @@ matrix coefficients calculated for different cell shapes. We have
 also computed the \( {\cal M} \) tensor in one and two dimensions.
 The \( {\cal M} \) tensor in one dimension can be computed analytically\begin{eqnarray*}
 {\cal M}^{m}_{l} & = & \sum _{{\mathbf{R}'}\in V_{\infty }-V_{in}}\, M_{l}^{m}[\mathbf{R}]\\
- & = & \sum _{{\mathbf{R}'}\in V_{\infty }-V_{in}}\, \widetilde{P}_{l}^{m}\left( \cos \left( \theta _{\mathbf{R}}\right) \right) e^{im\phi _{\mathbf{R}}}\, \left\{ \frac{1}{r^{l+1}}\right\} \\
- & = & \left\{ \frac{\widetilde{P}_{l}^{m}\left( \cos \left( \theta _{0}\right) \right) e^{im\phi _{0}}}{a_{0}^{l+1}}+\frac{\widetilde{P}_{l}^{m}\left( \cos \left( \theta _{0}+\frac{\pi }{2}\right) \right) e^{im\left( \phi _{0}+\pi \right) }}{a_{0}^{l+1}}\right\} \left\{ \sum _{n=n_{0}}^{\infty }\frac{1}{n^{l+1}}\right\} 
+ & = & \sum _{{\mathbf{R}'}\in V_{\infty }-V_{in}}\, \widetilde{P}_{l}^{m}\left( \cos \left( 
+\theta _{\mathbf{R}}\right) \right) e^{im\phi _{\mathbf{R}}}\, \left\{ \frac{1}{r^{l+1}}\right\} \\
+ & = & \left\{ \frac{\widetilde{P}_{l}^{m}\left( \cos \left( \theta _{0}\right) \right) e^{im\phi _{0}}}
+{a_{0}^{l+1}}+\frac{\widetilde{P}_{l}^{m}\left( \cos \left( \theta _{0}+\frac{\pi }{2}\right) \right) 
+e^{im\left( \phi _{0}+\pi \right) }}{a_{0}^{l+1}}\right\} \left\{ \sum _{n=n_{0}}^{\infty }\frac{1}{n^{l+1}}
+\right\} 
 \end{eqnarray*}
 
 
 \begin{equation}
 \label{C9}
-=Q_{l}^{m}\left[ a_{0},\theta _{0},\phi _{0}\right] \left\{ \zeta (l+1)-\sum _{n=1}^{n_{0}-1}\frac{1}{n^{l+1}}\right\} \qquad \qquad \qquad \qquad \quad \; \; 
+=Q_{l}^{m}\left[ a_{0},\theta _{0},\phi _{0}\right] \left\{ \zeta (l+1)-\sum _{n=1}^{n_{0}-1}\frac{1}{n^{l+1}}
+\right\} \qquad \qquad \qquad \qquad \quad \; \; 
 \end{equation}
 where \( a_{0} \), \( \theta _{0} \) and \( \phi _{0} \) are the
 initial box dimension and angles which are independent of the summation.
@@ -727,13 +818,26 @@ moments via numerical integration, where we take the limit as the
 non-periodic direction goes to infinity,
 
 \begin{eqnarray*}
-{\cal M}^{m}_{l} & = & \sum _{{\mathbf{R}'}\in V_{\infty }-V_{in}}\, \left( l-m\right) !\, P_{l}^{m}\left( \cos \left( \theta _{\mathbf{R}}\right) \right) e^{im\phi _{\mathbf{R}}}\, {\cal G}_{l}\left( \beta ,\left| \mathbf{R}\right| \right) \\
- & - & \sum _{{\mathbf{R}'}\in V_{in}}\, \left( l-m\right) !\, P_{l}^{m}\left( \cos \left( \theta _{\mathbf{R}}\right) \right) e^{im\phi _{\mathbf{R}}}{\cal F}_{l}\left( \beta ,\left| \mathbf{R}\right| \right) \\
- & + & \frac{4\pi ^{\frac{3}{2}}(\frac{i}{2})^{l}}{V_{cell}\Gamma \left( l+\frac{1}{2}\right) }\sum _{\mathbf{G}\neq \left\{ \emptyset \right\} }\, \left| \mathbf{G}\right| ^{l-2}e^{-\frac{\pi ^{2}\left| \mathbf{G}\right| ^{2}}{\beta ^{2}}}\, \left( l-m\right) !\, P_{l}^{m}\left( \cos \left( \theta _{\mathbf{G}}\right) \right) e^{im\phi _{\mathbf{G}}}\\
+{\cal M}^{m}_{l} & = & \sum _{{\mathbf{R}'}\in V_{\infty }-V_{in}}\, \left( l-m\right) !\, P_{l}^{m}
+\left( \cos \left( \theta _{\mathbf{R}}\right) \right) e^{im\phi _{\mathbf{R}}}\, {\cal G}_{l}
+\left( \beta ,\left| \mathbf{R}\right| \right) \\
+ & - & \sum _{{\mathbf{R}'}\in V_{in}}\, \left( l-m\right) !\, P_{l}^{m}\left( \cos \left( 
+\theta _{\mathbf{R}}\right) \right) e^{im\phi _{\mathbf{R}}}{\cal F}_{l}\left( \beta ,\left| 
+\mathbf{R}\right| \right) \\
+ & + & \frac{4\pi ^{\frac{3}{2}}(\frac{i}{2})^{l}}{V_{cell}\Gamma \left( l+\frac{1}{2}\right) }
+\sum _{\mathbf{G}\neq \left\{ \emptyset \right\} }\, \left| \mathbf{G}\right| ^{l-2}e^{-\frac{\pi ^{2}\left|
+ \mathbf{G}\right| ^{2}}{\beta ^{2}}}\, \left( l-m\right) !\, P_{l}^{m}\left( \cos \left( \theta _{\mathbf{G}}
+\right) \right) e^{im\phi _{\mathbf{G}}}\\
  &  & \\
- & = & \sum _{{\mathbf{R}'}\in V_{\infty }-V_{in}}\, \left( l-m\right) !\, P_{l}^{m}\left( \cos \left( \theta _{\mathbf{R}}\right) \right) e^{im\phi _{\mathbf{R}}}\, {\cal G}_{l}\left( \beta ,\left| \mathbf{R}\right| \right) \\
- & - & \sum _{{\mathbf{R}'}\in V_{in}}\, \left( l-m\right) !\, P_{l}^{m}\left( \cos \left( \theta _{\mathbf{R}}\right) \right) e^{im\phi _{\mathbf{R}}}{\cal F}_{l}\left( \beta ,\left| \mathbf{R}\right| \right) \\
- & + & \frac{4\pi ^{\frac{3}{2}}(\frac{i}{2})^{l}}{A_{cell}\Gamma \left( l+\frac{1}{2}\right) }\: \sum _{\mathbf{G}\neq \left\{ \emptyset \right\} }\, \int _{-\infty }^{\infty }\: dG_{z}\: \left| \mathbf{G}\right| ^{l-2}e^{-\frac{\pi ^{2}\left| \mathbf{G}\right| ^{2}}{\beta ^{2}}}\, \left( l-m\right) !\, P_{l}^{m}\left( \cos \left( \theta _{\mathbf{G}}\right) \right) e^{im\phi _{\mathbf{G}}}
+ & = & \sum _{{\mathbf{R}'}\in V_{\infty }-V_{in}}\, \left( l-m\right) !\, P_{l}^{m}\left( \cos 
+\left( \theta _{\mathbf{R}}\right) \right) e^{im\phi _{\mathbf{R}}}\, {\cal G}_{l}\left( \beta ,\left| 
+\mathbf{R}\right| \right) \\
+ & - & \sum _{{\mathbf{R}'}\in V_{in}}\, \left( l-m\right) !\, P_{l}^{m}\left( \cos \left( \theta _{
+\mathbf{R}}\right) \right) e^{im\phi _{\mathbf{R}}}{\cal F}_{l}\left( \beta ,\left| \mathbf{R}\right| \right) \\
+ & + & \frac{4\pi ^{\frac{3}{2}}(\frac{i}{2})^{l}}{A_{cell}\Gamma \left( l+\frac{1}{2}\right) }\: 
+\sum _{\mathbf{G}\neq \left\{ \emptyset \right\} }\, \int _{-\infty }^{\infty }\: dG_{z}\: \left| \mathbf{G}
+\right| ^{l-2}e^{-\frac{\pi ^{2}\left| \mathbf{G}\right| ^{2}}{\beta ^{2}}}\, \left( l-m\right) !\, P_{l}^{m}
+\left( \cos \left( \theta _{\mathbf{G}}\right) \right) e^{im\phi _{\mathbf{G}}}
 \end{eqnarray*}
 \begin{equation}
 \label{C10}
@@ -744,10 +848,7 @@ direction. We have found that we can obtain the \( {\cal M} \) tensor
 matrix elements to 8-10 digits of accuracy with this technique.
 
 
-\section*{\center{Appendix D}}
-
-
-\subsection*{Computation of the Dipole and Quadrapole Corrections }
+\section{Computation of the Dipole and Quadrapole Corrections }\label{DipC}
 
 Following the work of Redlack and Grindley \cite{Redlack72} we show
 the corrections needed in order to obtain Ewald boundary conditions.
@@ -757,11 +858,15 @@ For three dimensions,
 
 \begin{equation}
 \label{D1}
-\Phi _{S_{\infty }}({\mathbf{x}})=\sum _{{\mathbf{R}'}\in S_{\infty }}\, \int _{V_{\infty }}\: d{\mathbf{x}'}\frac{\rho ^{loc}\left( {\mathbf{x}'+\mathbf{R}'}\right) }{\left| \mathbf{x}-\mathbf{x}'\right| }
+\Phi _{S_{\infty }}({\mathbf{x}})=\sum _{{\mathbf{R}'}\in S_{\infty }}\, \int _{V_{\infty }}\: d{\mathbf{x}'}
+\frac{\rho ^{loc}\left( {\mathbf{x}'+\mathbf{R}'}\right) }{\left| \mathbf{x}-\mathbf{x}'\right| }
 \end{equation}
 which if we write this as a multipole expansion\begin{equation}
 \label{D2}
-\Phi _{S_{\infty }}({\mathbf{x}})=\sum _{{\mathbf{R}'}\in S_{\infty }}\, \left[ \frac{{\mathbf{p}}\cdot \left( {\mathbf{x}-\mathbf{R}'}\right) }{\left| {\mathbf{x}-\mathbf{R}'}\right| ^{3}}+\frac{1}{2}\sum _{i,j}Q_{ij}\frac{\left( {\mathbf{x}-\mathbf{R}'}\right) _{i}\left( {\mathbf{x}-\mathbf{R}'}\right) _{j}}{\left| \left( {\mathbf{x}-\mathbf{R}'}\right) \right| ^{5}}+\ldots \right] 
+\Phi _{S_{\infty }}({\mathbf{x}})=\sum _{{\mathbf{R}'}\in S_{\infty }}\, \left[ \frac{{\mathbf{p}}\cdot 
+\left( {\mathbf{x}-\mathbf{R}'}\right) }{\left| {\mathbf{x}-\mathbf{R}'}\right| ^{3}}+\frac{1}{2}
+\sum _{i,j}Q_{ij}\frac{\left( {\mathbf{x}-\mathbf{R}'}\right) _{i}\left( {\mathbf{x}-\mathbf{R}'}
+\right) _{j}}{\left| \left( {\mathbf{x}-\mathbf{R}'}\right) \right| ^{5}}+\ldots \right] 
 \end{equation}
 where \( {\mathbf{p}} \) and \( Q_{ij} \) are the dipole and quadrapole
 moments of \( \rho ^{loc}\left( {\mathbf{x}}\right)  \) . Both the
@@ -769,7 +874,8 @@ dipole and the quadrapole terms contribute to the potential in the
 cell, the dipole directly and the quadrupole conditionally. Upon summation
 over the surface, the dipole and quadrupole contributions become\begin{equation}
 \label{D3}
-\Phi ^{3D}_{S_{\infty }}({\mathbf{x}})=-\frac{4\pi }{3V_{cell}}{\mathbf{p}}\cdot \left( {\mathbf{x}-\mathbf{R}'}\right) +\frac{2\pi }{3V_{cell}}\left( Q_{11}+Q_{22}+Q_{33}\right) .
+\Phi ^{3D}_{S_{\infty }}({\mathbf{x}})=-\frac{4\pi }{3V_{cell}}{\mathbf{p}}\cdot \left( {\mathbf{x}-
+\mathbf{R}'}\right) +\frac{2\pi }{3V_{cell}}\left( Q_{11}+Q_{22}+Q_{33}\right) .
 \end{equation}
 For two dimensions only the dipole contributes to the potential within
 the cell as
@@ -781,7 +887,6 @@ the cell as
 
 
 \eject
-
 
 \begin{table}
 
@@ -883,7 +988,9 @@ Crystal98&
 \vspace{0.3cm}
 \end{table}
 
-
+%
+%
+%
 
 \begin{table}
 
@@ -983,10 +1090,10 @@ Crystal98&
 \hline
 \end{tabular}\par}
 \end{table}
-
-
-
-\begin{table}
+%
+%
+%
+~\begin{table}
 
 \caption{\label{table:ComToCrystal98_3} Comparison of Carbon test systems
 to Crystal98}
@@ -1023,9 +1130,10 @@ Crystal98&
 \hline
 \end{tabular}\par}
 \end{table}
-
-
-
+%
+%
+%
+\vskip 4.0 in \eject\eject
 \begin{table}
 
 \caption{\label{table: ConvegOfNaCl} Total energy per atom for sodium chloride
