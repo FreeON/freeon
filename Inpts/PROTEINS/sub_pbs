@@ -1,0 +1,10 @@
+rm -f $1.pbs
+echo "#!/bin/tcsh "                                   >  $1.pbs
+echo "#PBS -q alpha -l pvmem=2000000k"                >> $1.pbs
+echo "#PBS -joe -N MONDO_$1"                          >> $1.pbs
+echo "rm -rf /var/tmp/$1*"                            >> $1.pbs
+echo "cd `pwd`"                                       >> $1.pbs
+echo "$MONDO_HOME/Exec/MondoSCF $1"                   >> $1.pbs
+echo "rm -rf /var/tmp/$1* "                           >> $1.pbs
+chmod u+x $1.pbs
+qsub $1.pbs
