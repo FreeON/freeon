@@ -15,6 +15,7 @@ SUBROUTINE DisOrderGrad(BS,GM,DB,IB,SB,Drv,NameBuf)
   TYPE(DBuf)               :: DB        ! ONX distribution buffers
   TYPE(IBuf)               :: IB        ! ONX 2-e eval buffers
   TYPE(DSL)                :: SB        ! ONX distribution pointers
+  TYPE(ISpc)               :: IS
   TYPE(IDrv)               :: Drv       ! VRR/contraction drivers
   TYPE(INT_VECT)           :: NameBuf   ! for parallel implementation
 !--------------------------------------------------------------------------------
@@ -27,7 +28,7 @@ SUBROUTINE DisOrderGrad(BS,GM,DB,IB,SB,Drv,NameBuf)
   REAL(DOUBLE)           :: ACx,ACy,ACz,AC2,x,y,z
   REAL(DOUBLE)           :: Zeta,Za,Zc,Cnt,rInt,XiAB
   INTEGER                :: Lng,i,j,n
-  INTEGER                :: KonAC,LDis,NLOCD2,NLOCD3,NInts,NVRR
+  INTEGER                :: KonAC,LDis,NLOCD2,NLOCD3,NInts
   INTEGER                :: iBf,I0,I1,iCP,iCL,IKType
   INTEGER                :: AtA,CFA,PFA,StartLA,StopLA,StrideA
   INTEGER                :: AtC,CFC,PFC,StartLC,StopLC,StrideC
@@ -133,6 +134,9 @@ SUBROUTINE DisOrderGrad(BS,GM,DB,IB,SB,Drv,NameBuf)
           z=-ACz
         ENDIF
 
+        LDis=MaxLA+MaxLC
+        CALL GetIntSpace(IKType,IKType,LDis,LDis,IS)
+
         I0=0
         DO PFC=1,BS%NPFnc%I(CFC,KC)
         DO PFA=1,BS%NPFnc%I(CFA,KA)
@@ -182,36 +186,36 @@ SUBROUTINE DisOrderGrad(BS,GM,DB,IB,SB,Drv,NameBuf)
 
         IF (I0>0) THEN
           KonAC=I0
-          LDis=MaxLA+MaxLC
-          NLOCD2=IDmn(LDis)
-          NLOCD3=NFinal(IType)*NFinal(KType)
-          NVRR =NLOCD2*NLOCD2
-          NInts=NLOCD3*NLOCD3
-
+          NInts=IS%L1*IS%L2*IS%L3*IS%L4
           I0=iT(MIN(IType,KType),MAX(IType,KType))
           I1=11*I0-10
           iCP=Drv%CDrv%I(I1)
           iCL=Drv%CDrv%I(iCP)
 
-          IF (KonAC*KonAC*NVRR>IB%MAXI.OR.NInts>IB%MAXI) THEN
+          IF (2*KonAC*KonAC*IS%NVRR>IB%MAXI.OR.NInts>IB%MAXI) THEN
             ErrorCode=eMAXI
             GOTO 9000
           ENDIF
 
+       write(*,*) "calling rgen1c"
+
           CALL RGen1C(2*LDis,iBf,KonAC,IB%CB%D,IB%WR,IB%WZ, &
                       IB%W1%D,DB%TBufP,DB%TBufC)
-          CALL VRRs(LDis,LDis,NVRR,Drv)
+          CALL VRRs(LDis,LDis,Drv)
 
-          CALL VRRl(KonAC*KonAC,NVRR,Drv%nr,Drv%ns,Drv%VLOC%I(Drv%is),  &
-                    Drv%VLOC%I(Drv%is+Drv%nr),                          &
-                    IB%W2%D,IB%W1%D,IB%WR%D,IB%WZ%D)
+          CALL VRRl(KonAC*KonAC,IS%NVRR,Drv%nr,Drv%ns,         &
+                    Drv%VLOC%I(Drv%is),                     &
+                    Drv%VLOC%I(Drv%is+Drv%nr),IB,           &
+                    IB%W2%D,IB%W1%D)
 
-          CALL Contract(1,KonAC,KonAC,NVRR,iCL,Drv%CDrv%I(iCP+1), &
+          CALL Contract(1,KonAC,KonAC,IS%NVRR,iCL,Drv%CDrv%I(iCP+1), &
                         IB%CB%D,IB%CB%D,IB%W1%D,IB%W2%D)
 
           IF(LDis.NE.0) THEN
-            CALL HRRKet(IB%W1%D,DB%TBufC%D(1,iBf),1,SB%SLDis%I,NLOCD2,NLOCD2,IKType)
-            CALL HRRBra(IB%W1%D,IB%W2%D,x,y,z,1,NLOCD2,NLOCD3,NLOCD3,IKType)
+            CALL HrrKet(IB%W1%D,DB%TBufC%D(1,iBf),1,SB%SLDis%I,IS%NB1,  &
+                        IS%NB2,IS%NK1,IKType)
+            CALL HrrBra(IB%W1%D,IB%W2%D,x,y,z,1,IS%NB1,IS%L1*IS%L2,     &
+                        IS%L3*IS%L4,IKType)
             rInt = DSQRT(GetAbsMax(NInts,IB%W2))
           ELSE
             rInt = DSQRT(GetAbsMax(NInts,IB%W1))
@@ -288,6 +292,7 @@ SUBROUTINE DisOrderGrad(BS,GM,DB,IB,SB,Drv,NameBuf)
           GOTO 9000
         END IF
         CALL QuickSortDis(SchT%D(1,J,I),BufT%I(1,J,I),N,-2)
+  write(*,*) "calling PutDis"
         CALL PutDis(N,iDis,iPrm,I,J,IndexC,KonAC,BufT,DB)
       END IF
     END DO

@@ -190,6 +190,15 @@ SUBROUTINE ComputeKg(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,IS,Drv,SubInd,BfnInd)
                               IB%CB%D(1,1),IB%CK%D,IB%W1%D(1),IB%W2%D(1))
                 IF (LKet>0) CALL HRRKet(IB%W1%D,DB%DisBuf%D,ISL,               &
                                         SB%SLDis%I,IS%NB1,IS%NB2,IS%NK1,TKet)
+
+
+! SUBROUTINE HrrKet(T,BD,N,SLDis,LenB,NumB,LenK,IType)
+! SUBROUTINE HRRKetGrad(W,BD,N,SLDis,LenB,IType)
+!
+! SUBROUTINE HrrBra(U,T,x,y,z,N,LenBi,LenBf,NumK,IType)
+! SUBROUTINE HRRBraGrad(W,ACx,ACy,ACz,N,NLOCB2,NLOCK2,IType)
+
+
                 IF (LBra>0) THEN
                   CALL HRRBra(IB%W1%D(1),IB%W2%D(1),ACx,ACy,ACz,ISL,           &
                               IS%NB1,IS%L1*IS%L2,IS%L3*IS%L4,TBra)

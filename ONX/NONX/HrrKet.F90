@@ -780,6 +780,7 @@ SUBROUTINE HrrKet(T,BD,N,SLDis,LenB,NumB,LenK,IType)
     T(I,   100)=TM(   100)
    ENDDO
  CASE DEFAULT
+   WRITE(*,*) "IType=",IType
    CALL Halt('Illegal IType in HrrKet')
  END SELECT
  END SUBROUTINE HrrKet

@@ -47,8 +47,8 @@ Objects2 = ONXParameters.o ONXMemory.o ContractionScaling.o        \
            VRRDriver.o DisOrderGrad.o RangeOfDensity.o VRRs.o      \
            QuickSortDis.o PutDis.o  GDLoader.o \
            GDrivers.o ComputeXForce.o ContractG.o RGen.o           \
-           HRRBraGrad.o HRRKetGrad.o GetSubBlk.o GetGradient.o     \
-           InitSubInd.o DigestGradient.o GetAdr.o
+           GetSubBlk.o GetGradient.o     \
+           InitSubInd.o DigestGradient.o GetAdr.o GetIntSpace.o
 
 ReleaseFiles=ONXParameters.x ONXMemory.x ContractionScaling.x MatFilter.x \
              InitExchangeMatrix.x Sizes.x Stats.x MemInit.x \
@@ -60,7 +60,7 @@ ReleaseFiles=ONXParameters.x ONXMemory.x ContractionScaling.x MatFilter.x \
              RGen.x Digest.x Scatter.x GetAdr.x PutSubBlk.x Fillout.x \
              ComputeKe.x ComputeKg.x GetGradient.x     \
              InitSubInd.x DigestGradient.x GetAdr.x GDLoader.x \
-             BSearch.x  HRRBraGrad.x  HRRKetGrad.x  LSearch.x \
+             BSearch.x  LSearch.x \
              ComputeXForce.x  ContractG.x DisOrderGrad.x GDrivers.x 
 #
 Libs =  $(F90_LIBRARIES) $(LAPACK) -lVRR

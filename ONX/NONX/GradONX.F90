@@ -27,6 +27,7 @@ PROGRAM GradONX
   TYPE(DBuf)          :: DB        ! distribution buffers
   TYPE(IBuf)          :: IB        ! 2-e eval buffers
   TYPE(DSL)           :: SB        ! distribution pointers
+  TYPE(ISpc)          :: IS
   TYPE(IDrv)          :: Drv       ! VRR/contraction drivers
   TYPE(INT_VECT)      :: NameBuf
   TYPE(INT_RNK2)      :: SubInd
@@ -66,15 +67,19 @@ PROGRAM GradONX
 !--------------------------------------------------------------------------------
 ! Compute and sort the distribution buffers
 !--------------------------------------------------------------------------------
+  write(*,*) "Computing the range of the density matrix"
   CALL RangeOfDensity(D,NameBuf,BfnInd,DB,BS,GM)
   DO WHILE (ErrorCode/=eAOK) 
+    write(*,*) "Initializing the memory"
     CALL MemInit(DB,IB,SB,Drv,BS,BS)
+    write(*,*) "Computing the distribution buffers"
     CALL DisOrderGrad(BS,GM,DB,IB,SB,Drv,NameBuf)
   END DO
 !--------------------------------------------------------------------------------
 ! All set to compute the exchange gradient
 !--------------------------------------------------------------------------------
-  CALL ComputeXForce(BS,GM,D,XFrc,DB,IB,SB,Drv,SubInd,BfnInd)
+  write(*,*) "Computing the exchange force"
+  CALL ComputeXForce(BS,GM,D,XFrc,DB,IB,SB,IS,Drv,SubInd,BfnInd)
 !--------------------------------------------------------------------------------
 ! Clean up some ...
 !--------------------------------------------------------------------------------

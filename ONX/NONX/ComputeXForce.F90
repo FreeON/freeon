@@ -1,4 +1,4 @@
-SUBROUTINE ComputeXForce(BS,GM,D,XFrc,DB,IB,SB,Drv,SubInd,BfnInd)
+SUBROUTINE ComputeXForce(BS,GM,D,XFrc,DB,IB,SB,IS,Drv,SubInd,BfnInd)
   USE DerivedTypes
   USE GlobalScalars
   USE PrettyPrint
@@ -14,6 +14,7 @@ SUBROUTINE ComputeXForce(BS,GM,D,XFrc,DB,IB,SB,Drv,SubInd,BfnInd)
   TYPE(DBuf)                :: DB        ! ONX distribution buffers
   TYPE(IBuf)                :: IB        ! ONX 2-e eval buffers
   TYPE(DSL)                 :: SB        ! ONX distribution pointers
+  TYPE(ISpc)                :: IS        ! Array dimms for 2-e routines
   TYPE(IDrv)                :: Drv       ! VRR/contraction drivers
   TYPE(GradD)               :: GD        ! Gradient drivers
   TYPE(INT_RNK2)            :: SubInd    ! Index -> BCSR converter
@@ -31,10 +32,10 @@ SUBROUTINE ComputeXForce(BS,GM,D,XFrc,DB,IB,SB,Drv,SubInd,BfnInd)
   INTEGER               :: AtD,KD,CFD,StartLD,StopLD,StrideD,IndexD,NBFD
   INTEGER               :: AtA,NBFA,RS
   INTEGER               :: ri,ci,iPtr
-  INTEGER               :: I,J,I0,I1,I2,ISL,NVRR,NInts
+  INTEGER               :: I,J,I0,I1,I2,ISL,NInts
   INTEGER               :: IBD,IBP,IKD,IKP
   INTEGER               :: NB1,NB2,NK1,NK2
-  INTEGER               :: NT,N1,N2,N3
+  INTEGER               :: NT,N1,N2,N3,N4
   INTEGER               :: NA,NB,NC,ND
   INTEGER               :: L1,L2,L3,L4
   INTEGER               :: BraSwitch,KetSwitch,IntSwitch
@@ -89,12 +90,16 @@ SUBROUTINE ComputeXForce(BS,GM,D,XFrc,DB,IB,SB,Drv,SubInd,BfnInd)
     I1=iT(MIN(ITypeD,ITypeB),MAX(ITypeD,ITypeB))
     I2=I0+(I1-1)*10
     Ltot=LBra+LKet
-    LtotG=LBra+LKet+2
+    LtotG=LBraG+LKetG
 
+    CALL GetIntSpace(TBra,TKet,LBraG,LKetG,IS)
 
     write(*,*) "Getting the VRR table for LBra=",LBraG," and LKet=",LKetG
 
-    CALL VRRs(LBraG,LKetG,NVRR,Drv)      ! Get the pointers to the VRR table
+    CALL VRRs(LBraG,LKetG,Drv)      ! Get the pointers to the VRR table
+
+    write(*,*) "Getting gradient drivers, TBra=",TBra," TKet=",TKet
+
     CALL GDrivers(TBra,TKet,GD)     ! Get the gradient driver files
 
 !    GD%NCON   = GD%GDrv1%I(GD%LG1-3)
@@ -201,21 +206,31 @@ SUBROUTINE ComputeXForce(BS,GM,D,XFrc,DB,IB,SB,Drv,SubInd,BfnInd)
               END DO ! J, LenKet
 
               IF (ISL>0) THEN
-                CALL RGen(ISL,LBraG+LKetG,CBra,CKet,IB%CB%D,IB%CK%D,DB%DisBuf%D(IBD), &
-                          DB%PrmBuf%D(IBP),IB%W1%D,DB,IB,SB)
 
-                CALL VRRl(ISL*CBra*CKet,NVRR,Drv%nr,Drv%ns,Drv%VLOC%I(Drv%is), &
-                         Drv%VLOC%I(Drv%is+Drv%nr),                           &
-                         IB%W2%D,IB%W1%D,IB%WR%D,IB%WZ%D)
+                CALL RGen(ISL,LtotG,CBra,CKet,IB%CB%D(1,1),IB%CK%D(1,1,1), &
+                          DB%DisBuf%D(IBD),DB%PrmBuf%D(IBP),IB%W1%D(1),    &
+                          DB,IB,SB)
 
-                CALL ContractG(ISL,CBra,CKet,NVRR,IB%CB%D,IB%CK%D,IB%W1%D,     &
+                CALL VRRl(ISL*CBra*CKet,IS%NVRR,Drv%nr,Drv%ns,                &
+                          Drv%VLOC%I(Drv%is),                              &
+                          Drv%VLOC%I(Drv%is+Drv%nr),IB,                    &
+                          IB%W2%D(1),IB%W2%D(1))
+
+                CALL ContractG(ISL,CBra,CKet,IS%NVRR,IB%CB%D,IB%CK%D,IB%W1%D, &
                                IB%W2%D,DB%PrmBuf%D(IBP),DB,SB,GD)
 
                 DO IKet=1,GD%LG2
                   NT=GD%GDrv2%I(1,IKet)
                   N1=GD%GDrv2%I(2,IKet)
+                  N2=GD%GDrv2%I(3,IKet)
                   N3=ISL*(GD%GDrv2%I(4,IKet)-1)+1
-                  CALL HRRKetGrad(IB%W1%D(N3),DB%DisBuf%D,ISL,SB%SLDis%I,N1,NT)
+                  N4=GD%GDrv2%I(4,IKet)
+                  CALL HrrKet(IB%W1%D(N3),DB%DisBuf%D,ISL,    &
+                              SB%SLDis%I,N1,N1,N2,NT)
+!
+!   CALL HRRKet(IB%W1%D,DB%DisBuf%D,ISL,SB%SLDis%I,IS%NB1,IS%NB2,IS%NK1,TKet)
+!   CALL HRRKetGrad(IB%W1%D(N3),DB%DisBuf%D,ISL,SB%SLDis%I,N1,NT)
+!
                 END DO
 
                 DO IBra=1,GD%LG3
@@ -223,10 +238,14 @@ SUBROUTINE ComputeXForce(BS,GM,D,XFrc,DB,IB,SB,Drv,SubInd,BfnInd)
                   N1=GD%GDrv3%I(2,IBra)
                   N2=GD%GDrv3%I(3,IBra)
                   N3=ISL*(GD%GDrv3%I(4,IBra)-1)+1
-                  CALL HRRBraGrad(IB%W1%D(N3),ACx,ACy,ACz,ISL,N1,N2,NT)
+                  N4=GD%GDrv3%I(4,IBra)
+                  CALL HrrBra(IB%W1%D(N3),ACx,ACy,ACz,ISL,N1,N4,N2,N3)
+!
+!   CALL HRRBraGrad(IB%W1%D(N3),ACx,ACy,ACz,ISL,N1,N2,NT)
+!
                 END DO
 
-                CALL GetGradient(ISL,GD,IB%W2%D,IB%W1%D)
+!                CALL GetGradient(ISL,GD,IB%W2%D,IB%W1%D)
 !                CALL DigestGradient(ISL,NA,NB,NC,ND,L1,L2,L3,L4,IntSwitch,  &
 !                                    AtA,AtC,AtD,NBFA,RS,SB,DB,D,SubInd,     &
 !                                    NTmp,Dcd%D,Dab%D,XFrc,IB%W2%D)
