@@ -219,7 +219,7 @@ MODULE MDIO
          (GM%PBC%TransVec(i),i=1,3),GM%PBC%CellVolume
 #else
     WRITE(UNIT=ENE_UNIT,FMT='(" 1 ",4(E14.6,2X))') &
-         0.0D0,0.0D0,0.0.0D0,0.0D0
+         0.0D0,0.0D0,0.0D0,0.0D0
 #endif
 !
     WRITE(UNIT=ENE_UNIT,FMT='(" 2 ",5(E14.6,2X))') &
