@@ -4308,6 +4308,14 @@ CONTAINS
 !
 !----------------------------------------------------------------------
 !
+   LOGICAL FUNCTION HasBendLinB(Char)
+     CHARACTER(LEN=*) :: Char
+     HasBendLinB=(Char(1:4)=='BEND'.OR. &
+                  Char(1:4)=='LINB')
+   END FUNCTION HasBendLinB
+!
+!----------------------------------------------------------------------
+!
    LOGICAL FUNCTION HasTorsOutP(Char)
      CHARACTER(LEN=*) :: Char
      HasTorsOutP=(Char(1:4)=='OUTP'.OR. &

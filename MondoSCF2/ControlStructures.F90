@@ -170,6 +170,7 @@ MODULE ControlStructures
      REAL(DOUBLE)                       :: LinB
      REAL(DOUBLE)                       :: Tors
      INTEGER                            :: MaxGeOpSteps
+     LOGICAL                            :: DoBackTr
   END TYPE GConvCrit 
   !
   TYPE GOptStat 

@@ -37,6 +37,13 @@ MODULE ParseGeomOpt
        GOpt%GDIIS%NoGDIIS=.TRUE.
      ENDIF
      !
+     ! Parse for energy-back-tracking
+     !
+     GOpt%GConvCrit%DoBackTr=.True.
+     IF(OptKeyQ(Inp,GRADIENTS,OPT_NoBackTr)) THEN
+       GOpt%GConvCrit%DoBacktr=.FALSE.
+     ENDIF
+     !
      ! Parse for projecting out rotations and translations
      ! from geometry displacements.
      !

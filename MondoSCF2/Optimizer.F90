@@ -457,6 +457,7 @@ CONTAINS
        ! Calculate energy and force for all clones at once.
        !
        CALL SCF(iBAS,iGEO,C)
+       IF(iGEO>1) CALL BackTrack(iBAS,iGEO,C)
        CALL Force(iBAS,iGEO,C%Nams,C%Opts,C%Stat,C%Geos,C%Sets,C%MPIs)
        !
        ! Loop over all clones and modify geometries.
@@ -1043,7 +1044,7 @@ CONTAINS
      CtrlStat%RMSIntDispl =RMSIntDispl
      !
      IF(CtrlConstr%NConstr/=0) THEN
-       CtrlStat%GeOpConvgd=&
+       CtrlStat%GeOpConvgd=MaxCGrad<2.D0*GConvCr%Grad.AND. &
                            MaxStreDispl<GConvCr%Stre.AND. &
                            MaxBendDispl<GConvCr%Bend.AND. &
                            MaxLinBDispl<GConvCr%LinB.AND. &
@@ -1051,7 +1052,8 @@ CONTAINS
                            MaxTorsDispl<GConvCr%Tors
      ELSE
      ! no constraints
-       CtrlStat%GeOpConvgd=RMSGrad<GConvCr%Grad.AND. &
+       CtrlStat%GeOpConvgd=MaxCGrad<2.D0*GConvCr%Grad.AND. &
+                           RMSGrad<GConvCr%Grad.AND. &
                            MaxGrad<GConvCr%Grad.AND. &
                            MaxStreDispl<GConvCr%Stre.AND. &
                            MaxBendDispl<GConvCr%Bend.AND. &
@@ -1425,6 +1427,80 @@ CONTAINS
        ENDIF
      ENDDO
    END SUBROUTINE GetCGradMax
+!
+!-------------------------------------------------------------------
+!
+   SUBROUTINE BackTrack(iBAS,iGEO,C)
+     ! Go over clones and do backtracking whenever necessary
+     TYPE(Controls)   :: C
+     INTEGER          :: iBAS,iGEO,iCLONE
+     INTEGER          :: MaxBStep,IBStep
+     CHARACTER(LEN=DCL):: chGEO
+     TYPE(CRDS)       :: GMOld
+     LOGICAL          :: DoBackTrack
+     REAL(DOUBLE)     :: EOld,ENew
+     !
+     IF(.NOT.C%GOpt%GConvCrit%DoBackTr) THEN
+       RETURN
+     ENDIF
+     MaxBStep=10
+     DO iBStep=1,MaxBStep+1
+       DoBackTrack=.FALSE.
+       HDFFileID=OpenHDF(C%Nams%HFile)
+       DO iCLONE=1,C%Geos%Clones
+         HDF_CurrentID=OpenHDFGroup(HDFFileID, &
+                       "Clone #"//TRIM(IntToChar(iCLONE)))
+         chGEO=IntToChar(iGEO-1)
+         CALL Get(GMOld,chGEO)
+         CALL CloseHDFGroup(HDF_CurrentID)
+         EOld=GMOld%ETotal
+         ENew=C%Geos%Clone(iCLONE)%ETotal
+         IF(EOld<ENew) DoBackTrack=.TRUE.
+         !
+         IF(iBStep>1.OR.DoBackTrack) THEN  
+           CALL OPENAscii(OutFile,Out)
+             WRITE(*,200) iBStep-1,EOld,ENew
+             WRITE(Out,200) iBStep-1,EOld,ENew
+           CLOSE(Out,STATUS='KEEP')
+           200 FORMAT('Backtracking step= ',I3,' Old Energy= ', &
+                       F14.8,' Backtracking Energy= ',F14.8)
+         ENDIF
+         !
+         IF(DoBackTrack) THEN  
+           ! do bisection
+           C%Geos%Clone(iCLONE)%Carts%D= &
+             (C%Geos%Clone(iCLONE)%Carts%D+GMOld%Carts%D)*Half
+           C%Geos%Clone(iCLONE)%AbCarts%D= &
+             (C%Geos%Clone(iCLONE)%AbCarts%D+GMOld%AbCarts%D)*Half
+         ENDIF
+       ENDDO
+       CALL CloseHDF(HDFFileID)
+       !
+       IF(DoBackTrack) THEN
+         IF(iBStep>MaxBStep) THEN
+           CALL OPENAscii(OutFile,Out)
+             WRITE(*,100) MaxBStep-1
+             WRITE(Out,100) MaxBStep-1
+           CLOSE(Out,STATUS='KEEP')
+           100 FORMAT('Backtracking has not converged in ', &
+                       I3,' Steps. Continue with present geometry.')
+           EXIT
+         ENDIF
+         !
+         CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
+         CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
+         CALL SCF(iBAS,iGEO,C)
+       ELSE
+         EXIT
+       ENDIF
+       !
+     ENDDO
+     ! In the present version do not do any overwriting of 
+     ! the GMOld%Displ, since it refers 
+     ! strictly to the simple relaxation step, for GDIIS.
+     !
+     CALL Delete(GMOld)
+   END SUBROUTINE BackTrack
 !
 !-------------------------------------------------------------------
 !

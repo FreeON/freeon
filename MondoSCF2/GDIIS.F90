@@ -347,19 +347,19 @@ CONTAINS
      !
      CALL New(Coeffs,GDIISMemory)
      !
-!    IF(CtrlConstr%NConstr/=0) THEN
-!      IF(Print>=DEBUG_GEOP_MIN) THEN
-!        WRITE(*,200) 
-!        WRITE(Out,200) 
-!      ENDIF
-!      CALL CalcGDCoeffs(SRDispl%D,Coeffs%D)
-!    ELSE
+     IF(CtrlConstr%NConstr/=0) THEN
+       IF(Print>=DEBUG_GEOP_MIN) THEN
+         WRITE(*,200) 
+         WRITE(Out,200) 
+       ENDIF
+       CALL CalcGDCoeffs(SRDispl%D,Coeffs%D)
+     ELSE
        IF(Print>=DEBUG_GEOP_MIN) THEN
          WRITE(*,300) 
          WRITE(Out,300) 
        ENDIF
        CALL CalcGDCoeffs(RefGrad%D,Coeffs%D)
-!    ENDIF
+     ENDIF
      200 FORMAT("Doing Geometric DIIS based on Cartesian displacements.")
      300 FORMAT("Doing Geometric DIIS based on Cartesian gradients.")
      !
