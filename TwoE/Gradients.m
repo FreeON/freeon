@@ -56,7 +56,8 @@ IntegralClass[Ell_List] := Ell[[2]]*(Ell[[2]] + 1)/2 + Ell[[1]] + 1;
 (* Minimal 
    Classes = { {0,0},{1,1}} 
  *)
-   Classes = { {0,0},{0,1},{1,1} } 
+
+   Classes = { {0,0},{1,1} } 
 
 (* Maximal 
    Classes = { {0,0},{0,1},{1,1},{2,2},{3,3}}
@@ -69,7 +70,7 @@ CType[6]  = "D";
 CType[10] = "F";
 
 LC=Length[Classes];
-MxEll = Max[Classes];
+MxEll = Max[Classes+2];
 
 Print[" LC = ",LC];
 
@@ -156,6 +157,39 @@ VRR[a_List,c_List,m_]:=Module[{p,q,PA,QC,WP,WQ,one,two,a1,a2,c1,c2,Ai1,Ci1,CiO2z
                                 ];
                             ];
 
+
+     dHRR[Silent_String,s_String,a_List,b_List,c_List,d_List]:=Module[{pa,pb,pc,pd,MaxEll,a1,b1,c1,d1,one,two,adex,cdex},
+                              pb=Position[b,Max[b]][[1, 1]];
+                              pd=Position[d,Max[d]][[1, 1]];
+                              MaxEll=Max[Join[b,d]];
+			      (* Exit condition 1 *)
+                              If[ a[[pa]] < 0 || b[[pb]] < 0 || c[[pc]] < 0 || d[[pd]] < 0 ,Return[0];]; 
+			      (* Exit condition 2 *)
+                              If[ b[[pb]]==0 && d[[pd]]==0,
+                                 adex=LMNDex[a[[1]],a[[2]],a[[3]]];
+                                 cdex=LMNDex[c[[1]],c[[2]],c[[3]]];
+                                 BarExp=ToExpression[StringJoin["I",s,ToString[adex],"Bar",ToString[cdex]]];
+                                 If[Silent=="F",Return[BarExp],Return[ff[{x,s,a,c}]]]];
+			      (* Recursion *)
+			      If[b[[pb]]==MaxEll,(* Taking down ell on b *)
+                                 If[pb==1, one = {1, 0, 0}; AB = ABx; ];
+                                 If[pb==2, one = {0, 1, 0}; AB = ABy; ];
+                                 If[pb==3, one = {0, 0, 1}; AB = ABz; ];
+                                 a1 = a + one;
+                                 b1 = b - one;                
+                                 Return[ dHRR[Silent,s,a1, b1, c, d] + AB  dHRR[Silent,s,a, b1, c, d]]
+                                ];
+			      If[d[[pd]]==MaxEll,(* Taking down ell on d *)
+                                 If[pd==1, one = {1, 0, 0}; CD = CDx; ];
+                                 If[pd==2, one = {0, 1, 0}; CD = CDy; ];
+                                 If[pd==3, one = {0, 0, 1}; CD = CDz; ];
+                                 c1=c+one;
+                                 d1=d-one;                
+                                 Return[dHRR[Silent,s,a,b,c1,d1]+CD dHRR[Silent,s,a,b,c,d1]]
+                                ];
+                            ];
+
+
 (* LOAD OPTIMIZING AND FORMATING ROUTINES FOR MMA AND SET ASSOCIATED OPTIONS *)
 
 Get[StringJoin[MondoHome,"/MMA/FixedNumberForm.m"]];
@@ -169,6 +203,11 @@ SetOptions[OpenWrite, PageWidth -> 200];
 
 SetAttributes[o,NHoldAll];
 SetAttributes[SSSS,NHoldAll];
+SetAttributes[dI,NHoldAll];
+SetAttributes[OA,NHoldAll];
+SetAttributes[OB,NHoldAll];
+SetAttributes[OC,NHoldAll];
+SetAttributes[OD,NHoldAll];
 SetAttributes[MBarN,NHoldAll];
 
 (* PUT THE TRANSFORMATIONS TO FILE *)
@@ -180,16 +219,48 @@ PunchVRRClass[FileName_,BraEll_,KetEll_]:=Module[{oList,IList,Kount,a,c},
                                                  sList={};
 						 Kount = 0;
                                                  Do[Do[
+                                                       If[lx[i]+my[i]+nz[i]+lx[k]+my[k]+nz[k]<=BraEll+KetEll+1,
                                                        Kount = Kount + 1;
                                                        a = {lx[i], my[i], nz[i]};
                                                        c = {lx[k], my[k], nz[k]};
                                                        IList=Append[IList,VRR[a,c,0]+o[Kount]];
 						       MBarString=StringJoin["I",ToString[i],"Bar",ToString[k]];
                                                        oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->MBarString];
+                                                       ];
+                                                 ,{i,1,LEnd[BraEll+1]}];
+                                                 ,{k,1,LEnd[KetEll+1]}];
+                                                 Write[FileName,FortranAssign[o,IList,AssignReplace->oList]];
+                                                 ];
+
+
+
+PunchdVRRClass[FileName_,s_String,BraEll_,KetEll_]:=Module[{oList,IList,Kount,a,c},
+						 oList={" "->""};
+						 IList={};
+                                                 sList={};
+						 Kount = 0;
+                                                 Do[Do[
+                                                       Kount = Kount + 1;
+                                                       a = {lx[i], my[i], nz[i]};
+                                                       c = {lx[k], my[k], nz[k]};
+
+						       dMBarString  =StringJoin["I",s,ToString[i],"Bar",ToString[k]];
+						       MBarUp =StringJoin["I",ToString[i],"Bar",ToString[k]];
+						       MBarDwn=StringJoin["I",ToString[i],"Bar",ToString[k]];
+
+                                                             
+
+
+                                                       IList=Append[IList,VRR[a,c,0]+o[Kount]];
+						       dMBarString=StringJoin["I",ToString[i],"Bar",ToString[k]];
+                                                       oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->dMBarString];
+
+
                                                  ,{i,1,LEnd[BraEll]}];
                                                  ,{k,1,LEnd[KetEll]}];
                                                  Write[FileName,FortranAssign[o,IList,AssignReplace->oList]];
                                                  ];
+
 
 
 PunchGammas[Subroutine_,LTot_]:=Block[{WS,FStr,Gammas},
@@ -256,17 +327,44 @@ PunchHRRClass[FileName_,ic_,jc_,kc_,lc_]:=Module[{oList,IList,Kount,a,b,c,d},
 						 Kount = 0;
                                                  Do[Do[Do[Do[
                                                  Do[Do[Do[Do[
-                                                             Kount = Kount + 1;
+
                                                              a = {lx[i], my[i], nz[i]};
                                                              b = {lx[j], my[j], nz[j]};
                                                              c = {lx[k], my[k], nz[k]};
                                                              d = {lx[l], my[l], nz[l]};
-                                                             IList=Append[IList,HRR[a,b,c,d]];
-                                                             oList=Append[oList,StringJoin["o(",ToString[Kount],")"]-> 
-                                                                                StringJoin["I((OA+",ToString[i-LBegin[il]],")*LDA",     \
-                                                                                            "+(OB+",ToString[j-LBegin[jl]],")*LDB",     \
-                                                                                            "+(OC+",ToString[k-LBegin[kl]],")*LDC",     \
-                                                                                            "+(OD+",ToString[l-LBegin[ll]],")*LDD)"]];
+
+                                                  OffSet=(OA+i-LBegin[il])*LDA+(OB+j-LBegin[jl])*LDB+(OC+k-LBegin[kl])*LDC+(OD+l-LBegin[ll])*LDD;
+                                                  Kount = Kount + 1;
+                                                  IList=Append[IList,OffSet];
+                                                  oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->"OffSet"];
+
+
+                                              Do[ 
+
+                                                  plus={0,0,0}; plus[[cart]]=+1;
+                                                  mnus={0,0,0}; mnus[[cart]]=-1;
+
+						  TmpA=dHRR["F","a",a+plus,b,c,d]- a[[cart]]  HRR[a+mnus,b,c,d];
+						  TmpB=dHRR["F","b",a,b+plus,c,d]- b[[cart]]  HRR[a,b+mnus,c,d];
+						  TmpC=dHRR["F","c",a,b,c+plus,d]- c[[cart]]  HRR[a,b,c+mnus,d];
+
+                                                  Kount = Kount + 1;
+                                                  IList=Append[IList,TmpA+o[Kount]];
+                                                  oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["dI(",ToString[0 + cart],",OffSet)"]];
+
+                                                  Kount = Kount + 1;
+                                                  IList=Append[IList,TmpB+o[Kount]];
+                                                  oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["dI(",ToString[3 + cart],",OffSet)"]];
+
+                                                  Kount = Kount + 1;
+                                                  IList=Append[IList,TmpC+o[Kount]];
+                                                  oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["dI(",ToString[6 + cart],",OffSet)"]];
+                                                  
+                                                  Kount = Kount + 1;
+                                                  IList=Append[IList,-(dI[cart,OffSet]+dI[3+cart,OffSet]+dI[6+cart,OffSet])+o[Kount]];
+                                                  oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["dI(",ToString[9 + cart],",OffSet)"]];
+
+,{cart,1,3}]; 
 
                                                 ,{i,LBegin[il],LEnd[il]}]
                                                 ,{j,LBegin[jl],LEnd[jl]}]
@@ -276,11 +374,113 @@ PunchHRRClass[FileName_,ic_,jc_,kc_,lc_]:=Module[{oList,IList,Kount,a,b,c,d},
                                                 ,{jl,jmin,jmax}]
                                                 ,{kl,kmin,kmax}]
                                                 ,{ll,lmin,lmax}];
+						 olist=Append[olist,{" "->"","u"->"(","v"->",","w"->")"}];
+                                                 olist=Flatten[olist];
                                                 Write[FileName,FortranAssign[o,IList,AssignReplace->oList]];
+						(*
+                                                 Print["IList = ",IList];
+                                                 Print["OList = ",oList];*)
+
                                                ];
 
 
-PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_]:=Block[{WS,LBra,LKet,BKType,LenBra,LenKet},
+
+HRRNeeds[ic_,jc_,kc_,lc_]:=Module[{a,b,c,d,plus,mnus,ToTNeeds},
+				 imin = Classes[[ic, 1]]; imax = Classes[[ic, 2]];
+				 jmin = Classes[[jc, 1]]; jmax = Classes[[jc, 2]];
+				 kmin = Classes[[kc, 1]]; kmax = Classes[[kc, 2]];
+				 lmin = Classes[[lc, 1]]; lmax = Classes[[lc, 2]];
+                                 TotNeeds=0;
+                                                 Do[Do[Do[Do[
+                                                 Do[Do[Do[Do[
+
+                                                             a = {lx[i], my[i], nz[i]};
+                                                             b = {lx[j], my[j], nz[j]};
+                                                             c = {lx[k], my[k], nz[k]};
+                                                             d = {lx[l], my[l], nz[l]};
+                                              Do[ 
+
+                                                  plus={0,0,0}; plus[[cart]]=+1;
+                                                  mnus={0,0,0}; mnus[[cart]]=-1;
+
+                                                  TotNeeds=TotNeeds+dHRR["T","a",a+plus,b,c,d];
+                                                  TotNeeds=TotNeeds+dHRR["T","b",a,b+plus,c,d];
+                                                  TotNeeds=TotNeeds+dHRR["T","c",a,b,c+plus,d];
+
+,{cart,1,3}]; 
+
+                                                ,{i,LBegin[il],LEnd[il]}]
+                                                ,{j,LBegin[jl],LEnd[jl]}]
+                                                ,{k,LBegin[kl],LEnd[kl]}]
+                                                ,{l,LBegin[ll],LEnd[ll]}]
+                                                ,{il,imin,imax}]
+                                                ,{jl,jmin,jmax}]
+                                                ,{kl,kmin,kmax}]
+                                                ,{ll,lmin,lmax}];
+
+                                        TotNeeds  ];
+
+
+PunchGNeeds[Need_]:=Module[{a,c,e,adex,cdex,GString},
+			       Print["Party People Pump it UP !!! "];
+			       Print["Party People Pump it UP !!! "];
+			       Posit=Position[Need,x];
+			   (*  Print[Posit]; *)
+                               NeedsList={};
+                               Do[
+                                  If[Length[Posit[[i]]]==3,NeedsList=Append[NeedsList,Need[[Posit[[i,1]],Posit[[i,2]]]]]];
+                                  If[Length[Posit[[i]]]==4,NeedsList=Append[NeedsList,Need[[Posit[[i,1]],Posit[[i,2]],Posit[[i,3]]]]]];
+                                  If[Length[Posit[[i]]]>4, Print[ Need]; Abort[];]
+                                  ,{i,Length[Posit]}];
+                               NeedsList=Union[NeedsList];
+                               Do[
+                                  e=NeedsList[[iN,2]];
+                                  a=NeedsList[[iN,3]];
+                                  c=NeedsList[[iN,4]];
+                                  If[e=="a",exponent="Alpha"];
+                                  If[e=="b",exponent="Beta"];
+                                  If[e=="c",exponent="Gamma"];
+                                  adex=ToString[LMNDex[a[[1]],a[[2]],a[[3]]]];                                  
+                                  cdex=ToString[LMNDex[c[[1]],c[[2]],c[[3]]]];                                                                
+				  GString=StringJoin["         I",e,adex,"Bar",cdex,"=I",e,adex,"Bar",cdex,"+",exponent,"*I",adex,"Bar",cdex];
+                                   WS[GString];
+				  ,{iN,Length[NeedsList]}]
+			       ];
+
+
+ZeroNeeds[Bra_,LKet_,Need_]:=Module[{a,c,e,adex,cdex,GString},
+           Do[Do[
+                 If[lx[i]+my[i]+nz[i]+lx[k]+my[k]+nz[k]<=BraEll+KetEll+1,
+                    WS[StringJoin["I",ToString[i],"Bar",ToString[k],"=0.0d0"]]];
+            ,{i,1,LEnd[LBra+1]}],{k,1,LEnd[LKet+1]}];
+
+			       Posit=Position[Need,x];
+			   (*  Print[Posit]; *)
+                               NeedsList={};
+                               Do[
+                                  If[Length[Posit[[i]]]==3,
+                                     NeedsList=Append[NeedsList,Need[[Posit[[i,1]],Posit[[i,2]]]]];
+					    ,
+                                     NeedsList=Append[NeedsList,Need[[Posit[[i,1]],Posit[[i,2]],Posit[[i,3]]]]]];
+                                  ,{i,Length[Posit]}];
+                               NeedsList=Union[NeedsList];
+                               Do[
+                                  e=NeedsList[[iN,2]];
+                                  a=NeedsList[[iN,3]];
+                                  c=NeedsList[[iN,4]];
+                                  If[e=="a",exponent="Alpha"];
+                                  If[e=="b",exponent="Beta"];
+                                  If[e=="c",exponent="Gamma"];
+                                  adex=ToString[LMNDex[a[[1]],a[[2]],a[[3]]]];                                  
+                                  cdex=ToString[LMNDex[c[[1]],c[[2]],c[[3]]]];                                                                
+				  GString=StringJoin["I",e,adex,"Bar",cdex,"=0D0"];
+                                  WS[GString];
+				  ,{iN,Length[NeedsList]}]
+			       ];
+
+
+
+PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_,Needs_]:=Block[{WS,LBra,LKet,BKType,LenBra,LenKet},
            LBra=IMax+JMax;
            LKet=KMax+LMax;
 	   BKType=100*LBra+LKet;					   
@@ -288,14 +488,15 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_]:=Block[{WS,LBra,LKet,BKTyp
 (*
 
  *)
-           WriteString[Subroutine,StringJoin["   SUBROUTINE Int",ToString[IJKL],"(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo,I, & \n", \
-                                             "                              OA,LDA,OB,LDB,OC,LDC,OD,LDD) \n"]];
+           WriteString[Subroutine,StringJoin["   SUBROUTINE dInt",ToString[IJKL],"(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, & \n", \
+                                             "                              OA,LDA,OB,LDB,OC,LDC,OD,LDD,PBC,I) \n"]];
 
 	   WS[String_]:=WriteString[Subroutine,"      ",String,"\n"];
 
 	   WS["USE DerivedTypes"];
 	   WS["USE GlobalScalars"];
-	   WS["USE ONX2DataType"];
+           (*WS["USE ONX2DataType"];*)
+           WS["USE ShellPairStruct"];
 	   If[LBra+LKet==1,
               WS["USE GammaF0"];
               WS["USE GammaF1"];,
@@ -305,21 +506,22 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_]:=Block[{WS,LBra,LKet,BKTyp
            WS["INTEGER        :: LBra,LKet"];
            WS["REAL(DOUBLE)   :: PrmBufB(5,LBra),PrmBufK(5,LKet)"];
 	   WS["TYPE(SmallAtomInfo) :: ACInfo,BDInfo"];
+           WS["TYPE(PBCInfo) :: PBC"];
 	   LenBra=LEnd[LBra];
            LenKet=LEnd[LKet];
 
            WS[StringJoin["REAL(DOUBLE) :: I(*)"]];
 
            WS["REAL(DOUBLE)  :: Zeta,Eta,r1xZpE,HfxZpE,r1x2E,r1x2Z,ExZpE,ZxZpE,Omega,Up,Uq,Upq"];
-           WS["REAL(DOUBLE)  :: Ax,Ay,Az,Bx,By,Bz,Cx,Cy,Cz,Dx,Dy,Dz,Qx,Qy,Qz,Px,Py,Pz,Wx,Wy,Wz"];
+           WS["REAL(DOUBLE)  :: Ax,Ay,Az,Bx,By,Bz,Cx,Cy,Cz,Dx,Dy,Dz,Qx,Qy,Qz,Px,Py,Pz"];
            WS["REAL(DOUBLE)  :: QCx,QCy,QCz,PAx,PAy,PAz,PQx,PQy,PQz,WPx,WPy,WPz,WQx,WQy,WQz   "];
            WS["REAL(DOUBLE)  :: T,ET,TwoT,InvT,SqInvT,ABx,ABy,ABz,CDx,CDy,CDz"];
 
            WS["INTEGER       :: OA,LDA,OB,LDB,OC,LDC,OD,LDD,J,K,L"];
+           WS["REAL(DOUBLE)  :: FPQx,FPQy,FPQz"];
 
-           Do[Do[
-                 WS[StringJoin["I",ToString[i],"Bar",ToString[k],"=0.0d0"]];
-            ,{i,1,LEnd[LBra]}],{k,1,LEnd[LKet]}];
+
+           ZeroNeeds[LBra,LKet,Needs];  
 
   WS["Ax=ACInfo%Atm1X"];
   WS["Ay=ACInfo%Atm1Y"];
@@ -410,29 +612,59 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_]:=Block[{WS,LBra,LKet,BKTyp
            WS["      ZxZpE=Zeta*r1xZpE"];
            WS["      Omega=Eta*Zeta*r1xZpE"];
 
-           WS["      Wx=(Zeta*Px+Eta*Qx)*r1xZpE"];
-           WS["      Wy=(Zeta*Py+Eta*Qy)*r1xZpE"];
-           WS["      Wz=(Zeta*Pz+Eta*Qz)*r1xZpE"];
+           (*WS["      Wx=(Zeta*Px+Eta*Qx)*r1xZpE"];*)
+           (*WS["      Wy=(Zeta*Py+Eta*Qy)*r1xZpE"];*)
+           (*WS["      Wz=(Zeta*Pz+Eta*Qz)*r1xZpE"];*)
 
            WS["      PAx=Px-Ax"];
            WS["      PAy=Py-Ay"];
            WS["      PAz=Pz-Az"];
 
-
-
            WS["      PQx=Px-Qx"];
            WS["      PQy=Py-Qy"];
            WS["      PQz=Pz-Qz"];
-           WS["      WPx=Wx-Px"];
-           WS["      WPy=Wy-Py"];
-           WS["      WPz=Wz-Pz"];
-           WS["      WQx=Wx-Qx"];
-           WS["      WQy=Wy-Qy"];
-           WS["      WQz=Wz-Qz"];
+
+           (* Should improve this part, scalar replacement... *)
+           (*FPQx = PQx*PBC%InvBoxSh%D(1,1)+PQy*PBC%InvBoxSh%D(1,2)+PQz*PBC%InvBoxSh%D(1,3)
+           FPQy = PQy*PBC%InvBoxSh%D(2,2)+PQz*PBC%InvBoxSh%D(2,3)
+           FPQz = PQz*PBC%InvBoxSh%D(3,3)
+           IF(PBC%AutoW%I(1)==1) FPQx = FPQx-ANINT(FPQx)
+           IF(PBC%AutoW%I(2)==1) FPQy = FPQy-ANINT(FPQy)
+           IF(PBC%AutoW%I(3)==1) FPQz = FPQz-ANINT(FPQz)
+           PQx  = FPQx*PBC%BoxShape%D(1,1)+FPQy*PBC%BoxShape%D(1,2)+FPQz*PBC%BoxShape%D(1,3)
+           PQy  = FPQy*PBC%BoxShape%D(2,2)+FPQz*PBC%BoxShape%D(2,3)
+           PQz  = FPQz*PBC%BoxShape%D(3,3)*)
+
+           WS["! Need to be improve..."];
+           WS["      FPQx = PQx*PBC%InvBoxSh%D(1,1)+PQy*PBC%InvBoxSh%D(1,2)+PQz*PBC%InvBoxSh%D(1,3)"];
+           WS["      FPQy = PQy*PBC%InvBoxSh%D(2,2)+PQz*PBC%InvBoxSh%D(2,3)"];
+           WS["      FPQz = PQz*PBC%InvBoxSh%D(3,3)"];
+           WS["      IF(PBC%AutoW%I(1)==1) FPQx = FPQx-ANINT(ANINT(FPQx*1d9)*1d-9)"];
+           WS["      IF(PBC%AutoW%I(2)==1) FPQy = FPQy-ANINT(ANINT(FPQy*1d9)*1d-9)"];
+           WS["      IF(PBC%AutoW%I(3)==1) FPQz = FPQz-ANINT(ANINT(FPQz*1d9)*1d-9)"];
+           WS["      PQx  = FPQx*PBC%BoxShape%D(1,1)+FPQy*PBC%BoxShape%D(1,2)+FPQz*PBC%BoxShape%D(1,3)"];
+           WS["      PQy  = FPQy*PBC%BoxShape%D(2,2)+FPQz*PBC%BoxShape%D(2,3)"];
+           WS["      PQz  = FPQz*PBC%BoxShape%D(3,3)"];
+           WS["!"];
+
+
+           (*WS["      WPx=Wx-Px"];*)
+           (*WS["      WPy=Wy-Py"];*)
+           (*WS["      WPz=Wz-Pz"];*)
+           (*WS["      WQx=Wx-Qx"];*)
+           (*WS["      WQy=Wy-Qy"];*)
+           (*WS["      WQz=Wz-Qz"];*)
+
+           WS["      WPx = -Eta*PQx*r1xZpE"];
+           WS["      WPy = -Eta*PQy*r1xZpE"];
+           WS["      WPz = -Eta*PQz*r1xZpE"];
+           WS["      WQx = Zeta*PQx*r1xZpE"];
+           WS["      WQy = Zeta*PQy*r1xZpE"];
+           WS["      WQz = Zeta*PQz*r1xZpE"];
 
            WS["      T=Omega*(PQx*PQx+PQy*PQy+PQz*PQz)"];
 
-           PunchGammas[Subroutine,LBra+LKet];
+           PunchGammas[Subroutine,LBra+LKet+1];
 ];
 PunchVRRBack[Subroutine_,BKType_]:=Block[{WS},
       WS[String_]:=WriteString[Subroutine,"      ",String,"\n"];
@@ -441,8 +673,8 @@ PunchVRRBack[Subroutine_,BKType_]:=Block[{WS},
 ];
 
 
-MakeList="TwoEObjs= \\ \n";
-RelsList="TwoERels= \\ \n";
+MakeList="TwoEObjs= ";
+RelsList="TwoERels= ";
 
 Do[Do[Do[Do[
 
@@ -465,14 +697,23 @@ Do[Do[Do[Do[
 	    kmin = Classes[[kc, 1]]; kmax = Classes[[kc, 2]];
 	    lmin = Classes[[lc, 1]]; lmax = Classes[[lc, 2]];
 
-            ijklType=1000000*IntegralClass[Classes[[ic]]] \
+(*            ijklType=1000000*IntegralClass[Classes[[ic]]] \
                       +10000*IntegralClass[Classes[[jc]]] \
                         +100*IntegralClass[Classes[[kc]]] \
+	                    +IntegralClass[Classes[[lc]]];*)
+
+
+
+            ijklType=1000*IntegralClass[Classes[[ic]]] \
+                      +100*IntegralClass[Classes[[jc]]] \
+                        +10*IntegralClass[Classes[[kc]]] \
 	                    +IntegralClass[Classes[[lc]]];
+
+
 
 Print["ijklType=",ijklType," i=",IntegralClass[Classes[[ic]]]," j=",IntegralClass[Classes[[jc]]]," k=",IntegralClass[Classes[[kc]]]," l=",IntegralClass[Classes[[lc]]]];
 
-	   Subroutine=StringJoin["Int",ToString[ijklType],".F90"];
+	   Subroutine=StringJoin["dInt",ToString[ijklType],".F90"];
 
 	   OpenWrite[Subroutine];
 	   Print[" Openned ",Subroutine];
@@ -481,21 +722,25 @@ Print["ijklType=",ijklType," i=",IntegralClass[Classes[[ic]]]," j=",IntegralClas
 
 	   WriteString[Subroutine,CommentLine]; 
 
-	   MakeList=StringJoin[MakeList,StringJoin["Int",ToString[ijklType],".o \\ \n"]];
-           RelsList=StringJoin[RelsList,StringJoin["Int",ToString[ijklType],".x \\ \n"]]; 
+	   MakeList=StringJoin[MakeList,StringJoin[" \\ \n Int",ToString[ijklType],".o"]];
+           RelsList=StringJoin[RelsList,StringJoin[" \\ \n Int",ToString[ijklType],".x"]]; 
 
            BraEll=imax+jmax;
            KetEll=kmax+lmax;
 
-           PunchFront[Subroutine,imax,jmax,kmax,lmax,ijklType]; 
+           GNeeds=Expand[HRRNeeds[ic,jc,kc,lc]];
 
-           SetOptions[FortranAssign,AssignOptimize->True,AssignMaxSize->200, \
+           PunchFront[Subroutine,imax,jmax,kmax,lmax,ijklType,GNeeds]; 
+
+           SetOptions[FortranAssign,AssignOptimize->True,AssignMaxSize->300, \
            AssignBreak->{132," & \n          "},AssignIndent->"            ",\
            AssignTemporary->{W,Sequence}];
 
-
+     
            PunchVRRClass[Subroutine,BraEll,KetEll];
 
+           PunchGNeeds[GNeeds]; 
+ 
            PunchVRRBack[Subroutine,BKType];
 
 
@@ -505,7 +750,6 @@ Print["ijklType=",ijklType," i=",IntegralClass[Classes[[ic]]]," j=",IntegralClas
 
            WS["   ! HRR "];
            PunchHRRClass[Subroutine,ic,jc,kc,lc]; 
-
 
            WS[StringJoin["END SUBROUTINE Int",ToString[ijklType]]];
 
@@ -520,12 +764,41 @@ Print["ijklType=",ijklType," i=",IntegralClass[Classes[[ic]]]," j=",IntegralClas
 ,{lc,1,LC}];
 
 
+MakeList=StringJoin[MakeList," \n"];
+RelsList=StringJoin[RelsList," \n"]; 
+
+(**************** Print out the Makefile ************************)
+
+Makefile="Makefile1"
+
+OpenWrite[Makefile];
+
+WriteString[Makefile,"include $(MONDO_COMPILER)\n"];
+WriteString[Makefile,"include $(MONDO_HOME)/Includes/Suffixes\n"];
+WriteString[Makefile,"include $(MONDO_HOME)/Includes/RemoveAll\n"];
+WriteString[Makefile,"#\n"];
+WriteString[Makefile,"CPPMISC =\n"];
+WriteString[Makefile,"#\n"];
+WriteString[Makefile,"EXTRA_INCLUDES=\n"];
+WriteString[Makefile,"#\n"];
+WriteString[Makefile,"SPObObjs=ShellPairStruct.o\n"];
+WriteString[Makefile,"#\n"];
 Print[MakeList];
-
 Print[RelsList];
+WriteString[Makefile,MakeList];
+WriteString[Makefile,"#\n"];
+WriteString[Makefile,RelsList];
+WriteString[Makefile,"#\n"];
+WriteString[Makefile,"all:    TwoE\n"];
+WriteString[Makefile,"#\n"];
+WriteString[Makefile,"clean:  CTwoE\n"];
+WriteString[Makefile,"#\n"];
+WriteString[Makefile,"purge:clean \n","rm -f $(MONDO_LIB)/libTwoE.a\n","rm -f $(REMOVESRCE)\n"];
+WriteString[Makefile,"#\n"];
+WriteString[Makefile,"TwoE:$(SPObObjs) $(TwoEObjs)\n","$(AR) $(ARFLAGS) $(MONDO_LIB)/libTwoE.a $(?:.F90=.o)\n","$(RANLIB) $(MONDO_LIB)/libTwoE.a\n"];
+WriteString[Makefile,"#\n"];
+WriteString[Makefile,"CTwoE:\n","rm -f $(REMOVEMISC) $(REMOVEMODS)\n","rm -f \#*\n","rm -f *~\n","ln -s /dev/null core\n","ls -l\n"];
 
-
-
-
+Close[Makefile];
 
 
