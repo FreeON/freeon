@@ -1,3 +1,66 @@
+2003-08-01 15:15  mchalla
+
+	* Validate/Al2Cl2.inp: This validation file demonstrates that ECPs
+	with with d functions work.
+
+2003-08-01 15:14  mchalla
+
+	* BasisSets/User1.bas: User1.bas file has CEP-31G* basis set (SBKJC
+	with polarization).  Used by Validation/Na2Cl2.inp.
+
+2003-08-01 15:13  mchalla
+
+	* OneE/: MakeU.F90, UBlok.F90: Removed some printing.
+
+2003-08-01 13:46  ckgan
+
+	* Docs/PETN_paper/petn.tex: First submission to PRB.
+
+2003-07-31 21:57  nemeth
+
+	* Includes/CompilerSpecifics.AMDLinux.PG: A flag has been left out
+	from the gigabit MPI flags.
+
+2003-07-31 19:08  ckgan
+
+	* Docs/PETN_paper/petn.tex: [no log message]
+
+2003-07-31 16:39  nemeth
+
+	* Includes/CompilerSpecifics.AMDLinux.PG: Some modification to
+	compile the parallel code for gigabit.
+
+2003-07-31 15:57  mchalla
+
+	* OneE/MMA/: Omega2.Inc, Omega2Gen.m, PseudopotentialTypeOne.nb,
+	QQuad.Inc, QQuad.m: New code for variable bound Gaussian quadrature
+	grids used for ECP radial integration
+
+2003-07-31 15:56  mchalla
+
+	* OneE/: MakeU.F90, Makefile, UBlok.F90: ECPs seem to work now!!
+
+2003-07-31 13:47  tymczak
+
+	* QCTC/JForce.F90: Fixed the CheckSums for the JForce
+
+2003-07-31 13:45  tymczak
+
+	* OneE/SForce.F90: Fixed a Bug in SForce
+
+2003-07-30 22:43  ckgan
+
+	* Docs/: Bib/mondo.bib, PETN_paper/petn.tex: [no log message]
+
+2003-07-30 18:20  nemeth
+
+	* MondoMods/GlobalScalars.F90: The Slater radii of oxigen and
+	hydrogen have been increased.
+
+2003-07-30 11:40  mchalla
+
+	* ChangeLog: [no log message]
+
 2003-07-29 16:34  nemeth
 
 	* MondoSCF2/: Hessian.F90, InCoords.F90: Changes due to the change
