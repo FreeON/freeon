@@ -33,9 +33,9 @@ PROGRAM CPSCFSts
   !-------------------------------------------------------------------
   TYPE(ARGMT)                      :: Args
 #ifdef PARALLEL
-  TYPE(DBCSR)                      :: PPrm,T,P,Tmp1,Tmp2
+  TYPE(DBCSR)                      :: PPrm,FPrm,T,P,S,Tmp1,Tmp2
 #else
-  TYPE(BCSR )                      :: PPrm,T,P,Tmp1,Tmp2
+  TYPE(BCSR )                      :: PPrm,FPrm,T,P,S,Tmp1,Tmp2
 #endif
   !-------------------------------------------------------------------
   REAL(DOUBLE)                     :: DPrimMax,DIISErr,Prop,TmpP
@@ -82,9 +82,11 @@ PROGRAM CPSCFSts
   !
   CALL New(T   )
   CALL New(P   )
+  CALL New(S   )
   CALL New(Tmp1)
   CALL New(Tmp2)
   CALL New(PPrm)
+  CALL New(FPrm)
   !
   !-------------------------------------------------------------------
   ! Get the density matrices.
@@ -97,16 +99,38 @@ PROGRAM CPSCFSts
      CALL Get(PPrm,TrixFile('DPrime'//TRIM(Args%C%C(3)),Args,1))
   CASE('StartResponse','CPSCFSolving')
      CALL Get(PPrm,TrixFile('DPrime'//TRIM(Args%C%C(3)),Args,1))
+     CALL Get(FPrm,TrixFile('FPrime'//TRIM(Args%C%C(3)),Args,0))
   CASE DEFAULT; CALL Halt('Do not know this argument <'//TRIM(SCFActn)//'>.')
   END SELECT
   !CALL Print_BCSR(PPrm,'PPrm',Unit_O=6)
   !
   ! Get groud state density matrix.
   CALL Get(P,TrixFile('D',Args,LastSCFCycle-Args%I%I(1)))
-  !     
+  !
+  ! Get overlap matrix.
+  CALL Get(S,TrixFile('S',Args))
+  !
   !-------------------------------------------------------------------
   ! Compute expectation values.
   !-------------------------------------------------------------------
+  !
+  !>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+  ! 2n+1 rule 2n+1 rule 2n+1 rule 2n+1 rule 
+  IF(RespOrder==1) THEN
+     CALL New(Tmp3)
+     CALL Multiply(PPrm,S,Tmp1)
+     CALL Multiply(Tmp1,P,Tmp2)
+     CALL Multiply(P,S,Tmp1)
+     CALL Multiply(Tmp1,PPrm,Tmp3)
+     CALL Multiply(Tmp3,-One)
+     CALL Add(Tmp2,Tmp3,Tmp1)
+     CALL Multiply(Tmp1,S,Tmp2)
+     CALL Multiply(Tmp2,PPrm,Tmp3)
+     CALL Multiply(Tmp3,FPrm,Tmp1)
+     write(*,*) '2n+1=',-12d0*Trace(Tmp1)
+     CALL Delete(Tmp3)
+  ENDIF
+  !<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
   !
   IF(CPSCFCycl.LE.0) THEN
      COrig(:)=Zero! must be changed.
@@ -148,18 +172,6 @@ PROGRAM CPSCFSts
      CASE(3); Tensor(iXYZ)=-12.0d0*TmpP
      CASE DEFAULT; CALL Halt('Response order unknown! RespOrder='//TRIM(IntToChar(RespOrder)))
      END SELECT
-     !
-     !>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-!!$     CALL New(Tmp3)
-!!$     CALL Multiply(PPrm,P,Tmp1)
-!!$     CALL Multiply(P,PPrm,Tmp2)
-!!$     CALL Multiply(Tmp2,-One)
-!!$     CALL Add(Tmp1,Tmp2,Tmp3)
-!!$     CALL Multiply(Tmp3,PPrm,Tmp1)
-!!$     CALL Multiply(Tmp1,T,Tmp2)
-!!$     write(*,*) '2n+1=',Trace(Tmp2)
-!!$     CALL Delete(Tmp3)
-     !<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
      !
      IF('X'.EQ.TRIM(Args%C%C(5))) Prop=Tensor(1)
      IF('Y'.EQ.TRIM(Args%C%C(5))) Prop=Tensor(2)
@@ -215,8 +227,11 @@ PROGRAM CPSCFSts
   !
   ! Delete some arrays.
   CALL Delete(P   )
+  CALL Delete(T   )
+  CALL Delete(S   )
   CALL Delete(GM  )
   CALL Delete(PPrm)
+  CALL Delete(FPrm)
   CALL Delete(Tmp1)
   CALL Delete(Tmp2)
   !
