@@ -94,7 +94,7 @@ CONTAINS
              CALL NEBInit(G)
           ENDIF
        ELSEIF(O%Grad==GRAD_DO_DYNAMICS.AND.D%MDAlgorithm==MD_PARALLEL_REP)THEN
-#ifdef !defined(PARALLEL)
+#if !defined(PARALLEL)
           CALL MondoHalt(PRSE_ERROR,'Compile with -DPARALLEL to activate replica exchange.')
 #endif
           ALLOCATE(G%Clone(1:G%Clones))
