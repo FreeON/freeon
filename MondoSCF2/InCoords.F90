@@ -1731,10 +1731,10 @@ CONTAINS
        RMSD=1.D+9
        !
        DO IStep=1,GBackTrf%MaxIt_CooTrf
-         IF(PRESENT(iGEO_O)) THEN
-           CALL PrtBackTrf(AtNum,ActCarts%D,PBCDim,PWDPath, &
-                           IRep,IStep,iGEO_O)
-         ENDIF
+        !IF(PRESENT(iGEO_O)) THEN
+        !  CALL PrtBackTrf(AtNum,ActCarts%D,PBCDim,PWDPath, &
+        !                  IRep,IStep,iGEO_O)
+        !ENDIF
          !
          ! Get B and refresh values of internal coords
          !
@@ -5796,9 +5796,6 @@ return
                                LonelyAtom=HasLonelyAtm(TOPS%Cov12,JJ1,JJ2,LAtm)
                                FoundHBond=HasHBond(TOPS%Cov12,AtNum, &
                                             NJJ1,NJJ2,JJ1,JJ2,HAtm)
-if(ieq(jj1)==4.and.ieq(jj2)==8.or.ieq(jj1)==8.and.ieq(jj2)==4) then
-if(FoundHBond) write(*,*) 'foundh= ',ieq(jj1),ieq(jj2),jj1,jj2
-endif
                                CALL BondExcl(JJ1,JJ2,NJJ1,NJJ2,TOPS, &
                                              FoundHBond,FoundMetLig,&
                                              LonelyAtom,DoExclude)
