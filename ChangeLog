@@ -1,3 +1,24 @@
+2001-12-10 11:53  mchalla
+
+	* Validate/Lizard.inp: [no log message]
+
+2001-12-10 11:50  mchalla
+
+	* HiCu/CubeTree.F90, HiCu/HiCu.F90, HiCu/KxcGen.F90,
+	HiCu/XCForce.F90, HiCu/dXCBlok.F90, MondoMods/AtomPairs.F90,
+	MondoMods/DerivedTypes.F90, MondoMods/InOut.F90,
+	MondoMods/Macros.F90, MondoMods/PBC.F90,
+	MondoMods/Thresholding.F90, OneE/BlokTrPdT.F90, OneE/BlokTrWdS.F90,
+	OneE/MakeRho.F90, OneE/SBlok.F90, OneE/TBlok.F90,
+	ONX/NONX/DisOrder.F90, ONX/NONX/DisOrderGrad.F90,
+	MondoSCF/ParseInput.F90, SCFeqs/SDMM.F90, QCTC/BlokTrPdJ.F90,
+	QCTC/JGen.F90: Changed back to pre 2001-11-26 to eliminate periodic
+	instabilities and feature bloat.
+
+2001-12-07 12:17  mchalla
+
+	* ChangeLog: [no log message]
+
 2001-12-05 17:08  tymczak
 
 	* MondoMods/Thresholding.F90: Fixed an Allocate Bug
