@@ -86,7 +86,6 @@ CONTAINS
   END FUNCTION CountRhoLeafNode
   !===============================================================================
   SUBROUTINE GetBBox()
-    LOGICAL::Exist
     INTEGER::Power2(0:31),SmallN,PIndex,CIndex,Stage,DirInt,I,J,Ind,LineLocExist
     REAL(DOUBLE)::x2,LinDim
     TYPE(INT_VECT) :: ETDirArr
@@ -98,11 +97,9 @@ CONTAINS
     CALL New(RCoor,(/3,NVol/))
 
     CALL Get(LineLocExist,'LineLocExist')
-    IF(LineLocExist /= 0) THEN
-      Exist = .TRUE.
-    ENDIF
-
-    IF(Exist) THEN
+    IF(LineLocExist < 0) THEN 
+      STOP 'ERR: LineLocExist must be non-negative!'
+    ELSEIF(LineLocExist > 0) THEN
        CALL New(ETDirArr,NPrc-1)
        CALL New(ETRootArr,NPrc-1)
        CALL Get(ETDirArr,'ETDirArr')
