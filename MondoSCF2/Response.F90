@@ -1,4 +1,17 @@
 MODULE Response
+!H=================================================================================
+!H MODULE Response
+!H
+!H  OPTIONS:
+!H  DEBUGING: 
+!H  INFO    : 
+!H
+!H Comment:
+!H
+!H Ref:
+!H
+!H---------------------------------------------------------------------------------
+  !
   USE Parse
   USE InOut
   USE LinAlg 
@@ -14,12 +27,23 @@ MODULE Response
   USE NEB
   USE SCFs
   USE SetXYZ 
-  USE MLP
+  USE MLP !ONLY: MLPDriver
+  !
   IMPLICIT NONE 
+  PRIVATE
+  !
+!--------------------------------------------------------------------------------- 
+! PUBLIC DECLARATIONS
+!--------------------------------------------------------------------------------- 
+  PUBLIC  :: CPSCF
+  !
+!--------------------------------------------------------------------------------- 
+! PRIVATE DECLARATIONS
+!--------------------------------------------------------------------------------- 
+  PRIVATE :: Save_LastSCFCycleNbr
+  !
 CONTAINS
-!===============================================================================
-!
-!===============================================================================
+  !
   SUBROUTINE CPSCF(C)
 !H---------------------------------------------------------------------------------
 !H SUBROUTINE CPSCF(C)
@@ -39,8 +63,6 @@ CONTAINS
     ! Check if we need to compute a Response.
     IF(.NOT.C%POpt%Resp%StcAlpha) RETURN
     !
-    !write(*,*) 'CPSCF: Start'
-    !
     ! Save last SCF cycle number.
     CALL Save_LastSCFCycleNbr(C)
     !
@@ -52,7 +74,10 @@ CONTAINS
     C%Stat%Action%C(3)='All'
     CALL Invoke('MakeM',C%Nams,C%Stat,C%MPIs)
     !
-    !
+    ! Compute Multipole Moments.
+    !CALL MLPDriver()
+    !    
+    ! Let's compute the response.
     DO iXYZ=1,3
        !
        ! Do we need to compute the polarizability along this axis?
@@ -90,7 +115,6 @@ CONTAINS
     !
     CALL Delete(C%Stat%Action)
     !
-    !write(*,*) 'CPSCF: End'
   END SUBROUTINE CPSCF
   !
   !
