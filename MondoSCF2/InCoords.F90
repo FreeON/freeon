@@ -586,26 +586,31 @@ CONTAINS
      DoExclude=.FALSE.
      IF(ANY(TOPS%CovExcl%I(JJ1,2:1+IDimExcl)==JJ2) &
        .AND.IDimExcl/=0) THEN
-       IF(.NOT.(FoundHBond.OR.FoundMetLig)) THEN
-         DoExclude=.TRUE.
-         RETURN
-       ELSE
-         IDim12=TOPS%Cov12%I(JJ1,1)
-         IDim13=TOPS%Cov13%I(JJ1,1)
-         IF(ANY(TOPS%Cov12%I(JJ1,2:1+IDim12)==JJ2) &
-           .OR.ANY(TOPS%Cov13%I(JJ1,2:1+IDim13)==JJ2)) THEN
-           DoExclude=.TRUE.
-           RETURN
-         ENDIF
-         IDim14=TOPS%Cov14%I(JJ1,1)
-         IF(.NOT. &
-           (ANY(TOPS%Cov14%I(JJ1,2:1+IDim14)==JJ2) &
-           .AND.IDim14/=0)) THEN
-           DoExclude=.TRUE.
-           RETURN
-         ENDIF
-       ENDIF
+       DoExclude=.TRUE.
+       RETURN
      ENDIF
+   ! IF(ANY(TOPS%CovExcl%I(JJ1,2:1+IDimExcl)==JJ2) &
+   !   .AND.IDimExcl/=0) THEN
+   !   IF(.NOT.(FoundHBond.OR.FoundMetLig)) THEN
+   !     DoExclude=.TRUE.
+   !     RETURN
+   !   ELSE
+   !     IDim12=TOPS%Cov12%I(JJ1,1)
+   !     IDim13=TOPS%Cov13%I(JJ1,1)
+   !     IF(ANY(TOPS%Cov12%I(JJ1,2:1+IDim12)==JJ2) &
+   !       .OR.ANY(TOPS%Cov13%I(JJ1,2:1+IDim13)==JJ2)) THEN
+   !       DoExclude=.TRUE.
+   !       RETURN
+   !     ENDIF
+   !     IDim14=TOPS%Cov14%I(JJ1,1)
+   !     IF(.NOT. &
+   !       (ANY(TOPS%Cov14%I(JJ1,2:1+IDim14)==JJ2) &
+   !       .AND.IDim14/=0)) THEN
+   !       DoExclude=.TRUE.
+   !       RETURN
+   !     ENDIF
+   !   ENDIF
+   ! ENDIF
     !IF(.NOT.(FoundHBond.OR.FoundMetLig.OR.&
     !   LonelyAtom)) THEN
     !  DoExclude=.TRUE.
@@ -628,32 +633,6 @@ CONTAINS
    END SUBROUTINE MoreBondArray
 !
 !----------------------------------------------------------------
-!
-   SUBROUTINE VDWFilter(BondIJ,NBond,Top_Excl)
-     IMPLICIT NONE
-     INTEGER :: I,N,I1,I2,J,K,L,NBond,NBond2
-     TYPE(INT_RNK2) :: BondIJ,BondIJ2,Top_Excl
-     !   
-     CALL New(BondIJ2,(/2,NBond/)) 
-     !   
-     NBond2=0
-     DO I=1,NBond
-       I1=BondIJ%I(1,I)
-       I2=BondIJ%I(2,I)
-       N=Top_Excl%I(I1,1)
-       IF(ANY(Top_Excl%I(I1,2:N+1)==I2)) CYCLE
-       NBond2=NBond2+1
-       BondIJ2%I(1,NBond2)=I1
-       BondIJ2%I(2,NBond2)=I2
-     ENDDO
-     CALL Delete(BondIJ) 
-     NBond=NBond2
-     CALL New(BondIJ,(/2,NBond/))
-     BONDIJ%I(1:2,1:NBond)=BONDIJ2%I(1:2,1:NBond)
-     CALL Delete(BondIJ2) 
-   END SUBROUTINE VDWFilter
-!
-!------------------------------------------------------------
 !
    SUBROUTINE TorsionList(NatmsLoc,Top12,BondIJ,XYZ, &
                            TorsionIJKL,NTorsion)
