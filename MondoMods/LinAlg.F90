@@ -1301,8 +1301,14 @@ MODULE LinAlg
          ENDIF
 #endif
          CALL Delete(Flag)
-         IF(Status==FAIL)  &
+
+         IF(Status==FAIL) THEN
+            WRITE(*,*) "Status = ",Status
+            WRITE(*,*) A%NAtms,A%NBlks,A%NNon0,SIZE(A%MTrix%D)
+            WRITE(*,*) B%NAtms,B%NBlks,B%NNon0,SIZE(B%MTrix%D)
+            WRITE(*,*) C%NAtms,C%NBlks,C%NNon0,SIZE(C%MTrix%D)
             CALL Halt('Dimensions in Add_BCSR')
+         ENDIF
          PerfMon%FLOP=PerfMon%FLOP+FlOp
          IF(PRESENT(Perf_O))  &
            Perf_O%FLOP=Perf_O%FLOP+FlOp
@@ -2013,7 +2019,7 @@ MODULE LinAlg
 !     Wrapper for generic F77 style BCSR matrix filtration
 !===============================================================================
       SUBROUTINE FilterM_BCSR(A,B,Tol_O,Perf_O,SetEq_O)
-         TYPE(BCSR),           INTENT(INOUT)    :: A,B
+         TYPE(BCSR),           INTENT(INOUT) :: A,B
          REAL(DOUBLE),OPTIONAL,INTENT(IN)    :: Tol_O         
          TYPE(TIME),  OPTIONAL,INTENT(INOUT) :: Perf_O         
          REAL(DOUBLE)                        :: Tol,FlOp
