@@ -27,20 +27,20 @@ New Mexico 87545 }
 \date{\today}
 
 \begin{abstract}
-We report on a consistent derivation of the exchange matrix for periodic
+We report on a consistent derivation of the exact exchange matrix for periodic
 systems at the Gamma point. Previous work has always included k-space integration 
 within the calculation of the exchange matrix. However, in  these methods
 we can show that the calculation of the exchange matrix becomes inconsistent as the
 region of k-space shrinks. This leads to a non-translation-ally invariant exchange matrix,
 which is of major concern. We illustrate this problem and then show how, by a set of
-simple ideas and arguments, we can correct this problem.
+simple ideas and arguments, we can retifiy it.
 %
 \vskip 0.07 in
 \noindent{\bf Keywords}: Self-consistent-field, Exact-exchange, Linear-scaling, Gaussian-orbital 
 %
 \end{abstract}
 
-\pacs{???}
+\pacs{}
 
 \maketitle
 
@@ -48,7 +48,7 @@ simple ideas and arguments, we can correct this problem.
 \footnotetext[2]{\tt vweber@lanl.gov}
 \footnotetext[3]{\tt schwegler@llnl.gov}
 \footnotetext[4]{\tt mchalla@lanl.gov}
-\footnotetext[5]{Preprint LA-UR XX-XXXX}
+\footnotetext[5]{\tt Preprint LA-UR 03-9043}
 
 
 \section{INTRODUCTION}
@@ -176,7 +176,7 @@ In pseudocode,
 \end{itemize}
 Which we have implimented into our integral code.
 
-The problem with the ${\bf k}$-space convergence, which is extreme for the Gamma point, 
+This problem with the ${\bf k}$-space convergence, which is extreme for the Gamma point, 
 will also exist for any finite set of lattice vectors ${\bf n}$. Consider 
 figure \ref{figure:ExchangeRegion_k111} where we show the regions that atom $a$ exchanges with
 for a maximum ${\bf k}$-space of ${\bf k}_{max} = \{1,1,1\}$. Here we see again that the integral
@@ -192,18 +192,25 @@ energy for Magnesium Oxide as compared to results obtained from \textbf{Crystal9
 for the STO-3G basis set for increasing system size. We see that we obtain excellent
 convergence to the {\bf Crystal98} large ${\bf k}$-space calculation. This verifies that
 our methodology for doing the exchange matrix at the Gamma point is correct, and converges 
-in the correct fashion in regard to increasing system size.
+in the correct fashion in regard to increasing system size. In table \ref{table:ComToCrystal98_Ice}
+we show the convergence of the proton ordered ice system as compared to results obtained from 
+\textbf{Crystal98} using a more accurate crystal optimized basis set. Again we see excellent
+agreement with the \textbf{Crystal98} results.
+
 
 \section{Scaling}
  
-Figure \ref{figure:Scaling_Matrix_Build} the time it takes to build the
-matrix  \( K_{x} \) for the dense diamond periodic system up to 800 atoms for the
-basis set 6-31G$ ^\dagger$ \cite{Pople92} at a {\it loose} level of accuracy.
+Figure \ref{figure:Scaling_Matrix_Build} is the time it takes to build the
+exact exchange matrix  \( K_{x} \) for the periodic diamond system up to 800 atoms for the modified pople 
+basis set 6-31G$ ^\dagger$ \cite{Pople92} and for a matrix thresholding of $\tau=10^{-3}$ .
 Also included in the figure for comparision are the total time for the
 density matrix solver, TRS4 \cite{ANiklasson03}, 
 and the Coulomb matrix build using our Quantum chemical treee code \cite{CTymczak03c}. 
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\ref{figure:EnergyVsLattice}
 %We also show in figure \ref{figure:EnergyPerN} the energy per carbon atom and 
 %in figure \ref{figure:ErrorPerN} the relative error in the total energy. 
 %Again we see the convergence of the total energy
@@ -246,10 +253,10 @@ ${\bf k}_{max}=\{6,6,6\}$.}
                 & 128$^f$  & -17578.502  & -137.33205 \\
                 & 216$^g$  & -29663.729  & -137.33208 \\ 
 \hline
-${\sc Crystal98}^h$  & 32$^g$   & -4394.5847  & -137.33077 \\
+{\sc Crystal98}$^h$  & 32$^g$   & -4394.5847  & -137.33077 \\
                      & 64$^g$   & -8789.2484  & -137.33201 \\
 \hline
-${\sc Crystal98}^i$  & 2$^f$    & -274.66415  & -137.33208  \\ 
+{\sc Crystal98}$^i$  & 2    & -274.66415  & -137.33208  \\ 
 \botrule
 $ ^f$Triclinic \\
 $ ^g$Cubic  \\
@@ -257,7 +264,35 @@ $ ^g$Cubic  \\
 \multicolumn{4}{l}{$ ^i8\times8\times8$ $k$-space grid.}
 \end{tabular}}
 \end{table}
-
+%
+%
+\begin{table}
+\caption{Comparison \textbf{MondoSCF} and \textbf{Crystal98} for a proton ordered ice
+test system within the Hartree-Fock approxiamtion using
+a crystal optimized basis set\cite{CBS:511G:H,CBS:861G:MgO}. 
+The \textbf{MondoSCF} calculations where done to
+the accuracy of the quoted digits. All calculations where done at the Gamma point
+for comparison except the last \textbf{Crystal98} calculation, which was done at 
+${\bf k}_{max}=\{6,6,6\}$.}
+\label{table:ComToCrystal98_Ice}
+\center{
+\begin{tabular}{lcll}
+\toprule
+{\sc MondoSCF}  & 2$^a$    &  -152.03025  &  -76.01512 \\
+                & 16$^a$   &  -1216.3003  &  -76.01877 \\
+                & 54$^a$   &  -4105.0163  &  -76.01882 \\
+                & 128$^a$  &  -9730.4090  &  -76.01882 \\
+                & 250$^a$  &  -19004.705  &  -76.01882 \\ 
+\hline
+{\sc Crystal98}$^b$  & 2   &  -152.03765  &  -76.01882   \\ 
+\botrule
+\multicolumn{4}{l}{$ ^a $Gamma Point.} \\
+\multicolumn{4}{l}{$ ^b 6\times6\times6$ $k$-space grid.}
+\end{tabular}}
+\end{table}
+%
+%
+%
 \begin{figure}
 \caption{Unit cell and its brava lattice vectors.}
 \label{figure:SimCell}
@@ -301,30 +336,44 @@ unit cell at the Gamma-point at a tight level of accuracy, and a {\bf MondoSCF} 
 with 512 atoms  per
 unit cell at the Gamma-point at a loose level of accuracy.
 All calculation where done using the 
-6-31G$ ^\dagger$/HF basis set theory level. }
+6-31G$ ^\dagger$ basis set hartree fock theory level. }
 \label{figure:EnergyVsLattice}
 {\centering \includegraphics{Diamond_En_vs_a.ps} \par} 
 \end{figure}
-
 %
 %
 %
-%\begin{figure}
-%\caption{ Energy per carbon atom for the dense diamond
-%periodic system up to 512 atoms using the {\bf Crystal98} basis set 6-21G* \cite{CBS:621G:C}.}
-%\label{figure:EnergyPerN}
-%{\centering \includegraphics{blank.ps} \par} 
-%\end{figure}
+\begin{figure}
+\caption{Scaling results for the exchange matrix build, coulomb matrix
+build and the density matrix solver  for the proton ordered ice periodic system up to 432 water molecules 
+using a crystal optimized basis set\cite{CBS:511G:H,CBS:861G:MgO} for a matrix threshold of $\tau=10^{-4}$.}
+\label{figure:Scaling_Matrix_Build_Ice}
+{\centering \includegraphics{Timing_pIce_ONX_1.ps} \par} 
+\end{figure}
 %
 %
 %
-%\begin{figure}
-%\caption{ Relative Error per carbon atom for the dense diamond
-%periodic system up to 512 atoms using the {\bf Crystal98} basis set 6-21G* \cite{CBS:621G:C}.}
-%\label{figure:ErrorPerN}
-%{\centering \includegraphics{blank.ps} \par} 
-%\end{figure}
-
-
-
+\begin{figure}
+\caption{Scaling results for the exchange matrix
+build  for the proton ordered ice periodic system up to 432 water molecules 
+using a crystal optimized basis set\cite{CBS:511G:H,CBS:861G:MgO} for a matrix threshold of 
+$\tau=10^{-4}$ and  $\tau=10^{-6}$.}
+\label{figure:Scaling_Matrix_Build_Ice}
+{\centering \includegraphics{Timing_pIce_ONX_2.ps} \par} 
+\end{figure}
+%
+%
+%
+\begin{figure}
+\caption{Energy per Molecule vs. the $a_0$ Lattice constans for a {\bf Crystal98} calculation 
+with a two molecules per unit cell and ${\bf k}_{max} = (6,6,6)$ and a {\bf MondoSCF} calculation 
+with 432 molecules  per unit cell at the Gamma-point at a loose level of accuracy.
+All calculation where done using a crystal optimized basis set\cite{CBS:511G:H,CBS:861G:MgO} hartree fock theory level. }
+\label{figure:EnergyVsLattice_Ice}
+{\centering \includegraphics{pIce_En_vs_a.ps} \par} 
+\end{figure}
+%
+%
+%
+%
 \end{document}
