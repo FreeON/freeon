@@ -1321,6 +1321,7 @@ CONTAINS
                 CALL Get(GM%Carts,  'cartesians',Tag_O=Tag_O)
                 CALL Get(GM%Vects,  'velocities',Tag_O=Tag_O)
                 CALL Get(GM%BndBox, 'boundingbox',Tag_O=Tag_O)
+                CALL Get(GM%CConstrain,'constraints',Tag_O=Tag_O)
 #ifdef PERIODIC
                 CALL Get(GM%PBC,Tag_O=Tag_O)
                 CALL Get(GM%BoxCarts,  'LatticeCoord',Tag_O=Tag_O)
@@ -1358,6 +1359,7 @@ CONTAINS
                 CALL Put(GM%Carts,  'cartesians',Tag_O=Tag_O)
                 CALL Put(GM%Vects,  'velocities',Tag_O=Tag_O)
                 CALL Put(GM%BndBox, 'boundingbox',Tag_O=Tag_O)
+                CALL Put(GM%CConstrain,'constraints',Tag_O=Tag_O)
 #ifdef PERIODIC
                 CALL Put(GM%PBC,Tag_O=Tag_O)
                 CALL Put(GM%BoxCarts,  'LatticeCoord',Tag_O=Tag_O)
