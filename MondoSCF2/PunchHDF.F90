@@ -137,15 +137,15 @@ CONTAINS
     HDFFileID=OpenHDF(N%HFile)
     DO iCLONE=1,G%Clones
        G%Clone(iCLONE)%Confg=cGEO
-       ! Set the correct PBC cell set list
+!      Set the correct PBC cell set list
        CALL SetLatticeVectors(G%Clone(iCLONE),CS,B%AtomPairThresh(iCLONE,cBAS))
-       ! Make sure everything is wrapped correctly
+!      Make sure everything is wrapped correctly
        CALL WrapAtoms(G%Clone(iCLONE))
        HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
-       ! Put the geometry to this group ...
+!      Put the geometry to this group ...
        CALL Put(G%Clone(iCLONE),chGEO)
-       ! ... and the corresponding lattice vectors which for now ONLY DEPEND
-       ! ON THE BASIS SET.  THIS WILL HAVE TO BE CHANGED WHEN WE ADD BOX FORCES! 
+!      ... and the corresponding lattice vectors which for now ONLY DEPEND
+!      ON THE BASIS SET.  THIS WILL HAVE TO BE CHANGED WHEN WE ADD BOX FORCES! 
        CALL Put(CS,Tag_O=IntToChar(cBAS))
 !!$       CALL Put(CS,'CS_OUT',Tag_O=IntToChar(cBAS))
 !!$       CALL Put(CS,'CS_IN' ,Tag_O=IntToChar(cBAS))
@@ -164,6 +164,7 @@ CONTAINS
     TYPE(CellSet)             :: C
     REAL(DOUBLE), OPTIONAL    :: Rad_O
     REAL(DOUBLE)              :: AtomPairThresh,Radius
+    INTEGER                   :: IL
 !------------------------------------------------------------------------------
 !   First we create a CellSet with a Distance of MaxBoxDim+SQRT(AtomPairThresh)
 !   Some of these boxes will be to far away, next we determine how close the 
@@ -174,14 +175,21 @@ CONTAINS
        Radius = Rad_O
        CALL New_CellSet_Sphere(C,G%PBC%AutoW,G%PBC%BoxShape,Radius)   
     ELSE
-!       Radius = (One+1.D-14)*MaxAtomDist(G)+SQRT(AtomPairThresh)
-       Radius = (One+1.D-14)*MaxBoxDim(G)+SQRT(AtomPairThresh)
-       CALL New_CellSet_Sphere(C,G%PBC%AutoW,G%PBC%BoxShape,Radius)
+       IF(G%PBC%PFFOvRide) THEN
+          IL = G%PBC%PFFMaxLay
+          CALL New_CellSet_Cube(C,G%PBC%AutoW,G%PBC%BoxShape,(/IL,IL,IL/))
+       ELSE
+!          Radius = (One+1.D-14)*MaxAtomDist(G)+SQRT(AtomPairThresh)
+          Radius = (One+1.D-14)*MaxBoxDim(G)+SQRT(AtomPairThresh)
+          CALL New_CellSet_Sphere(C,G%PBC%AutoW,G%PBC%BoxShape,Radius)
+       ENDIF
     ENDIF
+!
     CALL Sort_CellSet(C)
     C%Radius = SQRT(C%CellCarts%D(1,1)**2+C%CellCarts%D(2,1)**2+C%CellCarts%D(3,1)**2)
     WRITE(*,*)' C%Radius = ',C%Radius
     WRITE(*,*)' C%NCells = ',C%NCells
+!
   END SUBROUTINE SetLatticeVectors
 !==============================================================================
 !
