@@ -3048,7 +3048,10 @@ CONTAINS
      !
      TwoPi=Two*PI
      DO I=1,NIntC
-       IF(IntCs%Def(I)(1:4)/='STRE'.OR.IntCs%Def(I)(1:4)/='CART') THEN
+       IF(IntCs%Def(I)(1:4)=='BEND'.OR. &
+          IntCs%Def(I)(1:4)=='LINB'.OR. &
+          IntCs%Def(I)(1:4)=='TORS'.OR. &
+          IntCs%Def(I)(1:4)=='OUTP') THEN
          Sum=VectInt(I)
          IF(Sum>PI) Sum=Sum-TwoPi
          IF(Sum<-PI) Sum=TwoPi+Sum
@@ -4274,6 +4277,52 @@ CONTAINS
      !
      CALL Delete(VectCart)
    END SUBROUTINE DelocToPrim
+!
+!----------------------------------------------------------------------
+!
+   SUBROUTINE AngleToPos(IntCs,Vect)
+     TYPE(INTC)   :: IntCs
+     REAL(DOUBLE) :: Vect(:),TwoPi
+     INTEGER      :: I,J,NIntC
+     !
+     NIntC=SIZE(IntCs%Def)
+     TwoPi=Two*Pi
+     DO I=1,NIntC
+       IF(IntCs%Def(I)(1:4)=="TORS") THEN
+         IF(Vect(I)<Zero) Vect(I)=TwoPi+Vect(I)
+       ELSE IF(IntCs%Def(I)(1:4)=="OUTP") THEN
+         IF(Vect(I)>Zero) THEN
+           Vect(I)=Pi-Vect(I)
+         ELSE
+           Vect(I)=-Pi-Vect(I)
+         ENDIF
+         IF(Vect(I)<Zero) Vect(I)=TwoPi+Vect(I)
+       ENDIF
+     ENDDO
+   END SUBROUTINE AngleToPos
+!
+!----------------------------------------------------------------------
+!
+   SUBROUTINE AngleToNeg(IntCs,Vect)
+     TYPE(INTC)   :: IntCs
+     REAL(DOUBLE) :: Vect(:),TwoPi
+     INTEGER      :: I,J,NIntC
+     !
+     NIntC=SIZE(IntCs%Def)
+     TwoPi=Two*Pi
+     DO I=1,NIntC
+       IF(IntCs%Def(I)(1:4)=="TORS") THEN 
+         IF(Vect(I)>Pi) Vect(I)=Vect(I)-TwoPi
+       ELSE IF(IntCs%Def(I)(1:4)=="OUTP") THEN
+         IF(Vect(I)>Pi) Vect(I)=Vect(I)-TwoPi
+         IF(Vect(I)>Zero) THEN
+           Vect(I)=Pi-Vect(I)
+         ELSE
+           Vect(I)=-Pi-Vect(I)
+         ENDIF
+       ENDIF
+     ENDDO
+   END SUBROUTINE AngleToNeg
 !
 !----------------------------------------------------------------------
 !

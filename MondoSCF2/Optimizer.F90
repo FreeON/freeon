@@ -1295,7 +1295,7 @@ CONTAINS
      TYPE(GConvCrit) :: GConv
      !
      BackT%MaxIt_CooTrf = 20
-     BackT%CooTrfCrit   = GConv%Stre/10.D0
+     BackT%CooTrfCrit   = MIN(GConv%Stre/10.D0,1.D-4)
      BackT%RMSCrit      = 0.75D0 
      BackT%MaxCartDiff  = 0.50D0  
      BackT%DistRefresh  = BackT%MaxCartDiff*BackT%RMSCrit

@@ -405,6 +405,7 @@ CONTAINS
        Vect%D=SRStruct%D(1:DimGDIIS,I)
        CALL CartRNK1ToCartRNK2(Vect%D,XYZ2%D)
        CALL INTCValue(IntCs,XYZ2%D,GCoordCtrl%LinCrit)
+         CALL AngleToPos(IntCs,IntCs%Value)
        PrISR%D(1:NIntC,I)=IntCs%Value
        DO J=1,NIntC 
          IF(.NOT.IntCs%Active(J)) Actives%I(J)=0
@@ -413,6 +414,7 @@ CONTAINS
        Vect%D=RefStruct%D(1:DimGDIIS,I)
        CALL CartRNK1ToCartRNK2(Vect%D,XYZ2%D)
        CALL INTCValue(IntCs,XYZ2%D,GCoordCtrl%LinCrit)
+         CALL AngleToPos(IntCs,IntCs%Value)
        PrIRef%D(1:NIntC,I)=IntCs%Value
        DO J=1,NIntC 
          IF(.NOT.IntCs%Active(J)) Actives%I(J)=0
@@ -582,6 +584,7 @@ CONTAINS
      DO I=1,NIntC
        IF(Actives%I(I)==0) Vect%D(I)=PrISR(I,GDIISMemory)
      ENDDO
+     CALL AngleToNeg(IntCs,Vect%D)
      IF(Print>=DEBUG_GEOP_MAX) CALL PrtIntCoords(IntCs,Vect%D,'predicted internals ')
      !
      CALL InternalToCart(XYZ,IntCs,Vect%D, &
