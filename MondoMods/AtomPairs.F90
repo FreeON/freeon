@@ -4,7 +4,6 @@
 !--  Los Alamos National Laboratory
 !--  Copyright 2000, The University of California
 !    Compute the Atom Pair and the Cells for PBC
-
 MODULE AtomPairs
   USE DerivedTypes
   USE GlobalScalars
@@ -29,7 +28,7 @@ CONTAINS
     TYPE(CRDS)                :: GM
     TYPE(BSet)                :: BS
     TYPE(BBox),OPTIONAL       :: Box_O
-    Pair%AB2 = MinImageDist(GM,GM%Carts%D(1:3,I),GM%Carts%D(1:3,J))
+    Pair%AB2  = MinImageDist(GM,GM%Carts%D(1:3,I),GM%Carts%D(1:3,J))
     Pair%KA   = GM%AtTyp%I(I)
     Pair%KB   = GM%AtTyp%I(J)
     Pair%NA   = BS%BFKnd%I(Pair%KA)
@@ -387,28 +386,6 @@ CONTAINS
 !
   END FUNCTION MaxAtomDist
 !-------------------------------------------------------------------------------
-!   Calculate Inverse Matrix
-!-------------------------------------------------------------------------------
-  FUNCTION InverseMatrix(Mat) RESULT(InvMat)
-    REAL(DOUBLE)                    :: Det,Norm
-    REAL(DOUBLE),DIMENSION(3,3)     :: Mat,InvMat
-
-!
-    Det  = Mat(1,1)*Mat(2,2)*Mat(3,3) + Mat(1,2)*Mat(2,3)*Mat(3,1) + Mat(1,3)*Mat(2,1)*Mat(3,2) &
-         - Mat(1,3)*Mat(2,2)*Mat(3,1) - Mat(1,1)*Mat(2,3)*Mat(3,2) - Mat(1,2)*Mat(2,1)*Mat(3,3)
-    Norm = One/Det
-    InvMat(1,1) = Norm*(Mat(2,2)*Mat(3,3) - Mat(2,3)*Mat(3,2))
-    InvMat(1,2) = Norm*(Mat(1,3)*Mat(3,2) - Mat(1,2)*Mat(3,3))
-    InvMat(1,3) = Norm*(Mat(1,2)*Mat(2,3) - Mat(1,3)*Mat(2,2))
-    InvMat(2,1) = Norm*(Mat(2,3)*Mat(3,1) - Mat(2,1)*Mat(3,3))
-    InvMat(2,2) = Norm*(Mat(1,1)*Mat(3,3) - Mat(1,3)*Mat(3,1))
-    InvMat(2,3) = Norm*(Mat(1,3)*Mat(2,1) - Mat(1,1)*Mat(2,3))
-    InvMat(3,1) = Norm*(Mat(2,1)*Mat(3,2) - Mat(2,2)*Mat(3,1))
-    InvMat(3,2) = Norm*(Mat(1,2)*Mat(3,1) - Mat(1,1)*Mat(3,2))
-    InvMat(3,3) = Norm*(Mat(1,1)*Mat(2,2) - Mat(1,2)*Mat(2,1))
-!
-  END FUNCTION InverseMatrix
-!-------------------------------------------------------------------------------
 !  Do the Latice Force Contraction
 !-------------------------------------------------------------------------------
   FUNCTION LaticeForce(GM,nlm,F) RESULT(LatF)
@@ -476,6 +453,28 @@ CONTAINS
     ENDIF
 !
   END SUBROUTINE MakeGMPeriodic
+!-------------------------------------------------------------------------------
+!   Calculate Inverse Matrix
+!-------------------------------------------------------------------------------
+  FUNCTION InverseMatrix(Mat) RESULT(InvMat)
+    REAL(DOUBLE)                    :: Det,Norm
+    REAL(DOUBLE),DIMENSION(3,3)     :: Mat,InvMat
+
+!
+    Det  = Mat(1,1)*Mat(2,2)*Mat(3,3) + Mat(1,2)*Mat(2,3)*Mat(3,1) + Mat(1,3)*Mat(2,1)*Mat(3,2) &
+         - Mat(1,3)*Mat(2,2)*Mat(3,1) - Mat(1,1)*Mat(2,3)*Mat(3,2) - Mat(1,2)*Mat(2,1)*Mat(3,3)
+    Norm = One/Det
+    InvMat(1,1) = Norm*(Mat(2,2)*Mat(3,3) - Mat(2,3)*Mat(3,2))
+    InvMat(1,2) = Norm*(Mat(1,3)*Mat(3,2) - Mat(1,2)*Mat(3,3))
+    InvMat(1,3) = Norm*(Mat(1,2)*Mat(2,3) - Mat(1,3)*Mat(2,2))
+    InvMat(2,1) = Norm*(Mat(2,3)*Mat(3,1) - Mat(2,1)*Mat(3,3))
+    InvMat(2,2) = Norm*(Mat(1,1)*Mat(3,3) - Mat(1,3)*Mat(3,1))
+    InvMat(2,3) = Norm*(Mat(1,3)*Mat(2,1) - Mat(1,1)*Mat(2,3))
+    InvMat(3,1) = Norm*(Mat(2,1)*Mat(3,2) - Mat(2,2)*Mat(3,1))
+    InvMat(3,2) = Norm*(Mat(1,2)*Mat(3,1) - Mat(1,1)*Mat(3,2))
+    InvMat(3,3) = Norm*(Mat(1,1)*Mat(2,2) - Mat(1,2)*Mat(2,1))
+!
+  END FUNCTION InverseMatrix
 !
 END MODULE AtomPairs
 
