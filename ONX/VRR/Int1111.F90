@@ -1,8 +1,6 @@
 SUBROUTINE Int1111(N,CBra,CKet,DisBufB,PrmBufB,DB,IB,SB,W1)
   USE DerivedTypes
   USE GlobalScalars
-  USE ONXParameters
-  USE PrettyPrint
   IMPLICIT NONE
 !--------------------------------------------------------------------------------
 ! Distribution buffer stuff
