@@ -88,8 +88,8 @@ PROGRAM TForce
 !--------------------------------------------------------------------------------
   CALL PChkSum(TFrc,'TForce')  
 ! for tmp debuging ...
-  CALL PPrint(TFrc,'TForce',Unit_O=6)
-  CALL PPrint(TFrc,'TForce')
+!  CALL PPrint(TFrc,'TForce',Unit_O=6)
+!  CALL PPrint(TFrc,'TForce')
 ! Sum in contribution to total force
   CALL New(Frc,3*NAtoms)
   CALL Get(Frc,'GradE',Tag_O=CurGeom)

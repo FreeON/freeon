@@ -106,8 +106,8 @@ PROGRAM JForce
 !--------------------------------------------------------------------------------
   CALL PChkSum(JFrc,'JForce')  
 ! for temp debuging....
-  CALL PPrint(JFrc,'JForce',Unit_O=6)
-  CALL PPrint(JFrc,'JForce')
+!  CALL PPrint(JFrc,'JForce',Unit_O=6)
+!  CALL PPrint(JFrc,'JForce')
 ! Sum in contribution to total force
   CALL New(Frc,3*NAtoms)
   CALL Get(Frc,'GradE',Tag_O=CurGeom)

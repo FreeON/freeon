@@ -99,8 +99,8 @@ PROGRAM XCForce
 !--------------------------------------------------------------------------------
   CALL PChkSum(XCFrc,'XCForce')  
 ! for tmp debuging ...
-  CALL PPrint(XCFrc,'XCForce',Unit_O=6)
-  CALL PPrint(XCFrc,'XCForce')
+!  CALL PPrint(XCFrc,'XCForce',Unit_O=6)
+!  CALL PPrint(XCFrc,'XCForce')
 ! Sum in contribution to total force
   CALL New(Frc,3*NAtoms)
   CALL Get(Frc,'GradE',Tag_O=CurGeom)
