@@ -15,6 +15,7 @@ MODULE PoleTree
 !----------------------------------------------------------------------------------
 !  Globals
    TYPE(PoleNode), POINTER               :: PoleRoot ! Root of the pole tree 
+   TYPE(PoleNode), POINTER               :: PR1
    INTEGER                               :: PoleNodes
    INTEGER                               :: RhoLevel
    INTEGER                               :: CurrentTier
