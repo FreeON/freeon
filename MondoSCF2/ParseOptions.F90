@@ -1,19 +1,20 @@
 MODULE ParseOptions
+  USE InOut
+  USE Parse
+  USE MemMan
+  USE Thresholds
+  USE OptionKeys
+  USE Functionals
   USE DerivedTypes
   USE GlobalScalars
   USE GlobalObjects
-  USE GlobalCharacters
   USE ProcessControl
-  USE InOut
-  USE MemMan
+  USE GlobalCharacters
   USE ParsingConstants
-  USE OptionKeys
-  USE Parse
-  USE Functionals
+  USE ControlStructures
 #ifdef NAG
   USE F90_UNIX
 #endif
-  USE ControlStructures
   IMPLICIT NONE
 CONTAINS 
   !============================================================================
@@ -35,7 +36,7 @@ CONTAINS
     ! Parse for model chemistries 
     CALL ParseModelChems(O%NModls,O%Models)
     ! Parse for gradient options.  
-    CALL ParseGradients(O%NSteps,O%Coordinates,O%Grad,O%OneBase,O%DoGDIIS)
+    CALL ParseGradients(O%NSteps,O%Coordinates,O%Grad,O%DoGDIIS,O%SteepStep)
     CLOSE(UNIT=Inp,STATUS='KEEP')
   END SUBROUTINE LoadOptions
   !============================================================================
@@ -202,7 +203,6 @@ CONTAINS
           Methods(Location(I))=RH_R_SCF 
        ENDDO
     ENDIF
-    CLOSE(UNIT=Inp,STATUS='KEEP')
     IF(NMthds==0) &
          CALL MondoHalt(PRSE_ERROR,'Option '//SCF_OPTION//' not set in input.'//RTRN   &
          //'Options include '//SCF_SDMM//', '//SCF_PM//', '//SCF_SP2//', '//SCF_TS4//', and '//SCF_RHHF)
@@ -214,15 +214,6 @@ CONTAINS
     INTEGER                       :: NThrsh,I
     INTEGER,   DIMENSION(MaxSets) :: AccuracyLevels
     TYPE(TOLS),DIMENSION(MaxSets) :: Thresholds
-    ! Thresholds (Loose ~4 digits, Good ~6 digits, Tight ~8 digits, VeryTight ~10 digits):
-    REAL(DOUBLE),PARAMETER,DIMENSION(4) :: TrixNeglect=(/1.D-4, 1.D-5, 1.D-6,  1.D-7 /)
-    REAL(DOUBLE),PARAMETER,DIMENSION(4) :: CubeNeglect=(/1.D-3, 1.D-5, 1.D-7,  1.D-9 /)
-    REAL(DOUBLE),PARAMETER,DIMENSION(4) :: TwoENeglect=(/1.D-6, 1.D-8, 1.D-10, 1.D-12/)
-    REAL(DOUBLE),PARAMETER,DIMENSION(4) :: DistNeglect=(/1.D-8, 1.D-10,1.D-12, 1.D-14/)
-    REAL(DOUBLE),PARAMETER,DIMENSION(4) :: ETol       =(/1.D-5, 1.D-7, 1.D-9,  1.D-11/)
-    REAL(DOUBLE),PARAMETER,DIMENSION(4) :: DTol       =(/1.D-2, 1.D-3, 1.D-4,  1.D-5 /)
-    REAL(DOUBLE),PARAMETER,DIMENSION(4) :: GTol       =(/1.D-2, 1.D-3, 1.D-4,  1.D-5 /)
-    REAL(DOUBLE),PARAMETER,DIMENSION(4) :: XTol       =(/1.D-1, 1.D-2, 1.D-3,  1.D-4 /)
     !-----------------------------------------------------------------------------------------------
     NThrsh=0
     IF(OptKeyLocQ(Inp,ACCURACY_OPTION,ACCURACY_CHEEZY,MaxSets,NLoc,Location))THEN
@@ -249,7 +240,6 @@ CONTAINS
           AccuracyLevels(Location(I))=4 
        ENDDO
     ENDIF
-    CLOSE(Inp,STATUS='KEEP')
     IF(NThrsh==0) &
          CALL MondoHalt(PRSE_ERROR,'Option '//ACCURACY_OPTION//' not set in input.'//RTRN   &
          //'Options include '//ACCURACY_CHEEZY//', '//ACCURACY_GOOD//', '   &
@@ -278,16 +268,15 @@ CONTAINS
        IF(.NOT.OptCharQ(Inp,RESTART_INFO,RestartHDF))  &
             CALL MondoHalt(PRSE_ERROR,'Restart requested, but no HDF file specified.')
        ! Check for absolute path 
-       IF(INDEX(RestartHDF,'/')==0)  &
-            RestartHDF=TRIM(M_PWD)//RestartHDF       
+       IF(RestartHDF(1:1)/='/')  &
+            CALL MondoHalt(PRSE_ERROR,'Please use absolute path to the restart HDF file')
        CALL New(RestartState,3)
        ! Open the old restart HDF file
-       HDFFileID=OpenHDFFile(RestartHDF)
+       HDF_CurrentID=OpenHDF(RestartHDF)       
+       ! Get the current state to restart from
        CALL Get(RestartState,'current')
        ! Now close the old file...
-       CALL CloseHDF(HDFFileID)
-       ! Reset the global HDF ID
-       HDFFileID=NewFileID
+       CALL CloseHDF(HDF_CurrentID)
     ELSEIF(OptKeyQ(Inp,GUESS_OPTION,GUESS_CORE))THEN
        Guess=GUESS_EQ_CORE
     ELSEIF(OptKeyQ(Inp,GUESS_OPTION,GUESS_SUPER))THEN
@@ -354,50 +343,55 @@ CONTAINS
   !===============================================================================================
   !
   !===============================================================================================
-  SUBROUTINE ParseGradients(NSteps,Coordinates,Grad,OneBase,DoGDIIS)
+  SUBROUTINE ParseGradients(NSteps,Coordinates,Grad,DoGDIIS,SteepStep)
     INTEGER NSteps,Coordinates,Grad
-    LOGICAL OneBase,DoGDIIS
+    LOGICAL OneBase,DoGDIIS,SteepStep
     !-----------------------------------------------------------------------------------------------
     ! Default max geometry steps is 100
     IF(.NOT.OptIntQ(Inp,GRADIENTS,NSteps))THEN
        NSteps=100               
     ENDIF
-    ! Check to see if we should do gradients options over all basis sets
-    IF(OptKeyQ(Inp,GRADIENTS,GRAD_ALL_BASIS))THEN
-       OneBase=.FALSE.
-    ELSE       
-       OneBase=.TRUE.             ! Default is last basis only
-    ENDIF
-    ! Check to see if we should use internal or Cartesian coordinates 
-    IF(OptKeyQ(Inp,GRADIENTS,GRAD_INTERNALS)) THEN
-       Coordinates=GRAD_INTS_OPT 
-    ELSE
-       Coordinates=GRAD_CART_OPT  ! Default is Cartesians
-    ENDIF
-    ! Check to see if we should use GDIIS in optimization
-    IF(OptKeyQ(Inp,GRADIENTS,GRAD_GDIIS))THEN
-       DoGDIIS=.TRUE.             
-    ELSE
-       DoGDIIS=.FALSE.            ! Default is no GDIIS
-    ENDIF
-    ! Parse macro gradient options
+    ! Macro gradient options
     IF(OptKeyQ(Inp,GRADIENTS,GRAD_FORCE))THEN
        Grad=GRAD_ONE_FORCE
        NSteps=1
     ELSEIF(OptKeyQ(Inp,GRADIENTS,GRAD_DYNAMICS))THEN
-       DoGDIIS=.FALSE.            ! Meaningless here
-       Coordinates=GRAD_CART_OPT  ! Only in Cartesians for now
-       Grad=GRAD_DO_DYNAMICS   ! Do molecular dynamics
-    ELSEIF(OptKeyQ(Inp,GRADIENTS,GRAD_QUNEW))THEN
-       DoGDIIS=.FALSE.            ! 
-       Coordinates=GRAD_CART_OPT  ! Only in Cartesians for now
-       Grad=GRAD_QNEW_OPT      ! Do explicit inverse BFGS Quasi-Newton optimization
-    ELSEIF(OptKeyQ(Inp,GRADIENTS,GRAD_SDESCENT))THEN
-       Grad=GRAD_SDESCENT_OPT  ! First order minimization
+       ! Do molecular dynamics
+       Grad=GRAD_DO_DYNAMICS    
+    ELSEIF(OptKeyQ(Inp,GRADIENTS,GRAD_OPTIMIZE))THEN
+       ! Go downhill in energy
+       Grad=GRAD_GO_DOWNHILL
     ELSEIF(OptKeyQ(Inp,GRADIENTS,GRAD_TS_SEARCH))THEN
-       Grad=GRAD_TS_SEARCH_NEB ! Transition state search with NEB
+       ! Transition state search 
+       Grad=GRAD_TS_SEARCH_NEB 
     ELSE
-       Grad=GRAD_NO_GRAD       ! Default is do nothing
+       ! Single point energy only
+       Grad=GRAD_NO_GRAD       
+       NSTeps=1
     ENDIF
+    ! Use internal or Cartesian coordinates ?
+    IF(OptKeyQ(Inp,GRADIENTS,GRAD_INTERNALS)) THEN
+       ! Yes, use internals where available
+       Coordinates=GRAD_INTS_OPT 
+    ELSE
+       ! Default is Cartesians
+       Coordinates=GRAD_CART_OPT  
+    ENDIF 
+    ! Use GDIIS in optimization ?
+    IF(OptKeyQ(Inp,GRADIENTS,GRAD_GDIIS))THEN
+       ! Yep
+       DoGDIIS=.TRUE.             
+    ELSE
+       ! Nope
+       DoGDIIS=.FALSE.    
+    ENDIF
+    ! Use approximate second order methods in optimization
+    IF(OptKeyQ(Inp,GRADIENTS,GRAD_APPRX_HESS))THEN
+       ! Yeah, but only if using internal coordinates
+       SteepStep=.FALSE.
+    ELSE
+       ! No, gradients only
+       SteepStep=.TRUE.
+    ENDIF    
   END SUBROUTINE ParseGradients
 END MODULE ParseOptions

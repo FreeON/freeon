@@ -1,0 +1,422 @@
+MODULE Macros
+   USE DerivedTypes
+   USE GlobalScalars
+   USE GlobalObjects
+   USE GlobalCharacters
+   USE ParsingConstants
+   USE PrettyPrint
+   USE Parse
+   USE Clock
+   USE InOut
+   USE Functionals
+   USE AtomPairs
+   USE Mechanics
+#ifdef PARALLEL
+   USE MondoMPI
+#endif
+#ifdef NAG
+  USE F90_UNIX
+#endif
+   IMPLICIT NONE
+   INTERFACE Init
+      MODULE PROCEDURE Init_TIME, Init_DEBG, Init_MEMS
+   END INTERFACE
+   INTEGER HDFFileID,H5GroupID
+!-------------------------------------------------------------------------------
+   CONTAINS
+     SUBROUTINE StartUp(Args,Prog,Serial_O)
+       TYPE(ARGMT),INTENT(OUT)              :: Args
+       CHARACTER(LEN=*),INTENT(IN)          :: Prog
+       CHARACTER(LEN=DCL)                   :: H5File
+       LOGICAL,OPTIONAL                     :: Serial_O
+       INTEGER                              :: I
+#ifdef PARALLEL
+       LOGICAL                              :: Serial
+       INTEGER                              :: ChkNPrc,MyClone
+       TYPE(INT_VECT)                       :: SpaceTimeSplit
+       CHARACTER(LEN=DCL)                   :: MONDO_HOST 
+       !-------------------------------------------------------------------------------
+#ifdef PARALLEL_CLONES
+       CALL InitMPI()
+!       CALL AlignNodes('Inited MPI')
+#else         
+       IF(PRESENT(Serial_O))THEN
+          IF(Serial_O)THEN
+             InParallel=.FALSE.
+          ELSE
+             CALL InitMPI()
+             InParallel=.TRUE.
+          ENDIF
+       ELSE
+          InParallel=.FALSE.
+       ENDIF
+#endif
+#endif
+       ! Get arguments
+       CALL Get(Args)
+       ! Get SCRATCH directoryfrom env
+       CALL GetEnv('MONDO_SCRATCH',MONDO_SCRATCH)
+       MONDO_SCRATCH=TRIM(MONDO_SCRATCH)//'/'
+       IF(LEN(TRIM(MONDO_SCRATCH))==0)CALL Halt(' $(MONDO_SCRATCH) not set.')
+       !        The HDF5 file name 
+       H5File=TRIM(MONDO_SCRATCH)//TRIM(Args%C%C(1))//TRIM(InfF)
+!       CALL AlignNodes(' H5File = <'// TRIM(H5File)//'>' )
+       InfFile=H5File
+       ! Open the HDF file
+       HDFFileID=OpenHDF(H5File)
+       ! This is the global IO file ID
+       HDF_CurrentID=HDFFileID
+#ifdef PARALLEL_CLONES
+       ! Get the space-time parallel topology
+       CALL New(SpaceTimeSplit,2)
+       CALL Get(SpaceTimeSplit,'spacetime')
+       CALL CloseHDF(HDFFileID)
+!       CALL AlignNodes('closed hdf file ')
+       ! Create Cartesian topology for the clones         
+       MyClone=CartCommSplit(SpaceTimeSplit,Serial_O)
+!       IF(InParallel)THEN
+!          CALL AlignNodes(' MyClone = '//TRIM(IntToChar(MyClone)))
+!       ELSE
+!          WRITE(*,*)'  MyClone = ',MyClone
+!       ENDIF
+       ! Each ROOT in each MONDO_COMM opens the HDF file 
+       HDFFileID=OpenHDF(H5File)
+       ! Operate at the top level of the archive
+#endif
+       ! Mark prog for failure
+       CALL MarkFailure(Prog)
+       ! Load global SCF status strings
+       CALL LoadTopLevelGlobals(Args)
+       ! Parse this programs debug level 
+       CALL Init(PrintFlags,Prog)
+       PrintFlags%Key=DEBUG_MAXIMUM
+       PrintFlags%Mat=DEBUG_MATRICES
+#ifdef PARALLEL_CLONES 
+       ! Open a group that the ROOT of each clone accesses by default
+       H5GroupID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(MyClone)))
+       ! Default is now the cloned group id rather than the HDF file id 
+       HDF_CurrentID=H5GroupID
+#endif
+!       IF(InParallel) &
+!       CALL AlignNodes(' Opened groups ')
+       ! Load more global variables
+       CALL LoadGroupGlobals(Args)
+ !      IF(InParallel) &
+ !      CALL AlignNodes(' LoadedGroupGlobals ')
+       ! Initialize memory statistics
+       CALL Init(MemStats)
+!       IF(InParallel) &
+!       CALL AlignNodes(' Inited MemStats ')
+       ! Start the clock ...
+       CALL Elapsed_Time(PerfMon,'Init')
+!       IF(InParallel) &
+!       CALL AlignNodes(' Started the clock ')
+       ! MESSY MESSY MESSY MESSY MESSY MESSY MESSY MESSY MESSY MESSY 
+       ! Print time stamp 
+       IF(PrintFlags%Key>DEBUG_MEDIUM)THEN
+#ifdef PARALLEL
+          IF(MyId==ROOT) &
+               CALL TimeStamp(' Entering '//TRIM(Prog),Enter_O=.TRUE.)
+#else
+          CALL TimeStamp('Entering '//TRIM(Prog))
+#endif 
+       ENDIF
+       ! MESSY MESSY MESSY MESSY MESSY MESSY MESSY MESSY MESSY MESSY 
+!       IF(InParallel)THEN
+!          CALL AlignNodes(' Done in StartUp ')
+!       ELSE
+!          WRITE(*,*)' Done in StartUp'
+!       ENDIF
+     END SUBROUTINE StartUp
+
+      FUNCTION CartCommSplit(Dims,Serial_O) RESULT(MyClone)
+        INTEGER               :: IErr,MyClone,CART_COMM
+        TYPE(INT_VECT)        :: Dims 
+        LOGICAL,OPTIONAL      :: Serial_O
+        CHARACTER(LEN=10)     :: Sub='SpaceNTime'
+        LOGICAl               :: AllButRootMustDie
+        INTEGER,DIMENSION(2)  :: Local
+        !-----------------------------------------------------------------------!
+!        write(*,*)MyId,' dims = ',dims%I        
+        ! Create a Dims(1) x Dims(2) Cartesian communicator
+        CALL MPI_CART_CREATE(MPI_COMM_WORLD,2,Dims%I,  & 
+             (/.FALSE.,.FALSE./),.TRUE.,CART_COMM,IErr)
+
+!        CALL AlignNodes("IERROR = "//TRIM(IntToChar(IErr)))
+
+        CALL ErrChk(IErr,Sub)
+
+!        CALL AlignNodes("BEFORE MPI_CART_COORDS")
+
+        ! Find out which row (group) this PE belongs to
+        CALL MPI_CART_COORDS(CART_COMM,MyId,2,Local,IErr)
+
+        CALL ErrChk(IErr,Sub)
+
+        MyClone=Local(2)+1
+!        CALL AlignNodes("MyClone = "//TRIM(IntToChar(MyClone)))
+
+        ! Now split into Dims(1) rows. Each row has Dims(2) processors
+        ! parallel in the spatial domain and using MONDO_COMM as their
+        ! default communicator
+
+!        CALL MPI_CART_SUB(CART_COMM,(/.FALSE.,.TRUE./),MONDO_COMM,IErr)
+        CALL MPI_CART_SUB(CART_COMM,(/.TRUE.,.FALSE./),MONDO_COMM,IErr)
+        CALL ErrChk(IErr,Sub)
+
+        ! Reload local rank and PE number for split MONDO_COMM
+        MyID=MRank()
+        NPrc=MSize()
+
+!        CALL AlignNodes("MyID = "//TRIM(IntToChar(MyID)//' NPrc = '//TRIM(IntToChar(NPrc))))
+
+        IF(PRESENT(Serial_O))THEN
+           IF(Serial_O)THEN
+              InParallel=.FALSE.
+           ELSE
+              InParallel=.TRUE.
+           ENDIF
+        ELSE
+           InParallel=.FALSE.
+        ENDIF
+        IF(MyID/=ROOT.AND..NOT.InParallel)THEN
+!           WRITE(*,*)' KILLING NODE MyID = ',MyID
+           CALL FiniMPI()
+           STOP 
+        ENDIF
+      END FUNCTION CartCommSplit
+      !-------------------------------------------------------------------------------
+
+     !==============================================================
+     ! LOAD GLOBAL VARIABLES FROM THE TOP LEVEL OF THE HDF FILE
+     !==============================================================
+     SUBROUTINE LoadTopLevelGlobals(Args)
+       TYPE(ARGMT) :: Args
+       INTEGER :: I,ChkNPrc
+       !-----------------------------------------------------------!
+       IF(Args%NC>=2) &
+            SCFActn=TRIM(Args%C%C(2))
+       Current=Args%I%I(1:3)
+       Previous=Args%I%I(4:6)
+       ! SCF Cycle
+       SCFCycl=TRIM(IntToChar(Args%I%I(1)))
+       IF(Args%I%I(3)-1<1)THEN
+          PrvCycl=TRIM(IntToChar(Previous(1)))        
+       ELSE
+          PrvCycl=TRIM(IntToChar(Args%I%I(1)-1))
+       ENDIF
+       NxtCycl=TRIM(IntToChar(Args%I%I(1)+1))
+       ! Geometry
+       CurGeom=TRIM(IntToChar(Args%I%I(3)))
+       IF(Args%I%I(3)-1<1)THEN
+          PrvGeom=TRIM(IntToChar(Previous(3)))        
+       ELSE
+          PrvGeom=TRIM(IntToChar(Args%I%I(3)-1))
+       ENDIF
+       NxtGeom=TRIM(IntToChar(Args%I%I(3)+1))
+       ! Basis
+       CurBase=TRIM(IntToChar(Args%I%I(2)))
+       PrvBase=TRIM(IntToChar(Previous(2)))
+       ScrName=TRIM(MONDO_SCRATCH)//TRIM(Args%C%C(1))
+       ! Load global file names
+       CALL Get(logFile,'logfile')
+       CALL Get(OutFile,'outputfile')
+       CALL Get(InpFile,'inputfile')
+       CALL Get(MaxAtms,'maxatms',Tag_O=CurBase)
+       CALL Get(MaxBlks,'maxblks',Tag_O=CurBase)
+       CALL Get(MaxNon0,'maxnon0',Tag_O=CurBase)
+#ifdef PARALLEL
+       IF(InParallel)THEN
+          CALL Get(MaxAtmsNode,'maxatmsnode', Tag_O=CurBase)
+          CALL Get(MaxBlksNode,'maxblksnode', Tag_O=CurBase)
+          CALL Get(MaxNon0Node,'maxnon0node', Tag_O=CurBase)
+       ENDIF
+#endif
+       CALL Get(ModelChem,'ModelChemistry',Tag_O=CurBase)
+     END SUBROUTINE LoadTopLevelGlobals
+     !==============================================================
+     ! LOAD GLOBAL VARIABLES FROM EACH CLONE/GROUP OF THE HDF FILE
+     !==============================================================
+     SUBROUTINE LoadGroupGlobals(Args)
+       TYPE(ARGMT) :: Args
+       INTEGER :: I,ChkNPrc
+       !-----------------------------------------------------------!
+#ifdef MMech
+       IF(HasQM())THEN
+#endif
+          CALL Get(NEl,'nel',Tag_O=CurGeom)
+          CALL Get(NAtoms,'natoms',Tag_O=CurGeom)
+          CALL New(BSiz,NAtoms)
+          CALL New(OffS,NAtoms)
+          CALL Get(NBasF,'nbasf',Tag_O=CurBase)
+          CALL Get(BSiz,'atsiz',Tag_O=CurBase)
+          CALL Get(OffS,'atoff',Tag_O=CurBase)
+          ! Global value for max block size
+          MaxBlkSize=0
+          DO I=1,NAtoms 
+             MaxBlkSize=MAX(MaxBlkSize,BSiz%I(I)) 
+          ENDDO
+#ifdef PARALLEL
+          IF(InParallel)THEN
+             CALL New(OffSt,NPrc-1,0)
+             CALL Get(OffSt,'dbcsroffsets',Tag_O=CurBase)
+!             CALL Get(ChkNPrc,'chknprc')
+!             IF(NPrc/=ChkNPrc) &
+!                  CALL Halt(' In StartUp() --- Inconsistency: NPrc = '  &
+!                  //TRIM(IntToChar(NPrc))//' ChkNPrc = ' &
+!                  //TRIM(IntToChar(ChkNPrc)))
+             CALL New(Beg,NPrc-1,0)
+             CALL New(End,NPrc-1,0)
+             CALL Get(Beg,'beg',Tag_O=CurBase)
+             CALL Get(End,'end',Tag_O=CurBase)
+          ENDIF
+#endif
+#ifdef MMech
+       ENDIF
+#endif
+       ! Load QM/MM switches
+       CALL InitMMech()
+       ! Load global thresholding values
+       CALL SetThresholds(CurBase)
+     END SUBROUTINE LoadGroupGlobals
+
+
+
+       SUBROUTINE ShutDown(Prog)
+         CHARACTER(LEN=*),INTENT(IN) :: Prog
+         !-------------------------------------------------------------------------------
+#ifdef MMech
+         IF(HasQM()) THEN
+#endif
+         CALL Delete(BSiz)
+         CALL Delete(OffS)
+#ifdef MMech
+         ENDIF
+#endif
+#ifdef PARALLEL
+         IF(InParallel)THEN
+            CALL Delete(Beg)
+            CALL Delete(End)
+         ENDIF
+#endif
+         IF(PrintFlags%Key>=DEBUG_MEDIUM)THEN
+!        IF(PrintFlags%Key>=DEBUG_MEDIUM.OR.PrintFlags%Chk==DEBUG_CHKSUMS)THEN
+            CALL Elapsed_TIME(PerfMon,'Accum',Proc_O=Prog)
+            CALL PPrint(PerfMon,Prog)
+         ENDIF
+         IF(PrintFlags%Key==DEBUG_MAXIMUM) &
+            CALL PPrint(MemStats,Prog)
+
+#ifdef PARALLEL_CLONES
+         CALL CloseHDFGroup(H5GroupID)
+         HDF_CurrentID=HDFFileID
+#endif
+#ifdef PARALLEL
+         IF(InParallel) &
+            CALL FiniMPI()
+         IF(PrintFlags%Key>DEBUG_MEDIUM.AND.MyId==ROOT)  &
+            CALL TimeStamp('Exiting '//TRIM(Prog),Enter_O=.FALSE.)
+#else
+         IF(PrintFlags%Key>DEBUG_MEDIUM)  &
+            CALL TimeStamp('Exiting '//TRIM(Prog),Enter_O=.FALSE.)
+
+#endif 
+         CALL MarkSuccess()
+!        Print time stamp
+         CALL CloseHDF(HDFFileID)
+         STOP 
+      END SUBROUTINE ShutDown     
+      !=========================================================
+      ! MARK FAILURE OF PROG
+      !=========================================================
+      SUBROUTINE MarkFailure(Prog)
+         CHARACTER(LEN=*) :: Prog
+         CALL Put(.TRUE.,'ProgramFailed')
+         CALL Put(Prog  ,'FailedProgram')
+      END SUBROUTINE         
+      !=========================================================
+      ! MARK SUCCESS OF PROG
+      !=========================================================
+      SUBROUTINE MarkSuccess()
+         CALL Put(.FALSE.,'ProgramFailed')
+      END SUBROUTINE         
+!-------------------------------------------------------------------------------
+!
+!-------------------------------------------------------------------------------
+      SUBROUTINE Init_MEMS(A)
+         TYPE(MEMS), INTENT(OUT) :: A
+         A%Allocs=0
+         A%DeAllocs=0
+         A%MemTab=0
+         A%MaxMem=0
+         A%MaxAlloc=0
+      END SUBROUTINE Init_MEMS
+!-------------------------------------------------------------------------------
+!
+!-------------------------------------------------------------------------------
+      SUBROUTINE Init_TIME(A)
+         TYPE(TIME),INTENT(OUT) :: A
+#ifdef PARALLEL
+         IF(InParallel)  &
+            CALL AlignNodes()
+#endif         
+         A%FLOP=Zero
+         A%CPUS=CPUSec()
+         A%Wall=WallSec()
+     END SUBROUTINE Init_TIME
+!-------------------------------------------------------------------------------
+ 
+!-------------------------------------------------------------------------------
+     SUBROUTINE Init_DEBG(A,Prog)
+        TYPE(DEBG), INTENT(OUT)      :: A
+        CHARACTER(LEN=*), INTENT(IN) :: Prog
+#ifdef PARALLEL
+        IF(MyId==ROOT)THEN
+#endif
+           CALL OpenASCII(InpFile,Inp)
+           IF(OptKeyQ(Inp,TRIM(Prog)  ,DBG_NONE).OR.         &
+              OptKeyQ(Inp,GLOBAL_DEBUG,DBG_NONE) )THEN
+              A%Key=DEBUG_NONE
+           ELSEIF(OptKeyQ(Inp,TRIM(Prog)  ,DBG_MEDIUM).OR.   &
+                  OptKeyQ(Inp,GLOBAL_DEBUG,DBG_MEDIUM) )THEN
+              A%Key=DEBUG_MEDIUM
+           ELSEIF(OptKeyQ(Inp,TRIM(Prog),  DBG_MAXIMUM).OR.  &
+                  OptKeyQ(Inp,GLOBAL_DEBUG,DBG_MAXIMUM) )THEN
+              A%Key=DEBUG_MAXIMUM
+           ELSE
+              A%Key=DEBUG_MINIMUM
+           ENDIF
+
+           IF(OptKeyQ(Inp,TRIM(Prog),  DBG_MATRICES).OR. &
+              OptKeyQ(Inp,GLOBAL_DEBUG,DBG_MATRICES) )THEN
+              A%Mat=DEBUG_MATRICES
+           ELSEIF(OptKeyQ(Inp,TRIM(Prog),  PLT_MATRICES).OR. &
+                  OptKeyQ(Inp,GLOBAL_DEBUG,PLT_MATRICES) )THEN
+              A%Mat=PLOT_MATRICES
+           ELSE
+              A%Mat=DEBUG_NONE
+           ENDIF
+
+           IF(OptKeyQ(Inp,TRIM(Prog),  DBG_CHKSUMS).OR. &
+              OptKeyQ(Inp,GLOBAL_DEBUG,DBG_CHKSUMS))THEN
+              A%Chk=DEBUG_CHKSUMS
+           ELSE
+              A%Chk=DEBUG_NONE
+           ENDIF
+
+           IF(OptKeyQ(Inp,TRIM(Prog),  DBG_MMA_STYLE).OR.     &
+              OptKeyQ(Inp,GLOBAL_DEBUG,DBG_MMA_STYLE) )THEN
+              A%Fmt=DEBUG_MMASTYLE
+           ELSEIF(OptKeyQ(Inp,TRIM(Prog),  DBG_FLT_STYLE).OR. &
+                  OptKeyQ(Inp,GLOBAL_DEBUG,DBG_FLT_STYLE) )THEN
+              A%Fmt=DEBUG_FLTSTYLE
+           ELSE
+              A%Fmt=DEBUG_DBLSTYLE
+           ENDIF 
+#ifdef PARALLEL
+        ENDIF
+        IF(InParallel)CALL BCast(A)
+#endif
+        CLOSE(Inp)
+    END SUBROUTINE Init_DEBG
+END MODULE Macros

@@ -55,24 +55,20 @@ MODULE OptionKeys
   ! Perform one force evaluation, with print out of the forces
   CHARACTER(LEN=8),   PARAMETER :: GRAD_FORCE        ='OneForce'
   INTEGER,            PARAMETER :: GRAD_ONE_FORCE    = 1084814 
-  ! Perform quasi-newton geometry optimization for each basis set in turn
-  CHARACTER(LEN=5),   PARAMETER :: GRAD_QUNEW        ='QuNew'
-  INTEGER,            PARAMETER :: GRAD_QNEW_OPT     = 3489343 
-  ! Optimizer type is set to Steepest Descent
-  CHARACTER(LEN=7),   PARAMETER :: GRAD_SDESCENT     ='StpDesc'
-  INTEGER,            PARAMETER :: GRAD_SDESCENT_OPT = 3876123 
-  ! Perform optimization/dynamics on all basis sets in sequence
-  CHARACTER(LEN=8),   PARAMETER :: GRAD_ALL_BASIS    ='AllBasis'
-  ! Constant energy molecular dynamics with the velocity verlet integrator
+  ! Geometry optimization
+  CHARACTER(LEN=8),   PARAMETER :: GRAD_OPTIMIZE     ='Optimize'
+  INTEGER,            PARAMETER :: GRAD_GO_DOWNHILL  = 3489343 
+  ! Molecular dynamics 
   CHARACTER(LEN=2),   PARAMETER :: GRAD_DYNAMICS     = 'MD'      
   INTEGER,            PARAMETER :: GRAD_DO_DYNAMICS  = 6413123 
-  ! Perform a gradients only transition state search using nugged elastic band
-  ! See below for <NEBand>  key words and keys
+  ! Transition state
   CHARACTER(LEN=8),   PARAMETER :: GRAD_TS_SEARCH    ='TSSearch'
   INTEGER,            PARAMETER :: GRAD_TS_SEARCH_NEB= 3577711 
-  ! To use GDIIS or not 
+  ! GDIIS 
   CHARACTER(LEN=8),   PARAMETER :: GRAD_GDIIS        ='GDIIS'
-  ! Coordinate type to use for gradient operations
+  ! Approximate diagonal Hessian in internal coordinates
+  CHARACTER(LEN=13),  PARAMETER :: GRAD_APPRX_HESS    ='ApproxHessian'
+  ! Coordinate types for gradient operations
   CHARACTER(LEN=9),   PARAMETER  :: GRAD_INTERNALS   ='Internals'
   INTEGER,            PARAMETER  :: GRAD_INTS_OPT    =83458086
   CHARACTER(LEN=9),   PARAMETER  :: GRAD_CARTESIAN   ='Cartesian'

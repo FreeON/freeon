@@ -17,6 +17,8 @@ MODULE GeometryKeys
   CHARACTER(LEN=11), PARAMETER :: TRAVEL_ORDER      ='TravelOrder'
   CHARACTER(LEN=14), PARAMETER :: TABLETRAV_ORDER   ='TableTravOrder'
   CHARACTER(LEN=7),  PARAMETER :: NO_ORDER          ='NoOrder'
+  ! Clones=
+  CHARACTER(LEN=6),  PARAMETER :: CLONES            ='Clones'
   !------------------------------------------------------------------------------
   ! Charge=
   CHARACTER(LEN=6),  PARAMETER :: TOTAL_CHARGE      ='Charge' 

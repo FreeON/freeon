@@ -2,9 +2,9 @@ MODULE ControlStructures
   USE GlobalScalars
   USE DerivedTypes
   USE BasisSetParameters
-!
+  !
   INTEGER, PARAMETER                :: MaxSets=6
-!
+  !
   TYPE FileNames
      INTEGER                        :: NewFileID
      INTEGER                        :: OldFileID
@@ -12,14 +12,14 @@ MODULE ControlStructures
      CHARACTER(LEN=DCL)             :: M_HOME
      CHARACTER(LEN=DCL)             :: M_SCRATCH
      CHARACTER(LEN=DCL)             :: SCF_NAME
-     CHARACTER(LEN=DCL)             :: IFile
-     CHARACTER(LEN=DCL)             :: OFile
-     CHARACTER(LEN=DCL)             :: LFile
-     CHARACTER(LEN=DCL)             :: GFile
-     CHARACTER(LEN=DCL)             :: HFile
-     CHARACTER(LEN=DCL)             :: RFile
+     CHARACTER(LEN=DCL)             :: IFile        !-- Input file
+     CHARACTER(LEN=DCL)             :: OFile        !-- Output file
+     CHARACTER(LEN=DCL)             :: LFile        !-- Log file
+     CHARACTER(LEN=DCL)             :: GFile        !-- Geometry file
+     CHARACTER(LEN=DCL)             :: HFile        !-- HDF5 file
+     CHARACTER(LEN=DCL)             :: RFile        !-- Restart HDF5 file
   END TYPE FileNames
-!
+
   TYPE Options
      INTEGER                        :: NMthds
      INTEGER                        :: NModls
@@ -31,18 +31,11 @@ MODULE ControlStructures
      INTEGER,   DIMENSION(MaxSets)  :: Methods
      INTEGER,   DIMENSION(MaxSets)  :: Models
      INTEGER,   DIMENSION(MaxSets)  :: AccuracyLevels
-     LOGICAL                        :: OneBase,DoGDIIS
+     LOGICAL                        :: DoGDIIS,SteepStep
      TYPE(INT_VECT)                 :: RestartState
      TYPE(TOLS),DIMENSION(MaxSets)  :: Thresholds
      TYPE(DEBG)                     :: PFlags
   END TYPE Options
-
-  TYPE Parallel
-     INTEGER                        :: NProc
-     INTEGER                        :: NTime
-     INTEGER                        :: NSpace
-     CHARACTER(LEN=DCL)             :: MPIRun
-  END TYPE Parallel
 
   TYPE Dynamics
      INTEGER                         :: MDAlgorithm
@@ -72,33 +65,31 @@ MODULE ControlStructures
   END TYPE Dynamics
 
   TYPE Geometries
-     INTEGER                         :: Klones
-     TYPE(CRDS),POINTER,DIMENSION(:) :: Klone
+     INTEGER                         :: Clones
+     TYPE(CRDS),POINTER,DIMENSION(:) :: Clone
   END TYPE Geometries
-
-  TYPE State
-     CHARACTER                       :: Action
-     CHARACTER                       :: SubAction
-     TYPE(INT_VECT)                  :: Current
-     TYPE(INT_VECT)                  :: Previous
-  END TYPE State
 
   TYPE BasisSets
      INTEGER                           :: NBSets
      INTEGER,  DIMENSION(MaxSets)      :: NExpt
+     INTEGER,  DIMENSION(MaxSets)      :: MxAts
+     INTEGER,  DIMENSION(MaxSets)      :: MxN0s
+     INTEGER,  DIMENSION(MaxSets)      :: MxBlk
      CHARACTER(LEN=BASESET_CHR_LEN),&
-                DIMENSION(MaxSets)     :: BName  
+          DIMENSION(MaxSets)     :: BName  
      TYPE(BSET),POINTER,            &
-                DIMENSION(:,:)         :: BSets
+          DIMENSION(:,:)         :: BSets
      TYPE(INT_VECT),POINTER,        &
-                DIMENSION(:,:)         :: OffS,BSiz,LnDex
+          DIMENSION(:,:)         :: OffS,BSiz,LnDex
      TYPE(DBL_VECT),POINTER,        &
-                DIMENSION(:,:)         :: DExpt
+          DIMENSION(:,:)         :: DExpt
   END TYPE BasisSets
 
 #ifdef PERIODIC
   TYPE Periodics
      INTEGER                           :: Dimen      !-- Dimension of the System
+     INTEGER                           :: PFFMAXLAY
+     INTEGER                           :: PFFMAXELL  
      LOGICAL                           :: AtomW      !-- Wrap atoms back into box--BE CAREFUL
      LOGICAL                           :: PFFOvRide  !-- Override of Automatic PFF stuff     
      LOGICAL                           :: InVecForm  !-- What form are the Lattice vectors in
@@ -110,16 +101,100 @@ MODULE ControlStructures
   END TYPE Periodics
 #endif
 
+#ifdef PARALLEL
+  TYPE Parallel
+     CHARACTER(LEN=DCL)                :: Invoking
+     CHARACTER(LEN=DCL)                :: ProcFlag
+     CHARACTER(LEN=DCL)                :: MachFlag
+     CHARACTER(LEN=DCL)                :: MachFile
+     INTEGER                           :: NProc
+     INTEGER                           :: NSpace
+     INTEGER, DIMENSION(MaxSets)       :: MxAtsNode,MxBlkNode,MxN0sNode
+     TYPE(INT_VECT),POINTER,        &
+          DIMENSION(:,:)         :: Beg,End,GLO
+  END TYPE Parallel
+#endif
+
+  TYPE State
+     CHARACTER(LEN=DCL)              :: Action
+     CHARACTER(LEN=DCL)              :: SubAction
+     TYPE(INT_VECT)                  :: Current,Previous
+  END TYPE State
+
+  TYPE Optimizer
+     INTEGER                            :: AccL
+     CHARACTER(LEN=DEFAULT_CHR_LEN)     :: CoordType
+     LOGICAL                            :: DoInternals
+     LOGICAL                            :: DoRotOff
+     LOGICAL                            :: DoTranslOff
+     INTEGER                            :: ActStep   
+     INTEGER                            :: ReDefIntC
+     INTEGER                            :: MaxGeOpSteps
+     INTEGER                            :: BlkGeomSize 
+     INTEGER                            :: IMaxGrad
+     INTEGER                            :: IMaxGradNoConstr
+     INTEGER                            :: MaxIt_GrdTrf
+     INTEGER                            :: MaxIt_CooTrf
+     INTEGER                            :: NConstr 
+     INTEGER                            :: NCartConstr 
+     INTEGER                            :: GDIISMinDomCount
+     INTEGER                            :: GDIISInit
+     INTEGER                            :: GDIISMaxMem
+     INTEGER                            :: LSStepMax
+     REAL(DOUBLE)                       :: AINVThrsh    
+     REAL(DOUBLE)                       :: BMatThrsh   
+     REAL(DOUBLE)                       :: StreHessian  
+     REAL(DOUBLE)                       :: BendHessian 
+     REAL(DOUBLE)                       :: LinBHessian 
+     REAL(DOUBLE)                       :: OutPHessian 
+     REAL(DOUBLE)                       :: TorsHessian 
+     REAL(DOUBLE)                       :: StpDescInvH 
+     REAL(DOUBLE)                       :: MaxGrad      
+     REAL(DOUBLE)                       :: RMSGrad      
+     REAL(DOUBLE)                       :: OldRMSGrad      
+     REAL(DOUBLE)                       :: MaxGradNoConstr
+     REAL(DOUBLE)                       :: RMSGradNoConstr
+     REAL(DOUBLE)                       :: MaxStreDispl 
+     REAL(DOUBLE)                       :: MaxBendDispl 
+     REAL(DOUBLE)                       :: MaxLinBDispl 
+     REAL(DOUBLE)                       :: MaxOutPDispl 
+     REAL(DOUBLE)                       :: MaxTorsDispl 
+     REAL(DOUBLE)                       :: RMSIntDispl   
+     REAL(DOUBLE)                       :: GradCrit     
+     REAL(DOUBLE)                       :: StreConvCrit
+     REAL(DOUBLE)                       :: BendConvCrit
+     REAL(DOUBLE)                       :: OutPConvCrit
+     REAL(DOUBLE)                       :: LinBConvCrit
+     REAL(DOUBLE)                       :: TorsConvCrit
+     REAL(DOUBLE)                       :: AINVThresh    
+     REAL(DOUBLE)                       :: GrdTrfCrit    
+     REAL(DOUBLE)                       :: MaxGradDiff   
+     REAL(DOUBLE)                       :: CooTrfCrit    
+     REAL(DOUBLE)                       :: RMSCrit    
+     REAL(DOUBLE)                       :: MaxCartDiff   
+     REAL(DOUBLE)                       :: DistRefresh   
+     REAL(DOUBLE)                       :: ConstrMax     
+     REAL(DOUBLE)                       :: ConstrMaxCrit 
+     REAL(DOUBLE)                       :: GDIISBandWidth 
+     REAL(DOUBLE)                       :: GDIISMetric
+     LOGICAL                            :: NoGDIIS    
+     LOGICAL                            :: GeOpConvgd    
+     LOGICAL                            :: GDIISOn
+     LOGICAL                            :: GDIISMetricOn
+     CHARACTER(LEN=DEFAULT_CHR_LEN)     :: GDIISCoordType
+  END TYPE Optimizer
+
   TYPE Controls
      TYPE(FileNames)  :: Nams
      TYPE(Options)    :: Opts
+     TYPE(Optimizer)  :: Mizr
      TYPE(Dynamics)   :: Dyns
      TYPE(Geometries) :: Geos
 #ifdef PERIODIC
      TYPE(Periodics)  :: PBCs
 #endif
      TYPE(BasisSets)  :: Sets
-!     TYPE(MMechanics) :: QMMM
+     !     TYPE(MMechanics) :: QMMM
 #ifdef PARALLEL
      TYPE(Parallel)   :: MPIs
 #endif

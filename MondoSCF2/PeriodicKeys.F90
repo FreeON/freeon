@@ -1,4 +1,7 @@
 MODULE PeriodicKeys
+   CHARACTER(LEN=19), PARAMETER :: BEGIN_PERIODIC='<BeginPeriodic>'
+   CHARACTER(LEN=17), PARAMETER :: END_PERIODIC  ='<EndPeriodic>'
+
    CHARACTER(LEN=9),  PARAMETER :: PBOUNDRY     ='Periodic' 
 !
    CHARACTER(LEN=3),  PARAMETER :: PBC_OFF      ='Off'
@@ -12,8 +15,9 @@ MODULE PeriodicKeys
 !
    CHARACTER(LEN=8),  PARAMETER :: ATOMW_ON     ='AtomWrap'
    CHARACTER(LEN=10), PARAMETER :: ATOMW_OFF    ='NoAtomWrap'
-   CHARACTER(LEN=9),  PARAMETER :: LVF_VEC      ='VecFormat'
-   CHARACTER(LEN=9),  PARAMETER :: LVF_ANG      ='AngFormat'
+
+!   CHARACTER(LEN=9),  PARAMETER :: LVF_VEC      ='VecFormat'
+!   CHARACTER(LEN=9),  PARAMETER :: LVF_ANG      ='AngFormat'
 !
    CHARACTER(LEN=2),  PARAMETER :: TRAN_VEC     ='tv'
    CHARACTER(LEN=2),  PARAMETER :: ALAT_VEC     ='av'

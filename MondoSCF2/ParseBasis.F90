@@ -1,10 +1,9 @@
-! <<<<<<< ANDERS: THE CURRENT BASIS SET DATA STRUCTURES AND ALGORITHMS ARE NOT HAPPY,
-!         ESPECIALLY IN THE CURRENT USAGE.  I KNOW WE CAN DO MUCH BETTER! >>>>>>>>>>>>
-!
 MODULE ParseBasis
+  USE Order
+  USE InOut
+  USE PrettyPrint
   USE ControlStructures
   USE BasisSetParameters
-  USE InOut
   IMPLICIT NONE
   CHARACTER(LEN=9),  PARAMETER :: BASIS_SETS ='BasisSets' 
 CONTAINS
@@ -12,33 +11,62 @@ CONTAINS
   ! 
   ! 
   !============================================================================
-  SUBROUTINE LoadBasisSets(N,G,B)
+  SUBROUTINE LoadBasisSets(N,O,G,B)
     TYPE(FileNames)    :: N
+    TYPE(Options)      :: O
     TYPE(Geometries)   :: G
     TYPE(BasisSets)    :: B
     INTEGER            :: I,J
     CHARACTER(LEN=DCL) :: BaseFile
    !-------------------------------------------------------------------------!    
     CALL OpenASCII(N%IFile,Inp)
+    ! Find out how many basis sets we are going over, and their names
     CALL ParseBasisNames(B)
-    ALLOCATE(B%BSiz(1:B%NBSets,1:G%Klones))
-    ALLOCATE(B%OffS(1:B%NBSets,1:G%Klones))
-    ALLOCATE(B%BSets(1:B%NBSets,1:G%Klones))
-    ALLOCATE(B%LnDex(1:B%NBSets,1:G%Klones))
-    ALLOCATE(B%DExpt(1:B%NBSets,1:G%Klones))
+    ! Allocate aux stuff...
+    ALLOCATE(B%BSiz(1:G%Clones,1:B%NBSets))
+    ALLOCATE(B%OffS(1:G%Clones,1:B%NBSets))
+    ALLOCATE(B%BSets(1:G%Clones,1:B%NBSets))
+    ALLOCATE(B%LnDex(1:G%Clones,1:B%NBSets))
+    ALLOCATE(B%DExpt(1:G%Clones,1:B%NBSets))
     DO J=1,B%NBSets
        BaseFile=TRIM(N%M_HOME)//'BasisSets/'//TRIM(B%BName(J))//BasF
        CALL OpenASCII(BaseFile,Bas,OldFileQ_O=.TRUE.)
-       DO I=1,G%Klones
-          IF(.NOT.ParseBasisSets(G%Klone(I),B%BSets(I,J),B%BSiz(I,J),B%OffS(I,J)))   &
+       DO I=1,G%Clones
+          IF(.NOT.ParseBasisSets(G%Clone(I),B%BSets(I,J),B%BSiz(I,J),B%OffS(I,J)))   &
                CALL MondoHalt(PRSE_ERROR,'ParseBasisSets failed for basis set file ' &
                               //RTRN//TRIM(BaseFile))
+          B%BSets(I,J)%BName=B%BName(J)
+          CALL BCSRDimensions(G%Clone(I),B%BSets(I,J),O%AccuracyLevels(J), &
+                              B%MxAts(J),B%MxBlk(J),B%MxN0s(J))
           CALL PrimitiveReDistribution(B%BSets(I,J),B%NExpt(J),B%DExpt(I,J),B%Lndex(I,J))
-       ENDDO
+#ifdef FULL_ON_FRONT_END_DEBUG
+          PrintFlags%Set=DEBUG_BASISSET
+          CALL Print_BSET(B%BSets(I,J))
+#endif
+      ENDDO
        CLOSE(Bas,STATUS='KEEP')
     ENDDO
     CLOSE(Inp,STATUS='KEEP')
   END SUBROUTINE LoadBasisSets
+  !============================================================================
+  ! WEAK ATTEMPT TO ESTIMATE NUMBER OF NONZEROS FOR SPARSE MATRICES, NEADS TWIDDLING
+  ! AND SHOULD BECOME OBSOLETE IN NEAR FURTURE AS FASTMAT TAKES OVER...
+  !============================================================================
+  SUBROUTINE BCSRDimensions(G,B,AccL,MaxAtms,MaxBlks,MaxNon0)
+    TYPE(CRDS) :: G
+    TYPE(BSET) :: B
+    INTEGER    :: AccL,MaxAtms,MaxBlks,MaxNon0
+    REAL(DOUBLE) :: BWEstim
+    REAL(DOUBLE),PARAMETER,DIMENSION(4) :: BandWidth=(/ 1.D3, 1.D3, 1.3D3,1.6D3/)
+    REAL(DOUBLE),PARAMETER,DIMENSION(4) :: BWDecay  =(/ 1.D-4,1.D-4,1.D-3,1.D-2/)
+    ! Use assymptotics to set the max matrix dimensions
+    MaxAtms=1+G%NAtms
+    BWEstim=MIN(G%NAtms,CEILING((DBLE(G%NAtms) &
+         +BandWidth(AccL)*BWDecay(AccL)*DBLE(G%NAtms)**2) &
+         /(One+BWDecay(AccL)*DBLE(G%NAtms)**2) ) ) 
+    MaxBlks=1+G%NAtms*BWEstim
+    MaxNon0=1+B%NBasF*(DBLE(B%NBasF)*DBLE(BWEstim)/DBLE(G%NAtms))
+  END SUBROUTINE BCSRDimensions
   !============================================================================
   ! PARSE A BASIS SET, SET UP ITS INDECIES, NORMALIZE THE PRIMITIVES AND 
   ! COMPUTE BLOCKING FOR SPARSE BLOCKED LINEAR ALGEBRA
@@ -58,6 +86,7 @@ CONTAINS
     BS%NCtrt=MaxCntrx
     BS%NPrim=MaxPrmtv
     BS%NAtms=G%NAtms
+    BS%NKind=G%NAtms
     CALL New(BS)
     ! Count kinds and load basis set kind index
     BS%NKind=1
@@ -141,7 +170,12 @@ CONTAINS
 99  CONTINUE
     CLOSE(UNIT=Bas,STATUS='KEEP')
     IF(KFound/=BS%NKind)RETURN
-    ! Correct dimensions
+    ! Computing basis set indexing
+    CALL BSetIndx(BS)
+    ! Normalize the primitives
+    CALL ReNormalizePrimitives(BS)
+    ! Set the correct dimensions
+    B%NAsym=BS%NAsym
     B%LMNLen=BS%LMNLen
     B%NCtrt=BS%NCtrt
     B%NPrim=BS%NPrim
@@ -149,24 +183,21 @@ CONTAINS
     B%NKind=BS%NKind
     ! New basis set
     CALL New(B)
-    B%Kinds%I=BS%Kinds%I
-    B%NCFnc%I=BS%NCFnc%I
-    B%BFKnd%I=BS%BFKnd%I
-    B%LxDex%I=BS%LxDex%I
-    B%LyDex%I=BS%LyDex%I
-    B%LzDex%I=BS%LzDex%I
-    B%NPFnc%I=BS%NPFnc%I
-    B%LStrt%I=BS%LStrt%I
-    B%LStop%I=BS%LStop%I
-    B%ASymm%I=BS%ASymm%I
-    B%Expnt%D=BS%Expnt%D
-    B%CCoef%D=BS%CCoef%D
+    ! Set old eq to new (should go to seteq sometime soon...)
+    B%Kinds%I(1:B%NKind)=BS%Kinds%I(1:B%NKind)
+    B%NCFnc%I(1:B%NKind)=BS%NCFnc%I(1:B%NKind)
+    B%BFKnd%I(1:B%NAtms)=BS%BFKnd%I(1:B%NAtms)
+    B%LxDex%I(1:B%LMNLen)=BS%LxDex%I(1:B%LMNLen)
+    B%LyDex%I(1:B%LMNLen)=BS%LyDex%I(1:B%LMNLen)
+    B%LzDex%I(1:B%LMNLen)=BS%LzDex%I(1:B%LMNLen)
+    B%LStrt%I(1:B%NCtrt,1:B%NKind)=BS%LStrt%I(1:B%NCtrt,1:B%NKind)
+    B%LStop%I(1:B%NCtrt,1:B%NKind)=BS%LStop%I(1:B%NCtrt,1:B%NKind)
+    B%NPFnc%I(1:B%NCtrt,1:B%NKind)=BS%NPFnc%I(1:B%NCtrt,1:B%NKind)
+    B%ASymm%I(:,1:B%NCtrt,1:B%NKind)=BS%ASymm%I(:,1:B%NCtrt,1:B%NKind)
+    B%Expnt%D(1:B%NPrim,1:B%NCtrt,1:B%NKind)=BS%Expnt%D(1:B%NPrim,1:B%NCtrt,1:B%NKind)
+    B%CCoef%D(1:B%LMNLen,1:B%NPrim,1:B%NCtrt,1:B%NKind)=BS%CCoef%D(1:B%LMNLen,1:B%NPrim,1:B%NCtrt,1:B%NKind)
     ! Done with the temp BS
     CALL Delete(BS)
-    ! Computing basis set indexing
-    CALL BSetIndx(B)
-    ! Normalize the primitives
-    CALL ReNormalizePrimatives(B)
     ! Compute blocking for sparse matrix methods
     CALL New(BlkSiz,B%NAtms)
     CALL New(OffSet,B%NAtms)
@@ -176,8 +207,9 @@ CONTAINS
 
   SUBROUTINE ReNormalizePrimitives(A)
     TYPE(BSET)       :: A
+    TYPE(DBL_RNK2)   :: AuxCoef
     REAL(DOUBLE)     :: Z,C,Expnt,RNorm,ZA,ZB,CA,CB,SQNrm
-    INTEGER          :: K,L,M,N,NC,NK,NP,LMN,MinL,MaxL,PFA,PFB
+    INTEGER          :: K,L,M,N,NC,NK,NP,LMN,MinL,MaxL,PFA,PFB,MaxSym,MaxPrm
     REAL(DOUBLE),PARAMETER, &      ! Fact=Sqrt[Pi](2*L-1)!! 2^(-L)
          DIMENSION(0:10)  :: Fact=(/0.17724538509055160273D1, &
                                               0.8862269254527580136D0,  &
@@ -191,30 +223,48 @@ CONTAINS
                                               0.1192924619946090071D6,  &
                                               0.11332783889487855673D7/) 
     !-------------------------------------------------------------------------------------!
+    ! Allocate temp space
+    MaxSym=0
+    MaxPrm=0
     DO K=1,A%NKind
        DO NC=1,A%NCFnc%I(K)
+          MaxSym=MAX(MaxSym,A%ASymm%I(2,NC,K))
+          MaxPrm=MAX(MaxPrm,A%NPFnc%I(NC,K))
+       ENDDO
+    ENDDO
+    CALL New(AuxCoef,(/MaxSym+1,MaxPrm/))    
+    DO K=1,A%NKind
+       DO NC=1,A%NCFnc%I(K)
+          MinL=A%ASymm%I(1,NC,K)
+          MaxL=A%ASymm%I(2,NC,K) 
+          DO NP=1,A%NPFnc%I(NC,K)
+             Z=A%Expnt%D(NP,NC,K)
+             DO L=MinL,MaxL
+                AuxCoef%D(L+1,NP)=A%CCoef%D(L+1,NP,NC,K)*Z**(Half*DBLE(L)+0.75D0)
+             ENDDO
+          ENDDO
           DO LMN=A%LStrt%I(NC,K),A%LStop%I(NC,K)            
+             RNorm=0.0D0
              L=A%LxDex%I(LMN)
              M=A%LyDex%I(LMN)
              N=A%LzDex%I(LMN)
-             RNorm=0.0D0
              DO PFA=1,A%NPFnc%I(NC,K)
                 ZA=A%Expnt%D(PFA,NC,K)
-                CA=A%CCoef%D(L+M+N+1,PFA,NC,K)
+                CA=AuxCoef%D(L+M+N+1,PFA)
                 DO PFB=1,A%NPFnc%I(NC,K)
                    ZB=A%Expnt%D(PFB,NC,K)
-                   CB=A%CCoef%D(L+M+N+1,PFB,NC,K)
-                   RNorm=RNorm+CA*CB*(ZA*ZB)**(Half*DBLE(L+M+N)+0.75D0)/(ZA+ZB)**(DBLE(L+M+N)+1.5D0)
+                   CB=AuxCoef%D(L+M+N+1,PFB)
+                   RNorm=RNorm+CA*CB*(ZA+ZB)**(-DBLE(L+M+N)-1.5D0)
                 ENDDO
              ENDDO
-             RNorm=RNorm*Fact(L)*Fact(M)*Fact(N)
-             SqNrm=1.0D0/SQRT(RNorm)
+             SqNrm=1.0D0/SQRT(RNorm*Fact(L)*Fact(M)*Fact(N))
              DO NP=1,A%NPFnc%I(NC,K)
-                A%CCoef%D(LMN,NP,NC,K)=A%CCoef%D(L+M+N+1,NP,NC,K)*SqNrm
+                A%CCoef%D(LMN,NP,NC,K)=AuxCoef%D(L+M+N+1,NP)*SqNrm
              ENDDO
           ENDDO
        ENDDO
     ENDDO
+    CALL Delete(AuxCoef)
   END SUBROUTINE ReNormalizePrimitives
 
   SUBROUTINE BlockBuild(G,B,BS,OS)

@@ -1,6 +1,7 @@
 ! Authors : Hugh Nymeyer and Matt Challacombe
 MODULE ParseDynamics
   USE Parse
+  USE InOut
   USE DynamicsKeys
   USE ControlStructures
   IMPLICIT NONE
@@ -21,9 +22,6 @@ CONTAINS
        D%MDAlgorithm=MD_SERIAL_VERLET
     ELSEIF(OptKeyQ(Inp,MOLDYNE,MD_PTEMPER))THEN
        D%MDAlgorithm=MD_PARALLEL_REP
-       IF(.NOT.OptIntQ(Inp,MD_REPLICAS,G%Klones))THEN
-          CALL MondoHalt(PRSE_ERROR,'Did not find input number of parallel replicas to run ')
-       ENDIF
     ENDIF
     IF(OptKeyQ(Inp,MOLDYNE,MD_CLOBBER))THEN
        D%CLOBBER=.TRUE.

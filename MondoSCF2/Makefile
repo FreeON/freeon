@@ -28,17 +28,23 @@
 include $(MONDO_COMPILER)
 include $(MONDO_HOME)/Includes/Suffixes
 include $(MONDO_HOME)/Includes/RemoveAll
+
+CPPMISC=#-DFULL_ON_FRONT_END_DEBUG
 #
-ObjectFiles = ControlStructures.o ParseCommands.o OptionKeys.o ParseOptions.o \
+ObjectFiles = GetPID.o Spawn.o \
+	      ControlStructures.o Thresholds.o ParseCommands.o OptionKeys.o ParseOptions.o \
               DynamicsKeys.o ParseDynamics.o GeometryKeys.o ParseGeometries.o \
-              PeriodicKeys.o ParsePeriodic.o ParseBasis.o ParseInput.o        \
-              MondoSCF.o
+              PeriodicKeys.o ParsePeriodic.o ParseBasis.o                     \
+              ParallelKeys.o ParseParallel.o Massage.o ParseInput.o           \
+              PunchHDF.o Overlay.o PrintParsed.o SCFKeys.o SCFs.o Optimizer.o MondoSCF.o
 
 #
 ReleaseFiles= GlobalParsing.x OptionKeys.x ParseCommands.x ParseOptions.x \
               ParseGeometries.x
 #
 all:	$(ObjectFiles) 
+	$(LD) $(LDFLAGS) MondoSCF $(ObjectFiles) $(F90_LIBRARIES) $(LAPACK)
+	mv MondoSCF $(MONDO_EXEC)/MondoSCF
 #
 release:$(ReleaseFiles) 
 #

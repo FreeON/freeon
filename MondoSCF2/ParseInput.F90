@@ -1,10 +1,16 @@
 MODULE ParseInput
-  USE ControlStructures
-  USE ParseCommands
-  USE ParseOptions
-  USE ParseDynamics
-  USE ParseGeometries
+  USE Massage
   USE ParseBasis
+  USE ParseOptions
+  USE ParseCommands
+  USE ParseDynamics
+  USE ParsePeriodic
+  USE ParseGeometries
+  USE ControlStructures
+  USE PrettyPrint
+#ifdef PARALLEL
+  USE ParseParallel
+#endif
 CONTAINS 
   !===============================================================
   ! 'NUFF SAID
@@ -13,18 +19,31 @@ CONTAINS
     TYPE(Controls) :: C
     !-------------------------------------------------------------!
     ! Parse command line and load env and file names 
-    CALL LoadCommands(C % Nams)
+    CALL LoadCommands(C%Nams)
+    ! Set global output and log file
+    OutFile=C%Nams%OFile
+    LogFile=C%Nams%LFile
+    ! Allocate state variables
+    CALL New(C%Stat%Current,3)
+    CALL New(C%Stat%Previous,3)
     ! Parse generic options 
-    CALL LoadOptions(C % Nams, C % Opts)
+    CALL LoadOptions(C%Nams,C%Opts)
     ! Parse dynamics options
-    CALL LoadDynamics(C % Nams, C % Opts, C % Geos, C % Dyns)
+    CALL LoadDynamics(C%Nams,C%Opts,C%Geos,C%Dyns)
     ! Parse geometry or get from restart HDF 
-    CALL LoadGeometry(C % Nams, C % Opts, C % Geos)
+    CALL LoadCoordinates(C%Nams,C%Opts,C%Dyns,C%Geos)
     ! Parse periodic info
-    CALL LoadPeriodic(C % Nams, C % Geos, C % PBCs)
-    ! Massage coodrinates after periodic info is loaded
-    CALL MassageCoordinates( C % Geos, C % PBCs)
-    ! Load basis sets.  
-    CALL LoadBasis( C % Nams, C % Geos, C % Sets ) 
+    CALL LoadPeriodic(C%Nams,C%Geos)
+    ! Massage coodrinates, switch to AUs etc 
+    CALL MassageCoordinates(C%Geos,C%PBCs)
+    ! Load basis sets  
+    CALL LoadBasisSets(C%Nams,C%Opts,C%Geos,C%Sets) 
+#ifdef PARALLEL    
+    ! Parse in parallel info
+    CALL LoadParallel(C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
+#endif
+    CALL Print_CRDS(C%Geos%Clone(1),Unit_O=6,PrintGeom_O='XYZ')
+    !STOP
+
   END SUBROUTINE ParseTheInput
 END MODULE ParseInput
