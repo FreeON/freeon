@@ -1,9 +1,5 @@
 all:	latex dvi
 
-latex:
-	latex Response2.tex
-	latex Response2.tex
-
 new: 	clean links dvi
 
 links:
@@ -22,6 +18,13 @@ ps:	latex
 
 dvi:	latex
 	xdvi -s 2 Response2
+
+latex:
+	latex Response2
+	bibtex Response2
+	latex Response2
+	bibtex Response2
+	latex Response2
 
 clean:
 	rm -rf *.log *.aux *.bbl *.blg *.dvi *~
