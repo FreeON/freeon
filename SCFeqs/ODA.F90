@@ -28,7 +28,7 @@ PROGRAM ODA
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg,MatFile
   CHARACTER(LEN=3),PARAMETER     :: Prog='ODA'
   REAL(DOUBLE)                   :: TrP0T,TrP1T,TrP0F0,TrP1F1,TrP0F1,TrP1F0, &
-                                    TrP0K1,TrP0K0,TrP1K0,TrP1K1,EASM
+                                    TrP0K1,TrP0K0,TrP1K0,TrP1K1,IKPS_Error,IKPS_denom
   !-------------------------------------------------------------------------
 #ifdef PARALLEL
   CALL StartUp(Args,Prog,SERIAL_O=.FALSE.)
@@ -71,14 +71,23 @@ PROGRAM ODA
         TrP0K1 =  Trace(T1)
         CALL Multiply(P,K0,T1)
         TrP1K0 =  Trace(T1)
-        EASM   =  ABS(TrP0K1-TrP1K0)/ABS(TrP0K1+TrP1K0)
+        CALL SetEq(T1,K0)
+        CALL Multiply(T1,-One)
+        CALL Add(K1,T1,T2)
+        CALL Multiply(T2,T2,T3)
+        IKPS_denom = SQRT(ABS(Trace(T3)))
+        IKPS_Error =  ABS(TrP0K1-TrP1K0)/IKPS_denom
 #else
         TrP0K1 =  Trace(PTilde,K1)
         TrP1K0 =  Trace(P,K0)
-        EASM   =  ABS(TrP0K1-TrP1K0)/ABS(TrP0K1+TrP1K0)
+        CALL SetEq(T1,K0)
+        CALL Multiply(T1,-One)
+        CALL Add(K1,T1,T2)
+        IKPS_denom = SQRT(ABS(Trace(T2,T2)))
+        IKPS_Error =  ABS(TrP0K1-TrP1K0)/IKPS_denom
 #endif
-        WRITE(Out,'(a18,D11.5)') " Tr[P0*K1-P1*K0] = ",EASM
-        WRITE(*  ,'(a18,D11.5)') " Tr[P0*K1-P1*K0] = ",EASM
+        WRITE(Out,'(a14,D11.5)') "IKPS_Error = ",IKPS_Error
+        WRITE(*  ,'(a14,D11.5)') "IKPS_Error = ",IKPS_Error
         CLOSE(Out)
      ENDIF
   ENDIF
