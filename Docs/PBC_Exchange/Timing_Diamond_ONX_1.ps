@@ -1,7 +1,7 @@
 %!PS-Adobe-2.0
-%%Title: Timing_pIce_ONX_1.ps
-%%Creator: gnuplot 3.8j patchlevel 0
-%%CreationDate: Wed Jan 14 14:02:01 2004
+%%Title: Timing_Diamond_ONX_1.ps
+%%Creator: gnuplot 3.7 patchlevel 3
+%%CreationDate: Tue May 11 10:48:35 2004
 %%DocumentFonts: (atend)
 %%BoundingBox: 0 0 250 180
 %%Orientation: Portrait
@@ -14,19 +14,15 @@ gnudict begin
 /gnulinewidth 15.000 def
 /userlinewidth gnulinewidth def
 /vshift -46 def
-/dl {10.0 mul} def
+/dl {10 mul} def
 /hpt_ 62 def
 /vpt_ 62 def
 /hpt hpt_ def
 /vpt vpt_ def
-/Rounded false def
 /M {moveto} bind def
 /L {lineto} bind def
 /R {rmoveto} bind def
 /V {rlineto} bind def
-/N {newpath moveto} bind def
-/C {setrgbcolor} bind def
-/f {rlineto fill} bind def
 /vpt2 vpt 2 mul def
 /hpt2 hpt 2 mul def
 /Lshow { currentpoint stroke M
@@ -38,15 +34,12 @@ gnudict begin
 /UP { dup vpt_ mul /vpt exch def hpt_ mul /hpt exch def
   /hpt2 hpt 2 mul def /vpt2 vpt 2 mul def } def
 /DL { Color {setrgbcolor Solid {pop []} if 0 setdash }
- {pop pop pop 0 setgray Solid {pop []} if 0 setdash} ifelse } def
-/BL { stroke userlinewidth 2 mul setlinewidth
-      Rounded { 1 setlinejoin 1 setlinecap } if } def
-/AL { stroke userlinewidth 2 div setlinewidth
-      Rounded { 1 setlinejoin 1 setlinecap } if } def
+ {pop pop pop Solid {pop []} if 0 setdash} ifelse } def
+/BL { stroke userlinewidth 2 mul setlinewidth } def
+/AL { stroke userlinewidth 2 div setlinewidth } def
 /UL { dup gnulinewidth mul /userlinewidth exch def
       dup 1 lt {pop 1} if 10 mul /udl exch def } def
-/PL { stroke userlinewidth setlinewidth
-      Rounded { 1 setlinejoin 1 setlinecap } if } def
+/PL { stroke userlinewidth setlinewidth } def
 /LTb { BL [] 0 0 0 DL } def
 /LTa { AL [1 udl mul 2 udl mul] 0 setdash 0 0 0 setrgbcolor } def
 /LT0 { PL [] 1 0 0 DL } def
@@ -244,52 +237,16 @@ gnudict begin
 /CircW { stroke [] 0 setdash 
   hpt 0 360 arc Opaque stroke } def
 /BoxFill { gsave Rec 1 setgray fill grestore } def
-/BoxColFill {
-  gsave Rec
-  /Fillden exch def
-  currentrgbcolor
-  /ColB exch def /ColG exch def /ColR exch def
-  /ColR ColR Fillden mul Fillden sub 1 add def
-  /ColG ColG Fillden mul Fillden sub 1 add def
-  /ColB ColB Fillden mul Fillden sub 1 add def
-  ColR ColG ColB setrgbcolor
-  fill grestore } def
-%
-% PostScript Level 1 Pattern Fill routine
-% Usage: x y w h s a XX PatternFill
-%	x,y = lower left corner of box to be filled
-%	w,h = width and height of box
-%	  a = angle in degrees between lines and x-axis
-%	 XX = 0/1 for no/yes cross-hatch
-%
-/PatternFill { gsave /PFa [ 9 2 roll ] def
-    PFa 0 get PFa 2 get 2 div add PFa 1 get PFa 3 get 2 div add translate
-    PFa 2 get -2 div PFa 3 get -2 div PFa 2 get PFa 3 get Rec
-    gsave 1 setgray fill grestore clip
-    currentlinewidth 0.5 mul setlinewidth
-    /PFs PFa 2 get dup mul PFa 3 get dup mul add sqrt def
-    0 0 M PFa 5 get rotate PFs -2 div dup translate
-	0 1 PFs PFa 4 get div 1 add floor cvi
-	{ PFa 4 get mul 0 M 0 PFs V } for
-    0 PFa 6 get ne {
-	0 1 PFs PFa 4 get div 1 add floor cvi
-	{ PFa 4 get mul 0 2 1 roll M PFs 0 V } for
-    } if
-    stroke grestore } def
-%
 /Symbol-Oblique /Symbol findfont [1 0 .167 1 0 0] makefont
 dup length dict begin {1 index /FID eq {pop pop} {def} ifelse} forall
 currentdict end definefont pop
 /MFshow {{dup dup 0 get findfont exch 1 get scalefont setfont
-     [ currentpoint ] exch dup 2 get 0 exch R dup 5 get 2 ne {dup dup 6
-     get exch 4 get {show} {stringwidth pop 0 R} ifelse }if dup 5 get 0 eq
-     {dup 3 get {2 get neg 0 exch R pop} {pop aload pop M} ifelse} {dup 5
-     get 1 eq {dup 2 get exch dup 3 get exch 6 get stringwidth pop -2 div
-     dup 0 R} {dup 6 get stringwidth pop -2 div 0 R 6 get
-     show 2 index {aload pop M neg 3 -1 roll neg R pop pop} {pop pop pop
-     pop aload pop M} ifelse }ifelse }ifelse } forall} bind def
-/MFwidth {0 exch {dup 3 get{dup dup 0 get findfont exch 1 get scalefont
-     setfont 6 get stringwidth pop add} {pop} ifelse} forall} bind def
+     [ currentpoint ] exch dup 2 get 0 exch rmoveto dup dup 5 get exch 4 get
+     {show} {stringwidth pop 0 rmoveto}ifelse dup 3 get
+     {2 get neg 0 exch rmoveto pop} {pop aload pop moveto}ifelse} forall} bind def
+/MFwidth {0 exch {dup 3 get{dup dup 0 get findfont exch 1 get scalefont setfont
+      5 get stringwidth pop add}
+    {pop} ifelse} forall} bind def
 /MLshow { currentpoint stroke M
   0 exch R MFshow } bind def
 /MRshow { currentpoint stroke M
@@ -308,281 +265,232 @@ newpath
 (Times) findfont 200 scalefont setfont
 1.000 UL
 LTb
-798 420 M
+882 420 M
 63 0 V
-6101 0 R
+6017 0 R
 -63 0 V
-stroke
-714 420 M
-[ [(Times) 200.0 0.0 true true 0 ( 0)]
+ stroke
+798 420 M
+[ [(Times) 200.0 0.0 true true ( 0)]
 ] -46.7 MRshow
-1.000 UL
-LTb
+882 1162 M
+63 0 V
+6017 0 R
+-63 0 V
+ stroke
 798 1162 M
-63 0 V
-6101 0 R
--63 0 V
-stroke
-714 1162 M
-[ [(Times) 200.0 0.0 true true 0 ( 500)]
+[ [(Times) 200.0 0.0 true true ( 5000)]
 ] -46.7 MRshow
-1.000 UL
-LTb
+882 1904 M
+63 0 V
+6017 0 R
+-63 0 V
+ stroke
 798 1904 M
-63 0 V
-6101 0 R
--63 0 V
-stroke
-714 1904 M
-[ [(Times) 200.0 0.0 true true 0 ( 1000)]
+[ [(Times) 200.0 0.0 true true ( 10000)]
 ] -46.7 MRshow
-1.000 UL
-LTb
+882 2646 M
+63 0 V
+6017 0 R
+-63 0 V
+ stroke
 798 2646 M
-63 0 V
-6101 0 R
--63 0 V
-stroke
-714 2646 M
-[ [(Times) 200.0 0.0 true true 0 ( 1500)]
+[ [(Times) 200.0 0.0 true true ( 15000)]
 ] -46.7 MRshow
-1.000 UL
-LTb
+882 3388 M
+63 0 V
+6017 0 R
+-63 0 V
+ stroke
 798 3388 M
-63 0 V
-6101 0 R
--63 0 V
-stroke
-714 3388 M
-[ [(Times) 200.0 0.0 true true 0 ( 2000)]
+[ [(Times) 200.0 0.0 true true ( 20000)]
 ] -46.7 MRshow
-1.000 UL
-LTb
+882 4130 M
+63 0 V
+6017 0 R
+-63 0 V
+ stroke
 798 4130 M
-63 0 V
-6101 0 R
--63 0 V
-stroke
-714 4130 M
-[ [(Times) 200.0 0.0 true true 0 ( 2500)]
+[ [(Times) 200.0 0.0 true true ( 25000)]
 ] -46.7 MRshow
-1.000 UL
-LTb
+882 4872 M
+63 0 V
+6017 0 R
+-63 0 V
+ stroke
 798 4872 M
-63 0 V
-6101 0 R
--63 0 V
-stroke
-714 4872 M
-[ [(Times) 200.0 0.0 true true 0 ( 3000)]
+[ [(Times) 200.0 0.0 true true ( 30000)]
 ] -46.7 MRshow
-1.000 UL
-LTb
-798 420 M
+882 420 M
 0 63 V
 0 4389 R
 0 -63 V
-stroke
-798 280 M
-[ [(Times) 200.0 0.0 true true 0 ( 0)]
+ stroke
+882 280 M
+[ [(Times) 200.0 0.0 true true ( 0)]
 ] -46.7 MCshow
-1.000 UL
-LTb
-1483 420 M
+1642 420 M
 0 63 V
 0 4389 R
 0 -63 V
-stroke
-1483 280 M
-[ [(Times) 200.0 0.0 true true 0 ( 50)]
+ stroke
+1642 280 M
+[ [(Times) 200.0 0.0 true true ( 100)]
 ] -46.7 MCshow
-1.000 UL
-LTb
-2168 420 M
+2402 420 M
 0 63 V
 0 4389 R
 0 -63 V
-stroke
-2168 280 M
-[ [(Times) 200.0 0.0 true true 0 ( 100)]
+ stroke
+2402 280 M
+[ [(Times) 200.0 0.0 true true ( 200)]
 ] -46.7 MCshow
-1.000 UL
-LTb
-2853 420 M
+3162 420 M
 0 63 V
 0 4389 R
 0 -63 V
-stroke
-2853 280 M
-[ [(Times) 200.0 0.0 true true 0 ( 150)]
+ stroke
+3162 280 M
+[ [(Times) 200.0 0.0 true true ( 300)]
 ] -46.7 MCshow
-1.000 UL
-LTb
-3538 420 M
+3922 420 M
 0 63 V
 0 4389 R
 0 -63 V
-stroke
-3538 280 M
-[ [(Times) 200.0 0.0 true true 0 ( 200)]
+ stroke
+3922 280 M
+[ [(Times) 200.0 0.0 true true ( 400)]
 ] -46.7 MCshow
-1.000 UL
-LTb
-4222 420 M
+4682 420 M
 0 63 V
 0 4389 R
 0 -63 V
-stroke
-4222 280 M
-[ [(Times) 200.0 0.0 true true 0 ( 250)]
+ stroke
+4682 280 M
+[ [(Times) 200.0 0.0 true true ( 500)]
 ] -46.7 MCshow
-1.000 UL
-LTb
-4907 420 M
+5442 420 M
 0 63 V
 0 4389 R
 0 -63 V
-stroke
-4907 280 M
-[ [(Times) 200.0 0.0 true true 0 ( 300)]
+ stroke
+5442 280 M
+[ [(Times) 200.0 0.0 true true ( 600)]
 ] -46.7 MCshow
-1.000 UL
-LTb
-5592 420 M
+6202 420 M
 0 63 V
 0 4389 R
 0 -63 V
-stroke
-5592 280 M
-[ [(Times) 200.0 0.0 true true 0 ( 350)]
+ stroke
+6202 280 M
+[ [(Times) 200.0 0.0 true true ( 700)]
 ] -46.7 MCshow
-1.000 UL
-LTb
-6277 420 M
-0 63 V
-0 4389 R
-0 -63 V
-stroke
-6277 280 M
-[ [(Times) 200.0 0.0 true true 0 ( 400)]
-] -46.7 MCshow
-1.000 UL
-LTb
 6962 420 M
 0 63 V
 0 4389 R
 0 -63 V
-stroke
+ stroke
 6962 280 M
-[ [(Times) 200.0 0.0 true true 0 ( 450)]
+[ [(Times) 200.0 0.0 true true ( 800)]
 ] -46.7 MCshow
 1.000 UL
 LTb
-1.000 UL
-LTb
-798 420 M
-6164 0 V
+882 420 M
+6080 0 V
 0 4452 V
--6164 0 V
-798 420 L
-LTb
-140 2646 M
+-6080 0 V
+882 420 L
+ stroke
+70 2646 M
 currentpoint gsave translate 90 rotate 0 0 moveto
-[ [(Times) 280.0 0.0 true true 0 (CPU Time \(sec\))]
+[ [(Times) 280.0 0.0 true true (CPU Time \(sec\))]
 ] -46.7 MCshow
 grestore
-LTb
-3880 -50 M
-[ [(Times) 280.0 0.0 true true 0 (Number of Molecules)]
+3922 -50 M
+[ [(Times) 280.0 0.0 true true (Number of Carbon Atoms)]
 ] -46.7 MCshow
+%
+%
+%
+1300 4600 M
+[ [(Times) 250.0 0.0 true true (Exchange Matrix Build)]
+] -46.7 MLshow
+%
+%
+1300 4200 M
+[ [(Times) 250.0 0.0 true true (Coulomb Matrix Build)]
+] -46.7 MLshow
+%
+%
+1300 3800 M
+[ [(Times) 250.0 0.0 true true (Density Matrix Solve \(x 10\))]
+] -46.7 MLshow
+%
+%
 1.000 UP
 1.000 UP
 1.000 UL
-%
-%
-%
-LTb
-1200 4300 M
-[ [(Times) 250.0 0.0 true true 0 (Coulomb Matrix Build)]
-] -46.7 MLshow
 LT1
-%798 420 M
-%27 16 V
-%192 85 V
-%521 232 V
-%1013 471 V
-%1671 743 V
-1538 753 M
-6715 3174 L
-798 420 Circle
-825 436 Circle
-1017 521 Circle
-1538 753 Circle
-2551 1224 Circle
-4222 1967 Circle
-6715 3174 Circle
-1000 4300 Circle
+943 463 Circle
+1004 492 Circle
+1125 550 Circle
+1368 646 Circle
+1612 766 Circle
+1976 920 Circle
+2524 1181 Circle
+3071 1463 Circle
+3800 1783 Circle
+4773 2149 Circle
+5746 2652 Circle
+6962 3262 Circle
+%
+1100 4250 Circle
+%
+943 463 M
+6962 3262 L
+%
 1.000 UP
 1.000 UL
-%
-%
-%
-LTb
-1200 4600 M
-[ [(Times) 250.0 0.0 true true 0 (Exchange Matrix Build)]
-] -46.7 MLshow
 LT0
-%798 420 M
-%27 8 V
-%192 84 V
-%521 314 V
-%1013 622 V
-%4222 2579 L
-1538 826 M
-6715 4357 L
-798 420 Box
-825 428 Box
-1017 512 Box
-1538 826 Box
-2551 1448 Box
-4222 2579 Box
-6715 4357 Box
-1000 4600 Box
+943 430 Box
+1004 442 Box
+1125 467 Box
+1368 534 Box
+1612 635 Box
+1976 784 Box
+2524 1155 Box
+3071 1549 Box
+3800 2124 Box
+4773 2817 Box
+5746 3547 Box
+6962 4682 Box
+%
+1100 4650 Box
+%
+2524 1155 M
+6962 4600 L
+%
 1.000 UP
 1.000 UL
-%
-%
-%
-LTb
-1200 4000 M
-[ [(Times) 250.0 0.0 true true 0 (Density Matrix Solve \(x 10\))]
-] -46.7 MLshow
 LT2
-%798 420 M
-%27 2 V
-%192 14 V
-%521 115 V
-%2551 882 L
-%1671 652 V
-1538 551 M
-6715 2584 L
-798 420 Dia
-825 422 Dia
-1017 436 Dia
-1538 551 Dia
-2551 882 Dia
-4222 1534 Dia
-6715 2584 Dia
-1000 4000 Dia
-1.000 UL
+943 420 TriU
+1004 420 TriU
+1125 421 TriU
+1368 429 TriU
+1612 445 TriU
+1976 490 TriU
+2524 632 TriU
+3071 858 TriU
+3800 1300 TriU
+4773 2158 TriU
+5746 3240 TriU
+6962 4695 TriU
 %
-LTb
-798 420 M
-6164 0 V
-0 4452 V
--6164 0 V
-798 420 L
-1.000 UP
+1100 3850 TriU
+%
+3800 1300 M
+6962 4600 L
+%
 stroke
 grestore
 end
