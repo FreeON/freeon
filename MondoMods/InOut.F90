@@ -23,7 +23,7 @@ MODULE InOut
           Get_BondD,    Get_AtmB,                   &
           Get_CHR_VECT, Get_LOG_VECT, Get_INTC,     &
           Get_LOG_SCLR, Get_BSET,     Get_CRDS,     &
-          Get_TOLS,     Get_BCSR,                   & 
+          Get_TOLS,     Get_BCSR,     Get_PBCFit,   & 
 #ifdef PARALLEL
           Get_DBCSR,                                &
 #endif
@@ -39,7 +39,7 @@ MODULE InOut
           Put_DBL_RNK4, Put_DBL_RNK6, Put_CHR_SCLR, &
           Put_CHR_VECT, Put_LOG_VECT, Put_CHR10_VECT,&
           Put_Sp1x1,    Put_BondD,                  &
-          Put_AtmB,     Put_INTC,                   &
+          Put_AtmB,     Put_INTC,     Put_PBCFit,   &
           Put_LOG_SCLR, Put_BSET,     Put_CRDS,     &
 #ifdef PARALLEL
           Put_DBCSR,                                &
@@ -1161,6 +1161,7 @@ CONTAINS
                 CALL Get(GM%IntCs     ,'IntCs'        ,Tag_O=Tag_O)
                 CALL Get(GM%Bond      ,'Bond'         ,Tag_O=Tag_O)
                 CALL Get(GM%AtmB      ,'AtmB'         ,Tag_O=Tag_O)
+                CALL Get(GM%PBCFit    ,'PBCFit'       ,Tag_O=Tag_O)
               END SUBROUTINE Get_CRDS
               !-------------------------------------------------------------------------------
               !     Put a coordinate set
@@ -1200,6 +1201,7 @@ CONTAINS
                 CALL Put(GM%IntCs     ,'IntCs'        ,Tag_O=Tag_O)
                 CALL Put(GM%Bond      ,'Bond'         ,Tag_O=Tag_O)
                 CALL Put(GM%AtmB      ,'AtmB'         ,Tag_O=Tag_O)
+                CALL Put(GM%PBCFit    ,'PBCFit'       ,Tag_O=Tag_O)
               END SUBROUTINE Put_CRDS
               !-------------------------------------------------------------------------------
               !     Get a BCSR matrix
@@ -2311,5 +2313,36 @@ CONTAINS
 !
 !---------------------------------------------------------------
 !
+  SUBROUTINE Get_PBCFit(A,Name,Tag_O)
+    TYPE(PBCFits) :: A
+    CHARACTER(LEN=*) :: Name
+    CHARACTER(LEN=*),OPTIONAL :: Tag_O
+    !
+    CALL Get(A%MaxMem,TRIM(Name)//'MaxMem',Tag_O=Tag_O)
+    CALL Get(A%ActMem,TRIM(Name)//'ActMem',Tag_O=Tag_O)
+    IF(A%MaxMem>LattMaxMem) CALL Halt('A%MaxMem>LattMaxMem in Get_PBCFit')
+    IF(.NOT.AllocQ(A%Alloc)) THEN
+      CALL New(A,LattMaxMem)
+    ELSE
+      IF(A%MaxMem/=LattMaxMem) CALL Halt('A%MaxMem/=LattMaxMem in Get_PBCFit')
+    ENDIF
+    CALL Get(A%AWeights,TRIM(Name)//'AWeights',Tag_O=Tag_O)
+    CALL Get(A%PBCValues,TRIM(Name)//'PBCValues',Tag_O=Tag_O)
+    CALL Get(A%PBCGrads,TRIM(Name)//'PBCGrads',Tag_O=Tag_O)
+  END SUBROUTINE Get_PBCFit
+!
+!---------------------------------------------------------------
+!
+  SUBROUTINE Put_PBCFit(A,Name,Tag_O)
+    TYPE(PBCFits)    :: A
+    CHARACTER(LEN=*) :: Name
+    CHARACTER(LEN=*),OPTIONAL :: Tag_O
+    !
+    CALL Put(A%MaxMem,TRIM(Name)//'MaxMem',Tag_O=Tag_O)
+    CALL Put(A%ActMem,TRIM(Name)//'ActMem',Tag_O=Tag_O)
+    CALL Put(A%AWeights,TRIM(Name)//'AWeights',Tag_O=Tag_O)
+    CALL Put(A%PBCValues,TRIM(Name)//'PBCValues',Tag_O=Tag_O)
+    CALL Put(A%PBCGrads,TRIM(Name)//'PBCGrads',Tag_O=Tag_O)
+  END SUBROUTINE Put_PBCFit
 END MODULE
 

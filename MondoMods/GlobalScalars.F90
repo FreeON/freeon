@@ -210,6 +210,10 @@ MODULE GlobalScalars
 !
    INTEGER,PARAMETER :: IntCPerAtom=30
 !
+! Maximum array size for remembered PBC lattice optimization points
+!
+   INTEGER,PARAMETER  :: LattMaxMem=10
+!
 ! SCF global arrays 
 !
    INTEGER,DIMENSION(3),SAVE :: Current

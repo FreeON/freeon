@@ -310,6 +310,17 @@ MODULE DerivedTypes
 !
 !----------------------------------------------------------------------
 !
+   TYPE PBCFits     
+     INTEGER        :: Alloc     !-- Allocation key
+     INTEGER        :: MaxMem
+     INTEGER        :: ActMem
+     TYPE(DBL_VECT) :: AWeights
+     TYPE(DBL_RNK2) :: PBCValues
+     TYPE(DBL_RNK2) :: PBCGrads
+   END TYPE PBCFits     
+!
+!----------------------------------------------------------------------
+!
 !  Coordinates
 !
    TYPE CRDS
@@ -353,6 +364,7 @@ MODULE DerivedTypes
       TYPE(INTC)       :: IntCs
       TYPE(BONDDATA)   :: Bond
       TYPE(ATOMBONDS)  :: AtmB
+      TYPE(PBCFits)    :: PBCFit    !-- Points used for Lattice fit 
    END TYPE 
 !-------------------------------------------------------------------------------------
 !  Cartesian Multipoles of the Density

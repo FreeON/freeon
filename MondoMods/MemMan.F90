@@ -14,6 +14,7 @@ MODULE MemMan
                        New_LOG_VECT, New_CHR10_VECT,&
                        New_BONDDATA, New_ATOMBONDS,&
                        New_PBCInfo,  New_CRDS,     &
+                       New_PBCFit ,                &
 #ifdef PARALLEL 
                        New_DBCSR,    New_MPI_INDX, &
 #endif    
@@ -38,6 +39,7 @@ MODULE MemMan
                        Delete_LOG_VECT, Delete_CHR10_VECT, &
                        Delete_BONDDATA, Delete_ATOMBONDS,&
                        Delete_PBCInfo,  Delete_CRDS,     &
+                       Delete_PBCFit  ,                   &
 #ifdef PARALLEL 
                        Delete_DBCSR,    Delete_MPI_INDX, &
 #endif    
@@ -594,6 +596,7 @@ MODULE MemMan
          CALL New(A%IntCs,0)
          CALL New(A%AtmB,0,0)
          CALL New(A%Bond,0)
+         CALL New(A%PBCFit,LattMaxMem)
          A%Alloc=ALLOCATED_TRUE
          A%ETotal=Zero
       END SUBROUTINE New_CRDS
@@ -997,6 +1000,7 @@ MODULE MemMan
          CALL Delete(A%IntCs)
          CALL Delete(A%Bond)
          CALL Delete(A%AtmB)
+         CALL Delete(A%PBCFit)
          A%NAtms=0
          A%Alloc=ALLOCATED_FALSE
       END SUBROUTINE Delete_CRDS 
@@ -1475,5 +1479,32 @@ MODULE MemMan
     ENDIF
 !
   END SUBROUTINE Delete_CellSet
-
+!
+!--------------------------------------------------------------------
+!
+  SUBROUTINE New_PBCFit(A,MaxMem)
+    TYPE(PBCFits) :: A
+    INTEGER       :: MaxMem
+    !
+    A%MaxMem=MaxMem
+    A%ActMem=0
+    CALL New(A%AWeights,A%MaxMem)
+    CALL New(A%PBCValues,(/9,A%MaxMem/))
+    CALL New(A%PBCGrads,(/9,A%MaxMem/))
+    A%Alloc=ALLOCATED_TRUE
+  END SUBROUTINE New_PBCFit
+!
+!--------------------------------------------------------------------
+!
+  SUBROUTINE Delete_PBCFit(A)
+    TYPE(PBCFits) :: A
+    !
+    A%MaxMem=0
+    A%ActMem=0
+    CALL Delete(A%AWeights)
+    CALL Delete(A%PBCValues)
+    CALL Delete(A%PBCGrads)
+    A%Alloc=ALLOCATED_FALSE
+  END SUBROUTINE Delete_PBCFit
+!
 END MODULE
