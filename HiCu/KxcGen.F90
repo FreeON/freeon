@@ -29,7 +29,7 @@ MODULE KxcGen
       TYPE(DBL_RNK2)         :: Temp
       TYPE(AtomPair)         :: Pair
       INTEGER                :: AtA,AtB
-      INTEGER                :: JP,K,NA,NB,NAB,P,Q,R,I,J   
+      INTEGER                :: JP,K,NA,NB,NAB,P,Q,R,I,J,NACount 
 !---------------------------------------------- 
 !     Initialize the matrix and associated indecies
       P=1; 
@@ -42,7 +42,7 @@ MODULE KxcGen
          DO AtB=1,NAtoms
             IF(SetAtomPair(GM,BS,AtA,AtB,Pair)) THEN
                NAB = Pair%NA*Pair%NB
-               IF(AtB<=AtA)THEN
+               IF(AtB<=AtA)THEN   
 !                 Compute only the lower triangle of symmetric Kxc
                   Kxc%MTrix%D(R:R+NAB-1)=KxcBlock(Pair,CubeRoot)
                ENDIF
@@ -158,7 +158,7 @@ MODULE KxcGen
                          + (Prim%A(3)-Prim%B(3))**2
 #endif
 !
-             IF(TestPrimPair(Prim%Xi,Prim%AB2))THEN
+             IF(TestPrimPair(Prim%Ell,Prim%Xi,Prim%AB2)) THEN
                 Prim%PFA=PFA 
                 Prim%PFB=PFB
 !               Set primitive values

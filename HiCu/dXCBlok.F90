@@ -82,8 +82,7 @@ MODULE dXCBlok
                          + (Prim%A(2)-Prim%B(2))**2 &
                          + (Prim%A(3)-Prim%B(3))**2
 #endif
-!
-             IF(TestPrimPair(Prim%Xi,Prim%AB2))THEN
+             IF(TestPrimPair(Prim%Ell,Prim%Xi,Prim%AB2)) THEN
                 Prim%PFA=PFA 
                 Prim%PFB=PFB
 !               Set primitive values, find distributions wheight
