@@ -151,7 +151,6 @@ CONTAINS
     REAL(DOUBLE)             :: Ax,Ay,Az,Bx,By,Bz
     REAL(DOUBLE)             :: Cx,Cy,Cz,Dx,Dy,Dz
     REAL(DOUBLE)             :: AB2,AC2,CD2
-    TYPE(DBL_VECT)           :: MR
     !-------------------------------------------------------------------
     !
     NRows=0

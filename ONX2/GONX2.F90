@@ -17,7 +17,7 @@ PROGRAM GONX2
   !
   USE ONX2DataType
   USE ONXCtrSclg   , ONLY: TrnMatBlk
-  USE ONX2List     , ONLY: AllocList3,DeAllocList3,MakeGList,PrintList3
+  USE ONX2List     , ONLY: AllocList,DeAllocList,MakeGList,PrintList
   USE GONX2ComputDK, ONLY: ComputDK
 
   !
@@ -37,10 +37,9 @@ PROGRAM GONX2
 #else
   TYPE(BCSR)                     :: D
 #endif
-  TYPE(BSET)                     :: BS
-  TYPE(CRDS)                     :: GM
+  TYPE(BSET)                     :: BSc
+  TYPE(CRDS)                     :: GMc
   TYPE(ARGMT)                    :: Args
-  TYPE(INT_VECT)                 :: Stat
 !--------------------------------------------------------------------------------
 #ifdef ONX2_PARALLEL
   TYPE(DBL_RNK2)                 :: GradTmp
@@ -55,14 +54,16 @@ PROGRAM GONX2
   INTEGER                        :: CMin,CMax,DMin,DMax,IErr
   INTEGER                        :: ANbr,BNbr,CNbr,DNbr
 #endif
-  INTEGER                        :: OldFileID,I,K,Off
   REAL(DOUBLE)                   :: Time1,Time2
   REAL(DOUBLE)                   :: TmTM,TmML,TmGx,TmAL,TmDL
-  CHARACTER(LEN=DEFAULT_CHR_LEN) :: InFile,RestartHDF
   CHARACTER(LEN=*),PARAMETER     :: Prog='GONX2'
 !--------------------------------------------------------------------------------
   TYPE(INT_RNK2) :: OffArr
-  TYPE(CList3), DIMENSION(:), POINTER :: ListC,ListD
+#ifdef ONX2_PARALLEL
+  TYPE(CList), DIMENSION(:), POINTER :: ListC,ListD
+#else
+  TYPE(CList), DIMENSION(:), POINTER :: ListC
+#endif
 !--------------------------------------------------------------------------------
   !
 #ifdef ONX2_PARALLEL
@@ -75,8 +76,8 @@ PROGRAM GONX2
   CALL Get(OffS ,'atoff',Tag_O=PrvBase)
   CALL Get(NBasF,'nbasf',Tag_O=PrvBase)
   !
-  CALL Get(BS,Tag_O=CurBase)
-  CALL Get(GM,Tag_O=CurGeom)
+  CALL Get(BSc,Tag_O=CurBase)
+  CALL Get(GMc,Tag_O=CurGeom)
   !
   !------------------------------------------------
   ! Initialization and allocations.
@@ -93,18 +94,21 @@ PROGRAM GONX2
   CALL New(GradAux,(/3,NAtoms/))
   CALL DBL_VECT_EQ_DBL_SCLR(3*NAtoms,GradAux%D(1,1),0.0D0)
   !
-  CALL New(OffArr,(/BS%NCtrt,BS%NKind/))
+  CALL New(OffArr,(/BSc%NCtrt,BSc%NKind/))
   !
   CALL New(BoxX,(/3,3/))
   BoxX%D=0.0D0
   !
-  CALL GetBufferSize(GM,BS)
+  CALL GetBufferSize(GMc,BSc,GMc,BSc)
   !
-  CALL GetOffArr(OffArr,BS)
+  CALL GetOffArr(OffArr,BSc)
   !
   !------------------------------------------------
   ! Get denstiy matrix.
   !
+#ifdef ONX2_PARALLEL
+  IF(MyID.EQ.ROOT) &
+#endif
   WRITE(*,*) '-------- We are in GONX2 --------'
   !
   SELECT CASE(SCFActn)
@@ -123,11 +127,11 @@ PROGRAM GONX2
   !
 #ifdef ONX2_PARALLEL
   Time1 = MPI_WTIME()
-  CALL TrnMatBlk(BS,GM,DFMcd)
+  CALL TrnMatBlk(BSc,GMc,DFMcd)
   Time2 = MPI_WTIME()
 #else
   CALL CPU_TIME(Time1)
-  CALL TrnMatBlk(BS,GM,D)
+  CALL TrnMatBlk(BSc,GMc,D)
   CALL CPU_TIME(Time2)
 #endif
   TmTM = Time2-Time1
@@ -141,12 +145,12 @@ PROGRAM GONX2
   !write(*,*) 'CMin',CMin,'CMax',CMax,'MyID',MyID
   !write(*,*) 'DMin',DMin,'DMax',DMax,'MyID',MyID
   !
-  CALL AllocList3(ListC,CMin,CMax)
-  CALL AllocList3(ListD,DMin,DMax)
+  CALL AllocList(ListC,CMin,CMax)
+  CALL AllocList(ListD,DMin,DMax)
   Time2 = MPI_WTIME()
 #else
   CALL CPU_TIME(Time1)
-  CALL AllocList3(ListC,1,NAtoms)
+  CALL AllocList(ListC,1,NAtoms)
   CALL CPU_TIME(Time2)
 #endif
   TmAL = Time2-Time1
@@ -157,14 +161,14 @@ PROGRAM GONX2
   !WRITE(*,*) 'make List'
 #ifdef ONX2_PARALLEL
   Time1 = MPI_WTIME()
-  CALL MakeGList(ListC,GM,BS,CS_OUT,CPt,CNbr,APt,ANbr)
+  CALL MakeGList(ListC,GMc,BSc,CS_OUT,CPt,CNbr,APt,ANbr)
   CALL MPI_Barrier(MONDO_COMM,IErr)
-  CALL MakeGList(ListD,GM,BS,CS_OUT,DPt,DNbr,BPt,BNbr)
+  CALL MakeGList(ListD,GMc,BSc,CS_OUT,DPt,DNbr,BPt,BNbr)
   CALL MPI_Barrier(MONDO_COMM,IErr)
   Time2 = MPI_WTIME()
 #else
   CALL CPU_TIME(Time1)
-  CALL MakeGList(ListC,GM,BS,CS_OUT)
+  CALL MakeGList(ListC,GMc,BSc,CS_OUT)
   CALL CPU_TIME(Time2)
 #endif
   TmML = Time2-Time1
@@ -176,10 +180,10 @@ PROGRAM GONX2
 #ifdef ONX2_DBUG
   !WRITE(*,*) 'Print List'
 #ifdef ONX2_PARALLEL
-  CALL PrintList3(ListC)
-  CALL PrintList3(ListD)
+  CALL PrintList(ListC)
+  CALL PrintList(ListD)
 #else
-  CALL PrintList3(ListC)
+  CALL PrintList(ListC)
 #endif
   !WRITE(*,*) 'Print List:ok'
 #endif
@@ -190,7 +194,7 @@ PROGRAM GONX2
 #ifdef ONX2_PARALLEL
   CALL GetDab(DFMab,APt,ANbr,BPt,BNbr,Args)
   Time1 = MPI_WTIME()
-  CALL TrnMatBlk(BS,GM,DFMab)
+  CALL TrnMatBlk(BSc,GMc,DFMab)
   Time2 = MPI_WTIME()
   TmTM = TmTM+Time2-Time1
 #endif
@@ -200,11 +204,11 @@ PROGRAM GONX2
   !WRITE(*,*) 'DKx'
 #ifdef ONX2_PARALLEL
   Time1 = MPI_WTIME()
-  CALL ComputDK(DFMcd,DFMab,GradX,ListC,ListD,OffArr,GM,BS,CS_OUT)
+  CALL ComputDK(DFMcd,DFMab,GradX,ListC,ListD,OffArr,GMc,BSc,CS_OUT)
   Time2 = MPI_WTIME()
 #else
   CALL CPU_TIME(Time1)
-  CALL ComputDK(D,GradX,BoxX,ListC,ListC,OffArr,GM,BS,CS_OUT)
+  CALL ComputDK(D,GradX,BoxX,ListC,ListC,OffArr,GMc,BSc,CS_OUT)
   CALL CPU_TIME(Time2)
 #endif
   TmGx = Time2-Time1
@@ -215,12 +219,12 @@ PROGRAM GONX2
   !WRITE(*,*) 'deallocate List'
 #ifdef ONX2_PARALLEL
   Time1 = MPI_WTIME()
-  CALL DeAllocList3(ListC)
-  CALL DeAllocList3(ListD)
+  CALL DeAllocList(ListC)
+  CALL DeAllocList(ListD)
   Time2 = MPI_WTIME()
 #else
   CALL CPU_TIME(Time1)
-  CALL DeAllocList3(ListC)
+  CALL DeAllocList(ListC)
   CALL CPU_TIME(Time2)
 #endif
   TmDL = Time2-Time1
@@ -365,8 +369,8 @@ PROGRAM GONX2
   CALL Delete(BoxX)
   CALL Delete(OffArr)
   !
-  CALL Delete(BS)
-  CALL Delete(GM)
+  CALL Delete(BSc)
+  CALL Delete(GMc)
   !
   CALL ShutDown(Prog)
   !

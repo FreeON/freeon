@@ -35,12 +35,12 @@ EXTRA_INCLUDES=-I$(MONDO_HOME)/TwoE
 
 all: GONX2 ONX2
 
-Objects = QuickSortDis.o QSDis.o PartDrv.o ONXParameters.o ONXInit.o ONXGet.o   \
+Objects = QSDis.o PartDrv.o ONXParameters.o ONXInit.o ONXGet.o   \
 	  ONXFillOut.o Stats.o ONXRng.o \
 	  ONX2F77.o ONX2DataType.o ONXCtrSclg.o \
 	  IntSSSS.o  ONX2List.o ONX2ComputK.o ONX2.o
 #
-GObjects = QuickSortDis.o QSDis.o PartDrv.o ONXParameters.o ONXGet.o \
+GObjects = QSDis.o PartDrv.o ONXParameters.o ONXGet.o \
 	   ONX2F77.o ONX2DataType.o ONXCtrSclg.o \
 	   IntSSSS.o ONX2List.o GONX2ComputDK.o GONX2.o
 #

@@ -3,33 +3,7 @@ MODULE ONX2DataType
   USE DerivedTypes
   USE ShellPairStruct
   !
-  TYPE RNode
-     INTEGER              :: iCell
-     REAL(DOUBLE)         :: MaxInt
-     TYPE(RNode), POINTER :: RNext
-  END TYPE RNode
-  !
   TYPE ANode
-     INTEGER              :: Atom
-     REAL(DOUBLE)         :: MaxInt
-     TYPE(ANode), POINTER :: AtmNext
-     TYPE(RNode), POINTER :: RNext
-  END TYPE ANode
-  !
-  TYPE ANode2
-     INTEGER :: Atom
-     INTEGER :: NCell
-#ifdef POINTERS_IN_DERIVED_TYPES
-     INTEGER     , DIMENSION(:), POINTER :: CellIdx
-     REAL(DOUBLE), DIMENSION(:), POINTER :: SqrtInt
-#else
-     INTEGER     , DIMENSION(:), ALLOCATABLE :: CellIdx
-     REAL(DOUBLE), DIMENSION(:), ALLOCATABLE :: SqrtInt
-#endif
-     TYPE(ANode2), POINTER :: AtmNext
-  END TYPE ANode2
-  !
-  TYPE ANode3
      INTEGER :: Atom
      INTEGER :: NFPair
 #ifdef POINTERS_IN_DERIVED_TYPES
@@ -39,44 +13,59 @@ MODULE ONX2DataType
      INTEGER     , DIMENSION(:,:), ALLOCATABLE :: Indx
      REAL(DOUBLE), DIMENSION(:  ), ALLOCATABLE :: RInt
 #endif
-     TYPE(ANode3), POINTER :: AtmNext
-  END TYPE ANode3
-  !
-  TYPE CList3
-     TYPE(ANode3), POINTER :: GoList
-  END TYPE CList3
-  !
-  TYPE CList2
-     TYPE(ANode2), POINTER :: GoList
-  END TYPE CList2
+     TYPE(ANode), POINTER :: AtmNext
+  END TYPE ANode
   !
   TYPE CList
      TYPE(ANode), POINTER :: GoList
   END TYPE CList
-  !
-  TYPE AtomPrG
-     TYPE(ShellPairG) :: SP
-  END TYPE AtomPrG
   !
   INTEGER, PUBLIC :: MaxFuncPerAtmBlk=0
   INTEGER, PUBLIC :: MaxShelPerAtmBlk=0
   !
 CONTAINS
   !
-  SUBROUTINE GetBufferSize(GM,BS)
-    TYPE(CRDS), INTENT(IN) :: GM
-    TYPE(BSET), INTENT(IN) :: BS
-    INTEGER :: ISize,I
+!!$  SUBROUTINE GetBufferSize(GM,BS)
+!!$    TYPE(CRDS) :: GM
+!!$    TYPE(BSET) :: BS
+!!$    INTEGER :: ISize,I
+!!$    !
+!!$    MaxFuncPerAtmBlk=0
+!!$    MaxShelPerAtmBlk=0
+!!$    !
+!!$    !write(*,*) 'NKind=',BS%NKind,' MAXVAL(GM%AtTyp%I(1:NAtoms))=',MAXVAL(GM%AtTyp%I(1:NAtoms))
+!!$    if(BS%NKind.ne.MAXVAL(GM%AtTyp%I(1:NAtoms))) stop 'GetBufferSize: problem'
+!!$    DO I=1,BS%NKind !MAXVAL(GM%AtTyp%I(1:NAtoms))
+!!$       MaxFuncPerAtmBlk=MAX(MaxFuncPerAtmBlk,BS%BfKnd%I(I))
+!!$       MaxShelPerAtmBlk=MAX(MaxShelPerAtmBlk,BS%NCFnc%I(I))
+!!$    ENDDO
+!!$    !
+!!$    !write(*,*) 'max',MAXVAL(GM%AtTyp%I(1:NAtoms)), &
+!!$    !     & ' MaxFuncPerAtmBlk',MaxFuncPerAtmBlk, &
+!!$    !     & ' MaxShelPerAtmBlk',MaxShelPerAtmBlk
+!!$  END SUBROUTINE GetBufferSize
+  !
+  SUBROUTINE GetBufferSize(GMc,BSc,GMp,BSp)
+    TYPE(CRDS) :: GMc,GMp
+    TYPE(BSET) :: BSc,BSp
+    INTEGER :: I
     !
     MaxFuncPerAtmBlk=0
     MaxShelPerAtmBlk=0
     !
-    DO I=1,MAXVAL(GM%AtTyp%I(1:NAtoms))
-       MaxFuncPerAtmBlk=MAX(MaxFuncPerAtmBlk,BS%BfKnd%I(I))
-       MaxShelPerAtmBlk=MAX(MaxShelPerAtmBlk,BS%NCFnc%I(I))
+    if(BSc%NKind.ne.MAXVAL(GMc%AtTyp%I(1:NAtoms))) stop 'GetBufferSize: problem'
+    DO I=1,BSc%NKind !MAXVAL(GMc%AtTyp%I(1:NAtoms))
+       MaxFuncPerAtmBlk=MAX(MaxFuncPerAtmBlk,BSc%BfKnd%I(I))
+       MaxShelPerAtmBlk=MAX(MaxShelPerAtmBlk,BSc%NCFnc%I(I))
     ENDDO
     !
-    !write(*,*) 'max',MAXVAL(GM%AtTyp%I(1:NAtoms)), &
+    if(BSp%NKind.ne.MAXVAL(GMp%AtTyp%I(1:NAtoms))) stop 'GetBufferSize: problem'
+    DO I=1,BSp%NKind !MAXVAL(GMp%AtTyp%I(1:NAtoms))
+       MaxFuncPerAtmBlk=MAX(MaxFuncPerAtmBlk,BSp%BfKnd%I(I))
+       MaxShelPerAtmBlk=MAX(MaxShelPerAtmBlk,BSp%NCFnc%I(I))
+    ENDDO
+    !
+    !write(*,*) &
     !     & ' MaxFuncPerAtmBlk',MaxFuncPerAtmBlk, &
     !     & ' MaxShelPerAtmBlk',MaxShelPerAtmBlk
   END SUBROUTINE GetBufferSize

@@ -7,8 +7,6 @@ MODULE ONXFillOut
 !H  PRIVATE:
 !H  o SUB FillOutBCSR
 !H  o SUB FillOutFASTMAT
-!H  o SUB XPose1C
-!H  o SUB XPose2C
 !H
 !H Comments:
 !H
@@ -40,8 +38,6 @@ MODULE ONXFillOut
 !--------------------------------------------------------------------------------- 
 ! PRIVATE DECLARATIONS
 !--------------------------------------------------------------------------------- 
-  PRIVATE :: XPose1C
-  PRIVATE :: XPose2C
   !
 CONTAINS
   !
@@ -101,35 +97,5 @@ CONTAINS
     !
   END SUBROUTINE FillOutFASTMAT
 #endif
-  !
-  !
-  SUBROUTINE XPose1C(M,N,A,B)
-    IMPLICIT REAL*8 (a-h,o-z)
-    IMPLICIT INTEGER (i-n)
-    INTEGER I,J,M,N
-    REAL*8 A(M,N)!vw<-- Can be changed
-    REAL*8 B(N,M)!vw<-- Can be changed
-    DO I=1,N
-       DO J=I+1,M
-          B(I,J)=A(J,I)
-       ENDDO
-    ENDDO
-    RETURN
-  END SUBROUTINE XPose1C
-  !
-  !
-  SUBROUTINE XPose2C(M,N,A,B)
-    IMPLICIT REAL*8 (a-h,o-z)
-    IMPLICIT INTEGER (i-n)
-    INTEGER I,J,M,N
-    REAL*8 A(M,N)
-    REAL*8 B(N,M)
-    DO I=1,N
-       DO J=1,M
-          B(I,J)=A(J,I)
-       ENDDO
-    ENDDO
-    RETURN
-  END SUBROUTINE XPose2C
   !
 END MODULE ONXFillOut

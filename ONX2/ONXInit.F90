@@ -55,13 +55,11 @@ CONTAINS
     TYPE(BSET), INTENT(IN   ) :: BS
     TYPE(CRDS), INTENT(IN   ) :: GM
     TYPE(BCSR), INTENT(INOUT) :: K
-    INTEGER                   :: AtA,KA,NBFA,CFA
+    INTEGER                   :: AtA,KA,NBFA
     INTEGER                   :: AtB,KB,NBFB
-    INTEGER                   :: StartLA,StopLA,StrideA
-    INTEGER                   :: IndexA1,IndexA2
     REAL(DOUBLE)              :: Ax,Ay,Az,AB2
     REAL(DOUBLE)              :: Bx,By,Bz
-    INTEGER                   :: J,iPnt,N2,NBFM
+    INTEGER                   :: J,iPnt
     !
     ! Set the number of Atoms in K.
     K%NAtms = NAtoms

@@ -15,35 +15,30 @@ PROGRAM ONX2
   USE Macros
   USE LinAlg
   !
-  !Old
+  USE ONX2DataType
+  USE ONX2List  , ONLY: AllocList,DeAllocList,MakeList,PrintList
+  USE ONX2ComputK
   USE ONXParameters
   USE ONXInit   , ONLY: InitK
   USE ONXCtrSclg, ONLY: TrnMatBlk
 #ifdef ONX2_PARALLEL
+  USE MondoMPI
+  USE FastMatrices
   USE ONXRng    , ONLY: RangeOfExchangeFASTMAT
   USE ONXFillOut, ONLY: FillOutFASTMAT
+  USE ONXGet    , ONLY: Get_Essential_RowCol,GetOffArr
+  USE PartDrv   , ONLY: PDrv_Initialize,PDrv_Finalize
 #else
   USE ONXRng    , ONLY: RangeOfExchangeBCSR
   USE ONXFillOut, ONLY: FillOutBCSR
+  USE ONXGet    , ONLY: GetOffArr
 #endif
-
-#ifdef ONX2_PARALLEL
-  !USE ONXGet    , ONLY: Get_Essential_RowCol
-  USE PartDrv   , ONLY: PDrv_Initialize,PDrv_Finalize
-  USE MondoMPI
-  USE FastMatrices
-#endif
-  !
-  !New
-  USE ONX2DataType
-  USE ONX2List
-  USE ONX2ComputK
   !
   IMPLICIT NONE
   !
 #ifdef ONX2_PARALLEL
-  TYPE(FASTMAT),POINTER          :: KxFastMat
-  TYPE(FASTMAT),POINTER          :: DFastMat
+  TYPE(FASTMAT),POINTER          :: KxFM
+  TYPE(FASTMAT),POINTER          :: DFM
   TYPE(DBCSR)                    :: D
   TYPE(BCSR )                    :: Kx
 #else
@@ -57,20 +52,30 @@ PROGRAM ONX2
   TYPE(ARGMT)                    :: Args
   TYPE(INT_VECT)                 :: Stat
 !--------------------------------------------------------------------------------
-! Misc. variables and parameters...
+#ifdef ONX2_PARALLEL
+  TYPE(DBL_RNK2)                 :: GradTmp
+  TYPE(INT_VECT)                 :: APt,BPt,CPt,DPt
+#endif
 !--------------------------------------------------------------------------------
+#ifdef ONX2_PARALLEL
+  TYPE(DBL_VECT)                 :: TmKxArr,TmMLArr,TmTMArr,TmALArr,TmDLArr,TmREArr,TmFOArr
+  INTEGER                        :: CMin,CMax,DMin,DMax,iErr
+  INTEGER                        :: ANbr,BNbr,CNbr,DNbr
+#endif
+  REAL(DOUBLE)                   :: TmAl,TmDl,TmKx,TmML,TmRE,TmFO,TmTM
   INTEGER                        :: OldFileID
-  REAL(DOUBLE)                   :: time1,time2
-  CHARACTER(LEN=DEFAULT_CHR_LEN) :: InFile,RestartHDF
+  REAL(DOUBLE)                   :: Time1,Time2
+  CHARACTER(LEN=DEFAULT_CHR_LEN) :: InFile
   CHARACTER(LEN=*),PARAMETER     :: Prog='ONX2'
 !--------------------------------------------------------------------------------
-  INTEGER :: IErr
-  REAL(DOUBLE)   :: TmML,TmRE,TmKx,TmFO,TmTM
-  TYPE(DBL_VECT) :: TmKxArr,TmMLArr,TmREArr,TmFOArr,TmTMArr!,TmKTArr,NERIsArr
-!New
-  TYPE(CList2), DIMENSION(:), POINTER :: ListC,ListD
-
-!
+  TYPE(INT_RNK2) :: OffArrC,OffArrP
+#ifdef ONX2_PARALLEL
+  TYPE(CList), DIMENSION(:), POINTER :: ListC,ListD
+#else
+  TYPE(CList), DIMENSION(:), POINTER :: ListC
+#endif
+!--------------------------------------------------------------------------------
+  !
 #ifdef ONX2_PARALLEL
   CALL StartUp(Args,Prog,Serial_O=.FALSE.)
 #else
@@ -117,66 +122,91 @@ PROGRAM ONX2
   CALL Get(BSc,Tag_O=CurBase)
   CALL Get(GMc,Tag_O=CurGeom)
   !
-  !
-!!$  SELECT CASE(SCFActn)
-!!$  !IF(SCFActn=='StartResponse'.OR.SCFActn=='FockPrimeBuild')THEN
-!!$  CASE('StartResponse','FockPrimeBuild')
-!!$#ifndef PARALLEL
-!!$     CALL Get(D,TrixFile('DPrime'//Args%C%C(4),Args,0))
-!!$#else
-!!$     CALL PDrv_Initialize(DFastMat,TrixFile('DPrime'//Args%C%C(4),Args,0),'ONXPart',Args)
-!!$#endif
-!!$  !ELSEIF(SCFActn=='InkFok')THEN
-!!$  CASE('InkFok')
-!!$#ifndef PARALLEL
-!!$     CALL Get(D,TrixFile('DeltaD',Args,0))
-!!$#else
-!!$     CALL PDrv_Initialize(DFastMat,TrixFile('DeltaD',Args,0),'ONXPart',Args)
-!!$#endif
-!!$  !ELSEIF(SCFActn=='BasisSetSwitch')THEN
-!!$  CASE('BasisSetSwitch')
-!!$#ifndef PARALLEL
-!!$     CALL Get(D,TrixFile('D',Args,-1))
-!!$#else
-!!$     CALL PDrv_Initialize(DFastMat,TrixFile('D',Args,-1),'ONXPart',Args)
-!!$#endif
-!!$  !ELSE
-!!$  CASE DEFAULT
-
+  !------------------------------------------------
+  ! Initialization and allocations.
 #ifdef ONX2_PARALLEL
-     CALL PDrv_Initialize(DFastMat,TrixFile('D',Args,0),'ONXPart',Args)
+  NULLIFY(ListC,ListD)
 #else
-     CALL Get(D,TrixFile('D',Args,0))
-#endif
-!!$  !ENDIF
-!!$  END SELECT
-  !
-  !
-#ifdef ONX2_PARALLEL
-  CALL TrnMatBlk(BSp,GMp,DFastMat)
-#else
-  CALL TrnMatBlk(BSp,GMp,D       )
+  NULLIFY(ListC)
 #endif
   !
+  TmTM=Zero;TmML=Zero;TmAL=Zero;TmDL=Zero
+  !
+  CALL New(OffArrC,(/BSc%NCtrt,BSc%NKind/))
+  CALL New(OffArrP,(/BSp%NCtrt,BSp%NKind/))
+  !
+  CALL GetOffArr(OffArrC,BSc)
+  CALL GetOffArr(OffArrP,BSp)
+  !
+  CALL GetBufferSize(GMc,BSc,GMp,BSp)
+  !
+  !------------------------------------------------
+  ! Get denstiy matrix.
   !
 #ifdef ONX2_PARALLEL
   IF(MyID.EQ.ROOT) &
 #endif
-  WRITE(*,*) 'WE ARE IN ONX2 WE ARE IN ONX2 WE ARE IN ONX2 WE ARE IN ONX2 WE ARE IN ONX2'
+  WRITE(*,*) '-------- We are in ONX2 --------'
   !
   !
+  SELECT CASE(SCFActn)
+  CASE('StartResponse','FockPrimeBuild')
+#ifndef PARALLEL
+     CALL Get(D,TrixFile('DPrime'//Args%C%C(3),Args,0))
+#else
+     CALL PDrv_Initialize(DFM,TrixFile('DPrime'//Args%C%C(3),Args,0),'ONXPart',Args)
+#endif
+  CASE('InkFok')
+#ifndef PARALLEL
+     CALL Get(D,TrixFile('DeltaD',Args,0))
+#else
+     CALL PDrv_Initialize(DFM,TrixFile('DeltaD',Args,0),'ONXPart',Args)
+#endif
+  CASE('BasisSetSwitch')
+#ifndef PARALLEL
+     CALL Get(D,TrixFile('D',Args,-1))
+#else
+     CALL PDrv_Initialize(DFM,TrixFile('D',Args,-1),'ONXPart',Args)
+#endif
+  CASE DEFAULT
+#ifdef ONX2_PARALLEL
+     CALL PDrv_Initialize(DFM,TrixFile('D',Args,0),'ONXPart',Args)
+#else
+     CALL Get(D,TrixFile('D',Args,0))
+#endif
+  END SELECT
+  !
+  !------------------------------------------------
+  ! Normalize the density matrix
+#ifdef ONX2_PARALLEL
+  Time1 = MPI_WTIME()
+  CALL TrnMatBlk(BSp,GMp,DFM)
+  Time2 = MPI_WTIME()
+#else
+  CALL CPU_TIME(Time1)
+  CALL TrnMatBlk(BSp,GMp,D)
+  CALL CPU_TIME(Time2)
+#endif
+  TmTM = Time2-Time1
+  !
+  !------------------------------------------------
+  ! Allocate the list(s) and get the buffer sizes.
   !WRITE(*,*) 'allocate List'
 #ifdef ONX2_PARALLEL
   Time1 = MPI_WTIME()
-  !CALL AllocList(ListC,NAtoms) !!!!!!!!!!!!!!!!!! Add atom1-atom2 or sthg like that !!!!!!!!!!!!!!!!!!
-  !CALL AllocList(ListD,NAtoms) !!!!!!!!!!!!!!!!!! Add atom1-atom2 or sthg like that !!!!!!!!!!!!!!!!!!
+  CALL Get_Essential_RowCol(DFM,CPt,CNbr,CMin,CMax,DPt,DNbr,DMin,DMax)
+  !write(*,*) 'CMin',CMin,'CMax',CMax,'MyID',MyID
+  !write(*,*) 'DMin',DMin,'DMax',DMax,'MyID',MyID
+  !
+  CALL AllocList(ListC,CMin,CMax)
+  CALL AllocList(ListD,DMin,DMax)
   Time2 = MPI_WTIME()
 #else
   CALL CPU_TIME(Time1)
   CALL AllocList(ListC,1,NAtoms)
-  CALL GetBufferSize(GMc,BSc)
   CALL CPU_TIME(Time2)
 #endif
+  TmAL = Time2-Time1
   !WRITE(*,*) 'allocate List: ok',Time2-Time1
   !
   !------------------------------------------------
@@ -184,19 +214,22 @@ PROGRAM ONX2
   !WRITE(*,*) 'make List'
 #ifdef ONX2_PARALLEL
   Time1 = MPI_WTIME()
-  CALL MakeList(ListC,GMc,BSc,CS_OUT) !!!!!!!!!!!!!!!!!! Add atom list !!!!!!!!!!!!!!!!!!
-  CALL MakeList(ListD,GMc,BSc,CS_OUT) !!!!!!!!!!!!!!!!!! Add atom list !!!!!!!!!!!!!!!!!!
+  Time1 = MPI_WTIME()
+  CALL MakeList(ListC,GMc,BSc,GMp,BSp,CS_OUT,CPt,CNbr,APt,ANbr)
+  CALL MPI_Barrier(MONDO_COMM,IErr)
+  CALL MakeList(ListD,GMc,BSc,GMp,BSp,CS_OUT,DPt,DNbr,BPt,BNbr)
+  CALL MPI_Barrier(MONDO_COMM,IErr)
   Time2 = MPI_WTIME()
 #else
   CALL CPU_TIME(Time1)
-  CALL MakeList(ListC,GMc,BSc,CS_OUT)
+  CALL MakeList(ListC,GMc,BSc,GMp,BSp,CS_OUT)
   CALL CPU_TIME(Time2)
 #endif
   TmML = Time2-Time1
   !WRITE(*,*) 'make List: ok',Time2-Time1
   !
   !------------------------------------------------
-  !
+  ! Print list.
 #ifdef ONX2_DBUG
   WRITE(*,*) 'Print List'
 #ifdef ONX2_PARALLEL
@@ -208,12 +241,11 @@ PROGRAM ONX2
   WRITE(*,*) 'Print List:ok'
 #endif
   !
-  !
   !------------------------------------------------
-  !
+  ! Get range of K.
 #ifdef ONX2_PARALLEL
   time1 = MPI_WTIME()
-  CALL RangeOfExchangeFASTMAT(BSc,GMc,BSp,GMp,DFastMat)
+  CALL RangeOfExchangeFASTMAT(BSc,GMc,BSp,GMp,DFM)
   time2 = MPI_WTIME()
 #else
   CALL CPU_TIME(time1)
@@ -222,15 +254,13 @@ PROGRAM ONX2
 #endif
   TmRE = time2-time1
   !
-  !
   !------------------------------------------------
-  !
+  ! Allocate the K matrix.
 #ifdef ONX2_PARALLEL
-  CALL New_FASTMAT(KxFastMat,0,(/0,0/))
+  CALL New_FASTMAT(KxFM,0,(/0,0/))
 #else
-  !write(*,*) 'ONXRange',ONXRange
   CALL New(Kx,(/NRows+1,NCols,NElem/))
-  CALL SetEq(Kx%MTrix,Zero)
+  CALL DBL_VECT_EQ_DBL_SCLR(NElem,Kx%MTrix%D(1),0.0D0)
   CALL InitK(BSc,GMc,Kx)
 #endif
   !
@@ -239,11 +269,11 @@ PROGRAM ONX2
   !WRITE(*,*) 'Compute Kx'
 #ifdef ONX2_PARALLEL
   Time1 = MPI_WTIME()
-  CALL ComputK(DFastMat,KxFastMat,ListC,ListD,GMc,BSc,CS_OUT)
+  CALL ComputK(DFM,KxFM,ListC,ListD,OffArrC,OffArrP,GMc,BSc,GMp,BSp,CS_OUT)
   Time2 = MPI_WTIME()
 #else
   CALL CPU_TIME(Time1)
-  CALL ComputK(D,Kx,ListC,ListC,GMc,BSc,CS_OUT)
+  CALL ComputK(D,Kx,ListC,ListC,OffArrC,OffArrP,GMc,BSc,GMp,BSp,CS_OUT)
   CALL CPU_TIME(Time2)
 #endif
   TmKx = Time2-Time1
@@ -268,7 +298,7 @@ PROGRAM ONX2
   ! 
 #ifdef ONX2_PARALLEL
   time1 = MPI_WTIME()
-  CALL FillOutFastMat(BSc,GMc,KxFastMat)
+  CALL FillOutFastMat(BSc,GMc,KxFM)
   time2 = MPI_WTIME()
 #else
   CALL CPU_TIME(time1)
@@ -281,49 +311,22 @@ PROGRAM ONX2
   ! Normilization.
 #ifdef ONX2_PARALLEL
   time1 = MPI_WTIME()
-  CALL TrnMatBlk(BSc,GMc,KxFastMat)
+  CALL TrnMatBlk(BSc,GMc,KxFM)
   time2 = MPI_WTIME()
 #else
   CALL CPU_TIME(time1)
-  CALL TrnMatBlk(BSc,GMc,Kx       )
+  CALL TrnMatBlk(BSc,GMc,Kx)
   CALL CPU_TIME(time2)
 #endif
   TmTM = time2-time1
   !
-  !
   !------------------------------------------------
   ! Redistribute partition informations.
 #ifdef ONX2_PARALLEL
-  CALL PDrv_Finalize(DFastMat,CollectInPar_O=.TRUE.)
-  CALL Delete_FastMat1(DFastMat)
+  CALL PDrv_Finalize(DFM,CollectInPar_O=.TRUE.)
+  CALL Delete_FastMat1(DFM)
 #else
   CALL Delete(D)
-#endif
-  !
-  !
-  !------------------------------------------------
-  !
-#ifdef ONX2_PARALLEL
-  !
-  ! End Total Timing
-  !TmEndKT = MPI_WTIME()
-  !TmKT = TmEndKT-TmBegKT
-  !
-  CALL New(TmKxArr ,NPrc)
-  CALL New(TmMLArr ,NPrc)
-  CALL New(TmREArr ,NPrc)
-  CALL New(TmFOArr ,NPrc)
-  CALL New(TmTMArr ,NPrc)
-  !CALL New(TmKTArr ,NPrc)
-  !CALL New(NERIsArr,NPrc)
-  !
-  CALL MPI_Gather(TmKx,1,MPI_DOUBLE_PRECISION,TmKxArr%D(1),1,MPI_DOUBLE_PRECISION,0,MONDO_COMM,IErr)
-  CALL MPI_Gather(TmML,1,MPI_DOUBLE_PRECISION,TmMLArr%D(1),1,MPI_DOUBLE_PRECISION,0,MONDO_COMM,IErr)
-  CALL MPI_Gather(TmRE,1,MPI_DOUBLE_PRECISION,TmREArr%D(1),1,MPI_DOUBLE_PRECISION,0,MONDO_COMM,IErr)
-  CALL MPI_Gather(TmFO,1,MPI_DOUBLE_PRECISION,TmFOArr%D(1),1,MPI_DOUBLE_PRECISION,0,MONDO_COMM,IErr)
-  CALL MPI_Gather(TmTM,1,MPI_DOUBLE_PRECISION,TmTMArr%D(1),1,MPI_DOUBLE_PRECISION,0,MONDO_COMM,IErr)
-  !CALL MPI_Gather(TmKT     ,1,MPI_DOUBLE_PRECISION,TmKTArr%D(1) ,1,MPI_DOUBLE_PRECISION,0,MONDO_COMM,IErr)
-  !CALL MPI_Gather(xTotNERIs,1,MPI_DOUBLE_PRECISION,NERIsArr%D(1),1,MPI_DOUBLE_PRECISION,0,MONDO_COMM,IErr)
 #endif
   !
   !------------------------------------------------
@@ -332,9 +335,9 @@ PROGRAM ONX2
   !
   IF(SCFActn == 'InkFok') CALL Halt('InkFok in PARALLEL ONX is not supported.')
   ! Collect the data on the root.
-  CALL Redistribute_FASTMAT(KxFastMat)
-  CALL Set_BCSR_EQ_DFASTMAT(Kx,KxFastMat)
-  CALL Delete_FastMat1(KxFastMat)
+  CALL Redistribute_FASTMAT(KxFM)
+  CALL Set_BCSR_EQ_DFASTMAT(Kx,KxFM)
+  CALL Delete_FastMat1(KxFM)
   !
 #else
   ! Add in correction if incremental K build
@@ -356,64 +359,82 @@ PROGRAM ONX2
   CALL PPrint( Kx,'Kx['//TRIM(SCFCycl)//']')
   CALL Plot(   Kx,'Kx['//TRIM(SCFCycl)//']')
   !
+  !------------------------------------------------
+  ! Timing.
+  !
+!#ifdef GONX2_INFO
 #ifdef ONX2_PARALLEL
   !
+  ! End Total Timing
+  CALL New(TmKxArr,NPrc)
+  CALL New(TmMLArr,NPrc)
+  CALL New(TmTMArr,NPrc)
+  CALL New(TmALArr,NPrc)
+  CALL New(TmDLArr,NPrc)
+  !
+  CALL MPI_Gather(TmKx,1,MPI_DOUBLE_PRECISION,TmKxArr%D(1),1,MPI_DOUBLE_PRECISION,0,MONDO_COMM,IErr)
+  CALL MPI_Gather(TmML,1,MPI_DOUBLE_PRECISION,TmMLArr%D(1),1,MPI_DOUBLE_PRECISION,0,MONDO_COMM,IErr)
+  CALL MPI_Gather(TmTM,1,MPI_DOUBLE_PRECISION,TmTMArr%D(1),1,MPI_DOUBLE_PRECISION,0,MONDO_COMM,IErr)
+  CALL MPI_Gather(TmAL,1,MPI_DOUBLE_PRECISION,TmALArr%D(1),1,MPI_DOUBLE_PRECISION,0,MONDO_COMM,IErr)
+  CALL MPI_Gather(TmDL,1,MPI_DOUBLE_PRECISION,TmDLArr%D(1),1,MPI_DOUBLE_PRECISION,0,MONDO_COMM,IErr)
+  !
   IF(MyID.EQ.ROOT) THEN
+     !
      ! Imbalance stuff.
      CALL PImbalance(TmKxArr ,NPrc,Prog_O='ComputeK')
-     !CALL PImbalance(TmKTArr,NPrc,Prog_O='ONX'     )
+     !CALL PImbalance(TmKTArr,NPrc,Prog_O='GONX'     )
      !
-     WRITE(*,1001) SUM(TmKxArr%D)/DBLE(NPrc),MINVAL(TmKxArr%D  ),MAXVAL(TmKxArr%D  )
-     !WRITE(*,1002) SUM(NERIsArr%D)           ,MINVAL(NERIsArr%D),MAXVAL(NERIsArr%D)
-     WRITE(*,1003) SUM(TmMLArr%D )/DBLE(NPrc),MINVAL(TmMLArr%D ),MAXVAL(TmMLArr%D )
-     WRITE(*,1004) SUM(TmREArr%D )/DBLE(NPrc),MINVAL(TmREArr%D ),MAXVAL(TmREArr%D )
-     WRITE(*,1005) SUM(TmFOArr%D )/DBLE(NPrc),MINVAL(TmFOArr%D ),MAXVAL(TmFOArr%D )
-     WRITE(*,1006) SUM(TmTMArr%D )/DBLE(NPrc),MINVAL(TmTMArr%D ),MAXVAL(TmTMArr%D )
+     WRITE(*,1001) SUM(TmALArr%D )/DBLE(NPrc),MINVAL(TmALArr%D ),MAXVAL(TmALArr%D )
+     WRITE(*,1002) SUM(TmMLArr%D )/DBLE(NPrc),MINVAL(TmMLArr%D ),MAXVAL(TmMLArr%D )
+     WRITE(*,1003) SUM(TmTMArr%D )/DBLE(NPrc),MINVAL(TmTMArr%D ),MAXVAL(TmTMArr%D )
+     WRITE(*,1004) SUM(TmKxArr%D )/DBLE(NPrc),MINVAL(TmKxArr%D ),MAXVAL(TmKxArr%D )
+     WRITE(*,1005) SUM(TmDLArr%D )/DBLE(NPrc),MINVAL(TmDLArr%D ),MAXVAL(TmDLArr%D )
+     !WRITE(*,1006) SUM(NERIsArr%D)           ,MINVAL(NERIsArr%D),MAXVAL(NERIsArr%D)
      !
-1001 FORMAT(' ONX: Ave TmKx = ',F15.2,', Min TmKx = ',F15.2,', Max TmKx = ',F15.2)
-!1002 FORMAT(' ONX: Tot ERI  = ',F15.2,', Min ERI  = ',F15.2,', Max ERI  = ',F15.2)
-1003 FORMAT(' ONX: Ave TmML = ',F15.2,', Min TmML = ',F15.2,', Max TmML = ',F15.2)
-1004 FORMAT(' ONX: Ave TmRE = ',F15.2,', Min TmRE = ',F15.2,', Max TmRE = ',F15.2)
-1005 FORMAT(' ONX: Ave TmFO = ',F15.2,', Min TmFO = ',F15.2,', Max TmFO = ',F15.2)
-1006 FORMAT(' ONX: Ave TmTM = ',F15.2,', Min TmTM = ',F15.2,', Max TmTM = ',F15.2)
+1001 FORMAT(' ONX: Ave TmAL = ',F15.2,', Min TmAL = ',F15.2,', Max TmAL = ',F15.2)
+1002 FORMAT(' ONX: Ave TmML = ',F15.2,', Min TmML = ',F15.2,', Max TmML = ',F15.2)
+1003 FORMAT(' ONX: Ave TmTM = ',F15.2,', Min TmTM = ',F15.2,', Max TmTM = ',F15.2)
+1004 FORMAT(' ONX: Ave TmKx = ',F15.2,', Min TmKx = ',F15.2,', Max TmKx = ',F15.2)
+1005 FORMAT(' ONX: Ave TmDL = ',F15.2,', Min TmDL = ',F15.2,', Max TmDL = ',F15.2)
+     !1006 FORMAT(' ONX: Tot ERI  = ',F15.2,', Min ERI  = ',F15.2,', Max ERI  = ',F15.2)
   ENDIF
   !
-  CALL Delete(TmKxArr  )
-!  CALL Delete(TmKTArr )
-!  CALL Delete(NERIsArr)
-  CALL Delete(TmMLArr )
-  CALL Delete(TmREArr )
-  CALL Delete(TmFOArr )
-  CALL Delete(TmTMArr )
+  CALL Delete(TmALArr)
+  CALL Delete(TmMLArr)
+  CALL Delete(TmTMArr)
+  CALL Delete(TmKxArr)
+  CALL Delete(TmDLArr)
   !
 #else
   !
-  !WRITE(*,1001) TmKx
-!  WRITE(*,1002) xTotNERIs
-  !WRITE(*,1003) TmML
-  !WRITE(*,1004) TmRE
-  !WRITE(*,1005) TmFO
-  !WRITE(*,1006) TmTM
+  WRITE(*,1001) TmAL
+  WRITE(*,1002) TmML
+  WRITE(*,1003) TmTM
+  WRITE(*,1004) TmKx
+  WRITE(*,1005) TmDL
+  !WRITE(*,1006) ....
   !
-1001 FORMAT(' ONX: Tot TmK  = ',F15.2)
-!1002 FORMAT(' ONX: Tot ERI  = ',F15.2)
-1003 FORMAT(' ONX: Tot TmDO = ',F15.2)
-1004 FORMAT(' ONX: Tot TmRE = ',F15.2)
-1005 FORMAT(' ONX: Tot TmFO = ',F15.2)
-1006 FORMAT(' ONX: Tot TmTM = ',F15.2)
+1001 FORMAT(' ONX: Ave TmAL = ',F15.2)
+1002 FORMAT(' ONX: Ave TmML = ',F15.2)
+1003 FORMAT(' ONX: Ave TmTM = ',F15.2)
+1004 FORMAT(' ONX: Ave TmKx = ',F15.2)
+1005 FORMAT(' ONX: Ave TmDL = ',F15.2)
+  !1006 FORMAT(' ONX: Tot ERI  = ',F15.2)
   !
-#endif !PARALLEL
-
-!--------------------------------------------------------------------------------
-! Clean up...
-!--------------------------------------------------------------------------------
+!#endif
+#endif
+  !
+  !------------------------------------------------
+  ! Deallocate Arrays
   !
   CALL Delete(Kx)
+  CALL Delete(OffArrC)
+  CALL Delete(OffArrP)
   !
-  CALL Delete(BSc   )
-  CALL Delete(GMc   )
-  CALL Delete(BSp   )
-  CALL Delete(GMp   )
+  CALL Delete(BSc)
+  CALL Delete(GMc)
+  CALL Delete(BSp)
+  CALL Delete(GMp)
   !
   CALL ShutDown(Prog)
   !

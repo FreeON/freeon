@@ -20,10 +20,6 @@ MODULE GONX2ComputDK
 #undef ONX2_PARALLEL
 #endif
   !
-#ifdef GONX2_DBUG
-#define GONX2_INFO
-#endif
-  !
   USE DerivedTypes
   USE GlobalScalars
   USE PrettyPrint
@@ -57,16 +53,14 @@ CONTAINS
   !
   !
 #ifdef ONX2_PARALLEL
-  SUBROUTINE ComputDK(DFMcd,DFMab,GradX,ListC,ListD,OffArr,GM,BS,CS_OUT)
+  SUBROUTINE ComputDK(DFMcd,DFMab,GradX,ListC,ListD,OffArr,GMc,BSc,CS_OUT)
 #else
-  SUBROUTINE ComputDK(D,GradX,BoxX,ListC,ListD,OffArr,GM,BS,CS_OUT)
+  SUBROUTINE ComputDK(D,GradX,BoxX,ListC,ListD,OffArr,GMc,BSc,CS_OUT)
 #endif
 !H---------------------------------------------------------------------------------
-!H SUBROUTINE ComputDK(D,GradX,ListC,ListD,GM,BS,CS_OUT)
+!H SUBROUTINE ComputDK(D,GradX,ListC,ListD,GMc,BSc,CS_OUT)
 !H
 !H---------------------------------------------------------------------------------
-    !
-    USE ONXGet, ONLY: GetAdrB
     !
     IMPLICIT NONE
     !
@@ -83,28 +77,28 @@ CONTAINS
 #endif
     TYPE(DBL_RNK2)                       :: GradX,BoxX
     TYPE(INT_RNK2)                       :: OffArr
-    TYPE(CList3) , DIMENSION(:), POINTER :: ListC,ListD
-    TYPE(CRDS)                           :: GM
-    TYPE(BSET)                           :: BS
+    TYPE(CList) , DIMENSION(:) , POINTER :: ListC,ListD
+    TYPE(CRDS)                           :: GMc
+    TYPE(BSET)                           :: BSc
     TYPE(CellSet)                        :: CS_OUT
     !-------------------------------------------------------------------
-    TYPE(ANode3), POINTER      :: AtAListTmp,AtAList,AtBListTmp,AtBList
+    TYPE(ANode), POINTER       :: AtAListTmp,AtAList,AtBListTmp,AtBList
     TYPE(AtomInfo)             :: ACAtmInfo,BDAtmInfo
     INTEGER                    :: AtA,AtB,AtC,AtD,KA,KB,KC,KD,CFA,CFB,CFC,CFD
-    INTEGER                    :: ci,iPtrD,iPtrD2,iPtrK,NBFC,NBFD,NBFA,NBFB
-    INTEGER                    :: CFAC,CFBD,iErr
+    INTEGER                    :: ci,iPtrD,iPtrD2,NBFC,NBFD,NBFA,NBFB
+    INTEGER                    :: iErr
     INTEGER                    :: NCFncA,NCFncB,NCFncC,NCFncD
-    INTEGER                    :: Off,Ind,LocNInt,IntType
-    INTEGER                    :: ACR,BDR,IXYZ,NIntBlk,Indx,iFAC,iFBD
+    INTEGER                    :: Ind,LocNInt,IntType
+    INTEGER                    :: IXYZ,NIntBlk,Indx,iFAC,iFBD
 #ifdef ONX2_PARALLEL
     REAL(DOUBLE)               :: TmBeg,TmEnd
 #endif
-    REAL(DOUBLE)               :: TmpGradA,TmpGradC,TmpGradB,TmpGradD
-    REAL(DOUBLE)               :: Dcd,Dab,NInts
+    REAL(DOUBLE)               :: TmpGradA,TmpGradC,TmpGradB
+    REAL(DOUBLE)               :: Dcd,Dab,NInts,NIntsTot
     !-------------------------------------------------------------------
     REAL(DOUBLE) , DIMENSION(MaxFuncPerAtmBlk**2) :: Work
     REAL(DOUBLE) , DIMENSION(MaxShelPerAtmBlk**2) :: DMcd,DMab
-    REAL(DOUBLE) , DIMENSION(12*MaxFuncPerAtmBlk**4) :: C  ,C_
+    REAL(DOUBLE) , DIMENSION(12*MaxFuncPerAtmBlk**4) :: C  !,C_
     TYPE(AtomPrG), DIMENSION(:), ALLOCATABLE :: ACAtmPair,BDAtmPair !size=MaxShelPerAtmBlk**2*CS_OUT%NCells
     !-------------------------------------------------------------------
     TYPE(ONX2OffSt)            :: OffSet
@@ -131,9 +125,9 @@ CONTAINS
     !Simple check Simple check Simple check Simple check
     isize=0
     do i=1,natoms
-       isize=MAX(isize,BS%BfKnd%I(GM%AtTyp%I(i)))
-       IF(12*(BS%BfKnd%I(GM%AtTyp%I(i)))**4.GT.SIZE(C)) THEN
-          write(*,*) 'size',12*BS%BfKnd%I(GM%AtTyp%I(i))**4
+       isize=MAX(isize,BSc%BfKnd%I(GMc%AtTyp%I(i)))
+       IF(12*(BSc%BfKnd%I(GMc%AtTyp%I(i)))**4.GT.SIZE(C)) THEN
+          write(*,*) 'size',12*BSc%BfKnd%I(GMc%AtTyp%I(i))**4
           STOP 'Incrase the size of C'
        ENDIF
     enddo
@@ -150,6 +144,7 @@ CONTAINS
     !
     LocNInt=0
     NInts=0.0D0
+    NIntsTot=0.0D0
     !
 #ifdef ONX2_PARALLEL
     P => DFMcd%Next ! Run over AtC.
@@ -161,13 +156,13 @@ CONTAINS
     DO AtC=1,NAtoms ! Run over AtC.
 #endif
        !
-       KC=GM%AtTyp%I(AtC)
-       NBFC=BS%BfKnd%I(KC)
-       NCFncC=BS%NCFnc%I(KC)
+       KC=GMc%AtTyp%I(AtC)
+       NBFC=BSc%BfKnd%I(KC)
+       NCFncC=BSc%NCFnc%I(KC)
        !
-       ACAtmInfo%Atm2X=GM%Carts%D(1,AtC)
-       ACAtmInfo%Atm2Y=GM%Carts%D(2,AtC)
-       ACAtmInfo%Atm2Z=GM%Carts%D(3,AtC)
+       ACAtmInfo%Atm2X=GMc%Carts%D(1,AtC)
+       ACAtmInfo%Atm2Y=GMc%Carts%D(2,AtC)
+       ACAtmInfo%Atm2Z=GMc%Carts%D(3,AtC)
        ACAtmInfo%K2=KC
        !
        ! Get AtA List.
@@ -191,13 +186,13 @@ CONTAINS
           iPtrD=D%BlkPt%I(ci)
 #endif
           !
-          KD=GM%AtTyp%I(AtD)
-          NBFD=BS%BfKnd%I(KD)
-          NCFncD=BS%NCFnc%I(KD)
+          KD=GMc%AtTyp%I(AtD)
+          NBFD=BSc%BfKnd%I(KD)
+          NCFncD=BSc%NCFnc%I(KD)
           !
-          BDAtmInfo%Atm2X=GM%Carts%D(1,AtD)
-          BDAtmInfo%Atm2Y=GM%Carts%D(2,AtD)
-          BDAtmInfo%Atm2Z=GM%Carts%D(3,AtD)
+          BDAtmInfo%Atm2X=GMc%Carts%D(1,AtD)
+          BDAtmInfo%Atm2Y=GMc%Carts%D(2,AtD)
+          BDAtmInfo%Atm2Z=GMc%Carts%D(3,AtD)
           BDAtmInfo%K2=KD
           !
           ! Get max of the block density matrix.
@@ -210,14 +205,14 @@ CONTAINS
           !
 #ifdef ONX2_PARALLEL
           CALL GetAbsDenBlk(U%MTrix(1,1),NBFC,NBFD,DMcd(1),    &
-               &            BS%NCFnc%I(KC),BS%NCFnc%I(KD),     &
-               &            BS%LStrt%I(1,KC),BS%LStop%I(1,KC), &
-               &            BS%LStrt%I(1,KD),BS%LStop%I(1,KD)  )
+               &            BSc%NCFnc%I(KC),BSc%NCFnc%I(KD),     &
+               &            BSc%LStrt%I(1,KC),BSc%LStop%I(1,KC), &
+               &            BSc%LStrt%I(1,KD),BSc%LStop%I(1,KD)  )
 #else
           CALL GetAbsDenBlk(D%MTrix%D(iPtrD),NBFC,NBFD,DMcd(1),&
-               &            BS%NCFnc%I(KC),BS%NCFnc%I(KD),     &
-               &            BS%LStrt%I(1,KC),BS%LStop%I(1,KC), &
-               &            BS%LStrt%I(1,KD),BS%LStop%I(1,KD)  )
+               &            BSc%NCFnc%I(KC),BSc%NCFnc%I(KD),     &
+               &            BSc%LStrt%I(1,KC),BSc%LStop%I(1,KC), &
+               &            BSc%LStrt%I(1,KD),BSc%LStop%I(1,KD)  )
 #endif
           !
 #ifdef GONX2_DBUG
@@ -250,9 +245,9 @@ CONTAINS
              !if(myid==0)write(*,*) 'We find AtC=',AtC,'AtD=',AtD,'AtA',AtA,'MyID',MyID
 #endif
              !
-             KA=GM%AtTyp%I(AtA)
-             NBFA=BS%BfKnd%I(KA)
-             NCFncA=BS%NCFnc%I(KA)
+             KA=GMc%AtTyp%I(AtA)
+             NBFA=BSc%BfKnd%I(KA)
+             NCFncA=BSc%NCFnc%I(KA)
              !
              ACAtmInfo%NCell=GetNonNFPair(AtAList,AtBListTmp%RInt(1)*Dcd,Thresholds%TwoE &
 #ifdef GTRESH
@@ -262,9 +257,9 @@ CONTAINS
 #endif
              IF(ACAtmInfo%NCell.EQ.0) EXIT RnOvA
              !
-             ACAtmInfo%Atm1X=GM%Carts%D(1,AtA)
-             ACAtmInfo%Atm1Y=GM%Carts%D(2,AtA)
-             ACAtmInfo%Atm1Z=GM%Carts%D(3,AtA)
+             ACAtmInfo%Atm1X=GMc%Carts%D(1,AtA)
+             ACAtmInfo%Atm1Y=GMc%Carts%D(2,AtA)
+             ACAtmInfo%Atm1Z=GMc%Carts%D(3,AtA)
              ACAtmInfo%K1=KA
              !
              ACAtmInfo%Atm12X=ACAtmInfo%Atm1X-ACAtmInfo%Atm2X
@@ -272,7 +267,7 @@ CONTAINS
              ACAtmInfo%Atm12Z=ACAtmInfo%Atm1Z-ACAtmInfo%Atm2Z
              !
              ! Get atom pair for BD.
-             CALL GetAtomPairG(ACAtmInfo,AtAList,ACAtmPair,BS,CS_OUT)
+             CALL GetAtomPairG(ACAtmInfo,AtAList,ACAtmPair,BSc,CS_OUT)
              !
              AtBList=>AtBListTmp
              !
@@ -282,9 +277,9 @@ CONTAINS
              !
              RnOvB: DO ! Run over AtB
                 AtB=AtBList%Atom 
-                KB=GM%AtTyp%I(AtB)
-                NBFB=BS%BfKnd%I(KB)
-                NCFncB=BS%NCFnc%I(KB)
+                KB=GMc%AtTyp%I(AtB)
+                NBFB=BSc%BfKnd%I(KB)
+                NCFncB=BSc%NCFnc%I(KB)
                 !
 #ifdef ONX2_PARALLEL
                 !if(myid==1)write(*,*) '+++++++++++++++++++++++++++++++++++++++++++++++'
@@ -327,9 +322,9 @@ CONTAINS
 #endif
                    IF(BDAtmInfo%NCell.EQ.0) EXIT RnOvB
                    !
-                   BDAtmInfo%Atm1X=GM%Carts%D(1,AtB)
-                   BDAtmInfo%Atm1Y=GM%Carts%D(2,AtB)
-                   BDAtmInfo%Atm1Z=GM%Carts%D(3,AtB)
+                   BDAtmInfo%Atm1X=GMc%Carts%D(1,AtB)
+                   BDAtmInfo%Atm1Y=GMc%Carts%D(2,AtB)
+                   BDAtmInfo%Atm1Z=GMc%Carts%D(3,AtB)
                    BDAtmInfo%K1=KB
                    !
                    BDAtmInfo%Atm12X=BDAtmInfo%Atm1X-BDAtmInfo%Atm2X
@@ -338,18 +333,18 @@ CONTAINS
                    !
 #ifdef ONX2_PARALLEL
                    CALL GetAbsDenBlk(V%MTrix(1,1),NBFA,NBFB,DMab(1),     &
-                        &            BS%NCFnc%I(KA),BS%NCFnc%I(KB),      &
-                        &            BS%LStrt%I(1,KA),BS%LStop%I(1,KA),  &
-                        &            BS%LStrt%I(1,KB),BS%LStop%I(1,KB)   )
+                        &            BSc%NCFnc%I(KA),BSc%NCFnc%I(KB),      &
+                        &            BSc%LStrt%I(1,KA),BSc%LStop%I(1,KA),  &
+                        &            BSc%LStrt%I(1,KB),BSc%LStop%I(1,KB)   )
 #else
                    CALL GetAbsDenBlk(D%MTrix%D(iPtrD2),NBFA,NBFB,DMab(1),&
-                        &            BS%NCFnc%I(KA),BS%NCFnc%I(KB),      &
-                        &            BS%LStrt%I(1,KA),BS%LStop%I(1,KA),  &
-                        &            BS%LStrt%I(1,KB),BS%LStop%I(1,KB)   )
+                        &            BSc%NCFnc%I(KA),BSc%NCFnc%I(KB),      &
+                        &            BSc%LStrt%I(1,KA),BSc%LStop%I(1,KA),  &
+                        &            BSc%LStrt%I(1,KB),BSc%LStop%I(1,KB)   )
 #endif
                    !
                    ! Get atom pair for BD.
-                   CALL GetAtomPairG(BDAtmInfo,AtBList,BDAtmPair,BS,CS_OUT)
+                   CALL GetAtomPairG(BDAtmInfo,AtBList,BDAtmPair,BSc,CS_OUT)
                    !
                    NIntBlk=NBFA*NBFB*NBFC*NBFD
                    !
@@ -492,28 +487,36 @@ CONTAINS
     IF(iErr.NE.0) CALL Halt('In ComputDK: Deallocation problem.')
     !
     !
-    WRITE(*,100) NInts,12D0*CS_OUT%NCells**2*DBLE(MaxNon0-1)**2, &
-         &       NInts/(12D0*CS_OUT%NCells**2*DBLE(MaxNon0-1)**2)*100D0
+!!$#ifdef ONX2_PARALLEL
+!!$    NIntsTot=Reduce(NInts)
+!!$    IF(MyID.EQ.ROOT) THEN
+!!$       WRITE(*,100) NIntsTot,12D0*CS_OUT%NCells**2*DBLE(NBasF)**4, &
+!!$            &       NIntsTot/(12D0*CS_OUT%NCells**2*DBLE(NBasF)**4)*100D0
+!!$    ENDIF
+!!$#else
+    WRITE(*,100) NInts,12D0*CS_OUT%NCells**2*DBLE(NBasF)**4, &
+         &       NInts/(12D0*CS_OUT%NCells**2*DBLE(NBasF)**4)*100D0
+!!$#endif
 100 FORMAT(' NInts = ',E8.2,' NIntTot = ',E8.2,' Ratio = ',E8.2,'%')
     !
   END SUBROUTINE ComputDK
   !
   !
-  SUBROUTINE GetAtomPairG(AtmInfo,List,AtmPair,BS,CS_OUT)
+  SUBROUTINE GetAtomPairG(AtmInfo,List,AtmPair,BSc,CS_OUT)
 !H---------------------------------------------------------------------------------
-!H SUBROUTINE GetAtomPairG(AtmInfo,List,AtmPair,BS,CS_OUT)
+!H SUBROUTINE GetAtomPairG(AtmInfo,List,AtmPair,BSc,CS_OUT)
 !H
 !H---------------------------------------------------------------------------------
     !
     IMPLICIT NONE
     !-------------------------------------------------------------------
     TYPE(AtomInfo)               :: AtmInfo
-    TYPE(ANode3)  , POINTER      :: List
+    TYPE(ANode)   , POINTER      :: List
     TYPE(AtomPrG) , DIMENSION(:) :: AtmPair
-    TYPE(BSET)                   :: BS
+    TYPE(BSET)                   :: BSc
     TYPE(CellSet)                :: CS_OUT
     !-------------------------------------------------------------------
-    INTEGER      :: CF1,CF2,I1,I2,II,JJ,IJ,iCell,Cell
+    INTEGER      :: CF1,CF2,I1,I2,II,JJ,IJ,Cell
     INTEGER      :: MinL1,MaxL1,Type1,MinL2,MaxL2,Type2
     INTEGER      :: StopL1,StartL1,StopL2,StartL2
     INTEGER      :: ISwitch1,ISwitch2,iNFPair
@@ -538,19 +541,19 @@ CONTAINS
        ! Then we add the PBC's to have the right interatomic distance.
        R12=(AtmInfo%Atm12X-RX)**2+(AtmInfo%Atm12Y-RY)**2+(AtmInfo%Atm12Z-RZ)**2
        !
-       MinL1=BS%ASymm%I(1,CF1,AtmInfo%K1)
-       MaxL1=BS%ASymm%I(2,CF1,AtmInfo%K1)
+       MinL1=BSc%ASymm%I(1,CF1,AtmInfo%K1)
+       MaxL1=BSc%ASymm%I(2,CF1,AtmInfo%K1)
        Type1=MaxL1*(MaxL1+1)/2+MinL1+1
-       StartL1=BS%LStrt%I(CF1,AtmInfo%K1)
-       StopL1=BS%LStop%I(CF1,AtmInfo%K1)
+       StartL1=BSc%LStrt%I(CF1,AtmInfo%K1)
+       StopL1=BSc%LStop%I(CF1,AtmInfo%K1)
        !
        if(Type1==2) stop 'SP shell not yet supported.'
        !
-       MinL2=BS%ASymm%I(1,CF2,AtmInfo%K2)
-       MaxL2=BS%ASymm%I(2,CF2,AtmInfo%K2)
+       MinL2=BSc%ASymm%I(1,CF2,AtmInfo%K2)
+       MaxL2=BSc%ASymm%I(2,CF2,AtmInfo%K2)
        Type2=MaxL2*(MaxL2+1)/2+MinL2+1
-       StartL2=BS%LStrt%I(CF2,AtmInfo%K2)
-       StopL2=BS%LStop%I(CF2,AtmInfo%K2)
+       StartL2=BSc%LStrt%I(CF2,AtmInfo%K2)
+       StopL2=BSc%LStop%I(CF2,AtmInfo%K2)
        !
        if(Type2==2) stop 'SP shell not yet supported.'
        !
@@ -570,13 +573,13 @@ CONTAINS
        II=0
        !
        ! We assume the primitives are ordered (exponants in decressing order).
-       DO I1=BS%NPFnc%I(CF1,AtmInfo%K1),1,-1
-          Z1=BS%Expnt%D(I1,CF1,AtmInfo%K1)
+       DO I1=BSc%NPFnc%I(CF1,AtmInfo%K1),1,-1
+          Z1=BSc%Expnt%D(I1,CF1,AtmInfo%K1)
           JJ=0
           !
           ! We assume the primitives are ordered (exponants in decressing order).
-          DO I2=BS%NPFnc%I(CF2,AtmInfo%K2),1,-1
-             Z2=BS%Expnt%D(I2,CF2,AtmInfo%K2)
+          DO I2=BSc%NPFnc%I(CF2,AtmInfo%K2),1,-1
+             Z2=BSc%Expnt%D(I2,CF2,AtmInfo%K2)
              Expt=Z1+Z2
              InvExpt=1.0d0/Expt
              XiR12=Z2*Z1*InvExpt*R12
@@ -592,8 +595,8 @@ CONTAINS
                 AtmPair(iNFPair)%SP%Cst(4,IJ)=(Z1*AtmInfo%Atm1Z+Z2*(AtmInfo%Atm2Z+RZ))*InvExpt
                 AtmPair(iNFPair)%SP%Cst(5,IJ)=5.914967172796D0*EXP(-XiR12)*InvExpt* &
                      !AtmPair(CF12)%SP%Cst(5,IJ)=5.914967172796D0*EXPInv(XiR12)*InvExpt* &
-                     &                     BS%CCoef%D(StopL1,I1,CF1,AtmInfo%K1)* &
-                     &                     BS%CCoef%D(StopL2,I2,CF2,AtmInfo%K2)
+                     &                     BSc%CCoef%D(StopL1,I1,CF1,AtmInfo%K1)* &
+                     &                     BSc%CCoef%D(StopL2,I2,CF2,AtmInfo%K2)
                 !
                 AtmPair(iNFPair)%SP%Cst(ISwitch1,IJ)=2.0d0*Z1!->ISwitch1=6,7
                 AtmPair(iNFPair)%SP%Cst(ISwitch2,IJ)=2.0d0*Z2!->ISwitch2=7,6
@@ -654,7 +657,7 @@ CONTAINS
     !
     IMPLICIT NONE
     !-------------------------------------------------------------------
-    TYPE(ANode3), POINTER    :: List
+    TYPE(ANode ), POINTER    :: List
     REAL(DOUBLE), INTENT(IN) :: DFac,Trsh
     !-------------------------------------------------------------------
     INTEGER                  :: I
