@@ -1,18 +1,18 @@
 all:	bib dvi
 
 latex:
-	latex MD_p1.tex
-	latex MD_p1.tex
+	latex MD_Paper_no1.tex
+	latex MD_Paper_no1.tex
 
 new: 	clean links bib dvi
 
 bib:	
-	latex MD_p1.tex
-	bibtex MD_p1
-	latex MD_p1.tex
-	bibtex MD_p1
-	latex MD_p1.tex	
-#	latex MD_p1.tex	
+	latex MD_Paper_no1.tex
+	bibtex MD_Paper_no1
+	latex MD_Paper_no1.tex
+	bibtex MD_Paper_no1
+	latex MD_Paper_no1.tex	
+#	latex MD_Paper_no1.tex	
 
 links:
 	ln -s ../Bib/mondo_new.bib ./mondo_new.bib 
@@ -27,10 +27,10 @@ links:
 
 
 ps:
-	dvips -o MD_p1.ps MD_p1
+	dvips -o MD_Paper_no1.ps MD_Paper_no1
 
 dvi:
-	xdvi -s 2 MD_p1
+	xdvi -s 2 MD_Paper_no1
 
 clean:
 	rm -rf *.log *.aux *.bbl *.blg *.dvi *~

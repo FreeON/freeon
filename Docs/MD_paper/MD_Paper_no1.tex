@@ -1,0 +1,65 @@
+% NOTE TO AIP TYPSETERS: TO CONVERT FROM TWO-COL TO PREPRINT, SWITCH
+% COMMENTOUT COMMAND FROM A TO B IE. use
+% \newcommand{\commentoutA}[1]{}
+% \newcommand{\commentoutB}[1]{#1}
+% instead of the following
+\newcommand{\commentout}[1]{}
+\newcommand{\commentoutA}[1]{#1}
+\newcommand{\commentoutB}[1]{}
+%\renewcommand{\thefootnote}{\fnsymbol{footnote}}
+
+\commentoutA{\documentclass[prb,aps,twocolumn,twocolumngrid,superbib]{revtex4}}
+%\commentoutA{\documentclass[prl,aps,nobibnotes,twocolumn,doublespace,twocolumngrid,superbib,showpacs]{revtex4}}
+\commentoutB{\documentclass[prl,aps,nobibnotes,superbib,showpacs,preprint]{revtex4}}
+
+\usepackage{graphicx}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{bm}
+\usepackage{alltt}
+\usepackage{dcolumn} 
+\usepackage{graphicx}
+\makeatletter 
+\makeatother
+
+\begin{document}
+
+\date{\today}
+
+\title{Linear Scaling ab initio Molecular Dynamics with Gaussian Orbitals:
+Non-Orthogonal Density Matrix Dynamics }
+
+\author{C.~J.~Tymczak}
+\affiliation{Theoretical Division, Los Alamos National Laboratory, Los Alamos, New Mexico 87545 }
+\author{Matt Challacombe}
+\affiliation{Theoretical Division, Los Alamos National Laboratory, Los Alamos, New Mexico 87545 }
+
+\begin{abstract}
+We report on the application of the molecular dynamics method to the linear scaling , electronic structure, 
+Gaussian orbital based code, MondoSCF.  When applying the molecular dynamics method to electronic structure 
+code which use non-orthogonal local basis functions, a major difficulty is illuminated. Within the  
+Born-Openheimer approximation, a systematic drift in the total energy is observed [P. Pulay and G. Fogarasi, 
+C. Phys Lett., 386 (2004) p. 272-278]. This energy drift is due to a systematic error in the density matrix 
+when the previous density matrix is used to compute a gueuss of the new density matrix. We illustrate this 
+problem with two examples, and then we illuminate a simple solution which eliminates it.
+\noindent{\bf Keywords}: 
+
+%
+\end{abstract}
+
+\pacs{}
+
+\maketitle
+
+\footnotetext[1]{}
+\footnotetext[2]{}
+
+\section{INTRODUCTION}
+
+\section{Method}
+
+\section{Examples}
+
+\section{Conclusions}
+
+\end{document}
