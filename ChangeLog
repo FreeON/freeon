@@ -1,3 +1,591 @@
+2002-06-08 09:56  mchalla
+
+	* ONX/NONX/: ComputeKe_PBC_1.F90, ComputeKg_PBC_1.F90,
+	DisOrder_PBC_1.F90, Makefile_PBC_1, MemInit_PBC_1.F90,
+	ONX_PBC_1.F90, RGen.F90: Performance tuned PBC ONX.  Replaced
+	expensive inner loop initializations such as x%i=0 with calls to
+	unrolled seteq77 routines.  Really no need to do use these
+	constructs in DB--should change the logic to avoid these inits
+	altoghether.  Also eliminated calls to function table loads, and
+	some copy in copy out issues related to pointer memory being passed
+	in DisOrder.  We should also work on inproving the interfaces to
+	avoid this problem (pass the object or just pass the first element
+	or use entirely allocatable memory).  -MC
+
+2002-06-08 09:33  mchalla
+
+	* MondoMods/SpecFun.F90, MondoMods/MMA/LookUpTables/GammaGrid.Inc,
+	ONX/VRR/Int1111.F90, ONX/VRR/Int1121.F90, ONX/VRR/Int1122.F90,
+	ONX/VRR/Int1161.F90, ONX/VRR/Int1162.F90, ONX/VRR/Int1166.F90,
+	ONX/VRR/Int2111.F90, ONX/VRR/Int2121.F90, ONX/VRR/Int2122.F90,
+	ONX/VRR/Int2161.F90, ONX/VRR/Int2162.F90, ONX/VRR/Int2211.F90,
+	ONX/VRR/Int2221.F90, ONX/VRR/Int2222.F90, ONX/VRR/Int2261.F90,
+	ONX/VRR/Int6111.F90, ONX/VRR/Int6121.F90, ONX/VRR/Int6122.F90,
+	ONX/VRR/Int6161.F90, ONX/VRR/Int6211.F90, ONX/VRR/Int6221.F90,
+	ONX/VRR/Int6611.F90: Changed Gammafunctions and exp tables to have
+	the same switch=30.  This will give worse accuracy for high ell,
+	and should eventually be redone.  For now though, allows new
+	SpecFun tables to be used in VRR and elswhere.	This modification
+	to PBC ONX works for MgO, and will allow exp table lookup to  be
+	avoided. -MC
+
+2002-06-07 21:45  mchalla
+
+	* OneE/MakeS.F90: Set MakeS back to previous.  Wanted to get in new
+	FastMat stuff, even though its still buggy (before another hard
+	computer crash...)
+
+2002-06-07 16:02  nemeth
+
+	* Dynamo/dynamo.F90: Some printing is removed.
+
+2002-06-07 15:41  nemeth
+
+	* IntCoo/IntCoo.F90: Memory handling is reorganized.
+
+2002-06-07 15:39  nemeth
+
+	* ONX/NONX/ONX_PBC_1.F90: Periodic preprocessing option is added to
+	two places to protect 'db2'.
+
+2002-06-07 13:42  nemeth
+
+	* MondoMods/PrettyPrint.F90: Changes due to type change of AtNum of
+	CRDS.
+
+2002-06-07 12:49  nemeth
+
+	* Includes/CompilerSpecifics.AMDLinux.PG: -lDynamo erased.
+
+2002-06-07 12:43  nemeth
+
+	* SCFeqs/SCFStatus.F90: Additional MMech preprocessing option
+	added.
+
+2002-06-07 12:41  nemeth
+
+	* QCTC/QCTC.F90: Additional MMech added.
+
+2002-06-07 12:22  nemeth
+
+	* OneE/MakeRho.F90: Additional MMech added, alignment of some rows
+	changed.
+
+2002-06-07 12:16  nemeth
+
+	* MondoSCF/ParseInput.F90: ParseCoordinates_MONDO changed back to
+	the original form.
+
+2002-06-07 12:14  nemeth
+
+	* MondoSCF/MondoSCF.F90: MMech preprocessing added.
+
+2002-06-07 12:09  nemeth
+
+	* MondoSCF/Makefile: LibDinamo deleted from Makefile.
+
+2002-06-07 12:05  nemeth
+
+	* MondoSCF/DrvSCFs.F90: Additional MMech preprocessing added.
+
+2002-06-07 12:00  nemeth
+
+	* Dynamo/energy_covalent.F90: Globalcharacters also used,
+	subroutine headers put between MMech preproc statements.
+
+2002-06-07 11:58  nemeth
+
+	* Dynamo/dynamo.F90: Subroutines of dynamo.F90 has been put in
+	#MMech preproc.
+
+2002-06-04 10:27  mchalla
+
+	* OneE/MakeS.F90: Fast matrix module, temporarily located in MakeS
+	for ease of development.  When fully developed, will go into
+	MondoMods.  Should not cause trouble here, unless
+	-DPARALLEL_DEVELOPMENT is used at compile time.
+
+2002-05-31 15:27  nemeth
+
+	* SCFeqs/SCFStatus.F90: Printouts from QMMM related energy terms
+
+2002-05-31 15:25  nemeth
+
+	* SCFeqs/P2Use.F90: Changes due to the change of type of AtNum in
+	CRDS type variables.  Also some change for charged systems (do not
+	know where it comes from).
+
+2002-05-31 14:59  nemeth
+
+	* QCTC/QCTC.F90: Modified, such that treatment of different QM, MM
+	and QMMM cases be available.  Since Rho is already built, the
+	specialties of QM (like Basis set) are be avoided for MM
+	calculations. MM_COUL, the MM Coulomb energy is calculated here via
+	NukE.
+
+2002-05-31 14:57  nemeth
+
+	* QCTC/NukE.F90: Modified such that GM/GM_MM must be passed in as
+	GM_Loc, also type of AtNum changed.
+
+2002-05-31 14:53  nemeth
+
+	* QCTC/BlokTrPdJ.F90: AddNukes is modified to deal with the
+	optional addition of MM charges into Rho. New optional argument
+	IOff_O in argument list.
+
+2002-05-31 14:47  nemeth
+
+	* OneE/RhoTools.F90: Integrate_HGRho has been modified to integrate
+	for QM, MM or QMMM cases.
+
+2002-05-31 14:47  nemeth
+
+	* OneE/RhoBlok.F90: AddNukes is modified to deal with the optional
+	addition of MM charges into Rho. New optional argument IOff_O in
+	argument list.
+
+2002-05-31 14:44  mchalla
+
+	* Docs/DM_Papers/: TP.tex, compile: [no log message]
+
+2002-05-31 14:41  nemeth
+
+	* MondoSCF/MondoSCF.F90: Modifications for making QMMM available. 
+	SetSCF is called only if HasQM; for CASE(GRAD_NO_GRAD) MM energy
+	terms are callable.
+
+2002-05-31 14:30  nemeth
+
+	* MondoMods/Macros.F90: Global parameter 'Mechanics' for QM/MM
+	introduced, controls mechanics type.  Nel and Natoms is tagged when
+	got from HDF.  HasQM, HasMM, MMOnly and QMOnly functions
+	introduced.  Get of Mechanics depending objects (related to basis
+	sets) controlled by HasQM in subroutine StartUp.
+
+2002-05-31 14:30  mchalla
+
+	* Docs/DM_Papers/TP.tex: Added new header material.
+
+2002-05-31 14:23  nemeth
+
+	* MondoMods/Macros.F90: Thresholds for MMOnly calculations set up
+	in SetMMThresholds.  In case of HasQM MM thresholds are the same as
+	the ones used for QM.
+
+2002-05-31 14:17  nemeth
+
+	* MondoMods/Thresholding.F90: Thresholds for MMOnly calculations
+	set up in SetMMThresholds.  In case of HasQM MM thresholds are the
+	same as the ones used for QM.
+
+2002-05-31 14:16  nemeth
+
+	* MondoMods/ProcessControl.F90: Printout of energies of QMMM terms.
+
+2002-05-31 14:14  nemeth
+
+	* MondoMods/PrettyPrint.F90: Things related to the type of Atnum
+	changed.
+
+2002-05-31 14:08  nemeth
+
+	* MondoMods/Parse.F90: Subroutine AlignLowcase introduced for
+	turning character strings into lower case
+
+2002-05-31 13:16  mchalla
+
+	* Docs/Bib/mondo.bib: Bibtex data base for mondo papers.  Use gbib
+	to manipulate/add additional files.
+
+2002-05-31 13:09  nemeth
+
+	* MondoMods/Makefile: [no log message]
+
+2002-05-31 13:03  nemeth
+
+	* MondoMods/LinAlg.F90: Stat has been retrived from HDF file in
+	order to be able to get the tag for GM.
+
+2002-05-31 13:02  nemeth
+
+	* MondoMods/InOut.F90: Interfaces for putting and getting CHR_VECT
+	and LOG_VECT have been introduces Tagging for Put/Get of CRDS type
+	objects introduced.
+
+2002-05-31 13:00  nemeth
+
+	* MondoMods/GlobalScalars.F90: JToHartree and C_Avogadro conversion
+	factors introduced.
+
+2002-05-31 12:56  nemeth
+
+	* MondoMods/DerivedTypes.F90: Type of AtmNum (in type CRDS) has
+	been changed from int_vect to dbl_vect in order to allow fractional
+	charges of MM atoms.
+
+2002-05-31 12:45  nemeth
+
+	* Makefile: Dynamo and IntCoo added
+
+2002-05-31 12:15  mchalla
+
+	* Docs/RevTex/: 10pt.rtx, 11pt.rtx, 12pt.rtx, README, aps.rtx,
+	apsrev.bst, apsrmp.bst, apssamp.tex, revguide.pdf, revguide.rty,
+	revguide.tex, revsymb.sty, revtex4.cls, revtex4.dtx, revtex4.ins,
+	revtex4.pdf, rmp.rtx, template.aps, template.rty: RevTex!
+
+2002-05-31 11:51  nemeth
+
+	* Includes/: CompilerSpecifics.IntelLinux.NAG,
+	CompilerSpecifics.IntelLinux.PG: Dynamo included, periodics
+	switched off temporarily.
+
+2002-05-31 11:50  nemeth
+
+	* Includes/CompilerSpecifics.IBMAIX.XLF: Dynamo included and
+	periodic switched off temporarily
+
+2002-05-31 11:39  nemeth
+
+	* Includes/CompilerSpecifics.AlphaLinux.COMPAQ: Dynamo included,
+	periodic temporarily switched off
+
+2002-05-31 11:27  nemeth
+
+	* Includes/CompilerSpecifics.AMDLinux.PG: inclusion of Dynamo,
+	periodics temporarily switched off
+
+2002-05-31 11:10  nemeth
+
+	* IntCoo/Makefile: Makefile for IntCoo
+
+2002-05-31 11:05  mchalla
+
+	* Docs/DM_Papers/TP_Fig_F_G.ps: Figure one.
+
+2002-05-31 11:03  mchalla
+
+	* Docs/DM_Papers/TP.tex: Trace setting DM paper.
+
+2002-05-31 10:56  nemeth
+
+	* Dynamo/Makefile: Makefile to compile Dynamo files
+
+2002-05-31 10:50  nemeth
+
+	* Dynamo/atoms.F90: atoms.F90 from Dynamo library
+
+2002-05-31 10:50  nemeth
+
+	* Dynamo/connectivity.F90: connectivity.F90 from Dynamo library
+
+2002-05-31 10:49  nemeth
+
+	* Dynamo/constants.F90: constants.F90 from Dynamo library
+
+2002-05-31 10:48  nemeth
+
+	* Dynamo/constraint.F90: constraint.F90 from Dynamo library
+
+2002-05-31 10:48  nemeth
+
+	* Dynamo/coordinate_io.F90: coordinate_io.F90 from Dynamo library
+
+2002-05-31 10:47  nemeth
+
+	* Dynamo/definitions.F90: definitions.F90 from Dynamo library
+
+2002-05-31 10:46  nemeth
+
+	* Dynamo/dynamo.F90: dynamo.F90 drives routines from Dynamo library
+	for MONDO
+
+2002-05-31 10:45  nemeth
+
+	* Dynamo/dynamo_variables.F90: dynamo_variables.F90 from Dynamo
+	library
+
+2002-05-31 10:44  nemeth
+
+	* Dynamo/elements.F90: elements.F90 from Dynamo library
+
+2002-05-31 10:43  nemeth
+
+	* Dynamo/energy_covalent.F90: energy_covalent.F90 from Dynamo
+	library
+
+2002-05-31 10:43  nemeth
+
+	* Dynamo/energy_nb_full.F90: energy_nb_full.F90 from Dynamo library
+
+2002-05-31 10:42  nemeth
+
+	* Dynamo/files.F90: files.F90 from Dynamo library
+
+2002-05-31 10:41  nemeth
+
+	* Dynamo/io_units.F90: io_units.F90 from Dynamo library
+
+2002-05-31 10:40  nemeth
+
+	* Dynamo/linear_algebra.F90: linear_algebra.F90 from Dynamo library
+
+2002-05-31 10:39  nemeth
+
+	* Dynamo/mm_file_data.F90: mm_file_data.F90 from Dynamo library
+
+2002-05-31 10:38  nemeth
+
+	* Dynamo/mm_file_io.F90: mm_file_io.F90 from Dynamo library
+
+2002-05-31 10:37  nemeth
+
+	* Dynamo/mm_system.F90: mm_system.F90 from Dynamo library
+
+2002-05-31 10:37  nemeth
+
+	* Dynamo/mm_terms.F90: mm_terms.F90 from Dynamo library
+
+2002-05-31 10:35  nemeth
+
+	* Dynamo/parsing.F90: parsing.F90 from Dynamo library
+
+2002-05-31 10:35  nemeth
+
+	* Dynamo/pdb_io.F90: pdb_io.F90 from Dynamo library
+
+2002-05-31 10:34  nemeth
+
+	* Dynamo/sequence.F90: sequence.F90 from Dynamo library
+
+2002-05-31 10:33  nemeth
+
+	* Dynamo/sort.F90: sort.F90 from Dynamo library
+
+2002-05-31 10:32  nemeth
+
+	* Dynamo/status.F90: status.F90 from Dynamo library
+
+2002-05-31 10:30  nemeth
+
+	* Dynamo/string.F90: string.F90 from Dynamo library
+
+2002-05-31 10:09  nemeth
+
+	* MondoSCF/string.F90: string.F90 from Dynamo library
+
+2002-05-30 19:40  nemeth
+
+	* Dynamo/symmetry.F90: symmetry.F90 from Dynamo
+
+2002-05-30 19:21  nemeth
+
+	* IntCoo/IntCoo.F90: IntCoo.F90 , to contain routines related to
+	geometry manipulations
+
+2002-05-30 18:09  nemeth
+
+	* MondoSCF/symmetry.F90: symmetry.F90 from Dynamo library
+
+2002-05-30 18:08  nemeth
+
+	* MondoSCF/status.F90: status.F90 from Dynamo library
+
+2002-05-30 18:07  nemeth
+
+	* MondoSCF/sort.F90: sort.F90 from Dynamo library
+
+2002-05-30 18:07  nemeth
+
+	* MondoSCF/sequence.F90: sequence.F90 from Dynamo library
+
+2002-05-30 18:06  nemeth
+
+	* MondoSCF/pdb_io.F90: pdb_io.F90 from Dynamo library
+
+2002-05-30 18:04  nemeth
+
+	* MondoSCF/parsing.F90: parsing.F90 from Dynamo library
+
+2002-05-30 18:03  nemeth
+
+	* MondoSCF/mm_terms.F90: mm_terms.F90 from Dynamo library
+
+2002-05-30 18:02  nemeth
+
+	* MondoSCF/mm_system.F90: mm_system.F90 from Dynamo library
+
+2002-05-30 18:01  nemeth
+
+	* MondoSCF/mm_file_io.F90: mm_file_io.F90 from Dynamo library
+
+2002-05-30 18:01  nemeth
+
+	* MondoSCF/mm_file_data.F90: mm_file_data.F90 from Dynamo library
+
+2002-05-30 18:00  nemeth
+
+	* MondoSCF/linear_algebra.F90: linear_algebra.F90 from Dynamo
+	library
+
+2002-05-30 17:59  nemeth
+
+	* MondoSCF/io_units.F90: io_units.F90 from Dynamo library
+
+2002-05-30 17:58  nemeth
+
+	* MondoSCF/files.F90: files.F90 from Dynamo library
+
+2002-05-30 17:56  nemeth
+
+	* MondoSCF/energy_nb_full.F90: energy_nb_full.F90 from Dynamo
+	library
+
+2002-05-30 17:55  nemeth
+
+	* MondoSCF/energy_covalent.F90: energy_covalent.F90 from Dynamo
+	library
+
+2002-05-30 17:53  nemeth
+
+	* MondoSCF/elements.F90: elements.F90 from Dynamo library
+
+2002-05-30 17:53  nemeth
+
+	* MondoSCF/dynamo_variables.F90: dynamo_variables.F90 from Dynamo
+	library
+
+2002-05-30 17:52  nemeth
+
+	* MondoSCF/dynamo.F90: dynamo.F90 from Dynamo library
+
+2002-05-30 17:50  nemeth
+
+	* MondoSCF/definitions.F90: definitions.F90 from Dynamo library
+
+2002-05-30 17:49  nemeth
+
+	* MondoSCF/: constraint.F90, coordinate_io.F90: coordinate_io.F90
+	from Dynamo library
+
+2002-05-30 17:47  nemeth
+
+	* MondoSCF/constants.F90: constants.F90 from Dynamo library
+
+2002-05-30 17:46  nemeth
+
+	* MondoSCF/connectivity.F90: connectivity.F90 from Dynamo library
+
+2002-05-30 17:45  nemeth
+
+	* MondoSCF/atoms.F90: atoms.F90 from Dynamo library
+
+2002-05-30 13:23  nemeth
+
+	* MondoSCF/SCFLocals.F90: Type SCFControls changed to include
+	Mechanics and MMMethod (MMMethod is not yet used elsewhere).
+
+2002-05-30 13:23  nemeth
+
+	* MondoSCF/ParsingKeys.F90: Keys for Mechanics, MM,QM and QMMM
+	introduced.
+
+2002-05-30 13:22  nemeth
+
+	* MondoSCF/Makefile: Modifications for handling Dynamo libraries.
+
+2002-05-30 13:15  nemeth
+
+	* MondoSCF/DrvSCFs.F90: Subroutines MM_COULOMBENERGY and MMENERG
+	introduced, to calculate energy terms related to the presence of MM
+	atoms.
+
+2002-05-30 13:14  nemeth
+
+	* MondoSCF/ParseInput.F90: ParseInput + USE Dynamo and IntCoo
+	ParseMM added, to parse MM input files and store info in GM_MM
+	(type CRDS).  ParseMech is introduced to parse for Mechanics. 
+	ParseAcc is added to parse for accuraces, this function is taken
+	out from ParseBaseSets, so that accuraces be available also for MM
+	calculations.  QMMMDATA_READ is added to parse data for QM/MM
+	separation.
+
+2002-05-24 11:41  tymczak
+
+	* MondoMods/LinAlg.F90: 
+	Added a  Gersgorin Spectral Bound Estimator
+
+2002-05-24 11:39  tymczak
+
+	* SCFeqs/: NT4.F90, PM.F90, SP2.F90, SP4.F90: 
+	These are Anders Density Matrix Minimization Schemes
+
+2002-04-30 16:17  tymczak
+
+	* QCTC/PBCFarField.F90: Better MAC and PAC dist in Far Fields
+
+2002-04-30 16:16  tymczak
+
+	* QCTC/: BlokTrPdJ.F90, JGen.F90: Removed the periodic wrapping,
+	causes problems
+
+2002-04-30 16:15  tymczak
+
+	* OneE/MakeRho.F90: Removed the Periodic Wrapping, causes problems
+
+2002-04-08 09:20  schwegle
+
+	* ONX/NONX/: DisOrder_PBC_1.F90, Makefile, Makefile_PBC_1,
+	ONX_PBC_1.F90: Update for the PBC version of ONX. To compile the
+	PBC version use the Makefile_PBC_1 file. This version of PBC ONX
+	should be the same as CJs notes:
+	
+	First, the Integral IS:
+	
+	K_{ab} = Sum_{c,d} Sum_{h,g,n} Int dr dr' Phi_a(r) Phi_c(r+h)
+	|r-r'| ^-1 P_{cd}[n] Phi_b(r'+g) Phi_d(r'+h+n)
+	
+	In our Case
+	
+	P_ab[n] = P_ab[0] delta_{n,0}
+	
+	Then
+	
+	K_{ab} = Sum_{c,d} Sum_{h,g} Int dr dr' Phi_a(r) Phi_c(r+h) |r-r'|
+	^-1 P_{cd}[0] Phi_b(r'+g) Phi_d(r'+h)
+	
+	This is not yet implemented in the general integral code so
+	d-functions and p-only (not sp) functions will not work with
+	periodics. For the MgO test input at sto-2g, loose, and HF, it
+	should give a total energy of -263.06001511.
+
+2002-03-20 09:41  mchalla
+
+	* XForm/LowdinO.F90: Got rid of Halt for large condition numbers of
+	S
+
+2002-03-10 13:47  mchalla
+
+	* MondoMods/GlobalScalars.F90: Replaced 1/HUGE with TINY.  This
+	gives the correct smallest double.
+
+2002-03-06 12:08  mchalla
+
+	* SCFeqs/DIIS.F90: Charge sloshing DIIS seems to be working really
+	badly.	Turned off for now, pending deeper analysis.
+
+2002-03-05 14:19  tymczak
+
+	* Docs/PBC_paper/LinearPBCMethod.lyx,
+	Docs/PBC_paper/LinearPBCMethod.tex,
+	Docs/PBC_paper/GaussianPapers.bib, MondoSCF/DrvFrcs.F90: [no log
+	message]
+
+2002-03-05 13:52  mchalla
+
+	* ChangeLog: [no log message]
+
 2002-03-05 13:51  mchalla
 
 	* ONX/NONX/ONX.F90: Changed get of GMp to CurBasis in case of a
