@@ -879,8 +879,8 @@ CONTAINS
                         SCRPath)
      ENDIF
      CALL LQFit(IntCValuesT%D,IntCGradsT%D,LWeightT%D,IntCsT,ABCT%D, &
-              ! RangeT%D,NDegsT%I,Zero,.TRUE.)
-                RangeT%D,NDegsT%I,Zero,.FALSE.)
+                RangeT%D,NDegsT%I,Zero,.TRUE.)
+              ! RangeT%D,NDegsT%I,Zero,.FALSE.)
      CALL DoPredict(ABCT%D,IntCValuesT%D,IntCGradsT%D,IntCsT, &
                     NDegsT%I,Path2,RangeT%D)
      CALL CleanRange(DisplT%D,RangeT%D,IntCs%Def%C,IntCsT%PredVal%D, &
