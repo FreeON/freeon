@@ -19,6 +19,7 @@ PROGRAM TForce
   USE MondoMPI
   TYPE(BCSR)                  :: P
   TYPE(DBL_VECT)              :: TotTFrc
+  TYPE(DBL_RNK2)              :: TmpLatFrc_T
   INTEGER                     :: IErr,TotFrcComp
 #else
   TYPE(BCSR)                  :: P
@@ -126,7 +127,16 @@ PROGRAM TForce
      A2=3*AtA
      GM%Gradients%D(1:3,AtA) =  GM%Gradients%D(1:3,AtA)+TFrc%D(A1:A2)
   ENDDO
+#ifdef PARALLEL
+  CALL New(TmpLatFrc_T,(/3,3/))
+  CALL DBL_VECT_EQ_DBL_SCLR(9,TmpLatFrc_T%D(1,1),0.0d0)
+  CALL MPI_REDUCE(LatFrc_T%D(1,1),TmpLatFrc_T%D(1,1),9,MPI_DOUBLE_PRECISION, &
+       &          MPI_SUM,ROOT,MONDO_COMM,IErr)
+  GM%PBC%LatFrc%D = GM%PBC%LatFrc%D+TmpLatFrc_T%D
+  CALL Delete(TmpLatFrc_T)
+#else
   GM%PBC%LatFrc%D = GM%PBC%LatFrc%D+LatFrc_T%D
+#endif
   CALL Put(GM,Tag_O=CurGeom)
 !------------------------------------------------------------------------------
 ! Tidy up 
