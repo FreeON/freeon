@@ -63,12 +63,12 @@ MODULE DrvFrcs
       WRITE(30,12) IGeo
       DO AtA = 1,NAtoms
          A1 = 3*(AtA-1)+1
-         WRITE(30,11) AtA,GM%Carts%D(1,AtA),GM%Carts%D(2,AtA),GM%Carts%D(3,AtA),Frc%D(A1),Frc%D(A1+1),Frc%D(A1+2)
+         WRITE(30,11) AtA,GM%Carts%D(:,AtA),Frc%D(A1:A1+2)
       ENDDO
       CLOSE(30)
       CALL Delete(Frc)
 !
-11    FORMAT('ATOM#',I6,2X,F20.16,2X,F20.16,2X,F20.16,2X,F20.16,2X,F20.16,2X,F20.16)
+11    FORMAT('ATOM#',I6,6(2X,D12.5))
 12    FORMAT('Geometry #',I6)
 !
     END SUBROUTINE Forces
