@@ -1,3 +1,67 @@
+2002-02-11 11:58  mchalla
+
+	* MondoMods/Thresholding.F90: Fixed bug in LineBoxOverlap for
+	diatomics:  Returns early if line box seperation is zero.
+
+2002-02-11 09:23  mchalla
+
+	* HiCu/KxcGen.F90: Now uses high level Line[AB]+extent--BBox
+	overlap in PBC double sum.  Note: Thresholding/LineBoxOverlap could
+	probably use some more work.  Still, gives a good speed up in HiCu.
+
+2002-02-11 09:20  mchalla
+
+	* QuNew/BFGSHess.F90: Fixed problem with DO limits defined to be
+	doubles for PBCs.
+
+2002-02-11 09:19  mchalla
+
+	* MondoMods/: AtomPairs.F90, BraBloks.F90, GlobalScalars.F90,
+	Thresholding.F90: Fixed serious bug in Thresholding/Extent0 with
+	undefined variable UniP.  Added support for Line[AB]--Box
+	thresholding.  This is usefull for avoiding pair-box overlap in the
+	double sums encountered in periodic HiCu.
+
+2002-02-06 10:02  mchalla
+
+	* ONX/NONX/DisOrder_PBC_2.F90: Alternative approach to PBCs, based
+	on including PBC loop in building distribution lists.  Doesn't seem
+	to work either.  Main difficulty lies in indexing, I believe.
+
+2002-02-05 15:49  mchalla
+
+	* ONX/NONX/: ComputeKe_PBC_1.F90, ComputeKg_PBC_1.F90,
+	DisOrder_PBC_1.F90, MemInit_PBC_1.F90, ONX_PBC_1.F90: First attempt
+	at adding PBCs to ONX.	So far, doesn't work.  Will try again!
+
+2002-02-04 21:38  ckgan
+
+	* MondoMods/Order.F90: 3 lines are commented because the assertion
+	on the value of IMax might not be true due to roundoff error.
+
+2002-02-04 14:44  mchalla
+
+	* MondoMods/PrettyPrint.F90: Removed USE ORDER again!
+
+2002-02-02 16:08  tymczak
+
+	* QCTC/JGen.F90: [no log message]
+
+2002-02-02 15:48  tymczak
+
+	* MondoMods/PrettyPrint.F90: Prints out the BlockError, which is
+	the error do to any aymrttry of the same atom block diagonal,
+	happen with periodic systems
+
+2002-02-02 12:35  ckgan
+
+	* Docs/BWR_paper/bwr.tex: the latex file is included.
+
+2002-02-02 12:35  ckgan
+
+	* Docs/BWR_paper/: anneal_s.eps, compare_all.eps, hilbert_s.eps,
+	morton_s.eps: add a paper bwr.tex to the repository.
+
 2002-02-01 13:18  mchalla
 
 	* MondoSCF/ParseInput.F90: Added Karoly to the author list.  Good
@@ -243,10 +307,6 @@
 	VRRl.F90, also changed the order of the indexes in IB%WR and IB%WZ.
 	This needs a change in MemMan.F90 in MondoMods.
 
-2001-12-14 15:33  mchalla
-
-	* ChangeLog: [no log message]
-
 2001-12-14 15:30  mchalla
 
 	* XForm/LowdinO.F90: Put in checking of cond(S), with appropriate
@@ -292,10 +352,6 @@
 	ONX.F90, Sizes.F90, VRRs.F90: Fixed a lot of bugs and messy stuff
 	with the array dimensions in the 2-e code.
 
-2001-12-10 11:57  mchalla
-
-	* ChangeLog: [no log message]
-
 2001-12-10 11:53  mchalla
 
 	* Validate/Lizard.inp: [no log message]
@@ -312,10 +368,6 @@
 	MondoSCF/ParseInput.F90, SCFeqs/SDMM.F90, QCTC/BlokTrPdJ.F90,
 	QCTC/JGen.F90: Changed back to pre 2001-11-26 to eliminate periodic
 	instabilities and feature bloat.
-
-2001-12-07 12:17  mchalla
-
-	* ChangeLog: [no log message]
 
 2001-12-05 17:08  tymczak
 
