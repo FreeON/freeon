@@ -63,7 +63,7 @@ Normy[LMN_List]:=Module[{Fct,X,Y,L,M,N},
                         Y=Fct[L]*Fct[M]*Fct[N];
 			Return[Sqrt[X/Y]]];
 
-Classes = { {0,0},{0,1},{1,1},{2,2},{3,3}};
+Classes = { {0,0},{0,1},{1,1},{2,2},{3,3},{4,4}};
 
 CType[1]  = "s";
 CType[2]  = "sp";
@@ -97,7 +97,7 @@ Get[StringJoin[MondoHome,"/MMA/Optimize.m"]];
 
 FF[x_] := ToString[FixedNumberForm[SetPrecision[N[x,32],32], 16, 2]];
 
-SetOptions[FortranAssign,AssignOptimize->False,AssignMaxSize->5000,
+SetOptions[FortranAssign,AssignOptimize->True,AssignMaxSize->5000,
            AssignBreak->{5000,"         "},AssignIndent->"      ",AssignTemporary->{W,Sequence}];
 SetOptions[Optimize,OptimizeVariable->{V,Array},OptimizeTimes->True,OptimizePlus->True,
            OptimizeCoefficients->True,OptimizeFunction->False]; 
