@@ -41,6 +41,9 @@ MODULE BlokTrPdJ
   USE BraBloks
   USE PoleTree
   USE TreeWalk
+#ifdef PERIODIC
+  USE PBCFarField
+#endif
   IMPLICIT NONE
   LOGICAL PrintFlag
 !----------!
@@ -48,7 +51,7 @@ MODULE BlokTrPdJ
 !=======================================================================================
 !
 !=======================================================================================
-     FUNCTION TrPdJ(Pair,P,AtA,AtB) RESULT(Vck)
+     FUNCTION TrPdJ(Pair,P) RESULT(Vck)
        TYPE(AtomPair)                           :: Pair
 !
        REAL(DOUBLE),DIMENSION(Pair%NA,Pair%NB)  :: P
@@ -69,6 +72,10 @@ MODULE BlokTrPdJ
                                                    NA,NB,LAB,MAB,NAB,LM,LMN, &
                                                    Ell,EllA,EllB,HGLenEll,SPLenEll
        REAL(DOUBLE), EXTERNAL                   :: BlkTrace_2 
+#ifdef PERIODIC
+       INTEGER                                  :: NC
+       REAL(DOUBLE)                             :: Px,Py,Pz
+#endif
 !----------------------------------------------------------------------------------------- 
 !
        Prim%A=Pair%A
@@ -122,8 +129,31 @@ MODULE BlokTrPdJ
                 Tau=Thresholds%TwoE
                 DP2=(MaxAmp/Tau)**(Two/DBLE(SPEll+1))
                 PoleSwitch=PFunk(Prim%Ell+MaxL,Tau/MaxAmp)
+!               Zero the Acumulators
+                HGKet=Zero
+                SPKetC=Zero
+                SPKetS=Zero 
+#ifdef PERIODIC
+!               Fold The Primative Back into the BOX
+                CALL AtomCyclic(GM,Prim%P)
+                Px = Prim%P(1)
+                Py = Prim%P(2)
+                Pz = Prim%P(3)
+!               Sum over cells
+                DO NC=1,CSMM1%NCells
+                   Prim%P(1)=Px+CSMM1%CellCarts%D(1,NC)
+                   Prim%P(2)=Py+CSMM1%CellCarts%D(2,NC)
+                   Prim%P(3)=Pz+CSMM1%CellCarts%D(3,NC)
+!                  Walk the walk
+                   CALL JWalk(PoleRoot)
+                ENDDO
+                Prim%P(1)=Px
+                Prim%P(2)=Py
+                Prim%P(3)=Pz
+#else
 !               Walk the walk
                 CALL JWalk(PoleRoot)
+#endif
 !               Contract <Bra|Ket> bloks to compute matrix elements of J
                 IA = IndexA
                 DO LMNA=StartLA,StopLA
@@ -142,21 +172,35 @@ MODULE BlokTrPdJ
                          ENDDO
                          CALL HGToSP(Prim,dHGBra%D(:,IA,IB,K),SPBraC,SPBraS)
                          DO LM=0,SPLenEll
-                            dJ(IA,IB,K)=dJ(IA,IB,K)+SPBraC(LM)*SPKetC(LM) &
-                                                   +SPBraS(LM)*SPKetS(LM)
+                            dJ(IA,IB,K)=dJ(IA,IB,K)+SPBraC(LM)*SPKetC(LM)+SPBraS(LM)*SPKetS(LM)
                          ENDDO
                       ENDDO
-                  ENDDO
-                  ENDDO
-             ENDIF 
+                   ENDDO
+                ENDDO
+#ifdef PERIODIC
+!               Calculate the FarField Multipole Contribution to the Matrix Element 
+!               Contract the Primative MM  with the density MM
+                IF(Dimen > 0) THEN
+                   IA=IndexA
+                   DO LMNA=StartLA,StopLA
+                      IA=IA+1                    
+                      IB=IndexB
+                      DO LMNB=StartLB,StopLB  
+                         IB=IB+1                      
+                         DO K=1,3
+                            dJ(IA,IB,K)=dJ(IA,IB,K) + CTraxFF(Prim,dHGBra%D(:,IA,IB,K)) &
+                                                    + CTraxQ(Prim,dHGBra%D(:,IA,IB,K))                                 
+                         ENDDO
+                      ENDDO
+                   ENDDO
+                ENDIF
+#endif
+             ENDIF
           ENDDO 
           ENDDO
        ENDDO
        ENDDO
-!       PrintFlags%Fmt=DEBUG_DBLSTYLE
-!       CALL  Print_DBL_Rank2A(TRANSPOSE(dJ(:,:,3)),'dJz',Unit_O=6)
-!       CALL  Print_DBL_Rank2A(P,'P',Unit_O=6)
-!       CALL  Print_DBL_Rank2A(MATMUL(P,dJ(:,:,3)),'P.dJ',Unit_O=6)
+!
        DO K=1,3
           Vck(K)=BlkTrace_2(Pair%NA,Pair%NB,P,TRANSPOSE(dJ(:,:,K)))
        ENDDO
@@ -175,24 +219,36 @@ MODULE BlokTrPdJ
        REAL(DOUBLE),DIMENSION(3)       :: Vct
        REAL(DOUBLE),DIMENSION(0:SPLen) :: SPBraC,SPBraS 
        INTEGER                         :: At,SPLenEll,HGLenEll,K,LM,LMN
+#ifdef PERIODIC
+       INTEGER                         :: NC
+       REAL(DOUBLE),DIMENSION(3)       :: QC
+#endif
 !---------------------------------------------------------------------------------------------
+       NukeCo   =-GM%AtNum%I(At)*(NuclearExpnt/Pi)**(ThreeHalves)
+       NukePole =-GM%AtNum%I(At)
 !      Set MAC and PAC parameters
-       NukeCo=-GM%AtNum%I(At)*(NuclearExpnt/Pi)**(ThreeHalves)
-       Tau=Thresholds%TwoE
-       DP2=(GM%AtNum%I(At)/Tau)**(Two/DBLE(SPEll+1))
+       Tau      =Thresholds%TwoE
+       DP2      =(ABS(NukePole)/Tau)**(Two/DBLE(SPEll+1))
        PoleSwitch=Gamma_Switch
 !      Set atomic "primitive"
-       Prim%P=GM%Carts%D(:,At) 
-       Prim%Zeta=NuclearExpnt
        Prim%Ell=1
+       Prim%Zeta=NuclearExpnt
        SPLenEll=LSP(Prim%Ell)
        HGLenEll=LHGTF(Prim%Ell)
 !      Zero accumulators
        HGKet=Zero
        SPKetC=Zero
        SPKetS=Zero
-!      Walk the walk
-       CALL VWalk(PoleRoot)
+#ifdef PERIODIC
+       QC(:)  = GM%Carts%D(:,At)
+       DO NC=1,CSMM1%NCells
+!         Set atomic "primitive"
+          Prim%P(:)=QC(:)+CSMM1%CellCarts%D(:,NC)
+!         Walk the walk
+          CALL VWalk(PoleRoot)
+       ENDDO
+!      Reset the Atomic Coordinates
+       Prim%P = QC
 !      Init bra xforms
        Vct=Zero
        dHGBra%D=Zero       
@@ -208,5 +264,32 @@ MODULE BlokTrPdJ
              Vct(K)=Vct(K)+SPBraC(LM)*SPKetC(LM)+SPBraS(LM)*SPKetS(LM)
           ENDDO
        ENDDO
+!      Add in the Far Field, Dipole and Quadripole Correction
+       IF(Dimen > 0) THEN
+          DO K=1,3
+             Vct(K)=Vct(K) + CTraxFF(Prim,dHGBra%D(:,1,1,K)) &
+                           + CTraxQ(Prim,dHGBra%D(:,1,1,K))
+          ENDDO
+       ENDIF
+#else
+       Prim%P=GM%Carts%D(:,At) 
+!      Walk the walk
+       CALL VWalk(PoleRoot)
+!      Init bra xforms
+       Vct=Zero
+       dHGBra%D=Zero       
+       dHGBra%D(2,1,1,1)=NukeCo
+       dHGBra%D(3,1,1,2)=NukeCo
+       dHGBra%D(4,1,1,3)=NukeCo
+       DO K=1,3
+          DO LMN=1,HGLenEll
+             Vct(K)=Vct(K) + Phase%D(LMN)*dHGBra%D(LMN,1,1,K)*HGKet(LMN)
+          ENDDO
+          CALL HGToSP(Prim,dHGBra%D(:,1,1,K),SPBraC,SPBraS)
+          DO LM=0,SPLenEll
+             Vct(K)=Vct(K)+SPBraC(LM)*SPKetC(LM)+SPBraS(LM)*SPKetS(LM)
+          ENDDO
+       ENDDO
+#endif
      END FUNCTION dNukE
 END MODULE BlokTrPdJ
