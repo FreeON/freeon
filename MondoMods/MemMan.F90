@@ -18,7 +18,8 @@ MODULE MemMan
                        New_BCSR,     New_BSET,     &
                        New_ARGMT,    New_HGRho,    &
                        New_DBuf,     New_IBuf,     &
-                       New_IDrv,     New_DSL
+                       New_IDrv,     New_DSL,      &
+                       New_GradD
    END INTERFACE
    INTERFACE Delete
       MODULE PROCEDURE Delete_INT_VECT, Delete_INT_RNK2, &
@@ -33,7 +34,8 @@ MODULE MemMan
                        Delete_BCSR,     Delete_BSET,     &
                        Delete_ARGMT,    Delete_HGRho,    &
                        Delete_DBuf,     Delete_IBuf,     &
-                       Delete_IDrv,     Delete_DSL
+                       Delete_IDrv,     Delete_DSL,      &
+                       Delete_GradD
    END INTERFACE
 !
    INTERFACE SetToBig
@@ -411,6 +413,19 @@ MODULE MemMan
          CALL New(A%SLKey,A%MAXSL)
          A%Alloc=ALLOCATED_TRUE
       END SUBROUTINE New_DSL
+!----------------------------------------------------------------------------
+!     Allocate ONX gradient driver space
+!
+      SUBROUTINE New_GradD(A)
+        TYPE(GradD),INTENT(INOUT)       :: A
+        CALL AllocChk(A%Alloc)
+        CALL New(A%GDrv1,(/4,2250/))
+        CALL New(A%GDrv2,(/4,10/))
+        CALL New(A%GDrv3,(/4,10/))
+        CALL New(A%GDrv4,(/4,2500/))
+        CALL New(A%GDrv5,(/6,10/))
+        A%Alloc=ALLOCATED_TRUE
+      END SUBROUTINE New_GradD
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !     
 !
@@ -678,6 +693,18 @@ MODULE MemMan
          CALL Delete(A%SLKey)
          A%Alloc=ALLOCATED_FALSE
       END SUBROUTINE Delete_DSL
+!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+!
+!
+      SUBROUTINE Delete_GradD(A)
+        TYPE(GradD),INTENT(INOUT)       :: A
+        CALL Delete(A%GDrv1)
+        CALL Delete(A%GDrv2)
+        CALL Delete(A%GDrv3)
+        CALL Delete(A%GDrv4)
+        CALL Delete(A%GDrv5)
+        A%Alloc=ALLOCATED_FALSE
+      END SUBROUTINE Delete_GradD
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
 !
