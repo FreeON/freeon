@@ -184,13 +184,17 @@ CONTAINS
     IF(PrintFlags%Key>=DEBUG_MEDIUM)THEN
        CALL Elapsed_TIME(PerfMon,'Accum',Proc_O=Prog)
        CALL PPrint(PerfMon,Prog)
+       IF(.FALSE.) THEN
+          CALL Elapsed_TIME(PerfMon,'Accum',Proc_O=Prog)
+          CALL PPrint(PerfMon,Prog,BareBones_O=.TRUE.)
+       ENDIF
+    ELSE
+       IF(.FALSE.) THEN
+          CALL Elapsed_TIME(PerfMon,'Accum',Proc_O=Prog)
+          CALL PPrint(PerfMon,Prog,BareBones_O=.TRUE.)
+       ENDIF
     ENDIF
-!
-!    IF(.TRUE.)THEN
-!       CALL Elapsed_TIME(PerfMon,'Accum',Proc_O=Prog)
-!       CALL PPrint(PerfMon,Prog,BareBones_O=.TRUE.)
-!    ENDIF
-!
+    !
     IF(PrintFlags%Key==DEBUG_MAXIMUM) &
          CALL PPrint(MemStats,Prog)
     ! Now mark sucess of this program ... 
