@@ -190,7 +190,7 @@ rv:
 pv:	
 	$(MAKE) -i -C Validate purge
 cv:	
-	$(MAKE) -i -C Validate
+	$(MAKE) -i -C Validate clean
 #----------------------------------------------
 #   Cleaning of other directories 
 #
