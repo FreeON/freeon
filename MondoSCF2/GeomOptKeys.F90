@@ -14,6 +14,8 @@ MODULE GeomOptKeys
    CHARACTER(LEN=7),  PARAMETER :: OPT_NoGDIIS      ='NoGDIIS'
    CHARACTER(LEN=10), PARAMETER :: OPT_GradNorm     ='DoGradNorm'
    CHARACTER(LEN=8),  PARAMETER :: OPT_Pictures     ='Pictures'
+   CHARACTER(LEN=8),  PARAMETER :: OPT_ExplLatt     ='ExplLatt'
+   CHARACTER(LEN=9),  PARAMETER :: OPT_Alternate    ='Alternate'
    CHARACTER(LEN=9),  PARAMETER :: OPT_DoThreeAt    ='DoThreeAt' 
    CHARACTER(LEN=8),  PARAMETER :: OPT_NoBackTr     ='NoBackTr'    
    CHARACTER(LEN=12), PARAMETER :: OPT_DoAtomBackTr ='DoAtomBackTr'

@@ -54,6 +54,21 @@ MODULE ParseGeomOpt
        GOpt%Pictures=.TRUE.
      ENDIF
      !
+     ! Parse for addinging explicit lattice coordinates to the optimization
+     !
+     GOpt%GConvCrit%ExplLatt=.FALSE.
+     IF(OptKeyQ(Inp,GRADIENTS,OPT_ExplLatt)) THEN
+       GOpt%GConvCrit%ExplLatt=.TRUE.
+     ENDIF
+     !
+     ! Parse for alternating lattice and atomic positions relaxation 
+     !
+     GOpt%GConvCrit%Alternate=.FALSE.
+     IF(OptKeyQ(Inp,GRADIENTS,OPT_Alternate)) THEN
+       GOpt%GConvCrit%Alternate=.TRUE.
+       IF(PBCDim==0) GOpt%GConvCrit%Alternate=.FALSE.
+     ENDIF
+     !
      ! Parse for energy-back-tracking
      !
      GOpt%GConvCrit%DoAtomBackTr=.TRUE.

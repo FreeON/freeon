@@ -173,8 +173,7 @@ MODULE ControlStructures
      LOGICAL                            :: DoAtomBackTr
      LOGICAL                            :: DoLattBackTr
      LOGICAL                            :: DoLattStep
-     LOGICAL                            :: AlternLatt
-     LOGICAL                            :: UnCoupleLatt
+     LOGICAL                            :: Alternate 
      LOGICAL                            :: ExplLatt    
   END TYPE GConvCrit 
   !

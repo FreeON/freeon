@@ -120,7 +120,7 @@ MODULE ParseExtraCoords
                 GOpt%ExtIntCs%Def%C(NIntCs)(1:10)='STRE_A    ' 
                 GOpt%ExtIntCs%Atoms%I(NIntCs,1:2)=1
                 GOpt%ExtIntCs%Cells%I(NIntCs,1:6)=(/0,0,0,1,0,0/)
-                GOpt%ExtIntCs%Active%L(NIntCs)=.FALSE.
+                GOpt%ExtIntCs%Active%L(NIntCs)=.TRUE.
                 IF(INDEX(LineLowCase,'.')==0) THEN
                 ELSE
                   READ(LineLowCase,*) &
@@ -137,7 +137,7 @@ MODULE ParseExtraCoords
                 GOpt%ExtIntCs%Def%C(NIntCs)(1:10)='STRE_B    ' 
                 GOpt%ExtIntCs%Atoms%I(NIntCs,1:2)=1
                 GOpt%ExtIntCs%Cells%I(NIntCs,1:6)=(/0,0,0,0,1,0/)
-                GOpt%ExtIntCs%Active%L(NIntCs)=.FALSE.
+                GOpt%ExtIntCs%Active%L(NIntCs)=.TRUE.
                 IF(INDEX(LineLowCase,'.')==0) THEN
                 ELSE
                   READ(LineLowCase,*) &
@@ -154,7 +154,7 @@ MODULE ParseExtraCoords
                 GOpt%ExtIntCs%Def%C(NIntCs)(1:10)='STRE_C    ' 
                 GOpt%ExtIntCs%Atoms%I(NIntCs,1:2)=1
                 GOpt%ExtIntCs%Cells%I(NIntCs,1:6)=(/0,0,0,0,0,1/)
-                GOpt%ExtIntCs%Active%L(NIntCs)=.FALSE.
+                GOpt%ExtIntCs%Active%L(NIntCs)=.TRUE.
                 IF(INDEX(LineLowCase,'.')==0) THEN
                 ELSE
                   READ(LineLowCase,*) &
@@ -227,7 +227,7 @@ MODULE ParseExtraCoords
                 GOpt%ExtIntCs%Def%C(NIntCs)(1:10)='GAMMA     ' 
                 GOpt%ExtIntCs%Atoms%I(NIntCs,1:3)=1
                 GOpt%ExtIntCs%Cells%I(NIntCs,1:9)=(/1,0,0,0,0,0,0,1,0/)
-                GOpt%ExtIntCs%Active%L(NIntCs)=.FALSE.
+                GOpt%ExtIntCs%Active%L(NIntCs)=.TRUE.
                 IF(INDEX(LineLowCase,'.')==0) THEN
                 ELSE
                   READ(LineLowCase,*) &
@@ -244,6 +244,7 @@ MODULE ParseExtraCoords
                 GOpt%ExtIntCs%Def%C(NIntCs)(1:10)='AREA_L    ' 
                 GOpt%ExtIntCs%Atoms%I(NIntCs,1:3)=1
                 GOpt%ExtIntCs%Cells%I(NIntCs,1:9)=(/0,0,0,1,0,0,0,1,0/)
+                GOpt%ExtIntCs%Active%L(NIntCs)=.TRUE.
                 IF(INDEX(LineLowCase,'.')==0) THEN
                 ELSE
                   READ(LineLowCase,*) &
@@ -261,6 +262,7 @@ MODULE ParseExtraCoords
                 GOpt%ExtIntCs%Def%C(NIntCs)(1:10)='VOLM_L    ' 
                 GOpt%ExtIntCs%Atoms%I(NIntCs,1:4)=1
                 GOpt%ExtIntCs%Cells%I(NIntCs,1:12)=(/0,0,0,1,0,0,0,1,0,0,0,1/)
+                GOpt%ExtIntCs%Active%L(NIntCs)=.TRUE.
                 IF(INDEX(LineLowCase,'.')==0) THEN
                 ELSE
                   READ(LineLowCase,*) &
@@ -277,7 +279,7 @@ MODULE ParseExtraCoords
                 GOpt%ExtIntCs%Def%C(NIntCs)(1:10)='BETA      ' 
                 GOpt%ExtIntCs%Atoms%I(NIntCs,1:3)=1
                 GOpt%ExtIntCs%Cells%I(NIntCs,1:9)=(/1,0,0,0,0,0,0,0,1/)
-                GOpt%ExtIntCs%Active%L(NIntCs)=.FALSE.
+                GOpt%ExtIntCs%Active%L(NIntCs)=.TRUE.
                 IF(INDEX(LineLowCase,'.')==0) THEN
                 ELSE
                   READ(LineLowCase,*) &
@@ -294,7 +296,7 @@ MODULE ParseExtraCoords
                 GOpt%ExtIntCs%Def%C(NIntCs)(1:10)='ALPHA     ' 
                 GOpt%ExtIntCs%Atoms%I(NIntCs,1:3)=1
                 GOpt%ExtIntCs%Cells%I(NIntCs,1:9)=(/0,1,0,0,0,0,0,0,1/)
-                GOpt%ExtIntCs%Active%L(NIntCs)=.FALSE.
+                GOpt%ExtIntCs%Active%L(NIntCs)=.TRUE.
                 IF(INDEX(LineLowCase,'.')==0) THEN
                 ELSE
                   READ(LineLowCase,*) &

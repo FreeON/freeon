@@ -7766,6 +7766,10 @@ return
          CALL DGEMM_NNc(3,3,1,One,Zero,BoxShapeT,Vect1,Vect2)
          CartGrad(K:L)=Vect2
        ENDDO
+       ! hardwire constrained lattice gradients to zero
+       CartGrad(NCart-7)=Zero
+       CartGrad(NCart-6)=Zero
+       CartGrad(NCart-3)=Zero
      ENDIF
      !
      CALL New(CartA1,NCart)

@@ -512,7 +512,7 @@ CONTAINS
      INTEGER                   :: I,iBAS,iGEO,iGEOst,iCLONE
      INTEGER                   :: AccL 
      INTEGER                   :: FirstGeom,NatmsLoc
-     INTEGER                   :: ConvgdAll,MaxSteps,IStart
+     INTEGER                   :: ConvgdAll,MaxSteps,IStart,Dimen
      TYPE(INT_VECT)            :: Convgd
      TYPE(INT_VECT)            :: BPrev,BCur
      TYPE(INTC)                :: IntCES
@@ -520,7 +520,7 @@ CONTAINS
      iGEO=C%Stat%Previous%I(3)
      iGEOst=iGEO
      ! Set geometry optimization controls
-     CALL SetGeOpCtrl(C%GOpt,C%Geos,C%Opts,C%Sets,C%Nams,C%PBCs,iGEO)
+     CALL SetGeOpCtrl(C%GOpt,C%Geos,C%Opts,C%Sets,C%Nams,iGEO)
      ! initial geometry
      MaxSteps=C%GOpt%GConvCrit%MaxGeOpSteps
      CALL NEW(BPrev,SIZE(C%Stat%Previous%I))
@@ -1303,21 +1303,21 @@ CONTAINS
 !
 !---------------------------------------------------------------
 !
-   SUBROUTINE SetGeOpCtrl(GOpt,Geos,Opts,Sets,Nams,PBCs,iGEO)
+   SUBROUTINE SetGeOpCtrl(GOpt,Geos,Opts,Sets,Nams,iGEO)
      !
      TYPE(GeomOpt)    :: GOpt
      TYPE(Options)    :: Opts
      TYPE(BasisSets)  :: Sets
      TYPE(Geometries) :: Geos
      TYPE(FileNames)  :: Nams
-     TYPE(Periodics)  :: PBCs
      INTEGER          :: NatmsLoc,NCart
      REAL(DOUBLE)     :: Sum,GCrit
-     INTEGER          :: AccL,iGEO
+     INTEGER          :: AccL,iGEO,Dimen
      !
      AccL    =Opts%AccuracyLevels(Sets%NBSets)
      NatmsLoc=Geos%Clone(1)%Natms
      NCart=3*NatmsLoc
+     Dimen=Geos%Clone(1)%PBC%Dimen
      !
      CALL SetCoordCtrl(GOpt%CoordCtrl)
      CALL   SetHessian(GOpt%Hessian)
@@ -1326,7 +1326,7 @@ CONTAINS
      CALL    SetGrdTrf(GOpt%GrdTrf,GOpt%GConvCrit)
      CALL   SetBackTrf(GOpt%BackTrf,GOpt%GConvCrit)
      CALL    SetConstr(GOpt%Constr,GOpt%BackTrf)
-     CALL   SetTrfCtrl(GOpt%TrfCtrl,GOpt%CoordCtrl,GOpt%Constr,PBCs%Dimen)
+     CALL   SetTrfCtrl(GOpt%TrfCtrl,GOpt%CoordCtrl,GOpt%Constr,Dimen)
    END SUBROUTINE SetGeOpCtrl
 !
 !---------------------------------------------------------------
@@ -1344,6 +1344,8 @@ CONTAINS
      CHARACTER(LEN=DCL)   :: SCRPath,PWDPath
      TYPE(DBL_RNK2)       :: XYZNew,GradNew,RefXYZ1,RefXYZ
      TYPE(DBL_VECT)       :: AtNumNew,CartGrad
+     TYPE(INTC)           :: EIntcSave
+     TYPE(Constr)         :: ConstrSave
      !
      SCRPath  =TRIM(Nams%M_SCRATCH)//TRIM(Nams%SCF_NAME)// &
              '.'//TRIM(IntToChar(iCLONE))
@@ -1357,7 +1359,6 @@ CONTAINS
      ! Now, cut out that part of the molecule, which is 
      ! not rigidly fixed and pass it in to the optimizer
      !
-     CALL OpenASCII(OutFile,Out)
      NatmsNew=0
      DO I=1,GMLoc%Natms
        IF(GMLoc%CConstrain%I(I)/=2) NatmsNew=NatmsNew+1
@@ -1385,12 +1386,15 @@ CONTAINS
          GradNew%D(J,NatmsNew+K)=GMLoc%PBC%LatFrc%D(J,K)
        ENDDO
      ENDDO
-     ! ensure proper orientation of (numerical) forces
-    !GradNew%D(2:3,NatmsNew+1)=Zero
-    !GradNew%D(3,NatmsNew+2)=Zero
      CALL Delete(RefXYZ1)
      AtNumNew%D(NatmsNew+1:NatmsNew+3)=Zero
      CALL ConvertToXYZRef(XYZNew%D,RefXYZ%D,GMLoc%PBC%Dimen)
+     IF(iGEO==1) GMLoc%LatticeOnly=.TRUE.
+     !
+     CALL OpenASCII(OutFile,Out)
+     CALL OpenAlternate(GOpt,XYZNew%D,GradNew%D,Opts%PFlags%GeOp, &
+                        GMLoc%BoxCarts%D,GMLoc%PBC%Dimen,&
+                        EIntcSave,ConstrSave,SCRPath,GMLoc%LatticeOnly) 
      !
      !--------------------------------------------
      !
@@ -1399,10 +1403,12 @@ CONTAINS
                        GMLoc%Etotal,GMLoc%PBC%Dimen,iGEO,iCLONE, &
                        SCRPath,PWDPath,DoNEB,Opts%PFlags%GeOp, &
                        Nams%HFile,GMLoc%PBCFit)
-     CLOSE(Out,STATUS='KEEP')
      !
      !--------------------------------------------
      !
+     CALL CloseAlternate(GOpt%ExtIntCs,GOpt%GConvCrit%Alternate, &
+                        GOpt%Constr,EIntcSave,ConstrSave) 
+     CLOSE(Out,STATUS='KEEP')
      ! Put back modified geometry into GMLoc array
      !
      NatmsNew=0
@@ -1506,7 +1512,7 @@ CONTAINS
      !
      TrfC%DoTranslOff=.TRUE.
      TrfC%DoRotOff=.TRUE.
-     IF(GConstr%NCartConstr>0) TrfC%DoTranslOff=.FALSE.
+     IF(GConstr%NCartConstr>0.OR.Dimen>0) TrfC%DoTranslOff=.FALSE.
      IF(GConstr%NCartConstr>0.AND.Dimen==0) TrfC%DoRotOff=.FALSE.
      !
      IF(CoordC%CoordType/=CoordType_Cartesian) THEN
@@ -1979,6 +1985,184 @@ CONTAINS
        On=.TRUE.
      ENDIF
    END SUBROUTINE TurnOnGDIIS
+!
+!-------------------------------------------------------------------
+!
+   SUBROUTINE OpenAlternate(GOpt,XYZ,GradIn,Print,BoxCarts,PBCDim, &
+                            EIntcSave,ConstrSave,SCRPath,LatticeOnly)
+     TYPE(GeomOpt)               :: GOpt
+     TYPE(INTC)                  :: EIntcSave
+     TYPE(Constr)                :: ConstrSave
+     LOGICAL                     :: LatticeOnly,Print2
+     REAL(DOUBLE),DIMENSION(:,:) :: XYZ,BoxCarts,GradIn
+     REAL(DOUBLE),DIMENSION(3,3) :: BoxShapeT,XYZAux
+     INTEGER                     :: NatmsLoc,OldDim,NewDim,NIntCs
+     INTEGER                     :: II,I,J,PBCDim,NCart,Print
+     TYPE(DBL_VECT)              :: CartGrad,Carts
+     CHARACTER(LEN=*)            :: SCRPath
+     !
+     IF(.NOT.GOpt%GConvCrit%Alternate) RETURN
+     Print2= Print>=DEBUG_GEOP_MAX
+     NatmsLoc=SIZE(BoxCarts,2)
+     NCart=3*NatmsLoc+9
+     !
+     ! Clean gradients from input constraints
+     !
+     CALL New(CartGrad,NCart)
+     CALL CartRNK2ToCartRNK1(CartGrad%D,GradIn)
+     CALL CleanConstrCart(XYZ,PBCDim,CartGrad%D,GOpt,SCRPath)
+     CALL New(Carts,NCart)
+     CALL CartRNK2ToCartRNK1(Carts%D,XYZ)
+     IF(GOpt%TrfCtrl%DoTranslOff) &
+       CALL TranslsOff(CartGrad%D(1:NCart-9),Print2)
+     IF(GOpt%TrfCtrl%DoRotOff) &
+       CALL RotationsOff(CartGrad%D,Carts%D,Print2,PBCDim)
+     CALL Delete(Carts)
+     CALL GetCGradMax(CartGrad%D,NCart,GOpt%GOptStat%IMaxCGrad,&
+                      GOpt%GOptStat%MaxCGrad,GOpt%GOptStat%ILMaxCGrad, &
+                      GOpt%GOptStat%LMaxCGrad)
+     CALL Delete(CartGrad)
+     !
+     IF(LatticeOnly) THEN
+       LatticeOnly=.NOT.(GOpt%GOptStat%LMaxCGrad<GOpt%GConvCrit%Grad)
+     ELSE
+       LatticeOnly=(GOpt%GOptStat%MaxCGrad>GOpt%GConvCrit%Grad)
+     ENDIF
+     !
+     OldDim=GOpt%ExtIntCs%N
+     ! Save old constraints
+     CALL New(EIntcSave,GOpt%ExtIntCs%N)
+     CALL SetEq(GOpt%ExtIntCs,EIntcSave,1,GOpt%ExtIntCs%N,1)
+     CALL SET_Constr_EQ_Constr(ConstrSave,GOpt%Constr)
+     !
+     IF(LatticeOnly) THEN
+       CALL Delete(GOpt%ExtIntCs)
+       NewDim=OldDim+3*NatmsLoc
+       CALL New(GOpt%ExtIntCs,NewDim)
+       CALL SetEq(GOpt%ExtIntCs,EIntcSave,1,OldDim,1)
+       DO I=1,NatmsLoc
+         II=OldDim+3*(I-1)
+         GOpt%ExtIntCs%Def%C(II+1)(1:10)='CARTX     '
+         GOpt%ExtIntCs%Def%C(II+2)(1:10)='CARTY     '
+         GOpt%ExtIntCs%Def%C(II+3)(1:10)='CARTZ     '
+         DO J=1,3
+           GOpt%ExtIntCs%Atoms%I(II+J,1)=I     
+           GOpt%ExtIntCs%Constraint%L(II+J)=.TRUE.
+           GOpt%ExtIntCs%Active%L(II+J)=.TRUE.
+           GOpt%ExtIntCs%ConstrValue%D(II+J)=BoxCarts(J,I)
+         ENDDO
+       ENDDO
+       GOpt%Constr%NConstr=GOpt%Constr%NConstr+3*NatmsLoc
+       GOpt%Constr%NCartConstr=GOpt%Constr%NCartConstr+3*NatmsLoc
+     ELSE
+       CALL Delete(GOpt%ExtIntCs)
+       NewDim=OldDim+6
+       CALL New(GOpt%ExtIntCs,NewDim)
+       CALL SetEq(GOpt%ExtIntCs,EIntcSave,1,OldDim,1)
+       DO J=1,3
+         BoxShapeT(J,1:3)=XYZ(1:3,NatmsLoc+J)
+       ENDDO
+       !
+       NIntCs=OldDim
+       !
+       NIntCs=NIntCs+1
+       GOpt%ExtIntCs%Def%C(NIntCs)(1:10)='STRE_A    '
+       GOpt%ExtIntCs%Atoms%I(NIntCs,1:2)=1
+       GOpt%ExtIntCs%Cells%I(NIntCs,1:6)=(/0,0,0,1,0,0/)
+       GOpt%ExtIntCs%Active%L(NIntCs)=.TRUE.
+       GOpt%ExtIntCs%Constraint%L(NIntCs)=.TRUE.
+       CALL PBCXYZAux(XYZ,BoxShapeT,XYZAux,GOpt%ExtIntCs,NIntCs)
+       CALL STRE(XYZAux(1:3,1),XYZAux(1:3,2), &
+                 Value_O=GOpt%ExtIntCs%ConstrValue%D(NIntCs))
+       !
+       IF(PBCDim>1) THEN
+         NIntCs=NIntCs+1
+         GOpt%ExtIntCs%Def%C(NIntCs)(1:10)='STRE_B    '
+         GOpt%ExtIntCs%Atoms%I(NIntCs,1:2)=1
+         GOpt%ExtIntCs%Cells%I(NIntCs,1:6)=(/0,0,0,0,1,0/)
+         GOpt%ExtIntCs%Active%L(NIntCs)=.TRUE.
+         GOpt%ExtIntCs%Constraint%L(NIntCs)=.TRUE.
+         CALL PBCXYZAux(XYZ,BoxShapeT,XYZAux,GOpt%ExtIntCs,NIntCs)
+         CALL STRE(XYZAux(1:3,1),XYZAux(1:3,2), &
+                   Value_O=GOpt%ExtIntCs%ConstrValue%D(NIntCs))
+       ENDIF
+       !
+       IF(PBCDim>2) THEN
+         NIntCs=NIntCs+1
+         GOpt%ExtIntCs%Def%C(NIntCs)(1:10)='STRE_C    '
+         GOpt%ExtIntCs%Atoms%I(NIntCs,1:2)=1
+         GOpt%ExtIntCs%Cells%I(NIntCs,1:6)=(/0,0,0,0,0,1/)
+         GOpt%ExtIntCs%Active%L(NIntCs)=.TRUE.
+         GOpt%ExtIntCs%Constraint%L(NIntCs)=.TRUE.
+         CALL PBCXYZAux(XYZ,BoxShapeT,XYZAux,GOpt%ExtIntCs,NIntCs)
+         CALL STRE(XYZAux(1:3,1),XYZAux(1:3,2), &
+                   Value_O=GOpt%ExtIntCs%ConstrValue%D(NIntCs))
+       ENDIF
+       !
+       IF(PBCDim>2) THEN
+         NIntCs=NIntCs+1
+         GOpt%ExtIntCs%Def%C(NIntCs)(1:10)='ALPHA     '
+         GOpt%ExtIntCs%Atoms%I(NIntCs,1:3)=1
+         GOpt%ExtIntCs%Cells%I(NIntCs,1:9)=(/0,1,0,0,0,0,0,0,1/)
+         GOpt%ExtIntCs%Active%L(NIntCs)=.TRUE.
+         GOpt%ExtIntCs%Constraint%L(NIntCs)=.TRUE.
+         CALL PBCXYZAux(XYZ,BoxShapeT,XYZAux,GOpt%ExtIntCs,NIntCs)
+         CALL BEND(XYZAux(1:3,1),XYZAux(1:3,2),XYZAux(1:3,3), &
+                   Value_O=GOpt%ExtIntCs%ConstrValue%D(NIntCs))
+         !
+         NIntCs=NIntCs+1
+         GOpt%ExtIntCs%Def%C(NIntCs)(1:10)='BETA      '
+         GOpt%ExtIntCs%Atoms%I(NIntCs,1:3)=1
+         GOpt%ExtIntCs%Cells%I(NIntCs,1:9)=(/1,0,0,0,0,0,0,0,1/)
+         GOpt%ExtIntCs%Active%L(NIntCs)=.TRUE.
+         GOpt%ExtIntCs%Constraint%L(NIntCs)=.TRUE.
+         CALL PBCXYZAux(XYZ,BoxShapeT,XYZAux,GOpt%ExtIntCs,NIntCs)
+         CALL BEND(XYZAux(1:3,1),XYZAux(1:3,2),XYZAux(1:3,3), &
+                   Value_O=GOpt%ExtIntCs%ConstrValue%D(NIntCs))
+       ENDIF
+       !
+       IF(PBCDim>1) THEN
+         NIntCs=NIntCs+1
+         GOpt%ExtIntCs%Def%C(NIntCs)(1:10)='GAMMA     '
+         GOpt%ExtIntCs%Atoms%I(NIntCs,1:3)=1
+         GOpt%ExtIntCs%Cells%I(NIntCs,1:9)=(/1,0,0,0,0,0,0,1,0/)
+         GOpt%ExtIntCs%Active%L(NIntCs)=.TRUE.
+         GOpt%ExtIntCs%Constraint%L(NIntCs)=.TRUE.
+         CALL PBCXYZAux(XYZ,BoxShapeT,XYZAux,GOpt%ExtIntCs,NIntCs)
+         CALL BEND(XYZAux(1:3,1),XYZAux(1:3,2),XYZAux(1:3,3), &
+                   Value_O=GOpt%ExtIntCs%ConstrValue%D(NIntCs))
+       ENDIF
+     ENDIF
+CALL PrtIntCoords(GOpt%ExtIntCs,GOpt%ExtIntCs%Value%D,'ExtIntCs',PBCDim_O=PBCDim)
+   END SUBROUTINE OpenAlternate
+!
+!------------------------------------------------------------------
+!
+   SUBROUTINE CloseAlternate(ExtIntCs,Alternate, &
+                             GConstr,EIntcSave,ConstrSave) 
+     TYPE(INTC)   :: ExtIntCs,EIntcSave
+     TYPE(Constr) :: GConstr,ConstrSave
+     LOGICAL      :: Alternate
+     !
+     IF(.NOT.Alternate) RETURN
+     CALL Delete(ExtIntCs)
+     CALL New(ExtIntCs,EIntcSave%N)
+     CALL SetEq(EIntcSave,ExtIntCs,1,ExtIntCs%N,1)
+     CALL SET_Constr_EQ_Constr(GConstr,ConstrSave)
+     CALL Delete(EIntcSave)
+   END SUBROUTINE CloseAlternate
+!
+!-------------------------------------------------------------------
+!
+   SUBROUTINE SET_Constr_EQ_Constr(ConstrN,ConstrO)
+     TYPE(Constr) :: ConstrN,ConstrO
+     ConstrN%NConstr       = ConstrO%NConstr
+     ConstrN%NCartConstr   = ConstrO%NCartConstr
+     ConstrN%ConstrMax     = ConstrO%ConstrMax
+     ConstrN%ConstrMaxCrit = ConstrO%ConstrMaxCrit
+     ConstrN%DoFixMM       = ConstrO%DoFixMM
+     ConstrN%TSSearch      = ConstrO%TSSearch
+   END SUBROUTINE SET_Constr_EQ_Constr
 !
 !-------------------------------------------------------------------
 !
