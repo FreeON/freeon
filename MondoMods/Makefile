@@ -57,7 +57,7 @@ MModRel  = GlobalScalars.x GlobalCharacters.x DerivedTypes.x    \
            D1Mach.x DCSEvl.x DErf.x DErfc.x DMach.x InitDS.x    \
            Mechanics.x Thresholding.x Functionals.x PBC.x AtomPairs.x       \
            BoundingBox.x BraBloks.x Macros.x FastMat.x EllToInclude.x     \
-           FTest.x SMTest.x CholFact.x InCoords.x
+           FTest.x SMTest.x CholFact.x 
 #
 small:	Mods
 #
