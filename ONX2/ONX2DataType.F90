@@ -32,9 +32,9 @@ MODULE ONX2DataType
      TYPE(ANode), POINTER :: GoList
   END TYPE CList
   !
-  TYPE OffSt
+  TYPE ONX2OffSt
      INTEGER :: A,B,C,D
-  END TYPE OffSt
+  END TYPE ONX2OffSt
   !
 !!$  TYPE SmallAtomInfo
 !!$     REAL(DOUBLE) :: Atm1X,Atm1Y,Atm1Z

@@ -33,7 +33,7 @@ EXTRA_INCLUDES=-I$(MONDO_HOME)/TwoE
 
 all: ONX2
 
-Objects = QuickSortDis.o ONXParameters.o ONXInit.o ONXGet.o   \
+Objects = QuickSortDis.o PartDrv.o ONXParameters.o ONXInit.o ONXGet.o   \
 	   ONXFillOut.o Stats.o ONXRng.o \
 	   ONX2F77.o ONX2DataType.o ONXCtrSclg.o \
 	   IntSSSS.o ONX2ComputK.o ONX2.o

@@ -26,6 +26,12 @@ MODULE ONX2ComputK
   USE PrettyPrint
   USE ONX2DataType
   USE InvExp
+  USE ONXParameters
+  !
+#ifdef PARALLEL
+  USE MondoMPI
+  USE FastMatrices
+#endif
   !
   IMPLICIT NONE
   !PRIVATE
@@ -81,6 +87,7 @@ MODULE ONX2ComputK
 CONTAINS
   !
   !
+
   SUBROUTINE ComputK(D,Kx,ListC,ListD,GM,BS,CS_OUT)
 !H---------------------------------------------------------------------------------
 !H SUBROUTINE ComputK(D,Kx,ListC,ListD,GM,BS,CS_OUT)
@@ -95,8 +102,20 @@ CONTAINS
     ! Kab = Dcd*(ac(R)|bd(R'))
     !
     !-------------------------------------------------------------------
+#ifdef PARALLEL
+    TYPE(fastmat)              , POINTER       :: D
+    TYPE(fastmat)              , POINTER       :: Kx
+    TYPE(FASTMAT)              , POINTER       :: P
+    TYPE(SRST   )              , POINTER       :: U
+
+
+    TYPE(FASTMAT ), POINTER       :: Q
+    TYPE(SRST    ), POINTER       :: V
+
+#else
     TYPE(BCSR)                 , INTENT(INout) :: D
     TYPE(BCSR)                 , INTENT(INOUT) :: Kx
+#endif
     TYPE(CList2) , DIMENSION(:), POINTER       :: ListC,ListD
     TYPE(CRDS)                 , INTENT(IN   ) :: GM
     TYPE(BSET)                 , INTENT(IN   ) :: BS
@@ -109,15 +128,17 @@ CONTAINS
     INTEGER                    :: CFAC,CFBD
     INTEGER                    :: Off,Ind
     REAL(DOUBLE)               :: Dcd
-    REAL(DOUBLE), DIMENSION(12000) :: C,CC  ! this should be declarated somewhere
+    REAL(DOUBLE), DIMENSION(38416) :: C,CC  ! this should be declarated somewhere
     INTEGER      :: LocNInt
     REAL(DOUBLE) :: NInts
     !-------------------------------------------------------------------
-    TYPE(AtomPr), DIMENSION(50) :: ACAtmPair,BDAtmPair  ! this should be declarated somewhere
-    TYPE(OffSt) :: OffSet
+    TYPE(AtomPr), DIMENSION(100) :: ACAtmPair,BDAtmPair  ! this should be declarated somewhere
+    TYPE(ONX2OffSt) :: OffSet
     !-------------------------------------------------------------------
     REAL(DOUBLE), EXTERNAL :: DGetAbsMax
     !-------------------------------------------------------------------
+    REAL(DOUBLE) :: TmBeg,TmEnd
+
     INTEGER :: ACR,BDR
     real(DOUBLE) :: tmp1,tmp2,tmp3,tmp4,tmp5,tmp6
     integer :: i,iA,iB
@@ -126,7 +147,8 @@ CONTAINS
 
     integer :: iint,iprint,isize
     !
-    REAL(DOUBLE), PARAMETER :: ThresholdTwoE=-1.0D-15
+    !REAL(DOUBLE), PARAMETER :: ThresholdTwoE=-1.0D-15
+    REAL(DOUBLE), PARAMETER :: ThresholdTwoE=1.0D-12
     !-------------------------------------------------------------------
     !
     NULLIFY(AtAListTmp,AtAList,AtBListTmp,AtBList)
@@ -158,7 +180,14 @@ CONTAINS
     LocNInt=0
     NInts=0.0d0
     !
+#ifdef PARALLEL
+    P => D%Next                              ! Loop over atom C
+    DO                               
+       IF(.NOT.ASSOCIATED(P)) EXIT   
+       AtC = P%Row
+#else
     DO AtC=1,NAtoms ! Run over AtC.
+#endif
        KC=GM%AtTyp%I(AtC)
        NBFC=BS%BfKnd%I(KC)
        ACAtmInfo%Atm2X=GM%Carts%D(1,AtC)
@@ -169,9 +198,22 @@ CONTAINS
        ! Get AtA List.
        AtAListTmp=>ListC(AtC)%GoList
        !
+#ifdef PARALLEL
+       U => P%RowRoot ! Run over AtD
+       DO                                
+          IF(.NOT.ASSOCIATED(U)) EXIT    
+          IF(U%L.NE.U%R) THEN            
+             U => U%Next                 
+             CYCLE                       
+          ENDIF
+          AtD = U%L                      
+          ! Set Time.                    
+          TmBeg = MPI_WTIME()            
+#else
        DO ci=D%RowPt%I(AtC),D%RowPt%I(AtC+1)-1 ! Run over AtD
           AtD = D%ColPt%I(ci)
           iPtrD= D%BlkPt%I(ci)
+#endif
           KD=GM%AtTyp%I(AtD)
           NBFD=BS%BfKnd%I(KD)
           BDAtmInfo%Atm2X=GM%Carts%D(1,AtD)
@@ -180,7 +222,11 @@ CONTAINS
           BDAtmInfo%K2=KD
           !
           ! Get max of the block density matrix.
+#ifdef PARALLEL
+          Dcd=DGetAbsMax(NBFC*NBFD,U%MTrix(1,1))
+#else
           Dcd=DGetAbsMax(NBFC*NBFD,D%MTrix%D(iPtrD))
+#endif
 #ifdef ONX2_DBUG
           WRITE(*,*) 'Max(Dcd)=',Dcd
 #endif
@@ -221,6 +267,12 @@ CONTAINS
                 EXIT
              ENDIF
 !!$             ENDIF
+             !
+             ! Find the row in Kx.
+#ifdef PARALLEL
+             Q => FindFastMatRow_1(Kx,AtA)
+#endif
+             !
              !
              ACAtmInfo%Atm1X=GM%Carts%D(1,AtA)
              ACAtmInfo%Atm1Y=GM%Carts%D(2,AtA)
@@ -282,16 +334,11 @@ CONTAINS
                    BDAtmInfo%Atm12Y=BDAtmInfo%Atm1Y-BDAtmInfo%Atm2Y
                    BDAtmInfo%Atm12Z=BDAtmInfo%Atm1Z-BDAtmInfo%Atm2Z
                    !
-                   ! Get address for Kx.
-                   CALL GetAdrB(AtA,AtB,Ind,Kx,0)
-                   iPtrK = Kx%BlkPt%I(Ind)
-                   !
                    ! Get atom pair for BD.
                    CALL GetAtomPair2N(BDAtmInfo,AtBList,BDAtmPair,BS,CS_OUT)
                    !
                    !CALL DBL_VECT_EQ_DBL_SCLR(NBFA*NBFB*NBFC*NBFD,C(1),BIG_DBL)
                    CALL DBL_VECT_EQ_DBL_SCLR(NBFA*NBFB*NBFC*NBFD,C(1),0.0d0)
-                   !C=BIG_DBL !TO REMOVE
                    !
                    CFAC=0
 !!!!!!!!!!!!!!!!!!!!
@@ -316,57 +363,53 @@ CONTAINS
                                ! Compute integral type.
                                IntType=ACAtmPair(CFAC)%SP%IntType*10000+BDAtmPair(CFBD)%SP%IntType
                                !
-!!$                 if(IntType==3010101) then
-!!$                 if(ata==2.and.atb==2.and.atc==2.and.atd==2.and. &
-!!$                      & ATAList%CellIdx(ACR)==9.and.AtBList%CellIdx(BDR)==8) then
-                 !   write(*,*) 'IntType',IntType
                                ! The integral interface.
                                INCLUDE 'ERIInterface.Inc'
-!!$                               write(*,'(2(A,E22.12))') &
-!!$                                    &     'ACR',CS_OUT%CellCarts%D(1,ATAList%CellIdx(ACR)), &
-!!$                                    &     'BDR',CS_OUT%CellCarts%D(1,AtBList%CellIdx(BDR))
-!!$                               write(*,'(10I4)') AtA,AtB,AtC,AtD,CFA,CFB,CFC,CFD, &
-!!$                                    &            ATAList%CellIdx(ACR),AtBList%CellIdx(BDR)
-!!$                               write(*,*) ''  
-
-                  !write(*,*) 'C(6)',C(6)
-                 !        stop
-!!$                 endif
-!!$                 endif
-
                                !
                                NInts=NInts+DBLE(LocNInt)
                                OffSet%D=OffSet%D+BS%LStop%I(CFD,KD)-BS%LStrt%I(CFD,KD)+1
-                            ENDDO ! End blkfunc on B and D
+                            ENDDO ! End blkfunc on D
                             OffSet%B=OffSet%B+BS%LStop%I(CFB,KB)-BS%LStrt%I(CFB,KB)+1
-                         ENDDO ! End blkfunc on A and C
+                         ENDDO ! End blkfunc on B
 !!!!!!!!!!!!!!!!!!!!!!!!!!
                          ENDDO
 !!!!!!!!!!!!!!!!!!!!!!!!!!
                          OffSet%C=OffSet%C+BS%LStop%I(CFC,KC)-BS%LStrt%I(CFC,KC)+1
-                      ENDDO
+                      ENDDO ! End blkfunc on C
                       OffSet%A=OffSet%A+BS%LStop%I(CFA,KA)-BS%LStrt%I(CFA,KA)+1
-                   ENDDO
+                   ENDDO ! End blkfunc on A
 !!!!!!!!!!!!!!!!!!!!
                    ENDDO
 !!!!!!!!!!!!!!!!!!!!
-                   !write(*,*) 'C(6)',C(6)
 !                   write(*,'(4I4)') AtA,AtB,AtC,AtD
 !                   CALL PrintMatrix(C(1),NBFA*NBFB,NBFC*NBFD,2,TEXT_O='Int matrix')
-!!$                   write(*,*) ''
-!                   stop
-
                    !CALL PrintMatrix(C(1),1,NBFA*NBFB*NBFC*NBFD,3,TEXT_O='Int matrix')
                    !CALL PrintMatrix(D%MTrix%D(iPtrD),NBFC,NBFD,2,TEXT_O='D matrix')
 !#ifdef ONX2_DBUG
 !                   WRITE(*,'(A,E22.15,4I4)') ' MaxInt=',MAXVAL(C(1:NBFA*NBFB*NBFC*NBFD)),AtA,AtC,AtB,AtD
 !#endif
                    !
-                   ! Digest the block of integral.
+                   ! Get address for Kx and digest the block of integral.
+#ifdef PARALLEL
+                   V => InsertSRSTNode(Q%RowRoot,AtB)
+                   IF(.NOT.ASSOCIATED(V%MTrix)) THEN
+                      ALLOCATE(V%MTrix(NBFA,NBFB),STAT=MemStatus)
+                      !CALL IncMem(MemStatus,0,NBFA*NBFB,'AddFASTMATBlok')
+                      CALL DBL_VECT_EQ_DBL_SCLR(NBFA*NBFB,V%MTrix(1,1),0.0d0)
+                   ENDIF
+                   !
+                   CALL DGEMV('N',NBFA*NBFB,NBFC*NBFD,-1.0d0,C(1), &
+                        &     NBFA*NBFB,U%MTrix(1,1),1,1.0d0, &
+                        &     V%MTrix(1,1),1)
+#else
+                   CALL GetAdrB(AtA,AtB,Ind,Kx,0)
+                   iPtrK = Kx%BlkPt%I(Ind)
+                   !
                    CALL DGEMV('N',NBFA*NBFB,NBFC*NBFD,-1.0d0,C(1), &
                         &     NBFA*NBFB,D%MTrix%D(iPtrD),1,1.0d0, &
                         &     Kx%MTrix%D(IPtrK),1)
-
+#endif
+                   !
                    !CALL PrintMatrix(Kx%MTrix%D(IPtrK),NBFA,NBFB,2,TEXT_O='Int matrix')
                    !CALL Print_BCSR(Kx,'Kx',Unit_O=6)
                    !
@@ -382,16 +425,32 @@ CONTAINS
              AtAList=>AtAList%AtmNext
           ENDDO ! End AtA
           !
+#ifdef PARALLEL
+          ! Set Time.
+          TmEnd = MPI_WTIME()
+          !Add Time.
+          U%Part = U%Part+TmEnd-TmBeg
+          U => U%Next
+#endif
        ENDDO ! End AtD
        !
+#ifdef PARALLEL
+       P => P%Next
+#endif
     ENDDO ! End AtC
     !
 !#ifdef ONX2_INFO
+#ifdef PARALLEL
+  IF(MyID.EQ.ROOT) THEN
+#endif
     WRITE(*,*) '-------------------------------------'
     WRITE(*,*) 'ComputK Statistic.'
     WRITE(*,'(A,F22.1)') ' Nbr ERI  =',NInts
     WRITE(*,'(A,I4)') ' Max Prim =',INT(SQRT(DBLE(MaxCont)))
     WRITE(*,*) '-------------------------------------'
+#ifdef PARALLEL
+  ENDIF
+#endif
 !#endif
 
 !!$    CALL Print_BCSR(Kx,'Kx',UNIT_O=6)
@@ -446,7 +505,9 @@ CONTAINS
     !-------------------------------------------------------------------
     !
     ! dbuging
+#ifdef ONX2_DBUG
     AtmPair(:)%SP%IntType=BIG_INT
+#endif
     !
     CF12=0
     DO iCell=1,AtmInfo%NCell
@@ -533,7 +594,7 @@ CONTAINS
              !old          ENDDO ! NCell
              !
              AtmPair(CF12)%SP%L=II
-             !AtmPair(CF12)%SP%L(iCell)=II
+             !old AtmPair(CF12)%SP%L(iCell)=II
              !
              ! We reorder the atomic positions if Type2 > Type1.
              ! Needed for the integral evaluations.
@@ -695,6 +756,8 @@ CONTAINS
        ENDDO
     ENDDO
     !
+    IF(CF12.GT.SIZE(AtmPair)) STOP 'Increase the size of -AtmPair-'
+    !
   END SUBROUTINE GetAtomPair4
   !
   !
@@ -717,14 +780,16 @@ CONTAINS
     INTEGER                              :: NCell,I,IntType,LocNInt,NBFA,NBFC
     REAL(DOUBLE)                         :: RInt,AC2,NInts
     !-------------------------------------------------------------------
-    TYPE(AtomPr) , DIMENSION(50)         :: ACAtmPair ! this should be declared somewhere
+    TYPE(AtomPr) , DIMENSION(100)        :: ACAtmPair ! this should be declared somewhere
     REAL(DOUBLE) , DIMENSION(50)         :: RIntCell  ! this should be declared somewhere
-    REAL(DOUBLE) , DIMENSION(12000)      :: C         ! this should be declared somewhere
+    REAL(DOUBLE) , DIMENSION(38416)      :: C         ! this should be declared somewhere
     INTEGER      , DIMENSION(50)         :: IndxCell  ! this should be declared somewhere
     !-------------------------------------------------------------------
     REAL(DOUBLE) , EXTERNAL              :: DGetAbsMax
     !-------------------------------------------------------------------
-    REAL(DOUBLE), PARAMETER :: ThresholdIntegral=-1.0D-15
+    !REAL(DOUBLE), PARAMETER :: ThresholdIntegral=-1.0D-15
+    !REAL(DOUBLE), PARAMETER :: ThresholdDistance=1.0D+99
+    REAL(DOUBLE), PARAMETER :: ThresholdIntegral=1.0D-12
     REAL(DOUBLE), PARAMETER :: ThresholdDistance=1.0D+99
     !-------------------------------------------------------------------
     !
@@ -738,13 +803,20 @@ CONTAINS
           STOP 'Incrase the size of C'
        ENDIF
     enddo
+#ifdef PARALLEL
+  IF(MyID.EQ.ROOT) &
+#endif
     write(*,*) 'size C=',isize**4
     !
     !
     NULLIFY(AtAList,AtAListTmp,NodeA)
     NInts=0.0d0
     !
+!#ifdef PARALLEL
+    ! TODO TODO TODO TODO TODO TODO TODO TODO
+!#else
     DO AtC=1,NAtoms ! Run over AtC
+!#endif
        !
        KC=GM%AtTyp%I(AtC)
        NBFC=BS%BfKnd%I(KC)
@@ -772,6 +844,9 @@ CONTAINS
           ! Cycle if needed.
           IF(AC2.GT.ThresholdDistance) CYCLE
           !
+          ! Set the range for range of exchange.
+          DisRange=MAX(DisRange,SQRT(AC2)*1.01D0)
+          !
           ! Initialize some cell variables.
           NCell=0
           !
@@ -790,7 +865,6 @@ CONTAINS
              !
              ! Initialize some cell variables.
              RInt=0.0d0
-             !C=BIG_DBL !TO REMOVE
              !
              DO CFAC=1,BS%NCFnc%I(KA)*BS%NCFnc%I(KC) ! Run over blkfunc on A,C
                 !
@@ -799,26 +873,11 @@ CONTAINS
                 !
                 CALL DBL_VECT_EQ_DBL_SCLR(NBFA*NBFA*NBFC*NBFC,C(1),0.0d0) !I need less zeroing!
                 !
-
-!if(AtA.eq.2.and.AtC.eq.1) then
                 ! The integral interface.
                 INCLUDE 'ERIListInterface.Inc'
                 !
                 RInt=MAX(RInt,DGetAbsMax(LocNInt,C(1)))
-
-!!$if(IntType==301)then
-!!$   if(abs(C(1)).GT.1.0d-15)write(*,'(A,E22.15,5I4)') 'x',C(1),AtA,AtC,AtA,AtC,iCell
-!!$   if(abs(C(2)).GT.1.0d-15)write(*,'(A,E22.15,5I4)') 'y',C(2),AtA,AtC,AtA,AtC,iCell
-!!$   if(abs(C(3)).GT.1.0d-15)write(*,'(A,E22.15,5I4)') 'z',C(3),AtA,AtC,AtA,AtC,iCell
-!!$   if(abs(C(4)).GT.1.0d-15)write(*,'(A,E22.15,5I4)') 'x',C(4),AtA,AtC,AtA,AtC,iCell
-!!$   if(abs(C(5)).GT.1.0d-15)write(*,'(A,E22.15,5I4)') 'y',C(5),AtA,AtC,AtA,AtC,iCell
-!!$   if(abs(C(6)).GT.1.0d-15)write(*,'(A,E22.15,5I4)') 'z',C(6),AtA,AtC,AtA,AtC,iCell
-!!$   if(abs(C(7)).GT.1.0d-15)write(*,'(A,E22.15,5I4)') 'x',C(7),AtA,AtC,AtA,AtC,iCell
-!!$   if(abs(C(8)).GT.1.0d-15)write(*,'(A,E22.15,5I4)') 'y',C(8),AtA,AtC,AtA,AtC,iCell
-!!$   if(abs(C(9)).GT.1.0d-15)write(*,'(A,E22.15,5I4)') 'z',C(9),AtA,AtC,AtA,AtC,iCell
-!!$endif
-!
-!endif
+                !
 #ifdef ONX2_DBUG
                 WRITE(*,'(2(A,E22.15),2(A,I6))') 'RInt',RInt,' RIntLocal',DGetAbsMax(LocNInt,C(1)), &
                      &    ' LocNInt',LocNInt,' IntType',IntType
@@ -873,10 +932,16 @@ CONTAINS
     ENDDO ! End AtC
     !
 !#ifdef ONX2_INF
+#ifdef PARALLEL
+  IF(MyID.EQ.ROOT) THEN
+#endif
     WRITE(*,*) '-------------------------------------'
     WRITE(*,*) 'MakeList Statistic.'
     WRITE(*,'(A,F22.1)') ' Nbr ERI=',NInts
     WRITE(*,*) '-------------------------------------'
+#ifdef PARALLEL
+  ENDIF
+#endif
 !#endif
     !
     !stop 'make list'
@@ -1002,9 +1067,9 @@ CONTAINS
   END SUBROUTINE DeAllocList
   !
   !
-  SUBROUTINE PrintList2(List)
+  SUBROUTINE PrintList(List)
 !H---------------------------------------------------------------------------------
-!H SUBROUTINE PrintList2(List)
+!H SUBROUTINE PrintList(List)
 !H
 !H---------------------------------------------------------------------------------
     !
@@ -1040,7 +1105,7 @@ CONTAINS
        !
     ENDDO
     !
-  END SUBROUTINE PrintList2
+  END SUBROUTINE PrintList
   !
   !
   SUBROUTINE PrintMatrix(V,M,N,IOpt,IOut_O,SHFTM_O,SHFTN_O,TEXT_O)

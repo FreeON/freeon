@@ -83,7 +83,7 @@ SUBROUTINE IntSSSS5N(PrmBufB,LBra,PrmBufK,LKet,OffSet,C)
   REAL(DOUBLE) :: PrmBufB(5,LBra)
   REAL(DOUBLE) :: PrmBufK(5,LKet)
   REAL(DOUBLE), DIMENSION(3,3,3,3) :: C
-  TYPE(OffSt), INTENT(IN) :: OffSet
+  TYPE(ONX2OffSt), INTENT(IN) :: OffSet
 !--------------------------------------------------------------------------------
 ! Temporary space for computing 2-e integrals
 !--------------------------------------------------------------------------------
@@ -141,7 +141,7 @@ SUBROUTINE IntSSSS5N_2(PrmBufB,LBra,PrmBufK,LKet,OffSet,C)
   REAL(DOUBLE) :: PrmBufB(5,LBra)
   REAL(DOUBLE) :: PrmBufK(5,LKet)
   REAL(DOUBLE), DIMENSION(81) :: C
-  TYPE(OffSt), INTENT(IN) :: OffSet
+  TYPE(ONX2OffSt), INTENT(IN) :: OffSet
 !--------------------------------------------------------------------------------
 ! Temporary space for computing 2-e integrals
 !--------------------------------------------------------------------------------
