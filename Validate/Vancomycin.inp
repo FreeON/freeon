@@ -70,9 +70,9 @@ Charge=0
 Multiplicity=1
 Guess=SuperPos
 SCFMethod=(SDMM,SDMM)
-BasisSets=(STO-2G,STO-2G)
-ModelChem=(BLYPxc,BLYPxc)
-Accuracy =(Loose,Loose)
+BasisSets=(STO-2G,STO-3G)
+ModelChem=(HF,B3LYP/VWN3)
+Accuracy =(Loose,Good)
 DebugAll =(MaxDebug)
 Geometry=(InAngstroms,NoOrder)
 <EndOptions>

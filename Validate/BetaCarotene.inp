@@ -56,10 +56,10 @@ B3LYP[VWN3]/STO-3G
 Charge=0
 Multiplicity=1
 Guess=SuperPos
-SCFMethod=(RH)
-BasisSets=(STO-3G)
-ModelChem=(HF)
-Accuracy =(Loose)
+SCFMethod=(SDMM,SDMM)
+BasisSets=(STO-2G,3-21G)
+ModelChem=(HF,B3LYP/VWN3)
+Accuracy =(Loose,Good)
 DebugAll =(MaxDebug)
 Geometry=(InAngstroms)
 <EndOptions>
