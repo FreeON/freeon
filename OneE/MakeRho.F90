@@ -135,27 +135,25 @@ PROGRAM MakeRho
         Pend = Dmat%RowPt%I(AtA+1)-1
         DO P = Pbeg,Pend
            AtB = Dmat%ColPt%I(P)
-           IF(AtB >= AtA) THEN
-              IF(SetAtomPair(GM,BS,AtA,AtB,Pair)) THEN
+           IF(SetAtomPair(GM,BS,AtA,AtB,Pair)) THEN
 #ifdef PERIODIC                 
-                 Bx = Pair%B(1)
-                 By = Pair%B(2)           
-                 Bz = Pair%B(3)
-                 DO NC = 1,CS%NCells
-                    Pair%B(1) = Bx+CS%CellCarts%D(1,NC)
-                    Pair%B(2) = By+CS%CellCarts%D(2,NC)
-                    Pair%B(3) = Bz+CS%CellCarts%D(3,NC)
-                    Pair%AB2  = (Pair%A(1)-Pair%B(1))**2 &
-                              + (Pair%A(2)-Pair%B(2))**2 &
-                              + (Pair%A(3)-Pair%B(3))**2
-                    IF(TestAtomPair(Pair)) THEN
-                       CALL PrimCount(BS,Pair,Rho)
-                    ENDIF
-                 ENDDO
+              Bx = Pair%B(1)
+              By = Pair%B(2)           
+              Bz = Pair%B(3)
+              DO NC = 1,CS%NCells
+                 Pair%B(1) = Bx+CS%CellCarts%D(1,NC)
+                 Pair%B(2) = By+CS%CellCarts%D(2,NC)
+                 Pair%B(3) = Bz+CS%CellCarts%D(3,NC)
+                 Pair%AB2  = (Pair%A(1)-Pair%B(1))**2 &
+                      + (Pair%A(2)-Pair%B(2))**2 &
+                      + (Pair%A(3)-Pair%B(3))**2
+                 IF(TestAtomPair(Pair)) THEN
+                    CALL PrimCount(BS,Pair,Rho)
+                 ENDIF
+              ENDDO
 #else
-                 CALL PrimCount(BS,Pair,Rho)
+              CALL PrimCount(BS,Pair,Rho)
 #endif
-              ENDIF
            ENDIF
         ENDDO
      ENDDO
@@ -188,29 +186,27 @@ PROGRAM MakeRho
         DO P = Pbeg,Pend
            AtB = Dmat%ColPt%I(P)
            R   = Dmat%BlkPt%I(P)
-           IF(AtB >= AtA) THEN
-              IF(SetAtomPair(GM,BS,AtA,AtB,Pair)) THEN
+           IF(SetAtomPair(GM,BS,AtA,AtB,Pair)) THEN
 #ifdef PERIODIC                 
-                 Bx = Pair%B(1)
-                 By = Pair%B(2)           
-                 Bz = Pair%B(3)
-                 DO NC = 1,CS%NCells
-                    Pair%B(1) = Bx+CS%CellCarts%D(1,NC)
-                    Pair%B(2) = By+CS%CellCarts%D(2,NC)
-                    Pair%B(3) = Bz+CS%CellCarts%D(3,NC)
-                    Pair%AB2  = (Pair%A(1)-Pair%B(1))**2 &
-                              + (Pair%A(2)-Pair%B(2))**2 &
-                              + (Pair%A(3)-Pair%B(3))**2
-                    IF(TestAtomPair(Pair)) THEN
-                       NN = Pair%NA*Pair%NB
-                       CALL RhoBlk(BS,MD,Dmat%MTrix%D(R:R+NN-1),Pair,First,Rho)
-                    ENDIF
-                 ENDDO
+              Bx = Pair%B(1)
+              By = Pair%B(2)           
+              Bz = Pair%B(3)
+              DO NC = 1,CS%NCells
+                 Pair%B(1) = Bx+CS%CellCarts%D(1,NC)
+                 Pair%B(2) = By+CS%CellCarts%D(2,NC)
+                 Pair%B(3) = Bz+CS%CellCarts%D(3,NC)
+                 Pair%AB2  = (Pair%A(1)-Pair%B(1))**2 &
+                      + (Pair%A(2)-Pair%B(2))**2 &
+                      + (Pair%A(3)-Pair%B(3))**2
+                 IF(TestAtomPair(Pair)) THEN
+                    NN = Pair%NA*Pair%NB
+                    CALL RhoBlk(BS,MD,Dmat%MTrix%D(R:R+NN-1),Pair,First,Rho)
+                 ENDIF
+              ENDDO
 #else
-                 NN = Pair%NA*Pair%NB
-                 CALL RhoBlk(BS,MD,Dmat%MTrix%D(R:R+NN-1),Pair,First,Rho)
+              NN = Pair%NA*Pair%NB
+              CALL RhoBlk(BS,MD,Dmat%MTrix%D(R:R+NN-1),Pair,First,Rho)
 #endif
-              ENDIF
            ENDIF
         ENDDO
      ENDDO 
