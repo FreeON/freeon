@@ -29,12 +29,16 @@ New Mexico 87545 }
 
 \date{\today}
 \begin{abstract}
-A translationally invariant formulation of the Hartree-Fock $\Gamma$-point approximation
-is achieved through introduction of the Minimum Image Convention.  This approximation is 
-implemented  in the ONX algorithm [J.~Chem Phys, ], extending it to linear scaling 
-computation of the periodic Hartree-Fock exchange matrix.  Convergence of the 
-$\Gamma$-point approximation to the ${\bf k}$-space limit is demonstrated for 
-magnesium oxide, ice and diamond.  True linear scaling is demonstrated for diamond and ice. 
+A translationally invariant formulation of the Hartree-Fock (HF) $\Gamma$-point approximation
+is presented.   This formulation is achieved through introduction of  the  Minimum Image Convention (MIC) at 
+the level of primitive two-electron integrals, and implemented in a periodic version of the 
+ONX algorithm [J.~Chem.~Phys, {\bf 106} 9708 (1997)] for linear scaling computation of the
+exchange matrix. Convergence of the HF-MIC $\Gamma$-point model to the HF ${\bf k}$-space limit 
+is demonstrated for fully periodic magnesium oxide, ice and diamond.  Computation of the diamond
+lattice constant using the HF-MIC model together with the hybrid PBE0 density functional 
+[Theochem, {\bf 499} 145 (1999)], yeilds $a_0=3.569$ with the 6-21G* basis set and a 
+$3\times3\times3$ supercell.  Linear scaling computation of the HF-MIC exchange matrix is demonstrated 
+for diamond and ice in the condensed phase. 
 \end{abstract}
 
 \pacs{}
@@ -506,10 +510,10 @@ a minimal basis and a {\tt LOOSE} accuracy level.  It is possible to achieve
 an early onset of linear scaling with significantly larger Gaussian basis sets by 
 tightening the valence region, but doing so without care can lead to  poor 
 performance in the computation of properities such as the lattice constant.  
-Such basis set localization effects have recieved considerable attention from the
-{\sc SIESTA} \cite{} and {\sc PLATO} \cite{} communities, leading to radial basis 
-functions that yeild both linear scaling and high quality properties. {\bf CJ, PLEASE ADD SOME
-CITATIONS HERE}
+Localization of the  basis set  has recieved considerable attention 
+\cite{SKenny00,JJunquera01,EAnglada02,CGan03},
+leading to radial basis functions that yeild both linear scaling and high quality properties,
+but has so far been unexplored in the context of a Gaussian representation.
 
 For less dense systems and larger basis functions, the periodic {\sc MondoSCF} algorithms 
 are able to achieve an early onset of linear scaling with more accurate thresholding parameters.
