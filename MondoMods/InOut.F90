@@ -438,8 +438,8 @@ CONTAINS
 
 #ifdef PARALLEL 
        ENDIF
-       !! not supported yet. IF(InParallel)CALL Bcast(A)
-       STOP 'ERROR : Bcast in Get_INTC (InOut.F90) not supported!'
+       !! IF(InParallel)CALL Bcast(A)
+       !! STOP 'ERROR : Bcast in Get_INTC (InOut.F90) not supported!'
 #endif 
      END SUBROUTINE Get_INTC
 
@@ -526,7 +526,7 @@ CONTAINS
 #ifdef PARALLEL 
           ENDIF
           ! not supported yet. IF(InParallel)CALL Bcast(A)
-          STOP 'ERROR : Bcast in Get_BMatr (InOut.F90) not supported!'
+          !! STOP 'ERROR : Bcast in Get_BMatr (InOut.F90) not supported!'
 #endif 
         END SUBROUTINE Get_BMATR
 
@@ -1989,7 +1989,7 @@ CONTAINS
 #ifdef PARALLEL 
                       ENDIF       
                       ! not supported yet. IF(InParallel)CALL Bcast(A)
-                      STOP 'ERROR : Bcast in Get_Chr_vect (InOut.F90) not supported!'
+                      !! STOP 'ERROR : Bcast in Get_Chr_vect (InOut.F90) not supported!'
 #endif 
                     END SUBROUTINE Get_CHR_VECT
                     !-------------------------------------------------------------------------------
