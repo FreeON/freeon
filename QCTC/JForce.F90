@@ -76,7 +76,7 @@ PROGRAM JForce
      MA=BSiz%I(AtA)
      A1=3*(AtA-1)+1
      A2=3*AtA
-     JFrc%D(A1:A2)=Two*dNukE(AtA)
+     JFrc%D(A1:A2)=dNukE(AtA)
      DO JP=P%RowPt%I(AtA),P%RowPt%I(AtA+1)-1
         AtB=P%ColPt%I(JP)
         IF(SetAtomPair(GM,BS,AtA,AtB,Pair))THEN
@@ -91,17 +91,19 @@ PROGRAM JForce
               Pair%B(3) = Bz+CS%CellCarts%D(3,NC)
               Pair%AB2  = (Pair%A(1)-Pair%B(1))**2+(Pair%A(2)-Pair%B(2))**2+(Pair%A(3)-Pair%B(3))**2
               IF(TestAtomPair(Pair)) THEN
-                 JFrc%D(A1:A2)=JFrc%D(A1:A2)+Two*TrPdJ(Pair,P%MTrix%D(Q:))
+                 JFrc%D(A1:A2)=JFrc%D(A1:A2)+TrPdJ(Pair,P%MTrix%D(Q:))
               ENDIF
            ENDDO
 #else
-           JFrc%D(A1:A2)=JFrc%D(A1:A2)+Two*TrPdJ(Pair,P%MTrix%D(Q:))
+           JFrc%D(A1:A2)=JFrc%D(A1:A2)+TrPdJ(Pair,P%MTrix%D(Q:))
 #endif
         ENDIF
      ENDDO
   ENDDO
+  JFrc%D=Two*JFrc%D
 !---------------------------------------------------------------
 ! Update forces
+  CALL PPrint(JFrc,'JFrce',Unit_O=6)
   CALL PPrint(JFrc,'JFrce')
   CALL Get(Frc,'GradE',Tag_O=CurGeom)
   Frc%D=Frc%D+JFrc%D

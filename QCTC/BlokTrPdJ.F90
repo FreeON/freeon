@@ -29,7 +29,7 @@ MODULE BlokTrPdJ
 !
        REAL(DOUBLE),DIMENSION(Pair%NA,Pair%NB)  :: P
        REAL(DOUBLE),DIMENSION(Pair%NA,Pair%NB,3):: dJ
-       REAL(DOUBLE),DIMENSION(3)                :: Vck
+       REAL(DOUBLE),DIMENSION(3)                :: PTmp,Vck
        REAL(DOUBLE),DIMENSION(0:SPLen)          :: SPBraC,SPBraS 
        REAL(DOUBLE)                             :: ZetaA,ZetaB,EtaAB,EtaIn,    &
                                                    XiAB,ExpAB,CA,CB,CC,Ov,     &
@@ -91,21 +91,10 @@ MODULE BlokTrPdJ
              IF(TestPrimPair(Prim%Xi,Prim%AB2))THEN
                 Prim%PFA=PFA 
                 Prim%PFB=PFB
-!
                 MaxAmp=SetBraBlok(Prim,BS,Gradients_O=Pair%SameAtom)
 !---------------------------------------------------------------------------------------------
 !               Compute maximal HG extent (for PAC) and Unsold esitmiate (for MAC)
 !               looping over all angular symmetries
-!
-!               PAC: Int{ Lambda_P[r] Potential_Q[r] } := Zero by non-overlapping BBoxes
-!
-!               MAC: PQ^2>(O[P]_Lp FF[Lp,L+1]/TauMac)^(2/(Lp+L+2)) 
-!                                       ^^^^^^
-!                                        DP2
-!
-!                         *(O[Q]_L)^(2/({Lp->0}+L+2)*(L+1)/L ) with L:=SPEll
-!                                       ^^^^^^
-!                                     Q%Strength
                 DP2=Zero
                 PExtent=Zero
                 IA = IndexA
@@ -119,10 +108,10 @@ MODULE BlokTrPdJ
                       Pab=P(IA,IB)
 !                     Extent (for PAC)
                       DO K=1,3
-                         PExtent=MAX(PExtent, & 
-                                     Extent(EllA+EllB,Prim%Zeta,Pab*dHGBra%D(:,IA,IB,K),TauPAC,ExtraEll_O=1))
+                         PExtent=MAX(PExtent,                        &  
+                                      Extent(EllA+EllB+1,Prim%Zeta,  &
+                                             Pab*dHGBra%D(:,IA,IB,K),TauPAC))
 !                        Strength (for MAC)
-           
                          CALL HGToSP(Prim,Pab*dHGBra%D(:,IA,IB,K),SPBraC,SPBraS)
                          DO L=0,EllA+EllB
                             PStrength = FudgeFactorial(L,SPEll+1)*UnsoldO(L,SPBraC,SPBraS)
@@ -131,30 +120,23 @@ MODULE BlokTrPdJ
                       ENDDO
                    ENDDO
                 ENDDO
-                DP2 = MAX(1.D10,DP2)
+                DP2=MIN(1.D10,DP2)
 !-----------------------------------------------------------------------------------------
                 IF(PExtent>Zero)THEN ! Evaluate this primitives Ket contribution
-!                  Zero the Acumulators
-                   HGKet=Zero
-                   SPKetC=Zero
-                   SPKetS=Zero 
+!                  Initialize <KET|
+                   CALL SetKet(Prim,PExtent)
 #ifdef PERIODIC
 !                  Fold The Primative Back into the BOX
                    CALL AtomCyclic(GM,Prim%P)
-                   Px = Prim%P(1)
-                   Py = Prim%P(2)
-                   Pz = Prim%P(3)
+                   PTmp=Prim%P
 !                  Sum over cells
                    DO NC=1,CSMM1%NCells
-                      Prim%P(1)=Px+CSMM1%CellCarts%D(1,NC)
-                      Prim%P(2)=Py+CSMM1%CellCarts%D(2,NC)
-                      Prim%P(3)=Pz+CSMM1%CellCarts%D(3,NC)
+                      Prim%P=PTmp+CSMM1%CellCarts%D(:,NC)
+                      PBox%Center=Prim%P
 !                     Walk the walk
                       CALL JWalk(PoleRoot)
                    ENDDO
-                   Prim%P(1)=Px
-                   Prim%P(2)=Py
-                   Prim%P(3)=Pz
+                   Prim%P=PTmp
 #else
 !                  Walk the walk
                    CALL JWalk(PoleRoot)
@@ -199,7 +181,7 @@ MODULE BlokTrPdJ
                       ENDDO
                    ENDIF
 #endif
-                ENDIF
+             ENDIF
              ENDIF
           ENDDO 
           ENDDO
@@ -219,47 +201,49 @@ MODULE BlokTrPdJ
 !
 !====================================================================================================
     FUNCTION dNukE(At) RESULT(Vct)
-       REAL(DOUBLE)                    :: Tau,NukeCo,NukePole
+       REAL(DOUBLE)                    :: Tau,NukeCo,NukePole,PExtent
        REAL(DOUBLE),DIMENSION(4)       :: dBra
        REAL(DOUBLE),DIMENSION(3)       :: Vct
        REAL(DOUBLE),DIMENSION(0:SPLen) :: SPBraC,SPBraS 
        INTEGER                         :: At,SPLenEll,HGLenEll,K,LM,LMN
 #ifdef PERIODIC
        INTEGER                         :: NC
-       REAL(DOUBLE),DIMENSION(3)       :: QC
+       REAL(DOUBLE),DIMENSION(3)       :: PTmp
 #endif
 !---------------------------------------------------------------------------------------------
-       NukeCo   =-GM%AtNum%I(At)*(NuclearExpnt/Pi)**(ThreeHalves)
-       NukePole =-GM%AtNum%I(At)
-!      Set MAC and PAC parameters
-       Tau      =Thresholds%TwoE
-       DP2      =(ABS(NukePole)/Tau)**(Two/DBLE(SPEll+1))
-       PoleSwitch=Gamma_Switch
-!      Set atomic "primitive"
+!      Initialize |dBRA>
+       NukeCo=-GM%AtNum%I(At)*(NuclearExpnt/Pi)**(ThreeHalves)
+       DO K=1,3
+          dHGBra%D(1:4,1,1,K)=Zero
+       ENDDO
+       dHGBra%D(2,1,1,1)=NukeCo
+       dHGBra%D(3,1,1,2)=NukeCo
+       dHGBra%D(4,1,1,3)=NukeCo
+!      Initialize the primitive          
        Prim%Ell=1
+       Prim%P=GM%Carts%D(:,At)
        Prim%Zeta=NuclearExpnt
-       SPLenEll=LSP(Prim%Ell)
-       HGLenEll=LHGTF(Prim%Ell)
-!      Zero accumulators
-       HGKet=Zero
-       SPKetC=Zero
-       SPKetS=Zero
+!      Set the MAC
+       DP2=(GM%AtNum%I(At)/TauMAC)**(Two/DBLE(SPEll+2))
+!      Set the PAC
+       PExtent=Extent(1,NuclearExpnt,dHGBra%D(:,1,1,1),TauPAC)
+!      Initialize <KET|
+       CALL SetKet(Prim,PExtent)
+!      Klumsy
+       SPLenEll=LSP(1)
+       HGLenEll=LHGTF(1)
 #ifdef PERIODIC
-       QC(:)  = GM%Carts%D(:,At)
+       PTmp=GM%Carts%D(:,At)
        DO NC=1,CSMM1%NCells
 !         Set atomic "primitive"
-          Prim%P(:)=QC(:)+CSMM1%CellCarts%D(:,NC)
+          Prim%P=PTmp+CSMM1%CellCarts%D(:,NC)
 !         Walk the walk
           CALL VWalk(PoleRoot)
        ENDDO
 !      Reset the Atomic Coordinates
-       Prim%P = QC
+       Prim%P=PTmp
 !      Init bra xforms
        Vct=Zero
-       dHGBra%D=Zero       
-       dHGBra%D(2,1,1,1)=NukeCo
-       dHGBra%D(3,1,1,2)=NukeCo
-       dHGBra%D(4,1,1,3)=NukeCo
        DO K=1,3
           DO LMN=1,HGLenEll
              Vct(K)=Vct(K)+Phase%D(LMN)*dHGBra%D(LMN,1,1,K)*HGKet(LMN)
@@ -276,15 +260,10 @@ MODULE BlokTrPdJ
           ENDDO
        ENDIF
 #else
-       Prim%P=GM%Carts%D(:,At) 
 !      Walk the walk
        CALL VWalk(PoleRoot)
-!      Init bra xforms
+!      <BRA|KET> 
        Vct=Zero
-       dHGBra%D=Zero       
-       dHGBra%D(2,1,1,1)=NukeCo
-       dHGBra%D(3,1,1,2)=NukeCo
-       dHGBra%D(4,1,1,3)=NukeCo
        DO K=1,3
           DO LMN=1,HGLenEll
              Vct(K)=Vct(K) + Phase%D(LMN)*dHGBra%D(LMN,1,1,K)*HGKet(LMN)

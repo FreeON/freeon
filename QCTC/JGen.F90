@@ -122,6 +122,7 @@ MODULE JGen
        REAL(DOUBLE),DIMENSION(Pair%NA,Pair%NB)  :: JBlk
        REAL(DOUBLE),DIMENSION(Pair%NA*Pair%NB)  :: Jvct
        REAL(DOUBLE),DIMENSION(0:SPLen)          :: SPBraC,SPBraS 
+       REAL(DOUBLE),DIMENSION(3)                :: PTmp
        REAL(DOUBLE)                             :: ZetaA,ZetaB,EtaAB,EtaIn,    &
                                                    XiAB,ExpAB,CA,CB,CC,Ov,     &
                                                    PAx,PAy,PAz,PBx,PBy,PBz,    &
@@ -129,7 +130,6 @@ MODULE JGen
                                                    Tau,OmegaMin,Px,Py,Pz
        REAL(DOUBLE)                             :: PExtent,EX
        REAL(DOUBLE)                             :: PStrength,Error
-
        INTEGER                                  :: KA,KB,CFA,CFB,PFA,PFB,      &
                                                    IndexA,IndexB,StartLA,      &
                                                    StartLB,StopLA,StopLB
@@ -173,15 +173,7 @@ MODULE JGen
 !---------------------------------------------------------------------------------------------
 !                     Compute maximal HG extent (for PAC) and Unsold esitmiate (for MAC)
 !                     looping over all angular symmetries
-!
-!                     PAC: Int{ Lambda_P[r] Potential_Q[r] } := Zero by non-overlapping BBoxes
-!
-!                     MAC: PQ^2>(O[P]_Lp FF[Lp,L+1]/TauMac)^(2/(Lp+L+2)) 
-!                                       ^^^^^^
-!                                        DP2
-!                              *(O[Q]_L)^(2/({Lp->0}+L+2)*(L+1)/L ) with L:=SPEll
-!                                       ^^^^^^
-!                                        Q%Strength
+
                       DP2=Zero
                       PExtent=Zero
                       IA = IndexA
@@ -203,44 +195,30 @@ MODULE JGen
                             ENDDO
                          ENDDO
                       ENDDO 
-                      DP2 = MIN(1.D10,DP2)
+                      DP2=MIN(1.D10,DP2)
 !--------------------------------------------------------------------------------------------
 !                     If finite compute ...
                       IF(PExtent>Zero.AND.PStrength>Zero)THEN
-!                        Set BBox for this primitive
-                         PBox%BndBox(:,1)=Prim%P
-                         PBox%BndBox(:,2)=Prim%P
-                         PBox=ExpandBox(PBox,PExtent)
-!                        Zero the Accumulators
-                         HGKet=Zero
-                         SPKetC=Zero
-                         SPKetS=Zero 
+!                        Initialize <KET|
+                         CALL SetKet(Prim,PExtent)
 #ifdef PERIODIC
-!                        Fold The Primative Back into the BOX
+!                        Fold primative back into the unit cell
                          CALL AtomCyclic(GM,Prim%P)
-!
-                         Px = Prim%P(1)
-                         Py = Prim%P(2)
-                         Pz = Prim%P(3)
+                         PTmp=Prim%P
 !                        Sum over cells
                          DO NC=1,CSMM1%NCells
-                            Prim%P(1)=Px+CSMM1%CellCarts%D(1,NC)
-                            Prim%P(2)=Py+CSMM1%CellCarts%D(2,NC)
-                            Prim%P(3)=Pz+CSMM1%CellCarts%D(3,NC)
-                            PBox%Center(:)=Prim%P(:) ! redundant
+                            Prim%P=PTmp+CSMM1%CellCarts%D(:,NC)
+                            PBox%Center=Prim%P
 !                           Walk the walk
                             CALL JWalk(PoleRoot)
                          ENDDO
-                         Prim%P(1)=Px
-                         Prim%P(2)=Py
-                         Prim%P(3)=Pz
+                         Prim%P=PTmp
 #else
 !                        Walk the walk
                          CALL JWalk(PoleRoot)
 #endif
 !---------------------------------------------------------------------------------------
-!                        Contract <Bra|Ket> bloks to compute matrix elements of J
-!**
+!                        <BRA|KET>
                          IA = IndexA
                          DO LMNA=StartLA,StopLA
                             IA=IA+1
