@@ -392,8 +392,8 @@ CONTAINS
      IF(AllocQ(A%Alloc)) CALL Delete(A)         
      CALL Get(A%N,                'NIntC'//TRIM(VarName),Tag_O=Tag_O)
      CALL New(A,A%N)                                           
-     CALL Get(A%Def,                'Def'//TRIM(VarName),Tag_O=Tag_O)
      CALL Get(A%Atoms,            'Atoms'//TRIM(VarName),Tag_O=Tag_O)
+     CALL Get(A%Def,                'Def'//TRIM(VarName),Tag_O=Tag_O)
      CALL Get(A%Value,            'Value'//TRIM(VarName),Tag_O=Tag_O)
      CALL Get(A%ConstrValue,'ConstrValue'//TRIM(VarName),Tag_O=Tag_O)
      CALL Get(A%Active,          'Active'//TRIM(VarName),Tag_O=Tag_O)
@@ -1846,7 +1846,7 @@ CONTAINS
                 TYPE(META_DATA)                      :: Meta
 
 #ifdef OLD_CHR_VECT
-                INTEGER,DIMENSION(DEFAULT_CHR_LEN)   :: B  !=ICHAR(' ')
+                INTEGER,DIMENSION(DCL)   :: B  !=ICHAR(' ')
 #else
                 INTEGER,ALLOCATABLE :: B(:)
                 INTEGER :: RunInd,BufSize
@@ -1860,7 +1860,7 @@ CONTAINS
                    NN=SIZE(A%C)
                    DO II = 1, NN
                       N=LEN(A%C(II))
-                      IF(N>DEFAULT_CHR_LEN) CALL Halt('Static strings overrun in Put_CHR_VECT')
+                      IF(N>DCL) CALL Halt('Static strings overrun in Put_CHR_VECT')
                       DO I=1,N; B(I)=ICHAR(A%C(II)(I:I)); ENDDO
                          Meta=SetMeta(NameTag(VarName,TRIM(IntToChar(II))// &
                               TRIM(Tag_O)),NATIVE_INT32,N,.FALSE.)
@@ -1873,7 +1873,7 @@ CONTAINS
                    BufSize = 1
                    DO II = 1, NN
                      N = LEN(TRIM(A%C(II)))
-                     IF(N>DEFAULT_CHR_LEN) CALL Halt('Static strings overrun in Put_CHR_VECT')
+                     IF(N>DCL) CALL Halt('Static strings overrun in Put_CHR_VECT')
                      BufSize = BufSize + N + 1
                    ENDDO
                    

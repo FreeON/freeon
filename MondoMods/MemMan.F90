@@ -268,6 +268,7 @@ MODULE MemMan
          CALL AllocChk(A%Alloc)
          A%N=N
          CALL New(A%Def,N)
+         A%Def%C='BLANK'
          CALL New(A%Atoms,(/N,4/))
          CALL New(A%Value,N)
          CALL New(A%Constraint,N)
