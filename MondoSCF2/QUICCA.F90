@@ -917,9 +917,7 @@ CONTAINS
        ABCT%D=ABC1T%D
      ENDIF
      !
-write(*,*) 'bef primw'
      CALL PrepPrimW(WeightsT%D,IntCGradsT%D,PBCGrads,IntCsT)
-write(*,*) 'aft primw',IntCsT%N
      CALL CalcHessian(FittedHessT%D,ABC1T%D)
      CALL SecondWeight(WeightsT%D,FittedHessT%D)
      IF(PRESENT(MixMat_O)) THEN
@@ -1916,9 +1914,7 @@ write(*,*) 'aft primw',IntCsT%N
      REAL(DOUBLE),DIMENSION(3,3) :: InvBoxSh,BoxShape
      REAL(DOUBLE),DIMENSION(3)   :: CartAux
      !
-   ! IF(.NOT.DoLatticeFit(GOpt)) RETURN
-write(*,*) 'doing latt fit'
-write(out,*) 'doing latt fit'
+     IF(.NOT.DoLatticeFit(GOpt)) RETURN
      !
      NDim=SIZE(RefStruct,2)
      NatmsLoc=SIZE(XYZ,2)
@@ -1927,12 +1923,18 @@ write(out,*) 'doing latt fit'
      CALL New(VectCart,NCart)
      CALL CollectPBCPast(RefStruct,RefGrad,IntCValues,IntCGrads, &
                           IntC_L,GOpt,SCRPath,Print,PBCDim)
-     CALL DisplFit(IntC_L,IntCGrads%D,IntCValues%D,GOpt%Hessian, &
-                IntCValues%D,IntCGrads%D, &
-                GOpt%CoordCtrl,PredVals,Displ,PWDPath,SCRPath,NCart, &
-                iGEO)
-write(*,*) 'intcval= ',IntCValues%D(:,NDim)
-write(*,*) 'predvals= ',PredVals%D
+    !CALL DisplFit(IntC_L,IntCGrads%D,IntCValues%D,GOpt%Hessian, &
+    !           IntCValues%D,IntCGrads%D, &
+    !           GOpt%CoordCtrl,PredVals,Displ,PWDPath,SCRPath,NCart, &
+    !           iGEO)
+     CALL INTCValue(IntC_L,XYZ,GOpt%CoordCtrl%LinCrit, &
+                    GOpt%CoordCtrl%TorsLinCrit)
+     CALL New(Displ,IntC_L%N) 
+     CALL New(PredVals,IntC_L%N) 
+     DO J=1,6
+       PredVals%D(J)=IntCValues%D(J,NDim)-0.5D0*IntCGrads%D(J,NDim)
+     ENDDO
+     CALL SetLattValues(PredVals%D(1:6),GOpt%ExtIntCs)
      !
      DO I=1,3
        BoxShape(1:3,I)=XYZ(1:3,NatmsLoc-3+I)
@@ -1985,8 +1987,9 @@ write(*,*) 'predvals= ',PredVals%D
      !
      DoLatticeFit=.FALSE.
      DO J=1,6 ; AbsGrad(J)=ABS(GOpt%LattIntC%Grad(J)) ; ENDDO
-     IF(GOpt%GOptStat%MaxCGrad<GOpt%GConvCrit%Grad.OR. &
-        MAXVAL(AbsGrad)>10.D0*GOpt%GOptStat%MaxCGrad) THEN
+     IF(GOpt%GOptStat%MaxCGrad<GOpt%GConvCrit%Grad) THEN 
+   ! IF(GOpt%GOptStat%MaxCGrad<GOpt%GConvCrit%Grad.OR. &
+   !    MAXVAL(AbsGrad)>10.D0*GOpt%GOptStat%MaxCGrad) THEN
        ! 
        DoLatticeFit=.TRUE.
      ENDIF

@@ -540,7 +540,8 @@ CONTAINS
          Geo,C%Opts%GeomPrint)
      ENDDO
      !
-     CALL SetEq(IntCES,C%GOpt%ExtIntCs,1,C%GOpt%ExtIntCs%N,1)
+   ! CALL New(IntCES,C%GOpt%ExtIntCs%N)
+   ! CALL SetEq(IntCES,C%GOpt%ExtIntCs,1,C%GOpt%ExtIntCs%N,1)
      CALL New(Convgd,C%Geos%Clones)
      Convgd%I=0
      !
@@ -614,7 +615,7 @@ CONTAINS
        IF(ConvgdAll==1) EXIT
      ENDDO
      CALL Delete(Convgd)
-     CALL Delete(IntCES)
+   ! CALL Delete(IntCES)
      !
      IGeo=C%Stat%Current%I(3)
      IF(IGeo>=MaxSteps) THEN
@@ -689,9 +690,7 @@ CONTAINS
      ! first constraints, then the rest.
      !
      CALL CartRNK2ToCartRNK1(CartGrad%D,GradIn)
-write(*,*) 'bef GetLattGrads'
      CALL GetLattGrads(CartGrad%D(NCart-8:NCart),XYZ,Gopt%LattIntC%Grad,PBCDim)
-write(*,*) 'aft GetLattGrads'
    ! CALL SYMMSTRESS(CartGrad%D(NCart-8:NCart),XYZ,PBCDim)
      CALL CleanConstrCart(XYZ,PBCDim,CartGrad%D,GOpt,SCRPath)
      CALL New(Carts,NCart)
@@ -706,7 +705,6 @@ write(*,*) 'aft GetLattGrads'
                       GOpt%GOptStat%MaxCGrad)
      !
      CALL GradConv(GOpt%GOptStat,GOpt%GConvCrit,GOpt%Constr,GOpt%LattIntC%Grad)
-write(*,*) 'chk 1'
      !
      ! Do we have to refresh internal coord defs?   
      !
@@ -723,7 +721,6 @@ write(*,*) 'chk 1'
                     'optimizer has not found any internal coordinates.')
        CALL LatticeINTC(IntCL,PBCDim)
      ENDIF
-write(*,*) 'chk 2'
      IF(IntCs%N/=0) THEN
        CALL INTCValue(IntCs,XYZ, &
                       GOpt%CoordCtrl%LinCrit,GOpt%CoordCtrl%TorsLinCrit)
@@ -739,11 +736,9 @@ write(*,*) 'chk 2'
      !
    ! CALL GetMixedBMat(IntCs,XYZ,PBE,GOpt%TrfCtrl,GOpt%CoordCtrl,TOPS, &
    !                   GOpt%Constr%NCartConstr,Print,SCRPath,.TRUE.)
-write(*,*) 'chk 3'
      CALL RefreshBMatInfo(IntCs,XYZ,GOpt%TrfCtrl, &
                     GOpt%CoordCtrl%LinCrit,GOpt%CoordCtrl%TorsLinCrit,&
                     PBCDim,Print,SCRPath,.TRUE.)
-write(*,*) 'chk 4'
    ! CALL BuildUMatr(SCRPath,NCart)
      !
      ! Print current set of internals for debugging
@@ -816,10 +811,8 @@ write(*,*) 'chk 4'
                           iGEO,XYZ,Print,PBCDim)
      CASE(GRAD_BiSect_OPT) 
        IF(iGEO<2) THEN
-write(*,*) 'bef RelaxDiagHess'
          CALL RelaxDiagHess(GOpt,SCRPath,PWDPath,CartGrad,IntCs,AtNum,&
                             iGEO,XYZ,Print,PBCDim)
-write(*,*) 'aft RelaxDiagHess'
        ELSE
          CALL RelaxBiSect(GOpt,SCRPath,PWDPath,HFileIn,CartGrad,IntCs, &
                           AtNum,PBCDim,iGEO,iCLONE,XYZ,RefXYZ,Print)
@@ -867,10 +860,8 @@ write(*,*) 'aft RelaxDiagHess'
      ENDDO
      !
      CALL LatticeINTC(IntC_L,PBCDim)
-write(*,*) 'bef CollectPBCPast'
      CALL CollectPBCPast(RefStruct%D,RefGrad%D,PBCValues,PBCGrads, &
                           IntC_L,GOpt,SCRPath,Print,PBCDim)
-write(*,*) 'aft CollectPBCPast'
      !
      CALL CollectINTCPast(RefStruct%D,RefGrad%D,IntCValues,IntCGrads, &
                           IntCs,GOpt,SCRPath,Print,PBCDim)
@@ -923,8 +914,10 @@ write(*,*) 'aft CollectPBCPast'
      ! Now, add correction by optimization of lattice only,
      ! while fractional coordinates of the atoms are fixed
      ! 
-   ! CALL LatticeFit(SRStruct%D,RefStruct%D,RefGrad%D,XYZ,PBCDim, &
-   !                 GOpt,Print,SCRPath,PWDPath,iGEO)
+     IF(PBCDim==3) THEN
+       CALL LatticeFit(SRStruct%D,RefStruct%D,RefGrad%D,XYZ,PBCDim, &
+                       GOpt,Print,SCRPath,PWDPath,iGEO)
+     ENDIF
      ! 
      ! Now, add fitting along correlation coordinates
      ! 
@@ -1334,21 +1327,6 @@ write(*,*) 'aft CollectPBCPast'
      CALL New(GradNew,(/3,NatmsNew/))
      CALL New(RefXYZ,(/3,NatmsNew/))
      ! fill atomic data
-do i=1,GMLoc%Natms
-write(*,*) INT(GMLoc%AtNum%D(I)),GMLoc%BoxCarts%D(1:3,i)
-enddo
-!write(*,*) 'GMLoc%Gradients%D = '
-!write(out,*) 'GMLoc%Gradients%D = '
-!do j=1,GMLoc%Natms
-!write(*,*) GMLoc%Gradients%D(1:3,j)
-!write(out,*) GMLoc%Gradients%D(1:3,j)
-!enddo
-!write(*,*) 'GMLoc%PBC%LatFrc%D = '
-!write(out,*) 'GMLoc%PBC%LatFrc%D = '
-!do j=1,3
-!write(*,*) GMLoc%PBC%LatFrc%D(J,1:3)
-!write(out,*) GMLoc%PBC%LatFrc%D(J,1:3)
-!enddo
      NatmsNew=0
      DO I=1,GMLoc%Natms
        IF(GMLoc%CConstrain%I(I)/=2) THEN
@@ -1359,34 +1337,19 @@ enddo
          AtNumNew%D(NatmsNew)=GMLoc%AtNum%D(NatmsNew)
        ENDIF
      ENDDO
-!write(*,*) 'lattice forces are temporarily hardwired to zero'
      DO K=1,3
        DO J=1,3
          XYZNew%D(J,NatmsNew+K)=GMLoc%PBC%BoxShape%D(J,K)
          RefXYZ%D(J,NatmsNew+K)=GMLoc%PBC%BoxShape%D(J,K)
          GradNew%D(J,NatmsNew+K)=GMLoc%PBC%LatFrc%D(J,K)
-!GradNew%D(J,NatmsNew+K)=Zero
        ENDDO
      ENDDO
      ! ensure proper orientation of (numerical) forces
-!write(*,*) 'forces orientation hardwired to zero'
     !GradNew%D(2:3,NatmsNew+1)=Zero
     !GradNew%D(3,NatmsNew+2)=Zero
      CALL Delete(RefXYZ1)
      AtNumNew%D(NatmsNew+1:NatmsNew+3)=Zero
      CALL ConvertToXYZRef(XYZNew%D,RefXYZ%D,GMLoc%PBC%Dimen)
-write(*,*) 'GradNew%D= '
-write(out,*) 'GradNew%D= '
-do i=natmsnew+1,natmsnew+3
-write(*,*) GradNew%D(1:3,i)
-write(out,*) GradNew%D(1:3,i)
-enddo
-write(*,*) 'XYZNew%D= '
-write(out,*) 'XYZNew%D= '
-do i=natmsnew+1,natmsnew+3
-write(*,*) XYZNew%D(1:3,i)
-write(out,*) XYZNew%D(1:3,i)
-enddo
      !
      !--------------------------------------------
      !

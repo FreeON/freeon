@@ -992,8 +992,8 @@ CONTAINS
        CALL CleanPBCIntCs(IntC_Bas,Cells%I,IEq%I)
        NIntC_Bas=IntC_Bas%N
       !CALL LatticeINTC(IntC_L,PBCDim)
-       CALL ExtraLattice(IntC_L,PBCDim)
-      !IntC_L%N=0
+      !CALL ExtraLattice(IntC_L,PBCDim)
+       IntC_L%N=0
      ELSE IF(Refresh==5) THEN !!! use only extra coords from input
        NIntC_Bas=0 
        NIntC_VDW=0 
@@ -1856,6 +1856,7 @@ CONTAINS
      ! Repeat until convergence
      !
      DO IRep=1,RepMax
+!CALL PrtIntCoords(IntCs,VectIntReq%D,'VectIntReq',PBCDim_O=PBCDim)
        RefreshB=.TRUE.
        RefreshAct=.TRUE.
        DoRepeat=.FALSE.
@@ -1907,6 +1908,7 @@ CONTAINS
          ENDIF
          !
          CALL MapAngleDispl(IntCs,IntCDispl%D) 
+!CALL PrtIntCoords(IntCs,IntCDispl%D,'IntCDispl',PBCDim_O=PBCDim)
          !
          IF(RefreshB.AND.RefreshAct) THEN
            CALL RefreshBMatInfo(IntCs,ActCarts%D,GTrfCtrl, &
@@ -2134,8 +2136,6 @@ RefreshAct=.TRUE.
      Crit=1.D-6
      CALL GetPBCProj(PBCDim,P,XYZ_O=XYZ)
      Grad1=Grad
-write(*,*) 'original grad= '
-write(*,100) Grad(1:9)
      DO I=1,MaxStep
        CALL DGEMM_NNc(9,9,1,One,Zero,P,Grad1,Grad2)
        Delta=Grad1-Grad2
@@ -2148,9 +2148,6 @@ write(*,100) Grad(1:9)
          IF(Fact<Fact2) Fact=Fact2
        ENDDO
        Grad1=Grad2
-write(*,*) i,'fact= ',fact
-write(*,100) Grad2(1:9)
-100 format(9F8.4)
        IF(Fact<Crit) EXIT
      ENDDO
      IF(Fact>Crit) THEN
@@ -3076,6 +3073,22 @@ write(*,100) Grad2(1:9)
        BoxShape(1:3,I)=VectCart(K:L)
      ENDDO
      CALL CalcBoxPars(Vec,BoxShape)
+     CALL SetLattValues(Vec,IntCs)
+     CALL BoxParsToCart(Vec,BoxShape)
+     DO I=1,3
+       K=NCart+3*(I-1)+1
+       L=K+2
+       VectCart(K:L)=BoxShape(1:3,I)
+     ENDDO
+   END SUBROUTINE SetFixedLattice
+!
+!--------------------------------------------------------------------
+!
+   SUBROUTINE SetLattValues(Vec,IntCs)
+     REAL(DOUBLE),DIMENSION(6) :: Vec
+     TYPE(INTC)                :: IntCs
+     INTEGER                   :: I
+     !
      DO I=1,IntCs%N
        IF(.NOT.IntCs%Constraint%L(I)) CYCLE
        IF(IntCs%Def%C(I)(1:6)=='STRE_A') Vec(1)=IntCs%ConstrValue%D(I)
@@ -3085,13 +3098,7 @@ write(*,100) Grad2(1:9)
        IF(IntCs%Def%C(I)(1:4)=='BETA')   Vec(5)=IntCs%ConstrValue%D(I)
        IF(IntCs%Def%C(I)(1:5)=='GAMMA')  Vec(6)=IntCs%ConstrValue%D(I)
      ENDDO
-     CALL BoxParsToCart(Vec,BoxShape)
-     DO I=1,3
-       K=NCart+3*(I-1)+1
-       L=K+2
-       VectCart(K:L)=BoxShape(1:3,I)
-     ENDDO
-   END SUBROUTINE SetFixedLattice
+   END SUBROUTINE SetLattValues
 !
 !----------------------------------------------------------------------
 !
@@ -3542,13 +3549,16 @@ write(*,100) Grad2(1:9)
      !
      CALL BMatrix(XYZ,IntCs,B,PBCDim,LinCrit,TorsLinCrit)
      CALL SetEq(BS,B)
-     IF(DoCleanCol) THEN
-       CALL CleanBConstr(IntCs,B,NatmsLoc)
-       CALL CleanBLConstr(XYZ,IntCs,B,PBCDim)
+     IF(PBCDim<3) THEN
+       IF(DoCleanCol) THEN
+         CALL CleanBConstr(IntCs,B,NatmsLoc)
+         CALL CleanBLConstr(XYZ,IntCs,B,PBCDim)
+       ENDIF
+       CALL CleanBLRot(XYZ,IntCs,B,PBCDim)
+     ELSE
+       write(*,*) 'B%BL hardwired to zero'
+       B%BL%D=Zero
      ENDIF
-     CALL CleanBLRot(XYZ,IntCs,B,PBCDim)
-!write(*,*) 'B%BL hardwired to zero'
-!B%BL%D=Zero
      !
      CALL BtoSpB_1x1(B,ISpB,JSpB,ASpB)
      !
@@ -3884,7 +3894,6 @@ write(*,100) Grad2(1:9)
            IF(IntCsE%Def%C(J)(1:8)==IntCs%Def%C(I)(1:8)) THEN
              IntCs%Active%L(I)=.TRUE.
              NCoinc=NCoinc+1
-write(*,*) i,j,IntCsE%Def%C(J)(1:8),IntCs%Def%C(I)(1:8),ncoinc
              EXIT
            ENDIF
          ENDIF
@@ -7071,12 +7080,12 @@ return
      Fact=One
      IF(PRESENT(Fact_O)) Fact=Fact_O
      DO I=1,IntCs%N
-       IF(IntCs%Def%C(I)(1:6)=="STRE_A".OR. &
-          IntCs%Def%C(I)(1:6)=="STRE_B".OR. &
-          IntCs%Def%C(I)(1:6)=="STRE_C".OR. &
-          IntCs%Def%C(I)(1:5)=="ALPHA".OR. &
-          IntCs%Def%C(I)(1:4)=="BETA".OR. &
-          IntCs%Def%C(I)(1:5)=="GAMMA") CYCLE
+      !IF(IntCs%Def%C(I)(1:6)=="STRE_A".OR. &
+      !   IntCs%Def%C(I)(1:6)=="STRE_B".OR. &
+      !   IntCs%Def%C(I)(1:6)=="STRE_C".OR. &
+      !   IntCs%Def%C(I)(1:5)=="ALPHA".OR. &
+      !   IntCs%Def%C(I)(1:4)=="BETA".OR. &
+      !   IntCs%Def%C(I)(1:5)=="GAMMA") CYCLE
        CALL CtrlDispl(IntCs%Def%C(I),Displ(I),Fact, &
                       StreCritIn,AngleCritIn)
      ENDDO
