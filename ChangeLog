@@ -1,3 +1,15 @@
+2004-10-20 10:39  vweber
+
+	* OneE/TForce.F90: Parallel bugs for stress hopefully fixed.
+
+2004-10-20 10:18  vweber
+
+	* QCTC/JForce.F90: Hope I fixed the parallel JStress, CJ, CJ, CJ...
+
+2004-10-20 09:39  mchalla
+
+	* ChangeLog: [no log message]
+
 2004-10-20 03:11  vweber
 
 	* TwoE/VRR/VRRp0p0.F90: [no log message]
@@ -19,6 +31,64 @@
 2004-10-19 18:13  mchalla
 
 	* Validate/Ice.inp: just a test to check if CVS is broken.
+
+2004-10-19 14:30  nemeth
+
+	* Benchmarks/BAKERS-TESTS/: cleanlist, cleanlist_tmp,
+	cleanlistzinc, docalc, doclean, doexch, dosed, dosubm, inplist,
+	inplist_1-10, inplist_11-20, inplist_21-30, inplist_short,
+	inpltemp, sedlist, T01_WATER/T01.water.inp,
+	T01_WATER/T01.water.out, T01_WATER/T01_28189.xyz,
+	T02_AMMO/T02.ammo.inp, T02_AMMO/T02.ammo.out,
+	T02_AMMO/T02_28203.xyz, T03_ETHAN/T03.ethan.inp,
+	T03_ETHAN/T03.ethan.out, T03_ETHAN/T03_11511.xyz,
+	T04_ACETILENE/T04.acetilene.inp, T04_ACETILENE/T04.acetilene.out,
+	T04_ACETILENE/T04_11523.xyz, T05_ALLENE/T05.alle.inp,
+	T05_ALLENE/T05.alle.out, T05_ALLENE/T05_4996.xyz,
+	T06_HYDRO/T06.hydro.inp, T06_HYDRO/T06.hydro.out,
+	T06_HYDRO/T06_5027.xyz, T07_BENZENE/T07.benzene.inp,
+	T07_BENZENE/T07.benzene.out, T07_BENZENE/T07_22207.xyz,
+	T08_METHYLAMIN/T08.methylamin.inp,
+	T08_METHYLAMIN/T08.methylamin.out, T08_METHYLAMIN/T08_22208.xyz,
+	T09_ETHANOL/T09.ethanol.inp, T09_ETHANOL/T09.ethanol.out,
+	T09_ETHANOL/T09_2717.xyz, T10_ACETONE/T10.acetone.inp,
+	T10_ACETONE/T10.acetone.out, T10_ACETONE/T10_2716.xyz,
+	T11_DISILYL_ETHER/T11.disi.inp, T11_DISILYL_ETHER/T11.disi.out,
+	T11_DISILYL_ETHER/T11_28880.xyz, T12_TRISIL/T12.trisil.inp,
+	T12_TRISIL/T12.trisil.out, T12_TRISIL/T12_29168.xyz,
+	T13_BENZAL/T13.benzal.inp, T13_BENZAL/T13.benzal.out,
+	T13_BENZAL/T13_12070.xyz, T14_DIFL13/T14.difl13.inp,
+	T14_DIFL13/T14.difl13.out, T14_DIFL13/T14_22761.xyz,
+	T15_TRIFL/T15.trifl.inp, T15_TRIFL/T15.trifl.out,
+	T15_TRIFL/T15_12460.xyz, T16_NEOP/T16.neop.inp,
+	T16_NEOP/T16.neop.out, T16_NEOP/T16_6082.xyz,
+	T17_FURAN/T17.furan.inp, T17_FURAN/T17.furan.out,
+	T17_FURAN/T17_6287.xyz, T18_NAPHTALENE/T18.naphtalene.inp,
+	T18_NAPHTALENE/T18.naphtalene.out, T18_NAPHTALENE/T18_3561.xyz,
+	T19_DIFLNAPH/T19.diflnaph.inp, T19_DIFLNAPH/T19.diflnaph.out,
+	T19_DIFLNAPH/T19_3905.xyz, T20_HYDRO/T20.hydro.inp,
+	T20_HYDRO/T20.hydro.out, T20_HYDRO/T20_23249.xyz,
+	T21_ACH/T21.ach.inp, T21_ACH/T21.ach.out, T21_ACH/T21_30342.xyz,
+	T22_ACAN/T22.acan.inp, T22_ACAN/T22.acan.out,
+	T22_ACAN/T22_13624.xyz, T23_BEND/T23.bend.inp,
+	T23_BEND/T23.bend.out, T23_BEND/T23_13629.xyz,
+	T24_PTER/T24.pter.inp, T24_PTER/T24.pter.out,
+	T24_PTER/T24_7483.xyz, T25_DIFU/T25.difu.inp,
+	T25_DIFU/T25.difu.out, T25_DIFU/T25_7477.xyz,
+	T26_MESI/T26.mesi.inp, T26_MESI/T26.mesi.out,
+	T26_MESI/T26_24315.xyz, T27_HIS/T27.his.inp, T27_HIS/T27.his.out,
+	T27_HIS/T27_24585.xyz, T28_DIM/T28.dim.inp, T28_DIM/T28.dim.out,
+	T28_DIM/T28_20033.xyz, T29_CAFFEINE/T29.caffeine.inp,
+	T29_CAFFEINE/T29.caffeine.out, T29_CAFFEINE/T29_25660.xyz,
+	T30_MEN/T30.men.inp, T30_MEN/T30.men.out, T30_MEN/T30_5266.xyz,
+	T31_ACTHCP/T31.acthcp.inp, T32_HISHP/T32.hishp.inp,
+	T33_HYDRAZO/T33.hydrazo.inp: Geometry optimizations on Baker's test
+	set molecules. Bakers criterion refers to a maximum Cartesian
+	gradient of 0.0003 a.u. Note that test calculations of the QUICCA
+	paper were done using  "supertight" gradients and no filtering of
+	data points in QUICCA. The optimizations checked in here needed
+	approximately the same number of steps as in the QUICCA
+	publication.
 
 2004-10-19 13:32  nemeth
 
