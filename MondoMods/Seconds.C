@@ -10,13 +10,8 @@ double cpu_seconds_(void)
  double CLOCKS=clock();
  return CLOCKS*CPS;
 }
+double cpu_seconds(void){return cpu_seconds_();}
 
-double cpu_seconds__(void)
-{
- double CPS=1.0/CLOCKS_PER_SEC;
- double CLOCKS=clock();
- return CLOCKS*CPS;
-}
 double wall_seconds_(void)
 {
  struct tms tbuff;
@@ -24,11 +19,4 @@ double wall_seconds_(void)
  double WALL=times(&tbuff);
  return WALL*CTK;
 }
-
-double wall_seconds__(void)
-{
- struct tms tbuff;
- double CTK=1.0/CLK_TCK;
- double WALL=times(&tbuff);
- return WALL*CTK;
-}
+double wall_seconds(void){return wall_seconds_();}
