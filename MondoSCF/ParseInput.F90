@@ -722,14 +722,12 @@ MODULE ParseInPut
 !           messed up at present.  Need to really clean house on front end.
             CALL FindKind(GM)
 !
+!           ComPute spin coordinates
+            CALL SpinCoords(GM) 
+!
 ! Convert coordinates
 !
             CALL ConvertCoords(GM)
-!
-!           ComPute spin coordinates
-            CALL SpinCoords(GM) 
-!           Determine a bounding box for the system
-            GM%BndBox%D=SetBox(GM%Carts)
 !
 !           OutPut the coordinates
             CALL Put(GM,Tag_O=TRIM(IntToChar(NumGeom)))
@@ -2003,14 +2001,6 @@ MODULE ParseInPut
 !
       CALL FindKind(GM_MM)
 !
-! set boundary box
-!
-      IF(HasQM()) THEN
-        GM_MM%BndBox%D=SetBox(GM_MM%Carts,GM%Carts)
-      ELSE
-        GM_MM%BndBox%D=SetBox(GM_MM%Carts)
-      ENDIF
-!
 ! Fractional coordinates handling
 !
         CALL ConvertCoords(GM_MM)
@@ -2736,10 +2726,15 @@ END SUBROUTINE ParsePeriodic
 !
             CALL WrapAtoms(GMLoc)
 !
+! set boundary box
+!
+            GMLoc%BndBox%D=SetBox(GMLoc%Carts)
+!
 !           ReSet the Cell Center
             DO I=1,3
                IF(.NOT. GMLoc%PBC%AutoW(I)) THEN
-                  GMLoc%PBC%CellCenter(I) = Half*(GMLoc%BndBox%D(I,2)+GMLoc%BndBox%D(I,1))
+                  GMLoc%PBC%CellCenter(I) = &
+                  Half*(GMLoc%BndBox%D(I,2)+GMLoc%BndBox%D(I,1))
                ENDIF
             ENDDO
 #else
