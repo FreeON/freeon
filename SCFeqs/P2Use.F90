@@ -151,9 +151,18 @@ PROGRAM P2Use
      HDF_CurrentID=OpenHDFGroup(OldFileID,"Clone #"//TRIM(IntToChar(MyClone)))
      ! Get the old AO-DM
      CALL Get(P,'CurrentDM',CheckPoint_O=.TRUE.)
-!     CALL PChkSum(P,'P['//TRIM(Cycl)//']',Prog,Unit_O=6)
-     !WHAT THE FUCK IS THIS ? ? 
-!     CALL Get(S,TrixFile('S',Args))
+     CALL Get(S,TrixFile('S',Args))
+#ifdef PARALLEL
+     CALL Multiply(P,S,Tmp1)
+     TError0 = ABS(Trace(Tmp1)-Half*DBLE(NEl))/DBLE(NEl)
+#else
+     TError0 = ABS(Trace(P,S)-Half*DBLE(NEl))/DBLE(NEl)
+#endif
+     IF(TError0>1D-3) &
+        CALL Halt(' Possible geometry, density matrix mismatch '//Rtrn// &
+                  ' Relative error in Tr(S.P)-Nel = '//DblToMedmChar(TError0)//Rtrn// &
+                  ' Try Guess=(Restart,Reparse) with previous geometry ' )
+
 !     CALL AOSP2(P,S,Tmp1,Tmp2,.TRUE.)
 !     CALL AOSP2(P,S,Tmp1,Tmp2,.FALSE.)
 !     CALL PChkSum(P,'P['//TRIM(Cycl)//']',Prog,Unit_O=6)
