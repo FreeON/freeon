@@ -38,7 +38,7 @@ backup:	purge tarball
 rmDJ:
 	rm -rf DirectJ
 #
-purge:	pmm ps pe px pn p1 p2 pExec pScr pWrk pLib
+purge:	pmm ps pe px pn p1 p2 pMisc
 #
 clean:	cmm cs ce cx cn c1 c2
 	rm -f $(REMOVEALL)
@@ -146,12 +146,22 @@ ch:
 	$(MAKE) -i -C HiCu clean
 #----------------------------------------------
 #   Cleaning of other directories 
+#
+pMisc:	pLib pWrk pInp pScr pPWD
+#
 pLib:	
 	rm -rf $(MONDO_HOME)/Libs/*
+#
 pExec:	
 	rm -rf $(MONDO_HOME)/Exec/*
+#
 pWrk:	
 	$(MAKE) -i -C $(MONDO_WORK) clean
+#
+pInp:	
+	$(MAKE) -i -C $(MONDO_HOME)/Inpts/WATER    purge
+	$(MAKE) -i -C $(MONDO_HOME)/Inpts/Validate purge
+#
 pScr:	
 	rm  -rf $(MONDO_SCRATCH)/*.S
 	rm  -rf $(MONDO_SCRATCH)/*.T
@@ -167,13 +177,15 @@ pScr:
 	rm  -rf $(MONDO_SCRATCH)/*.Kxc
 	rm  -rf $(MONDO_SCRATCH)/*.PFFT
 	rm  -rf $(MONDO_SCRATCH)/*
+#
+pPWD:
+	rm -f $(REMOVEALL)
 #---------------------------------------------------------------------------------
 #     Date tagged tarball 
 tarball:
 	cd $(MONDO_HOME)/.. ;\
         mv $(MONDO_HOME) MONDO_`date '+%B'`_`date '+%d'`_`date +%y` ;\
-        tar -cvf MondoSCF_`date '+%B'`_`date '+%d'`_`date +%y`.tar           \
-                    MONDO_`date '+%B'`_`date '+%d'`_`date +%y`              ;\
-        gzip     MondoSCF_`date '+%B'`_`date '+%d'`_`date +%y`.tar          ;\
+        tar -zcvf MondoSCF_`date '+%B'`_`date '+%d'`_`date +%y`.tgz  \
+                     MONDO_`date '+%B'`_`date '+%d'`_`date +%y`     ;\
         mv  MONDO_`date '+%B'`_`date '+%d'`_`date +%y` $(MONDO_HOME) 
 #---------------------------------------------------------------------------------
