@@ -92,9 +92,10 @@ PunchContractCalls[Subroutine_,ic_,jc_,kc_,lc_]:=Block[{WS,BKString,bra,ket},
 
       ContractName=StringJoin["CNTRCT",IClass,JClass,KClass,LClass];
 
-      WS[StringJoin["      CALL DBLAXPZY(",ToString[BLen*KLen],",HRR(1,1,1,1),Alpha,VRR(1,1,0)) "]];   
-      WS[StringJoin["      CALL DBLAXPZY(",ToString[BLen*KLen],",HRR(1,1,1,2),Beta,VRR(1,1,0)) "]];   
-      WS[StringJoin["      CALL DBLAXPZY(",ToString[BLen*KLen],",HRR(1,1,1,3),Gamma,VRR(1,1,0)) "]];   
+      WS[StringJoin["      CALL DBLAXPY( ",ToString[BLen*KLen],",HRR(1,1,1),       VRR(1,1,0)) "]];   
+      WS[StringJoin["      CALL DBLAXPZY(",ToString[BLen*KLen],",HRRA(1,1,1),Alpha,VRR(1,1,0)) "]];   
+      WS[StringJoin["      CALL DBLAXPZY(",ToString[BLen*KLen],",HRRB(1,1,1),Beta, VRR(1,1,0)) "]];   
+      WS[StringJoin["      CALL DBLAXPZY(",ToString[BLen*KLen],",HRRC(1,1,1),Gamma,VRR(1,1,0)) "]];   
 						       (*
       If[ic==2 || jc==2 || kc==2 || lc==2 || LMax < 6  ,
           WS[StringJoin["      CALL ",ContractName,"(VRR,HRR)"]];

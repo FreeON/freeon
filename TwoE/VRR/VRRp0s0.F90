@@ -1,0 +1,11 @@
+   SUBROUTINE VRRp0s0(LB,LK,VRR0,VRR1) 
+      USE DerivedTypes
+      USE VScratchB
+      USE GlobalScalars
+      IMPLICIT REAL(DOUBLE) (W)
+      INTEGER :: LB,LK
+      REAL(DOUBLE), DIMENSION(1:LB,1:LK) :: VRR0,VRR1
+      VRR0(2,1)=PAx*VRR0(1,1)+WPx*VRR1(1,1)
+      VRR0(3,1)=PAy*VRR0(1,1)+WPy*VRR1(1,1)
+      VRR0(4,1)=PAz*VRR0(1,1)+WPz*VRR1(1,1)
+END SUBROUTINE VRRp0s0

@@ -120,6 +120,7 @@ PunchVRRContract[Subroutine_,ic_,jc_,kc_,lc_,LBra_,LKet_]:=Block[{WS,BKString,br
       ContractName=StringJoin["CNTRCT",IClass,JClass,KClass,LClass];
       WS[StringJoin["SUBROUTINE ",ContractName,"(VRR,HRR)"]];
       WS["  USE DerivedTypes"];
+      WS["  USE VScratchB"];
       WS[StringJoin["  REAL(DOUBLE)  :: VRR(",ToString[LEnd[LBra]],",",ToString[LEnd[LKet]],",0:",ToString[LBra+LKet],")"]];
       WS[StringJoin["  REAL(DOUBLE)  :: HRR(",ToString[BraMax],",",ToString[KetMax],",",ToString[LEnd[lmax]],")"]];
 

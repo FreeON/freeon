@@ -1,7 +1,7 @@
 (*======================================--  BRA HRR --============================================*)
 
 PunchBraHRRFront[Subroutine_,Subname_,ic_,jc_]:=Block[{WS,BKType,LenBra,LenKet},
- WriteString[Subroutine,StringJoin["   SUBROUTINE ",Subname,"(OA,OB,LDA,LDB,CDOffSet,HRR,HRRA,HRRB,GRADIENT) \n"]];
+ WriteString[Subroutine,StringJoin["   SUBROUTINE ",Subname,"(OA,OB,LDA,LDB,NINT,CDOffSet,HRR,HRRA,HRRB,GRADIENT) \n"]];
 
  imin = Classes[[ic, 1]]; imax = Classes[[ic, 2]];
  jmin = Classes[[jc, 1]]; jmax = Classes[[jc, 2]];
@@ -17,9 +17,9 @@ PunchBraHRRFront[Subroutine_,Subname_,ic_,jc_]:=Block[{WS,BKType,LenBra,LenKet},
  WS["USE DerivedTypes"];
  WS["USE VScratchB"];
  WS["USE GlobalScalars"];
- WS["INTEGER       :: OA,OB,LDA,LDB,CDOffSet,OffSet"];
+ WS["INTEGER       :: OA,OB,LDA,LDB,NINT,CDOffSet,OffSet"];
  WS[StringJoin["REAL(DOUBLE)  :: HRR(*),HRRA(*),HRRB(*)"]];
- WS[StringJoin["REAL(DOUBLE)  :: GRADIENT(*,12)"]];
+ WS[StringJoin["REAL(DOUBLE)  :: GRADIENT(NINT,12)"]];
 ];
 
 (* -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  *)
@@ -75,8 +75,8 @@ PunchHRRBraCalls[FileName_,ic_,jc_,kc_,lc_]:=Module[{oList,IList,Kount,a,b,c,d,W
                                   "(",CType[IntegralClass[{imin,imax}]],",",
                                       CType[IntegralClass[{jmin,jmax}]],"'|",ToString[k],",L)"]];
 
-    WS[StringJoin["   CALL ",HRRSubName,"ab(OA,OB,LDA,LDB,CDOffSet,HRR(",HRRAddress,"),&\n                          ",
-                                      "HRRA(",HRRAddress,"),HRRB(",HRRAddress,"),GRADIENTS(1,1))"]];
+    WS[StringJoin["   CALL ",HRRSubName,"ab(NINT,LDA,LDB,OA,OB,GOA,GOB,CDOffSet,HRR(",HRRAddress,"),&\n                          ",
+                                        "HRRA(",HRRAddress,"),HRRB(",HRRAddress,"),GRADIENTS(1,1))"]];
     LK=lx[k];
     MK=my[k];
     NK=nz[k];
@@ -93,7 +93,7 @@ PunchHRRBraCalls[FileName_,ic_,jc_,kc_,lc_]:=Module[{oList,IList,Kount,a,b,c,d,W
                                   "(",CType[IntegralClass[{imin,imax}]],",",
                                       CType[IntegralClass[{jmin,jmax}]],"|",ToString[k],",L_x)"]];
     If[ LK==0 , 
-        WS[StringJoin["   CALL ",HRRSubName,"cd(OA,OB,LDA,LDB,CDOffSet,1,HRRC(1,",KPX,",L),GRADIENTS(1,1))"]];
+        WS[StringJoin["   CALL ",HRRSubName,"cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,1,HRRC(1,",KPX,",L),GRADIENTS(1,1))"]];
        ,
         WS[StringJoin["   HRRTmp(1:",BS,")=HRRC(1:",BS,",",KPX,",L)-",ToString[LK],"D0*HRR(1:",BS,",",KMX,",L)"]];
         WS[StringJoin["   CALL ",HRRSubName,"cd(OA,OB,LDA,LDB,CDOffSet,1,HRRTmp,GRADIENTS(1,1))"]]; 
@@ -106,7 +106,7 @@ PunchHRRBraCalls[FileName_,ic_,jc_,kc_,lc_]:=Module[{oList,IList,Kount,a,b,c,d,W
                                   "(",CType[IntegralClass[{imin,imax}]],",",
                                       CType[IntegralClass[{jmin,jmax}]],"|",ToString[k],",L_y)"]];
     If[ MK==0 , 
-        WS[StringJoin["   CALL ",HRRSubName,"cd(OA,OB,LDA,LDB,CDOffSet,2,HRRC(1,",KPY,",L),GRADIENTS(1,1))"]];
+        WS[StringJoin["   CALL ",HRRSubName,"cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,2,HRRC(1,",KPY,",L),GRADIENTS(1,1))"]];
        ,
         WS[StringJoin["   HRRTmp(1:",BS,")=HRRC(1:",BS,",",KPY,",L)-",ToString[MK],"D0*HRR(1:",BS,",",KMY,",L)"]];
         WS[StringJoin["   CALL ",HRRSubName,"cd(OA,OB,LDA,LDB,CDOffSet,2,HRRTmp,GRADIENTS(1,1))"]]; 
@@ -118,7 +118,7 @@ PunchHRRBraCalls[FileName_,ic_,jc_,kc_,lc_]:=Module[{oList,IList,Kount,a,b,c,d,W
                                   "(",CType[IntegralClass[{imin,imax}]],",",
                                       CType[IntegralClass[{jmin,jmax}]],"|",ToString[k],",L_z)"]];
     If[ NK==0 , 
-        WS[StringJoin["   CALL ",HRRSubName,"cd(OA,OB,LDA,LDB,CDOffSet,2,HRRC(1,",KPZ,",L),GRADIENTS(1,1))"]];
+        WS[StringJoin["   CALL ",HRRSubName,"cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,2,HRRC(1,",KPZ,",L),GRADIENTS(1,1))"]];
        ,
         WS[StringJoin["   HRRTmp(1:",BS,")=HRRC(1:",BS,",",KPZ,",L)-",ToString[NK],"D0*HRR(1:",BS,",",KMZ,",L)"]];
         WS[StringJoin["   CALL ",HRRSubName,"cd(OA,OB,LDA,LDB,CDOffSet,2,HRRTmp,GRADIENTS(1,1))"]]; 
@@ -177,7 +177,7 @@ Do[Do[
                 Kount = Kount + 1;
                 IList=Append[IList,Horner[hrr]];
                 HRRAddress=StringJoin[ToString[i],",",ToString[j]];
-                oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["GRADIENT(OffSet,",ToString[cart],")"]];
+                oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["GRADIENT(OffSet,",ToString[cart+GOA],")"]];
 
 
                 Kount = Kount + 1;
@@ -188,7 +188,7 @@ Do[Do[
                 Kount = Kount + 1;
                 IList=Append[IList,Horner[hrr]];
                 HRRAddress=StringJoin[ToString[i],",",ToString[j]];
-                oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["GRADIENT(OffSet,",ToString[cart+3],")"]];
+                oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["GRADIENT(OffSet,",ToString[cart+GOB],")"]];
 
              ,{cart,1,3}]
  ,{i,LBegin[il],LEnd[il]}]
@@ -205,13 +205,13 @@ Do[Do[
 
   OpenWrite[HRRSubroutine];
   WSS[String_]:=WriteString[HRRSubroutine,"    ",String,"\n"];
-  WSS[StringJoin["SUBROUTINE ",HRRSubName,"ab(OA,OB,LDA,LDB,CDOffSet,HRR,HRRA,HRRB,GRADIENT)"]];
+  WSS[StringJoin["SUBROUTINE ",HRRSubName,"ab(NINT,LDA,LDB,OA,OB,GOA,GOB,CDOffSet,HRR,HRRA,HRRB,GRADIENT)"]];
   WSS["  USE DerivedTypes"];
   WSS["  USE VScratchB"];
   WSS["  USE GlobalScalars"];
-  WSS["  INTEGER       :: OA,OB,LDA,LDB,CDOffSet,OffSet"];
+  WSS["  INTEGER       :: NINT,LDA,LDB,OA,OB,GOA,GOB,CDOffSet,OffSet"];
   WSS[StringJoin["  REAL(DOUBLE)  :: HRR(*),HRRA(*),HRRB(*)"]];
-  WSS[StringJoin["  REAL(DOUBLE)  :: GRADIENT(*,12)"]];
+  WSS[StringJoin["  REAL(DOUBLE)  :: GRADIENT(NINT,12)"]];
   Write[HRRSubroutine,FortranAssign[o,IList,AssignReplace->oList]];
   WSS[StringJoin["END SUBROUTINE ",HRRSubName,"ab"]];			       
 
@@ -237,13 +237,13 @@ Do[Do[
              Kount = Kount + 1;
              IList=Append[IList,Horner[hrr]];
              HRRAddress=StringJoin[ToString[i],",",ToString[j]];
-             oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["GRADIENT(OffSet,",ToString[Cart+6],")"]];
+             oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["GRADIENT(OffSet,",ToString[Cart+GOC],")"]];
 
              hrr=QRS;
              Kount = Kount + 1;
              IList=Append[IList,Horner[hrr]];
              HRRAddress=StringJoin[ToString[i],",",ToString[j]];
-             oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["GRADIENT(OffSet,",ToString[Cart+9],")"]];
+             oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["GRADIENT(OffSet,",ToString[Cart+GOD],")"]];
 
 
  ,{i,LBegin[il],LEnd[il]}]
@@ -253,19 +253,19 @@ Do[Do[
 
  spaces="                                ";
  oList=Append[oList,{" "->"","DV"->"_","ZP"->"","XX"->",","BB"->"(","KK"->"|","+"->"+&\n                                ",
-     "QRS"->StringJoin["-GRADIENT(OffSet,Cart)&\n",spaces,"-GRADIENT(OffSet,Cart+3)&\n",spaces,"-GRADIENT(OffSet,Cart+6)"]}];
+     "QRS"->StringJoin["-GRADIENT(OffSet,Cart+GOA)&\n",spaces,"-GRADIENT(OffSet,Cart+GOB)&\n",spaces,"-GRADIENT(OffSet,Cart+GOC)"]}];
 
  oList=Flatten[oList];
 
- WSS[StringJoin["SUBROUTINE ",HRRSubName,"cd(OA,OB,LDA,LDB,CDOffSet,Cart,HRR,GRADIENT)"]];
- WSS["  USE DerivedTypes"];
- WSS["  USE VScratchB"];
- WSS["  USE GlobalScalars"];
- WSS["  INTEGER       :: OA,OB,LDA,LDB,CDOffSet,Cart,OffSet"];
- WSS[StringJoin["  REAL(DOUBLE)  :: HRR(*)"]];
- WSS[StringJoin["  REAL(DOUBLE)  :: GRADIENT(*,12)"]];
- Write[HRRSubroutine,FortranAssign[o,IList,AssignReplace->oList]];
- WriteString[HRRSubroutine,StringJoin["END SUBROUTINE ",HRRSubName,"cd"]];			       
+  WSS[StringJoin["SUBROUTINE ",HRRSubName,"cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,Cart,HRR,GRADIENT)"]];
+  WSS["  USE DerivedTypes"];
+  WSS["  USE VScratchB"];
+  WSS["  USE GlobalScalars"];
+  WSS["  INTEGER       :: NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,Cart,CDOffSet,OffSet"];
+  WSS[StringJoin["  REAL(DOUBLE)  :: HRR(*)"]];
+  WSS[StringJoin["  REAL(DOUBLE)  :: GRADIENT(NINT,12)"]];
+  Write[HRRSubroutine,FortranAssign[o,IList,AssignReplace->oList]];
+  WSS[StringJoin["END SUBROUTINE ",HRRSubName,"cd"]];			       
 
  Close[HRRSubroutine];
 

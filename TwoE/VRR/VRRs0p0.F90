@@ -1,0 +1,11 @@
+   SUBROUTINE VRRs0p0(LB,LK,VRR0,VRR1) 
+      USE DerivedTypes
+      USE VScratchB
+      USE GlobalScalars
+      IMPLICIT REAL(DOUBLE) (W)
+      INTEGER :: LB,LK
+      REAL(DOUBLE), DIMENSION(1:LB,1:LK) :: VRR0,VRR1
+      VRR0(1,2)=QCx*VRR0(1,1)+WQx*VRR1(1,1)
+      VRR0(1,3)=QCy*VRR0(1,1)+WQy*VRR1(1,1)
+      VRR0(1,4)=QCz*VRR0(1,1)+WQz*VRR1(1,1)
+END SUBROUTINE VRRs0p0

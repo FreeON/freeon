@@ -32,8 +32,8 @@ PunchFront[Subroutine_,ic_,jc_,kc_,lc_,IJKL_]:=Block[{WS,LBra,LKet,BKType,LenBra
 
 
 
-           WriteString[Subroutine,StringJoin["   SUBROUTINE dIntB",ToString[IJKL],"(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, & \n", \
-                  "                              OA,LDA,OB,LDB,OC,LDC,OD,LDD,PBC,GRADIENT) \n"]];
+           WriteString[Subroutine,StringJoin["SUBROUTINE dIntB",ToString[IJKL],"(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &\n ",
+					     "OA,LDA,OB,LDB,OC,LDC,OD,LDD,GOA,GOB,GOC,GOD,NINT,PBC,GRADIENTS)\n "]];
 
 	   WS[String_]:=WriteString[Subroutine,"      ",String,"\n"];
 
@@ -45,13 +45,14 @@ PunchFront[Subroutine_,ic_,jc_,kc_,lc_,IJKL_]:=Block[{WS,LBra,LKet,BKType,LenBra
 	   If[LBra+LKet+1==1,
               WS["USE GammaF0"];
               WS["USE GammaF1"];,
-              WS[StringJoin["USE GammaF",ToString[LBra+LKet]]]];
+              WS[StringJoin["USE GammaF",ToString[LBra+LKet+1]]]];
            WS["IMPLICIT REAL(DOUBLE) (W)"]; 
-           WS["INTEGER        :: LBra,LKet,CDOffSet"];
-           WS["REAL(DOUBLE)   :: PrmBufB(*,LBra),PrmBufK(*,LKet)"];
+           WS["INTEGER        :: LBra,LKet,NINT,CDOffSet"];
+           WS["REAL(DOUBLE)   :: PrmBufB(10,LBra),PrmBufK(10,LKet)"];
 	   WS["TYPE(SmallAtomInfo) :: ACInfo,BDInfo"];
            WS["TYPE(PBCInfo) :: PBC"];
-           WS[StringJoin["REAL(DOUBLE)  :: GRADIENT(*,12)"]];
+         
+           WS[StringJoin["REAL(DOUBLE)  :: GRADIENTS(NINT,12)"]];
            WS["REAL(DOUBLE)  :: Ax,Ay,Az,Bx,By,Bz,Cx,Cy,Cz"];
            WS["REAL(DOUBLE)  :: Dx,Dy,Dz,Qx,Qy,Qz,Px,Py,Pz"];
            WS["REAL(DOUBLE)  :: PQx,PQy,PQz,FPQx,FPQy,FPQz"];
@@ -62,10 +63,11 @@ PunchFront[Subroutine_,ic_,jc_,kc_,lc_,IJKL_]:=Block[{WS,LBra,LKet,BKType,LenBra
            If[kc==2||lc==2,						     
               WS["REAL(DOUBLE)  :: SpSpK,FnSpK,SpFnK"]];
            WS["REAL(DOUBLE)  :: Alpha,Beta,Gamma"];
+           WS[StringJoin["REAL(DOUBLE), DIMENSION(",ToString[BraMax],") :: HRRTmp "]];
+           WS[StringJoin["REAL(DOUBLE), DIMENSION(",ToString[BraMax],",",ToString[KetMax],",",ToString[LEnd[lmax+1]],") :: HRR,HRRA,HRRB,HRRC "]];
            WS[StringJoin["REAL(DOUBLE)  :: VRR(",ToString[LenBra],",",ToString[LenKet],",0:",ToString[LBra+LKet+1],")"]];
-           WS[StringJoin["REAL(DOUBLE)  :: HRR(",ToString[BraMax],",",ToString[KetMax],",",ToString[LEnd[lmax+1]],",3)"]];
 
-           WS["INTEGER       :: OffSet,OA,LDA,OB,LDB,OC,LDC,OD,LDD,I,J,K,L"];
+           WS["INTEGER       :: OffSet,OA,LDA,GOA,OB,LDB,GOB,OC,LDC,GOC,OD,LDD,GOD,I,J,K,L"];
            WS["EXTERNAL InitDbl"];						     
            WS[StringJoin["CALL InitDbl(",ToString[BraMax],"*",ToString[KetMax],",HRR(1,1,1))"]];
 

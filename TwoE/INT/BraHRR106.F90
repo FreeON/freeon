@@ -1,0 +1,279 @@
+   SUBROUTINE BraHRR106(OA,OB,LDA,LDB,CDOffSet,HRR,INTGRL) 
+      USE DerivedTypes
+      USE VScratchB
+      USE GlobalScalars
+      IMPLICIT REAL(DOUBLE) (W)
+      INTEGER       :: OA,OB,LDA,LDB,CDOffSet,OffSet
+      REAL(DOUBLE)  :: HRR(*)
+      REAL(DOUBLE)  :: INTGRL(*)
+      OffSet=(OA+0)*LDA+(OB+0)*LDB+CDOffSet !=(11,5|
+      INTGRL(OffSet)=ABx*(ABx*HRR(11)+  & 
+        2.D0*HRR(21))+  & 
+        HRR(36)
+      OffSet=(OA+1)*LDA+(OB+0)*LDB+CDOffSet !=(12,5|
+      INTGRL(OffSet)=ABx*(2.23606797749979D0*ABx*HRR(12)+  & 
+        4.47213595499958D0*HRR(22))+  & 
+        2.23606797749979D0*HRR(37)
+      OffSet=(OA+2)*LDA+(OB+0)*LDB+CDOffSet !=(13,5|
+      INTGRL(OffSet)=ABx*(2.23606797749979D0*ABx*HRR(13)+  & 
+        4.47213595499958D0*HRR(23))+  & 
+        2.23606797749979D0*HRR(38)
+      OffSet=(OA+3)*LDA+(OB+0)*LDB+CDOffSet !=(14,5|
+      INTGRL(OffSet)=ABx*(ABx*HRR(14)+  & 
+        2.D0*HRR(24))+  & 
+        HRR(39)
+      OffSet=(OA+4)*LDA+(OB+0)*LDB+CDOffSet !=(15,5|
+      INTGRL(OffSet)=ABx*(2.23606797749979D0*ABx*HRR(15)+  & 
+        4.47213595499958D0*HRR(26))+  & 
+        2.23606797749979D0*HRR(42)
+      OffSet=(OA+5)*LDA+(OB+0)*LDB+CDOffSet !=(16,5|
+      INTGRL(OffSet)=ABx*(3.87298334620742D0*ABx*HRR(16)+  & 
+        7.74596669241483D0*HRR(27))+  & 
+        3.87298334620742D0*HRR(43)
+      OffSet=(OA+6)*LDA+(OB+0)*LDB+CDOffSet !=(17,5|
+      INTGRL(OffSet)=ABx*(2.23606797749979D0*ABx*HRR(17)+  & 
+        4.47213595499958D0*HRR(28))+  & 
+        2.23606797749979D0*HRR(44)
+      OffSet=(OA+7)*LDA+(OB+0)*LDB+CDOffSet !=(18,5|
+      INTGRL(OffSet)=ABx*(2.23606797749979D0*ABx*HRR(18)+  & 
+        4.47213595499958D0*HRR(30))+  & 
+        2.23606797749979D0*HRR(47)
+      OffSet=(OA+8)*LDA+(OB+0)*LDB+CDOffSet !=(19,5|
+      INTGRL(OffSet)=ABx*(2.23606797749979D0*ABx*HRR(19)+  & 
+        4.47213595499958D0*HRR(31))+  & 
+        2.23606797749979D0*HRR(48)
+      OffSet=(OA+9)*LDA+(OB+0)*LDB+CDOffSet !=(20,5|
+      INTGRL(OffSet)=ABx*(ABx*HRR(20)+  & 
+        2.D0*HRR(33))+  & 
+        HRR(51)
+      OffSet=(OA+0)*LDA+(OB+1)*LDB+CDOffSet !=(11,6|
+      INTGRL(OffSet)=1.73205080756888D0*ABy*HRR(21)+  & 
+        ABx*(1.73205080756888D0*ABy*HRR(11)+  & 
+        1.73205080756888D0*HRR(22))+  & 
+        1.73205080756888D0*HRR(37)
+      OffSet=(OA+1)*LDA+(OB+1)*LDB+CDOffSet !=(12,6|
+      INTGRL(OffSet)=3.87298334620742D0*ABy*HRR(22)+  & 
+        ABx*(3.87298334620742D0*ABy*HRR(12)+  & 
+        3.87298334620742D0*HRR(23))+  & 
+        3.87298334620742D0*HRR(38)
+      OffSet=(OA+2)*LDA+(OB+1)*LDB+CDOffSet !=(13,6|
+      INTGRL(OffSet)=3.87298334620742D0*ABy*HRR(23)+  & 
+        ABx*(3.87298334620742D0*ABy*HRR(13)+  & 
+        3.87298334620742D0*HRR(24))+  & 
+        3.87298334620742D0*HRR(39)
+      OffSet=(OA+3)*LDA+(OB+1)*LDB+CDOffSet !=(14,6|
+      INTGRL(OffSet)=1.73205080756888D0*ABy*HRR(24)+  & 
+        ABx*(1.73205080756888D0*ABy*HRR(14)+  & 
+        1.73205080756888D0*HRR(25))+  & 
+        1.73205080756888D0*HRR(40)
+      OffSet=(OA+4)*LDA+(OB+1)*LDB+CDOffSet !=(15,6|
+      INTGRL(OffSet)=3.87298334620742D0*ABy*HRR(26)+  & 
+        ABx*(3.87298334620742D0*ABy*HRR(15)+  & 
+        3.87298334620742D0*HRR(27))+  & 
+        3.87298334620742D0*HRR(43)
+      OffSet=(OA+5)*LDA+(OB+1)*LDB+CDOffSet !=(16,6|
+      INTGRL(OffSet)=6.70820393249937D0*ABy*HRR(27)+  & 
+        ABx*(6.70820393249937D0*ABy*HRR(16)+  & 
+        6.70820393249937D0*HRR(28))+  & 
+        6.70820393249937D0*HRR(44)
+      OffSet=(OA+6)*LDA+(OB+1)*LDB+CDOffSet !=(17,6|
+      INTGRL(OffSet)=3.87298334620742D0*ABy*HRR(28)+  & 
+        ABx*(3.87298334620742D0*ABy*HRR(17)+  & 
+        3.87298334620742D0*HRR(29))+  & 
+        3.87298334620742D0*HRR(45)
+      OffSet=(OA+7)*LDA+(OB+1)*LDB+CDOffSet !=(18,6|
+      INTGRL(OffSet)=3.87298334620742D0*ABy*HRR(30)+  & 
+        ABx*(3.87298334620742D0*ABy*HRR(18)+  & 
+        3.87298334620742D0*HRR(31))+  & 
+        3.87298334620742D0*HRR(48)
+      OffSet=(OA+8)*LDA+(OB+1)*LDB+CDOffSet !=(19,6|
+      INTGRL(OffSet)=3.87298334620742D0*ABy*HRR(31)+  & 
+        ABx*(3.87298334620742D0*ABy*HRR(19)+  & 
+        3.87298334620742D0*HRR(32))+  & 
+        3.87298334620742D0*HRR(49)
+      OffSet=(OA+9)*LDA+(OB+1)*LDB+CDOffSet !=(20,6|
+      INTGRL(OffSet)=1.73205080756888D0*ABy*HRR(33)+  & 
+        ABx*(1.73205080756888D0*ABy*HRR(20)+  & 
+        1.73205080756888D0*HRR(34))+  & 
+        1.73205080756888D0*HRR(52)
+      OffSet=(OA+0)*LDA+(OB+2)*LDB+CDOffSet !=(11,7|
+      INTGRL(OffSet)=ABy*(ABy*HRR(11)+  & 
+        2.D0*HRR(22))+  & 
+        HRR(38)
+      OffSet=(OA+1)*LDA+(OB+2)*LDB+CDOffSet !=(12,7|
+      INTGRL(OffSet)=ABy*(2.23606797749979D0*ABy*HRR(12)+  & 
+        4.47213595499958D0*HRR(23))+  & 
+        2.23606797749979D0*HRR(39)
+      OffSet=(OA+2)*LDA+(OB+2)*LDB+CDOffSet !=(13,7|
+      INTGRL(OffSet)=ABy*(2.23606797749979D0*ABy*HRR(13)+  & 
+        4.47213595499958D0*HRR(24))+  & 
+        2.23606797749979D0*HRR(40)
+      OffSet=(OA+3)*LDA+(OB+2)*LDB+CDOffSet !=(14,7|
+      INTGRL(OffSet)=ABy*(ABy*HRR(14)+  & 
+        2.D0*HRR(25))+  & 
+        HRR(41)
+      OffSet=(OA+4)*LDA+(OB+2)*LDB+CDOffSet !=(15,7|
+      INTGRL(OffSet)=ABy*(2.23606797749979D0*ABy*HRR(15)+  & 
+        4.47213595499958D0*HRR(27))+  & 
+        2.23606797749979D0*HRR(44)
+      OffSet=(OA+5)*LDA+(OB+2)*LDB+CDOffSet !=(16,7|
+      INTGRL(OffSet)=ABy*(3.87298334620742D0*ABy*HRR(16)+  & 
+        7.74596669241483D0*HRR(28))+  & 
+        3.87298334620742D0*HRR(45)
+      OffSet=(OA+6)*LDA+(OB+2)*LDB+CDOffSet !=(17,7|
+      INTGRL(OffSet)=ABy*(2.23606797749979D0*ABy*HRR(17)+  & 
+        4.47213595499958D0*HRR(29))+  & 
+        2.23606797749979D0*HRR(46)
+      OffSet=(OA+7)*LDA+(OB+2)*LDB+CDOffSet !=(18,7|
+      INTGRL(OffSet)=ABy*(2.23606797749979D0*ABy*HRR(18)+  & 
+        4.47213595499958D0*HRR(31))+  & 
+        2.23606797749979D0*HRR(49)
+      OffSet=(OA+8)*LDA+(OB+2)*LDB+CDOffSet !=(19,7|
+      INTGRL(OffSet)=ABy*(2.23606797749979D0*ABy*HRR(19)+  & 
+        4.47213595499958D0*HRR(32))+  & 
+        2.23606797749979D0*HRR(50)
+      OffSet=(OA+9)*LDA+(OB+2)*LDB+CDOffSet !=(20,7|
+      INTGRL(OffSet)=ABy*(ABy*HRR(20)+  & 
+        2.D0*HRR(34))+  & 
+        HRR(53)
+      OffSet=(OA+0)*LDA+(OB+3)*LDB+CDOffSet !=(11,8|
+      INTGRL(OffSet)=1.73205080756888D0*ABz*HRR(21)+  & 
+        ABx*(1.73205080756888D0*ABz*HRR(11)+  & 
+        1.73205080756888D0*HRR(26))+  & 
+        1.73205080756888D0*HRR(42)
+      OffSet=(OA+1)*LDA+(OB+3)*LDB+CDOffSet !=(12,8|
+      INTGRL(OffSet)=3.87298334620742D0*ABz*HRR(22)+  & 
+        ABx*(3.87298334620742D0*ABz*HRR(12)+  & 
+        3.87298334620742D0*HRR(27))+  & 
+        3.87298334620742D0*HRR(43)
+      OffSet=(OA+2)*LDA+(OB+3)*LDB+CDOffSet !=(13,8|
+      INTGRL(OffSet)=3.87298334620742D0*ABz*HRR(23)+  & 
+        ABx*(3.87298334620742D0*ABz*HRR(13)+  & 
+        3.87298334620742D0*HRR(28))+  & 
+        3.87298334620742D0*HRR(44)
+      OffSet=(OA+3)*LDA+(OB+3)*LDB+CDOffSet !=(14,8|
+      INTGRL(OffSet)=1.73205080756888D0*ABz*HRR(24)+  & 
+        ABx*(1.73205080756888D0*ABz*HRR(14)+  & 
+        1.73205080756888D0*HRR(29))+  & 
+        1.73205080756888D0*HRR(45)
+      OffSet=(OA+4)*LDA+(OB+3)*LDB+CDOffSet !=(15,8|
+      INTGRL(OffSet)=3.87298334620742D0*ABz*HRR(26)+  & 
+        ABx*(3.87298334620742D0*ABz*HRR(15)+  & 
+        3.87298334620742D0*HRR(30))+  & 
+        3.87298334620742D0*HRR(47)
+      OffSet=(OA+5)*LDA+(OB+3)*LDB+CDOffSet !=(16,8|
+      INTGRL(OffSet)=6.70820393249937D0*ABz*HRR(27)+  & 
+        ABx*(6.70820393249937D0*ABz*HRR(16)+  & 
+        6.70820393249937D0*HRR(31))+  & 
+        6.70820393249937D0*HRR(48)
+      OffSet=(OA+6)*LDA+(OB+3)*LDB+CDOffSet !=(17,8|
+      INTGRL(OffSet)=3.87298334620742D0*ABz*HRR(28)+  & 
+        ABx*(3.87298334620742D0*ABz*HRR(17)+  & 
+        3.87298334620742D0*HRR(32))+  & 
+        3.87298334620742D0*HRR(49)
+      OffSet=(OA+7)*LDA+(OB+3)*LDB+CDOffSet !=(18,8|
+      INTGRL(OffSet)=3.87298334620742D0*ABz*HRR(30)+  & 
+        ABx*(3.87298334620742D0*ABz*HRR(18)+  & 
+        3.87298334620742D0*HRR(33))+  & 
+        3.87298334620742D0*HRR(51)
+      OffSet=(OA+8)*LDA+(OB+3)*LDB+CDOffSet !=(19,8|
+      INTGRL(OffSet)=3.87298334620742D0*ABz*HRR(31)+  & 
+        ABx*(3.87298334620742D0*ABz*HRR(19)+  & 
+        3.87298334620742D0*HRR(34))+  & 
+        3.87298334620742D0*HRR(52)
+      OffSet=(OA+9)*LDA+(OB+3)*LDB+CDOffSet !=(20,8|
+      INTGRL(OffSet)=1.73205080756888D0*ABz*HRR(33)+  & 
+        ABx*(1.73205080756888D0*ABz*HRR(20)+  & 
+        1.73205080756888D0*HRR(35))+  & 
+        1.73205080756888D0*HRR(54)
+      OffSet=(OA+0)*LDA+(OB+4)*LDB+CDOffSet !=(11,9|
+      INTGRL(OffSet)=1.73205080756888D0*ABz*HRR(22)+  & 
+        ABy*(1.73205080756888D0*ABz*HRR(11)+  & 
+        1.73205080756888D0*HRR(26))+  & 
+        1.73205080756888D0*HRR(43)
+      OffSet=(OA+1)*LDA+(OB+4)*LDB+CDOffSet !=(12,9|
+      INTGRL(OffSet)=3.87298334620742D0*ABz*HRR(23)+  & 
+        ABy*(3.87298334620742D0*ABz*HRR(12)+  & 
+        3.87298334620742D0*HRR(27))+  & 
+        3.87298334620742D0*HRR(44)
+      OffSet=(OA+2)*LDA+(OB+4)*LDB+CDOffSet !=(13,9|
+      INTGRL(OffSet)=3.87298334620742D0*ABz*HRR(24)+  & 
+        ABy*(3.87298334620742D0*ABz*HRR(13)+  & 
+        3.87298334620742D0*HRR(28))+  & 
+        3.87298334620742D0*HRR(45)
+      OffSet=(OA+3)*LDA+(OB+4)*LDB+CDOffSet !=(14,9|
+      INTGRL(OffSet)=1.73205080756888D0*ABz*HRR(25)+  & 
+        ABy*(1.73205080756888D0*ABz*HRR(14)+  & 
+        1.73205080756888D0*HRR(29))+  & 
+        1.73205080756888D0*HRR(46)
+      OffSet=(OA+4)*LDA+(OB+4)*LDB+CDOffSet !=(15,9|
+      INTGRL(OffSet)=3.87298334620742D0*ABz*HRR(27)+  & 
+        ABy*(3.87298334620742D0*ABz*HRR(15)+  & 
+        3.87298334620742D0*HRR(30))+  & 
+        3.87298334620742D0*HRR(48)
+      OffSet=(OA+5)*LDA+(OB+4)*LDB+CDOffSet !=(16,9|
+      INTGRL(OffSet)=6.70820393249937D0*ABz*HRR(28)+  & 
+        ABy*(6.70820393249937D0*ABz*HRR(16)+  & 
+        6.70820393249937D0*HRR(31))+  & 
+        6.70820393249937D0*HRR(49)
+      OffSet=(OA+6)*LDA+(OB+4)*LDB+CDOffSet !=(17,9|
+      INTGRL(OffSet)=3.87298334620742D0*ABz*HRR(29)+  & 
+        ABy*(3.87298334620742D0*ABz*HRR(17)+  & 
+        3.87298334620742D0*HRR(32))+  & 
+        3.87298334620742D0*HRR(50)
+      OffSet=(OA+7)*LDA+(OB+4)*LDB+CDOffSet !=(18,9|
+      INTGRL(OffSet)=3.87298334620742D0*ABz*HRR(31)+  & 
+        ABy*(3.87298334620742D0*ABz*HRR(18)+  & 
+        3.87298334620742D0*HRR(33))+  & 
+        3.87298334620742D0*HRR(52)
+      OffSet=(OA+8)*LDA+(OB+4)*LDB+CDOffSet !=(19,9|
+      INTGRL(OffSet)=3.87298334620742D0*ABz*HRR(32)+  & 
+        ABy*(3.87298334620742D0*ABz*HRR(19)+  & 
+        3.87298334620742D0*HRR(34))+  & 
+        3.87298334620742D0*HRR(53)
+      OffSet=(OA+9)*LDA+(OB+4)*LDB+CDOffSet !=(20,9|
+      INTGRL(OffSet)=1.73205080756888D0*ABz*HRR(34)+  & 
+        ABy*(1.73205080756888D0*ABz*HRR(20)+  & 
+        1.73205080756888D0*HRR(35))+  & 
+        1.73205080756888D0*HRR(55)
+      OffSet=(OA+0)*LDA+(OB+5)*LDB+CDOffSet !=(11,10|
+      INTGRL(OffSet)=ABz*(ABz*HRR(11)+  & 
+        2.D0*HRR(26))+  & 
+        HRR(47)
+      OffSet=(OA+1)*LDA+(OB+5)*LDB+CDOffSet !=(12,10|
+      INTGRL(OffSet)=ABz*(2.23606797749979D0*ABz*HRR(12)+  & 
+        4.47213595499958D0*HRR(27))+  & 
+        2.23606797749979D0*HRR(48)
+      OffSet=(OA+2)*LDA+(OB+5)*LDB+CDOffSet !=(13,10|
+      INTGRL(OffSet)=ABz*(2.23606797749979D0*ABz*HRR(13)+  & 
+        4.47213595499958D0*HRR(28))+  & 
+        2.23606797749979D0*HRR(49)
+      OffSet=(OA+3)*LDA+(OB+5)*LDB+CDOffSet !=(14,10|
+      INTGRL(OffSet)=ABz*(ABz*HRR(14)+  & 
+        2.D0*HRR(29))+  & 
+        HRR(50)
+      OffSet=(OA+4)*LDA+(OB+5)*LDB+CDOffSet !=(15,10|
+      INTGRL(OffSet)=ABz*(2.23606797749979D0*ABz*HRR(15)+  & 
+        4.47213595499958D0*HRR(30))+  & 
+        2.23606797749979D0*HRR(51)
+      OffSet=(OA+5)*LDA+(OB+5)*LDB+CDOffSet !=(16,10|
+      INTGRL(OffSet)=ABz*(3.87298334620742D0*ABz*HRR(16)+  & 
+        7.74596669241483D0*HRR(31))+  & 
+        3.87298334620742D0*HRR(52)
+      OffSet=(OA+6)*LDA+(OB+5)*LDB+CDOffSet !=(17,10|
+      INTGRL(OffSet)=ABz*(2.23606797749979D0*ABz*HRR(17)+  & 
+        4.47213595499958D0*HRR(32))+  & 
+        2.23606797749979D0*HRR(53)
+      OffSet=(OA+7)*LDA+(OB+5)*LDB+CDOffSet !=(18,10|
+      INTGRL(OffSet)=ABz*(2.23606797749979D0*ABz*HRR(18)+  & 
+        4.47213595499958D0*HRR(33))+  & 
+        2.23606797749979D0*HRR(54)
+      OffSet=(OA+8)*LDA+(OB+5)*LDB+CDOffSet !=(19,10|
+      INTGRL(OffSet)=ABz*(2.23606797749979D0*ABz*HRR(19)+  & 
+        4.47213595499958D0*HRR(34))+  & 
+        2.23606797749979D0*HRR(55)
+      OffSet=(OA+9)*LDA+(OB+5)*LDB+CDOffSet !=(20,10|
+      INTGRL(OffSet)=ABz*(ABz*HRR(20)+  & 
+        2.D0*HRR(35))+  & 
+        HRR(56)
+END SUBROUTINE BraHRR106

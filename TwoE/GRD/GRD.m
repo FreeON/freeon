@@ -176,8 +176,8 @@ Do[Do[Do[Do[
 	   Print[" Openned ",Subroutine];
 	   WS[String_]:=WriteString[Subroutine,String,"\n"];
 	   WriteString[Subroutine,CommentLine]; 
-	   MakeList=Append[MakeList,StringJoin["IntB",ToString[ijklType],".o"]];
-           RelsList=Append[RelsList,StringJoin["IntB",ToString[ijklType],".x"]]; 
+	   MakeList=Append[MakeList,StringJoin["dIntB",ToString[ijklType],".o"]];
+           RelsList=Append[RelsList,StringJoin["dIntB",ToString[ijklType],".x"]]; 
            BraEll=imax+jmax;
            KetEll=kmax+lmax;
            PunchFront[Subroutine,ic,jc,kc,lc,ijklType]; 
@@ -189,7 +189,7 @@ Do[Do[Do[Do[
            PunchHRRKetCalls[Subroutine,ic,jc,kc,lc]; 
 	   PunchHRRBraCalls[Subroutine,ic,jc,kc,lc]; 
 	   WS[String_]:=WriteString[Subroutine,"   ",String,"\n"];
-           WS[StringJoin["END SUBROUTINE IntB",ToString[ijklType]]];
+           WS[StringJoin["END SUBROUTINE dIntB",ToString[ijklType]]];
            PunchVRRContract[Subroutine,ic,jc,kc,lc,BraEll,KetEll];
 
            Close[Subroutine];

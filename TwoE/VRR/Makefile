@@ -113,7 +113,6 @@ clean:  CVRR
 purge: clean
 	rm -f $(MONDO_LIB)/libVRR.a
 	rm -f $(REMOVESRCE)
-#
 ppurge: purge
 	rm -f VRR*.F90 
 #
