@@ -9,6 +9,7 @@ MODULE Conflicted
   PRIVATE :: GlbConflictCheck1
   PRIVATE :: GeoConflictCheck1
   PRIVATE :: PBCConflictCheck1
+  PRIVATE :: BStConflictCheck1
   !
 CONTAINS 
 !H---------------------------------------------------------------------------------
@@ -22,6 +23,7 @@ CONTAINS
     CALL OptConflictCheck(C%Opts)
     CALL GeoConflictCheck(C%Geos)
     CALL PBCConflictCheck(C%Geos)
+    CALL BStConflictCheck(C)
   END SUBROUTINE ConflictCheck
 
   SUBROUTINE OptConflictCheck(O)
@@ -151,5 +153,22 @@ CONTAINS
        ENDDO
     ENDDO
   END SUBROUTINE PBCConflictCheck1
+  !
+  !
+  SUBROUTINE BStConflictCheck(C)
+    TYPE(Controls) :: C
+    CALL BStConflictCheck1(C%Sets,C%Geos)
+  END SUBROUTINE BStConflictCheck
+  !
+  !
+  SUBROUTINE BStConflictCheck1(B,G)
+    TYPE(BasisSets)  :: B
+    TYPE(Geometries) :: G
+    !
+    IF(B%NBSets.EQ.0) CALL MondoHalt(PRSE_ERROR,'The Number of Basis Set is ZERO!')
+    !
+  END SUBROUTINE BStConflictCheck1
+  !
+  !
 
 END MODULE Conflicted
