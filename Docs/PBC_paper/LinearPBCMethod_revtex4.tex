@@ -16,9 +16,6 @@
 \usepackage{amsmath}
 \usepackage{bm}
 \usepackage{alltt}
-%\usepackage{epsfig}
-%%
-%%
 
 \begin{document}
 
@@ -36,14 +33,14 @@ Los Alamos, NM 87545, USA}
 \begin{abstract}
 {\bf CJ, to do list:}
 \begin{itemize}
+\item round values in tables to 8'th digit.
 \item Need correct citations (not just generic website) for all the crystal basis sets used
 \item {\it Need the correct BLYP citations}
 \end{itemize}
 {\bf Matt to do list:}
 \begin{itemize}
-\item Intro, HiCu, Conclusions, Appendix A.
+\item Intro, Conclusions, Appendix A.
 \end{itemize}
-
 
 \commentout{
 Periodic boundary conditions have been implemented in the linear scaling
@@ -173,7 +170,8 @@ with the inclusion of periodic boundary conditions.
 \pagebreak
 
 
-\section{boundary conditions, linear scaling and notation}
+\section{periodic 
+boundary conditions, linear scaling and basis sets}
 
 In conventional implementations of periodic boundary conditions, 
 Bloch functions 
@@ -193,7 +191,6 @@ primarily for the study of defects and vacancies rather than as a replacement fo
 perhaps due to the expense of conventional algorithms and slow convergence for small gap systems.
 
 \pagebreak
-
 
 In this contribution, ${\cal O}(N)$ algorithms are developed specifically for the the $\Gamma$-point 
 approximation, allowing the use of large supercells in the case of high symmetry and large primary UCs 
@@ -228,20 +225,27 @@ $\rho _{ab}^{\scriptscriptstyle \infty}({\mathbf{r}})=\sum _{\mathbf{R}}\phi _{a
 $ associated with integration over $V_\infty$.  We likewise define an intermediate 
 electron density $\rho^{\scriptscriptstyle \infty}({\bf{r}})= \sum _{ab} P_{ab} \rho _{ab}^{\scriptscriptstyle \infty}({\mathbf{r}})$,
 where $\bf P$ is the one-electron reduced density matrix.  
-In this convention, elements of periodic overlap matrix are simply 
-$S_{ab}=\int  d{\mathbf{r}}\, \rho^{\scriptscriptstyle \infty}_{ab}({\mathbf{r}})$, while the electron count is
+In this convention, $V_\infty$ is the default volume of integration, and elements of the periodic overlap 
+matrix are expressed simply  as $S_{ab}=\int  d{\mathbf{r}}\, \rho^{\scriptscriptstyle \infty}_{ab}({\mathbf{r}})$, while the electron count is
 $N_{\rm el} =\int  d{\mathbf{r}}\, \rho^{\scriptscriptstyle \infty}({\mathbf{r}})$.
 
 
 It is worth noting that the complexity of $\rho^{\scriptscriptstyle \infty}$ is ${\cal O}(N)$, due to the
-exponential prefactor factor $e^{- \chi_{ab} ({\bf A}-{\bf B}-{\bf R})^2}$ corresponding to each term 
-in term  $\rho^{\scriptscriptstyle \infty}_{ab}$.  Thus, non-zero terms resulting from the sum over 
-over {\bf A}, {\bf B} and {\bf R} are easily eliminated {\em a priori} with a simple distance test.
-However, for small exponents  $\chi_{ab}$, care must be exercised in 
-truncation of periodic sums to avoid overlap matrices that are not positive definite.  While these situations
-can be avoided simply with tighter neglect criteria, they are often due to use of basis sets designed for gas phase 
-calculations in conjunction with small UCs.  An alternative is to use one of the Crystal basis sets \cite{} or 
-increasing the most diffuse uncontracted exponent(s). {\bf Need a few lines of literature review here}.
+exponential prefactor $e^{- \chi_{ab} ({\bf A}-{\bf B}-{\bf R})^2}$ that enters each term in the sum 
+over {\bf A}, {\bf B} and {\bf R}.  Thus, $N$-scaling may be achieved {\em a priori} with a simple distance test.
+However, for small exponents, care must be exercised in  truncation of periodic sums to avoid overlap 
+matrices that are not positive definite.  While these situations can be avoided simply with tighter distance neglect 
+criteria, they are often due to the use of basis sets designed for gas phase calculations in conjunction with small UCs.  
+These considerations and others are discussed by Towler in an excellent overview of Gaussian basis sets for the condensed 
+phase \cite{MTowler00}.  Also, there are at least two libraries\cite{CrystalLib,TowlerLib} of Gaussian 
+basis sets appropriate for materials at standard densities. For high densities though, these basis sets may 
+still encounter problems with linear dependence and sensitivity to truncation.  One solution to this problem, suggested 
+by Gr{\"u}neich and He\ss \cite{AGruneich98} for even tempered basis sets, is to scale the exponents by the inverse square 
+of the lattice constant.  In many cases though, especially for large systems, standard quantum chemistry basis sets
+work well \cite{}.
+
+%% CyrstalLib http://www.crystal.unito.it/Basis_Sets/ptable.html
+%% TowlerLib http://www.tcm.phy.cam.ac.uk/~mdt26/crystal.html
 
 \pagebreak
 
@@ -258,16 +262,16 @@ introduction.
 \newpage
 
 Both QCTC and HiCu are homeomorphic, involving $k$-d tree representation of the density.  
-In our implementations, $k$-d trees are doubly linked lists with Axis Aligned Bounding Boxes (AABBs) 
-containing the spatial "extent" of each node and its children.    This scheme is almost identical to
-well developed technologies for ray tracing and data base searches, allowing allowing fast 
-${\cal O}({\rm lg} N)$ look up of overlapping components through AABB intersection tests \cite{}. 
+In our implementations, $k$-d trees are doubly linked lists with axis aligned bounding boxes (AABBs) 
+containing the spatial {\em extent} of each node and its children.    This scheme is similar to
+well developed technologies for ray tracing and data base searches, allowing fast 
+${\cal O}({\rm lg} N)$ {\em range queries} of overlapping components through AABB intersection tests \cite{}. 
 In the case of QCTC, this fast look up constitutes the penetration acceptability criterion (PAC) \cite{}, which identifies
-preliminary agglomerations $Q$ of the density that may be accurately represented via a multipole 
+spatial clusters or agglomerations, $\rho_Q$, of the density that may be accurately represented via a multipole 
 approximation due to the absence of charge-charge penetration effects.  For accepted agglomerations a second test, 
 the multipole acceptability criterion (MAC), is performed to check translation errors in the multipole 
 expansion \cite{}.  For each primitive bra distribution, this fast range query is performed on the $k$-d tree 
-representation of the total density, leading to a best case, on the fly partition of near-field (NF) and far-field (FF) 
+representation of the total density, leading to an on the fly partition of near-field (NF) and far-field (FF) 
 interactions in construction of the gas phase Coulomb matrix,
 \begin{eqnarray}
 J_{ab} &=& \sum_{Q\in \rm FF} \sum_l \sum_m O^l_m[\rho_{ab}] \sum_{l'} \sum_{m'} M^{l+l'}_{m+m'} O^{l'}_{m'}[\rho_Q]  \nonumber \\
@@ -278,19 +282,18 @@ is a moment of the regular solid harmonic\cite{},
 $Q$ runs over the  highest possible nodes in the density-tree as determined by PAC and MAC and 
 $q$ runs on the left over near-field primitive distributions in the density.
 The QCTC near/far-field partition pushes the multipole approximation to the limit, employing best case error estimates 
-that depend on magnitude and extent of both bra and ket and allowing tree traversal to the resolution of 
+that depend on the magnitude and extent of both bra and ket and allowing tree traversal to the resolution of 
 primitive distributions.  While resolving individual primitives forgoes well developed technologies for the 
-integral evaluation of contracted functions, it greatly accelerates the onset of linear scaling through the early
-agglomeration of close centers.
+integral evaluation of contracted functions, it accelerates the onset of linear scaling through the early
+clustering of close distributions.
 
 The Quantum Chemical Tree Code generally employs the total density, which simplifies the code, allows 
 electrostatic screening in MAC error estimates \cite{} and provides charge neutrality, an essential
-feature for periodic calculations.  Thus, the Coulomb matrix we compute includes the electron-nuclear terms;
-${\bf J} \equiv {\bf J} + {\bf V}_{\rm en}$
+feature for periodic calculations.  Thus, the Coulomb matrix employed here includes the electron-nuclear terms;
+${\bf J} \equiv {\bf J} + {\bf V}_{\rm en}$.
 
 \newpage
 \newpage
-
 
 In the case of HiCu, two separate $k$-d tree structures are used.  The rho-tree holds the electron density,
 while the cube-tree contains a hierarchical grid for integration of the exchange-correlation potential.  Each node of the 
@@ -302,13 +305,12 @@ that do not overlap with that portion of the grid.  Upon construction of the gri
 for each primitive distribution, the cube-tree is walked selecting only overlapping portions of the grid via the AABB 
 intersection test.
 
-
 For both of these fast algorithms, the trade off between efficiency and accuracy is controlled by the AABB,  which in turn 
 depends on the the extent or range $R_q$ of a primitive Gaussian distribution $\rho_q$, beyond which it is assumed to 
 have negligible influence.  Of coarse, negligible depends on the use to which the distribution is put, as will become 
 obvious in the following. 
 
-Both HiCu and QCTC employ a Hermite Gaussian (HG) representation of distributions
+Both HiCu and QCTC employ the Hermite Gaussian representation of distributions
 \begin{equation}
 \rho_q ({\bf r}) = \sum_{lmn} d_{lmn} \Lambda^q_{lmn}({\bf r}),
 \end{equation}
@@ -338,15 +340,6 @@ the constant $K=1.09$ and
 \newpage
 \newpage
 
-\begin{figure}
-\resizebox*{3.5in}{!}{\includegraphics{Extent.eps}}\label{extent}
-\caption{Behavior of the overlap extent $R^o$ and the penetration extent $R^p$ 
-	 as a function of $\tau/C$ for an $s$-type Gaussian with exponent $\zeta=0.1$.
-         For large $C$ and small $\tau$, $R^o$ and $R^p$ asymptote to the same value. However, 
-         for small $C$ (occurring for example due to a large atom-atom separation and/or small density 
-         matrix prefactor), $R^o$ goes to zero at the origin and its distribution is eliminated, 
-         while $R^p$ goes slowly to zero due to the Coulomb singularity.}
-\end{figure}
 
 For HiCu, the overlap extent $R^{\rm o}_q$ is used, beyond which numerical evaluation of the 
 distribution $\rho_q$ yields an accumulation less than $\tau$;
@@ -360,6 +353,7 @@ C_q \int \left[ \left(\pi/{\widetilde \zeta_q} \right)^{3/2}
 \delta({ r})  - e^{ -\widetilde \zeta_q {r}^2 } \right] \left|{ r}-{ R^{\rm p}_q} \right|^{-1} {\rm d} r = \tau .
 \end{equation}
 
+
 In both HiCu and QCTC, the density-tree is constructed by recursively splitting the largest
 box dimension, until each primitive has been resolved.  Then the primitive AABBs are computed from their
 extents and merged recursively back up the tree.  For HiCu, this is all there is to it, but for QCTC multipole
@@ -367,7 +361,21 @@ moments are also translated to a common center and recursively merged up the tre
 matrix elements of $\bf J$, the primitive bra AABB is computed with $R^{\rm o}_q$, while  $R^{\rm p}_q$ are 
 used to construct AABBs of the density-tree.
 
-In Fig.~\ref{regions}, differences between the penetration and overlap extent are shown for a diffuse $s$-type
+\newpage
+\newpage
+
+\begin{figure}
+\resizebox*{3.5in}{!}{\includegraphics{Extent.eps}}\label{extent}
+\caption{Behavior of the overlap extent $R^o$ and the penetration extent $R^p$ 
+	 as a function of $\tau/C$ for an $s$-type Gaussian with exponent $\zeta=0.1$.
+         For large $C$ and small $\tau$, $R^o$ and $R^p$ asymptote to the same value. However, 
+         for small $C$ (occurring for example due to a large atom-atom separation and/or small density 
+         matrix prefactor), $R^o$ goes to zero at the origin and its distribution is eliminated, 
+         while $R^p$ goes slowly to zero due to the Coulomb singularity.}
+\end{figure}
+
+
+In Fig.~\ref{extent}, differences between the penetration and overlap extent are shown for a diffuse $s$-type
 Gaussian.  For large extents, such as those encountered in a static FMM-type error bound, the two extents are 
 equivalent.  However, with aggressive use of the multipole approximation as in QCTC, the distinction becomes
 critical. 
@@ -492,7 +500,7 @@ is cheaply precomputed at the start of each Coulomb build.
 
 Because Eq.~(\ref{WorkingPFF}) is inexpensive, our strategy is to define a minimal buffer region, $V_{\rm in}$, sufficient 
 to control penetration errors, subtracting effort from the computation of $J^{\rm in}$ via QCTC and replacing
-it with cheaper, multipole work in the computation of $J^{\rm PFF}$.  To this end, the inner region $V_{\rm in}$ is constructed 
+it with cheaper, multipole work in the computation of $J^{\rm PFF}$.  To this end, a fixed inner region $V_{\rm in}$ is constructed 
 from neighboring cells that have simple Gaussian overlap with the unit cell, defined by the radius $R^{o}$.  
 As explained in Section~\ref{datastruct}, for the relatively large distances considered at this level the differences between the
 penetration and overlap extent are negligible. 
@@ -504,49 +512,70 @@ This static error is controlled by using the FMM-like error bound,
 \begin{equation}
 \frac{ 2^{p} {\cal C}^2 \,{d}_{\rm max}^{p+1}}
 {({R}^o)^{p+1}\left| {R}^o -2 \, {d}_{\rm max} \right| } 
-\leq \epsilon \;,
+\leq \tau \;,
 \end{equation}
-where $d_{\rm max}$ is the maximum translational distance, ${\cal C}$ is the Uns{\"o}ld weight of $\rho_{tot}^{\infty}$, 
-and $\epsilon$ is a target error. See reference \onlinecite{CTymczak03c} for a complete derivation and explanation of this error bound. 
-
+where $d_{\rm max}$ is the maximum translational distance, ${\cal C}$ is the Uns{\"o}ld weight of the system
+and $\tau$ is a threshold controling the precision. This expression is developed in Ref.~\onlinecite{CTymczak03c},
+stemming from new error bounds for the tree-code MAC that are both cheap and sensitive to the particulars
+of the expansion, including magnitude of the charges etc, captured by the  Uns{\"o}ld weight ${\cal C}$.  Because 
+${\cal C}$ will fluctuate slightly with the density between self-consistent-field cycles, so to will the
+expansion order $p$.  
 
 \newpage
-
 \newpage
 
 \subsection{Tin-Foil Boundary Conditions}\label{tinfoil}
 
-The surface charges created by direct summation over $V_{\rm PFF}$ must be subtracted out
-to achieve equivalence with true Ewald summation.   Achieving this equivalence is more than
+The surface charges created by direct summation over $V_{\rm PFF}$ must be canceled
+to achieve equivalence with Ewald summation.   Achieving this equivalence is more than
 semantic, since without tin-foil boundary conditions matrix elements lack translational
 iinvariance and often incur dramatic charge sloshing instabilities.   The correction is 
-strongly dependent on ordering of the direct sum, As the Nijboer and De Wette summation corresponds to 
-spherical summation, the appropriate correction is \cite{Redlack72} 
+strongly dependent on ordering of the direct sum; as the Nijboer and De Wette 
+summation corresponds to spherical summation due to symmetry of the real/reciprocal space
+partition, the appropriate correction is \cite{Redlack72} 
 \begin{equation}
-\Phi _{\rm Ew}\left( \mathbf{r}\right) =\Phi _{\rm SS}\left( \mathbf{r}\right) + 
-\frac{2\pi }{3V_{\rm UC}} \left(  Q - 2 \, {\bf r } \cdot \mathbf{D} \right)
+\Phi _{\rm Ew}\left( \mathbf{r}\right) =\Phi _{\rm SS}\left( \mathbf{r}\right) + \frac{2\pi }{3V_{\rm UC}} \left(  Q - 2 \, {\bf r } \cdot \mathbf{D} \right),
 \label{EW_pot}
 \end{equation}
-where ${\bf D}$ is the system dipole moment and $Q$ is the trace of the system quadrupole, and we have assumed origin centering, 
+where ${\bf D}$ is the system dipole moment and $Q$ is trace of the system quadrupole, and we have assumed origin centering, 
 The tin-foil correction to the Coulomb matrix is then 
 \begin{equation}
-J_{ab}^{TC}  = \frac{2\pi }{3V_{\rm UC}} \left(  Q\, S_{ab}-2 \, \mathbf{d}_{ab}\cdot \mathbf{D} \right) \label{JTC}
+J_{ab}^{TF}  = \frac{2\pi }{3V_{\rm UC}} \left(  Q\, S_{ab}-2 \, \mathbf{d}_{ab}\cdot \mathbf{D} \right) \label{JTC}
 \end{equation}
-where $S_{ab}$ is an element of the overlap matrix, and ${\bf d}_{ab}$ is the origin centered
+with  $S_{ab}$ an element of the overlap matrix, and ${\bf d}_{ab}$ the
 dipole moment of the distribution $\rho^\infty_{ab}$.  
 
 \newpage
 \newpage
 
 \begin{figure}
-
-\caption{\label{figure:SimCell} Simulation cell and its Bravais lattice vectors. Also
-shown is the HiCu cube in which we do the exchange-correlation integrals}
-{\centering \includegraphics{UnitCell_2.ps} \par}
+\resizebox*{3.5in}{!}{\includegraphics{BoxUC.eps}}
+\label{BoxUC}
+\caption{Transformation between the rectangular integration volume $V_\Box$ employed by HiCu and the
+         unit cell with volume $V_{\rm UC}$, described by the vectors {\bf a}, {\bf b} and {\bf c}.}
 \end{figure}
 
-\section{The exchange-correlation matrix}
+\section{Periodic exchange-correlation}
 
+The HiCu algorithm is ideally suited for periodic boundary conditions, 
+as the unit-cell $V_{\rm UC}$ can be simply transformed into an equivalent rectangular 
+integration domain $V_\Box$ which is the cube-tree's AABB.  These volumes,
+shown in Fig.~\ref{BoxUC},  are equivalent due to full periodicity of the distributions 
+and the density.  However, because the distributions and density involve a double sum over 
+lattice vectors, there will be a large number of atom-atom pairs that do not overlap
+with $V_\Box$.  A similar situation is encounted in the gas phase for parallel versions 
+of HiCu \cite{CGan02}, where each processor has a small, local cube-tree that may 
+overlap only a few of the many possible atom-atom pairs.  
+
+The solution again comes from the ray tracing litterature, in the form of a modified 
+ray-AABB \cite{MGomez99} and sphere-AABB test \cite{GGems}.  
+%     ! Modified Miguel Gomez' Ray-AABB test (Gamasutra '99) to work for Cylinder-AABB
+%     ! for Ray=Point, uses A Simple Method for Box-Sphere Intersection Testing, Graphics Gems, pp. 247-250
+The ray-AABB test has been modified into a cylinder-AABB test, where the radius of the cylinder
+is a maximal overlap extent of the atom-atom pair.  In the case of a same center atom-atom pair,
+it is of coarse more appropriate to employ a sphere-AABB test.  In both cases, overlap
+between the HiCu integration volume and atom-atom pairs is established with a negligible prefactor.
+\commentout{
 To calculate the DFT exchange correlation matrix in the periodic case,
 we take advantage of the periodicity of the functions being integrated
 and the locality of the basis functions \cite{Gill92},
@@ -581,7 +610,7 @@ expensive.
 Next, we directly calculate the integral of equation (\ref{Kxc_pbc_0}),
 where we obtain significant increase in efficacy by exploiting the
 localization of the atomic orbitals. 
-
+}
 \newpage
 \newpage
 
