@@ -162,14 +162,20 @@ CONTAINS
 
     DO I=1,3
        IF(GM%AutoW(I)) THEN
-          IF(VecF(I) > one) THEN
-             N = INT(VecF(I))
-             VecF(I) = VecF(I)-DBLE(N)
-          ENDIF
-          IF(VecF(I) < zero) THEN
-             N = INT(-VecF(I)+one)
-             VecF(I) = VecF(I)+DBLE(N)
-          ENDIF
+          DO 
+             IF(VecF(I) > One) THEN
+                VecF(I) = VecF(I) - One
+             ELSE
+                EXIT
+             ENDIF
+          ENDDO
+          DO 
+             IF(VecF(I) < Zero) THEN
+                VecF(I) = VecF(I) + One
+             ELSE
+                EXIT
+             ENDIF
+          ENDDO
        ENDIF
     ENDDO
   END SUBROUTINE FracCyclic
