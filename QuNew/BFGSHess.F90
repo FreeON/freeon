@@ -27,9 +27,13 @@ PROGRAM BFGSHess
    TYPE(BCSR)                 :: B0,B1,sDX,sDXB
    TYPE(DBL_VECT)             :: G0,G1,X0,X1,DX,DG,DXB
    TYPE(DBL_RNK2)             :: X, G, DnsB,BInv
-   INTEGER                    :: N3,I,J,K,IGeom
-   REAL(DOUBLE)               :: D1,D2,F,AdEl,MinEl,A,GradEDotDeltaX
+   INTEGER                    :: N3,I,J,K,IGeom,M1,M2,M3,I1,I2
+   REAL(DOUBLE)               :: D1,D2,F,AdEl,MinEl,A, &
+                                 AB2,AB2Max,GradEDotDeltaX
    REAL(DOUBLE),DIMENSION(6)  :: AA
+#ifdef PERIODIC
+    REAL(DOUBLE),DIMENSION(3) :: VecF,VecA,NRgn
+#endif
 !----------------------------------------------------------------------------
    CALL StartUp(Args,Prog)
    IGeom=Args%I%I(3)
@@ -77,15 +81,39 @@ PROGRAM BFGSHess
 !   WRITE(*,*)' BFGSHess : OLDGRAD # ',PrvGeom
    CALL Get(G1,'GradE',Tag_O=CurGeom)
 !   WRITE(*,*)' BFGSHess : NEWGRAD # ',CurGeom
+#ifdef PERIODIC
+    NRgn=0
+    DO K=1,3
+      IF(GM1%PBC%AutoW(K))NRgn(K)=1
+    ENDDO
+#endif
    K=0
    DO I=1,NAtoms
-      DO J=1,3
-         K=K+1
-         X0%D(K)=GM0%Carts%D(J,I)
-         X1%D(K)=GM1%Carts%D(J,I)
+      I1=(I-1)*3+1
+      I2=I*3
+      X0%D(I1:I2)=GM0%Carts%D(:,I)
+      X1%D(I1:I2)=GM1%Carts%D(:,I)
+#ifdef PERIODIC
+!     Find the minimum image distance
+      AB2MAX = 1D8
+      DO M1=-NRgn(1),NRgn(1)
+         DO M2=-NRgn(2),NRgn(2)
+            DO M3=-NRgn(3),NRgn(3)  
+               VecF=(/DBLE(M1),DBLE(M2),DBLE(M3)/)
+               VecA=ABS(FracToAtom(GM1,VecF)+X0%D(I1:I2)-X1%D(I1:I2))
+               AB2=VecA(1)**2+VecA(2)**2+VecA(3)**2
+               IF(AB2<AB2MAX)THEN
+                  DX%D(I1:I2)=VecA
+                  AB2MAX=AB2
+                ENDIF
+            ENDDO
+         ENDDO
       ENDDO
+#else
+      DX%D(I1:I2)=X1%D(I1:I2)-X0%D(I1:I2)
+#endif
    ENDDO
-   DX%D=X1%D-X0%D
+!WRITE(*,*)' DX = ',DX%D
    DG%D=G1%D-G0%D
    GradEDotDeltaX=DOT_PRODUCT(G1%D,DX%D)/DBLE(N3)
    CALL Put(GradEDotDeltaX,'GradEDotDeltaX')

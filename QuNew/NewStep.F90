@@ -52,8 +52,8 @@ PROGRAM NewStep
 !   WRITE(*,*)' NewStep: OLD GEOMETRY # ',PrvGeom
 !   CALL PPrint(GM,Unit_O=6,PrintGeom_O='XYZ')
    CALL Get(G1,'GradE',Tag_O=PrvGeom)
- !  WRITE(*,*)' NewStep: NEW GRADIENT # ',CurGeom
- !  CALL PPrint(G1,'GradE',Unit_O=6)
+!   WRITE(*,*)' NewStep: NEW GRADIENT # ',CurGeom
+!   CALL PPrint(G1,'GradE',Unit_O=6)
    K=0
    DO I=1,NAtoms
       DO J=1,3
@@ -101,6 +101,5 @@ PROGRAM NewStep
    CALL Put(GRMS,'RMSGrad',CurGeom)
    CALL Put(GMAX,'MaxGrad',CurGeom)
 !   WRITE(*,*)NxtGeom,'GradStats ',GRMS,GMAX
-
    CALL Shutdown(Prog)
 END PROGRAM 
