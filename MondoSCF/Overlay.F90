@@ -202,7 +202,6 @@ MODULE Overlay
              CALL Delete(ArgV)
              CALL Delete(ErrCodes)
          ENDIF
-         CALL FiniMPI()
          IF(Status==FAIL)THEN
 !           Bad run, call a halt :(
             CALL MondoHalt(MPIS_ERROR,'<'//TRIM(CmndLine)//'>')
