@@ -519,6 +519,8 @@ MODULE DerivedTypes
       INTEGER                            :: AccL
       CHARACTER(LEN=DEFAULT_CHR_LEN)     :: CoordType
       LOGICAL                            :: DoInternals
+      LOGICAL                            :: DoRotOff
+      LOGICAL                            :: DoTranslOff
       INTEGER                            :: ActStep   
       INTEGER                            :: ReDefIntC
       INTEGER                            :: MaxGeOpSteps
@@ -532,6 +534,7 @@ MODULE DerivedTypes
       REAL(DOUBLE)                       :: LinBHessian 
       REAL(DOUBLE)                       :: OutPHessian 
       REAL(DOUBLE)                       :: TorsHessian 
+      REAL(DOUBLE)                       :: StpDescInvH 
 !
       INTEGER                            :: IMaxGrad
       REAL(DOUBLE)                       :: MaxGrad      
