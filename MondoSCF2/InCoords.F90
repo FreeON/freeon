@@ -178,11 +178,11 @@ CONTAINS
        ENDDO
        B%BLI%I(IInt)=NCart-9
        II=0
-       DO ALPHA=1,3
-         DO BETA=1,3
+       DO BETA=1,PBCDim
+         DO ALPHA=1,3
            II=II+1
            DO J=1,4
-            !IF(IntCs%Atoms%I(IInt,J)==0) EXIT
+             IF(IntCs%Atoms%I(IInt,J)==0) EXIT
              JI=3*(J-1)+ALPHA
              JJ=3*(J-1)+BETA
              B%BL%D(IInt,II)=B%BL%D(IInt,II)+B%B%D(IInt,JI)*Frac(JJ)
