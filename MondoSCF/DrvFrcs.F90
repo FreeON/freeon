@@ -156,8 +156,10 @@ MODULE DrvFrcs
          INTEGER            :: KeepStep
          TYPE(SCFControls)  :: Ctrl
          TYPE(CRDS)         :: GM
-         REAL(DOUBLE)       :: StepSz,E0,E1,ET,RelErrE,EUncert,RMSGrad,MAXGrad
-         LOGICAL            :: RelCnvrgd,RMSCnvrgd,MAXCnvrgd
+         INTEGER            :: AccL
+         REAL(DOUBLE)       :: StepSz,E0,E1,ET,RelErrE,EUncert, &
+                               RMSGrad,MAXGrad,RMSDisp,MaxDisp
+         LOGICAL            :: ECnvrgd,GCnvrgd,XCnvrgd
          CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg
 !---------------------------------------------------------------------------
 !        Open the InfFile
@@ -167,6 +169,8 @@ MODULE DrvFrcs
 !        Get the previous and current total energy
          CALL Get(E0,'Etot',Tag_O=StatsToChar(Ctrl%Previous))
          CALL Get(E1,'Etot',Tag_O=StatsToChar(Ctrl%Current))
+         CALL Get(RMSDisp,'RMSDisp',CurGeom)
+         CALL Get(MaxDisp,'MaxDisp',CurGeom)
          CALL Get(RMSGrad,'RMSGrad',CurGeom)
          CALL Get(MaxGrad,'MaxGrad',CurGeom)
 !         WRITE(*,*)'E'//TRIM(StatsToChar(Ctrl%Previous))//' = '//TRIM(DblToChar(E0))
@@ -174,27 +178,23 @@ MODULE DrvFrcs
 !        Check for decreasing energies and need for backtracking
          RelErrE=(E1-E0)/ABS(E0)
 !        Check for convergence
-         ET=ETol(Ctrl%AccL(CBas))
-         RelCnvrgd=RelErrE<1D2*ET
-         RMSCnvrgd=RMSGrad<1D4*ET
-         MAXCnvrgd=MAXGrad<1D4*ET
-         IF(RelCnvrgd.AND.RMSCnvrgd.AND.MAXCnvrgd)THEN
+         AccL=Ctrl%AccL(CBas)
+         ET=ETol(AccL)
+         ECnvrgd=RelErrE<1D2*ET
+         GCnvrgd=RMSGrad<GTol(AccL).AND.MaxGrad<GTol(AccL)
+         XCnvrgd=RMSDisp<XTol(AccL).AND.MaxDisp<XTol(AccL)
+         IF(ECnvrgd.AND.GCnvrgd.AND.XCnvrgd)THEN
             KeepStep=-1
-            Mssg='Converged: dE = '//TRIM(DblToShrtChar(RelErrE)) &
-              //', RMS = '//TRIM(DblToShrtChar(RMSGrad)) &
-              //', MAX = '//TRIM(DblToShrtChar(MAXGrad)) &
-              //', Step = '//TRIM(DblToShrtChar(StepSz))
+            Mssg=ProcessName('QuNew','Converged #'//TRIM(CurGeom))
           ELSEIF(RelErrE<Zero)THEN
 !           If energy is going down, keep taking unit steps
             StepSz=One 
 !           Dont back track
             KeepStep=1
-            Mssg='GeomOpt: dE = '//TRIM(DblToShrtChar(RelErrE)) &
-               //', RMS = '//TRIM(DblToShrtChar(RMSGrad)) &
-               //', MAX = '//TRIM(DblToShrtChar(MAXGrad)) &
-               //', Step = '//TRIM(DblToShrtChar(StepSz))
+            Mssg=ProcessName('QuNew','Descent   #'//TRIM(CurGeom))
          ELSE
 !           Decrease step by half (could get fancy here and try interpolation...)
+            Mssg=ProcessName('QuNew','Backtrack #'//TRIM(CurGeom))
             StepSz=StepSz*Half
             IF(StepSz<1.D-3) CALL MondoHalt(DRIV_ERROR,                    &
                                             ' Reached max resolution = '   &
@@ -202,18 +202,18 @@ MODULE DrvFrcs
                                            //' in minimization of energy')
 !           Mark for backtracking
             KeepStep=0
-            Mssg='Baktrak: dE = '//TRIM(DblToShrtChar(RelErrE)) &
-               //', RMS = '//TRIM(DblToShrtChar(RMSGrad)) &
-               //', MAX = '//TRIM(DblToShrtChar(MAXGrad)) &
-               //', Step = '//TRIM(DblToShrtChar(StepSz))
          ENDIF
          CALL Put(StepSz,'StepSize')
+         Mssg=TRIM(Mssg)//' dE= '//TRIM(DblToShrtChar(RelErrE))      &
+                        //', Grms= '//TRIM(DblToShrtChar(RMSGrad)) &
+                        //', Gmax= '//TRIM(DblToShrtChar(MAXGrad)) &
+                        //', Xrms= '//TRIM(DblToShrtChar(RMSDisp)) &
+                        //', Xmax= '//TRIM(DblToShrtChar(MAXDisp))
+
          WRITE(*,*)TRIM(Mssg)             
-         IF(PrintFlags%Key>DEBUG_MINIMUM)THEN
-            CALL OpenASCII(OutFile,Out)
-            WRITE(Out,*)TRIM(Mssg)             
-            CLOSE(Out)
-         ENDIF
+         CALL OpenASCII(OutFile,Out)
+         WRITE(Out,*)TRIM(Mssg)             
+         CLOSE(Out)
          IF(ABS(KeepStep)==1)THEN
             CALL Get(GM,CurGeom)
             GM%Confg=CGeo

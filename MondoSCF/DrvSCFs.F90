@@ -300,7 +300,6 @@ MODULE DrvSCFs
 !        Check for convergence
          ETest=ETol(Ctrl%AccL(CBas))
          DTest=DTol(Ctrl%AccL(CBas))
-
 !        Check for absolute convergence below thresholds
 !        and approach from correct direction.
          IF(dDMax<dTest.AND.ETotQ<ETest.AND.ETotB<ETotA)THEN
@@ -347,6 +346,8 @@ MODULE DrvSCFs
          INTEGER           :: I,K,IBas,ICyc,IGeo,NCyc,Mthd,BTyp
          CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg
 !------------------------------------------------------------------
+         IF(PrintFlags%Key/=DEBUG_MAXIMUM)RETURN
+
 !        Simplify notation
          ICyc=Ctrl%Current(1)
          IBas=Ctrl%Current(2)

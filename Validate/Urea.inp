@@ -6,11 +6,12 @@
 Charge=0
 Multiplicity=1
 Guess=SuperPos
+Opt=(QuNew,OneBase)
 SCFMethod=(RH,RH)
 BasisSets=(STO-3G,6-31G**)
 ModelChem=(HF,BLYPxc)
-Accuracy =(Good,Tight)
-DebugAll =(MaxDebug)
+Accuracy =(Good,Good)
+DebugAll =(MinDebug)
 Geometry=(InAngstroms,NoOrder)
 <EndOptions>
 

@@ -140,9 +140,8 @@ PROGRAM PulayDIIS
    IF(ISCF<=1)THEN
 !    Damping on the first cycle
      CALL OpenASCII(InpFile,Inp)  
-     IF(.NOT.OptDblQ(Inp,'DIISDamp',Damp))Damp=0.1D0
+     IF(.NOT.OptDblQ(Inp,'DIISDamp',Damp))Damp=0.3D0
      CLOSE(Inp)
-     WRITE(*,*)' DAMP = ',DAMP
      C0=One-Damp
      C1=Damp
 !    Damp current Fock matrix by C1

@@ -77,16 +77,17 @@ PROGRAM MondoSCF
      CALL MondoHalt(USUP_ERROR,' Look for transition state optimizer in version 1.0b2.')
   CASE(GRAD_NO_GRAD)
 !    Loop first over basis sets 
-     DO ISet=Begin(2),Ctrl%NSet-1
+     DO ISet=Begin(2),Ctrl%NSet
         Ctrl%Current(2)=ISet
         CALL OneSCF(Ctrl)
         Ctrl%Current(1)=0
      ENDDO
      IF(Ctrl%NGeom>1)THEN
 !       Go over additional geometries at last basis set
-        DO IGeo=Begin(3),Ctrl%NGeom
+        DO IGeo=Begin(3)+1,Ctrl%NGeom
            Ctrl%Current=(/0,Ctrl%NSet,IGeo/)
            CALL OneSCF(Ctrl)
+
 !           Ctrl%Current(1)=Ctrl%Current(1)+1
 !           CtrlVect=SetCtrlVect(Ctrl,'Visualization')
 !           CALL Invoke('MakeRho',CtrlVect)

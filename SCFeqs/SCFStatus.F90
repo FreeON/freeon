@@ -87,8 +87,9 @@ PROGRAM SCFStatus
 !--------------------------------------------------------
 !  Find the largest block of the delta density matrix
 !  Allows for checking between extrapolated or projected DMs
-   DMax=1.D10
-   IF(SCFActn/='BasisSetSwitch')THEN
+   IF(SCFActn=='BasisSetSwitch')THEN
+      DMax=Max(P)
+   ELSE
       CALL Get(Tmp1,TrixFile('D',Args,0))
       CALL Get(Tmp2,TrixFile('D',Args,1))
       CALL Multiply(Tmp1,-One)
@@ -150,9 +151,14 @@ PROGRAM SCFStatus
    ELSEIF(PrintFlags%Key>=DEBUG_NONE)THEN
       SCFMessage=ProcessName(Prog,'['//TRIM(SCFCycl)//','  &
                                      //TRIM(CurBase)//','  &
-                                     //TRIM(CurGeom)//']') &
-                //'<SCF> = '//TRIM(FltToMedmChar(ETot))     &
-                //', dD = '//TRIM(DblToShrtChar(DMax))
+                                     //TRIM(CurGeom)//']') 
+      IF(SCFActn=='BasisSetSwitch')THEN
+         SCFMessage=TRIM(SCFMessage)//' Basis set switch ... '       &
+                                    //' MxD = '//TRIM(DblToShrtChar(DMax)) 
+      ELSE
+         SCFMessage=TRIM(SCFMessage)//' <SCF> = '//TRIM(FltToMedmChar(ETot)) &
+                                    //', dD = '//TRIM(DblToShrtChar(DMax))
+      ENDIF
 !     Add in DIIS error
       IF(DIISErr/=Zero)                                                     &
          SCFMessage=TRIM(SCFMessage)                                        &

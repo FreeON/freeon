@@ -29,7 +29,7 @@ PROGRAM NewStep
    TYPE(DBL_RNK2)             :: X, G, DnsB,BInv
    INTEGER                    :: N3,I,J,K,IGeom,I1
    REAL(DOUBLE)               :: D1,D2,F,AdEl,MinEl,A, &
-                                 StepSz,GradEDotNewStep,GMAX,GRMS
+                                 StepSz,GradEDotNewStep,GMAX,GRMS,XMAX,XRMS
    REAL(DOUBLE),DIMENSION(18) :: NGrad
 !----------------------------------------------------------------------------
    CALL StartUp(Args,Prog)
@@ -72,6 +72,12 @@ PROGRAM NewStep
    GradEDotNewStep=DOT_PRODUCT(X2%D,G1%D)
    CALL Put(GradEDotNewStep,'GradEDotNewStep')
    CALL Get(StepSz,'StepSize')
+   XRMS=StepSz*SQRT(DOT_PRODUCT(X2%D,X2%D))/DBLE(N3)
+   XMAX=Zero
+   DO I=1,N3;XMAX=MAX(XMAX,ABS(X2%D(I)));ENDDO
+   XMAX=XMAX*StepSz
+   CALL Put(XRMS,'RMSDisp',CurGeom)
+   CALL Put(XMAX,'MaxDisp',CurGeom)
    X2%D=X1%D+StepSz*X2%D
    K=0
    DO I=1,NAtoms
