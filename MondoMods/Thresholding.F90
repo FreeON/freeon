@@ -35,6 +35,7 @@ MODULE Thresholding
   USE GlobalObjects
   USE InOut
   USE SpecFun
+  USE McMurchie
 !-------------------------------------------------  
 !  Primary thresholds
 !
@@ -122,6 +123,138 @@ MODULE Thresholding
         REAL(DOUBLE)            :: GaussianExtent
         GaussianExtent=SQRT(MAX(1.D-10,PenetratDistanceThreshold+Amp)/Zeta)
      END FUNCTION GaussianExtent
+!===================================================================================
+!     Recursive bisection to determine largest extent for this distribution, outside
+!     outside of which its contribution to the density and gradient is less than Tau
+!===================================================================================
+      FUNCTION Extent(Ell,Zeta,HGTF,Tau,Digits_O,ExtraEll_O,Potential_O) RESULT (R)
+         INTEGER                         :: Ell
+         REAL(DOUBLE)                    :: Zeta,Tau
+         REAL(DOUBLE),DIMENSION(:)       :: HGTF
+         INTEGER,OPTIONAL                :: Digits_O,ExtraEll_O
+         LOGICAL,OPTIONAL                :: Potential_O
+         REAL(DOUBLE),DIMENSION(0:HGEll) :: Co,ErrR
+         REAL(DOUBLE),DIMENSION(0:HGEll, &
+                                0:HGEll) :: HGErr
+         REAL(DOUBLE),DIMENSION(0:20)    :: LambdaR
+         REAL(DOUBLE)                    :: R
+         INTEGER                         :: J,L,K,M,N,LMN,ExtraEll,LTot
+         REAL(DOUBLE)                    :: ConvergeTo,R2,DelR,BisR,CTest, &
+                                            RhoR,dRho,MidRho,Xpt,TwoZ, &
+                                            Omega,RPE,RTE,T
+         LOGICAL                         :: PotentialQ
+!----------------------------------------------------------------------------------
+         IF(PRESENT(Digits_O))THEN
+            ConvergeTo=10.D0**(-Digits_O)
+         ELSE 
+            ConvergeTo=10.D0**(-4)
+         ENDIF
+         IF(PRESENT(ExtraEll_O))THEN
+            ExtraEll=ExtraEll_O
+         ELSE
+            ExtraEll=1
+         ENDIF
+!        Take the spherical average of HGTF coefficients      
+         DO L=0,Ell
+            Co(L)=Zero
+            DO LMN=LBegin(L),LEnd(L)
+               Co(L)=Co(L)+HGTF(LMN)**2
+            ENDDO
+            Co(L)=SQRT(Co(L))
+         ENDDO                
+!        Do straight overlap type extent 
+         IF(.NOT.PRESENT(Potential_O))THEN
+            DelR=SQRT(EXP_SWITCH/Zeta)*1.5D0
+            BisR=Zero
+            DO J=1,200
+!              Half the step size
+               DelR=Half*DelR
+!              New midpoint
+               R=BisR+DelR
+!              Compute radial HGTF[R]
+               RhoR=Zero
+               dRho=Zero
+               R2=R*R
+               Xpt=EXP(-Zeta*R2)
+               TwoZ=Two*Zeta
+               LambdaR(0)=Xpt
+               LambdaR(1)=TwoZ*R*Xpt
+               DO L=2,Ell+ExtraEll
+                  LambdaR(L)=TwoZ*(R*LambdaR(L-1)-DBLE(L-1)*LambdaR(L-2))
+               ENDDO
+               DO L=0,Ell
+                  RhoR=RhoR+Co(L)*LambdaR(L)
+                  dRho=dRho+Co(L)*LambdaR(L+ExtraEll)
+               ENDDO
+               MidRho=MAX(ABS(dRho),ABS(RhoR))
+!              Convergence test
+               CTest=(MidRho-Tau)/Tau
+               IF(R<1.D-30)THEN
+                  R=Zero
+                  RETURN
+               ELSEIF(ABS(CTest)<ConvergeTo)THEN
+                  RETURN
+               ENDIF
+!              If still to the left, increment bisection point
+               IF(CTest>Zero)BisR=R
+            ENDDO
+            IF(MidRho>Tau)CALL Halt(' Faild in Extent of Overlap ')
+          ELSE
+            RTE=Zeta*NuclearExpnt
+            RPE=Zeta+NuclearExpnt
+            Omega=RTE/RPE 
+            Upq=TwoPi5x2/(RTE*SQRT(RPE)) &
+               *(NuclearExpnt/Pi)**(ThreeHalves) ! add on moment for delta function...
+            DelR=SQRT(GAMMA_SWITCH/Zeta)*Two
+            LTot=Ell+ExtraEll
+            BisR=Zero
+!            WRITE(*,*)' Zeta  = ',Zeta
+!            WRITE(*,*)' Omega = ',Omega
+!            WRITE(*,*)' UPQ   = ',Upq
+            DO K=1,200
+!              Half the step size
+               DelR=Half*DelR
+!              New midpoint
+               R=BisR+DelR
+               T=Omega*R*R
+               CALL ErrInts(HGEll,LTot,ErrR,Omega,T)
+               DO J=0,LTot
+                  HGErr(0,J)=Upq*ErrR(J)
+               ENDDO
+               DO J=0,LTot-1
+                  J1=J+1
+                  HGErr(1,J)=HGErr(0,J1)*R
+               ENDDO
+               DO N=2,LTot
+                  N1=N-1
+                  N2=N-2
+                  DO J=0,LTot-N
+                     J1=J+1
+                     HGErr(N,J)=HGErr(N1,J1)*R+HGErr(N2,J1)*DBLE(N1)
+                  ENDDO
+               ENDDO
+               RhoR=Zero
+               dRho=Zero
+               DO L=0,Ell
+                  RhoR=RhoR+Co(L)*HGErr(L,0)
+                  dRho=dRho+Co(L)*HGErr(L+ExtraEll,0)
+               ENDDO
+               MidRho=MAX(ABS(dRho),ABS(RhoR))
+!               WRITE(*,*)R,MidRho
+!              Convergence test
+               CTest=(MidRho-Tau)/Tau
+               IF(R<1.D-30)THEN
+                  R=Zero
+                  RETURN
+               ELSEIF(ABS(CTest)<ConvergeTo)THEN
+                  RETURN
+               ENDIF
+!              If still to the left, increment bisection point
+               IF(CTest>Zero)BisR=R
+            ENDDO
+            IF(MidRho>Tau)CALL Halt(' Faild in Extent of Potential ')
+         ENDIF
+      END FUNCTION Extent
 !====================================================================================================
 !     COMPUTE FUNCTIONS THAT RETURN THE ARGUMENT T TO THE GAMMA FUNCTIONS F[m,T]
 !     THAT RESULT FROM USING THE THE MULTIPOLE APPROXIMATION TO WITHIN A SPECIFIED 
