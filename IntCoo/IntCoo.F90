@@ -35,7 +35,7 @@ CHARACTER(LEN=DEFAULT_CHR_LEN),OPTIONAL :: InfFile
       NJ=TOP12%I(JJ,1)
 !
 ! check matrix size, increase size if necessary
-      IF(NI>NMAX12 .OR. NJ>NMAX12) THEN
+      IF(NI>=NMAX12 .OR. NJ>=NMAX12) THEN
         NMAX12=NMAX12+5
         CALL NEW(TOP12_2,(/NATOMS,NMAX12+1/))
         TOP12_2%I(1:NATOMS,1:NMAX12+1)=0 
@@ -136,7 +136,7 @@ CHARACTER(LEN=DEFAULT_CHR_LEN),OPTIONAL :: InfFile
 !
 ! check matrix size, increase size if necessary
 !
-      IF(NI>NMAX13) THEN
+      IF(NI>=NMAX13) THEN
         NMAX13=NMAX13+10
         CALL NEW(TOP13_2,(/NATOMS,NMAX13+1/))
         TOP13_2%I(1:NATOMS,1:NMAX13+1)=0 
@@ -231,7 +231,8 @@ CHARACTER(LEN=DEFAULT_CHR_LEN),OPTIONAL :: InfFile
       NI=TOP14%I(II,1)
 !
 ! check matrix size, increase size if necessary
-      IF(NI>NMAX14) THEN
+!
+      IF(NI>=NMAX14) THEN
         NMAX14=NMAX14+10
         CALL NEW(TOP14_2,(/NATOMS,NMAX14+1/))
         TOP14_2%I(1:NATOMS,1:NMAX14+1)=0 
