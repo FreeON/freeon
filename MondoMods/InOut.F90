@@ -2232,6 +2232,9 @@ CONTAINS
     CHARACTER(LEN=*) :: Name
     CHARACTER(LEN=*),OPTIONAL :: Tag_O
     !
+    IF(.NOT.AllocQ(A%Alloc)) THEN
+      A%N=0
+    ENDIF
     CALL Put(A%N,TRIM(Name)//'N',Tag_O=Tag_O) 
     IF(A%N/=0) THEN   
       CALL Put(A%IJ,TRIM(Name)//'IJ',Tag_O=Tag_O) 
@@ -2270,6 +2273,10 @@ CONTAINS
     CHARACTER(LEN=*),OPTIONAL :: Tag_O
     INTEGER          :: N1,N2
     !
+    IF(.NOT.AllocQ(A%Alloc)) THEN
+      A%N1=0
+      A%N2=0
+    ENDIF
     CALL Put(A%N1,TRIM(Name)//'N1',Tag_O=Tag_O)
     CALL Put(A%N2,TRIM(Name)//'N2',Tag_O=Tag_O)
     IF(A%N1==0) RETURN
