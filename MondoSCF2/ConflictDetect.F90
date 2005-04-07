@@ -115,13 +115,13 @@ CONTAINS
     DO i=1,MaxClone
        iClone=NClone(i)
        DO AtA=2,G%Clone(iClone)%NAtms
-          Ax=G%Clone(iClone)%AbCarts%D(1,AtA)
-          Ay=G%Clone(iClone)%AbCarts%D(2,AtA)
-          Az=G%Clone(iClone)%AbCarts%D(3,AtA)
+          Ax=G%Clone(iClone)%Carts%D(1,AtA)
+          Ay=G%Clone(iClone)%Carts%D(2,AtA)
+          Az=G%Clone(iClone)%Carts%D(3,AtA)
           DO AtB=1,AtA-1
-             Bx=G%Clone(iClone)%AbCarts%D(1,AtB)
-             By=G%Clone(iClone)%AbCarts%D(2,AtB)
-             Bz=G%Clone(iClone)%AbCarts%D(3,AtB)
+             Bx=G%Clone(iClone)%Carts%D(1,AtB)
+             By=G%Clone(iClone)%Carts%D(2,AtB)
+             Bz=G%Clone(iClone)%Carts%D(3,AtB)
              Dist=SQRT((Ax-Bx)**2+(Ay-By)**2+(Az-Bz)**2)
              !write(*,*) 'Dist',Dist,Ax,Ay,Az,Bx,By,Bz
              IF(Dist.LE.MinDist) THEN

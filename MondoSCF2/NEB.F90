@@ -37,20 +37,20 @@ CONTAINS
     !----------------------------------------------------------------------------
     !Initialize each clone to initial state then interpolate Cartesian coordinates
     !write(*,*)'NEB: Into NEBInit'
-    ReactionVector=G%Clone(G%Clones+1)%AbCarts%D-G%Clone(0)%AbCarts%D
+    ReactionVector=G%Clone(G%Clones+1)%Carts%D-G%Clone(0)%Carts%D
     iClone=0
     !write(*,'(1A7,I3)')'Image',iClone
-    !write(*,'(3F13.5)') (G%Clone(iCLONE)%AbCarts%D(:,j),j=1,G%Clone(0)%NAtms)
+    !write(*,'(3F13.5)') (G%Clone(iCLONE)%Carts%D(:,j),j=1,G%Clone(0)%NAtms)
     DO iCLONE=1,G%Clones
        ImageFraction=DBLE(iCLONE)/DBLE(G%Clones+1)
        CALL SetEq_CRDS(G%Clone(0),G%Clone(iCLONE))
-       G%Clone(iCLONE)%AbCarts%D=G%Clone(0)%AbCarts%D+ImageFraction*ReactionVector
+       G%Clone(iCLONE)%Carts%D=G%Clone(0)%Carts%D+ImageFraction*ReactionVector
        !write(*,'(1A7,I3)')'Image',iClone
-       !write(*,'(3F13.5)') (G%Clone(iCLONE)%AbCarts%D(:,j),j=1,G%Clone(0)%NAtms)
+       !write(*,'(3F13.5)') (G%Clone(iCLONE)%Carts%D(:,j),j=1,G%Clone(0)%NAtms)
     ENDDO
     iClone=G%Clones+1
     !write(*,'(1A7,I3)')'Image',iClone
-    !write(*,'(3F13.5)') (G%Clone(iCLONE)%AbCarts%D(:,j),j=1,G%Clone(0)%NAtms)
+    !write(*,'(3F13.5)') (G%Clone(iCLONE)%Carts%D(:,j),j=1,G%Clone(0)%NAtms)
     !write(*,*)'NEB: Done NEBInit'
   END SUBROUTINE NEBInit
   !===============================================================================
@@ -67,7 +67,7 @@ CONTAINS
     G2%NAlph=G1%NAlph
     G2%NBeta=G1%NBeta
     G2%Carts%D=G1%Carts%D
-    G2%AbCarts%D=G1%AbCarts%D
+    G2%Carts%D=G1%Carts%D
     G2%NAtms=G1%NAtms      
     G2%Nkind=G1%Nkind 
     G2%AtNum%D=G1%AtNum%D 
@@ -137,10 +137,10 @@ CONTAINS
     ! Add spring forces along the band
 
     !GH    write(*,*)'React Crds'
-    !GH    write(*,'(3F13.5)') (G%Clone(0)%AbCarts%D(:,j),j=1,G%Clone(0)%NAtms)
+    !GH    write(*,'(3F13.5)') (G%Clone(0)%Carts%D(:,j),j=1,G%Clone(0)%NAtms)
 
     !GH    write(*,*)'Prod Crds'
-    !GH    write(*,'(3F13.5)') (G%Clone(G%Clones+1)%AbCarts%D(:,j),j=1,G%Clone(0)%NAtms)
+    !GH    write(*,'(3F13.5)') (G%Clone(G%Clones+1)%Carts%D(:,j),j=1,G%Clone(0)%NAtms)
 
     Mssg=ProcessName('NEBForce','Reactant')//' D = '//TRIM(FltToShrtChar(Dist)) &
          //', E = '//TRIM(DblToMedmChar(G%Clone(0)%ETotal))
@@ -161,9 +161,9 @@ CONTAINS
           ! If we are not at an extrema of energy, 
           ! the tangent is the vector to the lower energy neighbour
           IF(UPm)THEN
-             N=G%Clone(I)%AbCarts%D-G%Clone(I-1)%AbCarts%D
+             N=G%Clone(I)%Carts%D-G%Clone(I-1)%Carts%D
           ELSE
-             N=G%Clone(I+1)%AbCarts%D-G%Clone(I)%AbCarts%D
+             N=G%Clone(I+1)%Carts%D-G%Clone(I)%Carts%D
           ENDIF
        ELSE
           ! At an extrema of energy, 
@@ -173,17 +173,17 @@ CONTAINS
           UMin=MIN(ABS(Up),ABS(Um))
           UMax=MAX(ABS(Up),ABS(Um))
           IF(Um>Up)THEN
-             N=(G%Clone(I+1)%AbCarts%D-G%Clone(I)%AbCarts%D)*UMin
-             N=N+(G%Clone(I)%AbCarts%D-G%Clone(I-1)%AbCarts%D)*UMax
+             N=(G%Clone(I+1)%Carts%D-G%Clone(I)%Carts%D)*UMin
+             N=N+(G%Clone(I)%Carts%D-G%Clone(I-1)%Carts%D)*UMax
           ELSE
-             N=(G%Clone(I+1)%AbCarts%D-G%Clone(I)%AbCarts%D)*UMax
-             N=N+(G%Clone(I+1)%AbCarts%D-G%Clone(I)%AbCarts%D)*UMin
+             N=(G%Clone(I+1)%Carts%D-G%Clone(I)%Carts%D)*UMax
+             N=N+(G%Clone(I+1)%Carts%D-G%Clone(I)%Carts%D)*UMin
           ENDIF
        ENDIF
        N=N/SQRT(SUM(N**2))
 
        !GH       write(*,*)'Crds'
-       !GH       write(*,'(3F13.5)') (G%Clone(I)%AbCarts%D(:,j),j=1,G%Clone(0)%NAtms)
+       !GH       write(*,'(3F13.5)') (G%Clone(I)%Carts%D(:,j),j=1,G%Clone(0)%NAtms)
        !GH       write(*,*)'Normal'
        !GH       write(*,'(3F13.5)') (N(:,j),j=1,G%Clone(0)%NAtms)
        !GH       write(*,*)'In Force'
@@ -202,8 +202,8 @@ CONTAINS
        !GH       write(*,'(3F13.5)') (G%Clone(I)%Gradients%D(:,j),j=1,G%Clone(0)%NAtms)
 
        ! Add spring forces along the band (if we are not the climbing image)
-       Rm=SQRT(SUM((G%Clone(I)%AbCarts%D-G%Clone(I-1)%AbCarts%D)**2))
-       Rp=SQRT(SUM((G%Clone(I)%AbCarts%D-G%Clone(I+1)%AbCarts%D)**2))
+       Rm=SQRT(SUM((G%Clone(I)%Carts%D-G%Clone(I-1)%Carts%D)**2))
+       Rp=SQRT(SUM((G%Clone(I)%Carts%D-G%Clone(I+1)%Carts%D)**2))
        !GH       write(*,*)'Rm,Rp',Rm,Rp
        IF(O%NEBClimb.AND.I==UMaxI)THEN
           ! Do nothing (no springs for the climbing image)
@@ -222,7 +222,7 @@ CONTAINS
             //', F = '//TRIM(DblToMedmChar(FProj))
        WRITE(*,*)TRIM(Mssg) 
     ENDDO
-    Rm=SQRT(SUM((G%Clone(G%Clones+1)%AbCarts%D-G%Clone(G%Clones)%AbCarts%D)**2))
+    Rm=SQRT(SUM((G%Clone(G%Clones+1)%Carts%D-G%Clone(G%Clones)%Carts%D)**2))
     Dist=Dist+Rm
     Mssg=ProcessName('NEBForce','Product')   &
          //' D = '//TRIM(FltToShrtChar(Dist)) &

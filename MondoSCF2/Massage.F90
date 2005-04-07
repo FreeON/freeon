@@ -47,7 +47,7 @@ CONTAINS
     IF(G%InAU) RETURN
     G%InAU=.TRUE.
     G%Carts%D    = AngstromsToAU*G%Carts%D               
-    G%AbCarts%D  = AngstromsToAU*G%AbCarts%D      
+    G%Carts%D  = AngstromsToAU*G%Carts%D      
     G%Velocity%D = AngstromsToAU*G%Velocity%D    
 !   
     G%PBC%CellCenter%D = G%PBC%CellCenter%D*AngstromsToAU

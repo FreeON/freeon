@@ -71,24 +71,24 @@ CONTAINS
           ! Read in the products geometry from input
           CALL ParseCoordinates(PRODUCTS_BEGIN,PRODUCTS_END,G%Clone(G%Clones+1),O%Coordinates)  
           ! Minimize the RMS deviation between the products and reactants
-          CALL RMSD(G%Clone(0)%NAtms,G%Clone(0)%AbCarts%D,G%Clone(G%Clones+1)%AbCarts%D,  &
+          CALL RMSD(G%Clone(0)%NAtms,G%Clone(0)%Carts%D,G%Clone(G%Clones+1)%Carts%D,  &
                     1, U, center2, center1, error )! , calc_g, grad)
           ! Rotation ... 
           DO I=1,G%Clone(0)%NAtms
-             G%Clone(0)%AbCarts%D(:,I)=MATMUL(U,G%Clone(0)%AbCarts%D(:,I))
+             G%Clone(0)%Carts%D(:,I)=MATMUL(U,G%Clone(0)%Carts%D(:,I))
           ENDDO
           ! ... and translation
           DO I=1,G%Clone(0)%NAtms
-             G%Clone(0)%AbCarts%D(:,I)=G%Clone(0)%AbCarts%D(:,I)+center1
-             G%Clone(G%Clones+1)%AbCarts%D(:,I)=G%Clone(G%Clones+1)%AbCarts%D(:,I)+center2
+             G%Clone(0)%Carts%D(:,I)=G%Clone(0)%Carts%D(:,I)+center1
+             G%Clone(G%Clones+1)%Carts%D(:,I)=G%Clone(G%Clones+1)%Carts%D(:,I)+center2
           ENDDO
 
           DO I=1,G%Clone(0)%NAtms
-             WRITE(*,3)Ats(INT(G%Clone(0)%AtNum%D(I))),G%Clone(0)%AbCarts%D(:,I)
+             WRITE(*,3)Ats(INT(G%Clone(0)%AtNum%D(I))),G%Clone(0)%Carts%D(:,I)
           ENDDO
           WRITE(*,*)' '
           DO I=1,G%Clone(0)%NAtms
-             WRITE(*,3)Ats(INT(G%Clone(0)%AtNum%D(I))),G%Clone(G%Clones+1)%AbCarts%D(:,I)
+             WRITE(*,3)Ats(INT(G%Clone(0)%AtNum%D(I))),G%Clone(G%Clones+1)%Carts%D(:,I)
           ENDDO
 3         format(A3,' ',3(F10.5,', '))
        ENDIF
@@ -195,15 +195,15 @@ CONTAINS
                                       //TRIM(LineLowCase)//'>>')
        IF(SIZE(C%C)==4) THEN
           At=TRIM(ADJUSTL(C%C(1)))
-          G%AbCarts%D(1,N)=CharToDbl(C%C(2))
-          G%AbCarts%D(2,N)=CharToDbl(C%C(3))
-          G%AbCarts%D(3,N)=CharToDbl(C%C(4))
+          G%Carts%D(1,N)=CharToDbl(C%C(2))
+          G%Carts%D(2,N)=CharToDbl(C%C(3))
+          G%Carts%D(3,N)=CharToDbl(C%C(4))
           G%CConstrain%I(N)=0
        ELSEIF(SIZE(C%C)==5)THEN
           At=TRIM(ADJUSTL(C%C(1)))
-          G%AbCarts%D(1,N)=CharToDbl(C%C(2))
-          G%AbCarts%D(2,N)=CharToDbl(C%C(3))
-          G%AbCarts%D(3,N)=CharToDbl(C%C(4))
+          G%Carts%D(1,N)=CharToDbl(C%C(2))
+          G%Carts%D(2,N)=CharToDbl(C%C(3))
+          G%Carts%D(3,N)=CharToDbl(C%C(4))
           IF(TRIM(C%C(5))=='u')THEN
              G%CConstrain%I(N)=0
           ELSE IF(TRIM(C%C(5))=='c')THEN
@@ -215,18 +215,18 @@ CONTAINS
           ENDIF
        ELSEIF(SIZE(C%C)==7)THEN
           At=TRIM(ADJUSTL(C%C(1)))
-          G%AbCarts%D(1,N) =CharToDbl(C%C(2))
-          G%AbCarts%D(2,N) =CharToDbl(C%C(3))
-          G%AbCarts%D(3,N) =CharToDbl(C%C(4))
+          G%Carts%D(1,N) =CharToDbl(C%C(2))
+          G%Carts%D(2,N) =CharToDbl(C%C(3))
+          G%Carts%D(3,N) =CharToDbl(C%C(4))
           G%Velocity%D(1,N)=CharToDbl(C%C(5))
           G%Velocity%D(2,N)=CharToDbl(C%C(6))
           G%Velocity%D(3,N)=CharToDbl(C%C(7))
           G%CConstrain%I(N)=0
        ELSEIF(SIZE(C%C)==8)THEN
           At=TRIM(ADJUSTL(C%C(1)))
-          G%AbCarts%D(1,N) =CharToDbl(C%C(2))
-          G%AbCarts%D(2,N) =CharToDbl(C%C(3))
-          G%AbCarts%D(3,N) =CharToDbl(C%C(4))
+          G%Carts%D(1,N) =CharToDbl(C%C(2))
+          G%Carts%D(2,N) =CharToDbl(C%C(3))
+          G%Carts%D(3,N) =CharToDbl(C%C(4))
           G%Velocity%D(1,N)=CharToDbl(C%C(5))
           G%Velocity%D(2,N)=CharToDbl(C%C(6))
           G%Velocity%D(3,N)=CharToDbl(C%C(7))

@@ -55,11 +55,11 @@ MODULE ParseExtraCoords
        CALL CloseHDFGroup(HDF_CurrentID)
        CALL CloseHDF(HDFFileID)
      ! CALL ToAtomicUnits(GMLoc)
-       XYZ%D=GMLoc%AbCarts%D
+       XYZ%D=GMLoc%Carts%D
        CConstrain%I=GMLoc%CConstrain%I
        CALL Delete(GMLoc)
      ELSE
-       XYZ%D=Geos%Clone(1)%AbCarts%D
+       XYZ%D=Geos%Clone(1)%Carts%D
        CConstrain%I=Geos%Clone(1)%CConstrain%I
      ENDIF
      !

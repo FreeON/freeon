@@ -195,8 +195,6 @@ MODULE MDynamics
        MDEpot%D(iCLONE) = C%Geos%Clone(iCLONE)%ETotal
        MDEtot%D(iCLONE) = MDEpot%D(iCLONE) + MDKin%D(iCLONE)
 !
-       C%Geos%Clone(iCLONE)%AbCarts%D=C%Geos%Clone(iCLONE)%Carts%D
-!
     ENDDO
 !
   END SUBROUTINE SetTempMaxBoltDist
@@ -254,7 +252,7 @@ MODULE MDynamics
        MDEpot%D(iCLONE) = C%Geos%Clone(iCLONE)%ETotal
        MDEtot%D(iCLONE) = MDEpot%D(iCLONE) + MDKin%D(iCLONE)
 !
-       C%Geos%Clone(iCLONE)%AbCarts%D=C%Geos%Clone(iCLONE)%Carts%D
+       C%Geos%Clone(iCLONE)%Carts%D=C%Geos%Clone(iCLONE)%Carts%D
 !
     ENDDO
 !
@@ -640,7 +638,7 @@ MODULE MDynamics
        ENDDO
 !      Archive Geometry for next step
        CALL MakeGMPeriodic(C%Geos%Clone(iCLONE))
-       C%Geos%Clone(1)%AbCarts%D = C%Geos%Clone(iCLONE)%Carts%D
+       C%Geos%Clone(1)%Carts%D = C%Geos%Clone(iCLONE)%Carts%D
        CALL GeomArchive(iBAS,iGEO+1,C%Nams,C%Sets,C%Geos)     
 !      Evaluate energies at the new geometry
        CALL SCF(iBAS,iGEO+1,C)

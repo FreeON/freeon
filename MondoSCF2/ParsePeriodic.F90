@@ -293,15 +293,15 @@ CONTAINS
     INTEGER    :: I
 !-----------------------------------------------------------------------!
     IF(G%PBC%InAtomCrd)THEN
-       G%Carts%D=G%AbCarts%D
+       G%Carts%D=G%Carts%D
        CALL CalFracCarts(G)
        IF(G%PBC%AtomW) THEN 
           CALL WrapAtoms(G)
        ENDIF
     ELSE
-       G%BoxCarts%D=G%AbCarts%D
+       G%BoxCarts%D=G%Carts%D
        CALL CalAtomCarts(G)
-       G%AbCarts%D=G%Carts%D
+       G%Carts%D=G%Carts%D
        IF(G%PBC%AtomW) THEN 
           CALL WrapAtoms(G)
        ENDIF

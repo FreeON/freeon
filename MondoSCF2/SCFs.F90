@@ -1097,7 +1097,6 @@ CONTAINS
 !
                 G%Clone(iCLONE)%PBC%BoxShape%D(I,J) =  Lat00+DDelta
                 CALL MakeGMPeriodic(G%Clone(iCLONE))
-                G%Clone(iCLONE)%AbCarts%D = G%Clone(iCLONE)%Carts%D
                 CALL GeomArchive(cBAS,cGEO,N,B,G)
                 CALL Invoke('MakeRho' ,N,S,M) 
                 CALL Invoke('MakePFFT',N,S,M)
@@ -1113,7 +1112,6 @@ CONTAINS
 !
                 G%Clone(iCLONE)%PBC%BoxShape%D(I,J) =  Lat00-DDelta
                 CALL MakeGMPeriodic(G%Clone(iCLONE))
-                G%Clone(iCLONE)%AbCarts%D = G%Clone(iCLONE)%Carts%D 
                 CALL GeomArchive(cBAS,cGEO,N,B,G)
                 CALL Invoke('MakeRho' ,N,S,M)
                 CALL Invoke('MakePFFT',N,S,M)
@@ -1136,7 +1134,6 @@ CONTAINS
 !
                 G%Clone(iCLONE)%PBC%BoxShape%D(I,J) =  Lat00
                 CALL MakeGMPeriodic(G%Clone(iCLONE))
-                G%Clone(1)%AbCarts%D = G%Clone(iCLONE)%Carts%D
                 CALL GeomArchive(cBAS,cGEO,N,B,G)
 !  
              ENDIF
@@ -1240,7 +1237,6 @@ CONTAINS
                 CALL CalcBoxPars(Vec,G%Clone(iCLONE)%PBC%BoxShape%D)
                 CALL BoxParsToCart(Vec,G%Clone(iCLONE)%PBC%BoxShape%D)
                 CALL MakeGMPeriodic(G%Clone(iCLONE))
-                G%Clone(1)%AbCarts%D = G%Clone(iCLONE)%Carts%D
                 CALL GeomArchive(cBAS,cGEO,N,B,G)
                 CALL Invoke('ONX'    ,N,S,M)  
                 TrixName=TRIM(N%M_SCRATCH)//TRIM(N%SCF_NAME)//'_Geom#'//TRIM(chGEO)//'_Base#'//TRIM(chBAS) &
@@ -1252,7 +1248,6 @@ CONTAINS
                 CALL CalcBoxPars(Vec,G%Clone(iCLONE)%PBC%BoxShape%D)
                 CALL BoxParsToCart(Vec,G%Clone(iCLONE)%PBC%BoxShape%D)
                 CALL MakeGMPeriodic(G%Clone(iCLONE))
-                G%Clone(1)%AbCarts%D = G%Clone(iCLONE)%Carts%D
                 CALL GeomArchive(cBAS,cGEO,N,B,G)
                 CALL Invoke('ONX',N,S,M)  
                 TrixName=TRIM(N%M_SCRATCH)//TRIM(N%SCF_NAME)//'_Geom#'//TRIM(chGEO)//'_Base#'//TRIM(chBAS) &
@@ -1266,7 +1261,6 @@ CONTAINS
 !
                 G%Clone(iCLONE)%PBC%BoxShape%D(I,J) =  Lat00
                 CALL MakeGMPeriodic(G%Clone(iCLONE))
-                G%Clone(1)%AbCarts%D = G%Clone(iCLONE)%Carts%D
                 CALL GeomArchive(cBAS,cGEO,N,B,G)
 !
              ENDIF
@@ -1369,7 +1363,6 @@ CONTAINS
                 CALL CalcBoxPars(Vec,G%Clone(iCLONE)%PBC%BoxShape%D)
                 CALL BoxParsToCart(Vec,G%Clone(iCLONE)%PBC%BoxShape%D)
                 CALL MakeGMPeriodic(G%Clone(iCLONE))
-                G%Clone(1)%AbCarts%D = G%Clone(iCLONE)%Carts%D
                 CALL GeomArchive(cBAS,cGEO,N,B,G)
                 CALL Invoke('MakeU'    ,N,S,M)  
                 TrixName=TRIM(N%M_SCRATCH)//TRIM(N%SCF_NAME)//'_Geom#'//TRIM(chGEO)//'_Base#'//TRIM(chBAS) &
@@ -1381,7 +1374,6 @@ CONTAINS
                 CALL CalcBoxPars(Vec,G%Clone(iCLONE)%PBC%BoxShape%D)
                 CALL BoxParsToCart(Vec,G%Clone(iCLONE)%PBC%BoxShape%D)
                 CALL MakeGMPeriodic(G%Clone(iCLONE))
-                G%Clone(1)%AbCarts%D = G%Clone(iCLONE)%Carts%D
                 CALL GeomArchive(cBAS,cGEO,N,B,G)
                 CALL Invoke('MakU',N,S,M)  
                 TrixName=TRIM(N%M_SCRATCH)//TRIM(N%SCF_NAME)//'_Geom#'//TRIM(chGEO)//'_Base#'//TRIM(chBAS) &
@@ -1395,7 +1387,6 @@ CONTAINS
 !
                 G%Clone(iCLONE)%PBC%BoxShape%D(I,J) =  Lat00
                 CALL MakeGMPeriodic(G%Clone(iCLONE))
-                G%Clone(1)%AbCarts%D = G%Clone(iCLONE)%Carts%D
                 CALL GeomArchive(cBAS,cGEO,N,B,G)
 !
              ENDIF
@@ -1469,7 +1460,6 @@ CONTAINS
 !
                 G%Clone(iCLONE)%PBC%BoxShape%D(I,J) =  Lat00+DDelta
                 CALL MakeGMPeriodic(G%Clone(iCLONE))
-                G%Clone(1)%AbCarts%D = G%Clone(iCLONE)%Carts%D
                 CALL GeomArchive(cBAS,cGEO,N,B,G)
                 CALL Invoke('MakeRho' ,N,S,M)
                 CALL Invoke('HiCu'    ,N,S,M)  
@@ -1483,7 +1473,6 @@ CONTAINS
 !
                 G%Clone(iCLONE)%PBC%BoxShape%D(I,J) =  Lat00-DDelta
                 CALL MakeGMPeriodic(G%Clone(iCLONE))
-                G%Clone(1)%AbCarts%D = G%Clone(iCLONE)%Carts%D
                 CALL GeomArchive(cBAS,cGEO,N,B,G)
                 CALL Invoke('MakeRho' ,N,S,M)
                 CALL Invoke('HiCu',N,S,M)  
@@ -1498,7 +1487,6 @@ CONTAINS
 !
                 G%Clone(iCLONE)%PBC%BoxShape%D(I,J) =  Lat00
                 CALL MakeGMPeriodic(G%Clone(iCLONE))
-                G%Clone(1)%AbCarts%D = G%Clone(iCLONE)%Carts%D
                 CALL GeomArchive(cBAS,cGEO,N,B,G)
 !  
              ENDIF
@@ -1566,7 +1554,6 @@ CONTAINS
        ! Set temporary geometries
        GTmp(iCLONE)%NAtms=G%Clone(iCLONE)%NAtms
        CALL New_CRDS(GTmp(iCLONE))
-       GTmp(iCLONE)%AbCarts%D=G%Clone(iCLONE)%AbCarts%D
        ! Get the density matrix for this clone
        TrixName=TRIM(N%M_SCRATCH)//TRIM(N%SCF_NAME)//'_Geom#'//TRIM(chGEO)//'_Base#'//TRIM(chBAS)//'_Cycl#'//TRIM(chSCF) &
             //'_Clone#'//TRIM(IntToChar(iCLONE))//'.D'
@@ -1581,9 +1568,9 @@ CONTAINS
                 !
                 ! Move the atom.
                 IF(II==1) THEN
-                   G%Clone(iCLONE)%AbCarts%D(IX,AtA)=GTmp(iCLONE)%AbCarts%D(IX,AtA)+DDelta
+                   G%Clone(iCLONE)%Carts%D(IX,AtA)=GTmp(iCLONE)%Carts%D(IX,AtA)+DDelta
                 ELSEIF(II==2) THEN
-                   G%Clone(iCLONE)%AbCarts%D(IX,AtA)=GTmp(iCLONE)%AbCarts%D(IX,AtA)-DDelta
+                   G%Clone(iCLONE)%Carts%D(IX,AtA)=GTmp(iCLONE)%Carts%D(IX,AtA)-DDelta
                 ENDIF
              ENDDO
              !
@@ -1592,9 +1579,9 @@ CONTAINS
              ! Move back the atom.
              DO iCLONE=1,G%Clones
                 IF(II==1) THEN
-                   G%Clone(iCLONE)%AbCarts%D(IX,AtA)=GTmp(iCLONE)%AbCarts%D(IX,AtA)
+                   G%Clone(iCLONE)%Carts%D(IX,AtA)=GTmp(iCLONE)%Carts%D(IX,AtA)
                 ELSEIF(II==2) THEN
-                   G%Clone(iCLONE)%AbCarts%D(IX,AtA)=GTmp(iCLONE)%AbCarts%D(IX,AtA)
+                   G%Clone(iCLONE)%Carts%D(IX,AtA)=GTmp(iCLONE)%Carts%D(IX,AtA)
                 ENDIF
              ENDDO
              ! vwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvw<<<
@@ -1645,7 +1632,7 @@ CONTAINS
     ENDDO
     CALL CloseHDF(HDFFileID)
     DO iCLONE=1,G%Clones
-       G%Clone(iCLONE)%AbCarts%D=GTmp(iCLONE)%AbCarts%D
+       G%Clone(iCLONE)%Carts%D=GTmp(iCLONE)%Carts%D
        CALL Delete(GTmp(iCLONE))
        CALL Delete(P(iCLONE))
     ENDDO
@@ -1722,7 +1709,7 @@ CONTAINS
     ! Set temporary geometries
     GTmp%NAtms=G%Clone(1)%NAtms
     CALL New_CRDS(GTmp)
-    GTmp%AbCarts%D=G%Clone(1)%AbCarts%D
+    GTmp%Carts%D=G%Clone(1)%Carts%D
     GTmp%Gradients%D=G%Clone(1)%Gradients%D
     ! Get the density matrix for this clone
     TrixName=TRIM(N%M_SCRATCH)//TRIM(N%SCF_NAME)//'_Geom#'//TRIM(chGEO)//'_Base#'//TRIM(chBAS)//'_Cycl#'//TRIM(chSCF) &
@@ -1735,9 +1722,9 @@ CONTAINS
              !
              ! Move the atom.
              IF(II==1) THEN
-                G%Clone(1)%AbCarts%D(IX,AtA)=GTmp%AbCarts%D(IX,AtA)+DDelta
+                G%Clone(1)%Carts%D(IX,AtA)=GTmp%Carts%D(IX,AtA)+DDelta
              ELSEIF(II==2) THEN
-                G%Clone(1)%AbCarts%D(IX,AtA)=GTmp%AbCarts%D(IX,AtA)-DDelta
+                G%Clone(1)%Carts%D(IX,AtA)=GTmp%Carts%D(IX,AtA)-DDelta
              ENDIF
              !
              G%Clone(1)%Gradients%D=0.0D0
@@ -1745,9 +1732,9 @@ CONTAINS
              ! vwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvw>>>
              ! Move back the atom.
              IF(II==1) THEN
-                G%Clone(1)%AbCarts%D(IX,AtA)=GTmp%AbCarts%D(IX,AtA)
+                G%Clone(1)%Carts%D(IX,AtA)=GTmp%Carts%D(IX,AtA)
              ELSEIF(II==2) THEN
-                G%Clone(1)%AbCarts%D(IX,AtA)=GTmp%AbCarts%D(IX,AtA)
+                G%Clone(1)%Carts%D(IX,AtA)=GTmp%Carts%D(IX,AtA)
              ENDIF
              ! vwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvw<<<
              CALL Invoke('TForce',N,S,M)
@@ -1781,7 +1768,7 @@ CONTAINS
     ENDDO
     !
     !
-    G%Clone(1)%AbCarts%D=GTmp%AbCarts%D
+    G%Clone(1)%Carts%D=GTmp%Carts%D
     G%Clone(1)%Gradients%D=GTmp%Gradients%D
     !
     CALL GeomArchive(cBAS,cGEO,N,B,G)
@@ -1850,7 +1837,6 @@ CONTAINS
          IF(C%Geos%Clone(1)%PBC%AutoW%I(I1)==1 .AND. C%Geos%Clone(1)%PBC%AutoW%I(I2)==1) THEN
             C%Geos%Clone(1)%PBC%BoxShape%D(I1,I2) = Lat00-DDelta
             CALL MakeGMPeriodic(C%Geos%Clone(1))
-            C%Geos%Clone(1)%AbCarts%D = C%Geos%Clone(1)%Carts%D
             CALL SinglePoints(C)
 !  
             HDFFileID=OpenHDF(C%Nams%HFile)
@@ -1860,7 +1846,6 @@ CONTAINS
 !   
             C%Geos%Clone(1)%PBC%BoxShape%D(I1,I2) = Lat00+DDelta
             CALL MakeGMPeriodic(C%Geos%Clone(1))
-            C%Geos%Clone(1)%AbCarts%D = C%Geos%Clone(1)%Carts%D
             CALL SinglePoints(C)
 !  
             HDFFileID=OpenHDF(C%Nams%HFile)
@@ -1947,7 +1932,6 @@ CONTAINS
    C%Stat%Action%C(1)='OneElectronMatrices'
    C%Geos%Clone(1)%PBC%BoxShape%D(I1,I2) = Lat00-DDelta
    CALL MakeGMPeriodic(C%Geos%Clone(1))
-   C%Geos%Clone(1)%AbCarts%D = C%Geos%Clone(1)%Carts%D
    CALL GeomArchive(1,1,C%Nams,C%Sets,C%Geos)
    CALL Invoke('MakeS',C%Nams,C%Stat,C%MPIs)
 !      
@@ -1960,7 +1944,6 @@ CONTAINS
 !
    C%Geos%Clone(1)%PBC%BoxShape%D(I1,I2) = Lat00+DDelta
    CALL MakeGMPeriodic(C%Geos%Clone(1))
-   C%Geos%Clone(1)%AbCarts%D = C%Geos%Clone(1)%Carts%D
    CALL GeomArchive(1,1,C%Nams,C%Sets,C%Geos)
    CALL Invoke('MakeS'   ,C%Nams,C%Stat,C%MPIs)
 !      
@@ -1981,7 +1964,6 @@ CONTAINS
 ! 
    C%Geos%Clone(1)%PBC%BoxShape%D(I1,I2) = Lat00-DDelta
    CALL MakeGMPeriodic(C%Geos%Clone(1))
-   C%Geos%Clone(1)%AbCarts%D = C%Geos%Clone(1)%Carts%D
    CALL GeomArchive(1,1,C%Nams,C%Sets,C%Geos)
    CALL Invoke('MakeT'   ,C%Nams,C%Stat,C%MPIs)
 !      
@@ -1994,7 +1976,6 @@ CONTAINS
 !
    C%Geos%Clone(1)%PBC%BoxShape%D(I1,I2) = Lat00+DDelta
    CALL MakeGMPeriodic(C%Geos%Clone(1))
-   C%Geos%Clone(1)%AbCarts%D = C%Geos%Clone(1)%Carts%D
    CALL GeomArchive(1,1,C%Nams,C%Sets,C%Geos)
    CALL Invoke('MakeT'   ,C%Nams,C%Stat,C%MPIs)
 !      
@@ -2015,7 +1996,6 @@ CONTAINS
 !
    C%Geos%Clone(1)%PBC%BoxShape%D(I1,I2) = Lat00-DDelta
    CALL MakeGMPeriodic(C%Geos%Clone(1))
-   C%Geos%Clone(1)%AbCarts%D = C%Geos%Clone(1)%Carts%D
    CALL GeomArchive(1,1,C%Nams,C%Sets,C%Geos)
 !
    CALL Invoke('MakeRho'     ,C%Nams,C%Stat,C%MPIs)
@@ -2027,7 +2007,6 @@ CONTAINS
 !
    C%Geos%Clone(1)%PBC%BoxShape%D(I1,I2) = Lat00+DDelta
    CALL MakeGMPeriodic(C%Geos%Clone(1))
-   C%Geos%Clone(1)%AbCarts%D = C%Geos%Clone(1)%Carts%D
    CALL GeomArchive(1,1,C%Nams,C%Sets,C%Geos)
 !
    CALL Invoke('MakeRho'     ,C%Nams,C%Stat,C%MPIs)
@@ -2045,7 +2024,6 @@ CONTAINS
 
    C%Geos%Clone(1)%PBC%BoxShape%D(I1,I2) = Lat00
    CALL MakeGMPeriodic(C%Geos%Clone(1))
-   C%Geos%Clone(1)%AbCarts%D = C%Geos%Clone(1)%Carts%D
    CALL GeomArchive(1,1,C%Nams,C%Sets,C%Geos)
    CALL Invoke('MakePFFT' ,C%Nams,C%Stat,C%MPIs)
    CALL Invoke('MakeRho'     ,C%Nams,C%Stat,C%MPIs)
@@ -2054,7 +2032,6 @@ CONTAINS
 !    
    C%Geos%Clone(1)%PBC%BoxShape%D(I1,I2) = Lat00-DDelta
    CALL MakeGMPeriodic(C%Geos%Clone(1))
-   C%Geos%Clone(1)%AbCarts%D = C%Geos%Clone(1)%Carts%D
    CALL GeomArchive(1,1,C%Nams,C%Sets,C%Geos)
    CALL Invoke('MakePFFT' ,C%Nams,C%Stat,C%MPIs)!   CALL Invoke('MakeRho'     ,C%Nams,C%Stat,C%MPIs) 
    CALL Invoke('MakeRho'     ,C%Nams,C%Stat,C%MPIs)
@@ -2073,7 +2050,6 @@ CONTAINS
 !  
    C%Geos%Clone(1)%PBC%BoxShape%D(I1,I2) = Lat00+DDelta
    CALL MakeGMPeriodic(C%Geos%Clone(1))  
-   C%Geos%Clone(1)%AbCarts%D = C%Geos%Clone(1)%Carts%D
    CALL GeomArchive(1,1,C%Nams,C%Sets,C%Geos)
    CALL Invoke('MakePFFT' ,C%Nams,C%Stat,C%MPIs)
    CALL Invoke('MakeRho'     ,C%Nams,C%Stat,C%MPIs)
@@ -2099,7 +2075,6 @@ CONTAINS
 !
    C%Geos%Clone(1)%PBC%BoxShape%D(I1,I2) = Lat00
    CALL MakeGMPeriodic(C%Geos%Clone(1))
-   C%Geos%Clone(1)%AbCarts%D = C%Geos%Clone(1)%Carts%D
    CALL GeomArchive(1,1,C%Nams,C%Sets,C%Geos)
    CALL Invoke('MakePFFT' ,C%Nams,C%Stat,C%MPIs)
    CALL Invoke('MakeRho'     ,C%Nams,C%Stat,C%MPIs)

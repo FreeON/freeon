@@ -168,10 +168,10 @@ CONTAINS
        CALL SetLatticeVectors(G%Clone(iCLONE),B%AtomPairThresh(iCLONE,cBAS),CS_IN,CS_OUT)
 !
 !      Make sure everything is wrapped correctly
-       G%Clone(iCLONE)%Carts%D = G%Clone(iCLONE)%AbCarts%D      
+       G%Clone(iCLONE)%Carts%D = G%Clone(iCLONE)%Carts%D      
        CALL CalFracCarts(G%Clone(iCLONE))
        CALL WrapAtoms(G%Clone(iCLONE))
-       G%Clone(iCLONE)%AbCarts%D = G%Clone(iCLONE)%Carts%D  
+       G%Clone(iCLONE)%Carts%D = G%Clone(iCLONE)%Carts%D  
 !
        HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
 !      If we have ECPs, temporarily reset this geometries nuclear charges

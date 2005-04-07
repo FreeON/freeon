@@ -1151,7 +1151,7 @@ CONTAINS
        Displ(I)=IntCs%PredVal%D(I)-IntCValues(I,NDim)
        CALL MapDAngle(IntCs%Def%C(I),IntCValues(I,NDim),Displ(I))
        !
-       CALL CtrlDispl(IntCs%Def%C(I),Displ(I),One,MaxStre,MaxAngle)
+       CALL CtrlDispl(IntCs%Def%C(I),IntCs%Value%D(I),Displ(I),One,MaxStre,MaxAngle)
        I1=1
        IntCs%PredVal%D(I)=IntCValues(I,NDim)+Displ(I)
        IF(IntCs%Def%C(I)(1:4)=='STRE') THEN

@@ -7,7 +7,6 @@ MODULE Optimizer
   USE ControlStructures  
   USE InCoords
   USE QUICCAMod
-  USE NEB
   USE GeomOptKeys     
   USE PunchHDF
   USE GlobalScalars
@@ -73,7 +72,7 @@ CONTAINS
        ! Compute new gradients
        CALL Force(iBAS,iGEO,C%Nams,C%Opts,C%Stat,C%Geos,C%Sets,C%MPIs)
        DO iCLONE=1,C%Geos%Clones
-          C%Geos%Clone(iCLONE)%Displ%D=C%Geos%Clone(iCLONE)%AbCarts%D
+          C%Geos%Clone(iCLONE)%Displ%D=C%Geos%Clone(iCLONE)%Carts%D
        ENDDO
 
        ExitQ=SteepStep(iBAS,iGEO,Energy(:,iGEO),C)
@@ -104,13 +103,13 @@ CONTAINS
        CALL New(OldXYZ,(/3,NatmsLoc/))
        DO iCLONE=1,C%Geos%Clones
           OldXYZ%D=C%Geos%Clone(iCLONE)%Displ%D
-          C%Geos%Clone(iCLONE)%Displ%D=C%Geos%Clone(iCLONE)%AbCarts%D
-          C%Geos%Clone(iCLONE)%AbCarts%D=OldXYZ%D
+          C%Geos%Clone(iCLONE)%Displ%D=C%Geos%Clone(iCLONE)%Carts%D
+          C%Geos%Clone(iCLONE)%Carts%D=OldXYZ%D
        ENDDO
        CALL Delete(OldXYZ)
        CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
        DO iCLONE=1,C%Geos%Clones
-          C%Geos%Clone(iCLONE)%AbCarts%D=C%Geos%Clone(iCLONE)%Displ%D
+          C%Geos%Clone(iCLONE)%Carts%D=C%Geos%Clone(iCLONE)%Displ%D
        ENDDO
        CALL GeomArchive(iBAS,iGEO+1,C%Nams,C%Sets,C%Geos)    
        CALL MergePrintClones(C%Geos,C%Nams,C%Opts,GBeg,GEnd)
@@ -156,7 +155,6 @@ CONTAINS
       DO J=1,Geos%Clone(iCLONE)%Natms
         M=M+1
         GMMerge%Carts%D(1:3,M)=Geos%Clone(iCLONE)%Carts%D(1:3,J)+TR*(iCLONE-1)
-        GMMerge%AbCarts%D(1:3,M)=Geos%Clone(iCLONE)%AbCarts%D(1:3,J)+TR*(iCLONE-1)
         GMMerge%AtNum%D(M)=Geos%Clone(iCLONE)%AtNum%D(J)
         GMMerge%AtNam%C(M)=Geos%Clone(iCLONE)%AtNam%C(J)
       ENDDO
@@ -213,20 +211,20 @@ CONTAINS
           ! GDIIS extrapolation 
           ! Put the geometries to HDF
             DO iCLONE=1,C%Geos%Clones
-              C%Geos%Clone(iCLONE)%Displ%D=C%Geos%Clone(iCLONE)%AbCarts%D
+              C%Geos%Clone(iCLONE)%Displ%D=C%Geos%Clone(iCLONE)%Carts%D
             ENDDO
             CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
           CALL ForceDStep(iGEO,C%Nams,C%Geos,DIISErr)
             CALL New(OldXYZ,(/3,NatmsLoc/))
             DO iCLONE=1,C%Geos%Clones
               OldXYZ%D=C%Geos%Clone(iCLONE)%Displ%D
-              C%Geos%Clone(iCLONE)%Displ%D=C%Geos%Clone(iCLONE)%AbCarts%D
-              C%Geos%Clone(iCLONE)%AbCarts%D=OldXYZ%D
+              C%Geos%Clone(iCLONE)%Displ%D=C%Geos%Clone(iCLONE)%Carts%D
+              C%Geos%Clone(iCLONE)%Carts%D=OldXYZ%D
             ENDDO
             CALL Delete(OldXYZ)
             CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
             DO iCLONE=1,C%Geos%Clones
-              C%Geos%Clone(iCLONE)%AbCarts%D=C%Geos%Clone(iCLONE)%Displ%D
+              C%Geos%Clone(iCLONE)%Carts%D=C%Geos%Clone(iCLONE)%Displ%D
             ENDDO
             CALL GeomArchive(iBAS,iGEO+1,C%Nams,C%Sets,C%Geos)    
           Mssg=TRIM(Mssg)//', Ediis='//TRIM(DblToShrtChar(DIISErr))
@@ -245,12 +243,12 @@ CONTAINS
        ELSE
           ! Take a few small steps along the gradient to start
           DO iCLONE=1,C%Geos%Clones
-             C%Geos%Clone(iCLONE)%Displ%D=C%Geos%Clone(iCLONE)%AbCarts%D &
+             C%Geos%Clone(iCLONE)%Displ%D=C%Geos%Clone(iCLONE)%Carts%D &
                                       -StepLength*C%Geos%Clone(iCLONE)%Gradients%D
           ENDDO
             CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
           DO iCLONE=1,C%Geos%Clones
-             C%Geos%Clone(iCLONE)%AbCarts%D=C%Geos%Clone(iCLONE)%Displ%D
+             C%Geos%Clone(iCLONE)%Carts%D=C%Geos%Clone(iCLONE)%Displ%D
           ENDDO
             CALL GeomArchive(iBAS,iGEO+1,C%Nams,C%Sets,C%Geos)    
           ! Put the geometries to HDF
@@ -346,19 +344,19 @@ CONTAINS
        ELSEIF(nDIIS>2)THEN
           ! Extrapolate
           iDIIS=1
-          G%Clone(iCLONE)%AbCarts%D=Zero
+          G%Clone(iCLONE)%Carts%D=Zero
           CALL New(Carts,(/3,G%Clone(iCLONE)%NAtms/))
           ! DIIS extrapolation of the position ...
           DO iGEO=mGEO,cGEO
              ! ... using the unwrapped Cartesian coordinates
              CALL Get(Carts,'abcartesians',Tag_O=IntToChar(iGEO))
-             G%Clone(iCLONE)%AbCarts%D=G%Clone(iCLONE)%AbCarts%D+DIISCo%D(iDIIS)*Carts%D
+             G%Clone(iCLONE)%Carts%D=G%Clone(iCLONE)%Carts%D+DIISCo%D(iDIIS)*Carts%D
              iDIIS=iDIIS+1
           ENDDO
           CALL Delete(Carts)
        ELSE
           ! Stalled, freshen things up with a steepest descent move
-          G%Clone(iCLONE)%AbCarts%D=G%Clone(iCLONE)%AbCarts%D-5D-1*G%Clone(iCLONE)%Gradients%D          
+          G%Clone(iCLONE)%Carts%D=G%Clone(iCLONE)%Carts%D-5D-1*G%Clone(iCLONE)%Gradients%D          
        ENDIF
        ! Clean up a bit 
        CALL Delete(XYZAux)
@@ -396,7 +394,7 @@ CONTAINS
     MAXGrad=Zero
     DO iCLONE=1,C%Geos%Clones
        CALL New(Carts(iCLONE),(/3,C%Geos%Clone(iCLONE)%NAtms/))
-       Carts(iCLONE)%D=C%Geos%Clone(iCLONE)%AbCarts%D
+       Carts(iCLONE)%D=C%Geos%Clone(iCLONE)%Carts%D
        MAXGrad=MAX(MAXGrad,C%Geos%Clone(iCLONE)%GradMax)
        RMSGrad=MAX(RMSGrad,C%Geos%Clone(iCLONE)%GradRMS)
     ENDDO
@@ -406,7 +404,7 @@ CONTAINS
        StepLength = C%Opts%RSL
        ! Take a step, any step
        DO iCLONE=1,C%Geos%Clones
-          C%Geos%Clone(iCLONE)%AbCarts%D=Carts(iCLONE)%D-StepLength*C%Geos%Clone(iCLONE)%Gradients%D
+          C%Geos%Clone(iCLONE)%Carts%D=Carts(iCLONE)%D-StepLength*C%Geos%Clone(iCLONE)%Gradients%D
        ENDDO
        ! Purify NEB images
        CALL NEBPurify(C%Geos)
@@ -438,7 +436,7 @@ CONTAINS
           StepLength=StepLength/Two
           ! Step the absolute positions
           DO iCLONE=1,C%Geos%Clones
-             C%Geos%Clone(iCLONE)%AbCarts%D=Carts(iCLONE)%D-StepLength*C%Geos%Clone(iCLONE)%Gradients%D
+             C%Geos%Clone(iCLONE)%Carts%D=Carts(iCLONE)%D-StepLength*C%Geos%Clone(iCLONE)%Gradients%D
           ENDDO
           ! Archive geometries
           CALL GeomArchive(cBAS,cGEO+1,C%Nams,C%Sets,C%Geos)    
@@ -530,8 +528,6 @@ CONTAINS
      CALL NEW(BCur ,SIZE(C%Stat%Previous%I))
      ! Build the guess 
      DO iBAS=1,C%Sets%NBSets-1
-      IF(C%Opts%Grad==GRAD_TS_SEARCH_NEB) &
-          CALL NEBPurify(C%Geos)
        CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
        CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
        CALL SCF(iBAS,iGEO,C)
@@ -553,6 +549,7 @@ CONTAINS
      !
      IStart=iGEO
      DO iGEO=IStart,MaxSteps
+       IF(C%Opts%Grad==GRAD_TS_SEARCH_NEB) CALL NEBPurify(C%Geos)
        CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
        CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
        !
@@ -577,8 +574,6 @@ CONTAINS
        !
        ! Archive displaced geometries 
        !
-        IF(C%Opts%Grad==GRAD_TS_SEARCH_NEB) &
-           CALL NEBPurify(C%Geos)
        CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
        !
        ! Fill in new geometries
@@ -1345,7 +1340,7 @@ CONTAINS
      SCRPath  =TRIM(Nams%M_SCRATCH)//TRIM(Nams%SCF_NAME)// &
              '.'//TRIM(IntToChar(iCLONE))
      PWDPath  =TRIM(Nams%M_PWD)//TRIM(IntToChar(iCLONE))
-     GMLoc%Displ%D=GMLoc%AbCarts%D
+     GMLoc%Displ%D=GMLoc%Carts%D
      DoNEB=(Opts%Grad==GRAD_TS_SEARCH_NEB)
      !
      CALL New(RefXYZ1,(/3,GMLoc%Natms/))
@@ -1536,7 +1531,7 @@ CONTAINS
    SUBROUTINE NewGeomFill(GMLoc)
      TYPE(CRDS)           :: GMLoc
      !
-     GMLoc%AbCarts%D=GMLoc%Displ%D
+     GMLoc%Carts%D=GMLoc%Displ%D
      GMLoc%PBC%BoxShape%D=GMLoc%PBCDispl%BoxShape%D
      CALL PBCInfoFromNewCarts(GMLoc%PBC)
    END SUBROUTINE NewGeomFill
@@ -1564,7 +1559,7 @@ CONTAINS
        CALL OPENAscii(OutFile,Out)
        IF((.NOT.GOpt%GDIIS%NoGDIIS).AND.GOpt%GDIIS%On.AND.&
            iGEO>=GOpt%GDIIS%Init) THEN
-         CALL GeoDIIS(GMLoc%AbCarts%D,RefXYZ1%D,Nams%HFile,iCLONE, &
+         CALL GeoDIIS(GMLoc%Carts%D,RefXYZ1%D,Nams%HFile,iCLONE, &
                      iGEO,Opts%PFlags%GeOp,PWDPath,GMLoc%PBC%Dimen,GOpt,SCRPath)
        ELSE
          IF(Opts%PFlags%GeOp>=DEBUG_GEOP_MIN) THEN
@@ -1629,7 +1624,7 @@ CONTAINS
      INTEGER          :: MaxBStep,IBStep
      CHARACTER(LEN=DCL):: chGEO
      TYPE(CRDS)       :: GMOld
-     LOGICAL          :: DoBackTrack,DoLineS
+     LOGICAL          :: DoBackTrack,DoLineS,DoBackTrackAll
      LOGICAL,OPTIONAL :: DoLineS_O
      REAL(DOUBLE)     :: EOld,ENew,MeanDist,FactN,FactO,Fact,MaxDist
      REAL(DOUBLE)     :: BackTrackFact,Aux9(9)
@@ -1680,43 +1675,22 @@ CONTAINS
      IF(DoLineS) MaxBStep=1
      !
      DO iBStep=1,MaxBStep+1
-       DoBackTrack=.FALSE.
+       DoBackTrackAll=.FALSE.
        DO iCLONE=1,C%Geos%Clones
+         DoBackTrack=.FALSE.
          NatmsLoc=C%Geos%Clone(iCLONE)%Natms
          NCart=3*NatmsLoc
-         CALL New(RefXYZ1,(/3,NatmsLoc/))
-         CALL GetRefXYZ(C%Nams%HFile,RefXYZ1,iCLONE)
          HDFFileID=OpenHDF(C%Nams%HFile)
          HDF_CurrentID=OpenHDFGroup(HDFFileID, &
                      "Clone #"//TRIM(IntToChar(iCLONE)))
          chGEO=IntToChar(iGEO-1)
          CALL Get(GMOld,chGEO)
-         CALL ConvertToXYZRef(GMOld%Carts%D,RefXYZ1%D, &
-                              GMOld%PBC%Dimen,&
-                              BoxShape_O=GMOld%PBC%BoxShape%D)
-         CALL ConvertToXYZRef(C%Geos%Clone(iCLONE)%Carts%D,RefXYZ1%D,&
-                        C%Geos%Clone(iCLONE)%PBC%Dimen, &
-                        BoxShape_O=C%Geos%Clone(iCLONE)%PBC%BoxShape%D)
-         ! Convert BoxCarts to same reference system
-       ! C%Geos%Clone(iCLONE)%PBC%InvBoxSh%D= &
-       !              InverseMatrix(C%Geos%Clone(iCLONE)%PBC%BoxShape%D)
-       ! GMOld%PBC%InvBoxSh%D=InverseMatrix(GMOld%PBC%BoxShape%D)
-         DO I=1,NatmsLoc
-           CALL DGEMM_NNc(3,3,1,One,Zero, &
-                C%Geos%Clone(iCLONE)%PBC%InvBoxSh%D, &
-                C%Geos%Clone(iCLONE)%Carts%D(1:3,I), &
-                C%Geos%Clone(iCLONE)%BoxCarts%D(1:3,I))   
-           CALL DGEMM_NNc(3,3,1,One,Zero, &
-                GMOld%PBC%InvBoxSh%D, &
-                GMOld%Carts%D(1:3,I), &
-                GMOld%BoxCarts%D(1:3,I))   
-         ENDDO
-         !
-         CALL Delete(RefXYZ1)
          CALL CloseHDFGroup(HDF_CurrentID)
          CALL CloseHDF(HDFFileID)
+         !
          EOld=GMOld%ETotal
          ENew=C%Geos%Clone(iCLONE)%ETotal
+         DoBackTrack=((ENew-EOld)/ABS(EOld)>BackTrackFact*ETol(AccL))
          !
          CALL New(DistVect1,NCart)
          CALL CartRNK2ToCartRNK1(DistVect1%D,GMOld%Carts%D)
@@ -1734,75 +1708,98 @@ CONTAINS
          CALL Delete(DistVect1)
          CALL Delete(DistVect2)
          !
-         DoBackTrack=((ENew-EOld)/ABS(EOld)>BackTrackFact*ETol(AccL))
+         CALL OPENAscii(OutFile,Out)
+         WRITE(*,200) iBStep-1,EOld,ENew,MeanDist,MaxDist
+         WRITE(Out,200) iBStep-1,EOld,ENew,MeanDist,MaxDist
+       200 FORMAT('Backtr. step= ',I3,' Old Energy= ', &
+                   F20.6,' New Energy= ',F20.6,' Dist= ',F14.8, &
+                   'MaxDist= ',F14.8)
+         CLOSE(Out,STATUS='KEEP')
          !
-         IF(iBStep>1.OR.DoBackTrack) THEN  
+         IF(iBStep==MaxBStep+1) THEN
              CALL OPENAscii(OutFile,Out)
-             WRITE(*,200) iBStep-1,EOld,ENew,MeanDist,MaxDist
-             WRITE(Out,200) iBStep-1,EOld,ENew,MeanDist,MaxDist
-           200 FORMAT('Backtr. step= ',I3,' Old Energy= ', &
-                       F20.6,' New Energy= ',F20.6,' Dist= ',F14.8, &
-                       'MaxDist= ',F14.8)
+             WRITE(*,100) iCLONE,MaxBStep
+             WRITE(Out,100) iCLONE,MaxBStep
+           100 FORMAT('Backtracking of clone',I3, &
+                      ' has not converged in ', &
+                       I3,' Steps. Continue with present geometry.')
              CLOSE(Out,STATUS='KEEP')
+           CYCLE
          ENDIF
+         IF(.NOT.DoBackTrack) CYCLE
+         DoBackTrackAll=.TRUE.
          !
-         IF(DoBackTrack) THEN  
-           ! do bisection
-           IF(DoLineS) THEN
-             CALL LineSearch(C%Geos%Clone(iCLONE),GMOld)
-           ELSE
-             !
-             ! Set up new box-coordinates
-             !
-             FactO=Half
-             FactN=Half
-             IF(C%GOpt%GConvCrit%DoLattBackTr) THEN
-               C%Geos%Clone(iCLONE)%PBC%BoxShape%D= &
-                 (FactN*C%Geos%Clone(iCLONE)%PBC%BoxShape%D+ &
-                                 FactO*GMOld%PBC%BoxShape%D)
-               ! apply lattice constraints, e.g. fixed volume
-               CALL SetFixedLattice(Aux9,C%GOpt%ExtIntCs,C%GOpt%Constr,BoxShape_O=C%Geos%Clone(iCLONE)%PBC%BoxShape%D)
-               CALL PBCInfoFromNewCarts(C%Geos%Clone(iCLONE)%PBC)
-             ENDIF
-             !
-             ! Set up new atomic positions (fractionals+Carts)
-             !
-             IF(C%GOpt%GConvCrit%DoAtomBackTr) THEN
-               !
-               C%Geos%Clone(iCLONE)%BoxCarts%D= &
-                 (FactN*C%Geos%Clone(iCLONE)%BoxCarts%D+&
-                  FactO*GMOld%BoxCarts%D)
-               !
-               DO I=1,NatmsLoc
-                 CALL DGEMM_NNc(3,3,1,One,Zero, &
-                      C%Geos%Clone(iCLONE)%PBC%BoxShape%D, &
-                      C%Geos%Clone(iCLONE)%BoxCarts%D(1:3,I), &
-                      C%Geos%Clone(iCLONE)%Carts%D(1:3,I))   
-               ENDDO
-               !
-               C%Geos%Clone(iCLONE)%AbCarts%D= &
-               C%Geos%Clone(iCLONE)%Carts%D
-             ENDIF
-             !
+         CALL New(RefXYZ1,(/3,NatmsLoc/))
+         CALL GetRefXYZ(C%Nams%HFile,RefXYZ1,iCLONE)
+         CALL ConvertToXYZRef(GMOld%Carts%D,RefXYZ1%D, &
+                              GMOld%PBC%Dimen,&
+                              BoxShape_O=GMOld%PBC%BoxShape%D)
+         CALL ConvertToXYZRef(C%Geos%Clone(iCLONE)%Carts%D,RefXYZ1%D,&
+                        C%Geos%Clone(iCLONE)%PBC%Dimen, &
+                        BoxShape_O=C%Geos%Clone(iCLONE)%PBC%BoxShape%D)
+         CALL Delete(RefXYZ1)
+         !
+         ! Convert BoxCarts to same reference system
+       ! C%Geos%Clone(iCLONE)%PBC%InvBoxSh%D= &
+       !              InverseMatrix(C%Geos%Clone(iCLONE)%PBC%BoxShape%D)
+       ! GMOld%PBC%InvBoxSh%D=InverseMatrix(GMOld%PBC%BoxShape%D)
+         DO I=1,NatmsLoc
+           CALL DGEMM_NNc(3,3,1,One,Zero, &
+                C%Geos%Clone(iCLONE)%PBC%InvBoxSh%D, &
+                C%Geos%Clone(iCLONE)%Carts%D(1:3,I), &
+                C%Geos%Clone(iCLONE)%BoxCarts%D(1:3,I))   
+           CALL DGEMM_NNc(3,3,1,One,Zero, &
+                GMOld%PBC%InvBoxSh%D, &
+                GMOld%Carts%D(1:3,I), &
+                GMOld%BoxCarts%D(1:3,I))   
+         ENDDO
+         !
+         ! do bisection
+         IF(DoLineS) THEN
+           CALL LineSearch(C%Geos%Clone(iCLONE),GMOld)
+         ELSE
+           !
+           ! Set up new box-coordinates
+           !
+           FactO=Half
+           FactN=Half
+           IF(C%GOpt%GConvCrit%DoLattBackTr) THEN
+             C%Geos%Clone(iCLONE)%PBC%BoxShape%D= &
+               (FactN*C%Geos%Clone(iCLONE)%PBC%BoxShape%D+ &
+                               FactO*GMOld%PBC%BoxShape%D)
+             ! apply lattice constraints, e.g. fixed volume
+             CALL SetFixedLattice(Aux9,C%GOpt%ExtIntCs,C%GOpt%Constr,BoxShape_O=C%Geos%Clone(iCLONE)%PBC%BoxShape%D)
+             CALL PBCInfoFromNewCarts(C%Geos%Clone(iCLONE)%PBC)
            ENDIF
+           !
+           ! Set up new atomic positions (fractionals+Carts)
+           !
+           IF(C%GOpt%GConvCrit%DoAtomBackTr) THEN
+             !
+             C%Geos%Clone(iCLONE)%BoxCarts%D= &
+               (FactN*C%Geos%Clone(iCLONE)%BoxCarts%D+&
+                FactO*GMOld%BoxCarts%D)
+             !
+             DO I=1,NatmsLoc
+               CALL DGEMM_NNc(3,3,1,One,Zero, &
+                    C%Geos%Clone(iCLONE)%PBC%BoxShape%D, &
+                    C%Geos%Clone(iCLONE)%BoxCarts%D(1:3,I), &
+                    C%Geos%Clone(iCLONE)%Carts%D(1:3,I))   
+             ENDDO
+             !
+             C%Geos%Clone(iCLONE)%Carts%D= &
+             C%Geos%Clone(iCLONE)%Carts%D
+           ENDIF
+           !
          ENDIF
        ENDDO
        !
-       IF(DoBackTrack) THEN
-         IF(iBStep>MaxBStep) THEN
-             CALL OPENAscii(OutFile,Out)
-             WRITE(*,100) MaxBStep-1
-             WRITE(Out,100) MaxBStep-1
-           100 FORMAT('Backtracking has not converged in ', &
-                       I3,' Steps. Continue with present geometry.')
-             CLOSE(Out,STATUS='KEEP')
-           EXIT
-         ENDIF
+       IF(DoBackTrackAll) THEN
          !
          C%Stat%Previous%I=BPrev
          C%Stat%Current%I=BCur
-        !C%Stat%Previous%I(3)=iGEO-1
-        !C%Stat%Current%I(3)=iGEO
+       ! C%Stat%Previous%I(3)=iGEO-1
+       ! C%Stat%Current%I(3)=iGEO
          CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
          CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
          CALL SCF(iBAS,iGEO,C)
@@ -1842,8 +1839,8 @@ CONTAINS
      CALL New(PGrad,4)
      CALL New(VAux,4)
      !
-     CALL CartRNK2ToCartRNK1(XV1%D,GMOld%AbCarts%D)
-     CALL CartRNK2ToCartRNK1(XV2%D,GMNew%AbCarts%D)
+     CALL CartRNK2ToCartRNK1(XV1%D,GMOld%Carts%D)
+     CALL CartRNK2ToCartRNK1(XV2%D,GMNew%Carts%D)
      DeltaX%D=XV2%D-XV1%D
      DX2=DOT_PRODUCT(DeltaX%D,DeltaX%D)
      DX=SQRT(DX2)
@@ -1917,12 +1914,12 @@ CONTAINS
      ENDIF
      !
      IF(DoHalve) THEN
-       GMNew%AbCarts%D=Half*(GMNew%AbCarts%D+GMOld%AbCarts%D)
+       GMNew%Carts%D=Half*(GMNew%Carts%D+GMOld%Carts%D)
        GMNew%Carts%D=Half*(GMNew%Carts%D+GMOld%Carts%D)
      ELSE
        Fact=D0/DX
-       GMNew%AbCarts%D=GMOld%AbCarts%D+ &
-                       Fact*(GMNew%AbCarts%D-GMOld%AbCarts%D)
+       GMNew%Carts%D=GMOld%Carts%D+ &
+                       Fact*(GMNew%Carts%D-GMOld%Carts%D)
        GMNew%Carts%D  =GMOld%Carts%D+   &
                        Fact*(GMNew%Carts%D-GMOld%Carts%D)
       !GMNew%ETotal=E0
@@ -2209,7 +2206,7 @@ CONTAINS
           !
           ! Move the atom
           DO iCLONE=1,C%Geos%Clones
-             C%Geos%Clone(iCLONE)%AbCarts%D(I,AtA)=C%Geos%Clone(iCLONE)%AbCarts%D(I,AtA)+ATOM_DISP
+             C%Geos%Clone(iCLONE)%Carts%D(I,AtA)=C%Geos%Clone(iCLONE)%Carts%D(I,AtA)+ATOM_DISP
              CALL MakeGMPeriodic(C%Geos%Clone(iCLONE))
           ENDDO
           CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)
@@ -2232,7 +2229,7 @@ CONTAINS
           !
           ! Move back.
           DO iCLONE=1,C%Geos%Clones
-             C%Geos%Clone(iCLONE)%AbCarts%D(I,AtA)=C%Geos%Clone(iCLONE)%AbCarts%D(I,AtA)-ATOM_DISP
+             C%Geos%Clone(iCLONE)%Carts%D(I,AtA)=C%Geos%Clone(iCLONE)%Carts%D(I,AtA)-ATOM_DISP
              CALL MakeGMPeriodic(C%Geos%Clone(iCLONE))
           ENDDO
           CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)
@@ -2252,7 +2249,7 @@ CONTAINS
     !CALL Print_DBL_RNK2(Hess,'Weighted Hessian',Unit_O=6)
     !
     ! Project out translations and rotations.
-    CALL ProjOut(C%Geos%Clone(1)%AbCarts,C%Geos%Clone(1)%AtMss,Hess,NatmsLoc)
+    CALL ProjOut(C%Geos%Clone(1)%Carts,C%Geos%Clone(1)%AtMss,Hess,NatmsLoc)
     !CALL Print_DBL_RNK2(Hess,'Projected Hessian',Unit_O=6)
     !
       ! Get Normal modes.
@@ -2268,7 +2265,7 @@ CONTAINS
     !CALL Print_DBL_RNK2(NMode,'NMode0',Unit_O=6)
     !
     ! Translational and rotational Sayvetz conditions.
-    CALL Sayvetz(NMode,C%Geos%Clone(1)%AbCarts,C%Geos%Clone(1)%AtMss,NatmsLoc)
+    CALL Sayvetz(NMode,C%Geos%Clone(1)%Carts,C%Geos%Clone(1)%AtMss,NatmsLoc)
     !
     ! Count number of negative eigenvalues.
     NNeg=0
@@ -2316,7 +2313,7 @@ CONTAINS
     CALL CompRAMANInt()
     !
     ! Statistic.
-    CALL ThermoStat(C%Geos%Clone(1)%AbCarts,C%Geos%Clone(1)%AtMss,Freqs, &
+    CALL ThermoStat(C%Geos%Clone(1)%Carts,C%Geos%Clone(1)%AtMss,Freqs, &
          &          NatmsLoc,C%Geos%Clone(1)%Multp)
     !
     ! Clean up.
@@ -2917,7 +2914,7 @@ CONTAINS
 !!$write(*,*) 'dipoleComp 12'
 !!$    CALL Multiply(P,M1,M2)
 !!$write(*,*) 'dipoleComp 20'
-!!$    NDip=DDOT(NAtoms,G%Clone(1)%AtNum%D(1),1,G%Clone(1)%AbCarts%D(1,1),3)
+!!$    NDip=DDOT(NAtoms,G%Clone(1)%AtNum%D(1),1,G%Clone(1)%Carts%D(1,1),3)
 !!$    Dipole%D(1) = NDip-2D0*Trace(M2)
 !!$    !Y
 !!$write(*,*) 'dipoleComp 30'
@@ -2925,14 +2922,14 @@ CONTAINS
 !!$         &      //'_Base#'//TRIM(chBAS)//'_Clone#'//TRIM(IntToChar(1))//'.DipoleX'
 !!$    CALL Get(M1,TrixName)
 !!$    CALL Multiply(P,M1,M2)
-!!$    NDip=DDOT(NAtoms,G%Clone(1)%AtNum%D(1),1,G%Clone(1)%AbCarts%D(2,1),3)
+!!$    NDip=DDOT(NAtoms,G%Clone(1)%AtNum%D(1),1,G%Clone(1)%Carts%D(2,1),3)
 !!$    Dipole%D(2) = NDip-2D0*Trace(M2)
 !!$    !Z
 !!$    TrixName=TRIM(N%M_SCRATCH)//TRIM(N%SCF_NAME)//'_Geom#'//TRIM(chGEO) &
 !!$         &      //'_Base#'//TRIM(chBAS)//'_Clone#'//TRIM(IntToChar(1))//'.DipoleX'
 !!$    CALL Get(M1,TrixName)
 !!$    CALL Multiply(P,M1,M2)
-!!$    NDip=DDOT(NAtoms,G%Clone(1)%AtNum%D(1),1,G%Clone(1)%AbCarts%D(3,1),3)
+!!$    NDip=DDOT(NAtoms,G%Clone(1)%AtNum%D(1),1,G%Clone(1)%Carts%D(3,1),3)
 !!$    Dipole%D(3) = NDip-2D0*Trace(M2)
 !!$    !
 !!$    CALL Delete(S%Action)
