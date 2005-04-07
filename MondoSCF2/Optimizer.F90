@@ -349,7 +349,7 @@ CONTAINS
           ! DIIS extrapolation of the position ...
           DO iGEO=mGEO,cGEO
              ! ... using the unwrapped Cartesian coordinates
-             CALL Get(Carts,'abcartesians',Tag_O=IntToChar(iGEO))
+             CALL Get(Carts,'cartesians',Tag_O=IntToChar(iGEO))
              G%Clone(iCLONE)%Carts%D=G%Clone(iCLONE)%Carts%D+DIISCo%D(iDIIS)*Carts%D
              iDIIS=iDIIS+1
           ENDDO

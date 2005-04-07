@@ -443,7 +443,7 @@ CONTAINS
      HDFFileID=OpenHDF(HFileIn)
      HDF_CurrentID= &
        OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
-     CALL Get(RefXYZ,'Abcartesians',Tag_O=TRIM(IntToChar(1)))
+     CALL Get(RefXYZ,'cartesians',Tag_O=TRIM(IntToChar(1)))
      CALL CloseHDFGroup(HDF_CurrentID)
      CALL CloseHDF(HDFFileID)
    END SUBROUTINE GetRefXYZ
@@ -502,7 +502,7 @@ CONTAINS
        CALL Get(Aux,'Displ',Tag_O=TRIM(IntToChar(IGeom)))
        CALL CartRNK2ToCartRNK1(Vect%D,Aux%D)
        DO J=1,NCartS ; SRStruct%D(J,ICount)=Vect%D(J) ; ENDDO
-       CALL Get(Aux,'Abcartesians',Tag_O=TRIM(IntToChar(IGeom)))
+       CALL Get(Aux,'cartesians',Tag_O=TRIM(IntToChar(IGeom)))
        CALL ConvertToXYZRef(Aux%D,RefXYZ,PBC%Dimen, &
                             BoxShape_O=PBC%BoxShape%D)
        CALL CartRNK2ToCartRNK1(Vect%D,Aux%D)
