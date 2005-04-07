@@ -547,7 +547,6 @@ MODULE MemMan
          CALL New(A%BoxCarts,(/3,A%NAtms/))
          CALL New(A%Velocity,(/3,A%NAtms/))
          CALL New(A%Gradients,(/3,A%NAtms/))
-         CALL New(A%AbCarts,(/3,A%NAtms/))
          CALL New(A%Displ,(/3,A%NAtms/))
          CALL New(A%PBCDispl)
          A%Alloc=ALLOCATED_TRUE
@@ -948,7 +947,6 @@ MODULE MemMan
          CALL Delete(A%BoxCarts)
          CALL Delete(A%Velocity)
          CALL Delete(A%Gradients)
-         CALL Delete(A%AbCarts)
          CALL Delete(A%Displ)
          CALL Delete(A%PBCDispl)
          A%NAtms=0

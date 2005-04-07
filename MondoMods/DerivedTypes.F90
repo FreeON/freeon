@@ -358,7 +358,6 @@ MODULE DerivedTypes
       TYPE(DBL_RNK2)   :: Velocity  !-- velocities    
       TYPE(DBL_RNK2)   :: Gradients !-- Gradients
 !
-      TYPE(DBL_RNK2)   :: AbCarts   !-- Absolute, unwrapped coordinates
       TYPE(DBL_RNK2)   :: Displ     !-- Displaced Cartesian geometry
       TYPE(PBCInfo)    :: PBCDispl  !-- Displaced Periodic Information
 !     Internal coordinates related arrays

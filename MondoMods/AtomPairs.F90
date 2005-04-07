@@ -283,7 +283,7 @@ CONTAINS
 !
     DO I=1,GM%NAtms
        GM%Carts%D(:,I)      = GM%Carts%D(:,I)    + ATvec(:)
-       GM%AbCarts%D(:,I)    = GM%AbCarts%D(:,I)  + ATvec(:)
+       GM%Carts%D(:,I)    = GM%Carts%D(:,I)  + ATvec(:)
        GM%BoxCarts%D(:,I)   = GM%BoxCarts%D(:,I) + FTvec(:)
     ENDDO
 !
