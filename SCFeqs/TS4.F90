@@ -15,14 +15,23 @@ PROGRAM DMP_TS4 ! Density matrix purification, TS4 variation
 ! Trace purserving TS4
 !-------------------------------------------------------------------------------------
   TYPE(ARGMT)                    :: Args
+#ifdef PARALLEL
+  TYPE(DBCSR)                    :: F,P,POld,Tmp1,Tmp2,Tmp3
+  TYPE(BCSR)                     :: F_BCSR
+#else
   TYPE(BCSR)                     :: F,P,POld,Tmp1,Tmp2,Tmp3
+#endif
   REAL(DOUBLE)                   :: Ne
   INTEGER                        :: I,MM
   LOGICAL                        :: Present
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg,FFile
   CHARACTER(LEN=3),PARAMETER     :: Prog='TS4'
 !-------------------------------------------------------------------------
+#ifdef PARALLEL
+  CALL StartUp(Args,Prog,SERIAL_O=.FALSE.)
+#else
   CALL StartUp(Args,Prog)
+#endif
   ! Suss for matrix threshold overide
   CALL SussTrix('NTFourTrix',Prog)  
   ! Get the Fock matrix
@@ -43,7 +52,13 @@ PROGRAM DMP_TS4 ! Density matrix purification, TS4 variation
   MM=0                        
   Ne=Half*DBLE(NEl)    
   ! Guess P from F
+#ifdef PARALLEL
+  CALL SetEq(F_BCSR,F)
+  CALL FockGuess(F_BCSR,P,Ne,1)
+  CALL Delete(F_BCSR)
+#else
   CALL FockGuess(F,P,Ne,1)
+#endif
   CALL SetEq(Pold,P)    
   ! Do TS4 iterations
   DO I=1,100 

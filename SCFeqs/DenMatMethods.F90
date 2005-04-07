@@ -691,7 +691,11 @@ CONTAINS
 
 !-------------------------------------------------------------------------------
    SUBROUTINE TS4(P,P2,Tmp1,Tmp2,Norm,MMMs)
+#ifdef PARALLEL
+     TYPE(DBCSR)                    :: P,P2,Tmp1,Tmp2
+#else
      TYPE(BCSR)                     :: P,P2,Tmp1,Tmp2
+#endif
      REAL(DOUBLE)                   :: CR,Norm,Gt,Gn,G,Coeff
      INTEGER                        :: MMMs
      REAL(DOUBLE)                   :: EPS = 1.D-12
@@ -700,8 +704,15 @@ CONTAINS
      MMMs = MMMs+1
      TrP  = Trace(P)
      TrP2 = Trace(P2)
+#ifdef PARALLEL
+     CALL Multiply(P,P2,Tmp1)
+     TrP3 = Trace(Tmp1)
+     CALL Multiply(P2,P2,Tmp1)
+     TrP4 = Trace(Tmp1)
+#else
      TrP3 = Trace(P,P2)
      TrP4 = Trace(P2,P2)
+#endif
      Gt   = (Norm-Four*TrP3+3*TrP4)
      Gn   = (TrP2-Two*TrP3+TrP4)
      CR   = TrP - Norm     
