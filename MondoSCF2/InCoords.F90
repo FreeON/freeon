@@ -5049,7 +5049,7 @@ return
      !
      ! For H-bonds: A-H...B = JJE-JJ1...JJ2
      !
-     BridgeCrit=3.5D0
+     BridgeCrit=3.5D0*AngstromsToAu
      HasAttached=.FALSE.
      Conv=180.D0/PI
      JJE=0
