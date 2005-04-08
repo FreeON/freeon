@@ -81,23 +81,49 @@ CONTAINS
   SUBROUTINE NEBPurify(G)
     TYPE(Geometries) :: G
     INTEGER          :: I,iCLONE,J
-    REAL(DOUBLE),DIMENSION(G%Clones) :: R2
+    REAL(DOUBLE),DIMENSION(G%Clones+1) :: R2
     REAL(DOUBLE),DIMENSION(3,3) :: U
     REAL(DOUBLE),DIMENSION(3)   :: Center1,Center2
     REAL(DOUBLE) :: Error
-    DO iCLONE=1,G%Clones
-       ! Minimize the RMS deviation between the products (clone 0) and clones
+    DO iCLONE=1,G%Clones+1
+#ifdef NEB_DEBUG       
+       WRITE(*,*)'==========',iclone,'============='
+#endif
+       ! Minimize the RMS deviation between the reactants (clone 0), the clones (1-N) and the products (N+1)
        CALL RMSD(G%Clone(0)%NAtms,G%Clone(iCLONE)%Carts%D,G%Clone(0)%Carts%D,  &
                  1, U, center2, center1, error )! , calc_g, grad)
+#ifdef NEB_DEBUG       
+       WRITE(*,333)1,center1
+       WRITE(*,333)2,center2
+333    FORMAT('CENTER',I2,' = ',3(F10.5,', '))
+#endif
+       IF(iCLONE==1)THEN
+          ! Translate the reactants just once to zero
+          DO I=1,G%Clone(0)%NAtms
+             G%Clone(0)%Carts%D(:,I)=G%Clone(0)%Carts%D(:,I)-center1
+          ENDDO
+       ENDIF
        ! Rotation ... 
+#ifdef NEB_DEBUG
+       DO I=1,G%Clone(0)%NAtms
+          WRITE(*,3)iCLONE,Ats(INT(G%Clone(0)%AtNum%D(I))),G%Clone(iCLONE)%Carts%D(:,I)
+       ENDDO
+3      format('BEFORE TRANS ',I3,' ',A3,' ',3(F10.5,', '))
+#endif
+       ! Translation ...
+       DO I=1,G%Clone(0)%NAtms
+          G%Clone(iCLONE)%Carts%D(:,I)=G%Clone(iCLONE)%Carts%D(:,I)-center2
+       ENDDO
+       ! ... and rotation
        DO I=1,G%Clone(0)%NAtms
           G%Clone(iCLONE)%Carts%D(:,I)=MATMUL(U,G%Clone(iCLONE)%Carts%D(:,I))
        ENDDO
-       ! ... and translation
+#ifdef NEB_DEBUG
        DO I=1,G%Clone(0)%NAtms
-          G%Clone(0)%Carts%D(:,I)=G%Clone(0)%Carts%D(:,I)+center2
-          G%Clone(iCLONE)%Carts%D(:,I)=G%Clone(iCLONE)%Carts%D(:,I)+center1
+          WRITE(*,4)iCLONE,Ats(INT(G%Clone(0)%AtNum%D(I))),G%Clone(iCLONE)%Carts%D(:,I)
        ENDDO
+4      format('AFTER TRANS ',I3,' ',A3,' ',3(F10.5,', '))
+#endif
        R2(iCLONE)=Zero
        DO I=1,G%Clone(0)%NAtms
           DO J=1,3
@@ -105,10 +131,9 @@ CONTAINS
           ENDDO
        ENDDO
        R2(iCLONE)=SQRT(R2(iCLONE))/G%Clone(0)%NAtms
-       WRITE(*,*)R2(iCLONE),Error
     ENDDO
     WRITE(*,33)R2(:)
-33  FORMAT('CLONE RMSDs = ',100(F6.4,', '))
+33  FORMAT('CLONE RMSDs = ',100(F8.4,', '))
   END SUBROUTINE NEBPurify
   !===============================================================================
   ! Project out the force along the band and add spring forces along the band.

@@ -29,7 +29,7 @@ include $(MONDO_COMPILER)
 include $(MONDO_HOME)/Includes/Suffixes
 include $(MONDO_HOME)/Includes/RemoveAll
 #
-CPPMISC= -DNEB2 #-DFULL_ON_FRONT_END_DEBUG
+CPPMISC= -DNEB2  #-DFULL_ON_FRONT_END_DEBUG
 #
 ObjectFiles = GetPID.o Spawn.o  ControlStructures.o ls_rmsd.o NEB.o Numerics.o ParseCommands.o  \
               OptionKeys.o ConflictDetect.o ParseOptions.o DynamicsKeys.o             \
