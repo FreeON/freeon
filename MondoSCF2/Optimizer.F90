@@ -512,11 +512,11 @@ CONTAINS
      TYPE(Controls)            :: C
      INTEGER                   :: I,iBAS,iGEO,iGEOst,iCLONE
      INTEGER                   :: AccL 
-     INTEGER                   :: FirstGeom,NatmsLoc
+     INTEGER                   :: FirstGeom,NatmsLoc,GuessO
      INTEGER                   :: ConvgdAll,MaxSteps,IStart,Dimen
      TYPE(INT_VECT)            :: Convgd
-     TYPE(INT_VECT)            :: BPrev,BCur
      TYPE(INTC)                :: IntCES
+     TYPE(State)               :: StateO
      !
      iGEO=C%Stat%Previous%I(3)
      iGEOst=iGEO
@@ -524,8 +524,6 @@ CONTAINS
      CALL SetGeOpCtrl(C%GOpt,C%Geos,C%Opts,C%Sets,C%Nams,iGEO)
      ! initial geometry
      MaxSteps=C%GOpt%GConvCrit%MaxGeOpSteps
-     CALL NEW(BPrev,SIZE(C%Stat%Previous%I))
-     CALL NEW(BCur ,SIZE(C%Stat%Previous%I))
      ! Build the guess 
      DO iBAS=1,C%Sets%NBSets-1
        CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
@@ -555,10 +553,13 @@ CONTAINS
        !
        ! Calculate energy and force for all clones at once.
        !
-       BPrev%I=C%Stat%Previous%I
-       BCur%I=C%Stat%Current%I
+       StateO%Action=C%Stat%Action
+       StateO%Current=C%Stat%Current
+       StateO%Previous=C%Stat%Previous
+       GuessO=C%Opts%Guess
+       !
        CALL SCF(iBAS,iGEO,C)
-       CALL BackTrack(iBAS,iGEO,C,BPrev%I,BCur%I)
+       CALL BackTrack(iBAS,iGEO,C,StateO,GuessO)
        CALL Force(iBAS,iGEO,C%Nams,C%Opts,C%Stat, &
                   C%Geos,C%Sets,C%MPIs)
        !
@@ -633,8 +634,6 @@ CONTAINS
      460  FORMAT('Geometry Optimization converged in ',I6,' steps.')
      700  FORMAT('Maximum number of optimization'&
             //' steps exceeded, optimization did not converge.')
-     CALL Delete(BPrev)
-     CALL Delete(BCur)
    END SUBROUTINE IntOpt
 !
 !------------------------------------------------------------------
@@ -1615,13 +1614,12 @@ CONTAINS
 !
 !-------------------------------------------------------------------
 !
-   SUBROUTINE BackTrack(iBAS,iGEO,C,BPrev,BCur,DoLineS_O)
+   SUBROUTINE BackTrack(iBAS,iGEO,C,StateO,GuessO,DoLineS_O)
      ! Go over clones and do backtracking whenever necessary
      TYPE(Controls)   :: C
      INTEGER          :: I,J,iBAS,iGEO,iCLONE,I1,I2
-     INTEGER,DIMENSION(:):: BPrev,BCur
      INTEGER          :: NatmsLoc,NCart,AccL
-     INTEGER          :: MaxBStep,IBStep
+     INTEGER          :: MaxBStep,IBStep,GuessO
      CHARACTER(LEN=DCL):: chGEO
      TYPE(CRDS)       :: GMOld
      LOGICAL          :: DoBackTrack,DoLineS,DoBackTrackAll
@@ -1631,6 +1629,7 @@ CONTAINS
      TYPE(DBL_VECT)   :: DistVect1,DistVect2
      TYPE(DBL_RNK2)   :: RefXYZ1
      TYPE(LOG_VECT)   :: NeedBackTr
+     TYPE(State)      :: StateO
      !
      IF(iGEO==1) RETURN
      BackTrackFact=1.D0
@@ -1795,11 +1794,10 @@ CONTAINS
        ENDDO
        !
        IF(DoBackTrackAll) THEN
-         !
-         C%Stat%Previous%I=BPrev
-         C%Stat%Current%I=BCur
-       ! C%Stat%Previous%I(3)=iGEO-1
-       ! C%Stat%Current%I(3)=iGEO
+         C%Stat%Action   =StateO%Action   
+         C%Stat%Current%I  =StateO%Current%I
+         C%Stat%Previous%I =StateO%Previous%I 
+         C%Opts%Guess=GuessO
          CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
          CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
          CALL SCF(iBAS,iGEO,C)
