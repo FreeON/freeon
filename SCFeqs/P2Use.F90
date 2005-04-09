@@ -149,7 +149,7 @@ PROGRAM P2Use
      CurGeom=TRIM(IntToChar(Stat%I(3)))
      ! Open the old group
      HDF_CurrentID=OpenHDFGroup(OldFileID,"Clone #"//TRIM(IntToChar(MyClone)))
-     ! Get the old AO-DM
+     ! Get the old AO-dM
      CALL Get(P,'CurrentDM',CheckPoint_O=.TRUE.)
      CALL Get(S,TrixFile('S',Args))
 #ifdef PARALLEL
@@ -293,14 +293,14 @@ PROGRAM P2Use
 #ifdef PARALLEL
      CALL Multiply(P0,S0,Tmp1)
      TError0 = ABS(Trace(Tmp1)-Half*DBLE(NEl))
-     IF(MyID.EQ.ROOT)WRITE(*,*) "Trace Error: Tr[P0,S0] = ",TError0
+!     IF(MyID.EQ.ROOT)WRITE(*,*) "Trace Error: Tr[P0,S0] = ",TError0
      CALL Multiply(P0,S1,Tmp1)
      TError0 = ABS(Trace(Tmp1)-Half*DBLE(NEl))
-     IF(MyID.EQ.ROOT)WRITE(*,*) "Trace Error: Tr[P0,S1] = ",TError0 
+!     IF(MyID.EQ.ROOT)WRITE(*,*) "Trace Error: Tr[P0,S1] = ",TError0 
 #else
      TError0 = ABS(Trace(P0,S1)-Half*DBLE(NEl))
-     WRITE(*,*) "Trace Error: Tr[P0,S0] = ",ABS(Trace(P0,S0)-Half*DBLE(NEl))
-     WRITE(*,*) "Trace Error: Tr[P0,S1] = ",ABS(Trace(P0,S1)-Half*DBLE(NEl))
+!     WRITE(*,*) "Trace Error: Tr[P0,S0] = ",ABS(Trace(P0,S0)-Half*DBLE(NEl))
+!     WRITE(*,*) "Trace Error: Tr[P0,S1] = ",ABS(Trace(P0,S1)-Half*DBLE(NEl))
 #endif
 !    Initialize
      NStep = 0
@@ -326,8 +326,8 @@ PROGRAM P2Use
                 //' Lambda = '//TRIM(DblToMedmChar(Lam))      
            CALL OpenASCII(OutFile,Out)
            CALL PrintProtectL(Out)
-           WRITE(*,*)TRIM(Mssg)
-           WRITE(Out,*)TRIM(Mssg)
+!           WRITE(*,*)TRIM(Mssg)
+!           WRITE(Out,*)TRIM(Mssg)
            CALL PrintProtectR(Out)
            CLOSE(UNIT=Out,STATUS='KEEP')
 #ifdef PARALLEL          
@@ -372,8 +372,8 @@ PROGRAM P2Use
                    //', %Non0='//TRIM(DblToShrtChar(PNon0s))              
               CALL OpenASCII(OutFile,Out)
               CALL PrintProtectL(Out)
-              WRITE(*,*)TRIM(Mssg)
-              WRITE(Out,*)TRIM(Mssg)
+!              WRITE(*,*)TRIM(Mssg)
+!              WRITE(Out,*)TRIM(Mssg)
               CALL PrintProtectR(Out)
               CLOSE(UNIT=Out,STATUS='KEEP')
 #ifdef PARALLEL          
