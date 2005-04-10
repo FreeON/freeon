@@ -531,11 +531,6 @@ CONTAINS
        CALL SCF(iBAS,iGEO,C)
      ENDDO
      iBAS=C%Sets%NBSets
-     ! Print the starting coordinates and energy
-     DO iCLONE=1,C%Geos%Clones
-       CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile, &
-         Geo,C%Opts%GeomPrint)
-     ENDDO
      !
    ! CALL New(IntCES,C%GOpt%ExtIntCs%N)
    ! CALL SetEq(IntCES,C%GOpt%ExtIntCs,1,C%GOpt%ExtIntCs%N,1)
@@ -1794,9 +1789,11 @@ CONTAINS
        ENDDO
        !
        IF(DoBackTrackAll) THEN
-         C%Stat%Action   =StateO%Action   
-         C%Stat%Current%I  =StateO%Current%I
-         C%Stat%Previous%I =StateO%Previous%I 
+       ! C%Stat%Action     =StateO%Action   
+         C%Stat%Current%I     = StateO%Current%I
+         C%Stat%Previous%I    = StateO%Previous%I
+         C%Stat%Current%I(3)  = iGEO
+         C%Stat%Previous%I(3) = iGEO-1
          C%Opts%Guess=GuessO
          CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
          CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
@@ -1812,7 +1809,6 @@ CONTAINS
      CALL Delete(GMOld)
      CALL Delete(NeedBackTr)
    END SUBROUTINE BackTrack
-!
 !
 !-------------------------------------------------------------------
 !
