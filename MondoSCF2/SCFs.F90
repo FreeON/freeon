@@ -56,7 +56,7 @@ CONTAINS
     !----------------------------------------------------------------------------!
     CALL New(C%Stat%Action,1)
     ! Determine if there was a geomety or Basis Set Change
-    CALL SameBasisSameGeom(cBAS,cGEO,C%Nams,C%Opts,C%Stat)
+    CALL SameBasisSameGeom(cBAS,cGEO,C%Nams,C%Opts,C%Stat,C%Geos)
     ! Compute one-electron matrices   
     CALL OneEMats(cBAS,cGEO,C%Nams,C%Sets,C%Stat,C%Opts,C%MPIs)
     ! Allocate space for convergence statistics
@@ -712,88 +712,97 @@ CONTAINS
 !---------------------------------------------------------------------------------
 !
 !---------------------------------------------------------------------------------
-  SUBROUTINE SameBasisSameGeom(cBAS,cGEO,N,O,S)
+  SUBROUTINE SameBasisSameGeom(cBAS,cGEO,N,O,S,G)
     TYPE(FileNames)    :: N
     TYPE(Options)      :: O
     TYPE(State)        :: S
+    TYPE(Geometries)   :: G
     TYPE(BSET),SAVE    :: BS,BS_rs
     TYPE(CRDS),SAVE    :: GM,GM_rs
     REAL(DOUBLE)       :: MaxDiff
     CHARACTER(LEN=DCL) :: chBAS,chGEO    
-    INTEGER            :: I,J,cBAS,cGEO,pBAS,pGEO
-!
+    INTEGER            :: I,J,cBAS,cGEO,pBAS,pGEO,iCLONE
+    LOGICAL,DIMENSION(G%Clones) :: SameCrds,SameLatt
+    !
     pBAS=S%Previous%I(2)
     pGEO=S%Previous%I(3)
     S%Current%I=(/0,cBAS,cGEO/)
-!
-    S%SameCrds  = .TRUE.
-    S%SameLatt  = .TRUE.
-    S%SameGeom  = .TRUE.
+    !
+    SameCrds=.TRUE.
+    SameLatt=.TRUE.
     S%SameBasis = .TRUE.
-!
+    !
     IF(O%Guess==GUESS_EQ_RESTART) THEN
-       HDFFileID=OpenHDF(N%HFile)
-       HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(1)))
-       chBAS = IntToChar(S%Current%I(2))
-       chGEO = IntToChar(S%Current%I(3))
-       CALL Get(BS,Tag_O=chBAS)
-       CALL Get(GM,Tag_O=chGEO)
-       CALL CloseHDFGroup(HDF_CurrentID)
-       CALL CloseHDF(HDFFileID)
-!
-       HDFFileID=OpenHDF(N%RFile)
-       HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(1)))
-       chBAS = IntToChar(O%RestartState%I(2))
-       chGEO = IntToChar(O%RestartState%I(3))
-       CALL Get(BS_rs,Tag_O=chBAS)
-       CALL Get(GM_rs,Tag_O=chGEO)
-       CALL CloseHDFGroup(HDF_CurrentID)
-       CALL CloseHDF(HDFFileID)
-!
-       IF(BS%BName /= BS_rs%BName) S%SameBasis=.FALSE.
-       MaxDiff=Zero
-       DO I=1,GM%Natms
-          MaxDiff=MAX(MaxDiff,ABS(GM%Carts%D(1,I)-GM_rs%Carts%D(1,I)) + &
-               ABS(GM%Carts%D(2,I)-GM_rs%Carts%D(2,I)) + &
-               ABS(GM%Carts%D(3,I)-GM_rs%Carts%D(3,I))) 
+       DO iCLONE=1,G%Clones
+          HDFFileID=OpenHDF(N%HFile)
+          HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
+          chBAS = IntToChar(S%Current%I(2))
+          chGEO = IntToChar(S%Current%I(3))
+
+          IF(iCLONE==1)CALL Get(BS,Tag_O=chBAS)
+          CALL Get(GM,Tag_O=chGEO)
+          CALL CloseHDFGroup(HDF_CurrentID)
+          CALL CloseHDF(HDFFileID)
+          !
+          HDFFileID=OpenHDF(N%RFile)
+          HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
+          chBAS = IntToChar(O%RestartState%I(2))
+          chGEO = IntToChar(O%RestartState%I(3))
+          IF(iCLONE==1)CALL Get(BS_rs,Tag_O=chBAS)
+          CALL Get(GM_rs,Tag_O=chGEO)
+          CALL CloseHDFGroup(HDF_CurrentID)
+          CALL CloseHDF(HDFFileID)
+          IF(iCLONE==1.AND.BS%BName/=BS_rs%BName)S%SameBasis=.FALSE.
+          MaxDiff=Zero
+          DO I=1,GM%Natms
+             MaxDiff=MAX(MaxDiff,ABS(GM%Carts%D(1,I)-GM_rs%Carts%D(1,I)) + &
+                  ABS(GM%Carts%D(2,I)-GM_rs%Carts%D(2,I)) + &
+                  ABS(GM%Carts%D(3,I)-GM_rs%Carts%D(3,I))) 
+          ENDDO
+          IF(MaxDiff>1D-8)SameCrds(iCLONE)=.FALSE.
+          MaxDiff=Zero
+          DO I=1,3
+             DO J=1,3
+                MaxDiff = MAX(MaxDiff,ABS(GM%PBC%BoxShape%D(I,J)-GM_rs%PBC%BoxShape%D(I,J)))
+             ENDDO
+          ENDDO
+          IF(MaxDiff>1D-8)SameLatt(iCLONE)=.FALSE.
        ENDDO
-       IF(MaxDiff>1D-8)     S%SameCrds=.FALSE.
-       MaxDiff=Zero
-       DO I=1,3;DO J=1,3
-          MaxDiff = MAX(MaxDiff,ABS(GM%PBC%BoxShape%D(I,J)-GM_rs%PBC%BoxShape%D(I,J)))
-       ENDDO;ENDDO 
-       IF(MaxDiff>1D-8)     S%SameLatt=.FALSE.
-       IF(.NOT. S%SameCrds) S%SameGeom=.FALSE. 
-       IF(.NOT. S%SameLatt) S%SameGeom=.FALSE. 
     ELSE
-       HDFFileID=OpenHDF(N%HFile)
-       HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(1)))
-       chBAS = IntToChar(cBAS)
-       chGEO = IntToChar(cGEO)
-       CALL Get(GM,Tag_O=chGEO)
-       CALL Get(BS,Tag_O=chBAS)
-       chBAS = IntToChar(pBAS)
-       chGEO = IntToChar(pGEO)
-       CALL Get(BS_rs,Tag_O=chBAS)
-       CALL Get(GM_rs,Tag_O=chGEO)
-       CALL CloseHDFGroup(HDF_CurrentID)
-       CALL CloseHDF(HDFFileID)
-       IF(BS%BName /= BS_rs%BName) S%SameBasis=.FALSE.
-       MaxDiff=Zero
-       DO I=1,GM%Natms
-          MaxDiff=MAX(MaxDiff,ABS(GM%Carts%D(1,I)-GM_rs%Carts%D(1,I)) + &
-               ABS(GM%Carts%D(2,I)-GM_rs%Carts%D(2,I)) + &
-               ABS(GM%Carts%D(3,I)-GM_rs%Carts%D(3,I))) 
+       DO iCLONE=1,G%Clones
+          HDFFileID=OpenHDF(N%HFile)
+          HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
+          chBAS = IntToChar(cBAS)
+          chGEO = IntToChar(cGEO)
+          CALL Get(GM,Tag_O=chGEO)
+          IF(iCLONE==1) &
+               CALL Get(BS,Tag_O=chBAS)
+          chBAS = IntToChar(pBAS)
+          chGEO = IntToChar(pGEO)
+          IF(iCLONE==1) &
+               CALL Get(BS_rs,Tag_O=chBAS)
+          CALL Get(GM_rs,Tag_O=chGEO)
+          CALL CloseHDFGroup(HDF_CurrentID)
+          CALL CloseHDF(HDFFileID)
+          IF(iCLONE==1.AND.BS%BName/=BS_rs%BName)S%SameBasis=.FALSE.
+          MaxDiff=Zero
+          DO I=1,GM%Natms
+             MaxDiff=MAX(MaxDiff,ABS(GM%Carts%D(1,I)-GM_rs%Carts%D(1,I)) + &
+                  ABS(GM%Carts%D(2,I)-GM_rs%Carts%D(2,I)) + &
+                  ABS(GM%Carts%D(3,I)-GM_rs%Carts%D(3,I))) 
+          ENDDO
+          IF(MaxDiff>1D-8)SameCrds(iCLONE)=.FALSE.
+          MaxDiff=Zero
+          DO I=1,3;DO J=1,3
+             MaxDiff = MAX(MaxDiff,ABS(GM%PBC%BoxShape%D(I,J)-GM_rs%PBC%BoxShape%D(I,J)))
+          ENDDO;ENDDO 
+          IF(MaxDiff>1D-8)SameLatt(iCLONE)=.FALSE.
        ENDDO
-       IF(MaxDiff>1D-8)            S%SameCrds=.FALSE.
-       MaxDiff=Zero
-       DO I=1,3;DO J=1,3
-          MaxDiff = MAX(MaxDiff,ABS(GM%PBC%BoxShape%D(I,J)-GM_rs%PBC%BoxShape%D(I,J)))
-       ENDDO;ENDDO 
-       IF(MaxDiff>1D-8)            S%SameLatt=.FALSE.
-       IF(.NOT. S%SameCrds)        S%SameGeom=.FALSE. 
-       IF(.NOT. S%SameLatt)        S%SameGeom=.FALSE. 
     ENDIF
+    S%SameGeom=.TRUE.
+    DO iCLONE=1,G%Clones
+       S%SameGeom=S%SameGeom.AND.SameCrds(iCLONE).AND.SameLatt(iCLONE)
+    ENDDO
   END SUBROUTINE SameBasisSameGeom
   !===============================================================================
   !
