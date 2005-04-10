@@ -1,8 +1,8 @@
 echo "#!/bin/tcsh "                                   >  $1.pbs
 echo "#PBS -joe  -N  $1"                              >> $1.pbs
 echo "cd $PWD"                                        >> $1.pbs
-echo "mkdir $MONDO_SCRATCH"                           >> $1.pbs     
-echo "$MONDO_EXEC/MondoSCF  $1.inp $1.out $1.log"     >> $1.pbs
+echo "mkdir  -p $MONDO_SCRATCH"                       >> $1.pbs     
+echo "$MONDO_EXEC/MondoSCF  $1.inp $1.out $1.log > $1.STDOUT "     >> $1.pbs
 chmod u+x $1.pbs
 qsub $1.pbs
 rm -f $1.pbs
