@@ -64,7 +64,7 @@ CONTAINS
     DO iCLONE=GBeg,GEnd
        CALL PPrint(C%Geos%Clone(iCLONE),TRIM(C%Nams%GFile)//IntToChar(iCLONE),Geo,C%Opts%GeomPrint)
     ENDDO
-    CALL MergePrintClones(C%Geos,C%Nams,C%Opts,GBeg,GEnd)
+    CALL MergePrintClones(C%Geos,C%Nams,C%Opts)
     iBAS=C%Sets%NBSets
     IStart=iGEO
     ! Follow the gradient downhill for NSteps
@@ -112,20 +112,22 @@ CONTAINS
           C%Geos%Clone(iCLONE)%Carts%D=C%Geos%Clone(iCLONE)%Displ%D
        ENDDO
        CALL GeomArchive(iBAS,iGEO+1,C%Nams,C%Sets,C%Geos)    
-       CALL MergePrintClones(C%Geos,C%Nams,C%Opts,GBeg,GEnd)
+       CALL MergePrintClones(C%Geos,C%Nams,C%Opts)
     ENDDO
   END SUBROUTINE SteepD
   !
   !=====================================================================================
   !
-  SUBROUTINE MergePrintClones(Geos,Nams,Opts,GBeg,GEnd)
+  SUBROUTINE MergePrintClones(Geos,Nams,Opts)
     TYPE(Geometries) :: Geos
     TYPE(FileNames)  :: Nams
     TYPE(Options)    :: Opts
     INTEGER          :: iCLONE,NatmsMerge,GBeg,GEnd,J,M
     TYPE(CRDS)       :: GMMerge
     REAL(DOUBLE),DIMENSION(3) :: CME1,CME2,TR,DIAG
-
+    !
+    GBeg=0
+    GEnd=Geos%Clones+1
     NatmsMerge=Geos%Clone(GBeg)%Natms*(GEnd-GBeg+1)
     CME1=Zero
     CME2=Zero
@@ -542,7 +544,10 @@ CONTAINS
      !
      IStart=iGEO
      DO iGEO=IStart,MaxSteps
-       IF(C%Opts%Grad==GRAD_TS_SEARCH_NEB) CALL NEBPurify(C%Geos)
+       IF(C%Opts%Grad==GRAD_TS_SEARCH_NEB) THEN
+         CALL NEBPurify(C%Geos)
+         CALL MergePrintClones(C%Geos,C%Nams,C%Opts)
+       ENDIF
        CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
        CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
        !
@@ -1297,8 +1302,10 @@ CONTAINS
      INTEGER          :: NatmsLoc,NCart
      REAL(DOUBLE)     :: Sum,GCrit
      INTEGER          :: AccL,iGEO,Dimen
+     LOGICAL          :: DoNEB
      !
      AccL    =Opts%AccuracyLevels(Sets%NBSets)
+     DoNEB   =(Opts%Grad==GRAD_TS_SEARCH_NEB)
      NatmsLoc=Geos%Clone(1)%Natms
      NCart=3*NatmsLoc
      Dimen=Geos%Clone(1)%PBC%Dimen
@@ -1310,7 +1317,7 @@ CONTAINS
      CALL    SetGrdTrf(GOpt%GrdTrf,GOpt%GConvCrit)
      CALL   SetBackTrf(GOpt%BackTrf,GOpt%GConvCrit)
      CALL    SetConstr(GOpt%Constr,GOpt%BackTrf)
-     CALL   SetTrfCtrl(GOpt%TrfCtrl,GOpt%CoordCtrl,GOpt%Constr,Dimen)
+     CALL   SetTrfCtrl(GOpt%TrfCtrl,GOpt%CoordCtrl,GOpt%Constr,DoNEB,Dimen)
    END SUBROUTINE SetGeOpCtrl
 !
 !---------------------------------------------------------------
@@ -1492,16 +1499,21 @@ CONTAINS
 !
 !-------------------------------------------------------------------
 !
-   SUBROUTINE SetTrfCtrl(TrfC,CoordC,GConstr,Dimen)
+   SUBROUTINE SetTrfCtrl(TrfC,CoordC,GConstr,DoNEB,Dimen)
      TYPE(TrfCtrl)   :: TrfC
      TYPE(CoordCtrl) :: CoordC
      TYPE(Constr)    :: GConstr
      INTEGER         :: Dimen
+     LOGICAL         :: DoNEB
      !
      TrfC%DoTranslOff=.TRUE.
      TrfC%DoRotOff=.TRUE.
      IF(GConstr%NCartConstr>0.OR.Dimen>0) TrfC%DoTranslOff=.FALSE.
      IF(GConstr%NCartConstr>0.AND.Dimen==0) TrfC%DoRotOff=.FALSE.
+     IF(DoNEB) THEN
+       TrfC%DoTranslOff=.FALSE.
+       TrfC%DoRotOff=.FALSE.
+     ENDIF
      !
      IF(CoordC%CoordType/=CoordType_Cartesian) THEN
        TrfC%DoInternals=.TRUE.
