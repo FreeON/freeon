@@ -91,9 +91,10 @@ MODULE LinAlg
 !-------------------------------------------------------------------------------
    INTERFACE Filter
 #ifdef PARALLEL
-      MODULE PROCEDURE FilterM_BCSR,FilterM_DBCSR
+      MODULE PROCEDURE FilterM_BCSR,FilterM_DBCSR, &
+           &           FilterM_InPlace_BCSR,FilterM_InPlace_DBCSR
 #else
-      MODULE PROCEDURE FilterM_BCSR
+      MODULE PROCEDURE FilterM_BCSR,FilterM_InPlace_BCSR
 #endif
    END INTERFACE
 !-------------------------------------------------------------------------------
@@ -2088,6 +2089,151 @@ MODULE LinAlg
          PerfMon%FLOP=PerfMon%FLOP+FlOp
          IF(PRESENT(Perf_O))Perf_O%FLOP=Perf_O%FLOP+FlOp
       END SUBROUTINE FilterM_BCSR
+!===============================================================================
+!     Wrapper for generic F77 style BCSR matrix filtration
+!===============================================================================
+      SUBROUTINE FilterM_InPlace_BCSR(A,Tol_O,Perf_O)
+         TYPE(BCSR),           INTENT(INOUT) :: A
+         REAL(DOUBLE),OPTIONAL,INTENT(IN)    :: Tol_O         
+         TYPE(TIME),  OPTIONAL,INTENT(INOUT) :: Perf_O         
+         REAL(DOUBLE)                        :: Tol,FlOp
+!-------------------------------------------------------------------------------
+         FlOp=Zero
+         IF(PRESENT(Tol_O))THEN
+            Tol=Tol_O
+         ELSE
+            Tol=Thresholds%Trix
+         ENDIF
+#ifdef PARALLEL
+         IF(MyId==ROOT)THEN
+#endif
+         CALL FilterM_InPlace_GENERIC(0,A%NAtms,A%NBlks,A%NNon0, &
+                              A%RowPt%I,A%ColPt%I,A%BlkPt%I,A%MTrix%D, &
+                              BSiz%I,Tol,FlOp)
+#ifdef PARALLEL
+         ENDIF
+#endif
+         PerfMon%FLOP=PerfMon%FLOP+FlOp
+         IF(PRESENT(Perf_O))Perf_O%FLOP=Perf_O%FLOP+FlOp
+      END SUBROUTINE FilterM_InPlace_BCSR
+#ifdef PARALLEL
+!===============================================================================
+!     Wrapper for generic F77 style DBCSR matrix filtration
+!===============================================================================
+      SUBROUTINE FilterM_InPlace_DBCSR(A,Tol_O,Perf_O)
+         REAL(DOUBLE),OPTIONAL,INTENT(IN)    :: Tol_O         
+         TYPE(TIME),  OPTIONAL,INTENT(INOUT) :: Perf_O         
+         TYPE(DBCSR),          INTENT(INOUT) :: A
+         REAL(DOUBLE)                        :: Tol,FlOp        
+!-------------------------------------------------------------------------------
+         FlOp=Zero
+         IF(PRESENT(Tol_O))THEN
+            Tol=Tol_O
+         ELSE
+            Tol=Thresholds%Trix
+         ENDIF
+         CALL FilterM_InPlace_GENERIC(OffSt%I(MyId),A%NAtms,A%NBlks,A%NNon0, &
+              &               A%RowPt%I,A%ColPt%I,A%BlkPt%I,A%MTrix%D, &
+              &               BSiz%I,Tol,FlOp)
+         A%Node=MyId
+         A%GUpDate=STATUS_FALSE
+         PerfMon%FLOP=PerfMon%FLOP+FlOp
+         IF(PRESENT(Perf_O))Perf_O%FLOP=Perf_O%FLOP+FlOp
+      END SUBROUTINE FilterM_InPlace_DBCSR
+#endif
+!===============================================================================
+!     Generic F77 style routine for filtering (D/B)CSR matrices:
+!     A=FILTER(B,Tol)
+!===============================================================================
+      SUBROUTINE FilterM_InPlace_GENERIC(BOffSt,ANAtms,ANBlks,ANNon0, &                       
+           &                     ARowPt,AColPt,ABlkPt,AMTrix, &
+           &                     MSiz,Tol,FlOp)
+         INTEGER,                  INTENT(IN)  :: BOffSt
+         INTEGER,     DIMENSION(:),INTENT(IN)  :: MSiz
+         REAL(DOUBLE),             INTENT(IN)  :: Tol
+         INTEGER,                  INTENT(INOUT) :: ANAtms,ANBlks,ANNon0
+         INTEGER,     DIMENSION(:),INTENT(INOUT) :: ARowPt,AColPt,ABlkPt
+         REAL(DOUBLE),DIMENSION(:),INTENT(INOUT) :: AMTrix
+         REAL(DOUBLE),             INTENT(INOUT) :: FlOp
+         REAL(DOUBLE),EXTERNAL                 :: DBL_Dot
+         REAL(DOUBLE)                          :: Op
+         INTEGER                               :: IL,IG,J,JP,K,P,Q,MA,NA,MN,MN1, &
+                                                  IStrtA,IStopA,iMvAtm,iMvBlk,iS
+!-------------------------------------------------------------------------------
+         iMvAtm=0;iMvBlk=0;K=0;Q=0;
+         Op=Zero
+         DO IL=1,ANAtms
+            IG=IL+BOffSt
+            MA=MSiz(IG)
+            IStrtA=ARowPt(IL)
+            IStopA=ARowPt(IL+1)-1
+            ARowPt(IL)=ARowPt(IL)-iMvAtm
+            IF(IStrtA.NE.0.AND.IStopA.NE.0)THEN
+               DO JP=IStrtA,IStopA
+                  J=AColPt(JP)
+                  P=ABlkPt(JP)
+                  NA=MSiz(J)
+                  MN=MA*NA
+                  IF(SQRT(DBL_Dot(MN,AMTrix(P),AMTrix(P))).LT.Tol)THEN
+                     AColPt(JP)=-9999
+                     ABlkPt(JP)=-9999
+                     CALL DBL_VECT_EQ_DBL_SCLR(MN,AMTrix(P),BIG_DBL)
+                     iMvAtm=iMvAtm+1
+                     iMvBlk=iMvBlk+MN
+                  ELSE
+                     IF(iMvAtm.NE.0) THEN
+                        AColPt(JP-iMvAtm)=J
+                        ABlkPt(JP-iMvAtm)=P-iMvBlk
+                        CALL DBL_VECT_EQ_DBL_VECT(MN,AMTrix(P-iMvBlk),AMTrix(P))
+                     ENDIF
+                     K=K+1
+                     Q=Q+MN
+                  ENDIF
+                  Op=Op+DBLE(MN)
+               ENDDO
+            ENDIF
+         ENDDO
+         ARowPt(ANAtms+1)=ARowPt(ANAtms+1)-iMvAtm
+         IF(K.GT.ANBlks.OR.Q.GT.ANNon0) THEN
+            WRITE(*,*) 'WRONG LOGIC IN Filter_InPlace 1!'
+            WRITE(*,*) 'ANBlks',ANBlks,' K',K
+            WRITE(*,*) 'ANNon0',ANNon0,' Q',Q
+            STOP
+         ENDIF
+         ANBlks=K
+         ANNon0=Q
+         !
+         iS=SIZE(AMTrix)
+         CALL DBL_VECT_EQ_DBL_SCLR(iS-ANNon0,AMTrix(ANNon0+1),-BIG_DBL)
+         iS=SIZE(AColPt)
+         CALL INT_VECT_EQ_INT_SCLR(iS-ANBlks,AColPt(ANBlks+1),BIG_INT)
+         CALL INT_VECT_EQ_INT_SCLR(iS-ANBlks,ABlkPt(ANBlks+1),BIG_INT)
+         !
+         DO JP=1,ANBlks
+            IF(AColPt(JP).EQ.-9999.OR.ABlkPt(JP).EQ.-9999) THEN
+               WRITE(*,*) 'WRONG LOGIC IN Filter_InPlace 2!'
+               WRITE(*,*) 'MyID',MyID
+               WRITE(*,*) 'ANBlks',ANBlks
+               WRITE(*,*) 'AColPt(',JP,')=',AColPt(JP)
+               WRITE(*,*) 'ABlkPt(',JP,')=',ABlkPt(JP)
+               STOP
+            ENDIF
+         ENDDO
+         DO P=1,ANNon0
+            IF(ABS(AMTrix(P)).GT.1D15) THEN
+               WRITE(*,*) 'WRONG LOGIC IN Filter_InPlace 3!'
+               WRITE(*,*) 'MyID',MyID
+               WRITE(*,*) 'ANNon0',ANNon0
+               WRITE(*,*) 'AMTrix(',P,')=',AMTrix(P)
+          STOP
+       ENDIF
+    ENDDO
+    FlOp=FlOp+Two*Op
+
+
+    !WRITE(*,*) 'iMvAtm=',iMvAtm,' iMvBlk=',iMvBlk
+    !                  
+  END SUBROUTINE FilterM_InPlace_GENERIC
 !===============================================================================
 !     Generic F77 style routine for filtering (D/B)CSR matrices:
 !     A=FILTER(B,Tol)
