@@ -180,6 +180,24 @@ will constrain the X component of the atom 34 to 1145.98 angstroems.
 In case of crystal optimizations, the corresponding fractional
 coordinate will be fixed.
 
+\subsubsection{Constraining the cell-volume in crystals}
+Similarly to other internal coordinate constraints, the cell volume 
+(for 3D crystals) and the area (for 2D crystals) can be constrained.
+These constraints are hard constraints and are held strictly at the 
+required value during the optimization.
+For example, for 3D crystals
+\\
+{\tt VOLM{\_}L 123.54 }
+\\
+will keep the lattice volume fixed at 123.54 cubic angstroems.
+For 2D cystals
+\\
+{\tt AREA{\_}L 23.54 }
+\\
+fixes the area spanned by the lattice vectors at 23.54 
+square angstroems. 
+
+
 \subsection{Alternating optimization}
 For crystal structure optimizations the alternation of atoms-only and
 lattice-only steps may be helpful.
