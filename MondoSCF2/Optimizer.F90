@@ -1664,6 +1664,16 @@ CONTAINS
          ENew=C%Geos%Clone(iCLONE)%ETotal
          DoBackTrack=((ENew-EOld)/ABS(EOld)>BackTrackFact*ETol(AccL))
          !
+         CALL New(RefXYZ1,(/3,NatmsLoc/))
+         CALL GetRefXYZ(C%Nams%HFile,RefXYZ1,iCLONE)
+         CALL ConvertToXYZRef(GMOld%Carts%D,RefXYZ1%D, &
+                              GMOld%PBC%Dimen,&
+                              BoxShape_O=GMOld%PBC%BoxShape%D)
+         CALL ConvertToXYZRef(C%Geos%Clone(iCLONE)%Carts%D,RefXYZ1%D,&
+                        C%Geos%Clone(iCLONE)%PBC%Dimen, &
+                        BoxShape_O=C%Geos%Clone(iCLONE)%PBC%BoxShape%D)
+         CALL Delete(RefXYZ1)
+         !
          CALL New(DistVect1,NCart)
          CALL CartRNK2ToCartRNK1(DistVect1%D,GMOld%Carts%D)
          CALL New(DistVect2,NCart)
@@ -1700,16 +1710,6 @@ CONTAINS
          ENDIF
          IF(.NOT.DoBackTrack) CYCLE
          DoBackTrackAll=.TRUE.
-         !
-         CALL New(RefXYZ1,(/3,NatmsLoc/))
-         CALL GetRefXYZ(C%Nams%HFile,RefXYZ1,iCLONE)
-         CALL ConvertToXYZRef(GMOld%Carts%D,RefXYZ1%D, &
-                              GMOld%PBC%Dimen,&
-                              BoxShape_O=GMOld%PBC%BoxShape%D)
-         CALL ConvertToXYZRef(C%Geos%Clone(iCLONE)%Carts%D,RefXYZ1%D,&
-                        C%Geos%Clone(iCLONE)%PBC%Dimen, &
-                        BoxShape_O=C%Geos%Clone(iCLONE)%PBC%BoxShape%D)
-         CALL Delete(RefXYZ1)
          !
          ! Convert BoxCarts to same reference system
        ! C%Geos%Clone(iCLONE)%PBC%InvBoxSh%D= &
