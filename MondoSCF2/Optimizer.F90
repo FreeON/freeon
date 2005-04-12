@@ -542,15 +542,15 @@ CONTAINS
      !
      CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
      CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
+     IF(C%Opts%Grad==GRAD_TS_SEARCH_NEB) THEN
+       CALL NEBPurify(C%Geos)
+       CALL MergePrintClones(C%Geos,C%Nams,C%Opts)
+     ENDIF
      !
      ! Start optimization                     
      !
      IStart=iGEO
      DO iGEO=IStart,MaxSteps
-       IF(C%Opts%Grad==GRAD_TS_SEARCH_NEB) THEN
-         CALL NEBPurify(C%Geos)
-         CALL MergePrintClones(C%Geos,C%Nams,C%Opts)
-       ENDIF
        !
        ! Calculate energy and force for all clones at once.
        !
@@ -579,6 +579,10 @@ CONTAINS
        DO iCLONE=1,C%Geos%Clones
          CALL NewGeomFill(C%Geos%Clone(iCLONE))
        ENDDO
+       IF(C%Opts%Grad==GRAD_TS_SEARCH_NEB) THEN
+         CALL NEBPurify(C%Geos)
+         CALL MergePrintClones(C%Geos,C%Nams,C%Opts)
+       ENDIF
        !
        ! Do GDIIS and print geometries
        !
