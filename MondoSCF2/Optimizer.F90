@@ -540,12 +540,12 @@ CONTAINS
      CALL New(Convgd,C%Geos%Clones)
      Convgd%I=0
      !
-     CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
-     CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
      IF(C%Opts%Grad==GRAD_TS_SEARCH_NEB) THEN
        CALL NEBPurify(C%Geos)
        CALL MergePrintClones(C%Geos,C%Nams,C%Opts)
      ENDIF
+     CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
+     CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
      !
      ! Start optimization                     
      !
@@ -1513,10 +1513,10 @@ CONTAINS
      TrfC%DoRotOff=.TRUE.
      IF(GConstr%NCartConstr>0.OR.Dimen>0) TrfC%DoTranslOff=.FALSE.
      IF(GConstr%NCartConstr>0.AND.Dimen==0) TrfC%DoRotOff=.FALSE.
-     IF(DoNEB) THEN
-       TrfC%DoTranslOff=.FALSE.
-       TrfC%DoRotOff=.FALSE.
-     ENDIF
+   ! IF(DoNEB) THEN
+   !   TrfC%DoTranslOff=.FALSE.
+   !   TrfC%DoRotOff=.FALSE.
+   ! ENDIF
      !
      IF(CoordC%CoordType/=CoordType_Cartesian) THEN
        TrfC%DoInternals=.TRUE.
