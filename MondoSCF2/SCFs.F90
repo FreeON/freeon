@@ -1010,6 +1010,7 @@ CONTAINS
           ENDDO
           ! Put the zeroed forces back ...
           ! ... and close the group
+          CALL Put(G%Clone(iCLONE)%Gradients,'Gradients',Tag_O=chGEO)
           CALL CloseHDFGroup(HDF_CurrentID)
           !
           !If I remember well rms=\sqrt{\frac{\sum_{i=1}^N x_i^2}{N}}
