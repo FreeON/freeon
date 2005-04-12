@@ -540,6 +540,9 @@ CONTAINS
      CALL New(Convgd,C%Geos%Clones)
      Convgd%I=0
      !
+     CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
+     CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
+     !
      ! Start optimization                     
      !
      IStart=iGEO
@@ -548,8 +551,6 @@ CONTAINS
          CALL NEBPurify(C%Geos)
          CALL MergePrintClones(C%Geos,C%Nams,C%Opts)
        ENDIF
-       CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
-       CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
        !
        ! Calculate energy and force for all clones at once.
        !
@@ -573,10 +574,6 @@ CONTAINS
          ConvgdAll=ConvgdAll*Convgd%I(iCLONE)
        ENDDO 
        !
-       ! Archive displaced geometries 
-       !
-       CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
-       !
        ! Fill in new geometries
        !
        DO iCLONE=1,C%Geos%Clones
@@ -586,14 +583,16 @@ CONTAINS
        ! Do GDIIS and print geometries
        !
        DO iCLONE=1,C%Geos%Clones
-         CALL MixGeoms(C%Opts,C%Nams,C%GOpt,Convgd%I, &
-                       C%Geos%Clone(iCLONE),iCLONE,iGEO)
          CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile,Geo, &
                      C%Opts%GeomPrint)
        ENDDO
        !
        C%Stat%Previous%I(3)=IGeo
        C%Stat%Current%I(3)=IGeo+1
+       !
+       ! Archive new geometries 
+       !
+       CALL GeomArchive(iBAS,iGEO+1,C%Nams,C%Sets,C%Geos)    
        !
        ! Continue optimization?
        !
@@ -1544,43 +1543,6 @@ CONTAINS
 !
 !-------------------------------------------------------------------
 !
-   SUBROUTINE MixGeoms(Opts,Nams,GOpt,Convgd,GMLoc,iCLONE,iGEO)
-     TYPE(Options)        :: Opts
-     TYPE(FileNames)      :: Nams
-     TYPE(GeomOpt)        :: GOpt
-     TYPE(CRDS)           :: GMLoc
-     INTEGER              :: iGEO,iCLONE
-     CHARACTER(LEN=DCL)   :: SCRPath,PWDPath
-     INTEGER,DIMENSION(:) :: Convgd
-     TYPE(DBL_RNK2)       :: RefXYZ1
-     !
-     SCRPath  =TRIM(Nams%M_SCRATCH)//TRIM(Nams%SCF_NAME)// &
-             '.'//TRIM(IntToChar(iCLONE))
-     PWDPath=TRIM(Nams%M_PWD)//TRIM(IntToChar(iCLONE))
-     !
-     CALL New(RefXYZ1,(/3,GMLoc%Natms/))
-     CALL GetRefXYZ(Nams%HFile,RefXYZ1,iCLONE)
-     !
-     IF(Convgd(iCLONE)/=1) THEN
-       CALL OPENAscii(OutFile,Out)
-       IF((.NOT.GOpt%GDIIS%NoGDIIS).AND.GOpt%GDIIS%On.AND.&
-           iGEO>=GOpt%GDIIS%Init) THEN
-         CALL GeoDIIS(GMLoc%Carts%D,RefXYZ1%D,Nams%HFile,iCLONE, &
-                     iGEO,Opts%PFlags%GeOp,PWDPath,GMLoc%PBC%Dimen,GOpt,SCRPath)
-       ELSE
-         IF(Opts%PFlags%GeOp>=DEBUG_GEOP_MIN) THEN
-           WRITE(*,200)
-           WRITE(Out,200)
-         ENDIF
-         200 FORMAT('No Geometric DIIS is being done in this step.')
-       ENDIF
-       CLOSE(Out,STATUS='KEEP')
-     ENDIF
-     CALL Delete(RefXYZ1)
-   END SUBROUTINE MixGeoms
-!
-!---------------------------------------------------------------------
-!
    SUBROUTINE GetCGradMax(CartGrad,NCart,IMaxCGrad,MaxCGrad, &
                           ILMaxCGrad,LMaxCGrad,PBCDim)
      REAL(DOUBLE),DIMENSION(:) :: CartGrad
@@ -1761,43 +1723,39 @@ CONTAINS
          ENDDO
          !
          ! do bisection
-         IF(DoLineS) THEN
-           CALL LineSearch(C%Geos%Clone(iCLONE),GMOld)
-         ELSE
-           !
-           ! Set up new box-coordinates
-           !
-           FactO=Half
-           FactN=Half
-           IF(C%GOpt%GConvCrit%DoLattBackTr) THEN
-             C%Geos%Clone(iCLONE)%PBC%BoxShape%D= &
-               (FactN*C%Geos%Clone(iCLONE)%PBC%BoxShape%D+ &
-                               FactO*GMOld%PBC%BoxShape%D)
-             ! apply lattice constraints, e.g. fixed volume
-             CALL SetFixedLattice(Aux9,C%GOpt%ExtIntCs,C%GOpt%Constr,BoxShape_O=C%Geos%Clone(iCLONE)%PBC%BoxShape%D)
-             CALL PBCInfoFromNewCarts(C%Geos%Clone(iCLONE)%PBC)
-           ENDIF
-           !
-           ! Set up new atomic positions (fractionals+Carts)
-           !
-           IF(C%GOpt%GConvCrit%DoAtomBackTr) THEN
-             !
-             C%Geos%Clone(iCLONE)%BoxCarts%D= &
-               (FactN*C%Geos%Clone(iCLONE)%BoxCarts%D+&
-                FactO*GMOld%BoxCarts%D)
-             !
-             DO I=1,NatmsLoc
-               CALL DGEMM_NNc(3,3,1,One,Zero, &
-                    C%Geos%Clone(iCLONE)%PBC%BoxShape%D, &
-                    C%Geos%Clone(iCLONE)%BoxCarts%D(1:3,I), &
-                    C%Geos%Clone(iCLONE)%Carts%D(1:3,I))   
-             ENDDO
-             !
-             C%Geos%Clone(iCLONE)%Carts%D= &
-             C%Geos%Clone(iCLONE)%Carts%D
-           ENDIF
-           !
+         !
+         ! Set up new box-coordinates
+         !
+         FactO=Half
+         FactN=Half
+         IF(C%GOpt%GConvCrit%DoLattBackTr) THEN
+           C%Geos%Clone(iCLONE)%PBC%BoxShape%D= &
+             (FactN*C%Geos%Clone(iCLONE)%PBC%BoxShape%D+ &
+                             FactO*GMOld%PBC%BoxShape%D)
+           ! apply lattice constraints, e.g. fixed volume
+           CALL SetFixedLattice(Aux9,C%GOpt%ExtIntCs,C%GOpt%Constr,BoxShape_O=C%Geos%Clone(iCLONE)%PBC%BoxShape%D)
+           CALL PBCInfoFromNewCarts(C%Geos%Clone(iCLONE)%PBC)
          ENDIF
+         !
+         ! Set up new atomic positions (fractionals+Carts)
+         !
+         IF(C%GOpt%GConvCrit%DoAtomBackTr) THEN
+           !
+           C%Geos%Clone(iCLONE)%BoxCarts%D= &
+             (FactN*C%Geos%Clone(iCLONE)%BoxCarts%D+&
+              FactO*GMOld%BoxCarts%D)
+           !
+           DO I=1,NatmsLoc
+             CALL DGEMM_NNc(3,3,1,One,Zero, &
+                  C%Geos%Clone(iCLONE)%PBC%BoxShape%D, &
+                  C%Geos%Clone(iCLONE)%BoxCarts%D(1:3,I), &
+                  C%Geos%Clone(iCLONE)%Carts%D(1:3,I))   
+           ENDDO
+           !
+           C%Geos%Clone(iCLONE)%Carts%D= &
+           C%Geos%Clone(iCLONE)%Carts%D
+         ENDIF
+         !
        ENDDO
        !
        IF(DoBackTrackAll) THEN
@@ -1821,129 +1779,6 @@ CONTAINS
      CALL Delete(GMOld)
      CALL Delete(NeedBackTr)
    END SUBROUTINE BackTrack
-!
-!-------------------------------------------------------------------
-!
-   SUBROUTINE LineSearch(GMNew,GMOld)
-     TYPE(CRDS)     :: GMNew,GMOld 
-     INTEGER        :: I,J,NCart,II
-     TYPE(DBL_VECT) :: DeltaX,Grad,PVect,VAux,XV1,XV2,PGrad
-     TYPE(DBL_RNK2) :: Mat,Aux,InvMat
-     REAL(DOUBLE)   :: GO,GN,DX2,DE,DX,DX3,DX4,X1,X2,X3,E0,E1,E2,E3,D0
-     REAL(DOUBLE)   :: DE2DX21,DE2DX22,Fact
-     LOGICAL        :: DoHalve
-     !
-     NCart=3*GMNew%Natms
-     CALL New(DeltaX,NCart)
-     CALL New(Grad,NCart)
-     CALL New(XV1,NCart)
-     CALL New(XV2,NCart)
-     CALL New(Mat,(/4,4/))
-     CALL New(Aux,(/4,4/))
-     CALL New(InvMat,(/4,4/))
-     CALL New(PVect,4)
-     CALL New(PGrad,4)
-     CALL New(VAux,4)
-     !
-     CALL CartRNK2ToCartRNK1(XV1%D,GMOld%Carts%D)
-     CALL CartRNK2ToCartRNK1(XV2%D,GMNew%Carts%D)
-     DeltaX%D=XV2%D-XV1%D
-     DX2=DOT_PRODUCT(DeltaX%D,DeltaX%D)
-     DX=SQRT(DX2)
-     DX3=DX*DX2
-     DX4=DX2*DX2
-     !
-     CALL CartRNK2ToCartRNK1(Grad%D,GMNew%Gradients%D)
-     GN=DOT_PRODUCT(Grad%D,DeltaX%D)/DX
-     CALL CartRNK2ToCartRNK1(Grad%D,GMOld%Gradients%D)
-     GO=DOT_PRODUCT(Grad%D,DeltaX%D)/DX
-     DE=GMNew%ETotal-GMOld%ETotal
-     !
-     Mat%D(1,1:4)=(/DX,DX2,DX3,DX4/)
-     Mat%D(2,1:4)=(/One,Zero,Zero,Zero/)
-     Mat%D(3,1:4)=(/One,Two*DX,3.D0*DX2,4.D0*DX3/)
-     Mat%D(4,1:4)=(/Zero,Two,Zero,Zero/)
-     DO II=1,2
-       PVect%D(1)=DE
-       PVect%D(2)=GO
-       PVect%D(3)=GN
-       PVect%D(4)=Zero
-       !
-       CALL DGEMM_TNc(4,4,4,One,Zero,Mat%D,Mat%D,Aux%D)
-       CALL DIISInvMat(Aux%D,InvMat%D,'Basic')
-       CALL DGEMM_TNc(4,4,1,One,Zero,Mat%D,PVect%D,VAux%D)
-       CALL DGEMM_NNc(4,4,1,One,Zero,InvMat%D,VAux%D,PVect%D)
-       !
-       PGrad%D(1)=PVect%D(1)
-       PGrad%D(2)=2.D0*PVect%D(2)
-       PGrad%D(3)=3.D0*PVect%D(3)
-       PGrad%D(4)=4.D0*PVect%D(4)
-       CALL CubicRoots(PGrad%D(1),PGrad%D(2),PGrad%D(3),PGrad%D(4), &
-                       X1,X2,X3)
-       !
-       ! Check second derivatives
-       !
-       DE2DX21=2.D0*PVect%D(2)
-       DE2DX22=2.D0*PVect%D(2)+6.D0*PVect%D(3)*DX+12.D0*PVect%D(4)*DX2
-       IF(DE2DX21>-1.D-10.AND.DE2DX22>-1.D-10) THEN
-         EXIT
-       ELSE IF(II<2) THEN
-         Mat%D(4,1:4)=(/Zero,Two,6.D0*DX,12.D0*DX2/)
-       ELSE
-         X1=-One ; X2=-One ; X3=-One
-       ENDIF
-     ENDDO
-     !
-     E1=GMOld%Etotal+PVect%D(1)*X1+PVect%D(2)*X1**2+ &
-        PVect%D(3)*X1**3+PVect%D(4)*X1**4
-     E2=GMOld%Etotal+PVect%D(1)*X2+PVect%D(2)*X2**2+ &
-        PVect%D(3)*X2**3+PVect%D(4)*X2**4
-     E3=GMOld%Etotal+PVect%D(1)*X3+PVect%D(2)*X3**2+ &
-        PVect%D(3)*X3**3+PVect%D(4)*X3**4
-     !
-     DoHalve=.TRUE.
-     E0=E1
-     IF(X1>Zero.AND.X1<DX) THEN
-       DoHalve=.FALSE. 
-       D0=X1
-       E0=E1
-     ENDIF
-     IF((X2>Zero.AND.X2<DX).AND.E2<E0) THEN
-       DoHalve=.FALSE. 
-       D0=X2
-       E0=E2
-     ENDIF
-     IF((X3>Zero.AND.X3<DX).AND.E3<E0) THEN
-       DoHalve=.FALSE. 
-       D0=X3
-       E0=E3
-     ENDIF
-     !
-     IF(DoHalve) THEN
-       GMNew%Carts%D=Half*(GMNew%Carts%D+GMOld%Carts%D)
-       GMNew%Carts%D=Half*(GMNew%Carts%D+GMOld%Carts%D)
-     ELSE
-       Fact=D0/DX
-       GMNew%Carts%D=GMOld%Carts%D+ &
-                       Fact*(GMNew%Carts%D-GMOld%Carts%D)
-       GMNew%Carts%D  =GMOld%Carts%D+   &
-                       Fact*(GMNew%Carts%D-GMOld%Carts%D)
-      !GMNew%ETotal=E0
-      !GMNew%Gradients%D=GMOld%Gradients%D+ &
-      !                Fact*(GMNew%Gradients%D-GMOld%Gradients%D)
-     ENDIF
-     !
-     CALL Delete(Grad)
-     CALL Delete(DeltaX)
-     CALL Delete(Mat)
-     CALL Delete(Aux)
-     CALL Delete(InvMat)
-     CALL Delete(PGrad)
-     CALL Delete(PVect)
-     CALL Delete(VAux)
-     CALL Delete(XV1)
-     CALL Delete(XV2)
-   END SUBROUTINE LineSearch
 !
 !-------------------------------------------------------------------
 !
