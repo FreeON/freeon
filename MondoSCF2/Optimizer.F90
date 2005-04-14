@@ -122,41 +122,48 @@ CONTAINS
     TYPE(Geometries) :: Geos
     TYPE(FileNames)  :: Nams
     TYPE(Options)    :: Opts
-    INTEGER          :: iCLONE,NatmsMerge,GBeg,GEnd,J,M
+    INTEGER          :: iCLONE,NatmsMerge,GBeg,GEnd,J,M,I
     TYPE(CRDS)       :: GMMerge
-    REAL(DOUBLE),DIMENSION(3) :: CME1,CME2,TR,DIAG
+    REAL(DOUBLE)              :: Length,Length0
+    REAL(DOUBLE),DIMENSION(3) :: CME1,CME2,TR,DIAG,TRM
     !
     GBeg=0
     GEnd=Geos%Clones+1
     NatmsMerge=Geos%Clone(GBeg)%Natms*(GEnd-GBeg+1)
-    CME1=Zero
-    CME2=Zero
-    DO J=1,Geos%Clone(GBeg)%Natms
-      CME1=CME1+Geos%Clone(GBeg)%Carts%D(1:3,J)
-      CME2=CME2+Geos%Clone(GEnd)%Carts%D(1:3,J)
+    Length=Zero 
+    DO iCLONE=GBeg,GEnd
+    ! CME1=Zero
+    ! CME2=Zero
+    ! DO J=1,Geos%Clone(iCLONE)%Natms
+    !   CME1=CME1+Geos%Clone(iCLONE)%Carts%D(1:3,J)
+    !   CME2=CME2+Geos%Clone(GEnd)%Carts%D(1:3,J)
+    ! ENDDO
+    ! CME1=CME1/DBLE(Geos%Clone(iCLONE)%Natms)
+    ! CME2=CME2/DBLE(Geos%Clone(iCLONE)%Natms)
+    ! TR=CME2-CME1
+    ! TR=TR/SQRT(DOT_PRODUCT(TR,TR))
+   
+      ! find bounding box
+      Geos%Clone(iCLONE)%BndBox%D(1:3,1) = Geos%Clone(iCLONE)%Carts%D(1:3,1)
+      Geos%Clone(iCLONE)%BndBox%D(1:3,2) = Geos%Clone(iCLONE)%Carts%D(1:3,1)
+      DO J = 2, Geos%Clone(iCLONE)%Natms
+        Geos%Clone(iCLONE)%BndBox%D(1:3,1) = MIN(Geos%Clone(iCLONE)%BndBox%D(1:3,1),Geos%Clone(iCLONE)%Carts%D(1:3,J))
+        Geos%Clone(iCLONE)%BndBox%D(1:3,2) = MAX(Geos%Clone(iCLONE)%BndBox%D(1:3,2),Geos%Clone(iCLONE)%Carts%D(1:3,J))
+      ENDDO
+      DIAG=Geos%Clone(iCLONE)%BndBox%D(1:3,2)-Geos%Clone(iCLONE)%BndBox%D(1:3,1)
+      Length0=SQRT(DOT_PRODUCT(DIAG,DIAG))
+      IF(Length0>Length) THEN
+        Length=Length0
+        TRM=(/Length,Zero,Zero/)
+      ENDIF
     ENDDO
-    CME1=CME1/DBLE(Geos%Clone(GBeg)%Natms)
-    CME2=CME2/DBLE(Geos%Clone(GBeg)%Natms)
-    TR=CME2-CME1
-    TR=TR/SQRT(DOT_PRODUCT(TR,TR))
-  
-    ! find bounding box
-    Geos%Clone(GBeg)%BndBox%D(1:3,1) = Geos%Clone(GBeg)%Carts%D(1:3,1)
-    Geos%Clone(GBeg)%BndBox%D(1:3,2) = Geos%Clone(GBeg)%Carts%D(1:3,1)
-    DO J = 2, Geos%Clone(GBeg)%Natms
-      Geos%Clone(GBeg)%BndBox%D(1:3,1) = MIN(Geos%Clone(GBeg)%BndBox%D(1:3,1),Geos%Clone(GBeg)%Carts%D(1:3,J))
-      Geos%Clone(GBeg)%BndBox%D(1:3,2) = MAX(Geos%Clone(GBeg)%BndBox%D(1:3,2),Geos%Clone(GBeg)%Carts%D(1:3,J))
-    ENDDO
-    DIAG=Geos%Clone(GBeg)%BndBox%D(1:3,2)-Geos%Clone(GBeg)%BndBox%D(1:3,1)
-    TR=TR*SQRT(DOT_PRODUCT(DIAG,DIAG))
- 
     GMMerge%Natms=NatmsMerge
     CALL New(GMMerge)
     M=0
     DO iCLONE=GBeg,GEnd
       DO J=1,Geos%Clone(iCLONE)%Natms
         M=M+1
-        GMMerge%Carts%D(1:3,M)=Geos%Clone(iCLONE)%Carts%D(1:3,J)+TR*(iCLONE-1)
+        GMMerge%Carts%D(1:3,M)=Geos%Clone(iCLONE)%Carts%D(1:3,J)+TRM*iCLONE
         GMMerge%AtNum%D(M)=Geos%Clone(iCLONE)%AtNum%D(J)
         GMMerge%AtNam%C(M)=Geos%Clone(iCLONE)%AtNam%C(J)
       ENDDO
