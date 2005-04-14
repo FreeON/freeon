@@ -91,7 +91,7 @@ CONTAINS
 !          DO I=1,G%Clone(0)%NAtms
 !             WRITE(*,3)Ats(INT(G%Clone(0)%AtNum%D(I))),G%Clone(G%Clones+1)%Carts%D(:,I)
 !          ENDDO
-!3         format(A3,' ',3(F10.5,', '))
+3         format(A3,' ',3(F10.5,', '))
        ENDIF
        IF(O%Guess==GUESS_EQ_RESTART)THEN
           ! Get midpoints from HDF
@@ -107,24 +107,17 @@ CONTAINS
           !    CALL PPrint(G%Clone(I),Unit_O=6)
           ! ENDDO
        ELSE
-          ! Initialize midpoints via interpolation
+          ! Purify R and P images ...
+          CALL NEBPurify(G,Init_O=.TRUE.)
+          ! ... then interpolate ...
           DO iCLONE=1,G%Clones
              G%Clone(iCLONE)%NAtms=G%Clone(0)%NAtms
              G%Clone(iCLONE)%NKind=G%Clone(0)%NKind
              CALL New(G%Clone(iCLONE))
           ENDDO
-
           CALL NEBInit(G)
-
-!          WRITE(*,*)' +_+_ +_+_ +_+_ +_+_ +_+_ +_+_ +_+_ +_+_ +_+_ +_+_ +_+_ +_+_ +_+_'
-
+          ! .. and finally purify the NEB images.
           CALL NEBPurify(G)
-
-!          WRITE(*,*)' +_+_ +_+_ +_+_ +_+_ +_+_ +_+_ +_+_ +_+_ +_+_ +_+_ +_+_ +_+_ +_+_'
-!          CALL NEBPurify(G)
-!          WRITE(*,*)' +_+_ +_+_ +_+_ +_+_ +_+_ +_+_ +_+_ +_+_ +_+_ +_+_ +_+_ +_+_ +_+_'
-!          CALL NEBPurify(G)
-!          WRITE(*,*)' +_+_ +_+_ +_+_ +_+_ +_+_ +_+_ +_+_ +_+_ +_+_ +_+_ +_+_ +_+_ +_+_'
       ENDIF
 !   Parrelel Rep
     ELSEIF(O%Grad==GRAD_DO_DYNAMICS .AND. D%Parallel_Rep)THEN

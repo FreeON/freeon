@@ -78,14 +78,28 @@ CONTAINS
     !    CALL SetEq_PBCInfo(G1%PBC,G2%PBC)
   END SUBROUTINE SetEq_CRDS
 
-  SUBROUTINE NEBPurify(G)
+  SUBROUTINE NEBPurify(G,Init_O)
     TYPE(Geometries) :: G
-    INTEGER          :: I,iCLONE,J
+    LOGICAL,OPTIONAL :: Init_O
+    INTEGER          :: I,iCLONE,bCLONE,eCLONE,J
     REAL(DOUBLE),DIMENSION(G%Clones+1) :: R2
     REAL(DOUBLE),DIMENSION(3,3) :: U
     REAL(DOUBLE),DIMENSION(3)   :: Center1,Center2
     REAL(DOUBLE) :: Error
-    DO iCLONE=1,G%Clones+1
+    IF(PRESENT(INIT_O))THEN
+       IF(INIT_O==.TRUE.)THEN
+          bCLONE=G%Clones+1
+          eCLONE=G%Clones+1
+       ELSE
+          bCLONE=1
+          eCLONE=G%Clones+1
+       ENDIF
+    ELSE
+       bCLONE=1
+       eCLONE=G%Clones+1
+    ENDIF
+!
+    DO iCLONE=bCLONE,eCLONE
 #ifdef NEB_DEBUG       
        WRITE(*,*)'==========',iclone,'============='
 #endif
@@ -95,22 +109,23 @@ CONTAINS
 #ifdef NEB_DEBUG       
        WRITE(*,333)1,center1
        WRITE(*,333)2,center2
+       WRITE(*,333)-1,-(center2-center1)
 333    FORMAT('CENTER',I2,' = ',3(F10.5,', '))
 #endif
-       IF(iCLONE==1)THEN
-          ! Translate the reactants just once to zero
+
+       IF(iCLONE==bCLONE)THEN
+          ! Translate the reactants just once to C1
           DO I=1,G%Clone(0)%NAtms
              G%Clone(0)%Carts%D(:,I)=G%Clone(0)%Carts%D(:,I)-center1
           ENDDO
        ENDIF
-       ! Rotation ... 
 #ifdef NEB_DEBUG
        DO I=1,G%Clone(0)%NAtms
           WRITE(*,3)iCLONE,Ats(INT(G%Clone(0)%AtNum%D(I))),G%Clone(iCLONE)%Carts%D(:,I)
        ENDDO
 3      format('BEFORE TRANS ',I3,' ',A3,' ',3(F10.5,', '))
 #endif
-       ! Translation ...
+       ! Translation to C2 ...
        DO I=1,G%Clone(0)%NAtms
           G%Clone(iCLONE)%Carts%D(:,I)=G%Clone(iCLONE)%Carts%D(:,I)-center2
        ENDDO
@@ -134,6 +149,8 @@ CONTAINS
     ENDDO
     WRITE(*,33)R2(:)
 33  FORMAT('CLONE RMSDs = ',100(F8.4,', '))
+
+!    STOP 'PURE'
   END SUBROUTINE NEBPurify
   !===============================================================================
   ! Project out the force along the band and add spring forces along the band.
