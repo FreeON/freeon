@@ -70,28 +70,6 @@ CONTAINS
           CALL ParseCoordinates(REACTANTS_BEGIN,REACTANTS_END,G%Clone(0),O%Coordinates)          
           ! Read in the products geometry from input
           CALL ParseCoordinates(PRODUCTS_BEGIN,PRODUCTS_END,G%Clone(G%Clones+1),O%Coordinates)  
-          ! Minimize the RMS deviation between the products and reactants
-
-!          CALL RMSD(G%Clone(0)%NAtms,G%Clone(0)%Carts%D,G%Clone(G%Clones+1)%Carts%D,  &
-!                    1, U, center2, center1, error )! , calc_g, grad)
-!          ! Rotation ... 
-!          DO I=1,G%Clone(0)%NAtms
-!             G%Clone(0)%Carts%D(:,I)=MATMUL(U,G%Clone(0)%Carts%D(:,I))
-!          ENDDO
-!          ! ... and translation
-!          DO I=1,G%Clone(0)%NAtms
-!             G%Clone(0)%Carts%D(:,I)=G%Clone(0)%Carts%D(:,I)+center1
-!             G%Clone(G%Clones+1)%Carts%D(:,I)=G%Clone(G%Clones+1)%Carts%D(:,I)+center2
-!          ENDDO
-!
-!          DO I=1,G%Clone(0)%NAtms
-!             WRITE(*,3)Ats(INT(G%Clone(0)%AtNum%D(I))),G%Clone(0)%Carts%D(:,I)
-!          ENDDO
-!          WRITE(*,*)' '
-!          DO I=1,G%Clone(0)%NAtms
-!             WRITE(*,3)Ats(INT(G%Clone(0)%AtNum%D(I))),G%Clone(G%Clones+1)%Carts%D(:,I)
-!          ENDDO
-3         format(A3,' ',3(F10.5,', '))
        ENDIF
        IF(O%Guess==GUESS_EQ_RESTART)THEN
           ! Get midpoints from HDF
@@ -118,9 +96,9 @@ CONTAINS
           CALL NEBInit(G)
           ! .. and finally purify the NEB images.
           CALL NEBPurify(G)
-      ENDIF
+     ENDIF
 !   Parrelel Rep
-    ELSEIF(O%Grad==GRAD_DO_DYNAMICS .AND. D%Parallel_Rep)THEN
+    ELSEIF(O%Grad==GRAD_DO_DYNAMICS.AND.D%Parallel_Rep)THEN
        CALL MondoHalt(PRSE_ERROR,'Parralel Rep not implimented')
        ! Parse for the number of clones to use in Parallel Rep
        IF(.NOT.OptIntQ(Inp,CLONES,G%Clones))THEN

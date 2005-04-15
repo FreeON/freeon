@@ -81,29 +81,53 @@ CONTAINS
   SUBROUTINE NEBPurify(G,Init_O)
     TYPE(Geometries) :: G
     LOGICAL,OPTIONAL :: Init_O
+    LOGICAL          :: Init
     INTEGER          :: I,iCLONE,bCLONE,eCLONE,J
     REAL(DOUBLE),DIMENSION(G%Clones+1) :: R2
     REAL(DOUBLE),DIMENSION(3,3) :: U
     REAL(DOUBLE),DIMENSION(3)   :: Center1,Center2
     REAL(DOUBLE) :: Error
     IF(PRESENT(INIT_O))THEN
-       IF(INIT_O)THEN
-          bCLONE=G%Clones+1
-          eCLONE=G%Clones+1
-       ELSE
-          bCLONE=1
-          eCLONE=G%Clones+1
-       ENDIF
+       INIT=.TRUE.
+    ELSE
+       INIT=.FALSE.
+    ENDIF
+    IF(INIT)THEN
+       bCLONE=G%Clones+1
+       eCLONE=G%Clones+1
+       ! Check for stupid input
+       DO I=1,G%Clone(0)%NAtms
+          IF(G%Clone(0)%AtNum%D(I).NE.G%Clone(G%Clones+1)%AtNum%D(I))THEN
+             CALL MondoHalt(NEBS_ERROR,'Ordering of Reactant and Product is different! ')
+          ENDIF
+       ENDDO
     ELSE
        bCLONE=1
        eCLONE=G%Clones+1
     ENDIF
 !
+!!$    ! Scale the coordinates by Z 
+!!$    DO I=1,G%Clone(0)%NAtms
+!!$       G%Clone(0)%Carts%D(:,I)=G%Clone(0)%Carts%D(:,I)*G%Clone(0)%AtNum%D(I)
+!!$    ENDDO
+
+#ifdef NEB_DEBUG       
+    WRITE(*,*)' bCLONE = ',bCLONE
+    WRITE(*,*)' eCLONE = ',eCLONE
+    WRITE(*,*)' CLONE ZERO AFTER SCALING = '
+    CALL PPrint(G%Clone(0),Unit_O=6,PrintGeom_O='XYZ')
+#endif
+    !
     DO iCLONE=bCLONE,eCLONE
 #ifdef NEB_DEBUG       
        WRITE(*,*)'==========',iclone,'============='
 #endif
-       ! Minimize the RMS deviation between the reactants (clone 0), the clones (1-N) and the products (N+1)
+!!$       ! Scale the coordinates by Z
+!!$       DO I=1,G%Clone(0)%NAtms
+!!$          G%Clone(iCLONE)%Carts%D(:,I)=G%Clone(iCLONE)%Carts%D(:,I)*G%Clone(iCLONE)%AtNum%D(I)
+!!$       ENDDO
+       ! Find the transformation that minimizes the RMS deviation between the 
+       ! reactants (clone 0), the clones (1-N) and the products (N+1)
        CALL RMSD(G%Clone(0)%NAtms,G%Clone(iCLONE)%Carts%D,G%Clone(0)%Carts%D,  &
                  1, U, center2, center1, error )! , calc_g, grad)
 #ifdef NEB_DEBUG       
@@ -112,18 +136,17 @@ CONTAINS
        WRITE(*,333)-1,-(center2-center1)
 333    FORMAT('CENTER',I2,' = ',3(F10.5,', '))
 #endif
-
-       IF(iCLONE==bCLONE)THEN
-          ! Translate the reactants just once to C1
+       IF(INIT)THEN
+          ! Translate the reactants JUST ONCE to C1
           DO I=1,G%Clone(0)%NAtms
              G%Clone(0)%Carts%D(:,I)=G%Clone(0)%Carts%D(:,I)-center1
           ENDDO
        ENDIF
 #ifdef NEB_DEBUG
-       DO I=1,G%Clone(0)%NAtms
-          WRITE(*,3)iCLONE,Ats(INT(G%Clone(0)%AtNum%D(I))),G%Clone(iCLONE)%Carts%D(:,I)
-       ENDDO
-3      format('BEFORE TRANS ',I3,' ',A3,' ',3(F10.5,', '))
+       WRITE(*,*)' CLONE = ',0,' AFTER TRANSLATION '
+       CALL PPrint(G%Clone(0),Unit_O=6,PrintGeom_O='XYZ')
+       WRITE(*,*)' CLONE = ',iCLONE,' BEFORE TRANSLATION'
+       CALL PPrint(G%Clone(iCLONE),Unit_O=6,PrintGeom_O='XYZ')
 #endif
        ! Translation to C2 ...
        DO I=1,G%Clone(0)%NAtms
@@ -134,11 +157,21 @@ CONTAINS
           G%Clone(iCLONE)%Carts%D(:,I)=MATMUL(U,G%Clone(iCLONE)%Carts%D(:,I))
        ENDDO
 #ifdef NEB_DEBUG
-       DO I=1,G%Clone(0)%NAtms
-          WRITE(*,4)iCLONE,Ats(INT(G%Clone(0)%AtNum%D(I))),G%Clone(iCLONE)%Carts%D(:,I)
-       ENDDO
-4      format('AFTER TRANS ',I3,' ',A3,' ',3(F10.5,', '))
+       WRITE(*,*)' CLONE = ',iCLONE,' AFTER TRANSLATION AND ROTATION '
+       CALL PPrint(G%Clone(iCLONE),Unit_O=6,PrintGeom_O='XYZ')
 #endif
+    ENDDO
+!!$    ! Un-scale the coordinates by Z
+!!$    DO I=1,G%Clone(0)%NAtms
+!!$       G%Clone(0)%Carts%D(:,I)=G%Clone(0)%Carts%D(:,I)/G%Clone(0)%AtNum%D(I)
+!!$    ENDDO
+!!$    DO iCLONE=bCLONE,eCLONE
+!!$       DO I=1,G%Clone(0)%NAtms
+!!$          G%Clone(iCLONE)%Carts%D(:,I)=G%Clone(iCLONE)%Carts%D(:,I)/G%Clone(iCLONE)%AtNum%D(I)
+!!$       ENDDO
+!!$    ENDDO
+    R2(:)=Zero
+    DO iCLONE=bCLONE,eCLONE
        R2(iCLONE)=Zero
        DO I=1,G%Clone(0)%NAtms
           DO J=1,3
@@ -149,8 +182,7 @@ CONTAINS
     ENDDO
     WRITE(*,33)R2(:)
 33  FORMAT('CLONE RMSDs = ',100(F8.4,', '))
-
-!    STOP 'PURE'
+!    STOP
   END SUBROUTINE NEBPurify
   !===============================================================================
   ! Project out the force along the band and add spring forces along the band.
