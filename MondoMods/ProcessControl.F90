@@ -13,6 +13,7 @@ MODULE ProcessControl
    INTEGER, PARAMETER     :: MISC_ERROR=-843503
    INTEGER, PARAMETER     :: DRIV_ERROR=-704823
    INTEGER, PARAMETER     :: PRSE_ERROR=-803484
+   INTEGER, PARAMETER     :: NEBS_ERROR=-924723
    INTEGER, PARAMETER     :: MPIS_ERROR=-975239
    INTEGER, PARAMETER     :: USUP_ERROR=-993942
    INTEGER, PARAMETER     :: INTC_ERROR=-135950
@@ -45,6 +46,9 @@ MODULE ProcessControl
          ELSEIF(IErr==USUP_ERROR)THEN
             WRITE(*,*)  'Unsupported feature: '//TRIM(Mssg)
             CALL Logger('Unsupported feature: '//TRIM(Mssg),.TRUE.)
+         ELSEIF(IErr==NEBS_ERROR)THEN
+            WRITE(*,*)  'Error in NEB: '//TRIM(Mssg)
+            CALL Logger('Error in NEB: '//TRIM(Mssg),.TRUE.)
          ELSEIF(IErr==INTC_ERROR)THEN
             WRITE(*,*)  'Error in IntCoo: '//TRIM(Mssg)
             CALL Logger('Error in IntCoo: '//TRIM(Mssg),.TRUE.)
