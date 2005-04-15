@@ -87,7 +87,7 @@ CONTAINS
     REAL(DOUBLE),DIMENSION(3)   :: Center1,Center2
     REAL(DOUBLE) :: Error
     IF(PRESENT(INIT_O))THEN
-       IF(INIT_O==.TRUE.)THEN
+       IF(INIT_O)THEN
           bCLONE=G%Clones+1
           eCLONE=G%Clones+1
        ELSE
