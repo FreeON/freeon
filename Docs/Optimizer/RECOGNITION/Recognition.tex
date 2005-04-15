@@ -12,6 +12,7 @@
 \newcommand{\commentoutA}[1]{}
 %\documentclass[prl,aps,preprint,showpacs,superbib]{revtex4}
 \documentclass[prl,aps,preprint,superbib,12pt]{revtex4}
+
 \usepackage{graphicx}
 \usepackage{amsfonts}
 \usepackage{amsmath}
@@ -30,11 +31,10 @@
 \title{On the recognition of internal coordinates in various 
 chemical systems}
 
-
 \author{K\'aroly N\'emeth\footnotemark[1]}
 \author{Matt Challacombe}
 
-\affiliation{Theoretical Division,\\ Los Alamos National Laboratory, \\ Los Alamos, NM 87545, USA}
+\affiliation{Theoretical Division, Los Alamos National Laboratory, Los Alamos, NM 87545, USA}
 
 \date{\today}
 
@@ -61,7 +61,7 @@ in a wide range of atomic arrangements.
 \section{Introduction}
 The earliest use of curvilinear internal coordinates 
 in computational chemistry
-is connected to vibrational analysis \cite{EWilson55}. 
+is associated with vibrational analysis \cite{EWilson55}. 
 It has been recognized in vibrational analysis 
 that most molecular vibrations
 are fairly well localized on internal coordinates that reflect
@@ -84,7 +84,7 @@ potentially great use of internal coordinates is represented
 by molecular dynamics \cite{PPulay02}, where research aims on developing
 efficient simulation of long time-scale dynamics of large molecules.
 
-In order to define a suitable internal coordinate set, first
+In order to define an appropriate internal coordinate set, first
 the molecular connectivity has to be determined.
 The connectivity of atoms is usually recognized on the basis of 
 overlapping spheres of atomic or Van der Waals radii 
@@ -98,17 +98,19 @@ of internal coordinates can substantially decrease the efficiency of
 an internal coordinate optimizer. On the other hand, missing internal 
 coordinates can lead to inefficient or non-convergent optimizations.
 
-Besides the case of ionic systems or random clusters of atoms
+Besides the case of ionic systems or random clusters of atoms,
 also fragmented sytems can cause problems. Consider, for example
 a system of isolated molecules that interact only by very long range
 forces but the intermolecular interaction cannot be described
 in terms of well defined bonds such as in covalently bound systems.
-E.g. two water molecules at a separation of 10{\AA} at a random 
-orientation, where the dominant interaction is the dipole-dipole one.
+E.g. two water molecules at a larger separation and at a random 
+orientation, where no clear hydrogen bonding exists but there is still
+a dipole-dipole interaction.
 In principle the interaction of these isolated units could be treated
-in terms or the Cartesian coordinates of their centers of masses
+in terms or the Cartesian coordinates of the correspondig centers 
+of masses
 and the appropriate rotations around them, however use of 
-relative (internal) coordinates could provide a substantial advance
+relative (internal) coordinates could provide a substantial advantage
 in the description of the relative motions of these units.
 
 Another very important area where internal coordinate recognition
@@ -133,11 +135,9 @@ Unfortunately,
 a general algorithm that would overcome this inconvenience in the use
 of internal coordinates has not yet been developed. This is probably
 the reason why internal coordinates based geometry manipulation
-is still often cosidered an art rather then science, especially
-in the physics community where the use of chemical concepts in 
-modeling is less widely accepted. 
+is sometimes cosidered an art rather then science.
 Indeed, the problem is that in many of the
-problematic systems the boundaries of these chemical concepts are 
+problematic systems the boundaries of the chemical concepts are 
 reached while the universality of Cartesian coordinates is always 
 clearly undoubted. Thus, at one hand internal coordinates offer
 great advantage in geometry manipulations on the other hand their
@@ -146,9 +146,92 @@ In the present paper we attempt to bridge the coordinate recognition
 gap between the great performance of internal coordinates and the 
 troblesomeness of their definition.
 
+\section{Selection via a condition number}
+The most important computational operations that are carried out 
+with internal coordinates are the coordinate transformations 
+\cite{PPulay77}. The coordinate transformations involve
+Wilson's B matrix \cite{EWilson55}, $B$, and its pseudo-inverse, A.
+Wilson's B matrix is defined as
+\begin{equation}
+B_{ij} = \frac{\partial \phi_{i}}{\partial x_{j}},
+\end{equation}
+where $\phi_{i}$ denotes the $i$-th internal coordinate and $x_{j}$
+denotes the $j$-th Cartesian coordinate of the molecule.
+The matrix $G_{c}$ connects the $B$ matrix with its pseudo-inverse
+$A$ via the definitions
+\begin{equation}
+G_{c} = B^{t} B
+\end{equation}
+and
+\begin{equation}
+A = G_{c}^{-1} B^{t} ,
+\end{equation}
+where $G_{c}$ is an $N_{c} \times N_{c}$ matrix, with $N_{c}$ being the
+number of Cartesian coordinates, and $N_{c}=3N$, for a molecule
+with $N$ atoms. $G_{c}$ has $3N-6$ nonzero eigenvalues that refer to 
+the internal degrees of motion of a non-linear molecule, and
+$6$ zero eigenvalues referring to molecular translations and rotations. 
+Thus the
+matrix, $G_{c}^{-1}$ must be computed as a generalized inverse. 
+Let $\lambda_{max}$ and $\lambda_{min}$ denote the maximum and minimum
+of the largest $3N-6$ eigenvalues of $G_{c}$ and 
+$\lambda_{c}=\lambda_{min}/\lambda_{max}$ is the condition number
+of $G_{c}$. 
+$\lambda_{c}$ can always be calculated once
+an internal coordinate set is given. 
+The first condition (Condition \#1) that any internal coordinate set
+must satisfy is that the $G_{c}$ matrix calculated over the 
+internal coordinates given,
+has $3N-6$ nonzero eigenvalues. This condition refers to the requirement
+that the internal coordinates must span the whole space 
+of internal motions of the molecule.
+Once this first condition is satisfied one can think of making
+selection between the actual internal coordinates and search
+for a reduced set of internal coordinates that satisfies 
+Condition \#1 with the minimal number of internal coordinates.
+Say, for an $N=100$ atoms molecule $N_{i}=294$ internal coordinates
+can be selected that satisfy Condition \#1. However, these $N_{i}=294$
+internal coordinates can be selected in lots of different ways,
+i.e. lots of sub-sets of the originally $N_{i}>294$ elements internal
+coordinate set can be chosen. To make a further selection
+among these subsets, Condition \#2 can be introduced:
+Let's choose the one among equal-sized subsets which provides the
+largest $\lambda_{c}$ condition number. This way both
+the size and the choice of internal coordinates can be chosen
+uniquely, unless degenerate subsets occure in the $\lambda_{c}$ sense.
+
+The condition number $\lambda_{c}$ of a given internal coordinate set
+can also be modified by the construction of appropriate linear 
+combinations of primarily given internal coordinates. Usually, the
+primary internal coordinate set consists of so-called primitive
+internal coordinates, i.e. stretchings, bendings, torsions,
+out-of-planes and linear bendings. One well established set of such
+linear-combinations is the so-called natural internal coordinates
+\cite{GFogarasi92,MvonArnim99}. Unfortunately, the construction
+of natural internal coordinates may be highly non-trivial for
+topologically complex systems and therefor it is difficult to 
+be automatized. Alternatively, one can use the so-called delocalized
+internal coordinates \cite{JBaker96}. Delocalized internal coordinates
+provide a $3N-6$ dimensional set of linear-combined primitive
+internal coordinates, where the linear combination coefficients
+come from a unitary matrix. 
+
+Delocalized are unique, and make selection through coefficients
+though diagonalization or RU decomposition is needed. We want
+more robust selection schemes. 
+
+
+
+
+that 
+
 
 
 \section{Conclusions} \label{Conclusions}
 
 \bibliography{../../Bib/mondo_new}
+
+
+
 \end{document}
+
