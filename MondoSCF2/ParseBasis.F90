@@ -383,6 +383,12 @@ CONTAINS
        B%Typ2Exp%D(1:B%Typ2Fnk,0:B%MxProjL,1:B%NKind)=BS%Typ2Exp%D(1:B%Typ2Fnk,0:B%MxProjL,1:B%NKind)
        B%Typ2CCo%D(1:B%Typ2Fnk,0:B%MxProjL,1:B%NKind)=BS%Typ2CCo%D(1:B%Typ2Fnk,0:B%MxProjL,1:B%NKind)
     ENDIF
+    !
+    ! We need to reorder the Expnt for any case. It is important to have
+    ! the Expnt in a decreassing order (skip out of the primitive loops
+    ! for integral evaluations).
+    CALL OrderExpnt(B)
+    !
 !    IF(B%HasECPs)THEN
 !       PrintFlags%Set=DEBUG_BASISSET
 !       CALL PPrint(B,Unit_O=6)
@@ -396,7 +402,55 @@ CONTAINS
     CALL BlockBuild2(G,B,BlkSiz,OffSet)
     ParseBasisSets=.TRUE.
   END FUNCTION ParseBasisSets
-
+  !
+  SUBROUTINE OrderExpnt(B)
+    TYPE(BSET)     :: B
+    TYPE(INT_VECT) :: IA
+    TYPE(DBL_RNK2) :: RA
+    INTEGER        :: NK,CF,PF,LMN
+    REAL(DOUBLE)   :: Tmp
+    LOGICAL        :: IsOrdred,GlbOrder
+    !-------------------------------------------------------------------------!
+    CALL New(RA,(/B%LMNLen,B%NPrim/))
+    CALL New(IA,B%NPrim)
+    GlbOrder=.FALSE.
+    DO NK=1,B%NKind
+       DO CF=1,B%NCFnc%I(NK)
+          Tmp=BIG_DBL
+          IsOrdred=.TRUE.
+          DO PF=1,B%NPFnc%I(CF,NK)
+             IA%I(PF)=PF
+             IF(B%Expnt%D(PF,CF,NK).GT.Tmp.AND.IsOrdred) IsOrdred=.FALSE.
+             Tmp=B%Expnt%D(PF,CF,NK)
+             !write(*,*) 'Before',B%Expnt%D(PF,CF,NK), &
+             !     & B%CCoef%D(B%LStrt%I(CF,NK):B%LStop%I(CF,NK),PF,CF,NK)
+          ENDDO
+          IF(IsOrdred) CYCLE
+          GlbOrder=.TRUE.
+          CALL DblIntSort77(B%NPFnc%I(CF,NK),B%Expnt%D(1,CF,NK),IA%I(1),-2)
+          CALL DCOPY(B%LMNLen*B%NPrim,B%CCoef%D(1,1,CF,NK),1,RA%D(1,1),1)
+          DO PF=1,B%NPFnc%I(CF,NK)
+             DO LMN=B%LStrt%I(CF,NK),B%LStop%I(CF,NK)
+                B%CCoef%D(LMN,PF,CF,NK)=RA%D(LMN,IA%I(PF))
+             ENDDO
+          ENDDO
+          !do PF=1,B%NPFnc%I(CF,NK)
+          !   write(*,*) 'After',B%Expnt%D(PF,CF,NK), &
+          !        & B%CCoef%D(B%LStrt%I(CF,NK):B%LStop%I(CF,NK),PF,CF,NK)
+          !enddo
+       ENDDO
+    ENDDO
+    IF(GlbOrder) THEN
+       CALL OpenASCII(OutFile,Out)
+       WRITE(Out,*)' ... ning Warning  Warning  Warning Wa ... '
+       WRITE(Out,*)' The primitive functions have been automatically '
+       WRITE(Out,*)' reordered in a decreasing way!'
+       CLOSE(Out)
+    ENDIF
+    CALL Delete(IA)
+    CALL Delete(RA)
+  END SUBROUTINE OrderExpnt
+  !
     SUBROUTINE BlockBuild2(G,B,BS,OS)
       TYPE(CRDS)      :: G
       TYPE(BSET)      :: B         
