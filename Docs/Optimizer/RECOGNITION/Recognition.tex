@@ -90,7 +90,8 @@ The connectivity of atoms is usually recognized on the basis of
 overlapping spheres of atomic or Van der Waals radii 
 \cite{VBakken02,TBucko05,KNemeth04}. Atomic radii are often not suitable
 to recognize bonding in e.g. ionic salts, since typical ionic radii
-may be 2-3 times larger or smaller then atomic ones. The application
+may be 2-3 times larger or smaller then atomic ones 
+\cite{Slater_64v41}. The application
 of Van der Waals radii usually results in a huge number of 
 connectivities of which most ones are neither chemically relevant nor 
 helpful for the optimization. In fact an overly large number
@@ -107,7 +108,7 @@ E.g. two water molecules at a larger separation and at a random
 orientation, where no clear hydrogen bonding exists but there is still
 a dipole-dipole interaction.
 In principle the interaction of these isolated units could be treated
-in terms or the Cartesian coordinates of the correspondig centers 
+in terms of Cartesian coordinates of the correspondig centers 
 of masses
 and the appropriate rotations around them, however use of 
 relative (internal) coordinates could provide a substantial advantage
@@ -130,7 +131,8 @@ over Cartesian ones
 is that while Cartesian coordinates are always readily and
 obviously at hand,
 internal ones are often somewhat arbitrarily defined and thus
-can provide a large, definitions-based performance difference. 
+can provide a large, definitions-based performance difference
+in geometry optimization. 
 Unfortunately,
 a general algorithm that would overcome this inconvenience in the use
 of internal coordinates has not yet been developed. This is probably
@@ -146,12 +148,74 @@ In the present paper we attempt to bridge the coordinate recognition
 gap between the great performance of internal coordinates and the 
 troblesomeness of their definition.
 
-\section{Selection via a condition number}
-The most important computational operations that are carried out 
+\section{Rigidity of internal coordinates}
+Let us suppose that a highly redundant set of primitive
+internal coordinates (stretches, bends, torsions, out-of-planes
+and linear bendings) is
+at hand and we want to reduce this set 
+by selecting out the minimally necessary subset of 
+primitive internal coordinates that is sufficient for succesful
+geometry optimization.
+Reducing the number of primitive internal coordinates
+is important because this reduces the rigidity of the internal 
+coordinate system and allowes for faster optimizations.
+The rigidity of an internal coordinate system appears when
+one wants to turn arbitrary internal coordinate displacements
+into a displaced Cartesian structure, for example
+during the course of the iterative back-transformation 
+\cite{PPulay77} in a geometry optimization step. 
+We define the rigidity of the internal coordinate system, $r$, 
+as the norm of the difference between the desired internal coordinate 
+displacements $\Delta \phi_{d}$ 
+and the realized displacements $\Delta \phi_{r}$: 
+\begin{equation}
+r = \| \Delta \phi_{d} - \Delta \phi_{r} \| .
+\end{equation}
+The fundamental reason for the appearence of non-zero
+rigidity in optimization steps is 
+that it is impossible to predict exact, $r=0$ curvilinear
+steps by the linearizing means of geometry optimization, unless
+the step is small enough. One important technique 
+that reduces the rigidity in an optimization step
+is based on a projection method \cite{PPulay92} that filters out
+so-called first order redundancies, while usually reduces 
+the step-size.
+
+One can also investigate the covariance matrix $R$
+of the rigidity vector $\Delta r = \Delta \phi_{d} - \Delta \phi_{r}$,
+\begin{equation}
+R = \Delta r \Delta r^{t} ,
+\end{equation}
+where all vectors denote column vectors. This covariance matrix,
+as summed up over several optimization steps and diagonalized 
+can provide linear
+combinations of internal coordinates that minimize the rigidity.
+A similar idea \cite{MKarplus81,AStrachan04} 
+is already widely used in the construction of 
+effective normal modes, e.g. on the basis of correlated velocies
+(instead of $\Delta r$-s) where velocity vectors
+are provided by molecular dynamics steps. Also note that the so-called
+error-matrix of the geometric DIIS algorithm \cite{PPulay84} is a 
+covariance matrix and its diagonalization can provide effective
+normal modes.
+
+The theory of rigidity of internal coordinate systems has 
+also been discussed recently in the context of the flexibility
+analysis of protein regions \cite{AJRader02}.
+
+In the following we describe several important conditions 
+that can assist one to select an internal coordinate set 
+for stuctural manipulations of large molecules.
+The main driving force of all the present investigation is to study the
+ways the rigidity of an internal coordinate system can be minimized.
+
+\subsection{Selection based on condition number}
+The most important computational operations 
+that are carried out in geometry optimization 
 with internal coordinates are the coordinate transformations 
 \cite{PPulay77}. The coordinate transformations involve
-Wilson's B matrix \cite{EWilson55}, $B$, and its pseudo-inverse, A.
-Wilson's B matrix is defined as
+Wilson's $B$ matrix \cite{EWilson55}, $B$, and its pseudo-inverse, $A$.
+Wilson's $B$ matrix is defined as
 \begin{equation}
 B_{ij} = \frac{\partial \phi_{i}}{\partial x_{j}},
 \end{equation}
@@ -182,24 +246,36 @@ an internal coordinate set is given.
 The first condition (Condition \#1) that any internal coordinate set
 must satisfy is that the $G_{c}$ matrix calculated over the 
 internal coordinates given,
-has $3N-6$ nonzero eigenvalues. This condition refers to the requirement
+must have $3N-6$ nonzero eigenvalues. 
+This condition refers to the requirement
 that the internal coordinates must span the whole space 
 of internal motions of the molecule.
 Once this first condition is satisfied one can think of making
 selection between the actual internal coordinates and search
-for a reduced set of internal coordinates that satisfies 
-Condition \#1 with the minimal number of internal coordinates.
+for a reduced set of internal coordinates that still satisfies 
+Condition \#1 with the minimal number of internal coordinates, so that
+rigidity can be reduced.
 Say, for an $N=100$ atoms molecule $N_{i}=294$ internal coordinates
 can be selected that satisfy Condition \#1. However, these $N_{i}=294$
 internal coordinates can be selected in lots of different ways,
 i.e. lots of sub-sets of the originally $N_{i}>294$ elements internal
 coordinate set can be chosen. To make a further selection
 among these subsets, Condition \#2 can be introduced:
-Let's choose the one among equal-sized subsets which provides the
+let us choose the one among equal-sized subsets which provides the
 largest $\lambda_{c}$ condition number. This way both
 the size and the choice of internal coordinates can be chosen
 uniquely, unless degenerate subsets occure in the $\lambda_{c}$ sense.
 
+It is needless to say that the calculation of $\lambda_{c}$
+for all possible selections of internal coordinates would be 
+very demanding computationally, even if it can be done very efficiently
+for each individual coordinate set using sparse matrix techniques.
+Thus we consider the $\lambda_{c}$-based
+selection procedure impractical for large molecules, even though it
+provides a mathematically stict formulation for reducing the rigidity
+of a coordinate system.
+
+\subsection{Linear combination of primitive internal coordinates}
 The condition number $\lambda_{c}$ of a given internal coordinate set
 can also be modified by the construction of appropriate linear 
 combinations of primarily given internal coordinates. Usually, the
@@ -208,22 +284,65 @@ internal coordinates, i.e. stretchings, bendings, torsions,
 out-of-planes and linear bendings. One well established set of such
 linear-combinations is the so-called natural internal coordinates
 \cite{GFogarasi92,MvonArnim99}. Unfortunately, the construction
-of natural internal coordinates may be highly non-trivial for
-topologically complex systems and therefor it is difficult to 
-be automatized. Alternatively, one can use the so-called delocalized
+of natural internal coordinates may be quite non-trivial for
+topologically complex systems and therefore it is difficult to 
+automatize \cite{BPaizs00}. 
+
+Alternatively, one can use the so-called delocalized
 internal coordinates \cite{JBaker96}. Delocalized internal coordinates
 provide a $3N-6$ dimensional set of linear-combined primitive
 internal coordinates, where the linear combination coefficients
-come from a unitary matrix. 
+come from a unitary matrix, $U$. $U$ is constructed either by
+diagonalizing the matrix $G_{i}=BB^{t}$ and taking eigenvectors of 
+its non-zero subspace or by QR-decomposition of
+$B$. Note that these two procedures result in different $U$ unitary 
+matrices. The purpose of constracting $U$ is solely to use
+the non-zero subspace of $G_{i}$ to get $3N-6$ linear combinations
+of primitive internal coordinates. Any unitary rotation
+of $U$ can be considered a legitimate linear combination. In practice 
+only the $U$ matrices constructed by diagonalization 
+\cite{JBaker96,JAndzelm92} or 
+by QR-decomposition (e.g. in Ref. \onlinecite{TBucko05})
+are used. The effect of the additional unitary trasnformation 
+on $U$ has not been studied yet. Also, the generation of
+the delocalized internal coordinates for very large molecules 
+can not be carried out in a robust fashion,
+as both diagonalization and QR-decomposition are
+inefficient for this purpose. While diagonalization scales cubically
+with system size, sparse QR-decomposition can best achieve 
+quadratic scaling.
 
-Delocalized are unique, and make selection through coefficients
-though diagonalization or RU decomposition is needed. We want
-more robust selection schemes. 
+We do not discuss further the applicability of delocalized internal 
+coordinates for very large systems since our primary goal here is 
+to focus on how to select primitive internals for a given molecule.
 
+\subsection{Selection based on Cholesky factorization}
+Paizs and Pulay describe a technique that is based
+on Cholesky factorization, to determine the $3N-6$ most independent
+coordinates of a redundant internal coordinate set \cite{BPaizs00}.
+The technique can be viewed as a sparse Cholesky factorization
+with column pivoting (see e.g. \cite{GGolub96}). Such a technique
+is tipically used to determine trapezoidal (incomplete) Cholesky
+factors of positiv semidefinite matrices, such as the $G_{i}$ matrix
+in the above discussions. The idea is based on the use of
+pivoting when factorizing the $G_{i}$ matrix. The most independent
+$3N-6$ internal coordinates are supposed to have large pivots, 
+which makes it possible to select a unique $3N-6$ dimensional
+set of coordinates, unless substantial degeneracies occur.
 
+As is well known, the application of pivoting
+is a major computational bottleneck when applied in large sparse 
+Cholesky factorization \cite{AGeorge81} 
+since it results in a huge amount of work
+in reorganizing matrices in the memory. For this reason pivoting is 
+most often avoided in sparse Cholesky factorizations. Instead,
+efficient symmetric permutations are used, such as the
+reverse Cuthill-McKee ordering \cite{AGeorge81}, to reduce filling
+of the Cholesky factors. Due to the technical difficulties,
+pivoting-based coordinate selection is not efficient for large 
+molecules.
 
-
-that 
+\subsection{van Armin stuff}
 
 
 
