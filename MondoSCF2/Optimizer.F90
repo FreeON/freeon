@@ -169,10 +169,9 @@ CONTAINS
       ENDDO
     ENDDO
     GMMerge%Confg=Geos%Clone(1)%Confg
-    CALL PPrint(GMMerge,TRIM(Nams%GFile)//'M',Geo,Opts%GeomPrint)
+    CALL PPrint(GMMerge,TRIM(Nams%SCF_NAME)//'.merged',Geo,Opts%GeomPrint)
     CALL Delete(GMMerge)
   END SUBROUTINE MergePrintClones
-  !
   !=====================================================================================  
   SUBROUTINE GDicer(C)
     TYPE(Controls)         :: C

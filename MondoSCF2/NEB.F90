@@ -111,6 +111,23 @@ CONTAINS
 !!$       G%Clone(0)%Carts%D(:,I)=G%Clone(0)%Carts%D(:,I)*G%Clone(0)%AtNum%D(I)
 !!$    ENDDO
 
+
+
+    R2(:)=Zero
+    DO iCLONE=bCLONE,eCLONE
+       R2(iCLONE)=Zero
+       DO I=1,G%Clone(0)%NAtms
+          DO J=1,3
+             R2(iCLONE)=R2(iCLONE)+(G%Clone(iCLONE)%Carts%D(J,I)-G%Clone(0)%Carts%D(J,I))**2
+          ENDDO
+       ENDDO
+       R2(iCLONE)=SQRT(R2(iCLONE))/G%Clone(0)%NAtms
+    ENDDO
+    WRITE(*,333)R2(:)
+333  FORMAT('BEFORE CLONE RMSDs = ',100(F8.4,', '))
+
+
+
 #ifdef NEB_DEBUG       
     WRITE(*,*)' bCLONE = ',bCLONE
     WRITE(*,*)' eCLONE = ',eCLONE
@@ -122,6 +139,9 @@ CONTAINS
 #ifdef NEB_DEBUG       
        WRITE(*,*)'==========',iclone,'============='
 #endif
+
+
+
 !!$       ! Scale the coordinates by Z
 !!$       DO I=1,G%Clone(0)%NAtms
 !!$          G%Clone(iCLONE)%Carts%D(:,I)=G%Clone(iCLONE)%Carts%D(:,I)*G%Clone(iCLONE)%AtNum%D(I)
@@ -181,7 +201,7 @@ CONTAINS
        R2(iCLONE)=SQRT(R2(iCLONE))/G%Clone(0)%NAtms
     ENDDO
     WRITE(*,33)R2(:)
-33  FORMAT('CLONE RMSDs = ',100(F8.4,', '))
+33  FORMAT('AFTER CLONE RMSDs = ',100(F8.4,', '))
 !    STOP
   END SUBROUTINE NEBPurify
   !===============================================================================
