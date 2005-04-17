@@ -90,6 +90,18 @@ MODULE Parse
             IF(J.NE.0)String(I:I)=Lower(J:J)
          ENDDO
       END SUBROUTINE LowCase
+
+!======================================================================
+!     Convert a string to all upper case
+!======================================================================
+      SUBROUTINE UpCase(String)
+         INTEGER           :: I,J
+         CHARACTER(LEN=*)  :: String
+         DO I=1,LEN(String)
+            J=INDEX(Lower,String(I:I))
+            IF(J.NE.0)String(I:I)=Upper(J:J)
+         ENDDO
+       END SUBROUTINE UpCase
 !======================================================================
 !     Determine if an option has a defined key set.
 !======================================================================

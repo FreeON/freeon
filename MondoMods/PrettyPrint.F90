@@ -513,6 +513,7 @@ MODULE PrettyPrint
         INTEGER                              :: I,PU
         CHARACTER(LEN=DEFAULT_CHR_LEN)       :: Mssg
         CHARACTER(LEN=DCL)                   :: AuxChar
+        CHARACTER(LEN=2)                     :: Atom
         REAL(DOUBLE)                         :: AA
         REAL(DOUBLE)                         :: A,B,C,Alpha,Beta,Gamma
 #ifdef PARALLEL
@@ -536,12 +537,10 @@ MODULE PrettyPrint
                     ELSE
                       AuxChar='    '
                     ENDIF
-                  ! Mssg=Ats(INT(GM%AtNum%D(I)))                         &  !!!! correct only for integer charged QM atoms
-                    Mssg=TRIM(IntToChar(INT(GM%AtNum%D(I))))                         &  !!!! correct only for integer charged QM atoms
-                           //'   '//FltToMedmChar(GM%Carts%D(1,I)*AA)    &
-                           //'   '//FltToMedmChar(GM%Carts%D(2,I)*AA)    &
-                           //'   '//FltToMedmChar(GM%Carts%D(3,I)*AA)//TRIM(AuxChar)
-                    WRITE(PU,*)TRIM(Mssg)
+                    Atom=GM%AtNam%C(I)
+                    CALL UpCase(Atom)
+                    WRITE(PU,222)Atom,(GM%Carts%D(K,I)*AA,K=1,3),AuxChar
+222                 FORMAT(1X,A2,3(F14.5,' '),A2)
                  ENDDO
               ELSE IF (PrintGeom_O=='XSF') THEN
 	      ! NJH: Print XSF format for XCrysden
@@ -595,7 +594,10 @@ MODULE PrettyPrint
                  33 FORMAT('CRYST1',3F9.3,3F7.2,1x,11A1,I4)
                  ENDIF
                  DO I=1,GM%NAtms
-                    WRITE(PU,44)I,GM%AtNam%C(I),GM%AtMMTyp%C(I),1,(GM%Carts%D(K,I)*AA,K=1,3),One,Zero !!!! correct only for integer charged QM atoms
+                    !!!! correct only for integer charged QM atoms
+!                    WRITE(*,44)I,GM%AtNam%C(I),GM%AtMMTyp%C(I),1,(GM%Carts%D(K,I)*AA,K=1,3),One,Zero 
+!                    WRITE(*,*)I,GM%AtNam%C(I),GM%AtMMTyp%C(I),1,(GM%Carts%D(K,I)*AA,K=1,3),One,Zero 
+                    WRITE(PU,44)I,GM%AtNam%C(I),GM%AtMMTyp%C(I),1,(GM%Carts%D(K,I)*AA,K=1,3),One,Zero 
                  44 FORMAT('ATOM  ',I5,1X,A5,A5,2X,I4,4X,3F8.3,2F6.2)
                  ENDDO
                  WRITE(PU,55)
