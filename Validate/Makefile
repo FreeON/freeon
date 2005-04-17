@@ -113,7 +113,7 @@ purge:	clean
 	rm -f *.out 
 	rm -f *.log
 	rm -f *.car
-	rm -f *.xsf *.xyz *.pdb* *.MDO
+	rm -f *.xsf *.xyz *.pdb* *.MDO *.merged
 #
 clean:
 	rm -f $(REMOVEMISC) $(REMOVEMODS)
