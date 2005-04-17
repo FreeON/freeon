@@ -174,8 +174,9 @@ r = \| \Delta \phi_{d} - \Delta \phi_{r} \| .
 The fundamental reason for the appearence of non-zero
 rigidity in optimization steps is 
 that it is impossible to predict exact, $r=0$ curvilinear
-steps by the linearizing means of geometry optimization, unless
-the step is small enough. One important technique 
+steps by the current means of geometry optimization, unless
+the step is small enough. 
+One important technique 
 that reduces the rigidity in an optimization step
 is based on a projection method \cite{PPulay92} that filters out
 so-called first order redundancies, while usually reduces 
@@ -195,7 +196,7 @@ is already widely used in the construction of
 effective normal modes, e.g. on the basis of correlated velocies
 (instead of $\Delta r$-s) where velocity vectors
 are provided by molecular dynamics steps. Also note that the so-called
-error-matrix of the geometric DIIS algorithm \cite{PPulay84} is a 
+error-matrix of the geometric DIIS algorithm \cite{PPulay84} is also a
 covariance matrix and its diagonalization can provide effective
 normal modes.
 
@@ -245,8 +246,7 @@ $\lambda_{c}$ can always be calculated once
 an internal coordinate set is given. 
 The first condition (Condition \#1) that any internal coordinate set
 must satisfy is that the $G_{c}$ matrix calculated over the 
-internal coordinates given,
-must have $3N-6$ nonzero eigenvalues. 
+internal coordinates given must have $3N-6$ nonzero eigenvalues. 
 This condition refers to the requirement
 that the internal coordinates must span the whole space 
 of internal motions of the molecule.
@@ -272,7 +272,7 @@ very demanding computationally, even if it can be done very efficiently
 for each individual coordinate set using sparse matrix techniques.
 Thus we consider the $\lambda_{c}$-based
 selection procedure impractical for large molecules, even though it
-provides a mathematically stict formulation for reducing the rigidity
+provides a mathematically strict formulation for reducing the rigidity
 of a coordinate system.
 
 \subsection{Linear combination of primitive internal coordinates}
@@ -284,9 +284,9 @@ internal coordinates, i.e. stretchings, bendings, torsions,
 out-of-planes and linear bendings. One well established set of such
 linear-combinations is the so-called natural internal coordinates
 \cite{GFogarasi92,MvonArnim99}. Unfortunately, the construction
-of natural internal coordinates may be quite non-trivial for
-topologically complex systems and therefore it is difficult to 
-automatize \cite{BPaizs00}. 
+of natural internal coordinates is difficult to 
+automatize especially for systems that contain
+lots of fused rings \cite{BPaizs00}. 
 
 Alternatively, one can use the so-called delocalized
 internal coordinates \cite{JBaker96}. Delocalized internal coordinates
@@ -298,13 +298,14 @@ its non-zero subspace or by QR-decomposition of
 $B$. Note that these two procedures result in different $U$ unitary 
 matrices. The purpose of constracting $U$ is solely to use
 the non-zero subspace of $G_{i}$ to get $3N-6$ linear combinations
-of primitive internal coordinates. Any unitary rotation
-of $U$ can be considered a legitimate linear combination. In practice 
+of primitive internal coordinates. Any rotationally transformed
+$U$ can be considered a legitimate linear combination as it still spans
+the non-zero subspace of $G_{i}$. In practice 
 only the $U$ matrices constructed by diagonalization 
 \cite{JBaker96,JAndzelm92} or 
 by QR-decomposition (e.g. in Ref. \onlinecite{TBucko05})
 are used. The effect of the additional unitary trasnformation 
-on $U$ has not been studied yet. Also, the generation of
+of $U$ has not been studied yet. Also note that the generation of
 the delocalized internal coordinates for very large molecules 
 can not be carried out in a robust fashion,
 as both diagonalization and QR-decomposition are
@@ -317,11 +318,12 @@ coordinates for very large systems since our primary goal here is
 to focus on how to select primitive internals for a given molecule.
 
 \subsection{Selection based on Cholesky factorization}
-Paizs and Pulay describe a technique that is based
+Paizs {\it et.al.} describe a technique that is based
 on Cholesky factorization, to determine the $3N-6$ most independent
 coordinates of a redundant internal coordinate set \cite{BPaizs00}.
 The technique can be viewed as a sparse Cholesky factorization
-with column pivoting (see e.g. \cite{GGolub96}). Such a technique
+with column pivoting (see e.g. Ref. \onlinecite{GGolub96}). 
+Such a technique
 is tipically used to determine trapezoidal (incomplete) Cholesky
 factors of positiv semidefinite matrices, such as the $G_{i}$ matrix
 in the above discussions. The idea is based on the use of
@@ -339,12 +341,38 @@ most often avoided in sparse Cholesky factorizations. Instead,
 efficient symmetric permutations are used, such as the
 reverse Cuthill-McKee ordering \cite{AGeorge81}, to reduce filling
 of the Cholesky factors. Due to the technical difficulties,
-pivoting-based coordinate selection is not efficient for large 
+pivoting-based coordinate selection does not seem efficient for large 
 molecules.
 
-\subsection{van Armin stuff}
+\subsection{The von Armin approach}
+I our opinion the best algorithm for practical 
+coordinate recognition so far described
+in the literature is the one by von Arnim and Ahlrichs 
+\cite{MvonArnim99}. Here we only focus on their algorithm of 
+recognizing the molecular connectivity. In this approach
+atomic radii are gradually increased while overlapping atomic 
+spheres are checked until the whole molecule becomes interconnected.   
+In the first phase somewhat scaled atomic radii are are used
+to recognize the strongest bonds. In the second phase, when 
+atomic radii are increased, first hydrogen bonds are checked and 
+if fragments are still not connected, bonds between any other atoms
+are also allowed. 
 
+\subsection{Length-scale scanning}
+Our algorithm for the recognition of connectivity is similar
+to von Arnim's one in the sense that it also gradually scannes 
+ranges of atomic radii and checks the connectivity, until all fragments
+are connected. Although we carry out the same kind of length-scale
+scanning the way we do it is efficiently adapted for use in very large
+molecules. Also the intermediate steps of connectivity recognition
+differ from the ones used by von Arnim.  
 
+-divide system into cubes of gradually increasing size
+-start with small radius, recognize fragments by reordering
+the sparse topology matrix
+-build sceleton, connect only different fragments until sceleton is ready
+-second scan: add h-bonds and other useful coordinates that were not found in first scan, avoid z-matrix like formation, don't connect topologically close atoms
+-another scan might be used with gaussian weights
 
 \section{Conclusions} \label{Conclusions}
 
