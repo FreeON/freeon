@@ -358,6 +358,13 @@ atomic radii are increased, first hydrogen bonds are checked and
 if fragments are still not connected, bonds between any other atoms
 are also allowed. 
 
+The great advantage of the von Armin approach of
+connectivity recognition against all previously
+mentioned analysis is that it can be carried out in an extremely robust
+fashion and does not require much use of large linear algebraic
+manipulations, as opposed to e.g. pivoting-based Cholesky 
+factorization or $\lambda_{c}$ based coordinate selection methods.
+
 \subsection{Length-scale scanning}
 Our algorithm for the recognition of connectivity is similar
 to von Arnim's one in the sense that it also gradually scannes 
