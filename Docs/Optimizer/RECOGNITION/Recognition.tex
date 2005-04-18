@@ -148,7 +148,7 @@ In the present paper we attempt to bridge the coordinate recognition
 gap between the great performance of internal coordinates and the 
 troblesomeness of their definition.
 
-\section{Rigidity of internal coordinates}
+\section{Rigidity and flexibility of internal coordinate systems}
 Let us suppose that a highly redundant set of primitive
 internal coordinates (stretches, bends, torsions, out-of-planes
 and linear bendings) is
@@ -156,9 +156,17 @@ at hand and we want to reduce this set
 by selecting out the minimally necessary subset of 
 primitive internal coordinates that is sufficient for succesful
 geometry optimization.
-Reducing the number of primitive internal coordinates
+On one hand, reducing the number of primitive internal coordinates
 is important because this reduces the rigidity of the internal 
 coordinate system and allowes for faster optimizations.
+On the other hand, an internal coordinate system that represents
+overly large flexibility may also be dangerous for the optimization.
+For example if a folded protein would be described only by the covalent
+bonds related coordinates, topologically far but spacially close
+pieces of the polymer would crash into each other during the 
+optimization. Thus a reasonable balance between rigidity and
+flexibility must be found for a good internal coordinate system.
+
 The rigidity of an internal coordinate system appears when
 one wants to turn arbitrary internal coordinate displacements
 into a displaced Cartesian structure, for example
@@ -175,7 +183,18 @@ The fundamental reason for the appearence of non-zero
 rigidity in optimization steps is 
 that it is impossible to predict exact, $r=0$ curvilinear
 steps by the current means of geometry optimization, unless
-the step is small enough. 
+the step is small enough or the coordinate system has a flexibility 
+similar to that of the z-matrix.
+
+Overly large flexibility can also manifest itself through the iterative
+back-transformation. For example if a protein is optimized
+using only its covalent-bond skeleton, an iterative 
+back-transformation can easily put
+topologically far but spacially close atoms in an strongly 
+overlapping position, that in turn results in huge forces.
+
+
+
 One important technique 
 that reduces the rigidity in an optimization step
 is based on a projection method \cite{PPulay92} that filters out
@@ -365,14 +384,71 @@ fashion and does not require much use of large linear algebraic
 manipulations, as opposed to e.g. pivoting-based Cholesky 
 factorization or $\lambda_{c}$ based coordinate selection methods.
 
-\subsection{Length-scale scanning}
+\section{Length-scale scanning}
 Our algorithm for the recognition of connectivity is similar
-to von Arnim's one in the sense that it also gradually scannes 
+to the one of von Arnim in the sense that it also gradually scannes 
 ranges of atomic radii and checks the connectivity, until all fragments
 are connected. Although we carry out the same kind of length-scale
-scanning the way we do it is efficiently adapted for use in very large
-molecules. Also the intermediate steps of connectivity recognition
+scanning, the way we do it is efficiently adapted for use in very large
+molecules. Also, the intermediate steps of connectivity recognition
 differ from the ones used by von Arnim.  
+
+Our algorithm consists of two loops.
+
+The goal of the first loop is to find the shortest bonds
+that build a molecular topology in which the molecule is not 
+fragmented. These bonds provide a molecular skeleton, which together
+with the corresponding angles (bendings, torsions, out-of-planes and 
+linear-bendings) is sufficient to satisfy Condition \#1, i.e.
+these coordinates span the whole space of internal motions. 
+
+The goal of the second loop is to recognize those bonds, which 
+have not been recognized in the first loop, because they have not been
+dominant bonds in their local environment, but still have relevance
+for the optimization. These bonds are often the weaker bonds,
+like hydrogen-bonds, Van der Waals contacts or ionic
+contacts, but they also may be strong covalent bonds.
+
+In both loops the molecule is divided into cubes and
+serial numbers of atoms falling in cubes are stored in a sparse matrix
+fashion. The linear size of the cubes starts at 3.0 \AA
+and will be multiplied by a factor of 1.05 in each new step of the loop
+with the purpuse of allowing longer bonds to appear within cubes and 
+between neighboring cubes.
+Then all possible connectivities are checked within each cube 
+and its neighbors. 
+
+In the first loop, all atoms are associated with a serial number of a 
+molecular fragment the atom is part of. Only connectivities
+between different fragments are checked. Obviously, in the first
+step of the first loop every atom belongs to a different fragment.
+
+Initially, atomic radii are set to 0.8 times the Slater radii
+\cite{Slater_64v41}. If the atomic spheres overlap and the atoms 
+belong to a different fragment, a bond is
+introduced. At the end of each cycle the sparse topology
+matrix is built on the basis of the bond-list. The 
+reverse Cuthill-McKee ordering \cite{AGeorge81} is applied
+to the sparse topology matrix which brings the topology matrix
+into a block-structured appearence. In this ordering unconnected 
+fragments of the molecule appear as isolated blocks in the 
+topology matrix. Based on this block structure, atoms are associated
+with new serial numbers of fragments they are part of.
+If there are no fragments the first loop is exited, otherwise
+atomic radii and linear sizes of the cubes are multiplied by 1.05
+and a new cycle of the first loop starts. The first loop repeats
+itself until the molecule is fragmented. 
+
+For ordinary organic molecules the first loop is normally
+enough to recognize all covalent bonds. For molecules, in which 
+weak bonds play an important role a second loop is necessary. 
+For example in a folded protein the first loop recognizes only
+the covalent skeleton. All weak interchain bonds must be added
+afterwards. Or in a distorted crystal structure of sodium-chloride
+the first loop only recognizes a Z-matrix like stucture while
+important ionic contacts may be left uncounted.
+
+Also note, that the first loop
 
 -divide system into cubes of gradually increasing size
 -start with small radius, recognize fragments by reordering
