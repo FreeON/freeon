@@ -552,6 +552,10 @@ CONTAINS
      ENDIF
      CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
      CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
+     DO iCLONE=1,C%Geos%Clones
+       CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile,Geo, &
+                   C%Opts%GeomPrint)
+     ENDDO
      !
      ! Start optimization                     
      !
@@ -590,19 +594,19 @@ CONTAINS
          CALL MergePrintClones(C%Geos,C%Nams,C%Opts)
        ENDIF
        !
-       ! Do GDIIS and print geometries
-       !
-       DO iCLONE=1,C%Geos%Clones
-         CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile,Geo, &
-                     C%Opts%GeomPrint)
-       ENDDO
-       !
        C%Stat%Previous%I(3)=IGeo
        C%Stat%Current%I(3)=IGeo+1
        !
        ! Archive new geometries 
        !
        CALL GeomArchive(iBAS,iGEO+1,C%Nams,C%Sets,C%Geos)    
+       !
+       ! Print geometries
+       !
+       DO iCLONE=1,C%Geos%Clones
+         CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile,Geo, &
+                     C%Opts%GeomPrint)
+       ENDDO
        !
        ! Continue optimization?
        !
