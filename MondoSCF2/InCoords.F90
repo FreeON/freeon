@@ -5948,7 +5948,7 @@ return
      TYPE(ATOMBONDS)             :: AtmB,AtmBF
      TYPE(TOPMATS)               :: TOPM
      INTEGER,DIMENSION(:,:)      :: Cells
-     TYPE(DBL_VECT)              :: CritRad,StRad
+     TYPE(DBL_VECT)              :: CritRad,StRad,MaxBondL
      REAL(DOUBLE)                :: Fact,BoxSize,MaxRadI,MaxRad
      INTEGER                     :: I,J,N,NatmsLoc,IFrags,NFrag,VDWRatio
      INTEGER                     :: MaxBonds,NBondEst,IntSet
@@ -5962,13 +5962,15 @@ return
      !
      CALL New(CritRad,NatmsLoc)
      CALL New(StRad,NatmsLoc)
+     CALL New(MaxBondL,NatmsLoc)
      DO IntSet=1,2
        IF(IntSet==1) THEN
          N=SIZE(SLRadii,1)
          Fact=0.8D0 !!! it's important to start from small values, see Si-O-Si in quartz, Si-Si bond if starting from big fact.
-         DO I=1,NatmsLoc
-           CritRad%D(I)=Fact*SLRadii(AtNum(I))*AngstromsToAU
-         ENDDO
+        !DO I=1,NatmsLoc
+        !  CritRad%D(I)=Fact*SLRadii(AtNum(I))*AngstromsToAU
+        !ENDDO
+         CritRad%D=0.75D0 
        ELSE IF(IntSet==2) THEN
          N=SIZE(SLRadii,1)
          Fact=0.5D0 
@@ -5980,8 +5982,13 @@ return
        StRad%D=CritRad%D
        !
        IF(IntSet==1) THEN
+         MaxBondL%D=Zero
          CALL New(FragID,NatmsLoc)
          DO J=1,NatmsLoc ; FragID%I(J)=J ; ENDDO
+         CALL New(TOPM%ITot12,NatmsLoc+1)
+         CALL New(TOPM%JTot12,NatmsLoc)
+         DO J=1,NatmsLoc+1 ; TOPM%ITot12%I(J)=J ; ENDDO
+         DO J=1,NatmsLoc   ; TOPM%JTot12%I(J)=J ; ENDDO
          NFrag=NatmsLoc
          DoQuit=.FALSE.
          DO IFrags=1,10000
@@ -5991,10 +5998,13 @@ return
            CALL IntCBoxes(XYZ,Box,BoxSize_O=BoxSize)
            CritRad%D=Fact*StRad%D
            !
-       !   CALL BondList2(XYZ,AtNum,Box,BondCov,IEq,CritRad%D)  
-           CALL BondList(XYZ,AtNum,IntSet,Box,BondCov, &
+        !  CALL BondList2(XYZ,AtNum,Box,BondCov,IEq,CritRad%D)  
+           CALL BondList(XYZ,AtNum,IntSet,Box,BondCov,MaxBondL%D, &
                          CritRad,IEq,FragID%I,NFrag,TOPM,HBondOnly)
            CALL SortBonds(NatmsLoc,AtmB,BondCov)
+           CALL GetMaxBondL(MaxBondL%D,NatmsLoc,AtmB,BondCov)
+           CALL Delete(TOPM%ITot12)
+           CALL Delete(TOPM%JTot12)
            CALL GetTot12(AtmB,TOPM%ITot12,TOPM%JTot12)
            CALL SortFragments(TOPM%ITot12%I,TOPM%JTot12%I,FragID%I,NFrag)
            IF(NFrag==1) THEN
@@ -6004,11 +6014,9 @@ return
            CALL Delete(Box)
            IF(DoQuit) EXIT
            IF(NFrag/=1) THEN
-             CALL Delete(TOPM%ITot12)
-             CALL Delete(TOPM%JTot12)
-       !     CALL Delete(BondCov)
+        !    CALL Delete(BondCov)
            ELSE
-exit
+!exit
              DoQuit=.TRUE.
            ENDIF
          ENDDO
@@ -6027,7 +6035,7 @@ exit
            CritRad%D=Fact*StRad%D
            CALL IntCBoxes(XYZ,Box,BoxSize_O=BoxSize)
            !
-           CALL BondList(XYZ,AtNum,IntSet,Box,BondVDW, &
+           CALL BondList(XYZ,AtNum,IntSet,Box,BondVDW,MaxBondL%D, &
                          CritRad,IEq,FragID%I,NFrag,TOPM,HBondOnly)
            IF(BondVDW%N/=0) THEN
              CALL MergeBonds(BondCov,BondVDW,Bond)
@@ -6036,6 +6044,7 @@ exit
              CALL SetEq(BondCov,Bond)
              CALL Delete(Bond)
              CALL SortBonds(NatmsLoc,AtmB,BondCov)
+           ! CALL GetMaxBondL(MaxBondL%D,NatmsLoc,AtmB,BondCov)
              CALL GetTot12(AtmB,TOPM%ITot12,TOPM%JTot12)
              CALL GetTopM(TOPM)
              CALL Delete(AtmB)
@@ -6048,17 +6057,44 @@ exit
      ENDDO
      CALL SortBonds(NatmsLoc,AtmB,BondCov)
      !
+     CALL Delete(MaxBondL) 
      CALL Delete(StRad) 
      CALL Delete(CritRad)
    END SUBROUTINE BondingScheme
 !
 !--------------------------------------------------------
 !
-   SUBROUTINE BondList(XYZ,AtNum,IntSet,Box,Bond, &
+   SUBROUTINE GetMaxBondL(MaxBondL,NatmsLoc,AtmB,Bond)
+     REAL(DOUBLE),DIMENSION(:)   :: MaxBondL
+     TYPE(BONDDATA)              :: Bond
+     TYPE(ATOMBONDS)             :: AtmB
+     INTEGER                     :: I,J,NatmsLoc,IB
+     REAL(DOUBLE)                :: W
+     !
+     DO I=1,NatmsLoc
+       IF(AtmB%Count%I(I)/=0) THEN
+        !W=Zero
+         MaxBondL(I)=1.D+99 
+         DO J=1,AtmB%Count%I(I)
+           IB=AtmB%Bonds%I(I,J) 
+          !W=W+One/Bond%Length%D(IB)
+           MaxBondL(I)=MIN(MaxBondL(I),Bond%Length%D(IB))
+         ENDDO
+        !MaxBondL(I)=DBLE(AtmB%Count%I(I))/(W+1.D-10)
+       ELSE
+         MaxBondL(I)=Zero   
+       ENDIF
+     ENDDO
+   END SUBROUTINE GetMaxBondL
+!
+!--------------------------------------------------------
+!
+   SUBROUTINE BondList(XYZ,AtNum,IntSet,Box,Bond,MaxBondL, &
                        CritRad,IEq,FragID,NFrag,TOPM,HbondOnly)
      IMPLICIT NONE
      INTEGER                     :: I,J,NatmsLoc,NBond
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
+     REAL(DOUBLE),DIMENSION(:)   :: MaxBondL
      TYPE(TOPMATS)               :: TOPM
      TYPE(BONDDATA)              :: Bond
      TYPE(IntCBox)               :: Box
@@ -6075,13 +6111,14 @@ exit
      INTEGER                     :: IDim14,IDim12,IDim13
      INTEGER                     :: HAtm,LAtm,DDimU,NBondOld
      INTEGER                     :: IChk,MaxRepeat
-     REAL(DOUBLE),DIMENSION(3)   :: DVect
+     REAL(DOUBLE)                :: DVect(3),MBF,CritMBF
      LOGICAL                     :: FoundHBond,FoundMetLig
      LOGICAL                     :: LonelyAtom,DoExclude
      LOGICAL                     :: NearestOnly,AtomRepeat,HBondonly
      !     
      NatmsLoc=SIZE(XYZ,2)
      HAtm=0
+     MBF=1.33D0
      NBondEst=Bond%N
      NBond=NBondEst
      MaxRepeat=1
@@ -6122,20 +6159,31 @@ exit
                            JJ2=Box%J%I(I2) !!! second atom
                            NJJ2=AtNum(JJ2)
                            IF(JJ2<=JJ1) CYCLE ! avoid double counting
+                           CALL ChkTop(TOPM%ITot12%I, &
+                                       TOPM%JTot12%I,&
+                                       JJ1,JJ2,DoExclude)
+                           IF(DoExclude) CYCLE
+                           !
+                           CritDist=CritRad%D(JJ1)+CritRad%D(JJ2)
+                           CritMBF=MBF*MAX(MaxBondL(JJ1),MaxBondL(JJ2))
+                           CritDist=MAX(CritDist,CritMBF)
+                           DVect(:)=XYZ(:,JJ1)-XYZ(:,JJ2)
+                           R12_2=DOT_PRODUCT(DVect,DVect)
+                           R12=SQRT(R12_2)
+                           !
                            IF(IntSet==1) THEN 
                              F1=FragID(JJ1)
                              F2=FragID(JJ2)
-                             IF(F1==F2) CYCLE
+                             IF(R12>CritMBF) THEN
+                               IF(F1==F2) CYCLE
+                             ENDIF
                              IF(NearestOnly) THEN
                                IF(ConnectedF(F1,F2,FTop%I)) CYCLE
                              ENDIF
                            ELSE IF(IntSet==2.AND.HBondOnly) THEN
                              IF(NJJ1/=1.AND.NJJ2/=1) CYCLE
                            ENDIF
-                           CritDist=CritRad%D(JJ1)+CritRad%D(JJ2)
-                           DVect(:)=XYZ(:,JJ1)-XYZ(:,JJ2)
-                           R12_2=DOT_PRODUCT(DVect,DVect)
-                           R12=SQRT(R12_2)
+                           !
                            IF(R12<CritDist) THEN
                              IF(IntSet==1) THEN
                                ! this will overwrite JJ1,JJ2 and R12
@@ -6149,12 +6197,8 @@ exit
                                  AtNum,NJJ1,NJJ2,JJ1,JJ2,XYZ,60.D0) 
                                DoExclude=.FALSE.
                                IF(.NOT.FoundHBond) THEN
-                                 CALL ChkTop(TOPM%IExcl%I,TOPM%JExcl%I,&
-                                             JJ1,JJ2,DoExclude)
-                               ELSE 
-                                 CALL ChkTop(TOPM%ITot12%I, &
-                                             TOPM%JTot12%I,&
-                                             JJ1,JJ2,DoExclude)
+                                    CALL ChkTop(TOPM%IExcl%I, &
+                                      TOPM%JExcl%I,JJ1,JJ2,DoExclude)
                                ENDIF
                                IF(DoExclude) CYCLE
                              ENDIF
@@ -6289,7 +6333,7 @@ exit
                              R12_2=DOT_PRODUCT(DVect,DVect)
                              R12=SQRT(R12_2)
                              GMass=GOverlap(R12,CritRad(JJ1),CritRad(JJ2))
-                             DVect=DVect
+                             DVect=DVect/R12
                              DVect=GMass*DVect
 !write(*,*) jj2,' gmass ',gmass
 !write(*,*) jj2,' dvect ',DVect
@@ -6478,6 +6522,238 @@ exit
 !
 !--------------------------------------------------------------
 !
+!
+!--------------------------------------------------------------
+!
+   SUBROUTINE BondList3(XYZ,AtNum,Box,Bond,IEq,CritRad)  
+     IMPLICIT NONE
+     INTEGER                     :: I,J,NatmsLoc,NBond,K,L
+     REAL(DOUBLE),DIMENSION(:,:) :: XYZ
+     REAL(DOUBLE),DIMENSION(:)   :: CritRad
+     TYPE(BONDDATA)              :: Bond
+     TYPE(IntCBox)               :: Box
+     INTEGER,DIMENSION(:)        :: AtNum,IEq
+     INTEGER                     :: IZ,IX,IY,I1,I2,JJ1,JJ2
+     INTEGER                     :: IORD,IORDD
+     INTEGER                     :: IZD,IXD,IYD,NJJ1,NJJ2
+     INTEGER                     :: JJ,NBondEst
+     INTEGER                     :: NBondOld,DDimU,AuxSize,ICount
+     INTEGER                     :: Info,MaxAtomBonds,NDim
+     REAL(DOUBLE),DIMENSION(3)   :: DVect,EigVect
+     REAL(DOUBLE),DIMENSION(3,3) :: Theta,ThetaI
+     REAL(DOUBLE)                :: VNorm
+     REAL(DOUBLE)                :: R12_2,R12,Fact,Q,GMass,DLength,Delta
+     TYPE(INT_VECT)              :: Atoms,IOrder
+     TYPE(DBL_VECT)              :: VectB,VectBO,QVals,QVals2
+     TYPE(DBL_RNK2)              :: Vects,Vects2
+     TYPE(ATOMBONDS)             :: AtmB,AtmB2
+     !     
+     NatmsLoc=SIZE(XYZ,2)
+     NBondEst=Bond%N
+     NBond=NBondEst
+     Delta=0.03D0
+     AuxSize=(1+(NatmsLoc-3)/(Box%NZ+Box%NX+Box%NY))*27*5
+     CALL New(Atoms,AuxSize)
+     CALL New(IOrder,AuxSize)
+     CALL New(Vects,(/AuxSize,3/))
+     CALL New(Vects2,(/AuxSize,3/))
+     CALL New(VectB,AuxSize)
+     CALL New(VectBO,AuxSize)
+     CALL New(QVals,AuxSize)
+     CALL New(QVals2,AuxSize)
+     CALL SetDSYEVWork(3)
+     MaxAtomBonds=10
+     CALL New(AtmB,NatmsLoc,MaxAtomBonds)
+     !
+     !  Go through all boxes and their neighbours
+     !
+     DO IZ=1,Box%NZ
+       DO IX=1,Box%NX
+         DO IY=1,Box%NY
+           ! absolute index of a box
+           IOrd=Box%NX*Box%NY*(IZ-1)+Box%NY*(IX-1)+IY
+           DO I1=Box%I%I(IOrd),Box%I%I(IOrd+1)-1
+             JJ1=Box%J%I(I1) !!! atom in central box
+             NJJ1=AtNum(JJ1)
+             Theta=Zero
+             ICount=0
+               DO IZD=-1,1
+                 IF(IZ+IZD>0 .AND. IZ+IZD<=Box%NZ) THEN
+                   DO IXD=-1,1
+                     IF(IX+IXD>0 .AND. IX+IXD<=Box%NX) THEN
+                       DO IYD=-1,1
+                         IF(IY+IYD>0 .AND. IY+IYD<=Box%NY) THEN
+                           IOrdD=Box%NX*Box%NY*(IZ-1+IZD)+&
+                                 Box%NY*(IX-1+IXD)+IY+IYD
+                           DO I2=Box%I%I(IOrdD),Box%I%I(IOrdD+1)-1
+                             JJ2=Box%J%I(I2) !!! second atom
+                             NJJ2=AtNum(JJ2)
+                             IF(JJ1==JJ2) CYCLE
+                             ICount=ICount+1
+                             Atoms%I(ICount)=JJ2
+                             DVect(:)=XYZ(:,JJ1)-XYZ(:,JJ2)
+                             R12_2=DOT_PRODUCT(DVect,DVect)
+                             R12=SQRT(R12_2)
+                             GMass=One/R12_2
+                          !  GMass=GOverlap(R12,CritRad(JJ1),CritRad(JJ2))
+                             DVect=DVect/R12
+                             DVect=GMass*DVect
+!write(*,*) jj2,' gmass ',gmass
+!write(*,*) jj2,' dvect ',DVect
+                             DO J=1,3 ; Vects%D(ICount,J)=DVect(J) ; ENDDO
+                            !DLength=DOT_PRODUCT(DVect,DVect)
+                             DO I=1,3
+                               DO J=1,3
+                                 ThetaI(I,J)=DVect(I)*DVect(J)
+                               ENDDO
+                             ! ThetaI(I,I)=ThetaI(I,I)+DLength
+                             ENDDO
+                             Theta=Theta+ThetaI
+                           ENDDO
+                         ENDIF
+                       ENDDO
+                     ENDIF
+                   ENDDO
+                 ENDIF
+               ENDDO
+               ! get principal directions
+               BLKVECT%D=Theta
+               CALL DSYEV('V','U',3,BLKVECT%D,BIGBLOK,BLKVALS%D, &
+                          BLKWORK%D,BLKLWORK,INFO)
+               !
+               DO J=1,3 
+                 IF(BLKVALS%D(J)/BLKVALS%D(3)>0.01D0) THEN
+                   BLKVALS%D(J)=One/SQRT(BLKVALS%D(J))
+                   VNorm=Zero
+                   DO I=1,ICount
+                     JJ2=Atoms%I(I)
+                     DVect(:)=XYZ(:,JJ1)-XYZ(:,JJ2)
+                     DVect=DVect/(CritRad(JJ1)+CritRad(JJ2))
+                     EigVect(:)=BLKVECT%D(:,J)
+                     Vects2%D(I,J)=ABS(DOT_PRODUCT(DVect,EigVect))
+                     VNorm=VNorm+Vects2%D(I,J)
+                   ENDDO
+                   VNorm=One/VNorm
+                   DO I=1,ICount
+                     Vects2%D(I,J)=VNorm*Vects2%D(I,J)
+                   ENDDO
+                 ELSE
+                   DO I=1,ICount
+                     Vects2%D(I,J)=Zero
+                   ENDDO
+                 ENDIF 
+               ENDDO 
+               !
+               ! Recognize bonds
+               !
+               VectB%D=Zero
+               DO I=1,ICount
+                 DO J=1,3
+                   VectB%D(I)=VectB%D(I)+Vects2%D(I,J)
+                 ENDDO
+               ENDDO
+               Fact=SUM(VectB%D(1:ICount))
+               !
+              !CALL ReorderN(VectB%D,IOrder%I,ICount) 
+               CALL ReorderI(VectB%D,IOrder%I,ICount)
+               !
+               DO I=1,ICount      
+                 K=IOrder%I(I)
+                 VectBO%D(I)=VectB%D(K)
+               ENDDO
+               VectBO%D=VectBO%D/VectBO%D(1)
+               QVals%D(1)=One 
+               DO I=2,ICount
+                !QVals%D(I+1)=ABS(VectBO%D(I+1)/VectBO%D(I))/ &
+                !            (ABS(VectBO%D(I+1)/VectBO%D(1))+1.D-10)
+                !QVals%D(I+1)=ABS(LOG10(VectBO%D(I+1))-LOG10(VectBO%D(I)))/ &
+                !            (ABS(LOG10(VectBO%D(1))-LOG10(VectBO%D(I+1)))+1.D-10)
+                 QVals%D(I)=ABS(LOG10(VectBO%D(I))-LOG10(VectBO%D(I-1)))/ &
+                           (ABS(LOG10(VectBO%D(I))-LOG10(VectBO%D(1)))+1.D-10)
+               ENDDO
+               DO I=1,ICount
+                 QVals2%D(I)=One-QVals%D(I)
+               ENDDO
+               !
+               NDim=ICount
+               DO I=2,ICount
+                 IF(I==2) THEN
+                   IF(VectBO%D(2)<1.33D0*VectBO%D(1)) CYCLE
+                 ELSE
+                   IF(QVals%D(I)<QTest90(MIN(10,I+1))-0.05D0) THEN
+                     CYCLE
+                  !ELSE IF(QVals%D(I)>0.95D0*QTest90(MIN(10,I))) THEN
+                  !  IF(I<ICount) THEN
+                  !    IF(QVals%D(I+1)>0.95D0*QTest90(MIN(10,I+1))) CYCLE
+                  !  ENDIF
+                   ENDIF
+                 ENDIF
+                 NDim=I-1
+                 EXIT
+               ENDDO
+               !
+               Q=Zero
+               DO I=1,NDim
+                 J=IOrder%I(I)
+                 JJ2=Atoms%I(J)
+                 IF(.NOT.ANY(AtmB%Atoms%I(JJ2,:)==JJ1)) THEN ! avoid double counting of bonds
+                   NBond=NBond+1
+                   IF(NBond>NBondEst) THEN
+                     DDimU=NatmsLoc*10
+                     CALL MoreBondArray(Bond,DDimU,NBondEst)
+                     NBondEst=NBondEst+DDimU
+                   ENDIF 
+                   DDimU=MAX(AtmB%Count%I(JJ1),AtmB%Count%I(JJ2))
+                   IF(MaxAtomBonds<DDimU+1) THEN
+                     MaxAtomBonds=MaxAtomBonds+10
+                     CALL SetEq(AtmB2,AtmB,N2_O=MaxAtomBonds)
+                     CALL Delete(AtmB)
+                     CALL SetEq(AtmB,AtmB2)
+                     CALL Delete(AtmB2)
+                   ENDIF 
+                   !
+                   IF(IEq(JJ1)<IEq(JJ2)) THEN
+                     Bond%IJ%I(1:2,NBond)=(/JJ1,JJ2/)
+                   ELSE
+                     Bond%IJ%I(1:2,NBond)=(/JJ2,JJ1/)
+                   ENDIF
+                   AtmB%Count%I(JJ1)=AtmB%Count%I(JJ1)+1
+                   AtmB%Count%I(JJ2)=AtmB%Count%I(JJ2)+1
+                   AtmB%Atoms%I(JJ1,AtmB%Count%I(JJ1))=JJ2
+                   AtmB%Atoms%I(JJ2,AtmB%Count%I(JJ2))=JJ1
+                   AtmB%Bonds%I(JJ1,AtmB%Count%I(JJ1))=NBond
+                   AtmB%Bonds%I(JJ2,AtmB%Count%I(JJ2))=NBond
+                   !
+                   DVect(:)=XYZ(:,JJ1)-XYZ(:,JJ2)
+                   R12_2=DOT_PRODUCT(DVect,DVect)
+                   R12=SQRT(R12_2)
+                   Bond%Length%D(NBond)=R12
+                   Bond%Type%C(NBond)(1:3)='COV'
+                 ENDIF
+               ENDDO
+               !
+           ENDDO !!! central box atoms
+         ENDDO
+       ENDDO
+     ENDDO !!! ends on central box indices
+     CALL Delete(Atoms)
+     CALL Delete(IOrder)
+     CALL Delete(Vects)
+     CALL Delete(Vects2)
+     CALL Delete(VectB)
+     CALL Delete(VectBO)
+     CALL Delete(QVals)
+     CALL Delete(QVals2)
+     CALL Delete(AtmB)
+     !
+     ! Compress Bond
+     !
+     CALL UnSetDSYEVWork()
+     CALL MoreBondArray(Bond,0,NBond)
+   END SUBROUTINE BondList3
+!
+!--------------------------------------------------------------
+!
    FUNCTION GOverlap(RAB,RA,RB)
      REAL(DOUBLE) :: RAB,RA,RB,GOverlap
      REAL(DOUBLE) :: XA,XB
@@ -6525,7 +6801,7 @@ exit
      NZ=SIZE(TOPM%JTot12%I)
      IF(AllocQ(TOPM%IExcl%Alloc)) CALL Delete(TOPM%IExcl) 
      IF(AllocQ(TOPM%JExcl%Alloc)) CALL Delete(TOPM%JExcl) 
-     NDeg=9! generates NDEG-th neighbours, NDEG+1-th neighbour is allowed for VDW connectivity
+     NDeg=5! generates NDEG-th neighbours, NDEG+1-th neighbour is allowed for VDW connectivity
      CALL New(IUnit,NatmsLoc+1)
      CALL New(JUnit,NatmsLoc)
      DO J=1,NatmsLoc+1 ; IUnit%I(J)=J ; ENDDO
