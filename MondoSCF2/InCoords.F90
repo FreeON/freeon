@@ -6166,6 +6166,7 @@ return
                            !
                            CritDist=CritRad%D(JJ1)+CritRad%D(JJ2)
                            CritMBF=MBF*MAX(MaxBondL(JJ1),MaxBondL(JJ2))
+                           CritMBF=MAX(CritMBF,1.3D0*(SLRadii(NJJ1)+SLRadii(NJJ2)))
                            CritDist=MAX(CritDist,CritMBF)
                            DVect(:)=XYZ(:,JJ1)-XYZ(:,JJ2)
                            R12_2=DOT_PRODUCT(DVect,DVect)
