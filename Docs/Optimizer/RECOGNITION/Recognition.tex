@@ -487,7 +487,7 @@ must be smaller than 60 degrees and the X-Y distance smaller than
 At the beginning of each cycle of loop \#2
 an additional topology matrix, $T_{excl}$ is built:
 \begin{equation}
-T_{excl} = {I+T_{12}}^{n_{excl}} ,
+T_{excl} = {(I+T_{12})}^{n_{excl}} ,
 \end{equation}
 where $I$ denotes the $3N \times 3N$ identity, $T_{12}$ is the 
 topology matrix based on all bonds from loop \#1 and previous 
@@ -513,11 +513,154 @@ be used with great efficiency in several challenging cases
 enumerated later in this paper.
 
 \section{Connectivity recognition on the basis of shell-structures}
+\label{shell}
 In order to simplify the above connectivity recognition, we have
 tested another algorithm that is based on the investigation
 of shell-structures around atoms.
 
-For each atom a kind of 
+For each atom $i$ an array of local bond-vectors $v_{j}$ is set up,
+and stored in the matrix $L^{i}$:
+\begin{equation}
+L^{i}_{j} = v_{j} ,
+\end{equation}
+with 
+\begin{equation}
+v_{j}=w_{ij}*(r_{j}-r_{i})/\|r_{j}-r_{i}\| ,
+\end{equation}
+where $r_{i}$ and $r_{j}$ are the location vectors of the atoms $i$ and 
+$j$ and $w_{ij}$ is a weight constructed by the overlap of two
+hypothetical spherical Gaussian fuctions with exponents
+$\xi_{i}=1/R_{i}^{2}$ and $\xi_{i}=1/R_{j}^{2}$, where
+$R_{i}$ and $R_{j}$ are the corresponding atomic radii:
+\begin{equation}
+w_{ij}=\sqrt{(\pi/(\xi_{i}+\xi_{j}))^{3}}   
+\exp{\left( -\frac{\xi_{i}\xi_{j}\|r_{j}-r_{i}\|^{2}}{\xi_{i}+\xi_{j}}\right) } .
+\end{equation}
+The Gaussian weights refer to a simple model of atomic orbital overlap.
+For close atoms this overlap is big, for farther atoms it is small, thus
+the wighting serves as a selection criteria for the importance of bonds.
+
+The eigenvectors $U$ of the matrix $S^{i}$
+\begin{equation}
+S^{i} = {L^{i}}^{t} L^{i}
+\end{equation}
+provide principal bonding directions around atom $i$.
+These principal bonding directions can be expressed in terms of
+the bond vectors $v_{j}$ via the matrix $K^{i}$:
+\begin{equation}
+K^{i} = L^{i} U D^{-1/2} ,
+\end{equation}
+where $D^{-1/2}$ is a diagonal matrix and contains the generalized
+inverse square-roots of the eigenvalues of $S^{i}$. Singularities
+of $S^{i}$ are treated by the constraint that all eigenvalues
+smaller then $0.01$ times the largest eigenvalue 
+of $S^{i}$ are set to zero and are not inverted.
+The total weight $W_{ij}$ of bond $ij$ among the bonds of $i$
+is calculated as 
+\begin{equation}
+W_{ij} = \sum_{l=1}^{3} {K^{i}_{jl}}^{2} .  
+\end{equation}
+What remains is the filtering of bonds that are important for 
+atom $i$. This is based on the assumption that unimportant
+bonds will have a small enough weight. The weights $W_{ij}$ are
+normalized such that they add up to one and
+ordered in decreasing order. Then, the values $Q_{ij}$ are computed:
+\begin{equation}
+Q_{ij} = \frac{log(W_{ij})-log(W_{i(j-1)})}{log(W_{ij})-log(W_{i1})}.
+\end{equation}
+Note that from the above equation the index $j$ refers to decreasing
+ordering in $W_{ij}$.
+The values of $Q_{ij}$ refer to the statistical $Q$-test to check
+whether an outlier of a series can be dropped. The tabulated Q-test
+values, $Q^{t}_{j}$ for $j=[3,10]$ are: 0.94,  0.76,  0.64,  
+0.56,  0.51,  0.47, 0.44, 0.41 for 90\% probability, respectively. 
+If the bond-list
+has only two elements, we require that the second bond should be
+dropped if the first one accounts for 90\% of the total weights.
+Otherwise, for a larger set of bonds, the series of allowed bonds will
+terminate at that specific $k-1$-th bond, for which $Q_{ik}<Q^{t}_{k}$,
+supposing that $\sum_{l=1}^{k-1} W_{il} > 0.90 $, where $0.90$
+referes to 90\% of the weights. 
+
+This simple algorithm is capable to correctly 
+recognize all bonds in Baker's
+test set of small and medium sized organic molecules and
+reproduce our previously published geometry optimization results 
+\cite{KNemeth04}. However, when some of the bonds are too long, like 
+a long Van der Waals contact, this algorithm fails. More
+appropriate choice of the Gaussian-based weights may though help and
+the algorithm may become generally useable.
+
+\section{Angles related internal coordinates}
+\subsection{Recognition of bendings}
+Our current internal coordinate generator adds all possible bond
+angles (bending coordinates) to the internal coordinate list,
+that is determined by nearest neighbor bonds.
+
+\subsection{Recognition of out-of-planes}
+The planarity of the vicinity of a certain atom $i$ is checked
+by calculating eigenvalues of the $S$ matrix as described in Section
+\ref{shell}. If the $S$ matrix has only two nonzero eigenvalues
+(after the application of the constraint on the condition number of $S$)
+all posible out-of-plane coordinates around atom $i$ are generated
+with $i$ in the central position. Note, that we use the spectroscopic
+out-of-plane coordinates \cite{EWilson55} instead of the
+improper torsions of molecular mechanics.
+
+\subsection{Recognition of torsions}
+Every bond will be associated with a single torsional coordinate,
+if applicable. The torsion is chosen so that the two valence angles
+at the ends of the torsions should be as close to 90 degrees as 
+possible, should contain the heaviest possible atoms for the terminal
+positions and the terminal atoms should be those having the largest
+number of topological neighbors. If fact a weight function of the form
+\begin{equation}
+W_{j} = \frac{(N_{j}+1)*Z_{j}}{|\pi/2-\alpha_{j}|}
+\end{equation}
+is used, where $j$ is a candidate atom for a terminal position of the torsion,
+$N_{j}$ is the number of its nearest neighbor atoms, $Z_{j}$ is
+the atomic number of $j$ and $\alpha_{j}$ is the angle $j$ closes
+with the central atoms of the torsion.
+
+\subsection{Recognition of linear bendings} 
+If an angle is linear, i.e. is between 175 and 180 degrees, 
+a linear bending coordinate is set up,
+independent from whether the central atom has two or more neighbors.
+If the terminal atoms of a linear bending have more than one
+neighbors one of these neighbors will be selected to reference
+the two perpendicular planes in whose intersection the linear bending is
+placed. If there is no such reference, the Cartesian framework will
+serve as a reference as described in Ref. \onlinecite{VBakken02}.
+Note, that to each linear bending coordinate there will be
+a long-range-torsion associated, that is constructed similarly to
+ordinary torsions but its central atoms will be the terminal atoms
+of the linear bending.
+In case of collinear chains linear bendings are generated for each 
+atomic triplet of the chain with an appropriate long-range torsion
+that brigdes the two ends of the collinear chain.
+
+\section{Case studies}
+Here we describe three difficult cases in which finding the 
+appropriate bonds turned out troublesome in earlier versions
+of our default coordinate recognition algorithm.
+
+\subsection{PETN - a high explosive with hydrogen bonds}
+Pentaerythritol tetranitrate (PETN) is a high explosive 
+\cite{Conant_1979}. It's crystal structure is bound together
+by $C-H \cdot\cdot\cdot O-N$ type hydrogen bonds (see Pict. \ref{PETN}).
+Our recognition algorithm founds 91 stretches, 174 bendings,
+24 linear bendings, 101 torsions and 16 long-range torsions, 
+and 36 out-of-planes. Note, that internal coordinates
+that have no atom common with the central cell are not listed here.
+Among the stretches, H-bond related coordinates can be divided into 
+two classes: one of approximate length of $2.48\AA$, there are
+16 such stretches; and the ones of length about $2.61\AA$ (12 pieces).
+The difficulty in recognizing the appropriate connectivity in this case
+originated in the fact that if non-uniform atomic radii are used,
+loop \#1 found some longer bonds for Van der Waals contacts, with 
+length of about $3.14\AA$, when connected fragments that are 
+isolated in the primary covalent bonding scheme.
+
 \section{Conclusions} \label{Conclusions}
 
 \bibliography{../../Bib/mondo_new}
