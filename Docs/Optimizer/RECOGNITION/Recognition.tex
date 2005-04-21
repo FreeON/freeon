@@ -387,6 +387,7 @@ manipulations, as opposed to e.g. pivoting-based Cholesky
 factorization or $\lambda_{c}$ based coordinate selection methods.
 
 \section{Length-scale scanning}
+\label{twoloops}
 Our algorithm for the recognition of connectivity is similar
 to the one of von Arnim in the sense that it also gradually scannes 
 ranges of atomic radii and checks the connectivity, until all fragments
@@ -648,20 +649,120 @@ of our default coordinate recognition algorithm.
 Pentaerythritol tetranitrate (PETN) is a high explosive 
 \cite{Conant_1979}. It's crystal structure is bound together
 by $C-H \cdot\cdot\cdot O-N$ type hydrogen bonds (see Pict. \ref{PETN}).
+The elementary cell of PETN contains 58 atoms.
 Our recognition algorithm founds 91 stretches, 174 bendings,
 24 linear bendings, 101 torsions and 16 long-range torsions, 
 and 36 out-of-planes. Note, that internal coordinates
 that have no atom common with the central cell are not listed here.
 Among the stretches, H-bond related coordinates can be divided into 
-two classes: one of approximate length of $2.48\AA$, there are
-16 such stretches; and the ones of length about $2.61\AA$ (12 pieces).
+two classes: one of approximate length of $2.48$\AA, there are
+16 such stretches; and the ones of length about $2.61$\AA (12 pieces).
 The difficulty in recognizing the appropriate connectivity in this case
 originated in the fact that if non-uniform atomic radii are used,
 loop \#1 found some longer bonds for Van der Waals contacts, with 
-length of about $3.14\AA$, when connected fragments that are 
+length of about $3.14$\AA, when connected fragments that are 
 isolated in the primary covalent bonding scheme.
+%\commentoutA{
+\begin{figure}[h]
+\resizebox*{3.5in}{!}{\includegraphics{PETN.eps}}
+\caption{
+Crystal structure of PETN.
+\label{PETN}
+}
+\end{figure}
+%}
+
+\subsection{Teflon crystal}
+The crystal of teflon (poly-tetrafluoro-ethylene) is held
+together by Van der Waals contacts (see Pict. \ref{teflon}).
+In our model a 156 atoms elementary cell was used.
+Our recognition scheme found 244 stretches, 204 of them 
+ordinary covalent bonds, and 40 Van der Waals contacts of approximate
+length of $2.60-2.85$\AA. These bonds are associated with 607
+bendings and 281 torsions. Note, that the number of intermolecular
+bods also depends on the topological exclusion principle
+presented in Section \ref{twoloops}.
+%\commentoutA{
+\begin{figure}[h]
+\resizebox*{3.5in}{!}{\includegraphics{teflon.eps}}
+\caption{
+Crystal structure of teflon.
+\label{PETN}
+}
+\end{figure}
+%}
+
+\subsection{Distorted Sodium Chloride}
+Distorted sodium chloride occured during optimization 
+with a previous version of
+our internal coordinates recognition scheme. 
+It also modells well the case of molten ionic crystals and,
+in general the case, when atomic radii are very pure approximations
+to discover bonding. The elementary cell consist of two atoms.
+All 27 seven stretches have been recognized that connect nearest
+sodium-sodium, cloride-chloride and sodium-chloride ions.
+Note, that changing the factor of $1.33$ (multiplyer for ``typical''
+bond-length, see Section \ref{twoloops}) to a smaller value, say
+1.2 results in the recognition of sodium-chloride interactions only.
+In the default algorithm, 276 bendings, 80 linear bendings,
+63 ordinary torsions and 51 long-range torsions have been detected.
+Clearly, this represents a quite redundant coordinate system for 
+sodium-chloride, as the stretches alone should be enough for the
+optimization.
+
+\subsection{Optimization characteristics for teflon}
+In this paper we present optimization characteristics
+for teflon, only. A more detailed paper about our recently 
+developed crystal structure optimizer we be published separately.
+Note, that for the Van der Waals contacts we have not used
+the so-called ``5/R'' coordinates, as suggested elsewhere
+\cite{JBaker00,TBucko05}. All optimizations have been carried out with
+the QUICCA algorithm \cite{KNemeth04} as modified for crystals.
+Energies and forces have been computed on the PBE/STO-3G level of
+theory. Optimization was considered converged after all
+atomic and lattice gradients decreased below 0.0005 a.u..
+The teflon system has been optimized in 54 steps from a geometry
+with initial gradients as large as 0.601103 a.u. in magnitude.
+The energy curve has a smooth decline, while gradient curves 
+show slow decline for the intermolecular forces. One possible 
+source of improvement in this decline 
+could be the application of "5/R" coordinates.
+%\commentoutA{
+\begin{figure}[h]
+\resizebox*{3.5in}{!}{\includegraphics{energ.eps}}
+\caption{
+Convergence of the energy during the optimization of teflon.
+\label{PETN}
+}
+\end{figure}
+%}
+%\commentoutA{
+\begin{figure}[h]
+\resizebox*{3.5in}{!}{\includegraphics{grads.eps}}
+\caption{
+Convergence of the maximum atomic (lower curve) 
+and lattice (upper curve)
+forces during the optimization of teflon.
+\label{PETN}
+}
+\end{figure}
+%}
 
 \section{Conclusions} \label{Conclusions}
+We have discussed strengths and weaknesses of 
+existing algorithms for the selection of 
+internal coordinates for the purpose of molecular geometry optimization.
+We have recommended new, robust algorithms that are capable
+to recognize efficient coordinate systems for topologically
+complex atomic arrangements that span the range from ionic melts to
+Van der Waals bonded crystals. With the algorithms
+described in the present paper we have contributed to the development 
+of internal coordinate recognition that aims on generalizing the
+use of internal coordinates for all situations 
+where Cartesian coordinates have been the preferred mean
+geometry manipulation. We have enumerated difficult cases 
+in coordinate recognition and provided robust solutions that proved to
+work well in complex, practical recognition tasks.
 
 \bibliography{../../Bib/mondo_new}
 
