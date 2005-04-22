@@ -62,6 +62,9 @@ PROGRAM XCForce
   NEl=GM%NElec
 ! Set local integration thresholds 
   CALL SetLocalThresholds(Thresholds%Cube*1.D-1)
+#ifdef NewPAC
+  CALL SetAACoef()
+#endif
 #ifdef PARALLEL
   CALL ParaInitRho(Args)
   CALL GetBBox()
