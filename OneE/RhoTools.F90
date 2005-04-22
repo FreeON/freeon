@@ -165,7 +165,6 @@ MODULE RhoTools
 !---------------------------------------------------------------------------------------
 ! Subroutine to Remove unnessesary distributions in rho
 !---------------------------------------------------------------------------------------
-
   SUBROUTINE Prune_Rho_new(TOL,Rho)
     TYPE(HGRho_new)     :: Rho,RhoTmp
     INTEGER             :: I,NDist,NCoef,Ell,LenKet,OffCo1,OffCo2
@@ -219,6 +218,57 @@ MODULE RhoTools
 !
   END SUBROUTINE Prune_Rho_new
 !---------------------------------------------------------------------------------------
+! Collect Distributuins of a perticulate Ell type
+!---------------------------------------------------------------------------------------
+  SUBROUTINE PruneEll_Rho_new(EllKeep,Rho)
+    TYPE(HGRho_new)     :: Rho,RhoTmp
+    INTEGER             :: EllKeep,I,NDist,NCoef,Ell,LenKet,OffCo1,OffCo2
+    REAL(DOUBLE)        :: Zeta,Mag
+!
+    CALL Copy_HGRho_new(RhoTmp,Rho)
+    CALL Delete_HGRho_new(Rho)
+!
+!   Count the Number of Distribution with Ell = EllKeep
+!
+    NDist = 0
+    NCoef = 0
+    DO I=1,RhoTmp%NDist
+       Ell    = RhoTmp%Ell%I(I)
+       LenKet = LHGTF(Ell)
+       IF(Ell==EllKeep) THEN
+          NDist = NDist+1
+          NCoef = NCoef+LenKet
+       ENDIF
+    ENDDO
+!
+!   Create New Rho
+!
+    CALL New_HGRho_new(Rho,(/NDist,NCoef/))
+!
+    NDist = 0
+    NCoef = 0
+    DO I=1,RhoTmp%NDist
+       Ell    = RhoTmp%Ell%I(I)
+       Zeta   = RhoTmp%Zeta%D(I)
+       LenKet = LHGTF(Ell)
+       OffCo1 = RhoTmp%OffCo%I(I)
+       IF(Ell==EllKeep) THEN
+          NDist = NDist+1
+          NCoef = NCoef+LenKet
+          OffCo2= NCoef-LenKet+1
+          Rho%Ell%I(NDist)   = RhoTmp%Ell%I(I)
+          Rho%Zeta%D(NDist)  = RhoTmp%Zeta%D(I)
+          Rho%Qx%D(NDist)    = RhoTmp%Qx%D(I)
+          Rho%Qy%D(NDist)    = RhoTmp%Qy%D(I)
+          Rho%Qz%D(NDist)    = RhoTmp%Qz%D(I)
+          Rho%OffCo%I(NDist) = OffCo2
+          Rho%Co%D(OffCo2:OffCo2+LenKet-1) = RhoTmp%Co%D(OffCo1:OffCo1+LenKet-1)
+       ENDIF         
+    ENDDO
+    CALL Delete_HGRho_new(RhoTmp)
+!
+  END SUBROUTINE PruneEll_Rho_new
+!---------------------------------------------------------------------------------------
 ! Fold the Distributions Back into the Box
 !---------------------------------------------------------------------------------------
   SUBROUTINE Fold_Rho_new(GM,Rho)
@@ -240,7 +290,6 @@ MODULE RhoTools
   END SUBROUTINE Fold_Rho_new
 !---------------------------------------------------------------------------------------
 ! Calculate the total Dipole of Rho
-
 !---------------------------------------------------------------------------------------
   SUBROUTINE CalRhoPoles_new(MP,Rho,GMLoc)
     TYPE(CMPoles)             :: MP
