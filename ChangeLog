@@ -1,3 +1,196 @@
+
+NOTE----------------------------------------------------------------
+
+	FIRST LETS WISH KAROLY GOOD LUCK AND A JOB WELL DONE!!
+
+	SECOND NOTE THAT CODE WILL NOT COMPILE WITHOUT -DNEWPAC OPTION!!
+	GIVE IT A TRY AND LET CJ KNOW, IS IT FASTER??
+
+NOTE----------------------------------------------------------------	
+
+2005-04-22 17:14  mchalla
+
+	* SCFeqs/P2Use.F90: Not quite stable yet.  BUT, looks very close.
+
+2005-04-22 15:21  tymczak
+
+	* SCFeqs/P2Use.F90: New Logic in Extrapolate, should fix the
+	non-convergence. Also have printflags around the printing
+
+2005-04-22 15:18  tymczak
+
+	* QCTC/PoleTree.F90: New PAC
+
+2005-04-22 15:18  tymczak
+
+	* QCTC/TreeWalk.F90: New PAC Test
+
+2005-04-22 15:16  tymczak
+
+	* QCTC/Thresholds.F90: [no log message]
+
+2005-04-22 15:15  tymczak
+
+	* QCTC/QCTC.F90: New PAC
+
+2005-04-22 15:12  tymczak
+
+	* QCTC/: BlokTrPdJ.F90, JGen.F90, NukE.F90: New PAC
+
+2005-04-22 15:11  tymczak
+
+	* OneE/RhoTools.F90: New Function which prunes of angluar momentum
+	type from the density
+
+2005-04-22 15:10  tymczak
+
+	* OneE/MakeRho.F90, QCTC/LibQCTC/ERIGlobals.F90,
+	QCTC/LibQCTC/PoleNodeType.F90: [no log message]
+
+2005-04-22 15:08  tymczak
+
+	* HiCu/: HiCu.F90, XCForce.F90: Put in new Extent
+
+2005-04-22 15:06  tymczak
+
+	* MondoMods/Thresholding.F90: Put in the New PAC functions for QCTC
+	and also the new Extent for HiCu
+
+2005-04-21 23:24  nemeth
+
+	* Docs/Optimizer/PBC_QUICCA/PBCQUICCA.tex: [no log message]
+
+2005-04-21 22:54  nemeth
+
+	* Docs/Optimizer/PBC_QUICCA/: ICE-grads.eps, NANO-grads.eps,
+	Quartz-grads.eps, Sulphure-grads.eps: [no log message]
+
+2005-04-21 22:18  nemeth
+
+	* Docs/Optimizer/PBC_QUICCA/OPTquartz.xyz: [no log message]
+
+2005-04-21 22:15  nemeth
+
+	* Docs/Optimizer/PBC_QUICCA/quartz.eps: [no log message]
+
+2005-04-21 20:51  nemeth
+
+	* Benchmarks/PBC-QUICCA/: B1x1/BN.inp, B1x1/BN.lsf,
+	B1x1/BN1x1-energ.eps, B1x1/BN1x1-grads.eps, B1x1/BN_6843776.log,
+	B1x1/BN_6843776.out, B1x1/BN_6843776.xyz, B1x1/carts, B1x1/carts2,
+	B1x1/energ2, B1x1/energies, B1x1/grads.eps, B1x1/latts,
+	B1x1/latts2, CH2/CH2.inp, CH2/CH2.lsf, CH2/CH2_8447466.out-1,
+	CH2/CH2_8447466.xyz-1, CH2/carts, CH2/carts2, CH2/ch2-energ.eps,
+	CH2/ch2-grads.eps, CH2/energ2, CH2/energies, CH2/grads.eps,
+	CH2/latts, I1x1x1/ICE-energ.eps, I1x1x1/ICE-grads.eps,
+	I1x1x1/Isto3g.inp, I1x1x1/Isto3g.lsf, I1x1x1/Isto3g_13133771.out-1,
+	I1x1x1/Isto3g_13133771.xyz-1, I1x1x1/Isto3g_7368832.out-2,
+	I1x1x1/Isto3g_7368832.xyz-2, I1x1x1/carts, I1x1x1/carts2,
+	I1x1x1/energ2, I1x1x1/energies, I1x1x1/latts, I1x1x1/latts2,
+	N1x1x1/NANO-energ.eps, N1x1x1/NANO-grads.eps, N1x1x1/Nano.inp,
+	N1x1x1/Nano.lsf, N1x1x1/Nano_12107565.out-1,
+	N1x1x1/Nano_12107565.xyz-1, N1x1x1/Nano_5822291.out-2,
+	N1x1x1/Nano_5822291.xyz-2, N1x1x1/carts, N1x1x1/carts2,
+	N1x1x1/energ2, N1x1x1/energies, N1x1x1/latts, N1x1x1/latts2,
+	Q1x1x1/Qsto3g.inp, Q1x1x1/Qsto3g_10516325.out-9,
+	Q1x1x1/Qsto3g_10516325.xyz-9, Q1x1x1/Qsto3g_10642847.out-7,
+	Q1x1x1/Qsto3g_10642847.xyz-7, Q1x1x1/Qsto3g_15803690.out-1,
+	Q1x1x1/Qsto3g_15803690.xyz-1, Q1x1x1/Qsto3g_1646854.out-10,
+	Q1x1x1/Qsto3g_1646854.xyz-10, Q1x1x1/Qsto3g_1822125.out-3,
+	Q1x1x1/Qsto3g_1822125.xyz-3, Q1x1x1/Qsto3g_2140414.out-4,
+	Q1x1x1/Qsto3g_2140414.xyz-4, Q1x1x1/Qsto3g_2658980.out-2,
+	Q1x1x1/Qsto3g_2658980.xyz-2, Q1x1x1/Qsto3g_3710684.out-11,
+	Q1x1x1/Qsto3g_3710684.xyz-11, Q1x1x1/Qsto3g_4745761.out-8,
+	Q1x1x1/Qsto3g_4745761.xyz-8, Q1x1x1/Qsto3g_4754582.out-5,
+	Q1x1x1/Qsto3g_4754582.xyz-5, Q1x1x1/Qsto3g_815862.out-6,
+	Q1x1x1/Qsto3g_815862.xyz-6, Q1x1x1/Quartz-energ.eps,
+	Q1x1x1/Quartz-grads.eps, Q1x1x1/carts, Q1x1x1/carts2,
+	Q1x1x1/energ2, Q1x1x1/energies, Q1x1x1/latts, Q1x1x1/latts2,
+	S1x1x1/OUTXYZ.tar.gz, S1x1x1/Sulphure-energ.eps,
+	S1x1x1/Sulphure-grads.eps, S1x1x1/carts, S1x1x1/carts2,
+	S1x1x1/energ2, S1x1x1/energies, S1x1x1/latts, S1x1x1/latts2: A buch
+	of files for periodic optimization, test results are put into PBC
+	QUICCA paper.
+
+2005-04-21 20:34  nemeth
+
+	* Docs/Optimizer/PBC_QUICCA/: Sulphure-energ.eps,
+	Sulphure-grads.eps: [no log message]
+
+2005-04-21 18:10  nemeth
+
+	* Docs/Optimizer/PBC_QUICCA/: Quartz-energ.eps, Quartz-grads.eps,
+	Quartz-grads.eps: [no log message]
+
+2005-04-21 18:01  nemeth
+
+	* Docs/Optimizer/PBC_QUICCA/: ICE-energ.eps, ICE-grads.eps: [no log
+	message]
+
+2005-04-21 17:48  nemeth
+
+	* Docs/Optimizer/PBC_QUICCA/: NANO-energ.eps, NANO-grads.eps: [no
+	log message]
+
+2005-04-21 16:47  nemeth
+
+	* Docs/Optimizer/PBC_QUICCA/: BN1x1-energ.eps, BN1x1-grads.eps,
+	ch2-energ.eps, ch2-grads.eps: [no log message]
+
+2005-04-21 11:59  nemeth
+
+	* Docs/Optimizer/PBC_QUICCA/mondo_new.bib: [no log message]
+
+2005-04-21 02:01  nemeth
+
+	* Docs/Optimizer/RECOGNITION/Recognition.tex: [no log message]
+
+2005-04-21 01:45  nemeth
+
+	* Docs/Optimizer/RECOGNITION/: carts, carts2, energ.eps, energ2,
+	grads.eps, latts, latts2: [no log message]
+
+2005-04-21 01:32  nemeth
+
+	* Docs/Optimizer/RECOGNITION/energ.eps: [no log message]
+
+2005-04-21 01:15  nemeth
+
+	* Docs/Optimizer/RECOGNITION/mondo_new.bib: [no log message]
+
+2005-04-21 00:26  nemeth
+
+	* Docs/Optimizer/RECOGNITION/teflon.eps: [no log message]
+
+2005-04-21 00:06  nemeth
+
+	* Docs/Optimizer/RECOGNITION/: PETN.eps, Recognition.tex: Update of
+	recognition paper.
+
+2005-04-20 18:36  nemeth
+
+	* Docs/Optimizer/RECOGNITION/: Recognition.tex, mondo_new.bib:
+	Update of the internal coords recognition paper.
+
+2005-04-20 16:18  nemeth
+
+	* MondoSCF2/InCoords.F90: Still, a conversion factor left out.
+
+2005-04-20 15:39  nemeth
+
+	* MondoSCF2/InCoords.F90: This has been left out.
+
+2005-04-20 15:16  nemeth
+
+	* MondoSCF2/InCoords.F90: A new version of the internal coordinate
+	recognition. Seems to be the ultimate (so far) works well for a
+	large set of molecules, from PETN, teflon, NaCl to Baker's test
+	set.
+
+2005-04-20 12:58  mchalla
+
+	* ChangeLog: [no log message]
+
 2005-04-19 13:36  nemeth
 
 	* MondoSCF2/Optimizer.F90: Printing of geometries changed since
