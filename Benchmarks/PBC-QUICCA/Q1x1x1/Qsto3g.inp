@@ -1,0 +1,52 @@
+<BeginTitle>
+ CSD ENTRY 93974ICS
+ Tucker, M.G.;Keen, D.A.;Dove, M.T. (2001)
+ Mineralogical Magazine (1969-) 65, 489-507
+ A detailed structural characterization of quartz 
+ on heating through the alpha - beta transition
+<EndTitle>
+
+<BeginOptions>
+Charge=0
+
+MPIInvoke="prun"
+MPIProcessors=8 
+MPISpatialProc=8 
+MPIProcFlag="-n"
+M#PIMachineFlag="--nper"
+M#PIMachineFile="2"
+
+Multiplicity=1
+Guess=Restart    
+HDFFile=/scratch1/knemeth/MondoScratch/Qsto3g/Qsto3g_3710684.hdf 
+Grad=(Optimize,PrimInt,BiSect,NoGDIIS,PrtBackTr)
+DebugAll=(MaxDebug,CheckSums,MaxGeOp)
+SCFMethod=(TC2)
+BasisSets=(STO-3G)
+ModelChem=(PBExc) 
+Accuracy =(tight)
+SCFConvergence=(DIIS)
+Geometry=(InAngstroms,NoOrder) 
+Periodic=(AtomCoord)
+PBC=(T,T,T)
+<EndOptions>
+
+<BeginPeriodic>
+ 4.9019   4.9019   5.3988  90.00  90.00 120.00     
+<EndPeriodic>
+
+<BeginGeometry>  
+  Si       1.306       2.261       0.000
+   O       2.768       2.492       4.772
+  Si      -1.145       1.984       3.599
+   O       1.360       1.151       1.172
+   O       3.225       0.602       2.972
+   O       0.317       1.753       4.226
+  Si       2.291       0.000       1.800
+   O      -1.091       3.094       2.427
+   O       0.774       3.643       0.627
+<EndGeometry>
+
+
+
+

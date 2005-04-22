@@ -1,0 +1,528 @@
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/MakePFFT BN_6843776 OneElectronMatr
+ ices 0 1 1 0 1 1
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/MakeS BN_6843776 OneElectronMatrice
+ s 0 1 1 0 1 1
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/AInv BN_6843776 OneElectronMatrices
+  0 1 1 0 1 1
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/MakeT BN_6843776 OneElectronMatrice
+ s 0 1 1 0 1 1
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/P2Use BN_6843776 DensitySuperpositi
+ on 0 1 1 0 1 1
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/MakeRho BN_6843776 DensitySuperposi
+ tion 0 1 1 0 1 1
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/QCTC BN_6843776 DensitySuperpositio
+ n 0 1 1 0 1 1
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/HiCu BN_6843776 DensitySuperpositio
+ n 0 1 1 0 1 1
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/FBuild BN_6843776 DensitySuperposit
+ ion 0 1 1 0 1 1
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/SP2 BN_6843776 DensitySuperposition
+  0 1 1 0 1 1
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/SCFstats BN_6843776 DensitySuperpos
+ ition 0 1 1 0 1 1
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/MakeRho BN_6843776 DensityNormal 1 
+ 1 1 0 1 1
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/QCTC BN_6843776 DensityNormal 1 1 1
+  0 1 1
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/HiCu BN_6843776 DensityNormal 1 1 1
+  0 1 1
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/FBuild BN_6843776 DensityNormal 1 1
+  1 0 1 1
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/DIIS BN_6843776 DensityNormal 1 1 1
+  0 1 1
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/SP2 BN_6843776 DensityNormal 1 1 1 
+ 0 1 1
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/SCFstats BN_6843776 DensityNormal 1
+  1 1 0 1 1
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/MakeRho BN_6843776 DensityNormal 2 
+ 1 1 1 1 1
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/QCTC BN_6843776 DensityNormal 2 1 1
+  1 1 1
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/HiCu BN_6843776 DensityNormal 2 1 1
+  1 1 1
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/FBuild BN_6843776 DensityNormal 2 1
+  1 1 1 1
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/DIIS BN_6843776 DensityNormal 2 1 1
+  1 1 1
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/SP2 BN_6843776 DensityNormal 2 1 1 
+ 1 1 1
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/SCFstats BN_6843776 DensityNormal 2
+  1 1 1 1 1
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/MakeRho BN_6843776 DensityNormal 3 
+ 1 1 2 1 1
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/QCTC BN_6843776 DensityNormal 3 1 1
+  2 1 1
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/HiCu BN_6843776 DensityNormal 3 1 1
+  2 1 1
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/FBuild BN_6843776 DensityNormal 3 1
+  1 2 1 1
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/DIIS BN_6843776 DensityNormal 3 1 1
+  2 1 1
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/SP2 BN_6843776 DensityNormal 3 1 1 
+ 2 1 1
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/SCFstats BN_6843776 DensityNormal 3
+  1 1 2 1 1
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/MakeRho BN_6843776 DensityNormal 4 
+ 1 1 3 1 1
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/QCTC BN_6843776 DensityNormal 4 1 1
+  3 1 1
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/HiCu BN_6843776 DensityNormal 4 1 1
+  3 1 1
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/FBuild BN_6843776 DensityNormal 4 1
+  1 3 1 1
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/DIIS BN_6843776 DensityNormal 4 1 1
+  3 1 1
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/SP2 BN_6843776 DensityNormal 4 1 1 
+ 3 1 1
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/SCFstats BN_6843776 DensityNormal 4
+  1 1 3 1 1
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/MakeRho BN_6843776 DensityNormal 5 
+ 1 1 4 1 1
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/QCTC BN_6843776 DensityNormal 5 1 1
+  4 1 1
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/HiCu BN_6843776 DensityNormal 5 1 1
+  4 1 1
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/FBuild BN_6843776 DensityNormal 5 1
+  1 4 1 1
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/DIIS BN_6843776 DensityNormal 5 1 1
+  4 1 1
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/SP2 BN_6843776 DensityNormal 5 1 1 
+ 4 1 1
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/SCFstats BN_6843776 DensityNormal 5
+  1 1 4 1 1
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/SForce BN_6843776 ForceEvaluation 5
+  1 1 5 1 1
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/TForce BN_6843776 ForceEvaluation 5
+  1 1 5 1 1
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/MakeRho BN_6843776 ForceEvaluation 
+ 5 1 1 5 1 1
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/JForce BN_6843776 ForceEvaluation 5
+  1 1 5 1 1
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/XCForce BN_6843776 ForceEvaluation 
+ 5 1 1 5 1 1
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/MakePFFT BN_6843776 OneElectronMatr
+ ices 0 1 2 5 1 1
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/MakeS BN_6843776 OneElectronMatrice
+ s 0 1 2 5 1 1
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/AInv BN_6843776 OneElectronMatrices
+  0 1 2 5 1 1
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/MakeT BN_6843776 OneElectronMatrice
+ s 0 1 2 5 1 1
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/P2Use BN_6843776 Extrapolate 0 1 2 
+ 5 1 1
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/MakeRho BN_6843776 Extrapolate 0 1 
+ 2 5 1 1
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/QCTC BN_6843776 Extrapolate 0 1 2 5
+  1 1
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/HiCu BN_6843776 Extrapolate 0 1 2 5
+  1 1
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/FBuild BN_6843776 Extrapolate 0 1 2
+  5 1 1
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/SP2 BN_6843776 Extrapolate 0 1 2 5 
+ 1 1
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/SCFstats BN_6843776 Extrapolate 0 1
+  2 5 1 1
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/MakeRho BN_6843776 DensityNormal 1 
+ 1 2 0 1 2
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/QCTC BN_6843776 DensityNormal 1 1 2
+  0 1 2
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/HiCu BN_6843776 DensityNormal 1 1 2
+  0 1 2
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/FBuild BN_6843776 DensityNormal 1 1
+  2 0 1 2
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/DIIS BN_6843776 DensityNormal 1 1 2
+  0 1 2
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/SP2 BN_6843776 DensityNormal 1 1 2 
+ 0 1 2
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/SCFstats BN_6843776 DensityNormal 1
+  1 2 0 1 2
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/MakeRho BN_6843776 DensityNormal 2 
+ 1 2 1 1 2
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/QCTC BN_6843776 DensityNormal 2 1 2
+  1 1 2
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/HiCu BN_6843776 DensityNormal 2 1 2
+  1 1 2
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/FBuild BN_6843776 DensityNormal 2 1
+  2 1 1 2
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/DIIS BN_6843776 DensityNormal 2 1 2
+  1 1 2
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/SP2 BN_6843776 DensityNormal 2 1 2 
+ 1 1 2
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/SCFstats BN_6843776 DensityNormal 2
+  1 2 1 1 2
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/MakeRho BN_6843776 DensityNormal 3 
+ 1 2 2 1 2
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/QCTC BN_6843776 DensityNormal 3 1 2
+  2 1 2
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/HiCu BN_6843776 DensityNormal 3 1 2
+  2 1 2
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/FBuild BN_6843776 DensityNormal 3 1
+  2 2 1 2
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/DIIS BN_6843776 DensityNormal 3 1 2
+  2 1 2
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/SP2 BN_6843776 DensityNormal 3 1 2 
+ 2 1 2
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/SCFstats BN_6843776 DensityNormal 3
+  1 2 2 1 2
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/MakeRho BN_6843776 DensityNormal 4 
+ 1 2 3 1 2
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/QCTC BN_6843776 DensityNormal 4 1 2
+  3 1 2
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/HiCu BN_6843776 DensityNormal 4 1 2
+  3 1 2
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/FBuild BN_6843776 DensityNormal 4 1
+  2 3 1 2
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/DIIS BN_6843776 DensityNormal 4 1 2
+  3 1 2
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/SP2 BN_6843776 DensityNormal 4 1 2 
+ 3 1 2
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/SCFstats BN_6843776 DensityNormal 4
+  1 2 3 1 2
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/SForce BN_6843776 ForceEvaluation 4
+  1 2 4 1 2
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/TForce BN_6843776 ForceEvaluation 4
+  1 2 4 1 2
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/MakeRho BN_6843776 ForceEvaluation 
+ 4 1 2 4 1 2
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/JForce BN_6843776 ForceEvaluation 4
+  1 2 4 1 2
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/XCForce BN_6843776 ForceEvaluation 
+ 4 1 2 4 1 2
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/MakePFFT BN_6843776 OneElectronMatr
+ ices 0 1 3 4 1 2
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/MakeS BN_6843776 OneElectronMatrice
+ s 0 1 3 4 1 2
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/AInv BN_6843776 OneElectronMatrices
+  0 1 3 4 1 2
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/MakeT BN_6843776 OneElectronMatrice
+ s 0 1 3 4 1 2
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/P2Use BN_6843776 Extrapolate 0 1 3 
+ 4 1 2
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/MakeRho BN_6843776 Extrapolate 0 1 
+ 3 4 1 2
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/QCTC BN_6843776 Extrapolate 0 1 3 4
+  1 2
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/HiCu BN_6843776 Extrapolate 0 1 3 4
+  1 2
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/FBuild BN_6843776 Extrapolate 0 1 3
+  4 1 2
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/SP2 BN_6843776 Extrapolate 0 1 3 4 
+ 1 2
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/SCFstats BN_6843776 Extrapolate 0 1
+  3 4 1 2
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/MakeRho BN_6843776 DensityNormal 1 
+ 1 3 0 1 3
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/QCTC BN_6843776 DensityNormal 1 1 3
+  0 1 3
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/HiCu BN_6843776 DensityNormal 1 1 3
+  0 1 3
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/FBuild BN_6843776 DensityNormal 1 1
+  3 0 1 3
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/DIIS BN_6843776 DensityNormal 1 1 3
+  0 1 3
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/SP2 BN_6843776 DensityNormal 1 1 3 
+ 0 1 3
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/SCFstats BN_6843776 DensityNormal 1
+  1 3 0 1 3
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/MakeRho BN_6843776 DensityNormal 2 
+ 1 3 1 1 3
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/QCTC BN_6843776 DensityNormal 2 1 3
+  1 1 3
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/HiCu BN_6843776 DensityNormal 2 1 3
+  1 1 3
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/FBuild BN_6843776 DensityNormal 2 1
+  3 1 1 3
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/DIIS BN_6843776 DensityNormal 2 1 3
+  1 1 3
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/SP2 BN_6843776 DensityNormal 2 1 3 
+ 1 1 3
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/SCFstats BN_6843776 DensityNormal 2
+  1 3 1 1 3
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/MakeRho BN_6843776 DensityNormal 3 
+ 1 3 2 1 3
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/QCTC BN_6843776 DensityNormal 3 1 3
+  2 1 3
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/HiCu BN_6843776 DensityNormal 3 1 3
+  2 1 3
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/FBuild BN_6843776 DensityNormal 3 1
+  3 2 1 3
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/DIIS BN_6843776 DensityNormal 3 1 3
+  2 1 3
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/SP2 BN_6843776 DensityNormal 3 1 3 
+ 2 1 3
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/SCFstats BN_6843776 DensityNormal 3
+  1 3 2 1 3
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/MakeRho BN_6843776 DensityNormal 4 
+ 1 3 3 1 3
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/QCTC BN_6843776 DensityNormal 4 1 3
+  3 1 3
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/HiCu BN_6843776 DensityNormal 4 1 3
+  3 1 3
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/FBuild BN_6843776 DensityNormal 4 1
+  3 3 1 3
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/DIIS BN_6843776 DensityNormal 4 1 3
+  3 1 3
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/SP2 BN_6843776 DensityNormal 4 1 3 
+ 3 1 3
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/SCFstats BN_6843776 DensityNormal 4
+  1 3 3 1 3
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/SForce BN_6843776 ForceEvaluation 4
+  1 3 4 1 3
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/TForce BN_6843776 ForceEvaluation 4
+  1 3 4 1 3
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/MakeRho BN_6843776 ForceEvaluation 
+ 4 1 3 4 1 3
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/JForce BN_6843776 ForceEvaluation 4
+  1 3 4 1 3
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/XCForce BN_6843776 ForceEvaluation 
+ 4 1 3 4 1 3
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/MakePFFT BN_6843776 OneElectronMatr
+ ices 0 1 4 4 1 3
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/MakeS BN_6843776 OneElectronMatrice
+ s 0 1 4 4 1 3
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/AInv BN_6843776 OneElectronMatrices
+  0 1 4 4 1 3
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/MakeT BN_6843776 OneElectronMatrice
+ s 0 1 4 4 1 3
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/P2Use BN_6843776 Extrapolate 0 1 4 
+ 4 1 3
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/MakeRho BN_6843776 Extrapolate 0 1 
+ 4 4 1 3
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/QCTC BN_6843776 Extrapolate 0 1 4 4
+  1 3
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/HiCu BN_6843776 Extrapolate 0 1 4 4
+  1 3
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/FBuild BN_6843776 Extrapolate 0 1 4
+  4 1 3
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/SP2 BN_6843776 Extrapolate 0 1 4 4 
+ 1 3
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/SCFstats BN_6843776 Extrapolate 0 1
+  4 4 1 3
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/MakeRho BN_6843776 DensityNormal 1 
+ 1 4 0 1 4
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/QCTC BN_6843776 DensityNormal 1 1 4
+  0 1 4
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/HiCu BN_6843776 DensityNormal 1 1 4
+  0 1 4
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/FBuild BN_6843776 DensityNormal 1 1
+  4 0 1 4
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/DIIS BN_6843776 DensityNormal 1 1 4
+  0 1 4
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/SP2 BN_6843776 DensityNormal 1 1 4 
+ 0 1 4
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/SCFstats BN_6843776 DensityNormal 1
+  1 4 0 1 4
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/MakeRho BN_6843776 DensityNormal 2 
+ 1 4 1 1 4
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/QCTC BN_6843776 DensityNormal 2 1 4
+  1 1 4
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/HiCu BN_6843776 DensityNormal 2 1 4
+  1 1 4
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/FBuild BN_6843776 DensityNormal 2 1
+  4 1 1 4
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/DIIS BN_6843776 DensityNormal 2 1 4
+  1 1 4
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/SP2 BN_6843776 DensityNormal 2 1 4 
+ 1 1 4
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/SCFstats BN_6843776 DensityNormal 2
+  1 4 1 1 4
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/MakeRho BN_6843776 DensityNormal 3 
+ 1 4 2 1 4
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/QCTC BN_6843776 DensityNormal 3 1 4
+  2 1 4
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/HiCu BN_6843776 DensityNormal 3 1 4
+  2 1 4
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/FBuild BN_6843776 DensityNormal 3 1
+  4 2 1 4
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/DIIS BN_6843776 DensityNormal 3 1 4
+  2 1 4
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/SP2 BN_6843776 DensityNormal 3 1 4 
+ 2 1 4
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/SCFstats BN_6843776 DensityNormal 3
+  1 4 2 1 4
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/MakeRho BN_6843776 DensityNormal 4 
+ 1 4 3 1 4
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/QCTC BN_6843776 DensityNormal 4 1 4
+  3 1 4
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/HiCu BN_6843776 DensityNormal 4 1 4
+  3 1 4
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/FBuild BN_6843776 DensityNormal 4 1
+  4 3 1 4
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/DIIS BN_6843776 DensityNormal 4 1 4
+  3 1 4
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/SP2 BN_6843776 DensityNormal 4 1 4 
+ 3 1 4
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/SCFstats BN_6843776 DensityNormal 4
+  1 4 3 1 4
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/SForce BN_6843776 ForceEvaluation 4
+  1 4 4 1 4
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/TForce BN_6843776 ForceEvaluation 4
+  1 4 4 1 4
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/MakeRho BN_6843776 ForceEvaluation 
+ 4 1 4 4 1 4
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/JForce BN_6843776 ForceEvaluation 4
+  1 4 4 1 4
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/XCForce BN_6843776 ForceEvaluation 
+ 4 1 4 4 1 4
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/MakePFFT BN_6843776 OneElectronMatr
+ ices 0 1 5 4 1 4
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/MakeS BN_6843776 OneElectronMatrice
+ s 0 1 5 4 1 4
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/AInv BN_6843776 OneElectronMatrices
+  0 1 5 4 1 4
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/MakeT BN_6843776 OneElectronMatrice
+ s 0 1 5 4 1 4
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/P2Use BN_6843776 Extrapolate 0 1 5 
+ 4 1 4
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/MakeRho BN_6843776 Extrapolate 0 1 
+ 5 4 1 4
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/QCTC BN_6843776 Extrapolate 0 1 5 4
+  1 4
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/HiCu BN_6843776 Extrapolate 0 1 5 4
+  1 4
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/FBuild BN_6843776 Extrapolate 0 1 5
+  4 1 4
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/SP2 BN_6843776 Extrapolate 0 1 5 4 
+ 1 4
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/SCFstats BN_6843776 Extrapolate 0 1
+  5 4 1 4
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/MakeRho BN_6843776 DensityNormal 1 
+ 1 5 0 1 5
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/QCTC BN_6843776 DensityNormal 1 1 5
+  0 1 5
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/HiCu BN_6843776 DensityNormal 1 1 5
+  0 1 5
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/FBuild BN_6843776 DensityNormal 1 1
+  5 0 1 5
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/DIIS BN_6843776 DensityNormal 1 1 5
+  0 1 5
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/SP2 BN_6843776 DensityNormal 1 1 5 
+ 0 1 5
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/SCFstats BN_6843776 DensityNormal 1
+  1 5 0 1 5
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/MakeRho BN_6843776 DensityNormal 2 
+ 1 5 1 1 5
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/QCTC BN_6843776 DensityNormal 2 1 5
+  1 1 5
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/HiCu BN_6843776 DensityNormal 2 1 5
+  1 1 5
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/FBuild BN_6843776 DensityNormal 2 1
+  5 1 1 5
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/DIIS BN_6843776 DensityNormal 2 1 5
+  1 1 5
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/SP2 BN_6843776 DensityNormal 2 1 5 
+ 1 1 5
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/SCFstats BN_6843776 DensityNormal 2
+  1 5 1 1 5
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/MakeRho BN_6843776 DensityNormal 3 
+ 1 5 2 1 5
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/QCTC BN_6843776 DensityNormal 3 1 5
+  2 1 5
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/HiCu BN_6843776 DensityNormal 3 1 5
+  2 1 5
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/FBuild BN_6843776 DensityNormal 3 1
+  5 2 1 5
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/DIIS BN_6843776 DensityNormal 3 1 5
+  2 1 5
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/SP2 BN_6843776 DensityNormal 3 1 5 
+ 2 1 5
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/SCFstats BN_6843776 DensityNormal 3
+  1 5 2 1 5
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/MakeRho BN_6843776 DensityNormal 4 
+ 1 5 3 1 5
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/QCTC BN_6843776 DensityNormal 4 1 5
+  3 1 5
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/HiCu BN_6843776 DensityNormal 4 1 5
+  3 1 5
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/FBuild BN_6843776 DensityNormal 4 1
+  5 3 1 5
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/DIIS BN_6843776 DensityNormal 4 1 5
+  3 1 5
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/SP2 BN_6843776 DensityNormal 4 1 5 
+ 3 1 5
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/SCFstats BN_6843776 DensityNormal 4
+  1 5 3 1 5
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/SForce BN_6843776 ForceEvaluation 4
+  1 5 4 1 5
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/TForce BN_6843776 ForceEvaluation 4
+  1 5 4 1 5
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/MakeRho BN_6843776 ForceEvaluation 
+ 4 1 5 4 1 5
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/JForce BN_6843776 ForceEvaluation 4
+  1 5 4 1 5
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/XCForce BN_6843776 ForceEvaluation 
+ 4 1 5 4 1 5
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/MakePFFT BN_6843776 OneElectronMatr
+ ices 0 1 6 4 1 5
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/MakeS BN_6843776 OneElectronMatrice
+ s 0 1 6 4 1 5
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/AInv BN_6843776 OneElectronMatrices
+  0 1 6 4 1 5
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/MakeT BN_6843776 OneElectronMatrice
+ s 0 1 6 4 1 5
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/P2Use BN_6843776 Extrapolate 0 1 6 
+ 4 1 5
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/MakeRho BN_6843776 Extrapolate 0 1 
+ 6 4 1 5
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/QCTC BN_6843776 Extrapolate 0 1 6 4
+  1 5
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/HiCu BN_6843776 Extrapolate 0 1 6 4
+  1 5
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/FBuild BN_6843776 Extrapolate 0 1 6
+  4 1 5
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/SP2 BN_6843776 Extrapolate 0 1 6 4 
+ 1 5
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/SCFstats BN_6843776 Extrapolate 0 1
+  6 4 1 5
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/MakeRho BN_6843776 DensityNormal 1 
+ 1 6 0 1 6
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/QCTC BN_6843776 DensityNormal 1 1 6
+  0 1 6
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/HiCu BN_6843776 DensityNormal 1 1 6
+  0 1 6
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/FBuild BN_6843776 DensityNormal 1 1
+  6 0 1 6
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/DIIS BN_6843776 DensityNormal 1 1 6
+  0 1 6
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/SP2 BN_6843776 DensityNormal 1 1 6 
+ 0 1 6
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/SCFstats BN_6843776 DensityNormal 1
+  1 6 0 1 6
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/MakeRho BN_6843776 DensityNormal 2 
+ 1 6 1 1 6
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/QCTC BN_6843776 DensityNormal 2 1 6
+  1 1 6
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/HiCu BN_6843776 DensityNormal 2 1 6
+  1 1 6
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/FBuild BN_6843776 DensityNormal 2 1
+  6 1 1 6
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/DIIS BN_6843776 DensityNormal 2 1 6
+  1 1 6
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/SP2 BN_6843776 DensityNormal 2 1 6 
+ 1 1 6
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/SCFstats BN_6843776 DensityNormal 2
+  1 6 1 1 6
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/MakeRho BN_6843776 DensityNormal 3 
+ 1 6 2 1 6
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/QCTC BN_6843776 DensityNormal 3 1 6
+  2 1 6
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/HiCu BN_6843776 DensityNormal 3 1 6
+  2 1 6
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/FBuild BN_6843776 DensityNormal 3 1
+  6 2 1 6
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/DIIS BN_6843776 DensityNormal 3 1 6
+  2 1 6
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/SP2 BN_6843776 DensityNormal 3 1 6 
+ 2 1 6
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/SCFstats BN_6843776 DensityNormal 3
+  1 6 2 1 6
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/SForce BN_6843776 ForceEvaluation 3
+  1 6 3 1 6
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/TForce BN_6843776 ForceEvaluation 3
+  1 6 3 1 6
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/MakeRho BN_6843776 ForceEvaluation 
+ 3 1 6 3 1 6
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/JForce BN_6843776 ForceEvaluation 3
+  1 6 3 1 6
+  prun -n 2 /users/knemeth/MONDO_KINASE_Exec/XCForce BN_6843776 ForceEvaluation 
+ 3 1 6 3 1 6

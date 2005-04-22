@@ -1,0 +1,48 @@
+<BeginTitle>
+    Ice 1h-H2O-[P63/MMC] Goto, A.;Hondoh, T.;Mae, S.(1990)
+<EndTitle>
+
+<BeginOptions>
+Charge=0
+
+MPIInvoke="prun"
+MPIProcessors=8 
+MPIProcFlag="-n"
+MPISpatialProc=8 
+M#PIMachineFlag="--nper"
+M#PIMachineFile="2"
+
+Multiplicity=1
+Guess=Restart 
+HDFFile=/scratch1/knemeth/MondoScratch/Isto3g/Isto3g_13133771.hdf
+Grad=(Optimize,PrimInt,BiSect,NoGDIIS)
+DebugAll=(MaxDebug,CheckSums,MaxGeOp)
+SCFMethod=(TC2)
+BasisSets=(STO-3G)
+ModelChem=(PBExc) 
+Accuracy =(tight)
+Geometry=(InAngstroms,NoOrder) 
+Periodic=(AtomCoord)
+SCFConvergence=(DIIS)
+PBC=(T,T,T)
+<EndOptions>
+
+<BeginPeriodic>
+4.511 4.511 7.346 90.000000 90.000000 120.000000
+<EndPeriodic>
+
+<BeginGeometry>  
+ O   -0.00000000              2.60400000               3.21600000
+ H   2.25550000               0.00035940               3.67300000
+ H   1.12800000               1.95400000               3.67300000
+ O   2.25600000               1.30200000               4.13000000
+ H   -1.12800000              1.95400000               3.67300000
+ H   2.25600000               1.30200000               5.51000000
+ O   2.25600000               1.30200000               6.88900000
+ H   1.12800000               1.95400000               7.34600000
+ H   -1.12800000              1.95400000               7.34600000
+ O   -0.00000000              2.60400000               7.80300000
+ H   -0.00000000              2.60400000               9.18300000
+ H   2.25550000               0.00035940               7.34600000
+<EndGeometry>
+

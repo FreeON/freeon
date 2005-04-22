@@ -1,0 +1,9 @@
+#!/bin/tcsh 
+mkdir /scratch1/knemeth/MondoScratch/Isto3g
+setenv MONDO_SCRATCH /scratch1/knemeth/MondoScratch/Isto3g
+setenv MONDO_HOME /users/knemeth/MONDO_CALC
+setenv MONDO_EXEC /users/knemeth/MONDO_KINASE_Exec
+setenv MONDO_LIB  /users/knemeth/MONDO_CALC_Libs
+setenv MONDO_INC       /users/knemeth/MONDO_CALC/Includes 
+cd /users/knemeth/COLLECT_SMALL_PBE/I1x1x1
+/users/knemeth/MONDO_KINASE_Exec/MondoSCF Isto3g.inp
