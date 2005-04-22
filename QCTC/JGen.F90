@@ -253,13 +253,7 @@ MODULE JGen
                                DP2=PStrength
                             ENDIF
 !                           Strength for PAC
-                            IF(EllAB==0) THEN
-                               PrimBeta = Prim%Zeta
-                            ELSE
-                               PrimBeta = GFactor*Prim%Zeta
-                            ENDIF
-                            PrimWCoef = PrimWCoef+MaxCoef(EllAB,Prim%Zeta,HGBra%D(1:LenHGTF,IA,IB)) &
-                                                  *((Pi/PrimBeta)**(ThreeHalves))
+                            PrimWCoef = MAX(PrimWCoef,NodeWeight(EllAB,Prim%Zeta,HGBra%D(1:LenHGTF,IA,IB)))
                          ENDDO
                       ENDDO
                       DP2=MIN(1.D10,DP2)

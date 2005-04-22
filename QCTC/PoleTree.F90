@@ -39,10 +39,9 @@ MODULE PoleTree
         PoleNodes=0
         RhoLevel=0
         MaxTier=0
-!       Initialize the root node
-        
+!       Initialize the root node   
         CALL NewPoleNode(PoleRoot,0)
-        ! CALL NewSPArrays(PoleRoot) 
+!        CALL NewSPArrays(PoleRoot) 
         PoleRoot%Bdex=1
         PoleRoot%Edex=Rho%NDist
         PoleRoot%NQ=Rho%NDist
@@ -91,6 +90,9 @@ MODULE PoleTree
             Node%Descend%Travrse%Travrse=>Node%Travrse
             Left=>Node%Descend
             Right=>Node%Descend%Travrse
+!           Compute the Bounding Box
+!            CALL ComputeBoundingBox(Node)
+!           Split the Box
             CALL SplitPoleBox(Node,Left,Right)
 !           Recur
             CALL SplitPole(Left)
@@ -141,7 +143,6 @@ MODULE PoleTree
                PMax = (Rho%Qx%D(J)-P%Box%Center(1))**2+(Rho%Qy%D(J)-P%Box%Center(2))**2+(Rho%Qz%D(J)-P%Box%Center(3))**2
                P%DMax2=MAX(P%DMax2,PMax)
             ENDDO
-!            WRITE(*,*) P%DMax2,P%Box%Tier
 !           Compute Zeta
             P%Zeta=MIN(LeftQ%Zeta,RightQ%Zeta)
 !           Set the Ells and the Strengths
@@ -172,7 +173,7 @@ MODULE PoleTree
                CALL XLate(RightQ,P)
 !              Reset Ell of Right and Left nodes if not leafs
                IF(.NOT.LeftQ%Leaf)  LeftQ%Ell  = SPEll
-               IF(.NOT.RightQ%Leaf) RightQ%Ell = SPEll
+               IF(.NOT.RightQ%Leaf) RightQ%Ell = SPEll 
 !              Compute the multipole strength MAX{[O^P_(L+1)]^(2/(2+L))}
                CQ=Zero
                DO L=SPEll+1,SPEll+MaxUEll
@@ -183,9 +184,8 @@ MODULE PoleTree
             ENDIF
 #ifdef NewPAC
 !           Accumulate Info for PAC from Left and Right Nodes
-            P%Beta    = MIN(LeftQ%Beta,RightQ%Beta)
-            P%WCoef   = LeftQ%WCoef+RightQ%WCoef
-            P%PACStr  = (TauPAC/P%WCoef)
+            P%WCoef = LeftQ%WCoef+RightQ%WCoef
+            P%EllCD = MAX(LeftQ%EllCD,RightQ%EllCD)
 #endif
          ELSE
 !           Keep on truckin ...
@@ -211,11 +211,11 @@ MODULE PoleTree
          KQ=Qdex(B)
          Node%Zeta=Zeta(KQ)
 !        Reset leaf nodes ell to min value: its untranslated!
-         Node%Ell = Ldex(KQ)
+         Node%Ell   = Ldex(KQ)
 !        Set and inflate this nodes BBox
-         Node%Box%BndBox(1,:)=Rho%Qx%D(KQ)
-         Node%Box%BndBox(2,:)=Rho%Qy%D(KQ)
-         Node%Box%BndBox(3,:)=Rho%Qz%D(KQ)
+         Node%Box%BndBox(1,:)= Rho%Qx%D(KQ)
+         Node%Box%BndBox(2,:)= Rho%Qy%D(KQ)
+         Node%Box%BndBox(3,:)= Rho%Qz%D(KQ)
          Node%Box=ExpandBox(Node%Box,Ext(KQ))
 !        Allocate and fill HGTF coefficients
          LMNLen=LHGTF(Node%Ell)
@@ -228,13 +228,8 @@ MODULE PoleTree
          Node%Strength = Zero
 #ifdef NewPAC
 !        Accumulate Info for the New PAC
-         IF(Node%Ell==0) THEN
-            Node%Beta = Node%Zeta
-         ELSE
-            Node%Beta = GFactor*Node%Zeta
-         ENDIF
-         Node%WCoef  = MaxCoef(Node%Ell,Node%Zeta,Node%Co)*((Pi/Node%Beta)**(1.5D0))
-         Node%PACStr = (TauPAC/Node%WCoef)
+         Node%WCoef  = NodeWeight(Node%Ell,Node%Zeta,Node%Co)
+         Node%EllCD  = Node%Ell
 #endif
       END SUBROUTINE FillRhoLeaf
 !==========================================================================
@@ -248,7 +243,8 @@ MODULE PoleTree
          Node%Leaf=.False.
          Node%Box%Tier=Level
          Node%Box%Number=PoleNodes
-         Node%Ell=SPEll+MaxUEll
+         Node%Ell  =SPEll+MaxUEll
+         Node%EllCD=0
          MaxTier=MAX(MaxTier,Level)
          PoleNodes=PoleNodes+1
          NULLIFY(Node%Travrse)
@@ -271,42 +267,78 @@ MODULE PoleTree
          CALL DBL_VECT_EQ_DBL_SCLR(LenSP+1,Node%C(0),Zero)
       END SUBROUTINE NewSPArrays
 !================================================================================
+!     Compute the Bounding Box and 
+!     The maxium distance from a dist to the box center
+!================================================================================
+      SUBROUTINE ComputeBoundingBox(Node)
+         TYPE(PoleNode), POINTER     :: Node
+         INTEGER                     :: I,J
+         REAL(DOUBLE)                :: PMAx
+!
+         J=Qdex(Node%Bdex)
+         Node%Box%BndBox(1,1) = Rho%Qx%D(J)-Ext(J)
+         Node%Box%BndBox(1,2) = Rho%Qx%D(J)+Ext(J)
+         Node%Box%BndBox(2,1) = Rho%Qy%D(J)-Ext(J)
+         Node%Box%BndBox(2,2) = Rho%Qy%D(J)+Ext(J)
+         Node%Box%BndBox(3,1) = Rho%Qz%D(J)-Ext(J)
+         Node%Box%BndBox(3,2) = Rho%Qz%D(J)+Ext(J)
+         DO I=Node%Bdex+1,Node%Edex
+            J=Qdex(I)
+            Node%Box%BndBox(1,1) = MIN(Node%Box%BndBox(1,1),Rho%Qx%D(J)-Ext(J))
+            Node%Box%BndBox(1,2) = MAX(Node%Box%BndBox(1,1),Rho%Qx%D(J)+Ext(J))
+            Node%Box%BndBox(2,1) = MIN(Node%Box%BndBox(2,1),Rho%Qy%D(J)-Ext(J))
+            Node%Box%BndBox(2,2) = MAX(Node%Box%BndBox(2,1),Rho%Qy%D(J)+Ext(J))
+            Node%Box%BndBox(3,1) = MIN(Node%Box%BndBox(3,1),Rho%Qz%D(J)-Ext(J))
+            Node%Box%BndBox(3,2) = MAX(Node%Box%BndBox(3,1),Rho%Qz%D(J)+Ext(J))
+         ENDDO
+         Node%Box%Half(1)  = Half*(Node%Box%BndBox(1,2)-Node%Box%BndBox(1,1))
+         Node%Box%Half(2)  = Half*(Node%Box%BndBox(2,2)-Node%Box%BndBox(2,1))
+         Node%Box%Half(3)  = Half*(Node%Box%BndBox(3,2)-Node%Box%BndBox(3,1))
+         Node%Box%Center(1)= Half*(Node%Box%BndBox(1,2)+Node%Box%BndBox(1,1))
+         Node%Box%Center(2)= Half*(Node%Box%BndBox(2,2)+Node%Box%BndBox(2,1))
+         Node%Box%Center(3)= Half*(Node%Box%BndBox(3,2)+Node%Box%BndBox(3,1))
+!
+         Node%DMax2 = Zero
+         DO I=Node%Bdex,Node%Edex
+            J=Qdex(I)
+            PMax = (Rho%Qx%D(J)-Node%Box%Center(1))**2 &
+                  +(Rho%Qy%D(J)-Node%Box%Center(2))**2 &
+                  +(Rho%Qz%D(J)-Node%Box%Center(3))**2
+            Node%DMax2=MAX(Node%DMax2,PMax)
+         ENDDO
+!
+       END SUBROUTINE ComputeBoundingBox
+!================================================================================
 !     Bisection   
 !================================================================================
       SUBROUTINE SplitPoleBox(Node,Left,Right)
          TYPE(PoleNode), POINTER     :: Node,Left,Right
-         REAL(DOUBLE)                :: Section,MaxBox,Extent
+         REAL(DOUBLE)                :: Section,MaxBox,Extent,MaxExt
          REAL(DOUBLE),DIMENSION(3)   :: MaxQL,MaxQH
          INTEGER                     :: B,E,N,ISplit,Split,I,J,k,IS
 !--------------------------------------------------------------
 !        Indexing
-         J=0
          B=Node%Bdex
          E=Node%Edex
          N=E-B+1
 !        Determine the Split in the Largest Direction 
          ISplit = Mod(Node%Box%Tier,3)+1
-!!$         MaxQL(1:3) = Zero         
-!!$         MaxQH(1:3) = Zero
+!!$         MaxBox = Zero
+!!$         DO I=1,3
+!!$            IF(MaxBox<Node%Box%Half(I))THEN
+!!$               MaxBox=Node%Box%Half(I)
+!!$               ISplit=I
+!!$            ENDIF
+!!$         ENDDO
+!!$!        Find the max extent, if > MaxBox*Two, split under extents
+!!$         MaxExt=Zero
 !!$         DO I=B,E
 !!$            K=Qdex(I)
-!!$            Extent = Ext(K)
-!!$            MaxQL(1) = MIN(Rho%Qx%D(K)-Extent,MaxQL(1))
-!!$            MaxQL(2) = MIN(Rho%Qy%D(K)-Extent,MaxQL(2))
-!!$            MaxQL(3) = MIN(Rho%Qz%D(K)-Extent,MaxQL(3))
-!!$            MaxQH(1) = MAX(Rho%Qx%D(K)+Extent,MaxQH(1))
-!!$            MaxQH(2) = MAX(Rho%Qy%D(K)+Extent,MaxQH(2))
-!!$            MaxQH(3) = MAX(Rho%Qz%D(K)+Extent,MaxQH(3))
+!!$            MaxExt=MAX(MaxExt,Ext(K))
 !!$         ENDDO
-!!$         MaxBox = Zero
-!!$         ISplit = 0
-!!$         DO IS=1,3
-!!$            IF(MaxBox < ABS(MaxQH(IS)-MaxQL(IS))) THEN
-!!$               MaxBox = ABS(MaxQH(IS)-MaxQL(IS))
-!!$               ISplit = IS
-!!$            ENDIF 
-!!$         ENDDO
+!!$         IF(MaxExt>Two*MaxBox) ISplit=4
 !        Split the Distibutuins
+         J=0
          IF(ISplit==1)THEN
             DO I=B,E
                J=J+1;K=Qdex(I)
@@ -322,14 +354,19 @@ MODULE PoleTree
                J=J+1;K=Qdex(I)
                RList(J)=Rho%Qz%D(K)
             ENDDO
+         ELSEIF(ISplit==4)THEN
+            DO I=B,E
+               J=J+1;K=Qdex(I)
+               RList(J)=Ext(K)
+            ENDDO
          ENDIF
 !        Sort
          CALL DblIntSort77(N,RList,Qdex(B:E),2)
 !        Orthogonal RECURSIVE bisection (ORB)
-         Section   =RList(1)+Half*(RList(N)-RList(1))
-         Split     =N/2
          Left%Bdex =B
          Right%Edex=E
+         Section   =RList(1)+Half*(RList(N)-RList(1))
+         Split     =N/2
          IF(Split==1)THEN 
             Split=2
             Left%Edex =Min(B,B+Split-2)
@@ -342,6 +379,7 @@ MODULE PoleTree
          Left%NQ=Left%Edex-Left%Bdex+1
          Right%NQ=Right%Edex-Right%Bdex+1
       END SUBROUTINE SplitPoleBox
+
 !========================================================================================
 !     ALLOCATE and read in the density, initalize global lists 
 !========================================================================================
@@ -373,11 +411,8 @@ MODULE PoleTree
             DO Q=1,Rho%NQ%I(z)
                QD=oq+Q
                CD=or+(Q-1)*LMNLen+1
-#ifdef NewPAC
-               EX=1.0D-16
-#else
-               EX=Extent(Ell,ZE,Rho%Co%D(CD:CD+LMNLen-1),Tau_O=TauPAC,Potential_O=.TRUE.,ExtraEll_O=0)
-#endif
+!               EX=Extent(Ell,ZE,Rho%Co%D(CD:CD+LMNLen-1),Tau_O=TauPAC,Potential_O=.TRUE.,ExtraEll_O=0)
+               EX = 1.D-16
 !              Threshold out distributions with zero extent 
                IF(EX>Zero)THEN
                   Qdex(IQ)=QD

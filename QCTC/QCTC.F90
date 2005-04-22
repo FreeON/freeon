@@ -44,9 +44,6 @@ PROGRAM QCTC
   REAL(DOUBLE)                   :: MM_COUL,E_C_EXCL,CONVF  
   INTEGER                        :: I,K,UOUT !!!!
   REAL(DOUBLE),EXTERNAL          :: MondoTimer
-#ifdef NewPAC
-  REAL(DOUBLE)                   :: GammaExp
-#endif
 !------------------------------------------------------------------------------- 
   ETimer(:) = Zero
 ! Start up macro
@@ -82,12 +79,6 @@ PROGRAM QCTC
   ENDIF
 ! Set thresholds local to QCTC (for PAC and MAC)
   CALL SetLocalThresholds(Thresholds%TwoE)
-#ifdef NewPAC
-  GammaExp=0.9D0
-  CALL SetLocalCoefs(GammaExp)
-  WRITE(*,*) 'Doing NewPAC'
-  WRITE(*,*) 'GammaExp = ',GammaExp
-#endif
 ! Potentially overide local QCTC thresholds
   IF(Args%NI==8)THEN
      TauPAC=1D1**(-Args%I%I(7))

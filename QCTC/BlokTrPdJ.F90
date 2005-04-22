@@ -121,13 +121,7 @@ MODULE BlokTrPdJ
                             DP2=PStrength
                          ENDIF
 !                        Strength for PAC
-                         IF(EllAB==0) THEN
-                            PrimBeta = Prim%Zeta
-                         ELSE
-                            PrimBeta = GFactor*Prim%Zeta
-                         ENDIF
-                         PrimWCoef = PrimWCoef+MaxCoef(EllAB,Prim%Zeta,Pab*dHGBra%D(1:LenHGTF,IA,IB,K)) &
-                                               *((Pi/PrimBeta)**(ThreeHalves))
+                         PrimWCoef = MAX(PrimWCoef,NodeWeight(EllAB,Prim%Zeta,Pab*dHGBra%D(1:LenHGTF,IA,IB,K)))
                       ENDDO
                    ENDDO
                 ENDDO
@@ -365,8 +359,7 @@ MODULE BlokTrPdJ
        DP2=MIN(1.D10,DP2)
 #ifdef NewPAC
 !      Set the PAC
-       PrimBeta  = Prim%Zeta
-       PrimWCoef = ABS(GMLoc%AtNum%D(At)) 
+       PrimWCoef = ABS(Three*GMLoc%AtNum%D(At)) 
 #else
 !      Set the PAC
        PExtent=Extent(1,NuclearExpnt,dHGBra%D(:,1,1,1),TauPAC)
