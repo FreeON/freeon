@@ -62,7 +62,8 @@ MODULE TreeWalk
        REAL(DOUBLE),DIMENSION(0:2*HGEll,0:2*HGEll,0:2*HGEll,0:2*HGEll) :: MDR
 #endif
 #ifdef NewPAC
-       REAL(DOUBLE)                     :: SqrtW,SqrtT,LeftS,RightS
+       INTEGER                          :: TotEll
+       REAL(DOUBLE)                     :: SqrtW,RDist,LeftS,RightS
 #endif
 !-----------------------------------------------------------------------------------------------
 !      PAC: 
@@ -75,11 +76,12 @@ MODULE TreeWalk
        Omega=RTE/RPE 
        T=Omega*PQ2
 #ifdef NewPAC
-       SqrtW  = SQRT(PrimBeta*Q%Beta/(PrimBeta+Q%Beta))
-       SqrtT  = SqrtW*(SQRT(PQ2)-SQRT(Q%DMax2))
-       LeftS  = PrimWCoef*SqrtW*Erfcc(SqrtT)
-       RightS = Q%PACStr*SqrtT
-       IF(SqrtT > Zero .AND. LeftS < RightS .OR. T>Gamma_Switch) THEN
+       TotEll = Prim%Ell+Q%EllCD
+       RDist  = SQRT(PQ2)-SQRT(Q%DMax2)
+       SqrtW  = SQRT(Omega)
+       LeftS  = Q%WCoef*PrimWcoef*EXP(RErfc(SqrtW*RDist,TotEll))
+       RightS = TauPAC*(RDist**(TotEll+1))
+       IF((LeftS < RightS .AND. RDist > Zero) .OR. T>Gamma_Switch) THEN
 #else
        IF(ABS(PQx)>PBox%Half(1)+Q%Box%Half(1).OR.  &
           ABS(PQy)>PBox%Half(2)+Q%Box%Half(2).OR.  &
@@ -104,7 +106,6 @@ MODULE TreeWalk
              CASE DEFAULT
                 CALL Halt('No explicit code for case LCode = '//TRIM(IntToChar(LCode))//' in CTraX.Inc')
              END SELECT
-!
 #else
              CALL CTrax(Prim,Q,SPKetC,SPKetS)
 #endif
@@ -178,9 +179,12 @@ MODULE TreeWalk
 #endif
        REAL(DOUBLE),PARAMETER           :: VTol = 1.D-12
 #ifdef NewPAC
-       REAL(DOUBLE)                     :: SqrtW,SqrtT,LeftS,RightS
+       INTEGER                          :: TotEll
+       REAL(DOUBLE)                     :: SqrtW,RDist,LeftS,RightS
 #endif
 !---------------------------------------------------------------------------------------------------
+!          LeftS  = PrimWCoef*Q%WCoef*RErfc(SqrtW*RDist,TotEll)
+!          RightS = (RDist**(TotEll+1))*TauPAC
 !      PAC:
        PQx=Prim%P(1)-Q%Box%Center(1)
        PQy=Prim%P(2)-Q%Box%Center(2)
@@ -190,18 +194,19 @@ MODULE TreeWalk
        RPE=Prim%Zeta+Q%Zeta
        Omega=RTE/RPE 
        T=Omega*PQ2
-#ifdef NewPAC
-       SqrtW  = SQRT(GFactor*Omega)
-       SqrtT  = SqrtW*(SQRT(PQ2)-SQRT(Q%DMax2))
-       LeftS  = PrimWCoef*SqrtW*Erfcc(SqrtT)
-       RightS = Q%PACStr*SqrtT
-       IF(LeftS < RightS) THEN
+#ifdef NewPAC 
+       TotEll = Prim%Ell+Q%EllCD
+       RDist  = SQRT(PQ2)-SQRT(Q%DMax2)
+       SqrtW  = SQRT(Omega)
+       LeftS  = PrimWCoef*Q%WCoef*EXP(RErfc(SqrtW*RDist,TotEll))
+       RightS = TauPAC*RDist**(TotEll+1)
+       IF((LeftS < RightS .AND. RDist > Zero) .OR. T>Gamma_Switch) THEN
 #else
        IF(ABS(PQx)>PBox%Half(1)+Q%Box%Half(1).OR.  &
           ABS(PQy)>PBox%Half(2)+Q%Box%Half(2).OR.  &
           ABS(PQz)>PBox%Half(3)+Q%Box%Half(3).OR.  &
           T>Gamma_Switch)THEN
-#endif
+#endif 
 !         MAC:
           IF((PQ2>Q%Strength*DP2+Q%DMax2).OR.Q%Leaf)THEN
              IF(Q%Zeta==NuclearExpnt .AND. PQ2<VTol) RETURN
@@ -217,7 +222,7 @@ MODULE TreeWalk
              END SELECT
 !
              SELECT CASE(LCode)
-                INCLUDE "CTraX.Inc"
+                INCLUDE "CTraX.Inc" 
              CASE DEFAULT
                 CALL Halt('No explicit code for case LCode = '//TRIM(IntToChar(LCode))//' in CTraX.Inc')
              END SELECT
@@ -230,8 +235,13 @@ MODULE TreeWalk
              CALL VWalk(Q%Descend%Travrse)
           ENDIF
        ELSEIF(Q%Leaf)THEN
-!         Check for self-interaction
-          IF(Q%Zeta==NuclearExpnt .AND. PQ2<VTol) RETURN
+!         Check for self-interaction and Point-Charge--Point-Charge interaction
+          IF(Q%Zeta==NuclearExpnt) THEN
+             IF(PQ2>VTol) THEN
+                SPKetC(0)=SPKetC(0)+Q%C(0)/SQRT(PQ2)
+             ENDIF
+             RETURN
+          ENDIF
 !         Flip sign...
           PQx=-PQx; PQy=-PQy; PQz=-PQz
           Upq=TwoPi5x2/(RTE*SQRT(RPE))
@@ -252,7 +262,7 @@ MODULE TreeWalk
           CASE DEFAULT
              CALL Halt('No explicit code for case LCode = '//TRIM(IntToChar(LCode))//' in HGTraX.Inc')
           END SELECT
-!
+! 
 #else
           Ell=Prim%Ell+Q%Ell
           CALL AuxInts(2*HGEll,Ell,AuxR,Omega,T)
