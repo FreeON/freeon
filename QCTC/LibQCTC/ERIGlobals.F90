@@ -9,7 +9,6 @@ MODULE ERIGlobals
   REAL(DOUBLE)                    :: PoleSwitch
 #ifdef NewPAC
   REAL(DOUBLE)                    :: PrimWCoef
-  REAL(DOUBLE)                    :: PrimBeta
 #endif
   INTEGER                         :: At
   REAL(DOUBLE),DIMENSION(1:HGLen) :: HGKet

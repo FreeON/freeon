@@ -29,7 +29,7 @@ PROGRAM MakeRho
 #else
   TYPE(BCSR)                      :: Dmat,D1,D2
 #endif
-  INTEGER                         :: NC
+  INTEGER                         :: NC,EllPrune
   REAL(DOUBLE),DIMENSION(3)       :: B
   TYPE(AtomPair)                  :: Pair
   TYPE(BSET)                      :: BS
@@ -201,6 +201,12 @@ PROGRAM MakeRho
   NDist_old = RhoA%NDist
   CALL Prune_Rho_new(Thresholds%Dist,RhoA)
   NDist_new = RhoA%NDist
+!************************************
+!!$  EllPrune=4
+!!$  CALL PruneEll_Rho_new(EllPrune,RhoA)
+!!$  WRITE(*,*) 'Ell = ',EllPrune
+!!$  WRITE(*,*) 'Number of Dists = ', RhoA%NDist,NDist_new
+!************************************
 !
 ! Fold distributions back into the box; For ForceEvaluation, rho is not folded
 ! This is turned off for now inorder to make the lattice force calculation
@@ -215,8 +221,8 @@ PROGRAM MakeRho
   RSumN    = Integrate_HGRho_new(RhoA,RhoA%NDist-NumAtoms+1,RhoA%NDist)
   TotRSumE = AllReduce(RSumE)
   TotRSumN = AllReduce(RSumN)
-  RSumE = TotRSumE
-  RSumN = TotRSumN
+  RSumE    = TotRSumE
+  RSumN    = TotRSumN
 #else
   RSumE  =  Integrate_HGRho_new(RhoA,1                    ,RhoA%NDist-GM%NAtms)
   RSumN  =  Integrate_HGRho_new(RhoA,RhoA%NDist-GM%NAtms+1,RhoA%NDist         )
