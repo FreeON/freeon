@@ -427,13 +427,12 @@ i.e. there is no band structure calculation in our treatment.
 \section{Results and discussion} \label{ResDissc}
 \subsection{The test set}
 Our test set of crystal optimizations contains
-10 different systems:
+6 different systems:
 Polyethylene, hexagonal boron-nitride , (10,0)carbon-nanotube,
-Halite (NaCl) \cite{whbragg13}, 
-ammonium-chloride \cite{DBSirdeshmukh70},
-Ice \cite{AGoto90}, Urea \cite{SSwaminathan84}, 
-Benzene \cite{GJeffrey87}, Sulphure \cite{ACGallacher92}, 
-Quartz \cite{MGTucker01}. In addition to these structures
+Ice \cite{AGoto90}, 
+Quartz \cite{MGTucker01}, 
+Sulphure \cite{ACGallacher92}. 
+In addition to these structures
 we also demonstrate the power of our optimizer
 on PETN, a 50 atoms high-explosive \cite{Trotter_1963v16,Conant_1979}
 which forms hydrogen-bonded crystals.
@@ -442,13 +441,13 @@ taken either from the Inorganic Crystal Stuctures Database
 (ICSD) \cite{ICSD} or from Cambridge Crystallographic Data Center
 \cite{CCDC} and the translationally unique positions were
 generated using Mercury \cite{Mercury}. 
-A brief description follows to provide data for the reproduction
-of input structures in case they cannot be found
-in the above mentioned data-bases or if extra handling was needed to 
-extract the starting structures from the literature data.
+In the following subsections input geometries are described that
+have been prepared by additional manipulation after 
+the primary structure have been downloaded
+from the crystallographic data-base.  
 
 \subsubsection{Polyethylene}
-The quasi one-dimensional polyethylene has been defined 
+The quasi one-dimensional structure of polyethylene has been defined 
 by the starting Cartesian coordinate set
 \\
 {\tt C    0.500   0.500   0.000} \\
@@ -457,8 +456,7 @@ by the starting Cartesian coordinate set
 {\tt C    1.500  -0.500   0.000} \\
 {\tt H    1.500  -1.300   0.800} \\
 {\tt H    1.500  -1.300  -0.800}, \\
-with a $2${\AA} long lattice vector along the $X$ axis. In test
-calculations the sixfold repeated supercell has been used.
+with a $2${\AA} long lattice vector along the $X$ axis. 
 
 \subsubsection{Hexagonal boron-nitride}
 The two-dimensional hexagonal boron-nitride has been 
@@ -478,13 +476,6 @@ The only cell parameter $a$ was initially $a=4.44${\AA}. The
 elementary cell contained 40 atoms. These data entirely determine
 the structure of the symmetric (10,0)carbon-nanotube.
 
-\subsubsection{ammonium chloide}
-The structure of ammonium-chloride have been 
-taken from the literature \cite{DBSirdeshmukh70} but the
-doubled cell has been used in order to maintain
-an even number of electrons in the simulation cell, as the elementary
-cell contains a nitrogen, a chlorine and only three hydrogen atoms.
-
 \subsubsection{Ice}
 Hexagonal ice is the most important natural occurance of ice.
 Its structure has been taken from the literature \cite{AGoto90}. 
@@ -494,8 +485,173 @@ our starting structure contained the average of these two positions
 for each hydrogen atom. The translational elementary cell contains
 four water molecules.
 
+\subsection{Results}
+Energies and forces have been calculated on the PBE/STO-3G level of 
+theory, in the $\Gamma$-point approximation. 
+The optimizations have been carried out by means of the
+QUICCA method as described above,
+simultaneously optimizing atomic positions and lattice vectors,
+all geometric parameters have been completely flexible during the 
+course of the optimization.
+In these optimizations a single
+convergence criterium has been used, namely that the maximum
+magnitude of both atomic and lattice vector gradients had to be
+smaller then 0.0005 a.u. at convergence.
+Table \ref{optsteps} shows the number of optimization steps and
+the optimum energy. While the first four test systems converged quickly,
+quartz and sulphure took substantially more steps to the optimum.
+in the case of quartz this is due to a very large structural change,
+namely four membered rings have been formed in the optimum structure,
+that probably indicates that the small basis applied and maybe 
+also the $\Gamma$-point approximation is very inappropriate
+for this system. The optimum structure of quartz is shown in
+Figure \ref{quartz}.
+In the sulphure crystal, the $S_{8}$ rings interact via Van der Waals
+interaction and this interaction potential is very flat. One way
+to accelerate the optimization of such a shallow potential surface
+is to use the so called $5/R$ coordinates instead of the stretches
+we have used to optimize inter-ring distances. We plan to compare
+these two coordinate sets in a forthcoming study.
+
+\begin{table}[h]
+\caption{Optimization results for crystal structures
+at the PBE/STO-3G level of theory and in the $\Gamma$-point 
+approximation, using the QUICCA algorithm.}
+\label{optsteps}
+\begin{tabular}{lcr}
+\toprule
+                       & Number of           & Optimum energy\\
+Molecule               & optimization steps  &  (a.u.) \\
+\colrule
+polyethylene           & 8   &    -77.56774   \\
+boron-nitride          & 5   &    -78.41368   \\
+(10-0)carbon-nanotube         & 7   &  -1503.75024   \\
+ice                    & 15  &   -301.31784   \\
+quartz                 & 44  &  -1303.03159   \\
+sulphure               & 89  & -12595.53586   \\
+\botrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Convergence of the energies}
+As discussed in our previous paper on the QUICCA optimization
+algorithm \cite{KNemeth04}, QUICCA converges as a first
+order optimization scheme. This convergence feature
+is also illustrated in Figures \ref{ch2-energ}-\ref{Sulphure-energ}.
+
+\subsubsection{Convergence of the gradients}
+Figures \ref{ch2-grad}-\ref{Sulphure-grad} illustrate the convergence
+of the magnitude of maximum atomic and lattice-vector gradients.
+The convergence is smooth and rapid in all cases with the exception
+of the sulphure crystal, which is due to the shallow van der Waals
+potential energy surface between the $S_{8}$ sulphure rings.
+Also note that the atomic and the lattice gradient curves run close
+to each other which is a sign of balanced optimization
+between lattice and atomic posions when simultaneously
+optimizing atomic positions and lattice in the QUICCA scheme.
+
+\begin{figure}[h]
+\resizebox*{3.5in}{!}{\includegraphics{quartz.eps}}
+\caption{The optimum structure of quartz at the PBE/STO-3G
+level of theory and in the $\Gamma$-point approximation.}
+\label{quartz}
+\end{figure}
+
+\begin{figure}[h]
+\resizebox*{3.5in}{!}{\includegraphics{ch2-energ.eps}}
+\caption{Convergence of the energy during the optimization
+of polyethylene.}
+\label{ch2-energ}
+\end{figure}
+
+\begin{figure}[h]
+\resizebox*{3.5in}{!}{\includegraphics{BN1x1-energ.eps}}
+\caption{Convergence of the energy during the optimization
+of hexagonal boron-nitride.}
+\label{BN1x1-energ}
+\end{figure}
+
+\begin{figure}[h]
+\resizebox*{3.5in}{!}{\includegraphics{NANO-energ.eps}}
+\caption{Convergence of the energy during the optimization
+of the (10,0)carbon-nanotube.}
+\label{NANO-energ}
+\end{figure}
+
+\begin{figure}[h]
+\resizebox*{3.5in}{!}{\includegraphics{ICE-energ.eps}}
+\caption{Convergence of the energy during the optimization
+of hexagonal ice.}
+\label{ICE-energ}
+\end{figure}
+
+\begin{figure}[h]
+\resizebox*{3.5in}{!}{\includegraphics{Quartz-energ.eps}}
+\caption{Convergence of the energy during the optimization
+of quartz.}
+\label{Quartz-energ}
+\end{figure}
+
+\begin{figure}[h]
+\resizebox*{3.5in}{!}{\includegraphics{Sulphure-energ.eps}}
+\caption{Convergence of the energy during the optimization
+of sulphure.}
+\label{Sulphure-energ}
+\end{figure}
+
+\begin{figure}[h]
+\resizebox*{3.5in}{!}{\includegraphics{ch2-grads.eps}}
+\caption{Convergence of the gradients during the optimization 
+of polyethylene.}
+\label{ch2-grads}
+\end{figure}
+
+\begin{figure}[h]
+\resizebox*{3.5in}{!}{\includegraphics{BN1x1-grads.eps}}
+\caption{Convergence of the gradients during the optimization
+of hexagonal boron-nitride.}
+\label{BN1x1-grads}
+\end{figure}
+
+\begin{figure}[h]
+\resizebox*{3.5in}{!}{\includegraphics{NANO-grads.eps}}
+\caption{Convergence of the gradients during the optimization
+of (10,0)carbon-nanotube.}
+\label{NANO-grads}
+\end{figure}
+
+\begin{figure}[h]
+\resizebox*{3.5in}{!}{\includegraphics{ICE-grads.eps}}
+\caption{Convergence of the gradients during the optimization 
+of hexagonal ice.}
+\label{ICE-grads}
+\end{figure}
+
+\begin{figure}[h]
+\resizebox*{3.5in}{!}{\includegraphics{Quartz-grads.eps}}
+\caption{Convergence of the gradients during the optimization
+of quartz.}
+\label{Quartz-grads}
+\end{figure}
+
+\begin{figure}[h]
+\resizebox*{3.5in}{!}{\includegraphics{Sulphure-grads.eps}}
+\caption{Convergence of the gradients during the optimization 
+of sulphure.}
+\label{Sulphure-grads}
+\end{figure}
 
 \section{Conclusions} \label{Conclusions}
+We have demonstrated that the QUICCA algorithm is an efficient
+way to optimize various crystal structures of one, two and three
+dimensional periodicity. The crystals of our test set are held
+together by either covalent bonds, or hydrogen bonds or even
+by van der Waals interactions. Succesful optimizations
+have been carried out in every possible dimensionality and crystal types
+while fully and simultaneously relaxing all geometric parameters.
+This study demonstrates that QUICCA is a robust and generally applicable
+optimization algorithm that can be applied both to gas-phase
+molecules and periodic systems.
 
 \bibliography{../../Bib/mondo_new}
 \end{document}
