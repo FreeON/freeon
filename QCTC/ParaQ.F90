@@ -521,9 +521,9 @@ endif
       P%Box%Half(1:3) = RecDblArr(DblIndex+1:DblIndex+3)
       DblIndex = DblIndex + 3 
 #ifdef NewPAC
-      P%EllCD=RecIntArr(IntIndex + 1)
+      P%EllCD=RecIntArr(IntIndex+1)
       IntIndex = IntIndex + 1
-      P%WCoef=RecDblArr(DblIndex+1:DblIndex+1)
+      P%WCoef=RecDblArr(DblIndex+1)
       DblIndex = DblIndex + 1
 #endif
       SizeofCo = LHGTF(P%Ell)
@@ -577,9 +577,9 @@ endif
       P%Box%Half(1:3) = RecDblArr(DblIndex+1:DblIndex+3)
       DblIndex = DblIndex + 3 
 #ifdef NewPAC
-      P%EllCD=RecIntArr(IntIndex + 1)
+      P%EllCD=RecIntArr(IntIndex+1)
       IntIndex = IntIndex + 1
-      P%WCoef=RecDblArr(DblIndex+1:DblIndex+1)
+      P%WCoef=RecDblArr(DblIndex+1)
       DblIndex = DblIndex + 1
 #endif
       SizeofSP = LSP(SPEll+MaxUEll)+1 !!!
@@ -643,7 +643,7 @@ endif
 #ifdef NewPAC
       RecIntArr(IntIndex + 1)=P%EllCD
       IntIndex = IntIndex + 1
-      RecDblArr(DblIndex+1:DblIndex+1)=P%WCoef
+      RecDblArr(DblIndex+1)=P%WCoef
       DblIndex = DblIndex + 1
 #endif
       SizeofCo = LHGTF(P%Ell)
@@ -688,7 +688,7 @@ endif
 #ifdef NewPAC
       RecIntArr(IntIndex + 1)=P%EllCD
       IntIndex = IntIndex + 1
-      RecDblArr(DblIndex+1:DblIndex+1)=P%WCoef
+      RecDblArr(DblIndex+1)=P%WCoef
       DblIndex = DblIndex + 1
 #endif
       SizeofSP = LSP(SPEll+MaxUEll)+1 !!!
