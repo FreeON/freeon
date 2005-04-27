@@ -520,7 +520,12 @@ endif
       DblIndex = DblIndex + 3 
       P%Box%Half(1:3) = RecDblArr(DblIndex+1:DblIndex+3)
       DblIndex = DblIndex + 3 
-
+#ifdef NewPAC
+      P%EllCD=RecIntArr(IntIndex + 1)
+      IntIndex = IntIndex + 1
+      P%WCoef=RecDblArr(DblIndex+1:DblIndex+1)
+      DblIndex = DblIndex + 1
+#endif
       SizeofCo = LHGTF(P%Ell)
       ALLOCATE(P%Co(1:SizeofCo),STAT=iErr)
       IF(iErr.NE.0) CALL Halt('In RecurCopy 200: Allocation problem.')
@@ -571,7 +576,12 @@ endif
       DblIndex = DblIndex + 3 
       P%Box%Half(1:3) = RecDblArr(DblIndex+1:DblIndex+3)
       DblIndex = DblIndex + 3 
-
+#ifdef NewPAC
+      P%EllCD=RecIntArr(IntIndex + 1)
+      IntIndex = IntIndex + 1
+      P%WCoef=RecDblArr(DblIndex+1:DblIndex+1)
+      DblIndex = DblIndex + 1
+#endif
       SizeofSP = LSP(SPEll+MaxUEll)+1 !!!
       ALLOCATE(P%S(0:SizeofSP-1),STAT=iErr)
       IF(iErr.NE.0) CALL Halt('In RecurCopy 600: Allocation problem.')
@@ -630,7 +640,12 @@ endif
       DblIndex = DblIndex + 3 
       DblArr(DblIndex+1:DblIndex+3) = P%Box%Half(1:3)
       DblIndex = DblIndex + 3 
-
+#ifdef NewPAC
+      RecIntArr(IntIndex + 1)=P%EllCD
+      IntIndex = IntIndex + 1
+      RecDblArr(DblIndex+1:DblIndex+1)=P%WCoef
+      DblIndex = DblIndex + 1
+#endif
       SizeofCo = LHGTF(P%Ell)
       DblArr(DblIndex+1:DblIndex+SizeofCo) = P%Co(1:SizeofCo)
       DblIndex = DblIndex + SizeofCo
@@ -670,7 +685,12 @@ endif
       DblIndex = DblIndex + 3 
       DblArr(DblIndex+1:DblIndex+3) = P%Box%Half(1:3)
       DblIndex = DblIndex + 3 
-
+#ifdef NewPAC
+      RecIntArr(IntIndex + 1)=P%EllCD
+      IntIndex = IntIndex + 1
+      RecDblArr(DblIndex+1:DblIndex+1)=P%WCoef
+      DblIndex = DblIndex + 1
+#endif
       SizeofSP = LSP(SPEll+MaxUEll)+1 !!!
       
       DblArr(DblIndex+1:DblIndex+SizeofSP) = P%C(0:SizeofSP-1)
