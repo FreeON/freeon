@@ -7,9 +7,9 @@ MODULE ERIGlobals
   REAL(DOUBLE)                    :: COne,SOne,CTwo,STwo
   REAL(DOUBLE)                    :: DP2
   REAL(DOUBLE)                    :: PoleSwitch
-#ifdef NewPAC
+!
   REAL(DOUBLE)                    :: PrimWCoef
-#endif
+!
   INTEGER                         :: At
   REAL(DOUBLE),DIMENSION(1:HGLen) :: HGKet
   REAL(DOUBLE),DIMENSION(0:SPLen) :: SPKetC

@@ -18,10 +18,10 @@ MODULE PoleNodeType
      TYPE(BBox)                            :: Box      ! Bounding Box of distribution (for PAC)
      TYPE(PoleNode),POINTER                :: Descend  ! Next node in tree descent
      TYPE(PoleNode),POINTER                :: Travrse  ! Next node in tree traversal
-#ifdef NewPAC
+!
      INTEGER                               :: EllCD    ! Maximium Ell of the Distributuions in the box
      REAL(DOUBLE)                          :: WCoef    ! Weight for the Gaussian in the Box 
-#endif
+!
 #ifdef POINTERS_IN_DERIVED_TYPES
      REAL(DOUBLE),DIMENSION(:),POINTER     :: S        ! Im component of the multipole tensor
      REAL(DOUBLE),DIMENSION(:),POINTER     :: C        ! Re component of the multipole tensor
