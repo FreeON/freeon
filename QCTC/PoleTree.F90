@@ -244,7 +244,9 @@ MODULE PoleTree
          Node%Box%Tier=Level
          Node%Box%Number=PoleNodes
          Node%Ell  =SPEll+MaxUEll
+#ifdef NewPAC
          Node%EllCD=0
+#endif
          MaxTier=MAX(MaxTier,Level)
          PoleNodes=PoleNodes+1
          NULLIFY(Node%Travrse)
