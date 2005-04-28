@@ -713,7 +713,13 @@ endif
 
     NodesVisit = NodesVisit + 1
     IF(P%Leaf) THEN
-      IntNum = IntNum + 5 + 1
+
+#ifdef NewPAC
+      IntNum = IntNum + 5 + 1 + 1
+#else
+      IntNum = IntNum + 5 + 1 
+#endif
+
       SizeofCo = Size(P%Co)
       IF(SizeofCo /= LHGTF(P%Ell)) THEN
         STOP 'ERR: Leaf: SizeofCo is wrong!'
@@ -722,19 +728,29 @@ endif
       IF(SizeofSP /= (LSP(P%Ell)+1)) THEN
         STOP 'ERR: Leaf: SizeofSP is wrong!'
       ENDIF
+#ifdef NewPAC
+      DblNum = DblNum + 15 + SizeofCo + SizeofSP + SizeofSP + 1
+#else
       DblNum = DblNum + 15 + SizeofCo + SizeofSP + SizeofSP
+#endif
     ELSE
 
-      IntNum = IntNum + 5 + 1
+#ifdef NewPAC
+      IntNum = IntNum + 5 + 1 + 1
+#else
+      IntNum = IntNum + 5 + 1 
+#endif
       SizeofSP = Size(P%S)
       IF(SizeofSP /= (LSP(SPEll+MaxUEll)+1)) THEN
         WRITE(*,*) 'SizeofSP = ',SizeofSP, ', (LSP(SPEll+MaxUEll)+1) = ',(LSP(SPEll+MaxUEll)+1)
         STOP 'ERR: Non-leaf: SizeofSP is wrong!'
       ENDIF
-      
-      !!! 
-
-      DblNum = DblNum + 15 + SizeofSP + SizeofSP
+!
+#ifdef NewPAC
+      DblNum = DblNum + 15 + SizeofSP + SizeofSP + 1
+#else
+      DblNum = DblNum + 15 + SizeofSP + SizeofSP 
+#endif
       Left => P%Descend
       Right => P%Descend%Travrse
       CALL FindSize(Left)
