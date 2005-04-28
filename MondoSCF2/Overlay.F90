@@ -43,10 +43,9 @@ CONTAINS
           CmndLine=TRIM(CmndLine)//Blnk//TRIM(ArgV%C(I))
           !          WRITE(*,*)I,' <',TRIM(ArgV%C(I)),">"
        ENDDO
-       !       WRITE(*,*)' COMMANDLINE  = ',TRIM(CmndLine)
        ! Log this run
        CALL Logger(CmndLine,.FALSE.)
-#if PARALLEL && MPI2
+#if MPI2
        CALL MPI_COMM_SPAWN(ArgV%C(1),ArgV%C(2:NArg),M%NProc,MPI_INFO_NULL, &
             ROOT,MPI_COMM_SELF,SPAWN,MPI_ERRCODES_IGNORE,IErr)
        IF(IErr/=MPI_SUCCESS)& 
@@ -88,7 +87,23 @@ CONTAINS
     INTEGER            :: I,K,NArg,cCLUMP,SNC,NewDex
     TYPE(CHR_VECT)     :: ArgT,ArgV
     SNC=SIZE(S%Action%C)
-#ifdef PARALLEL && !MPI2
+
+#ifdef MPI2
+    NArg=8+SNC
+    CALL New(ArgT,NArg)
+    ArgT%C(1) =TRIM(N%M_EXEC)//'/'//Ex
+    ArgT%C(2) =N%SCF_NAME
+    DO K=1,SNC
+      ArgT%C(2+K)=S%Action%C(K)
+    ENDDO
+    NewDex=2+SNC
+    ArgT%C(NewDex+1)=IntToChar(S%Current%I(1))
+    ArgT%C(NewDex+2)=IntToChar(S%Current%I(2))
+    ArgT%C(NewDex+3)=IntToChar(S%Current%I(3))
+    ArgT%C(NewDex+4)=IntToChar(S%Previous%I(1))
+    ArgT%C(NewDex+5)=IntToChar(S%Previous%I(2))
+    ArgT%C(NewDex+6)=IntToChar(S%Previous%I(3))
+#else
     NArg=13+SNC
     CALL New(ArgT,NArg)
     ArgT%C(1) =M%Invoking
@@ -102,21 +117,6 @@ CONTAINS
        ArgT%C(7+K)=S%Action%C(K)
     ENDDO
     NewDex=7+SNC
-    ArgT%C(NewDex+1)=IntToChar(S%Current%I(1))
-    ArgT%C(NewDex+2)=IntToChar(S%Current%I(2))
-    ArgT%C(NewDex+3)=IntToChar(S%Current%I(3))
-    ArgT%C(NewDex+4)=IntToChar(S%Previous%I(1))
-    ArgT%C(NewDex+5)=IntToChar(S%Previous%I(2))
-    ArgT%C(NewDex+6)=IntToChar(S%Previous%I(3))
-#else
-    NArg=8+SNC
-    CALL New(ArgT,NArg)
-    ArgT%C(1) =TRIM(N%M_EXEC)//'/'//Ex
-    ArgT%C(2) =N%SCF_NAME
-    DO K=1,SNC
-      ArgT%C(2+K)=S%Action%C(K)
-    ENDDO
-    NewDex=2+SNC
     ArgT%C(NewDex+1)=IntToChar(S%Current%I(1))
     ArgT%C(NewDex+2)=IntToChar(S%Current%I(2))
     ArgT%C(NewDex+3)=IntToChar(S%Current%I(3))
