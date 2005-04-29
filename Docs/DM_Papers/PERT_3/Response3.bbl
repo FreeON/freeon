@@ -319,11 +319,11 @@
   \bibinfo{journal}{Chem. Phys. Lett.} \textbf{\bibinfo{volume}{370}},
   \bibinfo{pages}{99} (\bibinfo{year}{2003}).
 
-\bibitem[{\citenamefont{Goedecker and Teter}(1995)}]{SGoedecker95b}
-\bibinfo{author}{\bibfnamefont{S.}~\bibnamefont{Goedecker}} \bibnamefont{and}
-  \bibinfo{author}{\bibfnamefont{M.}~\bibnamefont{Teter}},
-  \bibinfo{journal}{Phys. Rev.B} \textbf{\bibinfo{volume}{51}},
-  \bibinfo{pages}{9455} (\bibinfo{year}{1995}).
+\bibitem[{\citenamefont{Goedecker}(1995)}]{SGoedecker95}
+\bibinfo{author}{\bibfnamefont{S.}~\bibnamefont{Goedecker}},
+  \bibinfo{journal}{J. Comp. Phys.}
+  \textbf{\bibinfo{volume}{118}}(\bibinfo{number}{2}), \bibinfo{pages}{261}
+  (\bibinfo{year}{1995}).
 
 \bibitem[{\citenamefont{Liang} \emph{et~al.}(2003)\citenamefont{Liang,
   Saravanan, Shao, Baer, Bell, and Head-Gordon}}]{WLiang03}

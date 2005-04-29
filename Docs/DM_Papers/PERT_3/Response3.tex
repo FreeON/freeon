@@ -43,9 +43,9 @@ Perturbed projection  for linear scaling solution of the coupled-perturbed
 self-consistent-field equations 
 [Weber, Niklasson and  Challacombe, Phys.\ Rev.\ Lett. {\bf 92}, 193002 (2004)] 
 is extended to the computation of higher order static response properties.
-Although generally applicable, perturbed projection is developed here 
+Although generally applicable, perturbed projection is further developed  here 
 in the context of the self-consistent first and second electric hyperpolarizabilities 
-of water networks at the Hartree-Fock level of theory. 
+at the Hartree-Fock level of theory. 
 Non-orthogonal, density matrix analogues of Wigner's $2n+1$ rule valid for linear one-electron perturbations 
 are given up to fourth order.  Linear scaling and locality of the higher order response densities under perturbation 
 by a global electric field are demonstrated for three dimensional water clusters.  
@@ -167,7 +167,7 @@ but likewise provide no details on their method of solution.  Such commutation r
 lead to equations of the Sylvester type and may be solved with a number of approaches \cite{JBrandts01}, 
 the particulars of which are of interest. 
 
-In contrast, Perturbed Projection \cite{VWeber04} is a recently developed alternative 
+In contrast, Perturbed Projection \cite{VWeber04} is an alternative 
 for $N$-scaling solution of the CPSCF equations that is simple and explicit.  Based on a recently developed density 
 matrix perturbation theory \cite{ANiklasson04}, Perturbed Projection exploits the direct
 relationship between the density matrix $\mathcal{D}$ and the effective Hamiltonian or 
@@ -429,7 +429,7 @@ consistent with Eqs.~\ref{pol}(a-c) for the (hyper)polarizabilities.
 
 Although a number of analytic, asymptotically discontinuous representations exist for the Heaviside 
 step function $\theta$, direct representation (and variation) of these forms as in Eq.~(\ref{DDeriv}) 
-is problematic. Polynomial expansion of the step function is a alternative choice \cite{SGoedecker95b}, but 
+is problematic. Polynomial expansion of the step function is an alternative choice \cite{SGoedecker95}, but 
 demands a very high order and can be costly.  Specifically, polynomial expansion of $\theta$ with a $p$'th order polynomial 
 incurs a cost that is at best ${\cal O}(\sqrt{p})$ \cite{WLiang03,WLiang04}.  Polynomial expansion techniques,
 such as those based on the the Chebychev polynomials, may also be plagued by Gibbs oscillations \cite{AVoter96},
@@ -495,7 +495,7 @@ As with the  TC2 generator, the $n^{\rm th}$ order response functions
 % \D^{a...} = n!\lim_{i\rightarrow\infty} \X_i^{a...},
  \D^{a...} = \lim_{i\rightarrow\infty} \X_i^{a...},
 \end{equation}
-converge quadratically, reaching  convergence when either 
+converges quadratically, reaching  convergence when either 
 the error $\varepsilon = |\Tr[\X^0_{i}]-N_e| + |\Tr[\X^{a}_{i}]| + \ldots$, or 
 the maximum element in the change $\delta \X^{a\ldots} = |\X^{a\ldots}_{i+1}-\X^{a\ldots}_{i}|$ 
 falls below $\tau$, the atom-atom block drop tolerance described in Ref.~[\onlinecite{ANiklasson03}].
@@ -600,7 +600,7 @@ In most cases the complexity of these equations
 can be reduced by taking advantage of indicial symmetry; 
 $a,b,c,$ and $d$ represent the Cartesian directions $x,y,z$
 so that terms with indecies in the same direction simplify. 
-For example, $\gamma_{aaaa}$ reduces to only one term requiring only 15 matrix multiplications.
+For example, $\gamma_{aaaa}$ reduces to one term requiring only 15 matrix multiplications.
 In the worst case, where all the directions are different, i.e. $\gamma_{aabc}$ 
 (or any other permutation of $(a,a,b,c)$), the relation \eqref{eq:2n+1 fourth order} 
 reduces to include only 12 terms with 180 matrix multiplications. 

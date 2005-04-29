@@ -2,11 +2,10 @@
 %
 % Define page margins
 %
-\setlength{\oddsidemargin}{0.0cm}
+%\setlength{\oddsidemargin}{0.0cm}
 %\setlength{\topmargin}{-3.5cm}
-\setlength{\topmargin}{-1.5cm}
-\setlength{\textwidth}{16.5cm}
-\setlength{\textheight}{24.5cm}
+%\setlength{\textwidth}{16.5cm}
+%\setlength{\textheight}{26.5cm}
 %
 % Define the font for the letter : minion
 % Helvetica is used for the footer and the logo
@@ -76,7 +75,7 @@ Fax: &(505) 665-3909\\
 \begin{document}
 
 \begin{letter}{
-Editors\\
+Professor Ernie Davidson\\
 Journal of Chemical Physics
 }
 
@@ -86,25 +85,45 @@ Journal of Chemical Physics
            MS-B268, LANL\\
            Los Alamos, NM 87545}
 
-\opening{Dear Editors,}
-We would like to submit our paper \\[.1cm]
-``Higher Order Response in ${\cal O}(N)$ by Perturbed Projection''  \\
-by \\
-Val\'ery Weber,  Anders M. N. Niklasson and Matt Challacombe. \\
+\opening{Dear Professor Davidson,}
+We are resubmitting our paper A4.12.222 with minor revisions, per the referees comments.
+We have incorporated the referee's (excellent) comments to the best of our ability, except
+for items 1, 5 and 8, which we believe involve simple misunderstanding by the referee.
+Changes are as follows:
 
-{\bf REFEREES}\\
-We would like to suggest the following referees:\\
-Bernie Kirtman ({\tt kirtman@chem.ucsb.edu}) \\
-Hans Agren ({\tt agren@theochem.kth.se}) \\
-Benoît Champagne ({\tt benoit.champagne@fundp.ac.be})\\
+\begin{itemize}
+\item[1] No change, we actually do demonstrate linear scaling for three-dimensional water clusters.
+         The linear chains are used only to (a) make a connection with the literature (Ref.~[55])
+         and (b) to demonstrate error control.  Since separation is achieved rapidly in one-dimension,
+         this is appropriate.
+\item[2] We have converted our equations to be overall consistent with the Taylor's expansion.
+\item[3] We added a comment on the guess we use to start the CPSCF equations, which is just the core Hamiltonian. 
+\item[4] Equation (22) has been fixed.  
+\item[5] No change. We give these equations without proof; proof is beyond the scope of this paper. 
+\item[6] We have made use of the $n+1$ and $2n+1$ rule clear.
 
-We would would like to avoid this referee: \\
-Gustavo Scuseria \\
+\pagebreak 
+
+\item[7] We point out in the discussion that small gap semiconducting polymers like 
+         polymethineimine or polydiacetylene will have a later onset of linear scaling, 
+         relative to water chains.  Regardless of where the onset occurs,  the proof of principle
+         is clear.   
+\item[8] No change. Figure 6 demonstrates the increasing delocalization of the derivative density matrix with 
+         order in the perturbation.  This constitutes a central result of this paper, and should be
+         rendered in color to show this effect.
+\end{itemize}
+
 
 {\bf COLOR}\\
 We would like Figure 6 to appear in color.  This is because
 there are overlapping distributions that can only be identified
 with color.
+
+
+{\bf POSITIONING}\\
+We would like this article to appear immediately after its companion 
+piece ``Non-orthogonal Density Matrix Perturbation Theory'', recently resubmitted by 
+Anders Nilasson.
 
 \closing{Sincerely,}
 
