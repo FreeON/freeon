@@ -64,11 +64,13 @@ MODULE PoleTree
         IF(Node%Leaf)THEN
            WRITE(*,*) 'Leaf Node',Node%Box%Tier
            WRITE(*,*) Node%DMax2
+           WRITE(*,*) Node%Box%BndBox(1,1:2)
            RETURN   
         ELSE
            WRITE(*,*) 'Pole Node',Node%Box%Tier
            WRITE(*,*) Node%DMax2
-           CALL CheckNodes(Node%Descend)
+           WRITE(*,*) Node%Box%BndBox(1,1:2)
+!           CALL CheckNodes(Node%Descend)
            CALL CheckNodes(Node%Descend%Travrse)
         ENDIF
 !
@@ -413,8 +415,7 @@ MODULE PoleTree
             DO Q=1,Rho%NQ%I(z)
                QD=oq+Q
                CD=or+(Q-1)*LMNLen+1
-!               EX=Extent(Ell,ZE,Rho%Co%D(CD:CD+LMNLen-1),Tau_O=TauPAC,Potential_O=.TRUE.,ExtraEll_O=0)
-               EX = 1.D-16
+               EX=Extent(Ell,ZE,Rho%Co%D(CD:CD+LMNLen-1),Tau_O=TauPAC,Potential_O=.TRUE.,ExtraEll_O=0)
 !              Threshold out distributions with zero extent 
                IF(EX>Zero)THEN
                   Qdex(IQ)=QD
