@@ -177,7 +177,7 @@ MODULE TreeWalk
        INTEGER                          :: LP,MP,NP,LQ,MQ,NQ,PDex,QDex
        REAL(DOUBLE),DIMENSION(0:2*HGEll,0:2*HGEll,0:2*HGEll,0:2*HGEll) :: MDR
 #endif
-       REAL(DOUBLE),PARAMETER           :: VTol = 1.D-12
+       REAL(DOUBLE),PARAMETER           :: VTol = 1.D-10
 #ifdef NewPAC
        INTEGER                          :: TotEll
        REAL(DOUBLE)                     :: SqrtW,RDist,LeftS,RightS

@@ -21,8 +21,10 @@ MODULE Thresholding
   REAL(DOUBLE), SAVE                   :: MinZab,MinXab
   REAL(DOUBLE), SAVE                   :: AtomPairDistanceThreshold  ! Atom pairs
   REAL(DOUBLE), SAVE                   :: PrimPairDistanceThreshold  ! Prim pairs
+#ifdef NewPAC
   REAL(DOUBLE),PARAMETER               :: GFactor=0.90D0
   REAL(DOUBLE),DIMENSION(0:HGEll),SAVE :: AACoef
+#endif
   CONTAINS
 !====================================================================================================
 !    Set and load global threholding parameters
@@ -193,7 +195,7 @@ MODULE Thresholding
           SqrtW     = SQRT(Zeta)
           DelR      = SqrtW
           ScaledTau = Tau/(Coef+SMALL_DBL)
-          DO L=1,40
+          DO L=1,50
              Fun = EXP(RErfc(SqrtW*R,TotEll))
              IF(Fun > ScaledTau*(R**(TotEll+1))) THEN
                 R = R+DelR
@@ -313,6 +315,10 @@ MODULE Thresholding
         REAL(DOUBLE)               :: RErfc
         REAL(DOUBLE)               :: R
 !
+        IF(R < Zero) THEN
+           RErfc = One
+           RETURN
+        ENDIF
         SELECT CASE(L)
         CASE(0) 
            RErfc=RErfc0(R)
@@ -391,7 +397,7 @@ MODULE Thresholding
         DR = R/DeltaR
         IG = INT(DR)
         IF(IG>NGrid) THEN
-           RErfc0  = -36.841361487904731
+           RErfc0 = -36.841361487904731
         ELSE
            YY     = DBLE(IG+1)-DR
            XX     = YY*RErfData(IG)+(One-YY)*RErfData(IG+1)
