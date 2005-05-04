@@ -255,11 +255,11 @@ endif
     PR1%Ell = SPEll
     PoleRoot => PR1
 !
-    IF(MyID==0) THEN
-       WRITE(*,*) 'BranchTier = ',BranchTier
-       CALL CheckNodes(PoleRoot)
-    ENDIF
-    IF(.TRUE.) STOP
+!!$    IF(MyID==0) THEN
+!!$       WRITE(*,*) 'BranchTier = ',BranchTier
+!!$       CALL CheckNodes(PoleRoot)
+!!$    ENDIF
+!!$    IF(.TRUE.) STOP
 !
   END SUBROUTINE ParaRhoToPoleTree
 !------------------------------------------------------------------------------------------------------
@@ -352,11 +352,11 @@ endif
     ENDIF
 #endif
 !
-    IF(MyID == 1) THEN
-       WRITE(*,*) 'NodesNumArr= ',NodesNumArr(:)
-       WRITE(*,*) 'IntNumArr  = ',IntNumArr(:)
-       WRITE(*,*) 'DblNumArr  = ',DblNumArr(:)
-    ENDIF
+!!$    IF(MyID == 1) THEN
+!!$       WRITE(*,*) 'NodesNumArr= ',NodesNumArr(:)
+!!$       WRITE(*,*) 'IntNumArr  = ',IntNumArr(:)
+!!$       WRITE(*,*) 'DblNumArr  = ',DblNumArr(:)
+!!$    ENDIF
 !
     ALLOCATE(RecIntArr(GIntNum),STAT=iErr)
     IF(iErr.NE.0) CALL Halt('In ParaQ 700: Allocation problem.')
