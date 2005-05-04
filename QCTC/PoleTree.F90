@@ -62,13 +62,15 @@ MODULE PoleTree
         TYPE(PoleNode), POINTER :: Node
 !
         IF(Node%Leaf)THEN
-           WRITE(*,*) 'Leaf Node',Node%Box%Tier
+           WRITE(*,*) 'Leaf Node',Node%Ell,Node%EllCD,Node%Box%Tier
            WRITE(*,*) Node%DMax2
+           WRITE(*,*) Node%WCoef
            WRITE(*,*) Node%Box%BndBox(1,1:2)
            RETURN   
         ELSE
-           WRITE(*,*) 'Pole Node',Node%Box%Tier
+           WRITE(*,*) 'Pole Node',Node%Ell,Node%EllCD,Node%Box%Tier
            WRITE(*,*) Node%DMax2
+           WRITE(*,*) Node%WCoef
            WRITE(*,*) Node%Box%BndBox(1,1:2)
 !           CALL CheckNodes(Node%Descend)
            CALL CheckNodes(Node%Descend%Travrse)
@@ -218,7 +220,11 @@ MODULE PoleTree
          Node%Box%BndBox(1,:)= Rho%Qx%D(KQ)
          Node%Box%BndBox(2,:)= Rho%Qy%D(KQ)
          Node%Box%BndBox(3,:)= Rho%Qz%D(KQ)
+#ifdef NewPAC
+         Node%Box=ExpandBox(Node%Box,1.D-16)
+#else
          Node%Box=ExpandBox(Node%Box,Ext(KQ))
+#endif
 !        Allocate and fill HGTF coefficients
          LMNLen=LHGTF(Node%Ell)
          ALLOCATE(Node%Co(1:LMNLen),STAT=Status)
