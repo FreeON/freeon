@@ -88,7 +88,7 @@ CONTAINS
     TYPE(CHR_VECT)     :: ArgT,ArgV
     SNC=SIZE(S%Action%C)
 
-#ifdef MPI2
+#ifdef defined(MPI2) 
     NArg=8+SNC
     CALL New(ArgT,NArg)
     ArgT%C(1) =TRIM(N%M_EXEC)//'/'//Ex
@@ -103,7 +103,7 @@ CONTAINS
     ArgT%C(NewDex+4)=IntToChar(S%Previous%I(1))
     ArgT%C(NewDex+5)=IntToChar(S%Previous%I(2))
     ArgT%C(NewDex+6)=IntToChar(S%Previous%I(3))
-#else
+#elif PARALLEL
     NArg=13+SNC
     CALL New(ArgT,NArg)
     ArgT%C(1) =M%Invoking
@@ -117,6 +117,21 @@ CONTAINS
        ArgT%C(7+K)=S%Action%C(K)
     ENDDO
     NewDex=7+SNC
+    ArgT%C(NewDex+1)=IntToChar(S%Current%I(1))
+    ArgT%C(NewDex+2)=IntToChar(S%Current%I(2))
+    ArgT%C(NewDex+3)=IntToChar(S%Current%I(3))
+    ArgT%C(NewDex+4)=IntToChar(S%Previous%I(1))
+    ArgT%C(NewDex+5)=IntToChar(S%Previous%I(2))
+    ArgT%C(NewDex+6)=IntToChar(S%Previous%I(3))
+#else
+    NArg=8+SNC
+    CALL New(ArgT,NArg)
+    ArgT%C(1) =TRIM(N%M_EXEC)//'/'//Ex
+    ArgT%C(2) =N%SCF_NAME
+    DO K=1,SNC
+      ArgT%C(2+K)=S%Action%C(K)
+    ENDDO
+    NewDex=2+SNC
     ArgT%C(NewDex+1)=IntToChar(S%Current%I(1))
     ArgT%C(NewDex+2)=IntToChar(S%Current%I(2))
     ArgT%C(NewDex+3)=IntToChar(S%Current%I(3))
