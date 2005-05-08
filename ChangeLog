@@ -1,12 +1,78 @@
+2005-05-04 11:27  tymczak
 
-NOTE----------------------------------------------------------------
+	* QCTC/ParaQ.F90: [no log message]
 
-	FIRST LETS WISH KAROLY GOOD LUCK AND A JOB WELL DONE!!
+2005-05-04 11:25  tymczak
 
-	SECOND NOTE THAT CODE WILL NOT COMPILE WITHOUT -DNEWPAC OPTION!!
-	GIVE IT A TRY AND LET CJ KNOW, IS IT FASTER??
+	* QCTC/LibQCTC/PoleNodeType.F90: removed the NewPAC compiler
+	derective do not need it here
+	
+	CJ
 
-NOTE----------------------------------------------------------------	
+2005-05-04 11:24  tymczak
+
+	* QCTC/: ParaQ.F90, PoleTree.F90: Partial Fix of the Parallel stuff
+	with the new PAC
+	
+	NEEDS more work
+	
+	CJ
+
+2005-04-29 14:50  tymczak
+
+	* QCTC/PoleTree.F90: Fixed bug in old stuff
+
+2005-04-29 14:50  tymczak
+
+	* MondoMods/Thresholding.F90, QCTC/TreeWalk.F90: [no log message]
+
+2005-04-29 14:20  mchalla
+
+	* Docs/DM_Papers/PERT_3/: LET.tex, Response3.bbl, Response3.pdf,
+	Response3.tex: Final version!
+
+2005-04-28 13:55  mchalla
+
+	* Includes/CompilerSpecifics.AMDLinux.PG_MPI2: Should work with
+	MPICH2 on ZINC.
+
+2005-04-28 13:43  mchalla
+
+	* MondoSCF2/Overlay.F90: Hopefully working now for MPI2 (-DMPI
+	-DPARALLEL) and MPI1 (-DPARALLEL)
+
+2005-04-28 13:17  mchalla
+
+	* QCTC/ParaQ.F90: Maybe it works now?
+
+2005-04-28 11:36  tymczak
+
+	* QCTC/PoleTree.F90: Fixed Bug
+
+2005-04-28 11:34  tymczak
+
+	* Includes/CompilerSpecifics.AMDLinux.PG,
+	QCTC/LibQCTC/ERIGlobals.F90, QCTC/LibQCTC/PoleNodeType.F90: [no log
+	message]
+
+2005-04-27 15:19  mchalla
+
+	* QCTC/ParaQ.F90: my bad
+
+2005-04-27 15:01  mchalla
+
+	* QCTC/ParaQ.F90: Hopefully pack and unpack the NEWPAC items EllCD
+	and WCoeff in PoleNode used by the -DNewPAC -DPARALLEL options.
+	
+	And WOW CJ, it took me a whopping 3 minutes.
+
+2005-04-25 13:04  tymczak
+
+	* SCFeqs/P2Use.F90: Fixed the Extrapolate BUGS
+
+2005-04-22 17:19  mchalla
+
+	* ChangeLog: [no log message]
 
 2005-04-22 17:14  mchalla
 
