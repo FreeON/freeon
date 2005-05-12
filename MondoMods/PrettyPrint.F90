@@ -516,6 +516,7 @@ MODULE PrettyPrint
         CHARACTER(LEN=2)                     :: Atom
         REAL(DOUBLE)                         :: AA
         REAL(DOUBLE)                         :: A,B,C,Alpha,Beta,Gamma
+        AA=One/AngstromsToAU
 #ifdef PARALLEL
         IF(MyId==ROOT)THEN
 #endif
@@ -528,6 +529,30 @@ MODULE PrettyPrint
                  Mssg='Geom #'//TRIM(IntToChar(GM%Confg)) &
                     //', <SCF> = '//TRIM(FltToMedmChar(GM%ETotal))
                  WRITE(PU,*)TRIM(Mssg)
+              ELSE IF (PrintGeom_O=='XSF') THEN
+                 IF(GM%PBC%Dimen/=0)THEN
+                    IF(GM%PBC%Dimen<=2)THEN
+                       Mssg='SLAB'
+                    ELSE
+                       Mssg='CRYSTAL'
+                    ENDIF
+                    WRITE(PU,*)TRIM(Mssg)
+		    Mssg='PRIMVEC '//TRIM(IntToChar(GM%Confg+1))
+                    WRITE(PU,*)TRIM(Mssg)
+                    ! Cell Vectors
+	            GM%PBC%BoxShape%D=GM%PBC%BoxShape%D*AA
+	            WRITE(PU,111)GM%PBC%BoxShape%D(1,:)
+	            WRITE(PU,111)GM%PBC%BoxShape%D(2,:)
+	            WRITE(PU,111)GM%PBC%BoxShape%D(3,:)
+111                 FORMAT(1X,3(F14.5,' '))
+	            GM%PBC%BoxShape%D=GM%PBC%BoxShape%D/AA
+                    Mssg='PRIMCOORD '//TRIM(IntToChar(GM%Confg+1))
+                    WRITE(PU,*)TRIM(Mssg)
+                    WRITE(PU,*)GM%NAtms,1
+                 ELSE
+                    Mssg='ATOMS '//TRIM(IntToChar(GM%Confg+1))
+                    WRITE(PU,*)TRIM(Mssg)
+                 ENDIF
                  AA=One/AngstromsToAU
                  DO I=1,GM%NAtms
                     IF(GM%CConstrain%I(I)==1) THEN
@@ -542,46 +567,6 @@ MODULE PrettyPrint
                     WRITE(PU,222)Atom,(GM%Carts%D(K,I)*AA,K=1,3),AuxChar
 222                 FORMAT(1X,A2,3(F14.5,' '),A2)
                  ENDDO
-              ELSE IF (PrintGeom_O=='XSF') THEN
-	      ! NJH: Print XSF format for XCrysden
-	      ! NJH: Only does a single configuration correctly for now
-	      ! NJH: Needs future hooks in Optimizer to produce animation files
-                 ! MC got it working...
-                 ! NJH : made config number range 1- rather than 0-
-                 ! NJH : changed coordinates to non scientific format
-                 AA=One/AngstromsToAU
-                 IF(GM%PBC%Dimen/=0)THEN
-                    IF(GM%PBC%Dimen<=2)THEN
-                       Mssg='SLAB'
-                    ELSE
-                       Mssg='CRYSTAL'
-                    ENDIF
-                    WRITE(PU,*)TRIM(Mssg)
-		    Mssg='PRIMVEC '//TRIM(IntToChar(GM%Confg+1))
-                    WRITE(PU,*)TRIM(Mssg)
-                    ! Cell Vectors
-                    Mssg=                                             &
-                         FltToMedmChar(GM%PBC%BoxShape%D(1,1))//'  '// &
-                         FltToMedmChar(GM%PBC%BoxShape%D(1,2))//'  '// &
-                         FltToMedmChar(GM%PBC%BoxShape%D(1,3))//RTRN// &
-                         FltToMedmChar(GM%PBC%BoxShape%D(2,1))//'  '// &
-                         FltToMedmChar(GM%PBC%BoxShape%D(2,2))//'  '// &
-                         FltToMedmChar(GM%PBC%BoxShape%D(2,3))//RTRN// &
-                         FltToMedmChar(GM%PBC%BoxShape%D(3,1))//'  '// &
-                         FltToMedmChar(GM%PBC%BoxShape%D(3,2))//'  '// &
-                         FltToMedmChar(GM%PBC%BoxShape%D(3,3))
-                    WRITE(PU,*)TRIM(Mssg)
-                    Mssg='PRIMCOORD '//TRIM(IntToChar(GM%Confg+1))
-                    WRITE(PU,*)TRIM(Mssg)
-                    WRITE(PU,*)GM%NAtms,1
-                 ELSE
-                    Mssg='ATOMS '//TRIM(IntToChar(GM%Confg+1))
-                    WRITE(PU,*)TRIM(Mssg)
-                 ENDIF
-                 DO I=1,GM%NAtms
-		    WRITE(PU,99)GM%AtNam%C(I),(GM%Carts%D(K,I)*AA,K=1,3)
-                 99 FORMAT(1x,A3,3(1x,F11.5))
-		 ENDDO
               ELSEIF(PrintGeom_O=='PDB')THEN
 !                Print PDB format
                  AA=One/AngstromsToAU
