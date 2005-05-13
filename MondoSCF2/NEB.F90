@@ -1,5 +1,4 @@
 MODULE NEB
-#ifdef NEB2
   !===============================================================================
   ! Module for calculating reaction (minimum energy) paths between known 
   ! reactant and product states.  This module impliments the climbing image
@@ -22,7 +21,7 @@ MODULE NEB
   USE ls_rmsd
   USE PrettyPrint
   USE ControlStructures
-  IMPLICIT NONE
+  IMPLICIT NONE  
   SAVE
 CONTAINS
   !===============================================================================
@@ -271,7 +270,7 @@ CONTAINS
              N=N+(G%Clone(I)%Carts%D-G%Clone(I-1)%Carts%D)*UMax
           ELSE
              N=(G%Clone(I+1)%Carts%D-G%Clone(I)%Carts%D)*UMax
-             N=N+(G%Clone(I+1)%Carts%D-G%Clone(I)%Carts%D)*UMin
+             N=N+(G%Clone(I)%Carts%D-G%Clone(I-1)%Carts%D)*UMin
           ENDIF
        ENDIF
        N=N/SQRT(SUM(N**2))
@@ -332,25 +331,4 @@ CONTAINS
     ! Not implemented yet
   END SUBROUTINE NEBSpline
 
-#else
-
-  USE InOut
-  USE PrettyPrint
-  USE ControlStructures
-  IMPLICIT NONE
-  SAVE
-  PRIVATE
-  PUBLIC :: NEBInit,NEBForce
-CONTAINS
-  SUBROUTINE NEBInit(G)
-    TYPE(Geometries) :: G
-    CALL MondoHalt(DRIV_ERROR,'NEB ROUTINES ARE NOT OPERATIONAL IN THIS RELEASE.')
-  END SUBROUTINE NEBInit
-  SUBROUTINE NEBForce(G,O)
-    TYPE(Geometries) :: G
-    TYPE(Options)    :: O
-    CALL MondoHalt(DRIV_ERROR,'NEB ROUTINES ARE NOT OPERATIONAL IN THIS RELEASE.')
-  END SUBROUTINE NEBForce
-
-#endif
 END MODULE NEB

@@ -49,11 +49,11 @@ CONTAINS
          "|        |/ _ \| '_ \ / _  |/ _ \____  \   (__|  ____|",A1,    &
          '|  |\/|  | (_) | | | | (_| | (_) )     /\     |  |    ',A1,    &
          '|__|  |__|\___/|_| |_|\____|\___/_____/  \____|__|    ',A1,A1, &
-         ' Version 1.0 alpha 10 "Gyokuro"                       ',A1,    &  
+         ' Version 1.0 alpha 11 "Gyokuro"                       ',A1,    &  
          ' A program suite for O(N) SCF theory and ab initio MD ',A1,    &
-         ' Matt Challacombe, C.J. Tymczak,                      ',A1,    &
-         ' Chee Kwan Gan, Karoly Nemeth, Valery Weber,          ',A1,    &  
-         ' Eric Schwegler and Anders Niklasson                  ',A1,    &
+         ' Matt Challacombe, C.J. Tymczak, Karoly Nemeth,       ',A1,    &
+         ' Valery Weber, Chee Kwan Gan, Eric Schwegler,         ',A1,    &
+         ' Graeme Henkelman and Anders Niklasson                ',A1,    &
          ' Los Alamos National Laboratory                       ',A1,    & 
          ' LA-CC-04-086 (formerly 01-2)                         ',A1,    & 
          ' Copyright 2001, University of California.            ',A1)
