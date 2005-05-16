@@ -79,7 +79,8 @@ CONTAINS
 
        IF(C%Opts%Grad==GRAD_TS_SEARCH_NEB)THEN
           ! Overwrite the most recent GFile (doing transition state)
-          CALL OpenASCII(C%Nams%GFile,Geo,NewFile_O=.TRUE.);CLOSE(Geo)
+          !          CALL OpenASCII(C%Nams%GFile,Geo,NewFile_O=.TRUE.)
+          !          CLOSE(Geo)
           IF(C%Opts%GeomPrint=='XSF') &
              CALL XSFPreamble(C%Geos%Clones+2,C%Nams%GFile,Geo)
           DO iCLONE=GBeg,GEnd
@@ -552,10 +553,11 @@ CONTAINS
      ENDIF
      CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
      CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
-     DO iCLONE=1,C%Geos%Clones
-       CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile,Geo, &
-                   C%Opts%GeomPrint)
-     ENDDO
+     ! Should have already echoed the geometry(ies) when parsing in...
+!     DO iCLONE=1,C%Geos%Clones
+!       CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile,Geo, &
+!                   C%Opts%GeomPrint)
+!     ENDDO
      !
      ! Start optimization                     
      !
@@ -590,7 +592,7 @@ CONTAINS
          CALL NewGeomFill(C%Geos%Clone(iCLONE))
        ENDDO
        IF(C%Opts%Grad==GRAD_TS_SEARCH_NEB) THEN
-         CALL NEBPurify(C%Geos)
+         CALL NEBPurify(C%Geos,Print_O=.TRUE.)
          CALL MergePrintClones(C%Geos,C%Nams,C%Opts)
        ENDIF
        !
@@ -604,8 +606,7 @@ CONTAINS
        ! Print geometries
        !
        DO iCLONE=1,C%Geos%Clones
-         CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile,Geo, &
-                     C%Opts%GeomPrint)
+         CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile,Geo,C%Opts%GeomPrint,Clone_O=iCLONE)
        ENDDO
        !
        ! Continue optimization?

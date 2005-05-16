@@ -20,9 +20,10 @@ CONTAINS
     TYPE(Geometries)   :: G
     TYPE(BasisSets)    :: B
     TYPE(INT_VECT)     :: ArrMaxNon0s,ArrMaxNBlks
-    INTEGER            :: I,J,Ntot
+    INTEGER            :: I,J,Ntot,BasU
     CHARACTER(LEN=DCL) :: BaseFile,GhostFile
     CHARACTER(LEN=DEFAULT_CHR_LEN) :: Line
+    LOGICAL            :: Exists
     !-------------------------------------------------------------------------!    
     CALL OpenASCII(N%IFile,Inp)
     ! Find out how many basis sets we are going over, and their names
@@ -44,12 +45,19 @@ CONTAINS
     ALLOCATE(B%PrimPairThresh(1:G%Clones,1:B%NBSets))
     DO J=1,B%NBSets
        BaseFile=TRIM(N%M_HOME)//'BasisSets/'//TRIM(B%BName(J))//BasF
-       CALL OpenASCII(BaseFile,Bas,OldFileQ_O=.TRUE.)
-       GhostFile=TRIM(N%M_HOME)//'BasisSets/Ghost.bas'
-       CALL OpenASCII(GhostFile,GBas,OldFileQ_O=.TRUE.)
+       INQUIRE(FILE=BaseFile,EXIST=Exists)
+       IF(Exists)THEN
+          CALL OpenASCII(BaseFile,Bas,OldFileQ_O=.TRUE.)
+          REWIND(Bas)
+          BasU=Bas
+       ELSE
+          CALL LowCase(B%BName(J))
+          CALL AlignLowCase('<beginbasisset'//TRIM(B%BName(J))//'>',Inp)
+          BasU=Inp
+       ENDIF
        DO I=1,G%Clones
-          IF(.NOT.ParseBasisSets(G%Clone(I),B%BSets(I,J),B%BSiz(I,J),B%OffS(I,J)))THEN
-             CALL MondoHalt(PRSE_ERROR,'ParseBasisSets failed for basis set file '//RTRN//TRIM(BaseFile))
+          IF(.NOT.ParseBasisSets(G%Clone(I),B%BSets(I,J),BasU,B%BSiz(I,J),B%OffS(I,J)))THEN
+             CALL MondoHalt(PRSE_ERROR,'ParseBasisSets failed for basis set '//TRIM(B%BName(J)))
           ENDIF
           B%BSets(I,J)%BName=B%BName(J)
           CALL BCSRDimensions(G%Clone(I),B%BSets(I,J),O%AccuracyLevels(J), &
@@ -117,7 +125,7 @@ CONTAINS
 ! PARSE A BASIS SET, SET UP ITS INDECIES, NORMALIZE THE PRIMITIVES AND 
 ! COMPUTE BLOCKING FOR SPARSE BLOCKED LINEAR ALGEBRA
 !============================================================================
-  FUNCTION ParseBasisSets(G,B,BlkSiz,OffSet)
+  FUNCTION ParseBasisSets(G,B,BasU,BlkSiz,OffSet)
     TYPE(BSET)                 :: BS,B
     TYPE(CRDS)                 :: G
     TYPE(INT_VECT)             :: BlkSiz,OffSet
@@ -127,9 +135,11 @@ CONTAINS
     INTEGER, DIMENSION(2)      :: Ints
     LOGICAL                    :: ParseBasisSets
     CHARACTER(LEN=DCL)         :: Line
-    INTEGER                    :: I,J,K,L,N,NC,NK,NP,NS,MinL,MaxL,KFound,Prim,Ell
+    INTEGER                    :: I,J,K,L,N,NC,NK,NP,NS,MinL,MaxL,KFound,Prim,Ell,BasU
 !-------------------------------------------------------------------------!
+   ParseBasisSets=.FALSE.
 ! Allocate temporary set
+
     BS%LMNLen=LHGTF(MaxAsymt)
     BS%NCtrt=MaxCntrx
     BS%NPrim=MaxPrmtv
@@ -176,19 +186,21 @@ CONTAINS
     BS%NCoreEl%D=Zero
 !   Parse basis set 
     KFound=0
-    REWIND(Bas)
     DO 
-       READ(Bas,DEFAULT_CHR_FMT,END=99)Line                 
+       READ(BasU,DEFAULT_CHR_FMT,END=99)Line                 
        DO NK=1,BS%NKind    
           ! Look for the basis set 
          IF(KeyQ(Line,Ats(BS%Kinds%I(NK))).AND.KeyQ(Line,'0'))THEN                    
              NC=0
              KFound=KFound+1
              DO 
-                READ(Bas,DEFAULT_CHR_FMT,END=99)Line         
+                READ(BasU,DEFAULT_CHR_FMT,END=99)Line         
+                IF(INDEX(Line,'<End')/=0)THEN
+                   STOP 'lsadjflasdfjlsdfjslfdj'
+                ENDIF
                 IF(KeyQ(Line,Stars))GOTO 100
                 NC=NC+1                 
-                DO K=1,MaxLTyps
+                DO K=1,MaxLTyps                   
                    IF(KeyQ(Line,CLTyps(K)))THEN
                       BS%ASymm%I(1,NC,NK)=LTyps(1,K)                     
                       BS%ASymm%I(2,NC,NK)=LTyps(2,K)
@@ -210,7 +222,7 @@ CONTAINS
                 MaxL=BS%ASymm%I(2,NC,NK)
                 BS%NAsym=Max(BS%NAsym,MaxL)
                 DO NP=1,BS%NPFnc%I(NC,NK)
-                   READ(Bas,DEFAULT_CHR_FMT,END=99)Line
+                   READ(BasU,DEFAULT_CHR_FMT,END=99)Line
                    N=MaxL-MinL+2
                    CALL LineToDbls(Line,N,Dbls)
                    BS%Expnt%D(NP,NC,NK)=Dbls(1)
@@ -236,15 +248,15 @@ CONTAINS
                 BS%MxProjL=MAX(BS%MxProjL,BS%ProjEll%I(NK))
                 CALL Delete(C)
                 ! Read a dummy line, something about potentials 
-                READ(Bas,DEFAULT_CHR_FMT,END=99)Line         
+                READ(BasU,DEFAULT_CHR_FMT,END=99)Line         
                 ! This line should contain number of primitives in this ECP
-                READ(Bas,DEFAULT_CHR_FMT,END=99)Line         
+                READ(BasU,DEFAULT_CHR_FMT,END=99)Line         
                 CALL LineToInts(Line,1,Ints)                   
                 BS%NTyp1PF%I(NK)=Ints(1)
                 BS%Typ1Fnk=MAX(BS%Typ1Fnk,BS%NTyp1PF%I(NK))
                 ! Parse in the type one potential
                 DO Prim=1,BS%NTyp1PF%I(NK)
-                   READ(Bas,DEFAULT_CHR_FMT,END=99)Line         
+                   READ(BasU,DEFAULT_CHR_FMT,END=99)Line         
                    CALL LineToInts(Line,1,Ints)                      
                    CALL LineToDbls(Line,3,Dbls)                      
                    ! Load this ECPs primitive angular symmetries, exponents and coefficients 
@@ -255,15 +267,15 @@ CONTAINS
                 ! Parse in the type two potential
                 DO Ell=0,BS%ProjEll%I(NK)
                    ! Read a dummy line, something about potentials 
-                   READ(Bas,DEFAULT_CHR_FMT,END=99)Line         
+                   READ(BasU,DEFAULT_CHR_FMT,END=99)Line         
                    ! This line should contain number of primitives in this ECP
-                   READ(Bas,DEFAULT_CHR_FMT,END=99)Line         
+                   READ(BasU,DEFAULT_CHR_FMT,END=99)Line         
                    ! Parse in the type two potential for this ell value
                    CALL LineToInts(Line,1,Ints)                   
                    BS%NTyp2PF%I(Ell,NK)=Ints(1)
                    BS%Typ2Fnk=MAX(BS%Typ2Fnk,BS%NTyp2PF%I(Ell,NK))
                    DO Prim=1,BS%NTyp2PF%I(Ell,NK)
-                      READ(Bas,DEFAULT_CHR_FMT,END=99)Line         
+                      READ(BasU,DEFAULT_CHR_FMT,END=99)Line         
                       CALL LineToDbls(Line,3,Dbls)                      
                       CALL LineToInts(Line,1,Ints)                      
                       ! Load this ECPs primitive angular symmetries, exponents and coefficients 
@@ -278,63 +290,7 @@ CONTAINS
 100    CONTINUE
     ENDDO
 99  CONTINUE
-!
-    IF(KFound/=BS%NKind) THEN
-       REWIND(GBas)
-       DO 
-          READ(GBas,DEFAULT_CHR_FMT,END=999)Line                 
-          DO NK=1,BS%NKind    
-             ! Look for the basis set 
-             IF(KeyQ(Line,Ats(BS%Kinds%I(NK))).AND.KeyQ(Line,'0'))THEN                    
-                NC=0
-                KFound=KFound+1
-                DO 
-                   READ(GBas,DEFAULT_CHR_FMT,END=999)Line         
-                   IF(KeyQ(Line,Stars))GOTO 1000
-                   NC=NC+1                 
-                   DO K=1,MaxLTyps
-                      IF(KeyQ(Line,CLTyps(K)))THEN
-                         BS%ASymm%I(1,NC,NK)=LTyps(1,K)                     
-                         BS%ASymm%I(2,NC,NK)=LTyps(2,K)
-                         DO L=1,MaxPrmtv
-                            IF(KeyQ(Line,TRIM(IntToChar(L))))THEN
-                               NP=L
-                               GOTO 1001
-                            ENDIF
-                         ENDDO
-                      ENDIF
-                   ENDDO
-                   RETURN
-1001               CONTINUE
-                   BS%NCFnc%I(NK)=NC
-                   BS%NPFnc%I(NC,NK)=NP
-                   BS%NCtrt=Max(BS%NCtrt,NC)
-                   BS%NPrim=Max(BS%NPrim,NP)
-                   MinL=BS%ASymm%I(1,NC,NK)
-                   MaxL=BS%ASymm%I(2,NC,NK)
-                   BS%NAsym=Max(BS%NAsym,MaxL)
-                   DO NP=1,BS%NPFnc%I(NC,NK)
-                      READ(GBas,DEFAULT_CHR_FMT,END=999)Line
-                      N=MaxL-MinL+2
-                      CALL LineToDbls(Line,N,Dbls)
-                      BS%Expnt%D(NP,NC,NK)=Dbls(1)
-                      K=1
-                      BS%CCoef%D(1:,NP,NC,NK)=Zero
-                      DO NS=MinL,MaxL
-                         K=K+1
-                         BS%CCoef%D(NS+1,NP,NC,NK)=Dbls(K) 
-                      ENDDO
-                   ENDDO
-                ENDDO
-             ENDIF
-          ENDDO
-1000      CONTINUE
-       ENDDO
-999    CONTINUE
-    ENDIF
-!
 !   Continue On
-!
     IF(KFound/=BS%NKind) THEN
        WRITE(*,*) 'ParseBasis: PROBLEM <KFound/=BS%NKind>'
        WRITE(*,*) 'ParseBasis: The basis set file may not contain the desired atoms.'
@@ -543,18 +499,30 @@ CONTAINS
 
   SUBROUTINE ParseBasisNames(B)
     TYPE(BasisSets) :: B
-    INTEGER                               :: I,ILoc
+    INTEGER                               :: I,J
+    TYPE(CHR_VECT) :: Chars
+    CHARACTER(LEN=DCL) :: Line
+    LOGICAL            :: Found
     !----------------------------------------------------------------------------
-    B%NBSets=0
-    DO I=1,NSupSets
-       IF(OptKeyLocQ(Inp,BASIS_SETS,TRIM(CSets(1,I)),MaxSets,NLoc,Location))THEN
-          B%NBSets=B%NBSets+NLoc
-          DO ILoc=1,NLoc 
-             B%BName(Location(ILoc))=ADJUSTL(CSets(2,I))
-          ENDDO
+    CALL Align(BASIS_SETS,Inp)
+    BACKSPACE(Inp)
+    READ(Inp,DEFAULT_CHR_FMT)Line
+    CALL LineToChars(Line,Chars)
+    B%NBSets=SIZE(Chars%C)-1
+    DO I=2,SIZE(Chars%C)
+       Found=.FALSE.
+       DO J=1,NSupSets
+          IF(TRIM(Chars%C(I))==TRIM(CSets(1,J)))THEN
+             B%BName(I-1)=ADJUSTL(CSets(2,I))
+             Found=.TRUE.
+             EXIT
+          ENDIF
+       ENDDO
+       IF(.NOT.Found)THEN
+          B%BName(I-1)=TRIM(Chars%C(I))
        ENDIF
     ENDDO
-    IF(B%NBSets==0)CALL MondoHalt(PRSE_ERROR,TRIM(BASIS_SETS)//' not found in input.')
+    CALL Delete(Chars)
   END SUBROUTINE ParseBasisNames
   !=============================================================================
   ! PRECOMPUTE PRIMITIVE DISTRIBUTION INFORMATION

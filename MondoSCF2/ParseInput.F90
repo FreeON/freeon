@@ -11,6 +11,7 @@ MODULE ParseInput
   USE ParseParallel
   USE ParseGeomOpt
   USE ParseExtraCoords
+  USE PrettyPrint	
   USE ParseProperties, ONLY: LoadPropertyOptions
 CONTAINS 
   !===============================================================
@@ -52,5 +53,6 @@ CONTAINS
     CALL LoadPropertyOptions(C%Nams,C%POpt)
     ! Check for Global conflicts.
     CALL ConflictCheck(C)
+    CALL PPrint(C%Geos%Clone(1),Unit_O=6,PrintGeom_O='XSF')
  END SUBROUTINE ParseTheInput
 END MODULE ParseInput

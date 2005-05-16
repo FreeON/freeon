@@ -77,15 +77,16 @@ CONTAINS
     !    CALL SetEq_PBCInfo(G1%PBC,G2%PBC)
   END SUBROUTINE SetEq_CRDS
 
-  SUBROUTINE NEBPurify(G,Init_O)
+  SUBROUTINE NEBPurify(G,Init_O,Print_O)
     TYPE(Geometries) :: G
-    LOGICAL,OPTIONAL :: Init_O
+    LOGICAL,OPTIONAL :: Init_O,Print_O
     LOGICAL          :: Init
     INTEGER          :: I,iCLONE,bCLONE,eCLONE,J
     REAL(DOUBLE),DIMENSION(G%Clones+1) :: R2
     REAL(DOUBLE),DIMENSION(3,3) :: U
     REAL(DOUBLE),DIMENSION(3)   :: Center1,Center2
     REAL(DOUBLE) :: Error
+    CHARACTER(LEN=4*DCL) :: Mssg
     IF(PRESENT(INIT_O))THEN
        INIT=.TRUE.
     ELSE
@@ -104,27 +105,11 @@ CONTAINS
        bCLONE=1
        eCLONE=G%Clones+1
     ENDIF
-!
+    !
 !!$    ! Scale the coordinates by Z 
 !!$    DO I=1,G%Clone(0)%NAtms
 !!$       G%Clone(0)%Carts%D(:,I)=G%Clone(0)%Carts%D(:,I)*G%Clone(0)%AtNum%D(I)
 !!$    ENDDO
-
-
-
-    R2(:)=Zero
-    DO iCLONE=bCLONE,eCLONE
-       R2(iCLONE)=Zero
-       DO I=1,G%Clone(0)%NAtms
-          DO J=1,3
-             R2(iCLONE)=R2(iCLONE)+(G%Clone(iCLONE)%Carts%D(J,I)-G%Clone(0)%Carts%D(J,I))**2
-          ENDDO
-       ENDDO
-       R2(iCLONE)=SQRT(R2(iCLONE))/G%Clone(0)%NAtms
-    ENDDO
-    WRITE(*,333)R2(:)
-333  FORMAT('BEFORE CLONE RMSDs = ',100(F8.4,', '))
-
 
 
 #ifdef NEB_DEBUG       
@@ -148,7 +133,7 @@ CONTAINS
        ! Find the transformation that minimizes the RMS deviation between the 
        ! reactants (clone 0), the clones (1-N) and the products (N+1)
        CALL RMSD(G%Clone(0)%NAtms,G%Clone(iCLONE)%Carts%D,G%Clone(0)%Carts%D,  &
-                 1, U, center2, center1, error )! , calc_g, grad)
+            1, U, center2, center1, error )! , calc_g, grad)
 #ifdef NEB_DEBUG       
        WRITE(*,333)1,center1
        WRITE(*,333)2,center2
@@ -189,19 +174,29 @@ CONTAINS
 !!$          G%Clone(iCLONE)%Carts%D(:,I)=G%Clone(iCLONE)%Carts%D(:,I)/G%Clone(iCLONE)%AtNum%D(I)
 !!$       ENDDO
 !!$    ENDDO
-    R2(:)=Zero
-    DO iCLONE=bCLONE,eCLONE
-       R2(iCLONE)=Zero
-       DO I=1,G%Clone(0)%NAtms
-          DO J=1,3
-             R2(iCLONE)=R2(iCLONE)+(G%Clone(iCLONE)%Carts%D(J,I)-G%Clone(0)%Carts%D(J,I))**2
+!    IF(PRESENT(Print_O))THEN
+       R2(:)=Zero
+       DO iCLONE=bCLONE,eCLONE
+          R2(iCLONE)=Zero
+          DO I=1,G%Clone(0)%NAtms
+             DO J=1,3
+                R2(iCLONE)=R2(iCLONE)+(G%Clone(iCLONE)%Carts%D(J,I)-G%Clone(0)%Carts%D(J,I))**2
+             ENDDO
           ENDDO
+          R2(iCLONE)=SQRT(R2(iCLONE))/G%Clone(0)%NAtms
        ENDDO
-       R2(iCLONE)=SQRT(R2(iCLONE))/G%Clone(0)%NAtms
-    ENDDO
-    WRITE(*,33)R2(:)
-33  FORMAT('AFTER CLONE RMSDs = ',100(F8.4,', '))
-!    STOP
+       Mssg=ProcessName('MondoSCF','NEBPurify')//'RMSDs = '
+       DO I=1,G%Clones
+          IF(MOD(I,4)==0)THEN
+             Mssg=TRIM(Mssg)//RTRN//ProcessName() &
+                  //'          '//TRIM(DblToShrtChar(R2(I)))//','
+          ELSE
+             Mssg=TRIM(Mssg)//' '//TRIM(DblToShrtChar(R2(I)))//','
+          ENDIF
+       ENDDO
+       Mssg=TRIM(Mssg)//' '//TRIM(DblToShrtChar(R2(G%Clones+1)))
+       WRITE(*,*)TRIM(Mssg)
+!    ENDIF
   END SUBROUTINE NEBPurify
   !===============================================================================
   ! Project out the force along the band and add spring forces along the band.

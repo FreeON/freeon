@@ -66,6 +66,11 @@ MODULE OptionKeys
   ! Possibly restart from HDFFile density matrix  
   CHARACTER(LEN=*),  PARAMETER :: GUESS_RESTART      ='Restart'
   INTEGER,           PARAMETER :: GUESS_EQ_RESTART   =34344
+  CHARACTER(LEN=*),  PARAMETER :: GUESS_NUGUESS      ='ReGuess'
+  INTEGER,           PARAMETER :: GUESS_EQ_NUGUESS   =45524
+  CHARACTER(LEN=*),  PARAMETER :: GUESS_NEWGEOM      ='ReParse'
+  INTEGER,           PARAMETER :: GUESS_EQ_NEWGEOM   =53223
+  !------------------------------------------------------------------------------
   ! These are Guess options (hardwired) for solving CPSCF equations 
   ! the polarizability
   CHARACTER(LEN=*),  PARAMETER :: CPSCF_OPTION       ='CPSCF'   ! unused for now
@@ -73,12 +78,6 @@ MODULE OptionKeys
   INTEGER,           PARAMETER :: GUESS_EQ_DIPOLE    = 2834032  ! hard wired for now
   INTEGER,           PARAMETER :: GUESS_EQ_NOGUESS   = 4523123  ! hard wired for now
   CHARACTER(LEN=*),  PARAMETER :: RESTART_INFO       ='HDFFile'
-  !------------------------------------------------------------------------------
-  ! Options:Restart=
-  CHARACTER(LEN=*),  PARAMETER :: RESTART_OPTION     ='Restart'   
-  CHARACTER(LEN=*),  PARAMETER :: RESTART_NEWGEOM    ='ReParse'
-  CHARACTER(LEN=*),  PARAMETER :: RESTART_TC2PERT    ='TC2Perturb'
-  CHARACTER(LEN=*),  PARAMETER :: TC2PERT_OLDFOCK    ='OldFockMat'
   !------------------------------------------------------------------------------
   ! Options:InkFok=
   CHARACTER(LEN=*),  PARAMETER :: INKFOCK_OPTION     ='InkFok'

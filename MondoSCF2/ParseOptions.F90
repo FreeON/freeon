@@ -329,6 +329,14 @@ CONTAINS
     !-----------------------------------------------------------------------------------------------
     IF(OptKeyQ(Inp,GUESS_OPTION,GUESS_RESTART))THEN
        Guess=GUESS_EQ_RESTART
+    ELSEIF(OptKeyQ(Inp,GUESS_OPTION,GUESS_NUGUESS))THEN
+       Guess=GUESS_EQ_NUGUESS
+    ELSEIF(OptKeyQ(Inp,GUESS_OPTION,GUESS_NEWGEOM))THEN
+       Guess=GUESS_EQ_NEWGEOM
+    ENDIF
+    IF(Guess==GUESS_EQ_RESTART.OR. &
+       Guess==GUESS_EQ_NUGUESS.OR. &
+       Guess==GUESS_EQ_NEWGEOM )THEN
        IF(.NOT.OptCharQ(Inp,RESTART_INFO,RestartHDF))  &
             CALL MondoHalt(PRSE_ERROR,'Restart requested, but no HDF file specified.')
        ! Check for relative path for HDF, and if relative, expand ...

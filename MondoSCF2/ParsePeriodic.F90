@@ -18,15 +18,10 @@ CONTAINS
     TYPE(PBCInfo)    :: PBC
     INTEGER          :: I,GBeg,GEnd
 !-----------------------------------------------------------------------!
-!   If we are restarting, just use values read from HDF ...
+    ! If we are restarting or reguessing, just use values read from HDF ...
+    IF(O%Guess==GUESS_EQ_RESTART.OR.O%Guess==GUESS_EQ_NUGUESS)RETURN
+    ! ... otherwise, we are reading in new PBC info
     CALL OpenASCII(N%IFile,Inp)
-    IF(O%Guess==GUESS_EQ_RESTART .AND. .NOT.OptKeyQ(Inp,RESTART_OPTION,RESTART_NEWGEOM))THEN
-       CLOSE(Inp)
-       RETURN
-    ENDIF
-    IF(O%Guess==GUESS_EQ_RESTART .AND. OptKeyQ(Inp,RESTART_OPTION,RESTART_NEWGEOM)) THEN
-!       WRITE(*,*)' REPARSING PERIODIC ON RESTART'
-    ENDIF
     CALL New(PBC)
     CALL LoadPeriodicOptions(PBC)
     CALL LoadLattice(PBC)
@@ -43,7 +38,6 @@ CONTAINS
        G%Clone(I)%PBC=PBC
        CALL CalculateCoordArrays(G%Clone(I))
     ENDDO
-!   
   END SUBROUTINE LoadPeriodic
 !=========================================================================
 !

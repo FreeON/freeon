@@ -20,19 +20,19 @@ CONTAINS
     TYPE(Dynamics)   :: D
     TYPE(Geometries) :: G
     TYPE(Int_Vect)   :: CurrentState
-    INTEGER          :: I,iCLONE,HDFFileID,J
+    INTEGER          :: I,iCLONE,HDFFileID,J,IGeo
     REAL(DOUBLE),DIMENSION(3,3) :: U
     REAL(DOUBLE),DIMENSION(3)   :: Center1,Center2
     REAL(DOUBLE) :: Error,R2
     !--------------------------------------------------------------------------------------------------------------!
     CALL OpenASCII(N%IFile,Inp)
-!   NEB
+    !   NEB
     IF(O%Grad==GRAD_TS_SEARCH_NEB)THEN
        ! Parse for the number of clones to use in NEB
        IF(.NOT.OptIntQ(Inp,CLONES,G%Clones))THEN
           CALL MondoHalt(PRSE_ERROR,'Doing NEB, did not find input number of beads (clones) to use ')
        ENDIF
-       IF(O%Guess==GUESS_EQ_RESTART)THEN
+       IF(O%Guess==GUESS_EQ_RESTART.OR.O%Guess==GUESS_EQ_NUGUESS)THEN
           ! Overide any potential change in the number of clones ...
           HDFFileID=OpenHDF(N%RFile)
           HDF_CurrentID=HDFFileID
@@ -41,50 +41,74 @@ CONTAINS
        ENDIF
        ! Allocate Clones+2 geometries for NEB
        ALLOCATE(G%Clone(0:G%Clones+1))
-       ! Get left and right endpoints
-       IF(O%EndPts==ENDPOINTS_FROM_HDF)THEN            
-          CALL New(CurrentState,3)
-          ! Get the left endpoint from reactants HDF
-          HDFFileID=OpenHDF(N%ReactantsFile)
-          HDF_CurrentID=HDFFileID
-          ! Get the current reactants state 
-          CALL Get(CurrentState,'current_state')
-          HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(1)))
-          CALL Get(G%Clone(0),TAG_O=GTag(CurrentState))
-          CALL CloseHDFGroup(HDF_CurrentID)
-          CALL CloseHDF(HDFFileID)          
-          ! Get the right endpoint from products HDF
-          HDFFileID=OpenHDF(N%ProductsFile)
-          HDF_CurrentID=HDFFileID
-          ! Get the current reactants state 
-          CALL Get(CurrentState,'current_state')
-          HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(1)))
-          CALL Get(G%Clone(G%Clones+1),TAG_O=GTag(CurrentState))
-          CALL CloseHDFGroup(HDF_CurrentID)
-          CALL CloseHDF(HDFFileID)          
-          CALL Delete(CurrentState)
-          ! CALL PPrint(G%Clone(0),Unit_O=6)
-          ! CALL PPrint(G%Clone(G%Clones+1),Unit_O=6)
-       ELSE 
-          ! Read in the reactants geometry from input
-          CALL ParseCoordinates(REACTANTS_BEGIN,REACTANTS_END,G%Clone(0),O%Coordinates)          
-          ! Read in the products geometry from input
-          CALL ParseCoordinates(PRODUCTS_BEGIN,PRODUCTS_END,G%Clone(G%Clones+1),O%Coordinates)  
-       ENDIF
-       IF(O%Guess==GUESS_EQ_RESTART)THEN
-          ! Get midpoints from HDF
+       IF(O%Guess==GUESS_EQ_RESTART.OR.O%Guess==GUESS_EQ_NUGUESS)THEN
+          ! Get all the images, including endpoints from HDF
           HDFFileID=OpenHDF(N%RFile)
           HDF_CurrentID=HDFFileID
-          DO iCLONE=1,G%Clones
-             HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
-             CALL Get(G%Clone(iCLONE),TAG_O=GTag(O%RestartState))
-             CALL CloseHDFGroup(HDF_CurrentID)
+          ! Get and print the begining state
+          HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #0")
+          CALL Get(G%Clone(0))
+          CALL CloseHDFGroup(HDF_CurrentID)
+          CALL PPrint(G%Clone(0),FileName_O=N%GFile,Unit_O=Geo, &
+               PrintGeom_O=O%GeomPrint,Clone_O=0)
+          ! Get and print the end state
+          HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(G%Clones+1)))
+          CALL Get(G%Clone(G%Clones+1))
+          CALL CloseHDFGroup(HDF_CurrentID)
+          CALL PPrint(G%Clone(G%Clones+1),FileName_O=N%GFile,Unit_O=Geo, &
+               PrintGeom_O=O%GeomPrint,Clone_O=G%Clones+1)
+          ! Get and print the midpoints, past and present
+          CALL New(CurrentState,3)
+          CurrentState%I=O%RestartState%I
+          DO IGeo=1,O%RestartState%I(3)
+             CurrentState%I(3)=IGeo
+             DO iCLONE=1,G%Clones
+                HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
+                CALL Get(G%Clone(iCLONE),TAG_O=GTag(CurrentState))
+                CALL PPrint(G%Clone(iCLONE),FileName_O=N%GFile,Unit_O=Geo, &
+                     PrintGeom_O=O%GeomPrint,Clone_O=iCLONE)
+                CALL CloseHDFGroup(HDF_CurrentID)
+             ENDDO
           ENDDO
+          CALL Delete(CurrentState)
           CALL CloseHDF(HDFFileID)          
-          ! DO I=0,G%Clones+1
-          !    CALL PPrint(G%Clone(I),Unit_O=6)
-          ! ENDDO
-       ELSE
+       ELSE ! Get some endpoints 
+          IF(O%EndPts==ENDPOINTS_FROM_HDF)THEN            
+             CALL New(CurrentState,3)
+             ! Get the left endpoint from reactants HDF
+             HDFFileID=OpenHDF(N%ReactantsFile)
+             HDF_CurrentID=HDFFileID
+             ! Get the current reactants state 
+             CALL Get(CurrentState,'current_state')
+             HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(1)))
+             CALL Get(G%Clone(0),TAG_O=GTag(CurrentState))
+             CALL CloseHDFGroup(HDF_CurrentID)
+             CALL CloseHDF(HDFFileID)          
+             ! Get the right endpoint from products HDF
+             HDFFileID=OpenHDF(N%ProductsFile)
+             HDF_CurrentID=HDFFileID
+             ! Get the current reactants state 
+             CALL Get(CurrentState,'current_state')
+             HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(1)))
+             CALL Get(G%Clone(G%Clones+1),TAG_O=GTag(CurrentState))
+             CALL CloseHDFGroup(HDF_CurrentID)
+             CALL CloseHDF(HDFFileID)          
+             CALL Delete(CurrentState)
+             CALL PPrint(G%Clone(0),FileName_O=N%GFile,Unit_O=Geo, &
+                  PrintGeom_O=O%GeomPrint,Clone_O=0)
+             CALL PPrint(G%Clone(G%Clones+1),FileName_O=N%GFile,Unit_O=Geo, &
+                  PrintGeom_O=O%GeomPrint,Clone_O=G%Clones+1)
+          ELSE 
+             ! Read in the reactants geometry from input
+             CALL ParseCoordinates(REACTANTS_BEGIN,REACTANTS_END,G%Clone(0),O%Coordinates)          
+             ! Read in the products geometry from input
+             CALL ParseCoordinates(PRODUCTS_BEGIN,PRODUCTS_END,G%Clone(G%Clones+1),O%Coordinates)  
+
+!             CALL PPrint(G%Clone(0),FileName_O=N%GFile,Unit_O=Geo, &
+!                  PrintGeom_O=O%GeomPrint,Clone_O=0)
+!             CALL PPrint(G%Clone(G%Clones+1),FileName_O=N%GFile,Unit_O=Geo, &
+!                  PrintGeom_O=O%GeomPrint,Clone_O=G%Clones+1)
+          ENDIF
           ! Purify R and P images ...
           CALL NEBPurify(G,Init_O=.TRUE.)
           ! ... then interpolate ...
@@ -94,10 +118,10 @@ CONTAINS
              CALL New(G%Clone(iCLONE))
           ENDDO
           CALL NEBInit(G)
-          ! .. and finally purify the NEB images.
+          ! .. and purify the NEB images ...
           CALL NEBPurify(G)
-     ENDIF
-!   Parrelel Rep
+       ENDIF
+       !  Parrelel Rep
     ELSEIF(O%Grad==GRAD_DO_DYNAMICS.AND.D%Parallel_Rep)THEN
        CALL MondoHalt(PRSE_ERROR,'Parralel Rep not implimented')
        ! Parse for the number of clones to use in Parallel Rep
@@ -107,31 +131,37 @@ CONTAINS
        ALLOCATE(G%Clone(1:G%Clones))
        IF(O%Guess==GUESS_EQ_RESTART)THEN
        ELSE         
-       ENDIF 
-!   Not doing any fancy shmancy with clones ...
+       ENDIF
+       !   Not doing any fancy shmancy with clones ...
     ELSE 
-       IF(O%Guess==GUESS_EQ_RESTART .AND. .NOT. OptKeyQ(Inp,RESTART_OPTION,RESTART_NEWGEOM))THEN      
+       IF(O%Guess==GUESS_EQ_RESTART.OR.O%Guess==GUESS_EQ_NUGUESS)THEN
           HDFFileID=OpenHDF(N%RFile)
           HDF_CurrentID=HDFFileID
           CALL Get(G%Clones,'clones')
           ALLOCATE(G%Clone(1:G%Clones))          
-          DO iCLONE=1,G%Clones
-             HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
-             CALL Get(G%Clone(iCLONE),TAG_O=GTag(O%RestartState))
-             CALL CloseHDFGroup(HDF_CurrentID)
+          CALL New(CurrentState,3)
+          CurrentState%I=O%RestartState%I
+          DO IGeo=1,O%RestartState%I(3)
+             DO iCLONE=1,G%Clones
+                HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
+                CurrentState%I(3)=IGeo
+                CALL Get(G%Clone(iCLONE),TAG_O=GTag(CurrentState))
+                CALL PPrint(G%Clone(iCLONE),FileName_O=N%GFile,Unit_O=Geo, &
+                            PrintGeom_O=O%GeomPrint,Clone_O=iCLONE)
+                CALL CloseHDFGroup(HDF_CurrentID)
+             ENDDO
           ENDDO
+          CALL Delete(CurrentState)
           CALL CloseHDF(HDFFileID)          
        ELSE       
           G%Clones=1
           ALLOCATE(G%Clone(1))
           CALL ParseCoordinates(GEOMETRY_BEGIN,GEOMETRY_END,G%Clone(1),O%Coordinates)
-          IF(O%Guess==GUESS_EQ_RESTART .AND. OptKeyQ(Inp,RESTART_OPTION,RESTART_NEWGEOM)) THEN
-!             WRITE(*,*)' REPARSING GEOMETRY ON RESTART'
-          ENDIF
+!          CALL PPrint(G%Clone(iCLONE),FileName_O=N%GFile,Unit_O=Geo,PrintGeom_O=O%GeomPrint)
        ENDIF
     ENDIF
     CLOSE(UNIT=Inp,STATUS='KEEP')
-!
+    !
   END SUBROUTINE LoadCoordinates
 !------------------------------------------------------------------------!
 !

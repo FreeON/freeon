@@ -91,6 +91,17 @@ CONTAINS
     ENDDO
     CALL New(DM,(/MaxAtoms,MaxBloks,MaxNon0s/))
     CALL Put(G%Clones,'clones')
+    ! If we are doing NEB, then put the endpoints to HDF as well
+    IF(SIZE(G%Clone)==G%Clones+2)THEN
+       ! All thats going into the endpoints is the geometry
+       HDF_CurrentID=InitHDFGroup(HDFFileID,"Clone #0")
+       CALL Put(G%Clone(0))
+       CALL CloseHDFGroup(HDF_CurrentID)
+       HDF_CurrentID=InitHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(G%Clones+1)))
+       CALL Put(G%Clone(G%Clones+1))
+       CALL CloseHDFGroup(HDF_CurrentID)
+    ENDIF
+    !
     DO iCLONE=1,G%Clones
        HDF_CurrentID=InitHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
        ! Create data space for grouped objects to preserve structure of HDF5 
@@ -206,46 +217,28 @@ CONTAINS
     INTEGER          :: iGEOMem
     CHARACTER(LEN=DCL) :: chGEO
     TYPE(CRDS)       :: GMLoc,GMAux
-    !
     !-----------------------------------------------------------------!
     ! it is supposed that the number of clones did not change at restart
-    !
+    ! 
     iGEOMem=11
     LastGeo=O%RestartState%I(3)
     LastBas=O%RestartState%I(2)
     IGEOStart=MAX(LastGeo-iGEOMem,2)
     !
-    NatmsLoc=G%Clone(1)%Natms
-    NCart=3*NatmsLoc
-    !
     DO iCLONE=1,G%Clones
       ! Reachive very first geometry, as it serves 
       ! as a reference for PBC optimizations
-      CALL RearchIGEO(N,O,G,iCLONE,1,LastGeo) 
+      CALL ReArchIGEO(N,O,G,iCLONE,1,LastGeo) 
       ! Reachive GMLoc-s 
       DO iGEO=iGEOStart,LastGeo
-        CALL RearchIGEO(N,O,G,iCLONE,iGEO,LastGeo)
+        CALL ReArchIGEO(N,O,G,iCLONE,iGEO,LastGeo)
       ENDDO
-!      ! Rearchive CS 
-!      HDFFileID=OpenHDF(N%RFile)
-!      HDF_CurrentID=OpenHDFGroup(HDFFileID, &
-!                    "Clone #"//TRIM(IntToChar(iCLONE)))
-!        CALL Get(CS,Tag_O=IntToChar(LastBAS))
-!      CALL CloseHDFGroup(HDF_CurrentID)
-!      CALL CloseHDF(HDFFileID)
-!      HDFFileID=OpenHDF(N%HFile)
-!      HDF_CurrentID=OpenHDFGroup(HDFFileID, &
-!                    "Clone #"//TRIM(IntToChar(iCLONE)))
-!        CALL Put(CS,Tag_O=IntToChar(LastBAS))
-!      CALL CloseHDFGroup(HDF_CurrentID)
-!      CALL CloseHDF(HDFFileID)
-!      CALL Delete(CS)
     ENDDO
   END SUBROUTINE GeomReArchive
 !
 !---------------------------------------------------------------
 !
-   SUBROUTINE RearchIGEO(N,O,G,iCLONE,iGEO,LastGeo)
+   SUBROUTINE ReArchIGEO(N,O,G,iCLONE,iGEO,LastGeo)
      TYPE(FileNames)  :: N
      TYPE(Options)    :: O
      TYPE(Geometries) :: G    
@@ -260,20 +253,20 @@ CONTAINS
      HDFFileID=OpenHDF(N%RFile)
      HDF_CurrentID=OpenHDFGroup(HDFFileID, &
                    "Clone #"//TRIM(IntToChar(iCLONE)))
-       chGEO=IntToChar(iGeo)
-       CALL Get(GMLoc,chGEO)
+     chGEO=IntToChar(iGeo)
+     CALL Get(GMLoc,chGEO)
      CALL CloseHDFGroup(HDF_CurrentID)
      CALL CloseHDF(HDFFileID)
      !
      HDFFileID=OpenHDF(N%HFile)
      HDF_CurrentID=OpenHDFGroup(HDFFileID, &
                    "Clone #"//TRIM(IntToChar(iCLONE)))
-       chGEO=IntToChar(iGEO)
-       CALL Put(GMLoc,chGEO)
+     chGEO=IntToChar(iGEO)
+     CALL Put(GMLoc,chGEO)
      CALL CloseHDFGroup(HDF_CurrentID)
      CALL CloseHDF(HDFFileID)
      CALL Delete(GMLoc)
-   END SUBROUTINE RearchIGEO
+   END SUBROUTINE ReArchIGEO
 !
 !---------------------------------------------------------------
 !
@@ -372,7 +365,7 @@ CONTAINS
     TYPE(Options)  :: O
     INTEGER        :: LastGEO,LastBAS
     !
-    IF(O%Guess==GUESS_EQ_RESTART) THEN
+    IF(O%Guess==GUESS_EQ_RESTART.OR.O%Guess==GUESS_EQ_NUGUESS) THEN
       LastBAS=O%RestartState%I(2)
       LastGEO=O%RestartState%I(3)
     ELSE
@@ -393,7 +386,7 @@ CONTAINS
     ! Initialize HDF files for clones
     CALL InitClones(C%Nams,C%MPIs,C%Sets,C%Geos)
     ! Do rearchivation if requested
-    IF(C%Opts%Guess==GUESS_EQ_RESTART) THEN
+    IF(C%Opts%Guess==GUESS_EQ_RESTART.OR.C%Opts%Guess==GUESS_EQ_NUGUESS)THEN
       CALL GeomReArchive(C%Nams,C%Opts,C%Geos)
     ENDIF
     ! Set initial state vector
@@ -480,17 +473,13 @@ CONTAINS
      HDFFileID=OpenHDF(HFileIn)
      HDF_CurrentID= &
        OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
+
+     WRITE(*,*)' CLONE = ',ICLONE
      !
      DO IGeom=IStart,iGEO
+       WRITE(*,*)' iGEOM = ',IGEOM
        ICount=IGeom-IStart+1
        CALL Get(PBC,Tag_O=TRIM(IntToChar(IGeom)))
-       !!!!
-!       WRITE(*,*) 'WARNING! Hardwired cleaning of lattice forces in CollectPast'
-!       WRITE(Out,*) 'WARNING! Hardwired cleaning of lattice forces in CollectPast'
-!         PBC%LatFrc%D(2:3,1)=Zero
-!         PBC%LatFrc%D(3,2)=Zero
-!         CALL Put(PBC,Tag_O=TRIM(IntToChar(IGeom)))
-!       !!!!
        L=NCartS
        DO K=1,3
          DO J=1,3

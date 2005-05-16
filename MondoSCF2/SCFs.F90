@@ -602,6 +602,14 @@ CONTAINS
           O%Guess=0
           S%Previous%I     = S%Current%I
           S%Action%C(1)    = SCF_SUPERPOSITION
+       ELSEIF(O%Guess==GUESS_EQ_NUGUESS)THEN
+          O%Guess=0
+          S%Previous%I     = O%RestartState%I
+          S%Action%C(1)    = SCF_SUPERPOSITION
+       ELSEIF(O%Guess==GUESS_EQ_NEWGEOM)THEN
+          O%Guess=0
+          S%Previous%I  = O%RestartState%I
+          S%Action%C(1) = SCF_EXTRAPOLATE
        ELSEIF(O%Guess==GUESS_EQ_RESTART)THEN
           IF(S%SameBasis .AND. .NOT. S%SameGeom) THEN
              O%Guess=0
@@ -732,7 +740,7 @@ CONTAINS
     SameLatt=.TRUE.
     S%SameBasis = .TRUE.
     !
-    IF(O%Guess==GUESS_EQ_RESTART) THEN
+    IF(O%Guess==GUESS_EQ_RESTART.OR.O%Guess==GUESS_EQ_NUGUESS)THEN
        DO iCLONE=1,G%Clones
           HDFFileID=OpenHDF(N%HFile)
           HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
@@ -823,6 +831,7 @@ CONTAINS
     IF(O%Guess==GUESS_EQ_CORE)     DoPFFT=.TRUE.
     IF(O%Guess==GUESS_EQ_SUPR)     DoPFFT=.TRUE.
     IF(O%Guess==GUESS_EQ_RESTART)  DoPFFT=.TRUE.
+    IF(O%Guess==GUESS_EQ_NUGUESS)  DoPFFT=.TRUE.
     IF(.NOT. S%SameLatt)           DoPFFT=.TRUE.
     IF(.NOT. S%SameBasis)          DoPFFT=.TRUE.
 !
@@ -830,9 +839,12 @@ CONTAINS
        CALL Invoke('MakePFFT',N,S,M)
     ENDIF
 !
-    IF(O%Guess==GUESS_EQ_RESTART .AND.  .NOT. S%SameGeom) THEN
+    IF((O%Guess==GUESS_EQ_RESTART .AND.(.NOT.S%SameGeom)) &
+       .OR.O%Guess==GUESS_EQ_NEWGEOM)THEN
+       ! Make previous geometrys S matrix
        S%Action%C(1)='RestartGeomSwitch'
        CALL Invoke('MakeS',N,S,M)
+       ! now make current geometrys S matrix
        S%Action%C(1)='OneElectronMatrices'
        CALL Invoke('MakeS',N,S,M)
     ELSE
