@@ -73,15 +73,15 @@ CONTAINS
   END SUBROUTINE ParaInitRho
 
   !===============================================================================
-  RECURSIVE FUNCTION CountRhoLeafNode(RhoTreeNode)
+  RECURSIVE FUNCTION CountRhoLeafNode(RhoTreeNode) RESULT(LeafNode) 
     TYPE(RhoNode), POINTER :: RhoTreeNode
-    INTEGER:: CountRhoLeafNode
-    CountRhoLeafNode = 0
+    INTEGER :: LeafNode
+    LeafNode = 0
     IF(RhoTreeNode%Leaf) THEN
-       CountRhoLeafNode = 1
+       LeafNode = 1
     ELSE
-       CountRhoLeafNode = CountRhoLeafNode(RhoTreeNode%Descend) + &
-            CountRhoLeafNode(RhoTreeNode%Descend%Travrse)
+       LeafNode = CountRhoLeafNode(RhoTreeNode%Descend) + &
+                  CountRhoLeafNode(RhoTreeNode%Descend%Travrse)
     ENDIF
   END FUNCTION CountRhoLeafNode
   !===============================================================================
@@ -1166,11 +1166,10 @@ CONTAINS
        CalLeavesTm = RecurCalLeavesTm(CubeRoot)
     ENDIF
   END FUNCTION CalLeavesTm
-
   !===============================================================================
-  RECURSIVE FUNCTION RecurCalLeavesTm(Cube)
+  RECURSIVE FUNCTION RecurCalLeavesTm(Cube) RESULT(LeavesTm)
     TYPE(CubeNode),Pointer :: Cube
-    REAL(DOUBLE)::RecurCalLeavesTm,OverlapV,CubeV
+    REAL(DOUBLE)::LeavesTm,OverlapV,CubeV
     REAL(DOUBLE)::C1,C2,C3,NC1,NC2,NC3,LE(3),UE(3),P(3),Q(3),Ovlap(3)
     INTEGER::I
 
@@ -1186,13 +1185,12 @@ CONTAINS
        IF(C1 >= BoxPoint(1) .AND. C1 < BoxPoint(4) .AND. &
             C2 >= BoxPoint(2) .AND. C2 < BoxPoint(5) .AND. &
             C3 >= BoxPoint(3) .AND. C3 < BoxPoint(6)) THEN
-          RecurCalLeavesTm = Cube%LayGridCost
+          LeavesTm = Cube%LayGridCost
        ELSE
-          RecurCalLeavesTm = 0.0D0
+          LeavesTm = 0.0D0
        ENDIF
 #endif
 #ifdef FractionalConsideration
-
        IF(Cube%Leaf) THEN
           !! two possibilities: This leaf partially overlaps with BoxPoint or not!
           LE(1:3) = Cube%Box%BndBox(1:3,1)
@@ -1204,7 +1202,7 @@ CONTAINS
           IF(UE(1) <= P(1) .OR. LE(1) >= Q(1) .OR. &
                UE(2) <= P(2) .OR. LE(2) >= Q(2) .OR. &
                UE(3) <= P(3) .OR. LE(3) >= Q(3)) THEN
-             RecurCalLeavesTm = 0.0D0
+             LeavesTm = 0.0D0
           ELSE 
              DO I = 1, 3
                 !! I-direction Overlap
@@ -1225,23 +1223,23 @@ CONTAINS
              OverlapV = Ovlap(1)*Ovlap(2)*Ovlap(3)
              IF(OverlapV <= 0.0D0) STOP 'ERROR: OverlapV is negative!'
              CubeV = (UE(1)-LE(1))*(UE(2)-LE(2))*(UE(3)-LE(3))
-             RecurCalLeavesTm = (Cube%LayGridCost)*OverlapV/CubeV
+             LeavesTm = (Cube%LayGridCost)*OverlapV/CubeV
           ENDIF
 #endif
        ELSE
-          RecurCalLeavesTm = RecurCalLeavesTm(Cube%Descend)+&
-               RecurCalLeavesTm(Cube%Descend%Travrse)
+          LeavesTm = RecurCalLeavesTm(Cube%Descend)+&
+                     RecurCalLeavesTm(Cube%Descend%Travrse)
        ENDIF
      END FUNCTION RecurCalLeavesTm
 
      !===============================================================================
-     RECURSIVE FUNCTION LeavesTmCount(Cube)
+     RECURSIVE FUNCTION LeavesTmCount(Cube) RESULT(TmCount)
        TYPE(CubeNode), POINTER    :: Cube
-       REAL(DOUBLE)               :: LeavesTmCount
+       REAL(DOUBLE)               :: TmCount
        IF(Cube%Leaf)THEN
-          LeavesTmCount=Cube%LayGridCost
+          TmCount=Cube%LayGridCost
        ELSE
-          LeavesTmCount=LeavesTmCount(Cube%Descend)+LeavesTmCount(Cube%Descend%Travrse)
+          TmCount=LeavesTmCount(Cube%Descend)+LeavesTmCount(Cube%Descend%Travrse)
        ENDIF
      END FUNCTION LeavesTmCount
 
