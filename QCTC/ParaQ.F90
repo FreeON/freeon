@@ -157,8 +157,8 @@ ENDIF
                         MONDO_COMM,IErr)
     CALL MPI_AllGatherV(Tmp%Lndx%I(1),ENExpt,MPI_INTEGER,Rho%Lndx%I(1),Csize%I(0),disp%I(0),MPI_INTEGER, &
                         MONDO_COMM,IErr)
-    CALL MPI_AllGatherV(Tmp%Expt%d(1),ENExpt,MPI_DOUBLE_PRECISION,Rho%Expt%d(1),Csize%I(0),disp%I(0),MPI_DOUBLE_PRECISION, &
-                        MONDO_COMM,IErr)
+    CALL MPI_AllGatherV(Tmp%Expt%d(1),ENExpt,MPI_DOUBLE_PRECISION,Rho%Expt%d(1),Csize%I(0),disp%I(0), &
+                        MPI_DOUBLE_PRECISION,MONDO_COMM,IErr)
     Rho%NQ%i(NewNExpt) = TotNNDist
     Rho%Lndx%i(NewNExpt) = Tmp%Lndx%i(Tmp%NExpt)
     Rho%Expt%D(NewNExpt) = Tmp%expt%d(Tmp%NExpt)
@@ -182,9 +182,12 @@ endif
     do i = 1, nprc-1
       disp%i(i) = disp%i(i-1)+csize%i(i-1)
     enddo
-    call mpi_allgatherv(Tmp%Qx%d(1),ENDist,MPI_DOUBLE_PRECISION,Rho%Qx%d(1),CSize%I(0),disp%i(0),MPI_DOUBLE_PRECISION,MONDO_COMM,IErr)
-    call mpi_allgatherv(Tmp%Qy%d(1),ENDist,MPI_DOUBLE_PRECISION,Rho%Qy%d(1),CSize%I(0),disp%i(0),MPI_DOUBLE_PRECISION,MONDO_COMM,IErr)
-    call mpi_allgatherv(Tmp%Qz%d(1),ENDist,MPI_DOUBLE_PRECISION,Rho%Qz%d(1),CSize%I(0),disp%i(0),MPI_DOUBLE_PRECISION,MONDO_COMM,IErr)
+    call mpi_allgatherv(Tmp%Qx%d(1),ENDist,MPI_DOUBLE_PRECISION,Rho%Qx%d(1), &
+                        CSize%I(0),disp%i(0),MPI_DOUBLE_PRECISION,MONDO_COMM,IErr)
+    call mpi_allgatherv(Tmp%Qy%d(1),ENDist,MPI_DOUBLE_PRECISION,Rho%Qy%d(1), &
+                        CSize%I(0),disp%i(0),MPI_DOUBLE_PRECISION,MONDO_COMM,IErr)
+    call mpi_allgatherv(Tmp%Qz%d(1),ENDist,MPI_DOUBLE_PRECISION,Rho%Qz%d(1), &
+                       CSize%I(0),disp%i(0),MPI_DOUBLE_PRECISION,MONDO_COMM,IErr)
 
     CALL MPI_AllGather(NNDist,1,MPI_INTEGER,CSize%I(0),1,MPI_INTEGER,MONDO_COMM,IErr)
 
