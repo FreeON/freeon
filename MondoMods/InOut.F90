@@ -1150,7 +1150,7 @@ CONTAINS
                 CALL Get(GM%AtNam     ,'atomname'     ,Tag_O=Tag_O)
                 CALL Get(GM%AtMMTyp   ,'mmtype'       ,Tag_O=Tag_O)
                 CALL Get(GM%AtMss     ,'atomicmass'   ,Tag_O=Tag_O)
-                CALL Get(GM%PBC,Tag_O=Tag_O)
+                CALL Get(GM%PBC                       ,Tag_O=Tag_O)
                 CALL Get(GM%BndBox    ,'boundingbox'  ,Tag_O=Tag_O)
                 CALL Get(GM%CConstrain,'constraints'  ,Tag_O=Tag_O)
                 CALL Get(GM%Carts     ,'cartesians'   ,Tag_O=Tag_O)
@@ -1158,7 +1158,11 @@ CONTAINS
                 CALL Get(GM%Velocity  ,'Velocity'     ,Tag_O=Tag_O)
                 CALL Get(GM%Gradients ,'Gradients'    ,Tag_O=Tag_O)
                 CALL Get(GM%Displ     ,'Displ'        ,Tag_O=Tag_O)
-                CALL Get(GM%PBCDispl  ,Tag_O='PBCDispl'//TRIM(Tag_O))
+                IF(PRESENT(Tag_O))THEN
+                   CALL Get(GM%PBCDispl  ,Tag_O='PBCDispl'//TRIM(Tag_O))
+                ELSE
+                   CALL Get(GM%PBCDispl  ,Tag_O='PBCDispl')
+                ENDIF
                 CALL Get(GM%LatticeOnly,'LatticeOnly' ,Tag_O=Tag_O)
                 CALL Get(GM%AltCount  ,'AltCount'     ,Tag_O=Tag_O)
               END SUBROUTINE Get_CRDS
@@ -1187,7 +1191,7 @@ CONTAINS
                 CALL Put(GM%AtNam     ,'atomname'     ,Tag_O=Tag_O)
                 CALL Put(GM%AtMMTyp   ,'mmtype'       ,Tag_O=Tag_O)
                 CALL Put(GM%AtMss     ,'atomicmass'   ,Tag_O=Tag_O)
-                CALL Put(GM%PBC,Tag_O=Tag_O)
+                CALL Put(GM%PBC                       ,Tag_O=Tag_O)
                 CALL Put(GM%BndBox    ,'boundingbox'  ,Tag_O=Tag_O)
                 CALL Put(GM%CConstrain,'constraints'  ,Tag_O=Tag_O)
                 CALL Put(GM%Carts     ,'cartesians'   ,Tag_O=Tag_O)
@@ -1195,7 +1199,11 @@ CONTAINS
                 CALL Put(GM%Velocity  ,'Velocity'     ,Tag_O=Tag_O)
                 CALL Put(GM%Gradients ,'Gradients'    ,Tag_O=Tag_O)
                 CALL Put(GM%Displ     ,'Displ'        ,Tag_O=Tag_O)
-                CALL Put(GM%PBCDispl  ,Tag_O='PBCDispl'//TRIM(Tag_O))
+                IF(PRESENT(Tag_O))THEN
+                   CALL Put(GM%PBCDispl  ,Tag_O='PBCDispl'//TRIM(Tag_O))
+                ELSE
+                   CALL Put(GM%PBCDispl  ,Tag_O='PBCDispl')
+                ENDIF
                 CALL Put(GM%LatticeOnly,'LatticeOnly' ,Tag_O=Tag_O)
                 CALL Put(GM%AltCount  ,'AltCount'     ,Tag_O=Tag_O)
               END SUBROUTINE Put_CRDS
@@ -1948,33 +1956,13 @@ CONTAINS
                 INTEGER                              :: I,N,II,NN
                 TYPE(CHR10_VECT) :: A
                 CHARACTER(LEN=*),         INTENT(IN) :: VarName
-                CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Tag_O
+                CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Tag_O                
                 TYPE(META_DATA)                      :: Meta
-
-#ifdef OLD_CHR10_VECT
-                INTEGER,DIMENSION(DCL)   :: B  !=ICHAR(' ')
-#else
                 INTEGER,ALLOCATABLE :: B(:)
                 INTEGER :: RunInd,BufSize
-#endif
-
 #ifdef PARALLEL
                 IF(MyId==ROOT)THEN
 #endif
-
-#ifdef OLD_CHR10_VECT
-                   NN=SIZE(A%C)
-                   DO II = 1, NN
-                      N=LEN(A%C(II))
-                      IF(N>DCL) CALL Halt('Static strings overrun in Put_CHR10_VECT')
-                      DO I=1,N; B(I)=ICHAR(A%C(II)(I:I)); ENDDO
-                         Meta=SetMeta(NameTag(VarName,TRIM(IntToChar(II))// &
-                              TRIM(Tag_O)),NATIVE_INT32,N,.FALSE.)
-                         CALL OpenData(Meta,.TRUE.)
-                         CALL WriteIntegerVector(Meta,B)
-                         CALL CloseData(Meta)
-                   ENDDO
-#else
                    NN = SIZE(A%C)
                    BufSize = 1
                    DO II = 1, NN
@@ -1997,14 +1985,18 @@ CONTAINS
                      RunInd = RunInd + 1
                    ENDDO
                    IF(BufSize /= RunInd - 1) STOP 'ERR: Index problem in Put_CHR10_VECT !'
-                   CALL Put(BufSize,NameTag(VarName,TRIM(IntToChar(0))//TRIM(Tag_O)))
-                   Meta=SetMeta(NameTag(VarName,TRIM(IntToChar(1))// &
-                        TRIM(Tag_O)),NATIVE_INT32,BufSize,.FALSE.)
+                   IF(PRESENT(Tag_O))THEN
+                      CALL Put(BufSize,NameTag(VarName,TRIM(IntToChar(0))//TRIM(Tag_O)))
+                      Meta=SetMeta(NameTag(VarName,TRIM(IntToChar(1))// &
+                           TRIM(Tag_O)),NATIVE_INT32,BufSize,.FALSE.)
+                   ELSE
+                      CALL Put(BufSize,NameTag(VarName,TRIM(IntToChar(0))))
+                      Meta=SetMeta(NameTag(VarName,TRIM(IntToChar(1))),NATIVE_INT32,BufSize,.FALSE.)
+                   ENDIF
                    CALL OpenData(Meta,.TRUE.)
                    CALL WriteIntegerVector(Meta,B)
                    CALL CloseData(Meta)
                    DEALLOCATE(B)
-#endif
 #ifdef PARALLEL
                    ENDIF
 #endif
@@ -2016,40 +2008,25 @@ CONTAINS
                    TYPE(CHR10_VECT),           INTENT(INOUT) :: A
                    CHARACTER(LEN=*),         INTENT(IN)    :: VarName
                    CHARACTER(LEN=*),OPTIONAL,INTENT(IN)    :: Tag_O
-#ifdef OLD_CHR10_VECT
-                   INTEGER,DIMENSION(DEFAULT_CHR_LEN)      :: B !=ICHAR(' ')
-#else
                    INTEGER,ALLOCATABLE :: B(:)
                    INTEGER :: RunInd,StrInd,StrLen,BufSize
                    CHARACTER(LEN=DCL) :: TEMP
-#endif
                    TYPE(META_DATA)                         :: Meta
-
-#ifdef OLD_CHR10_VECT
-#else
-                   CALL Get(BufSize,NameTag(VarName,TRIM(IntToChar(0))//TRIM(Tag_O)))
-#endif
-
+                   IF(PRESENT(Tag_O))THEN
+                      CALL Get(BufSize,NameTag(VarName,TRIM(IntToChar(0))//TRIM(Tag_O)))
+                   ELSE
+                      CALL Get(BufSize,NameTag(VarName,TRIM(IntToChar(0))))
+                   ENDIF
 #ifdef PARALLEL 
 
                    IF(MyId==ROOT)THEN
 #endif 
-
-#ifdef OLD_CHR10_VECT
-                      NN=SIZE(A%C)
-                      DO II = 1, NN
-                        N=LEN(A%C(II))
-                        IF(N>DEFAULT_CHR_LEN) CALL Halt('Static strings overrun in Get_CHR10_VECT')
-                        Meta=SetMeta(NameTag(VarName,TRIM(IntToChar(II))//TRIM(Tag_O)),NATIVE_INT32,N,.FALSE.)
-
-                        CALL OpenData(Meta)
-                        CALL ReadIntegerVector(Meta,B(1))
-                        CALL CloseData(Meta)
-                        DO I=1,N; A%C(II)(I:I)=CHAR(B(I)); ENDDO
-                      ENDDO
-#else
                       NN = SIZE(A%C)
-                      Meta=SetMeta(NameTag(VarName,TRIM(IntToChar(1))//TRIM(Tag_O)),NATIVE_INT32,BufSize,.FALSE.)
+                      IF(PRESENT(Tag_O))THEN
+                         Meta=SetMeta(NameTag(VarName,TRIM(IntToChar(1))//TRIM(Tag_O)),NATIVE_INT32,BufSize,.FALSE.)
+                      ELSE
+                         Meta=SetMeta(NameTag(VarName,TRIM(IntToChar(1))),NATIVE_INT32,BufSize,.FALSE.)
+                      ENDIF
                       CALL OpenData(Meta)
                       ALLOCATE(B(BufSize))
                       CALL ReadIntegerVector(Meta,B(1))
@@ -2072,8 +2049,6 @@ CONTAINS
                       ENDDO
                       IF(BufSize /= RunInd -1 ) STOP 'ERR: Index problem in Get_CHR10_VECT'
                       DEALLOCATE(B)
-#endif
-
 #ifdef PARALLEL 
                       ENDIF       
                       ! not supported yet. IF(InParallel)CALL Bcast(A)
