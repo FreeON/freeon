@@ -502,6 +502,7 @@ CONTAINS
     INTEGER                               :: I,J
     TYPE(CHR_VECT) :: Chars
     CHARACTER(LEN=DCL) :: Line
+    CHARACTER(LEN=BASESET_CHR_LEN) :: LowC1,LowC2
     LOGICAL            :: Found
     !----------------------------------------------------------------------------
     CALL Align(BASIS_SETS,Inp)
@@ -512,7 +513,11 @@ CONTAINS
     DO I=2,SIZE(Chars%C)
        Found=.FALSE.
        DO J=1,NSupSets
-          IF(TRIM(Chars%C(I))==TRIM(CSets(1,J)))THEN
+          LowC1=Chars%C(I)
+          LowC2=CSets(1,J)
+          CALL LowCase(LowC1)
+          CALL LowCase(LowC2)
+          IF(TRIM(LowC1)==TRIM(LowC2))THEN
              B%BName(I-1)=ADJUSTL(CSets(2,I))
              Found=.TRUE.
              EXIT
