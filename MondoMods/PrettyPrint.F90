@@ -86,11 +86,7 @@ MODULE PrettyPrint
             PU=Tmp
             CALL OpenASCII(FileName_O,PU,NewFile_O=NewFile_O)
          ELSEIF(PRESENT(Unit_O))THEN
-            IF(Unit_O==6)THEN
-               PU=Unit_O
-            ELSE
-               CALL Halt(' Logic Error 1 in OpenPU ')
-            ENDIF
+            PU=Unit_O
          ELSE
             PU=Out
             CALL OpenASCII(OutFile,PU,NewFile_O=NewFile_O)
@@ -503,148 +499,145 @@ MODULE PrettyPrint
        CLOSE(Unit)
      END SUBROUTINE XSFPreamble
 
-     SUBROUTINE Print_CRDS(GM,FileName_O,Unit_O,PrintGeom_O,NewFile_O)
-        TYPE(CRDS) :: GM         
-        INTEGER :: K
-        LOGICAL :: Opened
-        INTEGER,         OPTIONAL,INTENT(IN) :: Unit_O
-        CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: FileName_O,PrintGeom_O
-        LOGICAL,         OPTIONAL,INTENT(IN) :: NewFile_O
-        INTEGER                              :: I,PU
-        CHARACTER(LEN=DEFAULT_CHR_LEN)       :: Mssg
-        CHARACTER(LEN=DCL)                   :: AuxChar
-        CHARACTER(LEN=2)                     :: Atom
-        REAL(DOUBLE)                         :: AA
-        REAL(DOUBLE)                         :: A,B,C,Alpha,Beta,Gamma
-        AA=One/AngstromsToAU
+     SUBROUTINE Print_CRDS(GM,FileName_O,Unit_O,PrintGeom_O,NewFile_O,Clone_O)
+       TYPE(CRDS) :: GM         
+       INTEGER :: K
+       LOGICAL :: Opened
+       INTEGER,         OPTIONAL,INTENT(IN) :: Unit_O,Clone_O
+       CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: FileName_O,PrintGeom_O
+       LOGICAL,         OPTIONAL,INTENT(IN) :: NewFile_O
+       INTEGER                              :: I,PU
+       CHARACTER(LEN=DEFAULT_CHR_LEN)       :: Mssg
+       CHARACTER(LEN=DCL)                   :: AuxChar
+       CHARACTER(LEN=2)                     :: Atom
+       REAL(DOUBLE)                         :: AA
+       REAL(DOUBLE)                         :: A,B,C,Alpha,Beta,Gamma
+       AA=One/AngstromsToAU
 #ifdef PARALLEL
-        IF(MyId==ROOT)THEN
+       IF(MyId==ROOT)THEN
 #endif
           PU=OpenPU(FileName_O=FileName_O,Unit_O=Unit_O,NewFile_O=NewFile_O)
           IF(PRESENT(PrintGeom_O))THEN
-             IF(PrintGeom_O=='XYZ')THEN
-                ! Print XYZ format
-                Mssg=IntToChar(GM%NAtms)
-                WRITE(PU,*)TRIM(Mssg)
-                 Mssg='Geom #'//TRIM(IntToChar(GM%Confg)) &
-                    //', <SCF> = '//TRIM(FltToMedmChar(GM%ETotal))
-                 WRITE(PU,*)TRIM(Mssg)
-              ELSE IF (PrintGeom_O=='XSF') THEN
-                 IF(GM%PBC%Dimen/=0)THEN
-                    IF(GM%PBC%Dimen<=2)THEN
-                       Mssg='SLAB'
-                    ELSE
-                       Mssg='CRYSTAL'
-                    ENDIF
-                    WRITE(PU,*)TRIM(Mssg)
-		    Mssg='PRIMVEC '//TRIM(IntToChar(GM%Confg+1))
-                    WRITE(PU,*)TRIM(Mssg)
-                    ! Cell Vectors
-	            GM%PBC%BoxShape%D=GM%PBC%BoxShape%D*AA
-	            WRITE(PU,111)GM%PBC%BoxShape%D(1,:)
-	            WRITE(PU,111)GM%PBC%BoxShape%D(2,:)
-	            WRITE(PU,111)GM%PBC%BoxShape%D(3,:)
-111                 FORMAT(1X,3(F14.5,' '))
-	            GM%PBC%BoxShape%D=GM%PBC%BoxShape%D/AA
-                    Mssg='PRIMCOORD '//TRIM(IntToChar(GM%Confg+1))
-                    WRITE(PU,*)TRIM(Mssg)
-                    WRITE(PU,*)GM%NAtms,1
-                 ELSE
-                    Mssg='ATOMS '//TRIM(IntToChar(GM%Confg+1))
-                    WRITE(PU,*)TRIM(Mssg)
-                 ENDIF
-                 AA=One/AngstromsToAU
-                 DO I=1,GM%NAtms
-                    IF(GM%CConstrain%I(I)==1) THEN
-                      AuxChar='  C '
-                    ELSE IF(GM%CConstrain%I(I)==2) THEN
-                      AuxChar='  R '
-                    ELSE
-                      AuxChar='    '
-                    ENDIF
-                    Atom=GM%AtNam%C(I)
-                    CALL UpCase(Atom)
-                    WRITE(PU,222)Atom,(GM%Carts%D(K,I)*AA,K=1,3),AuxChar
-222                 FORMAT(1X,A2,3(F14.5,' '),A2)
-                 ENDDO
-              ELSEIF(PrintGeom_O=='PDB')THEN
-!                Print PDB format
-                 AA=One/AngstromsToAU
-                 Mssg='Geom #'//TRIM(IntToChar(GM%Confg))//', <SCF> = '//TRIM(FltToMedmChar(GM%ETotal))
-                 WRITE(PU,22)Mssg
-              22 FORMAT('REMARK   1  ',A60)
-                 IF(GM%PBC%Dimen/=0)THEN
-                    CALL VecToAng(GM%PBC,a,b,c,alpha,beta,gamma)
-                    WRITE(PU,33)a*AA,b*AA,c*AA,alpha,beta,gamma
-                 33 FORMAT('CRYST1',3F9.3,3F7.2,1x,11A1,I4)
-                 ENDIF
-                 DO I=1,GM%NAtms
-                    !!!! correct only for integer charged QM atoms
-!                    WRITE(*,44)I,GM%AtNam%C(I),GM%AtMMTyp%C(I),1,(GM%Carts%D(K,I)*AA,K=1,3),One,Zero 
-!                    WRITE(*,*)I,GM%AtNam%C(I),GM%AtMMTyp%C(I),1,(GM%Carts%D(K,I)*AA,K=1,3),One,Zero 
-                    WRITE(PU,44)I,GM%AtNam%C(I),GM%AtMMTyp%C(I),1,(GM%Carts%D(K,I)*AA,K=1,3),One,Zero 
-                 44 FORMAT('ATOM  ',I5,1X,A5,A5,2X,I4,4X,3F8.3,2F6.2)
-                 ENDDO
-                 WRITE(PU,55)
-              55 FORMAT('END')
-              ENDIF
-           ELSEIF(PrintFlags%Fmt==DEBUG_MMASTYLE)THEN
-!             Print MMA format
-              Mssg=' NAtoms = '//IntToChar(GM%NAtms)//';'
-              WRITE(PU,*)TRIM(Mssg)
-              WRITE(PU,*)'(* Coordinates are in AU *)'
-              DO I=1,GM%NAtms
-                 Mssg='R['//TRIM(IntToChar(I))//']={'           &
-                          //DblToMMAChar(GM%Carts%D(1,I))//','  &
-                          //DblToMMAChar(GM%Carts%D(2,I))//','  &
-                          //DblToMMAChar(GM%Carts%D(3,I))//'};'
-                 WRITE(PU,*)TRIM(Mssg)
-              ENDDO
-           ELSE
-!             Default is the full dump of the internal representation
-              CALL PrintProtectL(PU)
-              WRITE(PU,3)
-              WRITE(PU,*)'Internal representation of the geometry:'
-              IF(GM%InAU)THEN
-                 WRITE(PU,*)'Geometry originally in AU has not been rescaled.'
-              ELSE
-                 WRITE(PU,*)'Geometry originally in Angstroms has been converted to AU.'
-              ENDIF
-              IF(GM%Ordrd==SFC_HILBERT)THEN
-                 WRITE(PU,*)'Geometry has been reordered using the Hilbert curve.'
-              ELSEIF(GM%Ordrd==SFC_PEANO)THEN
-                 WRITE(PU,*)'Geometry has been reordered using the Peano curve.'
-              ELSEIF(GM%Ordrd==SFC_RANDOM)THEN
-                 WRITE(PU,*)'Geometry has been randomly reordered.'
-              ELSE
-                 WRITE(PU,*)'Geometry has not been reordered.'
-              ENDIF
-              Mssg='Number of electrons = '//TRIM(IntToChar(GM%NElec))
-              WRITE(PU,*)TRIM(Mssg)
-              WRITE(PU,2)
-              CALL ClosePU(PU)
-              CALL Print_PBCInfo(GM%PBC,FileName_O,Unit_O)
-              PU=OpenPU(FileName_O=FileName_O,Unit_O=Unit_O)
-              DO I=1,GM%NAtms
-                  Mssg=TRIM(IntToChar(I))//'   '//Ats(INT(GM%AtNum%D(I))) &  !!!! correct only for integer charged QM atoms
-                    //'   '//DblToMedmChar(GM%Carts%D(1,I))          &
-                    //'   '//DblToMedmChar(GM%Carts%D(2,I))          &
-                    //'   '//DblToMedmChar(GM%Carts%D(3,I))           
+             IF(PrintGeom_O=='XYZ'.OR.PrintGeom_O=='XSF') THEN
+                IF(PrintGeom_O=='XYZ')THEN
+                   ! Print XYZ format
+                   Mssg=IntToChar(GM%NAtms)
                    WRITE(PU,*)TRIM(Mssg)
-              ENDDO
-              WRITE(PU,3)
-              CALL PrintProtectR(PU)
-           ENDIF
-           CALL ClosePU(PU)
+                   Mssg='Geom #'//TRIM(IntToChar(GM%Confg)) &
+                        //', <SCF> = '//TRIM(FltToMedmChar(GM%ETotal))
+                   IF(PRESENT(Clone_O)) &
+                      Mssg='Clone # '//TRIM(IntToChar(Clone_O))//" / "//TRIM(Mssg)
+                   WRITE(PU,*)TRIM(Mssg)
+                ELSE 
+                   IF(GM%PBC%Dimen==0)THEN
+                      Mssg='MOLECULE'
+                   ELSEIF(GM%PBC%Dimen==1)THEN
+                      Mssg='WIRE'
+                   ELSEIF(GM%PBC%Dimen==2)THEN
+                      Mssg='SLAB'
+                   ELSE
+                      Mssg='CRYSTAL'
+                   ENDIF
+                   WRITE(PU,*)TRIM(Mssg)
+                   Mssg='PRIMVEC '//TRIM(IntToChar(GM%Confg+1))
+                   WRITE(PU,*)TRIM(Mssg)
+                   ! Cell Vectors
+                   GM%PBC%BoxShape%D=GM%PBC%BoxShape%D*AA
+                   WRITE(PU,111)GM%PBC%BoxShape%D(1,:)
+                   WRITE(PU,111)GM%PBC%BoxShape%D(2,:)
+                   WRITE(PU,111)GM%PBC%BoxShape%D(3,:)
+111                FORMAT(1X,3(F14.5,' '))
+                   GM%PBC%BoxShape%D=GM%PBC%BoxShape%D/AA
+                   Mssg='PRIMCOORD '//TRIM(IntToChar(GM%Confg+1))
+                   WRITE(PU,*)TRIM(Mssg)
+                   WRITE(PU,*)GM%NAtms,1
+                ENDIF
+                ! XYZ style formating
+                DO I=1,GM%NAtms
+                   IF(GM%CConstrain%I(I)==1) THEN
+                      AuxChar='  C '
+                   ELSE IF(GM%CConstrain%I(I)==2) THEN
+                      AuxChar='  R '
+                   ELSE
+                      AuxChar='    '
+                   ENDIF
+                   Atom=GM%AtNam%C(I)
+                   CALL UpCase(Atom)
+                   WRITE(PU,222)Atom,(GM%Carts%D(K,I)*AA,K=1,3),AuxChar
+222                FORMAT(1X,A2,3(F14.5,' '),A2)
+                ENDDO
+             ELSEIF(PrintGeom_O=='PDB')THEN
+                ! Print PDB format
+                AA=One/AngstromsToAU
+                Mssg='Geom #'//TRIM(IntToChar(GM%Confg))//', <SCF> = '//TRIM(FltToMedmChar(GM%ETotal))
+                WRITE(PU,22)Mssg
+22              FORMAT('REMARK   1  ',A60)
+                IF(GM%PBC%Dimen/=0)THEN
+                   CALL VecToAng(GM%PBC,a,b,c,alpha,beta,gamma)
+                   WRITE(PU,33)a*AA,b*AA,c*AA,alpha,beta,gamma
+33                 FORMAT('CRYST1',3F9.3,3F7.2,1x,11A1,I4)
+                ENDIF
+                DO I=1,GM%NAtms
+                   WRITE(PU,44)I,GM%AtNam%C(I),GM%AtMMTyp%C(I),1,(GM%Carts%D(K,I)*AA,K=1,3),One,Zero 
+44                 FORMAT('ATOM  ',I5,1X,A5,A5,2X,I4,4X,3F8.3,2F6.2)
+                ENDDO
+                WRITE(PU,55)
+55              FORMAT('END')
+             ENDIF
+          ELSEIF(PrintFlags%Fmt==DEBUG_MMASTYLE)THEN
+             !             Print MMA format
+             Mssg=' NAtoms = '//IntToChar(GM%NAtms)//';'
+             WRITE(PU,*)TRIM(Mssg)
+             WRITE(PU,*)'(* Coordinates are in AU *)'
+             DO I=1,GM%NAtms
+                Mssg='R['//TRIM(IntToChar(I))//']={'           &
+                     //DblToMMAChar(GM%Carts%D(1,I))//','  &
+                     //DblToMMAChar(GM%Carts%D(2,I))//','  &
+                     //DblToMMAChar(GM%Carts%D(3,I))//'};'
+                WRITE(PU,*)TRIM(Mssg)
+             ENDDO
+          ELSE
+             !  Default is the full dump of the internal representation
+             CALL PrintProtectL(PU)
+             WRITE(PU,3)
+             WRITE(PU,*)'Internal representation of the geometry:'
+             IF(GM%InAU)THEN
+                WRITE(PU,*)'Geometry originally in AU has not been rescaled.'
+             ELSE
+                WRITE(PU,*)'Geometry originally in Angstroms has been converted to AU.'
+             ENDIF
+             IF(GM%Ordrd==SFC_HILBERT)THEN
+                WRITE(PU,*)'Geometry has been reordered using the Hilbert curve.'
+             ELSEIF(GM%Ordrd==SFC_PEANO)THEN
+                WRITE(PU,*)'Geometry has been reordered using the Peano curve.'
+             ELSEIF(GM%Ordrd==SFC_RANDOM)THEN
+                WRITE(PU,*)'Geometry has been randomly reordered.'
+             ELSE
+                WRITE(PU,*)'Geometry has not been reordered.'
+             ENDIF
+             Mssg='Number of electrons = '//TRIM(IntToChar(GM%NElec))
+             WRITE(PU,*)TRIM(Mssg)
+             WRITE(PU,2)
+             CALL ClosePU(PU)
+             CALL Print_PBCInfo(GM%PBC,FileName_O,Unit_O)
+             PU=OpenPU(FileName_O=FileName_O,Unit_O=Unit_O)
+             DO I=1,GM%NAtms
+                Mssg=TRIM(IntToChar(I))//'   '//Ats(INT(GM%AtNum%D(I))) &  !!!! correct only for integer charged QM atoms
+                     //'   '//DblToMedmChar(GM%Carts%D(1,I))          &
+                     //'   '//DblToMedmChar(GM%Carts%D(2,I))          &
+                     //'   '//DblToMedmChar(GM%Carts%D(3,I))           
+                WRITE(PU,*)TRIM(Mssg)
+             ENDDO
+             WRITE(PU,3)
+             CALL PrintProtectR(PU)
+          ENDIF
+          CALL ClosePU(PU)
 #ifdef PARALLEL
-        ENDIF
+       ENDIF
 #endif
-     2 FORMAT(72('-'))
-     3 FORMAT(72('='))
+2      FORMAT(72('-'))
+3      FORMAT(72('='))
      END SUBROUTINE Print_CRDS
-
-
-
 !-----------------------------------------------------------------------------
 !    Print a BCSR matrix
 !
