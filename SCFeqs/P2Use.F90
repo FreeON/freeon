@@ -353,7 +353,7 @@ PROGRAM P2Use
                 //' Lambda = '//TRIM(DblToMedmChar(Lam))      
            CALL OpenASCII(OutFile,Out)
            CALL PrintProtectL(Out)
-           IF(PrintFlags%Key==DEBUG_MAXIMUM) THEN
+           IF(PrintFlags%Key>=DEBUG_MEDIUM) THEN
               WRITE(*,*)TRIM(Mssg)
               WRITE(Out,*)TRIM(Mssg)
            ENDIF
@@ -403,7 +403,7 @@ PROGRAM P2Use
                    //', %Non0='//TRIM(DblToShrtChar(PNon0s))              
               CALL OpenASCII(OutFile,Out)
               CALL PrintProtectL(Out)
-              IF(PrintFlags%Key==DEBUG_MAXIMUM) THEN
+              IF(PrintFlags%Key>=DEBUG_MEDIUM) THEN
                  WRITE(*,*)TRIM(Mssg)
                  WRITE(Out,*)TRIM(Mssg)
               ENDIF
@@ -445,6 +445,7 @@ PROGRAM P2Use
         ENDIF
      ENDDO
      ! Save back to be sure.
+     CALL PChkSum(P,'P[0]',Prog)
      CALL Put(P,TrixFile('D',Args,0))
      CALL Put(P,'CurrentDM',CheckPoint_O=.TRUE.) 
      ! Clean Up
