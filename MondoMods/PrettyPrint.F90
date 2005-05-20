@@ -555,16 +555,16 @@ MODULE PrettyPrint
                 ! XYZ style formating
                 DO I=1,GM%NAtms
                    IF(GM%CConstrain%I(I)==1) THEN
-                      AuxChar='  C '
+                      AuxChar='C'
                    ELSE IF(GM%CConstrain%I(I)==2) THEN
-                      AuxChar='  R '
+                      AuxChar='R'
                    ELSE
-                      AuxChar='    '
+                      AuxChar=' '
                    ENDIF
                    Atom=GM%AtNam%C(I)
                    CALL UpCase(Atom)
-                   WRITE(PU,222)Atom,(GM%Carts%D(K,I)*AA,K=1,3),AuxChar
-222                FORMAT(1X,A2,3(F14.5,' '),A2)
+                   WRITE(PU,222)Atom,(GM%Carts%D(K,I)*AA,K=1,3),TRIM(ADJUSTL(AuxChar))
+222                FORMAT(1X,A2,3(F14.5,' '),A1)
                 ENDDO
              ELSEIF(PrintGeom_O=='PDB')THEN
                 ! Print PDB format
