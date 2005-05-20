@@ -220,10 +220,10 @@ CONTAINS
     !-----------------------------------------------------------------!
     ! it is supposed that the number of clones did not change at restart
     ! 
-    iGEOMem=11
+    iGEOMem=101
     LastGeo=O%RestartState%I(3)
     LastBas=O%RestartState%I(2)
-    IGEOStart=MAX(LastGeo-iGEOMem,2)
+    IGEOStart=MAX(LastGeo-iGEOMem,1)
     !
     DO iCLONE=1,G%Clones
       ! Reachive very first geometry, as it serves 

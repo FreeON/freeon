@@ -78,7 +78,7 @@ CONTAINS
     ELSEIF(Args%NC==4)THEN
        N%OFile=TRIM(N%M_PWD)//TRIM(Args%C%C(2))         
        N%LFile=TRIM(N%M_PWD)//TRIM(Args%C%C(3))
-       N%GFile=TRIM(N%M_PWD)
+       N%GFile=TRIM(N%M_PWD)//TRIM(Args%C%C(4))
     ENDIF
     N%HFile=TRIM(SCRName)//InfF
     ! If restart file set, it is set in ParseOptions

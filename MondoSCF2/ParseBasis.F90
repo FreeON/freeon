@@ -138,8 +138,7 @@ CONTAINS
     INTEGER                    :: I,J,K,L,N,NC,NK,NP,NS,MinL,MaxL,KFound,Prim,Ell,BasU
 !-------------------------------------------------------------------------!
    ParseBasisSets=.FALSE.
-! Allocate temporary set
-
+   ! Allocate temporary set
     BS%LMNLen=LHGTF(MaxAsymt)
     BS%NCtrt=MaxCntrx
     BS%NPrim=MaxPrmtv
@@ -161,7 +160,7 @@ CONTAINS
        BS%Kinds%I(BS%NKind)=G%AtNum%D(I)
 10     CONTINUE
     ENDDO
-!   now load geometry atom type (kinds pointer) array.
+    ! Now load geometry atom type (kinds pointer) array.
     G%NKind=BS%NKind
     DO K=1,BS%NKind
        DO I=1,G%NAtms
@@ -184,7 +183,7 @@ CONTAINS
     BS%Typ1Fnk=0
     BS%Typ2Fnk=0
     BS%NCoreEl%D=Zero
-!   Parse basis set 
+    ! Parse basis set 
     KFound=0
     DO 
        READ(BasU,DEFAULT_CHR_FMT,END=99)Line                 
@@ -195,10 +194,8 @@ CONTAINS
              KFound=KFound+1
              DO 
                 READ(BasU,DEFAULT_CHR_FMT,END=99)Line         
-                IF(INDEX(Line,'<End')/=0)THEN
-                   STOP 'lsadjflasdfjlsdfjslfdj'
-                ENDIF
-                IF(KeyQ(Line,Stars))GOTO 100
+                IF(INDEX(Line,'<End')/=0)RETURN
+                IF(KeyQ(TRIM(Line),Stars))GOTO 100
                 NC=NC+1                 
                 DO K=1,MaxLTyps                   
                    IF(KeyQ(Line,CLTyps(K)))THEN
@@ -518,7 +515,7 @@ CONTAINS
           CALL LowCase(LowC1)
           CALL LowCase(LowC2)
           IF(TRIM(LowC1)==TRIM(LowC2))THEN
-             B%BName(I-1)=ADJUSTL(CSets(2,I))
+             B%BName(I-1)=ADJUSTL(CSets(2,J))
              Found=.TRUE.
              EXIT
           ENDIF

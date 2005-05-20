@@ -60,7 +60,7 @@ CONTAINS
           ! Get and print the midpoints, past and present
           CALL New(CurrentState,3)
           CurrentState%I=O%RestartState%I
-          DO IGeo=1,O%RestartState%I(3)
+          DO IGeo=MAX(O%RestartState%I(3)-101,1),O%RestartState%I(3)
              CurrentState%I(3)=IGeo
              DO iCLONE=1,G%Clones
                 HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))

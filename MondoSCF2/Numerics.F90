@@ -8,7 +8,11 @@ MODULE Numerics
 !  REAL(DOUBLE),DIMENSION(4) :: TrixNeglect=(/1.D-5, 1.D-6, 1.D-7,  1.D-8/)
   REAL(DOUBLE),DIMENSION(4) :: TrixNeglect=(/1.D-4, 1.D-5, 1.D-6,  1.D-7 /)
   ! HiCu threshold
+#ifdef PARALLEL
+  REAL(DOUBLE),DIMENSION(4) :: CubeNeglect=(/1.D-4, 1.D-6, 1.D-8,  1.D-10 /)
+#else
   REAL(DOUBLE),DIMENSION(4) :: CubeNeglect=(/1.D-3, 1.D-5, 1.D-7,  1.D-9 /)
+#endif
   ! QCTC and ONX threshold
   REAL(DOUBLE),DIMENSION(4) :: TwoENeglect=(/1.D-6, 1.D-8, 1.D-10, 1.D-12/)
   ! Distribution threshold

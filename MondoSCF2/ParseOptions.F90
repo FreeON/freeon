@@ -430,16 +430,20 @@ CONTAINS
 !
     IF(OptKeyQ(Inp,OUTPUT_OPTION,OUTPUT_PDB)) THEN
 	GeomPrint='PDB'
+        IF(INDEX(Names%GFile,'.')==0) &
         Names%GFile=TRIM(Names%GFile)//'.pdb'
     ELSE IF (OptKeyQ(Inp,OUTPUT_OPTION,OUTPUT_XYZ)) THEN
     	GeomPrint='XYZ'
+        IF(INDEX(Names%GFile,'.')==0) &
         Names%GFile=TRIM(Names%GFile)//'.xyz'
     ELSE IF (OptKeyQ(Inp,OUTPUT_OPTION,OUTPUT_XCD)) THEN
         GeomPrint='XSF'
+        IF(INDEX(Names%GFile,'.')==0) &
         Names%GFile=TRIM(Names%GFile)//'.xsf'
-     ELSE
+    ELSE
         ! Default is xyz
         GeomPrint='XYZ'
+        IF(INDEX(Names%GFile,'.')==0) &
         Names%GFile=TRIM(Names%GFile)//'.xyz' 
     ENDIF
   END SUBROUTINE ParsePrintFlags
