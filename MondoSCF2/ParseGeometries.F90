@@ -49,12 +49,18 @@ CONTAINS
           HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #0")
           CALL Get(G%Clone(0))
           CALL CloseHDFGroup(HDF_CurrentID)
+          ! Reset the atomic number in the case that we had/have atomic numbers
+          ! cooresponding to an effective core potential basis set
+          CALL ReSetAtNum(G%Clone(0))
           CALL PPrint(G%Clone(0),FileName_O=N%GFile,Unit_O=Geo, &
                PrintGeom_O=O%GeomPrint,Clone_O=0)
           ! Get and print the end state
           HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(G%Clones+1)))
           CALL Get(G%Clone(G%Clones+1))
           CALL CloseHDFGroup(HDF_CurrentID)
+          ! Reset the atomic number in the case that we had/have atomic numbers
+          ! cooresponding to an effective core potential basis set
+          CALL ReSetAtNum(G%Clone(G%Clones+1))
           CALL PPrint(G%Clone(G%Clones+1),FileName_O=N%GFile,Unit_O=Geo, &
                PrintGeom_O=O%GeomPrint,Clone_O=G%Clones+1)
           ! Get and print the midpoints, past and present
@@ -65,8 +71,13 @@ CONTAINS
              DO iCLONE=1,G%Clones
                 HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
                 CALL Get(G%Clone(iCLONE),TAG_O=GTag(CurrentState))
-                CALL PPrint(G%Clone(iCLONE),FileName_O=N%GFile,Unit_O=Geo, &
-                     PrintGeom_O=O%GeomPrint,Clone_O=iCLONE)
+                ! Reset the atomic number in the case that we had/have atomic numbers
+                ! cooresponding to an effective core potential basis set
+                CALL ReSetAtNum(G%Clone(iCLONE))
+                IF(iGEO/=O%RestartState%I(3))THEN
+                   CALL PPrint(G%Clone(iCLONE),FileName_O=N%GFile,Unit_O=Geo, &
+                        PrintGeom_O=O%GeomPrint,Clone_O=iCLONE)
+                ENDIF
                 CALL CloseHDFGroup(HDF_CurrentID)
              ENDDO
           ENDDO
@@ -94,21 +105,20 @@ CONTAINS
              CALL CloseHDFGroup(HDF_CurrentID)
              CALL CloseHDF(HDFFileID)          
              CALL Delete(CurrentState)
-             CALL PPrint(G%Clone(0),FileName_O=N%GFile,Unit_O=Geo, &
-                  PrintGeom_O=O%GeomPrint,Clone_O=0)
-             CALL PPrint(G%Clone(G%Clones+1),FileName_O=N%GFile,Unit_O=Geo, &
-                  PrintGeom_O=O%GeomPrint,Clone_O=G%Clones+1)
+             ! Reset the atomic number in the case that we had/have atomic numbers
+             ! cooresponding to an effective core potential basis set
+             CALL ReSetAtNum(G%Clone(0))
+             CALL ReSetAtNum(G%Clone(G%Clones+1))
           ELSE 
              ! Read in the reactants geometry from input
              CALL ParseCoordinates(REACTANTS_BEGIN,REACTANTS_END,G%Clone(0),O%Coordinates)          
              ! Read in the products geometry from input
              CALL ParseCoordinates(PRODUCTS_BEGIN,PRODUCTS_END,G%Clone(G%Clones+1),O%Coordinates)  
-
-!             CALL PPrint(G%Clone(0),FileName_O=N%GFile,Unit_O=Geo, &
-!                  PrintGeom_O=O%GeomPrint,Clone_O=0)
-!             CALL PPrint(G%Clone(G%Clones+1),FileName_O=N%GFile,Unit_O=Geo, &
-!                  PrintGeom_O=O%GeomPrint,Clone_O=G%Clones+1)
           ENDIF
+          CALL PPrint(G%Clone(0),FileName_O=N%GFile,Unit_O=Geo, &
+               PrintGeom_O=O%GeomPrint,Clone_O=0)
+          CALL PPrint(G%Clone(G%Clones+1),FileName_O=N%GFile,Unit_O=Geo, &
+               PrintGeom_O=O%GeomPrint,Clone_O=G%Clones+1)
           ! Purify R and P images ...
           CALL NEBPurify(G,Init_O=.TRUE.)
           ! ... then interpolate ...
@@ -141,13 +151,19 @@ CONTAINS
           ALLOCATE(G%Clone(1:G%Clones))          
           CALL New(CurrentState,3)
           CurrentState%I=O%RestartState%I
-          DO IGeo=1,O%RestartState%I(3)
+          DO IGeo=MAX(O%RestartState%I(3)-101,1),O%RestartState%I(3)
+             CurrentState%I(3)=IGeo
              DO iCLONE=1,G%Clones
                 HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
-                CurrentState%I(3)=IGeo
                 CALL Get(G%Clone(iCLONE),TAG_O=GTag(CurrentState))
-                CALL PPrint(G%Clone(iCLONE),FileName_O=N%GFile,Unit_O=Geo, &
-                            PrintGeom_O=O%GeomPrint,Clone_O=iCLONE)
+                ! Reset the atomic number in the case that we had/have atomic numbers
+                ! cooresponding to an effective core potential basis set
+                CALL ReSetAtNum(G%Clone(iCLONE))
+                IF(iGEO/=O%RestartState%I(3))THEN
+                   CALL PPrint(G%Clone(iCLONE),FileName_O=N%GFile,Unit_O=Geo, &
+                        PrintGeom_O=O%GeomPrint,Clone_O=iCLONE)
+                   ! CALL PPrint(G%Clone(iCLONE),Unit_O=6,PrintGeom_O=O%GeomPrint,Clone_O=iCLONE)
+                ENDIF
                 CALL CloseHDFGroup(HDF_CurrentID)
              ENDDO
           ENDDO
@@ -157,20 +173,11 @@ CONTAINS
           G%Clones=1
           ALLOCATE(G%Clone(1))
           CALL ParseCoordinates(GEOMETRY_BEGIN,GEOMETRY_END,G%Clone(1),O%Coordinates)
-!          CALL PPrint(G%Clone(iCLONE),FileName_O=N%GFile,Unit_O=Geo,PrintGeom_O=O%GeomPrint)
+          !          CALL PPrint(G%Clone(iCLONE),FileName_O=N%GFile,Unit_O=Geo,PrintGeom_O=O%GeomPrint)
        ENDIF
     ENDIF
     CLOSE(UNIT=Inp,STATUS='KEEP')
-    !
   END SUBROUTINE LoadCoordinates
-!------------------------------------------------------------------------!
-!
-!------------------------------------------------------------------------!
-  FUNCTION GTag(State) RESULT(Tag)
-    TYPE(INT_VECT)   :: State
-    CHARACTER(LEN=4) :: Tag
-    Tag=IntToChar(State%I(3))
-  END FUNCTION GTag
 !------------------------------------------------------------------------!
 !
 !------------------------------------------------------------------------!
@@ -297,11 +304,12 @@ CONTAINS
     ! End of file error message
 1   CALL Halt('While parsing, failed to find '//EndDelimiter)
   END SUBROUTINE ParseCoordinates
-
+!------------------------------------------------------------------------!
+!
+!------------------------------------------------------------------------!
   SUBROUTINE SpinCoords(G) 
     TYPE(CRDS)     :: G
     INTEGER        :: I,J,NUnPEl
-    !----------------------------------------------------------------------------
     ! Calculate the electronic coordinates
     G%NElec=0
     DO I=1,G%NAtms
@@ -318,5 +326,31 @@ CONTAINS
     G%NAlph=DBLE(G%NElec+NUnPEl)*Half
     G%NBeta=DBLE(G%NElec-NUnPEl)*Half
   END SUBROUTINE SpinCoords
+!------------------------------------------------------------------------!
+!
+!------------------------------------------------------------------------!
+  SUBROUTINE ReSetAtNum(G)
+    TYPE(CRDS) :: G
+    INTEGER :: I,IAtomNo
+    DO I=1,G%NAtms
+       IAtomNo=G%AtNum%D(I)
+       IF(TRIM(Ats(I))/=TRIM(G%AtNam%C(I)))THEN
+          DO J=1,105
+             IF(TRIM(Ats(J))==TRIM(G%AtNam%C(I)))THEN
+                G%AtNum%D(I)=J
+                EXIT
+             ENDIF
+          ENDDO
+       ENDIF
+    ENDDO
+  END SUBROUTINE ReSetAtNum
+!------------------------------------------------------------------------!
+!
+!------------------------------------------------------------------------!
+  FUNCTION GTag(State) RESULT(Tag)
+    TYPE(INT_VECT)   :: State
+    CHARACTER(LEN=4) :: Tag
+    Tag=IntToChar(State%I(3))
+  END FUNCTION GTag
 
 END MODULE ParseGeometries

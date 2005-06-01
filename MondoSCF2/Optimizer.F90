@@ -553,64 +553,44 @@ CONTAINS
      ENDIF
      CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
      CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
-     ! Should have already echoed the geometry(ies) when parsing in...
-!     DO iCLONE=1,C%Geos%Clones
-!       CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile,Geo, &
-!                   C%Opts%GeomPrint)
-!     ENDDO
-     !
      ! Start optimization                     
-     !
      IStart=iGEO
      DO iGEO=IStart,MaxSteps
-       !
        ! Calculate energy and force for all clones at once.
-       !
        StateO%Action=C%Stat%Action
        StateO%Current=C%Stat%Current
        StateO%Previous=C%Stat%Previous
        GuessO=C%Opts%Guess
-       !
        CALL SCF(iBAS,iGEO,C)
        CALL BackTrack(iBAS,iGEO,C,StateO,GuessO)
-       CALL Force(iBAS,iGEO,C%Nams,C%Opts,C%Stat, &
-                  C%Geos,C%Sets,C%MPIs)
-       !
-       ! Loop over all clones and modify geometries.
-       !
-       ConvgdAll=1
-       DO iCLONE=1,C%Geos%Clones
-         Convgd%I=0
-         CALL OptSingleMol(C%GOpt,C%Nams,C%Opts, &
-           C%Geos%Clone(iCLONE),Convgd%I,iGEO,iCLONE)
-         ConvgdAll=ConvgdAll*Convgd%I(iCLONE)
-       ENDDO 
-       !
-       ! Fill in new geometries
-       !
-       DO iCLONE=1,C%Geos%Clones
-         CALL NewGeomFill(C%Geos%Clone(iCLONE))
-       ENDDO
-       IF(C%Opts%Grad==GRAD_TS_SEARCH_NEB) THEN
-         CALL NEBPurify(C%Geos,Print_O=.TRUE.)
-         CALL MergePrintClones(C%Geos,C%Nams,C%Opts)
-       ENDIF
-       !
-       C%Stat%Previous%I(3)=IGeo
-       C%Stat%Current%I(3)=IGeo+1
-       !
-       ! Archive new geometries 
-       !
-       CALL GeomArchive(iBAS,iGEO+1,C%Nams,C%Sets,C%Geos)    
-       !
-       ! Print geometries
-       !
+       ! Backtracking can modify geometries too, so this is the right place
+       ! to print geometries cooresponding to the energies that have just been computed
        DO iCLONE=1,C%Geos%Clones
          CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile,Geo,C%Opts%GeomPrint,Clone_O=iCLONE)
        ENDDO
-       !
+       IF(C%Opts%Grad==GRAD_TS_SEARCH_NEB) &
+         CALL NEBPurify(C%Geos,Print_O=.TRUE.)
+       IF(C%Opts%Grad==GRAD_TS_SEARCH_NEB) &
+         CALL MergePrintClones(C%Geos,C%Nams,C%Opts)
+       ! 
+       CALL Force(iBAS,iGEO,C%Nams,C%Opts,C%Stat, &
+                  C%Geos,C%Sets,C%MPIs)
+       ! Loop over all clones and modify geometries.
+       ConvgdAll=1
+       DO iCLONE=1,C%Geos%Clones
+         Convgd%I=0
+         CALL OptSingleMol(C%GOpt,C%Nams,C%Opts,C%Geos%Clone(iCLONE),Convgd%I,iGEO,iCLONE)
+         ConvgdAll=ConvgdAll*Convgd%I(iCLONE)
+       ENDDO 
+       ! Fill in new geometries
+       DO iCLONE=1,C%Geos%Clones
+         CALL NewGeomFill(C%Geos%Clone(iCLONE))
+       ENDDO
+       ! Bump counter and archive new geometries 
+       C%Stat%Previous%I(3)=IGeo
+       C%Stat%Current%I(3)=IGeo+1
+       CALL GeomArchive(iBAS,iGEO+1,C%Nams,C%Sets,C%Geos)    
        ! Continue optimization?
-       !
        IF(ConvgdAll==1) EXIT
      ENDDO
      CALL Delete(Convgd)

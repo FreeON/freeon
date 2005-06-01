@@ -48,14 +48,18 @@ CONTAINS
        INQUIRE(FILE=BaseFile,EXIST=Exists)
        IF(Exists)THEN
           CALL OpenASCII(BaseFile,Bas,OldFileQ_O=.TRUE.)
-          REWIND(Bas)
           BasU=Bas
        ELSE
           CALL LowCase(B%BName(J))
-          CALL AlignLowCase('<beginbasisset'//TRIM(B%BName(J))//'>',Inp)
           BasU=Inp
        ENDIF
        DO I=1,G%Clones
+          IF(Exists)THEN
+             REWIND(Bas)
+          ELSE
+             REWIND(Inp)
+             CALL AlignLowCase('<beginbasisset'//TRIM(B%BName(J))//'>',Inp)
+          ENDIF
           IF(.NOT.ParseBasisSets(G%Clone(I),B%BSets(I,J),BasU,B%BSiz(I,J),B%OffS(I,J)))THEN
              CALL MondoHalt(PRSE_ERROR,'ParseBasisSets failed for basis set '//TRIM(B%BName(J)))
           ENDIF
@@ -73,7 +77,6 @@ CONTAINS
 #endif
        ENDDO
        CLOSE(Bas,STATUS='KEEP')
-       CLOSE(GBas,STATUS='KEEP')
     ENDDO
     CLOSE(Inp,STATUS='KEEP')
     !Delete Arrays.
