@@ -188,7 +188,6 @@ PROGRAM QCTC
 #endif
      CALL Elapsed_Time(TimeNukE,'Accum')
   ENDIF
-  CALL Put(E_Nuc_Tot,'E_NuclearTotal')
   CALL Put(E_Nuc_Tot,'E_NuclearTotal',StatsToChar(Current))
 !-------------------------------------------------------------------------------
 ! Printing
