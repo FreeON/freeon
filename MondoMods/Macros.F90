@@ -30,9 +30,11 @@ CONTAINS
     LOGICAL,OPTIONAL                     :: Serial_O
     INTEGER                              :: I
     TYPE(INT_VECT)                       :: SpaceTimeSplit
+
+    REAL(DOUBLE) :: ETag
 #ifdef PARALLEL
     LOGICAL                              :: Serial
-    INTEGER                              :: ChkNPrc
+    INTEGER                              :: ChkNPrc,iTAG
     CHARACTER(LEN=DCL)                   :: MONDO_HOST 
     !-------------------------------------------------------------------------------
     CALL InitMPI()
@@ -50,32 +52,44 @@ CONTAINS
     HDFFileID=OpenHDF(H5File)    
     ! This is the global IO file ID
     HDF_CurrentID=HDFFileID
+    CALL BCast(HDFFileID)
+    CALL BCast(HDF_CurrentID)
     ! Mark prog for failure
     CALL MarkFailure(Prog)
     ! Load global SCF status strings
     CALL LoadTopLevelGlobals(Args)
     ! Parse this programs debug level 
     CALL Init(PrintFlags,Prog)
-    !       PrintFlags%Key=DEBUG_MAXIMUM
-    !       PrintFlags%Mat=DEBUG_MATRICES
 #ifdef PARALLEL    
     ! Get the space-time parallel topology
     CALL New(SpaceTimeSplit,3)
     CALL Get(SpaceTimeSplit,'spacetime')
+    CALL CloseHDF(HDFFileID)
     ! Create Cartesian topology for the clones         
     MyClone=CartCommSplit(SpaceTimeSplit,Serial_O)
-!    CALL AlignNodes(' After CartCommSplit ')
+    !    CALL AlignNodes(' After CartCommSplit ')
 #else
     CALL Get(MyClone,'spacetime')
     CALL CloseHDF(HDFFileID)
 #endif
     ! Each ROOT in each MONDO_COMM opens the HDF file --->FOR READ ONLY<---
     HDFFileID=OpenHDF(H5File)
+    HDF_CurrentID=HDFFileID
     ! Operate at the top level of the archive
     ! Open a group that the ROOT of each clone accesses by default
     H5GroupID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(MyClone)))
     ! Default is now the cloned group id rather than the HDF file id 
     HDF_CurrentID=H5GroupID
+!    WRITE(*,22)TRIM(Prog),MyId,MyClone
+! 22 format(A10,' IN MACROS, GETTING TAG',I3,", ",I3)
+! 23 format(A10,' IN MACROS, GOT     TAG',I3,", ",I3)
+!    CALL GET(ITAG,"TAG")
+!    WRITE(*,23)TRIM(Prog),MyId,MyClone
+!    CALL GET(ETAG,'E_NuclearTotal',StatsToChar(Current))
+!    CALL PUT(2*ITAG,"TAG")
+!    CALL PUT(2D0*ETAG,'E_NuclearTotal',StatsToChar(Current))
+!    IF(MyID==ROOT)WRITE(*,33),MyId,MyClone,iTAG,ETag,HDFFileID,HDF_CurrentID
+!    33 FORMAT(' MyId = ',I2,', MyClone = ',I2,', iTAG = ',I6,' ETAG = ',D12.6,', FileID = ',I10,' CURRENTID = ',I10) 
     ! Load variables global at the group (clone) level
     CALL LoadGroupGlobals(Args)
     ! Initialize memory statistics
@@ -91,6 +105,8 @@ CONTAINS
        CALL TimeStamp('Entering '//TRIM(Prog))
 #endif 
     ENDIF
+!
+!   CALL ShutDown(Prog)
   END SUBROUTINE StartUp
 #ifdef PARALLEL
   FUNCTION CartCommSplit(SpaceTime,Serial_O) RESULT(MyClone)
@@ -130,7 +146,7 @@ CONTAINS
     ENDIF
     ! Offset the actuall clone 
     MyClone=SpaceTime%I(3)+Local(2)
-    !    CALL AlignNodes('MyClone = '//TRIM(IntToChar(MyClone)))
+    !CALL AlignNodes('MyClone = '//TRIM(IntToChar(MyClone)))
     !
     ! Now split into SpaceTime%I(1) rows. Each row has SpaceTime%I(2) processors
     ! parallel in the spatial domain and using MONDO_COMM as their
@@ -144,13 +160,25 @@ CONTAINS
 #endif
   SUBROUTINE ShutDown(Prog)
     CHARACTER(LEN=*),INTENT(IN) :: Prog
+
+!    IF(MyID==ROOT)WRITE(*,33)Prog,MyId,MyClone,H5GroupID,HDFFileID
+!    33 FORMAT(A10,'SHUTDOWN: MyId = ',I2,', MyClone = ',I2,', GroupID = ',I10,' FileID = ',I10)
+
+    ! Following is a bit of fancy HDF footwork, nessesary for parallel-clones to work properly
+    !
+    ! Close the clone directories
     CALL CloseHDFGroup(H5GroupID)
-    HDF_CurrentID=HDFFileID
 #ifdef PARALLEL
-    ! Revert back to global communicator, rank etc
+    ! Close the global HDF file, possibly for multiple space-time root nodes
+    CALL CloseHDF(HDFFileID)
+    ! Revert back to global communicator, rank etc ...
     MONDO_COMM=MPI_COMM_WORLD
     MyID=MRank()    
+    ! and reopen the upper level HDF directory for just the world root node
+    HDFFileID=OpenHDF(H5File)    
 #endif
+    ! Here is the global file ID for the upper level HDF direcory, for the world root node
+    HDF_CurrentID=HDFFileID
     IF(HasQM()) THEN
        CALL Delete(BSiz)
        CALL Delete(OffS)
