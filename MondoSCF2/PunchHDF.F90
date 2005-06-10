@@ -45,20 +45,6 @@ CONTAINS
 #endif
     CALL CloseHDF(HDF_CurrentID)
   END SUBROUTINE MPIsArchive
-
-  SUBROUTINE StateArchive(N,S)
-    TYPE(FileNames) :: N
-    TYPE(State)     :: S
-    HDF_CurrentID=OpenHDF(N%HFile)
-    CALL Put(S%Current,'current_state')
-    CALL Put(S%Previous,'previous_state')
-
-    ! Not sure if this will cause a bug...
-!
-!    CALL Put(S%Action,'action_state')
-!    CALL Put(S%SubAction,'subaction_state')
-    CALL CloseHDF(HDF_CurrentID)
-  END SUBROUTINE StateArchive
   !==============================================================================
   ! THIS IS WHERE ALL SORTS OF MISC DATA SPACE IS INITIALIZED IN THE HDF5 FILE
   ! IN ORDER TO AVOID CHANGING THE DATA SPACE WHEN THE HDF FILE HAS BEEN OPENED
@@ -72,12 +58,13 @@ CONTAINS
     TYPE(DBL_VECT)   :: DoubleVect
     TYPE(BCSR)       :: DM
     CHARACTER(LEN=DCL) :: FailedProgram
-    INTEGER          :: iGEO,iCLONE,iBAS,HDFFileID,I,MaxEll,MaxAtoms,MaxBloks,MaxNon0s
+    INTEGER          :: iGEO,iCLONE,iBAS,HDFFileID,I,MaxEll,MaxAtoms,MaxBloks,MaxNon0s,J
     CHARACTER(LEN=DCL) :: chGEO
     TYPE(INT_VECT)   :: ETDirArr
     TYPE(DBL_VECT)   :: ETRootArr
+    TYPE(CMPoles)    :: MP
     !---------------------------------------------------------------------------!
-    chGEO=IntToChar(iGEO)
+    chGEO=IntToChar(iGEO) 
     HDFFileID=OpenHDF(N%HFile)
     HDF_CurrentID=HDFFileID
     ! Find max dimensions for BCSR matrices
@@ -106,6 +93,13 @@ CONTAINS
        HDF_CurrentID=InitHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
        ! Create data space for grouped objects to preserve structure of HDF5 
        ! to avoid multiple clones simultaneously creating new data
+       !
+       ! BEGIN STUPID MULTIPOLE REDUNDANCY
+       CALL New(MP)
+       MP%DPole%D=BIG_DBL
+       MP%QPole%D=BIG_DBL
+       CALL Put(MP)
+       CALL Delete(MP)
        CALL New(DoubleVect,3)
        DoubleVect%D=BIG_DBL
        CALL Put(DoubleVect,'dipole')
@@ -114,6 +108,7 @@ CONTAINS
        DoubleVect%D=BIG_DBL
        CALL Put(DoubleVect,'quadrupole')
        CALL Delete(DoubleVect)
+       ! END STUPID REDUNDANCY
        CALL Put(BIG_DBL,'e_nucleartotal')
        CALL Put(BIG_DBL,'exc')
        CALL Put(BIG_DBL,'homolumogap')
@@ -375,7 +370,31 @@ CONTAINS
     S%Previous%I=(/0,LastBAS,LastGEO/)
     S%Current%I=(/1,LastBAS,LastGEO/)
   END SUBROUTINE InitState
+!-----------------------------------------------------------------
 !
+  SUBROUTINE StateArchive(N,G,S,Init_O)
+    TYPE(FileNames) :: N
+    TYPE(Geometries):: G    
+    TYPE(State)     :: S
+    LOGICAL,OPTIONAL:: Init_O           
+    INTEGER         :: HDFFileID,iCLONE,J
+    HDFFileID=OpenHDF(N%HFile)
+    HDF_CurrentID=HDFFileID
+    CALL Put(S%Current,'current_state')
+    CALL Put(S%Previous,'previous_state')
+    IF(PRESENT(Init_O))THEN
+       IF(Init_O)THEN
+          DO iCLONE=1,G%Clones
+             HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
+             CALL Put(BIG_DBL,'E_NuclearTotal',StatsToChar(S%Current%I))
+             CALL Put(BIG_DBL,'Exc',StatsToChar(S%Current%I))
+             CALL Put(BIG_DBL,'Etot',StatsToChar(S%Current%I))
+             CALL CloseHDFGroup(HDF_CurrentID)
+          ENDDO
+       ENDIF
+    ENDIF
+    CALL CloseHDF(HDFFileID)
+  END SUBROUTINE StateArchive
 !-----------------------------------------------------------------
 !
   SUBROUTINE InitGlobal(C)
@@ -473,11 +492,8 @@ CONTAINS
      HDFFileID=OpenHDF(HFileIn)
      HDF_CurrentID= &
        OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
-
-     WRITE(*,*)' CLONE = ',ICLONE
      !
      DO IGeom=IStart,iGEO
-       WRITE(*,*)' iGEOM = ',IGEOM
        ICount=IGeom-IStart+1
        CALL Get(PBC,Tag_O=TRIM(IntToChar(IGeom)))
        L=NCartS
@@ -485,7 +501,7 @@ CONTAINS
          DO J=1,3
            L=L+1
            RefStruct%D(L,ICount)=PBC%BoxShape%D(J,K)
-             RefGrad%D(L,ICount)=  PBC%LatFrc%D(J,K)
+           RefGrad%D(L,ICount)=  PBC%LatFrc%D(J,K)
          ENDDO
        ENDDO
        CALL Get(Aux,'Displ',Tag_O=TRIM(IntToChar(IGeom)))
