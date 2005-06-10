@@ -161,13 +161,8 @@ PROGRAM HaiKu
 #endif
 ! Put Exc to Info
 #ifdef PARALLEL
-  IF(MyID == 0) THEN
-    ! REALLY UNFORTUNATE NAMING HERE (TotExc) REQUIRING DUPLICATE LOGIC<<<<
-    CALL Put(TotExc,'Exc')
     CALL Put(TotExc,'Exc',StatsToChar(Current))
-  ENDIF
 #else
-    CALL Put(Exc,'Exc')
     CALL Put(Exc,'Exc',StatsToChar(Current))
 #endif
 ! Printing
