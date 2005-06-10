@@ -30,6 +30,9 @@ CONTAINS
 #endif
     !------------------------------------------------------------!
     DO iCLUMP=1,M%Clumps
+!       WRITE(*,*)'========================================================='
+!       WRITE(*,*)' CLUMP = ',iCLUMP,' CLUMP = ',iCLUMP,' CLUMP = ',iCLUMP
+!       WRITE(*,*)'========================================================='
 #ifdef PARALLEL
        CALL MPIsArchive(N,M%NSpace,M%Clump%I(:,iCLUMP))
        CALL SetArgV(Ex,N,S,M,iCLUMP,NArg,ArgV)
@@ -41,8 +44,9 @@ CONTAINS
        CmndLine=' '
        DO I=1,NArg
           CmndLine=TRIM(CmndLine)//Blnk//TRIM(ArgV%C(I))
-          !          WRITE(*,*)I,' <',TRIM(ArgV%C(I)),">"
+          !          WRITE(*,*)I,' ARGVS <',TRIM(ArgV%C(I)),">"
        ENDDO
+!       WRITE(*,*)iCLUMP,' COMMANDLINE = ',TRIM(CmndLine)
        ! Log this run
        CALL Logger(CmndLine,.FALSE.)
 #if MPI2
@@ -88,7 +92,7 @@ CONTAINS
     TYPE(CHR_VECT)     :: ArgT,ArgV
     SNC=SIZE(S%Action%C)
 
-#ifdef defined(MPI2) 
+#ifdef MPI2 
     NArg=8+SNC
     CALL New(ArgT,NArg)
     ArgT%C(1) =TRIM(N%M_EXEC)//'/'//Ex
