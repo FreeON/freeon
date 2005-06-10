@@ -2,7 +2,7 @@
 # PREPROCESSOR OPTIONS: 
 #
 CPP       =/lib/cpp -P -C -traditional 
-CPPINCLUDE=-I$(MONDO_INC) -I$(HDF_INC) -I/usr/local/include -I$(MPI_INC)
+CPPINCLUDE=-I$(MONDO_INC) -I$(HDF_INC) -I/usr/local/include # -I$(MPI_INC)
 #
 # PREPROCESSING OPTIONS: 
 CPPOPTS = -DNewPAC #-DMPI2 -DPARALLEL  
@@ -31,7 +31,7 @@ F90_OPTIMIZE  = -O1 -tp athlon
 F90_MISC      = $(F_LIST) $(F_PROF) -Mbackslash 
 F90_INCLUDE   = -I$(MONDO_HOME)/Includes/               \
                 -I$(MONDO_HOME)/MondoMods               \
-                -I/usr/local/include -I$(MPI_INC)                   
+                -I/usr/local/include # -I$(MPI_INC)                   
 F90_FLAGS     = $(F90_MISC) $(F90_OPTIMIZE) $(F90_DEBUG) $(F90_INCLUDE)
 #---------------------------------------------------------------
 # LINK/LOADER DIRECTIVES
@@ -54,7 +54,7 @@ RANLIB  = ranlib
 #MPI_LIBS = -L$(MPI_LIB) -lpmpich -lmpich -lpmpich -L$(GM_LIB) -lgm -lpthread # myrinet
 #
 # For new style MPI2 (use -DPARALLEL -DMPI2)
-MPI_LIBS = -L$(MPI_LIB) -lmpich -lmpichf90 -lpthread 
+#MPI_LIBS = -L$(MPI_LIB) -lmpich -lmpichf90 -lpthread 
 #MPI_LIBS = -L$(MPI_LIB) -llammpio -llamf77mpi -lmpi -llam -lpthread -ldl
 #           -L$(GM_LIB) -lgm
 #---------------------------------------------------------------------
