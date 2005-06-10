@@ -52,8 +52,6 @@ CONTAINS
     HDFFileID=OpenHDF(H5File)    
     ! This is the global IO file ID
     HDF_CurrentID=HDFFileID
-    CALL BCast(HDFFileID)
-    CALL BCast(HDF_CurrentID)
     ! Mark prog for failure
     CALL MarkFailure(Prog)
     ! Load global SCF status strings
