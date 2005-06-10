@@ -1,3 +1,52 @@
+2005-06-10 09:32  mchalla
+
+	* MondoSCF2/InCoords.F90: K's recent mods.
+
+2005-06-10 09:06  mchalla
+
+	* QCTC/QCTC.F90: Removed put of E_tot_nuc
+
+2005-06-10 09:05  mchalla
+
+	* HiCu/HiCu.F90: removed put of Exc.
+
+2005-06-10 08:59  mchalla
+
+	* MondoSCF2/PunchHDF.F90: Modified StateArchive to archive each
+	Exc, ETot etc with a current tag, so as to not have the subprograms
+	initialize these items in the group(clone) directories of the HDF
+	file.  Likewise for the CMPoles (dipoles and quadrupoles)
+
+2005-06-10 08:55  mchalla
+
+	* MondoSCF2/Overlay.F90: Small change to MPI2 ifdef.
+
+2005-06-10 08:54  mchalla
+
+	* MondoSCF2/SCFs.F90: Modified arguments to StateArchive, and moved
+	definition of current out of DensityLogic to the beginning of
+	SCFCycle.  This enables correct archivation of variables in the HDF
+	groups(clones), so that they are not initialized by the sub
+	programs (verybad!).
+
+2005-06-10 08:26  mchalla
+
+	* MondoMods/Macros.F90: Modified to correctly open and close global
+	(world) and group (clone) directories in the HDF file.	This is
+	needed for doing parallel NEB with space .NE. time, and was a real
+	bitch to debug.
+	
+	-MC
+
+2005-06-01 17:06  mchalla
+
+	* MondoSCF2/: Optimizer.F90, ParseBasis.F90, ParseGeometries.F90:
+	[no log message]
+
+2005-05-19 18:26  mchalla
+
+	* ChangeLog: [no log message]
+
 2005-05-19 18:21  mchalla
 
 	* MondoSCF2/: Numerics.F90, ParseBasis.F90, ParseCommands.F90,
