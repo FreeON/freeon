@@ -98,7 +98,8 @@ CONTAINS
 !----------------------------------------------------------------------------!
 !   Initailize
     SCFCycle=.FALSE.
-    CALL StateArchive(N,S)
+    S%Current%I=(/cSCF,cBAS,cGEO/)
+    CALL StateArchive(N,G,S,Init_O=.TRUE.)
     IF(cSCF==0) THEN
        SCF_STATUS = NOT_CONVERGE
        ODA_DONE   = .FALSE.
@@ -146,22 +147,6 @@ CONTAINS
                 CLOSE(Out)
              ELSE
                 IConAls = ODA_CONALS
-             ENDIF
-          ENDIF
-       ELSEIF(O%ConAls(cBAS)==DOMIX_CONALS) THEN
-          IF(DIIS_FAIL) THEN
-             IConAls = ODA_CONALS
-          ELSE
-             IF(SCF_STATUS==SCF_STALLED) THEN
-                IConAls     = ODA_CONALS
-                DIIS_FAIL   = .TRUE.
-                Mssg = 'DIIS Failed: Turning on ODA'
-                CALL OpenASCII(OutFile,Out)
-                WRITE(Out,*)TRIM(Mssg)
-                WRITE(*,*)TRIM(Mssg)
-                CLOSE(Out)
-             ELSE
-                IConAls = DIIS_CONALS
              ENDIF
           ENDIF
        ELSE
@@ -227,11 +212,10 @@ CONTAINS
        END SELECT 
     ENDIF
 !   Archive and Check Status
-    CALL StateArchive(N,S)
+    CALL StateArchive(N,G,S)
     SCF_STATUS=ConvergedQ(cSCF,cBAS,cGEO,N,S,O,G,ETot,DMax,DIIS,IConAls,CPSCF_O)
     S%Previous%I=S%Current%I
     IF(SCF_STATUS==DID_CONVERGE) SCFCycle=.TRUE.
-!
   END FUNCTION SCFCycle
   !===============================================================================
   !
@@ -578,7 +562,7 @@ CONTAINS
     LOGICAL,OPTIONAL   :: CPSCF_O
     !----------------------------------------------------------------------------!
     pBAS=S%Previous%I(2)
-    S%Current%I=(/cSCF,cBAS,cGEO/)
+!    S%Current%I=(/cSCF,cBAS,cGEO/)
     IF(PRESENT(CPSCF_O))THEN
        DoCPSCF=CPSCF_O
     ELSE
