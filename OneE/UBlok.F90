@@ -575,7 +575,8 @@ ENDIF
     SELECT CASE(Index)
     INCLUDE "Omega2.Inc"
     CASE DEFAULT
-       CALL Halt(' No explicit code for case Ell = '//TRIM(IntToChar(Ell))//' in AngularTwo.')
+       CALL Halt(' No explicit code for case Ell = '//TRIM(IntToChar(Ell))// &
+                 ', ProjL = '//TRIM(IntToChar(ProjL))//' in AngularTwo.')
     END SELECT
 !    WRITE(*,*)'------------------------------------------------------'
 !    DO Lambda=0,Ell
