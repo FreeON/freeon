@@ -970,7 +970,7 @@ CONTAINS
        CALL Delete(TOPM%JTot12)
        CALL Delete(TOPM%IExcl)
        CALL Delete(TOPM%JExcl)
-       CALL CleanPBCIntCs(IntC_Bas,Cells%I,IEq%I)
+       CALL CleanPBCIntCs(IntC_Bas,Cells%I,IEq%I,XYZRepl%D)
        NIntC_Bas=IntC_Bas%N
        IF(GConvCr%ExplLatt) THEN
          CALL LatticeINTC(IntC_L,PBCDim)
@@ -1259,9 +1259,10 @@ CONTAINS
 !
 !-------------------------------------------------------------------
 !
-   SUBROUTINE CleanPBCIntCs(IntCs,Cells,IEq)
+   SUBROUTINE CleanPBCIntCs(IntCs,Cells,IEq,XYZ)
      TYPE(INTC)                  :: IntCs,IntCs2
      INTEGER,DIMENSION(:,:)      :: Cells
+     REAL(DOUBLE),DIMENSION(:,:) :: XYZ   
      INTEGER,DIMENSION(:)        :: IEq  
      TYPE(INT_VECT)              :: Sort
      INTEGER                     :: I,I1,I2,J,K,L,N,II,M
@@ -1279,59 +1280,25 @@ CONTAINS
      !
      II=0
      DO I=1,IntCs%N
-       DoAllow=.FALSE.
-       K1=1
-       K2=4
-       IF(IntCs%Def%C(I)(1:4)=='LINB') K2=3
-     ! IF(IntCs%Def%C(I)(1:4)=='TORS') THEN 
-     !   K1=2
-     !   K2=3
-     ! ENDIF
-     ! IF(IntCs%Def%C(I)(1:4)=='BEND'.OR. &
-     !    IntCs%Def%C(I)(1:4)=='OUTP'.OR. &
-     !    IntCs%Def%C(I)(1:4)=='LINB') THEN
-     !   K1=2
-     !   K2=2
-     ! ENDIF
-       Tr=0
-       DO J=K1,K2
-         K=IntCs%Atoms%I(I,J)
-         IF(K==0) EXIT
-         IF(ALL(Cells(K,1:3)==0)) THEN
-           DoAllow=.TRUE.
-         ELSE
-        !  IF(Cells(K,1)<Tr(1)) Tr(1)=Cells(K,1)
-        !  IF(Cells(K,2)<Tr(2)) Tr(2)=Cells(K,2)
-        !  IF(Cells(K,3)<Tr(3)) Tr(3)=Cells(K,3)
+       IF(IntCs%Def%C(I)(1:4)=='BEND'.OR. &
+          IntCs%Def%C(I)(1:4)=='OUTP') THEN
+         K=IntCs%Atoms%I(I,2)
+         IF(.NOT.ALL(Cells(K,1:3)==0)) CYCLE
+       ELSE
+         !
+         IF(IntCs%Def%C(I)(1:4)=='STRE') THEN
+           K1=IntCs%Atoms%I(I,1)  
+           K2=IntCs%Atoms%I(I,2)  
+         ELSE IF(IntCs%Def%C(I)(1:4)=='TORS') THEN
+           K1=IntCs%Atoms%I(I,2)  
+           K2=IntCs%Atoms%I(I,3)  
+         ELSE IF(IntCs%Def%C(I)(1:4)=='LINB') THEN
+           K1=IntCs%Atoms%I(I,1)  
+           K2=IntCs%Atoms%I(I,3)  
          ENDIF
-       ENDDO
-       IF(.NOT.DoAllow) CYCLE
-       !
-     ! IF(ANY(Tr<0)) THEN
-     !   IntCs%Cells%I(I,1:12)=0    
-     !   DO J=K1,K2
-     !     K=IntCs%Atoms%I(I,J)
-     !     IF(K==0) EXIT
-     !     J1=3*(J-1)+1
-     !     J2=J1+2
-     !     ! translate coordinate to positive space eighth
-     !     IntCs%Cells%I(I,J1:J2)=Cells(K,1:3)-Tr
-     !   ENDDO
-     !   !
-     !   DoAllow=.TRUE.
-     !   DO J=K1,K2
-     !     K=IntCs%Atoms%I(I,J)
-     !     IF(K==0) EXIT
-     !     J1=3*(J-1)+1
-     !     J2=J1+2
-     !     IF(ALL(IntCs%Cells%I(I,J1:J2)==0)) THEN
-     !       DoAllow=.FALSE.
-     !       EXIT
-     !     ENDIF
-     !   ENDDO
-     !   IF(DoAllow.AND.(Tr(2)/=0.OR.Tr(3)/=0)) DoAllow=.FALSE.
-     !   IF(.NOT.DoAllow) CYCLE
-     ! ENDIF
+         Cell1=Cells(K1,1:3)+Cells(K2,1:3)
+         IF(.NOT.(ALL(Cell1>=0).AND.ALL(Cell1<=1))) CYCLE
+       ENDIF
        !
        II=II+1
        Sort%I(I)=1
@@ -5992,8 +5959,8 @@ return
          NFrag=NatmsLoc
          DoQuit=.FALSE.
          DO IFrags=1,10000
-          !Fact=(One+0.05D0*(IFrags-1))
-           Fact=1.05D0**(IFrags-1)
+           Fact=(One+0.05D0*(IFrags-1))
+          !Fact=1.05D0**(IFrags-1)
            BoxSize=3.D0*Fact
            CALL IntCBoxes(XYZ,Box,BoxSize_O=BoxSize)
            CritRad%D=Fact*StRad%D
@@ -6028,8 +5995,8 @@ return
          FragID%I=1
          NFrag=1
          DO IFrags=1,10000   
-          !Fact=(One+0.05D0*(IFrags-1))
-           Fact=1.05D0**(IFrags-1)
+           Fact=(One+0.05D0*(IFrags-1))
+          !Fact=1.05D0**(IFrags-1)
            IF(Fact>VDWRatio) EXIT
            BoxSize=3.D0*Fact
            CritRad%D=Fact*StRad%D
