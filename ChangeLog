@@ -1,3 +1,24 @@
+2005-06-10 12:21  mchalla
+
+	* MondoMods/Macros.F90: Small parallel oops fix.
+
+2005-06-10 12:19  mchalla
+
+	* OneE/MMA/: Omega2.Inc, Omega2Gen.m: [no log message]
+
+2005-06-10 12:19  mchalla
+
+	* OneE/UBlok.F90: Modfied to go through at least Au with LANLDZP.
+
+2005-06-10 09:59  mchalla
+
+	* Includes/: CompilerSpecifics.AMDLinux.PG,
+	CompilerSpecifics.AMDLinux.PG: [no log message]
+
+2005-06-10 09:52  mchalla
+
+	* ChangeLog: [no log message]
+
 2005-06-10 09:32  mchalla
 
 	* MondoSCF2/InCoords.F90: K's recent mods.
