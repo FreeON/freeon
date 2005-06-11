@@ -449,13 +449,12 @@ CONTAINS
    SUBROUTINE GetRefXYZ(HFileIn,RefXYZ,iCLONE)
      TYPE(FileNames)      :: Nams
      CHARACTER(LEN=*)     :: HFileIn
-     INTEGER              :: HDFFileID,iCLONE,iCLONERef
+     INTEGER              :: HDFFileID,iCLONE
      TYPE(DBL_RNK2)       :: RefXYZ
      !
-     iCLONERef=1
      HDFFileID=OpenHDF(HFileIn)
      HDF_CurrentID= &
-       OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONERef)))
+       OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
      CALL Get(RefXYZ,'cartesians',Tag_O=TRIM(IntToChar(1)))
      CALL CloseHDFGroup(HDF_CurrentID)
      CALL CloseHDF(HDFFileID)
