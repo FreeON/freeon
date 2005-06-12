@@ -202,9 +202,12 @@ pScr:
 	rm  -rf $(MONDO_SCRATCH)/*.OrthoF
 	rm  -rf $(MONDO_SCRATCH)/*.F_DIIS
 	rm  -rf $(MONDO_SCRATCH)/*.D	
-	rm  -rf $(MONDO_SCRATCH)/*.OrhtoD
+	rm  -rf $(MONDO_SCRATCH)/*.OrthoD
 	rm  -rf $(MONDO_SCRATCH)/*.Kxc
 	rm  -rf $(MONDO_SCRATCH)/*.PFFT
+	rm  -rf $(MONDO_SCRATCH)/*.K
+	rm  -rf $(MONDO_SCRATCH)/*.X
+	rm  -rf $(MONDO_SCRATCH)/*.3*
 	rm  -rf $(MONDO_SCRATCH)/*
 #
 pPWD:
