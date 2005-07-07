@@ -1,8 +1,9 @@
 %------------------------------------
-\newcommand{\witheps}[1]{}
-\newcommand{\withpdf}[1]{#1}
 \newcommand{\twolinestyle}[1]{}
 \newcommand{\twoclmnstyle}[1]{#1}
+%------------------------------------
+\newcommand{\witheps}[1]{}
+\newcommand{\withpdf}[1]{#1}
 %------------------------------------
 \twolinestyle{\documentclass[prb,preprint]{revtex4}}
 \twoclmnstyle{\documentclass[prb,twocolumn,twocolumngrid]{revtex4}}
@@ -16,8 +17,10 @@
 %------------------------------------
 \begin{document}
 
+
 \title{Geometry Optimization of Crystals by the Quasi-\\
-       Independent Curvilinear Coordinate Approximation}
+       Independent Curvilinear Coordinate Approximation\twoclmnstyle{$^1$} }
+
 
 \author{K\'aroly N\'emeth}
 \email{Nemeth@ANL.Gov}
@@ -41,8 +44,8 @@ quartz and sulfur at the $\Gamma$-point RPBE/STO-3G level of theory.
 
 \maketitle
 
-%%\footnotetext[1]{\tt KNemeth@ANL.Gov}
-%%\footnotetext[2]{\tt MChalla@LANL.Gov}
+\twoclmnstyle{\footnotetext[1]{\tt LA-UR 05-4015}}
+\twolinestyle{\preprint{LA-UR 05-4015}}
 
 \section{Introduction}
 Internal coordinates, involving bond stretches, angle bends, torsions and out of plane bends, etc. 
