@@ -1,0 +1,33 @@
+set term postscript eps  enhanced color "Courrier" 28
+set output "UREA_321G.eps"
+
+set encoding iso_8859_1
+set style line  1 lt 1 lw 10 pt 1 ps 1.5
+set boxwidth 0.5 absolute
+set style fill solid 0.1250000 border
+#set size square 1.2, 1.6
+set xlabel "Iteration, i" 0,0.5  
+set ylabel "E_i-E_{opt} (hartree)"  0.5,0
+
+set logscale y
+#set logscale x
+ 
+set xrange [0:23]
+
+#21   -3581.29270946
+#24   -3581.29260656
+
+plot       'U321GKK.dat' using ($1):($2+895.326424)/2:1   title "GAUSSIAN" with boxes, \
+           'U321G.dat' using ($1):(($2+3581.29260656)/8  ) title "QUICCA" with lp ls 1
+
+set output "UREA_STO3G.eps"
+set xrange [0:18]
+
+plot       'USTOC98.dat' using ($1):($2+442.084595):1   title "CRYSTAL" with boxes, \
+           'USTO3G.dat' using ($1):(($2+3536.67736828)/8  ) title "QUICCA" with lp ls 1
+
+#     19        -3536.67736828
+
+# C98:
+#-442.069367
+#-442.084595

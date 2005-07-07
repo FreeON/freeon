@@ -1,0 +1,41 @@
+      1        -3536.55578808
+      2        -3536.63975658
+      3        -3536.64933446
+      4        -3536.65786127
+      5        -3536.66593645
+      6        -3536.67217649
+      7        -3536.67465210
+      8        -3536.67531950
+      9        -3536.67555742
+     10        -3536.67688344
+     11        -3536.67715813
+     12        -3536.67723324
+     13        -3536.67730307
+     14        -3536.67732871
+     15        -3536.67734338
+     16        -3536.67735045
+     17        -3536.67735946
+     18        -3536.67736537
+
+
+#     19        -3536.67736828
+
+#U2x2x2D.out:     Max Unconstrained Cart Grad =     0.074361      on atom     1
+#U2x2x2D.out:     Max Unconstrained Cart Grad =     0.017598      on atom     2
+#U2x2x2D.out:     Max Unconstrained Cart Grad =     0.014228      on atom    39
+#U2x2x2D.out:     Max Unconstrained Cart Grad =     0.012684      on atom    71
+#U2x2x2D.out:     Max Unconstrained Cart Grad =     0.010521      on atom    71
+#U2x2x2D.out:     Max Unconstrained Cart Grad =     0.006041      on atom     2
+#U2x2x2D.out:     Max Unconstrained Cart Grad =     0.004749      on atom   118
+#U2x2x2D.out:     Max Unconstrained Cart Grad =     0.010359      on atom    86
+#U2x2x2D.out:     Max Unconstrained Cart Grad =     0.008589      on atom    17
+#U2x2x2D.out:     Max Unconstrained Cart Grad =     0.003199      on atom    43
+#U2x2x2D.out:     Max Unconstrained Cart Grad =     0.002000      on atom   105
+#U2x2x2D.out:     Max Unconstrained Cart Grad =     0.002406      on atom    91
+#U2x2x2D.out:     Max Unconstrained Cart Grad =     0.001207      on atom    43
+#U2x2x2D_14633.out:     Max Unconstrained Cart Grad =     0.001139      on atom    58
+#U2x2x2D_14633.out:     Max Unconstrained Cart Grad =     0.001057      on atom    65
+#U2x2x2D_14633.out:     Max Unconstrained Cart Grad =     0.001947      on atom    17
+#U2x2x2D_14633.out:     Max Unconstrained Cart Grad =     0.000974      on atom    74
+#U2x2x2D_14633.out:     Max Unconstrained Cart Grad =     0.000612      on atom    86
+#U2x2x2D_14633.out:     Max Unconstrained Cart Grad =     0.000430      on atom    14
