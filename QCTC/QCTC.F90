@@ -116,7 +116,6 @@ PROGRAM QCTC
 #else
   CALL RhoToPoleTree
 #endif
-  CALL RhoToPoleTree
   CALL Elapsed_TIME(TimeMakeTree,'Accum')
 #ifdef PARALLEL
   CALL EqualTimeSetUp()
