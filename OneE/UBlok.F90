@@ -8,7 +8,7 @@ MODULE ECPBlock
   USE ProcessControl
   IMPLICIT NONE
   ! Global temporary arrays for explicit fortran intermediates
-  REAL(DOUBLE),DIMENSION(500) :: W,V
+  REAL(DOUBLE),DIMENSION(5000) :: W,V
   ! Global solid angle.  Soliiidddd.
   REAL(DOUBLE),PARAMETER    :: FourPi=12.56637061435917295385D0
   ! Global array of binomial coefficients
