@@ -331,7 +331,7 @@ CONTAINS
 !------------------------------------------------------------------------!
   SUBROUTINE ReSetAtNum(G)
     TYPE(CRDS) :: G
-    INTEGER :: I,IAtomNo
+    INTEGER :: I,J,IAtomNo
     DO I=1,G%NAtms
        IAtomNo=G%AtNum%D(I)
        IF(TRIM(Ats(I))/=TRIM(G%AtNam%C(I)))THEN
