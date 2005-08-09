@@ -371,8 +371,9 @@ MODULE MDynamics
 !--------------------------------------------------------------
   SUBROUTINE OutputMD(C,iGEO)
     TYPE(Controls)                 :: C
-    INTEGER                        :: iGEO,iCLONE,iATS
-    REAL(DOUBLE)                   :: Pressure,a12,a13,a23
+    INTEGER                        :: iGEO,iCLONE,iATS,I,J,K
+    REAL(DOUBLE)                   :: Pressure
+    REAL(DOUBLE),DIMENSION(3,3)    :: Latt,InvLatt,LattFrc
     CHARACTER(LEN=DEFAULT_CHR_LEN) :: File,Line
 !
     DO iCLONE=1,C%Geos%Clones
@@ -447,96 +448,79 @@ MODULE MDynamics
        WRITE(Out,98) "MD Temperature = ",MDTemp%D(iCLONE)
        WRITE(Out,96) "MD L. Momentum = ",MDLinP%D(1:3,iCLONE)
 !      Output Lattice and Lattice Forces
+       Latt    = C%Geos%Clone(iCLONE)%PBC%BoxShape%D
+       InvLatt = C%Geos%Clone(iCLONE)%PBC%InvBoxSh%D
+       LattFrc = C%Geos%Clone(iCLONE)%PBC%LatFrc%D
        IF(C%Geos%Clone(iCLONE)%PBC%Dimen==1) THEN
           IF(C%Geos%Clone(iCLONE)%PBC%AutoW%I(1)==1) THEN
              WRITE(Out,85) 
-             WRITE(Out,82) "       a       = ",C%Geos%Clone(iCLONE)%PBC%BoxShape%D(1,1)
+             WRITE(Out,82) "       a       = ",Latt(1,1)
              WRITE(Out,85) 
-             WRITE(Out,82) "     div(a)    = ",C%Geos%Clone(iCLONE)%PBC%LatFrc%D(1,1)
+             WRITE(Out,82) "     div(a)    = ",LattFrc(1,1)
              WRITE(Out,85) 
           ENDIF
           IF(C%Geos%Clone(iCLONE)%PBC%AutoW%I(2)==1) THEN
              WRITE(Out,85) 
-             WRITE(Out,82) "       b       = ",C%Geos%Clone(iCLONE)%PBC%BoxShape%D(2,2)
+             WRITE(Out,82) "       b       = ",Latt(2,2)
              WRITE(Out,85) 
-             WRITE(Out,82) "     div(b)    = ",C%Geos%Clone(iCLONE)%PBC%LatFrc%D(2,2)
+             WRITE(Out,82) "     div(b)    = ",LattFrc(2,2)
              WRITE(Out,85) 
           ENDIF
           IF(C%Geos%Clone(iCLONE)%PBC%AutoW%I(3)==1) THEN
              WRITE(Out,85) 
-             WRITE(Out,82) "       c       = ",C%Geos%Clone(iCLONE)%PBC%BoxShape%D(3,3)
+             WRITE(Out,82) "       c       = ",Latt(3,3)
              WRITE(Out,85) 
-             WRITE(Out,82) "     div(c)    = ",C%Geos%Clone(iCLONE)%PBC%LatFrc%D(3,3)
+             WRITE(Out,82) "     div(c)    = ",LattFrc(3,3)
              WRITE(Out,85) 
           ENDIF
        ELSEIF(C%Geos%Clone(iCLONE)%PBC%Dimen==2) THEN
           IF(C%Geos%Clone(iCLONE)%PBC%AutoW%I(1)==0) THEN
              WRITE(Out,85) 
-             WRITE(Out,82) "       b       = ",C%Geos%Clone(iCLONE)%PBC%BoxShape%D(2,2), & 
-                                               C%Geos%Clone(iCLONE)%PBC%BoxShape%D(3,2)
-             WRITE(Out,82) "       c       = ",C%Geos%Clone(iCLONE)%PBC%BoxShape%D(2,3), & 
-                                               C%Geos%Clone(iCLONE)%PBC%BoxShape%D(3,3)
+             WRITE(Out,82) "       b       = ",Latt(2,2), Latt(2,3)
+             WRITE(Out,82) "       c       = ",Latt(3,2), Latt(3,3)
              WRITE(Out,85) 
-             WRITE(Out,82) "     div(b)    = ",C%Geos%Clone(iCLONE)%PBC%LatFrc%D(2,2),   &
-                                               C%Geos%Clone(iCLONE)%PBC%LatFrc%D(3,2)
-             WRITE(Out,82) "     div(c)    = ",C%Geos%Clone(iCLONE)%PBC%LatFrc%D(2,3),   &
-                                               C%Geos%Clone(iCLONE)%PBC%LatFrc%D(3,3)
+             WRITE(Out,82) "     div(b)    = ",LattFrc(2,2), LattFrc(2,3)
+             WRITE(Out,82) "     div(c)    = ",LattFrc(3,2), LattFrc(3,3)
              WRITE(Out,85) 
           ENDIF
           IF(C%Geos%Clone(iCLONE)%PBC%AutoW%I(2)==0) THEN
              WRITE(Out,85) 
-             WRITE(Out,82) "       a       = ",C%Geos%Clone(iCLONE)%PBC%BoxShape%D(1,1), & 
-                                               C%Geos%Clone(iCLONE)%PBC%BoxShape%D(3,1)
-             WRITE(Out,82) "       c       = ",C%Geos%Clone(iCLONE)%PBC%BoxShape%D(1,3), & 
-                                               C%Geos%Clone(iCLONE)%PBC%BoxShape%D(3,3)
+             WRITE(Out,82) "       a       = ",Latt(1,1), Latt(1,3)
+             WRITE(Out,82) "       c       = ",Latt(3,1), Latt(3,3)
              WRITE(Out,85) 
-             WRITE(Out,82) "     div(a)    = ",C%Geos%Clone(iCLONE)%PBC%LatFrc%D(1,1),   &
-                                               C%Geos%Clone(iCLONE)%PBC%LatFrc%D(3,1)
-             WRITE(Out,82) "     div(c)    = ",C%Geos%Clone(iCLONE)%PBC%LatFrc%D(1,3),   &
-                                               C%Geos%Clone(iCLONE)%PBC%LatFrc%D(3,3)
+             WRITE(Out,82) "     div(a)    = ",LattFrc(1,1), LattFrc(1,3)
+             WRITE(Out,82) "     div(c)    = ",LattFrc(3,1), LattFrc(3,3)
              WRITE(Out,85) 
           ENDIF
           IF(C%Geos%Clone(iCLONE)%PBC%AutoW%I(3)==0) THEN
              WRITE(Out,85) 
-             WRITE(Out,82) "       a       = ",C%Geos%Clone(iCLONE)%PBC%BoxShape%D(1,1), & 
-                                               C%Geos%Clone(iCLONE)%PBC%BoxShape%D(2,1)
-             WRITE(Out,82) "       b       = ",C%Geos%Clone(iCLONE)%PBC%BoxShape%D(1,2), & 
-                                               C%Geos%Clone(iCLONE)%PBC%BoxShape%D(2,2)
+             WRITE(Out,82) "       a       = ",Latt(1,1), Latt(1,2)
+             WRITE(Out,82) "       b       = ",Latt(2,1), Latt(2,2)
              WRITE(Out,85) 
-             WRITE(Out,82) "     div(a)    = ",C%Geos%Clone(iCLONE)%PBC%LatFrc%D(1,1),   &
-                                               C%Geos%Clone(iCLONE)%PBC%LatFrc%D(2,1)
-             WRITE(Out,82) "     div(b)    = ",C%Geos%Clone(iCLONE)%PBC%LatFrc%D(1,2),   &
-                                               C%Geos%Clone(iCLONE)%PBC%LatFrc%D(2,2)
+             WRITE(Out,82) "     div(a)    = ",LattFrc(1,1), LattFrc(1,2)
+             WRITE(Out,82) "     div(b)    = ",LattFrc(2,1), LattFrc(2,2)
              WRITE(Out,85) 
           ENDIF
        ELSEIF(C%Geos%Clone(iCLONE)%PBC%Dimen==3) THEN
-          a12 = C%Geos%Clone(iCLONE)%PBC%BoxShape%D(1,1)*C%Geos%Clone(iCLONE)%PBC%BoxShape%D(2,2)
-          a23 = C%Geos%Clone(iCLONE)%PBC%BoxShape%D(2,2)*C%Geos%Clone(iCLONE)%PBC%BoxShape%D(3,3)
-          a13 = C%Geos%Clone(iCLONE)%PBC%BoxShape%D(1,1)*C%Geos%Clone(iCLONE)%PBC%BoxShape%D(3,3)
-          Pressure = - C%Geos%Clone(iCLONE)%PBC%LatFrc%D(1,1)/a23 &
-                     - C%Geos%Clone(iCLONE)%PBC%LatFrc%D(2,2)/a13 &
-                     - C%Geos%Clone(iCLONE)%PBC%LatFrc%D(3,3)/a12 
+!         Compute The Pressure
+          Pressure = (2.D0/3.D0)*MDKin%D(iCLONE)
+          DO I=1,3
+             DO J=1,3
+                Pressure = Pressure + Latt(I,J)*LattFrc(I,J)
+             ENDDO
+          ENDDO
+          Pressure=Pressure/(C%Geos%Clone(iCLONE)%PBC%CellVolume*GPaToAU)
+!
           WRITE(Out,85) 
-          WRITE(Out,82) "       a       = ",C%Geos%Clone(iCLONE)%PBC%BoxShape%D(1,1), & 
-                                            C%Geos%Clone(iCLONE)%PBC%BoxShape%D(2,1), &
-                                            C%Geos%Clone(iCLONE)%PBC%BoxShape%D(3,1)
-          WRITE(Out,82) "       b       = ",C%Geos%Clone(iCLONE)%PBC%BoxShape%D(1,2), & 
-                                            C%Geos%Clone(iCLONE)%PBC%BoxShape%D(2,2), &
-                                            C%Geos%Clone(iCLONE)%PBC%BoxShape%D(3,2)
-          WRITE(Out,82) "       c       = ",C%Geos%Clone(iCLONE)%PBC%BoxShape%D(1,3), & 
-                                            C%Geos%Clone(iCLONE)%PBC%BoxShape%D(2,3), &
-                                            C%Geos%Clone(iCLONE)%PBC%BoxShape%D(3,3)
+          WRITE(Out,82) "       a       = ",Latt(1,1), Latt(1,2), Latt(1,3)
+          WRITE(Out,82) "       b       = ",Latt(2,1), Latt(2,2), Latt(2,3)
+          WRITE(Out,82) "       c       = ",Latt(3,1), Latt(3,2), Latt(3,3)
           WRITE(Out,85) 
-          WRITE(Out,82) "     div(a)    = ",C%Geos%Clone(iCLONE)%PBC%LatFrc%D(1,1),   &
-                                            C%Geos%Clone(iCLONE)%PBC%LatFrc%D(2,1),   &
-                                            C%Geos%Clone(iCLONE)%PBC%LatFrc%D(3,1)
-          WRITE(Out,82) "     div(b)    = ",C%Geos%Clone(iCLONE)%PBC%LatFrc%D(1,2),   &
-                                            C%Geos%Clone(iCLONE)%PBC%LatFrc%D(2,2),   &
-                                            C%Geos%Clone(iCLONE)%PBC%LatFrc%D(3,2)
-          WRITE(Out,82) "     div(c)    = ",C%Geos%Clone(iCLONE)%PBC%LatFrc%D(1,3),   &
-                                            C%Geos%Clone(iCLONE)%PBC%LatFrc%D(2,3),   &
-                                            C%Geos%Clone(iCLONE)%PBC%LatFrc%D(3,3)
-          WRITE(Out,82) "    Pressure   = ",Pressure 
+          WRITE(Out,82) "     div(a)    = ",LattFrc(1,1), LattFrc(1,2), LattFrc(1,3)
+          WRITE(Out,82) "     div(b)    = ",LattFrc(2,1), LattFrc(2,2), LattFrc(2,3)
+          WRITE(Out,82) "     div(c)    = ",LattFrc(3,1), LattFrc(3,2), LattFrc(3,3)
+          WRITE(Out,85) 
+          WRITE(Out,80) "    Pressure   = ",Pressure," GPa"
           WRITE(Out,85) 
        ENDIF
        DO iATS=1,C%Geos%Clone(iCLONE)%NAtms
