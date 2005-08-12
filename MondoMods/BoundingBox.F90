@@ -57,6 +57,21 @@ MODULE BoundingBox
          Left%Center(ISplit)=Half*(Left%BndBox(ISplit,2)+Left%BndBox(ISplit,1))
          Right%Center(ISplit)=Half*(Right%BndBox(ISplit,2)+Right%BndBox(ISplit,1))
       END SUBROUTINE SplitBox
+
+      SUBROUTINE BoxMerge(Left,Right,Box)
+        TYPE(BBox)       :: Left,Right,Box
+        INTEGER          :: K
+        DO K=1,3
+           Box%BndBox(K,1)=MIN(Left%BndBox(K,1),Right%BndBox(K,1))
+           Box%BndBox(K,2)=MAX(Left%BndBox(K,2),Right%BndBox(K,2))
+        ENDDO
+        Box%Half(1)  = Half*(Box%BndBox(1,2)-Box%BndBox(1,1))
+        Box%Half(2)  = Half*(Box%BndBox(2,2)-Box%BndBox(2,1))
+        Box%Half(3)  = Half*(Box%BndBox(3,2)-Box%BndBox(3,1))
+        Box%Center(1)= Half*(Box%BndBox(1,2)+Box%BndBox(1,1))
+        Box%Center(2)= Half*(Box%BndBox(2,2)+Box%BndBox(2,1))
+        Box%Center(3)= Half*(Box%BndBox(3,2)+Box%BndBox(3,1))
+      END SUBROUTINE BoxMerge
 !===============================================================================
 !     Determine if a point with extent is outside a BBox
 !===============================================================================
