@@ -58,6 +58,31 @@ MODULE BoundingBox
          Right%Center(ISplit)=Half*(Right%BndBox(ISplit,2)+Right%BndBox(ISplit,1))
       END SUBROUTINE SplitBox
 
+!===============================================================================
+!     Determine if a point with extent is outside a BBox
+!===============================================================================
+      FUNCTION FurthestPointInBox(Point,Box)
+        TYPE(BBox)                  :: Box
+        REAL(DOUBLE)                :: PCDist2,FurthestPointInBox
+        REAL(DOUBLE),DIMENSION(3)   :: Point
+        REAL(DOUBLE),DIMENSION(3,8) :: Corner
+        INTEGER                     :: I
+        Corner(:,1)=(/Box%BndBox(1,1),Box%BndBox(2,1),Box%BndBox(3,1)/)
+        Corner(:,2)=(/Box%BndBox(1,2),Box%BndBox(2,1),Box%BndBox(3,1)/)
+        Corner(:,3)=(/Box%BndBox(1,1),Box%BndBox(2,2),Box%BndBox(3,1)/)
+        Corner(:,4)=(/Box%BndBox(1,1),Box%BndBox(2,1),Box%BndBox(3,2)/)
+        Corner(:,5)=(/Box%BndBox(1,2),Box%BndBox(2,1),Box%BndBox(3,2)/)
+        Corner(:,6)=(/Box%BndBox(1,2),Box%BndBox(2,2),Box%BndBox(3,1)/)
+        Corner(:,7)=(/Box%BndBox(1,1),Box%BndBox(2,2),Box%BndBox(3,2)/)
+        Corner(:,8)=(/Box%BndBox(1,2),Box%BndBox(2,2),Box%BndBox(3,2)/)
+        PCDist2=Zero
+        DO I=1,8
+           PCDist2=MAX(PCDist2,DOT_PRODUCT(Corner(:,I)-Point,Corner(:,I)-Point))
+        ENDDO
+        FurthestPointInBox=SQRT(PCDist2)
+      END FUNCTION FurthestPointInBox
+
+
       SUBROUTINE BoxMerge(Left,Right,Box)
         TYPE(BBox)       :: Left,Right,Box
         INTEGER          :: K
