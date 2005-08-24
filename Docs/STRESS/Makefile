@@ -22,7 +22,8 @@ links:
 	ln -s $(MONDO_HOME)/Docs/RevTex/12pt.rtx ./12pt.rtx
 
 ps:	latex
-	dvips -t a4 -o Stress.ps Stress
+#	dvips -t a4 -o Stress.ps Stress
+	dvips -o Stress.ps Stress
 
 pdf:	ps
 	ps2pdf Stress.ps Stress.pdf
