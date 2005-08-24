@@ -86,6 +86,240 @@ MODULE FastMatrices
 
 !======================================================================
 #ifdef PARALLEL
+#ifdef 1
+  !>>>>>>>
+  !
+  ! The following routines use a binary tree for the reduce.
+  ! Reduce_FASTMAT replaces the Redistribute_FASTMAT and Set_BCSR_EQ_DFASTMAT.
+  !
+  SUBROUTINE Reduce_FASTMAT(A,AFM)
+    IMPLICIT NONE
+    TYPE(BCSR)              :: A
+    TYPE(FASTMAT), POINTER  :: AFM
+    TYPE(BCSR)              :: B,C
+    INTEGER                 :: LMax,NCom,L,i,To,From,iErr,it
+    REAL(DOUBLE), PARAMETER :: INVLOG2=1.44269504088896D0
+    !
+    ! Depth of the tree.
+    LMax=CEILING(LOG(DBLE(NPrc))*INVLOG2)
+    !
+    CALL New_BCSR(A,OnAll_O=.TRUE.)
+    CALL New_BCSR(B,OnAll_O=.TRUE.)
+    CALL New_BCSR(C,OnAll_O=.TRUE.)
+    CALL Set_LBCSR_EQ_DFASTMAT(A,AFM)
+    !
+    ! Run over the shells in the tree.
+    DO L=LMax,1,-1
+       ! Compute the number max of send/recive.
+       NCom=2**(L-1)
+       IF(MyID==0)WRITE(*,*) 'L=',L,' NCom=',NCom
+       !
+       To=0
+       DO i=1,NCom
+          From=To+2**(LMax-l);
+          IF(MyID==0)WRITE(*,*) 'To =',To,'; From =',From,'; i =',i,MyID
+          !
+          ! Take into account If NPrc is not a power of 2.
+          IF(From.GT.NPrc-1) THEN
+             IF(MyID==0)WRITE(*,*) 'This one is grather than NPrc, we exit.'
+             EXIT
+          ENDIF
+          !
+          IF(MyID.EQ.To) THEN
+             CALL Recv_LBCSR(B,From)
+             CALL Add_LBCSR(A,B,C)
+             CALL Set_LBCSR_EQ_LBCSR(A,C)
+          ENDIF
+          IF(MyID.EQ.From) CALL Send_LBCSR(A,To)
+          To=To+INT(2**(LMax-L+1))
+       ENDDO
+    ENDDO
+    !
+    CALL Delete_BCSR(B,OnAll_O=.TRUE.)
+    CALL Delete_BCSR(C,OnAll_O=.TRUE.)
+  END SUBROUTINE Reduce_FASTMAT
+  !
+  SUBROUTINE Set_LBCSR_EQ_LBCSR(B,A)
+    TYPE(BCSR), INTENT(INOUT) :: A
+    TYPE(BCSR), INTENT(INOUT) :: B
+    IF(AllocQ(B%Alloc) .AND. &
+         (B%NAtms<A%NAtms.OR.B%NBlks<A%NBlks.OR.B%NNon0<A%NNon0) )THEN
+       CALL Delete(B,OnAll_O=.TRUE.)
+       CALL New(B,OnAll_O=.TRUE.)
+       B%NAtms=A%NAtms; B%NBlks=A%NBlks; B%NNon0=A%NNon0
+    ELSE
+       IF(.NOT.AllocQ(B%Alloc))CALL New(B,OnAll_O=.TRUE.)
+       B%NAtms=A%NAtms; B%NBlks=A%NBlks; B%NNon0=A%NNon0
+    ENDIF
+    CALL INT_VECT_EQ_INT_VECT(A%NAtms+1,B%RowPt%I(1),A%RowPt%I(1))
+    CALL INT_VECT_EQ_INT_VECT(A%NBlks  ,B%ColPt%I(1),A%ColPt%I(1))
+    CALL INT_VECT_EQ_INT_VECT(A%NBlks  ,B%BlkPt%I(1),A%BlkPt%I(1))
+    CALL DBL_VECT_EQ_DBL_VECT(A%NNon0  ,B%MTrix%D(1),A%MTrix%D(1))
+    !B%RowPt%I(1:A%NAtms+1)=A%RowPt%I(1:A%NAtms+1)
+    !B%ColPt%I(1:A%NBlks)  =A%ColPt%I(1:A%NBlks)
+    !B%BlkPt%I(1:A%NBlks)  =A%BlkPt%I(1:A%NBlks)
+    !B%MTrix%D(1:A%NNon0)  =A%MTrix%D(1:A%NNon0)
+  END SUBROUTINE Set_LBCSR_EQ_LBCSR
+  !
+  SUBROUTINE Add_LBCSR(A,B,C)
+    IMPLICIT NONE
+    TYPE(BCSR), INTENT(INOUT) :: A,B
+    TYPE(BCSR), INTENT(INOUT) :: C
+    INTEGER                   :: Status
+    REAL(DOUBLE)              :: FlOp
+    IF(.NOT.AllocQ(C%Alloc)) CALL New(C,OnAll_O=.TRUE.)
+    CALL New(Flag,NAtoms)
+    CALL SetEq(Flag,0)
+    Flop=Zero
+    Status=Add_GENERIC(SIZE(C%ColPt%I),SIZE(C%MTrix%D),         &
+         &             A%NAtms,0,                               &
+         &             C%NAtms,C%NBlks,C%NNon0,                 &
+         &             A%RowPt%I,A%ColPt%I,A%BlkPt%I,A%MTrix%D, &
+         &             B%RowPt%I,B%ColPt%I,B%BlkPt%I,B%MTrix%D, &
+         &             C%RowPt%I,C%ColPt%I,C%BlkPt%I,C%MTrix%D, &
+         &             BSiz%I,Flag%I,Flop)
+    CALL Delete(Flag)
+    IF(Status==FAIL) THEN
+       WRITE(*,*) "Status = ",Status
+       WRITE(*,*) A%NAtms,A%NBlks,A%NNon0,SIZE(A%MTrix%D)
+       WRITE(*,*) B%NAtms,B%NBlks,B%NNon0,SIZE(B%MTrix%D)
+       WRITE(*,*) C%NAtms,C%NBlks,C%NNon0,SIZE(C%MTrix%D)
+       CALL Halt('Dimensions in Add_LBCSR')
+    ENDIF
+  END SUBROUTINE Add_LBCSR
+  !
+  SUBROUTINE Send_LBCSR(A,To)
+    IMPLICIT NONE
+    TYPE(BCSR)     :: A
+    TYPE(INT_VECT) :: V
+    INTEGER        :: To,IErr,N,DUM(3)
+    !
+    DUM(1)=A%NAtms
+    DUM(2)=A%NBlks
+    DUM(3)=A%NNon0
+    write(*,'(A,3I10,A,I3,A,I3)') 'We send',DUM(1),DUM(2),DUM(3),'  MyID',MyID,' To  ',To
+    CALL MPI_SEND(DUM(1),3,MPI_INTEGER,To,10,MONDO_COMM,IErr)
+    !
+    N=A%NAtms+1+2*A%NBlks
+    CALL New(V,N)
+    CALL INT_VECT_EQ_INT_VECT(A%NAtms+1,V%I(1)                ,A%RowPt%I(1))
+    CALL INT_VECT_EQ_INT_VECT(A%NBlks  ,V%I(A%NAtms+2)        ,A%ColPt%I(1))
+    CALL INT_VECT_EQ_INT_VECT(A%NBlks  ,V%I(A%NAtms+2+A%NBlks),A%BlkPt%I(1))
+    CALL MPI_SEND(V%I(1),N,MPI_INTEGER,To,11,MONDO_COMM,IErr)
+    CALL Delete(V)
+    !
+    !CALL MPI_SEND(A%RowPt%I(1),A%NAtms+1,MPI_INTEGER,To,11,MONDO_COMM,IErr)
+    !CALL MPI_SEND(A%ColPt%I(1),A%NBlks  ,MPI_INTEGER,To,12,MONDO_COMM,IErr)
+    !CALL MPI_SEND(A%BlkPt%I(1),A%NBlks  ,MPI_INTEGER,To,13,MONDO_COMM,IErr)
+    !
+    CALL MPI_SEND(A%MTrix%D(1),A%NNon0  ,MPI_DOUBLE_PRECISION,To,14,MONDO_COMM,IErr)
+  END SUBROUTINE Send_LBCSR
+  !
+  SUBROUTINE Recv_LBCSR(A,From)
+    IMPLICIT NONE
+    TYPE(BCSR)     :: A
+    TYPE(INT_VECT) :: V
+    INTEGER        :: From,IErr,N,DUM(3),Status(MPI_STATUS_SIZE)
+    ! May use that MPI_STATUS_IGNORE
+    !
+    CALL MPI_RECV(DUM(1),3,MPI_INTEGER,From,10,MONDO_COMM,Status,IErr)
+    !CALL MPI_RECV(DUM(1),3,MPI_INTEGER,From,10,MONDO_COMM,MPI_STATUS_IGNORE,IErr)
+    write(*,'(A,3I10,A,I3,A,I3)') 'We recv',DUM(1),DUM(2),DUM(3),'  MyID',MyID,' From',From
+    A%NAtms=DUM(1)
+    A%NBlks=DUM(2)
+    A%NNon0=DUM(3)
+    !
+    N=A%NAtms+1+2*A%NBlks
+    CALL New(V,N)
+    CALL MPI_RECV(V%I(1),N,MPI_INTEGER,From,11,MONDO_COMM,Status,IErr)
+    !CALL MPI_RECV(V%I(1),N,MPI_INTEGER,From,11,MONDO_COMM,MPI_STATUS_IGNORE,IErr)
+    CALL INT_VECT_EQ_INT_VECT(A%NAtms+1,A%RowPt%I(1),V%I(1)                )
+    CALL INT_VECT_EQ_INT_VECT(A%NBlks  ,A%ColPt%I(1),V%I(A%NAtms+2)        )
+    CALL INT_VECT_EQ_INT_VECT(A%NBlks  ,A%BlkPt%I(1),V%I(A%NAtms+2+A%NBlks))
+    CALL Delete(V)
+    !
+    !CALL MPI_RECV(A%RowPt%I(1),A%NAtms+1,MPI_INTEGER,From,11, &
+    !     &        MONDO_COMM,Status,IErr)
+    !CALL MPI_RECV(A%ColPt%I(1),A%NBlks  ,MPI_INTEGER,From,12, &
+    !     &        MONDO_COMM,Status,IErr)
+    !CALL MPI_RECV(A%BlkPt%I(1),A%NBlks  ,MPI_INTEGER,From,13, &
+    !     &        MONDO_COMM,Status,IErr)
+    !
+    CALL MPI_RECV(A%MTrix%D(1),A%NNon0  ,MPI_DOUBLE_PRECISION, &
+         &        From,14,MONDO_COMM,Status,IErr)
+    !CALL MPI_RECV(A%MTrix%D(1),A%NNon0  ,MPI_DOUBLE_PRECISION, &
+    !     &        From,14,MONDO_COMM,MPI_STATUS_IGNORE,IErr)
+  END SUBROUTINE Recv_LBCSR
+
+  SUBROUTINE Set_LBCSR_EQ_DFASTMAT(B,A)
+    TYPE(FASTMAT),POINTER :: A,R
+    TYPE(SRST),POINTER    :: U
+    TYPE(BCSR)            :: B
+    INTEGER               :: I,J,JP,P,N,M,Q,OI,OJ,IC,JC,At,OldR
+    NULLIFY(R,U)
+    ! Check for prior allocation
+    !write(*,*) 'In Set_BCSR_EQ_FASTMAT -1'
+    IF(.NOT.ASSOCIATED(A%Next)) CALL Halt(' A not associated in Set_LBCSR_EQ_DFASTMAT')
+    !write(*,*) 'In Set_BCSR_EQ_FASTMAT 0',MyID
+    CALL FlattenAllRows(A)
+    !write(*,*) 'In Set_BCSR_EQ_FASTMAT 0.1'
+    !IF(AllocQ(B%Alloc)) CALL Delete(B,OnAll_O=.TRUE.)
+    !CALL New(B,OnAll_O=.TRUE.)
+    !write(*,*) 'In Set_BCSR_EQ_FASTMAT 0.2'
+    CALL INT_VECT_EQ_INT_SCLR(NAtoms+1,B%RowPt%I(1),-100000)
+    P=1
+    Q=1
+    OI=0
+    B%RowPt%I(1)=1
+    R => A%Next
+    !write(*,*) 'In Set_BCSR_EQ_FASTMAT 0.3'
+    DO
+       IF(.NOT.ASSOCIATED(R)) EXIT
+       I = R%Row
+       M = BSiz%I(I)
+       OJ=0
+       U => R%RowRoot
+       !write(*,*) 'In Set_BCSR_EQ_FASTMAT 0.4'
+       DO
+          IF(.NOT.ASSOCIATED(U)) EXIT
+          IF(U%L.EQ.U%R) THEN
+             IF(ASSOCIATED(U%MTrix)) THEN
+                J = U%L
+                N = BSiz%I(J)
+                DO JC=1,N
+                   DO IC=1,M
+                      B%MTrix%D(Q+IC-1+(JC-1)*M) = U%MTrix(IC,JC)
+                   ENDDO
+                ENDDO
+                !CALL DBL_VECT_EQ_DBL_VECT(M*N,B%MTrix%D(Q),U%MTrix(1,1))
+                B%BlkPt%I(P)=Q
+                B%ColPt%I(P)=J
+                Q=Q+M*N
+                P=P+1
+                B%RowPt%I(I+1)=P
+                OJ=OJ+N
+             ENDIF
+             OI=OI+M
+          ENDIF
+          U => U%Next
+          !write(*,*) 'In Set_BCSR_EQ_FASTMAT 7'
+       ENDDO
+       R => R%Next
+       !write(*,*) 'In Set_BCSR_EQ_FASTMAT 8'
+    ENDDO
+    B%NAtms=NAtoms
+    B%NBlks=P-1
+    B%NNon0=Q-1
+    !write(*,*) 'In Set_BCSR_EQ_FASTMAT 9',MyID
+    OldR=B%RowPt%I(1)
+    DO At=2,NAtoms+1
+       IF(B%RowPt%I(At).EQ.-100000) B%RowPt%I(At)=OldR
+       OldR=B%RowPt%I(At)
+    ENDDO
+  END SUBROUTINE Set_LBCSR_EQ_DFASTMAT
+  !<<<<<<<
+#endif
+  !
   SUBROUTINE Set_BCSR_EQ_DFASTMAT(C,A)
     TYPE(FASTMAT),POINTER :: A
     TYPE(BCSR) :: B,C
