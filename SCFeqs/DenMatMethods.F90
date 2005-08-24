@@ -207,7 +207,8 @@ CONTAINS
         OldE=BIG_DBL
         OldAEP=BIG_DBL
      ENDIF
-     PNon0=100.D0*DBLE(P%NNon0)/DBLE(NBasF*NBasF)
+     PNon0=DBLE(Reduce(P%NNon0))
+     PNon0=100.D0*PNon0/DBLE(NBasF*NBasF)
      ! Density matrix errors
      CALL Multiply(Pold,-One)
      CALL Add(Pold,P,Tmp1)
