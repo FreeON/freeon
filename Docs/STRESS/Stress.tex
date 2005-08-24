@@ -34,8 +34,8 @@
 
 %\documentclass[pre,aps,twocolumn,showpacs,twocolumngrid,superbib]{revtex4}
 %\documentclass[prl,aps,twocolumn,showkeys,twocolumngrid,superbib]{revtex4}
-\documentclass[twocolumn,showkeys,showpacs,preprintnumbers,amsmath,amssymb]{revtex4}
-
+%\documentclass[twocolumn,showkeys,showpacs,preprintnumbers,amsmath,amssymb]{revtex4}
+ \documentclass[prl,twocolumn,showpacs,twocolumngrid,superbib]{revtex4}
 
 \usepackage{graphicx}
 \usepackage{amsfonts}
@@ -89,7 +89,8 @@
 
 %\pacs{Valid PACS appear here}% PACS, the Physics and Astronomy
                              % Classification Scheme.
-\keywords{Periodic boundary condition, exact Hartree-Fock exchange, lattice gradients.}
+\keywords{Periodic boundary condition, exact Hartree-Fock exchange, atomic gradients, 
+lattice gradients.}
                               %display desired
 \maketitle
 
@@ -185,7 +186,7 @@ in Section~\ref{Sec:NumExamples} as an illustration of the formalism.
 Finally in Section~\ref{Sec:Conclusions} we summarize our results.
 
 
-\section{Hartree-Fock exchange}\label{Sec:Formalism}
+\section{Hartree-Fock exchange energy}\label{Sec:Formalism}
 The primitive cell is given by the three vectors $\mathbf{a}$, 
 $\mathbf{b}$ and $\mathbf{c}$, $M$ is the $3\times3$ matrix composed 
 of the primitive lattice vectors
@@ -196,7 +197,10 @@ The position of a direct lattice is defined as $\mathbf{R}=M\mathbf{n}$,
 with $\mathbf{n}=(n_a,n_b,n_c)$ being integer numbers.
 The position of an atom $A$ in the cell $\mathbf{n}$ is $\mathbf{A}=M(\mathbf{f}_A+\mathbf{n})$,
 and $\mathbf{f}_A=(f_{Aa},f_{Ab},f_{Ac})$ are the fractional coordinates of 
-the atom $A$ in the working cell.
+the atom $A$ in the working cell. 
+In the following, we will refer to the full set of
+fractional coordinates of the atoms in the working cell 
+$\mathbf{f}_A,\mathbf{f}_B,\ldots$ as $\{\mathbf{f}_A\}$.
 
 The unnormalized Cartesian Gaussian-type function (CGTF) centered on the atom $A$ reads
 \begin{equation}
@@ -206,15 +210,31 @@ where the triad $a=(a_x,a_y,a_z)$ sets the angular symmetry and the exponent $\z
 is chosen to describe a particular length scale. Gaussian basis functions are often
 contracted to approximate atomic eigenfunctions.
 
-In computation of the Hartree-Fock exchange matrix, 
-the MIC $\Gamma$-point approximation~\cite{CTymczak04b}
-is given 
+%The Hartree-Fock exchange energy is given by
+%\begin{equation}
+% E^x(\{\mathbf{f}_A\},M)=\Tr(PK)
+%\end{equation}
+%where $P=P(\{\mathbf{f}_A\},M)$ is the converged density matrix and $K=K(\{\mathbf{f}_A\},M)$ is
+%the Hartree-Fock exchange matrix within 
+%the MIC $\Gamma$-point approximation~\cite{CTymczak04b}
+%and its elements are
+%\begin{equation}
+%  K_{ab}(\{\mathbf{f}_A\},M)= -\frac{1}{2}\sum_{\substack{\mathbf{m}\mathbf{n}\\c d}}
+%  P_{cd}(ac^\mathbf{m}|bd^\mathbf{n})
+%\end{equation}
+%where the pair of indices $\mathbf{m}$ and $\mathbf{n}$ run over the direct lattice vectors, 
+%$c$ and $d$ over the basis functions, $P_{cd}$ is an element of the density matrix 
+%and the ERIs are written in the chemist notation.
+
+The Hartree-Fock exchange energy within the MIC $\Gamma$-point approximation~\cite{CTymczak04b} 
+is given by
 \begin{equation}
-  K_{ab}= -\frac{1}{2}\sum_{\substack{\mathbf{m}\mathbf{n}\\c d}}
-  P_{cd}(ac^\mathbf{m}|bd^\mathbf{n})
+ E^x(\{\mathbf{f}_A\},M)=
+ -\frac{1}{2}\sum_{\substack{\mathbf{m}\mathbf{n}\\a b c d}}P_{ab}P_{cd}
+ (ac^\mathbf{m}|bd^\mathbf{n})
 \end{equation}
-where the pair of indices $\mathbf{m}$ and $\mathbf{n}$ run over the direct lattice vectors, 
-$c$ and $d$ over the basis functions, $P_{cd}$ is an element of the density matrix 
+where the indices $\mathbf{mn}$ run over the direct lattice vectors, 
+$abcd$ over the basis functions, $P=P(\{\mathbf{f}_A\},M)$ is the density matrix 
 and the ERIs are written in the chemist notation.
 %\begin{equation}
 %  \begin{split}
@@ -223,6 +243,7 @@ and the ERIs are written in the chemist notation.
 %                    &\times\phi_b(\mathbf{r}_2)\phi_d(\mathbf{r}_2-M\mathbf{n})d^3r_1d^3r_2.
 %  \end{split}
 %\end{equation}
+
 The minimal image convention is applied in the so-called $K^4$ loop 
 (where $K$ is the degree of contraction)
 to the interaction vector $\mathbf{P-Q}$ during the evaluation of the ERIs and is 
@@ -239,17 +260,24 @@ and $[\bullet]$ is the nearest integer function defined as
 $[x]:=n$ with $x\in \mathbb{R}$, $n\in \mathbb{Z}$ and $|x-n|<1/2$.
 
 \subsection{Gradients}
-The exchange energy gradients acting on atom $G$ and direction $i$ 
-in the unit cell is given by
+The exchange energy gradient with respect to the fracional coordinate 
+$f_{Gj}$ can be obtained through the linear transform 
+\begin{equation*}
+ \frac{\partial E^x}{\partial f_{Gj}}=\sum_{i=x,y,z}M_{ij}\frac{\partial E^x}{\partial G_i},
+\end{equation*}
+where $\partial E^x/\partial G_i$ is the exchange energy gradient wrt atomic position and
+is given by
 \begin{equation}\label{Eq:Grad}
-  \frac{\partial E^x}{\partial G_i}\bigg|_P=
+  \frac{\partial E^x}{\partial G_i}\bigg|_P =
   -\frac{1}{2}\sum_{\substack{\mathbf{m}\mathbf{n}\\a b c d}}P_{ab}P_{cd}
   \frac{\partial(ac^\mathbf{m}|bd^\mathbf{n})}{\partial G_i},
 \end{equation}
+%\end{eqnarray}
 where the indices $abcd$ and $\mathbf{mn}$ run over the basis functions and the
-Bravais vectors respectively and $E^x=\Tr(PK(P))$ is the Hartree-Fock exchange energy.
-If we assume for example that $\partial PQ_k/\partial A_i=\delta_{ik}\zeta_a/(\zeta_a+\zeta_c)$
-is valid everywhere, then it is possible to
+Bravais vectors respectively.
+
+If we assume that $\partial PQ_k/\partial A_i=\delta_{ik}\zeta_a/(\zeta_a+\zeta_c)$
+(which is true except at some discontinuity points) it is then possible to
 see, after further manipulations, 
 that the evaluation of the derivative $\partial(ac^\mathbf{m}|bd^\mathbf{n})/\partial G_i$
 is completely similar to its correspondent gas phase
@@ -298,9 +326,9 @@ previous derivations~\cite{MTobita03,KKudin00B,KDoll04},
 has its origin in the derivative of the minimal image convention used in 
 our $\Gamma$-point approximation. 
 This can be seen by taking the derivative of Eq.~(\ref{Eq:MIC}) with respect to $M_{ij}$ as
-\begin{equation}
+\begin{equation*}
   \frac{\partial PQ_k}{\partial M_{ij}}=\delta_{ik}(f_{PQj}-[f_{PQj}-\varepsilon\mathrm{sgn}(f_{PQj})]),
-\end{equation}
+\end{equation*}
 while the first right hand term $f_{PQj}$ leads, after rearrangement, 
 to a contribution of the weighted gradients, 
 the second term $[f_{PQj}-\varepsilon \mathrm{sgn}(f_{PQj})]$
@@ -314,9 +342,9 @@ $[f_{PQj}-\varepsilon \mathrm{sgn}(f_{PQj})]$ vanishes.
 
 \subsection{Strategy for the evaluation of $[ac|bd]_{ij}$}
 The integral $[ac|bd]_{ij}$ can be divided into a product of a $i$ and $j$ part as
-\begin{equation}
-  [ac|bd]_{ij}=2\rho[f_{PQj}-\varepsilon\mathrm{sgn}(f_{PQj}) ][ac|bd]_{i},
-\end{equation}
+\begin{equation*}
+ [ac|bd]_{ij}=2\rho[f_{PQj}-\varepsilon\mathrm{sgn}(f_{PQj}) ][ac|bd]_{i},
+\end{equation*}
 and $\rho$ is defined below. This separation reduces the computational work
 in the $K^4$ loop by a non-negligible factor.
 In the following, we present a simple approach for the evaluation of
@@ -355,7 +383,7 @@ The auxiliary integral, $(a0|b0)^{(m+1)}$, are by product of the OS-HGP scheme d
 the evaluation of the gradients $\partial (ac|bd)/\partial G_i$.
 The use of the above MIC-VRR requires the explicit evaluation of the auxiliary integral
 over $s$ functions $[00|00]_{i}^{(m)}$, which is simply
-\begin{equation}
+\begin{equation*}
   \begin{split}
     [00|00]_{i}^{(m)}&=
     PQ_i \left(\frac{\rho}{\pi}\right)^{\frac{1}{2}}
@@ -365,7 +393,7 @@ over $s$ functions $[00|00]_{i}^{(m)}$, which is simply
     &\times F_{m+1}(\rho PQ^2) \\
     &=PQ_i(00|00)^{(m+1)},
   \end{split}
-\end{equation}
+\end{equation*}
 where $AC^2=|\mathbf{A-C}|^2$, $BD^2=|\mathbf{B-D}|^2$, $PQ^2=|\mathbf{PQ}|^2$ and
 $F_m(x)=\int_0^1t^{2m}\exp(-xt^2)dt$ is a reduced form of the incomplete gamma function.
 The horizontal recurrence relation~\cite{MGordon88} can be applied to $[a+c0|b+d0]_{ij}$ to give 
@@ -379,7 +407,7 @@ constant in the second right hand term involves only the atomic centers
 and can be applied outside the contraction loops (i.e. $K^0$).
 As the evaluation of the gradients $\partial (ac|bd)/\partial G_i$ and the integral
 $[ac|bd]_{ij}$ share the same incomplete gamma functions 
-$F_m(x)$ and intermediate integrals, it is 
+$F_m(x)$ and some intermediate integrals, it is 
 advantageous to combine the two algorithms together.
 Let us now summarize the proposed algorithm for evaluating the ERI derivatives
 with respect to cell parameters within our $\Gamma$-point approximation.
@@ -413,34 +441,33 @@ The {\tt TIGHT} level of numerical accuracy has been used throughout this work.
 Thresholds that define the {\tt TIGHT} accuracy level include a matrix 
 threshold $\tau=10^{-6}$, as well as other numerical thresholds 
 detailed in Ref.~\cite{CTymczak04a}, which deliver at least 8 digits of 
-relative accuracy in the total energy.  
+relative accuracy in the total energy and 4 digits of absolute accuracy 
+{\bf ?? WHY ABSOLUTE ACCURACY ??} in the forces.  
 
 In order to demonstrate the capabilities of our implementation of the
-Hartree-Fock exchange energy gradients and cell gradients, we present in this Section 
-full optimization studies of 1D and 3D periodic systems without any symmetry constrain. 
+Hartree-Fock exchange energy atomic and lattice gradients, we present in this Section 
+full optimization studies of 1D and 3D periodic systems without any lattice 
+nor atomic positions symmetry constrain. 
 Our first benchmark case is a linear chain of HF molecules, the second is
 urea, a purely organic compound. The third benchmark system is MgO. 
-These two latter systems have been recently optimize at the Hartree-Fock 
+These two latter systems have been recently optimized at the Hartree-Fock 
 level of theory by Doll, Dovesi and Orlando~\cite{KDoll04}.
 
-
-%\subsection{Convergence of the Atomic gradients}
-
-
 Table~\ref{Tab:HF-n} shows the progression of the cell constants $a_0$, bond lengths $d$ and
-total energies $E$ computed for linear HF chains at 
+total energies $E$ computed for linear (HF)$_n$ chains at 
 the $\Gamma$-point Hartree-Fock with the split-valence 6-31G basis set. 
 Comparisons are made to final cell parameter and bond length values obtained 
 with a 32 $k$-points in the first Brillouin zone at the 
 RHF/6-31G level of theory~\cite{DJacquemin99B}.
 
+
 \begin{table}[t]
   \centering
   \caption{\protect
     Progression of the Hartree-Fock $\Gamma$-points cell 
-    constant $a_0$, bond length $d$ and total energy $E$ for HF chains
+    constant $a_0$, bond length $d$ and total energy $E$ for (HF)$_n$ chains
     using the periodic RHF-MIC/6-31G level of theory and the {\tt TIGHT} threshold.
-    $n$ is the number of HF units in the (super)cell.
+%    $n$ is the number of HF units in the (super)cell.
     Bond lengths and lattice vectors are in \AA~and energies in atomic unit.
   }\label{Tab:HF-n}
   \begin{tabular}{lrllc}
@@ -487,7 +514,7 @@ We have performed full optimization of three dimensional urea supercells
 without any symmetry constraint on the lattice or the atomic positions.
 Table~\ref{Tab:Urea} shows the lattice constants, bond lengths, 
 bond angles, dihedral angles and total energies
-for urea supecells at the $\Gamma$-point RHF-MIC/6-21G* level of
+for (urea)$_n$ supecells at the $\Gamma$-point RHF-MIC/6-21G* level of
 theory. The basis set are the same as in Ref~\cite{RDovesi90}.
 For the seak of comparison, we have also fully optimized a tetragonal lattice
 of urea in the $P\bar{4}2_1m$ space group with the 
@@ -499,8 +526,9 @@ integration grid.
   \caption{\protect
     Progression of the Hartree-Fock $\Gamma$-point cell constants, 
     bond lengths, bond angles, dihedral angles 
-    and total energy for urea using the periodic RHF-MIC/6-21G* level of theory 
-    and the {\tt TIGHT} threshold. $n$ is the number of urea units in the (super)cell.
+    and total energy for (urea)$_n$ using the periodic RHF-MIC/6-21G* level of theory 
+    and the {\tt TIGHT} threshold. 
+%    $n$ is the number of urea units in the (super)cell.
     Lengths, angles and energies are in \AA ngstr\"oms, degrees and atomic units respectively.
   }\label{Tab:Urea}
   \begin{tabular}{lcccc}
@@ -538,35 +566,34 @@ The primitive cubic cell coordinates used for this system are given in
 Ref.~\cite{PBCCoordinates}.
 For comparison, we report the optimized lattice parameter of cubic MgO 
 obtained with {\sc Crystal03} and a $8\times 8\times 8$ $k$-points integration grid.
-
 \begin{table}[t]
   \centering
   \caption{\protect
     Progression of the Hartree-Fock $\Gamma$-point cell constant $a_0$
-    and total energies $E$ for MgO using the periodic 
+    and total energies $E$ for (MgO)$_n$ using the periodic 
     RHF-MIC/8-61G/8-51G level of theory and the {\tt TIGHT} threshold. 
-    $n$ is the number of MgO units in the (super)cell.
+%    $n$ is the number of MgO units in the (super)cell.
     Lengths and energies are in \AA~and atomic unit respectively.
   }\label{Tab:MgO}
   \begin{tabular}{lrcc}
   \toprule
   & $n$ & $a_0$ & $E/n$ \\
   \hline
-      {\sc MondoSCF}\footnote[1]{$\Gamma$-point.}
-      &  4 & 4.365 & $-$274.616533 \\%4.365-274.616533623575FullOpt
-      & 32 & 4.192 & $-$274.664119 \\%8.385-274.664118754687FullOpt
-      %&  4\footnote[2]{Full optimization.}        &4.365&$-$274.616533\\%4.365-274.616533623575FullOpt
-      %&  4\footnote[3]{Lattice optimization only.}&4.370&$-$274.615477\\%4.370-274.615477868575LattOpt
-      %& 32$^b$                                    &4.192&$-$274.664119\\%8.385-274.664118754687FullOpt
-      %& 32$^c$                                    &4.192&$-$274.664119\\%8.384-274.664118815087LattOpt
-      %& 108                                        & &\\
+    {\sc MondoSCF}\footnote[1]{$\Gamma$-point.}
+    &  4 & 4.365 & $-$274.616533 \\%4.365-274.616533623575FullOpt
+    & 32 & 4.192 & $-$274.664119 \\%8.385-274.664118754687FullOpt
+    %&  4\footnote[2]{Full optimization.}        &4.365&$-$274.616533\\%4.365-274.616533623575FullOpt
+    %&  4\footnote[3]{Lattice optimization only.}&4.370&$-$274.615477\\%4.370-274.615477868575LattOpt
+    %& 32$^b$                                    &4.192&$-$274.664119\\%8.385-274.664118754687FullOpt
+    %& 32$^c$                                    &4.192&$-$274.664119\\%8.384-274.664118815087LattOpt
+    %& 108                                        & &\\
   \hline
-      {\sc Crystal03}\footnote[2]{$8\times 8\times 8$ $k$-points.} 
-      &  1 & 4.192 & $-$274.664239 \\%-274.664239121540
+    {\sc Crystal03}\footnote[2]{$8\times 8\times 8$ $k$-points.} 
+    &  1 & 4.192 & $-$274.664239 \\%-274.664239121540
   \botrule
   \end{tabular}
 \end{table}
-
+%
 %Crystal03 HF/8-61G/8-51G 8x8x8 
 %4.201 -274.66420524315
 %4.200 -274.66420889046
@@ -594,6 +621,35 @@ obtained with {\sc Crystal03} and a $8\times 8\times 8$ $k$-points integration g
 %4.230 -275.28467343664 
 %
 %
+
+\subsection{???Convergence of the atomic gradients???}
+In Table~\ref{Tab:GradMgO} we present the progression of the average of the norm of the
+atomic gradients for the (MgO)$_n$ systems. 
+While the smallest system, (MgO)$_4$, gives 
+large unphysical gradients which reflets the poor approximation of 
+the $\Gamma$-point to the Brilloin zone,
+the larger systems provide gradients which are below the accuracy targeted by the 
+{\tt TIGHT} threshold (i.e. an absolute error of $10^{-4}$ a.u. in the forces).
+
+\begin{table}[t]
+  \centering
+  \caption{\protect
+    Progression of the Hartree-Fock $\Gamma$-point the averae norm of the gradients
+    for (MgO)$_n$ using the periodic 
+    RHF-MIC/8-61G/8-51G level of theory and the {\tt TIGHT} threshold. 
+%    $n$ is the number of MgO units in the (super)cell.
+    Gradients are in atomic unit. {\bf !! NEED TO MULTIPLY THE GRAD BY $\sqrt{3}$ !!}
+  }\label{Tab:GradMgO}
+  \begin{tabular}{rcc}
+  \toprule
+   $n$ & grad Mg & grad O \\
+  \hline
+         4 & 0.007540742 & 0.014363863 \\
+        32 & 0.000015481 & 0.000025388 \\
+       108 & 0.000000283 & 0.000000237 \\
+  \botrule
+  \end{tabular}
+\end{table}
 %
 %--------------------------------------------------------
 %   Atom   Z                Forces (au)
@@ -653,7 +709,9 @@ obtained with {\sc Crystal03} and a $8\times 8\times 8$ $k$-points integration g
 %   -0.0000000349    0.0155914895   -0.0000001022
 %   -0.0000000556   -0.0000001335    0.0110216519
 %--------------------------------------------------------
-
+%average
+%8   0.014363863 2.53886E-05 0.000000237
+%12  0.007540742 1.54816E-05 2.83279E-07
 
 \section{Conclusions}\label{Sec:Conclusions}
 
@@ -666,9 +724,11 @@ was presented and implemented in the {\sc MondoSCF} package.
 While the evaluation of the periodic exchange energy gradients are similar to their 
 gas phase limit, the exchange energy lattice gradients require the accumulation of 
 the gradients acting on atoms multiplied by some appropriate factors and a 
-modified ERI. The latter integral arises from the use of the minimal image convention. 
+modified ERI. The latter ERI arises from the use of the minimal image convention. 
 We demonstrated how this new ERI can be computed with the help of a modified VRR 
-in the frame of the Obara-Saika and Head-Gordon-Pople algorithm.  
+in the frame of the Obara-Saika and Head-Gordon-Pople algorithm. This new VRR can
+be easily inserted in existing codes using the OS-HGP approach to compute 
+first derivatives with respect to atomic displacement. 
 
 As an illustration, the analytical gradients and cell gradients have been used 
 in conjunction with the QUICCA algorithm to optimize few periodic systems at 
@@ -695,7 +755,9 @@ than 3 digits can be already achived with pseudo-cubic cells of about $600$\AA$^
  under contract ???????????? and the ASCI project.  
  The Advanced Computing Laboratory of Los 
  Alamos National Laboratory is acknowledged.
-\end{acknowledgments}
+ The authors would like to thank K. N\'emeth and C.J. Tymczak 
+ for helpfull comments.
+\end{acknowledgments}  
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \bibliography{mondo_new}
