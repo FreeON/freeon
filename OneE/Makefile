@@ -31,6 +31,7 @@ include $(MONDO_HOME)/Includes/RemoveAll
 #
 EXTRA_INCLUDES=-I$(MONDO_HOME)/OneE/MMA
 #
+Objs1 = Int1E.o     Make1X.o   Make1E.o
 ObjsM     = MBlok.o     MakeM.o  
 ObjsU     = UBlok.o     MakeU.o  
 ObjsS     = SBlok.o     MakeS.o 
@@ -47,8 +48,12 @@ ReleaseFiles = SBlok.x MakeS.x TBlok.x MakeT.x  UBlok.x MakeU.x \
                BlokTrWdS.x SForce.x BlokTrPdT.x  TForce.x       \
                UForce.x MakeM.x MBlok.x BlokTrPd2T.x THess.x
 #
-all: 	 MakeM MakeU MakeS MakeT MakeRho SForce TForce UForce MForce THess
+all: 	 Make1E MakeM MakeU MakeS MakeT MakeRho SForce TForce UForce MForce THess
 #
+Make1E:	$(Objs1)
+	$(LD) $(LDFLAGS) Make1E $(Objs1) $(F90_LIBRARIES) $(LAPACK)
+	mv Make1E $(MONDO_EXEC)/Make1E
+
 MakeM:	 $(ObjsM)
 	 $(LD) $(LDFLAGS) MakeM $(ObjsM) $(F90_LIBRARIES)
 	 mv MakeM $(MONDO_EXEC)/MakeM
@@ -98,6 +103,7 @@ clean:
 	rm -f $(REMOVEMISC) $(REMOVEMODS)
 	rm -f \#*
 	rm -f *~
+	rm -f $(MONDO_EXEC)/Make1E
 	rm -f $(MONDO_EXEC)/MakeS
 	rm -f $(MONDO_EXEC)/MakeT
 	rm -f $(MONDO_EXEC)/MakeRho
