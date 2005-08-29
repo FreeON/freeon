@@ -206,6 +206,7 @@ MODULE DerivedTypes
       INTEGER          :: NASym   !-- Max value of angular symmetry (s=0, p=1, ... ) on a BF
       INTEGER          :: LMNLen  !-- Max basis function length 
       TYPE(INT_VECT)   :: Kinds   !-- Atomic kinds or species (Z numbers)
+      TYPE(CHR10_VECT) :: AtNam   !-- Atomname
       TYPE(INT_VECT)   :: NCFnc   !-- Number of contracted functions per kind
       TYPE(INT_VECT)   :: BFKnd   !-- Number of basis functions per kind
       TYPE(INT_VECT)   :: LxDex   !-- Basis function index for X

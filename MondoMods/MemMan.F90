@@ -649,6 +649,7 @@ MODULE MemMan
          TYPE(BSET),INTENT(INOUT)       :: A
          CALL AllocChk(A%Alloc)
          CALL New(A%Kinds,A%NKind)
+         CALL New(A%AtNam,A%NKind)
          CALL New(A%NCFnc,A%NKind)
          CALL New(A%BFKnd,A%NAtms)
          CALL New(A%LxDex,A%LMNLen)
@@ -1017,6 +1018,7 @@ MODULE MemMan
          A%NCtrt=0; A%NPrim=0; A%NASym=0
          A%LMNLen=0
          CALL Delete(A%Kinds)
+         CALL Delete(A%AtNam)
          CALL Delete(A%NCFnc)
          CALL Delete(A%BFKnd)
          CALL Delete(A%LxDex)
