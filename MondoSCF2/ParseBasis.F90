@@ -155,19 +155,23 @@ CONTAINS
     ! Count kinds and load basis set kind index
     BS%NKind=1
     BS%Kinds%I(1)=G%AtNum%D(1)    
-    DO I=2,BS%NAtms 
+    BS%AtNam%C(1)=G%AtNam%C(1)
+    DO I=2,BS%NAtms
        DO J=1,BS%NKind
-          IF(BS%Kinds%I(J)==G%AtNum%D(I))GOTO 10
+          IF(BS%AtNam%C(J)==G%AtNam%C(I))GOTO 10
+          !vwIF(BS%Kinds%I(J)==G%AtNum%D(I))GOTO 10
        ENDDO
        BS%NKind=BS%NKind+1
        BS%Kinds%I(BS%NKind)=G%AtNum%D(I)
+       BS%AtNam%C(BS%NKind)=G%AtNam%C(I)
 10     CONTINUE
     ENDDO
     ! Now load geometry atom type (kinds pointer) array.
     G%NKind=BS%NKind
     DO K=1,BS%NKind
        DO I=1,G%NAtms
-          IF(BS%Kinds%I(K)==G%AtNum%D(I))G%AtTyp%I(I)=K
+          IF(BS%AtNam%C(K)==G%AtNam%C(I))G%AtTyp%I(I)=K
+          !vwIF(BS%Kinds%I(K)==G%AtNum%D(I))G%AtTyp%I(I)=K
        ENDDO
     ENDDO
     ! Zero counters
@@ -192,7 +196,8 @@ CONTAINS
        READ(BasU,DEFAULT_CHR_FMT,END=99)Line                 
        DO NK=1,BS%NKind    
           ! Look for the basis set 
-         IF(KeyQ(Line,Ats(BS%Kinds%I(NK))).AND.KeyQ(Line,'0'))THEN                    
+          IF(KeyQ(Line,BS%AtNam%C(NK)).AND.KeyQ(Line,'0'))THEN                    
+             !vwIF(KeyQ(Line,Ats(BS%Kinds%I(NK))).AND.KeyQ(Line,'0'))THEN                    
              NC=0
              KFound=KFound+1
              DO 

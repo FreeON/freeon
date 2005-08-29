@@ -186,8 +186,8 @@ CONTAINS
     TYPE(CRDS)                :: G
     TYPE(CHR_VECT)            :: C
     REAL(DOUBLE),DIMENSION(3) :: Carts(3)
-    INTEGER                   :: J,N,Coordinates
-    CHARACTER(LEN=2)          :: At
+    INTEGER                   :: J,N,Coordinates,L
+    CHARACTER(LEN=3)          :: At,AtTmp
     CHARACTER(LEN=DCL)        :: Line,LineLowCase
 !------------------------------------------------------------------------!
 !   Determine the number of atoms in this block
@@ -262,11 +262,20 @@ CONTAINS
        ENDIF
 !
        CALL Delete(C)
+!VW    Check for multiple definition of the same atom.
+       L=SCAN(At,Numbers)
+       SELECT CASE(L)
+       CASE(0);AtTmp=At
+       CASE(2);AtTmp(1:2)=At(1:1)//' '! we need this blank to be compatible with the definition of Ats.
+       CASE(3);AtTmp(1:2)=At(1:2)
+       CASE DEFAULT;CALL MondoHalt(PRSE_ERROR,'Cannot regonize this atom At=<'//At//'>')
+       END SELECT
 !      Find the atom number (elements >= 105 are ghost functions) 
        DO J=1,107
-          IF(At==Ats(J))THEN
+          !vwIF(At==Ats(J))THEN
+          IF(AtTmp(1:2)==Ats(J)(1:2))THEN
              G%AtNum%D(N)=J
-             G%AtNam%C(N)=Ats(J)
+             G%AtNam%C(N)=At!vwAts(J)
              G%AtMMTyp%C(N)='UNK' 
              G%AtMss%D(N)=AtsMss(J)
              EXIT
