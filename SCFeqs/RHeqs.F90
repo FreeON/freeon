@@ -30,14 +30,24 @@ PROGRAM RHEqs
   TYPE(INT_VECT)                 :: IWork
   TYPE(ARGMT)                    :: Args
   REAL(DOUBLE)                   :: CJK,HOMO,LUMO,dt
+  REAL(DOUBLE)                   :: Mu,Entrop,Ek,Z,A1,A2,H1,H3,H4,Fk,Sigma,Dum
   INTEGER                        :: I,J,K,LgN,LWORK,LIWORK,Info
-  CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg,FMatrix,PMatrix,XFile
+  CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg,FMatrix,PMatrix,XFile,smearing
   CHARACTER(LEN=5),PARAMETER     :: Prog='RHEqs'
   LOGICAL                        :: Present,DensityArchive
 !--------------------------------------------------------------------
 !
 !
   CALL StartUp(Args,Prog,Serial_O=.TRUE.)
+!--------------------------------------------------------------------
+! Initialize and parse some variables.
+!
+  CALL OpenASCII(InpFile,Inp)
+  Smearing='NoSmearing'
+  Sigma=0.002D0
+  IF(OptKeyQ(Inp,'Smearing','MP')) Smearing='Methfessel-Paxton'
+  IF(OptDblQ(Inp,'SmearingValue',Dum)) Sigma=Dum
+  CLOSE(Inp)
 !--------------------------------------------------------------------
 !
 !
@@ -65,6 +75,7 @@ PROGRAM RHEqs
 !
   HOMO=EigenV%D(NEl/2)
   LUMO=EigenV%D(NEl/2+1)
+  Mu=(HOMO+LUMO)*0.5D0
 !
   IF(PrintFlags%Key>=DEBUG_MEDIUM)THEN 
      Mssg=ProcessName(Prog)//'HOMO = '//TRIM(DblToMedmChar(HOMO)) &
@@ -78,7 +89,6 @@ PROGRAM RHEqs
   CALL Put(HOMO-LUMO,'HomoLumoGap')
 !
   CALL Delete(Work)
-  CALL Delete(EigenV)
 !--------------------------------------------------------------
 ! Make a new closed shell, orthogonal density matrix
 !
@@ -86,14 +96,55 @@ PROGRAM RHEqs
   P%D=Zero
 !  CALL DBL_VECT_EQ_DBL_SCLR(NBasF*NBasF,P%D,Zero)
 !
-  DO K=1,Nel/2                             ! Closed shell only
-     DO J=1,NBasF
-        CJK=F%D(J,K)
-        DO I=1,NBasF
-           P%D(I,J)=P%D(I,J)+F%D(I,K)*CJK  ! P_{ij}=Sum^{N_El/2}_k MO_ik MO_kj
+  SELECT CASE(Smearing)
+  CASE('Methfessel-Paxton')
+     Entrop=0D0
+     DO K=1,NBasF
+        ! PRB 40, 3616, 1989.
+        ! Second order smearing N=2.
+        Ek=EigenV%D(K)
+        Z=(Ek-Mu)/Sigma
+        A1=-1D0/( 4D0*SqrtPi)
+        A2= 1D0/(32D0*SqrtPi)
+        H1=2D0*Z
+        H3=Z*(8D0*Z**2-12D0)
+        H4=Z**2*(16D0*Z**2-48D0)+12D0
+        ! Fractional occupation.
+        Fk=0.5D0*(1D0-ERF(Z))+EXP(-Z**2)*(A1*H1+A2*H3)
+        ! Entropic correction to the energy (Comp. Mat. Sci. 6, 15, 1996).
+        Entrop=Entrop+Sigma*0.5D0*A2*H4*EXP(-Z**2)
+        !write(*,*) Fk,Entrop
+        DO J=1,NBasF
+           CJK=F%D(J,K)*Fk
+           DO I=1,NBasF
+              P%D(I,J)=P%D(I,J)+F%D(I,K)*CJK
+           ENDDO
         ENDDO
-    ENDDO
-  ENDDO    
+     ENDDO
+     IF(PrintFlags%Key>=DEBUG_MEDIUM)THEN 
+        Mssg=ProcessName(Prog)//'Sigma = '//TRIM(DblToShrtChar(Sigma)) &
+             &               //', Entropic correction per atom = ' &
+             &               //TRIM(DblToShrtChar(Entrop/DBLE(NAtoms)))
+        CALL OpenASCII(OutFile,Out)
+        CALL PrintProtectL(Out)
+        WRITE(Out,*)TRIM(Mssg)
+        CALL PrintProtectR(Out)
+        CLOSE(Out)
+     ENDIF
+  CASE('NoSmearing')
+     DO K=1,Nel/2                             ! Closed shell only
+        DO J=1,NBasF
+           CJK=F%D(J,K)
+           DO I=1,NBasF
+              P%D(I,J)=P%D(I,J)+F%D(I,K)*CJK  ! P_{ij}=Sum^{N_El/2}_k MO_ik MO_kj
+           ENDDO
+        ENDDO
+     ENDDO
+  CASE DEFAULT
+     CALL Halt('RHEqs: Doesn''t regonize this Smearing <'//TRIM(Smearing)//'>')
+  END SELECT
+!
+  CALL Delete(EigenV)
 ! 
   CALL SetEq(sX,P)          !  sX=P
   CALL New(sP)              
