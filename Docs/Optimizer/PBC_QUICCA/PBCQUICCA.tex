@@ -224,7 +224,7 @@ coordinate gradient,  allowing an independent, one-dimensional extrapolation
 to zero. The predicted minima for each internal coordinate  collectively 
 determines one optimization step.  This method works surprisingly well, but 
 only when the weights are chosen to account for coupling effects;  when 
-coupling is strong, the weights should be small and vica versa.  Also, the
+coupling is strong, the weights should be small and vice versa.  Also, the
 fitting process has an important averaging effect on coupling that contributes 
 to the success of QUICCA.
 
@@ -270,16 +270,16 @@ coordinate optimization.
 {\bf Here, we are using a still experimental algorithm, that is described
 in our previous paper on QUICCA \cite{KNemeth04}. The only modification
 applied to the previous scheme in the present work is that
-week Van der Waals bonds are only allowed if the corresponding atoms
+weak van der Waals bonds are only allowed if the corresponding atoms
 are topologically far enough from each other 
 (at least 10th neighbors) in the covalent bonding
-network, while being spacially within the Van der Waals radii of 
+network, while being spacially within the van der Waals radii of 
 each other. 
 The goal
 of this extra selection criterion is to filter the occurance of
 connectivity between spacially close but topologically far atoms.
 This feature affects 
-exclusively Van der Waals complexes, like the sulfur crystal. 
+exclusively van der Waals complexes, like the sulfur crystal. 
 We hope to report about a more advanced coordinate selection scheme in
 a forthcoming paper.
 
@@ -365,7 +365,7 @@ In all calculations, the {\tt TIGHT} numerical thresholding scheme \cite{CTymcza
 targeting a relative error of {\tt 1D-8} in the total energy and an 
 absolute error of {\tt 1D-4} in the forces.  A single convergence criterion is used.
 That criterion is that the maximum magnitude of both atomic and lattice vector gradients 
-is less than {\tt 5D-4} au at convergence.
+is less than {\tt 5D-4} a.u. at convergence.
 
 Atomic units are used throughout.
 
@@ -540,10 +540,10 @@ coordinates.
 {\bf
 Bu\v{c}ko {\em et.~al} \cite{TBucko05} used a delocalized internal coordinate system built
 from 152 conventional primitive internals and 160 $5/R$ type intermolecular
-stretches; they applied the same cell as used by Kudin {\em et.~al} \cite{KKudin01}.
+stretches; they applied the same cell as Kudin {\em et.~al} \cite{KKudin01}.
 Their optimization method was based on a mixture of the Rational Function 
 Optimization technique and Pulay's GDIIS method \cite{FEckert97}. 
-The BFGS method \cite{RFletcher81} has been used to update the Hessian.
+The BFGS scheme \cite{RFletcher81} has been used to update the Hessian.
 }
 
 Convergence of the RPBE/3-21G {\sc MondoSCF} calculations are shown in Fig.~\ref{U321G}, 
@@ -572,7 +572,7 @@ the 6 optimization steps taken by the algorithm of Bu\v{c}ko {\em et.~al}
 are clearly superior to all other methods presented here.
 We expect that using a more similar internal coordinate system, 
 especially in terms of intermolecular stretches, QUICCA will
-be able to a similar performance. We will investigate this point in a 
+be able for a similar performance. We will investigate this point in a 
 separate study.
 }
 
@@ -690,7 +690,7 @@ further development.
 \begin{acknowledgments}
  This work has been supported by the US Department of Energy 
  under contract W-7405-ENG-36 and the ASCI project.  The authors
- thank C.~J.~Tymczak, Valery Weber and Anders Niklasson for helpful 
+ thank C.~J.~Tymczak, Val\'ery Weber and Anders Niklasson for helpful 
  comments.
 \end{acknowledgments}
 
