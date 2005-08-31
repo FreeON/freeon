@@ -35,7 +35,8 @@
 %\documentclass[pre,aps,twocolumn,showpacs,twocolumngrid,superbib]{revtex4}
 %\documentclass[prl,aps,twocolumn,showkeys,twocolumngrid,superbib]{revtex4}
 %\documentclass[twocolumn,showkeys,showpacs,preprintnumbers,amsmath,amssymb]{revtex4}
- \documentclass[prl,twocolumn,showpacs,twocolumngrid,superbib]{revtex4}
+%\documentclass[prl,twocolumn,showpacs,twocolumngrid,superbib]{revtex4}
+\documentclass[showpacs,preprint,superbib]{revtex4}
 
 \usepackage{graphicx}
 \usepackage{amsfonts}
@@ -193,16 +194,16 @@ of the primitive lattice vectors
 \begin{equation}
   M=(\mathbf{a},\mathbf{b},\mathbf{c}).
 \end{equation}
-The position of a direct lattice is defined as $\mathbf{R}=M\mathbf{n}$,
-with $\mathbf{n}=(n_a,n_b,n_c)$ being integer numbers.
-The position of an atom $A$ in the cell $\mathbf{n}$ is $\mathbf{A}=M(\mathbf{f}_A+\mathbf{n})$,
-and $\mathbf{f}_A=(f_{Aa},f_{Ab},f_{Ac})$ are the fractional coordinates of 
-the atom $A$ in the working cell. 
+The position of a lattice is $\mathbf{R}=M\mathbf{n}$,
+with $\mathbf{n}=(n_a,n_b,n_c)$ a vector of integers.
+The position of atom $A$ in the cell $\mathbf{n}$ is $\mathbf{A}=M(\mathbf{f}_A+\mathbf{n})$,
+with $\mathbf{f}_A=(f_{Aa},f_{Ab},f_{Ac})$ the fractional coordinates of 
+the atom $A$ in the central cell. 
 In the following, we will refer to the full set of
 fractional coordinates of the atoms in the working cell 
-$\mathbf{f}_A,\mathbf{f}_B,\ldots$ as $\{\mathbf{f}_A\}$.
+$\mathbf{f}_A,\mathbf{f}_B,\ldots$ as $\{\mathbf{f}_G\}$.
 
-The unnormalized Cartesian Gaussian-type function (CGTF) centered on the atom $A$ reads
+An unnormalized Cartesian Gaussian-type function (CGTF) centered on atom $A$ is
 \begin{equation}
   \phi_a(\mathbf{r})=(x-A_x)^{a_x}(y-A_y)^{a_y}(z-A_z)^{a_z}e^{-\zeta_a(\mathbf{r-A})^2},
 \end{equation}
@@ -229,12 +230,12 @@ contracted to approximate atomic eigenfunctions.
 The Hartree-Fock exchange energy within the MIC $\Gamma$-point approximation~\cite{CTymczak04b} 
 is given by
 \begin{equation}
- E^x(\{\mathbf{f}_A\},M)=
+ E^x(\{\mathbf{f}_G\},M)=
  -\frac{1}{2}\sum_{\substack{\mathbf{m}\mathbf{n}\\a b c d}}P_{ab}P_{cd}
  (ac^\mathbf{m}|bd^\mathbf{n})
 \end{equation}
 where the indices $\mathbf{mn}$ run over the direct lattice vectors, 
-$abcd$ over the basis functions, $P=P(\{\mathbf{f}_A\},M)$ is the density matrix 
+$abcd$ over the basis functions, $P=P(\{\mathbf{f}_G\},M)$ is the density matrix 
 and the ERIs are written in the chemist notation.
 %\begin{equation}
 %  \begin{split}
@@ -263,9 +264,9 @@ $[x]:=n$ with $x\in \mathbb{R}$, $n\in \mathbb{Z}$ and $|x-n|<1/2$.
 The exchange energy gradient with respect to the fracional coordinate 
 $f_{Gj}$ can be obtained through the linear transform 
 \begin{equation*}
- \frac{\partial E^x}{\partial f_{Gj}}=\sum_{i=x,y,z}M_{ij}\frac{\partial E^x}{\partial G_i},
+ \frac{\partial E^x}{\partial f_{Gj}}\bigg|_P=\sum_{i=x,y,z}M_{ij}\frac{\partial E^x}{\partial G_i}\bigg|_P,
 \end{equation*}
-where $\partial E^x/\partial G_i$ is the exchange energy gradient wrt atomic position and
+where $\partial E^x/\partial G_i|_P$ is the exchange energy gradient wrt atomic position and
 is given by
 \begin{equation}\label{Eq:Grad}
   \frac{\partial E^x}{\partial G_i}\bigg|_P =
@@ -352,7 +353,8 @@ the integral $[ac|bd]_{ij}$ in the spirit of the Obara-Saika~\cite{SObara86}
 and Head-Gordon-Pople~\cite{MGordon88} (OS-HGP) algorithm.
 The generation of the two-electron integrals is broken up into two
 main steps. First, a set of two-electron integrals $c=d=0$ is generated from the
-incomplete gamma function by mean of a modified version of the OS VRR. Finally,
+reduced incomplete gamma function~\cite{IShavitt63} 
+by mean of a modified version of the OS VRR. Finally,
 the Cartesian powers between orbitals of the same electron are transfered using 
 the simple two terms horizontal recurrence relation (HRR)~\cite{MGordon88}.
 For the evaluation of the integral $[e0|f0]_{i}=[e0|f0]_{i}^{(0)}$, we have 
