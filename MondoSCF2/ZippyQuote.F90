@@ -104,6 +104,8 @@ CONTAINS
        WRITE(PU,*)"Hand me a pair of leather pants and a CASIO keyboard -- I'm living for today!"
     CASE (45)
        WRITE(PU,*)"I'm using my X-RAY VISION to obtain a rare glimpse of the INNER WORKINGS of this POTATO!!" 
+    CASE (46)
+       WRITE(PU,*)"Don't let CJ give a talk in Paris... PPRRRRRR... too late!" 
     END SELECT
   END SUBROUTINE ZippySez
 END MODULE ZippyQuote
