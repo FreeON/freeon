@@ -21,7 +21,7 @@ PROGRAM DIIS
 #endif
                                  :: F,P,EI,EJ,Tmp1,Tmp2
   TYPE(ARGMT)                    :: Args
-  TYPE(INT_VECT)                 :: IWork,Idx,SCFOff
+  TYPE(INT_VECT)                 :: IWork,Idx,SCFOff,DIISInfo
   TYPE(DBL_VECT)                 :: V,DIISCo,AbsDIISCo
   TYPE(DBL_RNK2)                 :: B,BB,BInv,BTmp
   TYPE(CMPoles),DIMENSION(2)     :: MP
@@ -29,7 +29,7 @@ PROGRAM DIIS
   REAL(DOUBLE),DIMENSION(6)      :: AvQP,DeltaQPi,DeltaQPj
   REAL(DOUBLE)                   :: DIISErr,C0,C1,Damp,EigThresh, &
        RelDevDP,RelDevQP,Sellers,DMax
-  INTEGER                        :: I,J,I0,J0,K,N,M,ISCF,BMax,DoDIIS,iDIIS,iOffSet
+  INTEGER                        :: I,J,I0,J0,K,N,M,ISCF,BMax,DoDIIS,iDIIS,iOffSet,DIISBeg
   CHARACTER(LEN=2)               :: Cycl,NxtC
   CHARACTER(LEN=5*DEFAULT_CHR_LEN) :: Mssg
   LOGICAL                        :: Present,Sloshed
@@ -80,16 +80,39 @@ PROGRAM DIIS
      N=MIN(ISCF,BMax)+1
      M=MAX(1,ISCF-BMax+1)
      CALL New(B,(/N,N/))
-     ! Pulays most excellent B matrix
-     I0=M-ISCF
-     DO I=1,N-1
+     !write(*,*) 'M',M,' N',N
+     CALL New(DIISInfo,2)
+     CALL Get(DIISInfo,'diisinfo')
+     CALL New(BTmp,(/20,20/))
+     CALL Get(BTmp,'diismtrix')
+     IF(DIISInfo%I(1).EQ.Args%I%I(2).AND.DIISInfo%I(2).EQ.Args%I%I(3)) THEN
+        ! We didn't BS switch or new geom or oda, then build a part of the B matrix.
+        B%D(1:N-2,1:N-2)=BTmp%D(1:N-2,1:N-2)
+        DIISBeg=N-1
+     ELSE
+        ! We did BS switch or new geom or oda, then build the full B matrix.
+        !write(*,*) 'We did BS switch or new geom.'
+        DIISInfo%I(1)=Args%I%I(2)
+        DIISInfo%I(2)=Args%I%I(3)
+        DIISBeg=1
+     ENDIF
+     CALL Put(DIISInfo,'diisinfo')
+     CALL Delete(DIISInfo)
+     !
+     ! Pulays most excellent B matrix     
+     I0=M-ISCF+DIISBeg-1
+     DO I=DIISBeg,N-1
+        !write(*,*) 'I0',I0
+        !write(*,*) TrixFile('OrthoF',Args,I0)
         CALL Get(F,TrixFile('OrthoF',Args,I0))    
         CALL Get(P,TrixFile('OrthoD',Args,I0))    
         CALL Multiply(F,P,EI)  
         CALL Multiply(P,F,EI,-One)
 !       We dont filter E for obvious reasons 
-        J0=I0
-        DO J=I,N-1
+        J0=I0-I+1
+        DO J=1,I
+           !write(*,*) 'J0',J0
+           !write(*,*) TrixFile('OrthoF',Args,J0)
            CALL Get(F,TrixFile('OrthoF',Args,J0))    
            CALL Get(P,TrixFile('OrthoD',Args,J0))    
            CALL Multiply(F,P,EJ)  
@@ -100,9 +123,39 @@ PROGRAM DIIS
         ENDDO
         I0=I0+1
      ENDDO
+!!$     ! Pulays most excellent B matrix
+!!$     I0=M-ISCF
+!!$     DO I=1,N-1
+!!$        CALL Get(F,TrixFile('OrthoF',Args,I0))    
+!!$        CALL Get(P,TrixFile('OrthoD',Args,I0))    
+!!$        CALL Multiply(F,P,EI)  
+!!$        CALL Multiply(P,F,EI,-One)
+!!$!       We dont filter E for obvious reasons 
+!!$        J0=I0
+!!$        DO J=I,N-1
+!!$           CALL Get(F,TrixFile('OrthoF',Args,J0))    
+!!$           CALL Get(P,TrixFile('OrthoD',Args,J0))    
+!!$           CALL Multiply(F,P,EJ)  
+!!$           CALL Multiply(P,F,EJ,-One)
+!!$           B%D(I,J)=Dot(EI,EJ)
+!!$           B%D(J,I)=B%D(I,J)
+!!$           J0=J0+1
+!!$        ENDDO
+!!$        I0=I0+1
+!!$     ENDDO
      B%D(N,1:N)=One
      B%D(1:N,N)=One
      B%D(N,N)=Zero
+     IF(N.LT.BMax+1) THEN
+        ! We didn't reach the size of the matrix.
+        BTmp%D(1:N-1,1:N-1)=B%D(1:N-1,1:N-1)
+     ELSE
+        ! We reach the size of the matrix, we reduce it.
+        !write(*,*) 'We reduce it'
+        BTmp%D(1:N-2,1:N-2)=B%D(2:N-1,2:N-1)
+     ENDIF
+     CALL Put(BTmp,'diismtrix')
+     CALL Delete(BTmp)
      ! Solve the least squares problem to obtain new DIIS coeficients.
      CALL New(DIISCo,N)
 #ifdef PARALLEL
