@@ -60,8 +60,9 @@ CONTAINS
     CHARACTER(LEN=DCL) :: FailedProgram
     INTEGER          :: iGEO,iCLONE,iBAS,HDFFileID,I,MaxEll,MaxAtoms,MaxBloks,MaxNon0s,J
     CHARACTER(LEN=DCL) :: chGEO
-    TYPE(INT_VECT)   :: ETDirArr
+    TYPE(INT_VECT)   :: ETDirArr,IntVect
     TYPE(DBL_VECT)   :: ETRootArr
+    TYPE(DBL_RNK2)   :: DblMat
     TYPE(CMPoles)    :: MP
     !---------------------------------------------------------------------------!
     chGEO=IntToChar(iGEO) 
@@ -116,6 +117,14 @@ CONTAINS
        CALL Put(BIG_DBL,'etot')
        CALL Put(BIG_DBL,'dmax')
        CALL Put(BIG_DBL,'diiserr')
+       CALL New(IntVect,2)
+       IntVect%I=0
+       CALL Put(IntVect,'diisinfo')
+       CALL Delete(IntVect)
+       CALL New(DblMat,(/20,20/))
+       DblMat%D=Zero
+       CALL Put(DblMat,'diismtrix')
+       CALL Delete(DblMat)
        CALL Put(.TRUE.,'programfailed')
        CALL Put(.FALSE.,'archivedensity')
 !      MD Stuff
