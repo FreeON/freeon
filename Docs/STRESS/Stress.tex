@@ -288,9 +288,11 @@ As an example, the MIC-integral over $s$-type functions is given by
   \end{split}
 \end{equation}
 where $\zeta=\zeta_a+\zeta_c$, $\eta=\zeta_b+\zeta_d$, $\rho=\zeta\eta/(\zeta+\eta)$,
-$AC^2=|\mathbf{A-C}|^2$, $BD^2=|\mathbf{B-D}|^2$, $PQ^2=|\mathbf{PQ}|^2$, 
-is given by Eq.~\ref{Eq:MIC} and
-$F_m(x)=\int_0^1t^{2m}\exp(-xt^2)dt$ is a reduced form of the incomplete gamma function~\cite{IShavitt63}.
+$AC^2=|\mathbf{A-C}|^2$, $BD^2=|\mathbf{B-D}|^2$, $PQ^2=|\mathbf{PQ}|^2$ 
+is given by Eq.~\ref{Eq:MIC}, $m\in\mathbb{Z}^*$ plays %is a nonnegative integer which
+the same role as in the OS algorithm (the integrals with $m=0$ are true ERIs, while
+integrals with $m>0$ are auxiliary integrals)
+and $F_m(x)=\int_0^1t^{2m}\exp(-xt^2)dt$ is a reduced form of the incomplete gamma function~\cite{IShavitt63}.
 
 
 \subsection{Gradients}
@@ -311,8 +313,8 @@ where the indices $abcd$ and $\mathbf{mn}$ run over the basis functions and the
 Bravais vectors respectively.
 
 If we assume {\it e.g.} that $\partial PQ_k/\partial A_i=\delta_{ik}\zeta_a/(\zeta_a+\zeta_c)$
-(which is true except at some discontinuity points) it is then possible to
-see, after further manipulations, 
+(which is true except at the discontinuity points of the nearest integer function) 
+it is then possible to see, after further manipulations, 
 that the evaluation of the derivative $\partial(ac^\mathbf{m}|bd^\mathbf{n})/\partial G_i$
 is completely similar to its correspondent gas phase
 limit (i.e. when the volume of the unit cell goes to infinite). 
@@ -320,6 +322,9 @@ Therefore, the evaluation of the exchange energy gradients at the $\Gamma$-point
 is standard and do not need to be addressed more 
 into detail here. Like in the gas phase calculation, the translational 
 invariance~\cite{AKorminicki77} can be also used to reduce the computational labor.
+
+Note that the discountinuty arising from the use of the nearest 
+integer function (See Eq.~\ref{Eq:MIC}) disapares in the limit of a
 
 \subsection{Lattice Gradients}
 The exchange energy lattice gradients are given by
@@ -406,10 +411,11 @@ to the one given by Obara and Saika
        \right\},
   \end{split}
 \end{equation}
-where $\zeta=\zeta_a+\zeta_c$, $\eta=\zeta_b+\zeta_d$, $\rho=\zeta\eta/(\zeta+\eta)$,
-$PA_k=P_k-A_k$, $PQ_k$ is given by~(\ref{Eq:MIC}), $m\in\mathbb{N}$ plays 
-the same role as in the OS algorithm (the integrals with $m=0$ are true ERIs, while
-integrals with $m>0$ are auxiliary integrals)
+%where $\zeta=\zeta_a+\zeta_c$, $\eta=\zeta_b+\zeta_d$, $\rho=\zeta\eta/(\zeta+\eta)$,
+where $PA_k=P_k-A_k$, $PQ_k$ is given by~(\ref{Eq:MIC})
+%, $m\in\mathbb{N}$ plays 
+%the same role as in the OS algorithm (the integrals with $m=0$ are true ERIs, while
+%integrals with $m>0$ are auxiliary integrals)
 and $a_k$ and $b_k$ are the $k$-th components of the angular 
 momentum of $\phi_a$ and $\phi_b$ respectively. 
 Similar relations may be written down for incrementing angular momentum 
@@ -426,11 +432,11 @@ over $s$ functions $[00|00]_{i}^{(m)}$, which is simply
     &\times\exp\left(-\frac{\zeta_a\zeta_c}{\zeta}AC^2\right) \\
     &\times\exp\left(-\frac{\zeta_b\zeta_d}{\eta}BD^2\right) \\
     &\times F_{m+1}(\rho PQ^2) \\
-    &=PQ_i(00|00)^{(m+1)},
+    &=PQ_i(00|00)^{(m+1)}.
   \end{split}
 \end{equation*}
-where $AC^2=|\mathbf{A-C}|^2$, $BD^2=|\mathbf{B-D}|^2$, $PQ^2=|\mathbf{PQ}|^2$ and
-$F_m(x)=\int_0^1t^{2m}\exp(-xt^2)dt$ is a reduced form of the incomplete gamma function.
+%where $AC^2=|\mathbf{A-C}|^2$, $BD^2=|\mathbf{B-D}|^2$, $PQ^2=|\mathbf{PQ}|^2$ and
+%$F_m(x)=\int_0^1t^{2m}\exp(-xt^2)dt$ is a reduced form of the incomplete gamma function.
 The horizontal recurrence relation~\cite{MGordon88} can be applied to $[a+c0|b+d0]_{ij}$ to give 
 finally the target integral $[ac|bd]_{ij}$.
 This RR shifts a unit of angular momentum from the first to the second center, i.e.
