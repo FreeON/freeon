@@ -35,8 +35,8 @@
 %\documentclass[pre,aps,twocolumn,showpacs,twocolumngrid,superbib]{revtex4}
 %\documentclass[prl,aps,twocolumn,showkeys,twocolumngrid,superbib]{revtex4}
 %\documentclass[twocolumn,showkeys,showpacs,preprintnumbers,amsmath,amssymb]{revtex4}
-%\documentclass[prl,twocolumn,showpacs,twocolumngrid,superbib]{revtex4}
-\documentclass[showpacs,preprint,superbib]{revtex4}
+\documentclass[prl,twocolumn,showpacs,twocolumngrid,superbib]{revtex4}
+%\documentclass[showpacs,preprint,superbib]{revtex4}
 
 \usepackage{graphicx}
 \usepackage{amsfonts}
@@ -125,14 +125,26 @@ the corresponding ${\bf k}$-space limit was recently
 demonstrated for DFT~\cite{CTymczak04a}, HF and hybrid 
 HF/DFT~\cite{CTymczak04b} level of theories.
 
-Gradients and lattice gradients are important concepts in characterizing the states of condensed
-matter. The simulation of system with periodic boundary condition (PBC) 
-involves the atomic positions in the unit cell and the lattice parameters. 
-The location of an energy minimum requires an optimization of both sets 
-of coordinates. This minimization can be achieved with the help of 
-the periodic energy gradients and cell gradients. The latter represents the 
-derivatives of the energy of the unit cell with respect to the lattice 
-parameters.
+The $\Gamma$-point approache opens the capabilities of studing very large 
+complexe and disordered systems such as liquides,....
+
+Finding crystal structures of condensed systems can
+be formulated as an identification of the total energy minima
+as a function of atomic coordinates and unit-cell vectors.
+The problem is then the minimization of the total energy in $M$ dimensions, where
+$M=3N+3$. $N$ is the number of atoms, $3N-3$ is the number
+of independent coordinates after the elimination of the translation, 
+and the number of independent unit-vector elements
+after the elimination of unit-cell rotations is 6.
+%Gradients and lattice gradients are important concepts in characterizing the states of condensed
+%matter. The simulation of system with periodic boundary condition (PBC) 
+%involves the atomic positions in the unit cell and the lattice parameters. 
+%The location of an energy minimum requires an optimization of both sets 
+%of coordinates. 
+This minimization can be achieved with the help of an efficient optimizer~\cite{KNemeth04,KNemeth05}
+and the knowledge of the periodic energy gradients and cell gradients. 
+%The latter represents the derivative of the energy of the unit cell 
+%with respect to the unit-cell vectors. 
                                   
 The first implementation of the Hartree-Fock cell gradients based on 
 Gaussian type atomic orbital (GTAO),
@@ -165,6 +177,12 @@ Their implementation is based on the Hermite Gaussian-type function
 in the context of the McMurchie-Davidson algorithm~\cite{LMcmurchie78}.
 
 
+The HF-MIC model is a translationally invariant definition of $\Gamma$-point Hartree-Fock exchange, 
+which correctly approaches the k-space integration value in the limit of a
+large cell. This is accomplished through introducing a 
+minimum image convention (MIC) into the exchange kernel
+at the level of primitive two-electron integrals.
+
 As it will be shown latter, the evaluation of the exchange energy gradients,
 within the $\Gamma$-point approximation,
 does not lead to special difficulties. The implementation requires the evaluation
@@ -194,9 +212,9 @@ of the primitive lattice vectors
 \begin{equation}
   M=(\mathbf{a},\mathbf{b},\mathbf{c}).
 \end{equation}
-The position of a lattice is $\mathbf{R}=M\mathbf{n}$,
+The position of a lattice is $\mathbf{R(n)}=M\mathbf{n}$,
 with $\mathbf{n}=(n_a,n_b,n_c)$ a vector of integers.
-The position of atom $A$ in the cell $\mathbf{n}$ is $\mathbf{A}=M(\mathbf{f}_A+\mathbf{n})$,
+The position of atom $A$ in the cell $\mathbf{R(n)}$ is $\mathbf{A}=M(\mathbf{f}_A+\mathbf{n})$,
 with $\mathbf{f}_A=(f_{Aa},f_{Ab},f_{Ac})$ the fractional coordinates of 
 the atom $A$ in the central cell. 
 In the following, we will refer to the full set of
@@ -259,6 +277,21 @@ $\varepsilon\approx 10^{-15}$ is
 required to yield a consistent wrapping when distributions lie at the cell boundary 
 and $[\bullet]$ is the nearest integer function defined as 
 $[x]:=n$ with $x\in \mathbb{R}$, $n\in \mathbb{Z}$ and $|x-n|<1/2$.
+As an example, the MIC-integral over $s$-type functions is given by
+\begin{equation}
+  \begin{split}
+  (00|00)^{(m)}&=\left(\frac{\rho}{\pi}\right)^{\frac{1}{2}}
+    \left(\frac{\pi}{\zeta}\right)^{\frac{3}{2}}\left(\frac{\pi}{\eta}\right)^{\frac{3}{2}}\\
+    &\times\exp\left(-\frac{\zeta_a\zeta_c}{\zeta}AC^2\right) \\
+    &\times\exp\left(-\frac{\zeta_b\zeta_d}{\eta}BD^2\right) \\
+    &\times F_{m}(\rho PQ^2)
+  \end{split}
+\end{equation}
+where $\zeta=\zeta_a+\zeta_c$, $\eta=\zeta_b+\zeta_d$, $\rho=\zeta\eta/(\zeta+\eta)$,
+$AC^2=|\mathbf{A-C}|^2$, $BD^2=|\mathbf{B-D}|^2$, $PQ^2=|\mathbf{PQ}|^2$, 
+is given by Eq.~\ref{Eq:MIC} and
+$F_m(x)=\int_0^1t^{2m}\exp(-xt^2)dt$ is a reduced form of the incomplete gamma function~\cite{IShavitt63}.
+
 
 \subsection{Gradients}
 The exchange energy gradient with respect to the fracional coordinate 
@@ -277,7 +310,7 @@ is given by
 where the indices $abcd$ and $\mathbf{mn}$ run over the basis functions and the
 Bravais vectors respectively.
 
-If we assume that $\partial PQ_k/\partial A_i=\delta_{ik}\zeta_a/(\zeta_a+\zeta_c)$
+If we assume {\it e.g.} that $\partial PQ_k/\partial A_i=\delta_{ik}\zeta_a/(\zeta_a+\zeta_c)$
 (which is true except at some discontinuity points) it is then possible to
 see, after further manipulations, 
 that the evaluation of the derivative $\partial(ac^\mathbf{m}|bd^\mathbf{n})/\partial G_i$
@@ -624,19 +657,19 @@ obtained with {\sc Crystal03} and a $8\times 8\times 8$ $k$-points integration g
 %
 %
 
-\subsection{???Convergence of the atomic gradients???}
+\subsection{???Convergence of the MIC-atomic gradients???}
 In Table~\ref{Tab:GradMgO} we present the progression of the average of the norm of the
 atomic gradients for the (MgO)$_n$ systems. 
 While the smallest system, (MgO)$_4$, gives 
-large unphysical gradients which reflets the poor approximation of 
-the $\Gamma$-point to the Brilloin zone,
+large unphysical gradients which reflets 
+an unsuitable use of the $\Gamma$-point approximation,
 the larger systems provide gradients which are below the accuracy targeted by the 
 {\tt TIGHT} threshold (i.e. an absolute error of $10^{-4}$ a.u. in the forces).
 
 \begin{table}[t]
   \centering
   \caption{\protect
-    Progression of the Hartree-Fock $\Gamma$-point the averae norm of the gradients
+    Progression of the Hartree-Fock $\Gamma$-point the average norm of the gradients
     for (MgO)$_n$ using the periodic 
     RHF-MIC/8-61G/8-51G level of theory and the {\tt TIGHT} threshold. 
 %    $n$ is the number of MgO units in the (super)cell.
@@ -903,10 +936,11 @@ than 3 digits can be already achived with pseudo-cubic cells of about $600$\AA$^
 }
 
 @Article{KDoll04,
-  author = 	 {K. Doll and R. Dovesi and R. Orlando},
-  journal = 	 {Theo. Chim. Acta},
-  year = 	 {2004},
-  note = 	 {submitted},
+  author =       {K. Doll and R. Dovesi and R. Orlando},
+  journal =      {Theo. Chim. Acta},
+  year =         {2004},
+  volume =       {112},
+  pages =        {394}
 }
 
 @Article{PEwald21,
