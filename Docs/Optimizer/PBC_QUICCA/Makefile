@@ -8,8 +8,8 @@ latex:
 	latex PBCQUICCA.tex
 
 links:
-	cp mondo_new.bib-save ../../Bib/mondo_new.bib
-	ln -s ../../Bib/mondo_new.bib ./mondo_new.bib 
+	cp mondo_new.bib-save mondo_new.bib
+#	ln -s ../../Bib/mondo_new.bib ./mondo_new.bib 
 	ln -s ../../RevTex/revtex4.cls ./revtex4.cls
 	ln -s ../../RevTex/apsrev.bst  ./apsrev.bst
 	ln -s ../../RevTex/apsrmp.bst  ./apsrmp.bst
