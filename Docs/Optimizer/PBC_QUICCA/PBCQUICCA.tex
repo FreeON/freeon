@@ -115,9 +115,9 @@ is related to the corresponding fractional coordinates by
 \begin{equation}
 \vec{r}_{k} = {\bf h} \vec{f}_{k} ,
 \end{equation}
-where ${\bf h}=\{\vec{h}_1:\vec{h}_2:\vec{h}_3\}$ is the matrix of (coloumn wise) Cartesian lattice vectors.
+where ${\bf h}=\{\vec{h}_1:\vec{h}_2:\vec{h}_3\}$ is the matrix of (column wise) Cartesian lattice vectors.
 
-The periodic B-matrix is naturally coloumn blocked, with a fractional coordinate block 
+The periodic B-matrix is naturally column blocked, with a fractional coordinate block 
 ${\bf B}^f_{\scriptscriptstyle N_i \times 3 N_a }$,
 and a lattice coordinate block ${\bf B}^h_{\scriptscriptstyle N_i \times 9}$.  The full B-matrix
 is then ${\bf B} = \left( {\bf B}^f : {\bf B}^h \right)$, a $N_i \times (3 N_a +9)$ matrix
@@ -174,7 +174,7 @@ Linear scaling factorization of ${\bf B}^t \bf B$ may be achieved, as the upper 
 $3 N_a \times 3 N_a$ block is 
 %hyper-sparse
 {\bf
-extremely sparse, as discussed in \onlinecite{KNemeth00B},
+extremely sparse, as discussed in Ref.~\onlinecite{KNemeth00B},
 }
 leading also to  
 %a hyper-sparse 
@@ -269,12 +269,15 @@ coordinate optimization.
 %which we hope to describe in a forthcoming paper.
 {\bf Here, we are using a still experimental algorithm, that is described
 in our previous paper on QUICCA \cite{KNemeth04}. The only modification
-applied to the previous scheme in the present work is that
+applied to the internal coordinate recognition is that
 weak van der Waals bonds are only allowed if the corresponding atoms
 are topologically far enough from each other 
-(at least 10th neighbors) in the covalent bonding
+in the covalent bonding
 network, while being spacially within the van der Waals radii of 
-each other. 
+each other. Topological distance is measured in the minimum number
+of bonds that connect two selected atoms in the covalent network.
+In the present scheme, van der Waals bonds are allowed, if this 
+topological distance is $10$ or greater.
 The goal
 of this extra selection criterion is to filter the occurance of
 connectivity between spacially close but topologically far atoms.
@@ -566,14 +569,16 @@ converged in 15 steps, while QUICCA took 19 steps.
 
 {\bf
 We could not make a direct comparison with the work of Bu\v{c}ko {\em et.~al} \cite{TBucko05}
-since planewaves based electronic structure methods are not available in {\sc MondoSCF}.
-Supposing that the potential energy surfaces are similar enough, 
-the 6 optimization steps taken by the algorithm of Bu\v{c}ko {\em et.~al} 
-are clearly superior to all other methods presented here.
-We expect that using a more similar internal coordinate system, 
-especially in terms of intermolecular stretches, QUICCA will
-be able for a similar performance. We will investigate this point in a 
-separate study.
+since planewaves based electronic structure methods are not available in {\sc MondoSCF}. 
+Also, the performance of internal coordinate methods on molecular
+crystals depends a lot on the choice of the internal coordinates.
+While Bu\v{c}ko {\em et.~} used $5/R$ type coordinates to describe
+intermolecular bonds, we used simple stretches that may be less 
+efficient for molecular crytals. Nevertheless, 
+the method of Bu\v{c}ko {\em et.~al} converges in only 6 optimization 
+steps. We expect that a more similar choice of the internal coordinates
+on a similar potential energy surface would bring QUICCA close
+to this performance, and will investigate this point in a later study.
 }
 
 \section{Discussion}\label{discussion}
