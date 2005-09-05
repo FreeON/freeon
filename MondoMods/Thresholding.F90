@@ -358,7 +358,8 @@ MODULE Thresholding
         REAL(DOUBLE)                    :: RErfc0,R,DR,XX,YY
         INTEGER                         :: IG
         INTEGER,PARAMETER               :: NGrid     = 99
-        REAL(DOUBLE),PARAMETER          :: DeltaR    = 0.05931686960054
+        REAL(DOUBLE),PARAMETER          :: DeltaR    = 0.05931686960054D0
+        REAL(DOUBLE),PARAMETER          :: MaxR      = 100.D0*DeltaR
         REAL(DOUBLE),DIMENSION(0:NGrid) :: RErfData = (/0.00000000000000, & 
         -0.069193073224990,-0.142991408326928,-0.221515189900601, &
         -0.304878985039043,-0.393191833185381,-0.486557367758120, &
@@ -394,15 +395,14 @@ MODULE Thresholding
         -33.39566701220809,-34.07093117369880,-34.75313079237544, &
         -35.44226780443437,-36.13834409257494,-36.84136148790473  /)
 !
-        DR = R/DeltaR
-        IG = INT(DR)
-        IF(IG>NGrid) THEN
-           RErfc0 = -36.841361487904731
+        IF(R .GE. MaxR) THEN
+           RErfc0  =-36.841361487904731D0
         ELSE
-           YY     = DBLE(IG+1)-DR
-           XX     = YY*RErfData(IG)+(One-YY)*RErfData(IG+1)
-           RErfc0 = XX
-        ENDIF
+           DR      = R/DeltaR
+           IG      = INT(DR)
+           YY      = DBLE(IG+1)-DR
+           RErfc0  = YY*RErfData(IG)+(One-YY)*RErfData(IG+1)
+        ENDIF 
 !
       END FUNCTION RErfc0
 !======================================================================================
@@ -410,7 +410,8 @@ MODULE Thresholding
         REAL(DOUBLE)                    :: RErfc1,R,DR,XX,YY
         INTEGER                         :: IG
         INTEGER,PARAMETER               :: NGrid     = 99
-        REAL(DOUBLE),PARAMETER          :: DeltaR    = 0.06292211887801
+        REAL(DOUBLE),PARAMETER          :: DeltaR    = 0.06292211887801D0
+        REAL(DOUBLE),PARAMETER          :: MaxR      = 100.D0*DeltaR
         REAL(DOUBLE),DIMENSION(0:NGrid) :: RErfData = (/0.00000000000000, & 
         -0.000186974756964,-0.001486152993383,-0.004965342495878, &
         -0.011615198762045,-0.022329451188646,-0.037896063626369, &
@@ -446,14 +447,14 @@ MODULE Thresholding
         -33.07121227924511,-33.80920498477436,-34.55521818237374, &
         -35.30924992139395,-36.07129830492483,-36.84136148790473  /)
 !
-        DR = R/DeltaR
-        IG = INT(DR)
-        IF(IG>NGrid) THEN
-           RErfc1 = -36.841361487904731
+
+        IF(R .GE. MaxR) THEN
+           RErfc1  =-36.841361487904731D0
         ELSE
-           YY     = DBLE(IG+1)-DR
-           XX     = YY*RErfData(IG)+(One-YY)*RErfData(IG+1)
-           RErfc1 = XX
+           DR      = R/DeltaR
+           IG      = INT(DR)
+           YY      = DBLE(IG+1)-DR
+           RErfc1  = YY*RErfData(IG)+(One-YY)*RErfData(IG+1)
         ENDIF
 !
       END FUNCTION RErfc1
@@ -463,6 +464,7 @@ MODULE Thresholding
         INTEGER                         :: IG
         INTEGER,PARAMETER               :: NGrid     = 99
         REAL(DOUBLE),PARAMETER          :: DeltaR    = 0.06650073239004
+        REAL(DOUBLE),PARAMETER          :: MaxR      = 100.D0*DeltaR
         REAL(DOUBLE),DIMENSION(0:NGrid) :: RErfData = (/1.09861228866811, & 
          1.098611898560562, 1.098599922810268, 1.098519850529684, &
          1.098231189148427, 1.097481253396448, 1.095891043053229, &
@@ -498,14 +500,13 @@ MODULE Thresholding
         -32.72553938501631,-33.53041008424174,-34.34443346185134, &
         -35.16760361952294,-35.99991482129561,-36.84136148790473  /)
 !
-        DR = R/DeltaR
-        IG = INT(DR)
-        IF(IG>NGrid) THEN
-           RErfc2 = -36.841361487904731
+        IF(R .GE. MaxR) THEN
+           RErfc2  =-36.841361487904731D0
         ELSE
-           YY     = DBLE(IG+1)-DR
-           XX     = YY*RErfData(IG)+(One-YY)*RErfData(IG+1)
-           RErfc2 = XX
+           DR      = R/DeltaR
+           IG      = INT(DR)
+           YY      = DBLE(IG+1)-DR
+           RErfc2  = YY*RErfData(IG)+(One-YY)*RErfData(IG+1)
         ENDIF
 !
       END FUNCTION RErfc2
@@ -515,6 +516,7 @@ MODULE Thresholding
         INTEGER                         :: IG
         INTEGER,PARAMETER               :: NGrid     = 99
         REAL(DOUBLE),PARAMETER          :: DeltaR    = 0.070042173079986
+        REAL(DOUBLE),PARAMETER          :: MaxR      = 100.D0*DeltaR
         REAL(DOUBLE),DIMENSION(0:NGrid) :: RErfData = (/2.564949357461537, &
          2.564989006596002, 2.565263625653670, 2.565992802603680, &
          2.567362349194489, 2.569501375799620, 2.572455274337426, &
@@ -550,14 +552,13 @@ MODULE Thresholding
         -32.36060091771853,-33.23611615663498,-34.12195963630871, &
         -35.01812141698625,-35.92459183395427,-36.84136148790473  /)
 !
-        DR = R/DeltaR
-        IG = INT(DR)
-        IF(IG>NGrid) THEN
-           RErfc3 = Zero
+        IF(R .GE. MaxR) THEN
+           RErfc3  =-36.841361487904731D0
         ELSE
-           YY     = DBLE(IG+1)-DR
-           XX     = YY*RErfData(IG)+(One-YY)*RErfData(IG+1)
-           RErfc3 = XX
+           DR      = R/DeltaR
+           IG      = INT(DR)
+           YY      = DBLE(IG+1)-DR
+           RErfc3  = YY*RErfData(IG)+(One-YY)*RErfData(IG+1)
         ENDIF
 !
       END FUNCTION RErfc3
@@ -567,6 +568,7 @@ MODULE Thresholding
         INTEGER                         :: IG
         INTEGER,PARAMETER               :: NGrid     = 99
         REAL(DOUBLE),PARAMETER          :: DeltaR    = 0.07353933182164
+        REAL(DOUBLE),PARAMETER          :: MaxR      = 100.D0*DeltaR
         REAL(DOUBLE),DIMENSION(0:NGrid) :: RErfData = (/4.31748811353631, &
          4.317512175896137, 4.317683623966438, 4.318164127293550, &
          4.319140372982487, 4.320827794009712, 4.323464056836887, &
@@ -602,14 +604,13 @@ MODULE Thresholding
         -31.97812224626968,-32.92771092725435,-33.88884308229508, &
         -34.86150462591662,-35.84568186560679,-36.84136148790429  /)
 !
-        DR = R/DeltaR
-        IG = INT(DR)
-        IF(IG>NGrid) THEN
-           RErfc4 = Zero
+        IF(R .GE. MaxR) THEN
+           RErfc4  =-36.841361487904731D0
         ELSE
-           YY     = DBLE(IG+1)-DR
-           XX     = YY*RErfData(IG)+(One-YY)*RErfData(IG+1)
-           RErfc4 = XX
+           DR      = R/DeltaR
+           IG      = INT(DR)
+           YY      = DBLE(IG+1)-DR
+           RErfc4  = YY*RErfData(IG)+(One-YY)*RErfData(IG+1)
         ENDIF
 !
       END FUNCTION RErfc4
@@ -619,6 +620,7 @@ MODULE Thresholding
         INTEGER                         :: IG
         INTEGER,PARAMETER               :: NGrid     = 99
         REAL(DOUBLE),PARAMETER          :: DeltaR    = 0.076987652162559
+        REAL(DOUBLE),PARAMETER          :: MaxR      = 100.D0*DeltaR
         REAL(DOUBLE),DIMENSION(0:NGrid) :: RErfData = (/ 6.293419278846481, &
          6.293428265819673, 6.293493693088801, 6.293684825294408, &
          6.294097480722633, 6.294868768085997, 6.296191436978435, &
@@ -654,14 +656,13 @@ MODULE Thresholding
         -31.57962532821967,-32.60641888202935,-33.64600735265372, &
         -34.69837240595972,-35.76349622428757,-36.84136148790473  /)
 !
-        DR = R/DeltaR
-        IG = INT(DR)
-        IF(IG>NGrid) THEN
-           RErfc5 = Zero
+        IF(R .GE. MaxR) THEN
+           RErfc5  =-36.841361487904731D0
         ELSE
-           YY     = DBLE(IG+1)-DR
-           XX     = YY*RErfData(IG)+(One-YY)*RErfData(IG+1)
-           RErfc5 = XX
+           DR      = R/DeltaR
+           IG      = INT(DR)
+           YY      = DBLE(IG+1)-DR
+           RErfc5  = YY*RErfData(IG)+(One-YY)*RErfData(IG+1)
         ENDIF
 !
       END FUNCTION RErfc5
@@ -671,6 +672,7 @@ MODULE Thresholding
         INTEGER                         :: IG
         INTEGER,PARAMETER               :: NGrid     = 99
         REAL(DOUBLE),PARAMETER          :: DeltaR    = 0.08038444969254
+        REAL(DOUBLE),PARAMETER          :: MaxR      = 100.D0*DeltaR
         REAL(DOUBLE),DIMENSION(0:NGrid) :: RErfData = (/8.45169420918354, &
          8.451696731464077, 8.451714888931130, 8.451767285120825, &
          8.451880596117433, 8.452098828437182, 8.452498313444538, &
@@ -706,14 +708,13 @@ MODULE Thresholding
         -31.16645187436438,-32.27331967150422,-33.39426688951615, &
         -34.52927084994538,-35.67830951978023,-36.84136148790473  /)
 !
-        DR = R/DeltaR
-        IG = INT(DR)
-        IF(IG>NGrid) THEN
-           RErfc6 = -36.841361487904731
+        IF(R .GE. MaxR) THEN
+           RErfc6  =-36.841361487904731D0
         ELSE
-           YY     = DBLE(IG+1)-DR
-           XX     = YY*RErfData(IG)+(One-YY)*RErfData(IG+1)
-           RErfc6 = XX
+           DR      = R/DeltaR
+           IG      = INT(DR)
+           YY      = DBLE(IG+1)-DR
+           RErfc6  = YY*RErfData(IG)+(One-YY)*RErfData(IG+1)
         ENDIF
 !
       END FUNCTION RErfc6
@@ -723,6 +724,7 @@ MODULE Thresholding
         INTEGER                         :: IG
         INTEGER,PARAMETER               :: NGrid     = 99
         REAL(DOUBLE),PARAMETER          :: DeltaR    = 0.08372839514058
+        REAL(DOUBLE),PARAMETER          :: MaxR      = 100.D0*DeltaR
         REAL(DOUBLE),DIMENSION(0:NGrid) :: RErfData = (/10.76411757198485, &
          10.76411813202136, 10.76412161068957, 10.76412884865863, &
          10.76413725129333, 10.76414135516990, 10.76413734281293, &
@@ -758,14 +760,13 @@ MODULE Thresholding
         -30.73978525723578,-31.92936561561601,-33.13434013964345, &
         -34.35468172068938,-35.59036402962264,-36.84136148790473  /)
 !
-        DR = R/DeltaR
-        IG = INT(DR)
-        IF(IG>NGrid) THEN
-           RErfc7 = -36.841361487904731
+        IF(R .GE. MaxR) THEN
+           RErfc7  =-36.841361487904731D0
         ELSE
-           YY     = DBLE(IG+1)-DR
-           XX     = YY*RErfData(IG)+(One-YY)*RErfData(IG+1)
-           RErfc7 = XX
+           DR      = R/DeltaR
+           IG      = INT(DR)
+           YY      = DBLE(IG+1)-DR
+           RErfc7  = YY*RErfData(IG)+(One-YY)*RErfData(IG+1)
         ENDIF
 !
       END FUNCTION RErfc7
@@ -775,6 +776,7 @@ MODULE Thresholding
         INTEGER                         :: IG
         INTEGER,PARAMETER               :: NGrid     = 99
         REAL(DOUBLE),PARAMETER          :: DeltaR    = 0.08701912793799076
+        REAL(DOUBLE),PARAMETER          :: MaxR      = 100.D0*DeltaR
         REAL(DOUBLE),DIMENSION(0:NGrid) :: RErfData = (/13.21007201125389, &
          13.21007210579564, 13.21007227927197, 13.21007005067418, &
          13.21005732941711, 13.21001669824980, 13.20991758420083, &
@@ -810,14 +812,13 @@ MODULE Thresholding
         -30.30067063526530,-31.57539783407339,-32.86686167730197, &
         -34.17503055077605,-35.49987375846828,-36.84136148790455  /)
 !
-        DR = R/DeltaR
-        IG = INT(DR)
-        IF(IG>NGrid) THEN
-           RErfc8 = -36.841361487904731
+        IF(R .GE. MaxR) THEN
+           RErfc8  =-36.841361487904731D0
         ELSE
-           YY     = DBLE(IG+1)-DR
-           XX     = YY*RErfData(IG)+(One-YY)*RErfData(IG+1)
-           RErfc8 = XX
+           DR      = R/DeltaR
+           IG      = INT(DR)
+           YY      = DBLE(IG+1)-DR
+           RErfc8  = YY*RErfData(IG)+(One-YY)*RErfData(IG+1)
         ENDIF
 !
       END FUNCTION RErfc8
@@ -827,6 +828,7 @@ MODULE Thresholding
         INTEGER                         :: IG
         INTEGER,PARAMETER               :: NGrid     = 99
         REAL(DOUBLE),PARAMETER          :: DeltaR    = 0.09025697036060773
+        REAL(DOUBLE),PARAMETER          :: MaxR      = 100.D0*DeltaR
         REAL(DOUBLE),DIMENSION(0:NGrid) :: RErfData = (/15.77380950510918, &
         15.77380951365833,15.77380929105443,15.77380705640535, &
         15.77379726100260,15.77376694867352,15.77368993018243, &
@@ -862,14 +864,13 @@ MODULE Thresholding
         -29.85003300930142,-31.21216074633698,-32.59239312127749, &
         -33.99069394918448,-35.40702810598882,-36.84136148790473  /)
 !
-        DR = R/DeltaR
-        IG = INT(DR)
-        IF(IG>NGrid) THEN
-           RErfc9 = -36.841361487904731
+        IF(R .GE. MaxR) THEN
+           RErfc9  =-36.841361487904731D0
         ELSE
-           YY     = DBLE(IG+1)-DR
-           XX     = YY*RErfData(IG)+(One-YY)*RErfData(IG+1)
-           RErfc9 = XX
+           DR      = R/DeltaR
+           IG      = INT(DR)
+           YY      = DBLE(IG+1)-DR
+           RErfc9  = YY*RErfData(IG)+(One-YY)*RErfData(IG+1)
         ENDIF
 !
       END FUNCTION RErfc9
@@ -879,6 +880,7 @@ MODULE Thresholding
         INTEGER                         :: IG
         INTEGER,PARAMETER               :: NGrid     = 99
         REAL(DOUBLE),PARAMETER          :: DeltaR    = 0.09344271762133112
+        REAL(DOUBLE),PARAMETER          :: MaxR      = 100.D0*DeltaR
         REAL(DOUBLE),DIMENSION(0:NGrid) :: RErfData = (/18.44290751886233, &
         18.44290751715104,18.44290738561470,18.44290633426016, &
         18.44290191135521,18.44288809157196,18.44285144576142, &
@@ -914,14 +916,13 @@ MODULE Thresholding
         -29.38869314611444,-30.84031487297506,-32.31143278326736, &
         -33.80200606541906,-35.31199511500598,-36.84136148790473  /)
 !
-        DR = R/DeltaR
-        IG = INT(DR)
-        IF(IG>NGrid) THEN
-           RErfc10= -36.841361487904731
+        IF(R .GE. MaxR) THEN
+           RErfc10 =-36.841361487904731D0
         ELSE
-           YY     = DBLE(IG+1)-DR
-           XX     = YY*RErfData(IG)+(One-YY)*RErfData(IG+1)
-           RErfc10= XX
+           DR      = R/DeltaR
+           IG      = INT(DR)
+           YY      = DBLE(IG+1)-DR
+           RErfc10 = YY*RErfData(IG)+(One-YY)*RErfData(IG+1)
         ENDIF
 !
       END FUNCTION RErfc10
@@ -931,6 +932,7 @@ MODULE Thresholding
         INTEGER                         :: IG
         INTEGER,PARAMETER               :: NGrid     = 99
         REAL(DOUBLE),PARAMETER          :: DeltaR    = 0.09657748457523069
+        REAL(DOUBLE),PARAMETER          :: MaxR      = 100.D0*DeltaR
         REAL(DOUBLE),DIMENSION(0:NGrid) :: RErfData = (/21.20731571229542, &
         21.20731571107156,21.20731566285921,21.20731531957955, &
         21.20731399323669,21.20731010902021,21.20730002148488, &
@@ -966,14 +968,13 @@ MODULE Thresholding
         -28.91738145130069,-30.46044799605671,-32.02442408491001, &
         -33.60926423212901,-35.21492430848480,-36.84136148790473  /)
 !
-        DR = R/DeltaR
-        IG = INT(DR)
-        IF(IG>NGrid) THEN
-           RErfc11= -36.841361487904731
+        IF(R .GE. MaxR) THEN
+           RErfc11 =-36.841361487904731D0
         ELSE
-           YY     = DBLE(IG+1)-DR
-           XX     = YY*RErfData(IG)+(One-YY)*RErfData(IG+1)
-           RErfc11= XX
+           DR      = R/DeltaR
+           IG      = INT(DR)
+           YY      = DBLE(IG+1)-DR
+           RErfc11 = YY*RErfData(IG)+(One-YY)*RErfData(IG+1)
         ENDIF
 !
       END FUNCTION RErfc11
@@ -983,6 +984,7 @@ MODULE Thresholding
         INTEGER                         :: IG
         INTEGER,PARAMETER               :: NGrid     = 99
         REAL(DOUBLE),PARAMETER          :: DeltaR    = 0.09966259428603357
+        REAL(DOUBLE),PARAMETER          :: MaxR      = 100.D0*DeltaR
         REAL(DOUBLE),DIMENSION(0:NGrid) :: RErfData = (/24.05873528266423, &
         24.05873528223582,24.05873526921308,24.05873519907667, &
         24.05873505179937,24.05873506479703,24.05873615062081, &
@@ -1018,14 +1020,13 @@ MODULE Thresholding
         -28.43674995742671,-30.07308480729448,-31.73176283714101, &
         -33.41273384685862,-35.11594914483587,-36.84136148790473  /)
 !
-        DR = R/DeltaR
-        IG = INT(DR)
-        IF(IG>NGrid) THEN
-           RErfc12= -36.841361487904731
+        IF(R .GE. MaxR) THEN
+           RErfc12 =-36.841361487904731D0
         ELSE
-           YY     = DBLE(IG+1)-DR
-           XX     = YY*RErfData(IG)+(One-YY)*RErfData(IG+1)
-           RErfc12= XX
+           DR      = R/DeltaR
+           IG      = INT(DR)
+           YY      = DBLE(IG+1)-DR
+           RErfc12 = YY*RErfData(IG)+(One-YY)*RErfData(IG+1)
         ENDIF
 !
       END FUNCTION RErfc12
