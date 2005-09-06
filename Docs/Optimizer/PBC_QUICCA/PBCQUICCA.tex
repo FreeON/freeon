@@ -171,17 +171,10 @@ which  may be solved in linear scaling CPU time, through Cholesky factorization 
 matrix ${\bf B}^{t} {\bf B}$ that enters the left-handed pseudo-inverse, 
 followed by forward and backward substitution, as described in Ref.~[\onlinecite{KNemeth00B}].  
 Linear scaling factorization of ${\bf B}^t \bf B$ may be achieved, as the upper left-hand 
-$3 N_a \times 3 N_a$ block is 
-%hyper-sparse
-{\bf
-extremely sparse, as discussed in Ref.~\onlinecite{KNemeth00B},
-}
-leading also to  
-%a hyper-sparse 
-an extremely sparse elimination tree
+$3 N_a \times 3 N_a$ block is extremely sparse, leading also to  an extremely sparse elimination tree
 and sparse Cholesky factors, similar to the case of isolated molecules \cite{KNemeth00B}.
 Note however that the factorization of ${\bf B B}^{t}$, involved in construction of a right-handed 
-pseudo-inverse, has the dense $9 \times N_i$ row uppermost and the dense $N_i \times 9$ coloumn foremost,
+pseudo-inverse, has the dense $9 \times N_i$ row uppermost and the dense $N_i \times 9$ column foremost,
 leading to dense Cholesky factors. Thus, the left- and right-handed approach  are not equivalent for 
 internal coordinate transformations of large crystal systems, as they are in the case of
 gas phase molecules, when using sparse linear algebra to achieve a reduced computational cost.
@@ -265,34 +258,25 @@ predicted minima.
 It is worth noting that an appropriate internal coordinate 
 recognition scheme is extremely important to the success of internal 
 coordinate optimization.  
-%Here, we are using a still experimental algorithm, 
-%which we hope to describe in a forthcoming paper.
 {\bf Here, we are using a still experimental algorithm, that is described
 in our previous paper on QUICCA \cite{KNemeth04}. The only modification
 applied to the internal coordinate recognition is that
 weak van der Waals bonds are only allowed if the corresponding atoms
 are topologically far enough from each other 
 in the covalent bonding
-network, while being spacially within the van der Waals radii of 
+network, while being spatially within the van der Waals radii of 
 each other. Topological distance is measured in the minimum number
 of bonds that connect two selected atoms in the covalent network.
 In the present scheme, van der Waals bonds are allowed, if this 
-topological distance is $10$ or greater.
+topological distance is $10$ au or greater.
 The goal
-of this extra selection criterion is to filter the occurance of
-connectivity between spacially close but topologically far atoms.
-This feature affects 
-exclusively van der Waals complexes, like the sulfur crystal. 
-We hope to report about a more advanced coordinate selection scheme in
-a forthcoming paper.
-
+of this extra selection criterion is to filter the occurrence of
+connectivity between spatially close but topologically far atoms.
+This feature affects exclusively van der Waals complexes, like the sulfur crystal. 
 It is also important to note, that we have not used the $5/R$ type
-internal coordinates for intermolecular stretches, as opposed to 
-several authors \cite{JBaker00,TBucko05}. We have not used 
-these coordinates yet, as simple stretches seemed to work satisfactorily
-e.g. in the ice-crystal (see Fig. \ref{iceIh}). We will
-investigate the differences in the performance of the various 
-intermolecular coordinates in another forthcoming publication.
+internal coordinates for intermolecular stretches, as other authors have \cite{JBaker00,TBucko05},
+as simple stretches seemed to work satisfactorily e.g. in the ice-crystal (see Fig. \ref{iceIh}). 
+
 }
 
 \subsection{Treatment of constraints}
@@ -526,8 +510,7 @@ we employ a $2\times2\times2$ supercell, so that we may make approximate numeric
 comparison with the {\bf k}-space methods.  This $2\times2\times2$ supercell involves 
 16 urea molecules, $C_1$ (no) symmetry, 128 atoms in total, and more than 850 redundant internal 
 coordinates;  the number of internal coordinates used by QUICCA fluctuates slightly during optimization.  
-{\bf
-The reason of this fluctuation is that planarity of the urea molecules
+{\bf  The reason of this fluctuation is that planarity of the urea molecules
 may be slightly distorted during the course of the optimization and gets 
 recovered in later optimization steps. This results
 in the loss or gain of the corresponding out-of-plane coordinates thus
@@ -543,10 +526,10 @@ coordinates.
 {\bf
 Bu\v{c}ko {\em et.~al} \cite{TBucko05} used a delocalized internal coordinate system built
 from 152 conventional primitive internals and 160 $5/R$ type intermolecular
-stretches; they applied the same cell as Kudin {\em et.~al} \cite{KKudin01}.
+stretches, which they applied to the same cell as that used by Kudin {\em et.~al} \cite{KKudin01}.
 Their optimization method was based on a mixture of the Rational Function 
-Optimization technique and Pulay's GDIIS method \cite{FEckert97}. 
-The BFGS scheme \cite{RFletcher81} has been used to update the Hessian.
+Optimization technique and Pulay's GDIIS method \cite{FEckert97}, with a
+BFGS \cite{RFletcher81} update of the full Hessian????
 }
 
 Convergence of the RPBE/3-21G {\sc MondoSCF} calculations are shown in Fig.~\ref{U321G}, 
@@ -565,20 +548,9 @@ relaxation of atomic centers only.   The beginning and ending {\sc CYRSTAL} valu
 calculation are {\tt -442.069368} and {\tt -442.084595}, respectively.  For {\sc MondoSCF},
 they are {\tt -442.069473} and {\tt -442.084671}.  The energy differences are {\tt -.01523} and
 {\tt -.01520} for {\sc CRYSTAL} and {\sc MondoSCF}, respectively.  The {\sc CRYSTAL} optimization
-converged in 15 steps, while QUICCA took 19 steps.
-
-{\bf
-We could not make a direct comparison with the work of Bu\v{c}ko {\em et.~al} \cite{TBucko05}
-since planewaves based electronic structure methods are not available in {\sc MondoSCF}. 
-Also, the performance of internal coordinate methods on molecular
-crystals depends a lot on the choice of the internal coordinates.
-While Bu\v{c}ko {\em et.~} used $5/R$ type coordinates to describe
-intermolecular bonds, we used simple stretches that may be less 
-efficient for molecular crytals. Nevertheless, 
-the method of Bu\v{c}ko {\em et.~al} converges in only 6 optimization 
-steps. We expect that a more similar choice of the internal coordinates
-on a similar potential energy surface would bring QUICCA close
-to this performance, and will investigate this point in a later study.
+converged in 15 steps, while QUICCA took 19 steps.  {\bf Impressively, the method of Bu\v{c}ko {\em et.~al} 
+converges in only 6 optimization steps.  Unfortunately, a more direct comparison with this 
+method is difficult, since the pseudopotential planewave method is not available in {\sc MondoSCF}. 
 }
 
 \section{Discussion}\label{discussion}
@@ -603,11 +575,8 @@ but plague most gradient only internal coordinate schemes.  Also, as with other
 schemes, we have found the performance of QUICCA to be sensitive to the quality 
 of the internal coordinate system.  It is our opinion that the difficulties 
 encountered with many floppy systems could be overcome with a better choice
-of internal coordinate system.  
-{\bf
-Such a better choice may involve the use of $5/R$ type intermolecular 
-stretches \cite{JBaker00,TBucko05} that we plan to test in a 
-forthcoming work.
+of internal coordinate system, such as the {\bf  $5/R$ type intermolecular 
+stretches introduced by Baker \cite{JBaker00} and used by  Bu\v{c}ko {\em et.~al} \cite{TBucko05}.
 }
 
 %There are two components involved determining the internal coordinate system:
@@ -632,12 +601,7 @@ notice that the $21^{\rm st}$ data point is missing from Fig.~\ref{U321G}.  This
 data point was removed because it was {\tt 1D-4} below the converged value of the 
 total energy, {\tt   -3581.2926}, confusing the log-linear plot. These 
 fluctuations are at the targeted energy resolution, and are likely due to 
-changes in the 
-%adaptive HiCu 
-{\bf
-hierarchical cubature (HiCu)
-}
-grid for numerical integration of the 
+changes in the hierarchical cubature (HiCu) grid for numerical integration of the 
 exchange-correlation \cite{CTymczak05a}.  
 Nevertheless, reliable structural information can still be obtained, as absolute 
 precision in the forces is retained with increasing system size, allowing gradient following
@@ -657,7 +621,19 @@ the $\Gamma$-point surface lacks the symmetry provided by {\bf k}-space
 sampling.  Secondly, the $2\times2\times2$ calculation has many more 
 degrees of freedom, and in particular, lower frequency modes due to the 
 larger cell.  
-  
+
+{\bf  While a direct comparison with the excellent results of  Bu\v{c}ko 
+{\em et.~al} \cite{TBucko05} are difficult due to differences in the basis sets, we can comment that 
+their optimization scheme is highly aggressive, using the most sophisticated
+techniques for a gradients only optimization, but which also demand the use of 
+dense matrices. Relative to these techniques, which include the use of  $5/R$ type 
+coordinates, delocalized internal coordinates, the Rational Function 
+Optimization technique, Pulay's GDIIS method and BFGS update of 
+the full Hessian, QUICCA is analogous to an incomplete (sparse) BFGS 
+update only.  We note that we can certainly combine QUICCA with some of these
+techniques, such as the   $5/R$ type coordinates and GDIIS,  and still achieve linear 
+scaling, but this is outside the current scope of this paper.}
+
 \section{Conclusions} \label{conclusion}
 
 We have implemented the Bu\v{c}ko, Hafner and {\'A}ngy{\'a}n  \cite{TBucko05}
