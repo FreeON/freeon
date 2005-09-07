@@ -31,8 +31,9 @@ PROGRAM DIIS
        RelDevDP,RelDevQP,Sellers,DMax
   INTEGER                        :: I,J,I0,J0,K,N,M,ISCF,BMax,DoDIIS,iDIIS,iOffSet,DIISBeg
   CHARACTER(LEN=2)               :: Cycl,NxtC
-  CHARACTER(LEN=5*DEFAULT_CHR_LEN) :: Mssg
+  CHARACTER(LEN=5*DEFAULT_CHR_LEN) :: Mssg,FFile
   LOGICAL                        :: Present,Sloshed
+  INTEGER                        :: IPresent,JPresent
   CHARACTER(LEN=4),PARAMETER     :: Prog='DIIS'
   CHARACTER(LEN=DCL) :: NAME
   !-------------------------------------------------------------------------------------
@@ -104,19 +105,51 @@ PROGRAM DIIS
      DO I=DIISBeg,N-1
         !write(*,*) 'I0',I0
         !write(*,*) TrixFile('OrthoF',Args,I0)
-        CALL Get(F,TrixFile('OrthoF',Args,I0))    
-        CALL Get(P,TrixFile('OrthoD',Args,I0))    
-        CALL Multiply(F,P,EI)  
-        CALL Multiply(P,F,EI,-One)
+        IF(MyID.EQ.ROOT) THEN
+           FFile=TrixFile('E_DIIS',Args,I0)
+           INQUIRE(FILE=FFile,EXIST=Present)
+           IPresent=1
+           IF(Present)IPresent=0
+        ENDIF
+#ifdef PARALLEL
+        CALL BCast(IPresent)
+#endif
+        IF(IPresent.EQ.0) THEN
+           !write(*,*) 'We load I '//TrixFile('E_DIIS',Args,I0)
+           CALL Get(EI,TrixFile('E_DIIS',Args,I0))
+        ELSE
+           CALL Get(F,TrixFile('OrthoF',Args,I0))    
+           CALL Get(P,TrixFile('OrthoD',Args,I0))    
+           CALL Multiply(F,P,EI)  
+           CALL Multiply(P,F,EI,-One)
+           CALL Put(EI,TrixFile('E_DIIS',Args,I0))
+           !write(*,*) 'We save I '//TrixFile('E_DIIS',Args,I0)
+        ENDIF
 !       We dont filter E for obvious reasons 
         J0=I0-I+1
         DO J=1,I
            !write(*,*) 'J0',J0
            !write(*,*) TrixFile('OrthoF',Args,J0)
-           CALL Get(F,TrixFile('OrthoF',Args,J0))    
-           CALL Get(P,TrixFile('OrthoD',Args,J0))    
-           CALL Multiply(F,P,EJ)  
-           CALL Multiply(P,F,EJ,-One)
+           IF(MyID.EQ.ROOT) THEN
+              FFile=TrixFile('E_DIIS',Args,J0)
+              INQUIRE(FILE=FFile,EXIST=Present)
+              JPresent=1
+              IF(Present)JPresent=0
+           ENDIF
+#ifdef PARALLEL
+           CALL BCast(JPresent)
+#endif
+           IF(JPresent.EQ.0) then
+              !write(*,*) 'We load J '//TrixFile('E_DIIS',Args,J0)
+              CALL Get(EJ,TrixFile('E_DIIS',Args,J0))
+           ELSE
+              CALL Get(F,TrixFile('OrthoF',Args,J0))    
+              CALL Get(P,TrixFile('OrthoD',Args,J0))    
+              CALL Multiply(F,P,EJ)  
+              CALL Multiply(P,F,EJ,-One)
+              CALL Put(EJ,TrixFile('E_DIIS',Args,J0))
+              !write(*,*) 'We save J '//TrixFile('E_DIIS',Args,J0)
+           ENDIF
            B%D(I,J)=Dot(EI,EJ)
            B%D(J,I)=B%D(I,J)
            J0=J0+1
