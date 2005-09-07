@@ -268,7 +268,7 @@ network, while being spatially within the van der Waals radii of
 each other. Topological distance is measured in the minimum number
 of bonds that connect two selected atoms in the covalent network.
 In the present scheme, van der Waals bonds are allowed, if this 
-topological distance is $10$ au or greater.
+topological distance is $10$ (covalent bonds) or greater.
 The goal
 of this extra selection criterion is to filter the occurrence of
 connectivity between spatially close but topologically far atoms.
@@ -529,7 +529,8 @@ from 152 conventional primitive internals and 160 $5/R$ type intermolecular
 stretches, which they applied to the same cell as that used by Kudin {\em et.~al} \cite{KKudin01}.
 Their optimization method was based on a mixture of the Rational Function 
 Optimization technique and Pulay's GDIIS method \cite{FEckert97}, with a
-BFGS \cite{RFletcher81} update of the full Hessian????
+BFGS \cite{RFletcher81} update of an initially diagonal guess of the
+Hessian.
 }
 
 Convergence of the RPBE/3-21G {\sc MondoSCF} calculations are shown in Fig.~\ref{U321G}, 
@@ -626,13 +627,30 @@ larger cell.
 {\em et.~al} \cite{TBucko05} are difficult due to differences in the basis sets, we can comment that 
 their optimization scheme is highly aggressive, using the most sophisticated
 techniques for a gradients only optimization, but which also demand the use of 
-dense matrices. Relative to these techniques, which include the use of  $5/R$ type 
-coordinates, delocalized internal coordinates, the Rational Function 
-Optimization technique, Pulay's GDIIS method and BFGS update of 
-the full Hessian, QUICCA is analogous to an incomplete (sparse) BFGS 
-update only.  We note that we can certainly combine QUICCA with some of these
-techniques, such as the   $5/R$ type coordinates and GDIIS,  and still achieve linear 
-scaling, but this is outside the current scope of this paper.}
+dense matrices, especially in the construction of the delocalized internal coordinates. 
+Another very important difference between the optimizer of Bu\v{c}ko {\em et.~al}
+and the present implementation of QUICCA is in the treatment of intermolecular
+stretches. The use of $5/R$ type stretches may be better suited
+for the intermolecular interactions than the simple stretches used in
+the present implementation of Crystal-QUICCA. The choice of $5/R$ type
+intermolecular stretches is however open for QUICCA 
+as well, though not yet implemented.
+
+While the optimization methods used in the BHA paper represent
+probably the optimum of decades of optimizer developments, QUICCA
+tries to challenge these methods in two points. First,
+we want to show that a simple fitting scheme can be similarly
+efficient as the best traditional methods. Second, we want that the 
+optimizer can use internal coordinates while retaining linear scaling
+for arbitrary molecular size.
+%Relative to these techniques, which include the use of  $5/R$ type 
+%coordinates, delocalized internal coordinates, the Rational Function 
+%Optimization technique, Pulay's GDIIS method and BFGS update of 
+%the full Hessian, QUICCA is analogous to an incomplete (sparse) BFGS 
+%update only.  We note that we can certainly combine QUICCA with some of these
+%techniques, such as the   $5/R$ type coordinates and GDIIS,  and still achieve linear 
+%scaling, but this is outside the current scope of this paper.
+}
 
 \section{Conclusions} \label{conclusion}
 
