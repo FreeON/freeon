@@ -317,14 +317,11 @@ If we assume {\it e.g.} that $\partial PQ_k/\partial A_i=\delta_{ik}\zeta_a/(\ze
 it is then possible to see, after further manipulations, 
 that the evaluation of the derivative $\partial(ac^\mathbf{m}|bd^\mathbf{n})/\partial G_i$
 is completely similar to its correspondent gas phase
-limit (i.e. when the volume of the unit cell goes to infinite). 
+limit (except the application of the MIC Eq.~\ref{Eq:MIC} at the $K^4$ loop). 
 Therefore, the evaluation of the exchange energy gradients at the $\Gamma$-point
 is standard and do not need to be addressed more 
 into detail here. Like in the gas phase calculation, the translational 
 invariance~\cite{AKorminicki77} can be also used to reduce the computational labor.
-
-Note that the discountinuty arising from the use of the nearest 
-integer function (See Eq.~\ref{Eq:MIC}) disapares in the limit of a
 
 \subsection{Lattice Gradients}
 The exchange energy lattice gradients are given by
@@ -345,6 +342,7 @@ to cell parameters $M_{ij}$, can be further decomposed as
     &+[ac^\mathbf{m}|bd^\mathbf{n}]_{ij},
   \end{split}
 \end{equation}
+{\bf ???ABOVE: SHALL WE USE TRANSLATIONAL INVARIANCE???}\\
 %\begin{equation}\label{Eq:DerMij}
 %  \begin{split}
 %    \frac{\partial (ac^\mathbf{m}|bd^\mathbf{n})}{\partial M_{ij}}
@@ -373,11 +371,13 @@ to a contribution of the weighted gradients,
 the second term $[f_{PQj}-\varepsilon \mathrm{sgn}(f_{PQj})]$
 gives extra contributions which can be collected into a new integral, the so-called
 $[ac^\mathbf{m}|bd^\mathbf{n}]_{ij}$.
-It is straightforward to see that this integral tends to vanish when 
-the allowed exchange interaction range becomes smaller than half the system size.
-In other words, there is no need to ``wrap'' around the distance between the two 
-distributions centered on $\mathbf{P}$ and $\mathbf{Q}$, i.e.
-$[f_{PQj}-\varepsilon \mathrm{sgn}(f_{PQj})]$ vanishes.
+
+%vw THAT ISN'T THAT FAST, IN FACT IT DECREASES AS 1/PQ.
+%It is straightforward to see that this integral tends to vanish when 
+%the allowed exchange interaction range becomes smaller than half the system size.
+%In other words, there is no need to ``wrap'' around the distance between the two 
+%distributions centered on $\mathbf{P}$ and $\mathbf{Q}$, i.e.
+%$[f_{PQj}-\varepsilon \mathrm{sgn}(f_{PQj})]$ vanishes.
 
 \subsection{Strategy for the evaluation of $[ac|bd]_{ij}$}
 The integral $[ac|bd]_{ij}$ can be divided into a product of a $i$ and $j$ part as
@@ -516,12 +516,52 @@ RHF/6-31G level of theory~\cite{DJacquemin99B}.
     & $n$ & $\;\;\;a_0$ & $\quad\; d$ & $E/n$ \\
     \hline
     {\sc MondoSCF}\footnote[1]{$\Gamma$-point.}
-    &                1  & 4.5463 & 0.92013 & $-$99.9852799 \\
-    &                2  & 2.7837 & 0.92564 & $-$99.9957549 \\
-    &                4  & 2.4833 & 0.94384 & $-$100.002061 \\
-    &                6  & 2.4760 & 0.94518 & $-$100.002211 \\
-    &                8  & 2.4747 & 0.94521 & $-$100.002215 \\
-    &               10  & 2.4748 & 0.94525 & $-$100.002215 \\
+    &                1  & 4.5449 & 0.9201 & $-$99.9852789 \\
+    &                2  & 2.7960 & 0.9257 & $-$99.9958044 \\
+    &                4  & 2.4838 & 0.9440 & $-$100.002065 \\
+    &                6  & 2.4746 & 0.9453 & $-$100.002213 \\
+    &                8  & 2.4745 & 0.9453 & $-$100.002217 \\
+    &               10  & 2.4745 & 0.9453 & $-$100.002217 \\
+%########################################################
+%# cvs update -D ``2005-04-17 07:37'' Optimizer.F90 InCoords.F90
+% Rel error vs 100.002217
+%A=[
+%#    L/n          L       d              E             E/n             log(RelError)
+%1  4.544915   4.544915 0.920090   -99.98527897    -99.98527897     -3.77114673046454
+%2  2.796054   5.592108 0.925690  -199.9916088145  -99.995804407250 -4.19297596851948
+%3  2.523260   7.569780 0.939533  -300.0037675145 -100.001255838167 -5.01721311122697
+%4  2.483856   9.935424 0.943980  -400.0082628497 -100.002065712425 -5.82020636658341
+%5  2.475845  12.379225 0.945100  -500.0109786307 -100.002195726140 -6.67216333131582
+%6  2.474669  14.848014 0.945275  -600.0132802070 -100.002213367833 -7.43984381891266
+%7  2.474571  17.321997 0.945325  -700.0155128320 -100.002216118857 -8.05496323522044
+%8  2.474471  19.795768 0.945332  -800.0177424840 -100.002217810500  inf
+%9  2.474525  22.270725 0.945332  -900.0199573226 -100.002217480289  inf
+%10 2.474580  24.745800 0.945335 -1000.0221719941 -100.002217199410  inf
+%]
+%########################################################
+%# cvs update -D ``2005-04-17 07:37'' Optimizer.F90 InCoords.F90
+%Rel error vs A(10,4)! scan with a0=2.474580 d=0.945335
+%A=[
+%#    L          E                E/n           log(RelError)
+%1   2.474580   -99.90931751  -99.909317510000  -3.03200127254986
+%2   4.949160  -199.98113057  -99.990565285000  -3.93365946786838 
+%3   7.423740  -300.00336359 -100.001121196667  -4.96069929811450 
+%4   9.898320  -400.00822751 -100.002056877500  -5.79845547146897 
+%5  12.372900  -500.01096966 -100.002193932000  -6.65752772485687 
+%6  14.847480  -600.01327381 -100.002212301667  -7.43970442086059 
+%7  17.322060  -700.01550758 -100.002215368571  -8.24686414765415 
+%8  19.796640  -800.01772666 -100.002215832500  -8.98928577493655 
+%9  22.271220  -900.01994330 -100.002215922222  -9.89354713250424 
+%10 24.745800 -1000.02215935 -100.002215935000  inf
+%]
+%
+%for i=1:9
+% log10( abs(A(i,4)+100.002215935000)/(100.002215935000) )
+%end
+%########################################################
+%########################################################
+%OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD 
+%OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD 
 % tight
 % n     A            E          dHF      A/n         E/n
 %  1  4.546343   -99.98527998 0.92013858 4.546343 - 99.98527998
@@ -540,16 +580,61 @@ RHF/6-31G level of theory~\cite{DJacquemin99B}.
 %  6 14.846526  -600.01327386 0.94519146 2.474421 -100.00221231
 %  8 19.792315  -800.01772686 0.94523512 2.474039 -100.00221585
 % 10 24.740767 -1000.02215951 0.94523867 2.474076 -100.00221595
+%
+% tight, scan with a0=2.4748 and d=0.94525
+%     L          E             E/n          log(RelError)
+%  2.4748   -99.90935332  -99.909353320000 -3.03216869570480
+%  4.9496  -199.98115488  -99.990577440000 -3.93411264998574
+%  7.4244  -300.00336830 -100.001122766667 -4.96132099181872
+%  9.8992  -400.00822872 -100.002057180000 -5.79927126890480
+% 12.3740  -500.01096991 -100.002193982000 -6.65843662169074
+% 14.8488  -600.01327390 -100.002212316667 -7.44102121067321
+% 17.3236  -700.01550761 -100.002215372857 -8.24708358999113
+% 19.7984  -800.01772671 -100.002215838750 -8.99892527947439 !<those guys should be removed from graph (tight!) 
+% 22.2732  -900.01994328 -100.002215920000 -9.72125606791418 !<
+% 24.7480 -1000.02215939 -100.002215939000      0            !<
+%
+% tight, scan with a0=2.4748 and d=0.94525 and NoMIC!
+%    L      log(RelError)
+% 2.4748  -3.09668203938085
+% 7.4244  -3.71849336661178
+%12.3740  -3.95069137577253
+%17.3236  -4.10175437495038
+%22.2732  -4.21356864999351
+%27.2228  -4.30236617020264
+%#32.1724  -4.37604364689683
+%#37.1220  -4.43898766893123
+%#42.0716  -4.49395628689044
+%#47.0212  -4.54273877305517
+%#51.9708  -4.58659003172900
+%#56.9204  -4.62641209977567
+%#61.8700  -4.66288870463734
+%#66.8196  -4.69653762428042
+%#71.7692  -4.72776681446666
+%#76.7188  -4.75689721889157
+%OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD 
+%OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD 
+%########################################################
+%########################################################
+%
     \hline
     {\sc POLOPT}\footnote[2]{32 $k$-points~\cite{DJacquemin99B}.} 
     & 1 & 2.4742 & 0.9452  & $-$\\
     {\sc GAUSSIAN03}\footnote[3]{32 $k$-points, {\tt Default}.}
-    & 1 & 2.4738 & 0.94548 & $-$100.002216\\%Default
+    & 1 & 2.4738 & 0.9455 & $-$100.002216\\%Default
     {\sc GAUSSIAN03}\footnote[4]{32 $k$-points, {\tt VeryTight}.}
-    & 1 & 2.4742 & 0.94522 & $-$100.002216\\%VeryTight
+    & 1 & 2.4742 & 0.9452 & $-$100.002216\\%VeryTight
     \botrule
   \end{tabular}
 \end{table}
+
+
+\begin{figure}[h]
+  \caption{Convergence of the $\Gamma$-point energy }\label{....}
+  \resizebox*{3.6in}{!}{\includegraphics[angle=-90.00]{HF_cnvg.ps}}
+\end{figure}
+
+
 
 We have performed full optimization of three dimensional urea supercells 
 without any symmetry constraint on the lattice or the atomic positions.
@@ -666,7 +751,7 @@ obtained with {\sc Crystal03} and a $8\times 8\times 8$ $k$-points integration g
 
 \subsection{???Convergence of the MIC-atomic gradients???}
 In Table~\ref{Tab:GradMgO} we present the progression of the average of the norm of the
-atomic gradients for the (MgO)$_n$ systems. 
+atomic gradients for the (MgO)$_n$ systems with a lattice constant of $a_0=4.20$\AA. 
 While the smallest system, (MgO)$_4$, gives 
 large unphysical gradients which reflets 
 an unsuitable use of the $\Gamma$-point approximation,
