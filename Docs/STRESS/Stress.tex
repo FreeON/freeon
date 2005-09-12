@@ -125,8 +125,8 @@ the corresponding ${\bf k}$-space limit was recently
 demonstrated for DFT~\cite{CTymczak04a}, HF and hybrid 
 HF/DFT~\cite{CTymczak04b} level of theories.
 
-The $\Gamma$-point approache opens the capabilities of studing very large 
-complexe and disordered systems such as liquides,....
+The $\Gamma$-point approach opens the capabilities of studying very large 
+complex and disordered systems such as liquides,....
 
 Finding crystal structures of condensed systems can
 be formulated as an identification of the total energy minima
@@ -296,7 +296,7 @@ and $F_m(x)=\int_0^1t^{2m}\exp(-xt^2)dt$ is a reduced form of the incomplete gam
 
 
 \subsection{Gradients}
-The exchange energy gradient with respect to the fracional coordinate 
+The exchange energy gradient with respect to the fractional coordinate 
 $f_{Gj}$ can be obtained through the linear transform 
 \begin{equation*}
  \frac{\partial E^x}{\partial f_{Gj}}\bigg|_P=\sum_{i=x,y,z}M_{ij}\frac{\partial E^x}{\partial G_i}\bigg|_P,
@@ -501,7 +501,6 @@ Comparisons are made to final cell parameter and bond length values obtained
 with a 32 $k$-points in the first Brillouin zone at the 
 RHF/6-31G level of theory~\cite{DJacquemin99B}.
 
-
 \begin{table}[t]
   \centering
   \caption{\protect
@@ -558,6 +557,22 @@ RHF/6-31G level of theory~\cite{DJacquemin99B}.
 %for i=1:9
 % log10( abs(A(i,4)+100.002215935000)/(100.002215935000) )
 %end
+%########################################################
+%# cvs update -D ``2005-04-17 07:37'' Optimizer.F90 InCoords.F90
+%# a0=2.474580 d=0.945335-0.01!
+%A=[
+%#      L           F         CellF        log(AbsError F)   log(AbsError CellF) 
+%1   2.474580 0.08285215 0.7105489538E-02  -1.12886841274938  -2.45633101570992
+%2   4.949160 0.01585675 0.1336029046E-01  -2.13495350060083  -2.01092472900073
+%3   7.423740 0.00508851 0.4565773942E-02  -2.46354130511526  -3.01905637077370
+%4   9.898320 0.00785897 0.3773522393E-02  -3.17473620497071  -3.78299460127464
+%5  12.372900 0.00841246 0.3634280123E-02  -3.93832138475466  -4.59216707108662
+%6  14.847480 0.00850540 0.3613436174E-02  -4.65130580973444  -5.32494893139389
+%7  17.322060 0.00852375 0.3609480725E-02  -5.40120949323681  -6.10979142942494
+%8  19.796640 0.00852700 0.3608902775E-02  -6.14266750356817  -6.70186770821990
+%9  22.271220 0.00852760 0.3608851489E-02  -6.92081875394868  -6.83154966090616
+%10 24.745800 0.00852772 0.3608704105E-02   inf                inf
+%]
 %########################################################
 %########################################################
 %OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD 
@@ -628,19 +643,34 @@ RHF/6-31G level of theory~\cite{DJacquemin99B}.
   \end{tabular}
 \end{table}
 
+To analyse the convergence of the $\Gamma$-point energy to the ${\bf k}$-space limit
+we have performed single point calculations for the 
+(HF)$_n$ chains with cell parameter $a_0=2.4745$\AA~and bond length $d=0.9453$\AA.
+Figure~\ref{Fig:CnvgEnergy} shows the relative error to the ${\bf k}$-space limit
+with respect to the unit-cell length with and without the MIC.
+The absolute convergences of the atomic and cell forces, where
+the bond length has been slight contracted by 0.01\AA~to generate 
+non-zero forces, are shown in~Fig.~\ref{Fig:CnvgEnergy}.
+
 
 \begin{figure}[h]
-  \caption{Convergence of the $\Gamma$-point energy }\label{....}
-  \resizebox*{3.6in}{!}{\includegraphics[angle=-90.00]{HF_cnvg.ps}}
+  \caption{Convergence of the $\Gamma$-point relative energy with and without the MIC to the corresponding 
+    ${\bf k}$-space limit for the (HF)$_n$ chains with respect to unit-cell length. The cell parameter 
+    $a_0=2.4745$\AA~and bond length $d=0.9453$\AA~were held fixed. 
+    {\bf !!MAY BE ADD SOMETHING ABOUT FORCES!!}
+    Calculations were performed at the RHF-MIC/6-31G level of theory and the {\tt TIGHT} threshold.}\label{Fig:CnvgEnergy}
+%  \resizebox*{3.6in}{!}{\includegraphics[angle=-90.00]{./DATA/HF_Energy_cnvg.ps}}
+%  \resizebox*{3.6in}{!}{\includegraphics[angle=-90.00]{./DATA/HF_Energy_Forces_cnvg.ps}}
+%  \resizebox*{3.6in}{!}{\includegraphics[angle=-90.00]{./DATA/HF_Energy_Forces_cnvg_2.ps}}
+  \resizebox*{3.6in}{!}{\includegraphics[angle=-90.00]{./DATA/HF_Energy_Forces_cnvg_3.ps}}
 \end{figure}
-
 
 
 We have performed full optimization of three dimensional urea supercells 
 without any symmetry constraint on the lattice or the atomic positions.
 Table~\ref{Tab:Urea} shows the lattice constants, bond lengths, 
 bond angles, dihedral angles and total energies
-for (urea)$_n$ supecells at the $\Gamma$-point RHF-MIC/6-21G* level of
+for (urea)$_n$ supercells at the $\Gamma$-point RHF-MIC/6-21G* level of
 theory. The basis set are the same as in Ref~\cite{RDovesi90}.
 For the seak of comparison, we have also fully optimized a tetragonal lattice
 of urea in the $P\bar{4}2_1m$ space group with the 
@@ -684,7 +714,7 @@ integration grid.
 \end{table}
 
 Table~\ref{Tab:MgO} shows the progression of the lattice constants and total energies computed
-for various MgO supecells at the $\Gamma$-point RHF-MIC level of theory using
+for various MgO supercells at the $\Gamma$-point RHF-MIC level of theory using
 the 8-61G basis set for the magnesium and the 8-51G basis set for the oxygen. 
 The basis sets were specially optimized for MgO by 
 Caus\`a et al~\cite{CBS:861G:MgO} and were obtained from Ref.~\cite{CrystalLib}.
@@ -753,7 +783,7 @@ obtained with {\sc Crystal03} and a $8\times 8\times 8$ $k$-points integration g
 In Table~\ref{Tab:GradMgO} we present the progression of the average of the norm of the
 atomic gradients for the (MgO)$_n$ systems with a lattice constant of $a_0=4.20$\AA. 
 While the smallest system, (MgO)$_4$, gives 
-large unphysical gradients which reflets 
+large unphysical gradients which reflects 
 an unsuitable use of the $\Gamma$-point approximation,
 the larger systems provide gradients which are below the accuracy targeted by the 
 {\tt TIGHT} threshold (i.e. an absolute error of $10^{-4}$ a.u. in the forces).
@@ -859,7 +889,17 @@ first derivatives with respect to atomic displacement.
 
 As an illustration, the analytical gradients and cell gradients have been used 
 in conjunction with the QUICCA algorithm to optimize few periodic systems at 
-the Hartree-Fock level of theory. Convergence of bond lengths, bond angles, 
+the Hartree-Fock level of theory. 
+
+For insulating systems, the convergence of the HF-MIC $\Gamma$-point energy, 
+atomic and cell forces to their corresponding 
+${\bf k}$-space integration limits have been shown to be exponential 
+in the cell size. 
+However, a naive implementation of the $\Gamma$-point exact exchange leads to
+a convergence of the total energy inversely proportional to the system size.
+
+
+Convergence of bond lengths, bond angles, 
 dihedral angles and lattice parameters within the HF-MIC $\Gamma$-point
 super cell approximation to the ${\bf k}$-space integration limit have
 been demonstrated for 1D and 3D systems to better than 3 digits.
@@ -868,7 +908,7 @@ Although the convergence of the HF-MIC $\Gamma$-point total energy to
 its ${\bf k}$-space integration counterpart with respect to cell size is relatively slow,
 the convergence of the geometrical parameters (lattice and atomic positions)
 requires much smaller cells. Thus, we could show that a relative accuracy better
-than 3 digits can be already achived with pseudo-cubic cells of about $600$\AA$^3$.
+than 3 digits can be already achieved with cubic cells of about $600$\AA$^3$.
 \\
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -883,7 +923,7 @@ than 3 digits can be already achived with pseudo-cubic cells of about $600$\AA$^
  The Advanced Computing Laboratory of Los 
  Alamos National Laboratory is acknowledged.
  The authors would like to thank K. N\'emeth and C.J. Tymczak 
- for helpfull comments.
+ for helpful comments.
 \end{acknowledgments}  
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
