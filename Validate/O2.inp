@@ -1,0 +1,28 @@
+<BeginTitle>
+               ** Oxygen **
+STO-3G
+ Ref  : E(UHF) = -147.632942003 S**2 = 2.0034
+ Mondo: E(UHF) = -147.63294196  S**2 = 2.00341
+
+6-31G
+ Ref  : E(UHF) = -149.545838043 S**2 = 2.0328
+ Mondo: E(UHF) = -149.54583803  S**2 = 2.03282
+
+<EndTitle>
+
+<BeginOptions>
+Charge=0
+Multiplicity=3
+DebugAll=(MaxDebug,CheckSums)
+Guess=SuperPos
+SCFMethod=(RH,RH)
+BasisSets=(STO-3G-SPLIT,6-31G-SPLIT)
+ModelChem=(HF,HF)
+Accuracy =(verytight,verytight)
+SCFConvergence=(DIIS,DIIS)
+<EndOptions>
+
+<BeginGeometry>
+ o   0.000000 0.0 0.0 
+ o   1.194828 0.0 0.0 
+<EndGeometry>
