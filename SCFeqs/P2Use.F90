@@ -84,6 +84,8 @@ PROGRAM P2Use
         DO I=1,NAtoms
            IF(GM%AtNum%D(I) < 105.D0) THEN
               CALL FillPBlok(BSiz%I(I),INT(GM%AtNum%D(I)),BlkP%D(:,I))
+              ! Rescale for charged molecules.
+              IF(TotCh.NE.Zero)BlkP%D(:,I)=NEl*BlkP%D(:,I)/(NEl+TotCh)
            ENDIF
         ENDDO
         CALL SetToI(P,BlkP)
