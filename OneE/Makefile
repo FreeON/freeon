@@ -71,7 +71,7 @@ MakeT:	 $(ObjsT)
 	 mv MakeT $(MONDO_EXEC)/MakeT
 #
 MakeRho: $(ObjsR)
-	 $(LD) $(LDFLAGS) MakeRho $(ObjsR) $(F90_LIBRARIES)
+	 $(LD) $(LDFLAGS) MakeRho $(ObjsR) $(F90_LIBRARIES) $(LAPACK)
 	 mv MakeRho $(MONDO_EXEC)/MakeRho
 #
 SForce: $(ObjSF)

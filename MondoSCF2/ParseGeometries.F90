@@ -323,17 +323,18 @@ CONTAINS
     G%NElec=0
     DO I=1,G%NAtms
        IF(G%AtNum%D(i) < 105.D0) THEN
-          G%NElec=G%NElec+G%AtNum%D(I)
+          G%NElec=G%NElec+INT(G%AtNum%D(I))
        ENDIF
     ENDDO
     G%NElec=G%NElec-G%TotCh
     NUnPEl=G%Multp-1
-    IF(NUnPEl.NE.0) &
-         CALL MondoHalt(PRSE_ERROR,'Open shell not supported yet.'   &
-         //' NElectrons = '//TRIM(IntToChar(G%NElec)) &
-         //' NUnPairedE = '//TRIM(IntToChar(NUnPEl)))
-    G%NAlph=DBLE(G%NElec+NUnPEl)*Half
-    G%NBeta=DBLE(G%NElec-NUnPEl)*Half
+!vw    IF(NUnPEl.NE.0) &
+!vw         CALL MondoHalt(PRSE_ERROR,'Open shell not supported yet.'   &
+!vw         //' NElectrons = '//TRIM(IntToChar(G%NElec)) &
+!vw         //' NUnPairedE = '//TRIM(IntToChar(NUnPEl)))
+    G%NAlph=(G%NElec+NUnPEl)/2
+    G%NBeta=(G%NElec-NUnPEl)/2
+    IF(G%NAlph+G%NBeta.NE.G%NElec)CALL Halt('SpinCoords: Did you give the right charge/multiplicity!')
   END SUBROUTINE SpinCoords
 !------------------------------------------------------------------------!
 !
