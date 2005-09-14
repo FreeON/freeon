@@ -263,7 +263,7 @@ PROGRAM MakeRho
      Mssg1=ProcessName(Prog,'Pruned Rho')
      Mssg2=ProcessName(Prog,'Moments')
   ENDIF
-  dNel     = Two*(RSumE+RSumN)
+  dNel     = Two*(RSumE+RSumN)+TotCh
   RelRhoErr= ABS(dNel)/DBLE(NEl)
   PcntDist=FLOOR(1.D2*DBLE(NDist_new)/DBLE(NDist_old))
   Mssg1=TRIM(Mssg1)//' dNel = '//TRIM(DblToShrtChar(dNel))//', kept '  &
