@@ -598,10 +598,10 @@ MODULE MemMan
 !----------------------------------------------------------------------------
 !     
 !
-      SUBROUTINE New_DBCSR(A,N_O,NoGlobals_O,Node_O)
+      SUBROUTINE New_DBCSR(A,N_O,NoGlobals_O,Node_O,NSMat_O)
          TYPE(DBCSR),INTENT(INOUT)      :: A
          INTEGER,OPTIONAL,DIMENSION(3)  :: N_O
-         INTEGER,OPTIONAL               :: Node_O
+         INTEGER,OPTIONAL               :: Node_O,NSMat_O
          LOGICAL,OPTIONAL               :: NoGlobals_O
 !------------------------------------------------------
 !        Check for a previous allocation
@@ -613,6 +613,8 @@ MODULE MemMan
             A%Node=MyId
          ENDIF
          A%Alloc=ALLOCATED_TRUE
+         A%NSMat=1
+         IF(PRESENT(NSMat_O))A%NSMat=NSMat_O
 !        Allocate local variables
          IF(PRESENT(N_O))THEN
             CALL New(A%RowPt,N_O(1)+1)
@@ -623,7 +625,7 @@ MODULE MemMan
             CALL New(A%RowPt,MaxAtmsNode)
             CALL New(A%ColPt,MaxBlksNode)
             CALL New(A%BlkPt,MaxBlksNode)
-            CALL New(A%MTrix,MaxNon0Node)
+            CALL New(A%MTrix,MaxNon0Node*A%NSMat)
          ENDIF
 !        Allocate global variables
          IF(PRESENT(NoGlobals_O))THEN 

@@ -163,6 +163,7 @@ MODULE DerivedTypes
 !
    TYPE DBCSR                                       
 !     Local 
+      INTEGER        :: NSMat  !-- Number of spin matrices
       INTEGER        :: Alloc  !-- Allocation key
       INTEGER        :: Node   !-- Node from which the data derived
       INTEGER        :: NAtms  !-- Number of atoms
