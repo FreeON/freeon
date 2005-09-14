@@ -52,7 +52,7 @@ CONTAINS
     TYPE(BCSR),INTENT(INOUT) :: A
     INTEGER                  :: AtA,KA,NBFA
     INTEGER                  :: AtB,KB,NBFB
-    INTEGER                  :: iPnt1,iPnt2,ci,Ind
+    INTEGER                  :: iPnt1,iPnt2,ci,Ind,iSmat
 !
 #ifdef ONX2_PARALLEL
     IF (MyID==ROOT) THEN
@@ -68,11 +68,15 @@ CONTAINS
              CALL GetAdrB(AtB,AtA,Ind,A,0)
              iPnt1=A%BlkPt%I(ci)
              iPnt2=A%BlkPt%I(Ind)
-             IF (iPnt1.EQ.iPnt2) THEN
-                CALL XPose1C(NBFA,NBFB,A%MTrix%D(iPnt1),A%MTrix%D(ipnt2))
-             ELSE
-                CALL XPose2C(NBFA,NBFB,A%MTrix%D(iPnt1),A%MTrix%D(ipnt2))
-             END IF
+             DO iSMat=1,A%NSMat
+                IF (iPnt1.EQ.iPnt2) THEN
+                   CALL XPose1C(NBFA,NBFB,A%MTrix%D(iPnt1),A%MTrix%D(ipnt2))
+                ELSE
+                   CALL XPose2C(NBFA,NBFB,A%MTrix%D(iPnt1),A%MTrix%D(ipnt2))
+                END IF
+                iPnt1=iPnt1+NBFA*NBFB
+                iPnt2=iPnt2+NBFA*NBFB
+             ENDDO
           END IF
        END DO
     END DO

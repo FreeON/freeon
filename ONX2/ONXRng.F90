@@ -217,6 +217,7 @@ CONTAINS
           END IF
        END DO ! ci
     END DO ! ri
+    NElem=NElem*D%NSMat
     MatRange=ONXRange
   END SUBROUTINE RangeOfExchangeBCSR
   !

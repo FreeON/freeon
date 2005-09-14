@@ -27,6 +27,9 @@ MODULE ONX2ComputK
   USE ONX2DataType
   USE InvExp
   USE ONXParameters
+
+!use VScratchB
+!USE int_interface
   !
 #ifdef ONX2_PARALLEL
   USE MondoMPI
@@ -95,7 +98,7 @@ CONTAINS
 #endif
     REAL(DOUBLE)               :: Dcd,NInts,NIntsTot
     !-------------------------------------------------------------------
-    REAL(DOUBLE), DIMENSION(MaxFuncPerAtmBlk**4) :: C
+    REAL(DOUBLE), DIMENSION(MaxFuncPerAtmBlk**4) :: C!,cc
     REAL(DOUBLE), DIMENSION(MaxShelPerAtmBlk**2) :: DMcd
     TYPE(AtomPr), DIMENSION(:), ALLOCATABLE :: ACAtmPair,BDAtmPair
     !-------------------------------------------------------------------
@@ -290,6 +293,9 @@ CONTAINS
                    NIntBlk=NBFA*NBFB*NBFC*NBFD
                    !
                    CALL DBL_VECT_EQ_DBL_SCLR(NIntBlk,C(1),0.0d0)
+
+!cc=0d0
+!c=0d0
                    !CALL DBL_VECT_EQ_DBL_SCLR(NIntBlk,C(1),BIG_DBL)
                    !
                    RnOvFAC: DO iFAC=1,ACAtmInfo%NFPair
@@ -340,8 +346,12 @@ CONTAINS
                             !
                             ! Compute integral type.
                             IntType=ACAtmPair(iFAC)%SP%IntType*10000+BDAtmPair(iFBD)%SP%IntType
-
+                            !
                             INCLUDE 'ERIInterfaceB.Inc'
+!!$                            INCLUDE '/n/srv2/vweber/MONDO/ONX2/ERIInterface.Inc'
+
+
+!if(maxval(abs(c-cc)).gt.1d-10) goto 1000
 
                             NInts=NInts+DBLE(LocNInt)
 
@@ -351,6 +361,17 @@ CONTAINS
                       ENDDO RnOvFBD
                    ENDDO RnOvFAC
                    !
+
+
+!goto 1001
+!1000 continue
+!write(*,*) 'IntType',IntType
+!                   CALL Print2E(AtA,AtC,AtB,AtD,GMc,BSc,GMp,BSp,C)
+!                   CALL Print2E(AtA,AtC,AtB,AtD,GMc,BSc,GMp,BSp,cc)
+!stop 9999
+!1001 continue
+
+
                    !CALL Print2E(AtA,AtC,AtB,AtD,GMc,BSc,GMp,BSp,C)
                    !
                    ! Get address for Kx and digest the block of integral.
@@ -374,9 +395,15 @@ CONTAINS
                    CALL GetAdrB(AtA,AtB,Ind,Kx,0)
                    iPtrK = Kx%BlkPt%I(Ind)
                    !
-                   CALL DGEMV('N',NBFA*NBFB,NBFC*NBFD,-1.0d0,C(1), &
-                        &     NBFA*NBFB,D%MTrix%D(iPtrD),1,1.0d0, &
-                        &     Kx%MTrix%D(IPtrK),1)
+                   IF(D%NSMat.EQ.1) THEN
+                      CALL DGEMV('N',NBFA*NBFB,NBFC*NBFD,-1.0d0,C(1), &
+                           &     NBFA*NBFB,D%MTrix%D(iPtrD),1,1.0d0, &
+                           &     Kx%MTrix%D(IPtrK),1)
+                   ELSE
+                      CALL DGEMM('N','N',NBFA*NBFB,D%NSMat,NBFC*NBFD,-1.0d0,C(1), &
+                           &     NBFA*NBFB,D%MTrix%D(iPtrD),NBFC*NBFD,1.0d0, &
+                           &     Kx%MTrix%D(IPtrK),NBFA*NBFB)
+                   ENDIF
 #endif
                    !
                 ENDIF
@@ -459,7 +486,7 @@ CONTAINS
        IJKL=IJKL+1
        IF(ABS(C(IJKL)).GT.1D-15) THEN
           iiii=iiii+1
-          WRITE(*,'(A,4I3,I8,A,E23.10)') 'Int(', &
+          WRITE(*,'(A,4I3,I8,A,E23.15)') 'Int(', &
                & OffS%I(AtA)+FA-1, &
                & OffS%I(AtC)+FC-1, &
                & OffS%I(AtB)+FB-1, &

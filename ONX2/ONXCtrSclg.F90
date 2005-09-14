@@ -137,7 +137,7 @@ CONTAINS
     TYPE(BSET),INTENT(IN)    :: BS
     TYPE(CRDS),INTENT(IN)    :: GM
     TYPE(BCSR),INTENT(INOUT) :: A
-    INTEGER                  :: ci,iPtr,N2
+    INTEGER                  :: ci,iPtr,N2,iSMat
     INTEGER                  :: AtA,AtB,KA,KB,NBFA,NBFB
 !
     DO AtA=1,NAtoms
@@ -149,7 +149,10 @@ CONTAINS
           NBFB=BS%BfKnd%I(KB)
           N2=NBFA*NBFB
           iPtr=A%BlkPt%I(ci)
-          CALL TrnSubBlk(BS,KA,KB,NBFA,NBFB,A%MTrix%D(iPtr:iPtr+N2-1))
+          DO iSMat=1,A%NSMat
+             CALL TrnSubBlk(BS,KA,KB,NBFA,NBFB,A%MTrix%D(iPtr:iPtr+N2-1))
+             iPtr=iPtr+N2
+          ENDDO
        END DO
     END DO
   END SUBROUTINE TrnMatBlk_BCSR

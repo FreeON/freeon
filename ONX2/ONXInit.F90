@@ -86,7 +86,7 @@ CONTAINS
              K%ColPt%I(j)=AtB
              K%BlkPt%I(j)=iPnt
              j=j+1
-             iPnt=iPnt+NBFA*NBFB
+             iPnt=iPnt+K%NSMat*NBFA*NBFB
           END IF
        END DO ! ci
     END DO ! ri

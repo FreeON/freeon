@@ -259,7 +259,7 @@ PROGRAM ONX2
 #ifdef ONX2_PARALLEL
   CALL New_FASTMAT(KxFM,0,(/0,0/))
 #else
-  CALL New(Kx,(/NRows+1,NCols,NElem/))
+  CALL New(Kx,(/NRows+1,NCols,NElem/),NSMat_O=D%NSMat)
   CALL DBL_VECT_EQ_DBL_SCLR(NElem,Kx%MTrix%D(1),0.0D0)
   CALL InitK(BSc,GMc,Kx)
 #endif
@@ -360,8 +360,8 @@ PROGRAM ONX2
 #else
   ! Add in correction if incremental K build
   IF(SCFActn == 'InkFok')THEN
-     CALL New(T1)
-     CALL New(T2)
+     CALL New(T1,NSMat_O=Kx%NSMat)
+     CALL New(T2,NSMat_O=Kx%NSMat)
      CALL Get(T1,TrixFile('K',Args,-1))
      CALL Add(Kx,T1,T2)
      CALL Filter(Kx,T2)
