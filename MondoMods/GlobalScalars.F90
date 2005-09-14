@@ -106,6 +106,7 @@ MODULE GlobalScalars
    INTEGER, PARAMETER      :: RES_OUT_UNIT=114
 !-------------------------------------------------  Matrix dimensions
    INTEGER, SAVE           :: NBasF,NEl,NAlph,NBeta,NAtoms
+   REAL(DOUBLE), SAVE      :: TotCh
    INTEGER, SAVE           :: MaxAtmsNode,MaxBlksNode,MaxNon0Node               
    INTEGER, SAVE           :: MaxAtms,MaxBlks,MaxNon0,MaxBlkSize
 !-------------------------------------------------  
