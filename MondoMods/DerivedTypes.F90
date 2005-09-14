@@ -181,6 +181,8 @@ MODULE DerivedTypes
 !  BLOCK COMPRESSED SPARSE ROW MATRIX
 !
    TYPE BCSR                                       
+      INTEGER        :: NSMat  !-- Number of spin matrices
+      !TYPE(INT_VECT) :: SInfo  !-- 
       INTEGER        :: Alloc  !-- Allocation key
       INTEGER        :: NAtms  !-- Number of atoms
       INTEGER        :: NBlks  !-- Number of non-zero blocks
@@ -189,7 +191,7 @@ MODULE DerivedTypes
       TYPE(INT_VECT) :: ColPt  !-- Coloumn index
       TYPE(INT_VECT) :: BlkPt  !-- Block index  
       TYPE(DBL_VECT) :: MTrix  !-- Blocked matrices
-   END TYPE                                      
+   END TYPE BCSR
 !------------------------------------------------------------
 !  Basis Sets
 !
