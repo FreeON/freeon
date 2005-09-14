@@ -1,28 +1,63 @@
 C===================================================================
 C     Transform a BCSR matrix to a dense matrix
 C===================================================================
-      SUBROUTINE BCSR_TO_DENS(NBasF,NAtoms,NBlks,NNon0,MSiz,OffS,
-     >                        A,MTrix,RowPt,ColPt,BlkPt)
+      SUBROUTINE BCSR_TO_DENS(NRow,NCol,NBasF,NSMat,NAtoms,NBlks,NNon0,
+     >                        MSiz,OffS,A,MTrix,RowPt,ColPt,BlkPt)
       IMPLICIT NONE
-      INTEGER NBasF,NAtoms,NBlks,NNon0
-      REAL*8  A(NBasF,NBasF),MTrix (NNon0)
-      INTEGER RowPt(NAtoms+1),ColPt(NBlks),BlkPt(NBlks), 
+      INTEGER NRow,NCol,NBasF,NSMat,NAtoms,NBlks,NNon0
+      REAL*8  A(NRow,NCol),MTrix (NNon0)
+      INTEGER RowPt(NAtoms+1),ColPt(NBlks),BlkPt(NBlks*NSMat), 
      >        MSiz(NAtoms),OffS(NAtoms),
-     >        I,J,K,L,P,S,II,JJ,JP,MA,NA
-      DO 10 I=1,NBasF
-         CALL DBL_VECT_EQ_DBL_SCLR(NBasF,A(1,I),0.0D0)
- 10   CONTINUE
+     >        I,J,K,L,P,S,II,JJ,II0,JJ0,JP,MA,NA,iS,iSMat
+
+c$$$      write(*,*) 'NRow',NRow
+c$$$      write(*,*) 'NCol',NCol
+c$$$      write(*,*) 'NBasF',NBasF
+c$$$      write(*,*) 'NSMat',NSMat
+c$$$      write(*,*) 'NAtoms',NAtoms
+c$$$      write(*,*) 'NBlks',NBlks
+c$$$      write(*,*) 'NNon0',NNon0
+c$$$      write(*,*) 'MSiz',MSiz
+c$$$      write(*,*) 'OffS',OffS
+c$$$      write(*,*) 'MTrix',MTrix
+c$$$      write(*,*) 'RowPt',RowPt
+c$$$      write(*,*) 'ColPt',ColPt
+c$$$      write(*,*) 'BlkPt',BlkPt
+
+      CALL DBL_VECT_EQ_DBL_SCLR(NRow*NCol,A(1,1),0.0D0)
+
       DO 100 I=1,NAtoms
          MA=MSiz(I)
-         II=OffS(I)
+         II0=OffS(I)
          DO 200 JP=RowPt(I),RowPt(I+1)-1
             J=ColPt(JP)
-            P=BlkPt(JP)
             NA=MSiz(J)
-            JJ=OffS(J)
-            DO 300 K=0,NA-1
-               DO 400 L=0,MA-1
-                  A(II+L,JJ+K)=MTrix(P+K*MA+L)
+            JJ0=OffS(J)
+            DO 300 iSMat=1,NSMat
+ccc               iS=NSMat*(JP-1)+iSMat
+c               write(*,*) iS
+c               IF(BlkPt(iS+1)-BlkPt(iS).LT.1) GOTO 300
+ccc               P=BlkPt(iS)
+               P=BlkPt(JP)+(iSMat-1)*MA*NA
+               IF(iSMat.EQ.1)THEN
+                  II=II0
+                  JJ=JJ0
+               ELSEIF(iSMat.EQ.2)THEN
+                  II=II0
+                  JJ=JJ0+NBasF
+               ELSEIF(iSMat.EQ.3)THEN
+                  II=II0+NBasF
+                  JJ=JJ0
+               ELSEIF(iSMat.EQ.4)THEN
+                  II=II0+NBasF
+                  JJ=JJ0+NBasF
+               ELSE
+                  STOP 'BCSR_TO_DENS'
+               ENDIF
+               DO 400 K=0,NA-1
+                  DO 500 L=0,MA-1
+                     A(II+L,JJ+K)=MTrix(P+K*MA+L)
+ 500              CONTINUE
  400           CONTINUE
  300        CONTINUE
  200     CONTINUE

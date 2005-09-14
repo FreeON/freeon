@@ -279,6 +279,8 @@ CONTAINS
     IF(HasQM())THEN
 #endif
        CALL Get(NEl,'nel',Tag_O=CurGeom)
+       CALL Get(NAlph,'nelalpha',Tag_O=CurGeom)
+       CALL Get(NBeta,'nelbeta',Tag_O=CurGeom)
        CALL Get(NAtoms,'natoms',Tag_O=CurGeom)
        CALL New(BSiz,NAtoms)
        CALL New(OffS,NAtoms)

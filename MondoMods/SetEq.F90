@@ -117,17 +117,18 @@ MODULE SetXYZ
 #ifdef PARALLEL
          IF(MyId==ROOT)THEN
 #endif 
-            IF(AllocQ(B%Alloc) .AND. &
-               (B%NAtms<A%NAtms.OR.B%NBlks<A%NBlks.OR.B%NNon0<A%NNon0) )THEN
-               CALL Delete(B)
-               CALL New(B)
-               B%NAtms=A%NAtms; B%NBlks=A%NBlks; B%NNon0=A%NNon0
+            IF(AllocQ(B%Alloc).AND. &
+                 (B%NSMat.NE.A%NSMat.OR.B%NAtms<A%NAtms.OR.B%NBlks<A%NBlks.OR.B%NNon0<A%NNon0) )THEN
+                 CALL Delete(B)
+                 CALL New(B,NSMat_O=A%NSMat)
+                 B%NSMat=A%NSMat; B%NAtms=A%NAtms; B%NBlks=A%NBlks; B%NNon0=A%NNon0
             ELSE
-               IF(.NOT.AllocQ(B%Alloc))CALL New(B)
-               B%NAtms=A%NAtms; B%NBlks=A%NBlks; B%NNon0=A%NNon0
+               IF(.NOT.AllocQ(B%Alloc))CALL New(B,NSMat_O=A%NSMat)
+               B%NSMat=A%NSMat; B%NAtms=A%NAtms; B%NBlks=A%NBlks; B%NNon0=A%NNon0
             ENDIF
             B%RowPt%I(1:A%NAtms+1)=A%RowPt%I(1:A%NAtms+1)
             B%ColPt%I(1:A%NBlks)  =A%ColPt%I(1:A%NBlks)
+            !B%BlkPt%I(1:A%NBlks*A%NSMat)=A%BlkPt%I(1:A%NBlks*A%NSMat)
             B%BlkPt%I(1:A%NBlks)  =A%BlkPt%I(1:A%NBlks)
             B%MTrix%D(1:A%NNon0)  =A%MTrix%D(1:A%NNon0)
 #ifdef PARALLEL
@@ -176,30 +177,60 @@ MODULE SetXYZ
       SUBROUTINE Set_RNK2_EQ_BCSR(B,A)
          TYPE(BCSR),    INTENT(IN)    :: A        
          TYPE(DBL_RNK2),INTENT(INOUT) :: B        
+         INTEGER                      :: NRow,NCol
          INTERFACE 
-            SUBROUTINE BCSR_TO_DENS(NBasF,NAtoms,NBlks,NNon0,BSiz,OffS, &
+            SUBROUTINE BCSR_TO_DENS(NRow,NCol,NBasF,NSMat,NAtoms,NBlks,NNon0,BSiz,OffS, &
                                     A,MTrix,RowPt,ColPt,BlkPt)
-               INTEGER                            ,INTENT(IN)  :: NBasF,NAtoms, &
-                                                                  NBlks,NNon0
-               INTEGER, PARAMETER                              :: DOUBLE=KIND(0.D0)
-               REAL(DOUBLE),DIMENSION(NBasF,NBasF),INTENT(OUT) :: A
-               REAL(DOUBLE),DIMENSION(NNon0),      INTENT(IN)  :: MTrix
-               INTEGER     ,DIMENSION(NAtoms+1),   INTENT(IN)  :: RowPt  
-               INTEGER     ,DIMENSION(NBlks),      INTENT(IN)  :: ColPt,BlkPt
-               INTEGER     ,DIMENSION(NAtoms),     INTENT(IN)  :: BSiz,OffS
+              INTEGER                            ,INTENT(IN)  :: NRow,NCol,NBasF,NSMat,NAtoms, &
+                                                                   NBlks,NNon0
+              INTEGER, PARAMETER                              :: DOUBLE=KIND(0.D0)
+              REAL(DOUBLE),DIMENSION(NRow,NCol),  INTENT(OUT) :: A
+              REAL(DOUBLE),DIMENSION(NNon0),      INTENT(IN)  :: MTrix
+              INTEGER     ,DIMENSION(NAtoms+1),   INTENT(IN)  :: RowPt  
+              INTEGER     ,DIMENSION(NBlks),      INTENT(IN)  :: ColPt
+              INTEGER     ,DIMENSION(NBlks*NSMat),INTENT(IN)  :: BlkPt
+              INTEGER     ,DIMENSION(NAtoms),     INTENT(IN)  :: BSiz,OffS
             END SUBROUTINE BCSR_TO_DENS
          END INTERFACE
 #ifdef PARALLEL
          IF(MyId==ROOT)THEN
 #endif
+            SELECT CASE(A%NSMat)
+            CASE(1);NRow=  NBasF;NCol=  NBasF
+            CASE(2);NRow=  NBasF;NCol=2*NBasF
+            CASE(4);NRow=2*NBasF;NCol=2*NBasF
+            CASE DEFAULT;CALL Halt(' Set_RNK2_EQ_BCSR: A%NSMat doesn''t have an expected value! ')
+            END SELECT
+
             IF(.NOT.AllocQ(B%Alloc))THEN
-               CALL New(B,(/NBasF,NBasF/))
-            ELSEIF(SIZE(B%D,1)/=NBasF.OR.SIZE(B%D,2)/=NBasF)THEN
+               CALL New(B,(/NRow,NCol/))
+            ELSEIF(SIZE(B%D,1)/=NRow.OR.SIZE(B%D,2)/=NCol)THEN
                CALL Delete(B)
-               CALL New(B,(/NBasF,NBasF/))
+               CALL New(B,(/NRow,NCol/))
             ENDIF
-            CALL BCSR_To_DENS(NBasF,NAtoms,A%NBlks,A%NNon0,BSiz%I,OffS%I, &
-                              B%D,A%MTrix%D,A%RowPt%I,A%ColPt%I,A%BlkPt%I)
+
+
+!     SUBROUTINE BCSR_TO_DENS(NRow,NCol,NBasF,NSMat,NAtoms,NBlks,NNon0,
+!     >                        MSiz,OffS,A,MTrix,RowPt,ColPt,BlkPt)
+
+!!$write(*,*) 'NRow',NRow
+!!$write(*,*) 'NCol',NCol
+!!$write(*,*) 'NBasF',NBasF
+!!$write(*,*) 'A%NSMat',A%NSMat
+!!$write(*,*) 'NAtoms',NAtoms
+!!$write(*,*) 'A%NBlks',A%NBlks
+!!$write(*,*) 'A%NNon0',A%NNon0
+!!$write(*,*) 'BSiz%I',BSiz%I
+!!$write(*,*) 'OffS%I',OffS%I
+!!$!!write(*,*) 'B%D',B%D
+!!$write(*,*) 'A%MTrix%D',A%MTrix%D
+!!$write(*,*) 'A%RowPt%I',A%RowPt%I
+!!$write(*,*) 'A%ColPt%I',A%ColPt%I
+!!$write(*,*) 'A%BlkPt%I',A%BlkPt%I
+
+            CALL BCSR_To_DENS(NRow,NCol,NBasF,A%NSMat,NAtoms,A%NBlks,A%NNon0,BSiz%I,OffS%I, &
+                 &            B%D,A%MTrix%D,A%RowPt%I,A%ColPt%I,A%BlkPt%I)
+
 #ifdef PARALLEL
          ENDIF
 #endif
@@ -241,31 +272,51 @@ MODULE SetXYZ
 !======================================================================
 !     Transform a dense matrix (Rank 2 array) into a BCSR matrix 
 !======================================================================
-      SUBROUTINE Set_BCSR_EQ_RNK2(B,A)
+      SUBROUTINE Set_BCSR_EQ_RNK2(B,A,NSMat_O)
          TYPE(DBL_RNK2), INTENT(INOUT) :: A        
-         TYPE(BCSR),     INTENT(INOUT) :: B        
-         INTEGER                       :: I,J,P,Q,OI,OJ,MA,NA
+         TYPE(BCSR),     INTENT(INOUT) :: B  
+         INTEGER,OPTIONAL              :: NSMat_O
+         INTEGER                       :: I,J,P,Q,OI,OJ,OI0,OJ0,MA,NA,NSMat,iSMat
+         NSMat=1
+         IF(PRESENT(NSMat_O))NSMat=NSMat_O
          IF(AllocQ(B%Alloc))  &
          CALL Delete(B)
-         CALL New(B)
+         CALL New(B,NSMat_O=NSMat)
          P=1
          Q=1
-         OI=0
+         OI0=0
          B%RowPt%I(1)=1 
          DO I=1,NAtoms
-            OJ=0
+            OJ0=0
             MA=BSiz%I(I) 
             DO J=1,NAtoms
                NA=BSiz%I(J)
-               CALL BlockToBlock(MA,NA,OI,OJ,A%D,B%MTrix%D(Q:))
                B%BlkPt%I(P)=Q
+               DO iSMat=1,NSMat
+                  IF(iSMat.EQ.1)THEN
+                     OI=OI0
+                     OJ=OJ0
+                  ELSEIF(iSMat.EQ.2)THEN
+                     OI=OI0
+                     OJ=OJ0+NBasF
+                  ELSEIF(iSMat.EQ.3)THEN
+                     OI=OI0+NBasF
+                     OJ=OJ0
+                  ELSEIF(iSMat.EQ.4)THEN
+                     OI=OI0+NBasF
+                     OJ=OJ0+NBasF
+                  ELSE
+                     STOP 'Set_BCSR_EQ_RNK2'
+                  ENDIF
+                  CALL BlockToBlock(MA,NA,OI,OJ,A%D,B%MTrix%D(Q:))
+                  Q=Q+MA*NA
+               ENDDO
                B%ColPt%I(P)=J               
-               Q=Q+MA*NA
                P=P+1
                B%RowPt%I(I+1)=P
-               OJ=OJ+NA
+               OJ0=OJ0+NA
             ENDDO
-            OI=OI+MA
+            OI0=OI0+MA
          ENDDO
          B%NAtms=NAtoms
          B%NBlks=P-1

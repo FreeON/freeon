@@ -494,7 +494,10 @@ MODULE LinAlg
          TYPE(BCSR),           INTENT(INOUT) :: C
          TYPE(TIME),  OPTIONAL,INTENT(INOUT) :: Perf_O         
          LOGICAL                             :: UpDate
+         INTEGER                             :: NSMat,N1,N2
+         type(dbl_rnk2)::AD,BD,CD
 !-------------------------------------------------------------------------------
+         NSMat=MAX(A%NSMat,B%NSMat)
          IF(PRESENT(Beta_O))THEN
             IF(Beta_O/=Zero)THEN
 
@@ -512,19 +515,63 @@ MODULE LinAlg
                ENDIF
                UpDate=.TRUE.
            ELSE
-               IF(.NOT.AllocQ(C%Alloc))CALL New(C)
+               IF(.NOT.AllocQ(C%Alloc))CALL New(C,NSMat_O=NSMat)
                UpDate=.FALSE.
             ENDIF
          ELSE
-            IF(.NOT.AllocQ(C%Alloc))CALL New(C)
+            IF(.NOT.AllocQ(C%Alloc))CALL New(C,NSMat_O=NSMat)
             UpDate=.FALSE.
          ENDIF
 
-         CALL New(Flag,NAtoms)
-         CALL SetEq(Flag,0)
-         CALL SymbolikMM(A,B,C,UpDate)
-         CALL NumerikMM( A,B,C,Perf_O)
-         CALL Delete(Flag) 
+         IF(C%NSMat.NE.NSMat) THEN
+            write(*,*) 'MultiplyM_BCSR: C%NSMat.NE.NSMat! Deallocate and reallocate.'
+            CALL Delete(C)
+            CALL New(C,NSMat_O=NSMat)
+         ENDIF
+
+         IF(NSMat.GT.1)THEN
+            N1=NBasF
+            N2=NBasF*2
+            write(*,'(A,3I3)') 'MultiplyM_BCSR: DGEMM are going to be done in dense format!',A%NSMat,B%NSMat,C%NSMat
+            call seteq(AD,A)
+            call seteq(BD,B)
+            call seteq(CD,C)
+            if(.NOT.UpDate)CD%D=0d0
+            IF(    A%NSMat.EQ.1.AND.B%NSMat.EQ.2)THEN
+               CD%d(1:N1,   1:N1)=matmul(AD%d,BD%d(1:N1,   1:N1))+CD%d(1:N1,   1:N1)
+               CD%d(1:N1,N1+1:N2)=matmul(AD%d,BD%d(1:N1,N1+1:N2))+CD%d(1:N1,N1+1:N2)
+            ELSEIF(A%NSMat.EQ.2.AND.B%NSMat.EQ.1)THEN
+               CD%d(1:N1,   1:N1)=matmul(AD%d(1:N1,   1:N1),BD%d)+CD%d(1:N1,   1:N1)
+               CD%d(1:N1,N1+1:N2)=matmul(AD%d(1:N1,N1+1:N2),BD%d)+CD%d(1:N1,N1+1:N2)
+            ELSEIF(A%NSMat.EQ.2.AND.B%NSMat.EQ.2)THEN
+               CD%d(1:N1,   1:N1)=matmul(AD%d(1:N1,   1:N1),BD%d(1:N1,   1:N1))+CD%d(1:N1,   1:N1)
+               CD%d(1:N1,N1+1:N2)=matmul(AD%d(1:N1,N1+1:N2),BD%d(1:N1,N1+1:N2))+CD%d(1:N1,N1+1:N2)
+            ELSEIF(A%NSMat.EQ.1.AND.B%NSMat.EQ.4)THEN
+               CD%d(   1:N1,   1:N1)=matmul(AD%d,BD%d(   1:N1,   1:N1))+CD%d(   1:N1,   1:N1)
+               CD%d(N1+1:N2,   1:N1)=matmul(AD%d,BD%d(N1+1:N2,   1:N1))+CD%d(N1+1:N2,   1:N1)
+               CD%d(   1:N1,N1+1:N2)=matmul(AD%d,BD%d(   1:N1,N1+1:N2))+CD%d(   1:N1,N1+1:N2)
+               CD%d(N1+1:N2,N1+1:N2)=matmul(AD%d,BD%d(N1+1:N2,N1+1:N2))+CD%d(N1+1:N2,N1+1:N2)
+            ELSEIF(A%NSMat.EQ.4.AND.B%NSMat.EQ.1)THEN
+               CD%d(   1:N1,   1:N1)=matmul(AD%d(   1:N1,   1:N1),BD%d)+CD%d(   1:N1,   1:N1)
+               CD%d(N1+1:N2,   1:N1)=matmul(AD%d(N1+1:N2,   1:N1),BD%d)+CD%d(N1+1:N2,   1:N1)
+               CD%d(   1:N1,N1+1:N2)=matmul(AD%d(   1:N1,N1+1:N2),BD%d)+CD%d(   1:N1,N1+1:N2)
+               CD%d(N1+1:N2,N1+1:N2)=matmul(AD%d(N1+1:N2,N1+1:N2),BD%d)+CD%d(N1+1:N2,N1+1:N2)
+            ELSEIF(A%NSMat.EQ.4.AND.B%NSMat.EQ.4)THEN
+               CD%d=matmul(AD%d,BD%d)+CD%d
+            ELSE
+               STOP 'MultiplyM_BCSR: Error with NSMat!'
+            ENDIF
+            call seteq(C,CD,nsmat_o=nsmat)
+            call delete(AD)
+            call delete(BD)
+            call delete(CD)
+         ELSE
+            CALL New(Flag,NAtoms)
+            CALL SetEq(Flag,0)
+            CALL SymbolikMM(A,B,C,UpDate)
+            CALL NumerikMM( A,B,C,Perf_O)
+            CALL Delete(Flag) 
+         ENDIF
       END SUBROUTINE MultiplyM_BCSR
 #ifdef PARALLEL
 
@@ -1320,21 +1367,70 @@ MODULE LinAlg
          TYPE(TIME),OPTIONAL,INTENT(INOUT) :: Perf_O         
          INTEGER                           :: Status
          REAL(DOUBLE)                      :: FlOp
+         integer :: NSMat,N1,N2
+         type(dbl_rnk2)::AD,BD,CD
 !-------------------------------------------------------------------------------
-         IF(.NOT.AllocQ(C%Alloc)   )CALL New(C)
+         NSMat=MAX(A%NSMat,B%NSMat)
+!write(*,*)'Add_BCSR:',A%NSMat,B%NSMat
+         IF(.NOT.AllocQ(C%Alloc)   )CALL New(C,NSMat_O=NSMat)
+         !
+         IF(NSMat.NE.C%NSMat) THEN
+            write(*,*) 'Add_BCSR: NSMat.NE.C%NSMat! Deallocate-reallocate'
+            CALL Delete(C)
+            CALL New(C,NSMat_O=NSMat)
+         ENDIF
+         !
          CALL New(Flag,NAtoms)
          CALL SetEq(Flag,0)
 #ifdef PARALLEL
          IF(MyId==ROOT)THEN
 #endif
-         FlOp=Zero
-         Status=Add_GENERIC(SIZE(C%ColPt%I),SIZE(C%MTrix%D),         &
-                            A%NAtms,0,                               &
-                            C%NAtms,C%NBlks,C%NNon0,                 &
-                            A%RowPt%I,A%ColPt%I,A%BlkPt%I,A%MTrix%D, &
-                            B%RowPt%I,B%ColPt%I,B%BlkPt%I,B%MTrix%D, &
-                            C%RowPt%I,C%ColPt%I,C%BlkPt%I,C%MTrix%D, &
-                            BSiz%I,Flag%I,Flop)
+         IF(A%NSMat.EQ.1.AND.B%NSMat.EQ.1) THEN
+            FlOp=Zero
+            Status=Add_GENERIC(SIZE(C%ColPt%I),SIZE(C%MTrix%D),         &
+                               A%NAtms,0,                               &
+                               C%NAtms,C%NBlks,C%NNon0,                 &
+                               A%RowPt%I,A%ColPt%I,A%BlkPt%I,A%MTrix%D, &
+                               B%RowPt%I,B%ColPt%I,B%BlkPt%I,B%MTrix%D, &
+                               C%RowPt%I,C%ColPt%I,C%BlkPt%I,C%MTrix%D, &
+                               BSiz%I,Flag%I,Flop)
+         ELSE
+            write(*,*) 'Add_BCSR: The add will be done in a dense way!'
+            N1=NBasF
+            N2=2*NBasF
+            call seteq(AD,A)
+            call seteq(BD,B)
+            call seteq(CD,C)
+            CD%D=0d0
+!!$call print_dbl_rnk2(ad,'AD',unit_o=6)
+!!$call print_dbl_rnk2(bd,'BD',unit_o=6)
+!!$call print_dbl_rnk2(cd,'CD',unit_o=6)
+            IF(    A%NSMat.EQ.B%NSMat)THEN
+               CD%D=AD%D+BD%D
+            ELSEIF(A%NSMat.EQ.2.AND.B%NSMat.EQ.1)THEN
+               CD%D(1:N1,   1:N1)=AD%D(1:N1,   1:N1)+BD%D
+               CD%D(1:N1,N1+1:N2)=AD%D(1:N1,N1+1:N2)+BD%D
+            ELSEIF(A%NSMat.EQ.1.AND.B%NSMat.EQ.2)THEN
+               CD%D(1:N1,   1:N1)=AD%D+BD%D(1:N1,   1:N1)
+               CD%D(1:N1,N1+1:N2)=AD%D+BD%D(1:N1,N1+1:N2)
+            ELSEIF(A%NSMat.EQ.4.AND.B%NSMat.EQ.1)THEN
+               CD%D(1:N1   ,   1:N1)=AD%D(1:N1   ,   1:N1)+BD%D
+               CD%D(N1+1:N2,N1+1:N2)=AD%D(N1+1:N2,N1+1:N2)+BD%D
+               CD%D(1:N1   ,N1+1:N2)=AD%D(1:N1   ,N1+1:N2)
+               CD%D(N1+1:N2,   1:N1)=AD%D(N1+1:N2,   1:N1)
+            ELSEIF(A%NSMat.EQ.1.AND.B%NSMat.EQ.4)THEN
+               CD%D(1:N1   ,   1:N1)=AD%D+BD%D(1:N1   ,   1:N1)
+               CD%D(N1+1:N2,N1+1:N2)=AD%D+BD%D(N1+1:N2,N1+1:N2)
+               CD%D(1:N1   ,N1+1:N2)=     BD%D(1:N1   ,N1+1:N2)
+               CD%D(N1+1:N2,   1:N1)=     BD%D(N1+1:N2,   1:N1)
+            ELSE
+               call Halt('Add_BCSR: Something wrong!')
+            ENDIF
+            call seteq(C,CD,nsmat_o=nsmat)
+            call delete(AD)
+            call delete(BD)
+            call delete(CD)
+         ENDIF
 #ifdef PARALLEL
          ENDIF
 #endif
@@ -1568,34 +1664,102 @@ MODULE LinAlg
          REAL(DOUBLE), EXTERNAL            :: BlkTrace_2
          INTEGER                           :: IL,MA,J,JP,K,KP,P,Q,MB, &
                                               IStrtA,IStopA,IStrtB,IStopB
+         type(dbl_rnk2)::AD,BD,cd
 !-------------------------------------------------------------------------------
-         Op=Zero
-         TraceMM_BCSR=Zero
-         DO IL=1,A%NAtms
-            MA=BSiz%I(IL)
-            IStrtA=A%RowPt%I(IL)
-            IStopA=A%RowPt%I(IL+1)-1
-            DO JP=IStrtA,IStopA
-               J=A%ColPt%I(JP)
-               P=A%BlkPt%I(JP)
-               MB=BSiz%I(J)
-               IStrtB=B%RowPt%I(J)
-               IStopB=B%RowPt%I(J+1)-1
-               DO KP=IStrtB,IStopB
-                  K=B%ColPt%I(KP)
-                  IF(K.EQ.IL)THEN
-                     Q=B%BlkPt%I(KP)
-                     TraceMM_BCSR=TraceMM_BCSR  &
-                                 +BlkTrace_2(MA,MB,A%MTrix%D(P),B%MTrix%D(Q))
-                     Op=Op+DBLE(MA*MB)
-                     EXIT
-                  ENDIF
+         IF(MAX(A%NSMat,B%NSMat).GT.1) THEN
+            write(*,*) 'TraceMM_BCSR: We will take the trace in a dense way!'
+            call seteq(AD,A)
+            call seteq(BD,B)
+!call print_dbl_rnk2(ad,'ad',unit_o=6)
+!call print_dbl_rnk2(bd,'bd',unit_o=6)
+            TraceMM_BCSR=0d0
+            IF(A%NSMat.EQ.2.AND.B%NSMat.EQ.2)THEN
+               if(size(AD%D,1).ne.NBasF.or.size(AD%D,2).ne.2*NBasF) CALL Halt('TraceMM_BCSR 1: Something wrong there!')
+               call new(cd,(/NBasF,2*NBasF/))
+               cD%D(1:NBasF,      1:  NBasF)=matmul(AD%D(1:NBasF,      1:  NBasF),BD%D(1:NBasF,      1:  NBasF))
+               cD%D(1:NBasF,NBasF+1:2*NBasF)=matmul(AD%D(1:NBasF,NBasF+1:2*NBasF),BD%D(1:NBasF,NBasF+1:2*NBasF))
+!call print_dbl_rnk2(cd,'cd',unit_o=6)
+               do j=1,NBasF
+                  TraceMM_BCSR=TraceMM_BCSR+cD%D(j,j)+cD%D(j,j+NBasF)
+               enddo
+               call delete(cd)
+            ELSEIF(A%NSMat.EQ.2.AND.B%NSMat.EQ.1)THEN
+               call new(cd,(/NBasF,2*NBasF/))
+               cD%D(1:NBasF,      1:  NBasF)=matmul(AD%D(1:NBasF,      1:  NBasF),BD%D)
+               cD%D(1:NBasF,NBasF+1:2*NBasF)=matmul(AD%D(1:NBasF,NBasF+1:2*NBasF),BD%D)
+               do j=1,NBasF
+                  TraceMM_BCSR=TraceMM_BCSR+CD%D(j,j)+CD%D(j,j+NBasF)
+               enddo
+               call delete(cd)
+            ELSEIF(A%NSMat.EQ.1.AND.B%NSMat.EQ.2)THEN
+               call new(cd,(/NBasF,2*NBasF/))
+               cD%D(1:NBasF,      1:  NBasF)=matmul(AD%D,BD%D(1:NBasF,      1:  NBasF))
+               cD%D(1:NBasF,NBasF+1:2*NBasF)=matmul(AD%D,BD%D(1:NBasF,NBasF+1:2*NBasF))
+               do j=1,NBasF
+                  TraceMM_BCSR=TraceMM_BCSR+CD%D(j,j)+CD%D(j,j+NBasF)
+               enddo
+               call delete(cd)
+            ELSEIF(A%NSMat.EQ.4.AND.B%NSMat.EQ.1)THEN
+               call new(cd,(/2*NBasF,2*NBasF/))
+               cD%D(      1:  NBasF,      1:  NBasF)=matmul(AD%D(      1:  NBasF,      1:  NBasF),BD%D)
+               cD%D(      1:  NBasF,NBasF+1:2*NBasF)=matmul(AD%D(      1:  NBasF,NBasF+1:2*NBasF),BD%D)
+               cD%D(NBasF+1:2*NBasF,      1:  NBasF)=matmul(AD%D(NBasF+1:2*NBasF,      1:  NBasF),BD%D)
+               cD%D(NBasF+1:2*NBasF,NBasF+1:2*NBasF)=matmul(AD%D(NBasF+1:2*NBasF,NBasF+1:2*NBasF),BD%D)
+               do j=1,2*NBasF
+                  TraceMM_BCSR=TraceMM_BCSR+CD%D(j,j)
+               enddo
+               call delete(cd)
+            ELSEIF(A%NSMat.EQ.1.AND.B%NSMat.EQ.4)THEN
+               call new(cd,(/2*NBasF,2*NBasF/))
+               cD%D(      1:  NBasF,      1:  NBasF)=matmul(AD%D,BD%D(      1:  NBasF,      1:  NBasF))
+               cD%D(      1:  NBasF,NBasF+1:2*NBasF)=matmul(AD%D,BD%D(      1:  NBasF,NBasF+1:2*NBasF))
+               cD%D(NBasF+1:2*NBasF,      1:  NBasF)=matmul(AD%D,BD%D(NBasF+1:2*NBasF,      1:  NBasF))
+               cD%D(NBasF+1:2*NBasF,NBasF+1:2*NBasF)=matmul(AD%D,BD%D(NBasF+1:2*NBasF,NBasF+1:2*NBasF))
+               do j=1,2*NBasF
+                  TraceMM_BCSR=TraceMM_BCSR+CD%D(j,j)
+               enddo
+               call delete(cd)
+            ELSEIF(A%NSMat.EQ.4.AND.B%NSMat.EQ.4)THEN
+               call new(cd,(/2*NBasF,2*NBasF/))
+               CD%D=matmul(AD%D,BD%D)
+               do j=1,2*NBasF
+                  TraceMM_BCSR=TraceMM_BCSR+CD%D(j,j)
+               enddo
+               call delete(cd)
+            ELSE
+               CALL Halt('TraceMM_BCSR 2: Something wrong there!')
+            ENDIF
+            call delete(ad)
+            call delete(bd)
+         ELSE
+            Op=Zero
+            TraceMM_BCSR=Zero
+            DO IL=1,A%NAtms
+               MA=BSiz%I(IL)
+               IStrtA=A%RowPt%I(IL)
+               IStopA=A%RowPt%I(IL+1)-1
+               DO JP=IStrtA,IStopA
+                  J=A%ColPt%I(JP)
+                  P=A%BlkPt%I(JP)
+                  MB=BSiz%I(J)
+                  IStrtB=B%RowPt%I(J)
+                  IStopB=B%RowPt%I(J+1)-1
+                  DO KP=IStrtB,IStopB
+                     K=B%ColPt%I(KP)
+                     IF(K.EQ.IL)THEN
+                        Q=B%BlkPt%I(KP)
+                        TraceMM_BCSR=TraceMM_BCSR  &
+                             +BlkTrace_2(MA,MB,A%MTrix%D(P),B%MTrix%D(Q))
+                        Op=Op+DBLE(MA*MB)
+                        EXIT
+                     ENDIF
+                  ENDDO
                ENDDO
             ENDDO
-         ENDDO
-         PerfMon%FLOP=PerfMon%FLOP+Two*Op
+            PerfMon%FLOP=PerfMon%FLOP+Two*Op
          IF(PRESENT(Perf_O))  &
-           Perf_O%FLOP=Perf_O%FLOP+Two*Op
+              Perf_O%FLOP=Perf_O%FLOP+Two*Op
+      ENDIF
       END FUNCTION TraceMM_BCSR
 #ifdef PARALLEL
 !===============================================================================
@@ -1658,8 +1822,20 @@ MODULE LinAlg
                J=A%ColPt%I(JP)
                IF(J==IL)THEN
                   P=A%BlkPt%I(JP)
-                  Trace_BCSR=Trace_BCSR+BlkTrace_1(MA,A%MTrix%D(P))
-                  Op=Op+DBLE(MA)
+                  IF(    A%NSMat.EQ.1) THEN
+                     Trace_BCSR=Trace_BCSR+BlkTrace_1(MA,A%MTrix%D(P))
+                     Op=Op+DBLE(MA)
+                  ELSEIF(A%NSMat.EQ.2) THEN
+                     Trace_BCSR=Trace_BCSR+BlkTrace_1(MA,A%MTrix%D(P))
+                     Trace_BCSR=Trace_BCSR+BlkTrace_1(MA,A%MTrix%D(P+MA*MA))
+                     Op=Op+2D0*DBLE(MA)
+                  ELSEIF(A%NSMat.EQ.4) THEN
+                     Trace_BCSR=Trace_BCSR+BlkTrace_1(MA,A%MTrix%D(P))
+                     Trace_BCSR=Trace_BCSR+BlkTrace_1(MA,A%MTrix%D(P+3*MA*MA))
+                     Op=Op+2D0*DBLE(MA)
+                  ELSE
+                     CALL Halt('Trace_BCSR: Something wrong!')
+                  ENDIF
                   EXIT
                ENDIF
             ENDDO
@@ -1680,11 +1856,11 @@ MODULE LinAlg
    SUBROUTINE SetToI_BCSR(A,B)
       TYPE(BCSR)              :: A
       TYPE(DBL_RNK2),OPTIONAL :: B
-      INTEGER                 :: I,N,N2,Q,R       
+      INTEGER                 :: I,N,N2,Q,R
 #ifdef PARALLEL
          IF(MyId==ROOT)THEN
 #endif
-            IF(.NOT.AllocQ(A%Alloc))CALL New(A)
+      IF(.NOT.AllocQ(A%Alloc))CALL New(A)
       Q=1
       R=1
       A%NAtms=0
@@ -1695,13 +1871,45 @@ MODULE LinAlg
          N2=N*N
          A%ColPt%I(Q)=I
          A%BlkPt%I(Q)=R
-         IF(PRESENT(B))THEN
-            A%MTrix%D(R:R+N2-1)=B%D(1:N2,I)
+         IF(A%NSMat.EQ.1)THEN
+            IF(PRESENT(B))THEN
+               A%MTrix%D(R:R+N2-1)=B%D(1:N2,I)
+            ELSE
+               CALL DiagI(N,A%MTrix%D(R:R+N2-1))
+            ENDIF
+         ELSEIF(A%NSMat.EQ.2) THEN
+            IF(PRESENT(B))THEN
+               A%MTrix%D(R:R+N2-1)=B%D(1:N2,I)
+               R=R+N2
+               A%MTrix%D(R:R+N2-1)=B%D(1:N2,I)
+            ELSE
+               CALL DiagI(N,A%MTrix%D(R:R+N2-1))
+               R=R+N2
+               CALL DiagI(N,A%MTrix%D(R:R+N2-1))
+            ENDIF
+         ELSEIF(A%NSMat.EQ.4) THEN
+            IF(PRESENT(B))THEN
+               A%MTrix%D(R:R+N2-1)=B%D(1:N2,I)
+               R=R+N2
+               A%MTrix%D(R:R+N2-1)=0D0
+               R=R+N2
+               A%MTrix%D(R:R+N2-1)=0D0
+               R=R+N2
+               A%MTrix%D(R:R+N2-1)=B%D(1:N2,I)
+            ELSE
+               CALL DiagI(N,A%MTrix%D(R:R+N2-1))
+               R=R+N2
+               A%MTrix%D(R:R+N2-1)=0D0
+               R=R+N2
+               A%MTrix%D(R:R+N2-1)=0D0
+               R=R+N2
+               CALL DiagI(N,A%MTrix%D(R:R+N2-1))
+            ENDIF
          ELSE
-           CALL DiagI(N,A%MTrix%D(R:R+N2-1))
+            CALL Halt('SetToI_BCSR: wrong value for A%NSMat')
          ENDIF
-         Q=Q+1 
-         R=R+N2     
+         R=R+N2
+         Q=Q+1    
          A%RowPt%I(A%NAtms+1)=Q
       ENDDO
       A%NBlks=Q-1 
@@ -1767,7 +1975,7 @@ MODULE LinAlg
          FlOp=Zero
          CALL New(Flag,NAtoms)
          CALL SetEq(Flag,0)
-         Tmp=Dot_GENERIC(A%NAtms,OffSt%I(MyId),BSiz%I,Flag%I,FlOp,  &
+         Tmp=Dot_GENERIC(1,A%NAtms,OffSt%I(MyId),BSiz%I,Flag%I,FlOp,  &
                          A%RowPt%I,A%ColPt%I,A%BlkPt%I,A%MTrix%D,   & 
                          B%RowPt%I,B%ColPt%I,B%BlkPt%I,B%MTrix%D)
          Dot_DBCSR=AllReduce(Tmp)
@@ -1787,6 +1995,8 @@ MODULE LinAlg
          TYPE(TIME),OPTIONAL,INTENT(INOUT) :: Perf_O         
          REAL(DOUBLE)                      :: FlOp
 !-------------------------------------------------------------------------------
+!write(*,*) 'Dot_BCSR: ',A%NSMat,B%NSMat
+         IF(A%NSMat.NE.B%NSMat)CALL Halt('Dot_BCSR: A%NSMat.NE.B%NSMat!')
 #ifdef PARALLEL
          IF(MyId==ROOT)THEN
 #endif
@@ -1794,7 +2004,7 @@ MODULE LinAlg
          CALL New(Flag,NAtoms)
          CALL SetEq(Flag,0)
          Dot_BCSR=                                            &
-         Dot_GENERIC(A%NAtms,0,BSiz%I,Flag%I,FlOp,            &
+         Dot_GENERIC(A%NSMat,A%NAtms,0,BSiz%I,Flag%I,FlOp,    &
                      A%RowPt%I,A%ColPt%I,A%BlkPt%I,A%MTrix%D, & 
                      B%RowPt%I,B%ColPt%I,B%BlkPt%I,B%MTrix%D)
          CALL Delete(Flag)
@@ -1809,12 +2019,12 @@ MODULE LinAlg
 !     Generic F77 style (D,B)CSR inner product of two matrices 
 !     MatrixDot = (A,B)     
 !===============================================================================
-      FUNCTION Dot_GENERIC(ANAtms,OffStA,BSiz,Flag,FlOp, &
+      FUNCTION Dot_GENERIC(NSMat,ANAtms,OffStA,BSiz,Flag,FlOp, &
                            ARowPt,AColPt,ABlkPt,AMTrix,  & 
                            BRowPt,BColPt,BBlkPt,BMTrix)
          IMPLICIT NONE
          REAL(DOUBLE)                            :: Dot_GENERIC
-         INTEGER,                  INTENT(IN)    :: ANAtms,OffStA
+         INTEGER,                  INTENT(IN)    :: NSMat,ANAtms,OffStA
          INTEGER,     DIMENSION(:),INTENT(IN)    :: ARowPt,AColPt,ABlkPt, &
                                                     BRowPt,BColPt,BBlkPt,BSiz        
          REAL(DOUBLE),DIMENSION(:),INTENT(IN)    :: AMTrix,BMTrix
@@ -1843,7 +2053,7 @@ MODULE LinAlg
                IF(L/=0)THEN                  
                   P=ABlkPt(JP)
                   Q=BBlkPt(L )
-                  MN=MA*BSiz(J)
+                  MN=MA*BSiz(J)*NSMat!<<< SPIN
                   Dot_GENERIC=Dot_GENERIC &
                              +DBL_DOT(MN,AMTrix(P),BMTrix(Q))
                   Op=Op+DBLE(MN)
@@ -1900,7 +2110,7 @@ MODULE LinAlg
                RETURN
             ENDIF
          ENDIF
-         CALL FilterM_GENERIC(B%NAtms,OffSt%I(MyId),                   &
+         CALL FilterM_GENERIC(1,B%NAtms,OffSt%I(MyId),                 & !<< will need to change that!
                               A%NAtms,A%NBlks,A%NNon0,                 &
                               A%RowPt%I,A%ColPt%I,A%BlkPt%I,A%MTrix%D, &
                               B%RowPt%I,B%ColPt%I,B%BlkPt%I,B%MTrix%D, &
@@ -2063,7 +2273,7 @@ MODULE LinAlg
          REAL(DOUBLE)                        :: Tol,FlOp
          LOGICAL,     OPTIONAL,INTENT(IN)    :: SetEq_O         
 !-------------------------------------------------------------------------------
-         IF(.NOT.AllocQ(A%Alloc))CALL New(A)
+         IF(.NOT.AllocQ(A%Alloc))CALL New(A,NSMat_O=B%NSMat)
          FlOp=Zero
          IF(PRESENT(Tol_O))THEN
             Tol=Tol_O
@@ -2076,10 +2286,13 @@ MODULE LinAlg
                RETURN
             ENDIF
          ENDIF
+
+!write(*,*) 'LinAlg',A%NSMat,B%NSMat
+
 #ifdef PARALLEL
          IF(MyId==ROOT)THEN
 #endif
-         CALL FilterM_GENERIC(B%NAtms,0,A%NAtms,A%NBlks,A%NNon0,       &
+         CALL FilterM_GENERIC(B%NSMat,B%NAtms,0,A%NAtms,A%NBlks,A%NNon0, &
                               A%RowPt%I,A%ColPt%I,A%BlkPt%I,A%MTrix%D, &
                               B%RowPt%I,B%ColPt%I,B%BlkPt%I,B%MTrix%D, &
                               BSiz%I,Tol,FlOp)
@@ -2238,12 +2451,12 @@ MODULE LinAlg
 !     Generic F77 style routine for filtering (D/B)CSR matrices:
 !     A=FILTER(B,Tol)
 !===============================================================================
-      SUBROUTINE FilterM_GENERIC(BNAtms,BOffSt,               &
+      SUBROUTINE FilterM_GENERIC(NSMat,BNAtms,BOffSt,         &
                                  ANAtms,ANBlks,ANNon0,        &
                                  ARowPt,AColPt,ABlkPt,AMTrix, &
                                  BRowPt,BColPt,BBlkPt,BMTrix, &
                                  MSiz,Tol,FlOp)
-         INTEGER,                  INTENT(IN)  :: BNAtms,BOffSt
+         INTEGER,                  INTENT(IN)  :: NSMat,BNAtms,BOffSt
          INTEGER,     DIMENSION(:),INTENT(IN)  :: BRowPt,BColPt,BBlkPt,MSiz
          REAL(DOUBLE),DIMENSION(:),INTENT(IN)  :: BMTrix
          REAL(DOUBLE),             INTENT(IN)  :: Tol
@@ -2271,7 +2484,7 @@ MODULE LinAlg
                   J=BColPt(JP)
                   P=BBlkPt(JP)
                   NA=MSiz(J)
-                  MN=MA*NA
+                  MN=MA*NA*NSMat!<< SPIN
                   MN1=MN-1
                   IF(SQRT(DBL_Dot(MN,BMTrix(P),BMTrix(P)))>Tol)THEN
 !                  IF(DSQRT(DDot(MN,BMTrix(P),1,BMTrix(P),1))>Tol)THEN

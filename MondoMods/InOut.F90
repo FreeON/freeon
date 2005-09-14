@@ -1218,7 +1218,7 @@ CONTAINS
                 LOGICAL,         OPTIONAL,INTENT(IN)    :: Bcast_O
                 REAL(DOUBLE)                            :: Dummy
                 CHARACTER(LEN=DEFAULT_CHR_LEN)          :: FileName          
-                INTEGER                                 :: I,NAtms,NBlks,NNon0,IOS
+                INTEGER                                 :: I,NSMat,NAtms,NBlks,NNon0,IOS
                 LOGICAL                                 :: Exists,LimitsQ
                 LOGICAL                                 :: Bcast
 
@@ -1232,8 +1232,12 @@ CONTAINS
 #ifdef PARALLEL
                 IF(MyId==0)THEN
 #endif
+!!$write(*,*)'In Get_bcsr',PRESENT(CheckPoint_O)
                    IF(PRESENT(CheckPoint_O))THEN
                       IF(CheckPoint_O)THEN
+!write(*,*)'In Get_bcsr',A%NSMat
+                         CALL Get(A%NSMat,TRIM(Name)//'%NSMat')
+!write(*,*)'In Get_bcsr',A%NSMat
                          CALL Get(A%NAtms,TRIM(Name)//'%NAtms')
                          CALL Get(A%NBlks,TRIM(Name)//'%NBlks')
                          CALL Get(A%NNon0,TRIM(Name)//'%NNon0')
@@ -1246,10 +1250,10 @@ CONTAINS
                                  (A%NNon0<=SIZE(A%MTrix%D))
                             IF(LimitsQ)THEN
                                CALL Delete(A)
-                               CALL New(A,(/A%NAtms,A%NBlks,A%NNon0/))
+                               CALL New(A,(/A%NAtms,A%NBlks,A%NNon0/),NSMat_O=A%NSMat)
                             ENDIF
                          ELSE
-                            CALL New(A,(/A%NAtms,A%NBlks,A%NNon0/))
+                            CALL New(A,(/A%NAtms,A%NBlks,A%NNon0/),NSMat_O=A%NSMat)
                          ENDIF
 !
                          CALL Get(A%RowPt,TRIM(Name)//'%RowPt')
@@ -1290,28 +1294,41 @@ CONTAINS
                    ENDIF
 
 #ifdef FORMATTED
-                   READ(UNIT=Seq,FMT=55,Err=1,IOSTAT=IOS)NAtms,NNon0,NBlks
+                   READ(UNIT=Seq,FMT=55,Err=1,IOSTAT=IOS)NSMat,NAtms,NNon0,NBlks
                    INCLUDE 'Formats.Inc'
 #else
-                   READ(UNIT=Seq,Err=1,IOSTAT=IOS)NAtms,NNon0,NBlks
+!write(*,*)'In Get_bcsr2',NSMat,A%NSMat
+                   READ(UNIT=Seq,Err=1,IOSTAT=IOS)NSMat,NAtms,NNon0,NBlks
+!!$write(*,*)'In Get_bcsr3',NSMat,A%NSMat
+!!$write(*,*)'In Get_bcsr3,NSMat,NAtms,NBlks,NBlks,NNon0',NSMat,NAtms,NBlks,NBlks,NNon0,AllocQ(A%Alloc)
 #endif
                    IF(AllocQ(A%Alloc))THEN
-                      LimitsQ=.NOT.                         &
-                           (NAtms<=SIZE(A%RowPt%I)).AND. &
-                           (NBlks<=SIZE(A%ColPt%I)).AND. &
-                           (NBlks<=SIZE(A%BlkPt%I)).AND. &
-                           (NNon0<=SIZE(A%MTrix%D))
+                      LimitsQ=                            &
+                           (NAtms.GT.SIZE(A%RowPt%I)).OR. &
+                           (NBlks.GT.SIZE(A%ColPt%I)).OR. &
+                           (NBlks.GT.SIZE(A%BlkPt%I)).OR. &
+                           (NNon0.GT.SIZE(A%MTrix%D)).OR. &
+                           (NSMat.GT.A%NSMat)
+
+
+!!$write(*,*)'In Get_bcsr4 LimitsQ=',LimitsQ
+!!$write(*,*)'In Get_bcsr5,NSMat,NAtms,NBlks,NBlks,NNon0',A%NSMat,SIZE(A%RowPt%I),SIZE(A%ColPt%I),SIZE(A%BlkPt%I),SIZE(A%MTrix%D)
+
                       IF(LimitsQ)THEN
+                         write(*,*)'In Get_bcsr Reallocate the matrix A%NSMat.EQ.NSMat=',A%NSMat.EQ.NSMat
                          CALL Delete(A)
-                         CALL New(A,(/NAtoms,NBlks,NNon0/))
+                         CALL New(A,(/NAtoms,NBlks,NNon0/),NSMat_O=NSMat)
                       ELSE
+                         A%NSMat=NSMat
                          A%NAtms=NAtms
                          A%NBlks=NBlks
                          A%NNon0=NNon0
                       ENDIF
                    ELSE
-                      CALL New(A,(/NAtms,NBlks,NNon0/))
+                      CALL New(A,(/NAtms,NBlks,NNon0/),NSMat_O=NSMat)
                    ENDIF
+!write(*,*)'In Get_bcsr4',NSMat,A%NSMat
+
 #ifdef FORMATTED
                    READ(UNIT=Seq,FMT=55,Err=1,IOSTAT=IOS)(A%RowPt%I(I),I=1,NAtoms+1)
                    READ(UNIT=Seq,FMT=55,Err=1,IOSTAT=IOS)(A%ColPt%I(I),I=1,A%NBlks)
@@ -1333,6 +1350,8 @@ CONTAINS
                    CALL BcastBCSR(A)
                 ENDIF
 #endif
+
+!write(*,'(A,I2,2(A,I5))') 'Get_bcsr NSMat=',A%NSMat,' A%NBlks=',A%NBlks,' size(A%BlkPt%I)=',size(A%BlkPt%I,1),trim(Name)
                 RETURN
 1               CALL Halt('IO Error '//TRIM(IntToChar(IOS))//' in Get_BCSR.')
               END SUBROUTINE Get_BCSR
@@ -1392,18 +1411,24 @@ CONTAINS
                       FileName=Name
                    ENDIF
 
+!write(*,*) 'put',A%NBlks
+
                    IF(PRESENT(CheckPoint_O))THEN
                       IF(CheckPoint_O)THEN
+!write(*,*) 'put',A%NSMat
+                         CALL Put(A%NSMat,TRIM(Name)//'%NSMat')
                          CALL Put(A%NAtms,TRIM(Name)//'%NAtms')
                          CALL Put(A%NBlks,TRIM(Name)//'%NBlks')
                          CALL Put(A%NNon0,TRIM(Name)//'%NNon0')
                          CALL Put(A%RowPt,TRIM(Name)//'%RowPt',A%NAtms+1)
 #ifdef PARALLEL_CLONES
                          CALL Put(A%ColPt,TRIM(Name)//'%ColPt',A%NBlks)!,UnLimit_O=.TRUE.)
+                         !CALL Put(A%BlkPt,TRIM(Name)//'%BlkPt',A%NBlks*A%NSMat)!,UnLimit_O=.TRUE.)
                          CALL Put(A%BlkPt,TRIM(Name)//'%BlkPt',A%NBlks)!,UnLimit_O=.TRUE.)
                          CALL Put(A%MTrix,TRIM(Name)//'%MTrix',A%NNon0)!,UnLimit_O=.TRUE.)
 #else
                          CALL Put(A%ColPt,TRIM(Name)//'%ColPt',A%NBlks,UnLimit_O=.TRUE.)
+                         !CALL Put(A%BlkPt,TRIM(Name)//'%BlkPt',A%NBlks*A%NSMat,UnLimit_O=.TRUE.)
                          CALL Put(A%BlkPt,TRIM(Name)//'%BlkPt',A%NBlks,UnLimit_O=.TRUE.)
                          CALL Put(A%MTrix,TRIM(Name)//'%MTrix',A%NNon0,UnLimit_O=.TRUE.)
 #endif
@@ -1437,17 +1462,20 @@ CONTAINS
 #endif
                    ENDIF
 #ifdef FORMATTED
-                   WRITE(UNIT=Seq,FMT=55,Err=1,IOSTAT=IOS)NAtoms,A%NNon0,A%NBlks
+                   WRITE(UNIT=Seq,FMT=55,Err=1,IOSTAT=IOS)A%NSMat,NAtoms,A%NNon0,A%NBlks
                    WRITE(UNIT=Seq,FMT=55,Err=1,IOSTAT=IOS)(A%RowPt%I(i),i=1,NAtoms+1)
                    WRITE(UNIT=Seq,FMT=55,Err=1,IOSTAT=IOS)(A%ColPt%I(i),i=1,A%NBlks)
+                   !WRITE(UNIT=Seq,FMT=55,Err=1,IOSTAT=IOS)(A%BlkPt%I(i),i=1,A%NBlks*A%NSMat)
                    WRITE(UNIT=Seq,FMT=55,Err=1,IOSTAT=IOS)(A%BlkPt%I(i),i=1,A%NBlks)
                    WRITE(UNIT=Seq,FMT=66,Err=1,IOSTAT=IOS)(BIG_DBL,i=1,A%NBlks)
                    WRITE(UNIT=Seq,FMT=66,Err=1,IOSTAT=IOS)(A%MTrix%D(i),i=1,A%NNon0)
                    INCLUDE 'Formats.Inc'            
 #else
-                   WRITE(UNIT=Seq,Err=1,IOSTAT=IOS)NAtoms,A%NNon0,A%NBlks
+!write(*,*) 'put',A%NSMat
+                   WRITE(UNIT=Seq,Err=1,IOSTAT=IOS)A%NSMat,NAtoms,A%NNon0,A%NBlks
                    WRITE(UNIT=Seq,Err=1,IOSTAT=IOS)(A%RowPt%I(i),i=1,NAtoms+1)
                    WRITE(UNIT=Seq,Err=1,IOSTAT=IOS)(A%ColPt%I(i),i=1,A%NBlks)
+                   !WRITE(UNIT=Seq,Err=1,IOSTAT=IOS)(A%BlkPt%I(i),i=1,A%NBlks*A%NSMat)
                    WRITE(UNIT=Seq,Err=1,IOSTAT=IOS)(A%BlkPt%I(i),i=1,A%NBlks)
                    WRITE(UNIT=Seq,Err=1,IOSTAT=IOS)(BIG_DBL,i=1,A%NBlks)
                    WRITE(UNIT=Seq,Err=1,IOSTAT=IOS)(A%MTrix%D(i),i=1,A%NNon0)
@@ -1456,6 +1484,8 @@ CONTAINS
 #ifdef PARALLEL
                 ENDIF
 #endif
+
+!write(*,'(A,I2,2(A,I5))') 'Put_bcsr NSMat=',A%NSMat,' A%NBlks=',A%NBlks,' size(A%BlkPt%I)=',size(A%BlkPt%I,1)
                 RETURN
 1               CALL Halt('IO Error '//TRIM(IntToChar(IOS))//' in Put_BCSR.')
               END SUBROUTINE Put_BCSR

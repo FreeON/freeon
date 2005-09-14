@@ -555,10 +555,11 @@ MODULE MemMan
 !
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !     
-      SUBROUTINE New_BCSR(A,N_O,OnAll_O)
+      SUBROUTINE New_BCSR(A,N_O,OnAll_O,NSMat_O)
          TYPE(BCSR),INTENT(INOUT)             :: A
          INTEGER,OPTIONAL,DIMENSION(3)        :: N_O
          LOGICAL,OPTIONAL                     :: OnAll_O
+         INTEGER,OPTIONAL                     :: NSMat_O
          LOGICAL                              :: OnAll
          IF(PRESENT(OnAll_O))THEN
             OnAll=OnAll_O
@@ -569,19 +570,25 @@ MODULE MemMan
 #ifdef PARALLEL
          IF(MyId==ROOT.OR.OnAll)THEN
 #endif
+            A%NSMat=1
+            IF(PRESENT(NSMat_O))A%NSMat=NSMat_O
             IF(PRESENT(N_O))THEN
                A%NAtms=N_O(1)
                A%NBlks=N_O(2) 
                A%NNon0=N_O(3)
+               CALL New(A%RowPt,A%NAtms+1)
+               CALL New(A%ColPt,A%NBlks  )
+               CALL New(A%BlkPt,A%NBlks  )!*A%NSMat)
+               CALL New(A%MTrix,A%NNon0  )
             ELSE
                A%NAtms=NAtoms! MaxAtms
                A%NBlks=MaxBlks
-               A%NNon0=MaxNon0
+               A%NNon0=MaxNon0*A%NSMat
+               CALL New(A%RowPt,A%NAtms+1)
+               CALL New(A%ColPt,A%NBlks  )
+               CALL New(A%BlkPt,A%NBlks  )!*A%NSMat)
+               CALL New(A%MTrix,A%NNon0  )
             ENDIF
-            CALL New(A%RowPt,A%NAtms+1)
-            CALL New(A%ColPt,A%NBlks  )
-            CALL New(A%BlkPt,A%NBlks  )
-            CALL New(A%MTrix,A%NNon0  )
             A%Alloc=ALLOCATED_TRUE
 #ifdef PARALLEL
          ENDIF
