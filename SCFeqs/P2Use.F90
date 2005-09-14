@@ -34,9 +34,9 @@ PROGRAM P2Use
   REAL(DOUBLE)                  :: MaxDS,NoiseLevel 
   REAL(DOUBLE)                  :: Scale,Fact,ECount,RelNErr, DeltaP,OldDeltaP, & 
                                    DensityDev,dN,MaxGDIff,GDIff,OldN,M,PNon0s,PSMin,PSMax, &
-                                   Ipot_Error,Norm_Error,Lam,DLam,TError0
+                                   Ipot_Error,Norm_Error,Lam,DLam,TError0,SFac
   INTEGER                       :: I,J,JP,AtA,Q,R,T,KA,NBFA,NPur,PcntPNon0,Qstep, & 
-                                   OldFileID,ICart,N,NStep,iGEO,DMPOrder
+                                   OldFileID,ICart,N,NStep,iGEO,DMPOrder,NSMat
   CHARACTER(LEN=2)              :: Cycl
   LOGICAL                       :: Present,DoingMD,ConvergeAOSP,ConvergeAll,AOSPExit
   CHARACTER(LEN=DEFAULT_CHR_LEN):: Mssg,BName
@@ -45,6 +45,12 @@ PROGRAM P2Use
   ! Start up macro
   CALL StartUp(Args,Prog,Serial_O=.FALSE.)
   Cycl=IntToChar(Args%I%I(1))
+  !
+  NSMat=1
+  IF(NAlph.NE.NBeta)NSMat=2
+  SFac=2D0
+  IF(NSMat.NE.1)SFac=1D0
+  !
   ! Get basis set and geometry
   CALL Get(BS,Tag_O=CurBase)
   CALL Get(GM,Tag_O=CurGeom)
@@ -52,7 +58,7 @@ PROGRAM P2Use
   SELECT CASE(SCFActn)
   ! P=0
   CASE('GuessEqCore')
-     CALL New(P)
+     CALL New(P,NSMat_O=NSMat)
      CALL New(BlkP,(/MaxBlkSize**2,NAtoms/))
      DO I=1,NAtoms
         BlkP%D(:,I)=Zero
@@ -67,7 +73,7 @@ PROGRAM P2Use
      CALL Delete(P)
   ! Density SuperPosition 
   CASE('DensitySuperposition')
-     CALL New(P)
+     CALL New(P,NSMat_O=NSMat)
      CALL New(Tmp1)
      CALL New(Tmp2)
      CALL Get(BName,'bsetname',CurBase)
@@ -83,8 +89,8 @@ PROGRAM P2Use
         CALL SetToI(P,BlkP)
         ! Check for the correct elctron count
         TrP=Trace(P)
-        IF(ABS(TrP-DBLE(NEl/Two))>1.D-10) &
-             CALL Warn(' In P2Use, TrP = '//TRIM(DblToChar(TrP)))
+        IF(ABS(TrP-DBLE(NEl/SFac))>1.D-10) &
+             & CALL Warn(' In P2Use, TrP = '//TRIM(DblToChar(TrP)))
         CALL Delete(BlkP)
      ELSE
         CALL SetToI(P)
@@ -95,9 +101,9 @@ PROGRAM P2Use
 #ifdef PARALLEL
   ENDIF
 #endif
-        CALL Multiply(P,DBLE(NEl)/DBLE(2*NBasF))
+        CALL Multiply(P,DBLE(NEl)/(SFac*DBLE(NBasF)))
         TrP=Trace(P)
-        IF(ABS(TrP-DBLE(NEl/Two))>1.D-10) CALL Warn(' In P2Use, TrP = '//TRIM(DblToChar(TrP)))
+        IF(ABS(TrP-DBLE(NEl/SFac))>1.D-10) CALL Warn(' In P2Use, TrP = '//TRIM(DblToChar(TrP)))
      ENDIF
 #ifdef PARALLEL    
      IF(MyId==ROOT)THEN
@@ -131,7 +137,7 @@ PROGRAM P2Use
      CALL Delete(Tmp2)
   ! Restarting without Geometry of BasisSet Change
   CASE('Restart')
-     CALL New(P)
+     CALL New(P,NSMat_O=NSMat)
      CALL New(S)
      CALL New(Tmp1)
      CALL New(Tmp2)
@@ -154,9 +160,9 @@ PROGRAM P2Use
      CALL Get(S,TrixFile('S',Args))
 #ifdef PARALLEL
      CALL Multiply(P,S,Tmp1)
-     TError0 = ABS(Trace(Tmp1)-Half*DBLE(NEl))/DBLE(NEl)
+     TError0 = ABS(SFac*Trace(Tmp1)-DBLE(NEl))/DBLE(NEl)
 #else
-     TError0 = ABS(Trace(P,S)-Half*DBLE(NEl))/DBLE(NEl)
+     TError0 = ABS(SFac*Trace(P,S)-DBLE(NEl))/DBLE(NEl)
 #endif
      IF(TError0>1D-3) &
         CALL Halt(' Possible geometry, density matrix mismatch '//Rtrn// &
@@ -292,7 +298,7 @@ PROGRAM P2Use
      ! Initial Trace Error
 #ifdef PARALLEL
      CALL Multiply(P0,S0,Tmp1)
-     TError0 = ABS(Trace(Tmp1)-Half*DBLE(NEl))
+     TError0 = ABS(Trace(Tmp1)-DBLE(NEl)/SFac)
      IF(MyID.EQ.ROOT) THEN 
         IF(PrintFlags%Key==DEBUG_MAXIMUM) THEN
            WRITE(*,*) "Trace Error: Tr[P0,S0] = ",TError0
@@ -304,7 +310,7 @@ PROGRAM P2Use
         ENDIF
      ENDIF
      CALL Multiply(P0,S1,Tmp1)
-     TError0 = ABS(Trace(Tmp1)-Half*DBLE(NEl))
+     TError0 = ABS(Trace(Tmp1)-DBLE(NEl)/SFac)
      IF(MyID.EQ.ROOT)THEN 
         IF(PrintFlags%Key==DEBUG_MAXIMUM) THEN 
            WRITE(*,*) "Trace Error: Tr[P0,S1] = ",TError0 
@@ -316,14 +322,14 @@ PROGRAM P2Use
         ENDIF
      ENDIF
 #else
-     TError0 = ABS(Trace(P0,S1)-Half*DBLE(NEl))
+     TError0 = ABS(Trace(P0,S1)-DBLE(NEl)/SFac)
      IF(PrintFlags%Key==DEBUG_MAXIMUM) THEN
-        WRITE(*,*) "Trace Error: Tr[P0,S0] = ",ABS(Trace(P0,S0)-Half*DBLE(NEl))
-        WRITE(*,*) "Trace Error: Tr[P0,S1] = ",ABS(Trace(P0,S1)-Half*DBLE(NEl))
+        WRITE(*,*) "Trace Error: Tr[P0,S0] = ",ABS(Trace(P0,S0)-DBLE(NEl)/SFac)
+        WRITE(*,*) "Trace Error: Tr[P0,S1] = ",ABS(Trace(P0,S1)-DBLE(NEl)/SFac)
         CALL OpenASCII(OutFile,Out)
         CALL PrintProtectL(Out)
-        WRITE(Out,*) "Trace Error: Tr[P0,S0] = ",ABS(Trace(P0,S0)-Half*DBLE(NEl))
-        WRITE(Out,*) "Trace Error: Tr[P0,S1] = ",ABS(Trace(P0,S1)-Half*DBLE(NEl))
+        WRITE(Out,*) "Trace Error: Tr[P0,S0] = ",ABS(Trace(P0,S0)-DBLE(NEl)/SFac)
+        WRITE(Out,*) "Trace Error: Tr[P0,S1] = ",ABS(Trace(P0,S1)-DBLE(NEl)/SFac)
         CALL PrintProtectR(Out)
         CLOSE(UNIT=Out,STATUS='KEEP')
      ENDIF
@@ -369,7 +375,7 @@ PROGRAM P2Use
 #else
         TrP        = Trace(P,S)
 #endif
-        Norm_Error = TrP-Half*DBLE(NEl)
+        Norm_Error = TrP-DBLE(NEl)/SFac
         Ipot_Error = One
 !
         Qstep        = 0
@@ -392,7 +398,7 @@ PROGRAM P2Use
                  CALL AOSP2(P,S,Tmp1,Tmp2,.TRUE.)
               ENDIF
            ENDIF
-           Norm_Error = TrP-Half*DBLE(NEl)
+           Norm_Error = TrP-DBLE(NEl)/SFac
            Ipot_Error = TrP2-Trace(P)
 #ifdef PARALLEL
            IF(MyId==ROOT)THEN

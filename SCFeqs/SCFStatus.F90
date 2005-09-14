@@ -21,7 +21,7 @@ PROGRAM SCFStatus
    TYPE(BCSR)                      :: P,Tmp1,Tmp2,Tmp3
 #endif
    REAL(DOUBLE)                    :: E_el_tot,E_nuc_tot,E_es_tot,E_ECPs,KinE,ExchE,Exc, &
-                                      Gap,Etot,DMax,Virial,DIISErr
+                                      Gap,Etot,DMax,Virial,DIISErr,S2
 #ifdef MMech
    REAL(DOUBLE)                    :: EBOND,EANGLE,ETorsion,ELJ,EOutOfPlane,MM_COUL,MM_ENERGY
    REAL(DOUBLE)                    :: E_C_EXCL,E_LJ_EXCL
@@ -49,14 +49,25 @@ PROGRAM SCFStatus
 !---------------------------------------------
 !  COMPUTE SOME EXPECTATION VALUES
 !
+!  S**2
+   CALL Get(Tmp1,TrixFile('S',Args))
+#ifdef PARALLEL
+!vw S2=GetS2(P,Tmp1)
+#else
+   S2=GetS2(P,Tmp1)
+#endif
+!
 !  KinE=<T>=Tr{P.T}
    CALL Get(Tmp1,TrixFile('T',Args))
+
 #ifdef PARALLEL
    CALL Multiply(P,Tmp1,Tmp2)
    KinE=Two*Trace(Tmp2)     
 #else
    KinE=Two*Trace(P,Tmp1)    
 #endif 
+   IF(P%NSMat.GT.1)KinE=KinE*0.5D0 !<<< SPIN
+!
    CALL Get(HasECPs,'hasecps',Tag_O=CurBase)
    IF(HasECPs)THEN
       ! Get the pseudopotential matrix U 
@@ -78,6 +89,7 @@ PROGRAM SCFStatus
 #else
    E_el_tot=Trace(P,Tmp1)    
 #endif
+   IF(P%NSMat.GT.1)E_el_tot=E_el_tot*0.5D0 !<<< SPIN
    ! Total electrostatic energy icluding ECPs
    E_el_tot=E_el_tot+E_ECPs
    CALL Put(E_el_tot,'E_ElectronicTotal')
@@ -98,6 +110,7 @@ PROGRAM SCFStatus
       IF(HasDFT(ModelChem)) &
          CALL Get(Exc,'Exc',StatsToChar(Current))
    ENDIF
+   IF(P%NSMat.GT.1)ExchE=ExchE*0.5D0 !<<< SPIN
 !  Get E_nuc_tot =<Vnn+Vne> 
    CALL Get(E_Nuc_Tot,'E_NuclearTotal',StatsToChar(Current))
    ! Total electrostaic energy
@@ -164,6 +177,10 @@ PROGRAM SCFStatus
       IF(Gap/=Zero)                                                         &
          SCFMessage=TRIM(SCFMessage)                                        &
                //'       Gap     = '//TRIM(DblToShrtChar(-Gap))//RTRN         
+!     Add in Spin
+      IF(P%NSMat/=1)                                                        & !<<< SPIN
+         SCFMessage=TRIM(SCFMessage)                                        &
+               //'       S**2    = '//TRIM(FltToShrtChar(S2))//RTRN         
 !     Add in DIIS error 
       IF(DIISErr/=Zero)                                                     &
          SCFMessage=TRIM(SCFMessage)                                        &
@@ -257,6 +274,31 @@ ENDIF
   CALL Delete(Tmp1)
   CALL Delete(Tmp2)
   CALL ShutDown(Prog)
+CONTAINS
+  REAL(DOUBLE) FUNCTION GetS2(P,S)
+    IMPLICIT NONE
+    TYPE(BCSR)     :: P,S
+    TYPE(DBL_RNK2) :: D1,D2    
+    INTEGER        :: I
+    GetS2=0D0
+    call seteq(D1,P)
+    call seteq(D2,Tmp1)
+    SELECT CASE(P%NSMat)
+    CASE(1);RETURN
+    CASE(2)
+       D1%D(1:NBasF,1:NBasF)=matmul(D1%D(1:NBasF,1:NBasF),D2%D)
+       D1%D(1:NBasF,1:NBasF)=matmul(D2%D,D1%D(1:NBasF,1:NBasF))
+       D1%D(1:NBasF,1:NBasF)=matmul(D1%D(1:NBasF,1:NBasF),D1%D(1:NBasF,NBasF+1:2*NBasF))
+       do i=1,NBasF
+          GetS2=GetS2+D1%D(i,i)
+       enddo
+       GetS2=0.25D0*(NAlph-NBeta)**2+0.5D0*(NAlph+NBeta)-GetS2
+    CASE(4);CALL Halt('GetS2: NSMat.EQ.4 not yet implemented!')
+    CASE DEFAULT;CALL Halt('GetS2: Something is wrong there!')
+    END SELECT
+    call delete(D1)
+    call delete(D2)
+  END FUNCTION GetS2
 END PROGRAM SCFStatus
 
 

@@ -30,10 +30,6 @@ PROGRAM FockNGrueven
   CHARACTER(LEN=12),PARAMETER    :: Prog='FockNGrueven'
   LOGICAL                        :: Present,ExchangeShift,HasECPs
 !------------------------------------------------------------------ 
-  !integer :: iii,jjj
-  !TYPE(DBL_RNK2)                       :: BTmp
-
-
   CALL StartUp(Args,Prog,Serial_O=.FALSE.)
   ISCF=Args%I%I(1)
   Cycl=IntToChar(ISCF)
@@ -199,24 +195,10 @@ PROGRAM FockNGrueven
      CALL Get(X,TrixFile('ZT',Args))  ! X =Z^t=L^{-t}           
      CALL Multiply(X,F,Tmp1)          ! T1=Z^t.F_AO
      CALL Get(X,TrixFile('Z',Args))   ! X=Z=L^{-1}
-
-
-
-     !CALL SetEq(BTmp,X)
-     !open(22)
-     !do iii=1,size(BTmp%D,1)
-     !  do jjj=1,size(BTmp%D,1)
-     !     write(22,'(E26.15)') BTmp%D(iii,jjj)
-     !  enddo
-     !enddo
-     !close(22)
-
-
      CALL Multiply(Tmp1,X,F)          ! F=Z^t.F_AO.Z
   ENDIF
   CALL Filter(Tmp1,F)                 ! T1 =F_Orthog=Filter[Z^t.F_AO.Z]
 !
-
   IF(SCFActn=='FockPrimeBuild'.OR.SCFActn=='StartResponse') THEN
      CALL Put(Tmp1,TrixFile('OrthoFPrime'//TRIM(Args%C%C(3)),Args,0)) 
      CALL PChkSum(Tmp1,'OrthoFPrime'//TRIM(Args%C%C(3))//'['//TRIM(SCFCycl)//']',Prog)
@@ -229,27 +211,6 @@ PROGRAM FockNGrueven
      CALL Plot(Tmp1,'OrthoF_'//TRIM(SCFCycl))
   ENDIF
 ! Tidy up
-
-    !CALL SetEq(BTmp,Tmp1)
-    !open(21)
-    !do iii=1,size(BTmp%D,1)
-    !   do jjj=1,size(BTmp%D,1)
-    !      write(21,'(E26.15)') BTmp%D(iii,jjj)
-    !   enddo
-    !enddo
-    !close(21)
-
-    !CALL Get(X,TrixFile('S',Args))
-    !CALL SetEq(BTmp,X)
-    !open(23)
-    !do iii=1,size(BTmp%D,1)
-    !   do jjj=1,size(BTmp%D,1)
-    !      write(23,'(E26.15)') BTmp%D(iii,jjj)
-    !   enddo
-    !enddo
-    !close(23)
-
-
   CALL Delete(F)
   CALL Delete(Tmp1)
   CALL ShutDown(Prog)
