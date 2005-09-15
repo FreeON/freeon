@@ -75,11 +75,11 @@ MakeRho: $(ObjsR)
 	 mv MakeRho $(MONDO_EXEC)/MakeRho
 #
 SForce: $(ObjSF)
-	$(LD) $(LDFLAGS) SForce $(ObjSF) $(F90_LIBRARIES)
+	$(LD) $(LDFLAGS) SForce $(ObjSF) $(F90_LIBRARIES) $(LAPACK)
 	mv SForce $(MONDO_EXEC)/SForce
 #
 TForce:	$(ObjTF)
-	$(LD) $(LDFLAGS) TForce $(ObjTF) $(F90_LIBRARIES)
+	$(LD) $(LDFLAGS) TForce $(ObjTF) $(F90_LIBRARIES) $(LAPACK)
 	mv TForce $(MONDO_EXEC)/TForce
 #
 MForce:	$(ObjMF)
