@@ -1667,7 +1667,7 @@ MODULE LinAlg
          type(dbl_rnk2)::AD,BD,cd
 !-------------------------------------------------------------------------------
          IF(MAX(A%NSMat,B%NSMat).GT.1) THEN
-            write(*,*) 'TraceMM_BCSR: We will take the trace in a dense way!'
+!            write(*,*) 'TraceMM_BCSR: We will take the trace in a dense way!'
             call seteq(AD,A)
             call seteq(BD,B)
 !call print_dbl_rnk2(ad,'ad',unit_o=6)
