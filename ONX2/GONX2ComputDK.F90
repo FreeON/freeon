@@ -99,7 +99,11 @@ CONTAINS
     REAL(DOUBLE)               :: TmpGradA,TmpGradC,TmpGradB
     REAL(DOUBLE)               :: Dcd,Dab,NInts,NIntsTot
     !-------------------------------------------------------------------
+#ifdef ONX2_PARALLEL
+    REAL(DOUBLE) , DIMENSION(MaxFuncPerAtmBlk**2        ) :: Work
+#else
     REAL(DOUBLE) , DIMENSION(MaxFuncPerAtmBlk**2*D%NSMat) :: Work
+#endif
     REAL(DOUBLE) , DIMENSION(MaxShelPerAtmBlk**2        ) :: DMcd,DMab
     REAL(DOUBLE) , DIMENSION(12*MaxFuncPerAtmBlk**4     ) :: C  !,C_
     !STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS
