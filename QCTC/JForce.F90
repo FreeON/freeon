@@ -35,7 +35,7 @@ PROGRAM JForce
 #endif
   TYPE(AtomPair)               :: Pair
   TYPE(DBL_VECT)               :: Frc,JFrc
-  INTEGER                      :: AtA,AtB,A1,A2,MA,NB,MN1,JP,Q
+  INTEGER                      :: AtA,AtB,A1,A2,MA,NB,MN1,MN,JP,Q
   REAL(DOUBLE)                 :: JFrcChk
   CHARACTER(LEN=6),PARAMETER   :: Prog='JForce'
   INTEGER                      :: NC,I,J,K
@@ -119,8 +119,23 @@ PROGRAM JForce
            Q=P%BlkPt%I(JP)
            NB=BSiz%I(AtB)
            MN1=MA*NB-1
+           MN=MN1+1
            A=Pair%A
            B=Pair%B
+!
+           !Quick and dirty!
+           SELECT CASE(P%NSMat)
+           CASE(1)
+              !We don't need to do anything!
+           CASE(2)
+              !We add up the two density martices!
+              CALL DAXPY(MN,1D0,P%MTrix%D(Q+MN),1,P%MTrix%D(Q),1)
+              CALL DSCAL(MN,0.5D0,P%MTrix%D(Q),1)
+           CASE(4)
+              !We add up the diagonal density martices!
+              CALL DAXPY(MN,1D0,P%MTrix%D(Q+3*MN),1,P%MTrix%D(Q),1)
+           CASE DEFAULT;CALL Halt(' JForce: P%NSMat doesn''t have an expected value! ')
+           END SELECT
 !
            DO NC=1,CS_OUT%NCells 
               Pair%A=A
