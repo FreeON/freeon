@@ -99,11 +99,11 @@ CONTAINS
     REAL(DOUBLE)               :: TmpGradA,TmpGradC,TmpGradB
     REAL(DOUBLE)               :: Dcd,Dab,NInts,NIntsTot
     !-------------------------------------------------------------------
-    REAL(DOUBLE) , DIMENSION(MaxFuncPerAtmBlk**2) :: Work
-    REAL(DOUBLE) , DIMENSION(MaxShelPerAtmBlk**2) :: DMcd,DMab
-    REAL(DOUBLE) , DIMENSION(12*MaxFuncPerAtmBlk**4) :: C  !,C_
+    REAL(DOUBLE) , DIMENSION(MaxFuncPerAtmBlk**2*D%NSMat) :: Work
+    REAL(DOUBLE) , DIMENSION(MaxShelPerAtmBlk**2        ) :: DMcd,DMab
+    REAL(DOUBLE) , DIMENSION(12*MaxFuncPerAtmBlk**4     ) :: C  !,C_
     !STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS
-    REAL(DOUBLE) , DIMENSION( 9*MaxFuncPerAtmBlk**4) :: CC
+    REAL(DOUBLE) , DIMENSION( 9*MaxFuncPerAtmBlk**4     ) :: CC
     !STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS
     TYPE(AtomPrG), DIMENSION(:), ALLOCATABLE :: ACAtmPair,BDAtmPair !size=MaxShelPerAtmBlk**2*CS_OUT%NCells
     !-------------------------------------------------------------------
@@ -476,11 +476,19 @@ CONTAINS
                                     & -DDOT(NBFA*NBFB,V%MTrix(1,1),1,Work(1),1)
 #else
                                !write(*,*) 'CC(Indx)',CC(Indx)
-                               CALL DGEMV('N',NBFA*NBFB,NBFC*NBFD,1.0d0,CC(Indx), &
-                                    &     NBFA*NBFB,D%MTrix%D(iPtrD),1,0.0d0,   &
-                                    &     Work(1),1)
-                               BoxX%D(IXYZ,JXYZ)=BoxX%D(IXYZ,JXYZ) &
-                                    & -DDOT(NBFA*NBFB,D%MTrix%D(iPtrD2),1,Work(1),1)
+                               IF(D%NSMat.EQ.1) THEN
+                                  CALL DGEMV('N',NBFA*NBFB,NBFC*NBFD,1.0d0,CC(Indx), &
+                                       &     NBFA*NBFB,D%MTrix%D(iPtrD),1,0.0d0,   &
+                                       &     Work(1),1)
+                                  BoxX%D(IXYZ,JXYZ)=BoxX%D(IXYZ,JXYZ) &
+                                       & -DDOT(NBFA*NBFB,D%MTrix%D(iPtrD2),1,Work(1),1)
+                               ELSE
+                                  CALL DGEMM('N','N',NBFA*NBFB,D%NSMat,NBFC*NBFD,1.0d0,CC(Indx), &
+                                       &     NBFA*NBFB,D%MTrix%D(iPtrD),NBFC*NBFD,0.0d0, &
+                                       &     Work(1),NBFA*NBFB)
+                                  BoxX%D(IXYZ,JXYZ)=BoxX%D(IXYZ,JXYZ) &
+                                       & -DDOT(NBFA*NBFB*D%NSMat,D%MTrix%D(iPtrD2),1,Work(1),1)
+                               ENDIF
 #endif
                             !
                             ENDIF
@@ -502,10 +510,16 @@ CONTAINS
                            &     Work(1),1)
                       TmpGradA=-DDOT(NBFA*NBFB,V%MTrix(1,1),1,Work(1),1)
 #else
-                      CALL DGEMV('N',NBFA*NBFB,NBFC*NBFD,1.0d0,C(Indx), &
-                           &     NBFA*NBFB,D%MTrix%D(iPtrD),1,0.0d0,    &
-                           &     Work(1),1)
-                      TmpGradA=-DDOT(NBFA*NBFB,D%MTrix%D(iPtrD2),1,Work(1),1)
+                      IF(D%NSMat.EQ.1) THEN
+                         CALL DGEMV('N',NBFA*NBFB,NBFC*NBFD,1.0d0,C(Indx), &
+                              &     NBFA*NBFB,D%MTrix%D(iPtrD),1,0.0d0,    &
+                              &     Work(1),1)
+                      ELSE
+                         CALL DGEMM('N','N',NBFA*NBFB,D%NSMat,NBFC*NBFD,1.0d0,C(Indx), &
+                              &     NBFA*NBFB,D%MTrix%D(iPtrD),NBFC*NBFD,0.0d0, &
+                              &     Work(1),NBFA*NBFB)
+                      ENDIF
+                      TmpGradA=-DDOT(NBFA*NBFB*D%NSMat,D%MTrix%D(iPtrD2),1,Work(1),1)
 #endif
                       GradX%D(IXYZ,AtA)=GradX%D(IXYZ,AtA)+TmpGradA
                       !
@@ -518,10 +532,16 @@ CONTAINS
                            &     Work(1),1)
                       TmpGradC=-DDOT(NBFA*NBFB,V%MTrix(1,1),1,Work(1),1)
 #else
-                      CALL DGEMV('N',NBFA*NBFB,NBFC*NBFD,1.0d0,C(Indx), &
-                           &     NBFA*NBFB,D%MTrix%D(iPtrD),1,0.0d0,    &
-                           &     Work(1),1)
-                      TmpGradC=-DDOT(NBFA*NBFB,D%MTrix%D(iPtrD2),1,Work(1),1)
+                      IF(D%NSMat.EQ.1) THEN
+                         CALL DGEMV('N',NBFA*NBFB,NBFC*NBFD,1.0d0,C(Indx), &
+                              &     NBFA*NBFB,D%MTrix%D(iPtrD),1,0.0d0,    &
+                              &     Work(1),1)
+                      ELSE
+                         CALL DGEMM('N','N',NBFA*NBFB,D%NSMat,NBFC*NBFD,1.0d0,C(Indx), &
+                              &     NBFA*NBFB,D%MTrix%D(iPtrD),NBFC*NBFD,0.0d0, &
+                              &     Work(1),NBFA*NBFB)
+                      ENDIF
+                      TmpGradC=-DDOT(NBFA*NBFB*D%NSMat,D%MTrix%D(iPtrD2),1,Work(1),1)
 #endif
                       GradX%D(IXYZ,AtC)=GradX%D(IXYZ,AtC)+TmpGradC
                       !
@@ -534,10 +554,16 @@ CONTAINS
                            &     Work(1),1)
                       TmpGradB=-DDOT(NBFA*NBFB,V%MTrix(1,1),1,Work(1),1)
 #else
-                      CALL DGEMV('N',NBFA*NBFB,NBFC*NBFD,1.0d0,C(Indx), &
-                           &     NBFA*NBFB,D%MTrix%D(iPtrD),1,0.0d0,    &
-                           &     Work(1),1)
-                      TmpGradB=-DDOT(NBFA*NBFB,D%MTrix%D(iPtrD2),1,Work(1),1)
+                      IF(D%NSMat.EQ.1) THEN
+                         CALL DGEMV('N',NBFA*NBFB,NBFC*NBFD,1.0d0,C(Indx), &
+                              &     NBFA*NBFB,D%MTrix%D(iPtrD),1,0.0d0,    &
+                              &     Work(1),1)
+                      ELSE
+                         CALL DGEMM('N','N',NBFA*NBFB,D%NSMat,NBFC*NBFD,1.0d0,C(Indx), &
+                              &     NBFA*NBFB,D%MTrix%D(iPtrD),NBFC*NBFD,0.0d0, &
+                              &     Work(1),NBFA*NBFB)
+                      ENDIF
+                      TmpGradB=-DDOT(NBFA*NBFB*D%NSMat,D%MTrix%D(iPtrD2),1,Work(1),1)
 #endif
                       GradX%D(IXYZ,AtB)=GradX%D(IXYZ,AtB)+TmpGradB
                       !

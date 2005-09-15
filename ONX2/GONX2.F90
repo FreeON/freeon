@@ -54,6 +54,7 @@ PROGRAM GONX2
   INTEGER                    :: CMin,CMax,DMin,DMax,IErr
   INTEGER                    :: ANbr,BNbr,CNbr,DNbr
 #endif
+  INTEGER                    :: NSMat
   REAL(DOUBLE)               :: Time1,Time2
   REAL(DOUBLE)               :: TmTM,TmML,TmGx,TmAL,TmDL
   CHARACTER(LEN=*),PARAMETER :: Prog='GONX2'
@@ -119,6 +120,7 @@ PROGRAM GONX2
      CALL PDrv_Initialize(DFMcd,TrixFile('D',Args,0),'GONXPart',Args,WhenPartS_O='GEO')
 #else
      CALL Get(D,TrixFile('D',Args,0))
+     NSMat=D%NSMat
 #endif
   CASE DEFAULT
      CALL Halt('GONX2: Do not recognize this action <'//TRIM(SCFActn)//'>.')
@@ -280,6 +282,7 @@ PROGRAM GONX2
   CALL Print_LatForce(GMc,GradTmp%D,'X Lattice Force',Unit_O=6)
   CALL Delete(GradTmp)
 #else
+  IF(NSMat.EQ.2) CALL DSCAL(3*NAtoms,0.5D0,GradX%D(1,1),1)
   ! Print out.
   CALL New(GTmp,3*NAtoms)
   DO IXYZ=1,GMc%NAtms
@@ -296,6 +299,7 @@ PROGRAM GONX2
 !
 ! STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS 
   IF(DoStrs) THEN
+     IF(NSMat.EQ.2) CALL DSCAL(9,0.5D0,BoxX%D(1,1),1)
 !    Zero the Lower Triange
      DO IXYZ=1,3
         DO JXYZ=1,IXYZ-1
