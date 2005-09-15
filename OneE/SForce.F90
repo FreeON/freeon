@@ -30,7 +30,7 @@ PROGRAM SForce
   TYPE(BSET)                 :: BS
   TYPE(CRDS)                 :: GM
   TYPE(ARGMT)                :: Args
-  INTEGER                    :: Q,R,AtA,AtB,NN,JP,MB,MA,NB,MN1,A1,A2
+  INTEGER                    :: Q,R,AtA,AtB,NN,JP,MB,MA,NB,MN1,MN,A1,A2
   TYPE(HGRho)                :: Rho
   TYPE(DBL_VECT)             :: SFrc
   REAL(DOUBLE)               :: SFrcChk
@@ -100,6 +100,19 @@ PROGRAM SForce
            Q=P%BlkPt%I(JP)
            NB=BSiz%I(AtB)
            MN1=MA*NB-1           
+           MN=MN1+1
+           !Quick and dirty!
+           SELECT CASE(P%NSMat)
+           CASE(1)
+              !We don't need to do anything!
+           CASE(2)
+              !We add up the two density martices!
+              CALL DAXPY(MN,1D0,P%MTrix%D(Q+MN),1,P%MTrix%D(Q),1)
+           CASE(4)
+              !We add up the diagonal density martices!
+              CALL DAXPY(MN,1D0,P%MTrix%D(Q+3*MN),1,P%MTrix%D(Q),1)
+           CASE DEFAULT;CALL Halt(' JForce: P%NSMat doesn''t have an expected value! ')
+           END SELECT
            A=Pair%A
            B=Pair%B
            DO NC=1,CS_OUT%NCells
@@ -154,6 +167,9 @@ PROGRAM SForce
 #ifdef PARALLEL  
   IF(MyID == ROOT) THEN
 #endif
+! Rescale the Forces if needed.
+     IF(P%NSMat.EQ.2) CALL DSCAL(3*NAtoms,0.5D0,    SFrc%D(1  ),1)
+     IF(P%NSMat.EQ.2) CALL DSCAL(       9,0.5D0,LatFrc_S%D(1,1),1)
 !    Zero the Lower Triange
      DO I=1,3
         DO J=1,I-1
