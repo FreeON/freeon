@@ -1303,17 +1303,17 @@ CONTAINS
 !!$write(*,*)'In Get_bcsr3,NSMat,NAtms,NBlks,NBlks,NNon0',NSMat,NAtms,NBlks,NBlks,NNon0,AllocQ(A%Alloc)
 #endif
                    IF(AllocQ(A%Alloc))THEN
+                      IF(NSMat.GT.A%NSMat) THEN
+                         CALL Delete(A)
+                         CALL New(A,NSMat_O=NSMat)
+                      ENDIF
                       LimitsQ=                            &
                            (NAtms.GT.SIZE(A%RowPt%I)).OR. &
                            (NBlks.GT.SIZE(A%ColPt%I)).OR. &
                            (NBlks.GT.SIZE(A%BlkPt%I)).OR. &
-                           (NNon0.GT.SIZE(A%MTrix%D)).OR. &
-                           (NSMat.GT.A%NSMat)
-
-
+                           (NNon0.GT.SIZE(A%MTrix%D))
 !!$write(*,*)'In Get_bcsr4 LimitsQ=',LimitsQ
 !!$write(*,*)'In Get_bcsr5,NSMat,NAtms,NBlks,NBlks,NNon0',A%NSMat,SIZE(A%RowPt%I),SIZE(A%ColPt%I),SIZE(A%BlkPt%I),SIZE(A%MTrix%D)
-
                       IF(LimitsQ)THEN
                          write(*,*)'In Get_bcsr Reallocate the matrix A%NSMat.EQ.NSMat=',A%NSMat.EQ.NSMat
                          CALL Delete(A)
