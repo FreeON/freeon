@@ -277,6 +277,7 @@ $\varepsilon\approx 10^{-15}$ is
 required to yield a consistent wrapping when distributions lie at the cell boundary 
 and $[\bullet]$ is the nearest integer function defined as 
 $[x]:=n$ with $x\in \mathbb{R}$, $n\in \mathbb{Z}$ and $|x-n|<1/2$.
+Note the $\mathbf{PQ}=\mathbf{P-Q}$ if and only if $[\mathbf{f}_{PQ}-\varepsilon\mathrm{sgn}(\mathbf{f}_{PQ})]$ cancel.
 As an example, the MIC-integral over $s$-type functions is given by
 \begin{equation}
   \begin{split}
@@ -731,22 +732,21 @@ obtained with {\sc Crystal03} and a $8\times 8\times 8$ $k$-points integration g
 %    $n$ is the number of MgO units in the (super)cell.
     Lengths and energies are in \AA~and atomic unit respectively.
   }\label{Tab:MgO}
-  \begin{tabular}{lrcc}
+  \begin{tabular}{lrccc}
   \toprule
-  & $n$ & $a_0$ & $E/n$ \\
+  & $n$ & $a_0$ & $E/n$ & $d/a_0$ \\
   \hline
     {\sc MondoSCF}\footnote[1]{$\Gamma$-point.}
-    &  4  & 4.365 & $-$274.616533 \\% 4.365-274.616533623575FullOpt
-    & 32  & 4.192 & $-$274.664119 \\% 8.385-274.664118754687FullOpt
-    & 108 & 4.192 & $-$274.664299 \\%12.575-274.664299043364FullOpt
+    &  4  & 4.365 & $-$274.616533 & 0.488 \\% 4.365-274.616533623575FullOpt 2.131
+    & 32  & 4.192 & $-$274.664119 & 0.500 \\% 8.385-274.664118754687FullOpt 2.096
+    & 108 & 4.192 & $-$274.664299 & 0.500 \\%12.575-274.664299043364FullOpt 2.096
     %&  4\footnote[2]{Full optimization.}        &4.365&$-$274.616533\\%4.365-274.616533623575FullOpt
     %&  4\footnote[3]{Lattice optimization only.}&4.370&$-$274.615477\\%4.370-274.615477868575LattOpt
     %& 32$^b$                                    &4.192&$-$274.664119\\%8.385-274.664118754687FullOpt
     %& 32$^c$                                    &4.192&$-$274.664119\\%8.384-274.664118815087LattOpt
-    %& 108                                        & &\\
   \hline
     {\sc Crystal03}\footnote[2]{$8\times 8\times 8$ $k$-points.} 
-    &  1 & 4.192 & $-$274.664239 \\%-274.664239121540
+    &  1 & 4.192 & $-$274.664239 & $1/2$ \\%-274.664239121540
   \botrule
   \end{tabular}
 \end{table}
