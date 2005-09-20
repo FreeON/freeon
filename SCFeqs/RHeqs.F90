@@ -89,8 +89,13 @@ write(*,*) 'RHeqs: NBeta',NBeta
      CALL DSYEV('V','U',NBasF,F%D(1,NBasF+1),NBasF,EigenV%D(NBasF+1),Work%D(1),LWORK,Info)
      IF(Info/=SUCCEED)CALL Halt('DSYEV flaked in RHEqs. INFO='//TRIM(IntToChar(Info)))
      !
-     HOMO=0d0!EigenV%D(NEl/2)
-     LUMO=0d0!EigenV%D(NEl/2+1)
+     IF(EigenV%D(NAlph)-EigenV%D(NAlph+1).LT.EigenV%D(NBasF+NBeta)-EigenV%D(NBasF+NBeta+1)) THEN
+        HOMO=EigenV%D(NAlph  )
+        LUMO=EigenV%D(NAlph+1)
+     ELSE
+        HOMO=EigenV%D(NBasF+NBeta  )
+        LUMO=EigenV%D(NBasF+NBeta+1)
+     ENDIF
   CASE(4)
      ! We just have one matrix.
      CALL DSYEV('V','U',2*NBasF,F%D(1,1),NRow,EigenV%D(1),Work%D(1),LWORK,Info)
@@ -169,6 +174,7 @@ write(*,*) 'RHeqs: NBeta',NBeta
      CASE(4)
         ! We have one density matrix to build.
         CALL BuildP0(Nel,2*NBasF,F%D(1,1),P%D(1,1))! Generalized 
+        ! Need to recompute NAlph and NBeta at this level.
      CASE DEFAULT;CALL Halt(' RHeqs: NSMat doesn''t have an expected value! ')
      END SELECT
      !
@@ -178,12 +184,6 @@ write(*,*) 'RHeqs: NBeta',NBeta
   CALL Delete(EigenV)
 !
   CALL SetEq(sX,P,nsmat_o=nsmat)          !  sX=P
-
-!!$write(*,*) 'NSMat',NSMat
-!!$call print_dbl_rnk2(p,'p1',unit_o=6)
-!!$call delete(p)
-!!$call print_dbl_rnk2(P,'RHEqs: P',Unit_O=6)
-
   CALL New(sP,nsmat_o=nsmat)              
   CALL Filter(sP,sX)        !  sP=Filter[sX]
   CALL Put(sP,TrixFile('OrthoD',Args,1))
@@ -221,7 +221,7 @@ write(*,*) 'RHeqs: NBeta',NBeta
 CONTAINS
   SUBROUTINE BuildP0(Nel,N,C,P)
     INTEGER      :: Nel,N
-    REAL(DOUBLE) :: C(N,N),P(N,N)
+    REAL(DOUBLE) :: C(N,*),P(N,N)
     INTEGER      :: I,J,K
     REAL(DOUBLE) :: CJK
     DO K=1,Nel

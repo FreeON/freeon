@@ -48,8 +48,12 @@ PROGRAM P2Use
   !
   NSMat=1
   IF(NAlph.NE.NBeta)NSMat=2
+!write(*,*) 'Enter NSMat'
+!read(5,*)NSMat
+  !
+  ! Select spin factor for R/U/G theory.
   SFac=2D0
-  IF(NSMat.NE.1)SFac=1D0
+  IF(NSMat.GT.1)SFac=1D0
   !
   ! Get basis set and geometry
   CALL Get(BS,Tag_O=CurBase)
@@ -326,12 +330,16 @@ PROGRAM P2Use
 #else
      TError0 = ABS(Trace(P0,S1)-DBLE(NEl)/SFac)
      IF(PrintFlags%Key==DEBUG_MAXIMUM) THEN
-        WRITE(*,*) "Trace Error: Tr[P0,S0] = ",ABS(Trace(P0,S0)-DBLE(NEl)/SFac)
-        WRITE(*,*) "Trace Error: Tr[P0,S1] = ",ABS(Trace(P0,S1)-DBLE(NEl)/SFac)
+        TrP=ABS(Trace(P0,S0)-DBLE(NEl)/SFac)
+        WRITE(*,*) "Trace Error: Tr[P0,S0] = ",TrP
+        TrP=ABS(Trace(P0,S1)-DBLE(NEl)/SFac)
+        WRITE(*,*) "Trace Error: Tr[P0,S1] = ",TrP
         CALL OpenASCII(OutFile,Out)
         CALL PrintProtectL(Out)
-        WRITE(Out,*) "Trace Error: Tr[P0,S0] = ",ABS(Trace(P0,S0)-DBLE(NEl)/SFac)
-        WRITE(Out,*) "Trace Error: Tr[P0,S1] = ",ABS(Trace(P0,S1)-DBLE(NEl)/SFac)
+        TrP=ABS(Trace(P0,S0)-DBLE(NEl)/SFac)
+        WRITE(Out,*) "Trace Error: Tr[P0,S0] = ",TrP
+        TrP=ABS(Trace(P0,S1)-DBLE(NEl)/SFac)
+        WRITE(Out,*) "Trace Error: Tr[P0,S1] = ",TrP
         CALL PrintProtectR(Out)
         CLOSE(UNIT=Out,STATUS='KEEP')
      ENDIF

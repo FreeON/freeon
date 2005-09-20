@@ -21,7 +21,7 @@ PROGRAM SCFStatus
    TYPE(BCSR)                      :: P,Tmp1,Tmp2,Tmp3
 #endif
    REAL(DOUBLE)                    :: E_el_tot,E_nuc_tot,E_es_tot,E_ECPs,KinE,ExchE,Exc, &
-                                      Gap,Etot,DMax,Virial,DIISErr,S2
+                                      Gap,Etot,DMax,Virial,DIISErr,S2,SFac
 #ifdef MMech
    REAL(DOUBLE)                    :: EBOND,EANGLE,ETorsion,ELJ,EOutOfPlane,MM_COUL,MM_ENERGY
    REAL(DOUBLE)                    :: E_C_EXCL,E_LJ_EXCL
@@ -47,6 +47,10 @@ PROGRAM SCFStatus
       CALL Get(P,TrixFile('D',Args,0))
    ENDIF
 !---------------------------------------------
+! Rescaling factor for R/U/G theory.
+   SFac=1D0
+   IF(P%NSMat.GT.1)SFac=0.5D0 !<<< SPIN
+!---------------------------------------------
 !  COMPUTE SOME EXPECTATION VALUES
 !
 !  S**2
@@ -66,7 +70,7 @@ PROGRAM SCFStatus
 #else
    KinE=Two*Trace(P,Tmp1)    
 #endif 
-   IF(P%NSMat.GT.1)KinE=KinE*0.5D0 !<<< SPIN
+   KinE=KinE*SFac !<<< SPIN
 !
    CALL Get(HasECPs,'hasecps',Tag_O=CurBase)
    IF(HasECPs)THEN
@@ -89,7 +93,7 @@ PROGRAM SCFStatus
 #else
    E_el_tot=Trace(P,Tmp1)    
 #endif
-   IF(P%NSMat.GT.1)E_el_tot=E_el_tot*0.5D0 !<<< SPIN
+   E_el_tot=E_el_tot*SFac !<<< SPIN
    ! Total electrostatic energy icluding ECPs
    E_el_tot=E_el_tot+E_ECPs
    CALL Put(E_el_tot,'E_ElectronicTotal')
@@ -103,14 +107,14 @@ PROGRAM SCFStatus
          CALL Multiply(P,Tmp1,Tmp2)
          ExchE=ExactXScale(ModelChem)*Trace(Tmp2)     
 #else
-         ExchE=ExactXScale(ModelChem)*Trace(P,Tmp1)    
+         ExchE=ExactXScale(ModelChem)*Trace(P,Tmp1)
 #endif
       ENDIF     
       !  Get the exchange correlation energy
       IF(HasDFT(ModelChem)) &
          CALL Get(Exc,'Exc',StatsToChar(Current))
    ENDIF
-   IF(P%NSMat.GT.1)ExchE=ExchE*0.5D0 !<<< SPIN
+   ExchE=ExchE*SFac !<<< SPIN
 !  Get E_nuc_tot =<Vnn+Vne> 
    CALL Get(E_Nuc_Tot,'E_NuclearTotal',StatsToChar(Current))
    ! Total electrostaic energy
@@ -293,7 +297,15 @@ CONTAINS
           GetS2=GetS2+D1%D(i,i)
        enddo
        GetS2=0.25D0*(NAlph-NBeta)**2+0.5D0*(NAlph+NBeta)-GetS2
-    CASE(4);CALL Halt('GetS2: NSMat.EQ.4 not yet implemented!')
+    CASE(4)
+       D1%D(1:NBasF,1:NBasF)=matmul(D1%D(1:NBasF,1:NBasF),D2%D)
+
+       D1%D(1:NBasF,1:NBasF)=matmul(D2%D,D1%D(1:NBasF,1:NBasF))
+       D1%D(1:NBasF,1:NBasF)=matmul(D1%D(1:NBasF,1:NBasF),D1%D(NBasF+1:2*NBasF,NBasF+1:2*NBasF))
+       do i=1,NBasF
+          GetS2=GetS2+D1%D(i,i)
+       enddo
+       GetS2=0.25D0*(NAlph-NBeta)**2+0.5D0*(NAlph+NBeta)-GetS2
     CASE DEFAULT;CALL Halt('GetS2: Something is wrong there!')
     END SELECT
     call delete(D1)
