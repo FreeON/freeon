@@ -82,6 +82,8 @@ PROGRAM JForce
   CALL DeleteRhoAux
 ! Delete the Density
   CALL Delete(Rho)
+! Rescale the density matrix for U/G theory.
+  IF(P%NSMat.GT.1) CALL DSCAL(P%NNon0,0.5D0,P%MTrix%D(1),1)
 !--------------------------------------------------------------------------------
 ! Compute the Coulomb contribution to the force in O(N Lg N)
 !--------------------------------------------------------------------------------
@@ -130,7 +132,6 @@ PROGRAM JForce
            CASE(2)
               !We add up the two density martices!
               CALL DAXPY(MN,1D0,P%MTrix%D(Q+MN),1,P%MTrix%D(Q),1)
-              CALL DSCAL(MN,0.5D0,P%MTrix%D(Q),1)
            CASE(4)
               !We add up the diagonal density martices!
               CALL DAXPY(MN,1D0,P%MTrix%D(Q+3*MN),1,P%MTrix%D(Q),1)
