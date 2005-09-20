@@ -140,8 +140,8 @@ PROGRAM TForce
   IF(MyID == ROOT) THEN
 #endif
 ! Rescale the Forces if needed.
-     IF(P%NSMat.EQ.2) CALL DSCAL(3*NAtoms,0.5D0,    TFrc%D(1  ),1)
-     IF(P%NSMat.EQ.2) CALL DSCAL(       9,0.5D0,LatFrc_T%D(1,1),1)
+     IF(P%NSMat.GT.1) CALL DSCAL(3*NAtoms,0.5D0,    TFrc%D(1  ),1)
+     IF(P%NSMat.GT.1) CALL DSCAL(       9,0.5D0,LatFrc_T%D(1,1),1)
 !    Zero the Lower Triange
      DO I=1,3
         DO J=1,I-1

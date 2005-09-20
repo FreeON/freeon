@@ -158,6 +158,8 @@ PROGRAM MakeRho
   ENDDO
 ! Allocate the Density
   CALL New_HGRho_new(RhoA,(/NDist,NCoef/))
+! Scale the density matrix for U/G theory.
+  IF(Dmat%NSMat.GT.1) CALL DSCAL(Dmat%NNon0,0.5D0,Dmat%MTrix%D(1),1)
 ! Initailize  Counters
   NDist        = 0
   NCoef        = 0
@@ -175,19 +177,19 @@ PROGRAM MakeRho
         AtB = Dmat%ColPt%I(P)
         R   = Dmat%BlkPt%I(P)
         NN=BSiz%I(AtA)*BSiz%I(AtB)
+        ! Quick and dirty.
         SELECT CASE(DMat%NSMat)
         CASE(1)
            !We don't need to do anything!
         CASE(2)
            !We add up the two density martices!
            CALL DAXPY(NN,1D0,Dmat%MTrix%D(R+NN),1,Dmat%MTrix%D(R),1)
-           CALL DSCAL(NN,0.5D0,Dmat%MTrix%D(R),1)
         CASE(4)
            !We add up the diagonal density martices!
            CALL DAXPY(NN,1D0,Dmat%MTrix%D(R+3*NN),1,Dmat%MTrix%D(R),1)
         CASE DEFAULT;CALL Halt(' MakeRho: DMat%NSMat doesn''t have an expected value! ')
         END SELECT
-
+        !
         IF(SetAtomPair(GM,BS,AtA,AtB,Pair)) THEN                   
            B = Pair%B 
            DO NC = 1,CS_OUT%NCells
