@@ -1569,7 +1569,7 @@ MODULE LinAlg
                                C%RowPt%I,C%ColPt%I,C%BlkPt%I,C%MTrix%D, &
                                BSiz%I,Flag%I,Flop)
          ELSE
-            write(*,*) 'Add_BCSR: The add will be done in a dense way!',A%NSMat,B%NSMat,C%NSMat
+            write(*,'(A,3I3)') 'Add_BCSR: The add will be done in a dense way!',A%NSMat,B%NSMat,C%NSMat
             N1=NBasF
             N2=2*NBasF
             call seteq(AD,A)
@@ -1614,12 +1614,14 @@ MODULE LinAlg
                CD%D(1:N1   ,N1+1:N2)=AD%D(1:N1   ,N1+1:N2)
                CD%D(N1+1:N2,   1:N1)=AD%D(N1+1:N2,   1:N1)
                write(*,*) 'Warning: Add 4-1 isn''t implemented in BCSR form yet'
+               call seteq(dd,a)
             ELSEIF(A%NSMat.EQ.1.AND.B%NSMat.EQ.4)THEN
                CD%D(1:N1   ,   1:N1)=AD%D+BD%D(1:N1   ,   1:N1)
                CD%D(N1+1:N2,N1+1:N2)=AD%D+BD%D(N1+1:N2,N1+1:N2)
                CD%D(1:N1   ,N1+1:N2)=     BD%D(1:N1   ,N1+1:N2)
                CD%D(N1+1:N2,   1:N1)=     BD%D(N1+1:N2,   1:N1)
                write(*,*) 'Warning: Add 1-4 isn''t implemented in BCSR form yet'
+               call seteq(dd,a)
             ELSEIF(A%NSMat.EQ.4.AND.B%NSMat.EQ.4)THEN
                CD%D=AD%D+BD%D
                !Check ADD!
@@ -1996,7 +1998,13 @@ MODULE LinAlg
                            Op=Op+DBLE(2*MA*MB)
                         ELSEIF(A%NSMat.EQ.4.AND.B%NSMat.EQ.4) THEN
                            TraceMM_BCSR=TraceMM_BCSR  &
-                                +BlkTrace_2(2*MA,2*MB,A%MTrix%D(P),B%MTrix%D(Q))
+                                +BlkTrace_2(MA,MB,A%MTrix%D(P),B%MTrix%D(Q))
+                           TraceMM_BCSR=TraceMM_BCSR  &
+                                +BlkTrace_2(MA,MB,A%MTrix%D(P+MA*MB),B%MTrix%D(Q+2*MA*MB))
+                           TraceMM_BCSR=TraceMM_BCSR  &
+                                +BlkTrace_2(MA,MB,A%MTrix%D(P+3*MA*MB),B%MTrix%D(Q+MA*MB))
+                           TraceMM_BCSR=TraceMM_BCSR  &
+                                +BlkTrace_2(MA,MB,A%MTrix%D(P+3*MA*MB),B%MTrix%D(Q+3*MA*MB))
                            Op=Op+DBLE(4*MA*MB)
                         ELSE
                            CALL Halt('TraceMM_BCSR 2: Something wrong there!')
