@@ -159,7 +159,7 @@ PROGRAM MakeRho
 ! Allocate the Density
   CALL New_HGRho_new(RhoA,(/NDist,NCoef/))
 ! Scale the density matrix for U/G theory.
-  IF(Dmat%NSMat.GT.1) CALL DSCAL(Dmat%NNon0,0.5D0,Dmat%MTrix%D(1),1)
+  IF(Dmat%NSMat.GT.1.AND.Dmat%NNon0.GT.0) CALL DSCAL(Dmat%NNon0,0.5D0,Dmat%MTrix%D(1),1)
 ! Initailize  Counters
   NDist        = 0
   NCoef        = 0
