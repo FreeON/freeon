@@ -115,7 +115,8 @@ PROGRAM HaiKu
 #ifdef PARALLEL
   CALL New_FASTMAT(Kxc,0,(/0,0/))
 #else
-  CALL NewBCSR(Kxc)
+  CALL New(Kxc)
+!old  CALL NewBCSR(Kxc)
 #endif
   CALL NewBraBlok(BS)
 #ifdef PARALLEL 
