@@ -734,7 +734,7 @@ obtained with {\sc Crystal03} and a $8\times 8\times 8$ $k$-points integration g
   }\label{Tab:MgO}
   \begin{tabular}{lrccc}
   \toprule
-  & $n$ & $a_0$ & $E/n$ & $d/a_0$ \\
+  & $n$ & $a_0$ & $E/n$ & $f_O$ \\
   \hline
     {\sc MondoSCF}\footnote[1]{$\Gamma$-point.}
     &  4  & 4.365 & $-$274.616533 & 0.488 \\% 4.365-274.616533623575FullOpt 2.131
@@ -751,7 +751,7 @@ obtained with {\sc Crystal03} and a $8\times 8\times 8$ $k$-points integration g
   \end{tabular}
 \end{table}
 %
-%Crystal03 HF/8-61G/8-51G 8x8x8 
+%Crystal03 HF/8-61G/8-51G 8x8x8 Default
 %4.201 -274.66420524315
 %4.200 -274.66420889046
 %4.199 -274.66421216488
@@ -763,11 +763,11 @@ obtained with {\sc Crystal03} and a $8\times 8\times 8$ $k$-points integration g
 %4.190 -274.66423867131
 %4.185 -274.66423067762
 %
-%Crystal03 PBExc/8-61G/8-51G 8x8x8 
+%Crystal03 PBExc/8-61G/8-51G 8x8x8 What was that?
 %4.190 -275.28462703246
 %4.200 -275.28469244414
 %4.205 -275.28471839588
-%4.210 -275.28473181717
+%4.210 -275.28473181717 
 %4.211 -275.28473298902
 %4.212 -275.28473352160 <<<
 %4.213 -275.28473330887
@@ -777,8 +777,53 @@ obtained with {\sc Crystal03} and a $8\times 8\times 8$ $k$-points integration g
 %4.220 -275.28472509192
 %4.230 -275.28467343664 
 %
+%MgO PBExc Crystal03 User2.bas 8x8x8 default
+%4.200 -275.28468980590
+%4.205 -275.28471572672
+%4.208 -275.28472235701
+%4.210 -275.28472911839
+%4.211 -275.28473028612
+%4.212 -275.28473081270 <<<
+%4.213 -275.28473059552
+%4.215 -275.28473044697
+%4.250 -275.28445240627
 %
-
+%MgO B3LYP Crystal03 User2.bas 8x8x8 default
+%4.190 -275.43120191268
+%4.200 -275.43122829482
+%4.202 -275.43123248175
+%4.203 -275.43123398833
+%4.204 -275.43123514068 <<<
+%4.205 -275.43123509457
+%4.210 -275.43123002554
+%4.215 -275.43121357505
+%4.220 -275.43118801547
+%4.250 -275.43082055853
+%
+%MONDO PBExc User2.bas Tight
+%  a0         E            d       f
+%4.3307 -1100.9726623928 2.1643  0.49976
+%
+%
+%
+%
+%MONDO B3LYP User2.bas Tight
+%
+%
+%
+%
+%
+%ICE ICE ICE ICE ICE ICE ICE ICE ICE ICE ICE ICE ICE ICE ICE 
+% Ferroelectric ordered ice in Cmc21 setting (from Crystal)
+% HF/6-31G**/Tight
+%               E            A        C
+% 2x2x1 -1216.7333268588 9.253791 7.644517   %Pink
+% 3x3x2 
+% 4x4x2 
+%
+%
+%
+%
 \subsection{???Convergence of the MIC-atomic gradients???}
 In Table~\ref{Tab:GradMgO} we present the progression of the average of the norm of the
 atomic gradients for the (MgO)$_n$ systems with a lattice constant of $a_0=4.20$\AA. 
