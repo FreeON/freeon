@@ -182,7 +182,7 @@ PROGRAM SCFStatus
          SCFMessage=TRIM(SCFMessage)                                        &
                //'       Gap     = '//TRIM(DblToShrtChar(-Gap))//RTRN         
 !     Add in Spin
-      IF(P%NSMat/=1)                                                        & !<<< SPIN
+      IF(P%NSMat/=1.AND.Args%I%I(1)/=0)                                     & !<<< SPIN 
          SCFMessage=TRIM(SCFMessage)                                        &
                //'       S**2    = '//TRIM(FltToShrtChar(S2))//RTRN         
 !     Add in DIIS error 
@@ -286,7 +286,7 @@ CONTAINS
     INTEGER        :: I
     GetS2=0D0
     call seteq(D1,P)
-    call seteq(D2,Tmp1)
+    call seteq(D2,S)
     SELECT CASE(P%NSMat)
     CASE(1);RETURN
     CASE(2)
@@ -298,8 +298,8 @@ CONTAINS
        enddo
        GetS2=0.25D0*(NAlph-NBeta)**2+0.5D0*(NAlph+NBeta)-GetS2
     CASE(4)
+       !That is certainly wrong!
        D1%D(1:NBasF,1:NBasF)=matmul(D1%D(1:NBasF,1:NBasF),D2%D)
-
        D1%D(1:NBasF,1:NBasF)=matmul(D2%D,D1%D(1:NBasF,1:NBasF))
        D1%D(1:NBasF,1:NBasF)=matmul(D1%D(1:NBasF,1:NBasF),D1%D(NBasF+1:2*NBasF,NBasF+1:2*NBasF))
        do i=1,NBasF
