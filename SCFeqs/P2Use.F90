@@ -107,7 +107,7 @@ PROGRAM P2Use
 #ifdef PARALLEL
   ENDIF
 #endif
-        CALL Multiply(P,DBLE(NEl)/(SFac*DBLE(NBasF)))
+        CALL Multiply(P,DBLE(NEl)/(Two*DBLE(NBasF)))
         TrP=Trace(P)
         IF(ABS(TrP-DBLE(NEl/SFac))>1.D-10) CALL Warn(' In P2Use, TrP = '//TRIM(DblToChar(TrP)))
      ENDIF
