@@ -1,0 +1,270 @@
+%
+%   This file is part of the APS files in the REVTeX 4 distribution.
+%   Version 4.0 of REVTeX, August 2001
+%
+%   Copyright (c) 2001 The American Physical Society.
+%
+%   See the REVTeX 4 README file for restrictions and more information.
+%
+% TeX'ing this file requires that you have AMS-LaTeX 2.0 installed
+% as well as the rest of the prerequisites for REVTeX 4.0
+%
+% See the REVTeX 4 README file
+% It also requires running BibTeX. The commands are as follows:
+%
+%  1)  latex apssamp.tex
+%  2)  bibtex apssamp
+%  3)  latex apssamp.tex
+%  4)  latex apssamp.tex
+%
+%\documentclass[prb,aps,nobibnotes,twocolumn,doublespace,twocolumngrid,superbib]{revtex4}
+%%\documentclass[twocolumn,showpacs,preprintnumbers,amsmath,amssymb]{revtex4}
+%\documentclass[preprint,showpacs,preprintnumbers,amsmath,amssymb]{revtex4}
+
+% Some other (several out of many) possibilities
+%\documentclass[preprint,aps]{revtex4}
+%\documentclass[preprint,aps,draft]{revtex4}
+%\documentclass[prb]{revtex4}% Physical Review B
+
+%%\usepackage{amsmath}
+%%\usepackage{amssymb}
+%%\usepackage{graphicx}% Include figure files
+%%\usepackage{dcolumn}% Align table columns on decimal point
+%%\usepackage{bm}% bold math
+
+%\documentclass[pre,aps,twocolumn,showpacs,twocolumngrid,superbib]{revtex4}
+%\documentclass[prl,aps,twocolumn,showkeys,twocolumngrid,superbib]{revtex4}
+%\documentclass[twocolumn,showkeys,showpacs,preprintnumbers,amsmath,amssymb]{revtex4}
+\documentclass[prl,twocolumn,showpacs,twocolumngrid,superbib]{revtex4}
+%\documentclass[showpacs,preprint,superbib]{revtex4}
+
+\usepackage{graphicx}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{bm}
+\usepackage{alltt}
+\usepackage{fancyhdr}
+\usepackage{dcolumn} 
+
+\pagestyle{fancy}
+
+
+\def\Tr{{\rm Tr}}
+%\nofiles
+
+\begin{document}
+
+%\preprint{APS/123-QED}
+
+\title{blablabla  energy gradients with respect to atomic positions and cell parameters
+  within the blablabla $\Gamma$-point approximation}
+
+\author{Val\'ery Weber}
+\email{valery.weber@unifr.ch}
+\affiliation{Department of Chemistry, University of Fribourg, 1700 Fribourg, Switzerland.}%
+\author{Christopher J. Tymczak}%
+\author{Matt Challacombe}%
+\affiliation{Los Alamos National Laboratory, Theoretical Division, Los Alamos 87545, New Mexico, USA.}%
+
+\date{\today}% It is always \today, today,
+             %  but any date may be explicitly specified
+
+\begin{abstract}
+
+\end{abstract}
+
+%\pacs{Valid PACS appear here}% PACS, the Physics and Astronomy
+                             % Classification Scheme.
+\keywords{Periodic boundary condition, exact Hartree-Fock exchange, atomic gradients, 
+lattice gradients.}
+                              %display desired
+\maketitle
+
+\section{Introduction}
+
+
+\section{Numerical Examples}\label{Sec:NumExamples}
+All developments were implemented in the MondoSCF~\cite{MondoSCF} suite of
+linear scaling quantum chemistry programs. The code was compiled 
+using the Portland Group F90 compiler {\tt pgf90} v5.1~\cite{pgf90} 
+with the~{\tt -O1} options and with the GNU C compiler {\tt gcc} 
+v3.2.2 using the~{\tt -O1} flag.
+All calculations were carried out on a 1024-node (2048 processors)
+dual P4 LinuxBIOS/BProc cluster connected with Myrinet 2000 running
+Red-Hat Linux release~9 (Shrike)~\cite{RedHat90}.
+
+The {\tt TIGHT} level of numerical accuracy has been used throughout this work.  
+Thresholds that define the {\tt TIGHT} accuracy level include a matrix 
+threshold $\tau=10^{-6}$, as well as other numerical thresholds 
+detailed in Ref.~\cite{CTymczak04a}, which deliver at least 8 digits of 
+relative accuracy in the total energy and 4 digits of absolute accuracy 
+{\bf ?? WHY ABSOLUTE ACCURACY ??} in the forces.  
+
+\begin{table}[t]
+  \centering
+  \caption{\protect
+    Progression of the Hartree-Fock $\Gamma$-point cell constants, 
+    bond lengths, bond angles, dihedral angles 
+    and total energy for (urea)$_n$ using the periodic RHF-MIC/6-21G* level of theory 
+    and the {\tt TIGHT} threshold. 
+%    $n$ is the number of urea units in the (super)cell.
+    Lengths, angles and energies are in \AA ngstr\"oms, degrees and atomic units respectively.
+  }\label{Tab:Urea}
+  \begin{tabular}{lcccc}
+    \toprule
+    &\multicolumn{3}{c}{\sc{MondoSCF}\footnote[1]{$\Gamma$-point.}}
+    &\multicolumn{1}{c}{\sc{Crystal03}\footnote[2]{$2\times 2\times 2$ $k$-points.}} \\
+    \hline
+    $n$             & 2 & 16 & 54 & 2 \\
+    $a_0$           & & & & 5.524 \\
+    $c_0$           & & & & 4.642 \\
+    $E/n$           & & & &$-$447.68322 \\
+    &\multicolumn{4}{c}{Bond lengths} \\
+    C$=$O           & & & & \\
+    C$-$N           & & & & \\
+    N$-$H$_1$       & & & & \\
+    N$-$H$_2$       & & & & \\
+    &\multicolumn{4}{c}{Bond angles} \\
+    OCN             & & & & \\
+    CNH$_1$         & & & & \\
+    CNH$_2$         & & & & \\
+    &\multicolumn{4}{c}{Dihedral angles} \\
+    OCNH$_1$        & & & & \\
+    OCNH$_2$        & & & & \\
+    NCNH$_1$        & & & & \\
+    \botrule
+  \end{tabular}
+\end{table}
+
+
+\begin{table}[t]
+  \centering
+  \caption{\protect
+    Progression of the Hartree-Fock $\Gamma$-point cell constant $a_0$
+    and total energies $E$ for (MgO)$_n$ using the periodic 
+    RHF-MIC/8-61G/8-51G level of theory and the {\tt TIGHT} threshold. 
+%    $n$ is the number of MgO units in the (super)cell.
+    Lengths and energies are in \AA~and atomic unit respectively.
+  }\label{Tab:MgO}
+  \begin{tabular}{lrccc}
+  \toprule
+  & $n$ & $a_0$ & $E/n$ & $f_O$ \\
+  \hline
+    {\sc MondoSCF}\footnote[1]{$\Gamma$-point.}
+    &  4  & 4.365 & $-$274.616533 & 0.488 \\% 4.365-274.616533623575FullOpt 2.131
+    & 32  & 4.192 & $-$274.664119 & 0.500 \\% 8.385-274.664118754687FullOpt 2.096
+    & 108 & 4.192 & $-$274.664299 & 0.500 \\%12.575-274.664299043364FullOpt 2.096
+    %&  4\footnote[2]{Full optimization.}        &4.365&$-$274.616533\\%4.365-274.616533623575FullOpt
+    %&  4\footnote[3]{Lattice optimization only.}&4.370&$-$274.615477\\%4.370-274.615477868575LattOpt
+    %& 32$^b$                                    &4.192&$-$274.664119\\%8.385-274.664118754687FullOpt
+    %& 32$^c$                                    &4.192&$-$274.664119\\%8.384-274.664118815087LattOpt
+  \hline
+    {\sc Crystal03}\footnote[2]{$8\times 8\times 8$ $k$-points.} 
+    &  1 & 4.192 & $-$274.664239 & $1/2$ \\%-274.664239121540
+  \botrule
+  \end{tabular}
+\end{table}
+%
+%Crystal03 HF/8-61G/8-51G 8x8x8 Default
+%4.201 -274.66420524315
+%4.200 -274.66420889046
+%4.199 -274.66421216488
+%4.195 -274.66423302172
+%4.194 -274.66423838462
+%4.193 -274.66423912154
+%4.192 -274.66423942700 <<<
+%4.191 -274.66423922829
+%4.190 -274.66423867131
+%4.185 -274.66423067762
+%
+%Crystal03 PBExc/8-61G/8-51G 8x8x8 What was that?
+%4.190 -275.28462703246
+%4.200 -275.28469244414
+%4.205 -275.28471839588
+%4.210 -275.28473181717 
+%4.211 -275.28473298902
+%4.212 -275.28473352160 <<<
+%4.213 -275.28473330887
+%4.214 -275.28473191983
+%4.215 -275.28473317201
+%4.218 -275.28472993937
+%4.220 -275.28472509192
+%4.230 -275.28467343664 
+%
+%MgO PBExc Crystal03 User2.bas 8x8x8 default
+%4.200 -275.28468980590
+%4.205 -275.28471572672
+%4.208 -275.28472235701
+%4.210 -275.28472911839
+%4.211 -275.28473028612
+%4.212 -275.28473081270 <<<
+%4.213 -275.28473059552
+%4.215 -275.28473044697
+%4.250 -275.28445240627
+%
+%MgO B3LYP Crystal03 User2.bas 8x8x8 default
+%4.190 -275.43120191268
+%4.200 -275.43122829482
+%4.202 -275.43123248175
+%4.203 -275.43123398833
+%4.204 -275.43123514068 <<<
+%4.205 -275.43123509457
+%4.210 -275.43123002554
+%4.215 -275.43121357505
+%4.220 -275.43118801547
+%4.250 -275.43082055853
+%
+%MONDO PBExc User2.bas Tight
+%  a0         E            d       f
+%4.3307 -1100.9726623928 2.1643  0.49976
+%
+%
+%
+%
+%MONDO B3LYP User2.bas Tight
+%
+%
+%
+%
+%
+%ICE ICE ICE ICE ICE ICE ICE ICE ICE ICE ICE ICE ICE ICE ICE 
+% Ferroelectric ordered ice in Cmc21 setting (from Crystal)
+% HF/6-31G**/Tight
+%               E            A        C
+% 2x2x1 -1216.7333268588 9.253791 7.644517   %Pink
+% 3x3x2 
+% 4x4x2 
+%
+%
+%
+%
+\section{Conclusions}\label{Sec:Conclusions}
+blablabla
+\\
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Acknowledgements
+\begin{acknowledgments}
+ V.W. would like to thank K. Doll for a preprint of his manuscript and informations
+ about the basis sets used in his work.
+ This work has been supported by the Swiss National Science Foundation, 
+ the Swiss Office for Education and Science through the European 
+ COST Action D14 and the US Department of Energy 
+ under contract ???????????? and the ASCI project.  
+ The Advanced Computing Laboratory of Los 
+ Alamos National Laboratory is acknowledged.
+ The authors would like to thank K. N\'emeth and C.J. Tymczak 
+ for helpful comments.
+\end{acknowledgments}  
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibliography{mondo_new}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\end{document}
+%
+% ****** End of file apssamp.tex ******
+%
