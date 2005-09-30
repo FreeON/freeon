@@ -14,6 +14,7 @@ MODULE RhoTools
 !  Density in a Hermite Gaussian basis
 !---------------------------------------------------------------------------------------
   TYPE HGRho_new
+     INTEGER          :: NSDen   !-- Number of Spin densities
      INTEGER          :: Alloc   !-- Allocation key
      INTEGER          :: NDist   !-- Number of distributions 
      INTEGER          :: NCoef   !-- Number of coefficients
@@ -32,7 +33,7 @@ MODULE RhoTools
 !---------------------------------------------------------------------------------------
   SUBROUTINE New_HGRho_new(A,N_O)
     TYPE(HGRho_new)                 :: A
-    INTEGER,OPTIONAL,DIMENSION(2)   :: N_O
+    INTEGER,OPTIONAL,DIMENSION(3)   :: N_O
 !
     IF(AllocQ(A%Alloc)) THEN
        CALL MondoHalt(0,'Attemp to Allocate HGRho_new already allocated')
@@ -41,9 +42,11 @@ MODULE RhoTools
        IF(PRESENT(N_O)) THEN
           A%NDist=N_O(1)
           A%NCoef=N_O(2)
+          A%NSDen=N_O(3)
        ELSE
           A%NDist=0
           A%NCoef=0
+          A%NSDen=0
        ENDIF
        CALL New(A%OffCo,A%NDist)
        CALL New(A%Ell  ,A%NDist)
@@ -51,7 +54,8 @@ MODULE RhoTools
        CALL New(A%Qx   ,A%NDist)
        CALL New(A%Qy   ,A%NDist)
        CALL New(A%Qz   ,A%NDist)
-       CALL New(A%Co   ,A%NCoef)
+       CALL New(A%Co   ,A%NCoef*A%NSDen)
+!old       CALL New(A%Co   ,A%NCoef)
     ENDIF
 !
   END SUBROUTINE New_HGRho_new
@@ -85,7 +89,7 @@ MODULE RhoTools
     IF(AllocQ(A%Alloc)) THEN
        CALL Delete_HGRho_new(A)
     ENDIF
-    CALL New_HGRho_new(A,(/B%NDist,B%NCoef/))
+    CALL New_HGRho_new(A,(/B%NDist,B%NCoef,B%NSDen/))
     DO I=1,B%NDist
        A%OffCo%I(I) = B%OffCo%I(I)
        A%Ell%I(I)   = B%Ell%I(I)
@@ -94,7 +98,8 @@ MODULE RhoTools
        A%Qy%D(I)    = B%Qy%D(I)
        A%Qz%D(I)    = B%Qz%D(I)
     ENDDO
-    DO I=1,B%NCoef
+
+    DO I=1,B%NCoef*B%NSDen
        A%Co%D(I)   = B%Co%D(I)
     ENDDO
 !    
@@ -102,15 +107,16 @@ MODULE RhoTools
 !---------------------------------------------------------------------------------------
 !  Integrate The Distibutions from NLow to NHig
 !---------------------------------------------------------------------------------------
-  FUNCTION Integrate_HGRho_new(Rho,NLow,NHig) RESULT(RhoSum)
+  FUNCTION Integrate_HGRho_new(Rho,iSDen,NLow,NHig) RESULT(RhoSum)
     TYPE(HGRho_new)                  :: Rho
-    INTEGER                          :: NLow,NHig,nd,OffCo
+    INTEGER                          :: iSDen,NLow,NHig,nd,OffCo,I0
     REAL(DOUBLE)                     :: Zeta,RhoSum
 !
+    I0=(iSDen-1)*Rho%NCoef !<<< SPIN
     RhoSum = Zero
     DO nd = NLow,NHig
        Zeta   = Rho%Zeta%D(nd) 
-       OffCo  = Rho%OffCo%I(nd)
+       OffCo  = Rho%OffCo%I(nd)+I0 !<<< SPIN
        RhoSum = RhoSum + Rho%Co%D(OffCo)*((Pi/Zeta)**ThreeHalves)
     ENDDO
 !
@@ -121,7 +127,7 @@ MODULE RhoTools
  SUBROUTINE AddDist(Rho,GM,Zeta,BNumDist,ENumDist)
     TYPE(CRDS)                    :: GM
     TYPE(HGRho_new)               :: Rho,RhoTmp
-    INTEGER                       :: BNumDist,ENumDist,NumDist,I,iq,ir,AtA
+    INTEGER                       :: BNumDist,ENumDist,NumDist,I,iq,ir,AtA,iSMat,I0,I1
     REAL(DOUBLE)                  :: DDelta,Zeta
 !
     CALL Copy_HGRho_new(RhoTmp,Rho)
@@ -129,7 +135,7 @@ MODULE RhoTools
 !
     DDelta = Half*(Zeta/Pi)**(ThreeHalves)
     NumDist = ENumDist-BNumDist+1
-    CALL New_HGRho_new(Rho,(/RhoTmp%NDist+NumDist,RhoTmp%NCoef+NumDist/))
+    CALL New_HGRho_new(Rho,(/RhoTmp%NDist+NumDist,RhoTmp%NCoef+NumDist,RhoTmp%NSDen/))
 !
     DO I=1,RhoTmp%NDist
        Rho%OffCo%I(I) = RhoTmp%OffCo%I(I)
@@ -139,8 +145,18 @@ MODULE RhoTools
        Rho%Qy%D(I)    = RhoTmp%Qy%D(I)
        Rho%Qz%D(I)    = RhoTmp%Qz%D(I)
     ENDDO
-    DO I=1,RhoTmp%NCoef
-       Rho%Co%D(I)    = RhoTmp%Co%D(I)
+
+    I0=1
+    I1=1
+    DO iSMat=1,RhoTmp%NSDen
+       DO I=1,RhoTmp%NCoef
+!old       DO I=1,RhoTmp%NCoef
+!old          Rho%Co%D(I)    = RhoTmp%Co%D(I) !<<< SPIN
+          Rho%Co%D(I1)    = RhoTmp%Co%D(I0) !<<< SPIN
+          I0=I0+1
+          I1=I1+1
+       ENDDO
+       I1=I1+NumDist
     ENDDO
 !
     DO I = 1,NumDist
@@ -154,9 +170,9 @@ MODULE RhoTools
        Rho%Qy%D(Iq)    = GM%Carts%D(2,AtA)
        Rho%Qz%D(Iq)    = GM%Carts%D(3,AtA)
        IF(GM%AtNum%D(AtA) < 105.D0) THEN
-          Rho%Co%D(Ir)    =-GM%AtNum%D(AtA)*DDelta
+          Rho%Co%D(Ir)    =-GM%AtNum%D(AtA)*DDelta !<<< SPIN
        ELSE
-          Rho%Co%D(Ir)    = Zero
+          Rho%Co%D(Ir)    = Zero !<<< SPIN
        ENDIF
     ENDDO
     CALL Delete_HGRho_new(RhoTmp)
@@ -167,7 +183,7 @@ MODULE RhoTools
 !---------------------------------------------------------------------------------------
   SUBROUTINE Prune_Rho_new(TOL,Rho)
     TYPE(HGRho_new)     :: Rho,RhoTmp
-    INTEGER             :: I,NDist,NCoef,Ell,LenKet,OffCo1,OffCo2
+    INTEGER             :: I,NDist,NCoef,Ell,LenKet,OffCo1,OffCo2,iSMat,I1,I2
     REAL(DOUBLE)        :: Zeta,Mag,TOL
 !
     CALL Copy_HGRho_new(RhoTmp,Rho)
@@ -182,7 +198,7 @@ MODULE RhoTools
        Zeta   = RhoTmp%Zeta%D(I)
        LenKet = LHGTF(Ell)
        OffCo1 = RhoTmp%OffCo%I(I)
-       Mag    = MagDist(Ell,Zeta,RhoTmp%Co%D(OffCo1:OffCo1+LenKet-1))
+       Mag    = MagDist(Ell,Zeta,RhoTmp%Co%D(OffCo1:OffCo1+LenKet-1)) !<<< SPIN
        IF(Mag > TOL) THEN
           NDist = NDist+1
           NCoef = NCoef+LenKet
@@ -191,7 +207,7 @@ MODULE RhoTools
 !
 !   Create New Rho
 !
-    CALL New_HGRho_new(Rho,(/NDist,NCoef/))
+    CALL New_HGRho_new(Rho,(/NDist,NCoef,RhoTmp%NSDen/))
 !
     NDist = 0
     NCoef = 0
@@ -200,7 +216,7 @@ MODULE RhoTools
        Zeta   = RhoTmp%Zeta%D(I)
        LenKet = LHGTF(Ell)
        OffCo1 = RhoTmp%OffCo%I(I)
-       Mag    = MagDist(Ell,Zeta,RhoTmp%Co%D(OffCo1:OffCo1+LenKet-1))
+       Mag    = MagDist(Ell,Zeta,RhoTmp%Co%D(OffCo1:OffCo1+LenKet-1))!<<< SPIN
        IF(Mag > TOL) THEN
           NDist = NDist+1
           NCoef = NCoef+LenKet
@@ -211,8 +227,13 @@ MODULE RhoTools
           Rho%Qy%D(NDist)    = RhoTmp%Qy%D(I)
           Rho%Qz%D(NDist)    = RhoTmp%Qz%D(I)
           Rho%OffCo%I(NDist) = OffCo2
-          Rho%Co%D(OffCo2:OffCo2+LenKet-1) = RhoTmp%Co%D(OffCo1:OffCo1+LenKet-1)
-       ENDIF         
+!old          Rho%Co%D(OffCo2:OffCo2+LenKet-1) = RhoTmp%Co%D(OffCo1:OffCo1+LenKet-1)!<<< SPIN
+          DO iSMat=1,RhoTmp%NSDen
+             I1=OffCo1+(iSMat-1)*RhoTmp%NCoef
+             I2=OffCo2+(iSMat-1)*Rho%NCoef
+             CALL DCOPY(LenKet,RhoTmp%Co%D(I1),1,Rho%Co%D(I2),1)
+          ENDDO
+       ENDIF
     ENDDO
     CALL Delete_HGRho_new(RhoTmp)
 !
@@ -243,7 +264,7 @@ MODULE RhoTools
 !
 !   Create New Rho
 !
-    CALL New_HGRho_new(Rho,(/NDist,NCoef/))
+    CALL New_HGRho_new(Rho,(/NDist,NCoef,RhoTmp%NSDen/))
 !
     NDist = 0
     NCoef = 0
@@ -262,7 +283,7 @@ MODULE RhoTools
           Rho%Qy%D(NDist)    = RhoTmp%Qy%D(I)
           Rho%Qz%D(NDist)    = RhoTmp%Qz%D(I)
           Rho%OffCo%I(NDist) = OffCo2
-          Rho%Co%D(OffCo2:OffCo2+LenKet-1) = RhoTmp%Co%D(OffCo1:OffCo1+LenKet-1)
+          Rho%Co%D(OffCo2:OffCo2+LenKet-1) = RhoTmp%Co%D(OffCo1:OffCo1+LenKet-1)!<<< SPIN
        ENDIF         
     ENDDO
     CALL Delete_HGRho_new(RhoTmp)
@@ -312,8 +333,8 @@ MODULE RhoTools
        RX   = Rho%Qx%D(I)-Center(1)
        RY   = Rho%Qy%D(I)-Center(2)
        RZ   = Rho%Qz%D(I)-Center(3)
-       MP%DPole%D=MP%DPole%D   +   CalculateDiPole(Ell,Zeta,RX,RY,RZ,Rho%Co%D(OffCo:OffCo+LenKet-1))
-       MP%QPole%D=MP%QPole%D + CalculateQuadruPole(Ell,Zeta,RX,RY,RZ,Rho%Co%D(OffCo:OffCo+LenKet-1)) 
+       MP%DPole%D=MP%DPole%D   +   CalculateDiPole(Ell,Zeta,RX,RY,RZ,Rho%Co%D(OffCo:OffCo+LenKet-1))!<<< SPIN
+       MP%QPole%D=MP%QPole%D + CalculateQuadruPole(Ell,Zeta,RX,RY,RZ,Rho%Co%D(OffCo:OffCo+LenKet-1)) !<<< SPIN
     ENDDO
 !
   END SUBROUTINE CalRhoPoles_new
@@ -368,7 +389,8 @@ MODULE RhoTools
     TYPE(HGRho)           :: Rho_old
     TYPE(HGRho_new)       :: Rho_new
 !
-    INTEGER               :: NExpt,Ell,I,J,K,IE,OffCo,LenKet,iq,ir,NCoef,NDist,LKet1,LKet2
+    INTEGER               :: NExpt,Ell,I,J,K,IE,OffCo,LenKet,iq,ir,NCoef,NDist,LKet1,LKet2, &
+         &                   iSMat
     TYPE(DBL_VECT)        :: Expt
     TYPE(INT_VECT)        :: Lndx,NQ
     REAL(DOUBLE)          :: Zeta
@@ -421,7 +443,7 @@ MODULE RhoTools
 !
 !   Allocate Rho_old
 !    
-    CALL New(Rho_old,(/NExpt,NDist,NCoef/))
+    CALL New(Rho_old,(/NExpt,NDist,NCoef,Rho_new%NSDen/))
 !
 !   Store the Indexing Info to Rho
 !
@@ -440,7 +462,6 @@ MODULE RhoTools
     DO I=1,Rho_new%NDist
 !
        Zeta   = Rho_new%Zeta%D(I)
-       OffCo  = Rho_new%OffCo%I(I)
        Ell    = Rho_new%Ell%I(I)
        LKet1  = LHGTF(Ell)
 !
@@ -458,17 +479,20 @@ MODULE RhoTools
        LKet2  = LHGTF(Ell)
        NQ%I(IE) = NQ%I(IE)+1
        iq  = Rho_old%OffQ%I(IE) + NQ%I(IE)
-       ir  = Rho_old%OffR%I(IE) +(NQ%I(IE)-1)*LKet2+1
 !
        Rho_old%Qx%D(iq) = Rho_new%Qx%D(I)
        Rho_old%Qy%D(iq) = Rho_new%Qy%D(I)
        Rho_old%Qz%D(iq) = Rho_new%Qz%D(I)
 !
-       DO J=0,LKet2-1
-          Rho_old%Co%D(ir+J) = Zero
-       ENDDO
-       DO J=0,MIN(LKet1,LKet2)-1
-          Rho_old%Co%D(ir+J) = Rho_new%Co%D(OffCo+J)
+       DO iSMat=1,Rho_old%NSDen !<<< SPIN
+          OffCo= Rho_new%OffCo%I(I)                       +(iSMat-1)*Rho_new%NCoef !<<< SPIN
+          ir   = Rho_old%OffR%I(IE)+(NQ%I(IE)-1)*LKet2+1  +(iSMat-1)*Rho_old%NCoef !<<< SPIN
+          DO J=0,LKet2-1
+             Rho_old%Co%D(ir+J) = Zero
+          ENDDO
+          DO J=0,MIN(LKet1,LKet2)-1
+             Rho_old%Co%D(ir+J) = Rho_new%Co%D(OffCo+J)
+          ENDDO
        ENDDO
 !
     ENDDO
@@ -556,7 +580,7 @@ MODULE RhoTools
 !
     NExpt = Rho_in%NExpt
     CALL Delete_HGRho(Rho_out)
-    CALL New_HGRho(Rho_out,(/NExpt,0,0/))
+    CALL New_HGRho(Rho_out,(/NExpt,0,0,0/))
     Rho_out%Expt%D = Rho_in%Expt%D
     Rho_out%Lndx%I = Rho_in%Lndx%I   
     Rho_out%NQ%I = 0  
@@ -591,7 +615,7 @@ MODULE RhoTools
 !
 !   Re-allocate the density
 !
-    CALL New_HGRho(Rho_out,(/NExpt,NDist,NCoef/))
+    CALL New_HGRho(Rho_out,(/NExpt,NDist,NCoef,Rho_out%NSDen/))
 !
 !   Add the Distributions to Rho_out
 !

@@ -39,13 +39,15 @@ PROGRAM MakeRho
   TYPE(HGRho_new)                 :: RhoA
   TYPE(CMPoles)                   :: MP
   TYPE(INT_VECT)                  :: Stat
+  TYPE(DBL_VECT)                  :: PTmp
   INTEGER                         :: P,R,AtA,AtB,NN,iSwitch,IC1,IC2,IL
   INTEGER                         :: NDist,NCoef,I,J,K,Iq,Ir,Pbeg,Pend,NDist_old,NDist_new
   INTEGER                         :: N1,N2,QMOffSetQ,QMOffSetR,PcntDist,OldFileID
-  REAL(DOUBLE)                    :: DistThresh,RSumE,RSumN,dNel,RelRhoErr, &
+  REAL(DOUBLE)                    :: DistThresh,RSumE,RSumE2,RSumN,dNel,RelRhoErr, &
                                      PcntCharge
   CHARACTER(LEN=DEFAULT_CHR_LEN)  :: Mssg1,Mssg2,RestartHDF,ResponsePostFix
   CHARACTER(LEN=*),PARAMETER      :: Prog='MakeRho'
+integer::NSMat
 
 #ifdef PARALLEL
   CALL StartUp(Args,Prog,Serial_O=.FALSE.)
@@ -121,7 +123,9 @@ PROGRAM MakeRho
         CALL Get(Dmat,TrixFile('D',Args,0))
      ENDIF
   ENDIF
+  CALL New(PTmp,MaxBlkSize**2)
   CALL NewBraBlok(BS)  
+  NSMat=DMat%NSMat
 !--------------------------------------------------------------
 ! Main loops: First pass calculates the size.
 !             Second pass calculates the density
@@ -157,9 +161,12 @@ PROGRAM MakeRho
      ENDDO
   ENDDO
 ! Allocate the Density
-  CALL New_HGRho_new(RhoA,(/NDist,NCoef/))
-! Scale the density matrix for U/G theory.
-  IF(Dmat%NSMat.GT.1.AND.Dmat%NNon0.GT.0) CALL DSCAL(Dmat%NNon0,0.5D0,Dmat%MTrix%D(1),1)
+  SELECT CASE(NSMat)
+  CASE(1); CALL New_HGRho_new(RhoA,(/NDist,NCoef,1/))
+  CASE(2); CALL New_HGRho_new(RhoA,(/NDist,NCoef,3/))!<<< SPIN 3-> rho_tot,rho_a,rho_b
+  CASE(4); CALL New_HGRho_new(RhoA,(/NDist,NCoef,4/))!<<< SPIN 4-> rho_tot,rho_a,rho_b,rho_ab
+  CASE DEFAULT; CALL Halt('MakeRho: NSMat not valid!')
+  END SELECT
 ! Initailize  Counters
   NDist        = 0
   NCoef        = 0
@@ -178,16 +185,31 @@ PROGRAM MakeRho
         R   = Dmat%BlkPt%I(P)
         NN=BSiz%I(AtA)*BSiz%I(AtB)
         ! Quick and dirty.
-        SELECT CASE(DMat%NSMat)
+        SELECT CASE(NSMat)
         CASE(1)
-           !We don't need to do anything!
+           !We need to copy the matrix!
+           CALL DCOPY(NN,Dmat%MTrix%D(R),1,PTmp%D(1),1)
         CASE(2)
-           !We add up the two density martices!
-           CALL DAXPY(NN,1D0,Dmat%MTrix%D(R+NN),1,Dmat%MTrix%D(R),1)
+           !We copy the first matrix!
+           CALL DCOPY(NN,Dmat%MTrix%D(R),1,PTmp%D(1),1)
+           !(Pa+Pb)/2->Ptot
+           CALL DAXPY(NN,1D0,Dmat%MTrix%D(R+NN),1,PTmp%D(1),1)
+           ! Scale the total density matrix.
+           CALL DSCAL(NN,0.5D0,PTmp%D(1),1) 
+           !Pa
+           CALL DCOPY(NN,Dmat%MTrix%D(R),1,PTmp%D(NN+1),1)
+           !Pb
+           CALL DCOPY(NN,Dmat%MTrix%D(R+NN),1,PTmp%D(2*NN+1),1)
         CASE(4)
-           !We add up the diagonal density martices!
-           CALL DAXPY(NN,1D0,Dmat%MTrix%D(R+3*NN),1,Dmat%MTrix%D(R),1)
-        CASE DEFAULT;CALL Halt(' MakeRho: DMat%NSMat doesn''t have an expected value! ')
+           !We copy the first matrix!
+           CALL DCOPY(NN,Dmat%MTrix%D(R),1,PTmp%D(1),1)
+           !(Pa+Pb)/2->Ptot
+           CALL DAXPY(NN,1D0,Dmat%MTrix%D(R+3*NN),1,PTmp%D(1),1)
+           ! Scale the total density matrix.
+           CALL DSCAL(NN,0.5D0,PTmp%D(1),1) 
+           ! TODO something here for HiCu densities, i.e rho_a,rho_b,rho_ab
+           !...
+        CASE DEFAULT;CALL Halt(' MakeRho: NSMat doesn''t have an expected value! ')
         END SELECT
         !
         IF(SetAtomPair(GM,BS,AtA,AtB,Pair)) THEN                   
@@ -199,13 +221,15 @@ PROGRAM MakeRho
                    + (Pair%A(3)-Pair%B(3))**2
               IF(TestAtomPair(Pair)) THEN
                  NN = Pair%NA*Pair%NB
-                 CALL RhoBlk(BS,Dmat%MTrix%D(R:R+NN-1),Pair,NDist,NCoef,RhoA)
+                 !CALL RhoBlk(BS,Dmat%MTrix%D(R),Pair,NDist,NCoef,RhoA)
+                 CALL RhoBlk(BS,PTmp%D(1),Pair,NDist,NCoef,RhoA)
               ENDIF
            ENDDO
         ENDIF
      ENDDO
   ENDDO
-! Don't add in nuclear charges if incremental fock builds or CPSCF  
+  !
+  ! Don't add in nuclear charges if incremental fock builds or CPSCF.
   IF(SCFActn/='InkFok'.AND. SCFActn/='StartResponse'.AND.SCFActn/='DensityPrime') THEN
 #ifdef PARALLEL
      CALL AddDist(RhoA,GM,NuclearExpnt,Beg%I(MyID),End%I(MyID))
@@ -233,15 +257,33 @@ PROGRAM MakeRho
 ! Compute integrated electron and nuclear densities
 #ifdef PARALLEL
   NumAtoms = End%I(MyID)-Beg%I(MyID)+1
-  RSumE    = Integrate_HGRho_new(RhoA,1,RhoA%NDist-NumAtoms)
-  RSumN    = Integrate_HGRho_new(RhoA,RhoA%NDist-NumAtoms+1,RhoA%NDist)
+  RSumE    = Integrate_HGRho_new(RhoA,1,1,RhoA%NDist-NumAtoms)
+  RSumN    = Integrate_HGRho_new(RhoA,1,RhoA%NDist-NumAtoms+1,RhoA%NDist)
   TotRSumE = AllReduce(RSumE)
   TotRSumN = AllReduce(RSumN)
   RSumE    = TotRSumE
   RSumN    = TotRSumN
 #else
-  RSumE  =  Integrate_HGRho_new(RhoA,1                    ,RhoA%NDist-GM%NAtms)
-  RSumN  =  Integrate_HGRho_new(RhoA,RhoA%NDist-GM%NAtms+1,RhoA%NDist         )
+  RSumE  =  Integrate_HGRho_new(RhoA,1,1                    ,RhoA%NDist-GM%NAtms)
+  RSumN  =  Integrate_HGRho_new(RhoA,1,RhoA%NDist-GM%NAtms+1,RhoA%NDist         )
+  RSumE2=0d0
+  IF(NSMat.EQ.1)THEN
+     RSumE2=Integrate_HGRho_new(RhoA,1,1,RhoA%NDist-GM%NAtms)
+     write(*,*) 'Rho_tot=',RSumE2
+     write(*,*) 'Rho_nuc=',RSumN
+  ELSEIF(NSMat.EQ.2)THEN
+     RSumE2=Integrate_HGRho_new(RhoA,1,1,RhoA%NDist-GM%NAtms)
+     write(*,*) 'Rho_tot=',RSumE2
+     RSumE2=Integrate_HGRho_new(RhoA,2,1,RhoA%NDist-GM%NAtms)
+     write(*,*) 'Rho_alp=',RSumE2
+     RSumE2=Integrate_HGRho_new(RhoA,3,1,RhoA%NDist-GM%NAtms)
+     write(*,*) 'Rho_bet=',RSumE2
+     write(*,*) 'Rho_nuc=',RSumN
+  ELSEIF(NSMat.EQ.4)THEN
+     RSumE2=Integrate_HGRho_new(RhoA,1,1,RhoA%NDist-GM%NAtms)
+     write(*,*) 'Rho_tot=',RSumE2
+     write(*,*) 'Rho_nuc=',RSumN
+  ENDIF
 #endif
 ! Calculate dipole and quadrupole moments
   CALL New(MP)
@@ -342,6 +384,7 @@ PROGRAM MakeRho
   CALL Delete(GM)
   CALL Delete(Dmat)
   CALL Delete(BS)
+  CALL Delete(PTmp)
   CALL DeleteBraBlok()
   CALL Delete_HGRho(Rho)
   CALL Delete_HGRho_new(RhoA)

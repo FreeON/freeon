@@ -47,21 +47,23 @@ MODULE RhoBlok
 !--------------------------------------------------------------
 ! Calculate the Primative Distributions Generated from atom A and B
 !--------------------------------------------------------------
-  SUBROUTINE RhoBlk(BS,Dmat,Pair,NDist,NCoef,Rho)
+!old  SUBROUTINE RhoBlk(BS,Dmat,Pair,NDist,NCoef,Rho)
+  SUBROUTINE RhoBlk(BS,DD,Pair,NDist,NCoef,Rho)
     TYPE(BSET)                              :: BS
     TYPE(AtomPair)                          :: Pair
     TYPE(PrimPair)                          :: Prim
     TYPE(HGRho_new)                         :: Rho
     INTEGER                                 :: NDist,NCoef
 !
-    REAL(DOUBLE),DIMENSION(Pair%NA*Pair%NB) :: Dmat
-    REAL(DOUBLE),DIMENSION(Pair%NA,Pair%NB) :: DD
+!old    REAL(DOUBLE),DIMENSION(Pair%NA*Pair%NB) :: Dmat
+!old    REAL(DOUBLE),DIMENSION(Pair%NA,Pair%NB) :: DD
+    REAL(DOUBLE),DIMENSION(Pair%NA,Pair%NB,Rho%NSDen) :: DD !<<<SPIN
     INTEGER                                 :: KA,KB,NBFA,NBFB,CFA,CFB,PFA,PFB, &
                                                IndexA,StartLA,StopLA,MaxLA, &
                                                IndexB,StartLB,StopLB,MaxLB, &
                                                IE,OffCo,LMN,LMNA,LMNB, &
                                                IA,IB,EllA,EllB,LAB,MAB,NAB, &
-                                               LenKet,AtA,AtB
+                                               LenKet,AtA,AtB,iSMat,I0,I1
     REAL(DOUBLE)                            :: ZetaA,ZetaB,ZetaAB,ZetaIn,XiAB,ExpAB, &
                                                AB2,Ax,Ay,Az,Bx,By,Bz, &
                                                Px,Py,Pz,PAx,PAy,PAz,PBx,PBy,PBz, &
@@ -82,7 +84,7 @@ MODULE RhoBlok
     Prim%KA=Pair%KA
     Prim%KB=Pair%KB
 !
-    DD = VectToBlock(NBFA,NBFB,Dmat)
+!old    DD = VectToBlock(NBFA,NBFB,Dmat)
     DO CFA=1,BS%NCFnc%I(KA)       
        IndexA  = CFBlokDex(BS,CFA,KA)
        StartLA = BS%LStrt%I(CFA,KA)        
@@ -129,7 +131,11 @@ MODULE RhoBlok
 !
 !                  Calculate and Store the Coefficients of the Distribution
 !
-                   Rho%Co%D(OffCo:OffCo+LenKet-1) = Zero 
+                   DO iSMat=1,Rho%NSDen !<<<SPIN
+                      CALL DBL_VECT_EQ_DBL_SCLR(LenKet,Rho%Co%D(OffCo+(iSMat-1)*Rho%NCoef),0D0) !<<<SPIN
+!                       Rho%Co%D(OffCo:OffCo+LenKet-1) = Zero
+                   ENDDO
+
                    IA=IndexA
                    DO LMNA=StartLA,StopLA
                       IA=IA+1
@@ -138,8 +144,15 @@ MODULE RhoBlok
                       DO LMNB=StartLB,StopLB
                          IB=IB+1
                          EllB = BS%LxDex%I(LMNB)+BS%LyDex%I(LMNB)+BS%LzDex%I(LMNB)
-                         DO LMN=1,LHGTF(EllA+EllB)
-                            Rho%Co%D(OffCo+LMN-1)=Rho%Co%D(OffCo+LMN-1)+HGBra%D(LMN,IA,IB)*DD(IA,IB)
+                         DO iSMat=1,Rho%NSDen !<<<SPIN
+                            I0=(iSMat-1)*Rho%NCoef+OffCo-1
+                            DO LMN=1,LHGTF(EllA+EllB)
+                               I1=LMN+I0
+                               Rho%Co%D(I1)=Rho%Co%D(I1)+ & !<<<SPIN
+!old                            Rho%Co%D(OffCo+LMN-1)=Rho%Co%D(OffCo+LMN-1)+ & !<<<SPIN
+                                    & HGBra%D(LMN,IA,IB)*DD(IA,IB,iSMat) !<<<SPIN
+!if(iSMat.eq.1)write(*,*) 'Rho%Co%D(I1)',I1,Rho%Co%D(I1),DD(IA,IB,iSMat)
+                            ENDDO
                          ENDDO
                       ENDDO
                    ENDDO                  
@@ -175,7 +188,7 @@ MODULE RhoBlok
        Rho%Qx%D(Iq)= GM%Carts%D(1,IA)
        Rho%Qy%D(Iq)= GM%Carts%D(2,IA)
        Rho%Qz%D(Iq)= GM%Carts%D(3,IA)
-       Rho%Co%D(Ir)=-GM%AtNum%D(IA)*DDelta
+       Rho%Co%D(Ir)=-GM%AtNum%D(IA)*DDelta !<<SPIN
     ENDDO
   END SUBROUTINE AddNukes
 
