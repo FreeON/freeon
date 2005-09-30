@@ -1636,7 +1636,7 @@ CONTAINS
               SUBROUTINE Get_HGRho(A,Name,Args,SCFCycle,BCast_O)
                 TYPE(HGRho)                      :: A
                 TYPE(ARGMT)                      :: Args
-                INTEGER                          :: SCFCycle,IOS,I,NExpt,NDist,NCoef
+                INTEGER                          :: SCFCycle,IOS,I,NExpt,NDist,NCoef,NSDen
                 CHARACTER(LEN=*)                 :: Name 
                 CHARACTER(LEN=DEFAULT_CHR_LEN)   :: FileName
                 LOGICAL                          :: Exists
@@ -1664,16 +1664,18 @@ CONTAINS
 
                    ! Allocate Memory
 
-                   READ(UNIT=Seq,Err=100,IOSTAT=IOS) NExpt,NDist,NCoef
+                   READ(UNIT=Seq,Err=100,IOSTAT=IOS) NSDen,NExpt,NDist,NCoef
 #ifdef PARALLEL
                 ENDIF
                 IF(BcastQ) THEN
+                   CALL Bcast(NSMat)
                    CALL Bcast(NExpt)
                    CALL Bcast(NDist)
                    CALL Bcast(NCoef)
+                   CALL Bcast(NSDen)
                 ENDIF
 #endif
-                CALL New_HGRho(A,(/NExpt,NDist,NCoef/))
+                CALL New_HGRho(A,(/NExpt,NDist,NCoef,NSDen/))
 
                 ! Read In the Density
 #ifdef PARALLEL
@@ -1687,7 +1689,7 @@ CONTAINS
                    READ(UNIT=Seq,Err=100,IOSTAT=IOS)(A%Qx%D(I)    ,I=1,A%NDist)
                    READ(UNIT=Seq,Err=100,IOSTAT=IOS)(A%Qy%D(I)    ,I=1,A%NDist)
                    READ(UNIT=Seq,Err=100,IOSTAT=IOS)(A%Qz%D(I)    ,I=1,A%NDist)
-                   READ(UNIT=Seq,Err=100,IOSTAT=IOS)(A%Co%D(I)    ,I=1,A%NCoef)
+                   READ(UNIT=Seq,Err=100,IOSTAT=IOS)(A%Co%D(I)    ,I=1,A%NCoef*A%NSDen)
 #ifdef PARALLEL
                 ENDIF
                 IF(BcastQ) THEN
@@ -1699,7 +1701,7 @@ CONTAINS
                    Call Bcast(A%Qx,N_O=A%NDist)
                    Call Bcast(A%Qy,N_O=A%NDist)
                    Call Bcast(A%Qz,N_O=A%NDist)
-                   Call Bcast(A%Co,N_O=A%NCoef)
+                   Call Bcast(A%Co,N_O=A%NCoef*A%NSDen)
                 ENDIF
                 IF(MyID == ROOT) THEN
 #endif
@@ -1733,7 +1735,7 @@ CONTAINS
 
                 !   Write density to disk
 
-                WRITE(UNIT=Seq,Err=100,IOSTAT=IOS) A%NExpt,A%NDist,A%NCoef
+                WRITE(UNIT=Seq,Err=100,IOSTAT=IOS) A%NSDen,A%NExpt,A%NDist,A%NCoef
                 WRITE(UNIT=Seq,Err=100,IOSTAT=IOS)(A%NQ%I(I)    ,I=1,A%NExpt)
                 WRITE(UNIT=Seq,Err=100,IOSTAT=IOS)(A%OffQ%I(I)  ,I=1,A%NExpt)
                 WRITE(UNIT=Seq,Err=100,IOSTAT=IOS)(A%OffR%I(I)  ,I=1,A%NExpt)
@@ -1742,7 +1744,7 @@ CONTAINS
                 WRITE(UNIT=Seq,Err=100,IOSTAT=IOS)(A%Qx%D(I)    ,I=1,A%NDist)
                 WRITE(UNIT=Seq,Err=100,IOSTAT=IOS)(A%Qy%D(I)    ,I=1,A%NDist)
                 WRITE(UNIT=Seq,Err=100,IOSTAT=IOS)(A%Qz%D(I)    ,I=1,A%NDist)
-                WRITE(UNIT=Seq,Err=100,IOSTAT=IOS)(A%Co%D(I)    ,I=1,A%NCoef)
+                WRITE(UNIT=Seq,Err=100,IOSTAT=IOS)(A%Co%D(I)    ,I=1,A%NCoef*A%NSDen)
 
                 CLOSE(UNIT=Seq,STATUS='KEEP')
                 RETURN

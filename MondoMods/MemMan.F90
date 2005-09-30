@@ -1151,7 +1151,7 @@ MODULE MemMan
 !========================================================================================
   SUBROUTINE New_HGRho(A,N_O)
     TYPE(HGRho)                     :: A
-    INTEGER,OPTIONAL,DIMENSION(3)   :: N_O
+    INTEGER,OPTIONAL,DIMENSION(4)   :: N_O
 !
     IF(AllocQ(A%Alloc)) THEN
        IF(PRESENT(N_O)) THEN
@@ -1177,10 +1177,11 @@ MODULE MemMan
              CALL New(A%Qy   ,A%NDist)
              CALL New(A%Qz   ,A%NDist)
           ENDIF
-          IF(N_O(3) /= A%NCoef) THEN
+          IF(N_O(3) /= A%NCoef.OR.N_O(4) /= A%NSDen) THEN
              A%NCoef = N_O(3)
+             A%NSDen = N_O(4)
              CALL Delete(A%Co)
-             CALL New(A%Co,A%NCoef)
+             CALL New(A%Co,A%NCoef*A%NSDen) !<<< SPIN
           ENDIF
        ENDIF
     ELSE
@@ -1189,10 +1190,12 @@ MODULE MemMan
           A%NExpt=N_O(1)
           A%NDist=N_O(2)
           A%NCoef=N_O(3)
+          A%NSDen=N_O(4)!<<< SPIN
        ELSE
           A%NExpt=0
           A%NDist=0
           A%NCoef=0
+          A%NSDen=0!<<< SPIN
        ENDIF
        CALL New(A%NQ  ,A%NExpt)
        CALL New(A%Lndx,A%NExpt)
@@ -1202,7 +1205,7 @@ MODULE MemMan
        CALL New(A%Qx  ,A%NDist)
        CALL New(A%Qy  ,A%NDist)
        CALL New(A%Qz  ,A%NDist)
-       CALL New(A%Co  ,A%NCoef)
+       CALL New(A%Co  ,A%NCoef*A%NSDen)!<<< SPIN
     ENDIF
 !
   END SUBROUTINE New_HGRho
@@ -1379,40 +1382,6 @@ MODULE MemMan
          INTEGER :: BytesPerDbl
          BytesPerDbl=8
       END FUNCTION BytesPerDbl
-!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-!! ckgan: added NewBCSR and DeleteBCSR because all procs need that.
-      SUBROUTINE NewBCSR(A,N_O)
-         TYPE(BCSR),INTENT(INOUT)             :: A
-         INTEGER,OPTIONAL,DIMENSION(3)        :: N_O
-         CALL AllocChk(A%Alloc)
-            IF(PRESENT(N_O))THEN
-               A%NAtms=N_O(1)
-               A%NBlks=N_O(2)
-               A%NNon0=N_O(3)
-            ELSE
-               A%NAtms=NAtoms! MaxAtms
-               A%NBlks=MaxBlks
-               A%NNon0=MaxNon0
-            ENDIF
-            CALL New(A%RowPt,A%NAtms+1)
-            CALL New(A%ColPt,A%NBlks  )
-            CALL New(A%BlkPt,A%NBlks  )
-            CALL New(A%MTrix,A%NNon0  )
-            A%Alloc=ALLOCATED_TRUE
-      END SUBROUTINE NewBCSR
-      SUBROUTINE DeleteBCSR(A)
-         TYPE(BCSR),INTENT(INOUT)       :: A
-            CALL Delete(A%RowPt)
-            CALL Delete(A%ColPt)
-            CALL Delete(A%BlkPt)
-            CALL Delete(A%MTrix)
-            A%NAtms=0
-            A%NBlks=0
-            A%NNon0=0
-            A%Alloc=ALLOCATED_FALSE
-      END SUBROUTINE DeleteBCSR
-
-
 !--------------------------------------------------------------------------
 ! Create the CellSet
 !--------------------------------------------------------------------------

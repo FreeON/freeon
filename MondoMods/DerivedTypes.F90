@@ -381,6 +381,7 @@ MODULE DerivedTypes
 !
   TYPE HGRho
      INTEGER          :: Alloc   !-- Allocation key
+     INTEGER          :: NSDen   !-- Number of Spin densities
      INTEGER          :: NExpt   !-- Number of exponents
      INTEGER          :: NDist   !-- Number of distributions 
      INTEGER          :: NCoef   !-- Number of coefficients

@@ -1354,10 +1354,10 @@ MODULE LinAlg
       SUBROUTINE MultiplyM_DBCSR_SCLR(A,B,Perf_O)
          REAL(DOUBLE),         INTENT(IN)    :: B
          TYPE(DBCSR),          INTENT(INOUT) :: A
-         TYPE(TIME),  OPTIONAL,INTENT(INOUT) :: Perf_O         
+         TYPE(TIME),  OPTIONAL,INTENT(INOUT) :: Perf_O  
 !-------------------------------------------------------------------------------
          CALL DBL_Scale(A%NNon0,A%MTrix%D,B)
-!         CALL DSCAL(A%NNon0,B,A%MTrix%D,1)
+         !CALL DSCAL(A%NNon0,B,A%MTrix%D,1)
          PerfMon%FLOP=PerfMon%FLOP+DBLE(A%NNon0)
          IF(PRESENT(Perf_O))  &
            Perf_O%FLOP=Perf_O%FLOP+DBLE(A%NNon0)
@@ -1366,17 +1366,38 @@ MODULE LinAlg
 !===============================================================================
 !     Matrix-scalar multiply for BCSR matrices
 !===============================================================================
-      SUBROUTINE MultiplyM_BCSR_SCLR(A,B,Perf_O)
+      SUBROUTINE MultiplyM_BCSR_SCLR(A,B,Expert_O,Perf_O)
          REAL(DOUBLE),         INTENT(IN)    :: B
          TYPE(BCSR),           INTENT(INOUT) :: A
+         INTEGER   ,  OPTIONAL,INTENT(IN)    :: Expert_O
          TYPE(TIME),  OPTIONAL,INTENT(INOUT) :: Perf_O         
+         INTEGER                             :: Expert
+         INTEGER                             :: AtA,AtB,MA,MB,P,R
 !-------------------------------------------------------------------------------
 #ifdef PARALLEL
          IF(MyId==ROOT)THEN
 #endif
-         CALL DBL_Scale(A%NNon0,A%MTrix%D,B)
-!         CALL DSCAL(A%NNon0,B,A%MTrix%D,1)
-         PerfMon%FLOP=PerfMon%FLOP+DBLE(A%NNon0)
+            Expert=0
+            IF(PRESENT(Expert_O))Expert=Expert_O
+            IF(Expert.EQ.0)THEN
+               CALL DBL_Scale(A%NNon0,A%MTrix%D,B)
+               !CALL DSCAL(A%NNon0,B,A%MTrix%D,1)
+               PerfMon%FLOP=PerfMon%FLOP+DBLE(A%NNon0)
+            ELSEIF(Expert.GT.0.AND.Expert.LT.5)THEN
+               DO AtA=1,A%NAtms
+                  MA=BSiz%I(AtA)
+                  DO P=A%RowPt%I(AtA),A%RowPt%I(AtA+1)-1
+                     AtB =A%ColPt%I(P)
+                     R   =A%BlkPt%I(P)
+                     MB  =BSiz%I(AtB)
+                     CALL DBL_Scale(MA*MB,A%MTrix%D(R+(Expert-1)*MA*MB),B)
+                     !CALL DSCAL(MA*MB,B,A%MTrix%D(R+(Expert-1)*MA*MB),1)
+                  ENDDO
+               ENDDO
+               PerfMon%FLOP=PerfMon%FLOP+DBLE(A%NNon0)/DBLE(A%NSMat)
+            ELSE
+               CALL Halt('MultiplyM_BCSR_SCLR: wrong value for Expert!')
+            ENDIF
 #ifdef PARALLEL
          ENDIF
 #endif
@@ -2111,13 +2132,16 @@ MODULE LinAlg
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 !     MATRIX EQUALS IDENTITY MATRIX EQUALS IDENTITY MATRIX EQUALS IDENTITY MATRIX E
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-   SUBROUTINE SetToI_BCSR(A,B)
+   SUBROUTINE SetToI_BCSR(A,B,Expert_O)
       TYPE(BCSR)              :: A
       TYPE(DBL_RNK2),OPTIONAL :: B
-      INTEGER                 :: I,N,N2,Q,R
+      INTEGER       ,OPTIONAL :: Expert_O
+      INTEGER                 :: I,N,N2,Q,R,Expert
 #ifdef PARALLEL
          IF(MyId==ROOT)THEN
 #endif
+      Expert=0
+      IF(PRESENT(Expert_O))Expert=Expert_O
       IF(.NOT.AllocQ(A%Alloc))CALL New(A)
       Q=1
       R=1
@@ -2129,44 +2153,58 @@ MODULE LinAlg
          N2=N*N
          A%ColPt%I(Q)=I
          A%BlkPt%I(Q)=R
-         IF(A%NSMat.EQ.1)THEN
+         IF(Expert.EQ.0)THEN
+            IF(A%NSMat.EQ.1)THEN
+               IF(PRESENT(B))THEN
+                  A%MTrix%D(R:R+N2-1)=B%D(1:N2,I)
+               ELSE
+                  CALL DiagI(N,A%MTrix%D(R:R+N2-1))
+               ENDIF
+            ELSEIF(A%NSMat.EQ.2) THEN
+               IF(PRESENT(B))THEN
+                  A%MTrix%D(R:R+N2-1)=B%D(1:N2,I)
+                  R=R+N2
+                  A%MTrix%D(R:R+N2-1)=B%D(1:N2,I)
+               ELSE
+                  CALL DiagI(N,A%MTrix%D(R:R+N2-1))
+                  R=R+N2
+                  CALL DiagI(N,A%MTrix%D(R:R+N2-1))
+               ENDIF
+            ELSEIF(A%NSMat.EQ.4) THEN
+               IF(PRESENT(B))THEN
+                  A%MTrix%D(R:R+N2-1)=B%D(1:N2,I)
+                  R=R+N2
+                  A%MTrix%D(R:R+N2-1)=0D0
+                  R=R+N2
+                  A%MTrix%D(R:R+N2-1)=0D0
+                  R=R+N2
+                  A%MTrix%D(R:R+N2-1)=B%D(1:N2,I)
+               ELSE
+                  CALL DiagI(N,A%MTrix%D(R:R+N2-1))
+                  R=R+N2
+                  A%MTrix%D(R:R+N2-1)=0D0
+                  R=R+N2
+                  A%MTrix%D(R:R+N2-1)=0D0
+                  R=R+N2
+                  CALL DiagI(N,A%MTrix%D(R:R+N2-1))
+               ENDIF
+            ELSE
+               CALL Halt('SetToI_BCSR: wrong value for A%NSMat')
+            ENDIF
+            R=R+N2
+         ELSEIF(Expert.GT.0.AND.Expert.LT.5)THEN
+            !The expert SetToI
             IF(PRESENT(B))THEN
+               R=R+(Expert-1)*N2
                A%MTrix%D(R:R+N2-1)=B%D(1:N2,I)
             ELSE
+               R=R+(Expert-1)*N2
                CALL DiagI(N,A%MTrix%D(R:R+N2-1))
             ENDIF
-         ELSEIF(A%NSMat.EQ.2) THEN
-            IF(PRESENT(B))THEN
-               A%MTrix%D(R:R+N2-1)=B%D(1:N2,I)
-               R=R+N2
-               A%MTrix%D(R:R+N2-1)=B%D(1:N2,I)
-            ELSE
-               CALL DiagI(N,A%MTrix%D(R:R+N2-1))
-               R=R+N2
-               CALL DiagI(N,A%MTrix%D(R:R+N2-1))
-            ENDIF
-         ELSEIF(A%NSMat.EQ.4) THEN
-            IF(PRESENT(B))THEN
-               A%MTrix%D(R:R+N2-1)=B%D(1:N2,I)
-               R=R+N2
-               A%MTrix%D(R:R+N2-1)=0D0
-               R=R+N2
-               A%MTrix%D(R:R+N2-1)=0D0
-               R=R+N2
-               A%MTrix%D(R:R+N2-1)=B%D(1:N2,I)
-            ELSE
-               CALL DiagI(N,A%MTrix%D(R:R+N2-1))
-               R=R+N2
-               A%MTrix%D(R:R+N2-1)=0D0
-               R=R+N2
-               A%MTrix%D(R:R+N2-1)=0D0
-               R=R+N2
-               CALL DiagI(N,A%MTrix%D(R:R+N2-1))
-            ENDIF
+            R=R+(A%NSMat-Expert+1)*N2
          ELSE
-            CALL Halt('SetToI_BCSR: wrong value for A%NSMat')
+            CALL Halt('SetToI_BCSR: wrong value for Expert')
          ENDIF
-         R=R+N2
          Q=Q+1    
          A%RowPt%I(A%NAtms+1)=Q
       ENDDO
