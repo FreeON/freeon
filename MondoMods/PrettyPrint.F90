@@ -583,6 +583,8 @@ MODULE PrettyPrint
                 ENDDO
                 WRITE(PU,55)
 55              FORMAT('END')
+             ELSEIF(PrintGeom_O=='CIF')THEN
+                CALL Print_CRDS_CIF(GM,PU)
              ENDIF
           ELSEIF(PrintFlags%Fmt==DEBUG_MMASTYLE)THEN
              !             Print MMA format
@@ -638,6 +640,66 @@ MODULE PrettyPrint
 2      FORMAT(72('-'))
 3      FORMAT(72('='))
      END SUBROUTINE Print_CRDS
+!-----------------------------------------------------------------------------
+!    Print a CIF Geom
+!
+     SUBROUTINE Print_CRDS_CIF(GM,PU)
+       TYPE(CRDS)                     :: GM
+       INTEGER, INTENT(IN)            :: PU
+       REAL(DOUBLE), DIMENSION(3)     :: VTmp
+       INTEGER                        :: I,K
+       CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg
+       CHARACTER(LEN=2)               :: Atom
+       REAL(DOUBLE)                   :: A,B,C,Alpha,Beta,Gamma
+       !
+       ! See http://www.iucr.ac.uk/iucr-top/cif/cifdic_html/1/cif_core.dic/index.html
+       ! for the definition of the entries.
+       !
+       CALL VecToAng(GM%PBC,A,B,C,Alpha,Beta,Gamma)
+       !
+       Mssg='data_'//'Geom#'//TRIM(IntToChar(GM%Confg))//'_<SCF>_=_'//TRIM(FltToMedmChar(GM%ETotal))
+       WRITE(PU,500) Mssg
+       !Cell
+       WRITE(PU,501)
+       WRITE(PU,502) A
+       WRITE(PU,503) B
+       WRITE(PU,504) C
+       WRITE(PU,505) Alpha
+       WRITE(PU,506) Beta 
+       WRITE(PU,507) Gamma
+       WRITE(PU,508) GM%PBC%CellVolume
+       !Atoms
+       WRITE(PU,550)
+       WRITE(PU,551)
+       WRITE(PU,552)
+       WRITE(PU,553)
+       WRITE(PU,554)
+       DO I=1,GM%NAtms
+          Atom=GM%AtNam%C(I)
+          Vtmp(1:3)=MATMUL(GM%PBC%InvBoxSh%D,GM%Carts%D(1:3,I))
+          CALL UpCase(Atom)
+          WRITE(PU,555)Atom,(VTmp(K),K=1,3)
+       ENDDO
+       !
+       !Cell
+500    FORMAT(A60)
+501    FORMAT('_space_group_symop_operation_xyz ''x, y, z''')
+502    FORMAT('_cell_length_a    ',F14.5)
+503    FORMAT('_cell_length_b    ',F14.5)
+504    FORMAT('_cell_length_c    ',F14.5)
+505    FORMAT('_cell_angle_alpha ',F14.5)
+506    FORMAT('_cell_angle_beta  ',F14.5)
+507    FORMAT('_cell_angle_gamma ',F14.5)
+508    FORMAT('_cell_volume      ',F14.5)
+       !Atoms
+550    FORMAT('loop_')
+551    FORMAT('_atom_site_type_symbol')
+552    FORMAT('_atom_site_fract_x')
+553    FORMAT('_atom_site_fract_y')
+554    FORMAT('_atom_site_fract_z')
+555    FORMAT(1X,A,1X,3F14.5)
+       !
+     END SUBROUTINE Print_CRDS_CIF
 !-----------------------------------------------------------------------------
 !    Print a BCSR matrix
 !
