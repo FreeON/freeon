@@ -123,7 +123,7 @@ integer::NSMat
         CALL Get(Dmat,TrixFile('D',Args,0))
      ENDIF
   ENDIF
-  CALL New(PTmp,MaxBlkSize**2)
+  CALL New(PTmp,4*MaxBlkSize**2)
   CALL NewBraBlok(BS)  
   NSMat=DMat%NSMat
 !--------------------------------------------------------------
@@ -168,8 +168,8 @@ integer::NSMat
   CASE DEFAULT; CALL Halt('MakeRho: NSMat not valid!')
   END SELECT
 ! Initailize  Counters
-  NDist        = 0
-  NCoef        = 0
+  NDist = 0
+  NCoef = 0
 #ifdef PARALLEL
   DO LocalAtom = 1, Dmat%NAtms
      AtA  = Beg%I(MyID)+(LocalAtom-1)
