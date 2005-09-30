@@ -63,12 +63,11 @@ PROGRAM SCFStatus
 !
 !  KinE=<T>=Tr{P.T}
    CALL Get(Tmp1,TrixFile('T',Args))
-
 #ifdef PARALLEL
    CALL Multiply(P,Tmp1,Tmp2)
-   KinE=Two*Trace(Tmp2)     
+   KinE=Two*Trace(Tmp2)
 #else
-   KinE=Two*Trace(P,Tmp1)    
+   KinE=Two*Trace(P,Tmp1)
 #endif 
    KinE=KinE*SFac !<<< SPIN
 !
@@ -85,6 +84,7 @@ PROGRAM SCFStatus
    ELSE
       E_ECPs=Zero
    ENDIF
+   E_ECPs=E_ECPs*SFac !<<< SPIN
    ! E_el_tot=<Vee+Vne>=Tr{P.(Vee+Vne)}
    CALL Get(Tmp1,TrixFile('J',Args,0))
 #ifdef PARALLEL
@@ -105,16 +105,16 @@ PROGRAM SCFStatus
          CALL Get(Tmp1,TrixFile('K',Args,0))
 #ifdef PARALLEL
          CALL Multiply(P,Tmp1,Tmp2)
-         ExchE=ExactXScale(ModelChem)*Trace(Tmp2)     
+         ExchE=ExactXScale(ModelChem)*Trace(Tmp2)
 #else
          ExchE=ExactXScale(ModelChem)*Trace(P,Tmp1)
 #endif
       ENDIF     
       !  Get the exchange correlation energy
-      IF(HasDFT(ModelChem)) &
-         CALL Get(Exc,'Exc',StatsToChar(Current))
+      IF(HasDFT(ModelChem)) CALL Get(Exc,'Exc',StatsToChar(Current))
    ENDIF
    ExchE=ExchE*SFac !<<< SPIN
+   Exc  =Exc  *SFac !<<< SPIN
 !  Get E_nuc_tot =<Vnn+Vne> 
    CALL Get(E_Nuc_Tot,'E_NuclearTotal',StatsToChar(Current))
    ! Total electrostaic energy
@@ -150,7 +150,6 @@ PROGRAM SCFStatus
       CALL PPrint( P,'DeltaP['//TRIM(NxtCycl)//']')
       CALL Plot(   P,'DeltaP_'//TRIM(NxtCycl))
    ENDIF
-
 !-----------------------------------------------------------
 !  Get DIIS Err and HOMO-LUMO Gap
    IF(Current(1)>=1.AND.SCFActn/='NumForceEvaluation') THEN  
@@ -282,8 +281,9 @@ CONTAINS
   REAL(DOUBLE) FUNCTION GetS2(P,S)
     IMPLICIT NONE
     TYPE(BCSR)     :: P,S
-    TYPE(DBL_RNK2) :: D1,D2    
+    TYPE(DBL_RNK2) :: D1,D2,D3
     INTEGER        :: I
+    REAL(DOUBLE)   :: Sx,Sy,Sz
     GetS2=0D0
     call seteq(D1,P)
     call seteq(D2,S)

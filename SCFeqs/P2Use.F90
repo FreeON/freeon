@@ -34,7 +34,7 @@ PROGRAM P2Use
   REAL(DOUBLE)                  :: MaxDS,NoiseLevel 
   REAL(DOUBLE)                  :: Scale,Fact,ECount,RelNErr, DeltaP,OldDeltaP, & 
                                    DensityDev,dN,MaxGDIff,GDIff,OldN,M,PNon0s,PSMin,PSMax, &
-                                   Ipot_Error,Norm_Error,Lam,DLam,TError0,SFac
+                                   Ipot_Error,Norm_Error,Lam,DLam,TError0,SFac,Dum
   INTEGER                       :: I,J,JP,AtA,Q,R,T,KA,NBFA,NPur,PcntPNon0,Qstep, & 
                                    OldFileID,ICart,N,NStep,iGEO,DMPOrder,NSMat
   CHARACTER(LEN=2)              :: Cycl
@@ -92,7 +92,36 @@ PROGRAM P2Use
               IF(TotCh.NE.Zero)BlkP%D(:,I)=NEl*BlkP%D(:,I)/(NEl+TotCh)
            ENDIF
         ENDDO
-        CALL SetToI(P,BlkP)
+        !
+        IF(NSMat.EQ.1)THEN
+           !Set the P
+           CALL SetToI(P,BlkP)
+        ELSEIF(NSMat.EQ.2)THEN
+           !Set the P_alpha
+           CALL DSCAL(MaxBlkSize**2*NAtoms,2D0*DBLE(NAlph)/DBLE(NEl)  ,BlkP%D(1,1),1)
+           CALL SetToI(P,BlkP,Expert_O=1)
+           !Set the P_beta
+           CALL DSCAL(MaxBlkSize**2*NAtoms,    DBLE(NBeta)/DBLE(NAlph),BlkP%D(1,1),1)
+           CALL SetToI(P,BlkP,Expert_O=2)
+        ELSEIF(NSMat.EQ.4)THEN
+           !Set the P_alpha
+           CALL DSCAL(MaxBlkSize**2*NAtoms,2D0*DBLE(NAlph)/DBLE(NEl)  ,BlkP%D(1,1),1)
+           CALL SetToI(P,BlkP,Expert_O=1)
+           !Set the off diag bloks P_alpha,beta P_beta,alpha
+           Dum=-0.1D0
+           CALL DSCAL(MaxBlkSize**2*NAtoms,            Dum/DBLE(NAlph),BlkP%D(1,1),1)
+           CALL SetToI(P,BlkP,Expert_O=2)
+           CALL SetToI(P,BlkP,Expert_O=3)
+           !Set the P_beta
+           CALL DSCAL(MaxBlkSize**2*NAtoms,    DBLE(NBeta)/Dum        ,BlkP%D(1,1),1)
+           CALL SetToI(P,BlkP,Expert_O=4)
+!           BlkP%D=0d0
+!           CALL SetToI(P,BlkP,Expert_O=2)
+!           CALL SetToI(P,BlkP,Expert_O=3)
+        ELSE
+           CALL Halt('P2Use: Something wrong when computing P_guess!')
+        ENDIF
+        !
         ! Check for the correct elctron count
         TrP=Trace(P)
         IF(ABS(TrP-DBLE(NEl/SFac))>1.D-10) &
@@ -101,13 +130,30 @@ PROGRAM P2Use
      ELSE
         CALL SetToI(P)
 #ifdef PARALLEL
-  IF(MyID == ROOT) THEN
+        IF(MyID == ROOT) &
 #endif
-        CALL Warn('Attempting to use density superpostion with a non STO basis set. Going for scaled I.')
-#ifdef PARALLEL
-  ENDIF
-#endif
-        CALL Multiply(P,DBLE(NEl)/(Two*DBLE(NBasF)))
+             CALL Warn('Attempting to use density superpostion with a non STO basis set. Going for scaled I.')
+        !
+        IF(NSMat.EQ.1)THEN
+           !Set the P
+           CALL Multiply(P,DBLE(NEl  )/(Two*DBLE(NBasF)))
+        ELSEIF(NSMat.EQ.2)THEN
+           !Set the P_alpha
+           CALL Multiply(P,DBLE(NAlph)/DBLE(NBasF),Expert_O=1)
+           !Set the P_beta
+           CALL Multiply(P,DBLE(NBeta)/DBLE(NBasF),Expert_O=2)
+        ELSEIF(NSMat.EQ.4)THEN
+           !Set the P_alpha
+           CALL Multiply(P,DBLE(NAlph)/DBLE(NBasF),Expert_O=1)
+           !Set the P_beta
+           CALL Multiply(P,DBLE(NBeta)/DBLE(NBasF),Expert_O=4)
+           !Set the P_ab and P_ba
+           CALL Multiply(P,DBLE(NEl  )/DBLE(NBasF),Expert_O=2)
+           CALL Multiply(P,DBLE(NEl  )/DBLE(NBasF),Expert_O=3)
+        ELSE
+           CALL Halt('P2Use: Something wrong when computing P_guess!')
+        ENDIF
+        !
         TrP=Trace(P)
         IF(ABS(TrP-DBLE(NEl/SFac))>1.D-10) CALL Warn(' In P2Use, TrP = '//TRIM(DblToChar(TrP)))
      ENDIF
