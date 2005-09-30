@@ -150,4 +150,7 @@ MODULE OptionKeys
   !
   CHARACTER(LEN=*),  PARAMETER :: OUTPUT_XCD          ='XSF'
   INTEGER,           PARAMETER :: XSF_FILE	      = -42
+  !
+  CHARACTER(LEN=*),  PARAMETER :: OUTPUT_CIF          ='CIF'
+  INTEGER,           PARAMETER :: CIF_FILE	      = -43
 END MODULE OptionKeys

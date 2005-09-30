@@ -440,6 +440,10 @@ CONTAINS
         GeomPrint='XSF'
         IF(INDEX(Names%GFile,'.')==0) &
         Names%GFile=TRIM(Names%GFile)//'.xsf'
+    ELSE IF (OptKeyQ(Inp,OUTPUT_OPTION,OUTPUT_CIF)) THEN
+        GeomPrint='CIF'
+        IF(INDEX(Names%GFile,'.')==0) &
+        Names%GFile=TRIM(Names%GFile)//'.cif'
     ELSE
         ! Default is xyz
         GeomPrint='XYZ'
