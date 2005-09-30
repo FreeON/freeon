@@ -50,12 +50,14 @@ MODULE CubeTree
 !  Global variables for current Cube
    TYPE(BBox)                     :: Box             !  Global BBox, set to current Cube%BBox        
    REAL(DOUBLE),DIMENSION(NGrid,3):: Grid            !  Global Grid, set to current Cube%Grid
-   REAL(DOUBLE),DIMENSION(NGrid,4):: RhoV            !  Global Vals, set to current Cube%Vals
+   REAL(DOUBLE),DIMENSION(NGrid * 3,4):: RhoV            !  Global Vals, set to current Cube%Vals  !<<< SPIN
    REAL(DOUBLE)                   :: Pop,dPopX,dPopY,dPopZ  !  Global Pop
 !  Global Objects
    TYPE(BSET)                     :: BS              !  Global basis set
    TYPE(CRDS)                     :: GM              !  Global molecular geometry
    TYPE(CubeNode), POINTER        :: CubeRoot
+
+integer::NSDen
 !-----------!
    CONTAINS !
 !================================================================================
@@ -65,7 +67,8 @@ MODULE CubeTree
          TYPE(BBox)                       :: WBox
          REAL(DOUBLE)                     :: SubVolRho,SubVolExc
          REAL(DOUBLE),   DIMENSION(2)     :: TotalError,LocalError,GlobalError, &
-                                             RelativeError,NewCubes,OldCubes
+                                             RelativeError
+         REAL(DOUBLE),   DIMENSION(2)     :: NewCubes,OldCubes
          REAL(DOUBLE)                     :: MaxError,BoxSep,Delta,TargtThresh,IXact
          REAL(DOUBLE), DIMENSION(0:MaxRes):: MaxRelError
          INTEGER                          :: I,J,K,NRes,ErrCount,PtsPerAtom,PU
@@ -97,6 +100,9 @@ MODULE CubeTree
             Box%BndBox(:,2) = BoxBndHig(:)+CS_OUT%CellCarts%D(:,NC)        
             IXact=IXact+PopInBox(RhoRoot)
          ENDDO
+
+write(*,*) 'IXact',IXact,' NSDen',NSDen
+
          Box%Center(:)   = BoxCenter(:)
          Box%BndBox(:,1) = BoxBndLow(:)
          Box%BndBox(:,2) = BoxBndHig(:)  
@@ -114,14 +120,14 @@ MODULE CubeTree
 !           Compute and print convergence statistics
             PtsPerAtom=INT(DBLE(NGrid*LeafCount(CubeRoot))/DBLE(NAtoms))
             RelativeError(1)=ABS(IXact-NewCubes(1))/IXact
-            Exc=NewCubes(2) 
+            Exc=NewCubes(2)
 #ifdef PARALLEL 
 #else
             IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
                Mssg=ProcessName('HiCu.GridGen')                    &
                   //'Tau = ' //TRIM(DblToShrtChar(TauRel))         &
                   //', <Rho> = '//TRIM(DblToMedmChar(NewCubes(1))) &
-                  //', <Exc> = '//TRIM(DblToMedmChar(Exc))         &
+                  //', <Exc> = '//TRIM(DblToMedmChar(Exc))      &
                   //', Pts/Atom = '//TRIM(IntToChar(PtsPerAtom))
                CALL OpenASCII(OutFile,Out)         
 !               WRITE(*,*)TRIM(Mssg)
@@ -278,17 +284,18 @@ MODULE CubeTree
 !===============================================================================
       SUBROUTINE LayGrid(Cube)
          TYPE(CubeNode), POINTER            :: Cube
-         REAL(DOUBLE),   DIMENSION(NGrid)   :: Rho,AbsGradRho2
-         REAL(DOUBLE),   DIMENSION(NGrid)   :: E,dEdRho,dEdAbsGradRho2
+         REAL(DOUBLE),   DIMENSION(NGrid * 3)   :: Rho,AbsGradRho2         !<<< SPIN
+         REAL(DOUBLE),   DIMENSION(NGrid * 3)   :: E,dEdRho,dEdAbsGradRho2 !<<< SPIN
          REAL(DOUBLE),   DIMENSION(3)       :: GradRhoOnTheCube
          REAL(DOUBLE)                       :: EOnTheCube,dEd1OnTheCube, &
                                                dEd2OnTheCube,RhoOnTheCube, &
                                                DeltaRho,DeltaGrad
-         INTEGER                            :: I,J,K
+         INTEGER                            :: I,J,K,iSDen,iGBeg,iGEnd
          INTEGER                            :: NC
          REAL(DOUBLE), DIMENSION(3)         :: BoxCenter,BoxBndLow,BoxBndHig
          REAL(DOUBLE), DIMENSION(NGRID,3)   :: GridOld
          REAL(DOUBLE)                       :: Rsum,PopOld
+         REAL(DOUBLE), EXTERNAL :: DDOT
 !--------------------------------------------------------------------------
 !        Transform cubature rule to this nodes bounding box
          CALL CubeRule(Cube)
@@ -322,7 +329,7 @@ MODULE CubeTree
          Grid(:,:)       = GridOld(:,:)
 !----------------------------------------------------------------------------------
 !        Transfer global Cube values to local Cube
-         DO I=1,NGrid             
+         DO I=1,NGrid*NSDen
             Rho(I)        =RhoV(I,1)
             AbsGradRho2(I)=RhoV(I,2)**2+RhoV(I,3)**2+RhoV(I,4)**2
             Cube%Vals(I,3)=RhoV(I,2)
@@ -330,7 +337,13 @@ MODULE CubeTree
             Cube%Vals(I,5)=RhoV(I,4)
          ENDDO
 !        Evaluate Exc, dExcdRho, and dExcdAbsGradRho2 on the grid
-         CALL ExcOnTheGrid(NGrid,Rho,AbsGradRho2,E,dEdRho,dEdAbsGradRho2) 
+         DO iSDen=1,NSDen
+            iGBeg=(iSDen-1)*NGrid+1
+            iGEnd= iSDen   *NGrid
+            CALL ExcOnTheGrid(NGrid,Rho(iGBeg:iGEnd),AbsGradRho2(iGBeg:iGEnd), &
+                 &            E(iGBeg:iGEnd),dEdRho(iGBeg:iGEnd), &
+                 &            dEdAbsGradRho2(iGBeg:iGEnd)) 
+         ENDDO
 !        Transfer global values to the cube and compute approximate integrals 
 !        of E, dE/dRho, dE/d(AbsGradRho^2), Rho and GradRho over the cube
          EOnTheCube=Zero
@@ -338,16 +351,31 @@ MODULE CubeTree
          dEd2OnTheCube=Zero
          RhoOnTheCube=Zero
          GradRhoOnTheCube=Zero
-         DO I=1,NGrid         
-            Cube%Vals(I,1)=dEdRho(I)
-            Cube%Vals(I,2)=dEdAbsGradRho2(I)
-            EOnTheCube=EOnTheCube+Cube%Wght(I)*E(I)                    ! E on the cube
+
+         CALL DCOPY(NGrid*NSDen,dEdRho(1)        ,1,Cube%Vals(1,1),1)
+         CALL DCOPY(NGrid*NSDen,dEdAbsGradRho2(1),1,Cube%Vals(1,2),1)
+         !
+         ! E on the cube
+         IF(NSDen.EQ.1)THEN
+            ! We need the E_tot=E(rho_tot)
+            EOnTheCube=EOnTheCube+DDOT(NGrid,Cube%Wght(1),1,E(1),1)
+         ELSE
+            ! We need the E_tot=E(rho_a)+E(rho_b)
+            EOnTheCube=EOnTheCube+DDOT(NGrid,Cube%Wght(1),1,E(  NGrid+1),1) &
+                 &               +DDOT(NGrid,Cube%Wght(1),1,E(2*NGrid+1),1)  
+         ENDIF
+
+         DO I=1,NGrid
+            !Cube%Vals(I,1)=dEdRho(I)
+            !Cube%Vals(I,2)=dEdAbsGradRho2(I)
+            !EOnTheCube=EOnTheCube+Cube%Wght(I)*E(I)                   ! E on the cube
             dEd1OnTheCube=dEd1OnTheCube+Cube%Wght(I)*dEdRho(I)         ! dEdRho on the cube
             dEd2OnTheCube=dEd2OnTheCube+Cube%Wght(I)*dEdAbsGradRho2(I) ! dEdAbsGradRho on the cube
             RhoOnTheCube=RhoOnTheCube+Cube%Wght(I)*RhoV(I,1)           ! Rho on the cube
             GradRhoOnTheCube(1:3)=GradRhoOnTheCube(1:3) &              ! GradRho on the cube
                                  +Cube%Wght(I)*RhoV(I,2:4)    
          ENDDO
+
          Cube%ICube(1)=RhoOnTheCube
          Cube%ICube(2)=EOnTheCube
 !        Compute local error estimates          
@@ -373,6 +401,7 @@ MODULE CubeTree
                                                        LXpt,UXpt,TwoZ,SqZ,CoFact,RL1,TmpX,TmpY, &
                                                        LXptX,LXptY,LXptZ,UXptX,UXptY,UXptZ,RL2
          INTEGER                                    :: I,J,IQ,IC,JQ,JC,KQ,KC,L,Ell,L1,L2,M,N,LMN,IGrid
+integer :: OffSDen,iSDen,I0
 !-------------------------------------------------------------------------------------------------------
          Tx=ABS(Node%Box%Center(1)-Box%Center(1))
          IF(Tx>Node%Box%Half(1)+Box%Half(1))RETURN
@@ -381,7 +410,8 @@ MODULE CubeTree
          Tz=ABS(Node%Box%Center(3)-Box%Center(3))
          IF(Tz>Node%Box%Half(3)+Box%Half(3))RETURN
 !
-         IF(Node%Leaf)THEN            
+         IF(Node%Leaf)THEN
+            OffSDen=LHGTF(Node%Ell)
 #ifdef EXPLICIT_SOURCE           
             INCLUDE 'ExplicitLeafPopulation.Inc'       
             INCLUDE 'ExplicitLeafContribution.Inc'
@@ -409,6 +439,7 @@ MODULE CubeTree
                                                        LXpt,UXpt,TwoZ,SqZ,CoFact,RL1,TmpX,TmpY, &
                                                        LXptX,LXptY,LXptZ,UXptX,UXptY,UXptZ,EPop,RL2
          INTEGER                                    :: I,J,IQ,IC,JQ,JC,KQ,KC,L,Ell,L1,L2,M,N,LMN,GKount
+integer::OffSDen
 !-------------------------------------------------------------------------------------------------------
          EPop=Zero
          Tx=ABS(Node%Box%Center(1)-Box%Center(1))
@@ -420,6 +451,7 @@ MODULE CubeTree
          IF(Node%Leaf)THEN            
 !           Intermediates for computation and thresholding of electron count contributions
             Pop=Zero
+            OffSDen=0*LHGTF(Node%Ell)
 #ifdef EXPLICIT_SOURCE           
             INCLUDE 'ExplicitLeafPopulation.Inc'       
 #else
@@ -505,7 +537,7 @@ MODULE CubeTree
          CALL IncMem(Status,0,3*NGrid,'HiCu.CubeTree.Node%Grid')
          ALLOCATE(Node%Wght(NGrid),STAT=Status)
          CALL IncMem(Status,0,NGrid,'HiCu.CubeTree.Node%Wght')
-         ALLOCATE(Node%Vals(NGrid,5),STAT=Status)
+         ALLOCATE(Node%Vals(NGrid*NSDen,5),STAT=Status)! <<< SPIN
          CALL IncMem(Status,0,5*NGrid,'HiCu.CubeTree.Node%Vals')
       END SUBROUTINE NewCubeNode
 !==========================================================================

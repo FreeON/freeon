@@ -75,6 +75,13 @@ PROGRAM XCForce
 #else
 ! Convert density to a 5-D BinTree
   CALL RhoToTree(Args)
+
+  NSDen=Rho%NSDen
+!  NSMat=1
+!  IF(NSDen.EQ.3) NSMat=2 !<<< SPIN
+  write(*,*) '_XCForce_: NSDen',NSDen
+
+
 ! Generate the grid as a 3-D BinTree 
   WBox%BndBox(1:3,1:2) = RhoRoot%Box%BndBox(1:3,1:2)
 ! Make Box Periodic
@@ -117,7 +124,7 @@ PROGRAM XCForce
         IF(SetAtomPair(GM,BS,AtA,AtB,Pair))THEN
            Q=P%BlkPt%I(JP)
            NB=BSiz%I(AtB)
-           MN1=MA*NB-1
+           MN1=MA*NB*P%NSMat-1 !<<< SPIN
            A=Pair%A
            B=Pair%B
            DO NCA=1,CS_OUT%NCells
@@ -128,7 +135,7 @@ PROGRAM XCForce
                          +(Pair%A(2)-Pair%B(2))**2 &
                          +(Pair%A(3)-Pair%B(3))**2
                   IF(TestAtomPair(Pair,CubeRoot%Box)) THEN
-                    F_nlm = dXC(Pair,P%MTrix%D(Q:Q+MN1))
+                    F_nlm = dXC(Pair,P%MTrix%D(Q:Q+MN1),P%NSMat)
                     IF(Pair%SameAtom) THEN
                        XCFrc%D(A1:A2) = XCFrc%D(A1:A2) + Two*F_nlm(4:6)
                     ELSE
@@ -223,6 +230,9 @@ PROGRAM XCForce
 #ifdef PARALLEL
   IF(MyID == ROOT) THEN
 #endif
+!    Rescale the Forces if needed.
+     IF(P%NSMat.GT.1) CALL DSCAL(3*NAtoms,0.5D0,    XCFrc%D(1  ),1)
+     IF(P%NSMat.GT.1) CALL DSCAL(       9,0.5D0,LatFrc_XC%D(1,1),1)
 !    Zero the Lower Triange
      DO I=1,3
         DO J=1,I-1

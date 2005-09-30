@@ -22,15 +22,16 @@ MODULE dXCBlok
 !=======================================================================================
 !
 !=======================================================================================
-     FUNCTION dXC(Pair,P) RESULT(Vck)
+     FUNCTION dXC(Pair,P,NSMat) RESULT(Vck)
        TYPE(AtomPair)                           :: Pair
+       INTEGER::NSMat
        REAL(DOUBLE),DIMENSION(6)                :: Vck
-       REAL(DOUBLE),DIMENSION(Pair%NA,Pair%NB)  :: P
+       REAL(DOUBLE),DIMENSION(Pair%NA,Pair%NB*NSMat)  :: P
        REAL(DOUBLE)                             :: ZetaA,ZetaB,EtaAB,EtaIn,    &
                                                    XiAB,ExpAB,CA,CB,CC,Ov,     &
                                                    PAx,PAy,PAz,PBx,PBy,PBz,    &
                                                    MDx,MDxy,MDxyz,Amp2,MaxAmp, &
-                                                   Pab,NewEx
+                                                   Pab,NewEx,Pab1,Pab2
        INTEGER                                  :: KA,KB,CFA,CFB,PFA,PFB,      &
                                                    IndexA,IndexB,              &
                                                    StartLA,StartLB,            &
@@ -97,7 +98,7 @@ MODULE dXCBlok
                       DO LMNB=StartLB,StopLB
                          IB=IB+1
                          EllB=BS%LxDex%I(LMNB)+BS%LyDex%I(LMNB)+BS%LzDex%I(LMNB)       
-                         Pab=P(IA,IB)
+                         Pab=P(IA,IB) ! <<< SPIN !We must run over all the NSMat here!
                          EllAB=EllA+EllB+1
                          LenAB=LHGTF(EllAB)
                          DO K=1,3
@@ -123,14 +124,28 @@ MODULE dXCBlok
                       DO LMNB=StartLB,StopLB
                          IB=IB+1
                           EllB=BS%LxDex%I(LMNB)+BS%LyDex%I(LMNB)+BS%LzDex%I(LMNB)                         
-                          Pab=P(IA,IB)
                           LenAB=LHGTF(EllA+EllB+1)
-                          DO K=1,3
-                             KI = K
-                             DO LMN=1,LenAB
-                                Vck(KI)=Vck(KI)+Pab*dHGBra%D(LMN,IA,IB,K)*Ket(LMN)
+                          !Q&D... I know!
+                          IF(NSMat.EQ.1)THEN
+                             Pab=P(IA,IB)
+                             DO K=1,3
+                                KI = K
+                                DO LMN=1,LenAB
+                                   Vck(KI)=Vck(KI)+Pab*dHGBra%D(LMN,IA,IB,K)*Ket(LMN)
+                                ENDDO
                              ENDDO
-                         ENDDO
+                          ELSEIF(NSMat.EQ.2)THEN
+                             Pab1=P(IA,IB)
+                             Pab2=P(IA,IB+Pair%NB)
+                             DO K=1,3
+                                KI = K
+                                DO LMN=1,LenAB
+                                   Vck(KI)=Vck(KI)+dHGBra%D(LMN,IA,IB,K)*( Pab1*Ket(LMN) + Pab2*Ket(LMN+LenAB) )
+                                ENDDO
+                             ENDDO
+                          ELSE
+                             CALL Halt('dXC: you are to impatient!')
+                          ENDIF
                       ENDDO
                    ENDDO
 !                  Contract <Bra|Ket> bloks to compute matrix elements of Kxc:  SameAtom=.TRUE.
@@ -145,12 +160,27 @@ MODULE dXCBlok
                           EllB=BS%LxDex%I(LMNB)+BS%LyDex%I(LMNB)+BS%LzDex%I(LMNB)                         
                           Pab=P(IA,IB)
                           LenAB=LHGTF(EllA+EllB+1)
-                          DO K=1,3
-                             KI = K+3
-                             DO LMN=1,LenAB
-                                Vck(KI)=Vck(KI)+Pab*dHGBra%D(LMN,IA,IB,K)*Ket(LMN)
+                          !Q&D... I know!
+                          IF(NSMat.EQ.1)THEN
+                             DO K=1,3
+                                KI = K+3
+                                DO LMN=1,LenAB
+                                   Vck(KI)=Vck(KI)+Pab*dHGBra%D(LMN,IA,IB,K)*Ket(LMN)
+                                ENDDO
                              ENDDO
-                         ENDDO
+                          ELSEIF(NSMat.EQ.2)THEN
+                             Pab1=P(IA,IB)
+                             Pab2=P(IA,IB+Pair%NB)
+                             DO K=1,3
+                                KI = K+3
+                                DO LMN=1,LenAB
+                                   Vck(KI)=Vck(KI)+dHGBra%D(LMN,IA,IB,K)*( Pab1*Ket(LMN) + Pab2*Ket(LMN+LenAB) )
+                                ENDDO
+                             ENDDO
+                          ELSE
+                             CALL Halt('dXC: you are to impatient!')
+                          ENDIF
+
                       ENDDO
                    ENDDO
 !

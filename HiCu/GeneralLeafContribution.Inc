@@ -53,11 +53,15 @@
                DO L=0,Node%Ell
                   DO M=0,Node%Ell-L
                      DO N=0,Node%Ell-M-L
-                        LMN=LMNDex(L,M,N)
-                        RhoV(IGrid,1)=RhoV(IGrid,1)+LambdaX(L  )*LambdaY(M  )*LambdaZ(N  )*Node%Co(LMN)
-                        RhoV(IGrid,2)=RhoV(IGrid,2)-LambdaX(L+1)*LambdaY(M  )*LambdaZ(N  )*Node%Co(LMN)
-                        RhoV(IGrid,3)=RhoV(IGrid,3)-LambdaX(L  )*LambdaY(M+1)*LambdaZ(N  )*Node%Co(LMN)
-                        RhoV(IGrid,4)=RhoV(IGrid,4)-LambdaX(L  )*LambdaY(M  )*LambdaZ(N+1)*Node%Co(LMN)
+                        DO iSDen=0,NSDen-1
+                           LMN=LMNDex(L,M,N)+iSDen*OffSDen
+                           I0=IGrid+iSDen*NGrid
+                           !
+                           RhoV(I0,1)=RhoV(I0,1)+LambdaX(L  )*LambdaY(M  )*LambdaZ(N  )*Node%Co(LMN)
+                           RhoV(I0,2)=RhoV(I0,2)-LambdaX(L+1)*LambdaY(M  )*LambdaZ(N  )*Node%Co(LMN)
+                           RhoV(I0,3)=RhoV(I0,3)-LambdaX(L  )*LambdaY(M+1)*LambdaZ(N  )*Node%Co(LMN)
+                           RhoV(I0,4)=RhoV(I0,4)-LambdaX(L  )*LambdaY(M  )*LambdaZ(N+1)*Node%Co(LMN)
+                        ENDDO
                      ENDDO
                   ENDDO
                ENDDO

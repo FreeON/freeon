@@ -36,7 +36,7 @@ MODULE KxcGen
     TYPE(DBL_RNK2)         :: Temp
     TYPE(AtomPair)         :: Pair
     INTEGER                :: AtA,AtB
-    INTEGER                :: JP,K,NA,NB,NAB,P,Q,R,I,J
+    INTEGER                :: JP,K,NA,NB,NAB,P,Q,R,I,J,iSMat
     INTEGER                   :: NCA,NCB
     REAL(DOUBLE),DIMENSION(3) :: A,B
 !------------------------------------------------------------------------------- 
@@ -53,7 +53,7 @@ MODULE KxcGen
     DO AtA=1,NAtoms
       DO AtB=1,NAtoms
         IF(SetAtomPair(GM,BS,AtA,AtB,Pair)) THEN
-          NAB = Pair%NA*Pair%NB
+          NAB = Pair%NA*Pair%NB*Kxc%NSMat
 #ifndef PARALLEL
           IF(AtB<=AtA)THEN
 #endif
@@ -71,7 +71,7 @@ MODULE KxcGen
 #ifdef PARALLEL
                   CALL AddFASTMATBlok(Kxc,AtA,AtB,KxcBlock(Pair,CubeRoot))
 #else
-                  Kxc%MTrix%D(R:R+NAB-1)=Kxc%MTrix%D(R:R+NAB-1)+KxcBlock(Pair,CubeRoot)
+                  Kxc%MTrix%D(R:R+NAB-1)=Kxc%MTrix%D(R:R+NAB-1)+KxcBlock(Pair,CubeRoot,Kxc%NSMat)
 #endif
                 ENDIF
               ENDDO
@@ -89,8 +89,9 @@ MODULE KxcGen
           P=P+1 
 !! deleted DBCSR part
           Kxc%RowPt%I(AtA+1)=P        
-          IF(R>MaxNon0.OR.P>MaxBlks) &
-            CALL Halt(' BCSR dimensions blown in Kxc ')
+          IF(R>MaxNon0*Kxc%NSMat.OR.P>MaxBlks) THEN
+             CALL Halt(' BCSR dimensions blown in Kxc ')
+          ENDIF
 #endif
         ENDIF
       ENDDO
@@ -102,6 +103,7 @@ MODULE KxcGen
     Kxc%NNon0=R-1
 #endif
 
+
 #ifdef PARALLEL
 #else
 !   Fill the upper triangle of Kxc
@@ -109,17 +111,21 @@ MODULE KxcGen
       DO JP=Kxc%RowPt%I(I),Kxc%RowPt%I(I+1)-1
         J=Kxc%ColPt%I(JP)
         IF(I>J)THEN
-          DO K=Kxc%RowPt%I(J),Kxc%RowPt%I(J+1)-1
-            IF(Kxc%ColPt%I(K)==I)THEN
-              Q=Kxc%BlkPt%I(K)                     
-              EXIT
-             ENDIF
-           ENDDO               
+           DO K=Kxc%RowPt%I(J),Kxc%RowPt%I(J+1)-1
+              IF(Kxc%ColPt%I(K)==I)THEN
+                 Q=Kxc%BlkPt%I(K)                     
+                 EXIT
+              ENDIF
+           ENDDO
            P=Kxc%BlkPt%I(JP)
            NA=BS%BFKnd%I(GM%AtTyp%I(I))
            NB=BS%BFKnd%I(GM%AtTyp%I(J))
            NAB=NA*NB
-           CALL XPose(NA,NB,Kxc%MTrix%D(P:P+NAB-1),Kxc%MTrix%D(Q:Q+NAB-1))
+           DO iSMat=1,Kxc%NSMat
+              CALL XPose(NA,NB,Kxc%MTrix%D(P:P+NAB-1),Kxc%MTrix%D(Q:Q+NAB-1))
+              P=P+NAB
+              Q=Q+NAB
+           ENDDO
         ENDIF
       ENDDO
     ENDDO
@@ -131,15 +137,16 @@ MODULE KxcGen
 #ifdef PARALLEL
      FUNCTION KxcBlock(Pair,CubeRoot) RESULT(Kblk)
 #else
-     FUNCTION KxcBlock(Pair,CubeRoot) RESULT(Kvct)
+     FUNCTION KxcBlock(Pair,CubeRoot,NSMat) RESULT(Kvct)
 #endif
        TYPE(AtomPair)                           :: Pair
        TYPE(CubeNode), POINTER                  :: CubeRoot
+       INTEGER                                  :: NSMat
 
-       REAL(DOUBLE),DIMENSION(Pair%NA,Pair%NB)  :: Kblk
+       REAL(DOUBLE),DIMENSION(Pair%NA,Pair%NB*NSMat)  :: Kblk
 #ifdef PARALLEL
 #else
-       REAL(DOUBLE),DIMENSION(Pair%NA*Pair%NB)  :: Kvct
+       REAL(DOUBLE),DIMENSION(Pair%NA*Pair%NB*NSMat)  :: Kvct
 #endif
 
        REAL(DOUBLE)                             :: ZetaA,ZetaB,EtaAB,EtaIn,    &
@@ -234,7 +241,14 @@ real(double):: Pextent_Old
                          IB=IB+1
                          EllB=BS%LxDex%I(LMNB)+BS%LyDex%I(LMNB)+BS%LzDex%I(LMNB)                         
                          DO LMN=1,LHGTF(EllA+EllB)
-                            Kblk(IA,IB)=Kblk(IA,IB)+HGBra%D(LMN,IA,IB)*Ket(LMN)
+
+                            IF(NSMat.EQ.1)THEN
+                               Kblk(IA,IB)=Kblk(IA,IB)+HGBra%D(LMN,IA,IB)*Ket(LMN)
+                            ELSE
+                               Kblk(IA,IB)=Kblk(IA,IB)+HGBra%D(LMN,IA,IB)*Ket(LMN)
+                               Kblk(IA,IB+Pair%NB)=Kblk(IA,IB+Pair%NB)+HGBra%D(LMN,IA,IB)*Ket(LMN+LHGTF(EllA+EllB))
+                            ENDIF
+
                          ENDDO
                       ENDDO
                    ENDDO
@@ -247,7 +261,7 @@ real(double):: Pextent_Old
        ENDDO
 #ifdef PARALLEL
 #else
-       Kvct=BlockToVect(Pair%NA,Pair%NB,Kblk)
+       Kvct=BlockToVect(Pair%NA,Pair%NB*NSMat,Kblk)
 #endif
      END FUNCTION KxcBlock
 !===============================================================================

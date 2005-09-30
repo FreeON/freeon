@@ -14,7 +14,7 @@ MODULE TreeWalk
   LOGICAL PrintFlag
 !-----------------------------------------------------
 ! Globals
-  REAL(DOUBLE),DIMENSION(HGLen)  :: Ket
+  REAL(DOUBLE),DIMENSION(HGLen*2):: Ket !<<< SPIN We may need at most 2 rhos
   REAL(DOUBLE)                   :: PExtent
   TYPE(BBox)                     :: PBox
   TYPE(PrimPair)                 :: Prim
@@ -58,9 +58,13 @@ MODULE TreeWalk
 
        REAL(DOUBLE), DIMENSION(50) :: Gx,Gy,Gz
        REAL(DOUBLE)                :: GradX,GradY,GradZ
-       INTEGER                     :: IA,IB,EllA,EllB,LMNA,LMNB
+       INTEGER                     :: IA,IB,EllA,EllB,LMNA,LMNB,OffSDen,I0,iSDen,SDBeg
 
 !
+       SDBeg=0
+       IF(NSDen.GT.1)SDBeg=1!<<< SPIN We don't need to integrate the rho_tot part.
+       OffSDen=LHGTF(Prim%Ell)
+
 #ifdef EXPLICIT_SOURCE
        INCLUDE 'ExplicitBraElements.Inc'
 #else
@@ -89,18 +93,24 @@ MODULE TreeWalk
           DO L=0,Prim%Ell
              DO M=0,Prim%Ell-L
                 DO N=0,Prim%Ell-M-L
-                   LMN=LMNDex(L,M,N)
                    PrimDist     = LambdaX(L  )*LambdaY(M  )*LambdaZ(N  )*Xpt
                    GradPrimDistX=-LambdaX(L+1)*LambdaY(M  )*LambdaZ(N  )*Xpt
                    GradPrimDistY=-LambdaX(L  )*LambdaY(M+1)*LambdaZ(N  )*Xpt
                    GradPrimDistZ=-LambdaX(L  )*LambdaY(M  )*LambdaZ(N+1)*Xpt
 !                  Kxc(LMN)=Kxc(LMN)+w_i*(dE/dRho-2dE/d(GradRho)^2 Phi_a*Phi_B GradRho.Grad(Phi_a*Phi_B)
-                   Ket(LMN)=Ket(LMN)+Cube%Wght(I)                  &
-                                    *(Cube%Vals(I,1)*PrimDist       & 
-                                    + Cube%Vals(I,2)*(              &
-                                      Cube%Vals(I,3)*GradPrimDistX  &
-                                    + Cube%Vals(I,4)*GradPrimDistY  &
-                                    + Cube%Vals(I,5)*GradPrimDistZ))
+                   DO iSDen=SDBeg,NSDen-1
+                      LMN=LMNDex(L,M,N)+(iSDen-SDBeg)*OffSDen
+                      I0=I+iSDen*NGrid
+
+                      Ket(LMN)=Ket(LMN)+Cube%Wght(I)                   &
+                                      *(Cube%Vals(I0,1)*PrimDist       & 
+                                      + Cube%Vals(I0,2)*(              &
+                                        Cube%Vals(I0,3)*GradPrimDistX  &
+                                      + Cube%Vals(I0,4)*GradPrimDistY  &
+                                      + Cube%Vals(I0,5)*GradPrimDistZ))
+
+
+                   ENDDO
 !                   Ket(LMN)=Ket(LMN)+Cube%Wght(I)*Cube%Vals(I,1)*PrimDist
                 ENDDO
              ENDDO

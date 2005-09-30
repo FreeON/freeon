@@ -133,11 +133,22 @@ PROGRAM VectorRhoMD
         ENDDO
      ENDIF
      WRITE(Out,*)(Blnk,I=1,15),'Wght=Cube%Wght(I)'
-     WRITE(Out,*)(Blnk,I=1,15),'dEdRho=Cube%Vals(I,1)'
-     WRITE(Out,*)(Blnk,I=1,15),'dEdAbsGradRho2=Cube%Vals(I,2)'
-     WRITE(Out,*)(Blnk,I=1,15),'GradRhoX=Cube%Vals(I,3)'
-     WRITE(Out,*)(Blnk,I=1,15),'GradRhoY=Cube%Vals(I,4)'
-     WRITE(Out,*)(Blnk,I=1,15),'GradRhoZ=Cube%Vals(I,5)'
+     !Spin Densities!
+     WRITE(Out,*)(Blnk,I=1,15),'!Q&D...'
+     WRITE(Out,*)(Blnk,I=1,15),'DO iSDen=SDBeg,NSDen-1'
+     WRITE(Out,*)(Blnk,I=1,17),'LMN=(iSDen-SDBeg)*OffSDen'
+     WRITE(Out,*)(Blnk,I=1,17),'I0=I+iSDen*NGrid'
+
+     !WRITE(Out,*)(Blnk,I=1,17),'dEdRho=Cube%Vals(I,1)'
+     WRITE(Out,*)(Blnk,I=1,17),'dEdRho=Cube%Vals(I0,1)'
+     !WRITE(Out,*)(Blnk,I=1,17),'dEdAbsGradRho2=Cube%Vals(I,2)'
+     WRITE(Out,*)(Blnk,I=1,17),'dEdAbsGradRho2=Cube%Vals(I0,2)'
+     !WRITE(Out,*)(Blnk,I=1,17),'GradRhoX=Cube%Vals(I,3)'
+     WRITE(Out,*)(Blnk,I=1,17),'GradRhoX=Cube%Vals(I0,3)'
+     !WRITE(Out,*)(Blnk,I=1,17),'GradRhoY=Cube%Vals(I,4)'
+     WRITE(Out,*)(Blnk,I=1,17),'GradRhoY=Cube%Vals(I0,4)'
+     !WRITE(Out,*)(Blnk,I=1,17),'GradRhoZ=Cube%Vals(I,5)'
+     WRITE(Out,*)(Blnk,I=1,17),'GradRhoZ=Cube%Vals(I0,5)'
 !
      K=0
      DO L=0,Ell
@@ -160,20 +171,22 @@ PROGRAM VectorRhoMD
                                      //')*LambdaZ('//IntToChar(N+1)//')'
               String(5,K)='GradBraRhoDot=GradRhoX*GradPrimDistX &'
               String(6,K)='+GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ'
-              String(7,K)='Ket('//IntToChar(LMN)//')=Ket('//IntToChar(LMN)//') & '
+              !String(7,K)='Ket('//IntToChar(LMN)//')=Ket('//IntToChar(LMN)//') & '
+              String(7,K)='Ket('//IntToChar(LMN)//'+LMN)=Ket('//IntToChar(LMN)//'+LMN) & '
               String(8,K)='+Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)'
-        WRITE(Out,*)(Blnk,I=1,15),TRIM(Squish(String(1,K)))
-        WRITE(Out,*)(Blnk,I=1,15),TRIM(Squish(String(2,K)))
-        WRITE(Out,*)(Blnk,I=1,15),TRIM(Squish(String(3,K)))
-        WRITE(Out,*)(Blnk,I=1,15),TRIM(Squish(String(4,K)))
-        WRITE(Out,*)(Blnk,I=1,15),TRIM(Squish(String(5,K)))
-        WRITE(Out,*)(Blnk,I=1,15),TRIM(Squish(String(6,K)))
-        WRITE(Out,*)(Blnk,I=1,15),TRIM(Squish(String(7,K)))
-        WRITE(Out,*)(Blnk,I=1,15),TRIM(Squish(String(8,K)))
+        WRITE(Out,*)(Blnk,I=1,17),TRIM(Squish(String(1,K)))
+        WRITE(Out,*)(Blnk,I=1,17),TRIM(Squish(String(2,K)))
+        WRITE(Out,*)(Blnk,I=1,17),TRIM(Squish(String(3,K)))
+        WRITE(Out,*)(Blnk,I=1,17),TRIM(Squish(String(4,K)))
+        WRITE(Out,*)(Blnk,I=1,17),TRIM(Squish(String(5,K)))
+        WRITE(Out,*)(Blnk,I=1,17),TRIM(Squish(String(6,K)))
+        WRITE(Out,*)(Blnk,I=1,17),TRIM(Squish(String(7,K)))
+        WRITE(Out,*)(Blnk,I=1,17),TRIM(Squish(String(8,K)))
 
              ENDDO
          ENDDO
      ENDDO
+     WRITE(Out,*)(Blnk,I=1,15),'ENDDO'
      WRITE(Out,*)(Blnk,I=1,12),'ENDIF'
      WRITE(Out,*)(Blnk,I=1,9),'ENDDO'
   ENDDO
@@ -219,6 +232,11 @@ PROGRAM VectorRhoMD
            ENDDO
         ENDDO
      ENDIF
+     !Spin Densities!
+     WRITE(Out,*)(Blnk,I=1,15),'!Q&D...'
+     WRITE(Out,*)(Blnk,I=1,15),'DO iSDen=0,NSDen-1'
+     WRITE(Out,*)(Blnk,I=1,17),'LMN=iSDen*OffSDen'
+     WRITE(Out,*)(Blnk,I=1,17),'I0=IGrid+iSDen*NGrid'
      K=0
      DO L=0,Ell
         DO M=0,Ell-L
@@ -226,26 +244,32 @@ PROGRAM VectorRhoMD
               LMN=LMNDex(L,M,N)
               K=K+1
               LMND(LMN)=K
-              String(1,LMN)='Co=Node%Co('//IntToChar(LMN)//')'
-              String(2,LMN)='RhoV(IGrid,1)=RhoV(IGrid,1)+LambdaX('//IntToChar(L) &
+!              String(1,LMN)='Co=Node%Co('//IntToChar(LMN)//')'
+              String(1,LMN)='Co=Node%Co('//IntToChar(LMN)//'+LMN)'
+!              String(2,LMN)='RhoV(IGrid,1)=RhoV(IGrid,1)+LambdaX('//IntToChar(L) &
+              String(2,LMN)='RhoV(I0,1)=RhoV(I0,1)+LambdaX('//IntToChar(L) &
                           //')*LambdaY('//IntToChar(M)//')*LambdaZ('//IntToChar(N)//')*Co'
-              String(3,LMN)='RhoV(IGrid,2)=RhoV(IGrid,2)-LambdaX('//IntToChar(L+1) &
+!              String(3,LMN)='RhoV(IGrid,2)=RhoV(IGrid,2)-LambdaX('//IntToChar(L+1) &
+              String(3,LMN)='RhoV(I0,2)=RhoV(I0,2)-LambdaX('//IntToChar(L+1) &
                           //')*LambdaY('//IntToChar(M)//')*LambdaZ('//IntToChar(N)//')*Co'
-              String(4,LMN)='RhoV(IGrid,3)=RhoV(IGrid,3)-LambdaX('//IntToChar(L) &
+!              String(4,LMN)='RhoV(IGrid,3)=RhoV(IGrid,3)-LambdaX('//IntToChar(L) &
+              String(4,LMN)='RhoV(I0,3)=RhoV(I0,3)-LambdaX('//IntToChar(L) &
                           //')*LambdaY('//IntToChar(M+1)//')*LambdaZ('//IntToChar(N)//')*Co'
-              String(5,LMN)='RhoV(IGrid,4)=RhoV(IGrid,4)-LambdaX('//IntToChar(L) &
+!              String(5,LMN)='RhoV(IGrid,4)=RhoV(IGrid,4)-LambdaX('//IntToChar(L) &
+              String(5,LMN)='RhoV(I0,4)=RhoV(I0,4)-LambdaX('//IntToChar(L) &
                           //')*LambdaY('//IntToChar(M)//')*LambdaZ('//IntToChar(N+1)//')*Co'
             ENDDO
          ENDDO
      ENDDO
      DO J=1,LHGTF(Ell)
         K=LMND(J)
-        WRITE(Out,*)(Blnk,I=1,15),TRIM(Squish(String(1,J)))
-        WRITE(Out,*)(Blnk,I=1,15),TRIM(Squish(String(2,J)))
-        WRITE(Out,*)(Blnk,I=1,15),TRIM(Squish(String(3,J)))
-        WRITE(Out,*)(Blnk,I=1,15),TRIM(Squish(String(4,J)))
-        WRITE(Out,*)(Blnk,I=1,15),TRIM(Squish(String(5,J)))
+        WRITE(Out,*)(Blnk,I=1,17),TRIM(Squish(String(1,J)))
+        WRITE(Out,*)(Blnk,I=1,17),TRIM(Squish(String(2,J)))
+        WRITE(Out,*)(Blnk,I=1,17),TRIM(Squish(String(3,J)))
+        WRITE(Out,*)(Blnk,I=1,17),TRIM(Squish(String(4,J)))
+        WRITE(Out,*)(Blnk,I=1,17),TRIM(Squish(String(5,J)))
      ENDDO
+     WRITE(Out,*)(Blnk,I=1,15),'ENDDO'
      WRITE(OUT,*)(Blnk,I=1,12),'ENDIF'
      WRITE(OUT,*)(Blnk,I=1,9),'ENDDO'
   ENDDO
