@@ -50,7 +50,8 @@ PROGRAM GONX2
   REAL(DOUBLE)               :: KScale
 !--------------------------------------------------------------------------------
 #ifdef ONX2_PARALLEL
-  TYPE(DBL_VECT)             :: TmGxArr,TmMLArr,TmTMArr,TmALArr,TmDLArr
+  TYPE(DBL_VECT)             :: TmGxArr,TmMLArr,TmTMArr,TmALArr,TmDLAr
+  REAL(DOUBLE), EXTERNAL     :: MondoTimer
   INTEGER                    :: CMin,CMax,DMin,DMax,IErr
   INTEGER                    :: ANbr,BNbr,CNbr,DNbr
 #endif
@@ -59,7 +60,6 @@ PROGRAM GONX2
   REAL(DOUBLE)               :: TmTM,TmML,TmGx,TmAL,TmDL
   CHARACTER(LEN=*),PARAMETER :: Prog='GONX2'
   LOGICAL                    :: DoStrs
-  REAL(DOUBLE), EXTERNAL     :: MondoTimer
 !--------------------------------------------------------------------------------
   TYPE(INT_RNK2) :: OffArr
 #ifdef ONX2_PARALLEL

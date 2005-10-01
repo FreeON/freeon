@@ -103,7 +103,9 @@ CONTAINS
     TYPE(AtomPr), DIMENSION(:), ALLOCATABLE :: ACAtmPair,BDAtmPair
     !-------------------------------------------------------------------
     REAL(DOUBLE), EXTERNAL :: DGetAbsMax
+#ifdef ONX2_PARALLEL
     REAL(DOUBLE), EXTERNAL :: MondoTimer
+#endif
     !-------------------------------------------------------------------
     integer :: i,isize,aalen,bblen,cclen,ddlen
     real(double) :: t1,t2,tt,fac

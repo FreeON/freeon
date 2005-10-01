@@ -116,7 +116,9 @@ CONTAINS
     !-------------------------------------------------------------------
     REAL(DOUBLE), EXTERNAL     :: DGetAbsMax
     REAL(DOUBLE), EXTERNAL     :: DDOT
+#ifdef ONX2_PARALLEL
     REAL(DOUBLE), EXTERNAL     :: MondoTimer
+#endif
     !-------------------------------------------------------------------
     !
     integer :: isize,i

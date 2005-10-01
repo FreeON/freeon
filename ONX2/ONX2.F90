@@ -59,6 +59,7 @@ PROGRAM ONX2
 !--------------------------------------------------------------------------------
 #ifdef ONX2_PARALLEL
   TYPE(DBL_VECT)                 :: TmKxArr,TmMLArr,TmTMArr,TmALArr,TmDLArr,TmREArr,TmFOArr
+  REAL(DOUBLE),EXTERNAL          :: MondoTimer
   INTEGER                        :: CMin,CMax,DMin,DMax,iErr
   INTEGER                        :: ANbr,BNbr,CNbr,DNbr
 #endif
@@ -67,7 +68,6 @@ PROGRAM ONX2
   REAL(DOUBLE)                   :: Time1,Time2
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: InFile
   CHARACTER(LEN=*),PARAMETER     :: Prog='ONX2'
-  REAL(DOUBLE),EXTERNAL          :: MondoTimer
 !--------------------------------------------------------------------------------
   TYPE(INT_RNK2) :: OffArrC,OffArrP
 #ifdef ONX2_PARALLEL
