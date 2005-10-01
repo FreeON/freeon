@@ -181,7 +181,9 @@ write(*,*) 'IXact',IXact,' NSDen',NSDen
          REAL(DOUBLE)             :: Q,MaxDir
          INTEGER                  :: J,ISplit
          REAL(DOUBLE)             :: StartWTime,EndWTime
+#ifdef PARALLEL
          REAL(DOUBLE),EXTERNAL    :: MondoTimer
+#endif
 !------------------------------------------------------------------------
 !        Stupid should be painfull...
          IF(.NOT.Cube%Leaf)CALL Halt(' Logic error in SplitCube ')

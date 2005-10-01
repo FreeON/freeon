@@ -51,8 +51,9 @@ PROGRAM XCForce
   TYPE(DBL_RNK2)                 :: LatFrc_XC,LatFrc_XC_S  
   TYPE(BBox)                     :: WBox,WBoxTmp
   REAL(DOUBLE)                   :: VolRho,VolExc,DelBox,Exc_old,Etot_old,Etot,dum0,dum1
+#ifdef PARALLEL
   REAL(DOUBLE),EXTERNAL    :: MondoTimer
-
+#endif
 !---------------------------------------------------------------------------------------
 ! Macro the start up
   CALL StartUp(Args,Prog,Serial_O=.FALSE.)
