@@ -47,6 +47,18 @@ else if ( "$MONDO_PLAT" == "IntelLinux.PG" ) then
      setenv MONDO_COMPILER ${MONDO_HOME}/Includes/CompilerSpecifics.IntelLinux.PG
      setenv MONDO_DGEMMS ${MONDO_HOME}/PHiPAC/runs/P3/PHiPAC_dgemm/src 
      setenv NO_STOP_MESSAGE
+else if ( "$MONDO_PLAT" == "IntelLinux.G95" ) then
+     setenv MONDO_COMPILER ${MONDO_HOME}/Includes/CompilerSpecifics.IntelLinux.G95
+     setenv MONDO_DGEMMS ${MONDO_HOME}/PHiPAC/runs/P3/PHiPAC_dgemm/src 
+     setenv NO_STOP_MESSAGE
+else if ( "$MONDO_PLAT" == "Opteron32.PG" ) then
+     setenv MONDO_COMPILER ${MONDO_HOME}/Includes/CompilerSpecifics.Opteron32.PG
+     setenv MONDO_DGEMMS ${MONDO_HOME}/PHiPAC/runs/TBird/PHiPAC_dgemm/src
+     setenv NO_STOP_MESSAGE
+else if ( "$MONDO_PLAT" == "Opteron64.PG" ) then
+     setenv MONDO_COMPILER ${MONDO_HOME}/Includes/CompilerSpecifics.Opteron64.PG
+     setenv MONDO_DGEMMS ${MONDO_HOME}/PHiPAC/runs/TBird/PHiPAC_dgemm/src
+     setenv NO_STOP_MESSAGE
 else if ( "$MONDO_PLAT" == "AMDLinux.PG" ) then
      setenv MONDO_COMPILER ${MONDO_HOME}/Includes/CompilerSpecifics.AMDLinux.PG
      setenv MONDO_DGEMMS ${MONDO_HOME}/PHiPAC/runs/TBird/PHiPAC_dgemm/src 
@@ -66,6 +78,8 @@ else if ( "$MONDO_PLAT" == "AlphaLinux.Compaq" ) then
 else if ( "$MONDO_PLAT" == "True64.COMPAQ" ) then
      setenv MONDO_COMPILER ${MONDO_HOME}/Includes/CompilerSpecifics.True64.COMPAQ
      setenv MONDO_DGEMMS ${MONDO_HOME}/PHiPAC/runs/Alpha/PHiPAC_dgemm/src 
+else
+     echo "MondoSetUp: does not regonize \$MONDO_PLAT=$MONDO_PLAT."
 endif
 
 
