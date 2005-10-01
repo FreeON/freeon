@@ -44,7 +44,9 @@ PROGRAM JForce
   TYPE(DBL_RNK2)               :: LatFrc_J,LatFrc_J_PFF,LatFrc_J_Dip
   REAL(DOUBLE),DIMENSION(3,3)  :: DivCV
   TYPE(CRDS)                   :: GMLoc
+#ifdef PARALLEL
   REAL(DOUBLE),EXTERNAL        :: MondoTimer
+#endif
 !-------------------------------------------------------------------------------- 
 ! Start up macro
   CALL StartUp(Args,Prog,Serial_O=.FALSE.)

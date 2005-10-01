@@ -43,7 +43,9 @@ PROGRAM QCTC
   TYPE(CRDS)                     :: GM_MM
   REAL(DOUBLE)                   :: MM_COUL,E_C_EXCL,CONVF  
   INTEGER                        :: I,K,UOUT !!!!
+#ifdef PARALLEL
   REAL(DOUBLE),EXTERNAL          :: MondoTimer
+#endif
 !------------------------------------------------------------------------------- 
   ETimer(:) = Zero
 ! Start up macro

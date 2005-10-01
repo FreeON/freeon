@@ -166,8 +166,8 @@ MODULE JGen
 #ifdef PARALLEL
        REAL(DOUBLE)                             :: ZA,ZB,T1,T2
        LOGICAL                                  :: FirstIterQ,OtherIterQ
-#endif
        REAL(DOUBLE),EXTERNAL :: MondoTimer
+#endif
 !------------------------------------------------------------------------------- 
        JBlk=Zero
        KA=Pair%KA
