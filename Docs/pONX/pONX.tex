@@ -36,7 +36,8 @@
 %\documentclass[prl,aps,twocolumn,showkeys,twocolumngrid,superbib]{revtex4}
 %\documentclass[twocolumn,showkeys,showpacs,preprintnumbers,amsmath,amssymb]{revtex4}
 %\documentclass[prl,aps,preprint,showpacs,superbib]{revtex4}
-\documentclass[prl,twocolumn,aps,showpacs,superbib]{revtex4}
+%\documentclass[prl,twocolumn,aps,showpacs,superbib]{revtex4}
+\documentclass[prl,twocolumn,showpacs,twocolumngrid,superbib]{revtex4}
 
 \usepackage{graphicx}
 \usepackage{amsfonts}
@@ -496,28 +497,23 @@ Level-2 BLAS matrix-vector multiplication subroutine (DGEMV).
 
 
 \begin{figure}[h]
-  \centering
   \caption{\protect
     Scaling of the parallel ONX on (H$_2$O)$_{50}$ 
     and (H$_2$O)$_{110}$ with the 6-31G and 6-31G**
     basis functions and the {\tt TIGHT} threshold.
     Speedups are relative to 2 processors.
   }\label{fig:h2o_50_110}
-  \begin{center}
-    \includegraphics[angle=-90,width=0.5\textwidth]{h2o_50_110}
-  \end{center}
+  \includegraphics[angle=-90,width=0.5\textwidth]{h2o_50_110}
 \end{figure}
 
+
 \begin{figure}[h]
-  \centering
   \caption{\protect
     Relative speedup of the parallel ONX on (H$_2$O)$_{50}$ with the RHF/6-31G**
     along the SCF iterations.
     Speedups are relative to 2 processors.
   }\label{fig:h2o_50_prop}
-  \begin{center}
-    \includegraphics[angle=-90,width=0.5\textwidth]{h2o_50_prop}
-  \end{center}
+  \includegraphics[angle=-90,width=0.5\textwidth]{h2o_50_prop}
 \end{figure}
 
 \subsection{Water box with PBC}
@@ -538,15 +534,12 @@ Level-2 BLAS matrix-vector multiplication subroutine (DGEMV).
  atom-block of the density matrix.\\
 
 \begin{figure}[p]
-  \centering
   \caption{\protect
     Scaling of the parallel ONX on (H$_2$O)$_{64}$ PBC with the RHF/6-31G*/5-11G*,
     the RHF/6-31G** and RHF/6-31G level of theories and the {\tt GOOD} threshold. 
     The speedups are relative to 2 processors.
   }\label{fig:h2o_pbc_64}
-  \begin{center}
-    \includegraphics[angle=-90,width=0.5\textwidth]{h2o_pbc_64}
-  \end{center}
+  \includegraphics[angle=-90,width=0.5\textwidth]{h2o_pbc_64}
 \end{figure}
 
 \subsection{Endothelin and periodic KCNS}
@@ -562,15 +555,12 @@ speedup, while the $2\times 2\times 2$ KCNS (128 atoms per simulation supercell)
 delivers 95 fold speedup. 
 
 \begin{figure}[p]
-  \centering
   \caption{\protect
     Scaling of the parallel ONX on Endothelin and periodic (KCNS)$_32$ with 
     the RHF/6-31G** and RHF/86-511G(K)/86-311G(S)/6-311G(C,N) respectively.
     The speedups are relative to 2 processors.
   }\label{fig:Endothelin_KCNS}
-  \begin{center}
-    \includegraphics[angle=-90,width=0.5\textwidth]{Endothelin_KCNS}
-  \end{center}
+  \includegraphics[angle=-90,width=0.5\textwidth]{Endothelin_KCNS}
 \end{figure}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -639,7 +629,6 @@ delivers 95 fold speedup.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{figure}[htbp]
- \centering
  \caption{\protect
    Horizontal and vertical multiple recursive decomposition.
  }\label{fig:part2D}

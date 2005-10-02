@@ -22,7 +22,8 @@ links:
 	ln -s $(MONDO_HOME)/Docs/RevTex/12pt.rtx ./12pt.rtx
 
 ps:	latex
-	dvips -t a4 -o pONX.ps pONX
+#	dvips -t a4 -o pONX.ps pONX
+	dvips -t letter -o pONX.ps pONX
 
 pdf:	ps
 	ps2pdf pONX.ps pONX.pdf
