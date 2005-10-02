@@ -36,7 +36,7 @@
 %\documentclass[prl,aps,twocolumn,showkeys,twocolumngrid,superbib]{revtex4}
 %\documentclass[twocolumn,showkeys,showpacs,preprintnumbers,amsmath,amssymb]{revtex4}
 %\documentclass[prl,aps,preprint,showpacs,superbib]{revtex4}
-\documentclass[prl,aps,showpacs,superbib]{revtex4}
+\documentclass[prl,twocolumn,aps,showpacs,superbib]{revtex4}
 
 \usepackage{graphicx}
 \usepackage{amsfonts}
@@ -87,7 +87,7 @@
  The current parallel ONX code is able to deliver up to 77\% overall
  efficiency for a cluster of 50-water molecules on 128 processors 
  (2.56 processors per heavy atom) and up to 87\% for a box of 64 
- water molecules (2 processors per heavy atom) with periodic boundary condition.
+ water molecules (2 processors per heavy atom) with periodic boundary conditions.
  
 \end{abstract}
 
@@ -100,23 +100,12 @@
 
 \section{Introduction}
 
- Density functional theory (DFT) and its variants, 
+ Density functional theory (DFT) and its variant, 
  the hybrid Hartree-Fock/Density Functional Theory (HF/DFT) are accurate and
- computationally attractive. These model chemistries are routinely used
- by conventional Gaussian-orbital quantum chemistry codes to excellent
- advantage.
+ computationally attractive. 
 
- During the past decade parallel algorithms for the 
- formation of the Fock matrix have been developed
- ~\cite{MColvin93,TFurlani95,RHarrison96,HTakashima02}.
- Achieving a load balance with a low communication overhead
- is a fundamental task in parallel computing.
- To achieve load balancing, these algorithms use complicate
- schemes for the distribution of the density and/or Fock 
- matrices. They also use intensive inter-processor 
- communications. 
  The most consuming part of an SCF cycle remains the formation
- of the Fock matrix, even with the apparition of fast linear
+ of the Fock matrix, even with the apperance of fast linear
  scaling algorithms. 
  With the advent in the development of $\mathcal{O}(N)$ methods
  that overcome the bottlenecks encountered in conventional methods,
@@ -128,7 +117,8 @@
  the exchange-correlation 
  matrix~\cite{CTymczak04a,Jorda95,RStratmann96,CGuerra98,MChallacombe00A}
  and iterative alternatives to eigensolution of the SCF 
- equations~\cite{XLi93,MDaw93,ADaniels97,APalser98,MChallacombe99,ANiklasson02A,ANiklasson03}.
+ equations~\cite{XLi93,MDaw93,ADaniels97,APalser98,
+                 MChallacombe99,ANiklasson02A,ANiklasson03}.
  It is well known that linear scaling 
  methods become more advantageous than conventional  
  algorithms only if the system size is bigger than
@@ -140,9 +130,44 @@
  Jaguar~\cite{DChasman98} and many others. 
  The upper limit of a single processor
  is now reached, and massively parallel and distributed
- architectures such as workstation clusters will be 
+ architectures as workstation clusters or supercomputers will be 
  more and more used in the near future for large-scale 
  molecular calculations.
+
+
+ During the past decade parallel algorithms for the 
+ formation of the Fock matrix have been developed
+ ~\cite{MColvin93,TFurlani95,RHarrison96,HTakashima02}.
+
+
+ Most of current parallel methods are based on a integral driven strategy
+ to compute the Fock matrix. On one side, the integral driven approach
+ allows a efficient and simple way to use the full permutational symmetry
+ of the two electron integrals reducing considerably the computational time. 
+ In the other side, it requires the contraction of an integral quartet with up to six 
+ different density matrix elements.
+ While this is certainly not a problem during a serial Fock build it becomes
+ much more complicate to distribute the density and/or Fock matrices through the 
+ processors when the method has to be brought to parallel machines.
+
+ To achieve load balance as well as data parallel, 
+ those algorithms use complicate schemes for the 
+ distribution of the density and/or Fock 
+ matrices through the processors during the computation.
+ This approach leads to an intensive inter-processor 
+ communications of the data which is difficulte to bring to an 
+ effectively scalable algorithm for massively parallel supercomputers. 
+
+
+% Achieving a load balance with a low communication overhead
+% is a fundamental task in parallel computing.
+
+ It should be pointed out that parallel $\mathcal{O}(N)$ computation
+ of the exact exchange matrix with ONX is highly irregular relative 
+ to parallel $\mathcal{O}(N^4)$ computation of the electron repulsion integrals (ERIs), 
+ the latter enables the master-slave approach to work well~\cite{RHarrison96}.
+
+
 
  Computational methods aimed at being used in studies of 
  chemically interesting systems or biologically relevant molecules
@@ -166,16 +191,13 @@
  matrices. The ${\cal O}(N)$ exchange-correlation and Coulomb matrices
  have been efficiently parallelized through the concept of equal time
  partition~\cite{CGan03,CGan04B}.
+
+
  In this work we present an efficient and simple implementation 
  of the Order N eXchange (ONX) algorithm for massive parallel computer. The method
  is based on the equal time partitioning (ET) and is used for periodic systems 
  as well without increasing the complexity of the code.
 
-
- It should be pointed out that parallel $\mathcal{O}(N)$ computation
- of the exact exchange matrix with ONX is highly irregular relative 
- to parallel $\mathcal{O}(N^4)$ computation of the electron repulsion integrals (ERIs), 
- the latter enables the master-slave approach to work well~\cite{RHarrison96}.
 
  The paper is organized as follow: in the Section~\ref{Sec:Algo} the method
  will be outlined.
@@ -191,8 +213,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Parallelization of the ONX algorithm}\label{Sec:Algo}
 The ONX algorithm for ${\cal O}(N)$ calculation of the exact exchange matrix
-has been fully described for gas phase as well as for periodic systems
-in Ref.~\cite{ESchwegler96,ESchwegler97,ESchwegler98A,ESchwegler99,ESchwegler00,CTymczak04b}.
+has been fully described for gas phase
+~\cite{ESchwegler96,ESchwegler97,ESchwegler98A,ESchwegler99,ESchwegler00}
+as well as for the periodic $\Gamma$-point approximation~\cite{CTymczak04b}.
 The exchange matrix element is given by
 \begin{equation}\label{Eq:Kab}
   K_{ab}(D)=-\frac{1}{2}\sum_{\substack{\mathbf{m}\mathbf{n}\\c d}}
@@ -206,10 +229,10 @@ is described elsewhere~\cite{CTymczak04b}.
 In case of gas phase calculations, the summations over 
 ${\bf m}$ and ${\bf n}$ are just removed from Eq.~(\ref{Eq:Kab}).
 
-Our algorithm uses a completely distributed Exchange matrix
+Our algorithm uses a completely distributed exchange matrix
 build. The density matrix, initially stored on the root
 processor, is partitioned following the scheme
-proposed in the Section~\ref{Sec:Impl}. Then each sub-blocks are sent
+proposed in the Section~\ref{Sec:Impl}. Then sub-blocks are sent
 to their respective processors. The manipulations of the density 
 and exchange matrices are easily
 carried out with the FastMat data structure~\cite{CGan04B}.
