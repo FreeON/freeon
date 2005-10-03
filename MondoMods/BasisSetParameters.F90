@@ -6,7 +6,7 @@ MODULE BasisSetParameters
    INTEGER, PARAMETER :: MaxPrmtv=20
    INTEGER, PARAMETER :: MaxASymt= 4
    INTEGER, PARAMETER :: MaxLTyps=10
-   INTEGER, PARAMETER :: NSupSets=40
+   INTEGER, PARAMETER :: NSupSets=42
 
 ! Element 105-107  are ghost function with charge = 0. 
   
@@ -54,39 +54,41 @@ MODULE BasisSetParameters
                 '6-31g*          ' , '6-31Gs          ',   &  ! 9
                 '6-31g**         ' , '6-31Gss         ',   &  ! 10
                 '6-31++g**       ' , '6-31ppGss       ',   &  ! 11
-                '6-311g**        ' , '6-311Gss        ',   &  ! 12
-                '6-311gbb        ' , '6-311G3df,3pd   ',   &  ! 13
-                '6-311++gbb      ' , '6-311ppG3df,3pd ',   &  ! 14
-                'mini            ' , 'MINI            ',   &  ! 15
-                'midi            ' , 'MIDI            ',   &  ! 16
-                'dunninghay_sv   ' , 'DunningHay_SV   ',   &  ! 17
-                'dunninghay_svp  ' , 'DunningHay_SVP  ',   &  ! 18
-                'dunning_dz      ' , 'Dunning_DZ      ',   &  ! 19
-                'dunning_dzp     ' , 'Dunning_DZP     ',   &  ! 20
-                'dunning_tz      ' , 'Dunning_TZ      ',   &  ! 21
-                'ahlrichs_vdz    ' , 'Ahlrichs_VDZ    ',   &  ! 22
-                'ahlrichs_pvdz   ' , 'Ahlrichs_pVDZ   ',   &  ! 23
-                'ahlrichs_vtz    ' , 'Ahlrichs_VTZ    ',   &  ! 24
-                'ahlrichs_tzv    ' , 'Ahlrichs_TZV    ',   &  ! 25
-                'wtbs            ' , 'WTBS            ',   &  ! 26
+                '6-311g          ' , '6-311G          ',   &  ! 12
+                '6-311g**        ' , '6-311Gss        ',   &  ! 13
+                '6-311gbb        ' , '6-311G3df,3pd   ',   &  ! 14
+                '6-311++gbb      ' , '6-311ppG3df,3pd ',   &  ! 15
+                'mini            ' , 'MINI            ',   &  ! 16
+                'midi            ' , 'MIDI            ',   &  ! 17
+                'dunninghay_sv   ' , 'DunningHay_SV   ',   &  ! 18
+                'dunninghay_svp  ' , 'DunningHay_SVP  ',   &  ! 19
+                'dunning_dz      ' , 'Dunning_DZ      ',   &  ! 20
+                'dunning_dzp     ' , 'Dunning_DZP     ',   &  ! 21
+                'dunning_tz      ' , 'Dunning_TZ      ',   &  ! 22
+                'ahlrichs_vdz    ' , 'Ahlrichs_VDZ    ',   &  ! 23
+                'ahlrichs_pvdz   ' , 'Ahlrichs_pVDZ   ',   &  ! 24
+                'ahlrichs_vtz    ' , 'Ahlrichs_VTZ    ',   &  ! 25
+                'ahlrichs_tzv    ' , 'Ahlrichs_TZV    ',   &  ! 26
+                'wtbs            ' , 'WTBS            ',   &  ! 27
 !               ECP BASIS SETS
-                'sbkjc           ' , 'SBKJC_VDZ_ECP   ',   &  ! 27
-                'lanl2           ' , 'LANL2_DZ_ECP    ',   &  ! 28
+                'sbkjc           ' , 'SBKJC_VDZ_ECP   ',   &  ! 28
+                'lanl2           ' , 'LANL2_DZ_ECP    ',   &  ! 29
 !               SPLIT BASIS SETS
-                'sto-2g-split    ' , 'STO-2G-SPLIT    ',   &  ! 29
-                'sto-3g-split    ' , 'STO-3G-SPLIT    ',   &  ! 30
-                'sto-6g-split    ' , 'STO-6G-SPLIT    ',   &  ! 31
-                '3-21g-split     ' , '3-21G-SPLIT     ',   &  ! 32
-                '6-31g-split     ' , '6-31G-SPLIT     ',   &  ! 33
-                '6-31g**-split   ' , '6-31Gss-SPLIT   ',   &  ! 34
+                'sto-2g-split    ' , 'STO-2G-SPLIT    ',   &  ! 30
+                'sto-3g-split    ' , 'STO-3G-SPLIT    ',   &  ! 31
+                'sto-6g-split    ' , 'STO-6G-SPLIT    ',   &  ! 32
+                '3-21g-split     ' , '3-21G-SPLIT     ',   &  ! 33
+                '6-31g-split     ' , '6-31G-SPLIT     ',   &  ! 34
+                '6-31g**-split   ' , '6-31Gss-SPLIT   ',   &  ! 35
+                '6-311g-split    ' , '6-311G-SPLIT    ',   &  ! 36
 !               USER DEFINED BASIS SETS
-                'user1           ' , 'User1           ',   &  ! 35
-                'user2           ' , 'User2           ',   &  ! 36
-                'user3           ' , 'User3           ',   &  ! 37
-                'user4           ' , 'User4           ',   &  ! 38
-                'user5           ' , 'User5           ',   &  ! 39
+                'user1           ' , 'User1           ',   &  ! 37
+                'user2           ' , 'User2           ',   &  ! 38
+                'user3           ' , 'User3           ',   &  ! 39
+                'user4           ' , 'User4           ',   &  ! 40
+                'user5           ' , 'User5           ',   &  ! 41
 !               Crystal Basis Set
-                'crystal98       ' , 'Crystal98       '    &  ! 40
+                'crystal98       ' , 'Crystal98       '    &  ! 42
                 /), (/2,NSupSets/) )
    CHARACTER(LEN=5),DIMENSION(MaxLTyps) ::  CLTyps = &
          (/'s    ','p    ','d    ','f    ','sp   ', &
