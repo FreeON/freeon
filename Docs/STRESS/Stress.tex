@@ -561,6 +561,7 @@ RHF/6-31G level of theory~\cite{DJacquemin99B}.
 %########################################################
 %# cvs update -D ``2005-04-17 07:37'' Optimizer.F90 InCoords.F90
 %# a0=2.474580 d=0.945335-0.01!
+%# F=sum(abs(Force_array))/NAtms
 %A=[
 %#      L           F         CellF        log(AbsError F)   log(AbsError CellF) 
 %1   2.474580 0.08285215 0.7105489538E-02  -1.12886841274938  -2.45633101570992
@@ -678,14 +679,15 @@ Figure~\ref{Fig:CnvgEnergy} shows the relative error to the ${\bf k}$-space limi
 with respect to the unit-cell length with and without the MIC.
 The absolute convergences of the atomic and cell forces, where
 the bond length has been slight contracted by 0.01\AA~to generate 
-non-zero forces, are shown in~Fig.~\ref{Fig:CnvgEnergy}.
+non-zero forces, are also shown in~Fig.~\ref{Fig:CnvgEnergy}.
 
 
 \begin{figure}[h]
   \caption{Convergence of the $\Gamma$-point relative energy with and without the MIC to the corresponding 
     ${\bf k}$-space limit for the (HF)$_n$ chains with respect to unit-cell length. The cell parameter 
     $a_0=2.4745$\AA~and bond length $d=0.9453$\AA~were held fixed. 
-    {\bf !!MAY BE ADD SOMETHING ABOUT FORCES!!}
+    Also shown the absolute convergence of the atomic and cell forces for a slight contracted 
+    bond length (see text for more detail).
     Calculations were performed at the RHF-MIC/6-31G level of theory and the {\tt TIGHT} threshold.}\label{Fig:CnvgEnergy}
 %  \resizebox*{3.6in}{!}{\includegraphics[angle=-90.00]{./DATA/HF_Energy_cnvg.ps}}
 %  \resizebox*{3.6in}{!}{\includegraphics[angle=-90.00]{./DATA/HF_Energy_Forces_cnvg.ps}}
