@@ -210,16 +210,18 @@ PROGRAM P2Use
      ! Get the old AO-dM
      CALL Get(P,'CurrentDM',CheckPoint_O=.TRUE.)
      CALL Get(S,TrixFile('S',Args))
-#ifdef PARALLEL
      CALL Multiply(P,S,Tmp1)
      TError0 = ABS(SFac*Trace(Tmp1)-DBLE(NEl))/DBLE(NEl)
-#else
-     TError0 = ABS(SFac*Trace(P,S)-DBLE(NEl))/DBLE(NEl)
-#endif
-     IF(TError0>1D-3) &
+     IF(TError0>1D-3) THEN
+        !Print out the checksum for P, S and P*S.
+        CALL PChkSum(P   ,'CurrentDM',Prog)
+        CALL PChkSum(S   ,'Overlap  ',Prog)
+        CALL PChkSum(Tmp1,'P*S      ',Prog)
         CALL Halt(' Possible geometry, density matrix mismatch '//Rtrn// &
                   ' Relative error in Tr(S.P)-Nel = '//DblToMedmChar(TError0)//Rtrn// &
+                  ' NEl = '//DblToMedmChar(DBLE(NEl))//Rtrn// &
                   ' Try Guess=(Restart,Reparse) with previous geometry ' )
+     ENDIF
 
 !     CALL AOSP2(P,S,Tmp1,Tmp2,.TRUE.)
 !     CALL AOSP2(P,S,Tmp1,Tmp2,.FALSE.)
