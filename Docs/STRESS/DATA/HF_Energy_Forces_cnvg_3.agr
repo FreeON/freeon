@@ -54,7 +54,7 @@
 @timestamp rot 0
 @timestamp font 0
 @timestamp char size 1.000000
-@timestamp def "Fri Sep  9 14:13:56 2005"
+@timestamp def "Wed Oct  5 18:54:06 2005"
 @r0 off
 @link r0 to g0
 @r0 type above
@@ -181,7 +181,7 @@
 @    yaxis  bar color 1
 @    yaxis  bar linestyle 1
 @    yaxis  bar linewidth 1.0
-@    yaxis  label "Log(Relative Error or Absolute Error)"
+@    yaxis  label "Log10(Error)"
 @    yaxis  label layout para
 @    yaxis  label place auto
 @    yaxis  label char size 1.600000

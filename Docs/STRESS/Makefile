@@ -23,7 +23,7 @@ links:
 
 ps:	latex
 #	dvips -t a4 -o Stress.ps Stress
-	dvips -o Stress.ps Stress
+	dvips -t letter -o Stress.ps Stress
 
 pdf:	ps
 	ps2pdf Stress.ps Stress.pdf
