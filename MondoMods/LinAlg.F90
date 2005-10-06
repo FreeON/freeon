@@ -2974,12 +2974,15 @@ MODULE LinAlg
          REAL(DOUBLE)                      :: Max_BCSR
          TYPE(BCSR),         INTENT(IN)    :: A
          TYPE(TIME),OPTIONAL,INTENT(INOUT) :: Perf_O         
-         INTEGER                           :: IL,MA,NA,J,JP,P,IStrtA,IStopA
+         INTEGER                           :: IL,MA,NA,MNA,J,JP,P,IStrtA,IStopA,iSMat
          REAL(DOUBLE), EXTERNAL            :: DBL_Dot
 !--------------------------------------------------------------------------         
 #ifdef PARALLEL
          IF(MyId==ROOT)THEN
 #endif
+         IF(A%NSMat.NE.1.AND.A%NSMat.NE.2.AND.A%NSMat.NE.4) &
+              & CALL Halt('Max_BCSR: NSMat doesn''t have an expected value!')
+
          Max_BCSR=Zero
          DO IL=1,A%NAtms
             MA=BSiz%I(IL)
@@ -2989,13 +2992,16 @@ MODULE LinAlg
                J=A%ColPt%I(JP)
                P=A%BlkPt%I(JP)
                NA=BSiz%I(J)
-               Max_BCSR=MAX(Max_BCSR,SQRT(DBL_Dot(MA*NA,A%MTrix%D(P),A%MTrix%D(P))))
-!               Max_BCSR=MAX(Max_BCSR,FNorm(MA*NA,A%MTrix%D(P:)))
+               MNA=MA*NA
+               DO iSMat=1,A%NSMat
+                  Max_BCSR=MAX(Max_BCSR,SQRT(DBL_Dot(MNA,A%MTrix%D(P),A%MTrix%D(P))))
+                  P=P+MNA
+               ENDDO
             ENDDO
          ENDDO
-         PerfMon%FLOP=PerfMon%FLOP+DBLE(2*A%NNon0)
+         PerfMon%FLOP=PerfMon%FLOP+DBLE(2*A%NNon0*A%NSMat)
          IF(PRESENT(Perf_O)) &
-           Perf_O%FLOP=Perf_O%FLOP+DBLE(2*A%NNon0)
+           Perf_O%FLOP=Perf_O%FLOP+DBLE(2*A%NNon0*A%NSMat)
 #ifdef PARALLEL
          ENDIF
          IF(InParallel) &
