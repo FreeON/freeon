@@ -53,6 +53,7 @@ PROGRAM ODA
   CALL Get(PTilde,TrixFile('D',Args,-1))   
   CALL Get(FTilde,TrixFile('F',Args,-1))  
   CALL Get(P,TrixFile('D',Args,0))
+  IF(P%NSMat.GE.2)CALL Halt('ODA: The unrestricted theories haven''t been implemented yet!')
   CALL Get(F,TrixFile('F',Args,0))  
 ! Get Kinectic Energy and ECPs
   CALL Get(T,TrixFile('T',Args))
