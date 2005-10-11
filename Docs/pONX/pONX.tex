@@ -103,7 +103,11 @@
 
  Density functional theory (DFT) and its variant, 
  the hybrid Hartree-Fock/Density Functional Theory (HF/DFT) are accurate and
- computationally attractive. 
+ computationally attractive. Together with linear scaling methods 
+ for solving the eigenvalue problem, these
+ advances provide an important tool for large applications in gas or condensed phase 
+ of both HF and HF/DFT models to areas such as biochemistry, material science, catalysis and others.
+
 
  The most consuming part of an SCF cycle remains the formation
  of the Fock matrix, even with the apperance of fast linear
@@ -138,7 +142,7 @@
 
  During the past decade parallel algorithms for the 
  formation of the Fock matrix have been developed
- ~\cite{MColvin93,TFurlani95,RHarrison96,HTakashima02}.
+ ~\cite{MColvin93,TFurlani95,RHarrison96,YAlexeev02,HTakashima02,RLindh03}.
 
 
  Most of current parallel methods are based on a integral driven strategy
@@ -163,27 +167,19 @@
 % Achieving a load balance with a low communication overhead
 % is a fundamental task in parallel computing.
 
- It should be pointed out that parallel $\mathcal{O}(N)$ computation
- of the exact exchange matrix with ONX is highly irregular relative 
- to parallel $\mathcal{O}(N^4)$ computation of the electron repulsion integrals (ERIs), 
- the latter enables the master-slave approach to work well~\cite{RHarrison96}.
-
-
-
- Computational methods aimed at being used in studies of 
- chemically interesting systems or biologically relevant molecules
- or most importantly, fractions of chemical reactions, are
- computationally expensive. Fortunately, the computer 
- industry has matured to a point where there is a basic parallel
- programming model that is very widely supported: the message 
- passing model and its main incarnation MPI~\cite{MPI}. This library
- allows parallel programs to become portable and they may
- also be efficiently run on many different types of platforms, 
- including PC clusters.
- In computational quantum chemistry, PVM~\cite{PVM}, MPI~\cite{MPI} and the 
- global array tools~\cite{JNieplocha94,JNieplocha96} are 
- the most widely used communication tools.
- 
+% Computational methods aimed at being used in studies of 
+% chemically interesting systems or biologically relevant molecules
+% or most importantly, fractions of chemical reactions, are
+% computationally expensive. Fortunately, the computer 
+% industry has matured to a point where there is a basic parallel
+% programming model that is very widely supported: the message 
+% passing model and its main incarnation MPI~\cite{MPI}. This library
+% allows parallel programs to become portable and they may
+% also be efficiently run on many different types of platforms, 
+% including PC clusters.
+% In computational quantum chemistry, PVM~\cite{PVM}, MPI~\cite{MPI} and the 
+% global array tools~\cite{JNieplocha94,JNieplocha96} are 
+% the most widely used communication tools.
 
 
  Three of the most computationally demanding parts in a 
@@ -193,12 +189,17 @@
  have been efficiently parallelized through the concept of equal time
  partition~\cite{CGan03,CGan04B}.
 
-
  In this work we present an efficient and simple implementation 
  of the Order N eXchange (ONX) algorithm for massive parallel computer. The method
- is based on the equal time partitioning (ET) and is used for periodic systems 
- as well without increasing the complexity of the code.
-
+ is based on the equal time partitioning (ET) and can treat gas phase and periodic systems 
+ without increasing the complexity of the code. The equal time partitioning exploits 
+ the slow variation of the density matrix between self-consistent-field iterations
+ to achieve load balance.
+ 
+ It should be pointed out that parallel $\mathcal{O}(N)$ computation
+ of the exact exchange matrix with ONX is highly irregular relative 
+ to parallel $\mathcal{O}(N^4)$ computation of the electron repulsion integrals (ERIs), 
+ the latter enables the master-slave approach to work well~\cite{RHarrison96}.
 
  The paper is organized as follow: in the Section~\ref{Sec:Algo} the method
  will be outlined.
@@ -214,10 +215,18 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Parallelization of the ONX algorithm}\label{Sec:Algo}
 The ONX algorithm for ${\cal O}(N)$ calculation of the exact exchange matrix
-has been fully described for gas phase
+has been extensively described for gas phase
 ~\cite{ESchwegler96,ESchwegler97,ESchwegler98A,ESchwegler99,ESchwegler00}
-as well as for the periodic $\Gamma$-point approximation~\cite{CTymczak04b}.
-The exchange matrix element is given by
+and the periodic $\Gamma$-point approximation~\cite{CTymczak04b}.
+The $\Gamma$-point approximation limits $k$-space sampling to
+just the central cell at $k=0$. Translational invariance is 
+imposed by introducing the minimum image convention (MIC)
+into the contraction phase of periodically summed
+two-electron integral, 
+this ensures that interactions are always calculated between 
+nearest images. 
+In computation of the HF exchange matrix, the MIC
+$\Gamma$-point approximation is given by
 \begin{equation}\label{Eq:Kab}
   K_{ab}(D)=-\frac{1}{2}\sum_{\substack{\mathbf{m}\mathbf{n}\\c d}}
                       D_{cd}(ac^\mathbf{m}|bd^\mathbf{n})_{\rm mic},
@@ -228,7 +237,7 @@ is an element of the density matrix.
 The evaluation of the two electron integrals $(ac^\mathbf{m}|bd^\mathbf{n})_{\rm mic}$
 is described elsewhere~\cite{CTymczak04b}.
 In case of gas phase calculations, the summations over 
-${\bf m}$ and ${\bf n}$ are just removed from Eq.~(\ref{Eq:Kab}).
+the lattices ${\bf m}$ and ${\bf n}$ are just removed from Eq.~(\ref{Eq:Kab}).
 
 Our algorithm uses a completely distributed exchange matrix
 build. The density matrix, initially stored on the root
@@ -240,7 +249,8 @@ carried out with the FastMat data structure~\cite{CGan04B}.
 
 The original ONX algorithm has been slightly restructured 
 to include PBC~\cite{CTymczak04b} and to improve parallel efficiency.
-In the first step, the two distribution lists $\{ac^\mathbf{m}\}$ and
+In the first step, each processors $p$ recive its dedicate sub density matrix $D(p)$ form root.
+During the second step, the two distribution lists $\{ac^\mathbf{m}\}$ and
 $\{bd^\mathbf{n}\}$ are built, where $c$ and $d$ run over the rows and the
 columns of $D(p)$, respectively. The procedure for structuring the list of distributions
 for the $\{ac^\mathbf{m}\}$ pair is outlined in Fig.~\ref{Fig:List}.
@@ -258,25 +268,29 @@ of the integral estimate $|(ac^\mathbf{m}|ac^\mathbf{m})_{\rm mic}|^{1/2}$.
   \begin{equation*}
     \begin{split}
       &\tt          DO\,AtC\in COL(D(p))\\
-      &\tt\quad       DO\,AtA=1,NAtoms\\
-      &\tt\qquad        DO\,iCell=1,NCell\\
+      &\tt          DO\,AtA=1,NAtoms\\
+      &\tt\quad       DO\,m=1,NCell\\
+      &\tt\qquad        DO\,c\in AtC\\
+      &\tt\qquad        DO\,a\in AtA\\
       &\tt\qquad\quad     COMPUTE\,|(ac^m|ac^m)_{mic}|^{1/2}\\
       &\tt\qquad\quad     IF(|(ac^m|ac^m)_{mic}|^{1/2}<{\tt Thresh)\,CYCLE}\\
       &\tt\qquad\quad     ADD\,ac^m\,{\tt to}\, \{ac^m\}\\
       &\tt\qquad        ENDDO\\
+      &\tt\qquad        ENDDO\\
       &\tt\quad       ENDDO\\
       &\tt\quad       SORT\,\{ac^m\}\,by\,decreasing\,|(ac^m|ac^m)_{mic}|^{1/2}\\
+      &\tt         ENDDO\\
       &\tt         ENDDO
     \end{split}
   \end{equation*}
 \end{figure}
 
-In the second step, parallel ONX $K$ builds begun with the outer loops over
+In the third step, parallel ONX $K$ builds begun with the outer loops over
 the rows and columns of the local density matrix $D(p)$, 
 as shown in Fig.~\ref{Fig:ONXcore}. Next, a two-fold loop over
 the distribution lists of $\{ac^\mathbf{m}\}$ and $\{bd^\mathbf{n}\}$
 is begun in which ERIs are computed. The contraction of 
-the ERIs with the density matrix is made after the loops over the lists with the help of a powerful
+the ERIs with the density matrix is made after the loops over the lists with the help of a 
 Level-2 BLAS matrix-vector multiplication subroutine (DGEMV).
 
 \begin{figure}[htbp]
@@ -286,24 +300,30 @@ Level-2 BLAS matrix-vector multiplication subroutine (DGEMV).
   }\label{Fig:ONXcore}
   \begin{equation*}
     \begin{split}
-%      &\tt        Send\,D(p) \\
+      &\tt        Receive\,D(p) from ROOT\\
+      &\tt        Make\,list\,\{ac^m\} \\
+      &\tt        Make\,list\,\{bd^n\} \\
       &\tt        DO\,AtC\in COL(D(p)) \\
-      &\tt\quad     DO\,AtD\in ROW(D(p),AtC) \\
-      &\tt\qquad      ti=TIMER(\,) \\
-      &\tt\qquad      DO\,a,m\in\{ac^m\} \\
+      &\tt        DO\,AtD\in ROW(D(p),AtC) \\
+      &\tt\quad     ti=TIMER(\,) \\
+      &\tt\quad     DO\,AtA=1,NAtoms \\
+      &\tt\quad     DO\,AtB=1,AtA \\
+      &\tt\qquad      DO\,a,c,m\in\{ac^m\}(AtA,AtC) \\
       &\tt\qquad\quad   IF(SkipOut)\,EXIT  \\
-      &\tt\qquad\quad   DO\,b,n\in\{bd^n\} \\
+      &\tt\qquad\quad   DO\,b,d,n\in\{bd^n\}(AtB,AtD) \\
       &\tt\qquad\qquad    IF(SkipOut)\,EXIT  \\
       &\tt\qquad\qquad    COMPUTE\,(ac^m|bd^n)_{mic} \\
       &\tt\qquad\quad   ENDDO \\
       &\tt\qquad      ENDDO \\
       &\tt\qquad      Digest\,D\,and\,ERIs \\
-      &\tt\qquad      tf=TIMER(\,) \\
-      &\tt\qquad      Time(AtC,AtD)=tf-ti \\
       &\tt\quad     ENDDO \\
-      &\tt         ENDDO \\
-      &\tt         Send\,Time\,to\,ROOT \\
-      &\tt         Global\,summation\,of\,K 
+      &\tt\quad     ENDDO \\
+      &\tt\quad     tf=TIMER(\,) \\
+      &\tt\quad     Time(AtC,AtD)=tf-ti \\
+      &\tt        ENDDO \\
+      &\tt        ENDDO \\
+      &\tt        Send\,Time\,to\,ROOT \\
+      &\tt        Global\,summation\,of\,K 
     \end{split}
   \end{equation*}
 \end{figure}
@@ -418,7 +438,7 @@ Level-2 BLAS matrix-vector multiplication subroutine (DGEMV).
  programs for linear scaling electronic structure theory and 
  {\it ab initio} molecular dynamics. 
  The code was compiled using the Portland Group F90 
- compiler {\tt pgf90} v5.1~\cite{pgf90} with the {\tt -O1} options 
+ compiler {\tt pgf90} v5.1~\cite{pgf90-v5.1} with the {\tt -O1} options 
  and with the GNU C compiler {\tt gcc} v3.2.2 using the {\tt -O1} flag
  or with the HP fortran compiler {\tt f95} v5.5A~\cite{f95v5.5a} 
  and the {\tt -O1} option and the Compaq C++ compiler {\tt cxx} 
@@ -552,7 +572,7 @@ These scaling have been carried out with the {\tt GOOD} accuracy level
 and on a Compaq machine.
 At the 128-processor level, the endothelin (133 heavy atoms) delivers 99 fold
 speedup, while the $2\times 2\times 2$ KCNS (128 atoms per simulation supercell)
-delivers 95 fold speedup. 
+delivers 105 fold speedup. 
 
 \begin{figure}[p]
   \caption{\protect
