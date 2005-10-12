@@ -121,10 +121,19 @@ CONTAINS
           CALL Invoke('QCTC',N,S,M)
           Modl=O%Models(cBAS)
           IF(HasHF(Modl)) CALL Invoke('ONX',N,S,M)
+#ifdef DIPMW
+          IF(HasDFT(Modl)) THEN
+             CALL Halt('SCFs: DFT-Response not yet supported!')
+             CALL Invoke('HiCu',N,S,M)
+             CALL Invoke('DipMW',N,S,M)
+             IF(.TRUE.) STOP
+          ENDIF
+#else
           IF(HasDFT(Modl)) THEN
              CALL Halt('SCFs: DFT-Response not yet supported!')
              CALL Invoke('HiCu',N,S,M)
           ENDIF
+#endif
        ENDIF
        CALL Invoke('FBuild',N,S,M)
        IF(cSCF.GT.0) CALL Invoke('DDIIS',N,S,M)
@@ -182,7 +191,13 @@ CONTAINS
 !            Rebuild non-linear KS matrix
              CALL DensityLogic(cSCF,cBAS,cGEO,N,S,O)
              CALL DensityBuild(N,S,M)
+#ifdef DIPMW
              CALL Invoke('HiCu',N,S,M)
+             CALL Invoke('DipMW',N,S,M)
+             IF(.TRUE.) STOP
+#else
+             CALL Invoke('HiCu',N,S,M)
+#endif
              CALL Invoke('FBuild',N,S,M)
           ENDIF
           CALL SolveSCF(cBAS,N,S,O,M)
@@ -644,8 +659,18 @@ CONTAINS
 
     IF(S%Action%C(1)/=SCF_GUESSEQCORE.AND.S%Action%C(1).NE.CPSCF_START_RESPONSE)THEN
        IF(HasHF(Modl)) CALL Invoke('ONX',N,S,M)
-       IF(HasDFT(Modl))CALL Invoke('HiCu',N,S,M)
-    ENDIF
+#ifdef DIPMW
+       IF(HasDFT(Modl)) THEN
+          CALL Invoke('HiCu',N,S,M)
+          CALL Invoke('DipMW',N,S,M)
+          IF(.TRUE.) STOP
+       ENDIF
+#else
+       IF(HasDFT(Modl)) THEN
+          CALL Invoke('HiCu',N,S,M)
+       ENDIF
+#endif
+    ENDIF            
 
     CALL Invoke('FBuild',N,S,M)
   END SUBROUTINE FockBuild
