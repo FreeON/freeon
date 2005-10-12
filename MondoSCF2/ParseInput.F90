@@ -32,7 +32,7 @@ CONTAINS
     ! Parse generic options 
     CALL LoadOptions(C%Nams,C%Opts)
     ! Parse dynamics options
-    IF(C%Opts%Grad==GRAD_DO_DYNAMICS) THEN
+    IF(C%Opts%Grad==GRAD_DO_DYNAMICS .OR. C%Opts%Grad==GRAD_DO_HYBRIDMC ) THEN
        CALL LoadDynamics(C%Nams,C%Opts,C%Geos,C%Dyns)
     ENDIF  
     ! Parse geometry or get from restart HDF 
