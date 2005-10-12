@@ -16,5 +16,8 @@ MODULE DynamicsKeys
 ! Temperature Rescaling
   CHARACTER(LEN=*),  PARAMETER :: MD_TEMP_SCALE      ='TempScaling'
   CHARACTER(LEN=*),  PARAMETER :: MD_TSCALE_INT      ='TempIntScaling'
+! MC Inputs
+  CHARACTER(LEN=*),  PARAMETER :: MC_MAX_STEP        ='MaxMCStep'
+  CHARACTER(LEN=*),  PARAMETER :: MC_TEMP            ='MCTemperature'
 !
 END MODULE DynamicsKeys 
