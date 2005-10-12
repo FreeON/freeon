@@ -470,6 +470,10 @@ CONTAINS
        ! Do molecular dynamics
        Grad=GRAD_DO_DYNAMICS  
        NSteps=1
+    ELSEIF(OptKeyQ(Inp,GRADIENTS,GRAD_HYBRIDMC))THEN
+       ! Do hybrid montecarlos / molecular dynamics
+       Grad=GRAD_DO_HYBRIDMC
+       NSteps=1
     ELSEIF(OptKeyQ(Inp,GRADIENTS,GRAD_OPTIMIZE))THEN
        ! Go downhill in energy
        Grad=GRAD_GO_DOWNHILL
