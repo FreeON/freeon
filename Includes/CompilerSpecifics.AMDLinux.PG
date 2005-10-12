@@ -5,7 +5,7 @@ CPP       =/lib/cpp -P -C -traditional
 CPPINCLUDE=-I$(MONDO_INC) -I$(HDF_INC) -I/usr/local/include # -I$(MPI_INC)
 #
 # PREPROCESSING OPTIONS: 
-CPPOPTS = -DNewPAC #-DMPI2 -DPARALLEL  
+CPPOPTS = -DNewPAC # -DDIPMW -DMPI2  -DPARALLEL 
 #---------------------------------------------------------------
 # C Compiler and options
 #
@@ -25,13 +25,13 @@ MOD_POSTFIX   = mod
 #
 F90           = pgf90
 F90_OPTIMIZE  = -O1 -tp athlon 
-#F90_DEBUG    = -g -C -Mbounds -Minfo=all -Minform=inform -Mchkptr 
+#F90_DEBUG     = -g  -C -Mbounds -Minfo=all -Minform=inform -Mchkptr
 #F_LIST       = -Mlist 
 #F_PROF       = -Mprof=lines
 F90_MISC      = $(F_LIST) $(F_PROF) -Mbackslash 
 F90_INCLUDE   = -I$(MONDO_HOME)/Includes/               \
                 -I$(MONDO_HOME)/MondoMods               \
-                -I/usr/local/include # -I$(MPI_INC)                   
+                -I/usr/local/include -I$(MPI_INC)                   
 F90_FLAGS     = $(F90_MISC) $(F90_OPTIMIZE) $(F90_DEBUG) $(F90_INCLUDE)
 #---------------------------------------------------------------
 # LINK/LOADER DIRECTIVES
@@ -54,6 +54,8 @@ RANLIB  = ranlib
 #MPI_LIBS = -L$(MPI_LIB) -lpmpich -lmpich -lpmpich -L$(GM_LIB) -lgm -lpthread # myrinet
 #
 # For new style MPI2 (use -DPARALLEL -DMPI2)
+#MPI_LIBS = -L$(MPI_LIB) -lmpich -lmpichf90 -lpthread 
+#MPI_LIBS = -L$(MPI_LIB) -llammpio -llamf77mpi -lmpi -llam -lpthread -ldl
 #MPI_LIBS = -L$(MPI_LIB) -lmpich -lmpichf90 -lpthread 
 #MPI_LIBS = -L$(MPI_LIB) -llammpio -llamf77mpi -lmpi -llam -lpthread -ldl
 #           -L$(GM_LIB) -lgm
