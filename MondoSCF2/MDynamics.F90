@@ -62,7 +62,7 @@ MODULE MDynamics
           HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
           CALL Put(MDTime%D(iCLONE),"MDTime")
           CALL Put(.TRUE.,"DoingMD")
-          CALL Put( C%Opts%DMPOrder,"DMPOrder")
+          CALL Put(C%Opts%DMPOrder,"DMPOrder")
           CALL CloseHDFGroup(HDF_CurrentID)
        ENDDO
        CALL CloseHDF(HDFFileID)
@@ -96,7 +96,7 @@ MODULE MDynamics
     ENDIF
 !   Initialize MD
     iBAS=C%Sets%NBSets
-    CALL RenameDensityMatrix(C,iREMOVE)
+    CALL RenameDensityMatrix(C,C%Stat%Current%I(1),C%Stat%Current%I(2),C%Stat%Current%I(3))
     CALL OutputMD(C,0)
 !   Do MD
     DO iGEO = 1,C%Dyns%MDMaxSteps
@@ -150,7 +150,10 @@ MODULE MDynamics
 !      Evaluate energies at the new geometry
        CALL SCF(iBAS,iGEO+1,C)
 !      Store the Last P matrix
-       CALL RenameDensityMatrix(C,iREMOVE)
+       CALL RenameDensityMatrix(C,C%Stat%Current%I(1),C%Stat%Current%I(2),C%Stat%Current%I(3))
+       IF(C%Stat%Current%I(3)-iREMOVE > 0) THEN
+          CALL RemoveDensityMatrix(C,C%Stat%Current%I(3)-iREMOVE-1)
+       ENDIF
 !      Remove old Stuff from Scratch
        CALL CleanScratch(C,iGEO)
     ENDDO
@@ -160,7 +163,6 @@ MODULE MDynamics
 !--------------------------------------------------------------
   SUBROUTINE SetTempMaxBoltDist(C,Temp0)
     TYPE(Controls)        :: C
-!    TYPE(DBL_VECT)        :: Temp0
     REAL(DOUBLE)          :: Temp0
     REAL(DOUBLE)          :: Temp,Kin,Mass,TVel,VX,VY,VZ
     INTEGER               :: iCLONE,iATS,I,J,Jmax
@@ -544,15 +546,19 @@ MODULE MDynamics
 !--------------------------------------------------------------
 ! Rename the Last Density Matrix, Remove old ones
 !--------------------------------------------------------------
-  SUBROUTINE RenameDensityMatrix(C,iREMOVE)
+  SUBROUTINE RenameDensityMatrix(C,iSCF,iBAS,iGEO)
     TYPE(Controls)                 :: C
-    INTEGER                        :: iCLONE,iREMOVE
+    INTEGER                        :: iCLONE,iSCF,iBAS,iGEO
     CHARACTER(LEN=DEFAULT_CHR_LEN) :: chSCF,chBAS,chGEO,chCLONE
     CHARACTER(LEN=DEFAULT_CHR_LEN) :: PoldFile,PnewFile
 !      
-    chSCF = IntToChar(C%Stat%Current%I(1))
-    chBAS = IntToChar(C%Stat%Current%I(2))
-    chGEO = IntToChar(C%Stat%Current%I(3))
+!!$    chSCF = IntToChar(C%Stat%Current%I(1))
+!!$    chBAS = IntToChar(C%Stat%Current%I(2))
+!!$    chGEO = IntToChar(C%Stat%Current%I(3))
+!
+    chSCF = IntToChar(iSCF)
+    chBAS = IntToChar(iBAS)
+    chGEO = IntToChar(iGEO)
 !
     DO iCLONE=1,C%Geos%Clones
        chCLONE = IntToChar(iCLONE)
@@ -567,21 +573,53 @@ MODULE MDynamics
        CALL SYSTEM('/bin/cp -f  '//PoldFile//' '//PnewFile)
     ENDDO
 !
-    IF(C%Stat%Current%I(3)-iREMOVE > 0) THEN
-       DO iCLONE=1,C%Geos%Clones
-          chCLONE = IntToChar(iCLONE)
-          chGEO   = IntToChar(C%Stat%Current%I(3)-iREMOVE)
-          PoldFile = TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)  &
-                                           //'_G#'//TRIM(chGEO)     &
-                                           //'_C#'//TRIM(chCLONE)//'.Dsave'
-          CALL SYSTEM('/bin/rm -f  '//PoldFile)
-       ENDDO
-    ENDIF
-!
   END SUBROUTINE RenameDensityMatrix
+!--------------------------------------------------------------
+! Rename the Last Density Matrix, Remove old ones
+!--------------------------------------------------------------
+  SUBROUTINE RemoveDensityMatrix(C,iGEO)
+    TYPE(Controls)                 :: C
+    INTEGER                        :: iCLONE,iGEO
+    CHARACTER(LEN=DEFAULT_CHR_LEN) :: chSCF,chBAS,chGEO,chCLONE
+    CHARACTER(LEN=DEFAULT_CHR_LEN) :: PoldFile,PnewFile
+!
+    DO iCLONE=1,C%Geos%Clones
+       chCLONE = IntToChar(iCLONE)
+       chGEO   = IntToChar(iGEO)
+       PoldFile = TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)  &
+            //'_G#'//TRIM(chGEO)     &
+            //'_C#'//TRIM(chCLONE)//'.Dsave'
+       CALL SYSTEM('/bin/rm -f  '//PoldFile)
+    ENDDO
+!
+  END SUBROUTINE RemoveDensityMatrix
+!--------------------------------------------------------------
+! Rename the Last Density Matrix, Remove old ones
+!--------------------------------------------------------------
+  SUBROUTINE CopyDensityMatrix(C,iGEO,nGEO)
+    TYPE(Controls)                 :: C
+    INTEGER                        :: iCLONE,iGEO,nGEO
+    CHARACTER(LEN=DEFAULT_CHR_LEN) :: chGEO,chCLONE
+    CHARACTER(LEN=DEFAULT_CHR_LEN) :: PoldFile,PnewFile
+!
+    DO iCLONE=1,C%Geos%Clones
+       chCLONE = IntToChar(iCLONE)
+       chGEO   = IntToChar(iGEO)
+       PoldFile = TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)  &
+            //'_G#'//TRIM(chGEO)     &
+            //'_C#'//TRIM(chCLONE)//'.Dsave'
+       chGEO   = IntToChar(nGEO)
+       PnewFile = TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)  &
+            //'_G#'//TRIM(chGEO)     &
+            //'_C#'//TRIM(chCLONE)//'.Dsave'
+       CALL SYSTEM('/bin/cp -f  '//PoldFile//' '//PnewFile)
+    ENDDO
+!
+  END SUBROUTINE CopyDensityMatrix
+!--------------------------------------------------------------
 !
 !
-!
+!--------------------------------------------------------------
   SUBROUTINE OptimizeLattice(C)
     TYPE(Controls)  :: C
     INTEGER         :: iBAS,iGEO,iCLONE,I,J
