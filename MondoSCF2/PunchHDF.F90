@@ -56,6 +56,7 @@ CONTAINS
     TYPE(Geometries) :: G    
     TYPE(BasisSets)  :: B
     TYPE(DBL_VECT)   :: DoubleVect
+    TYPE(DBL_RNK2)   :: DoubleRnk2
     TYPE(BCSR)       :: DM
     CHARACTER(LEN=DCL) :: FailedProgram
     INTEGER          :: iGEO,iCLONE,iBAS,HDFFileID,I,MaxEll,MaxAtoms,MaxBloks,MaxNon0s,J
@@ -127,9 +128,17 @@ CONTAINS
        CALL Delete(DblMat)
        CALL Put(.TRUE.,'programfailed')
        CALL Put(.FALSE.,'archivedensity')
-!      MD Stuff
+!      MD and MC Stuff
+       CALL Put(1      ,'MDIter')
+       CALL Put(BIG_DBL,'MDTime') 
        CALL Put(.FALSE.,'DoingMD')
-       CALL Put(0,'DMPOrder')
+       CALL Put(.FALSE.,'DoingHybridMC')
+       CALL Put(0      ,'DMPOrder')
+       CALL Put(BIG_DBL,'MCEtot0')
+       CALL Put(BIG_DBL,'MCTemp0') 
+       CALL New(DoubleRnk2,(/3,MaxAtoms/))
+       DoubleRnk2%D=BIG_DBL
+       CALL Put(DoubleRnk2,'MCCarts0')
 #ifdef PARALLEL
        CALL Put(0,'LineLocExist')
        CALL New(ETDirArr,P%NSpace-1)
