@@ -99,6 +99,9 @@ MODULE OptionKeys
   ! Molecular dynamics 
   CHARACTER(LEN=*),   PARAMETER  :: GRAD_DYNAMICS     = 'MolecularDynamics'      
   INTEGER,            PARAMETER  :: GRAD_DO_DYNAMICS  = 6413123 
+  ! Hybrid Mondte-Carlo 
+  CHARACTER(LEN=*),   PARAMETER  :: GRAD_HYBRIDMC     = 'HybridMonteCarlo'      
+  INTEGER,            PARAMETER  :: GRAD_DO_HYBRIDMC  = 7776665 
   ! Transition state
   CHARACTER(LEN=*),   PARAMETER  :: GRAD_TS_SEARCH    ='TSSearch'
   INTEGER,            PARAMETER  :: GRAD_TS_SEARCH_NEB= 3577711 
