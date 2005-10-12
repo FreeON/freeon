@@ -52,6 +52,9 @@ MODULE ControlStructures
   END TYPE Options
 
   TYPE Dynamics
+     INTEGER                        :: MCMaxSteps
+     REAL(DOUBLE)                   :: MCTemp
+!
      INTEGER                        :: MDMaxSteps
      INTEGER                        :: MDAlgorithm
      REAL(DOUBLE)                   :: DTime
