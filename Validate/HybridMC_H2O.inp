@@ -1,0 +1,30 @@
+<BeginOptions>
+
+Charge=0
+Multiplicity=1
+DebugAll=(MinDebug,CheckSums)
+Guess=SuperPos
+SCFMethod=(RH)
+BasisSets=(STO-3G-SPLIT)
+ModelChem=(HF)
+Accuracy =(good)
+SCFConvergence=(DIIS)
+
+Grad=(HybridMonteCarlo)
+MaxMCStep=100
+MCTemperature=300
+
+MDMethod=Verlet
+DeltaTime=1.0
+MaxMDStep=10
+DMPOrder=0
+MinSCF=3
+MaxSCF=15
+
+<EndOptions>
+
+<BeginGeometry>
+ o   0.95309668               0.00000000               0.63925771
+ h   0.00278150               0.00000000               0.91468038
+ h   0.84735582               0.00000000              -0.34449809
+<EndGeometry>
