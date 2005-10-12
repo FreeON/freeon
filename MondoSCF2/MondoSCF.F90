@@ -9,6 +9,7 @@ PROGRAM MondoSCF
   USE ZippyQuote
   USE PrintParsed
   USE MDynamics
+  USE MonteCarlo
   IMPLICIT NONE
   TYPE(Controls) :: C
   !------------------------------------------------------------!
@@ -36,6 +37,8 @@ PROGRAM MondoSCF
      CALL Descender(C)
   CASE(GRAD_DO_DYNAMICS)
      CALL MD(C)
+  CASE(GRAD_DO_HYBRIDMC)
+     CALL HybridMC(C)
   CASE(GRAD_DO_SCAN)
      CALL Halt('SCAN Not Implimented')
 !     CALL ScanGeom(C)
