@@ -713,7 +713,6 @@ non-zero forces, are also shown in~Fig.~\ref{Fig:CnvgEnergy}.
   \resizebox*{3.6in}{!}{\includegraphics[angle=-90.00]{./DATA/HF_Energy_Forces_cnvg_3.ps}}
 \end{figure}
 
-
 We have performed full optimization of three dimensional urea supercells 
 without any symmetry constraint on the lattice or the atomic positions.
 Table~\ref{Tab:Urea} shows the lattice constants, bond lengths, 
@@ -722,8 +721,23 @@ for (urea)$_n$ supercells at the $\Gamma$-point RHF-MIC/6-21G* level of
 theory. The basis set is the same as in Ref~\cite{RDovesi90}.
 For the sake of comparison, we have also fully optimized a tetragonal lattice
 of urea in the $P\bar{4}2_1m$ space group with the 
-{\sc Crystal03}~\cite{Crystal03} package and a $2\times 2\times 2$ $k$-points 
-integration grid.
+{\sc Crystal03}~\cite{Crystal03} package (last column of Table~\ref{Tab:Urea}), a $2\times 2\times 2$ $k$-points 
+integration grid was used and the lattice parameters were taken from~\cite{KDoll04}.
+While the geometries of the urea molecule agree perfectly between the $k$-space integration
+and the $\Gamma$-point approximation, the energies and lattice parameters disagree in a strong way.
+The reason for this disagrement can be found in the different atomic basis set used.
+{\sc Crystal03} uses spherical harmonics d-shells consisting of 5 AOs while {\sc MondoSCF} 
+pure Cartesian basis functions i.e. 6 AOs per Cartesian d-shells. To see this effect in a more
+quantitaive way, we have performed gas phase geometry optimizations 
+(using the {\sc Gamess}~\cite{gamess} package) at the RHF/6-21G* level 
+of a single urea molecule with both spherical and Cartesian basis functions.
+The difference in the bond lengths and angles of the two basis set 
+is no more than $0.001$ \AA~and $0.1^\circ$ respectively, but the
+difference in the energy is much more significant and is about $8\cdot 10^{-3}$ a.u.
+%Gamess
+%223.7884474840-5D
+%223.7964330646-6D  
+%
 
 \begin{table}[t]
   \centering
@@ -735,31 +749,44 @@ integration grid.
 %    $n$ is the number of urea units in the (super)cell.
     Lengths, angles and energies are in \AA ngstr\"oms, degrees and atomic units respectively.
   }\label{Tab:Urea}
-  \begin{tabular}{lcccc}
+  \begin{tabular}{lccc}
+%          STRE_A         11.226421     -0.000017      0.000000     11.226421
+%          STRE_B         11.226421      0.000000      0.000000     11.226421
+%          STRE_C          9.306216      0.000015      0.000000      9.306216
+%          ALPHA          90.000000      0.000126      0.000000     90.000000
+%          BETA           90.000000      0.000505      0.000000     90.000000
+%          GAMMA          90.000000     -0.001120      0.000000     90.000000
+%          VOLM_L       1172.885894      0.000000      0.000000   1172.885894
+%     1    -3581.5628751397
     \toprule
-    &\multicolumn{3}{c}{\sc{MondoSCF}\footnote[1]{$\Gamma$-point.}}
+    &\multicolumn{2}{c}{\sc{MondoSCF}\footnote[1]{$\Gamma$-point.}}
     &\multicolumn{1}{c}{\sc{Crystal03}\footnote[2]{$2\times 2\times 2$ $k$-points.}} \\
     \hline
-    $n$             & 2 & 16 & 54 & 2 \\
-    $a_0$           & & & & 5.524 \\
-    $c_0$           & & & & 4.642 \\
-    $E/n$           & & & &$-$447.68322 \\
-    &\multicolumn{4}{c}{Bond lengths} \\
-    C$=$O           & & & & \\
-    C$-$N           & & & & \\
-    N$-$H$_1$       & & & & \\
-    N$-$H$_2$       & & & & \\
-    &\multicolumn{4}{c}{Bond angles} \\
-    OCN             & & & & \\
-    CNH$_1$         & & & & \\
-    CNH$_2$         & & & & \\
-    &\multicolumn{4}{c}{Dihedral angles} \\
-    OCNH$_1$        & & & & \\
-    OCNH$_2$        & & & & \\
-    NCNH$_1$        & & & & \\
+    $n$             & 16 & 54 & 2 \\
+    $a_0$           & 5.613 & & 5.524 \\
+    $c_0$           & 4.653 & & 4.642 \\                    
+    $E/n$           & $-$223.8476797 & &$-$223.84161 \\%-223.7964330646-6D  -223.7884474840-5D
+%                                         -447.6736050476
+%                                         -447.6741364066 4x4x4
+%
+    &\multicolumn{3}{c}{Bond lengths} \\
+    C$=$O           & 1.246 & & 1.246 \\
+    C$-$N           & 1.334 & & 1.332 \\
+    N$-$H$_1$       & 1.002 & & 1.000 \\%cis-O
+    N$-$H$_2$       & 1.001 & & 0.999 \\%trans-O
+    &\multicolumn{3}{c}{Bond angles} \\
+    OCN             & 121.5 & & 121.5 \\
+    CNH$_1$         & 119.5 & & 119.1 \\%cis-O
+    CNH$_2$         & 120.6 & & 120.6 \\%trans-O
+    &\multicolumn{3}{c}{Dihedral angles} \\
+    OCNH$_1$        &   0.0 & &   0.0 \\%cis-O
+    OCNH$_2$        & 180.0 & & 180.0 \\%trans-O
+    NCNH$_1$        & 180.0 & & 180.0 \\
     \botrule
   \end{tabular}
 \end{table}
+
+
 
 Table~\ref{Tab:MgO} shows the progression of the lattice constants and total energies computed
 for various MgO supercells at the $\Gamma$-point RHF-MIC level of theory using
