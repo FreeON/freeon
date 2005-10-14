@@ -14,9 +14,11 @@ MODULE FastMatrices
 !   A FAST O(N LG N) SPARSE MATRIX DATA STRUCTURE FOR ALL PROCCEDURES
 !======================================================================
    TYPE FASTMAT
+      INTEGER                  :: NSMat   !-- Number of Spin Matrices !<<<SPIN
       INTEGER                  :: Alloc   !-- Allocation key
       INTEGER                  :: Nodes   !-- Number of nodes in this SRST
       INTEGER                  :: Row     !-- Row index of this link
+      INTEGER                  :: NSMat   !-- Nbr spin matrices
       TYPE(SRST),POINTER   :: RowRoot !-- Row link to a sparse row search tree
       TYPE(FASTMAT), POINTER   :: Next    !-- Next row in linked list
    END TYPE FASTMAT
@@ -1325,7 +1327,7 @@ MODULE FastMatrices
          P%MTrix=P%MTrix+B
       ELSE
          M=BSiz%I(Row)
-         N=BSiz%I(Col)
+         N=BSiz%I(Col)*A%NSMat !<<<SPIN
          ALLOCATE(P%MTrix(M,N),STAT=MemStatus)
          CALL IncMem(MemStatus,0,N*M,'AddFASTMATBlok')
          P%MTrix(1:M,1:N)=B(1:M,1:N)
@@ -2245,13 +2247,16 @@ MODULE FastMatrices
 !======================================================================
 !     Allocate a new Search Tree Block Sparse Matrix
 !======================================================================
-    SUBROUTINE New_FASTMAT(A,Row,Cols_O)
+    SUBROUTINE New_FASTMAT(A,Row,Cols_O,NSMat_O)
       TYPE(FASTMAT),POINTER         :: A
       INTEGER                       :: Row
-      INTEGER,OPTIONAL,DIMENSION(2) :: Cols_O                       
+      INTEGER,OPTIONAL,DIMENSION(2) :: Cols_O  
+      INTEGER,OPTIONAL              :: NSMat_O
       INTEGER,DIMENSION(2)          :: Cols
       INTEGER                       :: I
 !----------------------------------------------------------------------
+      A%NSMat=1
+      IF(PRESENT(NSMat_O))A%NSMat=NSMat_O
       IF(PRESENT(Cols_O))THEN
          Cols=Cols_O
       ELSE
@@ -2264,6 +2269,7 @@ MODULE FastMatrices
       A%Alloc=ALLOCATED_SKIP_POINTERS_OFF
       A%Row=Row
       A%Nodes=1
+      A%NSMat=1
       SRSTCount=0
       NULLIFY(A%Next)
       CALL New_SRST(A%RowRoot,Cols(1),Cols(2),0)
