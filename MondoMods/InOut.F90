@@ -1668,7 +1668,7 @@ CONTAINS
 #ifdef PARALLEL
                 ENDIF
                 IF(BcastQ) THEN
-                   CALL Bcast(NSMat)
+                   CALL Bcast(NSDen)
                    CALL Bcast(NExpt)
                    CALL Bcast(NDist)
                    CALL Bcast(NCoef)
