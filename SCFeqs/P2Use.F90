@@ -93,9 +93,12 @@ PROGRAM P2Use
            ENDIF
         ENDDO
         !
+#ifndef PARALLEL
         IF(NSMat.EQ.1)THEN
+#endif
            !Set the P
            CALL SetToI(P,BlkP)
+#ifndef PARALLEL
         ELSEIF(NSMat.EQ.2)THEN
            !Set the P_alpha
            CALL DSCAL(MaxBlkSize**2*NAtoms,2D0*DBLE(NAlph)/DBLE(NEl)  ,BlkP%D(1,1),1)
@@ -121,6 +124,7 @@ PROGRAM P2Use
         ELSE
            CALL Halt('P2Use: Something wrong when computing P_guess!')
         ENDIF
+#endif
         !
         ! Check for the correct elctron count
         TrP=Trace(P)
@@ -134,9 +138,12 @@ PROGRAM P2Use
 #endif
              CALL Warn('Attempting to use density superpostion with a non STO basis set. Going for scaled I.')
         !
+#ifndef PARALLEL
         IF(NSMat.EQ.1)THEN
+#endif
            !Set the P
            CALL Multiply(P,DBLE(NEl  )/(Two*DBLE(NBasF)))
+#ifndef PARALLEL
         ELSEIF(NSMat.EQ.2)THEN
            !Set the P_alpha
            CALL Multiply(P,DBLE(NAlph)/DBLE(NBasF),Expert_O=1)
@@ -153,6 +160,7 @@ PROGRAM P2Use
         ELSE
            CALL Halt('P2Use: Something wrong when computing P_guess!')
         ENDIF
+#endif
         !
         TrP=Trace(P)
         IF(ABS(TrP-DBLE(NEl/SFac))>1.D-10) CALL Warn(' In P2Use, TrP = '//TRIM(DblToChar(TrP)))
