@@ -123,14 +123,19 @@
  matrix~\cite{CTymczak04a,Jorda95,RStratmann96,CGuerra98,MChallacombe00A}
  and iterative alternatives to eigensolution of the SCF 
  equations~\cite{XLi93,MDaw93,ADaniels97,APalser98,
-                 MChallacombe99,ANiklasson02A,ANiklasson03}.
+                 MChallacombe99,ANiklasson02A,ANiklasson03}
+ADD STG
+.
+
+
  It is well known that linear scaling 
  methods become more advantageous than conventional  
  algorithms only if the system size is bigger than
  few hundred atoms. This disadvantageous property of the linear
- scaling, for small systems, can be overcame by the
- parallelization of such algorithms. 
- Parallel Fock build are available in most quantum
+ scaling, for small systems, can be overcome by 
+ parallelization. 
+ Parallel Fock build (i.e. construction of the Coulomb and exact exchange matrices)
+ are available in most quantum
  chemistry programs such as GAMESS~\cite{GAMESS},
  Jaguar~\cite{DChasman98} and many others. 
  The upper limit of a single processor
@@ -143,20 +148,18 @@
  During the past decade parallel algorithms for the 
  formation of the Fock matrix have been developed
  ~\cite{MColvin93,TFurlani95,RHarrison96,YAlexeev02,HTakashima02,RLindh03}.
-
-
  Most of current parallel methods are based on a integral driven strategy
  to compute the Fock matrix. On one side, the integral driven approach
  allows a efficient and simple way to use the full permutational symmetry
  of the two electron integrals reducing considerably the computational time. 
- In the other side, it requires the contraction of an integral quartet with up to six 
+ On the other side, it requires the contraction of an integral quartet with up to six 
  different density matrix elements.
  While this is certainly not a problem during a serial Fock build it becomes
- much more complicate to distribute the density and/or Fock matrices through the 
+ much more complicated to distribute the density and/or Fock matrices through the 
  processors when the method has to be brought to parallel machines.
 
  To achieve load balance as well as data parallel, 
- those algorithms use complicate schemes for the 
+ those algorithms use complicated schemes for the 
  distribution of the density and/or Fock 
  matrices through the processors during the computation.
  This approach leads to an intensive inter-processor 
@@ -190,7 +193,7 @@
  partition~\cite{CGan03,CGan04B}.
 
  In this work we present an efficient and simple implementation 
- of the Order N eXchange (ONX) algorithm for massive parallel computer. The method
+ of the Order N eXchange (ONX) algorithm for massive parallel computers. The method
  is based on the equal time partitioning (ET) and can treat gas phase and periodic systems 
  without increasing the complexity of the code. The equal time partitioning exploits 
  the slow variation of the density matrix between self-consistent-field iterations
@@ -200,6 +203,10 @@
  of the exact exchange matrix with ONX is highly irregular relative 
  to parallel $\mathcal{O}(N^4)$ computation of the electron repulsion integrals (ERIs), 
  the latter enables the master-slave approach to work well~\cite{RHarrison96}.
+ Also, the time for the communication of the density and/or Fock matrices for conventional Fock build
+ scale as $\mathcal{O}(N^2)$ and is completly masked by convetional $\mathcal{O}(N^4)$ ERI evaluation.
+ This contrast with the $\mathcal{O}(N)$ computation of the exact exchange matrix and the $\mathcal{O}(N)$
+ communication required to distribute and collect the density and exchange matrices, respectively.
 
  The paper is organized as follow: in the Section~\ref{Sec:Algo} the method
  will be outlined.
@@ -222,7 +229,7 @@ The $\Gamma$-point approximation limits $k$-space sampling to
 just the central cell at $k=0$. Translational invariance is 
 imposed by introducing the minimum image convention (MIC)
 into the contraction phase of periodically summed
-two-electron integral, 
+two-electron integrals; 
 this ensures that interactions are always calculated between 
 nearest images. 
 In computation of the HF exchange matrix, the MIC
@@ -239,7 +246,7 @@ is described elsewhere~\cite{CTymczak04b}.
 In case of gas phase calculations, the summations over 
 the lattices ${\bf m}$ and ${\bf n}$ are just removed from Eq.~(\ref{Eq:Kab}).
 
-Our algorithm uses a completely distributed exchange matrix
+Our algorithm uses a density driven, completely distributed exchange matrix
 build. The density matrix, initially stored on the root
 processor, is partitioned following the scheme
 proposed in the Section~\ref{Sec:Impl}. Then sub-blocks are sent
@@ -249,8 +256,8 @@ carried out with the FastMat data structure~\cite{CGan04B}.
 
 The original ONX algorithm has been slightly restructured 
 to include PBC~\cite{CTymczak04b} and to improve parallel efficiency.
-In the first step, each processors $p$ recive its dedicate sub density matrix $D(p)$ form root.
-During the second step, the two distribution lists $\{ac^\mathbf{m}\}$ and
+In the first step, each processor $p$ recives a dedicated sub density matrix $D(p)$ from root.
+During the second step, two distribution lists $\{ac^\mathbf{m}\}$ and
 $\{bd^\mathbf{n}\}$ are built, where $c$ and $d$ run over the rows and the
 columns of $D(p)$, respectively. The procedure for structuring the list of distributions
 for the $\{ac^\mathbf{m}\}$ pair is outlined in Fig.~\ref{Fig:List}.
@@ -267,18 +274,18 @@ of the integral estimate $|(ac^\mathbf{m}|ac^\mathbf{m})_{\rm mic}|^{1/2}$.
   }\label{Fig:List}
   \begin{equation*}
     \begin{split}
-      &\tt          DO\,AtC\in COL(D(p))\\
-      &\tt          DO\,AtA=1,NAtoms\\
+      &\tt          DO\,C\in COL(D(p))\\
+      &\tt          DO\,A=1,NAtoms\\
       &\tt\quad       DO\,m=1,NCell\\
-      &\tt\qquad        DO\,c\in AtC\\
-      &\tt\qquad        DO\,a\in AtA\\
+      &\tt\qquad        DO\,c\in A\\
+      &\tt\qquad        DO\,a\in A\\
       &\tt\qquad\quad     COMPUTE\,|(ac^m|ac^m)_{mic}|^{1/2}\\
       &\tt\qquad\quad     IF(|(ac^m|ac^m)_{mic}|^{1/2}<{\tt Thresh)\,CYCLE}\\
-      &\tt\qquad\quad     ADD\,ac^m\,{\tt to}\, \{ac^m\}\\
+      &\tt\qquad\quad     ADD\,ac^m\,{\tt to}\, \{ac^m\}(A,C)\\
       &\tt\qquad        ENDDO\\
       &\tt\qquad        ENDDO\\
       &\tt\quad       ENDDO\\
-      &\tt\quad       SORT\,\{ac^m\}\,by\,decreasing\,|(ac^m|ac^m)_{mic}|^{1/2}\\
+      &\tt\quad       SORT\,\{ac^m\}(A,C)\,by\,decreasing\,|(ac^m|ac^m)_{mic}|^{1/2}\\
       &\tt         ENDDO\\
       &\tt         ENDDO
     \end{split}
@@ -300,17 +307,17 @@ Level-2 BLAS matrix-vector multiplication subroutine (DGEMV).
   }\label{Fig:ONXcore}
   \begin{equation*}
     \begin{split}
-      &\tt        Receive\,D(p) from ROOT\\
+      &\tt        Receive\,D(p)\,from\,ROOT\\
       &\tt        Make\,list\,\{ac^m\} \\
       &\tt        Make\,list\,\{bd^n\} \\
-      &\tt        DO\,AtC\in COL(D(p)) \\
-      &\tt        DO\,AtD\in ROW(D(p),AtC) \\
+      &\tt        DO\,C\in COL(D(p)) \\
+      &\tt        DO\,D\in ROW(D(p),C) \\
       &\tt\quad     ti=TIMER(\,) \\
-      &\tt\quad     DO\,AtA=1,NAtoms \\
-      &\tt\quad     DO\,AtB=1,AtA \\
-      &\tt\qquad      DO\,a,c,m\in\{ac^m\}(AtA,AtC) \\
+      &\tt\quad     DO\,A=1,NAtoms \\
+      &\tt\quad     DO\,B=1,A \\
+      &\tt\qquad      DO\,a,c,m\in\{ac^m\}(A,C) \\
       &\tt\qquad\quad   IF(SkipOut)\,EXIT  \\
-      &\tt\qquad\quad   DO\,b,d,n\in\{bd^n\}(AtB,AtD) \\
+      &\tt\qquad\quad   DO\,b,d,n\in\{bd^n\}(B,D) \\
       &\tt\qquad\qquad    IF(SkipOut)\,EXIT  \\
       &\tt\qquad\qquad    COMPUTE\,(ac^m|bd^n)_{mic} \\
       &\tt\qquad\quad   ENDDO \\
@@ -319,7 +326,7 @@ Level-2 BLAS matrix-vector multiplication subroutine (DGEMV).
       &\tt\quad     ENDDO \\
       &\tt\quad     ENDDO \\
       &\tt\quad     tf=TIMER(\,) \\
-      &\tt\quad     Time(AtC,AtD)=tf-ti \\
+      &\tt\quad     Time(C,D)=tf-ti \\
       &\tt        ENDDO \\
       &\tt        ENDDO \\
       &\tt        Send\,Time\,to\,ROOT \\
@@ -328,28 +335,28 @@ Level-2 BLAS matrix-vector multiplication subroutine (DGEMV).
   \end{equation*}
 \end{figure}
 
- At this moment every processors, including the root, compute 
+ In this 4$^{th}$ step every processors, including the root, compute 
  the lower part of the exchange sub-matrix $K(D(p))$ 
  without any inter-processor communications. 
- The work of each atom-block
- $D_{ij}$ used to compute the exchange 
- sub-matrix $K(D_{ij})$ are timed.
- At the end of the parallel exchange build, each sub-matrices containing 
+ The work corresponding to each atom-block
+ $D_{CD}$ used to compute the exchange 
+ sub-matrix $K(D_{CD})$ are timed and collected in {\tt Time(C,D)}.
+ At the end of the parallel exchange build, 
  the timing information are send to the root processor.
- Thus the new timing matrix will be used to partition the density 
+ Thus the new timing matrix {\tt Time} can be used to partition the density 
  matrix for the next SCF iteration.
- The distributed exchange sub-matrices are sent to the root processor and globally 
- summed through a binary tree based communication.
- The strategy currently used in MondoSCF to store all the matrices on 
+ The distributed exchange sub-matrices are globally 
+ summed through a binary tree based communication to the root processor.
+ The strategy currently used in {\sc MondoSCF} to store all the matrices on 
  the root processor will be replace in a near future
  by a completely distributed scheme.
  
  However, to avoid excessive inter processor communications the algorithm 
- does not use any symmetry of the ERIs. This approach
- definitely increase the number of ERIs to compute at each Fock build,
- but in the same time greatly simplifies the coding and avoids complicate
+ does not use permutational symmetry of the ERIs. This approach
+ definitely increase the number of ERIs to compute at each Fock build by a factor 2-3~\cite{ESchwegler00} ,
+ however in the same time greatly simplifies the coding and avoids complicate
  synchronization problem between processors to send/receive blocks of the 
- density and exchange matrices. It becomes much 
+ density and/or exchange matrices. It becomes much 
  easier to control the amount of work given to each processor.
  At the present moment, the ERIs are evaluated accordingly to
  the vertical recurrence relation (VRR) introduced by Obara 
@@ -365,9 +372,9 @@ Level-2 BLAS matrix-vector multiplication subroutine (DGEMV).
  To estimate the time needed to process each block we define
  a non-negative cost function $\phi$ on contiguous atomic-block of
  $D$. In our case the function $\phi$ is either the number of 
- non-zero elements of $D$ or the time needed for the computation
- of the exchange matrix block $K(D_{ij})$ where $D_{ij}$ is the
- $ij$-th atomic block of the density matrix. In the following, 
+ non-zero elements of $D$ or the time {\tt Time} needed for the computation
+ of the exchange matrix block $K(D_{CD})$ where $D_{CD}$ is the
+ $CD$-th atomic block of the density matrix (see Figure~\ref{Fig:ONXcore}). In the following, 
  we will not discuss more into detail the non-zero partitioning.
  Indeed this partition leads to a very poor load balance and it is
  only used to generate the first partition (i.e. when 
