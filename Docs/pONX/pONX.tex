@@ -111,8 +111,7 @@
 
  The most consuming part of an SCF cycle remains the formation
  of the Fock matrix, even with the apperance of fast linear
- scaling algorithms. 
- With the advent in the development of $\mathcal{O}(N)$ methods
+ scaling algorithms 
  that overcome the bottlenecks encountered in conventional methods,
  including computation of the Hartree-Fock exchange 
  matrix~\cite{ESchwegler96,ESchwegler97,ESchwegler98A,ESchwegler99,ESchwegler00,CTymczak04b},
@@ -123,10 +122,7 @@
  matrix~\cite{CTymczak04a,Jorda95,RStratmann96,CGuerra98,MChallacombe00A}
  and iterative alternatives to eigensolution of the SCF 
  equations~\cite{XLi93,MDaw93,ADaniels97,APalser98,
-                 MChallacombe99,ANiklasson02A,ANiklasson03}
-ADD STG
-.
-
+                 MChallacombe99,ANiklasson02A,ANiklasson03}.
 
  It is well known that linear scaling 
  methods become more advantageous than conventional  
@@ -205,17 +201,16 @@ ADD STG
  the latter enables the master-slave approach to work well~\cite{RHarrison96}.
  Also, the time for the communication of the density and/or Fock matrices for conventional Fock build
  scale as $\mathcal{O}(N^2)$ and is completly masked by convetional $\mathcal{O}(N^4)$ ERI evaluation.
- This contrast with the $\mathcal{O}(N)$ computation of the exact exchange matrix and the $\mathcal{O}(N)$
- communication required to distribute and collect the density and exchange matrices, respectively.
+ This contrast with the ONX algorithm where the time for computing the exact 
+ exchange matrix and for the interprocessor communications scales linearly with system size.
 
  The paper is organized as follow: in the Section~\ref{Sec:Algo} the method
  will be outlined.
  In Section~\ref{Sec:Impl} we describe a computational implementation 
  of parallel ONX. In Section~\ref{Sec:Disc} we discuss benchmark calculations of 
- water clusters, endothelin and cells composed of 64 
- H$_2$O molecules and 32 KCNS with periodic boundary conditions (PBC).    
+ water clusters, endothelin and cells composed of 64
+ (H$_2$O) molecules and 32 KCNS with Periodic Boundary Conditions (PBC).    
  In Section~\ref{Sec:Conc} we present our conclusions.
-
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -292,12 +287,12 @@ of the integral estimate $|(ac^\mathbf{m}|ac^\mathbf{m})_{\rm mic}|^{1/2}$.
   \end{equation*}
 \end{figure}
 
-In the third step, parallel ONX $K$ builds begun with the outer loops over
+In the third step, parallel ONX $K$ builds start with the outer loops over
 the rows and columns of the local density matrix $D(p)$, 
 as shown in Fig.~\ref{Fig:ONXcore}. Next, a two-fold loop over
 the distribution lists of $\{ac^\mathbf{m}\}$ and $\{bd^\mathbf{n}\}$
-is begun in which ERIs are computed. The contraction of 
-the ERIs with the density matrix is made after the loops over the lists with the help of a 
+takes place in which ERIs are computed. The contraction of 
+the ERIs with the density matrix is done after the loops over the lists with the help of a 
 Level-2 BLAS matrix-vector multiplication subroutine (DGEMV).
 
 \begin{figure}[htbp]
@@ -308,8 +303,7 @@ Level-2 BLAS matrix-vector multiplication subroutine (DGEMV).
   \begin{equation*}
     \begin{split}
       &\tt        Receive\,D(p)\,from\,ROOT\\
-      &\tt        Make\,list\,\{ac^m\} \\
-      &\tt        Make\,list\,\{bd^n\} \\
+      &\tt        Make\,list\,\{ac^m\}\,and\,\{bd^n\} \\
       &\tt        DO\,C\in COL(D(p)) \\
       &\tt        DO\,D\in ROW(D(p),C) \\
       &\tt\quad     ti=TIMER(\,) \\
@@ -366,9 +360,19 @@ Level-2 BLAS matrix-vector multiplication subroutine (DGEMV).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% To partition the density matrix we use a two level Multiple Recursive Distribution (MRD)
+% scheme~\cite{LRomero95}.
+% Let us assume a $P$ processor network
+% During the first level partition, the matrix $T$ is divided into $p=\lceil\sqrt{P}\rceil$
+% consecutive rowwise intervals $[r_i,r_{i+1}]$ such that the sum $T_i$'s
+% for each block $1 \le i < p$
+%the sum of their 
+
 \subsection{Partition}
- In this section we present the block partition used
- throughout this work~\cite{APinar97,LRomero95}. 
+ In this section we present the two level version of the multiple recursive 
+ decomposition introduiced in~\cite{LRomero95}.
+% block partition used throughout this work. 
  To estimate the time needed to process each block we define
  a non-negative cost function $\phi$ on contiguous atomic-block of
  $D$. In our case the function $\phi$ is either the number of 
@@ -382,20 +386,21 @@ Level-2 BLAS matrix-vector multiplication subroutine (DGEMV).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{1D Partition}
- The first objective is to divide a 1D array task $T$ of length $M$
- into $p=\lceil\sqrt{P}\rceil$ consecutive intervals $[r_i,r_{i+1}]$ such
- that the $T_i$'s for
+ During the level 1 partition the 1D array task $T_k=\sum_l\phi_{kl}$ of length {\tt NAtoms}
+ is (rowwise) divided into $p=\lceil\sqrt{P}\rceil$ consecutive intervals $[r_i,r_{i+1}]$ such
+ that the sum of the $T_i$'s elements for
  each block $1 \le i < p$ are equal up to a certain error
- $\varepsilon$. In rowwise stripping the $T_i$ element is equal
- to the sum of the cost function along the $i$-th row 
- $T_i=\sum_j\phi_{ij}$. 
+ $\varepsilon$. 
+% In rowwise stripping the $T_i$ element is equal
+% to the sum of the cost function along the $i$-th row 
+% $T_i=\sum_j\phi_{ij}$. 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{2D Partition}
 % The matrix is first partitioned row wise into 
 % $p=\lfloor\sqrt{P}\rfloor$
 % consecutive intervals $[r_i,r_{i+1}]$, $1 \le i < p$
 % following the line as for the 1D partitioning.
- Then each rows are partitioned columnwise in a similar way,
+ During the level 2 partition, each rows $\phi_i$ are partitioned columnwise in a similar way,
  $[c_j,c_{j+1}]$, $1 \le j < q_i$ where $q_i$ is given
  by 
 \begin{equation}
@@ -408,6 +413,8 @@ Level-2 BLAS matrix-vector multiplication subroutine (DGEMV).
  in which $Q_i=\sum_{k=1}^{i-1}q_k$, $1 \le i < p$, $[\bullet]$ 
  is the nearest integer function, $\lfloor\bullet\rfloor$ and $\lceil\bullet\rceil$
  are the floor and ceiling functions respectively.
+ Figure~\ref{fig:part2D} shows an example of two level recursive decomposition
+ for a network of 15 processors.
 % $q_1=|\sqrt{P}|$, $q_j=\lfloor(P-\sum_{k=1}^jq_k)/$
 % The weight function is easily obtained through $w_i=q_i p/P$.
  
@@ -656,8 +663,9 @@ delivers 105 fold speedup.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{figure}[htbp]
+  \centering
  \caption{\protect
-   Horizontal and vertical multiple recursive decomposition.
+   Example of a horizontal and vertical recursive decomposition for a network of 15 processors.
  }\label{fig:part2D}
  \setlength{\unitlength}{5cm}
  \begin{picture}(1,1)
