@@ -1195,7 +1195,7 @@ MODULE MemMan
           A%NExpt=0
           A%NDist=0
           A%NCoef=0
-          A%NSDen=0!<<< SPIN
+          A%NSDen=1!<<< SPIN
        ENDIF
        CALL New(A%NQ  ,A%NExpt)
        CALL New(A%Lndx,A%NExpt)
