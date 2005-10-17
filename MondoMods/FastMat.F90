@@ -14,7 +14,6 @@ MODULE FastMatrices
 !   A FAST O(N LG N) SPARSE MATRIX DATA STRUCTURE FOR ALL PROCCEDURES
 !======================================================================
    TYPE FASTMAT
-      INTEGER                  :: NSMat   !-- Number of Spin Matrices !<<<SPIN
       INTEGER                  :: Alloc   !-- Allocation key
       INTEGER                  :: Nodes   !-- Number of nodes in this SRST
       INTEGER                  :: Row     !-- Row index of this link
