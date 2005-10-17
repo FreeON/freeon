@@ -59,7 +59,7 @@ CONTAINS
     Filename = TrixFile('Rho'//IntToChar(MyID),Args,SCFCycle)
     Open(Unit=Seq,File=TRIM(Filename),Status='old',form='unformatted',access='sequential')
 
-    Read(Unit=Seq,Err=202,IOSTAT=IOS) Tmp%NExpt,Tmp%NDist,Tmp%NCoef
+    Read(Unit=Seq,Err=202,IOSTAT=IOS) Tmp%NSDen,Tmp%NExpt,Tmp%NDist,Tmp%NCoef!<<<SPIN
     CALL New(Tmp%NQ  ,Tmp%NExpt)
     CALL New(Tmp%OffQ,Tmp%NExpt)
     CALL New(Tmp%OffR,Tmp%NExpt)
@@ -135,7 +135,7 @@ IF(MyID == 0) THEN
     write(*,*) 'NewNExpt,NewNDist,NewNCoef=',NewNExpt,NewNDist,NewNCoef
 ENDIF
 #endif
-    CALL New_HGRho(Rho,(/NewNExpt,NewNDist,NewNCoef/))
+    CALL New_HGRho(Rho,(/NewNExpt,NewNDist,NewNCoef,Tmp%NSDen/))!<<<SPIN
 
     CALL New(CSize,NPrc-1,M_O=0)
     CALL New(disp,NPrc-1,M_O=0)
