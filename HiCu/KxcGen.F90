@@ -69,7 +69,7 @@ MODULE KxcGen
                             + (Pair%A(3)-Pair%B(3))**2
                 IF(TestAtomPair(Pair,CubeRoot%Box)) THEN
 #ifdef PARALLEL
-                  CALL AddFASTMATBlok(Kxc,AtA,AtB,KxcBlock(Pair,CubeRoot))
+                  CALL AddFASTMATBlok(Kxc,AtA,AtB,KxcBlock(Pair,CubeRoot,Kxc%NSMat))
 #else
                   Kxc%MTrix%D(R:R+NAB-1)=Kxc%MTrix%D(R:R+NAB-1)+KxcBlock(Pair,CubeRoot,Kxc%NSMat)
 #endif
@@ -135,7 +135,7 @@ MODULE KxcGen
 
 !===============================================================================
 #ifdef PARALLEL
-     FUNCTION KxcBlock(Pair,CubeRoot) RESULT(Kblk)
+     FUNCTION KxcBlock(Pair,CubeRoot,NSMat) RESULT(Kblk)
 #else
      FUNCTION KxcBlock(Pair,CubeRoot,NSMat) RESULT(Kvct)
 #endif

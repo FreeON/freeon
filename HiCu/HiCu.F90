@@ -114,6 +114,8 @@ PROGRAM HaiKu
 #endif
 ! CALL New(Kxc)
 #ifdef PARALLEL
+  NSDen=1!Default for now
+  NSMat=1!Default for now
   CALL New_FASTMAT(Kxc,0,(/0,0/))
 #else
   NSDen=Rho%NSDen
