@@ -2254,8 +2254,6 @@ MODULE FastMatrices
       INTEGER,DIMENSION(2)          :: Cols
       INTEGER                       :: I
 !----------------------------------------------------------------------
-      A%NSMat=1
-      IF(PRESENT(NSMat_O))A%NSMat=NSMat_O
       IF(PRESENT(Cols_O))THEN
          Cols=Cols_O
       ELSE
@@ -2269,6 +2267,7 @@ MODULE FastMatrices
       A%Row=Row
       A%Nodes=1
       A%NSMat=1
+      IF(PRESENT(NSMat_O))A%NSMat=NSMat_O
       SRSTCount=0
       NULLIFY(A%Next)
       CALL New_SRST(A%RowRoot,Cols(1),Cols(2),0)
