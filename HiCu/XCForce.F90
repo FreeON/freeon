@@ -67,6 +67,7 @@ PROGRAM XCForce
   CALL SetAACoef()
 #endif
 #ifdef PARALLEL
+  NSDen=1 !<<< SPIN Default value for now!
   CALL ParaInitRho(Args)
   CALL GetBBox()
   CALL SendBBox()
