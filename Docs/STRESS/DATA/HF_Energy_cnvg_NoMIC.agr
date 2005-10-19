@@ -54,7 +54,7 @@
 @timestamp rot 0
 @timestamp font 0
 @timestamp char size 1.000000
-@timestamp def "Wed Oct 19 11:08:43 2005"
+@timestamp def "Wed Oct 19 12:05:36 2005"
 @r0 off
 @link r0 to g0
 @r0 type above
@@ -252,7 +252,7 @@
 @    frame background pattern 0
 @    s0 hidden false
 @    s0 type xy
-@    s0 symbol 0
+@    s0 symbol 8
 @    s0 symbol size 1.000000
 @    s0 symbol color 0
 @    s0 symbol pattern 1
@@ -301,7 +301,7 @@
 @    s0 legend  ""
 @    s2 hidden false
 @    s2 type xy
-@    s2 symbol 9
+@    s2 symbol 8
 @    s2 symbol size 1.750000
 @    s2 symbol color 1
 @    s2 symbol pattern 1
