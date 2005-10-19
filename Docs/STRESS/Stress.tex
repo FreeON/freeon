@@ -124,7 +124,7 @@ models to large condensed phase systems, surfaces and wires.
 While the $\Gamma$-point approximation uses only the $\mathbf{k}=0$ point to sample
 the Brillouin zone, it does however converge to the 
 ${\bf k}$-space integration limit, in the worst case with the inverse  
-the unit cell volume (see for example Refs.~\cite{CKittel71,NAshcroft76}).
+unit cell volume (see for example Refs.~\cite{CKittel71,NAshcroft76}).
 The convergence of the $\Gamma$-point approximation to 
 the corresponding ${\bf k}$-space limit was recently 
 demonstrated by us for DFT~\cite{CTymczak04a}, HF and hybrid 
@@ -175,7 +175,7 @@ which is a combination of direct and reciprocal lattice summations.
 For an efficient truncation of the three infinite summations of the exchange
 series, the {\sc Crystal03} program uses in the first hand, the decay between local basis function 
 products and in the second, the fact that the element of the density 
-matrix of an insulator decays exponentially with interatomic separations.
+matrix of an insulator decays exponentially with inter-atomic separations.
 The strategy to compute the analytical Hartree-Fock gradients for 
 periodic system, in the frame of the {\sc Crystal03} package has been 
 presented by Doll, Saunders and Harrison~\cite{KDoll01}.
@@ -697,11 +697,11 @@ geometry optimization with the {\sc Crystal03} package.
 In order to analyze the convergence of the $\Gamma$-point energy to the ${\bf k}$-space limit
 we have performed single point calculations for the 
 (HF)$_n$ chains with cell parameter $a_0=2.4745$\AA~and bond length $d=0.9453$\AA.
-Figure~\ref{Fig:CnvgEnergy} shows the relative error to the 
+Figure~\ref{Fig:CnvgEnergy} shows the logarithm relative error to the 
 converged large unit-cell $\Gamma$-point approximation
 %${\bf k}$-space limit
 with respect to the unit-cell length with and without the MIC.
-The absolute convergences of the atomic and cell forces, where
+The logarithm absolute convergences of the atomic and cell forces, where
 the bond length has been slight contracted by 0.01\AA~to generate 
 non-zero forces, are also shown in Figure~\ref{Fig:CnvgEnergy}.
 The calculations with the MIC show an exponential convergence of the total
@@ -709,18 +709,13 @@ energy and forces to the converged large unit-cell $\Gamma$-point approximation
 with respect to cell length. However, a naive implementation of 
 the $\Gamma$-point exact exchange i.e. without the MIC leads to a convergence 
 of the total energy inversely proportional to the system size as can be seen 
-in Figure~\ref{Fig:CnvgEnergy}. The behavior of the convergence of the total energy
+in Figure~\ref{Fig:CnvgEnergyNoMIC}. The behavior of the convergence of the total energy
 without the MIC is expected to be inversely proportional to the volume of the 
-unit-cell for 3D-periodic systems.\\
-\\
-\\
-{\bf ??? SHALL WE HAVE AN EXTRA FIG WITH A FIT 1/L ????}\\
-\\
-
+unit-cell for 3D-periodic systems.
 
 
 \begin{figure}[h]
-  \caption{Convergence of the $\Gamma$-point relative energy with and without the MIC to the corresponding 
+  \caption{Convergence of the logarithm $\Gamma$-point relative energy with and without the MIC to the corresponding 
     %${\bf k}$-space limit 
     converged large unit-cell $\Gamma$-point approximation
     for the (HF)$_n$ chains with respect to unit-cell length. The cell parameter 
@@ -732,6 +727,19 @@ unit-cell for 3D-periodic systems.\\
 %  \resizebox*{3.6in}{!}{\includegraphics[angle=-90.00]{./DATA/HF_Energy_Forces_cnvg.ps}}
 %  \resizebox*{3.6in}{!}{\includegraphics[angle=-90.00]{./DATA/HF_Energy_Forces_cnvg_2.ps}}
   \resizebox*{3.6in}{!}{\includegraphics[angle=-90.00]{./DATA/HF_Energy_Forces_cnvg_3.ps}}
+\end{figure}
+
+
+\begin{figure}[h]
+  \caption{Convergence of the logarithm $\Gamma$-point relative energy without the MIC to the corresponding 
+    converged large unit-cell MIC $\Gamma$-point approximation
+    for the (HF)$_n$ chains ($n$ ranges from 1 to 31) with respect to logarithm unit-cell length. 
+    The cell parameter $a_0=2.4745$\AA~and bond length $d=0.9453$\AA~were held fixed. 
+    Calculations were performed at the RHF-MIC/6-31G level of theory and the {\tt TIGHT} threshold.}\label{Fig:CnvgEnergyNoMIC}
+%  \resizebox*{3.6in}{!}{\includegraphics[angle=-90.00]{./DATA/HF_Energy_cnvg.ps}}
+%  \resizebox*{3.6in}{!}{\includegraphics[angle=-90.00]{./DATA/HF_Energy_Forces_cnvg.ps}}
+%  \resizebox*{3.6in}{!}{\includegraphics[angle=-90.00]{./DATA/HF_Energy_Forces_cnvg_2.ps}}
+  \resizebox*{3.6in}{!}{\includegraphics[angle=-90.00]{./DATA/HF_Energy_cnvg_NoMIC.ps}}
 \end{figure}
 
 We have performed full optimization of three dimensional urea supercells 
@@ -757,7 +765,9 @@ is no more than $0.001$ \AA~and $0.1^\circ$ respectively, but the
 difference in the energy is much more significant and is about $8\cdot 10^{-3}$ a.u.
 By inspection of the total energies in Table~\ref{Tab:Urea}, we can see that the difference
 in energy of the two different basis set is of the same order as what we could observe
-for gas phase calculations.
+for gas phase calculations. We conclude that the differences observed for the geometry
+optimizations of urea are mainly due to the different basis set used by {\sc Crystal03} and 
+{\sc MondoSCF}.
 %Gamess
 %-223.7884474840-5D
 %-223.7964330646-6D  
@@ -1057,16 +1067,16 @@ atomic and cell forces to the converged large unit-cell $\Gamma$-point approxima
 with respect to cell length have been explicitly shown to be exponential 
 in the cell size (see Figure~\ref{Fig:CnvgEnergy}). 
 A fast convergence of the total energy and geometrical parameters
-have also been observed for the 3D-systems (MgO)$_n$ and (urea)$_n$. We belive
+have also been observed for the 3D-systems (MgO)$_n$ and (urea)$_n$. We believe
 that, for insulator, the convergence of the HF-MIC $\Gamma$-point total energy 
 and geometrical parameters to the converged large unit-cell is exponential 
 with respect to cell volume.
-We have also shown for the (HF)$_n$ systems that a naive implementation of 
+We have also shown, for the (HF)$_n$ systems, that a naive implementation of 
 the $\Gamma$-point exact exchange i.e. without the minimal image convention 
 leads to a convergence of the total energy inversely proportional to 
-the system size. For 3D-periodic system, we belive that the convergence 
-of the total energy without the MIC behaves inversely proportional to the volume of the
-unit-cell.
+the system size. For 3D-periodic system, we believe that the convergence 
+of the total energy without the MIC behaves inversely proportional to the 
+unit-cell volume.
 
 Convergence of bond lengths, bond angles, 
 dihedral angles and lattice parameters within the HF-MIC $\Gamma$-point
