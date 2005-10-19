@@ -50,14 +50,15 @@
 
 
 \def\Tr{{\rm Tr}}
+
 %\nofiles
 
 \begin{document}
 
 %\preprint{APS/123-QED}
 
-\title{blablabla  energy gradients with respect to atomic positions and cell parameters
-  within the blablabla $\Gamma$-point approximation}
+\title{Density functional energy gradients with respect to atomic positions and cell parameters
+  within the $\Gamma$-point approximation}
 
 \author{Val\'ery Weber}
 \email{valery.weber@unifr.ch}
@@ -83,6 +84,74 @@ lattice gradients.}
 \section{Introduction}
 
 
+
+
+\subsection{Coulomb matrix}
+
+\begin{equation}
+  J_{ab}=J_{ab}^{In}+J_{ab}^{PFF}+J_{ab}^{TF}
+\end{equation}
+
+
+\subsubsection{Periodic far field}
+
+\begin{equation}
+  J_{ab}^{PFF}=\sum_{\mathbf{R}\in PFF}\iint
+  \frac{\rho_{ab}^{\infty}(\mathbf{r}_1)\rho_{tot}^{\infty}(\mathbf{r}_2)}{|\mathbf{r}_1-\mathbf{r}_2+\mathbf{R}|}
+  d^3r_1d^3r_2
+\end{equation}
+
+\subsubsection{Tin-Foil}
+The tin-foil correction to the Coulomb matrix is
+\begin{equation}
+  J_{ab}^{TF}=\frac{2\pi}{3V}(QS_{ab}-2\mathbf{d}_{ab}\cdot\mathbf{D})
+\end{equation}
+where $Q$ is the trace of the system quadrupole, $S_{ab}$ is an element of the overlap matrix,
+$\mathbf{D}$ the dipole moment of the system,
+$\mathbf{d}_{ab}$ the dipole moment of the distribution $\rho_{ab}^\infty$.
+The derivative of $J_{ab}^{TF}$ with respect to the cell parameter $M_{ij}$ is
+\begin{equation}
+  \begin{split}
+    \frac{\partial J_{ab}^{TF}}{\partial M_{ij}}&=
+    -\frac{2\pi}{3V^2}\frac{\partial V}{\partial M_{ij}}(QS_{ab}-2\mathbf{d}_{ab}\cdot\mathbf{D})\\
+    &+\frac{2\pi}{3V}(\frac{\partial Q}{\partial M_{ij}}S_{ab}+Q\frac{\partial S_{ab}}{\partial M_{ij}}\\
+    &-2\frac{\partial \mathbf{d}_{ab}}{\partial M_{ij}}\cdot\mathbf{D}
+    -2\mathbf{d}_{ab}\cdot\frac{\partial \mathbf{D}}{\partial M_{ij}}),
+  \end{split}
+\end{equation}
+where the derivatives ${\partial Q}/{\partial M_{ij}}$,
+${\partial \mathbf{d}_{ab}}/{\partial M_{ij}}$ and
+${\partial \mathbf{D}}/{\partial M_{ij}}$ are straitforward;
+the term ${\partial S_{ab}}/{\partial M_{ij}}$
+is given in (\ref{Eq:OvDer}).
+
+
+
+\subsection{Exchange-correlation matrix}
+
+
+In calculation with PBC, the numerical integration of the DFT
+exchange-correlation term is carried out over a cuboid
+integration domain $V_{\Box}$ which is equivalent to the unit
+cell volume $V_{UC}$. The exchange-correlation matrix element is thus
+\begin{equation}\label{Eq:xc}
+  K_{ab}^{xc}=\int_{V_\Box}\rho_{ab}(r)v_{xc}[\rho,r]d^3r.
+\end{equation}
+This simple integration volume should be contrasted with more
+conventional methods for computing the exchange-correlation matrix, involving
+the ``Becke weights'' cite, which requirs integration over $V_\infty$.
+The derivative of $K_{ab}^{xc}$ with respect to cell parameters is given by
+\begin{equation}
+  \begin{split}
+    \frac{\partial K_{ab}^{xc}}{\partial M_{ij}}&=
+    \int_{V_{\Box}}\frac{\partial}{\partial M_{ij}}(\rho_{ab}(\mathbf{r})v_{xc}[\rho,\mathbf{r}])d^3r\\
+    &+\delta_{ij}\int_{S_{j\Box}}\rho_{ab}(\mathbf{r})v_{xc}[\rho,\mathbf{r}]dS
+  \end{split}
+\end{equation}
+where the intergale on the surface $S_{j\Box}$ arises
+from the derivative of the limits of the integral (\ref{Eq:xc}).
+
+
 \section{Numerical Examples}\label{Sec:NumExamples}
 All developments were implemented in the MondoSCF~\cite{MondoSCF} suite of
 linear scaling quantum chemistry programs. The code was compiled 
@@ -98,7 +167,7 @@ Thresholds that define the {\tt TIGHT} accuracy level include a matrix
 threshold $\tau=10^{-6}$, as well as other numerical thresholds 
 detailed in Ref.~\cite{CTymczak04a}, which deliver at least 8 digits of 
 relative accuracy in the total energy and 4 digits of absolute accuracy 
-{\bf ?? WHY ABSOLUTE ACCURACY ??} in the forces.  
+in the forces.  
 
 \begin{table}[t]
   \centering
@@ -108,7 +177,7 @@ relative accuracy in the total energy and 4 digits of absolute accuracy
     and total energy for (urea)$_n$ using the periodic RHF-MIC/6-21G* level of theory 
     and the {\tt TIGHT} threshold. 
 %    $n$ is the number of urea units in the (super)cell.
-    Lengths, angles and energies are in \AA ngstr\"oms, degrees and atomic units respectively.
+    Lengths, angles and energies are in angstr\"oms, degrees and atomic units respectively.
   }\label{Tab:Urea}
   \begin{tabular}{lcccc}
     \toprule
