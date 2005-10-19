@@ -61,7 +61,8 @@
   within the Hartree-Fock $\Gamma$-point approximation}
 
 \author{Val\'ery Weber}
-\email{valery.weber@unifr.ch}
+\email{valeryw@lanl.gov}
+\author{Claude Daul}
 \affiliation{Department of Chemistry, University of Fribourg, 1700 Fribourg, Switzerland.}%
 \author{Matt Challacombe}%
 \affiliation{Los Alamos National Laboratory, Theoretical Division, Los Alamos 87545, New Mexico, USA.}%
@@ -75,17 +76,17 @@
   [J. Chem. Phys. {\bf 122}, 124105, (2005)]
   matrix within the $\Gamma$-point approximation
   has been introduced. In this article, the formalism for the evaluation of 
-  the analytical exact Hartree-Fock exchange energy gradients and lattice gradients at 
+  the analytical Hartree-Fock exchange energy gradients with respect to atomic positions and cell parameters at
   the $\Gamma$-point approximation is presented. While the evaluation of the
-  periodic exchange energy gradients are similar to their gas phase limit, the exchange
-  energy lattice gradients require the accumulation of the gradients acting on atoms multiplied 
-  by appropriate factors and a modified electron repulsion integral (ERI). The latter
-  integral arises from the use of the minimal image convention 
+  exchange gradients with respect to atomic positions are similar to their gas phase limit, the 
+  gradients with respect to cell parameters involve the accumulation of the gradients acting on atoms multiplied 
+  by appropriate factors and a modified electron repulsion integral (ERI). This latter
+  integral arises from use of the minimal image convention 
   in the definition of the $\Gamma$-point Hartree-Fock approximation. 
   We demonstrate how
   this new ERI can be computed with the help of a modified vertical 
   recurrence relation in the frame of the Obara-Saika and Head-Gordon-Pople 
-  algorithm.  As an illustration, the analytical gradients and lattice gradients have been used 
+  algorithm.  As an illustration, the analytical gradients have been used 
   in conjunction with the QUICCA algorithm [K. N\'emeth and M. Challacombe,
   J. Chem. Phys. {\bf 121}, 2877, (2004)] to optimize periodic 
   systems at the Hartree-Fock level of theory.
@@ -104,8 +105,9 @@ In preceding papers, we have developed linear scaling quantum chemical methods
 for construction of the periodic Coulomb, exchange-correlation~\cite{CTymczak04a}
 and the exact Hartree-Fock exchange~\cite{CTymczak04b} 
 matrices within the $\Gamma$-point approximation. 
-In this paper, the implementation of the exact Hartree-Fock exchange
-gradients and lattice gradients at the $\Gamma$-point is presented. 
+In this paper, the implementation of the Hartree-Fock exchange
+gradients with respect to atomic positions and cell parameters
+at the $\Gamma$-point is presented. 
 The formalism for the evaluation of the Coulomb and 
 exchange-correlation energy cell gradients will be presented 
 in a companion paper~\cite{CTymczak05}.
@@ -121,22 +123,23 @@ models to large condensed phase systems, surfaces and wires.
 
 While the $\Gamma$-point approximation uses only the $\mathbf{k}=0$ point to sample
 the Brillouin zone, it does however converge to the 
-${\bf k}$-space integration limit, in the worst case proportionally to the inverse of the volume of 
-the unit cell (see for example Refs.~\cite{CKittel71,NAshcroft76}).
+${\bf k}$-space integration limit, in the worst case with the inverse  
+the unit cell volume (see for example Refs.~\cite{CKittel71,NAshcroft76}).
 The convergence of the $\Gamma$-point approximation to 
 the corresponding ${\bf k}$-space limit was recently 
 demonstrated by us for DFT~\cite{CTymczak04a}, HF and hybrid 
 HF/DFT~\cite{CTymczak04b} level of theories.
 The $\Gamma$-point approach opens the capabilities of studying very large 
 complex and disordered systems such as liquids, low concentration defects, adsorption of 
-large molecule on surfaces etc where conventional methods 
-of sampling the Brillouin zone may become computationally too demanding.
+large molecule on surfaces, {\em etc}, where conventional methods 
+of sampling the Brillouin zone may become computationally too demanding,
+where the $\Gamma$-point approximation is well justified.
 
 Finding crystal structures of condensed systems can
 be formulated as minimization of the total energy 
-as a function of atomic coordinates and unit-cell vectors.
-The problem is then the minimization of the total energy in $M$ dimensions, where
-$M=3N+3$. $N$ is the number of atoms, $3N-3$ is the number
+with respect to atomic coordinates and unit-cell vectors.
+The problem is then the minimization of the total energy in $L$ dimensions, where
+$L=3N_{atm}+3$. $N_{atm}$ is the number of atoms, $3N_{atm}-3$ is the number
 of independent coordinates after the elimination of translation, 
 and the number of independent unit-vector elements
 after the elimination of unit-cell rotations is 6.
@@ -146,7 +149,7 @@ after the elimination of unit-cell rotations is 6.
 %The location of an energy minimum requires an optimization of both sets 
 %of coordinates. 
 This minimization can be achieved with the help of an efficient optimizer~\cite{KNemeth04,KNemeth05}
-and the knowledge of the periodic energy gradients and cell gradients. 
+and the knowledge of the gradients with respect to atomic positions and cell parameters.
 %The latter represents the derivative of the energy of the unit cell 
 %with respect to the unit-cell vectors. 
                                   
@@ -172,8 +175,7 @@ which is a combination of direct and reciprocal lattice summations.
 For an efficient truncation of the three infinite summations of the exchange
 series, the {\sc Crystal03} program uses in the first hand, the decay between local basis function 
 products and in the second, the fact that the element of the density 
-matrix of an insulator decays exponentially with the distance between 
-the two centers.
+matrix of an insulator decays exponentially with interatomic separations.
 The strategy to compute the analytical Hartree-Fock gradients for 
 periodic system, in the frame of the {\sc Crystal03} package has been 
 presented by Doll, Saunders and Harrison~\cite{KDoll01}.
@@ -191,10 +193,10 @@ As it will be shown latter, the evaluation of the atomic exchange energy gradien
 within the $\Gamma$-point approximation,
 does not lead to special difficulties. The implementation requires the evaluation
 of the derivative of the ERI's with respect to atomic positions and, 
-except the MIC applied at the primitive level, is
-similar to what has been done in the past for molecular calculations 
+except for applying the MIC at the primitive level, it is
+similar to what has been done in the past for molecular calculations
 ~\cite{SObara86,MGordon88,KIshida91,THelgaker92,KIshida93}.
-Difficulties arise when the derivative of the ERI's is taken with respect to lattice 
+Difficulties arise when derivative of ERI's are taken with respect to lattice 
 parameters. In this case the derivative provides, after some manipulation, 
 a new type of integral that
 arises due to the use of the MIC in our $\Gamma$-point approximation. This integral 
@@ -203,7 +205,8 @@ vertical recurrence relation (VRR) introduced by Obara and Saika~\cite{SObara86}
 
 The remainder of this paper is organized as follows:
 In Section~\ref{Sec:Formalism}, we introduce the formalism and discuss
-the implementation of the exact Hartree-Fock exchange energy gradients and cell gradients 
+the implementation of the Hartree-Fock exchange energy gradients with respect 
+to atomic positions and cell parameters
 at the $\Gamma$-point approximation. Full optimization of few periodic systems are given
 in Section~\ref{Sec:NumExamples} as an illustration of the formalism.
 Finally in Section~\ref{Sec:Conclusions} we summarize our results.
@@ -250,7 +253,7 @@ contracted to approximate atomic eigenfunctions.
 %and the ERIs are written in the chemist notation.
 
 The Hartree-Fock exchange energy within the MIC $\Gamma$-point approximation~\cite{CTymczak04b} 
-is given by
+is given by:
 \begin{equation}
 E^x(\mathbf{f}_A,\mathbf{f}_B,\ldots,M)=
 % E^x(\{\mathbf{f}_G\},M)=
@@ -286,7 +289,7 @@ required to yield a consistent wrapping when distributions lie at the cell bound
 and $[\bullet]$ is the nearest integer function defined as 
 $[x]:=n$ with $x\in \mathbb{R}$, $n\in \mathbb{Z}$ and $|x-n|<1/2$.
 Note that $\mathbf{PQ}=\mathbf{P-Q}$ if and only if $[\mathbf{f}_{PQ}-\varepsilon\mathrm{sgn}(\mathbf{f}_{PQ})]=0$.
-In the following Sections $\mathbf{PQ}$ will always refer to Eq.~\ref{Eq:MIC}.
+In the following Sections the notation $\mathbf{PQ}$ will always refer to Eq.~\ref{Eq:MIC}.
 
 As an example, the MIC-integral over $s$-type CGTF is given by
 \begin{equation}
@@ -306,7 +309,7 @@ integrals with $m>0$ are auxiliary integrals)
 and $F_m(x)=\int_0^1t^{2m}\exp(-xt^2)dt$ is the reduced incomplete gamma function~\cite{IShavitt63}.
 
 
-\subsection{Atomic Gradients}
+\subsection{Gradients with respect to atomic positions}
 The exchange energy gradient with respect to the fractional coordinate 
 $f_{Gj}$ can be obtained through the linear transform 
 \begin{equation*}
@@ -335,8 +338,8 @@ into detail here. As in the gas phase case, translational
 invariance~\cite{AKorminicki77} can likewise be used to reduce the 
 computational cost of atomic gradient calculation.
 
-\subsection{Lattice Gradients}
-The $\Gamma$-point MIC exchange energy lattice gradients are given by
+\subsection{Gradients with respect to cell parameters}
+The $\Gamma$-point MIC exchange energy gradients with respect to cell parameters are given by
 \begin{equation}\label{Eq:Xstress}
   \frac{\partial E^x}{\partial M_{ij}}\bigg|_P=
   -\frac{1}{2}\sum_{\substack{\mathbf{m}\mathbf{n}\\a b c d}}P_{ab}P_{cd}
@@ -354,7 +357,6 @@ to cell parameters $M_{ij}$, can be further decomposed as
     &+[ac^\mathbf{m}|bd^\mathbf{n}]_{ij},
   \end{split}
 \end{equation}
-{\bf ???ABOVE: SHALL WE USE TRANSLATIONAL INVARIANCE???}\\
 %\begin{equation}\label{Eq:DerMij}
 %  \begin{split}
 %    \frac{\partial (ac^\mathbf{m}|bd^\mathbf{n})}{\partial M_{ij}}
@@ -701,7 +703,20 @@ converged large unit-cell $\Gamma$-point approximation
 with respect to the unit-cell length with and without the MIC.
 The absolute convergences of the atomic and cell forces, where
 the bond length has been slight contracted by 0.01\AA~to generate 
-non-zero forces, are also shown in~Fig.~\ref{Fig:CnvgEnergy}.
+non-zero forces, are also shown in Figure~\ref{Fig:CnvgEnergy}.
+The calculations with the MIC show an exponential convergence of the total
+energy and forces to the converged large unit-cell $\Gamma$-point approximation
+with respect to cell length. However, a naive implementation of 
+the $\Gamma$-point exact exchange i.e. without the MIC leads to a convergence 
+of the total energy inversely proportional to the system size as can be seen 
+in Figure~\ref{Fig:CnvgEnergy}. The behavior of the convergence of the total energy
+without the MIC is expected to be inversely proportional to the volume of the 
+unit-cell for 3D-periodic systems.\\
+\\
+\\
+{\bf ??? SHALL WE HAVE AN EXTRA FIG WITH A FIT 1/L ????}\\
+\\
+
 
 
 \begin{figure}[h]
@@ -740,6 +755,9 @@ of a single urea molecule with both spherical and Cartesian basis functions.
 The difference in the bond lengths and angles of the two basis set 
 is no more than $0.001$ \AA~and $0.1^\circ$ respectively, but the
 difference in the energy is much more significant and is about $8\cdot 10^{-3}$ a.u.
+By inspection of the total energies in Table~\ref{Tab:Urea}, we can see that the difference
+in energy of the two different basis set is of the same order as what we could observe
+for gas phase calculations.
 %Gamess
 %-223.7884474840-5D
 %-223.7964330646-6D  
@@ -1017,11 +1035,12 @@ breaking the symmetry of the primitive cell (see the fractional coordinate Table
 In a previous paper, construction of the periodic exact Hartree-Fock exchange 
 matrix within the $\Gamma$-point approximation
 has been introduced. In this article, the formalism for the evaluation of 
-the analytical exact Hartree-Fock exchange energy gradients and lattice gradients at 
+the analytical Hartree-Fock exchange gradients with respect 
+to atomic positions and cell parameters at 
 the $\Gamma$-point approximation for Cartesian Gaussian-type basis function 
 was presented and implemented in the {\sc MondoSCF} package. 
-While the evaluation of the periodic exchange energy gradients are similar to their 
-gas phase limit, the exchange energy lattice gradients require the accumulation of 
+While the evaluation of the exchange gradients with respect to atomic positions are similar to their 
+gas phase limit, the exchange gradients with respect to ell parameters require the accumulation of 
 the gradients acting on atoms multiplied by some appropriate factors and a 
 modified ERI. The latter ERI arises from the use of the minimal image convention. 
 We demonstrated how this new ERI can be computed with the help of a modified VRR 
@@ -1033,17 +1052,26 @@ As an illustration, the analytical gradients and cell gradients have been used
 in conjunction with the QUICCA algorithm to optimize few periodic systems at 
 the Hartree-Fock level of theory. 
 
-For insulating systems, the convergence of the HF-MIC $\Gamma$-point energy, 
-atomic and cell forces to their corresponding 
-${\bf k}$-space integration limits have been shown to be exponential 
-in the cell size. 
-However, a naive implementation of the $\Gamma$-point exact exchange i.e. without
-the minimal image convention leads to a convergence of the total energy 
-inversely proportional to the system size.
+For the (HF)$_n$ systems, the convergence of the HF-MIC $\Gamma$-point energy, 
+atomic and cell forces to the converged large unit-cell $\Gamma$-point approximation
+with respect to cell length have been explicitly shown to be exponential 
+in the cell size (see Figure~\ref{Fig:CnvgEnergy}). 
+A fast convergence of the total energy and geometrical parameters
+have also been observed for the 3D-systems (MgO)$_n$ and (urea)$_n$. We belive
+that, for insulator, the convergence of the HF-MIC $\Gamma$-point total energy 
+and geometrical parameters to the converged large unit-cell is exponential 
+with respect to cell volume.
+We have also shown for the (HF)$_n$ systems that a naive implementation of 
+the $\Gamma$-point exact exchange i.e. without the minimal image convention 
+leads to a convergence of the total energy inversely proportional to 
+the system size. For 3D-periodic system, we belive that the convergence 
+of the total energy without the MIC behaves inversely proportional to the volume of the
+unit-cell.
 
 Convergence of bond lengths, bond angles, 
 dihedral angles and lattice parameters within the HF-MIC $\Gamma$-point
-super cell approximation to the ${\bf k}$-space integration limit have
+super cell approach and under full relaxation with no symmetry 
+to the converged large unit-cell $\Gamma$-point approximation have
 been demonstrated for 1D and 3D systems to better than 3 digits.
 
 Although the convergence of the HF-MIC $\Gamma$-point total energy to 
