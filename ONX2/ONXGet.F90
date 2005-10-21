@@ -244,7 +244,7 @@ CONTAINS
 #endif
   !
 !#ifdef ONX2_PARALLEL
-#ifdef 1
+#ifdef BLABLA2000
   SUBROUTINE Reduce_FASTMAT(A,AFM)
     IMPLICIT NONE
     TYPE(BCSR)              :: A

@@ -1560,7 +1560,7 @@ CONTAINS
   !
 #endif
   !
-#ifdef 0
+#ifdef BLABLA1000
   SUBROUTINE PChkSum_FASTMAT2(A,Name,Unit_O,Proc_O,ChkInPar_O)
 !H---------------------------------------------------------------------------------
 !H SUBROUTINE  PChkSum_FASTMAT(A,Name,Unit_O,Proc_O,ChkInPar_O)
