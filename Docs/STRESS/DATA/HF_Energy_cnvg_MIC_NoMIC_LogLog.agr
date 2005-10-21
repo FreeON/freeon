@@ -54,7 +54,7 @@
 @timestamp rot 0
 @timestamp font 0
 @timestamp char size 1.000000
-@timestamp def "Thu Oct 20 19:32:46 2005"
+@timestamp def "Thu Oct 20 12:32:31 2005"
 @r0 off
 @link r0 to g0
 @r0 type above
@@ -102,9 +102,9 @@
 @g0 fixedpoint prec 6, 6
 @with g0
 @    world xmin 0.25
-@    world xmax 2.25
-@    world ymin -5
-@    world ymax -3
+@    world xmax 2
+@    world ymin -10
+@    world ymax 0
 @    stack world 0, 0, 0, 0
 @    znorm 1
 @    view xmin 0.150000
@@ -189,7 +189,7 @@
 @    yaxis  label color 1
 @    yaxis  label place normal
 @    yaxis  tick on
-@    yaxis  tick major 0.5
+@    yaxis  tick major 2
 @    yaxis  tick minor ticks 1
 @    yaxis  tick default 6
 @    yaxis  tick place rounded true
@@ -240,7 +240,7 @@
 @    legend char size 1.500000
 @    legend color 1
 @    legend length 5
-@    legend vgap 2
+@    legend vgap 1
 @    legend hgap 1
 @    legend invert false
 @    frame type 0
@@ -299,10 +299,59 @@
 @    s0 errorbar riser clip length 0.100000
 @    s0 comment "HF_Energy_NoMIC_invL.dat"
 @    s0 legend  ""
+@    s1 hidden false
+@    s1 type xy
+@    s1 symbol 9
+@    s1 symbol size 1.750000
+@    s1 symbol color 1
+@    s1 symbol pattern 1
+@    s1 symbol fill color 1
+@    s1 symbol fill pattern 0
+@    s1 symbol linewidth 2.0
+@    s1 symbol linestyle 1
+@    s1 symbol char 65
+@    s1 symbol char font 0
+@    s1 symbol skip 0
+@    s1 line type 0
+@    s1 line linestyle 1
+@    s1 line linewidth 1.0
+@    s1 line color 1
+@    s1 line pattern 1
+@    s1 baseline type 0
+@    s1 baseline off
+@    s1 dropline off
+@    s1 fill type 0
+@    s1 fill rule 0
+@    s1 fill color 1
+@    s1 fill pattern 1
+@    s1 avalue off
+@    s1 avalue type 2
+@    s1 avalue char size 1.000000
+@    s1 avalue font 0
+@    s1 avalue color 1
+@    s1 avalue rot 0
+@    s1 avalue format general
+@    s1 avalue prec 3
+@    s1 avalue prepend ""
+@    s1 avalue append ""
+@    s1 avalue offset 0.000000 , 0.000000
+@    s1 errorbar on
+@    s1 errorbar place both
+@    s1 errorbar color 1
+@    s1 errorbar pattern 1
+@    s1 errorbar size 1.000000
+@    s1 errorbar linewidth 1.0
+@    s1 errorbar linestyle 1
+@    s1 errorbar riser linewidth 1.0
+@    s1 errorbar riser linestyle 1
+@    s1 errorbar riser clip off
+@    s1 errorbar riser clip length 0.100000
+@    s1 comment "/n/srv2/vweber/MONDO/Docs/STRESS/DATA/HF_Energy_MIC_LogL.dat"
+@    s1 legend  "Energy MIC"
 @    s2 hidden false
 @    s2 type xy
 @    s2 symbol 8
-@    s2 symbol size 2.000000
+@    s2 symbol size 1.750000
 @    s2 symbol color 1
 @    s2 symbol pattern 1
 @    s2 symbol fill color 1
@@ -352,9 +401,9 @@
 @    s3 type xy
 @    s3 symbol 0
 @    s3 symbol size 1.000000
-@    s3 symbol color 1
+@    s3 symbol color 4
 @    s3 symbol pattern 1
-@    s3 symbol fill color 1
+@    s3 symbol fill color 4
 @    s3 symbol fill pattern 0
 @    s3 symbol linewidth 1.0
 @    s3 symbol linestyle 1
@@ -364,7 +413,7 @@
 @    s3 line type 1
 @    s3 line linestyle 1
 @    s3 line linewidth 2.0
-@    s3 line color 1
+@    s3 line color 4
 @    s3 line pattern 1
 @    s3 baseline type 0
 @    s3 baseline off
@@ -386,7 +435,7 @@
 @    s3 avalue offset 0.000000 , 0.000000
 @    s3 errorbar on
 @    s3 errorbar place both
-@    s3 errorbar color 1
+@    s3 errorbar color 4
 @    s3 errorbar pattern 1
 @    s3 errorbar size 1.000000
 @    s3 errorbar linewidth 1.0
@@ -414,6 +463,16 @@
 1.8249039 -4.6965376
 1.8559381 -4.7277668
 1.8849018 -4.7568972
+&
+@target G0.S1
+@type xy
+0.39354011 -3.0321687
+0.6945701 -3.9341126
+0.87066136 -4.961321
+0.9956001 -5.7992713
+1.0925101 -6.6584366
+1.1716914 -7.4410212
+1.2386381 -8.2470836
 &
 @target G0.S2
 @type xy
