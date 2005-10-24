@@ -91,7 +91,6 @@ MODULE BlokTrPdJ
                 Prim%PFA=PFA 
                 Prim%PFB=PFB
                 MaxAmp=SetBraBlok(Prim,BS,Gradients_O=.FALSE.)
-#ifdef NewPAC
 !               Compute MAC and PAC
                 DP2       = Zero
                 PrimWCoef = Zero
@@ -127,46 +126,6 @@ MODULE BlokTrPdJ
                 ENDDO
                 DP2=MIN(1.D10,DP2)
                 IF(PrimWCoef>Zero .AND. DP2>Zero)THEN
-#else
-!---------------------------------------------------------------------------------------------
-!               Compute maximal HG extent (for PAC) and Unsold esitmiate (for MAC)
-!               Looping over all angular symmetries and Directions
-                DP2     = Zero
-                PExtent = Zero
-                IA      = IndexA
-                DO LMNA=StartLA,StopLA
-                   IA=IA+1
-                   IB=IndexB
-                   EllA=BS%LxDex%I(LMNA)+BS%LyDex%I(LMNA)+BS%LzDex%I(LMNA)                         
-                   DO LMNB=StartLB,StopLB
-                      IB=IB+1
-                      EllB=BS%LxDex%I(LMNB)+BS%LyDex%I(LMNB)+BS%LzDex%I(LMNB)    
-                      Pab    = P(IA,IB)
-                      EllAB  = EllA+EllB+1
-                      LenHGTF= LHGTF(EllAB)
-                      LenSP  = LSP(EllAB)
-                      PiZ    = (Pi/Prim%Zeta)**(ThreeHalves)
-!                     Extent (for PAC)
-                      DO K=1,3
-                         Ext=Extent(EllAB,Prim%Zeta,Pab*dHGBra%D(1:LenHGTF,IA,IB,K),TauPAC,Potential_O=.TRUE.)
-                         PExtent=MAX(PExtent,Ext)
-!                        Strength (for MAC)
-                         CALL HGToSP_Direct(EllAB,LenHGTF,LenSP,PiZ,Pab*dHGBra%D(1:LenHGTF,IA,IB,K), &
-                                            SPBraC(0:LenSP),SPBraS(0:LenSP))
-                         PStrength = Zero
-                         DO L=0,EllAB
-                            PStrength = PStrength+FudgeFactorial(L,SPEll+1)*Unsold0(L,SPBraC,SPBraS)
-                         ENDDO
-                         PStrength = (PStrength/TauMAC)**(Two/DBLE(SPEll+2))  
-                         IF(DP2 < PStrength) THEN
-                            DP2   = PStrength
-                         ENDIF
-                      ENDDO
-                   ENDDO
-                ENDDO 
-                DP2=MIN(1.D10,DP2)
-                IF(PExtent>Zero .AND. DP2 > Zero) THEN
-#endif
 !                  Initialize <KET|
                    CALL SetKet(Prim,PExtent)
 !                  Initialize
@@ -357,13 +316,8 @@ MODULE BlokTrPdJ
 !      Set the MAC
        DP2=((FudgeFactorial(1,SPEll+1)*ABS(GMLoc%AtNum%D(At)))/TauMAC)**(Two/DBLE(SPEll+3))
        DP2=MIN(1.D10,DP2)
-#ifdef NewPAC
 !      Set the PAC
        PrimWCoef = ABS(Three*GMLoc%AtNum%D(At)) 
-#else
-!      Set the PAC
-       PExtent=Extent(1,NuclearExpnt,dHGBra%D(:,1,1,1),TauPAC)
-#endif
 !      Initialize <KET|
        CALL SetKet(Prim,PExtent)
        HGKet_L(:,:)  = Zero

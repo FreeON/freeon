@@ -57,9 +57,7 @@ PROGRAM HaiKu
   NEl=GM%NElec
 ! Set local integration thresholds 
   CALL SetLocalThresholds(Thresholds%Cube)
-#ifdef NewPAC
   CALL SetAACoef()
-#endif
   ! Potentially overide local HiCu thresholds
   IF(Args%NI==8)THEN
      TauRel=1D1**(-Args%I%I(7))

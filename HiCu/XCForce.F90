@@ -63,9 +63,7 @@ PROGRAM XCForce
   NEl=GM%NElec
 ! Set local integration thresholds 
   CALL SetLocalThresholds(Thresholds%Cube*1.D-1)
-#ifdef NewPAC
   CALL SetAACoef()
-#endif
 #ifdef PARALLEL
   NSDen=1 !<<< SPIN Default value for now!
   CALL ParaInitRho(Args)

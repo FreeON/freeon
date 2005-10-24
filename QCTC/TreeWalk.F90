@@ -41,9 +41,7 @@ MODULE TreeWalk
        PBox%BndBox(2,2)=P%P(2)
        PBox%BndBox(3,2)=P%P(3)
 !      Expand this BBox from zero to the correct extent
-#ifdef NewPAC
        E=1.D-16
-#endif
        PBox=ExpandBox(PBox,E)
     END SUBROUTINE SetKet
 !===================================================================================================
@@ -61,10 +59,8 @@ MODULE TreeWalk
        INTEGER                          :: LP,MP,NP,LQ,MQ,NQ,PDex,QDex
        REAL(DOUBLE),DIMENSION(0:2*HGEll,0:2*HGEll,0:2*HGEll,0:2*HGEll) :: MDR
 #endif
-#ifdef NewPAC
        INTEGER                          :: TotEll
        REAL(DOUBLE)                     :: SqrtW,RDist,LeftS,RightS
-#endif
 !-----------------------------------------------------------------------------------------------
 !      PAC: 
        PQx=Prim%P(1)-Q%Box%Center(1)
@@ -75,19 +71,12 @@ MODULE TreeWalk
        RPE=Prim%Zeta+Q%Zeta
        Omega=RTE/RPE 
        T=Omega*PQ2
-#ifdef NewPAC
        TotEll = Prim%Ell+Q%EllCD
        RDist  = SQRT(PQ2)-SQRT(Q%DMax2)
        SqrtW  = SQRT(Omega)
        LeftS  = Q%WCoef*PrimWcoef*EXP(RErfc(SqrtW*RDist,TotEll))
        RightS = TauPAC*(RDist**(TotEll+1))
        IF((LeftS < RightS .AND. RDist > Zero) .OR. T>Gamma_Switch) THEN
-#else
-       IF(ABS(PQx)>PBox%Half(1)+Q%Box%Half(1).OR.  &
-          ABS(PQy)>PBox%Half(2)+Q%Box%Half(2).OR.  &
-          ABS(PQz)>PBox%Half(3)+Q%Box%Half(3).OR.  &
-          T>Gamma_Switch)THEN
-#endif
 !         MAC: 
           IF(PQ2>(Q%Strength*DP2+Q%DMax2).OR.Q%Leaf)THEN 
 !            Evaluate multipoles
@@ -178,10 +167,8 @@ MODULE TreeWalk
        REAL(DOUBLE),DIMENSION(0:2*HGEll,0:2*HGEll,0:2*HGEll,0:2*HGEll) :: MDR
 #endif
        REAL(DOUBLE),PARAMETER           :: VTol = 1.D-10
-#ifdef NewPAC
        INTEGER                          :: TotEll
        REAL(DOUBLE)                     :: SqrtW,RDist,LeftS,RightS
-#endif
 !---------------------------------------------------------------------------------------------------
 !          LeftS  = PrimWCoef*Q%WCoef*RErfc(SqrtW*RDist,TotEll)
 !          RightS = (RDist**(TotEll+1))*TauPAC
@@ -194,19 +181,12 @@ MODULE TreeWalk
        RPE=Prim%Zeta+Q%Zeta
        Omega=RTE/RPE 
        T=Omega*PQ2
-#ifdef NewPAC 
        TotEll = Prim%Ell+Q%EllCD
        RDist  = SQRT(PQ2)-SQRT(Q%DMax2)
        SqrtW  = SQRT(Omega)
        LeftS  = PrimWCoef*Q%WCoef*EXP(RErfc(SqrtW*RDist,TotEll))
        RightS = TauPAC*RDist**(TotEll+1)
        IF((LeftS < RightS .AND. RDist > Zero) .OR. T>Gamma_Switch) THEN
-#else
-       IF(ABS(PQx)>PBox%Half(1)+Q%Box%Half(1).OR.  &
-          ABS(PQy)>PBox%Half(2)+Q%Box%Half(2).OR.  &
-          ABS(PQz)>PBox%Half(3)+Q%Box%Half(3).OR.  &
-          T>Gamma_Switch)THEN
-#endif 
 !         MAC:
           IF((PQ2>Q%Strength*DP2+Q%DMax2).OR.Q%Leaf)THEN
              IF(Q%Zeta==NuclearExpnt .AND. PQ2<VTol) RETURN

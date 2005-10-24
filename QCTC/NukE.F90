@@ -47,11 +47,7 @@ MODULE NuklarE
             DP2 = (FudgeFactorial(0,SPELL+1)*ABS(GMLoc%AtNum%D(At))/TauMAC)**(Two/DBLE(SPEll+2))
             DP2 = MIN(1.D10,DP2)
 !           Set the PAC
-#ifdef NewPAC
             PrimWCoef = ABS(GMLoc%AtNum%D(At))
-#else
-            PExtent=Extent(0,NuclearExpnt,HGBra,TauPAC)
-#endif
 !           Initialize <KET|
             CALL SetKet(Prim,PExtent)
             PTmp=GMLoc%Carts%D(:,At)

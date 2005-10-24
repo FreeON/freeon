@@ -485,7 +485,6 @@ endif
     integer :: ierr
 !
     NodesVisit = NodesVisit + 1
-#ifdef NewPAC
 !   Allocate the Node
     CALL NewPoleNode(P,0)
 !   Unpack the Logical Leaf
@@ -536,96 +535,6 @@ endif
        NULLIFY(P%Descend)
        NULLIFY(P%Travrse)
     ELSE
-#else
-    IntIndex   = IntIndex + 1
-    IF(RecIntArr(IntIndex) == 100) THEN
-      CALL NewPoleNode(P,0)
-      P%Leaf = .TRUE.
-
-      P%Bdex = RecIntArr(IntIndex + 1)
-      IntIndex = IntIndex + 1
-      P%Edex = RecIntArr(IntIndex + 1)
-      IntIndex = IntIndex + 1
-      P%NQ = RecIntArr(IntIndex + 1)
-      IntIndex = IntIndex + 1
-      P%Ell = RecIntArr(IntIndex + 1)
-      IntIndex = IntIndex + 1
-      P%Box%Tier = RecIntArr(IntIndex + 1)
-      IntIndex = IntIndex + 1
-      P%Zeta = RecDblArr(DblIndex + 1)
-      DblIndex = DblIndex + 1
-      P%Strength = RecDblArr(DblIndex + 1) 
-      DblIndex = DblIndex + 1 
-      P%DMax2 = RecDblArr(DblIndex + 1)
-      DblIndex = DblIndex + 1 
-      P%Box%BndBox(1:3,1) = RecDblArr(DblIndex+1:DblIndex+3)
-      DblIndex = DblIndex + 3
-      P%Box%BndBox(1:3,2) = RecDblArr(DblIndex+1:DblIndex+3)
-      DblIndex = DblIndex + 3
-      P%Box%Center(1:3) = RecDblArr(DblIndex+1:DblIndex+3)
-      DblIndex = DblIndex + 3 
-      P%Box%Half(1:3) = RecDblArr(DblIndex+1:DblIndex+3)
-      DblIndex = DblIndex + 3 
-      SizeofCo = LHGTF(P%Ell)
-      ALLOCATE(P%Co(1:SizeofCo),STAT=iErr)
-      IF(iErr.NE.0) CALL Halt('In RecurCopy 200: Allocation problem.')
-
-      P%Co(1:SizeofCo) = RecDblArr(DblIndex+1:DblIndex+SizeofCo)
-      DblIndex = DblIndex + SizeofCo
-
-      SizeofSP = LSP(P%Ell)+1
-      ALLOCATE(P%S(0:SizeofSP-1),STAT=iErr)
-      IF(iErr.NE.0) CALL Halt('In RecurCopy 300: Allocation problem.')
-      ALLOCATE(P%C(0:SizeofSP-1),STAT=iErr)
-      IF(iErr.NE.0) CALL Halt('In RecurCopy 400: Allocation problem.')
-
-      P%C(0:SizeofSP-1) = RecDblArr(DblIndex+1:DblIndex+SizeofSP)
-      DblIndex = DblIndex + SizeofSP
-      
-      P%S(0:SizeofSP-1) = RecDblArr(DblIndex+1:DblIndex+SizeofSP)
-      DblIndex = DblIndex + SizeofSP
-      NULLIFY(P%Descend)
-      NULLIFY(P%Travrse)
-    ELSE
-      IF(RecIntArr(IntIndex) /= 200) STOP 'ERR: Leaf-node troubles!'
-      CALL NewPoleNode(P,0)
-      P%Leaf = .FALSE.
-
-      P%Bdex = RecIntArr(IntIndex + 1)
-      IntIndex = IntIndex + 1
-      P%Edex = RecIntArr(IntIndex + 1)
-      IntIndex = IntIndex + 1
-      P%NQ = RecIntArr(IntIndex + 1)
-      IntIndex = IntIndex + 1
-      P%Ell = RecIntArr(IntIndex + 1)
-      IntIndex = IntIndex + 1
-      P%Box%Tier = RecIntArr(IntIndex + 1)
-      IntIndex = IntIndex + 1
-      P%Zeta = RecDblArr(DblIndex + 1)
-      DblIndex = DblIndex + 1
-      P%Strength = RecDblArr(DblIndex + 1) 
-      DblIndex = DblIndex + 1 
-      P%DMax2 = RecDblArr(DblIndex + 1)
-      DblIndex = DblIndex + 1 
-      P%Box%BndBox(1:3,1) = RecDblArr(DblIndex+1:DblIndex+3)
-      DblIndex = DblIndex + 3
-      P%Box%BndBox(1:3,2) = RecDblArr(DblIndex+1:DblIndex+3)
-      DblIndex = DblIndex + 3
-      P%Box%Center(1:3) = RecDblArr(DblIndex+1:DblIndex+3)
-      DblIndex = DblIndex + 3 
-      P%Box%Half(1:3) = RecDblArr(DblIndex+1:DblIndex+3)
-      DblIndex = DblIndex + 3 
-      SizeofSP = LSP(SPEll+MaxUEll)+1 !!!
-      ALLOCATE(P%S(0:SizeofSP-1),STAT=iErr)
-      IF(iErr.NE.0) CALL Halt('In RecurCopy 600: Allocation problem.')
-      ALLOCATE(P%C(0:SizeofSP-1),STAT=iErr)
-      IF(iErr.NE.0) CALL Halt('In RecurCopy 700: Allocation problem.')
-      P%C(0:SizeofSP-1) = RecDblArr(DblIndex+1:DblIndex+SizeofSP)
-      DblIndex = DblIndex + SizeofSP
-      
-      P%S(0:SizeofSP-1) = RecDblArr(DblIndex+1:DblIndex+SizeofSP)
-      DblIndex = DblIndex + SizeofSP
-#endif
       CALL RecurCopy(P%Descend)
       CALL RecurCopy(P%Descend%Travrse)
     ENDIF
@@ -648,7 +557,6 @@ endif
     INTEGER :: SizeofCo,SizeofSP
 !
     NodesVisit1 = NodesVisit1 + 1
-#ifdef NewPAC
 !    WRITE(*,*) NodesVisit1,IntIndex,DblIndex
 !   Store the logical Leaf
     IntIndex = IntIndex+1
@@ -681,80 +589,6 @@ endif
        SizeofCo = LHGTF(P%Ell)
        DblIndex = DblIndex+SizeofCo;DblArr(DblIndex-SizeofCo+1:DblIndex) = P%Co(1:SizeofCo)
     ELSE
-#else
-    IF(P%Leaf) THEN
-      IntArr(IntIndex + 1) = 100
-      IntIndex = IntIndex + 1
-      IntArr(IntIndex + 1) = P%Bdex
-      IntIndex = IntIndex + 1
-      IntArr(IntIndex + 1) = P%Edex
-      IntIndex = IntIndex + 1
-      IntArr(IntIndex + 1) = P%NQ
-      IntIndex = IntIndex + 1
-      IntArr(IntIndex + 1) = P%Ell
-      IntIndex = IntIndex + 1
-      IntArr(IntIndex + 1) = P%Box%Tier
-      IntIndex = IntIndex + 1
-      DblArr(DblIndex + 1) = P%Zeta
-      DblIndex = DblIndex + 1
-      DblArr(DblIndex + 1) = P%Strength
-      DblIndex = DblIndex + 1 
-      DblArr(DblIndex + 1) = P%DMax2
-      DblIndex = DblIndex + 1 
-      DblArr(DblIndex+1:DblIndex+3) = P%Box%BndBox(1:3,1)
-      DblIndex = DblIndex + 3
-      DblArr(DblIndex+1:DblIndex+3) = P%Box%BndBox(1:3,2)
-      DblIndex = DblIndex + 3
-      DblArr(DblIndex+1:DblIndex+3) = P%Box%Center(1:3)
-      DblIndex = DblIndex + 3 
-      DblArr(DblIndex+1:DblIndex+3) = P%Box%Half(1:3)
-      DblIndex = DblIndex + 3 
-      SizeofCo = LHGTF(P%Ell)
-      DblArr(DblIndex+1:DblIndex+SizeofCo) = P%Co(1:SizeofCo)
-      DblIndex = DblIndex + SizeofCo
-
-      SizeofSP = LSP(P%Ell)+1
-      DblArr(DblIndex+1:DblIndex+SizeofSP) = P%C(0:SizeofSP-1)
-      DblIndex = DblIndex + SizeofSP
-      
-      DblArr(DblIndex+1:DblIndex+SizeofSP) = P%S(0:SizeofSP-1)
-      DblIndex = DblIndex + SizeofSP
-    ELSE
-      IntArr(IntIndex + 1) = 200
-      IntIndex = IntIndex + 1
-
-      IntArr(IntIndex + 1) = P%Bdex
-      IntIndex = IntIndex+1
-      IntArr(IntIndex + 1) = P%Edex
-      IntIndex = IntIndex+1
-      IntArr(IntIndex + 1) = P%NQ
-      IntIndex = IntIndex+1
-      IntArr(IntIndex + 1) = P%Ell
-      IntIndex = IntIndex+1
-      IntArr(IntIndex + 1) = P%Box%Tier
-      IntIndex = IntIndex+1
-      DblArr(DblIndex + 1) = P%Zeta
-      DblIndex = DblIndex + 1
-      DblArr(DblIndex + 1) = P%Strength
-      DblIndex = DblIndex + 1 
-      DblArr(DblIndex + 1) = P%DMax2
-      DblIndex = DblIndex + 1 
-      DblArr(DblIndex+1:DblIndex+3) = P%Box%BndBox(1:3,1)
-      DblIndex = DblIndex + 3
-      DblArr(DblIndex+1:DblIndex+3) = P%Box%BndBox(1:3,2)
-      DblIndex = DblIndex + 3
-      DblArr(DblIndex+1:DblIndex+3) = P%Box%Center(1:3)
-      DblIndex = DblIndex + 3 
-      DblArr(DblIndex+1:DblIndex+3) = P%Box%Half(1:3)
-      DblIndex = DblIndex + 3 
-      SizeofSP = LSP(SPEll+MaxUEll)+1 !!!
-      
-      DblArr(DblIndex+1:DblIndex+SizeofSP) = P%C(0:SizeofSP-1)
-      DblIndex = DblIndex + SizeofSP
-      
-      DblArr(DblIndex+1:DblIndex+SizeofSP) = P%S(0:SizeofSP-1)
-      DblIndex = DblIndex + SizeofSP
-#endif
 !     Recur Down
       Left => P%Descend
       Right => P%Descend%Travrse
@@ -771,7 +605,6 @@ endif
     INTEGER :: SizeofCo,SizeofSP
 !
     NodesVisit = NodesVisit + 1
-#ifdef NewPAC
     IntNum   = IntNum + 8
     DblNum   = DblNum + 16
     SizeofSP = LSP(P%Ell)+1
@@ -780,27 +613,6 @@ endif
        SizeofCo = LHGTF(P%Ell)
        DblNum   = DblNum + SizeofCo
     ELSE
-#else
-    IF(P%Leaf) THEN
-      IntNum = IntNum + 5 + 1 
-      SizeofCo = Size(P%Co)
-      IF(SizeofCo /= LHGTF(P%Ell)) THEN
-        STOP 'ERR: Leaf: SizeofCo is wrong!'
-      ENDIF
-      SizeofSP = Size(P%S)
-      IF(SizeofSP /= (LSP(P%Ell)+1)) THEN
-        STOP 'ERR: Leaf: SizeofSP is wrong!'
-      ENDIF
-      DblNum = DblNum + 15 + SizeofCo + SizeofSP + SizeofSP
-    ELSE
-      IntNum = IntNum + 5 + 1 
-      SizeofSP = Size(P%S)
-      IF(SizeofSP /= (LSP(SPEll+MaxUEll)+1)) THEN
-        WRITE(*,*) 'SizeofSP = ',SizeofSP, ', (LSP(SPEll+MaxUEll)+1) = ',(LSP(SPEll+MaxUEll)+1)
-        STOP 'ERR: Non-leaf: SizeofSP is wrong!'
-      ENDIF
-      DblNum = DblNum + 15 + SizeofSP + SizeofSP 
-#endif
 !     Recur Down
       Left => P%Descend
       Right => P%Descend%Travrse

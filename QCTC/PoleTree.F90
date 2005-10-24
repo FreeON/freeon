@@ -186,11 +186,9 @@ MODULE PoleTree
                MaxUnsold  = CQ*(P%DMax2**(Half*DBLE(SPEll+1)))
                P%Strength = MaxUnsold**(Two/DBLE(SPEll+2))
             ENDIF
-#ifdef NewPAC
 !           Accumulate Info for PAC from Left and Right Nodes
             P%WCoef = LeftQ%WCoef+RightQ%WCoef
             P%EllCD = MAX(LeftQ%EllCD,RightQ%EllCD)
-#endif
          ELSE
 !           Keep on truckin ...
             CALL MakePoleTree(P%Descend)
@@ -220,11 +218,7 @@ MODULE PoleTree
          Node%Box%BndBox(1,:)= Rho%Qx%D(KQ)
          Node%Box%BndBox(2,:)= Rho%Qy%D(KQ)
          Node%Box%BndBox(3,:)= Rho%Qz%D(KQ)
-#ifdef NewPAC
          Node%Box=ExpandBox(Node%Box,1.D-16)
-#else
-         Node%Box=ExpandBox(Node%Box,Ext(KQ))
-#endif
 !        Allocate and fill HGTF coefficients
          LMNLen=LHGTF(Node%Ell)
          ALLOCATE(Node%Co(1:LMNLen),STAT=Status)
@@ -234,11 +228,9 @@ MODULE PoleTree
 !        Initialize the MAC Stuff to be Zero
          Node%DMax2    = Zero
          Node%Strength = Zero
-#ifdef NewPAC
 !        Accumulate Info for the New PAC
          Node%WCoef  = NodeWeight(Node%Ell,Node%Zeta,Node%Co)
          Node%EllCD  = Node%Ell
-#endif
       END SUBROUTINE FillRhoLeaf
 !==========================================================================
 !     Initialize a new PoleNode
@@ -252,9 +244,7 @@ MODULE PoleTree
          Node%Box%Tier=Level
          Node%Box%Number=PoleNodes
          Node%Ell  =SPEll+MaxUEll
-#ifdef NewPAC
          Node%EllCD=0
-#endif
          MaxTier=MAX(MaxTier,Level)
          PoleNodes=PoleNodes+1
          NULLIFY(Node%Travrse)
