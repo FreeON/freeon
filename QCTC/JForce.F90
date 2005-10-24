@@ -35,7 +35,7 @@ PROGRAM JForce
 #endif
   TYPE(AtomPair)               :: Pair
   TYPE(DBL_VECT)               :: Frc,JFrc
-  INTEGER                      :: AtA,AtB,A1,A2,MA,NB,MN1,MN,JP,Q
+  INTEGER                      :: AtA,AtB,A1,A2,B1,B2,MA,NB,MN1,MN,JP,Q
   REAL(DOUBLE)                 :: JFrcChk
   CHARACTER(LEN=6),PARAMETER   :: Prog='JForce'
   INTEGER                      :: NC,I,J,K
@@ -62,7 +62,9 @@ PROGRAM JForce
   CALL Get(P,TrixFile('D',Args,1),BCast_O=.TRUE.)
   CALL GetDistrRho('Rho',Args,1)
 #else
-  CALL Get(P,TrixFile('D',Args,1),BCast_O=.TRUE.)
+!  WRITE(*,*) "JForce"
+!  WRITE(*,*) "D ",Args%I%I(4)
+  CALL Get(P,TrixFile('D',Args,0),BCast_O=.TRUE.)
   CALL Get(Rho,'Rho',Args,1,Bcast_O=.TRUE.)  
 #endif
   CALL Get(RhoPoles) 
@@ -119,6 +121,8 @@ PROGRAM JForce
 !    Start AtB Loop
      DO JP=P%RowPt%I(AtA),P%RowPt%I(AtA+1)-1 
         AtB=P%ColPt%I(JP)
+        B1=3*(AtB-1)+1
+        B2=3*AtB
         IF(SetAtomPair(GMLoc,BS,AtA,AtB,Pair)) THEN 
            Q=P%BlkPt%I(JP)
            NB=BSiz%I(AtB)
@@ -168,6 +172,16 @@ PROGRAM JForce
         ENDIF
      ENDDO
   ENDDO
+!
+!  A = Zero
+!  DO AtA=1,NAtoms
+!     A1=3*(AtA-1)+1
+!     A2=3*AtA
+!     A(1) = A(1) + JFrc%D(A1)
+!     A(2) = A(2) + JFrc%D(A1+1)
+!     A(3) = A(3) + JFrc%D(A1+2)
+!  ENDDO
+!  WRITE(*,*) A(1),A(2),A(3)
 #ifdef PARALLEL
   IF(MyID == ROOT) THEN
 #endif
