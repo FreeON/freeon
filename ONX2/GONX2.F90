@@ -58,6 +58,7 @@ PROGRAM GONX2
   INTEGER                    :: NSMat
   REAL(DOUBLE)               :: Time1,Time2
   REAL(DOUBLE)               :: TmTM,TmML,TmGx,TmAL,TmDL
+  REAL(DOUBLE),DIMENSION(3)  :: Frc
   CHARACTER(LEN=*),PARAMETER :: Prog='GONX2'
   LOGICAL                    :: DoStrs
 !--------------------------------------------------------------------------------
@@ -117,9 +118,11 @@ PROGRAM GONX2
   SELECT CASE(SCFActn)
   CASE('ForceEvaluation')
 #ifdef ONX2_PARALLEL
-     CALL PDrv_Initialize(DFMcd,TrixFile('D',Args,0),'GONXPart',Args,WhenPartS_O='GEO')
+     CALL PDrv_Initialize(DFMcd,TrixFile('D',Args,1),'GONXPart',Args,WhenPartS_O='GEO')
 #else
-     CALL Get(D,TrixFile('D',Args,0))
+!     WRITE(*,*) "GONX"
+!     WRITE(*,*) "D ",Args%I%I(4)
+     CALL Get(D,TrixFile('D',Args,1))
      NSMat=D%NSMat
 #endif
   CASE DEFAULT
@@ -290,6 +293,17 @@ PROGRAM GONX2
      A2=3*IXYZ
      GTmp%D(A1:A2) = GradX%D(1:3,IXYZ)
   ENDDO
+!
+!
+!  Frc=Zero
+!  DO IXYZ=1,GMc%NAtms
+!     A1=3*(IXYZ-1)+1
+!     A2=3*IXYZ
+!     Frc(1)=Frc(1)+GTmp%D(A1)
+!  ENDDO
+!  WRITE(*,*) Frc(1),Frc(2),Frc(3)
+!
+!
   CALL PChkSum(GTmp,'dKx/dR['//TRIM(CurGeom)//']',Proc_O=Prog) 
 ! Print Out Forces
   CALL Print_Force(GMc,GTmp,'X Force')
