@@ -479,18 +479,23 @@ yield, finally, the Hartree-Fock exchange contribution to the lattice gradients.
 
 \section{Numerical Examples}\label{Sec:NumExamples}
 All developments were implemented in the {\sc MondoSCF}~\cite{MondoSCF} suite of
-linear scaling quantum chemistry programs. The code was compiled 
-using the Portland Group F90 compiler {\tt pgf90} v5.1~\cite{pgf90-v5.1} 
-with the~{\tt -O1} options and with the GNU C compiler {\tt gcc} 
-v3.2.2 using the~{\tt -O1} flag.
+linear scaling quantum chemistry programs. 
+%The code was compiled using the Portland Group F90 compiler {\tt pgf90} 
+%v5.1~\cite{pgf90-v5.1} with the~{\tt -O1} options and with the GNU C 
+%compiler {\tt gcc} v3.2.2 using the~{\tt -O1} flag.
+The code was compiled using the HP fortran compiler {\tt f95}
+v5.5A~\cite{f95v5.5a} and the {\tt -O1} option and the Compaq
+C++ compiler {\tt cxx} v6.5~\cite{cxxv6.5} and the {\tt -O1} flag.
 The parallel ONX algorithm~\cite{VWeber05a} for computing
 the $\Gamma$-point exchange matrix has been modified to compute
 the atomic and lattice gradients.
 Geometry optimizations have been carried out using the QUICCA algorithm recently
 implemented by K. N\'emeth and M. Challacombe~\cite{KNemeth04,KNemeth05} in {\sc MondoSCF}. 
-All calculations were carried out on a 1024-node (2048 processors)
-dual P4 LinuxBIOS/BProc cluster connected with Myrinet 2000 running
-Red-Hat Linux release~9 (Shrike)~\cite{RedHat90}.
+%All calculations were carried out on a 1024-node (2048 processors)
+%dual P4 LinuxBIOS/BProc cluster connected with Myrinet 2000 running
+%Red-Hat Linux release~9 (Shrike)~\cite{RedHat90}.
+All calculations were carried out on a cluster of 256 4-CPU HP/Compaq
+Alphaserver ES45s with the Quadrics QsNet High Speed Interconnect.
 
 
 %The code was compiled using
