@@ -484,8 +484,8 @@ linear scaling quantum chemistry programs.
 %v5.1~\cite{pgf90-v5.1} with the~{\tt -O1} options and with the GNU C 
 %compiler {\tt gcc} v3.2.2 using the~{\tt -O1} flag.
 The code was compiled using the HP fortran compiler {\tt f95}
-v5.5A~\cite{f95v5.5a} and the {\tt -O4} option and the Compaq
-C++ compiler {\tt cxx} v6.5~\cite{cxxv6.5} and the {\tt -O1} flag.
+v5.5A~\cite{f95-v5.5a} and the {\tt -O4} option and the Compaq
+C compiler {\tt cc} v6.5~\cite{cc-v6.5} and the {\tt -O1} flag.
 The parallel ONX algorithm~\cite{VWeber05a} for computing
 the $\Gamma$-point exchange matrix has been modified to compute
 the atomic and lattice gradients.
@@ -771,7 +771,9 @@ is no more than $0.001$ \AA~and $0.1^\circ$ respectively, but the
 difference in the energy is much more significant and is about $8\cdot 10^{-3}$ a.u.
 By inspection of the total energies in Table~\ref{Tab:Urea}, we can see that the difference
 in energy of the two different basis sets is of the same order as what we could observe
-for gas phase calculations. We conclude that the differences observed for the geometry
+for gas phase calculations. The strong dependency of the lattice parameter, especially
+the $a$ and $b$ directions, with respect to basis set size has been recently observed by 
+Civalleri~\cite{BCivalleri05}. We conclude that the differences observed for the geometry
 optimizations of urea are mainly due to the different basis set used by {\sc Crystal03} and 
 {\sc MondoSCF}.
 %Gamess
