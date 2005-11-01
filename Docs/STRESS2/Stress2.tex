@@ -57,13 +57,15 @@
 
 %\preprint{APS/123-QED}
 
-\title{Density functional energy gradients with respect to atomic positions and cell parameters
-  within the $\Gamma$-point approximation}
+%\title{Density functional energy gradients with respect to atomic positions and cell parameters
+%  within the $\Gamma$-point approximation}
+\title{Energy gradients with respect to atomic positions and cell parameters
+  for the density functional theory at the $\Gamma$-point}
 
 \author{Val\'ery Weber}
-\email{valery.weber@unifr.ch}
 \affiliation{Department of Chemistry, University of Fribourg, 1700 Fribourg, Switzerland.}%
 \author{Christopher J. Tymczak}%
+\email{tymczak@lanl.gov}
 \author{Matt Challacombe}%
 \affiliation{Los Alamos National Laboratory, Theoretical Division, Los Alamos 87545, New Mexico, USA.}%
 
@@ -71,26 +73,200 @@
              %  but any date may be explicitly specified
 
 \begin{abstract}
-
+  Recently, construction of the exact Hartree-Fock exchange
+  gradients with respect to atomic positions and cell parameters
+  within the $\Gamma$-point approximation
+  has been introduced [J. Chem. Phys. {\bf ???}, ????, (200?)].
+  In this article, the formalism is extended to the evaluation of
+  analytical $\Gamma$-point density functional energy atomic and lattice gradients. 
+  As an illustration, the analytical gradients have been used
+  in conjunction with the QUICCA algorithm [K. N\'emeth and M. Challacombe,
+  J. Chem. Phys. {\bf 121}, 2877, (2004)] to optimize periodic
+  systems at the DFT and hybride-DFT levels.
 \end{abstract}
 
 %\pacs{Valid PACS appear here}% PACS, the Physics and Astronomy
                              % Classification Scheme.
-\keywords{Periodic boundary condition, exact Hartree-Fock exchange, atomic gradients, 
-lattice gradients.}
+\keywords{Periodic boundary condition, density functional theory, lattice gradients, $\Gamma$-point.}
                               %display desired
 \maketitle
 
 \section{Introduction}
+In preceding papers, we have developed linear scaling quantum chemical methods
+for construction of the periodic Coulomb, exchange-correlation~\cite{CTymczak04a}
+and the exact Hartree-Fock exchange~\cite{CTymczak04b}
+matrices within the $\Gamma$-point approximation.
+In this paper, the implementation of the Coulomb and exchange-correlation 
+energy gradients with respect to atomic positions and cell parameters
+at the $\Gamma$-point is presented.
 
+Kohn-Sham density functional theory has proven to be a highly 
+competitive method for a wide range of applications in solid 
+state physics and chemistry.
+The hybrid Hartree-Fock/Density Functional Theory (HF/DFT) model chemistries
+are an important next step in accuracy beyond the Generalized Gradient
+Approximation~\cite{Gill92,Becke93,VBarone96,CAdamo99}. Together with linear
+scaling methods for computing the density matrix~\cite{ANiklasson02A,ANiklasson03}, these
+advances provide a framework for the application of HF/DFT
+models to large condensed phase systems, surfaces, polymers and wires.
 
+While the $\Gamma$-point approximation uses only the $\mathbf{k}=0$ point to sample
+the Brillouin zone, it does however converge to the
+${\bf k}$-space integration limit, in the worst case with the inverse
+unit cell volume (see for example Refs.~\cite{CKittel71,NAshcroft76}).
+The convergence of the $\Gamma$-point approximation to
+the corresponding ${\bf k}$-space limit was recently
+demonstrated by us for DFT~\cite{CTymczak04a}, HF and hybrid
+HF/DFT~\cite{CTymczak04b} level of theories as well as for the Hartree-Fock 
+atomic and cell gradients~\cite{VWeber05b}.
 
+For 1D (HF)$_n$ chains, the convergence of the HF-MIC $\Gamma$-point energy,
+atomic and cell forces to the converged large unit-cell $\Gamma$-point approximation
+with respect to cell length have been explicitly shown to be exponential
+in the cell size~\cite{VWeber05b}. A fast convergence of the total energy and geometrical parameters
+have also been observed for 3D-systems as MgO and urea.
 
-\subsection{Coulomb matrix}
+The $\Gamma$-point approach opens the capabilities of studying very large
+complex and disordered systems such as liquids, low concentration defects, adsorption of
+large molecule on surfaces, {\em etc}, where conventional methods
+of sampling the Brillouin zone may become computationally too demanding, and
+where the $\Gamma$-point approximation is well justified.
 
+Finding crystal structures of condensed systems can
+be formulated as a minimization of the total energy
+with respect to atomic coordinates and unit-cell vectors.
+The problem is then the minimization of the total energy in $L$ dimensions, where
+$L=3N_{atm}+3$, $N_{atm}$ is the number of atoms, $3N_{atm}-3$ is the number
+of independent coordinates after the elimination of translation,
+and the number of independent unit-vector elements
+after the elimination of unit-cell rotations is 6.
+
+This minimization can be achieved with the help of an 
+efficient optimizer~\cite{KNemeth04,TBucko05,KNemeth05}
+and the knowledge of the gradients with respect to atomic 
+positions and cell parameters.
+
+The analytical lattice gradient method of density functional theory using GTAO for
+1D extended systems was implemented by Hirata and Iwata~\cite{SHirata98}.
+The three dimensional case has been implemented by Kudin and Scuseria
+~\cite{KKudin00A,KKudin00B}. Their approach for the Coulomb problem is
+based on the direct space fast multipole method.
+Recently Doll, Dovesi and Orlando~\cite{KDoll04} presented
+implementation of the Hartree-Fock cell gradients in
+the {\sc Crystal03}~\cite{RDovesi00} package for three dimensional systems.
+Their code is based on GTAO and the summation
+of the Coulomb energy is performed with the Ewald method~\cite{PEwald21},
+which is a combination of direct and reciprocal lattice summations.
+For an efficient truncation of the three infinite summations of the exchange
+series, the {\sc Crystal03} program uses in the first hand, the decay between local basis function
+products and in the second, the fact that elements of the density
+matrix of an insulator decays exponentially with inter-atomic separations.
+The strategy to compute the analytic Hartree-Fock gradients for
+periodic system, in the frame of the {\sc Crystal03} package has been
+presented by Doll, Saunders and Harrison~\cite{KDoll01}.
+Their implementation is based on the Hermite Gaussian-type functions
+in the context of the McMurchie-Davidson algorithm~\cite{LMcmurchie78}.
+
+The remainder of this paper is organized as follows:
+In Section~\ref{Sec:Formalism}, we introduce the formalism and discuss
+the implementation of the Coulomb and exchange-corelation gradients with respect
+to atomic positions and cell parameters
+at the $\Gamma$-point approximation. Full optimization of several periodic systems are given
+in Section~\ref{Sec:NumExamples} as an illustration of the formalism.
+Finally in Section~\ref{Sec:Conclusions} we summarize our results.
+
+\section{Formalism}\label{Sec:Formalism}
+The primitive cell is given by the three vectors $\mathbf{a}$,
+$\mathbf{b}$ and $\mathbf{c}$. Then $M$ is the $3\times3$ matrix composed
+of the primitive lattice vectors
 \begin{equation}
-  J_{ab}=J_{ab}^{In}+J_{ab}^{PFF}+J_{ab}^{TF}
+  M=(\mathbf{a},\mathbf{b},\mathbf{c}).
 \end{equation}
+The position of a lattice is $\mathbf{R(n)}=M\mathbf{n}$,
+with $\mathbf{n}=(n_a,n_b,n_c)$ a vector of integers.
+The position of atom $A$ in the cell $\mathbf{R(n)}$ is $\mathbf{A}=M(\mathbf{f}_A+\mathbf{n})$,
+with $\mathbf{f}_A=(f_{Aa},f_{Ab},f_{Ac})$ the fractional coordinates of
+atom $A$ in the central cell.
+
+An unnormalized Cartesian Gaussian-type function (CGTF) centered on atom $A$ is
+\begin{equation}
+  \phi_a(\mathbf{r})=(x-A_x)^{a_x}(y-A_y)^{a_y}(z-A_z)^{a_z}e^{-\zeta_a(\mathbf{r-A})^2},
+\end{equation}
+where the triad $a=(a_x,a_y,a_z)$ sets the angular symmetry and the exponent $\zeta_a$
+is chosen to describe a particular length scale. Gaussian basis functions are often
+contracted to approximate atomic eigenfunctions.
+
+The total energy within the $\Gamma$-point approximation~\cite{CTymczak04a,CTymczak04b} is given by:
+\begin{equation}
+  \begin{split}
+%    E_{tot}(\mathbf{f}_A,\mathbf{f}_B,\ldots,M)&=\Tr[PT]+h_{nuc}\\
+%    &+\frac{1}{2} \Tr [P(J+\alpha_1 K^{xc}+\alpha_2 K)]
+    E_{tot}(&\mathbf{f}_A,\mathbf{f}_B,\ldots,M)=\sum_{ab} P_{ab}T_{ab}\\
+    &+\frac{1}{2}\sum_{ab} P_{ab}[J_{ab}+\alpha_1 K_{ab}^{xc}+\alpha_2 K_{ab}]+h_{nuc},
+%    E(\mathbf{f}_A,\mathbf{f}_B,\ldots,M)=\sum_{a b}P_{ab}(h_{ab}+J_{ab}+K_{ab}^{xc}+K_{ab})+E_{nuc}
+%    -\frac{1}{2}\sum_{\substack{\mathbf{m}\\a b}}P_{ab}((a|\nabla^2|b^\mathbf{m})-\sum_A Z_A(a|1/|r-A||b^\mathbf{m}) )\\
+%    &+\sum_{\substack{\mathbf{m}\mathbf{n}\\a b c d}}P_{ab}P_{cd}( (ab|c^\mathbf{m}d^\mathbf{n})
+%    -\frac{1}{2}(ac^\mathbf{m}|bd^\mathbf{n}) )+E_{nuc}
+  \end{split}
+\end{equation}
+%where $P$, $T$, $J$, $K^{xc}$ and $K$ 
+%are respectively the density, kinetic energy, electron-electron and elecetron-nuclear Coulomb,
+%exchange-correlation, exacte Hartree-Fock exchange matrices.
+%and $h_{nuc}$ is the nuclear-nuclear repulsion energy.
+where $P$ is the density matrix, $T$ is the kinetic energy matrix, $J$
+is the electron-electron and electron-nuclear Coulomb matrix, 
+$K^{xc}$ the exchange-correlation matrix, $K$ is the exacte 
+Hartree-Fock exchange matrix and $h_{nuc}$ is the nuclear-nuclear repulsion energy.
+The factors $\alpha_1$ and $\alpha_2$ are mixing coefficients of the
+exchange-correlation and exacte Hartree-Fock energies respectively.
+%within the $\Gamma$-point approximation~\cite{CTymczak04a,CTymczak04b}
+%where the indices $\mathbf{mn}$ run over the direct lattice vectors,
+%$abcd$ over the basis functions,
+
+%and the ERIs are written in the Mulliken notation and computed
+%with the MIC as discussed in the following.
+
+The gradient with respect to $\lambda$ is 
+\begin{equation}
+  \begin{split}
+    \frac{\partial E_{tot}}{\partial \lambda}&=\sum_{ab}P_{ab}\frac{\partial T_{ab}}{\partial \lambda}
+    -\sum_{ab}W_{ab}\frac{\partial S_{ab}}{\partial \lambda}+\frac{\partial h_{nuc}}{\partial \lambda}\\
+    &+\frac{1}{2}\sum_{ab}P_{ab}\bigg[\frac{\partial J_{ab}}{\partial \lambda}\bigg|_P
+    +\alpha_1 \frac{\partial K^{xc}_{ab}}{\partial \lambda}\bigg|_P
+    +\alpha_2 \frac{\partial K_{ab}}{\partial \lambda}\bigg|_P\bigg]
+%    \frac{\partial E_{tot}}{\partial \lambda}&=2\Tr\left[PFP\frac{\partial S}{\partial \lambda}\right]
+%    +\frac{\partial h_{nuc}}{\partial \lambda}\\
+%    &-\Tr\left[P\frac{\partial J}{\partial \lambda}\bigg|_P+\alpha_1 P\frac{\partial K^{xc}}{\partial \lambda}\bigg|_P+\alpha_2 
+%      P\frac{\partial K}{\partial \lambda}\bigg|_P\right]
+%    E(\mathbf{f}_A,\mathbf{f}_B,\ldots,M)=\sum_{a b}P_{ab}(h_{ab}+J_{ab}+K_{ab}^{xc}+K_{ab})+E_{nuc}
+%    -\frac{1}{2}\sum_{\substack{\mathbf{m}\\a b}}P_{ab}((a|\nabla^2|b^\mathbf{m})-\sum_A Z_A(a|1/|r-A||b^\mathbf{m}) )\\
+%    &+\sum_{\substack{\mathbf{m}\mathbf{n}\\a b c d}}P_{ab}P_{cd}( (ab|c^\mathbf{m}d^\mathbf{n})
+%    -\frac{1}{2}(ac^\mathbf{m}|bd^\mathbf{n}) )+E_{nuc}
+  \end{split}
+\end{equation}
+where $W=PFP$ is the energy-weighted density matrix.
+The gradients with respect to fractional coordinates and lattice parameters 
+are simply given by $\lambda=f_{Gj}$ and $\lambda=M_{ij}$, respectively.
+The Hartree-Fock exchange gradients with respect to atomic and cell parameters
+$\partial K_{ab}/\partial \lambda |_P$ were derived in Ref.~\cite{VWeber05b}.
+The energy gradient with respect to the fractional coordinate
+$f_{Gj}$ can be obtained through the linear transform
+\begin{equation*}
+ \frac{\partial E_{tot}}{\partial f_{Gj}}=\sum_{i=x,y,z}M_{ij}\frac{\partial E_{tot}}{\partial G_i},
+\end{equation*}
+where $\partial E_{tot}/\partial G_i$ is the standard gradient.
+In the following, we describe the implementation of the Coulomb and exchange-correlation
+gradients with respect to atomic and cell parameters.
+
+\subsection{Coulomb integrals}
+The periodic quantum Coulomb sums involve the contributions
+\begin{equation}
+  J_{ab}=J_{ab}^{In}+J_{ab}^{PFF}+J_{ab}^{TF},
+\end{equation}
+where $J^{In}$ .... , $J^{PFF}$ is the periodic far field term and $J^{TF}$ 
+is a surface term which corrects the ...
+
+\subsubsection{In ...}
 
 
 \subsubsection{Periodic far field}
@@ -114,151 +290,137 @@ The derivative of $J_{ab}^{TF}$ with respect to the cell parameter $M_{ij}$ is
   \begin{split}
     \frac{\partial J_{ab}^{TF}}{\partial M_{ij}}&=
     -\frac{2\pi}{3V^2}\frac{\partial V}{\partial M_{ij}}(QS_{ab}-2\mathbf{d}_{ab}\cdot\mathbf{D})\\
-    &+\frac{2\pi}{3V}(\frac{\partial Q}{\partial M_{ij}}S_{ab}+Q\frac{\partial S_{ab}}{\partial M_{ij}}\\
+    &+\frac{2\pi}{3V}\bigg(\frac{\partial Q}{\partial M_{ij}}S_{ab}+Q\frac{\partial S_{ab}}{\partial M_{ij}}\\
     &-2\frac{\partial \mathbf{d}_{ab}}{\partial M_{ij}}\cdot\mathbf{D}
-    -2\mathbf{d}_{ab}\cdot\frac{\partial \mathbf{D}}{\partial M_{ij}}),
+    -2\mathbf{d}_{ab}\cdot\frac{\partial \mathbf{D}}{\partial M_{ij}} \bigg),
   \end{split}
 \end{equation}
 where the derivatives ${\partial Q}/{\partial M_{ij}}$,
 ${\partial \mathbf{d}_{ab}}/{\partial M_{ij}}$ and
 ${\partial \mathbf{D}}/{\partial M_{ij}}$ are straitforward;
 the term ${\partial S_{ab}}/{\partial M_{ij}}$
-is given in (\ref{Eq:OvDer}).
+is given in Ref.~\cite{KDoll04}.
 
 
 
-\subsection{Exchange-correlation matrix}
-
+\subsection{Exchange-correlation integrals}
 
 In calculation with PBC, the numerical integration of the DFT
 exchange-correlation term is carried out over a cuboid
 integration domain $V_{\Box}$ which is equivalent to the unit
 cell volume $V_{UC}$. The exchange-correlation matrix element is thus
 \begin{equation}\label{Eq:xc}
-  K_{ab}^{xc}=\int_{V_\Box}\rho_{ab}(r)v_{xc}[\rho,r]d^3r.
+%  K_{ab}^{xc}=\int_{V_\Box}\rho_{ab}(\mathbf{r})v_{xc}[\rho,\mathbf{r}]d^3r.
+  K_{ab}^{xc}=\int_{V_\Box}\rho_{ab}(\mathbf{r})v_{xc}[\rho,\mathbf{r}]dV
+  =\int_{V_\Box}f_{ab}(\mathbf{r})dV.
 \end{equation}
+In the following, the subscript $\Box$ will allways refer to the cuboid unit cell.
 This simple integration volume should be contrasted with more
 conventional methods for computing the exchange-correlation matrix, involving
-the ``Becke weights'' cite, which requirs integration over $V_\infty$.
-The derivative of $K_{ab}^{xc}$ with respect to cell parameters is given by
-\begin{equation}
-  \begin{split}
-    \frac{\partial K_{ab}^{xc}}{\partial M_{ij}}&=
-    \int_{V_{\Box}}\frac{\partial}{\partial M_{ij}}(\rho_{ab}(\mathbf{r})v_{xc}[\rho,\mathbf{r}])d^3r\\
-    &+\delta_{ij}\int_{S_{j\Box}}\rho_{ab}(\mathbf{r})v_{xc}[\rho,\mathbf{r}]dS
-  \end{split}
-\end{equation}
-where the intergale on the surface $S_{j\Box}$ arises
-from the derivative of the limits of the integral (\ref{Eq:xc}).
+the ``Becke weights''~\cite{ABecke88}, which requirs integration over $V_\infty$.
+While Eq.~\ref{Eq:xc} is written in terms of the 
+exchange-correlation potential for simplicity, in practice the code relies on the Pople, Gill
+and Johnson approach~\cite{JPople92,MChallacombe00A}. 
 
+The derivative of $K_{ab}^{xc}$ with respect to cell parameters is given by
+\begin{equation}\label{Eq:xcLatGrd}
+%  \begin{split}
+    \frac{\partial K_{ab}^{xc}}{\partial M_{ij}}=
+%    \int_{V_{\Box}}\frac{\partial}{\partial M_{ij}}(\rho_{ab}(\mathbf{r})v_{xc}[\rho,\mathbf{r}])dV\\
+%    &+\delta_{ij}\int_{S_{j}}\rho_{ab}(\mathbf{r})v_{xc}[\rho,\mathbf{r}]dS
+    \int_{V_{\Box}}\frac{\partial f_{ab}(\mathbf{r})}{\partial M_{ij}}dV\\
+    +\delta_{ij}\int_{S_{j\Box}}f_{ab}(\mathbf{r})dS
+%  \end{split}
+\end{equation}
+where the intergation of the surface $S_{j\Box}$ arises
+from the derivative of the limits of the integral~(\ref{Eq:xc}).
+The surface integral is approximate by 
+\begin{equation}%\label{Eq:xcLatGrd}
+  \int_{S_{j\Box}}f_{ab}(\mathbf{r})dS\approx 
+%  \frac{1}{2h}\int_{-h}^h\int_{S_{j\Box}}f_{ab}(\mathbf{r})dSdw_j
+  \frac{1}{2h}\int_{V_{j\Box}}f_{ab}(\mathbf{r})dV
+%  \int_{S_{j}}\rho_{ab}(\mathbf{r})v_{xc}[\rho,\mathbf{r}]dS\approx 
+%  \frac{1}{2h}\int_{V_{j}}\rho_{ab}(\mathbf{r})v_{xc}[\rho,\mathbf{r}]dV
+\end{equation}
+where $h$ is a small number (typically $10^{-4}\,a.u.$) and 
+$V_{j\Box}=S_{j\Box}\times[-h,h]$ is a thin volume where the integration over the interval $[-h,h]$
+is carried out along the normal to the surface $S_{j\Box}$. This simple domain $V_{j\Box}$ can be efficiently 
+integrated with the HiCu algorithm~\cite{MChallacombe00A} to high accuracy.
 
 \section{Numerical Examples}\label{Sec:NumExamples}
-All developments were implemented in the MondoSCF~\cite{MondoSCF} suite of
-linear scaling quantum chemistry programs. The code was compiled 
-using the Portland Group F90 compiler {\tt pgf90} v5.1~\cite{pgf90} 
-with the~{\tt -O1} options and with the GNU C compiler {\tt gcc} 
-v3.2.2 using the~{\tt -O1} flag.
-All calculations were carried out on a 1024-node (2048 processors)
-dual P4 LinuxBIOS/BProc cluster connected with Myrinet 2000 running
-Red-Hat Linux release~9 (Shrike)~\cite{RedHat90}.
+All developments were implemented in the {\sc MondoSCF}~\cite{MondoSCF} suite of
+linear scaling quantum chemistry programs. 
+%The code was compiled using the Portland Group F90 compiler {\tt pgf90} v5.1~\cite{pgf90-v5.1} 
+%with the~{\tt -O1} options and with the GNU C compiler {\tt gcc} 
+%v3.2.2 using the~{\tt -O1} flag.
+The code was compiled using the HP fortran compiler {\tt f95} 
+v5.5A~\cite{f95-v5.5a} and the {\tt -O4} option and the Compaq 
+C compiler {\tt cc} v6.5~\cite{cc-v6.5} and the {\tt -O1} flag.
+%All calculations were carried out on a 1024-node (2048 processors)
+%dual P4 LinuxBIOS/BProc cluster connected with Myrinet 2000 running
+%Red-Hat Linux release~9 (Shrike)~\cite{RedHat90}.
+All calculations were carried out on a cluster of 256 4-CPU HP/Compaq 
+Alphaserver ES45s with the Quadrics QsNet High Speed Interconnect.
 
 The {\tt TIGHT} level of numerical accuracy has been used throughout this work.  
 Thresholds that define the {\tt TIGHT} accuracy level include a matrix 
 threshold $\tau=10^{-6}$, as well as other numerical thresholds 
 detailed in Ref.~\cite{CTymczak04a}, which deliver at least 8 digits of 
 relative accuracy in the total energy and 4 digits of absolute accuracy 
-in the forces.  
+in the forces. 
+
+In order to demonstrate the capabilities of our implementation of the
+Khon-Sham density functional energy atomic and lattice gradients, we present in this Section
+full optimization studies of 3D periodic systems without any lattice
+nor any atomic positions symmetry constraint.
+Our first benchmark case is the optimization of MgO at the Perdew-Burke-Ernzerhof (PBE)~\cite{Perdew_96v77} 
+and Becke 3-parameter Lee-Yang-Parr (B3LYP)~\cite{ABecke93} 
+level of theories. The second benchmark is calix[4]hydroquinone 
+(CHQ) nanotube~\cite{KKim02} and was optimized at the B3LYP level of theory. 
+The latter system has been optimized at the generalized gradient 
+approximation of Perdew and Wang~\cite{YWang91} and 
+Vanderbilt~\cite{DVanderbilt90} pseudopotential plane wave 
+density functional level of theory by Kim et al~\cite{KKim02}.
+
+Table~\ref{Tab:MgO} shows the progression of the lattice constants and total energies computed
+for various MgO supercells at the $\Gamma$-point PBE~\cite{Perdew_96v77} 
+and B3LYP~\cite{ABecke93} level of theories using
+the 8-61G basis set for magnesium and the 8-51G basis set for oxygen.
+The basis sets were specially optimized at the HF level for MgO by
+Caus\`a et al~\cite{CBS:861G:MgO} and were obtained from Ref.~\cite{CrystalLib}.
+The primitive cubic cell coordinates used for this system are given in
+Ref.~\cite{PBCCoordinates}.
+For comparison, we report the optimized lattice parameter of cubic MgO
+obtained with the {\sc Crystal03} code and a $8\times 8\times 8$ $k$-points integration grid.
 
 \begin{table}[t]
   \centering
   \caption{\protect
-    Progression of the Hartree-Fock $\Gamma$-point cell constants, 
-    bond lengths, bond angles, dihedral angles 
-    and total energy for (urea)$_n$ using the periodic RHF-MIC/6-21G* level of theory 
-    and the {\tt TIGHT} threshold. 
-%    $n$ is the number of urea units in the (super)cell.
-    Lengths, angles and energies are in angstr\"oms, degrees and atomic units respectively.
-  }\label{Tab:Urea}
-  \begin{tabular}{lcccc}
-    \toprule
-    &\multicolumn{3}{c}{\sc{MondoSCF}\footnote[1]{$\Gamma$-point.}}
-    &\multicolumn{1}{c}{\sc{Crystal03}\footnote[2]{$2\times 2\times 2$ $k$-points.}} \\
-    \hline
-    $n$             & 2 & 16 & 54 & 2 \\
-    $a_0$           & & & & 5.524 \\
-    $c_0$           & & & & 4.642 \\
-    $E/n$           & & & &$-$447.68322 \\
-    &\multicolumn{4}{c}{Bond lengths} \\
-    C$=$O           & & & & \\
-    C$-$N           & & & & \\
-    N$-$H$_1$       & & & & \\
-    N$-$H$_2$       & & & & \\
-    &\multicolumn{4}{c}{Bond angles} \\
-    OCN             & & & & \\
-    CNH$_1$         & & & & \\
-    CNH$_2$         & & & & \\
-    &\multicolumn{4}{c}{Dihedral angles} \\
-    OCNH$_1$        & & & & \\
-    OCNH$_2$        & & & & \\
-    NCNH$_1$        & & & & \\
-    \botrule
-  \end{tabular}
-\end{table}
-
-
-\begin{table}[t]
-  \centering
-  \caption{\protect
-    Progression of the Hartree-Fock $\Gamma$-point cell constant $a_0$
-    and total energies $E$ for (MgO)$_n$ using the periodic 
-    RHF-MIC/8-61G/8-51G level of theory and the {\tt TIGHT} threshold. 
+    Progression of the cell constant $a_0$,
+    total energy $E$ and fractional coordinate of the oxygen in the primitive cell
+    for (MgO)$_n$ using the periodic $\Gamma$-point
+    PBE/8-61G/8-51G and B3LYP/8-61G/8-51G level of theories and the {\tt TIGHT} thresholds.
 %    $n$ is the number of MgO units in the (super)cell.
-    Lengths and energies are in \AA~and atomic unit respectively.
+    Lattice parameters and energies are in \AA~and atomic unit respectively.
   }\label{Tab:MgO}
-  \begin{tabular}{lrccc}
+  \begin{tabular}{lcrccc}
   \toprule
-  & $n$ & $a_0$ & $E/n$ & $f_O$ \\
+  & & $n$ & $a_0$ & $E/n$ & $f_O$ \\
   \hline
-    {\sc MondoSCF}\footnote[1]{$\Gamma$-point.}
-    &  4  & 4.365 & $-$274.616533 & 0.488 \\% 4.365-274.616533623575FullOpt 2.131
-    & 32  & 4.192 & $-$274.664119 & 0.500 \\% 8.385-274.664118754687FullOpt 2.096
-    & 108 & 4.192 & $-$274.664299 & 0.500 \\%12.575-274.664299043364FullOpt 2.096
-    %&  4\footnote[2]{Full optimization.}        &4.365&$-$274.616533\\%4.365-274.616533623575FullOpt
-    %&  4\footnote[3]{Lattice optimization only.}&4.370&$-$274.615477\\%4.370-274.615477868575LattOpt
-    %& 32$^b$                                    &4.192&$-$274.664119\\%8.385-274.664118754687FullOpt
-    %& 32$^c$                                    &4.192&$-$274.664119\\%8.384-274.664118815087LattOpt
+    {\sc MondoSCF}\footnote[1]{$\Gamma$-point.} 
+    & PBE   &   4 & 4.331 & $-$275.243165 & 0.4998 \\%
+    &       &  32 & 4.213 & $-$275.284428 & 0.5000 \\%
+    &       & 108 & 4.212 & $-$275.284641 & 0.5000 \\%
+    & B3LYP &   4 & 4.328 & $-$275.389093 & 0.4972 \\%VWN5
+    &       &  32 & 4.204 & $-$275.431167 & 0.5000 \\%VWN5
+    &       & 108 & 4.204 & $-$275.431343 & 0.5000 \\%VWN5
   \hline
-    {\sc Crystal03}\footnote[2]{$8\times 8\times 8$ $k$-points.} 
-    &  1 & 4.192 & $-$274.664239 & $1/2$ \\%-274.664239121540
+    {\sc Crystal03}\footnote[2]{$8\times 8\times 8$ $k$-points.}
+    & PBE   &   1 & 4.212 & $-$275.284731 & $1/2$ \\
+    & B3LYP &   1 & 4.204 & $-$275.431235 & $1/2$ \\
   \botrule
   \end{tabular}
 \end{table}
-%
-%Crystal03 HF/8-61G/8-51G 8x8x8 Default
-%4.201 -274.66420524315
-%4.200 -274.66420889046
-%4.199 -274.66421216488
-%4.195 -274.66423302172
-%4.194 -274.66423838462
-%4.193 -274.66423912154
-%4.192 -274.66423942700 <<<
-%4.191 -274.66423922829
-%4.190 -274.66423867131
-%4.185 -274.66423067762
-%
-%Crystal03 PBExc/8-61G/8-51G 8x8x8 What was that?
-%4.190 -275.28462703246
-%4.200 -275.28469244414
-%4.205 -275.28471839588
-%4.210 -275.28473181717 
-%4.211 -275.28473298902
-%4.212 -275.28473352160 <<<
-%4.213 -275.28473330887
-%4.214 -275.28473191983
-%4.215 -275.28473317201
-%4.218 -275.28472993937
-%4.220 -275.28472509192
-%4.230 -275.28467343664 
 %
 %MgO PBExc Crystal03 User2.bas 8x8x8 default
 %4.200 -275.28468980590
@@ -284,46 +446,62 @@ in the forces.
 %4.250 -275.43082055853
 %
 %MONDO PBExc User2.bas Tight
-%  a0         E            d       f
-%4.3307 -1100.9726623928 2.1643  0.49976
+%   a     a0         E                  E/n          d       f
+% 4.3307 4.3307  -1100.9726623928 -275.243165598200 2.1643  0.49976
+% 8.4253 4.2126  -8809.1016996344 -275.284428113575 2.1065  0.50004
+%12.6369 4.2123 -29730.7411945410 -275.284640690194 2.1062  0.50001
+%
+%MONDO B3LYP/VWN3 User2.bas Tight
+% 4.3278 4.3278  -1101.8625722845 -275.465643071125 2.1518  0.49720
+% 8.4070 4.2035  -8816.2479051094 -275.507747034669 2.1017  0.49999
 %
 %
+%MONDO B3LYP/VWN5 User2.bas Tight
+% 4.3278 4.3278  -1101.5563720224 -275.389093005600 2.1518  0.49720
+% 8.4080 4.2040  -8813.7973326984 -275.431166646825 2.1020  0.50000
+%12.6120 4.2040 -29746.5849984472 -275.431342578215 2.1020  0.50000
 %
-%
-%MONDO B3LYP User2.bas Tight
-%
-%
-%
-%
-%
-%ICE ICE ICE ICE ICE ICE ICE ICE ICE ICE ICE ICE ICE ICE ICE 
-% Ferroelectric ordered ice in Cmc21 setting (from Crystal)
-% HF/6-31G**/Tight
-%               E            A        C
-% 2x2x1 -1216.7333268588 9.253791 7.644517   %Pink
-% 3x3x2 
-% 4x4x2 
-%
-%
-%
-%
+
+In Table~\ref{Tab:CHQ}, we present the optimization of the CHQ nanotube
+at the B3LYP/6-311G** $\Gamma$-point approximation with the constraint $\alpha=\beta=\gamma=90^\circ$. 
+
 \section{Conclusions}\label{Sec:Conclusions}
-blablabla
-\\
+In a previous paper, construction of the analytical 
+exact Hartree-Fock exchange gradients with respect to 
+atomic and cell parameters within the $\Gamma$-point 
+approximation has been introduced. 
+In this article, the formalism for the evaluation of the density 
+functional gradients at the $\Gamma$-point approximation for 
+Cartesian Gaussian-type basis functions was presented and 
+implemented in the {\sc MondoSCF} package.
+
+As an illustration, the analytical gradients and cell gradients have been used
+in conjunction with the QUICCA algorithm to optimize few periodic systems at
+the DFT and HF/DFT level.
+
+Convergence of bond lengths, bond angles,
+dihedral angles and lattice parameters within the DFT and HF/DFT $\Gamma$-point
+super cell approach and under full relaxation with no symmetry
+to the converged large unit-cell $\Gamma$-point approximation have
+been demonstrated for 3D systems to better than 3 digits.
+
+Although the convergence of the Kohn-Sham density functional $\Gamma$-point total energy to
+its ${\bf k}$-space integration counterpart with respect to cell size is relatively slow,
+the convergence of the geometrical parameters (lattice and atomic positions)
+requires much smaller cells. Thus, we could show that a relative accuracy better
+than 3 digits can be already achieved with cubic cells of about $600$\AA$^3$.
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Acknowledgements
 \begin{acknowledgments}
- V.W. would like to thank K. Doll for a preprint of his manuscript and informations
- about the basis sets used in his work.
- This work has been supported by the Swiss National Science Foundation, 
- the Swiss Office for Education and Science through the European 
- COST Action D14 and the US Department of Energy 
+ The authors would like to thank K. N\'emeth and ...
+ for helpful comments.
+ This work has been supported by US Department of Energy 
  under contract ???????????? and the ASCI project.  
  The Advanced Computing Laboratory of Los 
  Alamos National Laboratory is acknowledged.
- The authors would like to thank K. N\'emeth and C.J. Tymczak 
- for helpful comments.
 \end{acknowledgments}  
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

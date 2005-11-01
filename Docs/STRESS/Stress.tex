@@ -96,7 +96,7 @@
 %\pacs{Valid PACS appear here}% PACS, the Physics and Astronomy
                              % Classification Scheme.
 \keywords{Periodic boundary condition, exact Hartree-Fock exchange, atomic gradients, 
-lattice gradients.}
+cell gradients.}
                               %display desired
 \maketitle
 
@@ -125,7 +125,7 @@ models to large condensed phase systems, surfaces and wires.
 While the $\Gamma$-point approximation uses only the $\mathbf{k}=0$ point to sample
 the Brillouin zone, it does however converge to the 
 ${\bf k}$-space integration limit, in the worst case with the inverse  
-unit cell volume (see for example Refs.~\cite{CKittel71,NAshcroft76}).
+cell volume (see for example Refs.~\cite{CKittel71,NAshcroft76}).
 The convergence of the $\Gamma$-point approximation to 
 the corresponding ${\bf k}$-space limit was recently 
 demonstrated by us for DFT~\cite{CTymczak04a}, HF and hybrid 
@@ -138,12 +138,12 @@ where the $\Gamma$-point approximation is well justified.
 
 Finding crystal structures of condensed systems can
 be formulated as a minimization of the total energy 
-with respect to atomic coordinates and unit-cell vectors.
-The problem is then the minimization of the total energy in $L$ dimensions, where
+with respect to atomic coordinates and cell vectors.
+The problem is then the minimization of the total energy with $L$ degree of freedom, where
 $L=3N_{atm}+3$, $N_{atm}$ is the number of atoms, $3N_{atm}-3$ is the number
 of independent coordinates after the elimination of translation, 
-and the number of independent unit-vector elements
-after the elimination of unit-cell rotations is 6.
+and the number of independent cell vector elements
+after the elimination of cell rotations is 6.
 %Gradients and lattice gradients are important concepts in characterizing the states of condensed
 %matter. The simulation of system with periodic boundary condition (PBC) 
 %involves the atomic positions in the unit cell and the lattice parameters. 
@@ -159,20 +159,20 @@ Gaussian type atomic orbitals (GTAO),
 were for one dimensional periodic systems~\cite{HTeramae83,HTeramae84}. 
 Other groups have also described such implementations for 
 one~\cite{DJacquemin99A,DJacquemin99B} and two~\cite{MTobita03} dimensions. 
-The analytical lattice gradient method of density functional theory using GTAO for 
+The analytical cell gradient method of density functional theory using GTAO for 
 1D extended systems was implemented by Hirata and Iwata~\cite{SHirata98}.
 The three dimensional case has been implemented by Kudin and Scuseria 
 ~\cite{KKudin00A,KKudin00B}. Their approach for the Coulomb problem is 
 based on the direct space fast multipole method.
-We can also mention the plane-wave local density functional (LDF) formulation
+We should also mention the plane-wave local density functional (LDF) formulation
 by Nielsen and Martin~\cite{ONielsen85} and the LDF-LCAO derivation of 
 the cell gradients by Feibelman~\cite{PFeibelman91}.
 Recently Doll, Dovesi and Orlando~\cite{KDoll04} presented 
 implementation of the Hartree-Fock cell gradients in 
 the {\sc Crystal03}~\cite{RDovesi00} package for three dimensional systems. 
 Their code is based on GTAO and the summation 
-of the Coulomb energy is performed with the Ewald method~\cite{PEwald21}, 
-which is a combination of direct and reciprocal lattice summations.
+of the Coulomb energy is performed using an Ewald method~\cite{PEwald21}, 
+which is a combination of direct and reciprocal cell summations.
 For an efficient truncation of the three infinite summations of the exchange
 series, the {\sc Crystal03} program uses in the first hand, the decay between local basis function 
 products and in the second, the fact that elements of the density 
@@ -197,12 +197,12 @@ of the derivative of the ERI's with respect to atomic positions and,
 except for applying the MIC at the primitive level, it is
 similar to what has been done in the past for molecular calculations
 ~\cite{SObara86,MGordon88,KIshida91,THelgaker92,KIshida93}.
-However, difficulties arise when derivative of ERI's are taken with respect to lattice 
+However, difficulties arise when derivative of ERI's are taken with respect to cell 
 parameters. In this case the derivative provides, after some manipulation, 
 a new type of integral that
 arises due to the use of the MIC in the $\Gamma$-point approximation. This integral 
 can be evaluated with the help of a modified recurrence relation (RR) similar to the
-vertical recurrence relation (VRR) introduced by Obara and Saika~\cite{SObara86}.
+vertical recurrence relation (VRR) introduced by Obara and Saika (OS)~\cite{SObara86}.
 
 The remainder of this paper is organized as follows:
 In Section~\ref{Sec:Formalism}, we introduce the formalism and discuss
@@ -214,13 +214,13 @@ Finally in Section~\ref{Sec:Conclusions} we summarize our results.
 
 
 \section{Hartree-Fock exchange energy}\label{Sec:Formalism}
-The primitive cell is given by the three vectors $\mathbf{a}$, 
+The cell is given by the three vectors $\mathbf{a}$, 
 $\mathbf{b}$ and $\mathbf{c}$. Then $M$ is the $3\times3$ matrix composed 
-of the primitive lattice vectors
+of the cell vectors
 \begin{equation}
   M=(\mathbf{a},\mathbf{b},\mathbf{c}).
 \end{equation}
-The position of a lattice is $\mathbf{R(n)}=M\mathbf{n}$,
+The position of a cell is $\mathbf{R(n)}=M\mathbf{n}$,
 with $\mathbf{n}=(n_a,n_b,n_c)$ a vector of integers.
 The position of atom $A$ in the cell $\mathbf{R(n)}$ is $\mathbf{A}=M(\mathbf{f}_A+\mathbf{n})$,
 with $\mathbf{f}_A=(f_{Aa},f_{Ab},f_{Ac})$ the fractional coordinates of 
@@ -258,10 +258,10 @@ is given by:
 \begin{equation}
 E^x(\mathbf{f}_A,\mathbf{f}_B,\ldots,M)=
 % E^x(\{\mathbf{f}_G\},M)=
- -\frac{1}{2}\sum_{\substack{\mathbf{m}\mathbf{n}\\a b c d}}P_{ab}P_{cd}
+ -\frac{1}{4}\sum_{\substack{\mathbf{m}\mathbf{n}\\a b c d}}P_{ab}P_{cd}
  (ac^\mathbf{m}|bd^\mathbf{n})
 \end{equation}
-where the indices $\mathbf{mn}$ run over the direct lattice vectors, 
+where the indices $\mathbf{mn}$ run over the direct cell vectors, 
 $abcd$ over the basis functions, 
 $P=P(\mathbf{f}_A,\mathbf{f}_B,\ldots,M)$
 %$P=P(\{\mathbf{f}_G\},M)$ 
@@ -313,14 +313,14 @@ and $F_m(x)=\int_0^1t^{2m}\exp(-xt^2)dt$ is the reduced incomplete gamma functio
 
 \subsection{Gradients with respect to atomic positions}
 The exchange energy gradient with respect to the fractional coordinate 
-$f_{Gj}$ can be obtained through the linear transform 
+$f_{Gj}$, at constant $P$, can be obtained through the linear transform 
 \begin{equation*}
  \frac{\partial E^x}{\partial f_{Gj}}\bigg|_P=\sum_{i=x,y,z}M_{ij}\frac{\partial E^x}{\partial G_i}\bigg|_P,
 \end{equation*}
-where $\partial E^x/\partial G_i|_P$ is the exchange energy gradient wrt atomic position given by
+where $\partial E^x/\partial G_i|_P$ is the exchange energy gradient with rrespect to atomic position given by
 \begin{equation}\label{Eq:Grad}
   \frac{\partial E^x}{\partial G_i}\bigg|_P =
-  -\frac{1}{2}\sum_{\substack{\mathbf{m}\mathbf{n}\\a b c d}}P_{ab}P_{cd}
+  -\frac{1}{4}\sum_{\substack{\mathbf{m}\mathbf{n}\\a b c d}}P_{ab}P_{cd}
   \frac{\partial(ac^\mathbf{m}|bd^\mathbf{n})}{\partial G_i},
 \end{equation}
 %\end{eqnarray}
@@ -343,7 +343,7 @@ computational cost of atomic gradient calculation.
 The $\Gamma$-point MIC exchange energy gradients with respect to cell parameters are given by
 \begin{equation}\label{Eq:Xstress}
   \frac{\partial E^x}{\partial M_{ij}}\bigg|_P=
-  -\frac{1}{2}\sum_{\substack{\mathbf{m}\mathbf{n}\\a b c d}}P_{ab}P_{cd}
+  -\frac{1}{4}\sum_{\substack{\mathbf{m}\mathbf{n}\\a b c d}}P_{ab}P_{cd}
   \frac{\partial(ac^\mathbf{m}|bd^\mathbf{n})}{\partial M_{ij}},
 \end{equation}
 where the summations are the same as in~(\ref{Eq:Grad}).
@@ -408,7 +408,7 @@ and Head-Gordon-Pople~\cite{MGordon88} (OS-HGP) algorithm.
 The generation of the two-electron integrals is broken up into two
 main steps. First, a set of two-electron integrals with $c=d=0$ is generated from the
 reduced incomplete gamma function~\cite{IShavitt63} 
-by mean of a modified version of the OS VRR. Finally,
+by mean of a modified version of the OS-VRR. Finally,
 the Cartesian powers between orbitals of the same electron are transfered using 
 the simple two term horizontal recurrence relation (HRR)~\cite{MGordon88}.
 For the evaluation of the integral $[e0|f0]_{i}=[e0|f0]_{i}^{(0)}$, we have 
@@ -474,7 +474,7 @@ to generate the intermediate integrals $(e0|f0)$ and $[e0|f0]_{ij}$. The
 desired ERI's are then computed with the help of the HRR Eq.~(\ref{Eq:HRR}),
 accumulated with the weighted gradients, Eq.~(\ref{Eq:DerMij}), and digested
 with the corresponding density matrix elements, Eq.~(\ref{Eq:Xstress}), to
-yield, finally, the Hartree-Fock exchange contribution to the lattice gradients.
+yield, finally, the Hartree-Fock exchange contribution to the cell gradients.
 
 
 \section{Numerical Examples}\label{Sec:NumExamples}
@@ -488,7 +488,7 @@ v5.5A~\cite{f95-v5.5a} and the {\tt -O4} option and the Compaq
 C compiler {\tt cc} v6.5~\cite{cc-v6.5} and the {\tt -O1} flag.
 The parallel ONX algorithm~\cite{VWeber05a} for computing
 the $\Gamma$-point exchange matrix has been modified to compute
-the atomic and lattice gradients.
+the atomic and cell gradients.
 Geometry optimizations have been carried out using the QUICCA algorithm recently
 implemented by K. N\'emeth and M. Challacombe~\cite{KNemeth04,KNemeth05} in {\sc MondoSCF}. 
 %All calculations were carried out on a 1024-node (2048 processors)
@@ -513,15 +513,15 @@ relative accuracy in the total energy and 4 digits of absolute accuracy
 in the forces.  
 
 In order to demonstrate the capabilities of our implementation of the
-Hartree-Fock exchange energy atomic and lattice gradients, we present in this Section 
-full optimization studies of 1D and 3D periodic systems without any lattice 
+Hartree-Fock exchange energy atomic and cell gradients, we present in this Section 
+full optimization studies of 1D and 3D periodic systems without any cell 
 nor any atomic positions symmetry constraint. 
 Our first benchmark case is a linear chain of HF molecules, the second is
 urea, a purely organic compound. The third benchmark system is MgO. 
 These two latter systems have been recently optimized at the Hartree-Fock 
 level of theory by Doll, Dovesi and Orlando~\cite{KDoll04}.
 
-Table~\ref{Tab:HF-n} shows the progression of the cell constants $a_0$, bond lengths $d$ and
+Table~\ref{Tab:HF-n} shows the progression of the cell parameters $a_0$, bond lengths $d$ and
 total energies $E$ computed for linear (HF)$_n$ chains at 
 the $\Gamma$-point Hartree-Fock with the split-valence 6-31G basis set. 
 Comparisons are made to final cell parameter and bond length values obtained 
@@ -534,10 +534,10 @@ geometry optimization with the {\sc Crystal03} package.
   \centering
   \caption{\protect
     Progression of the Hartree-Fock $\Gamma$-points cell 
-    constant $a_0$, bond length $d$ and total energy $E$ for (HF)$_n$ chains
+    parameter $a_0$, bond length $d$ and total energy $E$ for (HF)$_n$ chains
     using the periodic RHF-MIC/6-31G level of theory and the {\tt TIGHT} thresholds.
 %    $n$ is the number of HF units in the (super)cell.
-    Bond lengths and lattice vectors are in \AA~and energies in atomic unit.
+    Bond lengths and cell parameters are in \AA~and energies in atomic unit.
   }\label{Tab:HF-n}
   \begin{tabular}{lrllc}
     \toprule
@@ -704,9 +704,9 @@ In order to analyze the convergence of the $\Gamma$-point energy to the ${\bf k}
 we have performed single point calculations for the 
 (HF)$_n$ chains with cell parameter $a_0=2.4745$\AA~and bond length $d=0.9453$\AA.
 Figure~\ref{Fig:CnvgEnergy} shows the logarithm of the relative error relative to the 
-converged large unit-cell $\Gamma$-point approximation
+converged large cell $\Gamma$-point approximation
 %${\bf k}$-space limit
-with respect to the unit-cell length with and without the MIC.
+with respect to the cell length with and without the MIC.
 The logarithm absolute error in the atomic and cell forces
 are also shown in Figure~\ref{Fig:CnvgEnergy}.
 These forces were generated by a slight contraction (0.01\AA)~of the bond length.
@@ -716,13 +716,13 @@ the $\Gamma$-point exact exchange, i.e. without the MIC, leads to a convergence
 of the total energy inversely proportional to the system size, as can be seen 
 in Figure~\ref{Fig:CnvgEnergyNoMIC}. The behavior of the convergence of the total energy
 without the MIC is expected to be inversely proportional to the volume of the 
-unit-cell for 3D-periodic systems.
+cell for 3D-periodic systems.
 
 
 \begin{figure}[h]
   \caption{Convergence of the $\Gamma$-point relative energy, with and without the MIC,
     %${\bf k}$-space limit 
-    for the (HF)$_n$ chains with increasing unit-cell length. The cell parameter 
+    for the (HF)$_n$ chains with increasing cell length. The cell parameter 
     $a_0=2.4745$\AA~and bond length $d=0.9453$\AA~were held fixed. 
     Also shown is the absolute convergence of the atomic and cell forces for a slightly contracted 
     bond length (see text for more detail).
@@ -739,7 +739,7 @@ unit-cell for 3D-periodic systems.
 
 \begin{figure}[h]
   \caption{Convergence of the $\Gamma$-point relative energy without the MIC
-    for the (HF)$_n$ chains ($n$ ranges from 1 to 31) with respect to unit-cell length. 
+    for the (HF)$_n$ chains ($n$ ranges from 1 to 31) with respect to cell length. 
     The cell parameter $a_0=2.4745$\AA~and bond length $d=0.9453$\AA~were held fixed. 
     Calculations were performed at the RHF-MIC/6-31G level of theory and the {\tt TIGHT} thresholds.}\label{Fig:CnvgEnergyNoMIC}
 %  \resizebox*{3.6in}{!}{\includegraphics[angle=-90.00]{./DATA/HF_Energy_cnvg.ps}}
@@ -749,20 +749,20 @@ unit-cell for 3D-periodic systems.
 \end{figure}
 
 We have performed full optimization of three dimensional urea supercells 
-without any symmetry constraint on the lattice nor the atomic positions.
-Table~\ref{Tab:Urea} shows the lattice constants, bond lengths, 
+without any symmetry constraint on the cell nor the atomic positions.
+Table~\ref{Tab:Urea} shows the cell parameters, bond lengths, 
 bond angles, dihedral angles and total energies
 for (urea)$_n$ supercells at the $\Gamma$-point RHF-MIC/6-21G* level of
 theory. The basis set used is the same as in Ref~\cite{RDovesi90}.
-For the sake of comparison, we have also fully relaxed the atomic position of a tetragonal lattice
+For the sake of comparison, we have also fully relaxed the atomic position of a tetragonal cell
 of urea in the $P\bar{4}2_1m$ space group with the 
 {\sc Crystal03}~\cite{Crystal03} package (last column of Table~\ref{Tab:Urea}), using a $2\times 2\times 2$ $k$-points 
-integration grid and starting from lattice parameters taken from Ref.~\cite{KDoll04}.
+integration grid and starting from cell parameters taken from Ref.~\cite{KDoll04}.
 While the geometries of the urea molecule agree perfectly between the $k$-space integration
-and the $\Gamma$-point approximation, the energies and lattice parameters do not.
+and the $\Gamma$-point approximation, the energies and cell parameters do not.
 The reason for this disagreement can be found in the different atomic basis set used.
-{\sc Crystal03} uses spherical harmonics d-shells consisting of 5 AOs while {\sc MondoSCF} 
-pure Cartesian basis functions i.e.~6 AOs per Cartesian d-shells. To see this effect in a more
+{\sc Crystal03} uses spherical harmonics d-shells consisting of 5 atomic orbitals while {\sc MondoSCF} 
+pure Cartesian basis functions i.e.~6 atomic orbitals per Cartesian d-shells. To see this effect in a more
 quantitative way, we have performed gas phase geometry optimizations 
 (using the {\sc Gamess}~\cite{gamess} package) at the RHF/6-21G* level of theory 
 of a single urea molecule with both spherical and Cartesian basis functions.
@@ -771,7 +771,7 @@ is no more than $0.001$ \AA~and $0.1^\circ$ respectively, but the
 difference in the energy is much more significant and is about $8\cdot 10^{-3}$ a.u.
 By inspection of the total energies in Table~\ref{Tab:Urea}, we can see that the difference
 in energy of the two different basis sets is of the same order as what we could observe
-for gas phase calculations. The strong dependency of the lattice parameter, especially
+for gas phase calculations. The strong dependency of the cell parameter, especially
 the $a$ and $b$ directions, with respect to basis set size has been recently observed by 
 Civalleri~\cite{BCivalleri05}. We conclude that the differences observed for the geometry
 optimizations of urea are mainly due to the different basis set used by {\sc Crystal03} and 
@@ -783,7 +783,7 @@ optimizations of urea are mainly due to the different basis set used by {\sc Cry
 \begin{table}[t]
   \centering
   \caption{\protect
-    Progression of the Hartree-Fock $\Gamma$-point cell constants, 
+    Progression of the Hartree-Fock $\Gamma$-point cell parameters, 
     bond lengths, bond angles, dihedral angles 
     and total energy for (urea)$_n$ using the periodic RHF-MIC/6-21G* level of theory 
     and the {\tt TIGHT} thresholds. 
@@ -829,24 +829,23 @@ optimizations of urea are mainly due to the different basis set used by {\sc Cry
   \end{tabular}
 \end{table}
 
-Table~\ref{Tab:MgO} shows the progression of the lattice constants and total energies computed
+Table~\ref{Tab:MgO} shows the progression of the cell parameters and total energies computed
 for various MgO supercells at the $\Gamma$-point RHF-MIC level of theory using
 the 8-61G basis set for magnesium and the 8-51G basis set for oxygen. 
 The basis sets were specially optimized for MgO by 
 Caus\`a et al~\cite{CBS:861G:MgO} and were obtained from Ref.~\cite{CrystalLib}.
-The primitive cubic cell coordinates used for this system are given in 
-Ref.~\cite{PBCCoordinates}.
-For comparison, we report the optimized lattice parameter of cubic MgO 
+The cubic cell coordinates used for this system are given in Ref.~\cite{PBCCoordinates}.
+For comparison, we report the optimized cell parameter of cubic MgO 
 obtained with {\sc Crystal03} and a $8\times 8\times 8$ $k$-points integration grid.
 \begin{table}[t]
   \centering
   \caption{\protect
-    Progression of the Hartree-Fock $\Gamma$-point cell constant $a_0$,
-    total energy $E$ and fractional coordinate of the oxygen in the primitive cell
+    Progression of the Hartree-Fock $\Gamma$-point cell parameter $a_0$,
+    total energy $E$ and fractional coordinate of the oxygen $f_O$ in the primitive cell
     for (MgO)$_n$ using the periodic 
     RHF-MIC/8-61G/8-51G level of theory and the {\tt TIGHT} thresholds. 
 %    $n$ is the number of MgO units in the (super)cell.
-    Lattice vectores and energies are in \AA~and atomic unit respectively.
+    cell parameters and energies are in \AA~and atomic unit respectively.
   }\label{Tab:MgO}
   \begin{tabular}{lrccc}
   \toprule
@@ -931,14 +930,14 @@ obtained with {\sc Crystal03} and a $8\times 8\times 8$ $k$-points integration g
 %
 %\subsection{???Convergence of the MIC-atomic gradients???}
 In Table~\ref{Tab:GradMgO}, we present the progression of the average of the norm of the
-atomic gradients for the (MgO)$_n$ systems with a lattice constant of $a_0=4.20$\AA. 
+atomic gradients for the (MgO)$_n$ systems with a cell parameter of $a_0=4.20$\AA. 
 While the smallest system, (MgO)$_4$, gives 
 large unphysical gradients which reflects 
 an unsuitable use of the exact exchange $\Gamma$-point approximation,
 the larger systems provide gradients which are below the accuracy targeted by the 
 {\tt TIGHT} thresholds (i.e. an absolute error of $10^{-4}$ a.u. in the forces).
 These unphysical gradients observed for the (MgO)$_4$ system are responsible for
-breaking the symmetry of the primitive cell (see the fractional coordinate Table~\ref{Tab:MgO}).
+breaking the symmetry of the cell (see the fractional coordinate Table~\ref{Tab:MgO}).
 
 \begin{table}[t]
   \centering
@@ -1074,30 +1073,30 @@ in conjunction with the QUICCA algorithm to optimize few periodic systems at
 the Hartree-Fock level of theory. 
 
 For the (HF)$_n$ systems, the convergence of the HF-MIC $\Gamma$-point energy, 
-atomic and cell forces to the converged large unit-cell $\Gamma$-point approximation
+atomic and cell forces to the converged large cell $\Gamma$-point approximation
 with respect to cell length have been explicitly shown to be exponential 
 in the cell size (see Figure~\ref{Fig:CnvgEnergy}). 
 A fast convergence of the total energy and geometrical parameters
 have also been observed for the 3D-systems (MgO)$_n$ and (urea)$_n$. We believe
 that, for insulators, the convergence of the HF-MIC $\Gamma$-point total energy 
-and geometrical parameters to the converged large unit-cell is exponential 
+and geometrical parameters to the converged large cell is exponential 
 with respect to cell volume.
 We have also shown, for the (HF)$_n$ systems, that a naive implementation of 
 the $\Gamma$-point exact exchange i.e. without the minimal image convention 
 leads to a convergence of the total energy inversely proportional to 
 the system size. For 3D-periodic systems, we believe that the convergence 
 of the total energy without the MIC scales inversely with the 
-unit-cell volume.
+cell volume.
 
 Convergence of bond lengths, bond angles, 
-dihedral angles and lattice parameters within the HF-MIC $\Gamma$-point
+dihedral angles and cell parameters within the HF-MIC $\Gamma$-point
 super cell approach and under full relaxation with no symmetry 
-to the converged large unit-cell $\Gamma$-point approximation have
+to the converged large cell $\Gamma$-point approximation have
 been demonstrated for 1D and 3D systems to better than 3 digits.
 
 Although the convergence of the HF-MIC $\Gamma$-point total energy to 
 its ${\bf k}$-space integration counterpart with respect to cell size is relatively slow,
-the convergence of the geometrical parameters (lattice and atomic positions)
+the convergence of the geometrical parameters (cell and atomic positions)
 requires much smaller cells. Thus, we could show that a relative accuracy better
 than 3 digits can be already achieved with cubic cells of about $600$\AA$^3$.
 \\
