@@ -25,15 +25,13 @@ MODULE MonteCarlo
   SUBROUTINE  HybridMC(C)  
     TYPE(Controls)  :: C
     INTEGER         :: iMC,iMD,iSTART,iSTATUS
-    INTEGER         :: iSCF,iBAS,iGEO,iCLONE,iREMOVE,I,DMPOrder
+    INTEGER         :: iSCF,iBAS,iGEO,iCLONE,iREMOVE,I
     REAL(DOUBLE)    :: DelEtot,ExpFac,RanFac
     
 !--------------------------------------------------------------
 !   Intitialize
     C%Stat%Previous%I=(/0,1,1/)
-    iGEO      = 1 
-    DMPOrder  = C%Opts%DMPOrder
-    iREMOVE   = DMPOrder+1
+    iGEO      = 1
 !
     WRITE(*,*) "Hybrid Monte-Carlo"
 !
@@ -72,7 +70,7 @@ MODULE MonteCarlo
        DO iCLONE=1,C%Geos%Clones
           HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
           CALL Get(MDIter%I(iCLONE)  ,"MDIter")
-          CALL Get(C%Opts%DMPOrder   ,"DMPOrder")
+          CALL Get(C%Dyns%MDGeuss    ,"MDGeuss")
           CALL Get(MCEtot0%D(iCLONE) ,"MCEtot0")
           CALL Get(MCTemp0%D(iCLONE) ,"MCTemp0")
           CALL Get(Carts,"MCCarts0")
@@ -88,7 +86,7 @@ MODULE MonteCarlo
           CALL Put(MDTime%D(iCLONE),"MDTime")
           CALL Put(.TRUE.,"DoingMD")
           CALL Put(.TRUE.,"DoingHybridMC")
-          CALL Put(C%Opts%DMPOrder,"DMPOrder")
+          CALL Put(C%Dyns%MDGeuss   ,"MDGeuss")
           CALL Put(MCEtot0%D(iCLONE),"MCEtot0")
           CALL Put(MCTemp0%D(iCLONE),"MCTemp0")
           Carts%D(:,:) = MCCarts0%D(:,:,iCLONE)
@@ -125,7 +123,7 @@ MODULE MonteCarlo
           CALL Put(MDTime%D(iCLONE),"MDTime")
           CALL Put(.TRUE.,"DoingMD")
           CALL Put(.TRUE.,"DoingHybridMC")
-          CALL Put(C%Opts%DMPOrder,"DMPOrder")
+          CALL Put(C%Dyns%MDGeuss   ,"MDGeuss")
           CALL Put(MCEtot0%D(iCLONE),"MCEtot0")
           CALL Put(MCTemp0%D(iCLONE),"MCTemp0")
           Carts%D(:,:) = MCCarts0%D(:,:,iCLONE)
@@ -134,6 +132,25 @@ MODULE MonteCarlo
        ENDDO
        CALL CloseHDF(HDFFileID)
     ENDIF
+!   Determine iREMOVE
+    SELECT CASE(C%Dyns%MDGeuss)
+    CASE ('DMVerlet')
+       iREMOVE = 4
+    CASE ('FMVerlet')
+       iREMOVE = 4
+    CASE ('DMProj0')
+       iREMOVE = 1
+    CASE ('DMProj1')
+       iREMOVE = 2
+    CASE ('DMProj2')
+       iREMOVE = 3
+    CASE ('DMProj3')
+       iREMOVE = 4
+    CASE ('DMProj4')
+       iREMOVE = 5
+    CASE ('DMDGeuss')
+       iREMOVE = 0
+    END SELECT
 !   Initialize MD and MC
     iBAS=C%Sets%NBSets
     CALL RenameDensityMatrix(C,C%Stat%Current%I(1),C%Stat%Current%I(2),C%Stat%Current%I(3))
@@ -254,7 +271,7 @@ MODULE MonteCarlo
           WRITE(Out,97) Line
           Line = "# MD Algorithm = Verlet"
           WRITE(Out,97) Line
-          Line = "# DMPOrder     = "//TRIM(IntToChar(C%Opts%DMPOrder))
+          Line = "# MDGeuss      = "//TRIM(C%Dyns%MDGeuss)
           WRITE(Out,97) Line
           Line = "# Minium SCF   = "//TRIM(IntToChar(C%Opts%MinSCF))
           WRITE(Out,97) Line
