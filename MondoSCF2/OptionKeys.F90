@@ -135,7 +135,6 @@ MODULE OptionKeys
   CHARACTER(LEN=*),   PARAMETER :: NEB_SPRING        ='NEBSpring'
   !------------------------------------------------------------------------------
   ! Options:Density Matrix Projection Order, MaxSCF and MinSCF
-  CHARACTER(LEN=*),  PARAMETER :: Op_DMPOrder        ='DMPOrder'
   CHARACTER(LEN=*),  PARAMETER :: Op_MinSCF          ='MinSCF'
   CHARACTER(LEN=*),  PARAMETER :: Op_MaxSCF          ='MaxSCF'
   !------------------------------------------------------------------------------
