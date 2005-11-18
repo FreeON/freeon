@@ -1,0 +1,5 @@
+        W(1) = Node%Co(1) + RQx*TwoZeta*Node%Co(2) + RQy*TwoZeta*Node%Co(3) + RQz*TwoZeta*Node%Co(4) - TwoZeta*Node%Co(5) + RQx**2*TwoZeta**2*Node%Co(5)
+        W(2) = RQx*RQy*TwoZeta**2*Node%Co(6) - TwoZeta*Node%Co(7) + RQy**2*TwoZeta**2*Node%Co(7)
+        W(3) = RQx*RQz*TwoZeta**2*Node%Co(8) + RQy*RQz*TwoZeta**2*Node%Co(9) - TwoZeta*Node%Co(10) + RQz**2*TwoZeta**2*Node%Co(10)
+        W(4) = RhoSum(1)
+        RhoSum(1)  = Xpt*(W(1) + W(2) + W(3)) + W(4)

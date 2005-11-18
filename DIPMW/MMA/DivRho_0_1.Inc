@@ -1,0 +1,8 @@
+        RhoSum(1)  = Xpt*Node%Co(1) + RhoSum(1)
+        RhoSum(2)  = -2.D0*RQx*Xpt*Zeta*Node%Co(1) + RhoSum(2)
+        RhoSum(3)  = -2.D0*RQy*Xpt*Zeta*Node%Co(1) + RhoSum(3)
+        RhoSum(4)  = 4.D0*RQx*RQy*Xpt*Zeta**2*Node%Co(1) + RhoSum(4)
+        RhoSum(5)  = -2.D0*RQz*Xpt*Zeta*Node%Co(1) + RhoSum(5)
+        RhoSum(6)  = 4.D0*RQx*RQz*Xpt*Zeta**2*Node%Co(1) + RhoSum(6)
+        RhoSum(7)  = 4.D0*RQy*RQz*Xpt*Zeta**2*Node%Co(1) + RhoSum(7)
+        RhoSum(8)  = -8.D0*RQx*RQy*RQz*Xpt*Zeta**3*Node%Co(1) + RhoSum(8)
