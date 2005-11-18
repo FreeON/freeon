@@ -115,10 +115,10 @@ c1:
 #----------------------------------------------
 #     Two electron directories
 #
- 2:	 q  h   t  o
-r2:	rq rh  rt ro
-c2:	cq ch  ct co
-p2:	ph pq  pt po
+ 2:	 q  h   t  o #Dip
+r2:	rq rh  rt ro #rDip
+c2:	cq ch  ct co #cDip
+p2:	ph pq  pt po #pDip
 #----------------------------------------------
 #     ONX
  o:	
@@ -159,6 +159,16 @@ ph:
 	$(MAKE) -i -C HiCu purge
 ch:	
 	$(MAKE) -i -C HiCu clean
+#----------------------------------------------
+#     DIPMW 
+ Dip:	
+	$(MAKE) -C DIPMW
+rDip:	
+	$(MAKE) -i -C DIPMW release
+pDip:	
+	$(MAKE) -i -C DIPMW purge
+cDip:	
+	$(MAKE) -i -C DIPMW clean
 #----------------------------------------------
 #     DX Visualization support
  d:	
