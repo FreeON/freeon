@@ -20,13 +20,31 @@ CONTAINS
 !---------------------------------------------------------------------------------------!
     CALL OpenASCII(N%IFile,Inp)       
 !   Initialize
+    D%DoingMD        = .TRUE.
     D%Initial_Temp   = .FALSE.
     D%Temp_Scaling   = .FALSE.
     D%Const_Temp     = .FALSE.
     D%Const_Press    = .FALSE.
     D%Parallel_Rep   = .FALSE.
+    D%MDGeuss        = MD_DGeuss
 !   Parse MD
     IF(O%Grad==GRAD_DO_DYNAMICS) THEN
+!      Parse the Density Matrix Projection Algoithm
+       IF(    OptKeyQ(Inp,MD_PM_OPTION,MD_DMVerlet)) THEN
+          D%MDGeuss=MD_DMVerlet
+       ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_FMVerlet)) THEN
+          D%MDGeuss=MD_FMVerlet
+       ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_DMP0)    ) THEN
+          D%MDGeuss=MD_DMP0
+       ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_DMP1)    ) THEN
+          D%MDGeuss=MD_DMP1
+       ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_DMP2)    ) THEN
+          D%MDGeuss=MD_DMP2
+       ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_DMP3)    ) THEN
+          D%MDGeuss=MD_DMP3
+       ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_DMP4)    ) THEN
+          D%MDGeuss=MD_DMP4
+       ENDIF
 !      Parse MD Options: First MD Algorithmn
        IF(OptKeyQ(Inp,MD_AL_OPTION,MD_AL_VERLET))THEN
           D%MDAlgorithm = VERLET_MD_AL
@@ -63,7 +81,24 @@ CONTAINS
        ENDIF
 !   Parse Hybrid MC
     ELSEIF(O%Grad==GRAD_DO_HYBRIDMC) THEN
-!      Parse MD Options: First MD Algorithmn
+!      Parse MD Options:
+!      Parse the Density Matrix Projection Algoithm
+       IF(    OptKeyQ(Inp,MD_PM_OPTION,MD_DMVerlet)) THEN
+          D%MDGeuss=MD_DMVerlet
+       ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_FMVerlet)) THEN
+          D%MDGeuss=MD_FMVerlet
+       ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_DMP0)    ) THEN
+          D%MDGeuss=MD_DMP0
+       ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_DMP1)    ) THEN
+          D%MDGeuss=MD_DMP1
+       ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_DMP2)    ) THEN
+          D%MDGeuss=MD_DMP2
+       ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_DMP3)    ) THEN
+          D%MDGeuss=MD_DMP3
+       ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_DMP4)    ) THEN
+          D%MDGeuss=MD_DMP4
+       ENDIF
+!      MD Algorithmn
        IF(OptKeyQ(Inp,MD_AL_OPTION,MD_AL_VERLET))THEN
           D%MDAlgorithm = VERLET_MD_AL
        ELSEIF(OptKeyQ(Inp,MD_AL_OPTION,MD_AL_GEAR)) THEN

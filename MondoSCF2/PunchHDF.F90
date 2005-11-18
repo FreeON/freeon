@@ -133,7 +133,7 @@ CONTAINS
        CALL Put(BIG_DBL,'MDTime') 
        CALL Put(.FALSE.,'DoingMD')
        CALL Put(.FALSE.,'DoingHybridMC')
-       CALL Put(0      ,'DMPOrder')
+       CALL Put("XXXXXXXX",'MDGeuss')
        CALL Put(BIG_DBL,'MCEtot0')
        CALL Put(BIG_DBL,'MCTemp0') 
        CALL New(DoubleRnk2,(/3,MaxAtoms/))

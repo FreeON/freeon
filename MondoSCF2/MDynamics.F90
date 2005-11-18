@@ -221,18 +221,19 @@ MODULE MDynamics
   SUBROUTINE MDVerlet_NVE(C,iGEO)
     TYPE(Controls)            :: C
     INTEGER                   :: iGEO
-    INTEGER                   :: iCLONE,iATS
+    INTEGER                   :: iCLONE,iATS,AOut
     REAL(DOUBLE)              :: Mass,dT,dT2,dTSq2,Time,Dist
-    REAL(DOUBLE),DIMENSION(3) :: Pos,Vel,Acc,PosSave
+    REAL(DOUBLE),DIMENSION(3) :: Pos,Vel,Acc,PosSave,VelSave
 !--------------------------------------------------------------
 !   initialize
+    AOut  = 2
     dT    = C%Dyns%DTime
     dT2   = Half*dT
     dTSq2 = Half*dT*dT
 !   Clone Loop
     DO iCLONE=1,C%Geos%Clones
 !      Move The Atoms
-       PosSave(1:3) = C%Geos%Clone(iCLONE)%Carts%D(1:3,2)
+       PosSave(1:3) = C%Geos%Clone(iCLONE)%Carts%D(1:3,AOut)
        DO iATS=1,C%Geos%Clone(iCLONE)%NAtms
           IF(C%Geos%Clone(iCLONE)%CConstrain%I(iATS)==0)THEN
              Mass      =  C%Geos%Clone(iCLONE)%AtMss%D(iATS)
@@ -248,14 +249,10 @@ MODULE MDynamics
              C%Geos%Clone(iCLONE)%Velocity%D(1:3,iATS) = Vel(1:3)
           ENDIF
        ENDDO
+       VelSave(1:3) = C%Geos%Clone(1)%Velocity%D(1:3,AOut)
 !      Calculate Kinectic and  Temp, update Ave Temp
        CALL CalculateMDKin(C%Geos%Clone(iCLONE),MDKin%D(iCLONE),MDTemp%D(iCLONE))
        MDTave%D(iCLONE) = (DBLE(iGEO)/DBLE(iGEO+1))*MDTave%D(iCLONE) +(One/DBLE(iGEO+1))*MDTemp%D(iCLONE)
-       IF(.TRUE.) THEN
-          CALL OpenASCII("CoordMD.dat",98)
-          WRITE(98,'(F10.4,1x,F18.12,1x,F18.12)') MDTime%D(1),PosSave(1),C%Geos%Clone(1)%Velocity%D(1,2)  
-          CLOSE(98)
-       ENDIF
 !      Velocity: v(t+dT/2) = v(t)+a(t)dT/2
        DO iATS=1,C%Geos%Clone(iCLONE)%NAtms
           IF(C%Geos%Clone(iCLONE)%CConstrain%I(iATS)==0)THEN
@@ -273,9 +270,6 @@ MODULE MDynamics
 !      Store Potential and Total Energy
        MDEpot%D(iCLONE) = C%Geos%Clone(iCLONE)%ETotal
        MDEtot%D(iCLONE) = MDEpot%D(iCLONE) + MDKin%D(iCLONE)
-!
-       C%Geos%Clone(iCLONE)%Carts%D=C%Geos%Clone(iCLONE)%Carts%D
-!
     ENDDO
 !
     IF(.TRUE.) THEN
@@ -283,6 +277,11 @@ MODULE MDynamics
        WRITE(99,'(F10.4,1x,F18.12,1x,F18.12,1x,F18.12)') MDTime%D(1),MDKin%D(1),MDEpot%D(1),MDEtot%D(1) 
        WRITE(*,*) "Time = ",MDTime%D(1)," Temperature = ",MDTemp%D(1),' Ave Temp = ',MDTave%D(1)
        CLOSE(99)
+    ENDIF
+    IF(.TRUE.) THEN
+       CALL OpenASCII("CoordMD.dat",98)
+       WRITE(98,'(F10.4,1x,F14.8,1x,F14.8,1x,F14.8,1x,F14.8,1x,F14.8,1x,F14.8,1x)') MDTime%D(1),PosSave(1:),VelSave(1:3)  
+       CLOSE(98)
     ENDIF
 !
   END SUBROUTINE MDVerlet_NVE
