@@ -122,7 +122,7 @@ CONTAINS
           !
           ! Do a SCF cycle.
           IF(SCFCycle(iCPSCF,C%Stat%Current%I(2),C%Stat%Current%I(3), &
-               &      C%Nams,C%Stat,C%Opts,C%Geos,C%MPIs,ETot,DMax,   &
+               &      C%Nams,C%Stat,C%Opts,C%Geos,C%Dyns,C%MPIs,ETot,DMax,   &
                &      DIIS,CPSCF_O=.TRUE.))THEN
              EXIT
           ENDIF
@@ -178,7 +178,7 @@ CONTAINS
              !
              ! Do a SCF cycle.
              IF(SCFCycle(iCPSCF,C%Stat%Current%I(2),C%Stat%Current%I(3), &
-                  &      C%Nams,C%Stat,C%Opts,C%Geos,C%MPIs,ETot,DMax,   &
+                  &      C%Nams,C%Stat,C%Opts,C%Geos,C%Dyns,C%MPIs,ETot,DMax,   &
                   &      DIIS,CPSCF_O=.TRUE.))THEN
                 EXIT
              ENDIF
@@ -238,7 +238,7 @@ CONTAINS
                 !
                 ! Do a SCF cycle.
                 IF(SCFCycle(iCPSCF,C%Stat%Current%I(2),C%Stat%Current%I(3), &
-                     &      C%Nams,C%Stat,C%Opts,C%Geos,C%MPIs,ETot,DMax,   &
+                     &      C%Nams,C%Stat,C%Opts,C%Geos,C%Dyns,C%MPIs,ETot,DMax,   &
                      &      DIIS,CPSCF_O=.TRUE.))THEN
                    EXIT
                 ENDIF
