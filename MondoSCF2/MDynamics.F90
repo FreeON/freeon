@@ -20,15 +20,15 @@ MODULE MDynamics
 !--------------------------------------------------------------
  SUBROUTINE  MD(C)  
     TYPE(Controls)  :: C
-    INTEGER         :: iSCF,iBAS,iGEO,iCLONE,iREMOVE,I,DMPOrder
+    INTEGER         :: iSCF,iBAS,iGEO,iCLONE,iREMOVE,I
     REAL(DOUBLE)    :: Temp 
+    LOGICAL         :: NewECMD,OrthogDM
 !--------------------------------------------------------------
 !   Do Molecular Dynamics:Loop over Time Steps
 !   Intitialize
     C%Stat%Previous%I=(/0,1,1/)
     iGEO      = 1 
-    DMPOrder  = C%Opts%DMPOrder
-    iREMOVE   = DMPOrder+1
+!
     CALL New(MDTime ,C%Geos%Clones)
     CALL New(MDKin  ,C%Geos%Clones)
     CALL New(MDEpot ,C%Geos%Clones)
@@ -44,7 +44,6 @@ MODULE MDynamics
     MDTemp%D = Zero
     MDTave%D = Zero
     MDLinP%D = Zero
-!
 !   Initial Guess     
     IF(C%Opts%Guess==GUESS_EQ_RESTART) THEN
 !      Init the Time
@@ -52,7 +51,7 @@ MODULE MDynamics
        DO iCLONE=1,C%Geos%Clones
           HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
           CALL Get(MDTime%D(iCLONE),"MDTime")
-          CALL Get(C%Opts%DMPOrder,"DMPOrder")
+          CALL Get(C%Dyns%MDGeuss  ,"MDGeuss")
           CALL CloseHDFGroup(HDF_CurrentID)
        ENDDO   
        CALL CloseHDF(HDFFileID)
@@ -62,7 +61,7 @@ MODULE MDynamics
           HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
           CALL Put(MDTime%D(iCLONE),"MDTime")
           CALL Put(.TRUE.,"DoingMD")
-          CALL Put(C%Opts%DMPOrder,"DMPOrder")
+          CALL Put(C%Dyns%MDGeuss  ,"MDGeuss")
           CALL CloseHDFGroup(HDF_CurrentID)
        ENDDO
        CALL CloseHDF(HDFFileID)
@@ -83,7 +82,7 @@ MODULE MDynamics
           HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
           CALL Put(MDTime%D(iCLONE),"MDTime")
           CALL Put(.TRUE.,'DoingMD')
-          CALL Put( C%Opts%DMPOrder,'DMPOrder')
+          CALL Put(C%Dyns%MDGeuss  ,"MDGeuss")
           CALL CloseHDFGroup(HDF_CurrentID)
        ENDDO
        CALL CloseHDF(HDFFileID)
@@ -94,6 +93,26 @@ MODULE MDynamics
           CALL SCF(iBAS,iGEO,C)
        ENDDO
     ENDIF
+!   Determine iREMOVE
+    SELECT CASE(C%Dyns%MDGeuss)
+    CASE ('DMVerlet')
+       iREMOVE = 4
+    CASE ('FMVerlet')
+       iREMOVE = 4
+    CASE ('DMProj0')
+       iREMOVE = 1
+    CASE ('DMProj1')
+       iREMOVE = 2
+    CASE ('DMProj2')
+       iREMOVE = 3
+    CASE ('DMProj3')
+       iREMOVE = 4
+    CASE ('DMProj4')
+       iREMOVE = 5
+    CASE ('DMDGeuss')
+       iREMOVE = 0
+    END SELECT
+!
 !   Initialize MD
     iBAS=C%Sets%NBSets
     CALL RenameDensityMatrix(C,C%Stat%Current%I(1),C%Stat%Current%I(2),C%Stat%Current%I(3))
@@ -130,11 +149,7 @@ MODULE MDynamics
           IF(MOD(iGEO,C%Dyns%RescaleInt)==0) THEN
              WRITE(*,*) 'Rescaling Temperature' 
              DO iCLONE=1,C%Geos%Clones
-                IF(.TRUE.) THEN
-                   CALL RescaleVelocity(C%Geos%Clone(iCLONE),MDTemp%D(iCLONE),C%Dyns%TargetTemp)
-                ELSE
-                   CALL RescaleVelocity(C%Geos%Clone(iCLONE),MDTave%D(iCLONE),C%Dyns%TargetTemp)
-                ENDIF
+                CALL RescaleVelocity(C%Geos%Clone(iCLONE),MDTemp%D(iCLONE),C%Dyns%TargetTemp)
              ENDDO
           ENDIF   
        ENDIF
@@ -208,7 +223,7 @@ MODULE MDynamics
     INTEGER                   :: iGEO
     INTEGER                   :: iCLONE,iATS
     REAL(DOUBLE)              :: Mass,dT,dT2,dTSq2,Time,Dist
-    REAL(DOUBLE),DIMENSION(3) :: Pos,Vel,Acc
+    REAL(DOUBLE),DIMENSION(3) :: Pos,Vel,Acc,PosSave
 !--------------------------------------------------------------
 !   initialize
     dT    = C%Dyns%DTime
@@ -217,6 +232,7 @@ MODULE MDynamics
 !   Clone Loop
     DO iCLONE=1,C%Geos%Clones
 !      Move The Atoms
+       PosSave(1:3) = C%Geos%Clone(iCLONE)%Carts%D(1:3,2)
        DO iATS=1,C%Geos%Clone(iCLONE)%NAtms
           IF(C%Geos%Clone(iCLONE)%CConstrain%I(iATS)==0)THEN
              Mass      =  C%Geos%Clone(iCLONE)%AtMss%D(iATS)
@@ -234,8 +250,12 @@ MODULE MDynamics
        ENDDO
 !      Calculate Kinectic and  Temp, update Ave Temp
        CALL CalculateMDKin(C%Geos%Clone(iCLONE),MDKin%D(iCLONE),MDTemp%D(iCLONE))
-       MDTave%D(iCLONE) = (DBLE(iGEO)/DBLE(iGEO+1))*MDTave%D(iCLONE) &
-                         +(       One/DBLE(iGEO+1))*MDTemp%D(iCLONE)
+       MDTave%D(iCLONE) = (DBLE(iGEO)/DBLE(iGEO+1))*MDTave%D(iCLONE) +(One/DBLE(iGEO+1))*MDTemp%D(iCLONE)
+       IF(.TRUE.) THEN
+          CALL OpenASCII("CoordMD.dat",98)
+          WRITE(98,'(F10.4,1x,F18.12,1x,F18.12)') MDTime%D(1),PosSave(1),C%Geos%Clone(1)%Velocity%D(1,2)  
+          CLOSE(98)
+       ENDIF
 !      Velocity: v(t+dT/2) = v(t)+a(t)dT/2
        DO iATS=1,C%Geos%Clone(iCLONE)%NAtms
           IF(C%Geos%Clone(iCLONE)%CConstrain%I(iATS)==0)THEN
@@ -249,7 +269,7 @@ MODULE MDynamics
           ENDIF
        ENDDO
 !      Reset the Momentum to Zero    
-       CALL ResetMomentum(C%Geos%Clone(iCLONE),Zero,Zero,Zero)
+!       CALL ResetMomentum(C%Geos%Clone(iCLONE),Zero,Zero,Zero)
 !      Store Potential and Total Energy
        MDEpot%D(iCLONE) = C%Geos%Clone(iCLONE)%ETotal
        MDEtot%D(iCLONE) = MDEpot%D(iCLONE) + MDKin%D(iCLONE)
@@ -260,8 +280,9 @@ MODULE MDynamics
 !
     IF(.TRUE.) THEN
        CALL OpenASCII("EnergiesMD.dat",99)
-       WRITE(99,'(F10.4,1x,F18.12,1x,F18.12,1x,F18.12)') MDTime%D(1),MDKin%D(1),MDEpot%D(1),MDEtot%D(1)
+       WRITE(99,'(F10.4,1x,F18.12,1x,F18.12,1x,F18.12)') MDTime%D(1),MDKin%D(1),MDEpot%D(1),MDEtot%D(1) 
        WRITE(*,*) "Time = ",MDTime%D(1)," Temperature = ",MDTemp%D(1),' Ave Temp = ',MDTave%D(1)
+       CLOSE(99)
     ENDIF
 !
   END SUBROUTINE MDVerlet_NVE
@@ -396,7 +417,7 @@ MODULE MDynamics
              Line = "# MD Algorithm = Gear"
           ENDIF
           WRITE(Out,97) Line
-          Line = "# DMPOrder     = "//TRIM(IntToChar(C%Opts%DMPOrder))
+          Line = "# MDGeuss      = "//TRIM(C%Dyns%MDGeuss)
           WRITE(Out,97) Line
           Line = "# Minium SCF   = "//TRIM(IntToChar(C%Opts%MinSCF))
           WRITE(Out,97) Line
@@ -551,27 +572,53 @@ MODULE MDynamics
     INTEGER                        :: iCLONE,iSCF,iBAS,iGEO
     CHARACTER(LEN=DEFAULT_CHR_LEN) :: chSCF,chBAS,chGEO,chCLONE
     CHARACTER(LEN=DEFAULT_CHR_LEN) :: PoldFile,PnewFile
-!      
-!!$    chSCF = IntToChar(C%Stat%Current%I(1))
-!!$    chBAS = IntToChar(C%Stat%Current%I(2))
-!!$    chGEO = IntToChar(C%Stat%Current%I(3))
 !
-    chSCF = IntToChar(iSCF)
     chBAS = IntToChar(iBAS)
     chGEO = IntToChar(iGEO)
 !
-    DO iCLONE=1,C%Geos%Clones
-       chCLONE = IntToChar(iCLONE)
-       PoldFile = TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)  &
-                                        //'_Geom#'//TRIM(chGEO)  &
-                                        //'_Base#'//TRIM(chBAS)  &
-                                        //'_Cycl#'//TRIM(chSCF)  &
-                                        //'_Clone#'//TRIM(chCLONE)//'.D'
-       PnewFile = TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)  &
-                                        //'_G#'//TRIM(chGEO)     &
-                                        //'_C#'//TRIM(chCLONE)//'.Dsave'
-       CALL SYSTEM('/bin/cp -f  '//PoldFile//' '//PnewFile)
-    ENDDO
+    IF(    C%Dyns%MDGeuss=='DMVerlet') THEN
+       chSCF = IntToChar(iSCF+1)
+       DO iCLONE=1,C%Geos%Clones
+          chCLONE = IntToChar(iCLONE)
+          PoldFile = TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)  &
+                                           //'_Geom#'//TRIM(chGEO)  &
+                                           //'_Base#'//TRIM(chBAS)  &
+                                           //'_Cycl#'//TRIM(chSCF)  &
+                                           //'_Clone#'//TRIM(chCLONE)//'.OrthoD'
+          PnewFile = TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)  &
+                                           //'_G#'//TRIM(chGEO)     &
+                                           //'_C#'//TRIM(chCLONE)//'.DOsave'
+          CALL SYSTEM('/bin/cp -f  '//PoldFile//' '//PnewFile)
+       ENDDO
+    ELSEIF(C%Dyns%MDGeuss=='FMVerlet') THEN
+       chSCF = IntToChar(iSCF)
+       DO iCLONE=1,C%Geos%Clones
+          chCLONE = IntToChar(iCLONE)
+          PoldFile = TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)  &
+                                           //'_Geom#'//TRIM(chGEO)  &
+                                           //'_Base#'//TRIM(chBAS)  &
+                                           //'_Cycl#'//TRIM(chSCF)  &
+                                           //'_Clone#'//TRIM(chCLONE)//'.OrthoF'
+          PnewFile = TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)  &
+                                           //'_G#'//TRIM(chGEO)     &
+                                           //'_C#'//TRIM(chCLONE)//'.FOsave'
+          CALL SYSTEM('/bin/cp -f  '//PoldFile//' '//PnewFile)
+       ENDDO
+    ELSE
+       chSCF = IntToChar(iSCF+1)
+       DO iCLONE=1,C%Geos%Clones
+          chCLONE = IntToChar(iCLONE)
+          PoldFile = TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)  &
+                                           //'_Geom#'//TRIM(chGEO)  &
+                                           //'_Base#'//TRIM(chBAS)  &
+                                           //'_Cycl#'//TRIM(chSCF)  &
+                                           //'_Clone#'//TRIM(chCLONE)//'.D'
+          PnewFile = TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)  &
+                                           //'_G#'//TRIM(chGEO)     &
+                                           //'_C#'//TRIM(chCLONE)//'.Dsave'
+          CALL SYSTEM('/bin/cp -f  '//PoldFile//' '//PnewFile)
+       ENDDO
+    ENDIF
 !
   END SUBROUTINE RenameDensityMatrix
 !--------------------------------------------------------------
@@ -583,14 +630,42 @@ MODULE MDynamics
     CHARACTER(LEN=DEFAULT_CHR_LEN) :: chSCF,chBAS,chGEO,chCLONE
     CHARACTER(LEN=DEFAULT_CHR_LEN) :: PoldFile,PnewFile
 !
-    DO iCLONE=1,C%Geos%Clones
-       chCLONE = IntToChar(iCLONE)
-       chGEO   = IntToChar(iGEO)
-       PoldFile = TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)  &
-            //'_G#'//TRIM(chGEO)     &
-            //'_C#'//TRIM(chCLONE)//'.Dsave'
-       CALL SYSTEM('/bin/rm -f  '//PoldFile)
-    ENDDO
+    IF(    C%Dyns%MDGeuss=='DMVerlet') THEN
+       DO iCLONE=1,C%Geos%Clones
+          chCLONE = IntToChar(iCLONE)
+          chGEO   = IntToChar(iGEO)
+          PoldFile = TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)  &
+                                           //'_G#'//TRIM(chGEO)     &
+                                           //'_C#'//TRIM(chCLONE)//'.DOsave'
+          CALL SYSTEM('/bin/rm -f  '//PoldFile)
+          PoldFile = TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)  &
+                                           //'_G#'//TRIM(chGEO)     &
+                                           //'_C#'//TRIM(chCLONE)//'.DOPsave'
+          CALL SYSTEM('/bin/rm -f  '//PoldFile)
+       ENDDO
+    ELSEIF(C%Dyns%MDGeuss=='FMVerlet') THEN
+       DO iCLONE=1,C%Geos%Clones
+          chCLONE = IntToChar(iCLONE)
+          chGEO   = IntToChar(iGEO)
+          PoldFile = TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)  &
+                                           //'_G#'//TRIM(chGEO)     &
+                                           //'_C#'//TRIM(chCLONE)//'.FOsave'
+          CALL SYSTEM('/bin/rm -f  '//PoldFile)
+          PoldFile = TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)  &
+                                           //'_G#'//TRIM(chGEO)     &
+                                           //'_C#'//TRIM(chCLONE)//'.FOPsave'
+          CALL SYSTEM('/bin/rm -f  '//PoldFile)
+       ENDDO
+    ELSE
+       DO iCLONE=1,C%Geos%Clones
+          chCLONE = IntToChar(iCLONE)
+          chGEO   = IntToChar(iGEO)
+          PoldFile = TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)  &
+                                           //'_G#'//TRIM(chGEO)     &
+                                           //'_C#'//TRIM(chCLONE)//'.Dsave'
+          CALL SYSTEM('/bin/rm -f  '//PoldFile)
+       ENDDO
+    ENDIF
 !
   END SUBROUTINE RemoveDensityMatrix
 !--------------------------------------------------------------
@@ -602,18 +677,46 @@ MODULE MDynamics
     CHARACTER(LEN=DEFAULT_CHR_LEN) :: chGEO,chCLONE
     CHARACTER(LEN=DEFAULT_CHR_LEN) :: PoldFile,PnewFile
 !
-    DO iCLONE=1,C%Geos%Clones
-       chCLONE = IntToChar(iCLONE)
-       chGEO   = IntToChar(iGEO)
-       PoldFile = TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)  &
-            //'_G#'//TRIM(chGEO)     &
-            //'_C#'//TRIM(chCLONE)//'.Dsave'
-       chGEO   = IntToChar(nGEO)
-       PnewFile = TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)  &
-            //'_G#'//TRIM(chGEO)     &
-            //'_C#'//TRIM(chCLONE)//'.Dsave'
-       CALL SYSTEM('/bin/cp -f  '//PoldFile//' '//PnewFile)
-    ENDDO
+    IF(    C%Dyns%MDGeuss=='DMVerlet') THEN
+       DO iCLONE=1,C%Geos%Clones
+          chCLONE  = IntToChar(iCLONE)
+          chGEO    = IntToChar(iGEO)
+          PoldFile = TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)  &
+                                           //'_G#'//TRIM(chGEO)     &
+                                           //'_C#'//TRIM(chCLONE)//'.DOsave'
+          chGEO    = IntToChar(nGEO)
+          PnewFile = TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)  &
+                                           //'_G#'//TRIM(chGEO)     &
+                                           //'_C#'//TRIM(chCLONE)//'.DOsave'
+          CALL SYSTEM('/bin/cp -f  '//PoldFile//' '//PnewFile)
+       ENDDO
+    ELSEIF(C%Dyns%MDGeuss=='FMVerlet') THEN
+       DO iCLONE=1,C%Geos%Clones
+          chCLONE  = IntToChar(iCLONE)
+          chGEO    = IntToChar(iGEO)
+          PoldFile = TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)  &
+                                           //'_G#'//TRIM(chGEO)     &
+                                           //'_C#'//TRIM(chCLONE)//'.FOsave'
+          chGEO    = IntToChar(nGEO)
+          PnewFile = TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)  &
+                                           //'_G#'//TRIM(chGEO)     &
+                                           //'_C#'//TRIM(chCLONE)//'.FOsave'
+          CALL SYSTEM('/bin/cp -f  '//PoldFile//' '//PnewFile)
+       ENDDO
+    ELSE
+       DO iCLONE=1,C%Geos%Clones
+          chCLONE  = IntToChar(iCLONE)
+          chGEO    = IntToChar(iGEO)
+          PoldFile = TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)  &
+                                           //'_G#'//TRIM(chGEO)     &
+                                           //'_C#'//TRIM(chCLONE)//'.Dsave'
+          chGEO    = IntToChar(nGEO)
+          PnewFile = TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)  &
+                                           //'_G#'//TRIM(chGEO)     &
+                                           //'_C#'//TRIM(chCLONE)//'.Dsave'
+          CALL SYSTEM('/bin/cp -f  '//PoldFile//' '//PnewFile)
+       ENDDO
+    ENDIF
 !
   END SUBROUTINE CopyDensityMatrix
 !--------------------------------------------------------------
