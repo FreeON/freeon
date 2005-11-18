@@ -1,5 +1,19 @@
 MODULE DynamicsKeys
   IMPLICIT NONE
+! DM Projection Method
+  CHARACTER(LEN=*),  PARAMETER :: MD_PM_OPTION       ='MDProjection' 
+! DM Verlet
+  CHARACTER(LEN=*),  PARAMETER :: MD_DMVerlet        ='DMVerlet' 
+! FM Verlet  
+  CHARACTER(LEN=*),  PARAMETER :: MD_FMVerlet        ='FMVerlet' 
+! Stencil Denisty Matrix Projectors
+  CHARACTER(LEN=*),  PARAMETER :: MD_DMP0            ='DMProj0'
+  CHARACTER(LEN=*),  PARAMETER :: MD_DMP1            ='DMProj1'
+  CHARACTER(LEN=*),  PARAMETER :: MD_DMP2            ='DMProj2'
+  CHARACTER(LEN=*),  PARAMETER :: MD_DMP3            ='DMProj3'
+  CHARACTER(LEN=*),  PARAMETER :: MD_DMP4            ='DMProj4'
+! Diagonal Geuss
+  CHARACTER(LEN=*),  PARAMETER :: MD_DGeuss          ='DMDGeuss'
 ! MD Algorithm
   CHARACTER(LEN=*),  PARAMETER :: MD_AL_OPTION       ='MDMethod' 
 ! Velocity Velet
