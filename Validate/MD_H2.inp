@@ -1,0 +1,32 @@
+<BeginTitle>
+Simple Molecular Dynamics of H2 showing the New MD DMVerlet
+<EndTitle>
+
+
+<BeginOptions>
+
+Charge=0
+Multiplicity=1
+DebugAll=(MinDebug,CheckSums)
+Guess=SuperPos
+SCFMethod=(RH)
+BasisSets=(User1)
+ModelChem=(HF)
+Accuracy =(good)
+SCFConvergence=(ODA)
+Geometry=(InAU)
+
+Grad=(MolecularDynamics)
+MDProjection=DMVerlet
+MDMethod=Verlet
+DeltaTime=0.25
+MaxMDStep=2000
+MinSCF=0
+MaxSCF=8
+
+<EndOptions>
+
+<BeginGeometry>
+h     0.00000000     0.00000000     0.00000000  
+h     1.30000000     0.00000000     0.00000000
+<EndGeometry>
