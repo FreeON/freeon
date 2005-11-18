@@ -43,7 +43,7 @@ CONTAINS
     ! Parse for NEB options.
     CALL ParseNEB(O%RSL,O%NEBSpring,O%NEBClimb,O%EndPts,N%ReactantsFile,N%ProductsFile)
     ! Parse SCF convergence overides and DMPOrder
-    CALL ParseSCF(O%DMPOrder,O%MinSCF,O%MaxSCF)
+    CALL ParseSCF(O%MinSCF,O%MaxSCF)
     ! Parse Misc
     CALL ParseMISC(O%Pressure)
     ! close
@@ -551,12 +551,8 @@ CONTAINS
   !===============================================================================================
   !
   !===============================================================================================
-  SUBROUTINE ParseSCF(DMPOrder,MinSCF,MaxSCF)
-    INTEGER      :: DMPOrder,MinSCF,MaxSCF
-    !  Parse for Density Matrix Projection Order: Default = 0
-    IF(.NOT. OptIntQ(Inp,Op_DMPOrder,DMPOrder)) THEN
-       DMPOrder = 0
-    ENDIF
+  SUBROUTINE ParseSCF(MinSCF,MaxSCF)
+    INTEGER      :: MinSCF,MaxSCF
     ! Parse for Min and Max SCF
     IF(.NOT. OptIntQ(Inp,Op_MinSCF,MinSCF)) THEN
        MinSCF = 0
