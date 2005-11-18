@@ -39,7 +39,8 @@ PROGRAM P2Use
                                    OldFileID,ICart,N,NStep,iGEO,DMPOrder,NSMat
   CHARACTER(LEN=2)              :: Cycl
   LOGICAL                       :: Present,DoingMD,ConvergeAOSP,ConvergeAll,AOSPExit
-  CHARACTER(LEN=DEFAULT_CHR_LEN):: Mssg,BName
+  CHARACTER(LEN=DEFAULT_CHR_LEN):: Mssg,BName,FileName
+  CHARACTER(LEN=8)              :: MDGeuss
   CHARACTER(LEN=5),PARAMETER    :: Prog='P2Use'
   !------------------------------------------------------------------------------- 
   ! Start up macro
@@ -294,7 +295,98 @@ PROGRAM P2Use
      H5GroupID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(MyClone)))
      HDF_CurrentID=H5GroupID
      CALL Delete(P)
-  ! Geometry Change 
+!
+! Density Matrix Verlet
+!
+  CASE('DMVerlet')
+     iGEO = Args%I%I(3)
+     CALL New(P)
+     CALL New(Tmp1)
+     CALL New(Tmp2)
+!
+!    Compute Pnew in ortho space: This is specifically for MD
+!
+     IF(iGEO .LE. 4) THEN
+        CALL Halt('P2Use:DMVerlet: No Previous Density Matrix Defined') 
+     ELSE
+!       Save P(p-1,n) as P(p-1,0), where p<5
+        IF(iGEO==5) THEN
+           DO I=1,4
+              FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(I))//'_C#'//TRIM(IntToChar(MyClone))//'.DOsave'
+              CALL Get(Tmp1,FileName)
+              FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(I))//'_C#'//TRIM(IntToChar(MyClone))//'.DOPsave'  
+              CALL Put(Tmp1,FileName)  
+           ENDDO
+        ENDIF
+!       P(p,0) = 4*P(p-1,n)-6*P(p-2,n)+4*P(p-3,n)-P(p-4,0)
+!       Get P(p-1,n)
+        FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO-1))//'_C#'//TRIM(IntToChar(MyClone))//'.DOsave'
+        CALL Get(Tmp1,FileName)
+        CALL Multiply(Tmp1, 4.0D0)
+        CALL SetEq(P,Tmp1)
+!       Get P(p-2,n)
+        FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO-2))//'_C#'//TRIM(IntToChar(MyClone))//'.DOsave'
+        CALL Get(Tmp1,FileName)
+        CALL Multiply(Tmp1,-6.0D0)
+        CALL Add(P,Tmp1,Tmp2)
+        CALL SetEq(P,Tmp2)
+!       Get P(p-3,n)
+        FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO-3))//'_C#'//TRIM(IntToChar(MyClone))//'.DOsave'
+        CALL Get(Tmp1,FileName)
+        CALL Multiply(Tmp1, 4.0D0)
+        CALL Add(P,Tmp1,Tmp2)
+        CALL SetEq(P,Tmp2)
+!       Get P(p-4,0)
+        FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO-4))//'_C#'//TRIM(IntToChar(MyClone))//'.DOPsave'
+        CALL Get(Tmp1,FileName)
+        CALL Multiply(Tmp1,-1.0D0)
+        CALL Add(P,Tmp1,Tmp2)
+        CALL SetEq(P,Tmp2)
+     ENDIF
+!    Save P(p,0)
+     FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO  ))//'_C#'//TRIM(IntToChar(MyClone))//'.DOPsave'
+     CALL Put(P,FileName)
+!    Purify P(p,0) -> P(p,1/2)
+     DO I=1,2
+!      P <- P.P
+       CALL Multiply(P,P,Tmp1)
+       CALL Filter(P,Tmp1)
+!      P <- 2*P-P.P
+       CALL Multiply(P,P,Tmp1)
+       CALL Multiply(P,Two)
+       CALL Multiply(Tmp1,-One)
+       CALL Add(P,Tmp1,Tmp2)
+       CALL Filter(P,Tmp2)
+     ENDDO
+!    Convert to AO Rep
+     INQUIRE(FILE=TrixFile('X',Args),EXIST=Present)
+     IF(Present)THEN
+        CALL Get(Tmp1,TrixFile('X',Args))   ! Z=S^(-1/2)
+        CALL Multiply(Tmp1,P,Tmp2)
+        CALL Multiply(Tmp2,Tmp1,P)
+     ELSE
+        CALL Get(Tmp1,TrixFile('Z',Args))   ! Z=S^(-L)
+        CALL Multiply(Tmp1,P,Tmp2)
+        CALL Get(Tmp1,TrixFile('ZT',Args))
+        CALL Multiply(Tmp2,Tmp1,P)
+     ENDIF
+     CALL Filter(Tmp1,P)  
+!    Put to Disk
+     CALL Put(Tmp1,'CurrentDM',CheckPoint_O=.TRUE.)
+     CALL Put(Tmp1,TrixFile('D',Args,0))
+     CALL PChkSum(Tmp1,'P[0]',Prog)
+!    Clean Up
+     CALL Delete(P)
+     CALL Delete(Tmp1)
+     CALL Delete(Tmp2)
+!
+! Density Matrix Verlet
+!
+  CASE('FMVerlet')
+     CALL Halt('P2Use:FMVerlet not implimented')
+!
+!    Geometry Change 
+!
   CASE('Extrapolate')
      ! Allocate
      CALL New(P)
@@ -336,20 +428,18 @@ PROGRAM P2Use
         CALL Get(S0,TrixFile('S',Args,Stats_O=Previous))
         CALL Get(S1,TrixFile('S',Args,Stats_O=Current ))
         CALL Get(P0,TrixFile('D',Args,-1))
-!
+!       
         CALL Get(DoingMD ,'DoingMD')
-        CALL Get(DMPOrder,'DMPOrder')
-!
         IF(DoingMD) THEN
-           IF(DMPorder > 4) THEN
-              CALL Warn('P2Use:DMPOrder is only implimented up to 4th order')
-              DMPorder=4
-           ENDIF
-           iGEO  = Args%I%I(3)
+           DMPorder=0
+           CALL Get(MDGeuss ,"MDGeuss")
+           IF(MDGeuss=='DMProj0') DMPorder=0
+           IF(MDGeuss=='DMProj1') DMPorder=1
+           IF(MDGeuss=='DMProj2') DMPorder=2
+           IF(MDGeuss=='DMProj3') DMPorder=3
+           IF(MDGeuss=='DMProj4') DMPorder=4
+           iGEO     = Args%I%I(3)
            DMPOrder = MIN(MAX(iGEO-2,0),DMPOrder)
-!
-!          WRITE(*,*) "DMPOrder = ", DMPOrder
-!
            CALL DMPProj(iGEO,DMPOrder,P0,Tmp1,Tmp2)
         ELSE
            IF(DMPorder > 0) THEN
@@ -528,8 +618,6 @@ PROGRAM P2Use
      CALL Delete(S1)
      CALL Delete(Tmp1)
      CALL Delete(Tmp2)
-  CASE('Project')
-     CALL Halt(' Not Implimented '//TRIM(SCFActn))
   CASE DEFAULT
      CALL Halt(' Unknown option '//TRIM(SCFActn))
   END SELECT
