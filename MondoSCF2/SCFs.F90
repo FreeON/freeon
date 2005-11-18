@@ -65,8 +65,7 @@ CONTAINS
     CALL New(DIIS,(/MaxSCFs,C%Geos%Clones/),(/0,1/))
     DO iSCF=0,MaxSCFs
        ! Do an SCF cycle
-       IF(SCFCycle(iSCF,cBAS,cGEO, &
-            C%Nams,C%Stat,C%Opts,C%Geos,C%MPIs,ETot,DMax,DIIS))THEN
+       IF(SCFCycle(iSCF,cBAS,cGEO,C%Nams,C%Stat,C%Opts,C%Geos,C%Dyns,C%MPIs,ETot,DMax,DIIS))THEN
           ! Free memory
           CALL Delete(ETot)
           CALL Delete(DMax)
@@ -81,11 +80,12 @@ CONTAINS
   !===============================================================================
   !
   !===============================================================================
-  FUNCTION SCFCycle(cSCF,cBAS,cGEO,N,S,O,G,M,ETot,DMax,DIIS,CPSCF_O)
+  FUNCTION SCFCycle(cSCF,cBAS,cGEO,N,S,O,G,D,M,ETot,DMax,DIIS,CPSCF_O)
     TYPE(FileNames)    :: N
     TYPE(State)        :: S
     TYPE(Options)      :: O
     TYPE(Geometries)   :: G
+    TYPE(Dynamics)     :: D
     TYPE(Parallel)     :: M
     TYPE(DBL_RNK2)     :: ETot,DMax,DIIS
     INTEGER            :: cSCF,cBAS,cGEO,iCLONE,Modl,IConAls
@@ -113,7 +113,7 @@ CONTAINS
     ENDIF
 !   The options...
     IF(DoCPSCF)THEN
-       CALL DensityLogic(cSCF,cBAS,cGEO,N,S,O,CPSCF_O=.TRUE.)
+       CALL DensityLogic(cSCF,cBAS,cGEO,N,S,O,D,CPSCF_O=.TRUE.)
        CALL DensityBuild(N,S,M)
        IF(cSCF.EQ.0)S%Action%C(1)=CPSCF_START_RESPONSE
        IF(cSCF.GT.0)S%Action%C(1)=CPSCF_FOCK_BUILD
@@ -161,6 +161,10 @@ CONTAINS
        ELSE
           IConAls = O%ConAls(cBAS)
        ENDIF
+!      MD OverRule
+       IF(D%DoingMD .AND. cGEO > 4) THEN
+          IConAls = NO_CONALS 
+       ENDIF
 !      Parse for strict ODA or DIIS Over-Ride
        CALL OpenASCII(N%IFile,Inp)
        IF(OptKeyQ(Inp,CONALS_OVRIDE,CONALS_ODA))  IConAls = ODA_CONALS
@@ -175,21 +179,21 @@ CONTAINS
 !      Select the Case
        SELECT CASE (IConAls)
        CASE (DIIS_CONALS)
-          CALL DensityLogic(cSCF,cBAS,cGEO,N,S,O)
+          CALL DensityLogic(cSCF,cBAS,cGEO,N,S,O,D)
           CALL DensityBuild(N,S,M)
           CALL FockBuild(cSCF,cBAS,N,S,O,M)
           CALL Invoke('DIIS',N,S,M)
           CALL SolveSCF(cBAS,N,S,O,M)
           CALL Invoke('SCFstats',N,S,M)
        CASE (ODA_CONALS)
-          CALL DensityLogic(cSCF,cBAS,cGEO,N,S,O)
+          CALL DensityLogic(cSCF,cBAS,cGEO,N,S,O,D)
           CALL DensityBuild(N,S,M)
           CALL FockBuild(cSCF,cBAS,N,S,O,M)
           CALL SolveSCF(cBAS,N,S,O,M)
           CALL Invoke('ODA',N,S,M)
           IF(HasDFT(O%Models(cBAS)))THEN
 !            Rebuild non-linear KS matrix
-             CALL DensityLogic(cSCF,cBAS,cGEO,N,S,O)
+             CALL DensityLogic(cSCF,cBAS,cGEO,N,S,O,D)
              CALL DensityBuild(N,S,M)
 #ifdef DIPMW
              CALL Invoke('HiCu',N,S,M)
@@ -203,19 +207,19 @@ CONTAINS
           CALL SolveSCF(cBAS,N,S,O,M)
           CALL Invoke('SCFstats',N,S,M)
        CASE (SMIX_CONALS)
-          CALL DensityLogic(cSCF,cBAS,cGEO,N,S,O)
+          CALL DensityLogic(cSCF,cBAS,cGEO,N,S,O,D)
           CALL DensityBuild(N,S,M)
           CALL FockBuild(cSCF,cBAS,N,S,O,M)
           CALL SolveSCF(cBAS,N,S,O,M)
           CALL Invoke('SCFstats',N,S,M)
           S%Action%C(1)='Stanton MIX'
           CALL Invoke('MIX',N,S,M)
-          CALL DensityLogic(cSCF,cBAS,cGEO,N,S,O)
+          CALL DensityLogic(cSCF,cBAS,cGEO,N,S,O,D)
           CALL DensityBuild(N,S,M)
           CALL FockBuild(cSCF,cBAS,N,S,O,M)
           CALL SolveSCF(cBAS,N,S,O,M)
        CASE (NO_CONALS)          
-          CALL DensityLogic(cSCF,cBAS,cGEO,N,S,O)
+          CALL DensityLogic(cSCF,cBAS,cGEO,N,S,O,D)
           CALL DensityBuild(N,S,M)
           CALL FockBuild(cSCF,cBAS,N,S,O,M)
           CALL SolveSCF(cBAS,N,S,O,M)
@@ -228,22 +232,23 @@ CONTAINS
     ENDIF
 !   Archive and Check Status
     CALL StateArchive(N,G,S)
-    SCF_STATUS=ConvergedQ(cSCF,cBAS,cGEO,N,S,O,G,ETot,DMax,DIIS,IConAls,CPSCF_O)
+    SCF_STATUS=ConvergedQ(cSCF,cBAS,cGEO,N,S,O,G,D,M,ETot,DMax,DIIS,IConAls,CPSCF_O)
     S%Previous%I=S%Current%I
     IF(SCF_STATUS==DID_CONVERGE) SCFCycle=.TRUE.
   END FUNCTION SCFCycle
   !===============================================================================
   !
   !===============================================================================
-  FUNCTION ConvergedQ(cSCF,cBAS,cGEO,N,S,O,G,ETot,DMax,DIIS,IConAls,CPSCF_O)
+  FUNCTION ConvergedQ(cSCF,cBAS,cGEO,N,S,O,G,D,M,ETot,DMax,DIIS,IConAls,CPSCF_O)
     TYPE(FileNames)             :: N
     TYPE(State)                 :: S
     TYPE(Options)               :: O
     TYPE(Geometries)            :: G
+    TYPE(Dynamics)              :: D
     TYPE(Parallel)              :: M
     TYPE(DBL_RNK2)              :: ETot,DMax,DIIS
     LOGICAL,OPTIONAL            :: CPSCF_O
-    LOGICAL                     :: DoCPSCF,DoDIIS,DoODA,RebuildPostODA,DoingMD
+    LOGICAL                     :: DoCPSCF,DoDIIS,DoODA,RebuildPostODA
     LOGICAL                     :: ALogic,BLogic,CLogic,DLogic,ELogic,A2Logic, &
                                    GLogic,QLogic,ILogic,OLogic,FLogic
     INTEGER                     :: cSCF,cBAS,cGEO,iGEO,iCLONE
@@ -377,7 +382,6 @@ CONTAINS
           ! Determine SCF if restarting MD
           MinSCF = O%MinSCF
           MaxSCF = O%MaxSCF
-          CALL Get(DoingMD,'DoingMD')
           ! Gather convergence parameters
           CALL Get(Etot%D(cSCF,iCLONE),'Etot')
           CALL Get(DMax%D(cSCF,iCLONE),'DMax')
@@ -515,17 +519,27 @@ CONTAINS
           ConvergedQ=MIN(ConvergedQ,Converged(iCLONE))
        ENDDO
 !      Moleculr Dynamics Convergence Criteria
-       IF(DoingMD) THEN
+       IF(D%DoingMD) THEN
           DMaxMax=Zero
           DO iCLONE=1,G%Clones
              DMaxMax = MAX(DMax%D(cSCF,iCLONE),DMaxMax)
           ENDDO
-          IF(DMaxMax > DTest*1.D-1) THEN
-             ConvergedQ=NOT_CONVERGE
-             Mssg = " "
-          ELSE
+          IF(cGEO .GE. 5 .AND. cSCF .GE. MinSCF) THEN
              ConvergedQ=DID_CONVERGE
-             Mssg = "MD SCF convergence"
+             Mssg = "MD Verlet SCF convergence"
+             CALL OpenASCII(OutFile,Out)
+             WRITE(Out,*)TRIM(Mssg)
+             WRITE(*,*)TRIM(Mssg)
+             CLOSE(Out)
+             RETURN
+          ELSE
+             IF(DMaxMax > DTest*1.D-6) THEN
+                ConvergedQ=NOT_CONVERGE
+                Mssg = " "
+             ELSE
+                ConvergedQ=DID_CONVERGE
+                Mssg = "MD SCF convergence"
+             ENDIF
           ENDIF
        ENDIF
 !
@@ -538,7 +552,7 @@ CONTAINS
           Mssg = "Forced SCF convergence"
        ENDIF
        ! Convergence announcement
-       IF(Mssg .NE. " " .AND. cSCF >2)THEN
+       IF(Mssg .NE. " " .AND. cSCF >0)THEN
           CALL OpenASCII(OutFile,Out)
           WRITE(Out,*)TRIM(Mssg)
           WRITE(*,*)TRIM(Mssg)
@@ -568,10 +582,11 @@ CONTAINS
   !===============================================================================
   !
   !===============================================================================
-  SUBROUTINE DensityLogic(cSCF,cBAS,cGEO,N,S,O,CPSCF_O)
+  SUBROUTINE DensityLogic(cSCF,cBAS,cGEO,N,S,O,D,CPSCF_O)
     TYPE(FileNames)    :: N
     TYPE(State)        :: S
     TYPE(Options)      :: O
+    TYPE(Dynamics)     :: D
     INTEGER            :: cSCF,cBAS,cGEO,pBAS,I,J
     LOGICAL            :: DoCPSCF
     LOGICAL,OPTIONAL   :: CPSCF_O
@@ -635,6 +650,20 @@ CONTAINS
           S%Action%C(1)    = SCF_DENSITY_NORMAL
        ENDIF
     ENDIF
+!   If we are doing MD, Geuss to P2Use is Different
+    IF(D%DoingMD .AND. cGEO > 1 .AND. cSCF == 0) THEN
+       SELECT CASE(D%MDGeuss)
+       CASE ('DMVerlet')
+          S%Action%C(1)='DMVerlet'
+          IF(cGEO <= 4 .AND. cBAS == 1) S%Action%C(1)=SCF_SUPERPOSITION
+       CASE ('FMVerlet')
+          S%Action%C(1)='FMVerlet'
+          IF(cGEO <= 4 .AND. cBAS == 1) S%Action%C(1)=SCF_SUPERPOSITION
+       CASE('DMDGeuss')
+          IF(cBAS .EQ. 1) S%Action%C(1)=SCF_SUPERPOSITION
+       END SELECT
+    ENDIF
+!   Reset
     S%SameBasis=.TRUE.
     S%SameGeom =.TRUE.
     S%SameCrds =.TRUE.
@@ -1636,20 +1665,24 @@ CONTAINS
           IA=3*(AtA-1)+IX
           DO iCLONE=1,G%Clones
              FX(iCLONE,IA)=(EX(iCLONE,1)-EX(iCLONE,2))/(Two*DDelta)
-#ifdef NGONX_INFO!vwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvw
+!vwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvw
+#ifdef NGONXINFO 
              write(*,*) 'FX(',AtA,IX,')=',FX(iCLONE,IA)
-#endif!vwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvw
+#endif  
+!vwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvw
           ENDDO
        ENDDO
     ENDDO
     !
     CALL GeomArchive(cBAS,cGEO,N,B,G)
     !
-#ifdef NGONX_INFO!vwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvw
+!vwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvw
+#ifdef NGONXINFO 
     DO iCLONE=1,G%Clones
        WRITE(*,'(A,I3,A,E20.12)') ' Total XForce(',iCLONE,') =',SUM(FX(iCLONE,:))
     ENDDO
-#endif!vwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvw
+#endif  
+!vwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvw
    ! Add in the forces to the global gradient and put back to HDF
     HDFFileID=OpenHDF(N%HFile)
     DO iCLONE=1,G%Clones
