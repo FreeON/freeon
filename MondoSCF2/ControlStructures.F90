@@ -52,7 +52,7 @@ MODULE ControlStructures
 
   TYPE Dynamics
      LOGICAL                        :: DoingMD
-     CHARACTER(LEN=8)               :: MDGeuss 
+     CHARACTER(LEN=9)               :: MDGeuss 
 !
      INTEGER                        :: MCMaxSteps
      REAL(DOUBLE)                   :: MCTemp
