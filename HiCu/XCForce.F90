@@ -51,6 +51,7 @@ PROGRAM XCForce
   TYPE(DBL_RNK2)                 :: LatFrc_XC,LatFrc_XC_S  
   TYPE(BBox)                     :: WBox,WBoxTmp
   REAL(DOUBLE)                   :: VolRho,VolExc,DelBox,Exc_old,Etot_old,Etot,dum0,dum1
+  LOGICAL                        :: DoingMD
 #ifdef PARALLEL
   REAL(DOUBLE),EXTERNAL    :: MondoTimer
 #endif
@@ -62,7 +63,12 @@ PROGRAM XCForce
   CALL Get(GM,CurGeom)
   NEl=GM%NElec
 ! Set local integration thresholds 
-  CALL SetLocalThresholds(Thresholds%Cube*1.D-1)
+  CALL Get(DoingMD ,'DoingMD')
+  IF(DoingMD) THEN
+     CALL SetLocalThresholds(Thresholds%Cube*1.D-2)
+  ELSE
+     CALL SetLocalThresholds(Thresholds%Cube*1.D-1)
+  ENDIF
   CALL SetAACoef()
 #ifdef PARALLEL
   NSDen=1 !<<< SPIN Default value for now!

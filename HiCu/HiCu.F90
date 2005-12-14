@@ -45,9 +45,10 @@ PROGRAM HaiKu
   CHARACTER(LEN=12),PARAMETER    :: Sub2='HiCu.GridGen' 
   CHARACTER(LEN=12),PARAMETER    :: Sub3='HiCu.MakeKxc' 
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg 
-  TYPE(BBox)                     ::WBox
+  TYPE(BBox)                     :: WBox
   INTEGER                        :: NSMat
-  REAL(DOUBLE)                   ::VolRho,VolExc
+  REAL(DOUBLE)                   :: VolRho,VolExc
+  LOGICAL                        :: DoingMD
 !-------------------------------------------------------------------------------
 ! Macro the start up
   CALL StartUp(Args,Prog,Serial_O=.FALSE.)
@@ -56,7 +57,12 @@ PROGRAM HaiKu
   CALL Get(GM,CurGeom)
   NEl=GM%NElec
 ! Set local integration thresholds 
-  CALL SetLocalThresholds(Thresholds%Cube)
+  CALL Get(DoingMD ,'DoingMD')
+  IF(DoingMD) THEN
+     CALL SetLocalThresholds(Thresholds%Cube*1.D-1)
+  ELSE
+     CALL SetLocalThresholds(Thresholds%Cube)
+  ENDIF
   CALL SetAACoef()
   ! Potentially overide local HiCu thresholds
   IF(Args%NI==8)THEN
