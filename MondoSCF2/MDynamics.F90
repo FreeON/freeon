@@ -95,9 +95,13 @@ MODULE MDynamics
     ENDIF
 !   Determine iREMOVE
     SELECT CASE(C%Dyns%MDGeuss)
-    CASE ('DMVerlet')
+    CASE ('DMVerlet0')
+       iREMOVE = 2
+    CASE ('DMVerlet1')
        iREMOVE = 4
-    CASE ('FMVerlet')
+    CASE ('FMVerlet0')
+       iREMOVE = 2
+    CASE ('FMVerlet1')
        iREMOVE = 4
     CASE ('DMProj0')
        iREMOVE = 1
@@ -394,7 +398,7 @@ MODULE MDynamics
   SUBROUTINE OutputMD(C,iGEO)
     TYPE(Controls)                 :: C
     INTEGER                        :: iGEO,iCLONE,iATS,I,J,K
-    REAL(DOUBLE)                   :: Pressure
+    REAL(DOUBLE)                   :: Pressure,DMax
     REAL(DOUBLE),DIMENSION(3,3)    :: Latt,InvLatt,LattFrc
     CHARACTER(LEN=DEFAULT_CHR_LEN) :: File,Line
 !
@@ -464,6 +468,14 @@ MODULE MDynamics
               "-MD-------------------------------------------"
        WRITE(Out,97) Line
        WRITE(Out,98) "MD Time        = ",MDTime%D(iCLONE)
+!      Density Maxtrix Error
+       HDFFileID=OpenHDF(C%Nams%HFile)
+       HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
+       CALL Get(DMax,'DMax')
+       CALL CloseHDFGroup(HDF_CurrentID)
+       CALL CloseHDF(HDFFileID)
+       WRITE(Out,95) "MD DM Error    = ",MDTime%D(iCLONE),DMax
+!      Energies
        WRITE(Out,98) "MD Kinetic     = ",MDKin%D(iCLONE)
        WRITE(Out,98) "MD Potential   = ",MDEPot%D(iCLONE)
        WRITE(Out,98) "MD Total       = ",MDEtot%D(iCLONE)
@@ -558,10 +570,11 @@ MODULE MDynamics
 82  FORMAT(a18,F16.10,1x,F16.10,1x,F16.10)
 85  FORMAT("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
 !
+95  FORMAT(a18,F16.10,3x,E16.6)
 96  FORMAT(a18,3(F16.10,1x))
 97  FORMAT(a128)
 98  FORMAT(a18,F16.10)
-99  FORMAT(a3,6(1x,F14.8))
+99  FORMAT(a3,6(1x,F16.10))
   END SUBROUTINE OutputMD
 !--------------------------------------------------------------
 ! Rename the Last Density Matrix, Remove old ones
@@ -575,7 +588,7 @@ MODULE MDynamics
     chBAS = IntToChar(iBAS)
     chGEO = IntToChar(iGEO)
 !
-    IF(    C%Dyns%MDGeuss=='DMVerlet') THEN
+    IF(    C%Dyns%MDGeuss=='DMVerlet0' .OR.  C%Dyns%MDGeuss=='DMVerlet1') THEN
        chSCF = IntToChar(iSCF+1)
        DO iCLONE=1,C%Geos%Clones
           chCLONE = IntToChar(iCLONE)
@@ -589,7 +602,7 @@ MODULE MDynamics
                                            //'_C#'//TRIM(chCLONE)//'.DOsave'
           CALL SYSTEM('/bin/cp -f  '//PoldFile//' '//PnewFile)
        ENDDO
-    ELSEIF(C%Dyns%MDGeuss=='FMVerlet') THEN
+    ELSEIF(C%Dyns%MDGeuss=='FMVerlet0' .OR. C%Dyns%MDGeuss=='FMVerlet1') THEN
        chSCF = IntToChar(iSCF)
        DO iCLONE=1,C%Geos%Clones
           chCLONE = IntToChar(iCLONE)
@@ -629,7 +642,7 @@ MODULE MDynamics
     CHARACTER(LEN=DEFAULT_CHR_LEN) :: chSCF,chBAS,chGEO,chCLONE
     CHARACTER(LEN=DEFAULT_CHR_LEN) :: PoldFile,PnewFile
 !
-    IF(    C%Dyns%MDGeuss=='DMVerlet') THEN
+    IF(    C%Dyns%MDGeuss=='DMVerlet0' .OR.  C%Dyns%MDGeuss=='DMVerlet1') THEN
        DO iCLONE=1,C%Geos%Clones
           chCLONE = IntToChar(iCLONE)
           chGEO   = IntToChar(iGEO)
@@ -642,7 +655,7 @@ MODULE MDynamics
                                            //'_C#'//TRIM(chCLONE)//'.DOPsave'
           CALL SYSTEM('/bin/rm -f  '//PoldFile)
        ENDDO
-    ELSEIF(C%Dyns%MDGeuss=='FMVerlet') THEN
+    ELSEIF(C%Dyns%MDGeuss=='FMVerlet0' .OR. C%Dyns%MDGeuss=='FMVerlet1') THEN
        DO iCLONE=1,C%Geos%Clones
           chCLONE = IntToChar(iCLONE)
           chGEO   = IntToChar(iGEO)
@@ -676,7 +689,7 @@ MODULE MDynamics
     CHARACTER(LEN=DEFAULT_CHR_LEN) :: chGEO,chCLONE
     CHARACTER(LEN=DEFAULT_CHR_LEN) :: PoldFile,PnewFile
 !
-    IF(    C%Dyns%MDGeuss=='DMVerlet') THEN
+    IF(    C%Dyns%MDGeuss=='DMVerlet0' .OR.  C%Dyns%MDGeuss=='DMVerlet1') THEN
        DO iCLONE=1,C%Geos%Clones
           chCLONE  = IntToChar(iCLONE)
           chGEO    = IntToChar(iGEO)
@@ -689,7 +702,7 @@ MODULE MDynamics
                                            //'_C#'//TRIM(chCLONE)//'.DOsave'
           CALL SYSTEM('/bin/cp -f  '//PoldFile//' '//PnewFile)
        ENDDO
-    ELSEIF(C%Dyns%MDGeuss=='FMVerlet') THEN
+    ELSEIF(C%Dyns%MDGeuss=='FMVerlet0' .OR. C%Dyns%MDGeuss=='FMVerlet1') THEN
        DO iCLONE=1,C%Geos%Clones
           chCLONE  = IntToChar(iCLONE)
           chGEO    = IntToChar(iGEO)

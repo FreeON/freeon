@@ -3,9 +3,11 @@ MODULE DynamicsKeys
 ! DM Projection Method
   CHARACTER(LEN=*),  PARAMETER :: MD_PM_OPTION       ='MDProjection' 
 ! DM Verlet
-  CHARACTER(LEN=*),  PARAMETER :: MD_DMVerlet        ='DMVerlet' 
+  CHARACTER(LEN=*),  PARAMETER :: MD_DMVerlet0       ='DMVerlet0'
+  CHARACTER(LEN=*),  PARAMETER :: MD_DMVerlet1       ='DMVerlet1' 
 ! FM Verlet  
-  CHARACTER(LEN=*),  PARAMETER :: MD_FMVerlet        ='FMVerlet' 
+  CHARACTER(LEN=*),  PARAMETER :: MD_FMVerlet0       ='FMVerlet0'
+  CHARACTER(LEN=*),  PARAMETER :: MD_FMVerlet1       ='FMVerlet1' 
 ! Stencil Denisty Matrix Projectors
   CHARACTER(LEN=*),  PARAMETER :: MD_DMP0            ='DMProj0'
   CHARACTER(LEN=*),  PARAMETER :: MD_DMP1            ='DMProj1'
