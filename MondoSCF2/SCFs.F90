@@ -5,7 +5,7 @@ MODULE SCFs
   USE GlobalObjects
   USE SCFKeys
   USE Overlay
-  USE SCFKeys
+  USE DynamicsKeys
   USE PunchHDF
   USE Numerics
   USE OptionKeys
@@ -88,7 +88,7 @@ CONTAINS
     TYPE(Dynamics)     :: D
     TYPE(Parallel)     :: M
     TYPE(DBL_RNK2)     :: ETot,DMax,DIIS
-    INTEGER            :: cSCF,cBAS,cGEO,iCLONE,Modl,IConAls
+    INTEGER            :: cSCF,cBAS,cGEO,iCLONE,Modl,IConAls,MinMDGeo
     INTEGER,SAVE       :: SCF_STATUS
     LOGICAL,OPTIONAL   :: CPSCF_O
     LOGICAL            :: SCFCycle,DoCPSCF
@@ -104,6 +104,14 @@ CONTAINS
        SCF_STATUS = NOT_CONVERGE
        ODA_DONE   = .FALSE.
        DIIS_FAIL  = .FALSE.
+    ENDIF
+!   MD Stuff
+    IF(D%DoingMD) THEN
+       MinMDGeo = D%MDMaxSteps+1
+       IF(D%MDGeuss==MD_DMVerlet0) MinMDGeo=2
+       IF(D%MDGeuss==MD_FMVerlet0) MinMDGeo=2
+       IF(D%MDGeuss==MD_DMVerlet1) MinMDGeo=4
+       IF(D%MDGeuss==MD_FMVerlet1) MinMDGeo=4
     ENDIF
 !   Are we maybe solving CPSCF equations?
     IF(PRESENT(CPSCF_O))THEN
@@ -162,8 +170,8 @@ CONTAINS
           IConAls = O%ConAls(cBAS)
        ENDIF
 !      MD OverRule
-       IF(D%DoingMD .AND. cGEO > 4) THEN
-          IConAls = NO_CONALS 
+       IF(D%DoingMD .AND. cGEO > MinMDGeo) THEN
+!          IConAls = NO_CONALS 
        ENDIF
 !      Parse for strict ODA or DIIS Over-Ride
        CALL OpenASCII(N%IFile,Inp)
@@ -251,7 +259,7 @@ CONTAINS
     LOGICAL                     :: DoCPSCF,DoDIIS,DoODA,RebuildPostODA
     LOGICAL                     :: ALogic,BLogic,CLogic,DLogic,ELogic,A2Logic, &
                                    GLogic,QLogic,ILogic,OLogic,FLogic
-    INTEGER                     :: cSCF,cBAS,cGEO,iGEO,iCLONE
+    INTEGER                     :: cSCF,cBAS,cGEO,iGEO,iCLONE,MinMDGeo
     REAL(DOUBLE)                :: DIISA,DIISB,DDIIS,DIISQ,       &
          DETOT,ETOTA,ETOTB,ETOTQ,ETEST, &
          DDMAX,DMAXA,DMAXB,DMAXQ,DTEST,ETOTO,ODAQ,DMaxMax
@@ -264,6 +272,14 @@ CONTAINS
        DoCPSCF=CPSCF_O
     ELSE
        DoCPSCF=.FALSE.
+    ENDIF
+    ! MD Stuff
+    IF(D%DoingMD) THEN
+       MinMDGeo = D%MDMaxSteps+1
+       IF(D%MDGeuss==MD_DMVerlet0) MinMDGeo=2
+       IF(D%MDGeuss==MD_FMVerlet0) MinMDGeo=2
+       IF(D%MDGeuss==MD_DMVerlet1) MinMDGeo=4
+       IF(D%MDGeuss==MD_FMVerlet1) MinMDGeo=4
     ENDIF
     ! Convergence thresholds
     IF(DoCPSCF) THEN
@@ -524,7 +540,7 @@ CONTAINS
           DO iCLONE=1,G%Clones
              DMaxMax = MAX(DMax%D(cSCF,iCLONE),DMaxMax)
           ENDDO
-          IF(cGEO .GE. 5 .AND. cSCF .GE. MinSCF) THEN
+          IF(cGEO > MinMDGeo .AND. cSCF .GE. MinSCF) THEN
              ConvergedQ=DID_CONVERGE
              Mssg = "MD Verlet SCF convergence"
              CALL OpenASCII(OutFile,Out)
@@ -533,7 +549,7 @@ CONTAINS
              CLOSE(Out)
              RETURN
           ELSE
-             IF(DMaxMax > DTest*1.D-6) THEN
+             IF(DMaxMax > DTest*1.D-2) THEN
                 ConvergedQ=NOT_CONVERGE
                 Mssg = " "
              ELSE
@@ -653,13 +669,19 @@ CONTAINS
 !   If we are doing MD, Geuss to P2Use is Different
     IF(D%DoingMD .AND. cGEO > 1 .AND. cSCF == 0) THEN
        SELECT CASE(D%MDGeuss)
-       CASE ('DMVerlet')
-          S%Action%C(1)='DMVerlet'
+       CASE (MD_DMVerlet0)
+          S%Action%C(1)=MD_DMVerlet0
+          IF(cGEO <= 2 .AND. cBAS == 1) S%Action%C(1)=SCF_SUPERPOSITION
+       CASE (MD_DMVerlet1)
+          S%Action%C(1)=MD_DMVerlet1
           IF(cGEO <= 4 .AND. cBAS == 1) S%Action%C(1)=SCF_SUPERPOSITION
-       CASE ('FMVerlet')
-          S%Action%C(1)='FMVerlet'
+       CASE (MD_FMVerlet0)
+          S%Action%C(1)=MD_FMVerlet0
+          IF(cGEO <= 2 .AND. cBAS == 1) S%Action%C(1)=SCF_SUPERPOSITION
+       CASE (MD_FMVerlet1)
+          S%Action%C(1)=MD_FMVerlet1
           IF(cGEO <= 4 .AND. cBAS == 1) S%Action%C(1)=SCF_SUPERPOSITION
-       CASE('DMDGeuss')
+       CASE(MD_DGeuss)
           IF(cBAS .EQ. 1) S%Action%C(1)=SCF_SUPERPOSITION
        END SELECT
     ENDIF

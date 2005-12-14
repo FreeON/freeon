@@ -1,8 +1,3 @@
-<BeginTitle>
-Simple Molecular Dynamics of H2 showing the New MD DMVerlet
-<EndTitle>
-
-
 <BeginOptions>
 
 Charge=0
@@ -17,7 +12,7 @@ SCFConvergence=(ODA)
 Geometry=(InAU)
 
 Grad=(MolecularDynamics)
-MDProjection=DMVerlet
+MDProjection=FMVerlet1
 MDMethod=Verlet
 DeltaTime=0.25
 MaxMDStep=2000

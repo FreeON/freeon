@@ -28,15 +28,15 @@ PROGRAM P2Use
 #else
   TYPE(BCSR)  & 
 #endif
-                                :: P,P0,X,S,S0,S1,Tmp1,Tmp2
+                                :: F,P,P0,X,S,S0,S1,Tmp1,Tmp2
   TYPE(INT_VECT)                :: Stat
   TYPE(DBL_RNK2)                :: BlkP
   REAL(DOUBLE)                  :: MaxDS,NoiseLevel 
   REAL(DOUBLE)                  :: Scale,Fact,ECount,RelNErr, DeltaP,OldDeltaP, & 
                                    DensityDev,dN,MaxGDIff,GDIff,OldN,M,PNon0s,PSMin,PSMax, &
-                                   Ipot_Error,Norm_Error,Lam,DLam,TError0,SFac,Dum
+                                   Ipot_Error,Norm_Error,Lam,DLam,TError0,SFac,Dum,Fmin,Fmax
   INTEGER                       :: I,J,JP,AtA,Q,R,T,KA,NBFA,NPur,PcntPNon0,Qstep, & 
-                                   OldFileID,ICart,N,NStep,iGEO,DMPOrder,NSMat
+                                   OldFileID,ICart,N,NStep,iGEO,DMPOrder,NSMat,MM
   CHARACTER(LEN=2)              :: Cycl
   LOGICAL                       :: Present,DoingMD,ConvergeAOSP,ConvergeAll,AOSPExit
   CHARACTER(LEN=DEFAULT_CHR_LEN):: Mssg,BName,FileName
@@ -298,66 +298,48 @@ PROGRAM P2Use
 !
 ! Density Matrix Verlet
 !
-  CASE('DMVerlet')
+  CASE('DMVerlet0')
      iGEO = Args%I%I(3)
      CALL New(P)
      CALL New(Tmp1)
      CALL New(Tmp2)
-!
-!    Compute Pnew in ortho space: This is specifically for MD
-!
-     IF(iGEO .LE. 4) THEN
-        CALL Halt('P2Use:DMVerlet: No Previous Density Matrix Defined') 
-     ELSE
-!       Save P(p-1,n) as P(p-1,0), where p<5
-        IF(iGEO==5) THEN
-           DO I=1,4
-              FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(I))//'_C#'//TRIM(IntToChar(MyClone))//'.DOsave'
-              CALL Get(Tmp1,FileName)
-              FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(I))//'_C#'//TRIM(IntToChar(MyClone))//'.DOPsave'  
-              CALL Put(Tmp1,FileName)  
-           ENDDO
-        ENDIF
-!       P(p,0) = 4*P(p-1,n)-6*P(p-2,n)+4*P(p-3,n)-P(p-4,0)
-!       Get P(p-1,n)
-        FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO-1))//'_C#'//TRIM(IntToChar(MyClone))//'.DOsave'
-        CALL Get(Tmp1,FileName)
-        CALL Multiply(Tmp1, 4.0D0)
-        CALL SetEq(P,Tmp1)
-!       Get P(p-2,n)
-        FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO-2))//'_C#'//TRIM(IntToChar(MyClone))//'.DOsave'
-        CALL Get(Tmp1,FileName)
-        CALL Multiply(Tmp1,-6.0D0)
-        CALL Add(P,Tmp1,Tmp2)
-        CALL SetEq(P,Tmp2)
-!       Get P(p-3,n)
-        FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO-3))//'_C#'//TRIM(IntToChar(MyClone))//'.DOsave'
-        CALL Get(Tmp1,FileName)
-        CALL Multiply(Tmp1, 4.0D0)
-        CALL Add(P,Tmp1,Tmp2)
-        CALL SetEq(P,Tmp2)
-!       Get P(p-4,0)
-        FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO-4))//'_C#'//TRIM(IntToChar(MyClone))//'.DOPsave'
-        CALL Get(Tmp1,FileName)
-        CALL Multiply(Tmp1,-1.0D0)
-        CALL Add(P,Tmp1,Tmp2)
-        CALL SetEq(P,Tmp2)
+     IF(iGEO .LE. 2) CALL Halt('P2Use:PMVerlet0: No PreviousDensity Matrix Defined') 
+!    Save P(p-1,n) as P(p-1,0), where p<3
+     IF(iGEO==3) THEN
+        DO I=1,2
+           FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(I))//'_C#'//TRIM(IntToChar(MyClone))//'.DOsave'
+           CALL Get(Tmp1,FileName)
+           FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(I))//'_C#'//TRIM(IntToChar(MyClone))//'.DOPsave'  
+           CALL Put(Tmp1,FileName)  
+        ENDDO
      ENDIF
+!    P(p,0) = 2P(p-1,n)-P(p-2,0)
+!    Get P(p-1,n)
+     FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO-1))//'_C#'//TRIM(IntToChar(MyClone))//'.DOsave'
+     CALL Get(Tmp1,FileName)
+     CALL Multiply(Tmp1, 2.0D0)
+     CALL SetEq(P,Tmp1)
+!    Get P(p-2,0)
+     FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO-2))//'_C#'//TRIM(IntToChar(MyClone))//'.DOPsave'
+     CALL Get(Tmp1,FileName)
+     CALL Multiply(Tmp1,-1.0D0)
+     CALL Add(P,Tmp1,Tmp2)
+     CALL SetEq(P,Tmp2)
 !    Save P(p,0)
      FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO  ))//'_C#'//TRIM(IntToChar(MyClone))//'.DOPsave'
      CALL Put(P,FileName)
-!    Purify P(p,0) -> P(p,1/2)
-     DO I=1,2
-!      P <- P.P
-       CALL Multiply(P,P,Tmp1)
-       CALL Filter(P,Tmp1)
-!      P <- 2*P-P.P
-       CALL Multiply(P,P,Tmp1)
-       CALL Multiply(P,Two)
-       CALL Multiply(Tmp1,-One)
-       CALL Add(P,Tmp1,Tmp2)
-       CALL Filter(P,Tmp2)
+!    Purify P
+     CALL SpectralBounds(P,Fmin,Fmax)
+     CALL Add(P,-Fmin)
+     CALL Multiply(P,One/(Fmax-Fmin))
+     MM = 0
+     DO I=1,40
+        CALL SP2(P,Tmp1,Tmp2,Half*DBLE(NEl),MM)
+        IF(ABS(TrP -Half*DBLE(NEl))< 1.0D-8) THEN
+           IF(ABS(TrP2-Half*DBLE(NEl)) < 1.D-8) EXIT
+        ENDIF
      ENDDO
+     WRITE(*,*) "P2Use: Trace(P) = ",TrP,TrP2
 !    Convert to AO Rep
      INQUIRE(FILE=TrixFile('X',Args),EXIST=Present)
      IF(Present)THEN
@@ -379,11 +361,237 @@ PROGRAM P2Use
      CALL Delete(P)
      CALL Delete(Tmp1)
      CALL Delete(Tmp2)
+  CASE('DMVerlet1')
+     iGEO = Args%I%I(3)
+     CALL New(P)
+     CALL New(Tmp1)
+     CALL New(Tmp2)
+     IF(iGEO .LE. 2) CALL Halt('P2Use:PMVerlet0: No PreviousDensity Matrix Defined') 
 !
-! Density Matrix Verlet
+!    Compute Pnew in ortho space: This is specifically for MD
+!    Save P(p-1,n) as P(p-1,0), where p<5
+     IF(iGEO==5) THEN
+        DO I=1,4
+           FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(I))//'_C#'//TRIM(IntToChar(MyClone))//'.DOsave'
+           CALL Get(Tmp1,FileName)
+           FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(I))//'_C#'//TRIM(IntToChar(MyClone))//'.DOPsave'  
+           CALL Put(Tmp1,FileName)  
+        ENDDO
+     ENDIF
+!    P(p,0) = 4*P(p-1,n)-6*P(p-2,n)+4*P(p-3,n)-P(p-4,0)
+!    Get P(p-1,n)
+     FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO-1))//'_C#'//TRIM(IntToChar(MyClone))//'.DOsave'
+     CALL Get(Tmp1,FileName)
+     CALL Multiply(Tmp1, 4.0D0)
+     CALL SetEq(P,Tmp1)
+!    Get P(p-2,n)
+     FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO-2))//'_C#'//TRIM(IntToChar(MyClone))//'.DOsave'
+     CALL Get(Tmp1,FileName)
+     CALL Multiply(Tmp1,-6.0D0)
+     CALL Add(P,Tmp1,Tmp2)
+     CALL SetEq(P,Tmp2)
+!    Get P(p-3,n)
+     FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO-3))//'_C#'//TRIM(IntToChar(MyClone))//'.DOsave'
+     CALL Get(Tmp1,FileName)
+     CALL Multiply(Tmp1, 4.0D0)
+     CALL Add(P,Tmp1,Tmp2)
+     CALL SetEq(P,Tmp2)
+!    Get P(p-4,0)
+     FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO-4))//'_C#'//TRIM(IntToChar(MyClone))//'.DOPsave'
+     CALL Get(Tmp1,FileName)
+     CALL Multiply(Tmp1,-1.0D0)
+     CALL Add(P,Tmp1,Tmp2)
+     CALL SetEq(P,Tmp2)
+!    Save P(p,0)
+     FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO  ))//'_C#'//TRIM(IntToChar(MyClone))//'.DOPsave'
+     CALL Put(P,FileName)
+!    Purify P
+     CALL SpectralBounds(P,Fmin,Fmax)
+     CALL Add(P,-Fmin)
+     CALL Multiply(P,One/(Fmax-Fmin))
+     MM = 0
+     DO I=1,40
+        CALL SP2(P,Tmp1,Tmp2,Half*DBLE(NEl),MM)
+        IF(ABS(TrP -Half*DBLE(NEl))< 1.0D-8) THEN
+           IF(ABS(TrP2-Half*DBLE(NEl)) < 1.D-8) EXIT
+        ENDIF
+     ENDDO
+     WRITE(*,*) "P2Use: Trace(P) = ",TrP,TrP2
+!    Convert to AO Rep
+     INQUIRE(FILE=TrixFile('X',Args),EXIST=Present)
+     IF(Present)THEN
+        CALL Get(Tmp1,TrixFile('X',Args))   ! Z=S^(-1/2)
+        CALL Multiply(Tmp1,P,Tmp2)
+        CALL Multiply(Tmp2,Tmp1,P)
+     ELSE
+        CALL Get(Tmp1,TrixFile('Z',Args))   ! Z=S^(-L)
+        CALL Multiply(Tmp1,P,Tmp2)
+        CALL Get(Tmp1,TrixFile('ZT',Args))
+        CALL Multiply(Tmp2,Tmp1,P)
+     ENDIF
+     CALL Filter(Tmp1,P)  
+!    Put to Disk
+     CALL Put(Tmp1,'CurrentDM',CheckPoint_O=.TRUE.)
+     CALL Put(Tmp1,TrixFile('D',Args,0))
+     CALL PChkSum(Tmp1,'P[0]',Prog)
+!    Clean Up
+     CALL Delete(P)
+     CALL Delete(Tmp1)
+     CALL Delete(Tmp2)
+  CASE('FMVerlet0')
+     iGEO = Args%I%I(3)
+     CALL New(F)
+     CALL New(P)
+     CALL New(Tmp1)
+     CALL New(Tmp2)
+     IF(iGEO .LE. 2) CALL Halt('P2Use:FMVerlet0: No Previous Fock Matrix Defined') 
 !
-  CASE('FMVerlet')
-     CALL Halt('P2Use:FMVerlet not implimented')
+!    Compute Fnew in ortho space: This is specifically for MD
+!
+!    Save F(p-1,n) as F(p-1,0), when p==3
+     IF(iGEO==3) THEN
+        DO I=1,2
+           FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(I))//'_C#'//TRIM(IntToChar(MyClone))//'.FOsave'
+           CALL Get(Tmp1,FileName)
+           FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(I))//'_C#'//TRIM(IntToChar(MyClone))//'.FOPsave'  
+           CALL Put(Tmp1,FileName)  
+        ENDDO
+     ENDIF
+!    F(p,0) = 2*F(p-1,n)-F(p-2,0)
+!    Get F(p-1,n)
+     FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO-1))//'_C#'//TRIM(IntToChar(MyClone))//'.FOsave'
+     CALL Get(Tmp1,FileName)
+     CALL Multiply(Tmp1, 2.0D0)
+     CALL SetEq(F,Tmp1)
+!    Get F(p-2,0)
+     FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO-2))//'_C#'//TRIM(IntToChar(MyClone))//'.FOPsave'
+     CALL Get(Tmp1,FileName)
+     CALL Multiply(Tmp1,-1.0D0)
+     CALL Add(F,Tmp1,Tmp2)
+     CALL SetEq(F,Tmp2)
+!    Save F(p,0)
+     FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO  ))//'_C#'//TRIM(IntToChar(MyClone))//'.FOPsave'
+     CALL Put(F,FileName)
+!
+!    Solve for the Density Matrix using SP2
+!
+!    Guess P from F
+     CALL FockGuess(F,P,Half*DBLE(NEl),1)
+!    Solve for P
+     DO I=1,40
+        CALL SP2(P,Tmp1,Tmp2,Half*DBLE(NEl),MM)
+        IF(ABS(TrP -Half*DBLE(NEl))< 1.0D-8) THEN
+           IF(ABS(TrP2-Half*DBLE(NEl)) < 1.D-8) EXIT
+        ENDIF
+     ENDDO
+     WRITE(*,*) "P2Use: Trace(P) = ",TrP
+!    Convert to AO Rep
+     INQUIRE(FILE=TrixFile('X',Args),EXIST=Present)
+     IF(Present)THEN
+        CALL Get(Tmp1,TrixFile('X',Args))   ! Z=S^(-1/2)
+        CALL Multiply(Tmp1,P,Tmp2)
+        CALL Multiply(Tmp2,Tmp1,P)
+     ELSE
+        CALL Get(Tmp1,TrixFile('Z',Args))   ! Z=S^(-L)
+        CALL Multiply(Tmp1,P,Tmp2)
+        CALL Get(Tmp1,TrixFile('ZT',Args))
+        CALL Multiply(Tmp2,Tmp1,P)
+     ENDIF
+     CALL Filter(Tmp1,P)  
+!    Put to Disk
+     CALL Put(Tmp1,'CurrentDM',CheckPoint_O=.TRUE.)
+     CALL Put(Tmp1,TrixFile('D',Args,0))
+     CALL PChkSum(Tmp1,'P[0]',Prog)
+!    Clean Up
+     CALL Delete(F)
+     CALL Delete(P)
+     CALL Delete(Tmp1)
+     CALL Delete(Tmp2)
+!
+!
+!
+  CASE('FMVerlet1')
+     iGEO = Args%I%I(3)
+     CALL New(F)
+     CALL New(P)
+     CALL New(Tmp1)
+     CALL New(Tmp2)
+     IF(iGEO .LE. 4) CALL Halt('P2Use:FMVerlet0: No Previous Fock Matrix Defined') 
+!
+!    Compute Fnew in ortho space: This is specifically for MD
+!
+!    Save F(p-1,n) as F(p-1,0), when p==3
+     IF(iGEO==5) THEN
+        DO I=1,4
+           FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(I))//'_C#'//TRIM(IntToChar(MyClone))//'.FOsave'
+           CALL Get(Tmp1,FileName)
+           FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(I))//'_C#'//TRIM(IntToChar(MyClone))//'.FOPsave'  
+           CALL Put(Tmp1,FileName)  
+        ENDDO
+     ENDIF
+!    F(p,0) = 4*P(p-1,n)-6*P(p-2,n)+4*P(p-3,n)-P(p-4,0)
+!    Get F(p-1,n)
+     FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO-1))//'_C#'//TRIM(IntToChar(MyClone))//'.FOsave'
+     CALL Get(Tmp1,FileName)
+     CALL Multiply(Tmp1, 4.0D0)
+     CALL SetEq(F,Tmp1)
+!    Get F(p-2,0)
+     FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO-2))//'_C#'//TRIM(IntToChar(MyClone))//'.FOsave'
+     CALL Get(Tmp1,FileName)
+     CALL Multiply(Tmp1,-6.0D0)
+     CALL Add(F,Tmp1,Tmp2)
+     CALL SetEq(F,Tmp2)
+!    Get F(p-3,0)
+     FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO-3))//'_C#'//TRIM(IntToChar(MyClone))//'.FOsave'
+     CALL Get(Tmp1,FileName)
+     CALL Multiply(Tmp1, 4.0D0)
+     CALL Add(F,Tmp1,Tmp2)
+     CALL SetEq(F,Tmp2)
+!    Get F(p-4,0)
+     FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO-4))//'_C#'//TRIM(IntToChar(MyClone))//'.FOPsave'
+     CALL Get(Tmp1,FileName)
+     CALL Multiply(Tmp1,-1.0D0)
+     CALL Add(F,Tmp1,Tmp2)
+     CALL SetEq(F,Tmp2)
+!    Save F(p,0)
+     FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO  ))//'_C#'//TRIM(IntToChar(MyClone))//'.FOPsave'
+     CALL Put(F,FileName)
+!
+!
+!    Solve for the Density Matrix using SP2
+!
+!    Guess P from F
+     CALL FockGuess(F,P,Half*DBLE(NEl),1)
+!    Solve for P
+     DO I=1,40
+        CALL SP2(P,Tmp1,Tmp2,Half*DBLE(NEl),MM)
+        IF(ABS(TrP -Half*DBLE(NEl))< 1.0D-8) THEN
+           IF(ABS(TrP2-Half*DBLE(NEl)) < 1.D-8) EXIT
+        ENDIF
+     ENDDO
+     WRITE(*,*) "P2Use: Trace(P) = ",TrP
+!    Convert to AO Rep
+     INQUIRE(FILE=TrixFile('X',Args),EXIST=Present)
+     IF(Present)THEN
+        CALL Get(Tmp1,TrixFile('X',Args))   ! Z=S^(-1/2)
+        CALL Multiply(Tmp1,P,Tmp2)
+        CALL Multiply(Tmp2,Tmp1,P)
+     ELSE
+        CALL Get(Tmp1,TrixFile('Z',Args))   ! Z=S^(-L)
+        CALL Multiply(Tmp1,P,Tmp2)
+        CALL Get(Tmp1,TrixFile('ZT',Args))
+        CALL Multiply(Tmp2,Tmp1,P)
+     ENDIF
+     CALL Filter(Tmp1,P)  
+!    Put to Disk
+     CALL Put(Tmp1,'CurrentDM',CheckPoint_O=.TRUE.)
+     CALL Put(Tmp1,TrixFile('D',Args,0))
+     CALL PChkSum(Tmp1,'P[0]',Prog)
+!    Clean Up
+     CALL Delete(F)
+     CALL Delete(P)
+     CALL Delete(Tmp1)
+     CALL Delete(Tmp2)
 !
 !    Geometry Change 
 !
@@ -447,6 +655,10 @@ PROGRAM P2Use
            ENDIF
         ENDIF
      ENDIF
+
+
+
+
      ! Initial Trace Error
 #ifdef PARALLEL
      CALL Multiply(P0,S0,Tmp1)
