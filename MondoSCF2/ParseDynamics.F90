@@ -1,4 +1,4 @@
-! Authors : Hugh Nymeyer and Matt Challacombe
+! Authors : Hugh Nymeyer, CJ Tymczak and Matt Challacombe
 MODULE ParseDynamics
   USE Parse
   USE InOut
@@ -30,10 +30,14 @@ CONTAINS
 !   Parse MD
     IF(O%Grad==GRAD_DO_DYNAMICS) THEN
 !      Parse the Density Matrix Projection Algoithm
-       IF(    OptKeyQ(Inp,MD_PM_OPTION,MD_DMVerlet)) THEN
-          D%MDGeuss=MD_DMVerlet
-       ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_FMVerlet)) THEN
-          D%MDGeuss=MD_FMVerlet
+       IF(    OptKeyQ(Inp,MD_PM_OPTION,MD_DMVerlet0)) THEN
+          D%MDGeuss=MD_DMVerlet0
+       ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_DMVerlet1)) THEN
+          D%MDGeuss=MD_DMVerlet1
+       ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_FMVerlet0)) THEN
+          D%MDGeuss=MD_FMVerlet0
+       ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_FMVerlet1)) THEN
+          D%MDGeuss=MD_FMVerlet1
        ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_DMP0)    ) THEN
           D%MDGeuss=MD_DMP0
        ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_DMP1)    ) THEN
@@ -44,6 +48,9 @@ CONTAINS
           D%MDGeuss=MD_DMP3
        ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_DMP4)    ) THEN
           D%MDGeuss=MD_DMP4
+       ELSE
+          WRITE(*,*) ' In input file, no MD DM Projection algorithm Defined'
+          CALL Warn(' In input file, no MD DM Projection algorithm Defined')
        ENDIF
 !      Parse MD Options: First MD Algorithmn
        IF(OptKeyQ(Inp,MD_AL_OPTION,MD_AL_VERLET))THEN
@@ -81,22 +88,28 @@ CONTAINS
        ENDIF
 !   Parse Hybrid MC
     ELSEIF(O%Grad==GRAD_DO_HYBRIDMC) THEN
-!      Parse MD Options:
 !      Parse the Density Matrix Projection Algoithm
-       IF(    OptKeyQ(Inp,MD_PM_OPTION,MD_DMVerlet)) THEN
-          D%MDGeuss=MD_DMVerlet
-       ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_FMVerlet)) THEN
-          D%MDGeuss=MD_FMVerlet
-       ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_DMP0)    ) THEN
+       IF(    OptKeyQ(Inp,MD_PM_OPTION,MD_DMVerlet0)) THEN
+          D%MDGeuss=MD_DMVerlet0
+       ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_DMVerlet1)) THEN
+          D%MDGeuss=MD_DMVerlet1
+       ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_FMVerlet0)) THEN
+          D%MDGeuss=MD_FMVerlet0
+       ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_FMVerlet1)) THEN
+          D%MDGeuss=MD_FMVerlet1
+       ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_DMP0)     ) THEN
           D%MDGeuss=MD_DMP0
-       ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_DMP1)    ) THEN
+       ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_DMP1)     ) THEN
           D%MDGeuss=MD_DMP1
-       ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_DMP2)    ) THEN
+       ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_DMP2)     ) THEN
           D%MDGeuss=MD_DMP2
-       ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_DMP3)    ) THEN
+       ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_DMP3)     ) THEN
           D%MDGeuss=MD_DMP3
-       ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_DMP4)    ) THEN
+       ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_DMP4)     ) THEN
           D%MDGeuss=MD_DMP4
+       ELSE
+          WRITE(*,*) ' In input file, no MD DM Projection algorithm Defined'
+          CALL Warn('In input file, no MD DM Projection algorithm Defined')
        ENDIF
 !      MD Algorithmn
        IF(OptKeyQ(Inp,MD_AL_OPTION,MD_AL_VERLET))THEN
