@@ -405,7 +405,7 @@ MODULE RhoTools
        Zeta = Rho_new%Zeta%D(I)
        Ell  = Rho_new%Ell%I(I)
        DO J=1,NExpt
-          IF(ABS(Expt%D(J)-Zeta) < 1.D-6) THEN
+          IF(ABS(Expt%D(J)-Zeta) < 1.D-10) THEN
              IE = J
              GOTO 100
           ENDIF
