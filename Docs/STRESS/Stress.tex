@@ -1,4 +1,4 @@
-%
+
 %   This file is part of the APS files in the REVTeX 4 distribution.
 %   Version 4.0 of REVTeX, August 2001
 %
@@ -100,8 +100,11 @@ cell gradients.}
                               %display desired
 \maketitle
 
-\section{Introduction}
+%\section{Don't forget to change that}
+%-Add K. Doll in the Ref for Urea K. Doll Computer Physics Communications 137 (2001) 74-88\\
+%-Add KDoll01a in mondo.bib\\
 
+\section{Introduction}
 In preceding papers, we have developed linear scaling quantum chemical methods
 for construction of the periodic Coulomb, exchange-correlation~\cite{CTymczak04a}
 and the exact Hartree-Fock exchange~\cite{CTymczak04b} 
@@ -179,7 +182,7 @@ products and in the second, the fact that elements of the density
 matrix of an insulator decays exponentially with inter-atomic separations.
 The strategy to compute the analytic Hartree-Fock gradients for 
 periodic system, in the frame of the {\sc Crystal03} package has been 
-presented by Doll, Saunders and Harrison~\cite{KDoll01}.
+presented by Doll, Saunders and Harrison~\cite{KDoll01} and Doll~\cite{KDoll01a}.
 Their implementation is based on the Hermite Gaussian-type functions
 in the context of the McMurchie-Davidson algorithm~\cite{LMcmurchie78}.
 
@@ -217,9 +220,9 @@ Finally in Section~\ref{Sec:Conclusions} we summarize our results.
 The cell is given by the three vectors $\mathbf{a}$, 
 $\mathbf{b}$ and $\mathbf{c}$. Then $M$ is the $3\times3$ matrix composed 
 of the cell vectors
-\begin{equation}
+\begin{equation*}
   M=(\mathbf{a},\mathbf{b},\mathbf{c}).
-\end{equation}
+\end{equation*}
 The position of a cell is $\mathbf{R(n)}=M\mathbf{n}$,
 with $\mathbf{n}=(n_a,n_b,n_c)$ a vector of integers.
 The position of atom $A$ in the cell $\mathbf{R(n)}$ is $\mathbf{A}=M(\mathbf{f}_A+\mathbf{n})$,
@@ -230,9 +233,9 @@ atom $A$ in the central cell.
 %$\mathbf{f}_A,\mathbf{f}_B,\ldots$ as $\{\mathbf{f}_G\}$.
 
 An unnormalized Cartesian Gaussian-type function (CGTF) centered on atom $A$ is
-\begin{equation}
+\begin{equation*}
   \phi_a(\mathbf{r})=(x-A_x)^{a_x}(y-A_y)^{a_y}(z-A_z)^{a_z}e^{-\zeta_a(\mathbf{r-A})^2},
-\end{equation}
+\end{equation*}
 where the triad $a=(a_x,a_y,a_z)$ sets the angular symmetry and the exponent $\zeta_a$
 is chosen to describe a particular length scale. Gaussian basis functions are often
 contracted to approximate atomic eigenfunctions.
@@ -255,12 +258,12 @@ contracted to approximate atomic eigenfunctions.
 
 The Hartree-Fock exchange energy within the MIC $\Gamma$-point approximation~\cite{CTymczak04b} 
 is given by:
-\begin{equation}
+\begin{equation*}
 E^x(\mathbf{f}_A,\mathbf{f}_B,\ldots,M)=
 % E^x(\{\mathbf{f}_G\},M)=
  -\frac{1}{4}\sum_{\substack{\mathbf{m}\mathbf{n}\\a b c d}}P_{ab}P_{cd}
  (ac^\mathbf{m}|bd^\mathbf{n})
-\end{equation}
+\end{equation*}
 where the indices $\mathbf{mn}$ run over the direct cell vectors, 
 $abcd$ over the basis functions, 
 $P=P(\mathbf{f}_A,\mathbf{f}_B,\ldots,M)$
@@ -294,7 +297,7 @@ Note that $\mathbf{PQ}=\mathbf{P-Q}$ if and only if $[\mathbf{f}_{PQ}-\varepsilo
 In the following Sections the notation $\mathbf{PQ}$ will always refer to Eq.~\ref{Eq:MIC}.
 
 As an example, the MIC-integral over $s$-type CGTF is given by
-\begin{equation}
+\begin{equation*}
   \begin{split}
   (00|00)^{(m)}&=\left(\frac{\rho}{\pi}\right)^{\frac{1}{2}}
     \left(\frac{\pi}{\zeta}\right)^{\frac{3}{2}}\left(\frac{\pi}{\eta}\right)^{\frac{3}{2}}\\
@@ -302,7 +305,7 @@ As an example, the MIC-integral over $s$-type CGTF is given by
     &\times\exp\left(-\frac{\zeta_b\zeta_d}{\eta}BD^2\right) \\
     &\times F_{m}(\rho PQ^2)
   \end{split}
-\end{equation}
+\end{equation*}
 where $\zeta=\zeta_a+\zeta_c$, $\eta=\zeta_b+\zeta_d$, $\rho=\zeta\eta/(\zeta+\eta)$,
 $AC^2=|\mathbf{A-C}|^2$, $BD^2=|\mathbf{B-D}|^2$, $PQ^2=|\mathbf{PQ}|^2$ 
 is given by Eq.~\ref{Eq:MIC}, $m\in\mathbb{Z}^*$ plays %is a nonnegative integer which
@@ -748,38 +751,70 @@ cell for 3D-periodic systems.
   \resizebox*{3.6in}{!}{\includegraphics[angle=-90.00]{./DATA/HF_Energy_cnvg_NoMIC.ps}}
 \end{figure}
 
-We have performed full optimization of three dimensional urea supercells 
+We have performed full optimization of 3D urea supercells 
 without any symmetry constraint on the cell nor the atomic positions.
 Table~\ref{Tab:Urea} shows the cell parameters, bond lengths, 
 bond angles, dihedral angles and total energies
 for (urea)$_n$ supercells at the $\Gamma$-point RHF-MIC/6-21G* level of
 theory. The basis set used is the same as in Ref~\cite{RDovesi90}.
-For the sake of comparison, we have also fully relaxed the atomic position of a tetragonal cell
-of urea in the $P\bar{4}2_1m$ space group with the 
-{\sc Crystal03}~\cite{Crystal03} package (last column of Table~\ref{Tab:Urea}), using a $2\times 2\times 2$ $k$-points 
-integration grid and starting from cell parameters taken from Ref.~\cite{KDoll04}.
-While the geometries of the urea molecule agree perfectly between the $k$-space integration
-and the $\Gamma$-point approximation, the energies and cell parameters do not.
+For the sake of comparison, we also present fully relaxed atomic and cell parameters
+for urea obtained by Civalleri and Doll~\cite{BCivalleri05} with the 
+{\sc Crystal03}~\cite{Crystal03} package (last column of Table~\ref{Tab:Urea}), 
+using a $2\times 2\times 2$ $k$-points integration grid.
+While the atomic and cell parameters urea agree perfectly between the $k$-space integration
+and the $\Gamma$-point approximation, the energies do not.
 The reason for this disagreement can be found in the different atomic basis set used.
-{\sc Crystal03} uses spherical harmonics d-shells consisting of 5 atomic orbitals while {\sc MondoSCF} 
-pure Cartesian basis functions i.e.~6 atomic orbitals per Cartesian d-shells. To see this effect in a more
-quantitative way, we have performed gas phase geometry optimizations 
+{\sc Crystal03} uses spherical harmonics d-shells consisting of 5 atomic orbitals 
+while {\sc MondoSCF} pure Cartesian basis functions i.e.~6 atomic orbitals 
+per Cartesian d-shells.
+To see this effect in a more quantitative way, we have performed gas phase geometry optimizations 
 (using the {\sc Gamess}~\cite{gamess} package) at the RHF/6-21G* level of theory 
 of a single urea molecule with both spherical and Cartesian basis functions.
 The difference in the bond lengths and angles of the two basis sets 
 is no more than $0.001$ \AA~and $0.1^\circ$ respectively, but the
 difference in the energy is much more significant and is about $8\cdot 10^{-3}$ a.u.
 By inspection of the total energies in Table~\ref{Tab:Urea}, we can see that the difference
-in energy of the two different basis sets is of the same order as what we could observe
-for gas phase calculations. The strong dependency of the cell parameter, especially
-the $a$ and $b$ directions, with respect to basis set size has been recently observed by 
-Civalleri~\cite{BCivalleri05}. We conclude that the differences observed for the geometry
-optimizations of urea are mainly due to the different basis set used by {\sc Crystal03} and 
+in energy of the two different basis sets is of the same order ($\sim 10^{-2}$ a.u.) 
+as what we could observe
+for gas phase calculations. We conclude that the differences observed for the energy
+of urea are mainly due to the different basis set used by {\sc Crystal03} and 
 {\sc MondoSCF}.
+%%%%%%%%%%%%%% Old %%%%%%%%%%%%%
+%For the sake of comparison, we have also fully relaxed the atomic position of a tetragonal cell
+%of urea in the $P\bar{4}2_1m$ space group with the 
+%{\sc Crystal03}~\cite{Crystal03} package (last column of Table~\ref{Tab:Urea}), using a $2\times 2\times 2$ $k$-points 
+%integration grid and starting from cell parameters taken from Ref.~\cite{KDoll04}.
+%While the geometries of the urea molecule agree perfectly between the $k$-space integration
+%and the $\Gamma$-point approximation, the energies and cell parameters do not.
+%The reason for this disagreement can be found in the different atomic basis set used.
+%{\sc Crystal03} uses spherical harmonics d-shells consisting of 5 atomic orbitals while {\sc MondoSCF} 
+%pure Cartesian basis functions i.e.~6 atomic orbitals per Cartesian d-shells. To see this effect in a more
+%quantitative way, we have performed gas phase geometry optimizations 
+%(using the {\sc Gamess}~\cite{gamess} package) at the RHF/6-21G* level of theory 
+%of a single urea molecule with both spherical and Cartesian basis functions.
+%The difference in the bond lengths and angles of the two basis sets 
+%is no more than $0.001$ \AA~and $0.1^\circ$ respectively, but the
+%difference in the energy is much more significant and is about $8\cdot 10^{-3}$ a.u.
+%By inspection of the total energies in Table~\ref{Tab:Urea}, we can see that the difference
+%in energy of the two different basis sets is of the same order as what we could observe
+%for gas phase calculations. The strong dependency of the cell parameter, especially
+%the $a$ and $b$ directions, with respect to basis set size has been recently observed by 
+%Civalleri~\cite{BCivalleri05}. We conclude that the differences observed for the geometry
+%optimizations of urea are mainly due to the different basis set used by {\sc Crystal03} and 
+%{\sc MondoSCF}.
+%%%%%%%%%%%%%%%%%
+
 %Gamess
 %-223.7884474840-5D
 %-223.7964330646-6D  
 %
+% See :
+% A. Masunov and J.J. Dannenberg, Theoretical study of urea and thiourea. 2. Chains and ribbons., 
+% J. Phys. Chem. B 104, 806-810 (2000). 
+% C. Gatti, V.R. Saunders and C. Roetti, Crystal field effects on the topological properties of 
+% the electron density in molecular crystals. The case of urea, 
+% J. Chem. Phys. 101, 10686-10696 (1994). 
+
 \begin{table}[t]
   \centering
   \caption{\protect
@@ -802,34 +837,54 @@ optimizations of urea are mainly due to the different basis set used by {\sc Cry
 %     1    -3581.6544536206
 % 3x3x3
 
-% Crystal03 2x2x2
-% -2.23841752471450E+02
+% Crystal03 1x1x1
+% -2.23841752471450E+02 %Old%
+%%%%New values from Bartolomeo
+%  HF          & Mondo SCF& CRY/6-21G** & CRY/6-21G**(H exp. rescaled) & Old
+%  a_0         &       5.630 &        5.656 &       5.652 &       5.524
+%  c_0         &       4.660 &        4.667 &       4.678 &       4.642
+%  E/n         & -223.853403 & -223.8379155 & -223.842647 & -223.841752
+% Bond lengths						                 
+%  CO          &       1.246 &        1.244 &       1.243 &       1.245
+%  CN          &       1.334 &        1.333 &       1.333 &       1.330
+%  NH_1        &       0.999 &        1.000 &       0.997 &       0.997
+%  NH_2        &       0.998 &        1.000 &       0.996 &       0.995
+%  Bond angles						                
+%  OCN         &       121.7 &        121.7 &       121.7 &       121.5
+%  CNH_1       &       119.5 &        119.4 &       119.3 &       119.2
+%  CNH_2       &       120.6 &        120.5 &       120.6 &       120.6
+%  Dihedral angles					                 
+%  OCNH_1      &         0.0 &          0.0 &         0.0 &         0.0
+%  OCNH_2      &       180.0 &        180.0 &       180.0 &       180.0
+%  NCNH_1      &       180.0 &        180.0 &       180.0 &       180.0
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     \toprule
     &\multicolumn{2}{c}{\sc{MondoSCF}\footnote[1]{$\Gamma$-point.}}
     &\multicolumn{1}{c}{\sc{Crystal03}\footnote[2]{$2\times 2\times 2$ $k$-points.}} \\
     \hline
-    $n$          &    16 & 54 & 2 \\
-    $a_0$        & 5.630 & ? & 5.524 \\
-    $c_0$        & 4.660 & ? & 4.642 \\                    
-    $E/n$        & $-$223.853403 & ? &$-$223.841752 \\%
-    &\multicolumn{3}{c}{Bond lengths} \\
-    CO           & 1.246 & ? & 1.245 \\
-    CN           & 1.334 & ? & 1.330 \\
-    NH$_1$       & 0.999 & ? & 0.997 \\%cis-O
-    NH$_2$       & 0.998 & ? & 0.995 \\%trans-O
-    &\multicolumn{3}{c}{Bond angles} \\
-    OCN          & 121.7 & ? & 121.5 \\
-    CNH$_1$      & 119.5 & ? & 119.2 \\%cis-O
-    CNH$_2$      & 120.6 & ? & 120.6 \\%trans-O
+    $n$          &            16 & 54 &             2 \\
+    $a_0$        &         5.630 & ?  &         5.652 \\
+    $c_0$        &         4.660 & ?  &         4.678 \\                    
+    $E/n$        & $-$223.853403 & ?  & $-$223.842647 \\%
+    &\multicolumn{3}{c}{Bond lengths}    \\
+    CO           &         1.246 & ?  &         1.243 \\
+    CN           &         1.334 & ?  &         1.333 \\
+    NH$_1$       &         0.999 & ?  &         0.997 \\%cis-O
+    NH$_2$       &         0.998 & ?  &         0.996 \\%trans-O
+    &\multicolumn{3}{c}{Bond angles}     \\
+    OCN          &         121.7 & ?  &         121.7 \\
+    CNH$_1$      &         119.5 & ?  &         119.3 \\%cis-O
+    CNH$_2$      &         120.6 & ?  &         120.6 \\%trans-O
     &\multicolumn{3}{c}{Dihedral angles} \\
-    OCNH$_1$     &   0.0 & ? &   0.0 \\%cis-O
-    OCNH$_2$     & 180.0 & ? & 180.0 \\%trans-O
-    NCNH$_1$     & 180.0 & ? & 180.0 \\
+    OCNH$_1$     &           0.0 & ?  &           0.0 \\%cis-O
+    OCNH$_2$     &         180.0 & ?  &         180.0 \\%trans-O
+    NCNH$_1$     &         180.0 & ?  &         180.0 \\
     \botrule
   \end{tabular}
 \end{table}
 
-Table~\ref{Tab:MgO} shows the progression of the cell parameters and total energies computed
+Table~\ref{Tab:MgO} shows the progression of the cell parameters, total energies and
+fractional coordinates of the oxygen computed
 for various MgO supercells at the $\Gamma$-point RHF-MIC level of theory using
 the 8-61G basis set for magnesium and the 8-51G basis set for oxygen. 
 The basis sets were specially optimized for MgO by 
@@ -837,6 +892,11 @@ Caus\`a et al~\cite{CBS:861G:MgO} and were obtained from Ref.~\cite{CrystalLib}.
 The cubic cell coordinates used for this system are given in Ref.~\cite{PBCCoordinates}.
 For comparison, we report the optimized cell parameter of cubic MgO 
 obtained with {\sc Crystal03} and a $8\times 8\times 8$ $k$-points integration grid.
+The smallest system (MgO)$_4$ shows a large discrepantcy of the cell parameter, energy and 
+fractional coordinate of the oxygen
+with respect to its ${\bf k}$-space integration counterpart. The larger systems
+give perfect cell parameter, fractional coordinate of the oxygen
+and the energy systematical converges while the system grows.
 \begin{table}[t]
   \centering
   \caption{\protect
@@ -930,7 +990,7 @@ obtained with {\sc Crystal03} and a $8\times 8\times 8$ $k$-points integration g
 %
 %\subsection{???Convergence of the MIC-atomic gradients???}
 In Table~\ref{Tab:GradMgO}, we present the progression of the average of the norm of the
-atomic gradients for the (MgO)$_n$ systems with a cell parameter of $a_0=4.20$\AA. 
+atomic gradients for the (MgO)$_n$ systems with a cell parameter of $a_0=4.200$\AA. 
 While the smallest system, (MgO)$_4$, gives 
 large unphysical gradients which reflects 
 an unsuitable use of the exact exchange $\Gamma$-point approximation,
@@ -1104,10 +1164,12 @@ than 3 digits can be already achieved with cubic cells of about $600$\AA$^3$.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Acknowledgements
 \begin{acknowledgments}
- V.W. would like to thank K. Doll for a preprint of his manuscript and informations
- about the basis sets used in his work.
+% V.W. would like to thank K. Doll for a preprint of his manuscript and informations
+% about the basis sets used in his work.
  The authors would like to thank K. N\'emeth, D. Asthagiri, C.J. Tymczak 
- and B. Civalleri for helpful comments.
+ for careful reading of the manuscript. B. Civalleri and K. Doll 
+ are also gratefully acknowledged for providing numerous informations 
+ and data about basis sets and optimized urea coordinates.
  This work has been supported by the Swiss National Science Foundation, 
  the Swiss Office for Education and Science through the European 
  COST Action D14 and the US Department of Energy 
