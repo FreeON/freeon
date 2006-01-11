@@ -2043,7 +2043,7 @@ CONTAINS
           ! Move the atom
           DO iCLONE=1,C%Geos%Clones
              C%Geos%Clone(iCLONE)%Carts%D(I,AtA)=C%Geos%Clone(iCLONE)%Carts%D(I,AtA)+ATOM_DISP
-             CALL MakeGMPeriodic(C%Geos%Clone(iCLONE))
+             !CALL MakeGMPeriodic(C%Geos%Clone(iCLONE))
           ENDDO
           CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)
           !
@@ -2066,7 +2066,7 @@ CONTAINS
           ! Move back.
           DO iCLONE=1,C%Geos%Clones
              C%Geos%Clone(iCLONE)%Carts%D(I,AtA)=C%Geos%Clone(iCLONE)%Carts%D(I,AtA)-ATOM_DISP
-             CALL MakeGMPeriodic(C%Geos%Clone(iCLONE))
+             !CALL MakeGMPeriodic(C%Geos%Clone(iCLONE))
           ENDDO
           CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)
           iGEO=iGEO+1
