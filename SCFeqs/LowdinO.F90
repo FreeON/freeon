@@ -41,7 +41,7 @@ PROGRAM LowdinO
   TYPE(DBL_VECT)                 :: Values,Work
   TYPE(INT_VECT)                 :: IWork
   TYPE(ARGMT)                    :: Args
-  INTEGER                        :: I,J,K,LgN,LWORK,LIWORK,Info,Status
+  INTEGER                        :: I,J,K,LgN,LWORK,LIWORK,Info,Status,ISmall
   REAL(DOUBLE)                   :: Chk,CondS,OverlapEThresh
   CHARACTER(LEN=7),PARAMETER     :: Prog='LowdinO'
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg
@@ -56,7 +56,7 @@ PROGRAM LowdinO
      WRITE(Out,*)TRIM(Mssg)
      CLOSE(Out)
   ELSE
-     OverlapEThresh=1.D-12
+     OverlapEThresh=1.D-4
   ENDIF
   CLOSE(Inp)
   CALL New(Values,NBasF)
@@ -101,14 +101,19 @@ PROGRAM LowdinO
   CALL New(Tmp2,(/NBasF,NBasF/))
   CALL New(Tmp1,(/NBasF,NBasF/))
 !--------------------------------------------------------------------
+  ISmall=0
   Tmp1%D=Zero
   DO I=1,NBasF
      IF(Values%D(I)>OverlapEThresh)THEN
         Tmp1%D(I,I)=One/SQRT(Values%D(I))
      ELSE
         Tmp1%D(I,I)=Zero
+        ISmall=ISmall+1
      ENDIF
   ENDDO     
+  IF(ISmall.NE.0) CALL Warn('Removed '//TRIM(IntToChar(ISmall))//' eigenvalue(s) smaller than ' &
+       & //TRIM(DblToShrtChar(OverlapEThresh)))
+
   CALL DGEMM('N','N',NBasF,NBasF,NBasF,One,Vectors%D, &
              NBasF,Tmp1%D,NBasF,Zero,Tmp2%D,NBasF)
   CALL DGEMM('N','T',NBasF,NBasF,NBasF,One,Tmp2%D,    &
