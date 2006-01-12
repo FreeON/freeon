@@ -78,7 +78,10 @@ CONTAINS
        MaxBloks=MAX(MaxBloks,B%MxBlk(iBAS))
        MaxNon0s=MAX(MaxNon0s,B%MxN0s(iBAS))
     ENDDO
-    CALL New(DM,(/MaxAtoms,MaxBloks,MaxNon0s/))
+#ifdef PARALLEL
+    !If parallel and we have clones, we need to put the D matrices in the HDF.
+    IF(G%Clones.GT.1) CALL New(DM,(/MaxAtoms,MaxBloks,MaxNon0s/))
+#endif
     CALL Put(G%Clones,'clones')
     ! If we are doing NEB, then put the endpoints to HDF as well
     IF(SIZE(G%Clone)==G%Clones+2)THEN
@@ -166,10 +169,16 @@ CONTAINS
        CALL Put(DoubleVect,'PFFTensorC')
        CALL Put(DoubleVect,'PFFTensorS')
        CALL Delete(DoubleVect) 
-       CALL Put(DM,'CurrentDM',CheckPoint_O=.TRUE.)
+#ifdef PARALLEL
+       !If parallel and we have clones, we need to put the D matrices in the HDF.
+       IF(G%Clones.GT.1) CALL Put(DM,'CurrentDM',CheckPoint_O=.TRUE.)
+#endif
        CALL CloseHDFGroup(HDF_CurrentID)
     ENDDO
-    CALL Delete(DM)
+#ifdef PARALLEL
+    !If parallel and we have clones, we need to put the D matrices in the HDF.
+    IF(G%Clones.GT.1) CALL Delete(DM)
+#endif
     CALL CloseHDF(HDFFileID)
   END SUBROUTINE InitClones
 !==============================================================================
