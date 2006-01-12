@@ -302,7 +302,7 @@ void hdf5createdata_(int* FileID,int* Type,int* N,int* NC,int* IChr,int* ULimit,
    {
     mxdms[0]=H5S_UNLIMITED;
     dspc=H5Screate_simple(1,dms,mxdms);
-    chnk[0]=512;
+    chnk[0]=8192; /* 2048; */ /* 512; */
     stat=H5Pset_chunk(dprp,1,chnk);
 #ifdef debug_interface
     printf("IN CREATE_HDF5_DATA: UNLIMITED DIMENSION = %d\n",dms[0]);
