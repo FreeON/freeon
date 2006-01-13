@@ -835,7 +835,7 @@ WRITE(*,*)' C = ',C
 !-------------------------------------------------------------------------------
     SUBROUTINE FockGuess_DBCSR(F,P,Norm,Order)
       TYPE(DBCSR)                    :: P
-      TYPE(BCSR)                     :: F
+      TYPE(DBCSR)                    :: F
       REAL(DOUBLE)                   :: Fmin,Fmax,DF,Coeff,Mu,Lmbd1,  &
                                         Lmbd2,Norm
       INTEGER                        :: Order
@@ -1088,7 +1088,11 @@ WRITE(*,*)' C = ',C
 !   F_min = Min_R { F(R,R) - S(R) + ABS(F(R,R)) }
 !-------------------------------------------------------------------------------
       SUBROUTINE SpectralBounds(F,F_min,F_max)
+#ifdef PARALLEL
+        TYPE(DBCSR)      :: F
+#else
         TYPE(BCSR)       :: F
+#endif
         INTEGER          :: I,R,J,M,Col,Blk,N,C,Check
         REAL(DOUBLE)     :: F_min,F_max,Tmp_max,Tmp_min,Diag,Sum
 #ifdef EXACT_EIGEN_VALUES
