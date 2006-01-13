@@ -87,7 +87,7 @@ MODULE FastMatrices
 
 !======================================================================
 #ifdef PARALLEL
-#ifdef 1
+#ifdef BLABLABLA
   !>>>>>>>
   !
   ! The following routines use a binary tree for the reduce.
