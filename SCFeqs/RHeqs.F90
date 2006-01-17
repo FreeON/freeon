@@ -48,14 +48,22 @@ PROGRAM RHEqs
   ELSE
      CALL Get(sF,TrixFile('OrthoF',Args,0))    ! the orthogonalized Fock matrix
   ENDIF
-  NSMat=sF%NSMat
   !
-  SELECT CASE(NSMat)
-  CASE(1);NRow=  NBasF;NCol=  NBasF
-  CASE(2);NRow=  NBasF;NCol=2*NBasF
-  CASE(4);NRow=2*NBasF;NCol=2*NBasF
-  CASE DEFAULT;CALL Halt(' RHeqs: sF%NSMat doesn''t have an expected value! ')
-  END SELECT
+  IF(MyID.EQ.0) THEN
+     NSMat=sF%NSMat
+     SELECT CASE(NSMat)
+     CASE(1);NRow=  NBasF;NCol=  NBasF
+     CASE(2);NRow=  NBasF;NCol=2*NBasF
+     CASE(4);NRow=2*NBasF;NCol=2*NBasF
+     CASE DEFAULT;CALL Halt(' RHeqs: sF%NSMat doesn''t have an expected value! ')
+     END SELECT
+  ENDIF
+  !
+#ifdef PARALLEL
+  CALL BCast(NRow)
+  CALL BCast(NCol)
+  CALL BCast(NSMat)
+#endif
   !
   CALL New(F,(/NRow,NCol/))
   CALL SetEq(F,sF)
