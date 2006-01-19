@@ -359,6 +359,7 @@ CONTAINS
        ! Now close the old file...
        CALL CloseHDF(HDF_CurrentID)
     ELSEIF(OptKeyQ(Inp,GUESS_OPTION,GUESS_CORE))THEN
+       CALL MondoHalt(PRSE_ERROR,'Core guess may crash the code for some simple systems.')
        Guess=GUESS_EQ_CORE
     ELSEIF(OptKeyQ(Inp,GUESS_OPTION,GUESS_SUPER))THEN
        Guess=GUESS_EQ_SUPR
