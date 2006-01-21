@@ -269,22 +269,23 @@ of the integral estimate $|(ac^\mathbf{m}|ac^\mathbf{m})_{\rm mic}|^{1/2}$.
 \begin{figure}[htbp]
   \centering
   \caption{\protect
-    Parallel ordering of significant distributions.
+    Parallel ordering of significant distributions. 
+%    The indeces $A, C$ and $a, c$ run over the atoms and basis functions respectively;.
   }\label{Fig:List}
   \begin{equation*}
     \begin{split}
       &\tt          DO\,C\in COL(D(p))\\
       &\tt          DO\,A=1,NAtoms\\
-      &\tt\quad       DO\,m=1,NCell\\
+      &\tt\quad       DO\,\mathbf{m}=1,NCell\\
       &\tt\qquad        DO\,c\in C\\
       &\tt\qquad        DO\,a\in A\\
-      &\tt\qquad\quad     COMPUTE\,|(ac^m|ac^m)_{mic}|^{1/2}\\
-      &\tt\qquad\quad     IF(|(ac^m|ac^m)_{mic}|^{1/2}<{\tt Thresh)\,CYCLE}\\
-      &\tt\qquad\quad     ADD\,ac^m\,{\tt to}\, \{ac^m\}(A,C)\\
+      &\tt\qquad\quad     COMPUTE\,|(ac^\mathbf{m}|ac^\mathbf{m})_{mic}|^{1/2}\\
+      &\tt\qquad\quad     IF(|(ac^\mathbf{m}|ac^\mathbf{m})_{mic}|^{1/2}<{\tt Thresh)\,CYCLE}\\
+      &\tt\qquad\quad     ADD\,ac^\mathbf{m}\,{\tt to}\, \{ac^\mathbf{m}\}(A,C)\\
       &\tt\qquad        ENDDO\\
       &\tt\qquad        ENDDO\\
       &\tt\quad       ENDDO\\
-      &\tt\quad       SORT\,\{ac^m\}(A,C)\,by\,decreasing\,|(ac^m|ac^m)_{mic}|^{1/2}\\
+      &\tt\quad       SORT\,\{ac^\mathbf{m}\}(A,C)\,by\,decreasing\,|(ac^\mathbf{m}|ac^\mathbf{m})_{mic}|^{1/2}\\
       &\tt         ENDDO\\
       &\tt         ENDDO
     \end{split}
@@ -310,17 +311,17 @@ carried out with the FastMat data structure~\cite{CGan04B}.
   \begin{equation*}
     \begin{split}
       &\tt        Receive\,D(p)\,from\,ROOT\\
-      &\tt        Make\,list\,\{ac^m\}\,and\,\{bd^n\} \\
+      &\tt        Make\,list\,\{ac^\mathbf{m}\}\,and\,\{bd^\mathbf{n}\} \\
       &\tt        DO\,C\in COL(D(p)) \\
       &\tt        DO\,D\in ROW(D(p),C) \\
       &\tt\quad     ti=TIMER(\,) \\
       &\tt\quad     DO\,A=1,NAtoms \\
       &\tt\quad     DO\,B=1,A \\
-      &\tt\qquad      DO\,a,c,m\in\{ac^m\}(A,C) \\
+      &\tt\qquad      DO\,a,c,m\in\{ac^\mathbf{m}\}(A,C) \\
       &\tt\qquad\quad   IF(SkipOut)\,EXIT  \\
       &\tt\qquad\quad   DO\,b,d,n\in\{bd^n\}(B,D) \\
       &\tt\qquad\qquad    IF(SkipOut)\,EXIT  \\
-      &\tt\qquad\qquad    COMPUTE\,(ac^m|bd^n)_{mic} \\
+      &\tt\qquad\qquad    COMPUTE\,(ac^\mathbf{m}|bd^\mathbf{n})_{mic} \\
       &\tt\qquad\quad   ENDDO \\
       &\tt\qquad      ENDDO \\
       &\tt\qquad      Digest\,D\,and\,ERIs \\
