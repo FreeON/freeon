@@ -9,18 +9,18 @@ PROGRAM RHEqs
   USE Macros
   USE SetXYZ
   USE LinAlg
+  USE DenMatMethods,ONLY:MDiag_DSYEVX,MDiag_DSYEVD
 #ifdef NAG
    USE F90_UNIX_ENV
 #endif
   IMPLICIT NONE
   TYPE(BCSR)                     :: sP,sF,sX,sTmp1,sTmp2
-  TYPE(DBL_RNK2)                 :: X,F,MO,P    ,test1,test2,test3
-  TYPE(DBL_VECT)                 :: EigenV,Work
-  TYPE(INT_VECT)                 :: IWork
+  TYPE(DBL_RNK2)                 :: X,F,MO,P
+  TYPE(DBL_VECT)                 :: EigenV
   TYPE(ARGMT)                    :: Args
   REAL(DOUBLE)                   :: CJK,HOMO,LUMO,dt
   REAL(DOUBLE)                   :: Mu,Entrop,Ek,Z,A1,A2,H1,H3,H4,Fk,Sigma,Dum
-  INTEGER                        :: I,J,K,LgN,LWORK,LIWORK,Info,NRow,NCol,NSMat
+  INTEGER                        :: I,J,K,LgN,NRow,NCol,NSMat
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg,FMatrix,PMatrix,XFile,smearing
   CHARACTER(LEN=5),PARAMETER     :: Prog='RHEqs'
   LOGICAL                        :: Present,DensityArchive
@@ -48,69 +48,66 @@ PROGRAM RHEqs
   ELSE
      CALL Get(sF,TrixFile('OrthoF',Args,0))    ! the orthogonalized Fock matrix
   ENDIF
+  NSMat=sF%NSMat
+  IF(NSMat.GT.1.AND.Smearing.NE.'NoSmearing')CALL Halt('Smearing with unrestricted are not supported!')
   !
-  IF(MyID.EQ.0) THEN
-     NSMat=sF%NSMat
-     SELECT CASE(NSMat)
-     CASE(1);NRow=  NBasF;NCol=  NBasF
-     CASE(2);NRow=  NBasF;NCol=2*NBasF
-     CASE(4);NRow=2*NBasF;NCol=2*NBasF
-     CASE DEFAULT;CALL Halt(' RHeqs: sF%NSMat doesn''t have an expected value! ')
-     END SELECT
-  ENDIF
-  !
-#ifdef PARALLEL
-  CALL BCast(NRow)
-  CALL BCast(NCol)
-  CALL BCast(NSMat)
-#endif
+  SELECT CASE(NSMat)
+  CASE(1);NRow=  NBasF;NCol=  NBasF
+  CASE(2);NRow=  NBasF;NCol=2*NBasF
+  CASE(4);NRow=2*NBasF;NCol=2*NBasF
+  CASE DEFAULT;CALL Halt(' RHeqs: sF%NSMat doesn''t have an expected value! ')
+  END SELECT
   !
   CALL New(F,(/NRow,NCol/))
   CALL SetEq(F,sF)
   CALL Delete(sF) 
-
-write(*,*) 'RHeqs: NAlph',NAlph
-write(*,*) 'RHeqs: NBeta',NBeta
-
+  !write(*,*) 'RHeqs: NSMat',NSMat
+  !write(*,*) 'RHeqs: NAlph',NAlph
+  !write(*,*) 'RHeqs: NBeta',NBeta
 !----------------------------------
 !
 !
   CALL New(EigenV,NCol)
   CALL SetEq(EigenV,Zero)
-  LWORK=MAX(1,3*NRow+10)
-  CALL New(Work,LWork)
 ! 
   SELECT CASE(NSMat)
   CASE(1)
      ! We just have one matrix.
-     CALL DSYEV('V','U',NBasF,F%D(1,1),NBasF,EigenV%D(1),Work%D(1),LWORK,Info)
-     IF(Info/=SUCCEED)CALL Halt('DSYEV flaked in RHEqs. INFO='//TRIM(IntToChar(Info)))
+     IF(Smearing.EQ.'NoSmearing')THEN
+        CALL MDiag_DSYEVX(F,NBasF,MIN(NBasF,Nel/2+1),EigenV,0)
+     ELSE
+        CALL MDiag_DSYEVD(F,NBasF,EigenV,0)
+     ENDIF
      !
      HOMO=EigenV%D(NEl/2)
-     LUMO=EigenV%D(NEl/2+1)
+     LUMO=EigenV%D(MIN(NBasF,Nel/2+1))
   CASE(2)
      ! We have a block diagonal matrix, we diag each blocks separately.
-     ! Alpha Spin
-     CALL DSYEV('V','U',NBasF,F%D(1,1),NBasF,EigenV%D(1),Work%D(1),LWORK,Info)
-     IF(Info/=SUCCEED)CALL Halt('DSYEV flaked in RHEqs. INFO='//TRIM(IntToChar(Info)))
-     ! Beta Spin
-     CALL DSYEV('V','U',NBasF,F%D(1,NBasF+1),NBasF,EigenV%D(NBasF+1),Work%D(1),LWORK,Info)
-     IF(Info/=SUCCEED)CALL Halt('DSYEV flaked in RHEqs. INFO='//TRIM(IntToChar(Info)))
+     IF(Smearing.EQ.'NoSmearing')THEN
+        CALL MDiag_DSYEVX(F,NBasF,MIN(NBasF,NAlph+1),EigenV,0)
+        CALL MDiag_DSYEVX(F,NBasF,MIN(NBasF,NBeta+1),EigenV,NBasF)
+     ELSE
+        CALL MDiag_DSYEVD(F,NBasF,EigenV,0)
+        CALL MDiag_DSYEVD(F,NBasF,EigenV,NBasF)
+     ENDIF
      !
      IF(EigenV%D(NAlph)-EigenV%D(NAlph+1).LT.EigenV%D(NBasF+NBeta)-EigenV%D(NBasF+NBeta+1)) THEN
         HOMO=EigenV%D(NAlph  )
-        LUMO=EigenV%D(NAlph+1)
+        LUMO=EigenV%D(MIN(NBasF,NAlph+1))
      ELSE
         HOMO=EigenV%D(NBasF+NBeta  )
-        LUMO=EigenV%D(NBasF+NBeta+1)
+        LUMO=EigenV%D(NBasF+MIN(NBasF,NBeta+1))
      ENDIF
   CASE(4)
      ! We just have one matrix.
-     CALL DSYEV('V','U',2*NBasF,F%D(1,1),NRow,EigenV%D(1),Work%D(1),LWORK,Info)
-     IF(Info/=SUCCEED)CALL Halt('DSYEV flaked in RHEqs. INFO='//TRIM(IntToChar(Info)))
+     IF(Smearing.EQ.'NoSmearing')THEN
+        CALL MDiag_DSYEVX(F,2*NBasF,MIN(NBasF,Nel+1),EigenV,0)
+     ELSE
+        CALL MDiag_DSYEVD(F,2*NBasF,EigenV,0)
+     ENDIF
      !
      HOMO=EigenV%D(NEl)
-     LUMO=EigenV%D(NEl+1)
+     LUMO=EigenV%D(MIN(NBasF,Nel+1))
   CASE DEFAULT;CALL Halt(' RHeqs: NSMat doesn''t have an expected value! ')
   END SELECT
 !
@@ -127,7 +124,6 @@ write(*,*) 'RHeqs: NBeta',NBeta
   ENDIF
   CALL Put(HOMO-LUMO,'HomoLumoGap')
 !
-  CALL Delete(Work)
 !--------------------------------------------------------------
 ! Make a new closed shell, orthogonal density matrix
 !
@@ -174,14 +170,18 @@ write(*,*) 'RHeqs: NBeta',NBeta
      SELECT CASE(NSMat)
      CASE(1)
         ! We have one density matrix to build.
-        CALL BuildP0(Nel/2,NBasF,F%D(1,1),P%D(1,1))! Restricted 
+        CALL DGEMM('N','T',NBasF,NBasF,Nel/2,1D0,F%D(1,1), &
+             &     NBasF,F%D(1,1),NBasF,0D0,P%D(1,1),NBasF)
      CASE(2)
         ! We have two density matrices to build.
-        CALL BuildP0(NAlph,NBasF,F%D(1,1)      ,P%D(1,1)      )! Unrestricted Alpha
-        CALL BuildP0(NBeta,NBasF,F%D(1,NBasF+1),P%D(1,NBasF+1))! Unrestricted Beta
+        CALL DGEMM('N','T',NBasF,NBasF ,NAlph,1D0,F%D(1,      1), &
+             &     NBasF,F%D(1,      1),NBasF,0D0,P%D(1,      1),NBasF)
+        CALL DGEMM('N','T',NBasF,NBasF ,NBeta,1D0,F%D(1,NBasF+1), &
+             &     NBasF,F%D(1,NBasF+1),NBasF,0D0,P%D(1,NBasF+1),NBasF)
      CASE(4)
         ! We have one density matrix to build.
-        CALL BuildP0(Nel,2*NBasF,F%D(1,1),P%D(1,1))! Generalized 
+        CALL DGEMM('N','T',2*NBasF,2*NBasF,Nel,1D0,F%D(1,1), &
+             &     2*NBasF,F%D(1,1),2*NBasF,0D0,P%D(1,1),2*NBasF)
         ! Need to recompute NAlph and NBeta at this level.
      CASE DEFAULT;CALL Halt(' RHeqs: NSMat doesn''t have an expected value! ')
      END SELECT
@@ -226,21 +226,5 @@ write(*,*) 'RHeqs: NBeta',NBeta
   CALL Delete(sP)
   CALL Delete(sTmp1)
   CALL ShutDown(Prog)
-CONTAINS
-  SUBROUTINE BuildP0(Nel,N,C,P)
-    INTEGER      :: Nel,N
-    REAL(DOUBLE) :: C(N,*),P(N,N)
-    INTEGER      :: I,J,K
-    REAL(DOUBLE) :: CJK
-    DO K=1,Nel
-       DO J=1,N
-          CJK=C(J,K)
-          DO I=1,N
-             P(I,J)=P(I,J)+C(I,K)*CJK  ! P_{ij}=Sum^{N_El}_k MO_ik MO_kj
-          ENDDO
-       ENDDO
-    ENDDO
-  END SUBROUTINE BuildP0
 END PROGRAM  RHEqs
-
 

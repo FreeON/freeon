@@ -1345,4 +1345,83 @@ WRITE(*,*)' C = ',C
 
    END SUBROUTINE CalculateGap
 #endif
+  SUBROUTINE MDiag_DSYEVD(A,N,EigVal,OffSet)
+    TYPE(DBL_RNK2)   :: A
+    INTEGER          :: N
+    TYPE(DBL_VECT)   :: EigVal
+    TYPE(DBL_VECT)   :: Work
+    TYPE(INT_VECT)   :: IWork
+    INTEGER          :: K,LWORK,Info,LIWORK,LgN,OffSet
+    DO K=4,10000
+       IF(2**K>=N)THEN
+          LgN=K
+          EXIT
+       ENDIF
+    ENDDO
+    LWORK=2*(1+5*N+2*N*LgN+3*N**2)
+    LIWORK=2*(2+5*N)
+    CALL New(Work,LWork)
+    CALL New(IWork,LIWork)
+    CALL DSYEVD('V','U',N,A%D(1,1+OffSet),N,EigVal%D(1+OffSet),Work%D(1),LWORK, &
+         &      IWork%I(1),LIWORK,Info)
+    IF(Info/=SUCCEED)CALL Halt('DSYEVD flaked in RHEqs. INFO='//TRIM(IntToChar(Info)))
+    CALL Delete(IWork)
+    CALL Delete(Work)
+  END SUBROUTINE MDiag_DSYEVD
+  SUBROUTINE MDiag_DSYEVX(A,N,NEig,EigVal,OffSet)
+    TYPE(DBL_RNK2)   :: A
+    INTEGER          :: N,NEig
+    TYPE(DBL_VECT)   :: EigVal
+    TYPE(DBL_VECT)   :: Work
+    TYPE(DBL_RNK2)   :: Z
+    TYPE(INT_VECT)   :: IWork,IFail
+    INTEGER          :: LDWORK,LIWORK,Info,NFnd,NB,OffSet
+    REAL(DOUBLE)     :: AbsTol
+    REAL(DOUBLE),EXTERNAL:: DLAMCH
+    INTEGER,EXTERNAL::ILAENV
+    NB = MAX(ILAENV(1,"DSYTRD","U",n,-1,-1,-1),ILAENV(1,"DORMTR","U",n,-1,-1,-1))
+    LDWORK=MAX((NB+3)*N,8*N)+N
+    LIWORK=5*N
+    CALL New(Work,LDWORK)
+    CALL New(IWork,LIWORK)
+    CALL New(IFail,NEig)
+    CALL New(Z,(/N,NEig/))
+    AbsTol=2D0*dlamch('S')
+    CALL DSYEVX('V','I','U',N,A%D(1,1+OffSet),N,0D0,0D0,1,NEig,AbsTol,NFnd,EigVal%D(1+OffSet),&
+         &      Z%D(1,1),N,Work%D(1),LDWORK,IWork%I(1),IFail%I(1),Info)
+    IF(Info/=SUCCEED)CALL Halt('DSYEVX flaked in RHEqs. INFO='//TRIM(IntToChar(Info)))
+    CALL DCOPY(N*NEig,Z%D(1,1),1,A%D(1,1+OffSet),1)
+    CALL Delete(Z)
+    CALL Delete(Work)
+    CALL Delete(IWork)
+    CALL Delete(IFail)
+  END SUBROUTINE MDiag_DSYEVX
+  !SUBROUTINE MDiag_DSYEVR(A,N,NEig,EigVal,OffSet)
+  !  TYPE(DBL_RNK2)   :: A
+  !  INTEGER          :: N,NEig,OffSet
+  !  TYPE(DBL_VECT)   :: EigVal
+  !  TYPE(DBL_VECT)   :: Work
+  !  TYPE(DBL_RNK2)   :: Z
+  !  TYPE(INT_VECT)   :: IWork,ISuppZ
+  !  INTEGER          :: LDWORK,LIWORK,Info,NFnd,NB
+  !  REAL(DOUBLE)     :: AbsTol
+  !  REAL(DOUBLE),EXTERNAL:: DLAMCH
+  !  INTEGER,EXTERNAL::ILAENV
+  !  NB = MAX(ILAENV(1,"DSYTRD","U",n,-1,-1,-1),ILAENV(1,"DORMTR","U",n,-1,-1,-1))
+  !  LDWORK=MAX((NB+6)*N,26*N)+N
+  !  LIWORK=10*N
+  !  CALL New(Work,LDWORK)
+  !  CALL New(IWork,LIWORK)
+  !  CALL New(ISuppZ,2*NEig)
+  !  CALL New(Z,(/N,NEig/))
+  !  AbsTol=2D0*dlamch('S')
+  !  CALL DSYEVR('V','I','U',N,A%D(1,1+OffSet),N,0D0,0D0,1,NEig,AbsTol,NFnd,EigVal%D(1+OffSet),&
+  !       &      Z%D(1,1),N,ISuppZ%I(1),Work%D(1),LDWORK,IWork%I(1),LIWORK,Info)
+  !  IF(Info/=SUCCEED)CALL Halt('DSYEVX flaked in RHEqs. INFO='//TRIM(IntToChar(Info)))
+  !  CALL DCOPY(N*NEig,Z%D(1,1),1,A%D(1,1+OffSet),1)
+  !  CALL Delete(Z)
+  !  CALL Delete(Work)
+  !  CALL Delete(IWork)
+  !  CALL Delete(ISuppZ)
+  !END SUBROUTINE MDiag_DSYEVR
 END MODULE DenMatMethods

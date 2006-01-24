@@ -9,40 +9,14 @@ PROGRAM LowdinO
   USE Macros
   USE SetXYZ
   USE LinAlg
+  USE DenMatMethods,ONLY:MDiag_DSYEVD
   IMPLICIT NONE
-#ifdef DSYEVD  
-  INTERFACE DSYEVD
-     SUBROUTINE DSYEVD(JOBZ,UPLO,N,A,LDA,W,WORK,LWORK,IWORK,LIWORK,INFO)
-         USE GlobalScalars
-         CHARACTER(LEN=1), INTENT(IN)    :: JOBZ, UPLO
-         INTEGER,          INTENT(IN)    :: LDA, LIWORK, LWORK, N
-         INTEGER,          INTENT(OUT)   :: INFO
-         INTEGER,          INTENT(OUT)   :: IWORK(*)
-         REAL(DOUBLE),     INTENT(INOUT) :: A(LDA,*)
-         REAL(DOUBLE),     INTENT(OUT)   :: W(*)
-         REAL(DOUBLE),     INTENT(OUT)   :: WORK(*)
-     END SUBROUTINE DSYEVD
-  END INTERFACE
-#else
-  INTERFACE DSYEV
-     SUBROUTINE DSYEV(JOBZ,UPLO,N,A,LDA,W,WORK,LWORK,INFO)
-         USE GlobalScalars
-         CHARACTER(LEN=1), INTENT(IN)    :: JOBZ, UPLO
-         INTEGER,          INTENT(IN)    :: LDA,  LWORK, N
-         INTEGER,          INTENT(OUT)   :: INFO
-         REAL(DOUBLE),     INTENT(INOUT) :: A(LDA,*)
-         REAL(DOUBLE),     INTENT(OUT)   :: W(*)
-         REAL(DOUBLE),     INTENT(OUT)   :: WORK(*)
-     END SUBROUTINE DSYEV
-  END INTERFACE
-#endif
   TYPE(BCSR)                     :: S,X
   TYPE(DBL_RNK2)                 :: Vectors,Tmp1,Tmp2
-  TYPE(DBL_VECT)                 :: Values,Work
-  TYPE(INT_VECT)                 :: IWork
+  TYPE(DBL_VECT)                 :: Values
   TYPE(ARGMT)                    :: Args
-  INTEGER                        :: I,J,K,LgN,LWORK,LIWORK,Info,Status,ISmall
-  REAL(DOUBLE)                   :: Chk,CondS,OverlapEThresh
+  INTEGER                        :: I,J,K,LgN,Info,Status,ISmall
+  REAL(DOUBLE)                   :: Chk,CondS,OverlapEThresh,Scale
   CHARACTER(LEN=7),PARAMETER     :: Prog='LowdinO'
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg
 !--------------------------------------------------------------------
@@ -65,59 +39,38 @@ PROGRAM LowdinO
   CALL SetEq(Vectors,S)
   CALL Delete(S)
 !--------------------------------------------------------------------
+! Diag S
 !
-!
-#ifdef DSYEVD
-  DO K=4,10000
-     IF(2**K>=NBasF)THEN
-        LgN=K
-        EXIT
-     ENDIF   
-  ENDDO
-  LWORK=2*(1+5*NBasF+2*NBasF*LgN+3*NBasF**2)
-  LIWORK=2*(2+5*NBasF)
-  CALL New(Work,LWork)
-  CALL New(IWork,LIWork)
-  CALL DSYEVD('V','U',NBasF,Vectors%D,NBasF,Values%D, &
-              Work%D,LWORK,IWork%I,LIWORK,Info)
-  IF(Info/=SUCCEED) &
-  CALL Halt('DSYEVD flaked in LowdinO. INFO='//TRIM(IntToChar(Info)))
-  CALL Delete(Work)
-  CALL Delete(IWork)
-#else
-  LWORK=MAX(1,3*NBasF)
-  CALL New(Work,LWork)
-  CALL DSYEV('V','U',NBasF,Vectors%D,NBasF,Values%D,Work%D,LWORK,Info)
-  IF(Info/=SUCCEED) &
-  CALL Halt('DSYEV flaked in LowdinO. INFO='//TRIM(IntToChar(Info)))
-  CALL Delete(Work)
-#endif
+  CALL MDiag_DSYEVD(Vectors,NBasF,Values,0)
 !--------------------------------------------------------------------
+!
+!
   IF(Values%D(1)<Zero)CALL Halt(' S matrix is not pos def')
   CondS=Values%D(NBasF)/Values%D(1)
-  IF(CondS>1D4)  &
-     CALL Warn('Illconditioning detected in MakeS: Cond(S)='//TRIM(DblToShrtChar(CondS)))
+  IF(CondS>1D4)CALL Warn('Illconditioning detected in MakeS: Cond(S)='//TRIM(DblToShrtChar(CondS)))
 !--------------------------------------------------------------------
+!
+!
   CALL New(Tmp2,(/NBasF,NBasF/))
   CALL New(Tmp1,(/NBasF,NBasF/))
-!--------------------------------------------------------------------
+  !
   ISmall=0
-  Tmp1%D=Zero
+  CALL DCOPY(NBasF**2,Vectors%D(1,1),1,Tmp2%D(1,1),1)
   DO I=1,NBasF
      IF(Values%D(I)>OverlapEThresh)THEN
-        Tmp1%D(I,I)=One/SQRT(Values%D(I))
+        Scale=1D0/SQRT(Values%D(I))
+        CALL DSCAL(NBasF,Scale,Tmp2%D(1,I),1)
      ELSE
-        Tmp1%D(I,I)=Zero
+        CALL DSCAL(NBasF,  0D0,Tmp2%D(1,I),1)
         ISmall=ISmall+1
      ENDIF
-  ENDDO     
+  ENDDO
+  !
+  CALL DGEMM('N','T',NBasF,NBasF,NBasF,1D0,Tmp2%D(1,1), &
+       &     NBasF,Vectors%D(1,1),NBasF,0D0,Tmp1%D,NBasF)
+  !
   IF(ISmall.NE.0) CALL Warn('Removed '//TRIM(IntToChar(ISmall))//' eigenvalue(s) smaller than ' &
        & //TRIM(DblToShrtChar(OverlapEThresh)))
-
-  CALL DGEMM('N','N',NBasF,NBasF,NBasF,One,Vectors%D, &
-             NBasF,Tmp1%D,NBasF,Zero,Tmp2%D,NBasF)
-  CALL DGEMM('N','T',NBasF,NBasF,NBasF,One,Tmp2%D,    &
-             NBasF,Vectors%D,NBasF,Zero,Tmp1%D,NBasF)
 !--------------------------------------------------------------------
   CALL Delete(Values)
   CALL Delete(Vectors)
