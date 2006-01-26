@@ -317,9 +317,9 @@ carried out with the FastMat data structure~\cite{CGan04B}.
       &\tt\quad     ti=TIMER(\,) \\
       &\tt\quad     DO\,A=1,NAtoms \\
       &\tt\quad     DO\,B=1,A \\
-      &\tt\qquad      DO\,a,c,m\in\{ac^\mathbf{m}\}(A,C) \\
+      &\tt\qquad      DO\,a,c,\mathbf{m}\in\{ac^\mathbf{m}\}(A,C) \\
       &\tt\qquad\quad   IF(SkipOut)\,EXIT  \\
-      &\tt\qquad\quad   DO\,b,d,n\in\{bd^n\}(B,D) \\
+      &\tt\qquad\quad   DO\,b,d,\mathbf{n}\in\{bd^\mathbf{n}\}(B,D) \\
       &\tt\qquad\qquad    IF(SkipOut)\,EXIT  \\
       &\tt\qquad\qquad    COMPUTE\,(ac^\mathbf{m}|bd^\mathbf{n})_{mic} \\
       &\tt\qquad\quad   ENDDO \\
