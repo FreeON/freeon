@@ -24,11 +24,13 @@ PROGRAM P2Use
   TYPE(BSET)                    :: BS,BS_old
   TYPE(CRDS)                    :: GM,GM_old
 #ifdef PARALLEL
+  TYPE(BCSR) :: P_BCSR,F_BCSR
   TYPE(DBCSR) &
 #else
   TYPE(BCSR)  & 
 #endif
                                 :: F,P,P0,X,S,S0,S1,Tmp1,Tmp2
+
   TYPE(INT_VECT)                :: Stat
   TYPE(DBL_RNK2)                :: BlkP
   REAL(DOUBLE)                  :: MaxDS,NoiseLevel 
@@ -329,7 +331,13 @@ PROGRAM P2Use
      FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO  ))//'_C#'//TRIM(IntToChar(MyClone))//'.DOPsave'
      CALL Put(P,FileName)
 !    Purify P
+#ifdef PARALLEL
+     CALL SetEq(P_BCSR,P)
+     CALL SpectralBounds(P_BCSR,Fmin,Fmax)
+     CALL Delete(P_BCSR)
+#else
      CALL SpectralBounds(P,Fmin,Fmax)
+#endif
      CALL Add(P,-Fmin)
      CALL Multiply(P,One/(Fmax-Fmin))
      MM = 0
@@ -406,7 +414,13 @@ PROGRAM P2Use
      FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO  ))//'_C#'//TRIM(IntToChar(MyClone))//'.DOPsave'
      CALL Put(P,FileName)
 !    Purify P
+#ifdef PARALLEL
+     CALL SetEq(P_BCSR,P)
+     CALL SpectralBounds(P_BCSR,Fmin,Fmax)
+     CALL Delete(P_BCSR)
+#else
      CALL SpectralBounds(P,Fmin,Fmax)
+#endif
      CALL Add(P,-Fmin)
      CALL Multiply(P,One/(Fmax-Fmin))
      MM = 0
@@ -476,7 +490,13 @@ PROGRAM P2Use
 !    Solve for the Density Matrix using SP2
 !
 !    Guess P from F
+#ifdef PARALLEL
+     CALL SetEq(F_BCSR,F)
+     CALL FockGuess(F_BCSR,P,Half*DBLE(NEl),1)
+     CALL Delete(F_BCSR)
+#else
      CALL FockGuess(F,P,Half*DBLE(NEl),1)
+#endif
 !    Solve for P
      DO I=1,40
         CALL SP2(P,Tmp1,Tmp2,Half*DBLE(NEl),MM)
@@ -561,7 +581,13 @@ PROGRAM P2Use
 !    Solve for the Density Matrix using SP2
 !
 !    Guess P from F
+#ifdef PARALLEL
+     CALL SetEq(F_BCSR,F)
+     CALL FockGuess(F_BCSR,P,Half*DBLE(NEl),1)
+     CALL Delete(F_BCSR)
+#else
      CALL FockGuess(F,P,Half*DBLE(NEl),1)
+#endif
 !    Solve for P
      DO I=1,40
         CALL SP2(P,Tmp1,Tmp2,Half*DBLE(NEl),MM)

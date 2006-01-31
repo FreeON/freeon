@@ -835,7 +835,7 @@ WRITE(*,*)' C = ',C
 !-------------------------------------------------------------------------------
     SUBROUTINE FockGuess_DBCSR(F,P,Norm,Order)
       TYPE(DBCSR)                    :: P
-      TYPE(DBCSR)                    :: F
+      TYPE(BCSR)                     :: F
       REAL(DOUBLE)                   :: Fmin,Fmax,DF,Coeff,Mu,Lmbd1,  &
                                         Lmbd2,Norm
       INTEGER                        :: Order
@@ -1088,11 +1088,7 @@ WRITE(*,*)' C = ',C
 !   F_min = Min_R { F(R,R) - S(R) + ABS(F(R,R)) }
 !-------------------------------------------------------------------------------
       SUBROUTINE SpectralBounds(F,F_min,F_max)
-#ifdef PARALLEL
-        TYPE(DBCSR)      :: F
-#else
         TYPE(BCSR)       :: F
-#endif
         INTEGER          :: I,R,J,M,Col,Blk,N,C,Check
         REAL(DOUBLE)     :: F_min,F_max,Tmp_max,Tmp_min,Diag,Sum
 #ifdef EXACT_EIGEN_VALUES
@@ -1417,7 +1413,7 @@ WRITE(*,*)' C = ',C
   !  AbsTol=2D0*dlamch('S')
   !  CALL DSYEVR('V','I','U',N,A%D(1,1+OffSet),N,0D0,0D0,1,NEig,AbsTol,NFnd,EigVal%D(1+OffSet),&
   !       &      Z%D(1,1),N,ISuppZ%I(1),Work%D(1),LDWORK,IWork%I(1),LIWORK,Info)
-  !  IF(Info/=SUCCEED)CALL Halt('DSYEVX flaked in RHEqs. INFO='//TRIM(IntToChar(Info)))
+  !  IF(Info/=SUCCEED)CALL Halt('DSYEVR flaked in RHEqs. INFO='//TRIM(IntToChar(Info)))
   !  CALL DCOPY(N*NEig,Z%D(1,1),1,A%D(1,1+OffSet),1)
   !  CALL Delete(Z)
   !  CALL Delete(Work)
