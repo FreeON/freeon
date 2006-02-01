@@ -99,14 +99,17 @@
                               %display desired
 \maketitle
 
+\footnotetext[1]{Preprint LA-UR-???????.}
+
+
 \section{Introduction}
 
  Density functional theory (DFT) and its variant, 
  the hybrid Hartree-Fock/Density Functional Theory (HF/DFT) are accurate and
- computationally attractive. Together with linear scaling methods 
- for solving the eigenvalue problem, these
- advances provide an important tool for large applications in gas or condensed phase 
- of both HF and HF/DFT models to areas such as biochemistry, material science, catalysis and others.
+ computationally attractive. Together with linear scaling methods, these
+ advances provide an important tool for large applications
+ of both HF and HF/DFT models to areas such as biochemistry, 
+ material science, catalysis and others.
 
 % Three of the most computationally demanding parts in a 
 % hybrid density functional application are calculations
@@ -167,7 +170,7 @@
  In general, computation time scales as $\mathcal{O}(N^{4-2})$, thus dominating
  the $\mathcal{O}(N^{3-2})$ inter-processor 
  communication of the density and/or Fock matrices.
- For example, the Foster's algorithm achieves an efficiency, for the 
+ For example, Foster's algorithm achieves an efficiency, for the 
  Fock matrix construction, up to 97\% for Si$_{16}$O$_{25}$H$_{14}$ with 
  the 6-31G* on 512 processors~\cite{RHarrison96}.
 % the latter enables the master-slave approach to work well~\cite{RHarrison96}.
@@ -199,8 +202,9 @@
 % global array tools~\cite{JNieplocha94,JNieplocha96} are 
 % the most widely used communication tools.
 
- In this work we present an efficient and simple implementation 
- of the Order N eXchange (ONX) algorithm for massive parallel computers. The method
+ In this work we present an efficient and simple parallelization
+ of the Order N eXchange (ONX) algorithm for the ${\cal O}(N)$ computation 
+ of the HF exchange matrix. The method
  is based on the equal time partitioning (ET) and can treat gas phase and periodic systems 
  without increasing the complexity of the code. The equal time partitioning exploits 
  the slow variation of the density matrix between self-consistent-field iterations
@@ -213,14 +217,14 @@
  to coventional parallel $\mathcal{O}(N^4)$ computation of the electron repulsion integrals (ERIs).
  The ONX algorithm requires an $\mathcal{O}(N)$ communication of the 
  density and Fock matrices, which also contrasts with conventional methods.
- Our parallel ONX uses a partially distributed-data exchange build. While the density matrix is
- fully distributed on the processors, the corresponding exchange submatrices are not redistributed during
- its construction. This strategy avoids an expensive dynamic redistribution 
+ Our parallel ONX uses a partially distributed-data exchange build. While each processor 
+ is assigned a part of the density matrix, the corresponding exchange submatrices are not redistributed during
+ their constructions. This strategy avoids an expensive dynamic redistribution 
  of the exchange submatrices. 
  Also the current ONX is based on the simple ``index-driven'' algorithm although
  an ``integral-driven'' ONX algorithm exists~\cite{ESchwegler00}.
- The parallelization of the later requires expansive communications of data
- as do conventional algorithms.
+ The parallelization of the later requires expensive communications of data
+ as do conventional algorithms~\cite{HTakashima02}.
 
 % This contrast with the ONX algorithm where the time for computing the exact 
 % exchange matrix and for the interprocessor communications scales linearly with system size.
@@ -353,7 +357,7 @@ carried out with the FastMat data structure~\cite{CGan04B}.
 \end{figure}
 
  In the 4$^{th}$ step every processor, including the root, computes 
- the lower part of the exchange sub-matrix $K(D({\tt iPrc}))$ 
+ the lower triangular part of the exchange sub-matrix $K(D({\tt iPrc}))$ 
  without any inter-processor communication. 
  The work corresponding to each atom-block
  $D_{CD}$ used to compute the exchange 
@@ -370,10 +374,10 @@ carried out with the FastMat data structure~\cite{CGan04B}.
  
  To avoid excessive inter processor communications the algorithm 
  does not use permutational symmetry of the ERIs. This approach
- definitely increase the number of ERIs to compute at each Fock build by a factor 2-3~\cite{ESchwegler00},
- however in the same time greatly simplifies the coding and avoids complicate
- synchronization problem between processors to send/receive blocks of the 
- density and/or exchange matrices. It becomes much 
+ definitely increases the number of ERIs to compute at each Fock build by a factor 2-3~\cite{ESchwegler00},
+ however at the same time it greatly simplifies the coding and avoids complicated
+ synchronization problems between processors to send/receive blocks of the 
+ density and/or exchange matrices. It also becomes much 
  easier to control the amount of work given to each processor.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -388,15 +392,15 @@ carried out with the FastMat data structure~\cite{CGan04B}.
 %the sum of their 
 
 \subsection{Partition}
- In this section we present the two level version of the multiple recursive 
- decomposition introduced in~\cite{LRomero95}.
+ In this section we present a two level version of the multiple recursive 
+ decomposition introduced in Ref.~\cite{LRomero95}.
 % block partition used throughout this work. 
  To estimate the time needed to process each block we define
- a non-negative cost function $\phi$ on contiguous atomic-blocks of
+ a non-negative cost function $\phi$ on contiguous atom-atom blocks of
  $D$. In our case the function $\phi$ is either the number of 
  non-zero elements of $D$ or the time {\tt Time} needed for the computation
  of the exchange matrix $K(D_{CD})$, where $D_{CD}$ is the
- $CD$-th atomic block of the density matrix (see Figure~\ref{Fig:ONXcore}).
+ $CD$-th atom-atom block of the density matrix (see Figure~\ref{Fig:ONXcore}).
  We will not discuss the non-zero partitioning;
  indeed this partition leads to a very poor load balance and it is
  only used to generate an initial partition (i.e. when 
@@ -414,8 +418,8 @@ carried out with the FastMat data structure~\cite{CGan04B}.
 
 \subsection{2D Partition}
  During the level 2 partition, each partitioned row of the cost function $\phi_{i}$
- is further sectioned into $p$ coloumns $[c_j,c_{j+1}]$ with $1 \le j < p$ of approximately equal cost.
- Figure~\ref{fig:part2D} shows an example of two level recursive decomposition
+ is further sectioned into $p$ coloumns of approximately equal cost $[c_j,c_{j+1}]$ with $1 \le j < p$.
+ Figure~\ref{fig:part2D} shows an example of a two level recursive decomposition
  for 16 processors.
 
 %%%% GENERAL PARTITION %%%%
@@ -454,10 +458,10 @@ carried out with the FastMat data structure~\cite{CGan04B}.
 %% The weight function is easily obtained through $w_i=q_i p/P$.
  
  Of course different approaches to partition the density matrix can be 
- used as for example the recursive bipartitoning algorithm with
+ used, as for example the recursive bipartitoning algorithm with
  alternative directions by Vastenhouw and Bisseling~\cite{BVastenhouw}.
-
-
+ For more informations about the multiple recursive decomposition, the reader can refer 
+ to the original paper~\cite{LRomero95}.
 
 \begin{figure}[htbp]
   \centering
@@ -713,7 +717,7 @@ delivers 105 fold speedup.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{acknowledgments}
  This work has been supported by the US Department of Energy
- under contract ???????????? and the ASCI project.
+ under contract W-7405-ENG-36 and the ASCI project.
  The Advanced Computing Laboratory of Los
  Alamos National Laboratory is acknowledged.
 \end{acknowledgments}
