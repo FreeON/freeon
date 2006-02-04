@@ -19,6 +19,7 @@ PROGRAM LowdinO
   REAL(DOUBLE)                   :: Chk,CondS,OverlapEThresh,Scale
   CHARACTER(LEN=7),PARAMETER     :: Prog='LowdinO'
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg
+  EXTERNAL :: DGEMM_NT
 !--------------------------------------------------------------------
   CALL StartUp(Args,Prog)
   ! Check for thresholds overide 
@@ -66,8 +67,9 @@ PROGRAM LowdinO
      ENDIF
   ENDDO
   !
-  CALL DGEMM('N','T',NBasF,NBasF,NBasF,1D0,Tmp2%D(1,1), &
-       &     NBasF,Vectors%D(1,1),NBasF,0D0,Tmp1%D,NBasF)
+  CALL DGEMM_NT(NBasF,NBasF,NBasF,0D0,Tmp2%D(1,1),Vectors%D(1,1),Tmp1%D(1,1))
+  !CALL DGEMM('N','T',NBasF,NBasF,NBasF,1D0,Tmp2%D(1,1), &
+  !     &     NBasF,Vectors%D(1,1),NBasF,0D0,Tmp1%D(1,1),NBasF)
   !
   IF(ISmall.NE.0) CALL Warn('Removed '//TRIM(IntToChar(ISmall))//' eigenvalue(s) smaller than ' &
        & //TRIM(DblToShrtChar(OverlapEThresh)))

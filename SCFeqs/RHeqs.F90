@@ -24,6 +24,7 @@ PROGRAM RHEqs
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg,FMatrix,PMatrix,XFile,smearing
   CHARACTER(LEN=5),PARAMETER     :: Prog='RHEqs'
   LOGICAL                        :: Present,DensityArchive
+  EXTERNAL :: DGEMM_NT
 !--------------------------------------------------------------------
 !
 !
@@ -170,19 +171,22 @@ PROGRAM RHEqs
      SELECT CASE(NSMat)
      CASE(1)
         ! We have one density matrix to build.
-        CALL DGEMM('N','T',NBasF,NBasF,Nel/2,1D0,F%D(1,1), &
-             &     NBasF,F%D(1,1),NBasF,0D0,P%D(1,1),NBasF)
+        CALL DGEMM_NT(NBasF,Nel/2,NBasF,0D0,F%D(1,1),F%D(1,1),P%D(1,1))
+        !CALL DGEMM('N','T',NBasF,NBasF,Nel/2,1D0,F%D(1,1), &
+        !     &     NBasF,F%D(1,1),NBasF,0D0,P%D(1,1),NBasF)
      CASE(2)
         ! We have two density matrices to build.
-        CALL DGEMM('N','T',NBasF,NBasF ,NAlph,1D0,F%D(1,      1), &
-             &     NBasF,F%D(1,      1),NBasF,0D0,P%D(1,      1),NBasF)
-        CALL DGEMM('N','T',NBasF,NBasF ,NBeta,1D0,F%D(1,NBasF+1), &
-             &     NBasF,F%D(1,NBasF+1),NBasF,0D0,P%D(1,NBasF+1),NBasF)
+        CALL DGEMM_NT(NBasF,NAlph,NBasF,0D0,F%D(1,      1),F%D(1,      1),P%D(1,      1))
+        CALL DGEMM_NT(NBasF,NBeta,NBasF,0D0,F%D(1,NBasF+1),F%D(1,NBasF+1),P%D(1,NBasF+1))
+        !CALL DGEMM('N','T',NBasF,NBasF ,NAlph,1D0,F%D(1,      1), &
+        !     &     NBasF,F%D(1,      1),NBasF,0D0,P%D(1,      1),NBasF)
+        !CALL DGEMM('N','T',NBasF,NBasF ,NBeta,1D0,F%D(1,NBasF+1), &
+        !     &     NBasF,F%D(1,NBasF+1),NBasF,0D0,P%D(1,NBasF+1),NBasF)
      CASE(4)
         ! We have one density matrix to build.
-        CALL DGEMM('N','T',2*NBasF,2*NBasF,Nel,1D0,F%D(1,1), &
-             &     2*NBasF,F%D(1,1),2*NBasF,0D0,P%D(1,1),2*NBasF)
-        ! Need to recompute NAlph and NBeta at this level.
+        CALL DGEMM_NT(2*NBasF,Nel,2*NBasF,0D0,F%D(1,1),F%D(1,1),P%D(1,1))
+        !CALL DGEMM('N','T',2*NBasF,2*NBasF,Nel,1D0,F%D(1,1), &
+        !     &     2*NBasF,F%D(1,1),2*NBasF,0D0,P%D(1,1),2*NBasF)
      CASE DEFAULT;CALL Halt(' RHeqs: NSMat doesn''t have an expected value! ')
      END SELECT
      !
