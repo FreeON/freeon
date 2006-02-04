@@ -38,10 +38,10 @@ PROGRAM P2Use
                                    DensityDev,dN,MaxGDIff,GDIff,OldN,M,PNon0s,PSMin,PSMax, &
                                    Ipot_Error,Norm_Error,Lam,DLam,TError0,SFac,Dum,Fmin,Fmax
   INTEGER                       :: I,J,JP,AtA,Q,R,T,KA,NBFA,NPur,PcntPNon0,Qstep, & 
-                                   OldFileID,ICart,N,NStep,iGEO,DMPOrder,NSMat,MM
+                                   OldFileID,ICart,N,NStep,iGEO,DMPOrder,NSMat,MM,ICycle,Cycle
   CHARACTER(LEN=2)              :: Cycl
   LOGICAL                       :: Present,DoingMD,ConvergeAOSP,ConvergeAll,AOSPExit
-  CHARACTER(LEN=DEFAULT_CHR_LEN):: Mssg,BName,FileName
+  CHARACTER(LEN=DEFAULT_CHR_LEN):: Mssg,BName,FileName,DMFile
   CHARACTER(LEN=8)              :: MDGeuss
   CHARACTER(LEN=5),PARAMETER    :: Prog='P2Use'
   !------------------------------------------------------------------------------- 
@@ -631,8 +631,28 @@ PROGRAM P2Use
      CALL New(Tmp1)
      CALL New(Tmp2)
      ! Get Marices
-     INQUIRE(FILE=TrixFile('D',Args,-1),EXIST=Present)
-     IF(.NOT. Present)THEN
+
+     DO ICycle=0,1000
+       DMFile=TRIM(SCRName)//'_Geom#'//TRIM(IntToChar(Current(3)-1)) &
+                           //'_Base#'//TRIM(IntToChar(Current(2))) &
+                           //'_Cycl#'//TRIM(IntToChar(ICycle)) &
+                           //'_Clone#'//TRIM(IntToChar(MyClone)) &
+                           //'.D'
+        INQUIRE(FILE=DMFile,EXIST=Present)
+        IF(.NOT.Present)THEN
+           Cycle=ICycle-1		
+           DMFile=TRIM(SCRName)//'_Geom#'//TRIM(IntToChar(Current(3)-1)) &
+                               //'_Base#'//TRIM(IntToChar(Current(2))) &
+                               //'_Cycl#'//TRIM(IntToChar(Cycle)) &
+                               //'_Clone#'//TRIM(IntToChar(MyClone)) &
+                               //'.D'
+           CALL Logger('On extrapolation, P2Use is openning DM '//TRIM(DMFile),.TRUE.)
+           EXIT
+        ENDIF
+     ENDDO	
+
+     IF(Cycle<0)THEN
+	WRITE(*,*)' Assuming this is a restart!  If there is no restart, its going to die...'
         CALL Get(S0,TrixFile('S',Args,Stats_O=(/Current(1),Current(2),Current(3)-1/)))
         CALL Get(S1,TrixFile('S',Args,Stats_O=Current))
         ! Close Current Group
@@ -661,8 +681,12 @@ PROGRAM P2Use
      ELSE
         CALL Get(S0,TrixFile('S',Args,Stats_O=Previous))
         CALL Get(S1,TrixFile('S',Args,Stats_O=Current ))
-        CALL Get(P0,TrixFile('D',Args,-1))
-!       
+        DMFile=TRIM(SCRName)//'_Geom#'//TRIM(IntToChar(Current(3)-1)) &
+                            //'_Base#'//TRIM(IntToChar(Current(2))) &
+                            //'_Cycl#'//TRIM(IntToChar(Cycle)) &
+                            //'_Clone#'//TRIM(IntToChar(MyClone)) &
+                            //'.D'
+        CALL Get(P0,DMFile)
         CALL Get(DoingMD ,'DoingMD')
         IF(DoingMD) THEN
            DMPorder=0
@@ -681,10 +705,6 @@ PROGRAM P2Use
            ENDIF
         ENDIF
      ENDIF
-
-
-
-
      ! Initial Trace Error
 #ifdef PARALLEL
      CALL Multiply(P0,S0,Tmp1)
