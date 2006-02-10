@@ -25,8 +25,8 @@ PROGRAM ONX2
   USE MondoMPI
   USE FastMatrices
   USE ONXRng    , ONLY: RangeOfExchangeFASTMAT
-  USE ONXFillOut, ONLY: FillOutFASTMAT,FillOutBCSR
-  USE ONXGet    , ONLY: Get_Essential_RowCol,GetOffArr
+  USE ONXFillOut, ONLY: FillOutBCSR!FillOutFASTMAT,
+  USE ONXGet    , ONLY: Get_Essential_RowCol,GetOffArr,Reduce_FASTMAT
   USE PartDrv   , ONLY: PDrv_Initialize,PDrv_Finalize
 #else
   USE ONXRng    , ONLY: RangeOfExchangeBCSR
@@ -257,7 +257,7 @@ PROGRAM ONX2
   !------------------------------------------------
   ! Allocate the K matrix.
 #ifdef ONX2_PARALLEL
-  CALL New_FASTMAT(KxFM,0,(/0,0/))
+  CALL New_FASTMAT(KxFM,0,(/0,0/),NSMat_O=DFM%NSMat)
 #else
   CALL New(Kx,(/NRows+1,NCols,NElem/),NSMat_O=D%NSMat)
   CALL DBL_VECT_EQ_DBL_SCLR(NElem,Kx%MTrix%D(1),0.0D0)
@@ -336,10 +336,10 @@ PROGRAM ONX2
   IF(SCFActn == 'InkFok') CALL Halt('InkFok in PARALLEL ONX is not supported.')
   ! Collect the data on the root.
   !=======
-  !!!CALL Reduce_FASTMAT(T1,KxFM)
+  CALL Reduce_FASTMAT(T1,KxFM)
   !=======
-  CALL Redistribute_FASTMAT(KxFM)
-  CALL Set_BCSR_EQ_DFASTMAT(T1,KxFM)
+  !!!CALL Redistribute_FASTMAT(KxFM)
+  !!!CALL Set_BCSR_EQ_DFASTMAT(T1,KxFM)
   !=======
   CALL Delete_FastMat1(KxFM)
   !

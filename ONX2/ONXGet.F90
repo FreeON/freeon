@@ -39,7 +39,7 @@ MODULE ONXGet
 #ifdef ONX2_PARALLEL
   PUBLIC :: Get_Essential_RowCol
   PUBLIC :: Set_DFASTMAT_EQ_DBCSR2
-  !PUBLIC :: Reduce_FASTMAT
+  PUBLIC :: Reduce_FASTMAT
   PUBLIC :: GetDab
 #endif
   !
@@ -219,7 +219,7 @@ CONTAINS
     IF(ASSOCIATED(B))THEN
        CALL Delete_FASTMAT1(B)
        ! Begin with a new header Node
-       CALL New_FASTMAT(B,0,(/0,0/))
+       CALL New_FASTMAT(B,0,(/0,0/),NSMat_O=A%NSMat)
     ENDIF
     !
     DO I = 1,RowNbr
@@ -231,9 +231,9 @@ CONTAINS
           DO JP = A%RowPt%I(I),A%RowPt%I(I+1)-1
              J = A%ColPt%I(JP)
              P = A%BlkPt%I(JP)
-             N = BSiz%I(J)
+             N = BSiz%I(J)*A%NSMat
              ! Add bloks to this sparse row search tree
-             CALL AddFASTMATBlok(C,IRow,J,RESHAPE(A%MTrix%D(P:P+M*N-1),(/M,N/)))
+             CALL AddFASTMATBlok(C,IRow,J,M,N,RESHAPE(A%MTrix%D(P:P+M*N-1),(/M,N/)))
           ENDDO
        ENDIF
     ENDDO
@@ -243,8 +243,7 @@ CONTAINS
   END SUBROUTINE Set_DFASTMAT_EQ_DBCSR2
 #endif
   !
-!#ifdef ONX2_PARALLEL
-#ifdef BLABLA2000
+#ifdef ONX2_PARALLEL
   SUBROUTINE Reduce_FASTMAT(A,AFM)
     IMPLICIT NONE
     TYPE(BCSR)              :: A
@@ -256,31 +255,44 @@ CONTAINS
     ! Depth of the tree.
     LMax=CEILING(LOG(DBLE(NPrc))*INVLOG2)
     !
-    CALL New_BCSR(A,OnAll_O=.TRUE.)
-    CALL New_BCSR(B,OnAll_O=.TRUE.)
-    CALL New_BCSR(C,OnAll_O=.TRUE.)
+    CALL New_BCSR(A,OnAll_O=.TRUE.,NSMat_O=AFM%NSMat)
+    CALL New_BCSR(B,OnAll_O=.TRUE.,NSMat_O=AFM%NSMat)
+    CALL New_BCSR(C,OnAll_O=.TRUE.,NSMat_O=AFM%NSMat)
     CALL Set_LBCSR_EQ_DFASTMAT(A,AFM)
     !
     ! Run over the shells in the tree.
     DO L=LMax,1,-1
        ! Compute the number max of send/recive.
        NCom=2**(L-1)
-       IF(MyID==0)WRITE(*,*) 'L=',L,' NCom=',NCom
+       !IF(MyID==0)WRITE(*,*) 'L=',L,' NCom=',NCom
        !
        To=0
        DO i=1,NCom
           From=To+2**(LMax-l);
-          IF(MyID==0)WRITE(*,*) 'To =',To,'; From =',From,'; i =',i,MyID
+          !IF(MyID==0)WRITE(*,*) 'To =',To,'; From =',From,'; i =',i,MyID
           !
           ! Take into account If NPrc is not a power of 2.
           IF(From.GT.NPrc-1) THEN
-             IF(MyID==0)WRITE(*,*) 'This one is grather than NPrc, we exit.'
+             !IF(MyID==0)WRITE(*,*) 'This one is grather than NPrc, we exit.'
              EXIT
           ENDIF
           !
           IF(MyID.EQ.To) THEN
              CALL Recv_LBCSR(B,From)
-             CALL Add_LBCSR(A,B,C)
+             IF(    A%NSMat.EQ.1.AND.B%NSMat.EQ.1)THEN
+                CALL Add_LBCSR(A,B,C,1,1,1,1)
+             ELSEIF(A%NSMat.EQ.2.AND.B%NSMat.EQ.2)THEN
+                CALL Add_LBCSR(A,B,C,1,1,1,2)
+                CALL Add_LBCSR(A,B,C,2,2,2,2)
+             ELSEIF(A%NSMat.EQ.4.AND.B%NSMat.EQ.4)THEN
+                CALL Add_LBCSR(A,B,C,1,1,1,4)
+                CALL Add_LBCSR(A,B,C,2,2,2,4)
+                CALL Add_LBCSR(A,B,C,3,3,3,4)
+                CALL Add_LBCSR(A,B,C,4,4,4,4)
+             ELSE
+                write(*,*) 'A%NSMat=',A%NSMat,' B%NSMat=',B%NSMat,' C%NSMat=',C%NSMat,MyID
+                CALL Halt('Add_BCSR: Error with NSMat!')
+             ENDIF
              CALL Set_LBCSR_EQ_LBCSR(A,C)
           ENDIF
           IF(MyID.EQ.From) CALL Send_LBCSR(A,To)
@@ -298,10 +310,10 @@ CONTAINS
     IF(AllocQ(B%Alloc) .AND. &
          (B%NAtms<A%NAtms.OR.B%NBlks<A%NBlks.OR.B%NNon0<A%NNon0) )THEN
        CALL Delete(B,OnAll_O=.TRUE.)
-       CALL New(B,OnAll_O=.TRUE.)
+       CALL New(B,OnAll_O=.TRUE.,NSMat_O=A%NSMat)
        B%NAtms=A%NAtms; B%NBlks=A%NBlks; B%NNon0=A%NNon0
     ELSE
-       IF(.NOT.AllocQ(B%Alloc))CALL New(B,OnAll_O=.TRUE.)
+       IF(.NOT.AllocQ(B%Alloc))CALL New(B,OnAll_O=.TRUE.,NSMat_O=A%NSMat)
        B%NAtms=A%NAtms; B%NBlks=A%NBlks; B%NNon0=A%NNon0
     ENDIF
     CALL INT_VECT_EQ_INT_VECT(A%NAtms+1,B%RowPt%I(1),A%RowPt%I(1))
@@ -314,17 +326,18 @@ CONTAINS
     !B%MTrix%D(1:A%NNon0)  =A%MTrix%D(1:A%NNon0)
   END SUBROUTINE Set_LBCSR_EQ_LBCSR
   
-  SUBROUTINE Add_LBCSR(A,B,C)
+  SUBROUTINE Add_LBCSR(A,B,C,ASMat,BSMat,CSMat,NSMat)
     IMPLICIT NONE
     TYPE(BCSR), INTENT(INOUT) :: A,B
     TYPE(BCSR), INTENT(INOUT) :: C
-    INTEGER                   :: Status
+    INTEGER                   :: ASMat,BSMat,CSMat,NSMat,Status,CLen
     REAL(DOUBLE)              :: FlOp
     IF(.NOT.AllocQ(C%Alloc)) CALL New(C,OnAll_O=.TRUE.)
     CALL New(Flag,NAtoms)
     CALL SetEq(Flag,0)
     Flop=Zero
-    Status=Add_GENERIC(SIZE(C%ColPt%I),SIZE(C%MTrix%D),         &
+    Status=Add_GENERIC(ASMat,BSMat,CSMat,NSMat,                 &
+         &             SIZE(C%ColPt%I,1),SIZE(C%MTrix%D,1),     &
          &             A%NAtms,0,                               &
          &             C%NAtms,C%NBlks,C%NNon0,                 &
          &             A%RowPt%I,A%ColPt%I,A%BlkPt%I,A%MTrix%D, &
@@ -408,7 +421,7 @@ CONTAINS
     TYPE(FASTMAT),POINTER :: A,R
     TYPE(SRST),POINTER    :: U
     TYPE(BCSR)            :: B
-    INTEGER               :: I,J,JP,P,N,M,Q,OI,OJ,IC,JC,At,OldR
+    INTEGER               :: I,J,JP,P,N,M,MN,Q,OI,OJ,IC,JC,At,OldR
     NULLIFY(R,U)
     ! Check for prior allocation
     !write(*,*) 'In Set_BCSR_EQ_FASTMAT -1'
@@ -439,15 +452,16 @@ CONTAINS
              IF(ASSOCIATED(U%MTrix)) THEN
                 J = U%L
                 N = BSiz%I(J)
-                DO JC=1,N
-                   DO IC=1,M
-                      B%MTrix%D(Q+IC-1+(JC-1)*M) = U%MTrix(IC,JC)
-                   ENDDO
-                ENDDO
-                !CALL DBL_VECT_EQ_DBL_VECT(M*N,B%MTrix%D(Q),U%MTrix(1,1))
+                MN=M*N*B%NSMat !<<< SPIN
+                !DO JC=1,N
+                !   DO IC=1,M
+                !      B%MTrix%D(Q+IC-1+(JC-1)*M) = U%MTrix(IC,JC)
+                !   ENDDO
+                !ENDDO
+                CALL DBL_VECT_EQ_DBL_VECT(MN,B%MTrix%D(Q),U%MTrix(1,1))
                 B%BlkPt%I(P)=Q
                 B%ColPt%I(P)=J
-                Q=Q+M*N
+                Q=Q+MN
                 P=P+1
                 B%RowPt%I(I+1)=P
                 OJ=OJ+N
@@ -483,7 +497,7 @@ CONTAINS
     TYPE(BCSR )     :: A
     TYPE(DBCSR)     :: B
     TYPE(INT_VECT)  :: ANBrArr,BNBrArr,APtArr,BPtArr,ADisp,BDisp
-    INTEGER         :: iPrc,ANbrTot,BNbrTot
+    INTEGER         :: iPrc,ANbrTot,BNbrTot,NSMat
     INTEGER         :: I,J,JG,M,MN,MN1,P,NAtms,NBlks,NNon0,ICol,IRow
     LOGICAL         :: ReAllocate
     !-------------------------------------------------------------------
@@ -537,8 +551,10 @@ CONTAINS
     CALL Get_BCSR(A,TrixFile('D',Args,0))
     !
     !CALL PChkSum(A,'Density matrix on root',Unit_O=6)  
+    NSMat=A%NSMat
+    CALL BCast(NSMat)
     !
-    CALL New(B)
+    CALL New(B,NSMat_O=NSMat)
     !
 !------------------------------------------------
 !        Distribute to each processor
@@ -566,8 +582,9 @@ CONTAINS
                 B%ColPt%I(B%NBlks)=JG
                 B%BlkPt%I(B%NBlks)=B%NNon0
                 B%NBlks=B%NBlks+1
-                MN=M*BSiz%I(JG);MN1=MN-1
-                P=A%BlkPt%I(J)         
+                MN=M*BSiz%I(JG)*NSMat
+                MN1=MN-1
+                P=A%BlkPt%I(J)
                 B%MTrix%D(B%NNon0:B%NNon0+MN1)=A%MTrix%D(P:P+MN1) 
                 B%NNon0=B%NNon0+MN
              ENDDO
@@ -628,7 +645,7 @@ CONTAINS
 100 FORMAT(' Remaining block, Rel=',F8.3,'% Abs=',F8.3,'% MyID=',I4)
     !
     ! Copy the DBCSR to a FastMat.
-    CALL New_FASTMAT(DFMab,0,(/0,0/))
+    CALL New_FASTMAT(DFMab,0,(/0,0/),NSMat_O=B%NSMat)
     CALL Set_DFASTMAT_EQ_DBCSR2(DFMab,B,APt,ANBr)
     !CALL PChkSum_FASTMAT2(DFMab,'Density matrix ab',Unit_O=6)
     !

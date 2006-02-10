@@ -381,18 +381,26 @@ CONTAINS
                    if(atb.le.0) stop 'In ComputK'
                    V => InsertSRSTNode(Q%RowRoot,AtB)
                    IF(.NOT.ASSOCIATED(V%MTrix)) THEN
-                      ALLOCATE(V%MTrix(NBFA,NBFB),STAT=MemStatus)
-                      CALL DBL_VECT_EQ_DBL_SCLR(NBFA*NBFB,V%MTrix(1,1),0.0d0)
+                      ALLOCATE(V%MTrix(NBFA,NBFB*DFM%NSMat),STAT=MemStatus)
+                      CALL DBL_VECT_EQ_DBL_SCLR(NBFA*NBFB*DFM%NSMat,V%MTrix(1,1),0.0d0)
                    ENDIF
                    !
                    ! The variable -Fac- is needed to get the 
                    ! right full K matrix when filling out in ONX.
                    Fac=-1.0d0
                    iF(AtA.EQ.AtB) Fac=-0.5d0
-                   !CALL DGEMV('N',NBFA*NBFB,NBFC*NBFD,-1.0d0,C(1), &
-                   CALL DGEMV('N',NBFA*NBFB,NBFC*NBFD,Fac,C(1), &
-                        &     NBFA*NBFB,U%MTrix(1,1),1,1.0d0, &
-                        &     V%MTrix(1,1),1)
+                   IF(DFM%NSMat.EQ.1) THEN
+                      CALL DGEMV('N',NBFA*NBFB,NBFC*NBFD,Fac,C(1), &
+                           &     NBFA*NBFB,U%MTrix(1,1),1,1.0d0, &
+                           &     V%MTrix(1,1),1)
+                      !CALL DGEMM_NNC(NBFA*NBFB,NBFC*NBFD,1,Fac,1D0, &
+                      !     &         C(1),U%MTrix(1,1),V%MTrix(1,1))
+                   ELSE
+                      CALL DGEMM('N','N',NBFA*NBFB,DFM%NSMat,NBFC*NBFD,Fac,C(1), &
+                           &     NBFA*NBFB,U%MTrix(1,1),NBFC*NBFD,1.0d0, &
+                           &     V%MTrix(1,1),NBFA*NBFB)
+                   ENDIF
+
 #else
                    CALL GetAdrB(AtA,AtB,Ind,Kx,0)
                    iPtrK = Kx%BlkPt%I(Ind)

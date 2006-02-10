@@ -119,6 +119,7 @@ PROGRAM GONX2
   CASE('ForceEvaluation')
 #ifdef ONX2_PARALLEL
      CALL PDrv_Initialize(DFMcd,TrixFile('D',Args,1),'GONXPart',Args,WhenPartS_O='GEO')
+     NSMat=DFMcd%NSMat
 #else
 !     WRITE(*,*) "GONX"
 !     WRITE(*,*) "D ",Args%I%I(4)
@@ -247,6 +248,7 @@ PROGRAM GONX2
   !
   CALL Get(GradAux,'gradients',Tag_O=CurGeom)
   KScale=ExactXScale(ModelChem)
+  IF(NSMat.GT.1) CALL DSCAL(3*NAtoms,0.5D0,GradX%D(1,1),1)
 #ifdef ONX2_PARALLEL
   CALL New(GradTmp,(/3,NAtoms/))
   CALL DBL_VECT_EQ_DBL_SCLR(3*NAtoms,GradTmp%D(1,1),0.0d0)
@@ -270,6 +272,7 @@ PROGRAM GONX2
   CALL New(GradTmp,(/3,3/))
   CALL DBL_VECT_EQ_DBL_SCLR(9,GradTmp%D(1,1),0.0d0)
   IF(DoStrs) THEN
+     IF(NSMat.GT.1) CALL DSCAL(9,0.5D0,BoxX%D(1,1),1)
      CALL MPI_REDUCE(BoxX%D(1,1),GradTmp%D(1,1),9,MPI_DOUBLE_PRECISION, &
           &          MPI_SUM,ROOT,MONDO_COMM,IErr)
 !    Zero the Lower Triange
@@ -285,7 +288,6 @@ PROGRAM GONX2
   CALL Print_LatForce(GMc,GradTmp%D,'X Lattice Force',Unit_O=6)
   CALL Delete(GradTmp)
 #else
-  IF(NSMat.GT.1) CALL DSCAL(3*NAtoms,0.5D0,GradX%D(1,1),1)
   ! Print out.
   CALL New(GTmp,3*NAtoms)
   DO IXYZ=1,GMc%NAtms
@@ -293,16 +295,6 @@ PROGRAM GONX2
      A2=3*IXYZ
      GTmp%D(A1:A2) = GradX%D(1:3,IXYZ)
   ENDDO
-!
-!
-!  Frc=Zero
-!  DO IXYZ=1,GMc%NAtms
-!     A1=3*(IXYZ-1)+1
-!     A2=3*IXYZ
-!     Frc(1)=Frc(1)+GTmp%D(A1)
-!  ENDDO
-!  WRITE(*,*) Frc(1),Frc(2),Frc(3)
-!
 !
   CALL PChkSum(GTmp,'dKx/dR['//TRIM(CurGeom)//']',Proc_O=Prog) 
 ! Print Out Forces

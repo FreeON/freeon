@@ -31,9 +31,9 @@ MODULE ONXFillOut
 ! PUBLIC DECLARATIONS
 !--------------------------------------------------------------------------------- 
   PUBLIC  :: FillOutBCSR
-#ifdef ONX2_PARALLEL
-  PUBLIC  :: FillOutFASTMAT
-#endif
+!!$#ifdef ONX2_PARALLEL
+!!$  PUBLIC  :: FillOutFASTMAT
+!!$#endif
   !
 !--------------------------------------------------------------------------------- 
 ! PRIVATE DECLARATIONS
@@ -117,20 +117,20 @@ CONTAINS
   END SUBROUTINE FillOutBCSR
   !
   !
-#ifdef ONX2_PARALLEL
-  SUBROUTINE FillOutFASTMAT(BS,GM,KFastMat)
-!H---------------------------------------------------------------------------------
-!H SUBROUTINE FillOutDBCSR(BS,GM,KFastMat)
-!H 
-!H---------------------------------------------------------------------------------
-    IMPLICIT NONE
-    TYPE(BSET),INTENT(IN)     :: BS
-    TYPE(CRDS),INTENT(IN)     :: GM
-    TYPE(FastMat),POINTER          :: KFastMat
-    !
-    CALL Symmetrized_FASMAT(KFastMat,'L')
-    !
-  END SUBROUTINE FillOutFASTMAT
-#endif
+!!$#ifdef ONX2_PARALLEL
+!!$  SUBROUTINE FillOutFASTMAT(BS,GM,KFastMat)
+!!$!H---------------------------------------------------------------------------------
+!!$!H SUBROUTINE FillOutDBCSR(BS,GM,KFastMat)
+!!$!H 
+!!$!H---------------------------------------------------------------------------------
+!!$    IMPLICIT NONE
+!!$    TYPE(BSET),INTENT(IN)     :: BS
+!!$    TYPE(CRDS),INTENT(IN)     :: GM
+!!$    TYPE(FastMat),POINTER          :: KFastMat
+!!$    !
+!!$    CALL Symmetrized_FASMAT(KFastMat,'L')
+!!$    !
+!!$  END SUBROUTINE FillOutFASTMAT
+!!$#endif
   !
 END MODULE ONXFillOut

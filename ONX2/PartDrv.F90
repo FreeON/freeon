@@ -226,7 +226,7 @@ CONTAINS
     !
     !CALL CheckSum_DBCSR2(A,'A')
     ! Copy the DBCSR to a FastMat.
-    CALL New_FASTMAT(AFastMat,0,(/0,0/))
+    CALL New_FASTMAT(AFastMat,0,(/0,0/),NSMat_O=A%NSMat)
     CALL Set_DFASTMAT_EQ_DBCSR(AFastMat,A)
     !CALL PChkSum_FASTMAT2(AFastMat,'AFastMat')
     CALL Delete(A)
@@ -368,8 +368,14 @@ CONTAINS
     TotNBlks=Reduce(A%NBlks)
     TotNNon0=Reduce(A%NNon0)
     IF(MyID.EQ.ROOT) THEN
-       IF(TotNBlks.NE.B%NBlks) STOP 'Err1: Not consitent distribution of the DM'
-       IF(TotNNon0.NE.B%NNon0) STOP 'Err2: Not consitent distribution of the DM'
+       IF(TotNBlks.NE.B%NBlks) THEN
+          WRITE(*,*) 'TotNBlks=',TotNBlks,' B%NBlks=',B%NBlks
+          STOP 'Err1: Not consitent distribution of the DM'
+       ENDIF
+       IF(TotNNon0.NE.B%NNon0) THEN
+          WRITE(*,*) 'TotNNon0=',TotNNon0,' B%NNon0=',B%NNon0
+          STOP 'Err2: Not consitent distribution of the DM'
+       ENDIF
     ENDIF
     !
     ! Delete BCSR on Root.
@@ -401,7 +407,8 @@ CONTAINS
 !-----------------------------------------------------------------------
 !        Allocate if required
 !
-    IF(.NOT.AllocQ(B%Alloc))CALL New(B)
+    CALL BCast(A%NSMat) !<<< SPIN
+    IF(.NOT.AllocQ(B%Alloc))CALL New(B,NSMat_O=A%NSMat) !<<< SPIN
 !------------------------------------------------
 !        Distribute to each processor
 !
@@ -422,7 +429,8 @@ CONTAINS
                 B%ColPt%I(B%NBlks)=JG
                 B%BlkPt%I(B%NBlks)=B%NNon0
                 B%NBlks=B%NBlks+1
-                MN=M*BSiz%I(JG);MN1=MN-1
+                MN=M*BSiz%I(JG)*A%NSMat !<<< SPIN
+                MN1=MN-1
                 P=A%BlkPt%I(J)         
                 !CALL DBL_VECT_EQ_DBL_VECT(MN1,B%MTrix%D(B%NNon0),A%MTrix%D(P))
                 B%MTrix%D(B%NNon0:B%NNon0+MN1)=A%MTrix%D(P:P+MN1) 
