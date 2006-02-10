@@ -236,6 +236,7 @@ CONTAINS
 
   !===============================================================================
   SUBROUTINE DistDist()
+    IMPLICIT NONE
     INTEGER :: NC,Tot,FloatDblIndex,ActIntRecvAmt,ActDblRecvAmt,&
          DblSendBufIndex,IntSendBufIndex,IntAmtRecv,DblAmtRecv,&
          SendTo,RecvFrom,CD,DistIndex,EllFillIndex,CoFillIndex,NumOfCo,&
@@ -252,6 +253,12 @@ CONTAINS
     INTEGER,DIMENSION(MPI_STATUS_SIZE) :: DblStatus
     REAL(DOUBLE) :: StartTm,EndTm,TotTm
     REAL(DOUBLE),EXTERNAL    :: MondoTimer
+    INTEGER::iSDen,NCoef,CD1
+
+write(*,*)'Enter DistDist',MyID
+call mpi_barrier(mondo_comm,ierr)
+call mpi_barrier(mondo_comm,ierr)
+call mpi_barrier(mondo_comm,ierr)
 
     StartTm = MondoTimer()
     !    IF(MyID == 0) THEN
@@ -277,8 +284,13 @@ CONTAINS
     IntToSend%I(0:NPrc-1) = 0
     DblToSend%I(0:NPrc-1) = 0
 
-
     NDist = Rho%NDist
+    NCoef = Rho%NCoef      ! <<< SPIN
+    NSDen = Rho%NSDen      ! <<< SPIN
+
+    write(*,*) 'DistDist NSDen',NSDen,' NCoef',NCoef,'NDist',NDist,MyID
+
+
     DO I = 1, NDist
        KQ = QDex(I)
        NodeBox%BndBox(1:3,1) = (/Rho%Qx%D(KQ),Rho%Qy%D(KQ),Rho%Qz%D(KQ)/)
@@ -305,8 +317,8 @@ CONTAINS
                 IntToSend%I(J) = IntToSend%I(J) + 1 !! Ell
                 Ell = Ldex(KQ)
                 LMNLen = LHGTF(Ell)
-                CoToSend%I(J) = CoToSend%I(J) + LMNLen
-                DblToSend%I(J) = DblToSend%I(J) + 5 + LMNLen !! x,y,z,zeta,extent,co
+                CoToSend%I(J) = CoToSend%I(J) + LMNLen*NSDen           ! <<< SPIN
+                DblToSend%I(J) = DblToSend%I(J) + 5 + LMNLen*NSDen     ! <<< SPIN !! x,y,z,zeta,extent,co
                 EXIT ! crucial exit
              ENDIF
           ENDDO
@@ -443,8 +455,11 @@ CONTAINS
        LMNLen = LHGTF(Ell)
        CD = Cdex(KQ)
        NewCdex(EllFillIndex) = CoFillIndex+1
-       NewCo(CoFillIndex+1:CoFillIndex+LMNLen) = Rho%Co%D(CD:CD+LMNLen-1)
-       CoFillIndex = CoFillIndex + LMNLen
+       DO iSDen=1,NSDen                                                        ! <<< SPIN
+          CD1=CD+(iSDen-1)*NCoef                                               ! <<< SPIN
+          NewCo(CoFillIndex+1:CoFillIndex+LMNLen) = Rho%Co%D(CD1:CD1+LMNLen-1) ! <<< SPIN
+          CoFillIndex = CoFillIndex + LMNLen                                   ! <<< SPIN
+       ENDDO                                                                   ! <<< SPIN
     ENDDO
     !! WRITE(*,*) 'MyID = ',MyID, ', EllFillIndex = ',EllFillIndex,', CoFillIndex = ',CoFillIndex, ', IndexToSend%I(MyID) = ', IndexToSend%I(MyID), ', CoToSend%I(MyID) = ', CoToSend%I(MyID)
 
@@ -483,8 +498,11 @@ CONTAINS
              DblSendBuf(DblSendBufIndex) = Ext(KQ)
              LMNLen = LHGTF(Ell)
              CD = Cdex(KQ)
-             DblSendBuf(DblSendBufIndex+1:DblSendBufIndex+LMNLen) = Rho%Co%D(CD:CD+LMNLen-1)
-             DblSendBufIndex = DblSendBufIndex + LMNLen
+             DO iSDen=1,NSDen                                                                     ! <<< SPIN
+                CD1=CD+(iSDen-1)*NCoef                                                            ! <<< SPIN
+                DblSendBuf(DblSendBufIndex+1:DblSendBufIndex+LMNLen) = Rho%Co%D(CD1:CD1+LMNLen-1) ! <<< SPIN
+                DblSendBufIndex = DblSendBufIndex + LMNLen                                        ! <<< SPIN
+             ENDDO                                                                                ! <<< SPIN
           ENDDO
           IF(IntToSend%I(SendTo) /= IntSendBufIndex &
                .OR. DblToSend%I(SendTo) /= DblSendBufIndex) THEN
@@ -522,9 +540,11 @@ CONTAINS
              FloatDblIndex = FloatDblIndex+1
              NewExt(EllFillIndex) = DblRecvBuf(FloatDblIndex)
              NewCdex(EllFillIndex) = CoFillIndex+1
-             NewCo(CoFillIndex+1:CoFillIndex+LMNLen) = DblRecvBuf(FloatDblIndex+1:FloatDblIndex+LMNLen)
-             FloatDblIndex = FloatDblIndex + LMNLen
-             CoFillIndex = CoFillIndex + LMNLen
+             DO iSDen=1,NSDen                                                                   ! <<< SPIN
+                NewCo(CoFillIndex+1:CoFillIndex+LMNLen) = DblRecvBuf(FloatDblIndex+1:FloatDblIndex+LMNLen)
+                FloatDblIndex = FloatDblIndex + LMNLen                                          ! <<< SPIN
+                CoFillIndex = CoFillIndex + LMNLen                                              ! <<< SPIN
+             ENDDO                                                                              ! <<< SPIN
           ENDDO
 
        ELSE
@@ -550,9 +570,12 @@ CONTAINS
              FloatDblIndex = FloatDblIndex+1
              NewExt(EllFillIndex) = DblRecvBuf(FloatDblIndex)
              NewCdex(EllFillIndex) = CoFillIndex+1
-             NewCo(CoFillIndex+1:CoFillIndex+LMNLen) = DblRecvBuf(FloatDblIndex+1:FloatDblIndex+LMNLen)
-             FloatDblIndex = FloatDblIndex + LMNLen
-             CoFillIndex = CoFillIndex + LMNLen
+             DO iSDen=1,NSDen                                                                   ! <<< SPIN
+                NewCo(CoFillIndex+1:CoFillIndex+LMNLen) = DblRecvBuf(FloatDblIndex+1:FloatDblIndex+LMNLen)
+                FloatDblIndex = FloatDblIndex + LMNLen                                          ! <<< SPIN
+                CoFillIndex = CoFillIndex + LMNLen                                              ! <<< SPIN
+             ENDDO                                                                              ! <<< SPIN
+
           ENDDO
 
           !! packing int
@@ -571,8 +594,12 @@ CONTAINS
              DblSendBuf(DblSendBufIndex) = Ext(KQ)
              LMNLen = LHGTF(Ell)
              CD = Cdex(KQ)
-             DblSendBuf(DblSendBufIndex+1:DblSendBufIndex+LMNLen) = Rho%Co%D(CD:CD+LMNLen-1)
-             DblSendBufIndex = DblSendBufIndex + LMNLen
+             DO iSDen=1,NSDen                                                       ! <<< SPIN
+                CD1=CD+(iSDen-1)*NCoef                                              ! <<< SPIN
+                DblSendBuf(DblSendBufIndex+1:DblSendBufIndex+LMNLen) = Rho%Co%D(CD1:CD1+LMNLen-1)
+                DblSendBufIndex = DblSendBufIndex + LMNLen                          ! <<< SPIN
+             ENDDO                                                                  ! <<< SPIN
+
           ENDDO
           IF(IntToSend%I(SendTo) /= IntSendBufIndex &
                .OR. DblToSend%I(SendTo) /= DblSendBufIndex) THEN
@@ -619,6 +646,12 @@ CONTAINS
     CALL AlignNodes()
     EndTm = MondoTimer()
     TotTm = EndTm - StartTm
+
+write(*,*)'Exit DistDist',MyID
+call mpi_barrier(mondo_comm,ierr)
+call mpi_barrier(mondo_comm,ierr)
+call mpi_barrier(mondo_comm,ierr)
+
     !    IF(MyID == ROOT) THEN
     !      CALL OpenASCII(OutFile,Out)
     !      WRITE(Out,*) 'Total time to do DistDist is ', TotTm
@@ -746,8 +779,9 @@ CONTAINS
   !     Fill leaf nodes with data
   !===============================================================================
   SUBROUTINE ParaFillRhoLeaf(Node)
+    IMPLICIT NONE
     TYPE(RhoNode), POINTER :: Node
-    INTEGER   :: I,IQ,IC,J,K,KQ,KC,L,B,E,N,NQ,NC,LMNLen,LTmp,Status        
+    INTEGER   :: I,IQ,IC,J,K,KQ,KC,L,B,E,N,NQ,NC,LMNLen,LTmp,Status
     REAL(DOUBLE) :: RhoSum
     ! Set leaf logical
     Node%Leaf=.True.
@@ -768,10 +802,10 @@ CONTAINS
     Node%Qz=NewZ(KQ)
     ! Allocate HGTF coefficients array
     LMNLen=LHGTF(Node%Ell)
-    ALLOCATE(Node%Co(1:LMNLen),STAT=Status)
-    CALL IncMem(Status,0,LMNLen)
+    ALLOCATE(Node%Co(1:LMNLen*NSDen),STAT=Status)   !<<< SPIN
+    CALL IncMem(Status,0,LMNLen*NSDen)              !<<< SPIN
     ! Transfer data in
-    Node%Co(1:LMNLen)=NewCo(KC:KC+LMNLen-1)
+    Node%Co(1:LMNLen*NSDen)=NewCo(KC:KC+LMNLen*NSDen-1)  !<<< SPIN
   END SUBROUTINE ParaFillRhoLeaf
 
   !===============================================================================
@@ -799,6 +833,9 @@ CONTAINS
     CALL GridGen(WBox,SubVolRho,SubVolExc)
     TotRho = Reduce(SubVolRho)
     TotExc = Reduce(SubVolExc)
+
+if(myid==0)write(*,*)'ParaGridGen: TotRho=',TotRho,' TotExc=',TotExc,MyID
+
     !    IF(MyID == ROOT) THEN
     !      CALL OpenASCII(OutFile,Out)
     !      WRITE(Out,*) 'ParaGridGen: TotRho = ',TotRho, ', TotExc = ',TotExc
@@ -831,6 +868,9 @@ CONTAINS
     CALL GridGen(WBox,SubVolRho,SubVolExc)
     TotRho = Reduce(SubVolRho)
     TotExc = Reduce(SubVolExc)
+
+if(myid==0)write(*,*)'WorkBBox: TotRho=',TotRho,' TotExc=',TotExc,MyID
+
     MyLeavesTm = LeavesTmCount(CubeRoot)
     !    IF(MyID == ROOT) THEN
     !      CALL OpenASCII(OutFile,Out)

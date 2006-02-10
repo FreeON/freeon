@@ -57,7 +57,7 @@ MODULE CubeTree
    TYPE(CRDS)                     :: GM              !  Global molecular geometry
    TYPE(CubeNode), POINTER        :: CubeRoot
 
-integer::NSDen
+   INTEGER::NSDen
 !-----------!
    CONTAINS !
 !================================================================================
@@ -121,20 +121,29 @@ write(*,*) 'IXact',IXact,' NSDen',NSDen
             PtsPerAtom=INT(DBLE(NGrid*LeafCount(CubeRoot))/DBLE(NAtoms))
             RelativeError(1)=ABS(IXact-NewCubes(1))/IXact
             Exc=NewCubes(2)
-#ifdef PARALLEL 
-#else
             IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
-               Mssg=ProcessName('HiCu.GridGen')                    &
-                  //'Tau = ' //TRIM(DblToShrtChar(TauRel))         &
-                  //', <Rho> = '//TRIM(DblToMedmChar(NewCubes(1))) &
-                  //', <Exc> = '//TRIM(DblToMedmChar(Exc))      &
-                  //', Pts/Atom = '//TRIM(IntToChar(PtsPerAtom))
+#ifdef PARALLEL 
+               Mssg=ProcessName('HiCu.GridGen')                      &
+                    //'Tau = ' //TRIM(DblToShrtChar(TauRel))         &
+                    //', <Rho> = '//TRIM(DblToMedmChar(Reduce(NewCubes(1)))) &
+                    //', <Exc> = '//TRIM(DblToMedmChar(Reduce(Exc)))         &
+                    //', Pts/Atom = '//TRIM(IntToChar(Reduce(PtsPerAtom)))
+               IF(MyID.EQ.0)THEN
+                  CALL OpenASCII(OutFile,Out)         
+                  WRITE(Out,*)TRIM(Mssg)
+                  CLOSE(Out)
+               ENDIF
+#else
+               Mssg=ProcessName('HiCu.GridGen')                      &
+                    //'Tau = ' //TRIM(DblToShrtChar(TauRel))         &
+                    //', <Rho> = '//TRIM(DblToMedmChar(NewCubes(1))) &
+                    //', <Exc> = '//TRIM(DblToMedmChar(Exc))         &
+                    //', Pts/Atom = '//TRIM(IntToChar(PtsPerAtom))
                CALL OpenASCII(OutFile,Out)         
-!               WRITE(*,*)TRIM(Mssg)
                WRITE(Out,*)TRIM(Mssg)
                CLOSE(Out)
-            ENDIF
 #endif
+            ENDIF
             OldCubes=NewCubes
          ENDDO
          SubVolRho = NewCubes(1)
@@ -367,6 +376,8 @@ write(*,*) 'IXact',IXact,' NSDen',NSDen
                  &               +DDOT(NGrid,Cube%Wght(1),1,E(2*NGrid+1),1)  
          ENDIF
 
+!!!!write(*,*) 'EOnTheCube',EOnTheCube,MyID
+
          DO I=1,NGrid
             !Cube%Vals(I,1)=dEdRho(I)
             !Cube%Vals(I,2)=dEdAbsGradRho2(I)
@@ -441,7 +452,7 @@ integer :: OffSDen,iSDen,I0
                                                        LXpt,UXpt,TwoZ,SqZ,CoFact,RL1,TmpX,TmpY, &
                                                        LXptX,LXptY,LXptZ,UXptX,UXptY,UXptZ,EPop,RL2
          INTEGER                                    :: I,J,IQ,IC,JQ,JC,KQ,KC,L,Ell,L1,L2,M,N,LMN,GKount
-integer::OffSDen
+         !INTEGER::OffSDen
 !-------------------------------------------------------------------------------------------------------
          EPop=Zero
          Tx=ABS(Node%Box%Center(1)-Box%Center(1))
@@ -453,7 +464,7 @@ integer::OffSDen
          IF(Node%Leaf)THEN            
 !           Intermediates for computation and thresholding of electron count contributions
             Pop=Zero
-            OffSDen=0*LHGTF(Node%Ell)
+            !OffSDen=0*LHGTF(Node%Ell)!if you use that be careful with RhoOnGrid!
 #ifdef EXPLICIT_SOURCE           
             INCLUDE 'ExplicitLeafPopulation.Inc'       
 #else

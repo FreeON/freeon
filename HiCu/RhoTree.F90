@@ -65,7 +65,7 @@ MODULE RhoTree
 !        Initialize the density
          CALL InitRho(Args)
          NSDen=Rho%NSDen
-write(*,*) 'Rho%NSDen',Rho%NSDen
+write(*,*) 'RhoToTree: Rho%NSDen',Rho%NSDen,MyID
 !        Initialize counters
          RhoNodes=0
          RhoLevel=0
@@ -324,6 +324,7 @@ write(*,*) 'Rho%NSDen',Rho%NSDen
 #endif
          ENDIF
          Read(UNIT=Seq,Err=202,IOSTAT=IOS)Rho%NSDen,Rho%NExpt,Rho%NDist,Rho%NCoef!<<< SPIN
+         write(*,'(A,5I4)') 'InitRho:',Rho%NSDen,Rho%NExpt,Rho%NDist,Rho%NCoef,MyID
          CALL New(Rho%NQ  ,Rho%NExpt)
          CALL New(Rho%OffQ,Rho%NExpt)
          CALL New(Rho%OffR,Rho%NExpt)
@@ -378,7 +379,7 @@ write(*,*) 'Rho%NSDen',Rho%NSDen
                   IQ=IQ+1
                ENDIF
             ENDDO
-         ENDDO        
+         ENDDO
 !        Redefine NDist 
          Rho%NDist=IQ-1
 !        Normal exit
