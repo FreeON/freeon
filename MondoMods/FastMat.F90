@@ -47,6 +47,7 @@ MODULE FastMatrices
 !======================================================================
 ! COMPUTE BCSR MATRIX DIMENSIONS CORESPONDING TO A FAST MATRIX
 !======================================================================
+#ifdef PARALLEL
   FUNCTION MatDimensions_1(A,RowLimits,ColLimits) RESULT(Dim_res)
     TYPE(FASTMAT),POINTER :: A,C
     TYPE(SRST),POINTER :: P
@@ -291,7 +292,6 @@ MODULE FastMatrices
     B%NBlks = P-1
     B%NNon0 = MtxBegInd-1
   END SUBROUTINE GetLocalBCSR
-#endif
 !=================================================================
   SUBROUTINE Delete_FastMat1(A,RowLimits_O)
     TYPE(FASTMAT),POINTER         :: A,R,NextR,P
@@ -437,7 +437,6 @@ MODULE FastMatrices
 !======================================================================
 !======================================================================
 !======================================================================
-#ifdef PARALLEL
   SUBROUTINE Redistribute_FastMat(A)
     TYPE(FastMat),POINTER :: A
     TYPE(INT_RNK2)        :: LocalDims,RemoteDims
@@ -839,7 +838,6 @@ MODULE FastMatrices
     ENDDO
     IF(PRESENT(Perf_O))Perf_O%FLOP=Perf_O%FLOP+Op
   END SUBROUTINE UnPackNSumFastMat
-#endif
 !=================================================================
 !   ADD A BLOCK TO THE FAST MATRIX DATA STRUCTURE
 !=================================================================    
@@ -1542,7 +1540,7 @@ integer::iii
        OldR=B%RowPt%I(At)
     ENDDO
   END SUBROUTINE Set_LBCSR_EQ_DFASTMAT
-
+#endif
    END MODULE FASTMATRICES
 
 
