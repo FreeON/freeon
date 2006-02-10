@@ -68,7 +68,7 @@ MODULE JGen
                      Pair%AB2 = (Pair%A(1)-Pair%B(1))**2+(Pair%A(2)-Pair%B(2))**2+(Pair%A(3)-Pair%B(3))**2
                      IF(TestAtomPair(Pair)) THEN
 #ifdef PARALLEL
-                        CALL AddFASTMATBlok(J,AtA,AtB,Two*JBlock(Pair,PoleRoot))
+                        CALL AddFASTMATBlok(J,AtA,AtB,Pair%NA,Pair%NB,Two*JBlock(Pair,PoleRoot))
 #else
                         J%MTrix%D(R:R+NAB-1)=J%MTrix%D(R:R+NAB-1)+Two*JBlock(Pair,PoleRoot)
 #endif

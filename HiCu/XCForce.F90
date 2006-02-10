@@ -71,8 +71,12 @@ PROGRAM XCForce
   ENDIF
   CALL SetAACoef()
 #ifdef PARALLEL
-  NSDen=1 !<<< SPIN Default value for now!
   CALL ParaInitRho(Args)
+  NSDen=Rho%NSDen
+!  NSMat=1
+!  IF(NSDen.EQ.3) NSMat=2 !<<< SPIN
+  write(*,*) '_XCForce_Parallel_: NSDen',NSDen,MyID
+
   CALL GetBBox()
   CALL SendBBox()
   CALL DistDist()

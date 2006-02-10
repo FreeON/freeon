@@ -23,7 +23,7 @@ PROGRAM MakeRho
 #ifdef PARALLEL
   TYPE(DBCSR)                     :: Dmat,D1,D2
   INTEGER                         :: LocalAtom,NumAtoms
-  REAL(DOUBLE)                    :: TotRSumE,TotRSumN
+  REAL(DOUBLE)                    :: TotRSumE,TotRSumE2,TotRSumN
   INTEGER                         :: IErr
   TYPE(CMPoles)                   :: SMP
 #else
@@ -47,7 +47,7 @@ PROGRAM MakeRho
                                      PcntCharge
   CHARACTER(LEN=DEFAULT_CHR_LEN)  :: Mssg1,Mssg2,RestartHDF,ResponsePostFix
   CHARACTER(LEN=*),PARAMETER      :: Prog='MakeRho'
-integer::NSMat
+  INTEGER                         :: NSMat
 
 #ifdef PARALLEL
   CALL StartUp(Args,Prog,Serial_O=.FALSE.)
@@ -263,14 +263,31 @@ integer::NSMat
   TotRSumN = AllReduce(RSumN)
   RSumE    = TotRSumE
   RSumN    = TotRSumN
+  IF(NSMat.EQ.1)THEN
+     RSumE2=Integrate_HGRho_new(RhoA,1,1,RhoA%NDist-NumAtoms)
+     TotRSumE2 = Reduce(RSumE2)
+     IF(MyID.EQ.0) write(*,*) 'Rho_tot=',TotRSumE2
+  ELSEIF(NSMat.EQ.2)THEN
+     RSumE2=Integrate_HGRho_new(RhoA,1,1,RhoA%NDist-NumAtoms)
+     TotRSumE2 = Reduce(RSumE2)
+     IF(MyID.EQ.0) write(*,*) 'Rho_tot=',TotRSumE2
+     RSumE2=Integrate_HGRho_new(RhoA,2,1,RhoA%NDist-NumAtoms)
+     TotRSumE2 = Reduce(RSumE2)
+     IF(MyID.EQ.0) write(*,*) 'Rho_alp=',TotRSumE2
+     RSumE2=Integrate_HGRho_new(RhoA,3,1,RhoA%NDist-NumAtoms)
+     TotRSumE2 = Reduce(RSumE2)
+     IF(MyID.EQ.0) write(*,*) 'Rho_bet=',TotRSumE2
+  ELSEIF(NSMat.EQ.4)THEN
+     RSumE2=Integrate_HGRho_new(RhoA,1,1,RhoA%NDist-NumAtoms)
+     IF(MyID.EQ.0) write(*,*) 'Rho_tot=',TotRSumE2
+  ENDIF
+  IF(MyID.EQ.0) write(*,*) 'Rho_nuc=',RSumN
 #else
   RSumE  =  Integrate_HGRho_new(RhoA,1,1                    ,RhoA%NDist-GM%NAtms)
   RSumN  =  Integrate_HGRho_new(RhoA,1,RhoA%NDist-GM%NAtms+1,RhoA%NDist         )
-  RSumE2=0d0
   IF(NSMat.EQ.1)THEN
      RSumE2=Integrate_HGRho_new(RhoA,1,1,RhoA%NDist-GM%NAtms)
      write(*,*) 'Rho_tot=',RSumE2
-     write(*,*) 'Rho_nuc=',RSumN
   ELSEIF(NSMat.EQ.2)THEN
      RSumE2=Integrate_HGRho_new(RhoA,1,1,RhoA%NDist-GM%NAtms)
      write(*,*) 'Rho_tot=',RSumE2
@@ -278,12 +295,11 @@ integer::NSMat
      write(*,*) 'Rho_alp=',RSumE2
      RSumE2=Integrate_HGRho_new(RhoA,3,1,RhoA%NDist-GM%NAtms)
      write(*,*) 'Rho_bet=',RSumE2
-     write(*,*) 'Rho_nuc=',RSumN
   ELSEIF(NSMat.EQ.4)THEN
      RSumE2=Integrate_HGRho_new(RhoA,1,1,RhoA%NDist-GM%NAtms)
      write(*,*) 'Rho_tot=',RSumE2
-     write(*,*) 'Rho_nuc=',RSumN
   ENDIF
+  write(*,*) 'Rho_nuc=',RSumN
 #endif
 ! Calculate dipole and quadrupole moments
   CALL New(MP)

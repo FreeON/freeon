@@ -36,7 +36,7 @@ PROGRAM HaiKu
 #else
   TYPE(BCSR)                     :: Kxc
 #endif
-  TYPE(BCSR)                     :: T1
+  TYPE(BCSR)                     :: T1,T2,T3
   TYPE(TIME)                     :: TimeRhoToGrid,TimeGridToMat
   REAL(DOUBLE)                   :: Electrons
   CHARACTER(LEN=3)               :: SCFCycle
@@ -117,16 +117,14 @@ PROGRAM HaiKu
   CALL RhoToTree(Args)
 #endif
 ! CALL New(Kxc)
-#ifdef PARALLEL
-  NSDen=1!Default for now
-  NSMat=1!Default for now
-  CALL New_FASTMAT(Kxc,0,(/0,0/))
-#else
   NSDen=Rho%NSDen
   NSMat=1
   IF(NSDen.EQ.3) NSMat=2 !<<< SPIN
-  write(*,*) '_HiCu_: NSMat',NSMat,' NSDen',NSDen
+  write(*,*) '_HiCu_: NSMat',NSMat,' NSDen',NSDen,'MyID',MyID
   IF(NSDen.NE.1.AND.NSDen.NE.3)CALL Halt('HiCu: noncollinear spin DFT not yet implemented!')
+#ifdef PARALLEL
+  CALL New_FASTMAT(Kxc,0,(/0,0/),NSMat_O=NSMat) !<<< SPIN
+#else
   CALL New(Kxc,NSMat_O=NSMat) !<<< SPIN
 #endif
   CALL NewBraBlok(BS)
@@ -159,9 +157,20 @@ PROGRAM HaiKu
   CALL DeleteBraBlok()
 ! Put Kxc to disk
 #ifdef PARALLEL
-  CALL Redistribute_FASTMAT(Kxc)
-  CALL AlignNodes()
-  CALL Set_BCSR_EQ_DFASTMAT(T1,Kxc)
+  !vwCALL Redistribute_FASTMAT(Kxc)
+  !vwCALL AlignNodes()
+  !vwCALL Set_BCSR_EQ_DFASTMAT(T1,Kxc)
+  CALL Reduce_FASTMAT(T2,Kxc)
+  
+  IF(MyID.EQ.ROOT) THEN
+     ! The following needs the -Fac- variable
+     ! in ComputK to take into account for the
+     ! double counting of diag(K).
+     CALL XPose(T2,T3)
+     CALL Add(T2,T3,T1)
+     CALL Delete(T2)
+     CALL Delete(T3)
+  ENDIF
 #else
   CALL Filter(T1,Kxc)
 #endif

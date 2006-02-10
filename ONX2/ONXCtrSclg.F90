@@ -97,7 +97,7 @@ CONTAINS
     TYPE(FASTMAT), POINTER    :: A,P
     TYPE(SRST   ), POINTER    :: U
     INTEGER                   :: Row,Col,N2
-    INTEGER                   :: AtA,AtB,KA,KB,NBFA,NBFB
+    INTEGER                   :: AtA,AtB,KA,KB,NBFA,NBFB,iSMat
 !
     IF(.NOT.ASSOCIATED(A)) CALL Halt(' A not associated in TrnMatBlk_FASTMAT ')
     CALL FlattenAllRows(A)
@@ -117,7 +117,10 @@ CONTAINS
              NBFB = BS%BfKnd%I(KB)
              N2=NBFA*NBFB
              !if(myid==1)write(*,*) 'Row',Row,'Col',Col
-             CALL TrnSubBlk(BS,KA,KB,NBFA,NBFB,U%MTrix)
+             DO iSMat=1,A%NSMat
+                CALL TrnSubBlk(BS,KA,KB,NBFA,NBFB,U%MTrix(1:NBFA, (iSMat-1)*NBFB+1:iSMat*NBFB  ))
+             ENDDO
+             !CALL TrnSubBlk(BS,KA,KB,NBFA,NBFB,U%MTrix)
           ENDIF
           U => U%Next
        ENDDO

@@ -38,6 +38,7 @@ MODULE KxcGen
     INTEGER                :: AtA,AtB
     INTEGER                :: JP,K,NA,NB,NAB,P,Q,R,I,J,iSMat
     INTEGER                   :: NCA,NCB
+    REAL(DOUBLE)              :: Fac
     REAL(DOUBLE),DIMENSION(3) :: A,B
 !------------------------------------------------------------------------------- 
 !   Initialize the matrix and associated indecies
@@ -54,9 +55,11 @@ MODULE KxcGen
       DO AtB=1,NAtoms
         IF(SetAtomPair(GM,BS,AtA,AtB,Pair)) THEN
           NAB = Pair%NA*Pair%NB*Kxc%NSMat
-#ifndef PARALLEL
+!vw#ifndef PARALLEL
           IF(AtB<=AtA)THEN
-#endif
+             Fac=1D0
+             IF(AtA.EQ.AtB)Fac=0.5D0
+!vw#endif
 !         Compute only the lower triangle of symmetric Kxc
             A = Pair%A
             B = Pair%B
@@ -69,16 +72,16 @@ MODULE KxcGen
                             + (Pair%A(3)-Pair%B(3))**2
                 IF(TestAtomPair(Pair,CubeRoot%Box)) THEN
 #ifdef PARALLEL
-                  CALL AddFASTMATBlok(Kxc,AtA,AtB,KxcBlock(Pair,CubeRoot,Kxc%NSMat))
+                  CALL AddFASTMATBlok(Kxc,AtA,AtB,Pair%NA,Pair%NB*Kxc%NSMat,Fac*KxcBlock(Pair,CubeRoot,Kxc%NSMat))
 #else
                   Kxc%MTrix%D(R:R+NAB-1)=Kxc%MTrix%D(R:R+NAB-1)+KxcBlock(Pair,CubeRoot,Kxc%NSMat)
 #endif
                 ENDIF
               ENDDO
             ENDDO
-#ifndef PARALLEL
+!vw#ifndef PARALLEL
           ENDIF
-#endif
+!vw#endif
 
 !! the logic here strictly follows MakeS
 #ifdef PARALLEL
