@@ -45,7 +45,8 @@ MModObjs = GlobalScalars.o GlobalCharacters.o DerivedTypes.o    \
            D1Mach.o DCSEvl.o DErf.o DErfc.o DMach.o InitDS.o    \
            Mechanics.o Thresholding.o Functionals.o PBC.o AtomPairs.o       \
            BoundingBox.o BraBloks.o Macros.o FastMat.o \
-           CholFact.o Slatec.o
+           CholFact.o Slatec.o \
+	   uks_xc_b3lyp.o uks_xc_pw91.o
 #
 MModRel  = GlobalScalars.x GlobalCharacters.x DerivedTypes.x    \
            GlobalObjects.x BasisSetParameters.x MPIInclude.x    \
