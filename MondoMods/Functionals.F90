@@ -146,6 +146,7 @@ MODULE Functionals
          REAL(DOUBLE)                   :: a0,ax,ac
          REAL(DOUBLE), DIMENSION(NGrid) :: Rho,AbsGradRho2
          REAL(DOUBLE), DIMENSION(NGrid) :: E,dEdRho,dEdGam
+         INTEGER                        :: N1,N2
 !---------------------------------------------------------------------------------------
          E=Zero 
          dEdRho=Zero 
@@ -171,6 +172,13 @@ MODULE Functionals
             CALL PW91x_ClSh(NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,One)
             CALL Halt(' PW91c is buggy.  Sorry, please try another functional ')
             CALL PW91c_ClSh(NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,One)
+
+            !N1=  NGrid+1
+            !N2=2*NGrid+1
+            !CALL uks_xc_pw91(0,NGrid,Rho(1),Rho(N1),AbsGradRho2(1),AbsGradRho2(N1),AbsGradRho2(N2), &
+            !     &  E(1),dEdRho(1) dEdRho(N1),dEdGam(1),dEdGam(N1),dEdGam(N2), &
+            !     &  0D0,0D0,0D0,0D0,0D0,0D0,0D0,0D0,0D0,0D0,0D0,0D0,0D0,0D0,0D0)
+
          CASE(PURE_PW91_LYP)
             CALL PW91x_ClSh(NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,One)
             CALL LYPc_ClSh (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,One) 
@@ -215,6 +223,13 @@ MODULE Functionals
             CALL B88x_ClSh (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam, ax )
             CALL VWN5c_ClSh(NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam, One-ac )
             CALL LYPc_ClSh (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam, ac )
+
+            !N1=  NGrid+1
+            !N2=2*NGrid+1
+            !CALL uks_xc_b3lyp(0,NGrid,Rho(1),Rho(N1),AbsGradRho2(1),AbsGradRho2(N1),AbsGradRho2(N2), &
+            !     &  E(1),dEdRho(1) dEdRho(N1),dEdGam(1),dEdGam(N1),dEdGam(N2), &
+            !     &  0D0,0D0,0D0,0D0,0D0,0D0,0D0,0D0,0D0,0D0,0D0,0D0,0D0,0D0,0D0)
+
          CASE(HYBRID_X3LYP)
 !           Extended hybrid LYP functional
 !           Xu and Goddard, PNAS 101, p.2673 (2004)             
