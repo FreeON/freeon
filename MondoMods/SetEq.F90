@@ -118,14 +118,13 @@ MODULE SetXYZ
          IF(MyId==ROOT)THEN
 #endif 
             IF(AllocQ(B%Alloc).AND. &
-                 (B%NSMat.NE.A%NSMat.OR.B%NAtms<A%NAtms.OR.B%NBlks<A%NBlks.OR.B%NNon0<A%NNon0) )THEN
-                 CALL Delete(B)
-                 CALL New(B,NSMat_O=A%NSMat)
-                 B%NSMat=A%NSMat; B%NAtms=A%NAtms; B%NBlks=A%NBlks; B%NNon0=A%NNon0
+                 & (B%NSMat.NE.A%NSMat.OR.B%NAtms<A%NAtms.OR.B%NBlks<A%NBlks.OR.B%NNon0<A%NNon0) )THEN
+               CALL Delete(B)
+               CALL New(B,NSMat_O=A%NSMat)
             ELSE
                IF(.NOT.AllocQ(B%Alloc))CALL New(B,NSMat_O=A%NSMat)
-               B%NSMat=A%NSMat; B%NAtms=A%NAtms; B%NBlks=A%NBlks; B%NNon0=A%NNon0
             ENDIF
+            B%NSMat=A%NSMat; B%NAtms=A%NAtms; B%NBlks=A%NBlks; B%NNon0=A%NNon0
             B%RowPt%I(1:A%NAtms+1)=A%RowPt%I(1:A%NAtms+1)
             B%ColPt%I(1:A%NBlks)  =A%ColPt%I(1:A%NBlks)
             !B%BlkPt%I(1:A%NBlks*A%NSMat)=A%BlkPt%I(1:A%NBlks*A%NSMat)
@@ -143,20 +142,15 @@ MODULE SetXYZ
          TYPE(DBCSR), INTENT(INOUT) :: A        
          TYPE(DBCSR), INTENT(INOUT) :: B        
          LOGICAL                    :: LimitsQ
-         IF(AllocQ(B%Alloc))THEN
-            LimitsQ=.NOT.                         &
-                  (B%NAtms<=SIZE(A%RowPt%I)).AND. &
-                  (B%NBlks<=SIZE(A%ColPt%I)).AND. &
-                  (B%NBlks<=SIZE(A%BlkPt%I)).AND. &
-                  (B%NNon0<=SIZE(A%MTrix%D))
-            IF(LimitsQ)THEN
-               CALL Delete(B)
-               CALL New(B,(/A%NAtms,A%NBlks,A%NNon0/))
-            ENDIF
+         IF(AllocQ(B%Alloc).AND. &
+              & (B%NSMat.NE.A%NSMat.OR.B%NAtms<A%NAtms.OR.B%NBlks<A%NBlks.OR.B%NNon0<A%NNon0) )THEN
+            CALL Delete(B)
+            CALL New(B,NSMat_O=A%NSMat)
          ELSE
-            CALL New(B,(/A%NAtms,A%NBlks,A%NNon0/))
+            IF(.NOT.AllocQ(B%Alloc))CALL New(B,NSMat_O=A%NSMat)
          ENDIF
 !        Local
+         B%NSMat=A%NSMat
          B%NAtms=A%NAtms
          B%NBlks=A%NBlks
          B%NNon0=A%NNon0
@@ -541,6 +535,7 @@ MODULE SetXYZ
 !-1
 !MINUS     
          CALL New(B,(/B%NAtms,B%NBlks,B%NNon0/))
+         B%NSMat=A%NSMat
 !------------------------------------
 !        Number of atoms per node
 !
@@ -624,7 +619,12 @@ MODULE SetXYZ
 !-----------------------------------------------------------------------
 !        Allocate if required
 !
-         IF(.NOT.AllocQ(B%Alloc))CALL New(B)
+         CALL BCast(A%NSMat)
+         IF(.NOT.AllocQ(B%Alloc))CALL New(B,NSMat_O=A%NSMat)
+         IF(B%NSMat.NE.A%NSMat) THEN
+            CALL Delete(B)
+            CALL New(B,NSMat_O=A%NSMat)
+         ENDIF
 !------------------------------------------------
 !        Distribute to each processor
 !
@@ -642,7 +642,8 @@ MODULE SetXYZ
                      B%ColPt%I(B%NBlks)=JG
                      B%BlkPt%I(B%NBlks)=B%NNon0
                      B%NBlks=B%NBlks+1
-                     MN=M*BSiz%I(JG);MN1=MN-1
+                     MN=M*BSiz%I(JG)     *A%NSMat !<<< SPIN
+                     MN1=MN-1
                      P=A%BlkPt%I(J)         
                      B%MTrix%D(B%NNon0:B%NNon0+MN1)=A%MTrix%D(P:P+MN1) 
                      B%NNon0=B%NNon0+MN

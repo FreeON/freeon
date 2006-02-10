@@ -1361,29 +1361,32 @@ CONTAINS
 #ifdef PARALLEL
               SUBROUTINE BcastBCSR(A)
                 TYPE(BCSR) :: A
-                INTEGER :: IErr,NAtms,NBlks,NNon0
+                INTEGER :: IErr,NSMat,NAtms,NBlks,NNon0,i
                 LOGICAL :: LimitsQ
+                NSMat = A%NSMat
                 NAtms = A%NAtms
                 NBlks = A%NBlks
                 NNon0 = A%NNon0
 
+                CALL Bcast(NSMat)
                 CALL Bcast(NAtms)
                 CALL Bcast(NBlks)
                 CALL Bcast(NNon0)
 
-
                 IF(AllocQ(A%Alloc))THEN
-                   LimitsQ=.NOT.                         &
-                        (NAtms<=SIZE(A%RowPt%I)).AND. &
-                        (NBlks<=SIZE(A%ColPt%I)).AND. &
-                        (NBlks<=SIZE(A%BlkPt%I)).AND. &
-                        (NNon0<=SIZE(A%MTrix%D))
+                   LimitsQ=                            &
+                        (NAtms.GT.SIZE(A%RowPt%I)).OR. &
+                        (NBlks.GT.SIZE(A%ColPt%I)).OR. &
+                        (NBlks.GT.SIZE(A%BlkPt%I)).OR. &
+                        (NNon0.GT.SIZE(A%MTrix%D))
+                   IF(LimitsQ.AND.MyID.EQ.0) CALL Halt('BcastBCSR: Something wrong there 1')
                    IF(LimitsQ)THEN
-                      CALL Delete(A)
-                      CALL New(A,(/NAtms,NBlks,NNon0/),OnAll_O=.TRUE.)
+                      CALL Delete(A,OnAll_O=.TRUE.)
+                      CALL New(A,(/NAtms,NBlks,NNon0/),NSMat_O=NSMat,OnAll_O=.TRUE.)
                    ENDIF
                 ELSE
-                   CALL New(A,(/NAtms,NBlks,NNon0/),OnAll_O=.TRUE.)
+                   IF(MyID.EQ.0) CALL Halt('BcastBCSR: Something wrong there 2')
+                   CALL New(A,(/NAtms,NBlks,NNon0/),NSMat_O=NSMat,OnAll_O=.TRUE.)
                 ENDIF
                 CALL Bcast(A%RowPt,N_O=NAtoms+1)
                 CALL Bcast(A%ColPt,N_O=NBlks)
@@ -1490,6 +1493,400 @@ CONTAINS
 1               CALL Halt('IO Error '//TRIM(IntToChar(IOS))//' in Put_BCSR.')
               END SUBROUTINE Put_BCSR
 #ifdef PARALLEL
+!#ifdef MPIIO
+!
+!***MPI-IO***MPI-IO***MPI-IO***MPI-IO***MPI-IO***MPI-IO***MPI-IO***MPI-IO***
+!***MPI-IO***MPI-IO***MPI-IO***MPI-IO***MPI-IO***MPI-IO***MPI-IO***MPI-IO***
+!***MPI-IO***MPI-IO***MPI-IO***MPI-IO***MPI-IO***MPI-IO***MPI-IO***MPI-IO***
+   !
+   ! Get a DBCSR matrix
+   SUBROUTINE Get_DBCSR_MPIIO_N_1(A,Name,PFix_O)
+     TYPE(DBCSR),              INTENT(INOUT) :: A
+     CHARACTER(LEN=*),OPTIONAL,INTENT(IN)    :: PFix_O
+     CHARACTER(LEN=*),         INTENT(IN)    :: Name
+     CHARACTER(LEN=DEFAULT_CHR_LEN)          :: FileName
+     TYPE(INT_VECT)                          :: INTArr
+     INTEGER,DIMENSION(MPI_STATUS_SIZE)      :: Status
+     INTEGER,PARAMETER                       :: INTSIZE=4,DBLSIZE=8
+     INTEGER                                 :: IErr,Id,Header,Count,NPrcTmp,NInt,Dims(4)
+     INTEGER(KIND=MPI_OFFSET_KIND)           :: OffSet,LOffSet,ArrGOff(NPrc)
+     LOGICAL                                 :: Exists,LimitsQ
+     !-------------------------------------------------------------------------------
+     !
+     IF(PRESENT(PFix_O))THEN
+        FileName=TRIM(Name)//TRIM(PFix_O)
+     ELSE
+        FileName=Name
+     ENDIF
+     INQUIRE(FILE=TRIM(FileName),EXIST=Exists)
+     IF(.NOT.Exists) CALL Halt(' Get_DBCSR_MPI_IO could not find '//TRIM(FileName))
+     !
+     CALL MPI_FILE_OPEN(MONDO_COMM,FileName,MPI_MODE_RDONLY,MPI_INFO_NULL,Id,IErr)
+     !
+     ! Read NPrc to the file and bcast
+     IF(MyID.EQ.0) THEN
+        CALL MPI_FILE_READ_AT(Id,0_MPI_OFFSET_KIND,NPrcTmp,1,MPI_INTEGER,Status,IErr)
+     ENDIF
+     CALL MPI_BCAST(NPrcTmp,1,MPI_INTEGER,0,MONDO_COMM,IErr)
+     !
+     ! ADD SOMETHING HERE IF WE WANT RESTART WITH DIFF NPrc
+     IF(NPrcTmp.NE.NPrc) CALL Halt('Get_DBCSR_MPI_IO: current Nprc not consistent with the one in the file!')
+     !
+     ! Read the local offset
+     CALL MPI_FILE_READ_AT_ALL(Id,INT(INTSIZE,MPI_OFFSET_KIND),ArrGOff(1), &
+          &                NPrc*MPI_OFFSET_KIND,MPI_BYTE,Status,IErr)
+     !
+     ! Read the data
+     OffSet=ArrGOff(MyID+1)
+     CALL MPI_FILE_READ_AT_ALL(Id,OffSet,Dims(1),4,MPI_INTEGER,Status,IErr)
+     !
+     ! Check if right size
+     CALL CheckAlloc_DBCSR(A,Dims)
+     !
+     NInt=2*(A%NAtms+1)+2*A%NBlks
+     CALL New(INTArr,NInt)
+     !
+     ! Read the data
+     OffSet=OffSet+4*INTSIZE
+     CALL MPI_FILE_READ_AT_ALL(Id,OffSet,INTArr%I(1),NInt,MPI_INTEGER,Status,IErr)
+     !CALL MPI_GET_COUNT(Status,MPI_INTEGER,Count,IErr)
+     !write(*,'(A,I3,A,I6,A,I6)') 'process', MyID,' read 1',Count,' integers, expected ',NInt
+     OffSet=OffSet+NInt*INTSIZE
+     CALL MPI_FILE_READ_AT_ALL(Id,OffSet,A%MTrix%D(1),A%NNon0  ,MPI_DOUBLE_PRECISION,Status,IErr)
+     !CALL MPI_GET_COUNT(Status,MPI_DOUBLE_PRECISION,Count,IErr)
+     !write(*,'(A,I3,A,I6,A,I6)') 'process', MyID,' read 2',Count,' realss, expected ',A%NNon0
+     !
+     ! Unpack the data
+     CALL INT_VECT_EQ_INT_VECT(A%NAtms+1,A%RowPt%I(1),INTArr%I(                      1))
+     CALL INT_VECT_EQ_INT_VECT(A%NAtms+1,A%GRwPt%I(1),INTArr%I(  (A%NAtms+1)        +1))
+     CALL INT_VECT_EQ_INT_VECT(A%NBlks  ,A%ColPt%I(1),INTArr%I(2*(A%NAtms+1)        +1))
+     CALL INT_VECT_EQ_INT_VECT(A%NBlks  ,A%BlkPt%I(1),INTArr%I(2*(A%NAtms+1)+A%NBlks+1))
+     !
+     A%Node=MyId
+     !
+     CALL Delete(INTArr)
+     CALL MPI_FILE_CLOSE(Id,IErr)
+     !
+   END SUBROUTINE Get_DBCSR_MPIIO_N_1
+   !
+   ! Put a DBCSR matrix
+  SUBROUTINE Put_DBCSR_MPIIO_N_1(A,Name,PFix_O)
+     TYPE(DBCSR), INTENT(INOUT)           :: A
+     CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: PFix_O
+     CHARACTER(LEN=*),         INTENT(IN) :: Name
+     CHARACTER(LEN=DEFAULT_CHR_LEN)       :: FileName
+     TYPE(INT_VECT)                       :: INTArr
+     INTEGER,DIMENSION(MPI_STATUS_SIZE)   :: Status
+     INTEGER,PARAMETER                    :: INTSIZE=4,DBLSIZE=8
+     INTEGER                              :: IErr,Id,Dims(4),Count,Info,NInt
+     INTEGER(KIND=MPI_OFFSET_KIND)        :: OffSet,Header,ArrGOff(NPrc),LOffSet
+     !-------------------------------------------------------------------------------
+     !
+     IF(PRESENT(PFix_O))THEN
+        FileName=TRIM(Name)//TRIM(PFix_O)
+     ELSE
+        FileName=Name
+     ENDIF
+     !
+     CALL MPI_INFO_CREATE(Info,IErr)
+     CALL MPI_INFO_SET(Info,'serialize_open' ,'yes'    ,IErr)
+     CALL MPI_INFO_SET(Info,'striping_factor','2'      ,IErr) !2
+     CALL MPI_INFO_SET(Info,'striping_unit'  ,'8388608',IErr) !33554432 !8388608!1048576
+     CALL MPI_INFO_SET(Info,'start_iodevice' ,'1'      ,IErr) !3
+     !
+     CALL MPI_FILE_OPEN(MONDO_COMM,FileName,MPI_MODE_CREATE+MPI_MODE_WRONLY, &
+          !&             MPI_INFO_NULL,Id,IErr)
+          &             Info,Id,IErr)
+     !
+     ! Compute header
+     Header=NPrc*MPI_OFFSET_KIND+INTSIZE
+     CALL GetOffSet_DBCSR(A,ArrGOff,Header)
+     !
+     IF(MyID.EQ.0) THEN
+        ! Write NPrc to the file
+        CALL MPI_FILE_WRITE_AT(Id,0_MPI_OFFSET_KIND,NPrc,1,MPI_INTEGER,Status,IErr)
+        ! Write the global offset
+        CALL MPI_FILE_WRITE_AT(Id,INT(INTSIZE,MPI_OFFSET_KIND),ArrGOff(1), &
+             &                 NPrc*MPI_OFFSET_KIND,MPI_BYTE,Status,IErr)
+     ENDIF
+     !
+     ! Pack the data
+     NInt=4+2*(A%NAtms+1)+2*A%NBlks
+     CALL New(INTArr,NInt)
+     INTArr%I(1)=A%NSMat
+     INTArr%I(2)=A%NAtms
+     INTArr%I(3)=A%NBlks
+     INTArr%I(4)=A%NNon0
+     CALL INT_VECT_EQ_INT_VECT(A%NAtms+1,INTArr%I(                      5),A%RowPt%I(1))
+     CALL INT_VECT_EQ_INT_VECT(A%NAtms+1,INTArr%I(  (A%NAtms+1)        +5),A%GRwPt%I(1))
+     CALL INT_VECT_EQ_INT_VECT(A%NBlks  ,INTArr%I(2*(A%NAtms+1)        +5),A%ColPt%I(1))
+     CALL INT_VECT_EQ_INT_VECT(A%NBlks  ,INTArr%I(2*(A%NAtms+1)+A%NBlks+5),A%BlkPt%I(1))
+     !
+     ! Write the data
+     OffSet=ArrGOff(MyID+1)
+     CALL MPI_FILE_WRITE_AT_ALL(Id,OffSet,INTArr%I(1),NInt,MPI_INTEGER,Status,IErr)
+     CALL MPI_GET_COUNT(Status,MPI_INTEGER,Count,IErr)
+     IF(Count.NE.NInt) THEN
+        CALL Halt('process '//TRIM(IntToChar(MyID))//' write '//TRIM(IntToChar(Count))// &
+             &    ' integers, expected '//TRIM(IntToChar(NInt)))
+     ENDIF
+     !
+     OffSet=OffSet+NInt*INTSIZE
+     CALL MPI_FILE_WRITE_AT_ALL(Id,OffSet,A%MTrix%D(1),A%NNon0,MPI_DOUBLE_PRECISION,Status,IErr)
+     CALL MPI_GET_COUNT(Status,MPI_DOUBLE_PRECISION,Count,IErr)
+     IF(Count.NE.A%NNon0) THEN
+        CALL Halt('process '//TRIM(IntToChar(MyID))//' write '//TRIM(IntToChar(Count))// &
+             &    ' reals, expected '//TRIM(IntToChar(A%NNon0)))
+     ENDIF
+     !
+     CALL Delete(INTArr)
+     CALL MPI_FILE_CLOSE(Id,IErr)
+     !
+   END SUBROUTINE Put_DBCSR_MPIIO_N_1
+
+   SUBROUTINE GetOffSet_DBCSR(A,ArrGOff,Header)
+     TYPE(DBCSR)                  :: A
+     INTEGER(KIND=MPI_OFFSET_KIND):: ArrGOff(NPrc),ArrLOff(NPrc)
+     INTEGER(KIND=MPI_OFFSET_KIND):: Header
+     INTEGER,PARAMETER            :: INTSIZE=4,DBLSIZE=8
+     INTEGER                      :: THeader,IErr
+     !
+     ArrGOff=0
+     ! Local
+     THeader=                   4 *INTSIZE ! A%NSMat,NAtoms,A%NBlks,A%NNon0
+     THeader=THeader+2*(A%NAtms+1)*INTSIZE ! A%RowPt%I,A%GRwPt%I
+     THeader=THeader+2*(A%NBlks  )*INTSIZE ! A%ColPt%I,A%BlkPt%I
+     THeader=THeader+  (A%NNon0  )*DBLSIZE ! A%MTrix%D
+     !B%GUpDate=A%GUpDate
+     !A%GClPt! ??
+     ArrGOff(MyID+1)=THeader
+     CALL MPI_ALLGATHER(ArrGOff(MyID+1),MPI_OFFSET_KIND,MPI_BYTE,ArrGOff(1), &
+          &             MPI_OFFSET_KIND,MPI_BYTE,MONDO_COMM,IErr)
+     CALL CalcGOffSet(ArrGOff,Header)
+   END SUBROUTINE GetOffSet_DBCSR
+
+   SUBROUTINE CalcGOffSet(ArrGOff,Header)
+     INTEGER(KIND=MPI_OFFSET_KIND):: ArrGOff(NPrc),ArrLOff(NPrc),Header
+     INTEGER                      :: I
+     ArrLOff=ArrGOff
+     ArrGOff(1)=Header
+     DO I=1,NPrc-1
+        ArrGOff(I+1)=ArrGOff(I)+ArrLOff(I)
+     ENDDO
+   END SUBROUTINE CalcGOffSet
+
+   SUBROUTINE CheckAlloc_DBCSR(A,Dims)
+     TYPE(DBCSR) :: A
+     INTEGER     :: Dims(4)
+     LOGICAL     :: LimitsQ
+     IF(AllocQ(A%Alloc))THEN
+        IF(Dims(1).GT.A%NSMat) THEN
+           CALL Delete(A)
+           CALL New(A,NSMat_O=Dims(1))
+        ENDIF
+        LimitsQ=                             &
+             (Dims(2).GT.SIZE(A%RowPt%I)).OR. &
+             (Dims(3).GT.SIZE(A%ColPt%I)).OR. &
+             (Dims(3).GT.SIZE(A%BlkPt%I)).OR. &
+             (Dims(4).GT.SIZE(A%MTrix%D))
+        IF(LimitsQ)THEN
+           write(*,*)'In CheckAlloc_DBCSR Reallocate the matrix A%NSMat.EQ.NSMat=',A%NSMat.EQ.Dims(1)
+           CALL Delete(A)
+           CALL New(A,(/Dims(2),Dims(3),Dims(4)/),NSMat_O=Dims(1))
+        ELSE
+           A%NSMat=Dims(1)
+           A%NAtms=Dims(2)
+           A%NBlks=Dims(3)
+           A%NNon0=Dims(4)
+        ENDIF
+     ELSE
+        CALL New(A,(/Dims(2),Dims(3),Dims(4)/),NSMat_O=Dims(1))
+        A%NSMat=Dims(1)
+        A%NAtms=Dims(2)
+        A%NBlks=Dims(3)
+        A%NNon0=Dims(4)
+     ENDIF
+   END SUBROUTINE CheckAlloc_DBCSR
+
+   SUBROUTINE Put_DBCSR_N_1(A,Name,PFix_O)
+     TYPE(DBCSR), INTENT(INOUT)           :: A
+     CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: PFix_O
+     CHARACTER(LEN=*),         INTENT(IN) :: Name
+     CHARACTER(LEN=DEFAULT_CHR_LEN)       :: FileName
+     TYPE(INT_VECT)                       :: INTArr
+     TYPE(DBL_VECT)                       :: DBLArr
+     INTEGER,PARAMETER                    :: INTSIZE=4,DBLSIZE=8
+     INTEGER                              :: IErr,IOS,Dims(4),Count,Info,I,IPrc,NInt,NDbl
+     INTEGER(KIND=MPI_OFFSET_KIND)        :: OffSet,Header,ArrGOff(NPrc),LOffSet
+     LOGICAL                              :: Exists
+     !-------------------------------------------------------------------------------
+     !
+     IF(PRESENT(PFix_O))THEN
+        FileName=TRIM(Name)//TRIM(PFix_O)
+     ELSE
+        FileName=Name
+     ENDIF
+     !
+     IF(MyID.EQ.0) THEN
+        INQUIRE(FILE=FileName,EXIST=Exists)
+        IF(Exists)THEN
+           OPEN(UNIT=Seq,FILE=FileName,STATUS='REPLACE', &
+                FORM='UNFORMATTED',ACCESS='SEQUENTIAL')
+        ELSE
+           OPEN(UNIT=Seq,FILE=FileName,STATUS='NEW', &
+                FORM='UNFORMATTED',ACCESS='SEQUENTIAL')
+        ENDIF
+        !
+        !Write NPrc
+        WRITE(UNIT=Seq,Err=1,IOSTAT=IOS)NPrc
+        !
+        !Write the ROOT bcsr matrix 
+        WRITE(UNIT=Seq,Err=1,IOSTAT=IOS)A%NSMat,A%NAtms,A%NBlks,A%NNon0
+        WRITE(UNIT=Seq,Err=1,IOSTAT=IOS)(A%RowPt%I(I),I=1,A%NAtms+1)
+        WRITE(UNIT=Seq,Err=1,IOSTAT=IOS)(A%GRwPt%I(I),I=1,A%NAtms+1)
+        WRITE(UNIT=Seq,Err=1,IOSTAT=IOS)(A%ColPt%I(I),I=1,A%NBlks)
+        WRITE(UNIT=Seq,Err=1,IOSTAT=IOS)(A%BlkPt%I(I),I=1,A%NBlks)
+        WRITE(UNIT=Seq,Err=1,IOSTAT=IOS)(A%MTrix%D(I),I=1,A%NNon0)
+        CALL New(INTArr,2*(A%NAtms+1)+2*A%NBlks)
+        CALL New(DBLArr,A%NNon0)
+        !
+        DO IPrc=1,NPrc-1
+           CALL MPI_RECV(Dims(1),4,MPI_INTEGER,IPrc,101,MONDO_COMM,MPI_STATUS_IGNORE,IErr)
+           NInt=2*(Dims(2)+1)+2*Dims(3)
+           NDbl=Dims(4)
+           IF(SIZE(INTArr%I).LT.NInt) THEN
+              CALL Delete(INTArr)
+              CALL New(INTArr,NInt)
+           ENDIF
+           IF(SIZE(DBLArr%D).LT.NDbl) THEN
+              CALL Delete(DBLArr)
+              CALL New(DBLArr,NDbl)
+           ENDIF
+           CALL MPI_RECV(INTArr%I(1),NInt,MPI_INTEGER         ,IPrc,201,MONDO_COMM,MPI_STATUS_IGNORE,IErr)
+           CALL MPI_RECV(DBLArr%D(1),NDbl,MPI_DOUBLE_PRECISION,IPrc,301,MONDO_COMM,MPI_STATUS_IGNORE,IErr)
+           WRITE(UNIT=Seq,Err=1,IOSTAT=IOS)(Dims(I),I=1,4)
+           WRITE(UNIT=Seq,Err=1,IOSTAT=IOS)(INTArr%I(I),I=1,NInt)
+           WRITE(UNIT=Seq,Err=1,IOSTAT=IOS)(DBLArr%D(I),I=1,NDbl)
+        ENDDO
+        CALL Delete(INTArr)
+        CALL Delete(DBLArr)
+        CLOSE(UNIT=Seq,STATUS='KEEP')
+     ELSE
+        Dims(1)=A%NSMat;Dims(2)=A%NAtms;Dims(3)=A%NBlks;Dims(4)=A%NNon0
+        NInt=2*(Dims(2)+1)+2*Dims(3)
+        NDbl=Dims(4)
+        CALL New(INTArr,NInt)
+        !CALL INT_VECT_EQ_INT_VECT(A%NAtms+1,INTArr%I(                1),A%RowPt%I(1))
+        !CALL INT_VECT_EQ_INT_VECT(A%NBlks  ,INTArr%I(A%NAtms        +2),A%ColPt%I(1))
+        !CALL INT_VECT_EQ_INT_VECT(A%NBlks  ,INTArr%I(A%NAtms+A%NBlks+2),A%BlkPt%I(1))
+        CALL INT_VECT_EQ_INT_VECT(A%NAtms+1,INTArr%I(                      1),A%RowPt%I(1))
+        CALL INT_VECT_EQ_INT_VECT(A%NAtms+1,INTArr%I(  (A%NAtms+1)        +1),A%GRwPt%I(1))
+        CALL INT_VECT_EQ_INT_VECT(A%NBlks  ,INTArr%I(2*(A%NAtms+1)        +1),A%ColPt%I(1))
+        CALL INT_VECT_EQ_INT_VECT(A%NBlks  ,INTArr%I(2*(A%NAtms+1)+A%NBlks+1),A%BlkPt%I(1))
+        CALL MPI_SEND(     Dims(1),   4,MPI_INTEGER         ,0,101,MONDO_COMM,IErr)
+        CALL MPI_SEND( INTArr%I(1),NInt,MPI_INTEGER         ,0,201,MONDO_COMM,IErr)
+        CALL MPI_SEND(A%MTrix%D(1),NDbl,MPI_DOUBLE_PRECISION,0,301,MONDO_COMM,IErr)
+        CALL Delete(INTArr)
+     ENDIF
+     !
+     RETURN
+1    CALL Halt('IO Error '//TRIM(IntToChar(IOS))//' in Put_DBCSR_N_1.')
+   END SUBROUTINE Put_DBCSR_N_1
+
+   SUBROUTINE Get_DBCSR_N_1(A,Name,PFix_O)
+     TYPE(DBCSR),              INTENT(INOUT) :: A
+     CHARACTER(LEN=*),OPTIONAL,INTENT(IN)    :: PFix_O
+     CHARACTER(LEN=*),         INTENT(IN)    :: Name
+     CHARACTER(LEN=DEFAULT_CHR_LEN)          :: FileName
+     TYPE(INT_VECT)                          :: INTArr
+     TYPE(DBL_VECT)                          :: DBLArr
+     INTEGER,DIMENSION(MPI_STATUS_SIZE)      :: Status
+     INTEGER,PARAMETER                       :: INTSIZE=4,DBLSIZE=8
+     INTEGER                                 :: IErr,IOS,Id,NInt,NDbl,Count,I,IPrc,NPrcTmp,Dims(4)
+     LOGICAL                                 :: Exists
+     !-------------------------------------------------------------------------------
+     !
+     IF(PRESENT(PFix_O))THEN
+        FileName=TRIM(Name)//TRIM(PFix_O)
+     ELSE
+        FileName=Name
+     ENDIF
+     !
+     IF(MyID.EQ.0) THEN
+        INQUIRE(FILE=TRIM(FileName),EXIST=Exists)
+        IF(.NOT.Exists) CALL Halt(' Get_DBCSR_N_1 could not find '//TRIM(FileName))
+        !
+        !
+        OPEN(UNIT=Seq,FILE=FileName,STATUS='OLD', &
+             FORM='UNFORMATTED',ACCESS='SEQUENTIAL')
+        !
+        ! Read NPrc to the file and bcast
+        READ(UNIT=Seq,Err=1,IOSTAT=IOS)NPrcTmp
+        READ(UNIT=Seq,Err=1,IOSTAT=IOS)(Dims(I),I=1,4)
+        IF(NPrcTmp.NE.NPrc) CALL Halt('Get_DBCSR_N_1: current Nprc not consistent with the one in the file!')
+        !
+        ! Check if right size
+        CALL CheckAlloc_DBCSR(A,Dims)
+        !
+        ! Read the ROOT bcsr matrix
+        READ(UNIT=Seq,Err=1,IOSTAT=IOS)(A%RowPt%I(I),I=1,A%NAtms+1)
+        READ(UNIT=Seq,Err=1,IOSTAT=IOS)(A%GRwPt%I(I),I=1,A%NAtms+1)
+        READ(UNIT=Seq,Err=1,IOSTAT=IOS)(A%ColPt%I(I),I=1,A%NBlks)
+        READ(UNIT=Seq,Err=1,IOSTAT=IOS)(A%BlkPt%I(I),I=1,A%NBlks)
+        READ(UNIT=Seq,Err=1,IOSTAT=IOS)(A%MTrix%D(I),I=1,A%NNon0)
+        CALL New(INTArr,2*(A%NAtms+1)+2*A%NBlks)
+        CALL New(DBLArr,A%NNon0)
+        !
+        DO IPrc=1,NPrc-1
+           READ(UNIT=Seq,Err=1,IOSTAT=IOS)(Dims(I),I=1,4)
+           NInt=2*(Dims(2)+1)+2*Dims(3)
+           NDbl=Dims(4)
+           IF(SIZE(INTArr%I).LT.NInt) THEN
+              CALL Delete(INTArr)
+              CALL New(INTArr,NInt)
+           ENDIF
+           IF(SIZE(DBLArr%D).LT.NDbl) THEN
+              CALL Delete(DBLArr)
+              CALL New(DBLArr,NDbl)
+           ENDIF
+           READ(UNIT=Seq,Err=1,IOSTAT=IOS)(INTArr%I(I),I=1,NInt)
+           READ(UNIT=Seq,Err=1,IOSTAT=IOS)(DBLArr%D(I),I=1,NDbl)
+           !
+           CALL MPI_SEND(    Dims(1),   4,MPI_INTEGER         ,IPrc,101,MONDO_COMM,IErr)
+           CALL MPI_SEND(INTArr%I(1),NInt,MPI_INTEGER         ,IPrc,201,MONDO_COMM,IErr)
+           CALL MPI_SEND(DBLArr%D(1),NDbl,MPI_DOUBLE_PRECISION,IPrc,301,MONDO_COMM,IErr)
+        ENDDO
+        CALL Delete(INTArr)
+        CALL Delete(DBLArr)
+        CLOSE(UNIT=Seq,STATUS='KEEP')
+     ELSE
+        CALL MPI_RECV(Dims(1),4,MPI_INTEGER,0,101,MONDO_COMM,MPI_STATUS_IGNORE,IErr)
+        CALL CheckAlloc_DBCSR(A,Dims)
+        NInt=2*(Dims(2)+1)+2*Dims(3)
+        NDbl=Dims(4)
+        CALL New(INTArr,NInt)
+        CALL MPI_RECV( INTArr%I(1),NInt,MPI_INTEGER         ,0,201,MONDO_COMM,MPI_STATUS_IGNORE,IErr)
+        CALL MPI_RECV(A%MTrix%D(1),NDbl,MPI_DOUBLE_PRECISION,0,301,MONDO_COMM,MPI_STATUS_IGNORE,IErr)
+        CALL INT_VECT_EQ_INT_VECT(A%NAtms+1,A%RowPt%I(1),INTArr%I(                      1))
+        CALL INT_VECT_EQ_INT_VECT(A%NAtms+1,A%GRwPt%I(1),INTArr%I(  (A%NAtms+1)        +1))
+        CALL INT_VECT_EQ_INT_VECT(A%NBlks  ,A%ColPt%I(1),INTArr%I(2*(A%NAtms+1)        +1))
+        CALL INT_VECT_EQ_INT_VECT(A%NBlks  ,A%BlkPt%I(1),INTArr%I(2*(A%NAtms+1)+A%NBlks+1))
+        !CALL INT_VECT_EQ_INT_VECT(A%NAtms+1,A%RowPt%I(1),INTArr%I(                1))
+        !CALL INT_VECT_EQ_INT_VECT(A%NBlks  ,A%ColPt%I(1),INTArr%I(A%NAtms        +2))
+        !CALL INT_VECT_EQ_INT_VECT(A%NBlks  ,A%BlkPt%I(1),INTArr%I(A%NAtms+A%NBlks+2))
+        CALL Delete(INTArr)
+     ENDIF
+     A%Node=MyId
+     !
+     RETURN
+1    CALL Halt('IO Error '//TRIM(IntToChar(IOS))//' in Get_DBCSR_N_1.')
+   END SUBROUTINE Get_DBCSR_N_1
+
+
+!***MPI-IO***MPI-IO***MPI-IO***MPI-IO***MPI-IO***MPI-IO***MPI-IO***MPI-IO***
+!***MPI-IO***MPI-IO***MPI-IO***MPI-IO***MPI-IO***MPI-IO***MPI-IO***MPI-IO***
+!***MPI-IO***MPI-IO***MPI-IO***MPI-IO***MPI-IO***MPI-IO***MPI-IO***MPI-IO***
+!
               !-------------------------------------------------------------------------------
               !     Get a DBCSR matrix
 
@@ -1736,6 +2133,7 @@ CONTAINS
                 !   Write density to disk
 
                 WRITE(UNIT=Seq,Err=100,IOSTAT=IOS) A%NSDen,A%NExpt,A%NDist,A%NCoef
+                !write(*,'(A,5I4)') 'Put_HGRho:',A%NSDen,A%NExpt,A%NDist,A%NCoef,MyID
                 WRITE(UNIT=Seq,Err=100,IOSTAT=IOS)(A%NQ%I(I)    ,I=1,A%NExpt)
                 WRITE(UNIT=Seq,Err=100,IOSTAT=IOS)(A%OffQ%I(I)  ,I=1,A%NExpt)
                 WRITE(UNIT=Seq,Err=100,IOSTAT=IOS)(A%OffR%I(I)  ,I=1,A%NExpt)

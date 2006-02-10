@@ -146,15 +146,15 @@ C-------------------------------------------------------------------------------
 !     Post non-blocking ISend and IRecv for DBCSR data exchange
 !===============================================================================
       INTEGER FUNCTION PostRecv77(NAtoms,MyId,From,Tag,COMM,ANAtms,
-     >                            ANBlks,BNBlks,UNAtms,UNBlks,UNNon0,
-     >                            ARowPt,AColPt,BGRwPt,BGClPt,
-     >                            URowPt,UColPt,UBlkPt,UMTrix, 
-     >                            Flag,BSiz,FromBeg,FromEnd,
-     >                            MyOff,FromOff)
+     >                       ANBlks,BNSMat,BNBlks,UNAtms,UNBlks,UNNon0,
+     >                       ARowPt,AColPt,BGRwPt,BGClPt,
+     >                       URowPt,UColPt,UBlkPt,UMTrix, 
+     >                       Flag,BSiz,FromBeg,FromEnd,
+     >                       MyOff,FromOff)
          IMPLICIT NONE
          INTEGER I,S,T,IG,IL,KG,KP,JL,JP,JG,JH,
      >           NAtoms,MyId,From,Tag,COMM,
-     >           ANAtms,ANBlks,BNBlks,UNAtms,UNBlks,UNNon0,
+     >           ANAtms,ANBlks,BNSMat,BNBlks,UNAtms,UNBlks,UNNon0,
      >           FromBeg,FromEnd,MyOff,FromOff,IErr
          REAL*8 UMTrix(UNNon0)
          INTEGER ARowPt(ANAtms+1),AColPt(ANBlks),
@@ -189,7 +189,7 @@ C
                            UColPt(T)=KG       
                            UBlkPt(T)=S        
                            T=T+1              
-                           S=S+BSiz(JG)*BSiz(KG)                        
+                           S=S+BSiz(JG)*BSiz(KG)*BNSMat!<<<<< add spin here?
                         ENDDO                                        
                      ENDIF   
                   ENDIF
@@ -213,14 +213,14 @@ C
 C=========================================================================
 C 
 C=========================================================================
-      INTEGER FUNCTION PostSend77(NAtoms,ANBlks,BNAtms,BNBlks,
+      INTEGER FUNCTION PostSend77(NAtoms,ANBlks,BNSMat,BNAtms,BNBlks,
      >                            BNNon0,V,To,Tag,MyId,VType,COMM,       
      >                            AGrwPt,AGClPt,BRowPt,BColPt,
      >                            BBlkPt,BMTrix,VBlks,VDisp,Flag,
      >                            BSiz,MyOff,MyBeg,MyEnd,ToBeg,ToEnd) 
          IMPLICIT NONE
-         INTEGER NAtoms,ANBlks,BNAtms,BNBlks,BNNon0,V,To,Tag,MyId,
-     >           VType,COMM,MyOff,MyBeg,MyEnd,ToBeg,ToEnd
+         INTEGER NAtoms,ANBlks,BNSMat,BNAtms,BNBlks,BNNon0,V,To,
+     >           Tag,MyId,VType,COMM,MyOff,MyBeg,MyEnd,ToBeg,ToEnd
          REAL*8  BMTrix(BNNon0)
          INTEGER IErr,NAtms,I,K,MN,S,T,TT,JP,KP,IG,JG,JL,JH,KG
          INTEGER BSiz(NAtoms),Flag(NAtoms),VBlks(V),VDisp(V),
@@ -250,7 +250,7 @@ C!
                         Flag(JL)=1
                         DO KP=BRowPt(JL),BRowPt(JL+1)-1
                            KG=BColPt(KP)     
-                           MN=BSiz(JG)*BSiz(KG)                        
+                           MN=BSiz(JG)*BSiz(KG)*BNSMat  !<<<<< add spin here?
 C!                          Check for contigous blocks ..
 C                          IF(T.NE.0.AND.VDisp(T)+MN.EQ.BBlkPt(KP)-1)THEN 
 C                              VBlks(T)=VBlks(T)+MN
