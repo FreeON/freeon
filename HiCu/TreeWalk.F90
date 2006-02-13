@@ -45,6 +45,7 @@ MODULE TreeWalk
 !
 !====================================================================================================
      SUBROUTINE KxcCube(Cube)
+       IMPLICIT NONE
        TYPE(CubeNode), POINTER               :: Cube
        REAL(DOUBLE), DIMENSION(0:HGEll+1)    :: LambdaX,LambdaY,LambdaZ
        REAL(DOUBLE)                          :: Z,X,RPx,RPy,RPz,RP2,Xpt,TwoZ,  &
@@ -58,11 +59,11 @@ MODULE TreeWalk
 
        REAL(DOUBLE), DIMENSION(50) :: Gx,Gy,Gz
        REAL(DOUBLE)                :: GradX,GradY,GradZ,GRhoAG,GRhoBG
-       INTEGER                     :: IA,IB,EllA,EllB,LMNA,LMNB,OffSDen,I1,I2,LMN1,LMN2
+       INTEGER                     :: IA,IB,EllA,EllB,LMNA,LMNB,OffSDen,I1,I2,LMN1,LMN2,SDBeg,I0,iSDen
 
 !
-       !SDBeg=0
-       !IF(NSDen.GT.1)SDBeg=1!<<< SPIN We don't need to integrate the rho_tot part.
+       SDBeg=0
+       IF(NSDen.GT.1)SDBeg=1!<<< SPIN We don't need to integrate the rho_tot part.
        OffSDen=LHGTF(Prim%Ell)
 
 #ifdef EXPLICIT_SOURCE
