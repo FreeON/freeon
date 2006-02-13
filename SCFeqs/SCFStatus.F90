@@ -114,7 +114,7 @@ PROGRAM SCFStatus
       IF(HasDFT(ModelChem)) CALL Get(Exc,'Exc',StatsToChar(Current))
    ENDIF
    ExchE=ExchE*SFac !<<< SPIN
-   Exc  =Exc  *SFac !<<< SPIN
+!   Exc  =Exc  *SFac !<<< SPIN
 !  Get E_nuc_tot =<Vnn+Vne> 
    CALL Get(E_Nuc_Tot,'E_NuclearTotal',StatsToChar(Current))
    ! Total electrostaic energy

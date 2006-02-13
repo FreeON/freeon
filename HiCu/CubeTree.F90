@@ -295,18 +295,18 @@ write(*,*) 'IXact',IXact,' NSDen',NSDen
 !===============================================================================
       SUBROUTINE LayGrid(Cube)
          TYPE(CubeNode), POINTER            :: Cube
-         REAL(DOUBLE),   DIMENSION(NGrid * 3)   :: Rho,AbsGradRho2         !<<< SPIN
-         REAL(DOUBLE),   DIMENSION(NGrid * 3)   :: E,dEdRho,dEdAbsGradRho2 !<<< SPIN
+         REAL(DOUBLE),   DIMENSION(NGrid * 3):: Rho,AbsGradRho2         !<<< SPIN
+         REAL(DOUBLE),   DIMENSION(NGrid * 3):: E,dEdRho,dEdAbsGradRho2 !<<< SPIN
+         REAL(DOUBLE),   DIMENSION(NGrid    ):: Buf
          REAL(DOUBLE),   DIMENSION(3)       :: GradRhoOnTheCube
          REAL(DOUBLE)                       :: EOnTheCube,dEd1OnTheCube, &
                                                dEd2OnTheCube,RhoOnTheCube, &
                                                DeltaRho,DeltaGrad
-         INTEGER                            :: I,J,K,iSDen,iGBeg,iGEnd
+         INTEGER                            :: I,J,K,iSDen,iGBeg,iGEnd,I1,I2
          INTEGER                            :: NC
          REAL(DOUBLE), DIMENSION(3)         :: BoxCenter,BoxBndLow,BoxBndHig
          REAL(DOUBLE), DIMENSION(NGRID,3)   :: GridOld
          REAL(DOUBLE)                       :: Rsum,PopOld
-         REAL(DOUBLE), EXTERNAL :: DDOT
 !--------------------------------------------------------------------------
 !        Transform cubature rule to this nodes bounding box
          CALL CubeRule(Cube)
@@ -339,56 +339,77 @@ write(*,*) 'IXact',IXact,' NSDen',NSDen
          Box%BndBox(:,2) = BoxBndHig(:)  
          Grid(:,:)       = GridOld(:,:)
 !----------------------------------------------------------------------------------
-!        Transfer global Cube values to local Cube
-         DO I=1,NGrid*NSDen
-            Rho(I)        =RhoV(I,1)
-            AbsGradRho2(I)=RhoV(I,2)**2+RhoV(I,3)**2+RhoV(I,4)**2
-            Cube%Vals(I,3)=RhoV(I,2)
-            Cube%Vals(I,4)=RhoV(I,3)
-            Cube%Vals(I,5)=RhoV(I,4)
-         ENDDO
-!        Evaluate Exc, dExcdRho, and dExcdAbsGradRho2 on the grid
-         DO iSDen=1,NSDen
-            iGBeg=(iSDen-1)*NGrid+1
-            iGEnd= iSDen   *NGrid
-            CALL ExcOnTheGrid(NGrid,Rho(iGBeg:iGEnd),AbsGradRho2(iGBeg:iGEnd), &
-                 &            E(iGBeg:iGEnd),dEdRho(iGBeg:iGEnd), &
-                 &            dEdAbsGradRho2(iGBeg:iGEnd)) 
-         ENDDO
-!        Transfer global values to the cube and compute approximate integrals 
-!        of E, dE/dRho, dE/d(AbsGradRho^2), Rho and GradRho over the cube
+         ! Rho(2*NGrid)
+         ! AbsGradRho2(3*NGrid)
+         ! E(NGrid)
+         ! dEdRho(2*NGrid)
+         ! dEdAbsGradRho2(3*NGrid)
+         ! Transfer global Cube values to local Cube
+         IF(NSDen.EQ.1)THEN
+            DO I=1,NGrid
+               Rho(I)=RhoV(I,1)!Rho_tot
+               AbsGradRho2(I)=RhoV(I,2)**2+RhoV(I,3)**2+RhoV(I,4)**2!DOT(GRho_tot,GRho_tot)
+               Cube%Vals(I,3)=RhoV(I,2)!GRho_tot_x
+               Cube%Vals(I,4)=RhoV(I,3)!GRho_tot_y
+               Cube%Vals(I,5)=RhoV(I,4)!GRho_tot_z
+            ENDDO
+         ELSEIF(NSDen.EQ.3)THEN
+            DO I=1,NGrid
+               I1=I+  NGrid
+               I2=I+2*NGrid
+               Rho(I )=RhoV(I1,1)!Rho_a
+               Rho(I1)=RhoV(I2,1)!Rho_b
+               AbsGradRho2(I )=RhoV(I1,2)**2+RhoV(I1,3)**2+RhoV(I1,4)**2!DOT(GRho_a,GRho_a)
+               AbsGradRho2(I1)=RhoV(I2,2)**2+RhoV(I2,3)**2+RhoV(I2,4)**2!DOT(GRho_b,GRho_b)
+               AbsGradRho2(I2)=RhoV(I1,2)*RhoV(I2,2)+RhoV(I1,3)*RhoV(I2,3)+RhoV(I1,4)*RhoV(I2,4)!DOT(GRho_a,GRho_b)
+               Cube%Vals(I ,3)=RhoV(I1,2)!GRho_a_x
+               Cube%Vals(I ,4)=RhoV(I1,3)!GRho_a_y
+               Cube%Vals(I ,5)=RhoV(I1,4)!GRho_a_z
+               Cube%Vals(I1,3)=RhoV(I2,2)!GRho_b_x
+               Cube%Vals(I1,4)=RhoV(I2,3)!GRho_b_y
+               Cube%Vals(I1,5)=RhoV(I2,4)!GRho_b_z
+            ENDDO
+         ELSE
+            CALL Halt('LayGrid: Wrong NSDen')
+         ENDIF
+         ! Evaluate Exc, dExcdRho, and dExcdAbsGradRho2 on the grid
+         CALL ExcOnTheGrid_ClSh(NGrid,Rho(1),AbsGradRho2(1),E(1),dEdRho(1),dEdAbsGradRho2(1),Buf(1),NSDen)
+         ! Transfer global values to the cube and compute approximate integrals 
+         ! of E, dE/dRho, dE/d(AbsGradRho^2), Rho and GradRho over the cube
          EOnTheCube=Zero
          dEd1OnTheCube=Zero
          dEd2OnTheCube=Zero
          RhoOnTheCube=Zero
          GradRhoOnTheCube=Zero
 
-         CALL DCOPY(NGrid*NSDen,dEdRho(1)        ,1,Cube%Vals(1,1),1)
-         CALL DCOPY(NGrid*NSDen,dEdAbsGradRho2(1),1,Cube%Vals(1,2),1)
-         !
-         ! E on the cube
          IF(NSDen.EQ.1)THEN
-            ! We need the E_tot=E(rho_tot)
-            EOnTheCube=EOnTheCube+DDOT(NGrid,Cube%Wght(1),1,E(1),1)
+            DO I=1,NGrid
+               Cube%Vals(I,1)=dEdRho(I)
+               Cube%Vals(I,2)=dEdAbsGradRho2(I)
+               EOnTheCube=EOnTheCube+Cube%Wght(I)*E(I)                   ! E on the cube
+               dEd1OnTheCube=dEd1OnTheCube+Cube%Wght(I)*dEdRho(I)        ! dEdRho on the cube
+               dEd2OnTheCube=dEd2OnTheCube+Cube%Wght(I)*dEdAbsGradRho2(I)! dEdAbsGradRho on the cube
+               RhoOnTheCube=RhoOnTheCube+Cube%Wght(I)*RhoV(I,1)          ! Rho on the cube
+               GradRhoOnTheCube(1:3)=GradRhoOnTheCube(1:3) &             ! GradRho on the cube
+                    +Cube%Wght(I)*RhoV(I,2:4)
+            ENDDO
+         ELSEIF(NSDen.EQ.3)THEN
+            CALL DCOPY(2*NGrid,dEdRho(1)        ,1,Cube%Vals(1,1),1)
+            CALL DCOPY(3*NGrid,dEdAbsGradRho2(1),1,Cube%Vals(1,2),1)
+            DO I=1,NGrid
+               EOnTheCube=EOnTheCube+Cube%Wght(I)*E(I)                   ! E on the cube
+               dEd1OnTheCube=dEd1OnTheCube+Cube%Wght(I)* &
+                    &        (dEdRho(I)+dEdRho(I+NGrid))                 ! dEdRho on the cube
+               dEd2OnTheCube=dEd2OnTheCube+Cube%Wght(I)* &
+                    &        (dEdAbsGradRho2(I)+dEdAbsGradRho2(I+NGrid)) ! dEdAbsGradRho on the cube
+               RhoOnTheCube=RhoOnTheCube+Cube%Wght(I)*RhoV(I,1)          ! Rho on the cube
+               GradRhoOnTheCube(1:3)=GradRhoOnTheCube(1:3) &             ! GradRho on the cube
+                    +Cube%Wght(I)*RhoV(I,2:4)
+            ENDDO
          ELSE
-            ! We need the E_tot=E(rho_a)+E(rho_b)
-            EOnTheCube=EOnTheCube+DDOT(NGrid,Cube%Wght(1),1,E(  NGrid+1),1) &
-                 &               +DDOT(NGrid,Cube%Wght(1),1,E(2*NGrid+1),1)  
+            CALL Halt('LayGrid: Wrong NSDen')
          ENDIF
-
-!!!!write(*,*) 'EOnTheCube',EOnTheCube,MyID
-
-         DO I=1,NGrid
-            !Cube%Vals(I,1)=dEdRho(I)
-            !Cube%Vals(I,2)=dEdAbsGradRho2(I)
-            !EOnTheCube=EOnTheCube+Cube%Wght(I)*E(I)                   ! E on the cube
-            dEd1OnTheCube=dEd1OnTheCube+Cube%Wght(I)*dEdRho(I)         ! dEdRho on the cube
-            dEd2OnTheCube=dEd2OnTheCube+Cube%Wght(I)*dEdAbsGradRho2(I) ! dEdAbsGradRho on the cube
-            RhoOnTheCube=RhoOnTheCube+Cube%Wght(I)*RhoV(I,1)           ! Rho on the cube
-            GradRhoOnTheCube(1:3)=GradRhoOnTheCube(1:3) &              ! GradRho on the cube
-                                 +Cube%Wght(I)*RhoV(I,2:4)    
-         ENDDO
-
+!----------------------------------------------------------------------------------
          Cube%ICube(1)=RhoOnTheCube
          Cube%ICube(2)=EOnTheCube
 !        Compute local error estimates          
@@ -414,7 +435,7 @@ write(*,*) 'IXact',IXact,' NSDen',NSDen
                                                        LXpt,UXpt,TwoZ,SqZ,CoFact,RL1,TmpX,TmpY, &
                                                        LXptX,LXptY,LXptZ,UXptX,UXptY,UXptZ,RL2
          INTEGER                                    :: I,J,IQ,IC,JQ,JC,KQ,KC,L,Ell,L1,L2,M,N,LMN,IGrid
-integer :: OffSDen,iSDen,I0
+         INTEGER :: OffSDen,iSDen,I0
 !-------------------------------------------------------------------------------------------------------
          Tx=ABS(Node%Box%Center(1)-Box%Center(1))
          IF(Tx>Node%Box%Half(1)+Box%Half(1))RETURN

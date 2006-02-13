@@ -55,11 +55,11 @@ MODULE KxcGen
       DO AtB=1,NAtoms
         IF(SetAtomPair(GM,BS,AtA,AtB,Pair)) THEN
           NAB = Pair%NA*Pair%NB*Kxc%NSMat
-!vw#ifndef PARALLEL
           IF(AtB<=AtA)THEN
+#ifdef PARALLEL
              Fac=1D0
              IF(AtA.EQ.AtB)Fac=0.5D0
-!vw#endif
+#endif
 !         Compute only the lower triangle of symmetric Kxc
             A = Pair%A
             B = Pair%B
@@ -249,7 +249,7 @@ real(double):: Pextent_Old
                                Kblk(IA,IB)=Kblk(IA,IB)+HGBra%D(LMN,IA,IB)*Ket(LMN)
                             ELSE
                                Kblk(IA,IB)=Kblk(IA,IB)+HGBra%D(LMN,IA,IB)*Ket(LMN)
-                               Kblk(IA,IB+Pair%NB)=Kblk(IA,IB+Pair%NB)+HGBra%D(LMN,IA,IB)*Ket(LMN+LHGTF(EllA+EllB))
+                               Kblk(IA,IB+Pair%NB)=Kblk(IA,IB+Pair%NB)+HGBra%D(LMN,IA,IB)*Ket(LMN+LHGTF(Prim%Ell))
                             ENDIF
 
                          ENDDO

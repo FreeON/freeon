@@ -6,9 +6,9 @@ MODULE Functionals
    USE DerivedTypes
    USE ProcessControl
    USE Parse
-   INTERFACE ExcOnTheGrid
-      MODULE PROCEDURE ExcOnTheGrid_ClSh
-   END INTERFACE
+   !INTERFACE ExcOnTheGrid
+   !   MODULE PROCEDURE ExcOnTheGrid_ClSh
+   !END INTERFACE
 !  Parsing keys for <Options.Model=>
    CHARACTER(LEN=*),  PARAMETER :: MODEL_OPTION='ModelChem'
 !  Exchange only
@@ -141,60 +141,97 @@ MODULE Functionals
 !====================================================================================
 !
 !====================================================================================
-      SUBROUTINE ExcOnTheGrid_ClSh(NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam) 
-         INTEGER                        :: NGrid
-         REAL(DOUBLE)                   :: a0,ax,ac
-         REAL(DOUBLE), DIMENSION(NGrid) :: Rho,AbsGradRho2
-         REAL(DOUBLE), DIMENSION(NGrid) :: E,dEdRho,dEdGam
-         INTEGER                        :: N1,N2
+      SUBROUTINE ExcOnTheGrid_ClSh(NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,Buf,NSDen) 
+         INTEGER                    :: NGrid,NSDen
+         REAL(DOUBLE)               :: a0,ax,ac
+         REAL(DOUBLE), DIMENSION(*) :: Rho,AbsGradRho2
+         REAL(DOUBLE), DIMENSION(*) :: E,dEdRho,dEdGam,Buf
+         INTEGER                    :: N1,N2
 !---------------------------------------------------------------------------------------
-         E=Zero 
-         dEdRho=Zero 
-         dEdGam=Zero
-         SELECT CASE(ModelChem)         
+         !E=Zero
+         !dEdRho=Zero 
+         !dEdGam=Zero
+         IF(NSDen.EQ.1)THEN
+            E(1:NGrid)=Zero
+            dEdRho(1:NGrid)=Zero
+            dEdGam(1:NGrid)=Zero
+         ELSEIF(NSDen.EQ.3)THEN
+            E(1:NGrid)=Zero
+            dEdRho(1:2*NGrid)=Zero
+            dEdGam(1:3*NGrid)=Zero
+         ELSE
+            CALL Halt('Wrong NSDen!')
+         ENDIF
+         N1=  NGrid+1
+         N2=2*NGrid+1
+         SELECT CASE(ModelChem)
          CASE(SD_EXCHANGE)
-            CALL SDx_ClSh  (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,One)
+            IF(NSDen.EQ.1)THEN
+               CALL SDx_ClSh  (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,One)
+            ELSEIF(NSDen.EQ.3)THEN
+               CALL uks_x_lda(1,NGrid,Rho(1),Rho(N1),AbsGradRho2(1),AbsGradRho2(N1),AbsGradRho2(N2), &
+                    &  E(1),dEdRho(1),dEdRho(N1),dEdGam(1),dEdGam(N1),dEdGam(N2), &
+                    &  Buf(1),Buf(1),Buf(1),Buf(1),Buf(1),Buf(1),Buf(1),Buf(1), &
+                    &  Buf(1),Buf(1),Buf(1),Buf(1),Buf(1),Buf(1),Buf(1))
+            ENDIF
          CASE(XA_EXCHANGE)
+            IF(NSDen.NE.1)CALL Halt('This functional is not available for unrestricted! '//IntToChar(ModelChem))
             CALL XAx_ClSh  (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,One)
          CASE(B88_EXCHANGE)
+            IF(NSDen.NE.1)CALL Halt('This functional is not available for unrestricted! '//IntToChar(ModelChem))
             CALL B88x_ClSh (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,One) 
          CASE(PW91_EXCHANGE)
+            IF(NSDen.NE.1)CALL Halt('This functional is not available for unrestricted! '//IntToChar(ModelChem))
             CALL PW91x_ClSh(NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,One) 
          CASE(PBE_EXCHANGE)
+            IF(NSDen.NE.1)CALL Halt('This functional is not available for unrestricted! '//IntToChar(ModelChem))
             CALL PBEx_ClSh (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,One) 
          CASE(PURE_VWN3_LSD)
+            IF(NSDen.NE.1)CALL Halt('This functional is not available for unrestricted! '//IntToChar(ModelChem))
             CALL XAx_ClSh  (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,One)
             CALL VWN3c_ClSh(NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,One)
          CASE(PURE_VWN5_LSD)
+            IF(NSDen.NE.1)CALL Halt('This functional is not available for unrestricted! '//IntToChar(ModelChem))
             CALL XAx_ClSh  (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,One)
             CALL VWN5c_ClSh(NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,One)
          CASE(PURE_PW91_PW91)
-            CALL PW91x_ClSh(NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,One)
-            CALL Halt(' PW91c is buggy.  Sorry, please try another functional ')
-            CALL PW91c_ClSh(NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,One)
-
-            !N1=  NGrid+1
-            !N2=2*NGrid+1
-            !CALL uks_xc_pw91(0,NGrid,Rho(1),Rho(N1),AbsGradRho2(1),AbsGradRho2(N1),AbsGradRho2(N2), &
-            !     &  E(1),dEdRho(1) dEdRho(N1),dEdGam(1),dEdGam(N1),dEdGam(N2), &
-            !     &  0D0,0D0,0D0,0D0,0D0,0D0,0D0,0D0,0D0,0D0,0D0,0D0,0D0,0D0,0D0)
-
+            !IF(NSDen.NE.1)CALL Halt('This functional is not available for unrestricted!'//IntToChar(ModelChem))
+            IF(NSDen.EQ.1)THEN
+               !CALL PW91x_ClSh(NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,One)
+               !CALL Halt(' PW91c is buggy.  Sorry, please try another functional ')
+               !CALL PW91c_ClSh(NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,One)
+               Rho(1:NGrid)=2D0*Rho(1:NGrid)
+               AbsGradRho2(1:NGrid)=4D0*AbsGradRho2(1:NGrid)
+               CALL rks_xc_pw91(1,NGrid,Rho(1),AbsGradRho2(1), &
+                    &  E(1),dEdRho(1),dEdGam(1), &
+                    &  Buf(1),Buf(1),Buf(1))
+            ELSEIF(NSDen.EQ.3)THEN
+               CALL uks_xc_pw91(1,NGrid,Rho(1),Rho(N1),AbsGradRho2(1),AbsGradRho2(N1),AbsGradRho2(N2), &
+                    &  E(1),dEdRho(1),dEdRho(N1),dEdGam(1),dEdGam(N1),dEdGam(N2), &
+                    &  Buf(1),Buf(1),Buf(1),Buf(1),Buf(1),Buf(1),Buf(1),Buf(1),Buf(1), &
+                    &  Buf(1),Buf(1),Buf(1),Buf(1),Buf(1),Buf(1))
+            ENDIF
          CASE(PURE_PW91_LYP)
+            IF(NSDen.NE.1)CALL Halt('This functional is not available for unrestricted! '//IntToChar(ModelChem))
             CALL PW91x_ClSh(NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,One)
             CALL LYPc_ClSh (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,One) 
          CASE(PURE_B88_LYP)
+            IF(NSDen.NE.1)CALL Halt('This functional is not available for unrestricted! '//IntToChar(ModelChem))
             CALL B88x_ClSh (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,One) 
             CALL LYPc_ClSh (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,One) 
          CASE(PURE_PBE_PBE)
+            IF(NSDen.NE.1)CALL Halt('This functional is not available for unrestricted! '//IntToChar(ModelChem))
             CALL PBEx_ClSh (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,One) 
             CALL PBEc_ClSh (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,One) 
          CASE(HYBRID_PBE0)
+            IF(NSDen.NE.1)CALL Halt('This functional is not available for unrestricted! '//IntToChar(ModelChem))
 !           PBE0 Model, Adamo and Barone: JCP 110, p.6158 (1999)
 !           E^{PBE0}_{xc}=E^{PBE}_{xc}+(1/4)(E^{HF}_x-E^{GGA}_x)
 !                        =E^{PBE}_{c}+(3/4)E^{PBE}_x+(1/4)E^{HF}_x
             CALL PBEx_ClSh (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,0.75D0) 
             CALL PBEc_ClSh (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,One)
          CASE(HYBRID_B3LYP_VWN3)
+            !IF(NSDen.NE.1)CALL Halt('This functional is not available for unrestricted!'//IntToChar(ModelChem))
 !           Gaussianized B3LYP Model, uses VWN3 LSD correlation functional
 !           A. Becke: JCP 98, p.5648 (1993)
 !           R. H. Hertwig and W. Koch: CPL 268, p.345 (1997)
@@ -202,14 +239,22 @@ MODULE Functionals
 !           a0=0.2, ax=0.72, ac=0.81
 !           E^{B3LYP}_{xc}=(1-a0-ax)E^{LSD}_{x}+(1-ac)E^{VWN5}_c 
 !                         +ax*E^{B88}_x+ac*E^{LYP}_c+a0*E^{HF}_x                 
-            a0=0.20D0
-            ax=0.72D0
-            ac=0.81D0
-            CALL XAx_ClSh  (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam, One-a0-ax )
-            CALL B88x_ClSh (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam, ax )
-            CALL VWN3c_ClSh(NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam, One-ac )
-            CALL LYPc_ClSh (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam, ac )
+            IF(NSDen.EQ.1)THEN
+               a0=0.20D0
+               ax=0.72D0
+               ac=0.81D0
+               CALL XAx_ClSh  (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam, One-a0-ax )
+               CALL B88x_ClSh (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam, ax )
+               CALL VWN3c_ClSh(NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam, One-ac )
+               CALL LYPc_ClSh (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam, ac )
+            ELSEIF(NSDen.EQ.3)THEN
+               CALL uks_xc_b3lyp(1,NGrid,Rho(1),Rho(N1),AbsGradRho2(1),AbsGradRho2(N1),AbsGradRho2(N2), &
+                    &  E(1),dEdRho(1),dEdRho(N1),dEdGam(1),dEdGam(N1),dEdGam(N2), &
+                    &  Buf(1),Buf(1),Buf(1),Buf(1),Buf(1),Buf(1),Buf(1),Buf(1),Buf(1), &
+                    &  Buf(1),Buf(1),Buf(1),Buf(1),Buf(1),Buf(1))
+            ENDIF
          CASE(HYBRID_B3LYP_VWN5)
+            IF(NSDen.NE.1)CALL Halt('This functional is not available for unrestricted!'//IntToChar(ModelChem))
 !           Turbomolized B3LYP Model, 
 !           A. Becke: JCP 98, p.5648 (1993), uses VWN5 LSD correlation functional
 !           R. H. Hertwig and W. Koch: CPL 268, p.345 (1997)
@@ -223,14 +268,8 @@ MODULE Functionals
             CALL B88x_ClSh (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam, ax )
             CALL VWN5c_ClSh(NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam, One-ac )
             CALL LYPc_ClSh (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam, ac )
-
-            !N1=  NGrid+1
-            !N2=2*NGrid+1
-            !CALL uks_xc_b3lyp(0,NGrid,Rho(1),Rho(N1),AbsGradRho2(1),AbsGradRho2(N1),AbsGradRho2(N2), &
-            !     &  E(1),dEdRho(1) dEdRho(N1),dEdGam(1),dEdGam(N1),dEdGam(N2), &
-            !     &  0D0,0D0,0D0,0D0,0D0,0D0,0D0,0D0,0D0,0D0,0D0,0D0,0D0,0D0,0D0)
-
          CASE(HYBRID_X3LYP)
+            IF(NSDen.NE.1)CALL Halt('This functional is not available for unrestricted!'//IntToChar(ModelChem))
 !           Extended hybrid LYP functional
 !           Xu and Goddard, PNAS 101, p.2673 (2004)             
 !           E^{X3LYP}_{xc}=(1-a0-ax)E^{LSD}_{x}+ac*E^{VWN3}_c 

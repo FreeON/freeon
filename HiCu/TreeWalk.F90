@@ -57,12 +57,12 @@ MODULE TreeWalk
                                                 I,J,L,M,N,L1,L2,LMN,LMNLen
 
        REAL(DOUBLE), DIMENSION(50) :: Gx,Gy,Gz
-       REAL(DOUBLE)                :: GradX,GradY,GradZ
-       INTEGER                     :: IA,IB,EllA,EllB,LMNA,LMNB,OffSDen,I0,iSDen,SDBeg
+       REAL(DOUBLE)                :: GradX,GradY,GradZ,GRhoAG,GRhoBG
+       INTEGER                     :: IA,IB,EllA,EllB,LMNA,LMNB,OffSDen,I1,I2,LMN1,LMN2
 
 !
-       SDBeg=0
-       IF(NSDen.GT.1)SDBeg=1!<<< SPIN We don't need to integrate the rho_tot part.
+       !SDBeg=0
+       !IF(NSDen.GT.1)SDBeg=1!<<< SPIN We don't need to integrate the rho_tot part.
        OffSDen=LHGTF(Prim%Ell)
 
 #ifdef EXPLICIT_SOURCE
@@ -90,31 +90,60 @@ MODULE TreeWalk
              LambdaY(L)=TwoZ*(RPy*LambdaY(L1)-RL1*LambdaY(L2))
              LambdaZ(L)=TwoZ*(RPz*LambdaZ(L1)-RL1*LambdaZ(L2))
           ENDDO
-          DO L=0,Prim%Ell
+          !
+          IF(NSDen.EQ.1)THEN
+             DO L=0,Prim%Ell
              DO M=0,Prim%Ell-L
-                DO N=0,Prim%Ell-M-L
-                   PrimDist     = LambdaX(L  )*LambdaY(M  )*LambdaZ(N  )*Xpt
-                   GradPrimDistX=-LambdaX(L+1)*LambdaY(M  )*LambdaZ(N  )*Xpt
-                   GradPrimDistY=-LambdaX(L  )*LambdaY(M+1)*LambdaZ(N  )*Xpt
-                   GradPrimDistZ=-LambdaX(L  )*LambdaY(M  )*LambdaZ(N+1)*Xpt
-!                  Kxc(LMN)=Kxc(LMN)+w_i*(dE/dRho-2dE/d(GradRho)^2 Phi_a*Phi_B GradRho.Grad(Phi_a*Phi_B)
-                   DO iSDen=SDBeg,NSDen-1
-                      LMN=LMNDex(L,M,N)+(iSDen-SDBeg)*OffSDen
-                      I0=I+iSDen*NGrid
-
-                      Ket(LMN)=Ket(LMN)+Cube%Wght(I)                   &
-                                      *(Cube%Vals(I0,1)*PrimDist       & 
-                                      + Cube%Vals(I0,2)*(              &
-                                        Cube%Vals(I0,3)*GradPrimDistX  &
-                                      + Cube%Vals(I0,4)*GradPrimDistY  &
-                                      + Cube%Vals(I0,5)*GradPrimDistZ))
-
-
-                   ENDDO
-!                   Ket(LMN)=Ket(LMN)+Cube%Wght(I)*Cube%Vals(I,1)*PrimDist
-                ENDDO
+             DO N=0,Prim%Ell-M-L
+                PrimDist     = LambdaX(L  )*LambdaY(M  )*LambdaZ(N  )*Xpt
+                GradPrimDistX=-LambdaX(L+1)*LambdaY(M  )*LambdaZ(N  )*Xpt
+                GradPrimDistY=-LambdaX(L  )*LambdaY(M+1)*LambdaZ(N  )*Xpt
+                GradPrimDistZ=-LambdaX(L  )*LambdaY(M  )*LambdaZ(N+1)*Xpt
+                ! Kxc(LMN)=Kxc(LMN)+w_i*( dE/dRho*Phi_A*Phi_B +2*dE/d(GradRho)^2* GradRho.Grad(Phi_A*Phi_B) )
+                LMN=LMNDex(L,M,N)
+                Ket(LMN)=Ket(LMN)+Cube%Wght(I)                   &
+                                 *(Cube%Vals(I,1)*PrimDist       &
+                                 + Cube%Vals(I,2)*(              &
+                                   Cube%Vals(I,3)*GradPrimDistX  &
+                                 + Cube%Vals(I,4)*GradPrimDistY  &
+                                 + Cube%Vals(I,5)*GradPrimDistZ))
              ENDDO
-          ENDDO
+             ENDDO
+             ENDDO
+          ELSEIF(NSDen.EQ.3)THEN
+             DO L=0,Prim%Ell
+             DO M=0,Prim%Ell-L
+             DO N=0,Prim%Ell-M-L
+                PrimDist     = LambdaX(L  )*LambdaY(M  )*LambdaZ(N  )*Xpt
+                GradPrimDistX=-LambdaX(L+1)*LambdaY(M  )*LambdaZ(N  )*Xpt
+                GradPrimDistY=-LambdaX(L  )*LambdaY(M+1)*LambdaZ(N  )*Xpt
+                GradPrimDistZ=-LambdaX(L  )*LambdaY(M  )*LambdaZ(N+1)*Xpt
+                ! dEdRho(2*NGrid)
+                ! dEdAbsGradRho2(3*NGrid)
+                LMN1=LMNDex(L,M,N)
+                LMN2=LMN1+OffSDen
+                I1=I+  NGrid
+                I2=I+2*NGrid
+                !GradRho_a.Grad(Phi_A*Phi_B)
+                GRhoAG=Cube%Vals(I ,3)*GradPrimDistX+Cube%Vals(I ,4)*GradPrimDistY+Cube%Vals(I ,5)*GradPrimDistZ
+                !GradRho_b.Grad(Phi_A*Phi_B)
+                GRhoBG=Cube%Vals(I1,3)*GradPrimDistX+Cube%Vals(I1,4)*GradPrimDistY+Cube%Vals(I1,5)*GradPrimDistZ
+                !Kxc_a(LMN)=Kxc_a(LMN)+w_i*( dE/dRho_a*Phi_A*Phi_B 
+                !           +2*dE/d(GradRho_aa)^2*GradRho_a.Grad(Phi_A*Phi_B) 
+                !           +  dE/d(GradRho_ab)^2*GradRho_b.Grad(Phi_A*Phi_B) )
+                Ket(LMN1)=Ket(LMN1)+Cube%Wght(I)*( &
+                     & Cube%Vals(I ,1)*PrimDist + 2D0*Cube%Vals(I ,2)*GRhoAG + Cube%Vals(I2,2)*GRhoBG )
+                !Kxc_b(LMN)=Kxc_b(LMN)+w_i*( dE/dRho_b*Phi_A*Phi_B 
+                !           +2*dE/d(GradRho_bb)^2*GradRho_b.Grad(Phi_A*Phi_B) 
+                !           +  dE/d(GradRho_ab)^2*GradRho_a.Grad(Phi_A*Phi_B) )
+                Ket(LMN2)=Ket(LMN2)+Cube%Wght(I)*( &
+                     & Cube%Vals(I1,1)*PrimDist + 2D0*Cube%Vals(I1,2)*GRhoBG + Cube%Vals(I2,2)*GRhoAG )
+             ENDDO
+             ENDDO
+             ENDDO
+          ELSE
+             CALL Halt('Wrong NSDen in KxcCube!')
+          ENDIF
           ENDIF
        ENDDO
 #endif
