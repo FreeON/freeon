@@ -39,7 +39,7 @@ MODULE ONXGet
 #ifdef ONX2_PARALLEL
   PUBLIC :: Get_Essential_RowCol
   PUBLIC :: Set_DFASTMAT_EQ_DBCSR2
-  PUBLIC :: Reduce_FASTMAT
+!  PUBLIC :: Reduce_FASTMAT
   PUBLIC :: GetDab
 #endif
   !
@@ -243,7 +243,7 @@ CONTAINS
   END SUBROUTINE Set_DFASTMAT_EQ_DBCSR2
 #endif
   !
-#ifdef ONX2_PARALLEL
+#ifdef BLABLABLA
   SUBROUTINE Reduce_FASTMAT(A,AFM)
     IMPLICIT NONE
     TYPE(BCSR)              :: A
