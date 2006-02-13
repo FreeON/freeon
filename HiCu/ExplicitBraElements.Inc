@@ -18,24 +18,53 @@
                 LambdaY(1)=TwoZ*RPy
                 LambdaZ(1)=TwoZ*RPz
                 Wght=Cube%Wght(I)
-                !Q&D...
-                DO iSDen=SDBeg,NSDen-1
-                  LMN=(iSDen-SDBeg)*OffSDen
-                  I0=I+iSDen*NGrid
-                  dEdRho=Cube%Vals(I0,1)
-                  dEdAbsGradRho2=Cube%Vals(I0,2)
-                  GradRhoX=Cube%Vals(I0,3)
-                  GradRhoY=Cube%Vals(I0,4)
-                  GradRhoZ=Cube%Vals(I0,5)
+                IF(NSDen.EQ.1)THEN
+                  dEdRho=Cube%Vals(I,1)
+                  dEdAbsGradRho2=Cube%Vals(I,2)
+                  GradRhoX=Cube%Vals(I,3)
+                  GradRhoY=Cube%Vals(I,4)
+                  GradRhoZ=Cube%Vals(I,5)
                   PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(0)
                   GradPrimDistY=-LambdaX(0)*LambdaY(1)*LambdaZ(0)
                   GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(1+LMN)=Ket(1+LMN)&
+                  Ket(1)=Ket(1)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
-                ENDDO
+                ELSEIF(NSDen.EQ.3)THEN
+                  I1=I+  NGrid
+                  I2=I+2*NGrid
+                  dEdRhoA=Cube%Vals(I ,1)
+                  dEdRhoB=Cube%Vals(I1,1)
+                  dEdAbsGradRho2AA=Cube%Vals(I ,2)
+                  dEdAbsGradRho2BB=Cube%Vals(I1,2)
+                  dEdAbsGradRho2AB=Cube%Vals(I2,2)
+                  GradRhoXA=Cube%Vals(I ,3)
+                  GradRhoYA=Cube%Vals(I ,4)
+                  GradRhoZA=Cube%Vals(I ,5)
+                  GradRhoXB=Cube%Vals(I1,3)
+                  GradRhoYB=Cube%Vals(I1,4)
+                  GradRhoZB=Cube%Vals(I1,5)
+                  PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(1)
+                  LMN1=1
+                  LMN2=1+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                ELSE
+                  CALL Halt('ExplicitBraElements.Inc: Wrong NSDen')
+                ENDIF
              ENDIF
           ENDDO
        CASE(1)
@@ -58,22 +87,19 @@
                 LambdaY(2)=TwoZ*(RPY*LambdaY(1)-LambdaY(0))
                 LambdaZ(2)=TwoZ*(RPZ*LambdaZ(1)-LambdaZ(0))
                 Wght=Cube%Wght(I)
-                !Q&D...
-                DO iSDen=SDBeg,NSDen-1
-                  LMN=(iSDen-SDBeg)*OffSDen
-                  I0=I+iSDen*NGrid
-                  dEdRho=Cube%Vals(I0,1)
-                  dEdAbsGradRho2=Cube%Vals(I0,2)
-                  GradRhoX=Cube%Vals(I0,3)
-                  GradRhoY=Cube%Vals(I0,4)
-                  GradRhoZ=Cube%Vals(I0,5)
+                IF(NSDen.EQ.1)THEN
+                  dEdRho=Cube%Vals(I,1)
+                  dEdAbsGradRho2=Cube%Vals(I,2)
+                  GradRhoX=Cube%Vals(I,3)
+                  GradRhoY=Cube%Vals(I,4)
+                  GradRhoZ=Cube%Vals(I,5)
                   PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(0)
                   GradPrimDistY=-LambdaX(0)*LambdaY(1)*LambdaZ(0)
                   GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(1+LMN)=Ket(1+LMN)&
+                  Ket(1)=Ket(1)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(1)
@@ -81,7 +107,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(4+LMN)=Ket(4+LMN)&
+                  Ket(4)=Ket(4)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(1)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(1)*LambdaY(1)*LambdaZ(0)
@@ -89,7 +115,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(1)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(3+LMN)=Ket(3+LMN)&
+                  Ket(3)=Ket(3)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(0)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(2)*LambdaY(0)*LambdaZ(0)
@@ -97,9 +123,89 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(0)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(2+LMN)=Ket(2+LMN)&
+                  Ket(2)=Ket(2)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
-                ENDDO
+                ELSEIF(NSDen.EQ.3)THEN
+                  I1=I+  NGrid
+                  I2=I+2*NGrid
+                  dEdRhoA=Cube%Vals(I ,1)
+                  dEdRhoB=Cube%Vals(I1,1)
+                  dEdAbsGradRho2AA=Cube%Vals(I ,2)
+                  dEdAbsGradRho2BB=Cube%Vals(I1,2)
+                  dEdAbsGradRho2AB=Cube%Vals(I2,2)
+                  GradRhoXA=Cube%Vals(I ,3)
+                  GradRhoYA=Cube%Vals(I ,4)
+                  GradRhoZA=Cube%Vals(I ,5)
+                  GradRhoXB=Cube%Vals(I1,3)
+                  GradRhoYB=Cube%Vals(I1,4)
+                  GradRhoZB=Cube%Vals(I1,5)
+                  PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(1)
+                  LMN1=1
+                  LMN2=1+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(2)
+                  LMN1=4
+                  LMN2=4+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(1)*LambdaZ(1)
+                  LMN1=3
+                  LMN2=3+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(0)*LambdaZ(1)
+                  LMN1=2
+                  LMN2=2+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                ELSE
+                  CALL Halt('ExplicitBraElements.Inc: Wrong NSDen')
+                ENDIF
              ENDIF
           ENDDO
        CASE(2)
@@ -125,22 +231,19 @@
                 LambdaZ(2)=TwoZ*(RPZ*LambdaZ(1)-LambdaZ(0))
                 LambdaZ(3)=TwoZ*(RPZ*LambdaZ(2)-2.D0*LambdaZ(1))
                 Wght=Cube%Wght(I)
-                !Q&D...
-                DO iSDen=SDBeg,NSDen-1
-                  LMN=(iSDen-SDBeg)*OffSDen
-                  I0=I+iSDen*NGrid
-                  dEdRho=Cube%Vals(I0,1)
-                  dEdAbsGradRho2=Cube%Vals(I0,2)
-                  GradRhoX=Cube%Vals(I0,3)
-                  GradRhoY=Cube%Vals(I0,4)
-                  GradRhoZ=Cube%Vals(I0,5)
+                IF(NSDen.EQ.1)THEN
+                  dEdRho=Cube%Vals(I,1)
+                  dEdAbsGradRho2=Cube%Vals(I,2)
+                  GradRhoX=Cube%Vals(I,3)
+                  GradRhoY=Cube%Vals(I,4)
+                  GradRhoZ=Cube%Vals(I,5)
                   PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(0)
                   GradPrimDistY=-LambdaX(0)*LambdaY(1)*LambdaZ(0)
                   GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(1+LMN)=Ket(1+LMN)&
+                  Ket(1)=Ket(1)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(1)
@@ -148,7 +251,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(4+LMN)=Ket(4+LMN)&
+                  Ket(4)=Ket(4)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(2)
                   GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(2)
@@ -156,7 +259,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(3)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(10+LMN)=Ket(10+LMN)&
+                  Ket(10)=Ket(10)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(1)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(1)*LambdaY(1)*LambdaZ(0)
@@ -164,7 +267,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(1)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(3+LMN)=Ket(3+LMN)&
+                  Ket(3)=Ket(3)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(1)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(1)*LambdaY(1)*LambdaZ(1)
@@ -172,7 +275,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(1)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(9+LMN)=Ket(9+LMN)&
+                  Ket(9)=Ket(9)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(2)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(1)*LambdaY(2)*LambdaZ(0)
@@ -180,7 +283,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(2)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(7+LMN)=Ket(7+LMN)&
+                  Ket(7)=Ket(7)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(0)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(2)*LambdaY(0)*LambdaZ(0)
@@ -188,7 +291,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(0)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(2+LMN)=Ket(2+LMN)&
+                  Ket(2)=Ket(2)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(0)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(2)*LambdaY(0)*LambdaZ(1)
@@ -196,7 +299,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(0)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(8+LMN)=Ket(8+LMN)&
+                  Ket(8)=Ket(8)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(1)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(2)*LambdaY(1)*LambdaZ(0)
@@ -204,7 +307,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(1)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(6+LMN)=Ket(6+LMN)&
+                  Ket(6)=Ket(6)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(2)*LambdaY(0)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(3)*LambdaY(0)*LambdaZ(0)
@@ -212,9 +315,185 @@
                   GradPrimDistZ=-LambdaX(2)*LambdaY(0)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(5+LMN)=Ket(5+LMN)&
+                  Ket(5)=Ket(5)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
-                ENDDO
+                ELSEIF(NSDen.EQ.3)THEN
+                  I1=I+  NGrid
+                  I2=I+2*NGrid
+                  dEdRhoA=Cube%Vals(I ,1)
+                  dEdRhoB=Cube%Vals(I1,1)
+                  dEdAbsGradRho2AA=Cube%Vals(I ,2)
+                  dEdAbsGradRho2BB=Cube%Vals(I1,2)
+                  dEdAbsGradRho2AB=Cube%Vals(I2,2)
+                  GradRhoXA=Cube%Vals(I ,3)
+                  GradRhoYA=Cube%Vals(I ,4)
+                  GradRhoZA=Cube%Vals(I ,5)
+                  GradRhoXB=Cube%Vals(I1,3)
+                  GradRhoYB=Cube%Vals(I1,4)
+                  GradRhoZB=Cube%Vals(I1,5)
+                  PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(1)
+                  LMN1=1
+                  LMN2=1+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(2)
+                  LMN1=4
+                  LMN2=4+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(2)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(2)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(1)*LambdaZ(2)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(3)
+                  LMN1=10
+                  LMN2=10+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(1)*LambdaZ(1)
+                  LMN1=3
+                  LMN2=3+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(2)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(1)*LambdaZ(2)
+                  LMN1=9
+                  LMN2=9+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(3)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(2)*LambdaZ(1)
+                  LMN1=7
+                  LMN2=7+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(0)*LambdaZ(1)
+                  LMN1=2
+                  LMN2=2+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(0)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(0)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(0)*LambdaZ(2)
+                  LMN1=8
+                  LMN2=8+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(1)*LambdaZ(1)
+                  LMN1=6
+                  LMN2=6+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(2)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(3)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(2)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(2)*LambdaY(0)*LambdaZ(1)
+                  LMN1=5
+                  LMN2=5+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                ELSE
+                  CALL Halt('ExplicitBraElements.Inc: Wrong NSDen')
+                ENDIF
              ENDIF
           ENDDO
        CASE(3)
@@ -243,22 +522,19 @@
                 LambdaZ(3)=TwoZ*(RPZ*LambdaZ(2)-2.D0*LambdaZ(1))
                 LambdaZ(4)=TwoZ*(RPZ*LambdaZ(3)-3.D0*LambdaZ(2))
                 Wght=Cube%Wght(I)
-                !Q&D...
-                DO iSDen=SDBeg,NSDen-1
-                  LMN=(iSDen-SDBeg)*OffSDen
-                  I0=I+iSDen*NGrid
-                  dEdRho=Cube%Vals(I0,1)
-                  dEdAbsGradRho2=Cube%Vals(I0,2)
-                  GradRhoX=Cube%Vals(I0,3)
-                  GradRhoY=Cube%Vals(I0,4)
-                  GradRhoZ=Cube%Vals(I0,5)
+                IF(NSDen.EQ.1)THEN
+                  dEdRho=Cube%Vals(I,1)
+                  dEdAbsGradRho2=Cube%Vals(I,2)
+                  GradRhoX=Cube%Vals(I,3)
+                  GradRhoY=Cube%Vals(I,4)
+                  GradRhoZ=Cube%Vals(I,5)
                   PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(0)
                   GradPrimDistY=-LambdaX(0)*LambdaY(1)*LambdaZ(0)
                   GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(1+LMN)=Ket(1+LMN)&
+                  Ket(1)=Ket(1)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(1)
@@ -266,7 +542,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(4+LMN)=Ket(4+LMN)&
+                  Ket(4)=Ket(4)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(2)
                   GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(2)
@@ -274,7 +550,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(3)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(10+LMN)=Ket(10+LMN)&
+                  Ket(10)=Ket(10)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(3)
                   GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(3)
@@ -282,7 +558,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(4)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(20+LMN)=Ket(20+LMN)&
+                  Ket(20)=Ket(20)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(1)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(1)*LambdaY(1)*LambdaZ(0)
@@ -290,7 +566,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(1)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(3+LMN)=Ket(3+LMN)&
+                  Ket(3)=Ket(3)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(1)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(1)*LambdaY(1)*LambdaZ(1)
@@ -298,7 +574,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(1)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(9+LMN)=Ket(9+LMN)&
+                  Ket(9)=Ket(9)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(1)*LambdaZ(2)
                   GradPrimDistX=-LambdaX(1)*LambdaY(1)*LambdaZ(2)
@@ -306,7 +582,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(1)*LambdaZ(3)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(19+LMN)=Ket(19+LMN)&
+                  Ket(19)=Ket(19)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(2)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(1)*LambdaY(2)*LambdaZ(0)
@@ -314,7 +590,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(2)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(7+LMN)=Ket(7+LMN)&
+                  Ket(7)=Ket(7)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(2)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(1)*LambdaY(2)*LambdaZ(1)
@@ -322,7 +598,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(2)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(17+LMN)=Ket(17+LMN)&
+                  Ket(17)=Ket(17)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(3)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(1)*LambdaY(3)*LambdaZ(0)
@@ -330,7 +606,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(3)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(14+LMN)=Ket(14+LMN)&
+                  Ket(14)=Ket(14)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(0)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(2)*LambdaY(0)*LambdaZ(0)
@@ -338,7 +614,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(0)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(2+LMN)=Ket(2+LMN)&
+                  Ket(2)=Ket(2)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(0)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(2)*LambdaY(0)*LambdaZ(1)
@@ -346,7 +622,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(0)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(8+LMN)=Ket(8+LMN)&
+                  Ket(8)=Ket(8)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(0)*LambdaZ(2)
                   GradPrimDistX=-LambdaX(2)*LambdaY(0)*LambdaZ(2)
@@ -354,7 +630,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(0)*LambdaZ(3)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(18+LMN)=Ket(18+LMN)&
+                  Ket(18)=Ket(18)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(1)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(2)*LambdaY(1)*LambdaZ(0)
@@ -362,7 +638,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(1)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(6+LMN)=Ket(6+LMN)&
+                  Ket(6)=Ket(6)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(1)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(2)*LambdaY(1)*LambdaZ(1)
@@ -370,7 +646,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(1)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(16+LMN)=Ket(16+LMN)&
+                  Ket(16)=Ket(16)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(2)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(2)*LambdaY(2)*LambdaZ(0)
@@ -378,7 +654,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(2)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(13+LMN)=Ket(13+LMN)&
+                  Ket(13)=Ket(13)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(2)*LambdaY(0)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(3)*LambdaY(0)*LambdaZ(0)
@@ -386,7 +662,7 @@
                   GradPrimDistZ=-LambdaX(2)*LambdaY(0)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(5+LMN)=Ket(5+LMN)&
+                  Ket(5)=Ket(5)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(2)*LambdaY(0)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(3)*LambdaY(0)*LambdaZ(1)
@@ -394,7 +670,7 @@
                   GradPrimDistZ=-LambdaX(2)*LambdaY(0)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(15+LMN)=Ket(15+LMN)&
+                  Ket(15)=Ket(15)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(2)*LambdaY(1)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(3)*LambdaY(1)*LambdaZ(0)
@@ -402,7 +678,7 @@
                   GradPrimDistZ=-LambdaX(2)*LambdaY(1)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(12+LMN)=Ket(12+LMN)&
+                  Ket(12)=Ket(12)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(3)*LambdaY(0)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(4)*LambdaY(0)*LambdaZ(0)
@@ -410,9 +686,345 @@
                   GradPrimDistZ=-LambdaX(3)*LambdaY(0)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(11+LMN)=Ket(11+LMN)&
+                  Ket(11)=Ket(11)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
-                ENDDO
+                ELSEIF(NSDen.EQ.3)THEN
+                  I1=I+  NGrid
+                  I2=I+2*NGrid
+                  dEdRhoA=Cube%Vals(I ,1)
+                  dEdRhoB=Cube%Vals(I1,1)
+                  dEdAbsGradRho2AA=Cube%Vals(I ,2)
+                  dEdAbsGradRho2BB=Cube%Vals(I1,2)
+                  dEdAbsGradRho2AB=Cube%Vals(I2,2)
+                  GradRhoXA=Cube%Vals(I ,3)
+                  GradRhoYA=Cube%Vals(I ,4)
+                  GradRhoZA=Cube%Vals(I ,5)
+                  GradRhoXB=Cube%Vals(I1,3)
+                  GradRhoYB=Cube%Vals(I1,4)
+                  GradRhoZB=Cube%Vals(I1,5)
+                  PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(1)
+                  LMN1=1
+                  LMN2=1+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(2)
+                  LMN1=4
+                  LMN2=4+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(2)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(2)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(1)*LambdaZ(2)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(3)
+                  LMN1=10
+                  LMN2=10+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(3)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(3)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(1)*LambdaZ(3)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(4)
+                  LMN1=20
+                  LMN2=20+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(1)*LambdaZ(1)
+                  LMN1=3
+                  LMN2=3+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(2)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(1)*LambdaZ(2)
+                  LMN1=9
+                  LMN2=9+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(1)*LambdaZ(2)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(1)*LambdaZ(2)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(2)*LambdaZ(2)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(1)*LambdaZ(3)
+                  LMN1=19
+                  LMN2=19+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(3)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(2)*LambdaZ(1)
+                  LMN1=7
+                  LMN2=7+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(2)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(2)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(3)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(2)*LambdaZ(2)
+                  LMN1=17
+                  LMN2=17+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(3)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(3)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(4)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(3)*LambdaZ(1)
+                  LMN1=14
+                  LMN2=14+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(0)*LambdaZ(1)
+                  LMN1=2
+                  LMN2=2+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(0)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(0)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(0)*LambdaZ(2)
+                  LMN1=8
+                  LMN2=8+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(0)*LambdaZ(2)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(0)*LambdaZ(2)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(1)*LambdaZ(2)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(0)*LambdaZ(3)
+                  LMN1=18
+                  LMN2=18+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(1)*LambdaZ(1)
+                  LMN1=6
+                  LMN2=6+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(2)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(1)*LambdaZ(2)
+                  LMN1=16
+                  LMN2=16+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(3)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(2)*LambdaZ(1)
+                  LMN1=13
+                  LMN2=13+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(2)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(3)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(2)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(2)*LambdaY(0)*LambdaZ(1)
+                  LMN1=5
+                  LMN2=5+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(2)*LambdaY(0)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(3)*LambdaY(0)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(2)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(2)*LambdaY(0)*LambdaZ(2)
+                  LMN1=15
+                  LMN2=15+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(2)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(3)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(2)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(2)*LambdaY(1)*LambdaZ(1)
+                  LMN1=12
+                  LMN2=12+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(3)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(4)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(3)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(3)*LambdaY(0)*LambdaZ(1)
+                  LMN1=11
+                  LMN2=11+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                ELSE
+                  CALL Halt('ExplicitBraElements.Inc: Wrong NSDen')
+                ENDIF
              ENDIF
           ENDDO
        CASE(4)
@@ -444,22 +1056,19 @@
                 LambdaZ(4)=TwoZ*(RPZ*LambdaZ(3)-3.D0*LambdaZ(2))
                 LambdaZ(5)=TwoZ*(RPZ*LambdaZ(4)-4.D0*LambdaZ(3))
                 Wght=Cube%Wght(I)
-                !Q&D...
-                DO iSDen=SDBeg,NSDen-1
-                  LMN=(iSDen-SDBeg)*OffSDen
-                  I0=I+iSDen*NGrid
-                  dEdRho=Cube%Vals(I0,1)
-                  dEdAbsGradRho2=Cube%Vals(I0,2)
-                  GradRhoX=Cube%Vals(I0,3)
-                  GradRhoY=Cube%Vals(I0,4)
-                  GradRhoZ=Cube%Vals(I0,5)
+                IF(NSDen.EQ.1)THEN
+                  dEdRho=Cube%Vals(I,1)
+                  dEdAbsGradRho2=Cube%Vals(I,2)
+                  GradRhoX=Cube%Vals(I,3)
+                  GradRhoY=Cube%Vals(I,4)
+                  GradRhoZ=Cube%Vals(I,5)
                   PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(0)
                   GradPrimDistY=-LambdaX(0)*LambdaY(1)*LambdaZ(0)
                   GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(1+LMN)=Ket(1+LMN)&
+                  Ket(1)=Ket(1)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(1)
@@ -467,7 +1076,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(4+LMN)=Ket(4+LMN)&
+                  Ket(4)=Ket(4)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(2)
                   GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(2)
@@ -475,7 +1084,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(3)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(10+LMN)=Ket(10+LMN)&
+                  Ket(10)=Ket(10)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(3)
                   GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(3)
@@ -483,7 +1092,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(4)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(20+LMN)=Ket(20+LMN)&
+                  Ket(20)=Ket(20)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(4)
                   GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(4)
@@ -491,7 +1100,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(5)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(35+LMN)=Ket(35+LMN)&
+                  Ket(35)=Ket(35)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(1)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(1)*LambdaY(1)*LambdaZ(0)
@@ -499,7 +1108,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(1)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(3+LMN)=Ket(3+LMN)&
+                  Ket(3)=Ket(3)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(1)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(1)*LambdaY(1)*LambdaZ(1)
@@ -507,7 +1116,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(1)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(9+LMN)=Ket(9+LMN)&
+                  Ket(9)=Ket(9)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(1)*LambdaZ(2)
                   GradPrimDistX=-LambdaX(1)*LambdaY(1)*LambdaZ(2)
@@ -515,7 +1124,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(1)*LambdaZ(3)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(19+LMN)=Ket(19+LMN)&
+                  Ket(19)=Ket(19)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(1)*LambdaZ(3)
                   GradPrimDistX=-LambdaX(1)*LambdaY(1)*LambdaZ(3)
@@ -523,7 +1132,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(1)*LambdaZ(4)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(34+LMN)=Ket(34+LMN)&
+                  Ket(34)=Ket(34)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(2)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(1)*LambdaY(2)*LambdaZ(0)
@@ -531,7 +1140,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(2)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(7+LMN)=Ket(7+LMN)&
+                  Ket(7)=Ket(7)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(2)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(1)*LambdaY(2)*LambdaZ(1)
@@ -539,7 +1148,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(2)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(17+LMN)=Ket(17+LMN)&
+                  Ket(17)=Ket(17)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(2)*LambdaZ(2)
                   GradPrimDistX=-LambdaX(1)*LambdaY(2)*LambdaZ(2)
@@ -547,7 +1156,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(2)*LambdaZ(3)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(32+LMN)=Ket(32+LMN)&
+                  Ket(32)=Ket(32)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(3)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(1)*LambdaY(3)*LambdaZ(0)
@@ -555,7 +1164,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(3)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(14+LMN)=Ket(14+LMN)&
+                  Ket(14)=Ket(14)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(3)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(1)*LambdaY(3)*LambdaZ(1)
@@ -563,7 +1172,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(3)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(29+LMN)=Ket(29+LMN)&
+                  Ket(29)=Ket(29)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(4)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(1)*LambdaY(4)*LambdaZ(0)
@@ -571,7 +1180,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(4)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(25+LMN)=Ket(25+LMN)&
+                  Ket(25)=Ket(25)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(0)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(2)*LambdaY(0)*LambdaZ(0)
@@ -579,7 +1188,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(0)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(2+LMN)=Ket(2+LMN)&
+                  Ket(2)=Ket(2)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(0)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(2)*LambdaY(0)*LambdaZ(1)
@@ -587,7 +1196,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(0)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(8+LMN)=Ket(8+LMN)&
+                  Ket(8)=Ket(8)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(0)*LambdaZ(2)
                   GradPrimDistX=-LambdaX(2)*LambdaY(0)*LambdaZ(2)
@@ -595,7 +1204,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(0)*LambdaZ(3)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(18+LMN)=Ket(18+LMN)&
+                  Ket(18)=Ket(18)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(0)*LambdaZ(3)
                   GradPrimDistX=-LambdaX(2)*LambdaY(0)*LambdaZ(3)
@@ -603,7 +1212,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(0)*LambdaZ(4)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(33+LMN)=Ket(33+LMN)&
+                  Ket(33)=Ket(33)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(1)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(2)*LambdaY(1)*LambdaZ(0)
@@ -611,7 +1220,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(1)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(6+LMN)=Ket(6+LMN)&
+                  Ket(6)=Ket(6)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(1)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(2)*LambdaY(1)*LambdaZ(1)
@@ -619,7 +1228,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(1)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(16+LMN)=Ket(16+LMN)&
+                  Ket(16)=Ket(16)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(1)*LambdaZ(2)
                   GradPrimDistX=-LambdaX(2)*LambdaY(1)*LambdaZ(2)
@@ -627,7 +1236,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(1)*LambdaZ(3)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(31+LMN)=Ket(31+LMN)&
+                  Ket(31)=Ket(31)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(2)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(2)*LambdaY(2)*LambdaZ(0)
@@ -635,7 +1244,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(2)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(13+LMN)=Ket(13+LMN)&
+                  Ket(13)=Ket(13)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(2)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(2)*LambdaY(2)*LambdaZ(1)
@@ -643,7 +1252,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(2)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(28+LMN)=Ket(28+LMN)&
+                  Ket(28)=Ket(28)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(3)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(2)*LambdaY(3)*LambdaZ(0)
@@ -651,7 +1260,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(3)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(24+LMN)=Ket(24+LMN)&
+                  Ket(24)=Ket(24)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(2)*LambdaY(0)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(3)*LambdaY(0)*LambdaZ(0)
@@ -659,7 +1268,7 @@
                   GradPrimDistZ=-LambdaX(2)*LambdaY(0)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(5+LMN)=Ket(5+LMN)&
+                  Ket(5)=Ket(5)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(2)*LambdaY(0)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(3)*LambdaY(0)*LambdaZ(1)
@@ -667,7 +1276,7 @@
                   GradPrimDistZ=-LambdaX(2)*LambdaY(0)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(15+LMN)=Ket(15+LMN)&
+                  Ket(15)=Ket(15)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(2)*LambdaY(0)*LambdaZ(2)
                   GradPrimDistX=-LambdaX(3)*LambdaY(0)*LambdaZ(2)
@@ -675,7 +1284,7 @@
                   GradPrimDistZ=-LambdaX(2)*LambdaY(0)*LambdaZ(3)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(30+LMN)=Ket(30+LMN)&
+                  Ket(30)=Ket(30)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(2)*LambdaY(1)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(3)*LambdaY(1)*LambdaZ(0)
@@ -683,7 +1292,7 @@
                   GradPrimDistZ=-LambdaX(2)*LambdaY(1)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(12+LMN)=Ket(12+LMN)&
+                  Ket(12)=Ket(12)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(2)*LambdaY(1)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(3)*LambdaY(1)*LambdaZ(1)
@@ -691,7 +1300,7 @@
                   GradPrimDistZ=-LambdaX(2)*LambdaY(1)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(27+LMN)=Ket(27+LMN)&
+                  Ket(27)=Ket(27)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(2)*LambdaY(2)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(3)*LambdaY(2)*LambdaZ(0)
@@ -699,7 +1308,7 @@
                   GradPrimDistZ=-LambdaX(2)*LambdaY(2)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(23+LMN)=Ket(23+LMN)&
+                  Ket(23)=Ket(23)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(3)*LambdaY(0)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(4)*LambdaY(0)*LambdaZ(0)
@@ -707,7 +1316,7 @@
                   GradPrimDistZ=-LambdaX(3)*LambdaY(0)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(11+LMN)=Ket(11+LMN)&
+                  Ket(11)=Ket(11)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(3)*LambdaY(0)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(4)*LambdaY(0)*LambdaZ(1)
@@ -715,7 +1324,7 @@
                   GradPrimDistZ=-LambdaX(3)*LambdaY(0)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(26+LMN)=Ket(26+LMN)&
+                  Ket(26)=Ket(26)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(3)*LambdaY(1)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(4)*LambdaY(1)*LambdaZ(0)
@@ -723,7 +1332,7 @@
                   GradPrimDistZ=-LambdaX(3)*LambdaY(1)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(22+LMN)=Ket(22+LMN)&
+                  Ket(22)=Ket(22)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(4)*LambdaY(0)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(5)*LambdaY(0)*LambdaZ(0)
@@ -731,9 +1340,585 @@
                   GradPrimDistZ=-LambdaX(4)*LambdaY(0)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(21+LMN)=Ket(21+LMN)&
+                  Ket(21)=Ket(21)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
-                ENDDO
+                ELSEIF(NSDen.EQ.3)THEN
+                  I1=I+  NGrid
+                  I2=I+2*NGrid
+                  dEdRhoA=Cube%Vals(I ,1)
+                  dEdRhoB=Cube%Vals(I1,1)
+                  dEdAbsGradRho2AA=Cube%Vals(I ,2)
+                  dEdAbsGradRho2BB=Cube%Vals(I1,2)
+                  dEdAbsGradRho2AB=Cube%Vals(I2,2)
+                  GradRhoXA=Cube%Vals(I ,3)
+                  GradRhoYA=Cube%Vals(I ,4)
+                  GradRhoZA=Cube%Vals(I ,5)
+                  GradRhoXB=Cube%Vals(I1,3)
+                  GradRhoYB=Cube%Vals(I1,4)
+                  GradRhoZB=Cube%Vals(I1,5)
+                  PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(1)
+                  LMN1=1
+                  LMN2=1+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(2)
+                  LMN1=4
+                  LMN2=4+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(2)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(2)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(1)*LambdaZ(2)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(3)
+                  LMN1=10
+                  LMN2=10+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(3)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(3)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(1)*LambdaZ(3)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(4)
+                  LMN1=20
+                  LMN2=20+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(4)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(4)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(1)*LambdaZ(4)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(5)
+                  LMN1=35
+                  LMN2=35+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(1)*LambdaZ(1)
+                  LMN1=3
+                  LMN2=3+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(2)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(1)*LambdaZ(2)
+                  LMN1=9
+                  LMN2=9+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(1)*LambdaZ(2)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(1)*LambdaZ(2)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(2)*LambdaZ(2)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(1)*LambdaZ(3)
+                  LMN1=19
+                  LMN2=19+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(1)*LambdaZ(3)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(1)*LambdaZ(3)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(2)*LambdaZ(3)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(1)*LambdaZ(4)
+                  LMN1=34
+                  LMN2=34+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(3)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(2)*LambdaZ(1)
+                  LMN1=7
+                  LMN2=7+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(2)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(2)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(3)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(2)*LambdaZ(2)
+                  LMN1=17
+                  LMN2=17+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(2)*LambdaZ(2)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(2)*LambdaZ(2)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(3)*LambdaZ(2)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(2)*LambdaZ(3)
+                  LMN1=32
+                  LMN2=32+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(3)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(3)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(4)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(3)*LambdaZ(1)
+                  LMN1=14
+                  LMN2=14+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(3)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(3)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(4)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(3)*LambdaZ(2)
+                  LMN1=29
+                  LMN2=29+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(4)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(4)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(5)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(4)*LambdaZ(1)
+                  LMN1=25
+                  LMN2=25+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(0)*LambdaZ(1)
+                  LMN1=2
+                  LMN2=2+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(0)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(0)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(0)*LambdaZ(2)
+                  LMN1=8
+                  LMN2=8+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(0)*LambdaZ(2)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(0)*LambdaZ(2)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(1)*LambdaZ(2)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(0)*LambdaZ(3)
+                  LMN1=18
+                  LMN2=18+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(0)*LambdaZ(3)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(0)*LambdaZ(3)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(1)*LambdaZ(3)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(0)*LambdaZ(4)
+                  LMN1=33
+                  LMN2=33+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(1)*LambdaZ(1)
+                  LMN1=6
+                  LMN2=6+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(2)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(1)*LambdaZ(2)
+                  LMN1=16
+                  LMN2=16+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(1)*LambdaZ(2)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(1)*LambdaZ(2)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(2)*LambdaZ(2)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(1)*LambdaZ(3)
+                  LMN1=31
+                  LMN2=31+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(3)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(2)*LambdaZ(1)
+                  LMN1=13
+                  LMN2=13+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(2)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(2)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(3)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(2)*LambdaZ(2)
+                  LMN1=28
+                  LMN2=28+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(3)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(3)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(4)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(3)*LambdaZ(1)
+                  LMN1=24
+                  LMN2=24+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(2)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(3)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(2)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(2)*LambdaY(0)*LambdaZ(1)
+                  LMN1=5
+                  LMN2=5+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(2)*LambdaY(0)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(3)*LambdaY(0)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(2)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(2)*LambdaY(0)*LambdaZ(2)
+                  LMN1=15
+                  LMN2=15+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(2)*LambdaY(0)*LambdaZ(2)
+                  GradPrimDistX=-LambdaX(3)*LambdaY(0)*LambdaZ(2)
+                  GradPrimDistY=-LambdaX(2)*LambdaY(1)*LambdaZ(2)
+                  GradPrimDistZ=-LambdaX(2)*LambdaY(0)*LambdaZ(3)
+                  LMN1=30
+                  LMN2=30+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(2)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(3)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(2)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(2)*LambdaY(1)*LambdaZ(1)
+                  LMN1=12
+                  LMN2=12+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(2)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(3)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(2)*LambdaY(2)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(2)*LambdaY(1)*LambdaZ(2)
+                  LMN1=27
+                  LMN2=27+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(2)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(3)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(2)*LambdaY(3)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(2)*LambdaY(2)*LambdaZ(1)
+                  LMN1=23
+                  LMN2=23+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(3)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(4)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(3)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(3)*LambdaY(0)*LambdaZ(1)
+                  LMN1=11
+                  LMN2=11+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(3)*LambdaY(0)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(4)*LambdaY(0)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(3)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(3)*LambdaY(0)*LambdaZ(2)
+                  LMN1=26
+                  LMN2=26+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(3)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(4)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(3)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(3)*LambdaY(1)*LambdaZ(1)
+                  LMN1=22
+                  LMN2=22+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(4)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(5)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(4)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(4)*LambdaY(0)*LambdaZ(1)
+                  LMN1=21
+                  LMN2=21+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                ELSE
+                  CALL Halt('ExplicitBraElements.Inc: Wrong NSDen')
+                ENDIF
              ENDIF
           ENDDO
        CASE(5)
@@ -768,22 +1953,19 @@
                 LambdaZ(5)=TwoZ*(RPZ*LambdaZ(4)-4.D0*LambdaZ(3))
                 LambdaZ(6)=TwoZ*(RPZ*LambdaZ(5)-5.D0*LambdaZ(4))
                 Wght=Cube%Wght(I)
-                !Q&D...
-                DO iSDen=SDBeg,NSDen-1
-                  LMN=(iSDen-SDBeg)*OffSDen
-                  I0=I+iSDen*NGrid
-                  dEdRho=Cube%Vals(I0,1)
-                  dEdAbsGradRho2=Cube%Vals(I0,2)
-                  GradRhoX=Cube%Vals(I0,3)
-                  GradRhoY=Cube%Vals(I0,4)
-                  GradRhoZ=Cube%Vals(I0,5)
+                IF(NSDen.EQ.1)THEN
+                  dEdRho=Cube%Vals(I,1)
+                  dEdAbsGradRho2=Cube%Vals(I,2)
+                  GradRhoX=Cube%Vals(I,3)
+                  GradRhoY=Cube%Vals(I,4)
+                  GradRhoZ=Cube%Vals(I,5)
                   PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(0)
                   GradPrimDistY=-LambdaX(0)*LambdaY(1)*LambdaZ(0)
                   GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(1+LMN)=Ket(1+LMN)&
+                  Ket(1)=Ket(1)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(1)
@@ -791,7 +1973,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(4+LMN)=Ket(4+LMN)&
+                  Ket(4)=Ket(4)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(2)
                   GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(2)
@@ -799,7 +1981,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(3)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(10+LMN)=Ket(10+LMN)&
+                  Ket(10)=Ket(10)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(3)
                   GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(3)
@@ -807,7 +1989,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(4)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(20+LMN)=Ket(20+LMN)&
+                  Ket(20)=Ket(20)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(4)
                   GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(4)
@@ -815,7 +1997,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(5)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(35+LMN)=Ket(35+LMN)&
+                  Ket(35)=Ket(35)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(5)
                   GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(5)
@@ -823,7 +2005,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(6)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(56+LMN)=Ket(56+LMN)&
+                  Ket(56)=Ket(56)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(1)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(1)*LambdaY(1)*LambdaZ(0)
@@ -831,7 +2013,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(1)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(3+LMN)=Ket(3+LMN)&
+                  Ket(3)=Ket(3)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(1)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(1)*LambdaY(1)*LambdaZ(1)
@@ -839,7 +2021,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(1)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(9+LMN)=Ket(9+LMN)&
+                  Ket(9)=Ket(9)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(1)*LambdaZ(2)
                   GradPrimDistX=-LambdaX(1)*LambdaY(1)*LambdaZ(2)
@@ -847,7 +2029,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(1)*LambdaZ(3)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(19+LMN)=Ket(19+LMN)&
+                  Ket(19)=Ket(19)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(1)*LambdaZ(3)
                   GradPrimDistX=-LambdaX(1)*LambdaY(1)*LambdaZ(3)
@@ -855,7 +2037,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(1)*LambdaZ(4)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(34+LMN)=Ket(34+LMN)&
+                  Ket(34)=Ket(34)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(1)*LambdaZ(4)
                   GradPrimDistX=-LambdaX(1)*LambdaY(1)*LambdaZ(4)
@@ -863,7 +2045,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(1)*LambdaZ(5)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(55+LMN)=Ket(55+LMN)&
+                  Ket(55)=Ket(55)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(2)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(1)*LambdaY(2)*LambdaZ(0)
@@ -871,7 +2053,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(2)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(7+LMN)=Ket(7+LMN)&
+                  Ket(7)=Ket(7)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(2)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(1)*LambdaY(2)*LambdaZ(1)
@@ -879,7 +2061,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(2)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(17+LMN)=Ket(17+LMN)&
+                  Ket(17)=Ket(17)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(2)*LambdaZ(2)
                   GradPrimDistX=-LambdaX(1)*LambdaY(2)*LambdaZ(2)
@@ -887,7 +2069,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(2)*LambdaZ(3)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(32+LMN)=Ket(32+LMN)&
+                  Ket(32)=Ket(32)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(2)*LambdaZ(3)
                   GradPrimDistX=-LambdaX(1)*LambdaY(2)*LambdaZ(3)
@@ -895,7 +2077,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(2)*LambdaZ(4)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(53+LMN)=Ket(53+LMN)&
+                  Ket(53)=Ket(53)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(3)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(1)*LambdaY(3)*LambdaZ(0)
@@ -903,7 +2085,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(3)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(14+LMN)=Ket(14+LMN)&
+                  Ket(14)=Ket(14)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(3)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(1)*LambdaY(3)*LambdaZ(1)
@@ -911,7 +2093,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(3)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(29+LMN)=Ket(29+LMN)&
+                  Ket(29)=Ket(29)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(3)*LambdaZ(2)
                   GradPrimDistX=-LambdaX(1)*LambdaY(3)*LambdaZ(2)
@@ -919,7 +2101,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(3)*LambdaZ(3)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(50+LMN)=Ket(50+LMN)&
+                  Ket(50)=Ket(50)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(4)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(1)*LambdaY(4)*LambdaZ(0)
@@ -927,7 +2109,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(4)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(25+LMN)=Ket(25+LMN)&
+                  Ket(25)=Ket(25)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(4)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(1)*LambdaY(4)*LambdaZ(1)
@@ -935,7 +2117,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(4)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(46+LMN)=Ket(46+LMN)&
+                  Ket(46)=Ket(46)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(5)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(1)*LambdaY(5)*LambdaZ(0)
@@ -943,7 +2125,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(5)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(41+LMN)=Ket(41+LMN)&
+                  Ket(41)=Ket(41)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(0)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(2)*LambdaY(0)*LambdaZ(0)
@@ -951,7 +2133,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(0)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(2+LMN)=Ket(2+LMN)&
+                  Ket(2)=Ket(2)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(0)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(2)*LambdaY(0)*LambdaZ(1)
@@ -959,7 +2141,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(0)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(8+LMN)=Ket(8+LMN)&
+                  Ket(8)=Ket(8)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(0)*LambdaZ(2)
                   GradPrimDistX=-LambdaX(2)*LambdaY(0)*LambdaZ(2)
@@ -967,7 +2149,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(0)*LambdaZ(3)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(18+LMN)=Ket(18+LMN)&
+                  Ket(18)=Ket(18)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(0)*LambdaZ(3)
                   GradPrimDistX=-LambdaX(2)*LambdaY(0)*LambdaZ(3)
@@ -975,7 +2157,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(0)*LambdaZ(4)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(33+LMN)=Ket(33+LMN)&
+                  Ket(33)=Ket(33)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(0)*LambdaZ(4)
                   GradPrimDistX=-LambdaX(2)*LambdaY(0)*LambdaZ(4)
@@ -983,7 +2165,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(0)*LambdaZ(5)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(54+LMN)=Ket(54+LMN)&
+                  Ket(54)=Ket(54)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(1)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(2)*LambdaY(1)*LambdaZ(0)
@@ -991,7 +2173,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(1)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(6+LMN)=Ket(6+LMN)&
+                  Ket(6)=Ket(6)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(1)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(2)*LambdaY(1)*LambdaZ(1)
@@ -999,7 +2181,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(1)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(16+LMN)=Ket(16+LMN)&
+                  Ket(16)=Ket(16)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(1)*LambdaZ(2)
                   GradPrimDistX=-LambdaX(2)*LambdaY(1)*LambdaZ(2)
@@ -1007,7 +2189,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(1)*LambdaZ(3)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(31+LMN)=Ket(31+LMN)&
+                  Ket(31)=Ket(31)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(1)*LambdaZ(3)
                   GradPrimDistX=-LambdaX(2)*LambdaY(1)*LambdaZ(3)
@@ -1015,7 +2197,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(1)*LambdaZ(4)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(52+LMN)=Ket(52+LMN)&
+                  Ket(52)=Ket(52)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(2)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(2)*LambdaY(2)*LambdaZ(0)
@@ -1023,7 +2205,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(2)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(13+LMN)=Ket(13+LMN)&
+                  Ket(13)=Ket(13)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(2)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(2)*LambdaY(2)*LambdaZ(1)
@@ -1031,7 +2213,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(2)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(28+LMN)=Ket(28+LMN)&
+                  Ket(28)=Ket(28)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(2)*LambdaZ(2)
                   GradPrimDistX=-LambdaX(2)*LambdaY(2)*LambdaZ(2)
@@ -1039,7 +2221,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(2)*LambdaZ(3)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(49+LMN)=Ket(49+LMN)&
+                  Ket(49)=Ket(49)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(3)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(2)*LambdaY(3)*LambdaZ(0)
@@ -1047,7 +2229,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(3)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(24+LMN)=Ket(24+LMN)&
+                  Ket(24)=Ket(24)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(3)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(2)*LambdaY(3)*LambdaZ(1)
@@ -1055,7 +2237,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(3)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(45+LMN)=Ket(45+LMN)&
+                  Ket(45)=Ket(45)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(4)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(2)*LambdaY(4)*LambdaZ(0)
@@ -1063,7 +2245,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(4)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(40+LMN)=Ket(40+LMN)&
+                  Ket(40)=Ket(40)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(2)*LambdaY(0)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(3)*LambdaY(0)*LambdaZ(0)
@@ -1071,7 +2253,7 @@
                   GradPrimDistZ=-LambdaX(2)*LambdaY(0)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(5+LMN)=Ket(5+LMN)&
+                  Ket(5)=Ket(5)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(2)*LambdaY(0)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(3)*LambdaY(0)*LambdaZ(1)
@@ -1079,7 +2261,7 @@
                   GradPrimDistZ=-LambdaX(2)*LambdaY(0)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(15+LMN)=Ket(15+LMN)&
+                  Ket(15)=Ket(15)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(2)*LambdaY(0)*LambdaZ(2)
                   GradPrimDistX=-LambdaX(3)*LambdaY(0)*LambdaZ(2)
@@ -1087,7 +2269,7 @@
                   GradPrimDistZ=-LambdaX(2)*LambdaY(0)*LambdaZ(3)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(30+LMN)=Ket(30+LMN)&
+                  Ket(30)=Ket(30)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(2)*LambdaY(0)*LambdaZ(3)
                   GradPrimDistX=-LambdaX(3)*LambdaY(0)*LambdaZ(3)
@@ -1095,7 +2277,7 @@
                   GradPrimDistZ=-LambdaX(2)*LambdaY(0)*LambdaZ(4)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(51+LMN)=Ket(51+LMN)&
+                  Ket(51)=Ket(51)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(2)*LambdaY(1)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(3)*LambdaY(1)*LambdaZ(0)
@@ -1103,7 +2285,7 @@
                   GradPrimDistZ=-LambdaX(2)*LambdaY(1)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(12+LMN)=Ket(12+LMN)&
+                  Ket(12)=Ket(12)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(2)*LambdaY(1)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(3)*LambdaY(1)*LambdaZ(1)
@@ -1111,7 +2293,7 @@
                   GradPrimDistZ=-LambdaX(2)*LambdaY(1)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(27+LMN)=Ket(27+LMN)&
+                  Ket(27)=Ket(27)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(2)*LambdaY(1)*LambdaZ(2)
                   GradPrimDistX=-LambdaX(3)*LambdaY(1)*LambdaZ(2)
@@ -1119,7 +2301,7 @@
                   GradPrimDistZ=-LambdaX(2)*LambdaY(1)*LambdaZ(3)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(48+LMN)=Ket(48+LMN)&
+                  Ket(48)=Ket(48)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(2)*LambdaY(2)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(3)*LambdaY(2)*LambdaZ(0)
@@ -1127,7 +2309,7 @@
                   GradPrimDistZ=-LambdaX(2)*LambdaY(2)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(23+LMN)=Ket(23+LMN)&
+                  Ket(23)=Ket(23)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(2)*LambdaY(2)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(3)*LambdaY(2)*LambdaZ(1)
@@ -1135,7 +2317,7 @@
                   GradPrimDistZ=-LambdaX(2)*LambdaY(2)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(44+LMN)=Ket(44+LMN)&
+                  Ket(44)=Ket(44)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(2)*LambdaY(3)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(3)*LambdaY(3)*LambdaZ(0)
@@ -1143,7 +2325,7 @@
                   GradPrimDistZ=-LambdaX(2)*LambdaY(3)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(39+LMN)=Ket(39+LMN)&
+                  Ket(39)=Ket(39)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(3)*LambdaY(0)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(4)*LambdaY(0)*LambdaZ(0)
@@ -1151,7 +2333,7 @@
                   GradPrimDistZ=-LambdaX(3)*LambdaY(0)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(11+LMN)=Ket(11+LMN)&
+                  Ket(11)=Ket(11)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(3)*LambdaY(0)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(4)*LambdaY(0)*LambdaZ(1)
@@ -1159,7 +2341,7 @@
                   GradPrimDistZ=-LambdaX(3)*LambdaY(0)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(26+LMN)=Ket(26+LMN)&
+                  Ket(26)=Ket(26)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(3)*LambdaY(0)*LambdaZ(2)
                   GradPrimDistX=-LambdaX(4)*LambdaY(0)*LambdaZ(2)
@@ -1167,7 +2349,7 @@
                   GradPrimDistZ=-LambdaX(3)*LambdaY(0)*LambdaZ(3)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(47+LMN)=Ket(47+LMN)&
+                  Ket(47)=Ket(47)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(3)*LambdaY(1)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(4)*LambdaY(1)*LambdaZ(0)
@@ -1175,7 +2357,7 @@
                   GradPrimDistZ=-LambdaX(3)*LambdaY(1)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(22+LMN)=Ket(22+LMN)&
+                  Ket(22)=Ket(22)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(3)*LambdaY(1)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(4)*LambdaY(1)*LambdaZ(1)
@@ -1183,7 +2365,7 @@
                   GradPrimDistZ=-LambdaX(3)*LambdaY(1)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(43+LMN)=Ket(43+LMN)&
+                  Ket(43)=Ket(43)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(3)*LambdaY(2)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(4)*LambdaY(2)*LambdaZ(0)
@@ -1191,7 +2373,7 @@
                   GradPrimDistZ=-LambdaX(3)*LambdaY(2)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(38+LMN)=Ket(38+LMN)&
+                  Ket(38)=Ket(38)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(4)*LambdaY(0)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(5)*LambdaY(0)*LambdaZ(0)
@@ -1199,7 +2381,7 @@
                   GradPrimDistZ=-LambdaX(4)*LambdaY(0)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(21+LMN)=Ket(21+LMN)&
+                  Ket(21)=Ket(21)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(4)*LambdaY(0)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(5)*LambdaY(0)*LambdaZ(1)
@@ -1207,7 +2389,7 @@
                   GradPrimDistZ=-LambdaX(4)*LambdaY(0)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(42+LMN)=Ket(42+LMN)&
+                  Ket(42)=Ket(42)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(4)*LambdaY(1)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(5)*LambdaY(1)*LambdaZ(0)
@@ -1215,7 +2397,7 @@
                   GradPrimDistZ=-LambdaX(4)*LambdaY(1)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(37+LMN)=Ket(37+LMN)&
+                  Ket(37)=Ket(37)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(5)*LambdaY(0)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(6)*LambdaY(0)*LambdaZ(0)
@@ -1223,9 +2405,921 @@
                   GradPrimDistZ=-LambdaX(5)*LambdaY(0)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(36+LMN)=Ket(36+LMN)&
+                  Ket(36)=Ket(36)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
-                ENDDO
+                ELSEIF(NSDen.EQ.3)THEN
+                  I1=I+  NGrid
+                  I2=I+2*NGrid
+                  dEdRhoA=Cube%Vals(I ,1)
+                  dEdRhoB=Cube%Vals(I1,1)
+                  dEdAbsGradRho2AA=Cube%Vals(I ,2)
+                  dEdAbsGradRho2BB=Cube%Vals(I1,2)
+                  dEdAbsGradRho2AB=Cube%Vals(I2,2)
+                  GradRhoXA=Cube%Vals(I ,3)
+                  GradRhoYA=Cube%Vals(I ,4)
+                  GradRhoZA=Cube%Vals(I ,5)
+                  GradRhoXB=Cube%Vals(I1,3)
+                  GradRhoYB=Cube%Vals(I1,4)
+                  GradRhoZB=Cube%Vals(I1,5)
+                  PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(1)
+                  LMN1=1
+                  LMN2=1+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(2)
+                  LMN1=4
+                  LMN2=4+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(2)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(2)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(1)*LambdaZ(2)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(3)
+                  LMN1=10
+                  LMN2=10+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(3)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(3)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(1)*LambdaZ(3)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(4)
+                  LMN1=20
+                  LMN2=20+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(4)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(4)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(1)*LambdaZ(4)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(5)
+                  LMN1=35
+                  LMN2=35+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(5)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(5)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(1)*LambdaZ(5)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(6)
+                  LMN1=56
+                  LMN2=56+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(1)*LambdaZ(1)
+                  LMN1=3
+                  LMN2=3+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(2)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(1)*LambdaZ(2)
+                  LMN1=9
+                  LMN2=9+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(1)*LambdaZ(2)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(1)*LambdaZ(2)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(2)*LambdaZ(2)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(1)*LambdaZ(3)
+                  LMN1=19
+                  LMN2=19+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(1)*LambdaZ(3)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(1)*LambdaZ(3)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(2)*LambdaZ(3)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(1)*LambdaZ(4)
+                  LMN1=34
+                  LMN2=34+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(1)*LambdaZ(4)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(1)*LambdaZ(4)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(2)*LambdaZ(4)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(1)*LambdaZ(5)
+                  LMN1=55
+                  LMN2=55+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(3)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(2)*LambdaZ(1)
+                  LMN1=7
+                  LMN2=7+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(2)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(2)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(3)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(2)*LambdaZ(2)
+                  LMN1=17
+                  LMN2=17+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(2)*LambdaZ(2)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(2)*LambdaZ(2)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(3)*LambdaZ(2)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(2)*LambdaZ(3)
+                  LMN1=32
+                  LMN2=32+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(2)*LambdaZ(3)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(2)*LambdaZ(3)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(3)*LambdaZ(3)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(2)*LambdaZ(4)
+                  LMN1=53
+                  LMN2=53+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(3)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(3)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(4)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(3)*LambdaZ(1)
+                  LMN1=14
+                  LMN2=14+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(3)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(3)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(4)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(3)*LambdaZ(2)
+                  LMN1=29
+                  LMN2=29+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(3)*LambdaZ(2)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(3)*LambdaZ(2)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(4)*LambdaZ(2)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(3)*LambdaZ(3)
+                  LMN1=50
+                  LMN2=50+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(4)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(4)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(5)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(4)*LambdaZ(1)
+                  LMN1=25
+                  LMN2=25+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(4)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(4)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(5)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(4)*LambdaZ(2)
+                  LMN1=46
+                  LMN2=46+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(5)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(5)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(6)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(5)*LambdaZ(1)
+                  LMN1=41
+                  LMN2=41+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(0)*LambdaZ(1)
+                  LMN1=2
+                  LMN2=2+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(0)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(0)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(0)*LambdaZ(2)
+                  LMN1=8
+                  LMN2=8+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(0)*LambdaZ(2)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(0)*LambdaZ(2)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(1)*LambdaZ(2)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(0)*LambdaZ(3)
+                  LMN1=18
+                  LMN2=18+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(0)*LambdaZ(3)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(0)*LambdaZ(3)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(1)*LambdaZ(3)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(0)*LambdaZ(4)
+                  LMN1=33
+                  LMN2=33+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(0)*LambdaZ(4)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(0)*LambdaZ(4)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(1)*LambdaZ(4)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(0)*LambdaZ(5)
+                  LMN1=54
+                  LMN2=54+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(1)*LambdaZ(1)
+                  LMN1=6
+                  LMN2=6+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(2)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(1)*LambdaZ(2)
+                  LMN1=16
+                  LMN2=16+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(1)*LambdaZ(2)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(1)*LambdaZ(2)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(2)*LambdaZ(2)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(1)*LambdaZ(3)
+                  LMN1=31
+                  LMN2=31+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(1)*LambdaZ(3)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(1)*LambdaZ(3)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(2)*LambdaZ(3)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(1)*LambdaZ(4)
+                  LMN1=52
+                  LMN2=52+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(3)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(2)*LambdaZ(1)
+                  LMN1=13
+                  LMN2=13+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(2)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(2)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(3)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(2)*LambdaZ(2)
+                  LMN1=28
+                  LMN2=28+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(2)*LambdaZ(2)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(2)*LambdaZ(2)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(3)*LambdaZ(2)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(2)*LambdaZ(3)
+                  LMN1=49
+                  LMN2=49+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(3)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(3)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(4)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(3)*LambdaZ(1)
+                  LMN1=24
+                  LMN2=24+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(3)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(3)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(4)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(3)*LambdaZ(2)
+                  LMN1=45
+                  LMN2=45+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(4)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(4)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(5)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(4)*LambdaZ(1)
+                  LMN1=40
+                  LMN2=40+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(2)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(3)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(2)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(2)*LambdaY(0)*LambdaZ(1)
+                  LMN1=5
+                  LMN2=5+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(2)*LambdaY(0)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(3)*LambdaY(0)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(2)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(2)*LambdaY(0)*LambdaZ(2)
+                  LMN1=15
+                  LMN2=15+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(2)*LambdaY(0)*LambdaZ(2)
+                  GradPrimDistX=-LambdaX(3)*LambdaY(0)*LambdaZ(2)
+                  GradPrimDistY=-LambdaX(2)*LambdaY(1)*LambdaZ(2)
+                  GradPrimDistZ=-LambdaX(2)*LambdaY(0)*LambdaZ(3)
+                  LMN1=30
+                  LMN2=30+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(2)*LambdaY(0)*LambdaZ(3)
+                  GradPrimDistX=-LambdaX(3)*LambdaY(0)*LambdaZ(3)
+                  GradPrimDistY=-LambdaX(2)*LambdaY(1)*LambdaZ(3)
+                  GradPrimDistZ=-LambdaX(2)*LambdaY(0)*LambdaZ(4)
+                  LMN1=51
+                  LMN2=51+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(2)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(3)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(2)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(2)*LambdaY(1)*LambdaZ(1)
+                  LMN1=12
+                  LMN2=12+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(2)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(3)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(2)*LambdaY(2)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(2)*LambdaY(1)*LambdaZ(2)
+                  LMN1=27
+                  LMN2=27+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(2)*LambdaY(1)*LambdaZ(2)
+                  GradPrimDistX=-LambdaX(3)*LambdaY(1)*LambdaZ(2)
+                  GradPrimDistY=-LambdaX(2)*LambdaY(2)*LambdaZ(2)
+                  GradPrimDistZ=-LambdaX(2)*LambdaY(1)*LambdaZ(3)
+                  LMN1=48
+                  LMN2=48+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(2)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(3)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(2)*LambdaY(3)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(2)*LambdaY(2)*LambdaZ(1)
+                  LMN1=23
+                  LMN2=23+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(2)*LambdaY(2)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(3)*LambdaY(2)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(2)*LambdaY(3)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(2)*LambdaY(2)*LambdaZ(2)
+                  LMN1=44
+                  LMN2=44+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(2)*LambdaY(3)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(3)*LambdaY(3)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(2)*LambdaY(4)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(2)*LambdaY(3)*LambdaZ(1)
+                  LMN1=39
+                  LMN2=39+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(3)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(4)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(3)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(3)*LambdaY(0)*LambdaZ(1)
+                  LMN1=11
+                  LMN2=11+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(3)*LambdaY(0)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(4)*LambdaY(0)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(3)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(3)*LambdaY(0)*LambdaZ(2)
+                  LMN1=26
+                  LMN2=26+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(3)*LambdaY(0)*LambdaZ(2)
+                  GradPrimDistX=-LambdaX(4)*LambdaY(0)*LambdaZ(2)
+                  GradPrimDistY=-LambdaX(3)*LambdaY(1)*LambdaZ(2)
+                  GradPrimDistZ=-LambdaX(3)*LambdaY(0)*LambdaZ(3)
+                  LMN1=47
+                  LMN2=47+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(3)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(4)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(3)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(3)*LambdaY(1)*LambdaZ(1)
+                  LMN1=22
+                  LMN2=22+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(3)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(4)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(3)*LambdaY(2)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(3)*LambdaY(1)*LambdaZ(2)
+                  LMN1=43
+                  LMN2=43+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(3)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(4)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(3)*LambdaY(3)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(3)*LambdaY(2)*LambdaZ(1)
+                  LMN1=38
+                  LMN2=38+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(4)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(5)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(4)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(4)*LambdaY(0)*LambdaZ(1)
+                  LMN1=21
+                  LMN2=21+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(4)*LambdaY(0)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(5)*LambdaY(0)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(4)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(4)*LambdaY(0)*LambdaZ(2)
+                  LMN1=42
+                  LMN2=42+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(4)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(5)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(4)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(4)*LambdaY(1)*LambdaZ(1)
+                  LMN1=37
+                  LMN2=37+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(5)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(6)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(5)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(5)*LambdaY(0)*LambdaZ(1)
+                  LMN1=36
+                  LMN2=36+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                ELSE
+                  CALL Halt('ExplicitBraElements.Inc: Wrong NSDen')
+                ENDIF
              ENDIF
           ENDDO
        CASE(6)
@@ -1263,22 +3357,19 @@
                 LambdaZ(6)=TwoZ*(RPZ*LambdaZ(5)-5.D0*LambdaZ(4))
                 LambdaZ(7)=TwoZ*(RPZ*LambdaZ(6)-6.D0*LambdaZ(5))
                 Wght=Cube%Wght(I)
-                !Q&D...
-                DO iSDen=SDBeg,NSDen-1
-                  LMN=(iSDen-SDBeg)*OffSDen
-                  I0=I+iSDen*NGrid
-                  dEdRho=Cube%Vals(I0,1)
-                  dEdAbsGradRho2=Cube%Vals(I0,2)
-                  GradRhoX=Cube%Vals(I0,3)
-                  GradRhoY=Cube%Vals(I0,4)
-                  GradRhoZ=Cube%Vals(I0,5)
+                IF(NSDen.EQ.1)THEN
+                  dEdRho=Cube%Vals(I,1)
+                  dEdAbsGradRho2=Cube%Vals(I,2)
+                  GradRhoX=Cube%Vals(I,3)
+                  GradRhoY=Cube%Vals(I,4)
+                  GradRhoZ=Cube%Vals(I,5)
                   PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(0)
                   GradPrimDistY=-LambdaX(0)*LambdaY(1)*LambdaZ(0)
                   GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(1+LMN)=Ket(1+LMN)&
+                  Ket(1)=Ket(1)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(1)
@@ -1286,7 +3377,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(4+LMN)=Ket(4+LMN)&
+                  Ket(4)=Ket(4)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(2)
                   GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(2)
@@ -1294,7 +3385,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(3)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(10+LMN)=Ket(10+LMN)&
+                  Ket(10)=Ket(10)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(3)
                   GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(3)
@@ -1302,7 +3393,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(4)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(20+LMN)=Ket(20+LMN)&
+                  Ket(20)=Ket(20)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(4)
                   GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(4)
@@ -1310,7 +3401,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(5)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(35+LMN)=Ket(35+LMN)&
+                  Ket(35)=Ket(35)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(5)
                   GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(5)
@@ -1318,7 +3409,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(6)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(56+LMN)=Ket(56+LMN)&
+                  Ket(56)=Ket(56)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(6)
                   GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(6)
@@ -1326,7 +3417,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(7)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(84+LMN)=Ket(84+LMN)&
+                  Ket(84)=Ket(84)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(1)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(1)*LambdaY(1)*LambdaZ(0)
@@ -1334,7 +3425,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(1)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(3+LMN)=Ket(3+LMN)&
+                  Ket(3)=Ket(3)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(1)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(1)*LambdaY(1)*LambdaZ(1)
@@ -1342,7 +3433,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(1)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(9+LMN)=Ket(9+LMN)&
+                  Ket(9)=Ket(9)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(1)*LambdaZ(2)
                   GradPrimDistX=-LambdaX(1)*LambdaY(1)*LambdaZ(2)
@@ -1350,7 +3441,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(1)*LambdaZ(3)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(19+LMN)=Ket(19+LMN)&
+                  Ket(19)=Ket(19)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(1)*LambdaZ(3)
                   GradPrimDistX=-LambdaX(1)*LambdaY(1)*LambdaZ(3)
@@ -1358,7 +3449,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(1)*LambdaZ(4)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(34+LMN)=Ket(34+LMN)&
+                  Ket(34)=Ket(34)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(1)*LambdaZ(4)
                   GradPrimDistX=-LambdaX(1)*LambdaY(1)*LambdaZ(4)
@@ -1366,7 +3457,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(1)*LambdaZ(5)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(55+LMN)=Ket(55+LMN)&
+                  Ket(55)=Ket(55)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(1)*LambdaZ(5)
                   GradPrimDistX=-LambdaX(1)*LambdaY(1)*LambdaZ(5)
@@ -1374,7 +3465,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(1)*LambdaZ(6)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(83+LMN)=Ket(83+LMN)&
+                  Ket(83)=Ket(83)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(2)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(1)*LambdaY(2)*LambdaZ(0)
@@ -1382,7 +3473,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(2)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(7+LMN)=Ket(7+LMN)&
+                  Ket(7)=Ket(7)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(2)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(1)*LambdaY(2)*LambdaZ(1)
@@ -1390,7 +3481,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(2)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(17+LMN)=Ket(17+LMN)&
+                  Ket(17)=Ket(17)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(2)*LambdaZ(2)
                   GradPrimDistX=-LambdaX(1)*LambdaY(2)*LambdaZ(2)
@@ -1398,7 +3489,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(2)*LambdaZ(3)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(32+LMN)=Ket(32+LMN)&
+                  Ket(32)=Ket(32)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(2)*LambdaZ(3)
                   GradPrimDistX=-LambdaX(1)*LambdaY(2)*LambdaZ(3)
@@ -1406,7 +3497,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(2)*LambdaZ(4)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(53+LMN)=Ket(53+LMN)&
+                  Ket(53)=Ket(53)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(2)*LambdaZ(4)
                   GradPrimDistX=-LambdaX(1)*LambdaY(2)*LambdaZ(4)
@@ -1414,7 +3505,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(2)*LambdaZ(5)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(81+LMN)=Ket(81+LMN)&
+                  Ket(81)=Ket(81)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(3)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(1)*LambdaY(3)*LambdaZ(0)
@@ -1422,7 +3513,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(3)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(14+LMN)=Ket(14+LMN)&
+                  Ket(14)=Ket(14)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(3)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(1)*LambdaY(3)*LambdaZ(1)
@@ -1430,7 +3521,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(3)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(29+LMN)=Ket(29+LMN)&
+                  Ket(29)=Ket(29)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(3)*LambdaZ(2)
                   GradPrimDistX=-LambdaX(1)*LambdaY(3)*LambdaZ(2)
@@ -1438,7 +3529,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(3)*LambdaZ(3)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(50+LMN)=Ket(50+LMN)&
+                  Ket(50)=Ket(50)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(3)*LambdaZ(3)
                   GradPrimDistX=-LambdaX(1)*LambdaY(3)*LambdaZ(3)
@@ -1446,7 +3537,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(3)*LambdaZ(4)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(78+LMN)=Ket(78+LMN)&
+                  Ket(78)=Ket(78)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(4)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(1)*LambdaY(4)*LambdaZ(0)
@@ -1454,7 +3545,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(4)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(25+LMN)=Ket(25+LMN)&
+                  Ket(25)=Ket(25)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(4)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(1)*LambdaY(4)*LambdaZ(1)
@@ -1462,7 +3553,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(4)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(46+LMN)=Ket(46+LMN)&
+                  Ket(46)=Ket(46)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(4)*LambdaZ(2)
                   GradPrimDistX=-LambdaX(1)*LambdaY(4)*LambdaZ(2)
@@ -1470,7 +3561,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(4)*LambdaZ(3)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(74+LMN)=Ket(74+LMN)&
+                  Ket(74)=Ket(74)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(5)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(1)*LambdaY(5)*LambdaZ(0)
@@ -1478,7 +3569,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(5)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(41+LMN)=Ket(41+LMN)&
+                  Ket(41)=Ket(41)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(5)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(1)*LambdaY(5)*LambdaZ(1)
@@ -1486,7 +3577,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(5)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(69+LMN)=Ket(69+LMN)&
+                  Ket(69)=Ket(69)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(6)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(1)*LambdaY(6)*LambdaZ(0)
@@ -1494,7 +3585,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(6)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(63+LMN)=Ket(63+LMN)&
+                  Ket(63)=Ket(63)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(0)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(2)*LambdaY(0)*LambdaZ(0)
@@ -1502,7 +3593,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(0)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(2+LMN)=Ket(2+LMN)&
+                  Ket(2)=Ket(2)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(0)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(2)*LambdaY(0)*LambdaZ(1)
@@ -1510,7 +3601,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(0)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(8+LMN)=Ket(8+LMN)&
+                  Ket(8)=Ket(8)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(0)*LambdaZ(2)
                   GradPrimDistX=-LambdaX(2)*LambdaY(0)*LambdaZ(2)
@@ -1518,7 +3609,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(0)*LambdaZ(3)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(18+LMN)=Ket(18+LMN)&
+                  Ket(18)=Ket(18)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(0)*LambdaZ(3)
                   GradPrimDistX=-LambdaX(2)*LambdaY(0)*LambdaZ(3)
@@ -1526,7 +3617,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(0)*LambdaZ(4)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(33+LMN)=Ket(33+LMN)&
+                  Ket(33)=Ket(33)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(0)*LambdaZ(4)
                   GradPrimDistX=-LambdaX(2)*LambdaY(0)*LambdaZ(4)
@@ -1534,7 +3625,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(0)*LambdaZ(5)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(54+LMN)=Ket(54+LMN)&
+                  Ket(54)=Ket(54)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(0)*LambdaZ(5)
                   GradPrimDistX=-LambdaX(2)*LambdaY(0)*LambdaZ(5)
@@ -1542,7 +3633,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(0)*LambdaZ(6)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(82+LMN)=Ket(82+LMN)&
+                  Ket(82)=Ket(82)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(1)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(2)*LambdaY(1)*LambdaZ(0)
@@ -1550,7 +3641,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(1)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(6+LMN)=Ket(6+LMN)&
+                  Ket(6)=Ket(6)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(1)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(2)*LambdaY(1)*LambdaZ(1)
@@ -1558,7 +3649,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(1)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(16+LMN)=Ket(16+LMN)&
+                  Ket(16)=Ket(16)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(1)*LambdaZ(2)
                   GradPrimDistX=-LambdaX(2)*LambdaY(1)*LambdaZ(2)
@@ -1566,7 +3657,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(1)*LambdaZ(3)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(31+LMN)=Ket(31+LMN)&
+                  Ket(31)=Ket(31)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(1)*LambdaZ(3)
                   GradPrimDistX=-LambdaX(2)*LambdaY(1)*LambdaZ(3)
@@ -1574,7 +3665,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(1)*LambdaZ(4)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(52+LMN)=Ket(52+LMN)&
+                  Ket(52)=Ket(52)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(1)*LambdaZ(4)
                   GradPrimDistX=-LambdaX(2)*LambdaY(1)*LambdaZ(4)
@@ -1582,7 +3673,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(1)*LambdaZ(5)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(80+LMN)=Ket(80+LMN)&
+                  Ket(80)=Ket(80)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(2)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(2)*LambdaY(2)*LambdaZ(0)
@@ -1590,7 +3681,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(2)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(13+LMN)=Ket(13+LMN)&
+                  Ket(13)=Ket(13)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(2)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(2)*LambdaY(2)*LambdaZ(1)
@@ -1598,7 +3689,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(2)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(28+LMN)=Ket(28+LMN)&
+                  Ket(28)=Ket(28)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(2)*LambdaZ(2)
                   GradPrimDistX=-LambdaX(2)*LambdaY(2)*LambdaZ(2)
@@ -1606,7 +3697,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(2)*LambdaZ(3)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(49+LMN)=Ket(49+LMN)&
+                  Ket(49)=Ket(49)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(2)*LambdaZ(3)
                   GradPrimDistX=-LambdaX(2)*LambdaY(2)*LambdaZ(3)
@@ -1614,7 +3705,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(2)*LambdaZ(4)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(77+LMN)=Ket(77+LMN)&
+                  Ket(77)=Ket(77)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(3)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(2)*LambdaY(3)*LambdaZ(0)
@@ -1622,7 +3713,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(3)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(24+LMN)=Ket(24+LMN)&
+                  Ket(24)=Ket(24)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(3)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(2)*LambdaY(3)*LambdaZ(1)
@@ -1630,7 +3721,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(3)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(45+LMN)=Ket(45+LMN)&
+                  Ket(45)=Ket(45)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(3)*LambdaZ(2)
                   GradPrimDistX=-LambdaX(2)*LambdaY(3)*LambdaZ(2)
@@ -1638,7 +3729,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(3)*LambdaZ(3)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(73+LMN)=Ket(73+LMN)&
+                  Ket(73)=Ket(73)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(4)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(2)*LambdaY(4)*LambdaZ(0)
@@ -1646,7 +3737,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(4)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(40+LMN)=Ket(40+LMN)&
+                  Ket(40)=Ket(40)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(4)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(2)*LambdaY(4)*LambdaZ(1)
@@ -1654,7 +3745,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(4)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(68+LMN)=Ket(68+LMN)&
+                  Ket(68)=Ket(68)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(5)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(2)*LambdaY(5)*LambdaZ(0)
@@ -1662,7 +3753,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(5)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(62+LMN)=Ket(62+LMN)&
+                  Ket(62)=Ket(62)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(2)*LambdaY(0)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(3)*LambdaY(0)*LambdaZ(0)
@@ -1670,7 +3761,7 @@
                   GradPrimDistZ=-LambdaX(2)*LambdaY(0)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(5+LMN)=Ket(5+LMN)&
+                  Ket(5)=Ket(5)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(2)*LambdaY(0)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(3)*LambdaY(0)*LambdaZ(1)
@@ -1678,7 +3769,7 @@
                   GradPrimDistZ=-LambdaX(2)*LambdaY(0)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(15+LMN)=Ket(15+LMN)&
+                  Ket(15)=Ket(15)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(2)*LambdaY(0)*LambdaZ(2)
                   GradPrimDistX=-LambdaX(3)*LambdaY(0)*LambdaZ(2)
@@ -1686,7 +3777,7 @@
                   GradPrimDistZ=-LambdaX(2)*LambdaY(0)*LambdaZ(3)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(30+LMN)=Ket(30+LMN)&
+                  Ket(30)=Ket(30)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(2)*LambdaY(0)*LambdaZ(3)
                   GradPrimDistX=-LambdaX(3)*LambdaY(0)*LambdaZ(3)
@@ -1694,7 +3785,7 @@
                   GradPrimDistZ=-LambdaX(2)*LambdaY(0)*LambdaZ(4)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(51+LMN)=Ket(51+LMN)&
+                  Ket(51)=Ket(51)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(2)*LambdaY(0)*LambdaZ(4)
                   GradPrimDistX=-LambdaX(3)*LambdaY(0)*LambdaZ(4)
@@ -1702,7 +3793,7 @@
                   GradPrimDistZ=-LambdaX(2)*LambdaY(0)*LambdaZ(5)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(79+LMN)=Ket(79+LMN)&
+                  Ket(79)=Ket(79)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(2)*LambdaY(1)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(3)*LambdaY(1)*LambdaZ(0)
@@ -1710,7 +3801,7 @@
                   GradPrimDistZ=-LambdaX(2)*LambdaY(1)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(12+LMN)=Ket(12+LMN)&
+                  Ket(12)=Ket(12)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(2)*LambdaY(1)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(3)*LambdaY(1)*LambdaZ(1)
@@ -1718,7 +3809,7 @@
                   GradPrimDistZ=-LambdaX(2)*LambdaY(1)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(27+LMN)=Ket(27+LMN)&
+                  Ket(27)=Ket(27)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(2)*LambdaY(1)*LambdaZ(2)
                   GradPrimDistX=-LambdaX(3)*LambdaY(1)*LambdaZ(2)
@@ -1726,7 +3817,7 @@
                   GradPrimDistZ=-LambdaX(2)*LambdaY(1)*LambdaZ(3)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(48+LMN)=Ket(48+LMN)&
+                  Ket(48)=Ket(48)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(2)*LambdaY(1)*LambdaZ(3)
                   GradPrimDistX=-LambdaX(3)*LambdaY(1)*LambdaZ(3)
@@ -1734,7 +3825,7 @@
                   GradPrimDistZ=-LambdaX(2)*LambdaY(1)*LambdaZ(4)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(76+LMN)=Ket(76+LMN)&
+                  Ket(76)=Ket(76)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(2)*LambdaY(2)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(3)*LambdaY(2)*LambdaZ(0)
@@ -1742,7 +3833,7 @@
                   GradPrimDistZ=-LambdaX(2)*LambdaY(2)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(23+LMN)=Ket(23+LMN)&
+                  Ket(23)=Ket(23)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(2)*LambdaY(2)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(3)*LambdaY(2)*LambdaZ(1)
@@ -1750,7 +3841,7 @@
                   GradPrimDistZ=-LambdaX(2)*LambdaY(2)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(44+LMN)=Ket(44+LMN)&
+                  Ket(44)=Ket(44)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(2)*LambdaY(2)*LambdaZ(2)
                   GradPrimDistX=-LambdaX(3)*LambdaY(2)*LambdaZ(2)
@@ -1758,7 +3849,7 @@
                   GradPrimDistZ=-LambdaX(2)*LambdaY(2)*LambdaZ(3)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(72+LMN)=Ket(72+LMN)&
+                  Ket(72)=Ket(72)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(2)*LambdaY(3)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(3)*LambdaY(3)*LambdaZ(0)
@@ -1766,7 +3857,7 @@
                   GradPrimDistZ=-LambdaX(2)*LambdaY(3)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(39+LMN)=Ket(39+LMN)&
+                  Ket(39)=Ket(39)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(2)*LambdaY(3)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(3)*LambdaY(3)*LambdaZ(1)
@@ -1774,7 +3865,7 @@
                   GradPrimDistZ=-LambdaX(2)*LambdaY(3)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(67+LMN)=Ket(67+LMN)&
+                  Ket(67)=Ket(67)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(2)*LambdaY(4)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(3)*LambdaY(4)*LambdaZ(0)
@@ -1782,7 +3873,7 @@
                   GradPrimDistZ=-LambdaX(2)*LambdaY(4)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(61+LMN)=Ket(61+LMN)&
+                  Ket(61)=Ket(61)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(3)*LambdaY(0)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(4)*LambdaY(0)*LambdaZ(0)
@@ -1790,7 +3881,7 @@
                   GradPrimDistZ=-LambdaX(3)*LambdaY(0)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(11+LMN)=Ket(11+LMN)&
+                  Ket(11)=Ket(11)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(3)*LambdaY(0)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(4)*LambdaY(0)*LambdaZ(1)
@@ -1798,7 +3889,7 @@
                   GradPrimDistZ=-LambdaX(3)*LambdaY(0)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(26+LMN)=Ket(26+LMN)&
+                  Ket(26)=Ket(26)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(3)*LambdaY(0)*LambdaZ(2)
                   GradPrimDistX=-LambdaX(4)*LambdaY(0)*LambdaZ(2)
@@ -1806,7 +3897,7 @@
                   GradPrimDistZ=-LambdaX(3)*LambdaY(0)*LambdaZ(3)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(47+LMN)=Ket(47+LMN)&
+                  Ket(47)=Ket(47)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(3)*LambdaY(0)*LambdaZ(3)
                   GradPrimDistX=-LambdaX(4)*LambdaY(0)*LambdaZ(3)
@@ -1814,7 +3905,7 @@
                   GradPrimDistZ=-LambdaX(3)*LambdaY(0)*LambdaZ(4)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(75+LMN)=Ket(75+LMN)&
+                  Ket(75)=Ket(75)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(3)*LambdaY(1)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(4)*LambdaY(1)*LambdaZ(0)
@@ -1822,7 +3913,7 @@
                   GradPrimDistZ=-LambdaX(3)*LambdaY(1)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(22+LMN)=Ket(22+LMN)&
+                  Ket(22)=Ket(22)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(3)*LambdaY(1)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(4)*LambdaY(1)*LambdaZ(1)
@@ -1830,7 +3921,7 @@
                   GradPrimDistZ=-LambdaX(3)*LambdaY(1)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(43+LMN)=Ket(43+LMN)&
+                  Ket(43)=Ket(43)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(3)*LambdaY(1)*LambdaZ(2)
                   GradPrimDistX=-LambdaX(4)*LambdaY(1)*LambdaZ(2)
@@ -1838,7 +3929,7 @@
                   GradPrimDistZ=-LambdaX(3)*LambdaY(1)*LambdaZ(3)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(71+LMN)=Ket(71+LMN)&
+                  Ket(71)=Ket(71)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(3)*LambdaY(2)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(4)*LambdaY(2)*LambdaZ(0)
@@ -1846,7 +3937,7 @@
                   GradPrimDistZ=-LambdaX(3)*LambdaY(2)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(38+LMN)=Ket(38+LMN)&
+                  Ket(38)=Ket(38)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(3)*LambdaY(2)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(4)*LambdaY(2)*LambdaZ(1)
@@ -1854,7 +3945,7 @@
                   GradPrimDistZ=-LambdaX(3)*LambdaY(2)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(66+LMN)=Ket(66+LMN)&
+                  Ket(66)=Ket(66)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(3)*LambdaY(3)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(4)*LambdaY(3)*LambdaZ(0)
@@ -1862,7 +3953,7 @@
                   GradPrimDistZ=-LambdaX(3)*LambdaY(3)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(60+LMN)=Ket(60+LMN)&
+                  Ket(60)=Ket(60)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(4)*LambdaY(0)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(5)*LambdaY(0)*LambdaZ(0)
@@ -1870,7 +3961,7 @@
                   GradPrimDistZ=-LambdaX(4)*LambdaY(0)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(21+LMN)=Ket(21+LMN)&
+                  Ket(21)=Ket(21)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(4)*LambdaY(0)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(5)*LambdaY(0)*LambdaZ(1)
@@ -1878,7 +3969,7 @@
                   GradPrimDistZ=-LambdaX(4)*LambdaY(0)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(42+LMN)=Ket(42+LMN)&
+                  Ket(42)=Ket(42)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(4)*LambdaY(0)*LambdaZ(2)
                   GradPrimDistX=-LambdaX(5)*LambdaY(0)*LambdaZ(2)
@@ -1886,7 +3977,7 @@
                   GradPrimDistZ=-LambdaX(4)*LambdaY(0)*LambdaZ(3)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(70+LMN)=Ket(70+LMN)&
+                  Ket(70)=Ket(70)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(4)*LambdaY(1)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(5)*LambdaY(1)*LambdaZ(0)
@@ -1894,7 +3985,7 @@
                   GradPrimDistZ=-LambdaX(4)*LambdaY(1)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(37+LMN)=Ket(37+LMN)&
+                  Ket(37)=Ket(37)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(4)*LambdaY(1)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(5)*LambdaY(1)*LambdaZ(1)
@@ -1902,7 +3993,7 @@
                   GradPrimDistZ=-LambdaX(4)*LambdaY(1)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(65+LMN)=Ket(65+LMN)&
+                  Ket(65)=Ket(65)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(4)*LambdaY(2)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(5)*LambdaY(2)*LambdaZ(0)
@@ -1910,7 +4001,7 @@
                   GradPrimDistZ=-LambdaX(4)*LambdaY(2)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(59+LMN)=Ket(59+LMN)&
+                  Ket(59)=Ket(59)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(5)*LambdaY(0)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(6)*LambdaY(0)*LambdaZ(0)
@@ -1918,7 +4009,7 @@
                   GradPrimDistZ=-LambdaX(5)*LambdaY(0)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(36+LMN)=Ket(36+LMN)&
+                  Ket(36)=Ket(36)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(5)*LambdaY(0)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(6)*LambdaY(0)*LambdaZ(1)
@@ -1926,7 +4017,7 @@
                   GradPrimDistZ=-LambdaX(5)*LambdaY(0)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(64+LMN)=Ket(64+LMN)&
+                  Ket(64)=Ket(64)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(5)*LambdaY(1)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(6)*LambdaY(1)*LambdaZ(0)
@@ -1934,7 +4025,7 @@
                   GradPrimDistZ=-LambdaX(5)*LambdaY(1)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(58+LMN)=Ket(58+LMN)&
+                  Ket(58)=Ket(58)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(6)*LambdaY(0)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(7)*LambdaY(0)*LambdaZ(0)
@@ -1942,9 +4033,1369 @@
                   GradPrimDistZ=-LambdaX(6)*LambdaY(0)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(57+LMN)=Ket(57+LMN)&
+                  Ket(57)=Ket(57)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
-                ENDDO
+                ELSEIF(NSDen.EQ.3)THEN
+                  I1=I+  NGrid
+                  I2=I+2*NGrid
+                  dEdRhoA=Cube%Vals(I ,1)
+                  dEdRhoB=Cube%Vals(I1,1)
+                  dEdAbsGradRho2AA=Cube%Vals(I ,2)
+                  dEdAbsGradRho2BB=Cube%Vals(I1,2)
+                  dEdAbsGradRho2AB=Cube%Vals(I2,2)
+                  GradRhoXA=Cube%Vals(I ,3)
+                  GradRhoYA=Cube%Vals(I ,4)
+                  GradRhoZA=Cube%Vals(I ,5)
+                  GradRhoXB=Cube%Vals(I1,3)
+                  GradRhoYB=Cube%Vals(I1,4)
+                  GradRhoZB=Cube%Vals(I1,5)
+                  PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(1)
+                  LMN1=1
+                  LMN2=1+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(2)
+                  LMN1=4
+                  LMN2=4+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(2)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(2)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(1)*LambdaZ(2)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(3)
+                  LMN1=10
+                  LMN2=10+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(3)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(3)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(1)*LambdaZ(3)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(4)
+                  LMN1=20
+                  LMN2=20+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(4)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(4)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(1)*LambdaZ(4)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(5)
+                  LMN1=35
+                  LMN2=35+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(5)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(5)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(1)*LambdaZ(5)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(6)
+                  LMN1=56
+                  LMN2=56+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(6)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(6)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(1)*LambdaZ(6)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(7)
+                  LMN1=84
+                  LMN2=84+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(1)*LambdaZ(1)
+                  LMN1=3
+                  LMN2=3+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(2)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(1)*LambdaZ(2)
+                  LMN1=9
+                  LMN2=9+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(1)*LambdaZ(2)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(1)*LambdaZ(2)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(2)*LambdaZ(2)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(1)*LambdaZ(3)
+                  LMN1=19
+                  LMN2=19+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(1)*LambdaZ(3)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(1)*LambdaZ(3)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(2)*LambdaZ(3)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(1)*LambdaZ(4)
+                  LMN1=34
+                  LMN2=34+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(1)*LambdaZ(4)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(1)*LambdaZ(4)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(2)*LambdaZ(4)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(1)*LambdaZ(5)
+                  LMN1=55
+                  LMN2=55+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(1)*LambdaZ(5)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(1)*LambdaZ(5)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(2)*LambdaZ(5)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(1)*LambdaZ(6)
+                  LMN1=83
+                  LMN2=83+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(3)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(2)*LambdaZ(1)
+                  LMN1=7
+                  LMN2=7+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(2)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(2)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(3)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(2)*LambdaZ(2)
+                  LMN1=17
+                  LMN2=17+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(2)*LambdaZ(2)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(2)*LambdaZ(2)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(3)*LambdaZ(2)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(2)*LambdaZ(3)
+                  LMN1=32
+                  LMN2=32+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(2)*LambdaZ(3)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(2)*LambdaZ(3)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(3)*LambdaZ(3)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(2)*LambdaZ(4)
+                  LMN1=53
+                  LMN2=53+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(2)*LambdaZ(4)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(2)*LambdaZ(4)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(3)*LambdaZ(4)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(2)*LambdaZ(5)
+                  LMN1=81
+                  LMN2=81+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(3)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(3)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(4)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(3)*LambdaZ(1)
+                  LMN1=14
+                  LMN2=14+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(3)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(3)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(4)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(3)*LambdaZ(2)
+                  LMN1=29
+                  LMN2=29+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(3)*LambdaZ(2)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(3)*LambdaZ(2)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(4)*LambdaZ(2)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(3)*LambdaZ(3)
+                  LMN1=50
+                  LMN2=50+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(3)*LambdaZ(3)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(3)*LambdaZ(3)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(4)*LambdaZ(3)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(3)*LambdaZ(4)
+                  LMN1=78
+                  LMN2=78+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(4)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(4)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(5)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(4)*LambdaZ(1)
+                  LMN1=25
+                  LMN2=25+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(4)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(4)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(5)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(4)*LambdaZ(2)
+                  LMN1=46
+                  LMN2=46+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(4)*LambdaZ(2)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(4)*LambdaZ(2)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(5)*LambdaZ(2)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(4)*LambdaZ(3)
+                  LMN1=74
+                  LMN2=74+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(5)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(5)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(6)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(5)*LambdaZ(1)
+                  LMN1=41
+                  LMN2=41+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(5)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(5)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(6)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(5)*LambdaZ(2)
+                  LMN1=69
+                  LMN2=69+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(6)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(6)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(7)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(6)*LambdaZ(1)
+                  LMN1=63
+                  LMN2=63+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(0)*LambdaZ(1)
+                  LMN1=2
+                  LMN2=2+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(0)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(0)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(0)*LambdaZ(2)
+                  LMN1=8
+                  LMN2=8+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(0)*LambdaZ(2)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(0)*LambdaZ(2)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(1)*LambdaZ(2)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(0)*LambdaZ(3)
+                  LMN1=18
+                  LMN2=18+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(0)*LambdaZ(3)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(0)*LambdaZ(3)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(1)*LambdaZ(3)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(0)*LambdaZ(4)
+                  LMN1=33
+                  LMN2=33+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(0)*LambdaZ(4)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(0)*LambdaZ(4)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(1)*LambdaZ(4)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(0)*LambdaZ(5)
+                  LMN1=54
+                  LMN2=54+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(0)*LambdaZ(5)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(0)*LambdaZ(5)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(1)*LambdaZ(5)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(0)*LambdaZ(6)
+                  LMN1=82
+                  LMN2=82+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(1)*LambdaZ(1)
+                  LMN1=6
+                  LMN2=6+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(2)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(1)*LambdaZ(2)
+                  LMN1=16
+                  LMN2=16+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(1)*LambdaZ(2)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(1)*LambdaZ(2)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(2)*LambdaZ(2)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(1)*LambdaZ(3)
+                  LMN1=31
+                  LMN2=31+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(1)*LambdaZ(3)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(1)*LambdaZ(3)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(2)*LambdaZ(3)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(1)*LambdaZ(4)
+                  LMN1=52
+                  LMN2=52+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(1)*LambdaZ(4)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(1)*LambdaZ(4)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(2)*LambdaZ(4)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(1)*LambdaZ(5)
+                  LMN1=80
+                  LMN2=80+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(3)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(2)*LambdaZ(1)
+                  LMN1=13
+                  LMN2=13+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(2)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(2)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(3)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(2)*LambdaZ(2)
+                  LMN1=28
+                  LMN2=28+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(2)*LambdaZ(2)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(2)*LambdaZ(2)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(3)*LambdaZ(2)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(2)*LambdaZ(3)
+                  LMN1=49
+                  LMN2=49+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(2)*LambdaZ(3)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(2)*LambdaZ(3)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(3)*LambdaZ(3)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(2)*LambdaZ(4)
+                  LMN1=77
+                  LMN2=77+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(3)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(3)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(4)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(3)*LambdaZ(1)
+                  LMN1=24
+                  LMN2=24+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(3)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(3)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(4)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(3)*LambdaZ(2)
+                  LMN1=45
+                  LMN2=45+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(3)*LambdaZ(2)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(3)*LambdaZ(2)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(4)*LambdaZ(2)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(3)*LambdaZ(3)
+                  LMN1=73
+                  LMN2=73+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(4)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(4)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(5)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(4)*LambdaZ(1)
+                  LMN1=40
+                  LMN2=40+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(4)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(4)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(5)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(4)*LambdaZ(2)
+                  LMN1=68
+                  LMN2=68+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(5)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(5)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(6)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(5)*LambdaZ(1)
+                  LMN1=62
+                  LMN2=62+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(2)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(3)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(2)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(2)*LambdaY(0)*LambdaZ(1)
+                  LMN1=5
+                  LMN2=5+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(2)*LambdaY(0)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(3)*LambdaY(0)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(2)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(2)*LambdaY(0)*LambdaZ(2)
+                  LMN1=15
+                  LMN2=15+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(2)*LambdaY(0)*LambdaZ(2)
+                  GradPrimDistX=-LambdaX(3)*LambdaY(0)*LambdaZ(2)
+                  GradPrimDistY=-LambdaX(2)*LambdaY(1)*LambdaZ(2)
+                  GradPrimDistZ=-LambdaX(2)*LambdaY(0)*LambdaZ(3)
+                  LMN1=30
+                  LMN2=30+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(2)*LambdaY(0)*LambdaZ(3)
+                  GradPrimDistX=-LambdaX(3)*LambdaY(0)*LambdaZ(3)
+                  GradPrimDistY=-LambdaX(2)*LambdaY(1)*LambdaZ(3)
+                  GradPrimDistZ=-LambdaX(2)*LambdaY(0)*LambdaZ(4)
+                  LMN1=51
+                  LMN2=51+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(2)*LambdaY(0)*LambdaZ(4)
+                  GradPrimDistX=-LambdaX(3)*LambdaY(0)*LambdaZ(4)
+                  GradPrimDistY=-LambdaX(2)*LambdaY(1)*LambdaZ(4)
+                  GradPrimDistZ=-LambdaX(2)*LambdaY(0)*LambdaZ(5)
+                  LMN1=79
+                  LMN2=79+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(2)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(3)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(2)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(2)*LambdaY(1)*LambdaZ(1)
+                  LMN1=12
+                  LMN2=12+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(2)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(3)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(2)*LambdaY(2)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(2)*LambdaY(1)*LambdaZ(2)
+                  LMN1=27
+                  LMN2=27+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(2)*LambdaY(1)*LambdaZ(2)
+                  GradPrimDistX=-LambdaX(3)*LambdaY(1)*LambdaZ(2)
+                  GradPrimDistY=-LambdaX(2)*LambdaY(2)*LambdaZ(2)
+                  GradPrimDistZ=-LambdaX(2)*LambdaY(1)*LambdaZ(3)
+                  LMN1=48
+                  LMN2=48+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(2)*LambdaY(1)*LambdaZ(3)
+                  GradPrimDistX=-LambdaX(3)*LambdaY(1)*LambdaZ(3)
+                  GradPrimDistY=-LambdaX(2)*LambdaY(2)*LambdaZ(3)
+                  GradPrimDistZ=-LambdaX(2)*LambdaY(1)*LambdaZ(4)
+                  LMN1=76
+                  LMN2=76+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(2)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(3)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(2)*LambdaY(3)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(2)*LambdaY(2)*LambdaZ(1)
+                  LMN1=23
+                  LMN2=23+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(2)*LambdaY(2)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(3)*LambdaY(2)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(2)*LambdaY(3)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(2)*LambdaY(2)*LambdaZ(2)
+                  LMN1=44
+                  LMN2=44+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(2)*LambdaY(2)*LambdaZ(2)
+                  GradPrimDistX=-LambdaX(3)*LambdaY(2)*LambdaZ(2)
+                  GradPrimDistY=-LambdaX(2)*LambdaY(3)*LambdaZ(2)
+                  GradPrimDistZ=-LambdaX(2)*LambdaY(2)*LambdaZ(3)
+                  LMN1=72
+                  LMN2=72+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(2)*LambdaY(3)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(3)*LambdaY(3)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(2)*LambdaY(4)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(2)*LambdaY(3)*LambdaZ(1)
+                  LMN1=39
+                  LMN2=39+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(2)*LambdaY(3)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(3)*LambdaY(3)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(2)*LambdaY(4)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(2)*LambdaY(3)*LambdaZ(2)
+                  LMN1=67
+                  LMN2=67+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(2)*LambdaY(4)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(3)*LambdaY(4)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(2)*LambdaY(5)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(2)*LambdaY(4)*LambdaZ(1)
+                  LMN1=61
+                  LMN2=61+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(3)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(4)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(3)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(3)*LambdaY(0)*LambdaZ(1)
+                  LMN1=11
+                  LMN2=11+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(3)*LambdaY(0)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(4)*LambdaY(0)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(3)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(3)*LambdaY(0)*LambdaZ(2)
+                  LMN1=26
+                  LMN2=26+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(3)*LambdaY(0)*LambdaZ(2)
+                  GradPrimDistX=-LambdaX(4)*LambdaY(0)*LambdaZ(2)
+                  GradPrimDistY=-LambdaX(3)*LambdaY(1)*LambdaZ(2)
+                  GradPrimDistZ=-LambdaX(3)*LambdaY(0)*LambdaZ(3)
+                  LMN1=47
+                  LMN2=47+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(3)*LambdaY(0)*LambdaZ(3)
+                  GradPrimDistX=-LambdaX(4)*LambdaY(0)*LambdaZ(3)
+                  GradPrimDistY=-LambdaX(3)*LambdaY(1)*LambdaZ(3)
+                  GradPrimDistZ=-LambdaX(3)*LambdaY(0)*LambdaZ(4)
+                  LMN1=75
+                  LMN2=75+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(3)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(4)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(3)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(3)*LambdaY(1)*LambdaZ(1)
+                  LMN1=22
+                  LMN2=22+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(3)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(4)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(3)*LambdaY(2)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(3)*LambdaY(1)*LambdaZ(2)
+                  LMN1=43
+                  LMN2=43+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(3)*LambdaY(1)*LambdaZ(2)
+                  GradPrimDistX=-LambdaX(4)*LambdaY(1)*LambdaZ(2)
+                  GradPrimDistY=-LambdaX(3)*LambdaY(2)*LambdaZ(2)
+                  GradPrimDistZ=-LambdaX(3)*LambdaY(1)*LambdaZ(3)
+                  LMN1=71
+                  LMN2=71+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(3)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(4)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(3)*LambdaY(3)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(3)*LambdaY(2)*LambdaZ(1)
+                  LMN1=38
+                  LMN2=38+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(3)*LambdaY(2)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(4)*LambdaY(2)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(3)*LambdaY(3)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(3)*LambdaY(2)*LambdaZ(2)
+                  LMN1=66
+                  LMN2=66+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(3)*LambdaY(3)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(4)*LambdaY(3)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(3)*LambdaY(4)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(3)*LambdaY(3)*LambdaZ(1)
+                  LMN1=60
+                  LMN2=60+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(4)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(5)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(4)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(4)*LambdaY(0)*LambdaZ(1)
+                  LMN1=21
+                  LMN2=21+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(4)*LambdaY(0)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(5)*LambdaY(0)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(4)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(4)*LambdaY(0)*LambdaZ(2)
+                  LMN1=42
+                  LMN2=42+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(4)*LambdaY(0)*LambdaZ(2)
+                  GradPrimDistX=-LambdaX(5)*LambdaY(0)*LambdaZ(2)
+                  GradPrimDistY=-LambdaX(4)*LambdaY(1)*LambdaZ(2)
+                  GradPrimDistZ=-LambdaX(4)*LambdaY(0)*LambdaZ(3)
+                  LMN1=70
+                  LMN2=70+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(4)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(5)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(4)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(4)*LambdaY(1)*LambdaZ(1)
+                  LMN1=37
+                  LMN2=37+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(4)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(5)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(4)*LambdaY(2)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(4)*LambdaY(1)*LambdaZ(2)
+                  LMN1=65
+                  LMN2=65+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(4)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(5)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(4)*LambdaY(3)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(4)*LambdaY(2)*LambdaZ(1)
+                  LMN1=59
+                  LMN2=59+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(5)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(6)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(5)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(5)*LambdaY(0)*LambdaZ(1)
+                  LMN1=36
+                  LMN2=36+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(5)*LambdaY(0)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(6)*LambdaY(0)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(5)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(5)*LambdaY(0)*LambdaZ(2)
+                  LMN1=64
+                  LMN2=64+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(5)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(6)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(5)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(5)*LambdaY(1)*LambdaZ(1)
+                  LMN1=58
+                  LMN2=58+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(6)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(7)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(6)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(6)*LambdaY(0)*LambdaZ(1)
+                  LMN1=57
+                  LMN2=57+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                ELSE
+                  CALL Halt('ExplicitBraElements.Inc: Wrong NSDen')
+                ENDIF
              ENDIF
           ENDDO
        CASE(7)
@@ -1985,22 +5436,19 @@
                 LambdaZ(7)=TwoZ*(RPZ*LambdaZ(6)-6.D0*LambdaZ(5))
                 LambdaZ(8)=TwoZ*(RPZ*LambdaZ(7)-7.D0*LambdaZ(6))
                 Wght=Cube%Wght(I)
-                !Q&D...
-                DO iSDen=SDBeg,NSDen-1
-                  LMN=(iSDen-SDBeg)*OffSDen
-                  I0=I+iSDen*NGrid
-                  dEdRho=Cube%Vals(I0,1)
-                  dEdAbsGradRho2=Cube%Vals(I0,2)
-                  GradRhoX=Cube%Vals(I0,3)
-                  GradRhoY=Cube%Vals(I0,4)
-                  GradRhoZ=Cube%Vals(I0,5)
+                IF(NSDen.EQ.1)THEN
+                  dEdRho=Cube%Vals(I,1)
+                  dEdAbsGradRho2=Cube%Vals(I,2)
+                  GradRhoX=Cube%Vals(I,3)
+                  GradRhoY=Cube%Vals(I,4)
+                  GradRhoZ=Cube%Vals(I,5)
                   PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(0)
                   GradPrimDistY=-LambdaX(0)*LambdaY(1)*LambdaZ(0)
                   GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(1+LMN)=Ket(1+LMN)&
+                  Ket(1)=Ket(1)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(1)
@@ -2008,7 +5456,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(4+LMN)=Ket(4+LMN)&
+                  Ket(4)=Ket(4)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(2)
                   GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(2)
@@ -2016,7 +5464,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(3)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(10+LMN)=Ket(10+LMN)&
+                  Ket(10)=Ket(10)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(3)
                   GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(3)
@@ -2024,7 +5472,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(4)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(20+LMN)=Ket(20+LMN)&
+                  Ket(20)=Ket(20)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(4)
                   GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(4)
@@ -2032,7 +5480,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(5)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(35+LMN)=Ket(35+LMN)&
+                  Ket(35)=Ket(35)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(5)
                   GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(5)
@@ -2040,7 +5488,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(6)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(56+LMN)=Ket(56+LMN)&
+                  Ket(56)=Ket(56)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(6)
                   GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(6)
@@ -2048,7 +5496,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(7)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(84+LMN)=Ket(84+LMN)&
+                  Ket(84)=Ket(84)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(7)
                   GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(7)
@@ -2056,7 +5504,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(8)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(120+LMN)=Ket(120+LMN)&
+                  Ket(120)=Ket(120)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(1)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(1)*LambdaY(1)*LambdaZ(0)
@@ -2064,7 +5512,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(1)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(3+LMN)=Ket(3+LMN)&
+                  Ket(3)=Ket(3)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(1)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(1)*LambdaY(1)*LambdaZ(1)
@@ -2072,7 +5520,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(1)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(9+LMN)=Ket(9+LMN)&
+                  Ket(9)=Ket(9)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(1)*LambdaZ(2)
                   GradPrimDistX=-LambdaX(1)*LambdaY(1)*LambdaZ(2)
@@ -2080,7 +5528,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(1)*LambdaZ(3)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(19+LMN)=Ket(19+LMN)&
+                  Ket(19)=Ket(19)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(1)*LambdaZ(3)
                   GradPrimDistX=-LambdaX(1)*LambdaY(1)*LambdaZ(3)
@@ -2088,7 +5536,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(1)*LambdaZ(4)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(34+LMN)=Ket(34+LMN)&
+                  Ket(34)=Ket(34)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(1)*LambdaZ(4)
                   GradPrimDistX=-LambdaX(1)*LambdaY(1)*LambdaZ(4)
@@ -2096,7 +5544,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(1)*LambdaZ(5)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(55+LMN)=Ket(55+LMN)&
+                  Ket(55)=Ket(55)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(1)*LambdaZ(5)
                   GradPrimDistX=-LambdaX(1)*LambdaY(1)*LambdaZ(5)
@@ -2104,7 +5552,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(1)*LambdaZ(6)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(83+LMN)=Ket(83+LMN)&
+                  Ket(83)=Ket(83)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(1)*LambdaZ(6)
                   GradPrimDistX=-LambdaX(1)*LambdaY(1)*LambdaZ(6)
@@ -2112,7 +5560,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(1)*LambdaZ(7)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(119+LMN)=Ket(119+LMN)&
+                  Ket(119)=Ket(119)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(2)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(1)*LambdaY(2)*LambdaZ(0)
@@ -2120,7 +5568,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(2)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(7+LMN)=Ket(7+LMN)&
+                  Ket(7)=Ket(7)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(2)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(1)*LambdaY(2)*LambdaZ(1)
@@ -2128,7 +5576,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(2)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(17+LMN)=Ket(17+LMN)&
+                  Ket(17)=Ket(17)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(2)*LambdaZ(2)
                   GradPrimDistX=-LambdaX(1)*LambdaY(2)*LambdaZ(2)
@@ -2136,7 +5584,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(2)*LambdaZ(3)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(32+LMN)=Ket(32+LMN)&
+                  Ket(32)=Ket(32)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(2)*LambdaZ(3)
                   GradPrimDistX=-LambdaX(1)*LambdaY(2)*LambdaZ(3)
@@ -2144,7 +5592,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(2)*LambdaZ(4)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(53+LMN)=Ket(53+LMN)&
+                  Ket(53)=Ket(53)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(2)*LambdaZ(4)
                   GradPrimDistX=-LambdaX(1)*LambdaY(2)*LambdaZ(4)
@@ -2152,7 +5600,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(2)*LambdaZ(5)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(81+LMN)=Ket(81+LMN)&
+                  Ket(81)=Ket(81)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(2)*LambdaZ(5)
                   GradPrimDistX=-LambdaX(1)*LambdaY(2)*LambdaZ(5)
@@ -2160,7 +5608,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(2)*LambdaZ(6)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(117+LMN)=Ket(117+LMN)&
+                  Ket(117)=Ket(117)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(3)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(1)*LambdaY(3)*LambdaZ(0)
@@ -2168,7 +5616,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(3)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(14+LMN)=Ket(14+LMN)&
+                  Ket(14)=Ket(14)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(3)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(1)*LambdaY(3)*LambdaZ(1)
@@ -2176,7 +5624,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(3)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(29+LMN)=Ket(29+LMN)&
+                  Ket(29)=Ket(29)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(3)*LambdaZ(2)
                   GradPrimDistX=-LambdaX(1)*LambdaY(3)*LambdaZ(2)
@@ -2184,7 +5632,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(3)*LambdaZ(3)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(50+LMN)=Ket(50+LMN)&
+                  Ket(50)=Ket(50)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(3)*LambdaZ(3)
                   GradPrimDistX=-LambdaX(1)*LambdaY(3)*LambdaZ(3)
@@ -2192,7 +5640,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(3)*LambdaZ(4)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(78+LMN)=Ket(78+LMN)&
+                  Ket(78)=Ket(78)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(3)*LambdaZ(4)
                   GradPrimDistX=-LambdaX(1)*LambdaY(3)*LambdaZ(4)
@@ -2200,7 +5648,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(3)*LambdaZ(5)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(114+LMN)=Ket(114+LMN)&
+                  Ket(114)=Ket(114)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(4)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(1)*LambdaY(4)*LambdaZ(0)
@@ -2208,7 +5656,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(4)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(25+LMN)=Ket(25+LMN)&
+                  Ket(25)=Ket(25)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(4)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(1)*LambdaY(4)*LambdaZ(1)
@@ -2216,7 +5664,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(4)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(46+LMN)=Ket(46+LMN)&
+                  Ket(46)=Ket(46)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(4)*LambdaZ(2)
                   GradPrimDistX=-LambdaX(1)*LambdaY(4)*LambdaZ(2)
@@ -2224,7 +5672,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(4)*LambdaZ(3)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(74+LMN)=Ket(74+LMN)&
+                  Ket(74)=Ket(74)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(4)*LambdaZ(3)
                   GradPrimDistX=-LambdaX(1)*LambdaY(4)*LambdaZ(3)
@@ -2232,7 +5680,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(4)*LambdaZ(4)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(110+LMN)=Ket(110+LMN)&
+                  Ket(110)=Ket(110)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(5)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(1)*LambdaY(5)*LambdaZ(0)
@@ -2240,7 +5688,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(5)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(41+LMN)=Ket(41+LMN)&
+                  Ket(41)=Ket(41)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(5)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(1)*LambdaY(5)*LambdaZ(1)
@@ -2248,7 +5696,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(5)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(69+LMN)=Ket(69+LMN)&
+                  Ket(69)=Ket(69)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(5)*LambdaZ(2)
                   GradPrimDistX=-LambdaX(1)*LambdaY(5)*LambdaZ(2)
@@ -2256,7 +5704,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(5)*LambdaZ(3)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(105+LMN)=Ket(105+LMN)&
+                  Ket(105)=Ket(105)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(6)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(1)*LambdaY(6)*LambdaZ(0)
@@ -2264,7 +5712,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(6)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(63+LMN)=Ket(63+LMN)&
+                  Ket(63)=Ket(63)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(6)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(1)*LambdaY(6)*LambdaZ(1)
@@ -2272,7 +5720,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(6)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(99+LMN)=Ket(99+LMN)&
+                  Ket(99)=Ket(99)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(0)*LambdaY(7)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(1)*LambdaY(7)*LambdaZ(0)
@@ -2280,7 +5728,7 @@
                   GradPrimDistZ=-LambdaX(0)*LambdaY(7)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(92+LMN)=Ket(92+LMN)&
+                  Ket(92)=Ket(92)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(0)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(2)*LambdaY(0)*LambdaZ(0)
@@ -2288,7 +5736,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(0)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(2+LMN)=Ket(2+LMN)&
+                  Ket(2)=Ket(2)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(0)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(2)*LambdaY(0)*LambdaZ(1)
@@ -2296,7 +5744,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(0)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(8+LMN)=Ket(8+LMN)&
+                  Ket(8)=Ket(8)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(0)*LambdaZ(2)
                   GradPrimDistX=-LambdaX(2)*LambdaY(0)*LambdaZ(2)
@@ -2304,7 +5752,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(0)*LambdaZ(3)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(18+LMN)=Ket(18+LMN)&
+                  Ket(18)=Ket(18)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(0)*LambdaZ(3)
                   GradPrimDistX=-LambdaX(2)*LambdaY(0)*LambdaZ(3)
@@ -2312,7 +5760,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(0)*LambdaZ(4)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(33+LMN)=Ket(33+LMN)&
+                  Ket(33)=Ket(33)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(0)*LambdaZ(4)
                   GradPrimDistX=-LambdaX(2)*LambdaY(0)*LambdaZ(4)
@@ -2320,7 +5768,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(0)*LambdaZ(5)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(54+LMN)=Ket(54+LMN)&
+                  Ket(54)=Ket(54)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(0)*LambdaZ(5)
                   GradPrimDistX=-LambdaX(2)*LambdaY(0)*LambdaZ(5)
@@ -2328,7 +5776,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(0)*LambdaZ(6)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(82+LMN)=Ket(82+LMN)&
+                  Ket(82)=Ket(82)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(0)*LambdaZ(6)
                   GradPrimDistX=-LambdaX(2)*LambdaY(0)*LambdaZ(6)
@@ -2336,7 +5784,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(0)*LambdaZ(7)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(118+LMN)=Ket(118+LMN)&
+                  Ket(118)=Ket(118)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(1)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(2)*LambdaY(1)*LambdaZ(0)
@@ -2344,7 +5792,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(1)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(6+LMN)=Ket(6+LMN)&
+                  Ket(6)=Ket(6)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(1)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(2)*LambdaY(1)*LambdaZ(1)
@@ -2352,7 +5800,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(1)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(16+LMN)=Ket(16+LMN)&
+                  Ket(16)=Ket(16)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(1)*LambdaZ(2)
                   GradPrimDistX=-LambdaX(2)*LambdaY(1)*LambdaZ(2)
@@ -2360,7 +5808,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(1)*LambdaZ(3)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(31+LMN)=Ket(31+LMN)&
+                  Ket(31)=Ket(31)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(1)*LambdaZ(3)
                   GradPrimDistX=-LambdaX(2)*LambdaY(1)*LambdaZ(3)
@@ -2368,7 +5816,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(1)*LambdaZ(4)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(52+LMN)=Ket(52+LMN)&
+                  Ket(52)=Ket(52)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(1)*LambdaZ(4)
                   GradPrimDistX=-LambdaX(2)*LambdaY(1)*LambdaZ(4)
@@ -2376,7 +5824,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(1)*LambdaZ(5)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(80+LMN)=Ket(80+LMN)&
+                  Ket(80)=Ket(80)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(1)*LambdaZ(5)
                   GradPrimDistX=-LambdaX(2)*LambdaY(1)*LambdaZ(5)
@@ -2384,7 +5832,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(1)*LambdaZ(6)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(116+LMN)=Ket(116+LMN)&
+                  Ket(116)=Ket(116)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(2)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(2)*LambdaY(2)*LambdaZ(0)
@@ -2392,7 +5840,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(2)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(13+LMN)=Ket(13+LMN)&
+                  Ket(13)=Ket(13)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(2)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(2)*LambdaY(2)*LambdaZ(1)
@@ -2400,7 +5848,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(2)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(28+LMN)=Ket(28+LMN)&
+                  Ket(28)=Ket(28)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(2)*LambdaZ(2)
                   GradPrimDistX=-LambdaX(2)*LambdaY(2)*LambdaZ(2)
@@ -2408,7 +5856,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(2)*LambdaZ(3)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(49+LMN)=Ket(49+LMN)&
+                  Ket(49)=Ket(49)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(2)*LambdaZ(3)
                   GradPrimDistX=-LambdaX(2)*LambdaY(2)*LambdaZ(3)
@@ -2416,7 +5864,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(2)*LambdaZ(4)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(77+LMN)=Ket(77+LMN)&
+                  Ket(77)=Ket(77)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(2)*LambdaZ(4)
                   GradPrimDistX=-LambdaX(2)*LambdaY(2)*LambdaZ(4)
@@ -2424,7 +5872,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(2)*LambdaZ(5)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(113+LMN)=Ket(113+LMN)&
+                  Ket(113)=Ket(113)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(3)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(2)*LambdaY(3)*LambdaZ(0)
@@ -2432,7 +5880,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(3)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(24+LMN)=Ket(24+LMN)&
+                  Ket(24)=Ket(24)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(3)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(2)*LambdaY(3)*LambdaZ(1)
@@ -2440,7 +5888,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(3)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(45+LMN)=Ket(45+LMN)&
+                  Ket(45)=Ket(45)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(3)*LambdaZ(2)
                   GradPrimDistX=-LambdaX(2)*LambdaY(3)*LambdaZ(2)
@@ -2448,7 +5896,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(3)*LambdaZ(3)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(73+LMN)=Ket(73+LMN)&
+                  Ket(73)=Ket(73)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(3)*LambdaZ(3)
                   GradPrimDistX=-LambdaX(2)*LambdaY(3)*LambdaZ(3)
@@ -2456,7 +5904,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(3)*LambdaZ(4)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(109+LMN)=Ket(109+LMN)&
+                  Ket(109)=Ket(109)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(4)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(2)*LambdaY(4)*LambdaZ(0)
@@ -2464,7 +5912,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(4)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(40+LMN)=Ket(40+LMN)&
+                  Ket(40)=Ket(40)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(4)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(2)*LambdaY(4)*LambdaZ(1)
@@ -2472,7 +5920,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(4)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(68+LMN)=Ket(68+LMN)&
+                  Ket(68)=Ket(68)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(4)*LambdaZ(2)
                   GradPrimDistX=-LambdaX(2)*LambdaY(4)*LambdaZ(2)
@@ -2480,7 +5928,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(4)*LambdaZ(3)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(104+LMN)=Ket(104+LMN)&
+                  Ket(104)=Ket(104)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(5)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(2)*LambdaY(5)*LambdaZ(0)
@@ -2488,7 +5936,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(5)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(62+LMN)=Ket(62+LMN)&
+                  Ket(62)=Ket(62)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(5)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(2)*LambdaY(5)*LambdaZ(1)
@@ -2496,7 +5944,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(5)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(98+LMN)=Ket(98+LMN)&
+                  Ket(98)=Ket(98)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(1)*LambdaY(6)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(2)*LambdaY(6)*LambdaZ(0)
@@ -2504,7 +5952,7 @@
                   GradPrimDistZ=-LambdaX(1)*LambdaY(6)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(91+LMN)=Ket(91+LMN)&
+                  Ket(91)=Ket(91)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(2)*LambdaY(0)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(3)*LambdaY(0)*LambdaZ(0)
@@ -2512,7 +5960,7 @@
                   GradPrimDistZ=-LambdaX(2)*LambdaY(0)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(5+LMN)=Ket(5+LMN)&
+                  Ket(5)=Ket(5)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(2)*LambdaY(0)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(3)*LambdaY(0)*LambdaZ(1)
@@ -2520,7 +5968,7 @@
                   GradPrimDistZ=-LambdaX(2)*LambdaY(0)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(15+LMN)=Ket(15+LMN)&
+                  Ket(15)=Ket(15)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(2)*LambdaY(0)*LambdaZ(2)
                   GradPrimDistX=-LambdaX(3)*LambdaY(0)*LambdaZ(2)
@@ -2528,7 +5976,7 @@
                   GradPrimDistZ=-LambdaX(2)*LambdaY(0)*LambdaZ(3)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(30+LMN)=Ket(30+LMN)&
+                  Ket(30)=Ket(30)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(2)*LambdaY(0)*LambdaZ(3)
                   GradPrimDistX=-LambdaX(3)*LambdaY(0)*LambdaZ(3)
@@ -2536,7 +5984,7 @@
                   GradPrimDistZ=-LambdaX(2)*LambdaY(0)*LambdaZ(4)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(51+LMN)=Ket(51+LMN)&
+                  Ket(51)=Ket(51)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(2)*LambdaY(0)*LambdaZ(4)
                   GradPrimDistX=-LambdaX(3)*LambdaY(0)*LambdaZ(4)
@@ -2544,7 +5992,7 @@
                   GradPrimDistZ=-LambdaX(2)*LambdaY(0)*LambdaZ(5)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(79+LMN)=Ket(79+LMN)&
+                  Ket(79)=Ket(79)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(2)*LambdaY(0)*LambdaZ(5)
                   GradPrimDistX=-LambdaX(3)*LambdaY(0)*LambdaZ(5)
@@ -2552,7 +6000,7 @@
                   GradPrimDistZ=-LambdaX(2)*LambdaY(0)*LambdaZ(6)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(115+LMN)=Ket(115+LMN)&
+                  Ket(115)=Ket(115)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(2)*LambdaY(1)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(3)*LambdaY(1)*LambdaZ(0)
@@ -2560,7 +6008,7 @@
                   GradPrimDistZ=-LambdaX(2)*LambdaY(1)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(12+LMN)=Ket(12+LMN)&
+                  Ket(12)=Ket(12)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(2)*LambdaY(1)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(3)*LambdaY(1)*LambdaZ(1)
@@ -2568,7 +6016,7 @@
                   GradPrimDistZ=-LambdaX(2)*LambdaY(1)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(27+LMN)=Ket(27+LMN)&
+                  Ket(27)=Ket(27)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(2)*LambdaY(1)*LambdaZ(2)
                   GradPrimDistX=-LambdaX(3)*LambdaY(1)*LambdaZ(2)
@@ -2576,7 +6024,7 @@
                   GradPrimDistZ=-LambdaX(2)*LambdaY(1)*LambdaZ(3)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(48+LMN)=Ket(48+LMN)&
+                  Ket(48)=Ket(48)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(2)*LambdaY(1)*LambdaZ(3)
                   GradPrimDistX=-LambdaX(3)*LambdaY(1)*LambdaZ(3)
@@ -2584,7 +6032,7 @@
                   GradPrimDistZ=-LambdaX(2)*LambdaY(1)*LambdaZ(4)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(76+LMN)=Ket(76+LMN)&
+                  Ket(76)=Ket(76)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(2)*LambdaY(1)*LambdaZ(4)
                   GradPrimDistX=-LambdaX(3)*LambdaY(1)*LambdaZ(4)
@@ -2592,7 +6040,7 @@
                   GradPrimDistZ=-LambdaX(2)*LambdaY(1)*LambdaZ(5)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(112+LMN)=Ket(112+LMN)&
+                  Ket(112)=Ket(112)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(2)*LambdaY(2)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(3)*LambdaY(2)*LambdaZ(0)
@@ -2600,7 +6048,7 @@
                   GradPrimDistZ=-LambdaX(2)*LambdaY(2)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(23+LMN)=Ket(23+LMN)&
+                  Ket(23)=Ket(23)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(2)*LambdaY(2)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(3)*LambdaY(2)*LambdaZ(1)
@@ -2608,7 +6056,7 @@
                   GradPrimDistZ=-LambdaX(2)*LambdaY(2)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(44+LMN)=Ket(44+LMN)&
+                  Ket(44)=Ket(44)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(2)*LambdaY(2)*LambdaZ(2)
                   GradPrimDistX=-LambdaX(3)*LambdaY(2)*LambdaZ(2)
@@ -2616,7 +6064,7 @@
                   GradPrimDistZ=-LambdaX(2)*LambdaY(2)*LambdaZ(3)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(72+LMN)=Ket(72+LMN)&
+                  Ket(72)=Ket(72)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(2)*LambdaY(2)*LambdaZ(3)
                   GradPrimDistX=-LambdaX(3)*LambdaY(2)*LambdaZ(3)
@@ -2624,7 +6072,7 @@
                   GradPrimDistZ=-LambdaX(2)*LambdaY(2)*LambdaZ(4)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(108+LMN)=Ket(108+LMN)&
+                  Ket(108)=Ket(108)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(2)*LambdaY(3)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(3)*LambdaY(3)*LambdaZ(0)
@@ -2632,7 +6080,7 @@
                   GradPrimDistZ=-LambdaX(2)*LambdaY(3)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(39+LMN)=Ket(39+LMN)&
+                  Ket(39)=Ket(39)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(2)*LambdaY(3)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(3)*LambdaY(3)*LambdaZ(1)
@@ -2640,7 +6088,7 @@
                   GradPrimDistZ=-LambdaX(2)*LambdaY(3)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(67+LMN)=Ket(67+LMN)&
+                  Ket(67)=Ket(67)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(2)*LambdaY(3)*LambdaZ(2)
                   GradPrimDistX=-LambdaX(3)*LambdaY(3)*LambdaZ(2)
@@ -2648,7 +6096,7 @@
                   GradPrimDistZ=-LambdaX(2)*LambdaY(3)*LambdaZ(3)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(103+LMN)=Ket(103+LMN)&
+                  Ket(103)=Ket(103)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(2)*LambdaY(4)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(3)*LambdaY(4)*LambdaZ(0)
@@ -2656,7 +6104,7 @@
                   GradPrimDistZ=-LambdaX(2)*LambdaY(4)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(61+LMN)=Ket(61+LMN)&
+                  Ket(61)=Ket(61)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(2)*LambdaY(4)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(3)*LambdaY(4)*LambdaZ(1)
@@ -2664,7 +6112,7 @@
                   GradPrimDistZ=-LambdaX(2)*LambdaY(4)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(97+LMN)=Ket(97+LMN)&
+                  Ket(97)=Ket(97)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(2)*LambdaY(5)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(3)*LambdaY(5)*LambdaZ(0)
@@ -2672,7 +6120,7 @@
                   GradPrimDistZ=-LambdaX(2)*LambdaY(5)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(90+LMN)=Ket(90+LMN)&
+                  Ket(90)=Ket(90)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(3)*LambdaY(0)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(4)*LambdaY(0)*LambdaZ(0)
@@ -2680,7 +6128,7 @@
                   GradPrimDistZ=-LambdaX(3)*LambdaY(0)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(11+LMN)=Ket(11+LMN)&
+                  Ket(11)=Ket(11)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(3)*LambdaY(0)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(4)*LambdaY(0)*LambdaZ(1)
@@ -2688,7 +6136,7 @@
                   GradPrimDistZ=-LambdaX(3)*LambdaY(0)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(26+LMN)=Ket(26+LMN)&
+                  Ket(26)=Ket(26)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(3)*LambdaY(0)*LambdaZ(2)
                   GradPrimDistX=-LambdaX(4)*LambdaY(0)*LambdaZ(2)
@@ -2696,7 +6144,7 @@
                   GradPrimDistZ=-LambdaX(3)*LambdaY(0)*LambdaZ(3)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(47+LMN)=Ket(47+LMN)&
+                  Ket(47)=Ket(47)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(3)*LambdaY(0)*LambdaZ(3)
                   GradPrimDistX=-LambdaX(4)*LambdaY(0)*LambdaZ(3)
@@ -2704,7 +6152,7 @@
                   GradPrimDistZ=-LambdaX(3)*LambdaY(0)*LambdaZ(4)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(75+LMN)=Ket(75+LMN)&
+                  Ket(75)=Ket(75)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(3)*LambdaY(0)*LambdaZ(4)
                   GradPrimDistX=-LambdaX(4)*LambdaY(0)*LambdaZ(4)
@@ -2712,7 +6160,7 @@
                   GradPrimDistZ=-LambdaX(3)*LambdaY(0)*LambdaZ(5)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(111+LMN)=Ket(111+LMN)&
+                  Ket(111)=Ket(111)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(3)*LambdaY(1)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(4)*LambdaY(1)*LambdaZ(0)
@@ -2720,7 +6168,7 @@
                   GradPrimDistZ=-LambdaX(3)*LambdaY(1)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(22+LMN)=Ket(22+LMN)&
+                  Ket(22)=Ket(22)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(3)*LambdaY(1)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(4)*LambdaY(1)*LambdaZ(1)
@@ -2728,7 +6176,7 @@
                   GradPrimDistZ=-LambdaX(3)*LambdaY(1)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(43+LMN)=Ket(43+LMN)&
+                  Ket(43)=Ket(43)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(3)*LambdaY(1)*LambdaZ(2)
                   GradPrimDistX=-LambdaX(4)*LambdaY(1)*LambdaZ(2)
@@ -2736,7 +6184,7 @@
                   GradPrimDistZ=-LambdaX(3)*LambdaY(1)*LambdaZ(3)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(71+LMN)=Ket(71+LMN)&
+                  Ket(71)=Ket(71)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(3)*LambdaY(1)*LambdaZ(3)
                   GradPrimDistX=-LambdaX(4)*LambdaY(1)*LambdaZ(3)
@@ -2744,7 +6192,7 @@
                   GradPrimDistZ=-LambdaX(3)*LambdaY(1)*LambdaZ(4)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(107+LMN)=Ket(107+LMN)&
+                  Ket(107)=Ket(107)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(3)*LambdaY(2)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(4)*LambdaY(2)*LambdaZ(0)
@@ -2752,7 +6200,7 @@
                   GradPrimDistZ=-LambdaX(3)*LambdaY(2)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(38+LMN)=Ket(38+LMN)&
+                  Ket(38)=Ket(38)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(3)*LambdaY(2)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(4)*LambdaY(2)*LambdaZ(1)
@@ -2760,7 +6208,7 @@
                   GradPrimDistZ=-LambdaX(3)*LambdaY(2)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(66+LMN)=Ket(66+LMN)&
+                  Ket(66)=Ket(66)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(3)*LambdaY(2)*LambdaZ(2)
                   GradPrimDistX=-LambdaX(4)*LambdaY(2)*LambdaZ(2)
@@ -2768,7 +6216,7 @@
                   GradPrimDistZ=-LambdaX(3)*LambdaY(2)*LambdaZ(3)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(102+LMN)=Ket(102+LMN)&
+                  Ket(102)=Ket(102)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(3)*LambdaY(3)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(4)*LambdaY(3)*LambdaZ(0)
@@ -2776,7 +6224,7 @@
                   GradPrimDistZ=-LambdaX(3)*LambdaY(3)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(60+LMN)=Ket(60+LMN)&
+                  Ket(60)=Ket(60)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(3)*LambdaY(3)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(4)*LambdaY(3)*LambdaZ(1)
@@ -2784,7 +6232,7 @@
                   GradPrimDistZ=-LambdaX(3)*LambdaY(3)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(96+LMN)=Ket(96+LMN)&
+                  Ket(96)=Ket(96)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(3)*LambdaY(4)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(4)*LambdaY(4)*LambdaZ(0)
@@ -2792,7 +6240,7 @@
                   GradPrimDistZ=-LambdaX(3)*LambdaY(4)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(89+LMN)=Ket(89+LMN)&
+                  Ket(89)=Ket(89)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(4)*LambdaY(0)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(5)*LambdaY(0)*LambdaZ(0)
@@ -2800,7 +6248,7 @@
                   GradPrimDistZ=-LambdaX(4)*LambdaY(0)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(21+LMN)=Ket(21+LMN)&
+                  Ket(21)=Ket(21)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(4)*LambdaY(0)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(5)*LambdaY(0)*LambdaZ(1)
@@ -2808,7 +6256,7 @@
                   GradPrimDistZ=-LambdaX(4)*LambdaY(0)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(42+LMN)=Ket(42+LMN)&
+                  Ket(42)=Ket(42)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(4)*LambdaY(0)*LambdaZ(2)
                   GradPrimDistX=-LambdaX(5)*LambdaY(0)*LambdaZ(2)
@@ -2816,7 +6264,7 @@
                   GradPrimDistZ=-LambdaX(4)*LambdaY(0)*LambdaZ(3)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(70+LMN)=Ket(70+LMN)&
+                  Ket(70)=Ket(70)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(4)*LambdaY(0)*LambdaZ(3)
                   GradPrimDistX=-LambdaX(5)*LambdaY(0)*LambdaZ(3)
@@ -2824,7 +6272,7 @@
                   GradPrimDistZ=-LambdaX(4)*LambdaY(0)*LambdaZ(4)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(106+LMN)=Ket(106+LMN)&
+                  Ket(106)=Ket(106)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(4)*LambdaY(1)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(5)*LambdaY(1)*LambdaZ(0)
@@ -2832,7 +6280,7 @@
                   GradPrimDistZ=-LambdaX(4)*LambdaY(1)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(37+LMN)=Ket(37+LMN)&
+                  Ket(37)=Ket(37)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(4)*LambdaY(1)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(5)*LambdaY(1)*LambdaZ(1)
@@ -2840,7 +6288,7 @@
                   GradPrimDistZ=-LambdaX(4)*LambdaY(1)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(65+LMN)=Ket(65+LMN)&
+                  Ket(65)=Ket(65)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(4)*LambdaY(1)*LambdaZ(2)
                   GradPrimDistX=-LambdaX(5)*LambdaY(1)*LambdaZ(2)
@@ -2848,7 +6296,7 @@
                   GradPrimDistZ=-LambdaX(4)*LambdaY(1)*LambdaZ(3)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(101+LMN)=Ket(101+LMN)&
+                  Ket(101)=Ket(101)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(4)*LambdaY(2)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(5)*LambdaY(2)*LambdaZ(0)
@@ -2856,7 +6304,7 @@
                   GradPrimDistZ=-LambdaX(4)*LambdaY(2)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(59+LMN)=Ket(59+LMN)&
+                  Ket(59)=Ket(59)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(4)*LambdaY(2)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(5)*LambdaY(2)*LambdaZ(1)
@@ -2864,7 +6312,7 @@
                   GradPrimDistZ=-LambdaX(4)*LambdaY(2)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(95+LMN)=Ket(95+LMN)&
+                  Ket(95)=Ket(95)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(4)*LambdaY(3)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(5)*LambdaY(3)*LambdaZ(0)
@@ -2872,7 +6320,7 @@
                   GradPrimDistZ=-LambdaX(4)*LambdaY(3)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(88+LMN)=Ket(88+LMN)&
+                  Ket(88)=Ket(88)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(5)*LambdaY(0)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(6)*LambdaY(0)*LambdaZ(0)
@@ -2880,7 +6328,7 @@
                   GradPrimDistZ=-LambdaX(5)*LambdaY(0)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(36+LMN)=Ket(36+LMN)&
+                  Ket(36)=Ket(36)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(5)*LambdaY(0)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(6)*LambdaY(0)*LambdaZ(1)
@@ -2888,7 +6336,7 @@
                   GradPrimDistZ=-LambdaX(5)*LambdaY(0)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(64+LMN)=Ket(64+LMN)&
+                  Ket(64)=Ket(64)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(5)*LambdaY(0)*LambdaZ(2)
                   GradPrimDistX=-LambdaX(6)*LambdaY(0)*LambdaZ(2)
@@ -2896,7 +6344,7 @@
                   GradPrimDistZ=-LambdaX(5)*LambdaY(0)*LambdaZ(3)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(100+LMN)=Ket(100+LMN)&
+                  Ket(100)=Ket(100)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(5)*LambdaY(1)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(6)*LambdaY(1)*LambdaZ(0)
@@ -2904,7 +6352,7 @@
                   GradPrimDistZ=-LambdaX(5)*LambdaY(1)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(58+LMN)=Ket(58+LMN)&
+                  Ket(58)=Ket(58)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(5)*LambdaY(1)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(6)*LambdaY(1)*LambdaZ(1)
@@ -2912,7 +6360,7 @@
                   GradPrimDistZ=-LambdaX(5)*LambdaY(1)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(94+LMN)=Ket(94+LMN)&
+                  Ket(94)=Ket(94)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(5)*LambdaY(2)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(6)*LambdaY(2)*LambdaZ(0)
@@ -2920,7 +6368,7 @@
                   GradPrimDistZ=-LambdaX(5)*LambdaY(2)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(87+LMN)=Ket(87+LMN)&
+                  Ket(87)=Ket(87)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(6)*LambdaY(0)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(7)*LambdaY(0)*LambdaZ(0)
@@ -2928,7 +6376,7 @@
                   GradPrimDistZ=-LambdaX(6)*LambdaY(0)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(57+LMN)=Ket(57+LMN)&
+                  Ket(57)=Ket(57)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(6)*LambdaY(0)*LambdaZ(1)
                   GradPrimDistX=-LambdaX(7)*LambdaY(0)*LambdaZ(1)
@@ -2936,7 +6384,7 @@
                   GradPrimDistZ=-LambdaX(6)*LambdaY(0)*LambdaZ(2)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(93+LMN)=Ket(93+LMN)&
+                  Ket(93)=Ket(93)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(6)*LambdaY(1)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(7)*LambdaY(1)*LambdaZ(0)
@@ -2944,7 +6392,7 @@
                   GradPrimDistZ=-LambdaX(6)*LambdaY(1)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(86+LMN)=Ket(86+LMN)&
+                  Ket(86)=Ket(86)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
                   PrimDist=LambdaX(7)*LambdaY(0)*LambdaZ(0)
                   GradPrimDistX=-LambdaX(8)*LambdaY(0)*LambdaZ(0)
@@ -2952,9 +6400,1945 @@
                   GradPrimDistZ=-LambdaX(7)*LambdaY(0)*LambdaZ(1)
                   GradBraRhoDot=GradRhoX*GradPrimDistX&
                   +GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ
-                  Ket(85+LMN)=Ket(85+LMN)&
+                  Ket(85)=Ket(85)&
                   +Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)
-                ENDDO
+                ELSEIF(NSDen.EQ.3)THEN
+                  I1=I+  NGrid
+                  I2=I+2*NGrid
+                  dEdRhoA=Cube%Vals(I ,1)
+                  dEdRhoB=Cube%Vals(I1,1)
+                  dEdAbsGradRho2AA=Cube%Vals(I ,2)
+                  dEdAbsGradRho2BB=Cube%Vals(I1,2)
+                  dEdAbsGradRho2AB=Cube%Vals(I2,2)
+                  GradRhoXA=Cube%Vals(I ,3)
+                  GradRhoYA=Cube%Vals(I ,4)
+                  GradRhoZA=Cube%Vals(I ,5)
+                  GradRhoXB=Cube%Vals(I1,3)
+                  GradRhoYB=Cube%Vals(I1,4)
+                  GradRhoZB=Cube%Vals(I1,5)
+                  PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(1)
+                  LMN1=1
+                  LMN2=1+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(2)
+                  LMN1=4
+                  LMN2=4+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(2)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(2)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(1)*LambdaZ(2)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(3)
+                  LMN1=10
+                  LMN2=10+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(3)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(3)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(1)*LambdaZ(3)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(4)
+                  LMN1=20
+                  LMN2=20+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(4)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(4)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(1)*LambdaZ(4)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(5)
+                  LMN1=35
+                  LMN2=35+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(5)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(5)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(1)*LambdaZ(5)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(6)
+                  LMN1=56
+                  LMN2=56+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(6)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(6)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(1)*LambdaZ(6)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(7)
+                  LMN1=84
+                  LMN2=84+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(0)*LambdaZ(7)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(0)*LambdaZ(7)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(1)*LambdaZ(7)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(0)*LambdaZ(8)
+                  LMN1=120
+                  LMN2=120+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(1)*LambdaZ(1)
+                  LMN1=3
+                  LMN2=3+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(2)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(1)*LambdaZ(2)
+                  LMN1=9
+                  LMN2=9+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(1)*LambdaZ(2)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(1)*LambdaZ(2)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(2)*LambdaZ(2)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(1)*LambdaZ(3)
+                  LMN1=19
+                  LMN2=19+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(1)*LambdaZ(3)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(1)*LambdaZ(3)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(2)*LambdaZ(3)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(1)*LambdaZ(4)
+                  LMN1=34
+                  LMN2=34+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(1)*LambdaZ(4)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(1)*LambdaZ(4)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(2)*LambdaZ(4)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(1)*LambdaZ(5)
+                  LMN1=55
+                  LMN2=55+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(1)*LambdaZ(5)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(1)*LambdaZ(5)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(2)*LambdaZ(5)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(1)*LambdaZ(6)
+                  LMN1=83
+                  LMN2=83+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(1)*LambdaZ(6)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(1)*LambdaZ(6)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(2)*LambdaZ(6)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(1)*LambdaZ(7)
+                  LMN1=119
+                  LMN2=119+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(3)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(2)*LambdaZ(1)
+                  LMN1=7
+                  LMN2=7+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(2)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(2)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(3)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(2)*LambdaZ(2)
+                  LMN1=17
+                  LMN2=17+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(2)*LambdaZ(2)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(2)*LambdaZ(2)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(3)*LambdaZ(2)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(2)*LambdaZ(3)
+                  LMN1=32
+                  LMN2=32+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(2)*LambdaZ(3)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(2)*LambdaZ(3)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(3)*LambdaZ(3)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(2)*LambdaZ(4)
+                  LMN1=53
+                  LMN2=53+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(2)*LambdaZ(4)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(2)*LambdaZ(4)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(3)*LambdaZ(4)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(2)*LambdaZ(5)
+                  LMN1=81
+                  LMN2=81+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(2)*LambdaZ(5)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(2)*LambdaZ(5)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(3)*LambdaZ(5)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(2)*LambdaZ(6)
+                  LMN1=117
+                  LMN2=117+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(3)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(3)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(4)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(3)*LambdaZ(1)
+                  LMN1=14
+                  LMN2=14+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(3)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(3)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(4)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(3)*LambdaZ(2)
+                  LMN1=29
+                  LMN2=29+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(3)*LambdaZ(2)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(3)*LambdaZ(2)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(4)*LambdaZ(2)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(3)*LambdaZ(3)
+                  LMN1=50
+                  LMN2=50+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(3)*LambdaZ(3)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(3)*LambdaZ(3)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(4)*LambdaZ(3)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(3)*LambdaZ(4)
+                  LMN1=78
+                  LMN2=78+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(3)*LambdaZ(4)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(3)*LambdaZ(4)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(4)*LambdaZ(4)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(3)*LambdaZ(5)
+                  LMN1=114
+                  LMN2=114+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(4)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(4)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(5)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(4)*LambdaZ(1)
+                  LMN1=25
+                  LMN2=25+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(4)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(4)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(5)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(4)*LambdaZ(2)
+                  LMN1=46
+                  LMN2=46+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(4)*LambdaZ(2)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(4)*LambdaZ(2)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(5)*LambdaZ(2)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(4)*LambdaZ(3)
+                  LMN1=74
+                  LMN2=74+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(4)*LambdaZ(3)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(4)*LambdaZ(3)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(5)*LambdaZ(3)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(4)*LambdaZ(4)
+                  LMN1=110
+                  LMN2=110+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(5)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(5)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(6)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(5)*LambdaZ(1)
+                  LMN1=41
+                  LMN2=41+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(5)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(5)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(6)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(5)*LambdaZ(2)
+                  LMN1=69
+                  LMN2=69+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(5)*LambdaZ(2)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(5)*LambdaZ(2)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(6)*LambdaZ(2)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(5)*LambdaZ(3)
+                  LMN1=105
+                  LMN2=105+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(6)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(6)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(7)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(6)*LambdaZ(1)
+                  LMN1=63
+                  LMN2=63+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(6)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(6)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(7)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(6)*LambdaZ(2)
+                  LMN1=99
+                  LMN2=99+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(0)*LambdaY(7)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(1)*LambdaY(7)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(0)*LambdaY(8)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(0)*LambdaY(7)*LambdaZ(1)
+                  LMN1=92
+                  LMN2=92+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(0)*LambdaZ(1)
+                  LMN1=2
+                  LMN2=2+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(0)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(0)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(0)*LambdaZ(2)
+                  LMN1=8
+                  LMN2=8+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(0)*LambdaZ(2)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(0)*LambdaZ(2)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(1)*LambdaZ(2)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(0)*LambdaZ(3)
+                  LMN1=18
+                  LMN2=18+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(0)*LambdaZ(3)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(0)*LambdaZ(3)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(1)*LambdaZ(3)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(0)*LambdaZ(4)
+                  LMN1=33
+                  LMN2=33+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(0)*LambdaZ(4)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(0)*LambdaZ(4)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(1)*LambdaZ(4)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(0)*LambdaZ(5)
+                  LMN1=54
+                  LMN2=54+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(0)*LambdaZ(5)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(0)*LambdaZ(5)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(1)*LambdaZ(5)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(0)*LambdaZ(6)
+                  LMN1=82
+                  LMN2=82+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(0)*LambdaZ(6)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(0)*LambdaZ(6)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(1)*LambdaZ(6)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(0)*LambdaZ(7)
+                  LMN1=118
+                  LMN2=118+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(1)*LambdaZ(1)
+                  LMN1=6
+                  LMN2=6+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(2)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(1)*LambdaZ(2)
+                  LMN1=16
+                  LMN2=16+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(1)*LambdaZ(2)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(1)*LambdaZ(2)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(2)*LambdaZ(2)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(1)*LambdaZ(3)
+                  LMN1=31
+                  LMN2=31+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(1)*LambdaZ(3)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(1)*LambdaZ(3)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(2)*LambdaZ(3)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(1)*LambdaZ(4)
+                  LMN1=52
+                  LMN2=52+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(1)*LambdaZ(4)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(1)*LambdaZ(4)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(2)*LambdaZ(4)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(1)*LambdaZ(5)
+                  LMN1=80
+                  LMN2=80+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(1)*LambdaZ(5)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(1)*LambdaZ(5)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(2)*LambdaZ(5)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(1)*LambdaZ(6)
+                  LMN1=116
+                  LMN2=116+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(3)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(2)*LambdaZ(1)
+                  LMN1=13
+                  LMN2=13+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(2)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(2)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(3)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(2)*LambdaZ(2)
+                  LMN1=28
+                  LMN2=28+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(2)*LambdaZ(2)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(2)*LambdaZ(2)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(3)*LambdaZ(2)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(2)*LambdaZ(3)
+                  LMN1=49
+                  LMN2=49+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(2)*LambdaZ(3)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(2)*LambdaZ(3)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(3)*LambdaZ(3)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(2)*LambdaZ(4)
+                  LMN1=77
+                  LMN2=77+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(2)*LambdaZ(4)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(2)*LambdaZ(4)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(3)*LambdaZ(4)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(2)*LambdaZ(5)
+                  LMN1=113
+                  LMN2=113+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(3)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(3)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(4)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(3)*LambdaZ(1)
+                  LMN1=24
+                  LMN2=24+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(3)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(3)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(4)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(3)*LambdaZ(2)
+                  LMN1=45
+                  LMN2=45+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(3)*LambdaZ(2)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(3)*LambdaZ(2)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(4)*LambdaZ(2)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(3)*LambdaZ(3)
+                  LMN1=73
+                  LMN2=73+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(3)*LambdaZ(3)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(3)*LambdaZ(3)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(4)*LambdaZ(3)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(3)*LambdaZ(4)
+                  LMN1=109
+                  LMN2=109+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(4)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(4)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(5)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(4)*LambdaZ(1)
+                  LMN1=40
+                  LMN2=40+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(4)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(4)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(5)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(4)*LambdaZ(2)
+                  LMN1=68
+                  LMN2=68+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(4)*LambdaZ(2)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(4)*LambdaZ(2)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(5)*LambdaZ(2)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(4)*LambdaZ(3)
+                  LMN1=104
+                  LMN2=104+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(5)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(5)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(6)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(5)*LambdaZ(1)
+                  LMN1=62
+                  LMN2=62+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(5)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(5)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(6)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(5)*LambdaZ(2)
+                  LMN1=98
+                  LMN2=98+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(1)*LambdaY(6)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(2)*LambdaY(6)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(1)*LambdaY(7)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(1)*LambdaY(6)*LambdaZ(1)
+                  LMN1=91
+                  LMN2=91+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(2)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(3)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(2)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(2)*LambdaY(0)*LambdaZ(1)
+                  LMN1=5
+                  LMN2=5+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(2)*LambdaY(0)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(3)*LambdaY(0)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(2)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(2)*LambdaY(0)*LambdaZ(2)
+                  LMN1=15
+                  LMN2=15+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(2)*LambdaY(0)*LambdaZ(2)
+                  GradPrimDistX=-LambdaX(3)*LambdaY(0)*LambdaZ(2)
+                  GradPrimDistY=-LambdaX(2)*LambdaY(1)*LambdaZ(2)
+                  GradPrimDistZ=-LambdaX(2)*LambdaY(0)*LambdaZ(3)
+                  LMN1=30
+                  LMN2=30+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(2)*LambdaY(0)*LambdaZ(3)
+                  GradPrimDistX=-LambdaX(3)*LambdaY(0)*LambdaZ(3)
+                  GradPrimDistY=-LambdaX(2)*LambdaY(1)*LambdaZ(3)
+                  GradPrimDistZ=-LambdaX(2)*LambdaY(0)*LambdaZ(4)
+                  LMN1=51
+                  LMN2=51+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(2)*LambdaY(0)*LambdaZ(4)
+                  GradPrimDistX=-LambdaX(3)*LambdaY(0)*LambdaZ(4)
+                  GradPrimDistY=-LambdaX(2)*LambdaY(1)*LambdaZ(4)
+                  GradPrimDistZ=-LambdaX(2)*LambdaY(0)*LambdaZ(5)
+                  LMN1=79
+                  LMN2=79+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(2)*LambdaY(0)*LambdaZ(5)
+                  GradPrimDistX=-LambdaX(3)*LambdaY(0)*LambdaZ(5)
+                  GradPrimDistY=-LambdaX(2)*LambdaY(1)*LambdaZ(5)
+                  GradPrimDistZ=-LambdaX(2)*LambdaY(0)*LambdaZ(6)
+                  LMN1=115
+                  LMN2=115+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(2)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(3)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(2)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(2)*LambdaY(1)*LambdaZ(1)
+                  LMN1=12
+                  LMN2=12+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(2)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(3)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(2)*LambdaY(2)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(2)*LambdaY(1)*LambdaZ(2)
+                  LMN1=27
+                  LMN2=27+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(2)*LambdaY(1)*LambdaZ(2)
+                  GradPrimDistX=-LambdaX(3)*LambdaY(1)*LambdaZ(2)
+                  GradPrimDistY=-LambdaX(2)*LambdaY(2)*LambdaZ(2)
+                  GradPrimDistZ=-LambdaX(2)*LambdaY(1)*LambdaZ(3)
+                  LMN1=48
+                  LMN2=48+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(2)*LambdaY(1)*LambdaZ(3)
+                  GradPrimDistX=-LambdaX(3)*LambdaY(1)*LambdaZ(3)
+                  GradPrimDistY=-LambdaX(2)*LambdaY(2)*LambdaZ(3)
+                  GradPrimDistZ=-LambdaX(2)*LambdaY(1)*LambdaZ(4)
+                  LMN1=76
+                  LMN2=76+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(2)*LambdaY(1)*LambdaZ(4)
+                  GradPrimDistX=-LambdaX(3)*LambdaY(1)*LambdaZ(4)
+                  GradPrimDistY=-LambdaX(2)*LambdaY(2)*LambdaZ(4)
+                  GradPrimDistZ=-LambdaX(2)*LambdaY(1)*LambdaZ(5)
+                  LMN1=112
+                  LMN2=112+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(2)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(3)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(2)*LambdaY(3)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(2)*LambdaY(2)*LambdaZ(1)
+                  LMN1=23
+                  LMN2=23+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(2)*LambdaY(2)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(3)*LambdaY(2)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(2)*LambdaY(3)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(2)*LambdaY(2)*LambdaZ(2)
+                  LMN1=44
+                  LMN2=44+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(2)*LambdaY(2)*LambdaZ(2)
+                  GradPrimDistX=-LambdaX(3)*LambdaY(2)*LambdaZ(2)
+                  GradPrimDistY=-LambdaX(2)*LambdaY(3)*LambdaZ(2)
+                  GradPrimDistZ=-LambdaX(2)*LambdaY(2)*LambdaZ(3)
+                  LMN1=72
+                  LMN2=72+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(2)*LambdaY(2)*LambdaZ(3)
+                  GradPrimDistX=-LambdaX(3)*LambdaY(2)*LambdaZ(3)
+                  GradPrimDistY=-LambdaX(2)*LambdaY(3)*LambdaZ(3)
+                  GradPrimDistZ=-LambdaX(2)*LambdaY(2)*LambdaZ(4)
+                  LMN1=108
+                  LMN2=108+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(2)*LambdaY(3)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(3)*LambdaY(3)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(2)*LambdaY(4)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(2)*LambdaY(3)*LambdaZ(1)
+                  LMN1=39
+                  LMN2=39+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(2)*LambdaY(3)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(3)*LambdaY(3)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(2)*LambdaY(4)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(2)*LambdaY(3)*LambdaZ(2)
+                  LMN1=67
+                  LMN2=67+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(2)*LambdaY(3)*LambdaZ(2)
+                  GradPrimDistX=-LambdaX(3)*LambdaY(3)*LambdaZ(2)
+                  GradPrimDistY=-LambdaX(2)*LambdaY(4)*LambdaZ(2)
+                  GradPrimDistZ=-LambdaX(2)*LambdaY(3)*LambdaZ(3)
+                  LMN1=103
+                  LMN2=103+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(2)*LambdaY(4)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(3)*LambdaY(4)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(2)*LambdaY(5)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(2)*LambdaY(4)*LambdaZ(1)
+                  LMN1=61
+                  LMN2=61+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(2)*LambdaY(4)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(3)*LambdaY(4)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(2)*LambdaY(5)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(2)*LambdaY(4)*LambdaZ(2)
+                  LMN1=97
+                  LMN2=97+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(2)*LambdaY(5)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(3)*LambdaY(5)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(2)*LambdaY(6)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(2)*LambdaY(5)*LambdaZ(1)
+                  LMN1=90
+                  LMN2=90+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(3)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(4)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(3)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(3)*LambdaY(0)*LambdaZ(1)
+                  LMN1=11
+                  LMN2=11+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(3)*LambdaY(0)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(4)*LambdaY(0)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(3)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(3)*LambdaY(0)*LambdaZ(2)
+                  LMN1=26
+                  LMN2=26+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(3)*LambdaY(0)*LambdaZ(2)
+                  GradPrimDistX=-LambdaX(4)*LambdaY(0)*LambdaZ(2)
+                  GradPrimDistY=-LambdaX(3)*LambdaY(1)*LambdaZ(2)
+                  GradPrimDistZ=-LambdaX(3)*LambdaY(0)*LambdaZ(3)
+                  LMN1=47
+                  LMN2=47+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(3)*LambdaY(0)*LambdaZ(3)
+                  GradPrimDistX=-LambdaX(4)*LambdaY(0)*LambdaZ(3)
+                  GradPrimDistY=-LambdaX(3)*LambdaY(1)*LambdaZ(3)
+                  GradPrimDistZ=-LambdaX(3)*LambdaY(0)*LambdaZ(4)
+                  LMN1=75
+                  LMN2=75+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(3)*LambdaY(0)*LambdaZ(4)
+                  GradPrimDistX=-LambdaX(4)*LambdaY(0)*LambdaZ(4)
+                  GradPrimDistY=-LambdaX(3)*LambdaY(1)*LambdaZ(4)
+                  GradPrimDistZ=-LambdaX(3)*LambdaY(0)*LambdaZ(5)
+                  LMN1=111
+                  LMN2=111+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(3)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(4)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(3)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(3)*LambdaY(1)*LambdaZ(1)
+                  LMN1=22
+                  LMN2=22+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(3)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(4)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(3)*LambdaY(2)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(3)*LambdaY(1)*LambdaZ(2)
+                  LMN1=43
+                  LMN2=43+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(3)*LambdaY(1)*LambdaZ(2)
+                  GradPrimDistX=-LambdaX(4)*LambdaY(1)*LambdaZ(2)
+                  GradPrimDistY=-LambdaX(3)*LambdaY(2)*LambdaZ(2)
+                  GradPrimDistZ=-LambdaX(3)*LambdaY(1)*LambdaZ(3)
+                  LMN1=71
+                  LMN2=71+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(3)*LambdaY(1)*LambdaZ(3)
+                  GradPrimDistX=-LambdaX(4)*LambdaY(1)*LambdaZ(3)
+                  GradPrimDistY=-LambdaX(3)*LambdaY(2)*LambdaZ(3)
+                  GradPrimDistZ=-LambdaX(3)*LambdaY(1)*LambdaZ(4)
+                  LMN1=107
+                  LMN2=107+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(3)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(4)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(3)*LambdaY(3)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(3)*LambdaY(2)*LambdaZ(1)
+                  LMN1=38
+                  LMN2=38+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(3)*LambdaY(2)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(4)*LambdaY(2)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(3)*LambdaY(3)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(3)*LambdaY(2)*LambdaZ(2)
+                  LMN1=66
+                  LMN2=66+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(3)*LambdaY(2)*LambdaZ(2)
+                  GradPrimDistX=-LambdaX(4)*LambdaY(2)*LambdaZ(2)
+                  GradPrimDistY=-LambdaX(3)*LambdaY(3)*LambdaZ(2)
+                  GradPrimDistZ=-LambdaX(3)*LambdaY(2)*LambdaZ(3)
+                  LMN1=102
+                  LMN2=102+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(3)*LambdaY(3)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(4)*LambdaY(3)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(3)*LambdaY(4)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(3)*LambdaY(3)*LambdaZ(1)
+                  LMN1=60
+                  LMN2=60+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(3)*LambdaY(3)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(4)*LambdaY(3)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(3)*LambdaY(4)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(3)*LambdaY(3)*LambdaZ(2)
+                  LMN1=96
+                  LMN2=96+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(3)*LambdaY(4)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(4)*LambdaY(4)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(3)*LambdaY(5)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(3)*LambdaY(4)*LambdaZ(1)
+                  LMN1=89
+                  LMN2=89+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(4)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(5)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(4)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(4)*LambdaY(0)*LambdaZ(1)
+                  LMN1=21
+                  LMN2=21+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(4)*LambdaY(0)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(5)*LambdaY(0)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(4)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(4)*LambdaY(0)*LambdaZ(2)
+                  LMN1=42
+                  LMN2=42+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(4)*LambdaY(0)*LambdaZ(2)
+                  GradPrimDistX=-LambdaX(5)*LambdaY(0)*LambdaZ(2)
+                  GradPrimDistY=-LambdaX(4)*LambdaY(1)*LambdaZ(2)
+                  GradPrimDistZ=-LambdaX(4)*LambdaY(0)*LambdaZ(3)
+                  LMN1=70
+                  LMN2=70+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(4)*LambdaY(0)*LambdaZ(3)
+                  GradPrimDistX=-LambdaX(5)*LambdaY(0)*LambdaZ(3)
+                  GradPrimDistY=-LambdaX(4)*LambdaY(1)*LambdaZ(3)
+                  GradPrimDistZ=-LambdaX(4)*LambdaY(0)*LambdaZ(4)
+                  LMN1=106
+                  LMN2=106+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(4)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(5)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(4)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(4)*LambdaY(1)*LambdaZ(1)
+                  LMN1=37
+                  LMN2=37+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(4)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(5)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(4)*LambdaY(2)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(4)*LambdaY(1)*LambdaZ(2)
+                  LMN1=65
+                  LMN2=65+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(4)*LambdaY(1)*LambdaZ(2)
+                  GradPrimDistX=-LambdaX(5)*LambdaY(1)*LambdaZ(2)
+                  GradPrimDistY=-LambdaX(4)*LambdaY(2)*LambdaZ(2)
+                  GradPrimDistZ=-LambdaX(4)*LambdaY(1)*LambdaZ(3)
+                  LMN1=101
+                  LMN2=101+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(4)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(5)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(4)*LambdaY(3)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(4)*LambdaY(2)*LambdaZ(1)
+                  LMN1=59
+                  LMN2=59+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(4)*LambdaY(2)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(5)*LambdaY(2)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(4)*LambdaY(3)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(4)*LambdaY(2)*LambdaZ(2)
+                  LMN1=95
+                  LMN2=95+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(4)*LambdaY(3)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(5)*LambdaY(3)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(4)*LambdaY(4)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(4)*LambdaY(3)*LambdaZ(1)
+                  LMN1=88
+                  LMN2=88+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(5)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(6)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(5)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(5)*LambdaY(0)*LambdaZ(1)
+                  LMN1=36
+                  LMN2=36+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(5)*LambdaY(0)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(6)*LambdaY(0)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(5)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(5)*LambdaY(0)*LambdaZ(2)
+                  LMN1=64
+                  LMN2=64+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(5)*LambdaY(0)*LambdaZ(2)
+                  GradPrimDistX=-LambdaX(6)*LambdaY(0)*LambdaZ(2)
+                  GradPrimDistY=-LambdaX(5)*LambdaY(1)*LambdaZ(2)
+                  GradPrimDistZ=-LambdaX(5)*LambdaY(0)*LambdaZ(3)
+                  LMN1=100
+                  LMN2=100+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(5)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(6)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(5)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(5)*LambdaY(1)*LambdaZ(1)
+                  LMN1=58
+                  LMN2=58+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(5)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(6)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(5)*LambdaY(2)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(5)*LambdaY(1)*LambdaZ(2)
+                  LMN1=94
+                  LMN2=94+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(5)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(6)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(5)*LambdaY(3)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(5)*LambdaY(2)*LambdaZ(1)
+                  LMN1=87
+                  LMN2=87+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(6)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(7)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(6)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(6)*LambdaY(0)*LambdaZ(1)
+                  LMN1=57
+                  LMN2=57+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(6)*LambdaY(0)*LambdaZ(1)
+                  GradPrimDistX=-LambdaX(7)*LambdaY(0)*LambdaZ(1)
+                  GradPrimDistY=-LambdaX(6)*LambdaY(1)*LambdaZ(1)
+                  GradPrimDistZ=-LambdaX(6)*LambdaY(0)*LambdaZ(2)
+                  LMN1=93
+                  LMN2=93+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(6)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(7)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(6)*LambdaY(2)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(6)*LambdaY(1)*LambdaZ(1)
+                  LMN1=86
+                  LMN2=86+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                  PrimDist=LambdaX(7)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistX=-LambdaX(8)*LambdaY(0)*LambdaZ(0)
+                  GradPrimDistY=-LambdaX(7)*LambdaY(1)*LambdaZ(0)
+                  GradPrimDistZ=-LambdaX(7)*LambdaY(0)*LambdaZ(1)
+                  LMN1=85
+                  LMN2=85+OffSDen
+                  GRhoAG=GradRhoXA*GradPrimDistX&
+                  +GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ
+                  GRhoBG=GradRhoXB*GradPrimDistX&
+                  +GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ
+                  Ket(LMN1)=Ket(LMN1)&
+                  +Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG&
+                  +dEdAbsGradRho2AB*GRhoBG)
+                  Ket(LMN2)=Ket(LMN2)&
+                  +Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG&
+                  +dEdAbsGradRho2AB*GRhoAG)
+                ELSE
+                  CALL Halt('ExplicitBraElements.Inc: Wrong NSDen')
+                ENDIF
              ENDIF
           ENDDO
        CASE(8:)

@@ -133,23 +133,16 @@ PROGRAM VectorRhoMD
         ENDDO
      ENDIF
      WRITE(Out,*)(Blnk,I=1,15),'Wght=Cube%Wght(I)'
-     !Spin Densities!
-     WRITE(Out,*)(Blnk,I=1,15),'!Q&D...'
-     WRITE(Out,*)(Blnk,I=1,15),'DO iSDen=SDBeg,NSDen-1'
-     WRITE(Out,*)(Blnk,I=1,17),'LMN=(iSDen-SDBeg)*OffSDen'
-     WRITE(Out,*)(Blnk,I=1,17),'I0=I+iSDen*NGrid'
 
-     !WRITE(Out,*)(Blnk,I=1,17),'dEdRho=Cube%Vals(I,1)'
-     WRITE(Out,*)(Blnk,I=1,17),'dEdRho=Cube%Vals(I0,1)'
-     !WRITE(Out,*)(Blnk,I=1,17),'dEdAbsGradRho2=Cube%Vals(I,2)'
-     WRITE(Out,*)(Blnk,I=1,17),'dEdAbsGradRho2=Cube%Vals(I0,2)'
-     !WRITE(Out,*)(Blnk,I=1,17),'GradRhoX=Cube%Vals(I,3)'
-     WRITE(Out,*)(Blnk,I=1,17),'GradRhoX=Cube%Vals(I0,3)'
-     !WRITE(Out,*)(Blnk,I=1,17),'GradRhoY=Cube%Vals(I,4)'
-     WRITE(Out,*)(Blnk,I=1,17),'GradRhoY=Cube%Vals(I0,4)'
-     !WRITE(Out,*)(Blnk,I=1,17),'GradRhoZ=Cube%Vals(I,5)'
-     WRITE(Out,*)(Blnk,I=1,17),'GradRhoZ=Cube%Vals(I0,5)'
+     WRITE(Out,*)(Blnk,I=1,15),'IF(NSDen.EQ.1)THEN'
+
+     WRITE(Out,*)(Blnk,I=1,17),'dEdRho=Cube%Vals(I,1)'
+     WRITE(Out,*)(Blnk,I=1,17),'dEdAbsGradRho2=Cube%Vals(I,2)'
+     WRITE(Out,*)(Blnk,I=1,17),'GradRhoX=Cube%Vals(I,3)'
+     WRITE(Out,*)(Blnk,I=1,17),'GradRhoY=Cube%Vals(I,4)'
+     WRITE(Out,*)(Blnk,I=1,17),'GradRhoZ=Cube%Vals(I,5)'
 !
+
      K=0
      DO L=0,Ell
         DO M=0,Ell-L
@@ -171,8 +164,7 @@ PROGRAM VectorRhoMD
                                      //')*LambdaZ('//IntToChar(N+1)//')'
               String(5,K)='GradBraRhoDot=GradRhoX*GradPrimDistX &'
               String(6,K)='+GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ'
-              !String(7,K)='Ket('//IntToChar(LMN)//')=Ket('//IntToChar(LMN)//') & '
-              String(7,K)='Ket('//IntToChar(LMN)//'+LMN)=Ket('//IntToChar(LMN)//'+LMN) & '
+              String(7,K)='Ket('//IntToChar(LMN)//')=Ket('//IntToChar(LMN)//') & '
               String(8,K)='+Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)'
         WRITE(Out,*)(Blnk,I=1,17),TRIM(Squish(String(1,K)))
         WRITE(Out,*)(Blnk,I=1,17),TRIM(Squish(String(2,K)))
@@ -186,7 +178,81 @@ PROGRAM VectorRhoMD
              ENDDO
          ENDDO
      ENDDO
-     WRITE(Out,*)(Blnk,I=1,15),'ENDDO'
+
+     WRITE(Out,*)(Blnk,I=1,15),'ELSEIF(NSDen.EQ.3)THEN'
+     !UKS
+     WRITE(Out,*)(Blnk,I=1,17),'I1=I+  NGrid'
+     WRITE(Out,*)(Blnk,I=1,17),'I2=I+2*NGrid'
+     WRITE(Out,*)(Blnk,I=1,17),'dEdRhoA=Cube%Vals(I ,1)'
+     WRITE(Out,*)(Blnk,I=1,17),'dEdRhoB=Cube%Vals(I1,1)'
+     WRITE(Out,*)(Blnk,I=1,17),'dEdAbsGradRho2AA=Cube%Vals(I ,2)'
+     WRITE(Out,*)(Blnk,I=1,17),'dEdAbsGradRho2BB=Cube%Vals(I1,2)'
+     WRITE(Out,*)(Blnk,I=1,17),'dEdAbsGradRho2AB=Cube%Vals(I2,2)'
+     WRITE(Out,*)(Blnk,I=1,17),'GradRhoXA=Cube%Vals(I ,3)'
+     WRITE(Out,*)(Blnk,I=1,17),'GradRhoYA=Cube%Vals(I ,4)'
+     WRITE(Out,*)(Blnk,I=1,17),'GradRhoZA=Cube%Vals(I ,5)'
+     WRITE(Out,*)(Blnk,I=1,17),'GradRhoXB=Cube%Vals(I1,3)'
+     WRITE(Out,*)(Blnk,I=1,17),'GradRhoYB=Cube%Vals(I1,4)'
+     WRITE(Out,*)(Blnk,I=1,17),'GradRhoZB=Cube%Vals(I1,5)'
+
+     K=0
+     DO L=0,Ell
+        DO M=0,Ell-L
+           DO N=0,Ell-M-L
+              LMN=LMNDex(L,M,N)
+              K=K+1
+              LMND(LMN)=K
+              String(1,K)='PrimDist=LambdaX('//IntToChar(L)  &
+                               //')*LambdaY('//IntToChar(M)  &
+                               //')*LambdaZ('//IntToChar(N)//')'
+              String(2,K)='GradPrimDistX=-LambdaX('//IntToChar(L+1)  &
+                                     //')*LambdaY('//IntToChar(M)  &
+                                     //')*LambdaZ('//IntToChar(N)//')'
+              String(3,K)='GradPrimDistY=-LambdaX('//IntToChar(L)  &
+                                     //')*LambdaY('//IntToChar(M+1)  &
+                                     //')*LambdaZ('//IntToChar(N)//')'
+              String(4,K)='GradPrimDistZ=-LambdaX('//IntToChar(L)  &
+                                     //')*LambdaY('//IntToChar(M)  &
+                                     //')*LambdaZ('//IntToChar(N+1)//')'
+              String( 5,K)='LMN1='//IntToChar(LMN)
+              String( 6,K)='LMN2='//IntToChar(LMN)//'+OffSDen'
+              String( 7,K)='GRhoAG=GradRhoXA*GradPrimDistX &'
+              String( 8,K)='+GradRhoYA*GradPrimDistY+GradRhoZA*GradPrimDistZ'
+              String( 9,K)='GRhoBG=GradRhoXB*GradPrimDistX &'
+              String(10,K)='+GradRhoYB*GradPrimDistY+GradRhoZB*GradPrimDistZ'
+              !Alpha
+              String(11,K)='Ket(LMN1)=Ket(LMN1) & '
+              String(12,K)='+Wght*(dEdRhoA*PrimDist+2D0*dEdAbsGradRho2AA*GRhoAG &'
+              String(13,K)='+dEdAbsGradRho2AB*GRhoBG)'
+              !Beta
+              String(14,K)='Ket(LMN2)=Ket(LMN2) & '
+              String(15,K)='+Wght*(dEdRhoB*PrimDist+2D0*dEdAbsGradRho2BB*GRhoBG &'
+              String(16,K)='+dEdAbsGradRho2AB*GRhoAG)'
+
+        WRITE(Out,*)(Blnk,I=1,17),TRIM(Squish(String( 1,K)))
+        WRITE(Out,*)(Blnk,I=1,17),TRIM(Squish(String( 2,K)))
+        WRITE(Out,*)(Blnk,I=1,17),TRIM(Squish(String( 3,K)))
+        WRITE(Out,*)(Blnk,I=1,17),TRIM(Squish(String( 4,K)))
+        WRITE(Out,*)(Blnk,I=1,17),TRIM(Squish(String( 5,K)))
+        WRITE(Out,*)(Blnk,I=1,17),TRIM(Squish(String( 6,K)))
+        WRITE(Out,*)(Blnk,I=1,17),TRIM(Squish(String( 7,K)))
+        WRITE(Out,*)(Blnk,I=1,17),TRIM(Squish(String( 8,K)))
+        WRITE(Out,*)(Blnk,I=1,17),TRIM(Squish(String( 9,K)))
+        WRITE(Out,*)(Blnk,I=1,17),TRIM(Squish(String(10,K)))
+        WRITE(Out,*)(Blnk,I=1,17),TRIM(Squish(String(11,K)))
+        WRITE(Out,*)(Blnk,I=1,17),TRIM(Squish(String(12,K)))
+        WRITE(Out,*)(Blnk,I=1,17),TRIM(Squish(String(13,K)))
+        WRITE(Out,*)(Blnk,I=1,17),TRIM(Squish(String(14,K)))
+        WRITE(Out,*)(Blnk,I=1,17),TRIM(Squish(String(15,K)))
+        WRITE(Out,*)(Blnk,I=1,17),TRIM(Squish(String(16,K)))
+             ENDDO
+         ENDDO
+     ENDDO
+
+     WRITE(Out,*)(Blnk,I=1,15),'ELSE'
+     WRITE(Out,*)(Blnk,I=1,17),'CALL Halt(''ExplicitBraElements.Inc: Wrong NSDen'')'
+     WRITE(Out,*)(Blnk,I=1,15),'ENDIF'
+
      WRITE(Out,*)(Blnk,I=1,12),'ENDIF'
      WRITE(Out,*)(Blnk,I=1,9),'ENDDO'
   ENDDO
