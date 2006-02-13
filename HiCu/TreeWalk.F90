@@ -53,7 +53,11 @@ MODULE TreeWalk
                                                 dEdAbsGradRho2,GradBraRhoDot,&
                                                 GradRhoX,GradRhoY,GradRhoZ,  &
                                                 PrimDist,GradPrimDistX,      &
-                                                GradPrimDistY,GradPrimDistZ 
+                                                GradPrimDistY,GradPrimDistZ, &
+                                                dedrhoa,dedrhob,dedabsgradrho2aa,&
+                                                dedabsgradrho2bb,dedabsgradrho2ab,&
+                                                gradrhoxa,gradrhoya,gradrhoza,&
+                                                gradrhoxb,gradrhoyb,gradrhozb
        INTEGER                               :: IC,IQ,JC,JQ,KC,KQ,NQ,Ell,    &
                                                 I,J,L,M,N,L1,L2,LMN,LMNLen
 
