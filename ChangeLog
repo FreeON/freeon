@@ -1,3 +1,98 @@
+2006-02-13 17:29  vweber
+
+	* HiCu/HiCu.F90: removed printing.
+
+2006-02-13 17:26  vweber
+
+	* HiCu/CubeTree.F90: Removed prining.
+
+2006-02-13 17:09  vweber
+
+	* HiCu/RhoTree.F90: Removed print out.
+
+2006-02-13 16:05  vweber
+
+	* ONX2/ONXGet.F90: mv reduce_fastmat in fastmat.
+
+2006-02-13 15:50  vweber
+
+	* HiCu/TreeWalk.F90: uks variables.
+
+2006-02-13 14:47  vweber
+
+	* HiCu/: ExplicitBraElements.Inc, VRhoMD.F90: uks
+
+2006-02-13 11:04  vweber
+
+	* HiCu/TreeWalk.F90: variables missing for explicit code.
+
+2006-02-13 10:40  vweber
+
+	* MondoMods/: uks_xc_b3lyp.F, uks_xc_pw91.F: mv to DFRepository.F
+
+2006-02-13 10:26  vweber
+
+	* MondoMods/DFRepository.F, MondoMods/Functionals.F90,
+	HiCu/CubeTree.F90, HiCu/KxcGen.F90, HiCu/TreeWalk.F90,
+	MondoMods/Makefile, SCFeqs/SCFStatus.F90: uks
+
+2006-02-10 17:22  vweber
+
+	* SCFeqs/P2Use.F90: Removed directives.
+
+2006-02-10 16:49  vweber
+
+	* MondoMods/FastMat.F90: Fixed precompiler directive.
+
+2006-02-10 16:18  vweber
+
+	* HiCu/: CubeTree.F90, ParaHiCu.F90, RhoTree.F90: .... now the code
+	shouldn't work for a while.
+
+2006-02-10 16:15  vweber
+
+	* OneE/MakeRho.F90, QCTC/JGen.F90, HiCu/HiCu.F90, HiCu/KxcGen.F90,
+	HiCu/XCForce.F90: ...
+
+2006-02-10 16:14  vweber
+
+	* ONX2/: GONX2.F90, ONX2.F90, ONX2ComputK.F90, ONXFillOut.F90,
+	ONXGet.F90, PartDrv.F90, GONX2ComputDK.F90: ....
+
+2006-02-10 16:12  vweber
+
+	* MondoMods/FastMat.F90, ONX2/ONXCtrSclg.F90: ...
+
+2006-02-10 16:10  vweber
+
+	* MondoMods/: LinAlg77.F, InOut.F90, LinAlg.F90, SetEq.F90: Para
+	UHF/UKS
+
+2006-02-10 15:32  vweber
+
+	* MondoMods/Functionals.F90: [no log message]
+
+2006-02-10 14:51  vweber
+
+	* MondoMods/: uks_xc_b3lyp.F, uks_xc_pw91.F, Makefile: UKS
+	functionals.
+
+2006-02-10 14:50  vweber
+
+	* MondoMods/SetEq.F90: a copy in/out removed.
+
+2006-02-10 14:10  vweber
+
+	* Docs/STRESS/Stress.tex: [no log message]
+
+2006-02-04 19:00  vweber
+
+	* Validate/TEMPO.ref: [no log message]
+
+2006-02-04 13:37  mchalla
+
+	* ChangeLog: [no log message]
+
 2006-02-04 13:32  mchalla
 
 	* SCFeqs/P2Use.F90: Modified the DM lookup on "Extrapolate" to be
