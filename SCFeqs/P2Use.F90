@@ -624,13 +624,15 @@ PROGRAM P2Use
      CALL New(Tmp2)
      ! Get Marices
 
-     DO ICycle=0,1000
+     DO ICycle=1,1000
        DMFile=TRIM(SCRName)//'_Geom#'//TRIM(IntToChar(Current(3)-1)) &
                            //'_Base#'//TRIM(IntToChar(Current(2))) &
                            //'_Cycl#'//TRIM(IntToChar(ICycle)) &
                            //'_Clone#'//TRIM(IntToChar(MyClone)) &
                            //'.D'
+!       WRITE(*,*)' Looking for ',TRIM(DMFile)
         INQUIRE(FILE=DMFile,EXIST=Present)
+!       WRITE(*,*)' Found it? ',Present
         IF(.NOT.Present)THEN
            Cycle=ICycle-1		
            DMFile=TRIM(SCRName)//'_Geom#'//TRIM(IntToChar(Current(3)-1)) &
