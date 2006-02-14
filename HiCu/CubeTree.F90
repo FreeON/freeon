@@ -101,8 +101,6 @@ MODULE CubeTree
             IXact=IXact+PopInBox(RhoRoot)
          ENDDO
 
-write(*,*) 'IXact',IXact,' NSDen',NSDen
-
          Box%Center(:)   = BoxCenter(:)
          Box%BndBox(:,1) = BoxBndLow(:)
          Box%BndBox(:,2) = BoxBndHig(:)  
@@ -123,16 +121,17 @@ write(*,*) 'IXact',IXact,' NSDen',NSDen
             Exc=NewCubes(2)
             IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
 #ifdef PARALLEL 
-               Mssg=ProcessName('HiCu.GridGen')                      &
-                    //'Tau = ' //TRIM(DblToShrtChar(TauRel))         &
-                    //', <Rho> = '//TRIM(DblToMedmChar(Reduce(NewCubes(1)))) &
-                    //', <Exc> = '//TRIM(DblToMedmChar(Reduce(Exc)))         &
-                    //', Pts/Atom = '//TRIM(IntToChar(Reduce(PtsPerAtom)))
-               IF(MyID.EQ.0)THEN
-                  CALL OpenASCII(OutFile,Out)         
-                  WRITE(Out,*)TRIM(Mssg)
-                  CLOSE(Out)
-               ENDIF
+               !This breaks the load balancing algorithm!
+               !Mssg=ProcessName('HiCu.GridGen')                      &
+               !     //'Tau = ' //TRIM(DblToShrtChar(TauRel))         &
+               !     //', <Rho> = '//TRIM(DblToMedmChar(Reduce(NewCubes(1)))) &
+               !     //', <Exc> = '//TRIM(DblToMedmChar(Reduce(Exc)))         &
+               !     //', Pts/Atom = '//TRIM(IntToChar(Reduce(PtsPerAtom)))
+               !IF(MyID.EQ.0)THEN
+               !   CALL OpenASCII(OutFile,Out)         
+               !   WRITE(Out,*)TRIM(Mssg)
+               !   CLOSE(Out)
+               !ENDIF
 #else
                Mssg=ProcessName('HiCu.GridGen')                      &
                     //'Tau = ' //TRIM(DblToShrtChar(TauRel))         &
