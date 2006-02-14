@@ -120,7 +120,7 @@ PROGRAM HaiKu
   NSDen=Rho%NSDen
   NSMat=1
   IF(NSDen.EQ.3) NSMat=2 !<<< SPIN
-  write(*,*) '_HiCu_: NSMat',NSMat,' NSDen',NSDen,'MyID',MyID
+  !write(*,*) '_HiCu_: NSMat',NSMat,' NSDen',NSDen,'MyID',MyID
   IF(NSDen.NE.1.AND.NSDen.NE.3)CALL Halt('HiCu: noncollinear spin DFT not yet implemented!')
 #ifdef PARALLEL
   CALL New_FASTMAT(Kxc,0,(/0,0/),NSMat_O=NSMat) !<<< SPIN
