@@ -129,7 +129,7 @@ CONTAINS
     !-------------------------------------------------------------------
     TYPE(DBCSR  )                          :: A
     CHARACTER(LEN=DEFAULT_CHR_LEN)         :: FirstPartS,PartS,WhenPartS
-    INTEGER                                :: Cycl,Basis,Geom,iGONXPartExist
+    INTEGER                                :: Cycl,Basis,Geom,iONXPartExist,iGONXPartExist
     INTEGER :: iErr
     !-------------------------------------------------------------------
     !
@@ -149,12 +149,21 @@ CONTAINS
     IsFirst = .TRUE.
     SELECT CASE(WhenPartS)
     CASE('SCF')
-       IF(OptKeyQ(Inp,'Guess','Core')) THEN
-          !We use a Core Guess.
-          IsFirst = Cycl.LE.1.AND.Basis.LE.1!.AND.Geom.LE.1
-       ELSE
-          !We do not use a Core Guess.
-          IsFirst = Cycl.LE.0.AND.Basis.LE.1!.AND.Geom.LE.1
+       !IF(OptKeyQ(Inp,'Guess','Core')) THEN
+       !   !We use a Core Guess.
+       !   IsFirst = Cycl.LE.1.AND.Basis.LE.1!.AND.Geom.LE.1
+       !ELSE
+       !   !We do not use a Core Guess.
+       !   IsFirst = Cycl.LE.0.AND.Basis.LE.1!.AND.Geom.LE.1
+       !ENDIF
+       iONXPartExist=0
+       CALL Get(iONXPartExist,'ONXPartExist')
+       IsFirst=iONXPartExist.LE.0
+       !
+       ! It is no more the first relative iteration.
+       IF(IsFirst) THEN
+          iONXPartExist=1
+          CALL Put(iONXPartExist,'ONXPartExist')
        ENDIF
     CASE('GEO')
        iGONXPartExist=0

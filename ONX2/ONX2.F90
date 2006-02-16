@@ -62,6 +62,8 @@ PROGRAM ONX2
   REAL(DOUBLE),EXTERNAL          :: MondoTimer
   INTEGER                        :: CMin,CMax,DMin,DMax,iErr
   INTEGER                        :: ANbr,BNbr,CNbr,DNbr
+  TYPE(INT_VECT)                 :: OPart,GPart
+  INTEGER                        :: iONXPartExist,iGONXPartExist
 #endif
   REAL(DOUBLE)                   :: TmAl,TmDl,TmKx,TmML,TmRE,TmFO,TmTM
   INTEGER                        :: OldFileID
@@ -104,6 +106,18 @@ PROGRAM ONX2
      CALL Get(BSiz ,'atsiz',Tag_O=PrvBase)
      CALL Get(OffS ,'atoff',Tag_O=PrvBase)
      CALL Get(NBasF,'nbasf',Tag_O=PrvBase)
+     ! Check if a partition exist in Restart
+#ifdef ONX2_PARALLEL
+     CALL New(OPart,NPrc*4,0)
+     CALL New(GPart,NPrc*4,0)
+     iONXPartExist=-1000;iGONXPartExist=-1000;
+     CALL Get(iONXPartExist ,'ONXPartExist' )
+     IF(iONXPartExist .EQ.1) CALL Get(OPart,'ONXPart')
+     CALL Get(iGONXPartExist,'GONXPartExist')
+     IF(iGONXPartExist.EQ.1) CALL Get(GPart,'GONXPart')
+     !write(*,*) 'iONXPartExist' ,iONXPartExist,MyID
+     !write(*,*) 'iGONXPartExist',iGONXPartExist,MyID
+#endif
      ! Close the old hdf up 
      CALL CloseHDFGroup(HDF_CurrentID)
      CALL CloseHDF(OldFileID)
@@ -111,6 +125,21 @@ PROGRAM ONX2
      HDFFileID=OpenHDF(H5File)
      H5GroupID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(MyClone)))
      HDF_CurrentID=H5GroupID
+     ! Put the partition in the new hdf if needed
+#ifdef ONX2_PARALLEL
+     IF(iONXPartExist.EQ.1) THEN
+        CALL Put(iONXPartExist ,'ONXPartExist' )
+        CALL Put(OPart,'ONXPart')
+        IF(MyID.EQ.0)WRITE(*,*) 'ONX2: Successfully load/save the ONX Restart partition!'
+     ENDIF
+     IF(iGONXPartExist.EQ.1) THEN
+        CALL Put(iGONXPartExist,'GONXPartExist')
+        CALL Put(GPart,'GONXPart')
+        IF(MyID.EQ.0)WRITE(*,*) 'ONX2: Successfully load/save the GONX Restart partition!'
+     ENDIF
+     CALL Delete(OPart)
+     CALL Delete(GPart)
+#endif
      CALL Delete(Stat)
   ELSE
      CALL Get(BSp,Tag_O=PrvBase)
