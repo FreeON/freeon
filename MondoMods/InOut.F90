@@ -1235,25 +1235,35 @@ CONTAINS
 !!$write(*,*)'In Get_bcsr',PRESENT(CheckPoint_O)
                    IF(PRESENT(CheckPoint_O))THEN
                       IF(CheckPoint_O)THEN
-!write(*,*)'In Get_bcsr',A%NSMat
-                         CALL Get(A%NSMat,TRIM(Name)//'%NSMat')
-!write(*,*)'In Get_bcsr',A%NSMat
-                         CALL Get(A%NAtms,TRIM(Name)//'%NAtms')
-                         CALL Get(A%NBlks,TRIM(Name)//'%NBlks')
-                         CALL Get(A%NNon0,TRIM(Name)//'%NNon0')
+                         NSMat=A%NSMat
+                         NAtms=A%NAtms
+                         NNon0=A%NNon0
+                         NBlks=A%NBlks
+!write(*,*)'In Get_bcsr set to',A%NSMat
+                         CALL Get(NSMat,TRIM(Name)//'%NSMat')
+!write(*,*)'In Get_bcsr get',A%NSMat
+                         CALL Get(NAtms,TRIM(Name)//'%NAtms')
+                         CALL Get(NBlks,TRIM(Name)//'%NBlks')
+                         CALL Get(NNon0,TRIM(Name)//'%NNon0')
 
                          IF(AllocQ(A%Alloc))THEN
-                            LimitsQ=.NOT.                   &
-                                 (A%NAtms<=SIZE(A%RowPt%I)).AND. &
-                                 (A%NBlks<=SIZE(A%ColPt%I)).AND. &
-                                 (A%NBlks<=SIZE(A%BlkPt%I)).AND. &
-                                 (A%NNon0<=SIZE(A%MTrix%D))
+                            LimitsQ=                            &
+                                 (NAtms.GT.SIZE(A%RowPt%I)).OR. &
+                                 (NBlks.GT.SIZE(A%ColPt%I)).OR. &
+                                 (NBlks.GT.SIZE(A%BlkPt%I)).OR. &
+                                 (NNon0.GT.SIZE(A%MTrix%D))
+
+                            !LimitsQ=.NOT.                   &
+                            !     (A%NAtms<=SIZE(A%RowPt%I)).AND. &
+                            !     (A%NBlks<=SIZE(A%ColPt%I)).AND. &
+                            !     (A%NBlks<=SIZE(A%BlkPt%I)).AND. &
+                            !     (A%NNon0<=SIZE(A%MTrix%D))
                             IF(LimitsQ)THEN
                                CALL Delete(A)
-                               CALL New(A,(/A%NAtms,A%NBlks,A%NNon0/),NSMat_O=A%NSMat)
+                               CALL New(A,(/NAtms,NBlks,NNon0/),NSMat_O=NSMat)
                             ENDIF
                          ELSE
-                            CALL New(A,(/A%NAtms,A%NBlks,A%NNon0/),NSMat_O=A%NSMat)
+                            CALL New(A,(/NAtms,NBlks,NNon0/),NSMat_O=NSMat)
                          ENDIF
 !
                          CALL Get(A%RowPt,TRIM(Name)//'%RowPt')
@@ -1420,6 +1430,8 @@ CONTAINS
                       IF(CheckPoint_O)THEN
 !write(*,*) 'put',A%NSMat
                          CALL Put(A%NSMat,TRIM(Name)//'%NSMat')
+!call get(A%NSMat,TRIM(Name)//'%NSMat')
+!write(*,*) 'get',A%NSMat
                          CALL Put(A%NAtms,TRIM(Name)//'%NAtms')
                          CALL Put(A%NBlks,TRIM(Name)//'%NBlks')
                          CALL Put(A%NNon0,TRIM(Name)//'%NNon0')
