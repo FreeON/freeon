@@ -204,7 +204,10 @@ PROGRAM RHEqs
   CALL Plot(sP,'OrthoP['//TRIM(NxtCycl)//']')
   ! Transform to non-orthogonal rep
   XFile=TrixFile('X',Args)
-  INQUIRE(FILE=XFile,EXIST=Present)
+  IF(MyID.EQ.0) INQUIRE(FILE=XFile,EXIST=Present)
+#ifdef
+  CALL BCast(Present)
+#endif
   IF(Present)THEN
      CALL Get(sX,XFile)                  ! X =S^{-1/2}
      CALL Multiply(sX,sP,sTmp1)          ! T1=S^{-1/2}.P_Orthog

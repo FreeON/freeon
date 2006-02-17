@@ -242,6 +242,8 @@ PROGRAM P2Use
      HDFFileID=OpenHDF(H5File)
      H5GroupID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(MyClone)))
      HDF_CurrentID=H5GroupID
+     ! Put the DM into the hdf
+     CALL Put(P,'CurrentDM',CheckPoint_O=.TRUE.)
      ! Clean Up
      CALL Delete(P)
 !     CALL Delete(S)
