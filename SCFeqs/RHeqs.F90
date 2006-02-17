@@ -205,7 +205,7 @@ PROGRAM RHEqs
   ! Transform to non-orthogonal rep
   XFile=TrixFile('X',Args)
   IF(MyID.EQ.0) INQUIRE(FILE=XFile,EXIST=Present)
-#ifdef
+#ifdef PARALLEL
   CALL BCast(Present)
 #endif
   IF(Present)THEN
