@@ -41,13 +41,13 @@ MODULE FastMatrices
     TYPE(SRST),POINTER :: GlobalP
     TYPE(SRST),POINTER :: GlobalP1
 !======================================================================
+#ifdef PARALLEL
   CONTAINS
 !======================================================================
 
 !======================================================================
 ! COMPUTE BCSR MATRIX DIMENSIONS CORESPONDING TO A FAST MATRIX
 !======================================================================
-#ifdef PARALLEL
   FUNCTION MatDimensions_1(A,RowLimits,ColLimits) RESULT(Dim_res)
     TYPE(FASTMAT),POINTER :: A,C
     TYPE(SRST),POINTER :: P
