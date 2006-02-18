@@ -40,7 +40,7 @@ c        Automatic code generation in density functional theory
 c        Comp. Phys. Comm. 136 (2001) 310-318.
 c
       implicit real*8 (a-h,o-z)
-      integer ideriv,npt
+      integer ideriv,npt,i
       real*8 rhoa1(npt),rhob1(npt)
       real*8 sigmaaa1(npt),sigmabb1(npt),sigmaab1(npt)
       real*8 zk(npt),vrhoa(npt),vrhob(npt)
@@ -199,7 +199,7 @@ c        Automatic code generation in density functional theory
 c        Comp. Phys. Comm. 136 (2001) 310-318.
 c
       implicit real*8 (a-h,o-z)
-      integer ideriv,npt
+      integer ideriv,npt,i
       real*8 rhoa1(npt)
       real*8 sigmaaa1(npt)
       real*8 zk(npt),vrhoa(npt),vsigmaaa(npt)
@@ -300,7 +300,7 @@ c        Automatic code generation in density functional theory
 c        Comp. Phys. Comm. 136 (2001) 310-318.
 c
       implicit real*8 (a-h,o-z)
-      integer ideriv,npt
+      integer ideriv,npt,i
       real*8 rhoa1(npt),rhob1(npt)
       real*8 sigmaaa1(npt),sigmabb1(npt),sigmaab1(npt)
       real*8 zk(npt),vrhoa(npt),vrhob(npt)
@@ -2855,7 +2855,7 @@ c        Automatic code generation in density functional theory
 c        Comp. Phys. Comm. 136 (2001) 310-318.
 c
       implicit real*8 (a-h,o-z)
-      integer ideriv,npt
+      integer ideriv,npt,i
       real*8 rhoa1(npt)
       real*8 sigmaaa1(npt)
       real*8 zk(npt),vrhoa(npt),vsigmaaa(npt)
@@ -3419,7 +3419,7 @@ c        Automatic code generation in density functional theory
 c        Comp. Phys. Comm. 136 (2001) 310-318.
 c
       implicit real*8 (a-h,o-z)
-      integer ideriv,npt
+      integer ideriv,npt,i
       real*8 rhoa1(npt),rhob1(npt)
       real*8 sigmaaa1(npt),sigmabb1(npt),sigmaab1(npt)
       real*8 zk(npt),vrhoa(npt),vrhob(npt)
@@ -4742,7 +4742,7 @@ c        Automatic code generation in density functional theory
 c        Comp. Phys. Comm. 136 (2001) 310-318.
 c
       implicit real*8 (a-h,o-z)
-      integer ideriv,npt
+      integer ideriv,npt,i
       real*8 rhoa1(npt)
       real*8 sigmaaa1(npt)
       real*8 zk(npt),vrhoa(npt),vsigmaaa(npt)
