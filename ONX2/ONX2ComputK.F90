@@ -90,7 +90,7 @@ CONTAINS
     INTEGER                    :: ci,iPtrD,iPtrK,NBFC,NBFD,NBFA,NBFB
     INTEGER                    :: NIntBlk,iErr,iFAC,iFBD,NCFncD
     INTEGER                    :: Off,Ind
-    INTEGER                    :: LocNInt,IntType
+    INTEGER                    :: LocNInt,IntType,NSMat
     INTEGER                    :: OT,OAL,OBL,LDAL,LDBL,GOAL,GOBL
     INTEGER                    :: OA,OB,OC,OD,LDA,LDB,LDC,LDD,GOA,GOB,GOC,GOD
 #ifdef ONX2_PARALLEL
@@ -156,11 +156,13 @@ CONTAINS
     NIntsTot=0.0d0
     !
 #ifdef ONX2_PARALLEL
+    NSMat=DFM%NSMat
     P => DFM%Next ! Run over atom C
     DO                               
        IF(.NOT.ASSOCIATED(P)) EXIT   
        AtC = P%Row
 #else
+    NSMat=D%NSMat
     DO AtC=1,NAtoms ! Run over AtC.
 #endif
        KC=GMp%AtTyp%I(AtC)
@@ -207,15 +209,15 @@ CONTAINS
 #endif
           !
 #ifdef ONX2_PARALLEL
-          CALL GetAbsDenBlk(U%MTrix(1,1),NBFC,NBFD,DMcd(1),      &
+          CALL GetAbsDenBlk(U%MTrix(1,1),NBFC,NBFD,NSMat,DMcd(1),&
                &            BSp%NCFnc%I(KC),BSp%NCFnc%I(KD),     &
                &            BSp%LStrt%I(1,KC),BSp%LStop%I(1,KC), &
                &            BSp%LStrt%I(1,KD),BSp%LStop%I(1,KD)  )
 #else
-          CALL GetAbsDenBlk(D%MTrix%D(iPtrD),NBFC,NBFD,DMcd(1),  &
-               &            BSp%NCFnc%I(KC),BSp%NCFnc%I(KD),     &
-               &            BSp%LStrt%I(1,KC),BSp%LStop%I(1,KC), &
-               &            BSp%LStrt%I(1,KD),BSp%LStop%I(1,KD)  )
+          CALL GetAbsDenBlk(D%MTrix%D(iPtrD),NBFC,NBFD,NSMat,DMcd(1), &
+               &            BSp%NCFnc%I(KC),BSp%NCFnc%I(KD),          &
+               &            BSp%LStrt%I(1,KC),BSp%LStop%I(1,KC),      &
+               &            BSp%LStrt%I(1,KD),BSp%LStop%I(1,KD)       )
 #endif
           !
 #ifdef ONX2_DBUG
@@ -381,22 +383,22 @@ CONTAINS
                    if(atb.le.0) stop 'In ComputK'
                    V => InsertSRSTNode(Q%RowRoot,AtB)
                    IF(.NOT.ASSOCIATED(V%MTrix)) THEN
-                      ALLOCATE(V%MTrix(NBFA,NBFB*DFM%NSMat),STAT=MemStatus)
-                      CALL DBL_VECT_EQ_DBL_SCLR(NBFA*NBFB*DFM%NSMat,V%MTrix(1,1),0.0d0)
+                      ALLOCATE(V%MTrix(NBFA,NBFB*NSMat),STAT=MemStatus)
+                      CALL DBL_VECT_EQ_DBL_SCLR(NBFA*NBFB*NSMat,V%MTrix(1,1),0.0d0)
                    ENDIF
                    !
                    ! The variable -Fac- is needed to get the 
                    ! right full K matrix when filling out in ONX.
                    Fac=-1.0d0
                    iF(AtA.EQ.AtB) Fac=-0.5d0
-                   IF(DFM%NSMat.EQ.1) THEN
+                   IF(NSMat.EQ.1) THEN
                       CALL DGEMV('N',NBFA*NBFB,NBFC*NBFD,Fac,C(1), &
                            &     NBFA*NBFB,U%MTrix(1,1),1,1.0d0, &
                            &     V%MTrix(1,1),1)
                       !CALL DGEMM_NNC(NBFA*NBFB,NBFC*NBFD,1,Fac,1D0, &
                       !     &         C(1),U%MTrix(1,1),V%MTrix(1,1))
                    ELSE
-                      CALL DGEMM('N','N',NBFA*NBFB,DFM%NSMat,NBFC*NBFD,Fac,C(1), &
+                      CALL DGEMM('N','N',NBFA*NBFB,NSMat,NBFC*NBFD,Fac,C(1), &
                            &     NBFA*NBFB,U%MTrix(1,1),NBFC*NBFD,1.0d0, &
                            &     V%MTrix(1,1),NBFA*NBFB)
                    ENDIF
@@ -405,12 +407,12 @@ CONTAINS
                    CALL GetAdrB(AtA,AtB,Ind,Kx,0)
                    iPtrK = Kx%BlkPt%I(Ind)
                    !
-                   IF(D%NSMat.EQ.1) THEN
+                   IF(NSMat.EQ.1) THEN
                       CALL DGEMV('N',NBFA*NBFB,NBFC*NBFD,-1.0d0,C(1), &
                            &     NBFA*NBFB,D%MTrix%D(iPtrD),1,1.0d0, &
                            &     Kx%MTrix%D(IPtrK),1)
                    ELSE
-                      CALL DGEMM('N','N',NBFA*NBFB,D%NSMat,NBFC*NBFD,-1.0d0,C(1), &
+                      CALL DGEMM('N','N',NBFA*NBFB,NSMat,NBFC*NBFD,-1.0d0,C(1), &
                            &     NBFA*NBFB,D%MTrix%D(iPtrD),NBFC*NBFD,1.0d0, &
                            &     Kx%MTrix%D(IPtrK),NBFA*NBFB)
                    ENDIF

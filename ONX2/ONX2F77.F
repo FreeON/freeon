@@ -38,12 +38,12 @@ C
       RETURN
       END
 C     
-      SUBROUTINE GetAbsDenBlk(D,NR,NC,DM,NFR,NFC,IRB,IRE,ICB,ICE)
+      SUBROUTINE GetAbsDenBlk(D,NR,NC,NS,DM,NFR,NFC,IRB,IRE,ICB,ICE)
       IMPLICIT NONE
-      INTEGER NR,NC,NFR,NFC
+      INTEGER NR,NC,NS,NFR,NFC
       INTEGER IRB(NFR),IRE(NFR),ICB(NFC),ICE(NFC)
-      REAL*8 D(NR,NC),DM(NFC,NFR)
-      INTEGER INFC,INFR,I,J,IRB1,ICB1,STDR,STDC
+      REAL*8 D(NR,NC*NS),DM(NFC,NFR)
+      INTEGER INFC,INFR,I,J,IS,N,IRB1,ICB1,STDR,STDC
       REAL*8 TMP
       ICB1=0
       DO INFC=1,NFC
@@ -52,9 +52,12 @@ C
          DO INFR=1,NFR
             STDR=IRE(INFR)-IRB(INFR)+1
             TMP=0.0D0
-            DO J=ICB1+1,ICB1+STDC
+            DO IS=1,NS
+               N=(IS-1)*NC
+               DO J=ICB1+1,ICB1+STDC
                DO I=IRB1+1,IRB1+STDR
-                  TMP=MAX(TMP,ABS(D(I,J)))
+                  TMP=MAX(TMP,ABS(D(I,J+N)))
+               ENDDO
                ENDDO
             ENDDO
             DM(INFC,INFR)=TMP

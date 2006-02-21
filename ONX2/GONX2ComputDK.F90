@@ -228,15 +228,15 @@ CONTAINS
 #endif
           !
 #ifdef ONX2_PARALLEL
-          CALL GetAbsDenBlk(U%MTrix(1,1),NBFC,NBFD,DMcd(1),    &
+          CALL GetAbsDenBlk(U%MTrix(1,1),NBFC,NBFD,NSMat,DMcd(1),&
                &            BSc%NCFnc%I(KC),BSc%NCFnc%I(KD),     &
                &            BSc%LStrt%I(1,KC),BSc%LStop%I(1,KC), &
                &            BSc%LStrt%I(1,KD),BSc%LStop%I(1,KD)  )
 #else
-          CALL GetAbsDenBlk(D%MTrix%D(iPtrD),NBFC,NBFD,DMcd(1),&
-               &            BSc%NCFnc%I(KC),BSc%NCFnc%I(KD),     &
-               &            BSc%LStrt%I(1,KC),BSc%LStop%I(1,KC), &
-               &            BSc%LStrt%I(1,KD),BSc%LStop%I(1,KD)  )
+          CALL GetAbsDenBlk(D%MTrix%D(iPtrD),NBFC,NBFD,NSMat,DMcd(1),&
+               &            BSc%NCFnc%I(KC),BSc%NCFnc%I(KD),         &
+               &            BSc%LStrt%I(1,KC),BSc%LStop%I(1,KC),     &
+               &            BSc%LStrt%I(1,KD),BSc%LStop%I(1,KD)      )
 #endif
           !
 #ifdef GONX2_DBUG
@@ -387,15 +387,15 @@ CONTAINS
                    BDAtmInfo%Atm12Z=BDAtmInfo%Atm1Z-BDAtmInfo%Atm2Z
                    !
 #ifdef ONX2_PARALLEL
-                   CALL GetAbsDenBlk(V%MTrix(1,1),NBFA,NBFB,DMab(1),     &
+                   CALL GetAbsDenBlk(V%MTrix(1,1),NBFA,NBFB,NSMat,DMab(1), &
                         &            BSc%NCFnc%I(KA),BSc%NCFnc%I(KB),      &
                         &            BSc%LStrt%I(1,KA),BSc%LStop%I(1,KA),  &
                         &            BSc%LStrt%I(1,KB),BSc%LStop%I(1,KB)   )
 #else
-                   CALL GetAbsDenBlk(D%MTrix%D(iPtrD2),NBFA,NBFB,DMab(1),&
-                        &            BSc%NCFnc%I(KA),BSc%NCFnc%I(KB),      &
-                        &            BSc%LStrt%I(1,KA),BSc%LStop%I(1,KA),  &
-                        &            BSc%LStrt%I(1,KB),BSc%LStop%I(1,KB)   )
+                   CALL GetAbsDenBlk(D%MTrix%D(iPtrD2),NBFA,NBFB,NSMat,DMab(1), &
+                        &            BSc%NCFnc%I(KA),BSc%NCFnc%I(KB),           &
+                        &            BSc%LStrt%I(1,KA),BSc%LStop%I(1,KA),       &
+                        &            BSc%LStrt%I(1,KB),BSc%LStop%I(1,KB)        )
 #endif
                    !
                    ! Get atom pair for BD.
