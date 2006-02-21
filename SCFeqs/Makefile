@@ -151,7 +151,7 @@ PM:	$(PM_Objs)
 #	Misc
 #
 Stat:	$(Stat_Objs)
-	$(LD) $(LDFLAGS) SCFstats $(Stat_Objs)  $(F90_LIBRARIES) 
+	$(LD) $(LDFLAGS) SCFstats $(Stat_Objs)  $(F90_LIBRARIES) $(LAPACK)
 	mv SCFstats $(MONDO_EXEC)/SCFstats
 #
 RStat:	$(RStat_Objs)

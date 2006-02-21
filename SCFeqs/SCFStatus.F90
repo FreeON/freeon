@@ -55,11 +55,7 @@ PROGRAM SCFStatus
 !
 !  S**2
    CALL Get(Tmp1,TrixFile('S',Args))
-#ifdef PARALLEL
-!vw S2=GetS2(P,Tmp1)
-#else
-   S2=GetS2(P,Tmp1)
-#endif
+   S2=GetS2(P,Tmp1,Tmp2)
 !
 !  KinE=<T>=Tr{P.T}
    CALL Get(Tmp1,TrixFile('T',Args))
@@ -183,7 +179,7 @@ PROGRAM SCFStatus
 !     Add in Spin
       IF(P%NSMat/=1.AND.Args%I%I(1)/=0)                                     & !<<< SPIN 
          SCFMessage=TRIM(SCFMessage)                                        &
-               //'       S**2    = '//TRIM(FltToShrtChar(S2))//RTRN         
+               //'       <S^2>   = '//TRIM(FltToShrtChar(S2))//RTRN         
 !     Add in DIIS error 
       IF(DIISErr/=Zero)                                                     &
          SCFMessage=TRIM(SCFMessage)                                        &
@@ -278,38 +274,41 @@ ENDIF
   CALL Delete(Tmp2)
   CALL ShutDown(Prog)
 CONTAINS
-  REAL(DOUBLE) FUNCTION GetS2(P,S)
+  REAL(DOUBLE) FUNCTION GetS2(P,S,Tmp1)
     IMPLICIT NONE
-    TYPE(BCSR)     :: P,S
-    TYPE(DBL_RNK2) :: D1,D2,D3
+#ifdef PARALLEL
+    TYPE(DBCSR)    :: P,S,Tmp1
+#else
+    TYPE(BCSR)     :: P,S,Tmp1
+#endif
+    TYPE(BCSR)     :: Tmp2
+    TYPE(DBL_RNK2) :: D1,D2
     INTEGER        :: I
     REAL(DOUBLE)   :: Sx,Sy,Sz
     GetS2=0D0
-    call seteq(D1,P)
-    call seteq(D2,S)
-    SELECT CASE(P%NSMat)
-    CASE(1);RETURN
-    CASE(2)
-       D1%D(1:NBasF,1:NBasF)=matmul(D1%D(1:NBasF,1:NBasF),D2%D)
-       D1%D(1:NBasF,1:NBasF)=matmul(D2%D,D1%D(1:NBasF,1:NBasF))
-       D1%D(1:NBasF,1:NBasF)=matmul(D1%D(1:NBasF,1:NBasF),D1%D(1:NBasF,NBasF+1:2*NBasF))
-       do i=1,NBasF
-          GetS2=GetS2+D1%D(i,i)
-       enddo
-       GetS2=0.25D0*(NAlph-NBeta)**2+0.5D0*(NAlph+NBeta)-GetS2
-    CASE(4)
-       !That is certainly wrong!
-       D1%D(1:NBasF,1:NBasF)=matmul(D1%D(1:NBasF,1:NBasF),D2%D)
-       D1%D(1:NBasF,1:NBasF)=matmul(D2%D,D1%D(1:NBasF,1:NBasF))
-       D1%D(1:NBasF,1:NBasF)=matmul(D1%D(1:NBasF,1:NBasF),D1%D(NBasF+1:2*NBasF,NBasF+1:2*NBasF))
-       do i=1,NBasF
-          GetS2=GetS2+D1%D(i,i)
-       enddo
-       GetS2=0.25D0*(NAlph-NBeta)**2+0.5D0*(NAlph+NBeta)-GetS2
-    CASE DEFAULT;CALL Halt('GetS2: Something is wrong there!')
-    END SELECT
-    call delete(D1)
-    call delete(D2)
+    CALL Multiply(P,S,Tmp1)
+    CALL SetEq(Tmp2,Tmp1)
+    IF(MyID.EQ.0)THEN
+       CALL SetEq(D1,Tmp2)
+       CALL New(D2,(/NBasF,NBasF/))
+       SELECT CASE(P%NSMat)
+       CASE(1)
+          !
+       CASE(2)
+          CALL DGEMM('N','N',NBasf,NBasF,NBasF,1D0,D1%D(1,1),NBasF, &
+               &     D1%D(1,NBasF+1),NBasF,0D0,D2%D(1,1),NBasF)
+          DO I=1,NBasF
+             GetS2=GetS2+D2%D(I,I)
+          ENDDO
+          GetS2=0.25D0*(NAlph-NBeta)**2+0.5D0*(NAlph+NBeta)-GetS2
+       CASE(4)
+          !
+       CASE DEFAULT;CALL Halt('GetS2: Something is wrong there!')
+       END SELECT
+       CALL Delete(D1)
+       CALL Delete(D2)
+       CALL Delete(Tmp2)
+    ENDIF
   END FUNCTION GetS2
 END PROGRAM SCFStatus
 
