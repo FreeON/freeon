@@ -239,21 +239,21 @@ MODULE Thresholding
        DO L=1,HGEll
           X1 = SQRT(0.499D0*DBLE(L)/(1.D0-GFactor))
           X2 = 2.D0*X1
-          F1 = Herm(X1,L+1)+2.D0*GFactor*X1*Herm(X1,L)
-          F2 = Herm(X2,L+1)+2.D0*GFactor*X2*Herm(X2,L)
+          F1 = Hermite(X1,L+1)+2.D0*GFactor*X1*Hermite(X1,L)
+          F2 = Hermite(X2,L+1)+2.D0*GFactor*X2*Hermite(X2,L)
           IF(SIGN(1.D0,F1)==SIGN(1.D0,F2)) THEN
              CALL Halt('Failed to Find Root in  SetLocalCoefs')
           ENDIF
           DO I=1,100
              X3 = 0.5D0*(X1+X2)
-             F3 = Herm(X3,L+1)+2.D0*GFactor*X3*Herm(X3,L)
+             F3 = Hermite(X3,L+1)+2.D0*GFactor*X3*Hermite(X3,L)
              IF(SIGN(1.D0,F3)==SIGN(1.D0,F1)) THEN
                 X1 = X3
              ELSE
                 X2 = X3
              ENDIF
           ENDDO
-          AACoef(L) = ABS(Herm(X3,L))*EXP(-(One-GFactor)*X3*X3)
+          AACoef(L) = ABS(Hermite(X3,L))*EXP(-(One-GFactor)*X3*X3)
 !          WRITE(*,*) 'L=',L,' X3 = ',X3,' F3 = ',F3
 !          WRITE(*,*) 'AACoef = ',AACoef(L)
        ENDDO
@@ -261,9 +261,9 @@ MODULE Thresholding
 !=================================================================================================
 !
 !=================================================================================================
-      FUNCTION Herm(x,L)
+      FUNCTION Hermite(x,L)
         INTEGER                         :: L,I,J
-        REAL(DOUBLE)                    :: Herm,x
+        REAL(DOUBLE)                    :: Hermite,x
         REAL(DOUBLE),DIMENSION(0:8,0:8) :: CC
 !
         CC(0:8,0) = (/ 1.000D0, 0.000D0, 0.0000D0, 0.000D0, 0.0000D0, 0.000D0, 0.000D0, 0.00D0, 0.00D0/)
@@ -277,13 +277,13 @@ MODULE Thresholding
         CC(0:8,8) = (/ 1680.D0, 0.000D0,-13440.D0, 0.000D0, 13440.D0, 0.000D0,-3584.D0, 0.00D0, 256.D0/)
 
 !
-        IF(L>8) CALL Halt("FUNCTION Herm: L>8")
-        Herm = CC(L,L)
+        IF(L>8) CALL Halt("FUNCTION Hermite: L>8")
+        Hermite = CC(L,L)
         DO I=0,L-1
            J = L-1-I
-           Herm = Herm*x+CC(J,L)
+           Hermite = Hermite*x+CC(J,L)
         ENDDO
-      END FUNCTION Herm
+      END FUNCTION Hermite
 !======================================================================================
 !
 !======================================================================================
