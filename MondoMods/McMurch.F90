@@ -206,6 +206,30 @@ MODULE McMurchie
          ENDDO
       END SUBROUTINE AuxInts
 
+      SUBROUTINE OvrInts(MaxL,LTot,AuxR,Omega,T)
+         REAL(DOUBLE),                  INTENT(IN)  :: Omega,T
+         INTEGER,                       INTENT(IN)  :: MaxL,LTot 
+         REAL(DOUBLE),DIMENSION(0:MaxL),INTENT(OUT) :: AuxR
+         REAL(DOUBLE),PARAMETER                     :: Switch=26.0D0
+         INTEGER,PARAMETER                          :: LPlus=50
+         INTEGER,PARAMETER                          :: L2=12+LPlus
+         REAL(DOUBLE),DIMENSION(0:L2)               :: F
+         REAL(DOUBLE)                               :: SqrtT,ET,OneOvT,FJ,TwoT, &
+                                                       OmegaJ,TwoO
+         INTEGER                                    :: J
+!---------------------------------------------------------------------------------
+!        Compute the incomplete gamma functions F_j(T)
+!
+            OmegaJ=One
+            TwoO=-Two*Omega
+            ET=EXP(-T)
+            DO J=0,LTot
+               AuxR(J)=OmegaJ*ET
+               OmegaJ=TwoO*OmegaJ
+            ENDDO
+            RETURN            
+          END SUBROUTINE OvrInts
+
 
 
 
@@ -217,7 +241,7 @@ MODULE McMurchie
          INTEGER,                       INTENT(IN)  :: MaxL,LTot 
          REAL(DOUBLE),DIMENSION(0:MaxL),INTENT(OUT) :: ErrR
          REAL(DOUBLE),PARAMETER                     :: Switch=35.0D0
-         INTEGER,PARAMETER                          :: LPlus=150
+         INTEGER,PARAMETER                          :: LPlus=250
          INTEGER,PARAMETER                          :: L2=12+LPlus
          REAL(DOUBLE),DIMENSION(0:MaxL)             :: E
          REAL(DOUBLE),DIMENSION(0:L2)               :: M,F
