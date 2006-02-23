@@ -96,14 +96,14 @@ MODULE MonteCarlo
        CALL CloseHDF(HDFFileID)
 !      Do The initial SCF
        iBAS=C%Sets%NBSets
-       CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos) 
+       CALL GeomArchive(iBAS,iGEO,C%Nams,C%Opts,C%Sets,C%Geos) 
        CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
        CALL SCF(iBAS,iGEO,C)
     ELSE
        WRITE(*,*) 'Geuss==SUPERPOS'
 !      Do The initial SCF: Build the SCF 
        DO iBAS=1,C%Sets%NBSets
-          CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos) 
+          CALL GeomArchive(iBAS,iGEO,C%Nams,C%Opts,C%Sets,C%Geos) 
           CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
           CALL SCF(iBAS,iGEO,C)
        ENDDO
@@ -189,7 +189,7 @@ MODULE MonteCarlo
           ENDDO
           CALL CloseHDF(HDFFileID)
 !         Archive Geometry for next step
-          CALL GeomArchive(iBAS,iGEO+1,C%Nams,C%Sets,C%Geos)     
+          CALL GeomArchive(iBAS,iGEO+1,C%Nams,C%Opts,C%Sets,C%Geos)     
 !         Evaluate energies at the new geometry
           CALL SCF(iBAS,iGEO+1,C)
 !         Store the Last P matrix

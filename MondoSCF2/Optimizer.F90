@@ -55,7 +55,7 @@ CONTAINS
     NatmsLoc=C%Geos%Clone(1)%Natms
     ! Build the guess 
     DO iBAS=1,C%Sets%NBSets
-       CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
+       CALL GeomArchive(iBAS,iGEO,C%Nams,C%Opts,C%Sets,C%Geos)    
        CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
        CALL SCF(iBAS,iGEO,C)
     ENDDO
@@ -108,11 +108,11 @@ CONTAINS
           C%Geos%Clone(iCLONE)%Carts%D=OldXYZ%D
        ENDDO
        CALL Delete(OldXYZ)
-       CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
+       CALL GeomArchive(iBAS,iGEO,C%Nams,C%Opts,C%Sets,C%Geos)    
        DO iCLONE=1,C%Geos%Clones
           C%Geos%Clone(iCLONE)%Carts%D=C%Geos%Clone(iCLONE)%Displ%D
        ENDDO
-       CALL GeomArchive(iBAS,iGEO+1,C%Nams,C%Sets,C%Geos)    
+       CALL GeomArchive(iBAS,iGEO+1,C%Nams,C%Opts,C%Sets,C%Geos)    
        CALL MergePrintClones(C%Geos,C%Nams,C%Opts)
     ENDDO
   END SUBROUTINE SteepD
@@ -192,7 +192,7 @@ CONTAINS
     NatmsLoc=C%Geos%Clone(1)%Natms
     ! Build the guess 
     DO iBAS=1,C%Sets%NBSets
-       CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
+       CALL GeomArchive(iBAS,iGEO,C%Nams,C%Opts,C%Sets,C%Geos)    
        CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
        CALL SCF(iBAS,iGEO,C)
     ENDDO    
@@ -222,7 +222,7 @@ CONTAINS
             DO iCLONE=1,C%Geos%Clones
               C%Geos%Clone(iCLONE)%Displ%D=C%Geos%Clone(iCLONE)%Carts%D
             ENDDO
-            CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
+            CALL GeomArchive(iBAS,iGEO,C%Nams,C%Opts,C%Sets,C%Geos)    
           CALL ForceDStep(iGEO,C%Nams,C%Geos,DIISErr)
             CALL New(OldXYZ,(/3,NatmsLoc/))
             DO iCLONE=1,C%Geos%Clones
@@ -231,11 +231,11 @@ CONTAINS
               C%Geos%Clone(iCLONE)%Carts%D=OldXYZ%D
             ENDDO
             CALL Delete(OldXYZ)
-            CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
+            CALL GeomArchive(iBAS,iGEO,C%Nams,C%Opts,C%Sets,C%Geos)    
             DO iCLONE=1,C%Geos%Clones
               C%Geos%Clone(iCLONE)%Carts%D=C%Geos%Clone(iCLONE)%Displ%D
             ENDDO
-            CALL GeomArchive(iBAS,iGEO+1,C%Nams,C%Sets,C%Geos)    
+            CALL GeomArchive(iBAS,iGEO+1,C%Nams,C%Opts,C%Sets,C%Geos)    
           Mssg=TRIM(Mssg)//', Ediis='//TRIM(DblToShrtChar(DIISErr))
           ! Check for absolute convergence
           Converged=.FALSE.
@@ -255,11 +255,11 @@ CONTAINS
              C%Geos%Clone(iCLONE)%Displ%D=C%Geos%Clone(iCLONE)%Carts%D &
                                       -StepLength*C%Geos%Clone(iCLONE)%Gradients%D
           ENDDO
-            CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
+            CALL GeomArchive(iBAS,iGEO,C%Nams,C%Opts,C%Sets,C%Geos)    
           DO iCLONE=1,C%Geos%Clones
              C%Geos%Clone(iCLONE)%Carts%D=C%Geos%Clone(iCLONE)%Displ%D
           ENDDO
-            CALL GeomArchive(iBAS,iGEO+1,C%Nams,C%Sets,C%Geos)    
+            CALL GeomArchive(iBAS,iGEO+1,C%Nams,C%Opts,C%Sets,C%Geos)    
           ! Put the geometries to HDF
           ! And here is some 
           Mssg=TRIM(Mssg)//', Step='//TRIM(DblToShrtChar(StepLength))
@@ -418,7 +418,7 @@ CONTAINS
        ! Purify NEB images
        CALL NEBPurify(C%Geos)
        ! Archive geometries
-       CALL GeomArchive(cBAS,cGEO+1,C%Nams,C%Sets,C%Geos)    
+       CALL GeomArchive(cBAS,cGEO+1,C%Nams,C%Opts,C%Sets,C%Geos)    
        ! Evaluate energies at the new geometry
        CALL SCF(cBAS,cGEO+1,C)          
        ! Relative change in the total Energy
@@ -448,7 +448,7 @@ CONTAINS
              C%Geos%Clone(iCLONE)%Carts%D=Carts(iCLONE)%D-StepLength*C%Geos%Clone(iCLONE)%Gradients%D
           ENDDO
           ! Archive geometries
-          CALL GeomArchive(cBAS,cGEO+1,C%Nams,C%Sets,C%Geos)    
+          CALL GeomArchive(cBAS,cGEO+1,C%Nams,C%Opts,C%Sets,C%Geos)    
           ! Evaluate energies at the new geometry
           CALL SCF(cBAS,cGEO+1,C)          
           ! Relative change in the total Energy
@@ -508,7 +508,7 @@ CONTAINS
        CALL Delete(Carts(iCLONE))
     ENDDO
     ! Keep geometry
-    CALL GeomArchive(cBAS,cGEO,C%Nams,C%Sets,C%Geos)    
+    CALL GeomArchive(cBAS,cGEO,C%Nams,C%Opts,C%Sets,C%Geos)    
     ! Store the current minimum energies ...
     DO iCLONE=1,C%Geos%Clones
        Energies(iClone)=C%Geos%Clone(iClone)%ETotal
@@ -535,7 +535,7 @@ CONTAINS
      MaxSteps=C%GOpt%GConvCrit%MaxGeOpSteps
      ! Build the guess 
      DO iBAS=1,C%Sets%NBSets-1
-       CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
+       CALL GeomArchive(iBAS,iGEO,C%Nams,C%Opts,C%Sets,C%Geos)    
        CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
        CALL SCF(iBAS,iGEO,C)
      ENDDO
@@ -551,7 +551,7 @@ CONTAINS
        CALL NEBPurify(C%Geos)
        CALL MergePrintClones(C%Geos,C%Nams,C%Opts)
      ENDIF
-     CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
+     CALL GeomArchive(iBAS,iGEO,C%Nams,C%Opts,C%Sets,C%Geos)    
      CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
      ! Start optimization                     
      IStart=iGEO
@@ -589,7 +589,7 @@ CONTAINS
        ! Bump counter and archive new geometries 
        C%Stat%Previous%I(3)=IGeo
        C%Stat%Current%I(3)=IGeo+1
-       CALL GeomArchive(iBAS,iGEO+1,C%Nams,C%Sets,C%Geos)    
+       CALL GeomArchive(iBAS,iGEO+1,C%Nams,C%Opts,C%Sets,C%Geos)    
        ! Continue optimization?
        IF(ConvgdAll==1) EXIT
      ENDDO
@@ -1760,7 +1760,7 @@ CONTAINS
          C%Stat%Current%I(3)  = iGEO
          C%Stat%Previous%I(3) = iGEO-1
          C%Opts%Guess=GuessO
-         CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
+         CALL GeomArchive(iBAS,iGEO,C%Nams,C%Opts,C%Sets,C%Geos)    
          CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
          CALL SCF(iBAS,iGEO,C)
        ELSE
@@ -2018,7 +2018,7 @@ CONTAINS
     !
     ! Build the guess 
     DO iBAS=1,C%Sets%NBSets
-       CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
+       CALL GeomArchive(iBAS,iGEO,C%Nams,C%Opts,C%Sets,C%Geos)    
        CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
        CALL SCF(iBAS,iGEO,C)
     ENDDO
@@ -2045,7 +2045,7 @@ CONTAINS
              C%Geos%Clone(iCLONE)%Carts%D(I,AtA)=C%Geos%Clone(iCLONE)%Carts%D(I,AtA)+ATOM_DISP
              !CALL MakeGMPeriodic(C%Geos%Clone(iCLONE))
           ENDDO
-          CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)
+          CALL GeomArchive(iBAS,iGEO,C%Nams,C%Opts,C%Sets,C%Geos)
           !
           ! Optimize and Forces.
           CALL SCF(iBAS,iGEO,C)
@@ -2068,7 +2068,7 @@ CONTAINS
              C%Geos%Clone(iCLONE)%Carts%D(I,AtA)=C%Geos%Clone(iCLONE)%Carts%D(I,AtA)-ATOM_DISP
              !CALL MakeGMPeriodic(C%Geos%Clone(iCLONE))
           ENDDO
-          CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)
+          CALL GeomArchive(iBAS,iGEO,C%Nams,C%Opts,C%Sets,C%Geos)
           iGEO=iGEO+1
           J=J+1
        ENDDO

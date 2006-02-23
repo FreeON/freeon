@@ -184,21 +184,33 @@ CONTAINS
 !==============================================================================
 !
 !==============================================================================
-  SUBROUTINE GeomArchive(cBAS,cGEO,N,B,G)
-
+  SUBROUTINE GeomArchive(cBAS,cGEO,N,O,B,G)
+    TYPE(Options)      :: O
     TYPE(FileNames)    :: N
     TYPE(BasisSets)    :: B
     TYPE(Geometries)   :: G    
     TYPE(CellSet)      :: CS_IN,CS_OUT
-    INTEGER            :: cBAS,cGEO,iCLONE,HDFFileID,I
+    INTEGER            :: cBAS,cGEO,iCLONE,HDFFileID,I,NK,CF,PF
     CHARACTER(LEN=DCL) :: chGEO
+    REAL(DOUBLE)       :: MinExpt
 !---------------------------------------------------------------------------!
     chGEO=IntToChar(cGEO)
     HDFFileID=OpenHDF(N%HFile)
     DO iCLONE=1,G%Clones
        G%Clone(iCLONE)%Confg=cGEO
+
+       MinExpt=1D25
+       DO NK=1,B%BSets(iCLONE,cBAS)%NKind
+          DO CF=1,B%BSets(iCLONE,cBAS)%NCFnc%I(NK)
+             DO PF=1,B%BSets(iCLONE,cBAS)%NPFnc%I(CF,NK)
+                MinExpt=MIN(MinExpt,B%BSets(iCLONE,cBAS)%Expnt%D(PF,CF,NK))
+             ENDDO
+          ENDDO
+       ENDDO
+
 !      Set the correct PBC cell set list
-       CALL SetLatticeVectors(G%Clone(iCLONE),B%AtomPairThresh(iCLONE,cBAS),CS_IN,CS_OUT)
+       CALL SetLatticeVectors(G%Clone(iCLONE),B%AtomPairThresh(iCLONE,cBAS), &
+                              O%Thresholds(cBAS),MinExpt,CS_IN,CS_OUT)
 !
 !      Make sure everything is wrapped correctly
        G%Clone(iCLONE)%Carts%D = G%Clone(iCLONE)%Carts%D      
@@ -295,11 +307,12 @@ CONTAINS
 !==============================================================================
 ! SET UP SUMMATION OF LATTICE VECTORS, ACCOUNTING FOR CELL SIZE AND SHAPE
 !==============================================================================
-  SUBROUTINE SetLatticeVectors(G,AtomPairThresh,CS_IN,CS_OUT,Rad_O)
+  SUBROUTINE SetLatticeVectors(G,AtomPairThresh,Thresholds,MinExpt,CS_IN,CS_OUT,Rad_O)
     TYPE(CRDS)                :: G
     TYPE(CellSet)             :: CS_IN,CS_OUT
     REAL(DOUBLE), OPTIONAL    :: Rad_O
-    REAL(DOUBLE)              :: AtomPairThresh,Radius_in,Radius_out
+    TYPE(TOLS)                :: Thresholds
+    REAL(DOUBLE)              :: MinExpt,AtomPairThresh,Radius_in,Radius_out
     INTEGER                   :: IL
     INTEGER                   :: MaxCell
 !------------------------------------------------------------------------------
@@ -328,8 +341,13 @@ CONTAINS
        CALL New_CellSet_Cube(CS_OUT,G%PBC%AutoW%I,G%PBC%BoxShape%D,(/IL,IL,IL/)      ,MaxCell_O=MaxCell)
        CALL New_CellSet_Cube(CS_IN ,G%PBC%AutoW%I,G%PBC%BoxShape%D,(/2*IL,2*IL,2*IL/),MaxCell_O=MaxCell)
     ELSE
-       CALL New_CellSet_Sphere(CS_OUT,G%PBC%AutoW%I,G%PBC%BoxShape%D,Radius_out ,MaxCell_O=MaxCell)
-       CALL New_CellSet_Sphere(CS_IN ,G%PBC%AutoW%I,G%PBC%BoxShape%D,Radius_in  ,MaxCell_O=MaxCell)
+!       CALL New_CellSet_Sphere(CS_OUT,G%PBC%AutoW%I,G%PBC%BoxShape%D,Radius_out ,MaxCell_O=MaxCell)
+!       CALL New_CellSet_Sphere(CS_IN ,G%PBC%AutoW%I,G%PBC%BoxShape%D,Radius_in  ,MaxCell_O=MaxCell)
+       CALL New_CellSet_Sphere2(CS_In ,G%PBC%AutoW%I,G%PBC%BoxShape%D,'Penetration',Thresholds%Dist,MinExpt,G%NElec,MaxCell_O=MaxCell)
+       CALL New_CellSet_Sphere2(CS_Out,G%PBC%AutoW%I,G%PBC%BoxShape%D,'Overlap',Thresholds%TwoE,MinExpt,G%NElec,MaxCell_O=MaxCell)
+       WRITE(*,*)' USING NEW SPHERE:'
+       WRITE(*,*)' Pentrat Cells = ',CS_In%NCells
+       WRITE(*,*)' Overlap Cells = ',CS_Out%NCells
     ENDIF
 !
     CALL Sort_CellSet(CS_IN)

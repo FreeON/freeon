@@ -98,7 +98,7 @@ CONTAINS
        PBC%PFFMaxLay=1
 !      Look for MaxEll in periodic boundary options
        IF(.NOT.OptIntQ(Inp,PFFMXELL,PBC%PFFMaxEll)) THEN 
-          PBC%PFFMaxEll=10
+          PBC%PFFMaxEll=14
        ENDIF  
     ENDIF
 !   Parse permeability 

@@ -67,7 +67,7 @@ MODULE MDynamics
        CALL CloseHDF(HDFFileID)
 !      Do The initial SCF
        iBAS=C%Sets%NBSets
-       CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos) 
+       CALL GeomArchive(iBAS,iGEO,C%Nams,C%Opts,C%Sets,C%Geos) 
        CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
        CALL SCF(iBAS,iGEO,C)
     ELSE
@@ -88,7 +88,7 @@ MODULE MDynamics
        CALL CloseHDF(HDFFileID)
 !      Build the SCF 
        DO iBAS=1,C%Sets%NBSets
-          CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos) 
+          CALL GeomArchive(iBAS,iGEO,C%Nams,C%Opts,C%Sets,C%Geos) 
           CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
           CALL SCF(iBAS,iGEO,C)
        ENDDO
@@ -165,7 +165,7 @@ MODULE MDynamics
           CALL Put(MDTime%D(iCLONE),"MDTime")
        ENDDO
 !      Archive Geometry for next step
-       CALL GeomArchive(iBAS,iGEO+1,C%Nams,C%Sets,C%Geos)     
+       CALL GeomArchive(iBAS,iGEO+1,C%Nams,C%Opts,C%Sets,C%Geos)     
 !      Evaluate energies at the new geometry
        CALL SCF(iBAS,iGEO+1,C)
 !      Store the Last P matrix
@@ -776,7 +776,7 @@ MODULE MDynamics
 !      Archive Geometry for next step
        CALL MakeGMPeriodic(C%Geos%Clone(iCLONE))
        C%Geos%Clone(1)%Carts%D = C%Geos%Clone(iCLONE)%Carts%D
-       CALL GeomArchive(iBAS,iGEO+1,C%Nams,C%Sets,C%Geos)     
+       CALL GeomArchive(iBAS,iGEO+1,C%Nams,C%Opts,C%Sets,C%Geos)     
 !      Evaluate energies at the new geometry
        CALL SCF(iBAS,iGEO+1,C)
 !      Calculate Force

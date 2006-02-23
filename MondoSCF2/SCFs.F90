@@ -38,7 +38,7 @@ CONTAINS
 !      Loop over basis sets 
        DO iBAS=iBBegin,C%Sets%NBSets
 !         Archive 
-          CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)
+          CALL GeomArchive(iBAS,iGEO,C%Nams,C%Opts,C%Sets,C%Geos)
           CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
 !         Converge an SCF
           CALL SCF(iBAS,iGEO,C)
@@ -948,7 +948,7 @@ CONTAINS
        G%Clone(iCLONE)%GradRMS=&
             SQRT(G%Clone(iCLONE)%GradRMS)/DBLE(3*G%Clone(iCLONE)%NAtms)
     ENDDO
-    CALL GeomArchive(cBAS,cGEO,N,B,G)
+    CALL GeomArchive(cBAS,cGEO,N,O,B,G)
     ! Now evaluate the forces
     S%Action%C(1)='ForceEvaluation'
     ! The non-orthogonal response    
@@ -1179,7 +1179,7 @@ CONTAINS
 !
                 G%Clone(iCLONE)%PBC%BoxShape%D(I,J) =  Lat00+DDelta
                 CALL MakeGMPeriodic(G%Clone(iCLONE))
-                CALL GeomArchive(cBAS,cGEO,N,B,G)
+                CALL GeomArchive(cBAS,cGEO,N,O,B,G)
                 CALL Invoke('MakeRho' ,N,S,M) 
                 CALL Invoke('MakePFFT',N,S,M)
                 CALL Invoke('QCTC'    ,N,S,M)  
@@ -1194,7 +1194,7 @@ CONTAINS
 !
                 G%Clone(iCLONE)%PBC%BoxShape%D(I,J) =  Lat00-DDelta
                 CALL MakeGMPeriodic(G%Clone(iCLONE))
-                CALL GeomArchive(cBAS,cGEO,N,B,G)
+                CALL GeomArchive(cBAS,cGEO,N,O,B,G)
                 CALL Invoke('MakeRho' ,N,S,M)
                 CALL Invoke('MakePFFT',N,S,M)
                 CALL Invoke('QCTC',N,S,M)  
@@ -1216,7 +1216,7 @@ CONTAINS
 !
                 G%Clone(iCLONE)%PBC%BoxShape%D(I,J) =  Lat00
                 CALL MakeGMPeriodic(G%Clone(iCLONE))
-                CALL GeomArchive(cBAS,cGEO,N,B,G)
+                CALL GeomArchive(cBAS,cGEO,N,O,B,G)
 !  
              ENDIF
           ENDDO
@@ -1319,7 +1319,7 @@ CONTAINS
                 CALL CalcBoxPars(Vec,G%Clone(iCLONE)%PBC%BoxShape%D)
                 CALL BoxParsToCart(Vec,G%Clone(iCLONE)%PBC%BoxShape%D)
                 CALL MakeGMPeriodic(G%Clone(iCLONE))
-                CALL GeomArchive(cBAS,cGEO,N,B,G)
+                CALL GeomArchive(cBAS,cGEO,N,O,B,G)
                 CALL Invoke('ONX'    ,N,S,M)  
                 TrixName=TRIM(N%M_SCRATCH)//TRIM(N%SCF_NAME)//'_Geom#'//TRIM(chGEO)//'_Base#'//TRIM(chBAS) &
                      //'_Cycl#'//TRIM(chSCF)//'_Clone#'//TRIM(IntToChar(iCLONE))//'.K'
@@ -1330,7 +1330,7 @@ CONTAINS
                 CALL CalcBoxPars(Vec,G%Clone(iCLONE)%PBC%BoxShape%D)
                 CALL BoxParsToCart(Vec,G%Clone(iCLONE)%PBC%BoxShape%D)
                 CALL MakeGMPeriodic(G%Clone(iCLONE))
-                CALL GeomArchive(cBAS,cGEO,N,B,G)
+                CALL GeomArchive(cBAS,cGEO,N,O,B,G)
                 CALL Invoke('ONX',N,S,M)  
                 TrixName=TRIM(N%M_SCRATCH)//TRIM(N%SCF_NAME)//'_Geom#'//TRIM(chGEO)//'_Base#'//TRIM(chBAS) &
                      //'_Cycl#'//TRIM(chSCF)//'_Clone#'//TRIM(IntToChar(iCLONE))//'.K'
@@ -1343,7 +1343,7 @@ CONTAINS
 !
                 G%Clone(iCLONE)%PBC%BoxShape%D(I,J) =  Lat00
                 CALL MakeGMPeriodic(G%Clone(iCLONE))
-                CALL GeomArchive(cBAS,cGEO,N,B,G)
+                CALL GeomArchive(cBAS,cGEO,N,O,B,G)
 !
              ENDIF
           ENDDO
@@ -1445,7 +1445,7 @@ CONTAINS
                 CALL CalcBoxPars(Vec,G%Clone(iCLONE)%PBC%BoxShape%D)
                 CALL BoxParsToCart(Vec,G%Clone(iCLONE)%PBC%BoxShape%D)
                 CALL MakeGMPeriodic(G%Clone(iCLONE))
-                CALL GeomArchive(cBAS,cGEO,N,B,G)
+                CALL GeomArchive(cBAS,cGEO,N,O,B,G)
                 CALL Invoke('MakeU'    ,N,S,M)  
                 TrixName=TRIM(N%M_SCRATCH)//TRIM(N%SCF_NAME)//'_Geom#'//TRIM(chGEO)//'_Base#'//TRIM(chBAS) &
                      //'_Clone#'//TRIM(IntToChar(iCLONE))//'.U'
@@ -1456,7 +1456,7 @@ CONTAINS
                 CALL CalcBoxPars(Vec,G%Clone(iCLONE)%PBC%BoxShape%D)
                 CALL BoxParsToCart(Vec,G%Clone(iCLONE)%PBC%BoxShape%D)
                 CALL MakeGMPeriodic(G%Clone(iCLONE))
-                CALL GeomArchive(cBAS,cGEO,N,B,G)
+                CALL GeomArchive(cBAS,cGEO,N,O,B,G)
                 CALL Invoke('MakU',N,S,M)  
                 TrixName=TRIM(N%M_SCRATCH)//TRIM(N%SCF_NAME)//'_Geom#'//TRIM(chGEO)//'_Base#'//TRIM(chBAS) &
                      //'_Clone#'//TRIM(IntToChar(iCLONE))//'.U'
@@ -1469,7 +1469,7 @@ CONTAINS
 !
                 G%Clone(iCLONE)%PBC%BoxShape%D(I,J) =  Lat00
                 CALL MakeGMPeriodic(G%Clone(iCLONE))
-                CALL GeomArchive(cBAS,cGEO,N,B,G)
+                CALL GeomArchive(cBAS,cGEO,N,O,B,G)
 !
              ENDIF
           ENDDO
@@ -1542,7 +1542,7 @@ CONTAINS
 !
                 G%Clone(iCLONE)%PBC%BoxShape%D(I,J) =  Lat00+DDelta
                 CALL MakeGMPeriodic(G%Clone(iCLONE))
-                CALL GeomArchive(cBAS,cGEO,N,B,G)
+                CALL GeomArchive(cBAS,cGEO,N,O,B,G)
                 CALL Invoke('MakeRho' ,N,S,M)
                 CALL Invoke('HiCu'    ,N,S,M)  
 !
@@ -1555,7 +1555,7 @@ CONTAINS
 !
                 G%Clone(iCLONE)%PBC%BoxShape%D(I,J) =  Lat00-DDelta
                 CALL MakeGMPeriodic(G%Clone(iCLONE))
-                CALL GeomArchive(cBAS,cGEO,N,B,G)
+                CALL GeomArchive(cBAS,cGEO,N,O,B,G)
                 CALL Invoke('MakeRho' ,N,S,M)
                 CALL Invoke('HiCu',N,S,M)  
 !
@@ -1569,12 +1569,12 @@ CONTAINS
 !
                 G%Clone(iCLONE)%PBC%BoxShape%D(I,J) =  Lat00
                 CALL MakeGMPeriodic(G%Clone(iCLONE))
-                CALL GeomArchive(cBAS,cGEO,N,B,G)
+                CALL GeomArchive(cBAS,cGEO,N,O,B,G)
 !  
              ENDIF
           ENDDO
           G%Clone(iCLONE)%PBC%LatFrc%D=G%Clone(iCLONE)%PBC%LatFrc%D+LatFrc_XC
-          CALL GeomArchive(cBAS,cGEO,N,B,G)
+          CALL GeomArchive(cBAS,cGEO,N,O,B,G)
        ENDDO
 !      Print J Lattice Forces
 !       CALL Print_LatForce(G,LatFrc_XC%D,'XC Lattice Force Numerical')
@@ -1656,7 +1656,7 @@ CONTAINS
                 ENDIF
              ENDDO
              !
-             CALL GeomArchive(cBAS,cGEO,N,B,G)    
+             CALL GeomArchive(cBAS,cGEO,N,O,B,G)    
              ! vwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvw>>>
              ! Move back the atom.
              DO iCLONE=1,G%Clones
@@ -1696,7 +1696,7 @@ CONTAINS
        ENDDO
     ENDDO
     !
-    CALL GeomArchive(cBAS,cGEO,N,B,G)
+    CALL GeomArchive(cBAS,cGEO,N,O,B,G)
     !
 !vwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvw
 #ifdef NGONXINFO 
@@ -1814,7 +1814,7 @@ CONTAINS
              ENDIF
              !
              G%Clone(1)%Gradients%D=0.0D0
-             CALL GeomArchive(cBAS,cGEO,N,B,G)
+             CALL GeomArchive(cBAS,cGEO,N,O,B,G)
              ! vwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvw>>>
              ! Move back the atom.
              IF(II==1) THEN
@@ -1857,7 +1857,7 @@ CONTAINS
     G%Clone(1)%Carts%D=GTmp%Carts%D
     G%Clone(1)%Gradients%D=GTmp%Gradients%D
     !
-    CALL GeomArchive(cBAS,cGEO,N,B,G)
+    CALL GeomArchive(cBAS,cGEO,N,O,B,G)
     !
     CALL Print_DBL_RNK2(HT,'THessian',Unit_O=6)
 
@@ -2018,7 +2018,7 @@ CONTAINS
    C%Stat%Action%C(1)='OneElectronMatrices'
    C%Geos%Clone(1)%PBC%BoxShape%D(I1,I2) = Lat00-DDelta
    CALL MakeGMPeriodic(C%Geos%Clone(1))
-   CALL GeomArchive(1,1,C%Nams,C%Sets,C%Geos)
+   CALL GeomArchive(1,1,C%Nams,C%Opts,C%Sets,C%Geos)
    CALL Invoke('MakeS',C%Nams,C%Stat,C%MPIs)
 !      
    HDFFileID=OpenHDF(C%Nams%HFile)  
@@ -2030,7 +2030,7 @@ CONTAINS
 !
    C%Geos%Clone(1)%PBC%BoxShape%D(I1,I2) = Lat00+DDelta
    CALL MakeGMPeriodic(C%Geos%Clone(1))
-   CALL GeomArchive(1,1,C%Nams,C%Sets,C%Geos)
+   CALL GeomArchive(1,1,C%Nams,C%Opts,C%Sets,C%Geos)
    CALL Invoke('MakeS'   ,C%Nams,C%Stat,C%MPIs)
 !      
    HDFFileID=OpenHDF(C%Nams%HFile)
@@ -2050,7 +2050,7 @@ CONTAINS
 ! 
    C%Geos%Clone(1)%PBC%BoxShape%D(I1,I2) = Lat00-DDelta
    CALL MakeGMPeriodic(C%Geos%Clone(1))
-   CALL GeomArchive(1,1,C%Nams,C%Sets,C%Geos)
+   CALL GeomArchive(1,1,C%Nams,C%Opts,C%Sets,C%Geos)
    CALL Invoke('MakeT'   ,C%Nams,C%Stat,C%MPIs)
 !      
    HDFFileID=OpenHDF(C%Nams%HFile)
@@ -2062,7 +2062,7 @@ CONTAINS
 !
    C%Geos%Clone(1)%PBC%BoxShape%D(I1,I2) = Lat00+DDelta
    CALL MakeGMPeriodic(C%Geos%Clone(1))
-   CALL GeomArchive(1,1,C%Nams,C%Sets,C%Geos)
+   CALL GeomArchive(1,1,C%Nams,C%Opts,C%Sets,C%Geos)
    CALL Invoke('MakeT'   ,C%Nams,C%Stat,C%MPIs)
 !      
    HDFFileID=OpenHDF(C%Nams%HFile)
@@ -2082,7 +2082,7 @@ CONTAINS
 !
    C%Geos%Clone(1)%PBC%BoxShape%D(I1,I2) = Lat00-DDelta
    CALL MakeGMPeriodic(C%Geos%Clone(1))
-   CALL GeomArchive(1,1,C%Nams,C%Sets,C%Geos)
+   CALL GeomArchive(1,1,C%Nams,C%Opts,C%Sets,C%Geos)
 !
    CALL Invoke('MakeRho'     ,C%Nams,C%Stat,C%MPIs)
    CALL Invoke('HiCu'     ,C%Nams,C%Stat,C%MPIs)
@@ -2093,7 +2093,7 @@ CONTAINS
 !
    C%Geos%Clone(1)%PBC%BoxShape%D(I1,I2) = Lat00+DDelta
    CALL MakeGMPeriodic(C%Geos%Clone(1))
-   CALL GeomArchive(1,1,C%Nams,C%Sets,C%Geos)
+   CALL GeomArchive(1,1,C%Nams,C%Opts,C%Sets,C%Geos)
 !
    CALL Invoke('MakeRho'     ,C%Nams,C%Stat,C%MPIs)
    CALL Invoke('HiCu'     ,C%Nams,C%Stat,C%MPIs)
@@ -2110,7 +2110,7 @@ CONTAINS
 
    C%Geos%Clone(1)%PBC%BoxShape%D(I1,I2) = Lat00
    CALL MakeGMPeriodic(C%Geos%Clone(1))
-   CALL GeomArchive(1,1,C%Nams,C%Sets,C%Geos)
+   CALL GeomArchive(1,1,C%Nams,C%Opts,C%Sets,C%Geos)
    CALL Invoke('MakePFFT' ,C%Nams,C%Stat,C%MPIs)
    CALL Invoke('MakeRho'     ,C%Nams,C%Stat,C%MPIs)
 !
@@ -2118,7 +2118,7 @@ CONTAINS
 !    
    C%Geos%Clone(1)%PBC%BoxShape%D(I1,I2) = Lat00-DDelta
    CALL MakeGMPeriodic(C%Geos%Clone(1))
-   CALL GeomArchive(1,1,C%Nams,C%Sets,C%Geos)
+   CALL GeomArchive(1,1,C%Nams,C%Opts,C%Sets,C%Geos)
    CALL Invoke('MakePFFT' ,C%Nams,C%Stat,C%MPIs)!   CALL Invoke('MakeRho'     ,C%Nams,C%Stat,C%MPIs) 
    CALL Invoke('MakeRho'     ,C%Nams,C%Stat,C%MPIs)
    CALL Invoke('QCTC'     ,C%Nams,C%Stat,C%MPIs)
@@ -2136,7 +2136,7 @@ CONTAINS
 !  
    C%Geos%Clone(1)%PBC%BoxShape%D(I1,I2) = Lat00+DDelta
    CALL MakeGMPeriodic(C%Geos%Clone(1))  
-   CALL GeomArchive(1,1,C%Nams,C%Sets,C%Geos)
+   CALL GeomArchive(1,1,C%Nams,C%Opts,C%Sets,C%Geos)
    CALL Invoke('MakePFFT' ,C%Nams,C%Stat,C%MPIs)
    CALL Invoke('MakeRho'     ,C%Nams,C%Stat,C%MPIs)
    CALL Invoke('QCTC'     ,C%Nams,C%Stat,C%MPIs)
@@ -2161,7 +2161,7 @@ CONTAINS
 !
    C%Geos%Clone(1)%PBC%BoxShape%D(I1,I2) = Lat00
    CALL MakeGMPeriodic(C%Geos%Clone(1))
-   CALL GeomArchive(1,1,C%Nams,C%Sets,C%Geos)
+   CALL GeomArchive(1,1,C%Nams,C%Opts,C%Sets,C%Geos)
    CALL Invoke('MakePFFT' ,C%Nams,C%Stat,C%MPIs)
    CALL Invoke('MakeRho'     ,C%Nams,C%Stat,C%MPIs)
 !
