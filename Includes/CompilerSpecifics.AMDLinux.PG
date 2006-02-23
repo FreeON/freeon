@@ -28,7 +28,7 @@ F90_OPTIMIZE  = -O1 -tp athlon
 #F90_DEBUG     = -g  -C -Mbounds -Minfo=all -Minform=inform -Mchkptr
 #F_LIST       = -Mlist 
 #F_PROF       = -Mprof=lines
-F90_MISC      = $(F_LIST) $(F_PROF) -Mbackslash 
+F90_MISC      = $(F_LIST) $(F_PROF) -Mbackslash -Mextend
 F90_INCLUDE   = -I$(MONDO_HOME)/Includes/               \
                 -I$(MONDO_HOME)/MondoMods               \
                 -I/usr/local/include -I$(MPI_INC)                   
