@@ -5,17 +5,35 @@ MODULE Clock
 #endif
    IMPLICIT NONE
    INTERFACE 
+
       FUNCTION CPU_Seconds()
          USE DerivedTypes
          REAL(DOUBLE) CPU_Seconds
       END FUNCTION CPU_Seconds
 
+      FUNCTION MondoTimer()
+         USE DerivedTypes
+         REAL(DOUBLE) MondoTimer
+       END FUNCTION MondoTimer
+
       FUNCTION Wall_Seconds()
          USE DerivedTypes
          REAL(DOUBLE) Wall_Seconds
       END FUNCTION Wall_Seconds
+
    END INTERFACE
    CONTAINS
+
+      FUNCTION MTimer()
+        REAL(DOUBLE) MTimer
+#ifdef IPM || PARALLEL 
+        MTimer=MondoTimer()   
+#else
+        MTimer=Wall_Seconds()
+#endif
+      END FUNCTION MTimer
+
+
       FUNCTION CPUSec()
          REAL(DOUBLE) CPUSec
 #ifdef PARALLEL
