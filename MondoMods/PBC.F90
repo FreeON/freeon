@@ -154,6 +154,147 @@ MODULE CellSets
 !--------------------------------------------------------------------------
 ! Set up the set of cells out to some radius R
 !--------------------------------------------------------------------------
+
+  SUBROUTINE New_CellSet_Sphere2(CS,AW,MAT,Option,CellSetsThreshold,MinExpt,NElect,Rmin_O,MaxCell_O)
+    TYPE(CellSet)                        :: CS
+    INTEGER,DIMENSION(3)                 :: AW
+    REAL(DOUBLE),DIMENSION(3,3)          :: MAT
+    REAL(DOUBLE),DIMENSION(3)            :: UpperUC,LowerUC
+    REAL(DOUBLE)                         :: CellSetsThreshold,MinExpt,MinSepSq,Sep2,T
+    REAL(DOUBLE),OPTIONAL                :: Rmin_O
+    REAL(DOUBLE),DIMENSION(3,8)          :: UCCorners,NuCorners
+    INTEGER,OPTIONAL                     :: MaxCell_O
+    CHARACTER(LEN=*)                     :: Option
+!
+    INTEGER                              :: I,J,K,L,M,Corners,NElect
+    INTEGER                              :: IXM,IYM,IZM,NCELL
+    REAL(DOUBLE)                         :: X,Y,Z,Rad,R,TTemp
+    LOGICAL                              :: InCell
+
+    WRITE(*,*)' NEW ',Option,' CELLSET SPHERE '
+!    TTemp=TwoEThreshold
+!    TwoEThreshold=1D-16
+!    WRITE(*,*)' Threshold = ',TwoEThreshold
+!
+    Corners=0
+    DO I=0,1*AW(1)
+       DO J=0,1*AW(2)
+          DO K=0,1*AW(3)
+             Corners=Corners+1
+              UCCorners(:,Corners)=(/I*MAT(1,1)+J*MAT(1,2)+K*MAT(1,3),  &
+                                     I*MAT(2,1)+J*MAT(2,2)+K*MAT(2,3),  &
+                                     I*MAT(3,1)+J*MAT(3,2)+K*MAT(3,3)/)             
+!              WRITE(*,33)I,J,K,Corners,UCCorners(:,Corners)
+!33            FORMAT(4(I3,", "),3(D12.6,", "))
+           ENDDO
+        ENDDO
+     ENDDO
+!
+    IXM = 0
+    IYM = 0
+    IZM = 0
+    IF(AW(1)==1)THEN
+       IXM=15
+    ENDIF
+    IF(AW(2)==1)THEN
+       IYM=15
+    ENDIF
+    IF(AW(3)==1)THEN
+       IZM=15
+    ENDIF
+!
+    NCELL = 0
+    DO I=-IXM,IXM
+       DO J=-IYM,IYM
+          DO K=-IZM,IZM
+             X=I*MAT(1,1)+J*MAT(1,2)+K*MAT(1,3)
+             Y=I*MAT(2,1)+J*MAT(2,2)+K*MAT(2,3)
+             Z=I*MAT(3,1)+J*MAT(3,2)+K*MAT(3,3)
+             MinSepSq=1D20
+             DO L=1,Corners
+                NuCorners(:,L)=UCCorners(:,L)+(/X,Y,Z/)
+             ENDDO
+             DO L=1,Corners
+                DO M=1,Corners
+                   Sep2=DOT_PRODUCT(NuCorners(:,L)-UCCorners(:,M),NuCorners(:,L)-UCCorners(:,M))
+                   MinSepSq=MIN(MinSepSq,Sep2)
+!                   WRITE(*,22)0,L,M,NuCorners(1,L),UCCorners(1,M),MinSepSq,Sep2
+                ENDDO
+             ENDDO
+
+             MinSepSq=MinSepSq+1D-10
+             IF(Option=='Penetration')THEN
+                T=MinExpt*MinSepSq
+                InCell=DBLE(NElect)*EXP(-T)/MinSepSq>CellSetsThreshold
+             ELSEIF(Option=='Overlap')THEN
+                T=Half*MinExpt*MinSepSq
+                InCell=EXP(-T)>CellSetsThreshold
+             ELSE
+                CALL Halt(' Unknown option to New_CellSet_Sphere2 ')
+             ENDIF
+             IF(InCell)THEN
+                NCELL = NCELL+1
+!                WRITE(*,22)I,J,K,T
+!22              FORMAT(3(I5,", "),10(D12.6,", "))
+             ENDIF
+          ENDDO
+       ENDDO
+    ENDDO
+!  
+    IF(PRESENT(MaxCell_O)) THEN
+       IF(NCELL > MaxCell_O) THEN
+          WRITE(*,*) 'NCELL   = ',NCELL
+          WRITE(*,*) 'MaxCell = ',MaxCell_O
+          CALL Halt('NCELL is Greater then MaxCell')
+       ELSE
+          CALL New_CellSet(CS,MaxCell_O)
+          CS%NCells=NCELL
+       ENDIF
+    ELSE
+       CALL New_CellSet(CS,NCELL)
+       CS%NCells=NCELL
+    ENDIF
+!
+    NCELL = 0
+    DO I=-IXM,IXM
+       DO J=-IYM,IYM
+          DO K=-IZM,IZM
+             X=I*MAT(1,1)+J*MAT(1,2)+K*MAT(1,3)
+             Y=I*MAT(2,1)+J*MAT(2,2)+K*MAT(2,3)
+             Z=I*MAT(3,1)+J*MAT(3,2)+K*MAT(3,3)
+             MinSepSq=1D20
+             DO L=1,Corners
+                NuCorners(:,L)=UCCorners(:,L)+(/X,Y,Z/)
+             ENDDO
+             DO L=1,Corners
+                DO M=1,Corners
+                   Sep2=DOT_PRODUCT(NuCorners(:,L)-UCCorners(:,M),NuCorners(:,L)-UCCorners(:,M))
+                   MinSepSq=MIN(MinSepSq,Sep2)
+                ENDDO
+             ENDDO
+             MinSepSq=MinSepSq+1D-10
+             IF(Option=='Penetration')THEN
+                T=MinExpt*MinSepSq
+                InCell=DBLE(NElect)*EXP(-T)/MinSepSq>CellSetsThreshold
+             ELSEIF(Option=='Overlap')THEN
+                T=Half*MinExpt*MinSepSq
+                InCell=EXP(-T)>CellSetsThreshold
+             ELSE
+                CALL Halt(' Unknown option to New_CellSet_Sphere2 ')
+             ENDIF
+             IF(InCell)THEN
+                NCELL = NCELL+1
+                CS%CellCarts%D(:,NCELL)=(/X,Y,Z/)
+             ENDIF
+          ENDDO
+       ENDDO
+    ENDDO
+
+!!    TwoEThreshold=TTemp
+  END SUBROUTINE New_CellSet_Sphere2
+
+
+
   SUBROUTINE New_CellSet_Sphere(CS,AW,MAT,Radius,Rmin_O,MaxCell_O)
     TYPE(CellSet)                        :: CS
     INTEGER,DIMENSION(3)                 :: AW
