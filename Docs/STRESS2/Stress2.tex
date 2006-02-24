@@ -296,24 +296,39 @@ In the following, we describe the implementation of the Coulomb and exchange-cor
 gradients with respect to atomic and cell parameters.
 
 \subsection{Coulomb integrals}
-{\bf ! CJ you need to work here!}\\
-The periodic quantum Coulomb sums involve the contributions
+\noindent The periodic quantum Coulomb sums involve the contributions
 \begin{equation}
   J_{ab}=J_{ab}^{In}+J_{ab}^{PFF}+J_{ab}^{TF},
 \end{equation}
-where $J^{In}$ .... , $J^{PFF}$ is the periodic far field term and $J^{TF}$ 
-is a surface term which corrects the ...
-
-\subsubsection{In ...}
-
-
-\subsubsection{Periodic far field}
-
+where $J^{In}$ s the inner cell set sum done directly, $J^{PFF}$ is the periodic far field term and $J^{TF}$ 
+is a surface term which corrects the boundary at infinity.
+\subsubsection{Inner Sum}
+\noindent The Inner cell set contribution to the Coulomb matrix is 
 \begin{equation}
-  J_{ab}^{PFF}=\sum_{\mathbf{R}\in PFF}\iint
-  \frac{\rho_{ab}^{\infty}(\mathbf{r}_1)\rho_{tot}^{\infty}(\mathbf{r}_2)}{|\mathbf{r}_1-\mathbf{r}_2+\mathbf{R}|}
-  d^3r_1d^3r_2
+J_{ab}^{In} = \sum_{{\bf R'} \in In} \int d^3{\bf r} \, d^3{\bf r'}\, \rho_{ab}({\bf r}) | {\bf r}-{\bf r'}+{\bf R'}|^{-1} \rho_{tot}({\bf r'})
 \end{equation}
+where
+\begin{eqnarray}
+\rho_{ab}({\bf r})  & = & \sum_{\bf R} \phi_a({\bf r}) \phi_b({\bf r}+{\bf R}) \nonumber\\
+\rho_{tot}({\bf r}) & = & \sum_{ab} \sum_{\bf R} P_{ab} \, \phi_a({\bf r}) \phi_b({\bf r}+{\bf R}) -\sum_{a} Z_a \delta({\bf r}-{\bf a})
+\nonumber  
+\end{eqnarray}
+The derivative of $J_{ab}^{In}$ with respect to the cell parameter $M_{ij}$ is
+\begin{equation}
+{{\partial J_{ab}^{In}} \over {\partial M_{ij}}} = Blah
+\end{equation}
+\subsubsection{Periodic far field}
+The periodic far field correction to the colomb matrix is
+\begin{equation}
+  J_{ab}^{PFF}={1 \over 2}\sum_{\bf R} \sum_{ml,m'l'} (-1)^l \rho^{ml}_{ab}({\bf R}) \,\, {\cal M}_{ml,m'l'} \,\, \rho^{m'l'}_{tot}
+\end{equation}
+where
+\begin{eqnarray}
+\rho^{ml}_{ab}({\bf R}) & = & \int d^3{\bf r} \, \phi_a({\bf r}) \phi_b({\bf r}+{\bf R}) \, O_{ml}({\bf r}) \\
+\rho^{ml}_{tot}         & = & \int d^3{\bf r} \, \rho_{tot}({\bf r})\, O_{ml}({\bf r}) 
+\end{eqnarray}
+The derivative of $J_{ab}^{PFF}$ with respect to the cell parameter $M_{ij}$ is
+
 
 \subsubsection{Tin-Foil}
 The tin-foil correction to the Coulomb matrix is
