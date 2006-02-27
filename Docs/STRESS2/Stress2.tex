@@ -298,42 +298,56 @@ gradients with respect to atomic and cell parameters.
 \subsection{Coulomb integrals}
 \noindent The periodic quantum Coulomb sums involve the contributions
 \begin{equation}
-  J_{ab}=J_{ab}^{In}+J_{ab}^{PFF}+J_{ab}^{TF},
+J_{ab}=J_{ab}^{In}+J_{ab}^{PFF}+J_{ab}^{TF},
 \end{equation}
 where $J^{In}$ s the inner cell set sum done directly, $J^{PFF}$ is the periodic far field term and $J^{TF}$ 
 is a surface term which corrects the boundary at infinity.
 \subsubsection{Inner Sum}
 \noindent The Inner cell set contribution to the Coulomb matrix is 
 \begin{equation}
-J_{ab}^{In} = \sum_{{\bf R'} \in In} \int d^3{\bf r} \, d^3{\bf r'}\, \rho_{ab}({\bf r}) | {\bf r}-{\bf r'}+{\bf R'}|^{-1} \rho_{tot}({\bf r'})
+J_{ab}^{In} = \sum_{{\bf R'} \in In} \int d^3{\bf r} \, d^3{\bf r'}\, \rho_{ab}({\bf r}) | 
+{\bf r}-{\bf r'}+{\bf R'}|^{-1} \rho_{tot}({\bf r'})
 \end{equation}
 where
 \begin{eqnarray}
 \rho_{ab}({\bf r})  & = & \sum_{\bf R} \phi_a({\bf r}) \phi_b({\bf r}+{\bf R}) \nonumber\\
-\rho_{tot}({\bf r}) & = & \sum_{ab} \sum_{\bf R} P_{ab} \, \phi_a({\bf r}) \phi_b({\bf r}+{\bf R}) -\sum_{a} Z_a \delta({\bf r}-{\bf a})
+\rho_{tot}({\bf r}) & = & \sum_{ab} \sum_{\bf R} P_{ab} \, \phi_a({\bf r}) \phi_b({\bf r}
++{\bf R}) -\sum_{a} Z_a \delta({\bf r}-{\bf a})\nonumber
 \nonumber  
 \end{eqnarray}
 The derivative of $J_{ab}^{In}$ with respect to the cell parameter $M_{ij}$ is
-\begin{equation}
-{{\partial J_{ab}^{In}} \over {\partial M_{ij}}} = Blah
-\end{equation}
+\begin{eqnarray}
+{{\partial J_{ab}^{In}} \over {\partial M_{ij}}} &=& \sum_{{\bf R'} \in In} 2\int d^3{\bf r} \, d^3{\bf r'}\, 
+{{\partial \rho_{ab}({\bf r})}\over {\partial M_{ij}} } | 
+{\bf r}-{\bf r'}+{\bf R'}|^{-1} \rho_{tot}({\bf r'}) \nonumber \\
+&+& \int d^3{\bf r} \, d^3{\bf r'}\, \rho_{ab}({\bf r})
+{{\partial |{\bf r}-{\bf r'}+{\bf R'}|^{-1}} \over {\partial M_{ij}}} \rho_{tot}({\bf r'})
+\end{eqnarray}
 \subsubsection{Periodic far field}
-The periodic far field correction to the colomb matrix is
+\noindent We use a spherical multipole method inorder to compute the periodic far field correction to the colomb matrix, which is
 \begin{equation}
-  J_{ab}^{PFF}={1 \over 2}\sum_{\bf R} \sum_{ml,m'l'} (-1)^l \rho^{ml}_{ab}({\bf R}) \,\, {\cal M}_{ml,m'l'} \,\, \rho^{m'l'}_{tot}
+J_{ab}^{PFF}=\sum_{mlm'l'} (-1)^l \, \rho^{ml}_{ab} \,\, {\cal M}_{mlm'l'} \,\, \rho^{m'l'}_{tot}
 \end{equation}
 where
 \begin{eqnarray}
-\rho^{ml}_{ab}({\bf R}) & = & \int d^3{\bf r} \, \phi_a({\bf r}) \phi_b({\bf r}+{\bf R}) \, O_{ml}({\bf r}) \\
-\rho^{ml}_{tot}         & = & \int d^3{\bf r} \, \rho_{tot}({\bf r})\, O_{ml}({\bf r}) 
+\rho^{ml}_{ab}     & = & \sum_{\bf R} \int d^3{\bf r} \, \phi_a({\bf r}) \phi_b({\bf r}+{\bf R}) \, O_{ml}({\bf r}) \nonumber\\
+\rho^{ml}_{tot}    & = & \int d^3{\bf r} \, \rho_{tot}({\bf r})\, O_{ml}({\bf r}) \nonumber
 \end{eqnarray}
+and where the ${\cal M}$ tensor is summed using a ewald like partiaion [ref]
+\begin{equation}
+{\cal M}_{mlm'l'} =  \sum_{\bf R} M_{mlm'l'}[{\bf R}] \nonumber
+\end{equation}
 The derivative of $J_{ab}^{PFF}$ with respect to the cell parameter $M_{ij}$ is
-
-
+\begin{eqnarray}
+{{\partial J_{ab}^{PFF}} \over {\partial M_{ij}}} &=& \sum_{mlm'l'}
+2 {{\partial \rho^{ml}_{ab}} \over {\partial M_{ij}}} \,\, {\cal M}_{mlm'l'} \,\, \rho^{m'l'}_{tot} \nonumber\\
+&+& \rho^{ml}_{ab} \,\, {{\partial {\cal M}_{mlm'l'}}\over {\partial M_{ij}} } \,\, \rho^{m'l'}_{tot}
+\end{eqnarray}
+where the calculation of the derivatives of the ${\cal M}$ tensor is shown in Appendix A in detail (???) 
 \subsubsection{Tin-Foil}
 The tin-foil correction to the Coulomb matrix is
 \begin{equation}
-  J_{ab}^{TF}=\frac{2\pi}{3V}(QS_{ab}-2\mathbf{d}_{ab}\cdot\mathbf{D})
+J_{ab}^{TF}=\frac{2\pi}{3V}(QS_{ab}-2\mathbf{d}_{ab}\cdot\mathbf{D})
 \end{equation}
 where $Q$ is the trace of the system quadrupole, $S_{ab}$ is an element of the overlap matrix,
 $\mathbf{D}$ the dipole moment of the system,
