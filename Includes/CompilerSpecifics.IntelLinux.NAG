@@ -28,7 +28,7 @@ F90_OPTIMIZE = -O2 -Oassumed=always_contig -Ounroll=1
 #
 #F90_DEBUG     =  -g -g90 -gline -C=all -mtrace=basic
 #
-F90_MISC      =  -u -v -w=unused -mismatch_all -maxcontin=1500 -ieee=full -nan -save
+F90_MISC      =  -132 -u -v -w=unused -mismatch_all -maxcontin=1500 -ieee=full -nan -save
 #
 F77_EXTRAS    = -132 -w -dusty 
 #
@@ -84,7 +84,7 @@ F90_LIBRARIES = $(MONDO_LIBS) $(MPI_LIBS) $(HDF_LIBS)
 #  'Nuff said
 #
 #LAPACK = -L$(LAPACK_LIB) -llapack_NAG -lblas_NAG
-LAPACK = -llapack -lblas -L/usr/lib/gcc-lib/i386-redhat-linux/3.2.2 -lg2c
+LAPACK = -llapack -lblas -lgfortran # -L/usr/lib/gcc-lib/i386-redhat-linux/3.2.2 -lg2c
 #---------------------------------------------------------------------------
 
 
