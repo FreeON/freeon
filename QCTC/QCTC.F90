@@ -44,7 +44,7 @@ PROGRAM QCTC
   REAL(DOUBLE)                   :: MM_COUL,E_C_EXCL,CONVF  
   INTEGER                        :: I,K,UOUT !!!!
 #ifdef PARALLEL
-  REAL(DOUBLE),EXTERNAL          :: MondoTimer
+!  REAL(DOUBLE),EXTERNAL          :: MondoTimer
 #endif
 !------------------------------------------------------------------------------- 
   ETimer(:) = Zero

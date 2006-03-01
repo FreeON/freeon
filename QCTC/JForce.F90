@@ -45,7 +45,7 @@ PROGRAM JForce
   REAL(DOUBLE),DIMENSION(3,3)  :: DivCV
   TYPE(CRDS)                   :: GMLoc
 #ifdef PARALLEL
-  REAL(DOUBLE),EXTERNAL        :: MondoTimer
+!  REAL(DOUBLE),EXTERNAL        :: MondoTimer
 #endif
 !-------------------------------------------------------------------------------- 
 ! Start up macro

@@ -51,7 +51,7 @@ PROGRAM GONX2
 !--------------------------------------------------------------------------------
 #ifdef ONX2_PARALLEL
   TYPE(DBL_VECT)             :: TmGxArr,TmMLArr,TmTMArr,TmALArr,TmDLAr,TmDLArr
-  REAL(DOUBLE), EXTERNAL     :: MondoTimer
+!  REAL(DOUBLE), EXTERNAL     :: MondoTimer
   INTEGER                    :: CMin,CMax,DMin,DMax,IErr
   INTEGER                    :: ANbr,BNbr,CNbr,DNbr
 #endif

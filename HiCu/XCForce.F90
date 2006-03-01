@@ -53,7 +53,7 @@ PROGRAM XCForce
   REAL(DOUBLE)                   :: VolRho,VolExc,DelBox,Exc_old,Etot_old,Etot,dum0,dum1
   LOGICAL                        :: DoingMD
 #ifdef PARALLEL
-  REAL(DOUBLE),EXTERNAL    :: MondoTimer
+!  REAL(DOUBLE),EXTERNAL    :: MondoTimer
 #endif
 !---------------------------------------------------------------------------------------
 ! Macro the start up

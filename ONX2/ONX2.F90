@@ -59,7 +59,7 @@ PROGRAM ONX2
 !--------------------------------------------------------------------------------
 #ifdef ONX2_PARALLEL
   TYPE(DBL_VECT)                 :: TmKxArr,TmMLArr,TmTMArr,TmALArr,TmDLArr,TmREArr,TmFOArr
-  REAL(DOUBLE),EXTERNAL          :: MondoTimer
+!  REAL(DOUBLE),EXTERNAL          :: MondoTimer
   INTEGER                        :: CMin,CMax,DMin,DMax,iErr
   INTEGER                        :: ANbr,BNbr,CNbr,DNbr
   TYPE(INT_VECT)                 :: OPart,GPart
