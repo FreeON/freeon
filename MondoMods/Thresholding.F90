@@ -453,6 +453,9 @@ MODULE Thresholding
            DR      = R*OneOverDR
            IG      = INT(DR)
            YY      = DBLE(IG+1)-DR
+           IF(IG.GT.98)THEN
+              WRITE(*,*)myid,' IG = ',IG,' DR = ',DR
+           ENDIF
            RErfc1  = YY*RErfData(IG)+(One-YY)*RErfData(IG+1)
         ENDIF
 !
