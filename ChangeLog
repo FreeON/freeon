@@ -1,3 +1,65 @@
+2006-03-01 10:39  mchalla
+
+	* Includes/CompilerSpecifics.Opteron64.IFC: Here is a compiler file
+	for IFC on the 64 bit Opterons
+
+2006-03-01 10:38  mchalla
+
+	* Scripts/MondoSetUp: Added some more options.
+
+2006-03-01 10:37  mchalla
+
+	* MondoMods/Thresholding.F90: Fixed a bounds error.  We need to use
+	LBOUND and UBOUND, rather than SIZE, since often the bounds may not
+	start at 1 (but at 0, -1 etc).
+
+2006-03-01 10:36  mchalla
+
+	* QCTC/JForce.F90, QCTC/QCTC.F90, ONX2/GONX2.F90, ONX2/ONX2.F90,
+	HiCu/XCForce.F90: Commented out the external mondo timer
+	statements.  MondoTimer should (and is) now be accessed with a USE
+	statement.
+
+2006-02-28 20:25  vweber
+
+	* Docs/STRESS2/Stress2.tex: [no log message]
+
+2006-02-28 14:38  tymczak
+
+	* MondoMods/Thresholding.F90: 
+	FIXED
+
+2006-02-28 14:04  mchalla
+
+	* Includes/CompilerSpecifics.IntelLinux.NAG: Maybe more SCANDIUM
+	friendly.
+
+2006-02-28 12:32  tymczak
+
+	* MondoMods/Thresholding.F90: Hopefully I Fixed the RErfc function
+	
+	CJ
+
+2006-02-27 16:17  vweber
+
+	* Docs/STRESS/Stress.tex: [no log message]
+
+2006-02-27 15:03  vweber
+
+	* Docs/Bib/mondo_new.bib: [no log message]
+
+2006-02-27 12:12  tymczak
+
+	* Docs/STRESS2/: Stress2.ps, Stress2.tex: [no log message]
+
+2006-02-24 15:55  tymczak
+
+	* Docs/STRESS2/: Stress2.ps, Stress2.tex: [no log message]
+
+2006-02-23 12:52  mchalla
+
+	* ChangeLog: [no log message]
+
 2006-02-23 12:49  mchalla
 
 	* Includes/: CompilerSpecifics.AMDLinux.PG,
@@ -9886,10 +9948,6 @@
 	optimizer. First three points of optimization are created by small
 	uniform displacements, instead of steepest descent.
 
-2003-08-26 18:42  nemeth
-
-	* IntCoo/: IntCoo.F90, Makefile: IntCoo directory is being removed.
-
 2003-08-26 18:28  nemeth
 
 	* Includes/: CompilerSpecifics.AMDLinux.PG,
@@ -9903,16 +9961,6 @@
 	* MondoMods/: Functionals.F90, GlobalCharacters.F90, MondoMPI.F90,
 	ParsingConstants.F90, PrettyPrint.F90, ProcessControl.F90: Another
 	CHARACTER(LEN=*),PARAMETER checkin.
-
-2003-08-26 17:42  nemeth
-
-	* Validate/BALA-PERIODIC/MM/: bALA_000-periodic.crd,
-	bALA_000-periodic.inp, bALA_000.seq, spec2.opls: [no log message]
-
-2003-08-26 17:39  nemeth
-
-	* Validate/BALA-PERIODIC/MM/EWALD/: ews8BALA-highp.f, fort.22:
-	Gradually removing a directory structure from Validate.
 
 2003-08-26 17:33  nemeth
 
@@ -13765,12 +13813,6 @@
 	* Validate/: MgOmm.inp, validation.opls, Water64mm.crd,
 	Water64mm.inp, Water64mm.seq: [no log message]
 
-2002-10-12 12:00  mchalla
-
-	* Validate/MgO-PERIODIC/MM/: EWALD/ews8MgOcubic.f, EWALD/fort.22,
-	MgO-PERIODIC.crd, MgO-PERIODIC.inp, MgO.seq, spec2.opls: [no log
-	message]
-
 2002-10-12 11:59  mchalla
 
 	* Validate/: MgOmm.crd, MgOmm.inp, MgOmm.seq, spec2.opls: Adding in
@@ -13868,22 +13910,6 @@
 
 	* Docs/DM_Papers/TS4/: TP_Fig_F_G_large.eps, TP_Fig_F_G_small.eps,
 	TS4.tex: New Updated version of the TS4 paper.
-
-2002-10-07 23:08  nemeth
-
-	* Validate/MgO-PERIODIC/MM/: MgO-PERIODIC.crd, MgO-PERIODIC.inp,
-	MgO.seq, spec2.opls, EWALD/ews8MgOcubic.f, EWALD/fort.22: [no log
-	message]
-
-2002-10-07 22:21  nemeth
-
-	* Validate/BALA-PERIODIC/MM/EWALD/fort.22: [no log message]
-
-2002-10-07 22:18  nemeth
-
-	* Validate/BALA-PERIODIC/MM/: bALA_000-periodic.crd,
-	bALA_000-periodic.inp, bALA_000.seq, spec2.opls,
-	EWALD/ews8BALA-highp.f: [no log message]
 
 2002-10-07 17:35  nemeth
 
@@ -14283,15 +14309,6 @@
 	QM/MM calculations. I don't see, what to do in case of 'InkFok'. So
 	far it worked without modification.
 
-2002-08-21 19:53  nemeth
-
-	* IntCoo/IntCoo.F90: IntCoo is under major development. Currently
-	status: Internal coordinate generator is ready, but bending->
-	linear bending transition must be added, also Cartesians may be
-	added to internal's set. B matrix is generated is conventional
-	sparse form and turned into blocked sparse row-wise form. Also
-	introduce more checks for three-linear atoms in torsion generator.
-
 2002-08-19 09:46  mchalla
 
 	* MondoMods/MatFunk.F90, SCFeqs/P2Use.F90: Rewrote P2Use.  Now uses
@@ -14484,11 +14501,6 @@
 	linear scaling through the same number of MMs.	Also, greatly
 	simplified NT4, and removed variable thresholding.
 
-2002-07-18 11:30  nemeth
-
-	* IntCoo/IntCoo.F90: Declaration of Cartesian coord array now
-	follows declaration of atomnumbers.
-
 2002-07-17 16:32  mchalla
 
 	* MondoMods/FastMat.F90: Hopefully fixed setSRSTSkipPtrs to work
@@ -14569,12 +14581,6 @@
 	* HiCu/: HiCu.F90, KxcGen.F90, ParaHiCu.F90: Parallel HiCu uses the
 	module FastMatrices.
 
-2002-07-08 16:14  nemeth
-
-	* IntCoo/IntCoo.F90: NATOMS changed to NatomsMM, not to mess up
-	with global variable; NBOX defined in SORT_INTO_BOX; characters
-	changed from uppercase to lowercase to fit better to general style.
-
 2002-07-08 13:41  ckgan
 
 	* HiCu/: CubeTree.F90, HiCu.F90, ParaHiCu.F90, XCForce.F90: A bug
@@ -14654,11 +14660,6 @@
 	included. These will go away when the fast matrix subroutines are
 	in place.
 
-2002-06-26 11:30  ckgan
-
-	* IntCoo/IntCoo.F90: intent(in) and intent(out) are omitted for
-	variables T12 and T14.
-
 2002-06-26 11:28  ckgan
 
 	* SCFeqs/: NT4.F90, PM.F90, SP2.F90, SP4.F90: an trivial extension
@@ -14731,11 +14732,6 @@
 	* QCTC/QCTC.F90: New printout for coulomb energy in QM/MM cases
 	added.
 
-2002-06-20 21:51  nemeth
-
-	* IntCoo/IntCoo.F90: New subroutines introduced to handle
-	topologically more complex systems, containing rings.
-
 2002-06-19 17:06  mchalla
 
 	* SCFeqs/Makefile: Works.
@@ -14747,11 +14743,6 @@
 2002-06-19 17:06  mchalla
 
 	* Makefile: No longer makes x
-
-2002-06-19 16:36  nemeth
-
-	* IntCoo/IntCoo.F90: Matrix size parameters had to be fixed,
-	modification in topology matrix sizes.
 
 2002-06-19 16:34  mchalla
 
@@ -14911,11 +14902,6 @@
 
 	* ChangeLog: New ChangeLog!
 
-2002-06-11 12:12  nemeth
-
-	* IntCoo/IntCoo.F90: sort_into_box changed and tested, used to
-	Lennard Jones energy calculation, to be used to generate bond-list.
-
 2002-06-08 09:33  mchalla
 
 	* MondoMods/: SpecFun.F90, MMA/LookUpTables/GammaGrid.Inc: Changed
@@ -14930,10 +14916,6 @@
 	* OneE/MakeS.F90: Set MakeS back to previous.  Wanted to get in new
 	FastMat stuff, even though its still buggy (before another hard
 	computer crash...)
-
-2002-06-07 15:41  nemeth
-
-	* IntCoo/IntCoo.F90: Memory handling is reorganized.
 
 2002-06-07 13:42  nemeth
 
@@ -15110,10 +15092,6 @@
 	* Includes/CompilerSpecifics.AMDLinux.PG: inclusion of Dynamo,
 	periodics temporarily switched off
 
-2002-05-31 11:10  nemeth
-
-	* IntCoo/Makefile: Makefile for IntCoo
-
 2002-05-31 11:05  mchalla
 
 	* Docs/DM_Papers/TP_Fig_F_G.ps: Figure one.
@@ -15121,11 +15099,6 @@
 2002-05-31 11:03  mchalla
 
 	* Docs/DM_Papers/TP.tex: Trace setting DM paper.
-
-2002-05-30 19:21  nemeth
-
-	* IntCoo/IntCoo.F90: IntCoo.F90 , to contain routines related to
-	geometry manipulations
 
 2002-05-24 11:41  tymczak
 
