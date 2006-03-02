@@ -303,16 +303,16 @@ gradients with respect to atomic and cell parameters.
 \subsection{Coulomb integrals}
 \noindent The periodic quantum Coulomb sum involves the three contributions~\cite{CTymczak04a}
 \begin{equation*}
-J_{ab}=J_{ab}^{In}+J_{ab}^{PFF}+J_{ab}^{TF},
+J_{ab}=J_{ab}^{\rm In}+J_{ab}^{\rm PFF}+J_{ab}^{\rm TF},
 \end{equation*}
-where $J_{ab}^{In}$ is the inner cell set sum evaluated by the 
-Quantum Chemical Tree Code (QCTC)~\cite{MChallacombe97}, $J_{ab}^{PFF}$ is the 
-periodic far field term and $J_{ab}^{TF}$ is a surface term which corrects 
+where $J_{ab}^{\rm In}$ is the inner cell set sum evaluated by the 
+Quantum Chemical Tree Code (QCTC)~\cite{MChallacombe97}, $J_{ab}^{\rm PFF}$ is the 
+periodic far field term and $J_{ab}^{\rm TF}$ is a surface term which corrects 
 the boundary at infinity.
 \subsubsection{Inner Sum}
 \noindent The inner cell set contribution to the Coulomb matrix is 
 \begin{equation*}
-J_{ab}^{In} = \sum_{{\bf R'} \in In} \iint \rho_{ab}({\bf r}) | 
+J_{ab}^{\rm In} = \sum_{{\bf R'} \in {\rm In}} \iint \rho_{ab}({\bf r}) | 
 {\bf r}-{\bf r'}+{\bf R'}|^{-1} \rho_{tot}({\bf r'}) dVdV'\,,
 \end{equation*}
 where
@@ -321,10 +321,10 @@ where
 \rho_{tot}({\bf r}) & = & \sum_{ab} P_{ab} \rho_{ab}({\bf r}) -\sum_{A} Z_A \delta({\bf r}-{\bf A}),
 \end{eqnarray*}
 $Z_A$ is the charge of atom $A$ and $\delta({\bf r})$ is the Dirac delta function.
-The derivative of $J_{ab}^{In}$, at $P$ constant, with respect to the cell parameter $M_{ij}$ is
+The derivative of $J_{ab}^{\rm In}$, at $P$ constant, with respect to the cell parameter $M_{ij}$ is
 \begin{equation*}
   \begin{split}
-{{\partial J_{ab}^{In}} \over {\partial M_{ij}}}\bigg|_P &= \sum_{{\bf R'} \in In} 2\iint  
+{{\partial J_{ab}^{\rm In}} \over {\partial M_{ij}}}\bigg|_P &= \sum_{{\bf R'} \in {\rm In}} 2\iint  
 {{\partial \rho_{ab}({\bf r})}\over {\partial M_{ij}} } | 
 {\bf r}-{\bf r'}+{\bf R'}|^{-1} \rho_{tot}({\bf r'}) dVdV'\\
 &+ \iint \rho_{ab}({\bf r})
@@ -337,40 +337,41 @@ The derivative of $J_{ab}^{In}$, at $P$ constant, with respect to the cell param
 \noindent We use a spherical multipole method in order to compute the periodic far field correction to the 
 Coulomb matrix~\cite{CTymczak04a}, which is 
 \begin{equation*}
-J_{ab}^{PFF}=\sum_{mlm'l'} (-1)^l \rho^{ml}_{ab} {\cal M}_{mlm'l'}  \rho^{m'l'}_{tot}
+J_{ab}^{\rm PFF}=\sum_{lml'm'} (-1)^l \rho^{lm}_{ab} {\cal M}_{l+l'}^{m+m'}  \rho^{l'm'}_{tot}
 \end{equation*}
-where the spherical densities $\rho^{ml}_{ab}$ and $\rho^{ml}_{tot}$ are obtained
+where the spherical densities $\rho^{lm}_{ab}$ and $\rho^{lm}_{tot}$ are obtained
 by projecting  $\rho_{ab}({\bf r})$ and $\rho_{tot}({\bf r})$, respectively, onto the regular spherical 
-harmonics $O_{ml}({\bf r})$ as
+harmonics $O_{lm}({\bf r})$ as
 \begin{eqnarray*}
-\rho^{ml}_{ab}  & = & \int \rho_{ab}( {\bf r}) O_{ml}({\bf r})dV \textrm{ and}\\
-\rho^{ml}_{tot} & = & \int \rho_{tot}({\bf r}) O_{ml}({\bf r})dV. 
+\rho^{lm}_{ab}  & = & \int \rho_{ab}( {\bf r}) O_{lm}({\bf r})dV \textrm{ and}\\
+\rho^{lm}_{tot} & = & \int \rho_{tot}({\bf r}) O_{lm}({\bf r})dV. 
 \end{eqnarray*}
-The derivative of $J_{ab}^{PFF}$, at $P$ constant, with respect to the cell parameter $M_{ij}$ is
+The derivative of $J_{ab}^{\rm PFF}$, at $P$ constant, with respect to the cell parameter $M_{ij}$ is
 \begin{equation*}
   \begin{split}
-{{\partial J_{ab}^{PFF}} \over {\partial M_{ij}}}\bigg|_P &= \sum_{mlm'l'}
-2 (-1)^l {{\partial \rho^{ml}_{ab}} \over {\partial M_{ij}}} {\cal M}_{mlm'l'} \rho^{m'l'}_{tot}\\
-&+ (-1)^l \rho^{ml}_{ab} {{\partial {\cal M}_{mlm'l'}}\over {\partial M_{ij}} } \rho^{m'l'}_{tot}
+{{\partial J_{ab}^{\rm PFF}} \over {\partial M_{ij}}}\bigg|_P &= \sum_{lml'm'}
+2 (-1)^l {{\partial \rho^{lm}_{ab}} \over {\partial M_{ij}}} {\cal M}_{l+l'}^{m+m'} \rho^{l'm'}_{tot}\\
+&+ (-1)^l \rho^{lm}_{ab} {{\partial {\cal M}_{l+l'}^{m+m'}}\over {\partial M_{ij}} } \rho^{l'm'}_{tot}
   \end{split}
 \end{equation*}
-where the calculation of $\partial {\cal M}/\partial M_{ij}$ is shown in the Appendix.%~\ref{Apx:MDer}.
+where the calculation of $\partial {\cal M}_l^m/\partial M_{ij}$ is straitforward but tedious
+and is shown in the Appendix~\ref{Apx:MDer}. for completness.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{Tin-Foil}
 \noindent The tin-foil correction to the Coulomb matrix is
 \begin{equation*}
-J_{ab}^{TF}=\frac{2\pi}{3V}(QS_{ab}-2\mathbf{d}_{ab}\cdot\mathbf{D})
+J_{ab}^{\rm TF}=\frac{2\pi}{3V_{uc}}(QS_{ab}-2\mathbf{d}_{ab}\cdot\mathbf{D})
 \end{equation*}
 where $Q$ is the trace of the system quadrupole, $S_{ab}$ is an element of the overlap matrix,
 $\mathbf{D}$ the dipole moment of the system,
 $\mathbf{d}_{ab}$ the dipole moment of the distribution $\rho_{ab}$.
-The derivative of $J_{ab}^{TF}$ with respect to the cell parameter $M_{ij}$ is
+The derivative of $J_{ab}^{\rm TF}$ with respect to the cell parameter $M_{ij}$ is
 \begin{equation*}
   \begin{split}
-    \frac{\partial J_{ab}^{TF}}{\partial M_{ij}}\bigg|_P&=
-    -\frac{2\pi}{3V^2}\frac{\partial V}{\partial M_{ij}}(QS_{ab}-2\mathbf{d}_{ab}\cdot\mathbf{D})\\
-    &+\frac{2\pi}{3V}\bigg(\frac{\partial Q}{\partial M_{ij}}\bigg|_P S_{ab}+Q\frac{\partial S_{ab}}{\partial M_{ij}}\\
+    \frac{\partial J_{ab}^{\rm TF}}{\partial M_{ij}}\bigg|_P&=
+    -\frac{2\pi}{3V_{uc}^2}\frac{\partial V_{uc}}{\partial M_{ij}}(QS_{ab}-2\mathbf{d}_{ab}\cdot\mathbf{D})\\
+    &+\frac{2\pi}{3V_{uc}}\bigg(\frac{\partial Q}{\partial M_{ij}}\bigg|_P S_{ab}+Q\frac{\partial S_{ab}}{\partial M_{ij}}\\
     &-2\frac{\partial \mathbf{d}_{ab}}{\partial M_{ij}}\cdot\mathbf{D}
     -2\mathbf{d}_{ab}\cdot\frac{\partial \mathbf{D}}{\partial M_{ij}}\bigg|_P \bigg),
   \end{split}
@@ -378,8 +379,8 @@ The derivative of $J_{ab}^{TF}$ with respect to the cell parameter $M_{ij}$ is
 where the derivatives ${\partial Q}/{\partial M_{ij}}|_P$,
 ${\partial \mathbf{d}_{ab}}/{\partial M_{ij}}$ and
 ${\partial \mathbf{D}}/{\partial M_{ij}}|_P$ are straitforward;
-the term ${\partial S_{ab}}/{\partial M_{ij}}$
-is given in Ref.~\cite{KDoll04}.
+the terms ${\partial S_{ab}}/{\partial M_{ij}}$ and ${\partial V_{uc}}/{\partial M_{ij}}$ 
+are given in Ref.~\cite{KDoll04}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -388,7 +389,7 @@ is given in Ref.~\cite{KDoll04}.
 The numerical integration of the DFT
 exchange-correlation term is carried out over a cuboid
 integration domain $V_{\Box}$ which is equivalent to the unit
-cell volume $V$. The exchange-correlation energy is thus
+cell volume $V_{uc}$. The exchange-correlation energy is thus
 \begin{equation}\label{Eq:xc}
 %  K_{ab}^{xc}=\int_{V_\Box}\rho_{ab}(\mathbf{r})v_{xc}[\rho,\mathbf{r}]d^3r.
 %%  K_{ab}^{xc}=\int_{V_\Box}\rho_{ab}(\mathbf{r})v_{xc}(\rho,\mathbf{r})dV
@@ -398,7 +399,7 @@ cell volume $V$. The exchange-correlation energy is thus
   =\int_{V_\Box}f(\mathbf{r})dV,
 \end{equation}
 where $\rho(\mathbf{r})=\sum_{ab}P_{ab}\sum_{\bf RR'}\phi_a({\bf r+R})\phi_b({\bf r+R'})$ is the
-electronic density associated with $V$.
+electronic density associated with $V_{uc}$.
 %where $v_{xc}$ is the exchange-correlation potentiel.
 In the following, the subscript $\Box$ will always refer to the cuboid cell.
 This simple integration volume should be contrasted with more
@@ -895,42 +896,76 @@ than 3 digits can be already achieved with cubic cells of about $600$\AA$^3$.\\
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \appendix
-\section*{Computation of the derivative of the ${\cal M}$ 
+\section{Computation of the derivative of the ${\cal M}$ 
   tensor with respect to cell parameters }\label{Apx:MDer}
 %\begin{equation*}
 %{\cal M}_{mlm'l'} = \sum_{{\bf R}\in PFF} M_{mlm'l'}({\bf R}).
 %\end{equation*}
 Following Tymczak and Challacombe~\cite{CTymczak04a}, the ${\cal M}$ tensor can be written into 
 real and reciprocal space terms as
-\begin{eqnarray}
-  {\cal M}^{m}_{l} &=&\sum _{\mathbf{R}\in V_{\rm PFF}}\, \widetilde{P}_{l}^{m}
-  \left( \cos \theta _{\mathbf{R}}\right) e^{im\phi _{\mathbf{R}}}\, {\cal G}_{l}\left( \beta ,\left|
-  \mathbf{R}\right| \right)
-  \nonumber\\
-  &-&\sum _{\mathbf{R}\in V_{\rm In}}\widetilde{P}_{l}^{m}\left( \cos
-  \theta _{\mathbf{R}}\right) e^{im\phi _{\mathbf{R}}}{\cal F}_{l}\left( \beta ,\left| \mathbf{R}\right|
-  \right)
-  \nonumber\\
-  &+&\frac{4\pi ^{\frac{3}{2}}(\frac{i}{2})^{l}}{V\Gamma \left( l+\frac{1}{2}\right) }
-  \nonumber\\
-  &&\sum _{\mathbf{G}\neq \left\{ \emptyset \right\} }\, \left| \mathbf{G}\right| ^{l-2}e^{-\frac{\pi ^{2}\left|
-      \mathbf{G}\right| ^{2}}{\beta ^{2}}}\widetilde{P_{l}}^{m}\left( \cos \theta _{\mathbf{G}}
-  \right) e^{im\phi _{\mathbf{G}}} \, ,
-  \nonumber\\
-  \label{C4}
-\end{eqnarray}
-where $\mathbf{G}$ is a reciprocal lattice vector, $\widetilde{P}_{l}^{m}$ 
-is the associated Legendre polynomial, $\beta=\sqrt{\pi }/V^{\frac{1}{3}}$,
+\begin{equation}\label{Eq:MTensor}
+  \begin{split}
+  {\cal M}^{m}_{l}&=\sum _{\mathbf{R}\in{\rm PFF}}\widetilde{P}_{l}^{m}
+  \left(\cos\theta_{\mathbf{R}}\right)e^{im\phi_{\mathbf{R}}}{\cal G}_{l}\left(\beta,\left|\mathbf{R}\right|\right)\\
+  &-\sum_{\mathbf{R}\in{\rm In}}\widetilde{P}_{l}^{m}\left(\cos\theta_{\mathbf{R}}\right) 
+  e^{im\phi_{\mathbf{R}}}{\cal F}_{l}\left(\beta,\left|\mathbf{R}\right|\right)\\
+  &+\frac{4\pi ^{\frac{3}{2}}(\frac{i}{2})^{l}}{V_{uc}\Gamma\left(l+\frac{1}{2}\right)}\\
+  &\sum_{\mathbf{G}\neq\left\{\emptyset\right\}}G^{l-2}
+  e^{-\frac{\pi^{2}G^{2}}{\beta^{2}}}\widetilde{P}_{l}^{m}\left(\cos\theta_{\mathbf{G}}\right) 
+  e^{im\phi _{\mathbf{G}}},
+  \end{split}
+\end{equation}
+where $\mathbf{G}$ is a reciprocal lattice vector, $G=|\mathbf{G}|$, $\widetilde{P}_{l}^{m}$ 
+is the associated Legendre polynomial, $\beta=\sqrt{\pi }/V_{uc}^{\frac{1}{3}}$,
 \begin{equation}
   {\cal G}_{l}\left( \beta ,r\right) =\frac{\gamma \left( l+\frac{1}{2},\beta ^{2}r^{2}\right) }
-  {\Gamma \left( l+\frac{1}{2}\right) \, r^{l+1}}
+  {\Gamma \left( l+\frac{1}{2}\right)r^{l+1}}
 \end{equation}
 and
 \begin{equation}
-  {\cal F}_{l}\left( \beta ,r\right) =\frac{\gamma \left( l+\frac{1}{2},\beta ^{2}r^{2}\right) }
-  {\Gamma \left( l+\frac{1}{2}\right) \, r^{l+1}} \, ,
+  {\cal F}_{l}\left( \beta ,r\right) =\frac{\Gamma \left( l+\frac{1}{2},\beta ^{2}r^{2}\right) }
+  {\Gamma \left( l+\frac{1}{2}\right)r^{l+1}},
 \end{equation}
-where $\Gamma(x)$ is the gamma function, $\gamma(a,x)$ is the incomplete gamma function~\cite{MAbramowitz87}.
+where $\Gamma$ is the gamma function and $\gamma$ is the incomplete gamma function~\cite{MAbramowitz87}.
+The derivative of ${\cal M}$ Eq.~\ref{Eq:MTensor} with respect to cell parameters $M_{ij}$ is
+\begin{equation}\label{Eq:DerMTensor}
+  \begin{split}
+   \frac{\partial {\cal M}^{m}_{l} }{\partial M_{ij}}&=\sum _{\mathbf{R}\in {\rm PFF}}
+   \frac{\partial\widetilde{P}_{l}^{m}}{\partial M_{ij}}
+   e^{im\phi _{\mathbf{R}}}{\cal G}_{l}
+   +im\widetilde{P}_{l}^{m}\frac{\partial\phi_{\mathbf{R}}}{\partial M_{ij}}e^{im\phi _{\mathbf{R}}}{\cal G}_{l}\\
+   &+\widetilde{P}_{l}^{m}e^{im\phi _{\mathbf{R}}} \frac{\partial{\cal G}_{l}}{\partial M_{ij}}\\
+   &-\sum_{\mathbf{R}\in {\rm In}}\frac{\partial\widetilde{P}_{l}^{m}}{\partial M_{ij}}e^{im\phi_{\mathbf{R}}}{\cal F}_{l}
+   +im\widetilde{P}_{l}^{m}\frac{\partial\phi_{\mathbf{R}}}{\partial M_{ij}}e^{im\phi_{\mathbf{R}}}{\cal F}_{l}\\
+   &+\widetilde{P}_{l}^{m} e^{im\phi_{\mathbf{R}}}\frac{\partial{\cal F}_{l}}{\partial M_{ij}}\\
+   &-\frac{4\pi^{\frac{3}{2}}(\frac{i}{2})^{l}}{V_{uc}^2\Gamma\left(l+\frac{1}{2}\right)}
+   \frac{\partial V_{uc}}{\partial M_{ij}}\\
+   &\sum_{\mathbf{G}\neq\left\{\emptyset\right\}}G^{l-2}e^{-\frac{\pi^{2}\left|
+       \mathbf{G}\right|^{2}}{\beta^{2}}}\widetilde{P}_{l}^{m}e^{im\phi _{\mathbf{G}}}\\
+   &+\frac{4\pi^{\frac{3}{2}}(\frac{i}{2})^{l}}{V_{uc}\Gamma\left(l+\frac{1}{2}\right)}\\
+   &\sum_{\mathbf{G}\neq\left\{\emptyset\right\}}
+   (l-2)G^{l-3}\frac{\partial G}{\partial M_{ij}}
+   e^{-\frac{\pi^{2}G^{2}}{\beta ^{2}}}
+   \widetilde{P}_{l}^{m}e^{im\phi_{\mathbf{G}}}\\
+   &-2\frac{\pi^2}{\beta^2}G^{l-1}
+   \left(\frac{\partial G}{\partial M_{ij}}
+   -\frac{G}{\beta}\frac{\partial\beta}{\partial M_{ij}}\right)
+   e^{-\frac{\pi ^{2}G^{2}}{\beta^{2}}}
+   \widetilde{P}_{l}^{m}e^{im\phi_{\mathbf{G}}}\\
+   &+G^{l-2}
+   e^{-\frac{\pi^{2}G^{2}}{\beta^{2}}}
+   \frac{\partial\widetilde{P}_{l}^{m}}{\partial M_{ij}}e^{im\phi_{\mathbf{G}}}\\
+   &+imG^{l-2}
+   e^{-\frac{\pi ^{2}G^{2}}{\beta ^{2}}}
+   \widetilde{P}_{l}^{m}\frac{\partial\phi_{\mathbf{G}}}{\partial M_{ij}}e^{im\phi_{\mathbf{G}}},
+  \end{split}
+\end{equation}
+where 
+\begin{equation*}
+  \frac{\partial\widetilde{P}_{l}^{m}}{\partial M_{ij}}=
+  \frac{\partial\widetilde{P}_{l}^{m}}{\partial\theta_{\mathbf{R}}}
+  \frac{\partial\theta_{\mathbf{R}}}{\partial M_{ij}}
+\end{equation*}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
