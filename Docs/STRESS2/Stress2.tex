@@ -256,7 +256,7 @@ exacte Hartree-Fock and exchange-correlation energies respectively.
 %and the ERIs are written in the Mulliken notation and computed
 %with the MIC as discussed in the following.
 
-The derivative of the total energy Eq.~\ref{Eq:TotE} with respect to an external perturbation $\lambda$ is 
+The derivative of the total energy Eq.~\ref{Eq:TotE} with respect to a general external perturbation $\lambda$ is 
 \begin{equation*}
   \begin{split}
 %%%   \frac{\partial E_{tot}}{\partial \lambda}&=\frac{\partial E^{kin}}{\partial \lambda}
@@ -284,11 +284,11 @@ The derivative of the total energy Eq.~\ref{Eq:TotE} with respect to an external
 %    -\frac{1}{2}(ac^\mathbf{m}|bd^\mathbf{n}) )+E_{nuc}
   \end{split}
 \end{equation*}
-where $W=PFP$ is the energy-weighted density matrix and $F$ is the Fockian.
+where $W=PFP$ is the energy-weighted density matrix and $F$ the Fockian.
 The gradients with respect to fractional coordinates and cell parameters 
 are simply given by $\lambda=f_{Gj}$ and $\lambda=M_{ij}$, respectively.
 The Hartree-Fock exchange gradients with respect to atomic and cell parameters,
-{\it i.e.} $\partial K_{ab}/\partial\lambda |_P$, have been previously derived~\cite{VWeber05b}.
+{\em i.e.} $\partial K_{ab}/\partial\lambda |_P$, have been previously derived~\cite{VWeber05b}.
 
 The energy gradient with respect to the fractional coordinate
 $f_{Gj}$ can be obtained through the linear transform
@@ -301,19 +301,20 @@ gradients with respect to atomic and cell parameters.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Coulomb integrals}
-\noindent The periodic quantum Coulomb sums involve the contributions
-\begin{equation}
+\noindent The periodic quantum Coulomb sum involves the three contributions~\cite{CTymczak04a}
+\begin{equation*}
 J_{ab}=J_{ab}^{In}+J_{ab}^{PFF}+J_{ab}^{TF},
-\end{equation}
-where $J_{ab}^{In}$ is the inner cell set sum done directly, $J_{ab}^{PFF}$ is the 
+\end{equation*}
+where $J_{ab}^{In}$ is the inner cell set sum evaluated by the 
+Quantum Chemical Tree Code (QCTC)~\cite{MChallacombe97}, $J_{ab}^{PFF}$ is the 
 periodic far field term and $J_{ab}^{TF}$ is a surface term which corrects 
 the boundary at infinity.
 \subsubsection{Inner Sum}
 \noindent The inner cell set contribution to the Coulomb matrix is 
-\begin{equation}
+\begin{equation*}
 J_{ab}^{In} = \sum_{{\bf R'} \in In} \iint \rho_{ab}({\bf r}) | 
 {\bf r}-{\bf r'}+{\bf R'}|^{-1} \rho_{tot}({\bf r'}) dVdV'\,,
-\end{equation}
+\end{equation*}
 where
 \begin{eqnarray*}
 \rho_{ab}({\bf r})  & = & \sum_{\bf R} \phi_a({\bf r}) \phi_b({\bf r}+{\bf R}),\\
@@ -321,51 +322,51 @@ where
 \end{eqnarray*}
 $Z_A$ is the charge of atom $A$ and $\delta({\bf r})$ is the Dirac delta function.
 The derivative of $J_{ab}^{In}$, at $P$ constant, with respect to the cell parameter $M_{ij}$ is
-\begin{eqnarray}
-{{\partial J_{ab}^{In}} \over {\partial M_{ij}}}\bigg|_P &=& \sum_{{\bf R'} \in In} 2\iint  
+\begin{equation*}
+  \begin{split}
+{{\partial J_{ab}^{In}} \over {\partial M_{ij}}}\bigg|_P &= \sum_{{\bf R'} \in In} 2\iint  
 {{\partial \rho_{ab}({\bf r})}\over {\partial M_{ij}} } | 
-{\bf r}-{\bf r'}+{\bf R'}|^{-1} \rho_{tot}({\bf r'}) dVdV'\nonumber \\
-&+& \iint \rho_{ab}({\bf r})
+{\bf r}-{\bf r'}+{\bf R'}|^{-1} \rho_{tot}({\bf r'}) dVdV'\\
+&+ \iint \rho_{ab}({\bf r})
 {{\partial |{\bf r}-{\bf r'}+{\bf R'}|^{-1}} \over {\partial M_{ij}}} \rho_{tot}({\bf r'})dVdV'.
-\end{eqnarray}
+  \end{split}
+\end{equation*}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{Periodic far field}
-\noindent We use a spherical multipole method inorder to compute the periodic far field correction to the 
-Coulomb matrix, which is  \\ {\bf ??? CJ: does $O_{ml}({\bf r})$ come from the moon??? }
-\begin{equation}
+\noindent We use a spherical multipole method in order to compute the periodic far field correction to the 
+Coulomb matrix~\cite{CTymczak04a}, which is 
+\begin{equation*}
 J_{ab}^{PFF}=\sum_{mlm'l'} (-1)^l \rho^{ml}_{ab} {\cal M}_{mlm'l'}  \rho^{m'l'}_{tot}
-\end{equation}
+\end{equation*}
 where the spherical densities $\rho^{ml}_{ab}$ and $\rho^{ml}_{tot}$ are obtained
-by projecting  $\rho_{ab}({\bf r})$ and $\rho_{tot}({\bf r})$, respectively, onto the spherical 
+by projecting  $\rho_{ab}({\bf r})$ and $\rho_{tot}({\bf r})$, respectively, onto the regular spherical 
 harmonics $O_{ml}({\bf r})$ as
 \begin{eqnarray*}
 \rho^{ml}_{ab}  & = & \int \rho_{ab}( {\bf r}) O_{ml}({\bf r})dV \textrm{ and}\\
 \rho^{ml}_{tot} & = & \int \rho_{tot}({\bf r}) O_{ml}({\bf r})dV. 
 \end{eqnarray*}
-The ${\cal M}$ tensor is summed using a Ewald like partition [{\bf ??CJ which ref??}]
-\begin{equation*}
-{\cal M}_{mlm'l'} = \sum_{\bf R} M_{mlm'l'}({\bf R}).
-\end{equation*}
 The derivative of $J_{ab}^{PFF}$, at $P$ constant, with respect to the cell parameter $M_{ij}$ is
-\begin{eqnarray}
-{{\partial J_{ab}^{PFF}} \over {\partial M_{ij}}}\bigg|_P &=& \sum_{mlm'l'}
-2 (-1)^l {{\partial \rho^{ml}_{ab}} \over {\partial M_{ij}}} {\cal M}_{mlm'l'} \rho^{m'l'}_{tot} \nonumber\\
-&+& (-1)^l \rho^{ml}_{ab} {{\partial {\cal M}_{mlm'l'}}\over {\partial M_{ij}} } \rho^{m'l'}_{tot}
-\end{eqnarray}
-where the calculation of the derivatives of the ${\cal M}$ tensor is shown in Appendix A.
+\begin{equation*}
+  \begin{split}
+{{\partial J_{ab}^{PFF}} \over {\partial M_{ij}}}\bigg|_P &= \sum_{mlm'l'}
+2 (-1)^l {{\partial \rho^{ml}_{ab}} \over {\partial M_{ij}}} {\cal M}_{mlm'l'} \rho^{m'l'}_{tot}\\
+&+ (-1)^l \rho^{ml}_{ab} {{\partial {\cal M}_{mlm'l'}}\over {\partial M_{ij}} } \rho^{m'l'}_{tot}
+  \end{split}
+\end{equation*}
+where the calculation of $\partial {\cal M}/\partial M_{ij}$ is shown in the Appendix.%~\ref{Apx:MDer}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{Tin-Foil}
 \noindent The tin-foil correction to the Coulomb matrix is
-\begin{equation}
+\begin{equation*}
 J_{ab}^{TF}=\frac{2\pi}{3V}(QS_{ab}-2\mathbf{d}_{ab}\cdot\mathbf{D})
-\end{equation}
+\end{equation*}
 where $Q$ is the trace of the system quadrupole, $S_{ab}$ is an element of the overlap matrix,
 $\mathbf{D}$ the dipole moment of the system,
 $\mathbf{d}_{ab}$ the dipole moment of the distribution $\rho_{ab}$.
 The derivative of $J_{ab}^{TF}$ with respect to the cell parameter $M_{ij}$ is
-\begin{equation}
+\begin{equation*}
   \begin{split}
     \frac{\partial J_{ab}^{TF}}{\partial M_{ij}}\bigg|_P&=
     -\frac{2\pi}{3V^2}\frac{\partial V}{\partial M_{ij}}(QS_{ab}-2\mathbf{d}_{ab}\cdot\mathbf{D})\\
@@ -373,7 +374,7 @@ The derivative of $J_{ab}^{TF}$ with respect to the cell parameter $M_{ij}$ is
     &-2\frac{\partial \mathbf{d}_{ab}}{\partial M_{ij}}\cdot\mathbf{D}
     -2\mathbf{d}_{ab}\cdot\frac{\partial \mathbf{D}}{\partial M_{ij}}\bigg|_P \bigg),
   \end{split}
-\end{equation}
+\end{equation*}
 where the derivatives ${\partial Q}/{\partial M_{ij}}|_P$,
 ${\partial \mathbf{d}_{ab}}/{\partial M_{ij}}$ and
 ${\partial \mathbf{D}}/{\partial M_{ij}}|_P$ are straitforward;
@@ -387,15 +388,17 @@ is given in Ref.~\cite{KDoll04}.
 The numerical integration of the DFT
 exchange-correlation term is carried out over a cuboid
 integration domain $V_{\Box}$ which is equivalent to the unit
-cell volume $V_{UC}$. The exchange-correlation energy is thus
+cell volume $V$. The exchange-correlation energy is thus
 \begin{equation}\label{Eq:xc}
 %  K_{ab}^{xc}=\int_{V_\Box}\rho_{ab}(\mathbf{r})v_{xc}[\rho,\mathbf{r}]d^3r.
 %%  K_{ab}^{xc}=\int_{V_\Box}\rho_{ab}(\mathbf{r})v_{xc}(\rho,\mathbf{r})dV
 %%  =\int_{V_\Box}f_{ab}(\mathbf{r})dV,
   E^{xc}%=\int_{V_\Box}\rho(\mathbf{r})\varepsilon_{xc}(\rho)dV
   =\int_{V_\Box}\rho(\mathbf{r})\varepsilon^{xc}(\rho(\mathbf{r}))dV
-  =\int_{V_\Box}f(\mathbf{r})dV.
+  =\int_{V_\Box}f(\mathbf{r})dV,
 \end{equation}
+where $\rho(\mathbf{r})=\sum_{ab}P_{ab}\sum_{\bf RR'}\phi_a({\bf r+R})\phi_b({\bf r+R'})$ is the
+electronic density associated with $V$.
 %where $v_{xc}$ is the exchange-correlation potentiel.
 In the following, the subscript $\Box$ will always refer to the cuboid cell.
 This simple integration volume should be contrasted with more
@@ -442,7 +445,7 @@ The surface integral is approximated by
 \end{equation*}
 where $h$ is a small number (typically $10^{-4}\,a.u.$) and 
 $V_{j\Box}=S_{j\Box}\times[-h,h]$ is a thin volume where the integration over the interval $[-h,h]$
-is carried out along the normal to the surface $S_{j\Box}$. This simple domain, {\it i.e.} $V_{j\Box}$, 
+is carried out along the normal to the surface $S_{j\Box}$. This simple domain, {\em i.e.} $V_{j\Box}$, 
 can be efficiently integrated with the help of the HiCu algorithm~\cite{MChallacombe00A} 
 to a desired accuracy.
 
@@ -519,15 +522,25 @@ per Cartesian d-shells.
 %     1     -950.8368795328
 % c-c 1.588 c-f 1.360 f-c-f 109.9
 % 3x1x1 tight 6-31G**
+%Lattice Parameter        Old Value      Gradient    Displacement   New Value
+%          STRE_A          7.920249     -0.000125      0.000000      7.920249
+%     1    -1426.2991245708
 % 4x1x1 tight 6-31G**
 %Lattice Parameter        Old Value      Gradient    Displacement   New Value
 %          STRE_A         10.536676     -0.000143      0.000000     10.536676
 %     1    -1901.7401759761
+% 5x1x1 tight 6-31G**
+% 6x1x1 tight 6-31G**
+%Lattice Parameter        Old Value      Gradient    Displacement   New Value
+%          STRE_A         15.795180      0.000374      0.000000     15.795180
+%     1    -2852.6132167641
     {\sc MondoSCF}\footnote[1]{$\Gamma$-point.} 
     &    1 & 3.400 & 1.823 & 1.339 & 116.9 & $-$475.261618 \\%
     &    2 & 2.701 & 1.588 & 1.360 & 109.9 & $-$475.418440 \\%
-    &    3 &  &  &  &  & $-$ \\%
+    &    3 & 2.640 & 1.571 & 1.361 & 109.5 & $-$475.433042 \\%
     &    4 & 2.634 & 1.570 & 1.361 & 109.5 & $-$475.435044 \\%
+%    &    5 &  &  &  &  & $-$ \\%
+    &    6 & 2.632 & 1.570 & 1.361 & 109.5 & $-$475.435536 \\%
   \hline
     {\sc Crystal03}\footnote[2]{12 $k$-points.}
 % Crystal Default 2.628  -4.754309452268E+02 c-c 1.570 c-f 1.360 c-c-c 113.7 f-c-f 109.5
@@ -645,9 +658,7 @@ obtained by Jochym, Parlinski and Krzywiec~\cite{PJochym04} with the {\sc Vasp}~
 code and a $3\times 3\times 3$ $\mathbf{k}$-points integration grid.
 We also report the experimental cell parameters 
 messured by Yoder and Sahama~\cite{HYoder57}.
-
 %with the constraint $\alpha=\beta=\gamma=90^\circ$. 
-
 %
 % See:
 % Merawa M, Noel Y, Civalleri B, Brown R, Dovesi R, Raman and infrared vibrational 
@@ -771,7 +782,23 @@ messured by Yoder and Sahama~\cite{HYoder57}.
 %          GAMMA          90.000000     -0.000980      0.000000     90.000000
 %          VOLM_L        593.535171      0.000000      0.000000    593.535171
 %     1    -7930.0861345846
-
+%
+% 2x1x2 2x1x2 2x1x2 2x1x2 2x1x2 2x1x2 2x1x2 2x1x2 2x1x2 2x1x2 2x1x2 2x1x2 2x1x2
+% b3lyp double-zeta TIGHT
+%
+%
+% 3x1x2 3x1x2 3x1x2 3x1x2 3x1x2 3x1x2 3x1x2 3x1x2 3x1x2 3x1x2 3x1x2 3x1x2 3x1x2
+% b3lyp double-zeta TIGHT
+%Lattice Parameter        Old Value      Gradient    Displacement   New Value
+%          STRE_A         14.362687      0.000117      0.000000     14.362687
+%          STRE_B         10.257567     -0.000034      0.000000     10.257567
+%          STRE_C         11.990901     -0.000058      0.000000     11.990901
+%          ALPHA          90.000000      0.001098      0.000000     90.000000
+%          BETA           90.000000     -0.000375      0.000000     90.000000
+%          GAMMA          90.000000     -0.000383      0.000000     90.000000
+%          VOLM_L       1766.574086      0.000000      0.000000   1766.574086
+%     1   -23790.5241758833
+%
   & $n$ & $a_0$ & $b_0$ & $c_0$ & $E/n$ \\
   \hline
     {\sc MondoSCF}\footnote[1]{$\Gamma$-point.} 
@@ -789,7 +816,7 @@ messured by Yoder and Sahama~\cite{HYoder57}.
     &  4 & 4.726 & 10.181 & 6.119 & $-$991.264858 \\%
     &  8 & 4.762 & 10.184 & 6.119 & $-$991.260767 \\%
     & 16 &  &  &  & $-$ \\%
-    & 24 &  &  &  & $-$ \\%
+    & 24 & 4.787 & 10.257 & 5.995 & $-$991.271841 \\%
   \hline
     {\sc Vasp}\footnote[2]{$3\times 3\times 3$ $\mathbf{k}$-points~\cite{PJochym04}.}
     &  4 & 4.7995 & 10.3056 & 6.0408 & \\
@@ -807,18 +834,17 @@ messured by Yoder and Sahama~\cite{HYoder57}.
 %a 4,756  b 10,195  c 5,981
 % H.S. Yoder, G. Sahama, The American Mineralogist 42 (1957) 475­491.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 As for the MgO case, the smallest system (Mg$_2$SiO$_4$)$_4$
 shows a large discrepantcy for the cell parameters 
 with respect to the {\sc Vasp} and experimental values. 
-The larger systems  i.e. the $2\times 1\times 2$ and $3\times 1\times 2$ supercells
+The larger systems  {\em i.e.} the $2\times 1\times 2$ and $3\times 1\times 2$ supercells
 give cell parameters in very good agreement with the experimental data; 
 and the energies systematical converge while the system grows.
 %The total CPU time needed to fully relax the forsterite, 
 %from the smallest to the biggest systems, were 592, 1664, 2816 and 8320 hours respectively.
 The cell parameters obtained from the $\Gamma$-point
 B3LYP/8-61G*(Mg)/88-31G*(Si)/8-51G*(O) level of theory 
-deviate no more that ...\% with respect to the experimental values.
+deviate less than 1\% with respect to the experimental values.
 
 \section{Conclusions}\label{Sec:Conclusions}
 In a previous paper, construction of the analytical 
@@ -862,9 +888,51 @@ than 3 digits can be already achieved with cubic cells of about $600$\AA$^3$.\\
  The Advanced Computing Laboratory of Los 
  Alamos National Laboratory is acknowledged.
 \end{acknowledgments}  
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \bibliography{mondo_new}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\appendix
+\section*{Computation of the derivative of the ${\cal M}$ 
+  tensor with respect to cell parameters }\label{Apx:MDer}
+%\begin{equation*}
+%{\cal M}_{mlm'l'} = \sum_{{\bf R}\in PFF} M_{mlm'l'}({\bf R}).
+%\end{equation*}
+Following Tymczak and Challacombe~\cite{CTymczak04a}, the ${\cal M}$ tensor can be written into 
+real and reciprocal space terms as
+\begin{eqnarray}
+  {\cal M}^{m}_{l} &=&\sum _{\mathbf{R}\in V_{\rm PFF}}\, \widetilde{P}_{l}^{m}
+  \left( \cos \theta _{\mathbf{R}}\right) e^{im\phi _{\mathbf{R}}}\, {\cal G}_{l}\left( \beta ,\left|
+  \mathbf{R}\right| \right)
+  \nonumber\\
+  &-&\sum _{\mathbf{R}\in V_{\rm In}}\widetilde{P}_{l}^{m}\left( \cos
+  \theta _{\mathbf{R}}\right) e^{im\phi _{\mathbf{R}}}{\cal F}_{l}\left( \beta ,\left| \mathbf{R}\right|
+  \right)
+  \nonumber\\
+  &+&\frac{4\pi ^{\frac{3}{2}}(\frac{i}{2})^{l}}{V\Gamma \left( l+\frac{1}{2}\right) }
+  \nonumber\\
+  &&\sum _{\mathbf{G}\neq \left\{ \emptyset \right\} }\, \left| \mathbf{G}\right| ^{l-2}e^{-\frac{\pi ^{2}\left|
+      \mathbf{G}\right| ^{2}}{\beta ^{2}}}\widetilde{P_{l}}^{m}\left( \cos \theta _{\mathbf{G}}
+  \right) e^{im\phi _{\mathbf{G}}} \, ,
+  \nonumber\\
+  \label{C4}
+\end{eqnarray}
+where $\mathbf{G}$ is a reciprocal lattice vector, $\widetilde{P}_{l}^{m}$ 
+is the associated Legendre polynomial, $\beta=\sqrt{\pi }/V^{\frac{1}{3}}$,
+\begin{equation}
+  {\cal G}_{l}\left( \beta ,r\right) =\frac{\gamma \left( l+\frac{1}{2},\beta ^{2}r^{2}\right) }
+  {\Gamma \left( l+\frac{1}{2}\right) \, r^{l+1}}
+\end{equation}
+and
+\begin{equation}
+  {\cal F}_{l}\left( \beta ,r\right) =\frac{\gamma \left( l+\frac{1}{2},\beta ^{2}r^{2}\right) }
+  {\Gamma \left( l+\frac{1}{2}\right) \, r^{l+1}} \, ,
+\end{equation}
+where $\Gamma(x)$ is the gamma function, $\gamma(a,x)$ is the incomplete gamma function~\cite{MAbramowitz87}.
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
