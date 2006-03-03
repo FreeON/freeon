@@ -902,71 +902,125 @@ than 3 digits can be already achieved with cubic cells of about $600$\AA$^3$.\\
 %{\cal M}_{mlm'l'} = \sum_{{\bf R}\in PFF} M_{mlm'l'}({\bf R}).
 %\end{equation*}
 Following Tymczak and Challacombe~\cite{CTymczak04a}, the ${\cal M}$ tensor can be written into 
-real and reciprocal space terms as
+direct and reciprocal space terms as
 \begin{equation}\label{Eq:MTensor}
   \begin{split}
   {\cal M}^{m}_{l}&=\sum _{\mathbf{R}\in{\rm PFF}}\widetilde{P}_{l}^{m}
-  \left(\cos\theta_{\mathbf{R}}\right)e^{im\phi_{\mathbf{R}}}{\cal G}_{l}\left(\beta,\left|\mathbf{R}\right|\right)\\
+  \left(\cos\theta_{\mathbf{R}}\right)e^{im\phi_{\mathbf{R}}}{\cal G}_{l}\left(\beta,R\right)\\
   &-\sum_{\mathbf{R}\in{\rm In}}\widetilde{P}_{l}^{m}\left(\cos\theta_{\mathbf{R}}\right) 
-  e^{im\phi_{\mathbf{R}}}{\cal F}_{l}\left(\beta,\left|\mathbf{R}\right|\right)\\
+  e^{im\phi_{\mathbf{R}}}{\cal F}_{l}(\beta,R)\\
   &+\frac{4\pi ^{\frac{3}{2}}(\frac{i}{2})^{l}}{V_{uc}\Gamma\left(l+\frac{1}{2}\right)}\\
   &\sum_{\mathbf{G}\neq\left\{\emptyset\right\}}G^{l-2}
   e^{-\frac{\pi^{2}G^{2}}{\beta^{2}}}\widetilde{P}_{l}^{m}\left(\cos\theta_{\mathbf{G}}\right) 
   e^{im\phi _{\mathbf{G}}},
   \end{split}
 \end{equation}
-where $\mathbf{G}$ is a reciprocal lattice vector, $G=|\mathbf{G}|$, $\widetilde{P}_{l}^{m}$ 
-is the associated Legendre polynomial, $\beta=\sqrt{\pi }/V_{uc}^{\frac{1}{3}}$,
-\begin{equation}
-  {\cal G}_{l}\left( \beta ,r\right) =\frac{\gamma \left( l+\frac{1}{2},\beta ^{2}r^{2}\right) }
-  {\Gamma \left( l+\frac{1}{2}\right)r^{l+1}}
-\end{equation}
+where $\mathbf{G}$ is a reciprocal lattice vector, $G=|\mathbf{G}|$, $R=\left|\mathbf{R}\right|$,
+$\widetilde{P}_{l}^{m}$ is the associated Legendre polynomial, 
+$\beta=\sqrt{\pi }/V_{uc}^{\frac{1}{3}}$,
+\begin{equation*}
+  {\cal G}_{l}(\beta,R) =\frac{\gamma(l+1/2,\beta^{2}R^{2})}{\Gamma(l+1/2)R^{l+1}}
+\end{equation*}
 and
-\begin{equation}
-  {\cal F}_{l}\left( \beta ,r\right) =\frac{\Gamma \left( l+\frac{1}{2},\beta ^{2}r^{2}\right) }
-  {\Gamma \left( l+\frac{1}{2}\right)r^{l+1}},
-\end{equation}
-where $\Gamma$ is the gamma function and $\gamma$ is the incomplete gamma function~\cite{MAbramowitz87}.
+\begin{equation*}
+  {\cal F}_{l}(\beta,R) =\frac{\Gamma(l+1/2,\beta^{2}R^{2})}{\Gamma(l+1/2)R^{l+1}},
+\end{equation*}
+where $\Gamma(a,x)=\int_x^\infty t^{a-1}\exp(-t)dt$ 
+is the gamma function, $\Gamma(a)=\Gamma(a,0)$ and $\gamma(a,x)=\int_0^x t^{a-1}\exp(-t)dt$ 
+is the incomplete gamma function~\cite{MAbramowitz87}.
 The derivative of ${\cal M}$ Eq.~\ref{Eq:MTensor} with respect to cell parameters $M_{ij}$ is
-\begin{equation}\label{Eq:DerMTensor}
+\begin{equation*}\label{Eq:DerMTensor}
   \begin{split}
-   \frac{\partial {\cal M}^{m}_{l} }{\partial M_{ij}}&=\sum _{\mathbf{R}\in {\rm PFF}}
+   \frac{\partial{\cal M}^{m}_{l}}{\partial M_{ij}}&=\sum_{\mathbf{R}\in {\rm PFF}}
+   e^{im\phi_{\mathbf{R}}}
+   \bigg(
    \frac{\partial\widetilde{P}_{l}^{m}}{\partial M_{ij}}
-   e^{im\phi _{\mathbf{R}}}{\cal G}_{l}
-   +im\widetilde{P}_{l}^{m}\frac{\partial\phi_{\mathbf{R}}}{\partial M_{ij}}e^{im\phi _{\mathbf{R}}}{\cal G}_{l}\\
-   &+\widetilde{P}_{l}^{m}e^{im\phi _{\mathbf{R}}} \frac{\partial{\cal G}_{l}}{\partial M_{ij}}\\
-   &-\sum_{\mathbf{R}\in {\rm In}}\frac{\partial\widetilde{P}_{l}^{m}}{\partial M_{ij}}e^{im\phi_{\mathbf{R}}}{\cal F}_{l}
-   +im\widetilde{P}_{l}^{m}\frac{\partial\phi_{\mathbf{R}}}{\partial M_{ij}}e^{im\phi_{\mathbf{R}}}{\cal F}_{l}\\
-   &+\widetilde{P}_{l}^{m} e^{im\phi_{\mathbf{R}}}\frac{\partial{\cal F}_{l}}{\partial M_{ij}}\\
-   &-\frac{4\pi^{\frac{3}{2}}(\frac{i}{2})^{l}}{V_{uc}^2\Gamma\left(l+\frac{1}{2}\right)}
-   \frac{\partial V_{uc}}{\partial M_{ij}}\\
-   &\sum_{\mathbf{G}\neq\left\{\emptyset\right\}}G^{l-2}e^{-\frac{\pi^{2}\left|
-       \mathbf{G}\right|^{2}}{\beta^{2}}}\widetilde{P}_{l}^{m}e^{im\phi _{\mathbf{G}}}\\
-   &+\frac{4\pi^{\frac{3}{2}}(\frac{i}{2})^{l}}{V_{uc}\Gamma\left(l+\frac{1}{2}\right)}\\
-   &\sum_{\mathbf{G}\neq\left\{\emptyset\right\}}
-   (l-2)G^{l-3}\frac{\partial G}{\partial M_{ij}}
-   e^{-\frac{\pi^{2}G^{2}}{\beta ^{2}}}
-   \widetilde{P}_{l}^{m}e^{im\phi_{\mathbf{G}}}\\
-   &-2\frac{\pi^2}{\beta^2}G^{l-1}
+   {\cal G}_{l}\\
+   &+im\widetilde{P}_{l}^{m}\frac{\partial\phi_{\mathbf{R}}}{\partial M_{ij}}{\cal G}_{l}
+   +\widetilde{P}_{l}^{m}\frac{\partial{\cal G}_{l}}{\partial M_{ij}}
+   \bigg)\\
+   &-\sum_{\mathbf{R}\in {\rm In}}
+   e^{im\phi_{\mathbf{R}}}
+   \bigg(
+   \frac{\partial\widetilde{P}_{l}^{m}}{\partial M_{ij}}{\cal F}_{l}\\
+   &+im\widetilde{P}_{l}^{m}\frac{\partial\phi_{\mathbf{R}}}{\partial M_{ij}}{\cal F}_{l}
+   +\widetilde{P}_{l}^{m}\frac{\partial{\cal F}_{l}}{\partial M_{ij}}
+   \bigg)\\
+   &+\frac{4\pi^{\frac{3}{2}}(\frac{i}{2})^{l}}{V_{uc}\Gamma\left(l+\frac{1}{2}\right)}
+   \sum_{\mathbf{G}\neq\left\{\emptyset\right\}}
+   G^{l-3}e^{-\frac{\pi^{2}G^{2}}{\beta^{2}}}e^{im\phi_{\mathbf{G}}}\\
+   &\bigg(
+   \frac{-1}{V_{uc}}\frac{\partial V_{uc}}{\partial M_{ij}}
+   G\widetilde{P}_{l}^{m}+(l-2)\frac{\partial G}{\partial M_{ij}}\widetilde{P}_{l}^{m}\\
+   &-2\frac{\pi^2}{\beta^2}G^2
    \left(\frac{\partial G}{\partial M_{ij}}
    -\frac{G}{\beta}\frac{\partial\beta}{\partial M_{ij}}\right)
-   e^{-\frac{\pi ^{2}G^{2}}{\beta^{2}}}
-   \widetilde{P}_{l}^{m}e^{im\phi_{\mathbf{G}}}\\
-   &+G^{l-2}
-   e^{-\frac{\pi^{2}G^{2}}{\beta^{2}}}
-   \frac{\partial\widetilde{P}_{l}^{m}}{\partial M_{ij}}e^{im\phi_{\mathbf{G}}}\\
-   &+imG^{l-2}
-   e^{-\frac{\pi ^{2}G^{2}}{\beta ^{2}}}
-   \widetilde{P}_{l}^{m}\frac{\partial\phi_{\mathbf{G}}}{\partial M_{ij}}e^{im\phi_{\mathbf{G}}},
+   \widetilde{P}_{l}^{m}\\
+   &+G\frac{\partial\widetilde{P}_{l}^{m}}{\partial M_{ij}}
+   +imG\widetilde{P}_{l}^{m}\frac{\partial\phi_{\mathbf{G}}}{\partial M_{ij}}
+   \bigg).
+%%%OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD 
+%   &-\frac{4\pi^{\frac{3}{2}}(\frac{i}{2})^{l}}{V_{uc}^2\Gamma\left(l+\frac{1}{2}\right)}
+%   \frac{\partial V_{uc}}{\partial M_{ij}}\\
+%   &\sum_{\mathbf{G}\neq\left\{\emptyset\right\}}G^{l-2}e^{-\frac{\pi^{2}
+%       G^{2}}{\beta^{2}}}\widetilde{P}_{l}^{m}e^{im\phi_{\mathbf{G}}}\\
+%   &+\frac{4\pi^{\frac{3}{2}}(\frac{i}{2})^{l}}{V_{uc}\Gamma\left(l+\frac{1}{2}\right)}\\
+%   &\sum_{\mathbf{G}\neq\left\{\emptyset\right\}}
+%   (l-2)G^{l-3}\frac{\partial G}{\partial M_{ij}}
+%   e^{-\frac{\pi^{2}G^{2}}{\beta ^{2}}}
+%   \widetilde{P}_{l}^{m}e^{im\phi_{\mathbf{G}}}\\
+%   &-2\frac{\pi^2}{\beta^2}G^{l-1}
+%   \left(\frac{\partial G}{\partial M_{ij}}
+%   -\frac{G}{\beta}\frac{\partial\beta}{\partial M_{ij}}\right)
+%   e^{-\frac{\pi ^{2}G^{2}}{\beta^{2}}}
+%   \widetilde{P}_{l}^{m}e^{im\phi_{\mathbf{G}}}\\
+%   &+G^{l-2}
+%   e^{-\frac{\pi^{2}G^{2}}{\beta^{2}}}
+%   \frac{\partial\widetilde{P}_{l}^{m}}{\partial M_{ij}}e^{im\phi_{\mathbf{G}}}\\
+%   &+imG^{l-2}
+%   e^{-\frac{\pi ^{2}G^{2}}{\beta ^{2}}}
+%   \widetilde{P}_{l}^{m}\frac{\partial\phi_{\mathbf{G}}}{\partial M_{ij}}e^{im\phi_{\mathbf{G}}},
   \end{split}
-\end{equation}
-where 
-\begin{equation*}
-  \frac{\partial\widetilde{P}_{l}^{m}}{\partial M_{ij}}=
-  \frac{\partial\widetilde{P}_{l}^{m}}{\partial\theta_{\mathbf{R}}}
-  \frac{\partial\theta_{\mathbf{R}}}{\partial M_{ij}}
 \end{equation*}
-
+The derivative of the associate Legendre polynomial is
+\begin{equation*}
+  \frac{\partial\widetilde{P}_{l}^{m}}{\partial M_{ij}}(\cos\theta)=
+  \frac{l\cos\theta\widetilde{P}_{l}^{m}-(l+m)\widetilde{P}_{l-1}^{m}}
+       {\sqrt{1-\cos^2\theta}}
+  \frac{\partial\theta}{\partial M_{ij}},
+\end{equation*}
+which holds for both $\theta=\theta_{\bf R}$ and $\theta=\theta_{\bf G}$.
+Derivation of ${\cal G}_{l}$ and ${\cal F}_{l}$ are
+\begin{equation*}
+  \begin{split}
+    \frac{\partial{\cal G}_{l}}{\partial M_{ij}}&=
+    \frac{-1}{\Gamma(l+1/2)R^{l+1}}\\
+    &\bigg(2(\beta R)^{2l}e^{-\beta^2R^2}
+    \frac{\partial(R\beta)}{\partial M_{ij}}
+    +\frac{l+1}{R}\frac{\partial R}{\partial M_{ij}}  \bigg),
+  \end{split}
+\end{equation*}
+and 
+\begin{equation*}
+  \begin{split}
+    \frac{\partial{\cal F}_{l}}{\partial M_{ij}}&=
+    \frac{1}{\Gamma(l+1/2)R^{l+1}}\\
+    &\bigg(2(\beta R)^{2l}e^{-\beta^2R^2}
+    \frac{\partial (R\beta)}{\partial M_{ij}}
+    -\frac{l+1}{R}\frac{\partial R}{\partial M_{ij}} \bigg).
+  \end{split}
+\end{equation*}
+%\begin{equation*}
+%  \frac{\partial\beta}{\partial M_{ij}}=-\frac{1}{3}\sqrt{\pi}V_{uc}^{-2/3}
+%  \frac{\partial V_{uc}}{\partial M_{ij}}
+%\end{equation*}
+The derivatives $\partial V_{uc}/\partial M_{ij}$ and $\partial G/\partial M_{ij}$ can be
+found in Ref.~\cite{KDoll04} and the remaining derivatives {\em i.e.}
+$\partial R/\partial M_{ij}$, $\partial\beta/\partial M_{ij}$,
+$\partial\theta_{\mathbf{R}}/\partial M_{ij}$, 
+$\partial\theta_{\mathbf{G}}/\partial M_{ij}$
+$\partial\phi_{\mathbf{R}}/\partial M_{ij}$ and
+$\partial\phi_{\mathbf{G}}/\partial M_{ij}$ are simple.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
