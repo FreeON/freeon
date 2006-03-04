@@ -80,7 +80,7 @@
   within the $\Gamma$-point approximation
   has been introduced [J. Chem. Phys. {\bf ???}, ????, (2006)].
   In this article, the formalism is extended to the evaluation of
-  analytical $\Gamma$-point density functional energy atomic and cell gradients. 
+  analytical $\Gamma$-point density functional atomic and cell gradients. 
   As an illustration, the analytical gradients have been used
   in conjunction with the QUICCA algorithm [K. N\'emeth and M. Challacombe,
   J. Chem. Phys. {\bf 121}, 2877, (2004)] to optimize 1D and 3D periodic
@@ -133,7 +133,7 @@ HF-MIC $\Gamma$-point energy, atomic and cell forces to the converged
 large cell $\Gamma$-point approximation with respect to cell length 
 have been explicitly shown to be exponential in the cell size~\cite{VWeber05b}. 
 A fast convergence of the total energy and geometrical parameters
-have also been observed for 1D and 3D systems as MgO and urea.
+have also been observed for 3D systems as MgO and urea.
 
 The $\Gamma$-point approach opens the capabilities of studying very large
 complex and disordered systems such as liquids, low concentration defects, adsorption of
@@ -180,19 +180,19 @@ The remainder of this paper is organized as follows:
 In Section~\ref{Sec:Formalism}, we introduce the formalism and discuss
 the implementation of the Coulomb and exchange-correlation gradients with respect
 to atomic positions and cell parameters
-at the $\Gamma$-point approximation. Full optimization of several 3D
+at the $\Gamma$-point approximation. Then full optimization of several 3D
 periodic systems are given
 in Section~\ref{Sec:NumExamples} as an illustration of the formalism.
 Finally in Section~\ref{Sec:Conclusions} we summarize our results.
 
 \section{Formalism}\label{Sec:Formalism}
-The primitive cell is given by the three vectors $\mathbf{a}$,
-$\mathbf{b}$ and $\mathbf{c}$. Then $M$ is the $3\times3$ matrix composed
+The primitive cell can be represented by the three vectors $\mathbf{a}$,
+$\mathbf{b}$ and $\mathbf{c}$. Let us define $M$ as the $3\times3$ matrix composed
 of the primitive cell vectors
 \begin{equation*}
   M=(\mathbf{a},\mathbf{b},\mathbf{c}).
 \end{equation*}
-The position of a cell is $\mathbf{R(n)}=M\mathbf{n}$,
+The position of any replicated cell is $\mathbf{R(n)}=M\mathbf{n}$,
 with $\mathbf{n}=(n_a,n_b,n_c)$ a vector of integers.
 The position of atom $A$ in the cell $\mathbf{R(n)}$ is $\mathbf{A}=M(\mathbf{f}_A+\mathbf{n})$,
 with $\mathbf{f}_A=(f_{Aa},f_{Ab},f_{Ac})$ the fractional coordinates of
@@ -244,10 +244,10 @@ expressed as:
 %and $h_{nuc}$ is the nuclear-nuclear repulsion energy.
 where $P$ is the density matrix, $T$ is the kinetic energy matrix, $J$
 is the electron-electron and electron-nuclear Coulomb matrix, 
-$E^{xc}$ the exchange-correlation energy, $K$ is the exacte 
-Hartree-Fock exchange matrix and $h_{nuc}$ is the nuclear-nuclear repulsion energy.
+$E^{xc}$ the exchange-correlation energy, $K$ is the exact 
+Hartree-Fock exchange matrix and $h_{nuc}$ is the nuclear-nuclear electron-nuclear energy.
 The factors $\alpha_1$ and $\alpha_2$ are mixing coefficients of the
-exacte Hartree-Fock and exchange-correlation energies respectively.
+exact Hartree-Fock and exchange-correlation energies respectively.
 
 %within the $\Gamma$-point approximation~\cite{CTymczak04a,CTymczak04b}
 %where the indices $\mathbf{mn}$ run over the direct lattice vectors,
@@ -284,7 +284,7 @@ The derivative of the total energy Eq.~\ref{Eq:TotE} with respect to a general e
 %    -\frac{1}{2}(ac^\mathbf{m}|bd^\mathbf{n}) )+E_{nuc}
   \end{split}
 \end{equation*}
-where $W=PFP$ is the energy-weighted density matrix and $F$ the Fockian.
+where $|_P$ stands for $P$ constant, $W=PFP$ is the energy-weighted density matrix and $F$ the Fockian.
 The gradients with respect to fractional coordinates and cell parameters 
 are simply given by $\lambda=f_{Gj}$ and $\lambda=M_{ij}$, respectively.
 The Hartree-Fock exchange gradients with respect to atomic and cell parameters,
@@ -301,7 +301,8 @@ gradients with respect to atomic and cell parameters.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Coulomb integrals}
-\noindent The periodic quantum Coulomb sum involves the three contributions~\cite{CTymczak04a}
+\noindent The periodic quantum Coulomb sum involves the three contributions 
+(See Ref.~\cite{CTymczak04a}, Section IV)
 \begin{equation*}
 J_{ab}=J_{ab}^{\rm In}+J_{ab}^{\rm PFF}+J_{ab}^{\rm TF},
 \end{equation*}
@@ -311,73 +312,115 @@ periodic far field term and $J_{ab}^{\rm TF}$ is a surface term which corrects
 the boundary at infinity.
 \subsubsection{Inner Sum}
 \noindent The inner cell set contribution to the Coulomb matrix is 
-\begin{equation*}
+\begin{equation}\label{Eq:JIn}
 J_{ab}^{\rm In} = \sum_{{\bf R'} \in {\rm In}} \iint \rho_{ab}({\bf r}) | 
 {\bf r}-{\bf r'}+{\bf R'}|^{-1} \rho_{tot}({\bf r'}) dVdV'\,,
-\end{equation*}
+\end{equation}
 where
 \begin{eqnarray*}
 \rho_{ab}({\bf r})  & = & \sum_{\bf R} \phi_a({\bf r}) \phi_b({\bf r}+{\bf R}),\\
 \rho_{tot}({\bf r}) & = & \sum_{ab} P_{ab} \rho_{ab}({\bf r}) -\sum_{A} Z_A \delta({\bf r}-{\bf A}),
 \end{eqnarray*}
 $Z_A$ is the charge of atom $A$ and $\delta({\bf r})$ is the Dirac delta function.
-The derivative of $J_{ab}^{\rm In}$, at $P$ constant, with respect to the cell parameter $M_{ij}$ is
+The derivatives of Eq.~\ref{Eq:JIn} with respect to atomic position $G_i$ and cell parameter $M_{ij}$ are
+\begin{equation*}
+  \frac{\partial J_{ab}^{\rm In}}{\partial G_i}\bigg|_P = 2\sum_{{\bf R'} \in {\rm In}}
+  \iint\frac{\partial \rho_{ab}({\bf r})}{\partial G_i}
+  |{\bf r}-{\bf r'}+{\bf R'}|^{-1}
+  \rho_{tot}({\bf r'}) dVdV',
+\end{equation*}
+and
 \begin{equation*}
   \begin{split}
-{{\partial J_{ab}^{\rm In}} \over {\partial M_{ij}}}\bigg|_P &= \sum_{{\bf R'} \in {\rm In}} 2\iint  
-{{\partial \rho_{ab}({\bf r})}\over {\partial M_{ij}} } | 
-{\bf r}-{\bf r'}+{\bf R'}|^{-1} \rho_{tot}({\bf r'}) dVdV'\\
-&+ \iint \rho_{ab}({\bf r})
-{{\partial |{\bf r}-{\bf r'}+{\bf R'}|^{-1}} \over {\partial M_{ij}}} \rho_{tot}({\bf r'})dVdV'.
+    \frac{\partial J_{ab}^{\rm In}}{\partial M_{ij}}\bigg|_P = 
+    \sum_{{\bf R'}\in{\rm In}}&\iint\bigg(
+    2\frac{\partial\rho_{ab}({\bf r})}{\partial M_{ij}}
+    |{\bf r}-{\bf r'}+{\bf R'}|^{-1}\\
+    &+\rho_{ab}({\bf r})
+    \frac{\partial |{\bf r}-{\bf r'}+{\bf R'}|^{-1}}{\partial M_{ij}}\bigg)\rho_{tot}({\bf r'}) dVdV',
   \end{split}
 \end{equation*}
-
+where the derivatives $\partial\rho_{ab}/\partial G_i$,
+$\partial |{\bf r}-{\bf r'}+{\bf R'}|^{-1}/\partial M_{ij}$ and 
+$\partial\rho_{ab}/\partial M_{ij}$ are straitforward and 
+do not need to be addressed in more detail. 
+Note that similar terms arise for $h_{nuc}$ and are treated in an equivalent way as $J_{ab}^{\rm In}$. 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{Periodic far field}
 \noindent We use a spherical multipole method in order to compute the periodic far field correction to the 
 Coulomb matrix~\cite{CTymczak04a}, which is 
-\begin{equation*}
+\begin{equation}\label{Eq:JPFF}
 J_{ab}^{\rm PFF}=\sum_{lml'm'} (-1)^l \rho^{lm}_{ab} {\cal M}_{l+l'}^{m+m'}  \rho^{l'm'}_{tot}
-\end{equation*}
+\end{equation}
 where the spherical densities $\rho^{lm}_{ab}$ and $\rho^{lm}_{tot}$ are obtained
 by projecting  $\rho_{ab}({\bf r})$ and $\rho_{tot}({\bf r})$, respectively, onto the regular spherical 
-harmonics $O_{lm}({\bf r})$ as
+harmonics $O_l^m({\bf r})$ as
 \begin{eqnarray*}
-\rho^{lm}_{ab}  & = & \int \rho_{ab}( {\bf r}) O_{lm}({\bf r})dV \textrm{ and}\\
-\rho^{lm}_{tot} & = & \int \rho_{tot}({\bf r}) O_{lm}({\bf r})dV. 
+\rho^{lm}_{ab}  & = & \int \rho_{ab}( {\bf r}) O_l^m({\bf r})dV \textrm{ and}\\
+\rho^{lm}_{tot} & = & \int \rho_{tot}({\bf r}) O_l^m({\bf r})dV. 
 \end{eqnarray*}
-The derivative of $J_{ab}^{\rm PFF}$, at $P$ constant, with respect to the cell parameter $M_{ij}$ is
+The derivatives of Eq.~\ref{Eq:JPFF} with respect to atomic position
+$G_i$ and the cell parameter $M_{ij}$ are
+\begin{equation*}
+  \frac{\partial J_{ab}^{\rm PFF}}{\partial G_i}\bigg|_P = 2\sum_{lml'm'}
+  (-1)^l \frac{\partial\rho^{lm}_{ab}}{\partial G_i} {\cal M}_{l+l'}^{m+m'} \rho^{l'm'}_{tot},
+\end{equation*}
+and
 \begin{equation*}
   \begin{split}
-{{\partial J_{ab}^{\rm PFF}} \over {\partial M_{ij}}}\bigg|_P &= \sum_{lml'm'}
-2 (-1)^l {{\partial \rho^{lm}_{ab}} \over {\partial M_{ij}}} {\cal M}_{l+l'}^{m+m'} \rho^{l'm'}_{tot}\\
-&+ (-1)^l \rho^{lm}_{ab} {{\partial {\cal M}_{l+l'}^{m+m'}}\over {\partial M_{ij}} } \rho^{l'm'}_{tot}
+    \frac{\partial J_{ab}^{\rm PFF}}{\partial M_{ij}}\bigg|_P = \sum_{lml'm'}(-1)^l&\bigg(
+    2\frac{\partial\rho^{lm}_{ab}}{\partial M_{ij}}{\cal M}_{l+l'}^{m+m'}\\
+    &+\rho^{lm}_{ab}\frac{\partial{\cal M}_{l+l'}^{m+m'}}{\partial M_{ij}}\bigg)\rho^{l'm'}_{tot}
   \end{split}
 \end{equation*}
-where the calculation of $\partial {\cal M}_l^m/\partial M_{ij}$ is straitforward but tedious
-and is shown in the Appendix~\ref{Apx:MDer}. for completness.
+where $\partial\rho^{lm}_{ab}/\partial G_i$ and $\partial\rho^{lm}_{ab}/\partial M_{ij}$
+are simple and do not need to be shown here. The calculation of 
+$\partial {\cal M}_l^m/\partial M_{ij}$ is straitforward but tedious
+and is shown in the Appendix~\ref{Apx:MDer} for completness.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{Tin-Foil}
 \noindent The tin-foil correction to the Coulomb matrix is
-\begin{equation*}
+\begin{equation}\label{Eq:JTF}
 J_{ab}^{\rm TF}=\frac{2\pi}{3V_{uc}}(QS_{ab}-2\mathbf{d}_{ab}\cdot\mathbf{D})
-\end{equation*}
+\end{equation}
 where $Q$ is the trace of the system quadrupole, $S_{ab}$ is an element of the overlap matrix,
 $\mathbf{D}$ the dipole moment of the system,
 $\mathbf{d}_{ab}$ the dipole moment of the distribution $\rho_{ab}$.
-The derivative of $J_{ab}^{\rm TF}$ with respect to the cell parameter $M_{ij}$ is
+The derivatives of Eq.~\ref{Eq:JTF} with respect to atomic position $G_i$ and the cell 
+parameter $M_{ij}$ are
 \begin{equation*}
   \begin{split}
-    \frac{\partial J_{ab}^{\rm TF}}{\partial M_{ij}}\bigg|_P&=
-    -\frac{2\pi}{3V_{uc}^2}\frac{\partial V_{uc}}{\partial M_{ij}}(QS_{ab}-2\mathbf{d}_{ab}\cdot\mathbf{D})\\
-    &+\frac{2\pi}{3V_{uc}}\bigg(\frac{\partial Q}{\partial M_{ij}}\bigg|_P S_{ab}+Q\frac{\partial S_{ab}}{\partial M_{ij}}\\
-    &-2\frac{\partial \mathbf{d}_{ab}}{\partial M_{ij}}\cdot\mathbf{D}
-    -2\mathbf{d}_{ab}\cdot\frac{\partial \mathbf{D}}{\partial M_{ij}}\bigg|_P \bigg),
+    \frac{\partial J_{ab}^{\rm TF}}{\partial G_i}\bigg|_P&=
+    \frac{2\pi}{3V_{uc}}\bigg(\frac{\partial Q}{\partial G_i}\bigg|_P S_{ab}+Q\frac{\partial S_{ab}}{\partial G_i}\\
+    &-2\frac{\partial \mathbf{d}_{ab}}{\partial G_i}\cdot\mathbf{D}
+    -2\mathbf{d}_{ab}\cdot\frac{\partial \mathbf{D}}{\partial G_i}\bigg|_P \bigg),
   \end{split}
 \end{equation*}
-where the derivatives ${\partial Q}/{\partial M_{ij}}|_P$,
-${\partial \mathbf{d}_{ab}}/{\partial M_{ij}}$ and
+and
+\begin{equation*}
+  \begin{split}
+    \frac{\partial J_{ab}^{\rm TF}}{\partial M_{ij}}\bigg|_P&=\frac{2\pi}{3V_{uc}}
+    \bigg(
+    \frac{\partial Q}{\partial M_{ij}}\bigg|_P S_{ab}+Q\frac{\partial S_{ab}}{\partial M_{ij}}\\
+    &-2\frac{\partial \mathbf{d}_{ab}}{\partial M_{ij}}\cdot\mathbf{D}
+    -2\mathbf{d}_{ab}\cdot\frac{\partial \mathbf{D}}{\partial M_{ij}}\bigg|_P\\
+    &-\frac{1}{V_{uc}}\frac{\partial V_{uc}}{\partial M_{ij}}(QS_{ab}-2\mathbf{d}_{ab}\cdot\mathbf{D})
+    \bigg),
+%    -\frac{2\pi}{3V_{uc}^2}\frac{\partial V_{uc}}{\partial M_{ij}}(QS_{ab}-2\mathbf{d}_{ab}\cdot\mathbf{D})\\
+%    &+\frac{2\pi}{3V_{uc}}\bigg(\frac{\partial Q}{\partial M_{ij}}\bigg|_P S_{ab}+Q\frac{\partial S_{ab}}{\partial M_{ij}}\\
+%    &-2\frac{\partial \mathbf{d}_{ab}}{\partial M_{ij}}\cdot\mathbf{D}
+%    -2\mathbf{d}_{ab}\cdot\frac{\partial \mathbf{D}}{\partial M_{ij}}\bigg|_P \bigg),
+  \end{split}
+\end{equation*}
+where the derivatives 
+${\partial Q}/{\partial G_i}|_P$,
+${\partial \mathbf{d}_{ab}}/{\partial G_i}$, 
+${\partial \mathbf{D}}/{\partial G_i}|_P$,
+${\partial S_{ab}}/{\partial G_i}$,
+${\partial Q}/{\partial M_{ij}}|_P$,
+${\partial \mathbf{d}_{ab}}/{\partial M_{ij}}$ 
+and
 ${\partial \mathbf{D}}/{\partial M_{ij}}|_P$ are straitforward;
 the terms ${\partial S_{ab}}/{\partial M_{ij}}$ and ${\partial V_{uc}}/{\partial M_{ij}}$ 
 are given in Ref.~\cite{KDoll04}.
@@ -386,10 +429,14 @@ are given in Ref.~\cite{KDoll04}.
 
 
 \subsection{Exchange-correlation integrals}
-The numerical integration of the DFT
-exchange-correlation term is carried out over a cuboid
-integration domain $V_{\Box}$ which is equivalent to the unit
-cell volume $V_{uc}$. The exchange-correlation energy is thus
+%The numerical integration of the DFT
+%exchange-correlation term is carried out over a cuboid
+%integration domain $V_{\Box}$ which is equivalent to the unit
+%cell volume $V_{uc}$. 
+In Ref.~\cite{CTymczak04a} we showed that the exchange-correlation energy, 
+for a periodic system, can be computed over a cubic region $V_{\Box}$, and is completely
+equivalant to the integration over the unit cell $V_{uc}$.
+The exchange-correlation energy is thus
 \begin{equation}\label{Eq:xc}
 %  K_{ab}^{xc}=\int_{V_\Box}\rho_{ab}(\mathbf{r})v_{xc}[\rho,\mathbf{r}]d^3r.
 %%  K_{ab}^{xc}=\int_{V_\Box}\rho_{ab}(\mathbf{r})v_{xc}(\rho,\mathbf{r})dV
@@ -409,7 +456,12 @@ While Eq.~\ref{Eq:xc} is written in an abstract form for simplicity,
 in practice the code relies on the Pople, Gill and Johnson 
 approach~\cite{JPople92,MChallacombe00A}. 
 
-The derivative of Eq.~\ref{Eq:xc} with respect to cell parameter $M_{ij}$ at $P$ constant is given by
+The derivatives of Eq.~\ref{Eq:xc} with respect to atomic position $G_i$ and cell parameter $M_{ij}$ are given by
+\begin{equation*}
+  \frac{\partial E^{xc}}{\partial M_{ij}}\bigg|_P=
+  \int_{V_{\Box}}\frac{\partial f(\mathbf{r})}{\partial G_i}\bigg|_PdV,
+\end{equation*}
+and
 \begin{equation}\label{Eq:xcLatGrd}
   \begin{split}
     \frac{\partial E^{xc}}{\partial M_{ij}}\bigg|_P&=
@@ -448,7 +500,7 @@ where $h$ is a small number (typically $10^{-4}\,a.u.$) and
 $V_{j\Box}=S_{j\Box}\times[-h,h]$ is a thin volume where the integration over the interval $[-h,h]$
 is carried out along the normal to the surface $S_{j\Box}$. This simple domain, {\em i.e.} $V_{j\Box}$, 
 can be efficiently integrated with the help of the HiCu algorithm~\cite{MChallacombe00A} 
-to a desired accuracy.
+to any desired accuracy.
 
 \section{Numerical Examples}\label{Sec:NumExamples}
 All developments were implemented in the {\sc MondoSCF}~\cite{MondoSCF} suite of
@@ -475,7 +527,7 @@ in the forces.
 In order to demonstrate the capabilities of our implementation of the
 Khon-Sham density functional energy atomic and cell gradients, we present in this Section
 full optimization studies of 1D and 3D periodic systems without any cell
-or atomic positions symmetry constraint.
+or atomic positions symmetry constraints.
 Our first benchmark case is the optimization of 1D polytetrafluoroethylene (CF$_2$)$_{2n}$
 at the Perdew-Wang~\cite{JPerdew92} level of theory. The PW91 functional has been obtained from the
 the Density Functional Repository~\cite{DFRepository}.
@@ -497,7 +549,7 @@ and the $\Gamma$-point approximation, the energies do not.
 The reason for this disagreement can be found in the different atomic basis set used.
 {\sc Crystal03} uses spherical harmonics d-shells consisting of 5 atomic orbitals
 while {\sc MondoSCF} employs pure Cartesian basis functions {\em i.e.}~6 atomic orbitals
-per Cartesian d-shells.
+per Cartesian d-shells. This leads to a slightly lower energy in the {\sc MondoSCF} calculations.
 
 \begin{table}[t]
   \centering
@@ -506,7 +558,7 @@ per Cartesian d-shells.
     bond angle (F$-$C$-$F) and total energy $E$ 
     for polytetrafluoroethylene (CF$_2$)$_{2n}$ using the periodic $\Gamma$-point
     PW91/6-31G** level of theory and the {\tt TIGHT} thresholds.
-    Lengths, angles and energies are in \AA, degrees and atomic units respectively.
+    Lengths, angles and energies are in \AA ngstr\"oms, degrees and atomic units respectively.
   }\label{Tab:PFE}
   \begin{tabular}{lrccccc}
   \toprule
@@ -531,6 +583,9 @@ per Cartesian d-shells.
 %          STRE_A         10.536676     -0.000143      0.000000     10.536676
 %     1    -1901.7401759761
 % 5x1x1 tight 6-31G**
+%Lattice Parameter        Old Value      Gradient    Displacement   New Value
+%          STRE_A         13.167172      0.000343      0.000000     13.167172
+%     1    -2377.1772551877
 % 6x1x1 tight 6-31G**
 %Lattice Parameter        Old Value      Gradient    Displacement   New Value
 %          STRE_A         15.795180      0.000374      0.000000     15.795180
@@ -540,7 +595,7 @@ per Cartesian d-shells.
     &    2 & 2.701 & 1.588 & 1.360 & 109.9 & $-$475.418440 \\%
     &    3 & 2.640 & 1.571 & 1.361 & 109.5 & $-$475.433042 \\%
     &    4 & 2.634 & 1.570 & 1.361 & 109.5 & $-$475.435044 \\%
-%    &    5 &  &  &  &  & $-$ \\%
+    &    5 & 2.633 & 1.571 & 1.361 & 109.5 & $-$475.435451 \\%
     &    6 & 2.632 & 1.570 & 1.361 & 109.5 & $-$475.435536 \\%
   \hline
     {\sc Crystal03}\footnote[2]{12 $k$-points.}
@@ -577,7 +632,7 @@ while the system grows.
     for cubic (MgO)$_n$ using the periodic $\Gamma$-point
     PBE/8-61G(Mg)/8-51G(O) and B3LYP/8-61G(Mg)/8-51G(O) level 
     of theories and the {\tt TIGHT} thresholds.
-    Cell parameters and energies are in \AA~and atomic unit respectively.
+    Cell parameters and energies are in \AA ngstr\"oms~and atomic unit respectively.
   }\label{Tab:MgO}
   \begin{tabular}{lcrccc}
   \toprule
@@ -694,7 +749,7 @@ messured by Yoder and Sahama~\cite{HYoder57}.
     $1\times 1\times 1$, $2\times 1\times 1$, $2\times 1\times 2$ 
     and $3\times 1\times 2$, respectively.
 %    $n$ is the number of MgO units in the (super)cell.
-    Cell parameters and energies are in \AA~and atomic unit respectively.
+    Cell parameters and energies are in \AA ngstr\"oms~and atomic unit respectively.
   }\label{Tab:Forsterite}
   \begin{tabular}{crcccc}
   \toprule
@@ -857,9 +912,9 @@ functional gradients at the $\Gamma$-point approximation for
 Cartesian Gaussian-type basis functions was presented and 
 implemented in the {\sc MondoSCF} package.
 
-As an illustration, the analytical gradients and cell gradients have been used
+As an illustration, the analytical atomic and cell gradients have been used
 in conjunction with the QUICCA algorithm to optimize few 1D and 3D periodic systems at
-the DFT and hybrid-HF/DFT levels.
+the DFT and hybrid-HF/DFT level of theories.
 
 Convergence of bond lengths, bond angles and 
 cell parameters within the DFT and hybrid-HF/DFT $\Gamma$-point
@@ -901,20 +956,20 @@ than 3 digits can be already achieved with cubic cells of about $600$\AA$^3$.\\
 %\begin{equation*}
 %{\cal M}_{mlm'l'} = \sum_{{\bf R}\in PFF} M_{mlm'l'}({\bf R}).
 %\end{equation*}
-Following Tymczak and Challacombe~\cite{CTymczak04a}, the ${\cal M}$ tensor can be written into 
+Following Tymczak and Challacombe~\cite{CTymczak04a}, the ${\cal M}_l^m$ tensor can be written into 
 direct and reciprocal space terms as
-\begin{equation}\label{Eq:MTensor}
+\begin{equation*}\label{Eq:MTensor}
   \begin{split}
   {\cal M}^{m}_{l}&=\sum _{\mathbf{R}\in{\rm PFF}}\widetilde{P}_{l}^{m}
   \left(\cos\theta_{\mathbf{R}}\right)e^{im\phi_{\mathbf{R}}}{\cal G}_{l}\left(\beta,R\right)\\
   &-\sum_{\mathbf{R}\in{\rm In}}\widetilde{P}_{l}^{m}\left(\cos\theta_{\mathbf{R}}\right) 
   e^{im\phi_{\mathbf{R}}}{\cal F}_{l}(\beta,R)\\
-  &+\frac{4\pi ^{\frac{3}{2}}(\frac{i}{2})^{l}}{V_{uc}\Gamma\left(l+\frac{1}{2}\right)}\\
+  &+\frac{4\pi ^{\frac{3}{2}}(i/2)^{l}}{V_{uc}\Gamma(l+1/2)}\\
   &\sum_{\mathbf{G}\neq\left\{\emptyset\right\}}G^{l-2}
   e^{-\frac{\pi^{2}G^{2}}{\beta^{2}}}\widetilde{P}_{l}^{m}\left(\cos\theta_{\mathbf{G}}\right) 
   e^{im\phi _{\mathbf{G}}},
   \end{split}
-\end{equation}
+\end{equation*}
 where $\mathbf{G}$ is a reciprocal lattice vector, $G=|\mathbf{G}|$, $R=\left|\mathbf{R}\right|$,
 $\widetilde{P}_{l}^{m}$ is the associated Legendre polynomial, 
 $\beta=\sqrt{\pi }/V_{uc}^{\frac{1}{3}}$,
@@ -928,7 +983,7 @@ and
 where $\Gamma(a,x)=\int_x^\infty t^{a-1}\exp(-t)dt$ 
 is the gamma function, $\Gamma(a)=\Gamma(a,0)$ and $\gamma(a,x)=\int_0^x t^{a-1}\exp(-t)dt$ 
 is the incomplete gamma function~\cite{MAbramowitz87}.
-The derivative of ${\cal M}$ Eq.~\ref{Eq:MTensor} with respect to cell parameters $M_{ij}$ is
+The derivative of ${\cal M}_l^m$ with respect to cell parameters $M_{ij}$ is
 \begin{equation*}\label{Eq:DerMTensor}
   \begin{split}
    \frac{\partial{\cal M}^{m}_{l}}{\partial M_{ij}}&=\sum_{\mathbf{R}\in {\rm PFF}}
@@ -946,13 +1001,13 @@ The derivative of ${\cal M}$ Eq.~\ref{Eq:MTensor} with respect to cell parameter
    &+im\widetilde{P}_{l}^{m}\frac{\partial\phi_{\mathbf{R}}}{\partial M_{ij}}{\cal F}_{l}
    +\widetilde{P}_{l}^{m}\frac{\partial{\cal F}_{l}}{\partial M_{ij}}
    \bigg)\\
-   &+\frac{4\pi^{\frac{3}{2}}(\frac{i}{2})^{l}}{V_{uc}\Gamma\left(l+\frac{1}{2}\right)}
+   &+\frac{4\pi^{\frac{3}{2}}(i/2)^{l}}{V_{uc}\Gamma(l+1/2)}
    \sum_{\mathbf{G}\neq\left\{\emptyset\right\}}
    G^{l-3}e^{-\frac{\pi^{2}G^{2}}{\beta^{2}}}e^{im\phi_{\mathbf{G}}}\\
    &\bigg(
    \frac{-1}{V_{uc}}\frac{\partial V_{uc}}{\partial M_{ij}}
    G\widetilde{P}_{l}^{m}+(l-2)\frac{\partial G}{\partial M_{ij}}\widetilde{P}_{l}^{m}\\
-   &-2\frac{\pi^2}{\beta^2}G^2
+   &-2\pi^2\left(\frac{G}{\beta}\right)^2
    \left(\frac{\partial G}{\partial M_{ij}}
    -\frac{G}{\beta}\frac{\partial\beta}{\partial M_{ij}}\right)
    \widetilde{P}_{l}^{m}\\
@@ -982,7 +1037,7 @@ The derivative of ${\cal M}$ Eq.~\ref{Eq:MTensor} with respect to cell parameter
 %   \widetilde{P}_{l}^{m}\frac{\partial\phi_{\mathbf{G}}}{\partial M_{ij}}e^{im\phi_{\mathbf{G}}},
   \end{split}
 \end{equation*}
-The derivative of the associate Legendre polynomial is
+The derivative of the associate Legendre polynomial $\widetilde{P}_{l}^{m}(\cos\theta)$ is
 \begin{equation*}
   \frac{\partial\widetilde{P}_{l}^{m}}{\partial M_{ij}}(\cos\theta)=
   \frac{l\cos\theta\widetilde{P}_{l}^{m}-(l+m)\widetilde{P}_{l-1}^{m}}
@@ -990,24 +1045,24 @@ The derivative of the associate Legendre polynomial is
   \frac{\partial\theta}{\partial M_{ij}},
 \end{equation*}
 which holds for both $\theta=\theta_{\bf R}$ and $\theta=\theta_{\bf G}$.
-Derivation of ${\cal G}_{l}$ and ${\cal F}_{l}$ are
+Derivation of ${\cal G}_{l}(\beta,R)$ and ${\cal F}_{l}(\beta,R)$ are given by
 \begin{equation*}
   \begin{split}
-    \frac{\partial{\cal G}_{l}}{\partial M_{ij}}&=
-    \frac{-1}{\Gamma(l+1/2)R^{l+1}}\\
-    &\bigg(2(\beta R)^{2l}e^{-\beta^2R^2}
-    \frac{\partial(R\beta)}{\partial M_{ij}}
-    +\frac{l+1}{R}\frac{\partial R}{\partial M_{ij}}  \bigg),
+    \frac{\partial{\cal G}_{l}}{\partial M_{ij}}(\beta,R)&=
+    \frac{1}{\Gamma(l+1/2)R^{l+1}}
+    \bigg(2(\beta R)^{2l}e^{-\beta^2R^2}
+    \frac{\partial(R\beta)}{\partial M_{ij}}\\
+    &-(l+1)\frac{\gamma(l+1/2,\beta^2R^2)}{R}\frac{\partial R}{\partial M_{ij}}  \bigg),
   \end{split}
 \end{equation*}
 and 
 \begin{equation*}
   \begin{split}
-    \frac{\partial{\cal F}_{l}}{\partial M_{ij}}&=
-    \frac{1}{\Gamma(l+1/2)R^{l+1}}\\
-    &\bigg(2(\beta R)^{2l}e^{-\beta^2R^2}
-    \frac{\partial (R\beta)}{\partial M_{ij}}
-    -\frac{l+1}{R}\frac{\partial R}{\partial M_{ij}} \bigg).
+    \frac{\partial{\cal F}_{l}}{\partial M_{ij}}(\beta,R)&=
+    \frac{-1}{\Gamma(l+1/2)R^{l+1}}
+    \bigg(2(\beta R)^{2l}e^{-\beta^2R^2}
+    \frac{\partial (R\beta)}{\partial M_{ij}}\\
+    &+(l+1)\frac{\Gamma(l+1/2,\beta^2R^2)}{R}\frac{\partial R}{\partial M_{ij}} \bigg).
   \end{split}
 \end{equation*}
 %\begin{equation*}
