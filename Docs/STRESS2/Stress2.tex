@@ -35,7 +35,7 @@
 %\documentclass[pre,aps,twocolumn,showpacs,twocolumngrid,superbib]{revtex4}
 %\documentclass[prl,aps,twocolumn,showkeys,twocolumngrid,superbib]{revtex4}
 %\documentclass[twocolumn,showkeys,showpacs,preprintnumbers,amsmath,amssymb]{revtex4}
-\documentclass[pra,twocolumn,showpacs,twocolumngrid,superbib]{revtex4}
+\documentclass[pra,twocolumn,twocolumngrid,superbib]{revtex4}
 %\documentclass[showpacs,preprint,superbib]{revtex4}
 
 \usepackage{graphicx}
@@ -93,9 +93,7 @@
                               %display desired
 \maketitle
 
-%\section{Don't forget to change that}
-%-Add KDoll01a in mondo.bib K. Doll Computer Physics Communications 137 (2001) 74-88\\
-%-See that http://www.cryst.ehu.es/\\
+\footnotetext[1]{Preprint LA-UR-?????.}
 
 \section{Introduction}
 In preceding papers, we have developed linear scaling quantum chemical methods
@@ -211,8 +209,8 @@ expressed as:
 \begin{equation}\label{Eq:TotE}
   \begin{split}
 %%%%%%%%%%%%%%%%%%%%%%%%
-    E_{tot}(&\mathbf{f}_A,\mathbf{f}_B,\ldots,M)=\sum_{ab} P_{ab}
-    [T_{ab}+\frac{1}{2}(J_{ab}+\alpha_1 K_{ab})]\\
+    E(\mathbf{f}_A,\mathbf{f}_B,\ldots,M)&=\sum_{ab} P_{ab}
+    \left(T_{ab}+\frac{1}{2}(J_{ab}+\alpha_1 K_{ab})\right)\\
     &+\alpha_2 E^{xc}+h_{nuc},
 %%%%%%%%%%%%%%%%%%%%%%%%
 %    E_{tot}(\mathbf{f}_A,&\mathbf{f}_B,\ldots,M)=E^{k}+E^{c}+\alpha_1 E^{x}+\alpha_2 E^{xc}\\
@@ -245,7 +243,7 @@ expressed as:
 where $P$ is the density matrix, $T$ is the kinetic energy matrix, $J$
 is the electron-electron and electron-nuclear Coulomb matrix, 
 $E^{xc}$ the exchange-correlation energy, $K$ is the exact 
-Hartree-Fock exchange matrix and $h_{nuc}$ is the nuclear-nuclear electron-nuclear energy.
+Hartree-Fock exchange matrix and $h_{nuc}$ is the nuclear-nuclear and electron-nuclear energy.
 The factors $\alpha_1$ and $\alpha_2$ are mixing coefficients of the
 exact Hartree-Fock and exchange-correlation energies respectively.
 
@@ -264,13 +262,13 @@ The derivative of the total energy Eq.~\ref{Eq:TotE} with respect to a general e
 %%%   &+\frac{1}{2}\bigg[\frac{\partial E^{C}}{\partial \lambda}\bigg|_P
 %%%    +\alpha_1 \frac{\partial E^{x}}{\partial \lambda}\bigg|_P\bigg]
 %%%    +\alpha_2 \frac{\partial E^{xc}}{\partial \lambda}\bigg|_P
-    \frac{\partial E_{tot}}{\partial\lambda}&=
+    \frac{\partial E}{\partial\lambda}&=
 %    \frac{\partial E^{k}}{\partial\lambda}+\frac{\partial E^{c}}{\partial\lambda}+
 %    \frac{\partial E^{x}}{\partial\lambda}+\frac{\partial E^{xc}}{\partial\lambda}\\
     \sum_{ab}P_{ab}\frac{\partial T_{ab}}{\partial\lambda}
     +\frac{\partial h_{nuc}}{\partial\lambda}\\
-    &+\frac{1}{2}\sum_{ab}P_{ab}\bigg[\frac{\partial J_{ab}}{\partial\lambda}\bigg|_P
-     +\alpha_1 \frac{\partial K_{ab}}{\partial\lambda}\bigg|_P\bigg]\\
+    &+\frac{1}{2}\sum_{ab}P_{ab}\left(\frac{\partial J_{ab}}{\partial\lambda}\bigg|_P
+     +\alpha_1 \frac{\partial K_{ab}}{\partial\lambda}\bigg|_P\right)\\
     &+\alpha_2 \frac{\partial E^{xc}}{\partial\lambda}\bigg|_P
     -\sum_{ab}W_{ab}\frac{\partial S_{ab}}{\partial\lambda}
 %    &+\alpha_2 E^{xc}+h_{nuc},
@@ -284,7 +282,8 @@ The derivative of the total energy Eq.~\ref{Eq:TotE} with respect to a general e
 %    -\frac{1}{2}(ac^\mathbf{m}|bd^\mathbf{n}) )+E_{nuc}
   \end{split}
 \end{equation*}
-where $|_P$ stands for $P$ constant, $W=PFP$ is the energy-weighted density matrix and $F$ the Fockian.
+where $|_P$ stands for $P$ constant, $W=PFP$ is the energy-weighted density matrix and $F$ the Fockian or
+Kohn-Sham Hamiltonian.
 The gradients with respect to fractional coordinates and cell parameters 
 are simply given by $\lambda=f_{Gj}$ and $\lambda=M_{ij}$, respectively.
 The Hartree-Fock exchange gradients with respect to atomic and cell parameters,
@@ -293,16 +292,16 @@ The Hartree-Fock exchange gradients with respect to atomic and cell parameters,
 The energy gradient with respect to the fractional coordinate
 $f_{Gj}$ can be obtained through the linear transform
 \begin{equation*}
-  \frac{\partial E_{tot}}{\partial f_{Gj}}=\sum_{i=x,y,z}M_{ij}\frac{\partial E_{tot}}{\partial G_i},
+  \frac{\partial E}{\partial f_{Gj}}=\sum_{i=x,y,z}M_{ij}\frac{\partial E}{\partial G_i},
 \end{equation*}
-where $\partial E_{tot}/\partial G_i$ is the standard gradient with respect to atomic position.
+where $\partial E/\partial G_i$ is the standard gradient with respect to atomic position.
 In the following, we describe the implementation of the Coulomb and exchange-correlation
 gradients with respect to atomic and cell parameters.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Coulomb integrals}
 \noindent The periodic quantum Coulomb sum involves the three contributions 
-(See Ref.~\cite{CTymczak04a}, Section IV)
+(see Ref.~\cite{CTymczak04a}, Section IV)
 \begin{equation*}
 J_{ab}=J_{ab}^{\rm In}+J_{ab}^{\rm PFF}+J_{ab}^{\rm TF},
 \end{equation*}
@@ -313,36 +312,40 @@ the boundary at infinity.
 \subsubsection{Inner Sum}
 \noindent The inner cell set contribution to the Coulomb matrix is 
 \begin{equation}\label{Eq:JIn}
-J_{ab}^{\rm In} = \sum_{{\bf R'} \in {\rm In}} \iint \rho_{ab}({\bf r}) | 
-{\bf r}-{\bf r'}+{\bf R'}|^{-1} \rho_{tot}({\bf r'}) dVdV'\,,
+J_{ab}^{\rm In} = \sum_{{\bf R} \in {\rm In}} \iint \rho_{ab}({\bf r}) | 
+{\bf r}-{\bf r'}+{\bf R}|^{-1} \rho_{tot}({\bf r'}) dVdV'\,,
 \end{equation}
 where
-\begin{eqnarray*}
-\rho_{ab}({\bf r})  & = & \sum_{\bf R} \phi_a({\bf r}) \phi_b({\bf r}+{\bf R}),\\
-\rho_{tot}({\bf r}) & = & \sum_{ab} P_{ab} \rho_{ab}({\bf r}) -\sum_{A} Z_A \delta({\bf r}-{\bf A}),
-\end{eqnarray*}
+\begin{gather*}
+  \rho_{ab}({\bf r})=\sum_{\bf R'} \phi_a({\bf r}) \phi_b({\bf r}+{\bf R'}),\\
+  \rho_{tot}({\bf r})=\sum_{ab} P_{ab} \rho_{ab}({\bf r}) -\sum_{A} Z_A \delta({\bf r}-{\bf A}),
+\end{gather*}
+%\begin{eqnarray*}
+%\rho_{ab}({\bf r})  & = & \sum_{\bf R} \phi_a({\bf r}) \phi_b({\bf r}+{\bf R}),\\
+%\rho_{tot}({\bf r}) & = & \sum_{ab} P_{ab} \rho_{ab}({\bf r}) -\sum_{A} Z_A \delta({\bf r}-{\bf A}),
+%\end{eqnarray*}
 $Z_A$ is the charge of atom $A$ and $\delta({\bf r})$ is the Dirac delta function.
 The derivatives of Eq.~\ref{Eq:JIn} with respect to atomic position $G_i$ and cell parameter $M_{ij}$ are
 \begin{equation*}
-  \frac{\partial J_{ab}^{\rm In}}{\partial G_i}\bigg|_P = 2\sum_{{\bf R'} \in {\rm In}}
+  \frac{\partial J_{ab}^{\rm In}}{\partial G_i}\bigg|_P = 2\sum_{{\bf R} \in {\rm In}}
   \iint\frac{\partial \rho_{ab}({\bf r})}{\partial G_i}
-  |{\bf r}-{\bf r'}+{\bf R'}|^{-1}
+  |{\bf r}-{\bf r'}+{\bf R}|^{-1}
   \rho_{tot}({\bf r'}) dVdV',
 \end{equation*}
 and
 \begin{equation*}
   \begin{split}
     \frac{\partial J_{ab}^{\rm In}}{\partial M_{ij}}\bigg|_P = 
-    \sum_{{\bf R'}\in{\rm In}}&\iint\bigg(
+    \sum_{{\bf R}\in{\rm In}}&\iint\bigg(
     2\frac{\partial\rho_{ab}({\bf r})}{\partial M_{ij}}
-    |{\bf r}-{\bf r'}+{\bf R'}|^{-1}\\
+    |{\bf r}-{\bf r'}+{\bf R}|^{-1}\\
     &+\rho_{ab}({\bf r})
-    \frac{\partial |{\bf r}-{\bf r'}+{\bf R'}|^{-1}}{\partial M_{ij}}\bigg)\rho_{tot}({\bf r'}) dVdV',
+    \frac{\partial |{\bf r}-{\bf r'}+{\bf R}|^{-1}}{\partial M_{ij}}\bigg)\rho_{tot}({\bf r'}) dVdV',
   \end{split}
 \end{equation*}
 where the derivatives $\partial\rho_{ab}/\partial G_i$,
-$\partial |{\bf r}-{\bf r'}+{\bf R'}|^{-1}/\partial M_{ij}$ and 
-$\partial\rho_{ab}/\partial M_{ij}$ are straitforward and 
+$\partial |{\bf r}-{\bf r'}+{\bf R}|^{-1}/\partial M_{ij}$ and 
+$\partial\rho_{ab}/\partial M_{ij}$ are straightforward and 
 do not need to be addressed in more detail. 
 Note that similar terms arise for $h_{nuc}$ and are treated in an equivalent way as $J_{ab}^{\rm In}$. 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -355,10 +358,10 @@ J_{ab}^{\rm PFF}=\sum_{lml'm'} (-1)^l \rho^{lm}_{ab} {\cal M}_{l+l'}^{m+m'}  \rh
 where the spherical densities $\rho^{lm}_{ab}$ and $\rho^{lm}_{tot}$ are obtained
 by projecting  $\rho_{ab}({\bf r})$ and $\rho_{tot}({\bf r})$, respectively, onto the regular spherical 
 harmonics $O_l^m({\bf r})$ as
-\begin{eqnarray*}
-\rho^{lm}_{ab}  & = & \int \rho_{ab}( {\bf r}) O_l^m({\bf r})dV \textrm{ and}\\
-\rho^{lm}_{tot} & = & \int \rho_{tot}({\bf r}) O_l^m({\bf r})dV. 
-\end{eqnarray*}
+\begin{equation*}
+  \rho^{lm}_{ab}=\int\rho_{ab}({\bf r}) O_l^m({\bf r})dV \text{ and }
+  \rho^{lm}_{tot}=\int\rho_{tot}({\bf r}) O_l^m({\bf r})dV. 
+\end{equation*}
 The derivatives of Eq.~\ref{Eq:JPFF} with respect to atomic position
 $G_i$ and the cell parameter $M_{ij}$ are
 \begin{equation*}
@@ -375,8 +378,8 @@ and
 \end{equation*}
 where $\partial\rho^{lm}_{ab}/\partial G_i$ and $\partial\rho^{lm}_{ab}/\partial M_{ij}$
 are simple and do not need to be shown here. The calculation of 
-$\partial {\cal M}_l^m/\partial M_{ij}$ is straitforward but tedious
-and is shown in the Appendix~\ref{Apx:MDer} for completness.
+$\partial {\cal M}_l^m/\partial M_{ij}$ is straightforward but tedious
+and is shown in the Appendix~\ref{Apx:MDer} for completeness.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{Tin-Foil}
@@ -384,7 +387,9 @@ and is shown in the Appendix~\ref{Apx:MDer} for completness.
 \begin{equation}\label{Eq:JTF}
 J_{ab}^{\rm TF}=\frac{2\pi}{3V_{uc}}(QS_{ab}-2\mathbf{d}_{ab}\cdot\mathbf{D})
 \end{equation}
-where $Q$ is the trace of the system quadrupole, $S_{ab}$ is an element of the overlap matrix,
+where $V_{uc}$ is the unit cell volume, 
+$Q$ is the trace of the system quadrupole, 
+$S_{ab}$ is an element of the overlap matrix,
 $\mathbf{D}$ the dipole moment of the system,
 $\mathbf{d}_{ab}$ the dipole moment of the distribution $\rho_{ab}$.
 The derivatives of Eq.~\ref{Eq:JTF} with respect to atomic position $G_i$ and the cell 
@@ -421,44 +426,42 @@ ${\partial S_{ab}}/{\partial G_i}$,
 ${\partial Q}/{\partial M_{ij}}|_P$,
 ${\partial \mathbf{d}_{ab}}/{\partial M_{ij}}$ 
 and
-${\partial \mathbf{D}}/{\partial M_{ij}}|_P$ are straitforward;
+${\partial \mathbf{D}}/{\partial M_{ij}}|_P$ are straightforward;
 the terms ${\partial S_{ab}}/{\partial M_{ij}}$ and ${\partial V_{uc}}/{\partial M_{ij}}$ 
-are given in Ref.~\cite{KDoll04}.
+are given {\em e.g.} in Ref.~\cite{KDoll04}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 
 \subsection{Exchange-correlation integrals}
 %The numerical integration of the DFT
 %exchange-correlation term is carried out over a cuboid
 %integration domain $V_{\Box}$ which is equivalent to the unit
 %cell volume $V_{uc}$. 
-In Ref.~\cite{CTymczak04a} we showed that the exchange-correlation energy, 
+In Ref.~\cite{CTymczak04a}, Tymczak and Challacombe showed that the exchange-correlation energy, 
 for a periodic system, can be computed over a cubic region $V_{\Box}$, and is completely
-equivalant to the integration over the unit cell $V_{uc}$.
+equivalent to the integration over the unit cell $V_{uc}$.
 The exchange-correlation energy is thus
 \begin{equation}\label{Eq:xc}
 %  K_{ab}^{xc}=\int_{V_\Box}\rho_{ab}(\mathbf{r})v_{xc}[\rho,\mathbf{r}]d^3r.
 %%  K_{ab}^{xc}=\int_{V_\Box}\rho_{ab}(\mathbf{r})v_{xc}(\rho,\mathbf{r})dV
 %%  =\int_{V_\Box}f_{ab}(\mathbf{r})dV,
   E^{xc}%=\int_{V_\Box}\rho(\mathbf{r})\varepsilon_{xc}(\rho)dV
-  =\int_{V_\Box}\rho(\mathbf{r})\varepsilon^{xc}(\rho(\mathbf{r}))dV
+  =\int_{V_\Box}\rho[\mathbf{r}]\varepsilon^{xc}(\rho(\mathbf{r}))dV
   =\int_{V_\Box}f(\mathbf{r})dV,
 \end{equation}
 where $\rho(\mathbf{r})=\sum_{ab}P_{ab}\sum_{\bf RR'}\phi_a({\bf r+R})\phi_b({\bf r+R'})$ is the
 electronic density associated with $V_{uc}$.
-%where $v_{xc}$ is the exchange-correlation potentiel.
 In the following, the subscript $\Box$ will always refer to the cuboid cell.
 This simple integration volume should be contrasted with more
 conventional methods for computing the exchange-correlation matrix, involving
-the ``Becke weights''~\cite{ABecke88}, which requirs integration over all the space $V_\infty$.
+the ``Becke weights''~\cite{ABecke88}, which requires integration over all the space $V_\infty$.
 While Eq.~\ref{Eq:xc} is written in an abstract form for simplicity, 
 in practice the code relies on the Pople, Gill and Johnson 
 approach~\cite{JPople92,MChallacombe00A}. 
 
 The derivatives of Eq.~\ref{Eq:xc} with respect to atomic position $G_i$ and cell parameter $M_{ij}$ are given by
 \begin{equation*}
-  \frac{\partial E^{xc}}{\partial M_{ij}}\bigg|_P=
+  \frac{\partial E^{xc}}{\partial G_i}\bigg|_P=
   \int_{V_{\Box}}\frac{\partial f(\mathbf{r})}{\partial G_i}\bigg|_PdV,
 \end{equation*}
 and
@@ -469,9 +472,11 @@ and
 %    &+\delta_{ij}\int_{S_{j}}\rho_{ab}(\mathbf{r})v_{xc}[\rho,\mathbf{r}]dS
     \int_{V_{\Box}}\frac{\partial f(\mathbf{r})}{\partial M_{ij}}\bigg|_PdV
 %    \sum_{A}(f_{Aj}+n_j)\int_{V_{\Box}}\frac{\partial f(\mathbf{r})}{\partial A_i}dV\\
-    +\delta_{ij}\int_{S_{j\Box}}f(\mathbf{r})dS.
+    +\delta_{ij}\int_{S_{j\Box}}f(\mathbf{r})dS,
   \end{split}
 \end{equation}
+where $S_{j\Box}$ is the surface of the cuboid cell with 
+its normal vector along the $j$-th Cartesian direction.
 %where the intergation over the surface $S_{j\Box}$ arises
 %from the derivative of the limits of the integral~(\ref{Eq:xc}).
 %where $S_{j\Box}$ is the surface defined by the two lattice vectors different than $j$. 
@@ -498,9 +503,10 @@ The surface integral is approximated by
 \end{equation*}
 where $h$ is a small number (typically $10^{-4}\,a.u.$) and 
 $V_{j\Box}=S_{j\Box}\times[-h,h]$ is a thin volume where the integration over the interval $[-h,h]$
-is carried out along the normal to the surface $S_{j\Box}$. This simple domain, {\em i.e.} $V_{j\Box}$, 
-can be efficiently integrated with the help of the HiCu algorithm~\cite{MChallacombe00A} 
-to any desired accuracy.
+is carried out along the normal to the surface $S_{i\Box}$ 
+({\em i.e.} along the $j$-th Cartesian direction). 
+This simple domain, {\em i.e.} $V_{j\Box}$, can be efficiently integrated with 
+the help of the HiCu algorithm~\cite{MChallacombe00A} to any desired accuracy.
 
 \section{Numerical Examples}\label{Sec:NumExamples}
 All developments were implemented in the {\sc MondoSCF}~\cite{MondoSCF} suite of
@@ -618,7 +624,7 @@ For comparison, we report the optimized cell parameter of cubic MgO
 obtained with the {\sc Crystal03} code and a $8\times 8\times 8$ ${\bf k}$-points integration grid
 as well as the experimental cell parameter~\cite{RWyckoff63}.
 For both PBE and B3LYP, the smallest system (MgO)$_4$ 
-shows a large discrepantcy of the cell parameter, energy and fractional 
+shows a large discrepancy of the cell parameter, energy and fractional 
 coordinate of the oxygen with respect to its ${\bf k}$-space integration 
 counterpart. The larger systems give cell parameter and 
 fractional coordinate of the oxygen in very good agreement 
@@ -713,7 +719,7 @@ For comparison, we report the optimized cell parameters of forsterite
 obtained by Jochym, Parlinski and Krzywiec~\cite{PJochym04} with the {\sc Vasp}~\cite{Kresse96a,Kresse96b} 
 code and a $3\times 3\times 3$ $\mathbf{k}$-points integration grid.
 We also report the experimental cell parameters 
-messured by Yoder and Sahama~\cite{HYoder57}.
+measured by Yoder and Sahama~\cite{HYoder57}.
 %with the constraint $\alpha=\beta=\gamma=90^\circ$. 
 %
 % See:
@@ -842,6 +848,15 @@ messured by Yoder and Sahama~\cite{HYoder57}.
 % 2x1x2 2x1x2 2x1x2 2x1x2 2x1x2 2x1x2 2x1x2 2x1x2 2x1x2 2x1x2 2x1x2 2x1x2 2x1x2
 % b3lyp double-zeta TIGHT
 %
+%Lattice Parameter        Old Value      Gradient    Displacement   New Value
+%          STRE_A          9.574460      0.000074      0.000000      9.574460
+%          STRE_B         10.258702     -0.000106      0.000000     10.258702
+%          STRE_C         11.991359      0.000031      0.000000     11.991359
+%          ALPHA          90.000000     -0.003371      0.000000     90.000000
+%          BETA           90.000000     -0.000177      0.000000     90.000000
+%          GAMMA          90.000000      0.000033      0.000000     90.000000
+%          VOLM_L       1177.809694      0.000000      0.000000   1177.809694
+%     1   -15860.3471454661
 %
 % 3x1x2 3x1x2 3x1x2 3x1x2 3x1x2 3x1x2 3x1x2 3x1x2 3x1x2 3x1x2 3x1x2 3x1x2 3x1x2
 % b3lyp double-zeta TIGHT
@@ -871,7 +886,7 @@ messured by Yoder and Sahama~\cite{HYoder57}.
 % DZVP TIGHT
     &  4 & 4.726 & 10.181 & 6.119 & $-$991.264858 \\%
     &  8 & 4.762 & 10.184 & 6.119 & $-$991.260767 \\%
-    & 16 &  &  &  & $-$ \\%
+    & 16 & 4.787 & 10.258 & 5.996 & $-$991.271696 \\%
     & 24 & 4.787 & 10.257 & 5.995 & $-$991.271841 \\%
   \hline
     {\sc Vasp}\footnote[2]{$3\times 3\times 3$ $\mathbf{k}$-points~\cite{PJochym04}.}
@@ -891,7 +906,7 @@ messured by Yoder and Sahama~\cite{HYoder57}.
 % H.S. Yoder, G. Sahama, The American Mineralogist 42 (1957) 475­491.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 As for the MgO case, the smallest system (Mg$_2$SiO$_4$)$_4$
-shows a large discrepantcy for the cell parameters 
+shows a large discrepancy for the cell parameters 
 with respect to the {\sc Vasp} and experimental values. 
 The larger systems  {\em i.e.} the $2\times 1\times 2$ and $3\times 1\times 2$ supercells
 give cell parameters in very good agreement with the experimental data; 
@@ -964,9 +979,10 @@ direct and reciprocal space terms as
   \left(\cos\theta_{\mathbf{R}}\right)e^{im\phi_{\mathbf{R}}}{\cal G}_{l}\left(\beta,R\right)\\
   &-\sum_{\mathbf{R}\in{\rm In}}\widetilde{P}_{l}^{m}\left(\cos\theta_{\mathbf{R}}\right) 
   e^{im\phi_{\mathbf{R}}}{\cal F}_{l}(\beta,R)\\
-  &+\frac{4\pi ^{\frac{3}{2}}(i/2)^{l}}{V_{uc}\Gamma(l+1/2)}\\
-  &\sum_{\mathbf{G}\neq\left\{\emptyset\right\}}G^{l-2}
-  e^{-\frac{\pi^{2}G^{2}}{\beta^{2}}}\widetilde{P}_{l}^{m}\left(\cos\theta_{\mathbf{G}}\right) 
+  &+\frac{4\pi ^{\frac{3}{2}}(i/2)^{l}}{V_{uc}\Gamma(l+1/2)}
+  \sum_{\mathbf{G}\neq\left\{\emptyset\right\}}G^{l-2}
+  e^{-\frac{\pi^{2}G^{2}}{\beta^{2}}}\\
+  &\times\widetilde{P}_{l}^{m}(\cos\theta_{\mathbf{G}})
   e^{im\phi _{\mathbf{G}}},
   \end{split}
 \end{equation*}
@@ -1004,7 +1020,7 @@ The derivative of ${\cal M}_l^m$ with respect to cell parameters $M_{ij}$ is
    &+\frac{4\pi^{\frac{3}{2}}(i/2)^{l}}{V_{uc}\Gamma(l+1/2)}
    \sum_{\mathbf{G}\neq\left\{\emptyset\right\}}
    G^{l-3}e^{-\frac{\pi^{2}G^{2}}{\beta^{2}}}e^{im\phi_{\mathbf{G}}}\\
-   &\bigg(
+   &\times\bigg(
    \frac{-1}{V_{uc}}\frac{\partial V_{uc}}{\partial M_{ij}}
    G\widetilde{P}_{l}^{m}+(l-2)\frac{\partial G}{\partial M_{ij}}\widetilde{P}_{l}^{m}\\
    &-2\pi^2\left(\frac{G}{\beta}\right)^2
@@ -1049,20 +1065,30 @@ Derivation of ${\cal G}_{l}(\beta,R)$ and ${\cal F}_{l}(\beta,R)$ are given by
 \begin{equation*}
   \begin{split}
     \frac{\partial{\cal G}_{l}}{\partial M_{ij}}(\beta,R)&=
-    \frac{1}{\Gamma(l+1/2)R^{l+1}}
-    \bigg(2(\beta R)^{2l}e^{-\beta^2R^2}
+    \frac{1}{\Gamma(l+1/2)R^{l+2}}
+    \bigg(2R(\beta R)^{2l}e^{-\beta^2R^2}
     \frac{\partial(R\beta)}{\partial M_{ij}}\\
-    &-(l+1)\frac{\gamma(l+1/2,\beta^2R^2)}{R}\frac{\partial R}{\partial M_{ij}}  \bigg),
+    &-(l+1)\gamma(l+1/2,\beta^2R^2)\frac{\partial R}{\partial M_{ij}} \bigg),
+%    \frac{\partial{\cal G}_{l}}{\partial M_{ij}}(\beta,R)&=
+%    \frac{1}{\Gamma(l+1/2)R^{l+1}}
+%    \bigg(2(\beta R)^{2l}e^{-\beta^2R^2}
+%    \frac{\partial(R\beta)}{\partial M_{ij}}\\
+%    &-(l+1)\frac{\gamma(l+1/2,\beta^2R^2)}{R}\frac{\partial R}{\partial M_{ij}} \bigg),
   \end{split}
 \end{equation*}
 and 
 \begin{equation*}
   \begin{split}
     \frac{\partial{\cal F}_{l}}{\partial M_{ij}}(\beta,R)&=
-    \frac{-1}{\Gamma(l+1/2)R^{l+1}}
-    \bigg(2(\beta R)^{2l}e^{-\beta^2R^2}
+    \frac{-1}{\Gamma(l+1/2)R^{l+2}}
+    \bigg(2R(\beta R)^{2l}e^{-\beta^2R^2}
     \frac{\partial (R\beta)}{\partial M_{ij}}\\
-    &+(l+1)\frac{\Gamma(l+1/2,\beta^2R^2)}{R}\frac{\partial R}{\partial M_{ij}} \bigg).
+    &+(l+1)\Gamma(l+1/2,\beta^2R^2)\frac{\partial R}{\partial M_{ij}} \bigg).
+%    \frac{\partial{\cal F}_{l}}{\partial M_{ij}}(\beta,R)&=
+%    \frac{-1}{\Gamma(l+1/2)R^{l+1}}
+%    \bigg(2(\beta R)^{2l}e^{-\beta^2R^2}
+%    \frac{\partial (R\beta)}{\partial M_{ij}}\\
+%    &+(l+1)\frac{\Gamma(l+1/2,\beta^2R^2)}{R}\frac{\partial R}{\partial M_{ij}} \bigg).
   \end{split}
 \end{equation*}
 %\begin{equation*}
