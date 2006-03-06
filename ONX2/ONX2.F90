@@ -155,7 +155,7 @@ PROGRAM ONX2
   !------------------------------------------------
   ! Initialization and allocations.
 #ifdef ONX2_PARALLEL
-  NULLIFY(ListC,ListD)
+  NULLIFY(ListC,ListD,DFM,KxFM)
 #else
   NULLIFY(ListC)
 #endif
