@@ -262,6 +262,7 @@ CONTAINS
     TYPE(FASTMAT), POINTER              :: BFastMat
     LOGICAL                             :: CollectInPar
     !-------------------------------------------------------------------
+    NULLIFY(BFastMat)
     !
     ! Test if we need to do a partition at level 1.
     IF(.NOT.PartAtLevel1) THEN
@@ -304,7 +305,7 @@ CONTAINS
   !     Get a DBCSR matrix
   SUBROUTINE Get_DBCSR_Part(A,Name,ParType,PFix_O,CheckPoint_O)
     IMPLICIT NONE
-    TYPE(DBCSR),                INTENT(INOUT) :: A     
+    TYPE(DBCSR)                               :: A     
     LOGICAL,          OPTIONAL, INTENT(IN   ) :: CheckPoint_O
     CHARACTER(LEN=*),           INTENT(IN   ) :: Name,ParType
     CHARACTER(LEN=*), OPTIONAL, INTENT(IN   ) :: PFix_O
@@ -317,6 +318,7 @@ CONTAINS
     integer :: TotNBlks,TotNNon0
 #endif
     !-------------------------------------------------------------------------------
+    NULLIFY(BFastMat)
 #ifdef ONX2_PARALLEL
     IF(PRESENT(Checkpoint_O))THEN
        InParTemp=InParallel
@@ -406,12 +408,12 @@ CONTAINS
 !     Scatter a serial BCSR matrix from ROOT to a distributed BCSR matrix
 !============================================================================
   SUBROUTINE Set_DBCSR_EQ_BCSR_Part(B,A,PrcDist)
-    TYPE(BCSR),  INTENT(INOUT)  :: A
-    TYPE(DBCSR), INTENT(INOUT)  :: B
+    TYPE(BCSR)                  :: A
+    TYPE(DBCSR)                 :: B
     INTEGER                     :: I,Id,J,JG,M,MN,MN1,P,  &
          &                         NAtms,NBlks,NNon0!,DUM(3)
     LOGICAL                     :: ReAllocate
-    TYPE(INT_VECT), INTENT(IN)  :: PrcDist
+    TYPE(INT_VECT)              :: PrcDist
     !TYPE(INT_VECT) :: V
 !-----------------------------------------------------------------------
 !        Allocate if required
@@ -522,7 +524,7 @@ CONTAINS
     IMPLICIT NONE
     !-------------------------------------------------------------------
     TYPE(FASTMAT )  , POINTER       :: A
-    TYPE(INT_VECT)  , INTENT(INOUT) :: PrcDist
+    TYPE(INT_VECT)                  :: PrcDist
     CHARACTER(LEN=*), INTENT(IN   ) :: ParType
     !-------------------------------------------------------------------
     !
@@ -594,7 +596,7 @@ CONTAINS
 !H---------------------------------------------------------------------------------
     IMPLICIT NONE
     !-------------------------------------------------------------------
-    TYPE(INT_VECT), INTENT(INOUT) :: PrcDist
+    TYPE(INT_VECT)                :: PrcDist
     !-------------------------------------------------------------------
     INTEGER                       :: iPrc
     LOGICAL                       :: InParTemp
@@ -756,8 +758,8 @@ CONTAINS
     IMPLICIT NONE
     !-------------------------------------------------------------------
     TYPE(FASTMAT ), POINTER    :: A
-    TYPE(INT_VECT), INTENT(IN) :: VRow,VCol
-    TYPE(DBL_VECT), INTENT(IN) :: VPar
+    TYPE(INT_VECT)             :: VRow,VCol
+    TYPE(DBL_VECT)             :: VPar
     INTEGER       , INTENT(IN) :: N
     !-------------------------------------------------------------------
     TYPE(FASTMAT ), POINTER    :: C
@@ -766,6 +768,7 @@ CONTAINS
     REAL(DOUBLE)               :: Par
     !-------------------------------------------------------------------
     !
+    NULLIFY(C,P)
     ! Some checks.
     IF(ASSOCIATED(A))THEN
        CALL Delete_FASTMAT1(A)
@@ -801,7 +804,7 @@ CONTAINS
     !-------------------------------------------------------------------
     TYPE(FASTMAT)   , POINTER       :: A
     CHARACTER(LEN=*), INTENT(IN   ) :: ParType
-    TYPE(INT_VECT)  , INTENT(INOUT) :: PrcDist
+    TYPE(INT_VECT)                  :: PrcDist
     !-------------------------------------------------------------------
     INTEGER                         :: IPrc
     TYPE(DBL_VECT)                  :: DeltaT
@@ -889,12 +892,12 @@ CONTAINS
     IMPLICIT NONE
     !-------------------------------------------------------------------
     TYPE(FASTMAT )          , POINTER       :: A
-    TYPE(INT_VECT)          , INTENT(  OUT) :: PrcDist
+    TYPE(INT_VECT)                          :: PrcDist
     INTEGER       , OPTIONAL, INTENT(IN   ) :: NumPrc_O
     CHARACTER(LEN=*)        , INTENT(IN   ) :: ParType
-    TYPE(DBL_VECT), OPTIONAL, INTENT(IN   ) :: W_O
-    TYPE(INT_VECT), OPTIONAL, INTENT(IN   ) :: Copy_O
-    TYPE(DBL_VECT), OPTIONAL, INTENT(INOUT) :: DeltaT_O
+    TYPE(DBL_VECT), OPTIONAL                :: W_O
+    TYPE(INT_VECT), OPTIONAL                :: Copy_O
+    TYPE(DBL_VECT), OPTIONAL                :: DeltaT_O
     !-------------------------------------------------------------------
     TYPE(DBL_VECT)                          :: T
     TYPE(DBL_VECT)                          :: W
@@ -1009,9 +1012,9 @@ CONTAINS
     IMPLICIT NONE
     !-------------------------------------------------------------------
     TYPE(FASTMAT ), POINTER                 :: A
-    TYPE(INT_VECT), INTENT(IN   )           :: ColP
-    TYPE(INT_VECT), INTENT(INOUT)           :: PrcDist
-    TYPE(DBL_VECT), INTENT(INOUT), OPTIONAL :: DeltaT_O
+    TYPE(INT_VECT)                          :: ColP
+    TYPE(INT_VECT)                          :: PrcDist
+    TYPE(DBL_VECT)               , OPTIONAL :: DeltaT_O
     CHARACTER(LEN=*),INTENT(IN  )           :: ParType
     INTEGER       , INTENT(IN   )           :: NbrPrt
     INTEGER       , INTENT(IN   ), OPTIONAL :: NumPrc_O
@@ -1028,6 +1031,7 @@ CONTAINS
     INTEGER       , PARAMETER               :: TYPE_TIME = 2
     !-------------------------------------------------------------------
     !
+    NULLIFY(P,U)
     ! Set number of proc's.
     NumPrc = NPrc
     IF(PRESENT(NumPrc_O)) NumPrc = NumPrc_O
@@ -1143,9 +1147,9 @@ CONTAINS
     IMPLICIT NONE
     !-------------------------------------------------------------------
     TYPE(FASTMAT )          , POINTER       :: A
-    TYPE(INT_VECT)          , INTENT(OUT  ) :: PrcDist
-    TYPE(DBL_VECT), OPTIONAL, INTENT(IN   ) :: W_O
-    TYPE(DBL_VECT), OPTIONAL, INTENT(INOUT) :: DeltaT_O
+    TYPE(INT_VECT)                          :: PrcDist
+    TYPE(DBL_VECT), OPTIONAL                :: W_O
+    TYPE(DBL_VECT), OPTIONAL                :: DeltaT_O
     INTEGER       , OPTIONAL, INTENT(IN   ) :: NumPrc_O
     CHARACTER(LEN=*)        , INTENT(IN   ) :: ParType
     !-------------------------------------------------------------------
@@ -1190,7 +1194,7 @@ CONTAINS
     !-------------------------------------------------------------------
     TYPE(FASTMAT)   , POINTER       :: A
     CHARACTER(LEN=*), INTENT(IN   ) :: ParType
-    TYPE(INT_VECT)  , INTENT(INOUT) :: PrcDist
+    TYPE(INT_VECT)                  :: PrcDist
     !-------------------------------------------------------------------
     INTEGER                      :: Row,Col,M,N,AtA,IPrc,OpBI
     INTEGER                      :: WMaxI,WMinI,WtI,LBI,UBI,midBI,BI
@@ -1277,7 +1281,7 @@ CONTAINS
     IMPLICIT NONE
     !-------------------------------------------------------------------
     TYPE(FASTMAT )  , POINTER     :: A
-    TYPE(DBL_VECT)  , INTENT(OUT) :: T
+    TYPE(DBL_VECT)                :: T
     CHARACTER(LEN=*), INTENT(IN ) :: ParType
     !-------------------------------------------------------------------
     TYPE(FASTMAT )  , POINTER     :: P
@@ -1287,6 +1291,8 @@ CONTAINS
     INTEGER         , PARAMETER   :: TYPE_NON0=1
     INTEGER         , PARAMETER   :: TYPE_TIME=2
     !-------------------------------------------------------------------
+    !
+    NULLIFY(P,U)
     !
     SELECT CASE(TRIM(ParType))
     CASE('Non0'); IType=TYPE_NON0
@@ -1343,7 +1349,7 @@ CONTAINS
 !H---------------------------------------------------------------------------------
     IMPLICIT NONE
     !-------------------------------------------------------------------
-    TYPE(DBL_VECT)   , INTENT(IN) :: T
+    TYPE(DBL_VECT)                :: T
     INTEGER, OPTIONAL, INTENT(IN) :: NumPrc_O
     REAL(DOUBLE)                  :: OpB
     !-------------------------------------------------------------------
@@ -1392,8 +1398,8 @@ CONTAINS
     IMPLICIT NONE
     !-------------------------------------------------------------------
     INTEGER       , INTENT(OUT) :: RowP
-    TYPE(INT_VECT), INTENT(OUT) :: ColP
-    TYPE(DBL_VECT), INTENT(OUT) :: Weight
+    TYPE(INT_VECT)              :: ColP
+    TYPE(DBL_VECT)              :: Weight
     !-------------------------------------------------------------------
     INTEGER                     :: ColTot,iRow
     !-------------------------------------------------------------------
@@ -1480,7 +1486,7 @@ CONTAINS
 !H---------------------------------------------------------------------------------
     IMPLICIT NONE
     !-------------------------------------------------------------------
-    TYPE(DBL_VECT), INTENT(IN) :: T
+    TYPE(DBL_VECT)             :: T
     REAL(DOUBLE  ), INTENT(IN) :: B,Wt
     INTEGER       , INTENT(IN) :: NumPrc
     !-------------------------------------------------------------------
@@ -1509,7 +1515,7 @@ CONTAINS
 !H---------------------------------------------------------------------------------
     IMPLICIT NONE
     !-------------------------------------------------------------------
-    TYPE(INT_VECT), INTENT(IN) :: PrcDist
+    TYPE(INT_VECT)             :: PrcDist
     !-------------------------------------------------------------------
     INTEGER                    :: iPrc
     !-------------------------------------------------------------------
@@ -1633,7 +1639,7 @@ CONTAINS
     ENDDO
   END SUBROUTINE PChkSum_FASTMAT2
   SUBROUTINE CheckSum_DBCSR2(A,Name,Proc_O,Unit_O)
-    TYPE(DBCSR), INTENT(IN)   :: A
+    TYPE(DBCSR)               :: A
     CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Proc_O
     INTEGER,         OPTIONAL,INTENT(IN) :: Unit_O
     REAL(DOUBLE)              :: Chk
