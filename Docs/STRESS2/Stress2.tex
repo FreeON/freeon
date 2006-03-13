@@ -60,7 +60,7 @@
 %\title{Density functional energy gradients with respect to atomic positions and cell parameters
 %  within the $\Gamma$-point approximation}
 \title{Energy gradients with respect to atomic positions and cell parameters
-  for the density functional theory at the $\Gamma$-point}
+  for the Kohn-Sham density functional theory at the $\Gamma$-point}
 
 \author{Val\'ery Weber}
 \affiliation{Department of Chemistry, University of Fribourg, 1700 Fribourg, Switzerland.}%
@@ -79,13 +79,24 @@
   with experimental values. Recently, construction of the exact Hartree-Fock exchange
   gradients with respect to atomic positions and cell parameters
   within the $\Gamma$-point approximation
-  has been introduced [J. Chem. Phys. {\bf ???}, ????, (2006)].
+  has been introduced [Submitted to J. Chem. Phys. (2006)].%[J. Chem. Phys. {\bf ???}, ????, (2006)].
   In this article, the formalism is extended to the evaluation of
   analytical $\Gamma$-point density functional atomic and cell gradients. 
+%
+  While the evaluation of Coulomb and exchange-correlation gradients with 
+  respect to atomic positions are similar to those in the gas phase limit,
+  the gradients with respect to cell parameters needs to be treated with some care.
+  The derivative of the far field multipole interaction tensor needs to be carefully handled in
+  both direct and reciprocal space and the exchange-correlation energy derivative 
+  leads to a surface term which has its origin in the derivative of the 
+  limits of the integration over the cell.
+%
   As an illustration, the analytical gradients have been used
   in conjunction with the QUICCA algorithm [K. N\'emeth and M. Challacombe,
   J. Chem. Phys. {\bf 121}, 2877, (2004)] to optimize 1D and 3D periodic
-  systems at the DFT and hybride-HF/DFT levels.
+  systems at the DFT and hybride-HF/DFT levels. We also report
+  the full relaxation of forsterite supercells at the B3LYP level of theory.
+
 \end{abstract}
 
 %\pacs{Valid PACS appear here}% PACS, the Physics and Astronomy
@@ -94,7 +105,7 @@
                               %display desired
 \maketitle
 
-\footnotetext[1]{Preprint LA-UR-?????.}
+\footnotetext[1]{Preprint LA-UR-06-1746.}
 
 \section{Introduction}
 In preceding papers, we have developed linear scaling quantum chemical methods
@@ -105,7 +116,7 @@ In this paper, the implementation of the Coulomb and exchange-correlation
 energy gradients with respect to atomic positions and cell parameters
 at the $\Gamma$-point is presented.
 
-Kohn-Sham density functional theory has proven to be a highly 
+The Kohn-Sham approach to density functional theory has proven to be a highly 
 competitive method for a wide range of applications in solid 
 state physics and chemistry.
 The hybrid Hartree-Fock/Density Functional Theory (hybrid-HF/DFT) model chemistries
@@ -126,14 +137,12 @@ the corresponding ${\bf k}$-space limit was recently
 demonstrated by us for DFT~\cite{CTymczak04a}, HF and hybrid-HF/DFT~\cite{CTymczak04b} 
 level of theories as well as for the Hartree-Fock 
 atomic and cell gradients~\cite{VWeber05b}.
-
 For one dimensional fluoric acid chains (HF)$_n$, the convergence of the 
 HF-MIC $\Gamma$-point energy, atomic and cell forces to the converged 
 large cell $\Gamma$-point approximation with respect to cell length 
 have been explicitly shown to be exponential in the cell size~\cite{VWeber05b}. 
 A fast convergence of the total energy and geometrical parameters
 have also been observed for 3D systems such as MgO and urea.
-
 The $\Gamma$-point approach enables study of very large
 complex and disordered systems such as liquids, low concentration defects, adsorption of
 large molecule on surfaces, {\em etc}, where conventional methods
@@ -174,13 +183,22 @@ presented by Doll, Saunders and Harrison~\cite{KDoll01} and Doll \cite{KDoll01a}
 Their implementation is based on the Hermite Gaussian-type functions
 in the context of the McMurchie-Davidson algorithm~\cite{LMcmurchie78}.
 
-In this paper, we will show that the evaluation of the atomic energy gradients
-within the $\Gamma$-point approximation does not lead to special difficulties. 
-The implementation requires mainly the evaluation of the derivative 
-of the basis function with respect to atomic positions.
-However, difficulties arise when derivative of the 
-multipole interaction tensor and exchange-correlation energy 
-are taken with respect to cell parameters. 
+This paper describes the complete implementation of the atomic and lattice gradients
+within the Kohn-Sham approach to density functional theory at the $\Gamma$-point.
+We show that, like for the exact HF exchange, the evaluation 
+of the atomic gradients within the $\Gamma$-point approximation 
+does not lead to special difficulties. The implementation requires mainly 
+the evaluation of the derivative of the basis function with respect 
+to atomic positions.
+However, difficulties arise when derivative of the total energy
+is taken with respect to lattice parameters. For the periodic far field Coulomb term,
+the derivative of the multipole interaction tensor needs to be carefully handled in 
+both direct and reciprocal space. 
+The exchange-correlation energy derivative leads to a surface term, which has its
+origin in the derivative of the limits of the integration over the cell.
+We finally demonstrate the convergence of geometrical parameters and total 
+energy for few periodic systems within the DFT and hybrid-HF/DFT $\Gamma$-point
+super cell approach to the converged large cell $\Gamma$-point approximation.
 
 The remainder of this paper is organized as follows:
 In Section~\ref{Sec:Formalism}, we introduce the formalism and discuss
@@ -253,7 +271,7 @@ is the electron-electron and electron-nuclear Coulomb matrix,
 $E^{xc}$ the exchange-correlation energy, $K$ is the exact 
 Hartree-Fock exchange matrix and $h_{nuc}$ is the nuclear-nuclear and nuclear-electron energy.
 The factors $\alpha_1$ and $\alpha_2$ are mixing coefficients of the
-exact Hartree-Fock and exchange-correlation energies respectively.
+exact Hartree-Fock exchange and exchange-correlation energies respectively.
 
 %within the $\Gamma$-point approximation~\cite{CTymczak04a,CTymczak04b}
 %where the indices $\mathbf{mn}$ run over the direct lattice vectors,
@@ -387,8 +405,8 @@ and
 \end{equation*}
 where $\partial\rho^{lm}_{ab}/\partial G_i$ and $\partial\rho^{lm}_{ab}/\partial M_{ij}$
 are simple and do not need to be shown here. The calculation of 
-$\partial {\cal M}_l^m/\partial M_{ij}$ is straightforward but tedious
-and is shown in the Appendix~\ref{Apx:MDer} for completeness.
+$\partial {\cal M}_l^m/\partial M_{ij}$ %is straightforward but tedious and 
+is shown in the Appendix~\ref{Apx:MDer}.% for completeness.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{Tin-Foil}
@@ -458,7 +476,7 @@ The exchange-correlation energy is thus
   =\int_{V_\Box}\tilde\varepsilon_{xc}[\rho(\mathbf{r})]dV
   =\int_{V_\Box}\tilde\varepsilon_{xc}(\mathbf{r})dV,
 \end{equation}
-where $\rho(\mathbf{r})=\sum_{ab}P_{ab}\sum_{\bf R}\rho_{ab}({\bf r+R})$ is the periodic 
+where $\rho(\mathbf{r})=\sum_{ab{\bf R}}P_{ab}\rho_{ab}({\bf r+R})$ is the periodic 
 electronic density.
 In the following, the subscript $\Box$ will always refer to the cuboid cell.
 This simple integration volume should be contrasted with more
@@ -544,7 +562,8 @@ in the forces.
 In order to demonstrate the capabilities of our implementation of the
 Khon-Sham density functional energy atomic and cell gradients, we present in this Section
 full optimization studies of 1D and 3D periodic systems without any cell
-or atomic positions symmetry constraints.
+or atomic positions symmetry constraints. The optimizations were carried out with
+the QUICCA algorithm~\cite{KNemeth04,KNemeth05}.
 Our first benchmark case is the optimization of 1D polytetrafluoroethylene (CF$_2$)$_{2n}$
 at the Perdew-Wang~\cite{JPerdew92} level of theory. The PW91 functional has been obtained from the
 the Density Functional Repository~\cite{DFRepository}.
@@ -649,7 +668,7 @@ while the system grows.
     for cubic (MgO)$_n$ using the periodic $\Gamma$-point
     PBE/8-61G(Mg)/8-51G(O) and B3LYP/8-61G(Mg)/8-51G(O) level 
     of theories and the {\tt TIGHT} thresholds.
-    Cell parameters and energies are in \AA ngstr\"oms~and atomic unit respectively.
+    Cell parameters and energies are in \AA ngstr\"oms~and atomic units respectively.
   }\label{Tab:MgO}
   \begin{tabular}{lcrccc}
   \toprule
@@ -659,16 +678,32 @@ while the system grows.
     & PBE   &   4 & 4.331 & $-$275.243165 & 0.4998 \\%
     &       &  32 & 4.213 & $-$275.284428 & 0.5000 \\%
     &       & 108 & 4.212 & $-$275.284641 & 0.5000 \\%
+  \hline
+    {\sc Crystal03}\footnote[2]{$8\times 8\times 8$ $\mathbf{k}$-points.}
+    & PBE   &   1 & 4.212 & $-$275.284731 & $1/2$ \\
+  \hline
+    {\sc MondoSCF}$^{\rm a}$
     & B3LYP &   4 & 4.328 & $-$275.389093 & 0.4972 \\%VWN5
     &       &  32 & 4.204 & $-$275.431167 & 0.5000 \\%VWN5
     &       & 108 & 4.204 & $-$275.431343 & 0.5000 \\%VWN5
   \hline
-    {\sc Crystal03}\footnote[2]{$8\times 8\times 8$ $\mathbf{k}$-points.}
-    & PBE   &   1 & 4.212 & $-$275.284731 & $1/2$ \\
+    {\sc Crystal03}$^{\rm b}$
     & B3LYP &   1 & 4.204 & $-$275.431235 & $1/2$ \\
+%  \hline
+%    {\sc MondoSCF}\footnote[1]{$\Gamma$-point.} 
+%    & PBE   &   4 & 4.331 & $-$275.243165 & 0.4998 \\%
+%    &       &  32 & 4.213 & $-$275.284428 & 0.5000 \\%
+%    &       & 108 & 4.212 & $-$275.284641 & 0.5000 \\%
+%    & B3LYP &   4 & 4.328 & $-$275.389093 & 0.4972 \\%VWN5
+%    &       &  32 & 4.204 & $-$275.431167 & 0.5000 \\%VWN5
+%    &       & 108 & 4.204 & $-$275.431343 & 0.5000 \\%VWN5
+%  \hline
+%    {\sc Crystal03}\footnote[2]{$8\times 8\times 8$ $\mathbf{k}$-points.}
+%    & PBE   &   1 & 4.212 & $-$275.284731 & $1/2$ \\
+%    & B3LYP &   1 & 4.204 & $-$275.431235 & $1/2$ \\
   \hline
     {Exp.}\footnote[3]{Experimental value~\cite{RWyckoff63}.}
-    &       &   1 & 4.20  &               &  \\
+    &       &   1 & $4.20\;\;$  &               &  \\
 %    {Exp.}\footnote[4]{Experimental value~\cite{SSinogeikin99,SSinogeikin00}.}
 %    &       &   1 & 4.211 &               &  \\
 %%%%
@@ -731,6 +766,17 @@ obtained by Jochym, Parlinski and Krzywiec~\cite{PJochym04} with the {\sc Vasp}~
 code and a $3\times 3\times 3$ $\mathbf{k}$-points integration grid.
 We also report the experimental cell parameters 
 measured by Yoder and Sahama~\cite{HYoder57}.
+As for the MgO case, the smallest system (Mg$_2$SiO$_4$)$_4$
+shows a large discrepancy for the cell parameters 
+with respect to the {\sc Vasp} and experimental values. 
+The larger systems  {\em i.e.} the $2\times 1\times 2$ and $3\times 1\times 2$ supercells
+give cell parameters in very good agreement with the experimental data; 
+and the energies systematical converge while the system grows.
+%The total CPU time needed to fully relax the forsterite, 
+%from the smallest to the biggest systems, were 592, 1664, 2816 and 8320 hours respectively.
+The cell parameters obtained from the $\Gamma$-point
+B3LYP/8-61G*(Mg)/88-31G*(Si)/8-51G*(O) level of theory 
+deviate less than 1\% with respect to the experimental values.
 %with the constraint $\alpha=\beta=\gamma=90^\circ$. 
 %
 % See:
@@ -766,7 +812,7 @@ measured by Yoder and Sahama~\cite{HYoder57}.
     $1\times 1\times 1$, $2\times 1\times 1$, $2\times 1\times 2$ 
     and $3\times 1\times 2$, respectively.
 %    $n$ is the number of MgO units in the (super)cell.
-    Cell parameters and energies are in \AA ngstr\"oms~and atomic unit respectively.
+    Cell parameters and energies are in \AA ngstr\"oms~and atomic units respectively.
   }\label{Tab:Forsterite}
   \begin{tabular}{crcccc}
   \toprule
@@ -901,7 +947,7 @@ measured by Yoder and Sahama~\cite{HYoder57}.
     & 24 & 4.787 & 10.257 & 5.995 & $-$991.271841 \\%
   \hline
     {\sc Vasp}\footnote[2]{$3\times 3\times 3$ $\mathbf{k}$-points~\cite{PJochym04}.}
-    &  4 & 4.7995 & 10.3056 & 6.0408 & \\
+    &  4 & 4.800 & 10.306 & 6.041 & \\
   \hline
     {Exp.}\footnote[3]{Experimental values~\cite{HYoder57}.}
     &  4 & 4.756  & 10.195  & 5.981  & \\
@@ -916,17 +962,6 @@ measured by Yoder and Sahama~\cite{HYoder57}.
 %a 4,756  b 10,195  c 5,981
 % H.S. Yoder, G. Sahama, The American Mineralogist 42 (1957) 475­491.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-As for the MgO case, the smallest system (Mg$_2$SiO$_4$)$_4$
-shows a large discrepancy for the cell parameters 
-with respect to the {\sc Vasp} and experimental values. 
-The larger systems  {\em i.e.} the $2\times 1\times 2$ and $3\times 1\times 2$ supercells
-give cell parameters in very good agreement with the experimental data; 
-and the energies systematical converge while the system grows.
-%The total CPU time needed to fully relax the forsterite, 
-%from the smallest to the biggest systems, were 592, 1664, 2816 and 8320 hours respectively.
-The cell parameters obtained from the $\Gamma$-point
-B3LYP/8-61G*(Mg)/88-31G*(Si)/8-51G*(O) level of theory 
-deviate less than 1\% with respect to the experimental values.
 
 \section{Conclusions}\label{Sec:Conclusions}
 In a previous paper, construction of the analytical 
@@ -937,25 +972,34 @@ In this article, the formalism for the evaluation of the density
 functional gradients at the $\Gamma$-point approximation for 
 Cartesian Gaussian-type basis functions was presented and 
 implemented in the {\sc MondoSCF} package.
+We show that, like for the exact HF exchange, the evaluation
+of the atomic gradients within the $\Gamma$-point approximation
+does not lead to special difficulties. The implementation requires mainly
+the evaluation of the derivative of the basis function with respect
+to atomic positions.
+However, difficulties arise when derivative of the total energy
+is taken with respect to lattice parameters. For the periodic far field Coulomb term,
+the derivative of the multipole interaction tensor needs to be carefully handled in
+both direct and reciprocal space.
+The exchange-correlation energy derivative leads to a surface term, which has its
+origin in the derivative of the limits of the integration over the cell.
+We finally demonstrate the convergence of geometrical parameters and total
+energy for few periodic systems within the DFT and hybrid-HF/DFT $\Gamma$-point
+super cell approach to the converged large cell $\Gamma$-point approximation.
 
 As an illustration, the analytical atomic and cell gradients have been used
 in conjunction with the QUICCA algorithm to optimize few 1D and 3D periodic systems at
 the DFT and hybrid-HF/DFT level of theories.
-
 Convergence of bond lengths, bond angles and 
 cell parameters within the DFT and hybrid-HF/DFT $\Gamma$-point
 super cell approach and under full relaxation with no symmetry
 to the converged large cell $\Gamma$-point approximation have
 been demonstrated for 1D and 3D systems to better than 3 digits.
-
-
-Although the convergence of the Kohn-Sham density functional $\Gamma$-point total energy to
+Although the convergence of the Kohn-Sham $\Gamma$-point total energy to
 its ${\bf k}$-space integration counterpart with respect to cell size is relatively slow,
 the convergence of the geometrical parameters (cell and atomic positions)
 requires much smaller cells. Thus, we could show that a relative accuracy better
 than 3 digits can be already achieved with cubic cells of about $600$\AA$^3$.\\
-
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -999,7 +1043,7 @@ direct and reciprocal space terms as
 \end{equation*}
 where $\mathbf{G}$ is a reciprocal lattice vector, $G=|\mathbf{G}|$, $R=\left|\mathbf{R}\right|$,
 $\widetilde{P}_{l}^{m}$ is the associated Legendre polynomial, 
-$\beta=\sqrt{\pi }/V_{\rm uc}^{\frac{1}{3}}$ for convinence,
+$\beta=\sqrt{\pi }/V_{\rm uc}^{\frac{1}{3}}$ for convenience,
 \begin{equation*}
   {\cal G}_{l}(\beta,R) =\frac{\gamma(l+1/2,\beta^{2}R^{2})}{\Gamma(l+1/2)R^{l+1}}
 \end{equation*}
