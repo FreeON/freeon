@@ -282,6 +282,12 @@ MODULE PBCFarField
       REAL(DOUBLE)                          :: PFFTau
       REAL(DOUBLE),DIMENSION(3)             :: PQ
 !---------------------------------------------------------------------------------!
+
+      
+      ML1=GMLoc%PBC%PFFMaxEll
+      WRITE(*,*)' FUcked up CalMaxEll hardwired for now at ...',ML1
+      RETURN
+
       PFFTau = TauMAC
 !
 !     First, Determint the Distance to the Nearest Cell in the CellSet CS_inf-CS_IN 
