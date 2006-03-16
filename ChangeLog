@@ -1,3 +1,31 @@
+2006-03-14 17:12  vweber
+
+	* Docs/STRESS2/: Stress2.tex, Let.tex: [no log message]
+
+2006-03-14 14:35  vweber
+
+	* Docs/Bib/mondo_new.bib: [no log message]
+
+2006-03-14 11:42  mchalla
+
+	* QCTC/PBCFarField.F90: This is to fix the fucked up CalMaxEll
+
+2006-03-14 10:45  vweber
+
+	* Docs/: STRESS2/Stress2.tex, Bib/mondo_new.bib: [no log message]
+
+2006-03-13 10:37  vweber
+
+	* Docs/STRESS2/Stress2.tex: [no log message]
+
+2006-03-11 07:03  mchalla
+
+	* MondoMods/Thresholding.F90: Fixed CJ indexing.
+
+2006-03-11 06:12  mchalla
+
+	* ChangeLog: [no log message]
+
 2006-03-09 09:22  vweber
 
 	* Docs/STRESS2/Let.tex: [no log message]
