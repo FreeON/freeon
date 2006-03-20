@@ -20,75 +20,110 @@ PROGRAM QCTC
   USE PBCFarField
   USE JGen
   USE NukularE
-!  USE ParallelQCTC
+  USE Density
   USE Clock
   USE TreeWalk
   IMPLICIT NONE
   TYPE(BCSR)                     :: J
   TYPE(BCSR)                     :: T1,T2
+  TYPE(BCSR)                     :: Dmat,D1,D2
+  TYPE(INT_VECT)                 :: Stat
+  TYPE(HGLL),POINTER             :: RhoHead
   REAL(DOUBLE)                   :: E_Nuc_Tot,SdvErrorJ,MaxErrorJ,JMExact
   REAL(DOUBLE)                   :: QCTC_TotalTime_Start
   TYPE(TIME)                     :: TimeMakeJ,TimeMakeTree,TimeNukE
   CHARACTER(LEN=4),PARAMETER     :: Prog='QCTC'
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg
-  TYPE(CRDS)                     :: GM_MM
-  REAL(DOUBLE)                   :: MM_COUL,E_C_EXCL,CONVF  
-  INTEGER                        :: I,K,UOUT !!!!
+  INTEGER                        :: I,K,NLink,OldFileID
+
   !  REAL(DOUBLE),EXTERNAL          :: MondoTimer
   !------------------------------------------------------------------------------- 
   QCTC_TotalTime_Start=MTimer()
-
   ! Start up macro
   CALL StartUp(Args,Prog,Serial_O=.FALSE.)
-  ! Get basis set and geometry
-  CALL Get(BS,Tag_O=CurBase)
-  CALL Get(GM,Tag_O=CurGeom)
-  ! Allocations 
-  CALL NewBraBlok(BS)
-  ! What Action to Take
-  IF(SCFActn=='InkFok')THEN
-     CALL Get(Rho,'DeltaRho',Args,0)
-     CALL Get(RhoPoles,'Delta')
-  ELSE IF(SCFActn=='ForceEvaluation')THEN
-     IF(MMOnly()) THEN
-        CALL Get(Rho,'Rho',Args,Current(1))
-        CALL Get(RhoPoles)
-     ELSE
-        CALL Get(Rho,'Rho',Args,1,Bcast_O=.TRUE.)
-        CALL Get(RhoPoles)
-     ENDIF
+  ! Chose a density matrix
+  IF(SCFActn=='BasisSetSwitch')THEN
+     ! Get the previous information
+     CALL Get(BS,PrvBase)
+     CALL Get(GM,CurGeom)
+     CALL SetThresholds(PrvBase)
+     CALL Get(BSiz,'atsiz',PrvBase)
+     CALL Get(OffS,'atoff',PrvBase)
+     CALL Get(NBasF,'nbasf',PrvBase)
+     CALL Get(Dmat,TrixFile('D',Args,-1))
+  ELSEIF(SCFActn=='Restart'.OR. SCFActn=='RestartBasisSwitch')THEN
+     ! Get the current geometry from the current HDF first
+     CALL Get(GM,CurGeom)
+     ! then close current group and HDF
+     CALL CloseHDFGroup(H5GroupID)
+     CALL CloseHDF(HDFFileID)
+     ! and open the old group and HDF
+     HDF_CurrentID=OpenHDF(Restart)
+     OldFileID=HDF_CurrentID
+     CALL New(Stat,3)
+     CALL Get(Stat,'current_state')
+     HDF_CurrentID=OpenHDFGroup(HDF_CurrentID,"Clone #"//TRIM(IntToChar(MyClone)))
+     ! Get old basis set stuff
+     SCFCycl=TRIM(IntToChar(Stat%I(1)))
+     CurBase=TRIM(IntToChar(Stat%I(2)))
+     CurGeom=TRIM(IntToChar(Stat%I(3)))
+     CALL Get(BS,CurBase)
+     ! Compute a sparse matrix blocking scheme for the old BS
+     CALL BlockBuild(GM,BS,BSiz,OffS)
+     NBasF=BS%NBasF
+     ! Close the old hdf up 
+     CALL CloseHDFGroup(HDF_CurrentID)
+     CALL CloseHDF(OldFileID)
+     ! Reopen current group and HDF
+     HDFFileID=OpenHDF(H5File)
+     H5GroupID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(MyClone)))
+     HDF_CurrentID=H5GroupID
+     CALL Get(Dmat,TrixFile('D',Args,0))
   ELSE
-     CALL Get(Rho,'Rho',Args,0,Bcast_O=.TRUE.)
-     CALL Get(RhoPoles)
+     ! Get the current information
+     CALL Get(BS,CurBase)
+     CALL Get(GM,CurGeom)
+     IF(SCFActn=='InkFok')THEN
+        CALL Get(D1,TrixFile('D',Args,-1))
+        CALL Get(D2,TrixFile('D',Args,0))
+        CALL Multiply(D1,-One)
+        CALL Add(D1,D2,DMat)
+        IF(HasHF(ModelChem))THEN                
+           CALL Filter(D1,DMat)
+           CALL Put(D1,TrixFile('DeltaD',Args,0))
+        ENDIF
+        CALL Delete(D1)
+        CALL Delete(D2)
+     ELSEIF(SCFActn=='ForceEvaluation')THEN
+        CALL Get(Dmat,TrixFile('D',Args,1))
+     ELSEIF(SCFActn=='StartResponse')THEN
+        CALL Halt('MakeRho: SCFActn cannot be equal to <StartResponse>')
+     ELSEIF(SCFActn=='DensityPrime')THEN
+        CALL Get(Dmat,TrixFile('DPrime'//TRIM(Args%C%C(3)),Args,0))
+     ELSEIF(SCFActn/='Core')THEN
+!       Default
+        CALL Get(Dmat,TrixFile('D',Args,0))
+     ENDIF
   ENDIF
+  ! Allocate some memory for bra HG shenanigans 
+  CALL NewBraBlok(BS)
   ! Set thresholds local to QCTC (for PAC and MAC)
   CALL SetLocalThresholds(Thresholds%TwoE)
-  ! Potentially overide local QCTC thresholds
-  IF(Args%NI==8)THEN
-     TauPAC=1D1**(-Args%I%I(7))
-     TauMAC=1D1**(-Args%I%I(8))
-     CALL OpenASCII(OutFile,Out)         
-     Mssg=TRIM(ProcessName('QCTC'))//' TauPAC = '//TRIM(DblToShrtChar(TauPAC))
-     WRITE(Out,*)TRIM(Mssg)
-     Mssg=TRIM(ProcessName('QCTC'))//' TauMAC = '//TRIM(DblToShrtChar(TauMAC))
-     WRITE(Out,*)TRIM(Mssg)
-     CLOSE(Out)
-  ELSE
-     CALL OpenASCII(InpFile,Inp)         
-     IF(OptDblQ(Inp,'TauPAC',TauPAC))THEN
-        Mssg=TRIM(ProcessName('QCTC'))//' TauPAC = '//TRIM(DblToShrtChar(TauPAC))
-        CALL OpenASCII(OutFile,Out)         
-        WRITE(Out,*)TRIM(Mssg)
-        CLOSE(Out)
-     ENDIF
-     IF(OptDblQ(Inp,'TauMAC',TauMAC))THEN
-        Mssg=TRIM(ProcessName('QCTC'))//' TauMAC = '//TRIM(DblToShrtChar(TauMAC))
-        CALL OpenASCII(OutFile,Out)         
-        WRITE(Out,*)TRIM(Mssg)
-        CLOSE(Out)
-     ENDIF
-     CLOSE(Inp)
+  ! RhoHead is the start of a linked density list
+  ALLOCATE(RhoHead)
+  ! Here, the LL is filled out
+  CALL MakeRhoList(GM,BS,DMat,NLink,RhoHead)
+  ! Add in the nuclear charges only in certain cases
+  IF(SCFActn/='InkFok'.AND.SCFActn/='StartResponse'.AND.SCFActn/='DensityPrime')THEN
+     CALL AddNukes(GM,RhoHead)
+     NLink=NLink+GM%NAtms
   ENDIF
+  ! Load density into arrays and delete the linked list
+  CALL Collate(GM,RhoHead,Rho,RhoPoles,NLink)
+  CALL DeleteHGLL(RhoHead)
+  ! Allocate and compute multipole moments of the density
+  !
+  WRITE(*,*)' Gaussians in the total density = ',NLink
   ClusterSize=32
   MaxPoleEll=MIN(2*(BS%NASym+4),14)
   WRITE(*,*)' ClusterSize used in QCTC = ',ClusterSize
@@ -123,8 +158,6 @@ PROGRAM QCTC
   ! Allocate J
   CALL New(J)
   ! Compute the Coulomb matrix J in O(N Lg N)
-
-
   CALL Elapsed_Time(TimeMakeJ,'Init')
 
   JWalk_Time=0D0

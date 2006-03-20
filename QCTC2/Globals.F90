@@ -7,8 +7,6 @@ MODULE Globals
   TYPE(CRDS)        :: GM
   TYPE(DBL_RNK4)    :: MD
   TYPE(ARGMT)       :: Args
-  TYPE(HGRho)       :: Rho
-  TYPE(CMPoles)     :: RhoPoles
   INTEGER,PARAMETER :: TimerSize = 40
   REAL(DOUBLE)      :: ETimer(TimerSize)
 !

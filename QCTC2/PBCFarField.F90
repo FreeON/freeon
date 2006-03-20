@@ -87,10 +87,12 @@ MODULE PBCFarField
 !     If Not Over Riden Calculate MaxEll 
       MaxEll=CalMaxEll(GMLoc)
 !     Calculate PFF  energy
+      WRITE(*,*)' 1 '
       E_PFF = Zero
       DO LM = 0,LSP(MaxELL)
          E_PFF = E_PFF + Two*RhoC%D(LM)*TenRhoC%D(LM)+Two*RhoS%D(LM)*TenRhoS%D(LM)
       ENDDO
+      WRITE(*,*)' 2 '
 !     Calculate Dipole energy
       IF(GMLoc%PBC%Dimen == 1) THEN
          E_DP = 0.0D0

@@ -40,7 +40,7 @@ CommonObjs=PoleNodeType.o Indexing.o MMML.o  CTraX.o \
 CTraX4.o CTraX6.o CTraX8.o CTraX10.o  CTraX12.o  CTraX14.o  \
 HGTraX0.o  HGTraX1.o  HGTraX2.o  HGTraX3.o HGTraX4.o \
 Globals.o Gamma.o KTrax.o MD3TRR.o AA95.o AA95c.o MondoPoles.o Thresholds.o    \
-PoleTree.o TreeWalk.o PFFTensor.o DivPFFTensor.o PBCFarField.o 
+Density.o PoleTree.o TreeWalk.o PFFTensor.o DivPFFTensor.o PBCFarField.o 
 #
 QCTCObjs=$(CommonObjs) JGen.o NukE.o QCTC.o 
 JFrcObjs=$(CommonObjs) BlokTrPdJ.o JForce.o
@@ -54,7 +54,7 @@ all:	QCTC PFFT
 
 tarball:
 	tar -cvf JWALKING_`date '+%B'`_`date '+%d'`_`date +%y`.tar  \
-		*.F* Makefile CTraX HGToSP MACError figs* *.Inc *.m  	         
+		*.F* Makefile CTraX HGToSP MACError *.Inc 
 	gzip JWALKING_`date '+%B'`_`date '+%d'`_`date +%y`.tar     ;\
 
 release: clean $(ReleaseFiles) rlQCTC 

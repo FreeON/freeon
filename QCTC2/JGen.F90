@@ -195,10 +195,20 @@ CONTAINS
                    CALL DBL_VECT_EQ_DBL_SCLR(HGLen,HGKet(1),Zero)
                    CALL DBL_VECT_EQ_DBL_SCLR(SPLen+1,SPKetC(0),Zero)
                    CALL DBL_VECT_EQ_DBL_SCLR(SPLen+1,SPKetS(0),Zero)   
-                  ! Sum over cells
+                   !
+                   ! Now wrap the coordinates back in, for a full factor of two
+
+!                   QP%Prim%P=AtomToFrac(GM,QP%Prim%P)
+!                   CALL FracCyclic(GM,QP%Prim%P)
+!                   QP%Prim%P=FracToAtom(GM,QP%Prim%P)
+
+                   CALL AtomCyclic(GM,QP%Prim%P)
+
+                   ! Sum over cells
                    PTmp=QP%Prim%P
                    DO NC=1,CS_IN%NCells
                       QP%Prim%P=PTmp+CS_IN%CellCarts%D(:,NC)
+
                       NNearTmp=NNearAv
                       NNearAv=0
                       CALL JWalk2(QP,PoleRoot) 

@@ -25,7 +25,7 @@ CONTAINS !
     REAL(DOUBLE)                    :: NukE,NukeCo,NukePole,PExtent
     REAL(DOUBLE),DIMENSION(1:1)     :: HGBra
     REAL(DOUBLE),DIMENSION(0:0)     :: SPBraC,SPBraS
-    INTEGER                         :: NC
+    INTEGER                         :: NC,AT
     TYPE(QCPrim)                    :: QP
     REAL(DOUBLE),DIMENSION(3)       :: PTmp
     !---------------------------------------------------------------------------------------------

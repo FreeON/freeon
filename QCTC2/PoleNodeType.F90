@@ -2,20 +2,11 @@ MODULE ERIGlobals
   USE DerivedTypes
   USE GlobalScalars   
   IMPLICIT NONE
-  REAL(DOUBLE)                    :: COne,SOne,CTwo,STwo
-  REAL(DOUBLE)                    :: DP2
-  REAL(DOUBLE)                    :: PoleSwitch
-!
-  REAL(DOUBLE)                    :: PrimWCoef
-!
-  INTEGER                         :: At
   REAL(DOUBLE),DIMENSION(1:HGLen) :: HGKet
   REAL(DOUBLE),DIMENSION(0:SPLen) :: SPKetC
   REAL(DOUBLE),DIMENSION(0:SPLen) :: SPKetS
-  REAL(DOUBLE),DIMENSION(500)     :: W
-!
+!  REAL(DOUBLE),DIMENSION(500)     :: W
 END MODULE ERIGlobals
-
 
 MODULE PoleGlobals
   USE Derivedtypes
@@ -38,6 +29,23 @@ MODULE PoleGlobals
   REAL(DOUBLE), DIMENSION(0:SPEll+1,0:FFELL)   :: FudgeFactorial
   ! 
 END MODULE
+
+MODULE RhoList
+
+  USE Derivedtypes
+  USE GlobalScalars   
+  IMPLICIT NONE
+  TYPE HGLink
+     INTEGER                   :: Ell      ! The highest angular symmetry in this cluster
+     REAL(DOUBLE)              :: Zeta     ! The true zeta for the distributions
+     REAL(DOUBLE),DIMENSION(3) :: Cent     ! This is the center of the distribution
+     TYPE(DBL_VECT)            :: Coef     ! Coefficients of the HGTF density
+     TYPE(HGLink),POINTER      :: Next     ! Next link in the chain
+  END TYPE HGLink
+
+END MODULE RhoList
+
+
 
 MODULE PoleNodeType
   USE Derivedtypes

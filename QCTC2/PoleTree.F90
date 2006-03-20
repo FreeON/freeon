@@ -13,6 +13,7 @@ MODULE PoleTree
   USE BoundingBox
   USE MondoPoles
   USE Globals
+  USE Density
   USE Order
   USE Clock
   USE MatFunk
@@ -1157,7 +1158,7 @@ CONTAINS
     REAL(DOUBLE) :: ZE,EX,CheckChg
     TYPE(DBL_VECT) :: Est
     !-------------------------------------------------------------
-    !        ALLOCATE global lists
+    !  ALLOCATE global lists
     ALLOCATE(Qdex(1:Rho%NDist),STAT=Status)
     CALL IncMem(Status,Rho%NDist,0)
     ALLOCATE(Cdex(1:Rho%NDist),STAT=Status)
