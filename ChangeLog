@@ -1,3 +1,30 @@
+2006-03-21 10:28  mchalla
+
+	* MondoSCF2/PunchHDF.F90: [no log message]
+
+2006-03-20 05:28  mchalla
+
+	* QCTC2/: Globals.F90, JGen.F90, Makefile, NukE.F90,
+	PBCFarField.F90, PoleNodeType.F90, PoleTree.F90, QCTC.F90: More
+	changes related to the density economization.
+
+2006-03-20 05:27  mchalla
+
+	* QCTC2/Density.F90: This is a QCTC specific replacement for
+	MakeRho.  It has NOT been tested yet for openshell.  It uses a
+	linked list data structure and attempts to economize the density
+	through clustering based on the Bhattychara measure.  In periodic
+	boundary conditions, wrapping of distributions is a must to recover
+	the factor of 2 redundancy in the density.
+
+2006-03-16 14:24  vweber
+
+	* Docs/Bib/mondo_new.bib: [no log message]
+
+2006-03-16 11:55  mchalla
+
+	* ChangeLog: [no log message]
+
 2006-03-14 17:12  vweber
 
 	* Docs/STRESS2/: Stress2.tex, Let.tex: [no log message]

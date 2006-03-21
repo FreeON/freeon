@@ -343,9 +343,11 @@ CONTAINS
     ELSE
 !       CALL New_CellSet_Sphere(CS_OUT,G%PBC%AutoW%I,G%PBC%BoxShape%D,Radius_out ,MaxCell_O=MaxCell)
 !       CALL New_CellSet_Sphere(CS_IN ,G%PBC%AutoW%I,G%PBC%BoxShape%D,Radius_in  ,MaxCell_O=MaxCell)
-       CALL New_CellSet_Sphere2(CS_In ,G%PBC%AutoW%I,G%PBC%BoxShape%D,'Penetration',Thresholds%Dist,MinExpt,G%NElec,MaxCell_O=MaxCell)
-       CALL New_CellSet_Sphere2(CS_Out,G%PBC%AutoW%I,G%PBC%BoxShape%D,'Overlap',Thresholds%TwoE,MinExpt,G%NElec,MaxCell_O=MaxCell)
-       WRITE(*,*)' USING NEW SPHERE:'
+       CALL New_CellSet_Sphere2(CS_In ,G%PBC%AutoW%I,G%PBC%BoxShape%D,'Penetration', &
+                                Thresholds%Dist,MinExpt,G%NElec,MaxCell_O=MaxCell)
+       CALL New_CellSet_Sphere2(CS_Out,G%PBC%AutoW%I,G%PBC%BoxShape%D,'Overlap',     &
+                                Thresholds%TwoE,MinExpt,G%NElec,MaxCell_O=MaxCell)
+       WRITE(*,*)' USING NEW CELL SET:'
        WRITE(*,*)' Pentrat Cells = ',CS_In%NCells
        WRITE(*,*)' Overlap Cells = ',CS_Out%NCells
     ENDIF
