@@ -35,7 +35,8 @@
 %\documentclass[pre,aps,twocolumn,showpacs,twocolumngrid,superbib]{revtex4}
 %\documentclass[prl,aps,twocolumn,showkeys,twocolumngrid,superbib]{revtex4}
 %\documentclass[twocolumn,showkeys,showpacs,preprintnumbers,amsmath,amssymb]{revtex4}
-\documentclass[pra,twocolumn,twocolumngrid,superbib]{revtex4}
+%%\documentclass[pra,twocolumn,twocolumngrid,superbib]{revtex4} %<<< double
+\documentclass[prl,preprint,doublespace]{revtex4} %<<< For the journal
 %\documentclass[showpacs,preprint,superbib]{revtex4}
 
 \usepackage{graphicx}
@@ -49,6 +50,12 @@
 \pagestyle{fancy}
 
 
+\newcommand{\commentoutB}[1]{#1}
+\newcommand{\commentoutA}[1]{}
+
+%\newcommand{\commentoutA}[1]{#1}
+%\newcommand{\commentoutB}[1]{}
+
 \def\Tr{{\rm Tr}}
 
 %\nofiles
@@ -56,6 +63,36 @@
 \begin{document}
 
 %\preprint{APS/123-QED}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%In my opinion this is a well and neatly written paper suitable for 
+%publication in JCP.
+%The implementation of the algorithms for the calculation of DFT energy 
+%gradients with respect to atomic positions and cell parameters in 
+%MONDOSCF is illustrated properly. Attention is correctly focused on the 
+%delicate aspects of the calculation of the derivatives with respect to 
+%cell parameters, where handling Coulomb series requires some care and 
+%the effects due to variation of the integration volume of the 
+%exchange-correlation functional must be taken into account properly. 
+%This latter effect probably corresponds to the much larger importance of 
+%the integration weight gradients relative to cell parameters than to 
+%atomic positions observed in approaches based on an atomic partition of 
+%the electron charge density.
+%Numerical results obtained with the implemented procedure are well 
+%documented and shown to compare well with those obtained with standard 
+%periodic codes for few, though representative, testcases.
+%A few small suggestions:
+%a) check references (for example, ref. 23)
+%b) I guess that the factor 2 and lack of the derivative of rhotot in the 
+%derivatives of eqs. (2) and (3) are related to the fact that rhoab and 
+%rhotot span the same set of CGTFs. Perhaps a short comment about this 
+%point might be helpful for a reader who is not very familiar with the 
+%method like me.
+%c) specification of the symmetry of the crystalline systems used in the 
+%numerical examples (cubic and orthorhombic?) would probably be useful to 
+%indicate more clearly which cell parameters need to be optimized and how 
+%complex the structures are.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 %\title{Density functional energy gradients with respect to atomic positions and cell parameters
 %  within the $\Gamma$-point approximation}
@@ -375,7 +412,8 @@ and
     \frac{\partial |{\bf r}-{\bf r'}+{\bf R}|^{-1}}{\partial M_{ij}}\bigg)\rho_{tot}({\bf r'}) dVdV',
   \end{split}
 \end{equation*}
-where the derivatives $\partial\rho_{ab}/\partial G_i$,
+where the factors of two arise from the bra/ket symmetry, 
+the derivatives $\partial\rho_{ab}/\partial G_i$,
 $\partial |{\bf r}-{\bf r'}+{\bf R}|^{-1}/\partial M_{ij}$ and 
 $\partial\rho_{ab}/\partial M_{ij}$ are straightforward and 
 do not need to be addressed in more detail. 
@@ -578,9 +616,9 @@ the QUICCA algorithm~\cite{KNemeth04,KNemeth05}.
 Our first benchmark case is the optimization of 1D polytetrafluoroethylene (CF$_2$)$_{2n}$
 at the Perdew-Wang~\cite{JPerdew92} level of theory. The PW91 functional has been obtained from the
 the Density Functional Repository~\cite{DFRepository}.
-The second benchmark is MgO and was optimized at the Perdew-Burke-Ernzerhof (PBE)~\cite{Perdew_96v77} 
+The second benchmark is cubic MgO and was optimized at the Perdew-Burke-Ernzerhof (PBE)~\cite{Perdew_96v77} 
 and Becke 3-parameter Lee-Yang-Parr (B3LYP)~\cite{ABecke93} 
-level of theory. Finally, magnesium orthosilicate (Mg$_2$SiO$_4$, forsterite) 
+level of theory. Finally, orthorhombic magnesium orthosilicate (Mg$_2$SiO$_4$, forsterite) 
 was optimized at the B3LYP~\cite{ABecke93,Stephens94} level of theory. 
 
 Table~\ref{Tab:PFE} shows the progression of the cell parameters $a_0$, bond lengths (C$-$C and C$-$F),
@@ -598,6 +636,8 @@ The reason for this disagreement can be found in the different basis set used.
 while {\sc MondoSCF} employs pure Cartesian basis functions {\em i.e.}~6 atomic orbitals
 per Cartesian d-shells. This leads to a slightly lower energy in the {\sc MondoSCF} calculations.
 
+\commentoutA{
+
 \begin{table}[t]
   \centering
   \caption{\protect
@@ -605,7 +645,7 @@ per Cartesian d-shells. This leads to a slightly lower energy in the {\sc MondoS
     bond angle (F$-$C$-$F) and total energy $E$ 
     for polytetrafluoroethylene (CF$_2$)$_{2n}$ using the periodic $\Gamma$-point
     PW91/6-31G** level of theory and the {\tt TIGHT} thresholds.
-    Lengths, angles and energies are in \AA ngstr\"oms, degrees and atomic units respectively.
+    Lengths, angles and energies are in Angstroms, degrees and atomic units respectively.
   }\label{Tab:PFE}
   \begin{tabular}{lrccccc}
   \toprule
@@ -652,9 +692,11 @@ per Cartesian d-shells. This leads to a slightly lower energy in the {\sc MondoS
   \end{tabular}
 \end{table}
 
+} %\commentoutA
+
 Table~\ref{Tab:MgO} shows the progression of the cell parameters, total energies and
 fractional coordinates of oxygen computed
-for various cubic MgO supercells at the $\Gamma$-point PBE~\cite{Perdew_96v77}
+for various MgO supercells (cubic symmetry) at the $\Gamma$-point PBE~\cite{Perdew_96v77}
 and B3LYP~\cite{ABecke93} level of theories using
 the 8-61G(Mg)/8-51G(O) basis sets.
 The basis sets were specially optimized at the HF level for MgO by
@@ -671,6 +713,9 @@ counterpart. The larger systems give cell parameter and
 fractional coordinate of the oxygen in very good agreement 
 with the {\sc Crystal03} results, and the energies systematical converge 
 while the system grows.
+
+\commentoutA{
+
 \begin{table}[t]
   \centering
   \caption{\protect
@@ -679,7 +724,7 @@ while the system grows.
     for cubic (MgO)$_n$ using the periodic $\Gamma$-point
     PBE/8-61G(Mg)/8-51G(O) and B3LYP/8-61G(Mg)/8-51G(O) level 
     of theories and the {\tt TIGHT} thresholds.
-    Cell parameters and energies are in \AA ngstr\"oms~and atomic units respectively.
+    Cell parameters and energies are in Angstroms and atomic units respectively.
   }\label{Tab:MgO}
   \begin{tabular}{lcrccc}
   \toprule
@@ -727,6 +772,9 @@ while the system grows.
   \botrule
   \end{tabular}
 \end{table}
+
+} %\commentoutA
+
 %
 %MgO PBExc Crystal03 User2.bas 8x8x8 default
 %4.200 -275.28468980590
@@ -768,7 +816,7 @@ while the system grows.
 %12.6120 4.2040 -29746.5849x98447 -275.431342578215 2.1020  0.50000
 %
 
-In Table~\ref{Tab:Forsterite}, we present the optimization of forsterite at the 
+In Table~\ref{Tab:Forsterite}, we present the optimization of forsterite (orthorhombic symmetry) at the 
 %P. J. Stevens et al, J. Phys. Chem. 98, p.11623 (1994)
 B3LYP/8-61G*(Mg)/88-31G*(Si)/8-51G*(O) $\Gamma$-point approximation.
 The basis sets were obtained from Ref.~\cite{CrystalLib}.
@@ -814,17 +862,20 @@ deviate less than 1\% with respect to the experimental values.
 % of galena (PbS), 
 % Chem. Phys. Letters 257, 627-632 (1996). 
 %
+
+\commentoutA{
+
 \begin{table}[t]
   \centering
   \caption{\protect
     Progression of the cell parameters $a_0$, $b_0$, $c_0$ and total energy $E$ 
-    for (Mg$_2$SiO$_4$)$_n$ using the periodic $\Gamma$-point
+    for orthorhombic (Mg$_2$SiO$_4$)$_n$ using the periodic $\Gamma$-point
     B3LYP/8-61G*(Mg)/88-31G*(Si)/8-51G*(O) level of theory and the {\tt TIGHT} thresholds.
     The number $n=4,8,16,24$ correspond to the (super)cells 
     $1\times 1\times 1$, $2\times 1\times 1$, $2\times 1\times 2$ 
     and $3\times 1\times 2$, respectively.
 %    $n$ is the number of MgO units in the (super)cell.
-    Cell parameters and energies are in \AA ngstr\"oms~and atomic units respectively.
+    Cell parameters and energies are in Angstroms and atomic units respectively.
   }\label{Tab:Forsterite}
   \begin{tabular}{crcccc}
   \toprule
@@ -966,6 +1017,9 @@ deviate less than 1\% with respect to the experimental values.
   \botrule
   \end{tabular}
 \end{table}
+
+} %\commentoutA
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Comp: 
 %a 4,7995 b 10,3056 c 6,0408 
@@ -1186,7 +1240,260 @@ $\partial\phi_{\mathbf{G}}/\partial M_{ij}$ are easily computed.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\commentoutB{
+
+\clearpage
+
+\begin{center}
+\bf  TABLES\\[1.cm]
+\end{center}
+
+\clearpage
+
+\begin{table}[t]
+  \centering
+  \caption{\protect
+    Progression of the cell parameter $a_0$, bond lengths (C$-$C and C$-$F), 
+    bond angle (F$-$C$-$F) and total energy $E$ 
+    for polytetrafluoroethylene (CF$_2$)$_{2n}$ using the periodic $\Gamma$-point
+    PW91/6-31G** level of theory and the {\tt TIGHT} thresholds.
+    Lengths, angles and energies are in Angstroms, degrees and atomic units respectively.
+  }\label{Tab:PFE}
+  \begin{tabular}{lrccccc}
+  \toprule
+  & $n$ & $a_0$ & CC & CF & FCF & $E/n$  \\
+  \hline
+    {\sc MondoSCF}\footnote[1]{$\Gamma$-point.} 
+    &    1 & 3.400 & 1.823 & 1.339 & 116.9 & $-$475.261618 \\%
+    &    2 & 2.701 & 1.588 & 1.360 & 109.9 & $-$475.418440 \\%
+    &    3 & 2.640 & 1.571 & 1.361 & 109.5 & $-$475.433042 \\%
+    &    4 & 2.634 & 1.570 & 1.361 & 109.5 & $-$475.435044 \\%
+    &    5 & 2.633 & 1.571 & 1.361 & 109.5 & $-$475.435451 \\%
+    &    6 & 2.632 & 1.570 & 1.361 & 109.5 & $-$475.435536 \\%
+  \hline
+    {\sc Crystal03}\footnote[2]{12 $k$-points.}
+    &    1 & 2.628 & 1.569 & 1.360 & 109.5 & $-$475.430945 \\
+  \botrule
+  \end{tabular}
+\end{table}
+
+\clearpage
+
+\begin{table}[t]
+  \centering
+  \caption{\protect
+    Progression of the cell parameter $a_0$,
+    total energy $E$ and fractional coordinate of the oxygen $f_O$ in the primitive cell 
+    for cubic (MgO)$_n$ using the periodic $\Gamma$-point
+    PBE/8-61G(Mg)/8-51G(O) and B3LYP/8-61G(Mg)/8-51G(O) level 
+    of theories and the {\tt TIGHT} thresholds.
+    Cell parameters and energies are in Angstroms and atomic units respectively.
+  }\label{Tab:MgO}
+  \begin{tabular}{lcrccc}
+  \toprule
+  & & $n$ & $a_0$ & $E/n$ & $f_O$ \\
+  \hline
+    {\sc MondoSCF}\footnote[1]{$\Gamma$-point.} 
+    & PBE   &   4 & 4.331 & $-$275.243165 & 0.4998 \\%
+    &       &  32 & 4.213 & $-$275.284428 & 0.5000 \\%
+    &       & 108 & 4.212 & $-$275.284641 & 0.5000 \\%
+  \hline
+    {\sc Crystal03}\footnote[2]{$8\times 8\times 8$ $\mathbf{k}$-points.}
+    & PBE   &   1 & 4.212 & $-$275.284731 & $1/2$ \\
+  \hline
+    {\sc MondoSCF}$^{\rm a}$
+    & B3LYP &   4 & 4.328 & $-$275.389093 & 0.4972 \\%VWN5
+    &       &  32 & 4.204 & $-$275.431167 & 0.5000 \\%VWN5
+    &       & 108 & 4.204 & $-$275.431343 & 0.5000 \\%VWN5
+  \hline
+    {\sc Crystal03}$^{\rm b}$
+    & B3LYP &   1 & 4.204 & $-$275.431235 & $1/2$ \\
+%  \hline
+%    {\sc MondoSCF}\footnote[1]{$\Gamma$-point.} 
+%    & PBE   &   4 & 4.331 & $-$275.243165 & 0.4998 \\%
+%    &       &  32 & 4.213 & $-$275.284428 & 0.5000 \\%
+%    &       & 108 & 4.212 & $-$275.284641 & 0.5000 \\%
+%    & B3LYP &   4 & 4.328 & $-$275.389093 & 0.4972 \\%VWN5
+%    &       &  32 & 4.204 & $-$275.431167 & 0.5000 \\%VWN5
+%    &       & 108 & 4.204 & $-$275.431343 & 0.5000 \\%VWN5
+%  \hline
+%    {\sc Crystal03}\footnote[2]{$8\times 8\times 8$ $\mathbf{k}$-points.}
+%    & PBE   &   1 & 4.212 & $-$275.284731 & $1/2$ \\
+%    & B3LYP &   1 & 4.204 & $-$275.431235 & $1/2$ \\
+  \hline
+    {Exp.}\footnote[3]{Experimental value~\cite{RWyckoff63}.}
+    &       &   1 & $4.20\;\;$  &               &  \\
+%    {Exp.}\footnote[4]{Experimental value~\cite{SSinogeikin99,SSinogeikin00}.}
+%    &       &   1 & 4.211 &               &  \\
+%%%%
+% Exp1.
+%   S. V. Sinogeikin and J. D. Bass, Phys. Earth Planet. Inter. 120, 43 2000 
+%   S. V. Sinogeikin and J. D. Bass, Phys. Rev. B 59, R14 141 1999
+% Exp2.
+%   R. W. G. Wyckoff 1963 Crystal Structure (New York: Wiley)
+%%%%
+  \botrule
+  \end{tabular}
+\end{table}
+
+\clearpage
+
+\begin{table}[t]
+  \centering
+  \caption{\protect
+    Progression of the cell parameters $a_0$, $b_0$, $c_0$ and total energy $E$ 
+    for orthorhombic (Mg$_2$SiO$_4$)$_n$ using the periodic $\Gamma$-point
+    B3LYP/8-61G*(Mg)/88-31G*(Si)/8-51G*(O) level of theory and the {\tt TIGHT} thresholds.
+    The number $n=4,8,16,24$ correspond to the (super)cells 
+    $1\times 1\times 1$, $2\times 1\times 1$, $2\times 1\times 2$ 
+    and $3\times 1\times 2$, respectively.
+%    $n$ is the number of MgO units in the (super)cell.
+    Cell parameters and energies are in Angstroms and atomic units respectively.
+  }\label{Tab:Forsterite}
+  \begin{tabular}{crcccc}
+  \toprule
+%
+% 1x1x1 1x1x1 1x1x1 1x1x1 1x1x1 1x1x1 1x1x1 1x1x1 1x1x1 1x1x1 1x1x1 1x1x1 1x1x1
+% b3lyp triple-zeta GOOD
+%Lattice Parameter        Old Value      Gradient    Displacement   New Value
+%          STRE_A          4.740117      0.001885      0.000000      4.740117
+%          STRE_B         10.227458      0.001229      0.000000     10.227458
+%          STRE_C          6.107109     -0.003163      0.000000      6.107109
+%          ALPHA          90.000000     -0.000216      0.000000     90.000000
+%          BETA           90.000000     -0.004659      0.000000     90.000000
+%          GAMMA          90.000000     -0.004069      0.000000     90.000000
+%          VOLM_L        296.068646     -0.000005      0.000000    296.068646
+%     1    -3965.1673904250
+%
+% 2x1x1 2x1x1 2x1x1 2x1x1 2x1x1 2x1x1 2x1x1 2x1x1 2x1x1 2x1x1 2x1x1 2x1x1 2x1x1
+% b3lyp triple-zeta GOOD
+%Lattice Parameter        Old Value      Gradient    Displacement   New Value
+%          STRE_A          9.551844      0.003681      0.000000      9.551844
+%          STRE_B         10.213044      0.000085      0.000000     10.213044
+%          STRE_C          6.127509     -0.002413      0.000000      6.127509
+%          ALPHA          90.000000      0.007276      0.000000     90.000000
+%          BETA           90.000000     -0.000533      0.000000     90.000000
+%          GAMMA          90.000000      0.004678      0.000000     90.000000
+%          VOLM_L        597.759301     -0.000006      0.000000    597.759301
+%     1    -7930.3051533414
+% b3lyp triple-zeta TIGHT
+%Lattice Parameter        Old Value      Gradient    Displacement   New Value
+%          STRE_A          9.540204      0.000044      0.000000      9.540204
+%          STRE_B         10.213910      0.000043      0.000000     10.213910
+%          STRE_C          6.143471     -0.000055      0.000000      6.143471
+%          ALPHA          90.000000      0.005176      0.000000     90.000000
+%          BETA           90.000000      0.000025      0.000000     90.000000
+%          GAMMA          90.000000      0.000325      0.000000     90.000000
+%          VOLM_L        598.636902     -0.000001      0.000000    598.636902
+%     1    -7930.3101284096
+%
+% 2x1x2 2x1x2 2x1x2 2x1x2 2x1x2 2x1x2 2x1x2 2x1x2 2x1x2 2x1x2 2x1x2 2x1x2 2x1x2
+% b3lyp triple-zeta GOOD
+%Lattice Parameter        Old Value      Gradient    Displacement   New Value
+%          STRE_A          9.581385     -0.001913      0.000000      9.581385
+%          STRE_B         10.272478     -0.000525      0.000000     10.272478
+%          STRE_C         12.050157      0.003022      0.000000     12.050157
+%          ALPHA          90.000000      0.010020      0.000000     90.000000
+%          BETA           90.000000      0.026387      0.000000     90.000000
+%          GAMMA          90.000000      0.010248      0.000000     90.000000
+%          VOLM_L       1186.031466     -0.000006      0.000000   1186.031466
+%     1   -15860.7857090709
+%
+% 3x1x2 3x1x2 3x1x2 3x1x2 3x1x2 3x1x2 3x1x2 3x1x2 3x1x2 3x1x2 3x1x2 3x1x2 3x1x2
+% b3lyp triple-zeta GOOD
+%Lattice Parameter        Old Value      Gradient    Displacement   New Value
+%          STRE_A         14.385331     -0.000565      0.000000     14.385331
+%          STRE_B         10.284986      0.000427      0.000000     10.284986
+%          STRE_C         12.034432     -0.000027      0.000000     12.034432
+%          ALPHA          90.000000      0.019238      0.000000     90.000000
+%          BETA           90.000000      0.052125      0.000000     90.000000
+%          GAMMA          90.000000      0.024294      0.000000     90.000000
+%          VOLM_L       1780.529432     -0.000003      0.000000   1780.529432
+%     1   -23791.1953304828
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% 1x1x1 1x1x1 1x1x1 1x1x1 1x1x1 1x1x1 1x1x1 1x1x1 1x1x1 1x1x1 1x1x1 1x1x1 1x1x1
+% b3lyp double-zeta TIGHT
+%Lattice Parameter        Old Value      Gradient    Displacement   New Value
+%          STRE_A          4.726164     -0.000024      0.000000      4.726164
+%          STRE_B         10.181053      0.000040      0.000000     10.181053
+%          STRE_C          6.112551      0.000007      0.000000      6.112551
+%          ALPHA          90.000000     -0.002500      0.000000     90.000000
+%          BETA           90.000000      0.000738      0.000000     90.000000
+%          GAMMA          90.000000     -0.000001      0.000000     90.000000
+%          VOLM_L        294.119630      0.000000      0.000000    294.119630
+% Clone #         Energy
+%     1    -3965.0594336276
+%
+% 2x1x1 2x1x1 2x1x1 2x1x1 2x1x1 2x1x1 2x1x1 2x1x1 2x1x1 2x1x1 2x1x1 2x1x1 2x1x1
+% b3lyp double-zeta TIGHT
+%Lattice Parameter        Old Value      Gradient    Displacement   New Value
+%          STRE_A          9.523968     -0.000011      0.000000      9.523968
+%          STRE_B         10.184572      0.000100      0.000000     10.184572
+%          STRE_C          6.119075     -0.000053      0.000000      6.119075
+%          ALPHA          90.000000      0.004220      0.000000     90.000000
+%          BETA           90.000000     -0.000757      0.000000     90.000000
+%          GAMMA          90.000000     -0.000980      0.000000     90.000000
+%          VOLM_L        593.535171      0.000000      0.000000    593.535171
+%     1    -7930.0861345846
+%
+% 2x1x2 2x1x2 2x1x2 2x1x2 2x1x2 2x1x2 2x1x2 2x1x2 2x1x2 2x1x2 2x1x2 2x1x2 2x1x2
+% b3lyp double-zeta TIGHT
+%
+%Lattice Parameter        Old Value      Gradient    Displacement   New Value
+%          STRE_A          9.574460      0.000074      0.000000      9.574460
+%          STRE_B         10.258702     -0.000106      0.000000     10.258702
+%          STRE_C         11.991359      0.000031      0.000000     11.991359
+%          ALPHA          90.000000     -0.003371      0.000000     90.000000
+%          BETA           90.000000     -0.000177      0.000000     90.000000
+%          GAMMA          90.000000      0.000033      0.000000     90.000000
+%          VOLM_L       1177.809694      0.000000      0.000000   1177.809694
+%     1   -15860.3471454661
+%
+% 3x1x2 3x1x2 3x1x2 3x1x2 3x1x2 3x1x2 3x1x2 3x1x2 3x1x2 3x1x2 3x1x2 3x1x2 3x1x2
+% b3lyp double-zeta TIGHT
+%Lattice Parameter        Old Value      Gradient    Displacement   New Value
+%          STRE_A         14.362687      0.000117      0.000000     14.362687
+%          STRE_B         10.257567     -0.000034      0.000000     10.257567
+%          STRE_C         11.990901     -0.000058      0.000000     11.990901
+%          ALPHA          90.000000      0.001098      0.000000     90.000000
+%          BETA           90.000000     -0.000375      0.000000     90.000000
+%          GAMMA          90.000000     -0.000383      0.000000     90.000000
+%          VOLM_L       1766.574086      0.000000      0.000000   1766.574086
+%     1   -23790.5241758833
+%
+  & $n$ & $a_0$ & $b_0$ & $c_0$ & $E/n$ \\
+  \hline
+    {\sc MondoSCF}\footnote[1]{$\Gamma$-point.} 
+% TZVP GOOD
+%    &  4 & 4.74   & 10.23   & 6.11   & $-$991.2918 \\%
+%    &  8 & 4.77   & 10.21   & 6.13   & $-$991.2881 \\%
+%    & 16 & 4.79   & 10.27   & 6.02   & $-$991.2991 \\%
+%    & 24 & 4.79   & 10.28   & 6.02   & $-$991.2998 \\%
+% TZVP TIGHT
+%    &  4 &    & 10.   & 6.   & $-$991. \\%
+%    &  8 & 4.770 & 10.214 & 6.143 & $-$991.288766 \\%
+%    & 16 &    & 10.   & 6.   & $-$991. \\%
+%    & 24 &    & 10.   & 6.   & $-$991. \\%
+% DZVP TIGHT
+    &  4 & 4.726 & 10.181 & 6.119 & $-$991.264858 \\%
+    &  8 & 4.762 & 10.184 & 6.119 & $-$991.260767 \\%
+    & 16 & 4.787 & 10.258 & 5.996 & $-$991.271696 \\%
+    & 24 & 4.787 & 10.257 & 5.995 & $-$991.271841 \\%
+  \hline
+    {\sc Vasp}\footnote[2]{$3\times 3\times 3$ $\mathbf{k}$-points and PW91~\cite{PJochym04}.}
+    &  4 & 4.800 & 10.306 & 6.041 & \\
+  \hline
+    {Exp.}\footnote[3]{Experimental values~\cite{HYoder57}.}
+    &  4 & 4.756  & 10.195  & 5.981  & \\
+  \botrule
+  \end{tabular}
+\end{table}
+
+} %commentoutB
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \end{document}
