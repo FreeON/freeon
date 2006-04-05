@@ -142,6 +142,7 @@ CONTAINS
        CALL New(DoubleRnk2,(/3,MaxAtoms/))
        DoubleRnk2%D=BIG_DBL
        CALL Put(DoubleRnk2,'MCCarts0')
+       CALL Delete(DoubleRnk2)
 #ifdef PARALLEL
        CALL Put(0,'LineLocExist')
        CALL New(ETDirArr,P%NSpace-1)
