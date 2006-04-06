@@ -116,9 +116,9 @@ CONTAINS
              CALL ParseCoordinates(PRODUCTS_BEGIN,PRODUCTS_END,G%Clone(G%Clones+1),O%Coordinates)  
           ENDIF
           CALL PPrint(G%Clone(0),FileName_O=N%GFile,Unit_O=Geo, &
-               PrintGeom_O=O%GeomPrint,Clone_O=0)
+               PrintGeom_O=O%GeomPrint,Clone_O=0,CrdInAng_O=.TRUE.)
           CALL PPrint(G%Clone(G%Clones+1),FileName_O=N%GFile,Unit_O=Geo, &
-               PrintGeom_O=O%GeomPrint,Clone_O=G%Clones+1)
+               PrintGeom_O=O%GeomPrint,Clone_O=G%Clones+1,CrdInAng_O=.TRUE.)
           ! Purify R and P images ...
           CALL NEBPurify(G,Init_O=.TRUE.)
           ! ... then interpolate ...
