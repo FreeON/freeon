@@ -499,20 +499,28 @@ MODULE PrettyPrint
        CLOSE(Unit)
      END SUBROUTINE XSFPreamble
 
-     SUBROUTINE Print_CRDS(GM,FileName_O,Unit_O,PrintGeom_O,NewFile_O,Clone_O)
+     SUBROUTINE Print_CRDS(GM,FileName_O,Unit_O,PrintGeom_O,NewFile_O,Clone_O,CrdInAng_O)
        TYPE(CRDS) :: GM         
        INTEGER :: K
        LOGICAL :: Opened
        INTEGER,         OPTIONAL,INTENT(IN) :: Unit_O,Clone_O
        CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: FileName_O,PrintGeom_O
-       LOGICAL,         OPTIONAL,INTENT(IN) :: NewFile_O
+       LOGICAL,         OPTIONAL,INTENT(IN) :: NewFile_O,CrdInAng_O
+       LOGICAL                              :: CrdInAng
        INTEGER                              :: I,PU
        CHARACTER(LEN=DEFAULT_CHR_LEN)       :: Mssg
        CHARACTER(LEN=DCL)                   :: AuxChar
        CHARACTER(LEN=2)                     :: Atom
        REAL(DOUBLE)                         :: AA
        REAL(DOUBLE)                         :: A,B,C,Alpha,Beta,Gamma
-       AA=One/AngstromsToAU
+       !Check if the coordinates are in Angstrom.
+       CrdInAng=.FALSE.
+       IF(PRESENT(CrdInAng_O))CrdInAng=CrdInAng_O
+       IF(CrdInAng)THEN
+          AA=One
+       ELSE
+          AA=One/AngstromsToAU
+       ENDIF
 #ifdef PARALLEL
        IF(MyId==ROOT)THEN
 #endif
