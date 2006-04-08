@@ -161,7 +161,9 @@ CONTAINS
     GMMerge%Natms=NatmsMerge
     CALL New(GMMerge)
     M=0
+    GMMerge%ETotal=0D0
     DO iCLONE=GBeg,GEnd
+      GMMerge%ETotal=GMMerge%ETotal+Geos%Clone(iCLONE)%ETotal
       DO J=1,Geos%Clone(iCLONE)%Natms
         M=M+1
         GMMerge%Carts%D(1:3,M)=Geos%Clone(iCLONE)%Carts%D(1:3,J)+TRM*iCLONE
@@ -568,10 +570,6 @@ CONTAINS
        DO iCLONE=1,C%Geos%Clones
          CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile,Geo,C%Opts%GeomPrint,Clone_O=iCLONE)
        ENDDO
-       IF(C%Opts%Grad==GRAD_TS_SEARCH_NEB) &
-         CALL NEBPurify(C%Geos,Print_O=.TRUE.)
-       IF(C%Opts%Grad==GRAD_TS_SEARCH_NEB) &
-         CALL MergePrintClones(C%Geos,C%Nams,C%Opts)
        ! 
        CALL Force(iBAS,iGEO,C%Nams,C%Opts,C%Stat, &
                   C%Geos,C%Sets,C%MPIs)
@@ -582,6 +580,12 @@ CONTAINS
          CALL OptSingleMol(C%GOpt,C%Nams,C%Opts,C%Geos%Clone(iCLONE),Convgd%I,iGEO,iCLONE)
          ConvgdAll=ConvgdAll*Convgd%I(iCLONE)
        ENDDO 
+       !
+       IF(C%Opts%Grad==GRAD_TS_SEARCH_NEB) THEN
+          CALL NEBPurify(C%Geos,Print_O=.TRUE.)
+          CALL MergePrintClones(C%Geos,C%Nams,C%Opts)
+       ENDIF
+       !
        ! Fill in new geometries
        DO iCLONE=1,C%Geos%Clones
          CALL NewGeomFill(C%Geos%Clone(iCLONE))
