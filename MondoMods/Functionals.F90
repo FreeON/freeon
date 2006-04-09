@@ -236,17 +236,23 @@ MODULE Functionals
                     &  Buf(1),Buf(N1),Buf(N2), &
                     &  0D0,0D0,0D0)
                ! Copy the exchange in the mondo arrays !
-               CALL DCOPY(NGrid,Buf( 1),1,     E(1),1)
-               CALL DCOPY(NGrid,Buf(N1),1,dEdRho(1),1)
-               CALL DCOPY(NGrid,Buf(N2),1,dEdGam(1),1)
+               E     (1:NGrid)=Buf( 1:   NGrid)
+               dEdRho(1:NGrid)=Buf(N1:N1+NGrid)
+               dEdGam(1:NGrid)=Buf(N2:N2+NGrid)
+               !CALL DCOPY(NGrid,Buf( 1),1,     E(1),1)
+               !CALL DCOPY(NGrid,Buf(N1),1,dEdRho(1),1)
+               !CALL DCOPY(NGrid,Buf(N2),1,dEdGam(1),1)
                ! Correlation part !
                CALL rks_c_pw91(1,NGrid,Rho(1),AbsGradRho2(1), &
                     &  Buf(1),Buf(N1),Buf(N2), &
                     &  0D0,0D0,0D0)
                ! Add the correlation part !
-               CALL DAXPY(NGrid,1D0,Buf( 1),1,     E(1),1)
-               CALL DAXPY(NGrid,1D0,Buf(N1),1,dEdRho(1),1)
-               CALL DAXPY(NGrid,1D0,Buf(N2),1,dEdGam(1),1)
+               E     (1:NGrid)=Buf( 1:   NGrid)+     E(1:NGrid)
+               dEdRho(1:NGrid)=Buf(N1:N1+NGrid)+dEdRho(1:NGrid)
+               dEdGam(1:NGrid)=Buf(N2:N2+NGrid)+dEdGam(1:NGrid)
+               !CALL DAXPY(NGrid,1D0,Buf( 1),1,     E(1),1)
+               !CALL DAXPY(NGrid,1D0,Buf(N1),1,dEdRho(1),1)
+               !CALL DAXPY(NGrid,1D0,Buf(N2),1,dEdGam(1),1)
             ELSEIF(NSDen.EQ.3)THEN
                ! What follow sucks !
                ! Exchange part !
@@ -255,24 +261,36 @@ MODULE Functionals
                     &  0D0,0D0,0D0,0D0,0D0,0D0,0D0,0D0,0D0, &
                     &  0D0,0D0,0D0,0D0,0D0,0D0)
                ! Copy the exchange in the mondo arrays !
-               CALL DCOPY(NGrid,Buf( 1),1,     E( 1),1)
-               CALL DCOPY(NGrid,Buf(N1),1,dEdRho( 1),1)
-               CALL DCOPY(NGrid,Buf(N2),1,dEdRho(N1),1)
-               CALL DCOPY(NGrid,Buf(N3),1,dEdGam( 1),1)
-               CALL DCOPY(NGrid,Buf(N4),1,dEdGam(N1),1)
-               CALL DCOPY(NGrid,Buf(N5),1,dEdGam(N2),1)
+               E     ( 1:   NGrid)=Buf( 1:   NGrid)
+               dEdRho( 1:   NGrid)=Buf(N1:N1+NGrid)
+               dEdRho(N1:N1+NGrid)=Buf(N2:N2+NGrid)
+               dEdGam( 1:   NGrid)=Buf(N3:N3+NGrid)
+               dEdGam(N1:N1+NGrid)=Buf(N4:N4+NGrid)
+               dEdGam(N2:N2+NGrid)=Buf(N5:N5+NGrid)
+               !CALL DCOPY(NGrid,Buf( 1),1,     E( 1),1)
+               !CALL DCOPY(NGrid,Buf(N1),1,dEdRho( 1),1)
+               !CALL DCOPY(NGrid,Buf(N2),1,dEdRho(N1),1)
+               !CALL DCOPY(NGrid,Buf(N3),1,dEdGam( 1),1)
+               !CALL DCOPY(NGrid,Buf(N4),1,dEdGam(N1),1)
+               !CALL DCOPY(NGrid,Buf(N5),1,dEdGam(N2),1)
                ! Correlation part !
                CALL uks_c_pw91(1,NGrid,Rho(1),Rho(N1),AbsGradRho2(1),AbsGradRho2(N1),AbsGradRho2(N2), &
                     &  Buf(1),Buf(N1),Buf(N2),Buf(N3),Buf(N4),Buf(N5), &
                     &  0D0,0D0,0D0,0D0,0D0,0D0,0D0,0D0,0D0, &
                     &  0D0,0D0,0D0,0D0,0D0,0D0)
                ! Add the correlation part !
-               CALL DAXPY(NGrid,1D0,Buf( 1),1,     E( 1),1)
-               CALL DAXPY(NGrid,1D0,Buf(N1),1,dEdRho( 1),1)
-               CALL DAXPY(NGrid,1D0,Buf(N2),1,dEdRho(N1),1)
-               CALL DAXPY(NGrid,1D0,Buf(N3),1,dEdGam( 1),1)
-               CALL DAXPY(NGrid,1D0,Buf(N4),1,dEdGam(N1),1)
-               CALL DAXPY(NGrid,1D0,Buf(N5),1,dEdGam(N2),1)
+               E     ( 1:   NGrid)=Buf( 1:   NGrid)+     E( 1:   NGrid)
+               dEdRho( 1:   NGrid)=Buf(N1:N1+NGrid)+dEdRho( 1:   NGrid)
+               dEdRho(N1:N1+NGrid)=Buf(N2:N2+NGrid)+dEdRho(N1:N1+NGrid)
+               dEdGam( 1:   NGrid)=Buf(N3:N3+NGrid)+dEdGam( 1:   NGrid)
+               dEdGam(N1:N1+NGrid)=Buf(N4:N4+NGrid)+dEdGam(N1:N1+NGrid)
+               dEdGam(N2:N2+NGrid)=Buf(N5:N5+NGrid)+dEdGam(N2:N2+NGrid)
+               !CALL DAXPY(NGrid,1D0,Buf( 1),1,     E( 1),1)
+               !CALL DAXPY(NGrid,1D0,Buf(N1),1,dEdRho( 1),1)
+               !CALL DAXPY(NGrid,1D0,Buf(N2),1,dEdRho(N1),1)
+               !CALL DAXPY(NGrid,1D0,Buf(N3),1,dEdGam( 1),1)
+               !CALL DAXPY(NGrid,1D0,Buf(N4),1,dEdGam(N1),1)
+               !CALL DAXPY(NGrid,1D0,Buf(N5),1,dEdGam(N2),1)
             ENDIF
          CASE(PURE_PBE_PBE)
             IF(NSDen.NE.1)CALL Halt('This functional is not available for unrestricted! '//IntToChar(ModelChem))
