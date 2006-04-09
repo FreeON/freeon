@@ -463,7 +463,7 @@ CONTAINS
   SUBROUTINE SetAtomCharges(G,B)
     TYPE(CRDS) :: G
     TYPE(BSET) :: B
-    INTEGER    :: I
+    INTEGER    :: I,NUnPEl
     DO I=1,G%NAtms
        G%AtNum%D(I)=G%AtNum%D(I)-B%NCoreEl%D(G%AtTyp%I(I))
     ENDDO
@@ -474,12 +474,17 @@ CONTAINS
        ENDIF
     ENDDO
     G%NElec=G%NElec-G%TotCh
+    ! We need to correct number of alpha/beta electron.
+    NUnPEl=G%Multp-1
+    G%NAlph=(G%NElec+NUnPEl)/2
+    G%NBeta=(G%NElec-NUnPEl)/2
+    !write(*,*) 'SetAtomCharges: NElec',G%NElec,' NAlph',G%NAlph,' NBeta',G%NBeta
   END SUBROUTINE SetAtomCharges
 
   SUBROUTINE UnSetAtomCharges(G,B)
     TYPE(CRDS) :: G
     TYPE(BSET) :: B
-    INTEGER    :: I
+    INTEGER    :: I,NUnPEl
     DO I=1,G%NAtms
        G%AtNum%D(I)=G%AtNum%D(I)+B%NCoreEl%D(G%AtTyp%I(I))
     ENDDO
@@ -490,6 +495,11 @@ CONTAINS
        ENDIF
     ENDDO
     G%NElec=G%NElec-G%TotCh
+    ! We need to correct number of alpha/beta electron.
+    NUnPEl=G%Multp-1
+    G%NAlph=(G%NElec+NUnPEl)/2
+    G%NBeta=(G%NElec-NUnPEl)/2
+    !write(*,*) 'UnSetAtomCharges: NElec',G%NElec,' NAlph',G%NAlph,' NBeta',G%NBeta
   END SUBROUTINE UnSetAtomCharges
 !
 !-------------------------------------------------------------------
