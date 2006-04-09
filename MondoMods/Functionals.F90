@@ -24,6 +24,7 @@ MODULE Functionals
    CHARACTER(LEN=*),  PARAMETER :: MODEL_PW91PW91     ='PW91xc'
    CHARACTER(LEN=*),  PARAMETER :: MODEL_PW91LYP      ='PW91LYP'
    CHARACTER(LEN=*),  PARAMETER :: MODEL_BLYP         ='BLYPxc'
+   CHARACTER(LEN=*),  PARAMETER :: MODEL_BPW91        ='BPW91xc'
    CHARACTER(LEN=*),  PARAMETER :: MODEL_PBEPBE       ='PBExc'
 !  Hybrid exchange-correlation functionals
    CHARACTER(LEN=*),  PARAMETER :: MODEL_B3LYP_VWN3   ='B3LYP'
@@ -48,6 +49,7 @@ MODULE Functionals
    INTEGER, PARAMETER :: PURE_VWN5_LSD    =40038402 ! Slater exchange and VWN5 LSDA correlation
    INTEGER, PARAMETER :: PURE_PBE_PBE     =42509434 ! Perdew Burke Enzerhoff GGA exchange-correlation
    INTEGER, PARAMETER :: PURE_B88_LYP     =43083038 ! B88 exchange with LYP correlation
+   INTEGER, PARAMETER :: PURE_B88_PW91    =43083039 ! B88 exchange with PW91 correlation
    INTEGER, PARAMETER :: PURE_PW91_LYP    =42034802 ! PW91 exchange with LYP correlation
    INTEGER, PARAMETER :: PURE_PW91_PW91   =41243253 ! PW91 exchange with PW91 correlation
 !-----------------------------------------------------------------------------------------------------
@@ -87,6 +89,8 @@ MODULE Functionals
             Name='PW91x/PW91c'
          CASE(PURE_B88_LYP)
             Name='B88x/LYPc'
+         CASE(PURE_B88_PW91)
+            Name='B88x/PW91c'
          CASE(PURE_PBE_PBE)
             Name='PBEx/PBEc'  
          CASE(HYBRID_PBE0)
@@ -146,7 +150,7 @@ MODULE Functionals
          REAL(DOUBLE)               :: a0,ax,ac
          REAL(DOUBLE), DIMENSION(*) :: Rho,AbsGradRho2
          REAL(DOUBLE), DIMENSION(*) :: E,dEdRho,dEdGam,Buf
-         INTEGER                    :: N1,N2
+         INTEGER                    :: N1,N2,N3,N4,N5
 !---------------------------------------------------------------------------------------
          !E=Zero
          !dEdRho=Zero 
@@ -164,6 +168,9 @@ MODULE Functionals
          ENDIF
          N1=  NGrid+1
          N2=2*NGrid+1
+         N3=3*NGrid+1
+         N4=4*NGrid+1
+         N5=5*NGrid+1
          SELECT CASE(ModelChem)
          CASE(SD_EXCHANGE)
             IF(NSDen.EQ.1)THEN
@@ -171,8 +178,8 @@ MODULE Functionals
             ELSEIF(NSDen.EQ.3)THEN
                CALL uks_x_lda(1,NGrid,Rho(1),Rho(N1),AbsGradRho2(1),AbsGradRho2(N1),AbsGradRho2(N2), &
                     &  E(1),dEdRho(1),dEdRho(N1),dEdGam(1),dEdGam(N1),dEdGam(N2), &
-                    &  Buf(1),Buf(1),Buf(1),Buf(1),Buf(1),Buf(1),Buf(1),Buf(1), &
-                    &  Buf(1),Buf(1),Buf(1),Buf(1),Buf(1),Buf(1),Buf(1))
+                    &  0D0,0D0,0D0,0D0,0D0,0D0,0D0,0D0, &
+                    &  0D0,0D0,0D0,0D0,0D0,0D0,0D0)
             ENDIF
          CASE(XA_EXCHANGE)
             IF(NSDen.NE.1)CALL Halt('This functional is not available for unrestricted! '//IntToChar(ModelChem))
@@ -204,12 +211,12 @@ MODULE Functionals
                AbsGradRho2(1:NGrid)=4D0*AbsGradRho2(1:NGrid)
                CALL rks_xc_pw91(1,NGrid,Rho(1),AbsGradRho2(1), &
                     &  E(1),dEdRho(1),dEdGam(1), &
-                    &  Buf(1),Buf(1),Buf(1))
+                    &  0D0,0D0,0D0)
             ELSEIF(NSDen.EQ.3)THEN
                CALL uks_xc_pw91(1,NGrid,Rho(1),Rho(N1),AbsGradRho2(1),AbsGradRho2(N1),AbsGradRho2(N2), &
                     &  E(1),dEdRho(1),dEdRho(N1),dEdGam(1),dEdGam(N1),dEdGam(N2), &
-                    &  Buf(1),Buf(1),Buf(1),Buf(1),Buf(1),Buf(1),Buf(1),Buf(1),Buf(1), &
-                    &  Buf(1),Buf(1),Buf(1),Buf(1),Buf(1),Buf(1))
+                    &  0D0,0D0,0D0,0D0,0D0,0D0,0D0,0D0,0D0, &
+                    &  0D0,0D0,0D0,0D0,0D0,0D0)
             ENDIF
          CASE(PURE_PW91_LYP)
             IF(NSDen.NE.1)CALL Halt('This functional is not available for unrestricted! '//IntToChar(ModelChem))
@@ -219,6 +226,54 @@ MODULE Functionals
             IF(NSDen.NE.1)CALL Halt('This functional is not available for unrestricted! '//IntToChar(ModelChem))
             CALL B88x_ClSh (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,One) 
             CALL LYPc_ClSh (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,One) 
+         CASE(PURE_B88_PW91)
+            IF(NSDen.EQ.1)THEN
+               Rho(1:NGrid)=2D0*Rho(1:NGrid)
+               AbsGradRho2(1:NGrid)=4D0*AbsGradRho2(1:NGrid)
+               ! What follow sucks !
+               ! Exchange part !
+               CALL rks_x_b88(1,NGrid,Rho(1),AbsGradRho2(1), &
+                    &  Buf(1),Buf(N1),Buf(N2), &
+                    &  0D0,0D0,0D0)
+               ! Copy the exchange in the mondo arrays !
+               CALL DCOPY(NGrid,Buf( 1),1,     E(1),1)
+               CALL DCOPY(NGrid,Buf(N1),1,dEdRho(1),1)
+               CALL DCOPY(NGrid,Buf(N2),1,dEdGam(1),1)
+               ! Correlation part !
+               CALL rks_c_pw91(1,NGrid,Rho(1),AbsGradRho2(1), &
+                    &  Buf(1),Buf(N1),Buf(N2), &
+                    &  0D0,0D0,0D0)
+               ! Add the correlation part !
+               CALL DAXPY(NGrid,1D0,Buf( 1),1,     E(1),1)
+               CALL DAXPY(NGrid,1D0,Buf(N1),1,dEdRho(1),1)
+               CALL DAXPY(NGrid,1D0,Buf(N2),1,dEdGam(1),1)
+            ELSEIF(NSDen.EQ.3)THEN
+               ! What follow sucks !
+               ! Exchange part !
+               CALL uks_x_b88(1,NGrid,Rho(1),Rho(N1),AbsGradRho2(1),AbsGradRho2(N1),AbsGradRho2(N2), &
+                    &  Buf(1),Buf(N1),Buf(N2),Buf(N3),Buf(N4),Buf(N5), &
+                    &  0D0,0D0,0D0,0D0,0D0,0D0,0D0,0D0,0D0, &
+                    &  0D0,0D0,0D0,0D0,0D0,0D0)
+               ! Copy the exchange in the mondo arrays !
+               CALL DCOPY(NGrid,Buf( 1),1,     E( 1),1)
+               CALL DCOPY(NGrid,Buf(N1),1,dEdRho( 1),1)
+               CALL DCOPY(NGrid,Buf(N2),1,dEdRho(N1),1)
+               CALL DCOPY(NGrid,Buf(N3),1,dEdGam( 1),1)
+               CALL DCOPY(NGrid,Buf(N4),1,dEdGam(N1),1)
+               CALL DCOPY(NGrid,Buf(N5),1,dEdGam(N2),1)
+               ! Correlation part !
+               CALL uks_c_pw91(1,NGrid,Rho(1),Rho(N1),AbsGradRho2(1),AbsGradRho2(N1),AbsGradRho2(N2), &
+                    &  Buf(1),Buf(N1),Buf(N2),Buf(N3),Buf(N4),Buf(N5), &
+                    &  0D0,0D0,0D0,0D0,0D0,0D0,0D0,0D0,0D0, &
+                    &  0D0,0D0,0D0,0D0,0D0,0D0)
+               ! Add the correlation part !
+               CALL DAXPY(NGrid,1D0,Buf( 1),1,     E( 1),1)
+               CALL DAXPY(NGrid,1D0,Buf(N1),1,dEdRho( 1),1)
+               CALL DAXPY(NGrid,1D0,Buf(N2),1,dEdRho(N1),1)
+               CALL DAXPY(NGrid,1D0,Buf(N3),1,dEdGam( 1),1)
+               CALL DAXPY(NGrid,1D0,Buf(N4),1,dEdGam(N1),1)
+               CALL DAXPY(NGrid,1D0,Buf(N5),1,dEdGam(N2),1)
+            ENDIF
          CASE(PURE_PBE_PBE)
             IF(NSDen.NE.1)CALL Halt('This functional is not available for unrestricted! '//IntToChar(ModelChem))
             CALL PBEx_ClSh (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,One) 
@@ -250,8 +305,8 @@ MODULE Functionals
             ELSEIF(NSDen.EQ.3)THEN
                CALL uks_xc_b3lyp(1,NGrid,Rho(1),Rho(N1),AbsGradRho2(1),AbsGradRho2(N1),AbsGradRho2(N2), &
                     &  E(1),dEdRho(1),dEdRho(N1),dEdGam(1),dEdGam(N1),dEdGam(N2), &
-                    &  Buf(1),Buf(1),Buf(1),Buf(1),Buf(1),Buf(1),Buf(1),Buf(1),Buf(1), &
-                    &  Buf(1),Buf(1),Buf(1),Buf(1),Buf(1),Buf(1))
+                    &  0D0,0D0,0D0,0D0,0D0,0D0,0D0,0D0,0D0, &
+                    &  0D0,0D0,0D0,0D0,0D0,0D0)
             ENDIF
          CASE(HYBRID_B3LYP_VWN5)
             IF(NSDen.NE.1)CALL Halt('This functional is not available for unrestricted!'//IntToChar(ModelChem))

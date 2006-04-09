@@ -140,6 +140,13 @@ CONTAINS
           Models(Location(I))=PURE_B88_LYP
        ENDDO
     ENDIF
+    ! Pure BPW91 GGA exchange-correlation 
+    IF(OptKeyLocQ(Inp,MODEL_OPTION,MODEL_BPW91,MaxSets,NLoc,Location))THEN
+       NModls=NModls+NLoc
+       DO I=1,NLoc
+          Models(Location(I))=PURE_B88_PW91
+       ENDDO
+    ENDIF
     ! Hybrid B3LYP/VWN3 exchange-correlation 
     IF(OptKeyLocQ(Inp,MODEL_OPTION,MODEL_B3LYP_VWN3,MaxSets,NLoc,Location))THEN
        NModls=NModls+NLoc

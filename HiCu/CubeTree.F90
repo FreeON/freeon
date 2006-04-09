@@ -296,7 +296,7 @@ MODULE CubeTree
          TYPE(CubeNode), POINTER            :: Cube
          REAL(DOUBLE),   DIMENSION(NGrid * 3):: Rho,AbsGradRho2         !<<< SPIN
          REAL(DOUBLE),   DIMENSION(NGrid * 3):: E,dEdRho,dEdAbsGradRho2 !<<< SPIN
-         REAL(DOUBLE),   DIMENSION(NGrid    ):: Buf
+         REAL(DOUBLE),   DIMENSION(NGrid * 6):: Buf
          REAL(DOUBLE),   DIMENSION(3)       :: GradRhoOnTheCube
          REAL(DOUBLE)                       :: EOnTheCube,dEd1OnTheCube, &
                                                dEd2OnTheCube,RhoOnTheCube, &
