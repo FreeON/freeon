@@ -17,7 +17,7 @@ double cpu_seconds__(void){return cpu_seconds_();}
 double wall_seconds_(void)
 {
  struct tms tbuff;
- double CTK=sysconf(_SC_CLK_TCK);
+ double CTK=1.0/sysconf(_SC_CLK_TCK);
  /* double CTK=1.0/CLK_TCK; This is obsolete. */
  double WALL=times(&tbuff);
  return WALL*CTK;
