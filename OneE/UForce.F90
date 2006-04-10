@@ -28,7 +28,7 @@ PROGRAM UForce
   TYPE(BSET)                  :: BS
   TYPE(CRDS)                  :: GM
   TYPE(ARGMT)                 :: Args
-  INTEGER                     :: Q,R,AtA,AtB,AtC,KC,JP,MB,MA,NB,MN1,A1,A2,C1,C2,NCB,NCC
+  INTEGER                     :: Q,R,AtA,AtB,AtC,KC,JP,MB,MA,NB,MN1,MN,A1,A2,C1,C2,NCB,NCC
   TYPE(HGRho)                 :: Rho
   TYPE(DBL_VECT)              :: UFrc,Frc
   REAL(DOUBLE)                :: Ax,Ay,Az,Bx,By,Bz,Cx,Cy,Cz,UFrcChk,F1a,F2a,F3a,f11,f10
@@ -62,6 +62,7 @@ PROGRAM UForce
            Q=P%BlkPt%I(JP)
            NB=BSiz%I(AtB)
            MN1=MA*NB-1
+           MN=MN1+1
            !Quick and dirty!
            SELECT CASE(P%NSMat)
            CASE(1)
