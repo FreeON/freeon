@@ -62,6 +62,18 @@ PROGRAM UForce
            Q=P%BlkPt%I(JP)
            NB=BSiz%I(AtB)
            MN1=MA*NB-1
+           !Quick and dirty!
+           SELECT CASE(P%NSMat)
+           CASE(1)
+              !We don't need to do anything!
+           CASE(2)
+              !We add up the two density martices!
+              CALL DAXPY(MN,1D0,P%MTrix%D(Q+MN),1,P%MTrix%D(Q),1)
+           CASE(4)
+              !We add up the diagonal density martices!
+              CALL DAXPY(MN,1D0,P%MTrix%D(Q+3*MN),1,P%MTrix%D(Q),1)
+           CASE DEFAULT;CALL Halt(' UForce: P%NSMat doesn''t have an expected value! ')
+           END SELECT
            B=Pair%B
            DO NCB=1,CS_OUT%NCells
               Pair%B=B +CS_OUT%CellCarts%D(:,NCB)
