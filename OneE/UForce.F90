@@ -180,6 +180,11 @@ UFrc%D=Two*UFrc%D
   ENDIF
   CALL Delete(TotUFrc)
 #endif
+! Rescale the Forces if needed.
+  IF(P%NSMat.GT.1) CALL DSCAL(3*NAtoms,0.5D0,    UFrc%D(1  ),1)
+  !Dont forget to rescale the lattice forces for unrestricted theory!
+  !IF(P%NSMat.GT.1) CALL DSCAL(       9,0.5D0,LatFrc_U%D(1,1),1)
+
 !  CALL PPrint(UFrc,'dU',Unit_O=6)
 ! Do some checksumming, resumming and IO 
   CALL PChkSum(UFrc,'dU/dR',Proc_O=Prog)  
