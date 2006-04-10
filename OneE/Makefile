@@ -87,7 +87,7 @@ MForce:	$(ObjMF)
 	mv MForce $(MONDO_EXEC)/MForce
 #
 UForce:	$(ObjUF)
-	$(LD) $(LDFLAGS) UForce $(ObjUF) $(F90_LIBRARIES)
+	$(LD) $(LDFLAGS) UForce $(ObjUF) $(F90_LIBRARIES) $(LAPACK)
 	mv UForce $(MONDO_EXEC)/UForce
 #
 THess:	$(ObjTH)
