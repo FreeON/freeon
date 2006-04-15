@@ -1,6 +1,92 @@
+2006-04-14 18:29  mchalla
+
+	* QCTC2/HGToSP/: HGToSP.m, HGToSP_Density.Inc, HGToSP_PoleNode.Inc:
+	Through L=7.
+
+2006-04-10 10:59  vweber
+
+	* OneE/UForce.F90: hopefully this time is the right one!
+
+2006-04-10 09:28  vweber
+
+	* OneE/UForce.F90: Fixed another problem with unrestricted.
+
+2006-04-09 19:00  vweber
+
+	* OneE/Makefile: Added LAPACK to UForce
+
+2006-04-09 18:59  vweber
+
+	* OneE/UForce.F90: Added the rescaling of the forces for
+	unrestricted.  !FOR LATTICE FORCES DONT FORGET TO RESCALE THEM!
+
+2006-04-09 12:58  vweber
+
+	* MondoMods/Seconds.C: forgot to inverse the tictac!
+
+2006-04-09 12:38  vweber
+
+	* MondoSCF2/PunchHDF.F90: Fixed a bug with ECP and unrestricted
+	theory. Mondo was not removing core electrons for alpha/beta.
+
+2006-04-08 19:54  vweber
+
+	* MondoMods/Functionals.F90: replace the DCOPYs there
+
+2006-04-08 18:49  vweber
+
+	* MondoSCF2/ParseOptions.F90, MondoMods/Functionals.F90,
+	HiCu/CubeTree.F90: new BPW91
+
+2006-04-08 17:22  vweber
+
+	* MondoMods/DFRepository.F: Added few functional for Mister Nemeth.
+
+2006-04-08 12:59  vweber
+
+	* MondoSCF2/Optimizer.F90: Fixed the bug wrt NEBPurify which was
+	modifing the geos between SCF and Forces calculations.	mv it just
+	before GeomArchive.
+
+2006-04-06 10:42  vweber
+
+	* MondoSCF2/ParseGeometries.F90: Changed 2 PPrint to avoid
+	rescaling a.u.->A.
+
+2006-04-06 10:40  vweber
+
+	* MondoMods/PrettyPrint.F90: Added an option CrdInAng_O to avoid
+	the rescaling a.u.->A if not needed.
+
+2006-04-05 17:26  vweber
+
+	* Docs/STRESS2/Stress2.tex: [no log message]
+
+2006-04-05 14:29  vweber
+
+	* Docs/Bib/mondo_new.bib: Fixed an error.
+
+2006-04-05 09:42  vweber
+
+	* MondoSCF2/PunchHDF.F90: Fixed CJ bug.
+
+2006-04-04 14:47  vweber
+
+	* MondoMods/Seconds.C: replace the obsolete tictac.
+
+2006-04-04 10:15  vweber
+
+	* Docs/pONX/pONX.tex: [no log message]
+
+2006-03-27 12:28  mchalla
+
+	* QCTC/JForce.F90: Modified to include P+1, that is use the SAME
+	density in the force as in the density build!!	Now serial and
+	parallel are the same.
+
 2006-03-21 10:28  mchalla
 
-	* MondoSCF2/PunchHDF.F90: [no log message]
+	* MondoSCF2/PunchHDF.F90, ChangeLog: [no log message]
 
 2006-03-20 05:28  mchalla
 
