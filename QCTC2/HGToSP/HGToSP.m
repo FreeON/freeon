@@ -42,10 +42,11 @@ If[MondoHome==$FAILED,
 EllFile = StringJoin[MondoHome,"/Includes/Ell.m"];
 Get[EllFile];
 
-HGEll=4;
+HGEll=7;
 
 (* INDEXING OF ARRAY ELEMENTS *)
 
+LHGTF[L_]:=(L+1)*(L+2)*(L+3)/6;                                    
 LBegin[L_]:=(L*(L+1)*(L+2))/6+1;
 LMNDex[L_,M_,N_]:=LBegin[L+M+N]+N*(2*(L+M+N)-N+3)/2+M
 SPDex[L_,M_]:=Binomial[L+1,2]+M;
@@ -119,17 +120,41 @@ SetOptions[OpenWrite, PageWidth -> 200];
 
 (* PUT THE TRANSFORMATIONS TO FILE *)
 
-FileName="HGToSP.Inc";
+FileName="HGToSP_PoleNode.Inc";
 Print[" Openned ",FileName];
 OpenWrite[FileName];
 
 Do[
    WriteString[FileName,"     CASE(",L,") \n"];
    WriteString[FileName,"        DO J=1,HG%NQ(",L,") \n"];
+   WriteString[FileName,"           PiZ=(Pi/HG%Zeta(",L,")%D(J))**(ThreeHalves) \n"];
    Do[
       ls=ToString[l];
       Write[FileName,FortranAssign[c,SPC[l],AssignReplace->{"c"->StringJoin["CMTmp%D(J,",ls,")"],"HGCo"->StringJoin["HG%Coef(",ToString[L],")%D"]," "->""}]];
       Write[FileName,FortranAssign[s,SPS[l],AssignReplace->{"s"->StringJoin["SMTmp%D(J,",ls,")"],"HGCo"->StringJoin["HG%Coef(",ToString[L],")%D"]," "->""}]];
+     ,{l,0,LSP[L]}];
+   WriteString[FileName,"        ENDDO \n"];
+  ,{L,0,HGEll}];
+Close[FileName];          
+Print[" Closed ",FileName];
+
+
+
+FileName="HGToSP_Density.Inc";
+Print[" Openned ",FileName];
+OpenWrite[FileName];
+
+Do[
+   WriteString[FileName,"     CASE(",L,") \n"];
+   WriteString[FileName,"        DO J=L,U \n"];
+   WriteString[FileName,"           N=N+1 \n"];
+   WriteString[FileName,"           IAdd=OffQ+J \n"];
+   WriteString[FileName,"           JAdd=OffR+(J-1)*",ToString[LHGTF[L]]," \n"];
+   WriteString[FileName,"           PTmp%D(:,N)=(/Rho%Qx%D(IAdd),Rho%Qy%D(IAdd),Rho%Qz%D(IAdd)/) \n"];
+   Do[
+      ls=ToString[l];
+      Write[FileName,FortranAssign[c,SPC[l],AssignReplace->{"c"->StringJoin["CTmp%D(N,",ls,")"],"HGCo"->StringJoin["Rho%Co%D"],",J"->"+JAdd"," "->""}]];
+      Write[FileName,FortranAssign[s,SPS[l],AssignReplace->{"s"->StringJoin["STmp%D(N,",ls,")"],"HGCo"->StringJoin["Rho%Co%D"],",J"->"+JAdd"," "->""}]];
      ,{l,0,LSP[L]}];
    WriteString[FileName,"        ENDDO \n"];
   ,{L,0,HGEll}];
