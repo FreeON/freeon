@@ -37,8 +37,8 @@
 %\documentclass[twocolumn,showkeys,showpacs,preprintnumbers,amsmath,amssymb]{revtex4}
 %\documentclass[prl,aps,preprint,showpacs,superbib]{revtex4}
 %\documentclass[prl,twocolumn,aps,showpacs,superbib]{revtex4}
-\documentclass[prl,twocolumn,twocolumngrid,superbib]{revtex4} %<<<< orig
-%>>>>\documentclass[prl,preprint,doublespace]{revtex4} %<<< For the journal
+%>>>>\documentclass[prl,twocolumn,twocolumngrid,superbib]{revtex4} %<<<< orig
+\documentclass[prl,preprint,doublespace]{revtex4} %<<< For the journal
 
 \usepackage{graphicx}
 \usepackage{amsfonts}
@@ -51,8 +51,13 @@
 \pagestyle{fancy}
 
 
+
 \newcommand{\commentoutB}[1]{#1}
-% \newcommand{\commentoutA}[1]{#1}
+\newcommand{\commentoutA}[1]{}
+
+%\newcommand{\commentoutA}[1]{#1}
+%\newcommand{\commentoutB}[1]{}
+
 
 
 %\def\Tr{{\rm Tr}}
@@ -349,6 +354,8 @@ each basis function $c$, the list $\{ac^\mathbf{m}\}$ is created and the
 two indices $a$ and $\mathbf{m}$ are ordered by decreasing value 
 of the integral estimate $|(ac^\mathbf{m}|ac^\mathbf{m})_{\rm mic}|^{1/2}$.
 
+\commentoutA{
+
 \begin{figure}[htbp]
   \centering
   \caption{\protect
@@ -375,6 +382,8 @@ of the integral estimate $|(ac^\mathbf{m}|ac^\mathbf{m})_{\rm mic}|^{1/2}$.
   \end{equation*}
 \end{figure}
 
+}%\commentoutA
+
 In the third step, the parallel ONX $K$ builds start with the outer loops over
 the rows and columns of the local density matrix $D({\tt iPrc})$, 
 as shown in Fig.~\ref{Fig:ONXcore}. Next, a two-fold loop over
@@ -386,6 +395,7 @@ Level-2 BLAS matrix-vector multiplication subroutine (DGEMV).
 The manipulations of the density and exchange matrices are 
 carried out with the {\sc FastMat} data structure~\cite{CGan04B}.
 
+\commentoutA{
 
 \begin{figure}[htbp]
   \centering
@@ -424,6 +434,8 @@ carried out with the {\sc FastMat} data structure~\cite{CGan04B}.
     \end{split}
   \end{equation*}
 \end{figure}
+
+}%\commentoutA
 
  In the 4$^{th}$ step every processor, including the root, computes 
  the lower triangular part of the exchange sub-matrix $K(D({\tt iPrc}))$ 
@@ -532,6 +544,8 @@ carried out with the {\sc FastMat} data structure~\cite{CGan04B}.
  For more informations about the multiple recursive decomposition, the reader can refer 
  to the original paper~\cite{LRomero95}.
 
+\commentoutA{
+
 \begin{figure}[htbp]
   \centering
  \caption{\protect
@@ -564,6 +578,8 @@ carried out with the {\sc FastMat} data structure~\cite{CGan04B}.
    \multiput(0.75,0.85)(0   ,0.05){ 3} {\line(0,1){0.025}}
  \end{picture}
 \end{figure}
+
+}%\commentoutA
 
 \subsection{Global summation of the exchange matrices}
 % At the end of the exchange build, all processors obtain their own local
@@ -686,6 +702,7 @@ carried out with the {\sc FastMat} data structure~\cite{CGan04B}.
  Thus the performance of the ET is quite insensitive to the SCF cycle, after
  a stabilization time.
 
+\commentoutA{
 
 \begin{figure}[h]
   \caption{\protect
@@ -707,6 +724,8 @@ carried out with the {\sc FastMat} data structure~\cite{CGan04B}.
   \includegraphics[angle=-90,width=0.5\textwidth]{h2o_50_prop}
 \end{figure}
 
+}%\commentoutA
+
 \subsection{Water box with PBC}
  For the periodic systems, the result of the 64-water molecules obtained on the BProc cluster is shown
  in Fig.~\ref{fig:h2o_pbc_64}. The calculations are performed at the
@@ -725,6 +744,8 @@ carried out with the {\sc FastMat} data structure~\cite{CGan04B}.
  the timing function gives a more accurate elapsed time for each 
  atom-block of the density matrix.\\
 
+\commentoutA{
+
 \begin{figure}[p]
   \caption{\protect
     Scaling of the parallel ONX on (H$_2$O)$_{64}$ PBC with the RHF/6-31G*(O)/5-11G*(H),
@@ -733,6 +754,8 @@ carried out with the {\sc FastMat} data structure~\cite{CGan04B}.
   }\label{fig:h2o_pbc_64}
   \includegraphics[angle=-90,width=0.5\textwidth]{h2o_pbc_64}
 \end{figure}
+
+}%\commentoutA
 
 \subsection{Endothelin and periodic KCNS}
 Finally, we present, in Fig.~\ref{fig:Endothelin_KCNS}, 
@@ -749,10 +772,13 @@ We also show in Fig.~\ref{fig:EndothelinTotalTiming} the total speedup
 of the fourth SCF for endothelin as well as the three most consuming parts of the SCF
 {\em i.e.} the Coulomb build (Quantum Chemical Tree Code QCTC~\cite{MChallacombe97}),
 the exact exchange build (ONX) and the density matrix solver (TRS4).
+The timing for the different parts are reported in Table~\ref{Tab:EndothelinTotalTiming}.
+
+\commentoutA{
 
 \begin{figure}[p]
   \caption{\protect
-    Scaling of the parallel ONX on Endothelin and periodic (KCNS)$_{32}$ with 
+    Scaling of the parallel ONX on endothelin and periodic (KCNS)$_{32}$ with 
     the RHF/6-31G** and RHF/86-511G(K)/86-311G(S)/6-311G(C,N) 
     respectively and the {\tt GOOD} threshold.
     The speedups are relative to 2 processors.
@@ -763,12 +789,36 @@ the exact exchange build (ONX) and the density matrix solver (TRS4).
 \begin{figure}[p]
   \caption{\protect
     Total scaling of the parallel SCF and its most consuming parts 
-    on Endothelin with the RHF/6-31G**  
+    on endothelin with the RHF/6-31G**  
     and the {\tt GOOD} threshold. 
     The speedups are relative to 2 processors.
   }\label{fig:EndothelinTotalTiming}
   \includegraphics[angle=-90,width=0.5\textwidth]{EndothelinTotalTiming}
 \end{figure}
+
+\begin{table}[t]
+  \centering
+  \caption{\protect
+    Timing of the parallel SCF and its most consuming parts
+    on endothelin with the RHF/6-31G** and the {\tt GOOD} threshold.
+    Times are in seconds.
+  }\label{Tab:EndothelinTotalTiming}
+  \begin{tabular}{ccccc}
+    \toprule
+    Nbr. Proc. & Total & QCTC & ONX & TRS4 \\
+  \hline
+    2 & 19849 & 10937 & 6810 & 1737 \\
+    4 & 10284 &  5669 & 3432 &  760 \\
+    8 &  5471 &  2910 & 1733 &  484 \\
+   16 &  3127 &  1561 &  896 &  380 \\
+   32 &  1922 &   825 &  490 &  324 \\
+   64 &  1346 &   489 &  249 &  325 \\
+  128 &  1156 &   315 &  138 &  391 \\
+  \botrule
+  \end{tabular}
+\end{table}
+
+}\commentoutA
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -834,6 +884,28 @@ the exact exchange build (ONX) and the density matrix solver (TRS4).
 \bf  TABLES\\[1.cm]
 \end{center}
 
+\begin{table}[h]
+  \centering
+  \caption{\protect
+    Timing of the parallel SCF and its most consuming parts
+    on endothelin with the RHF/6-31G** and the {\tt GOOD} threshold.
+    Times are in seconds.
+  }\label{Tab:EndothelinTotalTiming}
+  \begin{tabular}{ccccc}
+    \toprule
+    Nbr. Proc. & Total & QCTC & ONX & TRS4 \\
+  \hline
+    2 & 19849 & 10937 & 6810 & 1737 \\
+    4 & 10284 &  5669 & 3432 &  760 \\
+    8 &  5471 &  2910 & 1733 &  484 \\
+   16 &  3127 &  1561 &  896 &  380 \\
+   32 &  1922 &   825 &  490 &  324 \\
+   64 &  1346 &   489 &  249 &  325 \\
+  128 &  1156 &   315 &  138 &  391 \\
+  \botrule
+  \end{tabular}
+\end{table}
+
 \clearpage
 
 \begin{figure}[h]
@@ -841,9 +913,51 @@ the exact exchange build (ONX) and the density matrix solver (TRS4).
 \bf  FIGURES\\[1.cm]
 \end{center}
 
-%\caption{\protect  Total CPU time of the fifth CPSCF iteration for the water cluster sequence with
-%         the 6-31G and 6-31G** basis sets and the {\tt GOOD} and {\tt TIGHT} numerical thresholds (see text)
-%         controlling numerical precision of the result.  The lines are fits to the last three and four points, respectively.}\label{scaling}
+  \caption{\protect
+    Parallel ordering of significant distributions.
+%    The indeces $A, C$ and $a, c$ run over the atoms and basis functions respectively;.
+  }\label{Fig:List}
+
+  \caption{\protect
+    The parallel ONX loops.
+  }\label{Fig:ONXcore}
+
+ \caption{\protect
+   Example of a horizontal and vertical recursive decomposition for 16 processors.
+ }\label{fig:part2D}
+
+  \caption{\protect
+    Scaling of the parallel ONX on (H$_2$O)$_{50}$
+    and (H$_2$O)$_{110}$ with the 6-31G and 6-31G**
+    basis functions and the {\tt TIGHT} threshold.
+    Speedups are relative to 2 processors.
+  }\label{fig:h2o_50_110}
+
+  \caption{\protect
+    Relative speedup of the parallel ONX on (H$_2$O)$_{50}$ with the RHF/6-31G**
+    along the SCF iterations.
+    Speedups are relative to 2 processors.
+  }\label{fig:h2o_50_prop}
+
+  \caption{\protect
+    Scaling of the parallel ONX on (H$_2$O)$_{64}$ PBC with the RHF/6-31G*(O)/5-11G*(H),
+    the RHF/6-31G** and RHF/6-31G level of theories and the {\tt GOOD} threshold.
+    The speedups are relative to 2 processors.
+  }\label{fig:h2o_pbc_64}
+
+  \caption{\protect
+    Scaling of the parallel ONX on endothelin and periodic (KCNS)$_{32}$ with
+    the RHF/6-31G** and RHF/86-511G(K)/86-311G(S)/6-311G(C,N)
+    respectively and the {\tt GOOD} threshold.
+    The speedups are relative to 2 processors.
+  }\label{fig:Endothelin_KCNS}
+
+  \caption{\protect
+    Total scaling of the parallel SCF and its most consuming parts
+    on endothelin with the RHF/6-31G**
+    and the {\tt GOOD} threshold.
+    The speedups are relative to 2 processors.
+  }\label{fig:EndothelinTotalTiming}
 
 \end{figure}
 
@@ -851,41 +965,121 @@ the exact exchange build (ONX) and the density matrix solver (TRS4).
 
 \begin{center}
 Figure 1, V.~Weber and M.~Challacombe \\[1.cm]
-%\resizebox*{5in}{!}{\includegraphics{figure1.eps}}
+  \begin{equation*}
+    \begin{split}
+      &\tt          DO\,C\in COL(D(iPrc))\\
+      &\tt          DO\,A=1,NAtoms\\
+      &\tt\quad       DO\,\mathbf{m}=1,NCell\\
+      &\tt\qquad        DO\,c\in C\\
+      &\tt\qquad        DO\,a\in A\\
+      &\tt\qquad\quad     COMPUTE\,|(ac^\mathbf{m}|ac^\mathbf{m})_{mic}|^{1/2}\\
+      &\tt\qquad\quad     IF(|(ac^\mathbf{m}|ac^\mathbf{m})_{mic}|^{1/2}<{\tt Thresh)\,CYCLE}\\
+      &\tt\qquad\quad     ADD\,ac^\mathbf{m}\,{\tt to}\, \{ac^\mathbf{m}\}(A,C)\\
+      &\tt\qquad        ENDDO\\
+      &\tt\qquad        ENDDO\\
+      &\tt\quad       ENDDO\\
+      &\tt\quad       SORT\,\{ac^\mathbf{m}\}(A,C)\,by\,decreasing\,|(ac^\mathbf{m}|ac^\mathbf{m})_{mic}|^{1/2}\\
+      &\tt         ENDDO\\
+      &\tt         ENDDO
+    \end{split}
+  \end{equation*}
 \end{center}
 
 \clearpage
 
 \begin{center}
 Figure 2, V.~Weber  and M.~Challacombe \\[1.cm]
-%\resizebox*{7in}{!}{\includegraphics{figure2.eps}}
+  \begin{equation*}
+    \begin{split}
+      &\tt        Receive\,D(iPrc)\,from\,ROOT\\
+      &\tt        Make\,list\,\{ac^\mathbf{m}\}\,and\,\{bd^\mathbf{n}\} \\
+      &\tt        DO\,C\in COL(D(iPrc)) \\
+      &\tt        DO\,D\in ROW(D(iPrc),C) \\
+      &\tt\quad     ti=TIMER(\,) \\
+      &\tt\quad     DO\,A=1,NAtoms \\
+      &\tt\quad     DO\,B=1,A \\
+      &\tt\qquad      DO\,a,c,\mathbf{m}\in\{ac^\mathbf{m}\}(A,C) \\
+%      &\tt\qquad\quad   IF(SkipOut)\,EXIT  \\
+      &\tt\qquad\quad   IF(\max(|D_{cD}|)|(ac^\mathbf{m}|ac^\mathbf{m})_{mic}|^{1/2}\quad\&\\
+      &\tt\qquad\quad    \&\quad|(bd_f^\mathbf{n}|bd_f^\mathbf{n})_{mic}|^{1/2}<Thresh)\,EXIT  \\
+      &\tt\qquad\quad   DO\,b,d,\mathbf{n}\in\{bd^\mathbf{n}\}(B,D) \\
+%      &\tt\qquad\qquad    IF(SkipOut)\,EXIT  \\
+      &\tt\qquad\qquad    IF(|D_{cd}||(ac^\mathbf{m}|ac^\mathbf{m})_{mic}|^{1/2}\quad\&\\
+      &\tt\qquad\qquad    \&\quad|(bd^\mathbf{n}|bd^\mathbf{n})_{mic}|^{1/2}<Thresh)\,EXIT  \\
+      &\tt\qquad\qquad    COMPUTE\,(ac^\mathbf{m}|bd^\mathbf{n})_{mic} \\
+      &\tt\qquad\quad   ENDDO \\
+      &\tt\qquad      ENDDO \\
+      &\tt\qquad      Digest\,D\,and\,ERIs \\
+      &\tt\quad     ENDDO \\
+      &\tt\quad     ENDDO \\
+      &\tt\quad     tf=TIMER(\,) \\
+      &\tt\quad     Time(C,D)=tf-ti \\
+      &\tt        ENDDO \\
+      &\tt        ENDDO \\
+      &\tt        Send\,Time\,to\,ROOT \\
+      &\tt        Global\,summation\,of\,K
+    \end{split}
+  \end{equation*}
 \end{center}
 
 \clearpage
 
 \begin{center}
 Figure 3, V.~Weber  and M.~Challacombe \\[1.cm]
-%\resizebox*{7in}{!}{\includegraphics{figure2.eps}}
+ \setlength{\unitlength}{5cm}
+ \begin{picture}(1,1)
+   \put(0,0){\line(0,1){1}}
+   \put(0,0){\line(1,0){1}}
+   \put(1,0){\line(0,1){1}}
+   \put(0,1){\line(1,0){1}}
+   %
+   \multiput(0   ,0.2 )(0.05,0   ){20} {\line(1,0){0.025}}
+   \multiput(0.2 ,0   )(0   ,0.05){ 4} {\line(0,1){0.025}}
+   \multiput(0.45,0   )(0   ,0.05){ 4} {\line(0,1){0.025}}
+   \multiput(0.9 ,0   )(0   ,0.05){ 4} {\line(0,1){0.025}}
+   %
+   \multiput(0   ,0.45)(0.05,0   ){20} {\line(1,0){0.025}}
+   \multiput(0.25,0.2 )(0   ,0.05){ 5} {\line(0,1){0.025}}
+   \multiput(0.6 ,0.2 )(0   ,0.05){ 5} {\line(0,1){0.025}}
+   \multiput(0.8 ,0.2 )(0   ,0.05){ 5} {\line(0,1){0.025}}
+   %
+   \multiput(0   ,0.85)(0.05,0   ){20} {\line(1,0){0.025}}
+   \multiput(0.23,0.45)(0   ,0.05){ 8} {\line(0,1){0.025}}
+   \multiput(0.43,0.45)(0   ,0.05){ 8} {\line(0,1){0.025}}
+   \multiput(0.70,0.45)(0   ,0.05){ 8} {\line(0,1){0.025}}
+   %
+   \multiput(0.15,0.85)(0   ,0.05){ 3} {\line(0,1){0.025}}
+   \multiput(0.40,0.85)(0   ,0.05){ 3} {\line(0,1){0.025}}
+   \multiput(0.75,0.85)(0   ,0.05){ 3} {\line(0,1){0.025}}
+ \end{picture}
 \end{center}
 
 \clearpage
 
 \begin{center}
 Figure 4, V.~Weber  and M.~Challacombe \\[1.cm]
-%\resizebox*{7in}{!}{\includegraphics{figure2.eps}}
+\includegraphics[angle=-90,width=0.5\textwidth]{h2o_50_110}
+\end{center}
+
+\clearpage
+
+\begin{center}
+Figure 5, V.~Weber  and M.~Challacombe \\[1.cm]
+\includegraphics[angle=-90,width=0.5\textwidth]{h2o_50_prop}
 \end{center}
 
 \clearpage
 
 \begin{center}
 Figure 6, V.~Weber  and M.~Challacombe \\[1.cm]
-%\resizebox*{7in}{!}{\includegraphics{figure2.eps}}
+  \includegraphics[angle=-90,width=0.5\textwidth]{h2o_pbc_64}
 \end{center}
 
 \clearpage
 
 \begin{center}
 Figure 7, V.~Weber  and M.~Challacombe \\[1.cm]
+\includegraphics[angle=-90,width=0.5\textwidth]{Endothelin_KCNS}
 %\resizebox*{7in}{!}{\includegraphics{figure2.eps}}
 \end{center}
 
@@ -893,10 +1087,8 @@ Figure 7, V.~Weber  and M.~Challacombe \\[1.cm]
 
 \begin{center}
 Figure 8, V.~Weber  and M.~Challacombe \\[1.cm]
-%\resizebox*{7in}{!}{\includegraphics{figure2.eps}}
+\includegraphics[angle=-90,width=0.5\textwidth]{EndothelinTotalTiming}
 \end{center}
-
-
 
 } %commentoutB
 
