@@ -878,7 +878,7 @@ MODULE PrettyPrint
 !---------------------------------------------------------------------------------------   
 !       Compute check sum
         Chk=Zero
-        DO I=1,SIZE(A%D)
+        DO I=LBOUND(A%D,1),UBOUND(A%D,1)
            Chk=Chk+A%D(I)*A%D(I)
         ENDDO
         Chk=SQRT(Chk) 
