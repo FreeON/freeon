@@ -35,8 +35,8 @@
 %\documentclass[pre,aps,twocolumn,showpacs,twocolumngrid,superbib]{revtex4}
 %\documentclass[prl,aps,twocolumn,showkeys,twocolumngrid,superbib]{revtex4}
 %\documentclass[twocolumn,showkeys,showpacs,preprintnumbers,amsmath,amssymb]{revtex4}
-%<<<<\documentclass[prl,twocolumn,showpacs,twocolumngrid,superbib]{revtex4}
-\documentclass[prl,preprint,doublespace]{revtex4} %<<< For the journal
+\documentclass[prl,twocolumn,showpacs,twocolumngrid,superbib]{revtex4}
+%\documentclass[prl,preprint,doublespace]{revtex4} %<<< For the journal
 %%%\documentclass[prl,showpacs,preprint,superbib]{revtex4}
 %\documentclass[showpacs,preprint,superbib]{revtex4}
 
@@ -51,13 +51,46 @@
 \pagestyle{fancy}
 
 
+%\newcommand{\commentoutB}[1]{#1}
+\newcommand{\commentoutA}[1]{}
+
+%\newcommand{\commentoutA}[1]{#1}
+\newcommand{\commentoutB}[1]{}
+
+
 \def\Tr{{\rm Tr}}
 %\nofiles
 
 \begin{document}
 
 %\preprint{APS/123-QED}
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%This manuscript reports about an implementation of analytical gradients
+%with respect to atomic positions and cell parameters, for periodic
+%systems, at the Hartree-Fock level. The implementation is based on the
+%usage of a single k-point, and a large cell is used to converge to the
+%k-space integration limit.  Examples for geometry optimizations are given,
+%and the convergence with system size is discussed. 
+%
+%The manuscript is concise and clearly written, and the topic is certainly
+%interesting. However, I think the following points should be addressed: 
+%
+%1)  The authors have stated that they obtain an accuracy of 4 digits in
+%the forces. In my opinion, it is crucial to document this accuracy, by
+%providing a table where numerical and analytical gradients are compared.
+%For example, one could choose geometries which are not the equilibrium
+%geometry of HF, urea and MgO, and then compute the numerical and the
+%analytical gradient with respect to atomic positions and with respect to
+%the cell parameters. 
+%
+%2)  In Table IV and the corresponding part of the text, it is unclear what
+%is meant with 'unsuitable use of the exact exchange Gamma-point
+%approximation'.  It is not clear why the gradients do not vanish with n=4. 
+%Even if they don't vanish, the gradients with respect to atomic positions
+%should sum to zero. This needs more discussion. 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%
 %\title{Exact Hartree-Fock exchange gradient and stress within the $\Gamma$-point approximation}
 \title{Exchange energy gradients with respect to atomic positions and cell parameters
   within the Hartree-Fock $\Gamma$-point approximation}
@@ -184,7 +217,7 @@ For an efficient truncation of the three infinite summations of the exchange
 series, the {\sc Crystal03} program uses in the first hand, the decay between local basis function 
 products and in the second, the fact that elements of the density 
 matrix of an insulator decay exponentially with inter-atomic separation.
-The strategy to compute the analytic Hartree-Fock gradients for 
+The strategy to compute the analytical Hartree-Fock gradients for 
 periodic system, in the frame of the {\sc Crystal03} package has been 
 presented by Doll, Saunders and Harrison~\cite{KDoll01} and Doll~\cite{KDoll01a}.
 Their implementation is based on the Hermite Gaussian-type functions
@@ -513,11 +546,11 @@ Alphaserver ES45s with the Quadrics QsNet High Speed Interconnect.
 %All calculations were carried out on a AMD Athlon MP 2100+ running 
 %RedHat Enterprise Linux WS release 3~\cite{RedHatEnt3}.
 
-The {\tt TIGHT} level of numerical accuracy has been used throughout this work.  
-Thresholds that define the {\tt TIGHT} accuracy level include a matrix 
-threshold $\tau=10^{-6}$, as well as other numerical thresholds 
-detailed in Ref.~\cite{CTymczak04a}, which deliver at least 8 digits of 
-relative accuracy in the total energy and 4 digits of absolute accuracy 
+The {\tt TIGHT} and {\tt VERYTIGHT} level of numerical accuracies have been used throughout this work.  
+Thresholds that define the {\tt TIGHT} ({\tt VERYTIGHT}) accuracy level include a matrix 
+threshold $\tau=10^{-6}$ ($10^{-7}$), as well as other numerical thresholds 
+detailed in Ref.~\cite{CTymczak04a}, which deliver at least 8 (10) digits of 
+relative accuracy in the total energy and 4 (5) digits of absolute accuracy 
 in the forces.  
 
 In order to demonstrate the capabilities of our implementation of the
@@ -528,6 +561,66 @@ Our first benchmark case is a linear chain of HF molecules, the second is
 urea, a purely organic compound. The third benchmark system is MgO. 
 These two latter systems have been recently optimized at the Hartree-Fock 
 level of theory by Doll, Dovesi and Orlando~\cite{KDoll04}.
+
+%Force accuracy
+In order to show the accuracy of the Hartree-Fock $\Gamma$-point gradients, we present
+in Table~\ref{Tab:GradAccu} the analytical 
+atomic and cell gradients for a linear 
+(HF)$_6$ chain and a 3D (MgO)$_{32}$ with different thresholds 
+at the RHF-MIC/6-31G and RHF-MIC/8-61G(Mg)/8-51G(O) level of theories, respectively. 
+These gradients were generated by a slight deformation of the
+equilibrium geometries. For HF the bond length and cell parameter were 
+$d=0.9$\AA~and $a_0=2.4$\AA, respectively. For MgO, the cell parameter 
+was $a_0=4.1$\AA~and a Mg atom was moved by $0.2$\AA~parallel to the $x$-direction.
+Comparisons are made to numerical atomic and cell gradients obtained 
+with the {\tt VERYTIGHT} threshold, 21 energy points
+and a 6-th degree polynomial fit.
+\begin{table}[t]
+  \centering
+  \caption{\protect
+    Analytical Hartree-Fock atomic and 
+    cell gradients for (HF)$_6$ and (MgO)$_{32}$
+    with different thresholds at the RHF-MIC/6-31G and RHF-MIC/8-61G(Mg)/8-51G(O) 
+    level of theories, respectively.
+    Comparisons are made to numerical atomic and cell gradients obtained 
+    with the {\tt VERYTIGHT} threshold.
+    Gradients are in atomic units.
+  }\label{Tab:GradAccu}
+  \begin{tabular}{lcccc}
+  \toprule
+  &\multicolumn{2}{c}{(HF)$_6$}&\multicolumn{2}{c}{(MgO)$_{32}$}\\
+  \cline{2-5}
+  Threshold 
+  & Atomic\footnote[1]{Gradient on the F atom along the periodic axis.}
+  & Cell\footnote[2]{Component $\partial E/\partial a_x$.}
+  & Atomic\footnote[3]{Gradient on the displaced Mg atom along the $x$-axis.}
+  & Cell$^b$\\
+  \hline
+%  {\tt LOOSE}     & $-$0.047490 & $-$0.018567 & 0.091945 & $-$0.081510 \\
+%  {\tt GOOD}      & $-$0.047787 & $-$0.023911 & 0.092476 & $-$0.129455 \\
+  {\tt TIGHT}     & $-$0.047916 & $-$0.024155 & 0.092434 & $-$0.128109 \\
+  {\tt VERYTIGHT} & $-$0.047941 & $-$0.024230 & 0.092436 & $-$0.128074 \\
+  \hline		  
+  Numerical       & $-$0.047941 & $-$0.024230 & 0.092435 & $-$0.128089 \\
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%hf          atomic          cell
+%NEW NEW NEW NEW NEW NEW NEW NEW NEW NEW NEW NEW 
+%loose     0.0474905040  0.01 856730382
+%good      0.0477867200  0.023 91065693
+%tight     0.0479155941  0.0241 5513950
+%verytight 0.0479412001  0.02423013890
+%numeric   0.0479407686  0.02423009859
+%OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD 
+%loose     0.0525413161  0.0 3339414863
+%good      0.0479597270  0.024 49527375
+%tight     0.0479479526  0.02422 863066
+%verytight 0.0479415176  0.02423005344
+%numeric   0.0479407686  0.02423009859
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  \botrule
+  \end{tabular}
+\end{table}
+
 
 Table~\ref{Tab:HF-n} shows the progression of the cell parameters $a_0$, bond lengths $d$ and
 total energies $E$ computed for linear (HF)$_n$ chains at 
@@ -541,11 +634,11 @@ geometry optimization with the {\sc Crystal03}~\cite{Crystal03} package.
 \begin{table}[t]
   \centering
   \caption{\protect
-    Progression of the Hartree-Fock $\Gamma$-points cell 
+    Progression of the Hartree-Fock $\Gamma$-point cell 
     parameter $a_0$, bond length $d$ and total energy $E$ for (HF)$_n$ chains
     using the periodic RHF-MIC/6-31G level of theory and the {\tt TIGHT} thresholds.
 %    $n$ is the number of HF units in the (super)cell.
-    Bond lengths and cell parameters are in \AA~and energies in atomic units.
+    Bond lengths and cell parameters are in Angstrom and energies in atomic units.
   }\label{Tab:HF-n}
   \begin{tabular}{lrllc}
     \toprule
@@ -717,11 +810,11 @@ with and without the MIC, for the (HF)$_n$ chains with increasing cell length.
 %converged large cell $\Gamma$-point approximation
 %%${\bf k}$-space limit
 %with respect to the cell length with and without the MIC.
-The logarithm absolute error in the atomic and cell forces
+The logarithm absolute error in the atomic and cell gradients
 are also shown in Figure~\ref{Fig:CnvgEnergy}.
-These forces were generated by a slight contraction (0.01\AA)~of the bond length.
+These gradients were generated by a slight contraction (0.01\AA)~of the bond length.
 The calculations with the MIC show an exponential convergence of the total
-energy and forces. However, a naive implementation of 
+energy and gradients. However, a naive implementation of 
 the $\Gamma$-point exact exchange, {\em i.e.} without the MIC, leads to a convergence 
 of the total energy inversely proportional to the system size, as can be seen 
 in Figure~\ref{Fig:CnvgEnergyNoMIC}. By analogy, the behavior of the convergence of the total energy
@@ -830,7 +923,7 @@ of urea are mainly due to the different basis set used by {\sc Crystal03} and
     and total energy for (urea)$_n$ using the periodic RHF-MIC/6-21G* level of theory 
     and the {\tt TIGHT} thresholds. 
 %    $n$ is the number of urea units in the (super)cell.
-    Lengths, angles and energies are in \AA, degrees and atomic units respectively.
+    Lengths, angles and energies are in Angstrom, degrees and atomic units respectively.
   }\label{Tab:Urea}
   \begin{tabular}{lccc}
 % 2x2x2
@@ -919,7 +1012,7 @@ and the energy systematically converges with system size.
     for (MgO)$_n$ using the periodic 
     RHF-MIC/8-61G/8-51G level of theory and the {\tt TIGHT} thresholds. 
 %    $n$ is the number of MgO units in the (super)cell.
-    cell parameters and energies are in \AA~and atomic unit respectively.
+    cell parameters and energies are in Angstrom and atomic unit respectively.
   }\label{Tab:MgO}
   \begin{tabular}{lrccc}
   \toprule
@@ -1003,13 +1096,24 @@ and the energy systematically converges with system size.
 %
 %
 %\subsection{???Convergence of the MIC-atomic gradients???}
-In Table~\ref{Tab:GradMgO}, we present the progression of the average of the norm of the
-atomic gradients for the (MgO)$_n$ systems with a cell parameter of $a_0=4.200$\AA. 
+In Table~\ref{Tab:GradMgO}, we present the progression 
+of the average of the norm of the
+atomic gradients for the (MgO)$_n$ systems with a cell parameter of $a_0=4.2$\AA. 
+Note that the gradients with respect to atomic positions sum to zero within the accuracy requested.
 While the smallest system, (MgO)$_4$, gives 
-large unphysical gradients which reflects 
-an unsuitable use of the exact exchange $\Gamma$-point approximation,
+large unphysical gradients which reflects the use of a too small cell for a $\Gamma$-point calculation,
 the larger systems provide gradients which are below the accuracy targeted by the 
-{\tt TIGHT} thresholds ({\em i.e.} an absolute error of $10^{-4}$ a.u. in the forces).
+{\tt TIGHT} thresholds ({\em i.e.} an absolute error 
+of $10^{-4}$ a.u. in the forces).
+%In Table~\ref{Tab:GradMgO}, we present the progression 
+%of the average of the norm of the
+%atomic gradients for the (MgO)$_n$ systems with a cell parameter of $a_0=4.200$\AA. 
+%While the smallest system, (MgO)$_4$, gives 
+%large unphysical gradients which reflects 
+%an unsuitable use of the exact exchange $\Gamma$-point approximation,
+%the larger systems provide gradients which are below the accuracy targeted by the 
+%{\tt TIGHT} thresholds ({\em i.e.} an absolute error 
+%of $10^{-4}$ a.u. in the forces).
 These unphysical gradients observed for the (MgO)$_4$ system are responsible for
 breaking the symmetry of the cell (see the fractional coordinate Table~\ref{Tab:MgO}).
 
@@ -1017,13 +1121,13 @@ breaking the symmetry of the cell (see the fractional coordinate Table~\ref{Tab:
   \centering
   \caption{\protect
     Progression of the Hartree-Fock $\Gamma$-point average norm of the gradients
-    for (MgO)$_n$ using the periodic 
+    on the Mg and O atoms for (MgO)$_n$ using the periodic 
     RHF-MIC/8-61G/8-51G level of theory and the {\tt TIGHT} thresholds. 
     Gradients are in atomic units.
   }\label{Tab:GradMgO}
   \begin{tabular}{rcc}
   \toprule
-   $n$ & grad Mg & grad O \\
+   $n$ & Mg & O \\
   \hline
          4 & 0.0130609 & 0.0248789 \\% 0.007540742 & 0.014363863 \\
         32 & 0.0000268 & 0.0000439 \\% 0.000015481 & 0.000025388 \\
@@ -1147,7 +1251,8 @@ in conjunction with the QUICCA algorithm to optimize a few periodic systems at
 the Hartree-Fock level of theory. 
 
 For the (HF)$_n$ systems, the convergence of the HF-MIC $\Gamma$-point energy, 
-atomic and cell forces to the converged large cell $\Gamma$-point approximation
+atomic and cell gradients 
+%to the converged large cell $\Gamma$-point approximation
 with respect to cell length have been explicitly shown to be exponential 
 in the cell size (see Fig.~\ref{Fig:CnvgEnergy}). 
 A fast convergence of the total energy and geometrical parameters
@@ -1194,240 +1299,92 @@ than 3 digits can be already achieved with cubic cells of about $600$\AA$^3$.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \bibliography{mondo_new}
+\newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\commentoutB{
+
+\clearpage
+
+\begin{center}
+\bf  TABLES\\[1.cm]
+\end{center}
+
+\clearpage
+
+\begin{figure}[h]
+\begin{center}
+\bf  FIGURES\\[1.cm]
+\end{center}
+
+%\caption{\protect  Total CPU time of the fifth CPSCF iteration for the water cluster sequence with
+%         the 6-31G and 6-31G** basis sets and the {\tt GOOD} and {\tt TIGHT} numerical thresholds (see text)
+%         controlling numerical precision of the result.  The lines are fits to the last three and four points, respectively.}\label{scaling}
+
+\end{figure}
+
+\clearpage
+
+
+\clearpage
+
+\begin{center}
+Figure 1, V.~Weber and M.~Challacombe \\[1.cm]
+%\resizebox*{5in}{!}{\includegraphics{figure1.eps}}
+\end{center}
+
+\clearpage
+
+\begin{center}
+Figure 2, V.~Weber  and M.~Challacombe \\[1.cm]
+%\resizebox*{7in}{!}{\includegraphics{figure2.eps}}
+\end{center}
+
+\clearpage
+
+\begin{center}
+Figure 3, V.~Weber  and M.~Challacombe \\[1.cm]
+%\resizebox*{7in}{!}{\includegraphics{figure2.eps}}
+\end{center}
+
+\clearpage
+
+\begin{center}
+Figure 4, V.~Weber  and M.~Challacombe \\[1.cm]
+%\resizebox*{7in}{!}{\includegraphics{figure2.eps}}
+\end{center}
+
+\clearpage
+
+\begin{center}
+Figure 6, V.~Weber  and M.~Challacombe \\[1.cm]
+%\resizebox*{7in}{!}{\includegraphics{figure2.eps}}
+\end{center}
+
+\clearpage
+
+
+\begin{center}
+Figure 7, V.~Weber  and M.~Challacombe \\[1.cm]
+%\resizebox*{7in}{!}{\includegraphics{figure2.eps}}
+\end{center}
+
+\clearpage
+
+\begin{center}
+Figure 8, V.~Weber  and M.~Challacombe \\[1.cm]
+%\resizebox*{7in}{!}{\includegraphics{figure2.eps}}
+\end{center}
+
+
+} %commentoutB
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \end{document}
 %
 % ****** End of file apssamp.tex ******
-%\begin{table}[t]
-%  \centering
-%  \caption{\protect
-%    Progression of the Hartree-Fock $\Gamma$-point cell constant 
-%    and total energy for urea using the periodic RHF-MIC/6-21G* level of theory.
-%    Lengths and energies are in \AA~and atomic unit respectively.
-%  }\label{Tab:Urea}
-%  \begin{tabular}{lrccc}
-%    \toprule
-%    & $N$ & $a_0$ & $c_0$ & $E_{\rm tot}/N$ \\
-%    \hline
-%    \sc{MondoSCF} & 1 &  &  & \\
-%    &               8 &  &  & \\
-%    &              27 &  &  & \\
-%    \hline
-%    \sc{Crystal03}\footnote[1]{$2\times 2\times 2$ $k$-points.} &
-%    1 & 5.524 & 4.642 & $-$447.683224\\
-%    \botrule
-%  \end{tabular}
-%\end{table}
-%\begin{table}[t]
-%  \centering
-%  \caption{\protect
-%    Progression of the Hartree-Fock $\Gamma$-point cell 
-%    constant ([\AA]) and total energy for (CH$_2$)$_{\rm 2n}$
-%    using the periodic RHF-MIC/6-31G level of theory and the {\tt TIGHT} threshold.
-%  }\label{Tab:CH2-n}
-%  \begin{tabular}{ccc}
-%    \toprule
-%    n & $a_0^{\rm HF}/n$ & $E^{\rm HF}_{\rm tot}/n$ \\
-%    \hline
-%    4  & 2.56083 & -78.03612187 \\
-%    6  & 2.56075 & -78.03682305 \\
-%    8  & 2.56106 & -78.03686057 \\
-%    10 & 2.56109 & -78.03686393 \\
-%    \hline
-%        & ??????\footnote[3]{Taken from Ref.~\cite{CBS:861G:MgO}.} & ??????$^c$\\
-%    \botrule
-%  \end{tabular}
-%\end{table}
-
-
-
-@misc{Crystal03,
-	author = {R. Dovesi and V. R. Saunders and C. Roetti and
-                  M. Causa and N. M. Harrison and R. Orlando and
-                  E. Apra},
-	title = {{\bf CRYSTAL03}},
-	howpublished = {\url{http://www.chimifm.unito.it/teorica/crystal/}},
-	year = 2003
-}
-
-@Article{RDovesi90,
-  author = 	 {R. Dovesi and M. Caus{\`a} and R. Orlando C. Roetti},
-  journal = 	 {J. Chem. Phys.},
-  year = 	 {1990},
-  volume = 	 {92},
-  pages = 	 {7402},
-}
-
-@Article{KNemeth04,
-  author = 	 {K. N\'emeth and M. Challacombe},
-  journal = 	 {J. Chem. Phys.},
-  year = 	 {2004},
-  volume = 	 {121},
-  pages = 	 {2877},
-}
-
-@Article{PFeibelman91,
-  author = 	 {P. J. Feibelman},
-  journal = 	 {Phys. Rev. B},
-  year = 	 {1991},
-  volume =       {44},
-  pages =        {3916}
-}
-
-@Article{ONielsen85,
-  author = 	 {O. H. Nielsen and R. M. Martin},
-  journal = 	 {Phys. Rev. B},
-  year = 	 {1985},
-  volume =       {32},
-  pages =        {3780}
-}
-
-@misc{nagf95,
- author = {\mbox{The Numerical Algorithms Group}},
- title = {Fortran 95 compiler Release 5.0(253)},
- howpublished = {\url{http://www.nag.co.uk/}},
- year = 2003
-}
-
-@Book{NAshcroft76,
-  author = 	 {N. W. Ashcroft and N. D. Mermin},
-  title = 	 {Solid State Physics},
-  publisher = 	 {Holt, Rinehart and Winston},
-  year = 	 {1976},
-  address = 	 {New York},
-}
-
-@Article{KIshida93,
-  author = 	 {K. Ishida},
-  journal = 	 {J. Chem. Phys.},
-  year = 	 {1993},
-  volume =       {98},
-  pages =        {2176}
-}
-
-@Article{KIshida91,
-  author = 	 {K. Ishida},
-  journal = 	 {J. Chem. Phys.},
-  year = 	 {1991},
-  volume =       {95},
-  pages =        {5198}
-}
-
-@Book{CKittel71,
-  author = 	 {C. Kittel},
-  title = 	 {Introduction to Solid State Physics},
-  publisher = 	 {John Wiley and Sons},
-  year = 	 {1971},
-  address = 	 {New York},
-}
-
-@Article{AKorminicki77,
-  author = 	 {A. Korminicki and K. Ishida and K. Morokuma and R. Ditchfield and M. Conrad},
-  journal = 	 {Chem. Phys. Lett.},
-  year = 	 {1977},
-  volume =       {45},
-  pages =        {595}
-}
-
-@Article{KDoll04,
-  author =       {K. Doll and R. Dovesi and R. Orlando},
-  journal =      {Theo. Chim. Acta},
-  year =         {2004},
-  volume =       {112},
-  pages =        {394}
-}
-
-@Article{PEwald21,
-        author = {P. P. Ewald},
-        journal = {Ann. Phys. (Leipzig)},
-        year = 1921,
-        volume = 64,
-        pages = {253}
-}
-
-@Article{HTeramae83,
-  author = 	 {H. Teramae and T. Yamabe and C. Satoko and A. Imamura},
-  journal = 	 {Chem. Phys. Lett.},
-  year = 	 {1983},
-  volume = 	 {101},
-  pages = 	 {149},
-}
-
-@Article{HTeramae84,
-  author = 	 {H. Teramae and T. Yamabe and A. Imamura},
-  journal = 	 {J. Chem. Phys.},
-  year = 	 {1984},
-  volume = 	 {81},
-  pages = 	 {3564},
-}
-
-@Article{DJacquemin99A,
-  author = 	 {D. Jacquemin and J. Andr\'e and Benoît Champagne },
-  journal = 	 {J. Chem. Phys.},
-  year = 	 {1999},
-  volume = 	 {111},
-  pages = 	 {5306},
-}
-
-@Article{DJacquemin99B,
-  author = 	 {D. Jacquemin and J. Andr\'e and Benoît Champagne },
-  journal = 	 {J. Chem. Phys.},
-  year = 	 {1999},
-  volume = 	 {111},
-  pages = 	 {5324},
-}
-
-@Article{MTobita03,
-  author = 	 {M. Tobita and S. Hirata and R. J. Bartlett},
-  journal = 	 {J. Chem. Phys.},
-  year = 	 {2003},
-  volume = 	 {118},
-  pages = 	 {5776},
-}
-
-@Article{SHirata98,
-  author = 	 {S. Hirata and S. Iwata},
-  journal = 	 {J. Phys. Chem. A},
-  year = 	 {1998},
-  volume = 	 {102},
-  pages = 	 {8426},
-}
-
-@Article{KKudin00A,
-  author = 	 {K. N. Kudin and G. E. Scuseria},
-  journal = 	 {Phys. Rev. B},
-  year = 	 {2000},
-  volume = 	 {61},
-  pages = 	 {5141},
-}
-
-@Article{KKudin00B,
-  author = 	 {K. N. Kudin and G. E. Scuseria},
-  journal = 	 {Phys. Rev. B},
-  year = 	 {2000},
-  volume = 	 {61},
-  pages = 	 {16440},
-}
-
-@Article{CTymczak05,
-  author = 	 {C. J. Tymczak and V. Weber and M. Challacombe},
-  journal = 	 {},
-  year = 	 {2005},
-  volume = 	 {},
-  pages = 	 {},
-  note =         {To be submitted}
-}
-
-@misc{RedHatEnt3,
-	author = {\mbox{Redhat}},
-	title = {RedHat Enterprise Linux WS release 3},
-	howpublished = {\url{http://www.redhat.com/}},
-	year = 2004
-}
-
-
 
