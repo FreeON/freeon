@@ -165,6 +165,7 @@ CONTAINS
        CALL Put(FailedProgram,'failedprogram')
        MaxEll=G%Clone(iCLONE)%PBC%PFFMaxEll
        CALL Put(MaxEll,'MaxEll')
+       CALL Put(MaxEll,'MaxPFFFEll')
        CALL New(DoubleVect,LSP(2*MaxEll),0)
        DoubleVect%D=BIG_DBL
        CALL Put(DoubleVect,'PFFTensorC')
