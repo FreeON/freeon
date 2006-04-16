@@ -387,91 +387,93 @@ C
 
  END SUBROUTINE CTSetUp
   
-  SUBROUTINE XLSetUp
-    INTEGER                         :: LP,LQ,Count
-    INTEGER                         :: L1,L2,L3,M1,M2,M3,LDX1,LDX2,LDX3,ABSM2,ABSM3
-    REAL(DOUBLE)                    :: CN,SN,CMN,SMN
+ SUBROUTINE XLSetUp
+   INTEGER                         :: LP,LQ,Count
+   INTEGER                         :: L1,L2,L3,M1,M2,M3,LDX1,LDX2,LDX3,ABSM2,ABSM3
+   REAL(DOUBLE)                    :: CN,SN,CMN,SMN
 
 
-    ALLOCATE(XLLen(0:MaxPoleEll,0:MaxPoleEll))
-    ALLOCATE(XLSgn(0:MaxPoleEll,0:MaxPoleEll))
-    ALLOCATE(XLIdx(0:MaxPoleEll,0:MaxPoleEll))
+   ALLOCATE(XLLen(0:MaxPFFFEll,0:MaxPoleEll))
+   ALLOCATE(XLSgn(0:MaxPFFFEll,0:MaxPoleEll))
+   ALLOCATE(XLIdx(0:MaxPFFFEll,0:MaxPoleEll))
 
-    DO LQ=0,MaxPoleEll
-       LP=MaxPoleEll
-       IF(LQ.LE.HGEll.OR.LQ.EQ.LP)THEN
-          
-          Count=0
-          DO L1 = 0,LP
-             DO M1 = 0,L1
-                LDX1 = LTD(L1)+M1
-                DO L2 = 0,MIN(L1,LQ)
-                   L3    = L1-L2
-                   DO M2 = -L2,L2
-                      ABSM2 = ABS(M2)
-                      LDX2  = LTD(L2)+ABSM2
-                      M3    = M1-M2
-                      ABSM3 = ABS(M3)
-                      LDX3  = LTD(L3)+ABSM3
-                      IF(ABSM3 .LE. L3)Count=Count+1
-                   ENDDO
-                ENDDO
-             ENDDO
-          ENDDO
-          !        
-          WRITE(*,*)LP,LQ,Count
-          XLLen(LP,LQ)=Count
-          CALL New(XLSgn(LP,LQ),(/4,Count/))
-          CALL New(XLIdx(LP,LQ),(/3,Count/))
-          !
-          Count=0
-          DO L1 = 0,LP
-             DO M1 = 0,L1
-                LDX1 = LTD(L1)+M1
-                DO L2 = 0,MIN(L1,LQ)
-                   L3    = L1-L2
-                   DO M2 = -L2,L2
-                      ABSM2 = ABS(M2)
-                      LDX2  = LTD(L2)+ABSM2
-                      M3    = M1-M2
-                      ABSM3 = ABS(M3)
-                      LDX3  = LTD(L3)+ABSM3
-                      IF(ABSM3 .LE. L3) THEN                       
-                         Count=Count+1
-                         IF(M2 .LT. 0) THEN
-                            CN = (-One)**(ABSM2)
-                            SN = -CN
-                         ELSE
-                            CN = One
-                            SN = One
-                         ENDIF
-                         IF(M3 .LT. 0) THEN
-                            CMN = (-One)**(ABSM3)
-                            SMN = -CMN
-                         ELSE
-                            CMN = One
-                            SMN = One
-                         ENDIF
-                         XLSgn(LP,LQ)%D(1,Count)=CN*CMN
-                         XLSgn(LP,LQ)%D(2,Count)=-SN*SMN
-                         XLSgn(LP,LQ)%D(3,Count)=CN*SMN
-                         XLSgn(LP,LQ)%D(4,Count)=SN*CMN
-                         XLIdx(LP,LQ)%I(1,Count)=LDX1
-                         XLIdx(LP,LQ)%I(2,Count)=LDX2
-                         XLIdx(LP,LQ)%I(3,Count)=LDX3
-                         !                       Cp(LDX1) = Cp(LDX1)+CN*CMN*Cq(LDX2)*Cpq(LDX3) &
-                              !                                          -SN*SMN*Sq(LDX2)*Spq(LDX3)
-                         !                       Sp(LDX1) = Sp(LDX1)+CN*SMN*Cq(LDX2)*Spq(LDX3) &
-                              !                                          +SN*CMN*Sq(LDX2)*Cpq(LDX3)
+   DO LP=MaxPoleEll,MaxPFFFEll
+      DO LQ=0,MaxPoleEll
 
-                      ENDIF
-                   ENDDO
-                ENDDO
-             ENDDO
-          ENDDO
-       ENDIF
-    ENDDO
-  END SUBROUTINE XLSetUp
+         IF(LQ.LE.HGEll.OR.LQ.EQ.LP)THEN
+
+            Count=0
+            DO L1 = 0,LP
+               DO M1 = 0,L1
+                  LDX1 = LTD(L1)+M1
+                  DO L2 = 0,MIN(L1,LQ)
+                     L3    = L1-L2
+                     DO M2 = -L2,L2
+                        ABSM2 = ABS(M2)
+                        LDX2  = LTD(L2)+ABSM2
+                        M3    = M1-M2
+                        ABSM3 = ABS(M3)
+                        LDX3  = LTD(L3)+ABSM3
+                        IF(ABSM3 .LE. L3)Count=Count+1
+                     ENDDO
+                  ENDDO
+               ENDDO
+            ENDDO
+            !        
+!            WRITE(*,*)LP,LQ,Count
+            XLLen(LP,LQ)=Count
+            CALL New(XLSgn(LP,LQ),(/4,Count/))
+            CALL New(XLIdx(LP,LQ),(/3,Count/))
+            !
+            Count=0
+            DO L1 = 0,LP
+               DO M1 = 0,L1
+                  LDX1 = LTD(L1)+M1
+                  DO L2 = 0,MIN(L1,LQ)
+                     L3    = L1-L2
+                     DO M2 = -L2,L2
+                        ABSM2 = ABS(M2)
+                        LDX2  = LTD(L2)+ABSM2
+                        M3    = M1-M2
+                        ABSM3 = ABS(M3)
+                        LDX3  = LTD(L3)+ABSM3
+                        IF(ABSM3 .LE. L3) THEN                       
+                           Count=Count+1
+                           IF(M2 .LT. 0) THEN
+                              CN = (-One)**(ABSM2)
+                              SN = -CN
+                           ELSE
+                              CN = One
+                              SN = One
+                           ENDIF
+                           IF(M3 .LT. 0) THEN
+                              CMN = (-One)**(ABSM3)
+                              SMN = -CMN
+                           ELSE
+                              CMN = One
+                              SMN = One
+                           ENDIF
+                           XLSgn(LP,LQ)%D(1,Count)=CN*CMN
+                           XLSgn(LP,LQ)%D(2,Count)=-SN*SMN
+                           XLSgn(LP,LQ)%D(3,Count)=CN*SMN
+                           XLSgn(LP,LQ)%D(4,Count)=SN*CMN
+                           XLIdx(LP,LQ)%I(1,Count)=LDX1
+                           XLIdx(LP,LQ)%I(2,Count)=LDX2
+                           XLIdx(LP,LQ)%I(3,Count)=LDX3
+                           !                       Cp(LDX1) = Cp(LDX1)+CN*CMN*Cq(LDX2)*Cpq(LDX3) &
+                           !                                          -SN*SMN*Sq(LDX2)*Spq(LDX3)
+                           !                       Sp(LDX1) = Sp(LDX1)+CN*SMN*Cq(LDX2)*Spq(LDX3) &
+                           !                                          +SN*CMN*Sq(LDX2)*Cpq(LDX3)
+
+                        ENDIF
+                     ENDDO
+                  ENDDO
+               ENDDO
+            ENDDO
+         ENDIF
+      ENDDO
+   ENDDO
+ END SUBROUTINE XLSetUp
   !===================================================================================================
   !
   !===================================================================================================

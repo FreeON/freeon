@@ -28,7 +28,7 @@ MODULE Density
   !
 CONTAINS 
   !
-  SUBROUTINE MakeRhoList(GM,BS,P,NLink,RhoHead)
+  SUBROUTINE MakeRhoList(GM,BS,P,NLink,RhoHead,NoWrap_O)
     !
     TYPE(CRDS)                :: GM
     TYPE(BSET)                :: BS 
@@ -38,6 +38,14 @@ CONTAINS
     TYPE(DBL_VECT)            :: Psv
     REAL(DOUBLE),DIMENSION(3) :: B
     INTEGER                   :: AtA,AtB,NC,PBeg,PEnd,BlkP,RowP,NN,SpinM,NLink,NNaive
+    LOGICAL, OPTIONAL         :: NoWrap_O
+    LOGICAL                   :: NoWrap
+    !
+    IF(PRESENT(NoWrap_O))THEN
+       NoWrap=NoWrap_O
+    ELSE
+       NoWrap=.FALSE.
+    ENDIF
     !
     NLink=0
     HGLink=>RhoHead
@@ -60,7 +68,7 @@ CONTAINS
        Pend = P%RowPt%I(AtA+1)-1
        DO RowP=Pbeg,Pend
           AtB=P%ColPt%I(RowP)          
-
+!!$          IF(UpperT.AND.AtB<AtA)CYCLE
           IF(SetAtomPair(GM,BS,AtA,AtB,Pair)) THEN
              ! Sum this part of the DM 
              BlkP=P%BlkPt%I(RowP)
@@ -90,13 +98,14 @@ CONTAINS
              CASE DEFAULT
                 CALL Halt(' MakeRho: P%NSMat doesnt have an expected value! ')
              END SELECT
-             B=Pair%B 
+!!$             IF(UpperT.AND.AtA==AtB)Psv%D=5D-1*Psv%D
+             B=Pair%B
              DO NC=1,CS_OUT%NCells
                 Pair%B=B+CS_OUT%CellCarts%D(:,NC)
                 Pair%AB2=(Pair%A(1)-Pair%B(1))**2 &
                        + (Pair%A(2)-Pair%B(2))**2 &
                        + (Pair%A(3)-Pair%B(3))**2
-                IF(TestAtomPair(Pair))CALL RhoPop(GM,BS,CS_IN,SpinM,Psv%D(1),Pair,HGLink,NLink)
+                IF(TestAtomPair(Pair))CALL RhoPop(GM,BS,CS_IN,NoWrap,SpinM,Psv%D(1),Pair,HGLink,NLink)
              ENDDO
           ENDIF
        ENDDO
@@ -123,7 +132,7 @@ CONTAINS
     REAL(DOUBLE),DIMENSION(NLink)   :: RealArray
     INTEGER,DIMENSION(NLink)        :: ListArray
     INTEGER                         :: N,NExpt,NCoef,Status
-    INTEGER                         :: I,J,K,IAdd,JAdd,NQ,NR,EllZ,LenZ
+    INTEGER                         :: I,J,K,IAdd,JAdd,NQ,NR,EllZ,LenZ,LenCo
     INTEGER,PARAMETER               :: MaxExp=2000
     INTEGER,DIMENSION(MaxExp)       :: NZ,NL,El,IZ
     REAL(DOUBLE), DIMENSION(MaxExp) :: Ze
@@ -199,15 +208,22 @@ CONTAINS
        R%Lndx%I(I)=El(IZ(I))
        R%OffQ%I(I)=NQ
        R%OffR%I(I)=NR
-       LenZ=LHGTF(El(IZ(I)))
+       EllZ=El(IZ(I))
+       LenZ=LHGTF(EllZ)
        DO J=1,NZ(IZ(I))
           HGLink=>LinkArray(ListArray(Nq+1))%L
-!!$          WRITE(*,22)I,J,El(IZ(I)),HGLink%Ell,Ze(I),HGLink%Zeta
+!!          WRITE(*,22)I,J,El(IZ(I)),HGLink%Ell,Ze(I),HGLink%Zeta
 !!$22        FORMAT(4(I3,', '),2(F14.5,', '))
           R%Qx%D(Nq+1)=HGLink%Cent(1)
           R%Qy%D(Nq+1)=HGLink%Cent(2)
           R%Qz%D(Nq+1)=HGLink%Cent(3)
-          R%Co%D(NR+1:NR+LenZ)=HGLink%Coef%D
+          IF(HGLink%Ell==EllZ)THEN
+             R%Co%D(NR+1:NR+LenZ)=HGLink%Coef%D
+          ELSE
+             R%Co%D(NR+1:NR+LenZ)=Zero
+             LenCo=LHGTF(HGLink%Ell)
+             R%Co%D(NR+1:NR+LenCo)=HGLink%Coef%D(1:LenCo)
+          ENDIF
           NQ=NQ+1
           NR=NR+LenZ
        ENDDO
@@ -222,7 +238,7 @@ CONTAINS
        LenZ=LHGTF(EllZ)
        Zeta=R%Expt%D(I)
        ZZ=(Pi/R%Expt%D(I))**1.5D0
-!!       WRITE(*,*)' I = ',I,' Ell = ',EllZ,' Zeta = ',Zeta,'-------------------------------'
+!       WRITE(*,*)' I = ',I,' Ell = ',EllZ,' Zeta = ',Zeta,'-------------------------------'
        DO J=1,R%NQ%I(I)
           IAdd=R%OffQ%I(I)+J
           JAdd=R%OffR%I(I)+(J-1)*LenZ+1
@@ -233,8 +249,8 @@ CONTAINS
           P%QPole%D=P%QPole%D+QPole(EllZ,Zeta,ZZ,RX,RY,RZ,Rho%Co%D(JAdd:JAdd+LenZ-1)) 
           ChTot=ChTot+R%Co%D(JAdd)*ZZ
 !             IF(Zeta>1D10)&
-!!          WRITE(*,31)J,iadd,jadd,P%DPole%D,Rho%Co%D(JAdd:JAdd)
-!!             31 FORMAT(I5,", ",I5,", ",I5,", ",3(", ",F14.5),", ",8(D12.6,", "))
+!          WRITE(*,31)J,iadd,jadd,P%DPole%D,RX,Rho%Co%D(JAdd:JAdd+2)   !,SUM(P%QPole%D(:))
+!             31 FORMAT(I5,", ",I5,", ",I5,", ",3(", ",F14.5),", ",8(D12.6,", "))
        ENDDO
     ENDDO
 
@@ -375,8 +391,10 @@ CONTAINS
              !
              JLst=ListArray1(J)
              KLst=ListArray2(I)
+
 !!$             WRITE(*,*)' Link to be retaind (J) = ',JLst
 !!$             WRITE(*,*)' Link to be removed (K) = ',KLst
+
              IF(KLst==1.OR.KLst==NLink)CYCLE
 
              EllJ=LinkArray1(JLst)%L%Ell
@@ -453,7 +471,7 @@ CONTAINS
     !
   END SUBROUTINE RhoEcon
 
-  SUBROUTINE RhoPop(GM,BS,CS,SpinM,Psv,Pair,HGLink,NLink)
+  SUBROUTINE RhoPop(GM,BS,CS,NoWrap,SpinM,Psv,Pair,HGLink,NLink)
     !
     TYPE(CRDS)                              :: GM
     TYPE(BSET)                              :: BS
@@ -478,7 +496,7 @@ CONTAINS
                                                Px,Py,Pz,PAx,PAy,PAz,PBx,PBy,PBz, &
                                                Ex,Exy,Exyz,CA,CB,MaxAmp
     !
-    LOGICAL                                 :: AEQB
+    LOGICAL                                 :: AEQB,NoWrap
     !
     KA   = Pair%KA
     KB   = Pair%KB  
@@ -530,17 +548,16 @@ CONTAINS
                    HGLink%Zeta=Prim%Zeta
                    !
                    P=(Prim%ZA*Prim%A+Prim%ZB*Prim%B)/Prim%Zeta
-
-                   ! Now wrap the coordinates back in, for a full factor of two
-
-!                  P=AtomToFrac(GM,P)
-!                  CALL FracCyclic(GM,P)
-!                  P=FracToAtom(GM,P)
-	
-                   CALL AtomCyclic(GM,P)
-
+!!$
+                   IF(.NOT.NoWrap)THEN
+                      ! Now wrap the coordinates back in, for a full factor of two
+                      P=AtomToFrac(GM,P)
+                      CALL FracCyclic(GM,P)
+                      P=FracToAtom(GM,P)
+                   ENDIF
+!
                    HGLink%Cent=P
-                   !
+                   
                    NULLIFY(HGLink%Next)
                    !
                    CALL New(HGLink%Coef,LenKet)
@@ -600,6 +617,7 @@ CONTAINS
     RX2 = Half/Expt + RX*RX 
     RY2 = Half/Expt + RY*RY    
     RZ2 = Half/Expt + RZ*RZ 
+
     SELECT CASE(LQ)
     CASE(0)
        QPole(1) = PiExpt*Coef(1)*RX2

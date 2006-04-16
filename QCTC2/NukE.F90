@@ -57,7 +57,7 @@ CONTAINS !
           QP%PAC%Wght=GMLoc%AtNum%D(At)
           QP%MAC%O(0)=GMLoc%AtNum%D(At)
           QP%MAC%Delta=Zero
-          QP%IHalf=ABS(HGBra(1)) !??
+          QP%IHalf=ABS(HGBra(1))  !! ??????????
           ! Initialize the ket
           HGKet(1)=Zero
           SPKetC(0)=Zero
@@ -80,14 +80,3 @@ CONTAINS !
     ENDDO
   END FUNCTION NukE
 END MODULE NukularE
-
-
-!  NukeE =   -3.3319240537953522E+02
-!  NukeE =   -4.1961861220141731E+02
-!  NukeE =   -7.5267525922534048E+02
-!  NukeE =   -8.3887193954951090E+02
-!  NukeE =   -9.2510685429043531E+02
-!  NukeE =   -1.0115307860803191E+03
-!  NukeE =   -1.3442293987235985E+03
-!  NukeE =   -1.4306381470191338E+03
-!  NukeE =   -1.5169285373755615E+03

@@ -30,6 +30,10 @@ C
       INTEGER LSP,LenSP
       LSP(L)=L*(L+3)/2
 C
+      WRITE(*,*)' Len = ',Len
+      STOP
+
+
       Ell=MAX(EllP,EllQ)
       LenSP=LSP(L)
 C
@@ -81,9 +85,9 @@ c 33      FORMAT('B ',3(I3,', '),2(d12.6))
 
          DO I=1,Nc
 
-c          WRITE(*,22)I,J,idx1,idx2,idx3,Cq(I,idx2),
-c     >              Cpq(I,idx3),Sq(I,idx2),Spq(I,idx3)
-c 22       FORMAT(5(I4,", "),4(D12.6,", "))
+          WRITE(*,22)I,J,idx1,idx2,idx3,Cq(I,idx2),
+     >              Cpq(I,idx3),Sq(I,idx2),Spq(I,idx3)
+ 22       FORMAT(5(I4,", "),4(D12.6,", "))
 
 
           
@@ -216,59 +220,6 @@ C
       END
 C
 
-      SUBROUTINE XLate77(LP,LQ,Cp,Sp,Cpq,Spq,Cq,Sq)
-C
-      REAL*8 Cp(0:*),Sp(0:*),Cpq(0:*),Spq(0:*),Cq(0:*),Sq(0:*)
-      REAL*8 CMN,SMN,CN,SN
-C
-      INTEGER L,LP,LL,M,LDX,K,LK,KK,LKLK,NSTART,NSTOP,
-     >        N,NABS,MNABS,KDX,LKDX,ID,LQ
-C
-      ID(L)=L*(L+1)/2
-C
-      DO l=0,LP
-         ll=ID(l)
-         DO m=0,l
-            ldx=ll+m
-            DO k=0,MIN(l,LQ)
-               lk=l-k
-               kk=ID(k)
-               lklk=ID(lk)
-               nStart=MAX(-k, k-l+m)
-               nStop =MIN( k,-k+l+m)
-               DO n=nStart,nStop
-                  nabs=ABS(n)
-                  mnabs=ABS(m-n)
-                  kdx=kk+nabs                          
-                  lkdx=lklk+mnabs
-                  IF(m-n.LT.0)THEN
-                     cmn=(-1.0D0)**mnabs
-                     ! smn=(-1.0D0)**(mnabs+1)
-                     smn = -cmn
-                  ELSE
-                     cmn=1.0D0
-                     smn=1.0D0
-                  ENDIF
-                  IF(n.LT.0)THEN
-                     cn=(-1.0D0)**nabs
-                     ! sn=(-1.0D0)**(nabs+1)
-                     sn = -cn
-                  ELSE
-                     cn=1.0D0
-                     sn=1.0D0
-                  ENDIF
-
-c                 WRITE(*,33)ldx,kdx,lkdx,cn*cmn,-sn*smn
-c 33               FORMAT('A ',3(I3,', '),2(d12.6))
 
 
-                  Cp(ldx)=Cp(ldx)+cn*Cq(kdx)*cmn*Cpq(lkdx)
-     >                           -sn*Sq(kdx)*smn*Spq(lkdx)        
-                  Sp(ldx)=Sp(ldx)+cn*Cq(kdx)*smn*Spq(lkdx)
-     >                           +sn*Sq(kdx)*cmn*Cpq(lkdx)
-               ENDDO
-            ENDDO
-         ENDDO
-      ENDDO
-      RETURN
-      END
+

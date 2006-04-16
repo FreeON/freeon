@@ -191,7 +191,6 @@ CONTAINS
              ENDDO
           ENDDO
        ENDDO
-!!$
        DO EllQ=0,Q%HERM%Ell
 	  IF(Q%HERM%NQ(EllQ).NE.0)THEN
              CALL Delete(Q%HERM%IHlf(EllQ))

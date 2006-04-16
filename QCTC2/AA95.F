@@ -531,52 +531,6 @@ C
       END
 #endif
 C
-      SUBROUTINE ENuE0(Nc,P,Q,ZetaP,ZetaQ,QCo,Ket)
-C     
-      INTEGER Nc,I,J,   Mesh
-      REAL*8 P(3),Q(3,*),ZetaP,ZetaQ(*),QCo(*),Ket(*)
-      REAL*8 PQx,PQy,PQz,RTE,RPE,Omega,Upq,SqrtPi,TwoPi5x2
-      REAL*8 PQ2,T,T1,T2,T3
-
-      REAL*8 Switch,F0Asymp,F1Asymp,F2Asymp,F3Asymp,F4Asymp,
-     >              F5Asymp,F6Asymp,F7Asymp,F8Asymp,F9Asymp,
-     >              F10Asymp,F11Asymp,F12Asymp,F13Asymp,Grid
-
-C
-      PARAMETER(TwoPi5x2=3.4986836655249725693D1)
-      PARAMETER(SqrtPi=1.7724538509055160273D0)
-C     
-      INCLUDE "Mesh.Inc"
-      REAL*8 F0_0(0:Mesh),F0_1(0:Mesh),F0_2(0:Mesh),F0_3(0:Mesh)        
-      
-      INCLUDE "Gamma_0.Inc"                                                            
-      INCLUDE "Gamma_Asymptotics.Inc"
-C     
-      DO 100 I=1,Nc
-         PQx=-(P(1)-Q(1,I))
-         PQy=-(P(2)-Q(2,I))
-         PQz=-(P(3)-Q(3,I))
-         PQ2=PQx*PQx+PQy*PQy+PQz*PQz
-         IF(.NOT.(PQ2.LT.1D-16.AND.ZetaQ(I).EQ.ZetaP))THEN         
-            RTE=ZetaP*ZetaQ(I)
-            RPE=ZetaP+ZetaQ(I)
-            Omega=RTE/RPE
-            Upq=TwoPi5x2/(RTE*SQRT(RPE))
-            T=Omega*PQ2
-            IF(T.LT.Switch)THEN
-               j=AINT(T*Grid)                                              
-               T2=T*T                                                      
-               T3=T2*T                                                     
-               Ket(1)=Ket(1)+QCo(I)* 
-     >              Upq*(F0_0(j)+T*F0_1(j)+T2*F0_2(j)+T3*F0_3(j))           
-            ELSE                                                           
-               Ket(1)=Ket(1)+QCo(I)*Upq*SqrtPi/(2D0*DSQRT(T))
-            ENDIF                                                          
-         ENDIF
- 100  CONTINUE
-      RETURN
-      END      
-C
       SUBROUTINE IBounds(Ell,Len,Nq,Zt,Co,Pndex,Qndex,PQndex,Est)
 C
       INTEGER Ell,Len,Nq

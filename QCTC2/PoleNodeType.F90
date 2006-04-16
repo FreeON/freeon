@@ -12,22 +12,28 @@ MODULE PoleGlobals
   USE Derivedtypes
   USE GlobalScalars
   IMPLICIT NONE
-  ! Flexible
-  INTEGER                                      :: MaxPoleEll
+  ! This is the dynamically set expansion order and tensor length for multipole expansions on the tree
+  INTEGER                                      :: MaxPoleEll,LenPoleEll
+  ! This is the dynamically set expansion order and tensor length for cell multipole expansions 
+  INTEGER                                      :: MaxPFFFEll,LenPFFFEll
+  ! This is the dynamically set number of Guassian distributions that can occuply a leaf of the tree
   INTEGER                                      :: ClusterSize
-  ! Fixed
+  ! This is the fixed expansion order used for the Factorial function, scratch memory
+  ! and other precomputed values
   INTEGER,PARAMETER                            :: FFELL=64
   INTEGER,PARAMETER                            :: FFELL2=2*FFELL
   INTEGER,PARAMETER                            :: FFLen=FFEll*(FFEll+3)/2
   INTEGER,PARAMETER                            :: FFLen2=FFEll2*(FFEll2+3)/2!
+  ! Globally available precomputed factorial functions etc 
   REAL(DOUBLE), DIMENSION(0:2*FFEll2)          :: Factorial
-  REAL(DOUBLE), DIMENSION(0:FFEll2)            :: FactOlm0,FactMlm0,Sine,Cosine,CoFact
-  REAL(DOUBLE), DIMENSION(0:FFLen2)            :: FactOlm2,FactMlm2,ALegendreP,Spq,Cpq
-!
-  REAL(DOUBLE), DIMENSION(0:FFLen2,3)          :: DCpq,DSpq
-!
+  REAL(DOUBLE), DIMENSION(0:FFEll2)            :: FactOlm0,FactMlm0
+  REAL(DOUBLE), DIMENSION(0:FFLen2)            :: FactOlm2,FactMlm2
+  ! The binomial distribution
   REAL(DOUBLE), DIMENSION(0:SPEll+1,0:FFELL)   :: FudgeFactorial
-  ! 
+  ! Scratch space for tensor manipulations
+  REAL(DOUBLE), DIMENSION(0:FFEll2)            :: Sine,Cosine,CoFact
+  REAL(DOUBLE), DIMENSION(0:FFLen2)            :: ALegendreP,Spq,Cpq
+  REAL(DOUBLE), DIMENSION(0:FFLen2,3)          :: DCpq,DSpq
 END MODULE
 
 MODULE RhoList

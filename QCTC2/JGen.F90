@@ -140,14 +140,16 @@ CONTAINS
           StopLB  = BS%LStop%I(CFB,KB)
           MaxLA   = BS%ASymm%I(2,CFA,KA)
           MaxLB   = BS%ASymm%I(2,CFB,KB)
+          !---------------------------------- 
           QP%Prim%CFA=CFA             
           QP%Prim%CFB=CFB
           QP%Prim%Ell=MaxLA+MaxLB
           TempHerm%Ell=QP%Prim%Ell
           LenAB=LHGTF(QP%Prim%Ell)
-
+          !---------------------------------- 
           DO PFA=1,BS%NPFnc%I(CFA,KA)          
              DO PFB=1,BS%NPFnc%I(CFB,KB)
+                !---------------------------------- 
                 QP%Prim%ZA=BS%Expnt%D(PFA,CFA,KA)
                 QP%Prim%ZB=BS%Expnt%D(PFB,CFB,KB)
                 QP%Prim%Zeta=QP%Prim%ZA+QP%Prim%ZB
@@ -174,11 +176,6 @@ CONTAINS
                    ENDDO
                    !
                    CALL SetSerialPAC(QP%PAC,TempHerm)                   
-                   ! Third level of primitive screening, based on Holders and 
-                   ! Cramers inequalities.  Maybe this argues finally for a pair list...
-
-!                   IF(QP%PAC%Wght/QP%PAC%Zeta<DBLE(NEl)*TauTwo)CYCLE
-                   !
                    CALL SetSerialMAC(QP%MAC,TempHerm)                   
                    ! The integral estimate (ab|ab)^(1/2)
                    QP%IHalf=Estimate(QP%Prim%Ell,QP%Prim%Zeta,TempHerm%Coef(1:LenAB))
@@ -195,20 +192,10 @@ CONTAINS
                    CALL DBL_VECT_EQ_DBL_SCLR(HGLen,HGKet(1),Zero)
                    CALL DBL_VECT_EQ_DBL_SCLR(SPLen+1,SPKetC(0),Zero)
                    CALL DBL_VECT_EQ_DBL_SCLR(SPLen+1,SPKetS(0),Zero)   
-                   !
-                   ! Now wrap the coordinates back in, for a full factor of two
-
-!                   QP%Prim%P=AtomToFrac(GM,QP%Prim%P)
-!                   CALL FracCyclic(GM,QP%Prim%P)
-!                   QP%Prim%P=FracToAtom(GM,QP%Prim%P)
-
-                   CALL AtomCyclic(GM,QP%Prim%P)
-
                    ! Sum over cells
                    PTmp=QP%Prim%P
                    DO NC=1,CS_IN%NCells
                       QP%Prim%P=PTmp+CS_IN%CellCarts%D(:,NC)
-
                       NNearTmp=NNearAv
                       NNearAv=0
                       CALL JWalk2(QP,PoleRoot) 
@@ -235,27 +222,15 @@ CONTAINS
                          DO LMN=1,LenHGTF
                             JBlk(IA,IB)=JBlk(IA,IB)+Phase%D(LMN)*HGBra%D(LMN,IA,IB)*HGKet(LMN)
                          ENDDO
-                         !  Far field
-                         CALL HGToSP_Direct(EllAB,LenHGTF,LenSP,PiZ,HGBra%D(1:LenHGTF,IA,IB), &
-                                            SPBraC(0:LenSP),SPBraS(0:LenSP))
+                         !  Far-field
+                         CALL HGToSP77(EllAB,PiZ,HGBra%D(1,IA,IB),SPBraC(0),SPBraS(0))
                          DO LM=0,LenSP
                             JBlk(IA,IB)=JBlk(IA,IB)+SPBraC(LM)*SPKetC(LM)+SPBraS(LM)*SPKetS(LM)
                          ENDDO
+                         ! Periodic far-field
+                         JBlk(IA,IB)=JBlk(IA,IB)+CTraxFF(QP%Prim,HGBra%D(:,IA,IB),GM)
                       ENDDO
                    ENDDO
-                   ! Calculate the FarField Multipole Contribution to the Matrix Element
-                   ! Contract the Primative MM  with the density MM
-                   IF(GM%PBC%Dimen > 0) THEN
-                      IA = IndexA
-                      DO LMNA=StartLA,StopLA
-                         IA=IA+1
-                         IB=IndexB
-                         DO LMNB=StartLB,StopLB  
-                            IB=IB+1
-                            JBlk(IA,IB)=JBlk(IA,IB)+CTraxFF(QP%Prim,HGBra%D(:,IA,IB),GM)
-                         ENDDO
-                      ENDDO
-                   ENDIF
                 ENDIF !End primitive thresholding
              ENDDO
           ENDDO

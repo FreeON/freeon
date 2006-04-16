@@ -4,109 +4,145 @@ MODULE PBCFarField
   USE GlobalObjects
   USE ProcessControl
   USE Indexing
-  USE Parse
   USE InOut
   USE Macros
   USE Thresholding
   USE BoundingBox
-  USE McMurchie
-  USE AtomPairs
   USE MondoPoles
   USE PoleTree
-  USE SpecFun
   USE Globals
-  USE PFFTen
   IMPLICIT NONE
 !  
-  INTEGER                             :: MaxELL
   REAL(DOUBLE)                        :: E_PFF,E_DP
   REAL(DOUBLE)                        :: PDist,BDist,RDist
   REAL(DOUBLE),DIMENSION(3)           :: BOXDist
 !
-  TYPE(DBL_VECT)                      :: TensorC,TensorS
+  ! Variables that contain the Periodic Far Field potential
   TYPE(DBL_VECT)                      :: TenRhoC,TenRhoS
-  TYPE(DBL_VECT)                      :: RhoC,RhoS
+  TYPE(DBL_RNK3)                      :: dTenRhoC,dTenRhoS
+  ! Some other shit
   TYPE(DBL_VECT)                      :: PFFBraC,PFFBraS
   TYPE(DBL_VECT)                      :: PFFKetC,PFFKetS
-  TYPE(DBL_RNK3)                      :: dTensorC,dTensorS
-  TYPE(DBL_RNK3)                      :: dTenRhoC,dTenRhoS
+
+
   CONTAINS
 !====================================================================================
 !   Setup the PBCFarField Matrix. 
 !====================================================================================
-    SUBROUTINE PBCFarFieldSetUp(Q,GMLoc)
+    SUBROUTINE PBCFarFuckingFieldSetUp(GMLoc,RhoLoc,MaxPFFFEll,EPFF,LatFrc)
+      INTEGER                         :: MaxPFFFEll,MaxPFFFLen
+      TYPE (HGRho)                    :: RhoLoc
       TYPE(PoleNode)                  :: Q
       TYPE(CRDS)                      :: GMLoc
       INTEGER                         :: I,J,K,NC,L,LM,LP
       REAL(DOUBLE)                    :: Layers,OL,NL,FAC,Px,Py,Pz
       REAL(DOUBLE),DIMENSION(3)       :: PQ
-!
+      TYPE(DBL_VECT)                  :: TensorC,TensorS
+      TYPE(DBL_RNK3)                  :: dTensorC,dTensorS
+      TYPE(DBL_VECT)                  :: RhoC,RhoS
+      REAL(DOUBLE)                    :: EPFF
+      REAL(DOUBLE),DIMENSION(3,3)     :: DivCV
+      TYPE(DBL_RNK2)                  :: LatFrc_Dip,LatFrc_PFF
+      TYPE(DBL_RNK2),OPTIONAL         :: LatFrc
+      !
       IF(GMLoc%PBC%Dimen==0) RETURN
-      CALL Get(MaxEll,'MaxEll')
-      CALL New(TensorC,LSP(2*MaxEll),0)
-      CALL New(TensorS,LSP(2*MaxEll),0) 
-      CALL New(dTensorC,(/LSP(2*MaxEll),3,3/),(/0,1,1/))
-      CALL New(dTensorS,(/LSP(2*MaxEll),3,3/),(/0,1,1/))
+      !
+      IF(MaxPFFFEll>FFEll) &
+           STOP ' MaxPFFFEll to large in PBCFarFuckingFieldSetUp '
+      LenPFFFEll=LSP(MaxPFFFEll)
+      !Allocate and fill global PBC Far Field tensors
+      CALL New(TensorC,LSP(2*MaxPFFFEll),0)
+      CALL New(TensorS,LSP(2*MaxPFFFEll),0) 
+      CALL New(dTensorC,(/LSP(2*MaxPFFFEll),3,3/),(/0,1,1/))
+      CALL New(dTensorS,(/LSP(2*MaxPFFFEll),3,3/),(/0,1,1/))
+      ! Get the script M tensors and their derivatives from HDF 
       CALL Get(TensorC,'PFFTensorC')
       CALL Get(TensorS,'PFFTensorS')
       CALL Get(dTensorC,'dPFFTensorC')
       CALL Get(dTensorS,'dPFFTensorS')
-!     Initialize Arrays
-      CALL New(TenRhoC,LSP(MaxEll),0)
-      CALL New(TenRhoS,LSP(MaxEll),0)
-      CALL New(dTenRhoC,(/LSP(2*MaxEll),3,3/),(/0,1,1/))
-      CALL New(dTenRhoS,(/LSP(2*MaxEll),3,3/),(/0,1,1/))
-      CALL New(PFFBraC,LSP(MaxEll),0)
-      CALL New(PFFBraS,LSP(MaxEll),0)
-      CALL New(PFFKetC,LSP(MaxEll),0)
-      CALL New(PFFKetS,LSP(MaxELL),0) 
-      CALL New(RhoC,LSP(FFEll),0)  
-      CALL New(RhoS,LSP(FFEll),0) 
-!     Calculate the Box Moments and the BDist
-      CALL RhoToSP(GMLoc)
-!     Contract TenRho 
+      ! 
+      CALL New(TenRhoC,LenPFFFEll,0)
+      CALL New(TenRhoS,LenPFFFEll,0)
+      CALL New(dTenRhoC,(/LenPFFFEll,3,3/),(/0,1,1/))
+      CALL New(dTenRhoS,(/LenPFFFEll,3,3/),(/0,1,1/))
+      ! Allocate local tensors that hold the density translated to the cell center
+      CALL New(RhoC,LenPFFFEll,0)  
+      CALL New(RhoS,LenPFFFEll,0) 
+      ! Compute the multipole tensors of the density translated to the cell center
+      CALL HGToSP_HGRho(MaxPFFFEll,LenPFFFEll,RhoLoc,GMLoc%PBC%CellCenter%D,RhoC%D(0),RhoS%D(0))
+      ! Contract expansion of the density with the PFF tensors and put in TenRho 
       TenRhoC%D=Zero
       TenRhoS%D=Zero
-      CALL CTraX77(MaxEll,MaxEll,TenRhoC%D,TenRhoS%D,TensorC%D,TensorS%D,RhoC%D,RhoS%D)  
-!     Contract dTenRho
+      CALL CTraX77(MaxPFFFEll,MaxPFFFEll,TenRhoC%D,TenRhoS%D,TensorC%D,TensorS%D,RhoC%D,RhoS%D)  
+      ! Contract expansion of the density with the derivative PFF tensors and put in dTenRho 
       dTenRhoC%D=Zero
       dTenRhoS%D=Zero
       DO I=1,3
          DO J=1,3
             IF(GMLoc%PBC%AutoW%I(I)==1 .AND. GMLoc%PBC%AutoW%I(J)==1) THEN
-               CALL CTraX77(MaxEll,MaxEll,dTenRhoC%D(:,I,J),dTenRhoS%D(:,I,J), &
-                            dTensorC%D(:,I,J),dTensorS%D(:,I,J),RhoC%D,RhoS%D)  
+               CALL CTraX77(MaxPFFFEll,MaxPFFFEll,dTenRhoC%D(:,I,J),dTenRhoS%D(:,I,J), &
+                    dTensorC%D(:,I,J),dTensorS%D(:,I,J),RhoC%D,RhoS%D)  
             ENDIF
          ENDDO
       ENDDO
-!     PACDist (From PoleRoot)
-      Px=Half*(Q%Box%BndBox(1,2)-Q%Box%BndBox(1,1))
-      Py=Half*(Q%Box%BndBox(2,2)-Q%Box%BndBox(2,1))   
-      Pz=Half*(Q%Box%BndBox(3,2)-Q%Box%BndBox(3,1))
-      PDist = SQRT(Px*Px+Py*Py+Pz*Pz)
-!     If Not Over Riden Calculate MaxEll 
-      MaxEll=CalMaxEll(GMLoc)
-!     Calculate PFF  energy
-      WRITE(*,*)' 1 '
-      E_PFF = Zero
-      DO LM = 0,LSP(MaxELL)
-         E_PFF = E_PFF + Two*RhoC%D(LM)*TenRhoC%D(LM)+Two*RhoS%D(LM)*TenRhoS%D(LM)
+      ! Here is where we reset MaxPFFFEll based on cell-cell MAC
+      ! but punt for now...
+      !      MaxPFFFEll=CalMaxPFFFEll(GMLoc)
+      !
+      !
+      !
+      !  Calculate energy of the crystal field
+      EPFF=Zero
+      DO LM=0,LenPFFFEll
+         EPFF=EPFF+Two*RhoC%D(LM)*TenRhoC%D(LM)+Two*RhoS%D(LM)*TenRhoS%D(LM)
       ENDDO
-      WRITE(*,*)' 2 '
-!     Calculate Dipole energy
-      IF(GMLoc%PBC%Dimen == 1) THEN
-         E_DP = 0.0D0
-      ELSEIF(GMLoc%PBC%Dimen == 2) THEN
-         IF(GMLoc%PBC%AutoW%I(1)==0 ) E_DP = Two*GMLoc%PBC%DipoleFAC*RhoPoles%DPole%D(1)**2
-         IF(GMLoc%PBC%AutoW%I(2)==0 ) E_DP = Two*GMLoc%PBC%DipoleFAC*RhoPoles%DPole%D(2)**2         
-         IF(GMLoc%PBC%AutoW%I(3)==0 ) E_DP = Two*GMLoc%PBC%DipoleFAC*RhoPoles%DPole%D(3)**2
-      ELSEIF(GMLoc%PBC%Dimen == 3) THEN 
-         E_DP = Two*GMLoc%PBC%DipoleFAC*(RhoPoles%DPole%D(1)**2+RhoPoles%DPole%D(2)**2+RhoPoles%DPole%D(3)**2)
-      ELSE
-         CALL Halt('PBCFarField: Unknown dimension <'//IntToChar(GMLoc%PBC%Dimen)//'>')
+
+      IF(PRESENT(LatFrc))THEN
+         ! The tin foil (dipole) contribution to the energy and lattice forces
+         IF(GMLoc%PBC%Dimen == 1) THEN
+            E_DP = 0.0D0
+         ELSEIF(GMLoc%PBC%Dimen == 2) THEN
+            IF(GMLoc%PBC%AutoW%I(1)==0 ) E_DP = Two*GMLoc%PBC%DipoleFAC*RhoPoles%DPole%D(1)**2
+            IF(GMLoc%PBC%AutoW%I(2)==0 ) E_DP = Two*GMLoc%PBC%DipoleFAC*RhoPoles%DPole%D(2)**2         
+            IF(GMLoc%PBC%AutoW%I(3)==0 ) E_DP = Two*GMLoc%PBC%DipoleFAC*RhoPoles%DPole%D(3)**2
+         ELSEIF(GMLoc%PBC%Dimen == 3) THEN 
+            E_DP = Two*GMLoc%PBC%DipoleFAC*(RhoPoles%DPole%D(1)**2+RhoPoles%DPole%D(2)**2+RhoPoles%DPole%D(3)**2)
+         ELSE
+            CALL Halt('PBCFarField: Unknown dimension <'//IntToChar(GMLoc%PBC%Dimen)//'>')
+         ENDIF
+         CALL New(LatFrc_Dip,(/3,3/))
+         LatFrc_Dip%D = Zero
+         IF(GMLoc%PBC%Dimen > 0) THEN
+            DivCV=DivCellVolume(GMLoc%PBC%BoxShape%D,GMLoc%PBC%AutoW%I)
+            DO I=1,3
+               DO J=1,3
+                  IF(GMLoc%PBC%AutoW%I(I)==1.AND.GMLoc%PBC%AutoW%I(J)==1)THEN
+                     LatFrc_Dip%D(I,J)=LatFrc_Dip%D(I,J)-E_DP*DivCV(I,J)/GMLoc%PBC%CellVolume
+                  ENDIF
+               ENDDO
+            ENDDO
+         ENDIF
+         ! The crystal field contribution to the lattice forces
+         CALL New(LatFrc_PFF,(/3,3/))
+         LatFrc_PFF%D = Zero
+         IF(GMLoc%PBC%Dimen > 0) THEN
+            DO I=1,3
+               DO J=1,3
+                  IF(GMLoc%PBC%AutoW%I(I)==1 .AND. GMLoc%PBC%AutoW%I(J)==1) THEN
+                     DO K=0,LenPFFFEll
+                        LatFrc_PFF%D(I,J)=LatFrc_PFF%D(I,J)-Two*(RhoC%D(K)*dTenRhoC%D(K,I,J)+RhoS%D(K)*dTenRhoS%D(K,I,J))
+                     ENDDO
+                  ENDIF
+               ENDDO
+            ENDDO
+         ENDIF
+         ! Initialize the lattice forces with the tin foil and crystal field terms
+         LatFrc%D=LatFrc_Dip%D+LatFrc_PFF%D
+         CALL Delete(LatFrc_Dip)
+         CALL Delete(LatFrc_PFF)
       ENDIF
-!
-    END SUBROUTINE PBCFarFieldSetUp
+      !
+    END SUBROUTINE PBCFarFuckingFieldSetUp
 !====================================================================================
 !   Calculate the FarField Component of the J matrix
 !====================================================================================
@@ -117,42 +153,41 @@ MODULE PBCFarField
       REAL(DOUBLE), DIMENSION(3)       :: PQ,HGDipole 
       REAL(DOUBLE), DIMENSION(1:)      :: HGBra
       TYPE(CRDS)                       :: GMLoc
-!   
-      CTFF=Zero
+      REAL(DOUBLE),DIMENSION(0:FFLen)  :: KetC,KetS
+      REAL(DOUBLE),DIMENSION(0:FFLen)  :: BraC,BraS
+
 !     Transform <Bra| coefficients from HG to SP
       PiZ=(Pi/Prim%Zeta)**(ThreeHalves)
-      CALL HGToSP_Gen(Prim%Ell,PiZ,HGBra,PFFKetC%D,PFFKetS%D)   
-      PQ = Prim%P-GMLoc%PBC%CellCenter%D   
+      CALL HGToSP_Gen(Prim%Ell,PiZ,HGBra,KetC,KetS)   
+      PQ=Prim%P-GMLoc%PBC%CellCenter%D   
 !     Contract
       IF(NoTranslate(PQ)) THEN
+         CTFF=Zero
          DO LM = 0,LSP(Prim%Ell)
-            CTFF = CTFF + PFFKetC%D(LM)*TenRhoC%D(LM)+PFFKetS%D(LM)*TenRhoS%D(LM)
+            CTFF=CTFF+KetC(LM)*TenRhoC%D(LM)+KetS(LM)*TenRhoS%D(LM)
          ENDDO
       ELSE
-         PFFBraC%D=Zero 
-         PFFBraS%D=Zero 
-         CALL Regular(MaxELL,PQ(1),PQ(2),PQ(3))
-         CALL XLate77(MaxEll,Prim%Ell,PFFBraC%D,PFFBraS%D,Cpq,Spq,PFFKetC%D,PFFKetS%D)
-         DO LM=0,LSP(MaxEll)
-            CTFF = CTFF + PFFBraC%D(LM)*TenRhoC%D(LM)+PFFBraS%D(LM)*TenRhoS%D(LM)
+         CTFF=Zero
+         BraC(0:LenPFFFEll)=Zero 
+         BraS(0:LenPFFFEll)=Zero 
+         CALL Regular(MaxPFFFELL,PQ(1),PQ(2),PQ(3))
+         CALL XLate77(MaxPFFFEll,Prim%Ell,BraC(0),BraS(0),Cpq(0),Spq(0),KetC(0),KetS(0))
+         DO LM=0,LenPFFFEll
+            CTFF=CTFF+BraC(LM)*TenRhoC%D(LM)+BraS(LM)*TenRhoS%D(LM)
          ENDDO
       ENDIF
 !     Include the Dipole correction to FarFC and FarFS
       PQ=Prim%P-GMLoc%PBC%CellCenter%D 
-      IF(GMLoc%PBC%Dimen==1) THEN
-         RETURN
-      ELSEIF(GMLoc%PBC%Dimen==2) THEN
+      IF(GMLoc%PBC%Dimen==2) THEN
          HGDipole = CalculateDiPole(Prim%Ell,Prim%Zeta,PQ(1),PQ(2),PQ(3),HGBra(1:))
          IF(GMLoc%PBC%AutoW%I(1)==0) CTFF  = CTFF + GMLoc%PBC%DipoleFAC*HGDipole(1)*RhoPoles%DPole%D(1)         
          IF(GMLoc%PBC%AutoW%I(2)==0) CTFF  = CTFF + GMLoc%PBC%DipoleFAC*HGDipole(2)*RhoPoles%DPole%D(2)
          IF(GMLoc%PBC%AutoW%I(3)==0) CTFF  = CTFF + GMLoc%PBC%DipoleFAC*HGDipole(3)*RhoPoles%DPole%D(3)
-         RETURN
       ELSEIF(GMLoc%PBC%Dimen==3) THEN
          HGDipole = CalculateDiPole(Prim%Ell,Prim%Zeta,PQ(1),PQ(2),PQ(3),HGBra(1:))
          CTFF  = CTFF + GMLoc%PBC%DipoleFAC*(HGDipole(1)*RhoPoles%DPole%D(1)         &
                                            + HGDipole(2)*RhoPoles%DPole%D(2)         &
                                            + HGDipole(3)*RhoPoles%DPole%D(3) )
-         RETURN
       ENDIF
 !
     END FUNCTION CTraxFF
@@ -175,7 +210,7 @@ MODULE PBCFarField
          Unit=OpenPU(Unit_O=Unit_O)
          IF(PrintFlags%Key > DEBUG_MINIMUM) THEN
             Mssg=ProcessName(Prog,TRIM(IntToChar(GMLoc%PBC%Dimen))//'-D periodics')   &
-                 //'MxL = '//TRIM(IntToChar(MaxEll))                                  &
+                 //'MxL = '//TRIM(IntToChar(MaxPFFFEll))                                  &
                  //', PAC Cells = '//TRIM(IntToChar(CS_OUT%NCells))                   &
                  //', MAC Cells = '//TRIM(IntToChar(CS_IN%NCells))                    
             WRITE(Unit,*)TRIM(Mssg)
@@ -189,7 +224,7 @@ MODULE PBCFarField
 #endif
 !
 100   FORMAT('========================================Periodic Information======================================')
-101   FORMAT(' MaxEll             = ',I3,'     Dimension = ',I2)
+101   FORMAT(' MaxPFFFEll         = ',I3,'     Dimension = ',I2)
 102   FORMAT(' Dipole Moment      = (',F12.6,',',F12.6,',',F12.6,')')
 103   FORMAT(' PAC Distance       = ',F6.2,' BOX Distance = ',F6.2,' Cell Distance = ',F6.2)
 108   FORMAT(' No. of Layers      = ',F6.2)
@@ -200,156 +235,6 @@ MODULE PBCFarField
 107   FORMAT('=========================================END======================================================')
 !
     END SUBROUTINE Print_Periodic
-!========================================================================================
-! Calculate the SP Moments of Rho_Loc
-!========================================================================================
-    SUBROUTINE RhoToSP(GMLoc,zq_low_o,zq_hig_o)
-      INTEGER,OPTIONAL                :: zq_low_o,zq_hig_o
-      INTEGER                         :: zq_low,zq_hig
-      INTEGER                         :: LP,LQ,LPQ,LenP,LenQ,LenPQ,LKet,I
-      INTEGER                         :: zq,iq,iadd,jadd,NQ,OffQ,OffR,LM
-      REAL(DOUBLE)                    :: Zeta,PiZ,Dist
-      REAL(DOUBLE),DIMENSION(3)       :: PQ
-      TYPE(CRDS)                      :: GMLoc
-!-----------------------------------------------------------------------------------!
-      IF(PRESENT(zq_low_o))THEN
-         zq_low=zq_low_o
-      ELSE
-         zq_low=1
-      ENDIF
-      IF(PRESENT(zq_hig_o))THEN
-         zq_hig=zq_hig_o
-      ELSE
-         zq_hig=Rho%NExpt
-      ENDIF
-!------------------------------
-      BDist   = Zero
-      RhoC%D  = Zero
-      RhoS%D  = Zero
-      DO zq=zq_low,zq_hig
-         NQ    = Rho%NQ%I(zq)
-         Zeta  = Rho%Expt%D(zq)
-         OffQ  = Rho%OffQ%I(zq)
-         OffR  = Rho%OffR%I(zq)
-         LQ    = Rho%Lndx%I(zq)
-         LP    = FFELL
-         LPQ   = MAX(LP,LQ)
-         LenQ  = LSP(LQ)  
-         LenP  = LSP(LP)  
-         LenPQ = LSP(LPQ) 
-         LKet  = LHGTF(LQ)
-         IF(NQ > 0) THEN
-            DO iq=1,NQ
-               iadd   = Rho%OffQ%I(zq)+iq
-               jadd   = Rho%OffR%I(zq)+(iq-1)*LKet+1
-               PQ(1)  = Rho%Qx%D(iadd)-GMLoc%PBC%CellCenter%D(1)
-               PQ(2)  = Rho%Qy%D(iadd)-GMLoc%PBC%CellCenter%D(2)
-               PQ(3)  = Rho%Qz%D(iadd)-GMLoc%PBC%CellCenter%D(3)
-               PiZ=(Pi/Zeta)**(ThreeHalves)  
-               Dist = SQRT(PQ(1)**2+PQ(2)**2+PQ(3)**2)
-               IF(Dist > BDist) THEN
-                  BDist      = Dist
-                  BOXDist(1) = PQ(1)
-                  BOXDist(2) = PQ(2)
-                  BOXDist(3) = PQ(3)
-               ENDIF
-               PFFKetC%D = Zero
-               PFFKetS%D = Zero
-               ! THE FOLLOWING IS INEFFICIENT
-               CALL HGToSP_Gen(LQ,PiZ,Rho%Co%D(jadd:jadd+LKet-1),PFFKetC%D,PFFKetS%D) 
-               IF(NoTranslate(PQ)) THEN
-                  DO LM = 0,LSP(LQ)
-                     RhoC%D(LM) = RhoC%D(LM)+PFFKetC%D(LM)
-                     RhoS%D(LM) = RhoS%D(LM)+PFFKetS%D(LM)
-                  ENDDO
-               ELSE
-                  CALL Regular(LPQ,PQ(1),PQ(2),PQ(3))
-                  CALL XLate77(LP,LQ,RhoC%D,RhoS%D,Cpq,Spq,PFFKetC%D,PFFKetS%D)
-               ENDIF
-            ENDDO
-         ENDIF
-      ENDDO
-      RhoC%D(0) = Zero
-      RhoS%D(0) = Zero
-    END SUBROUTINE RhoToSP
-!=======================================================================================
-! Calculate the Maxium Ell
-!=======================================================================================
-    FUNCTION CalMaxEll(GMLoc) RESULT(ML1)
-      TYPE(CRDS)                            :: GMLoc
-      TYPE(CellSet)                         :: CStmp
-      INTEGER                               :: NC,L,LP,ML1
-      REAL(DOUBLE)                          :: Radius,MinRadius
-      REAL(DOUBLE)                          :: PL,OL,FAC,NL,OL1,CQ
-      REAL(DOUBLE)                          :: PFFTau
-      REAL(DOUBLE),DIMENSION(3)             :: PQ
-!---------------------------------------------------------------------------------!
-
-      
-      ML1=GMLoc%PBC%PFFMaxEll
-      WRITE(*,*)' FUcked up CalMaxEll hardwired for now at ...',ML1
-      RETURN
-
-      PFFTau = TauMAC
-!
-!     First, Determint the Distance to the Nearest Cell in the CellSet CS_inf-CS_IN 
-!
-      Radius = Zero
-      DO NC=1,CS_IN%NCells
-         PQ(:) = CS_IN%CellCarts%D(:,NC)
-         Radius = MAX(Radius,SQRT(PQ(1)**2+PQ(2)**2+PQ(3)**2))
-      ENDDO
-!
-      CALL New_CellSet_Sphere(CStmp,GMLoc%PBC%AutoW%I,GMLoc%PBC%BoxShape%D,1.25D0*Radius) 
-      MinRadius = 1.D16
-      DO NC=1,CStmp%NCells
-         PQ(:) = CStmp%CellCarts%D(:,NC)
-         IF(.NOT. InCell_CellSet(CS_IN,PQ(1),PQ(2),PQ(3))) THEN
-            MinRadius = MIN(MinRadius,SQRT(PQ(1)**2+PQ(2)**2+PQ(3)**2))
-         ENDIF
-      ENDDO
-!
-      IF(Two*BDist > MinRadius) THEN
-         CALL Halt('2*BDist Greater Then Radius increase PFFMaxLay')
-      ENDIF
-!
-      ML1 = FFEll+1
-      CQ  = Zero
-      DO L=SPEll,FFELL
-         OL1 = Unsold0(L,RhoC%D,RhoS%D)
-         CQ  = MAX(CQ,OL1/BDist**DBLE(L))
-      ENDDO
-!
-      DO L=SPEll,FFEll
-         PL  = CQ*(Two*BDist)**DBLE(L)
-         FAC = PL/((MinRadius-Two*BDist)*MinRadius**DBLE(L+1))
-         IF(FAC .LT. PFFTau) THEN
-            ML1 = L
-            EXIT
-         ENDIF
-      ENDDO
-!
-      CALL OpenASCII(OutFile,Out)  
-      IF(GMLoc%PBC%PFFOvRide) THEN
-         IF(MyID.EQ.ROOT) THEN
-            WRITE(Out,990) ML1,GMLoc%PBC%PFFMaxEll
-            WRITE(*,990) ML1,GMLoc%PBC%PFFMaxEll
-         ENDIF
-         ML1 = GMLoc%PBC%PFFMaxEll
-      ELSE
-         IF(ML1 .GT. GMLoc%PBC%PFFMaxEll) THEN
-            IF(MyID.EQ.ROOT) THEN
-               WRITE(Out,991) ML1,GMLoc%PBC%PFFMaxEll
-               WRITE(*,991) ML1,GMLoc%PBC%PFFMaxEll
-            ENDIF
-            ML1=GMLoc%PBC%PFFMaxEll
-         ENDIF      
-      ENDIF
-      CLOSE(Out)
-!
-990   FORMAT(' OverRide is On: Ell ==> ',I3,' PFFMaxEll ==> ',I3)
-991   FORMAT(' *** WARNING *** Ell > MaxEll *** WARNING *** : Ell ==> ',I3,' PFFMaxEll ==> ',I3)
-    END FUNCTION CalMaxEll
 !========================================================================================
 ! If QP is < TOL, do not translate
 !========================================================================================

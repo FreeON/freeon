@@ -123,6 +123,11 @@
          Omega=RTE/RPE                                                  
          Upq=TwoPi5x2/(RTE*SQRT(RPE))                                   
          T=Omega*(PQx(I)*PQx(I)+PQy(I)*PQy(I)+PQz(I)*PQz(I))            
+c         IF(ABS(0.3573111010D+01-ZetaQ(I))<1D-5)THEN
+c            WRITE(*,*)'------------------------------------'
+c            WRITE(*,*)' Z, Q, UPQ, T = '
+c            WRITE(*,33)ZetaP,ZetaQ(I),Upq,T
+
          IF(T.LT.Switch)THEN                                            
             T2=T*T                                                      
             T3=T*T2                                                     
@@ -143,16 +148,39 @@
             SqrtT=DSQRT(T)                                              
             OneOvT=One/T                                                
             G0=SqrtPi/(Two*SqrtT)                                       
+
+
             o1=Upq                                                      
             o2=-2D0*Omega                                               
             AuxR(0,I)=o1*G0                                             
+
+!            WRITE(*,*)0,o1,Omega,G0,AuxR(0,I)
+
             o1=o2*o1                                                    
             G1=G0*0.5000000000000000D+00*OneOvT                         
             AuxR(1,I)=o1*G1                                             
+
+!            WRITE(*,*)1,o1,Omega,G1,AuxR(1,I)
+
             o1=o2*o1                                                    
             G2=G1*0.1500000000000000D+01*OneOvT                         
             AuxR(2,I)=o1*G2                                             
+!            WRITE(*,*)2,o1,Omega,G1,AuxR(1,I)
+
+
+!            WRITE(*,*)' G0 1,2 = '
+!            WRITE(*,33)G0,G1,G2
+
          ENDIF                                                          
+
+c         ELSE
+c            AuxR(0:2,I)=0D0
+c         ENDIF
+
+c          WRITE(*,*)' Aux = '
+c          WRITE(*,33)AuxR(0:2,i)/Upq
+33         FORMAT(10(D16.10,", "))
+c         ENDIF
  100  CONTINUE
       RETURN
       END

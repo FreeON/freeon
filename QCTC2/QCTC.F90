@@ -40,7 +40,7 @@ PROGRAM QCTC
   !------------------------------------------------------------------------------- 
   QCTC_TotalTime_Start=MTimer()
   ! Start up macro
-  CALL StartUp(Args,Prog,Serial_O=.FALSE.)
+  CALL StartUp(Args,Prog,Serial_O=.TRUE.)
   ! Chose a density matrix
   IF(SCFActn=='BasisSetSwitch')THEN
      ! Get the previous information
@@ -112,7 +112,7 @@ PROGRAM QCTC
   ! RhoHead is the start of a linked density list
   ALLOCATE(RhoHead)
   ! Here, the LL is filled out
-  CALL MakeRhoList(GM,BS,DMat,NLink,RhoHead)
+  CALL MakeRhoList(GM,BS,DMat,NLink,RhoHead)!,NoWrap_O=.TRUE.)
   ! Add in the nuclear charges only in certain cases
   IF(SCFActn/='InkFok'.AND.SCFActn/='StartResponse'.AND.SCFActn/='DensityPrime')THEN
      CALL AddNukes(GM,RhoHead)
@@ -125,9 +125,15 @@ PROGRAM QCTC
   !
   WRITE(*,*)' Gaussians in the total density = ',NLink
   ClusterSize=32
+  ! Local expansion order of the multipoles to use in the tree
   MaxPoleEll=MIN(2*(BS%NASym+4),14)
+  CALL Get(MaxPFFFEll,'MaxPFFFEll')
+  ! For now, set PFFFEll to be the largest expansion length
+  ! May be reset later
+  MaxPFFFEll=MAX(MaxPoleEll,MaxPFFFEll)
   WRITE(*,*)' ClusterSize used in QCTC = ',ClusterSize
   WRITE(*,*)' Multipole Expansion used in QCTC = ',MaxPoleEll
+  WRITE(*,*)' Max Multipole order available for periodics = ',MaxPFFFEll
   ! Initialize addressing for tensor contraction loops
   CALL TensorIndexingSetUp()
   ! Setup global arrays for computation of multipole tensors ...
@@ -149,8 +155,8 @@ PROGRAM QCTC
   NNearAv=0
   ! Build the global PoleTree representation of the total density
   CALL RhoToPoleTree
-  ! Set the electrostatic background
-  CALL PBCFarFieldSetUp(PoleRoot,GM)
+  ! Set up the crystal field
+  CALL PBCFarFuckingFieldSetUp(GM,Rho,MaxPFFFEll,E_PFF)
   ! Delete the auxiliary density arrays
   CALL DeleteRhoAux
   ! Delete the Density
@@ -170,7 +176,7 @@ PROGRAM QCTC
 
   K=0
   DO I=1,CS_IN%NCells
-     WRITE(*,*)I,NNearCount(I)
+!     WRITE(*,*)I,NNearCount(I)
      IF(NNearCount(I)==0D0)K=K+1
   ENDDO
   WRITE(*,*)' % of NoPAC = ',DBLE(K)/DBLE(CS_IN%NCells)
@@ -181,17 +187,17 @@ PROGRAM QCTC
   WRITE(*,11)' Integral_Time = ',Integral_Time
   WRITE(*,11)' Multipol_Time = ',Multipole_Time
   WRITE(*,11)' Total J Time  = ',Decompose_Time+TreeMake_Time+JWalk_Time+Multipole_Time+Integral_Time
-  WRITE(*,11)' Total JWalks  = ',DBLE(NPrim)
-  WRITE(*,11)' Av  Ints/Prim = ',DBLE(NInts)/DBLE(NPrim)
-  WRITE(*,11)' Av  # NF/Prim = ',DBLE(NNearAv)/DBLE(NPrim)
-  WRITE(*,11)' Av  # FF/Prim = ',DBLE(NFarAv)/DBLE(NPrim)
-  WRITE(*,11)' Time per INode= ',Integral_Time/DBLE(NNearAv)
-  WRITE(*,11)' Time per MNode= ',Multipole_Time/DBLE(NFarAv)
+!  WRITE(*,11)' Total JWalks  = ',DBLE(NPrim)
+!  WRITE(*,11)' Av  Ints/Prim = ',DBLE(NInts)/DBLE(NPrim)
+!  WRITE(*,11)' Av  # NF/Prim = ',DBLE(NNearAv)/DBLE(NPrim)
+!  WRITE(*,11)' Av  # FF/Prim = ',DBLE(NFarAv)/DBLE(NPrim)
+!  WRITE(*,11)' Time per INode= ',Integral_Time/DBLE(NNearAv)
+!  WRITE(*,11)' Time per MNode= ',Multipole_Time/DBLE(NFarAv)
 11 FORMAT(A20,D12.6)
 
   CALL Elapsed_TIME(TimeMakeJ,'Accum')
   IF(SCFActn=='InkFok')THEN
-     !    Add in correction if incremental J build
+     ! Add in correction if incremental J build
      CALL New(T1)
      CALL New(T2)
      CALL Get(T1,TrixFile('J',Args,-1))

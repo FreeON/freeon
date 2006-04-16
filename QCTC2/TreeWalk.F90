@@ -170,7 +170,7 @@ CONTAINS
              ENDIF  
           ENDIF
        ENDIF
-
+!
        IF(MAC)THEN
           NFar=NFar+1
           Far(NFar)%P=>Q
@@ -197,13 +197,13 @@ CONTAINS
 
     ENDDO
     !
+    !---------------------------------------------------------------------------------------------
     Multipole_Time_Start=MTimer()
     JWalk_Time=JWalk_Time+(Multipole_Time_Start-JWalk_Time_Start)
-    !
     LCode=100*QC%Prim%Ell+MaxPoleEll
     SELECT CASE(LCode)	
     INCLUDE "CTraX.Inc"
-
+    !---------------------------------------------------------------------------------------------
 !!$    DO N=1,NFar
 !!$       Q=>Far(N)%P
 !!$       PQ=QC%Prim%P-Q%Pole%Center
@@ -220,23 +220,19 @@ CONTAINS
 !!$       CALL IrRegular(LPQ,PQv(1),PQv(2),PQv(3))
 !!$       CALL CTraX77(LP,LQ,SPKetC(0),SPKetS(0),Cpq,Spq,Q%Pole%C(0),Q%Pole%S(0))
 !!$    ENDDO
-    !
+    !---------------------------------------------------------------------------------------------
     Integral_Time_Start=MTimer()
     Multipole_Time=Multipole_Time+(Integral_Time_Start-Multipole_Time_Start)
-    !
-!    CALL PAPIEX_START(5,"Integrals")
-
-!    WRITE(*,*) ' NNear  =', NNear
+    ! CALL PAPIEX_START(5,"Integrals")
     DO N=1,NNear
        is=Near(N)%P%HERM%Stack
        CALL RAhmadiJAlmlof95c(EllP,LenP,NuclearExpnt,JTau,QC%Prim%Zeta,QC%Prim%P,HGKet,HGStack(is)) 
     ENDDO
-!    CALL PAPIEX_STOP(5)
-
+    ! CALL PAPIEX_STOP(5)
+    !---------------------------------------------------------------------------------------------
+!!$
 !!$    DO N=1,NNear
 !!$       Q=>Near(N)%P
-!!$!       WRITE(*,*)NNear,' Q%Box%Number = ',Near(N)%P%Box%Number
-!!$!       WRITE(*,*)' NQ = ',Near(N)%P%Herm%NQ
 !!$       EllP=QC%Prim%Ell
 !!$       LenP=LHGTF(EllP)
 !!$       DO EllQ=0,Q%HERM%Ell
@@ -245,20 +241,23 @@ CONTAINS
 !!$             LenQ=LHGTF(EllQ)
 !!$             PQEll=EllP+EllQ
 !!$             PQLen=LHGTF(PQEll)
-!!$             IF(Q%Box%Number==41.AND.EllQ==2)THEN
-!!$                WRITE(*,*)' EllQ = ',EllQ
-!!$                WRITE(*,*)'R  = ',Q%HERM%Cent(EllQ)%D
-!!$                WRITE(*,*)'Z  = ',Q%HERM%Zeta(EllQ)%D
-!!$                WRITE(*,*)'CO = ',Q%HERM%Coef(EllQ)%D
+!!$
+!!$             WRITE(*,*)'==========================================================='
+!!$             WRITE(*,*)' NQ = ',NQ
+!!$
+!!$             WRITE(*,*)' Est = ',Q%Herm%IHlf(EllQ)%D
 !!$
 !!$             CALL VMD3(QC%Prim%Ell,LHGTF(QC%Prim%Ell),EllQ,LHGTF(EllQ),         &
 !!$                       QC%Prim%Ell+EllQ,LHGTF(QC%Prim%Ell+EllQ),Q%HERM%Nq(EllQ), &
 !!$                       QC%Prim%P,QC%Prim%Zeta,Q%HERM%Cent(EllQ)%D,             &
 !!$                       Q%HERM%Zeta(EllQ)%D,Q%HERM%Coef(EllQ)%D,HGKet)
-!!$
-!!$                WRITE(*,*)EllQ,Q%Box%Number,'A HGKet = ',DOT_PRODUCT(HGKET,HGKET)
+!!$!!WRITE(*,*)' HGKet = ',HGKet(1:6)
+!!$!        WRITE(*,33)EllP,EllQ,QC%Prim%Zeta,Q%HERM%Zeta(EllQ)%D(1),NQ, &
+!!$!                  DOT_PRODUCT(Q%HERM%Coef(EllQ)%D(:,1),Q%HERM%Coef(EllQ)%D(:,1)),  &
+!!$!                  DOT_PRODUCT(HGKET,HGKET)
+!!$33 FORMAT('LP = ',I2,', LQ = ',I2,' ZP = ',D12.6,' ZQ = ',D12.6,' NQ = ',I2,' Co = ',D12.6,' HG = ',D12.6)
 !!$!                STOP
-!!$             ENDIF
+!!$
 !!$             NInts=NInts+Nq
 !!$          ENDIF
 !!$       ENDDO
@@ -640,7 +639,6 @@ CONTAINS
     REAL(DOUBLE),DIMENSION(LenP) :: Ket1
 
     !-------------------------------------------------------------------------
-!!$    WRITE(*,*)'================================================'
 !!$    WRITE(*,*)' EllP = ',EllP,' EllQ = ',EllQ
 !!$    WRITE(*,*)' EllPQ = ',EllPQ,' LenPQ = ',LenPQ
 
@@ -648,20 +646,22 @@ CONTAINS
        PQx(I)=-(P(1)-Q(1,I))
        PQy(I)=-(P(2)-Q(2,I))
        PQz(I)=-(P(3)-Q(3,I))
+
+       WRITE(*,*)' ZetaP = ',ZetaP,' ZetaQ = ',ZetaQ(I)
+!       WRITE(*,*)' P = ',P
+!       WRITE(*,*)' Q = ',Q(:,I)
+
+
        RTE=ZetaP*ZetaQ(I)
        RPE=ZetaP+ZetaQ(I)
        Omega=RTE/RPE
-       WRITE(*,*)I,'RTE = ',RTE,' RPE = ',RPE,' OMEGA = ',Omega
        Upq=TwoPi5x2/(RTE*SQRT(RPE))
        T=Omega*(PQx(I)*PQx(I)+PQy(I)*PQy(I)+PQz(I)*PQz(I))
-       WRITE(*,22)I,ZetaP,ZetaQ(I),T
-       22 FORMAT(I3," ",4(D12.6,", "))
        IF(T==Zero)THEN
           OmegaJ=One
           TwoO=-Two*Omega
           DO J=0,EllPQ
              AuxR(I,J)=Upq*OmegaJ/DBLE(2*J+1)
-             WRITE(*,*)I,J,AuxR(I,J),Upq,Omega,OmegaJ
              OmegaJ=TwoO*OmegaJ
           ENDDO
        ELSE
@@ -670,11 +670,7 @@ CONTAINS
              TwoT=Two*T
              ET=DEXP(-T)
              FJ=Zero
-             WRITE(*,*)T,' ET = ',ET,TwoT
-             WRITE(*,*)EXP(-17.10326008837604D0)
-             WRITE(*,*)EXP(-T)
-             DO J=EllPQ+LPlus,0,-1
-                
+             DO J=EllPQ+LPlus,0,-1                
                 F(J)=FJ
                 FJ=(TwoT*F(J)+ET)/(Two*DBLE(J)-One)
              ENDDO
@@ -691,11 +687,14 @@ CONTAINS
           TwoO=-Two*Omega
           DO J=0,EllPQ
              AuxR(I,J)=Upq*OmegaJ*F(J)
-             WRITE(*,*)I,J,AuxR(I,J)
              OmegaJ=TwoO*OmegaJ
           ENDDO
        ENDIF
     ENDDO
+
+!    WRITE(*,*)' T = ',T
+!    WRITE(*,*)' AuxR = ',AuxR(I,0:1)
+
     !
     DO J=EllPQ,0,-1
        DO L=EllPQ-J,1,-1
