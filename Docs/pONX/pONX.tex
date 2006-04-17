@@ -165,7 +165,7 @@
                               %display desired
 \maketitle
 
-\footnotetext[1]{Preprint LA-UR-06-0892.}
+%\footnotetext[1]{Preprint LA-UR-06-0892.}
 
 
 \section{Introduction}
@@ -913,58 +913,38 @@ The timing for the different parts are reported in Table~\ref{Tab:EndothelinTota
 \bf  FIGURES\\[1.cm]
 \end{center}
 
-  \caption{\protect
-    Parallel ordering of significant distributions.
-%    The indeces $A, C$ and $a, c$ run over the atoms and basis functions respectively;.
-  }\label{Fig:List}
-
-  \caption{\protect
-    The parallel ONX loops.
-  }\label{Fig:ONXcore}
-
- \caption{\protect
-   Example of a horizontal and vertical recursive decomposition for 16 processors.
- }\label{fig:part2D}
-
-  \caption{\protect
-    Scaling of the parallel ONX on (H$_2$O)$_{50}$
+   FIG. 1: Parallel ordering of significant distributions.\\
+   FIG. 2: The parallel ONX loops.\\
+   FIG. 3: Example of a horizontal and vertical recursive decomposition for 16 processors.\\
+   FIG. 4: Scaling of the parallel ONX on (H$_2$O)$_{50}$
     and (H$_2$O)$_{110}$ with the 6-31G and 6-31G**
     basis functions and the {\tt TIGHT} threshold.
-    Speedups are relative to 2 processors.
-  }\label{fig:h2o_50_110}
-
-  \caption{\protect
-    Relative speedup of the parallel ONX on (H$_2$O)$_{50}$ with the RHF/6-31G**
+    Speedups are relative to 2 processors.\\
+   FIG. 5: Relative speedup of the parallel ONX on (H$_2$O)$_{50}$ with the RHF/6-31G**
     along the SCF iterations.
-    Speedups are relative to 2 processors.
-  }\label{fig:h2o_50_prop}
-
-  \caption{\protect
-    Scaling of the parallel ONX on (H$_2$O)$_{64}$ PBC with the RHF/6-31G*(O)/5-11G*(H),
+    Speedups are relative to 2 processors.\\
+   FIG. 6: Scaling of the parallel ONX on (H$_2$O)$_{64}$ PBC with the RHF/6-31G*(O)/5-11G*(H),
     the RHF/6-31G** and RHF/6-31G level of theories and the {\tt GOOD} threshold.
-    The speedups are relative to 2 processors.
-  }\label{fig:h2o_pbc_64}
-
-  \caption{\protect
-    Scaling of the parallel ONX on endothelin and periodic (KCNS)$_{32}$ with
+    The speedups are relative to 2 processors.\\
+   FIG. 7: Scaling of the parallel ONX on endothelin and periodic (KCNS)$_{32}$ with
     the RHF/6-31G** and RHF/86-511G(K)/86-311G(S)/6-311G(C,N)
     respectively and the {\tt GOOD} threshold.
-    The speedups are relative to 2 processors.
-  }\label{fig:Endothelin_KCNS}
-
-  \caption{\protect
-    Total scaling of the parallel SCF and its most consuming parts
+    The speedups are relative to 2 processors.\\
+   FIG. 8: Total scaling of the parallel SCF and its most consuming parts
     on endothelin with the RHF/6-31G**
     and the {\tt GOOD} threshold.
-    The speedups are relative to 2 processors.
-  }\label{fig:EndothelinTotalTiming}
+    The speedups are relative to 2 processors.\\
 
 \end{figure}
 
 \clearpage
-
+Figure 1, V.~Weber and M.~Challacombe, Journal of Chemical Physics \\[1.cm]
+\begin{figure}[h]
+  \caption{\protect
+    Parallel ordering of significant distributions.
+%    The indeces $A, C$ and $a, c$ run over the atoms and basis functions respectively;.
+  }\label{Fig:List}
 \begin{center}
-Figure 1, V.~Weber and M.~Challacombe \\[1.cm]
   \begin{equation*}
     \begin{split}
       &\tt          DO\,C\in COL(D(iPrc))\\
@@ -985,10 +965,16 @@ Figure 1, V.~Weber and M.~Challacombe \\[1.cm]
   \end{equation*}
 \end{center}
 
-\clearpage
+\end{figure}
 
+\clearpage
+Figure 2, V.~Weber  and M.~Challacombe, Journal of Chemical Physics \\[1. cm]
+\begin{figure}[h]
+  \caption{\protect
+    The parallel ONX loops.
+  }\label{Fig:ONXcore}
 \begin{center}
-Figure 2, V.~Weber  and M.~Challacombe \\[1.cm]
+
   \begin{equation*}
     \begin{split}
       &\tt        Receive\,D(iPrc)\,from\,ROOT\\
@@ -1022,10 +1008,16 @@ Figure 2, V.~Weber  and M.~Challacombe \\[1.cm]
   \end{equation*}
 \end{center}
 
-\clearpage
+\end{figure}
 
+\clearpage
+Figure 3, V.~Weber  and M.~Challacombe, Journal of Chemical Physics \\[1.cm]
+\begin{figure}[h]
+ \caption{\protect
+   Example of a horizontal and vertical recursive decomposition for 16 processors.
+ }\label{fig:part2D}
 \begin{center}
-Figure 3, V.~Weber  and M.~Challacombe \\[1.cm]
+
  \setlength{\unitlength}{5cm}
  \begin{picture}(1,1)
    \put(0,0){\line(0,1){1}}
@@ -1054,41 +1046,85 @@ Figure 3, V.~Weber  and M.~Challacombe \\[1.cm]
  \end{picture}
 \end{center}
 
-\clearpage
+\end{figure}
 
+\clearpage
+Figure 4, V.~Weber  and M.~Challacombe, Journal of Chemical Physics \\[1.cm]
+\begin{figure}[h]
+  \caption{\protect
+    Scaling of the parallel ONX on (H$_2$O)$_{50}$
+    and (H$_2$O)$_{110}$ with the 6-31G and 6-31G**
+    basis functions and the {\tt TIGHT} threshold.
+    Speedups are relative to 2 processors.
+  }\label{fig:h2o_50_110}
 \begin{center}
-Figure 4, V.~Weber  and M.~Challacombe \\[1.cm]
 \includegraphics[angle=-90,width=0.5\textwidth]{h2o_50_110}
 \end{center}
 
-\clearpage
+\end{figure}
 
+\clearpage
+Figure 5, V.~Weber  and M.~Challacombe, Journal of Chemical Physics \\[1.cm]
+\begin{figure}[h]
+  \caption{\protect
+    Relative speedup of the parallel ONX on (H$_2$O)$_{50}$ with the RHF/6-31G**
+    along the SCF iterations.
+    Speedups are relative to 2 processors.
+  }\label{fig:h2o_50_prop}
 \begin{center}
-Figure 5, V.~Weber  and M.~Challacombe \\[1.cm]
+
 \includegraphics[angle=-90,width=0.5\textwidth]{h2o_50_prop}
 \end{center}
 
-\clearpage
+\end{figure}
 
+\clearpage
+Figure 6, V.~Weber  and M.~Challacombe, Journal of Chemical Physics \\[1.cm]
+\begin{figure}[h]
+  \caption{\protect
+    Scaling of the parallel ONX on (H$_2$O)$_{64}$ PBC with the RHF/6-31G*(O)/5-11G*(H),
+    the RHF/6-31G** and RHF/6-31G level of theories and the {\tt GOOD} threshold.
+    The speedups are relative to 2 processors.
+  }\label{fig:h2o_pbc_64}
 \begin{center}
-Figure 6, V.~Weber  and M.~Challacombe \\[1.cm]
+
   \includegraphics[angle=-90,width=0.5\textwidth]{h2o_pbc_64}
 \end{center}
 
-\clearpage
+\end{figure}
 
+\clearpage
+Figure 7, V.~Weber  and M.~Challacombe, Journal of Chemical Physics \\[1.cm]
+\begin{figure}[h]
+  \caption{\protect
+    Scaling of the parallel ONX on endothelin and periodic (KCNS)$_{32}$ with
+    the RHF/6-31G** and RHF/86-511G(K)/86-311G(S)/6-311G(C,N)
+    respectively and the {\tt GOOD} threshold.
+    The speedups are relative to 2 processors.
+  }\label{fig:Endothelin_KCNS}
 \begin{center}
-Figure 7, V.~Weber  and M.~Challacombe \\[1.cm]
+
 \includegraphics[angle=-90,width=0.5\textwidth]{Endothelin_KCNS}
 %\resizebox*{7in}{!}{\includegraphics{figure2.eps}}
 \end{center}
 
+\end{figure}
+
 \clearpage
+Figure 8, V.~Weber  and M.~Challacombe, Journal of Chemical Physics \\[1.cm]
+\begin{figure}[h]
+  \caption{\protect
+    Total scaling of the parallel SCF and its most consuming parts
+    on endothelin with the RHF/6-31G**
+    and the {\tt GOOD} threshold.
+    The speedups are relative to 2 processors.
+  }\label{fig:EndothelinTotalTiming}
 
 \begin{center}
-Figure 8, V.~Weber  and M.~Challacombe \\[1.cm]
 \includegraphics[angle=-90,width=0.5\textwidth]{EndothelinTotalTiming}
 \end{center}
+
+\end{figure}
 
 } %commentoutB
 

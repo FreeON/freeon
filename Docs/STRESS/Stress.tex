@@ -35,8 +35,8 @@
 %\documentclass[pre,aps,twocolumn,showpacs,twocolumngrid,superbib]{revtex4}
 %\documentclass[prl,aps,twocolumn,showkeys,twocolumngrid,superbib]{revtex4}
 %\documentclass[twocolumn,showkeys,showpacs,preprintnumbers,amsmath,amssymb]{revtex4}
-\documentclass[prl,twocolumn,showpacs,twocolumngrid,superbib]{revtex4}
-%\documentclass[prl,preprint,doublespace]{revtex4} %<<< For the journal
+%%%%\documentclass[prl,twocolumn,showpacs,twocolumngrid,superbib]{revtex4}
+\documentclass[prl,preprint,doublespace]{revtex4} %<<< For the journal
 %%%\documentclass[prl,showpacs,preprint,superbib]{revtex4}
 %\documentclass[showpacs,preprint,superbib]{revtex4}
 
@@ -50,12 +50,11 @@
 
 \pagestyle{fancy}
 
-
-%\newcommand{\commentoutB}[1]{#1}
+\newcommand{\commentoutB}[1]{#1}
 \newcommand{\commentoutA}[1]{}
 
 %\newcommand{\commentoutA}[1]{#1}
-\newcommand{\commentoutB}[1]{}
+%\newcommand{\commentoutB}[1]{}
 
 
 \def\Tr{{\rm Tr}}
@@ -135,7 +134,7 @@ cell gradients.}
 
 \maketitle
 
-\footnotetext[1]{Preprint LA-UR-05-3120.}
+%\footnotetext[1]{Preprint LA-UR-05-3120.}
 
 %\section{Don't forget to change that}
 %-Add K. Doll in the Ref for Urea K. Doll Computer Physics Communications 137 (2001) 74-88\\
@@ -575,6 +574,9 @@ was $a_0=4.1$\AA~and a Mg atom was moved by $0.2$\AA~parallel to the $x$-directi
 Comparisons are made to numerical atomic and cell gradients obtained 
 with the {\tt VERYTIGHT} threshold, 21 energy points
 and a 6-th degree polynomial fit.
+
+\commentoutA{
+
 \begin{table}[t]
   \centering
   \caption{\protect
@@ -621,6 +623,7 @@ and a 6-th degree polynomial fit.
   \end{tabular}
 \end{table}
 
+} % commentoutA
 
 Table~\ref{Tab:HF-n} shows the progression of the cell parameters $a_0$, bond lengths $d$ and
 total energies $E$ computed for linear (HF)$_n$ chains at 
@@ -630,6 +633,7 @@ with 32 $k$-points in the first Brillouin zone at the
 RHF/6-31G level of theory~\cite{DJacquemin99B}. We have also performed a high quality
 geometry optimization with the {\sc Crystal03}~\cite{Crystal03} package.
 
+\commentoutA{
 
 \begin{table}[t]
   \centering
@@ -801,6 +805,8 @@ geometry optimization with the {\sc Crystal03}~\cite{Crystal03} package.
   \end{tabular}
 \end{table}
 
+} % commentoutA
+
 In order to analyze the convergence of the $\Gamma$-point energy to the ${\bf k}$-space limit
 we have performed single point calculations for the 
 (HF)$_n$ chains with cell parameter $a_0=2.4745$\AA~and bond length $d=0.9453$\AA.
@@ -821,6 +827,7 @@ in Figure~\ref{Fig:CnvgEnergyNoMIC}. By analogy, the behavior of the convergence
 without the MIC is expected to be inversely proportional to the volume of the 
 cell for 3D-periodic systems.
 
+\commentoutA{
 
 \begin{figure}[h]
   \caption{Convergence of the $\Gamma$-point relative energy, with and without the MIC,
@@ -850,6 +857,8 @@ cell for 3D-periodic systems.
 %  \resizebox*{3.6in}{!}{\includegraphics[angle=-90.00]{./DATA/HF_Energy_Forces_cnvg_2.ps}}
   \resizebox*{3.6in}{!}{\includegraphics[angle=-90.00]{./DATA/HF_Energy_cnvg_NoMIC.ps}}
 \end{figure}
+
+} % commentoutA
 
 We have performed full optimization of 3D urea supercells 
 without any symmetry constraint on the cell or the atomic positions.
@@ -914,6 +923,8 @@ of urea are mainly due to the different basis set used by {\sc Crystal03} and
 % C. Gatti, V.R. Saunders and C. Roetti, Crystal field effects on the topological properties of 
 % the electron density in molecular crystals. The case of urea, 
 % J. Chem. Phys. 101, 10686-10696 (1994). 
+
+\commentoutA{
 
 \begin{table}[t]
   \centering
@@ -990,6 +1001,8 @@ of urea are mainly due to the different basis set used by {\sc Crystal03} and
   \end{tabular}
 \end{table}
 
+} % commentoutA
+
 Table~\ref{Tab:MgO} shows the progression of the cell parameters, total energies and
 fractional coordinates of oxygen computed
 for various MgO supercells at the $\Gamma$-point RHF-MIC level of theory using
@@ -1004,6 +1017,9 @@ fractional coordinate of the oxygen
 with respect to its ${\bf k}$-space integration counterpart. The larger systems
 give perfect cell parameter, fractional coordinate of the oxygen
 and the energy systematically converges with system size.
+
+\commentoutA{
+
 \begin{table}[t]
   \centering
   \caption{\protect
@@ -1032,6 +1048,9 @@ and the energy systematically converges with system size.
   \botrule
   \end{tabular}
 \end{table}
+
+} % commentoutA
+
 %
 %Crystal03 HF/8-61G/8-51G 8x8x8 Default
 %4.201 -274.66420524315
@@ -1117,6 +1136,8 @@ of $10^{-4}$ a.u. in the forces).
 These unphysical gradients observed for the (MgO)$_4$ system are responsible for
 breaking the symmetry of the cell (see the fractional coordinate Table~\ref{Tab:MgO}).
 
+\commentoutA{
+
 \begin{table}[t]
   \centering
   \caption{\protect
@@ -1135,6 +1156,9 @@ breaking the symmetry of the cell (see the fractional coordinate Table~\ref{Tab:
   \botrule
   \end{tabular}
 \end{table}
+
+} % commentoutA
+
 %
 %--------------------------------------------------------
 %   Atom   Z                Forces (au)
@@ -1312,72 +1336,205 @@ than 3 digits can be already achieved with cubic cells of about $600$\AA$^3$.
 \bf  TABLES\\[1.cm]
 \end{center}
 
+\begin{table}[h]
+  \centering
+  \caption{\protect
+    Analytical Hartree-Fock atomic and 
+    cell gradients for (HF)$_6$ and (MgO)$_{32}$
+    with different thresholds at the RHF-MIC/6-31G and RHF-MIC/8-61G(Mg)/8-51G(O) 
+    level of theories, respectively.
+    Comparisons are made to numerical atomic and cell gradients obtained 
+    with the {\tt VERYTIGHT} threshold.
+    Gradients are in atomic units.
+  }\label{Tab:GradAccu}
+  \begin{tabular}{lcccc}
+  \toprule
+  &\multicolumn{2}{c}{(HF)$_6$}&\multicolumn{2}{c}{(MgO)$_{32}$}\\
+  \cline{2-5}
+  Threshold 
+  & Atomic\footnote[1]{Gradient on the F atom along the periodic axis.}
+  & Cell\footnote[2]{Component $\partial E/\partial a_x$.}
+  & Atomic\footnote[3]{Gradient on the displaced Mg atom along the $x$-axis.}
+  & Cell$^b$\\
+  \hline
+  {\tt TIGHT}     & $-$0.047916 & $-$0.024155 & 0.092434 & $-$0.128109 \\
+  {\tt VERYTIGHT} & $-$0.047941 & $-$0.024230 & 0.092436 & $-$0.128074 \\
+  \hline		  
+  Numerical       & $-$0.047941 & $-$0.024230 & 0.092435 & $-$0.128089 \\
+  \botrule
+  \end{tabular}
+\end{table}
+
 \clearpage
+
+\begin{table}[h]
+  \centering
+  \caption{\protect
+    Progression of the Hartree-Fock $\Gamma$-point cell 
+    parameter $a_0$, bond length $d$ and total energy $E$ for (HF)$_n$ chains
+    using the periodic RHF-MIC/6-31G level of theory and the {\tt TIGHT} thresholds.
+    Bond lengths and cell parameters are in Angstrom and energies in atomic units.
+  }\label{Tab:HF-n}
+  \begin{tabular}{lrllc}
+    \toprule
+    & $n$ & $\;\;\;a_0$ & $\quad\; d$ & $E/n$ \\
+    \hline
+    {\sc MondoSCF}\footnote[1]{$\Gamma$-point.}
+    &                1  & 4.5449 & 0.9201 & $-$99.9852789 \\
+    &                2  & 2.7960 & 0.9257 & $-$99.9958044 \\
+    &                4  & 2.4838 & 0.9440 & $-$100.002065 \\
+    &                6  & 2.4746 & 0.9453 & $-$100.002213 \\
+    &                8  & 2.4745 & 0.9453 & $-$100.002217 \\
+    &               10  & 2.4745 & 0.9453 & $-$100.002217 \\
+    \hline
+    {\sc Polopt}\footnote[2]{32 $k$-points taken from~\cite{DJacquemin99B}.} 
+    & 1 & 2.4742 & 0.9452  & $-$\\
+    {\sc Crystal03}\footnote[3]{32 $k$-points, ITOL: 10 12 10 16 16 and $\Delta E=10^{-12}$.}
+    & 1 & 2.4751 & 0.9451 & $-$100.002205\\
+    \botrule
+  \end{tabular}
+\end{table}
+
+\clearpage
+
+\begin{table}[h]
+  \centering
+  \caption{\protect
+    Progression of the Hartree-Fock $\Gamma$-point cell parameters, 
+    bond lengths, bond angles, dihedral angles 
+    and total energy for (urea)$_n$ using the periodic RHF-MIC/6-21G* level of theory 
+    and the {\tt TIGHT} thresholds. 
+    Lengths, angles and energies are in Angstrom, degrees and atomic units respectively.
+  }\label{Tab:Urea}
+  \begin{tabular}{lccc}
+    \toprule
+    &\multicolumn{2}{c}{\sc{MondoSCF}\footnote[1]{$\Gamma$-point.}}
+    &\multicolumn{1}{c}{\sc{Crystal03}\footnote[2]{$2\times 2\times 2$ $k$-points.}} \\
+    \hline
+    $n$          &            16 &            54 &             2 \\
+    $a_0$        &         5.630 &         5.636 &         5.652 \\
+    $c_0$        &         4.660 &         4.649 &         4.678 \\                    
+    $E/n$        & $-$223.853403 & $-$223.853869 & $-$223.842647 \\%
+    &\multicolumn{3}{c}{Bond lengths}    \\
+    CO           &         1.246 &         1.246 &         1.243 \\
+    CN           &         1.334 &         1.334 &         1.333 \\
+    NH$_1$       &         0.999 &         0.998 &         0.997 \\%cis-O
+    NH$_2$       &         0.998 &         0.998 &         0.996 \\%trans-O
+    &\multicolumn{3}{c}{Bond angles}     \\
+    OCN          &         121.7 &         121.7 &         121.7 \\
+    CNH$_1$      &         119.5 &         119.6 &         119.3 \\%cis-O
+    CNH$_2$      &         120.6 &         120.5 &         120.6 \\%trans-O
+    &\multicolumn{3}{c}{Dihedral angles} \\
+    OCNH$_1$     &           0.0 &           0.0 &           0.0 \\%cis-O
+    OCNH$_2$     &         180.0 &         180.0 &         180.0 \\%trans-O
+    NCNH$_1$     &         180.0 &         180.0 &         180.0 \\
+    \botrule
+  \end{tabular}
+\end{table}
+
+\clearpage
+
+\begin{table}[h]
+  \centering
+  \caption{\protect
+    Progression of the Hartree-Fock $\Gamma$-point cell parameter $a_0$,
+    total energy $E$ and fractional coordinate of the oxygen $f_O$ in the primitive cell
+    for (MgO)$_n$ using the periodic 
+    RHF-MIC/8-61G/8-51G level of theory and the {\tt TIGHT} thresholds. 
+    cell parameters and energies are in Angstrom and atomic unit respectively.
+  }\label{Tab:MgO}
+  \begin{tabular}{lrccc}
+  \toprule
+  & $n$ & $a_0$ & $E/n$ & $f_O$ \\
+  \hline
+    {\sc MondoSCF}\footnote[1]{$\Gamma$-point.}
+    &  4  & 4.365 & $-$274.616533 & 0.4882 \\% 4.365-274.616533623575FullOpt 2.131
+    & 32  & 4.192 & $-$274.664119 & 0.5000 \\% 8.385-274.664118754687FullOpt 2.096
+    & 108 & 4.192 & $-$274.664299 & 0.5000 \\%12.575-274.664299043364FullOpt 2.096
+  \hline
+    {\sc Crystal03}\footnote[2]{$8\times 8\times 8$ $k$-points.} 
+    &  1 & 4.192 & $-$274.664239 & $1/2$ \\%-274.664239121540
+  \botrule
+  \end{tabular}
+\end{table}
+
+\clearpage
+
+\begin{table}[t]
+  \centering
+  \caption{\protect
+    Progression of the Hartree-Fock $\Gamma$-point average norm of the gradients
+    on the Mg and O atoms for (MgO)$_n$ using the periodic 
+    RHF-MIC/8-61G/8-51G level of theory and the {\tt TIGHT} thresholds. 
+    Gradients are in atomic units. 
+  }\label{Tab:GradMgO}
+  \begin{tabular}{rcc}
+  \toprule
+   $n$ & Mg & O \\
+  \hline
+         4 & 0.0130609 & 0.0248789 \\% 0.007540742 & 0.014363863 \\
+        32 & 0.0000268 & 0.0000439 \\% 0.000015481 & 0.000025388 \\
+       108 & 0.0000004 & 0.0000004 \\% 0.000000283 & 0.000000237 \\
+  \botrule
+  \end{tabular}
+\end{table}
+
+\clearpage
+
 
 \begin{figure}[h]
 \begin{center}
 \bf  FIGURES\\[1.cm]
 \end{center}
 
-%\caption{\protect  Total CPU time of the fifth CPSCF iteration for the water cluster sequence with
-%         the 6-31G and 6-31G** basis sets and the {\tt GOOD} and {\tt TIGHT} numerical thresholds (see text)
-%         controlling numerical precision of the result.  The lines are fits to the last three and four points, respectively.}\label{scaling}
+   FIG. 1: Convergence of the $\Gamma$-point relative energy, with and without the MIC,
+    for the (HF)$_n$ chains with increasing cell length. The cell parameter
+    $a_0=2.4745$\AA~and bond length $d=0.9453$\AA~were held fixed.
+    Also shown is the absolute convergence of the atomic and cell forces for a slightly contracted
+    bond length (see text for more detail).
+    Calculations were performed at the RHF-MIC/6-31G level of theory with
+    the {\tt TIGHT} thresholds.\\
+   FIG. 2: Convergence of the $\Gamma$-point relative energy without the MIC
+    for the (HF)$_n$ chains ($n$ ranges from 1 to 31) with respect to cell length.
+    The cell parameter $a_0=2.4745$\AA~and bond length $d=0.9453$\AA~were held fixed.
+    Calculations were performed at the RHF-MIC/6-31G level of theory and the {\tt TIGHT} thresholds.\\
 
 \end{figure}
 
 \clearpage
 
+Figure 1, V.~Weber and M.~Challacombe, Journal of Chemical Physics \\[1.cm]
+
+\begin{figure}[h]
+  \caption{Convergence of the $\Gamma$-point relative energy, with and without the MIC,
+    for the (HF)$_n$ chains with increasing cell length. The cell parameter 
+    $a_0=2.4745$\AA~and bond length $d=0.9453$\AA~were held fixed. 
+    Also shown is the absolute convergence of the atomic and cell forces for a slightly contracted 
+    bond length (see text for more detail).
+    Calculations were performed at the RHF-MIC/6-31G level of theory with 
+    the {\tt TIGHT} thresholds.}\label{Fig:CnvgEnergy}
+
+  \begin{center}
+    \resizebox*{3.6in}{!}{\includegraphics[angle=-90.00]{./DATA/HF_Energy_Forces_cnvg_4.ps}}
+  \end{center}
+
+\end{figure}
 
 \clearpage
 
-\begin{center}
-Figure 1, V.~Weber and M.~Challacombe \\[1.cm]
-%\resizebox*{5in}{!}{\includegraphics{figure1.eps}}
-\end{center}
+Figure 2, V.~Weber  and M.~Challacombe, Journal of Chemical Physics \\[1.cm]
 
-\clearpage
+\begin{figure}[h]
+  \caption{Convergence of the $\Gamma$-point relative energy without the MIC
+    for the (HF)$_n$ chains ($n$ ranges from 1 to 31) with respect to cell length. 
+    The cell parameter $a_0=2.4745$\AA~and bond length $d=0.9453$\AA~were held fixed. 
+    Calculations were performed at the RHF-MIC/6-31G level of theory and the {\tt TIGHT} thresholds.}\label{Fig:CnvgEnergyNoMIC}
 
-\begin{center}
-Figure 2, V.~Weber  and M.~Challacombe \\[1.cm]
-%\resizebox*{7in}{!}{\includegraphics{figure2.eps}}
-\end{center}
+  \begin{center}
+    \resizebox*{3.6in}{!}{\includegraphics[angle=-90.00]{./DATA/HF_Energy_cnvg_NoMIC.ps}}
+  \end{center}
 
-\clearpage
-
-\begin{center}
-Figure 3, V.~Weber  and M.~Challacombe \\[1.cm]
-%\resizebox*{7in}{!}{\includegraphics{figure2.eps}}
-\end{center}
-
-\clearpage
-
-\begin{center}
-Figure 4, V.~Weber  and M.~Challacombe \\[1.cm]
-%\resizebox*{7in}{!}{\includegraphics{figure2.eps}}
-\end{center}
-
-\clearpage
-
-\begin{center}
-Figure 6, V.~Weber  and M.~Challacombe \\[1.cm]
-%\resizebox*{7in}{!}{\includegraphics{figure2.eps}}
-\end{center}
-
-\clearpage
-
-
-\begin{center}
-Figure 7, V.~Weber  and M.~Challacombe \\[1.cm]
-%\resizebox*{7in}{!}{\includegraphics{figure2.eps}}
-\end{center}
-
-\clearpage
-
-\begin{center}
-Figure 8, V.~Weber  and M.~Challacombe \\[1.cm]
-%\resizebox*{7in}{!}{\includegraphics{figure2.eps}}
-\end{center}
-
+\end{figure}
 
 } %commentoutB
 
