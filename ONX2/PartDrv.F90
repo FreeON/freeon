@@ -162,7 +162,7 @@ CONTAINS
        !
        ! It is no more the first relative iteration.
        IF(IsFirst) THEN
-          iONXPartExist=1
+          iONXPartExist=NPrc
           CALL Put(iONXPartExist,'ONXPartExist')
        ENDIF
     CASE('GEO')
@@ -172,7 +172,7 @@ CONTAINS
        !
        ! It is no more the first relative iteration.
        IF(IsFirst) THEN
-          iGONXPartExist=1
+          iGONXPartExist=NPrc
           CALL Put(iGONXPartExist,'GONXPartExist')
        ENDIF
     CASE DEFAULT

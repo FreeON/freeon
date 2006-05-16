@@ -112,9 +112,9 @@ PROGRAM ONX2
      CALL New(GPart,NPrc*4,0)
      iONXPartExist=-1000;iGONXPartExist=-1000;
      CALL Get(iONXPartExist ,'ONXPartExist' )
-     IF(iONXPartExist .EQ.1) CALL Get(OPart,'ONXPart')
+     IF(iONXPartExist .EQ.NPrc) CALL Get(OPart,'ONXPart')
      CALL Get(iGONXPartExist,'GONXPartExist')
-     IF(iGONXPartExist.EQ.1) CALL Get(GPart,'GONXPart')
+     IF(iGONXPartExist.EQ.NPrc) CALL Get(GPart,'GONXPart')
      !write(*,*) 'iONXPartExist' ,iONXPartExist,MyID
      !write(*,*) 'iGONXPartExist',iGONXPartExist,MyID
 #endif
@@ -127,12 +127,12 @@ PROGRAM ONX2
      HDF_CurrentID=H5GroupID
      ! Put the partition in the new hdf if needed
 #ifdef ONX2_PARALLEL
-     IF(iONXPartExist.EQ.1) THEN
+     IF(iONXPartExist.EQ.NPrc) THEN
         CALL Put(iONXPartExist ,'ONXPartExist' )
         CALL Put(OPart,'ONXPart')
         IF(MyID.EQ.0)WRITE(*,*) 'ONX2: Successfully load/save the ONX Restart partition!'
      ENDIF
-     IF(iGONXPartExist.EQ.1) THEN
+     IF(iGONXPartExist.EQ.NPrc) THEN
         CALL Put(iGONXPartExist,'GONXPartExist')
         CALL Put(GPart,'GONXPart')
         IF(MyID.EQ.0)WRITE(*,*) 'ONX2: Successfully load/save the GONX Restart partition!'
