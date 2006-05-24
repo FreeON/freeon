@@ -147,6 +147,34 @@ CONTAINS
           Models(Location(I))=PURE_B88_PW91
        ENDDO
     ENDIF
+    ! Pure HCTH93 GGA exchange-correlation 
+    IF(OptKeyLocQ(Inp,MODEL_OPTION,MODEL_HCTH93,MaxSets,NLoc,Location))THEN
+       NModls=NModls+NLoc
+       DO I=1,NLoc
+          Models(Location(I))=PURE_HCTH93
+       ENDDO
+    ENDIF
+    ! Pure HCTH120 GGA exchange-correlation 
+    IF(OptKeyLocQ(Inp,MODEL_OPTION,MODEL_HCTH120,MaxSets,NLoc,Location))THEN
+       NModls=NModls+NLoc
+       DO I=1,NLoc
+          Models(Location(I))=PURE_HCTH120
+       ENDDO
+    ENDIF
+    ! Pure HCTH147 GGA exchange-correlation 
+    IF(OptKeyLocQ(Inp,MODEL_OPTION,MODEL_HCTH147,MaxSets,NLoc,Location))THEN
+       NModls=NModls+NLoc
+       DO I=1,NLoc
+          Models(Location(I))=PURE_HCTH147
+       ENDDO
+    ENDIF
+    ! Pure HCTH407 GGA exchange-correlation 
+    IF(OptKeyLocQ(Inp,MODEL_OPTION,MODEL_HCTH407,MaxSets,NLoc,Location))THEN
+       NModls=NModls+NLoc
+       DO I=1,NLoc
+          Models(Location(I))=PURE_HCTH407
+       ENDDO
+    ENDIF
     ! Hybrid B3LYP/VWN3 exchange-correlation 
     IF(OptKeyLocQ(Inp,MODEL_OPTION,MODEL_B3LYP_VWN3,MaxSets,NLoc,Location))THEN
        NModls=NModls+NLoc

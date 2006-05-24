@@ -26,6 +26,10 @@ MODULE Functionals
    CHARACTER(LEN=*),  PARAMETER :: MODEL_BLYP         ='BLYPxc'
    CHARACTER(LEN=*),  PARAMETER :: MODEL_BPW91        ='BPW91xc'
    CHARACTER(LEN=*),  PARAMETER :: MODEL_PBEPBE       ='PBExc'
+   CHARACTER(LEN=*),  PARAMETER :: MODEL_HCTH93       ='HCTH93xc'
+   CHARACTER(LEN=*),  PARAMETER :: MODEL_HCTH120      ='HCTH120xc'
+   CHARACTER(LEN=*),  PARAMETER :: MODEL_HCTH147      ='HCTH147xc'
+   CHARACTER(LEN=*),  PARAMETER :: MODEL_HCTH407      ='HCTH407xc'
 !  Hybrid exchange-correlation functionals
    CHARACTER(LEN=*),  PARAMETER :: MODEL_B3LYP_VWN3   ='B3LYP'
    CHARACTER(LEN=*),  PARAMETER :: MODEL_B3LYP_VWN5   ='B3LYP/VWN5'
@@ -52,6 +56,10 @@ MODULE Functionals
    INTEGER, PARAMETER :: PURE_B88_PW91    =43083039 ! B88 exchange with PW91 correlation
    INTEGER, PARAMETER :: PURE_PW91_LYP    =42034802 ! PW91 exchange with LYP correlation
    INTEGER, PARAMETER :: PURE_PW91_PW91   =41243253 ! PW91 exchange with PW91 correlation
+   INTEGER, PARAMETER :: PURE_HCTH93      =41243260 ! HCTH Handy's family functional
+   INTEGER, PARAMETER :: PURE_HCTH120     =41243261 !
+   INTEGER, PARAMETER :: PURE_HCTH147     =41243262 !
+   INTEGER, PARAMETER :: PURE_HCTH407     =41243263 !
 !-----------------------------------------------------------------------------------------------------
 !  Avoid under and over flows
    REAL(DOUBLE), PARAMETER :: NoNAN=1.D-30
@@ -285,12 +293,58 @@ MODULE Functionals
                dEdGam( 1:   NGrid)=Buf(N3:N3+NGrid)+dEdGam( 1:   NGrid)
                dEdGam(N1:N1+NGrid)=Buf(N4:N4+NGrid)+dEdGam(N1:N1+NGrid)
                dEdGam(N2:N2+NGrid)=Buf(N5:N5+NGrid)+dEdGam(N2:N2+NGrid)
-               !CALL DAXPY(NGrid,1D0,Buf( 1),1,     E( 1),1)
-               !CALL DAXPY(NGrid,1D0,Buf(N1),1,dEdRho( 1),1)
-               !CALL DAXPY(NGrid,1D0,Buf(N2),1,dEdRho(N1),1)
-               !CALL DAXPY(NGrid,1D0,Buf(N3),1,dEdGam( 1),1)
-               !CALL DAXPY(NGrid,1D0,Buf(N4),1,dEdGam(N1),1)
-               !CALL DAXPY(NGrid,1D0,Buf(N5),1,dEdGam(N2),1)
+            ENDIF
+         CASE(PURE_HCTH93)
+            IF(NSDen.EQ.1)THEN
+               Rho(1:NGrid)=2D0*Rho(1:NGrid)
+               AbsGradRho2(1:NGrid)=4D0*AbsGradRho2(1:NGrid)
+               CALL rks_xc_hcth(1,NGrid,Rho(1),AbsGradRho2(1), &
+                    &  E(1),dEdRho(1),dEdGam(1), &
+                    &  0D0,0D0,0D0)
+            ELSEIF(NSDen.EQ.3)THEN
+               CALL uks_xc_hcth(1,NGrid,Rho(1),Rho(N1),AbsGradRho2(1),AbsGradRho2(N1),AbsGradRho2(N2), &
+                    &  E(1),dEdRho(1),dEdRho(N1),dEdGam(1),dEdGam(N1),dEdGam(N2), &
+                    &  0D0,0D0,0D0,0D0,0D0,0D0,0D0,0D0,0D0, &
+                    &  0D0,0D0,0D0,0D0,0D0,0D0)
+            ENDIF
+         CASE(PURE_HCTH120)
+            IF(NSDen.EQ.1)THEN
+               Rho(1:NGrid)=2D0*Rho(1:NGrid)
+               AbsGradRho2(1:NGrid)=4D0*AbsGradRho2(1:NGrid)
+               CALL rks_xc_hcth120(1,NGrid,Rho(1),AbsGradRho2(1), &
+                    &  E(1),dEdRho(1),dEdGam(1), &
+                    &  0D0,0D0,0D0)
+            ELSEIF(NSDen.EQ.3)THEN
+               CALL uks_xc_hcth120(1,NGrid,Rho(1),Rho(N1),AbsGradRho2(1),AbsGradRho2(N1),AbsGradRho2(N2), &
+                    &  E(1),dEdRho(1),dEdRho(N1),dEdGam(1),dEdGam(N1),dEdGam(N2), &
+                    &  0D0,0D0,0D0,0D0,0D0,0D0,0D0,0D0,0D0, &
+                    &  0D0,0D0,0D0,0D0,0D0,0D0)
+            ENDIF
+         CASE(PURE_HCTH147)
+            IF(NSDen.EQ.1)THEN
+               Rho(1:NGrid)=2D0*Rho(1:NGrid)
+               AbsGradRho2(1:NGrid)=4D0*AbsGradRho2(1:NGrid)
+               CALL rks_xc_hcth147(1,NGrid,Rho(1),AbsGradRho2(1), &
+                    &  E(1),dEdRho(1),dEdGam(1), &
+                    &  0D0,0D0,0D0)
+            ELSEIF(NSDen.EQ.3)THEN
+               CALL uks_xc_hcth147(1,NGrid,Rho(1),Rho(N1),AbsGradRho2(1),AbsGradRho2(N1),AbsGradRho2(N2), &
+                    &  E(1),dEdRho(1),dEdRho(N1),dEdGam(1),dEdGam(N1),dEdGam(N2), &
+                    &  0D0,0D0,0D0,0D0,0D0,0D0,0D0,0D0,0D0, &
+                    &  0D0,0D0,0D0,0D0,0D0,0D0)
+            ENDIF
+         CASE(PURE_HCTH407)
+            IF(NSDen.EQ.1)THEN
+               Rho(1:NGrid)=2D0*Rho(1:NGrid)
+               AbsGradRho2(1:NGrid)=4D0*AbsGradRho2(1:NGrid)
+               CALL rks_xc_hcth407(1,NGrid,Rho(1),AbsGradRho2(1), &
+                    &  E(1),dEdRho(1),dEdGam(1), &
+                    &  0D0,0D0,0D0)
+            ELSEIF(NSDen.EQ.3)THEN
+               CALL uks_xc_hcth407(1,NGrid,Rho(1),Rho(N1),AbsGradRho2(1),AbsGradRho2(N1),AbsGradRho2(N2), &
+                    &  E(1),dEdRho(1),dEdRho(N1),dEdGam(1),dEdGam(N1),dEdGam(N2), &
+                    &  0D0,0D0,0D0,0D0,0D0,0D0,0D0,0D0,0D0, &
+                    &  0D0,0D0,0D0,0D0,0D0,0D0)
             ENDIF
          CASE(PURE_PBE_PBE)
             IF(NSDen.NE.1)CALL Halt('This functional is not available for unrestricted! '//IntToChar(ModelChem))
