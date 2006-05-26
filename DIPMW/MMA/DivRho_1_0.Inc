@@ -1,1 +1,5 @@
-        RhoSum(1)  = Xpt*(Node%Co(1) + RQx*TwoZeta*Node%Co(2) + RQy*TwoZeta*Node%Co(3) + RQz*TwoZeta*Node%Co(4)) + RhoSum(1)
+        W(1) = Node%Co(1)*LamX(0)*LamY(0)*LamZ(0)
+        W(2) = -1.D0*Node%Co(2)*LamX(1)*LamY(0)*LamZ(0)
+        W(3) = -1.D0*Node%Co(3)*LamX(0)*LamY(1)*LamZ(0)
+        W(4) = -1.D0*Node%Co(4)*LamX(0)*LamY(0)*LamZ(1) + RhoSum(1)
+        RhoSum(1)  = W(1) + W(2) + W(3) + W(4)

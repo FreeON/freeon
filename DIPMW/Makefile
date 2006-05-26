@@ -35,18 +35,19 @@ EXTRA_INCLUDES=-I$(MONDO_HOME)/MondoMods/MMA/Functionals
 #
 CommonObjs = DIPMWThresholds.o RhoTree.o  
 #
-DipMWObjs   = $(CommonObjs) DIPMWTree.o DIPMWavelet.o TreeWalkDIPMW.o #KxcGenPIGW.o 
+DipMWObjs   = $(CommonObjs) DIPMWTree.o TreeWalkDIPMW.o KxcGenDIPMW.o DIPMWavelet.o
+XCFObjs     = $(CommonObjs) DIPMWTree.o TreeWalkDIPMW.o XCForceDIPMW.o dXCBlokDIPMW.o
 #
 ReleaseFiles= DIPMWThresholds.x RhoTree.x  
 #
-all:	DipMW
+all:	DipMW XCFDipMW
 #
 release:clean $(ReleaseFiles)
 #
 purge:	clean
 	rm -f $(REMOVESRCE)
 #
-clean:	CDipMW
+clean:	CDipMW CXCFDipMW
 	rm -f $(REMOVEMISC) $(REMOVEMODS)
 	rm -f \#*
 	rm -f *~
@@ -59,8 +60,19 @@ DipMW:	$(DipMWObjs)
 CDipMW:	
 	rm -f $(MONDO_EXEC)/DipMW
 #-----------------------------------------------------------------------
+#-----------------------------------------------------------------------
+XCFDipMW: $(XCFObjs)
+	  $(LD) $(LDFLAGS) XCForceDIPMW $(XCFObjs) $(F90_LIBRARIES) $(LAPACK)
+	  mv XCForceDIPMW $(MONDO_EXEC)
+#
+CXCFDipMW:	
+	rm -f $(MONDO_EXEC)/XCForceDIPMW
+#-----------------------------------------------------------------------
 RhoTree.o:	 $(MONDO_LIB)/libMondoMods.a
 DIPMWTree.o:     $(MONDO_LIB)/libMondoMods.a DIPMWThresholds.o RhoTree.o
-TreeWalkDIPMW.o: $(MONDO_LIB)/libMondoMods.a DIPMWThresholds.o RhoTree.o PIGWTree.o
-DIPMWavelet.o:   $(MONDO_LIB)/libMondoMods.a DIPMWThresholds.o RhoTree.o DIPMWTree.o TreeWalkDIPMW.o
+TreeWalkDIPMW.o: $(MONDO_LIB)/libMondoMods.a DIPMWThresholds.o RhoTree.o DIPMWTree.o
+dXCBlockDIPMW.o: $(MONDO_LIB)/libMondoMods.a DIPMWThresholds.o RhoTree.o DIPMWTree.o
+DIPMWavelet.o:   $(MONDO_LIB)/libMondoMods.a DIPMWThresholds.o RhoTree.o DIPMWTree.o KxcGenDIPMW.o TreeWalkDIPMW.o
+XCForceDIPMW.o:  $(MONDO_LIB)/libMondoMods.a DIPMWThresholds.o RhoTree.o DIPMWTree.o TreeWalkDIPMW.o dXCBlokDIPMW.o
+
 
