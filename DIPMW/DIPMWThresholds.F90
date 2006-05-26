@@ -18,7 +18,7 @@ MODULE DIPMWThresholds
    CONTAINS
       SUBROUTINE SetLocalThresholdsDIPMW(Tau)
         REAL(DOUBLE) :: Tau
-        TauRho  = 1.D-14     ! Reset rho overlap threshold
+        TauRho  = Tau*1.D-3  ! Reset rho overlap threshold
         TauDIPMW= Tau*1.D0   ! Deterines error of Wavelet representation
       END SUBROUTINE SetLocalThresholdsDIPMW
 END MODULE

@@ -52,16 +52,19 @@ MODULE RhoTree
    REAL(DOUBLE),DIMENSION(:),Allocatable :: RList       ! Bisection array  
    REAL(DOUBLE),DIMENSION(:),Allocatable :: Zeta        ! Exponent list
    REAL(DOUBLE),DIMENSION(:),Allocatable :: Ext         ! Extent array
+!-----------!
    CONTAINS !
 !=================================================================================
 !     Build the RhoTree from Rho in HGTF array form 
 !=================================================================================
       SUBROUTINE RhoToTree(Args)
          TYPE(ARGMT)               :: Args
-         INTEGER                   :: Status,K,I
+         INTEGER                   :: NSDen,Status,K,I
 !--------------------------------------------------------------------------------
 !        Initialize the density
          CALL InitRho(Args)
+         NSDen=Rho%NSDen
+write(*,*) 'Rho%NSDen',Rho%NSDen
 !        Initialize counters
          RhoNodes=0
          RhoLevel=0
@@ -214,7 +217,7 @@ MODULE RhoTree
 !=====================================================================================
       SUBROUTINE FillRhoLeaf(Node)
          TYPE(RhoNode), POINTER :: Node
-         INTEGER                :: I,IQ,IC,J,K,KQ,KC,L,B,E,N,NQ,NC,LMNLen,LTmp,Status        
+         INTEGER                :: I,IQ,IC,J,K,KQ,KC,L,B,E,N,NQ,NC,LMNLen,LTmp,Status,iSDen
          REAL(DOUBLE) :: RhoSum
          Interface 
             SUBROUTINE DblIntSort77(N,X,Y,Ordr)
@@ -245,10 +248,13 @@ MODULE RhoTree
          Node%Qz=Rho%Qz%D(KQ)
 !        Allocate HGTF coefficients array
          LMNLen=LHGTF(Node%Ell)
-         ALLOCATE(Node%Co(1:LMNLen),STAT=Status)
-         CALL IncMem(Status,0,LMNLen)
+         ALLOCATE(Node%Co(1:LMNLen*Rho%NSDen),STAT=Status)!<<< SPIN
+         CALL IncMem(Status,0,LMNLen*Rho%NSDen)
 !        Transfer data in
-         Node%Co(1:LMNLen)=Rho%Co%D(KC:KC+LMNLen-1)
+         DO iSDen=1,Rho%NSDen
+            CALL DCOPY(LMNLen,Rho%Co%D(KC+(iSDen-1)*Rho%NCoef),1,Node%Co(1+(iSDen-1)*LMNLen),1)
+!old            Node%Co(1:LMNLen)=Rho%Co%D(KC:KC+LMNLen-1)
+         ENDDO
       END SUBROUTINE FillRhoLeaf
 !==========================================================================
 !     Initialize a new RhoNode
@@ -316,7 +322,7 @@ MODULE RhoTree
                  FORM='UNFORMATTED',ACCESS='SEQUENTIAL')
 #endif
          ENDIF
-         Read(UNIT=Seq,Err=202,IOSTAT=IOS)Rho%NExpt,Rho%NDist,Rho%NCoef
+         Read(UNIT=Seq,Err=202,IOSTAT=IOS)Rho%NSDen,Rho%NExpt,Rho%NDist,Rho%NCoef!<<< SPIN
          CALL New(Rho%NQ  ,Rho%NExpt)
          CALL New(Rho%OffQ,Rho%NExpt)
          CALL New(Rho%OffR,Rho%NExpt)
@@ -325,7 +331,7 @@ MODULE RhoTree
          CALL New(Rho%Qx,  Rho%NDist)
          CALL New(Rho%Qy,  Rho%NDist)
          CALL New(Rho%Qz,  Rho%NDist)
-         CALL New(Rho%Co,  Rho%NCoef)
+         CALL New(Rho%Co,  Rho%NCoef*Rho%NSDen)!<<< SPIN
          Read(UNIT=Seq,Err=202,IOSTAT=IOS)(Rho%NQ%I  (i),i=1,Rho%NExpt)
          Read(UNIT=Seq,Err=202,IOSTAT=IOS)(Rho%OffQ%I(i),i=1,Rho%NExpt)
          Read(UNIT=Seq,Err=202,IOSTAT=IOS)(Rho%OffR%I(i),i=1,Rho%NExpt)
@@ -334,7 +340,7 @@ MODULE RhoTree
          Read(UNIT=Seq,Err=202,IOSTAT=IOS)(Rho%Qx%D  (i),i=1,Rho%NDist)
          Read(UNIT=Seq,Err=202,IOSTAT=IOS)(Rho%Qy%D  (i),i=1,Rho%NDist)
          Read(UNIT=Seq,Err=202,IOSTAT=IOS)(Rho%Qz%D  (i),i=1,Rho%NDist)
-         Read(UNIT=Seq,Err=202,IOSTAT=IOS)(Rho%Co%D  (i),i=1,Rho%NCoef)
+         Read(UNIT=Seq,Err=202,IOSTAT=IOS)(Rho%Co%D  (i),i=1,Rho%NCoef*Rho%NSDen)!<<< SPIN
          Close(UNIT=Seq,STATUS='KEEP')
 !        ALLOCATE global arrays
          ALLOCATE(Qdex(1:Rho%NDist),STAT=Status)
@@ -433,7 +439,4 @@ MODULE RhoTree
            CALL Halt(' Logical error 3 in BinarySearch ')
          ENDIF
       END FUNCTION BinarySearch
-!
-!
-!
 END MODULE

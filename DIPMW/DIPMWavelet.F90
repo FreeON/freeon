@@ -17,9 +17,10 @@ PROGRAM DIPMWavelet
   USE Thresholding
   USE RhoTree
   USE Functionals
-  USE BoundingBox
+  USE BoundingBox 
   USE DIPMWThresholds
   USE DIPMWTree
+  USE KxcGenDIPMW
 !
   IMPLICIT NONE
   INTEGER                        :: I,J,K
@@ -27,7 +28,7 @@ PROGRAM DIPMWavelet
   TYPE(BCSR)                     :: Kxc
   TYPE(BCSR)                     :: T1
   TYPE(TIME)                     :: TimeRhoToTree,TimeDIPMWTree,TimeMakeKxc
-  REAL(DOUBLE)                   :: Electrons
+  REAL(DOUBLE)                   :: Electrons,TmpDbl,Error
   CHARACTER(LEN=3)               :: SCFCycle
   CHARACTER(LEN=4),PARAMETER     :: Prog='DIPMW'
   CHARACTER(LEN=12),PARAMETER    :: Sub1='DIPMW.RhoTree' 
@@ -38,9 +39,14 @@ PROGRAM DIPMWavelet
 ! Macro the start up
   CALL StartUp(Args,Prog,Serial_O=.FALSE.)
 ! Get basis set, geometry, thresholds and model type
+  CALL Get(BS,CurBase)
   CALL Get(GM,CurGeom)
 ! Set local integration thresholds 
   CALL SetLocalThresholdsDIPMW(Thresholds%Cube)
+  TauDIPMW = 1.0D-3
+  TauRho   = TauDIPMW*1.D-3
+  WRITE(*,*) 'TauDIPMW = ',TauDIPMW
+  WRITE(*,*) 'TauRho   = ',TauRho
   CALL SetAACoef()
 ! Begin local performance accumulator for grid generation
   CALL Elapsed_Time(TimeRhoToTree,'Init')
@@ -49,28 +55,30 @@ PROGRAM DIPMWavelet
   CALL Elapsed_Time(TimeRhoToTree,'Accum')
   WRITE(*,*) "RhoToTree = ",TimeRhoToTree%CPUS,TimeRhoToTree%WALL
 ! Genergate the Wavelet Representation of the XC potential
-  TauDIPMW = 1.D-8
-  TauRho   = TauDIPMW*1.D-4
-  WRITE(*,*) 'TauDIPMW = ',TauDIPMW
   CALL Elapsed_Time(TimeDIPMWTree,'Init')
   CALL DIPMWTree(20)
   CALL Elapsed_Time(TimeDIPMWTree,'Accum')
   WRITE(*,*) "RhoToPIGW = ",TimeDIPMWTree%CPUS,TimeDIPMWTree%WALL
-  IF(.TRUE.) STOP
 ! Allocate Kxc
+  CALL NewBraBlok(BS)
   CALL New(Kxc)
 ! Make the Exchange Corelation Matrix
-!!$  CALL MakeKxcDIPMW(Kxc,PIGWRoot)
+  CALL Elapsed_Time(TimeMakeKxc,'Init')
+  CALL MakeKxcDIPMW(Kxc,PIGWRoot)
+  CALL Elapsed_Time(TimeMakeKxc,'Accum')
+  WRITE(*,*) " TimeMakeKxc = ",TimeMakeKxc%CPUS,TimeMakeKxc%WALL
+!
+  CALL PPrint(Kxc,'Kxc',Unit_O=6)
 ! Delete the RhoTree,PIGWRoot and BraBloks
-!  CALL DeleteDIPMWTree(PIGWRoot)
   CALL DeleteRhoTree(RhoRoot)
-!!$  CALL DeleteBraBlok()
+  CALL DeleteDIPMWTree(PIGWRoot)
+  CALL DeleteBraBlok()
 ! Put Kxc to disk
   CALL Filter(T1,Kxc)
   CALL Put(Kxc,TrixFile('Kxc',Args,0))
 ! Put Exc to Info
-!!$  CALL Put(Exc,'Exc')
-!!$  CALL Put(Exc,'Exc',StatsToChar(Current))
+  CALL Put(XCEnergy,'Exc')
+  CALL Put(XCEnergy,'Exc',StatsToChar(Current))
 ! Printing
   CALL PChkSum(T1,'Kxc['//TRIM(SCFCycl)//']',Prog)
   CALL PPrint( T1,'Kxc['//TRIM(SCFCycl)//']')
