@@ -132,7 +132,7 @@ MODULE ProcessControl
 
       SUBROUTINE Warn(Strng)
          CHARACTER (LEN=*) Strng
-         CHARACTER (LEN=DEFAULT_CHR_LEN) :: Warning
+         CHARACTER (LEN=10*DEFAULT_CHR_LEN) :: Warning
          Warning='... ning Warning  Warning  Warning Wa ...'//Rtrn//TRIM(ADJUSTL(Strng))
          CALL Logger(Warning,.TRUE.)
       END SUBROUTINE Warn
