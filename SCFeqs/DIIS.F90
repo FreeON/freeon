@@ -52,6 +52,11 @@ PROGRAM DIIS
   Damp=MIN(Damp,5D-1)
   !  Max number of equations to keep in DIIS 
   IF(.NOT.OptIntQ(Inp,'DIISDimension',BMax)) BMax=8
+  IF(BMax.GT.DIIS_MAX_MATRIX_SIZE)THEN
+     CALL Warn('Requested DIISDimension greater than DIIS_MAX_MATRIX_SIZE! '//RTRN//&
+          &    'Reseting DIISDimension to DIIS_MAX_MATRIX_SIZE.')
+     BMax=DIIS_MAX_MATRIX_SIZE
+  ENDIF
   CLOSE(Inp)
   !  Allocations
   CALL New(P)
@@ -84,7 +89,7 @@ PROGRAM DIIS
      !write(*,*) 'M',M,' N',N
      CALL New(DIISInfo,2)
      CALL Get(DIISInfo,'diisinfo')
-     CALL New(BTmp,(/20,20/))
+     CALL New(BTmp,(/DIIS_MAX_MATRIX_SIZE,DIIS_MAX_MATRIX_SIZE/))
      CALL Get(BTmp,'diismtrix')
      IF(DIISInfo%I(1).EQ.Args%I%I(2).AND.DIISInfo%I(2).EQ.Args%I%I(3)) THEN
         ! We didn't BS switch or new geom or oda, then build a part of the B matrix.

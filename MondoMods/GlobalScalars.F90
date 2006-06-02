@@ -109,6 +109,7 @@ MODULE GlobalScalars
    REAL(DOUBLE), SAVE      :: TotCh
    INTEGER, SAVE           :: MaxAtmsNode,MaxBlksNode,MaxNon0Node               
    INTEGER, SAVE           :: MaxAtms,MaxBlks,MaxNon0,MaxBlkSize
+   INTEGER, PARAMETER      :: DIIS_MAX_MATRIX_SIZE=25
 !-------------------------------------------------  
 !  Memory managment
 ! 

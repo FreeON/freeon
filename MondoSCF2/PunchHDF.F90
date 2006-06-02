@@ -125,7 +125,7 @@ CONTAINS
        IntVect%I=0
        CALL Put(IntVect,'diisinfo')
        CALL Delete(IntVect)
-       CALL New(DblMat,(/20,20/))
+       CALL New(DblMat,(/DIIS_MAX_MATRIX_SIZE,DIIS_MAX_MATRIX_SIZE/))
        DblMat%D=Zero
        CALL Put(DblMat,'diismtrix')
        CALL Delete(DblMat)
@@ -349,9 +349,9 @@ CONTAINS
                                 Thresholds%Dist,MinExpt,G%NElec,MaxCell_O=MaxCell)
        CALL New_CellSet_Sphere2(CS_Out,G%PBC%AutoW%I,G%PBC%BoxShape%D,'Overlap',     &
                                 Thresholds%TwoE,MinExpt,G%NElec,MaxCell_O=MaxCell)
-       WRITE(*,*)' USING NEW CELL SET:'
-       WRITE(*,*)' Pentrat Cells = ',CS_In%NCells
-       WRITE(*,*)' Overlap Cells = ',CS_Out%NCells
+!       WRITE(*,*)' USING NEW CELL SET:'
+!       WRITE(*,*)' Pentrat Cells = ',CS_In%NCells
+!       WRITE(*,*)' Overlap Cells = ',CS_Out%NCells
     ENDIF
 !
     CALL Sort_CellSet(CS_IN)
