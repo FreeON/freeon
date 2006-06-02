@@ -303,7 +303,7 @@ MODULE SetXYZ
                      STOP 'Set_BCSR_EQ_RNK2'
                   ENDIF
                   !CALL BlockToBlock(MA,NA,OI,OJ,A%D,B%MTrix%D(Q:))
-                  CALL BlockToBlock_(MA,NA,OI,OJ,A%D(1,1),B%MTrix%D(Q))
+                  CALL BlockToBlock_(MA,NA,OI,OJ,A,B%MTrix%D(Q))
                   Q=Q+MA*NA
                ENDDO
                B%ColPt%I(P)=J               
@@ -321,12 +321,12 @@ MODULE SetXYZ
       SUBROUTINE BlockToBlock_(M,N,OI,OJ,A,B)
         IMPLICIT NONE
         INTEGER :: M,N,OI,OJ
-        REAL(DOUBLE),DIMENSION(NBasF,NBasF) :: A
+        TYPE(DBL_RNK2), INTENT(INOUT) :: A
         REAL(DOUBLE),DIMENSION(M,N) :: B
         INTEGER :: I,J
         DO J=1,N
            DO I=1,M
-              B(I,J)=A(OI+I,OJ+J)
+              B(I,J)=A%D(OI+I,OJ+J)
            ENDDO
         ENDDO
       END SUBROUTINE BlockToBlock_
