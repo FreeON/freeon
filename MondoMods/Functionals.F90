@@ -210,7 +210,6 @@ MODULE Functionals
             CALL XAx_ClSh  (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,One)
             CALL VWN5c_ClSh(NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,One)
          CASE(PURE_PW91_PW91)
-            !IF(NSDen.NE.1)CALL Halt('This functional is not available for unrestricted!'//IntToChar(ModelChem))
             IF(NSDen.EQ.1)THEN
                !CALL PW91x_ClSh(NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,One)
                !CALL Halt(' PW91c is buggy.  Sorry, please try another functional ')
@@ -247,9 +246,6 @@ MODULE Functionals
                E     (1:NGrid)=Buf( 1:   NGrid)
                dEdRho(1:NGrid)=Buf(N1:N1+NGrid)
                dEdGam(1:NGrid)=Buf(N2:N2+NGrid)
-               !CALL DCOPY(NGrid,Buf( 1),1,     E(1),1)
-               !CALL DCOPY(NGrid,Buf(N1),1,dEdRho(1),1)
-               !CALL DCOPY(NGrid,Buf(N2),1,dEdGam(1),1)
                ! Correlation part !
                CALL rks_c_pw91(1,NGrid,Rho(1),AbsGradRho2(1), &
                     &  Buf(1),Buf(N1),Buf(N2), &
@@ -258,9 +254,6 @@ MODULE Functionals
                E     (1:NGrid)=Buf( 1:   NGrid)+     E(1:NGrid)
                dEdRho(1:NGrid)=Buf(N1:N1+NGrid)+dEdRho(1:NGrid)
                dEdGam(1:NGrid)=Buf(N2:N2+NGrid)+dEdGam(1:NGrid)
-               !CALL DAXPY(NGrid,1D0,Buf( 1),1,     E(1),1)
-               !CALL DAXPY(NGrid,1D0,Buf(N1),1,dEdRho(1),1)
-               !CALL DAXPY(NGrid,1D0,Buf(N2),1,dEdGam(1),1)
             ELSEIF(NSDen.EQ.3)THEN
                ! What follow sucks !
                ! Exchange part !
@@ -275,12 +268,6 @@ MODULE Functionals
                dEdGam( 1:   NGrid)=Buf(N3:N3+NGrid)
                dEdGam(N1:N1+NGrid)=Buf(N4:N4+NGrid)
                dEdGam(N2:N2+NGrid)=Buf(N5:N5+NGrid)
-               !CALL DCOPY(NGrid,Buf( 1),1,     E( 1),1)
-               !CALL DCOPY(NGrid,Buf(N1),1,dEdRho( 1),1)
-               !CALL DCOPY(NGrid,Buf(N2),1,dEdRho(N1),1)
-               !CALL DCOPY(NGrid,Buf(N3),1,dEdGam( 1),1)
-               !CALL DCOPY(NGrid,Buf(N4),1,dEdGam(N1),1)
-               !CALL DCOPY(NGrid,Buf(N5),1,dEdGam(N2),1)
                ! Correlation part !
                CALL uks_c_pw91(1,NGrid,Rho(1),Rho(N1),AbsGradRho2(1),AbsGradRho2(N1),AbsGradRho2(N2), &
                     &  Buf(1),Buf(N1),Buf(N2),Buf(N3),Buf(N4),Buf(N5), &
@@ -347,18 +334,71 @@ MODULE Functionals
                     &  0D0,0D0,0D0,0D0,0D0,0D0)
             ENDIF
          CASE(PURE_PBE_PBE)
-            IF(NSDen.NE.1)CALL Halt('This functional is not available for unrestricted! '//IntToChar(ModelChem))
-            CALL PBEx_ClSh (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,One) 
-            CALL PBEc_ClSh (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,One) 
+            IF(NSDen.EQ.1)THEN
+               CALL PBEx_ClSh (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,One) 
+               CALL PBEc_ClSh (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,One) 
+            ELSEIF(NSDen.EQ.3)THEN
+               ! What follow sucks !
+               ! Exchange part !
+               CALL uks_x_pbe(1,NGrid,Rho(1),Rho(N1),AbsGradRho2(1),AbsGradRho2(N1),AbsGradRho2(N2), &
+                    &  Buf(1),Buf(N1),Buf(N2),Buf(N3),Buf(N4),Buf(N5), &
+                    &  0D0,0D0,0D0,0D0,0D0,0D0,0D0,0D0,0D0, &
+                    &  0D0,0D0,0D0,0D0,0D0,0D0)
+               ! Copy the exchange in the mondo arrays !
+               E     ( 1:   NGrid)=Buf( 1:   NGrid)
+               dEdRho( 1:   NGrid)=Buf(N1:N1+NGrid)
+               dEdRho(N1:N1+NGrid)=Buf(N2:N2+NGrid)
+               dEdGam( 1:   NGrid)=Buf(N3:N3+NGrid)
+               dEdGam(N1:N1+NGrid)=Buf(N4:N4+NGrid)
+               dEdGam(N2:N2+NGrid)=Buf(N5:N5+NGrid)
+               ! Correlation part !
+               CALL uks_c_pbe(1,NGrid,Rho(1),Rho(N1),AbsGradRho2(1),AbsGradRho2(N1),AbsGradRho2(N2), &
+                    &  Buf(1),Buf(N1),Buf(N2),Buf(N3),Buf(N4),Buf(N5), &
+                    &  0D0,0D0,0D0,0D0,0D0,0D0,0D0,0D0,0D0, &
+                    &  0D0,0D0,0D0,0D0,0D0,0D0)
+               ! Add the correlation part !
+               E     ( 1:   NGrid)=Buf( 1:   NGrid)+     E( 1:   NGrid)
+               dEdRho( 1:   NGrid)=Buf(N1:N1+NGrid)+dEdRho( 1:   NGrid)
+               dEdRho(N1:N1+NGrid)=Buf(N2:N2+NGrid)+dEdRho(N1:N1+NGrid)
+               dEdGam( 1:   NGrid)=Buf(N3:N3+NGrid)+dEdGam( 1:   NGrid)
+               dEdGam(N1:N1+NGrid)=Buf(N4:N4+NGrid)+dEdGam(N1:N1+NGrid)
+               dEdGam(N2:N2+NGrid)=Buf(N5:N5+NGrid)+dEdGam(N2:N2+NGrid)
+            ENDIF
          CASE(HYBRID_PBE0)
-            IF(NSDen.NE.1)CALL Halt('This functional is not available for unrestricted! '//IntToChar(ModelChem))
+            IF(NSDen.EQ.1)THEN
 !           PBE0 Model, Adamo and Barone: JCP 110, p.6158 (1999)
 !           E^{PBE0}_{xc}=E^{PBE}_{xc}+(1/4)(E^{HF}_x-E^{GGA}_x)
 !                        =E^{PBE}_{c}+(3/4)E^{PBE}_x+(1/4)E^{HF}_x
-            CALL PBEx_ClSh (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,0.75D0) 
-            CALL PBEc_ClSh (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,One)
+               CALL PBEx_ClSh (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,0.75D0) 
+               CALL PBEc_ClSh (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,One)
+            ELSEIF(NSDen.EQ.3)THEN
+               ! What follow sucks !
+               ! Exchange part !
+               CALL uks_x_pbe(1,NGrid,Rho(1),Rho(N1),AbsGradRho2(1),AbsGradRho2(N1),AbsGradRho2(N2), &
+                    &  Buf(1),Buf(N1),Buf(N2),Buf(N3),Buf(N4),Buf(N5), &
+                    &  0D0,0D0,0D0,0D0,0D0,0D0,0D0,0D0,0D0, &
+                    &  0D0,0D0,0D0,0D0,0D0,0D0)
+               ! Copy the exchange in the mondo arrays !
+               E     ( 1:   NGrid)=0.75D0*Buf( 1:   NGrid)
+               dEdRho( 1:   NGrid)=0.75D0*Buf(N1:N1+NGrid)
+               dEdRho(N1:N1+NGrid)=0.75D0*Buf(N2:N2+NGrid)
+               dEdGam( 1:   NGrid)=0.75D0*Buf(N3:N3+NGrid)
+               dEdGam(N1:N1+NGrid)=0.75D0*Buf(N4:N4+NGrid)
+               dEdGam(N2:N2+NGrid)=0.75D0*Buf(N5:N5+NGrid)
+               ! Correlation part !
+               CALL uks_c_pbe(1,NGrid,Rho(1),Rho(N1),AbsGradRho2(1),AbsGradRho2(N1),AbsGradRho2(N2), &
+                    &  Buf(1),Buf(N1),Buf(N2),Buf(N3),Buf(N4),Buf(N5), &
+                    &  0D0,0D0,0D0,0D0,0D0,0D0,0D0,0D0,0D0, &
+                    &  0D0,0D0,0D0,0D0,0D0,0D0)
+               ! Add the correlation part !
+               E     ( 1:   NGrid)=Buf( 1:   NGrid)+     E( 1:   NGrid)
+               dEdRho( 1:   NGrid)=Buf(N1:N1+NGrid)+dEdRho( 1:   NGrid)
+               dEdRho(N1:N1+NGrid)=Buf(N2:N2+NGrid)+dEdRho(N1:N1+NGrid)
+               dEdGam( 1:   NGrid)=Buf(N3:N3+NGrid)+dEdGam( 1:   NGrid)
+               dEdGam(N1:N1+NGrid)=Buf(N4:N4+NGrid)+dEdGam(N1:N1+NGrid)
+               dEdGam(N2:N2+NGrid)=Buf(N5:N5+NGrid)+dEdGam(N2:N2+NGrid)
+            ENDIF
          CASE(HYBRID_B3LYP_VWN3)
-            !IF(NSDen.NE.1)CALL Halt('This functional is not available for unrestricted!'//IntToChar(ModelChem))
 !           Gaussianized B3LYP Model, uses VWN3 LSD correlation functional
 !           A. Becke: JCP 98, p.5648 (1993)
 !           R. H. Hertwig and W. Koch: CPL 268, p.345 (1997)
