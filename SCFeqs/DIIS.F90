@@ -53,8 +53,9 @@ PROGRAM DIIS
   !  Max number of equations to keep in DIIS 
   IF(.NOT.OptIntQ(Inp,'DIISDimension',BMax)) BMax=8
   IF(BMax.GT.DIIS_MAX_MATRIX_SIZE)THEN
-     CALL Warn('Requested DIISDimension greater than DIIS_MAX_MATRIX_SIZE! '//RTRN//&
-          &    'Reseting DIISDimension to DIIS_MAX_MATRIX_SIZE.')
+     CALL Warn('Requested DIISDimension '//TRIM(IntToChar(BMax))// &
+          &    ' greater than DIIS_MAX_MATRIX_SIZE '//TRIM(IntToChar(DIIS_MAX_MATRIX_SIZE))// &
+          &    '! '//RTRN//'Reseting DIISDimension to DIIS_MAX_MATRIX_SIZE.')
      BMax=DIIS_MAX_MATRIX_SIZE
   ENDIF
   CLOSE(Inp)
