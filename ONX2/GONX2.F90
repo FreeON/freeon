@@ -330,7 +330,7 @@ PROGRAM GONX2
   !------------------------------------------------
   ! Timing.
   !
-!#ifdef GONX2_INFO
+#ifdef GONX2_INFO
 #ifdef ONX2_PARALLEL
   !
   ! End Total Timing
@@ -388,7 +388,7 @@ PROGRAM GONX2
 1005 FORMAT(' GONX: Ave TmDL = ',F15.2)
   !1006 FORMAT(' ONX: Tot ERI  = ',F15.2)
   !
-!#endif
+#endif
 #endif
   !
   !------------------------------------------------
