@@ -644,9 +644,9 @@ CONTAINS
     IF(iErr.NE.0) CALL Halt('In ComputDK: Deallocation problem.')
     !
     !
-    WRITE(*,100) NInts,12D0*CS_OUT%NCells**2*DBLE(NBasF)**4, &
-         &       NInts/(12D0*CS_OUT%NCells**2*DBLE(NBasF)**4)*100D0
-100 FORMAT(' NInts = ',E8.2,' NIntTot = ',E8.2,' Ratio = ',E8.2,'%')
+!    WRITE(*,100) NInts,12D0*CS_OUT%NCells**2*DBLE(NBasF)**4, &
+!         &       NInts/(12D0*CS_OUT%NCells**2*DBLE(NBasF)**4)*100D0
+!100 FORMAT(' NInts = ',E8.2,' NIntTot = ',E8.2,' Ratio = ',E8.2,'%')
     !
   END SUBROUTINE ComputDK
   !
