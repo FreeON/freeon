@@ -175,6 +175,13 @@ CONTAINS
           Models(Location(I))=PURE_HCTH407
        ENDDO
     ENDIF
+    ! Pure XLYP exchange-correlation 
+    IF(OptKeyLocQ(Inp,MODEL_OPTION,MODEL_XLYP,MaxSets,NLoc,Location))THEN
+       NModls=NModls+NLoc
+       DO I=1,NLoc 
+          Models(Location(I))=PURE_XLYP
+       ENDDO
+    ENDIF
     ! Hybrid B3LYP/VWN3 exchange-correlation 
     IF(OptKeyLocQ(Inp,MODEL_OPTION,MODEL_B3LYP_VWN3,MaxSets,NLoc,Location))THEN
        NModls=NModls+NLoc
@@ -207,7 +214,7 @@ CONTAINS
     IF(OptKeyLocQ(Inp,MODEL_OPTION,MODEL_X3LYP,MaxSets,NLoc,Location))THEN
        NModls=NModls+NLoc
        DO I=1,NLoc 
-          Models(Location(I))=HYBRID_PBE0
+          Models(Location(I))=HYBRID_X3LYP
        ENDDO
     ENDIF
   END SUBROUTINE ParseModelChems
