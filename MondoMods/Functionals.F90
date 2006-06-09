@@ -30,6 +30,7 @@ MODULE Functionals
    CHARACTER(LEN=*),  PARAMETER :: MODEL_HCTH120      ='HCTH120xc'
    CHARACTER(LEN=*),  PARAMETER :: MODEL_HCTH147      ='HCTH147xc'
    CHARACTER(LEN=*),  PARAMETER :: MODEL_HCTH407      ='HCTH407xc'
+   CHARACTER(LEN=*),  PARAMETER :: MODEL_XLYP         ='XLYPxc'
 !  Hybrid exchange-correlation functionals
    CHARACTER(LEN=*),  PARAMETER :: MODEL_B3LYP_VWN3   ='B3LYP'
    CHARACTER(LEN=*),  PARAMETER :: MODEL_B3LYP_VWN5   ='B3LYP/VWN5'
@@ -60,6 +61,7 @@ MODULE Functionals
    INTEGER, PARAMETER :: PURE_HCTH120     =41243261 !
    INTEGER, PARAMETER :: PURE_HCTH147     =41243262 !
    INTEGER, PARAMETER :: PURE_HCTH407     =41243263 !
+   INTEGER, PARAMETER :: PURE_XLYP        =10685609 ! Xtended LYP hybrid
 !-----------------------------------------------------------------------------------------------------
 !  Avoid under and over flows
    REAL(DOUBLE), PARAMETER :: NoNAN=1.D-30
@@ -101,6 +103,8 @@ MODULE Functionals
             Name='B88x/PW91c'
          CASE(PURE_PBE_PBE)
             Name='PBEx/PBEc'  
+         CASE(PURE_XLYP)
+            Name='XLYP'
          CASE(HYBRID_PBE0)
             Name='PBE0'
          CASE(HYBRID_B3LYP_VWN3)
@@ -155,7 +159,7 @@ MODULE Functionals
 !====================================================================================
       SUBROUTINE ExcOnTheGrid_ClSh(NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,Buf,NSDen) 
          INTEGER                    :: NGrid,NSDen
-         REAL(DOUBLE)               :: a0,ax,ac
+         REAL(DOUBLE)               :: a0,ax,ac,Ax1,Ax2
          REAL(DOUBLE), DIMENSION(*) :: Rho,AbsGradRho2
          REAL(DOUBLE), DIMENSION(*) :: E,dEdRho,dEdGam,Buf
          INTEGER                    :: N1,N2,N3,N4,N5
@@ -179,6 +183,7 @@ MODULE Functionals
          N3=3*NGrid+1
          N4=4*NGrid+1
          N5=5*NGrid+1
+         !write(*,*) 'ModelChem',ModelChem
          SELECT CASE(ModelChem)
          CASE(SD_EXCHANGE)
             IF(NSDen.EQ.1)THEN
@@ -364,6 +369,12 @@ MODULE Functionals
                dEdGam(N1:N1+NGrid)=Buf(N4:N4+NGrid)+dEdGam(N1:N1+NGrid)
                dEdGam(N2:N2+NGrid)=Buf(N5:N5+NGrid)+dEdGam(N2:N2+NGrid)
             ENDIF
+         CASE(PURE_XLYP)
+            IF(NSDen.NE.1)CALL Halt('This functional is not available for unrestricted!'//IntToChar(ModelChem))
+            Ax1=0.722D0
+            Ax2=0.347D0
+            CALL XG04x_ClSh(NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam, One, Ax1, Ax2 )
+            CALL LYPc_ClSh (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam, One )
          CASE(HYBRID_PBE0)
             IF(NSDen.EQ.1)THEN
 !           PBE0 Model, Adamo and Barone: JCP 110, p.6158 (1999)
@@ -444,8 +455,11 @@ MODULE Functionals
             a0=0.218D0
             ax=0.709D0
             ac=0.129D0
+            Ax1=0.765D0
+            Ax2=0.235D0
             CALL XAx_ClSh  (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam, One-a0-ax )
-            CALL XG04x_ClSh(NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam, ax )
+            CALL XG04x_ClSh(NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam, ax, Ax1, Ax2)
+
             CALL VWN3c_ClSh(NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam, ac )
             CALL LYPc_ClSh (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam, One-ac )
          CASE DEFAULT
@@ -536,10 +550,10 @@ MODULE Functionals
 !     Closed shell version of the Xu Goddard 04 GGA
 !     PNAS, p.2673 (2004)
 !====================================================================================
-      SUBROUTINE XG04x_ClSh(NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,Scale)
+      SUBROUTINE XG04x_ClSh(NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,Scale,Ax1,Ax2)
          INTEGER                        :: I,NGrid
          REAL(DOUBLE), DIMENSION(NGrid) :: Rho,AbsGradRho2,E,dEdRho,dEdGam
-         REAL(DOUBLE)                   :: R,A,Scale,Ei,dEdRhoi,dEdGami,X,ASinh
+         REAL(DOUBLE)                   :: R,A,Scale,Ei,dEdRhoi,dEdGami,X,ASinh,Ax1,Ax2
          ASinh(X)=LOG(X+SQRT(1.0D0+X*X))
 !-------------------------------------------------------------------------------------
          DO I=1,NGrid
