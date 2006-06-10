@@ -23,7 +23,7 @@ MOD_POSTFIX   = mod
 #---------------------------------------------------------------
 # Fortran Compilers, options and include files
 #
-F90           = g95
+F90           = g95_64
 F90_OPTIMIZE  = -O1 -freal=nan -Wprecision-loss
 F90_DEBUG    = -g -fbounds-check -ftrace=full
 #F_LIST       = 
@@ -71,6 +71,6 @@ F90_LIBRARIES = $(MONDO_LIBS) $(MPI_LIBS) $(HDF_LIBS)
 #--------------------------------------------------------------------------
 #  'Nuff said
 #
-LAPACK = -L$(LAPACK_LIB) -llapack_G95 -lblas_G95 
+LAPACK = -llapack -lblas 
 #---------------------------------------------------------------------------
 

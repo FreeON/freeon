@@ -51,6 +51,10 @@ else if ( "$MONDO_PLAT" == "IntelLinux.G95" ) then
      setenv MONDO_COMPILER ${MONDO_HOME}/Includes/CompilerSpecifics.IntelLinux.G95
      setenv MONDO_DGEMMS ${MONDO_HOME}/PHiPAC/runs/P3/PHiPAC_dgemm/src 
      setenv NO_STOP_MESSAGE
+else if ( "$MONDO_PLAT" == "Opteron64.G95" ) then
+     setenv MONDO_COMPILER ${MONDO_HOME}/Includes/CompilerSpecifics.Opteron64.G95
+     setenv MONDO_DGEMMS ${MONDO_HOME}/PHiPAC/runs/TBird/PHiPAC_dgemm/src 
+     setenv NO_STOP_MESSAGE
 else if ( "$MONDO_PLAT" == "Opteron32.PG" ) then
      setenv MONDO_COMPILER ${MONDO_HOME}/Includes/CompilerSpecifics.Opteron32.PG
      setenv MONDO_DGEMMS ${MONDO_HOME}/PHiPAC/runs/TBird/PHiPAC_dgemm/src
