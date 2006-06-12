@@ -1987,8 +1987,8 @@ CONTAINS
     !-------------------------------------------------------------------
     TYPE(Controls) :: C
     !-------------------------------------------------------------------
-    INTEGER        :: iBAS,iGEO,iCLONE,AtA,AtB,I,J,II,JJ,IMin,N
-    INTEGER        :: NatmsLoc,IStart,GBeg,GEnd
+    INTEGER        :: iBAS,iGEO,AtA,AtB,I,J,II,JJ,IMin,N
+    INTEGER        :: NatmsLoc,IStart
     TYPE(DBL_RNK2) :: Grad0,Hess,P,NMode,DDer
     TYPE(DBL_VECT) :: Freqs,EigenV,Work,Dipole
     REAL(DOUBLE)   :: SMA,SMB,Dum
@@ -1999,26 +1999,31 @@ CONTAINS
     !            A0=5.291771E-09 A
     !            C =2.997925E+10 A/SEC
     REAL(DOUBLE), PARAMETER :: FreqToWaveNbr=2.642461D+07
-    REAL(DOUBLE), PARAMETER :: ATOM_DISP=0.001D0
+    REAL(DOUBLE), PARAMETER :: ATOM_DISP=0.005D0
     REAL(DOUBLE), EXTERNAL  :: DDOT
+    !
+    INTEGER :: IOS,IC,JC,K,JStart,NTmp
+    LOGICAL :: Exists,Done
+    INTEGER, PARAMETER :: FID=68
+    CHARACTER(LEN=*), PARAMETER :: FileName='HESSIAN'
     !-------------------------------------------------------------------
     !
-    GBeg=1
-    GEnd=C%Geos%Clones
+    IF(C%Geos%Clones.NE.1) CALL Halt('NHessian: NHessian doesn''t work with the clones!')
+    !
     ! initial geometry
     iGEO=C%Stat%Previous%I(3)
     NatmsLoc=C%Geos%Clone(1)%Natms
     N=3*NatmsLoc
     CALL New(Grad0,(/3,NatmsLoc/))
-    CALL DBL_VECT_EQ_DBL_SCLR(N,Grad0%D(1,1),0.0D0)
+    CALL DBL_VECT_EQ_DBL_SCLR(N   ,Grad0%D(1,1),0.0D0)
     CALL New(Hess,(/N,N/))
-    CALL DBL_VECT_EQ_DBL_SCLR(N**2,Hess%D(1,1),0.0D0)
+    CALL DBL_VECT_EQ_DBL_SCLR(N**2,Hess%D(1,1) ,0.0D0)
     CALL New(DDer,(/3,N/))
-    CALL DBL_VECT_EQ_DBL_SCLR(3*N ,DDer%D(1,1),0.0D0)
+    CALL DBL_VECT_EQ_DBL_SCLR(3*N ,DDer%D(1,1) ,0.0D0)
     CALL New(P,(/N,N/))
     CALL New(Freqs,N)
     CALL New(NMode,(/N,N/))
-    CALL New(Dipole,3)
+    !CALL New(Dipole,3)
     !
     ! Build the guess 
     DO iBAS=1,C%Sets%NBSets
@@ -2029,7 +2034,7 @@ CONTAINS
     iBAS=C%Sets%NBSets
     CALL Force(iBAS,iGEO,C%Nams,C%Opts,C%Stat,C%Geos,C%Sets,C%MPIs)
     CALL DCOPY(N,C%Geos%Clone(1)%Gradients%D(1,1),1,Grad0%D(1,1),1)
-    CALL Print_DBL_RNK2(Grad0,'Grad0',Unit_O=6)
+    !CALL Print_DBL_RNK2(Grad0,'Grad0',Unit_O=6)
     !
     ! Get Dipole.
     !HDFFileID=OpenHDF(C%Nams%HFile)
@@ -2039,44 +2044,70 @@ CONTAINS
     !CALL CloseHDFGroup(HDF_CurrentID)
     !CALL CloseHDF(HDFFileID)
     !
-    iGEO=iGEO+1
-    J=1
-    DO AtA=1,NAtmsLoc
-       DO I=1,3
-          !
-          ! Move the atom
-          DO iCLONE=1,C%Geos%Clones
-             C%Geos%Clone(iCLONE)%Carts%D(I,AtA)=C%Geos%Clone(iCLONE)%Carts%D(I,AtA)+ATOM_DISP
-             !CALL MakeGMPeriodic(C%Geos%Clone(iCLONE))
-          ENDDO
-          CALL GeomArchive(iBAS,iGEO,C%Nams,C%Opts,C%Sets,C%Geos)
-          !
-          ! Optimize and Forces.
-          CALL SCF(iBAS,iGEO,C)
-          CALL Force(iBAS,iGEO,C%Nams,C%Opts,C%Stat,C%Geos,C%Sets,C%MPIs)
-          !CALL Print_DBL_RNK2(C%Geos%Clone(1)%Carts,'Posi',Unit_O=6)
-          !CALL Print_DBL_RNK2(C%Geos%Clone(1)%Gradients,'Grad',Unit_O=6)
-          CALL DCOPY(N,C%Geos%Clone(1)%Gradients%D(1,1),1,Hess%D(1,J),1)
-          CALL DAXPY(N,-1D0,Grad0%D(1,1),1,Hess%D(1,J),1)
-          !
-          ! Get Dipole.
-          !HDFFileID=OpenHDF(C%Nams%HFile)
-          !HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(1)))
-          !CALL Get(Dipole,'dipole')
-          !write(*,*) 'Dipole',Dipole%D
-          !CALL CloseHDFGroup(HDF_CurrentID)
-          !CALL CloseHDF(HDFFileID)
-          !
-          ! Move back.
-          DO iCLONE=1,C%Geos%Clones
-             C%Geos%Clone(iCLONE)%Carts%D(I,AtA)=C%Geos%Clone(iCLONE)%Carts%D(I,AtA)-ATOM_DISP
-             !CALL MakeGMPeriodic(C%Geos%Clone(iCLONE))
-          ENDDO
-          CALL GeomArchive(iBAS,iGEO,C%Nams,C%Opts,C%Sets,C%Geos)
-          iGEO=iGEO+1
-          J=J+1
+    ! Open HESSIAN file.
+    INQUIRE(FILE=FileName,EXIST=Exists)
+    OPEN(FID,FILE=FileName,STATUS='UNKNOWN',FORM='UNFORMATTED', &
+         & ACCESS='SEQUENTIAL')
+    IF(Exists) THEN
+       NTmp=0
+       READ(FID) NTmp
+       IF(NTmp.NE.N) CALL Halt('NHessian: Something wrong with the HESSIAN file!')
+       Done=.FALSE.
+       JC=0
+       DO J=1,N
+          READ(FID,IOSTAT=IOS) (Hess%D(I,J),I=1,N)
+          IC=I-1
+          IF(IOS.NE.0) THEN
+             Done=.TRUE.
+             EXIT
+          ENDIF
+          IF(IC.NE.N.AND.IC.NE.0) CALL Halt('NHessian: Something wrong with the HESSIAN file!')
+          IF(Done) EXIT
+          JC=JC+1
        ENDDO
+       JStart=JC+1
+       write(*,*) 'We read JC=',JC,' JStart=',JStart
+    ELSE
+       WRITE(FID) N
+       JStart=1
+    ENDIF
+    CLOSE(FID)
+    !
+    iGEO=iGEO+1
+    DO J=JStart,N
+       AtA=CEILING(DBLE(J)/3D0)
+       I=J-3*(AtA-1)
+       !
+       ! Move the atom.
+       C%Geos%Clone(1)%Carts%D(I,AtA)=C%Geos%Clone(1)%Carts%D(I,AtA)+ATOM_DISP
+       CALL GeomArchive(iBAS,iGEO,C%Nams,C%Opts,C%Sets,C%Geos)
+       !
+       ! Optimize and Forces.
+       CALL SCF(iBAS,iGEO,C)
+       CALL Force(iBAS,iGEO,C%Nams,C%Opts,C%Stat,C%Geos,C%Sets,C%MPIs)
+       CALL DCOPY(N,C%Geos%Clone(1)%Gradients%D(1,1),1,Hess%D(1,J),1)
+       CALL DAXPY(N,-1D0,Grad0%D(1,1),1,Hess%D(1,J),1)
+       !
+       ! Write HESSIAN.
+       OPEN(FID,FILE=FileName,STATUS='OLD',FORM='UNFORMATTED', &
+            & ACCESS='SEQUENTIAL',POSITION='APPEND')
+       WRITE(FID) (Hess%D(K,J),K=1,N)
+       CLOSE(FID)
+       !
+       ! Get Dipole.
+       !HDFFileID=OpenHDF(C%Nams%HFile)
+       !HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(1)))
+       !CALL Get(Dipole,'dipole')
+       !write(*,*) 'Dipole',Dipole%D
+       !CALL CloseHDFGroup(HDF_CurrentID)
+       !CALL CloseHDF(HDFFileID)
+       !
+       ! Move back.
+       C%Geos%Clone(1)%Carts%D(I,AtA)=C%Geos%Clone(1)%Carts%D(I,AtA)-ATOM_DISP
+       CALL GeomArchive(iBAS,iGEO,C%Nams,C%Opts,C%Sets,C%Geos)
+       iGEO=iGEO+1
     ENDDO
+    !
     Dum=1D0/ATOM_DISP
     CALL DSCAL(N**2,Dum,Hess%D(1,1),1)
     !
@@ -2092,7 +2123,7 @@ CONTAINS
     CALL ProjOut(C%Geos%Clone(1)%Carts,C%Geos%Clone(1)%AtMss,Hess,NatmsLoc)
     !CALL Print_DBL_RNK2(Hess,'Projected Hessian',Unit_O=6)
     !
-      ! Get Normal modes.
+    ! Get Normal modes.
     CALL New(EigenV,N)
     LWORK=MAX(1,3*N+10)
     CALL New(WORK,LWORK)
@@ -2146,6 +2177,25 @@ CONTAINS
     CALL Print_DBL_VECT(Freqs,'Frequencies' ,Unit_O=6)
     CALL Print_DBL_RNK2(NMode,'Normal Modes',Unit_O=6)
     !
+    ! Print the frequencies and normal modes.
+    OPEN(FID,FILE='FREQUENCIES',STATUS='UNKNOWN',FORM='FORMATTED')
+    DO I=1,N
+       IF(ABS(Freqs%D(I)).LT.0.1D0) CYCLE
+       WRITE(FID,*) C%Geos%Clone(1)%Natms
+       WRITE(FID,'(F8.2)') Freqs%D(I)
+       K=1
+       DO J=1,C%Geos%Clone(1)%Natms
+          CALL UpCase(C%Geos%Clone(1)%AtNam%C(J))          
+          WRITE(FID,'(A,3F10.5,I3,3F10.5)') TRIM(C%Geos%Clone(1)%AtNam%C(J)), &
+               & BohrsToAngstroms*C%Geos%Clone(1)%Carts%D(1,J), &
+               & BohrsToAngstroms*C%Geos%Clone(1)%Carts%D(2,J), &
+               & BohrsToAngstroms*C%Geos%Clone(1)%Carts%D(3,J), &
+               & 0,NMode%D(K,I),NMode%D(K+1,I),NMode%D(K+2,I)
+          K=K+3
+       ENDDO
+    ENDDO
+    CLOSE(FID)
+    !
     ! Compute IR intensities.
     CALL CompIRInt(NMode,DDer,NatmsLoc)
     !
@@ -2163,9 +2213,9 @@ CONTAINS
     CALL Delete(P)
     CALL Delete(Hess)
     CALL Delete(DDer)
-    CALL Delete(Dipole)
+    !CALL Delete(Dipole)
     !
-  END SUBROUTINE NHessian  
+  END SUBROUTINE NHessian
   !
   SUBROUTINE WghtMtrx(AtMss,A,NAtoms,FromTo)
     !-------------------------------------------------------------------
@@ -2439,7 +2489,7 @@ CONTAINS
     TYPE(DBL_VECT) :: AtMss,Freqs
     INTEGER        :: NAtoms,Multp
     !-------------------------------------------------------------------
-    REAL(DOUBLE)   :: MssTot,R,T,KT,P,Sigma,Dum,Fac,U,ExpU,ExpMU
+    REAL(DOUBLE)   :: MssTot,R,KT,Sigma,Dum,Fac,U,ExpU,ExpMU
     REAL(DOUBLE)   :: QElec,UElec,HElec,CvElec,CpElec,SElec,GElec,AElec
     REAL(DOUBLE)   :: QTran,UTran,HTran,CvTran,CpTran,STran,GTran,ATran
     REAL(DOUBLE)   :: QRot ,URot ,HRot ,CvRot ,CpRot ,SRot ,GRot ,ARot
@@ -2448,18 +2498,20 @@ CONTAINS
     REAL(DOUBLE)   :: TInrt(3,3),TEig(3),TEVec(3,3)
     INTEGER        :: I
     !-------------------------------------------------------------------
+    REAL(DOUBLE), PARAMETER :: T=298.15D0
+    REAL(DOUBLE), PARAMETER :: P=1.01325D+05
+    !-------------------------------------------------------------------
     REAL(DOUBLE), PARAMETER :: C_Planck=6.626176D-34
     REAL(DOUBLE), PARAMETER :: C_Boltzmann=1.380662D-23
     REAL(DOUBLE), PARAMETER :: C_Light=2.99792458D+08
-    REAL(DOUBLE), PARAMETER :: JouleToCal=4.184D+00
+    REAL(DOUBLE), PARAMETER :: CalToJoule=4.184D+00
+    REAL(DOUBLE), PARAMETER :: JouleToCal=0.239005736137667D+00
     !
     real(double), parameter :: TOKCAL=627.51D+00
     real(double), parameter :: TOCM=2.194746D+05
     !
-    T=298.15D0
     KT=C_Boltzmann*T
     R=C_Avogadro*C_Boltzmann
-    P=1.01325D+05
     MssTot=SUM(AtMss%D(1:NAtoms))
     !
     ! Electronic.
@@ -2490,6 +2542,7 @@ CONTAINS
     !
     ! Rotation.
     CALL Inertia(Carts,AtMss,NAtoms,TInrt,TEig,TEVec)
+    !
     ! Check for atoms or linear molecules.
     IF(ABS(TEig(1)*TEig(2)*TEig(3)).LT.1D-3) THEN
        WRITE(*,*) 'Atoms or linear molecules are not supported yet'
@@ -2501,6 +2554,7 @@ CONTAINS
     WRITE(*,*) ' In ThermoStat, Sigma is set to 1'
     WRITE(*,*) ' then change it if needed.'
     WRITE(*,*) 'WARNING WARNING WARNING WARNING'
+    CALL Warn(' ThermoStat: Sigma is set to 1, then change it if needed.')
     Sigma=1.0D+00
     !
     Fac=BohrsToAngstroms**2/C_Avogadro
@@ -2524,7 +2578,7 @@ CONTAINS
        IF(Freqs%D(I).LT.1D-2) CYCLE
        Dum=Dum+Freqs%D(I)
     ENDDO
-    Dum=Dum*TOKCAL*JouleToCal/(TOCM*TWO)
+    Dum=Dum*TOKCAL*CalToJoule/(TOCM*TWO)
     !
     QVib = ONE
     UVib = ZERO
@@ -2593,10 +2647,23 @@ CONTAINS
     WRITE(*,911) 'Rot  ',URot ,HRot ,GRot ,CvRot ,CpRot ,SRot
     WRITE(*,911) 'Vib  ',UVib ,HVib ,GVib ,CvVib ,CpVib ,SVib
     WRITE(*,911) 'Tot  ',UTot ,HTot ,GTot ,CvTot ,CpTot ,STot
-
+    WRITE(*,  *)
+    WRITE(*,909) 
+    WRITE(*,910) '  KCal/Mol','  KCal/Mol','  KCal/Mol','  Cal/MolK','  Cal/MolK','  Cal/MolK'
+    WRITE(*,911) 'Elec ',UElec*JouleToCal,HElec*JouleToCal,GElec*JouleToCal,CvElec*JouleToCal, &
+         & CpElec*JouleToCal,SElec*JouleToCal
+    WRITE(*,911) 'Trans',UTran*JouleToCal,HTran*JouleToCal,GTran*JouleToCal,CvTran*JouleToCal, &
+         & CpTran*JouleToCal,STran*JouleToCal
+    WRITE(*,911) 'Rot  ',URot *JouleToCal,HRot *JouleToCal,GRot *JouleToCal,CvRot *JouleToCal, &
+         & CpRot *JouleToCal,SRot *JouleToCal
+    WRITE(*,911) 'Vib  ',UVib *JouleToCal,HVib *JouleToCal,GVib *JouleToCal,CvVib *JouleToCal, &
+         & CpVib *JouleToCal,SVib *JouleToCal
+    WRITE(*,911) 'Tot  ',UTot *JouleToCal,HTot *JouleToCal,GTot *JouleToCal,CvTot *JouleToCal, &
+         & CpTot *JouleToCal,STot *JouleToCal
+    !
 907 FORMAT(/1X,14X,'Q',15X,'ln(Q)')
 908 FORMAT(1X,A6,1P,E15.5,0P,F15.6)
-909 FORMAT(/14X,'E',9X,'H',9X,'G',9X,'CV',8X,'CP',8X,'S')
+909 FORMAT(/14X,'U',9X,'H',9X,'G',9X,'CV',8X,'CP',8X,'S')
 910 FORMAT(1X,6X,6A10)
 911 FORMAT(1X,A6,6F10.3)
   END SUBROUTINE ThermoStat
