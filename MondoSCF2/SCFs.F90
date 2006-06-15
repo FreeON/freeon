@@ -868,8 +868,10 @@ CONTAINS
        ENDDO
     ENDIF
     S%SameGeom=.TRUE.
+    S%SameLatt=.TRUE.
     DO iCLONE=1,G%Clones
        S%SameGeom=S%SameGeom.AND.SameCrds(iCLONE).AND.SameLatt(iCLONE)
+       S%SameLatt=S%SameLatt.AND.SameLatt(iCLONE)
     ENDDO
   END SUBROUTINE SameBasisSameGeom
   !===============================================================================
