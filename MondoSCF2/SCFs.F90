@@ -893,6 +893,7 @@ CONTAINS
     IF(O%Guess==GUESS_EQ_CORE)     DoPFFT=.TRUE.
     IF(O%Guess==GUESS_EQ_SUPR)     DoPFFT=.TRUE.
     IF(O%Guess==GUESS_EQ_RESTART)  DoPFFT=.TRUE.
+    IF(O%Guess==GUESS_EQ_NEWGEOM)  DoPFFT=.TRUE.
     IF(O%Guess==GUESS_EQ_NUGUESS)  DoPFFT=.TRUE.
     IF(.NOT. S%SameLatt)           DoPFFT=.TRUE.
     IF(.NOT. S%SameBasis)          DoPFFT=.TRUE.
