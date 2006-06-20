@@ -911,8 +911,8 @@ MODULE PrettyPrint
 !---------------------------------------------------------------------------------------   
 !       Compute check sum
         Chk=Zero
-        DO I=1,SIZE(A%D,1)
-           DO J=1,SIZE(A%D,2)
+        DO I=LBOUND(A%D,1),UBOUND(A%D,1)
+           DO J=LBOUND(A%D,2),UBOUND(A%D,2)
               Chk=Chk+A%D(I,J)*A%D(I,J)
            ENDDO
         ENDDO
