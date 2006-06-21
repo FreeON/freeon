@@ -41,26 +41,32 @@ MODULE DIPMWTree
 !  Globals
 !==================================================================
    TYPE(PIGWNode), POINTER               :: PIGWRoot 
-   INTEGER                               :: CurrentLevel,NCallToRho
+   INTEGER                               :: CurrentLevel,NCallToRho,NumLeafs
    INTEGER,PARAMETER                     :: BigJ=20
    INTEGER,DIMENSION(0:BigJ)             :: PIGWNodes
    REAL(DOUBLE),DIMENSION(1:3)           :: X0,Length
-   REAL(DOUBLE),DIMENSION(0:BigJ)        :: JFactor,InvJFactor,ScaleX,ScaleY,ScaleZ
+   REAL(DOUBLE),DIMENSION(0:BigJ)        :: JFactor,InvJFactor
+   REAL(DOUBLE),DIMENSION(0:BigJ)        :: ScaleX,ScaleY,ScaleZ
 !------------------------------------------------------------------
 !  Wavelet Order Stuff
 !
    INTEGER,PARAMETER                     :: DOrder=3
    INTEGER,PARAMETER                     :: DMax=DOrder+1
    INTEGER,PARAMETER                     :: LenDOrder=(DOrder+1)**3
-   REAL(DOUBLE),DIMENSION(LenDOrder)     :: RhoTmp
-   REAL(DOUBLE),DIMENSION(DMax)          :: WvltInt
-   REAL(DOUBLE),DIMENSION(2,DMax,DMax)   :: WFilter
+!
+   INTEGER,PARAMETER                     :: DOrderM    = 3
+   INTEGER,PARAMETER                     :: DMaxM      = 4
+   INTEGER,PARAMETER                     :: LenDOrderM = 64
+!
+   REAL(DOUBLE),DIMENSION(LenDOrderM)    :: RhoTmp
+   REAL(DOUBLE),DIMENSION(DMaxM)         :: WvltInt
+   REAL(DOUBLE),DIMENSION(2,DMaxM,DMaxM) :: WFilter
 !------------------------------------------------------------------
 !  RhoAtPoint and HasNode Stuff
 !
    LOGICAL                               :: IsTrue
    REAL(DOUBLE)                          :: VxcSum 
-   REAL(DOUBLE),DIMENSION(LenDOrder)     :: RhoSum
+   REAL(DOUBLE),DIMENSION(LenDOrderM)    :: RhoSum
    REAL(DOUBLE),DIMENSION(1:3)           :: Xpos
    TYPE(BBox)                            :: RhoBox,XCBox       
 !------------------------------------------------------------------
@@ -71,12 +77,14 @@ MODULE DIPMWTree
 !==================================================================
 !  Generate the Wavelet Rep of the XC potential
 !==================================================================
-   SUBROUTINE DIPMWTree(MaxJ)
-     INTEGER                             :: MaxJ,J,I,K,TotWav,NN,MaxCurrent
+   SUBROUTINE DIPMWTreeBuild(MaxJ)
+     INTEGER                             :: MaxJ,MinJ,J,I,K,TotWav,NN
      REAL(DOUBLE),DIMENSION(3)           :: X,XX
-     REAL(DOUBLE)                        :: TauDIPMW_old,MinDelta,DX,DY,DZ
+     REAL(DOUBLE)                        :: TauDIPMW_old,MinLength,DX,DY,DZ
      REAL(DOUBLE)                        :: FFac,SUM,RhoInt,Tmp1,Tmp2
+     TYPE(TIME)                          :: TimeInit,TimeWave
      CHARACTER(LEN=DEFAULT_CHR_LEN)      :: Mssg 
+
 !------------------------------------------------------------------
 !    Error Check
      IF(MaxJ > BigJ) THEN
@@ -90,14 +98,13 @@ MODULE DIPMWTree
 !    Rho Bounding Box
      RhoBox%Center(:)   = RhoRoot%Box%Center(:)
      RhoBox%Half(:)     = RhoRoot%Box%Half(:)
-     RhoBox%BndBox(:,1) = RhoRoot%Box%BndBox(:,1)+1.D-12
-     RhoBox%BndBox(:,2) = RhoRoot%Box%BndBox(:,2)-1.D-12
+     RhoBox%BndBox(:,:) = RhoRoot%Box%BndBox(:,:)
 !    ExchangeCorrelation Regions Bounding Box
      XCBox%Center(:)    = RhoRoot%Box%Center(:)
      XCBox%Half(:)      = RhoRoot%Box%Half(:)
-     XCBox%BndBox(:,1)  = RhoRoot%Box%BndBox(:,1)+1.D-12
-     XCBox%BndBox(:,2)  = RhoRoot%Box%BndBox(:,2)-1.D-12
+     XCBox%BndBox(:,:)  = RhoRoot%Box%BndBox(:,:)
      CALL MakeBoxPeriodic(XCBox)
+!    Readjust XCBox
 !    Initialize the lengths  
      Length(:)        = ABS(XCBox%BndBox(:,2)-XCBox%BndBox(:,1))
      X0(:)            = Half*(XCBox%BndBox(:,2)+XCBox%BndBox(:,1))
@@ -109,13 +116,32 @@ MODULE DIPMWTree
         ScaleY(J)     = InvJFactor(J)*Length(2)
         ScaleZ(J)     = InvJFactor(J)*Length(3)  
      ENDDO
+!    Determine MinJ
+     MinJ = LOG(DBLE(GM%NAtms)**(1.D0/3.D0))/LOG(2.D0)+1
+     WRITE(*,*) "MinJ = ",MinJ
 !    Initialize the Root Node and XC Energy
      NCallToRho= 0
+     TotWav    = 0
      XCEnergy  = Zero
-     CALL InitializePIGWRoot(X0,0)
+     NumLeafs  = 0
+     CALL Elapsed_Time(TimeInit,'Init')
+     CALL InitializePIGWRoot(X0,MinJ)
+     CALL Elapsed_Time(TimeInit,'Accum')
+     DO J=0,MinJ
+        TotWav = TotWav + PIGWNodes(J)
+     ENDDO
+     Mssg=ProcessName('DIPMW.TreeInit')                             &
+          // 'Level = ' // TRIM(IntToChar(MinJ))      &
+          //', Tau = ' //TRIM(DblToShrtChar(TauDIPMW))        &
+          //', <Exc> = '//TRIM(DblToMedmChar(XCEnergy))       &
+          //', DipMW/Atom  = '//TRIM(IntToChar(TotWav/GM%Natms))
+     CALL OpenASCII(OutFile,Out)         
+     WRITE(*,*)TRIM(Mssg)
+     WRITE(Out,*)TRIM(Mssg)
+     CLOSE(Out)
 !    Recursively generate the Wavelet Rep of the Density, XC Energy and XC potential
-     TotWav  = PIGWNodes(0)
-     DO CurrentLevel=1,MaxJ
+     CALL Elapsed_Time(TimeWave,'Init')
+     DO CurrentLevel=MinJ+1,MaxJ
         CALL MakePIGWTree(PIGWRoot)
         IF(PIGWNodes(CurrentLevel) == 0) EXIT
         TotWav = TotWav+PIGWNodes(CurrentLevel)
@@ -131,24 +157,80 @@ MODULE DIPMWTree
         WRITE(Out,*)TRIM(Mssg)
         CLOSE(Out)
      ENDDO
+     CALL Elapsed_Time(TimeWave,'Accum')
+!    Write out the Timings
+     CALL OpenASCII(OutFile,Out)   
+     Mssg=ProcessName('DIPMW.TreeGen') //' CPU Sec = '//TRIM(DblToMedmChar(TimeWave%CPUS)) &
+                                       //',CPU Wall = '//TRIM(DblToMedmChar(TimeWave%WALL))
+     WRITE(*,*) TRIM(Mssg)
+     WRITE(Out,*)TRIM(Mssg)
+     Mssg=ProcessName('DIPMW.TreeInit')//' CPU Sec = '//TRIM(DblToMedmChar(TimeInit%CPUS)) &
+                                       //',CPU Wall = '//TRIM(DblToMedmChar(TimeInit%WALL))
+     WRITE(*,*) TRIM(Mssg)
+     WRITE(Out,*)TRIM(Mssg)
+     CLOSE(Out)
 !
      WRITE(*,*) "Total Wavelets        = ",TotWav
      WRITE(*,*) "Total Call to RhoTree = ",NCallToRho
 !
 !    Compute Pointwise the Vxc for reference
-!!$     DO I=0,256
-!!$        X(1) =  XCBox%BndBox(1,1)+I*Length(1)/256.D0
-!!$        X(2) =  XCBox%BndBox(2,1)+Length(2)/2.0D0
-!!$        X(3) =  XCBox%BndBox(3,1)+Length(3)/2.0D0
-!!$        RhoTmp = RhoAtX(X)
-!!$        Tmp1   = VxcAtX(X)
-!!$        Tmp2   = -1.8610514726982D0*(2.D0/3.D0)*(RhoTmp(1))**(1.D0/3.D0)
-!!$        WRITE(99,'4(D16.8,3x)') X(1),Tmp1,Tmp2,Tmp2-Tmp1
+!!$     SUM = Zero
+!!$     DO K=0,32
+!!$        DO J=0,32
+!!$           DO I=0,32
+!!$              X(1) =  XCBox%BndBox(1,1)+I*Length(1)/(32.D0+1.D-11)+2.D-12
+!!$              X(2) =  XCBox%BndBox(2,1)+J*Length(2)/(32.D0+1.D-11)+2.D-12
+!!$              X(3) =  XCBox%BndBox(3,1)+K*Length(3)/(32.D0+1.D-11)+2.D-12
+!!$              RhoTmp = RhoAtX(X)
+!!$              Tmp1   = VxcAtX(X)
+!!$              Tmp2   = -1.8610514726982D0*(RhoTmp(1))**(4.D0/3.D0)
+!!$              FFac = Length(1)*Length(2)*Length(3)/(32.D0**3)
+!!$              IF(I==0) FFac=Half*FFac
+!!$              IF(I==32) FFac=Half*FFac
+!!$              IF(J==0) FFac=Half*FFac
+!!$              IF(J==32) FFac=Half*FFac
+!!$              IF(K==0) FFac=Half*FFac
+!!$              IF(K==32) FFac=Half*FFac
+!!$              SUM = SUM + FFac*Tmp2 
+!!$!              CALL FindNode(X)
+!!$!              WRITE(*,*) 'F*Tmp1 = ',FFac*Tmp1
+!!$!              IF(.TRUE.) STOP
+!!$!              WRITE(99,66) X(1),X(2),X(3),Tmp2,Tmp1
+!!$           ENDDO
+!!$!           WRITE(99,*)
+!!$        ENDDO
 !!$     ENDDO
-!!$
-!!$     IF(.TRUE.) STOP
+!!$ 66  FORMAT(D16.8,3x,D16.8,3x,D16.8,3x,D16.8,3x,D16.8)
+!!$     WRITE(*,*) 'Exc = ',SUM
+!!$!
+!!$     X(1) =  XCBox%BndBox(1,1)+0.25D0*Length(1)
+!!$     X(2) =  XCBox%BndBox(2,1)+(1.D0-1.D-12)*Length(2)
+!!$     X(3) =  XCBox%BndBox(3,1)+0.00D0*Length(3)
+!!$     RhoTmp = RhoAtX(X)
+!!$     Tmp1   = VxcAtX(X)
+!!$     Tmp2   = -1.8610514726982D0*(2.D0/3.D0)*(RhoTmp(1))**(1.D0/3.D0)
+!!$     WRITE(*,*) Tmp2,Tmp1,Tmp2-Tmp1
+!!$     CALL FindNode(X)
 !
-   END SUBROUTINE DIPMWTree
+!     IF(.TRUE.) STOP
+!
+   END SUBROUTINE DIPMWTreeBuild
+!
+!
+!
+   RECURSIVE SUBROUTINE CountLeafs(Node)
+    TYPE(PIGWNode), POINTER         :: Node
+    INTEGER                         :: ILinks
+!
+    IF(Node%LeafType=='LeafLeaf') THEN 
+       NumLeafs = NumLeafs+1
+       RETURN
+    ELSE
+       DO ILinks=1,Node%NLinks
+          CALL CountLeafs(Node%Links(ILinks)%Link)
+       ENDDO
+    ENDIF
+   END SUBROUTINE CountLeafs
 !==================================================================
 !  Initialize the Wavelet Filters
 !==================================================================
@@ -249,67 +331,198 @@ MODULE DIPMWTree
 !==================================================================
 !  Initialize PIGWTree
 !==================================================================
-   SUBROUTINE InitializePIGWRoot(X,ILevel)
-     INTEGER                            :: ILevel,Status,ILink,IX,IY,IZ,JLink,I
-     REAL(DOUBLE),DIMENSION(LenDOrder)  :: RhoX,ExcX,VxcX
-     REAL(DOUBLE),DIMENSION(3)          :: X,XX,DX,XL,XH
-     LOGICAL                            :: DoNode
+   SUBROUTINE InitializePIGWRoot(X,MinJ)
+     INTEGER                            :: MinJ,Status,I
+     REAL(DOUBLE),DIMENSION(3)          :: X,DX,XL,XH
 !        
 !    PIGWRoot
 !
 !    Allocate the Root Node: There is no Inforamtion on this Node
-     CALL NewPIGWNode(PIGWRoot,ILevel,1000,X)
-     PIGWRoot%LeafType ='NodeNode'
-     DX                = PIGWRoot%DX
+     CALL NewPIGWNode(PIGWRoot,0,1000,X,AArray_O=.FALSE.)
+     DX = PIGWRoot%DX
 !    Bounding Box of Root Node
-     XL = X-DX
+     XL = X-DX 
      XH = X+DX
      CALL NodeBoundingBox(XL,XH,PIGWRoot%Box)
 !    Allocate the Links
-     PIGWRoot%NLinks  = 3*3*3
-     ALLOCATE(PIGWRoot%Links(PIGWRoot%NLinks),STAT=Status)
-     IF(Status/=SUCCEED)CALL Halt('Link ALLOCATE failed in InitializePIGWRoot ')
-!
-!    Surface Scaling Functions 
-!
-     JLink = 0
-     DO IX =-1,1
-        DO IY = -1,1
-           DO IZ =-1,1
-              JLink = JLink+1
-              XX(1) = X(1)+IX*DX(1)
-              XX(2) = X(2)+IY*DX(2)
-              XX(3) = X(3)+IZ*DX(3)
-!             Allocate Node
-              CALL NewPIGWNode(PIGWRoot%Links(JLink)%Link,ILevel,1000,XX)
-!             Bounding Box of Root Node
-              XL = XX-DX
-              XH = XX+DX
-              CALL NodeBoundingBox(XL,XH,PIGWRoot%Links(JLink)%Link%Box)
-!             Integration Weight
-              CALL WWeight(XX,DX,PIGWRoot%Links(JLink)%Link%Box,PIGWRoot%Links(JLink)%Link%IntFactor)
-              RhoX = RhoAtX(XX)
-              CALL ExcVxc(RhoX,ExcX,VxcX)
-              CALL NormalizeWCoefs(VxcX,DX(1),DX(2),DX(3))
-              CALL NormalizeWCoefs(ExcX,DX(1),DX(2),DX(3))
-              PIGWRoot%Links(JLink)%Link%WCoef = VxcX
-!             Compute Initial Exc
-              DO I=1,LenDOrder
-                 XCEnergy = XCEnergy + PIGWRoot%Links(JLink)%Link%IntFactor(I)*ExcX(I)
-              ENDDO
-           ENDDO
-        ENDDO
+     PIGWRoot%Level   = -1
+!    Recursively Allocate the New Nodes Down to Level MinJ
+     DO I=0,MinJ-1
+        CALL BuildBranchesOfTree(PIGWRoot)
      ENDDO
+!    Fill in the Leaf Nodes Coef's (Scaling Functions)
+     CALL BuildLeafsOfTree(PIGWRoot)
 !
-   END SUBROUTINE InitializePIGWRoot
+  END SUBROUTINE InitializePIGWRoot
+!==================================================================
+!  Build The Branches
+!==================================================================
+  RECURSIVE SUBROUTINE  BuildBranchesOfTree(Node)
+    TYPE(PIGWNode), POINTER         :: Node
+    INTEGER                         :: ILinks,NLinks,NewLevel
+    INTEGER                         :: IX,IY,IZ,Status
+    REAL(DOUBLE),DIMENSION(3)       :: XX,DX,XL,XH
+!
+    IF(Node%LeafType=='LeafLeaf') THEN 
+!      Reset the Node to Null
+       Node%LeafType='NullNode'
+!      Initialize
+       NewLevel = Node%Level+1
+       DX(1)    = ScaleX(NewLevel)
+       DX(2)    = ScaleY(NewLevel)
+       DX(3)    = ScaleZ(NewLevel)
+!      Determine which Null nodes that will exist
+       NLinks = 0
+       DO IX=-1,1
+          DO IY=-1,1
+             DO IZ=-1,1
+                XX(1) = Node%X(1)+IX*DX(1)
+                XX(2) = Node%X(2)+IY*DX(2)
+                XX(3) = Node%X(3)+IZ*DX(3)
+                IF(.NOT. HasNode(XX)) THEN
+                   Nlinks=NLinks+1
+                ENDIF
+             ENDDO
+          ENDDO
+       ENDDO
+!      Allocate the Links
+       ALLOCATE(Node%Links(NLinks),STAT=Status)
+       IF(Status/=SUCCEED)CALL Halt('Link ALLOCATE failed in InitializePIGWRoot ')
+!      Allocate the Null Nodes
+       NLinks = 0
+       DO IX=-1,1
+          DO IY=-1,1
+             DO IZ=-1,1
+                XX(1) = Node%X(1)+IX*DX(1)
+                XX(2) = Node%X(2)+IY*DX(2)
+                XX(3) = Node%X(3)+IZ*DX(3)
+                IF(.NOT. HasNode(XX)) THEN
+                   NLinks=NLinks+1
+!                  Allocate Null node
+                   CALL NewPIGWNode(Node%Links(NLinks)%Link,NewLevel,1000,XX,AArray_O=.FALSE.)
+!                  Bounding Box of Null Node
+                   XL = XX-DX
+                   XH = XX+DX
+                   CALL NodeBoundingBox(XL,XH,Node%Links(NLinks)%Link%Box)
+                ENDIF
+             ENDDO
+          ENDDO
+       ENDDO
+!      Allocate the Links
+       Node%NLinks  = NLinks
+       RETURN
+    ELSE
+       DO ILinks=1,Node%NLinks
+          CALL BuildBranchesOfTree(Node%Links(ILinks)%Link)
+       ENDDO
+    ENDIF
+    RETURN
+!
+  END SUBROUTINE BuildBranchesOfTree
+!==================================================================
+!  Build The Branches
+!==================================================================
+  RECURSIVE SUBROUTINE  BuildLeafsOfTree(Node)
+    TYPE(PIGWNode), POINTER            :: Node
+    INTEGER                            :: ILinks,NLinks,NewLevel
+    INTEGER                            :: IX,IY,IZ,Status,I
+    REAL(DOUBLE)                       :: TotalWeight
+    REAL(DOUBLE),DIMENSION(3)          :: XX,DX,XL,XH
+    REAL(DOUBLE),DIMENSION(LenDOrderM) :: RhoX,ExcX,VxcX,IntFac
+!
+    IF(Node%LeafType=='LeafLeaf') THEN 
+!      Reset the Node to Null
+       Node%LeafType='NullNode'
+!      Initialize
+       NewLevel = Node%Level+1
+       DX(1)    = ScaleX(NewLevel)
+       DX(2)    = ScaleY(NewLevel)
+       DX(3)    = ScaleZ(NewLevel)
+!      Determine which Null nodes that will exist
+       NLinks = 0
+       DO IX=-1,1
+          DO IY=-1,1
+             DO IZ=-1,1
+                XX(1) = Node%X(1)+IX*DX(1)
+                XX(2) = Node%X(2)+IY*DX(2)
+                XX(3) = Node%X(3)+IZ*DX(3)
+                IF(.NOT. HasNode(XX)) THEN
+                   Nlinks=NLinks+1
+                ENDIF
+             ENDDO
+          ENDDO
+       ENDDO
+!      Allocate the Links
+       ALLOCATE(Node%Links(NLinks),STAT=Status)
+       IF(Status/=SUCCEED)CALL Halt('Link ALLOCATE failed in InitializePIGWRoot ')
+!      Allocate the Null Nodes
+       NLinks = 0
+       DO IX=-1,1
+          DO IY=-1,1
+             DO IZ=-1,1
+                XX(1) = Node%X(1)+IX*DX(1)
+                XX(2) = Node%X(2)+IY*DX(2)
+                XX(3) = Node%X(3)+IZ*DX(3)
+                IF(.NOT. HasNode(XX)) THEN
+                   NLinks=NLinks+1
+!                  Allocate Null node
+                   CALL NewPIGWNode(Node%Links(NLinks)%Link,NewLevel,1000,XX)
+!                  Bounding Box of Null Node
+                   XL = XX-DX
+                   XH = XX+DX
+                   CALL NodeBoundingBox(XL,XH,Node%Links(NLinks)%Link%Box)
+!                  Integration Weight
+                   CALL WWeight(XX,DX,Node%Links(NLinks)%Link%Box,Node%Links(NLinks)%Link%IntFactor)
+                   RhoX = RhoAtX(XX)
+                   CALL ExcVxc(RhoX,ExcX,VxcX)
+                   CALL NormalizeWCoefs(VxcX,DX(1),DX(2),DX(3))
+                   CALL NormalizeWCoefs(ExcX,DX(1),DX(2),DX(3))
+                   Node%Links(NLinks)%Link%WCoef = VxcX
+!                  Compute Initial Exc
+                   DO I=1,LenDOrder
+                      XCEnergy = XCEnergy + Node%Links(NLinks)%Link%IntFactor(I)*ExcX(I)
+                   ENDDO
+!                  Compute the Max Weight
+                   CALL MaxWWeight(XX,DX,Node%Links(NLinks)%Link%Box,IntFac)
+                   TotalWeight = Zero
+                   DO I=1,LenDOrder
+                      TotalWeight = TotalWeight+ABS(IntFac(I)*ExcX(I))
+                   ENDDO
+!                  End Scaling Nodes with no Weight
+                   IF(TotalWeight<TauDIPMW*1.D-2) THEN
+                      Node%Links(NLinks)%Link%LeafType='EnddLeaf'
+                   ENDIF
+!
+                ENDIF
+             ENDDO
+          ENDDO
+       ENDDO
+!      Allocate the Links
+       Node%NLinks  = NLinks
+       RETURN
+    ELSE
+       DO ILinks=1,Node%NLinks
+          CALL BuildLeafsOfTree(Node%Links(ILinks)%Link)
+       ENDDO
+    ENDIF
+    RETURN
+!
+  END SUBROUTINE BuildLeafsOfTree
 !==================================================================
 !  Allocate Node
 !==================================================================
-   SUBROUTINE NewPIGWNode(Node,ILevel,IType,X)
+   SUBROUTINE NewPIGWNode(Node,ILevel,IType,X,AArray_O)
      TYPE(PIGWNode), POINTER         :: Node
      INTEGER                         :: ILevel,Status
      INTEGER                         :: IType
      REAL(DOUBLE),DIMENSION(3)       :: X
+     LOGICAL,OPTIONAL                :: AArray_O
+     LOGICAL                         :: AArray
+!
+     AArray=.TRUE.
+     IF(PRESENT(AArray_O)) THEN
+        AArray=AArray_O
+     ENDIF
 !
      ALLOCATE(Node,STAT=Status)
      IF(Status/=SUCCEED)CALL Halt(' Node ALLOCATE failed in NewPIGWNode ')
@@ -322,14 +535,16 @@ MODULE DIPMWTree
      Node%X               = X
      CALL ComputeDX(ILevel,IType,Node%DX)
 !    Allocate Wavelet Coefs
-     ALLOCATE(Node%WCoef(1:LenDOrder),STAT=Status)
-     IF(Status/=SUCCEED)CALL Halt(' Node%WCoef ALLOCATE failed in NewPIGWNode ')
-!    Allocate Integration Factor
-     ALLOCATE(Node%IntFactor(1:LenDOrder),STAT=Status)
-     IF(Status/=SUCCEED)CALL Halt(' Node%IntFactor ALLOCATE failed in NewPIGWNode ')
-!    Intitialize WCoefs and IntFactor
-     Node%WCoef(:)        = Zero
-     Node%IntFactor(:)    = Zero
+     IF(AArray) THEN
+        ALLOCATE(Node%WCoef(1:LenDOrder),STAT=Status)
+        IF(Status/=SUCCEED) CALL Halt(' Node%WCoef ALLOCATE failed in NewPIGWNode ')
+!       Allocate Integration Factor
+        ALLOCATE(Node%IntFactor(1:LenDOrder),STAT=Status)
+        IF(Status/=SUCCEED) CALL Halt(' Node%IntFactor ALLOCATE failed in NewPIGWNode ')
+!       Intitialize WCoefs and IntFactor
+        Node%WCoef(:)        = Zero
+        Node%IntFactor(:)    = Zero
+     ENDIF
 !    Initialize Box
      Node%Box%Center      = Zero
      Node%Box%Half        = Zero
@@ -397,7 +612,7 @@ MODULE DIPMWTree
      INTEGER                           :: I,J,K,IJK
      REAL(DOUBLE)                      :: Lx,Ly,Lz,Rx,Ry,Rz
      REAL(DOUBLE)                      :: WX,WY,WZ
-     REAL(DOUBLE),DIMENSION(LenDOrder) :: IWeight
+     REAL(DOUBLE),DIMENSION(LenDOrderM):: IWeight
 
 !
      Lx = MIN(X(1)-Box%BndBox(1,1),DX(1))
@@ -430,7 +645,7 @@ MODULE DIPMWTree
      INTEGER                           :: I,J,K,IJK
      REAL(DOUBLE)                      :: Lx,Ly,Lz,Rx,Ry,Rz
      REAL(DOUBLE)                      :: WX,WY,WZ
-     REAL(DOUBLE),DIMENSION(LenDOrder) :: IWeight
+     REAL(DOUBLE),DIMENSION(LenDOrderM):: IWeight
 
 !
      Lx = MIN(X(1)-Box%BndBox(1,1),DX(1))
@@ -463,11 +678,11 @@ MODULE DIPMWTree
      REAL(DOUBLE)                          :: TotalWeight
      REAL(DOUBLE),DIMENSION(3)             :: DX,XX,DXX,XL,XH
      INTEGER                               :: NewLevel,IX,IY,IZ,NewIType,ILink,Status,NLinks,I,J,K
-     REAL(DOUBLE),DIMENSION(LenDOrder)     :: WECoef,WVCoef,IntValue
+     REAL(DOUBLE),DIMENSION(LenDOrderM)    :: WECoef,WVCoef,IntValue
 !
      INTEGER,DIMENSION(26)                 :: ITypeArray,ILeafType
      REAL(DOUBLE),DIMENSION(26,3)          :: XposArray
-     REAL(DOUBLE),DIMENSION(26,LenDOrder)  :: WCoefArray,IntVArray
+     REAL(DOUBLE),DIMENSION(26,LenDOrderM) :: WCoefArray,IntVArray
      REAL(DOUBLE),PARAMETER                :: Mix=0.01D0
 !
      IF(Node%LeafType=='LeafLeaf') THEN 
@@ -511,14 +726,16 @@ MODULE DIPMWTree
                  ILeafType(NLinks)              = 1
                  ITypeArray(NLinks)             = NewIType
                  XposArray(NLinks,1:3)          = XX(1:3)
-                 WCoefArray(NLinks,1:LenDOrder) = WVCoef(1:LenDOrder)
+!                 WCoefArray(NLinks,1:LenDOrder) = WVCoef(1:LenDOrder)
+                 WCoefArray(NLinks,1:LenDOrder) = WECoef(1:LenDOrder)
                  IntVArray(NLinks,1:LenDOrder)  = IntValue(1:LenDOrder)
               ELSE
                  NLinks = NLinks+1
                  ILeafType(NLinks)              = 0
                  ITypeArray(NLinks)             = NewIType
                  XposArray(NLinks,1:3)          = XX(1:3)
-                 WCoefArray(NLinks,1:LenDOrder) = WVCoef(1:LenDOrder)
+!                 WCoefArray(NLinks,1:LenDOrder) = WVCoef(1:LenDOrder)
+                 WCoefArray(NLinks,1:LenDOrder) = WECoef(1:LenDOrder)
                  IntVArray(NLinks,1:LenDOrder)  = IntValue(1:LenDOrder)
               ENDIF
            ENDIF
@@ -554,7 +771,9 @@ MODULE DIPMWTree
         ENDDO
 !       We are Done, Return
         RETURN
-     ELSEIF(Node%LeafType=='NodeNode') THEN
+     ELSEIF(Node%LeafType=='EnddLeaf') THEN 
+        RETURN
+     ELSE
         DO ILink=1,Node%NLinks
            CALL MakePIGWTree(Node%Links(ILink)%Link)
         ENDDO
@@ -567,7 +786,7 @@ MODULE DIPMWTree
 !==================================================================
    SUBROUTINE NormalizeWCoefs(WCoef,DX,DY,DZ)
      INTEGER                           :: I,J,K,IJK
-     REAL(DOUBLE),DIMENSION(LenDOrder) :: WCoef
+     REAL(DOUBLE),DIMENSION(LenDOrderM):: WCoef
      REAL(DOUBLE)                      :: DX,DY,DZ  
 !
      DO K=0,DOrder
@@ -588,7 +807,7 @@ MODULE DIPMWTree
        REAL(DOUBLE),DIMENSION(3)         :: DX,DX2,DX3,XD,XD2,XD3
        INTEGER                           :: NewLevel,NewIType,NN,I,J,K
        INTEGER                           :: IJK0,IJK1,IJK2,IJK3
-       REAL(DOUBLE),DIMENSION(LenDOrder) :: RhoX,WECoef,WVCoef,Tmp1,Tmp2
+       REAL(DOUBLE),DIMENSION(LenDOrderM):: RhoX,WECoef,WVCoef,Tmp1,Tmp2
        REAL(DOUBLE)                      :: SX,SY,SZ
 !
        DX(1) = ScaleX(NewLevel)
@@ -1011,15 +1230,17 @@ MODULE DIPMWTree
 !
      IF(IsTrue) RETURN
 !    Determine if in in Bounding Box 
-     IF(ABS(Node%Box%Center(1)-Xpos(1)) > Node%Box%Half(1)) RETURN
-     IF(ABS(Node%Box%Center(2)-Xpos(2)) > Node%Box%Half(2)) RETURN
-     IF(ABS(Node%Box%Center(3)-Xpos(3)) > Node%Box%Half(3)) RETURN
+     IF(ABS(Node%X(1)-Xpos(1)) > Node%DX(1)) RETURN
+     IF(ABS(Node%X(2)-Xpos(2)) > Node%DX(2)) RETURN
+     IF(ABS(Node%X(3)-Xpos(3)) > Node%DX(3)) RETURN
 !    Determine is the X positions are te Same
      IF(ABS(Node%X(1)-Xpos(1)) < DTol .AND. &
         ABS(Node%X(2)-Xpos(2)) < DTol .AND. &
         ABS(Node%X(3)-Xpos(3)) < DTol) THEN
-        IsTrue = .TRUE.
-        RETURN
+        IF(Node%LeafType .NE. 'NullNode') THEN
+           IsTrue = .TRUE.
+           RETURN
+        ENDIF
      ENDIF
 !    If No links, return
      IF(Node%NLinks==0) RETURN
@@ -1034,15 +1255,18 @@ MODULE DIPMWTree
 !  Wrapper for RhoAtPoint
 !=================================================================================
    FUNCTION RhoAtX(XX) 
-     REAL(DOUBLE),DIMENSION(LenDOrder) :: RhoAtX
+     REAL(DOUBLE),DIMENSION(LenDOrderM):: RhoAtX
      REAL(DOUBLE),DIMENSION(3)         :: XX
      INTEGER                           :: NC
 !
      RhoAtX(:)  = Zero
      NCallToRho = NCallToRho+1
      DO NC=1,CS_IN%NCells
-        Xpos(1:3) = XX(1:3)+CS_IN%CellCarts%D(1:3,NC)
-        RhoSum(:)=Zero
+        Xpos(1) = XX(1)+CS_IN%CellCarts%D(1,NC)
+        Xpos(2) = XX(2)+CS_IN%CellCarts%D(2,NC)
+        Xpos(3) = XX(3)+CS_IN%CellCarts%D(3,NC) 
+!
+        RhoSum(:) = Zero
         CALL RhoAtPointX(RhoRoot)
         RhoAtX(:) = RhoAtX(:)+RhoSum(:)
      ENDDO
@@ -1056,8 +1280,8 @@ MODULE DIPMWTree
      INTEGER                                    :: L,M,N,LMN,L1,L2,J
      REAL(DOUBLE)                               :: RQx,RQy,RQz,RQ2,RL1
      REAL(DOUBLE)                               :: Xpt,Zeta,TwoZ,X
-     REAL(DOUBLE),DIMENSION(1:43)               :: W
-     REAL(DOUBLE),DIMENSION(0:7)                :: LamX,LamY,LamZ
+     REAL(DOUBLE),DIMENSION(1:200)              :: Tmp
+     REAL(DOUBLE),DIMENSION(0:10)               :: LamX,LamY,LamZ
 !----------------------------------------------------------------------------------
      RQx=Node%Box%Center(1)-Xpos(1)
      IF(ABS(RQx)>Node%Box%Half(1)) RETURN
@@ -1097,9 +1321,15 @@ MODULE DIPMWTree
               CASE(2)
                  INCLUDE "MMA/DivRho_2_0.Inc"
               CASE(3)
-!                 INCLUDE "MMA/DivRho_3_0.Inc"
+                 INCLUDE "MMA/DivRho_3_0.Inc"
               CASE(4)
-!                 INCLUDE "MMA/DivRho_4_0.Inc"
+                 INCLUDE "MMA/DivRho_4_0.Inc"
+              CASE(5)
+!                 INCLUDE "MMA/DivRho_5_0.Inc"
+              CASE(6)
+!                 INCLUDE "MMA/DivRho_6_0.Inc"
+              CASE(7)
+!                 INCLUDE "MMA/DivRho_7_0.Inc"
               END SELECT
            CASE(1)
               SELECT CASE(Node%Ell)
@@ -1110,9 +1340,15 @@ MODULE DIPMWTree
               CASE(2)
                  INCLUDE "MMA/DivRho_2_1.Inc"
               CASE(3)
-!                 INCLUDE "MMA/DivRho_3_1.Inc"
+                 INCLUDE "MMA/DivRho_3_1.Inc"
               CASE(4)
-!                 INCLUDE "MMA/DivRho_4_1.Inc"
+                 INCLUDE "MMA/DivRho_4_1.Inc"
+              CASE(5)
+!                 INCLUDE "MMA/DivRho_5_1.Inc"
+              CASE(6)
+!                 INCLUDE "MMA/DivRho_6_1.Inc"
+              CASE(7)
+!                 INCLUDE "MMA/DivRho_7_1.Inc"
               END SELECT
            CASE(2)
               SELECT CASE(Node%Ell)
@@ -1123,9 +1359,15 @@ MODULE DIPMWTree
               CASE(2)
                  INCLUDE "MMA/DivRho_2_2.Inc"
               CASE(3)
-!                 INCLUDE "MMA/DivRho_3_2.Inc"
+                 INCLUDE "MMA/DivRho_3_2.Inc"
               CASE(4)
-!                 INCLUDE "MMA/DivRho_4_2.Inc"
+                 INCLUDE "MMA/DivRho_4_2.Inc"
+              CASE(5)
+!                 INCLUDE "MMA/DivRho_5_2.Inc"
+              CASE(6)
+!                 INCLUDE "MMA/DivRho_6_2.Inc"
+              CASE(7)
+!                 INCLUDE "MMA/DivRho_7_2.Inc"
               END SELECT
            CASE(3)
               SELECT CASE(Node%Ell)
@@ -1136,9 +1378,15 @@ MODULE DIPMWTree
               CASE(2)
                  INCLUDE "MMA/DivRho_2_3.Inc"
               CASE(3)
-!                 INCLUDE "MMA/DivRho_3_3.Inc"
+                 INCLUDE "MMA/DivRho_3_3.Inc"
               CASE(4)
-!                 INCLUDE "MMA/DivRho_4_3.Inc"
+                 INCLUDE "MMA/DivRho_4_3.Inc"
+              CASE(5)
+!                 INCLUDE "MMA/DivRho_5_3.Inc"
+              CASE(6)
+!                 INCLUDE "MMA/DivRho_6_3.Inc"
+              CASE(7)
+!                 INCLUDE "MMA/DivRho_7_3.Inc"
               END SELECT
            END SELECT
         ENDIF
@@ -1151,7 +1399,7 @@ MODULE DIPMWTree
 !  Calculate Exc 
 !====================================================================================
    SUBROUTINE ExcVxc(RhoXX,Exc,Vxc)
-     REAL(DOUBLE),DIMENSION(LenDOrder) :: RhoXX,Exc,Vxc
+     REAL(DOUBLE),DIMENSION(LenDOrderM):: RhoXX,Exc,Vxc
      REAL(DOUBLE)                      :: InvRho,d0Exc,d1Exc,d2Exc,d3Exc,d10Exc
      REAL(DOUBLE)                      :: d4Exc,d5Exc,d6Exc,d7Exc,d8Exc,d9Exc
      REAL(DOUBLE)                      :: d0Vxc,d1Vxc,d2Vxc,d3Vxc
@@ -1210,7 +1458,7 @@ MODULE DIPMWTree
               d2Vxc  =  Half*d3Exc
               d3Vxc  =  Half*d4Exc
            ENDIF
-           INCLUDE "MMA/RhoToExc_1.Inc"
+           INCLUDE "MMA/Functionals/RhoToExc_1.Inc"
         CASE(2) 
            IF(RhoXX(1) .LE. Zero) THEN
               Exc = Zero
@@ -1234,7 +1482,7 @@ MODULE DIPMWTree
               d5Vxc  =  Half*d6Exc
               d6Vxc  =  Half*d7Exc
            ENDIF
-           INCLUDE "MMA/RhoToExc_2.Inc"
+           INCLUDE "MMA/Functionals/RhoToExc_2.Inc"
         CASE(3) 
            IF(RhoXX(1) .LE. Zero) THEN
               Exc = Zero
@@ -1264,11 +1512,104 @@ MODULE DIPMWTree
               d8Vxc  =  Half*d9Exc
               d9Vxc  =  Half*d10Exc
            ENDIF
-           INCLUDE "MMA/RhoToExc_3.Inc"
+           INCLUDE "MMA/Functionals/RhoToExc_3.Inc"
         END SELECT
      END SELECT
 !
    END SUBROUTINE ExcVxc
+!====================================================================================
+!  Calculate Exc 
+!====================================================================================
+   SUBROUTINE ExcVxc_New(RhoXX,Exc,Vxc)
+     REAL(DOUBLE),DIMENSION(LenDOrderM):: RhoXX,Exc,Vxc
+     REAL(DOUBLE),DIMENSION(LenDOrderM) ::RhoTmp0,RhoTmp1,RhoTmp2
+     REAL(DOUBLE),DIMENSION(0:3*DMaxM) :: dRhoExc,dRhoVxc
+     REAL(DOUBLE)                      :: Tmp1,FacExc,FacVxc,FacN,SUM
+     INTEGER                           :: N,I,J,K,R,S,T,IJK,RST,RSTP
+     CHARACTER(LEN=20)                 :: ExchangeType
+!
+     ExchangeType = 'SlaterDirac'
+     SELECT CASE(ExchangeType) 
+!    Slater-Dirac exchange
+     CASE('SlaterDirac')
+        SELECT CASE(DOrder)
+        CASE(0)
+           IF(RhoXX(1) .LE. Zero) THEN
+              Exc = Zero
+              Vxc = Zero
+              RETURN
+           ELSE
+              INCLUDE 'MMA/Functionals/Exc_SlaterDirac_D0.Inc'
+           ENDIF
+        CASE(1)
+           IF(RhoXX(1) .LE. Zero) THEN
+              Exc = Zero
+              Vxc = Zero
+              RETURN
+           ELSE
+              INCLUDE 'MMA/Functionals/Exc_SlaterDirac_D1.Inc'
+           ENDIF
+        CASE(2) 
+           IF(RhoXX(1) .LE. Zero) THEN
+              Exc = Zero
+              Vxc = Zero
+              RETURN
+           ELSE
+              INCLUDE 'MMA/Functionals/Exc_SlaterDirac_D2.Inc'
+           ENDIF
+        CASE(3) 
+           IF(RhoXX(1) .LE. Zero) THEN
+              Exc = Zero
+              Vxc = Zero
+              RETURN
+           ELSE
+              INCLUDE 'MMA/Functionals/Exc_SlaterDirac_D3.Inc'
+           ENDIF
+        END SELECT
+!       If DOrder==0, we are done
+        IF(DOrder==0) RETURN
+!       Initialize RhoTmp1 Exc and Vxc n==1
+        RhoXX(1) = Zero
+        DO IJK=1,LenDOrder
+           RhoTmp1(IJK) = RhoXX(IJK)
+           Exc(IJK)     = dRhoExc(1)*RhoXX(IJK)
+           Vxc(IJK)     = dRhoVxc(1)*RhoXX(IJK)
+        ENDDO
+        Exc(1)     = dRhoExc(0)
+        Vxc(1)     = dRhoVxc(0)
+!       Loop    
+        DO N = 2,3*DOrder
+           FacN   =  One/DBLE(N)
+           FacExc =  dRhoExc(N)
+           FacVxc =  dRhoVxc(N)
+           RhoTmp1(1) = Zero
+           DO K=0,DOrder
+              DO J=0,DOrder
+                 DO I=0,DOrder
+                    IJK = 1+I+J*DMax+K*DMax*DMax
+                    SUM = Zero 
+                    DO T=0,K
+                       DO S=0,J
+                          DO R=0,I
+                             RST  = 1+R+S*DMax+T*DMax*Dmax
+                             RSTP = 1+(I-R)+(J-S)*DMax+(K-T)*DMax*DMax 
+                             SUM  = SUM + RhoXX(RST)*RhoTmp1(RSTP)
+                          ENDDO
+                       ENDDO
+                    ENDDO
+                    RhoTmp2(IJK) = SUM*FacN
+                    Exc(IJK)     = Exc(IJK)+FacExc*SUM*FacN
+                    Vxc(IJK)     = Vxc(IJK)+FacVxc*SUM*FacN
+                 ENDDO
+              ENDDO
+           ENDDO
+           DO IJK=1,LenDOrder
+              RhoTmp1(IJK) = RhoTmp2(IJK)
+           ENDDO
+        ENDDO
+     END SELECT
+!
+   END SUBROUTINE ExcVxc_New
 !==========================================================================
 !  Make the Bounding Box Periodic
 !==========================================================================
@@ -1357,7 +1698,7 @@ MODULE DIPMWTree
      TYPE(PIGWNode), POINTER                    :: Node
      INTEGER                                    :: I,J,K,IJK,ILink
      REAL(DOUBLE)                               :: RQx,RQy,RQz,XR,YR,ZR,FacX,FacY,FacZ
-     REAL(DOUBLE),DIMENSION(0:DOrder)           :: WVx,WVy,WVz
+     REAL(DOUBLE),DIMENSION(0:DOrderM)          :: WVx,WVy,WVz
 !----------------------------------------------------------------------------------
 !    See if point overlaps with bounding box 
 !    Test to See If We Overlap Wavelet in the Box
@@ -1440,8 +1781,8 @@ MODULE DIPMWTree
    SUBROUTINE PrintNode(Node)
      TYPE(PIGWNode), POINTER            :: Node
      INTEGER                            :: I,J,K,IJK
-     REAL(DOUBLE),DIMENSION(LenDOrder)  :: IntValue
-     REAL(DOUBLE)                       :: MaxWeight
+     REAL(DOUBLE),DIMENSION(LenDOrderM) :: IntValue
+     REAL(DOUBLE)                       :: Weight,MaxWeight
 !
      WRITE(*,*) "----------------------------"
      WRITE(*,*) 'Level    = ',Node%Level
@@ -1459,29 +1800,85 @@ MODULE DIPMWTree
      DO K=0,DOrder
         DO J=0,DOrder
            IJK = 1+DMax*J+DMax*DMax*K
-           WRITE(*,'4(5X,I1,I1,I1,1X,D16.8)') (I,J,K,Node%WCoef(IJK+I),I=0,DOrder) 
+           WRITE(*,990) (I,J,K,Node%WCoef(IJK+I),I=0,DOrder) 
         ENDDO
      ENDDO
      WRITE(*,*) 'Integration  Factor'
      DO K=0,DOrder
         DO J=0,DOrder
            IJK = 1+DMax*J+DMax*DMax*K
-           WRITE(*,'4(5X,I1,I1,I1,1X,D16.8)') (I,J,K,Node%IntFactor(IJK+I),I=0,DOrder) 
+           WRITE(*,990) (I,J,K,Node%IntFactor(IJK+I),I=0,DOrder) 
         ENDDO
      ENDDO
+!
+     Weight = Zero
+     DO I=1,LenDOrder
+        Weight = Weight+Node%IntFactor(I)*Node%WCoef(I)
+     ENDDO
+! 
      CALL MaxWWeight(Node%X,Node%DX,Node%Box,IntValue)
      MaxWeight = Zero
      DO I=1,LenDOrder
         MaxWeight = MaxWeight+ABS(IntValue(I))*ABS(Node%WCoef(I))
      ENDDO
-     WRITE(*,*) 'Max Weight = ',MaxWeight
+!
 
+     WRITE(*,*) '    Weight = ',Weight
+     WRITE(*,*) 'Max Weight = ',MaxWeight
      WRITE(*,*) "----------------------------"
+ 990 FORMAT(5X,I1,I1,I1,1X,D16.8,5X,I1,I1,I1,1X,D16.8,5X,I1,I1,I1,1X,D16.8,5X,I1,I1,I1,1X,D16.8)
 !
    END SUBROUTINE PrintNode
+!==================================================================
+!  Find a Node
+!==================================================================
+   SUBROUTINE FindNode(XX)
+     REAL(DOUBLE),DIMENSION(3)  :: XX
 !
+     IF(ABS(XX(1)-XCBox%Center(1))>XCBox%Half(1)) THEN
+        RETURN
+     ELSEIF(ABS(XX(2)-XCBox%Center(2))>XCBox%Half(2)) THEN
+        RETURN
+     ELSEIF(ABS(XX(3)-XCBox%Center(3))>XCBox%Half(3)) THEN
+        RETURN
+     ELSE
+        Xpos   = XX
+        CALL FindThisNode(PIGWRoot)
+     ENDIF
+   END SUBROUTINE FindNode
+!==================================================================
+!  Determine if PIGWTree has this Node
+!==================================================================
+   RECURSIVE SUBROUTINE FindThisNode(Node)
+     TYPE(PIGWNode), POINTER      :: Node
+     INTEGER                      :: ILink,I
+     REAL(DOUBLE)                 :: RQx,RQy,RQz,Weight
+     REAL(DOUBLE),PARAMETER       :: DTol=1.D-10
 !
+!    Determine if in in Bounding Box 
+     IF(ABS(Node%X(1)-Xpos(1)) > Node%DX(1)) RETURN 
+     IF(ABS(Node%X(2)-Xpos(2)) > Node%DX(2)) RETURN
+     IF(ABS(Node%X(3)-Xpos(3)) > Node%DX(3)) RETURN
+!    Determine is the X positions are te Same
+     IF(ABS(Node%X(1)-Xpos(1)) < DTol .AND. &
+        ABS(Node%X(2)-Xpos(2)) < DTol .AND. &
+        ABS(Node%X(3)-Xpos(3)) < DTol) THEN
+        Weight = Zero
+        DO I=1,LenDOrder
+           Weight = Weight+Node%IntFactor(I)*Node%WCoef(I)
+        ENDDO
+        WRITE(*,*) 'Weight = ',Weight
+!        CALL PrintNode(Node)
+     ENDIF
+!    If No links, return
+     IF(Node%NLinks==0) RETURN
+!    Reccur Down
+     DO ILink=1,Node%NLinks
+        CALL FindThisNode(Node%Links(ILink)%Link)
+     ENDDO
 !
+   END SUBROUTINE FindThisNode
+
 END MODULE DIPMWTree
 !!$        CASE(1)
 !!$           WvltInt(1,1) = 0.0D0

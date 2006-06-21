@@ -20,7 +20,7 @@ MODULE TreeWalkDIPMW
   TYPE(BBox)                     :: PBox
   TYPE(PrimPair)                 :: Prim
 ! Tmp Matrices
-  REAL(DOUBLE),DIMENSION(0:DOrder,0:4,0:100)  :: TmpMatX,TmpMatY,TmpMatZ
+!  REAL(DOUBLE),DIMENSION(0:DOrder,0:4,0:100)  :: TmpMatX,TmpMatY,TmpMatZ
   CONTAINS 
 !-------------------------------------------------------------------------------------
   RECURSIVE SUBROUTINE KxcWalkDIPMW(Node)
@@ -29,7 +29,8 @@ MODULE TreeWalkDIPMW
     INTEGER                                      :: STypeX,STypeY,STypeZ
     REAL(DOUBLE)                                 :: PQx,PQy,PQz
     REAL(DOUBLE)                                 :: Zeta,SqZeta
-    REAL(DOUBLE),DIMENSION(0:DOrder,0:4)         :: WxVec,WyVec,WzVec
+!
+    REAL(DOUBLE),DIMENSION(0:DOrderM,0:4)        :: WxVec,WyVec,WzVec
 !
 !   Does PBox intersect this DIPMW BBox? 
 !
@@ -117,7 +118,7 @@ MODULE TreeWalkDIPMW
     REAL(DOUBLE)                                 :: Zeta,SqZeta,RDist,DX0
     REAL(DOUBLE)                                 :: OneSqZeta,RZeta1,XZeta1,RmXZeta1,RpXZeta1
     REAL(DOUBLE)                                 :: ErfRmX0,Erf0,ErfRpX0,ExpRmX0,Exp0,ExpRpX0
-    REAL(DOUBLE),DIMENSION(0:DOrder,0:4)         :: WV    
+    REAL(DOUBLE),DIMENSION(0:DOrderM,0:4)        :: WV    
     REAL(DOUBLE)                                 :: t1,t2,t3,t4,t5,t6,t7,t8,t9,t10,t11,t12,t13,t14, &
                                                     t15,t16,t17,t18,t19,t20,t21,t22,t23,t24,t25,t26, &
                                                     t27,t28,t29,t30,t31,t32,t33,t34,t35,t36,t37,t38, &
@@ -147,13 +148,13 @@ MODULE TreeWalkDIPMW
        CASE(0)
           SELECT CASE(Ell)
           CASE(0)
-             INCLUDE 'MMA/IntWavelet_Asy_0_0.Inc'
+!             INCLUDE 'MMA/IntWavelet_Asy_0_0.Inc'
           CASE(1)
-             INCLUDE 'MMA/IntWavelet_Asy_0_1.Inc'
+!             INCLUDE 'MMA/IntWavelet_Asy_0_1.Inc'
           CASE(2)
-             INCLUDE 'MMA/IntWavelet_Asy_0_2.Inc'
+!             INCLUDE 'MMA/IntWavelet_Asy_0_2.Inc'
           CASE(3)
-             INCLUDE 'MMA/IntWavelet_Asy_0_3.Inc'
+!             INCLUDE 'MMA/IntWavelet_Asy_0_3.Inc'
           CASE(4)
 !             INCLUDE 'MMA/IntWavelet_Asy_0_4.Inc'
           CASE(5)
@@ -168,13 +169,13 @@ MODULE TreeWalkDIPMW
        CASE(1)
           SELECT CASE(Ell)
           CASE(0)
-             INCLUDE 'MMA/IntWavelet_Asy_1_0.Inc'
+!             INCLUDE 'MMA/IntWavelet_Asy_1_0.Inc'
           CASE(1)
-             INCLUDE 'MMA/IntWavelet_Asy_1_1.Inc'
+!             INCLUDE 'MMA/IntWavelet_Asy_1_1.Inc'
           CASE(2)
-             INCLUDE 'MMA/IntWavelet_Asy_1_2.Inc'
+!             INCLUDE 'MMA/IntWavelet_Asy_1_2.Inc'
           CASE(3)
-             INCLUDE 'MMA/IntWavelet_Asy_1_3.Inc'
+!             INCLUDE 'MMA/IntWavelet_Asy_1_3.Inc'
           CASE(4)
 !             INCLUDE 'MMA/IntWavelet_Asy_1_4.Inc'
           CASE(5)
@@ -189,13 +190,13 @@ MODULE TreeWalkDIPMW
        CASE(2)
           SELECT CASE(Ell)
           CASE(0)
-             INCLUDE 'MMA/IntWavelet_Asy_2_0.Inc'
+!             INCLUDE 'MMA/IntWavelet_Asy_2_0.Inc'
           CASE(1)
-             INCLUDE 'MMA/IntWavelet_Asy_2_1.Inc'
+!             INCLUDE 'MMA/IntWavelet_Asy_2_1.Inc'
           CASE(2)
-             INCLUDE 'MMA/IntWavelet_Asy_2_2.Inc'
+!             INCLUDE 'MMA/IntWavelet_Asy_2_2.Inc'
           CASE(3)
-             INCLUDE 'MMA/IntWavelet_Asy_2_3.Inc'
+!             INCLUDE 'MMA/IntWavelet_Asy_2_3.Inc'
           CASE(4)
 !             INCLUDE 'MMA/IntWavelet_Asy_2_4.Inc'
           CASE(5)
@@ -210,13 +211,13 @@ MODULE TreeWalkDIPMW
        CASE(3)
           SELECT CASE(Ell)
           CASE(0)
-             INCLUDE 'MMA/IntWavelet_Asy_3_0.Inc'
+!             INCLUDE 'MMA/IntWavelet_Asy_3_0.Inc'
           CASE(1)
-             INCLUDE 'MMA/IntWavelet_Asy_3_1.Inc'
+!             INCLUDE 'MMA/IntWavelet_Asy_3_1.Inc'
           CASE(2)
-             INCLUDE 'MMA/IntWavelet_Asy_3_2.Inc'
+!             INCLUDE 'MMA/IntWavelet_Asy_3_2.Inc'
           CASE(3)
-             INCLUDE 'MMA/IntWavelet_Asy_3_3.Inc'
+!             INCLUDE 'MMA/IntWavelet_Asy_3_3.Inc'
           CASE(4)
 !             INCLUDE 'MMA/IntWavelet_Asy_3_4.Inc'
           CASE(5)
@@ -248,13 +249,13 @@ MODULE TreeWalkDIPMW
        CASE(0)
           SELECT CASE(Ell)
           CASE(0)
-             INCLUDE 'MMA/IntWavelet_0_0.Inc'
+!             INCLUDE 'MMA/IntWavelet_0_0.Inc'
           CASE(1)
-             INCLUDE 'MMA/IntWavelet_0_1.Inc'
+!             INCLUDE 'MMA/IntWavelet_0_1.Inc'
           CASE(2)
-             INCLUDE 'MMA/IntWavelet_0_2.Inc'
+!             INCLUDE 'MMA/IntWavelet_0_2.Inc'
           CASE(3)
-             INCLUDE 'MMA/IntWavelet_0_3.Inc'
+!             INCLUDE 'MMA/IntWavelet_0_3.Inc'
           CASE(4)
 !             INCLUDE 'MMA/IntWavelet_0_4.Inc'
           CASE(5)
@@ -269,13 +270,13 @@ MODULE TreeWalkDIPMW
        CASE(1)
           SELECT CASE(Ell)
           CASE(0)
-             INCLUDE 'MMA/IntWavelet_1_0.Inc'
+!             INCLUDE 'MMA/IntWavelet_1_0.Inc'
           CASE(1)
-             INCLUDE 'MMA/IntWavelet_1_1.Inc'
+!             INCLUDE 'MMA/IntWavelet_1_1.Inc'
           CASE(2)
-             INCLUDE 'MMA/IntWavelet_1_2.Inc'
+!             INCLUDE 'MMA/IntWavelet_1_2.Inc'
           CASE(3)
-             INCLUDE 'MMA/IntWavelet_1_3.Inc'
+!             INCLUDE 'MMA/IntWavelet_1_3.Inc'
           CASE(4)
 !             INCLUDE 'MMA/IntWavelet_1_4.Inc'
           CASE(5)
@@ -290,13 +291,13 @@ MODULE TreeWalkDIPMW
        CASE(2)
           SELECT CASE(Ell)
           CASE(0)
-             INCLUDE 'MMA/IntWavelet_2_0.Inc'
+!             INCLUDE 'MMA/IntWavelet_2_0.Inc'
           CASE(1)
-             INCLUDE 'MMA/IntWavelet_2_1.Inc'
+!             INCLUDE 'MMA/IntWavelet_2_1.Inc'
           CASE(2)
-             INCLUDE 'MMA/IntWavelet_2_2.Inc'
+!             INCLUDE 'MMA/IntWavelet_2_2.Inc'
           CASE(3)
-             INCLUDE 'MMA/IntWavelet_2_3.Inc'
+!             INCLUDE 'MMA/IntWavelet_2_3.Inc'
           CASE(4)
 !             INCLUDE 'MMA/IntWavelet_2_4.Inc'
           CASE(5)
@@ -311,13 +312,13 @@ MODULE TreeWalkDIPMW
        CASE(3)
           SELECT CASE(Ell)
           CASE(0)
-             INCLUDE 'MMA/IntWavelet_3_0.Inc'
+!             INCLUDE 'MMA/IntWavelet_3_0.Inc'
           CASE(1)
-             INCLUDE 'MMA/IntWavelet_3_1.Inc'
+!             INCLUDE 'MMA/IntWavelet_3_1.Inc'
           CASE(2)
-             INCLUDE 'MMA/IntWavelet_3_2.Inc'
+!             INCLUDE 'MMA/IntWavelet_3_2.Inc'
           CASE(3)
-             INCLUDE 'MMA/IntWavelet_3_3.Inc'
+!             INCLUDE 'MMA/IntWavelet_3_3.Inc'
           CASE(4)
 !             INCLUDE 'MMA/IntWavelet_3_4.Inc'
           CASE(5)

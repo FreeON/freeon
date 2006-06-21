@@ -30,10 +30,10 @@ PROGRAM DIPMWavelet
   TYPE(TIME)                     :: TimeRhoToTree,TimeDIPMWTree,TimeMakeKxc
   REAL(DOUBLE)                   :: Electrons,TmpDbl,Error
   CHARACTER(LEN=3)               :: SCFCycle
-  CHARACTER(LEN=4),PARAMETER     :: Prog='DIPMW'
-  CHARACTER(LEN=12),PARAMETER    :: Sub1='DIPMW.RhoTree' 
-  CHARACTER(LEN=12),PARAMETER    :: Sub2='DIPMW.Tree' 
-  CHARACTER(LEN=12),PARAMETER    :: Sub3='DIPMW.MakeKxc' 
+  CHARACTER(LEN=5),PARAMETER     :: Prog='DIPMW'
+  CHARACTER(LEN=15),PARAMETER    :: Sub1='DIPMW.RhoTree  ' 
+  CHARACTER(LEN=15),PARAMETER    :: Sub2='DIPMW.TreeBuild' 
+  CHARACTER(LEN=15),PARAMETER    :: Sub3='DIPMW.MakeKxc  ' 
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg 
 !-------------------------------------------------------------------------------
 ! Macro the start up
@@ -56,9 +56,10 @@ PROGRAM DIPMWavelet
   WRITE(*,*) "RhoToTree = ",TimeRhoToTree%CPUS,TimeRhoToTree%WALL
 ! Genergate the Wavelet Representation of the XC potential
   CALL Elapsed_Time(TimeDIPMWTree,'Init')
-  CALL DIPMWTree(20)
+  CALL DIPMWTreeBuild(20)
   CALL Elapsed_Time(TimeDIPMWTree,'Accum')
   WRITE(*,*) "RhoToPIGW = ",TimeDIPMWTree%CPUS,TimeDIPMWTree%WALL
+  IF(.TRUE.) STOP
 ! Allocate Kxc
   CALL NewBraBlok(BS)
   CALL New(Kxc)
@@ -67,8 +68,8 @@ PROGRAM DIPMWavelet
   CALL MakeKxcDIPMW(Kxc,PIGWRoot)
   CALL Elapsed_Time(TimeMakeKxc,'Accum')
   WRITE(*,*) " TimeMakeKxc = ",TimeMakeKxc%CPUS,TimeMakeKxc%WALL
-!
   CALL PPrint(Kxc,'Kxc',Unit_O=6)
+  IF(.TRUE.) STOP
 ! Delete the RhoTree,PIGWRoot and BraBloks
   CALL DeleteRhoTree(RhoRoot)
   CALL DeleteDIPMWTree(PIGWRoot)

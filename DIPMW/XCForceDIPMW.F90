@@ -56,7 +56,7 @@ PROGRAM XCForceDIPMW
 ! Convert density to a 5-D BinTree
   CALL RhoToTree(Args)
 ! Genergate the Wavelet Representation of the XC potential
-  CALL DIPMWTree(20)
+  CALL DIPMWTreeBuild(20)
 ! Delete the density
   CALL DeleteRhoTree(RhoRoot)
 ! More allocations 
