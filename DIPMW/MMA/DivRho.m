@@ -33,7 +33,7 @@
 *)
 (* INDEXING OF ARRAY ELEMENTS *)
 MaxEll=2;
-MaxOrder=3;
+MaxOrder=1;
 LBegin[L_]:=(L*(L+1)*(L+2))/6+1;
 LMNDex[L_,M_,N_]:=LBegin[L+M+N]+N*(2*(L+M+N)-N+3)/2+M;
 IJK[i_,j_,k_,O_] = 1+i+(O+1)*j+(O+1)*(O+1)*k;
@@ -44,8 +44,8 @@ Get["FixedNumberForm.m"];
 Get["Format.m"];
 Get["Optimize.m"];
 
-SetOptions[FortranAssign,AssignOptimize->False,AssignPrecision->20,AssignMaxSize->500,AssignBreak->{180," & \n "},
-           AssignTemporary->{W,Array},AssignTemporary->{W,Array},AssignToArray->{RhoSum,HGCo}];
+SetOptions[FortranAssign,AssignOptimize->False,AssignPrecision->20,AssignMaxSize->500,AssignBreak->{128," & \n "},
+           AssignTemporary->{Tmp,Array},AssignTemporary->{Tmp,Array},AssignToArray->{RhoSum,HGCo,LamX,LamY,LamZ}];
 
 SetOptions[OpenWrite, PageWidth -> 200];
 
@@ -57,45 +57,29 @@ FileName=StringJoin[FileName,ToString[MaxEll],"_",ToString[MaxOrder],".Inc"];
 Print[" Openned ",FileName];
 OpenWrite[FileName];
 
-Rho=0;
-Expon = Exp[-Zeta*(RQx*RQx+RQy*RQy+RQz*RQz)];
-LamX[0]=1;
-LamY[0]=1;
-LamZ[0]=1;
-LamX[1]=TwoZeta*RQx;
-LamY[1]=TwoZeta*RQy;
-LamZ[1]=TwoZeta*RQz;
 Do[
-  LamX[l]=TwoZeta*(RQx*LamX[l-1]-(l-1)*LamX[l-2]);
-  LamY[l]=TwoZeta*(RQy*LamY[l-1]-(l-1)*LamY[l-2]);
-  LamZ[l]=TwoZeta*(RQz*LamZ[l-1]-(l-1)*LamZ[l-2]);
-,{l,2,MaxEll}];
 Do[
-  Do[
-    Do[
-      LMN = LMNDex[l,m,n];
-      Print["LMN = ",LMN,"  ",l,m,n];
-      HGKet = LamX[l]*LamY[m]*LamZ[n];
-      Rho = Rho+HGCo[LMN]*HGKet;
-    ,{n,0,MaxEll-m-l}];
-  ,{m,0,MaxEll-l}];
-,{l,0,MaxEll}];
-Rho = Expand[Factor[Simplify[Rho]]];
-Rho = Rho*Expon;
 Do[
-  Do[
-    Do[
-      ijk = IJK[i,j,k,MaxOrder];
-      Print["IJK = ",i,j,k];
-      tmp = D[Rho,{RQx,i},{RQy,j},{RQz,k}];
-      tmp = tmp/Expon;
-      tmp = Factor[Simplify[Expand[tmp]]];
-      tmp = tmp*Xpt+RhoSum[ijk];
-      Write[FileName,FortranAssign[RXX,tmp,AssignReplace->{"RXX"->StringJoin["RhoSum(",ToString[ijk],") "],
-                                                           "HGCo"->"Node%Co"}]];
-    ,{i,0,MaxOrder}];
-  ,{j,0,MaxOrder}];
+   Rho=0;
+   Do[
+     Do[
+       Do[
+         LMN = LMNDex[l,m,n];
+	 tt = Rho + ((-1)^(l+m+n))*HGCo[LMN]*LamX[l+i]*LamY[m+j]*LamZ[n+k];
+         Rho = tt;
+       ,{n,0,MaxEll-m-l}];
+     ,{m,0,MaxEll-l}];
+   ,{l,0,MaxEll}];
+
+   ijk = IJK[i,j,k,MaxOrder];
+   Print["IJK = ",i,j,k];
+   tmp = RhoSum[ijk] + Rho;
+   Write[FileName,FortranAssign[RXX,tmp,AssignReplace->{"RXX"->StringJoin["RhoSum(",ToString[ijk],") "],"HGCo"->"Node%Co"}]];
+,{i,0,MaxOrder}];
+,{j,0,MaxOrder}];
 ,{k,0,MaxOrder}];
+
+
 
 Close[FileName];          
 Print[" Closed ",FileName];
