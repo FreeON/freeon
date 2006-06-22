@@ -357,10 +357,11 @@ CONTAINS
 !
 !=========================================================================
   SUBROUTINE SuperCellGeom(G)
-    TYPE(CRDS)                :: G,Gtmp
-    REAL(DOUBLE)              :: SCFacX,SCFacY,SCFacZ
-    INTEGER                   :: I,J,K,ISCX,ISCY,ISCZ,AT,NC
-    REAL(DOUBLE),DIMENSION(3) :: RVec,IVec
+    TYPE(CRDS)                 :: G,Gtmp
+    REAL(DOUBLE)               :: SCFacX,SCFacY,SCFacZ
+    INTEGER                    :: I,J,K,ISCX,ISCY,ISCZ,AT,NC
+    REAL(DOUBLE),DIMENSION(3)  :: RVec,IVec
+    REAL(DOUBLE),DIMENSION(3,3):: M
 !    
     IF(G%PBC%SuperCell%I(1)+G%PBC%SuperCell%I(2)+G%PBC%SuperCell%I(3)==3) RETURN
 !
@@ -427,6 +428,8 @@ CONTAINS
 !
     Gtmp%PBC%InvBoxSh%D = InverseMatrix(Gtmp%PBC%BoxShape%D)
 !
+    M = MATMUL(Gtmp%PBC%InvBoxSh%D,G%PBC%BoxShape%D)
+!
     NC = 0
     DO I=1,ISCX
        DO J=1,ISCY
@@ -449,8 +452,20 @@ CONTAINS
                 Gtmp%Velocity%D(1:3,NC) = G%Velocity%D(1:3,AT)  
                 Gtmp%Gradients%D(1:3,NC)= G%Gradients%D(1:3,AT)
 !
-                Gtmp%Carts%D(1:3,NC)    = G%Carts%D(1:3,AT)+RVec(1:3) 
-                Gtmp%BoxCarts%D(1:3,NC) = G%BoxCarts%D(1:3,AT)+IVec(1:3) 
+                IF(G%PBC%InAtomCrd) THEN
+                   ! Coords are in AtomCoord.
+                   Gtmp%Carts%D(1:3,NC)    = G%Carts%D(1:3,AT)+RVec(1:3)
+                   ! The next guy is set in CalculateCoordArrays.
+                   !Gtmp%BoxCarts%D(1:3,NC) = G%BoxCarts%D(1:3,AT)+IVec(1:3)
+                   Gtmp%BoxCarts%D(1:3,NC) = BIG_DBL
+                ELSE
+                   ! Coords are in FracCoord.
+                   ! f_s=Inv(M_s)*M_p*(f_p+t)
+                   Gtmp%Carts%D(1:3,NC)    = MATMUL(M,G%Carts%D(1:3,AT)+IVec(1:3))
+                   ! The next guy is set in CalculateCoordArrays.
+                   !Gtmp%BoxCarts%D(1:3,NC) = G%BoxCarts%D(1:3,AT)+IVec(1:3)
+                   Gtmp%BoxCarts%D(1:3,NC) = BIG_DBL
+                ENDIF
              ENDDO
           ENDDO
        ENDDO
