@@ -1984,46 +1984,71 @@ CONTAINS
 !-------------------------------------------------------------------
 !
   SUBROUTINE NHessian(C)
+    IMPLICIT NONE
     !-------------------------------------------------------------------
     TYPE(Controls) :: C
     !-------------------------------------------------------------------
-    INTEGER        :: iBAS,iGEO,AtA,AtB,I,J,II,JJ,IMin,N
-    INTEGER        :: NatmsLoc,IStart
-    TYPE(DBL_RNK2) :: Grad0,Hess,P,NMode,DDer
-    TYPE(DBL_VECT) :: Freqs,EigenV,Work,Dipole
+    TYPE(DBL_RNK2) :: Grad0,Hess,NMode,DDer,CartRed
+    TYPE(DBL_VECT) :: Freqs,EigenV,Work,Dipole,MassRed
+    INTEGER        :: iBAS,iGEO,AtA,AtB,AtAA,I,J,K,II,JJ,N,NInCell,NRed,NRedInCell
+    INTEGER        :: IStart,NAtm,NAtmInCell,NAtmRed,NAtmRedInCell,NCell,iCell,jCell
+    INTEGER        :: LWORK,Info,NNeg,JStart
     REAL(DOUBLE)   :: SMA,SMB,Dum
-    INTEGER        :: LWORK,Info,NNeg
-    ! FreqToWaveNbr=E*E*NA/4*PI*PI*C*C*A0*A0*A0,
-    !            E =4.803242E-10 SQRT(G*CM**3)/SEC
-    !            NA=6.022045E+23 /G
-    !            A0=5.291771E-09 A
-    !            C =2.997925E+10 A/SEC
     REAL(DOUBLE), PARAMETER :: FreqToWaveNbr=2.642461D+07
     REAL(DOUBLE), PARAMETER :: ATOM_DISP=0.005D0
     REAL(DOUBLE), EXTERNAL  :: DDOT
     !
-    INTEGER :: IOS,IC,JC,K,JStart,NTmp
-    LOGICAL :: Exists,Done
-    INTEGER, PARAMETER :: FID=68
-    CHARACTER(LEN=*), PARAMETER :: FileName='HESSIAN'
+    INTEGER         , PARAMETER :: FID=68
+    CHARACTER(LEN=*), PARAMETER :: HessianFileName='HESSIAN'
+    CHARACTER(LEN=*), PARAMETER :: FreqsFileName  ='FREQUENCIES'
+
+    !THIS SHOULD BE SET SOMEWHERE ELSE!
+    logical::SuperCellFreq
+    type(int_vect)::DoFreq
+    call new(DoFreq,C%Geos%Clone(1)%Natms)
+    DoFreq%I(:)=1
+    !DoFreq%I(3:4)=0
+    SuperCellFreq=.TRUE.
+    !THIS SHOULD BE SET SOMEWHERE ELSE!
     !-------------------------------------------------------------------
     !
-    IF(C%Geos%Clones.NE.1) CALL Halt('NHessian: NHessian doesn''t work with the clones!')
+    IF(C%Geos%Clones.NE.1) THEN
+       CALL Halt('NHessian: NHessian doesn''t work with the clones!')
+    ENDIF
     !
-    ! initial geometry
+    ! Initial geometry.
     iGEO=C%Stat%Previous%I(3)
-    NatmsLoc=C%Geos%Clone(1)%Natms
-    N=3*NatmsLoc
-    CALL New(Grad0,(/3,NatmsLoc/))
-    CALL DBL_VECT_EQ_DBL_SCLR(N   ,Grad0%D(1,1),0.0D0)
-    CALL New(Hess,(/N,N/))
-    CALL DBL_VECT_EQ_DBL_SCLR(N**2,Hess%D(1,1) ,0.0D0)
-    CALL New(DDer,(/3,N/))
-    CALL DBL_VECT_EQ_DBL_SCLR(3*N ,DDer%D(1,1) ,0.0D0)
-    CALL New(P,(/N,N/))
-    CALL New(Freqs,N)
-    CALL New(NMode,(/N,N/))
+    NAtm=C%Geos%Clone(1)%Natms
+    N=3*NAtm
+    NAtmRed=0
+    DO I=1,NAtm
+       IF(DoFreq%I(I).EQ.1) NAtmRed=NAtmRed+1!C%Geos%Clone(1)%DoFreq%I
+    ENDDO
+    NRed=3*NAtmRed
+    NCell= C%Geos%Clone(1)%PBC%SuperCell%I(1)*C%Geos%Clone(1)%PBC%SuperCell%I(2)* &
+         & C%Geos%Clone(1)%PBC%SuperCell%I(3)
+    NAtmInCell=NAtm/NCell
+    NInCell=N/NCell
+    NAtmRedInCell=NAtmRed/NCell
+    NRedInCell=NRed/NCell
+
+write(*,*) 'NCell=',NCell
+write(*,*) 'NAtm         =',NAtm         ,' N         =',N
+write(*,*) 'NAtmRed      =',NAtmRed      ,' NRed      =',NRed
+write(*,*) 'NAtmInCell   =',NAtmInCell   ,' NInCell   =',NInCell
+write(*,*) 'NAtmRedInCell=',NAtmRedInCell,' NRedInCell=',NRedInCell
+
+    CALL New(Grad0  ,(/3,NAtm/))
+    CALL New(Hess   ,(/N,N/))
+    CALL New(Freqs  ,NRed)
+    CALL New(NMode  ,(/NRed,NRed/))
+    CALL New(CartRed,(/3,NAtmRed/))
+    CALL New(MassRed,NAtmRed)
+    !CALL New(DDer,(/3,N/))
     !CALL New(Dipole,3)
+    CALL DBL_VECT_EQ_DBL_SCLR(N   ,Grad0%D(1,1),0.0D0)
+    CALL DBL_VECT_EQ_DBL_SCLR(N**2,Hess%D(1,1) ,0.0D0)
+    !CALL DBL_VECT_EQ_DBL_SCLR(3*N ,DDer%D(1,1) ,0.0D0)
     !
     ! Build the guess 
     DO iBAS=1,C%Sets%NBSets
@@ -2032,9 +2057,30 @@ CONTAINS
        CALL SCF(iBAS,iGEO,C)
     ENDDO
     iBAS=C%Sets%NBSets
-    CALL Force(iBAS,iGEO,C%Nams,C%Opts,C%Stat,C%Geos,C%Sets,C%MPIs)
-    CALL DCOPY(N,C%Geos%Clone(1)%Gradients%D(1,1),1,Grad0%D(1,1),1)
-    !CALL Print_DBL_RNK2(Grad0,'Grad0',Unit_O=6)
+    !
+    ! Open/init HESSIAN file.
+    CALL InitHESSIANFile(HessianFileName,NAtm,N,Grad0,Hess,JStart)
+    !
+    ! Compute forces.
+    IF(JStart.EQ.0) THEN
+       write(*,*) 'We compute Grad0'
+       CALL Force(iBAS,iGEO,C%Nams,C%Opts,C%Stat,C%Geos,C%Sets,C%MPIs)
+       CALL DCOPY(N,C%Geos%Clone(1)%Gradients%D(1,1),1,Grad0%D(1,1),1)
+       !CALL Print_DBL_RNK2(C%Geos%Clone(1)%Carts,'Carts0',Unit_O=6)
+       !CALL Print_DBL_RNK2(Grad0,'Grad0',Unit_O=6)
+       OPEN(FID,FILE=HessianFileName,STATUS='OLD',FORM='UNFORMATTED', &
+            & ACCESS='SEQUENTIAL',POSITION='APPEND')
+       WRITE(FID) 0
+       DO J=1,NAtm
+          WRITE(FID) (Grad0%D(K,J),K=1,3)
+       ENDDO
+       CLOSE(FID)
+       JStart=1
+    ENDIF
+    !write(*,*) '||Grad0||',SUM(ABS(Grad0%D))
+    !do j=1,jstart-1
+    !   write(*,*) '||hess||_(in file)',j,SUM(ABS(hess%D(:,j)))
+    !enddo
     !
     ! Get Dipole.
     !HDFFileID=OpenHDF(C%Nams%HFile)
@@ -2044,39 +2090,29 @@ CONTAINS
     !CALL CloseHDFGroup(HDF_CurrentID)
     !CALL CloseHDF(HDFFileID)
     !
-    ! Open HESSIAN file.
-    INQUIRE(FILE=FileName,EXIST=Exists)
-    OPEN(FID,FILE=FileName,STATUS='UNKNOWN',FORM='UNFORMATTED', &
-         & ACCESS='SEQUENTIAL')
-    IF(Exists) THEN
-       NTmp=0
-       READ(FID) NTmp
-       IF(NTmp.NE.N) CALL Halt('NHessian: Something wrong with the HESSIAN file!')
-       Done=.FALSE.
-       JC=0
-       DO J=1,N
-          READ(FID,IOSTAT=IOS) (Hess%D(I,J),I=1,N)
-          IC=I-1
-          IF(IOS.NE.0) THEN
-             Done=.TRUE.
-             EXIT
-          ENDIF
-          IF(IC.NE.N.AND.IC.NE.0) CALL Halt('NHessian: Something wrong with the HESSIAN file!')
-          IF(Done) EXIT
-          JC=JC+1
-       ENDDO
-       JStart=JC+1
-       write(*,*) 'We read JC=',JC,' JStart=',JStart
-    ELSE
-       WRITE(FID) N
-       JStart=1
-    ENDIF
-    CLOSE(FID)
+    ! Copy the masses and coords.
+    JJ=1
+    DO AtA=1,NAtm
+       IF(DoFreq%I(AtA).NE.1) CYCLE
+       CartRed%D(:,JJ)=C%Geos%Clone(1)%Carts%D(:,AtA)
+       MassRed%D(  JJ)=C%Geos%Clone(1)%AtMss%D(  AtA)
+       JJ=JJ+1
+    ENDDO
     !
+write(*,*) 'We start grad calculation'
+write(*,*) 'JStart=',JStart,' N=',N
     iGEO=iGEO+1
     DO J=JStart,N
        AtA=CEILING(DBLE(J)/3D0)
        I=J-3*(AtA-1)
+write(*,*) 'Loop J=',J,' AtA=',AtA,' I=',I, 'NCell=',NCell
+       !
+       ! Cycle if we dont want freq on this atom.
+       !IF(C%Geos%Clone(1)%DoFreq%I(AtA).NE.1) CYCLE
+       IF(DoFreq%I(AtA).NE.1) CYCLE
+       !
+       ! Cycle if we do supercell.
+       IF(J.GT.NInCell) CYCLE
        !
        ! Move the atom.
        C%Geos%Clone(1)%Carts%D(I,AtA)=C%Geos%Clone(1)%Carts%D(I,AtA)+ATOM_DISP
@@ -2085,12 +2121,17 @@ CONTAINS
        ! Optimize and Forces.
        CALL SCF(iBAS,iGEO,C)
        CALL Force(iBAS,iGEO,C%Nams,C%Opts,C%Stat,C%Geos,C%Sets,C%MPIs)
+       !CALL Print_DBL_RNK2(C%Geos%Clone(1)%Gradients,'Grad1',Unit_O=6)
        CALL DCOPY(N,C%Geos%Clone(1)%Gradients%D(1,1),1,Hess%D(1,J),1)
        CALL DAXPY(N,-1D0,Grad0%D(1,1),1,Hess%D(1,J),1)
        !
+       !write(*,*) '||grad||_(on the fly)',j,SUM(ABS(C%Geos%Clone(1)%Gradients%D(:,:)))
+       !write(*,*) '||hess||_(on the fly)',j,SUM(ABS(hess%D(:,j)))
+       !
        ! Write HESSIAN.
-       OPEN(FID,FILE=FileName,STATUS='OLD',FORM='UNFORMATTED', &
+       OPEN(FID,FILE=HessianFileName,STATUS='OLD',FORM='UNFORMATTED', &
             & ACCESS='SEQUENTIAL',POSITION='APPEND')
+       WRITE(FID) J
        WRITE(FID) (Hess%D(K,J),K=1,N)
        CLOSE(FID)
        !
@@ -2108,55 +2149,95 @@ CONTAINS
        iGEO=iGEO+1
     ENDDO
     !
-    Dum=1D0/ATOM_DISP
-    CALL DSCAL(N**2,Dum,Hess%D(1,1),1)
+    !write(*,*) '||Hess||_tot',SUM(ABS(Hess%D(:,:)))
     !
-    ! Symmetrize the Hessian
-    CALL SymmMtrx(Hess,N)
-    !CALL Print_DBL_RNK2(Hess,'Hessian',Unit_O=6)
+    ! Extract the wanted freqs.
+    IF(NRed.NE.N) THEN
+       J =1
+       JJ=1
+       DO AtA=1,NAtm
+          !IF(C%Geos%Clone(1)%DoFreq%I(AtA).EQ.1) THEN
+          IF(DoFreq%I(AtA).EQ.1) THEN
+             DO I=1,3
+                CALL DCOPY(NRed,Hess%D(JJ,1),N,NMode%D(J,1),NRed)
+                J=J+1
+                JJ=JJ+1
+             ENDDO
+          ELSE
+             JJ=JJ+3
+          ENDIF
+       ENDDO
+    ELSE
+       CALL DCOPY(NRed**2,Hess%D(1,1),1,NMode%D(1,1),1)
+    ENDIF
+    !
+    ! If we do supercell then fill up.
+    IF(NCell.GT.1) THEN
+       DO jCell=2,NCell
+       DO iCell=1,NCell
+          I = NRedInCell*(iCell-1)+1
+          J = 1
+          II= NRedInCell*(iCell-1)+NRedInCell*(jCell-1)+1
+          IF(II.GT.NRed)II=II-NRed
+          JJ=NRedInCell*(jCell-1)+1
+          !write(*,*) 'I=',I,' J=',J,'II=',II,' JJ=',JJ
+          IF(iCell.EQ.jCell) THEN
+             NMode%D(II:II+NRedInCell-1,JJ:JJ+NRedInCell-1)= &
+                  & NMode%D(I:I+NRedInCell-1,J:J+NRedInCell-1)
+          ELSE
+             NMode%D(II:II+NRedInCell-1,JJ:JJ+NRedInCell-1)= &
+                  & TRANSPOSE(NMode%D(I:I+NRedInCell-1,J:J+NRedInCell-1))
+          ENDIF
+       ENDDO
+       ENDDO
+    ENDIF
+    !
+    ! Rescale the gradients to get the derivative.
+    Dum=1D0/ATOM_DISP
+    CALL DSCAL(NRed**2,Dum,NMode%D(1,1),1)
+    !
+    ! Symmetrize the hessian.
+    CALL SymmMtrx(NMode,NRed)
     !
     ! Generate mass weighted hessian.
-    CALL WghtMtrx(C%Geos%Clone(1)%AtMss,Hess,NatmsLoc,'CToWC')
-    !CALL Print_DBL_RNK2(Hess,'Weighted Hessian',Unit_O=6)
+    CALL WghtMtrx(MassRed,NMode,NAtmRed,'CToWC')
     !
     ! Project out translations and rotations.
-    CALL ProjOut(C%Geos%Clone(1)%Carts,C%Geos%Clone(1)%AtMss,Hess,NatmsLoc)
-    !CALL Print_DBL_RNK2(Hess,'Projected Hessian',Unit_O=6)
+    CALL ProjOut(CartRed,MassRed,NMode,NAtmRed)
     !
     ! Get Normal modes.
-    CALL New(EigenV,N)
-    LWORK=MAX(1,3*N+10)
+    CALL New(EigenV,NRed)
+    LWORK=MAX(1,3*NRed+10)
     CALL New(WORK,LWORK)
-    CALL DCOPY(N**2,Hess%D(1,1),1,NMode%D(1,1),1)
-    CALL DSYEV('V','U',N,NMode%D(1,1),N,EigenV%D(1),Work%D(1),LWORK,Info)
+    CALL DSYEV('V','U',NRed,NMode%D(1,1),NRed,EigenV%D(1),Work%D(1),LWORK,Info)
     IF(Info/=SUCCEED)CALL Halt('DSYEV flaked in NHessian. INFO='//TRIM(IntToChar(Info)))
-    CALL DCOPY(N,EigenV%D(1),1,Freqs%D(1),1)
+    CALL DCOPY(NRed,EigenV%D(1),1,Freqs%D(1),1)
     CALL Delete(EigenV)
     CALL Delete(Work)
     !CALL Print_DBL_RNK2(NMode,'NMode0',Unit_O=6)
     !
     ! Translational and rotational Sayvetz conditions.
-    CALL Sayvetz(NMode,C%Geos%Clone(1)%Carts,C%Geos%Clone(1)%AtMss,NatmsLoc)
+    CALL Sayvetz(NMode,CartRed,MassRed,NAtmRed)
     !
     ! Count number of negative eigenvalues.
     NNeg=0
-    DO I=1,N
+    DO I=1,NRed
        IF(Freqs%D(I).LT.0.0D0) NNeg=NNeg+1
     ENDDO
     !
     ! Convert frequencies to wavenumbers.
     !CALL Print_DBL_VECT(Freqs,'Frequencies**2',Unit_O=6)
-    DO I=1,N
+    DO I=1,NRed
        Freqs%D(I)=SQRT(ABS(FreqToWaveNbr*Freqs%D(I)))
     ENDDO
     !
     ! Convert normal mode displacements from mass 
     ! weighted cartesian to cartesian.
-    DO AtB=1,NatmsLoc
+    DO AtB=1,NAtmRed
        DO J=1,3
           JJ=3*(AtB-1)+J
-          DO AtA=1,NatmsLoc
-             SMA=1D0/SQRT(C%Geos%Clone(1)%AtMss%D(AtA))
+          DO AtA=1,NAtmRed
+             SMA=1D0/SQRT(MassRed%D(AtA))
              DO I=1,3
                 II=3*(AtA-1)+I
                 NMode%D(II,JJ)=NMode%D(II,JJ)*SMA
@@ -2166,56 +2247,161 @@ CONTAINS
     ENDDO
     !
     ! Compute reduced mass.
-    !DO I=1,N
+    !DO I=1,NRed
     !   write(*,*) 'Reduced Mass=',1D0/DDOT(N,NMode%D(1,I),1,NMode%D(1,I),1)
     !END DO
     !
     ! Print out frequency.
-    DO I=1,N
+    DO I=1,NRed
        IF(ABS(Freqs%D(I)).GT.1D-3)write(*,'(A,F10.4)') 'Frequencies=',Freqs%D(I)
     ENDDO
-    CALL Print_DBL_VECT(Freqs,'Frequencies' ,Unit_O=6)
-    CALL Print_DBL_RNK2(NMode,'Normal Modes',Unit_O=6)
+    !CALL Print_DBL_VECT(Freqs,'Frequencies' ,Unit_O=6)
+    !CALL Print_DBL_RNK2(NMode,'Normal Modes',Unit_O=6)
     !
     ! Print the frequencies and normal modes.
-    OPEN(FID,FILE='FREQUENCIES',STATUS='UNKNOWN',FORM='FORMATTED')
-    DO I=1,N
-       IF(ABS(Freqs%D(I)).LT.0.1D0) CYCLE
-       WRITE(FID,*) C%Geos%Clone(1)%Natms
-       WRITE(FID,'(F8.2)') Freqs%D(I)
-       K=1
-       DO J=1,C%Geos%Clone(1)%Natms
-          CALL UpCase(C%Geos%Clone(1)%AtNam%C(J))          
-          WRITE(FID,'(A,3F10.5,I3,3F10.5)') TRIM(C%Geos%Clone(1)%AtNam%C(J)), &
-               & BohrsToAngstroms*C%Geos%Clone(1)%Carts%D(1,J), &
-               & BohrsToAngstroms*C%Geos%Clone(1)%Carts%D(2,J), &
-               & BohrsToAngstroms*C%Geos%Clone(1)%Carts%D(3,J), &
-               & 0,NMode%D(K,I),NMode%D(K+1,I),NMode%D(K+2,I)
-          K=K+3
-       ENDDO
-    ENDDO
-    CLOSE(FID)
+    CALL Print_FREQUENCIES(FreqsFileName,C%Geos%Clone(1),Freqs,NMode)
     !
     ! Compute IR intensities.
-    CALL CompIRInt(NMode,DDer,NatmsLoc)
+    !CALL CompIRInt(NMode,DDer,NAtmRed)
     !
     ! Compute Raman intensities.
-    CALL CompRAMANInt()
+    !CALL CompRAMANInt()
     !
     ! Statistic.
-    CALL ThermoStat(C%Geos%Clone(1)%Carts,C%Geos%Clone(1)%AtMss,Freqs, &
-         &          NatmsLoc,C%Geos%Clone(1)%Multp)
+    CALL ThermoStat(CartRed,MassRed,Freqs,NAtmRed,C%Geos%Clone(1)%Multp)
     !
     ! Clean up.
     CALL Delete(Freqs)
     CALL Delete(NMode)
     CALL Delete(Grad0)
-    CALL Delete(P)
     CALL Delete(Hess)
-    CALL Delete(DDer)
+    CALL Delete(CartRed)
+    CALL Delete(MassRed)
+    !CALL Delete(DDer)
     !CALL Delete(Dipole)
     !
   END SUBROUTINE NHessian
+  !
+  SUBROUTINE Print_FREQUENCIES(FreqsFileName,GM,Freqs,NMode)
+    !-------------------------------------------------------------------
+    IMPLICIT NONE
+    !-------------------------------------------------------------------
+    CHARACTER(LEN=*)     :: FreqsFileName
+    TYPE(CRDS)           :: GM
+    TYPE(DBL_VECT)       :: Freqs
+    TYPE(DBL_RNK2)       :: NMode
+    !-------------------------------------------------------------------
+    INTEGER            :: NAtm,AtA,K,I
+    REAL(DOUBLE)       :: NModeV(3)
+    INTEGER, PARAMETER :: FID=68
+    !-------------------------------------------------------------------
+    !
+    NAtm=GM%Natms
+    !
+    OPEN(FID,FILE=FreqsFileName,STATUS='UNKNOWN',FORM='FORMATTED')
+    DO I=1,SIZE(Freqs%D,1)
+       IF(ABS(Freqs%D(I)).LT.0.1D0) CYCLE
+       WRITE(FID,*) NAtm
+       WRITE(FID,'(F8.2)') Freqs%D(I)
+       K=1
+       DO AtA=1,NAtm
+          CALL UpCase(GM%AtNam%C(AtA))          
+          !
+          !IF(C%Geos%Clone(1)%DoFreq%I(AtA).EQ.1) THEN
+          !IF(DoFreq%I(AtA).EQ.1) THEN
+             NModeV(1:3)=NMode%D(K:K+2,I)
+             K=K+3
+          !ELSE
+          !   NModeV=0D0
+          !ENDIF
+          !
+          WRITE(FID,'(A,3F10.5,I3,3F10.5)') TRIM(GM%AtNam%C(AtA)), &
+               & BohrsToAngstroms*GM%Carts%D(1,AtA), &
+               & BohrsToAngstroms*GM%Carts%D(2,AtA), &
+               & BohrsToAngstroms*GM%Carts%D(3,AtA), &
+               & 0,NModeV(1),NModeV(2),NModeV(3)
+       ENDDO
+    ENDDO
+    CLOSE(FID)
+  END SUBROUTINE Print_FREQUENCIES
+  !
+  SUBROUTINE InitHESSIANFile(HessianFileName,NAtm,N,Grad0,Hess,JStart)
+    !-------------------------------------------------------------------
+    IMPLICIT NONE
+    !-------------------------------------------------------------------
+    CHARACTER(LEN=*)   :: HessianFileName
+    TYPE(DBL_RNK2)     :: Grad0,Hess
+    INTEGER            :: NAtm,N,JStart
+    !-------------------------------------------------------------------
+    LOGICAL            :: Exists,Done
+    INTEGER            :: NTmp,IOS,I,J,K,IC,JC
+    INTEGER, PARAMETER :: FID=68
+    !-------------------------------------------------------------------
+    !
+    ! Check if the HESSIAN file exists.
+    INQUIRE(FILE=HessianFileName,EXIST=Exists)
+    OPEN(FID,FILE=HessianFileName,STATUS='UNKNOWN',FORM='UNFORMATTED', &
+         & ACCESS='SEQUENTIAL')
+    IF(Exists) THEN
+       JStart=1
+       !
+       ! Simple check.
+       NTmp=0
+       READ(FID,IOSTAT=IOS) NTmp
+       IF(NTmp.NE.N.OR.IOS.NE.0) THEN
+          CALL Halt('InitHESSIANFile: Something wrong with the HESSIAN file!')
+       ENDIF
+       !
+       ! Load Grad0.
+       NTmp=0
+       READ(FID,IOSTAT=IOS) NTmp
+       IF(NTmp.NE.0.OR.IOS.NE.0) THEN
+          CALL Halt('InitHESSIANFile: Something wrong with the HESSIAN file!')
+       ENDIF
+       DO J=1,NAtm
+          READ(FID,IOSTAT=IOS) (Grad0%D(I,J),I=1,3)
+          IF(IOS.NE.0) THEN
+             CALL Halt('InitHESSIANFile: Something wrong with the HESSIAN file!')
+          ENDIF
+       ENDDO
+       !
+       ! Load Grads.
+       Done=.FALSE.
+       JC=0
+       DO
+          !
+          ! Where goes the grad.
+          READ(FID,IOSTAT=IOS) J
+          IF(IOS.NE.0) EXIT
+          JC=J
+          !
+          ! Read the grad.
+          READ(FID,IOSTAT=IOS) (Hess%D(I,J),I=1,N)
+          IC=I-1
+          IF(IOS.NE.0) THEN
+             Done=.TRUE.
+             EXIT
+          ENDIF
+          IF(IC.NE.N.AND.IC.NE.0) THEN
+             CALL Halt('InitHESSIANFile: Something wrong with the HESSIAN file!')
+          ENDIF
+          IF(Done) EXIT
+       ENDDO
+       !
+       ! Where shall we start the calculation of the new grad.
+       JStart=JC+1
+       write(*,*) 'We read JC=',JC,' JStart=',JStart
+    ELSE
+       !
+       ! This is the first time we open the HESSIAN file.
+       WRITE(*,*) 'It is the first time we open the HESSIAN File'
+       !
+       ! Simple check.
+       WRITE(FID) N
+       JStart=0
+    ENDIF
+    CLOSE(FID)
+  END SUBROUTINE InitHESSIANFile
   !
   SUBROUTINE WghtMtrx(AtMss,A,NAtoms,FromTo)
     !-------------------------------------------------------------------
@@ -2230,7 +2416,7 @@ CONTAINS
     SELECT CASE(FromTo)
     CASE('CToWC');IFromTo=0
     CASE('WCToC');IFromTo=1
-    CASE DEFAULT; STOP'Err:WghtMtrx'
+    CASE DEFAULT; CALL Halt('WghtMtrx: Error')
     END SELECT
     DO AtB=1,NAtoms
        IF(IFromTo.EQ.0) THEN
@@ -2315,9 +2501,7 @@ CONTAINS
     CALL DBL_VECT_EQ_DBL_SCLR(9,ITheta%D(1,1),0.0D0)
     IF(ABS(EigenV%D(1)*EigenV%D(2)*EigenV%D(3)).LT.1.0D-8) THEN
        IF(ABS(EigenV%D(1))+ABS(EigenV%D(2))+ABS(EigenV%D(3)).LT.1.0D-8) THEN
-          WRITE(*,*) 'Is it an atom?'
-          WRITE(*,*) 'STOPPED in ProjOut'
-          STOP 
+          CALL Halt('ProjOut: Is it an atom?')
        ENDIF
        ! Linear systems.
        ! X.eq.0 and Y,Z.ne.0
@@ -2377,7 +2561,7 @@ CONTAINS
                       Dum=Dum+Tens(IA,IB,IC)*Tens(JA,JB,JC)*ITheta%D(IA,JA) &
                            & *WCarts%D(IB,I)*WCarts%D(JB,J)
                    ENDDO
-                             ENDDO
+                   ENDDO
                 ENDDO
                 ENDDO
                 P%D(KK,LL)=Dum
@@ -2545,8 +2729,7 @@ CONTAINS
     !
     ! Check for atoms or linear molecules.
     IF(ABS(TEig(1)*TEig(2)*TEig(3)).LT.1D-3) THEN
-       WRITE(*,*) 'Atoms or linear molecules are not supported yet'
-       STOP 'Err:ThermoStat'
+       CALL Halt('ThermoStat: Atoms or linear molecules are not supported yet')
     ENDIF
     !
     !Should be changed to account the molecular symmetry.
@@ -2756,10 +2939,10 @@ CONTAINS
           ENDDO
        ENDDO
        !
-       write(*,'(A,I3,A,E26.16)') 'SVTZTT(',I,')=', &
-            & SQRT(SvtzT%D(1,I)**2+SvtzT%D(2,I)**2+SvtzT%D(3,I)**2)
-       write(*,'(A,I3,A,E26.16)') 'SVTZRT(',I,')=', &
-            & SQRT(SvtzR%D(1,I)**2+SvtzR%D(2,I)**2+SvtzR%D(3,I)**2)
+       !write(*,'(A,I3,A,E26.16)') 'SVTZTT(',I,')=', &
+       !     & SQRT(SvtzT%D(1,I)**2+SvtzT%D(2,I)**2+SvtzT%D(3,I)**2)
+       !write(*,'(A,I3,A,E26.16)') 'SVTZRT(',I,')=', &
+       !     & SQRT(SvtzR%D(1,I)**2+SvtzR%D(2,I)**2+SvtzR%D(3,I)**2)
        !SvtzTT(I)=SQRT(SvtzT(1,I)**2+SvtzT(2,I)**2+SvtzT(3,I)**2)
        !SvtzRT(I)=SQRT(SvtzR(1,I)**2+SvtzR(2,I)**2+SvtzR(3,I)**2)
     ENDDO
