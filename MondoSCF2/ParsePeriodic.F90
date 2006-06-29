@@ -316,6 +316,7 @@ CONTAINS
     INTEGER,DIMENSION(3) :: SC 
     TYPE(PBCInfo)        :: PBC
     INTEGER              :: I,J,K,NTot
+    CHARACTER(LEN=10)    :: C1,C2,C3
     !
     SC(:)=0
     IF(FindKey(SUPERC,Inp))THEN
@@ -342,14 +343,13 @@ CONTAINS
          & CALL MondoHalt(PRSE_ERROR,'ParseSuperCell: SupreCell Number should be 1 along the c-direction!')
     !
     IF(SUM(PBC%SuperCell%I).NE.3) THEN
+       C1=TRIM(IntToChar(PBC%SuperCell%I(1)))
+       C2=TRIM(IntToChar(PBC%SuperCell%I(2)))
+       C3=TRIM(IntToChar(PBC%SuperCell%I(3)))
        WRITE(*,*)'ParseSuperCell: Matt be ready to blame CJ... SuperCell=(' &
-            & //TRIM(IntToChar(PBC%SuperCell%I(1)))//',' &
-            & //TRIM(IntToChar(PBC%SuperCell%I(2)))//',' &
-            & //TRIM(IntToChar(PBC%SuperCell%I(2)))//')'
+            & //TRIM(C1)//','//TRIM(C2)//','//TRIM(C3)//')'
        CALL Warn('ParseSuperCell: Matt be ready to blame CJ... SuperCell=(' &
-            & //TRIM(IntToChar(PBC%SuperCell%I(1)))//',' &
-            & //TRIM(IntToChar(PBC%SuperCell%I(2)))//',' &
-            & //TRIM(IntToChar(PBC%SuperCell%I(2)))//')' )
+            & //TRIM(C1)//','//TRIM(C2)//','//TRIM(C2)//')')
     ENDIF
     !
   END SUBROUTINE ParseSuperCell
