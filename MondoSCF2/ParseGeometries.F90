@@ -213,6 +213,8 @@ CONTAINS
        CALL LineToChars(LineLowCase,C)
        IF(SIZE(C%C)<4)CALL MondoHalt(PRSE_ERROR,' bad data on parsing goemetry at line = <<' &
                                       //TRIM(LineLowCase)//'>>')
+       ! Set the atom for freq calculation
+       G%DoFreq%I(N)=0
        IF(SIZE(C%C)==4) THEN
           At=TRIM(ADJUSTL(C%C(1)))
           G%Carts%D(1,N)=CharToDbl(C%C(2))
@@ -230,6 +232,11 @@ CONTAINS
              G%CConstrain%I(N)=1
           ELSE IF(TRIM(C%C(5))=='r')THEN
              G%CConstrain%I(N)=2
+          ELSE IF(TRIM(C%C(5))=='f')THEN
+             ! We found an atom for freq calculation
+             G%DoFreq%I(N)=1
+             ! We set the constrain for any case
+             G%CConstrain%I(N)=0
           ELSE
              G%CConstrain%I(N)=0
           ENDIF
@@ -282,6 +289,11 @@ CONTAINS
           ENDIF
        ENDDO
     ENDDO
+    !
+    ! If no freqs have been explicitly set, then do all of them.
+    IF(SUM(G%DoFreq%I).EQ.0)G%DoFreq%I=1
+    write(*,*) 'ParseGeometies: G%DoFreq%I=',G%DoFreq%I
+    !
     IF(N/=G%NAtms) &
          CALL MondoHalt(PRSE_ERROR,'Atom number mismatch in ParseCoordinates')
 !

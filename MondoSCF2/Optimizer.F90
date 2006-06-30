@@ -2001,15 +2001,6 @@ CONTAINS
     INTEGER         , PARAMETER :: FID=68
     CHARACTER(LEN=*), PARAMETER :: HessianFileName='HESSIAN'
     CHARACTER(LEN=*), PARAMETER :: FreqsFileName  ='FREQUENCIES'
-
-    !THIS SHOULD BE SET SOMEWHERE ELSE!
-    logical::SuperCellFreq
-    type(int_vect)::DoFreq
-    call new(DoFreq,C%Geos%Clone(1)%Natms)
-    DoFreq%I(:)=1
-    !DoFreq%I(3:4)=0
-    SuperCellFreq=.TRUE.
-    !THIS SHOULD BE SET SOMEWHERE ELSE!
     !-------------------------------------------------------------------
     !
     IF(C%Geos%Clones.NE.1) THEN
@@ -2022,7 +2013,7 @@ CONTAINS
     N=3*NAtm
     NAtmRed=0
     DO I=1,NAtm
-       IF(DoFreq%I(I).EQ.1) NAtmRed=NAtmRed+1!C%Geos%Clone(1)%DoFreq%I
+       IF(C%Geos%Clone(1)%DoFreq%I(I).EQ.1) NAtmRed=NAtmRed+1
     ENDDO
     NRed=3*NAtmRed
     NCell= C%Geos%Clone(1)%PBC%SuperCell%I(1)*C%Geos%Clone(1)%PBC%SuperCell%I(2)* &
@@ -2093,7 +2084,7 @@ write(*,*) 'NAtmRedInCell=',NAtmRedInCell,' NRedInCell=',NRedInCell
     ! Copy the masses and coords.
     JJ=1
     DO AtA=1,NAtm
-       IF(DoFreq%I(AtA).NE.1) CYCLE
+       IF(C%Geos%Clone(1)%DoFreq%I(AtA).NE.1) CYCLE
        CartRed%D(:,JJ)=C%Geos%Clone(1)%Carts%D(:,AtA)
        MassRed%D(  JJ)=C%Geos%Clone(1)%AtMss%D(  AtA)
        JJ=JJ+1
@@ -2105,11 +2096,10 @@ write(*,*) 'JStart=',JStart,' N=',N
     DO J=JStart,N
        AtA=CEILING(DBLE(J)/3D0)
        I=J-3*(AtA-1)
-write(*,*) 'Loop J=',J,' AtA=',AtA,' I=',I, 'NCell=',NCell
+write(*,*) 'Loop J=',J,' AtA=',AtA,' I=',I, 'NCell=',NCell,' DoFreq=',C%Geos%Clone(1)%DoFreq%I(AtA)
        !
        ! Cycle if we dont want freq on this atom.
-       !IF(C%Geos%Clone(1)%DoFreq%I(AtA).NE.1) CYCLE
-       IF(DoFreq%I(AtA).NE.1) CYCLE
+       IF(C%Geos%Clone(1)%DoFreq%I(AtA).NE.1) CYCLE
        !
        ! Cycle if we do supercell.
        IF(J.GT.NInCell) CYCLE
@@ -2156,8 +2146,7 @@ write(*,*) 'Loop J=',J,' AtA=',AtA,' I=',I, 'NCell=',NCell
        J =1
        JJ=1
        DO AtA=1,NAtm
-          !IF(C%Geos%Clone(1)%DoFreq%I(AtA).EQ.1) THEN
-          IF(DoFreq%I(AtA).EQ.1) THEN
+          IF(C%Geos%Clone(1)%DoFreq%I(AtA).EQ.1) THEN
              DO I=1,3
                 CALL DCOPY(NRed,Hess%D(JJ,1),N,NMode%D(J,1),NRed)
                 J=J+1
@@ -2307,13 +2296,12 @@ write(*,*) 'Loop J=',J,' AtA=',AtA,' I=',I, 'NCell=',NCell
        DO AtA=1,NAtm
           CALL UpCase(GM%AtNam%C(AtA))          
           !
-          !IF(C%Geos%Clone(1)%DoFreq%I(AtA).EQ.1) THEN
-          !IF(DoFreq%I(AtA).EQ.1) THEN
+          IF(GM%DoFreq%I(AtA).EQ.1) THEN
              NModeV(1:3)=NMode%D(K:K+2,I)
              K=K+3
-          !ELSE
-          !   NModeV=0D0
-          !ENDIF
+          ELSE
+             NModeV=0D0
+          ENDIF
           !
           WRITE(FID,'(A,3F10.5,I3,3F10.5)') TRIM(GM%AtNam%C(AtA)), &
                & BohrsToAngstroms*GM%Carts%D(1,AtA), &
