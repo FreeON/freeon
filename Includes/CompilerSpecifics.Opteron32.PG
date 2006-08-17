@@ -23,12 +23,12 @@ MOD_POSTFIX   = mod
 #---------------------------------------------------------------
 # Fortran Compilers, options and include files
 #
-F90           = pgf90 -tp k8-32 
-F90_OPTIMIZE  = -O1 -Kieee
+F90           = pgf90 
+F90_OPTIMIZE  = -O1
 #F90_DEBUG    = -g -C -Mbounds -Minfo=all -Minform=inform -Mchkptr 
 #F_LIST       = -Mlist 
 #F_PROF       = -Mprof=lines
-F90_MISC      = $(F_LIST) $(F_PROF) -Mbackslash 
+F90_MISC      = $(F_LIST) $(F_PROF) -Mbackslash -Mextend -Mr8 -Mr8intrinsics  
 F90_INCLUDE   = -I$(MONDO_HOME)/Includes/               \
                 -I$(MONDO_HOME)/MondoMods               \
                 -I/usr/local/include #-I$(MPI_INC)                   
@@ -37,7 +37,7 @@ F90_FLAGS     = $(F90_MISC) $(F90_OPTIMIZE) $(F90_DEBUG) $(F90_INCLUDE)
 # LINK/LOADER DIRECTIVES
 #
 LD          = $(F90) 
-LDMISC      = $(F_PROF) -tp k8-32 -v  -Wl,-Bstatic
+LDMISC      = $(F_PROF) -v #  -Wl,-Bstatic
 # make statically linked executables
 LDFLAGS     = $(LDMISC) -o 
 #---------------------------------------------------------------

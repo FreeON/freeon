@@ -195,26 +195,9 @@ CONTAINS
   SUBROUTINE FracCyclic(GM,VecF)
     TYPE(CRDS)                 :: GM        
     REAL(DOUBLE),DIMENSION(3)  :: VecF
-    INTEGER                    :: I,N     
-    REAL(DOUBLE),PARAMETER     :: MDelt = 1.D-12
-
+    INTEGER                    :: I
     DO I=1,3
-       IF(GM%PBC%AutoW%I(I)==1) THEN
-          DO 
-             IF(VecF(I) > (One+MDelt)) THEN
-                VecF(I) = VecF(I) - One
-             ELSE
-                EXIT
-             ENDIF
-          ENDDO
-          DO 
-             IF(VecF(I) < (Zero-MDelt)) THEN
-                VecF(I) = VecF(I) + One
-             ELSE
-                EXIT
-             ENDIF
-          ENDDO
-       ENDIF
+       IF(GM%PBC%AutoW%I(I)==1)VecF(I)=MODULO(VecF(I),1D0)
     ENDDO
   END SUBROUTINE FracCyclic
 !-------------------------------------------------------------------------------

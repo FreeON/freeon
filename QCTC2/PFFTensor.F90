@@ -113,7 +113,7 @@ CONTAINS
 ! Calculate the PFFTensor 1D
 !========================================================================================
   SUBROUTINE MakeTensor1D(MaxL,GM,Args,CS,TenC,TenS)
-    INTEGER                           :: MaxL
+    INTEGER                           :: MaxL,LenL
     INTEGER                           :: I,J,L,M,LM,NC
     TYPE(CellSet)                     :: CS, CSMM
     TYPE(DBL_VECT)                    :: TenC,TenS
@@ -123,28 +123,29 @@ CONTAINS
 !
 !   Number of Inner Boxes
 !
+    LenL=LSP(MaxL)
     TenC%D=Zero
-    TenS%D=Zero
     NC = (CS%NCells-1)/2
 !
 !   One Dimension: Lef and Right
 !
     IF(GM%PBC%AutoW%I(1)==1) THEN
        CALL IrRegular(MaxL, GM%PBC%BoxShape%D(1,1),Zero,Zero)
-       TenC%D = Cpq
+       TenC%D(0:LenL) = Cpq(0:LenL)
        CALL IrRegular(MaxL,-GM%PBC%BoxShape%D(1,1),Zero,Zero)
-       TenC%D = TenC%D+Cpq
+       TenC%D(0:LenL) = TenC%D(0:LenL)+Cpq(0:LenL)
     ELSEIF(GM%PBC%AutoW%I(2)==1) THEN
        CALL IrRegular(MaxL,Zero, GM%PBC%BoxShape%D(2,2),Zero)
-       TenC%D = Cpq
+       TenC%D(0:LenL) = Cpq(0:LenL)
        CALL IrRegular(MaxL,Zero,-GM%PBC%BoxShape%D(2,2),Zero)
-       TenC%D = TenC%D+Cpq
+       TenC%D(0:LenL) = TenC%D(0:LenL)+Cpq(0:LenL)
     ELSEIF(GM%PBC%AutoW%I(3)==1) THEN      
        CALL IrRegular(MaxL,Zero,Zero, GM%PBC%BoxShape%D(3,3))
-       TenC%D = Cpq
+       TenC%D(0:LenL) = Cpq(0:LenL)
        CALL IrRegular(MaxL,Zero,Zero,-GM%PBC%BoxShape%D(3,3))
-       TenC%D = TenC%D+Cpq
+       TenC%D(0:LenL) = TenC%D(0:LenL)+Cpq(0:LenL)
     ENDIF
+
     DO L=1,MaxL
        DO M = 0,L
           LM = LTD(L)+M

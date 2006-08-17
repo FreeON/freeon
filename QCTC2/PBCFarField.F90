@@ -96,7 +96,7 @@ MODULE PBCFarField
       DO LM=0,LenPFFFEll
          EPFF=EPFF+Two*RhoC%D(LM)*TenRhoC%D(LM)+Two*RhoS%D(LM)*TenRhoS%D(LM)
       ENDDO
-
+      WRITE(*,*)' E_PFF = ',E_PFF
       IF(PRESENT(LatFrc))THEN
          ! The tin foil (dipole) contribution to the energy and lattice forces
          IF(GMLoc%PBC%Dimen == 1) THEN
@@ -122,6 +122,7 @@ MODULE PBCFarField
                ENDDO
             ENDDO
          ENDIF
+
          ! The crystal field contribution to the lattice forces
          CALL New(LatFrc_PFF,(/3,3/))
          LatFrc_PFF%D = Zero
@@ -136,11 +137,17 @@ MODULE PBCFarField
                ENDDO
             ENDDO
          ENDIF
+         PrintFlags%Key=DEBUG_MAXIMUM	
+         PrintFlags%MM=DEBUG_FRC
+         CALL Print_LatForce(GMLoc,LatFrc_PFF%D,'J  PFF   Lattice Force')
+         CALL Print_LatForce(GMLoc,LatFrc_PFF%D,'J  PFF   Lattice Force',Unit_O=6)
+
          ! Initialize the lattice forces with the tin foil and crystal field terms
          LatFrc%D=LatFrc_Dip%D+LatFrc_PFF%D
          CALL Delete(LatFrc_Dip)
          CALL Delete(LatFrc_PFF)
       ENDIF
+
       !
     END SUBROUTINE PBCFarFuckingFieldSetUp
 !====================================================================================
@@ -156,18 +163,18 @@ MODULE PBCFarField
       REAL(DOUBLE),DIMENSION(0:FFLen)  :: KetC,KetS
       REAL(DOUBLE),DIMENSION(0:FFLen)  :: BraC,BraS
 
+      CTFF=Zero
+      IF(GMLoc%PBC%Dimen==0) RETURN
 !     Transform <Bra| coefficients from HG to SP
       PiZ=(Pi/Prim%Zeta)**(ThreeHalves)
       CALL HGToSP_Gen(Prim%Ell,PiZ,HGBra,KetC,KetS)   
       PQ=Prim%P-GMLoc%PBC%CellCenter%D   
 !     Contract
       IF(NoTranslate(PQ)) THEN
-         CTFF=Zero
          DO LM = 0,LSP(Prim%Ell)
             CTFF=CTFF+KetC(LM)*TenRhoC%D(LM)+KetS(LM)*TenRhoS%D(LM)
          ENDDO
       ELSE
-         CTFF=Zero
          BraC(0:LenPFFFEll)=Zero 
          BraS(0:LenPFFFEll)=Zero 
          CALL Regular(MaxPFFFELL,PQ(1),PQ(2),PQ(3))
@@ -189,7 +196,6 @@ MODULE PBCFarField
                                            + HGDipole(2)*RhoPoles%DPole%D(2)         &
                                            + HGDipole(3)*RhoPoles%DPole%D(3) )
       ENDIF
-!
     END FUNCTION CTraxFF
 !---------------------------------------------------------------------------------------------- 
 !   Print out Periodic Info
@@ -244,6 +250,7 @@ MODULE PBCFarField
       LOGICAL                   :: NoTranslate
       NoTranslate = (ABS(X(1)).LT.TOL) .AND. (ABS(X(2)).LT.TOL) .AND. (ABS(X(3)).LT.TOL)
     END FUNCTION NoTranslate
+
 !
 END MODULE PBCFarField
 

@@ -25,7 +25,7 @@ CONTAINS
   !===============================================================================
 
   !===============================================================================
-  SUBROUTINE MakeJ(J)
+  SUBROUTINE MakeJ(J,NoWrap_O)
     TYPE(BCSR)                :: J
     TYPE(DBL_RNK2)            :: Temp
     TYPE(AtomPair)            :: Pair
@@ -33,6 +33,7 @@ CONTAINS
     INTEGER                   :: JP,K,NA,NB,NAB,P,Q,R,I1,I2,I3,L,I
     INTEGER                   :: NC
     REAL(DOUBLE),DIMENSION(3) :: B  
+    LOGICAL, OPTIONAL         :: NoWrap_O
     !------------------------------------------------------------------------------- 
     !    
     ALLOCATE(TempHerm%Coef(1:HGLen))
@@ -54,7 +55,7 @@ CONTAINS
                    Pair%B   = B+CS_OUT%CellCarts%D(:,NC)
                    Pair%AB2 = (Pair%A(1)-Pair%B(1))**2+(Pair%A(2)-Pair%B(2))**2+(Pair%A(3)-Pair%B(3))**2
                    IF(TestAtomPair(Pair)) THEN
-                      J%MTrix%D(R:R+NAB-1)=J%MTrix%D(R:R+NAB-1)+Two*JBlock(Pair,PoleRoot)
+                      J%MTrix%D(R:R+NAB-1)=J%MTrix%D(R:R+NAB-1)+Two*JBlock(Pair,PoleRoot,NoWrap_O)
                    ENDIF
                 ENDDO
              ENDIF
@@ -96,7 +97,7 @@ CONTAINS
   !===============================================================================
   !
   !===============================================================================
-  FUNCTION JBlock(Pair,PoleRoot) RESULT(Jvct)
+  FUNCTION JBlock(Pair,PoleRoot,NoWrap_O) RESULT(Jvct)
     TYPE(AtomPair)                            :: Pair
     TYPE(PoleNode), POINTER                   :: PoleRoot    
     TYPE(QCPrim)                              :: QP
@@ -119,8 +120,15 @@ CONTAINS
     INTEGER                                   :: LMNB,LA,LB,MA,MB,NA,NB,LAB
     INTEGER                                   :: MAB,NAB,LM,LMN,EllAB,EllA,LenAB
     INTEGER                                   :: EllB,NC,L,M,LenHGTF,LenSP ,NNearTmp
+    LOGICAL, OPTIONAL                         :: NoWrap_O
+    LOGICAL                                   :: NoWrap
     REAL(DOUBLE),EXTERNAL                     :: MondoTimer
     !------------------------------------------------------------------------------- 
+    IF(PRESENT(NoWrap_O))THEN
+       NoWrap=NoWrap_O
+    ELSE
+       NoWrap=.FALSE.
+    ENDIF
     JBlk=Zero
     KA=Pair%KA
     KB=Pair%KB
@@ -158,6 +166,12 @@ CONTAINS
                    QP%Prim%PFA=PFA 
                    QP%Prim%PFB=PFB
                    MaxAmp=SetBraBlok(QP%Prim,BS)
+                   IF(.NOT.NoWrap)THEN
+                      ! Now wrap the coordinates back in, for a full factor of two
+                      QP%Prim%P=AtomToFrac(GM,QP%Prim%P)
+                      CALL FracCyclic(GM,QP%Prim%P)
+                      QP%Prim%P=FracToAtom(GM,QP%Prim%P)
+                   ENDIF
                    TempHerm%Zeta=QP%Prim%Zeta
                    TempHerm%Coef(1:LenAB)=Zero
                    IA = IndexA
@@ -190,6 +204,8 @@ CONTAINS
 #endif
                    ! Initialize <KET|
                    CALL DBL_VECT_EQ_DBL_SCLR(HGLen,HGKet(1),Zero)
+                   CALL DBL_VECT_EQ_DBL_SCLR(HGLen,HGKet2(1),Zero)
+                   CALL DBL_VECT_EQ_DBL_SCLR(HGLen,HGKet3(1),Zero)
                    CALL DBL_VECT_EQ_DBL_SCLR(SPLen+1,SPKetC(0),Zero)
                    CALL DBL_VECT_EQ_DBL_SCLR(SPLen+1,SPKetS(0),Zero)   
                    ! Sum over cells

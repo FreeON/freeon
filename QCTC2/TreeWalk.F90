@@ -27,7 +27,7 @@ MODULE TreeWalk
   REAL(DOUBLE) :: PC22,TPAC2
   REAL(DOUBLE),DIMENSION(1:HGLen) :: ErrBra
 #endif
-  REAL(DOUBLE),DIMENSION(1:HGLen) :: HGKet2
+  REAL(DOUBLE),DIMENSION(1:HGLen) :: HGKet2, HGKet3, HGKet4
 #ifdef MAC_DEBUG  
   REAL(DOUBLE) :: RR22,PC22,TPAC2,DeltaPrime
   REAL(DOUBLE),DIMENSION(3) :: POLECENTER
@@ -77,6 +77,7 @@ CONTAINS
 
     !-----------------------------------------------------------------------------------------------
     !  
+
     IF(PRESENT(Nucular_O))THEN
        Nucular=Nucular_O
     ELSE
@@ -143,6 +144,13 @@ CONTAINS
           RPE=QC%Prim%Zeta+Q%PAC%Zeta
           TPAC=(RTE/RPE)*PC2
           PAC=Q%PAC%Wght*QC%PAC%Wght*EXP(-TPAC)<TauPAC*PC2
+!!$          IF(Q%PAC%Wght*QC%PAC%Wght*EXP(-TPAC)/PC2.GT.1D-14)THEN
+!!$             PAC=.FALSE.
+!!$          ELSE
+!!$             !CALL ErrCompare(QC,Q,Q%PAC%Wght*QC%PAC%Wght*EXP(-TPAC)/PC2)
+!!$             WRITE(*,*)' TPAC = ',TPAC,' Err = ',Q%PAC%Wght,QC%PAC%Wght,EXP(-TPAC)/PC2
+!!$             PAC=.TRUE.
+!!$          ENDIF
           IF(PAC)THEN 
              IF(Q%MAC%Delta==Zero)THEN
                 MAC=.TRUE.
@@ -155,22 +163,24 @@ CONTAINS
                 IF(Q%MAC%Delta<R)THEN
                    ! This (LCode=0) may also be a fuck up, but seems ok for now
                    ! maybe fortuitously.  
-                   MACError=(QC%MAC%O(0)*Q%MAC%O(0)/(R-Q%MAC%Delta))*(Q%MAC%Delta/R)**(1+Q%Pole%Ell)
+!                   MACError=(QC%MAC%O(0)*Q%MAC%O(0)/(R-Q%MAC%Delta))*(Q%MAC%Delta/R)**(1+Q%Pole%Ell)
 
-!!$                   LCode=100*QC%Prim%Ell+Q%Herm%Ell
-!!$                   SELECT CASE(LCode)
-!!$                      INCLUDE "MACErrBnd4.Inc"
-!!$                   CASE DEFAULT
-!!$                      CALL Halt('No explicit code for case LCode = '  &
-!!$                           //TRIM(IntToChar(LCode))//' in MACErrBnd2.Inc')
-!!$                   END SELECT
+                   LCode=100*QC%Prim%Ell+Q%Herm%Ell
+                   SELECT CASE(LCode)
+                      INCLUDE "MACErrBnd4.Inc"
+                   CASE DEFAULT
+                      CALL Halt('No explicit code for case LCode = '  &
+                           //TRIM(IntToChar(LCode))//' in MACErrBnd2.Inc')
+                   END SELECT
 
                    MAC=MACError<TauMAC
+
                 ENDIF
              ENDIF  
           ENDIF
        ENDIF
-!
+       !
+       MAC=.FALSE.
        IF(MAC)THEN
           NFar=NFar+1
           Far(NFar)%P=>Q
@@ -223,13 +233,14 @@ CONTAINS
     !---------------------------------------------------------------------------------------------
     Integral_Time_Start=MTimer()
     Multipole_Time=Multipole_Time+(Integral_Time_Start-Multipole_Time_Start)
-    ! CALL PAPIEX_START(5,"Integrals")
+
+
     DO N=1,NNear
-       is=Near(N)%P%HERM%Stack
-       CALL RAhmadiJAlmlof95c(EllP,LenP,NuclearExpnt,JTau,QC%Prim%Zeta,QC%Prim%P,HGKet,HGStack(is)) 
-    ENDDO
-    ! CALL PAPIEX_STOP(5)
-    !---------------------------------------------------------------------------------------------
+      is=Near(N)%P%HERM%Stack
+      CALL RAhmadiJAlmlof95c(EllP,LenP,NuclearExpnt,JTau,QC%Prim%Zeta,QC%Prim%P,HGKet,HGStack(is)) 
+   ENDDO
+!!$
+!!$
 !!$
 !!$    DO N=1,NNear
 !!$       Q=>Near(N)%P
@@ -241,27 +252,25 @@ CONTAINS
 !!$             LenQ=LHGTF(EllQ)
 !!$             PQEll=EllP+EllQ
 !!$             PQLen=LHGTF(PQEll)
-!!$
-!!$             WRITE(*,*)'==========================================================='
-!!$             WRITE(*,*)' NQ = ',NQ
-!!$
-!!$             WRITE(*,*)' Est = ',Q%Herm%IHlf(EllQ)%D
-!!$
-!!$             CALL VMD3(QC%Prim%Ell,LHGTF(QC%Prim%Ell),EllQ,LHGTF(EllQ),         &
+!!$             CALL VMD3(QC%Prim%Ell,LHGTF(QC%Prim%Ell),EllQ,LHGTF(EllQ),          &
 !!$                       QC%Prim%Ell+EllQ,LHGTF(QC%Prim%Ell+EllQ),Q%HERM%Nq(EllQ), &
-!!$                       QC%Prim%P,QC%Prim%Zeta,Q%HERM%Cent(EllQ)%D,             &
+!!$                       QC%Prim%P,QC%Prim%Zeta,Q%HERM%Cent(EllQ)%D,               &
 !!$                       Q%HERM%Zeta(EllQ)%D,Q%HERM%Coef(EllQ)%D,HGKet)
-!!$!!WRITE(*,*)' HGKet = ',HGKet(1:6)
-!!$!        WRITE(*,33)EllP,EllQ,QC%Prim%Zeta,Q%HERM%Zeta(EllQ)%D(1),NQ, &
-!!$!                  DOT_PRODUCT(Q%HERM%Coef(EllQ)%D(:,1),Q%HERM%Coef(EllQ)%D(:,1)),  &
-!!$!                  DOT_PRODUCT(HGKET,HGKET)
-!!$33 FORMAT('LP = ',I2,', LQ = ',I2,' ZP = ',D12.6,' ZQ = ',D12.6,' NQ = ',I2,' Co = ',D12.6,' HG = ',D12.6)
-!!$!                STOP
-!!$
 !!$             NInts=NInts+Nq
 !!$          ENDIF
 !!$       ENDDO
 !!$    ENDDO
+
+!!$      IF(ABS((HGKet(1)-HGKet2(1))/HGKet2(1)).GT.1D-8)THEN
+!!$          WRITE(*,*)' Nucular = ',Nucular
+!!$          WRITE(*,*)' HGKet = ',HGKet(1)
+!!$          WRITE(*,*)' HGKet = ',HGKet2(1)
+!!$          STOP
+!!$       ENDIF
+
+
+
+
 
 !!$
 !!$    DO N=1,NNear
@@ -603,6 +612,8 @@ CONTAINS
 #endif
 
   SUBROUTINE VMD3(EllP,LenP,EllQ,LenQ,EllPQ,LenPQ,Nc,P,ZetaP,Q,ZetaQ,QCoeff,Ket)
+
+    USE GammaFunctions
     !
     INTEGER :: EllP,LenP,EllQ,LenQ,EllPQ,LenPQ,Nc
     REAL(DOUBLE),DIMENSION(Nc,0:LenPQ)    :: R
@@ -614,10 +625,10 @@ CONTAINS
     REAL(DOUBLE),DIMENSION(LenQ,Nc)      :: QCoeff
     REAL(DOUBLE),DIMENSION(LenP)         :: Ket
     !
-    REAL(DOUBLE)                  :: Omega,T
+    REAL(DOUBLE)                  :: Omega,T,PQ2
     INTEGER                       :: MaxL,LTot 
-    REAL(DOUBLE),PARAMETER        :: Switch=22.0D0
-    INTEGER,PARAMETER             :: LPlus=50
+    REAL(DOUBLE),PARAMETER        :: Switch=26.0D0
+    INTEGER,PARAMETER             :: LPlus= 300
     INTEGER,PARAMETER             :: L2=12+LPlus
     REAL(DOUBLE),DIMENSION(0:L2)  :: F
     REAL(DOUBLE)                  :: SqrtT,ET,OneOvT,FJ,TwoT,OmegaJ,TwoO
@@ -638,6 +649,8 @@ CONTAINS
 
     REAL(DOUBLE),DIMENSION(LenP) :: Ket1
 
+
+
     !-------------------------------------------------------------------------
 !!$    WRITE(*,*)' EllP = ',EllP,' EllQ = ',EllQ
 !!$    WRITE(*,*)' EllPQ = ',EllPQ,' LenPQ = ',LenPQ
@@ -646,54 +659,70 @@ CONTAINS
        PQx(I)=-(P(1)-Q(1,I))
        PQy(I)=-(P(2)-Q(2,I))
        PQz(I)=-(P(3)-Q(3,I))
+       PQ2=PQx(I)*PQx(I)+PQy(I)*PQy(I)+PQz(I)*PQz(I)
 
-       WRITE(*,*)' ZetaP = ',ZetaP,' ZetaQ = ',ZetaQ(I)
-!       WRITE(*,*)' P = ',P
-!       WRITE(*,*)' Q = ',Q(:,I)
-
-
-       RTE=ZetaP*ZetaQ(I)
-       RPE=ZetaP+ZetaQ(I)
-       Omega=RTE/RPE
-       Upq=TwoPi5x2/(RTE*SQRT(RPE))
-       T=Omega*(PQx(I)*PQx(I)+PQy(I)*PQy(I)+PQz(I)*PQz(I))
-       IF(T==Zero)THEN
-          OmegaJ=One
-          TwoO=-Two*Omega
-          DO J=0,EllPQ
-             AuxR(I,J)=Upq*OmegaJ/DBLE(2*J+1)
-             OmegaJ=TwoO*OmegaJ
-          ENDDO
+       IF(ZetaP==NuclearExpnt.AND.EllQ==0.AND.(PQ2.LT.1D-16.AND.ZetaQ(I).EQ.ZetaP))THEN
+          AuxR(I,:)=0D0
        ELSE
-          IF(T.LT.Switch) THEN
-             ! F_{j}(T)=(2*T*F_{j+1}+Exp[-T])/(2*j+1)
-             TwoT=Two*T
-             ET=DEXP(-T)
-             FJ=Zero
-             DO J=EllPQ+LPlus,0,-1                
-                F(J)=FJ
-                FJ=(TwoT*F(J)+ET)/(Two*DBLE(J)-One)
+          RTE=ZetaP*ZetaQ(I)
+          RPE=ZetaP+ZetaQ(I)
+          Omega=RTE/RPE
+          Upq=TwoPi5x2/(RTE*SQRT(RPE))
+          T=Omega*PQ2
+
+          
+!          WRITE(*,*)' T = ',T
+!          WRITE(*,*)' Q = ',Q(1,I),' T = ',T
+
+          IF(T==Zero)THEN
+             OmegaJ=One
+             TwoO=-Two*Omega
+             DO J=0,EllPQ
+                AuxR(I,J)=Upq*OmegaJ/DBLE(2*J+1)
+                OmegaJ=TwoO*OmegaJ
              ENDDO
           ELSE
-             ! Multipole approx and upward recursion
-             SqrtT=SQRT(T)
-             OneOvT=One/T
-             F(0)=SqrtPi/(Two*SqrtT) 
-             DO J=1,EllPQ
-                F(J)=F(J-1)*(DBLE(J)-Half)*OneOvT
+             IF(T.LT.Switch) THEN
+                ! F_{j}(T)=(2*T*F_{j+1}+Exp[-T])/(2*j+1)
+                !             WRITE(*,*)' T = ',T
+                TwoT=Two*T
+                ET=DEXP(-T)
+                !             WRITE(*,*)' ET = ',ET
+                FJ=Zero
+                DO J=EllPQ+LPlus,0,-1                
+                   F(J)=FJ
+                   !                WRITE(*,*)' J = ',J,' FJ = ',F(J)
+                   FJ=(TwoT*F(J)+ET)/(Two*DBLE(J)-One)
+                ENDDO
+!!$
+!!$                WRITE(*,*)' F1= ',F(1)
+!!$                WRITE(*,*)' F0= ',F(0)
+!!$
+
+                !             IF(T.GT.25D0)STOP
+             ELSE
+                ! Multipole approx and upward recursion
+                SqrtT=SQRT(T)
+                OneOvT=One/T
+                F(0)=SqrtPi/(Two*SqrtT) 
+                DO J=1,EllPQ
+                   F(J)=F(J-1)*(DBLE(J)-Half)*OneOvT
+                ENDDO
+             ENDIF
+             OmegaJ=One
+             TwoO=-Two*Omega
+             DO J=0,EllPQ
+                AuxR(I,J)=Upq*OmegaJ*F(J)
+                OmegaJ=TwoO*OmegaJ
              ENDDO
           ENDIF
-          OmegaJ=One
-          TwoO=-Two*Omega
-          DO J=0,EllPQ
-             AuxR(I,J)=Upq*OmegaJ*F(J)
-             OmegaJ=TwoO*OmegaJ
-          ENDDO
        ENDIF
+
+!!$
+!       WRITE(*,333)ZetaP,ZetaQ(I),T,F(0)
+333    FORMAT('ZP = ',D12.6,' ZQ = ',D12.6,' T = ',D12.6,' F = ',D12.6)
     ENDDO
 
-!    WRITE(*,*)' T = ',T
-!    WRITE(*,*)' AuxR = ',AuxR(I,0:1)
 
     !
     DO J=EllPQ,0,-1
@@ -783,10 +812,10 @@ CONTAINS
 !!$       ENDIF
 !!$    ENDDO
     !
- 
-!    DO I=1,Nc
-!       WRITE(*,*)I,DOT_PRODUCT(QCoeff(:,I),QCoeff(:,I))
-!    ENDDO
+
+    !    DO I=1,Nc
+    !       WRITE(*,*)I,DOT_PRODUCT(QCoeff(:,I),QCoeff(:,I))
+    !    ENDDO
 
     DO LP=0,EllP
        DO MP=0,EllP-LP
@@ -798,7 +827,12 @@ CONTAINS
                       Qdex=LMNx(LQ,MQ,NQ)
                       PQdex=LMNx(LP+LQ,MP+MQ,NP+NQ)
                       DO I=1,Nc
-                         Ket(PDex)=Ket(Pdex)+R(I,PQdex)*QCoeff(Qdex,I)
+!                         IF(QCoeff(QDex,I).NE.0D0.AND.Q(1,I)==0D0)THEN
+                             Ket(PDex)=Ket(Pdex)+R(I,PQdex)*QCoeff(Qdex,I)
+!                             WRITE(*,*)' Ket = ',Ket(1)
+!                             WRITE(*,444)I,P(1),Q(1,I),R(I,PQdex)*QCoeff(Qdex,I)
+444                          FORMAT(I4,' px = ',D12.6,', qx = ',D12.6,', R*Q = ',D12.6)
+!                          ENDIF
                       ENDDO
                    ENDDO
                 ENDDO

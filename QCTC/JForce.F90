@@ -64,8 +64,8 @@ PROGRAM JForce
 #else
 !  WRITE(*,*) "JForce"
 !  WRITE(*,*) "D ",Args%I%I(4)
-  CALL Get(P,TrixFile('D',Args,1),BCast_O=.TRUE.)
-  CALL Get(Rho,'Rho',Args,1,Bcast_O=.TRUE.)  
+  CALL Get(P,TrixFile('D',Args,0),BCast_O=.TRUE.)
+  CALL Get(Rho,'Rho',Args,0,Bcast_O=.TRUE.)  
 #endif
   CALL Get(RhoPoles) 
 ! Set thresholds local to JForce (for PAC and MAC)
@@ -247,9 +247,12 @@ PROGRAM JForce
            LatFrc_J_PFF%D(I,J) = Zero
         ENDDO
      ENDDO
+     PrintFlags%Key=DEBUG_MAXIMUM	
+     PrintFlags%MM=DEBUG_FRC
+
 !    Do some printing
-     CALL Print_LatForce(GMLoc,LatFrc_J%D,'J Lattice Force')
-     CALL Print_LatForce(GMLoc,LatFrc_J%D,'J Lattice Force',Unit_O=6)
+     CALL Print_LatForce(GMLoc,LatFrc_J%D,'RAW J Lattice Force')
+     CALL Print_LatForce(GMLoc,LatFrc_J%D,'RAW J Lattice Force',Unit_O=6)
      CALL Print_LatForce(GMLoc,LatFrc_J_Dip%D,'J Dipole Lattice Force')
      CALL Print_LatForce(GMLoc,LatFrc_J_Dip%D,'J Dipole Lattice Force',Unit_O=6)
      CALL Print_LatForce(GMLoc,LatFrc_J_PFF%D,'J  PFF   Lattice Force')
@@ -262,6 +265,9 @@ PROGRAM JForce
      ENDDO
 !    Sum in the J contribution to total lattice force,including Dip and PFF
      LatFrc_J%D         = LatFrc_J%D+LatFrc_J_Dip%D+LatFrc_J_PFF%D
+     CALL Print_LatForce(GMLoc,LatFrc_J%D,'TOTAL Lattice Force')
+     CALL Print_LatForce(GMLoc,LatFrc_J%D,'TOTAL Lattice Force',Unit_O=6)
+
      GMLoc%PBC%LatFrc%D = GMLoc%PBC%LatFrc%D+LatFrc_J%D
 !    Tidy Up
      CALL Delete(LatFrc_J_Dip)

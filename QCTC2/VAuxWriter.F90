@@ -23,7 +23,11 @@ CONTAINS
 !    String=Space//"IMPLICIT INTEGER(I-N)"
 !    WRITE (77,FMT)String
 !
-    String=Space//"INTEGER Nc,Ns,Mesh,I,J,K"
+    IF(Ell==0)THEN
+       String=Space//"INTEGER Nc,Ns,Mesh,I,J,K,IF0"
+    ELSE
+       String=Space//"INTEGER Nc,Ns,Mesh,I,J,K,IF0,"//"IF"//TRIM(IntToChar(Ell))
+    ENDIF
     WRITE (77,FMT)String
 !
     String=Space//"REAL*8  P(3),Q(3,*),PQx(*),PQy(*),PQz(*)"
@@ -31,47 +35,68 @@ CONTAINS
 
     String=Space//"REAL*8  ZetaP,ZetaQ(*),AuxR(0:"//TRIM(IntToChar(Ell))//",*) "
     WRITE (77,FMT)String
-
-    String=Space//"REAL*8 ET,TwoT,T,T2,T3,T4,RTE,RPE,Upq,TwoPi5x2"
+!
+    String=Space//"REAL*8 ET,TwoT,T,RTE,RPE,Upq,TwoPi5x2"
     WRITE (77,FMT)String
-
+!
     String=Space//"REAL*8 SqrtT,SqrtPi,One,Two"
     WRITE (77,FMT)String
-
+!
     String=Space//"PARAMETER(SqrtPi=1.7724538509055160273D0)"
     WRITE (77,FMT)String
     String=Space//"PARAMETER(TwoPi5x2=3.4986836655249725693D1)"
     WRITE (77,FMT)String
-
-
+!
     String=Space//"PARAMETER(One=1D0)"
     WRITE (77,FMT)String
     String=Space//"PARAMETER(Two=2D0)"
     WRITE (77,FMT)String
-
-    String=Space//'INCLUDE "Gamma_Asymptotics.Inc"'
-    WRITE (77,FMT)String
-
-    String=Space//'INCLUDE "Mesh.Inc"'
+!
+    String=Space//'INCLUDE "GammaGrid_77.Inc"'
     WRITE (77,FMT)String
 !
-
-!    String=Space//'INCLUDE "GammaDimensions.Inc"'
-!    WRITE (77,FMT)String
-
-    String=Space//'REAL*8 F'//TRIM(IntToChar(Ell))//'_0(0:Mesh)'
+    String=Space//'INCLUDE "GammaDimensions_77.Inc"'
     WRITE (77,FMT)String
-    String=Space//'REAL*8 F'//TRIM(IntToChar(Ell))//'_1(0:Mesh)'
+!
+    String=Space//'REAL*8 F0_0(0:Gamma_Mesh)'
     WRITE (77,FMT)String
-    String=Space//'REAL*8 F'//TRIM(IntToChar(Ell))//'_2(0:Mesh)'
+    String=Space//'REAL*8 F0_1(0:Gamma_Mesh)'
     WRITE (77,FMT)String
-    String=Space//'REAL*8 F'//TRIM(IntToChar(Ell))//'_3(0:Mesh)'
+    String=Space//'REAL*8 F0_2(0:Gamma_Mesh)'
     WRITE (77,FMT)String
-!    String=Space//'REAL*8 F'//TRIM(IntToChar(Ell))//'_4(0:GammaMesh)'
-!    WRITE (77,FMT)String
-    String=Space//'INCLUDE "Gamma_'//TRIM(IntToChar(Ell))//'.Inc"'
+    String=Space//'REAL*8 F0_3(0:Gamma_Mesh)'
     WRITE (77,FMT)String
-
+    String=Space//'REAL*8 F0_4(0:Gamma_Mesh)'
+    WRITE (77,FMT)String
+    String=Space//'REAL*8 F0_5(0:Gamma_Mesh)'
+    WRITE (77,FMT)String
+    String=Space//'REAL*8 F0_6(0:Gamma_Mesh)'
+    WRITE (77,FMT)String
+!
+    IF(Ell.NE.0)THEN
+    String=Space//'REAL*8 F'//TRIM(IntToChar(Ell))//'_0(0:Gamma_Mesh)'
+    WRITE (77,FMT)String
+    String=Space//'REAL*8 F'//TRIM(IntToChar(Ell))//'_1(0:Gamma_Mesh)'
+    WRITE (77,FMT)String
+    String=Space//'REAL*8 F'//TRIM(IntToChar(Ell))//'_2(0:Gamma_Mesh)'
+    WRITE (77,FMT)String
+    String=Space//'REAL*8 F'//TRIM(IntToChar(Ell))//'_3(0:Gamma_Mesh)'
+    WRITE (77,FMT)String
+    String=Space//'REAL*8 F'//TRIM(IntToChar(Ell))//'_4(0:Gamma_Mesh)'
+    WRITE (77,FMT)String
+    String=Space//'REAL*8 F'//TRIM(IntToChar(Ell))//'_5(0:Gamma_Mesh)'
+    WRITE (77,FMT)String
+    String=Space//'REAL*8 F'//TRIM(IntToChar(Ell))//'_6(0:Gamma_Mesh)'
+    WRITE (77,FMT)String
+    ENDIF
+!
+    String=Space//'INCLUDE "F0_77.Inc"'
+    WRITE (77,FMT)String
+    IF(Ell.NE.0)THEN
+       String=Space//'INCLUDE "F'//TRIM(IntToChar(Ell))//'_77.Inc"'
+       WRITE (77,FMT)String
+    ENDIF
+!
   END SUBROUTINE PREAMBLE
 !
 END MODULE AuxAux
@@ -104,8 +129,6 @@ PROGRAM VAuxWriter
   DO Ell=0,12 !BigEll
      ChL=IntToChar(Ell)
      CALL Preamble(77,Ell)     
-!     String=Space2//'RETURN'
-!     WRITE(77,FMT)String
      String=Space2//'DO 100 I=1,Nc'
      WRITE(77,FMT)String
      String=Space2//'   PQx(I)=-(P(1)-Q(1,I))'
@@ -124,17 +147,14 @@ PROGRAM VAuxWriter
      WRITE(77,FMT)String
      String=Space2//'   T=Omega*(PQx(I)*PQx(I)+PQy(I)*PQy(I)+PQz(I)*PQz(I))'
      WRITE(77,FMT)String
-     String=Space2//'   IF(T.LT.Switch)THEN'
+     String=Space2//'   IF(T.LT.1D0)THEN'
      WRITE(77,FMT)String
-     String=Space2//'      T2=T*T'
+     String=Space2//'      J=AINT(T*Gamma_Grid)'
      WRITE(77,FMT)String
-     String=Space2//'      T3=T*T2'
+     String=Space2//'      G'//TRIM(ChL)//'=F'//TRIM(ChL)//'_0(J)+T*(F' &
+                  //TRIM(ChL)//'_1(J)+T*(F'//TRIM(ChL)//'_2(J)+T*(F'//TRIM(ChL)//'_3(J)'
      WRITE(77,FMT)String
-     String=Space2//'      J=AINT(T*Grid)'
-     WRITE(77,FMT)String
-     String=Space2//'      G'//TRIM(ChL)//'=(F'//TRIM(ChL)//'_0(J)' &
-                 //'+T*F'//TRIM(ChL)//'_1(J)'//'+T2*F' &
-                 //TRIM(ChL)//'_2(J)'//'+T3*F'//TRIM(ChL)//'_3(J))'
+     String='     >        +T*(F'//TRIM(ChL)//'_4(J)+T*(F'//TRIM(ChL)//'_5(J)+T*F'//TRIM(ChL)//'_6(J))))))'
      WRITE(77,FMT)String
      IF(Ell.NE.0)THEN
         String=SPACE2//'      ET=DEXP(-T)'
@@ -153,26 +173,30 @@ PROGRAM VAuxWriter
         String=Space2//"      "//String
         WRITE(77,FMT)String
      END DO
- 
-     String=Space2//"      "//'o1=Upq'
+
+
+     String=Space2//'   ELSEIF(T.LT.Gamma_Switch)THEN'
+     WRITE(77,FMT)String
+     String=Space2//'      J=AINT(T*Gamma_Grid)'
+     WRITE(77,FMT)String
+     String=Space2//'      G0=F0_0(J)+T*(F0_1(J)+T*(F0_2(J)+T*(F0_3(J)'
+     WRITE(77,FMT)String
+     String='     >        +T*(F0_4(J)+T*(F0_5(J)+T*F0_6(J))))))'
      WRITE(77,FMT)String
      IF(Ell.NE.0)THEN
-        String=Space2//"      "//'o2=-2D0*Omega'
+        String=SPACE2//'      ET=DEXP(-T)'
+        WRITE(77,FMT)String
+        String=Space2//'      OneOvr2T=5D-1/T'
         WRITE(77,FMT)String
      ENDIF
-     DO L=0,Ell
-        String=Space2//"      AuxR("//TRIM(IntToChar(L))//',I)=o1*G'//TRIM(IntToChar(L))
+     DO L=1,Ell
+        Flt=(2D0*DBLE(L)-1D0)
+        STRING = 'G'//TRIM(IntToChar(L))//'=OneOvr2T*('//DblToChar(Flt)// '*G'//TRIM(IntToChar(L-1))//'-ET)'
+        String=Space2//"      "//String
         WRITE(77,FMT)String
-        IF(L.LE.Ell-1)THEN
-           String=Space2//"      o1=o2*o1"
-           WRITE(77,FMT)String
-        ENDIF
-     ENDDO
-     
+     END DO
      String=Space2//'   ELSE'
      WRITE(77,FMT)String
-
-
 !
      String=Space2//'      SqrtT=DSQRT(T)'
      WRITE(77,FMT)String
@@ -182,14 +206,6 @@ PROGRAM VAuxWriter
      String=Space2//'      G0=SqrtPi/(Two*SqrtT)'
      WRITE(77,FMT)String
  
-     String=Space2//"      "//'o1=Upq'
-     WRITE(77,FMT)String
-
-     IF(Ell.NE.0)THEN
-        String=Space2//"      "//'o2=-2D0*Omega'
-        WRITE(77,FMT)String
-     ENDIF
-
      DO L=0,Ell
         IF(L.GT.0)THEN
            String=Space2//'      G'//TRIM(IntToChar(L))//'=G' &
@@ -197,16 +213,28 @@ PROGRAM VAuxWriter
                 //TRIM(DblToChar(DBLE(L)-0.5D0))//'*OneOvT'
            WRITE(77,FMT)String
         ENDIF
-        String=Space2//"      AuxR("//TRIM(IntToChar(L))//',I)=o1*G'//TRIM(IntToChar(L))
-        WRITE(77,FMT)String
-        IF(L.LE.Ell-1)THEN
-           String=Space2//"      o1=o2*o1"
-           WRITE(77,FMT)String
-        ENDIF
      ENDDO
 
      String=Space2//'   ENDIF'
      WRITE(77,FMT)String
+
+     String=Space2//"   "//'o1=Upq'
+     WRITE(77,FMT)String
+
+     IF(Ell.NE.0)THEN
+        String=Space2//"   "//'o2=-2D0*Omega'
+        WRITE(77,FMT)String
+     ENDIF
+
+     DO L=0,Ell
+        String=Space2//"   AuxR("//TRIM(IntToChar(L))//',I)=o1*G'//TRIM(IntToChar(L))
+        WRITE(77,FMT)String
+        IF(L.LE.Ell-1)THEN
+           String=Space2//"   o1=o2*o1"
+           WRITE(77,FMT)String
+        ENDIF
+     ENDDO
+
      WRITE(77,*)'100  CONTINUE'
 !
      WRITE(77,*)'     RETURN'

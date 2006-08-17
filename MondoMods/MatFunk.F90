@@ -111,7 +111,7 @@ MODULE MatFunk
       BLKMAT1%D=Zero
       IF(PosDefMat) THEN
          DO I=1,N
-            IF(BLKVALS%D(I)<EigenThreshold.AND.BLKVALS%D(I)>-1D-14)THEN
+            IF(BLKVALS%D(I)<EigenThreshold)THEN
                BLKMAT1%D(I,I)=Zero
             ELSEIF(BLKVALS%D(I)<-1D-14)THEN
                CALL Halt('In MatFunk, apparently a non-positive definate matrix: Eval = ' &

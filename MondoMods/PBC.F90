@@ -166,16 +166,12 @@ MODULE CellSets
     INTEGER,OPTIONAL                     :: MaxCell_O
     CHARACTER(LEN=*)                     :: Option
 !
-    INTEGER                              :: I,J,K,L,M,Corners,NElect
+    INTEGER                              :: I,J,K,L,M,Corners,NElect, HardP,HardO
     INTEGER                              :: IXM,IYM,IZM,NCELL
     REAL(DOUBLE)                         :: X,Y,Z,Rad,R,TTemp
     LOGICAL                              :: InCell
 
-    WRITE(*,*)' NEW ',Option,' CELLSET SPHERE '
-!    TTemp=TwoEThreshold
-!    TwoEThreshold=1D-16
-!    WRITE(*,*)' Threshold = ',TwoEThreshold
-!
+
     Corners=0
     DO I=0,1*AW(1)
        DO J=0,1*AW(2)
@@ -194,15 +190,18 @@ MODULE CellSets
     IYM = 0
     IZM = 0
     IF(AW(1)==1)THEN
-       IXM=15
+       IXM=2000
     ENDIF
     IF(AW(2)==1)THEN
-       IYM=15
+       IYM=200
     ENDIF
     IF(AW(3)==1)THEN
-       IZM=15
+       IZM=200
     ENDIF
 !
+!!$    HardP=3!50
+!!$    HardO=3!5
+
     NCELL = 0
     DO I=-IXM,IXM
        DO J=-IYM,IYM
@@ -226,16 +225,16 @@ MODULE CellSets
              IF(Option=='Penetration')THEN
                 T=MinExpt*MinSepSq
                 InCell=DBLE(NElect)*EXP(-T)/MinSepSq>CellSetsThreshold
+!!$                InCell=J==0.AND.K==0.AND.ABS(I)<=HardP
              ELSEIF(Option=='Overlap')THEN
                 T=Half*MinExpt*MinSepSq
                 InCell=EXP(-T)>CellSetsThreshold
+!!$                InCell=J==0.AND.K==0.AND.ABS(I)<=HardO
              ELSE
                 CALL Halt(' Unknown option to New_CellSet_Sphere2 ')
              ENDIF
              IF(InCell)THEN
                 NCELL = NCELL+1
-!                WRITE(*,22)I,J,K,T
-!22              FORMAT(3(I5,", "),10(D12.6,", "))
              ENDIF
           ENDDO
        ENDDO
@@ -276,9 +275,11 @@ MODULE CellSets
              IF(Option=='Penetration')THEN
                 T=MinExpt*MinSepSq
                 InCell=DBLE(NElect)*EXP(-T)/MinSepSq>CellSetsThreshold
+!!$                InCell=J==0.AND.K==0.AND.ABS(I)<=HardP
              ELSEIF(Option=='Overlap')THEN
                 T=Half*MinExpt*MinSepSq
                 InCell=EXP(-T)>CellSetsThreshold
+!!$                InCell=J==0.AND.K==0.AND.ABS(I)<=HardO
              ELSE
                 CALL Halt(' Unknown option to New_CellSet_Sphere2 ')
              ENDIF
@@ -290,7 +291,8 @@ MODULE CellSets
        ENDDO
     ENDDO
 
-!!    TwoEThreshold=TTemp
+    WRITE(*,*)' NEW ',Option,' CELLSET SPHERE, NCELL = ',NCELL
+
   END SUBROUTINE New_CellSet_Sphere2
 
 
@@ -370,15 +372,24 @@ MODULE CellSets
 !
   END SUBROUTINE New_CellSet_Sphere
 !--------------------------------------------------------------------------
-! Sort the Cells From Large R to Small R
+! Sortharthe Cells From Large R to Small R
 !--------------------------------------------------------------------------
-  SUBROUTINE Sort_CellSet(CS)
+  SUBROUTINE Sort_CellSet(CS,Order_O)
     TYPE(CellSet)                        :: CS
     TYPE(INT_VECT)                       :: IPnt
     TYPE(DBL_VECT)                       :: Vec
     TYPE(DBL_RNK2)                       :: CCarts
     INTEGER                              :: NC
+    INTEGER, OPTIONAL                    :: Order_O
+    INTEGER                              :: Order
 !
+ 
+    IF(PRESENT(Order_O))THEN
+       Order=Order_O
+    ELSE
+       Order=2
+    ENDIF
+
     CALL New(IPnt  ,CS%NCells)
     CALL New(Vec   ,CS%NCells)
     CALL New(CCarts,(/3,CS%NCells/))
@@ -387,7 +398,10 @@ MODULE CellSets
        Vec%D(NC) = SQRT(CS%CellCarts%D(1,NC)**2+CS%CellCarts%D(2,NC)**2+CS%CellCarts%D(3,NC)**2)
     ENDDO
 !
-    CALL Sort(Vec,IPnt,CS%NCells,2)
+    CALL Sort(Vec,IPnt,CS%NCells,Order)
+
+    WRITE(*,*)' Vec = ',Vec%D
+
 !
     DO NC=1,CS%NCells
        CCarts%D(1,NC) = CS%CellCarts%D(1,IPnt%I(NC))

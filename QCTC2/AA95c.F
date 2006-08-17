@@ -108,11 +108,6 @@ C           CALL PAPIEX_START(11,"< CASE 1 >")
 C           CALL PAPIEX_STOP(11)
          CASE(2)
 C           CALL PAPIEX_START(12,"< CASE 2 > ")
-
-
-!            Ket(1:2)=0D0
-
-
             CALL AuxIGen2(Nc,P,C(iQ),ZP,C(iZQ),Wrk(iPQx),Wrk(iPQy),
      >                    Wrk(iPQz),Wrk(iAux))                               
             CALL MD3TRR2(Nc,Wrk(iPQx),Wrk(iPQy),Wrk(iPQz),
@@ -121,13 +116,6 @@ C           CALL PAPIEX_START(12,"< CASE 2 > ")
                CALL KTrax_0_2(Nc,Wrk(iArr),C(iCo),Ket)
             ELSEIF(EllP==1)THEN
                CALL KTrax_1_1(Nc,Wrk(iArr),C(iCo),Ket)
-
-
-c              WRITE(*,*)' HGKet = '
-c              WRITE(*,33)Ket(1:2)               
-c 33   FORMAT(10(D12.6,", "))
-
-
             ELSE
                CALL KTrax_2_0(Nc,Wrk(iArr),C(iCo),Ket)
             ENDIF
@@ -261,7 +249,7 @@ C     SPECIAL PURPOSE CODE THAT AVOIDS THE NUCLEAR NUCLEAR SELF INTERACTION
 C
       SUBROUTINE ENuE0(Nc,P,Q,ZetaP,ZetaQ,QCo,Ket)
 C     
-      INTEGER Nc,I,J,   Mesh
+      INTEGER Nc,I,J,IF0
       REAL*8 P(3),Q(3,*),ZetaP,ZetaQ(*),QCo(*),Ket(*)
       REAL*8 PQx,PQy,PQz,RTE,RPE,Omega,Upq,SqrtPi,TwoPi5x2
       REAL*8 PQ2,T,T1,T2,T3
@@ -274,12 +262,17 @@ C
       PARAMETER(TwoPi5x2=3.4986836655249725693D1)
       PARAMETER(SqrtPi=1.7724538509055160273D0)
 C     
-      INCLUDE "Mesh.Inc"
-      REAL*8 F0_0(0:Mesh),F0_1(0:Mesh),F0_2(0:Mesh),F0_3(0:Mesh)        
-      
-      INCLUDE "Gamma_0.Inc"                                                            
-      INCLUDE "Gamma_Asymptotics.Inc"
-C     
+      INCLUDE "GammaDimensions_77.Inc"                                  
+      INCLUDE "GammaGrid_77.Inc"                                        
+      REAL*8 F0_0(0:Gamma_Mesh)                                         
+      REAL*8 F0_1(0:Gamma_Mesh)                                         
+      REAL*8 F0_2(0:Gamma_Mesh)                                         
+      REAL*8 F0_3(0:Gamma_Mesh)                                         
+      REAL*8 F0_4(0:Gamma_Mesh)                                         
+      REAL*8 F0_5(0:Gamma_Mesh)                                         
+      REAL*8 F0_6(0:Gamma_Mesh)                                         
+      INCLUDE "F0_77.Inc"                                               
+C      
       DO 100 I=1,Nc
          PQx=-(P(1)-Q(1,I))
          PQy=-(P(2)-Q(2,I))
@@ -291,12 +284,11 @@ C
             Omega=RTE/RPE
             Upq=TwoPi5x2/(RTE*SQRT(RPE))
             T=Omega*PQ2
-            IF(T.LT.Switch)THEN
-               j=AINT(T*Grid)                                              
-               T2=T*T                                                      
-               T3=T2*T                                                     
-               Ket(1)=Ket(1)+QCo(I)* 
-     >              Upq*(F0_0(j)+T*F0_1(j)+T2*F0_2(j)+T3*F0_3(j))           
+            IF(T.LT.Gamma_Switch)THEN
+               j=AINT(T*Gamma_Grid)                                              
+               Ket(1)=Ket(1)+QCo(I)*Upq*(
+     >                F0_0(J)+T*(F0_1(J)+T*(F0_2(J)+T*(F0_3(J)                 
+     >               +T*(F0_4(J)+T*(F0_5(J)+T*F0_6(J)))))))
             ELSE                                                           
                Ket(1)=Ket(1)+QCo(I)*Upq*SqrtPi/(2D0*DSQRT(T))
             ENDIF                                                          
@@ -307,25 +299,38 @@ C
 
       SUBROUTINE ENuE1(Nc,P,Q,ZetaP,ZetaQ,QCo,Ket)
 C     
-      INTEGER Nc,I,J,   Mesh
+      INTEGER Nc,I,J,IF0,IF1
       REAL*8 P(3),Q(3,*),ZetaP,ZetaQ(*),QCo(*),Ket(*)
-      REAL*8 PQx,PQy,PQz,RTE,RPE,Omega,Upq,SqrtPi,TwoPi5x2
-      REAL*8 PQ2,T,T1,T2,T3,F0,F1,Aux0,Aux1
+      REAL*8 PQx,PQy,PQz,RTE,RPE,Omega,Upq,SqrtPi,TwoPi5x2,OneOvr2T
+      REAL*8 PQ2,T,T1,T2,T3,F0,F1,Aux0,Aux1,One,Two,ET,TwoT,SQRTT,OneOvT
 
       REAL*8 Switch,F0Asymp,F1Asymp,F2Asymp,F3Asymp,F4Asymp,
      >              F5Asymp,F6Asymp,F7Asymp,F8Asymp,F9Asymp,
      >              F10Asymp,F11Asymp,F12Asymp,F13Asymp,Grid
 C
+      PARAMETER(One=1D0,Two=2D0)
       PARAMETER(TwoPi5x2=3.4986836655249725693D1)
       PARAMETER(SqrtPi=1.7724538509055160273D0)
 C     
-      INCLUDE "Mesh.Inc"
-      REAL*8 F0_0(0:Mesh),F0_1(0:Mesh),F0_2(0:Mesh),F0_3(0:Mesh)        
-      REAL*8 F1_0(0:Mesh),F1_1(0:Mesh),F1_2(0:Mesh),F1_3(0:Mesh)        
-      
-      INCLUDE "Gamma_0.Inc"                                                            
-      INCLUDE "Gamma_1.Inc"                                                            
-      INCLUDE "Gamma_Asymptotics.Inc"
+      INCLUDE "GammaDimensions_77.Inc"                                  
+      INCLUDE "GammaGrid_77.Inc"                                        
+      REAL*8 F0_0(0:Gamma_Mesh)                                         
+      REAL*8 F0_1(0:Gamma_Mesh)                                         
+      REAL*8 F0_2(0:Gamma_Mesh)                                         
+      REAL*8 F0_3(0:Gamma_Mesh)                                         
+      REAL*8 F0_4(0:Gamma_Mesh)                                         
+      REAL*8 F0_5(0:Gamma_Mesh)                                         
+      REAL*8 F0_6(0:Gamma_Mesh)                                         
+      REAL*8 F1_0(0:Gamma_Mesh)                                         
+      REAL*8 F1_1(0:Gamma_Mesh)                                         
+      REAL*8 F1_2(0:Gamma_Mesh)                                         
+      REAL*8 F1_3(0:Gamma_Mesh)                                         
+      REAL*8 F1_4(0:Gamma_Mesh)                                         
+      REAL*8 F1_5(0:Gamma_Mesh)                                         
+      REAL*8 F1_6(0:Gamma_Mesh)                                         
+c
+      INCLUDE "F0_77.Inc"                                               
+      INCLUDE "F1_77.Inc"                                               
 C     
       DO 100 I=1,Nc
          PQx=-(P(1)-Q(1,I))
@@ -338,16 +343,27 @@ C
             Omega=RTE/RPE
             Upq=TwoPi5x2/(RTE*SQRT(RPE))
             T=Omega*PQ2
-            IF(T.LT.Switch)THEN
-               j=AINT(T*Grid)                                              
-               T2=T*T                                                      
-               T3=T2*T                                                     
-               F0=(F0_0(J)+T*(F0_1(J)+T*(F0_2(J)+T*F0_3(J))))
-               F1=(F1_0(J)+T*(F1_1(J)+T*(F1_2(J)+T*F1_3(J))))
-            ELSE  
-               F0=SqrtPi*5D-1/DSQRT(T)
-               F1=5D-1*F0/T
+            IF(T.LT.1D0)THEN                                               
+               J=AINT(T*Gamma_Grid)                                        
+               F1=F1_0(J)+T*(F1_1(J)+T*(F1_2(J)+T*(F1_3(J)                 
+     >              +T*(F1_4(J)+T*(F1_5(J)+T*F1_6(J))))))                     
+               ET=DEXP(-T)                                                 
+               TwoT=2.0D0*T                                                
+               F0=TwoT*F1+ET                                               
+            ELSEIF(T.LT.Gamma_Switch)THEN                                  
+               J=AINT(T*Gamma_Grid)                                        
+               F0=F0_0(J)+T*(F0_1(J)+T*(F0_2(J)+T*(F0_3(J)                 
+     >              +T*(F0_4(J)+T*(F0_5(J)+T*F0_6(J))))))                     
+               ET=DEXP(-T)                                                 
+               OneOvr2T=5D-1/T                                             
+               F1=OneOvr2T*(0.1000000000000000D+01*F0-ET)                  
+            ELSE                                                           
+               SqrtT=DSQRT(T)                                              
+               OneOvT=One/T                                                
+               F0=SqrtPi/(Two*SqrtT)                                       
+               F1=F0*0.5000000000000000D+00*OneOvT                         
             ENDIF                                                          
+
             Aux0=F0*Upq
             Aux1=-2D0*Omega*F1*Upq
             Ket(1)=Ket(1)+QCo(I)*Aux0

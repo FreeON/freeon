@@ -357,7 +357,6 @@ MODULE DerivedTypes
       TYPE(CHR10_VECT) :: AtMMTyp   !-- Molecular Mechanics atomtype
       TYPE(DBL_VECT)   :: AtMss     !-- Atomic Mass per Atom
       TYPE(INT_VECT)   :: CConstrain!-- Atom type or kind per atom 
-      TYPE(INT_VECT)   :: DoFreq    !-- Atom included in the frequency calculation
       TYPE(DBL_RNK2)   :: Carts     !-- Cartesian coordinates 
       TYPE(DBL_RNK2)   :: BoxCarts  !-- Lattice coordinates 
       TYPE(DBL_RNK2)   :: Velocity  !-- velocities    

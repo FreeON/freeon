@@ -31,7 +31,7 @@ PROGRAM LowdinO
      WRITE(Out,*)TRIM(Mssg)
      CLOSE(Out)
   ELSE
-     OverlapEThresh=1.D-4
+     OverlapEThresh=1.D-14
   ENDIF
   CLOSE(Inp)
   CALL New(Values,NBasF)
@@ -58,6 +58,7 @@ PROGRAM LowdinO
   ISmall=0
   CALL DCOPY(NBasF**2,Vectors%D(1,1),1,Tmp2%D(1,1),1)
   DO I=1,NBasF
+     WRITE(*,*)' Values = ',Values%D(I)
      IF(Values%D(I)>OverlapEThresh)THEN
         Scale=1D0/SQRT(Values%D(I))
         CALL DSCAL(NBasF,Scale,Tmp2%D(1,I),1)

@@ -80,6 +80,8 @@ CONTAINS
     Decompose_Time=TreeMake_Time_Start-Decompose_Time_Start
     ! Make PoleTree tier by tier, recuring up from the bottom
     CALL MakePoleTree(PoleRoot) 
+!    CALL Print_POLEROOT_PAC(PoleRoot)
+!    STOP
     TreeMake_Time=MTimer()-TreeMake_Time_Start
     ! Delete global arrays etc
     CALL Delete(Qndx)
@@ -93,6 +95,7 @@ CONTAINS
     J=iHGStack
     iHGStack=1
     CALL PackStack(PoleRoot)    
+
   END SUBROUTINE RhoToPoleTree
   !=====================================================================================
   !     
@@ -325,7 +328,10 @@ CONTAINS
     ! H_n(t) < K 2^(n/2) SQRT(n!) EXP(t^2/2), with K=1.09
     !-------------------------------------------------------------------------------    
     PC%Zeta=PACZetaMin(Node)
-    IF(PC%Zeta==NuclearExpnt)PC%Zeta=PC%Zeta-1D10
+
+!    IF(PC%Zeta==NuclearExpnt)PC%Zeta=PC%Zeta-1D10
+
+
     ! Corners
     Centers(:,1)=(/Node%Box%BndBox(1,1),Node%Box%BndBox(2,1),Node%Box%BndBox(3,1)/)
     Centers(:,2)=(/Node%Box%BndBox(1,1),Node%Box%BndBox(2,1),Node%Box%BndBox(3,2)/)
@@ -343,6 +349,7 @@ CONTAINS
     Centers(:,13)=(/Node%Box%BndBox(1,2),Node%Box%Center(2),Node%Box%BndBox(3,2)/)
     Centers(:,14)=(/Node%Box%BndBox(1,2),Node%Box%BndBox(2,2),Node%Box%Center(3)/)
     ChProj=PACChargeProject(Node,PC%Zeta,Centers)
+!    WRITE(*,*)'  ChProj = ',ChProj
     RTE=PC%Zeta*PC%Zeta
     RPE=PC%Zeta+PC%Zeta
     T=0D0
@@ -370,7 +377,7 @@ CONTAINS
           ENDDO
        ENDDO
     ENDDO
-    CALL FunkOnSqMat(LenFit,Inverse,FitTrix,InvTrix,PosDefMat_O=.FALSE.)
+    CALL FunkOnSqMat(LenFit,Inverse,FitTrix,InvTrix,PosDefMat_O=.FALSE.,EigenThresh_O=0D0)
     PC%Wght=0D0
     DO J=1,14
        Fit=MATMUL(InvTrix,ChProj(:,J))
@@ -390,6 +397,35 @@ CONTAINS
     PiZ=(Pi/PC%Zeta)**(ThreeHalves)
     PC%Wght=PC%Wght*PiZ
     IF(EllFit.NE.0)PC%Zeta=PC%Zeta*PACFudgeFactor
+!!$    IF(Node%Leaf.and.PC%Wght<1D-40)THEN
+!!$       WRITE(*,*)' Leaf? = ',Node%Leaf,' Wght = ',PC%Wght
+!!$       WRITE(*,*)' Node center = ',Node%HERM%Cent(0)%D(:,1)
+!!$       WRITE(*,*)' ChProj  = ',ChProj
+!!$       WRITE(*,*)' FitTrix = ',FitTrix
+!!$       DO J=1,14
+!!$          Fit=MATMUL(InvTrix,ChProj(:,J))
+!!$          WRITE(*,*)' InVTrix = ',InvTrix
+!!$          WRITE(*,*)' Fit =',Fit
+!!$          Wght=Zero
+!!$          DO L=0,EllFit
+!!$             DO M=0,EllFit-L
+!!$                DO N=0,EllFit-L-M
+!!$                   LMN=LMNx(L,M,N)
+!!$                   MixMax=Fact(L)*Fact(M)*Fact(N)
+!!$                   HGInEq=SQRT(MixMax*(Two*PC%Zeta)**(L+M+N))*Fit(LMN)
+!!$                   Wght(L+M+N)=MAX(Wght(L+M+N),ABS(HGInEq))
+!!$                ENDDO
+!!$             ENDDO
+!!$          ENDDO
+!!$          PC%Wght=MAX(PC%Wght,SUM(Wght(0:EllFit)))
+!!$       ENDDO
+!!$       
+!!$
+!!$
+!!$!       DO I=1,14
+!!$!          WRITE(*,*)' Centers     = ',Centers(:,I)
+!!$!       ENDDO
+!!$    ENDIF
   END SUBROUTINE SetSignedPAC
 
   RECURSIVE FUNCTION PACChargeProject(Q,PCZeta,Corners) RESULT(ChFit)
@@ -410,17 +446,21 @@ CONTAINS
              PQLen=LHGTF(PQEll)
              Nuke=0
              DO I=1,Q%HERM%Nq(EllQ)
-                IF(Q%HERM%Zeta(EllQ)%D(I)==NuclearExpnt)THEN
-                   Nuke=Nuke+1
-                   NukeMask(Nuke)=Q%HERM%Coef(EllQ)%D(1,I)
-                   Q%HERM%Coef(EllQ)%D(1,I)=0D0
-                ELSE
+!!$                IF(Q%HERM%Zeta(EllQ)%D(I)==NuclearExpnt)THEN
+!!$                   Nuke=Nuke+1
+!!$                   NukeMask(Nuke)=Q%HERM%Coef(EllQ)%D(1,I)
+!!$                   Q%HERM%Coef(EllQ)%D(1,I)=0D0
+!!$                ELSE
                    PiZ=(Pi/Q%HERM%Zeta(EllQ)%D(I))**(3D0/2D0)
                    !                   ChFit(1)=ChFit(1)+Q%HERM%Coef(EllQ)%D(1,I)*PiZ
                    !                   Q%HERM%Coef(EllQ)%D(:,I)=Q%HERM%Coef(EllQ)%D(:,I)*PiZ
-                ENDIF
+!!$                ENDIF
              ENDDO
+
+!             WRITE(*,*)' QHERM + ',Q%HERM%Coef(EllQ)%D(1,1)
+
              DO ICrnr=1,14
+!                WRITE(*,*)' QCent = ',Q%Herm%Cent(EllQ)%D(1,1),' Corner = ',Corners(1,ICrnr)
 #ifdef OVERLAP_PROJECTION    
                 CALL AAOverlap(HGEll4,Q%HERM%Nq(EllQ),              &
                      EllP,EllQ,LenP,LHGTF(EllQ),PQEll,PQLen,               &
@@ -433,17 +473,19 @@ CONTAINS
                      NuclearExpnt,1D-100,Q%HERM%IHlf(EllQ)%D(1),             &
                      PCZeta,Q%HERM%Zeta(EllQ)%D(1),Corners(:,ICrnr),       &
                      Q%HERM%Cent(EllQ)%D(1,1),Q%HERM%Coef(EllQ)%D(1,1),ChFit(:,ICrnr))             
+!                WRITE(*,*)' COUL = ',ChFit(:,ICrnr)             
 #endif
+
              ENDDO
              Nuke=0
              DO I=1,Q%HERM%Nq(EllQ)
-                IF(Q%HERM%Zeta(EllQ)%D(I)==NuclearExpnt)THEN
-                   Nuke=Nuke+1
-                   Q%HERM%Coef(EllQ)%D(1,I)=NukeMask(Nuke)
-                ELSE
+!!$                IF(Q%HERM%Zeta(EllQ)%D(I)==NuclearExpnt)THEN
+!!$                   Nuke=Nuke+1
+!!$                   Q%HERM%Coef(EllQ)%D(1,I)=NukeMask(Nuke)
+!!$                ELSE
                    PiZ=(Pi/Q%HERM%Zeta(EllQ)%D(I))**(-3D0/2D0)
                    !                   Q%HERM%Coef(EllQ)%D(:,I)=Q%HERM%Coef(EllQ)%D(:,I)*PiZ
-                ENDIF
+!!$                ENDIF
              ENDDO
           ENDIF
        ENDDO
@@ -759,6 +801,7 @@ CONTAINS
           ISplit=I
        ENDIF
     ENDDO
+!!$
     IF(Node%ChargeSplitOK)THEN
        IF(ISplit==1)THEN
           IF(.NOT.BalancedSplit(N,Qdex(B:E),Cdex,Zeta,Rho%Qx%D,Rho%Co%D,JS))THEN
@@ -787,6 +830,7 @@ CONTAINS
           CALL FairSplit(N,Qdex(B:E),Ldex,Rho%Qz%D,JS)
        ENDIF
     ENDIF
+
     Split=B+JS-1
     ! Set new indices ...
     Left%Bdex =B

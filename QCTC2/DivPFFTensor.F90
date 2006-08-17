@@ -39,7 +39,7 @@ CONTAINS
 ! Calculate the Derivative PFFTensor 1D
 !========================================================================================
   SUBROUTINE MakeDivTensor1D(MaxL,GM,Args,CS,dTenC,dTenS)
-    INTEGER                           :: MaxL
+    INTEGER                           :: MaxL,LenL
     INTEGER                           :: I,J,L,M,LM,NC,IJ
     TYPE(CellSet)                     :: CS, CSMM
     TYPE(DBL_RNK3)                    :: dTenC,dTenS
@@ -49,6 +49,7 @@ CONTAINS
 !
 !   Number of Inner Boxes
 !
+    LenL=LSP(MaxL)
     dTenC%D=Zero
     dTenS%D=Zero
     NC = (CS%NCells-1)/2
@@ -58,21 +59,21 @@ CONTAINS
     IF(GM%PBC%AutoW%I(1)==1) THEN
        IJ = 1
        CALL DIrRegular(MaxL,GM%PBC%BoxShape%D(IJ,IJ),Zero,Zero)
-       dTenC%D(:,IJ,IJ) = -DCpq(:,IJ)
+       dTenC%D(0:LenL,IJ,IJ) = -DCpq(0:LenL,IJ)
        CALL DIrRegular(MaxL,-GM%PBC%BoxShape%D(IJ,IJ),Zero,Zero)
-       dTenC%D(:,IJ,IJ) = dTenC%D(:,IJ,IJ)+DCpq(:,IJ)
+       dTenC%D(0:LenL,IJ,IJ) = dTenC%D(0:LenL,IJ,IJ)+DCpq(0:LenL,IJ)
     ELSEIF(GM%PBC%AutoW%I(2)==1) THEN
        IJ = 2
        CALL DIrRegular(MaxL,Zero, GM%PBC%BoxShape%D(IJ,IJ),Zero)
-       dTenC%D(:,IJ,IJ) = -DCpq(:,IJ)
+       dTenC%D(0:LenL,IJ,IJ) = -DCpq(0:LenL,IJ)
        CALL DIrRegular(MaxL,Zero,-GM%PBC%BoxShape%D(IJ,IJ),Zero)
-       dTenC%D(:,IJ,IJ) = dTenC%D(:,IJ,IJ)+DCpq(:,IJ)
+       dTenC%D(0:LenL,IJ,IJ) = dTenC%D(0:LenL,IJ,IJ)+DCpq(0:LenL,IJ)
     ELSEIF(GM%PBC%AutoW%I(3)==1) THEN 
        IJ = 3
        CALL DIrRegular(MaxL,Zero,Zero, GM%PBC%BoxShape%D(IJ,IJ))
-       dTenC%D(:,IJ,IJ) = -DCpq(:,IJ)
+       dTenC%D(0:LenL,IJ,IJ) = -DCpq(0:LenL,IJ)
        CALL DIrRegular(MaxL,Zero,Zero,-GM%PBC%BoxShape%D(IJ,IJ))
-       dTenC%D(:,IJ,IJ) = dTenC%D(:,IJ,IJ)+DCpq(:,IJ)
+       dTenC%D(0:LenL,IJ,IJ) = dTenC%D(0:LenL,IJ,IJ)+DCpq(0:LenL,IJ)
     ENDIF
     DO L=1,MaxL
        DO M = 0,L

@@ -323,9 +323,9 @@ CONTAINS
     IF(G%PBC%Dimen==0) THEN
        MaxCell=1
     ELSEIF(G%PBC%Dimen==1) THEN
-       MaxCell=50
-    ELSEIF(G%PBC%Dimen==2) THEN
        MaxCell=500
+    ELSEIF(G%PBC%Dimen==2) THEN
+       MaxCell=1000
     ELSEIF(G%PBC%Dimen==3) THEN
        MaxCell=5000
     ENDIF 
@@ -349,12 +349,12 @@ CONTAINS
                                 Thresholds%Dist,MinExpt,G%NElec,MaxCell_O=MaxCell)
        CALL New_CellSet_Sphere2(CS_Out,G%PBC%AutoW%I,G%PBC%BoxShape%D,'Overlap',     &
                                 Thresholds%TwoE,MinExpt,G%NElec,MaxCell_O=MaxCell)
-!       WRITE(*,*)' USING NEW CELL SET:'
-!       WRITE(*,*)' Pentrat Cells = ',CS_In%NCells
-!       WRITE(*,*)' Overlap Cells = ',CS_Out%NCells
+       WRITE(*,*)' USING NEW CELL SET:'
+       WRITE(*,*)' Pentrat Cells = ',CS_In%NCells
+       WRITE(*,*)' Overlap Cells = ',CS_Out%NCells
     ENDIF
 !
-    CALL Sort_CellSet(CS_IN)
+    CALL Sort_CellSet(CS_IN,-2)
     CS_IN%Radius  = SQRT(CS_IN%CellCarts%D(1,1)**2 +CS_IN%CellCarts%D(2,1)**2 +CS_IN%CellCarts%D(3,1)**2)
     CALL Sort_CellSet(CS_OUT)
     CS_OUT%Radius = SQRT(CS_OUT%CellCarts%D(1,1)**2+CS_OUT%CellCarts%D(2,1)**2+CS_OUT%CellCarts%D(3,1)**2)

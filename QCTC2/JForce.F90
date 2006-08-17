@@ -33,6 +33,8 @@ PROGRAM JForce
   REAL(DOUBLE),DIMENSION(3)    :: A,B,nlm
   REAL(DOUBLE),DIMENSION(15)   :: F_nlm
   TYPE(DBL_RNK2)               :: LatFrc_J,LatFrc_J_PFF,LatFrc_J_Dip
+  !LOGICAL                        :: NoWrap=.TRUE.
+  LOGICAL                        :: NoWrap=.FALSE.
   !-------------------------------------------------------------------------------- 
   JFORCE_TotalTime_Start=MTimer()
   ! Start up macro
@@ -42,14 +44,15 @@ PROGRAM JForce
   CALL Get(GM,Tag_O=CurGeom)
   ! Allocate some memory for bra HG shenanigans 
   CALL NewBraBlok(BS)
-  CALL Get(P,TrixFile('D',Args,1) )
+  CALL Get(P,TrixFile('D',Args,0) )
   ! Set thresholds local to QCTC (for PAC and MAC)
   CALL SetLocalThresholds(Thresholds%TwoE)
   ! RhoHead is the start of a linked density list
   ALLOCATE(RhoHead)
+  RhoHead%LNum=0
   ! Here, the LL is filled out, with no wrapping of the density
   ! we are such pussys on this
-  CALL MakeRhoList(GM,BS,P,NLink,RhoHead,NoWrap_O=.TRUE.)
+  CALL MakeRhoList(GM,BS,P,NLink,RhoHead,NoWrap_O=NoWrap)
   ! Add in the nuclear charges
   CALL AddNukes(GM,RhoHead)
   NLink=NLink+GM%NAtms
@@ -113,8 +116,8 @@ PROGRAM JForce
      MA=BSiz%I(AtA)
      A1=3*(AtA-1)+1
      A2=3*AtA
-     F_nlm = dNukE(GM,AtA)
-     JFrc%D(A1:A2)= Two*F_nlm(1:3) 
+     F_nlm=dNukE(GM,AtA)
+     JFrc%D(A1:A2)=Two*F_nlm(1:3) 
      ! Store Inner Nuc Lattice Forces
      LatFrc_J%D(1:3,1) = LatFrc_J%D(1:3,1) + F_nlm(7:9)
      LatFrc_J%D(1:3,2) = LatFrc_J%D(1:3,2) + F_nlm(10:12)
@@ -122,6 +125,9 @@ PROGRAM JForce
      ! Outer Nuc Lattice Forces
      nlm        = AtomToFrac(GM,GM%Carts%D(:,AtA))
      LatFrc_J%D = LatFrc_J%D + Two*LaticeForce(GM,nlm,F_nlm(1:3))
+!     WRITE(*,*)' 7 ',F_nlm(7)     
+!     WRITE(*,*)' 1 ',F_nlm(1)
+!     STOP
      ! Start AtB Loop
      DO JP=P%RowPt%I(AtA),P%RowPt%I(AtA+1)-1 
         AtB=P%ColPt%I(JP)
@@ -152,24 +158,25 @@ PROGRAM JForce
               Pair%A=A
               Pair%B=B+CS_OUT%CellCarts%D(:,NC)
               Pair%AB2=(Pair%A(1)-Pair%B(1))**2 &
-                   +(Pair%A(2)-Pair%B(2))**2 &
-                   +(Pair%A(3)-Pair%B(3))**2
+                      +(Pair%A(2)-Pair%B(2))**2 &
+                      +(Pair%A(3)-Pair%B(3))**2
               IF(TestAtomPair(Pair))THEN
-                 F_nlm = TrPdJ(Pair,P%MTrix%D(Q:Q+MN1),GM)
-                 IF(Pair%SameAtom) THEN
-                    JFrc%D(A1:A2) = JFrc%D(A1:A2) +  Four*F_nlm(4:6)
-                 ELSE
-                    JFrc%D(A1:A2) = JFrc%D(A1:A2) + Eight*F_nlm(1:3)
-                 ENDIF
-                 ! Store Inner J Lattice Forces
-                 LatFrc_J%D(1:3,1) = LatFrc_J%D(1:3,1) + Two*F_nlm(7:9)
-                 LatFrc_J%D(1:3,2) = LatFrc_J%D(1:3,2) + Two*F_nlm(10:12)
-                 LatFrc_J%D(1:3,3) = LatFrc_J%D(1:3,3) + Two*F_nlm(13:15)
-                 ! Outer Lattice J Forces 
-                 nlm        = AtomToFrac(GM,Pair%A) 
-                 LatFrc_J%D = LatFrc_J%D+Four*LaticeForce(GM,nlm,F_nlm(1:3))
-                 nlm        = AtomToFrac(GM,Pair%B) 
-                 LatFrc_J%D = LatFrc_J%D+Four*LaticeForce(GM,nlm,(F_nlm(4:6)-F_nlm(1:3)))
+!!$                 F_nlm = TrPdJ(Pair,P%MTrix%D(Q:Q+MN1),GM,NoWrap_O=NoWrap)
+                 CALL TrPdJ2(Pair,P%MTrix%D(Q:Q+MN1),GM,JFrc%D(A1:A2),LatFrc_J%D,NoWrap_O=NoWrap)
+!!$                 IF(Pair%SameAtom) THEN
+!!$                    JFrc%D(A1:A2) = JFrc%D(A1:A2) +  Four*F_nlm(4:6)
+!!$                 ELSE
+!!$                    JFrc%D(A1:A2) = JFrc%D(A1:A2) + Eight*F_nlm(1:3)
+!!$                 ENDIF
+!!$                ! Store Inner J Lattice Forces
+!!$                 LatFrc_J%D(1:3,1) = LatFrc_J%D(1:3,1) + Two*F_nlm(7:9)
+!!$                 LatFrc_J%D(1:3,2) = LatFrc_J%D(1:3,2) + Two*F_nlm(10:12)
+!!$                 LatFrc_J%D(1:3,3) = LatFrc_J%D(1:3,3) + Two*F_nlm(13:15)
+!!$                ! Outer Lattice J Forces 
+!!$                 nlm        = AtomToFrac(GM,Pair%A) 
+!!$                 LatFrc_J%D = LatFrc_J%D+Four*LaticeForce(GM,nlm,F_nlm(1:3))
+!!$                 nlm        = AtomToFrac(GM,Pair%B) 
+!!$                 LatFrc_J%D = LatFrc_J%D+Four*LaticeForce(GM,nlm,(F_nlm(4:6)-F_nlm(1:3)))
               ENDIF
            ENDDO
         ENDIF
@@ -181,6 +188,12 @@ PROGRAM JForce
         LatFrc_J%D(I,J)=Zero
      ENDDO
   ENDDO
+
+  PrintFlags%Key=DEBUG_MAXIMUM	
+  PrintFlags%MM=DEBUG_FRC
+  CALL Print_LatForce(GM,LatFrc_J%D,'TOTAL Lattice Force')
+  CALL Print_LatForce(GM,LatFrc_J%D,'TOTAL Lattice Force',Unit_O=6)
+
   ! ... and add them into the rest of the lattice gradients.
   GM%PBC%LatFrc%D=GM%PBC%LatFrc%D+LatFrc_J%D
   ! Add in the atomic forces as well 
@@ -236,5 +249,6 @@ PROGRAM JForce
 
   WRITE(*,11)' JFORCE Total Time = ',MTimer()-JFORCE_TotalTime_Start
 
+!  STOP
   CALL ShutDown(Prog)
 END PROGRAM JForce

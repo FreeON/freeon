@@ -35,8 +35,8 @@ PROGRAM QCTC
   CHARACTER(LEN=4),PARAMETER     :: Prog='QCTC'
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg
   INTEGER                        :: I,K,NLink,OldFileID
-
-  !  REAL(DOUBLE),EXTERNAL          :: MondoTimer
+  !LOGICAL                        :: NoWrap=.TRUE.
+   LOGICAL                        :: NoWrap=.FALSE.
   !------------------------------------------------------------------------------- 
   QCTC_TotalTime_Start=MTimer()
   ! Start up macro
@@ -111,8 +111,9 @@ PROGRAM QCTC
   CALL SetLocalThresholds(Thresholds%TwoE)
   ! RhoHead is the start of a linked density list
   ALLOCATE(RhoHead)
+  RhoHead%LNum=0
   ! Here, the LL is filled out
-  CALL MakeRhoList(GM,BS,DMat,NLink,RhoHead)!,NoWrap_O=.TRUE.)
+  CALL MakeRhoList(GM,BS,DMat,NLink,RhoHead,NoWrap_O=NoWrap)
   ! Add in the nuclear charges only in certain cases
   IF(SCFActn/='InkFok'.AND.SCFActn/='StartResponse'.AND.SCFActn/='DensityPrime')THEN
      CALL AddNukes(GM,RhoHead)
@@ -172,7 +173,7 @@ PROGRAM QCTC
 
   ALLOCATE(NNearCount(1:CS_IN%NCells))
   NNearCount=0D0
-  CALL MakeJ(J)
+  CALL MakeJ(J,NoWrap_O=NoWrap)
 
   K=0
   DO I=1,CS_IN%NCells
@@ -256,8 +257,6 @@ PROGRAM QCTC
                Decompose_Time,TreeMake_Time,JWalk_Time,Integral_Time,Multipole_Time,MTimer()-QCTC_TotalTime_Start
 12 FORMAT(100(" ",D12.6))
   CLOSE(111)
-
-
 
   CALL ShutDown(Prog)
 END PROGRAM QCTC

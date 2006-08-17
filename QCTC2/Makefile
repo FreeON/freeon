@@ -29,19 +29,20 @@ include $(MONDO_COMPILER)
 include $(MONDO_HOME)/Includes/Suffixes
 include $(MONDO_HOME)/Includes/RemoveAll
 #
-CPPMISC = -DWRAP -DOVERLAP_PROJECTION # -DPAPIEX  -DPAC_DEBUG  #-DMAC_DEBUG # -DEXPLICIT_SOURCE 
+CPPMISC = -DWRAP -DOVERLAP_PROJECTION #-DPAC_DEBUG  -DPAPIEX  -DPAC_DEBUG  #-DMAC_DEBUG # -DEXPLICIT_SOURCE 
 #
 
-EXTRA_INCLUDES=-I$(MONDO_HOME)/OneE/ -I$(MONDO_HOME)/MondoMods/MMA/Functions #-I./LibQCTC/
+EXTRA_INCLUDES=-I$(MONDO_HOME)/OneE/ -I$(MONDO_HOME)/MondoMods/MMA/LookUpTables_800_6x
 #
 QCTCLibs=$(F90_LIBRARIES) $(LAPACK)  #-lQCTC 
 #
 CommonObjs=PoleNodeType.o Indexing.o XLate.o  CTraX.o \
 CTraX4.o CTraX6.o CTraX8.o CTraX10.o  CTraX12.o  CTraX14.o  \
-HGTraX0.o  HGTraX1.o  HGTraX2.o  HGTraX3.o HGTraX4.o \
 Globals.o Gamma.o KTrax.o MD3TRR.o AA95.o AA95c.o   \
 MondoPoles77.o MondoPoles.o Thresholds.o    \
 Density.o PoleTree.o TreeWalk.o PBCFarField.o  
+#HGTraX0.o  HGTraX1.o  HGTraX2.o  HGTraX3.o HGTraX4.o \
+
 #
 QCTCObjs=$(CommonObjs) JGen.o NukE.o QCTC.o 
 JFrcObjs=$(CommonObjs) BlokTrPdJ.o JForce.o

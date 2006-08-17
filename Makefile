@@ -150,6 +150,16 @@ pq:
 cq:	
 	$(MAKE) -i -C QCTC clean
 #----------------------------------------------
+#     QCTC 
+ q2:	
+	$(MAKE)    -C QCTC2
+rq2:	
+	$(MAKE) -i -C QCTC2 release
+pq2:	
+	$(MAKE) -i -C QCTC2 purge
+cq2:	
+	$(MAKE) -i -C QCTC2 clean
+#----------------------------------------------
 #      HiCu
  h:	
 	$(MAKE) -C HiCu
