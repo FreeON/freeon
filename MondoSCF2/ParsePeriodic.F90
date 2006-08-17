@@ -448,7 +448,6 @@ CONTAINS
                 Gtmp%AtMMTyp%C(NC)    = G%AtMMTyp%C(AT)
                 Gtmp%AtMss%D(NC)      = G%AtMss%D(AT)
                 Gtmp%CConstrain%I(NC) = G%CConstrain%I(AT)
-                Gtmp%DoFreq%I(NC)     = G%DoFreq%I(AT)
 !
                 Gtmp%Velocity%D(1:3,NC) = G%Velocity%D(1:3,AT)  
                 Gtmp%Gradients%D(1:3,NC)= G%Gradients%D(1:3,AT)
@@ -526,7 +525,6 @@ CONTAINS
     G%AtMMTyp%C    = Gtmp%AtMMTyp%C
     G%AtMss%D      = Gtmp%AtMss%D
     G%CConstrain%I = Gtmp%CConstrain%I
-    G%DoFreq%I     = Gtmp%DoFreq%I
 !
     G%Velocity%D   = Gtmp%Velocity%D 
     G%Gradients%D  = Gtmp%Gradients%D
