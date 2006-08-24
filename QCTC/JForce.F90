@@ -64,8 +64,8 @@ PROGRAM JForce
 #else
 !  WRITE(*,*) "JForce"
 !  WRITE(*,*) "D ",Args%I%I(4)
-  CALL Get(P,TrixFile('D',Args,0),BCast_O=.TRUE.)
-  CALL Get(Rho,'Rho',Args,0,Bcast_O=.TRUE.)  
+  CALL Get(P,TrixFile('D',Args,1),BCast_O=.TRUE.)
+  CALL Get(Rho,'Rho',Args,1,Bcast_O=.TRUE.)  
 #endif
   CALL Get(RhoPoles) 
 ! Set thresholds local to JForce (for PAC and MAC)
