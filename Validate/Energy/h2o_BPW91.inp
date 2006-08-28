@@ -1,0 +1,27 @@
+<BeginTitle>
+sto-3g, verytight
+Ref:     
+Mondo:   -75.31326728
+
+6-31G**, verytight
+Ref:     
+Mondo:   -76.41072208
+<EndTitle>
+
+<BeginOptions>
+Charge=0
+Multiplicity=1
+DebugAll=(MaxDebug,CheckSums)
+Guess=SuperPos
+SCFMethod=(rh,rh)
+BasisSets=(sto-3G-SPLIT,6-31G**-split)
+ModelChem=(bpw91xc,bpw91xc)
+Accuracy =(verytight,verytight)
+SCFConvergence=(diis,diis)
+<EndOptions>
+
+<BeginGeometry>
+ o   0.95309668               0.00000000               0.63925771
+ h   0.00278150               0.00000000               0.91468038
+ h   0.84735582               0.00000000              -0.34449809
+<EndGeometry>
