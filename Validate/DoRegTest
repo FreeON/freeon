@@ -23,6 +23,7 @@
 #  -nocvs    : do not access the CVS for any updating, makes regtesting fully local
 #  -nopurge  : do not do a purge 
 #  -nocompile: do not recompile
+#  -noemail  : do not send an email
 #  -cvsdate string : specify any string to cvs update (most likely used as "-D 2005-02-17")
 #
 ########################################################################################################
@@ -40,6 +41,7 @@ mondo_prefix="${MONDO_EXEC}/MondoSCF"
 mondo_postfix=
 
 # email address
+#email="valeryw@lanl.gov"
 email=""
 
 # *** make and awk
@@ -98,10 +100,12 @@ function init_global(){
     log_purge=${dir_report}/purge.log
     log_cvs=${dir_report}/cvs.log
     error_description_file=${dir_report}/error_summary
-    error__file=${dir_report}/error_number
+    error_file=${dir_report}/error_number
     report_file=${dir_report}/report_summary
-    rm -fR ${error_description_file} ${error__file} ${log_compile} ${log_cvs} ${log_purge} ${report_file}
-    touch  ${error_description_file} ${error__file} ${log_compile} ${log_cvs} ${log_purge} ${report_file}
+    rm -fR ${error_description_file} ${error_file} ${log_compile} ${log_cvs} \
+	${log_purge} ${report_file}
+    touch  ${error_description_file} ${error_file} ${log_compile} ${log_cvs} \
+	${log_purge} ${report_file}
 }
 ###################################################################################
 #
@@ -196,7 +200,7 @@ function get_test_types(){
 ###################################################################################
 function sendemail(){
 if [[ ${noemail} != "noemail" ]]; then
-  mail ${email} < ${report_file}
+  mail -s "MondoSCF report summary ${datum_short}" ${email} < ${report_file}
 fi
 }
 ###################################################################################
@@ -226,7 +230,8 @@ if [[ ${nocvs} != "nocvs" ]]; then
   echo "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" >> ${error_description_file}
   echo "error happened : no cvs update ... bailing out"
   echo "error happened : no cvs update ... bailing out" >> ${report_file}
-  end_test 1
+  end_test 
+  exit 1
   fi
   echo "requested : cvs update ... went fine"
   echo "requested : cvs update ... went fine" >> ${report_file}
@@ -243,12 +248,15 @@ if [[ ${nopurge} != "nopurge" ]]; then
    cd ${MONDO_HOME}
    ${make} purge &> ${log_purge}
    if (( $? )); then
-      echo "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" >> ${error_description_file}
+      echo "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" >> \
+	  ${error_description_file}
       tail -20 ${log_purge} >> ${error_description_file}
-      echo "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" >> ${error_description_file}
+      echo "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" >> \
+	  ${error_description_file}
       echo "error happened : make purge ... bailing out"
       echo "error happened : make purge ... bailing out" >> ${report_file}
-      end_test 3
+      end_test
+      exit 2
    else
       echo "requested : make purge ... went fine"
       echo "requested : make purge ... went fine" >> ${report_file}
@@ -266,13 +274,16 @@ if [[ ${nocompile} != "nocompile" ]]; then
     cd ${MONDO_HOME}
     ${make} all &> ${log_compile}
     if (( $? )); then
-	echo "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" >> ${error_description_file}
+	echo "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" >> \
+	    ${error_description_file}
 	tail -20 ${log_compile} >> ${error_description_file}
-	echo "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" >> ${error_description_file}
+	echo "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" >> \
+	    ${error_description_file}
 	echo "error happened : make all"
 	echo "error happened : make all" >> ${report_file}
 	cat "${error_description_file}"
-	end_test 4
+	end_test 
+	exit 3
     else
 	compile_warnings=`grep "Warning:" ${log_compile} | wc | tail -1 |  ${awk} '{print $1}'`
 	echo "requested : make all (${compile_warnings} warnings)"
@@ -301,7 +312,7 @@ MONDO_SCRATCH_TMP=${MONDO_SCRATCH}
 for dir in ${dirs};
 do
   cd ${MONDO_HOME}/Validate/${dir}
-  rm -f *.out *.log *.xyz *.stdout
+  rm -f *.out *.log *.xyz *.stdout *.pbs *.pbs.*
   #
   # read test type file
   #
@@ -327,31 +338,34 @@ do
     xyz_file=${file}.xyz
     n_tests=$((n_tests+1))
     this_test=""
-    ( ulimit -t 3000 ; ${mondo_prefix} ${input_file} ${output_file} ${log_file} ${xyz_file} ${mondo_postfix} &> ${stdout_file} )
+#( ulimit -t 3000 ; ${mondo_prefix} ${input_file} ${output_file} ${log_file} ${xyz_file} ${mondo_postfix} &> ${stdout_file} ) &> /dev/null
+    ( ulimit -S ; ${mondo_prefix} ${input_file} ${output_file} ${log_file} ${xyz_file} ${mondo_postfix} &> ${stdout_file} ) &> /dev/null
     #
-    # *** cp2k failed obviously
+    # *** MondoSCF failed obviously
     #
     if (( $? )); then
-	echo "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" >> ${error_description_file}
+	echo "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" >> \
+	    ${error_description_file}
         echo ${output_file} >> ${error_description_file}
         tail -20 ${output_file} >> ${error_description_file}
-        echo "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" >> ${error_description_file}
+        echo "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" >> \
+	    ${error_description_file}
         this_test="RUNTIME FAIL"
         n_runtime_error=$((n_runtime_error+1))
-        failed_tests="${failed_tests} ${output_file}"
     else
         #
         # *** but didn't end !?
 	#
         grep -a "Successful MondoSCF run" ${output_file} &> /dev/null
         if (( $? )); then
-	    echo "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" >> ${error_description_file}
+	    echo "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" >> \
+		${error_description_file}
 	    echo ${output_file} >> ${error_description_file}
 	    tail -20 ${output_file} >> ${error_description_file}
-	    echo "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" >> ${error_description_file}
+	    echo "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" >> \
+		${error_description_file}
 	    this_test="RUNTIME FAIL"
 	    n_runtime_error=$((n_runtime_error+1))
-	    failed_tests="${failed_tests} ${output_file}"
         else
            # *** still running, you must be joking...
            # *** see if we manage to pass the testing
@@ -360,7 +374,7 @@ do
 	       m_correct=0
 	       for ((itest=1;itest<=Ntest_types;itest++));
 	       do
-		 do_test_grep ${output_file} ${ref_file} ${error__file} "${test_grep[itest]}" "${test_col[itest]}"
+		 do_test_grep ${output_file} ${ref_file} ${error_file} "${test_grep[itest]}" "${test_col[itest]}"
                  if (( $? )); then
                     this_test="WRONG ${test_grep[itest]}"
                     n_wrong_results=$((n_wrong_results+1))
@@ -424,6 +438,7 @@ end_test
 # start the jobs
 #
 ###################################################################################
+
 
 init_global
 
