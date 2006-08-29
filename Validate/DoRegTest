@@ -284,7 +284,9 @@ fi
 # *** from here failures are likely to be bugs in MondoSCF
 #
 echo "------------------------- compiling MondoSCF -----------------------------"
+echo " compiling for ${MONDO_PLAT}"
 echo "------------------------- compiling MondoSCF -----------------------------" >> ${report_file}
+echo " compiling for ${MONDO_PLAT}" >> ${report_file}
 if [[ ${nocompile} != "nocompile" ]]; then
     cd ${MONDO_HOME}
     ${make} all &> ${log_compile}
