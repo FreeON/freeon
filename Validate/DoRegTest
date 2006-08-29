@@ -343,14 +343,18 @@ do
     #
     # *** MondoSCF failed obviously
     #
+    echo "after ulimit $?"
     if (( $? )); then
 	echo "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" >> \
 	    ${error_description_file}
         echo ${output_file} >> ${error_description_file}
         tail -20 ${output_file} >> ${error_description_file}
+	echo "---------------------------------------------------------------" >> \
+	    ${error_description_file}
+        tail -20 ${stdout_file} >> ${error_description_file}
         echo "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" >> \
 	    ${error_description_file}
-        this_test="RUNTIME FAIL"
+        this_test="RUNTIME FAIL 1"
         n_runtime_error=$((n_runtime_error+1))
     else
         #
@@ -362,9 +366,12 @@ do
 		${error_description_file}
 	    echo ${output_file} >> ${error_description_file}
 	    tail -20 ${output_file} >> ${error_description_file}
+	    echo "---------------------------------------------------------------" >> \
+		${error_description_file}
+	    tail -20 ${stdout_file} >> ${error_description_file}
 	    echo "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" >> \
 		${error_description_file}
-	    this_test="RUNTIME FAIL"
+	    this_test="RUNTIME FAIL 2"
 	    n_runtime_error=$((n_runtime_error+1))
         else
            # *** still running, you must be joking...
