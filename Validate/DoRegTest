@@ -366,7 +366,6 @@ do
     #
     # *** MondoSCF failed obviously
     #
-    echo "after ulimit $?"
     if (( $? )); then
 	echo "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" >> \
 	    ${error_description_file}

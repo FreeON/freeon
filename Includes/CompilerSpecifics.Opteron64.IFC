@@ -69,7 +69,7 @@ RANLIB  = ranlib
 #---------------------------------------------------------------------
 #  HDF5 libraries with compression and jpeg libs. 
 #
-HDF_LIBS = -L$(HDF_LIB) -lhdf5 -ljpeg -lz 
+HDF_LIBS = -L$(HDF_LIB) -lhdf5 -L$(JPEG_LIB) -ljpeg -lz 
 #---------------------------------------------------------------------
 #  Mondo libraries
 MONDO_LIBS= -L$(MONDO_LIB) -lMondoMods  
