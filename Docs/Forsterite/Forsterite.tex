@@ -1,0 +1,704 @@
+
+%   This file is part of the APS files in the REVTeX 4 distribution.
+%   Version 4.0 of REVTeX, August 2001
+%
+%   Copyright (c) 2001 The American Physical Society.
+%
+%   See the REVTeX 4 README file for restrictions and more information.
+%
+% TeX'ing this file requires that you have AMS-LaTeX 2.0 installed
+% as well as the rest of the prerequisites for REVTeX 4.0
+%
+% See the REVTeX 4 README file
+% It also requires running BibTeX. The commands are as follows:
+%
+%  1)  latex apssamp.tex
+%  2)  bibtex apssamp
+%  3)  latex apssamp.tex
+%  4)  latex apssamp.tex
+%
+%\documentclass[prb,aps,nobibnotes,twocolumn,doublespace,twocolumngrid,superbib]{revtex4}
+%%\documentclass[twocolumn,showpacs,preprintnumbers,amsmath,amssymb]{revtex4}
+%\documentclass[preprint,showpacs,preprintnumbers,amsmath,amssymb]{revtex4}
+
+% Some other (several out of many) possibilities
+%\documentclass[preprint,aps]{revtex4}
+%\documentclass[preprint,aps,draft]{revtex4}
+%\documentclass[prb]{revtex4}% Physical Review B
+
+%%\usepackage{amsmath}
+%%\usepackage{amssymb}
+%%\usepackage{graphicx}% Include figure files
+%%\usepackage{dcolumn}% Align table columns on decimal point
+%%\usepackage{bm}% bold math
+
+%\documentclass[pre,aps,twocolumn,showpacs,twocolumngrid,superbib]{revtex4}
+%\documentclass[prl,aps,twocolumn,showkeys,twocolumngrid,superbib]{revtex4}
+%\documentclass[twocolumn,showkeys,showpacs,preprintnumbers,amsmath,amssymb]{revtex4}
+\documentclass[pra,twocolumn,twocolumngrid,superbib]{revtex4} %<<< double
+%\documentclass[prb,onecolumn,twocolumngrid,superbib]{revtex4}
+%\documentclass[prl,preprint,doublespace]{revtex4} %<<< For the journal
+%%%\documentclass[prl,showpacs,preprint,superbib]{revtex4}
+%\documentclass[showpacs,preprint,superbib]{revtex4}
+
+\usepackage{graphicx}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{bm}
+\usepackage{alltt}
+\usepackage{fancyhdr}
+\usepackage{dcolumn} 
+
+\pagestyle{fancy}
+
+\newcommand{\commentoutB}[1]{#1}
+\newcommand{\commentoutA}[1]{}
+
+%\newcommand{\commentoutA}[1]{#1}
+%\newcommand{\commentoutB}[1]{}
+
+%\nofiles
+
+\begin{document}
+
+%\preprint{APS/123-QED}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Optical Properties of Photonic Crystals
+%Solid State Spectroscopies: Basic Principles and Applications
+%Solid-State Spectroscopy: An Introduction
+%%
+%Basic Solid State Chemistry
+%Solid State Chemistry
+%Structure and Chemistry of Crystalline Solids
+%%
+%http://www.psusse.de/minabs/newabs/rgr.html
+% Uniform ASCII symbols for space groups, point groups, and crystal systems.  by P. SUSSE, Poster presented at the 17th General Meeting of the International Mineralogical Association, Toronto, Canada, Aug. 9 - 14, 1998. s. Abstracts  page A62.
+%
+%
+% TO SEE TO SEE TO SEE TO SEE TO SEE TO SEE TO SEE TO SEE TO SEE TO SEE 
+% http://www.vlab.msi.umn.edu/reports/allpublications/
+% ``Vibrational and thermodynamic properties of MgSiO3 post-perovskite'', 
+% J. Tsuchiya, T. Tsuchiya, and R. M. Wentzcovitch, J. Geophys. Res., 110 (B2), B02204/1-6 (2005). 
+% ``Vibrational and thermodynamic properties of forsterite'', 
+% Li Li, R. M. Wentzcovitch, D. Weidner, C. R. S. da Silva, J. Geophys. Res., submitted (2006). 
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%
+\title{ Influence of density functional models in calculation of geometrical and 
+        elastic parameters of forsterite within the $\Gamma$-point approximation }
+
+\author{Val\'ery Weber}
+\email{valeryw@lanl.gov}
+\author{Matt Challacombe}%
+\affiliation{Los Alamos National Laboratory, Theoretical Division, Los Alamos 87545, New Mexico, USA.}%
+
+\date{\today}% It is always \today, today,
+             %  but any date may be explicitly specified
+
+
+\begin{abstract}
+The application of theoretical methods based on density-functional 
+theory is known to provide atomic and cell parameters in very good 
+agreement with experimental values. Recently, construction of the 
+hybrid density functional gradients with respect to atomic positions and cell parameters
+within the $\Gamma$-point approximation has been introduced 
+[V. Weber et al., J. Chem. Phys. {\bf 124}, 214105, (2006) and 
+ V. Weber et al., J. Chem. Phys. {\bf 124}, 224107, (2006)]. 
+In this article, the analytical gradients have been used in conjunction with the
+QUICCA algorithm [K. N\'emeth and M. Challacombe, J. Chem. Phys. {\bf 121}, 2877, (2004)]
+to compute the geometrical parameters and the elastic constants of orthorhombic forsterite 
+at the density-functional theory and hybrid Hartree-Fock/density-functional theory levels. 
+The influence of the DFT functionals on the calculated atomic positions, cell parameters and
+elastic constants is also discussed.
+\end{abstract}
+
+%\pacs{Valid PACS appear here}% PACS, the Physics and Astronomy
+                             % Classification Scheme.
+\keywords{Periodic boundary condition, elastic constants, density functional theory, $\Gamma$-point approximation.}
+%display desired
+
+\maketitle
+
+%\footnotetext[1]{Preprint LA-UR-05-3120.}
+
+\section{Introduction}
+The Kohn-Sham approach to density functional theory has proven to be a highly
+competitive method for a wide range of applications in solid
+state physics and chemistry.
+The hybrid Hartree-Fock/density functional theory (hybrid-HF/DFT) model chemistries
+are an important next step in accuracy beyond the generalized gradient
+approximation~\cite{Gill92,Becke93,VBarone96,CAdamo99}.
+
+In preceding papers, we have developed linear scaling quantum chemical methods
+for construction of the periodic Coulomb, exchange-correlation~\cite{CTymczak04a}
+and the exact Hartree-Fock exchange~\cite{CTymczak04b}
+matrices within the $\Gamma$-point approximation.
+In this paper, the analytical gradients have been used in conjunction with the
+QUICCA algorithm~\cite{KNemeth04} to compute the geometrical parameters and the 
+elastic constants of orthorhombic forsterite at the density-functional theory 
+and hybrid Hartree-Fock/density-functional theory levels.
+
+Finding crystal structures of condensed systems can
+be formulated as a minimization of the total energy
+with respect to atomic coordinates and cell vectors.
+The problem is then minimization of the total energy with $L$ degrees of freedom, where
+$L=3N_{atm}+3$, $N_{atm}$ is the number of atoms, $3N_{atm}-3$ is the number
+of independent coordinates after the elimination of translation,
+and the number of independent vector elements
+after the elimination of cell rotations is 6.
+This minimization can be achieved with the help of an
+efficient optimizer~\cite{KNemeth04,TBucko05,KNemeth05}
+and knowledge of the gradients with respect to atomic
+positions and cell parameters.
+
+The magnesium orthosilicate (Mg$_2$SiO$_4$, forsterite) is one of the main
+constituent of the middle and lower crust as well as the upper mantle of 
+the Earth~\cite{DLAnderson98}. Forsterite has been the subject of 
+many experimental studies on crystallographic, thermodynamic and 
+spectroscopic properties. First-principle investigations have been performed
+on the structural, elastic~\cite{PJochym04,JBrodholt96,CSilva97} 
+and vibrational spectra~\cite{YNoel06} of forsterite.
+%
+%JBrodholt96 Brodholt, J; Patel, A; Refson, K
+%AMERICAN MINERALOGIST; JAN-FEB 1996; v.81, no.1-2, p.257-260
+%CSilva97 Da Silva, C; Stixrude, L; Wentzcovitch, RM
+%Geophysical Research Letters; 1 Aug. 1997; vol.24, no.15, p.1963-6
+%
+The elastic tensor determines important geophysical properties
+of the Earth's interior such as: seismic velocity, Young's and shear moduli, 
+Poisson's ratio... These properties play an important role in the interpretation
+of sesmic data.
+
+In this paper, the geometry and elastic constants of forsterite 
+have been computed for each Hamiltonian
+considered (HF, PW91~\cite{JPerdew92}, PBE0~\cite{Perdew_96v77,CAdamo99} 
+and B3LYP~\cite{ABecke93,Stephens94}). 
+Inner coordinates and cell parameters have been optimized
+within an iterative procedure based on the total
+energy gradients calculated analytically with respect to the nuclear
+coordinates and cell parameters. 
+The elastic parameters are determined by appling strains and calculating the
+resulting stress tensor. Because strains couple to vibrational modes, the atomic
+positions are re-optimized in the deformed lattice.
+
+%... orthorhombic magnesium orthosilicate (Mg$_2$SiO$_4$, forsterite)
+%was optimized at the B3LYP~\cite{ABecke93,Stephens94} level of theory.
+
+The remainder of this paper is organized as follows:
+In Section~\ref{Sec:ComputMethods}, we summarize briefly the method employed for the
+calculation of the elastic tensor, Section~\ref{Sec:ResultsAndDiscusions}
+presents our calculated data and compare the present results with previous theoretical and
+experimental data. Finally in Section~\ref{Sec:Conclusions} we summarize our results.
+
+\section{Computational Methods}\label{Sec:ComputMethods}
+
+\subsection{How to get the elastic parameters}
+
+The elastic parameters have been obtained by a simple finite deformation approach.
+The system of inhomogenous linear equations is solved by the singular value decomposition.
+
+A Taylor expansion of the energy of the unit cell to second order in the strain components
+yields
+\begin{equation}
+  E(\varepsilon)=E(0)+\sum_{i}\frac{\partial E}{\partial \varepsilon_{i}}
+  \bigg|_{0}\varepsilon_{i}
+  +\frac{1}{2}\sum_{ij}\frac{\partial^2 E}{\partial \varepsilon_{i}\partial \varepsilon_{j}}
+  \bigg|_{0}\varepsilon_{i}\varepsilon_{j}+\cdots
+\end{equation}
+
+If $E(0)$ refers to the equilibrium conguration the rst derivative is zero, since there is no
+force on any atom in equilibrium. The elastic constants of the system can be obtained by
+evaluating the energy as a function of deformations of the unit cell parameters.
+
+The elastic constants are second derivatives of the energy 
+density with respect to strain components:
+\begin{equation}
+  c_{ij}=\frac{1}{V}\frac{\partial^2 E}{\partial \varepsilon_{i}\partial \varepsilon_{j}},
+\end{equation}
+where V is the volume of the cell.
+
+\begin{equation}
+  \sigma_{i}=\sum_{j}c_{ij}\varepsilon_{j}
+\end{equation}
+
+
+\subsection{How to run the calculations}
+
+Four different Hamiltonians are considered, namely the Hartree–Fock (HF), 
+Density Functional Theory (DFT) both in the nonlocal (PW91) formulation, 
+and the hybrid scheme (PBE0 and B3LYP). The PBE0 and B3LYP hybrid functionals 
+have been shown to provide excellent frequency values for molecular~\cite{WKoch00}. 
+The B3LYP has also been extensively used to compute properties of crystalline 
+systems~\cite{PBaranek01,RDovesi98,MCatti00,FPascale02,BCivalleri99,BCivalleri00}.
+
+%???1
+%Koch, W.; Holthausen, M. C. A Chemist’s Guide to Density Functional
+%Theory, Wiley–VCH Verlag GmbH: Weinheim, 2000.
+%???2
+%Baranek, Ph.; Lichanot, A.; Orlando, R.; Dovesi, R. Chem Phys Lett 2001, 340, 362
+%Civalleri, B.; Zicovich–Wilson, C. M.; Ugliengo, P.; Saunders, V. R.;
+%Dovesi, R. Chem Phys Lett 1998, 292, 394.
+%Catti, M.; Ugliengo, P.; Civalleri, B. J Phys Chem B 2000, 104, 7259.
+%Pascale, F.; Ugliengo, P.; Civalleri, B.; Orlando, R.; D’Arco, Ph.; Dovesi, R. J Chem Phys 2002, 117, 5337.
+%Civalleri, B.; Casassa, S.; Garrone, E.; Pisani, C.; Ugliengo, P. J Phys Chem B 1999, 103, 2165.
+%Civalleri, B.; Ugliengo, P. J Phys Chem B 2000, 104, 9491.
+
+
+
+
+
+
+In this work, density functional theory calculations were
+performed using the method ref{...} as
+implemented in the {\sc MondoSCF} program~\cite{MondoSCF_1.0-alpha-11}. 
+A localized gaussian-type basis set for the expansion of the wave functions has been used.
+
+We used the Perdew-PB parametrization to the GGA
+
+
+....optimized at the 
+HF, PW91~\cite{JPerdew92}, PBE0~\cite{Adamo99} and B3LYP~\cite{ABecke93} level of theories.
+The PW91 functional has been obtained from the the Density Functional 
+Repository~\cite{DFRepository}.
+
+
+
+The {\tt TIGHT} level of numerical accuracy has been used throughout this work.
+Thresholds that define the {\tt TIGHT} accuracy level include a matrix
+threshold $\tau=10^{-6}$, as well as other numerical thresholds
+detailed in Ref.~\cite{CTymczak04a}, which deliver at least $10^{-8}$ of
+relative accuracy in the total energy and $10^{-4}$ of absolute accuracy
+in the forces.
+
+An all-electron gaussian basis set has been used to expand the Kohn-Sham orbitals.
+This basis set is a 8-61G*, 88-31G* and 8-51G* contraction for Mg, Si and O, respectively.
+The basis sets have been obtained from~\cite{CrystalLib}. 
+
+We used only the $\Gamma$ point for sampling the Brillouin zone.
+
+During the geometry optimization no constrains on the system have been imposed.
+Our simulations were conducted on supercells $2\times1\times2$ and
+$3\times1\times2$ corresonding to 16 and 24 Mg$_2$SiO$_4$ units, respectively.
+
+
+Under a given deformation, the internal
+coordinates and unit cell parameters of the forsterite
+crystal were determined by minimizing the Hellmann-Feynman force 
+on the atoms and cell simultaneously.
+The optimizations were carried out with the QUICCA algorithm~\cite{KNemeth04,KNemeth05}.
+
+At standard conditions the forsterite is orthorhombic and there are nine independent elastic
+constants. 
+
+
+\section{Results and Discusions}\label{Sec:ResultsAndDiscusions}
+
+\subsection{Cell Parameters}
+
+In Table~\ref{Tab:Forsterite}, we present the optimized lattice parameters of forsterite 
+with the HF, PW91, PBE0 and B3LYP Hamiltonians and the basis set 
+8-61G*(Mg)/88-31G*(Si)/8-51G*(O) within the $\Gamma$-point approximation.
+The cell parameters for the B3LYP functional have been presented 
+elsewhere~\cite{VWeber06b} and are reported here for the sake of comparison.
+The total CPU time needed to fully relax the forsterite $2\times 1\times 2$ supercell 
+was about 270-400 days, depending on the Hamiltonain used.
+For comparison, we report the optimized cell parameters of forsterite
+obtained by Brodholt, Patel and Refson~\cite{JBrodholt96} using the density functional code 
+{\sc Cetep}~\cite{MPayne92}, the local exchange-correlation potential of 
+Perdew and Zunger (PZ)~\cite{JPerdew81}, the \emph{ab initio} norm-conserving nonlocal 
+Kleinman and Bylander pseudopotentials~\cite{LKleinman82}, a plane waves cut-off of 600 eV
+and the $\Gamma$-point has been used to sample the Brillouin zone.
+%4.643 9.988 6.074 % JBrodholt96 %PL=Perdew-Local=Perdew-Zunger % CETEP (Payne et al. 1992)
+%ab initio norm-conserving, nonlocal, Kleinman-Bylander-type
+%pseudopotentials for the valence-core electron interactions
+%-Brodholt, J; Patel, A; Refson, K
+% Source: AMERICAN MINERALOGIST; JAN-FEB 1996; v.81, no.1-2, p.257-260
+%- J. P. Perdew and A. Zunger, Phys. Rev. B 23, 5048 (1981).
+%-Payne, M.C., Teter, M.P., Allan, D.C., Arias, T., and Joannopoulos, J.D.
+% (1992) Iterative minimization techniques for ab-initio total energy calculations:
+% Molecular dynamics and conjugate gradients. Reviews of Modern Physics, 64, 1045-1097.
+%-Kleinman, L., and Bylander, D.M. (1982) Efficacious form for model
+% pseudopotentials. Physical Review Letters, 48, 1425-1428.
+Jochym, Parlinski and Krzywiec~\cite{PJochym04} reported the lattice parameters
+at the PW91 level of theory, utilizing projector augmented wave (PAW) 
+pseudopotentials~\cite{PBlochl94,GKresse99}, a plane waves cut-off of 600 eV and 
+a $3\times 3\times 3$ $\mathbf{k}$-points net
+with the {\sc Vasp}~\cite{Kresse96a,Kresse96b} package.
+%-P.E. Blöchl, Phys. Rev. B 50, 17953 (1994).
+%-G. Kresse, and J. Joubert, Phys. Rev. B 59, 1758 (1999).
+Noel~\emph{et al.}~\cite{YNoel06} also computed the geometrical paramters of forsterite within 
+a localized gaussian-type basis set approach implemented in the {\sc Crystal} program.
+The B3LYP Hamiltonian with the 8-511G*(Mg), 8-6311G*(Si) and 8-411G*(O) basis sets and
+a $4\times 4\times 4$ $\mathbf{k}$-points integration grid have been used to compute
+geometrical and elastic parameters.
+%-Y. Noel, M. Catti, Ph. D’Arco and R. Dovesi
+% Phys Chem Minerals (2006)
+%Add crystal results here.
+We also report the experimental cell parameters
+measured by Yoder and Sahama~\cite{HYoder57}, Hazen~\cite{RHazen76}, 
+Fujino~\emph{et al.}~\cite{KFujino81} and Takeuchi~\emph{et al.}~\cite{YTakeuchi84}.
+%-YODER, HS; SAHAMA, TG Source: American Mineralogist; July-Aug 1957; v.42, no.7-8, p.475-491
+%-Hazen, RM  Source: AMERICAN MINERALOGIST; 1976; v.61, no.11-1, p.1280-1293
+%-Fujino, K.; Sasaki, S.; Takeuchi, Y.; Sadanaga, R.
+% Source: Acta Crystallographica, Section B (Structural Crystallography and Crystal Chemistry); 
+% 15 March 1981; vol.B37, pt.3,
+% Acta Cryst. (1981). B37, 513-518  
+%-Takeuchi, Y., T. Yamanaka, N. Haga, and M. Hirano, High temperature crystallography
+% of olivines and spinels, in Materials Science of the Earth’s Interior, edited by I.
+% Sunagawa, pp. 191–231, Terra Scientific Publishing, Tokyo, 1984. 
+For the previous \emph{ab initio} calculations, the quality of the lattice parameters
+improved from the LDA (PZ), GGA (PW91) to the hybrid functional (B3LYP) where the maximum error
+with respect to the experimental values is 2.4\%, 1.2\% and 0.9\%, respectively. 
+The {\sc MondoSCF} $\Gamma$-point calculations follow the same tendency, \emph{i.e.} 
+??HF?? (), PW91 (1.0\%), B3LYP (0.9\%) and PBE0 (0.3\%) with the maximum 
+deviations versus experiments in parenthesis. We can also see that GGA 
+and hybrid functional give too large lattice parameters, while LDA too short except 
+along the $c$-axis. As a global trend, the quality of the different models used in this work
+to compute lattice parameters range, with increassing quality, form HF, PW91, B3LYP and PBE0.
+
+\begin{table}[t]
+  \centering
+  \caption{\protect
+    Calculated and experimental cell parameters of forsterite.
+%    Cell parameters $a_0$, $b_0$, $c_0$ and total energy $E_0$
+%    for orthorhombic (Mg$_2$SiO$_4$)$_n$ using the periodic $\Gamma$-point
+%    B3LYP, PBE0, PW91, HF   /8-61G*(Mg)/88-31G*(Si)/8-51G*(O) level of theory and the {\tt TIGHT} thresholds.
+%    The number $n=4,16$ correspond to the (super)cells
+%    $1\times 1\times 1$ and $2\times 1\times 2$ respectively.
+    Cell parameters and energies are in Angstroms and atomic units respectively.
+  }\label{Tab:Forsterite}
+  \begin{tabular}{llcccc}
+  \toprule
+  & Model & $a_0$ & $b_0$ & $c_0$ & $E_0$ \\
+  \hline
+    {\sc MondoSCF}\footnote[1]{$\Gamma$-point.}
+    & HF     &  &  &  & $-$ \\%
+    & PW91   & 4.794 & 10.262 & 6.004 & $-$991.076090 \\%
+    & PBE0   & 4.761 & 10.187 & 5.963 & $-$990.585407 \\%
+    & B3LYP\footnote[2]{$2\times 1\times 2$ supercell.} %($2\times 1\times 2$) 
+             & 4.787 & 10.258 & 5.996 & $-$991.271696 \\%
+    & B3LYP\footnote[3]{$3\times 1\times 2$ supercell.} %($3\times 1\times 2$)
+             & 4.787 & 10.257 & 5.995 & $-$991.271841 \\%
+  \hline
+%Brodholt, J; Patel, A; Refson, K
+%Source: AMERICAN MINERALOGIST; JAN-FEB 1996; v.81, no.1-2, p.257-260
+%4.643 9.988 6.074 % JBrodholt96 %PL=Perdew-Local=Perdew-Zunger % CETEP (Payne et al. 1992)
+%ab initio norm-conserving, nonlocal, Kleinman-Bylander-type 
+%pseudopotentials for the valence-core electron interactions
+% J. P. Perdew and A. Zunger, Phys. Rev. B 23, 5048 (1981).
+%Payne, M.C., Teter, M.P., Allan, D.C., Arias, T., and Joannopoulos, J.D.
+%(1992) Iterative minimization techniques for ab-initio total energy calculations:
+%Molecular dynamics and conjugate gradients. Reviews of Modern Physics, 64, 1045-1097.
+    {\sc Cetep}\footnote[4]{$\Gamma$-point~\cite{JBrodholt96}.}
+    & PZ     & 4.643 & 9.998  & 6.074  & \\
+    {\sc Vasp}\footnote[5]{$3\times 3\times 3$ $\mathbf{k}$-points~\cite{PJochym04}.}
+    & PW91   & 4.800 & 10.306 & 6.041 & \\
+    {\sc Crystal03}\footnote[6]{$4\times 4\times 4$ $\mathbf{k}$-points~\cite{YNoel06}.}
+    & B3LYP  & 4.79  & 10.25  & 6.01  & \\
+  \hline
+    {Exp.}\footnote[7]{Experimental values, T=??? K~\cite{HYoder57}.}
+    &        & 4.756 & 10.195 & 5.981 & \\
+    {Exp.}\footnote[8]{Experimental values, T=??? K~\cite{RHazen76}.}
+    &        & 4.746 & 10.18  & 5.976 & \\
+    {Exp.}\footnote[9]{Experimental values, T=??? K~\cite{KFujino81}.}
+    &        & 4.753 & 10.190 & 5.978 & \\
+    {Exp.}\footnote[10]{Experimental values, T=??? K~\cite{YTakeuchi84}.}
+    &        & 4.750 & 10.187 & 5.977 & \\
+%Takeuchi, Y., T. Yamanaka, N. Haga, and M. Hirano, High temperature crystallography
+%of olivines and spinels, in Materials Science of the Earth’s Interior, edited by I.
+%Sunagawa, pp. 191–231, Terra Scientific Publishing, Tokyo, 1984. 
+  \botrule
+  \end{tabular}
+\end{table}
+
+{\bf NEED TO SAY SOMETHING ABOUT GAMMA CONVERGENCE B3LYP 2x1x2 vs 3x1x2}\\
+\subsection{Atomic coordinates and bond lengths}
+
+Forsterite has an orthorhombic structure (Pbnm). Magnesium atoms occupy two
+distinct octahedral sites (Wyckoff site in paranthesis): 
+Mg1 (4a) and Mg2 (4c); silicium atoms occupy the tetrahedral site (4c),
+oxygen atoms occupy three distinct sites at tetrahedral corners: 
+O1 (4c), O2 (4d) and O3 (8d). The oxygen atoms form a distorted hexagonal 
+close-packed arrangement.
+
+In Table~\cite{Tab:FracCoords}, we present the {\sc MondoSCF} and {\sc Crystal03}~\cite{YNoel06} 
+optimized atomic coordinates and bond lengths at the same respective level of theories as above.
+We also report the experimental data measured by Hazen~\cite{RHazen76}, 
+Fujino~\emph{et al.}~\cite{KFujino81} and Takeuchi~\emph{et al.}~\cite{YTakeuchi84}.
+The calculated equilibrium geometries, given in Table~\cite{Tab:FracCoords}, are
+in good aggrement with experiments. The Si$-$O and Mg$-$O distances are very well
+reproduiced with a largest difference smaller than about ?.???\AA, 0.03\AA, 0.02\AA~and
+0.02\AA, ~for the HF, PW91, PBE0 and B3LYP modeles, respectively.
+Again the quality of the different models increasses from HF, PW91, B3LYP and PBE0.
+
+
+\begin{table}[t]
+  \centering
+  \caption{\protect
+    Calculated and experimental fractional coordinates and cation-anion distances of forsterite.
+    Distances are in Angstroms.
+  }\label{Tab:FracCoords}
+  \begin{tabular}{lllrrrlcccc}
+  \toprule
+  &  &  &  &  &  &  &  &  &  & \\
+  & Model & \multicolumn{4}{l}{Fractional coordinates} & \multicolumn{5}{l}{Cation-anion distances} \\
+  \hline
+    {\sc MondoSCF}\footnote[1]{$\Gamma$-point.}
+    % 2x1x2
+    & HF     & Mg1 &  &  &  & Si$-$O  &       &       &       & \\%
+    &        & Mg2 &  &  &  & Mg1$-$O &       &       &       & \\%
+    &        & Si  &  &  &  & Mg2$-$O &       &       &       & \\%
+    &        & O1  &  &  &  &         &       &       &       & \\%
+    &        & O2  &  &  &  &         &       &       &       & \\%
+    &        & O3  &  &  &  &         &       &       &       & \\%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % 2x1x2 max(std)=0.00008
+% Mg1 x = 0.00000 0.00006  y = 0.00001 0.00003  z = 0.00004 0.00006
+% Mg2 x = 0.00682 0.00006  y = 0.27719 0.00003  z = 0.24994 0.00008
+% Si  x = 0.42873 0.00004  y = 0.09375 0.00005  z = 0.25003 0.00007
+% O1  x = 0.22984 0.00006  y = 0.09090 0.00004  z = 0.24999 0.00007
+% O2  x = 0.22388 0.00007  y = 0.44630 0.00005  z = 0.25000 0.00008
+% O3  x = 0.27539 0.00007  y = 0.16246 0.00004  z = 0.03135 0.00007
+% Si-O  = 1.63720 0.00022  1.68077 0.00029  1.66166 0.00013
+% Mg1-O = 2.08251 0.00017  2.07580 0.00021  2.13490 0.00046
+% Mg2-O = 2.19040 0.00037  2.05777 0.00029  2.08017 0.00030  2.22258 0.00054
+    & PW91   & Mg1 &     0.0000 & 0.0000 & 0.0000 & Si$-$O  & 1.637 & 1.681 & 1.662 & \\%
+    &        & Mg2 &  $-$0.0068 & 0.2772 & 0.2499 & Mg1$-$O & 2.082 & 2.076 & 2.135 & \\%
+    &        & Si  &     0.4287 & 0.0938 & 0.2500 & Mg2$-$O & 2.190 & 2.058 & 2.080 & 2.222 \\%
+    &        & O1  &  $-$0.2298 & 0.0909 & 0.2500 &         &       &       &       & \\%
+    &        & O2  &     0.2239 & 0.4463 & 0.2500 &         &       &       &       & \\%
+    &        & O3  &     0.2754 & 0.1625 & 0.0314 &         &       &       &       & \\%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % 2x1x2 max(std)=0.00006
+% Mg1 x = 0.00001 0.00006  y = 0.00000 0.00003  z = 0.00001 0.00002
+% Mg2 x = 0.00691 0.00006  y = 0.27719 0.00003  z = 0.24993 0.00006
+% Si  x = 0.42914 0.00005  y = 0.09406 0.00003  z = 0.25004 0.00004
+% O1  x = 0.23018 0.00004  y = 0.09106 0.00002  z = 0.25000 0.00003
+% O2  x = 0.22257 0.00005  y = 0.44688 0.00002  z = 0.24998 0.00003
+% O3  x = 0.27611 0.00005  y = 0.16250 0.00002  z = 0.03196 0.00005
+% Si-O  = 1.62232 0.00026  1.66418 0.00021  1.64548 0.00025
+% Mg1-O = 2.06970 0.00018  2.06405 0.00029  2.12242 0.00026
+% Mg2-O = 2.17379 0.00034  2.04499 0.00018  2.06679 0.00029  2.20703 0.00067
+    & PBE0   & Mg1 &    0.0000 & 0.0000 & 0.0000 & Si$-$O  & 1.622 & 1.664 & 1.645 & \\%
+    &        & Mg2 & $-$0.0069 & 0.2772 & 0.2499 & Mg1$-$O & 2.070 & 2.064 & 2.122 & \\%
+    &        & Si  &    0.4291 & 0.0941 & 0.2500 & Mg2$-$O & 2.174 & 2.045 & 2.067 & 2.207 \\%
+    &        & O1  & $-$0.2302 & 0.0911 & 0.2500 &         &       &       &       & \\%
+    &        & O2  &    0.2226 & 0.4469 & 0.2500 &         &       &       &       & \\%
+    &        & O3  &    0.2761 & 0.1625 & 0.0320 &         &       &       &       & \\%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % 2x1x2 max(std)=0.00018
+% Mg1 x = 0.00013 0.00009  y = 0.00005 0.00005  z = 0.00004 0.00003
+% Mg2 x = 0.00697 0.00018  y = 0.27772 0.00004  z = 0.24989 0.00015
+% Si  x = 0.42891 0.00014  y = 0.09401 0.00003  z = 0.25005 0.00016
+% O1  x = 0.23127 0.00014  y = 0.09088 0.00003  z = 0.25000 0.00014
+% O2  x = 0.22303 0.00014  y = 0.44740 0.00004  z = 0.24999 0.00013
+% O3  x = 0.27671 0.00014  y = 0.16210 0.00005  z = 0.03228 0.00017
+% Si-O  = 1.62718 0.00012  1.67066 0.00006  1.65012 0.00017
+% Mg1-O = 2.08356 0.00043  2.07260 0.00038  2.13483 0.00049
+% Mg2-O = 2.19705 0.00036  2.05965 0.00025  2.07786 0.00030  2.22604 0.00084
+    & B3LYP\footnote[2]{$2\times 1\times 2$ supercell.} %($2\times 1\times 2$) 
+             & Mg1 &    0.0001 & 0.0000 & 0.0000 & Si$-$O  & 1.627 & 1.671 & 1.650 & \\%
+    &        & Mg2 & $-$0.0070 & 0.2777 & 0.2499 & Mg1$-$O & 2.084 & 2.073 & 2.135 & \\%
+    &        & Si  &    0.4290 & 0.0940 & 0.2501 & Mg2$-$O & 2.197 & 2.060 & 2.079 & 2.226 \\%
+    &        & O1  & $-$0.2313 & 0.0909 & 0.2500 &         &       &       &       & \\%
+    &        & O2  &    0.2230 & 0.4474 & 0.2500 &         &       &       &       & \\%
+    &        & O3  &    0.2767 & 0.1621 & 0.0323 &         &       &       &       & \\%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % 3x1x2 max(std)=0.00007
+% Mg1 x = 0.00008 0.00008  y = 0.00000 0.00003  z = 0.00002 0.00003
+% Mg2 x = 0.00702 0.00009  y = 0.27773 0.00003  z = 0.25000 0.00003
+% Si  x = 0.42891 0.00005  y = 0.09401 0.00004  z = 0.24999 0.00002
+% O1  x = 0.23125 0.00005  y = 0.09087 0.00004  z = 0.24999 0.00002
+% O2  x = 0.22303 0.00007  y = 0.44740 0.00003  z = 0.25000 0.00002
+% O3  x = 0.27669 0.00005  y = 0.16211 0.00003  z = 0.03232 0.00003
+% Si-O  = 1.62733 0.00020  1.67055 0.00012  1.64994 0.00017
+% Mg1-O = 2.08367 0.00032  2.07277 0.00024  2.13478 0.00023
+% Mg2-O = 2.19689 0.00044  2.05956 0.00022  2.07793 0.00021  2.22581 0.00024
+    & B3LYP\footnote[3]{$3\times 1\times 2$ supercell.} %($3\times 1\times 2$) 
+             & Mg1 &    0.0001 & 0.0000 & 0.0000 & Si$-$O  & 1.627 & 1.671 & 1.650 & \\%
+    &        & Mg2 & $-$0.0070 & 0.2777 & 0.2500 & Mg1$-$O & 2.083 & 2.073 & 2.134 & \\%
+    &        & Si  &    0.4289 & 0.0940 & 0.2500 & Mg2$-$O & 2.197 & 2.060 & 2.078 & 2.226\\%
+    &        & O1  & $-$0.2313 & 0.0909 & 0.2500 &         &       &       &       & \\%
+    &        & O2  &    0.2230 & 0.4474 & 0.2500 &         &       &       &       & \\%
+    &        & O3  &    0.2767 & 0.1621 & 0.0323 &         &       &       &       & \\%
+%    &        &     &  &  &  &      &       &       &       & \\%
+  \hline
+    {\sc Crystal03}\footnote[4]{$4\times 4\times 4$ $\mathbf{k}$-points~\cite{YNoel06}.}
+    & B3LYP & Mg1 &    0      & 0      & 0      & Si$-$O  & 1.629 & 1.673 & 1.653 & \\%
+    &       & Mg2 & $-$0.0084 & 0.2774 & 1/4    & Mg1$-$O & 2.095 & 2.073 & 2.132 & \\%
+    &       & Si  &    0.4260 & 0.0938 & 1/4    & Mg2$-$O & 2.195 & 2.063 & 2.083 & 2.222 \\%
+    &       & O1  & $-$0.2341 & 0.0911 & 1/4    &         &       &       &       & \\%
+    &       & O2  &    0.2247 & 0.4466 & 1/4    &         &       &       &       & \\%
+    &       & O3  &    0.2747 & 0.1625 & 0.0324 &         &       &       &       & \\%
+  \hline
+    {Exp.}\footnote[5]{Experimental values~\cite{RHazen76}.}
+    &       & Mg1 &    0      & 0      & 0      & Si$-$O  & 1.616 & 1.649 & 1.633 & \\%
+    &       & Mg2 & $-$0.0086 & 0.2772 & 1/4    & Mg1$-$O & 2.085 & 2.069 & 2.126 & \\%
+    &       & Si  &    0.4261 & 0.0939 & 1/4    & Mg2$-$O & 2.166 & 2.040 & 2.066 & 2.208 \\%
+    &       & O1  & $-$0.2339 & 0.0919 & 1/4    &         &       &       &       & \\%
+    &       & O2  &    0.2202 & 0.4469 & 1/4    &         &       &       &       & \\%
+    &       & O3  &    0.2777 & 0.1628 & 0.0333 &         &       &       &       & \\%
+    {Exp.}\footnote[6]{Experimental values~\cite{KFujino81}.}
+    &       & Mg1 &    0      & 0      & 0      & Si$-$O  & 1.613 & 1.654 & 1.637 & \\%
+    &       & Mg2 & $-$0.0083 & 0.2777 & 1/4    & Mg1$-$O & 2.084 & 2.068 & 2.131 & \\%
+    &       & Si  &    0.4265 & 0.0940 & 1/4    & Mg2$-$O & 2.179 & 2.043 & 2.065 & 2.212 \\%
+    &       & O1  & $-$0.2341 & 0.0916 & 1/4    &         &       &       &       & \\%
+    &       & O2  &    0.2216 & 0.4471 & 1/4    &         &       &       &       & \\%
+    &       & O3  &    0.2775 & 0.1631 & 0.0330 &         &       &       &       & \\%
+    {Exp.}\footnote[7]{Experimental values~\cite{YTakeuchi84}.}
+    &       & Mg1 &    0      & 0      & 0      & Si$-$O  &  &  &  & \\%
+    &       & Mg2 & $-$0.0084 & 0.2775 & 1/4    & Mg1$-$O &  &  &  & \\%
+    &       & Si  &    0.4266 & 0.0941 & 1/4    & Mg2$-$O &  &  &  & \\%
+    &       & O1  & $-$0.2336 & 0.0914 & 1/4    &         &       &       &       & \\%
+    &       & O2  &    0.2215 & 0.4472 & 1/4    &         &       &       &       & \\%
+    &       & O3  &    0.2778 & 0.1631 &?0.0066?&         &       &       &       & \\%
+  \botrule
+  \end{tabular}
+\end{table}
+
+
+\subsection{Elastic parameters}
+
+\begin{table}[t]
+  \centering
+  \caption{\protect
+    Calculated and experimental elastic constant of forsterite.
+  }\label{Tab:ElasticConstants}
+  \begin{tabular}{llccccccccc}
+  \toprule
+  & Model & $c_{11}$ & $c_{22}$ & $c_{33}$ & $c_{44}$ & $c_{55}$ 
+  & $c_{66}$ & $c_{12}$ & $c_{13}$ & $c_{23}$  \\
+  \hline
+    {\sc MondoSCF}\footnote[1]{$\Gamma$-point.}
+  & HF    & & & & & & & & & \\
+  & PW91  & & & & & & & & & \\
+  & PBE0  & & & & & & & & & \\
+  & B3LYP\footnote[2]{$2\times 1\times 2$ supercell.} %($2\times 1\times 2$)
+          & 353.8 & 216.3 & & & & & 69.4 & 73.0 & 79.7 \\
+  & B3LYP\footnote[3]{$3\times 1\times 2$ supercell.} %($3\times 1\times 2$) 
+          & & & & & & & & & \\
+  \hline
+    {\sc Vasp}\footnote[4]{$3\times 3\times 3$ $\mathbf{k}$-points~\cite{PJochym04}.}
+  & PW91  & 306.0 & 190.8 & 219.8 & 60.8 & 74.6 & 74.0 & 63.3 & 65.5 & 69.3 \\
+    {\sc Crystal03}\footnote[5]{$4\times 4\times 4$ $\mathbf{k}$-points~\cite{YNoel06}.}
+  & B3LYP & 345.3 & 212.0 & 241.7 & 68.0 & 82.8 & 81.3 & 69.1 & 71.9 & 78.7 \\
+  \hline
+%%%%%%%%%%%
+%this is a science paper, but without all the data!!!! Data taken from PJochym04
+%    {Exp. (T=??? K)}\footnote[4]{Experimental values, ultrasonic measurments~\cite{GChen96}.}
+%  &       & 330.0 & 200.0 & 235.0 & 68.0 & 81.0 & 81.0 & 68.0 & 69.0 & 72.0 \\
+%%%%%%%%%%%
+    {Exp. (T=300 K)}\footnote[6]{Experimental values, ??????????????????????~\cite{DIssak89}.}
+  &       & 330.0 & 200.3 & 236.2 & 67.1 & 81.6 & 81.2 & 66.2 & 68.0 & 72.2 \\
+    {Exp. (T=0 K)}\footnote[7]{Experimental values, 
+      obtained by extrapolation of temperature gradients~\cite{YNoel06,DIssak89}.}
+  &       & 340.9 & 208.2 & 244.4 & 71.5 & 85.7 & 86.0 & 69.4 & 70.8 & 73.7 \\
+  \botrule
+  \end{tabular}
+\end{table}
+
+
+\begin{table}[t]
+  \centering
+  \caption{\protect
+    aaa
+  }\label{Tab:FracCoords}
+  \begin{tabular}{llccccccc}
+  \toprule
+  &  & $B$ & $\mu$ & $E$ & $\sigma$ & $V_p$ & $V_s$ & $E_g$ \\
+  \hline
+    {\sc MondoSCF}\footnote[1]{$\Gamma$-point.}
+    & HF    &  &  &  &  &  &  & \\%
+    & PW91  &  &  &  &  &  &  & \\%
+    & PBE0  &  &  &  &  &  &  & 8.4 \\%
+    & B3LYP ($2\times 1\times 2$)
+            &  &  &  &  &  &  & 7.9 \\%
+    & B3LYP ($3\times 1\times 2$)
+            &  &  &  &  &  &  & 7.9 \\%
+  \hline
+    {\sc Vasp}\footnote[2]{$3\times 3\times 3$ $\mathbf{k}$-points~\cite{PJochym04}.}
+    & PW91  & 123.6 & 76.5 & 0.244 & 190.2 & 8.494 & 4.945 & \\
+    {\sc Crystal03}\footnote[3]{$4\times 4\times 4$ $\mathbf{k}$-points~\cite{YNoel06}.}
+    & B3LYP & 137.6 & 85.0 & 0.244 & 211.5 &  &  & \\
+  \hline
+    {Exp.}\footnote[4]{Experimental values~\cite{????}.}
+    &       &  &  &  &  &  &  &\\
+    {Exp.}\footnote[5]{Experimental values~\cite{????}.}
+    &       &  &  &  &  &  &  &\\
+    {Exp.}\footnote[6]{Experimental values~\cite{????}.}
+    &       &  &  &  &  &  &  &\\
+  \botrule
+  \end{tabular}
+\end{table}
+
+
+
+
+
+\section{Conclusions}\label{Sec:Conclusions}
+In a previous paper, construction of the analytical
+exact Hartree-Fock exchange gradients with respect to
+atomic and cell parameters within the $\Gamma$-point
+approximation has been introduced.
+In this article, the formalism for evaluation of the Density
+Functional analytic gradients in $\Gamma$-point approximation for
+Cartesian Gaussian-type basis functions was presented and
+implemented in the {\sc MondoSCF} package.
+We show that, like for the exact HF exchange, the evaluation
+of the atomic gradients within the $\Gamma$-point approximation
+does not lead to difficulties. The implementation requires mainly
+the evaluation of the derivative of the basis function with respect
+to atomic positions.
+However, complications arise when derivatives of the total energy
+are taken with respect to lattice parameters. For the periodic far field Coulomb term,
+the derivative of the multipole interaction tensor needs to be carefully handled in
+both direct and reciprocal space.
+
+The exchange-correlation energy derivative leads to a surface term, which has its
+origin in the derivative of the limits of the integration over the cell.
+The analytical atomic and cell gradients have been used
+in conjunction with the QUICCA algorithm to optimize a few 1D and 3D periodic systems at
+the DFT and hybrid-HF/DFT level of theory.
+Convergence of bond lengths, bond angles and
+cell parameters within the DFT and hybrid-HF/DFT $\Gamma$-point
+super cell approach and under full relaxation with no symmetry
+%to the converged large cell $\Gamma$-point approximation
+have been demonstrated for 1D and 3D systems to better than 3 digits.
+%Although the convergence of the Kohn-Sham $\Gamma$-point total energy to
+%its ${\bf k}$-space integration counterpart with respect to cell size is relatively slow,
+%the convergence of the geometrical parameters (cell and atomic positions)
+%requires much smaller cells.
+Thus, we could show that a relative accuracy better
+than 3 digits can be already achieved with cubic cells of about $600$\AA$^3$.\\
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Acknowledgements
+\begin{acknowledgments}
+The authors would like to thank C. J. Tymczak
+for careful reading of the manuscript. 
+This work has been supported by the US Department of Energy
+under contract W-7405-ENG-36 and the ASCI project.
+The Advanced Computing Laboratory of Los Alamos National 
+Laboratory is acknowledged.
+\end{acknowledgments}  
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibliography{mondo_new}
+\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\end{document}
+%
+% ****** End of file apssamp.tex ******
+
