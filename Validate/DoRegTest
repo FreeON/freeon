@@ -114,10 +114,12 @@ function init_global(){
 ###################################################################################
 function beg_test() {
 echo "*************************** testing started ******************************"
+echo " started on machine" `uname -n -s -p`
 echo " started on " `date`
 echo " checking version ${cvsdate} "
 
 echo "*************************** testing started ******************************" >> ${report_file}
+echo " started on machine" `uname -n -s -p`                                       >> ${report_file}
 echo " started on " `date`                                                        >> ${report_file}
 echo " checking version ${cvsdate} "                                              >> ${report_file}
 }
@@ -199,8 +201,9 @@ function get_test_types(){
 #
 ###################################################################################
 function sendemail(){
+file_to_send=$1
 if [[ ${noemail} != "noemail" ]]; then
-  mail -s "MondoSCF report summary ${datum_short}" ${email} < ${report_file}
+  mail -s "MondoSCF report summary ${datum_short}" ${email} < ${file_to_send}
 fi
 }
 ###################################################################################
@@ -451,7 +454,7 @@ init_global
 
 do_test
 
-sendemail
+sendemail ${report_file}
 
 exit 0
 
