@@ -232,7 +232,13 @@ if [[ ${nocvs} != "nocvs" ]]; then
   tail -20 ${log_cvs} >> ${error_description_file}
   echo "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" >> ${error_description_file}
   echo "error happened : no cvs update ... bailing out"
+  echo "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+  tail -20 ${log_cvs}
+  echo "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
   echo "error happened : no cvs update ... bailing out" >> ${report_file}
+  echo "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" >> ${report_file}
+  tail -20 ${log_cvs} >> ${report_file}
+  echo "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" >> ${report_file}
   end_test 
   exit 1
   fi
@@ -257,7 +263,13 @@ if [[ ${nopurge} != "nopurge" ]]; then
       echo "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" >> \
 	  ${error_description_file}
       echo "error happened : make purge ... bailing out"
-      echo "error happened : make purge ... bailing out" >> ${report_file}
+      echo "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      tail -20 ${log_purge}
+      echo "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" 
+      echo "error happened : make purge ... bailing out"                     >> ${report_file}
+      echo "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" >> ${report_file}
+      tail -20 ${log_purge}                                                  >> ${report_file}
+      echo "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" >> ${report_file}
       end_test
       exit 2
    else
@@ -283,7 +295,13 @@ if [[ ${nocompile} != "nocompile" ]]; then
 	echo "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" >> \
 	    ${error_description_file}
 	echo "error happened : make all"
-	echo "error happened : make all" >> ${report_file}
+	echo "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+	tail -20 ${log_compile}
+	echo "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+	echo "error happened : make all"                                       >> ${report_file}
+	echo "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" >> ${report_file}
+	tail -20 ${log_compile}                                                >> ${report_file}
+	echo "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" >> ${report_file}
 	cat "${error_description_file}"
 	end_test 
 	exit 3
