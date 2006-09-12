@@ -143,8 +143,9 @@ function do_test_grep(){
  output_new=$1
  output_old=$2
  error_file=$3
- grep_string=$4
- grep_field=$5
+ report_file=$4
+ grep_string=$5
+ grep_field=$6
  #echo "grep_string ${grep_string}"
  #echo "grep_field ${grep_field}"
  e1=`grep -a "${grep_string}" ${output_old} | tail -1 | ${awk} -v f=${grep_field} '{print $f}'`
@@ -161,6 +162,10 @@ function do_test_grep(){
   echo " ${grep_string} : old = ${e1} new = ${e2} " >> ${error_file}
   echo " relative error : ${big}  " >> ${error_file}
   echo "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" >> ${error_file}
+  #
+  echo " ${grep_string} : old = ${e1} new = ${e2} " >> ${report_file}
+  echo " relative error : ${big}  " >> ${report_file}
+  #
   return 1 ;;
  esac
 }
@@ -403,7 +408,7 @@ do
 	       m_correct=0
 	       for ((itest=1;itest<=Ntest_types;itest++));
 	       do
-		 do_test_grep ${output_file} ${ref_file} ${error_file} "${test_grep[itest]}" "${test_col[itest]}"
+		 do_test_grep ${output_file} ${ref_file} ${error_file} ${report_file} "${test_grep[itest]}" "${test_col[itest]}"
                  if (( $? )); then
                     this_test="WRONG ${test_grep[itest]}"
                     n_wrong_results=$((n_wrong_results+1))
