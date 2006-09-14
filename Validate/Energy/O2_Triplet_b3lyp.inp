@@ -1,0 +1,30 @@
+<BeginTitle>
+               ** Oxygen **
+
+STO-3G, d=1.3
+ Ref  : E(USD) =-148.280371167 S**2 = 2.0007
+ Mondo: E(USD) =-148.28037308  S**2 = 2.00069 !verytight
+
+STO-3G, Opt
+ Ref  : E(USD) =-148.280694090  S**2 = 2.0007  d= 1.2853
+ Mondo: E(USD) =-148.2806951030 S**2 = 2.00070 d= 1.2853 !verytight
+
+<EndTitle>
+
+<BeginOptions>
+Charge=0
+Multiplicity=3
+Grad=(Optimize,PrimInt,BiSect,NoGDIIS)
+DebugAll=(MaxDebug,CheckSums)
+Guess=SuperPos
+SCFMethod=(RH)
+BasisSets=(STO-3G-SPLIT)
+ModelChem=(b3lyp)
+Accuracy =(verytight)
+SCFConvergence=(DIIS)
+<EndOptions>
+
+<BeginGeometry>
+ o   0.000000 0.0 0.0 
+ o   1.300000 0.0 0.0 
+<EndGeometry>

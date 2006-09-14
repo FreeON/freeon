@@ -1,0 +1,33 @@
+
+<BeginOptions>
+Grad=(Optimize,PrimInt,BiSect,NoGDIIS)
+Charge=0
+Multiplicity=1
+DebugAll=(MaxDebug,CheckSums,FrcDebug)
+Guess=SuperPos
+SCFMethod=(RH)
+BasisSets=(6-31G-SPLIT)
+ModelChem=(pw91xc)
+Accuracy =(good)
+SCFConvergence=(DIIS)
+PBC=(T,F,F)
+Periodic=(AtomCoord)
+<EndOptions>
+
+<BeginPeriodic>
+ 14.847480 1.0 1.0 90.0 90.0 90.0
+<EndPeriodic>
+<BeginGeometry>
+ h 0.0 0.0 0.0
+ f 0.945335 0.0 0.0
+ h 2.474580 0.0 0.0
+ f 3.419915 0.0 0.0
+ h 4.949160 0.0 0.0
+ f 5.894495 0.0 0.0
+ h 7.423740 0.0 0.0
+ f 8.369075 0.0 0.0
+ h 9.898320 0.0 0.0
+ f 10.843655 0.0 0.0
+ h 12.372900 0.0 0.0
+ f 13.318235 0.0 0.0
+<EndGeometry>
