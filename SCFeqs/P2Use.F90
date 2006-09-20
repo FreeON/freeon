@@ -79,7 +79,7 @@ PROGRAM P2Use
      CALL Plot(   P,'P_'//TRIM(Cycl))
      CALL Delete(P)
   ! Density SuperPosition 
-  CASE('DensitySuperposition')
+  CASE('DensitySuperposition','DMDGeuss')
      CALL New(P,NSMat_O=NSMat)
      CALL New(Tmp1)
      CALL New(Tmp2)
@@ -292,7 +292,7 @@ PROGRAM P2Use
      HDF_CurrentID=H5GroupID
      CALL Delete(P)
 !
-! Density Matrix Verlet
+! Density Matrix Verlet's
 !
   CASE('DMVerlet0')
      iGEO = Args%I%I(3)
@@ -522,8 +522,6 @@ PROGRAM P2Use
      CALL Delete(Tmp1)
      CALL Delete(Tmp2)
 !
-!
-!
   CASE('FMVerlet1')
      iGEO = Args%I%I(3)
      CALL New(F)
@@ -615,7 +613,7 @@ PROGRAM P2Use
 !
 !    Geometry Change 
 !
-  CASE('Extrapolate')
+  CASE('Extrapolate','DMProj0','DMProj1','DMProj2','DMProj3','DMProj4')
      ! Allocate
      CALL New(P)
      CALL New(P0)
