@@ -44,7 +44,9 @@ PROGRAM JForce
   CALL Get(GM,Tag_O=CurGeom)
   ! Allocate some memory for bra HG shenanigans 
   CALL NewBraBlok(BS)
-  CALL Get(P,TrixFile('D',Args,0) )
+!****** Should be 1 not zero
+!  CALL Get(P,TrixFile('D',Args,0) )
+  CALL Get(P,TrixFile('D',Args,1) )
   ! Set thresholds local to QCTC (for PAC and MAC)
   CALL SetLocalThresholds(Thresholds%TwoE)
   ! RhoHead is the start of a linked density list
