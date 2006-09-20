@@ -153,8 +153,8 @@ MODULE MonteCarlo
     END SELECT
 !   Initialize MD and MC
     iBAS=C%Sets%NBSets
-    CALL RenameDensityMatrix(C,C%Stat%Current%I(1),C%Stat%Current%I(2),C%Stat%Current%I(3))
-    CALL CopyDensityMatrix(C,C%Stat%Current%I(3),C%Stat%Current%I(3)+C%Dyns%MDMaxSteps)
+!    CALL RenameDensityMatrix(C,C%Stat%Current%I(1),C%Stat%Current%I(2),C%Stat%Current%I(3))
+!    CALL CopyDensityMatrix(C,C%Stat%Current%I(3),C%Stat%Current%I(3)+C%Dyns%MDMaxSteps)
     CALL OutputMD(C,0)   
     CALL OutputMC(C,0,1)
 !   Do MC
@@ -193,12 +193,12 @@ MODULE MonteCarlo
 !         Evaluate energies at the new geometry
           CALL SCF(iBAS,iGEO+1,C)
 !         Store the Last P matrix
-          CALL RenameDensityMatrix(C,C%Stat%Current%I(1),C%Stat%Current%I(2),C%Stat%Current%I(3))
+!          CALL RenameDensityMatrix(C,C%Stat%Current%I(1),C%Stat%Current%I(2),C%Stat%Current%I(3))
           IF(C%Stat%Current%I(3)-iREMOVE > 0) THEN
-             CALL RemoveDensityMatrix(C,C%Stat%Current%I(3)-iREMOVE)
+!             CALL RemoveDensityMatrix(C,C%Stat%Current%I(3)-iREMOVE)
           ENDIF
           IF(iMD < iREMOVE+1) THEN
-             CALL CopyDensityMatrix(C,C%Stat%Current%I(3),C%Stat%Current%I(3)+C%Dyns%MDMaxSteps)
+!             CALL CopyDensityMatrix(C,C%Stat%Current%I(3),C%Stat%Current%I(3)+C%Dyns%MDMaxSteps)
           ENDIF
 !         Remove old Stuff from Scratch
           CALL CleanScratch(C,iGEO)
@@ -217,7 +217,7 @@ MODULE MonteCarlo
              MCEtot0%D(iCLONE) = MDEtot%D(iCLONE)
              MCCarts0%D(:,:,iCLONE)= C%Geos%Clone(iCLONE)%Carts%D(:,:)
              DO I=1,iREMOVE
-                CALL RemoveDensityMatrix(C,C%Stat%Current%I(3)+I)
+!                CALL RemoveDensityMatrix(C,C%Stat%Current%I(3)+I)
              ENDDO
              iSTATUS=1
           ELSE
@@ -227,8 +227,8 @@ MODULE MonteCarlo
              C%Geos%Clone(iCLONE)%Carts%D(:,:)=MCCarts0%D(:,:,iCLONE)
 !            Place old density matrices where they are needed
              DO I=1,iREMOVE
-                CALL   CopyDensityMatrix(C,C%Stat%Current%I(3)+I,C%Stat%Current%I(3)+I-iREMOVE)
-                CALL RemoveDensityMatrix(C,C%Stat%Current%I(3)+I)
+!                CALL   CopyDensityMatrix(C,C%Stat%Current%I(3)+I,C%Stat%Current%I(3)+I-iREMOVE)
+!                CALL RemoveDensityMatrix(C,C%Stat%Current%I(3)+I)
              ENDDO
              iSTATUS=0
           ENDIF 

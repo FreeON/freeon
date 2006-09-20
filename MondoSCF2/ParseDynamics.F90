@@ -68,6 +68,11 @@ CONTAINS
        IF(.NOT. OptIntQ(Inp,MD_MAX_STEP,D%MDMaxSteps)) THEN
           CALL MondoHalt(PRSE_ERROR,MD_MAX_STEP//' not found in input.')
        ENDIF
+!      Parse for Number of SCF cycles
+       IF(.NOT. OptIntQ(Inp,MD_NUM_SCF,D%MDNumSCF)) THEN
+          CALL Warn('Number of SCF cycles for MD is not set: DEFAULT is eight')
+          D%MDNumSCF=8
+       ENDIF
 !      Parse for Initial Temp, if any
        IF(OptDblQ(Inp,MD_INIT_TEMP,D%TempInit))THEN
           D%Initial_Temp   = .TRUE.

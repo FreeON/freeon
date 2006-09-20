@@ -27,6 +27,7 @@ MODULE DynamicsKeys
 ! MD Inputs
   CHARACTER(LEN=*),  PARAMETER :: MD_TIME_STEP       ='DeltaTime'
   CHARACTER(LEN=*),  PARAMETER :: MD_MAX_STEP        ='MaxMDStep' 
+  CHARACTER(LEN=*),  PARAMETER :: MD_NUM_SCF         ='MDNumSCF' 
 ! Initial Temp
   CHARACTER(LEN=*),  PARAMETER :: MD_INIT_TEMP       ='InitTemp'
 ! Temperature Rescaling

@@ -77,9 +77,66 @@ CONTAINS
     CALL MondoHalt(DRIV_ERROR,'Failed to converge SCF in ' &
          //TRIM(IntToChar(MaxSCFs))//' SCF iterations.')
   END SUBROUTINE SCF
-  !===============================================================================
-  !
-  !===============================================================================
+!===============================================================================
+!
+!===============================================================================
+  SUBROUTINE SCFLogic(cSCF,cBAS,cGEO,SCF_STATUS,ODA_DONE,DIIS_FAIL,IConAls,N,S,O,D)
+    TYPE(FileNames)    :: N
+    TYPE(State)        :: S
+    TYPE(Options)      :: O
+    TYPE(Dynamics)     :: D
+    INTEGER            :: cSCF,cBAS,cGEO,IConAls,MinMDGeo,iREMOVE
+!
+    INTEGER            :: SCF_STATUS
+    LOGICAL            :: DIIS_FAIL,ODA_DONE
+!
+    IF(cSCF==0) THEN
+       SCF_STATUS = NOT_CONVERGE
+       ODA_DONE   = .FALSE.
+       DIIS_FAIL  = .FALSE.
+    ENDIF
+!   Logic for Algorithm Choice
+    IF(O%ConAls(cBAS)==ODMIX_CONALS) THEN
+       IF(ODA_DONE) THEN
+          IConAls = DIIS_CONALS
+       ELSE
+          IF(SCF_STATUS==DIIS_NOPATH) THEN
+             IConAls   = DIIS_CONALS
+             ODA_DONE  = .TRUE.
+             Mssg = 'Turning on DIIS'
+             CALL OpenASCII(OutFile,Out)
+             WRITE(Out,*)TRIM(Mssg)
+             WRITE(*,*)TRIM(Mssg)
+             CLOSE(Out)
+          ELSE
+             IConAls = ODA_CONALS
+          ENDIF
+       ENDIF
+    ELSE
+       IConAls = O%ConAls(cBAS)
+    ENDIF
+!   Parse for strict ODA or DIIS Over-Ride
+    CALL OpenASCII(N%IFile,Inp)
+    IF(OptKeyQ(Inp,CONALS_OVRIDE,CONALS_ODA))  IConAls = ODA_CONALS
+    IF(OptKeyQ(Inp,CONALS_OVRIDE,CONALS_DIIS)) IConAls = DIIS_CONALS
+    CLOSE(Inp)
+!   Defaults
+    IF(cSCF < 1)                                         IConAls = NO_CONALS
+    IF(S%Action%C(1) ==SCF_GUESSEQCORE    .AND. cSCF<2)  IConAls = NO_CONALS 
+    IF(S%Action%C(1) ==SCF_BASISSETSWITCH .AND. cSCF<2)  IConAls = NO_CONALS 
+    IF(S%Action%C(1) ==SCF_RWBSS          .AND. cSCF<2)  IConAls = NO_CONALS 
+!   MD OverRule
+    IF(D%DoingMD) THEN
+       CALL CalculateMDGeo(D,iREMOVE,MinMDGeo)
+       IF(cGEO > MinMDGeo) THEN
+!        IConAls = NO_CONALS 
+       ENDIF
+    ENDIF
+!
+  END SUBROUTINE SCFLogic
+!===============================================================================
+!
+!===============================================================================
   FUNCTION SCFCycle(cSCF,cBAS,cGEO,N,S,O,G,D,M,ETot,DMax,DIIS,CPSCF_O)
     TYPE(FileNames)    :: N
     TYPE(State)        :: S
@@ -99,26 +156,16 @@ CONTAINS
 !   Initailize
     SCFCycle=.FALSE.
     S%Current%I=(/cSCF,cBAS,cGEO/)
-    CALL StateArchive(N,G,S,Init_O=.TRUE.)
-    IF(cSCF==0) THEN
-       SCF_STATUS = NOT_CONVERGE
-       ODA_DONE   = .FALSE.
-       DIIS_FAIL  = .FALSE.
-    ENDIF
-!   MD Stuff
-    IF(D%DoingMD) THEN
-       MinMDGeo = D%MDMaxSteps+1
-       IF(D%MDGeuss==MD_DMVerlet0) MinMDGeo=2
-       IF(D%MDGeuss==MD_FMVerlet0) MinMDGeo=2
-       IF(D%MDGeuss==MD_DMVerlet1) MinMDGeo=4
-       IF(D%MDGeuss==MD_FMVerlet1) MinMDGeo=4
-    ENDIF
 !   Are we maybe solving CPSCF equations?
     IF(PRESENT(CPSCF_O))THEN
        DoCPSCF=CPSCF_O
     ELSE
        DoCPSCF=.FALSE.
     ENDIF
+!   Init and Archives the State
+    CALL StateArchive(N,G,S,Init_O=.TRUE.)
+!   Decide on the Choice of convergence Algorithms
+    CALL SCFLogic(cSCF,cBAS,cGEO,SCF_STATUS,ODA_DONE,DIIS_FAIL,IConAls,N,S,O,D)
 !   The options...
     IF(DoCPSCF)THEN
        CALL DensityLogic(cSCF,cBAS,cGEO,N,S,O,D,CPSCF_O=.TRUE.)
@@ -129,19 +176,10 @@ CONTAINS
           CALL Invoke('QCTC',N,S,M)
           Modl=O%Models(cBAS)
           IF(HasHF(Modl)) CALL Invoke('ONX',N,S,M)
-#ifdef DIPMW
-          IF(HasDFT(Modl)) THEN
-             CALL Halt('SCFs: DFT-Response not yet supported!')
-             CALL Invoke('HiCu',N,S,M)
-             CALL Invoke('DipMW',N,S,M)
-             IF(.TRUE.) STOP
-          ENDIF
-#else
           IF(HasDFT(Modl)) THEN
              CALL Halt('SCFs: DFT-Response not yet supported!')
              CALL Invoke('HiCu',N,S,M)
           ENDIF
-#endif
        ENDIF
        CALL Invoke('FBuild',N,S,M)
        IF(cSCF.GT.0) CALL Invoke('DDIIS',N,S,M)
@@ -149,54 +187,16 @@ CONTAINS
        CALL SolveSCF(cBAS,N,S,O,M)
        CALL Invoke('CPSCFStatus',N,S,M)
     ELSE
-!      Logic for Algorithm Choice
-       IF(O%ConAls(cBAS)==ODMIX_CONALS) THEN
-          IF(ODA_DONE) THEN
-             IConAls = DIIS_CONALS
-          ELSE
-             IF(SCF_STATUS==DIIS_NOPATH) THEN
-                IConAls   = DIIS_CONALS
-                ODA_DONE  = .TRUE.
-                Mssg = 'Turning on DIIS'
-                CALL OpenASCII(OutFile,Out)
-                WRITE(Out,*)TRIM(Mssg)
-                WRITE(*,*)TRIM(Mssg)
-                CLOSE(Out)
-             ELSE
-                IConAls = ODA_CONALS
-             ENDIF
-          ENDIF
-       ELSE
-          IConAls = O%ConAls(cBAS)
-       ENDIF
-!      MD OverRule
-       IF(D%DoingMD .AND. cGEO > MinMDGeo) THEN
-!          IConAls = NO_CONALS 
-       ENDIF
-!      Parse for strict ODA or DIIS Over-Ride
-       CALL OpenASCII(N%IFile,Inp)
-       IF(OptKeyQ(Inp,CONALS_OVRIDE,CONALS_ODA))  IConAls = ODA_CONALS
-       IF(OptKeyQ(Inp,CONALS_OVRIDE,CONALS_DIIS)) IConAls = DIIS_CONALS
-       CLOSE(Inp)
-!      Defaults
-       IF(cSCF < 1)                                         IConAls = NO_CONALS
-       IF(O%ConAls(cBAS)==SMIX_CONALS        .AND. cSCF<2)  IConAls = NO_CONALS
-       IF(S%Action%C(1) ==SCF_GUESSEQCORE    .AND. cSCF<2)  IConAls = NO_CONALS 
-       IF(S%Action%C(1) ==SCF_BASISSETSWITCH .AND. cSCF<2)  IConAls = NO_CONALS 
-       IF(S%Action%C(1) ==SCF_RWBSS          .AND. cSCF<2)  IConAls = NO_CONALS 
+       CALL DensityLogic(cSCF,cBAS,cGEO,N,S,O,D)
+       CALL DensityBuild(N,S,M)
+       CALL FockBuild(cSCF,cBAS,N,S,O,M)
 !      Select the Case
        SELECT CASE (IConAls)
        CASE (DIIS_CONALS)
-          CALL DensityLogic(cSCF,cBAS,cGEO,N,S,O,D)
-          CALL DensityBuild(N,S,M)
-          CALL FockBuild(cSCF,cBAS,N,S,O,M)
           CALL Invoke('DIIS',N,S,M)
           CALL SolveSCF(cBAS,N,S,O,M)
           CALL Invoke('SCFstats',N,S,M)
        CASE (ODA_CONALS)
-          CALL DensityLogic(cSCF,cBAS,cGEO,N,S,O,D)
-          CALL DensityBuild(N,S,M)
-          CALL FockBuild(cSCF,cBAS,N,S,O,M)
           CALL SolveSCF(cBAS,N,S,O,M)
           CALL Invoke('ODA',N,S,M)
           IF(HasDFT(O%Models(cBAS)))THEN
@@ -214,26 +214,9 @@ CONTAINS
           ENDIF
           CALL SolveSCF(cBAS,N,S,O,M)
           CALL Invoke('SCFstats',N,S,M)
-       CASE (SMIX_CONALS)
-          CALL DensityLogic(cSCF,cBAS,cGEO,N,S,O,D)
-          CALL DensityBuild(N,S,M)
-          CALL FockBuild(cSCF,cBAS,N,S,O,M)
-          CALL SolveSCF(cBAS,N,S,O,M)
-          CALL Invoke('SCFstats',N,S,M)
-          S%Action%C(1)='Stanton MIX'
-          CALL Invoke('MIX',N,S,M)
-          CALL DensityLogic(cSCF,cBAS,cGEO,N,S,O,D)
-          CALL DensityBuild(N,S,M)
-          CALL FockBuild(cSCF,cBAS,N,S,O,M)
-          CALL SolveSCF(cBAS,N,S,O,M)
        CASE (NO_CONALS)          
-          CALL DensityLogic(cSCF,cBAS,cGEO,N,S,O,D)
-          CALL DensityBuild(N,S,M)
-          CALL FockBuild(cSCF,cBAS,N,S,O,M)
           CALL SolveSCF(cBAS,N,S,O,M)
           CALL Invoke('SCFstats',N,S,M)
-       CASE(TEST_CONALS)
-          CALL MondoHalt(DRIV_ERROR,'Test Algorithm Not Implimented')
        CASE DEFAULT
           CALL MondoHalt(DRIV_ERROR,'Logic failure in SCFCycle')
        END SELECT 
@@ -244,9 +227,9 @@ CONTAINS
     S%Previous%I=S%Current%I
     IF(SCF_STATUS==DID_CONVERGE) SCFCycle=.TRUE.
   END FUNCTION SCFCycle
-  !===============================================================================
-  !
-  !===============================================================================
+!===============================================================================
+!
+!===============================================================================
   FUNCTION ConvergedQ(cSCF,cBAS,cGEO,N,S,O,G,D,M,ETot,DMax,DIIS,IConAls,CPSCF_O)
     TYPE(FileNames)             :: N
     TYPE(State)                 :: S
@@ -259,7 +242,7 @@ CONTAINS
     LOGICAL                     :: DoCPSCF,DoDIIS,DoODA,RebuildPostODA
     LOGICAL                     :: ALogic,BLogic,CLogic,DLogic,ELogic,A2Logic, &
                                    GLogic,QLogic,ILogic,OLogic,FLogic
-    INTEGER                     :: cSCF,cBAS,cGEO,iGEO,iCLONE,MinMDGeo
+    INTEGER                     :: cSCF,cBAS,cGEO,iGEO,iCLONE,MinMDGeo,iREMOVE
     REAL(DOUBLE)                :: DIISA,DIISB,DDIIS,DIISQ,       &
          DETOT,ETOTA,ETOTB,ETOTQ,ETEST, &
          DDMAX,DMAXA,DMAXB,DMAXQ,DTEST,ETOTO,ODAQ,DMaxMax
@@ -272,14 +255,6 @@ CONTAINS
        DoCPSCF=CPSCF_O
     ELSE
        DoCPSCF=.FALSE.
-    ENDIF
-    ! MD Stuff
-    IF(D%DoingMD) THEN
-       MinMDGeo = D%MDMaxSteps+1
-       IF(D%MDGeuss==MD_DMVerlet0) MinMDGeo=2
-       IF(D%MDGeuss==MD_FMVerlet0) MinMDGeo=2
-       IF(D%MDGeuss==MD_DMVerlet1) MinMDGeo=4
-       IF(D%MDGeuss==MD_FMVerlet1) MinMDGeo=4
     ENDIF
     ! Convergence thresholds
     IF(DoCPSCF) THEN
@@ -536,6 +511,8 @@ CONTAINS
        ENDDO
 !      Moleculr Dynamics Convergence Criteria
        IF(D%DoingMD) THEN
+          CALL CalculateMDGeo(D,iREMOVE,MinMDGeo)
+!
           DMaxMax=Zero
           DO iCLONE=1,G%Clones
              DMaxMax = MAX(DMax%D(cSCF,iCLONE),DMaxMax)
@@ -667,23 +644,8 @@ CONTAINS
        ENDIF
     ENDIF
 !   If we are doing MD, Geuss to P2Use is Different
-    IF(D%DoingMD .AND. cGEO > 1 .AND. cSCF == 0) THEN
-       SELECT CASE(D%MDGeuss)
-       CASE (MD_DMVerlet0)
-          S%Action%C(1)=MD_DMVerlet0
-          IF(cGEO <= 2 .AND. cBAS == 1) S%Action%C(1)=SCF_SUPERPOSITION
-       CASE (MD_DMVerlet1)
-          S%Action%C(1)=MD_DMVerlet1
-          IF(cGEO <= 4 .AND. cBAS == 1) S%Action%C(1)=SCF_SUPERPOSITION
-       CASE (MD_FMVerlet0)
-          S%Action%C(1)=MD_FMVerlet0
-          IF(cGEO <= 2 .AND. cBAS == 1) S%Action%C(1)=SCF_SUPERPOSITION
-       CASE (MD_FMVerlet1)
-          S%Action%C(1)=MD_FMVerlet1
-          IF(cGEO <= 4 .AND. cBAS == 1) S%Action%C(1)=SCF_SUPERPOSITION
-       CASE(MD_DGeuss)
-          IF(cBAS .EQ. 1) S%Action%C(1)=SCF_SUPERPOSITION
-       END SELECT
+    IF(D%DoingMD .AND. cSCF==0) THEN
+       S%Action%C(1)=O%GeussToP2Use
     ENDIF
 !   Reset
     S%SameBasis=.TRUE.
@@ -1734,14 +1696,23 @@ CONTAINS
 !===============================================================================
 ! Clean the Scratch
 !===============================================================================
-  SUBROUTINE CleanScratch(C,iGEO)
+  SUBROUTINE CleanScratch(C,iGEO,DoingMD_O)
     TYPE(Controls)                 :: C
     INTEGER                        :: iGEO
     CHARACTER(LEN=DEFAULT_CHR_LEN) :: RemoveFile,chGEO
+    LOGICAL,OPTIONAL               :: DoingMD_O
+    LOGICAL                        :: DoingMD
+!
+    DoingMD=.FALSE.
+    IF(PRESENT(DoingMD_O)) DoingMD=DoingMD_O
 !    
     chGEO = IntToChar(iGEO)
     RemoveFile=TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)//'*_Geom#'//TRIM(chGEO)//"_*.*"       
     CALL SYSTEM('/bin/rm -f  '//RemoveFile)
+    IF(DoingMD) THEN
+       RemoveFile=TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)//'*_G#'//TRIM(chGEO)//"_*.*" 
+       CALL SYSTEM('/bin/rm -f  '//RemoveFile)
+    ENDIF
 !
   END SUBROUTINE CleanScratch
 !===============================================================================
@@ -2179,6 +2150,42 @@ CONTAINS
    CALL Delete(T3)
 !
  END SUBROUTINE NLattForce1
+!--------------------------------------------------------------
+! Determin iREMOVE and MinMDGeo
+!--------------------------------------------------------------
+  SUBROUTINE  CalculateMDGeo(D,iREMOVE,MinMDGeo)
+    TYPE(Dynamics)  :: D
+    INTEGER         :: iREMOVE,MinMDGeo
+!
+    iREMOVE = D%MDMaxSteps+1
+    SELECT CASE(D%MDGeuss)
+    CASE ('DMVerlet0','FMVerlet0')
+       iREMOVE = 2
+       MinMDGeo= 2
+    CASE ('DMVerlet1','FMVerlet1')
+       iREMOVE = 4
+       MinMDGeo= 4
+    CASE ('DMProj0')
+       iREMOVE = 1
+       MinMDGeo= 1
+    CASE ('DMProj1')
+       iREMOVE = 2
+       MinMDGeo= 2
+    CASE ('DMProj2')
+       iREMOVE = 3
+       MinMDGeo= 3
+    CASE ('DMProj3')
+       iREMOVE = 4
+       MinMDGeo= 4
+    CASE ('DMProj4')
+       iREMOVE = 5
+       MinMDGeo= 5
+    CASE ('DMDGeuss')
+       iREMOVE = 1
+       MinMDGeo= 1
+    END SELECT
+!
+  END SUBROUTINE CalculateMDGeo
 !======================================================================================
 END MODULE SCFs
 

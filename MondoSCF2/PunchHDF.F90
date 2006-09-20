@@ -343,6 +343,7 @@ CONTAINS
        CALL New_CellSet_Cube(CS_OUT,G%PBC%AutoW%I,G%PBC%BoxShape%D,(/IL,IL,IL/)      ,MaxCell_O=MaxCell)
        CALL New_CellSet_Cube(CS_IN ,G%PBC%AutoW%I,G%PBC%BoxShape%D,(/2*IL,2*IL,2*IL/),MaxCell_O=MaxCell)
     ELSE
+       
 !       CALL New_CellSet_Sphere(CS_OUT,G%PBC%AutoW%I,G%PBC%BoxShape%D,Radius_out ,MaxCell_O=MaxCell)
 !       CALL New_CellSet_Sphere(CS_IN ,G%PBC%AutoW%I,G%PBC%BoxShape%D,Radius_in  ,MaxCell_O=MaxCell)
        CALL New_CellSet_Sphere2(CS_In ,G%PBC%AutoW%I,G%PBC%BoxShape%D,'Penetration', &

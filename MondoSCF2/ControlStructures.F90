@@ -44,6 +44,7 @@ MODULE ControlStructures
      LOGICAL                        :: NEBClimb      
      CHARACTER(LEN=3)               :: GeomPrint
 !
+     CHARACTER(LEN=20)              :: GeussToP2Use
      INTEGER                        :: MinSCF
      INTEGER                        :: MaxSCF
 !
@@ -52,7 +53,8 @@ MODULE ControlStructures
 
   TYPE Dynamics
      LOGICAL                        :: DoingMD
-     CHARACTER(LEN=9)               :: MDGeuss 
+     CHARACTER(LEN=9)               :: MDGeuss
+     INTEGER                        :: MDNumSCF  
 !
      INTEGER                        :: MCMaxSteps
      REAL(DOUBLE)                   :: MCTemp
