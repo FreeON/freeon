@@ -433,7 +433,7 @@ MODULE MDynamics
           CLOSE(98)
        ENDIF
        IF(.TRUE.) THEN
-          FileName = 'CoorMD2_'//TRIM(C%Nams%SCF_NAME)//'_'//TRIM(IntToChar(iC))//'.dat'
+          FileName = 'CoordMD2_'//TRIM(C%Nams%SCF_NAME)//'_'//TRIM(IntToChar(iC))//'.dat'
           CALL OpenASCII(TRIM(FileName),97)
           Pos = C%Geos%Clone(iC)%Carts%D(1:3,2)
           Vel = C%Geos%Clone(iC)%Velocity%D(1:3,2)
