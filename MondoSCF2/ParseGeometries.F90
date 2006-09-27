@@ -221,6 +221,7 @@ CONTAINS
           G%Carts%D(2,N)=CharToDbl(C%C(3))
           G%Carts%D(3,N)=CharToDbl(C%C(4))
           G%CConstrain%I(N)=0
+          G%Velocity%D(1:3,N)=0.0D0
        ELSEIF(SIZE(C%C)==5)THEN
           At=TRIM(ADJUSTL(C%C(1)))
           G%Carts%D(1,N)=CharToDbl(C%C(2))
@@ -240,6 +241,7 @@ CONTAINS
           ELSE
              G%CConstrain%I(N)=0
           ENDIF
+          G%Velocity%D(1:3,N)=0.0D0
        ELSEIF(SIZE(C%C)==7)THEN
           At=TRIM(ADJUSTL(C%C(1)))
           G%Carts%D(1,N) =CharToDbl(C%C(2))
