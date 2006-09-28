@@ -2,26 +2,28 @@
 
 Charge=0
 Multiplicity=1
-DebugAll=(MinDebug,CheckSums)
+DebugAll=(MaxDebug,CheckSums)
 Guess=SuperPos
-SCFMethod=(RH)
-BasisSets=(User1)
-ModelChem=(HF)
-Accuracy =(good)
-SCFConvergence=(ODA)
+SCFMethod=(RH,RH)
+BasisSets=(STO-3G,6-31G**)
+ModelChem=(HF,PBE0) 
+Accuracy =(tight,tight)
+SCFConvergence=(DIIS,DIIS)
 Geometry=(InAU)
+MinSCF=1
+MaxSCF=8
 
 Grad=(MolecularDynamics)
-MDProjection=FMVerlet1
+MDProjection=FMVerlet0
 MDMethod=Verlet
-DeltaTime=0.25
-MaxMDStep=2000
-MinSCF=0
-MaxSCF=8
+DeltaTime=0.125
+MaxMDStep=100
+MDNumSCF=1
 
 <EndOptions>
 
 <BeginGeometry>
-h     0.00000000     0.00000000     0.00000000  
-h     1.30000000     0.00000000     0.00000000
+H     0.00000000     0.00000000     0.00000000     0.00000000     0.00000000     0.00000000  
+H     1.20000000     0.00000000     0.00000000     0.00000000     0.00000000     0.00000000
 <EndGeometry>
+ 
