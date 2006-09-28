@@ -11,7 +11,7 @@ Accuracy =(tight,tight)
 SCFConvergence=(DIIS,DIIS)
 Geometry=(InAU)
 MinSCF=1
-MaxSCF=8
+MaxSCF=10
 
 Grad=(MolecularDynamics)
 MDProjection=FMVerlet0
