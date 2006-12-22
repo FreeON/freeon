@@ -211,15 +211,6 @@ MODULE MDynamics
           ENDDO
        ENDDO
     ENDIF
-!   Thermostats
-    IF(C%Dyns%Temp_Scaling) THEN
-       IF(MOD(iGEO,C%Dyns%RescaleInt)==0) THEN
-          WRITE(*,*) 'Rescaling Temperature' 
-          DO iCLONE=1,C%Geos%Clones
-             CALL RescaleVelocity(C%Geos%Clone(iCLONE),MDTemp%D(iCLONE),C%Dyns%TargetTemp)
-          ENDDO
-       ENDIF
-    ENDIF
 !   Reset the Linear Momentum, Compute the Kinectic Energy and Ave Kinectic Energy
     DO iCLONE=1,C%Geos%Clones
 !      Calculate Kinectic Energy and  Temp, update Ave Temp
@@ -229,6 +220,17 @@ MODULE MDynamics
        MDEpot%D(iCLONE) = C%Geos%Clone(iCLONE)%ETotal
        MDEtot%D(iCLONE) = MDEpot%D(iCLONE) + MDKin%D(iCLONE)
     ENDDO
+!   Thermostats
+    IF(C%Dyns%Temp_Scaling) THEN
+       IF(MOD(iGEO,C%Dyns%RescaleInt)==0) THEN
+          WRITE(*,*) 'Rescaling Temperature' 
+          WRITE(*,*) 'Target Temp = ',C%Dyns%TargetTemp
+	  WRITE(*,*) 'MD Temp     = ',MDTemp%D(1)
+          DO iCLONE=1,C%Geos%Clones
+             CALL RescaleVelocity(C%Geos%Clone(iCLONE),MDTemp%D(iCLONE),C%Dyns%TargetTemp)
+          ENDDO
+       ENDIF
+    ENDIF
 !   Generate Output
     CALL OutputMD(C,iGEO)
     CALL TempOut(C,iGEO)
@@ -461,7 +463,7 @@ MODULE MDynamics
        File = TRIM(C%Nams%SCF_NAME)//"_Clone#"//TRIM(IntToChar(iCLONE))//".MDO"
        CALL OpenASCII(File,Out)
 !      Add Header
-       IF(iGEO==0) THEN
+       IF(iGEO==1) THEN
           Line = "##########################################################################"
           WRITE(Out,97) Line
           Line = "# MD Clone No. = "//TRIM(IntToChar(iCLONE))
@@ -476,9 +478,7 @@ MODULE MDynamics
           WRITE(Out,97) Line
           Line = "# MDGeuss      = "//TRIM(C%Dyns%MDGeuss)
           WRITE(Out,97) Line
-          Line = "# Minium SCF   = "//TRIM(IntToChar(C%Opts%MinSCF))
-          WRITE(Out,97) Line
-          Line = "# Maxium SCF   = "//TRIM(IntToChar(C%Opts%MaxSCF))
+          Line = "# MD Num SCF   = "//TRIM(IntToChar(C%Dyns%MDNumSCF))
           WRITE(Out,97) Line
           Line = "# MD Time Step = "//TRIM(DblToMedmChar(C%Dyns%DTime))//" au" 
           WRITE(Out,97) Line
