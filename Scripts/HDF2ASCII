@@ -1,2 +1,0 @@
-#!/bin/sh
-$HDF_BIN/h5dump  $MONDO_SCRATCH/$1*.hdf > $PWD/$1.ASCII

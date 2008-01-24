@@ -1,3 +1,0 @@
-cd $1
-rm -f core* 1* *.log *.xyz *.o* *.pbs *.lsf *.stdout
-$HOME/SCRIPTS/submit $2

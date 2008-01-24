@@ -1,8 +1,0 @@
-rm -f $1.lsf
-echo "#!/bin/tcsh "                                   >  $1.lsf
-echo "cd `pwd`"                                       >> $1.lsf
-echo "$MONDO_EXEC/MondoSCF  $1.inp $1.out $1.log"     >> $1.lsf
-chmod u+x $1.lsf
-bsub  -n $2 -q smallq -W 8:00 -o $1.STDOUT -J $1 ./$1.lsf
-rm -f $1.lsf
-

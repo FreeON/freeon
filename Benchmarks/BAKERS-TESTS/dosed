@@ -1,3 +1,0 @@
-cd $1
-sed "s/User1/STO-3G-SPLIT/" $2.inp > buf
-mv buf $2.inp

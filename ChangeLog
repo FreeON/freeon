@@ -1,3 +1,14 @@
+2007-11-17 08:00 nbock
+
+	* Clean up code: I removed unused directories like QCTC2 and renamed ONX2 ->
+	ONX and MondoSCF2 -> MondoSCF.
+
+2007-10-16 13:23  nbock
+
+	* Autoconf/automake: I changed the build system of MondoSCF. It uses autoconf
+	now which means that it can be built with the sequence: ./configure, make,
+	make install. Details are in the README file.
+
 2006-12-22 06:32  tymczak
 
 	* MondoSCF2/MDynamics.F90: Removed some bufs in the Temperture

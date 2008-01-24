@@ -1,4 +1,0 @@
-REMOVESRCE = *.f *.f90 *.c
-REMOVEMISC =  *.cpp *.log *.stb *.out *.g90 core core.* *.o *.L *.lst a.out fort.* *~    
-REMOVEMODS = *.MOD *.mod 
-REMOVEALL  = $(REMOVEMISC) $(REMOVEMODS) $(REMOVESRCE)

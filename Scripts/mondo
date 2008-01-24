@@ -1,2 +1,0 @@
-#!/bin/csh -f
-${MONDO_EXEC}/MondoSCF $1 $2 $3 $4 

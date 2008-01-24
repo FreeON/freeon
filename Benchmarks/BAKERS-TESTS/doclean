@@ -1,2 +1,0 @@
-cd $1
-rm -f 1* core* *.o* *.pbs *.lsf *.stdout *xyz *log 

@@ -1,8 +1,0 @@
-mkinpts
-sub_nqs SoftSeg_1
-sub_nqs HardSeg_1
-sub_nqs Estane_1 
-sub_nqs Estane_2 
-sub_nqs Estane_3 
-sub_nqs Estane_4
-sub_nqs Estane_8

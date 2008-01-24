@@ -1,0 +1,45 @@
+When this is checked out from the git repository, the configure script might be
+here already (unless you have done the following steps at some point in time
+before). Run the following commands:
+
+aclocal
+autoconf
+automake --add-missing
+autoheader
+
+Some examples of how to configure MondoSCF. The following configure commands
+work. In order to use the PHiPAC (P3) optimized dgemms, add --enable-phipac to
+the configure command line.
+
+(1)
+./configure FC=/usr/local/gcc-4.2.1/bin/gfortran F77=/usr/local/gcc-4.2.1/bin/gfortran CC=/usr/local/gcc-4.2.1/bin/gcc LDFLAGS=-L/usr/local/lapack/lib LIBS="-llapack_linuxi386-gfortran-4.2.1 -lblas_linuxi386-gfortran-4.2.1" CFLAGS="-O3 -fomit-frame-pointer" FFLAGS="-O3 -fomit-frame-pointer" FCFLAGS="-O3 -fomit-frame-pointer" --prefix=/tmp/Mondo
+
+(2)
+./configure FC=/usr/local/gcc-4.2.1/bin/gfortran F77=/usr/local/gcc-4.2.1/bin/gfortran CC=/usr/local/gcc-4.2.1/bin/gcc LDFLAGS=-L/usr/local/lapack/lib LIBS="-llapack_linuxi386-gfortran-4.2.1 -lblas_linuxi386-gfortran-4.2.1" FFLAGS="-O0 -g" FCFLAGS="-O0 -g" CFLAGS="-O0 -g" --prefix=/tmp/Mondo
+
+(3)
+./configure FC=ifort F77=ifort CC=icc LDFLAGS=-L/usr/local/lapack/lib LIBS="-llapack_linux-ifort-10.0.023 -lblas_linux-ifort-10.0.023" CFLAGS="-O3 -fomit-frame-pointer" FFLAGS="-O3 -fomit-frame-pointer" FCFLAGS="-O3 -fomit-frame-pointer" --prefix=/tmp/Mondo
+
+(4)
+./configure FC=ifort F77=ifort CC=icc CFLAGS="-O3 -fomit-frame-pointer" FFLAGS="-O3 -fomit-frame-pointer" FCFLAGS="-O3 -fomit-frame-pointer" --prefix=/tmp/Mondo
+
+(5)
+./configure FC=/usr/local/gcc-4.2.1/bin/gfortran F77=/usr/local/gcc-4.2.1/bin/gfortran CC=/usr/local/gcc-4.2.1/bin/gcc CFLAGS="-O3 -fomit-frame-pointer" FFLAGS="-O3 -fomit-frame-pointer" FCFLAGS="-O3 -fomit-frame-pointer" --prefix=/tmp/Mondo --with-hdf5=/usr/local/hdf-1.4.5-post2
+
+(6)
+./configure FC=ifort F77=ifort CC=icc CFLAGS="-O3 -fomit-frame-pointer" FFLAGS="-O3 -fomit-frame-pointer" FCFLAGS="-O3 -fomit-frame-pointer" --prefix=/tmp/Mondo --disable-internal-lapack --with-lapack=/usr/local/lapack --with-lapacklibs="-llapack_linux-ifort-10.0.023 -lblas_linux-ifort-10.0.023"
+
+The internal hdf5 does not seem to work well on 64-bit.
+
+Some timing information:
+
+Running Validate/MD_H2.inp on MacBook Pro 1 (Core Duo) 2.16GHz
+gfortran 4.2.1, compiled with (1): real 10m39.911s user 9m46.164s sys 0m15.639s
+ifort 10.0.023, compiled with (3): real  9m10.989s user 8m14.051s sys 0m16.881s
+
+Some building information:
+
+Building (4) on MacBook Pro 1 (Core Duo) 2.16GHz
+make -j1: real 23m6.268s  user 20m16.247s sys 1m38.732s
+make -j2: real 15m24.275s user 23m26.838s sys 1m49.598s
+make -j3: real 15m35.510s user 23m38.548s sys 1m49.434s

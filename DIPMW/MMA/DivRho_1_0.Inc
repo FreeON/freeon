@@ -1,5 +1,0 @@
-        Tmp(1) = Node%Co(1)*LamX(0)*LamY(0)*LamZ(0)
-        Tmp(2) = -1.D0*Node%Co(2)*LamX(1)*LamY(0)*LamZ(0)
-        Tmp(3) = -1.D0*Node%Co(3)*LamX(0)*LamY(1)*LamZ(0)
-        Tmp(4) = -1.D0*Node%Co(4)*LamX(0)*LamY(0)*LamZ(1) + RhoSum(1)
-        RhoSum(1)  = Tmp(1) + Tmp(2) + Tmp(3) + Tmp(4)

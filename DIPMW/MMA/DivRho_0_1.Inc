@@ -1,8 +1,0 @@
-        RhoSum(1)  = Node%Co(1)*LamX(0)*LamY(0)*LamZ(0) + RhoSum(1)
-        RhoSum(2)  = Node%Co(1)*LamX(1)*LamY(0)*LamZ(0) + RhoSum(2)
-        RhoSum(3)  = Node%Co(1)*LamX(0)*LamY(1)*LamZ(0) + RhoSum(3)
-        RhoSum(4)  = Node%Co(1)*LamX(1)*LamY(1)*LamZ(0) + RhoSum(4)
-        RhoSum(5)  = Node%Co(1)*LamX(0)*LamY(0)*LamZ(1) + RhoSum(5)
-        RhoSum(6)  = Node%Co(1)*LamX(1)*LamY(0)*LamZ(1) + RhoSum(6)
-        RhoSum(7)  = Node%Co(1)*LamX(0)*LamY(1)*LamZ(1) + RhoSum(7)
-        RhoSum(8)  = Node%Co(1)*LamX(1)*LamY(1)*LamZ(1) + RhoSum(8)

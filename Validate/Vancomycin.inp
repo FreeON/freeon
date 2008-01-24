@@ -16,7 +16,7 @@ Guess=SuperPos
 SCFMethod=(TC2)
 BasisSets=(STO-3G-SPLIT)
 ModelChem=(B3LYP/VWN5)
-Accuracy =(Loose)
+Accuracy=(Loose)
 SCFConvergence=(DIIS)
 
 <EndOptions>

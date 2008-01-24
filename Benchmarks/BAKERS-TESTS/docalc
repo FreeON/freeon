@@ -1,4 +1,0 @@
-cd $1
-rm -f 1* *log *xyz *lsf *stdout *.o* *.pbs core*
-#$HOME/SCRIPTS/submitshort $2
-$HOME/SCRIPTS/submit $2

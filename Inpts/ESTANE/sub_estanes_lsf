@@ -1,8 +1,0 @@
-mkinpts
-sub_lsf SoftSeg_1
-sub_lsf HardSeg_1
-sub_lsf Estane_1 
-sub_lsf Estane_2 
-sub_lsf Estane_3 
-sub_lsf Estane_4
-sub_lsf Estane_8
