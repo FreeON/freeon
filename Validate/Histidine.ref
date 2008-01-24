@@ -1,0 +1,113 @@
+
+
+ __    __                 _       ____________ ______ 
+|  \  /  |               | |     /       /    |      |
+|   \/   | ___  _ __   __| | ___/   ____/   __|  |==='
+|        |/ _ \| '_ \ / _  |/ _ \____  \   (__|  ____|
+|  |\/|  | (_) | | | | (_| | (_) )     /\     |  |    
+|__|  |__|\___/|_| |_|\____|\___/_____/  \____|__|    
+
+ Version 1.0 alpha 9                                  
+ A program suite for O(N) SCF theory and ab initio MD 
+ Matt Challacombe, Eric Schwegler, C.J. Tymczak,      
+ Chee Kwan Gan, Karoly Nemeth, Valery Weber,          
+ Anders Niklasson and Graeme Henkelman                
+ Los Alamos National Laboratory (LA-CC 01-2)          
+ Copyright 2001, University of California.            
+ Compiled for AMDLinux.PG, executing on zinc02
+ a i686 machine running Linux 2.4.20-18.9smp
+
+ Current HDF :: /scratch/nemeth/T27_21918.hdf
+<<Starting MondoSCF 09/16/03 @ 23:18:30>>
+ SCFStatus : [0,1,1]    :: <SCF> = -522.33830378, dD = 0.22D+01
+ SCFStatus : [1,1,1]    :: <SCF> = -540.59887749, dD = 0.71D-01, DIIS = 0.12D-01
+ SCFStatus : [2,1,1]    :: <SCF> = -540.77933146, dD = 0.21D+00, DIIS = 0.91D-02
+ SCFStatus : [3,1,1]    :: <SCF> = -540.93926975, dD = 0.94D-01, DIIS = 0.41D-02
+ SCFStatus : [4,1,1]    :: <SCF> = -540.98180646, dD = 0.38D-01, DIIS = 0.11D-02
+ SCFStatus : [5,1,1]    :: <SCF> = -540.98379971, dD = 0.21D-01, DIIS = 0.68D-03
+ SCFStatus : [6,1,1]    :: <SCF> = -540.98488225, dD = 0.62D-02, DIIS = 0.24D-03
+ SCFStatus : [7,1,1]    :: <SCF> = -540.98505500, dD = 0.31D-02, DIIS = 0.99D-04
+ SCFStatus : [8,1,1]    :: <SCF> = -540.98504773, dD = 0.13D-02, DIIS = 0.44D-04
+ SCFStatus : [9,1,1]    :: <SCF> = -540.98505160, dD = 0.47D-03, DIIS = 0.17D-04
+ Normal SCF convergence.b
+       Clone =      1 GeOp step =      1 Total Energy =        -540.98505160
+                   Max intl Grad =     0.081381 between atoms   11  20   0   0
+     Max Unconstrained Cart Grad =     0.098903      on atom    11
+                   RMS intl Grad =     0.020649
+                  Max STRE Displ =     0.090053 between atoms   11  20
+                  Max BEND Displ =     9.061314 between atoms    3   5   4
+                  Max OUTP Displ =     0.189906 between atoms    2   4  13   5
+                  Max TORS Displ =     0.974969 between atoms    2   6   7   9
+                       RMS Displ =     0.052950
+No Geometric DIIS is being done in this step.
+ SCFStatus : [0,1,2]    :: <SCF> = -540.95997578, dD = 0.15D+00
+ SCFStatus : [1,1,2]    :: <SCF> = -540.98254120, dD = 0.40D-01, DIIS = 0.40D-02
+ SCFStatus : [2,1,2]    :: <SCF> = -541.00716040, dD = 0.61D-01, DIIS = 0.25D-02
+ SCFStatus : [3,1,2]    :: <SCF> = -541.00867345, dD = 0.49D-01, DIIS = 0.23D-02
+ SCFStatus : [4,1,2]    :: <SCF> = -541.02280619, dD = 0.96D-02, DIIS = 0.37D-03
+ SCFStatus : [5,1,2]    :: <SCF> = -541.02311183, dD = 0.47D-02, DIIS = 0.18D-03
+ SCFStatus : [6,1,2]    :: <SCF> = -541.02315928, dD = 0.14D-02, DIIS = 0.72D-04
+ SCFStatus : [7,1,2]    :: <SCF> = -541.02316485, dD = 0.69D-03, DIIS = 0.25D-04
+ Normal SCF convergence.b
+       Clone =      1 GeOp step =      2 Total Energy =        -541.02316485
+                   Max intl Grad =     0.033580 between atoms    8  10   0   0
+     Max Unconstrained Cart Grad =     0.052338      on atom     8
+                   RMS intl Grad =     0.006300
+                  Max STRE Displ =     0.059030 between atoms    8  11
+                  Max BEND Displ =     7.000001 between atoms    7   9  19
+                  Max OUTP Displ =     1.963732 between atoms    3   1  12   2
+                  Max TORS Displ =     7.000000 between atoms    2   6   7   9
+                       RMS Displ =     0.036292
+No Geometric DIIS is being done in this step.
+ SCFStatus : [0,1,3]    :: <SCF> = -540.95129205, dD = 0.16D+00
+ SCFStatus : [1,1,3]    :: <SCF> = -540.99689865, dD = 0.41D-01, DIIS = 0.34D-02
+ SCFStatus : [2,1,3]    :: <SCF> = -541.01710339, dD = 0.78D-01, DIIS = 0.19D-02
+ SCFStatus : [3,1,3]    :: <SCF> = -541.02174137, dD = 0.39D-01, DIIS = 0.14D-02
+ SCFStatus : [4,1,3]    :: <SCF> = -541.02626209, dD = 0.40D-02, DIIS = 0.17D-03
+ SCFStatus : [5,1,3]    :: <SCF> = -541.02631379, dD = 0.24D-02, DIIS = 0.70D-04
+ SCFStatus : [6,1,3]    :: <SCF> = -541.02632773, dD = 0.76D-03, DIIS = 0.31D-04
+ Normal SCF convergence.a
+       Clone =      1 GeOp step =      3 Total Energy =        -541.02632773
+                   Max intl Grad =     0.015985 between atoms    8  11   0   0
+     Max Unconstrained Cart Grad =     0.015298      on atom     7
+                   RMS intl Grad =     0.003677
+                  Max STRE Displ =     0.032399 between atoms    7   9
+                  Max BEND Displ =     3.676285 between atoms    2   1  12
+                  Max OUTP Displ =     3.005382 between atoms    4   2   6   1
+                  Max TORS Displ =     2.058894 between atoms    8  10  20  11
+                       RMS Displ =     0.024427
+No Geometric DIIS is being done in this step.
+ SCFStatus : [0,1,4]    :: <SCF> = -541.01369170, dD = 0.63D-01
+ SCFStatus : [1,1,4]    :: <SCF> = -541.02011928, dD = 0.14D-01, DIIS = 0.15D-02
+ SCFStatus : [2,1,4]    :: <SCF> = -541.02412207, dD = 0.26D-01, DIIS = 0.90D-03
+ SCFStatus : [3,1,4]    :: <SCF> = -541.02497632, dD = 0.20D-01, DIIS = 0.72D-03
+ SCFStatus : [4,1,4]    :: <SCF> = -541.02618857, dD = 0.55D-02, DIIS = 0.17D-03
+ SCFStatus : [5,1,4]    :: <SCF> = -541.02625579, dD = 0.15D-02, DIIS = 0.56D-04
+ SCFStatus : [6,1,4]    :: <SCF> = -541.02626282, dD = 0.26D-03, DIIS = 0.17D-04
+ Normal SCF convergence.b
+       Clone =      1 GeOp step =      4 Total Energy =        -541.02626282
+                   Max intl Grad =     0.023558 between atoms    3   5   0   0
+     Max Unconstrained Cart Grad =     0.026526      on atom     5
+                   RMS intl Grad =     0.004377
+                  Max STRE Displ =     0.026276 between atoms    7   9
+                  Max BEND Displ =     3.022666 between atoms    2   1  12
+                  Max OUTP Displ =     2.531573 between atoms   11   8   7  10
+                  Max TORS Displ =     7.000003 between atoms    6   7   8  11
+                       RMS Displ =     0.020540
+No Geometric DIIS is being done in this step.
+ SCFStatus : [0,1,5]    :: <SCF> = -540.98141687, dD = 0.19D+00
+ SCFStatus : [1,1,5]    :: <SCF> = -541.02601033, dD = 0.84D-02, DIIS = 0.10D-02
+ SCFStatus : [2,1,5]    :: <SCF> = -541.02753768, dD = 0.21D-01, DIIS = 0.64D-03
+ SCFStatus : [3,1,5]    :: <SCF> = -541.02786300, dD = 0.14D-01, DIIS = 0.52D-03
+ SCFStatus : [4,1,5]    :: <SCF> = -541.02859837, dD = 0.49D-02, DIIS = 0.16D-03
+ SCFStatus : [5,1,5]    :: <SCF> = -541.02865771, dD = 0.18D-02, DIIS = 0.75D-04
+ SCFStatus : [6,1,5]    :: <SCF> = -541.02862926, dD = 0.33D-03, DIIS = 0.17D-04
+ SCFStatus : [7,1,5]    :: <SCF> = -541.02862897, dD = 0.12D-03, DIIS = 0.12D-04
+ Normal SCF convergence.b
+     Geometry optimization of Clone # 1 converged in   5 steps.
+       Clone =      1 GeOp step =      5 Total Energy =        -541.02862897
+     Max Unconstrained Cart Grad =     0.004859      on atom     5
+Energies of final structures:
+ Clone #         Energy         
+     1     -541.0286289653
+>-Successful MondoSCF run 09/17/03 @ 00:08:23-<

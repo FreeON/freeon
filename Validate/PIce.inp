@@ -1,0 +1,57 @@
+    P-Ice (2 Waters molecules)
+
+    This input file demonstrates 
+    (1) lattice constrained optimization of atomic coordinates
+    (2) Use of the ECP basis CEP-31G with periodic boundaries.
+        Note that ECP lattice forces are not yet implemented
+
+<BeginOptions>
+
+MPIInvoke="mpirun"
+MPIProcessors=4 
+MPISpatialProc=4 
+MPIProcFlag="-np"
+MPIMachineFlag="--nper"
+MPIMachineFile="2"
+
+Charge=0
+Multiplicity=1
+
+OutPut=XYZ
+Grad=(Optimize,PrimInt,NoGDIIS,BiSect,HBondOnly,NoFragmConnect,NonCovBend,NonCovTors)
+
+Guess=SuperPos
+DebugAll=(MinDebug,CheckSums)
+SCFMethod=(RH)
+BasisSets=(User5)
+ModelChem=(B3LYP)
+SCFConvergence=(DIIS)
+Accuracy =(Good)
+
+PBC=(T,T,T)
+PFFMaxEll=18
+Periodic=(AtomCoord)
+
+<EndOptions>
+
+<BeginPeriodic>
+ 7.328  7.820   4.400  90.000  90.000   90.000
+<EndPeriodic>
+
+<BeginGeometry> 
+ O   0.46706474               4.56252426               0.00000000
+ O   6.86093526               7.16747574               0.00000000
+ H   1.43706477               4.56252426               0.00000000
+ H   0.13531152               4.09903286               0.78133440
+ H   7.18468630               6.26464110               0.00000000
+ H   7.19268848               7.63096714               3.61866560
+<EndGeometry>
+
+<Begin_Add_Internals>
+STRE_A  7.328  
+STRE_B  7.820   
+STRE_C  4.400  
+ALPHA 90.000  
+BETA  90.000   
+GAMMA 90.000
+<End_Add_Internals>

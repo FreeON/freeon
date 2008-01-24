@@ -1,0 +1,3091 @@
+
+
+ __    __                 _       ____________ ______ 
+|  \  /  |               | |     /       /    |      |
+|   \/   | ___  _ __   __| | ___/   ____/   __|  |==='
+|        |/ _ \| '_ \ / _  |/ _ \____  \   (__|  ____|
+|  |\/|  | (_) | | | | (_| | (_) )     /\     |  |    
+|__|  |__|\___/|_| |_|\____|\___/_____/  \____|__|    
+
+ Version 1.0 alpha 10 "Gyokuro"                       
+ A program suite for O(N) SCF theory and ab initio MD 
+ Matt Challacombe, C.J. Tymczak,                      
+ Chee Kwan Gan, Karoly Nemeth, Valery Weber,          
+ Eric Schwegler and Anders Niklasson                  
+ Los Alamos National Laboratory                       
+ LA-CC-04-086 (formerly 01-2)                         
+ Compiled for IntelLinux.PG, executing on pink.lanl.gov
+ a i686 machine running Linux 2.4.24-cm32lnxi6smp
+
+ Current HDF :: /net/scratch1/knemeth/PBCquartz_4580.hdf
+<<Starting MondoSCF 10/26/04 @ 23:03:34>>
+<< Entering MakePFFT 10/26/04 @ 23:04:23>>
+ MakePFFT               :: WALL Sec = 0.11D+02, NProc = 1
+>-Exiting MakePFFT 10/26/04 @ 23:04:34-<
+<< Entering MakeS 10/26/04 @ 23:04:35>>
+ MakeS                  :: S CheckSum  = 0.8319213830546914D+01                                                                  
+ MakeS                  :: Parallel Statistics
+                     Imblnce = 0.91D-01
+                     MinTime = 0.50D-01
+                     AvgTime = 0.55D-01
+                     MaxTime = 0.60D-01
+ MakeS                  :: WALL Sec = 0.60D-01, NProc = 8
+>-Exiting MakeS 10/26/04 @ 23:04:35-<
+<< Entering BlokAInv 10/26/04 @ 23:04:37>>
+ BlokAInv               :: WALL (Sec,MFLOPS) = (0.20D-01, 14), NProc = 1
+ BlokAInv               :: Max(Z^t.A.Z-I)=0.82D-14, TrixThrsh=0.10D-04
+ BlokAInv               :: Z CheckSum  = 0.8722927292142288D+01
+ BlokAInv               :: WALL (Sec,MFLOPS) = (0.50D-01, 14), NProc = 1
+>-Exiting BlokAInv 10/26/04 @ 23:04:37-<
+<< Entering MakeT 10/26/04 @ 23:04:39>>
+ MakeT                  :: T CheckSum  = 0.1760797390220191D+03                                                                  
+ MakeT                  :: Parallel Statistics
+                     Imblnce = 0.00D+00
+                     MinTime = 0.13D+00
+                     AvgTime = 0.13D+00
+                     MaxTime = 0.13D+00
+ MakeT                  :: WALL Sec = 0.13D+00, NProc = 8
+>-Exiting MakeT 10/26/04 @ 23:04:39-<
+<< Entering P2Use 10/26/04 @ 23:04:40>>
+ P2Use                  :: P[0] CheckSum  = 0.9419294438221259D+01                                                               
+ P2Use                  :: Parallel Statistics
+                     Imblnce = 0.23D+00
+                     MinTime = 0.30D-01
+                     AvgTime = 0.32D-01
+                     MaxTime = 0.40D-01
+ P2Use                  :: WALL (Sec,MFLOPS) = (0.30D-01, 5), NProc = 8
+>-Exiting P2Use 10/26/04 @ 23:04:40-<
+<< Entering MakeRho 10/26/04 @ 23:04:41>>
+ MakeRho : Pruned Rho   :: dNel = 0.00D+00, kept 100% of distributions.
+ MakeRho : Moments      :: <r> = (0.35D+01, 0.79D+01, 0.11D+02), <r^2> = 0.98D+02
+ MakeRho                :: Rho CheckSum  = 0.2621726447327414D+04
+ MakeRho                :: Parallel Statistics
+                     Imblnce = 0.10D-09
+                     MinTime = 0.14D+00
+                     AvgTime = 0.14D+00
+                     MaxTime = 0.14D+00
+ MakeRho                :: WALL Sec = 0.14D+00, NProc = 8
+>-Exiting MakeRho 10/26/04 @ 23:04:41-<
+<< Entering QCTC 10/26/04 @ 23:04:42>>
+ QCTC                   :: J[0] CheckSum  = 0.2883617635936157D+03
+ QCTC : 3-D periodics   :: MxL = 7, PAC Cells = 277, MAC Cells = 851
+ QCTC : FF Energy       :: <FF> = -.7495686617214092D-02
+ QCTC                   :: Parallel Statistics
+                     Imblnce = 0.28D-12
+                     MinTime = 0.10D+03
+                     AvgTime = 0.10D+03
+                     MaxTime = 0.10D+03
+ QCTC                   :: WALL Sec = 0.10D+03, NProc = 8
+>-Exiting QCTC 10/26/04 @ 23:06:25-<
+<< Entering ONX2 10/26/04 @ 23:06:28>>
+ ONX2                   :: Kx[0] CheckSum  = 0.2331707207506177D+02
+ ONX2                   :: Parallel Statistics
+                     Imblnce = 0.22D-11
+                     MinTime = 0.13D+02
+                     AvgTime = 0.13D+02
+                     MaxTime = 0.13D+02
+ ONX2                   :: WALL Sec = 0.13D+02, NProc = 8
+>-Exiting ONX2 10/26/04 @ 23:06:41-<
+<< Entering FockNGrueven 10/26/04 @ 23:06:42>>
+ FockNGrueven           :: F[0] CheckSum  = 0.1418559635776523D+03                                                               
+ FockNGrueven           :: OrthoF[0] CheckSum  = 0.1278027907461334D+03                                                          
+ FockNGrueven           :: Parallel Statistics
+                     Imblnce = 0.18D+00
+                     MinTime = 0.40D-01
+                     AvgTime = 0.42D-01
+                     MaxTime = 0.50D-01
+ FockNGrueven           :: WALL (Sec,MFLOPS) = (0.40D-01, 10), NProc = 8
+>-Exiting FockNGrueven 10/26/04 @ 23:06:42-<
+<< Entering SP2 10/26/04 @ 23:06:43>>
+ SP2 : Pure 1           :: dE=0.10D+01, dP=0.28D+00, %Non0=0.16D+02
+ SP2 : Pure 2           :: dE=0.14D+00, dP=0.43D+00, %Non0=0.16D+02
+ SP2 : Pure 3           :: dE=0.10D+00, dP=0.62D+00, %Non0=0.16D+02
+ SP2 : Pure 4           :: dE=0.55D-01, dP=0.67D+00, %Non0=0.16D+02
+ SP2 : Pure 5           :: dE=0.22D-01, dP=0.48D+00, %Non0=0.16D+02
+ SP2 : Pure 6           :: dE=0.34D-01, dP=0.61D+00, %Non0=0.16D+02
+ SP2 : Pure 7           :: dE=0.12D-01, dP=0.40D+00, %Non0=0.16D+02
+ SP2 : Pure 8           :: dE=0.20D-01, dP=0.53D+00, %Non0=0.16D+02
+ SP2 : Pure 9           :: dE=0.50D-02, dP=0.33D+00, %Non0=0.16D+02
+ SP2 : Pure 10          :: dE=0.92D-02, dP=0.46D+00, %Non0=0.16D+02
+ SP2 : Pure 11          :: dE=0.15D-01, dP=0.48D+00, %Non0=0.16D+02
+ SP2 : Pure 12          :: dE=0.47D-02, dP=0.44D+00, %Non0=0.16D+02
+ SP2 : Pure 13          :: dE=0.83D-02, dP=0.45D+00, %Non0=0.16D+02
+ SP2 : Pure 14          :: dE=0.24D-02, dP=0.41D+00, %Non0=0.16D+02
+ SP2 : Pure 15          :: dE=0.54D-02, dP=0.40D+00, %Non0=0.16D+02
+ SP2 : Pure 16          :: dE=0.71D-03, dP=0.37D+00, %Non0=0.16D+02
+ SP2 : Pure 17          :: dE=0.33D-02, dP=0.32D+00, %Non0=0.16D+02
+ SP2 : Pure 18          :: dE=0.34D-03, dP=0.29D+00, %Non0=0.16D+02
+ SP2 : Pure 19          :: dE=0.16D-02, dP=0.19D+00, %Non0=0.16D+02
+ SP2 : Pure 20          :: dE=0.65D-03, dP=0.19D+00, %Non0=0.16D+02
+ SP2 : Pure 21          :: dE=0.38D-03, dP=0.84D-01, %Non0=0.16D+02
+ SP2 : Pure 22          :: dE=0.11D-02, dP=0.10D+00, %Non0=0.16D+02
+ SP2 : Pure 23          :: dE=0.10D-03, dP=0.49D-01, %Non0=0.16D+02
+ SP2 : Pure 24          :: dE=0.24D-03, dP=0.45D-01, %Non0=0.16D+02
+ SP2 : Pure 25          :: dE=0.36D-03, dP=0.39D-01, %Non0=0.16D+02
+ SP2 : Pure 26          :: dE=0.90D-04, dP=0.41D-01, %Non0=0.16D+02
+ SP2 : Pure 27          :: dE=0.57D-04, dP=0.20D-01, %Non0=0.16D+02
+ SP2 : Pure 28          :: dE=0.39D-04, dP=0.53D-02, %Non0=0.16D+02
+ SP2 : Pure 29          :: dE=0.12D-04, dP=0.58D-02, %Non0=0.16D+02
+ SP2 : Pure 30          :: dE=0.68D-06, dP=0.21D-03, %Non0=0.16D+02
+ SP2 : Pure 31          :: dE=0.53D-06, dP=0.11D-03, %Non0=0.16D+02
+ SP2 : Pure 32          :: dE=0.10D-08, dP=0.49D-06, %Non0=0.16D+02
+ SP2 : Hit dE increase  :: Tr{FP}=-.3914477423884129D+03, dNel = 0.28D-13
+ SP2                    :: 32 purification steps, 33 matrix multiplies
+ SP2                    :: Fractional occupation = 0.79D+00, ThrX=0.10D-04, %Non0s = 0.16D+02
+ SP2 : Max abs errors   :: dE=0.41D-06, dP=0.49D-06
+ SP2                    :: Rel dE=0.10D-08, ||dP||_F=0.28D-05
+ SP2                    :: OrthoP[1] CheckSum  = 0.6708203932498132D+01                                                          
+ SP2                    :: P[1] CheckSum  = 0.6869223062882226D+01                                                               
+ SP2                    :: Parallel Statistics
+                     Imblnce = 0.12D-01
+                     MinTime = 0.20D+00
+                     AvgTime = 0.21D+00
+                     MaxTime = 0.21D+00
+ SP2                    :: WALL (Sec,MFLOPS) = (0.21D+00, 120), NProc = 8
+>-Exiting SP2 10/26/04 @ 23:06:43-<
+<< Entering SCFStatus 10/26/04 @ 23:06:44>>
+ 
+= = = = = SCFCycle #0, Basis #1, Geometry #1 = = = = =
+
+       MaxDelD = 0.22D+01
+       <T>     = 0.13259436D+04
+       <V>     = -.24990480D+04
+       <HF>    = -.10913519D+03
+       <SCF>   = -1282.23957563
+
+ SCFStatus              :: Parallel Statistics
+                     Imblnce = 0.60D+00
+                     MinTime = 0.10D-01
+                     AvgTime = 0.13D-01
+                     MaxTime = 0.20D-01
+ SCFStatus              :: WALL (Sec,MFLOPS) = (0.10D-01, 112), NProc = 8
+>-Exiting SCFStatus 10/26/04 @ 23:06:44-<
+<< Entering MakeRho 10/26/04 @ 23:06:45>>
+ MakeRho : Pruned Rho   :: dNel = -.57D-13, kept 100% of distributions.
+ MakeRho : Moments      :: <r> = (-.35D+01, -.59D+01, -.77D+01), <r^2> = 0.27D+02
+ MakeRho                :: Rho CheckSum  = 0.2560240415964196D+04
+ MakeRho                :: Parallel Statistics
+                     Imblnce = 0.00D+00
+                     MinTime = 0.13D+00
+                     AvgTime = 0.13D+00
+                     MaxTime = 0.13D+00
+ MakeRho                :: WALL Sec = 0.13D+00, NProc = 8
+>-Exiting MakeRho 10/26/04 @ 23:06:45-<
+<< Entering QCTC 10/26/04 @ 23:06:46>>
+ QCTC                   :: J[1] CheckSum  = 0.2890051398225707D+03
+ QCTC : 3-D periodics   :: MxL = 7, PAC Cells = 277, MAC Cells = 851
+ QCTC : FF Energy       :: <FF> = -.3758683578025281D-02
+ QCTC                   :: Parallel Statistics
+                     Imblnce = 0.00D+00
+                     MinTime = 0.97D+02
+                     AvgTime = 0.97D+02
+                     MaxTime = 0.97D+02
+ QCTC                   :: WALL Sec = 0.97D+02, NProc = 8
+>-Exiting QCTC 10/26/04 @ 23:08:24-<
+<< Entering ONX2 10/26/04 @ 23:08:25>>
+ ONX2                   :: Kx[1] CheckSum  = 0.2358094712659217D+02
+ ONX2                   :: Parallel Statistics
+                     Imblnce = 0.91D-03
+                     MinTime = 0.96D+01
+                     AvgTime = 0.97D+01
+                     MaxTime = 0.97D+01
+ ONX2                   :: WALL Sec = 0.97D+01, NProc = 8
+>-Exiting ONX2 10/26/04 @ 23:08:34-<
+<< Entering FockNGrueven 10/26/04 @ 23:08:35>>
+ FockNGrueven           :: F[1] CheckSum  = 0.1424751087516590D+03                                                               
+ FockNGrueven           :: OrthoF[1] CheckSum  = 0.1283717163642687D+03                                                          
+ FockNGrueven           :: Parallel Statistics
+                     Imblnce = 0.14D+00
+                     MinTime = 0.30D-01
+                     AvgTime = 0.35D-01
+                     MaxTime = 0.40D-01
+ FockNGrueven           :: WALL (Sec,MFLOPS) = (0.40D-01, 10), NProc = 8
+>-Exiting FockNGrueven 10/26/04 @ 23:08:35-<
+<< Entering SP2 10/26/04 @ 23:08:35>>
+ SP2 : Pure 1           :: dE=0.10D+01, dP=0.29D+00, %Non0=0.16D+02
+ SP2 : Pure 2           :: dE=0.13D+00, dP=0.44D+00, %Non0=0.16D+02
+ SP2 : Pure 3           :: dE=0.97D-01, dP=0.63D+00, %Non0=0.16D+02
+ SP2 : Pure 4           :: dE=0.48D-01, dP=0.66D+00, %Non0=0.16D+02
+ SP2 : Pure 5           :: dE=0.13D-01, dP=0.47D+00, %Non0=0.16D+02
+ SP2 : Pure 6           :: dE=0.14D-03, dP=0.18D+00, %Non0=0.16D+02
+ SP2 : Pure 7           :: dE=0.99D-03, dP=0.31D+00, %Non0=0.16D+02
+ SP2 : Pure 8           :: dE=0.40D-02, dP=0.45D+00, %Non0=0.16D+02
+ SP2 : Pure 9           :: dE=0.11D-01, dP=0.51D+00, %Non0=0.16D+02
+ SP2 : Pure 10          :: dE=0.23D-02, dP=0.41D+00, %Non0=0.16D+02
+ SP2 : Pure 11          :: dE=0.11D-02, dP=0.46D+00, %Non0=0.16D+02
+ SP2 : Pure 12          :: dE=0.49D-02, dP=0.38D+00, %Non0=0.16D+02
+ SP2 : Pure 13          :: dE=0.29D-02, dP=0.42D+00, %Non0=0.16D+02
+ SP2 : Pure 14          :: dE=0.60D-02, dP=0.34D+00, %Non0=0.16D+02
+ SP2 : Pure 15          :: dE=0.44D-02, dP=0.33D+00, %Non0=0.16D+02
+ SP2 : Pure 16          :: dE=0.18D-03, dP=0.36D+00, %Non0=0.16D+02
+ SP2 : Pure 17          :: dE=0.34D-02, dP=0.24D+00, %Non0=0.16D+02
+ SP2 : Pure 18          :: dE=0.21D-03, dP=0.27D+00, %Non0=0.16D+02
+ SP2 : Pure 19          :: dE=0.18D-02, dP=0.13D+00, %Non0=0.16D+02
+ SP2 : Pure 20          :: dE=0.10D-03, dP=0.17D+00, %Non0=0.16D+02
+ SP2 : Pure 21          :: dE=0.64D-03, dP=0.49D-01, %Non0=0.16D+02
+ SP2 : Pure 22          :: dE=0.41D-04, dP=0.61D-01, %Non0=0.16D+02
+ SP2 : Pure 23          :: dE=0.16D-03, dP=0.12D-01, %Non0=0.16D+02
+ SP2 : Pure 24          :: dE=0.91D-05, dP=0.76D-02, %Non0=0.16D+02
+ SP2 : Pure 25          :: dE=0.23D-04, dP=0.22D-02, %Non0=0.16D+02
+ SP2 : Pure 26          :: dE=0.34D-06, dP=0.12D-03, %Non0=0.16D+02
+ SP2 : Pure 27          :: dE=0.71D-06, dP=0.68D-04, %Non0=0.16D+02
+ SP2 : Pure 28          :: dE=0.34D-09, dP=0.43D-07, %Non0=0.16D+02
+ SP2 : Met dE/dP goals  :: Tr{FP}=-.3842068377141807D+03, dNel = 0.00D+00
+ SP2                    :: 28 purification steps, 29 matrix multiplies
+ SP2                    :: Fractional occupation = 0.79D+00, ThrX=0.10D-04, %Non0s = 0.16D+02
+ SP2 : Max abs errors   :: dE=0.13D-06, dP=0.43D-07
+ SP2                    :: Rel dE=0.34D-09, ||dP||_F=0.24D-06
+ SP2                    :: OrthoP[2] CheckSum  = 0.6708203932500181D+01                                                          
+ SP2                    :: P[2] CheckSum  = 0.6763988977837245D+01                                                               
+ SP2                    :: Parallel Statistics
+                     Imblnce = 0.13D-01
+                     MinTime = 0.19D+00
+                     AvgTime = 0.20D+00
+                     MaxTime = 0.20D+00
+ SP2                    :: WALL (Sec,MFLOPS) = (0.20D+00, 111), NProc = 8
+>-Exiting SP2 10/26/04 @ 23:08:36-<
+<< Entering ODA 10/26/04 @ 23:08:36>>
+ IKPS_Error = 0.83841D-03
+ ODA :  Mix = 1.00000   :: <SCF> = -1299.77437622, d3 = -.11D-12
+ ODA                    :: Pao[2] CheckSum  = 0.6869223062882226D+01                                                             
+ ODA                    :: Fao[2] CheckSum  = 0.1424751087516590D+03                                                             
+ ODA                    :: For[2] CheckSum  = 0.1283717163642687D+03                                                             
+ ODA                    :: Parallel Statistics
+                     Imblnce = 0.45D-11
+                     MinTime = 0.33D+01
+                     AvgTime = 0.33D+01
+                     MaxTime = 0.33D+01
+ ODA                    :: WALL (Sec,MFLOPS) = (0.33D+01, 1), NProc = 8
+>-Exiting ODA 10/26/04 @ 23:08:40-<
+<< Entering SP2 10/26/04 @ 23:08:41>>
+ SP2 : Pure 1           :: dE=0.10D+01, dP=0.29D+00, %Non0=0.16D+02
+ SP2 : Pure 2           :: dE=0.13D+00, dP=0.44D+00, %Non0=0.16D+02
+ SP2 : Pure 3           :: dE=0.97D-01, dP=0.63D+00, %Non0=0.16D+02
+ SP2 : Pure 4           :: dE=0.48D-01, dP=0.66D+00, %Non0=0.16D+02
+ SP2 : Pure 5           :: dE=0.13D-01, dP=0.47D+00, %Non0=0.16D+02
+ SP2 : Pure 6           :: dE=0.14D-03, dP=0.18D+00, %Non0=0.16D+02
+ SP2 : Pure 7           :: dE=0.99D-03, dP=0.31D+00, %Non0=0.16D+02
+ SP2 : Pure 8           :: dE=0.40D-02, dP=0.45D+00, %Non0=0.16D+02
+ SP2 : Pure 9           :: dE=0.11D-01, dP=0.51D+00, %Non0=0.16D+02
+ SP2 : Pure 10          :: dE=0.23D-02, dP=0.41D+00, %Non0=0.16D+02
+ SP2 : Pure 11          :: dE=0.11D-02, dP=0.46D+00, %Non0=0.16D+02
+ SP2 : Pure 12          :: dE=0.49D-02, dP=0.38D+00, %Non0=0.16D+02
+ SP2 : Pure 13          :: dE=0.29D-02, dP=0.42D+00, %Non0=0.16D+02
+ SP2 : Pure 14          :: dE=0.60D-02, dP=0.34D+00, %Non0=0.16D+02
+ SP2 : Pure 15          :: dE=0.44D-02, dP=0.33D+00, %Non0=0.16D+02
+ SP2 : Pure 16          :: dE=0.18D-03, dP=0.36D+00, %Non0=0.16D+02
+ SP2 : Pure 17          :: dE=0.34D-02, dP=0.24D+00, %Non0=0.16D+02
+ SP2 : Pure 18          :: dE=0.21D-03, dP=0.27D+00, %Non0=0.16D+02
+ SP2 : Pure 19          :: dE=0.18D-02, dP=0.13D+00, %Non0=0.16D+02
+ SP2 : Pure 20          :: dE=0.10D-03, dP=0.17D+00, %Non0=0.16D+02
+ SP2 : Pure 21          :: dE=0.64D-03, dP=0.49D-01, %Non0=0.16D+02
+ SP2 : Pure 22          :: dE=0.41D-04, dP=0.61D-01, %Non0=0.16D+02
+ SP2 : Pure 23          :: dE=0.16D-03, dP=0.12D-01, %Non0=0.16D+02
+ SP2 : Pure 24          :: dE=0.91D-05, dP=0.76D-02, %Non0=0.16D+02
+ SP2 : Pure 25          :: dE=0.23D-04, dP=0.22D-02, %Non0=0.16D+02
+ SP2 : Pure 26          :: dE=0.34D-06, dP=0.12D-03, %Non0=0.16D+02
+ SP2 : Pure 27          :: dE=0.71D-06, dP=0.68D-04, %Non0=0.16D+02
+ SP2 : Pure 28          :: dE=0.34D-09, dP=0.43D-07, %Non0=0.16D+02
+ SP2 : Met dE/dP goals  :: Tr{FP}=-.3842068377141807D+03, dNel = 0.00D+00
+ SP2                    :: 28 purification steps, 29 matrix multiplies
+ SP2                    :: Fractional occupation = 0.79D+00, ThrX=0.10D-04, %Non0s = 0.16D+02
+ SP2 : Max abs errors   :: dE=0.13D-06, dP=0.43D-07
+ SP2                    :: Rel dE=0.34D-09, ||dP||_F=0.24D-06
+ SP2                    :: OrthoP[2] CheckSum  = 0.6708203932500181D+01                                                          
+ SP2                    :: P[2] CheckSum  = 0.6763988977837245D+01                                                               
+ SP2                    :: Parallel Statistics
+                     Imblnce = 0.27D-01
+                     MinTime = 0.18D+00
+                     AvgTime = 0.18D+00
+                     MaxTime = 0.19D+00
+ SP2                    :: WALL (Sec,MFLOPS) = (0.18D+00, 123), NProc = 8
+>-Exiting SP2 10/26/04 @ 23:08:41-<
+<< Entering SCFStatus 10/26/04 @ 23:08:42>>
+ 
+= = = = = SCFCycle #1, Basis #1, Geometry #1 = = = = =
+
+       DIISErr = 0.10D+01
+       MaxDelD = 0.28D+00
+       <T>     = 0.12908900D+04
+       <V>     = -.24767778D+04
+       <HF>    = -.11388661D+03
+       <SCF>   = -1299.77437622
+
+ SCFStatus              :: Parallel Statistics
+                     Imblnce = 0.22D-08
+                     MinTime = 0.20D-01
+                     AvgTime = 0.20D-01
+                     MaxTime = 0.20D-01
+ SCFStatus              :: WALL (Sec,MFLOPS) = (0.20D-01, 56), NProc = 8
+>-Exiting SCFStatus 10/26/04 @ 23:08:42-<
+<< Entering MakeRho 10/26/04 @ 23:08:43>>
+ MakeRho : Pruned Rho   :: dNel = -.57D-13, kept 100% of distributions.
+ MakeRho : Moments      :: <r> = (-.27D+01, -.44D+01, -.58D+01), <r^2> = 0.37D+02
+ MakeRho                :: Rho CheckSum  = 0.2559475936687973D+04
+ MakeRho                :: Parallel Statistics
+                     Imblnce = 0.34D-01
+                     MinTime = 0.14D+00
+                     AvgTime = 0.14D+00
+                     MaxTime = 0.15D+00
+ MakeRho                :: WALL Sec = 0.15D+00, NProc = 8
+>-Exiting MakeRho 10/26/04 @ 23:08:43-<
+<< Entering QCTC 10/26/04 @ 23:08:46>>
+ QCTC                   :: J[2] CheckSum  = 0.2889877478452519D+03
+ QCTC : 3-D periodics   :: MxL = 7, PAC Cells = 277, MAC Cells = 851
+ QCTC : FF Energy       :: <FF> = -.2113413670787622D-02
+ QCTC                   :: Parallel Statistics
+                     Imblnce = 0.25D-04
+                     MinTime = 0.99D+02
+                     AvgTime = 0.99D+02
+                     MaxTime = 0.99D+02
+ QCTC                   :: WALL Sec = 0.99D+02, NProc = 8
+>-Exiting QCTC 10/26/04 @ 23:10:25-<
+<< Entering ONX2 10/26/04 @ 23:10:26>>
+ ONX2                   :: Kx[2] CheckSum  = 0.2355939339994965D+02
+ ONX2                   :: Parallel Statistics
+                     Imblnce = 0.25D-03
+                     MinTime = 0.10D+02
+                     AvgTime = 0.10D+02
+                     MaxTime = 0.10D+02
+ ONX2                   :: WALL Sec = 0.10D+02, NProc = 8
+>-Exiting ONX2 10/26/04 @ 23:10:36-<
+<< Entering FockNGrueven 10/26/04 @ 23:10:37>>
+ FockNGrueven           :: F[2] CheckSum  = 0.1424560846893738D+03                                                               
+ FockNGrueven           :: OrthoF[2] CheckSum  = 0.1283599198941661D+03                                                          
+ FockNGrueven           :: Parallel Statistics
+                     Imblnce = 0.00D+00
+                     MinTime = 0.50D-01
+                     AvgTime = 0.50D-01
+                     MaxTime = 0.50D-01
+ FockNGrueven           :: WALL (Sec,MFLOPS) = (0.50D-01, 8), NProc = 8
+>-Exiting FockNGrueven 10/26/04 @ 23:10:37-<
+<< Entering SP2 10/26/04 @ 23:10:38>>
+ SP2 : Pure 1           :: dE=0.10D+01, dP=0.29D+00, %Non0=0.16D+02
+ SP2 : Pure 2           :: dE=0.14D+00, dP=0.44D+00, %Non0=0.16D+02
+ SP2 : Pure 3           :: dE=0.98D-01, dP=0.63D+00, %Non0=0.16D+02
+ SP2 : Pure 4           :: dE=0.48D-01, dP=0.67D+00, %Non0=0.16D+02
+ SP2 : Pure 5           :: dE=0.15D-01, dP=0.46D+00, %Non0=0.16D+02
+ SP2 : Pure 6           :: dE=0.26D-01, dP=0.60D+00, %Non0=0.16D+02
+ SP2 : Pure 7           :: dE=0.51D-02, dP=0.39D+00, %Non0=0.16D+02
+ SP2 : Pure 8           :: dE=0.11D-01, dP=0.51D+00, %Non0=0.16D+02
+ SP2 : Pure 9           :: dE=0.92D-03, dP=0.33D+00, %Non0=0.16D+02
+ SP2 : Pure 10          :: dE=0.95D-03, dP=0.44D+00, %Non0=0.16D+02
+ SP2 : Pure 11          :: dE=0.63D-02, dP=0.47D+00, %Non0=0.16D+02
+ SP2 : Pure 12          :: dE=0.24D-02, dP=0.41D+00, %Non0=0.16D+02
+ SP2 : Pure 13          :: dE=0.16D-02, dP=0.43D+00, %Non0=0.16D+02
+ SP2 : Pure 14          :: dE=0.38D-02, dP=0.36D+00, %Non0=0.16D+02
+ SP2 : Pure 15          :: dE=0.18D-03, dP=0.35D+00, %Non0=0.16D+02
+ SP2 : Pure 16          :: dE=0.41D-02, dP=0.29D+00, %Non0=0.16D+02
+ SP2 : Pure 17          :: dE=0.46D-03, dP=0.23D+00, %Non0=0.16D+02
+ SP2 : Pure 18          :: dE=0.32D-02, dP=0.20D+00, %Non0=0.16D+02
+ SP2 : Pure 19          :: dE=0.51D-03, dP=0.11D+00, %Non0=0.16D+02
+ SP2 : Pure 20          :: dE=0.17D-02, dP=0.11D+00, %Non0=0.16D+02
+ SP2 : Pure 21          :: dE=0.35D-03, dP=0.35D-01, %Non0=0.16D+02
+ SP2 : Pure 22          :: dE=0.86D-04, dP=0.29D-01, %Non0=0.16D+02
+ SP2 : Pure 23          :: dE=0.93D-04, dP=0.10D-01, %Non0=0.16D+02
+ SP2 : Pure 24          :: dE=0.59D-07, dP=0.16D-02, %Non0=0.16D+02
+ SP2 : Pure 25          :: dE=0.13D-04, dP=0.15D-02, %Non0=0.16D+02
+ SP2 : Pure 26          :: dE=0.11D-06, dP=0.16D-04, %Non0=0.16D+02
+ SP2 : Pure 27          :: dE=0.36D-07, dP=0.93D-05, %Non0=0.16D+02
+ SP2 : Pure 28          :: dE=0.26D-10, dP=0.33D-08, %Non0=0.16D+02
+ SP2 : Met dE/dP goals  :: Tr{FP}=-.3876653101479160D+03, dNel = 0.00D+00
+ SP2                    :: 28 purification steps, 29 matrix multiplies
+ SP2                    :: Fractional occupation = 0.79D+00, ThrX=0.10D-04, %Non0s = 0.16D+02
+ SP2 : Max abs errors   :: dE=0.10D-07, dP=0.33D-08
+ SP2                    :: Rel dE=0.26D-10, ||dP||_F=0.21D-07
+ SP2                    :: OrthoP[3] CheckSum  = 0.6708203932499933D+01                                                          
+ SP2                    :: P[3] CheckSum  = 0.6739043010620912D+01                                                               
+ SP2                    :: Parallel Statistics
+                     Imblnce = 0.00D+00
+                     MinTime = 0.19D+00
+                     AvgTime = 0.19D+00
+                     MaxTime = 0.19D+00
+ SP2                    :: WALL (Sec,MFLOPS) = (0.19D+00, 117), NProc = 8
+>-Exiting SP2 10/26/04 @ 23:10:38-<
+<< Entering ODA 10/26/04 @ 23:10:39>>
+ IKPS_Error = 0.31378D-03
+ ODA :  Mix = 1.00000   :: <SCF> = -1300.29232287, d3 = 0.00D+00
+ ODA                    :: Pao[3] CheckSum  = 0.6763988977837245D+01                                                             
+ ODA                    :: Fao[3] CheckSum  = 0.1424560846893738D+03                                                             
+ ODA                    :: For[3] CheckSum  = 0.1283599198941661D+03                                                             
+ ODA                    :: Por[3] CheckSum  = 0.6708203932500181D+01                                                             
+ ODA                    :: Parallel Statistics
+                     Imblnce = 0.73D-03
+                     MinTime = 0.34D+01
+                     AvgTime = 0.34D+01
+                     MaxTime = 0.35D+01
+ ODA                    :: WALL (Sec,MFLOPS) = (0.34D+01, 1), NProc = 8
+>-Exiting ODA 10/26/04 @ 23:10:43-<
+<< Entering SP2 10/26/04 @ 23:10:44>>
+ SP2 : Pure 1           :: dE=0.10D+01, dP=0.29D+00, %Non0=0.16D+02
+ SP2 : Pure 2           :: dE=0.14D+00, dP=0.44D+00, %Non0=0.16D+02
+ SP2 : Pure 3           :: dE=0.98D-01, dP=0.63D+00, %Non0=0.16D+02
+ SP2 : Pure 4           :: dE=0.48D-01, dP=0.67D+00, %Non0=0.16D+02
+ SP2 : Pure 5           :: dE=0.15D-01, dP=0.46D+00, %Non0=0.16D+02
+ SP2 : Pure 6           :: dE=0.26D-01, dP=0.60D+00, %Non0=0.16D+02
+ SP2 : Pure 7           :: dE=0.51D-02, dP=0.39D+00, %Non0=0.16D+02
+ SP2 : Pure 8           :: dE=0.11D-01, dP=0.51D+00, %Non0=0.16D+02
+ SP2 : Pure 9           :: dE=0.92D-03, dP=0.33D+00, %Non0=0.16D+02
+ SP2 : Pure 10          :: dE=0.95D-03, dP=0.44D+00, %Non0=0.16D+02
+ SP2 : Pure 11          :: dE=0.63D-02, dP=0.47D+00, %Non0=0.16D+02
+ SP2 : Pure 12          :: dE=0.24D-02, dP=0.41D+00, %Non0=0.16D+02
+ SP2 : Pure 13          :: dE=0.16D-02, dP=0.43D+00, %Non0=0.16D+02
+ SP2 : Pure 14          :: dE=0.38D-02, dP=0.36D+00, %Non0=0.16D+02
+ SP2 : Pure 15          :: dE=0.18D-03, dP=0.35D+00, %Non0=0.16D+02
+ SP2 : Pure 16          :: dE=0.41D-02, dP=0.29D+00, %Non0=0.16D+02
+ SP2 : Pure 17          :: dE=0.46D-03, dP=0.23D+00, %Non0=0.16D+02
+ SP2 : Pure 18          :: dE=0.32D-02, dP=0.20D+00, %Non0=0.16D+02
+ SP2 : Pure 19          :: dE=0.51D-03, dP=0.11D+00, %Non0=0.16D+02
+ SP2 : Pure 20          :: dE=0.17D-02, dP=0.11D+00, %Non0=0.16D+02
+ SP2 : Pure 21          :: dE=0.35D-03, dP=0.35D-01, %Non0=0.16D+02
+ SP2 : Pure 22          :: dE=0.86D-04, dP=0.29D-01, %Non0=0.16D+02
+ SP2 : Pure 23          :: dE=0.93D-04, dP=0.10D-01, %Non0=0.16D+02
+ SP2 : Pure 24          :: dE=0.59D-07, dP=0.16D-02, %Non0=0.16D+02
+ SP2 : Pure 25          :: dE=0.13D-04, dP=0.15D-02, %Non0=0.16D+02
+ SP2 : Pure 26          :: dE=0.11D-06, dP=0.16D-04, %Non0=0.16D+02
+ SP2 : Pure 27          :: dE=0.36D-07, dP=0.93D-05, %Non0=0.16D+02
+ SP2 : Pure 28          :: dE=0.26D-10, dP=0.33D-08, %Non0=0.16D+02
+ SP2 : Met dE/dP goals  :: Tr{FP}=-.3876653101479160D+03, dNel = 0.00D+00
+ SP2                    :: 28 purification steps, 29 matrix multiplies
+ SP2                    :: Fractional occupation = 0.79D+00, ThrX=0.10D-04, %Non0s = 0.16D+02
+ SP2 : Max abs errors   :: dE=0.10D-07, dP=0.33D-08
+ SP2                    :: Rel dE=0.26D-10, ||dP||_F=0.21D-07
+ SP2                    :: OrthoP[3] CheckSum  = 0.6708203932499933D+01                                                          
+ SP2                    :: P[3] CheckSum  = 0.6739043010620912D+01                                                               
+ SP2                    :: Parallel Statistics
+                     Imblnce = 0.29D-01
+                     MinTime = 0.26D+00
+                     AvgTime = 0.26D+00
+                     MaxTime = 0.27D+00
+ SP2                    :: WALL (Sec,MFLOPS) = (0.27D+00, 82), NProc = 8
+>-Exiting SP2 10/26/04 @ 23:10:44-<
+<< Entering SCFStatus 10/26/04 @ 23:10:45>>
+ 
+= = = = = SCFCycle #2, Basis #1, Geometry #1 = = = = =
+
+       DIISErr = 0.24D-02
+       MaxDelD = 0.44D-01
+       <T>     = 0.12873384D+04
+       <V>     = -.24749566D+04
+       <HF>    = -.11267411D+03
+       <SCF>   = -1300.29232287
+
+ SCFStatus              :: Parallel Statistics
+                     Imblnce = 0.60D+00
+                     MinTime = 0.10D-01
+                     AvgTime = 0.13D-01
+                     MaxTime = 0.20D-01
+ SCFStatus              :: WALL (Sec,MFLOPS) = (0.10D-01, 112), NProc = 8
+>-Exiting SCFStatus 10/26/04 @ 23:10:45-<
+<< Entering MakeRho 10/26/04 @ 23:10:46>>
+ MakeRho : Pruned Rho   :: dNel = -.28D-13, kept 100% of distributions.
+ MakeRho : Moments      :: <r> = (-.28D+01, -.47D+01, -.61D+01), <r^2> = 0.36D+02
+ MakeRho                :: Rho CheckSum  = 0.2558167010344279D+04
+ MakeRho                :: Parallel Statistics
+                     Imblnce = 0.00D+00
+                     MinTime = 0.13D+00
+                     AvgTime = 0.13D+00
+                     MaxTime = 0.13D+00
+ MakeRho                :: WALL Sec = 0.13D+00, NProc = 8
+>-Exiting MakeRho 10/26/04 @ 23:10:47-<
+<< Entering QCTC 10/26/04 @ 23:10:48>>
+ QCTC                   :: J[3] CheckSum  = 0.2890077721015255D+03
+ QCTC : 3-D periodics   :: MxL = 7, PAC Cells = 277, MAC Cells = 851
+ QCTC : FF Energy       :: <FF> = -.2282221916665979D-02
+ QCTC                   :: Parallel Statistics
+                     Imblnce = 0.25D-04
+                     MinTime = 0.99D+02
+                     AvgTime = 0.99D+02
+                     MaxTime = 0.99D+02
+ QCTC                   :: WALL Sec = 0.99D+02, NProc = 8
+>-Exiting QCTC 10/26/04 @ 23:12:27-<
+<< Entering ONX2 10/26/04 @ 23:12:28>>
+ ONX2                   :: Kx[3] CheckSum  = 0.2356169179316368D+02
+ ONX2                   :: Parallel Statistics
+                     Imblnce = 0.00D+00
+                     MinTime = 0.10D+02
+                     AvgTime = 0.10D+02
+                     MaxTime = 0.10D+02
+ ONX2                   :: WALL Sec = 0.10D+02, NProc = 8
+>-Exiting ONX2 10/26/04 @ 23:12:39-<
+<< Entering FockNGrueven 10/26/04 @ 23:12:40>>
+ FockNGrueven           :: F[3] CheckSum  = 0.1424747639634980D+03                                                               
+ FockNGrueven           :: OrthoF[3] CheckSum  = 0.1283761795539458D+03                                                          
+ FockNGrueven           :: Parallel Statistics
+                     Imblnce = 0.15D-08
+                     MinTime = 0.30D-01
+                     AvgTime = 0.30D-01
+                     MaxTime = 0.30D-01
+ FockNGrueven           :: WALL (Sec,MFLOPS) = (0.30D-01, 14), NProc = 8
+>-Exiting FockNGrueven 10/26/04 @ 23:12:41-<
+<< Entering SP2 10/26/04 @ 23:12:41>>
+ SP2 : Pure 1           :: dE=0.10D+01, dP=0.29D+00, %Non0=0.16D+02
+ SP2 : Pure 2           :: dE=0.14D+00, dP=0.44D+00, %Non0=0.16D+02
+ SP2 : Pure 3           :: dE=0.98D-01, dP=0.63D+00, %Non0=0.16D+02
+ SP2 : Pure 4           :: dE=0.48D-01, dP=0.67D+00, %Non0=0.16D+02
+ SP2 : Pure 5           :: dE=0.15D-01, dP=0.46D+00, %Non0=0.16D+02
+ SP2 : Pure 6           :: dE=0.26D-01, dP=0.60D+00, %Non0=0.16D+02
+ SP2 : Pure 7           :: dE=0.49D-02, dP=0.39D+00, %Non0=0.16D+02
+ SP2 : Pure 8           :: dE=0.11D-01, dP=0.51D+00, %Non0=0.16D+02
+ SP2 : Pure 9           :: dE=0.11D-02, dP=0.33D+00, %Non0=0.16D+02
+ SP2 : Pure 10          :: dE=0.71D-03, dP=0.44D+00, %Non0=0.16D+02
+ SP2 : Pure 11          :: dE=0.60D-02, dP=0.47D+00, %Non0=0.16D+02
+ SP2 : Pure 12          :: dE=0.26D-02, dP=0.41D+00, %Non0=0.16D+02
+ SP2 : Pure 13          :: dE=0.14D-02, dP=0.43D+00, %Non0=0.16D+02
+ SP2 : Pure 14          :: dE=0.39D-02, dP=0.36D+00, %Non0=0.16D+02
+ SP2 : Pure 15          :: dE=0.92D-04, dP=0.35D+00, %Non0=0.16D+02
+ SP2 : Pure 16          :: dE=0.41D-02, dP=0.29D+00, %Non0=0.16D+02
+ SP2 : Pure 17          :: dE=0.48D-03, dP=0.24D+00, %Non0=0.16D+02
+ SP2 : Pure 18          :: dE=0.31D-02, dP=0.20D+00, %Non0=0.16D+02
+ SP2 : Pure 19          :: dE=0.48D-03, dP=0.11D+00, %Non0=0.16D+02
+ SP2 : Pure 20          :: dE=0.17D-02, dP=0.11D+00, %Non0=0.16D+02
+ SP2 : Pure 21          :: dE=0.32D-03, dP=0.34D-01, %Non0=0.16D+02
+ SP2 : Pure 22          :: dE=0.10D-03, dP=0.32D-01, %Non0=0.16D+02
+ SP2 : Pure 23          :: dE=0.80D-04, dP=0.90D-02, %Non0=0.16D+02
+ SP2 : Pure 24          :: dE=0.30D-05, dP=0.20D-02, %Non0=0.16D+02
+ SP2 : Pure 25          :: dE=0.92D-05, dP=0.11D-02, %Non0=0.16D+02
+ SP2 : Pure 26          :: dE=0.38D-07, dP=0.11D-04, %Non0=0.16D+02
+ SP2 : Pure 27          :: dE=0.13D-06, dP=0.16D-04, %Non0=0.16D+02
+ SP2 : Pure 28          :: dE=0.13D-10, dP=0.17D-08, %Non0=0.16D+02
+ SP2 : Met dE/dP goals  :: Tr{FP}=-.3873554206849110D+03, dNel = 0.00D+00
+ SP2                    :: 28 purification steps, 29 matrix multiplies
+ SP2                    :: Fractional occupation = 0.79D+00, ThrX=0.10D-04, %Non0s = 0.16D+02
+ SP2 : Max abs errors   :: dE=0.52D-08, dP=0.17D-08
+ SP2                    :: Rel dE=0.13D-10, ||dP||_F=0.11D-07
+ SP2                    :: OrthoP[4] CheckSum  = 0.6708203932500075D+01                                                          
+ SP2                    :: P[4] CheckSum  = 0.6732931681263314D+01                                                               
+ SP2                    :: Parallel Statistics
+                     Imblnce = 0.35D-01
+                     MinTime = 0.21D+00
+                     AvgTime = 0.21D+00
+                     MaxTime = 0.22D+00
+ SP2                    :: WALL (Sec,MFLOPS) = (0.21D+00, 105), NProc = 8
+>-Exiting SP2 10/26/04 @ 23:12:41-<
+<< Entering ODA 10/26/04 @ 23:12:43>>
+ IKPS_Error = 0.30336D-03
+ ODA :  Mix = 1.00000   :: <SCF> = -1300.30696025, d3 = 0.45D-12
+ ODA                    :: Pao[4] CheckSum  = 0.6739043010620912D+01                                                             
+ ODA                    :: Fao[4] CheckSum  = 0.1424747639634980D+03                                                             
+ ODA                    :: For[4] CheckSum  = 0.1283761795539458D+03                                                             
+ ODA                    :: Por[4] CheckSum  = 0.6708203932499933D+01                                                             
+ ODA                    :: Parallel Statistics
+                     Imblnce = 0.71D-03
+                     MinTime = 0.35D+01
+                     AvgTime = 0.35D+01
+                     MaxTime = 0.35D+01
+ ODA                    :: WALL (Sec,MFLOPS) = (0.35D+01, 1), NProc = 8
+>-Exiting ODA 10/26/04 @ 23:12:46-<
+<< Entering SP2 10/26/04 @ 23:12:47>>
+ SP2 : Pure 1           :: dE=0.10D+01, dP=0.29D+00, %Non0=0.16D+02
+ SP2 : Pure 2           :: dE=0.14D+00, dP=0.44D+00, %Non0=0.16D+02
+ SP2 : Pure 3           :: dE=0.98D-01, dP=0.63D+00, %Non0=0.16D+02
+ SP2 : Pure 4           :: dE=0.48D-01, dP=0.67D+00, %Non0=0.16D+02
+ SP2 : Pure 5           :: dE=0.15D-01, dP=0.46D+00, %Non0=0.16D+02
+ SP2 : Pure 6           :: dE=0.26D-01, dP=0.60D+00, %Non0=0.16D+02
+ SP2 : Pure 7           :: dE=0.49D-02, dP=0.39D+00, %Non0=0.16D+02
+ SP2 : Pure 8           :: dE=0.11D-01, dP=0.51D+00, %Non0=0.16D+02
+ SP2 : Pure 9           :: dE=0.11D-02, dP=0.33D+00, %Non0=0.16D+02
+ SP2 : Pure 10          :: dE=0.71D-03, dP=0.44D+00, %Non0=0.16D+02
+ SP2 : Pure 11          :: dE=0.60D-02, dP=0.47D+00, %Non0=0.16D+02
+ SP2 : Pure 12          :: dE=0.26D-02, dP=0.41D+00, %Non0=0.16D+02
+ SP2 : Pure 13          :: dE=0.14D-02, dP=0.43D+00, %Non0=0.16D+02
+ SP2 : Pure 14          :: dE=0.39D-02, dP=0.36D+00, %Non0=0.16D+02
+ SP2 : Pure 15          :: dE=0.92D-04, dP=0.35D+00, %Non0=0.16D+02
+ SP2 : Pure 16          :: dE=0.41D-02, dP=0.29D+00, %Non0=0.16D+02
+ SP2 : Pure 17          :: dE=0.48D-03, dP=0.24D+00, %Non0=0.16D+02
+ SP2 : Pure 18          :: dE=0.31D-02, dP=0.20D+00, %Non0=0.16D+02
+ SP2 : Pure 19          :: dE=0.48D-03, dP=0.11D+00, %Non0=0.16D+02
+ SP2 : Pure 20          :: dE=0.17D-02, dP=0.11D+00, %Non0=0.16D+02
+ SP2 : Pure 21          :: dE=0.32D-03, dP=0.34D-01, %Non0=0.16D+02
+ SP2 : Pure 22          :: dE=0.10D-03, dP=0.32D-01, %Non0=0.16D+02
+ SP2 : Pure 23          :: dE=0.80D-04, dP=0.90D-02, %Non0=0.16D+02
+ SP2 : Pure 24          :: dE=0.30D-05, dP=0.20D-02, %Non0=0.16D+02
+ SP2 : Pure 25          :: dE=0.92D-05, dP=0.11D-02, %Non0=0.16D+02
+ SP2 : Pure 26          :: dE=0.38D-07, dP=0.11D-04, %Non0=0.16D+02
+ SP2 : Pure 27          :: dE=0.13D-06, dP=0.16D-04, %Non0=0.16D+02
+ SP2 : Pure 28          :: dE=0.13D-10, dP=0.17D-08, %Non0=0.16D+02
+ SP2 : Met dE/dP goals  :: Tr{FP}=-.3873554206849110D+03, dNel = 0.00D+00
+ SP2                    :: 28 purification steps, 29 matrix multiplies
+ SP2                    :: Fractional occupation = 0.79D+00, ThrX=0.10D-04, %Non0s = 0.16D+02
+ SP2 : Max abs errors   :: dE=0.52D-08, dP=0.17D-08
+ SP2                    :: Rel dE=0.13D-10, ||dP||_F=0.11D-07
+ SP2                    :: OrthoP[4] CheckSum  = 0.6708203932500075D+01                                                          
+ SP2                    :: P[4] CheckSum  = 0.6732931681263314D+01                                                               
+ SP2                    :: Parallel Statistics
+                     Imblnce = 0.14D-01
+                     MinTime = 0.17D+00
+                     AvgTime = 0.18D+00
+                     MaxTime = 0.18D+00
+ SP2                    :: WALL (Sec,MFLOPS) = (0.18D+00, 123), NProc = 8
+>-Exiting SP2 10/26/04 @ 23:12:47-<
+<< Entering SCFStatus 10/26/04 @ 23:12:48>>
+ 
+= = = = = SCFCycle #3, Basis #1, Geometry #1 = = = = =
+
+       DIISErr = 0.58D-03
+       MaxDelD = 0.14D-01
+       <T>     = 0.12871677D+04
+       <V>     = -.24746747D+04
+       <HF>    = -.11279998D+03
+       <SCF>   = -1300.30696025
+
+ SCFStatus              :: Parallel Statistics
+                     Imblnce = 0.17D-01
+                     MinTime = 0.14D+00
+                     AvgTime = 0.15D+00
+                     MaxTime = 0.15D+00
+ SCFStatus              :: WALL (Sec,MFLOPS) = (0.15D+00, 7), NProc = 8
+>-Exiting SCFStatus 10/26/04 @ 23:12:48-<
+<< Entering MakeRho 10/26/04 @ 23:12:49>>
+ MakeRho : Pruned Rho   :: dNel = -.28D-13, kept 100% of distributions.
+ MakeRho : Moments      :: <r> = (-.28D+01, -.47D+01, -.60D+01), <r^2> = 0.36D+02
+ MakeRho                :: Rho CheckSum  = 0.2557938831356693D+04
+ MakeRho                :: Parallel Statistics
+                     Imblnce = 0.20D-01
+                     MinTime = 0.12D+00
+                     AvgTime = 0.13D+00
+                     MaxTime = 0.13D+00
+ MakeRho                :: WALL Sec = 0.12D+00, NProc = 8
+>-Exiting MakeRho 10/26/04 @ 23:12:50-<
+<< Entering QCTC 10/26/04 @ 23:12:51>>
+ QCTC                   :: J[4] CheckSum  = 0.2890063337311917D+03
+ QCTC : 3-D periodics   :: MxL = 7, PAC Cells = 277, MAC Cells = 851
+ QCTC : FF Energy       :: <FF> = -.2278934222263918D-02
+ QCTC                   :: Parallel Statistics
+                     Imblnce = 0.76D-04
+                     MinTime = 0.99D+02
+                     AvgTime = 0.99D+02
+                     MaxTime = 0.99D+02
+ QCTC                   :: WALL Sec = 0.99D+02, NProc = 8
+>-Exiting QCTC 10/26/04 @ 23:14:29-<
+<< Entering ONX2 10/26/04 @ 23:14:32>>
+ ONX2                   :: Kx[4] CheckSum  = 0.2356139771430535D+02
+ ONX2                   :: Parallel Statistics
+                     Imblnce = 0.25D-03
+                     MinTime = 0.10D+02
+                     AvgTime = 0.10D+02
+                     MaxTime = 0.10D+02
+ ONX2                   :: WALL Sec = 0.10D+02, NProc = 8
+>-Exiting ONX2 10/26/04 @ 23:14:42-<
+<< Entering FockNGrueven 10/26/04 @ 23:14:44>>
+ FockNGrueven           :: F[4] CheckSum  = 0.1424732351566615D+03                                                               
+ FockNGrueven           :: OrthoF[4] CheckSum  = 0.1283748980110843D+03                                                          
+ FockNGrueven           :: Parallel Statistics
+                     Imblnce = 0.23D+00
+                     MinTime = 0.30D-01
+                     AvgTime = 0.33D-01
+                     MaxTime = 0.40D-01
+ FockNGrueven           :: WALL (Sec,MFLOPS) = (0.40D-01, 10), NProc = 8
+>-Exiting FockNGrueven 10/26/04 @ 23:14:44-<
+<< Entering SP2 10/26/04 @ 23:14:45>>
+ SP2 : Pure 1           :: dE=0.10D+01, dP=0.29D+00, %Non0=0.16D+02
+ SP2 : Pure 2           :: dE=0.14D+00, dP=0.44D+00, %Non0=0.16D+02
+ SP2 : Pure 3           :: dE=0.98D-01, dP=0.63D+00, %Non0=0.16D+02
+ SP2 : Pure 4           :: dE=0.48D-01, dP=0.67D+00, %Non0=0.16D+02
+ SP2 : Pure 5           :: dE=0.15D-01, dP=0.46D+00, %Non0=0.16D+02
+ SP2 : Pure 6           :: dE=0.26D-01, dP=0.60D+00, %Non0=0.16D+02
+ SP2 : Pure 7           :: dE=0.49D-02, dP=0.39D+00, %Non0=0.16D+02
+ SP2 : Pure 8           :: dE=0.11D-01, dP=0.51D+00, %Non0=0.16D+02
+ SP2 : Pure 9           :: dE=0.11D-02, dP=0.33D+00, %Non0=0.16D+02
+ SP2 : Pure 10          :: dE=0.73D-03, dP=0.44D+00, %Non0=0.16D+02
+ SP2 : Pure 11          :: dE=0.61D-02, dP=0.47D+00, %Non0=0.16D+02
+ SP2 : Pure 12          :: dE=0.26D-02, dP=0.41D+00, %Non0=0.16D+02
+ SP2 : Pure 13          :: dE=0.14D-02, dP=0.43D+00, %Non0=0.16D+02
+ SP2 : Pure 14          :: dE=0.39D-02, dP=0.36D+00, %Non0=0.16D+02
+ SP2 : Pure 15          :: dE=0.70D-04, dP=0.35D+00, %Non0=0.16D+02
+ SP2 : Pure 16          :: dE=0.42D-02, dP=0.29D+00, %Non0=0.16D+02
+ SP2 : Pure 17          :: dE=0.51D-03, dP=0.24D+00, %Non0=0.16D+02
+ SP2 : Pure 18          :: dE=0.32D-02, dP=0.20D+00, %Non0=0.16D+02
+ SP2 : Pure 19          :: dE=0.52D-03, dP=0.11D+00, %Non0=0.16D+02
+ SP2 : Pure 20          :: dE=0.17D-02, dP=0.11D+00, %Non0=0.16D+02
+ SP2 : Pure 21          :: dE=0.34D-03, dP=0.34D-01, %Non0=0.16D+02
+ SP2 : Pure 22          :: dE=0.91D-04, dP=0.30D-01, %Non0=0.16D+02
+ SP2 : Pure 23          :: dE=0.86D-04, dP=0.96D-02, %Non0=0.16D+02
+ SP2 : Pure 24          :: dE=0.15D-05, dP=0.18D-02, %Non0=0.16D+02
+ SP2 : Pure 25          :: dE=0.11D-04, dP=0.13D-02, %Non0=0.16D+02
+ SP2 : Pure 26          :: dE=0.66D-07, dP=0.11D-04, %Non0=0.16D+02
+ SP2 : Pure 27          :: dE=0.46D-07, dP=0.12D-04, %Non0=0.16D+02
+ SP2 : Pure 28          :: dE=0.12D-10, dP=0.15D-08, %Non0=0.16D+02
+ SP2 : Met dE/dP goals  :: Tr{FP}=-.3874037047526030D+03, dNel = 0.28D-13
+ SP2                    :: 28 purification steps, 29 matrix multiplies
+ SP2                    :: Fractional occupation = 0.79D+00, ThrX=0.10D-04, %Non0s = 0.16D+02
+ SP2 : Max abs errors   :: dE=0.45D-08, dP=0.15D-08
+ SP2                    :: Rel dE=0.12D-10, ||dP||_F=0.97D-08
+ SP2                    :: OrthoP[5] CheckSum  = 0.6708203932500074D+01                                                          
+ SP2                    :: P[5] CheckSum  = 0.6730813761863542D+01                                                               
+ SP2                    :: Parallel Statistics
+                     Imblnce = 0.45D-10
+                     MinTime = 0.32D+00
+                     AvgTime = 0.32D+00
+                     MaxTime = 0.32D+00
+ SP2                    :: WALL (Sec,MFLOPS) = (0.32D+00, 69), NProc = 8
+>-Exiting SP2 10/26/04 @ 23:14:46-<
+<< Entering ODA 10/26/04 @ 23:14:47>>
+ IKPS_Error = 0.35268D-03
+ ODA :  Mix = 1.00000   :: <SCF> = -1300.30798280, d3 = -.45D-12
+ ODA                    :: Pao[5] CheckSum  = 0.6732931681263314D+01                                                             
+ ODA                    :: Fao[5] CheckSum  = 0.1424732351566615D+03                                                             
+ ODA                    :: For[5] CheckSum  = 0.1283748980110843D+03                                                             
+ ODA                    :: Por[5] CheckSum  = 0.6708203932500075D+01                                                             
+ ODA                    :: Parallel Statistics
+                     Imblnce = 0.80D-11
+                     MinTime = 0.37D+01
+                     AvgTime = 0.37D+01
+                     MaxTime = 0.37D+01
+ ODA                    :: WALL (Sec,MFLOPS) = (0.37D+01, 1), NProc = 8
+>-Exiting ODA 10/26/04 @ 23:14:50-<
+<< Entering SP2 10/26/04 @ 23:14:51>>
+ SP2 : Pure 1           :: dE=0.10D+01, dP=0.29D+00, %Non0=0.16D+02
+ SP2 : Pure 2           :: dE=0.14D+00, dP=0.44D+00, %Non0=0.16D+02
+ SP2 : Pure 3           :: dE=0.98D-01, dP=0.63D+00, %Non0=0.16D+02
+ SP2 : Pure 4           :: dE=0.48D-01, dP=0.67D+00, %Non0=0.16D+02
+ SP2 : Pure 5           :: dE=0.15D-01, dP=0.46D+00, %Non0=0.16D+02
+ SP2 : Pure 6           :: dE=0.26D-01, dP=0.60D+00, %Non0=0.16D+02
+ SP2 : Pure 7           :: dE=0.49D-02, dP=0.39D+00, %Non0=0.16D+02
+ SP2 : Pure 8           :: dE=0.11D-01, dP=0.51D+00, %Non0=0.16D+02
+ SP2 : Pure 9           :: dE=0.11D-02, dP=0.33D+00, %Non0=0.16D+02
+ SP2 : Pure 10          :: dE=0.73D-03, dP=0.44D+00, %Non0=0.16D+02
+ SP2 : Pure 11          :: dE=0.61D-02, dP=0.47D+00, %Non0=0.16D+02
+ SP2 : Pure 12          :: dE=0.26D-02, dP=0.41D+00, %Non0=0.16D+02
+ SP2 : Pure 13          :: dE=0.14D-02, dP=0.43D+00, %Non0=0.16D+02
+ SP2 : Pure 14          :: dE=0.39D-02, dP=0.36D+00, %Non0=0.16D+02
+ SP2 : Pure 15          :: dE=0.70D-04, dP=0.35D+00, %Non0=0.16D+02
+ SP2 : Pure 16          :: dE=0.42D-02, dP=0.29D+00, %Non0=0.16D+02
+ SP2 : Pure 17          :: dE=0.51D-03, dP=0.24D+00, %Non0=0.16D+02
+ SP2 : Pure 18          :: dE=0.32D-02, dP=0.20D+00, %Non0=0.16D+02
+ SP2 : Pure 19          :: dE=0.52D-03, dP=0.11D+00, %Non0=0.16D+02
+ SP2 : Pure 20          :: dE=0.17D-02, dP=0.11D+00, %Non0=0.16D+02
+ SP2 : Pure 21          :: dE=0.34D-03, dP=0.34D-01, %Non0=0.16D+02
+ SP2 : Pure 22          :: dE=0.91D-04, dP=0.30D-01, %Non0=0.16D+02
+ SP2 : Pure 23          :: dE=0.86D-04, dP=0.96D-02, %Non0=0.16D+02
+ SP2 : Pure 24          :: dE=0.15D-05, dP=0.18D-02, %Non0=0.16D+02
+ SP2 : Pure 25          :: dE=0.11D-04, dP=0.13D-02, %Non0=0.16D+02
+ SP2 : Pure 26          :: dE=0.66D-07, dP=0.11D-04, %Non0=0.16D+02
+ SP2 : Pure 27          :: dE=0.46D-07, dP=0.12D-04, %Non0=0.16D+02
+ SP2 : Pure 28          :: dE=0.12D-10, dP=0.15D-08, %Non0=0.16D+02
+ SP2 : Met dE/dP goals  :: Tr{FP}=-.3874037047526030D+03, dNel = 0.00D+00
+ SP2                    :: 28 purification steps, 29 matrix multiplies
+ SP2                    :: Fractional occupation = 0.79D+00, ThrX=0.10D-04, %Non0s = 0.16D+02
+ SP2 : Max abs errors   :: dE=0.45D-08, dP=0.15D-08
+ SP2                    :: Rel dE=0.12D-10, ||dP||_F=0.97D-08
+ SP2                    :: OrthoP[5] CheckSum  = 0.6708203932500075D+01                                                          
+ SP2                    :: P[5] CheckSum  = 0.6730813761863544D+01                                                               
+ SP2                    :: Parallel Statistics
+                     Imblnce = 0.13D-01
+                     MinTime = 0.18D+00
+                     AvgTime = 0.19D+00
+                     MaxTime = 0.19D+00
+ SP2                    :: WALL (Sec,MFLOPS) = (0.18D+00, 123), NProc = 8
+>-Exiting SP2 10/26/04 @ 23:14:51-<
+<< Entering SCFStatus 10/26/04 @ 23:14:52>>
+ 
+= = = = = SCFCycle #4, Basis #1, Geometry #1 = = = = =
+
+       DIISErr = 0.17D-03
+       MaxDelD = 0.45D-02
+       <T>     = 0.12870846D+04
+       <V>     = -.24746068D+04
+       <HF>    = -.11278574D+03
+       <SCF>   = -1300.30798280
+
+ SCFStatus              :: Parallel Statistics
+                     Imblnce = 0.33D+00
+                     MinTime = 0.10D-01
+                     AvgTime = 0.15D-01
+                     MaxTime = 0.20D-01
+ SCFStatus              :: WALL (Sec,MFLOPS) = (0.20D-01, 56), NProc = 8
+>-Exiting SCFStatus 10/26/04 @ 23:14:52-<
+<< Entering MakeRho 10/26/04 @ 23:14:53>>
+ MakeRho : Pruned Rho   :: dNel = 0.00D+00, kept 100% of distributions.
+ MakeRho : Moments      :: <r> = (-.28D+01, -.47D+01, -.60D+01), <r^2> = 0.36D+02
+ MakeRho                :: Rho CheckSum  = 0.2557839119558170D+04
+ MakeRho                :: Parallel Statistics
+                     Imblnce = 0.86D-10
+                     MinTime = 0.34D+00
+                     AvgTime = 0.34D+00
+                     MaxTime = 0.34D+00
+ MakeRho                :: WALL Sec = 0.34D+00, NProc = 8
+>-Exiting MakeRho 10/26/04 @ 23:14:53-<
+<< Entering QCTC 10/26/04 @ 23:14:54>>
+ QCTC                   :: J[5] CheckSum  = 0.2890068597869186D+03
+ QCTC : 3-D periodics   :: MxL = 7, PAC Cells = 277, MAC Cells = 851
+ QCTC : FF Energy       :: <FF> = -.2278523400835835D-02
+ QCTC                   :: Parallel Statistics
+                     Imblnce = 0.76D-04
+                     MinTime = 0.99D+02
+                     AvgTime = 0.99D+02
+                     MaxTime = 0.99D+02
+ QCTC                   :: WALL Sec = 0.99D+02, NProc = 8
+>-Exiting QCTC 10/26/04 @ 23:16:33-<
+<< Entering ONX2 10/26/04 @ 23:16:35>>
+ ONX2                   :: Kx[5] CheckSum  = 0.2356144571633417D+02
+ ONX2                   :: Parallel Statistics
+                     Imblnce = 0.49D-03
+                     MinTime = 0.10D+02
+                     AvgTime = 0.10D+02
+                     MaxTime = 0.10D+02
+ ONX2                   :: WALL Sec = 0.10D+02, NProc = 8
+>-Exiting ONX2 10/26/04 @ 23:16:45-<
+<< Entering FockNGrueven 10/26/04 @ 23:16:47>>
+ FockNGrueven           :: F[5] CheckSum  = 0.1424737010745968D+03                                                               
+ FockNGrueven           :: OrthoF[5] CheckSum  = 0.1283753028704030D+03                                                          
+ FockNGrueven           :: Parallel Statistics
+                     Imblnce = 0.14D+00
+                     MinTime = 0.30D-01
+                     AvgTime = 0.35D-01
+                     MaxTime = 0.40D-01
+ FockNGrueven           :: WALL (Sec,MFLOPS) = (0.40D-01, 10), NProc = 8
+>-Exiting FockNGrueven 10/26/04 @ 23:16:47-<
+<< Entering SP2 10/26/04 @ 23:16:48>>
+ SP2 : Pure 1           :: dE=0.10D+01, dP=0.29D+00, %Non0=0.16D+02
+ SP2 : Pure 2           :: dE=0.14D+00, dP=0.44D+00, %Non0=0.16D+02
+ SP2 : Pure 3           :: dE=0.98D-01, dP=0.63D+00, %Non0=0.16D+02
+ SP2 : Pure 4           :: dE=0.48D-01, dP=0.67D+00, %Non0=0.16D+02
+ SP2 : Pure 5           :: dE=0.15D-01, dP=0.46D+00, %Non0=0.16D+02
+ SP2 : Pure 6           :: dE=0.26D-01, dP=0.60D+00, %Non0=0.16D+02
+ SP2 : Pure 7           :: dE=0.49D-02, dP=0.39D+00, %Non0=0.16D+02
+ SP2 : Pure 8           :: dE=0.11D-01, dP=0.51D+00, %Non0=0.16D+02
+ SP2 : Pure 9           :: dE=0.11D-02, dP=0.33D+00, %Non0=0.16D+02
+ SP2 : Pure 10          :: dE=0.72D-03, dP=0.44D+00, %Non0=0.16D+02
+ SP2 : Pure 11          :: dE=0.60D-02, dP=0.47D+00, %Non0=0.16D+02
+ SP2 : Pure 12          :: dE=0.26D-02, dP=0.41D+00, %Non0=0.16D+02
+ SP2 : Pure 13          :: dE=0.14D-02, dP=0.43D+00, %Non0=0.16D+02
+ SP2 : Pure 14          :: dE=0.39D-02, dP=0.36D+00, %Non0=0.16D+02
+ SP2 : Pure 15          :: dE=0.65D-04, dP=0.35D+00, %Non0=0.16D+02
+ SP2 : Pure 16          :: dE=0.42D-02, dP=0.29D+00, %Non0=0.16D+02
+ SP2 : Pure 17          :: dE=0.52D-03, dP=0.24D+00, %Non0=0.16D+02
+ SP2 : Pure 18          :: dE=0.32D-02, dP=0.20D+00, %Non0=0.16D+02
+ SP2 : Pure 19          :: dE=0.52D-03, dP=0.11D+00, %Non0=0.16D+02
+ SP2 : Pure 20          :: dE=0.17D-02, dP=0.11D+00, %Non0=0.16D+02
+ SP2 : Pure 21          :: dE=0.34D-03, dP=0.34D-01, %Non0=0.16D+02
+ SP2 : Pure 22          :: dE=0.90D-04, dP=0.30D-01, %Non0=0.16D+02
+ SP2 : Pure 23          :: dE=0.87D-04, dP=0.97D-02, %Non0=0.16D+02
+ SP2 : Pure 24          :: dE=0.14D-05, dP=0.18D-02, %Non0=0.16D+02
+ SP2 : Pure 25          :: dE=0.11D-04, dP=0.13D-02, %Non0=0.16D+02
+ SP2 : Pure 26          :: dE=0.68D-07, dP=0.12D-04, %Non0=0.16D+02
+ SP2 : Pure 27          :: dE=0.45D-07, dP=0.12D-04, %Non0=0.16D+02
+ SP2 : Pure 28          :: dE=0.12D-10, dP=0.16D-08, %Non0=0.16D+02
+ SP2 : Met dE/dP goals  :: Tr{FP}=-.3874003787776109D+03, dNel = 0.28D-13
+ SP2                    :: 28 purification steps, 29 matrix multiplies
+ SP2                    :: Fractional occupation = 0.79D+00, ThrX=0.10D-04, %Non0s = 0.16D+02
+ SP2 : Max abs errors   :: dE=0.48D-08, dP=0.16D-08
+ SP2                    :: Rel dE=0.12D-10, ||dP||_F=0.10D-07
+ SP2                    :: OrthoP[6] CheckSum  = 0.6708203932500073D+01                                                          
+ SP2                    :: P[6] CheckSum  = 0.6730064888357846D+01                                                               
+ SP2                    :: Parallel Statistics
+                     Imblnce = 0.00D+00
+                     MinTime = 0.19D+00
+                     AvgTime = 0.19D+00
+                     MaxTime = 0.19D+00
+ SP2                    :: WALL (Sec,MFLOPS) = (0.19D+00, 117), NProc = 8
+>-Exiting SP2 10/26/04 @ 23:16:49-<
+<< Entering ODA 10/26/04 @ 23:16:50>>
+ IKPS_Error = 0.83768D-04
+ ODA :  Mix = 1.00000   :: <SCF> = -1300.30810670, d3 = 0.45D-12
+ ODA                    :: Pao[6] CheckSum  = 0.6730813761863544D+01                                                             
+ ODA                    :: Fao[6] CheckSum  = 0.1424737010745968D+03                                                             
+ ODA                    :: For[6] CheckSum  = 0.1283753028704030D+03                                                             
+ ODA                    :: Por[6] CheckSum  = 0.6708203932500075D+01                                                             
+ ODA                    :: Parallel Statistics
+                     Imblnce = 0.32D-03
+                     MinTime = 0.39D+01
+                     AvgTime = 0.39D+01
+                     MaxTime = 0.39D+01
+ ODA                    :: WALL (Sec,MFLOPS) = (0.39D+01, 1), NProc = 8
+>-Exiting ODA 10/26/04 @ 23:16:54-<
+<< Entering SP2 10/26/04 @ 23:16:55>>
+ SP2 : Pure 1           :: dE=0.10D+01, dP=0.29D+00, %Non0=0.16D+02
+ SP2 : Pure 2           :: dE=0.14D+00, dP=0.44D+00, %Non0=0.16D+02
+ SP2 : Pure 3           :: dE=0.98D-01, dP=0.63D+00, %Non0=0.16D+02
+ SP2 : Pure 4           :: dE=0.48D-01, dP=0.67D+00, %Non0=0.16D+02
+ SP2 : Pure 5           :: dE=0.15D-01, dP=0.46D+00, %Non0=0.16D+02
+ SP2 : Pure 6           :: dE=0.26D-01, dP=0.60D+00, %Non0=0.16D+02
+ SP2 : Pure 7           :: dE=0.49D-02, dP=0.39D+00, %Non0=0.16D+02
+ SP2 : Pure 8           :: dE=0.11D-01, dP=0.51D+00, %Non0=0.16D+02
+ SP2 : Pure 9           :: dE=0.11D-02, dP=0.33D+00, %Non0=0.16D+02
+ SP2 : Pure 10          :: dE=0.72D-03, dP=0.44D+00, %Non0=0.16D+02
+ SP2 : Pure 11          :: dE=0.60D-02, dP=0.47D+00, %Non0=0.16D+02
+ SP2 : Pure 12          :: dE=0.26D-02, dP=0.41D+00, %Non0=0.16D+02
+ SP2 : Pure 13          :: dE=0.14D-02, dP=0.43D+00, %Non0=0.16D+02
+ SP2 : Pure 14          :: dE=0.39D-02, dP=0.36D+00, %Non0=0.16D+02
+ SP2 : Pure 15          :: dE=0.65D-04, dP=0.35D+00, %Non0=0.16D+02
+ SP2 : Pure 16          :: dE=0.42D-02, dP=0.29D+00, %Non0=0.16D+02
+ SP2 : Pure 17          :: dE=0.52D-03, dP=0.24D+00, %Non0=0.16D+02
+ SP2 : Pure 18          :: dE=0.32D-02, dP=0.20D+00, %Non0=0.16D+02
+ SP2 : Pure 19          :: dE=0.52D-03, dP=0.11D+00, %Non0=0.16D+02
+ SP2 : Pure 20          :: dE=0.17D-02, dP=0.11D+00, %Non0=0.16D+02
+ SP2 : Pure 21          :: dE=0.34D-03, dP=0.34D-01, %Non0=0.16D+02
+ SP2 : Pure 22          :: dE=0.90D-04, dP=0.30D-01, %Non0=0.16D+02
+ SP2 : Pure 23          :: dE=0.87D-04, dP=0.97D-02, %Non0=0.16D+02
+ SP2 : Pure 24          :: dE=0.14D-05, dP=0.18D-02, %Non0=0.16D+02
+ SP2 : Pure 25          :: dE=0.11D-04, dP=0.13D-02, %Non0=0.16D+02
+ SP2 : Pure 26          :: dE=0.68D-07, dP=0.12D-04, %Non0=0.16D+02
+ SP2 : Pure 27          :: dE=0.45D-07, dP=0.12D-04, %Non0=0.16D+02
+ SP2 : Pure 28          :: dE=0.12D-10, dP=0.16D-08, %Non0=0.16D+02
+ SP2 : Met dE/dP goals  :: Tr{FP}=-.3874003787776109D+03, dNel = 0.00D+00
+ SP2                    :: 28 purification steps, 29 matrix multiplies
+ SP2                    :: Fractional occupation = 0.79D+00, ThrX=0.10D-04, %Non0s = 0.16D+02
+ SP2 : Max abs errors   :: dE=0.48D-08, dP=0.16D-08
+ SP2                    :: Rel dE=0.12D-10, ||dP||_F=0.10D-07
+ SP2                    :: OrthoP[6] CheckSum  = 0.6708203932500071D+01                                                          
+ SP2                    :: P[6] CheckSum  = 0.6730064888357844D+01                                                               
+ SP2                    :: Parallel Statistics
+                     Imblnce = 0.00D+00
+                     MinTime = 0.19D+00
+                     AvgTime = 0.19D+00
+                     MaxTime = 0.19D+00
+ SP2                    :: WALL (Sec,MFLOPS) = (0.19D+00, 117), NProc = 8
+>-Exiting SP2 10/26/04 @ 23:16:55-<
+<< Entering SCFStatus 10/26/04 @ 23:16:56>>
+ 
+= = = = = SCFCycle #5, Basis #1, Geometry #1 = = = = =
+
+       DIISErr = 0.67D-04
+       MaxDelD = 0.21D-02
+       <T>     = 0.12870664D+04
+       <V>     = -.24745858D+04
+       <HF>    = -.11278865D+03
+       <SCF>   = -1300.30810670
+
+ SCFStatus              :: Parallel Statistics
+                     Imblnce = 0.33D+00
+                     MinTime = 0.10D-01
+                     AvgTime = 0.15D-01
+                     MaxTime = 0.20D-01
+ SCFStatus              :: WALL (Sec,MFLOPS) = (0.20D-01, 56), NProc = 8
+>-Exiting SCFStatus 10/26/04 @ 23:16:56-<
+ Turning on DIIS
+<< Entering MakeRho 10/26/04 @ 23:16:57>>
+ MakeRho : Pruned Rho   :: dNel = 0.14D-13, kept 100% of distributions.
+ MakeRho : Moments      :: <r> = (-.28D+01, -.47D+01, -.61D+01), <r^2> = 0.36D+02
+ MakeRho                :: Rho CheckSum  = 0.2557804359608042D+04
+ MakeRho                :: Parallel Statistics
+                     Imblnce = 0.13D-09
+                     MinTime = 0.22D+00
+                     AvgTime = 0.22D+00
+                     MaxTime = 0.22D+00
+ MakeRho                :: WALL Sec = 0.22D+00, NProc = 8
+>-Exiting MakeRho 10/26/04 @ 23:16:57-<
+<< Entering QCTC 10/26/04 @ 23:16:58>>
+ QCTC                   :: J[6] CheckSum  = 0.2890068738771708D+03
+ QCTC : 3-D periodics   :: MxL = 7, PAC Cells = 277, MAC Cells = 851
+ QCTC : FF Energy       :: <FF> = -.2280478134183878D-02
+ QCTC                   :: Parallel Statistics
+                     Imblnce = 0.38D-04
+                     MinTime = 0.99D+02
+                     AvgTime = 0.99D+02
+                     MaxTime = 0.99D+02
+ QCTC                   :: WALL Sec = 0.99D+02, NProc = 8
+>-Exiting QCTC 10/26/04 @ 23:18:37-<
+<< Entering ONX2 10/26/04 @ 23:18:38>>
+ ONX2                   :: Kx[6] CheckSum  = 0.2356144645625566D+02
+ ONX2                   :: Parallel Statistics
+                     Imblnce = 0.24D-03
+                     MinTime = 0.10D+02
+                     AvgTime = 0.10D+02
+                     MaxTime = 0.10D+02
+ ONX2                   :: WALL Sec = 0.10D+02, NProc = 8
+>-Exiting ONX2 10/26/04 @ 23:18:48-<
+<< Entering FockNGrueven 10/26/04 @ 23:18:49>>
+ FockNGrueven           :: F[6] CheckSum  = 0.1424736970674178D+03                                                               
+ FockNGrueven           :: OrthoF[6] CheckSum  = 0.1283753025342039D+03                                                          
+ FockNGrueven           :: Parallel Statistics
+                     Imblnce = 0.11D-09
+                     MinTime = 0.13D+00
+                     AvgTime = 0.13D+00
+                     MaxTime = 0.13D+00
+ FockNGrueven           :: WALL (Sec,MFLOPS) = (0.13D+00, 3), NProc = 8
+>-Exiting FockNGrueven 10/26/04 @ 23:18:49-<
+<< Entering DIIS 10/26/04 @ 23:18:50>>
+ DIIS                   :: Cond# = 0.77D+07, MIN(E) = 0.33D-06
+ DIIS : Pulay C1        :: DIISCo = -.52D-03, 0.55D-02, 0.56D-01,
+                                    -.24D+00, -.59D+00, 0.18D+01
+ DIIS                   :: F_DIIS[6] CheckSum  = 0.1283753665918867D+03                                                          
+ DIIS                   :: Parallel Statistics
+                     Imblnce = 0.23D-01
+                     MinTime = 0.10D+00
+                     AvgTime = 0.11D+00
+                     MaxTime = 0.11D+00
+ DIIS                   :: WALL (Sec,MFLOPS) = (0.10D+00, 210), NProc = 8
+>-Exiting DIIS 10/26/04 @ 23:18:50-<
+<< Entering SP2 10/26/04 @ 23:18:51>>
+ SP2 : Pure 1           :: dE=0.10D+01, dP=0.29D+00, %Non0=0.16D+02
+ SP2 : Pure 2           :: dE=0.14D+00, dP=0.44D+00, %Non0=0.16D+02
+ SP2 : Pure 3           :: dE=0.98D-01, dP=0.63D+00, %Non0=0.16D+02
+ SP2 : Pure 4           :: dE=0.48D-01, dP=0.67D+00, %Non0=0.16D+02
+ SP2 : Pure 5           :: dE=0.15D-01, dP=0.46D+00, %Non0=0.16D+02
+ SP2 : Pure 6           :: dE=0.26D-01, dP=0.60D+00, %Non0=0.16D+02
+ SP2 : Pure 7           :: dE=0.49D-02, dP=0.39D+00, %Non0=0.16D+02
+ SP2 : Pure 8           :: dE=0.11D-01, dP=0.51D+00, %Non0=0.16D+02
+ SP2 : Pure 9           :: dE=0.11D-02, dP=0.33D+00, %Non0=0.16D+02
+ SP2 : Pure 10          :: dE=0.72D-03, dP=0.44D+00, %Non0=0.16D+02
+ SP2 : Pure 11          :: dE=0.60D-02, dP=0.47D+00, %Non0=0.16D+02
+ SP2 : Pure 12          :: dE=0.26D-02, dP=0.41D+00, %Non0=0.16D+02
+ SP2 : Pure 13          :: dE=0.14D-02, dP=0.43D+00, %Non0=0.16D+02
+ SP2 : Pure 14          :: dE=0.39D-02, dP=0.36D+00, %Non0=0.16D+02
+ SP2 : Pure 15          :: dE=0.60D-04, dP=0.35D+00, %Non0=0.16D+02
+ SP2 : Pure 16          :: dE=0.42D-02, dP=0.29D+00, %Non0=0.16D+02
+ SP2 : Pure 17          :: dE=0.52D-03, dP=0.24D+00, %Non0=0.16D+02
+ SP2 : Pure 18          :: dE=0.32D-02, dP=0.20D+00, %Non0=0.16D+02
+ SP2 : Pure 19          :: dE=0.53D-03, dP=0.11D+00, %Non0=0.16D+02
+ SP2 : Pure 20          :: dE=0.17D-02, dP=0.11D+00, %Non0=0.16D+02
+ SP2 : Pure 21          :: dE=0.34D-03, dP=0.34D-01, %Non0=0.16D+02
+ SP2 : Pure 22          :: dE=0.88D-04, dP=0.30D-01, %Non0=0.16D+02
+ SP2 : Pure 23          :: dE=0.88D-04, dP=0.97D-02, %Non0=0.16D+02
+ SP2 : Pure 24          :: dE=0.12D-05, dP=0.17D-02, %Non0=0.16D+02
+ SP2 : Pure 25          :: dE=0.11D-04, dP=0.13D-02, %Non0=0.16D+02
+ SP2 : Pure 26          :: dE=0.72D-07, dP=0.12D-04, %Non0=0.16D+02
+ SP2 : Pure 27          :: dE=0.44D-07, dP=0.12D-04, %Non0=0.16D+02
+ SP2 : Pure 28          :: dE=0.13D-10, dP=0.17D-08, %Non0=0.16D+02
+ SP2 : Met dE/dP goals  :: Tr{FP}=-.3874011458702662D+03, dNel = 0.00D+00
+ SP2                    :: 28 purification steps, 29 matrix multiplies
+ SP2                    :: Fractional occupation = 0.79D+00, ThrX=0.10D-04, %Non0s = 0.16D+02
+ SP2 : Max abs errors   :: dE=0.51D-08, dP=0.17D-08
+ SP2                    :: Rel dE=0.13D-10, ||dP||_F=0.11D-07
+ SP2                    :: OrthoP[7] CheckSum  = 0.6708203932500068D+01                                                          
+ SP2                    :: P[7] CheckSum  = 0.6729560954634686D+01                                                               
+ SP2                    :: Parallel Statistics
+                     Imblnce = 0.27D-01
+                     MinTime = 0.28D+00
+                     AvgTime = 0.28D+00
+                     MaxTime = 0.29D+00
+ SP2                    :: WALL (Sec,MFLOPS) = (0.28D+00, 79), NProc = 8
+>-Exiting SP2 10/26/04 @ 23:18:51-<
+<< Entering SCFStatus 10/26/04 @ 23:18:52>>
+ 
+= = = = = SCFCycle #6, Basis #1, Geometry #1 = = = = =
+
+       DIISErr = 0.28D-04
+       MaxDelD = 0.17D-02
+       <T>     = 0.12870594D+04
+       <V>     = -.24745788D+04
+       <HF>    = -.11278874D+03
+       <SCF>   = -1300.30812709
+
+ SCFStatus              :: Parallel Statistics
+                     Imblnce = 0.60D+00
+                     MinTime = 0.10D-01
+                     AvgTime = 0.13D-01
+                     MaxTime = 0.20D-01
+ SCFStatus              :: WALL (Sec,MFLOPS) = (0.20D-01, 56), NProc = 8
+>-Exiting SCFStatus 10/26/04 @ 23:18:52-<
+<< Entering MakeRho 10/26/04 @ 23:18:52>>
+ MakeRho : Pruned Rho   :: dNel = -.14D-12, kept 100% of distributions.
+ MakeRho : Moments      :: <r> = (-.28D+01, -.47D+01, -.61D+01), <r^2> = 0.36D+02
+ MakeRho                :: Rho CheckSum  = 0.2557779458856824D+04
+ MakeRho                :: Parallel Statistics
+                     Imblnce = 0.29D-01
+                     MinTime = 0.26D+00
+                     AvgTime = 0.26D+00
+                     MaxTime = 0.27D+00
+ MakeRho                :: WALL Sec = 0.27D+00, NProc = 8
+>-Exiting MakeRho 10/26/04 @ 23:18:53-<
+<< Entering QCTC 10/26/04 @ 23:18:56>>
+ QCTC                   :: J[7] CheckSum  = 0.2890069396417084D+03
+ QCTC : 3-D periodics   :: MxL = 7, PAC Cells = 277, MAC Cells = 851
+ QCTC : FF Energy       :: <FF> = -.2280729415701759D-02
+ QCTC                   :: Parallel Statistics
+                     Imblnce = 0.76D-04
+                     MinTime = 0.99D+02
+                     AvgTime = 0.99D+02
+                     MaxTime = 0.99D+02
+ QCTC                   :: WALL Sec = 0.99D+02, NProc = 8
+>-Exiting QCTC 10/26/04 @ 23:20:35-<
+<< Entering ONX2 10/26/04 @ 23:20:37>>
+ ONX2                   :: Kx[7] CheckSum  = 0.2356145257977561D+02
+ ONX2                   :: Parallel Statistics
+                     Imblnce = 0.73D-03
+                     MinTime = 0.10D+02
+                     AvgTime = 0.10D+02
+                     MaxTime = 0.10D+02
+ ONX2                   :: WALL Sec = 0.10D+02, NProc = 8
+>-Exiting ONX2 10/26/04 @ 23:20:47-<
+<< Entering FockNGrueven 10/26/04 @ 23:20:48>>
+ FockNGrueven           :: F[7] CheckSum  = 0.1424737511063181D+03                                                               
+ FockNGrueven           :: OrthoF[7] CheckSum  = 0.1283753498612624D+03                                                          
+ FockNGrueven           :: Parallel Statistics
+                     Imblnce = 0.91D-01
+                     MinTime = 0.50D-01
+                     AvgTime = 0.55D-01
+                     MaxTime = 0.60D-01
+ FockNGrueven           :: WALL (Sec,MFLOPS) = (0.50D-01, 8), NProc = 8
+>-Exiting FockNGrueven 10/26/04 @ 23:20:48-<
+<< Entering DIIS 10/26/04 @ 23:20:49>>
+ DIIS                   :: Cond# = 0.25D+09, MIN(E) = 0.11D-07
+ DIIS : Pulay C1        :: DIISCo = 0.50D-04, -.18D-02, -.12D-01,
+                                    0.75D-01, 0.13D+00, -.51D+00, 0.13D+01
+ DIIS                   :: F_DIIS[7] CheckSum  = 0.1283753527822932D+03                                                          
+ DIIS                   :: Parallel Statistics
+                     Imblnce = 0.20D-01
+                     MinTime = 0.12D+00
+                     AvgTime = 0.13D+00
+                     MaxTime = 0.13D+00
+ DIIS                   :: WALL (Sec,MFLOPS) = (0.13D+00, 207), NProc = 8
+>-Exiting DIIS 10/26/04 @ 23:20:49-<
+<< Entering SP2 10/26/04 @ 23:20:50>>
+ SP2 : Pure 1           :: dE=0.10D+01, dP=0.29D+00, %Non0=0.16D+02
+ SP2 : Pure 2           :: dE=0.14D+00, dP=0.44D+00, %Non0=0.16D+02
+ SP2 : Pure 3           :: dE=0.98D-01, dP=0.63D+00, %Non0=0.16D+02
+ SP2 : Pure 4           :: dE=0.48D-01, dP=0.67D+00, %Non0=0.16D+02
+ SP2 : Pure 5           :: dE=0.15D-01, dP=0.46D+00, %Non0=0.16D+02
+ SP2 : Pure 6           :: dE=0.26D-01, dP=0.60D+00, %Non0=0.16D+02
+ SP2 : Pure 7           :: dE=0.49D-02, dP=0.39D+00, %Non0=0.16D+02
+ SP2 : Pure 8           :: dE=0.11D-01, dP=0.51D+00, %Non0=0.16D+02
+ SP2 : Pure 9           :: dE=0.11D-02, dP=0.33D+00, %Non0=0.16D+02
+ SP2 : Pure 10          :: dE=0.72D-03, dP=0.44D+00, %Non0=0.16D+02
+ SP2 : Pure 11          :: dE=0.60D-02, dP=0.47D+00, %Non0=0.16D+02
+ SP2 : Pure 12          :: dE=0.26D-02, dP=0.41D+00, %Non0=0.16D+02
+ SP2 : Pure 13          :: dE=0.14D-02, dP=0.43D+00, %Non0=0.16D+02
+ SP2 : Pure 14          :: dE=0.39D-02, dP=0.36D+00, %Non0=0.16D+02
+ SP2 : Pure 15          :: dE=0.60D-04, dP=0.35D+00, %Non0=0.16D+02
+ SP2 : Pure 16          :: dE=0.42D-02, dP=0.29D+00, %Non0=0.16D+02
+ SP2 : Pure 17          :: dE=0.52D-03, dP=0.24D+00, %Non0=0.16D+02
+ SP2 : Pure 18          :: dE=0.32D-02, dP=0.20D+00, %Non0=0.16D+02
+ SP2 : Pure 19          :: dE=0.53D-03, dP=0.11D+00, %Non0=0.16D+02
+ SP2 : Pure 20          :: dE=0.17D-02, dP=0.11D+00, %Non0=0.16D+02
+ SP2 : Pure 21          :: dE=0.34D-03, dP=0.34D-01, %Non0=0.16D+02
+ SP2 : Pure 22          :: dE=0.88D-04, dP=0.30D-01, %Non0=0.16D+02
+ SP2 : Pure 23          :: dE=0.88D-04, dP=0.97D-02, %Non0=0.16D+02
+ SP2 : Pure 24          :: dE=0.12D-05, dP=0.17D-02, %Non0=0.16D+02
+ SP2 : Pure 25          :: dE=0.11D-04, dP=0.13D-02, %Non0=0.16D+02
+ SP2 : Pure 26          :: dE=0.72D-07, dP=0.12D-04, %Non0=0.16D+02
+ SP2 : Pure 27          :: dE=0.44D-07, dP=0.12D-04, %Non0=0.16D+02
+ SP2 : Pure 28          :: dE=0.13D-10, dP=0.17D-08, %Non0=0.16D+02
+ SP2 : Met dE/dP goals  :: Tr{FP}=-.3874008545632458D+03, dNel = 0.28D-13
+ SP2                    :: 28 purification steps, 29 matrix multiplies
+ SP2                    :: Fractional occupation = 0.79D+00, ThrX=0.10D-04, %Non0s = 0.16D+02
+ SP2 : Max abs errors   :: dE=0.52D-08, dP=0.17D-08
+ SP2                    :: Rel dE=0.13D-10, ||dP||_F=0.11D-07
+ SP2                    :: OrthoP[8] CheckSum  = 0.6708203932500066D+01                                                          
+ SP2                    :: P[8] CheckSum  = 0.6729554636546931D+01                                                               
+ SP2                    :: Parallel Statistics
+                     Imblnce = 0.66D-02
+                     MinTime = 0.37D+00
+                     AvgTime = 0.38D+00
+                     MaxTime = 0.38D+00
+ SP2                    :: WALL (Sec,MFLOPS) = (0.38D+00, 58), NProc = 8
+>-Exiting SP2 10/26/04 @ 23:20:51-<
+<< Entering SCFStatus 10/26/04 @ 23:20:52>>
+ 
+= = = = = SCFCycle #7, Basis #1, Geometry #1 = = = = =
+
+       DIISErr = 0.19D-05
+       MaxDelD = 0.88D-04
+       <T>     = 0.12870553D+04
+       <V>     = -.24745744D+04
+       <HF>    = -.11278901D+03
+       <SCF>   = -1300.30813098
+
+ SCFStatus              :: Parallel Statistics
+                     Imblnce = 0.44D-09
+                     MinTime = 0.10D+00
+                     AvgTime = 0.10D+00
+                     MaxTime = 0.10D+00
+ SCFStatus              :: WALL (Sec,MFLOPS) = (0.10D+00, 11), NProc = 8
+>-Exiting SCFStatus 10/26/04 @ 23:20:52-<
+ Normal SCF convergence.
+<< Entering SForce 10/26/04 @ 23:20:54>>
+ SForce                 :: dS/dR CheckSum  = 0.1851613738001526D+00
+ SForce                 :: Parallel Statistics
+                     Imblnce = 0.26D-01
+                     MinTime = 0.19D+00
+                     AvgTime = 0.20D+00
+                     MaxTime = 0.20D+00
+ SForce                 :: WALL (Sec,MFLOPS) = (0.19D+00, 3), NProc = 8
+>-Exiting SForce 10/26/04 @ 23:20:55-<
+<< Entering TForce 10/26/04 @ 23:20:57>>
+ TForce                 :: dT/dR CheckSum  = 0.5646404155975554D+00
+ TForce                 :: Parallel Statistics
+                     Imblnce = 0.00D+00
+                     MinTime = 0.55D+00
+                     AvgTime = 0.55D+00
+                     MaxTime = 0.55D+00
+ TForce                 :: WALL Sec = 0.55D+00, NProc = 8
+>-Exiting TForce 10/26/04 @ 23:20:57-<
+<< Entering MakeRho 10/26/04 @ 23:20:58>>
+ MakeRho : Pruned Rho   :: dNel = 0.28D-13, kept 100% of distributions.
+ MakeRho : Moments      :: <r> = (-.17D+01, -.30D+01, -.38D+01), <r^2> = 0.45D+02
+ MakeRho                :: Rho CheckSum  = 0.2557778863420448D+04
+ MakeRho                :: Parallel Statistics
+                     Imblnce = 0.35D-01
+                     MinTime = 0.21D+00
+                     AvgTime = 0.21D+00
+                     MaxTime = 0.22D+00
+ MakeRho                :: WALL Sec = 0.21D+00, NProc = 8
+>-Exiting MakeRho 10/26/04 @ 23:20:58-<
+<< Entering JForce 10/26/04 @ 23:21:01>>
+ JForce                 :: dJ/dR CheckSum  = 0.3887938402867554D+00
+ JForce                 :: Parallel Statistics
+                     Imblnce = 0.14D-04
+                     MinTime = 0.18D+03
+                     AvgTime = 0.18D+03
+                     MaxTime = 0.18D+03
+ JForce                 :: WALL Sec = 0.18D+03, NProc = 8
+>-Exiting JForce 10/26/04 @ 23:24:04-<
+<< Entering GONX2 10/26/04 @ 23:24:05>>
+ GONX2                  :: dKx/dR[1] CheckSum  = 0.3460301858748642D+00
+ ComputeGK: TmMax=     51.44496892346069      , TmMin= 
+    19.78202596318442     
+ ComputeGK: Imbalance =    0.3593861616992440     
+ GONX2                  :: Parallel Statistics
+                     Imblnce = 0.56D-12
+                     MinTime = 0.52D+02
+                     AvgTime = 0.52D+02
+                     MaxTime = 0.52D+02
+ GONX2                  :: WALL Sec = 0.52D+02, NProc = 8
+>-Exiting GONX2 10/26/04 @ 23:24:57-<
+ GradNew%D= 
+   0.2058362532595331        0.1841111940308147        0.1263401479945012     
+   5.6378385641518793E-002   0.2706029406825777        0.1287667246227677     
+   5.5051106863598589E-002   9.8706095665969347E-002   0.2677889399807269     
+ XYZNew%D= 
+    9.263247823415023         0.000000000000000         0.000000000000000     
+   -4.631623911707512         8.022207936628320         0.000000000000000     
+    0.000000000000000         0.000000000000000         10.20225266713989     
+ before cleanconstr cartgrad = 
+   4.6774009406434640E-003   6.7346260502030573E-003   1.8209170936826780E-004
+  -9.9473532737741337E-004  -3.5465701741234228E-003  -6.6349500291771335E-003
+   2.8373536259480513E-003  -7.9692925392914411E-003   1.1614461071187296E-003
+   3.8501396676681733E-003  -1.2006096065044336E-003  -3.9372669367814805E-003
+  -6.3983519900134844E-004   4.9940424017436982E-003  -4.6968944139666320E-003
+  -3.7629444826138281E-003   2.5895770690550490E-003   3.2468321991670352E-003
+  -8.0443223926216429E-003  -1.9963495942365928E-003  -9.9119806110440578E-004
+   4.7646283897247450E-003   2.0600581000811342E-003   4.5910952435961052E-003
+  -2.9752764815693391E-003  -2.1411143039779534E-003   7.0861083752354208E-003
+   0.2058362532595331        0.1841111940308147        0.1263401479945012     
+   5.6378385641518793E-002   0.2706029406825777        0.1287667246227677     
+   5.5051106863598589E-002   9.8706095665969347E-002   0.2677889399807269     
+ after SYMMSTRESS cartgrad = 
+   4.6774009406434640E-003   6.7346260502030573E-003   1.8209170936826780E-004
+  -9.9473532737741337E-004  -3.5465701741234228E-003  -6.6349500291771335E-003
+   2.8373536259480513E-003  -7.9692925392914411E-003   1.1614461071187296E-003
+   3.8501396676681733E-003  -1.2006096065044336E-003  -3.9372669367814805E-003
+  -6.3983519900134844E-004   4.9940424017436982E-003  -4.6968944139666320E-003
+  -3.7629444826138281E-003   2.5895770690550490E-003   3.2468321991670352E-003
+  -8.0443223926216429E-003  -1.9963495942365928E-003  -9.9119806110440578E-004
+   4.7646283897247450E-003   2.0600581000811342E-003   4.5910952435961052E-003
+  -2.9752764815693391E-003  -2.1411143039779534E-003   7.0861083752354208E-003
+   0.2058362532595331        0.1841111940308147        0.1263401479945012     
+   5.6378385641518793E-002   0.2706029406825777        0.1287667246227677     
+   5.5051106863598589E-002   9.8706095665969347E-002   0.2677889399807269     
+ after cleanconstr cartgrad = 
+   4.6774009406434640E-003   6.7346260502030573E-003   1.8209170936826780E-004
+  -9.9473532737741337E-004  -3.5465701741234228E-003  -6.6349500291771335E-003
+   2.8373536259480513E-003  -7.9692925392914411E-003   1.1614461071187296E-003
+   3.8501396676681733E-003  -1.2006096065044336E-003  -3.9372669367814805E-003
+  -6.3983519900134844E-004   4.9940424017436982E-003  -4.6968944139666320E-003
+  -3.7629444826138281E-003   2.5895770690550490E-003   3.2468321991670352E-003
+  -8.0443223926216429E-003  -1.9963495942365928E-003  -9.9119806110440578E-004
+   4.7646283897247450E-003   2.0600581000811342E-003   4.5910952435961052E-003
+  -2.9752764815693391E-003  -2.1411143039779534E-003   7.0861083752354208E-003
+   0.2058362532595331        0.1841111940308147        0.1263401479945012     
+   5.6378385641518793E-002   0.2706029406825777        0.1287667246227677     
+   5.5051106863598589E-002   9.8706095665969347E-002   0.2677889399807269     
+ after transloff cartgrad = 
+   4.7093555249989238E-003   6.7874741165420467E-003   1.8128457676205617E-004
+  -9.6278074302195353E-004  -3.4937221077844334E-003  -6.6357571617833457E-003
+   2.8693082103035113E-003  -7.9164444729524526E-003   1.1606389745125179E-003
+   3.8820942520236329E-003  -1.1477615401654442E-003  -3.9380740693876923E-003
+  -6.0788061464588861E-004   5.0468904680826876E-003  -4.6977015465728442E-003
+  -3.7309898982583682E-003   2.6424251353940384E-003   3.2460250665608230E-003
+  -8.0123678082661840E-003  -1.9435015278976033E-003  -9.9200519371061766E-004
+   4.7965829740802048E-003   2.1129061664201241E-003   4.5902881109898930E-003
+  -2.9433218972138793E-003  -2.0882662376389636E-003   7.0853012426292068E-003
+   0.2058362532595331        0.1841111940308147        0.1263401479945012     
+   5.6378385641518793E-002   0.2706029406825777        0.1287667246227677     
+   5.5051106863598589E-002   9.8706095665969347E-002   0.2677889399807269     
+PRot=   0.002%
+ after rotoff cartgrad = 
+   4.7093555249989238E-003   6.7874741165420467E-003   1.8128457676205617E-004
+  -9.6278074302195353E-004  -3.4937221077844334E-003  -6.6357571617833457E-003
+   2.8693082103035113E-003  -7.9164444729524526E-003   1.1606389745125179E-003
+   3.8820942520236329E-003  -1.1477615401654442E-003  -3.9380740693876923E-003
+  -6.0788061464588861E-004   5.0468904680826876E-003  -4.6977015465728442E-003
+  -3.7309898982583682E-003   2.6424251353940384E-003   3.2460250665608230E-003
+  -8.0123678082661840E-003  -1.9435015278976033E-003  -9.9200519371061766E-004
+   4.7965829740802048E-003   2.1129061664201241E-003   4.5902881109898930E-003
+  -2.9433218972138793E-003  -2.0882662376389636E-003   7.0853012426292068E-003
+   0.2058362532595331        0.1841188892810081        0.1255191928758384     
+   5.6371721359362814E-002   0.2705990930574810        0.1277835774163276     
+   5.5955281264266894E-002   0.1004784396510543        0.2677889399807269     
+ NUMBER OF FRAGMENTS OBSERVED=             7
+ Sparsity of B=  25.00 % # of SpB%NNon0       432
+Sparsity of Gc=  48.61 % # of  Gc%NNon0       630
+Sparsity of Ch=  52.86 % # of  Ch%NNon0       333
+ Internals at step #1
+INTERNAL COORDINATES
+       DEFINITION       ATOMS_INVOLVED      VALUE        CONSTRAINT    ACTIVE
+      1  STRE          1    4    0    0      1.615116    F    0.000000    T
+      2  STRE          1    9    0    0      1.608128    F    0.000000    T
+      3  STRE          4    7    0    0      1.608088    F    0.000000    T
+      4  STRE          7    9    0    0      1.615797    F    0.000000    T
+                0 1 0   0 0 0   0 0 0   0 0 0
+      5  STRE          3    8    0    0      1.615116    F    0.000000    T
+      6  STRE          3    6    0    0      1.607462    F    0.000000    T
+      7  STRE          7    8    0    0      1.607848    F    0.000000    T
+                0 1 0   0 0 0   0 0 0   0 0 0
+      8  STRE          5    7    0    0      1.615037    F    0.000000    T
+      9  STRE          3    5    0    0      1.608095    F    0.000000    T
+                1 0 0   0 0 0   0 0 0   0 0 0
+     10  STRE          1    6    0    0      1.616058    F    0.000000    T
+                0 0 1   0 0 0   0 0 0   0 0 0
+     11  STRE          2    3    0    0      1.616142    F    0.000000    T
+                0 0 0   1 0 0   0 0 0   0 0 0
+     12  STRE          1    2    0    0      1.607384    F    0.000000    T
+                0 0 1   0 0 0   0 0 0   0 0 0
+     13  BEND          4    1    6    0    109.331744    F    0.000000    T
+                0 0 0   0 0 0   0 0-1   0 0 0
+     14  BEND          4    1    9    0    108.587583    F    0.000000    T
+     15  BEND          2    1    4    0    110.568206    F    0.000000    T
+                0 0-1   0 0 0   0 0 0   0 0 0
+     16  BEND          6    1    9    0    110.526466    F    0.000000    T
+                0 0-1   0 0 0   0 0 0   0 0 0
+     17  BEND          2    1    6    0    108.591106    F    0.000000    T
+                0 0-1   0 0 0   0 0-1   0 0 0
+     18  BEND          2    1    9    0    109.234385    F    0.000000    T
+                0 0-1   0 0 0   0 0 0   0 0 0
+     19  BEND          1    2    3    0    142.598569    F    0.000000    T
+                0 0 1   0 0 0   1 0 0   0 0 0
+     20  BEND          5    3    8    0    108.587854    F    0.000000    T
+               -1 0 0   0 0 0   0 0 0   0 0 0
+     21  BEND          2    3    8    0    109.336027    F    0.000000    T
+               -1 0 0   0 0 0   0 0 0   0 0 0
+     22  BEND          6    3    8    0    110.572688    F    0.000000    T
+     23  BEND          2    3    5    0    110.532325    F    0.000000    T
+               -1 0 0   0 0 0  -1 0 0   0 0 0
+     24  BEND          5    3    6    0    109.233338    F    0.000000    T
+               -1 0 0   0 0 0   0 0 0   0 0 0
+     25  BEND          2    3    6    0    108.577393    F    0.000000    T
+               -1 0 0   0 0 0   0 0 0   0 0 0
+     26  BEND          1    4    7    0    142.622088    F    0.000000    T
+     27  BEND          3    5    7    0    142.614604    F    0.000000    T
+                1 0 0   0 0 0   0 0 0   0 0 0
+     28  BEND          1    6    3    0    142.608101    F    0.000000    T
+                0 0 1   0 0 0   0 0 0   0 0 0
+     29  BEND          4    7    9    0    108.534756    F    0.000000    T
+                0 0 0   0 0 0   0-1 0   0 0 0
+     30  BEND          4    7    8    0    109.238496    F    0.000000    T
+                0 0 0   0 0 0   0-1 0   0 0 0
+     31  BEND          4    7    5    0    110.573906    F    0.000000    T
+     32  BEND          8    7    9    0    110.547140    F    0.000000    T
+                0-1 0   0 0 0   0-1 0   0 0 0
+     33  BEND          5    7    9    0    109.357051    F    0.000000    T
+                0 0 0   0 0 0   0-1 0   0 0 0
+     34  BEND          5    7    8    0    108.588560    F    0.000000    T
+                0 0 0   0 0 0   0-1 0   0 0 0
+     35  BEND          3    8    7    0    142.597631    F    0.000000    T
+                0 0 0   0 0 0   0 1 0   0 0 0
+     36  BEND          1    9    7    0    142.611509    F    0.000000    T
+                0 0 0   0 0 0   0 1 0   0 0 0
+     37  TORS          7    4    1    9   -134.189621    F    0.000000    T
+     38  TORS          4    1    9    7    -28.748913    F    0.000000    T
+                0 0 0   0 0 0   0 0 0   0 1 0
+     39  TORS          1    4    7    9    -28.892038    F    0.000000    T
+                0 0 0   0 0 0   0 0 0   0-1 0
+     40  TORS          1    9    7    4   -134.260315    F    0.000000    T
+                0 0 0   0 0 0   0 1 0   0 1 0
+     41  TORS          5    3    8    7   -134.227696    F    0.000000    T
+               -1 0 0   0 0 0   0 0 0   0 1 0
+     42  TORS          1    6    3    2    -28.848752    F    0.000000    T
+                0 0 1   0 0 0   0 0 0  -1 0 0
+     43  TORS          3    8    7    5    -28.842050    F    0.000000    T
+                0 0 0   0 0 0   0 1 0   0 1 0
+     44  TORS          3    5    7    8   -134.240290    F    0.000000    T
+                1 0 0   0 0 0   0 0 0   0-1 0
+     45  TORS          7    5    3    8    -28.792194    F    0.000000    T
+                0 0 0   0 0 0   1 0 0   1 0 0
+     46  TORS          2    1    6    3   -134.189387    F    0.000000    T
+                0 0 0   0 0 1   0 0 0   0 0 0
+     47  TORS          1    2    3    6   -134.202271    F    0.000000    T
+                0 0 1   0 0 0   1 0 0   1 0 0
+     48  TORS          3    2    1    6    -28.832477    F    0.000000    T
+                1 0 0   0 0 0   0 0 1   0 0 0
+LATTICE  STRE_A                              4.901900
+LATTICE  STRE_B                              4.901900
+LATTICE  STRE_C                              5.398800
+LATTICE  ALPHA                              90.000000
+LATTICE  BETA                               90.000000
+LATTICE  GAMMA                             120.000000
+Gradient transformation, No. Int. Coords=      48
+Grad Trf, step=   1 MaxChange=     0.008277 ChangeNorm=     0.003200
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   2 steps
+ Internal Coordinate forces
+INTERNAL COORDINATES
+       DEFINITION       ATOMS_INVOLVED      VALUE        CONSTRAINT    ACTIVE
+      1  STRE          1    4    0    0     -0.000516    F    0.000000    T
+      2  STRE          1    9    0    0      0.000007    F    0.000000    T
+      3  STRE          4    7    0    0     -0.000901    F    0.000000    T
+      4  STRE          7    9    0    0     -0.001812    F    0.000000    T
+                0 1 0   0 0 0   0 0 0   0 0 0
+      5  STRE          3    8    0    0     -0.000825    F    0.000000    T
+      6  STRE          3    6    0    0     -0.001132    F    0.000000    T
+      7  STRE          7    8    0    0     -0.001460    F    0.000000    T
+                0 1 0   0 0 0   0 0 0   0 0 0
+      8  STRE          5    7    0    0     -0.000852    F    0.000000    T
+      9  STRE          3    5    0    0     -0.001378    F    0.000000    T
+                1 0 0   0 0 0   0 0 0   0 0 0
+     10  STRE          1    6    0    0     -0.000178    F    0.000000    T
+                0 0 1   0 0 0   0 0 0   0 0 0
+     11  STRE          2    3    0    0     -0.001670    F    0.000000    T
+                0 0 0   1 0 0   0 0 0   0 0 0
+     12  STRE          1    2    0    0     -0.000272    F    0.000000    T
+                0 0 1   0 0 0   0 0 0   0 0 0
+     13  BEND          4    1    6    0     -0.322493    F    0.000000    T
+                0 0 0   0 0 0   0 0-1   0 0 0
+     14  BEND          4    1    9    0     -0.086819    F    0.000000    T
+     15  BEND          2    1    4    0      0.009766    F    0.000000    T
+                0 0-1   0 0 0   0 0 0   0 0 0
+     16  BEND          6    1    9    0      0.004049    F    0.000000    T
+                0 0-1   0 0 0   0 0 0   0 0 0
+     17  BEND          2    1    6    0     -0.077210    F    0.000000    T
+                0 0-1   0 0 0   0 0-1   0 0 0
+     18  BEND          2    1    9    0      0.474214    F    0.000000    T
+                0 0-1   0 0 0   0 0 0   0 0 0
+     19  BEND          1    2    3    0      0.276395    F    0.000000    T
+                0 0 1   0 0 0   1 0 0   0 0 0
+     20  BEND          5    3    8    0     -0.039967    F    0.000000    T
+               -1 0 0   0 0 0   0 0 0   0 0 0
+     21  BEND          2    3    8    0     -0.319385    F    0.000000    T
+               -1 0 0   0 0 0   0 0 0   0 0 0
+     22  BEND          6    3    8    0     -0.020855    F    0.000000    T
+     23  BEND          2    3    5    0      0.003145    F    0.000000    T
+               -1 0 0   0 0 0  -1 0 0   0 0 0
+     24  BEND          5    3    6    0      0.431671    F    0.000000    T
+               -1 0 0   0 0 0   0 0 0   0 0 0
+     25  BEND          2    3    6    0     -0.053635    F    0.000000    T
+               -1 0 0   0 0 0   0 0 0   0 0 0
+     26  BEND          1    4    7    0      0.256405    F    0.000000    T
+     27  BEND          3    5    7    0      0.286600    F    0.000000    T
+                1 0 0   0 0 0   0 0 0   0 0 0
+     28  BEND          1    6    3    0      0.252391    F    0.000000    T
+                0 0 1   0 0 0   0 0 0   0 0 0
+     29  BEND          4    7    9    0     -0.060477    F    0.000000    T
+                0 0 0   0 0 0   0-1 0   0 0 0
+     30  BEND          4    7    8    0      0.438195    F    0.000000    T
+                0 0 0   0 0 0   0-1 0   0 0 0
+     31  BEND          4    7    5    0     -0.019161    F    0.000000    T
+     32  BEND          8    7    9    0      0.004601    F    0.000000    T
+                0-1 0   0 0 0   0-1 0   0 0 0
+     33  BEND          5    7    9    0     -0.323143    F    0.000000    T
+                0 0 0   0 0 0   0-1 0   0 0 0
+     34  BEND          5    7    8    0     -0.038863    F    0.000000    T
+                0 0 0   0 0 0   0-1 0   0 0 0
+     35  BEND          3    8    7    0      0.285315    F    0.000000    T
+                0 0 0   0 0 0   0 1 0   0 0 0
+     36  BEND          1    9    7    0      0.284282    F    0.000000    T
+                0 0 0   0 0 0   0 1 0   0 0 0
+     37  TORS          7    4    1    9     -0.003239    F    0.000000    T
+     38  TORS          4    1    9    7     -0.095529    F    0.000000    T
+                0 0 0   0 0 0   0 0 0   0 1 0
+     39  TORS          1    4    7    9     -0.094276    F    0.000000    T
+                0 0 0   0 0 0   0 0 0   0-1 0
+     40  TORS          1    9    7    4      0.012952    F    0.000000    T
+                0 0 0   0 0 0   0 1 0   0 1 0
+     41  TORS          5    3    8    7      0.009117    F    0.000000    T
+               -1 0 0   0 0 0   0 0 0   0 1 0
+     42  TORS          1    6    3    2     -0.092158    F    0.000000    T
+                0 0 1   0 0 0   0 0 0  -1 0 0
+     43  TORS          3    8    7    5     -0.113472    F    0.000000    T
+                0 0 0   0 0 0   0 1 0   0 1 0
+     44  TORS          3    5    7    8      0.009517    F    0.000000    T
+                1 0 0   0 0 0   0 0 0   0-1 0
+     45  TORS          7    5    3    8     -0.113047    F    0.000000    T
+                0 0 0   0 0 0   1 0 0   1 0 0
+     46  TORS          2    1    6    3     -0.003471    F    0.000000    T
+                0 0 0   0 0 1   0 0 0   0 0 0
+     47  TORS          1    2    3    6      0.012438    F    0.000000    T
+                0 0 1   0 0 0   1 0 0   1 0 0
+     48  TORS          3    2    1    6     -0.096634    F    0.000000    T
+                1 0 0   0 0 0   0 0 1   0 0 0
+Iterative back-transformation, No. Int. Coords=     48
+ Sparsity of B=  25.00 % # of SpB%NNon0       432
+Sparsity of Gc=  48.61 % # of  Gc%NNon0       630
+Sparsity of Ch=  52.86 % # of  Ch%NNon0       333
+PRot=   0.000%
+Step=   1   Max_DX=     0.044206  X_RMSD=     0.020726
+PRot=   0.000%
+Step=   2   Max_DX=     0.000528  X_RMSD=     0.000268
+PRot=   0.000%
+Step=   3   Max_DX=     0.000019  X_RMSD=     0.000008
+PRot=   0.000%
+Step=   4   Max_DX=     0.000000  X_RMSD=     0.000000
+Coordinate back-transformation converged in   4 steps
+       Clone =      1 GeOp step =      1 Total Energy =       -1300.30813098
+                   Max intl Grad =     0.008277 between atoms    2   1   9   0
+     Max Unconstrained Cart Grad =     0.008500      on atom     3
+                   RMS intl Grad =     0.003200
+                  Max STRE Displ =     0.006406 between atoms    7   9
+                  Max BEND Displ =     2.184791 between atoms    2   1   9
+                  Max TORS Displ =     0.704981 between atoms    3   8   7   5
+                       RMS Displ =     0.015827
+Lattice Parameter        Old Value      Gradient    Displacement   New Value
+          STRE_A          4.901900      0.004709      0.000000      4.901900
+          STRE_B          4.901900     -0.002544      0.000000      4.901900
+          STRE_C          5.398800      0.001161      0.000000      5.398800
+          ALPHA          90.000000      0.072413      0.000000     90.000000
+          BETA           90.000000      0.002212      0.000000     90.000000
+          GAMMA         120.000000     -0.019484      0.000000    120.000000
+No Geometric DIIS is being done in this step.
+<< Entering MakeS 10/26/04 @ 23:25:02>>
+ MakeS                  :: S CheckSum  = 0.8313688285155166D+01                                                                  
+ MakeS                  :: Parallel Statistics
+                     Imblnce = 0.37D-01
+                     MinTime = 0.60D-01
+                     AvgTime = 0.68D-01
+                     MaxTime = 0.70D-01
+ MakeS                  :: WALL Sec = 0.70D-01, NProc = 8
+>-Exiting MakeS 10/26/04 @ 23:25:02-<
+<< Entering BlokAInv 10/26/04 @ 23:25:03>>
+ BlokAInv               :: WALL (Sec,MFLOPS) = (0.30D-01, 9), NProc = 1
+ BlokAInv               :: Max(Z^t.A.Z-I)=0.60D-14, TrixThrsh=0.10D-04
+ BlokAInv               :: Z CheckSum  = 0.8709061922752898D+01
+ BlokAInv               :: WALL (Sec,MFLOPS) = (0.70D-01, 10), NProc = 1
+>-Exiting BlokAInv 10/26/04 @ 23:25:03-<
+<< Entering MakeT 10/26/04 @ 23:25:04>>
+ MakeT                  :: T CheckSum  = 0.1760796433412795D+03                                                                  
+ MakeT                  :: Parallel Statistics
+                     Imblnce = 0.37D-01
+                     MinTime = 0.13D+00
+                     AvgTime = 0.14D+00
+                     MaxTime = 0.14D+00
+ MakeT                  :: WALL Sec = 0.13D+00, NProc = 8
+>-Exiting MakeT 10/26/04 @ 23:25:05-<
+<< Entering P2Use 10/26/04 @ 23:25:06>>
+ P2Use : AO-DMX         ::  Nstep  = 1 Lambda = 0.10000000D+01
+ P2Use : AO-DMX 1       ::  dN=-.69D-03, %Non0=0.16D+02
+ P2Use : AO-DMX 2       ::  dN=-.16D-06, %Non0=0.16D+02
+ P2Use : AO-DMX 3       ::  dN=-.21D-13, %Non0=0.16D+02
+ P2Use                  :: Parallel Statistics
+                     Imblnce = 0.36D-09
+                     MinTime = 0.80D-01
+                     AvgTime = 0.80D-01
+                     MaxTime = 0.80D-01
+ P2Use                  :: WALL (Sec,MFLOPS) = (0.80D-01, 70), NProc = 8
+>-Exiting P2Use 10/26/04 @ 23:25:06-<
+<< Entering MakeRho 10/26/04 @ 23:25:07>>
+ MakeRho : Pruned Rho   :: dNel = -.28D-13, kept 100% of distributions.
+ MakeRho : Moments      :: <r> = (-.27D+01, -.47D+01, -.60D+01), <r^2> = 0.36D+02
+ MakeRho                :: Rho CheckSum  = 0.2557687590030922D+04
+ MakeRho                :: Parallel Statistics
+                     Imblnce = 0.71D-10
+                     MinTime = 0.41D+00
+                     AvgTime = 0.41D+00
+                     MaxTime = 0.41D+00
+ MakeRho                :: WALL Sec = 0.41D+00, NProc = 8
+>-Exiting MakeRho 10/26/04 @ 23:25:07-<
+<< Entering QCTC 10/26/04 @ 23:25:08>>
+ QCTC                   :: J[0] CheckSum  = 0.2890105612757865D+03
+ QCTC : 3-D periodics   :: MxL = 7, PAC Cells = 277, MAC Cells = 851
+ QCTC : FF Energy       :: <FF> = -.2223747287276593D-02
+ QCTC                   :: Parallel Statistics
+                     Imblnce = 0.23D-04
+                     MinTime = 0.11D+03
+                     AvgTime = 0.11D+03
+                     MaxTime = 0.11D+03
+ QCTC                   :: WALL Sec = 0.11D+03, NProc = 8
+>-Exiting QCTC 10/26/04 @ 23:26:58-<
+<< Entering ONX2 10/26/04 @ 23:27:00>>
+ ONX2                   :: Kx[0] CheckSum  = 0.2355630860902391D+02
+ ONX2                   :: Parallel Statistics
+                     Imblnce = 0.25D-11
+                     MinTime = 0.11D+02
+                     AvgTime = 0.11D+02
+                     MaxTime = 0.11D+02
+ ONX2                   :: WALL Sec = 0.11D+02, NProc = 8
+>-Exiting ONX2 10/26/04 @ 23:27:11-<
+<< Entering FockNGrueven 10/26/04 @ 23:27:12>>
+ FockNGrueven           :: F[0] CheckSum  = 0.1424742623369717D+03                                                               
+ FockNGrueven           :: OrthoF[0] CheckSum  = 0.1283790622082966D+03                                                          
+ FockNGrueven           :: Parallel Statistics
+                     Imblnce = 0.87D-09
+                     MinTime = 0.50D-01
+                     AvgTime = 0.50D-01
+                     MaxTime = 0.50D-01
+ FockNGrueven           :: WALL (Sec,MFLOPS) = (0.50D-01, 8), NProc = 8
+>-Exiting FockNGrueven 10/26/04 @ 23:27:12-<
+<< Entering SP2 10/26/04 @ 23:27:13>>
+ SP2 : Pure 1           :: dE=0.10D+01, dP=0.29D+00, %Non0=0.16D+02
+ SP2 : Pure 2           :: dE=0.14D+00, dP=0.44D+00, %Non0=0.16D+02
+ SP2 : Pure 3           :: dE=0.98D-01, dP=0.63D+00, %Non0=0.16D+02
+ SP2 : Pure 4           :: dE=0.48D-01, dP=0.67D+00, %Non0=0.16D+02
+ SP2 : Pure 5           :: dE=0.15D-01, dP=0.47D+00, %Non0=0.16D+02
+ SP2 : Pure 6           :: dE=0.26D-01, dP=0.60D+00, %Non0=0.16D+02
+ SP2 : Pure 7           :: dE=0.50D-02, dP=0.39D+00, %Non0=0.16D+02
+ SP2 : Pure 8           :: dE=0.11D-01, dP=0.51D+00, %Non0=0.16D+02
+ SP2 : Pure 9           :: dE=0.10D-02, dP=0.33D+00, %Non0=0.16D+02
+ SP2 : Pure 10          :: dE=0.80D-03, dP=0.44D+00, %Non0=0.16D+02
+ SP2 : Pure 11          :: dE=0.62D-02, dP=0.47D+00, %Non0=0.16D+02
+ SP2 : Pure 12          :: dE=0.25D-02, dP=0.41D+00, %Non0=0.16D+02
+ SP2 : Pure 13          :: dE=0.16D-02, dP=0.43D+00, %Non0=0.16D+02
+ SP2 : Pure 14          :: dE=0.38D-02, dP=0.36D+00, %Non0=0.16D+02
+ SP2 : Pure 15          :: dE=0.25D-03, dP=0.36D+00, %Non0=0.16D+02
+ SP2 : Pure 16          :: dE=0.40D-02, dP=0.29D+00, %Non0=0.16D+02
+ SP2 : Pure 17          :: dE=0.32D-03, dP=0.24D+00, %Non0=0.16D+02
+ SP2 : Pure 18          :: dE=0.30D-02, dP=0.19D+00, %Non0=0.16D+02
+ SP2 : Pure 19          :: dE=0.37D-03, dP=0.11D+00, %Non0=0.16D+02
+ SP2 : Pure 20          :: dE=0.16D-02, dP=0.10D+00, %Non0=0.16D+02
+ SP2 : Pure 21          :: dE=0.26D-03, dP=0.33D-01, %Non0=0.16D+02
+ SP2 : Pure 22          :: dE=0.13D-03, dP=0.37D-01, %Non0=0.16D+02
+ SP2 : Pure 23          :: dE=0.63D-04, dP=0.74D-02, %Non0=0.16D+02
+ SP2 : Pure 24          :: dE=0.73D-05, dP=0.26D-02, %Non0=0.16D+02
+ SP2 : Pure 25          :: dE=0.62D-05, dP=0.74D-03, %Non0=0.16D+02
+ SP2 : Pure 26          :: dE=0.23D-07, dP=0.15D-04, %Non0=0.16D+02
+ SP2 : Pure 27          :: dE=0.61D-07, dP=0.73D-05, %Non0=0.16D+02
+ SP2 : Pure 28          :: dE=0.99D-12, dP=0.64D-09, %Non0=0.16D+02
+ SP2 : Hit dE increase  :: Tr{FP}=-.3873803383924317D+03, dNel = 0.00D+00
+ SP2                    :: 28 purification steps, 29 matrix multiplies
+ SP2                    :: Fractional occupation = 0.79D+00, ThrX=0.10D-04, %Non0s = 0.16D+02
+ SP2 : Max abs errors   :: dE=0.38D-09, dP=0.64D-09
+ SP2                    :: Rel dE=0.99D-12, ||dP||_F=0.32D-08
+ SP2                    :: OrthoP[1] CheckSum  = 0.6708203932499973D+01                                                          
+ SP2                    :: P[1] CheckSum  = 0.6731583184658726D+01                                                               
+ SP2                    :: Parallel Statistics
+                     Imblnce = 0.88D-10
+                     MinTime = 0.33D+00
+                     AvgTime = 0.33D+00
+                     MaxTime = 0.33D+00
+ SP2                    :: WALL (Sec,MFLOPS) = (0.33D+00, 67), NProc = 8
+>-Exiting SP2 10/26/04 @ 23:27:14-<
+<< Entering SCFStatus 10/26/04 @ 23:27:14>>
+ 
+= = = = = SCFCycle #0, Basis #1, Geometry #2 = = = = =
+
+       MaxDelD = 0.11D-01
+       <T>     = 0.12869526D+04
+       <V>     = -.24744938D+04
+       <HF>    = -.11276709D+03
+       <SCF>   = -1300.30827925
+
+ SCFStatus              :: Parallel Statistics
+                     Imblnce = 0.33D+00
+                     MinTime = 0.20D-01
+                     AvgTime = 0.22D-01
+                     MaxTime = 0.30D-01
+ SCFStatus              :: WALL (Sec,MFLOPS) = (0.20D-01, 56), NProc = 8
+>-Exiting SCFStatus 10/26/04 @ 23:27:14-<
+<< Entering MakeRho 10/26/04 @ 23:27:16>>
+ MakeRho : Pruned Rho   :: dNel = 0.11D-12, kept 100% of distributions.
+ MakeRho : Moments      :: <r> = (-.27D+01, -.47D+01, -.60D+01), <r^2> = 0.36D+02
+ MakeRho                :: Rho CheckSum  = 0.2557944754163712D+04
+ MakeRho                :: Parallel Statistics
+                     Imblnce = 0.32D-01
+                     MinTime = 0.23D+00
+                     AvgTime = 0.23D+00
+                     MaxTime = 0.24D+00
+ MakeRho                :: WALL Sec = 0.23D+00, NProc = 8
+>-Exiting MakeRho 10/26/04 @ 23:27:16-<
+<< Entering QCTC 10/26/04 @ 23:27:20>>
+ QCTC                   :: J[1] CheckSum  = 0.2890107222974031D+03
+ QCTC : 3-D periodics   :: MxL = 7, PAC Cells = 277, MAC Cells = 851
+ QCTC : FF Energy       :: <FF> = -.2202222358961035D-02
+ QCTC                   :: Parallel Statistics
+                     Imblnce = 0.24D-04
+                     MinTime = 0.10D+03
+                     AvgTime = 0.10D+03
+                     MaxTime = 0.10D+03
+ QCTC                   :: WALL Sec = 0.10D+03, NProc = 8
+>-Exiting QCTC 10/26/04 @ 23:29:03-<
+<< Entering ONX2 10/26/04 @ 23:29:04>>
+ ONX2                   :: Kx[1] CheckSum  = 0.2355593312658868D+02
+ ONX2                   :: Parallel Statistics
+                     Imblnce = 0.73D-03
+                     MinTime = 0.10D+02
+                     AvgTime = 0.10D+02
+                     MaxTime = 0.10D+02
+ ONX2                   :: WALL Sec = 0.10D+02, NProc = 8
+>-Exiting ONX2 10/26/04 @ 23:29:14-<
+<< Entering FockNGrueven 10/26/04 @ 23:29:16>>
+ FockNGrueven           :: F[1] CheckSum  = 0.1424745723601914D+03                                                               
+ FockNGrueven           :: OrthoF[1] CheckSum  = 0.1283793676316452D+03                                                          
+ FockNGrueven           :: Parallel Statistics
+                     Imblnce = 0.67D-01
+                     MinTime = 0.70D-01
+                     AvgTime = 0.75D-01
+                     MaxTime = 0.80D-01
+ FockNGrueven           :: WALL (Sec,MFLOPS) = (0.80D-01, 5), NProc = 8
+>-Exiting FockNGrueven 10/26/04 @ 23:29:16-<
+<< Entering SP2 10/26/04 @ 23:29:16>>
+ SP2 : Pure 1           :: dE=0.10D+01, dP=0.29D+00, %Non0=0.16D+02
+ SP2 : Pure 2           :: dE=0.14D+00, dP=0.44D+00, %Non0=0.16D+02
+ SP2 : Pure 3           :: dE=0.98D-01, dP=0.63D+00, %Non0=0.16D+02
+ SP2 : Pure 4           :: dE=0.48D-01, dP=0.67D+00, %Non0=0.16D+02
+ SP2 : Pure 5           :: dE=0.15D-01, dP=0.47D+00, %Non0=0.16D+02
+ SP2 : Pure 6           :: dE=0.26D-01, dP=0.60D+00, %Non0=0.16D+02
+ SP2 : Pure 7           :: dE=0.50D-02, dP=0.39D+00, %Non0=0.16D+02
+ SP2 : Pure 8           :: dE=0.11D-01, dP=0.51D+00, %Non0=0.16D+02
+ SP2 : Pure 9           :: dE=0.10D-02, dP=0.33D+00, %Non0=0.16D+02
+ SP2 : Pure 10          :: dE=0.84D-03, dP=0.44D+00, %Non0=0.16D+02
+ SP2 : Pure 11          :: dE=0.62D-02, dP=0.47D+00, %Non0=0.16D+02
+ SP2 : Pure 12          :: dE=0.25D-02, dP=0.41D+00, %Non0=0.16D+02
+ SP2 : Pure 13          :: dE=0.16D-02, dP=0.43D+00, %Non0=0.16D+02
+ SP2 : Pure 14          :: dE=0.38D-02, dP=0.36D+00, %Non0=0.16D+02
+ SP2 : Pure 15          :: dE=0.28D-03, dP=0.36D+00, %Non0=0.16D+02
+ SP2 : Pure 16          :: dE=0.40D-02, dP=0.29D+00, %Non0=0.16D+02
+ SP2 : Pure 17          :: dE=0.30D-03, dP=0.24D+00, %Non0=0.16D+02
+ SP2 : Pure 18          :: dE=0.30D-02, dP=0.19D+00, %Non0=0.16D+02
+ SP2 : Pure 19          :: dE=0.36D-03, dP=0.11D+00, %Non0=0.16D+02
+ SP2 : Pure 20          :: dE=0.16D-02, dP=0.10D+00, %Non0=0.16D+02
+ SP2 : Pure 21          :: dE=0.26D-03, dP=0.33D-01, %Non0=0.16D+02
+ SP2 : Pure 22          :: dE=0.14D-03, dP=0.37D-01, %Non0=0.16D+02
+ SP2 : Pure 23          :: dE=0.62D-04, dP=0.73D-02, %Non0=0.16D+02
+ SP2 : Pure 24          :: dE=0.73D-05, dP=0.26D-02, %Non0=0.16D+02
+ SP2 : Pure 25          :: dE=0.61D-05, dP=0.73D-03, %Non0=0.16D+02
+ SP2 : Pure 26          :: dE=0.23D-07, dP=0.14D-04, %Non0=0.16D+02
+ SP2 : Pure 27          :: dE=0.59D-07, dP=0.71D-05, %Non0=0.16D+02
+ SP2 : Pure 28          :: dE=0.88D-12, dP=0.61D-09, %Non0=0.16D+02
+ SP2 : Hit dE increase  :: Tr{FP}=-.3874369578464460D+03, dNel = 0.00D+00
+ SP2                    :: 28 purification steps, 29 matrix multiplies
+ SP2                    :: Fractional occupation = 0.79D+00, ThrX=0.10D-04, %Non0s = 0.16D+02
+ SP2 : Max abs errors   :: dE=0.34D-09, dP=0.61D-09
+ SP2                    :: Rel dE=0.88D-12, ||dP||_F=0.31D-08
+ SP2                    :: OrthoP[2] CheckSum  = 0.6708203932499925D+01                                                          
+ SP2                    :: P[2] CheckSum  = 0.6732945893669358D+01                                                               
+ SP2                    :: Parallel Statistics
+                     Imblnce = 0.35D-10
+                     MinTime = 0.41D+00
+                     AvgTime = 0.41D+00
+                     MaxTime = 0.41D+00
+ SP2                    :: WALL (Sec,MFLOPS) = (0.41D+00, 54), NProc = 8
+>-Exiting SP2 10/26/04 @ 23:29:17-<
+<< Entering ODA 10/26/04 @ 23:29:18>>
+ IKPS_Error = 0.29213D-03
+ ODA :  Mix = 1.00000   :: <SCF> = -1300.30976173, d3 = 0.23D-12
+ ODA                    :: Pao[2] CheckSum  = 0.6731583184658726D+01                                                             
+ ODA                    :: Fao[2] CheckSum  = 0.1424745723601914D+03                                                             
+ ODA                    :: For[2] CheckSum  = 0.1283793676316452D+03                                                             
+ ODA                    :: Parallel Statistics
+                     Imblnce = 0.11D-10
+                     MinTime = 0.40D+01
+                     AvgTime = 0.40D+01
+                     MaxTime = 0.40D+01
+ ODA                    :: WALL Sec = 0.40D+01, NProc = 8
+>-Exiting ODA 10/26/04 @ 23:29:22-<
+<< Entering SP2 10/26/04 @ 23:29:22>>
+ SP2 : Pure 1           :: dE=0.10D+01, dP=0.29D+00, %Non0=0.16D+02
+ SP2 : Pure 2           :: dE=0.14D+00, dP=0.44D+00, %Non0=0.16D+02
+ SP2 : Pure 3           :: dE=0.98D-01, dP=0.63D+00, %Non0=0.16D+02
+ SP2 : Pure 4           :: dE=0.48D-01, dP=0.67D+00, %Non0=0.16D+02
+ SP2 : Pure 5           :: dE=0.15D-01, dP=0.47D+00, %Non0=0.16D+02
+ SP2 : Pure 6           :: dE=0.26D-01, dP=0.60D+00, %Non0=0.16D+02
+ SP2 : Pure 7           :: dE=0.50D-02, dP=0.39D+00, %Non0=0.16D+02
+ SP2 : Pure 8           :: dE=0.11D-01, dP=0.51D+00, %Non0=0.16D+02
+ SP2 : Pure 9           :: dE=0.10D-02, dP=0.33D+00, %Non0=0.16D+02
+ SP2 : Pure 10          :: dE=0.84D-03, dP=0.44D+00, %Non0=0.16D+02
+ SP2 : Pure 11          :: dE=0.62D-02, dP=0.47D+00, %Non0=0.16D+02
+ SP2 : Pure 12          :: dE=0.25D-02, dP=0.41D+00, %Non0=0.16D+02
+ SP2 : Pure 13          :: dE=0.16D-02, dP=0.43D+00, %Non0=0.16D+02
+ SP2 : Pure 14          :: dE=0.38D-02, dP=0.36D+00, %Non0=0.16D+02
+ SP2 : Pure 15          :: dE=0.28D-03, dP=0.36D+00, %Non0=0.16D+02
+ SP2 : Pure 16          :: dE=0.40D-02, dP=0.29D+00, %Non0=0.16D+02
+ SP2 : Pure 17          :: dE=0.30D-03, dP=0.24D+00, %Non0=0.16D+02
+ SP2 : Pure 18          :: dE=0.30D-02, dP=0.19D+00, %Non0=0.16D+02
+ SP2 : Pure 19          :: dE=0.36D-03, dP=0.11D+00, %Non0=0.16D+02
+ SP2 : Pure 20          :: dE=0.16D-02, dP=0.10D+00, %Non0=0.16D+02
+ SP2 : Pure 21          :: dE=0.26D-03, dP=0.33D-01, %Non0=0.16D+02
+ SP2 : Pure 22          :: dE=0.14D-03, dP=0.37D-01, %Non0=0.16D+02
+ SP2 : Pure 23          :: dE=0.62D-04, dP=0.73D-02, %Non0=0.16D+02
+ SP2 : Pure 24          :: dE=0.73D-05, dP=0.26D-02, %Non0=0.16D+02
+ SP2 : Pure 25          :: dE=0.61D-05, dP=0.73D-03, %Non0=0.16D+02
+ SP2 : Pure 26          :: dE=0.23D-07, dP=0.14D-04, %Non0=0.16D+02
+ SP2 : Pure 27          :: dE=0.59D-07, dP=0.71D-05, %Non0=0.16D+02
+ SP2 : Pure 28          :: dE=0.88D-12, dP=0.61D-09, %Non0=0.16D+02
+ SP2 : Hit dE increase  :: Tr{FP}=-.3874369578464460D+03, dNel = 0.00D+00
+ SP2                    :: 28 purification steps, 29 matrix multiplies
+ SP2                    :: Fractional occupation = 0.79D+00, ThrX=0.10D-04, %Non0s = 0.16D+02
+ SP2 : Max abs errors   :: dE=0.34D-09, dP=0.61D-09
+ SP2                    :: Rel dE=0.88D-12, ||dP||_F=0.31D-08
+ SP2                    :: OrthoP[2] CheckSum  = 0.6708203932499925D+01                                                          
+ SP2                    :: P[2] CheckSum  = 0.6732945893669358D+01                                                               
+ SP2                    :: Parallel Statistics
+                     Imblnce = 0.88D-10
+                     MinTime = 0.33D+00
+                     AvgTime = 0.33D+00
+                     MaxTime = 0.33D+00
+ SP2                    :: WALL (Sec,MFLOPS) = (0.33D+00, 67), NProc = 8
+>-Exiting SP2 10/26/04 @ 23:29:22-<
+<< Entering SCFStatus 10/26/04 @ 23:29:23>>
+ 
+= = = = = SCFCycle #1, Basis #1, Geometry #2 = = = = =
+
+       DIISErr = 0.10D+01
+       MaxDelD = 0.40D-02
+       <T>     = 0.12869609D+04
+       <V>     = -.24745146D+04
+       <HF>    = -.11275605D+03
+       <SCF>   = -1300.30976173
+
+ SCFStatus              :: Parallel Statistics
+                     Imblnce = 0.15D-08
+                     MinTime = 0.30D-01
+                     AvgTime = 0.30D-01
+                     MaxTime = 0.30D-01
+ SCFStatus              :: WALL (Sec,MFLOPS) = (0.30D-01, 37), NProc = 8
+>-Exiting SCFStatus 10/26/04 @ 23:29:23-<
+<< Entering MakeRho 10/26/04 @ 23:29:24>>
+ MakeRho : Pruned Rho   :: dNel = -.85D-13, kept 100% of distributions.
+ MakeRho : Moments      :: <r> = (-.27D+01, -.47D+01, -.60D+01), <r^2> = 0.36D+02
+ MakeRho                :: Rho CheckSum  = 0.2558034346755713D+04
+ MakeRho                :: Parallel Statistics
+                     Imblnce = 0.23D-01
+                     MinTime = 0.32D+00
+                     AvgTime = 0.32D+00
+                     MaxTime = 0.33D+00
+ MakeRho                :: WALL Sec = 0.33D+00, NProc = 8
+>-Exiting MakeRho 10/26/04 @ 23:29:24-<
+<< Entering QCTC 10/26/04 @ 23:29:25>>
+ QCTC                   :: J[2] CheckSum  = 0.2890112694943973D+03
+ QCTC : 3-D periodics   :: MxL = 7, PAC Cells = 277, MAC Cells = 851
+ QCTC : FF Energy       :: <FF> = -.2200525795416602D-02
+ QCTC                   :: Parallel Statistics
+                     Imblnce = 0.25D-04
+                     MinTime = 0.98D+02
+                     AvgTime = 0.98D+02
+                     MaxTime = 0.98D+02
+ QCTC                   :: WALL Sec = 0.98D+02, NProc = 8
+>-Exiting QCTC 10/26/04 @ 23:31:03-<
+<< Entering ONX2 10/26/04 @ 23:31:05>>
+ ONX2                   :: Kx[2] CheckSum  = 0.2355589613959720D+02
+ ONX2                   :: Parallel Statistics
+                     Imblnce = 0.48D-03
+                     MinTime = 0.10D+02
+                     AvgTime = 0.10D+02
+                     MaxTime = 0.10D+02
+ ONX2                   :: WALL Sec = 0.10D+02, NProc = 8
+>-Exiting ONX2 10/26/04 @ 23:31:16-<
+<< Entering FockNGrueven 10/26/04 @ 23:31:16>>
+ FockNGrueven           :: F[2] CheckSum  = 0.1424751620022931D+03                                                               
+ FockNGrueven           :: OrthoF[2] CheckSum  = 0.1283798718684562D+03                                                          
+ FockNGrueven           :: Parallel Statistics
+                     Imblnce = 0.49D-01
+                     MinTime = 0.15D+00
+                     AvgTime = 0.15D+00
+                     MaxTime = 0.16D+00
+ FockNGrueven           :: WALL (Sec,MFLOPS) = (0.15D+00, 2), NProc = 8
+>-Exiting FockNGrueven 10/26/04 @ 23:31:16-<
+<< Entering SP2 10/26/04 @ 23:31:17>>
+ SP2 : Pure 1           :: dE=0.10D+01, dP=0.29D+00, %Non0=0.16D+02
+ SP2 : Pure 2           :: dE=0.14D+00, dP=0.44D+00, %Non0=0.16D+02
+ SP2 : Pure 3           :: dE=0.98D-01, dP=0.63D+00, %Non0=0.16D+02
+ SP2 : Pure 4           :: dE=0.48D-01, dP=0.67D+00, %Non0=0.16D+02
+ SP2 : Pure 5           :: dE=0.15D-01, dP=0.47D+00, %Non0=0.16D+02
+ SP2 : Pure 6           :: dE=0.26D-01, dP=0.60D+00, %Non0=0.16D+02
+ SP2 : Pure 7           :: dE=0.50D-02, dP=0.39D+00, %Non0=0.16D+02
+ SP2 : Pure 8           :: dE=0.11D-01, dP=0.51D+00, %Non0=0.16D+02
+ SP2 : Pure 9           :: dE=0.10D-02, dP=0.33D+00, %Non0=0.16D+02
+ SP2 : Pure 10          :: dE=0.85D-03, dP=0.44D+00, %Non0=0.16D+02
+ SP2 : Pure 11          :: dE=0.62D-02, dP=0.47D+00, %Non0=0.16D+02
+ SP2 : Pure 12          :: dE=0.25D-02, dP=0.41D+00, %Non0=0.16D+02
+ SP2 : Pure 13          :: dE=0.16D-02, dP=0.43D+00, %Non0=0.16D+02
+ SP2 : Pure 14          :: dE=0.37D-02, dP=0.36D+00, %Non0=0.16D+02
+ SP2 : Pure 15          :: dE=0.29D-03, dP=0.36D+00, %Non0=0.16D+02
+ SP2 : Pure 16          :: dE=0.40D-02, dP=0.29D+00, %Non0=0.16D+02
+ SP2 : Pure 17          :: dE=0.29D-03, dP=0.24D+00, %Non0=0.16D+02
+ SP2 : Pure 18          :: dE=0.30D-02, dP=0.19D+00, %Non0=0.16D+02
+ SP2 : Pure 19          :: dE=0.35D-03, dP=0.11D+00, %Non0=0.16D+02
+ SP2 : Pure 20          :: dE=0.15D-02, dP=0.10D+00, %Non0=0.16D+02
+ SP2 : Pure 21          :: dE=0.25D-03, dP=0.33D-01, %Non0=0.16D+02
+ SP2 : Pure 22          :: dE=0.14D-03, dP=0.37D-01, %Non0=0.16D+02
+ SP2 : Pure 23          :: dE=0.61D-04, dP=0.72D-02, %Non0=0.16D+02
+ SP2 : Pure 24          :: dE=0.76D-05, dP=0.26D-02, %Non0=0.16D+02
+ SP2 : Pure 25          :: dE=0.59D-05, dP=0.71D-03, %Non0=0.16D+02
+ SP2 : Pure 26          :: dE=0.27D-07, dP=0.15D-04, %Non0=0.16D+02
+ SP2 : Pure 27          :: dE=0.56D-07, dP=0.67D-05, %Non0=0.16D+02
+ SP2 : Pure 28          :: dE=0.44D-12, dP=0.64D-09, %Non0=0.16D+02
+ SP2 : Hit dE increase  :: Tr{FP}=-.3874443687732946D+03, dNel = 0.00D+00
+ SP2                    :: 28 purification steps, 29 matrix multiplies
+ SP2                    :: Fractional occupation = 0.79D+00, ThrX=0.10D-04, %Non0s = 0.16D+02
+ SP2 : Max abs errors   :: dE=0.17D-09, dP=0.64D-09
+ SP2                    :: Rel dE=0.44D-12, ||dP||_F=0.30D-08
+ SP2                    :: OrthoP[3] CheckSum  = 0.6708203932499928D+01                                                          
+ SP2                    :: P[3] CheckSum  = 0.6733560816950352D+01                                                               
+ SP2                    :: Parallel Statistics
+                     Imblnce = 0.92D-02
+                     MinTime = 0.54D+00
+                     AvgTime = 0.55D+00
+                     MaxTime = 0.55D+00
+ SP2                    :: WALL (Sec,MFLOPS) = (0.55D+00, 40), NProc = 8
+>-Exiting SP2 10/26/04 @ 23:31:17-<
+<< Entering ODA 10/26/04 @ 23:31:18>>
+ IKPS_Error = 0.34776D-03
+ ODA :  Mix = 1.00000   :: <SCF> = -1300.30994967, d3 = -.45D-12
+ ODA                    :: Pao[3] CheckSum  = 0.6732945893669358D+01                                                             
+ ODA                    :: Fao[3] CheckSum  = 0.1424751620022931D+03                                                             
+ ODA                    :: For[3] CheckSum  = 0.1283798718684562D+03                                                             
+ ODA                    :: Por[3] CheckSum  = 0.6708203932499925D+01                                                             
+ ODA                    :: Parallel Statistics
+                     Imblnce = 0.13D-02
+                     MinTime = 0.40D+01
+                     AvgTime = 0.40D+01
+                     MaxTime = 0.40D+01
+ ODA                    :: WALL (Sec,MFLOPS) = (0.40D+01, 1), NProc = 8
+>-Exiting ODA 10/26/04 @ 23:31:22-<
+<< Entering SP2 10/26/04 @ 23:31:23>>
+ SP2 : Pure 1           :: dE=0.10D+01, dP=0.29D+00, %Non0=0.16D+02
+ SP2 : Pure 2           :: dE=0.14D+00, dP=0.44D+00, %Non0=0.16D+02
+ SP2 : Pure 3           :: dE=0.98D-01, dP=0.63D+00, %Non0=0.16D+02
+ SP2 : Pure 4           :: dE=0.48D-01, dP=0.67D+00, %Non0=0.16D+02
+ SP2 : Pure 5           :: dE=0.15D-01, dP=0.47D+00, %Non0=0.16D+02
+ SP2 : Pure 6           :: dE=0.26D-01, dP=0.60D+00, %Non0=0.16D+02
+ SP2 : Pure 7           :: dE=0.50D-02, dP=0.39D+00, %Non0=0.16D+02
+ SP2 : Pure 8           :: dE=0.11D-01, dP=0.51D+00, %Non0=0.16D+02
+ SP2 : Pure 9           :: dE=0.10D-02, dP=0.33D+00, %Non0=0.16D+02
+ SP2 : Pure 10          :: dE=0.85D-03, dP=0.44D+00, %Non0=0.16D+02
+ SP2 : Pure 11          :: dE=0.62D-02, dP=0.47D+00, %Non0=0.16D+02
+ SP2 : Pure 12          :: dE=0.25D-02, dP=0.41D+00, %Non0=0.16D+02
+ SP2 : Pure 13          :: dE=0.16D-02, dP=0.43D+00, %Non0=0.16D+02
+ SP2 : Pure 14          :: dE=0.37D-02, dP=0.36D+00, %Non0=0.16D+02
+ SP2 : Pure 15          :: dE=0.29D-03, dP=0.36D+00, %Non0=0.16D+02
+ SP2 : Pure 16          :: dE=0.40D-02, dP=0.29D+00, %Non0=0.16D+02
+ SP2 : Pure 17          :: dE=0.29D-03, dP=0.24D+00, %Non0=0.16D+02
+ SP2 : Pure 18          :: dE=0.30D-02, dP=0.19D+00, %Non0=0.16D+02
+ SP2 : Pure 19          :: dE=0.35D-03, dP=0.11D+00, %Non0=0.16D+02
+ SP2 : Pure 20          :: dE=0.15D-02, dP=0.10D+00, %Non0=0.16D+02
+ SP2 : Pure 21          :: dE=0.25D-03, dP=0.33D-01, %Non0=0.16D+02
+ SP2 : Pure 22          :: dE=0.14D-03, dP=0.37D-01, %Non0=0.16D+02
+ SP2 : Pure 23          :: dE=0.61D-04, dP=0.72D-02, %Non0=0.16D+02
+ SP2 : Pure 24          :: dE=0.76D-05, dP=0.26D-02, %Non0=0.16D+02
+ SP2 : Pure 25          :: dE=0.59D-05, dP=0.71D-03, %Non0=0.16D+02
+ SP2 : Pure 26          :: dE=0.27D-07, dP=0.15D-04, %Non0=0.16D+02
+ SP2 : Pure 27          :: dE=0.56D-07, dP=0.67D-05, %Non0=0.16D+02
+ SP2 : Pure 28          :: dE=0.44D-12, dP=0.64D-09, %Non0=0.16D+02
+ SP2 : Hit dE increase  :: Tr{FP}=-.3874443687732946D+03, dNel = 0.00D+00
+ SP2                    :: 28 purification steps, 29 matrix multiplies
+ SP2                    :: Fractional occupation = 0.79D+00, ThrX=0.10D-04, %Non0s = 0.16D+02
+ SP2 : Max abs errors   :: dE=0.17D-09, dP=0.64D-09
+ SP2                    :: Rel dE=0.44D-12, ||dP||_F=0.30D-08
+ SP2                    :: OrthoP[3] CheckSum  = 0.6708203932499928D+01                                                          
+ SP2                    :: P[3] CheckSum  = 0.6733560816950352D+01                                                               
+ SP2                    :: Parallel Statistics
+                     Imblnce = 0.42D-10
+                     MinTime = 0.35D+00
+                     AvgTime = 0.35D+00
+                     MaxTime = 0.35D+00
+ SP2                    :: WALL (Sec,MFLOPS) = (0.35D+00, 63), NProc = 8
+>-Exiting SP2 10/26/04 @ 23:31:23-<
+<< Entering SCFStatus 10/26/04 @ 23:31:24>>
+ 
+= = = = = SCFCycle #2, Basis #1, Geometry #2 = = = = =
+
+       DIISErr = 0.78D-04
+       MaxDelD = 0.17D-02
+       <T>     = 0.12869727D+04
+       <V>     = -.24745253D+04
+       <HF>    = -.11275735D+03
+       <SCF>   = -1300.30994967
+
+ SCFStatus              :: Parallel Statistics
+                     Imblnce = 0.73D-09
+                     MinTime = 0.20D-01
+                     AvgTime = 0.20D-01
+                     MaxTime = 0.20D-01
+ SCFStatus              :: WALL (Sec,MFLOPS) = (0.20D-01, 56), NProc = 8
+>-Exiting SCFStatus 10/26/04 @ 23:31:25-<
+<< Entering MakeRho 10/26/04 @ 23:31:26>>
+ MakeRho : Pruned Rho   :: dNel = -.28D-13, kept 100% of distributions.
+ MakeRho : Moments      :: <r> = (-.27D+01, -.47D+01, -.59D+01), <r^2> = 0.36D+02
+ MakeRho                :: Rho CheckSum  = 0.2558075009816901D+04
+ MakeRho                :: Parallel Statistics
+                     Imblnce = 0.25D-01
+                     MinTime = 0.35D+00
+                     AvgTime = 0.35D+00
+                     MaxTime = 0.36D+00
+ MakeRho                :: WALL Sec = 0.35D+00, NProc = 8
+>-Exiting MakeRho 10/26/04 @ 23:31:26-<
+<< Entering QCTC 10/26/04 @ 23:31:28>>
+ QCTC                   :: J[3] CheckSum  = 0.2890113744406755D+03
+ QCTC : 3-D periodics   :: MxL = 7, PAC Cells = 277, MAC Cells = 851
+ QCTC : FF Energy       :: <FF> = -.2198964272850101D-02
+ QCTC                   :: Parallel Statistics
+                     Imblnce = 0.63D-04
+                     MinTime = 0.99D+02
+                     AvgTime = 0.99D+02
+                     MaxTime = 0.99D+02
+ QCTC                   :: WALL Sec = 0.99D+02, NProc = 8
+>-Exiting QCTC 10/26/04 @ 23:33:07-<
+<< Entering ONX2 10/26/04 @ 23:33:09>>
+ ONX2                   :: Kx[3] CheckSum  = 0.2355586854329195D+02
+ ONX2                   :: Parallel Statistics
+                     Imblnce = 0.14D-11
+                     MinTime = 0.11D+02
+                     AvgTime = 0.11D+02
+                     MaxTime = 0.11D+02
+ ONX2                   :: WALL Sec = 0.11D+02, NProc = 8
+>-Exiting ONX2 10/26/04 @ 23:33:19-<
+<< Entering FockNGrueven 10/26/04 @ 23:33:21>>
+ FockNGrueven           :: F[3] CheckSum  = 0.1424752884187779D+03                                                               
+ FockNGrueven           :: OrthoF[3] CheckSum  = 0.1283799792131069D+03                                                          
+ FockNGrueven           :: Parallel Statistics
+                     Imblnce = 0.26D-10
+                     MinTime = 0.57D+00
+                     AvgTime = 0.57D+00
+                     MaxTime = 0.57D+00
+ FockNGrueven           :: WALL Sec = 0.57D+00, NProc = 8
+>-Exiting FockNGrueven 10/26/04 @ 23:33:21-<
+<< Entering SP2 10/26/04 @ 23:33:23>>
+ SP2 : Pure 1           :: dE=0.10D+01, dP=0.29D+00, %Non0=0.16D+02
+ SP2 : Pure 2           :: dE=0.14D+00, dP=0.44D+00, %Non0=0.16D+02
+ SP2 : Pure 3           :: dE=0.98D-01, dP=0.63D+00, %Non0=0.16D+02
+ SP2 : Pure 4           :: dE=0.48D-01, dP=0.67D+00, %Non0=0.16D+02
+ SP2 : Pure 5           :: dE=0.15D-01, dP=0.47D+00, %Non0=0.16D+02
+ SP2 : Pure 6           :: dE=0.26D-01, dP=0.60D+00, %Non0=0.16D+02
+ SP2 : Pure 7           :: dE=0.50D-02, dP=0.39D+00, %Non0=0.16D+02
+ SP2 : Pure 8           :: dE=0.11D-01, dP=0.51D+00, %Non0=0.16D+02
+ SP2 : Pure 9           :: dE=0.10D-02, dP=0.33D+00, %Non0=0.16D+02
+ SP2 : Pure 10          :: dE=0.85D-03, dP=0.44D+00, %Non0=0.16D+02
+ SP2 : Pure 11          :: dE=0.62D-02, dP=0.47D+00, %Non0=0.16D+02
+ SP2 : Pure 12          :: dE=0.24D-02, dP=0.41D+00, %Non0=0.16D+02
+ SP2 : Pure 13          :: dE=0.16D-02, dP=0.43D+00, %Non0=0.16D+02
+ SP2 : Pure 14          :: dE=0.37D-02, dP=0.36D+00, %Non0=0.16D+02
+ SP2 : Pure 15          :: dE=0.30D-03, dP=0.36D+00, %Non0=0.16D+02
+ SP2 : Pure 16          :: dE=0.40D-02, dP=0.29D+00, %Non0=0.16D+02
+ SP2 : Pure 17          :: dE=0.28D-03, dP=0.24D+00, %Non0=0.16D+02
+ SP2 : Pure 18          :: dE=0.30D-02, dP=0.19D+00, %Non0=0.16D+02
+ SP2 : Pure 19          :: dE=0.35D-03, dP=0.11D+00, %Non0=0.16D+02
+ SP2 : Pure 20          :: dE=0.15D-02, dP=0.10D+00, %Non0=0.16D+02
+ SP2 : Pure 21          :: dE=0.25D-03, dP=0.33D-01, %Non0=0.16D+02
+ SP2 : Pure 22          :: dE=0.14D-03, dP=0.37D-01, %Non0=0.16D+02
+ SP2 : Pure 23          :: dE=0.61D-04, dP=0.72D-02, %Non0=0.16D+02
+ SP2 : Pure 24          :: dE=0.77D-05, dP=0.26D-02, %Non0=0.16D+02
+ SP2 : Pure 25          :: dE=0.59D-05, dP=0.71D-03, %Non0=0.16D+02
+ SP2 : Pure 26          :: dE=0.28D-07, dP=0.15D-04, %Non0=0.16D+02
+ SP2 : Pure 27          :: dE=0.55D-07, dP=0.66D-05, %Non0=0.16D+02
+ SP2 : Pure 28          :: dE=0.33D-12, dP=0.65D-09, %Non0=0.16D+02
+ SP2 : Hit dE increase  :: Tr{FP}=-.3874489634515854D+03, dNel = 0.00D+00
+ SP2                    :: 28 purification steps, 29 matrix multiplies
+ SP2                    :: Fractional occupation = 0.79D+00, ThrX=0.10D-04, %Non0s = 0.16D+02
+ SP2 : Max abs errors   :: dE=0.13D-09, dP=0.65D-09
+ SP2                    :: Rel dE=0.33D-12, ||dP||_F=0.30D-08
+ SP2                    :: OrthoP[4] CheckSum  = 0.6708203932499930D+01                                                          
+ SP2                    :: P[4] CheckSum  = 0.6733831920645234D+01                                                               
+ SP2                    :: Parallel Statistics
+                     Imblnce = 0.31D-02
+                     MinTime = 0.16D+01
+                     AvgTime = 0.16D+01
+                     MaxTime = 0.16D+01
+ SP2                    :: WALL (Sec,MFLOPS) = (0.16D+01, 13), NProc = 8
+>-Exiting SP2 10/26/04 @ 23:33:25-<
+<< Entering ODA 10/26/04 @ 23:33:25>>
+ IKPS_Error = 0.46415D-03
+ ODA :  Mix = 1.00000   :: <SCF> = -1300.30997957, d3 = 0.23D-12
+ ODA                    :: Pao[4] CheckSum  = 0.6733560816950352D+01                                                             
+ ODA                    :: Fao[4] CheckSum  = 0.1424752884187779D+03                                                             
+ ODA                    :: For[4] CheckSum  = 0.1283799792131069D+03                                                             
+ ODA                    :: Por[4] CheckSum  = 0.6708203932499928D+01                                                             
+ ODA                    :: Parallel Statistics
+                     Imblnce = 0.65D-03
+                     MinTime = 0.39D+01
+                     AvgTime = 0.39D+01
+                     MaxTime = 0.39D+01
+ ODA                    :: WALL (Sec,MFLOPS) = (0.39D+01, 1), NProc = 8
+>-Exiting ODA 10/26/04 @ 23:33:29-<
+<< Entering SP2 10/26/04 @ 23:33:30>>
+ SP2 : Pure 1           :: dE=0.10D+01, dP=0.29D+00, %Non0=0.16D+02
+ SP2 : Pure 2           :: dE=0.14D+00, dP=0.44D+00, %Non0=0.16D+02
+ SP2 : Pure 3           :: dE=0.98D-01, dP=0.63D+00, %Non0=0.16D+02
+ SP2 : Pure 4           :: dE=0.48D-01, dP=0.67D+00, %Non0=0.16D+02
+ SP2 : Pure 5           :: dE=0.15D-01, dP=0.47D+00, %Non0=0.16D+02
+ SP2 : Pure 6           :: dE=0.26D-01, dP=0.60D+00, %Non0=0.16D+02
+ SP2 : Pure 7           :: dE=0.50D-02, dP=0.39D+00, %Non0=0.16D+02
+ SP2 : Pure 8           :: dE=0.11D-01, dP=0.51D+00, %Non0=0.16D+02
+ SP2 : Pure 9           :: dE=0.10D-02, dP=0.33D+00, %Non0=0.16D+02
+ SP2 : Pure 10          :: dE=0.85D-03, dP=0.44D+00, %Non0=0.16D+02
+ SP2 : Pure 11          :: dE=0.62D-02, dP=0.47D+00, %Non0=0.16D+02
+ SP2 : Pure 12          :: dE=0.24D-02, dP=0.41D+00, %Non0=0.16D+02
+ SP2 : Pure 13          :: dE=0.16D-02, dP=0.43D+00, %Non0=0.16D+02
+ SP2 : Pure 14          :: dE=0.37D-02, dP=0.36D+00, %Non0=0.16D+02
+ SP2 : Pure 15          :: dE=0.30D-03, dP=0.36D+00, %Non0=0.16D+02
+ SP2 : Pure 16          :: dE=0.40D-02, dP=0.29D+00, %Non0=0.16D+02
+ SP2 : Pure 17          :: dE=0.28D-03, dP=0.24D+00, %Non0=0.16D+02
+ SP2 : Pure 18          :: dE=0.30D-02, dP=0.19D+00, %Non0=0.16D+02
+ SP2 : Pure 19          :: dE=0.35D-03, dP=0.11D+00, %Non0=0.16D+02
+ SP2 : Pure 20          :: dE=0.15D-02, dP=0.10D+00, %Non0=0.16D+02
+ SP2 : Pure 21          :: dE=0.25D-03, dP=0.33D-01, %Non0=0.16D+02
+ SP2 : Pure 22          :: dE=0.14D-03, dP=0.37D-01, %Non0=0.16D+02
+ SP2 : Pure 23          :: dE=0.61D-04, dP=0.72D-02, %Non0=0.16D+02
+ SP2 : Pure 24          :: dE=0.77D-05, dP=0.26D-02, %Non0=0.16D+02
+ SP2 : Pure 25          :: dE=0.59D-05, dP=0.71D-03, %Non0=0.16D+02
+ SP2 : Pure 26          :: dE=0.28D-07, dP=0.15D-04, %Non0=0.16D+02
+ SP2 : Pure 27          :: dE=0.55D-07, dP=0.66D-05, %Non0=0.16D+02
+ SP2 : Pure 28          :: dE=0.33D-12, dP=0.65D-09, %Non0=0.16D+02
+ SP2 : Hit dE increase  :: Tr{FP}=-.3874489634515854D+03, dNel = 0.00D+00
+ SP2                    :: 28 purification steps, 29 matrix multiplies
+ SP2                    :: Fractional occupation = 0.79D+00, ThrX=0.10D-04, %Non0s = 0.16D+02
+ SP2 : Max abs errors   :: dE=0.13D-09, dP=0.65D-09
+ SP2                    :: Rel dE=0.33D-12, ||dP||_F=0.30D-08
+ SP2                    :: OrthoP[4] CheckSum  = 0.6708203932499930D+01                                                          
+ SP2                    :: P[4] CheckSum  = 0.6733831920645234D+01                                                               
+ SP2                    :: Parallel Statistics
+                     Imblnce = 0.20D-10
+                     MinTime = 0.22D+01
+                     AvgTime = 0.22D+01
+                     MaxTime = 0.22D+01
+ SP2                    :: WALL (Sec,MFLOPS) = (0.22D+01, 10), NProc = 8
+>-Exiting SP2 10/26/04 @ 23:33:32-<
+<< Entering SCFStatus 10/26/04 @ 23:33:33>>
+ 
+= = = = = SCFCycle #3, Basis #1, Geometry #2 = = = = =
+
+       DIISErr = 0.31D-04
+       MaxDelD = 0.71D-03
+       <T>     = 0.12869774D+04
+       <V>     = -.24745302D+04
+       <HF>    = -.11275721D+03
+       <SCF>   = -1300.30997957
+
+ SCFStatus              :: Parallel Statistics
+                     Imblnce = 0.11D-08
+                     MinTime = 0.40D-01
+                     AvgTime = 0.40D-01
+                     MaxTime = 0.40D-01
+ SCFStatus              :: WALL (Sec,MFLOPS) = (0.40D-01, 28), NProc = 8
+>-Exiting SCFStatus 10/26/04 @ 23:33:33-<
+ Normal SCF convergence.
+<< Entering SForce 10/26/04 @ 23:33:36>>
+ SForce                 :: dS/dR CheckSum  = 0.1941564711426931D+00
+ SForce                 :: Parallel Statistics
+                     Imblnce = 0.24D-01
+                     MinTime = 0.20D+00
+                     AvgTime = 0.20D+00
+                     MaxTime = 0.21D+00
+ SForce                 :: WALL (Sec,MFLOPS) = (0.20D+00, 3), NProc = 8
+>-Exiting SForce 10/26/04 @ 23:33:37-<
+<< Entering TForce 10/26/04 @ 23:33:39>>
+ TForce                 :: dT/dR CheckSum  = 0.5808881921757926D+00
+ TForce                 :: Parallel Statistics
+                     Imblnce = 0.00D+00
+                     MinTime = 0.58D+00
+                     AvgTime = 0.58D+00
+                     MaxTime = 0.58D+00
+ TForce                 :: WALL Sec = 0.58D+00, NProc = 8
+>-Exiting TForce 10/26/04 @ 23:33:40-<
+<< Entering MakeRho 10/26/04 @ 23:33:42>>
+ MakeRho : Pruned Rho   :: dNel = 0.57D-13, kept 100% of distributions.
+ MakeRho : Moments      :: <r> = (-.17D+01, -.29D+01, -.37D+01), <r^2> = 0.46D+02
+ MakeRho                :: Rho CheckSum  = 0.2558092399292194D+04
+ MakeRho                :: Parallel Statistics
+                     Imblnce = 0.58D-02
+                     MinTime = 0.13D+01
+                     AvgTime = 0.13D+01
+                     MaxTime = 0.13D+01
+ MakeRho                :: WALL Sec = 0.13D+01, NProc = 8
+>-Exiting MakeRho 10/26/04 @ 23:33:44-<
+<< Entering JForce 10/26/04 @ 23:33:47>>
+ JForce                 :: dJ/dR CheckSum  = 0.4074199251992287D+00
+ JForce                 :: Parallel Statistics
+                     Imblnce = 0.41D-04
+                     MinTime = 0.18D+03
+                     AvgTime = 0.18D+03
+                     MaxTime = 0.18D+03
+ JForce                 :: WALL Sec = 0.18D+03, NProc = 8
+>-Exiting JForce 10/26/04 @ 23:36:49-<
+<< Entering GONX2 10/26/04 @ 23:36:51>>
+ GONX2                  :: dKx/dR[2] CheckSum  = 0.3621424322451905D+00
+ ComputeGK: TmMax=     46.78253495728131      , TmMin= 
+    15.29066402593162     
+ ComputeGK: Imbalance =    0.2859507159794509     
+ GONX2                  :: Parallel Statistics
+                     Imblnce = 0.92D-12
+                     MinTime = 0.47D+02
+                     AvgTime = 0.47D+02
+                     MaxTime = 0.47D+02
+ GONX2                  :: WALL Sec = 0.47D+02, NProc = 8
+>-Exiting GONX2 10/26/04 @ 23:37:39-<
+ GradNew%D= 
+   0.2039872312306878        0.1813726461389096        0.1235781540246469     
+   5.5115459035430190E-002   0.2670580560415265        0.1264777809114491     
+   5.3515046906695822E-002   9.6607842468599774E-002   0.2671815291434925     
+ XYZNew%D= 
+    9.263247823415023         0.000000000000000         0.000000000000000     
+   -4.631623911707512         8.022207936628320         0.000000000000000     
+    0.000000000000000         0.000000000000000         10.20225266713989     
+ before cleanconstr cartgrad = 
+   1.0476509063158044E-003   1.8481160679795217E-003   2.2667237998649781E-004
+  -5.1894047165023105E-003  -1.0922278362353321E-004   1.0329950334479754E-003
+   5.8641659087337388E-004  -2.8951701225254434E-003   5.3602491492564797E-004
+   2.6509332375716927E-003  -4.5825712357403789E-003   1.4724979367523316E-003
+   2.8433258250380874E-003   4.9196329746632737E-003   9.7585545243387966E-004
+  -5.3455498865246645E-003   1.3200867433463270E-005  -1.6101011973168877E-003
+  -2.1098691817011543E-003  -7.1577580681058697E-004  -3.5803512799703352E-004
+   2.8262885676936662E-003   5.0421202549164255E-003  -9.4084095509069936E-004
+   2.4026514146682150E-003  -4.4293108793988791E-003  -1.0403323021191124E-003
+   0.2039872312306878        0.1813726461389096        0.1235781540246469     
+   5.5115459035430190E-002   0.2670580560415265        0.1264777809114491     
+   5.3515046906695822E-002   9.6607842468599774E-002   0.2671815291434925     
+ after SYMMSTRESS cartgrad = 
+   1.0476509063158044E-003   1.8481160679795217E-003   2.2667237998649781E-004
+  -5.1894047165023105E-003  -1.0922278362353321E-004   1.0329950334479754E-003
+   5.8641659087337388E-004  -2.8951701225254434E-003   5.3602491492564797E-004
+   2.6509332375716927E-003  -4.5825712357403789E-003   1.4724979367523316E-003
+   2.8433258250380874E-003   4.9196329746632737E-003   9.7585545243387966E-004
+  -5.3455498865246645E-003   1.3200867433463270E-005  -1.6101011973168877E-003
+  -2.1098691817011543E-003  -7.1577580681058697E-004  -3.5803512799703352E-004
+   2.8262885676936662E-003   5.0421202549164255E-003  -9.4084095509069936E-004
+   2.4026514146682150E-003  -4.4293108793988791E-003  -1.0403323021191124E-003
+   0.2039872312306878        0.1813726461389096        0.1235781540246469     
+   5.5115459035430190E-002   0.2670580560415265        0.1264777809114491     
+   5.3515046906695822E-002   9.6607842468599774E-002   0.2671815291434925     
+ after cleanconstr cartgrad = 
+   1.0476509063158044E-003   1.8481160679795217E-003   2.2667237998649781E-004
+  -5.1894047165023105E-003  -1.0922278362353321E-004   1.0329950334479754E-003
+   5.8641659087337388E-004  -2.8951701225254434E-003   5.3602491492564797E-004
+   2.6509332375716927E-003  -4.5825712357403789E-003   1.4724979367523316E-003
+   2.8433258250380874E-003   4.9196329746632737E-003   9.7585545243387966E-004
+  -5.3455498865246645E-003   1.3200867433463270E-005  -1.6101011973168877E-003
+  -2.1098691817011543E-003  -7.1577580681058697E-004  -3.5803512799703352E-004
+   2.8262885676936662E-003   5.0421202549164255E-003  -9.4084095509069936E-004
+   2.4026514146682150E-003  -4.4293108793988791E-003  -1.0403323021191124E-003
+   0.2039872312306878        0.1813726461389096        0.1235781540246469     
+   5.5115459035430190E-002   0.2670580560415265        0.1264777809114491     
+   5.3515046906695822E-002   9.6607842468599774E-002   0.2671815291434925     
+ after transloff cartgrad = 
+   1.0796017110455032E-003   1.9491139194357592E-003   1.9392392053954232E-004
+  -5.1574539117726115E-003  -8.2249321672956874E-006   1.0002465740010200E-003
+   6.1836739560307272E-004  -2.7941722710692063E-003   5.0327645547869260E-004
+   2.6828840423013918E-003  -4.4815733842841423E-003   1.4397494773053763E-003
+   2.8752766297677862E-003   5.0206308261195112E-003   9.4310699298692420E-004
+  -5.3135990817949654E-003   1.1419871888970079E-004  -1.6428496567638433E-003
+  -2.0779183769714553E-003  -6.1477795535434945E-004  -3.9078358744398907E-004
+   2.8582393724233652E-003   5.1431181063726630E-003  -9.7358941453765464E-004
+   2.4346022193979140E-003  -4.3283130279426416E-003  -1.0730807615660678E-003
+   0.2039872312306878        0.1813726461389096        0.1235781540246469     
+   5.5115459035430190E-002   0.2670580560415265        0.1264777809114491     
+   5.3515046906695822E-002   9.6607842468599774E-002   0.2671815291434925     
+PRot=   0.003%
+ after rotoff cartgrad = 
+   1.0796017110455032E-003   1.9491139194357592E-003   1.9392392053954232E-004
+  -5.1574539117726115E-003  -8.2249321672956874E-006   1.0002465740010200E-003
+   6.1836739560307272E-004  -2.7941722710692063E-003   5.0327645547869260E-004
+   2.6828840423013918E-003  -4.4815733842841423E-003   1.4397494773053763E-003
+   2.8752766297677862E-003   5.0206308261195112E-003   9.4310699298692420E-004
+  -5.3135990817949654E-003   1.1419871888970079E-004  -1.6428496567638433E-003
+  -2.0779183769714553E-003  -6.1477795535434945E-004  -3.9078358744398907E-004
+   2.8582393724233652E-003   5.1431181063726630E-003  -9.7358941453765464E-004
+   2.4346022193979140E-003  -4.3283130279426416E-003  -1.0730807615660678E-003
+   0.2039872312306878        0.1813165309127988        0.1226952153831657     
+   5.5164056246781286E-002   0.2670861136545819        0.1253687859464896     
+   5.4487488029041851E-002   9.8579647303259286E-002   0.2671815291434925     
+ NUMBER OF FRAGMENTS OBSERVED=             7
+ Sparsity of B=  25.00 % # of SpB%NNon0       432
+Sparsity of Gc=  56.94 % # of  Gc%NNon0       738
+Sparsity of Ch=  55.71 % # of  Ch%NNon0       351
+ Internals at step #2
+INTERNAL COORDINATES
+       DEFINITION       ATOMS_INVOLVED      VALUE        CONSTRAINT    ACTIVE
+      1  STRE          1    4    0    0      1.618616    F    0.000000    T
+      2  STRE          1    9    0    0      1.610993    F    0.000000    T
+      3  STRE          4    7    0    0      1.612534    F    0.000000    T
+      4  STRE          7    9    0    0      1.622203    F    0.000000    T
+                0 1 0   0 0 0   0 0 0   0 0 0
+      5  STRE          3    8    0    0      1.619674    F    0.000000    T
+      6  STRE          3    6    0    0      1.612391    F    0.000000    T
+      7  STRE          7    8    0    0      1.614042    F    0.000000    T
+                0 1 0   0 0 0   0 0 0   0 0 0
+      8  STRE          5    7    0    0      1.619575    F    0.000000    T
+      9  STRE          3    5    0    0      1.614058    F    0.000000    T
+                1 0 0   0 0 0   0 0 0   0 0 0
+     10  STRE          1    6    0    0      1.618863    F    0.000000    T
+                0 0 1   0 0 0   0 0 0   0 0 0
+     11  STRE          2    3    0    0      1.622330    F    0.000000    T
+                0 0 0   1 0 0   0 0 0   0 0 0
+     12  STRE          1    2    0    0      1.610901    F    0.000000    T
+                0 0 1   0 0 0   0 0 0   0 0 0
+     13  BEND          4    1    6    0    111.037823    F    0.000000    T
+                0 0 0   0 0 0   0 0-1   0 0 0
+     14  BEND          4    1    9    0    108.967175    F    0.000000    T
+     15  BEND          2    1    4    0    110.401224    F    0.000000    T
+                0 0-1   0 0 0   0 0 0   0 0 0
+     16  BEND          6    1    9    0    110.373286    F    0.000000    T
+                0 0-1   0 0 0   0 0 0   0 0 0
+     17  BEND          2    1    6    0    108.932646    F    0.000000    T
+                0 0-1   0 0 0   0 0-1   0 0 0
+     18  BEND          2    1    9    0    107.049595    F    0.000000    T
+                0 0-1   0 0 0   0 0 0   0 0 0
+     19  BEND          1    2    3    0    141.249195    F    0.000000    T
+                0 0 1   0 0 0   1 0 0   0 0 0
+     20  BEND          5    3    8    0    108.801845    F    0.000000    T
+               -1 0 0   0 0 0   0 0 0   0 0 0
+     21  BEND          2    3    8    0    111.083124    F    0.000000    T
+               -1 0 0   0 0 0   0 0 0   0 0 0
+     22  BEND          6    3    8    0    110.522394    F    0.000000    T
+     23  BEND          2    3    5    0    110.402979    F    0.000000    T
+               -1 0 0   0 0 0  -1 0 0   0 0 0
+     24  BEND          5    3    6    0    107.173497    F    0.000000    T
+               -1 0 0   0 0 0   0 0 0   0 0 0
+     25  BEND          2    3    6    0    108.782386    F    0.000000    T
+               -1 0 0   0 0 0   0 0 0   0 0 0
+     26  BEND          1    4    7    0    141.383862    F    0.000000    T
+     27  BEND          3    5    7    0    141.231704    F    0.000000    T
+                1 0 0   0 0 0   0 0 0   0 0 0
+     28  BEND          1    6    3    0    141.388004    F    0.000000    T
+                0 0 1   0 0 0   0 0 0   0 0 0
+     29  BEND          4    7    9    0    108.763234    F    0.000000    T
+                0 0 0   0 0 0   0-1 0   0 0 0
+     30  BEND          4    7    8    0    107.157900    F    0.000000    T
+                0 0 0   0 0 0   0-1 0   0 0 0
+     31  BEND          4    7    5    0    110.516102    F    0.000000    T
+     32  BEND          8    7    9    0    110.420344    F    0.000000    T
+                0-1 0   0 0 0   0-1 0   0 0 0
+     33  BEND          5    7    9    0    111.111340    F    0.000000    T
+                0 0 0   0 0 0   0-1 0   0 0 0
+     34  BEND          5    7    8    0    108.795880    F    0.000000    T
+                0 0 0   0 0 0   0-1 0   0 0 0
+     35  BEND          3    8    7    0    141.222467    F    0.000000    T
+                0 0 0   0 0 0   0 1 0   0 0 0
+     36  BEND          1    9    7    0    141.218966    F    0.000000    T
+                0 0 0   0 0 0   0 1 0   0 0 0
+     37  TORS          7    4    1    9   -134.338256    F    0.000000    T
+     38  TORS          2    1    9    7   -147.554045    F    0.000000    T
+                0 0-1   0 0 0   0 0 0   0 1 0
+     39  TORS          1    4    7    8   -147.692227    F    0.000000    T
+                0 0 0   0 0 0   0 0 0   0-1 0
+     40  TORS          1    9    7    4   -134.503577    F    0.000000    T
+                0 0 0   0 0 0   0 1 0   0 1 0
+     41  TORS          5    3    8    7   -134.522863    F    0.000000    T
+               -1 0 0   0 0 0   0 0 0   0 1 0
+     42  TORS          1    6    3    5   -147.668413    F    0.000000    T
+                0 0 1   0 0 0   0 0 0  -1 0 0
+     43  TORS          3    8    7    4   -147.644600    F    0.000000    T
+                0 0 0   0 0 0   0 1 0   0 1 0
+     44  TORS          3    5    7    8   -134.538186    F    0.000000    T
+                1 0 0   0 0 0   0 0 0   0-1 0
+     45  TORS          6    3    5    7   -147.616422    F    0.000000    T
+                1 0 0   1 0 0   0 0 0   0 0 0
+     46  TORS          2    1    6    3   -134.334936    F    0.000000    T
+                0 0 0   0 0 1   0 0 0   0 0 0
+     47  TORS          1    2    3    6   -134.443957    F    0.000000    T
+                0 0 1   0 0 0   1 0 0   1 0 0
+     48  TORS          3    2    1    9   -147.575842    F    0.000000    T
+                1 0 0   0 0 0   0 0 1   0 0 1
+LATTICE  STRE_A                              4.901900
+LATTICE  STRE_B                              4.901900
+LATTICE  STRE_C                              5.398800
+LATTICE  ALPHA                              90.000000
+LATTICE  BETA                               90.000000
+LATTICE  GAMMA                             120.000000
+ Sparsity of B=  25.00 % # of SpB%NNon0       432
+Sparsity of Gc=  56.94 % # of  Gc%NNon0       738
+Sparsity of Ch=  55.71 % # of  Ch%NNon0       351
+Gradient transformation, No. Int. Coords=      48
+Grad Trf, step=   1 MaxChange=     0.006909 ChangeNorm=     0.002862
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   2 steps
+ Sparsity of B=  25.00 % # of SpB%NNon0       432
+Sparsity of Gc=  56.94 % # of  Gc%NNon0       738
+Sparsity of Ch=  55.71 % # of  Ch%NNon0       351
+Gradient transformation, No. Int. Coords=      48
+Grad Trf, step=   1 MaxChange=     0.003880 ChangeNorm=     0.001965
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   2 steps
+Iterative back-transformation, No. Int. Coords=     48
+ Sparsity of B=  25.00 % # of SpB%NNon0       432
+Sparsity of Gc=  56.94 % # of  Gc%NNon0       738
+Sparsity of Ch=  55.71 % # of  Ch%NNon0       351
+PRot=   0.000%
+Step=   1   Max_DX=     0.028777  X_RMSD=     0.012289
+PRot=   0.000%
+Step=   2   Max_DX=     0.000087  X_RMSD=     0.000038
+PRot=   0.000%
+Step=   3   Max_DX=     0.000000  X_RMSD=     0.000000
+Coordinate back-transformation converged in   3 steps
+       Clone =      1 GeOp step =      2 Total Energy =       -1300.30997957
+                   Max intl Grad =     0.003880 between atoms    3   5   0   0
+     Max Unconstrained Cart Grad =     0.005964      on atom     8
+                   RMS intl Grad =     0.001965
+                  Max STRE Displ =     0.007797 between atoms    7   8
+                  Max BEND Displ =     0.778404 between atoms    4   1   6
+                  Max TORS Displ =     0.348648 between atoms    5   3   8   7
+                       RMS Displ =     0.007283
+Lattice Parameter        Old Value      Gradient    Displacement   New Value
+          STRE_A          4.901900      0.001080      0.000000      4.901900
+          STRE_B          4.901900      0.002572      0.000000      4.901900
+          STRE_C          5.398800      0.000503      0.000000      5.398800
+          ALPHA          90.000000      0.006993      0.000000     90.000000
+          BETA           90.000000     -0.002255      0.000000     90.000000
+          GAMMA         120.000000      0.011679      0.000000    120.000000
+No Geometric DIIS is being done in this step.
+<< Entering MakeS 10/26/04 @ 23:37:42>>
+ MakeS                  :: S CheckSum  = 0.8309360647817563D+01                                                                  
+ MakeS                  :: Parallel Statistics
+                     Imblnce = 0.68D-02
+                     MinTime = 0.36D+00
+                     AvgTime = 0.37D+00
+                     MaxTime = 0.37D+00
+ MakeS                  :: WALL Sec = 0.37D+00, NProc = 8
+>-Exiting MakeS 10/26/04 @ 23:37:42-<
+<< Entering BlokAInv 10/26/04 @ 23:37:44>>
+ BlokAInv               :: WALL (Sec,MFLOPS) = (0.30D-01, 9), NProc = 1
+ BlokAInv               :: Max(Z^t.A.Z-I)=0.63D-14, TrixThrsh=0.10D-04
+ BlokAInv               :: Z CheckSum  = 0.8698812922041563D+01
+ BlokAInv               :: WALL (Sec,MFLOPS) = (0.46D+00, 1), NProc = 1
+>-Exiting BlokAInv 10/26/04 @ 23:37:45-<
+<< Entering MakeT 10/26/04 @ 23:37:47>>
+ MakeT                  :: T CheckSum  = 0.1760795749164881D+03                                                                  
+ MakeT                  :: Parallel Statistics
+                     Imblnce = 0.14D-01
+                     MinTime = 0.36D+00
+                     AvgTime = 0.37D+00
+                     MaxTime = 0.37D+00
+ MakeT                  :: WALL Sec = 0.37D+00, NProc = 8
+>-Exiting MakeT 10/26/04 @ 23:37:47-<
+<< Entering P2Use 10/26/04 @ 23:37:50>>
+ P2Use : AO-DMX         ::  Nstep  = 1 Lambda = 0.10000000D+01
+ P2Use : AO-DMX 1       ::  dN=-.18D-03, %Non0=0.16D+02
+ P2Use : AO-DMX 2       ::  dN=-.11D-07, %Non0=0.16D+02
+ P2Use : AO-DMX 3       ::  dN=0.00D+00, %Non0=0.16D+02
+ P2Use                  :: Parallel Statistics
+                     Imblnce = 0.38D-02
+                     MinTime = 0.65D+00
+                     AvgTime = 0.66D+00
+                     MaxTime = 0.66D+00
+ P2Use                  :: WALL (Sec,MFLOPS) = (0.66D+00, 8), NProc = 8
+>-Exiting P2Use 10/26/04 @ 23:37:51-<
+<< Entering MakeRho 10/26/04 @ 23:37:52>>
+ MakeRho : Pruned Rho   :: dNel = -.28D-13, kept 100% of distributions.
+ MakeRho : Moments      :: <r> = (-.82D+01, 0.48D+01, -.60D+01), <r^2> = 0.33D+02
+ MakeRho                :: Rho CheckSum  = 0.2557991737287929D+04
+ MakeRho                :: Parallel Statistics
+                     Imblnce = 0.00D+00
+                     MinTime = 0.57D+00
+                     AvgTime = 0.57D+00
+                     MaxTime = 0.57D+00
+ MakeRho                :: WALL Sec = 0.57D+00, NProc = 8
+>-Exiting MakeRho 10/26/04 @ 23:37:53-<
+<< Entering QCTC 10/26/04 @ 23:37:54>>
+ QCTC                   :: J[0] CheckSum  = 0.2889608927844848D+03
+ QCTC : 3-D periodics   :: MxL = 7, PAC Cells = 277, MAC Cells = 851
+ QCTC : FF Energy       :: <FF> = 0.4718485585659265D-03
+ QCTC                   :: Parallel Statistics
+                     Imblnce = 0.68D-04
+                     MinTime = 0.15D+03
+                     AvgTime = 0.15D+03
+                     MaxTime = 0.15D+03
+ QCTC                   :: WALL Sec = 0.15D+03, NProc = 8
+>-Exiting QCTC 10/26/04 @ 23:40:22-<
+<< Entering ONX2 10/26/04 @ 23:40:25>>
+ ONX2                   :: Kx[0] CheckSum  = 0.2355202104524146D+02
+ ONX2                   :: Parallel Statistics
+                     Imblnce = 0.00D+00
+                     MinTime = 0.12D+02
+                     AvgTime = 0.12D+02
+                     MaxTime = 0.12D+02
+ ONX2                   :: WALL Sec = 0.12D+02, NProc = 8
+>-Exiting ONX2 10/26/04 @ 23:40:37-<
+<< Entering FockNGrueven 10/26/04 @ 23:40:38>>
+ FockNGrueven           :: F[0] CheckSum  = 0.1424204236308044D+03                                                               
+ FockNGrueven           :: OrthoF[0] CheckSum  = 0.1283368884219044D+03                                                          
+ FockNGrueven           :: Parallel Statistics
+                     Imblnce = 0.18D-09
+                     MinTime = 0.24D+00
+                     AvgTime = 0.24D+00
+                     MaxTime = 0.24D+00
+ FockNGrueven           :: WALL (Sec,MFLOPS) = (0.24D+00, 1), NProc = 8
+>-Exiting FockNGrueven 10/26/04 @ 23:40:39-<
+<< Entering SP2 10/26/04 @ 23:40:40>>
+ SP2 : Pure 1           :: dE=0.10D+01, dP=0.29D+00, %Non0=0.16D+02
+ SP2 : Pure 2           :: dE=0.14D+00, dP=0.44D+00, %Non0=0.16D+02
+ SP2 : Pure 3           :: dE=0.97D-01, dP=0.63D+00, %Non0=0.16D+02
+ SP2 : Pure 4           :: dE=0.48D-01, dP=0.67D+00, %Non0=0.16D+02
+ SP2 : Pure 5           :: dE=0.15D-01, dP=0.47D+00, %Non0=0.16D+02
+ SP2 : Pure 6           :: dE=0.25D-01, dP=0.60D+00, %Non0=0.16D+02
+ SP2 : Pure 7           :: dE=0.48D-02, dP=0.39D+00, %Non0=0.16D+02
+ SP2 : Pure 8           :: dE=0.11D-01, dP=0.51D+00, %Non0=0.16D+02
+ SP2 : Pure 9           :: dE=0.12D-02, dP=0.33D+00, %Non0=0.16D+02
+ SP2 : Pure 10          :: dE=0.61D-03, dP=0.44D+00, %Non0=0.16D+02
+ SP2 : Pure 11          :: dE=0.33D-02, dP=0.26D+00, %Non0=0.16D+02
+ SP2 : Pure 12          :: dE=0.37D-02, dP=0.37D+00, %Non0=0.16D+02
+ SP2 : Pure 13          :: dE=0.16D-02, dP=0.40D+00, %Non0=0.16D+02
+ SP2 : Pure 14          :: dE=0.52D-02, dP=0.33D+00, %Non0=0.16D+02
+ SP2 : Pure 15          :: dE=0.37D-02, dP=0.34D+00, %Non0=0.16D+02
+ SP2 : Pure 16          :: dE=0.47D-03, dP=0.33D+00, %Non0=0.16D+02
+ SP2 : Pure 17          :: dE=0.33D-02, dP=0.24D+00, %Non0=0.16D+02
+ SP2 : Pure 18          :: dE=0.54D-04, dP=0.21D+00, %Non0=0.16D+02
+ SP2 : Pure 19          :: dE=0.20D-02, dP=0.13D+00, %Non0=0.16D+02
+ SP2 : Pure 20          :: dE=0.89D-04, dP=0.86D-01, %Non0=0.16D+02
+ SP2 : Pure 21          :: dE=0.85D-03, dP=0.59D-01, %Non0=0.16D+02
+ SP2 : Pure 22          :: dE=0.10D-03, dP=0.18D-01, %Non0=0.16D+02
+ SP2 : Pure 23          :: dE=0.27D-03, dP=0.24D-01, %Non0=0.16D+02
+ SP2 : Pure 24          :: dE=0.38D-04, dP=0.45D-02, %Non0=0.16D+02
+ SP2 : Pure 25          :: dE=0.80D-06, dP=0.56D-03, %Non0=0.16D+02
+ SP2 : Pure 26          :: dE=0.24D-05, dP=0.28D-03, %Non0=0.16D+02
+ SP2 : Pure 27          :: dE=0.20D-08, dP=0.83D-06, %Non0=0.16D+02
+ SP2 : Hit dE increase  :: Tr{FP}=-.3867358651429369D+03, dNel = 0.14D-13
+ SP2                    :: 27 purification steps, 28 matrix multiplies
+ SP2                    :: Fractional occupation = 0.79D+00, ThrX=0.10D-04, %Non0s = 0.16D+02
+ SP2 : Max abs errors   :: dE=0.78D-06, dP=0.83D-06
+ SP2                    :: Rel dE=0.20D-08, ||dP||_F=0.42D-05
+ SP2                    :: OrthoP[1] CheckSum  = 0.6708203932497458D+01                                                          
+ SP2                    :: P[1] CheckSum  = 0.6734157948085690D+01                                                               
+ SP2                    :: Parallel Statistics
+                     Imblnce = 0.24D-02
+                     MinTime = 0.20D+01
+                     AvgTime = 0.21D+01
+                     MaxTime = 0.21D+01
+ SP2                    :: WALL (Sec,MFLOPS) = (0.21D+01, 10), NProc = 8
+>-Exiting SP2 10/26/04 @ 23:40:43-<
+<< Entering SCFStatus 10/26/04 @ 23:40:44>>
+ 
+= = = = = SCFCycle #0, Basis #1, Geometry #3 = = = = =
+
+       MaxDelD = 0.51D-02
+       <T>     = 0.12869021D+04
+       <V>     = -.24744705D+04
+       <HF>    = -.11274209D+03
+       <SCF>   = -1300.31047518
+
+ SCFStatus              :: Parallel Statistics
+                     Imblnce = 0.18D+00
+                     MinTime = 0.40D-01
+                     AvgTime = 0.43D-01
+                     MaxTime = 0.50D-01
+ SCFStatus              :: WALL (Sec,MFLOPS) = (0.40D-01, 28), NProc = 8
+>-Exiting SCFStatus 10/26/04 @ 23:40:45-<
+<< Entering MakeRho 10/26/04 @ 23:40:46>>
+ MakeRho : Pruned Rho   :: dNel = -.85D-13, kept 100% of distributions.
+ MakeRho : Moments      :: <r> = (-.81D+01, 0.48D+01, -.60D+01), <r^2> = 0.34D+02
+ MakeRho                :: Rho CheckSum  = 0.2558122440410895D+04
+ MakeRho                :: Parallel Statistics
+                     Imblnce = 0.26D-03
+                     MinTime = 0.98D+01
+                     AvgTime = 0.98D+01
+                     MaxTime = 0.98D+01
+ MakeRho                :: WALL Sec = 0.98D+01, NProc = 8
+>-Exiting MakeRho 10/26/04 @ 23:40:56-<
+<< Entering QCTC 10/26/04 @ 23:40:58>>
+ QCTC                   :: J[1] CheckSum  = 0.2889610044517345D+03
+ QCTC : 3-D periodics   :: MxL = 7, PAC Cells = 277, MAC Cells = 851
+ QCTC : FF Energy       :: <FF> = 0.4619188552069082D-03
+ QCTC                   :: Parallel Statistics
+                     Imblnce = 0.50D-04
+                     MinTime = 0.10D+03
+                     AvgTime = 0.10D+03
+                     MaxTime = 0.10D+03
+ QCTC                   :: WALL Sec = 0.10D+03, NProc = 8
+>-Exiting QCTC 10/26/04 @ 23:42:40-<
+<< Entering ONX2 10/26/04 @ 23:42:42>>
+ ONX2                   :: Kx[1] CheckSum  = 0.2355183419930240D+02
+ ONX2                   :: Parallel Statistics
+                     Imblnce = 0.00D+00
+                     MinTime = 0.10D+02
+                     AvgTime = 0.10D+02
+                     MaxTime = 0.10D+02
+ ONX2                   :: WALL Sec = 0.10D+02, NProc = 8
+>-Exiting ONX2 10/26/04 @ 23:42:53-<
+<< Entering FockNGrueven 10/26/04 @ 23:42:53>>
+ FockNGrueven           :: F[1] CheckSum  = 0.1424206277410256D+03                                                               
+ FockNGrueven           :: OrthoF[1] CheckSum  = 0.1283370733689168D+03                                                          
+ FockNGrueven           :: Parallel Statistics
+                     Imblnce = 0.58D-09
+                     MinTime = 0.50D-01
+                     AvgTime = 0.50D-01
+                     MaxTime = 0.50D-01
+ FockNGrueven           :: WALL (Sec,MFLOPS) = (0.50D-01, 8), NProc = 8
+>-Exiting FockNGrueven 10/26/04 @ 23:42:54-<
+<< Entering SP2 10/26/04 @ 23:42:54>>
+ SP2 : Pure 1           :: dE=0.10D+01, dP=0.29D+00, %Non0=0.16D+02
+ SP2 : Pure 2           :: dE=0.14D+00, dP=0.44D+00, %Non0=0.16D+02
+ SP2 : Pure 3           :: dE=0.97D-01, dP=0.63D+00, %Non0=0.16D+02
+ SP2 : Pure 4           :: dE=0.48D-01, dP=0.67D+00, %Non0=0.16D+02
+ SP2 : Pure 5           :: dE=0.15D-01, dP=0.47D+00, %Non0=0.16D+02
+ SP2 : Pure 6           :: dE=0.25D-01, dP=0.60D+00, %Non0=0.16D+02
+ SP2 : Pure 7           :: dE=0.48D-02, dP=0.39D+00, %Non0=0.16D+02
+ SP2 : Pure 8           :: dE=0.11D-01, dP=0.51D+00, %Non0=0.16D+02
+ SP2 : Pure 9           :: dE=0.12D-02, dP=0.33D+00, %Non0=0.16D+02
+ SP2 : Pure 10          :: dE=0.63D-03, dP=0.44D+00, %Non0=0.16D+02
+ SP2 : Pure 11          :: dE=0.33D-02, dP=0.26D+00, %Non0=0.16D+02
+ SP2 : Pure 12          :: dE=0.37D-02, dP=0.37D+00, %Non0=0.16D+02
+ SP2 : Pure 13          :: dE=0.16D-02, dP=0.40D+00, %Non0=0.16D+02
+ SP2 : Pure 14          :: dE=0.52D-02, dP=0.33D+00, %Non0=0.16D+02
+ SP2 : Pure 15          :: dE=0.37D-02, dP=0.34D+00, %Non0=0.16D+02
+ SP2 : Pure 16          :: dE=0.48D-03, dP=0.33D+00, %Non0=0.16D+02
+ SP2 : Pure 17          :: dE=0.33D-02, dP=0.24D+00, %Non0=0.16D+02
+ SP2 : Pure 18          :: dE=0.63D-04, dP=0.21D+00, %Non0=0.16D+02
+ SP2 : Pure 19          :: dE=0.20D-02, dP=0.13D+00, %Non0=0.16D+02
+ SP2 : Pure 20          :: dE=0.86D-04, dP=0.86D-01, %Non0=0.16D+02
+ SP2 : Pure 21          :: dE=0.84D-03, dP=0.59D-01, %Non0=0.16D+02
+ SP2 : Pure 22          :: dE=0.10D-03, dP=0.18D-01, %Non0=0.16D+02
+ SP2 : Pure 23          :: dE=0.27D-03, dP=0.24D-01, %Non0=0.16D+02
+ SP2 : Pure 24          :: dE=0.38D-04, dP=0.45D-02, %Non0=0.16D+02
+ SP2 : Pure 25          :: dE=0.81D-06, dP=0.56D-03, %Non0=0.16D+02
+ SP2 : Pure 26          :: dE=0.24D-05, dP=0.28D-03, %Non0=0.16D+02
+ SP2 : Pure 27          :: dE=0.20D-08, dP=0.82D-06, %Non0=0.16D+02
+ SP2 : Hit dE increase  :: Tr{FP}=-.3867675545570886D+03, dNel = 0.28D-13
+ SP2                    :: 27 purification steps, 28 matrix multiplies
+ SP2                    :: Fractional occupation = 0.79D+00, ThrX=0.10D-04, %Non0s = 0.16D+02
+ SP2 : Max abs errors   :: dE=0.76D-06, dP=0.82D-06
+ SP2                    :: Rel dE=0.20D-08, ||dP||_F=0.41D-05
+ SP2                    :: OrthoP[2] CheckSum  = 0.6708203932497507D+01                                                          
+ SP2                    :: P[2] CheckSum  = 0.6734824391034320D+01                                                               
+ SP2                    :: Parallel Statistics
+                     Imblnce = 0.61D-02
+                     MinTime = 0.10D+01
+                     AvgTime = 0.10D+01
+                     MaxTime = 0.10D+01
+ SP2                    :: WALL (Sec,MFLOPS) = (0.10D+01, 20), NProc = 8
+>-Exiting SP2 10/26/04 @ 23:42:55-<
+<< Entering ODA 10/26/04 @ 23:42:58>>
+ IKPS_Error = 0.37893D-03
+ ODA :  Mix = 1.00000   :: <SCF> = -1300.31076819, d3 = -.45D-12
+ ODA                    :: Pao[2] CheckSum  = 0.6734157948085690D+01                                                             
+ ODA                    :: Fao[2] CheckSum  = 0.1424206277410256D+03                                                             
+ ODA                    :: For[2] CheckSum  = 0.1283370733689168D+03                                                             
+ ODA                    :: Parallel Statistics
+                     Imblnce = 0.72D-11
+                     MinTime = 0.40D+01
+                     AvgTime = 0.40D+01
+                     MaxTime = 0.40D+01
+ ODA                    :: WALL Sec = 0.40D+01, NProc = 8
+>-Exiting ODA 10/26/04 @ 23:43:02-<
+<< Entering SP2 10/26/04 @ 23:43:03>>
+ SP2 : Pure 1           :: dE=0.10D+01, dP=0.29D+00, %Non0=0.16D+02
+ SP2 : Pure 2           :: dE=0.14D+00, dP=0.44D+00, %Non0=0.16D+02
+ SP2 : Pure 3           :: dE=0.97D-01, dP=0.63D+00, %Non0=0.16D+02
+ SP2 : Pure 4           :: dE=0.48D-01, dP=0.67D+00, %Non0=0.16D+02
+ SP2 : Pure 5           :: dE=0.15D-01, dP=0.47D+00, %Non0=0.16D+02
+ SP2 : Pure 6           :: dE=0.25D-01, dP=0.60D+00, %Non0=0.16D+02
+ SP2 : Pure 7           :: dE=0.48D-02, dP=0.39D+00, %Non0=0.16D+02
+ SP2 : Pure 8           :: dE=0.11D-01, dP=0.51D+00, %Non0=0.16D+02
+ SP2 : Pure 9           :: dE=0.12D-02, dP=0.33D+00, %Non0=0.16D+02
+ SP2 : Pure 10          :: dE=0.63D-03, dP=0.44D+00, %Non0=0.16D+02
+ SP2 : Pure 11          :: dE=0.33D-02, dP=0.26D+00, %Non0=0.16D+02
+ SP2 : Pure 12          :: dE=0.37D-02, dP=0.37D+00, %Non0=0.16D+02
+ SP2 : Pure 13          :: dE=0.16D-02, dP=0.40D+00, %Non0=0.16D+02
+ SP2 : Pure 14          :: dE=0.52D-02, dP=0.33D+00, %Non0=0.16D+02
+ SP2 : Pure 15          :: dE=0.37D-02, dP=0.34D+00, %Non0=0.16D+02
+ SP2 : Pure 16          :: dE=0.48D-03, dP=0.33D+00, %Non0=0.16D+02
+ SP2 : Pure 17          :: dE=0.33D-02, dP=0.24D+00, %Non0=0.16D+02
+ SP2 : Pure 18          :: dE=0.63D-04, dP=0.21D+00, %Non0=0.16D+02
+ SP2 : Pure 19          :: dE=0.20D-02, dP=0.13D+00, %Non0=0.16D+02
+ SP2 : Pure 20          :: dE=0.86D-04, dP=0.86D-01, %Non0=0.16D+02
+ SP2 : Pure 21          :: dE=0.84D-03, dP=0.59D-01, %Non0=0.16D+02
+ SP2 : Pure 22          :: dE=0.10D-03, dP=0.18D-01, %Non0=0.16D+02
+ SP2 : Pure 23          :: dE=0.27D-03, dP=0.24D-01, %Non0=0.16D+02
+ SP2 : Pure 24          :: dE=0.38D-04, dP=0.45D-02, %Non0=0.16D+02
+ SP2 : Pure 25          :: dE=0.81D-06, dP=0.56D-03, %Non0=0.16D+02
+ SP2 : Pure 26          :: dE=0.24D-05, dP=0.28D-03, %Non0=0.16D+02
+ SP2 : Pure 27          :: dE=0.20D-08, dP=0.82D-06, %Non0=0.16D+02
+ SP2 : Hit dE increase  :: Tr{FP}=-.3867675545570886D+03, dNel = 0.00D+00
+ SP2                    :: 27 purification steps, 28 matrix multiplies
+ SP2                    :: Fractional occupation = 0.79D+00, ThrX=0.10D-04, %Non0s = 0.16D+02
+ SP2 : Max abs errors   :: dE=0.76D-06, dP=0.82D-06
+ SP2                    :: Rel dE=0.20D-08, ||dP||_F=0.41D-05
+ SP2                    :: OrthoP[2] CheckSum  = 0.6708203932497507D+01                                                          
+ SP2                    :: P[2] CheckSum  = 0.6734824391034322D+01                                                               
+ SP2                    :: Parallel Statistics
+                     Imblnce = 0.10D-02
+                     MinTime = 0.49D+01
+                     AvgTime = 0.49D+01
+                     MaxTime = 0.49D+01
+ SP2                    :: WALL (Sec,MFLOPS) = (0.49D+01, 4), NProc = 8
+>-Exiting SP2 10/26/04 @ 23:43:08-<
+<< Entering SCFStatus 10/26/04 @ 23:43:09>>
+ 
+= = = = = SCFCycle #1, Basis #1, Geometry #3 = = = = =
+
+       DIISErr = 0.10D+01
+       MaxDelD = 0.19D-02
+       <T>     = 0.12869091D+04
+       <V>     = -.24744831D+04
+       <HF>    = -.11273676D+03
+       <SCF>   = -1300.31076819
+
+ SCFStatus              :: Parallel Statistics
+                     Imblnce = 0.97D-09
+                     MinTime = 0.30D-01
+                     AvgTime = 0.30D-01
+                     MaxTime = 0.30D-01
+ SCFStatus              :: WALL (Sec,MFLOPS) = (0.30D-01, 37), NProc = 8
+>-Exiting SCFStatus 10/26/04 @ 23:43:09-<
+<< Entering MakeRho 10/26/04 @ 23:43:10>>
+ MakeRho : Pruned Rho   :: dNel = 0.28D-13, kept 100% of distributions.
+ MakeRho : Moments      :: <r> = (-.81D+01, 0.48D+01, -.60D+01), <r^2> = 0.34D+02
+ MakeRho                :: Rho CheckSum  = 0.2558166269255984D+04
+ MakeRho                :: Parallel Statistics
+                     Imblnce = 0.57D-02
+                     MinTime = 0.43D+00
+                     AvgTime = 0.44D+00
+                     MaxTime = 0.44D+00
+ MakeRho                :: WALL Sec = 0.44D+00, NProc = 8
+>-Exiting MakeRho 10/26/04 @ 23:43:11-<
+<< Entering QCTC 10/26/04 @ 23:43:12>>
+ QCTC                   :: J[2] CheckSum  = 0.2889612089644845D+03
+ QCTC : 3-D periodics   :: MxL = 7, PAC Cells = 277, MAC Cells = 851
+ QCTC : FF Energy       :: <FF> = 0.4608621074253524D-03
+ QCTC                   :: Parallel Statistics
+                     Imblnce = 0.51D-04
+                     MinTime = 0.98D+02
+                     AvgTime = 0.98D+02
+                     MaxTime = 0.98D+02
+ QCTC                   :: WALL Sec = 0.98D+02, NProc = 8
+>-Exiting QCTC 10/26/04 @ 23:44:51-<
+<< Entering ONX2 10/26/04 @ 23:44:52>>
+ ONX2                   :: Kx[2] CheckSum  = 0.2355181468063433D+02
+ ONX2                   :: Parallel Statistics
+                     Imblnce = 0.24D-03
+                     MinTime = 0.10D+02
+                     AvgTime = 0.10D+02
+                     MaxTime = 0.10D+02
+ ONX2                   :: WALL Sec = 0.10D+02, NProc = 8
+>-Exiting ONX2 10/26/04 @ 23:45:03-<
+<< Entering FockNGrueven 10/26/04 @ 23:45:04>>
+ FockNGrueven           :: F[2] CheckSum  = 0.1424208503792620D+03                                                               
+ FockNGrueven           :: OrthoF[2] CheckSum  = 0.1283372658089176D+03                                                          
+ FockNGrueven           :: Parallel Statistics
+                     Imblnce = 0.27D-01
+                     MinTime = 0.28D+00
+                     AvgTime = 0.28D+00
+                     MaxTime = 0.29D+00
+ FockNGrueven           :: WALL (Sec,MFLOPS) = (0.28D+00, 1), NProc = 8
+>-Exiting FockNGrueven 10/26/04 @ 23:45:04-<
+<< Entering SP2 10/26/04 @ 23:45:05>>
+ SP2 : Pure 1           :: dE=0.10D+01, dP=0.29D+00, %Non0=0.16D+02
+ SP2 : Pure 2           :: dE=0.14D+00, dP=0.44D+00, %Non0=0.16D+02
+ SP2 : Pure 3           :: dE=0.97D-01, dP=0.63D+00, %Non0=0.16D+02
+ SP2 : Pure 4           :: dE=0.48D-01, dP=0.67D+00, %Non0=0.16D+02
+ SP2 : Pure 5           :: dE=0.15D-01, dP=0.47D+00, %Non0=0.16D+02
+ SP2 : Pure 6           :: dE=0.25D-01, dP=0.60D+00, %Non0=0.16D+02
+ SP2 : Pure 7           :: dE=0.48D-02, dP=0.39D+00, %Non0=0.16D+02
+ SP2 : Pure 8           :: dE=0.11D-01, dP=0.51D+00, %Non0=0.16D+02
+ SP2 : Pure 9           :: dE=0.12D-02, dP=0.33D+00, %Non0=0.16D+02
+ SP2 : Pure 10          :: dE=0.63D-03, dP=0.44D+00, %Non0=0.16D+02
+ SP2 : Pure 11          :: dE=0.33D-02, dP=0.26D+00, %Non0=0.16D+02
+ SP2 : Pure 12          :: dE=0.37D-02, dP=0.37D+00, %Non0=0.16D+02
+ SP2 : Pure 13          :: dE=0.16D-02, dP=0.40D+00, %Non0=0.16D+02
+ SP2 : Pure 14          :: dE=0.52D-02, dP=0.33D+00, %Non0=0.16D+02
+ SP2 : Pure 15          :: dE=0.37D-02, dP=0.34D+00, %Non0=0.16D+02
+ SP2 : Pure 16          :: dE=0.49D-03, dP=0.33D+00, %Non0=0.16D+02
+ SP2 : Pure 17          :: dE=0.33D-02, dP=0.24D+00, %Non0=0.16D+02
+ SP2 : Pure 18          :: dE=0.67D-04, dP=0.21D+00, %Non0=0.16D+02
+ SP2 : Pure 19          :: dE=0.20D-02, dP=0.13D+00, %Non0=0.16D+02
+ SP2 : Pure 20          :: dE=0.83D-04, dP=0.86D-01, %Non0=0.16D+02
+ SP2 : Pure 21          :: dE=0.84D-03, dP=0.58D-01, %Non0=0.16D+02
+ SP2 : Pure 22          :: dE=0.99D-04, dP=0.18D-01, %Non0=0.16D+02
+ SP2 : Pure 23          :: dE=0.27D-03, dP=0.24D-01, %Non0=0.16D+02
+ SP2 : Pure 24          :: dE=0.38D-04, dP=0.44D-02, %Non0=0.16D+02
+ SP2 : Pure 25          :: dE=0.85D-06, dP=0.56D-03, %Non0=0.16D+02
+ SP2 : Pure 26          :: dE=0.23D-05, dP=0.27D-03, %Non0=0.16D+02
+ SP2 : Pure 27          :: dE=0.18D-08, dP=0.82D-06, %Non0=0.16D+02
+ SP2 : Hit dE increase  :: Tr{FP}=-.3867702466928208D+03, dNel = 0.00D+00
+ SP2                    :: 27 purification steps, 28 matrix multiplies
+ SP2                    :: Fractional occupation = 0.79D+00, ThrX=0.10D-04, %Non0s = 0.16D+02
+ SP2 : Max abs errors   :: dE=0.69D-06, dP=0.82D-06
+ SP2                    :: Rel dE=0.18D-08, ||dP||_F=0.41D-05
+ SP2                    :: OrthoP[3] CheckSum  = 0.6708203932497437D+01                                                          
+ SP2                    :: P[3] CheckSum  = 0.6735137013658648D+01                                                               
+ SP2                    :: Parallel Statistics
+                     Imblnce = 0.19D-02
+                     MinTime = 0.27D+01
+                     AvgTime = 0.27D+01
+                     MaxTime = 0.27D+01
+ SP2                    :: WALL (Sec,MFLOPS) = (0.27D+01, 7), NProc = 8
+>-Exiting SP2 10/26/04 @ 23:45:08-<
+<< Entering ODA 10/26/04 @ 23:45:10>>
+ IKPS_Error = 0.74045D-03
+ ODA :  Mix = 1.00000   :: <SCF> = -1300.31080608, d3 = 0.34D-12
+ ODA                    :: Pao[3] CheckSum  = 0.6734824391034322D+01                                                             
+ ODA                    :: Fao[3] CheckSum  = 0.1424208503792620D+03                                                             
+ ODA                    :: For[3] CheckSum  = 0.1283372658089176D+03                                                             
+ ODA                    :: Por[3] CheckSum  = 0.6708203932497507D+01                                                             
+ ODA                    :: Parallel Statistics
+                     Imblnce = 0.43D-03
+                     MinTime = 0.58D+01
+                     AvgTime = 0.58D+01
+                     MaxTime = 0.58D+01
+ ODA                    :: WALL Sec = 0.58D+01, NProc = 8
+>-Exiting ODA 10/26/04 @ 23:45:16-<
+<< Entering SP2 10/26/04 @ 23:45:17>>
+ SP2 : Pure 1           :: dE=0.10D+01, dP=0.29D+00, %Non0=0.16D+02
+ SP2 : Pure 2           :: dE=0.14D+00, dP=0.44D+00, %Non0=0.16D+02
+ SP2 : Pure 3           :: dE=0.97D-01, dP=0.63D+00, %Non0=0.16D+02
+ SP2 : Pure 4           :: dE=0.48D-01, dP=0.67D+00, %Non0=0.16D+02
+ SP2 : Pure 5           :: dE=0.15D-01, dP=0.47D+00, %Non0=0.16D+02
+ SP2 : Pure 6           :: dE=0.25D-01, dP=0.60D+00, %Non0=0.16D+02
+ SP2 : Pure 7           :: dE=0.48D-02, dP=0.39D+00, %Non0=0.16D+02
+ SP2 : Pure 8           :: dE=0.11D-01, dP=0.51D+00, %Non0=0.16D+02
+ SP2 : Pure 9           :: dE=0.12D-02, dP=0.33D+00, %Non0=0.16D+02
+ SP2 : Pure 10          :: dE=0.63D-03, dP=0.44D+00, %Non0=0.16D+02
+ SP2 : Pure 11          :: dE=0.33D-02, dP=0.26D+00, %Non0=0.16D+02
+ SP2 : Pure 12          :: dE=0.37D-02, dP=0.37D+00, %Non0=0.16D+02
+ SP2 : Pure 13          :: dE=0.16D-02, dP=0.40D+00, %Non0=0.16D+02
+ SP2 : Pure 14          :: dE=0.52D-02, dP=0.33D+00, %Non0=0.16D+02
+ SP2 : Pure 15          :: dE=0.37D-02, dP=0.34D+00, %Non0=0.16D+02
+ SP2 : Pure 16          :: dE=0.49D-03, dP=0.33D+00, %Non0=0.16D+02
+ SP2 : Pure 17          :: dE=0.33D-02, dP=0.24D+00, %Non0=0.16D+02
+ SP2 : Pure 18          :: dE=0.67D-04, dP=0.21D+00, %Non0=0.16D+02
+ SP2 : Pure 19          :: dE=0.20D-02, dP=0.13D+00, %Non0=0.16D+02
+ SP2 : Pure 20          :: dE=0.83D-04, dP=0.86D-01, %Non0=0.16D+02
+ SP2 : Pure 21          :: dE=0.84D-03, dP=0.58D-01, %Non0=0.16D+02
+ SP2 : Pure 22          :: dE=0.99D-04, dP=0.18D-01, %Non0=0.16D+02
+ SP2 : Pure 23          :: dE=0.27D-03, dP=0.24D-01, %Non0=0.16D+02
+ SP2 : Pure 24          :: dE=0.38D-04, dP=0.44D-02, %Non0=0.16D+02
+ SP2 : Pure 25          :: dE=0.85D-06, dP=0.56D-03, %Non0=0.16D+02
+ SP2 : Pure 26          :: dE=0.23D-05, dP=0.27D-03, %Non0=0.16D+02
+ SP2 : Pure 27          :: dE=0.18D-08, dP=0.82D-06, %Non0=0.16D+02
+ SP2 : Hit dE increase  :: Tr{FP}=-.3867702466928208D+03, dNel = 0.00D+00
+ SP2                    :: 27 purification steps, 28 matrix multiplies
+ SP2                    :: Fractional occupation = 0.79D+00, ThrX=0.10D-04, %Non0s = 0.16D+02
+ SP2 : Max abs errors   :: dE=0.69D-06, dP=0.82D-06
+ SP2                    :: Rel dE=0.18D-08, ||dP||_F=0.41D-05
+ SP2                    :: OrthoP[3] CheckSum  = 0.6708203932497435D+01                                                          
+ SP2                    :: P[3] CheckSum  = 0.6735137013658647D+01                                                               
+ SP2                    :: Parallel Statistics
+                     Imblnce = 0.73D-03
+                     MinTime = 0.34D+01
+                     AvgTime = 0.34D+01
+                     MaxTime = 0.34D+01
+ SP2                    :: WALL (Sec,MFLOPS) = (0.34D+01, 6), NProc = 8
+>-Exiting SP2 10/26/04 @ 23:45:21-<
+<< Entering SCFStatus 10/26/04 @ 23:45:22>>
+ 
+= = = = = SCFCycle #2, Basis #1, Geometry #3 = = = = =
+
+       DIISErr = 0.34D-04
+       MaxDelD = 0.82D-03
+       <T>     = 0.12869150D+04
+       <V>     = -.24744882D+04
+       <HF>    = -.11273758D+03
+       <SCF>   = -1300.31080608
+
+ SCFStatus              :: Parallel Statistics
+                     Imblnce = 0.11D+00
+                     MinTime = 0.40D-01
+                     AvgTime = 0.45D-01
+                     MaxTime = 0.50D-01
+ SCFStatus              :: WALL (Sec,MFLOPS) = (0.50D-01, 22), NProc = 8
+>-Exiting SCFStatus 10/26/04 @ 23:45:23-<
+<< Entering SForce 10/26/04 @ 23:45:24>>
+ SForce                 :: dS/dR CheckSum  = 0.1944625861567695D+00
+ SForce                 :: Parallel Statistics
+                     Imblnce = 0.71D-10
+                     MinTime = 0.41D+00
+                     AvgTime = 0.41D+00
+                     MaxTime = 0.41D+00
+ SForce                 :: WALL (Sec,MFLOPS) = (0.41D+00, 1), NProc = 8
+>-Exiting SForce 10/26/04 @ 23:45:25-<
+<< Entering TForce 10/26/04 @ 23:45:26>>
+ TForce                 :: dT/dR CheckSum  = 0.5856506944798317D+00
+ TForce                 :: Parallel Statistics
+                     Imblnce = 0.45D-10
+                     MinTime = 0.98D+00
+                     AvgTime = 0.98D+00
+                     MaxTime = 0.98D+00
+ TForce                 :: WALL Sec = 0.98D+00, NProc = 8
+>-Exiting TForce 10/26/04 @ 23:45:27-<
+<< Entering MakeRho 10/26/04 @ 23:45:33>>
+ MakeRho : Pruned Rho   :: dNel = -.57D-13, kept 100% of distributions.
+ MakeRho : Moments      :: <r> = (-.50D+01, 0.29D+01, -.37D+01), <r^2> = 0.44D+02
+ MakeRho                :: Rho CheckSum  = 0.2558186722196351D+04
+ MakeRho                :: Parallel Statistics
+                     Imblnce = 0.78D-10
+                     MinTime = 0.56D+00
+                     AvgTime = 0.56D+00
+                     MaxTime = 0.56D+00
+ MakeRho                :: WALL Sec = 0.56D+00, NProc = 8
+>-Exiting MakeRho 10/26/04 @ 23:45:34-<
+<< Entering JForce 10/26/04 @ 23:45:35>>
+ JForce                 :: dJ/dR CheckSum  = 0.4118982041312288D+00
+ JForce                 :: Parallel Statistics
+                     Imblnce = 0.78D-04
+                     MinTime = 0.19D+03
+                     AvgTime = 0.19D+03
+                     MaxTime = 0.19D+03
+ JForce                 :: WALL Sec = 0.19D+03, NProc = 8
+>-Exiting JForce 10/26/04 @ 23:48:47-<
+<< Entering GONX2 10/26/04 @ 23:48:50>>
+ GONX2                  :: dKx/dR[3] CheckSum  = 0.3680695750009904D+00
+ ComputeGK: TmMax=     46.42880697466899      , TmMin= 
+    15.23875994340051     
+ ComputeGK: Imbalance =    0.2865124176794794     
+ GONX2                  :: Parallel Statistics
+                     Imblnce = 0.16D-03
+                     MinTime = 0.47D+02
+                     AvgTime = 0.47D+02
+                     MaxTime = 0.47D+02
+ GONX2                  :: WALL Sec = 0.47D+02, NProc = 8
+>-Exiting GONX2 10/26/04 @ 23:49:37-<
+ GradNew%D= 
+   0.4358152020391999        5.2892442042462573E-002   0.1223859434737345     
+  -0.1741096988061443        0.4063133246514709       -0.1239699293119133     
+   0.1636912155872329       -9.5538155335654409E-002   0.3672190797472767     
+ XYZNew%D= 
+    9.263247823415023         0.000000000000000         0.000000000000000     
+   -4.631623911707512         8.022207936628320         0.000000000000000     
+    0.000000000000000         0.000000000000000         10.20225266713989     
+ before cleanconstr cartgrad = 
+   5.5816493042344648E-004   1.3583742883710170E-003   1.2153153468534572E-004
+  -7.3790997528969111E-004   1.9022719525762648E-003  -1.8882946175286381E-003
+  -6.0422869535926846E-004   4.4346050950875782E-004  -2.0673025646387684E-004
+  -1.5694883674399751E-003  -6.4542526991765410E-004  -2.2981200384041416E-003
+   1.5477652226050798E-003  -1.2120203870274182E-003  -2.9011945800124920E-003
+   5.1694769718939328E-004  -1.7402116742407935E-003   2.4826403591457211E-003
+  -1.1451673214227243E-004  -2.2674575049311945E-004  -1.1222503392513405E-005
+  -2.1007927479463895E-003   3.9197361169153453E-004   3.0662664950145411E-003
+   2.1300950985436025E-003  -2.2004247073661998E-004   1.6227789046122516E-003
+   0.4358152020391999        5.2892442042462573E-002   0.1223859434737345     
+  -0.1741096988061443        0.4063133246514709       -0.1239699293119133     
+   0.1636912155872329       -9.5538155335654409E-002   0.3672190797472767     
+ after SYMMSTRESS cartgrad = 
+   5.5816493042344648E-004   1.3583742883710170E-003   1.2153153468534572E-004
+  -7.3790997528969111E-004   1.9022719525762648E-003  -1.8882946175286381E-003
+  -6.0422869535926846E-004   4.4346050950875782E-004  -2.0673025646387684E-004
+  -1.5694883674399751E-003  -6.4542526991765410E-004  -2.2981200384041416E-003
+   1.5477652226050798E-003  -1.2120203870274182E-003  -2.9011945800124920E-003
+   5.1694769718939328E-004  -1.7402116742407935E-003   2.4826403591457211E-003
+  -1.1451673214227243E-004  -2.2674575049311945E-004  -1.1222503392513405E-005
+  -2.1007927479463895E-003   3.9197361169153453E-004   3.0662664950145411E-003
+   2.1300950985436025E-003  -2.2004247073661998E-004   1.6227789046122516E-003
+   0.4358152020391999        5.2892442042462573E-002   0.1223859434737345     
+  -0.1741096988061443        0.4063133246514709       -0.1239699293119133     
+   0.1636912155872329       -9.5538155335654409E-002   0.3672190797472767     
+ after cleanconstr cartgrad = 
+   5.5816493042344648E-004   1.3583742883710170E-003   1.2153153468534572E-004
+  -7.3790997528969111E-004   1.9022719525762648E-003  -1.8882946175286381E-003
+  -6.0422869535926846E-004   4.4346050950875782E-004  -2.0673025646387684E-004
+  -1.5694883674399751E-003  -6.4542526991765410E-004  -2.2981200384041416E-003
+   1.5477652226050798E-003  -1.2120203870274182E-003  -2.9011945800124920E-003
+   5.1694769718939328E-004  -1.7402116742407935E-003   2.4826403591457211E-003
+  -1.1451673214227243E-004  -2.2674575049311945E-004  -1.1222503392513405E-005
+  -2.1007927479463895E-003   3.9197361169153453E-004   3.0662664950145411E-003
+   2.1300950985436025E-003  -2.2004247073661998E-004   1.6227789046122516E-003
+   0.4358152020391999        5.2892442042462573E-002   0.1223859434737345     
+  -0.1741096988061443        0.4063133246514709       -0.1239699293119133     
+   0.1636912155872329       -9.5538155335654409E-002   0.3672190797472767     
+ after transloff cartgrad = 
+   5.9971643813634383E-004   1.3526370872896871E-003   1.2290316827910150E-004
+  -6.9635846757679403E-004   1.8965347514949348E-003  -1.8869229839348822E-003
+  -5.6267718764637120E-004   4.3772330842742777E-004  -2.0535862287012110E-004
+  -1.5279368597270779E-003  -6.5116247099898397E-004  -2.2967484048103861E-003
+   1.5893167303179769E-003  -1.2177575881087481E-003  -2.8998229464187366E-003
+   5.5849920490229055E-004  -1.7459488753221235E-003   2.4840119927394770E-003
+  -7.2965224429375226E-005  -2.3248295157444945E-004  -9.8508697987576159E-006
+  -2.0592412402334923E-003   3.8623641061020454E-004   3.0676381286082970E-003
+   2.1716466062564996E-003  -2.2577967181794998E-004   1.6241505382060073E-003
+   0.4358152020391999        5.2892442042462573E-002   0.1223859434737345     
+  -0.1741096988061443        0.4063133246514709       -0.1239699293119133     
+   0.1636912155872329       -9.5538155335654409E-002   0.3672190797472767     
+PRot=   0.001%
+ after rotoff cartgrad = 
+   5.9971643813634383E-004   1.3526370872896871E-003   1.2290316827910150E-004
+  -6.9635846757679403E-004   1.8965347514949348E-003  -1.8869229839348822E-003
+  -5.6267718764637120E-004   4.3772330842742777E-004  -2.0535862287012110E-004
+  -1.5279368597270779E-003  -6.5116247099898397E-004  -2.2967484048103861E-003
+   1.5893167303179769E-003  -1.2177575881087481E-003  -2.8998229464187366E-003
+   5.5849920490229055E-004  -1.7459488753221235E-003   2.4840119927394770E-003
+  -7.2965224429375226E-005  -2.3248295157444945E-004  -9.8508697987576159E-006
+  -2.0592412402334923E-003   3.8623641061020454E-004   3.0676381286082970E-003
+   2.1716466062564996E-003  -2.2577967181794998E-004   1.6241505382060073E-003
+   0.4358152020391999        5.2632841078410202E-002   0.1208590947681818     
+  -0.1738848777764280        0.4064431251334971       -0.1225548002339262     
+   0.1653728392008394       -9.6366961609873663E-002   0.3672190797472767     
+ NUMBER OF FRAGMENTS OBSERVED=             7
+ Sparsity of B=  25.00 % # of SpB%NNon0       432
+Sparsity of Gc=  56.94 % # of  Gc%NNon0       738
+Sparsity of Ch=  55.71 % # of  Ch%NNon0       351
+ Internals at step #3
+INTERNAL COORDINATES
+       DEFINITION       ATOMS_INVOLVED      VALUE        CONSTRAINT    ACTIVE
+      1  STRE          1    4    0    0      1.618775    F    0.000000    T
+      2  STRE          1    9    0    0      1.615649    F    0.000000    T
+      3  STRE          4    7    0    0      1.619023    F    0.000000    T
+      4  STRE          7    9    0    0      1.622916    F    0.000000    T
+                0 1 0   0 0 0   0 0 0   0 0 0
+      5  STRE          3    8    0    0      1.619483    F    0.000000    T
+      6  STRE          3    6    0    0      1.619532    F    0.000000    T
+      7  STRE          7    8    0    0      1.621839    F    0.000000    T
+                0 1 0   0 0 0   0 0 0   0 0 0
+      8  STRE          5    7    0    0      1.619906    F    0.000000    T
+      9  STRE          3    5    0    0      1.621772    F    0.000000    T
+                1 0 0   0 0 0   0 0 0   0 0 0
+     10  STRE          1    6    0    0      1.618893    F    0.000000    T
+                0 0 1   0 0 0   0 0 0   0 0 0
+     11  STRE          2    3    0    0      1.622790    F    0.000000    T
+                0 0 0   1 0 0   0 0 0   0 0 0
+     12  STRE          1    2    0    0      1.616182    F    0.000000    T
+                0 0 1   0 0 0   0 0 0   0 0 0
+     13  BEND          4    1    6    0    110.259419    F    0.000000    T
+                0 0 0   0 0 0   0 0-1   0 0 0
+     14  BEND          4    1    9    0    108.853193    F    0.000000    T
+     15  BEND          2    1    4    0    110.800213    F    0.000000    T
+                0 0-1   0 0 0   0 0 0   0 0 0
+     16  BEND          6    1    9    0    110.763026    F    0.000000    T
+                0 0-1   0 0 0   0 0 0   0 0 0
+     17  BEND          2    1    6    0    108.859290    F    0.000000    T
+                0 0-1   0 0 0   0 0-1   0 0 0
+     18  BEND          2    1    9    0    107.266926    F    0.000000    T
+                0 0-1   0 0 0   0 0 0   0 0 0
+     19  BEND          1    2    3    0    140.705033    F    0.000000    T
+                0 0 1   0 0 0   1 0 0   0 0 0
+     20  BEND          5    3    8    0    108.673028    F    0.000000    T
+               -1 0 0   0 0 0   0 0 0   0 0 0
+     21  BEND          2    3    8    0    110.345690    F    0.000000    T
+               -1 0 0   0 0 0   0 0 0   0 0 0
+     22  BEND          6    3    8    0    110.983152    F    0.000000    T
+     23  BEND          2    3    5    0    110.807039    F    0.000000    T
+               -1 0 0   0 0 0  -1 0 0   0 0 0
+     24  BEND          5    3    6    0    107.346513    F    0.000000    T
+               -1 0 0   0 0 0   0 0 0   0 0 0
+     25  BEND          2    3    6    0    108.649315    F    0.000000    T
+               -1 0 0   0 0 0   0 0 0   0 0 0
+     26  BEND          1    4    7    0    140.948157    F    0.000000    T
+     27  BEND          3    5    7    0    140.612875    F    0.000000    T
+                1 0 0   0 0 0   0 0 0   0 0 0
+     28  BEND          1    6    3    0    140.927378    F    0.000000    T
+                0 0 1   0 0 0   0 0 0   0 0 0
+     29  BEND          4    7    9    0    108.654938    F    0.000000    T
+                0 0 0   0 0 0   0-1 0   0 0 0
+     30  BEND          4    7    8    0    107.332958    F    0.000000    T
+                0 0 0   0 0 0   0-1 0   0 0 0
+     31  BEND          4    7    5    0    110.945604    F    0.000000    T
+     32  BEND          8    7    9    0    110.792643    F    0.000000    T
+                0-1 0   0 0 0   0-1 0   0 0 0
+     33  BEND          5    7    9    0    110.363482    F    0.000000    T
+                0 0 0   0 0 0   0-1 0   0 0 0
+     34  BEND          5    7    8    0    108.713557    F    0.000000    T
+                0 0 0   0 0 0   0-1 0   0 0 0
+     35  BEND          3    8    7    0    140.542597    F    0.000000    T
+                0 0 0   0 0 0   0 1 0   0 0 0
+     36  BEND          1    9    7    0    140.786624    F    0.000000    T
+                0 0 0   0 0 0   0 1 0   0 0 0
+     37  TORS          7    4    1    9   -134.629291    F    0.000000    T
+     38  TORS          2    1    9    7   -147.701027    F    0.000000    T
+                0 0-1   0 0 0   0 0 0   0 1 0
+     39  TORS          1    4    7    8   -147.775619    F    0.000000    T
+                0 0 0   0 0 0   0 0 0   0-1 0
+     40  TORS          1    9    7    4   -134.786168    F    0.000000    T
+                0 0 0   0 0 0   0 1 0   0 1 0
+     41  TORS          5    3    8    7   -134.871511    F    0.000000    T
+               -1 0 0   0 0 0   0 0 0   0 1 0
+     42  TORS          1    6    3    5   -147.714158    F    0.000000    T
+                0 0 1   0 0 0   0 0 0  -1 0 0
+     43  TORS          3    8    7    4   -147.714934    F    0.000000    T
+                0 0 0   0 0 0   0 1 0   0 1 0
+     44  TORS          3    5    7    8   -134.867147    F    0.000000    T
+                1 0 0   0 0 0   0 0 0   0-1 0
+     45  TORS          6    3    5    7   -147.662727    F    0.000000    T
+                1 0 0   1 0 0   0 0 0   0 0 0
+     46  TORS          2    1    6    3   -134.626749    F    0.000000    T
+                0 0 0   0 0 1   0 0 0   0 0 0
+     47  TORS          1    2    3    6   -134.754919    F    0.000000    T
+                0 0 1   0 0 0   1 0 0   1 0 0
+     48  TORS          3    2    1    9   -147.724264    F    0.000000    T
+                1 0 0   0 0 0   0 0 1   0 0 1
+LATTICE  STRE_A                              4.901900
+LATTICE  STRE_B                              4.901900
+LATTICE  STRE_C                              5.398800
+LATTICE  ALPHA                              90.000000
+LATTICE  BETA                               90.000000
+LATTICE  GAMMA                             120.000000
+     Geometry optimization of Clone # 1 converged in   3 steps.
+       Clone =      1 GeOp step =      3 Total Energy =       -1300.31080608
+     Max Unconstrained Cart Grad =     0.003715      on atom     3
+Lattice Parameter        Old Value      Gradient    Displacement   New Value
+          STRE_A          4.901900      0.000600      0.000000      4.901900
+          STRE_B          4.901900      0.001991      0.000000      4.901900
+          STRE_C          5.398800     -0.000205      0.000000      5.398800
+          ALPHA          90.000000      0.007357      0.000000     90.000000
+          BETA           90.000000      0.003632      0.000000     90.000000
+          GAMMA         120.000000     -0.007864      0.000000    120.000000
+Energies of final structures:
+ Clone #         Energy         
+     1    -1300.3108060831
+>-Successful MondoSCF run 10/26/04 @ 23:48:54-<

@@ -1,0 +1,2836 @@
+!--------------------------------------------------------------------------------------------------!
+! INPUT FILE = /n/srv2/vweber/MONDO/Validate/O2.inp                                                !
+! <BeginTitle>                                                                                     !
+!                ** Oxygen **                                                                      !
+!                                                                                                  !
+! STO-3G, d=1.194828                                                                               !
+!  Ref  : E(UHF) = -147.632942003 S**2 = 2.0034                                                    !
+!  Mondo: E(UHF) = -147.63294196  S**2 = 2.00341 !verytight                                        !
+!                                                                                                  !
+! 6-31G, d=1.194828                                                                                !
+!  Ref  : E(UHF) = -149.545838043 S**2 = 2.0328                                                    !
+!  Mondo: E(UHF) = -149.54583803  S**2 = 2.03282 !verytight                                        !
+!                                                                                                  !
+! 6-31G, GeoOpt                                                                                    !
+!  Ref  : E(UHF) = -149.545838043 S**2 = 2.0328  d = 1.194828                                      !
+!  Mondo: E(UHF) = -149.545838024 S**2 = 2.03282 d = 1.194800 !verytight                           !
+!                                                                                                  !
+! <EndTitle>                                                                                       !
+!                                                                                                  !
+! <BeginOptions>                                                                                   !
+! Charge=0                                                                                         !
+! Multiplicity=3                                                                                   !
+! Grad=(Optimize,PrimInt,BiSect,NoGDIIS)                                                           !
+! DebugAll=(MaxDebug,CheckSums)                                                                    !
+! Guess=SuperPos                                                                                   !
+! SCFMethod=(RH,RH)                                                                                !
+! BasisSets=(STO-3G-SPLIT,6-31G-SPLIT)                                                             !
+! ModelChem=(HF,HF)                                                                                !
+! Accuracy =(verytight,verytight)                                                                  !
+! SCFConvergence=(DIIS,DIIS)                                                                       !
+! <EndOptions>                                                                                     !
+!                                                                                                  !
+! <BeginGeometry>                                                                                  !
+!  o   0.000000 0.0 0.0                                                                            !
+!  o   1.300000 0.0 0.0                                                                            !
+! <EndGeometry>                                                                                    !
+!--------------------------------------------------------------------------------------------------!
+
+
+ __    __                 _       ____________ ______ 
+|  \  /  |               | |     /       /    |      |
+|   \/   | ___  _ __   __| | ___/   ____/   __|  |==='
+|        |/ _ \| '_ \ / _  |/ _ \____  \   (__|  ____|
+|  |\/|  | (_) | | | | (_| | (_) )     /\     |  |    
+|__|  |__|\___/|_| |_|\____|\___/_____/  \____|__|    
+
+ Version 1.0 alpha 11 "Gyokuro"                       
+ A program suite for O(N) SCF theory and ab initio MD 
+ Matt Challacombe, C.J. Tymczak, Karoly Nemeth,       
+ Valery Weber, Chee Kwan Gan, Eric Schwegler,         
+ Graeme Henkelman and Anders Niklasson                
+ Los Alamos National Laboratory                       
+ LA-CC-04-086 (formerly 01-2)                         
+ Compiled for IntelLinux.PG, executing on breather
+ a i686 machine running Linux 2.4.21-15.0.4.ELsmp
+
+ Current HDF :: /n/scratch/vweber/ScandiumScratch1/O2_8344.hdf
+<<Starting MondoSCF 09/14/05 @ 19:15:19>>
+<<Entering MakePFFT 09/14/05 @ 19:15:19>>
+ MakePFFT               :: WALL (Sec) = 0.00D+00
+ MakePFFT               :: Allocs=26,  DeAllocs=30, -40 bytes are presently allocated.
+                           A max of 912 bytes were allocated.
+>-Exiting MakePFFT 09/14/05 @ 19:15:19-<
+<<Entering MakeS 09/14/05 @ 19:15:19>>
+ MakeS                  :: S CheckSum  = 0.3296404248815177D+01
+ MakeS                  :: CPU Sec = 0.10D-01, WALL Sec = 0.40D-01
+ MakeS                  :: Allocs=52,  DeAllocs=54, -16 bytes are presently allocated.
+                           A max of 10996 bytes were allocated.
+>-Exiting MakeS 09/14/05 @ 19:15:19-<
+<<Entering LowdinO 09/14/05 @ 19:15:19>>
+ LowdinO                :: X CheckSum  = 0.3341328106846887D+01
+ LowdinO                :: CPU Sec = 0.10D-01, WALL Sec = 0.20D-01
+ LowdinO                :: Allocs=17,  DeAllocs=19, -16 bytes are presently allocated.
+                           A max of 2480 bytes were allocated.
+>-Exiting LowdinO 09/14/05 @ 19:15:19-<
+<<Entering MakeT 09/14/05 @ 19:15:19>>
+ MakeT                  :: T CheckSum  = 0.4150110182892745D+02
+ MakeT                  :: WALL (Sec) = 0.30D-01
+ MakeT                  :: Allocs=48,  DeAllocs=50, -16 bytes are presently allocated.
+                           A max of 5420 bytes were allocated.
+>-Exiting MakeT 09/14/05 @ 19:15:19-<
+<<Entering P2Use 09/14/05 @ 19:15:19>>
+ P2Use                  :: P[0] CheckSum  = 0.4462080821213681D+01
+ P2Use                  :: WALL (Sec) = 0.20D-01
+ P2Use                  :: Allocs=78,  DeAllocs=80, -16 bytes are presently allocated.
+                           A max of 11244 bytes were allocated.
+>-Exiting P2Use 09/14/05 @ 19:15:19-<
+<<Entering MakeRho 09/14/05 @ 19:15:19>>
+ MakeRho : Pruned Rho   :: dNel = -.11D-13, kept 96% of distributions.
+ MakeRho : Moments      :: <r> = (0.12D-13, 0.00D+00, 0.00D+00), <r^2> = 0.92D+01
+ MakeRho                :: Rho-Coef CheckSum  = 0.2132622736382994D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.2782202836797782D+05
+ MakeRho                :: Rho-LMNs CheckSum  = 0.2172784421323721D+03
+ MakeRho                :: CPU Sec = 0.10D-01, WALL Sec = 0.30D-01
+ MakeRho                :: Allocs=97,  DeAllocs=97, 56 bytes are presently allocated.
+                           A max of 58976 bytes were allocated.
+>-Exiting MakeRho 09/14/05 @ 19:15:19-<
+<<Entering QCTC 09/14/05 @ 19:15:19>>
+ QCTC                   :: J[0] CheckSum  = 0.6343354049842592D+02
+ QCTC                   :: CPU Sec = 0.70D-01, WALL Sec = 0.80D-01
+ QCTC                   :: Allocs=1577,  DeAllocs=68, 420240 bytes are presently allocated.
+                           A max of 456444 bytes were allocated.
+>-Exiting QCTC 09/14/05 @ 19:15:19-<
+<<Entering ONX2 09/14/05 @ 19:15:19>>
+ ONX2                   :: Kx[0] CheckSum  = 0.1089027606908640D+02
+ ONX2                   :: CPU Sec = 0.50D-01, WALL Sec = 0.60D-01
+ ONX2                   :: Allocs=88,  DeAllocs=90, -16 bytes are presently allocated.
+                           A max of 6108 bytes were allocated.
+>-Exiting ONX2 09/14/05 @ 19:15:19-<
+<<Entering FockNGrueven 09/14/05 @ 19:15:19>>
+ FockNGrueven           :: F[0] CheckSum  = 0.4330268441566301D+02
+ FockNGrueven           :: OrthoF[0] CheckSum  = 0.4046111181444318D+02
+ FockNGrueven           :: WALL (Sec) = 0.30D-01
+ FockNGrueven           :: Allocs=59,  DeAllocs=57, 828 bytes are presently allocated.
+                           A max of 8180 bytes were allocated.
+>-Exiting FockNGrueven 09/14/05 @ 19:15:19-<
+<<Entering RHEqs 09/14/05 @ 19:15:20>>
+ RHEqs                  :: HOMO = 0.00000000D+00, LUMO = 0.00000000D+00
+ RHEqs                  :: OrthoP[1] CheckSum  = 0.4000000000000000D+01
+ RHEqs                  :: P[1] CheckSum  = 0.4154402750594508D+01
+ RHEqs                  :: CPU Sec = 0.10D-01, WALL Sec = 0.50D-01
+ RHEqs                  :: Allocs=38,  DeAllocs=38, 3184 bytes are presently allocated.
+                           A max of 12204 bytes were allocated.
+>-Exiting RHEqs 09/14/05 @ 19:15:20-<
+<<Entering SCFStatus 09/14/05 @ 19:15:20>>
+ 
+= = = = = SCFCycle #0, Basis #1, Geometry #1 = = = = =
+
+       S**2    = 2.33333
+       MaxDelD = 0.83D+00
+       <T>     = 0.14930389D+03
+       <V>     = -.27925890D+03
+       <HF>    = -.15781074D+02
+       <SCF>   = -145.73608156
+
+ SCFStatus              :: WALL (Sec) = 0.10D-01
+ SCFStatus              :: Allocs=43,  DeAllocs=45, -16 bytes are presently allocated.
+                           A max of 9764 bytes were allocated.
+>-Exiting SCFStatus 09/14/05 @ 19:15:20-<
+<<Entering MakeRho 09/14/05 @ 19:15:20>>
+ MakeRho : Pruned Rho   :: dNel = -.11D-13, kept 96% of distributions.
+ MakeRho : Moments      :: <r> = (-.20D-13, -.29D-16, -.20D-31), <r^2> = 0.97D+01
+ MakeRho                :: Rho-Coef CheckSum  = 0.2105029636076698D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.2763204381383301D+05
+ MakeRho                :: Rho-LMNs CheckSum  = 0.2142798197134848D+03
+ MakeRho                :: CPU Sec = 0.10D-01, WALL Sec = 0.30D-01
+ MakeRho                :: Allocs=97,  DeAllocs=97, 56 bytes are presently allocated.
+                           A max of 58976 bytes were allocated.
+>-Exiting MakeRho 09/14/05 @ 19:15:20-<
+<<Entering QCTC 09/14/05 @ 19:15:20>>
+ QCTC                   :: J[1] CheckSum  = 0.6375686035931432D+02
+ QCTC                   :: CPU Sec = 0.70D-01, WALL Sec = 0.90D-01
+ QCTC                   :: Allocs=1577,  DeAllocs=68, 420240 bytes are presently allocated.
+                           A max of 456444 bytes were allocated.
+>-Exiting QCTC 09/14/05 @ 19:15:20-<
+<<Entering ONX2 09/14/05 @ 19:15:20>>
+ ONX2                   :: Kx[1] CheckSum  = 0.1098486672446063D+02
+ ONX2                   :: CPU Sec = 0.40D-01, WALL Sec = 0.60D-01
+ ONX2                   :: Allocs=88,  DeAllocs=90, -16 bytes are presently allocated.
+                           A max of 6108 bytes were allocated.
+>-Exiting ONX2 09/14/05 @ 19:15:20-<
+<<Entering FockNGrueven 09/14/05 @ 19:15:20>>
+ FockNGrueven           :: F[1] CheckSum  = 0.4377193849698601D+02
+ FockNGrueven           :: OrthoF[1] CheckSum  = 0.4089349199609853D+02
+ FockNGrueven           :: WALL (Sec) = 0.50D-01
+ FockNGrueven           :: Allocs=59,  DeAllocs=57, 828 bytes are presently allocated.
+                           A max of 8180 bytes were allocated.
+>-Exiting FockNGrueven 09/14/05 @ 19:15:20-<
+<<Entering DIIS 09/14/05 @ 19:15:20>>
+ DIIS : Damping         :: Co = 0.90D+00, 0.10D+00
+ DIIS                   :: F_DIIS[1] CheckSum  = 0.4050316635426316D+02
+ DIIS                   :: WALL (Sec) = 0.30D-01
+ DIIS                   :: Allocs=79,  DeAllocs=77, 128 bytes are presently allocated.
+                           A max of 12500 bytes were allocated.
+>-Exiting DIIS 09/14/05 @ 19:15:20-<
+<<Entering RHEqs 09/14/05 @ 19:15:20>>
+ RHEqs                  :: HOMO = 0.00000000D+00, LUMO = 0.00000000D+00
+ RHEqs                  :: OrthoP[2] CheckSum  = 0.4000000000000000D+01
+ RHEqs                  :: P[2] CheckSum  = 0.4149793747145716D+01
+ RHEqs                  :: WALL (Sec) = 0.40D-01
+ RHEqs                  :: Allocs=38,  DeAllocs=38, 3184 bytes are presently allocated.
+                           A max of 12204 bytes were allocated.
+>-Exiting RHEqs 09/14/05 @ 19:15:20-<
+<<Entering SCFStatus 09/14/05 @ 19:15:20>>
+ 
+= = = = = SCFCycle #1, Basis #1, Geometry #1 = = = = =
+
+       S**2    = 2.00000
+       DIISErr = 0.17D-01
+       MaxDelD = 0.55D-02
+       <T>     = 0.14616644D+03
+       <V>     = -.27735345D+03
+       <HF>    = -.16421471D+02
+       <SCF>   = -147.60847340
+
+ SCFStatus              :: WALL (Sec) = 0.10D-01
+ SCFStatus              :: Allocs=43,  DeAllocs=45, -16 bytes are presently allocated.
+                           A max of 9764 bytes were allocated.
+>-Exiting SCFStatus 09/14/05 @ 19:15:20-<
+<<Entering MakeRho 09/14/05 @ 19:15:20>>
+ MakeRho : Pruned Rho   :: dNel = -.11D-13, kept 96% of distributions.
+ MakeRho : Moments      :: <r> = (-.11D-13, -.10D-16, -.11D-31), <r^2> = 0.97D+01
+ MakeRho                :: Rho-Coef CheckSum  = 0.2104466385121705D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.2762593448155671D+05
+ MakeRho                :: Rho-LMNs CheckSum  = 0.2142312719787619D+03
+ MakeRho                :: CPU Sec = 0.10D-01, WALL Sec = 0.30D-01
+ MakeRho                :: Allocs=97,  DeAllocs=97, 56 bytes are presently allocated.
+                           A max of 58976 bytes were allocated.
+>-Exiting MakeRho 09/14/05 @ 19:15:20-<
+<<Entering QCTC 09/14/05 @ 19:15:20>>
+ QCTC                   :: J[2] CheckSum  = 0.6375996054758647D+02
+ QCTC                   :: CPU Sec = 0.90D-01, WALL Sec = 0.11D+00
+ QCTC                   :: Allocs=1577,  DeAllocs=68, 420240 bytes are presently allocated.
+                           A max of 456444 bytes were allocated.
+>-Exiting QCTC 09/14/05 @ 19:15:20-<
+<<Entering ONX2 09/14/05 @ 19:15:20>>
+ ONX2                   :: Kx[2] CheckSum  = 0.1098471735059640D+02
+ ONX2                   :: CPU Sec = 0.30D-01, WALL Sec = 0.50D-01
+ ONX2                   :: Allocs=88,  DeAllocs=90, -16 bytes are presently allocated.
+                           A max of 6108 bytes were allocated.
+>-Exiting ONX2 09/14/05 @ 19:15:21-<
+<<Entering FockNGrueven 09/14/05 @ 19:15:21>>
+ FockNGrueven           :: F[2] CheckSum  = 0.4377617798694548D+02
+ FockNGrueven           :: OrthoF[2] CheckSum  = 0.4089717487655713D+02
+ FockNGrueven           :: WALL (Sec) = 0.40D-01
+ FockNGrueven           :: Allocs=59,  DeAllocs=57, 828 bytes are presently allocated.
+                           A max of 8180 bytes were allocated.
+>-Exiting FockNGrueven 09/14/05 @ 19:15:21-<
+<<Entering DIIS 09/14/05 @ 19:15:21>>
+ DIIS                   :: Cond# = 0.12D+05, MIN(E) = 0.12D-03
+ DIIS : Pulay C1        :: DIISCo = -.97D+01, 0.11D+02
+ DIIS                   :: F_DIIS[2] CheckSum  = 0.4093285523657490D+02
+ DIIS                   :: CPU Sec = 0.10D-01, WALL Sec = 0.70D-01
+ DIIS                   :: Allocs=124,  DeAllocs=121, 200 bytes are presently allocated.
+                           A max of 15676 bytes were allocated.
+>-Exiting DIIS 09/14/05 @ 19:15:21-<
+<<Entering RHEqs 09/14/05 @ 19:15:21>>
+ RHEqs                  :: HOMO = 0.00000000D+00, LUMO = 0.00000000D+00
+ RHEqs                  :: OrthoP[3] CheckSum  = 0.4000000000000000D+01
+ RHEqs                  :: P[3] CheckSum  = 0.4108745702402768D+01
+ RHEqs                  :: CPU Sec = 0.10D-01, WALL Sec = 0.40D-01
+ RHEqs                  :: Allocs=38,  DeAllocs=38, 3184 bytes are presently allocated.
+                           A max of 12204 bytes were allocated.
+>-Exiting RHEqs 09/14/05 @ 19:15:21-<
+<<Entering SCFStatus 09/14/05 @ 19:15:21>>
+ 
+= = = = = SCFCycle #2, Basis #1, Geometry #1 = = = = =
+
+       S**2    = 2.00001
+       DIISErr = 0.15D-01
+       MaxDelD = 0.45D-01
+       <T>     = 0.14614408D+03
+       <V>     = -.27733337D+03
+       <HF>    = -.16421255D+02
+       <SCF>   = -147.61054071
+
+ SCFStatus              :: WALL (Sec) = 0.10D-01
+ SCFStatus              :: Allocs=43,  DeAllocs=45, -16 bytes are presently allocated.
+                           A max of 9764 bytes were allocated.
+>-Exiting SCFStatus 09/14/05 @ 19:15:21-<
+<<Entering MakeRho 09/14/05 @ 19:15:21>>
+ MakeRho : Pruned Rho   :: dNel = 0.78D-13, kept 94% of distributions.
+ MakeRho : Moments      :: <r> = (-.21D-12, 0.56D-16, 0.22D-29), <r^2> = 0.99D+01
+ MakeRho                :: Rho-Coef CheckSum  = 0.2098734342096681D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.2756247106927480D+05
+ MakeRho                :: Rho-LMNs CheckSum  = 0.2137347972946986D+03
+ MakeRho                :: CPU Sec = 0.10D-01, WALL Sec = 0.50D-01
+ MakeRho                :: Allocs=97,  DeAllocs=97, 56 bytes are presently allocated.
+                           A max of 58512 bytes were allocated.
+>-Exiting MakeRho 09/14/05 @ 19:15:21-<
+<<Entering QCTC 09/14/05 @ 19:15:21>>
+ QCTC                   :: J[3] CheckSum  = 0.6378773969892777D+02
+ QCTC                   :: CPU Sec = 0.11D+00, WALL Sec = 0.13D+00
+ QCTC                   :: Allocs=1557,  DeAllocs=68, 414928 bytes are presently allocated.
+                           A max of 450764 bytes were allocated.
+>-Exiting QCTC 09/14/05 @ 19:15:21-<
+<<Entering ONX2 09/14/05 @ 19:15:21>>
+ ONX2                   :: Kx[3] CheckSum  = 0.1098317654729778D+02
+ ONX2                   :: CPU Sec = 0.40D-01, WALL Sec = 0.50D-01
+ ONX2                   :: Allocs=88,  DeAllocs=90, -16 bytes are presently allocated.
+                           A max of 6108 bytes were allocated.
+>-Exiting ONX2 09/14/05 @ 19:15:21-<
+<<Entering FockNGrueven 09/14/05 @ 19:15:21>>
+ FockNGrueven           :: F[3] CheckSum  = 0.4381374732201787D+02
+ FockNGrueven           :: OrthoF[3] CheckSum  = 0.4092967010045300D+02
+ FockNGrueven           :: WALL (Sec) = 0.30D-01
+ FockNGrueven           :: Allocs=59,  DeAllocs=57, 828 bytes are presently allocated.
+                           A max of 8180 bytes were allocated.
+>-Exiting FockNGrueven 09/14/05 @ 19:15:21-<
+<<Entering DIIS 09/14/05 @ 19:15:21>>
+ DIIS                   :: Cond# = 0.18D+07, MIN(E) = 0.99D-06
+ DIIS : Pulay C1        :: DIISCo = 0.41D+01, -.45D+01, 0.14D+01
+ DIIS                   :: F_DIIS[3] CheckSum  = 0.4092876530334627D+02
+ DIIS                   :: CPU Sec = 0.10D-01, WALL Sec = 0.40D-01
+ DIIS                   :: Allocs=118,  DeAllocs=115, 256 bytes are presently allocated.
+                           A max of 14948 bytes were allocated.
+>-Exiting DIIS 09/14/05 @ 19:15:21-<
+<<Entering RHEqs 09/14/05 @ 19:15:21>>
+ RHEqs                  :: HOMO = 0.00000000D+00, LUMO = 0.00000000D+00
+ RHEqs                  :: OrthoP[4] CheckSum  = 0.4000000000000000D+01
+ RHEqs                  :: P[4] CheckSum  = 0.4108605163713989D+01
+ RHEqs                  :: CPU Sec = 0.10D-01, WALL Sec = 0.40D-01
+ RHEqs                  :: Allocs=38,  DeAllocs=38, 3184 bytes are presently allocated.
+                           A max of 12204 bytes were allocated.
+>-Exiting RHEqs 09/14/05 @ 19:15:21-<
+<<Entering SCFStatus 09/14/05 @ 19:15:21>>
+ 
+= = = = = SCFCycle #3, Basis #1, Geometry #1 = = = = =
+
+       S**2    = 2.00243
+       DIISErr = 0.77D-03
+       MaxDelD = 0.38D-02
+       <T>     = 0.14593658D+03
+       <V>     = -.27713709D+03
+       <HF>    = -.16419814D+02
+       <SCF>   = -147.62032322
+
+ SCFStatus              :: WALL (Sec) = 0.10D-01
+ SCFStatus              :: Allocs=43,  DeAllocs=45, -16 bytes are presently allocated.
+                           A max of 9764 bytes were allocated.
+>-Exiting SCFStatus 09/14/05 @ 19:15:21-<
+<<Entering MakeRho 09/14/05 @ 19:15:22>>
+ MakeRho : Pruned Rho   :: dNel = 0.60D-13, kept 94% of distributions.
+ MakeRho : Moments      :: <r> = (0.20D-12, 0.65D-16, 0.45D-28), <r^2> = 0.99D+01
+ MakeRho                :: Rho-Coef CheckSum  = 0.2098680452192942D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.2756186488935009D+05
+ MakeRho                :: Rho-LMNs CheckSum  = 0.2137299364659569D+03
+ MakeRho                :: CPU Sec = 0.10D-01, WALL Sec = 0.40D-01
+ MakeRho                :: Allocs=97,  DeAllocs=97, 56 bytes are presently allocated.
+                           A max of 58512 bytes were allocated.
+>-Exiting MakeRho 09/14/05 @ 19:15:22-<
+<<Entering QCTC 09/14/05 @ 19:15:22>>
+ QCTC                   :: J[4] CheckSum  = 0.6378783506594093D+02
+ QCTC                   :: CPU Sec = 0.70D-01, WALL Sec = 0.80D-01
+ QCTC                   :: Allocs=1557,  DeAllocs=68, 414928 bytes are presently allocated.
+                           A max of 450764 bytes were allocated.
+>-Exiting QCTC 09/14/05 @ 19:15:22-<
+<<Entering ONX2 09/14/05 @ 19:15:22>>
+ ONX2                   :: Kx[4] CheckSum  = 0.1098318421821335D+02
+ ONX2                   :: CPU Sec = 0.30D-01, WALL Sec = 0.50D-01
+ ONX2                   :: Allocs=88,  DeAllocs=90, -16 bytes are presently allocated.
+                           A max of 6108 bytes were allocated.
+>-Exiting ONX2 09/14/05 @ 19:15:22-<
+<<Entering FockNGrueven 09/14/05 @ 19:15:22>>
+ FockNGrueven           :: F[4] CheckSum  = 0.4381386758902262D+02
+ FockNGrueven           :: OrthoF[4] CheckSum  = 0.4092977782846967D+02
+ FockNGrueven           :: WALL (Sec) = 0.40D-01
+ FockNGrueven           :: Allocs=59,  DeAllocs=57, 828 bytes are presently allocated.
+                           A max of 8180 bytes were allocated.
+>-Exiting FockNGrueven 09/14/05 @ 19:15:22-<
+<<Entering DIIS 09/14/05 @ 19:15:22>>
+ DIIS                   :: Cond# = 0.65D+07, MIN(E) = 0.31D-06
+ DIIS : Pulay C1        :: DIISCo = 0.32D-01, -.31D-01, -.19D+00, 0.12D+01
+ DIIS                   :: F_DIIS[4] CheckSum  = 0.4092967574683153D+02
+ DIIS                   :: WALL (Sec) = 0.40D-01
+ DIIS                   :: Allocs=127,  DeAllocs=124, 328 bytes are presently allocated.
+                           A max of 15020 bytes were allocated.
+>-Exiting DIIS 09/14/05 @ 19:15:22-<
+<<Entering RHEqs 09/14/05 @ 19:15:22>>
+ RHEqs                  :: HOMO = 0.00000000D+00, LUMO = 0.00000000D+00
+ RHEqs                  :: OrthoP[5] CheckSum  = 0.3999999999999999D+01
+ RHEqs                  :: P[5] CheckSum  = 0.4108715430553570D+01
+ RHEqs                  :: WALL (Sec) = 0.40D-01
+ RHEqs                  :: Allocs=38,  DeAllocs=38, 3184 bytes are presently allocated.
+                           A max of 12204 bytes were allocated.
+>-Exiting RHEqs 09/14/05 @ 19:15:22-<
+<<Entering SCFStatus 09/14/05 @ 19:15:22>>
+ 
+= = = = = SCFCycle #4, Basis #1, Geometry #1 = = = = =
+
+       S**2    = 2.00318
+       DIISErr = 0.12D-03
+       MaxDelD = 0.90D-03
+       <T>     = 0.14593569D+03
+       <V>     = -.27713589D+03
+       <HF>    = -.16420163D+02
+       <SCF>   = -147.62035438
+
+ SCFStatus              :: WALL (Sec) = 0.10D-01
+ SCFStatus              :: Allocs=43,  DeAllocs=45, -16 bytes are presently allocated.
+                           A max of 9764 bytes were allocated.
+>-Exiting SCFStatus 09/14/05 @ 19:15:22-<
+<<Entering MakeRho 09/14/05 @ 19:15:22>>
+ MakeRho : Pruned Rho   :: dNel = 0.64D-13, kept 94% of distributions.
+ MakeRho : Moments      :: <r> = (-.30D-12, -.21D-16, 0.70D-28), <r^2> = 0.99D+01
+ MakeRho                :: Rho-Coef CheckSum  = 0.2098690258508766D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.2756198219368043D+05
+ MakeRho                :: Rho-LMNs CheckSum  = 0.2137307246061101D+03
+ MakeRho                :: CPU Sec = 0.30D-01, WALL Sec = 0.50D-01
+ MakeRho                :: Allocs=97,  DeAllocs=97, 56 bytes are presently allocated.
+                           A max of 58512 bytes were allocated.
+>-Exiting MakeRho 09/14/05 @ 19:15:22-<
+<<Entering QCTC 09/14/05 @ 19:15:22>>
+ QCTC                   :: J[5] CheckSum  = 0.6378776055494427D+02
+ QCTC                   :: CPU Sec = 0.70D-01, WALL Sec = 0.90D-01
+ QCTC                   :: Allocs=1557,  DeAllocs=68, 414928 bytes are presently allocated.
+                           A max of 450764 bytes were allocated.
+>-Exiting QCTC 09/14/05 @ 19:15:22-<
+<<Entering ONX2 09/14/05 @ 19:15:22>>
+ ONX2                   :: Kx[5] CheckSum  = 0.1098319132691688D+02
+ ONX2                   :: CPU Sec = 0.30D-01, WALL Sec = 0.50D-01
+ ONX2                   :: Allocs=88,  DeAllocs=90, -16 bytes are presently allocated.
+                           A max of 6108 bytes were allocated.
+>-Exiting ONX2 09/14/05 @ 19:15:22-<
+<<Entering FockNGrueven 09/14/05 @ 19:15:22>>
+ FockNGrueven           :: F[5] CheckSum  = 0.4381376611442128D+02
+ FockNGrueven           :: OrthoF[5] CheckSum  = 0.4092969124909766D+02
+ FockNGrueven           :: WALL (Sec) = 0.30D-01
+ FockNGrueven           :: Allocs=59,  DeAllocs=57, 828 bytes are presently allocated.
+                           A max of 8180 bytes were allocated.
+>-Exiting FockNGrueven 09/14/05 @ 19:15:22-<
+<<Entering DIIS 09/14/05 @ 19:15:22>>
+ DIIS                   :: Cond# = 0.18D+11, MIN(E) = 0.12D-09
+ DIIS : Pulay C1        :: DIISCo = 0.46D-03, -.73D-03, 0.15D-01,
+                                    -.90D-01, 0.11D+01
+ DIIS                   :: F_DIIS[5] CheckSum  = 0.4092969031117879D+02
+ DIIS                   :: CPU Sec = 0.10D-01, WALL Sec = 0.50D-01
+ DIIS                   :: Allocs=136,  DeAllocs=133, 416 bytes are presently allocated.
+                           A max of 15108 bytes were allocated.
+>-Exiting DIIS 09/14/05 @ 19:15:23-<
+<<Entering RHEqs 09/14/05 @ 19:15:23>>
+ RHEqs                  :: HOMO = 0.00000000D+00, LUMO = 0.00000000D+00
+ RHEqs                  :: OrthoP[6] CheckSum  = 0.4000000000000000D+01
+ RHEqs                  :: P[6] CheckSum  = 0.4108717061302981D+01
+ RHEqs                  :: CPU Sec = 0.10D-01, WALL Sec = 0.40D-01
+ RHEqs                  :: Allocs=38,  DeAllocs=38, 3184 bytes are presently allocated.
+                           A max of 12204 bytes were allocated.
+>-Exiting RHEqs 09/14/05 @ 19:15:23-<
+<<Entering SCFStatus 09/14/05 @ 19:15:23>>
+ 
+= = = = = SCFCycle #5, Basis #1, Geometry #1 = = = = =
+
+       S**2    = 2.00332
+       DIISErr = 0.68D-06
+       MaxDelD = 0.47D-05
+       <T>     = 0.14593623D+03
+       <V>     = -.27713635D+03
+       <HF>    = -.16420236D+02
+       <SCF>   = -147.62035514
+
+ SCFStatus              :: WALL (Sec) = 0.10D-01
+ SCFStatus              :: Allocs=43,  DeAllocs=45, -16 bytes are presently allocated.
+                           A max of 9764 bytes were allocated.
+>-Exiting SCFStatus 09/14/05 @ 19:15:23-<
+<<Entering MakeRho 09/14/05 @ 19:15:23>>
+ MakeRho : Pruned Rho   :: dNel = 0.68D-13, kept 94% of distributions.
+ MakeRho : Moments      :: <r> = (0.15D-12, -.17D-15, 0.14D-26), <r^2> = 0.99D+01
+ MakeRho                :: Rho-Coef CheckSum  = 0.2098690472287669D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.2756198467735965D+05
+ MakeRho                :: Rho-LMNs CheckSum  = 0.2137307426349226D+03
+ MakeRho                :: WALL (Sec) = 0.30D-01
+ MakeRho                :: Allocs=97,  DeAllocs=97, 56 bytes are presently allocated.
+                           A max of 58512 bytes were allocated.
+>-Exiting MakeRho 09/14/05 @ 19:15:23-<
+<<Entering QCTC 09/14/05 @ 19:15:23>>
+ QCTC                   :: J[6] CheckSum  = 0.6378775946538417D+02
+ QCTC                   :: CPU Sec = 0.80D-01, WALL Sec = 0.10D+00
+ QCTC                   :: Allocs=1557,  DeAllocs=68, 414928 bytes are presently allocated.
+                           A max of 450764 bytes were allocated.
+>-Exiting QCTC 09/14/05 @ 19:15:23-<
+<<Entering ONX2 09/14/05 @ 19:15:23>>
+ ONX2                   :: Kx[6] CheckSum  = 0.1098319139395926D+02
+ ONX2                   :: CPU Sec = 0.40D-01, WALL Sec = 0.50D-01
+ ONX2                   :: Allocs=88,  DeAllocs=90, -16 bytes are presently allocated.
+                           A max of 6108 bytes were allocated.
+>-Exiting ONX2 09/14/05 @ 19:15:23-<
+<<Entering FockNGrueven 09/14/05 @ 19:15:23>>
+ FockNGrueven           :: F[6] CheckSum  = 0.4381376463911653D+02
+ FockNGrueven           :: OrthoF[6] CheckSum  = 0.4092968998152097D+02
+ FockNGrueven           :: CPU Sec = 0.10D-01, WALL Sec = 0.40D-01
+ FockNGrueven           :: Allocs=59,  DeAllocs=57, 828 bytes are presently allocated.
+                           A max of 8180 bytes were allocated.
+>-Exiting FockNGrueven 09/14/05 @ 19:15:23-<
+<<Entering DIIS 09/14/05 @ 19:15:23>>
+ DIIS                   :: Cond# = 0.54D+15, MIN(E) = 0.45D-14
+ DIIS : Pulay C1        :: DIISCo = 0.19D-03, -.32D-03, 0.66D-02,
+                                    -.41D-01, 0.50D+00, 0.54D+00
+ DIIS                   :: F_DIIS[6] CheckSum  = 0.4092969015066892D+02
+ DIIS                   :: CPU Sec = 0.40D-01, WALL Sec = 0.60D-01
+ DIIS                   :: Allocs=145,  DeAllocs=142, 520 bytes are presently allocated.
+                           A max of 15212 bytes were allocated.
+>-Exiting DIIS 09/14/05 @ 19:15:23-<
+<<Entering RHEqs 09/14/05 @ 19:15:23>>
+ RHEqs                  :: HOMO = 0.00000000D+00, LUMO = 0.00000000D+00
+ RHEqs                  :: OrthoP[7] CheckSum  = 0.4000000000000000D+01
+ RHEqs                  :: P[7] CheckSum  = 0.4108717041291916D+01
+ RHEqs                  :: WALL (Sec) = 0.40D-01
+ RHEqs                  :: Allocs=38,  DeAllocs=38, 3184 bytes are presently allocated.
+                           A max of 12204 bytes were allocated.
+>-Exiting RHEqs 09/14/05 @ 19:15:23-<
+<<Entering SCFStatus 09/14/05 @ 19:15:23>>
+ 
+= = = = = SCFCycle #6, Basis #1, Geometry #1 = = = = =
+
+       S**2    = 2.00332
+       DIISErr = 0.17D-07
+       MaxDelD = 0.63D-07
+       <T>     = 0.14593624D+03
+       <V>     = -.27713636D+03
+       <HF>    = -.16420236D+02
+       <SCF>   = -147.62035514
+
+ SCFStatus              :: CPU Sec = 0.10D-01, WALL Sec = 0.10D-01
+ SCFStatus              :: Allocs=43,  DeAllocs=45, -16 bytes are presently allocated.
+                           A max of 9764 bytes were allocated.
+>-Exiting SCFStatus 09/14/05 @ 19:15:23-<
+ Normal SCF convergence.
+<<Entering MakePFFT 09/14/05 @ 19:15:23>>
+ MakePFFT               :: WALL (Sec) = 0.00D+00
+ MakePFFT               :: Allocs=26,  DeAllocs=30, -40 bytes are presently allocated.
+                           A max of 912 bytes were allocated.
+>-Exiting MakePFFT 09/14/05 @ 19:15:23-<
+<<Entering MakeS 09/14/05 @ 19:15:23>>
+ MakeS                  :: S CheckSum  = 0.5271528956489727D+01
+ MakeS                  :: WALL (Sec) = 0.20D-01
+ MakeS                  :: Allocs=52,  DeAllocs=54, -16 bytes are presently allocated.
+                           A max of 31140 bytes were allocated.
+>-Exiting MakeS 09/14/05 @ 19:15:23-<
+<<Entering LowdinO 09/14/05 @ 19:15:24>>
+ LowdinO                :: X CheckSum  = 0.7620418805168796D+01
+ LowdinO                :: WALL (Sec) = 0.20D-01
+ LowdinO                :: Allocs=17,  DeAllocs=19, -16 bytes are presently allocated.
+                           A max of 7920 bytes were allocated.
+>-Exiting LowdinO 09/14/05 @ 19:15:24-<
+<<Entering MakeT 09/14/05 @ 19:15:24>>
+ MakeT                  :: T CheckSum  = 0.4344608035855278D+02
+ MakeT                  :: CPU Sec = 0.10D-01, WALL Sec = 0.20D-01
+ MakeT                  :: Allocs=48,  DeAllocs=50, -16 bytes are presently allocated.
+                           A max of 9884 bytes were allocated.
+>-Exiting MakeT 09/14/05 @ 19:15:24-<
+<<Entering MakeRho 09/14/05 @ 19:15:24>>
+ MakeRho : Pruned Rho   :: dNel = 0.60D-13, kept 94% of distributions.
+ MakeRho : Moments      :: <r> = (-.36D-13, -.12D-16, -.43D-26), <r^2> = 0.99D+01
+ MakeRho                :: Rho-Coef CheckSum  = 0.2098690469727931D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.2756198464759898D+05
+ MakeRho                :: Rho-LMNs CheckSum  = 0.2137307424196814D+03
+ MakeRho                :: CPU Sec = 0.20D-01, WALL Sec = 0.50D-01
+ MakeRho                :: Allocs=98,  DeAllocs=98, 56 bytes are presently allocated.
+                           A max of 58512 bytes were allocated.
+>-Exiting MakeRho 09/14/05 @ 19:15:24-<
+<<Entering QCTC 09/14/05 @ 19:15:24>>
+ QCTC                   :: J[0] CheckSum  = 0.6557945594115773D+02
+ QCTC                   :: CPU Sec = 0.11D+00, WALL Sec = 0.13D+00
+ QCTC                   :: Allocs=1557,  DeAllocs=68, 430608 bytes are presently allocated.
+                           A max of 467324 bytes were allocated.
+>-Exiting QCTC 09/14/05 @ 19:15:24-<
+<<Entering ONX2 09/14/05 @ 19:15:24>>
+ ONX2                   :: Kx[0] CheckSum  = 0.1241523461376884D+02
+ ONX2                   :: CPU Sec = 0.70D-01, WALL Sec = 0.90D-01
+ ONX2                   :: Allocs=88,  DeAllocs=90, -16 bytes are presently allocated.
+                           A max of 10580 bytes were allocated.
+>-Exiting ONX2 09/14/05 @ 19:15:24-<
+<<Entering FockNGrueven 09/14/05 @ 19:15:24>>
+ FockNGrueven           :: F[0] CheckSum  = 0.4667315510291029D+02
+ FockNGrueven           :: OrthoF[0] CheckSum  = 0.4190145996497419D+02
+ FockNGrueven           :: WALL (Sec) = 0.50D-01
+ FockNGrueven           :: Allocs=59,  DeAllocs=57, 2620 bytes are presently allocated.
+                           A max of 26100 bytes were allocated.
+>-Exiting FockNGrueven 09/14/05 @ 19:15:24-<
+<<Entering RHEqs 09/14/05 @ 19:15:24>>
+ RHEqs                  :: HOMO = 0.00000000D+00, LUMO = 0.00000000D+00
+ RHEqs                  :: OrthoP[1] CheckSum  = 0.4000000000000000D+01
+ RHEqs                  :: P[1] CheckSum  = 0.3171674708255835D+01
+ RHEqs                  :: CPU Sec = 0.10D-01, WALL Sec = 0.50D-01
+ RHEqs                  :: Allocs=38,  DeAllocs=38, 10352 bytes are presently allocated.
+                           A max of 39084 bytes were allocated.
+>-Exiting RHEqs 09/14/05 @ 19:15:24-<
+<<Entering SCFStatus 09/14/05 @ 19:15:24>>
+ 
+= = = = = SCFCycle #0, Basis #2, Geometry #1 = = = = =
+
+       S**2    = 2.01743
+       MaxDelD = 0.17D+01
+       <T>     = 0.14913948D+03
+       <V>     = -.27982600D+03
+       <HF>    = -.16254386D+02
+       <SCF>   = -146.94090638
+
+ SCFStatus              :: WALL (Sec) = 0.10D-01
+ SCFStatus              :: Allocs=31,  DeAllocs=33, -16 bytes are presently allocated.
+                           A max of 28660 bytes were allocated.
+>-Exiting SCFStatus 09/14/05 @ 19:15:24-<
+<<Entering MakeRho 09/14/05 @ 19:15:24>>
+ MakeRho : Pruned Rho   :: dNel = 0.50D-13, kept 95% of distributions.
+ MakeRho : Moments      :: <r> = (-.32D-13, 0.48D-15, -.54D-16), <r^2> = 0.12D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.3115658304113184D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3286454629343784D+06
+ MakeRho                :: Rho-LMNs CheckSum  = 0.3154790318064927D+03
+ MakeRho                :: CPU Sec = 0.20D-01, WALL Sec = 0.50D-01
+ MakeRho                :: Allocs=97,  DeAllocs=97, 56 bytes are presently allocated.
+                           A max of 129424 bytes were allocated.
+>-Exiting MakeRho 09/14/05 @ 19:15:24-<
+<<Entering QCTC 09/14/05 @ 19:15:24>>
+ QCTC                   :: J[1] CheckSum  = 0.6568136198476454D+02
+ QCTC                   :: CPU Sec = 0.22D+00, WALL Sec = 0.24D+00
+ QCTC                   :: Allocs=3307,  DeAllocs=68, 902368 bytes are presently allocated.
+                           A max of 975796 bytes were allocated.
+>-Exiting QCTC 09/14/05 @ 19:15:25-<
+<<Entering ONX2 09/14/05 @ 19:15:25>>
+ ONX2                   :: Kx[1] CheckSum  = 0.1239730410453922D+02
+ ONX2                   :: CPU Sec = 0.13D+00, WALL Sec = 0.13D+00
+ ONX2                   :: Allocs=88,  DeAllocs=90, -16 bytes are presently allocated.
+                           A max of 15052 bytes were allocated.
+>-Exiting ONX2 09/14/05 @ 19:15:25-<
+<<Entering FockNGrueven 09/14/05 @ 19:15:25>>
+ FockNGrueven           :: F[1] CheckSum  = 0.4689194468556759D+02
+ FockNGrueven           :: OrthoF[1] CheckSum  = 0.4195049871875083D+02
+ FockNGrueven           :: CPU Sec = 0.10D-01, WALL Sec = 0.40D-01
+ FockNGrueven           :: Allocs=59,  DeAllocs=57, 2620 bytes are presently allocated.
+                           A max of 26100 bytes were allocated.
+>-Exiting FockNGrueven 09/14/05 @ 19:15:25-<
+<<Entering RHEqs 09/14/05 @ 19:15:25>>
+ RHEqs                  :: HOMO = 0.00000000D+00, LUMO = 0.00000000D+00
+ RHEqs                  :: OrthoP[2] CheckSum  = 0.4000000000000004D+01
+ RHEqs                  :: P[2] CheckSum  = 0.3170794343958084D+01
+ RHEqs                  :: WALL (Sec) = 0.50D-01
+ RHEqs                  :: Allocs=38,  DeAllocs=38, 10352 bytes are presently allocated.
+                           A max of 39084 bytes were allocated.
+>-Exiting RHEqs 09/14/05 @ 19:15:25-<
+<<Entering SCFStatus 09/14/05 @ 19:15:25>>
+ 
+= = = = = SCFCycle #1, Basis #2, Geometry #1 = = = = =
+
+       S**2    = 2.01743
+       DIISErr = 0.17D-07
+       MaxDelD = 0.25D-01
+       <T>     = 0.14913948D+03
+       <V>     = -.28246802D+03
+       <HF>    = -.16197789D+02
+       <SCF>   = -149.52632140
+
+ SCFStatus              :: WALL (Sec) = 0.20D-01
+ SCFStatus              :: Allocs=43,  DeAllocs=45, -16 bytes are presently allocated.
+                           A max of 31268 bytes were allocated.
+>-Exiting SCFStatus 09/14/05 @ 19:15:25-<
+<<Entering MakeRho 09/14/05 @ 19:15:25>>
+ MakeRho : Pruned Rho   :: dNel = 0.39D-13, kept 95% of distributions.
+ MakeRho : Moments      :: <r> = (0.11D-13, 0.75D-15, -.73D-16), <r^2> = 0.12D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.3117105921781039D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3287399868624691D+06
+ MakeRho                :: Rho-LMNs CheckSum  = 0.3155901596948335D+03
+ MakeRho                :: WALL (Sec) = 0.40D-01
+ MakeRho                :: Allocs=97,  DeAllocs=97, 56 bytes are presently allocated.
+                           A max of 129424 bytes were allocated.
+>-Exiting MakeRho 09/14/05 @ 19:15:25-<
+<<Entering QCTC 09/14/05 @ 19:15:25>>
+ QCTC                   :: J[2] CheckSum  = 0.6568344020544099D+02
+ QCTC                   :: CPU Sec = 0.22D+00, WALL Sec = 0.24D+00
+ QCTC                   :: Allocs=3307,  DeAllocs=68, 902368 bytes are presently allocated.
+                           A max of 975796 bytes were allocated.
+>-Exiting QCTC 09/14/05 @ 19:15:25-<
+<<Entering ONX2 09/14/05 @ 19:15:25>>
+ ONX2                   :: Kx[2] CheckSum  = 0.1239765485547328D+02
+ ONX2                   :: CPU Sec = 0.12D+00, WALL Sec = 0.14D+00
+ ONX2                   :: Allocs=88,  DeAllocs=90, -16 bytes are presently allocated.
+                           A max of 15052 bytes were allocated.
+>-Exiting ONX2 09/14/05 @ 19:15:26-<
+<<Entering FockNGrueven 09/14/05 @ 19:15:26>>
+ FockNGrueven           :: F[2] CheckSum  = 0.4689449959989573D+02
+ FockNGrueven           :: OrthoF[2] CheckSum  = 0.4195300465096634D+02
+ FockNGrueven           :: WALL (Sec) = 0.40D-01
+ FockNGrueven           :: Allocs=59,  DeAllocs=57, 2620 bytes are presently allocated.
+                           A max of 26100 bytes were allocated.
+>-Exiting FockNGrueven 09/14/05 @ 19:15:26-<
+<<Entering DIIS 09/14/05 @ 19:15:26>>
+ DIIS                   :: Cond# = 0.29D+03, MIN(E) = 0.49D-02
+ DIIS : Pulay C1        :: DIISCo = -.26D+00, 0.13D+01
+ DIIS                   :: F_DIIS[2] CheckSum  = 0.4195366822044573D+02
+ DIIS                   :: CPU Sec = 0.10D-01, WALL Sec = 0.60D-01
+ DIIS                   :: Allocs=124,  DeAllocs=121, 200 bytes are presently allocated.
+                           A max of 42556 bytes were allocated.
+>-Exiting DIIS 09/14/05 @ 19:15:26-<
+<<Entering RHEqs 09/14/05 @ 19:15:26>>
+ RHEqs                  :: HOMO = 0.00000000D+00, LUMO = 0.00000000D+00
+ RHEqs                  :: OrthoP[3] CheckSum  = 0.4000000000000000D+01
+ RHEqs                  :: P[3] CheckSum  = 0.3171165990244016D+01
+ RHEqs                  :: CPU Sec = 0.10D-01, WALL Sec = 0.40D-01
+ RHEqs                  :: Allocs=38,  DeAllocs=38, 10352 bytes are presently allocated.
+                           A max of 39084 bytes were allocated.
+>-Exiting RHEqs 09/14/05 @ 19:15:26-<
+<<Entering SCFStatus 09/14/05 @ 19:15:26>>
+ 
+= = = = = SCFCycle #2, Basis #2, Geometry #1 = = = = =
+
+       S**2    = 2.02772
+       DIISErr = 0.20D-02
+       MaxDelD = 0.13D-01
+       <T>     = 0.14913709D+03
+       <V>     = -.28246661D+03
+       <HF>    = -.16201033D+02
+       <SCF>   = -149.53054999
+
+ SCFStatus              :: WALL (Sec) = 0.10D-01
+ SCFStatus              :: Allocs=43,  DeAllocs=45, -16 bytes are presently allocated.
+                           A max of 31268 bytes were allocated.
+>-Exiting SCFStatus 09/14/05 @ 19:15:26-<
+<<Entering MakeRho 09/14/05 @ 19:15:26>>
+ MakeRho : Pruned Rho   :: dNel = 0.43D-13, kept 95% of distributions.
+ MakeRho : Moments      :: <r> = (-.46D-13, 0.11D-14, 0.43D-16), <r^2> = 0.12D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.3117995976791707D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3287983574908017D+06
+ MakeRho                :: Rho-LMNs CheckSum  = 0.3156714660419284D+03
+ MakeRho                :: CPU Sec = 0.40D-01, WALL Sec = 0.50D-01
+ MakeRho                :: Allocs=97,  DeAllocs=97, 56 bytes are presently allocated.
+                           A max of 129424 bytes were allocated.
+>-Exiting MakeRho 09/14/05 @ 19:15:26-<
+<<Entering QCTC 09/14/05 @ 19:15:26>>
+ QCTC                   :: J[3] CheckSum  = 0.6567955996226983D+02
+ QCTC                   :: CPU Sec = 0.23D+00, WALL Sec = 0.25D+00
+ QCTC                   :: Allocs=3307,  DeAllocs=68, 902368 bytes are presently allocated.
+                           A max of 975796 bytes were allocated.
+>-Exiting QCTC 09/14/05 @ 19:15:26-<
+<<Entering ONX2 09/14/05 @ 19:15:26>>
+ ONX2                   :: Kx[3] CheckSum  = 0.1239877174034036D+02
+ ONX2                   :: CPU Sec = 0.19D+00, WALL Sec = 0.19D+00
+ ONX2                   :: Allocs=88,  DeAllocs=90, -16 bytes are presently allocated.
+                           A max of 15052 bytes were allocated.
+>-Exiting ONX2 09/14/05 @ 19:15:27-<
+<<Entering FockNGrueven 09/14/05 @ 19:15:27>>
+ FockNGrueven           :: F[3] CheckSum  = 0.4688943452472507D+02
+ FockNGrueven           :: OrthoF[3] CheckSum  = 0.4194932810374891D+02
+ FockNGrueven           :: WALL (Sec) = 0.30D-01
+ FockNGrueven           :: Allocs=59,  DeAllocs=57, 2620 bytes are presently allocated.
+                           A max of 26100 bytes were allocated.
+>-Exiting FockNGrueven 09/14/05 @ 19:15:27-<
+<<Entering DIIS 09/14/05 @ 19:15:27>>
+ DIIS                   :: Cond# = 0.13D+05, MIN(E) = 0.13D-03
+ DIIS : Pulay C1        :: DIISCo = 0.46D-01, -.41D+00, 0.14D+01
+ DIIS                   :: F_DIIS[3] CheckSum  = 0.4194788018132540D+02
+ DIIS                   :: CPU Sec = 0.20D-01, WALL Sec = 0.50D-01
+ DIIS                   :: Allocs=118,  DeAllocs=115, 256 bytes are presently allocated.
+                           A max of 42116 bytes were allocated.
+>-Exiting DIIS 09/14/05 @ 19:15:27-<
+<<Entering RHEqs 09/14/05 @ 19:15:27>>
+ RHEqs                  :: HOMO = 0.00000000D+00, LUMO = 0.00000000D+00
+ RHEqs                  :: OrthoP[4] CheckSum  = 0.4000000000000001D+01
+ RHEqs                  :: P[4] CheckSum  = 0.3171154087693921D+01
+ RHEqs                  :: WALL (Sec) = 0.40D-01
+ RHEqs                  :: Allocs=38,  DeAllocs=38, 10352 bytes are presently allocated.
+                           A max of 39084 bytes were allocated.
+>-Exiting RHEqs 09/14/05 @ 19:15:27-<
+<<Entering SCFStatus 09/14/05 @ 19:15:27>>
+ 
+= = = = = SCFCycle #3, Basis #2, Geometry #1 = = = = =
+
+       S**2    = 2.03438
+       DIISErr = 0.55D-03
+       MaxDelD = 0.48D-02
+       <T>     = 0.14917228D+03
+       <V>     = -.28249611D+03
+       <HF>    = -.16207257D+02
+       <SCF>   = -149.53109586
+
+ SCFStatus              :: WALL (Sec) = 0.20D-01
+ SCFStatus              :: Allocs=43,  DeAllocs=45, -16 bytes are presently allocated.
+                           A max of 31268 bytes were allocated.
+>-Exiting SCFStatus 09/14/05 @ 19:15:27-<
+<<Entering MakeRho 09/14/05 @ 19:15:27>>
+ MakeRho : Pruned Rho   :: dNel = 0.39D-13, kept 95% of distributions.
+ MakeRho : Moments      :: <r> = (-.28D-13, 0.70D-15, 0.57D-16), <r^2> = 0.12D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.3117960218483518D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3287955886568846D+06
+ MakeRho                :: Rho-LMNs CheckSum  = 0.3156678108494272D+03
+ MakeRho                :: CPU Sec = 0.20D-01, WALL Sec = 0.40D-01
+ MakeRho                :: Allocs=97,  DeAllocs=97, 56 bytes are presently allocated.
+                           A max of 129424 bytes were allocated.
+>-Exiting MakeRho 09/14/05 @ 19:15:27-<
+<<Entering QCTC 09/14/05 @ 19:15:27>>
+ QCTC                   :: J[4] CheckSum  = 0.6567956654848066D+02
+ QCTC                   :: CPU Sec = 0.26D+00, WALL Sec = 0.25D+00
+ QCTC                   :: Allocs=3307,  DeAllocs=68, 902368 bytes are presently allocated.
+                           A max of 975796 bytes were allocated.
+>-Exiting QCTC 09/14/05 @ 19:15:27-<
+<<Entering ONX2 09/14/05 @ 19:15:27>>
+ ONX2                   :: Kx[4] CheckSum  = 0.1239893670459481D+02
+ ONX2                   :: CPU Sec = 0.14D+00, WALL Sec = 0.15D+00
+ ONX2                   :: Allocs=88,  DeAllocs=90, -16 bytes are presently allocated.
+                           A max of 15052 bytes were allocated.
+>-Exiting ONX2 09/14/05 @ 19:15:27-<
+<<Entering FockNGrueven 09/14/05 @ 19:15:27>>
+ FockNGrueven           :: F[4] CheckSum  = 0.4688947346138048D+02
+ FockNGrueven           :: OrthoF[4] CheckSum  = 0.4194937950518550D+02
+ FockNGrueven           :: CPU Sec = 0.10D-01, WALL Sec = 0.70D-01
+ FockNGrueven           :: Allocs=59,  DeAllocs=57, 2620 bytes are presently allocated.
+                           A max of 26100 bytes were allocated.
+>-Exiting FockNGrueven 09/14/05 @ 19:15:28-<
+<<Entering DIIS 09/14/05 @ 19:15:28>>
+ DIIS                   :: Cond# = 0.28D+06, MIN(E) = 0.72D-05
+ DIIS : Pulay C1        :: DIISCo = 0.51D-04, 0.51D-01, -.40D+00, 0.14D+01
+ DIIS                   :: F_DIIS[4] CheckSum  = 0.4194958384981467D+02
+ DIIS                   :: CPU Sec = 0.10D-01, WALL Sec = 0.50D-01
+ DIIS                   :: Allocs=127,  DeAllocs=124, 328 bytes are presently allocated.
+                           A max of 42212 bytes were allocated.
+>-Exiting DIIS 09/14/05 @ 19:15:28-<
+<<Entering RHEqs 09/14/05 @ 19:15:28>>
+ RHEqs                  :: HOMO = 0.00000000D+00, LUMO = 0.00000000D+00
+ RHEqs                  :: OrthoP[5] CheckSum  = 0.3999999999999999D+01
+ RHEqs                  :: P[5] CheckSum  = 0.3171086011702879D+01
+ RHEqs                  :: CPU Sec = 0.10D-01, WALL Sec = 0.60D-01
+ RHEqs                  :: Allocs=38,  DeAllocs=38, 10352 bytes are presently allocated.
+                           A max of 39084 bytes were allocated.
+>-Exiting RHEqs 09/14/05 @ 19:15:28-<
+<<Entering SCFStatus 09/14/05 @ 19:15:28>>
+ 
+= = = = = SCFCycle #4, Basis #2, Geometry #1 = = = = =
+
+       S**2    = 2.03697
+       DIISErr = 0.12D-03
+       MaxDelD = 0.15D-02
+       <T>     = 0.14917458D+03
+       <V>     = -.28249679D+03
+       <HF>    = -.16208937D+02
+       <SCF>   = -149.53114180
+
+ SCFStatus              :: WALL (Sec) = 0.10D-01
+ SCFStatus              :: Allocs=43,  DeAllocs=45, -16 bytes are presently allocated.
+                           A max of 31268 bytes were allocated.
+>-Exiting SCFStatus 09/14/05 @ 19:15:28-<
+<<Entering MakeRho 09/14/05 @ 19:15:28>>
+ MakeRho : Pruned Rho   :: dNel = 0.50D-13, kept 95% of distributions.
+ MakeRho : Moments      :: <r> = (0.25D-13, 0.40D-15, 0.79D-16), <r^2> = 0.12D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.3117919080719443D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3287916443055930D+06
+ MakeRho                :: Rho-LMNs CheckSum  = 0.3156645678543348D+03
+ MakeRho                :: CPU Sec = 0.20D-01, WALL Sec = 0.50D-01
+ MakeRho                :: Allocs=97,  DeAllocs=97, 56 bytes are presently allocated.
+                           A max of 129424 bytes were allocated.
+>-Exiting MakeRho 09/14/05 @ 19:15:28-<
+<<Entering QCTC 09/14/05 @ 19:15:28>>
+ QCTC                   :: J[5] CheckSum  = 0.6567871373763029D+02
+ QCTC                   :: CPU Sec = 0.24D+00, WALL Sec = 0.24D+00
+ QCTC                   :: Allocs=3307,  DeAllocs=68, 902368 bytes are presently allocated.
+                           A max of 975796 bytes were allocated.
+>-Exiting QCTC 09/14/05 @ 19:15:28-<
+<<Entering ONX2 09/14/05 @ 19:15:28>>
+ ONX2                   :: Kx[5] CheckSum  = 0.1239911646388517D+02
+ ONX2                   :: CPU Sec = 0.14D+00, WALL Sec = 0.16D+00
+ ONX2                   :: Allocs=88,  DeAllocs=90, -16 bytes are presently allocated.
+                           A max of 15052 bytes were allocated.
+>-Exiting ONX2 09/14/05 @ 19:15:28-<
+<<Entering FockNGrueven 09/14/05 @ 19:15:28>>
+ FockNGrueven           :: F[5] CheckSum  = 0.4688831904641204D+02
+ FockNGrueven           :: OrthoF[5] CheckSum  = 0.4194848234930373D+02
+ FockNGrueven           :: WALL (Sec) = 0.40D-01
+ FockNGrueven           :: Allocs=59,  DeAllocs=57, 2620 bytes are presently allocated.
+                           A max of 26100 bytes were allocated.
+>-Exiting FockNGrueven 09/14/05 @ 19:15:28-<
+<<Entering DIIS 09/14/05 @ 19:15:28>>
+ DIIS                   :: Cond# = 0.42D+07, MIN(E) = 0.53D-06
+ DIIS : Pulay C1        :: DIISCo = -.25D-02, 0.27D-01, -.11D+00,
+                                    0.19D+00, 0.90D+00
+ DIIS                   :: F_DIIS[5] CheckSum  = 0.4194867367840948D+02
+ DIIS                   :: CPU Sec = 0.20D-01, WALL Sec = 0.60D-01
+ DIIS                   :: Allocs=136,  DeAllocs=133, 416 bytes are presently allocated.
+                           A max of 42324 bytes were allocated.
+>-Exiting DIIS 09/14/05 @ 19:15:29-<
+<<Entering RHEqs 09/14/05 @ 19:15:29>>
+ RHEqs                  :: HOMO = 0.00000000D+00, LUMO = 0.00000000D+00
+ RHEqs                  :: OrthoP[6] CheckSum  = 0.3999999999999998D+01
+ RHEqs                  :: P[6] CheckSum  = 0.3171059018053578D+01
+ RHEqs                  :: WALL (Sec) = 0.40D-01
+ RHEqs                  :: Allocs=38,  DeAllocs=38, 10352 bytes are presently allocated.
+                           A max of 39084 bytes were allocated.
+>-Exiting RHEqs 09/14/05 @ 19:15:29-<
+<<Entering SCFStatus 09/14/05 @ 19:15:29>>
+ 
+= = = = = SCFCycle #5, Basis #2, Geometry #1 = = = = =
+
+       S**2    = 2.03752
+       DIISErr = 0.19D-04
+       MaxDelD = 0.39D-04
+       <T>     = 0.14917848D+03
+       <V>     = -.28249979D+03
+       <HF>    = -.16209830D+02
+       <SCF>   = -149.53114407
+
+ SCFStatus              :: WALL (Sec) = 0.10D-01
+ SCFStatus              :: Allocs=43,  DeAllocs=45, -16 bytes are presently allocated.
+                           A max of 31268 bytes were allocated.
+>-Exiting SCFStatus 09/14/05 @ 19:15:29-<
+<<Entering MakeRho 09/14/05 @ 19:15:29>>
+ MakeRho : Pruned Rho   :: dNel = 0.50D-13, kept 95% of distributions.
+ MakeRho : Moments      :: <r> = (-.36D-13, 0.86D-15, 0.27D-16), <r^2> = 0.12D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.3117896972842153D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3287903056800116D+06
+ MakeRho                :: Rho-LMNs CheckSum  = 0.3156623315544014D+03
+ MakeRho                :: CPU Sec = 0.20D-01, WALL Sec = 0.60D-01
+ MakeRho                :: Allocs=97,  DeAllocs=97, 56 bytes are presently allocated.
+                           A max of 129424 bytes were allocated.
+>-Exiting MakeRho 09/14/05 @ 19:15:29-<
+<<Entering QCTC 09/14/05 @ 19:15:29>>
+ QCTC                   :: J[6] CheckSum  = 0.6567895104293265D+02
+ QCTC                   :: CPU Sec = 0.22D+00, WALL Sec = 0.26D+00
+ QCTC                   :: Allocs=3307,  DeAllocs=68, 902368 bytes are presently allocated.
+                           A max of 975796 bytes were allocated.
+>-Exiting QCTC 09/14/05 @ 19:15:29-<
+<<Entering ONX2 09/14/05 @ 19:15:29>>
+ ONX2                   :: Kx[6] CheckSum  = 0.1239907630995569D+02
+ ONX2                   :: CPU Sec = 0.12D+00, WALL Sec = 0.14D+00
+ ONX2                   :: Allocs=88,  DeAllocs=90, -16 bytes are presently allocated.
+                           A max of 15052 bytes were allocated.
+>-Exiting ONX2 09/14/05 @ 19:15:29-<
+<<Entering FockNGrueven 09/14/05 @ 19:15:29>>
+ FockNGrueven           :: F[6] CheckSum  = 0.4688863738129660D+02
+ FockNGrueven           :: OrthoF[6] CheckSum  = 0.4194872503024543D+02
+ FockNGrueven           :: CPU Sec = 0.10D-01, WALL Sec = 0.40D-01
+ FockNGrueven           :: Allocs=59,  DeAllocs=57, 2620 bytes are presently allocated.
+                           A max of 26100 bytes were allocated.
+>-Exiting FockNGrueven 09/14/05 @ 19:15:29-<
+<<Entering DIIS 09/14/05 @ 19:15:29>>
+ DIIS                   :: Cond# = 0.30D+09, MIN(E) = 0.81D-08
+ DIIS : Pulay C1        :: DIISCo = 0.79D-03, -.94D-02, 0.43D-01,
+                                    -.86D-01, -.25D+00, 0.13D+01
+ DIIS                   :: F_DIIS[6] CheckSum  = 0.4194871633569889D+02
+ DIIS                   :: CPU Sec = 0.10D-01, WALL Sec = 0.70D-01
+ DIIS                   :: Allocs=145,  DeAllocs=142, 520 bytes are presently allocated.
+                           A max of 42452 bytes were allocated.
+>-Exiting DIIS 09/14/05 @ 19:15:29-<
+<<Entering RHEqs 09/14/05 @ 19:15:29>>
+ RHEqs                  :: HOMO = 0.00000000D+00, LUMO = 0.00000000D+00
+ RHEqs                  :: OrthoP[7] CheckSum  = 0.4000000000000001D+01
+ RHEqs                  :: P[7] CheckSum  = 0.3171054333668309D+01
+ RHEqs                  :: WALL (Sec) = 0.60D-01
+ RHEqs                  :: Allocs=38,  DeAllocs=38, 10352 bytes are presently allocated.
+                           A max of 39084 bytes were allocated.
+>-Exiting RHEqs 09/14/05 @ 19:15:29-<
+<<Entering SCFStatus 09/14/05 @ 19:15:30>>
+ 
+= = = = = SCFCycle #6, Basis #2, Geometry #1 = = = = =
+
+       S**2    = 2.03756
+       DIISErr = 0.25D-05
+       MaxDelD = 0.12D-04
+       <T>     = 0.14917718D+03
+       <V>     = -.28249861D+03
+       <HF>    = -.16209714D+02
+       <SCF>   = -149.53114411
+
+ SCFStatus              :: WALL (Sec) = 0.10D-01
+ SCFStatus              :: Allocs=43,  DeAllocs=45, -16 bytes are presently allocated.
+                           A max of 31268 bytes were allocated.
+>-Exiting SCFStatus 09/14/05 @ 19:15:30-<
+<<Entering MakeRho 09/14/05 @ 19:15:30>>
+ MakeRho : Pruned Rho   :: dNel = 0.43D-13, kept 95% of distributions.
+ MakeRho : Moments      :: <r> = (0.20D-13, 0.18D-14, 0.10D-15), <r^2> = 0.12D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.3117895977182795D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3287902267413128D+06
+ MakeRho                :: Rho-LMNs CheckSum  = 0.3156622313175651D+03
+ MakeRho                :: CPU Sec = 0.20D-01, WALL Sec = 0.14D+00
+ MakeRho                :: Allocs=97,  DeAllocs=97, 56 bytes are presently allocated.
+                           A max of 129424 bytes were allocated.
+>-Exiting MakeRho 09/14/05 @ 19:15:30-<
+<<Entering QCTC 09/14/05 @ 19:15:30>>
+ QCTC                   :: J[7] CheckSum  = 0.6567894182954844D+02
+ QCTC                   :: CPU Sec = 0.22D+00, WALL Sec = 0.23D+00
+ QCTC                   :: Allocs=3307,  DeAllocs=68, 902368 bytes are presently allocated.
+                           A max of 975796 bytes were allocated.
+>-Exiting QCTC 09/14/05 @ 19:15:30-<
+<<Entering ONX2 09/14/05 @ 19:15:30>>
+ ONX2                   :: Kx[7] CheckSum  = 0.1239907745160460D+02
+ ONX2                   :: CPU Sec = 0.12D+00, WALL Sec = 0.15D+00
+ ONX2                   :: Allocs=88,  DeAllocs=90, -16 bytes are presently allocated.
+                           A max of 15052 bytes were allocated.
+>-Exiting ONX2 09/14/05 @ 19:15:30-<
+<<Entering FockNGrueven 09/14/05 @ 19:15:30>>
+ FockNGrueven           :: F[7] CheckSum  = 0.4688862477949829D+02
+ FockNGrueven           :: OrthoF[7] CheckSum  = 0.4194871503520204D+02
+ FockNGrueven           :: CPU Sec = 0.10D-01, WALL Sec = 0.60D-01
+ FockNGrueven           :: Allocs=59,  DeAllocs=57, 2620 bytes are presently allocated.
+                           A max of 26100 bytes were allocated.
+>-Exiting FockNGrueven 09/14/05 @ 19:15:30-<
+<<Entering DIIS 09/14/05 @ 19:15:30>>
+ DIIS                   :: Cond# = 0.58D+11, MIN(E) = 0.45D-10
+ DIIS : Pulay C1        :: DIISCo = 0.30D-03, -.36D-02, 0.16D-01,
+                                    -.32D-01, -.97D-01, 0.47D+00, 0.64D+00
+ DIIS                   :: F_DIIS[7] CheckSum  = 0.4194871594299447D+02
+ DIIS                   :: CPU Sec = 0.20D-01, WALL Sec = 0.50D-01
+ DIIS                   :: Allocs=154,  DeAllocs=151, 640 bytes are presently allocated.
+                           A max of 42596 bytes were allocated.
+>-Exiting DIIS 09/14/05 @ 19:15:30-<
+<<Entering RHEqs 09/14/05 @ 19:15:30>>
+ RHEqs                  :: HOMO = 0.00000000D+00, LUMO = 0.00000000D+00
+ RHEqs                  :: OrthoP[8] CheckSum  = 0.4000000000000001D+01
+ RHEqs                  :: P[8] CheckSum  = 0.3171054655435682D+01
+ RHEqs                  :: CPU Sec = 0.10D-01, WALL Sec = 0.40D-01
+ RHEqs                  :: Allocs=38,  DeAllocs=38, 10352 bytes are presently allocated.
+                           A max of 39084 bytes were allocated.
+>-Exiting RHEqs 09/14/05 @ 19:15:30-<
+<<Entering SCFStatus 09/14/05 @ 19:15:30>>
+ 
+= = = = = SCFCycle #7, Basis #2, Geometry #1 = = = = =
+
+       S**2    = 2.03756
+       DIISErr = 0.28D-06
+       MaxDelD = 0.15D-05
+       <T>     = 0.14917722D+03
+       <V>     = -.28249864D+03
+       <HF>    = -.16209719D+02
+       <SCF>   = -149.53114411
+
+ SCFStatus              :: WALL (Sec) = 0.10D-01
+ SCFStatus              :: Allocs=43,  DeAllocs=45, -16 bytes are presently allocated.
+                           A max of 31268 bytes were allocated.
+>-Exiting SCFStatus 09/14/05 @ 19:15:31-<
+ Normal SCF convergence.
+<<Entering SForce 09/14/05 @ 19:15:31>>
+ SForce                 :: dS/dR CheckSum  = 0.3907057402634170D+00
+ SForce                 :: LFrcS CheckSum  = 0.1732050807568877D+09
+ SForce                 :: CPU Sec = 0.40D-01, WALL Sec = 0.50D-01
+ SForce                 :: Allocs=84,  DeAllocs=86, -16 bytes are presently allocated.
+                           A max of 78560 bytes were allocated.
+>-Exiting SForce 09/14/05 @ 19:15:31-<
+<<Entering TForce 09/14/05 @ 19:15:31>>
+ TForce                 :: dT/dR CheckSum  = 0.6723329729337999D+00
+ TForce                 :: LFrcT CheckSum  = 0.0000000000000000D+00
+ TForce                 :: CPU Sec = 0.50D-01, WALL Sec = 0.40D-01
+ TForce                 :: Allocs=45,  DeAllocs=47, -16 bytes are presently allocated.
+                           A max of 7624 bytes were allocated.
+>-Exiting TForce 09/14/05 @ 19:15:31-<
+<<Entering MakeRho 09/14/05 @ 19:15:31>>
+ MakeRho : Pruned Rho   :: dNel = 0.28D-13, kept 95% of distributions.
+ MakeRho : Moments      :: <r> = (-.34D-13, 0.89D-15, 0.55D-16), <r^2> = 0.12D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.3117895971399537D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3287902267639028D+06
+ MakeRho                :: Rho-LMNs CheckSum  = 0.3156622304089371D+03
+ MakeRho                :: CPU Sec = 0.20D-01, WALL Sec = 0.60D-01
+ MakeRho                :: Allocs=97,  DeAllocs=97, 56 bytes are presently allocated.
+                           A max of 129424 bytes were allocated.
+>-Exiting MakeRho 09/14/05 @ 19:15:31-<
+<<Entering JForce 09/14/05 @ 19:15:31>>
+ JForce                 :: dJ/dR CheckSum  = 0.7817839329371782D+00
+ JForce                 :: LFrcJ CheckSum  = 0.0000000000000000D+00
+ JForce                 :: CPU Sec = 0.37D+00, WALL Sec = 0.39D+00
+ JForce                 :: Allocs=3307,  DeAllocs=71, 878832 bytes are presently allocated.
+                           A max of 1028448 bytes were allocated.
+>-Exiting JForce 09/14/05 @ 19:15:31-<
+<<Entering GONX2 09/14/05 @ 19:15:31>>
+ GONX2                  :: dKx/dR[1] CheckSum  = 0.4665297042774673D+00
+ GONX2                  :: CPU Sec = 0.60D+00, WALL Sec = 0.61D+00
+ GONX2                  :: Allocs=49,  DeAllocs=51, -16 bytes are presently allocated.
+                           A max of 7700 bytes were allocated.
+>-Exiting GONX2 09/14/05 @ 19:15:32-<
+       Clone =      1 GeOp step =      1 Total Energy =        -149.53114411
+                   Max intl Grad =     0.131009 between atoms    1   2   0   0
+     Max Unconstrained Cart Grad =     0.131009      on atom     1
+                   RMS intl Grad =     0.131009
+                  Max STRE Displ =     0.052918 between atoms    1   2
+                       RMS Displ =     0.100000
+<<Entering MakeS 09/14/05 @ 19:15:32>>
+ MakeS                  :: S CheckSum  = 0.5309535876332624D+01
+ MakeS                  :: CPU Sec = 0.10D-01, WALL Sec = 0.30D-01
+ MakeS                  :: Allocs=52,  DeAllocs=54, -16 bytes are presently allocated.
+                           A max of 31140 bytes were allocated.
+>-Exiting MakeS 09/14/05 @ 19:15:32-<
+<<Entering LowdinO 09/14/05 @ 19:15:32>>
+ LowdinO                :: X CheckSum  = 0.8046841772507891D+01
+ LowdinO                :: WALL (Sec) = 0.20D-01
+ LowdinO                :: Allocs=17,  DeAllocs=19, -16 bytes are presently allocated.
+                           A max of 7920 bytes were allocated.
+>-Exiting LowdinO 09/14/05 @ 19:15:32-<
+<<Entering MakeT 09/14/05 @ 19:15:32>>
+ MakeT                  :: T CheckSum  = 0.4344817886992018D+02
+ MakeT                  :: CPU Sec = 0.20D-01, WALL Sec = 0.20D-01
+ MakeT                  :: Allocs=48,  DeAllocs=50, -16 bytes are presently allocated.
+                           A max of 9884 bytes were allocated.
+>-Exiting MakeT 09/14/05 @ 19:15:32-<
+<<Entering P2Use 09/14/05 @ 19:15:32>>
+ Trace Error: Tr[P0,S0] =    5.3290705182007514E-15
+ Trace Error: Tr[P0,S1] =    6.0144570579012679E-04
+ P2Use : AO-DMX         ::  Nstep  = 1 Lambda = 0.10000000D+01
+ P2Use : AO-DMX 1:1     ::  dN=0.67D-02, %Non0=0.20D+03
+ P2Use : AO-DMX 1:2     ::  dN=-.44D-01, %Non0=0.20D+03
+ P2Use : AO-DMX 1:3     ::  dN=-.10D-07, %Non0=0.20D+03
+ P2Use : AO-DMX 1:4     ::  dN=-.18D-14, %Non0=0.20D+03
+ P2Use                  :: P[0] CheckSum  = 0.3187095665075510D+01
+ P2Use                  :: WALL (Sec) = 0.40D-01
+ P2Use                  :: Allocs=246,  DeAllocs=248, -16 bytes are presently allocated.
+                           A max of 46776 bytes were allocated.
+>-Exiting P2Use 09/14/05 @ 19:15:32-<
+<<Entering MakeRho 09/14/05 @ 19:15:32>>
+ MakeRho : Pruned Rho   :: dNel = 0.75D-13, kept 95% of distributions.
+ MakeRho : Moments      :: <r> = (-.36D-14, 0.96D-15, 0.88D-16), <r^2> = 0.12D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.3119560025986128D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3288510378017088D+06
+ MakeRho                :: Rho-LMNs CheckSum  = 0.3158590077986047D+03
+ MakeRho                :: CPU Sec = 0.30D-01, WALL Sec = 0.70D-01
+ MakeRho                :: Allocs=97,  DeAllocs=97, 56 bytes are presently allocated.
+                           A max of 130352 bytes were allocated.
+>-Exiting MakeRho 09/14/05 @ 19:15:32-<
+<<Entering QCTC 09/14/05 @ 19:15:32>>
+ QCTC                   :: J[0] CheckSum  = 0.6572673209198220D+02
+ QCTC                   :: CPU Sec = 0.26D+00, WALL Sec = 0.25D+00
+ QCTC                   :: Allocs=3347,  DeAllocs=68, 912992 bytes are presently allocated.
+                           A max of 987156 bytes were allocated.
+>-Exiting QCTC 09/14/05 @ 19:15:33-<
+<<Entering ONX2 09/14/05 @ 19:15:33>>
+ ONX2                   :: Kx[0] CheckSum  = 0.1249107953068174D+02
+ ONX2                   :: CPU Sec = 0.14D+00, WALL Sec = 0.15D+00
+ ONX2                   :: Allocs=88,  DeAllocs=90, -16 bytes are presently allocated.
+                           A max of 15052 bytes were allocated.
+>-Exiting ONX2 09/14/05 @ 19:15:33-<
+<<Entering FockNGrueven 09/14/05 @ 19:15:33>>
+ FockNGrueven           :: F[0] CheckSum  = 0.4706110642496168D+02
+ FockNGrueven           :: OrthoF[0] CheckSum  = 0.4196358596682997D+02
+ FockNGrueven           :: WALL (Sec) = 0.50D-01
+ FockNGrueven           :: Allocs=59,  DeAllocs=57, 2620 bytes are presently allocated.
+                           A max of 26100 bytes were allocated.
+>-Exiting FockNGrueven 09/14/05 @ 19:15:33-<
+<<Entering RHEqs 09/14/05 @ 19:15:33>>
+ RHEqs                  :: HOMO = 0.00000000D+00, LUMO = 0.00000000D+00
+ RHEqs                  :: OrthoP[1] CheckSum  = 0.3999999999999998D+01
+ RHEqs                  :: P[1] CheckSum  = 0.3197345273565099D+01
+ RHEqs                  :: WALL (Sec) = 0.60D-01
+ RHEqs                  :: Allocs=38,  DeAllocs=38, 10352 bytes are presently allocated.
+                           A max of 39084 bytes were allocated.
+>-Exiting RHEqs 09/14/05 @ 19:15:33-<
+<<Entering SCFStatus 09/14/05 @ 19:15:33>>
+ 
+= = = = = SCFCycle #0, Basis #2, Geometry #2 = = = = =
+
+       S**2    = 2.03706
+       MaxDelD = 0.24D-01
+       <T>     = 0.14929204D+03
+       <V>     = -.28257673D+03
+       <HF>    = -.16254564D+02
+       <SCF>   = -149.53925677
+
+ SCFStatus              :: WALL (Sec) = 0.10D-01
+ SCFStatus              :: Allocs=43,  DeAllocs=45, -16 bytes are presently allocated.
+                           A max of 31268 bytes were allocated.
+>-Exiting SCFStatus 09/14/05 @ 19:15:33-<
+<<Entering MakeRho 09/14/05 @ 19:15:33>>
+ MakeRho : Pruned Rho   :: dNel = 0.96D-13, kept 94% of distributions.
+ MakeRho : Moments      :: <r> = (-.53D-13, -.64D-15, 0.29D-16), <r^2> = 0.12D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.3119139370156039D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3287727726599607D+06
+ MakeRho                :: Rho-LMNs CheckSum  = 0.3158265053388237D+03
+ MakeRho                :: CPU Sec = 0.20D-01, WALL Sec = 0.40D-01
+ MakeRho                :: Allocs=97,  DeAllocs=97, 56 bytes are presently allocated.
+                           A max of 129888 bytes were allocated.
+>-Exiting MakeRho 09/14/05 @ 19:15:33-<
+<<Entering QCTC 09/14/05 @ 19:15:33>>
+ QCTC                   :: J[1] CheckSum  = 0.6569002525167110D+02
+ QCTC                   :: CPU Sec = 0.26D+00, WALL Sec = 0.27D+00
+ QCTC                   :: Allocs=3327,  DeAllocs=68, 907680 bytes are presently allocated.
+                           A max of 981476 bytes were allocated.
+>-Exiting QCTC 09/14/05 @ 19:15:33-<
+<<Entering ONX2 09/14/05 @ 19:15:34>>
+ ONX2                   :: Kx[1] CheckSum  = 0.1249551979549661D+02
+ ONX2                   :: CPU Sec = 0.13D+00, WALL Sec = 0.15D+00
+ ONX2                   :: Allocs=88,  DeAllocs=90, -16 bytes are presently allocated.
+                           A max of 15052 bytes were allocated.
+>-Exiting ONX2 09/14/05 @ 19:15:34-<
+<<Entering FockNGrueven 09/14/05 @ 19:15:34>>
+ FockNGrueven           :: F[1] CheckSum  = 0.4701090959094650D+02
+ FockNGrueven           :: OrthoF[1] CheckSum  = 0.4192441810521935D+02
+ FockNGrueven           :: WALL (Sec) = 0.50D-01
+ FockNGrueven           :: Allocs=59,  DeAllocs=57, 2620 bytes are presently allocated.
+                           A max of 26100 bytes were allocated.
+>-Exiting FockNGrueven 09/14/05 @ 19:15:34-<
+<<Entering DIIS 09/14/05 @ 19:15:34>>
+ DIIS : Damping         :: Co = 0.90D+00, 0.10D+00
+ DIIS                   :: F_DIIS[1] CheckSum  = 0.4195966718070797D+02
+ DIIS                   :: WALL (Sec) = 0.30D-01
+ DIIS                   :: Allocs=79,  DeAllocs=77, 128 bytes are presently allocated.
+                           A max of 39380 bytes were allocated.
+>-Exiting DIIS 09/14/05 @ 19:15:34-<
+<<Entering RHEqs 09/14/05 @ 19:15:34>>
+ RHEqs                  :: HOMO = 0.00000000D+00, LUMO = 0.00000000D+00
+ RHEqs                  :: OrthoP[2] CheckSum  = 0.3999999999999999D+01
+ RHEqs                  :: P[2] CheckSum  = 0.3197458475781548D+01
+ RHEqs                  :: CPU Sec = 0.20D-01, WALL Sec = 0.40D-01
+ RHEqs                  :: Allocs=38,  DeAllocs=38, 10352 bytes are presently allocated.
+                           A max of 39084 bytes were allocated.
+>-Exiting RHEqs 09/14/05 @ 19:15:34-<
+<<Entering SCFStatus 09/14/05 @ 19:15:34>>
+ 
+= = = = = SCFCycle #1, Basis #2, Geometry #2 = = = = =
+
+       S**2    = 2.03644
+       DIISErr = 0.13D-02
+       MaxDelD = 0.95D-03
+       <T>     = 0.14945061D+03
+       <V>     = -.28271898D+03
+       <HF>    = -.16273216D+02
+       <SCF>   = -149.54158712
+
+ SCFStatus              :: WALL (Sec) = 0.10D-01
+ SCFStatus              :: Allocs=43,  DeAllocs=45, -16 bytes are presently allocated.
+                           A max of 31268 bytes were allocated.
+>-Exiting SCFStatus 09/14/05 @ 19:15:34-<
+<<Entering MakeRho 09/14/05 @ 19:15:34>>
+ MakeRho : Pruned Rho   :: dNel = 0.82D-13, kept 94% of distributions.
+ MakeRho : Moments      :: <r> = (-.44D-13, 0.13D-15, -.23D-16), <r^2> = 0.12D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.3119009429234056D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3287647549303039D+06
+ MakeRho                :: Rho-LMNs CheckSum  = 0.3158130608321626D+03
+ MakeRho                :: CPU Sec = 0.20D-01, WALL Sec = 0.50D-01
+ MakeRho                :: Allocs=97,  DeAllocs=97, 56 bytes are presently allocated.
+                           A max of 129888 bytes were allocated.
+>-Exiting MakeRho 09/14/05 @ 19:15:34-<
+<<Entering QCTC 09/14/05 @ 19:15:34>>
+ QCTC                   :: J[2] CheckSum  = 0.6569139217578584D+02
+ QCTC                   :: CPU Sec = 0.26D+00, WALL Sec = 0.29D+00
+ QCTC                   :: Allocs=3327,  DeAllocs=68, 907680 bytes are presently allocated.
+                           A max of 981476 bytes were allocated.
+>-Exiting QCTC 09/14/05 @ 19:15:34-<
+<<Entering ONX2 09/14/05 @ 19:15:34>>
+ ONX2                   :: Kx[2] CheckSum  = 0.1249523593352801D+02
+ ONX2                   :: CPU Sec = 0.13D+00, WALL Sec = 0.14D+00
+ ONX2                   :: Allocs=88,  DeAllocs=90, -16 bytes are presently allocated.
+                           A max of 15052 bytes were allocated.
+>-Exiting ONX2 09/14/05 @ 19:15:35-<
+<<Entering FockNGrueven 09/14/05 @ 19:15:35>>
+ FockNGrueven           :: F[2] CheckSum  = 0.4701275294083288D+02
+ FockNGrueven           :: OrthoF[2] CheckSum  = 0.4192578895197619D+02
+ FockNGrueven           :: WALL (Sec) = 0.40D-01
+ FockNGrueven           :: Allocs=59,  DeAllocs=57, 2620 bytes are presently allocated.
+                           A max of 26100 bytes were allocated.
+>-Exiting FockNGrueven 09/14/05 @ 19:15:35-<
+<<Entering DIIS 09/14/05 @ 19:15:35>>
+ DIIS                   :: Cond# = 0.69D+06, MIN(E) = 0.20D-05
+ DIIS : Pulay C1        :: DIISCo = -.10D+02, 0.11D+02
+ DIIS                   :: F_DIIS[2] CheckSum  = 0.4193945770995211D+02
+ DIIS                   :: CPU Sec = 0.10D-01, WALL Sec = 0.70D-01
+ DIIS                   :: Allocs=124,  DeAllocs=121, 200 bytes are presently allocated.
+                           A max of 42556 bytes were allocated.
+>-Exiting DIIS 09/14/05 @ 19:15:35-<
+<<Entering RHEqs 09/14/05 @ 19:15:35>>
+ RHEqs                  :: HOMO = 0.00000000D+00, LUMO = 0.00000000D+00
+ RHEqs                  :: OrthoP[3] CheckSum  = 0.3999999999999998D+01
+ RHEqs                  :: P[3] CheckSum  = 0.3198879249602359D+01
+ RHEqs                  :: WALL (Sec) = 0.50D-01
+ RHEqs                  :: Allocs=38,  DeAllocs=38, 10352 bytes are presently allocated.
+                           A max of 39084 bytes were allocated.
+>-Exiting RHEqs 09/14/05 @ 19:15:35-<
+<<Entering SCFStatus 09/14/05 @ 19:15:35>>
+ 
+= = = = = SCFCycle #2, Basis #2, Geometry #2 = = = = =
+
+       S**2    = 2.03640
+       DIISErr = 0.12D-02
+       MaxDelD = 0.98D-02
+       <T>     = 0.14944306D+03
+       <V>     = -.28271235D+03
+       <HF>    = -.16272327D+02
+       <SCF>   = -149.54161271
+
+ SCFStatus              :: WALL (Sec) = 0.10D-01
+ SCFStatus              :: Allocs=43,  DeAllocs=45, -16 bytes are presently allocated.
+                           A max of 31268 bytes were allocated.
+>-Exiting SCFStatus 09/14/05 @ 19:15:35-<
+<<Entering MakeRho 09/14/05 @ 19:15:35>>
+ MakeRho : Pruned Rho   :: dNel = 0.50D-13, kept 94% of distributions.
+ MakeRho : Moments      :: <r> = (-.34D-13, 0.13D-14, 0.51D-16), <r^2> = 0.12D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.3117795964353373D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3286855211243808D+06
+ MakeRho                :: Rho-LMNs CheckSum  = 0.3156890422056352D+03
+ MakeRho                :: CPU Sec = 0.10D-01, WALL Sec = 0.60D-01
+ MakeRho                :: Allocs=97,  DeAllocs=97, 56 bytes are presently allocated.
+                           A max of 129888 bytes were allocated.
+>-Exiting MakeRho 09/14/05 @ 19:15:35-<
+<<Entering QCTC 09/14/05 @ 19:15:35>>
+ QCTC                   :: J[3] CheckSum  = 0.6570042377899512D+02
+ QCTC                   :: CPU Sec = 0.23D+00, WALL Sec = 0.27D+00
+ QCTC                   :: Allocs=3327,  DeAllocs=68, 907680 bytes are presently allocated.
+                           A max of 981476 bytes were allocated.
+>-Exiting QCTC 09/14/05 @ 19:15:35-<
+<<Entering ONX2 09/14/05 @ 19:15:35>>
+ ONX2                   :: Kx[3] CheckSum  = 0.1249308165281830D+02
+ ONX2                   :: CPU Sec = 0.13D+00, WALL Sec = 0.15D+00
+ ONX2                   :: Allocs=88,  DeAllocs=90, -16 bytes are presently allocated.
+                           A max of 15052 bytes were allocated.
+>-Exiting ONX2 09/14/05 @ 19:15:35-<
+<<Entering FockNGrueven 09/14/05 @ 19:15:35>>
+ FockNGrueven           :: F[3] CheckSum  = 0.4702487056818511D+02
+ FockNGrueven           :: OrthoF[3] CheckSum  = 0.4193464576713657D+02
+ FockNGrueven           :: WALL (Sec) = 0.40D-01
+ FockNGrueven           :: Allocs=59,  DeAllocs=57, 2620 bytes are presently allocated.
+                           A max of 26100 bytes were allocated.
+>-Exiting FockNGrueven 09/14/05 @ 19:15:36-<
+<<Entering DIIS 09/14/05 @ 19:15:36>>
+ DIIS                   :: Cond# = 0.93D+07, MIN(E) = 0.19D-06
+ DIIS : Pulay C1        :: DIISCo = -.93D+00, 0.94D+00, 0.99D+00
+ DIIS                   :: F_DIIS[3] CheckSum  = 0.4193581636717135D+02
+ DIIS                   :: WALL (Sec) = 0.60D-01
+ DIIS                   :: Allocs=118,  DeAllocs=115, 256 bytes are presently allocated.
+                           A max of 42116 bytes were allocated.
+>-Exiting DIIS 09/14/05 @ 19:15:36-<
+<<Entering RHEqs 09/14/05 @ 19:15:36>>
+ RHEqs                  :: HOMO = 0.00000000D+00, LUMO = 0.00000000D+00
+ RHEqs                  :: OrthoP[4] CheckSum  = 0.3999999999999999D+01
+ RHEqs                  :: P[4] CheckSum  = 0.3198909249201001D+01
+ RHEqs                  :: CPU Sec = 0.10D-01, WALL Sec = 0.70D-01
+ RHEqs                  :: Allocs=38,  DeAllocs=38, 10352 bytes are presently allocated.
+                           A max of 39084 bytes were allocated.
+>-Exiting RHEqs 09/14/05 @ 19:15:36-<
+<<Entering SCFStatus 09/14/05 @ 19:15:36>>
+ 
+= = = = = SCFCycle #3, Basis #2, Geometry #2 = = = = =
+
+       S**2    = 2.03561
+       DIISErr = 0.11D-03
+       MaxDelD = 0.10D-02
+       <T>     = 0.14938945D+03
+       <V>     = -.28266542D+03
+       <HF>    = -.16265789D+02
+       <SCF>   = -149.54175421
+
+ SCFStatus              :: CPU Sec = 0.10D-01, WALL Sec = 0.20D-01
+ SCFStatus              :: Allocs=43,  DeAllocs=45, -16 bytes are presently allocated.
+                           A max of 31268 bytes were allocated.
+>-Exiting SCFStatus 09/14/05 @ 19:15:36-<
+<<Entering MakeRho 09/14/05 @ 19:15:36>>
+ MakeRho : Pruned Rho   :: dNel = 0.71D-13, kept 94% of distributions.
+ MakeRho : Moments      :: <r> = (-.44D-12, 0.53D-15, 0.67D-16), <r^2> = 0.12D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.3117683373748245D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3286787022204013D+06
+ MakeRho                :: Rho-LMNs CheckSum  = 0.3156774670137906D+03
+ MakeRho                :: CPU Sec = 0.20D-01, WALL Sec = 0.80D-01
+ MakeRho                :: Allocs=97,  DeAllocs=97, 56 bytes are presently allocated.
+                           A max of 129888 bytes were allocated.
+>-Exiting MakeRho 09/14/05 @ 19:15:36-<
+<<Entering QCTC 09/14/05 @ 19:15:36>>
+ QCTC                   :: J[4] CheckSum  = 0.6570173242022426D+02
+ QCTC                   :: CPU Sec = 0.25D+00, WALL Sec = 0.28D+00
+ QCTC                   :: Allocs=3327,  DeAllocs=68, 907680 bytes are presently allocated.
+                           A max of 981476 bytes were allocated.
+>-Exiting QCTC 09/14/05 @ 19:15:36-<
+<<Entering ONX2 09/14/05 @ 19:15:36>>
+ ONX2                   :: Kx[4] CheckSum  = 0.1249281644057662D+02
+ ONX2                   :: CPU Sec = 0.14D+00, WALL Sec = 0.16D+00
+ ONX2                   :: Allocs=88,  DeAllocs=90, -16 bytes are presently allocated.
+                           A max of 15052 bytes were allocated.
+>-Exiting ONX2 09/14/05 @ 19:15:36-<
+<<Entering FockNGrueven 09/14/05 @ 19:15:36>>
+ FockNGrueven           :: F[4] CheckSum  = 0.4702663654545950D+02
+ FockNGrueven           :: OrthoF[4] CheckSum  = 0.4193596294426530D+02
+ FockNGrueven           :: CPU Sec = 0.10D-01, WALL Sec = 0.40D-01
+ FockNGrueven           :: Allocs=59,  DeAllocs=57, 2620 bytes are presently allocated.
+                           A max of 26100 bytes were allocated.
+>-Exiting FockNGrueven 09/14/05 @ 19:15:37-<
+<<Entering DIIS 09/14/05 @ 19:15:37>>
+ DIIS                   :: Cond# = 0.29D+08, MIN(E) = 0.70D-07
+ DIIS : Pulay C1        :: DIISCo = 0.75D+00, -.78D+00, -.57D+00, 0.16D+01
+ DIIS                   :: F_DIIS[4] CheckSum  = 0.4193597995210048D+02
+ DIIS                   :: CPU Sec = 0.10D-01, WALL Sec = 0.60D-01
+ DIIS                   :: Allocs=127,  DeAllocs=124, 328 bytes are presently allocated.
+                           A max of 42212 bytes were allocated.
+>-Exiting DIIS 09/14/05 @ 19:15:37-<
+<<Entering RHEqs 09/14/05 @ 19:15:37>>
+ RHEqs                  :: HOMO = 0.00000000D+00, LUMO = 0.00000000D+00
+ RHEqs                  :: OrthoP[5] CheckSum  = 0.4000000000000000D+01
+ RHEqs                  :: P[5] CheckSum  = 0.3198904965427393D+01
+ RHEqs                  :: CPU Sec = 0.10D-01, WALL Sec = 0.40D-01
+ RHEqs                  :: Allocs=38,  DeAllocs=38, 10352 bytes are presently allocated.
+                           A max of 39084 bytes were allocated.
+>-Exiting RHEqs 09/14/05 @ 19:15:37-<
+<<Entering SCFStatus 09/14/05 @ 19:15:37>>
+ 
+= = = = = SCFCycle #4, Basis #2, Geometry #2 = = = = =
+
+       S**2    = 2.03543
+       DIISErr = 0.23D-04
+       MaxDelD = 0.23D-03
+       <T>     = 0.14938220D+03
+       <V>     = -.28265909D+03
+       <HF>    = -.16264867D+02
+       <SCF>   = -149.54175538
+
+ SCFStatus              :: WALL (Sec) = 0.10D-01
+ SCFStatus              :: Allocs=43,  DeAllocs=45, -16 bytes are presently allocated.
+                           A max of 31268 bytes were allocated.
+>-Exiting SCFStatus 09/14/05 @ 19:15:37-<
+<<Entering MakeRho 09/14/05 @ 19:15:37>>
+ MakeRho : Pruned Rho   :: dNel = 0.89D-13, kept 94% of distributions.
+ MakeRho : Moments      :: <r> = (0.54D-12, 0.22D-15, 0.35D-16), <r^2> = 0.12D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.3117685408345784D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3286788468306052D+06
+ MakeRho                :: Rho-LMNs CheckSum  = 0.3156777034334843D+03
+ MakeRho                :: CPU Sec = 0.20D-01, WALL Sec = 0.60D-01
+ MakeRho                :: Allocs=97,  DeAllocs=97, 56 bytes are presently allocated.
+                           A max of 129888 bytes were allocated.
+>-Exiting MakeRho 09/14/05 @ 19:15:37-<
+<<Entering QCTC 09/14/05 @ 19:15:37>>
+ QCTC                   :: J[5] CheckSum  = 0.6570175760898309D+02
+ QCTC                   :: CPU Sec = 0.24D+00, WALL Sec = 0.27D+00
+ QCTC                   :: Allocs=3327,  DeAllocs=68, 907680 bytes are presently allocated.
+                           A max of 981476 bytes were allocated.
+>-Exiting QCTC 09/14/05 @ 19:15:37-<
+<<Entering ONX2 09/14/05 @ 19:15:37>>
+ ONX2                   :: Kx[5] CheckSum  = 0.1249280783357271D+02
+ ONX2                   :: CPU Sec = 0.13D+00, WALL Sec = 0.15D+00
+ ONX2                   :: Allocs=88,  DeAllocs=90, -16 bytes are presently allocated.
+                           A max of 15052 bytes were allocated.
+>-Exiting ONX2 09/14/05 @ 19:15:37-<
+<<Entering FockNGrueven 09/14/05 @ 19:15:37>>
+ FockNGrueven           :: F[5] CheckSum  = 0.4702667059738760D+02
+ FockNGrueven           :: OrthoF[5] CheckSum  = 0.4193598735103915D+02
+ FockNGrueven           :: WALL (Sec) = 0.30D-01
+ FockNGrueven           :: Allocs=59,  DeAllocs=57, 2620 bytes are presently allocated.
+                           A max of 26100 bytes were allocated.
+>-Exiting FockNGrueven 09/14/05 @ 19:15:37-<
+<<Entering DIIS 09/14/05 @ 19:15:37>>
+ DIIS                   :: Cond# = 0.83D+09, MIN(E) = 0.27D-08
+ DIIS : Pulay C1        :: DIISCo = -.28D+00, 0.29D+00, 0.21D+00,
+                                    -.66D+00, 0.14D+01
+ DIIS                   :: F_DIIS[5] CheckSum  = 0.4193598944242294D+02
+ DIIS                   :: CPU Sec = 0.10D-01, WALL Sec = 0.50D-01
+ DIIS                   :: Allocs=136,  DeAllocs=133, 416 bytes are presently allocated.
+                           A max of 42324 bytes were allocated.
+>-Exiting DIIS 09/14/05 @ 19:15:38-<
+<<Entering RHEqs 09/14/05 @ 19:15:38>>
+ RHEqs                  :: HOMO = 0.00000000D+00, LUMO = 0.00000000D+00
+ RHEqs                  :: OrthoP[6] CheckSum  = 0.4000000000000000D+01
+ RHEqs                  :: P[6] CheckSum  = 0.3198911875115655D+01
+ RHEqs                  :: CPU Sec = 0.10D-01, WALL Sec = 0.60D-01
+ RHEqs                  :: Allocs=38,  DeAllocs=38, 10352 bytes are presently allocated.
+                           A max of 39084 bytes were allocated.
+>-Exiting RHEqs 09/14/05 @ 19:15:38-<
+<<Entering SCFStatus 09/14/05 @ 19:15:38>>
+ 
+= = = = = SCFCycle #5, Basis #2, Geometry #2 = = = = =
+
+       S**2    = 2.03532
+       DIISErr = 0.32D-05
+       MaxDelD = 0.31D-04
+       <T>     = 0.14938199D+03
+       <V>     = -.28265896D+03
+       <HF>    = -.16264784D+02
+       <SCF>   = -149.54175546
+
+ SCFStatus              :: WALL (Sec) = 0.10D-01
+ SCFStatus              :: Allocs=43,  DeAllocs=45, -16 bytes are presently allocated.
+                           A max of 31268 bytes were allocated.
+>-Exiting SCFStatus 09/14/05 @ 19:15:38-<
+<<Entering MakeRho 09/14/05 @ 19:15:38>>
+ MakeRho : Pruned Rho   :: dNel = 0.89D-13, kept 94% of distributions.
+ MakeRho : Moments      :: <r> = (-.12D-11, -.38D-15, -.58D-16), <r^2> = 0.12D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.3117688605474656D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3286790800894059D+06
+ MakeRho                :: Rho-LMNs CheckSum  = 0.3156780053294937D+03
+ MakeRho                :: CPU Sec = 0.20D-01, WALL Sec = 0.70D-01
+ MakeRho                :: Allocs=97,  DeAllocs=97, 56 bytes are presently allocated.
+                           A max of 129888 bytes were allocated.
+>-Exiting MakeRho 09/14/05 @ 19:15:38-<
+<<Entering QCTC 09/14/05 @ 19:15:38>>
+ QCTC                   :: J[6] CheckSum  = 0.6570176006803433D+02
+ QCTC                   :: CPU Sec = 0.26D+00, WALL Sec = 0.27D+00
+ QCTC                   :: Allocs=3327,  DeAllocs=68, 907680 bytes are presently allocated.
+                           A max of 981476 bytes were allocated.
+>-Exiting QCTC 09/14/05 @ 19:15:38-<
+<<Entering ONX2 09/14/05 @ 19:15:38>>
+ ONX2                   :: Kx[6] CheckSum  = 0.1249280704646073D+02
+ ONX2                   :: CPU Sec = 0.12D+00, WALL Sec = 0.14D+00
+ ONX2                   :: Allocs=88,  DeAllocs=90, -16 bytes are presently allocated.
+                           A max of 15052 bytes were allocated.
+>-Exiting ONX2 09/14/05 @ 19:15:38-<
+<<Entering FockNGrueven 09/14/05 @ 19:15:38>>
+ FockNGrueven           :: F[6] CheckSum  = 0.4702667423091282D+02
+ FockNGrueven           :: OrthoF[6] CheckSum  = 0.4193599076738174D+02
+ FockNGrueven           :: WALL (Sec) = 0.50D-01
+ FockNGrueven           :: Allocs=59,  DeAllocs=57, 2620 bytes are presently allocated.
+                           A max of 26100 bytes were allocated.
+>-Exiting FockNGrueven 09/14/05 @ 19:15:38-<
+<<Entering DIIS 09/14/05 @ 19:15:38>>
+ DIIS                   :: Cond# = 0.44D+11, MIN(E) = 0.56D-10
+ DIIS : Pulay C1        :: DIISCo = -.81D-01, 0.85D-01, 0.61D-01,
+                                    -.19D+00, 0.38D+00, 0.74D+00
+ DIIS                   :: F_DIIS[6] CheckSum  = 0.4193599032792598D+02
+ DIIS                   :: CPU Sec = 0.10D-01, WALL Sec = 0.90D-01
+ DIIS                   :: Allocs=145,  DeAllocs=142, 520 bytes are presently allocated.
+                           A max of 42452 bytes were allocated.
+>-Exiting DIIS 09/14/05 @ 19:15:39-<
+<<Entering RHEqs 09/14/05 @ 19:15:39>>
+ RHEqs                  :: HOMO = 0.00000000D+00, LUMO = 0.00000000D+00
+ RHEqs                  :: OrthoP[7] CheckSum  = 0.3999999999999999D+01
+ RHEqs                  :: P[7] CheckSum  = 0.3198911867863879D+01
+ RHEqs                  :: CPU Sec = 0.20D-01, WALL Sec = 0.40D-01
+ RHEqs                  :: Allocs=38,  DeAllocs=38, 10352 bytes are presently allocated.
+                           A max of 39084 bytes were allocated.
+>-Exiting RHEqs 09/14/05 @ 19:15:39-<
+<<Entering SCFStatus 09/14/05 @ 19:15:39>>
+ 
+= = = = = SCFCycle #6, Basis #2, Geometry #2 = = = = =
+
+       S**2    = 2.03531
+       DIISErr = 0.23D-06
+       MaxDelD = 0.13D-05
+       <T>     = 0.14938200D+03
+       <V>     = -.28265898D+03
+       <HF>    = -.16264775D+02
+       <SCF>   = -149.54175546
+
+ SCFStatus              :: CPU Sec = 0.10D-01, WALL Sec = 0.10D-01
+ SCFStatus              :: Allocs=43,  DeAllocs=45, -16 bytes are presently allocated.
+                           A max of 31268 bytes were allocated.
+>-Exiting SCFStatus 09/14/05 @ 19:15:39-<
+ Normal SCF convergence.
+<<Entering SForce 09/14/05 @ 19:15:39>>
+ SForce                 :: dS/dR CheckSum  = 0.4638874002818116D+00
+ SForce                 :: LFrcS CheckSum  = 0.1732050807568877D+09
+ SForce                 :: CPU Sec = 0.50D-01, WALL Sec = 0.60D-01
+ SForce                 :: Allocs=84,  DeAllocs=86, -16 bytes are presently allocated.
+                           A max of 78560 bytes were allocated.
+>-Exiting SForce 09/14/05 @ 19:15:39-<
+<<Entering TForce 09/14/05 @ 19:15:39>>
+ TForce                 :: dT/dR CheckSum  = 0.8429919344408781D+00
+ TForce                 :: LFrcT CheckSum  = 0.0000000000000000D+00
+ TForce                 :: CPU Sec = 0.30D-01, WALL Sec = 0.40D-01
+ TForce                 :: Allocs=45,  DeAllocs=47, -16 bytes are presently allocated.
+                           A max of 7624 bytes were allocated.
+>-Exiting TForce 09/14/05 @ 19:15:39-<
+<<Entering MakeRho 09/14/05 @ 19:15:39>>
+ MakeRho : Pruned Rho   :: dNel = 0.71D-13, kept 94% of distributions.
+ MakeRho : Moments      :: <r> = (0.48D-12, -.62D-15, -.89D-16), <r^2> = 0.12D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.3117688655629253D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3286790849745589D+06
+ MakeRho                :: Rho-LMNs CheckSum  = 0.3156780092029015D+03
+ MakeRho                :: WALL (Sec) = 0.60D-01
+ MakeRho                :: Allocs=97,  DeAllocs=97, 56 bytes are presently allocated.
+                           A max of 129888 bytes were allocated.
+>-Exiting MakeRho 09/14/05 @ 19:15:39-<
+<<Entering JForce 09/14/05 @ 19:15:39>>
+ JForce                 :: dJ/dR CheckSum  = 0.9248686780819835D+00
+ JForce                 :: LFrcJ CheckSum  = 0.0000000000000000D+00
+ JForce                 :: CPU Sec = 0.40D+00, WALL Sec = 0.42D+00
+ JForce                 :: Allocs=3327,  DeAllocs=71, 884144 bytes are presently allocated.
+                           A max of 1034128 bytes were allocated.
+>-Exiting JForce 09/14/05 @ 19:15:39-<
+<<Entering GONX2 09/14/05 @ 19:15:39>>
+ GONX2                  :: dKx/dR[2] CheckSum  = 0.4919200197848874D+00
+ GONX2                  :: CPU Sec = 0.61D+00, WALL Sec = 0.61D+00
+ GONX2                  :: Allocs=49,  DeAllocs=51, -16 bytes are presently allocated.
+                           A max of 7700 bytes were allocated.
+>-Exiting GONX2 09/14/05 @ 19:15:40-<
+       Clone =      1 GeOp step =      2 Total Energy =        -149.54175546
+                   Max intl Grad =     0.077718 between atoms    1   2   0   0
+     Max Unconstrained Cart Grad =     0.077718      on atom     2
+                   RMS intl Grad =     0.077718
+                  Max STRE Displ =     0.052918 between atoms    1   2
+                       RMS Displ =     0.100000
+<<Entering MakeS 09/14/05 @ 19:15:40>>
+ MakeS                  :: S CheckSum  = 0.5350388902146809D+01
+ MakeS                  :: CPU Sec = 0.10D-01, WALL Sec = 0.20D-01
+ MakeS                  :: Allocs=52,  DeAllocs=54, -16 bytes are presently allocated.
+                           A max of 31140 bytes were allocated.
+>-Exiting MakeS 09/14/05 @ 19:15:40-<
+<<Entering LowdinO 09/14/05 @ 19:15:40>>
+ LowdinO                :: X CheckSum  = 0.8570017347208776D+01
+ LowdinO                :: CPU Sec = 0.10D-01, WALL Sec = 0.20D-01
+ LowdinO                :: Allocs=17,  DeAllocs=19, -16 bytes are presently allocated.
+                           A max of 7920 bytes were allocated.
+>-Exiting LowdinO 09/14/05 @ 19:15:40-<
+<<Entering MakeT 09/14/05 @ 19:15:40>>
+ MakeT                  :: T CheckSum  = 0.4345068883491232D+02
+ MakeT                  :: CPU Sec = 0.10D-01, WALL Sec = 0.30D-01
+ MakeT                  :: Allocs=48,  DeAllocs=50, -16 bytes are presently allocated.
+                           A max of 9884 bytes were allocated.
+>-Exiting MakeT 09/14/05 @ 19:15:40-<
+<<Entering P2Use 09/14/05 @ 19:15:40>>
+ Trace Error: Tr[P0,S0] =    1.4210854715202004E-14
+ Trace Error: Tr[P0,S1] =    2.4463467077886492E-03
+ P2Use : AO-DMX         ::  Nstep  = 1 Lambda = 0.10000000D+01
+ P2Use : AO-DMX 1:1     ::  dN=-.64D-02, %Non0=0.20D+03
+ P2Use : AO-DMX 1:2     ::  dN=-.20D-04, %Non0=0.20D+03
+ P2Use : AO-DMX 1:3     ::  dN=-.35D-09, %Non0=0.20D+03
+ P2Use : AO-DMX 1:4     ::  dN=0.00D+00, %Non0=0.20D+03
+ P2Use                  :: P[0] CheckSum  = 0.3218658930838966D+01
+ P2Use                  :: CPU Sec = 0.10D-01, WALL Sec = 0.30D-01
+ P2Use                  :: Allocs=246,  DeAllocs=248, -16 bytes are presently allocated.
+                           A max of 46776 bytes were allocated.
+>-Exiting P2Use 09/14/05 @ 19:15:41-<
+<<Entering MakeRho 09/14/05 @ 19:15:41>>
+ MakeRho : Pruned Rho   :: dNel = 0.21D-13, kept 96% of distributions.
+ MakeRho : Moments      :: <r> = (-.11D-11, -.45D-17, -.72D-17), <r^2> = 0.12D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.3119596981972434D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3287500950724388D+06
+ MakeRho                :: Rho-LMNs CheckSum  = 0.3159019156294863D+03
+ MakeRho                :: CPU Sec = 0.20D-01, WALL Sec = 0.11D+00
+ MakeRho                :: Allocs=97,  DeAllocs=97, 56 bytes are presently allocated.
+                           A max of 131280 bytes were allocated.
+>-Exiting MakeRho 09/14/05 @ 19:15:41-<
+<<Entering QCTC 09/14/05 @ 19:15:41>>
+ QCTC                   :: J[0] CheckSum  = 0.6575750408878376D+02
+ QCTC                   :: CPU Sec = 0.23D+00, WALL Sec = 0.26D+00
+ QCTC                   :: Allocs=3387,  DeAllocs=68, 923392 bytes are presently allocated.
+                           A max of 998196 bytes were allocated.
+>-Exiting QCTC 09/14/05 @ 19:15:41-<
+<<Entering ONX2 09/14/05 @ 19:15:41>>
+ ONX2                   :: Kx[0] CheckSum  = 0.1259532137564340D+02
+ ONX2                   :: CPU Sec = 0.13D+00, WALL Sec = 0.15D+00
+ ONX2                   :: Allocs=88,  DeAllocs=90, -16 bytes are presently allocated.
+                           A max of 15052 bytes were allocated.
+>-Exiting ONX2 09/14/05 @ 19:15:41-<
+<<Entering FockNGrueven 09/14/05 @ 19:15:41>>
+ FockNGrueven           :: F[0] CheckSum  = 0.4722427487253428D+02
+ FockNGrueven           :: OrthoF[0] CheckSum  = 0.4195411354680320D+02
+ FockNGrueven           :: WALL (Sec) = 0.40D-01
+ FockNGrueven           :: Allocs=59,  DeAllocs=57, 2620 bytes are presently allocated.
+                           A max of 26100 bytes were allocated.
+>-Exiting FockNGrueven 09/14/05 @ 19:15:41-<
+<<Entering RHEqs 09/14/05 @ 19:15:41>>
+ RHEqs                  :: HOMO = 0.00000000D+00, LUMO = 0.00000000D+00
+ RHEqs                  :: OrthoP[1] CheckSum  = 0.4000000000000000D+01
+ RHEqs                  :: P[1] CheckSum  = 0.3231400552873785D+01
+ RHEqs                  :: CPU Sec = 0.10D-01, WALL Sec = 0.50D-01
+ RHEqs                  :: Allocs=38,  DeAllocs=38, 10352 bytes are presently allocated.
+                           A max of 39084 bytes were allocated.
+>-Exiting RHEqs 09/14/05 @ 19:15:41-<
+<<Entering SCFStatus 09/14/05 @ 19:15:41>>
+ 
+= = = = = SCFCycle #0, Basis #2, Geometry #3 = = = = =
+
+       S**2    = 2.03480
+       MaxDelD = 0.27D-01
+       <T>     = 0.14952403D+03
+       <V>     = -.28275244D+03
+       <HF>    = -.16314440D+02
+       <SCF>   = -149.54284950
+
+ SCFStatus              :: CPU Sec = 0.10D-01, WALL Sec = 0.10D-01
+ SCFStatus              :: Allocs=43,  DeAllocs=45, -16 bytes are presently allocated.
+                           A max of 31268 bytes were allocated.
+>-Exiting SCFStatus 09/14/05 @ 19:15:41-<
+<<Entering MakeRho 09/14/05 @ 19:15:41>>
+ MakeRho : Pruned Rho   :: dNel = 0.25D-13, kept 95% of distributions.
+ MakeRho : Moments      :: <r> = (0.10D-11, -.13D-14, -.14D-15), <r^2> = 0.12D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.3119103757166146D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3286592781276460D+06
+ MakeRho                :: Rho-LMNs CheckSum  = 0.3158622386961862D+03
+ MakeRho                :: CPU Sec = 0.30D-01, WALL Sec = 0.50D-01
+ MakeRho                :: Allocs=97,  DeAllocs=97, 56 bytes are presently allocated.
+                           A max of 130912 bytes were allocated.
+>-Exiting MakeRho 09/14/05 @ 19:15:41-<
+<<Entering QCTC 09/14/05 @ 19:15:41>>
+ QCTC                   :: J[1] CheckSum  = 0.6571618066904782D+02
+ QCTC                   :: CPU Sec = 0.23D+00, WALL Sec = 0.26D+00
+ QCTC                   :: Allocs=3367,  DeAllocs=68, 918304 bytes are presently allocated.
+                           A max of 992836 bytes were allocated.
+>-Exiting QCTC 09/14/05 @ 19:15:42-<
+<<Entering ONX2 09/14/05 @ 19:15:42>>
+ ONX2                   :: Kx[1] CheckSum  = 0.1260022540267531D+02
+ ONX2                   :: CPU Sec = 0.13D+00, WALL Sec = 0.16D+00
+ ONX2                   :: Allocs=88,  DeAllocs=90, -16 bytes are presently allocated.
+                           A max of 15052 bytes were allocated.
+>-Exiting ONX2 09/14/05 @ 19:15:42-<
+<<Entering FockNGrueven 09/14/05 @ 19:15:42>>
+ FockNGrueven           :: F[1] CheckSum  = 0.4716718216263501D+02
+ FockNGrueven           :: OrthoF[1] CheckSum  = 0.4191041841825199D+02
+ FockNGrueven           :: CPU Sec = 0.10D-01, WALL Sec = 0.40D-01
+ FockNGrueven           :: Allocs=59,  DeAllocs=57, 2620 bytes are presently allocated.
+                           A max of 26100 bytes were allocated.
+>-Exiting FockNGrueven 09/14/05 @ 19:15:42-<
+<<Entering DIIS 09/14/05 @ 19:15:42>>
+ DIIS : Damping         :: Co = 0.90D+00, 0.10D+00
+ DIIS                   :: F_DIIS[1] CheckSum  = 0.4194974146225351D+02
+ DIIS                   :: WALL (Sec) = 0.30D-01
+ DIIS                   :: Allocs=79,  DeAllocs=77, 128 bytes are presently allocated.
+                           A max of 39380 bytes were allocated.
+>-Exiting DIIS 09/14/05 @ 19:15:42-<
+<<Entering RHEqs 09/14/05 @ 19:15:42>>
+ RHEqs                  :: HOMO = 0.00000000D+00, LUMO = 0.00000000D+00
+ RHEqs                  :: OrthoP[2] CheckSum  = 0.4000000000000002D+01
+ RHEqs                  :: P[2] CheckSum  = 0.3231571618761123D+01
+ RHEqs                  :: WALL (Sec) = 0.40D-01
+ RHEqs                  :: Allocs=38,  DeAllocs=38, 10352 bytes are presently allocated.
+                           A max of 39084 bytes were allocated.
+>-Exiting RHEqs 09/14/05 @ 19:15:42-<
+<<Entering SCFStatus 09/14/05 @ 19:15:42>>
+ 
+= = = = = SCFCycle #1, Basis #2, Geometry #3 = = = = =
+
+       S**2    = 2.03410
+       DIISErr = 0.14D-02
+       MaxDelD = 0.11D-02
+       <T>     = 0.14969638D+03
+       <V>     = -.28290683D+03
+       <HF>    = -.16335191D+02
+       <SCF>   = -149.54563339
+
+ SCFStatus              :: CPU Sec = 0.10D-01, WALL Sec = 0.20D-01
+ SCFStatus              :: Allocs=43,  DeAllocs=45, -16 bytes are presently allocated.
+                           A max of 31268 bytes were allocated.
+>-Exiting SCFStatus 09/14/05 @ 19:15:42-<
+<<Entering MakeRho 09/14/05 @ 19:15:42>>
+ MakeRho : Pruned Rho   :: dNel = 0.39D-13, kept 95% of distributions.
+ MakeRho : Moments      :: <r> = (0.81D-12, -.11D-14, -.83D-16), <r^2> = 0.12D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.3118958892293160D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3286503450288610D+06
+ MakeRho                :: Rho-LMNs CheckSum  = 0.3158472138830645D+03
+ MakeRho                :: CPU Sec = 0.30D-01, WALL Sec = 0.50D-01
+ MakeRho                :: Allocs=97,  DeAllocs=97, 56 bytes are presently allocated.
+                           A max of 130912 bytes were allocated.
+>-Exiting MakeRho 09/14/05 @ 19:15:42-<
+<<Entering QCTC 09/14/05 @ 19:15:42>>
+ QCTC                   :: J[2] CheckSum  = 0.6571772077113778D+02
+ QCTC                   :: CPU Sec = 0.26D+00, WALL Sec = 0.26D+00
+ QCTC                   :: Allocs=3367,  DeAllocs=68, 918304 bytes are presently allocated.
+                           A max of 992836 bytes were allocated.
+>-Exiting QCTC 09/14/05 @ 19:15:43-<
+<<Entering ONX2 09/14/05 @ 19:15:43>>
+ ONX2                   :: Kx[2] CheckSum  = 0.1259990621119840D+02
+ ONX2                   :: CPU Sec = 0.14D+00, WALL Sec = 0.16D+00
+ ONX2                   :: Allocs=88,  DeAllocs=90, -16 bytes are presently allocated.
+                           A max of 15052 bytes were allocated.
+>-Exiting ONX2 09/14/05 @ 19:15:43-<
+<<Entering FockNGrueven 09/14/05 @ 19:15:43>>
+ FockNGrueven           :: F[2] CheckSum  = 0.4716927172567626D+02
+ FockNGrueven           :: OrthoF[2] CheckSum  = 0.4191195723184548D+02
+ FockNGrueven           :: WALL (Sec) = 0.40D-01
+ FockNGrueven           :: Allocs=59,  DeAllocs=57, 2620 bytes are presently allocated.
+                           A max of 26100 bytes were allocated.
+>-Exiting FockNGrueven 09/14/05 @ 19:15:43-<
+<<Entering DIIS 09/14/05 @ 19:15:43>>
+ DIIS                   :: Cond# = 0.57D+06, MIN(E) = 0.25D-05
+ DIIS : Pulay C1        :: DIISCo = -.99D+01, 0.11D+02
+ DIIS                   :: F_DIIS[2] CheckSum  = 0.4192722612256716D+02
+ DIIS                   :: CPU Sec = 0.10D-01, WALL Sec = 0.60D-01
+ DIIS                   :: Allocs=124,  DeAllocs=121, 200 bytes are presently allocated.
+                           A max of 42556 bytes were allocated.
+>-Exiting DIIS 09/14/05 @ 19:15:43-<
+<<Entering RHEqs 09/14/05 @ 19:15:43>>
+ RHEqs                  :: HOMO = 0.00000000D+00, LUMO = 0.00000000D+00
+ RHEqs                  :: OrthoP[3] CheckSum  = 0.3999999999999999D+01
+ RHEqs                  :: P[3] CheckSum  = 0.3233600777320527D+01
+ RHEqs                  :: WALL (Sec) = 0.40D-01
+ RHEqs                  :: Allocs=38,  DeAllocs=38, 10352 bytes are presently allocated.
+                           A max of 39084 bytes were allocated.
+>-Exiting RHEqs 09/14/05 @ 19:15:43-<
+<<Entering SCFStatus 09/14/05 @ 19:15:43>>
+ 
+= = = = = SCFCycle #2, Basis #2, Geometry #3 = = = = =
+
+       S**2    = 2.03405
+       DIISErr = 0.13D-02
+       MaxDelD = 0.11D-01
+       <T>     = 0.14968795D+03
+       <V>     = -.28289942D+03
+       <HF>    = -.16334191D+02
+       <SCF>   = -149.54566438
+
+ SCFStatus              :: CPU Sec = 0.10D-01, WALL Sec = 0.10D-01
+ SCFStatus              :: Allocs=43,  DeAllocs=45, -16 bytes are presently allocated.
+                           A max of 31268 bytes were allocated.
+>-Exiting SCFStatus 09/14/05 @ 19:15:43-<
+<<Entering MakeRho 09/14/05 @ 19:15:43>>
+ MakeRho : Pruned Rho   :: dNel = 0.53D-13, kept 95% of distributions.
+ MakeRho : Moments      :: <r> = (0.10D-11, 0.33D-15, 0.87D-16), <r^2> = 0.12D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.3117608678899643D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3285623099414295D+06
+ MakeRho                :: Rho-LMNs CheckSum  = 0.3157087445388266D+03
+ MakeRho                :: CPU Sec = 0.20D-01, WALL Sec = 0.50D-01
+ MakeRho                :: Allocs=97,  DeAllocs=97, 56 bytes are presently allocated.
+                           A max of 130448 bytes were allocated.
+>-Exiting MakeRho 09/14/05 @ 19:15:43-<
+<<Entering QCTC 09/14/05 @ 19:15:43>>
+ QCTC                   :: J[3] CheckSum  = 0.6572789513122049D+02
+ QCTC                   :: CPU Sec = 0.26D+00, WALL Sec = 0.27D+00
+ QCTC                   :: Allocs=3347,  DeAllocs=68, 912992 bytes are presently allocated.
+                           A max of 987156 bytes were allocated.
+>-Exiting QCTC 09/14/05 @ 19:15:44-<
+<<Entering ONX2 09/14/05 @ 19:15:44>>
+ ONX2                   :: Kx[3] CheckSum  = 0.1259747889668088D+02
+ ONX2                   :: CPU Sec = 0.13D+00, WALL Sec = 0.16D+00
+ ONX2                   :: Allocs=88,  DeAllocs=90, -16 bytes are presently allocated.
+                           A max of 15052 bytes were allocated.
+>-Exiting ONX2 09/14/05 @ 19:15:44-<
+<<Entering FockNGrueven 09/14/05 @ 19:15:44>>
+ FockNGrueven           :: F[3] CheckSum  = 0.4718299195691866D+02
+ FockNGrueven           :: OrthoF[3] CheckSum  = 0.4192191813451979D+02
+ FockNGrueven           :: CPU Sec = 0.10D-01, WALL Sec = 0.40D-01
+ FockNGrueven           :: Allocs=59,  DeAllocs=57, 2620 bytes are presently allocated.
+                           A max of 26100 bytes were allocated.
+>-Exiting FockNGrueven 09/14/05 @ 19:15:44-<
+<<Entering DIIS 09/14/05 @ 19:15:44>>
+ DIIS                   :: Cond# = 0.75D+07, MIN(E) = 0.23D-06
+ DIIS : Pulay C1        :: DIISCo = -.86D+00, 0.87D+00, 0.10D+01
+ DIIS                   :: F_DIIS[3] CheckSum  = 0.4192321326548249D+02
+ DIIS                   :: CPU Sec = 0.30D-01, WALL Sec = 0.50D-01
+ DIIS                   :: Allocs=118,  DeAllocs=115, 256 bytes are presently allocated.
+                           A max of 42116 bytes were allocated.
+>-Exiting DIIS 09/14/05 @ 19:15:44-<
+<<Entering RHEqs 09/14/05 @ 19:15:44>>
+ RHEqs                  :: HOMO = 0.00000000D+00, LUMO = 0.00000000D+00
+ RHEqs                  :: OrthoP[4] CheckSum  = 0.4000000000000000D+01
+ RHEqs                  :: P[4] CheckSum  = 0.3233676143352785D+01
+ RHEqs                  :: CPU Sec = 0.20D-01, WALL Sec = 0.50D-01
+ RHEqs                  :: Allocs=38,  DeAllocs=38, 10352 bytes are presently allocated.
+                           A max of 39084 bytes were allocated.
+>-Exiting RHEqs 09/14/05 @ 19:15:44-<
+<<Entering SCFStatus 09/14/05 @ 19:15:44>>
+ 
+= = = = = SCFCycle #3, Basis #2, Geometry #3 = = = = =
+
+       S**2    = 2.03314
+       DIISErr = 0.12D-03
+       MaxDelD = 0.12D-02
+       <T>     = 0.14962783D+03
+       <V>     = -.28284684D+03
+       <HF>    = -.16326827D+02
+       <SCF>   = -149.54583565
+
+ SCFStatus              :: CPU Sec = 0.10D-01, WALL Sec = 0.10D-01
+ SCFStatus              :: Allocs=43,  DeAllocs=45, -16 bytes are presently allocated.
+                           A max of 31268 bytes were allocated.
+>-Exiting SCFStatus 09/14/05 @ 19:15:44-<
+<<Entering MakeRho 09/14/05 @ 19:15:44>>
+ MakeRho : Pruned Rho   :: dNel = 0.39D-13, kept 95% of distributions.
+ MakeRho : Moments      :: <r> = (-.73D-12, -.52D-15, 0.69D-16), <r^2> = 0.12D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.3117483476302427D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3285547566113030D+06
+ MakeRho                :: Rho-LMNs CheckSum  = 0.3156958282599632D+03
+ MakeRho                :: CPU Sec = 0.20D-01, WALL Sec = 0.70D-01
+ MakeRho                :: Allocs=97,  DeAllocs=97, 56 bytes are presently allocated.
+                           A max of 130448 bytes were allocated.
+>-Exiting MakeRho 09/14/05 @ 19:15:44-<
+<<Entering QCTC 09/14/05 @ 19:15:44>>
+ QCTC                   :: J[4] CheckSum  = 0.6572936315521559D+02
+ QCTC                   :: CPU Sec = 0.24D+00, WALL Sec = 0.26D+00
+ QCTC                   :: Allocs=3347,  DeAllocs=68, 912992 bytes are presently allocated.
+                           A max of 987156 bytes were allocated.
+>-Exiting QCTC 09/14/05 @ 19:15:44-<
+<<Entering ONX2 09/14/05 @ 19:15:45>>
+ ONX2                   :: Kx[4] CheckSum  = 0.1259718159354100D+02
+ ONX2                   :: CPU Sec = 0.13D+00, WALL Sec = 0.14D+00
+ ONX2                   :: Allocs=88,  DeAllocs=90, -16 bytes are presently allocated.
+                           A max of 15052 bytes were allocated.
+>-Exiting ONX2 09/14/05 @ 19:15:45-<
+<<Entering FockNGrueven 09/14/05 @ 19:15:45>>
+ FockNGrueven           :: F[4] CheckSum  = 0.4718498640243224D+02
+ FockNGrueven           :: OrthoF[4] CheckSum  = 0.4192338888171419D+02
+ FockNGrueven           :: WALL (Sec) = 0.40D-01
+ FockNGrueven           :: Allocs=59,  DeAllocs=57, 2620 bytes are presently allocated.
+                           A max of 26100 bytes were allocated.
+>-Exiting FockNGrueven 09/14/05 @ 19:15:45-<
+<<Entering DIIS 09/14/05 @ 19:15:45>>
+ DIIS                   :: Cond# = 0.21D+08, MIN(E) = 0.94D-07
+ DIIS : Pulay C1        :: DIISCo = 0.75D+00, -.78D+00, -.59D+00, 0.16D+01
+ DIIS                   :: F_DIIS[4] CheckSum  = 0.4192340792874921D+02
+ DIIS                   :: CPU Sec = 0.10D-01, WALL Sec = 0.50D-01
+ DIIS                   :: Allocs=127,  DeAllocs=124, 328 bytes are presently allocated.
+                           A max of 42212 bytes were allocated.
+>-Exiting DIIS 09/14/05 @ 19:15:45-<
+<<Entering RHEqs 09/14/05 @ 19:15:45>>
+ RHEqs                  :: HOMO = 0.00000000D+00, LUMO = 0.00000000D+00
+ RHEqs                  :: OrthoP[5] CheckSum  = 0.4000000000000000D+01
+ RHEqs                  :: P[5] CheckSum  = 0.3233679852517970D+01
+ RHEqs                  :: CPU Sec = 0.10D-01, WALL Sec = 0.50D-01
+ RHEqs                  :: Allocs=38,  DeAllocs=38, 10352 bytes are presently allocated.
+                           A max of 39084 bytes were allocated.
+>-Exiting RHEqs 09/14/05 @ 19:15:45-<
+<<Entering SCFStatus 09/14/05 @ 19:15:45>>
+ 
+= = = = = SCFCycle #4, Basis #2, Geometry #3 = = = = =
+
+       S**2    = 2.03293
+       DIISErr = 0.27D-04
+       MaxDelD = 0.27D-03
+       <T>     = 0.14961978D+03
+       <V>     = -.28283983D+03
+       <HF>    = -.16325788D+02
+       <SCF>   = -149.54583717
+
+ SCFStatus              :: WALL (Sec) = 0.10D-01
+ SCFStatus              :: Allocs=43,  DeAllocs=45, -16 bytes are presently allocated.
+                           A max of 31268 bytes were allocated.
+>-Exiting SCFStatus 09/14/05 @ 19:15:45-<
+<<Entering MakeRho 09/14/05 @ 19:15:45>>
+ MakeRho : Pruned Rho   :: dNel = 0.36D-13, kept 95% of distributions.
+ MakeRho : Moments      :: <r> = (0.14D-11, -.79D-15, -.61D-16), <r^2> = 0.12D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.3117487252106857D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3285550351562589D+06
+ MakeRho                :: Rho-LMNs CheckSum  = 0.3156962319885018D+03
+ MakeRho                :: CPU Sec = 0.20D-01, WALL Sec = 0.70D-01
+ MakeRho                :: Allocs=97,  DeAllocs=97, 56 bytes are presently allocated.
+                           A max of 130448 bytes were allocated.
+>-Exiting MakeRho 09/14/05 @ 19:15:45-<
+<<Entering QCTC 09/14/05 @ 19:15:45>>
+ QCTC                   :: J[5] CheckSum  = 0.6572939214992094D+02
+ QCTC                   :: CPU Sec = 0.27D+00, WALL Sec = 0.28D+00
+ QCTC                   :: Allocs=3347,  DeAllocs=68, 912992 bytes are presently allocated.
+                           A max of 987156 bytes were allocated.
+>-Exiting QCTC 09/14/05 @ 19:15:45-<
+<<Entering ONX2 09/14/05 @ 19:15:45>>
+ ONX2                   :: Kx[5] CheckSum  = 0.1259717244148055D+02
+ ONX2                   :: CPU Sec = 0.13D+00, WALL Sec = 0.16D+00
+ ONX2                   :: Allocs=88,  DeAllocs=90, -16 bytes are presently allocated.
+                           A max of 15052 bytes were allocated.
+>-Exiting ONX2 09/14/05 @ 19:15:46-<
+<<Entering FockNGrueven 09/14/05 @ 19:15:46>>
+ FockNGrueven           :: F[5] CheckSum  = 0.4718502644631222D+02
+ FockNGrueven           :: OrthoF[5] CheckSum  = 0.4192341723265892D+02
+ FockNGrueven           :: WALL (Sec) = 0.40D-01
+ FockNGrueven           :: Allocs=59,  DeAllocs=57, 2620 bytes are presently allocated.
+                           A max of 26100 bytes were allocated.
+>-Exiting FockNGrueven 09/14/05 @ 19:15:46-<
+<<Entering DIIS 09/14/05 @ 19:15:46>>
+ DIIS                   :: Cond# = 0.68D+09, MIN(E) = 0.33D-08
+ DIIS : Pulay C1        :: DIISCo = -.27D+00, 0.28D+00, 0.21D+00,
+                                    -.64D+00, 0.14D+01
+ DIIS                   :: F_DIIS[5] CheckSum  = 0.4192341910031158D+02
+ DIIS                   :: CPU Sec = 0.10D-01, WALL Sec = 0.60D-01
+ DIIS                   :: Allocs=136,  DeAllocs=133, 416 bytes are presently allocated.
+                           A max of 42324 bytes were allocated.
+>-Exiting DIIS 09/14/05 @ 19:15:46-<
+<<Entering RHEqs 09/14/05 @ 19:15:46>>
+ RHEqs                  :: HOMO = 0.00000000D+00, LUMO = 0.00000000D+00
+ RHEqs                  :: OrthoP[6] CheckSum  = 0.4000000000000000D+01
+ RHEqs                  :: P[6] CheckSum  = 0.3233690109531342D+01
+ RHEqs                  :: CPU Sec = 0.10D-01, WALL Sec = 0.40D-01
+ RHEqs                  :: Allocs=38,  DeAllocs=38, 10352 bytes are presently allocated.
+                           A max of 39084 bytes were allocated.
+>-Exiting RHEqs 09/14/05 @ 19:15:46-<
+<<Entering SCFStatus 09/14/05 @ 19:15:46>>
+ 
+= = = = = SCFCycle #5, Basis #2, Geometry #3 = = = = =
+
+       S**2    = 2.03280
+       DIISErr = 0.34D-05
+       MaxDelD = 0.33D-04
+       <T>     = 0.14961955D+03
+       <V>     = -.28283970D+03
+       <HF>    = -.16325692D+02
+       <SCF>   = -149.54583728
+
+ SCFStatus              :: WALL (Sec) = 0.10D-01
+ SCFStatus              :: Allocs=43,  DeAllocs=45, -16 bytes are presently allocated.
+                           A max of 31268 bytes were allocated.
+>-Exiting SCFStatus 09/14/05 @ 19:15:46-<
+<<Entering MakeRho 09/14/05 @ 19:15:46>>
+ MakeRho : Pruned Rho   :: dNel = 0.25D-13, kept 95% of distributions.
+ MakeRho : Moments      :: <r> = (-.27D-11, -.91D-15, 0.80D-18), <r^2> = 0.12D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.3117490969830848D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3285553019936206D+06
+ MakeRho                :: Rho-LMNs CheckSum  = 0.3156965850091067D+03
+ MakeRho                :: CPU Sec = 0.10D-01, WALL Sec = 0.50D-01
+ MakeRho                :: Allocs=97,  DeAllocs=97, 56 bytes are presently allocated.
+                           A max of 130448 bytes were allocated.
+>-Exiting MakeRho 09/14/05 @ 19:15:46-<
+<<Entering QCTC 09/14/05 @ 19:15:46>>
+ QCTC                   :: J[6] CheckSum  = 0.6572939458838918D+02
+ QCTC                   :: CPU Sec = 0.24D+00, WALL Sec = 0.27D+00
+ QCTC                   :: Allocs=3347,  DeAllocs=68, 912992 bytes are presently allocated.
+                           A max of 987156 bytes were allocated.
+>-Exiting QCTC 09/14/05 @ 19:15:46-<
+<<Entering ONX2 09/14/05 @ 19:15:46>>
+ ONX2                   :: Kx[6] CheckSum  = 0.1259717174655091D+02
+ ONX2                   :: CPU Sec = 0.14D+00, WALL Sec = 0.14D+00
+ ONX2                   :: Allocs=88,  DeAllocs=90, -16 bytes are presently allocated.
+                           A max of 15052 bytes were allocated.
+>-Exiting ONX2 09/14/05 @ 19:15:46-<
+<<Entering FockNGrueven 09/14/05 @ 19:15:47>>
+ FockNGrueven           :: F[6] CheckSum  = 0.4718503016697933D+02
+ FockNGrueven           :: OrthoF[6] CheckSum  = 0.4192342071737080D+02
+ FockNGrueven           :: WALL (Sec) = 0.40D-01
+ FockNGrueven           :: Allocs=59,  DeAllocs=57, 2620 bytes are presently allocated.
+                           A max of 26100 bytes were allocated.
+>-Exiting FockNGrueven 09/14/05 @ 19:15:47-<
+<<Entering DIIS 09/14/05 @ 19:15:47>>
+ DIIS                   :: Cond# = 0.35D+11, MIN(E) = 0.69D-10
+ DIIS : Pulay C1        :: DIISCo = -.80D-01, 0.83D-01, 0.63D-01,
+                                    -.19D+00, 0.39D+00, 0.74D+00
+ DIIS                   :: F_DIIS[6] CheckSum  = 0.4192342012529288D+02
+ DIIS                   :: CPU Sec = 0.10D-01, WALL Sec = 0.50D-01
+ DIIS                   :: Allocs=145,  DeAllocs=142, 520 bytes are presently allocated.
+                           A max of 42452 bytes were allocated.
+>-Exiting DIIS 09/14/05 @ 19:15:47-<
+<<Entering RHEqs 09/14/05 @ 19:15:47>>
+ RHEqs                  :: HOMO = 0.00000000D+00, LUMO = 0.00000000D+00
+ RHEqs                  :: OrthoP[7] CheckSum  = 0.4000000000000002D+01
+ RHEqs                  :: P[7] CheckSum  = 0.3233690061263208D+01
+ RHEqs                  :: CPU Sec = 0.20D-01, WALL Sec = 0.40D-01
+ RHEqs                  :: Allocs=38,  DeAllocs=38, 10352 bytes are presently allocated.
+                           A max of 39084 bytes were allocated.
+>-Exiting RHEqs 09/14/05 @ 19:15:47-<
+<<Entering SCFStatus 09/14/05 @ 19:15:47>>
+ 
+= = = = = SCFCycle #6, Basis #2, Geometry #3 = = = = =
+
+       S**2    = 2.03278
+       DIISErr = 0.25D-06
+       MaxDelD = 0.15D-05
+       <T>     = 0.14961957D+03
+       <V>     = -.28283972D+03
+       <HF>    = -.16325683D+02
+       <SCF>   = -149.54583728
+
+ SCFStatus              :: CPU Sec = 0.10D-01, WALL Sec = 0.20D-01
+ SCFStatus              :: Allocs=43,  DeAllocs=45, -16 bytes are presently allocated.
+                           A max of 31268 bytes were allocated.
+>-Exiting SCFStatus 09/14/05 @ 19:15:47-<
+<<Entering MakeRho 09/14/05 @ 19:15:47>>
+ MakeRho : Pruned Rho   :: dNel = 0.21D-13, kept 95% of distributions.
+ MakeRho : Moments      :: <r> = (0.11D-11, -.76D-16, 0.35D-16), <r^2> = 0.12D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.3117491022269661D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3285553068773826D+06
+ MakeRho                :: Rho-LMNs CheckSum  = 0.3156965892440322D+03
+ MakeRho                :: CPU Sec = 0.30D-01, WALL Sec = 0.40D-01
+ MakeRho                :: Allocs=97,  DeAllocs=97, 56 bytes are presently allocated.
+                           A max of 130448 bytes were allocated.
+>-Exiting MakeRho 09/14/05 @ 19:15:47-<
+<<Entering QCTC 09/14/05 @ 19:15:47>>
+ QCTC                   :: J[7] CheckSum  = 0.6572939433474671D+02
+ QCTC                   :: CPU Sec = 0.27D+00, WALL Sec = 0.30D+00
+ QCTC                   :: Allocs=3347,  DeAllocs=68, 912992 bytes are presently allocated.
+                           A max of 987156 bytes were allocated.
+>-Exiting QCTC 09/14/05 @ 19:15:47-<
+<<Entering ONX2 09/14/05 @ 19:15:47>>
+ ONX2                   :: Kx[7] CheckSum  = 0.1259717176436002D+02
+ ONX2                   :: CPU Sec = 0.15D+00, WALL Sec = 0.15D+00
+ ONX2                   :: Allocs=88,  DeAllocs=90, -16 bytes are presently allocated.
+                           A max of 15052 bytes were allocated.
+>-Exiting ONX2 09/14/05 @ 19:15:47-<
+<<Entering FockNGrueven 09/14/05 @ 19:15:47>>
+ FockNGrueven           :: F[7] CheckSum  = 0.4718502981440837D+02
+ FockNGrueven           :: OrthoF[7] CheckSum  = 0.4192342048635036D+02
+ FockNGrueven           :: WALL (Sec) = 0.30D-01
+ FockNGrueven           :: Allocs=59,  DeAllocs=57, 2620 bytes are presently allocated.
+                           A max of 26100 bytes were allocated.
+>-Exiting FockNGrueven 09/14/05 @ 19:15:48-<
+<<Entering DIIS 09/14/05 @ 19:15:48>>
+ DIIS                   :: Cond# = 0.77D+13, MIN(E) = 0.34D-12
+ DIIS : Pulay C1        :: DIISCo = -.47D-01, 0.49D-01, 0.37D-01,
+                                    -.11D+00, 0.22D+00, 0.42D+00, 0.43D+00
+ DIIS                   :: F_DIIS[7] CheckSum  = 0.4192342028092542D+02
+ DIIS                   :: WALL (Sec) = 0.50D-01
+ DIIS                   :: Allocs=154,  DeAllocs=151, 640 bytes are presently allocated.
+                           A max of 42596 bytes were allocated.
+>-Exiting DIIS 09/14/05 @ 19:15:48-<
+<<Entering RHEqs 09/14/05 @ 19:15:48>>
+ RHEqs                  :: HOMO = 0.00000000D+00, LUMO = 0.00000000D+00
+ RHEqs                  :: OrthoP[8] CheckSum  = 0.4000000000000002D+01
+ RHEqs                  :: P[8] CheckSum  = 0.3233690034258345D+01
+ RHEqs                  :: CPU Sec = 0.20D-01, WALL Sec = 0.40D-01
+ RHEqs                  :: Allocs=38,  DeAllocs=38, 10352 bytes are presently allocated.
+                           A max of 39084 bytes were allocated.
+>-Exiting RHEqs 09/14/05 @ 19:15:48-<
+<<Entering SCFStatus 09/14/05 @ 19:15:48>>
+ 
+= = = = = SCFCycle #7, Basis #2, Geometry #3 = = = = =
+
+       S**2    = 2.03278
+       DIISErr = 0.11D-06
+       MaxDelD = 0.37D-06
+       <T>     = 0.14961957D+03
+       <V>     = -.28283972D+03
+       <HF>    = -.16325683D+02
+       <SCF>   = -149.54583728
+
+ SCFStatus              :: WALL (Sec) = 0.10D-01
+ SCFStatus              :: Allocs=43,  DeAllocs=45, -16 bytes are presently allocated.
+                           A max of 31268 bytes were allocated.
+>-Exiting SCFStatus 09/14/05 @ 19:15:48-<
+ Normal SCF convergence.
+<<Entering SForce 09/14/05 @ 19:15:48>>
+ SForce                 :: dS/dR CheckSum  = 0.5580310393268140D+00
+ SForce                 :: LFrcS CheckSum  = 0.1732050807568877D+09
+ SForce                 :: CPU Sec = 0.40D-01, WALL Sec = 0.40D-01
+ SForce                 :: Allocs=84,  DeAllocs=86, -16 bytes are presently allocated.
+                           A max of 78560 bytes were allocated.
+>-Exiting SForce 09/14/05 @ 19:15:48-<
+<<Entering TForce 09/14/05 @ 19:15:48>>
+ TForce                 :: dT/dR CheckSum  = 0.1066194517369895D+01
+ TForce                 :: LFrcT CheckSum  = 0.0000000000000000D+00
+ TForce                 :: CPU Sec = 0.30D-01, WALL Sec = 0.30D-01
+ TForce                 :: Allocs=45,  DeAllocs=47, -16 bytes are presently allocated.
+                           A max of 7624 bytes were allocated.
+>-Exiting TForce 09/14/05 @ 19:15:48-<
+<<Entering MakeRho 09/14/05 @ 19:15:48>>
+ MakeRho : Pruned Rho   :: dNel = 0.25D-13, kept 95% of distributions.
+ MakeRho : Moments      :: <r> = (0.14D-12, -.96D-15, 0.11D-16), <r^2> = 0.12D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.3117491024038874D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3285553073262587D+06
+ MakeRho                :: Rho-LMNs CheckSum  = 0.3156965892026820D+03
+ MakeRho                :: CPU Sec = 0.20D-01, WALL Sec = 0.80D-01
+ MakeRho                :: Allocs=97,  DeAllocs=97, 56 bytes are presently allocated.
+                           A max of 130448 bytes were allocated.
+>-Exiting MakeRho 09/14/05 @ 19:15:48-<
+<<Entering JForce 09/14/05 @ 19:15:48>>
+ JForce                 :: dJ/dR CheckSum  = 0.1098024926654798D+01
+ JForce                 :: LFrcJ CheckSum  = 0.0000000000000000D+00
+ JForce                 :: CPU Sec = 0.48D+00, WALL Sec = 0.46D+00
+ JForce                 :: Allocs=3347,  DeAllocs=71, 889456 bytes are presently allocated.
+                           A max of 1039808 bytes were allocated.
+>-Exiting JForce 09/14/05 @ 19:15:49-<
+<<Entering GONX2 09/14/05 @ 19:15:49>>
+ GONX2                  :: dKx/dR[3] CheckSum  = 0.5245161320296700D+00
+ GONX2                  :: CPU Sec = 0.61D+00, WALL Sec = 0.61D+00
+ GONX2                  :: Allocs=49,  DeAllocs=51, -16 bytes are presently allocated.
+                           A max of 7700 bytes were allocated.
+>-Exiting GONX2 09/14/05 @ 19:15:49-<
+       Clone =      1 GeOp step =      3 Total Energy =        -149.54583728
+                   Max intl Grad =     0.001191 between atoms    1   2   0   0
+     Max Unconstrained Cart Grad =     0.001191      on atom     2
+                   RMS intl Grad =     0.001191
+                  Max STRE Displ =     0.000882 between atoms    1   2
+                       RMS Displ =     0.001667
+<<Entering MakeS 09/14/05 @ 19:15:49>>
+ MakeS                  :: S CheckSum  = 0.5349683395210716D+01
+ MakeS                  :: CPU Sec = 0.10D-01, WALL Sec = 0.30D-01
+ MakeS                  :: Allocs=52,  DeAllocs=54, -16 bytes are presently allocated.
+                           A max of 31140 bytes were allocated.
+>-Exiting MakeS 09/14/05 @ 19:15:49-<
+<<Entering LowdinO 09/14/05 @ 19:15:49>>
+ LowdinO                :: X CheckSum  = 0.8560371633232172D+01
+ LowdinO                :: WALL (Sec) = 0.40D-01
+ LowdinO                :: Allocs=17,  DeAllocs=19, -16 bytes are presently allocated.
+                           A max of 7920 bytes were allocated.
+>-Exiting LowdinO 09/14/05 @ 19:15:50-<
+<<Entering MakeT 09/14/05 @ 19:15:50>>
+ MakeT                  :: T CheckSum  = 0.4345064248822538D+02
+ MakeT                  :: CPU Sec = 0.10D-01, WALL Sec = 0.30D-01
+ MakeT                  :: Allocs=48,  DeAllocs=50, -16 bytes are presently allocated.
+                           A max of 9884 bytes were allocated.
+>-Exiting MakeT 09/14/05 @ 19:15:50-<
+<<Entering P2Use 09/14/05 @ 19:15:50>>
+ Trace Error: Tr[P0,S0] =    1.0658141036401503E-14
+ Trace Error: Tr[P0,S1] =    9.3756175296277888E-05
+ P2Use : AO-DMX         ::  Nstep  = 1 Lambda = 0.10000000D+01
+ P2Use : AO-DMX 1:1     ::  dN=0.19D-03, %Non0=0.20D+03
+ P2Use : AO-DMX 1:2     ::  dN=-.16D-04, %Non0=0.20D+03
+ P2Use : AO-DMX 1:3     ::  dN=-.18D-14, %Non0=0.20D+03
+ P2Use                  :: P[0] CheckSum  = 0.3233328450607834D+01
+ P2Use                  :: CPU Sec = 0.20D-01, WALL Sec = 0.30D-01
+ P2Use                  :: Allocs=210,  DeAllocs=212, -16 bytes are presently allocated.
+                           A max of 46776 bytes were allocated.
+>-Exiting P2Use 09/14/05 @ 19:15:50-<
+<<Entering MakeRho 09/14/05 @ 19:15:50>>
+ MakeRho : Pruned Rho   :: dNel = 0.43D-13, kept 95% of distributions.
+ MakeRho : Moments      :: <r> = (0.11D-11, 0.45D-15, 0.28D-16), <r^2> = 0.12D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.3117457586959959D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3285540484710348D+06
+ MakeRho                :: Rho-LMNs CheckSum  = 0.3156926739914713D+03
+ MakeRho                :: CPU Sec = 0.30D-01, WALL Sec = 0.50D-01
+ MakeRho                :: Allocs=97,  DeAllocs=97, 56 bytes are presently allocated.
+                           A max of 130448 bytes were allocated.
+>-Exiting MakeRho 09/14/05 @ 19:15:50-<
+<<Entering QCTC 09/14/05 @ 19:15:50>>
+ QCTC                   :: J[0] CheckSum  = 0.6572838935035736D+02
+ QCTC                   :: CPU Sec = 0.22D+00, WALL Sec = 0.24D+00
+ QCTC                   :: Allocs=3347,  DeAllocs=68, 912992 bytes are presently allocated.
+                           A max of 987156 bytes were allocated.
+>-Exiting QCTC 09/14/05 @ 19:15:50-<
+<<Entering ONX2 09/14/05 @ 19:15:50>>
+ ONX2                   :: Kx[0] CheckSum  = 0.1259536626342288D+02
+ ONX2                   :: CPU Sec = 0.13D+00, WALL Sec = 0.15D+00
+ ONX2                   :: Allocs=88,  DeAllocs=90, -16 bytes are presently allocated.
+                           A max of 15052 bytes were allocated.
+>-Exiting ONX2 09/14/05 @ 19:15:50-<
+<<Entering FockNGrueven 09/14/05 @ 19:15:50>>
+ FockNGrueven           :: F[0] CheckSum  = 0.4718151021426581D+02
+ FockNGrueven           :: OrthoF[0] CheckSum  = 0.4192307842064595D+02
+ FockNGrueven           :: WALL (Sec) = 0.30D-01
+ FockNGrueven           :: Allocs=59,  DeAllocs=57, 2620 bytes are presently allocated.
+                           A max of 26100 bytes were allocated.
+>-Exiting FockNGrueven 09/14/05 @ 19:15:50-<
+<<Entering RHEqs 09/14/05 @ 19:15:50>>
+ RHEqs                  :: HOMO = 0.00000000D+00, LUMO = 0.00000000D+00
+ RHEqs                  :: OrthoP[1] CheckSum  = 0.3999999999999998D+01
+ RHEqs                  :: P[1] CheckSum  = 0.3233087298548701D+01
+ RHEqs                  :: CPU Sec = 0.10D-01, WALL Sec = 0.50D-01
+ RHEqs                  :: Allocs=38,  DeAllocs=38, 10352 bytes are presently allocated.
+                           A max of 39084 bytes were allocated.
+>-Exiting RHEqs 09/14/05 @ 19:15:50-<
+<<Entering SCFStatus 09/14/05 @ 19:15:50>>
+ 
+= = = = = SCFCycle #0, Basis #2, Geometry #4 = = = = =
+
+       S**2    = 2.03279
+       MaxDelD = 0.48D-03
+       <T>     = 0.14961706D+03
+       <V>     = -.28283809D+03
+       <HF>    = -.16324812D+02
+       <SCF>   = -149.54583704
+
+ SCFStatus              :: WALL (Sec) = 0.10D-01
+ SCFStatus              :: Allocs=43,  DeAllocs=45, -16 bytes are presently allocated.
+                           A max of 31268 bytes were allocated.
+>-Exiting SCFStatus 09/14/05 @ 19:15:50-<
+<<Entering MakeRho 09/14/05 @ 19:15:51>>
+ MakeRho : Pruned Rho   :: dNel = 0.36D-13, kept 95% of distributions.
+ MakeRho : Moments      :: <r> = (-.11D-11, -.69D-16, -.16D-15), <r^2> = 0.12D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.3117465645497346D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3285556243204743D+06
+ MakeRho                :: Rho-LMNs CheckSum  = 0.3156933174555522D+03
+ MakeRho                :: CPU Sec = 0.20D-01, WALL Sec = 0.60D-01
+ MakeRho                :: Allocs=97,  DeAllocs=97, 56 bytes are presently allocated.
+                           A max of 130448 bytes were allocated.
+>-Exiting MakeRho 09/14/05 @ 19:15:51-<
+<<Entering QCTC 09/14/05 @ 19:15:51>>
+ QCTC                   :: J[1] CheckSum  = 0.6572911891225381D+02
+ QCTC                   :: CPU Sec = 0.25D+00, WALL Sec = 0.27D+00
+ QCTC                   :: Allocs=3347,  DeAllocs=68, 912992 bytes are presently allocated.
+                           A max of 987156 bytes were allocated.
+>-Exiting QCTC 09/14/05 @ 19:15:51-<
+<<Entering ONX2 09/14/05 @ 19:15:51>>
+ ONX2                   :: Kx[1] CheckSum  = 0.1259528600236523D+02
+ ONX2                   :: CPU Sec = 0.12D+00, WALL Sec = 0.14D+00
+ ONX2                   :: Allocs=88,  DeAllocs=90, -16 bytes are presently allocated.
+                           A max of 15052 bytes were allocated.
+>-Exiting ONX2 09/14/05 @ 19:15:51-<
+<<Entering FockNGrueven 09/14/05 @ 19:15:51>>
+ FockNGrueven           :: F[1] CheckSum  = 0.4718252060428297D+02
+ FockNGrueven           :: OrthoF[1] CheckSum  = 0.4192385077409730D+02
+ FockNGrueven           :: CPU Sec = 0.10D-01, WALL Sec = 0.40D-01
+ FockNGrueven           :: Allocs=59,  DeAllocs=57, 2620 bytes are presently allocated.
+                           A max of 26100 bytes were allocated.
+>-Exiting FockNGrueven 09/14/05 @ 19:15:51-<
+<<Entering DIIS 09/14/05 @ 19:15:51>>
+ DIIS : Damping         :: Co = 0.90D+00, 0.10D+00
+ DIIS                   :: F_DIIS[1] CheckSum  = 0.4192315565519737D+02
+ DIIS                   :: CPU Sec = 0.10D-01, WALL Sec = 0.30D-01
+ DIIS                   :: Allocs=79,  DeAllocs=77, 128 bytes are presently allocated.
+                           A max of 39380 bytes were allocated.
+>-Exiting DIIS 09/14/05 @ 19:15:51-<
+<<Entering RHEqs 09/14/05 @ 19:15:51>>
+ RHEqs                  :: HOMO = 0.00000000D+00, LUMO = 0.00000000D+00
+ RHEqs                  :: OrthoP[2] CheckSum  = 0.3999999999999999D+01
+ RHEqs                  :: P[2] CheckSum  = 0.3233084026318774D+01
+ RHEqs                  :: WALL (Sec) = 0.40D-01
+ RHEqs                  :: Allocs=38,  DeAllocs=38, 10352 bytes are presently allocated.
+                           A max of 39084 bytes were allocated.
+>-Exiting RHEqs 09/14/05 @ 19:15:51-<
+<<Entering SCFStatus 09/14/05 @ 19:15:51>>
+ 
+= = = = = SCFCycle #1, Basis #2, Geometry #4 = = = = =
+
+       S**2    = 2.03280
+       DIISErr = 0.25D-04
+       MaxDelD = 0.19D-04
+       <T>     = 0.14961396D+03
+       <V>     = -.28283535D+03
+       <HF>    = -.16324450D+02
+       <SCF>   = -149.54583788
+
+ SCFStatus              :: CPU Sec = 0.10D-01, WALL Sec = 0.10D-01
+ SCFStatus              :: Allocs=43,  DeAllocs=45, -16 bytes are presently allocated.
+                           A max of 31268 bytes were allocated.
+>-Exiting SCFStatus 09/14/05 @ 19:15:51-<
+<<Entering MakeRho 09/14/05 @ 19:15:51>>
+ MakeRho : Pruned Rho   :: dNel = 0.43D-13, kept 95% of distributions.
+ MakeRho : Moments      :: <r> = (-.93D-12, 0.42D-15, -.13D-15), <r^2> = 0.12D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.3117468167830140D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3285557796344213D+06
+ MakeRho                :: Rho-LMNs CheckSum  = 0.3156935794520645D+03
+ MakeRho                :: CPU Sec = 0.10D-01, WALL Sec = 0.40D-01
+ MakeRho                :: Allocs=97,  DeAllocs=97, 56 bytes are presently allocated.
+                           A max of 130448 bytes were allocated.
+>-Exiting MakeRho 09/14/05 @ 19:15:51-<
+<<Entering QCTC 09/14/05 @ 19:15:51>>
+ QCTC                   :: J[2] CheckSum  = 0.6572909184390164D+02
+ QCTC                   :: CPU Sec = 0.27D+00, WALL Sec = 0.29D+00
+ QCTC                   :: Allocs=3347,  DeAllocs=68, 912992 bytes are presently allocated.
+                           A max of 987156 bytes were allocated.
+>-Exiting QCTC 09/14/05 @ 19:15:52-<
+<<Entering ONX2 09/14/05 @ 19:15:52>>
+ ONX2                   :: Kx[2] CheckSum  = 0.1259529165820086D+02
+ ONX2                   :: CPU Sec = 0.15D+00, WALL Sec = 0.17D+00
+ ONX2                   :: Allocs=88,  DeAllocs=90, -16 bytes are presently allocated.
+                           A max of 15052 bytes were allocated.
+>-Exiting ONX2 09/14/05 @ 19:15:52-<
+<<Entering FockNGrueven 09/14/05 @ 19:15:52>>
+ FockNGrueven           :: F[2] CheckSum  = 0.4718248390049830D+02
+ FockNGrueven           :: OrthoF[2] CheckSum  = 0.4192382372044143D+02
+ FockNGrueven           :: CPU Sec = 0.10D-01, WALL Sec = 0.40D-01
+ FockNGrueven           :: Allocs=59,  DeAllocs=57, 2620 bytes are presently allocated.
+                           A max of 26100 bytes were allocated.
+>-Exiting FockNGrueven 09/14/05 @ 19:15:52-<
+<<Entering DIIS 09/14/05 @ 19:15:52>>
+ DIIS                   :: Cond# = 0.19D+10, MIN(E) = 0.76D-09
+ DIIS : Pulay C1        :: DIISCo = -.99D+01, 0.11D+02
+ DIIS                   :: F_DIIS[2] CheckSum  = 0.4192355661208021D+02
+ DIIS                   :: CPU Sec = 0.20D-01, WALL Sec = 0.90D-01
+ DIIS                   :: Allocs=124,  DeAllocs=121, 200 bytes are presently allocated.
+                           A max of 42556 bytes were allocated.
+>-Exiting DIIS 09/14/05 @ 19:15:52-<
+<<Entering RHEqs 09/14/05 @ 19:15:52>>
+ RHEqs                  :: HOMO = 0.00000000D+00, LUMO = 0.00000000D+00
+ RHEqs                  :: OrthoP[3] CheckSum  = 0.4000000000000000D+01
+ RHEqs                  :: P[3] CheckSum  = 0.3233046608979536D+01
+ RHEqs                  :: CPU Sec = 0.10D-01, WALL Sec = 0.40D-01
+ RHEqs                  :: Allocs=38,  DeAllocs=38, 10352 bytes are presently allocated.
+                           A max of 39084 bytes were allocated.
+>-Exiting RHEqs 09/14/05 @ 19:15:52-<
+<<Entering SCFStatus 09/14/05 @ 19:15:52>>
+ 
+= = = = = SCFCycle #2, Basis #2, Geometry #4 = = = = =
+
+       S**2    = 2.03281
+       DIISErr = 0.22D-04
+       MaxDelD = 0.20D-03
+       <T>     = 0.14961411D+03
+       <V>     = -.28283548D+03
+       <HF>    = -.16324467D+02
+       <SCF>   = -149.54583789
+
+ SCFStatus              :: WALL (Sec) = 0.10D-01
+ SCFStatus              :: Allocs=43,  DeAllocs=45, -16 bytes are presently allocated.
+                           A max of 31268 bytes were allocated.
+>-Exiting SCFStatus 09/14/05 @ 19:15:52-<
+<<Entering MakeRho 09/14/05 @ 19:15:52>>
+ MakeRho : Pruned Rho   :: dNel = 0.60D-13, kept 95% of distributions.
+ MakeRho : Moments      :: <r> = (-.12D-11, -.37D-16, -.21D-15), <r^2> = 0.12D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.3117491554777586D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3285573005602403D+06
+ MakeRho                :: Rho-LMNs CheckSum  = 0.3156959813113949D+03
+ MakeRho                :: CPU Sec = 0.20D-01, WALL Sec = 0.50D-01
+ MakeRho                :: Allocs=97,  DeAllocs=97, 56 bytes are presently allocated.
+                           A max of 130448 bytes were allocated.
+>-Exiting MakeRho 09/14/05 @ 19:15:52-<
+<<Entering QCTC 09/14/05 @ 19:15:52>>
+ QCTC                   :: J[3] CheckSum  = 0.6572891334199386D+02
+ QCTC                   :: CPU Sec = 0.28D+00, WALL Sec = 0.31D+00
+ QCTC                   :: Allocs=3347,  DeAllocs=68, 912992 bytes are presently allocated.
+                           A max of 987156 bytes were allocated.
+>-Exiting QCTC 09/14/05 @ 19:15:53-<
+<<Entering ONX2 09/14/05 @ 19:15:53>>
+ ONX2                   :: Kx[3] CheckSum  = 0.1259533448385295D+02
+ ONX2                   :: CPU Sec = 0.14D+00, WALL Sec = 0.17D+00
+ ONX2                   :: Allocs=88,  DeAllocs=90, -16 bytes are presently allocated.
+                           A max of 15052 bytes were allocated.
+>-Exiting ONX2 09/14/05 @ 19:15:53-<
+<<Entering FockNGrueven 09/14/05 @ 19:15:53>>
+ FockNGrueven           :: F[3] CheckSum  = 0.4718224331113809D+02
+ FockNGrueven           :: OrthoF[3] CheckSum  = 0.4192364884373251D+02
+ FockNGrueven           :: WALL (Sec) = 0.40D-01
+ FockNGrueven           :: Allocs=59,  DeAllocs=57, 2620 bytes are presently allocated.
+                           A max of 26100 bytes were allocated.
+>-Exiting FockNGrueven 09/14/05 @ 19:15:53-<
+<<Entering DIIS 09/14/05 @ 19:15:53>>
+ DIIS                   :: Cond# = 0.24D+11, MIN(E) = 0.71D-10
+ DIIS : Pulay C1        :: DIISCo = -.90D-01, 0.15D-01, 0.11D+01
+ DIIS                   :: F_DIIS[3] CheckSum  = 0.4192363330475524D+02
+ DIIS                   :: WALL (Sec) = 0.40D-01
+ DIIS                   :: Allocs=118,  DeAllocs=115, 256 bytes are presently allocated.
+                           A max of 42116 bytes were allocated.
+>-Exiting DIIS 09/14/05 @ 19:15:53-<
+<<Entering RHEqs 09/14/05 @ 19:15:53>>
+ RHEqs                  :: HOMO = 0.00000000D+00, LUMO = 0.00000000D+00
+ RHEqs                  :: OrthoP[4] CheckSum  = 0.4000000000000002D+01
+ RHEqs                  :: P[4] CheckSum  = 0.3233045108070355D+01
+ RHEqs                  :: CPU Sec = 0.10D-01, WALL Sec = 0.50D-01
+ RHEqs                  :: Allocs=38,  DeAllocs=38, 10352 bytes are presently allocated.
+                           A max of 39084 bytes were allocated.
+>-Exiting RHEqs 09/14/05 @ 19:15:53-<
+<<Entering SCFStatus 09/14/05 @ 19:15:53>>
+ 
+= = = = = SCFCycle #3, Basis #2, Geometry #4 = = = = =
+
+       S**2    = 2.03282
+       DIISErr = 0.22D-05
+       MaxDelD = 0.23D-04
+       <T>     = 0.14961516D+03
+       <V>     = -.28283640D+03
+       <HF>    = -.16324597D+02
+       <SCF>   = -149.54583794
+
+ SCFStatus              :: WALL (Sec) = 0.10D-01
+ SCFStatus              :: Allocs=43,  DeAllocs=45, -16 bytes are presently allocated.
+                           A max of 31268 bytes were allocated.
+>-Exiting SCFStatus 09/14/05 @ 19:15:53-<
+<<Entering MakeRho 09/14/05 @ 19:15:53>>
+ MakeRho : Pruned Rho   :: dNel = 0.60D-13, kept 95% of distributions.
+ MakeRho : Moments      :: <r> = (0.11D-11, -.12D-14, -.26D-15), <r^2> = 0.12D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.3117493890086467D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3285574405745237D+06
+ MakeRho                :: Rho-LMNs CheckSum  = 0.3156962226042974D+03
+ MakeRho                :: CPU Sec = 0.30D-01, WALL Sec = 0.50D-01
+ MakeRho                :: Allocs=97,  DeAllocs=97, 56 bytes are presently allocated.
+                           A max of 130448 bytes were allocated.
+>-Exiting MakeRho 09/14/05 @ 19:15:53-<
+<<Entering QCTC 09/14/05 @ 19:15:53>>
+ QCTC                   :: J[4] CheckSum  = 0.6572888530900573D+02
+ QCTC                   :: CPU Sec = 0.28D+00, WALL Sec = 0.29D+00
+ QCTC                   :: Allocs=3347,  DeAllocs=68, 912992 bytes are presently allocated.
+                           A max of 987156 bytes were allocated.
+>-Exiting QCTC 09/14/05 @ 19:15:54-<
+<<Entering ONX2 09/14/05 @ 19:15:54>>
+ ONX2                   :: Kx[4] CheckSum  = 0.1259534014523133D+02
+ ONX2                   :: CPU Sec = 0.13D+00, WALL Sec = 0.15D+00
+ ONX2                   :: Allocs=88,  DeAllocs=90, -16 bytes are presently allocated.
+                           A max of 15052 bytes were allocated.
+>-Exiting ONX2 09/14/05 @ 19:15:54-<
+<<Entering FockNGrueven 09/14/05 @ 19:15:54>>
+ FockNGrueven           :: F[4] CheckSum  = 0.4718220522329007D+02
+ FockNGrueven           :: OrthoF[4] CheckSum  = 0.4192362073188667D+02
+ FockNGrueven           :: WALL (Sec) = 0.40D-01
+ FockNGrueven           :: Allocs=59,  DeAllocs=57, 2620 bytes are presently allocated.
+                           A max of 26100 bytes were allocated.
+>-Exiting FockNGrueven 09/14/05 @ 19:15:54-<
+<<Entering DIIS 09/14/05 @ 19:15:54>>
+ DIIS                   :: Cond# = 0.66D+11, MIN(E) = 0.30D-10
+ DIIS : Pulay C1        :: DIISCo = -.23D+00, 0.25D+00, 0.47D-01, 0.93D+00
+ DIIS                   :: F_DIIS[4] CheckSum  = 0.4192361996234873D+02
+ DIIS                   :: CPU Sec = 0.30D-01, WALL Sec = 0.50D-01
+ DIIS                   :: Allocs=127,  DeAllocs=124, 328 bytes are presently allocated.
+                           A max of 42212 bytes were allocated.
+>-Exiting DIIS 09/14/05 @ 19:15:54-<
+<<Entering RHEqs 09/14/05 @ 19:15:54>>
+ RHEqs                  :: HOMO = 0.00000000D+00, LUMO = 0.00000000D+00
+ RHEqs                  :: OrthoP[5] CheckSum  = 0.4000000000000002D+01
+ RHEqs                  :: P[5] CheckSum  = 0.3233045141544017D+01
+ RHEqs                  :: CPU Sec = 0.10D-01, WALL Sec = 0.50D-01
+ RHEqs                  :: Allocs=38,  DeAllocs=38, 10352 bytes are presently allocated.
+                           A max of 39084 bytes were allocated.
+>-Exiting RHEqs 09/14/05 @ 19:15:54-<
+<<Entering SCFStatus 09/14/05 @ 19:15:54>>
+ 
+= = = = = SCFCycle #4, Basis #2, Geometry #4 = = = = =
+
+       S**2    = 2.03283
+       DIISErr = 0.47D-06
+       MaxDelD = 0.10D-05
+       <T>     = 0.14961531D+03
+       <V>     = -.28283654D+03
+       <HF>    = -.16324617D+02
+       <SCF>   = -149.54583794
+
+ SCFStatus              :: WALL (Sec) = 0.10D-01
+ SCFStatus              :: Allocs=43,  DeAllocs=45, -16 bytes are presently allocated.
+                           A max of 31268 bytes were allocated.
+>-Exiting SCFStatus 09/14/05 @ 19:15:54-<
+ Normal SCF convergence.
+<<Entering SForce 09/14/05 @ 19:15:54>>
+ SForce                 :: dS/dR CheckSum  = 0.5562966832746493D+00
+ SForce                 :: LFrcS CheckSum  = 0.1732050807568877D+09
+ SForce                 :: CPU Sec = 0.20D-01, WALL Sec = 0.50D-01
+ SForce                 :: Allocs=84,  DeAllocs=86, -16 bytes are presently allocated.
+                           A max of 78560 bytes were allocated.
+>-Exiting SForce 09/14/05 @ 19:15:54-<
+<<Entering TForce 09/14/05 @ 19:15:54>>
+ TForce                 :: dT/dR CheckSum  = 0.1062056117366140D+01
+ TForce                 :: LFrcT CheckSum  = 0.0000000000000000D+00
+ TForce                 :: CPU Sec = 0.20D-01, WALL Sec = 0.30D-01
+ TForce                 :: Allocs=45,  DeAllocs=47, -16 bytes are presently allocated.
+                           A max of 7624 bytes were allocated.
+>-Exiting TForce 09/14/05 @ 19:15:54-<
+<<Entering MakeRho 09/14/05 @ 19:15:54>>
+ MakeRho : Pruned Rho   :: dNel = 0.50D-13, kept 95% of distributions.
+ MakeRho : Moments      :: <r> = (-.11D-11, -.33D-15, -.19D-15), <r^2> = 0.12D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.3117493599077551D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3285574233080067D+06
+ MakeRho                :: Rho-LMNs CheckSum  = 0.3156961921519774D+03
+ MakeRho                :: CPU Sec = 0.20D-01, WALL Sec = 0.40D-01
+ MakeRho                :: Allocs=97,  DeAllocs=97, 56 bytes are presently allocated.
+                           A max of 130448 bytes were allocated.
+>-Exiting MakeRho 09/14/05 @ 19:15:54-<
+<<Entering JForce 09/14/05 @ 19:15:54>>
+ JForce                 :: dJ/dR CheckSum  = 0.1094967904556576D+01
+ JForce                 :: LFrcJ CheckSum  = 0.0000000000000000D+00
+ JForce                 :: CPU Sec = 0.44D+00, WALL Sec = 0.46D+00
+ JForce                 :: Allocs=3347,  DeAllocs=71, 889456 bytes are presently allocated.
+                           A max of 1039808 bytes were allocated.
+>-Exiting JForce 09/14/05 @ 19:15:55-<
+<<Entering GONX2 09/14/05 @ 19:15:55>>
+ GONX2                  :: dKx/dR[4] CheckSum  = 0.5239371538282075D+00
+ GONX2                  :: CPU Sec = 0.61D+00, WALL Sec = 0.62D+00
+ GONX2                  :: Allocs=49,  DeAllocs=51, -16 bytes are presently allocated.
+                           A max of 7700 bytes were allocated.
+>-Exiting GONX2 09/14/05 @ 19:15:56-<
+       Clone =      1 GeOp step =      4 Total Energy =        -149.54583794
+                   Max intl Grad =     0.000391 between atoms    1   2   0   0
+     Max Unconstrained Cart Grad =     0.000391      on atom     1
+                   RMS intl Grad =     0.000391
+                  Max STRE Displ =     0.000245 between atoms    1   2
+                       RMS Displ =     0.000463
+<<Entering MakeS 09/14/05 @ 19:15:56>>
+ MakeS                  :: S CheckSum  = 0.5349879399964434D+01
+ MakeS                  :: CPU Sec = 0.10D-01, WALL Sec = 0.20D-01
+ MakeS                  :: Allocs=52,  DeAllocs=54, -16 bytes are presently allocated.
+                           A max of 31140 bytes were allocated.
+>-Exiting MakeS 09/14/05 @ 19:15:56-<
+<<Entering LowdinO 09/14/05 @ 19:15:56>>
+ LowdinO                :: X CheckSum  = 0.8563049185759734D+01
+ LowdinO                :: WALL (Sec) = 0.20D-01
+ LowdinO                :: Allocs=17,  DeAllocs=19, -16 bytes are presently allocated.
+                           A max of 7920 bytes were allocated.
+>-Exiting LowdinO 09/14/05 @ 19:15:56-<
+<<Entering MakeT 09/14/05 @ 19:15:56>>
+ MakeT                  :: T CheckSum  = 0.4345065535223009D+02
+ MakeT                  :: WALL (Sec) = 0.20D-01
+ MakeT                  :: Allocs=48,  DeAllocs=50, -16 bytes are presently allocated.
+                           A max of 9884 bytes were allocated.
+>-Exiting MakeT 09/14/05 @ 19:15:56-<
+<<Entering P2Use 09/14/05 @ 19:15:56>>
+ Trace Error: Tr[P0,S0] =    1.7763568394002505E-14
+ Trace Error: Tr[P0,S1] =    2.5793797815865105E-05
+ P2Use : AO-DMX         ::  Nstep  = 1 Lambda = 0.10000000D+01
+ P2Use : AO-DMX 1:1     ::  dN=-.15D-06, %Non0=0.20D+03
+ P2Use : AO-DMX 1:2     ::  dN=-.12D-13, %Non0=0.20D+03
+ P2Use                  :: P[0] CheckSum  = 0.3233145500677852D+01
+ P2Use                  :: CPU Sec = 0.10D-01, WALL Sec = 0.30D-01
+ P2Use                  :: Allocs=174,  DeAllocs=176, -16 bytes are presently allocated.
+                           A max of 46776 bytes were allocated.
+>-Exiting P2Use 09/14/05 @ 19:15:56-<
+<<Entering MakeRho 09/14/05 @ 19:15:56>>
+ MakeRho : Pruned Rho   :: dNel = 0.50D-13, kept 95% of distributions.
+ MakeRho : Moments      :: <r> = (0.12D-11, -.88D-15, -.17D-15), <r^2> = 0.12D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.3117503178725208D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3285577901080769D+06
+ MakeRho                :: Rho-LMNs CheckSum  = 0.3156973103082508D+03
+ MakeRho                :: CPU Sec = 0.10D-01, WALL Sec = 0.50D-01
+ MakeRho                :: Allocs=97,  DeAllocs=97, 56 bytes are presently allocated.
+                           A max of 130448 bytes were allocated.
+>-Exiting MakeRho 09/14/05 @ 19:15:56-<
+<<Entering QCTC 09/14/05 @ 19:15:56>>
+ QCTC                   :: J[0] CheckSum  = 0.6572916435511898D+02
+ QCTC                   :: CPU Sec = 0.22D+00, WALL Sec = 0.24D+00
+ QCTC                   :: Allocs=3347,  DeAllocs=68, 912992 bytes are presently allocated.
+                           A max of 987156 bytes were allocated.
+>-Exiting QCTC 09/14/05 @ 19:15:56-<
+<<Entering ONX2 09/14/05 @ 19:15:56>>
+ ONX2                   :: Kx[0] CheckSum  = 0.1259584161773718D+02
+ ONX2                   :: CPU Sec = 0.14D+00, WALL Sec = 0.15D+00
+ ONX2                   :: Allocs=88,  DeAllocs=90, -16 bytes are presently allocated.
+                           A max of 15052 bytes were allocated.
+>-Exiting ONX2 09/14/05 @ 19:15:57-<
+<<Entering FockNGrueven 09/14/05 @ 19:15:57>>
+ FockNGrueven           :: F[0] CheckSum  = 0.4718318265938151D+02
+ FockNGrueven           :: OrthoF[0] CheckSum  = 0.4192371563832045D+02
+ FockNGrueven           :: WALL (Sec) = 0.40D-01
+ FockNGrueven           :: Allocs=59,  DeAllocs=57, 2620 bytes are presently allocated.
+                           A max of 26100 bytes were allocated.
+>-Exiting FockNGrueven 09/14/05 @ 19:15:57-<
+<<Entering RHEqs 09/14/05 @ 19:15:57>>
+ RHEqs                  :: HOMO = 0.00000000D+00, LUMO = 0.00000000D+00
+ RHEqs                  :: OrthoP[1] CheckSum  = 0.4000000000000002D+01
+ RHEqs                  :: P[1] CheckSum  = 0.3233212374306970D+01
+ RHEqs                  :: CPU Sec = 0.10D-01, WALL Sec = 0.40D-01
+ RHEqs                  :: Allocs=38,  DeAllocs=38, 10352 bytes are presently allocated.
+                           A max of 39084 bytes were allocated.
+>-Exiting RHEqs 09/14/05 @ 19:15:57-<
+<<Entering SCFStatus 09/14/05 @ 19:15:57>>
+ 
+= = = = = SCFCycle #0, Basis #2, Geometry #5 = = = = =
+
+       S**2    = 2.03282
+       MaxDelD = 0.13D-03
+       <T>     = 0.14961601D+03
+       <V>     = -.28283699D+03
+       <HF>    = -.16324859D+02
+       <SCF>   = -149.54583795
+
+ SCFStatus              :: WALL (Sec) = 0.10D-01
+ SCFStatus              :: Allocs=43,  DeAllocs=45, -16 bytes are presently allocated.
+                           A max of 31268 bytes were allocated.
+>-Exiting SCFStatus 09/14/05 @ 19:15:57-<
+<<Entering MakeRho 09/14/05 @ 19:15:57>>
+ MakeRho : Pruned Rho   :: dNel = 0.43D-13, kept 95% of distributions.
+ MakeRho : Moments      :: <r> = (-.11D-11, -.26D-14, 0.21D-15), <r^2> = 0.12D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.3117500679545770D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3285573372230896D+06
+ MakeRho                :: Rho-LMNs CheckSum  = 0.3156971041360284D+03
+ MakeRho                :: CPU Sec = 0.10D-01, WALL Sec = 0.60D-01
+ MakeRho                :: Allocs=97,  DeAllocs=97, 56 bytes are presently allocated.
+                           A max of 130448 bytes were allocated.
+>-Exiting MakeRho 09/14/05 @ 19:15:57-<
+<<Entering QCTC 09/14/05 @ 19:15:57>>
+ QCTC                   :: J[1] CheckSum  = 0.6572896461321439D+02
+ QCTC                   :: CPU Sec = 0.26D+00, WALL Sec = 0.26D+00
+ QCTC                   :: Allocs=3347,  DeAllocs=68, 912992 bytes are presently allocated.
+                           A max of 987156 bytes were allocated.
+>-Exiting QCTC 09/14/05 @ 19:15:57-<
+<<Entering ONX2 09/14/05 @ 19:15:57>>
+ ONX2                   :: Kx[1] CheckSum  = 0.1259586345214394D+02
+ ONX2                   :: CPU Sec = 0.11D+00, WALL Sec = 0.15D+00
+ ONX2                   :: Allocs=88,  DeAllocs=90, -16 bytes are presently allocated.
+                           A max of 15052 bytes were allocated.
+>-Exiting ONX2 09/14/05 @ 19:15:57-<
+<<Entering FockNGrueven 09/14/05 @ 19:15:57>>
+ FockNGrueven           :: F[1] CheckSum  = 0.4718290596034936D+02
+ FockNGrueven           :: OrthoF[1] CheckSum  = 0.4192350407867720D+02
+ FockNGrueven           :: CPU Sec = 0.10D-01, WALL Sec = 0.40D-01
+ FockNGrueven           :: Allocs=59,  DeAllocs=57, 2620 bytes are presently allocated.
+                           A max of 26100 bytes were allocated.
+>-Exiting FockNGrueven 09/14/05 @ 19:15:58-<
+<<Entering DIIS 09/14/05 @ 19:15:58>>
+ DIIS : Damping         :: Co = 0.90D+00, 0.10D+00
+ DIIS                   :: F_DIIS[1] CheckSum  = 0.4192369448229645D+02
+ DIIS                   :: WALL (Sec) = 0.30D-01
+ DIIS                   :: Allocs=79,  DeAllocs=77, 128 bytes are presently allocated.
+                           A max of 39380 bytes were allocated.
+>-Exiting DIIS 09/14/05 @ 19:15:58-<
+<<Entering RHEqs 09/14/05 @ 19:15:58>>
+ RHEqs                  :: HOMO = 0.00000000D+00, LUMO = 0.00000000D+00
+ RHEqs                  :: OrthoP[2] CheckSum  = 0.4000000000000000D+01
+ RHEqs                  :: P[2] CheckSum  = 0.3233213275332820D+01
+ RHEqs                  :: CPU Sec = 0.10D-01, WALL Sec = 0.40D-01
+ RHEqs                  :: Allocs=38,  DeAllocs=38, 10352 bytes are presently allocated.
+                           A max of 39084 bytes were allocated.
+>-Exiting RHEqs 09/14/05 @ 19:15:58-<
+<<Entering SCFStatus 09/14/05 @ 19:15:58>>
+ 
+= = = = = SCFCycle #1, Basis #2, Geometry #5 = = = = =
+
+       S**2    = 2.03282
+       DIISErr = 0.68D-05
+       MaxDelD = 0.52D-05
+       <T>     = 0.14961686D+03
+       <V>     = -.28283774D+03
+       <HF>    = -.16324959D+02
+       <SCF>   = -149.54583802
+
+ SCFStatus              :: WALL (Sec) = 0.20D-01
+ SCFStatus              :: Allocs=43,  DeAllocs=45, -16 bytes are presently allocated.
+                           A max of 31268 bytes were allocated.
+>-Exiting SCFStatus 09/14/05 @ 19:15:58-<
+<<Entering MakeRho 09/14/05 @ 19:15:58>>
+ MakeRho : Pruned Rho   :: dNel = 0.28D-13, kept 95% of distributions.
+ MakeRho : Moments      :: <r> = (-.90D-12, -.77D-15, 0.19D-15), <r^2> = 0.12D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.3117499978985532D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3285572939790454D+06
+ MakeRho                :: Rho-LMNs CheckSum  = 0.3156970314070865D+03
+ MakeRho                :: CPU Sec = 0.20D-01, WALL Sec = 0.50D-01
+ MakeRho                :: Allocs=97,  DeAllocs=97, 56 bytes are presently allocated.
+                           A max of 130448 bytes were allocated.
+>-Exiting MakeRho 09/14/05 @ 19:15:58-<
+<<Entering QCTC 09/14/05 @ 19:15:58>>
+ QCTC                   :: J[2] CheckSum  = 0.6572897201580497D+02
+ QCTC                   :: CPU Sec = 0.26D+00, WALL Sec = 0.26D+00
+ QCTC                   :: Allocs=3347,  DeAllocs=68, 912992 bytes are presently allocated.
+                           A max of 987156 bytes were allocated.
+>-Exiting QCTC 09/14/05 @ 19:15:58-<
+<<Entering ONX2 09/14/05 @ 19:15:58>>
+ ONX2                   :: Kx[2] CheckSum  = 0.1259586190253322D+02
+ ONX2                   :: CPU Sec = 0.15D+00, WALL Sec = 0.17D+00
+ ONX2                   :: Allocs=88,  DeAllocs=90, -16 bytes are presently allocated.
+                           A max of 15052 bytes were allocated.
+>-Exiting ONX2 09/14/05 @ 19:15:58-<
+<<Entering FockNGrueven 09/14/05 @ 19:15:58>>
+ FockNGrueven           :: F[2] CheckSum  = 0.4718291599660041D+02
+ FockNGrueven           :: OrthoF[2] CheckSum  = 0.4192351147384053D+02
+ FockNGrueven           :: CPU Sec = 0.10D-01, WALL Sec = 0.40D-01
+ FockNGrueven           :: Allocs=59,  DeAllocs=57, 2620 bytes are presently allocated.
+                           A max of 26100 bytes were allocated.
+>-Exiting FockNGrueven 09/14/05 @ 19:15:58-<
+<<Entering DIIS 09/14/05 @ 19:15:58>>
+ DIIS                   :: Cond# = 0.24D+11, MIN(E) = 0.58D-10
+ DIIS : Pulay C1        :: DIISCo = 0.50D+00, 0.50D+00
+ DIIS                   :: F_DIIS[2] CheckSum  = 0.4192350777625864D+02
+ DIIS                   :: CPU Sec = 0.20D-01, WALL Sec = 0.70D-01
+ DIIS                   :: Allocs=124,  DeAllocs=121, 200 bytes are presently allocated.
+                           A max of 42556 bytes were allocated.
+>-Exiting DIIS 09/14/05 @ 19:15:59-<
+<<Entering RHEqs 09/14/05 @ 19:15:59>>
+ RHEqs                  :: HOMO = 0.00000000D+00, LUMO = 0.00000000D+00
+ RHEqs                  :: OrthoP[3] CheckSum  = 0.3999999999999999D+01
+ RHEqs                  :: P[3] CheckSum  = 0.3233221484703814D+01
+ RHEqs                  :: CPU Sec = 0.10D-01, WALL Sec = 0.50D-01
+ RHEqs                  :: Allocs=38,  DeAllocs=38, 10352 bytes are presently allocated.
+                           A max of 39084 bytes were allocated.
+>-Exiting RHEqs 09/14/05 @ 19:15:59-<
+<<Entering SCFStatus 09/14/05 @ 19:15:59>>
+ 
+= = = = = SCFCycle #2, Basis #2, Geometry #5 = = = = =
+
+       S**2    = 2.03282
+       DIISErr = 0.62D-05
+       MaxDelD = 0.47D-04
+       <T>     = 0.14961682D+03
+       <V>     = -.28283770D+03
+       <HF>    = -.16324954D+02
+       <SCF>   = -149.54583802
+
+ SCFStatus              :: CPU Sec = 0.10D-01, WALL Sec = 0.10D-01
+ SCFStatus              :: Allocs=43,  DeAllocs=45, -16 bytes are presently allocated.
+                           A max of 31268 bytes were allocated.
+>-Exiting SCFStatus 09/14/05 @ 19:15:59-<
+<<Entering MakeRho 09/14/05 @ 19:15:59>>
+ MakeRho : Pruned Rho   :: dNel = 0.21D-13, kept 95% of distributions.
+ MakeRho : Moments      :: <r> = (0.92D-12, -.10D-14, 0.22D-15), <r^2> = 0.12D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.3117493663533327D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3285569031020876D+06
+ MakeRho                :: Rho-LMNs CheckSum  = 0.3156963761185523D+03
+ MakeRho                :: CPU Sec = 0.20D-01, WALL Sec = 0.60D-01
+ MakeRho                :: Allocs=97,  DeAllocs=97, 56 bytes are presently allocated.
+                           A max of 130448 bytes were allocated.
+>-Exiting MakeRho 09/14/05 @ 19:15:59-<
+<<Entering QCTC 09/14/05 @ 19:15:59>>
+ QCTC                   :: J[3] CheckSum  = 0.6572903781689385D+02
+ QCTC                   :: CPU Sec = 0.31D+00, WALL Sec = 0.32D+00
+ QCTC                   :: Allocs=3347,  DeAllocs=68, 912992 bytes are presently allocated.
+                           A max of 987156 bytes were allocated.
+>-Exiting QCTC 09/14/05 @ 19:15:59-<
+<<Entering ONX2 09/14/05 @ 19:15:59>>
+ ONX2                   :: Kx[3] CheckSum  = 0.1259584805777507D+02
+ ONX2                   :: CPU Sec = 0.12D+00, WALL Sec = 0.14D+00
+ ONX2                   :: Allocs=88,  DeAllocs=90, -16 bytes are presently allocated.
+                           A max of 15052 bytes were allocated.
+>-Exiting ONX2 09/14/05 @ 19:15:59-<
+<<Entering FockNGrueven 09/14/05 @ 19:15:59>>
+ FockNGrueven           :: F[3] CheckSum  = 0.4718300518923580D+02
+ FockNGrueven           :: OrthoF[3] CheckSum  = 0.4192357716360591D+02
+ FockNGrueven           :: CPU Sec = 0.10D-01, WALL Sec = 0.50D-01
+ FockNGrueven           :: Allocs=59,  DeAllocs=57, 2620 bytes are presently allocated.
+                           A max of 26100 bytes were allocated.
+>-Exiting FockNGrueven 09/14/05 @ 19:15:59-<
+<<Entering DIIS 09/14/05 @ 19:15:59>>
+ DIIS                   :: Cond# = 0.14D+15, MIN(E) = 0.13D-13
+ DIIS : Pulay C1        :: DIISCo = -.11D+00, 0.14D-01, 0.11D+01
+ DIIS                   :: F_DIIS[3] CheckSum  = 0.4192358392065461D+02
+ DIIS                   :: CPU Sec = 0.20D-01, WALL Sec = 0.50D-01
+ DIIS                   :: Allocs=118,  DeAllocs=115, 256 bytes are presently allocated.
+                           A max of 42116 bytes were allocated.
+>-Exiting DIIS 09/14/05 @ 19:15:59-<
+<<Entering RHEqs 09/14/05 @ 19:16:00>>
+ RHEqs                  :: HOMO = 0.00000000D+00, LUMO = 0.00000000D+00
+ RHEqs                  :: OrthoP[4] CheckSum  = 0.4000000000000001D+01
+ RHEqs                  :: P[4] CheckSum  = 0.3233223567169943D+01
+ RHEqs                  :: CPU Sec = 0.10D-01, WALL Sec = 0.50D-01
+ RHEqs                  :: Allocs=38,  DeAllocs=38, 10352 bytes are presently allocated.
+                           A max of 39084 bytes were allocated.
+>-Exiting RHEqs 09/14/05 @ 19:16:00-<
+<<Entering SCFStatus 09/14/05 @ 19:16:00>>
+ 
+= = = = = SCFCycle #3, Basis #2, Geometry #5 = = = = =
+
+       S**2    = 2.03282
+       DIISErr = 0.18D-05
+       MaxDelD = 0.81D-05
+       <T>     = 0.14961646D+03
+       <V>     = -.28283738D+03
+       <HF>    = -.16324911D+02
+       <SCF>   = -149.54583802
+
+ SCFStatus              :: WALL (Sec) = 0.10D-01
+ SCFStatus              :: Allocs=43,  DeAllocs=45, -16 bytes are presently allocated.
+                           A max of 31268 bytes were allocated.
+>-Exiting SCFStatus 09/14/05 @ 19:16:00-<
+<<Entering MakeRho 09/14/05 @ 19:16:00>>
+ MakeRho : Pruned Rho   :: dNel = 0.39D-13, kept 95% of distributions.
+ MakeRho : Moments      :: <r> = (-.11D-11, -.11D-14, 0.22D-15), <r^2> = 0.12D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.3117493416286330D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3285568662575402D+06
+ MakeRho                :: Rho-LMNs CheckSum  = 0.3156963578502287D+03
+ MakeRho                :: CPU Sec = 0.30D-01, WALL Sec = 0.60D-01
+ MakeRho                :: Allocs=97,  DeAllocs=97, 56 bytes are presently allocated.
+                           A max of 130448 bytes were allocated.
+>-Exiting MakeRho 09/14/05 @ 19:16:00-<
+<<Entering QCTC 09/14/05 @ 19:16:00>>
+ QCTC                   :: J[4] CheckSum  = 0.6572902100675641D+02
+ QCTC                   :: CPU Sec = 0.23D+00, WALL Sec = 0.25D+00
+ QCTC                   :: Allocs=3347,  DeAllocs=68, 912992 bytes are presently allocated.
+                           A max of 987156 bytes were allocated.
+>-Exiting QCTC 09/14/05 @ 19:16:00-<
+<<Entering ONX2 09/14/05 @ 19:16:00>>
+ ONX2                   :: Kx[4] CheckSum  = 0.1259585011594037D+02
+ ONX2                   :: CPU Sec = 0.14D+00, WALL Sec = 0.14D+00
+ ONX2                   :: Allocs=88,  DeAllocs=90, -16 bytes are presently allocated.
+                           A max of 15052 bytes were allocated.
+>-Exiting ONX2 09/14/05 @ 19:16:00-<
+<<Entering FockNGrueven 09/14/05 @ 19:16:00>>
+ FockNGrueven           :: F[4] CheckSum  = 0.4718298200732505D+02
+ FockNGrueven           :: OrthoF[4] CheckSum  = 0.4192355942673055D+02
+ FockNGrueven           :: WALL (Sec) = 0.50D-01
+ FockNGrueven           :: Allocs=59,  DeAllocs=57, 2620 bytes are presently allocated.
+                           A max of 26100 bytes were allocated.
+>-Exiting FockNGrueven 09/14/05 @ 19:16:00-<
+<<Entering DIIS 09/14/05 @ 19:16:00>>
+ DIIS                   :: Cond# = 0.56D+19, MIN(E) = 0.36D-18
+ DIIS : Pulay C1        :: DIISCo = -.46D-01, -.36D-01, 0.96D-01, 0.99D+00
+ DIIS                   :: F_DIIS[4] CheckSum  = 0.4192356537996096D+02
+ DIIS                   :: CPU Sec = 0.20D-01, WALL Sec = 0.60D-01
+ DIIS                   :: Allocs=127,  DeAllocs=124, 328 bytes are presently allocated.
+                           A max of 42212 bytes were allocated.
+>-Exiting DIIS 09/14/05 @ 19:16:00-<
+<<Entering RHEqs 09/14/05 @ 19:16:00>>
+ RHEqs                  :: HOMO = 0.00000000D+00, LUMO = 0.00000000D+00
+ RHEqs                  :: OrthoP[5] CheckSum  = 0.4000000000000004D+01
+ RHEqs                  :: P[5] CheckSum  = 0.3233223903847088D+01
+ RHEqs                  :: CPU Sec = 0.10D-01, WALL Sec = 0.80D-01
+ RHEqs                  :: Allocs=38,  DeAllocs=38, 10352 bytes are presently allocated.
+                           A max of 39084 bytes were allocated.
+>-Exiting RHEqs 09/14/05 @ 19:16:01-<
+<<Entering SCFStatus 09/14/05 @ 19:16:01>>
+ 
+= = = = = SCFCycle #4, Basis #2, Geometry #5 = = = = =
+
+       S**2    = 2.03282
+       DIISErr = 0.55D-06
+       MaxDelD = 0.53D-05
+       <T>     = 0.14961653D+03
+       <V>     = -.28283745D+03
+       <HF>    = -.16324918D+02
+       <SCF>   = -149.54583802
+
+ SCFStatus              :: WALL (Sec) = 0.20D-01
+ SCFStatus              :: Allocs=43,  DeAllocs=45, -16 bytes are presently allocated.
+                           A max of 31268 bytes were allocated.
+>-Exiting SCFStatus 09/14/05 @ 19:16:01-<
+ Normal SCF convergence.
+<<Entering SForce 09/14/05 @ 19:16:01>>
+ SForce                 :: dS/dR CheckSum  = 0.5567782586109682D+00
+ SForce                 :: LFrcS CheckSum  = 0.1732050807568877D+09
+ SForce                 :: CPU Sec = 0.30D-01, WALL Sec = 0.50D-01
+ SForce                 :: Allocs=84,  DeAllocs=86, -16 bytes are presently allocated.
+                           A max of 78560 bytes were allocated.
+>-Exiting SForce 09/14/05 @ 19:16:01-<
+<<Entering TForce 09/14/05 @ 19:16:01>>
+ TForce                 :: dT/dR CheckSum  = 0.1063206778388572D+01
+ TForce                 :: LFrcT CheckSum  = 0.0000000000000000D+00
+ TForce                 :: CPU Sec = 0.30D-01, WALL Sec = 0.40D-01
+ TForce                 :: Allocs=45,  DeAllocs=47, -16 bytes are presently allocated.
+                           A max of 7624 bytes were allocated.
+>-Exiting TForce 09/14/05 @ 19:16:01-<
+<<Entering MakeRho 09/14/05 @ 19:16:01>>
+ MakeRho : Pruned Rho   :: dNel = 0.25D-13, kept 95% of distributions.
+ MakeRho : Moments      :: <r> = (0.82D-12, -.26D-16, 0.20D-15), <r^2> = 0.12D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.3117492842521477D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3285568316954023D+06
+ MakeRho                :: Rho-LMNs CheckSum  = 0.3156962986514665D+03
+ MakeRho                :: CPU Sec = 0.20D-01, WALL Sec = 0.80D-01
+ MakeRho                :: Allocs=97,  DeAllocs=97, 56 bytes are presently allocated.
+                           A max of 130448 bytes were allocated.
+>-Exiting MakeRho 09/14/05 @ 19:16:01-<
+<<Entering JForce 09/14/05 @ 19:16:01>>
+ JForce                 :: dJ/dR CheckSum  = 0.1095818032757684D+01
+ JForce                 :: LFrcJ CheckSum  = 0.0000000000000000D+00
+ JForce                 :: CPU Sec = 0.40D+00, WALL Sec = 0.41D+00
+ JForce                 :: Allocs=3347,  DeAllocs=71, 889456 bytes are presently allocated.
+                           A max of 1039808 bytes were allocated.
+>-Exiting JForce 09/14/05 @ 19:16:01-<
+<<Entering GONX2 09/14/05 @ 19:16:01>>
+ GONX2                  :: dKx/dR[5] CheckSum  = 0.5240970374359575D+00
+ GONX2                  :: CPU Sec = 0.62D+00, WALL Sec = 0.62D+00
+ GONX2                  :: Allocs=49,  DeAllocs=51, -16 bytes are presently allocated.
+                           A max of 7700 bytes were allocated.
+>-Exiting GONX2 09/14/05 @ 19:16:02-<
+     Geometry optimization of Clone # 1 converged in   5 steps.
+       Clone =      1 GeOp step =      5 Total Energy =        -149.54583802
+     Max Unconstrained Cart Grad =     0.000049      on atom     1
+Energies of final structures:
+ Clone #         Energy         
+     1     -149.5458380240
+>-Successful MondoSCF run 09/14/05 @ 19:16:02-<

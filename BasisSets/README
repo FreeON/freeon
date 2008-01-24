@@ -1,0 +1,23 @@
+These basis sets were obtained in Gaussian 94 format
+from the EMSL Gaussian Basis Set Order Form at
+http://www.emsl.pnl.gov:2080/forms/basisform.html.
+To add a basis set, copy it here, strip off extraneous
+ascii, modify MondoMods/BasisSetParameters.F90 as
+appropriate and remake. 
+
+Alternatively, you can create your own basis sets (mix and match or whatever)
+and copy/link them to User1.bas or User2.bas;  then just specify User1 or User2 
+in your input files.
+
+Finally, users should consider the following:
+
+Citation: In addition to the original scientific reference, users of this form are requested to include 
+the following citation in any publications resulting from its use: 
+
+Basis sets were obtained from the Extensible Computational Chemistry Environment Basis Set Database, 
+Version 6/19/03, as developed and distributed by the Molecular Science Computing Facility, Environmental 
+and Molecular Sciences Laboratory which is part of the Pacific Northwest Laboratory, P.O. Box 999, Richland, 
+Washington 99352, USA, and funded by the U.S. Department of Energy. The Pacific Northwest Laboratory is a
+multi-program laboratory operated by Battelle Memorial Institue for the U.S. Department of Energy under 
+contract DE-AC06-76RLO 1830. Contact David Feller or Karen Schuchardt for further information. 
+

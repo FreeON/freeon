@@ -1,0 +1,15 @@
+After checking out for the first time:
+
+aclocal
+autoconf
+automake --add-missing
+
+To check all of the dependencies, run
+
+for i in *.F;   do make clean; echo "******"; echo "making $i"; echo "******"; make `basename $i .F`.o   || break; done
+for i in *.C;   do make clean; echo "******"; echo "making $i"; echo "******"; make `basename $i .C`.o   || break; done
+for i in *.F90; do make clean; echo "******"; echo "making $i"; echo "******"; make `basename $i .F90`.o || break; done
+
+For gfortran, use:
+
+./configure FC=/usr/local/gcc-4.2.1/bin/gfortran F77=/usr/local/gcc-4.2.1/bin/gfortran CC=/usr/local/gcc-4.2.1/bin/gcc CPPFLAGS="-DGFORTRAN -DPHIPAC"

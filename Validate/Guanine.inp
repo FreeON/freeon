@@ -1,0 +1,39 @@
+<BeginTitle>
+Adenine
+<EndTitle>
+
+<BeginOptions>
+
+G!rad=(Optimize,PrimInt)
+Grad=(NumFreq)
+
+Charge=0
+Multiplicity=1
+Guess=SuperPos
+SCFMethod=(RH)
+BasisSets=(6-31G)
+ModelChem=(PW91xc)
+Accuracy=(verytight)
+SCFConvergence=(DIIS)
+Geometry=(InAngstroms)
+
+<EndOptions>
+
+<BeginGeometry>
+ N       -0.77272       -1.51384        0.00000  
+ C        0.60211       -1.68859        0.00000  
+ N        1.46684       -0.66766        0.00000  
+ C        0.85144        0.55304        0.00000  
+ C       -0.52967        0.84148        0.00000  
+ C       -1.47434       -0.23933        0.00000  
+ O       -2.72625       -0.24065        0.00000  
+ N       -0.74688        2.22586        0.00000  
+ C        0.47466        2.75982        0.00000  
+ N        1.48159        1.78435        0.00000  
+ H        2.48591        1.92668        0.00000  
+ H        0.69721        3.82020        0.00000  
+ N        1.09470       -2.96584        0.00000  
+ H        2.10139       -3.07347        0.00000  
+ H        0.50537       -3.78708        0.00000  
+ H       -1.40436       -2.31497        0.00000  
+<EndGeometry>

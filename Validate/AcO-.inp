@@ -1,0 +1,34 @@
+STO-3G
+Ref  : (RHF) = -224.007559984
+MONDO: <SCF> = -224.00755990
+
+6-31G**
+Ref  : (RHF) = -227.195688424
+MONDO: <SCF> = -227.19569673
+
+<BeginOptions>
+
+Charge=-1
+Multiplicity=1
+
+DebugAll=(MinDebug,CheckSums)
+
+Guess=SuperPos
+SCFMethod=(TRS4,TRS4)
+BasisSets=(STO-3G-SPLIT,6-31G**-SPLIT)
+ModelChem=(HF,HF)
+Accuracy =(verytight,verytight)
+SCFConvergence=(DIIS,DIIS)
+
+<EndOptions>
+
+<BeginGeometry>
+ C     0.000000     0.000000     0.000000
+ H     0.000000     0.000000     1.089000
+ C     1.367073     0.000000    -0.483333
+ H    -0.513360    -0.889165    -0.363000
+ H    -0.513360     0.889165    -0.363000
+ O     1.622894     0.000000    -1.859762
+ O     2.294370     0.000000     0.309459
+<EndGeometry>
+

@@ -1,0 +1,52 @@
+<BeginTitle>
+
+    Diamond
+
+ STO-3G/HF     = -298.85433467^*
+ 8-511G/BLYP   = -303.98984456^*
+ 6-111G^&/BLYP = -303.98874742^*
+
+^* MondoSCF/Good
+^& made up basis set in User2.bas
+
+<EndTitle>
+
+<BeginOptions>
+
+Charge=0
+Multiplicity=1
+
+Guess=SuperPos
+DebugAll=(MinDebug,CheckSums)
+
+SCFMethod=(RH,RH)
+ModelChem=(HF,BLYPxc) 
+BasisSets=(STO-3G-SPLIT,User2)
+Accuracy =(Loose,Good)
+
+PBC=(T,T,T)
+Periodic=(FracCoord)
+
+MPIInvoke="mpirun"
+MPIProcessors=4
+MPIProcFlag="-np"
+MPISpatialProc=4
+MPIMachineFlag="-machinefile"
+MPIMachineFile="$PBS_NODEFILE"
+
+<EndOptions>
+
+<BeginPeriodic>
+  3.57   3.57   3.57   90.00000   90.00000   90.00000 
+<EndPeriodic>
+
+<BeginGeometry>   
+C      0.1250000000     0.1250000000     0.1250000000
+C      0.3750000000     0.3750000000     0.3750000000
+C      0.6250000000     0.6250000000     0.1250000000
+C      0.8750000000     0.8750000000     0.3750000000
+C      0.6250000000     0.1250000000     0.6250000000
+C      0.8750000000     0.3750000000     0.8750000000
+C      0.1250000000     0.6250000000     0.6250000000
+C      0.3750000000     0.8750000000     0.8750000000       
+<EndGeometry>
