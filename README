@@ -4,8 +4,8 @@ before). Run the following commands:
 
 aclocal
 autoconf
-automake --add-missing
 autoheader
+automake --add-missing
 
 Some examples of how to configure MondoSCF. The following configure commands
 work. In order to use the PHiPAC (P3) optimized dgemms, add --enable-phipac to

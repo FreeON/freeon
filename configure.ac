@@ -599,6 +599,15 @@ AC_SUBST(CPP, ${CPP})
 AC_SUBST(AM_CPPFLAGS, ${AM_CPPFLAGS})
 AC_SUBST(FORTRAN_CPPFLAGS, ${FORTRAN_CPPFLAGS})
 
+AC_MSG_CHECKING([whether we should remove preprocessed files])
+AC_ARG_ENABLE([delete-preprocessed-files],
+  [AS_HELP_STRING([--disable-delete-preprocessed-files],
+  [Disable the deleting of preprocessed files. This is useful for debugging...])],
+  [remove_preprocessed_files="${enableval}"],
+  [remove_preprocessed_files="yes"])
+AC_MSG_RESULT([${remove_preprocessed_files}])
+AC_SUBST(REMOVE_PREPROCESSED_FILES, ${remove_preprocessed_files})
+
 # Some mondo variables.
 AC_DEFINE_UNQUOTED(HAVE_MONDO_HOME, ["${prefix}"], [Define the main installation directory.])
 AC_DEFINE_UNQUOTED(HAVE_MONDO_PLAT, ["${build}"], [Define build platform.])
@@ -671,6 +680,11 @@ if test "${use_internal_hdf5}" = "yes"; then
   AC_MSG_NOTICE([Using internal hdf5])
 else
   AC_MSG_NOTICE([Using external hdf5 library])
+fi
+if test "${remove_preprocessed_files}" = "yes"; then
+  AC_MSG_NOTICE([I will remove preprocessed files])
+else
+  AC_MSG_NOTICE([I will _not_ remove preprocessed files])
 fi
 AC_MSG_NOTICE([*** End Summary ***])
 

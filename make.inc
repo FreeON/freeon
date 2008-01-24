@@ -36,16 +36,22 @@ FC_COMMAND  = $(FC) $(AM_FCFLAGS) $(FCFLAGS) $(EXTRA_INCLUDES)
 F77_COMMAND = $(F77) $(AM_FFLAGS) $(FFLAGS) $(EXTRA_INCLUDES)
 CC_COMMAND  = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(CPPFLAGS) $(CPPMISC) $(AM_CFLAGS) $(CFLAGS) $(EXTRA_INCLUDES)
 
+REMOVE_PREPROCESSED_FILES = @REMOVE_PREPROCESSED_FILES@
+
 # Suffix rules.
 .f90.o :
 	@$(CPP_COMMAND) $< | grep -v -E "^#" | sed 's/&[ \t]\+/&\n/g' > $(notdir $(basename $<))$(PREPROCESSED_SUFFIX).f90
 	$(FC_COMMAND) -c -o $@ $(notdir $(basename $<))$(PREPROCESSED_SUFFIX).f90
-	@rm $(notdir $(basename $<))$(PREPROCESSED_SUFFIX).f90
+	@if test "${REMOVE_PREPROCESSED_FILES}" = "yes"; then \
+	  rm $(notdir $(basename $<))$(PREPROCESSED_SUFFIX).f90; \
+	fi
 
 .f.o :
 	@$(CPP_COMMAND) $< | grep -v -E "^#" > $(notdir $(basename $<))$(PREPROCESSED_SUFFIX).f
 	$(F77_COMMAND) -c -o $@ $(notdir $(basename $<))$(PREPROCESSED_SUFFIX).f
-	@rm $(notdir $(basename $<))$(PREPROCESSED_SUFFIX).f
+	@if test "${REMOVE_PREPROCESSED_FILES}" = "yes"; then \
+	  rm $(notdir $(basename $<))$(PREPROCESSED_SUFFIX).f; \
+	fi
 
 # For dependencies of -L and -I.
 if INTERNAL_HDF5
