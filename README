@@ -1,11 +1,29 @@
-When this is checked out from the git repository, the configure script might be
-here already (unless you have done the following steps at some point in time
-before). Run the following commands:
+If you checked out the sources from the git repository, then you will have to
+build the configure script before you can configure and make the sources. This
+step has to be done only once however. After subsequent updates from git through
+"git pull" you will need to only make "make clean" and then "make" again.
+
+In order to build the configure script run the following commands:
 
 aclocal
 autoconf
 autoheader
 automake --add-missing
+
+Once the sources are configured (run "./configure --help" to get a list of
+options it understands) run
+
+make
+make install
+
+which will build the sources and install them. You should decide where you want
+to have the binaries installed when you run the configure script. The default is
+"/usr/local", i.e. the binaries are going to be installed in "/usr/local/bin".
+You can change this by running configure as
+
+./configure --prefix=/some/other/directory
+
+which will install the binaries into /some/other/directory/bin.
 
 Some examples of how to configure MondoSCF. The following configure commands
 work. In order to use the PHiPAC (P3) optimized dgemms, add --enable-phipac to
@@ -29,6 +47,7 @@ the configure command line.
 (6)
 ./configure FC=ifort F77=ifort CC=icc CFLAGS="-O3 -fomit-frame-pointer" FFLAGS="-O3 -fomit-frame-pointer" FCFLAGS="-O3 -fomit-frame-pointer" --prefix=/tmp/Mondo --disable-internal-lapack --with-lapack=/usr/local/lapack --with-lapacklibs="-llapack_linux-ifort-10.0.023 -lblas_linux-ifort-10.0.023"
 
+Note:
 The internal hdf5 does not seem to work well on 64-bit.
 
 Some timing information:
