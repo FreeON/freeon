@@ -152,16 +152,18 @@ PROGRAM RHEqs
   END SELECT
   !
   Mu=(HOMO+LUMO)*0.5D0
-  !
-  IF(PrintFlags%Key>=DEBUG_MEDIUM)THEN
-    Mssg=ProcessName(Prog)//'HOMO = '//TRIM(DblToMedmChar(HOMO)) &
-         //', LUMO = '//TRIM(DblToMedmChar(LUMO))
-    CALL OpenASCII(OutFile,Out)
-    CALL PrintProtectL(Out)
-    WRITE(Out,*)TRIM(Mssg)
-    CALL PrintProtectR(Out)
-    CLOSE(Out)
-  ENDIF
+
+  !IF(PrintFlags%Key>=DEBUG_MEDIUM)THEN
+    !Mssg=ProcessName(Prog)//'HOMO = '//TRIM(DblToMedmChar(HOMO)) &
+         !//', LUMO = '//TRIM(DblToMedmChar(LUMO))
+    !CALL OpenASCII(OutFile,Out)
+    !CALL PrintProtectL(Out)
+    !WRITE(Out,*)TRIM(Mssg)
+    !CALL PrintProtectR(Out)
+    !CLOSE(Out)
+  !ENDIF
+  LOG_MEDIUM(ProcessName(Prog)//'HOMO = '//TRIM(DblToMedmChar(HOMO)) &
+    //', LUMO = '//TRIM(DblToMedmChar(LUMO)))
   CALL Put(HOMO-LUMO,'HomoLumoGap')
   !
   !--------------------------------------------------------------
@@ -195,16 +197,19 @@ PROGRAM RHEqs
         ENDDO
       ENDDO
     ENDDO
-    IF(PrintFlags%Key>=DEBUG_MEDIUM)THEN
-      Mssg=ProcessName(Prog)//'Sigma = '//TRIM(DblToShrtChar(Sigma)) &
-                           //', Entropic correction per atom = ' &
-                           //TRIM(DblToShrtChar(Entrop/DBLE(NAtoms)))
-      CALL OpenASCII(OutFile,Out)
-      CALL PrintProtectL(Out)
-      WRITE(Out,*)TRIM(Mssg)
-      CALL PrintProtectR(Out)
-      CLOSE(Out)
-    ENDIF
+    !IF(PrintFlags%Key>=DEBUG_MEDIUM)THEN
+    !  Mssg=ProcessName(Prog)//'Sigma = '//TRIM(DblToShrtChar(Sigma)) &
+    !                       //', Entropic correction per atom = ' &
+    !                       //TRIM(DblToShrtChar(Entrop/DBLE(NAtoms)))
+    !  CALL OpenASCII(OutFile,Out)
+    !  CALL PrintProtectL(Out)
+    !  WRITE(Out,*)TRIM(Mssg)
+    !  CALL PrintProtectR(Out)
+    !  CLOSE(Out)
+    !ENDIF
+    LOG_MEDIUM(ProcessName(Prog)//'Sigma = '//TRIM(DblToShrtChar(Sigma)) &
+      //', Entropic correction per atom = ' &
+      //TRIM(DblToShrtChar(Entrop/DBLE(NAtoms))))
   CASE('NoSmearing')
     !
     SELECT CASE(NSMat)

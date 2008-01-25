@@ -163,8 +163,9 @@ CONTAINS
       CALL Delete(DblMat)
       CALL Put(.TRUE.,'programfailed')
       CALL Put(.FALSE.,'archivedensity')
+
       ! MD and MC Stuff
-      CALL Put(1      ,'MDIter')
+      CALL Put(1 ,'MDIter')
       CALL Put(BIG_DBL,'MDTime')
       CALL Put(D%MDalpha, 'MDalpha')
       CALL Put(D%MDDampStep, 'MDDampStep')
