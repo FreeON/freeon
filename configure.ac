@@ -1,4 +1,4 @@
-AC_INIT([MondoSCF], [1.0_alpha], [mchalla@lanl.gov])
+AC_INIT([MondoSCF], [1.0-alpha], [mchalla@lanl.gov])
 AC_COPYRIGHT([
 This code is part of the MondoSCF suite of programs for linear scaling 
 electronic structure theory and ab initio molecular dynamics.
@@ -26,6 +26,8 @@ disemination in future releases.
 ])
 
 AM_INIT_AUTOMAKE
+
+AC_DEFINE([LOCAL_VERSION], ["1"], [The local version of Mondo])
 
 # Fix up the header definitions for hdf.
 AC_OUTPUT_COMMANDS([
