@@ -30,8 +30,6 @@
 ! trace correcting purification expansion with 2nd order purifications.
 !-------------------------------------------------------------------------------
 
-#include <MondoLogger.h>
-
 PROGRAM DMP_SP2 ! Density matrix purification, SP2 variation
   USE DerivedTypes
   USE GlobalScalars
@@ -91,7 +89,7 @@ PROGRAM DMP_SP2 ! Density matrix purification, SP2 variation
   CALL Xpose(F, FT)
   FT%MTrix%D = -FT%MTrix%D
   CALL Add(F, FT, Tmp1)
-  LOG_NONE("FNorm(F-FT) = "//TRIM(FltToChar(FNorm(Tmp1))))
+  CALL MondoLog(DEBUG_NONE, "SP2", "FNorm(F-FT) = "//TRIM(FltToChar(FNorm(Tmp1))))
 
   MM=0
   Ne=Half*DBLE(NEl)
@@ -136,7 +134,7 @@ PROGRAM DMP_SP2 ! Density matrix purification, SP2 variation
     ! Put the Fock matrix back all tidy like
     CALL Put(POld,TrixFile('OrthoF',Args,0))
     Lambda=ABS(Lambda)-One
-    LOG_NONE(TRIM(ProcessName(Prog)) &
+    CALL MondoLog(DEBUG_NONE, "SP2", TRIM(ProcessName(Prog)) &
       //' LevlShift = '//TRIM(DblToMedmChar(Lambda)))
   ENDIF
   CLOSE(Inp)
@@ -148,7 +146,7 @@ PROGRAM DMP_SP2 ! Density matrix purification, SP2 variation
   CALL Xpose(P, PT)
   PT%MTrix%D = -PT%MTrix%D
   CALL Add(P, PT, Tmp2)
-  LOG_NONE("FNorm(P-PT) = "//TRIM(FltToChar(FNorm(Tmp2))))
+  CALL MondoLog(DEBUG_NONE, "SP2", "FNorm(P-PT) = "//TRIM(FltToChar(FNorm(Tmp2))))
 
   ! Tidy up
   CALL Delete(PT)

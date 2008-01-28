@@ -24,8 +24,6 @@
 !    disemination in future releases.
 !------------------------------------------------------------------------------
 
-#include <MondoLogger.h>
-
 MODULE PoleTree
   USE Derivedtypes
   USE GlobalScalars

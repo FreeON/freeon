@@ -27,7 +27,7 @@ disemination in future releases.
 
 AM_INIT_AUTOMAKE
 
-AC_DEFINE([LOCAL_VERSION], ["1"], [The local version of Mondo])
+AC_DEFINE([LOCAL_VERSION], ["10428fb35bed07abc856b2a993c0cb3f8e930794"], [The local version of Mondo])
 
 # Fix up the header definitions for hdf.
 AC_OUTPUT_COMMANDS([
@@ -312,7 +312,7 @@ AC_SUBST(LAPACK_TIMER, [${LAPACK_TIMER}])
 # Check for internal hdf5.
 AC_MSG_CHECKING([for internal hdf5])
 AC_ARG_ENABLE([internal-hdf5],
-  [AS_HELP_STRING([--enable-internal-hdf5],
+  [AS_HELP_STRING([--disable-internal-hdf5],
   [Disable the internal hdf5 (1.4.5-post2) and use your own. You might have to
    use the option --with-hdf5=DIR to specify where exactly your hdf5 library
    is.])],

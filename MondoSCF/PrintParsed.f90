@@ -25,7 +25,6 @@
 !------------------------------------------------------------------------------
 
 #include <MondoConfig.h>
-#include <MondoLogger.h>
 
 MODULE PrintParsed
   USE InOut
@@ -62,64 +61,64 @@ CONTAINS
 
     ! Print the Input File to the Output File
     OPEN(UNIT=Inp,FILE=N%IFile,STATUS='Old')
-    LOG_PLAIN("--------- input file = "//TRIM(N%IFile))
+    CALL MondoLogPlain("--------- input file = "//TRIM(N%IFile))
     DO
       READ(Inp, '(A500)', END=101) Line
-      LOG_PLAIN(TRIM(Line))
+      CALL MondoLogPlain(TRIM(Line))
     ENDDO
 101 CONTINUE
     CLOSE(Inp)
-    LOG_PLAIN("--------- end of input file")
+    CALL MondoLogPlain("--------- end of input file")
 
     ! Print MondoSCF banner and authorship
-    LOG_PLAIN(' __    __                 _       ____________ ______ ')
-    LOG_PLAIN('|  \  /  |               | |     /       /    |      |')
-    LOG_PLAIN("|   \/   | ___  _ __   __| | ___/   ____/   __|  |==='")
-    LOG_PLAIN("|        |/ _ \| '_ \ / _  |/ _ \____  \   (__|  ____|")
-    LOG_PLAIN('|  |\/|  | (_) | | | | (_| | (_) )     /\     |  |    ')
-    LOG_PLAIN('|__|  |__|\___/|_| |_|\____|\___/_____/  \____|__|    ')
-    LOG_PLAIN("")
-    LOG_PLAIN("Version "//VERSION)
-    LOG_PLAIN("local version: "//LOCAL_VERSION)
-    LOG_PLAIN("")
-    LOG_PLAIN('A program suite for O(N) SCF theory and ab initio MD ')
-    LOG_PLAIN("")
-    LOG_PLAIN("Authors:")
-    LOG_PLAIN('Matt Challacombe, C.J. Tymczak, Karoly Nemeth,       ')
-    LOG_PLAIN('Valery Weber, Chee Kwan Gan, Eric Schwegler,         ')
-    LOG_PLAIN('Nicolas Bock, Anders Niklasson, and Graeme Henkelman ')
-    LOG_PLAIN("")
-    LOG_PLAIN('Los Alamos National Laboratory                       ')
-    LOG_PLAIN('LA-CC-04-086 (formerly 01-2)                         ')
-    LOG_PLAIN('Copyright 2001, University of California.            ')
+    CALL MondoLogPlain(' __    __                 _       ____________ ______ ')
+    CALL MondoLogPlain('|  \  /  |               | |     /       /    |      |')
+    CALL MondoLogPlain("|   \/   | ___  _ __   __| | ___/   ____/   __|  |==='")
+    CALL MondoLogPlain("|        |/ _ \| '_ \ / _  |/ _ \____  \   (__|  ____|")
+    CALL MondoLogPlain('|  |\/|  | (_) | | | | (_| | (_) )     /\     |  |    ')
+    CALL MondoLogPlain('|__|  |__|\___/|_| |_|\____|\___/_____/  \____|__|    ')
+    CALL MondoLogPlain("")
+    CALL MondoLogPlain("Version "//VERSION)
+    CALL MondoLogPlain("local version: "//LOCAL_VERSION)
+    CALL MondoLogPlain("")
+    CALL MondoLogPlain('A program suite for O(N) SCF theory and ab initio MD ')
+    CALL MondoLogPlain("")
+    CALL MondoLogPlain("Authors:")
+    CALL MondoLogPlain('Matt Challacombe, C.J. Tymczak, Karoly Nemeth,       ')
+    CALL MondoLogPlain('Valery Weber, Chee Kwan Gan, Eric Schwegler,         ')
+    CALL MondoLogPlain('Nicolas Bock, Anders Niklasson, and Graeme Henkelman ')
+    CALL MondoLogPlain("")
+    CALL MondoLogPlain('Los Alamos National Laboratory                       ')
+    CALL MondoLogPlain('LA-CC-04-086 (formerly 01-2)                         ')
+    CALL MondoLogPlain('Copyright 2001, University of California.            ')
 
     ! Write information on host, platform, etc
-    LOG_PLAIN("")
-    LOG_PLAIN("*** Summary ***")
-    LOG_PLAIN("compiled for "//TRIM(M_PLAT))
-    LOG_PLAIN("on "//TRIM(M_HOST))
-    LOG_PLAIN("a "//TRIM(M_MACH)//" machine")
-    LOG_PLAIN("running "//TRIM(M_SYST)//" "//TRIM(M_VRSN))
+    CALL MondoLogPlain("")
+    CALL MondoLogPlain("*** Summary ***")
+    CALL MondoLogPlain("compiled for "//TRIM(M_PLAT))
+    CALL MondoLogPlain("on "//TRIM(M_HOST))
+    CALL MondoLogPlain("a "//TRIM(M_MACH)//" machine")
+    CALL MondoLogPlain("running "//TRIM(M_SYST)//" "//TRIM(M_VRSN))
     CALL HDF5Version(HDF5_majnum, HDF5_minnum, HDF5_relnum)
-    LOG_PLAIN("using HDF5 library version " &
+    CALL MondoLogPlain("using HDF5 library version " &
       //TRIM(IntToChar(HDF5_majnum))//"." &
       //TRIM(IntToChar(HDF5_minnum))//"." &
       //TRIM(IntToChar(HDF5_relnum)))
     CALL GetStacksizeLimit(StackCurrent, StackMax)
     IF(StackCurrent < 0) THEN
-      LOG_PLAIN("current stacksize limit: unlimited")
+      CALL MondoLogPlain("current stacksize limit: unlimited")
     ELSE
-      LOG_PLAIN("current stacksize limit: "//TRIM(FltToChar(StackCurrent/1024.0D0/1024.0D0))//" MB")
-      LOG_PLAIN("")
-      LOG_PLAIN("Notice:")
-      LOG_PLAIN("In case you see unexplained segmentation violations, try")
-      LOG_PLAIN("raising the stacksize limit.")
-      LOG_PLAIN("")
+      CALL MondoLogPlain("current stacksize limit: "//TRIM(FltToChar(StackCurrent/1024.0D0/1024.0D0))//" MB")
+      CALL MondoLogPlain("")
+      CALL MondoLogPlain("Notice:")
+      CALL MondoLogPlain("In case you see unexplained segmentation violations, try")
+      CALL MondoLogPlain("raising the stacksize limit.")
+      CALL MondoLogPlain("")
     ENDIF
-    LOG_PLAIN("current HDF file = "//TRIM(N%HFile))
-    LOG_PLAIN("")
+    CALL MondoLogPlain("current HDF file = "//TRIM(N%HFile))
+    CALL MondoLogPlain("")
     CALL TimeStamp("Starting MondoSCF")
-    LOG_PLAIN("")
+    CALL MondoLogPlain("")
 
   END SUBROUTINE PrintsStartUp
 

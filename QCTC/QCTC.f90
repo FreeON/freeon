@@ -27,8 +27,6 @@
 ! Authors:  Matt Challacombe and CJ Tymczak
 !===============================================================================
 
-#include <MondoLogger.h>
-
 PROGRAM QCTC
   USE DerivedTypes
   USE GlobalScalars
@@ -260,7 +258,7 @@ PROGRAM QCTC
   PerfMon%FLOP=Zero
 
   CALL GetMemoryUsage(datasize)
-  LOG_MINIMUM("virtual memory size = "//TRIM(IntToChar(datasize))//" kB")
+  CALL MondoLog(DEBUG_MINIMUM, "QCTC", "virtual memory size = "//TRIM(IntToChar(datasize))//" kB")
 
   ! Shutdown
   CALL ShutDown(Prog)

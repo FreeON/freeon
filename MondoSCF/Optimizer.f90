@@ -24,8 +24,6 @@
 !    disemination in future releases.
 !------------------------------------------------------------------------------
 
-#include <MondoLogger.h>
-
 MODULE Optimizer
   USE SCFs
   USE InOut
@@ -2035,7 +2033,7 @@ CONTAINS
     CHARACTER(LEN=2048) :: HessianFileName
     CHARACTER(LEN=2048) :: FreqsFileName
 
-    LOG_MINIMUM("starting")
+    CALL MondoLog(DEBUG_MINIMUM, "Optimizier:NHessian", "starting")
 
     IF(C%Geos%Clones.NE.1) THEN
       CALL Halt('NHessian: NHessian doesn''t work with the clones!')
@@ -2044,8 +2042,8 @@ CONTAINS
     HessianFileName = TRIM(C%Nams%SCF_NAME)//".hessian"
     FreqsFileName = TRIM(C%Nams%SCF_NAME)//".frequencies"
 
-    LOG_MINIMUM("using Hessian file "//TRIM(HessianFileName))
-    LOG_MINIMUM("using frequencies file "//TRIM(FreqsFileName))
+    CALL MondoLog(DEBUG_MINIMUM, "Optimizer:NHessian", "using Hessian file "//TRIM(HessianFileName))
+    CALL MondoLog(DEBUG_MINIMUM, "Optimizer:NHessian", "using frequencies file "//TRIM(FreqsFileName))
 
     ! Initial geometry.
     iGEO=C%Stat%Previous%I(3)
@@ -2082,7 +2080,7 @@ CONTAINS
     !CALL DBL_VECT_EQ_DBL_SCLR(3*N ,DDer%D(1,1) ,0.0D0)
 
     ! Build the guess
-    LOG_MINIMUM("building guess")
+    CALL MondoLog(DEBUG_MINIMUM, "Optimizer", "building guess")
     DO iBAS=1,C%Sets%NBSets
       CALL GeomArchive(iBAS,iGEO,C%Nams,C%Opts,C%Sets,C%Geos)
       CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
@@ -2091,12 +2089,12 @@ CONTAINS
     iBAS=C%Sets%NBSets
 
     ! Open/init HESSIAN file.
-    LOG_MINIMUM("initialize the hessian file")
+    CALL MondoLog(DEBUG_MINIMUM, "Optimizer", "initialize the hessian file")
     CALL InitHESSIANFile(HessianFileName,NAtm,N,Grad0,Hess,JStart)
 
     ! Compute forces.
     IF(JStart.EQ.0) THEN
-      LOG_MINIMUM('We compute Grad0')
+      CALL MondoLog(DEBUG_MINIMUM, "Optimizer", 'We compute Grad0')
       CALL Force(iBAS,iGEO,C%Nams,C%Opts,C%Stat,C%Geos,C%Sets,C%MPIs)
       CALL DCOPY(N,C%Geos%Clone(1)%Gradients%D(1,1),1,Grad0%D(1,1),1)
       !CALL Print_DBL_RNK2(C%Geos%Clone(1)%Carts,'Carts0',Unit_O=6)
@@ -2124,7 +2122,7 @@ CONTAINS
     !CALL CloseHDF(HDFFileID)
 
     ! Copy the masses and coords.
-    LOG_MINIMUM("copy masses and coords")
+    CALL MondoLog(DEBUG_MINIMUM, "Optimizer", "copy masses and coords")
     JJ=1
     DO AtA=1,NAtm
       IF(C%Geos%Clone(1)%DoFreq%I(AtA).NE.1) CYCLE
@@ -2133,18 +2131,18 @@ CONTAINS
       JJ=JJ+1
     ENDDO
 
-    LOG_MINIMUM('We start grad calculation')
-    LOG_MINIMUM('JStart='//TRIM(IntToChar(JStart)))
-    LOG_MINIMUM('N='//TRIM(IntToChar(N)))
+    CALL MondoLog(DEBUG_MINIMUM, "Optimizer", 'We start grad calculation')
+    CALL MondoLog(DEBUG_MINIMUM, "Optimizer", 'JStart='//TRIM(IntToChar(JStart)))
+    CALL MondoLog(DEBUG_MINIMUM, "Optimizer", 'N='//TRIM(IntToChar(N)))
     iGEO=iGEO+1
     DO J=JStart,N
       AtA=CEILING(DBLE(J)/3D0)
       I=J-3*(AtA-1)
-      LOG_MINIMUM('Loop J='//TRIM(IntToChar(J)))
-      LOG_MINIMUM('AtA='//TRIM(IntToChar(AtA)))
-      LOG_MINIMUM('I='//TRIM(IntToChar(I)))
-      LOG_MINIMUM('NCell='//TRIM(IntToChar(NCell)))
-      LOG_MINIMUM('DoFreq='//TRIM(IntToChar(C%Geos%Clone(1)%DoFreq%I(AtA))))
+      CALL MondoLog(DEBUG_MINIMUM, "Optimizer", 'Loop J='//TRIM(IntToChar(J)))
+      CALL MondoLog(DEBUG_MINIMUM, "Optimizer", 'AtA='//TRIM(IntToChar(AtA)))
+      CALL MondoLog(DEBUG_MINIMUM, "Optimizer", 'I='//TRIM(IntToChar(I)))
+      CALL MondoLog(DEBUG_MINIMUM, "Optimizer", 'NCell='//TRIM(IntToChar(NCell)))
+      CALL MondoLog(DEBUG_MINIMUM, "Optimizer", 'DoFreq='//TRIM(IntToChar(C%Geos%Clone(1)%DoFreq%I(AtA))))
 
       ! Cycle if we dont want freq on this atom.
       IF(C%Geos%Clone(1)%DoFreq%I(AtA).NE.1) CYCLE
@@ -2430,7 +2428,7 @@ CONTAINS
     ELSE
 
       ! This is the first time we open the HESSIAN file.
-      LOG_MINIMUM('It is the first time we open the HESSIAN File')
+      CALL MondoLog(DEBUG_MINIMUM, "Optimizer", 'It is the first time we open the HESSIAN File')
 
       ! Simple check.
       WRITE(FID) N

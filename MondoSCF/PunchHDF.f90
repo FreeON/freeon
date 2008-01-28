@@ -24,8 +24,6 @@
 !    disemination in future releases.
 !------------------------------------------------------------------------------
 
-#include <MondoLogger.h>
-
 MODULE PunchHDF
   USE InOut
   USE MemMan
@@ -385,9 +383,9 @@ CONTAINS
            Thresholds%Dist,MinExpt,G%NElec,MaxCell_O=MaxCell)
       CALL New_CellSet_Sphere2(CS_Out,G%PBC%AutoW%I,G%PBC%BoxShape%D,'Overlap',     &
            Thresholds%TwoE,MinExpt,G%NElec,MaxCell_O=MaxCell)
-      LOG_NONE('USING NEW CELL SET:')
-      LOG_NONE('Pentrat Cells = '//TRIM(IntToChar(CS_In%NCells)))
-      LOG_NONE('Overlap Cells = '//TRIM(IntToChar(CS_Out%NCells)))
+      CALL MondoLog(DEBUG_NONE, "PunchHDF:SetLatticeVectors", 'USING NEW CELL SET:')
+      CALL MondoLog(DEBUG_NONE, "PunchHDF:SetLatticeVectors", 'Pentrat Cells = '//TRIM(IntToChar(CS_In%NCells)))
+      CALL MondoLog(DEBUG_NONE, "PunchHDF:SetLatticeVectors", 'Overlap Cells = '//TRIM(IntToChar(CS_Out%NCells)))
     ENDIF
 
     CALL Sort_CellSet(CS_IN,-2)

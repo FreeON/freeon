@@ -24,8 +24,6 @@
 !    disemination in future releases.
 !------------------------------------------------------------------------------
 
-#include <MondoLogger.h>
-
 PROGRAM RHEqs
   USE DerivedTypes
   USE GlobalScalars
@@ -96,7 +94,7 @@ PROGRAM RHEqs
   CALL Xpose(sF, FT)
   FT%MTrix%D = -FT%MTrix%D
   CALL Add(sF, FT, sTmp1)
-  LOG_MINIMUM("FNorm(F-FT) = "//TRIM(DblToChar(FNorm(sTmp1))))
+  CALL MondoLog(DEBUG_MINIMUM, "RHeqs", "FNorm(F-FT) = "//TRIM(DblToChar(FNorm(sTmp1))))
   CALL Delete(FT)
 
   CALL New(F,(/NRow,NCol/))
@@ -162,7 +160,7 @@ PROGRAM RHEqs
     !CALL PrintProtectR(Out)
     !CLOSE(Out)
   !ENDIF
-  LOG_MEDIUM(ProcessName(Prog)//'HOMO = '//TRIM(DblToMedmChar(HOMO)) &
+  CALL MondoLog(DEBUG_MINIMUM, "RHeqs", ProcessName(Prog)//'HOMO = '//TRIM(DblToMedmChar(HOMO)) &
     //', LUMO = '//TRIM(DblToMedmChar(LUMO)))
   CALL Put(HOMO-LUMO,'HomoLumoGap')
   !
@@ -207,7 +205,7 @@ PROGRAM RHEqs
     !  CALL PrintProtectR(Out)
     !  CLOSE(Out)
     !ENDIF
-    LOG_MEDIUM(ProcessName(Prog)//'Sigma = '//TRIM(DblToShrtChar(Sigma)) &
+    CALL MondoLog(DEBUG_MEDIUM, "RHeqs", ProcessName(Prog)//'Sigma = '//TRIM(DblToShrtChar(Sigma)) &
       //', Entropic correction per atom = ' &
       //TRIM(DblToShrtChar(Entrop/DBLE(NAtoms))))
   CASE('NoSmearing')

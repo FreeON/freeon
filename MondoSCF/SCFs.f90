@@ -24,8 +24,6 @@
 ! disemination in future releases.
 !------------------------------------------------------------------------------
 
-#include <MondoLogger.h>
-
 MODULE SCFs
   USE Parse
   USE InOut
@@ -135,7 +133,7 @@ CONTAINS
           IConAls   = DIIS_CONALS
           ODA_DONE  = .TRUE.
           Mssg = 'Turning on DIIS'
-          LOG_PLAIN(Mssg)
+          CALL MondoLogPlain(Mssg)
           !CALL OpenASCII(OutFile,Out)
           !WRITE(Out,*)TRIM(Mssg)
           !WRITE(*,*)TRIM(Mssg)
@@ -376,7 +374,7 @@ CONTAINS
       ENDDO
       ! Convergence announcement
       IF(ConvergedQ.NE.NOT_CONVERGE.AND.cSCF>2)THEN!.AND.PrintFlags%Key>DEBUG_NONE)THEN
-        LOG_PLAIN(Mssg)
+        CALL MondoLogPlain(Mssg)
         !CALL OpenASCII(OutFile,Out)
         !WRITE(Out,*)TRIM(Mssg)
         !WRITE(*,*)TRIM(Mssg)
@@ -461,17 +459,17 @@ CONTAINS
             !WRITE(Out,*)'DMaxA = ',DMaxA
             !WRITE(Out,*)'DMaxB = ',DMaxB
             !CLOSE(Out)
-            LOG_NONE('ODAQ  = '//TRIM(FltToChar(ODAQ)))
-            LOG_NONE('ETotQ = '//TRIM(FltToChar(ETotQ)))
-            LOG_NONE('DIISQ = '//TRIM(FltToChar(DIISQ)))
-            LOG_NONE('DMaxQ = '//TRIM(FltToChar(DMaxQ)))
-            LOG_NONE('ETOTO = '//TRIM(FltToChar(ETotO)))
-            LOG_NONE('ETOTA = '//TRIM(FltToChar(ETOTA)))
-            LOG_NONE('ETOTB = '//TRIM(FltToChar(ETOTB)))
-            LOG_NONE('DIISA = '//TRIM(FltToChar(DIISA)))
-            LOG_NONE('DIISB = '//TRIM(FltToChar(DIISB)))
-            LOG_NONE('DMaxA = '//TRIM(FltToChar(DMaxA)))
-            LOG_NONE('DMaxB = '//TRIM(FltToChar(DMaxB)))
+            CALL MondoLog(DEBUG_NONE, "SCFs", 'ODAQ  = '//TRIM(FltToChar(ODAQ)))
+            CALL MondoLog(DEBUG_NONE, "SCFs", 'ETotQ = '//TRIM(FltToChar(ETotQ)))
+            CALL MondoLog(DEBUG_NONE, "SCFs", 'DIISQ = '//TRIM(FltToChar(DIISQ)))
+            CALL MondoLog(DEBUG_NONE, "SCFs", 'DMaxQ = '//TRIM(FltToChar(DMaxQ)))
+            CALL MondoLog(DEBUG_NONE, "SCFs", 'ETOTO = '//TRIM(FltToChar(ETotO)))
+            CALL MondoLog(DEBUG_NONE, "SCFs", 'ETOTA = '//TRIM(FltToChar(ETOTA)))
+            CALL MondoLog(DEBUG_NONE, "SCFs", 'ETOTB = '//TRIM(FltToChar(ETOTB)))
+            CALL MondoLog(DEBUG_NONE, "SCFs", 'DIISA = '//TRIM(FltToChar(DIISA)))
+            CALL MondoLog(DEBUG_NONE, "SCFs", 'DIISB = '//TRIM(FltToChar(DIISB)))
+            CALL MondoLog(DEBUG_NONE, "SCFs", 'DMaxA = '//TRIM(FltToChar(DMaxA)))
+            CALL MondoLog(DEBUG_NONE, "SCFs", 'DMaxB = '//TRIM(FltToChar(DMaxB)))
           ENDIF
           Converged(iCLONE)=NOT_CONVERGE
           ! Convergence from above +/- expected delta
@@ -512,17 +510,17 @@ CONTAINS
             !WRITE(Out,*)' GLogic = ',GLogic
             !WRITE(Out,*)' FLogic = ',FLogic
             !CLOSE(Out)
-            LOG_NONE('ETest  = '//TRIM(FltToChar(ETest)))
-            LOG_NONE('DTest  = '//TRIM(FltToChar(DTest)))
-            LOG_NONE('ALogic = '//TRIM(LogicalToChar(ALogic)))
-            LOG_NONE('A2Logic= '//TRIM(LogicalToChar(A2Logic)))
-            LOG_NONE('ELogic = '//TRIM(LogicalToChar(ELogic)))
-            LOG_NONE('CLogic = '//TRIM(LogicalToChar(CLogic)))
-            LOG_NONE('DLogic = '//TRIM(LogicalToChar(DLogic)))
-            LOG_NONE('QLogic = '//TRIM(LogicalToChar(QLogic)))
-            LOG_NONE('ILogic = '//TRIM(LogicalToChar(ILogic)))
-            LOG_NONE('GLogic = '//TRIM(LogicalToChar(GLogic)))
-            LOG_NONE('FLogic = '//TRIM(LogicalToChar(FLogic)))
+            CALL MondoLog(DEBUG_NONE, "SCFs", 'ETest  = '//TRIM(FltToChar(ETest)))
+            CALL MondoLog(DEBUG_NONE, "SCFs", 'DTest  = '//TRIM(FltToChar(DTest)))
+            CALL MondoLog(DEBUG_NONE, "SCFs", 'ALogic = '//TRIM(LogicalToChar(ALogic)))
+            CALL MondoLog(DEBUG_NONE, "SCFs", 'A2Logic= '//TRIM(LogicalToChar(A2Logic)))
+            CALL MondoLog(DEBUG_NONE, "SCFs", 'ELogic = '//TRIM(LogicalToChar(ELogic)))
+            CALL MondoLog(DEBUG_NONE, "SCFs", 'CLogic = '//TRIM(LogicalToChar(CLogic)))
+            CALL MondoLog(DEBUG_NONE, "SCFs", 'DLogic = '//TRIM(LogicalToChar(DLogic)))
+            CALL MondoLog(DEBUG_NONE, "SCFs", 'QLogic = '//TRIM(LogicalToChar(QLogic)))
+            CALL MondoLog(DEBUG_NONE, "SCFs", 'ILogic = '//TRIM(LogicalToChar(ILogic)))
+            CALL MondoLog(DEBUG_NONE, "SCFs", 'GLogic = '//TRIM(LogicalToChar(GLogic)))
+            CALL MondoLog(DEBUG_NONE, "SCFs", 'FLogic = '//TRIM(LogicalToChar(FLogic)))
           ENDIF
 
           ! No message.
@@ -580,7 +578,7 @@ CONTAINS
           !WRITE(Out,*)TRIM(Mssg)
           !WRITE(*,*)TRIM(Mssg)
           !CLOSE(Out)
-          LOG_PLAIN(Mssg)
+          CALL MondoLogPlain(Mssg)
           RETURN
         ELSE
           IF(DMaxMax > DTest*1.D-2) THEN
@@ -610,7 +608,7 @@ CONTAINS
         !WRITE(Out,*)TRIM(Mssg)
         !WRITE(*,*)TRIM(Mssg)
         !CLOSE(Out)
-        LOG_PLAIN(Mssg)
+        CALL MondoLogPlain(Mssg)
       ENDIF
     ENDIF
   END FUNCTION ConvergedQ

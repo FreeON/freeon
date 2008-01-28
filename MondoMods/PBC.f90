@@ -26,8 +26,6 @@
 !    ROUTINES FOR THE IMPLIMENTATION OF PERIODIC BOUNDARY CONDITIONS
 !    Author: C.J. Tymczak
 
-#include <MondoLogger.h>
-
 MODULE CellSets
   USE DerivedTypes
   USE GlobalScalars
@@ -154,8 +152,8 @@ CONTAINS
     !
     IF(PRESENT(MaxCell_O)) THEN
       IF(NCELL > MaxCell_O) THEN
-        LOG_NONE('NCELL   = '//TRIM(IntToChar(NCELL)))
-        LOG_NONE('MaxCell = '//TRIM(IntToChar(MaxCell_O)))
+        CALL MondoLogPlain('NCELL   = '//TRIM(IntToChar(NCELL)))
+        CALL MondoLogPlain('MaxCell = '//TRIM(IntToChar(MaxCell_O)))
         CALL Halt('NCELL is Greater then MaxCell')
       ELSE
         CALL New_CellSet(CS,MaxCell_O)
@@ -228,8 +226,8 @@ CONTAINS
     !
     IF(PRESENT(MaxCell_O)) THEN
       IF(NCELL > MaxCell_O) THEN
-        LOG_NONE('NCELL   = '//TRIM(IntToChar(NCELL)))
-        LOG_NONE('MaxCell = '//TRIM(IntToChar(MaxCell_O)))
+        CALL MondoLogPlain('NCELL   = '//TRIM(IntToChar(NCELL)))
+        CALL MondoLogPlain('MaxCell = '//TRIM(IntToChar(MaxCell_O)))
         CALL Halt('NCELL is Greater then MaxCell')
       ELSE
         CALL New_CellSet(CS,MaxCell_O)
@@ -327,8 +325,8 @@ CONTAINS
     !
     IF(PRESENT(MaxCell_O)) THEN
       IF(NCELL > MaxCell_O) THEN
-        LOG_NONE('NCELL   = '//TRIM(IntToChar(NCELL)))
-        LOG_NONE('MaxCell = '//TRIM(IntToChar(MaxCell_O)))
+        CALL MondoLogPlain('NCELL   = '//TRIM(IntToChar(NCELL)))
+        CALL MondoLogPlain('MaxCell = '//TRIM(IntToChar(MaxCell_O)))
         CALL Halt('NCELL is Greater then MaxCell')
       ELSE
         CALL New_CellSet(CS,MaxCell_O)
@@ -364,7 +362,7 @@ CONTAINS
       ENDDO
     ENDDO
 
-    LOG_NONE('NEW '//Option//' CELLSET SPHERE, NCELL = '//TRIM(IntToChar(NCELL)))
+    CALL MondoLogPlain('NEW '//Option//' CELLSET SPHERE, NCELL = '//TRIM(IntToChar(NCELL)))
 
   END SUBROUTINE New_CellSet_Sphere2
   !--------------------------------------------------------------------------

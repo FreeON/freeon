@@ -24,8 +24,6 @@
 ! disemination in future releases.
 !------------------------------------------------------------------------------
 
-#include <MondoLogger.h>
-
 MODULE MDynamics
   USE Order
   USE SCFs
@@ -178,10 +176,10 @@ CONTAINS
       CALL Force(C%Sets%NBSets,iGEO,C%Nams,C%Opts,C%Stat,C%Geos,C%Sets,C%MPIs)
 
       ! Print the positions.
-      LOG_PLAIN("[MD] Positions:")
+      CALL MondoLogPlain("[MD] Positions:")
       DO iCLONE=1,C%Geos%Clones
         DO iATS=1,C%Geos%Clone(iCLONE)%NAtms
-          LOG_PLAIN(&
+          CALL MondoLogPlain(&
             TRIM(IntToChar(iATS))//" "// &
             TRIM(C%Geos%Clone(iCLONE)%AtNam%C(iATS))//" "// &
             TRIM(DblToMedmChar(C%Geos%Clone(iCLONE)%AtMSS%D(iATS)))//" "// &
@@ -192,10 +190,10 @@ CONTAINS
       ENDDO
 
       ! Print the forces.
-      LOG_PLAIN("[MD] Forces:")
+      CALL MondoLogPlain("[MD] Forces:")
       DO iCLONE=1,C%Geos%Clones
         DO iATS=1,C%Geos%Clone(iCLONE)%NAtms
-          LOG_PLAIN(&
+          CALL MondoLogPlain(&
             TRIM(IntToChar(iATS))//" "// &
             TRIM(C%Geos%Clone(iCLONE)%AtNam%C(iATS))//" "// &
             TRIM(DblToMedmChar(C%Geos%Clone(iCLONE)%AtMSS%D(iATS)))//" "// &
@@ -276,7 +274,7 @@ CONTAINS
       ENDDO
 
       Acc(1:3) = Acc(1:3)/DBLE(numberUnconstrainedAtoms)
-      LOG_NONE("flying ice-cube correction:" &
+      CALL MondoLog(DEBUG_NONE, "MDynamics:MD_Verlet_NVE", "flying ice-cube correction:" &
         //TRIM(DblToChar(Acc(1))) &
         //TRIM(DblToChar(Acc(2))) &
         //TRIM(DblToChar(Acc(3))))
@@ -317,9 +315,9 @@ CONTAINS
     ! Thermostats
     IF(C%Dyns%Temp_Scaling) THEN
       IF(MOD(iGEO,C%Dyns%RescaleInt)==0) THEN
-        LOG_PLAIN('Rescaling Temperature')
-        LOG_PLAIN('Target Temp = '//TRIM(DblToChar(C%Dyns%TargetTemp)))
-        LOG_PLAIN('MD Temp     = '//TRIM(DblToChar(MDTemp%D(1))))
+        CALL MondoLogPlain('Rescaling Temperature')
+        CALL MondoLogPlain('Target Temp = '//TRIM(DblToChar(C%Dyns%TargetTemp)))
+        CALL MondoLogPlain('MD Temp     = '//TRIM(DblToChar(MDTemp%D(1))))
         DO iCLONE = 1,C%Geos%Clones
           CALL RescaleVelocity(C%Geos%Clone(iCLONE),MDTemp%D(iCLONE),C%Dyns%TargetTemp)
         ENDDO
@@ -328,9 +326,9 @@ CONTAINS
 
     ! Berendsen thermostat.
     IF(C%Dyns%Thermostat == MD_THERM_BERENDSEN) THEN
-      LOG_PLAIN("Applying Berendsen thermostat")
-      LOG_PLAIN("MD temperature = "//TRIM(DblToChar(MDTemp%D(1))))
-      LOG_PLAIN("Target temperature = "//TRIM(DblToChar(C%Dyns%TargetTemp)))
+      CALL MondoLogPlain("Applying Berendsen thermostat")
+      CALL MondoLogPlain("MD temperature = "//TRIM(DblToChar(MDTemp%D(1))))
+      CALL MondoLogPlain("Target temperature = "//TRIM(DblToChar(C%Dyns%TargetTemp)))
       DO iCLONE = 1, C%Geos%Clones
         CALL BerendsenThermostat(C%Geos%Clone(iCLONE), MDTemp%D(iCLONE), C%Dyns%TargetTemp, C%Dyns%DTime, C%Dyns%BerendsenTau)
       ENDDO
@@ -429,9 +427,9 @@ CONTAINS
     ! Thermostats
     IF(C%Dyns%Temp_Scaling) THEN
       IF(MOD(iGEO,C%Dyns%RescaleInt)==0) THEN
-        LOG_PLAIN('Rescaling Temperature')
-        LOG_PLAIN('Target Temp = '//TRIM(DblToChar(C%Dyns%TargetTemp)))
-        LOG_PLAIN('MD Temp     = '//TRIM(DblToChar(MDTemp%D(1))))
+        CALL MondoLogPlain('Rescaling Temperature')
+        CALL MondoLogPlain('Target Temp = '//TRIM(DblToChar(C%Dyns%TargetTemp)))
+        CALL MondoLogPlain('MD Temp     = '//TRIM(DblToChar(MDTemp%D(1))))
         DO iCLONE=1,C%Geos%Clones
           CALL RescaleVelocity(C%Geos%Clone(iCLONE),MDTemp%D(iCLONE),C%Dyns%TargetTemp)
         ENDDO
@@ -439,9 +437,9 @@ CONTAINS
     ENDIF
 
     IF(C%Dyns%Thermostat == MD_THERM_BERENDSEN) then
-      LOG_PLAIN("Applying Berendsen thermostat")
-      LOG_PLAIN("MD temperature = "//TRIM(DblToChar(MDTemp%D(1))))
-      LOG_PLAIN("Target temperature = "//TRIM(DblToChar(C%Dyns%TargetTemp)))
+      CALL MondoLogPlain("Applying Berendsen thermostat")
+      CALL MondoLogPlain("MD temperature = "//TRIM(DblToChar(MDTemp%D(1))))
+      CALL MondoLogPlain("Target temperature = "//TRIM(DblToChar(C%Dyns%TargetTemp)))
       DO iCLONE = 1, C%Geos%Clones
         CALL BerendsenThermostat(C%Geos%Clone(iCLONE), MDTemp%D(iCLONE), C%Dyns%TargetTemp, C%Dyns%DTime, C%Dyns%BerendsenTau)
       ENDDO
@@ -572,11 +570,11 @@ CONTAINS
     IF(T > 1.0d-10) THEN
       v_scale = SQRT(1 + delta_t/tau_T * (T0/T - 1))
 
-      LOG_NONE("T = "//TRIM(DblToChar(T)))
-      LOG_NONE("T0 = "//TRIM(DblToChar(T0)))
-      LOG_NONE("delta_t = "//TRIM(DblToChar(delta_t)))
-      LOG_NONE("tau_T = "//TRIM(DblToChar(tau_T)))
-      LOG_NONE("v_scale = "//TRIM(DblToChar(v_scale)))
+      CALL MondoLogPlain("T = "//TRIM(DblToChar(T)))
+      CALL MondoLogPlain("T0 = "//TRIM(DblToChar(T0)))
+      CALL MondoLogPlain("delta_t = "//TRIM(DblToChar(delta_t)))
+      CALL MondoLogPlain("tau_T = "//TRIM(DblToChar(tau_T)))
+      CALL MondoLogPlain("v_scale = "//TRIM(DblToChar(v_scale)))
 
       DO i = 1, GM%NAtms
         IF(GM%CConstrain%I(i) == 0) THEN

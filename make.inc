@@ -41,7 +41,7 @@ REMOVE_PREPROCESSED_FILES = @REMOVE_PREPROCESSED_FILES@
 
 # Suffix rules.
 .f90.o :
-	@$(CPP_COMMAND) $< | grep -v -E "^#" | sed 's/&[ \t]\+/&\n/g' > $(notdir $(basename $<))$(PREPROCESSED_SUFFIX).f90
+	@$(CPP_COMMAND) $< | grep -v -E "^#" > $(notdir $(basename $<))$(PREPROCESSED_SUFFIX).f90
 	$(FC_COMMAND) -c -o $@ $(notdir $(basename $<))$(PREPROCESSED_SUFFIX).f90
 	@if test "${REMOVE_PREPROCESSED_FILES}" = "yes"; then \
 	  rm $(notdir $(basename $<))$(PREPROCESSED_SUFFIX).f90; \
