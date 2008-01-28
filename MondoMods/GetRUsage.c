@@ -52,29 +52,29 @@ getmemoryusage (int * size)
   int i;
 
   /* Get PID. */
-  our_pid = getpid ();
+  our_pid = getpid();
 
   /* Open statm in the proc filesystem. */
-  sprintf (path, "/proc/%i/stat", (int) our_pid);
-  file = fopen (path, "r");
+  sprintf(path, "/proc/%i/stat", (int) our_pid);
+  file = fopen(path, "r");
 
   if (file != NULL)
   {
     for (i = 0; i < 22; ++i)
     {
-      fscanf (file, "%s", & token[0]);
+      fscanf(file, "%s", & token[0]);
     }
-    fscanf (file, "%lu", & temp);
-    *size = (int) round (temp/1024.);
+    fscanf(file, "%lu", & temp);
+    *size = (int) round(temp/1024.);
   }
 
   else { *size = -1; }
 
   /* Close file again. */
-  fclose (file);
+  fclose(file);
 }
 
 void getmemoryusage_ (int * size)
 {
-  getmemoryusage (size);
+  getmemoryusage(size);
 }

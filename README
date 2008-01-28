@@ -10,6 +10,10 @@ autoconf
 autoheader
 automake --add-missing
 
+This whole procedure can be done in one single command:
+
+autoreconf -i -s
+
 Once the sources are configured (run "./configure --help" to get a list of
 options it understands) run
 

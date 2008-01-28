@@ -83,6 +83,9 @@ AC_PROG_CC
 AC_PROG_FC
 AC_PROG_F77
 
+# Put the C-compiler into standard C mode.
+AC_PROG_CC_STDC
+
 # Set line-length limits.
 AC_MSG_CHECKING([how to set line length limits of f90 compiler])
 if test "`basename ${FC}`" = "gfortran"; then
@@ -122,6 +125,12 @@ have built MondoSCF already and you are simply changing from using PHiPAC to
 using BLAS or vice versa, you don't have to rebuild the whole code. Simply
 delete MondoMods/SMWrap.o and run make again.  This will rebuild all that is
 necessary.])
+
+# Test some stuff for C-code.
+AC_LANG(C)
+
+AC_CHECK_LIB([m], [round], [],
+  [AC_MSG_FAILURE([we need the round() function])])
 
 # Switch tests to fortran.
 AC_LANG(Fortran)
