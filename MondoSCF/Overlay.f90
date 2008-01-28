@@ -73,7 +73,7 @@ CONTAINS
        ENDDO
 !       WRITE(*,*)iCLUMP,' COMMANDLINE = ',TRIM(CmndLine)
        ! Log this run
-       CALL Logger(CmndLine,.FALSE.)
+       CALL MondoLog(DEBUG_NONE, "Overlay:Invoke", TRIM(CmndLine))
 #if MPI2
        CALL MPI_COMM_SPAWN(ArgV%C(1),ArgV%C(2:NArg),M%NProc,MPI_INFO_NULL, &
             ROOT,MPI_COMM_SELF,SPAWN,MPI_ERRCODES_IGNORE,IErr)

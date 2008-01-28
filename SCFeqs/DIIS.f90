@@ -24,8 +24,6 @@
 !    disemination in future releases.
 !------------------------------------------------------------------------------
 
-#include <MondoLogger.h>
-
 PROGRAM DIIS
   USE DerivedTypes
   USE GlobalScalars
@@ -106,7 +104,7 @@ PROGRAM DIIS
   DIISErr=SQRT(Dot(EI,EI))/DBLE(NBasF)
 
   ! Consider just damping, certainly on first go through
-  LOG_NONE("hack-alarm....")
+  CALL MondoLog(DEBUG_NONE, "DIIS", "hack-alarm....")
   !IF(ISCF<=1)THEN
   IF(ISCF<=4)THEN
     DoDIIS=-1  ! No DIIS, but damp non-extrapolated Fock matrices

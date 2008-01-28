@@ -30,8 +30,6 @@
 !    Author: Matt Challacombe
 !-------------------------------------------------------------------------
 
-#include <MondoLogger.h>
-
 PROGRAM P2Use
   USE DerivedTypes
   USE GlobalScalars
@@ -383,7 +381,7 @@ PROGRAM P2Use
         IF(ABS(TrP2-Half*DBLE(NEl)) < 1.D-8) EXIT
       ENDIF
     ENDDO
-    LOG_PLAIN("Trace(P) = "//DblToChar(TrP)//" "//DblToChar(TrP2))
+    CALL MondoLogPlain("Trace(P) = "//DblToChar(TrP)//" "//DblToChar(TrP2))
 
     ! Convert to AO Rep
     INQUIRE(FILE=TrixFile('X',Args),EXIST=Present)
@@ -454,7 +452,7 @@ PROGRAM P2Use
     CALL Get(Tmp2,FileName)
     CALL Add(Tmp1,Tmp2,P)
 
-    LOG_NONE("[P2Use] FNorm(P-D) = "//TRIM(DblToChar(FNorm(P))))
+    CALL MondoLog(DEBUG_NONE, "P2Use", "FNorm(P-D) = "//TRIM(DblToChar(FNorm(P))))
     ! End Debugging.
 
     ! Get D(n-1)
@@ -498,8 +496,8 @@ PROGRAM P2Use
         IF(ABS(TrP2-Half*DBLE(NEl)) < 1.0D-8) EXIT
       ENDIF
     ENDDO
-    LOG_NONE("[P2Use] Trace(P)  = "//TRIM(DblToChar(TrP)))
-    LOG_NONE("[P2Use] Trace(P2) = "//TRIM(DblToChar(TrP2)))
+    CALL MondoLog(DEBUG_NONE, "P2Use", "Trace(P)  = "//TRIM(DblToChar(TrP)))
+    CALL MondoLog(DEBUG_NONE, "P2Use", "Trace(P2) = "//TRIM(DblToChar(TrP2)))
 
     ! Convert to AO Rep
     INQUIRE(FILE=TrixFile('X',Args),EXIST=Present)
@@ -651,7 +649,7 @@ PROGRAM P2Use
         IF(ABS(TrP2-Half*DBLE(NEl)) < 1.D-8) EXIT
       ENDIF
     ENDDO
-    LOG_NONE("[P2Use] Trace(P) = "//TRIM(FltToChar(TrP))//" "//TRIM(FltToChar(TrP2)))
+    CALL MondoLog(DEBUG_NONE, "P2Use", "Trace(P) = "//TRIM(FltToChar(TrP))//" "//TRIM(FltToChar(TrP2)))
 
     ! Convert to AO Rep
     INQUIRE(FILE=TrixFile('X',Args),EXIST=Present)
@@ -730,7 +728,7 @@ PROGRAM P2Use
         IF(ABS(TrP2-Half*DBLE(NEl)) < 1.D-8) EXIT
       ENDIF
     ENDDO
-    LOG_NONE("P2Use: Trace(P) = "//TRIM(FltToChar(TrP)))
+    CALL MondoLog(DEBUG_NONE, "P2Use", "Trace(P) = "//TRIM(FltToChar(TrP)))
 
     !    Convert to AO Rep
     INQUIRE(FILE=TrixFile('X',Args),EXIST=Present)
@@ -820,7 +818,7 @@ PROGRAM P2Use
         IF(ABS(TrP2-Half*DBLE(NEl)) < 1.D-8) EXIT
       ENDIF
     ENDDO
-    LOG_NONE("P2Use: Trace(P) = "//TRIM(FltToChar(TrP)))
+    CALL MondoLog(DEBUG_NONE, "P2Use", "Trace(P) = "//TRIM(FltToChar(TrP)))
 
     !    Convert to AO Rep
     INQUIRE(FILE=TrixFile('X',Args),EXIST=Present)
@@ -874,13 +872,13 @@ PROGRAM P2Use
              //'_Cycl#'//TRIM(IntToChar(Cycle)) &
              //'_Clone#'//TRIM(IntToChar(MyClone)) &
              //'.D'
-        CALL Logger('On extrapolation, P2Use is opening DM '//TRIM(DMFile),.TRUE.)
+        CALL MondoLog(DEBUG_NONE, "P2Use", "On extrapolation, P2Use is opening DM "//TRIM(DMFile))
         EXIT
       ENDIF
     ENDDO
 
     IF(Cycle<0)THEN
-      LOG_NONE('Assuming this is a restart!  If there is no restart, its going to die...')
+      CALL MondoLog(DEBUG_NONE, "P2Use", 'Assuming this is a restart!  If there is no restart, its going to die...')
       CALL Get(S0,TrixFile('S',Args,Stats_O=(/Current(1),Current(2),Current(3)-1/)))
       CALL Get(S1,TrixFile('S',Args,Stats_O=Current))
       ! Close Current Group
@@ -939,10 +937,10 @@ PROGRAM P2Use
     TError0 = ABS(Trace(Tmp1)-DBLE(NEl)/SFac)
     IF(MyID.EQ.ROOT) THEN
       IF(PrintFlags%Key==DEBUG_MAXIMUM) THEN
-        LOG_MAXIMUM("Trace Error: Tr[P0,S0] = "//TRIM(IntToChar(TError0)))
+        CALL MondoLog(DEBUG_MAXIMUM, "P2Use", "Trace Error: Tr[P0,S0] = "//TRIM(IntToChar(TError0)))
         !CALL OpenASCII(OutFile,Out)
         !CALL PrintProtectL(Out)
-        LOG_MAXIMUM("Trace Error: Tr[P0,S1] = "//TRIM(IntToChar(TError0)))
+        CALL MondoLog(DEBUG_MAXIMUM, "P2Use", "Trace Error: Tr[P0,S1] = "//TRIM(IntToChar(TError0)))
         !CALL PrintProtectR(Out)
         !CLOSE(UNIT=Out,STATUS='KEEP')
       ENDIF
@@ -950,15 +948,15 @@ PROGRAM P2Use
     CALL Multiply(P0,S1,Tmp1)
     TError0 = ABS(Trace(Tmp1)-DBLE(NEl)/SFac)
     IF(MyID.EQ.ROOT)THEN
-      LOG_MAXIMUM("Trace Error: Tr[P0,S1] = "//TRIM(IntToChar(TError0)))
+      CALL MondoLog(DEBUG_MAXIMUM, "P2Use", "Trace Error: Tr[P0,S1] = "//TRIM(IntToChar(TError0)))
     ENDIF
 #else
     TError0 = ABS(Trace(P0,S1)-DBLE(NEl)/SFac)
     IF(PrintFlags%Key==DEBUG_MAXIMUM) THEN
       TrP=ABS(Trace(P0,S0)-DBLE(NEl)/SFac)
-      LOG_MAXIMUM("Trace Error: Tr[P0,S0] = "//TRIM(FltToChar(TrP)))
+      CALL MondoLog(DEBUG_MAXIMUM, "P2Use", "Trace Error: Tr[P0,S0] = "//TRIM(FltToChar(TrP)))
       TrP=ABS(Trace(P0,S1)-DBLE(NEl)/SFac)
-      LOG_MAXIMUM("Trace Error: Tr[P0,S1] = "//TRIM(FltToChar(TrP)))
+      CALL MondoLog(DEBUG_MAXIMUM, "P2Use", "Trace Error: Tr[P0,S1] = "//TRIM(FltToChar(TrP)))
     ENDIF
 #endif
     !    Initialize
@@ -981,7 +979,7 @@ PROGRAM P2Use
 #ifdef PARALLEL
       IF(MyId==ROOT)THEN
 #endif
-        LOG_MEDIUM(ProcessName(Prog,'AO-DMX ') &
+        CALL MondoLog(DEBUG_MEDIUM, "P2Use", ProcessName(Prog,'AO-DMX ') &
              //' Nstep  = '//TRIM(IntToChar(NStep)) &
              //' Lambda = '//TRIM(DblToMedmChar(Lam)))
 #ifdef PARALLEL
@@ -1023,7 +1021,7 @@ PROGRAM P2Use
         IF(MyId==ROOT)THEN
 #endif
           PNon0s=100.D0*DBLE(P%NNon0)/DBLE(NBasF*NBasF)
-          LOG_MEDIUM(ProcessName(Prog,'AO-DMX ' &
+          CALL MondoLog(DEBUG_MEDIUM, "P2Use", ProcessName(Prog,'AO-DMX ' &
             //TRIM(IntToChar(NStep))//":"//TRIM(IntToChar(I))) &
             //' dN='//TRIM(DblToShrtChar(Norm_Error)) &
             //', %Non0='//TRIM(DblToShrtChar(PNon0s)))

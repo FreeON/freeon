@@ -34,6 +34,8 @@ MODULE DenMatMethods
   USE Parse
   USE Macros
   USE LinAlg
+  USE MondoLogger
+
   IMPLICIT NONE
 
   INTERFACE NormTrace
@@ -83,9 +85,7 @@ CONTAINS
       Thresholds%Trix=Trix
       Mssg=TRIM(ProcessName(Prog))//' Trix = '  &
            //TRIM(DblToShrtChar(Thresholds%Trix))
-      CALL OpenASCII(OutFile,Out)
-      WRITE(Out,*)TRIM(Mssg)
-      CLOSE(Out)
+      CALL MondoLog(DEBUG_NONE, "DenMatMethods:SussTrix", TRIM(Mssg))
     ENDIF
     CLOSE(Inp)
     CALL SetVarThresh()
@@ -294,14 +294,7 @@ CONTAINS
 
     IF(MyId==ROOT)THEN
 
-      IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
-        CALL OpenASCII(OutFile,Out)
-        CALL PrintProtectL(Out)
-        WRITE(*,*)TRIM(Mssg)
-        WRITE(Out,*)TRIM(Mssg)
-        CALL PrintProtectR(Out)
-        CLOSE(UNIT=Out,STATUS='KEEP')
-      ENDIF
+      CALL MondoLog(DEBUG_MAXIMUM, "DenMatMethods", TRIM(Mssg))
 
     ENDIF
 

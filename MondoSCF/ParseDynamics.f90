@@ -25,8 +25,6 @@
 !------------------------------------------------------------------------------
 ! Authors : Hugh Nymeyer, CJ Tymczak and Matt Challacombe
 
-#include <MondoLogger.h>
-
 MODULE ParseDynamics
   USE Parse
   USE InOut
@@ -85,7 +83,7 @@ CONTAINS
       ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_DMP4)) THEN
         D%MDGeuss=MD_DMP4
       ELSE
-        LOG_PLAIN('In input file, no MD DM Projection algorithm Defined')
+        CALL MondoLogPlain('In input file, no MD DM Projection algorithm Defined')
       ENDIF
 
       ! Parse MD Options: First MD Algorithmn
@@ -112,7 +110,7 @@ CONTAINS
       ENDIF
       ! Parse for Number of SCF cycles
       IF(.NOT. OptIntQ(Inp,MD_NUM_SCF,D%MDNumSCF)) THEN
-        LOG_PLAIN('Number of SCF cycles for MD is not set: DEFAULT is eight')
+        CALL MondoLogPlain('Number of SCF cycles for MD is not set: DEFAULT is eight')
         D%MDNumSCF=8
       ENDIF
 
@@ -138,17 +136,17 @@ CONTAINS
 
       ! Parse for thermostat.
       IF(OptKeyQ(Inp, MD_THERMOSTAT, MD_THERM_BERENDSEN)) then
-        LOG_PLAIN("Using Berendsen thermostat")
+        CALL MondoLogPlain("Using Berendsen thermostat")
         D%Thermostat = MD_THERM_BERENDSEN
       ELSE
-        LOG_PLAIN("Unknown thermostat or thermostat not set")
+        CALL MondoLogPlain("Unknown thermostat or thermostat not set")
         D%Thermostat = MD_THERM_UNSET
       ENDIF
 
       IF(OptDblQ(Inp, MD_BERENDSEN_TAU, D%BerendsenTau)) then
-        LOG_PLAIN("Using tau = "//TRIM(DblToChar(D%BerendsenTau)))
+        CALL MondoLogPlain("Using tau = "//TRIM(DblToChar(D%BerendsenTau)))
       ELSE
-        LOG_PLAIN("BerendsenTau not specified in input: Setting tau to DeltaTime")
+        CALL MondoLogPlain("BerendsenTau not specified in input: Setting tau to DeltaTime")
         D%BerendsenTau = D%DTime
       ENDIF
 
@@ -191,7 +189,7 @@ CONTAINS
       ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_DMP4)) THEN
         D%MDGeuss=MD_DMP4
       ELSE
-        LOG_PLAIN('In input file, no MD DM Projection algorithm Defined')
+        CALL MondoLogPlain('In input file, no MD DM Projection algorithm Defined')
       ENDIF
       ! MD Algorithmn
       IF(OptKeyQ(Inp,MD_AL_OPTION,MD_AL_VERLET))THEN

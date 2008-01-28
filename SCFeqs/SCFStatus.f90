@@ -24,8 +24,6 @@
 !    disemination in future releases.
 !------------------------------------------------------------------------------
 
-#include <MondoLogger.h>
-
 PROGRAM SCFStatus
   USE DerivedTypes
   USE GlobalScalars
@@ -292,7 +290,7 @@ PROGRAM SCFStatus
   IF(MyId==ROOT)THEN
 #endif
     IF(SCFActn/='Silent')THEN
-      LOG_NONE(TRIM(SCFMessage))
+      CALL MondoLogPlain(TRIM(SCFMessage))
     ENDIF
 #ifdef PARALLEL
   ENDIF
