@@ -128,7 +128,7 @@ CONTAINS
       HDF_CurrentID=InitHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
       ! Create data space for grouped objects to preserve structure of HDF5
       ! to avoid multiple clones simultaneously creating new data
-      !
+
       ! BEGIN STUPID MULTIPOLE REDUNDANCY
       CALL New(MP)
       MP%DPole%D=BIG_DBL
@@ -144,6 +144,7 @@ CONTAINS
       CALL Put(DoubleVect,'quadrupole')
       CALL Delete(DoubleVect)
       ! END STUPID REDUNDANCY
+
       CALL Put(BIG_DBL,'e_nucleartotal')
       CALL Put(BIG_DBL,'exc')
       CALL Put(BIG_DBL,'homolumogap')

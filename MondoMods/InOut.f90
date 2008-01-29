@@ -127,13 +127,11 @@ CONTAINS
 #ifdef PARALLEL
     IF(MyId==ROOT)THEN
 #endif
-      !WRITE(*,*) "[OpenHDF] opening hdf file "//TRIM(FileName)
       NC=StringLen(FileName)
       FileID=HDF5OpenFile(NC,Char2Ints(NC,FileName))
       IF(FileID==FAIL) THEN
         CALL Halt(' Failed to open the HDF file <'//TRIM(FileName)//'>.')
       ENDIF
-      !WRITE(*,*) "[OpenHDF] hdf file open with FileID "//TRIM(IntToChar(FileID))
 #ifdef PARALLEL
     ENDIF
 #endif
@@ -146,13 +144,11 @@ CONTAINS
 #ifdef PARALLEL
     IF(MyId==ROOT)THEN
 #endif
-      !WRITE(*,*) "[CloseHDF] closing hdf file "//TRIM(IntToChar(FileID))
       STATUS=HDF5CloseFile(FileID)
       IF(STATUS==FAIL) THEN
         CALL Halt(' Failed to close an HDF file with HDF_CurrentID=' &
            //'<'//TRIM(IntToChar(FileID))//'>. ')
       ENDIF
-      !WRITE(*,*) "[CloseHDF] hdf file closed"
 #ifdef PARALLEL
     ENDIF
 #endif
@@ -232,7 +228,6 @@ CONTAINS
     LOGICAL,OPTIONAL :: Put_O
     INTEGER          :: I,NC,SizeOf,SIZE_OF_HDF5_DATA
 
-    !WRITE(*,*) "[OpenData] opening "//TRIM(Meta%VarName)
     Meta%Status=FAIL
     NC=StringLen(Meta%VarName)
     CALL HDF5OpenData(HDF_CurrentID,NC,Char2Ints(NC,Meta%VarName), &
@@ -258,7 +253,6 @@ CONTAINS
         CALL HDF5SelectData(Meta%DataId,Meta%DataSpc,Meta%Dimension)
       ENDIF
     ENDIF
-    !WRITE(*,*) "[OpenData] done"
   END SUBROUTINE OpenData
   !===============================================================================
   !
@@ -1320,12 +1314,6 @@ CONTAINS
             CALL BcastBCSR(A)
           ENDIF
 #endif
-!!$
-!!$                         WRITE(*,*)' IN GET, ATMS = ',A%NAtms,' Blks = ',A%NBlks,' NNon0 = ',A%NNon0
-!!$                         WRITE(*,*)A%RowPt%I
-!!$                         WRITE(*,*)A%ColPt%I
-!!$                         WRITE(*,*) A%MTrix%D(1:A%NNon0)
-
           RETURN
         ENDIF
       ENDIF
@@ -1492,17 +1480,11 @@ CONTAINS
           CALL Put(A%BlkPt,TRIM(Name)//'%BlkPt',A%NBlks,UnLimit_O=.TRUE.)
           CALL Put(A%MTrix,TRIM(Name)//'%MTrix',A%NNon0,UnLimit_O=.TRUE.)
 #endif
-!!$
-!!$                         WRITE(*,*)' IN PUT, ATMS = ',A%NAtms,' Blks = ',A%NBlks,' NNon0 = ',A%NNon0
-!!$                         WRITE(*,*) A%RowPt%I
-!!$                         WRITE(*,*) A%ColPt%I
-!!$                         WRITE(*,*) A%MTrix%D(1:A%NNon0)
-
           RETURN
         ENDIF
       ENDIF
 
-      !           WRITE TO BINARY FILE
+      ! WRITE TO BINARY FILE
       INQUIRE(FILE=FileName,EXIST=Exists)
       IF(Exists)THEN
 #if FORMATTED
@@ -1793,10 +1775,10 @@ CONTAINS
         OPEN(UNIT=Seq,FILE=FileName,STATUS='NEW', &
              FORM='UNFORMATTED',ACCESS='SEQUENTIAL')
       ENDIF
-      !
+
       !Write NPrc
       WRITE(UNIT=Seq,Err=1,IOSTAT=IOS)NPrc
-      !
+
       !Write the ROOT bcsr matrix
       WRITE(UNIT=Seq,Err=1,IOSTAT=IOS)A%NSMat,A%NAtms,A%NBlks,A%NNon0
       WRITE(UNIT=Seq,Err=1,IOSTAT=IOS)(A%RowPt%I(I),I=1,A%NAtms+1)
@@ -1845,7 +1827,7 @@ CONTAINS
       CALL MPI_SEND(A%MTrix%D(1),NDbl,MPI_DOUBLE_PRECISION,0,301,MONDO_COMM,IErr)
       CALL Delete(INTArr)
     ENDIF
-    !
+
     RETURN
 1   CALL Halt('IO Error '//TRIM(IntToChar(IOS))//' in Put_DBCSR_N_1.')
   END SUBROUTINE Put_DBCSR_N_1

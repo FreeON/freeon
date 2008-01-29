@@ -470,11 +470,11 @@ int hdf5readdoublevector__(int* DataId, int* DataSpc, double* Data)
 {return hdf5readdoublevector_(DataId,DataSpc,Data);}
 
 /* Get the library version. */
-int hdf5version(unsigned *majnum, unsigned *minnum, unsigned *relnum)
+int hdf5version (unsigned *majnum, unsigned *minnum, unsigned *relnum)
 {
   return H5get_libversion(majnum, minnum, relnum);
 }
-int hdf5version_(unsigned *majnum, unsigned *minnum, unsigned *relnum)
+int hdf5version_ (unsigned *majnum, unsigned *minnum, unsigned *relnum)
 {
   return hdf5version(majnum, minnum, relnum);
 }
