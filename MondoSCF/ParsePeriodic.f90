@@ -31,6 +31,8 @@ MODULE ParsePeriodic
   USE OptionKeys
   USE PeriodicKeys
   USE ControlStructures
+  USE MondoLogger
+
 CONTAINS
   !=========================================================================
   !
@@ -125,8 +127,12 @@ CONTAINS
       PBC%PFFMaxLay=1
       !      Look for MaxEll in periodic boundary options
       IF(.NOT.OptIntQ(Inp,PFFMXELL,PBC%PFFMaxEll)) THEN
-        PBC%PFFMaxEll=14
+        PBC%PFFMaxEll=64
       ENDIF
+
+      ! For now, we will set this to a large value...
+      CALL MondoLog(DEBUG_NONE, "LoadPeriodicOptions", "setting PFFMaxEll to 64")
+      PBC%PFFMaxEll=64
     ENDIF
     !   Parse permeability
     IF(.NOT.OptDblQ(Inp,EPSILON,PBC%Epsilon))THEN
