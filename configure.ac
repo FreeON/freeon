@@ -1,4 +1,4 @@
-AC_INIT([MondoSCF], [1.0-alpha], [mchalla@lanl.gov])
+AC_INIT([MondoSCF], [1.0-alpha-latest], [mchalla@lanl.gov])
 AC_COPYRIGHT([
 This code is part of the MondoSCF suite of programs for linear scaling 
 electronic structure theory and ab initio molecular dynamics.
