@@ -179,3 +179,7 @@ EXTRA_DIST = \
   $(Validate)
 
 CLEANFILES = *~
+
+# Cryptographically sign the dist.
+distsign : dist
+	gpg -b $(distdir).tar.bz2
