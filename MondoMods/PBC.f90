@@ -362,7 +362,7 @@ CONTAINS
       ENDDO
     ENDDO
 
-    CALL MondoLogPlain('NEW '//Option//' CELLSET SPHERE, NCELL = '//TRIM(IntToChar(NCELL)))
+    CALL MondoLog(DEBUG_NONE, "New_CellSet_Sphere2", 'NEW '//Option//' CELLSET SPHERE, NCELL = '//TRIM(IntToChar(NCELL)))
 
   END SUBROUTINE New_CellSet_Sphere2
   !--------------------------------------------------------------------------
