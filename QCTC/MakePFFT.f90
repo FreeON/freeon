@@ -62,12 +62,14 @@ PROGRAM MakePFFT
     ENDIF
     !    Set up the multipole arrays
     CALL MultipoleSetUp()
+
     !    Allocate the tensors
     MaxEll=GM%PBC%PFFMaxEll
     CALL New(TenC,LSP(2*MaxEll),0)
     CALL New(TenS,LSP(2*MaxEll),0)
     TenC%D=Zero
     TenS%D=Zero
+
     !    Calculate the tensors ...
     CALL CalculatePFFT(MaxEll,GM,Args,CS_IN,TenC,TenS)
     !    Put them to HDF
