@@ -659,6 +659,7 @@ CONTAINS
       ! Open File
       FileName = TRIM(C%Nams%SCF_NAME)//"_Clone#"//TRIM(IntToChar(iCLONE))//".MDO"
       CALL OpenASCII(FileName,Out)
+
       ! Add Header
       IF(iGEO==1) THEN
         Line = "##########################################################################"
@@ -859,11 +860,12 @@ CONTAINS
         IF((MOD(iGEO-1,4)+1).EQ.4) THEN
 
           FileName = TRIM(C%Nams%SCF_NAME)//'_'//TRIM(IntToChar(iCLONE))//'_Energies_Symplectic.dat'
-          CALL OpenASCII(TRIM(FileName),99)
-          WRITE(99,60) MDTime%D(iCLONE)*InternalTimeToFemtoseconds,MDKin%D(iCLONE),MDEpot%D(iCLONE),MDEtot%D(iCLONE)
-          WRITE(*,*) "Time = ",MDTime%D(iCLONE)*InternalTimeToFemtoseconds, &
-            " fs Temperature = ",MDTemp%D(iCLONE),'Ave Temp = ',MDTave%D(iCLONE)
-          CLOSE(99)
+          CALL OpenASCII(TRIM(FileName), Out)
+          WRITE(Out,60) MDTime%D(iCLONE)*InternalTimeToFemtoseconds,MDKin%D(iCLONE),MDEpot%D(iCLONE),MDEtot%D(iCLONE)
+          CALL MondoLogPlain("Time = "//TRIM(FltToChar(MDTime%D(iCLONE)*InternalTimeToFemtoseconds)) &
+            //" fs, Temperature = "//TRIM(FltToChar(MDTemp%D(iCLONE))) &
+            //" K, avg. Temperature = "//TRIM(FltToChar(MDTave%D(iCLONE)))//" K")
+          CLOSE(Out)
 
         ENDIF
       ELSE

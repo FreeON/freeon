@@ -66,12 +66,11 @@ CONTAINS
        CALL SetArgV(Ex,N,S,M,NArg,ArgV)
 #endif
        ! This is the command line we are going to execute 
-       CmndLine=''
-       DO I=1,NArg
+       CmndLine=TRIM(ArgV%C(1))
+       DO I=2,NArg
           CmndLine=TRIM(CmndLine)//Blnk//TRIM(ArgV%C(I))
-          !          WRITE(*,*)I,' ARGVS <',TRIM(ArgV%C(I)),">"
        ENDDO
-!       WRITE(*,*)iCLUMP,' COMMANDLINE = ',TRIM(CmndLine)
+
        ! Log this run
        CALL MondoLog(DEBUG_NONE, "Overlay:Invoke", TRIM(CmndLine))
 #if MPI2
@@ -79,6 +78,7 @@ CONTAINS
             ROOT,MPI_COMM_SELF,SPAWN,MPI_ERRCODES_IGNORE,IErr)
        IF(IErr/=MPI_SUCCESS)& 
           CALL MondoHalt(MPIS_ERROR,' Could not spawn <'//TRIM(CmndLine)//'>')
+
        ! Merge the spawned and current local communicators
        CALL MPI_INTERCOMM_MERGE(SPAWN,.TRUE.,ALL,IErr)
        ! Wait for the kiddies to be done
