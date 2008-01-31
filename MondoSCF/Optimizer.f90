@@ -276,9 +276,7 @@ CONTAINS
         ELSE
           Mssg=ProcessName('GDicer',' GDIIS # '//TRIM(IntToChar(iGEO)))//TRIM(Mssg)
         ENDIF
-        CALL OpenASCII(C%Nams%OFile,Out)
-        WRITE(Out,*)TRIM(Mssg)
-        CLOSE(Out,STATUS='KEEP')
+        CALL MondoLogPlain(Mssg)
         IF(Converged)EXIT
       ELSE
         ! Take a few small steps along the gradient to start
@@ -295,10 +293,7 @@ CONTAINS
         ! And here is some
         Mssg=TRIM(Mssg)//', Step='//TRIM(DblToShrtChar(StepLength))
         Mssg=ProcessName('GDicer',' Relax # '//TRIM(IntToChar(iGEO)))//TRIM(Mssg)
-        CALL OpenASCII(C%Nams%OFile,Out)
-        WRITE(Out,*)TRIM(Mssg)
-        WRITE(*,*)TRIM(Mssg)
-        CLOSE(Out,STATUS='KEEP')
+        CALL MondoLogPlain(Mssg)
       ENDIF
       ! Compute a new energy
       CALL SCF(iBAS,iGEO+1,C)
@@ -518,10 +513,7 @@ CONTAINS
                //', Gmax= '//TRIM(DblToShrtChar(MAXGrad))         &
                //', Step= '//TRIM(DblToShrtChar(StepLength))
           !    WRITE(*,*)TRIM(Mssg)
-          CALL OpenASCII(OutFile,Out)
-          WRITE(*,*)TRIM(Mssg)
-          WRITE(Out,*)TRIM(Mssg)
-          CLOSE(Out)
+          CALL MondoLogPlain(Mssg)
         ENDIF
       ENDDO
     ENDIF
@@ -530,10 +522,7 @@ CONTAINS
          //', Gmax= '//TRIM(DblToShrtChar(MAXGrad))        &
          //', Step= '//TRIM(DblToShrtChar(StepLength))
     !    WRITE(*,*)TRIM(Mssg)
-    CALL OpenASCII(OutFile,Out)
-    WRITE(*,*)TRIM(Mssg)
-    WRITE(Out,*)TRIM(Mssg)
-    CLOSE(Out)
+    CALL MondoLogPlain(Mssg)
     ! Clean up
     DO iCLONE=1,C%Geos%Clones
       CALL Delete(Carts(iCLONE))
@@ -630,31 +619,22 @@ CONTAINS
     !
     IGeo=C%Stat%Current%I(3)
     IF(IGeo>=MaxSteps) THEN
-      CALL OpenASCII(OutFile,Out)
       IF(ConvgdAll/=1) THEN
-        WRITE(Out,700)
-        WRITE(*,700)
+        CALL MondoLogPlain('Maximum number of optimization steps exceeded, optimization did not converge.')
       ELSE
-        WRITE(Out,460) iGeo-1
-        WRITE(*,460) iGeo-1
+        CALL MondoLogPlain('Geometry Optimization converged in '//TRIM(IntToChar(iGeo-1))//' steps.')
       ENDIF
-      CLOSE(Out,STATUS='KEEP')
     ENDIF
     !
     ! Convergence is reached at this point, print final energy
     ! and finish optimization.
     !
-    CALL OpenASCII(OutFile,Out)
-    WRITE(Out,500)
-    WRITE(*,500)
-    WRITE(Out,600)
-    WRITE(*,600)
+    CALL MondoLogPlain('Energies of final structures:')
+    CALL MondoLogPlain(' Clone #         Energy         ')
     DO iCLONE=1,C%Geos%Clones
-      WRITE(Out,400) iCLONE,C%Geos%Clone(iCLONE)%ETotal
-      WRITE(*,400) iCLONE,C%Geos%Clone(iCLONE)%ETotal
+      CALL MondoLogPlain(TRIM(IntToChar(iCLONE))//" "//TRIM(FltToChar(C%Geos%Clone(iCLONE)%ETotal)))
     ENDDO
-    CLOSE(Out,STATUS='KEEP')
-    !
+
 400 FORMAT(I6,F20.10)
 500 FORMAT('Energies of final structures:')
 600 FORMAT(' Clone #         Energy         ')
@@ -763,8 +743,9 @@ CONTAINS
            IntCs,iGEO,SCRPath,PWDPath,PBCDim,Print,HFileIn, &
            Refresh)
     ELSE
-      WRITE(*,200) iCLONE,iGEO
-      WRITE(Out,200) iCLONE,iGEO
+      CALL MondoLogPlain('     Geometry optimization of Clone #' &
+        //TRIM(IntToChar(iCLONE))//' converged in ' &
+        //TRIM(IntToChar(iGEO))//' steps.')
 200   FORMAT('     Geometry optimization of Clone #',I2,' converged in ',I3,' steps.')
       Convgd(iCLONE)=1
     ENDIF
@@ -1084,10 +1065,10 @@ CONTAINS
       ENDDO
     ENDIF
     IF(CtrlStat%GeOpConvgd) THEN
-      WRITE(*,399) iCLONE,iGEO,ETot
-      WRITE(Out,399) iCLONE,iGEO,ETot
+      CALL MondoLogPlain(TRIM(IntToChar(iCLONE))//" " &
+        //TRIM(IntToChar(iGEO))//" " &
+        //TRIM(FltToChar(ETot)))
       WRITE(*,140) MaxCGrad,(IMaxCGrad-1)/3+1
-      WRITE(Out,140) MaxCGrad,(IMaxCGrad-1)/3+1
       IF(PBCDim>0) THEN
         IF(ILMaxCGrad==NatmsLoc-2) THEN
           ALatt='   A'
@@ -1097,7 +1078,6 @@ CONTAINS
           ALatt='   C'
         ENDIF
         WRITE(*,145) LMaxCGrad,ALAtt
-        WRITE(Out,145) LMaxCGrad,ALAtt
         CALL LattReview(IntCL,LatOld,LattIntC,PBCDim)
       ENDIF
       RETURN
@@ -1170,8 +1150,7 @@ CONTAINS
     ! Review iterations
     !
     WRITE(*,399) iCLONE,iGEO,ETot
-    WRITE(Out,399) iCLONE,iGEO,ETot
-    !
+
     MaxStreDispl=MaxStreDispl/AngstromsToAu
     MaxBendDispl=MaxBendDispl*180.D0/PI
     MaxLinBDispl=MaxLinBDispl*180.D0/PI
@@ -1181,8 +1160,6 @@ CONTAINS
     WRITE(*,410) MaxGrad,IntCs%Atoms%I(IMaxGrad,1:4)
     WRITE(*,140) MaxCGrad,IMaxCGrad
     WRITE(*,420) RMSGrad
-    WRITE(Out,410) MaxGrad,IntCs%Atoms%I(IMaxGrad,1:4)
-    WRITE(Out,140) MaxCGrad,IMaxCGrad
     IF(ILMaxCGrad==NatmsLoc-2) THEN
       ALatt='   A'
     ELSE IF(ILMaxCGrad==NatmsLoc-1) THEN
@@ -1192,41 +1169,30 @@ CONTAINS
     ENDIF
     IF(PBCDim>0) THEN
       WRITE(*,145) LMaxCGrad,ALAtt
-      WRITE(Out,145) LMaxCGrad,ALAtt
     ENDIF
-    WRITE(Out,420) RMSGrad
     IF(CtrlConstr%NConstr/=0) THEN
       WRITE(*,510) MaxGradNoConstr, &
            IntCs%Atoms%I(IMaxGradNoConstr,1:4)
       WRITE(*,520) RMSGradNoConstr
-      WRITE(Out,510) MaxGradNoConstr, &
-           IntCs%Atoms%I(IMaxGradNoConstr,1:4)
-      WRITE(Out,520) RMSGradNoConstr
     ENDIF
     !
     IF(MaxStre/=0) THEN
       WRITE(*,430) MaxStreDispl,IntCs%Atoms%I(MaxStre,1:2)
-      WRITE(Out,430) MaxStreDispl,IntCs%Atoms%I(MaxStre,1:2)
     ENDIF
     IF(MaxBend/=0) THEN
       WRITE(*,435) MaxBendDispl,IntCs%Atoms%I(MaxBend,1:3)
-      WRITE(Out,435) MaxBendDispl,IntCs%Atoms%I(MaxBend,1:3)
     ENDIF
     IF(MaxLinB/=0) THEN
       WRITE(*,436) MaxLinBDispl,IntCs%Atoms%I(MaxLinB,1:3)
-      WRITE(Out,436) MaxLinBDispl,IntCs%Atoms%I(MaxLinB,1:3)
     ENDIF
     IF(MaxOutP/=0) THEN
       WRITE(*,437) MaxOutPDispl,IntCs%Atoms%I(MaxOutP,1:4)
-      WRITE(Out,437) MaxOutPDispl,IntCs%Atoms%I(MaxOutP,1:4)
     ENDIF
     IF(MaxTors/=0) THEN
       WRITE(*,438) MaxTorsDispl,IntCs%Atoms%I(MaxTors,1:4)
-      WRITE(Out,438) MaxTorsDispl,IntCs%Atoms%I(MaxTors,1:4)
     ENDIF
     !
     WRITE(*,440) RMSIntDispl
-    WRITE(Out,440) RMSIntDispl
     !
     IF(PBCDim>0) CALL LattReview(IntCL,LatOld,LattIntC,PBCDim)
     !
@@ -1259,7 +1225,6 @@ CONTAINS
     !
     IF(PBCDim>0) THEN
       WRITE(*,1010)
-      WRITE(Out,1010)
       IF(PBCDim==1) THEN
         NStre=1
         NBend=0
@@ -1277,16 +1242,10 @@ CONTAINS
         WRITE(*,1020) IntCL%Def%C(I)(1:6),LatOld%D(I)*Fact, &
              LattIntC%Grad%D(I),LattIntC%Displ%D(I)*Fact, &
              IntCL%Value%D(I)*Fact
-        WRITE(Out,1020) IntCL%Def%C(I)(1:6),LatOld%D(I)*Fact, &
-             LattIntC%Grad%D(I),LattIntC%Displ%D(I)*Fact, &
-             IntCL%Value%D(I)*Fact
       ENDDO
       Fact=180.D0/PI
       DO I=NStre+1,NStre+NBend
         WRITE(*,1020) IntCL%Def%C(I)(1:6),LatOld%D(I)*Fact, &
-             LattIntC%Grad%D(I),LattIntC%Displ%D(I)*Fact, &
-             IntCL%Value%D(I)*Fact
-        WRITE(Out,1020) IntCL%Def%C(I)(1:6),LatOld%D(I)*Fact, &
              LattIntC%Grad%D(I),LattIntC%Displ%D(I)*Fact, &
              IntCL%Value%D(I)*Fact
       ENDDO
@@ -1297,18 +1256,12 @@ CONTAINS
         WRITE(*,1020) IntCL%Def%C(I)(1:6),LatOld%D(I)*Fact, &
              LattIntC%Grad%D(I),LattIntC%Displ%D(I)*Fact, &
              IntCL%Value%D(I)*Fact
-        WRITE(Out,1020) IntCL%Def%C(I)(1:6),LatOld%D(I)*Fact, &
-             LattIntC%Grad%D(I),LattIntC%Displ%D(I)*Fact, &
-             IntCL%Value%D(I)*Fact
       ENDIF
       !
       IF(PBCDim==2.AND.IntCL%Def%C(4)(1:8)=='AREA_L  ') THEN
         Fact=One/(AngstromsToAu**2)
         I=4
         WRITE(*,1020) IntCL%Def%C(I)(1:6),LatOld%D(I)*Fact, &
-             LattIntC%Grad%D(I),LattIntC%Displ%D(I)*Fact, &
-             IntCL%Value%D(I)*Fact
-        WRITE(Out,1020) IntCL%Def%C(I)(1:6),LatOld%D(I)*Fact, &
              LattIntC%Grad%D(I),LattIntC%Displ%D(I)*Fact, &
              IntCL%Value%D(I)*Fact
       ENDIF
@@ -1415,7 +1368,6 @@ CONTAINS
       GMLoc%AltCount=0
     ENDIF
     !
-    CALL OpenASCII(OutFile,Out)
     CALL OpenAlternate(GOpt,XYZNew%D,GradNew%D,Opts%PFlags%GeOp, &
          GMLoc%BoxCarts%D,GMLoc%PBC%Dimen,GMLoc%AltCount,&
          EIntcSave,ConstrSave,SCRPath,GMLoc%LatticeOnly)
@@ -1432,7 +1384,6 @@ CONTAINS
     !
     CALL CloseAlternate(GOpt%ExtIntCs,GOpt%GConvCrit%Alternate, &
          GOpt%Constr,EIntcSave,ConstrSave)
-    CLOSE(Out,STATUS='KEEP')
     ! Put back modified geometry into GMLoc array
     !
     NatmsNew=0
@@ -1715,23 +1666,23 @@ CONTAINS
         ENDDO
         CALL Delete(DistVect1)
         CALL Delete(DistVect2)
-        !
-        CALL OpenASCII(OutFile,Out)
-        WRITE(*,200) iBStep-1,EOld,ENew,MeanDist,MaxDist
-        WRITE(Out,200) iBStep-1,EOld,ENew,MeanDist,MaxDist
+
+        CALL MondoLogPlain('Backtr. step = '//TRIM(IntToChar(iBStep-1)) &
+          //' Old Energy= '//TRIM(FltToChar(EOld)) &
+          //' New Energy= '//TRIM(FltToChar(ENew)) &
+          //' Dist= '//TRIM(FltToChar(MeanDist)) &
+          //' MaxDist= '//TRIM(FltToChar(MaxDist)))
 200     FORMAT('Backtr. step= ',I3,' Old Energy= ', &
              F20.6,' New Energy= ',F20.6,' Dist= ',F14.8, &
              'MaxDist= ',F14.8)
-        CLOSE(Out,STATUS='KEEP')
-        !
+
         IF(iBStep==MaxBStep+1) THEN
-          CALL OpenASCII(OutFile,Out)
-          WRITE(*,100) iCLONE,MaxBStep
-          WRITE(Out,100) iCLONE,MaxBStep
+          CALL MondoLogPlain('Backtracking of clone '//TRIM(IntToChar(iCLONE)) &
+            //' has not converged in '//TRIM(IntToChar(MaxBStep)) &
+            //' Steps. Continue with present geometry.')
 100       FORMAT('Backtracking of clone',I3, &
                ' has not converged in ', &
                I3,' Steps. Continue with present geometry.')
-          CLOSE(Out,STATUS='KEEP')
           CYCLE
         ENDIF
         IF(.NOT.DoBackTrack) CYCLE

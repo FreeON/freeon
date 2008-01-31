@@ -1,0 +1,1470 @@
+[LoadPeriodicOptions] setting PFFMaxEll to 64
+--------- input file = /home/nbock/Research/Mondo/Validate/CH2x-6.inp
+<BeginTitle>
+Polyacetilene geometry optimization with fixed lattice vectors
+in STO-3G basis
+<EndTitle>
+
+
+<BeginOptions>
+MPIInvoke="mpiun"
+MPIProcFlag="-np"
+MPIProcessors=8
+MPISpatialProc=8
+MPIMachineFlag="--nper"
+MPIMachineFile="2"
+
+Charge=0
+Multiplicity=1
+
+Grad=(Optimize,PrimInt,BiSect,NoGDIIS)
+DebugAll=(MinDebug,CheckSums)
+Guess=SuperPos
+SCFMethod=(TC2)
+BasisSets=(STO-3G-SPLIT)
+ModelChem=(HF)
+Accuracy =(good)
+SCFConvergence=(DIIS)
+
+PBC=(T,F,F)
+PFFMaxEll=16
+Periodic=(AtomCoord)
+
+<EndOptions>
+
+<BeginPeriodic>
+ 12.000  1.0 1.0     90.0  90.0  90.0
+<EndPeriodic>
+
+<BeginGeometry>
+ C    0.500   0.500   0.000
+ H    0.500   1.300   0.800
+ H    0.500   1.300  -0.800
+ C    1.500  -0.500   0.000
+ H    1.500  -1.300   0.800
+ H    1.500  -1.300  -0.800
+ C    2.500   0.500   0.000
+ H    2.500   1.300   0.800
+ H    2.500   1.300  -0.800
+ C    3.500  -0.500   0.000
+ H    3.500  -1.300   0.800
+ H    3.500  -1.300  -0.800
+ C    4.500   0.500   0.000
+ H    4.500   1.300   0.800
+ H    4.500   1.300  -0.800
+ C    5.500  -0.500   0.000
+ H    5.500  -1.300   0.800
+ H    5.500  -1.300  -0.800
+ C    6.500   0.500   0.000
+ H    6.500   1.300   0.800
+ H    6.500   1.300  -0.800
+ C    7.500  -0.500   0.000
+ H    7.500  -1.300   0.800
+ H    7.500  -1.300  -0.800
+ C    8.500   0.500   0.000
+ H    8.500   1.300   0.800
+ H    8.500   1.300  -0.800
+ C    9.500  -0.500   0.000
+ H    9.500  -1.300   0.800
+ H    9.500  -1.300  -0.800
+ C   10.500   0.500   0.000
+ H   10.500   1.300   0.800
+ H   10.500   1.300  -0.800
+ C   11.500  -0.500   0.000
+ H   11.500  -1.300   0.800
+ H   11.500  -1.300  -0.800
+<EndGeometry>
+
+
+--------- end of input file
+ __    __                 _       ____________ ______ 
+|  \  /  |               | |     /       /    |      |
+|   \/   | ___  _ __   __| | ___/   ____/   __|  |==='
+|        |/ _ \| '_ \ / _  |/ _ \____  \   (__|  ____|
+|  |\/|  | (_) | | | | (_| | (_) )     /\     |  |    
+|__|  |__|\___/|_| |_|\____|\___/_____/  \____|__|    
+
+Version 1.0-alpha-latest
+local version: 2d9246e1dd1be682eabc4b68de9110b5c6d975c4
+
+A program suite for O(N) SCF theory and ab initio MD 
+
+Authors:
+Matt Challacombe, C.J. Tymczak, Karoly Nemeth,       
+Valery Weber, Chee Kwan Gan, Eric Schwegler,         
+Nicolas Bock, Anders Niklasson, and Graeme Henkelman 
+
+Los Alamos National Laboratory                       
+LA-CC-04-086 (formerly 01-2)                         
+Copyright 2001, University of California.            
+
+*** Summary ***
+compiled for i686-pc-linux-gnu
+on DasBoot
+a i686 machine
+running linux-gnu 2.6.23.9-mactel
+using HDF5 library version 1.4.5
+current stacksize limit: 8.0000000000000000 MB
+
+Notice:
+In case you see unexplained segmentation violations, try
+raising the stacksize limit.
+
+current HDF file = /tmp//CH2x-6_30611.hdf
+
+<<Starting MondoSCF 01/30/08 @ 16:11:31>>
+
+[New_CellSet_Sphere2] NEW Penetration CELLSET SPHERE, NCELL = 3
+[New_CellSet_Sphere2] NEW Overlap CELLSET SPHERE, NCELL = 3
+[PunchHDF:SetLatticeVectors] USING NEW CELL SET:
+[PunchHDF:SetLatticeVectors] Pentrat Cells = 3
+[PunchHDF:SetLatticeVectors] Overlap Cells = 3
+[Overlay:Invoke]  /tmp/Mondo/bin/MakePFFT CH2x-6_30611 OneElectronMatrices 0 1 1 0 1 1
+ MakePFFT               :: TenC CheckSum  = 0.8819627627944594D-01
+ MakePFFT               :: TenS CheckSum  = 0.0000000000000000D+00
+[Overlay:Invoke]  /tmp/Mondo/bin/MakeS CH2x-6_30611 OneElectronMatrices 0 1 1 0 1 1
+ MakeS                  :: S CheckSum  = 0.1139579539204945D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/AInv CH2x-6_30611 OneElectronMatrices 0 1 1 0 1 1
+ BlokAInv               :: Z CheckSum  = 0.1246860156504771D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/MakeT CH2x-6_30611 OneElectronMatrices 0 1 1 0 1 1
+ MakeT                  :: T CheckSum  = 0.5596747027986593D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/P2Use CH2x-6_30611 DensitySuperposition 0 1 1 0 1 1
+ P2Use                  :: P[0] CheckSum  = 0.1375632258889522D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/MakeRho CH2x-6_30611 DensitySuperposition 0 1 1 0 1 1
+[MakeRho] Rho_tot=0.4799999998921238D+02
+[MakeRho] Rho_nuc=-.4800000000000001D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.5746115180657250D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3872922335712827D+05
+ MakeRho                :: Rho-LMNs CheckSum  = 0.6025977372358434D+03
+[Overlay:Invoke]  /tmp/Mondo/bin/QCTC CH2x-6_30611 DensitySuperposition 0 1 1 0 1 1
+[CalMaxEll] CalMaxEll hardwired for now at ...64
+ QCTC                   :: J[0] CheckSum  = 0.8089463092834627D+02
+[QCTC] virtual memory size = 41588 kB
+[Overlay:Invoke]  /tmp/Mondo/bin/ONX CH2x-6_30611 DensitySuperposition 0 1 1 0 1 1
+ ONX2                   :: Kx[0] CheckSum  = 0.1456934246385729D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/FBuild CH2x-6_30611 DensitySuperposition 0 1 1 0 1 1
+ FockNGrueven           :: F[0] CheckSum  = 0.4134764683698137D+02
+ FockNGrueven           :: OrthoF[0] CheckSum  = 0.3724295926865813D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/SP2 CH2x-6_30611 DensitySuperposition 0 1 1 0 1 1
+[SP2] FNorm(F-FT) = 0.0000000000000088
+ SP2                    :: OrthoP[1] CheckSum  = 0.6928203230275516D+01
+ SP2                    :: P[1] CheckSum  = 0.6261917736952928D+01
+[SP2] FNorm(P-PT) = 0.0000000000000146
+[Overlay:Invoke]  /tmp/Mondo/bin/SCFstats CH2x-6_30611 DensitySuperposition 0 1 1 0 1 1
+SCFStatus : [0,1,1]    :: <SCF> = -424.19870744, dD = 0.22D+01
+[Overlay:Invoke]  /tmp/Mondo/bin/MakeRho CH2x-6_30611 DensityNormal 1 1 1 0 1 1
+[MakeRho] Rho_tot=0.4799999999801847D+02
+[MakeRho] Rho_nuc=-.4800000000000001D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.5049007318068442D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3616779639960707D+05
+ MakeRho                :: Rho-LMNs CheckSum  = 0.5174764404544612D+03
+[Overlay:Invoke]  /tmp/Mondo/bin/QCTC CH2x-6_30611 DensityNormal 1 1 1 0 1 1
+[CalMaxEll] CalMaxEll hardwired for now at ...64
+ QCTC                   :: J[1] CheckSum  = 0.8264363781101071D+02
+[QCTC] virtual memory size = 43032 kB
+[Overlay:Invoke]  /tmp/Mondo/bin/ONX CH2x-6_30611 DensityNormal 1 1 1 0 1 1
+ ONX2                   :: Kx[1] CheckSum  = 0.1561529974484278D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/FBuild CH2x-6_30611 DensityNormal 1 1 1 0 1 1
+ FockNGrueven           :: F[1] CheckSum  = 0.4348743438858721D+02
+ FockNGrueven           :: OrthoF[1] CheckSum  = 0.3889158384269790D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/DIIS CH2x-6_30611 DensityNormal 1 1 1 0 1 1
+[DIIS] hack-alarm....
+ DIIS                   :: F_DIIS[1] CheckSum  = 0.3889158384269790D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/SP2 CH2x-6_30611 DensityNormal 1 1 1 0 1 1
+[SP2] FNorm(F-FT) = 0.0000000000000099
+ SP2                    :: OrthoP[2] CheckSum  = 0.6928203230274382D+01
+ SP2                    :: P[2] CheckSum  = 0.5906309319868004D+01
+[SP2] FNorm(P-PT) = 0.0000000000000087
+[Overlay:Invoke]  /tmp/Mondo/bin/SCFstats CH2x-6_30611 DensityNormal 1 1 1 0 1 1
+SCFStatus : [1,1,1]    :: <SCF> = -461.04304651, dD = 0.28D+00, DIIS = 0.10D-01
+[Overlay:Invoke]  /tmp/Mondo/bin/MakeRho CH2x-6_30611 DensityNormal 2 1 1 1 1 1
+[MakeRho] Rho_tot=0.4800000000050776D+02
+[MakeRho] Rho_nuc=-.4800000000000001D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.4985085517175277D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3583535759871357D+05
+ MakeRho                :: Rho-LMNs CheckSum  = 0.5119027834106476D+03
+[Overlay:Invoke]  /tmp/Mondo/bin/QCTC CH2x-6_30611 DensityNormal 2 1 1 1 1 1
+[CalMaxEll] CalMaxEll hardwired for now at ...64
+ QCTC                   :: J[2] CheckSum  = 0.8204970944439167D+02
+[QCTC] virtual memory size = 42360 kB
+[Overlay:Invoke]  /tmp/Mondo/bin/ONX CH2x-6_30611 DensityNormal 2 1 1 1 1 1
+ ONX2                   :: Kx[2] CheckSum  = 0.1567076638245919D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/FBuild CH2x-6_30611 DensityNormal 2 1 1 1 1 1
+ FockNGrueven           :: F[2] CheckSum  = 0.4283027465135717D+02
+ FockNGrueven           :: OrthoF[2] CheckSum  = 0.3843971173494415D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/DIIS CH2x-6_30611 DensityNormal 2 1 1 1 1 1
+[DIIS] hack-alarm....
+ DIIS                   :: F_DIIS[2] CheckSum  = 0.3843971173494415D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/SP2 CH2x-6_30611 DensityNormal 2 1 1 1 1 1
+[SP2] FNorm(F-FT) = 0.0000000000000110
+ SP2                    :: OrthoP[3] CheckSum  = 0.6928203230275510D+01
+ SP2                    :: P[3] CheckSum  = 0.5828868551382075D+01
+[SP2] FNorm(P-PT) = 0.0000000000000088
+[Overlay:Invoke]  /tmp/Mondo/bin/SCFstats CH2x-6_30611 DensityNormal 2 1 1 1 1 1
+SCFStatus : [2,1,1]    :: <SCF> = -461.65898715, dD = 0.85D-01, DIIS = 0.29D-02
+[Overlay:Invoke]  /tmp/Mondo/bin/MakeRho CH2x-6_30611 DensityNormal 3 1 1 2 1 1
+[MakeRho] Rho_tot=0.4799999999501626D+02
+[MakeRho] Rho_nuc=-.4800000000000001D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.4955834870431146D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3567465859395088D+05
+ MakeRho                :: Rho-LMNs CheckSum  = 0.5087819167925850D+03
+[Overlay:Invoke]  /tmp/Mondo/bin/QCTC CH2x-6_30611 DensityNormal 3 1 1 2 1 1
+[CalMaxEll] CalMaxEll hardwired for now at ...64
+ QCTC                   :: J[3] CheckSum  = 0.8224759264312540D+02
+[QCTC] virtual memory size = 42380 kB
+[Overlay:Invoke]  /tmp/Mondo/bin/ONX CH2x-6_30611 DensityNormal 3 1 1 2 1 1
+ ONX2                   :: Kx[3] CheckSum  = 0.1566117080398691D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/FBuild CH2x-6_30611 DensityNormal 3 1 1 2 1 1
+ FockNGrueven           :: F[3] CheckSum  = 0.4304206590559160D+02
+ FockNGrueven           :: OrthoF[3] CheckSum  = 0.3858701697020429D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/DIIS CH2x-6_30611 DensityNormal 3 1 1 2 1 1
+[DIIS] hack-alarm....
+ DIIS                   :: F_DIIS[3] CheckSum  = 0.3858701697020429D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/SP2 CH2x-6_30611 DensityNormal 3 1 1 2 1 1
+[SP2] FNorm(F-FT) = 0.0000000000000115
+ SP2                    :: OrthoP[4] CheckSum  = 0.6928203230273996D+01
+ SP2                    :: P[4] CheckSum  = 0.5815013435499996D+01
+[SP2] FNorm(P-PT) = 0.0000000000000092
+[Overlay:Invoke]  /tmp/Mondo/bin/SCFstats CH2x-6_30611 DensityNormal 3 1 1 2 1 1
+SCFStatus : [3,1,1]    :: <SCF> = -461.70593099, dD = 0.20D-01, DIIS = 0.80D-03
+[Overlay:Invoke]  /tmp/Mondo/bin/MakeRho CH2x-6_30611 DensityNormal 4 1 1 3 1 1
+[MakeRho] Rho_tot=0.4800000000148317D+02
+[MakeRho] Rho_nuc=-.4800000000000001D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.4951644904163886D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3565290938876002D+05
+ MakeRho                :: Rho-LMNs CheckSum  = 0.5084516550092602D+03
+[Overlay:Invoke]  /tmp/Mondo/bin/QCTC CH2x-6_30611 DensityNormal 4 1 1 3 1 1
+[CalMaxEll] CalMaxEll hardwired for now at ...64
+ QCTC                   :: J[4] CheckSum  = 0.8218783178887109D+02
+[QCTC] virtual memory size = 42356 kB
+[Overlay:Invoke]  /tmp/Mondo/bin/ONX CH2x-6_30611 DensityNormal 4 1 1 3 1 1
+ ONX2                   :: Kx[4] CheckSum  = 0.1566449704574256D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/FBuild CH2x-6_30611 DensityNormal 4 1 1 3 1 1
+ FockNGrueven           :: F[4] CheckSum  = 0.4297532669048488D+02
+ FockNGrueven           :: OrthoF[4] CheckSum  = 0.3854119134140507D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/DIIS CH2x-6_30611 DensityNormal 4 1 1 3 1 1
+[DIIS] hack-alarm....
+ DIIS                   :: F_DIIS[4] CheckSum  = 0.3854119134140507D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/SP2 CH2x-6_30611 DensityNormal 4 1 1 3 1 1
+[SP2] FNorm(F-FT) = 0.0000000000000098
+ SP2                    :: OrthoP[5] CheckSum  = 0.6928203230275508D+01
+ SP2                    :: P[5] CheckSum  = 0.5810214056908229D+01
+[SP2] FNorm(P-PT) = 0.0000000000000101
+[Overlay:Invoke]  /tmp/Mondo/bin/SCFstats CH2x-6_30611 DensityNormal 4 1 1 3 1 1
+SCFStatus : [4,1,1]    :: <SCF> = -461.71008601, dD = 0.80D-02, DIIS = 0.27D-03
+[Overlay:Invoke]  /tmp/Mondo/bin/MakeRho CH2x-6_30611 DensityNormal 5 1 1 4 1 1
+[MakeRho] Rho_tot=0.4800000000258724D+02
+[MakeRho] Rho_nuc=-.4800000000000001D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.4949240439064700D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3564043415528705D+05
+ MakeRho                :: Rho-LMNs CheckSum  = 0.5081667141174565D+03
+[Overlay:Invoke]  /tmp/Mondo/bin/QCTC CH2x-6_30611 DensityNormal 5 1 1 4 1 1
+[CalMaxEll] CalMaxEll hardwired for now at ...64
+ QCTC                   :: J[5] CheckSum  = 0.8220781626394347D+02
+[QCTC] virtual memory size = 42336 kB
+[Overlay:Invoke]  /tmp/Mondo/bin/ONX CH2x-6_30611 DensityNormal 5 1 1 4 1 1
+ ONX2                   :: Kx[5] CheckSum  = 0.1566335788628096D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/FBuild CH2x-6_30611 DensityNormal 5 1 1 4 1 1
+ FockNGrueven           :: F[5] CheckSum  = 0.4299678574846684D+02
+ FockNGrueven           :: OrthoF[5] CheckSum  = 0.3855610850124366D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/DIIS CH2x-6_30611 DensityNormal 5 1 1 4 1 1
+[DIIS] hack-alarm....
+ DIIS                   :: F_DIIS[5] CheckSum  = 0.3855215953654074D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/SP2 CH2x-6_30611 DensityNormal 5 1 1 4 1 1
+[SP2] FNorm(F-FT) = 0.0000000000000098
+ SP2                    :: OrthoP[6] CheckSum  = 0.6928203230275510D+01
+ SP2                    :: P[6] CheckSum  = 0.5808757848747904D+01
+[SP2] FNorm(P-PT) = 0.0000000000000094
+[Overlay:Invoke]  /tmp/Mondo/bin/SCFstats CH2x-6_30611 DensityNormal 5 1 1 4 1 1
+SCFStatus : [5,1,1]    :: <SCF> = -461.71052642, dD = 0.36D-02, DIIS = 0.87D-04
+[Overlay:Invoke]  /tmp/Mondo/bin/MakeRho CH2x-6_30611 DensityNormal 6 1 1 5 1 1
+[MakeRho] Rho_tot=0.4799999999643730D+02
+[MakeRho] Rho_nuc=-.4800000000000001D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.4948657478808219D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3563780658505789D+05
+ MakeRho                :: Rho-LMNs CheckSum  = 0.5081027250255959D+03
+[Overlay:Invoke]  /tmp/Mondo/bin/QCTC CH2x-6_30611 DensityNormal 6 1 1 5 1 1
+[CalMaxEll] CalMaxEll hardwired for now at ...64
+ QCTC                   :: J[6] CheckSum  = 0.8220359966833190D+02
+[QCTC] virtual memory size = 42212 kB
+[Overlay:Invoke]  /tmp/Mondo/bin/ONX CH2x-6_30611 DensityNormal 6 1 1 5 1 1
+ ONX2                   :: Kx[6] CheckSum  = 0.1566357375480115D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/FBuild CH2x-6_30611 DensityNormal 6 1 1 5 1 1
+ FockNGrueven           :: F[6] CheckSum  = 0.4299201766751319D+02
+ FockNGrueven           :: OrthoF[6] CheckSum  = 0.3855285175069854D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/DIIS CH2x-6_30611 DensityNormal 6 1 1 5 1 1
+[DIIS] hack-alarm....
+ DIIS                   :: F_DIIS[6] CheckSum  = 0.3855271730009899D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/SP2 CH2x-6_30611 DensityNormal 6 1 1 5 1 1
+[SP2] FNorm(F-FT) = 0.0000000000000123
+ SP2                    :: OrthoP[7] CheckSum  = 0.6928203230275507D+01
+ SP2                    :: P[7] CheckSum  = 0.5808803616120798D+01
+[SP2] FNorm(P-PT) = 0.0000000000000105
+[Overlay:Invoke]  /tmp/Mondo/bin/SCFstats CH2x-6_30611 DensityNormal 6 1 1 5 1 1
+SCFStatus : [6,1,1]    :: <SCF> = -461.71059260, dD = 0.30D-03, DIIS = 0.12D-04
+[Overlay:Invoke]  /tmp/Mondo/bin/MakeRho CH2x-6_30611 DensityNormal 7 1 1 6 1 1
+[MakeRho] Rho_tot=0.4799999999605269D+02
+[MakeRho] Rho_nuc=-.4800000000000001D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.4948673584731662D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3563795756482460D+05
+ MakeRho                :: Rho-LMNs CheckSum  = 0.5081028209864073D+03
+[Overlay:Invoke]  /tmp/Mondo/bin/QCTC CH2x-6_30611 DensityNormal 7 1 1 6 1 1
+[CalMaxEll] CalMaxEll hardwired for now at ...64
+ QCTC                   :: J[7] CheckSum  = 0.8220333676293029D+02
+[QCTC] virtual memory size = 42264 kB
+[Overlay:Invoke]  /tmp/Mondo/bin/ONX CH2x-6_30611 DensityNormal 7 1 1 6 1 1
+ ONX2                   :: Kx[7] CheckSum  = 0.1566358913840982D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/FBuild CH2x-6_30611 DensityNormal 7 1 1 6 1 1
+ FockNGrueven           :: F[7] CheckSum  = 0.4299173644860242D+02
+ FockNGrueven           :: OrthoF[7] CheckSum  = 0.3855265619935153D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/DIIS CH2x-6_30611 DensityNormal 7 1 1 6 1 1
+[DIIS] hack-alarm....
+ DIIS                   :: F_DIIS[7] CheckSum  = 0.3855266247209793D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/SP2 CH2x-6_30611 DensityNormal 7 1 1 6 1 1
+[SP2] FNorm(F-FT) = 0.0000000000000089
+ SP2                    :: OrthoP[8] CheckSum  = 0.6928203230275509D+01
+ SP2                    :: P[8] CheckSum  = 0.5808818921984268D+01
+[SP2] FNorm(P-PT) = 0.0000000000000084
+[Overlay:Invoke]  /tmp/Mondo/bin/SCFstats CH2x-6_30611 DensityNormal 7 1 1 6 1 1
+SCFStatus : [7,1,1]    :: <SCF> = -461.71059148, dD = 0.46D-04, DIIS = 0.90D-05
+[New_CellSet_Sphere2] NEW Penetration CELLSET SPHERE, NCELL = 3
+[New_CellSet_Sphere2] NEW Overlap CELLSET SPHERE, NCELL = 3
+[PunchHDF:SetLatticeVectors] USING NEW CELL SET:
+[PunchHDF:SetLatticeVectors] Pentrat Cells = 3
+[PunchHDF:SetLatticeVectors] Overlap Cells = 3
+[Overlay:Invoke]  /tmp/Mondo/bin/SForce CH2x-6_30611 ForceEvaluation 7 1 1 7 1 1
+ SForce                 :: dS/dR CheckSum  = 0.8834506719466803D+00
+ SForce                 :: LFrcS CheckSum  = 0.1732050807568877D+09
+[Overlay:Invoke]  /tmp/Mondo/bin/TForce CH2x-6_30611 ForceEvaluation 7 1 1 7 1 1
+ TForce                 :: dT/dR CheckSum  = 0.2340690585247561D+01
+ TForce                 :: LFrcT CheckSum  = 0.1183323782687674D+00
+[Overlay:Invoke]  /tmp/Mondo/bin/MakeRho CH2x-6_30611 ForceEvaluation 7 1 1 7 1 1
+[MakeRho] Rho_tot=0.4799999999609314D+02
+[MakeRho] Rho_nuc=-.4800000000000001D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.4948677699407872D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3563798379486969D+05
+ MakeRho                :: Rho-LMNs CheckSum  = 0.5081029365104282D+03
+[Overlay:Invoke]  /tmp/Mondo/bin/JForce CH2x-6_30611 ForceEvaluation 7 1 1 7 1 1
+[CalMaxEll] CalMaxEll hardwired for now at ...64
+ RAW J Lattice Force
+----------------------------------------------------------
+         div(a)            div(b)           div(c)
+----------------------------------------------------------
+  -0.6503019524E-01   0.0000000000E+00   0.0000000000E+00
+   0.0000000000E+00   0.0000000000E+00   0.0000000000E+00
+   0.0000000000E+00   0.0000000000E+00   0.0000000000E+00
+----------------------------------------------------------
+ J Dipole Lattice Force
+----------------------------------------------------------
+         div(a)            div(b)           div(c)
+----------------------------------------------------------
+   0.0000000000E+00   0.0000000000E+00   0.0000000000E+00
+   0.0000000000E+00   0.0000000000E+00   0.0000000000E+00
+   0.0000000000E+00   0.0000000000E+00   0.0000000000E+00
+----------------------------------------------------------
+ J  PFF   Lattice Force
+----------------------------------------------------------
+         div(a)            div(b)           div(c)
+----------------------------------------------------------
+  -0.2352860243E-05   0.0000000000E+00   0.0000000000E+00
+   0.0000000000E+00   0.0000000000E+00   0.0000000000E+00
+   0.0000000000E+00   0.0000000000E+00   0.0000000000E+00
+----------------------------------------------------------
+ TOTAL Lattice Force
+----------------------------------------------------------
+         div(a)            div(b)           div(c)
+----------------------------------------------------------
+  -0.6503254810E-01   0.0000000000E+00   0.0000000000E+00
+   0.0000000000E+00   0.0000000000E+00   0.0000000000E+00
+   0.0000000000E+00   0.0000000000E+00   0.0000000000E+00
+----------------------------------------------------------
+ J Force
+--------------------------------------------------------
+   Atom   Z                Forces (au) 
+--------------------------------------------------------
+     1    6   -0.0000108184 -0.1570316079  0.0000008558
+     2    1   -0.0000002475 -0.2512528997 -0.1874009507
+     3    1   -0.0000001637 -0.2512530075  0.1874011884
+     4    6    0.0000165469  0.1570433389 -0.0000004618
+     5    1   -0.0000016577  0.2512528577 -0.1874001303
+     6    1   -0.0000014433  0.2512528747  0.1874003135
+     7    6   -0.0000051840 -0.1570385513  0.0000000960
+     8    1   -0.0000007426 -0.2512549363 -0.1874009000
+     9    1   -0.0000007177 -0.2512547993  0.1874009676
+    10    6    0.0000093927  0.1570287972 -0.0000002192
+    11    1   -0.0000010670  0.2512547566 -0.1874009371
+    12    1   -0.0000011569  0.2512547062  0.1874009843
+    13    6    0.0000088686 -0.1570461228 -0.0000003880
+    14    1   -0.0000018086 -0.2512517797 -0.1873990900
+    15    1   -0.0000017327 -0.2512518487  0.1873991964
+    16    6   -0.0000117256  0.1570516993 -0.0000010909
+    17    1   -0.0000000281  0.2512527705 -0.1873989298
+    18    1    0.0000000042  0.2512524823  0.1873988160
+    19    6    0.0000078829 -0.1570481151  0.0000008788
+    20    1    0.0000001514 -0.2512537415 -0.1873999530
+    21    1    0.0000001555 -0.2512536593  0.1874000694
+    22    6   -0.0000106329  0.1570414957 -0.0000006818
+    23    1    0.0000007705  0.2512526619 -0.1873996270
+    24    1    0.0000011935  0.2512524903  0.1873995364
+    25    6    0.0000055267 -0.1570453597  0.0000006156
+    26    1    0.0000003140 -0.2512520158 -0.1873993235
+    27    1    0.0000004595 -0.2512520403  0.1873992995
+    28    6   -0.0000056594  0.1570561878  0.0000000140
+    29    1    0.0000009004  0.2512518943 -0.1873998196
+    30    1    0.0000008017  0.2512521830  0.1873997488
+    31    6   -0.0000174038 -0.1570448453 -0.0000004950
+    32    1    0.0000014598 -0.2512527944 -0.1874003674
+    33    1    0.0000015730 -0.2512530784  0.1874002521
+    34    6    0.0000162124  0.1570367915 -0.0000001741
+    35    1   -0.0000002151  0.2512520858 -0.1874004663
+    36    1    0.0000000527  0.2512522039  0.1874005028
+--------------------------------------------------------
+ JForce                 :: dJ/dR CheckSum  = 0.1629071144217711D+01
+ JForce                 :: LFrcJ CheckSum  = 0.6503254809843446D-01
+ JForce                 :: CPU Sec = 0.23D+03, WALL Sec = 0.23D+03
+ JForce                 :: Allocs=87842,  DeAllocs=72, 26050480 bytes are presently allocated.
+                           A max of 27814412 bytes were allocated.
+>-Exiting JForce 01/30/08 @ 16:28:08-<
+[Overlay:Invoke]  /tmp/Mondo/bin/GONX CH2x-6_30611 ForceEvaluation 7 1 1 7 1 1
+ GONX2                  :: dKx/dR[1] CheckSum  = 0.1685911195056941D+01
+[New_CellSet_Sphere2] NEW Penetration CELLSET SPHERE, NCELL = 3
+[New_CellSet_Sphere2] NEW Overlap CELLSET SPHERE, NCELL = 3
+[PunchHDF:SetLatticeVectors] USING NEW CELL SET:
+[PunchHDF:SetLatticeVectors] Pentrat Cells = 3
+[PunchHDF:SetLatticeVectors] Overlap Cells = 3
+[Overlay:Invoke]  /tmp/Mondo/bin/MakePFFT CH2x-6_30611 OneElectronMatrices 0 1 2 7 1 1
+ MakePFFT               :: TenC CheckSum  = 0.7921702282168495D-01
+ MakePFFT               :: TenS CheckSum  = 0.0000000000000000D+00
+[Overlay:Invoke]  /tmp/Mondo/bin/MakeS CH2x-6_30611 OneElectronMatrices 0 1 2 7 1 1
+ MakeS                  :: S CheckSum  = 0.1129477831673678D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/AInv CH2x-6_30611 OneElectronMatrices 0 1 2 7 1 1
+ BlokAInv               :: Z CheckSum  = 0.1246188638973200D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/MakeT CH2x-6_30611 OneElectronMatrices 0 1 2 7 1 1
+ MakeT                  :: T CheckSum  = 0.5596668405691896D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/P2Use CH2x-6_30611 Extrapolate 0 1 2 7 1 1
+[P2Use] On extrapolation, P2Use is opening DM /tmp/CH2x-6_30611_Geom#1_Base#1_Cycl#8_Clone#1.D
+... ning Warning  Warning  Warning Wa ...
+P2Use:DMPOrder is only implimented for MD
+ P2Use                  :: P[0] CheckSum  = 0.5599993790298325D+01
+[Overlay:Invoke]  /tmp/Mondo/bin/MakeRho CH2x-6_30611 Extrapolate 0 1 2 7 1 1
+[MakeRho] Rho_tot=0.4799999997414294D+02
+[MakeRho] Rho_nuc=-.4800000000000001D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.4933495690289581D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3558959122562558D+05
+ MakeRho                :: Rho-LMNs CheckSum  = 0.5060269639429490D+03
+[Overlay:Invoke]  /tmp/Mondo/bin/QCTC CH2x-6_30611 Extrapolate 0 1 2 7 1 1
+[CalMaxEll] CalMaxEll hardwired for now at ...64
+ QCTC                   :: J[0] CheckSum  = 0.8229201579665624D+02
+[QCTC] virtual memory size = 39820 kB
+[Overlay:Invoke]  /tmp/Mondo/bin/ONX CH2x-6_30611 Extrapolate 0 1 2 7 1 1
+ ONX2                   :: Kx[0] CheckSum  = 0.1554906203110121D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/FBuild CH2x-6_30611 Extrapolate 0 1 2 7 1 1
+ FockNGrueven           :: F[0] CheckSum  = 0.4295473493106703D+02
+ FockNGrueven           :: OrthoF[0] CheckSum  = 0.3865093341292986D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/SP2 CH2x-6_30611 Extrapolate 0 1 2 7 1 1
+[SP2] FNorm(F-FT) = 0.0000000000000090
+ SP2                    :: OrthoP[1] CheckSum  = 0.6928203230277892D+01
+ SP2                    :: P[1] CheckSum  = 0.5611061484395108D+01
+[SP2] FNorm(P-PT) = 0.0000000000000064
+[Overlay:Invoke]  /tmp/Mondo/bin/SCFstats CH2x-6_30611 Extrapolate 0 1 2 7 1 1
+SCFStatus : [0,1,2]    :: <SCF> = -462.50517336, dD = 0.15D-01
+[Overlay:Invoke]  /tmp/Mondo/bin/MakeRho CH2x-6_30611 DensityNormal 1 1 2 0 1 2
+[MakeRho] Rho_tot=0.4799999997878838D+02
+[MakeRho] Rho_nuc=-.4800000000000001D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.4939129489834585D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3562116619401944D+05
+ MakeRho                :: Rho-LMNs CheckSum  = 0.5066325363736062D+03
+[Overlay:Invoke]  /tmp/Mondo/bin/QCTC CH2x-6_30611 DensityNormal 1 1 2 0 1 2
+[CalMaxEll] CalMaxEll hardwired for now at ...64
+ QCTC                   :: J[1] CheckSum  = 0.8225099264362417D+02
+[QCTC] virtual memory size = 39920 kB
+[Overlay:Invoke]  /tmp/Mondo/bin/ONX CH2x-6_30611 DensityNormal 1 1 2 0 1 2
+ ONX2                   :: Kx[1] CheckSum  = 0.1555150141375095D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/FBuild CH2x-6_30611 DensityNormal 1 1 2 0 1 2
+ FockNGrueven           :: F[1] CheckSum  = 0.4291177600133915D+02
+ FockNGrueven           :: OrthoF[1] CheckSum  = 0.3861997766164171D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/DIIS CH2x-6_30611 DensityNormal 1 1 2 0 1 2
+[DIIS] hack-alarm....
+ DIIS                   :: F_DIIS[1] CheckSum  = 0.3861997766164171D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/SP2 CH2x-6_30611 DensityNormal 1 1 2 0 1 2
+[SP2] FNorm(F-FT) = 0.0000000000000114
+ SP2                    :: OrthoP[2] CheckSum  = 0.6928203230453167D+01
+ SP2                    :: P[2] CheckSum  = 0.5614160874020778D+01
+[SP2] FNorm(P-PT) = 0.0000000000000081
+[Overlay:Invoke]  /tmp/Mondo/bin/SCFstats CH2x-6_30611 DensityNormal 1 1 2 0 1 2
+SCFStatus : [1,1,2]    :: <SCF> = -462.51522566, dD = 0.36D-02, DIIS = 0.27D-03
+[Overlay:Invoke]  /tmp/Mondo/bin/MakeRho CH2x-6_30611 DensityNormal 2 1 2 1 1 2
+[MakeRho] Rho_tot=0.4799999997789421D+02
+[MakeRho] Rho_nuc=-.4800000000000001D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.4940118270357336D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3562623052480575D+05
+ MakeRho                :: Rho-LMNs CheckSum  = 0.5067284411670975D+03
+[Overlay:Invoke]  /tmp/Mondo/bin/QCTC CH2x-6_30611 DensityNormal 2 1 2 1 1 2
+[CalMaxEll] CalMaxEll hardwired for now at ...64
+ QCTC                   :: J[2] CheckSum  = 0.8225899506951303D+02
+[QCTC] virtual memory size = 39952 kB
+[Overlay:Invoke]  /tmp/Mondo/bin/ONX CH2x-6_30611 DensityNormal 2 1 2 1 1 2
+ ONX2                   :: Kx[2] CheckSum  = 0.1555104770336011D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/FBuild CH2x-6_30611 DensityNormal 2 1 2 1 1 2
+ FockNGrueven           :: F[2] CheckSum  = 0.4292067039379401D+02
+ FockNGrueven           :: OrthoF[2] CheckSum  = 0.3862624415264543D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/DIIS CH2x-6_30611 DensityNormal 2 1 2 1 1 2
+[DIIS] hack-alarm....
+ DIIS                   :: F_DIIS[2] CheckSum  = 0.3862624415264543D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/SP2 CH2x-6_30611 DensityNormal 2 1 2 1 1 2
+[SP2] FNorm(F-FT) = 0.0000000000000087
+ SP2                    :: OrthoP[3] CheckSum  = 0.6928203230447255D+01
+ SP2                    :: P[3] CheckSum  = 0.5615118012308628D+01
+[SP2] FNorm(P-PT) = 0.0000000000000074
+[Overlay:Invoke]  /tmp/Mondo/bin/SCFstats CH2x-6_30611 DensityNormal 2 1 2 1 1 2
+SCFStatus : [2,1,2]    :: <SCF> = -462.51568988, dD = 0.12D-02, DIIS = 0.68D-04
+[Overlay:Invoke]  /tmp/Mondo/bin/MakeRho CH2x-6_30611 DensityNormal 3 1 2 2 1 2
+[MakeRho] Rho_tot=0.4799999998220051D+02
+[MakeRho] Rho_nuc=-.4800000000000001D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.4940525903151551D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3562848307368297D+05
+ MakeRho                :: Rho-LMNs CheckSum  = 0.5067728201232347D+03
+[Overlay:Invoke]  /tmp/Mondo/bin/QCTC CH2x-6_30611 DensityNormal 3 1 2 2 1 2
+[CalMaxEll] CalMaxEll hardwired for now at ...64
+ QCTC                   :: J[3] CheckSum  = 0.8225708425333552D+02
+[QCTC] virtual memory size = 40044 kB
+[Overlay:Invoke]  /tmp/Mondo/bin/ONX CH2x-6_30611 DensityNormal 3 1 2 2 1 2
+ ONX2                   :: Kx[3] CheckSum  = 0.1555115545047883D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/FBuild CH2x-6_30611 DensityNormal 3 1 2 2 1 2
+ FockNGrueven           :: F[3] CheckSum  = 0.4291870164939505D+02
+ FockNGrueven           :: OrthoF[3] CheckSum  = 0.3862481629422641D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/DIIS CH2x-6_30611 DensityNormal 3 1 2 2 1 2
+[DIIS] hack-alarm....
+ DIIS                   :: F_DIIS[3] CheckSum  = 0.3862481629422641D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/SP2 CH2x-6_30611 DensityNormal 3 1 2 2 1 2
+[SP2] FNorm(F-FT) = 0.0000000000000098
+ SP2                    :: OrthoP[4] CheckSum  = 0.6928203230327643D+01
+ SP2                    :: P[4] CheckSum  = 0.5615364525724809D+01
+[SP2] FNorm(P-PT) = 0.0000000000000080
+[Overlay:Invoke]  /tmp/Mondo/bin/SCFstats CH2x-6_30611 DensityNormal 3 1 2 2 1 2
+SCFStatus : [3,1,2]    :: <SCF> = -462.51571638, dD = 0.32D-03, DIIS = 0.20D-04
+[New_CellSet_Sphere2] NEW Penetration CELLSET SPHERE, NCELL = 3
+[New_CellSet_Sphere2] NEW Overlap CELLSET SPHERE, NCELL = 3
+[PunchHDF:SetLatticeVectors] USING NEW CELL SET:
+[PunchHDF:SetLatticeVectors] Pentrat Cells = 3
+[PunchHDF:SetLatticeVectors] Overlap Cells = 3
+[Overlay:Invoke]  /tmp/Mondo/bin/SForce CH2x-6_30611 ForceEvaluation 3 1 2 3 1 2
+ SForce                 :: dS/dR CheckSum  = 0.8553522916178533D+00
+ SForce                 :: LFrcS CheckSum  = 0.1732050807568877D+09
+[Overlay:Invoke]  /tmp/Mondo/bin/TForce CH2x-6_30611 ForceEvaluation 3 1 2 3 1 2
+ TForce                 :: dT/dR CheckSum  = 0.2229182411472091D+01
+ TForce                 :: LFrcT CheckSum  = 0.2918389636414334D+00
+[Overlay:Invoke]  /tmp/Mondo/bin/MakeRho CH2x-6_30611 ForceEvaluation 3 1 2 3 1 2
+[MakeRho] Rho_tot=0.4799999998213277D+02
+[MakeRho] Rho_nuc=-.4800000000000001D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.4940609960848838D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3562892048172431D+05
+ MakeRho                :: Rho-LMNs CheckSum  = 0.5067815177515535D+03
+[Overlay:Invoke]  /tmp/Mondo/bin/JForce CH2x-6_30611 ForceEvaluation 3 1 2 3 1 2
+[CalMaxEll] CalMaxEll hardwired for now at ...64
+ RAW J Lattice Force
+----------------------------------------------------------
+         div(a)            div(b)           div(c)
+----------------------------------------------------------
+   0.1329513366E+00   0.0000000000E+00   0.0000000000E+00
+   0.0000000000E+00   0.0000000000E+00   0.0000000000E+00
+   0.0000000000E+00   0.0000000000E+00   0.0000000000E+00
+----------------------------------------------------------
+ J Dipole Lattice Force
+----------------------------------------------------------
+         div(a)            div(b)           div(c)
+----------------------------------------------------------
+   0.0000000000E+00   0.0000000000E+00   0.0000000000E+00
+   0.0000000000E+00   0.0000000000E+00   0.0000000000E+00
+   0.0000000000E+00   0.0000000000E+00   0.0000000000E+00
+----------------------------------------------------------
+ J  PFF   Lattice Force
+----------------------------------------------------------
+         div(a)            div(b)           div(c)
+----------------------------------------------------------
+  -0.2700973598E-06   0.0000000000E+00   0.0000000000E+00
+   0.0000000000E+00   0.0000000000E+00   0.0000000000E+00
+   0.0000000000E+00   0.0000000000E+00   0.0000000000E+00
+----------------------------------------------------------
+ TOTAL Lattice Force
+----------------------------------------------------------
+         div(a)            div(b)           div(c)
+----------------------------------------------------------
+   0.1329510665E+00   0.0000000000E+00   0.0000000000E+00
+   0.0000000000E+00   0.0000000000E+00   0.0000000000E+00
+   0.0000000000E+00   0.0000000000E+00   0.0000000000E+00
+----------------------------------------------------------
+ J Force
+--------------------------------------------------------
+   Atom   Z                Forces (au) 
+--------------------------------------------------------
+     1    6   -0.0000112347 -0.0774409342  0.0000029236
+     2    1   -0.0000000527 -0.2368521211 -0.1819336241
+     3    1   -0.0000067900 -0.2368488159  0.1819342312
+     4    6   -0.0000038729  0.0775122479  0.0000030658
+     5    1    0.0000007518  0.2368150142 -0.1819744794
+     6    1   -0.0000059477  0.2368158352  0.1819689921
+     7    6    0.0000080646 -0.0774920342  0.0000035921
+     8    1    0.0000049180 -0.2368249225 -0.1819420028
+     9    1    0.0000021304 -0.2368260665  0.1819370597
+    10    6   -0.0000170679  0.0775129402  0.0000031006
+    11    1   -0.0000075936  0.2368130087 -0.1819619696
+    12    1   -0.0000039809  0.2368167503  0.1819531589
+    13    6    0.0000120218 -0.0775331919  0.0000020889
+    14    1    0.0000008913 -0.2368106691 -0.1819800116
+    15    1    0.0000052449 -0.2368049432  0.1819831032
+    16    6   -0.0000079555  0.0775094150  0.0000028049
+    17    1    0.0000002808  0.2368207146 -0.1819571613
+    18    1   -0.0000014114  0.2368167404  0.1819580849
+    19    6    0.0000028455 -0.0775374041  0.0000027527
+    20    1   -0.0000037616 -0.2368031044 -0.1819770453
+    21    1   -0.0000003742 -0.2368102882  0.1819634088
+    22    6    0.0000003362  0.0775381104  0.0000029078
+    23    1   -0.0000026026  0.2368083363 -0.1819726974
+    24    1    0.0000068353  0.2368047761  0.1819730608
+    25    6    0.0000028280 -0.0774855978  0.0000003868
+    26    1   -0.0000014288 -0.2368301260 -0.1819557987
+    27    1    0.0000048533 -0.2368269258  0.1819560238
+    28    6    0.0000043377  0.0774781327  0.0000003570
+    29    1   -0.0000011070  0.2368349326 -0.1819426834
+    30    1    0.0000003188  0.2368297534  0.1819458666
+    31    6   -0.0000130053 -0.0775205185  0.0000013518
+    32    1   -0.0000011966 -0.2368152337 -0.1819621278
+    33    1   -0.0000054508 -0.2368105073  0.1819639006
+    34    6    0.0000219768  0.0774901867  0.0000018180
+    35    1    0.0000100095  0.2368277335 -0.1819517937
+    36    1    0.0000036218  0.2368270391  0.1819488553
+--------------------------------------------------------
+ JForce                 :: dJ/dR CheckSum  = 0.1487517993108552D+01
+ JForce                 :: LFrcJ CheckSum  = 0.1329510664957174D+00
+ JForce                 :: CPU Sec = 0.18D+03, WALL Sec = 0.18D+03
+ JForce                 :: Allocs=79762,  DeAllocs=72, 23901360 bytes are presently allocated.
+                           A max of 25513164 bytes were allocated.
+>-Exiting JForce 01/30/08 @ 16:37:46-<
+[Overlay:Invoke]  /tmp/Mondo/bin/GONX CH2x-6_30611 ForceEvaluation 3 1 2 3 1 2
+ GONX2                  :: dKx/dR[2] CheckSum  = 0.1616640604132049D+01
+[New_CellSet_Sphere2] NEW Penetration CELLSET SPHERE, NCELL = 3
+[New_CellSet_Sphere2] NEW Overlap CELLSET SPHERE, NCELL = 3
+[PunchHDF:SetLatticeVectors] USING NEW CELL SET:
+[PunchHDF:SetLatticeVectors] Pentrat Cells = 3
+[PunchHDF:SetLatticeVectors] Overlap Cells = 3
+[Overlay:Invoke]  /tmp/Mondo/bin/MakePFFT CH2x-6_30611 OneElectronMatrices 0 1 3 3 1 2
+ MakePFFT               :: TenC CheckSum  = 0.7328287416373852D-01
+ MakePFFT               :: TenS CheckSum  = 0.0000000000000000D+00
+[Overlay:Invoke]  /tmp/Mondo/bin/MakeS CH2x-6_30611 OneElectronMatrices 0 1 3 3 1 2
+ MakeS                  :: S CheckSum  = 0.1118195201860824D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/AInv CH2x-6_30611 OneElectronMatrices 0 1 3 3 1 2
+ BlokAInv               :: Z CheckSum  = 0.1231375373336124D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/MakeT CH2x-6_30611 OneElectronMatrices 0 1 3 3 1 2
+ MakeT                  :: T CheckSum  = 0.5596235963825178D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/P2Use CH2x-6_30611 Extrapolate 0 1 3 3 1 2
+[P2Use] On extrapolation, P2Use is opening DM /tmp/CH2x-6_30611_Geom#2_Base#1_Cycl#4_Clone#1.D
+... ning Warning  Warning  Warning Wa ...
+P2Use:DMPOrder is only implimented for MD
+ P2Use                  :: P[0] CheckSum  = 0.5540028050544341D+01
+[Overlay:Invoke]  /tmp/Mondo/bin/MakeRho CH2x-6_30611 Extrapolate 0 1 3 3 1 2
+[MakeRho] Rho_tot=0.4800000000321417D+02
+[MakeRho] Rho_nuc=-.4800000000000001D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.4930533334897168D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3558718401827678D+05
+ MakeRho                :: Rho-LMNs CheckSum  = 0.5055211828573630D+03
+[Overlay:Invoke]  /tmp/Mondo/bin/QCTC CH2x-6_30611 Extrapolate 0 1 3 3 1 2
+[CalMaxEll] CalMaxEll hardwired for now at ...64
+ QCTC                   :: J[0] CheckSum  = 0.8228355025933394D+02
+[QCTC] virtual memory size = 38140 kB
+[Overlay:Invoke]  /tmp/Mondo/bin/ONX CH2x-6_30611 Extrapolate 0 1 3 3 1 2
+ ONX2                   :: Kx[0] CheckSum  = 0.1542487314670311D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/FBuild CH2x-6_30611 Extrapolate 0 1 3 3 1 2
+ FockNGrueven           :: F[0] CheckSum  = 0.4282086300121463D+02
+ FockNGrueven           :: OrthoF[0] CheckSum  = 0.3866030101707830D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/SP2 CH2x-6_30611 Extrapolate 0 1 3 3 1 2
+[SP2] FNorm(F-FT) = 0.0000000000000101
+ SP2                    :: OrthoP[1] CheckSum  = 0.6928203230165902D+01
+ SP2                    :: P[1] CheckSum  = 0.5548576987489301D+01
+[SP2] FNorm(P-PT) = 0.0000000000000064
+[Overlay:Invoke]  /tmp/Mondo/bin/SCFstats CH2x-6_30611 Extrapolate 0 1 3 3 1 2
+SCFStatus : [0,1,3]    :: <SCF> = -462.81182979, dD = 0.10D-01
+[Overlay:Invoke]  /tmp/Mondo/bin/MakeRho CH2x-6_30611 DensityNormal 1 1 3 0 1 3
+[MakeRho] Rho_tot=0.4800000005461691D+02
+[MakeRho] Rho_nuc=-.4800000000000001D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.4935156408993394D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3561393549537214D+05
+ MakeRho                :: Rho-LMNs CheckSum  = 0.5059830722645402D+03
+[Overlay:Invoke]  /tmp/Mondo/bin/QCTC CH2x-6_30611 DensityNormal 1 1 3 0 1 3
+[CalMaxEll] CalMaxEll hardwired for now at ...64
+ QCTC                   :: J[1] CheckSum  = 0.8227901289093327D+02
+[QCTC] virtual memory size = 38140 kB
+[Overlay:Invoke]  /tmp/Mondo/bin/ONX CH2x-6_30611 DensityNormal 1 1 3 0 1 3
+ ONX2                   :: Kx[1] CheckSum  = 0.1542549741299285D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/FBuild CH2x-6_30611 DensityNormal 1 1 3 0 1 3
+ FockNGrueven           :: F[1] CheckSum  = 0.4281747753194120D+02
+ FockNGrueven           :: OrthoF[1] CheckSum  = 0.3865765590061305D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/DIIS CH2x-6_30611 DensityNormal 1 1 3 0 1 3
+[DIIS] hack-alarm....
+ DIIS                   :: F_DIIS[1] CheckSum  = 0.3865765590061305D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/SP2 CH2x-6_30611 DensityNormal 1 1 3 0 1 3
+[SP2] FNorm(F-FT) = 0.0000000000000088
+ SP2                    :: OrthoP[2] CheckSum  = 0.6928203230157501D+01
+ SP2                    :: P[2] CheckSum  = 0.5550857320912768D+01
+[SP2] FNorm(P-PT) = 0.0000000000000079
+[Overlay:Invoke]  /tmp/Mondo/bin/SCFstats CH2x-6_30611 DensityNormal 1 1 3 0 1 3
+SCFStatus : [1,1,3]    :: <SCF> = -462.81496441, dD = 0.27D-02, DIIS = 0.16D-03
+[Overlay:Invoke]  /tmp/Mondo/bin/MakeRho CH2x-6_30611 DensityNormal 2 1 3 1 1 3
+[MakeRho] Rho_tot=0.4800000005336054D+02
+[MakeRho] Rho_nuc=-.4800000000000001D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.4936140183606839D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3561946710265115D+05
+ MakeRho                :: Rho-LMNs CheckSum  = 0.5060818102669434D+03
+[Overlay:Invoke]  /tmp/Mondo/bin/QCTC CH2x-6_30611 DensityNormal 2 1 3 1 1 3
+[CalMaxEll] CalMaxEll hardwired for now at ...64
+ QCTC                   :: J[2] CheckSum  = 0.8227904308570955D+02
+[QCTC] virtual memory size = 38140 kB
+[Overlay:Invoke]  /tmp/Mondo/bin/ONX CH2x-6_30611 DensityNormal 2 1 3 1 1 3
+ ONX2                   :: Kx[2] CheckSum  = 0.1542549920087347D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/FBuild CH2x-6_30611 DensityNormal 2 1 3 1 1 3
+ FockNGrueven           :: F[2] CheckSum  = 0.4281775043563677D+02
+ FockNGrueven           :: OrthoF[2] CheckSum  = 0.3865781606632893D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/DIIS CH2x-6_30611 DensityNormal 2 1 3 1 1 3
+[DIIS] hack-alarm....
+ DIIS                   :: F_DIIS[2] CheckSum  = 0.3865781606632893D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/SP2 CH2x-6_30611 DensityNormal 2 1 3 1 1 3
+[SP2] FNorm(F-FT) = 0.0000000000000090
+ SP2                    :: OrthoP[3] CheckSum  = 0.6928203230482573D+01
+ SP2                    :: P[3] CheckSum  = 0.5551457988428409D+01
+[SP2] FNorm(P-PT) = 0.0000000000000080
+[Overlay:Invoke]  /tmp/Mondo/bin/SCFstats CH2x-6_30611 DensityNormal 2 1 3 1 1 3
+SCFStatus : [2,1,3]    :: <SCF> = -462.81511456, dD = 0.73D-03, DIIS = 0.40D-04
+[Overlay:Invoke]  /tmp/Mondo/bin/MakeRho CH2x-6_30611 DensityNormal 3 1 3 2 1 3
+[MakeRho] Rho_tot=0.4800000005308278D+02
+[MakeRho] Rho_nuc=-.4800000000000001D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.4936394301513185D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3562088593201262D+05
+ MakeRho                :: Rho-LMNs CheckSum  = 0.5061079536023994D+03
+[Overlay:Invoke]  /tmp/Mondo/bin/QCTC CH2x-6_30611 DensityNormal 3 1 3 2 1 3
+[CalMaxEll] CalMaxEll hardwired for now at ...64
+ QCTC                   :: J[3] CheckSum  = 0.8227890163443448D+02
+[QCTC] virtual memory size = 38140 kB
+[Overlay:Invoke]  /tmp/Mondo/bin/ONX CH2x-6_30611 DensityNormal 3 1 3 2 1 3
+ ONX2                   :: Kx[3] CheckSum  = 0.1542550390984522D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/FBuild CH2x-6_30611 DensityNormal 3 1 3 2 1 3
+ FockNGrueven           :: F[3] CheckSum  = 0.4281765653497702D+02
+ FockNGrueven           :: OrthoF[3] CheckSum  = 0.3865773790197224D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/DIIS CH2x-6_30611 DensityNormal 3 1 3 2 1 3
+[DIIS] hack-alarm....
+ DIIS                   :: F_DIIS[3] CheckSum  = 0.3865773790197224D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/SP2 CH2x-6_30611 DensityNormal 3 1 3 2 1 3
+[SP2] FNorm(F-FT) = 0.0000000000000094
+ SP2                    :: OrthoP[4] CheckSum  = 0.6928203230486990D+01
+ SP2                    :: P[4] CheckSum  = 0.5551615591677050D+01
+[SP2] FNorm(P-PT) = 0.0000000000000072
+[Overlay:Invoke]  /tmp/Mondo/bin/SCFstats CH2x-6_30611 DensityNormal 3 1 3 2 1 3
+SCFStatus : [3,1,3]    :: <SCF> = -462.81512360, dD = 0.20D-03, DIIS = 0.16D-04
+[New_CellSet_Sphere2] NEW Penetration CELLSET SPHERE, NCELL = 3
+[New_CellSet_Sphere2] NEW Overlap CELLSET SPHERE, NCELL = 3
+[PunchHDF:SetLatticeVectors] USING NEW CELL SET:
+[PunchHDF:SetLatticeVectors] Pentrat Cells = 3
+[PunchHDF:SetLatticeVectors] Overlap Cells = 3
+[Overlay:Invoke]  /tmp/Mondo/bin/SForce CH2x-6_30611 ForceEvaluation 3 1 3 3 1 3
+ SForce                 :: dS/dR CheckSum  = 0.8616006439317020D+00
+ SForce                 :: LFrcS CheckSum  = 0.1732050807568877D+09
+[Overlay:Invoke]  /tmp/Mondo/bin/TForce CH2x-6_30611 ForceEvaluation 3 1 3 3 1 3
+ TForce                 :: dT/dR CheckSum  = 0.2212519203928456D+01
+ TForce                 :: LFrcT CheckSum  = 0.3582132357390612D+00
+[Overlay:Invoke]  /tmp/Mondo/bin/MakeRho CH2x-6_30611 ForceEvaluation 3 1 3 3 1 3
+[MakeRho] Rho_tot=0.4800000005303315D+02
+[MakeRho] Rho_nuc=-.4800000000000001D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.4936459770203778D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3562124786542945D+05
+ MakeRho                :: Rho-LMNs CheckSum  = 0.5061147900079040D+03
+[Overlay:Invoke]  /tmp/Mondo/bin/JForce CH2x-6_30611 ForceEvaluation 3 1 3 3 1 3
+[CalMaxEll] CalMaxEll hardwired for now at ...64
+ RAW J Lattice Force
+----------------------------------------------------------
+         div(a)            div(b)           div(c)
+----------------------------------------------------------
+   0.2246975889E+00   0.0000000000E+00   0.0000000000E+00
+   0.0000000000E+00   0.0000000000E+00   0.0000000000E+00
+   0.0000000000E+00   0.0000000000E+00   0.0000000000E+00
+----------------------------------------------------------
+ J Dipole Lattice Force
+----------------------------------------------------------
+         div(a)            div(b)           div(c)
+----------------------------------------------------------
+   0.0000000000E+00   0.0000000000E+00   0.0000000000E+00
+   0.0000000000E+00   0.0000000000E+00   0.0000000000E+00
+   0.0000000000E+00   0.0000000000E+00   0.0000000000E+00
+----------------------------------------------------------
+ J  PFF   Lattice Force
+----------------------------------------------------------
+         div(a)            div(b)           div(c)
+----------------------------------------------------------
+  -0.1253413512E-07   0.0000000000E+00   0.0000000000E+00
+   0.0000000000E+00   0.0000000000E+00   0.0000000000E+00
+   0.0000000000E+00   0.0000000000E+00   0.0000000000E+00
+----------------------------------------------------------
+ TOTAL Lattice Force
+----------------------------------------------------------
+         div(a)            div(b)           div(c)
+----------------------------------------------------------
+   0.2246975764E+00   0.0000000000E+00   0.0000000000E+00
+   0.0000000000E+00   0.0000000000E+00   0.0000000000E+00
+   0.0000000000E+00   0.0000000000E+00   0.0000000000E+00
+----------------------------------------------------------
+ J Force
+--------------------------------------------------------
+   Atom   Z                Forces (au) 
+--------------------------------------------------------
+     1    6    0.0000662472 -0.0045460636  0.0000112494
+     2    1   -0.0000321003 -0.2261279722 -0.1932247512
+     3    1   -0.0000444159 -0.2261112590  0.1932164621
+     4    6    0.0000497048  0.0047251831 -0.0000170500
+     5    1    0.0000018398  0.2260379627 -0.1933633041
+     6    1   -0.0000082650  0.2260634616  0.1933743550
+     7    6    0.0000742959 -0.0044715571  0.0000045851
+     8    1    0.0000597645 -0.2260936950 -0.1932902026
+     9    1    0.0000578860 -0.2260910362  0.1932838375
+    10    6   -0.0000045807  0.0044887309  0.0000036923
+    11    1   -0.0000612369  0.2260652592 -0.1933271734
+    12    1   -0.0000615292  0.2260629680  0.1933189567
+    13    6    0.0000325922 -0.0045612665 -0.0000114996
+    14    1    0.0000422244 -0.2260384306 -0.1933744168
+    15    1    0.0000433765 -0.2260481975  0.1933874950
+    16    6    0.0000237773  0.0043739066 -0.0000046373
+    17    1   -0.0000026425  0.2260786319 -0.1933209221
+    18    1    0.0000004383  0.2260853542  0.1933239692
+    19    6   -0.0000654415 -0.0044802912  0.0000114024
+    20    1   -0.0000227828 -0.2260616306 -0.1933938390
+    21    1   -0.0000094494 -0.2260641798  0.1933686181
+    22    6   -0.0000452947  0.0046339867  0.0000090389
+    23    1   -0.0000266312  0.2260600436 -0.1933987144
+    24    1   -0.0000109772  0.2260455009  0.1933977310
+    25    6   -0.0000060328 -0.0045261194 -0.0000003694
+    26    1    0.0000305981 -0.2260898123 -0.1933188235
+    27    1    0.0000401988 -0.2260885207  0.1933198765
+    28    6   -0.0001373712  0.0045639492  0.0000014775
+    29    1   -0.0000263384  0.2261030933 -0.1932677318
+    30    1   -0.0000241212  0.2260906768  0.1932737940
+    31    6   -0.0001017810 -0.0050464120 -0.0000121440
+    32    1   -0.0000759639 -0.2260321157 -0.1933627087
+    33    1   -0.0000856801 -0.2260338955  0.1933831892
+    34    6    0.0001086064  0.0049065380 -0.0000108515
+    35    1    0.0001151777  0.2260563269 -0.1933107224
+    36    1    0.0001044300  0.2260694111  0.1933178164
+--------------------------------------------------------
+ JForce                 :: dJ/dR CheckSum  = 0.1457354950332005D+01
+ JForce                 :: LFrcJ CheckSum  = 0.2246975763888985D+00
+ JForce                 :: CPU Sec = 0.17D+03, WALL Sec = 0.17D+03
+ JForce                 :: Allocs=74842,  DeAllocs=72, 22590000 bytes are presently allocated.
+                           A max of 24107660 bytes were allocated.
+>-Exiting JForce 01/30/08 @ 16:46:00-<
+[Overlay:Invoke]  /tmp/Mondo/bin/GONX CH2x-6_30611 ForceEvaluation 3 1 3 3 1 3
+ GONX2                  :: dKx/dR[3] CheckSum  = 0.1624144841426508D+01
+[New_CellSet_Sphere2] NEW Penetration CELLSET SPHERE, NCELL = 3
+[New_CellSet_Sphere2] NEW Overlap CELLSET SPHERE, NCELL = 3
+[PunchHDF:SetLatticeVectors] USING NEW CELL SET:
+[PunchHDF:SetLatticeVectors] Pentrat Cells = 3
+[PunchHDF:SetLatticeVectors] Overlap Cells = 3
+[Overlay:Invoke]  /tmp/Mondo/bin/MakePFFT CH2x-6_30611 OneElectronMatrices 0 1 4 3 1 3
+ MakePFFT               :: TenC CheckSum  = 0.7065625967662303D-01
+ MakePFFT               :: TenS CheckSum  = 0.0000000000000000D+00
+[Overlay:Invoke]  /tmp/Mondo/bin/MakeS CH2x-6_30611 OneElectronMatrices 0 1 4 3 1 3
+ MakeS                  :: S CheckSum  = 0.1113188994447418D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/AInv CH2x-6_30611 OneElectronMatrices 0 1 4 3 1 3
+ BlokAInv               :: Z CheckSum  = 0.1224030283205217D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/MakeT CH2x-6_30611 OneElectronMatrices 0 1 4 3 1 3
+ MakeT                  :: T CheckSum  = 0.5596024943645308D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/P2Use CH2x-6_30611 Extrapolate 0 1 4 3 1 3
+[P2Use] On extrapolation, P2Use is opening DM /tmp/CH2x-6_30611_Geom#3_Base#1_Cycl#4_Clone#1.D
+... ning Warning  Warning  Warning Wa ...
+P2Use:DMPOrder is only implimented for MD
+ P2Use                  :: P[0] CheckSum  = 0.5526858386085890D+01
+[Overlay:Invoke]  /tmp/Mondo/bin/MakeRho CH2x-6_30611 Extrapolate 0 1 4 3 1 3
+[MakeRho] Rho_tot=0.4799999998497196D+02
+[MakeRho] Rho_nuc=-.4800000000000001D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.4932868635779654D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3560631502314925D+05
+ MakeRho                :: Rho-LMNs CheckSum  = 0.5056370786018977D+03
+[Overlay:Invoke]  /tmp/Mondo/bin/QCTC CH2x-6_30611 Extrapolate 0 1 4 3 1 3
+[CalMaxEll] CalMaxEll hardwired for now at ...64
+ QCTC                   :: J[0] CheckSum  = 0.8228692218085271D+02
+[QCTC] virtual memory size = 37492 kB
+[Overlay:Invoke]  /tmp/Mondo/bin/ONX CH2x-6_30611 Extrapolate 0 1 4 3 1 3
+ ONX2                   :: Kx[0] CheckSum  = 0.1537170514470333D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/FBuild CH2x-6_30611 Extrapolate 0 1 4 3 1 3
+ FockNGrueven           :: F[0] CheckSum  = 0.4277419800439035D+02
+ FockNGrueven           :: OrthoF[0] CheckSum  = 0.3866922952379814D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/SP2 CH2x-6_30611 Extrapolate 0 1 4 3 1 3
+[SP2] FNorm(F-FT) = 0.0000000000000083
+ SP2                    :: OrthoP[1] CheckSum  = 0.6928203230343119D+01
+ SP2                    :: P[1] CheckSum  = 0.5530519170260717D+01
+[SP2] FNorm(P-PT) = 0.0000000000000067
+[Overlay:Invoke]  /tmp/Mondo/bin/SCFstats CH2x-6_30611 Extrapolate 0 1 4 3 1 3
+SCFStatus : [0,1,4]    :: <SCF> = -462.92419305, dD = 0.42D-02
+[Overlay:Invoke]  /tmp/Mondo/bin/MakeRho CH2x-6_30611 DensityNormal 1 1 4 0 1 4
+[MakeRho] Rho_tot=0.4800000006798958D+02
+[MakeRho] Rho_nuc=-.4800000000000001D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.4934877909232603D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3561811293792415D+05
+ MakeRho                :: Rho-LMNs CheckSum  = 0.5058293308111990D+03
+[Overlay:Invoke]  /tmp/Mondo/bin/QCTC CH2x-6_30611 DensityNormal 1 1 4 0 1 4
+[CalMaxEll] CalMaxEll hardwired for now at ...64
+ QCTC                   :: J[1] CheckSum  = 0.8228738628735660D+02
+[QCTC] virtual memory size = 37492 kB
+[Overlay:Invoke]  /tmp/Mondo/bin/ONX CH2x-6_30611 DensityNormal 1 1 4 0 1 4
+ ONX2                   :: Kx[1] CheckSum  = 0.1537180367954603D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/FBuild CH2x-6_30611 DensityNormal 1 1 4 0 1 4
+ FockNGrueven           :: F[1] CheckSum  = 0.4277531982923970D+02
+ FockNGrueven           :: OrthoF[1] CheckSum  = 0.3867000296803088D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/DIIS CH2x-6_30611 DensityNormal 1 1 4 0 1 4
+[DIIS] hack-alarm....
+ DIIS                   :: F_DIIS[1] CheckSum  = 0.3867000296803088D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/SP2 CH2x-6_30611 DensityNormal 1 1 4 0 1 4
+[SP2] FNorm(F-FT) = 0.0000000000000087
+ SP2                    :: OrthoP[2] CheckSum  = 0.6928203230354224D+01
+ SP2                    :: P[2] CheckSum  = 0.5531485422439027D+01
+[SP2] FNorm(P-PT) = 0.0000000000000079
+[Overlay:Invoke]  /tmp/Mondo/bin/SCFstats CH2x-6_30611 DensityNormal 1 1 4 0 1 4
+SCFStatus : [1,1,4]    :: <SCF> = -462.92472732, dD = 0.11D-02, DIIS = 0.64D-04
+[Overlay:Invoke]  /tmp/Mondo/bin/MakeRho CH2x-6_30611 DensityNormal 2 1 4 1 1 4
+[MakeRho] Rho_tot=0.4800000006847171D+02
+[MakeRho] Rho_nuc=-.4800000000000001D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.4935328726854356D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3562071532504680D+05
+ MakeRho                :: Rho-LMNs CheckSum  = 0.5058729481484223D+03
+[Overlay:Invoke]  /tmp/Mondo/bin/QCTC CH2x-6_30611 DensityNormal 2 1 4 1 1 4
+[CalMaxEll] CalMaxEll hardwired for now at ...64
+ QCTC                   :: J[2] CheckSum  = 0.8228712393680800D+02
+[QCTC] virtual memory size = 37492 kB
+[Overlay:Invoke]  /tmp/Mondo/bin/ONX CH2x-6_30611 DensityNormal 2 1 4 1 1 4
+ ONX2                   :: Kx[2] CheckSum  = 0.1537181750961771D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/FBuild CH2x-6_30611 DensityNormal 2 1 4 1 1 4
+ FockNGrueven           :: F[2] CheckSum  = 0.4277515114663237D+02
+ FockNGrueven           :: OrthoF[2] CheckSum  = 0.3866986433567057D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/DIIS CH2x-6_30611 DensityNormal 2 1 4 1 1 4
+[DIIS] hack-alarm....
+ DIIS                   :: F_DIIS[2] CheckSum  = 0.3866986433567057D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/SP2 CH2x-6_30611 DensityNormal 2 1 4 1 1 4
+[SP2] FNorm(F-FT) = 0.0000000000000091
+ SP2                    :: OrthoP[3] CheckSum  = 0.6928203230352493D+01
+ SP2                    :: P[3] CheckSum  = 0.5531737515935933D+01
+[SP2] FNorm(P-PT) = 0.0000000000000077
+[Overlay:Invoke]  /tmp/Mondo/bin/SCFstats CH2x-6_30611 DensityNormal 2 1 4 1 1 4
+SCFStatus : [2,1,4]    :: <SCF> = -462.92474796, dD = 0.29D-03, DIIS = 0.18D-04
+[New_CellSet_Sphere2] NEW Penetration CELLSET SPHERE, NCELL = 3
+[New_CellSet_Sphere2] NEW Overlap CELLSET SPHERE, NCELL = 3
+[PunchHDF:SetLatticeVectors] USING NEW CELL SET:
+[PunchHDF:SetLatticeVectors] Pentrat Cells = 3
+[PunchHDF:SetLatticeVectors] Overlap Cells = 3
+[Overlay:Invoke]  /tmp/Mondo/bin/SForce CH2x-6_30611 ForceEvaluation 2 1 4 2 1 4
+ SForce                 :: dS/dR CheckSum  = 0.8656722818131982D+00
+ SForce                 :: LFrcS CheckSum  = 0.1732050807568877D+09
+[Overlay:Invoke]  /tmp/Mondo/bin/TForce CH2x-6_30611 ForceEvaluation 2 1 4 2 1 4
+ TForce                 :: dT/dR CheckSum  = 0.2220181531424762D+01
+ TForce                 :: LFrcT CheckSum  = 0.3791445349498998D+00
+[Overlay:Invoke]  /tmp/Mondo/bin/MakeRho CH2x-6_30611 ForceEvaluation 2 1 4 2 1 4
+[MakeRho] Rho_tot=0.4800000006860202D+02
+[MakeRho] Rho_nuc=-.4800000000000001D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.4935439600908128D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3562134974280868D+05
+ MakeRho                :: Rho-LMNs CheckSum  = 0.5058836696806771D+03
+[Overlay:Invoke]  /tmp/Mondo/bin/JForce CH2x-6_30611 ForceEvaluation 2 1 4 2 1 4
+[CalMaxEll] CalMaxEll hardwired for now at ...64
+ RAW J Lattice Force
+----------------------------------------------------------
+         div(a)            div(b)           div(c)
+----------------------------------------------------------
+   0.2569300703E+00   0.0000000000E+00   0.0000000000E+00
+   0.0000000000E+00   0.0000000000E+00   0.0000000000E+00
+   0.0000000000E+00   0.0000000000E+00   0.0000000000E+00
+----------------------------------------------------------
+ J Dipole Lattice Force
+----------------------------------------------------------
+         div(a)            div(b)           div(c)
+----------------------------------------------------------
+   0.0000000000E+00   0.0000000000E+00   0.0000000000E+00
+   0.0000000000E+00   0.0000000000E+00   0.0000000000E+00
+   0.0000000000E+00   0.0000000000E+00   0.0000000000E+00
+----------------------------------------------------------
+ J  PFF   Lattice Force
+----------------------------------------------------------
+         div(a)            div(b)           div(c)
+----------------------------------------------------------
+  -0.5710609981E-09   0.0000000000E+00   0.0000000000E+00
+   0.0000000000E+00   0.0000000000E+00   0.0000000000E+00
+   0.0000000000E+00   0.0000000000E+00   0.0000000000E+00
+----------------------------------------------------------
+ TOTAL Lattice Force
+----------------------------------------------------------
+         div(a)            div(b)           div(c)
+----------------------------------------------------------
+   0.2569300698E+00   0.0000000000E+00   0.0000000000E+00
+   0.0000000000E+00   0.0000000000E+00   0.0000000000E+00
+   0.0000000000E+00   0.0000000000E+00   0.0000000000E+00
+----------------------------------------------------------
+ J Force
+--------------------------------------------------------
+   Atom   Z                Forces (au) 
+--------------------------------------------------------
+     1    6   -0.0001090302  0.0157937370 -0.0000025470
+     2    1    0.0001200818 -0.2078434056 -0.2149827699
+     3    1    0.0000884604 -0.2078099376  0.2150083636
+     4    6    0.0000958881 -0.0154422840 -0.0001961563
+     5    1   -0.0000803296  0.2077363091 -0.2151104880
+     6    1   -0.0000742536  0.2075659539  0.2152648390
+     7    6    0.0001053497  0.0156312096  0.0000059123
+     8    1   -0.0000370826 -0.2077510115 -0.2150570153
+     9    1   -0.0000456656 -0.2077463806  0.2150587544
+    10    6   -0.0001137984 -0.0155257634  0.0000864331
+    11    1    0.0000556722  0.2076628573 -0.2151480522
+    12    1    0.0000319703  0.2077433493  0.2150769205
+    13    6    0.0001050062  0.0152907732 -0.0000020386
+    14    1   -0.0001039550 -0.2076678215 -0.2151776640
+    15    1   -0.0000923901 -0.2076651829  0.2151893644
+    16    6    0.0001210000 -0.0155927392 -0.0001045731
+    17    1    0.0000305726  0.2077717189 -0.2150445472
+    18    1    0.0000545561  0.2076871392  0.2151161252
+    19    6   -0.0001078818  0.0154903574  0.0000577301
+    20    1   -0.0000544575 -0.2076303000 -0.2151819352
+    21    1   -0.0000188488 -0.2076885505  0.2151291585
+    22    6   -0.0000637626 -0.0152589717  0.0001466192
+    23    1    0.0000222730  0.2075807933 -0.2152399206
+    24    1    0.0000520819  0.2077235328  0.2151110639
+    25    6   -0.0000250155  0.0156218421 -0.0000220598
+    26    1    0.0000829575 -0.2077395333 -0.2150827959
+    27    1    0.0001038378 -0.2077213280  0.2150980073
+    28    6   -0.0002042423 -0.0156822548  0.0000072783
+    29    1    0.0000138656  0.2077595315 -0.2150529542
+    30    1    0.0000190803  0.2077592286  0.2150513477
+    31    6   -0.0001827525  0.0151702829 -0.0000144110
+    32    1    0.0001008478 -0.2076155589 -0.2152232901
+    33    1    0.0000867270 -0.2076046310  0.2152390376
+    34    6    0.0002371136 -0.0153651126 -0.0000167984
+    35    1   -0.0000959362  0.2076868099 -0.2151305871
+    36    1   -0.0001175774  0.2076757459  0.2151465530
+--------------------------------------------------------
+ JForce                 :: dJ/dR CheckSum  = 0.1465910872913006D+01
+ JForce                 :: LFrcJ CheckSum  = 0.2569300697689566D+00
+ JForce                 :: CPU Sec = 0.16D+03, WALL Sec = 0.16D+03
+ JForce                 :: Allocs=72922,  DeAllocs=72, 22085232 bytes are presently allocated.
+                           A max of 23569196 bytes were allocated.
+>-Exiting JForce 01/30/08 @ 16:52:40-<
+[Overlay:Invoke]  /tmp/Mondo/bin/GONX CH2x-6_30611 ForceEvaluation 2 1 4 2 1 4
+ GONX2                  :: dKx/dR[4] CheckSum  = 0.1632888189377103D+01
+[New_CellSet_Sphere2] NEW Penetration CELLSET SPHERE, NCELL = 3
+[New_CellSet_Sphere2] NEW Overlap CELLSET SPHERE, NCELL = 3
+[PunchHDF:SetLatticeVectors] USING NEW CELL SET:
+[PunchHDF:SetLatticeVectors] Pentrat Cells = 3
+[PunchHDF:SetLatticeVectors] Overlap Cells = 3
+[Overlay:Invoke]  /tmp/Mondo/bin/MakePFFT CH2x-6_30611 OneElectronMatrices 0 1 5 2 1 4
+ MakePFFT               :: TenC CheckSum  = 0.6998229723322275D-01
+ MakePFFT               :: TenS CheckSum  = 0.0000000000000000D+00
+[Overlay:Invoke]  /tmp/Mondo/bin/MakeS CH2x-6_30611 OneElectronMatrices 0 1 5 2 1 4
+ MakeS                  :: S CheckSum  = 0.1111551662008649D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/AInv CH2x-6_30611 OneElectronMatrices 0 1 5 2 1 4
+ BlokAInv               :: Z CheckSum  = 0.1221176419755244D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/MakeT CH2x-6_30611 OneElectronMatrices 0 1 5 2 1 4
+ MakeT                  :: T CheckSum  = 0.5595947943915060D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/P2Use CH2x-6_30611 Extrapolate 0 1 5 2 1 4
+[P2Use] On extrapolation, P2Use is opening DM /tmp/CH2x-6_30611_Geom#4_Base#1_Cycl#3_Clone#1.D
+... ning Warning  Warning  Warning Wa ...
+P2Use:DMPOrder is only implimented for MD
+ P2Use                  :: P[0] CheckSum  = 0.5526474014325569D+01
+[Overlay:Invoke]  /tmp/Mondo/bin/MakeRho CH2x-6_30611 Extrapolate 0 1 5 2 1 4
+[MakeRho] Rho_tot=0.4800000022120852D+02
+[MakeRho] Rho_nuc=-.4800000000000001D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.4935218844705788D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3562190170385328D+05
+ MakeRho                :: Rho-LMNs CheckSum  = 0.5057811671244201D+03
+[Overlay:Invoke]  /tmp/Mondo/bin/QCTC CH2x-6_30611 Extrapolate 0 1 5 2 1 4
+[CalMaxEll] CalMaxEll hardwired for now at ...64
+ QCTC                   :: J[0] CheckSum  = 0.8227748340746724D+02
+[QCTC] virtual memory size = 36388 kB
+[Overlay:Invoke]  /tmp/Mondo/bin/ONX CH2x-6_30611 Extrapolate 0 1 5 2 1 4
+ ONX2                   :: Kx[0] CheckSum  = 0.1535545647356660D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/FBuild CH2x-6_30611 Extrapolate 0 1 5 2 1 4
+ FockNGrueven           :: F[0] CheckSum  = 0.4274925198760293D+02
+ FockNGrueven           :: OrthoF[0] CheckSum  = 0.3866322755864991D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/SP2 CH2x-6_30611 Extrapolate 0 1 5 2 1 4
+[SP2] FNorm(F-FT) = 0.0000000000000092
+ SP2                    :: OrthoP[1] CheckSum  = 0.6928203230439951D+01
+ SP2                    :: P[1] CheckSum  = 0.5526747370861919D+01
+[SP2] FNorm(P-PT) = 0.0000000000000054
+[Overlay:Invoke]  /tmp/Mondo/bin/SCFstats CH2x-6_30611 Extrapolate 0 1 5 2 1 4
+SCFStatus : [0,1,5]    :: <SCF> = -462.95461685, dD = 0.56D-02
+[Overlay:Invoke]  /tmp/Mondo/bin/MakeRho CH2x-6_30611 DensityNormal 1 1 5 0 1 5
+[MakeRho] Rho_tot=0.4800000005924064D+02
+[MakeRho] Rho_nuc=-.4800000000000001D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.4935894927642499D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3562600195111366D+05
+ MakeRho                :: Rho-LMNs CheckSum  = 0.5058555674622112D+03
+[Overlay:Invoke]  /tmp/Mondo/bin/QCTC CH2x-6_30611 DensityNormal 1 1 5 0 1 5
+[CalMaxEll] CalMaxEll hardwired for now at ...64
+ QCTC                   :: J[1] CheckSum  = 0.8227812860863287D+02
+[QCTC] virtual memory size = 36828 kB
+[Overlay:Invoke]  /tmp/Mondo/bin/ONX CH2x-6_30611 DensityNormal 1 1 5 0 1 5
+ ONX2                   :: Kx[1] CheckSum  = 0.1535544883066140D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/FBuild CH2x-6_30611 DensityNormal 1 1 5 0 1 5
+ FockNGrueven           :: F[1] CheckSum  = 0.4275013643666315D+02
+ FockNGrueven           :: OrthoF[1] CheckSum  = 0.3866391668199148D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/DIIS CH2x-6_30611 DensityNormal 1 1 5 0 1 5
+[DIIS] hack-alarm....
+ DIIS                   :: F_DIIS[1] CheckSum  = 0.3866391668199148D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/SP2 CH2x-6_30611 DensityNormal 1 1 5 0 1 5
+[SP2] FNorm(F-FT) = 0.0000000000000092
+ SP2                    :: OrthoP[2] CheckSum  = 0.6928203230534546D+01
+ SP2                    :: P[2] CheckSum  = 0.5526898238307708D+01
+[SP2] FNorm(P-PT) = 0.0000000000000074
+[Overlay:Invoke]  /tmp/Mondo/bin/SCFstats CH2x-6_30611 DensityNormal 1 1 5 0 1 5
+SCFStatus : [1,1,5]    :: <SCF> = -462.95584792, dD = 0.14D-02, DIIS = 0.10D-03
+[Overlay:Invoke]  /tmp/Mondo/bin/MakeRho CH2x-6_30611 DensityNormal 2 1 5 1 1 5
+[MakeRho] Rho_tot=0.4800000006038719D+02
+[MakeRho] Rho_nuc=-.4800000000000001D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.4936051904932261D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3562695162029992D+05
+ MakeRho                :: Rho-LMNs CheckSum  = 0.5058721477259844D+03
+[Overlay:Invoke]  /tmp/Mondo/bin/QCTC CH2x-6_30611 DensityNormal 2 1 5 1 1 5
+[CalMaxEll] CalMaxEll hardwired for now at ...64
+ QCTC                   :: J[2] CheckSum  = 0.8227813285743126D+02
+[QCTC] virtual memory size = 36792 kB
+[Overlay:Invoke]  /tmp/Mondo/bin/ONX CH2x-6_30611 DensityNormal 2 1 5 1 1 5
+ ONX2                   :: Kx[2] CheckSum  = 0.1535544082137967D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/FBuild CH2x-6_30611 DensityNormal 2 1 5 1 1 5
+ FockNGrueven           :: F[2] CheckSum  = 0.4275017715514344D+02
+ FockNGrueven           :: OrthoF[2] CheckSum  = 0.3866394927511111D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/DIIS CH2x-6_30611 DensityNormal 2 1 5 1 1 5
+[DIIS] hack-alarm....
+ DIIS                   :: F_DIIS[2] CheckSum  = 0.3866394927511111D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/SP2 CH2x-6_30611 DensityNormal 2 1 5 1 1 5
+[SP2] FNorm(F-FT) = 0.0000000000000087
+ SP2                    :: OrthoP[3] CheckSum  = 0.6928203230542986D+01
+ SP2                    :: P[3] CheckSum  = 0.5526947620784425D+01
+[SP2] FNorm(P-PT) = 0.0000000000000079
+[Overlay:Invoke]  /tmp/Mondo/bin/SCFstats CH2x-6_30611 DensityNormal 2 1 5 1 1 5
+SCFStatus : [2,1,5]    :: <SCF> = -462.95591417, dD = 0.33D-03, DIIS = 0.26D-04
+[Overlay:Invoke]  /tmp/Mondo/bin/MakeRho CH2x-6_30611 DensityNormal 3 1 5 2 1 5
+[MakeRho] Rho_tot=0.4800000006002425D+02
+[MakeRho] Rho_nuc=-.4800000000000001D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.4936091213926135D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3562719333005629D+05
+ MakeRho                :: Rho-LMNs CheckSum  = 0.5058759141078625D+03
+[Overlay:Invoke]  /tmp/Mondo/bin/QCTC CH2x-6_30611 DensityNormal 3 1 5 2 1 5
+[CalMaxEll] CalMaxEll hardwired for now at ...64
+ QCTC                   :: J[3] CheckSum  = 0.8227815586476888D+02
+[QCTC] virtual memory size = 36788 kB
+[Overlay:Invoke]  /tmp/Mondo/bin/ONX CH2x-6_30611 DensityNormal 3 1 5 2 1 5
+ ONX2                   :: Kx[3] CheckSum  = 0.1535543750685369D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/FBuild CH2x-6_30611 DensityNormal 3 1 5 2 1 5
+ FockNGrueven           :: F[3] CheckSum  = 0.4275021089689457D+02
+ FockNGrueven           :: OrthoF[3] CheckSum  = 0.3866397390769203D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/DIIS CH2x-6_30611 DensityNormal 3 1 5 2 1 5
+[DIIS] hack-alarm....
+ DIIS                   :: F_DIIS[3] CheckSum  = 0.3866397390769203D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/SP2 CH2x-6_30611 DensityNormal 3 1 5 2 1 5
+[SP2] FNorm(F-FT) = 0.0000000000000089
+ SP2                    :: OrthoP[4] CheckSum  = 0.6928203230544036D+01
+ SP2                    :: P[4] CheckSum  = 0.5526962050480249D+01
+[SP2] FNorm(P-PT) = 0.0000000000000077
+[Overlay:Invoke]  /tmp/Mondo/bin/SCFstats CH2x-6_30611 DensityNormal 3 1 5 2 1 5
+SCFStatus : [3,1,5]    :: <SCF> = -462.95591927, dD = 0.82D-04, DIIS = 0.11D-04
+[New_CellSet_Sphere2] NEW Penetration CELLSET SPHERE, NCELL = 3
+[New_CellSet_Sphere2] NEW Overlap CELLSET SPHERE, NCELL = 3
+[PunchHDF:SetLatticeVectors] USING NEW CELL SET:
+[PunchHDF:SetLatticeVectors] Pentrat Cells = 3
+[PunchHDF:SetLatticeVectors] Overlap Cells = 3
+[Overlay:Invoke]  /tmp/Mondo/bin/SForce CH2x-6_30611 ForceEvaluation 3 1 5 3 1 5
+ SForce                 :: dS/dR CheckSum  = 0.8603630430779262D+00
+ SForce                 :: LFrcS CheckSum  = 0.1732050807568877D+09
+[Overlay:Invoke]  /tmp/Mondo/bin/TForce CH2x-6_30611 ForceEvaluation 3 1 5 3 1 5
+ TForce                 :: dT/dR CheckSum  = 0.2215748607188964D+01
+ TForce                 :: LFrcT CheckSum  = 0.3817946858574389D+00
+[Overlay:Invoke]  /tmp/Mondo/bin/MakeRho CH2x-6_30611 ForceEvaluation 3 1 5 3 1 5
+[MakeRho] Rho_tot=0.4800000005995263D+02
+[MakeRho] Rho_nuc=-.4800000000000001D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.4936101560113137D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3562725828796016D+05
+ MakeRho                :: Rho-LMNs CheckSum  = 0.5058768185137773D+03
+[Overlay:Invoke]  /tmp/Mondo/bin/JForce CH2x-6_30611 ForceEvaluation 3 1 5 3 1 5
+[CalMaxEll] CalMaxEll hardwired for now at ...64
+ RAW J Lattice Force
+----------------------------------------------------------
+         div(a)            div(b)           div(c)
+----------------------------------------------------------
+   0.2630394325E+00   0.0000000000E+00   0.0000000000E+00
+   0.0000000000E+00   0.0000000000E+00   0.0000000000E+00
+   0.0000000000E+00   0.0000000000E+00   0.0000000000E+00
+----------------------------------------------------------
+ J Dipole Lattice Force
+----------------------------------------------------------
+         div(a)            div(b)           div(c)
+----------------------------------------------------------
+   0.0000000000E+00   0.0000000000E+00   0.0000000000E+00
+   0.0000000000E+00   0.0000000000E+00   0.0000000000E+00
+   0.0000000000E+00   0.0000000000E+00   0.0000000000E+00
+----------------------------------------------------------
+ J  PFF   Lattice Force
+----------------------------------------------------------
+         div(a)            div(b)           div(c)
+----------------------------------------------------------
+  -0.8290847068E-09   0.0000000000E+00   0.0000000000E+00
+   0.0000000000E+00   0.0000000000E+00   0.0000000000E+00
+   0.0000000000E+00   0.0000000000E+00   0.0000000000E+00
+----------------------------------------------------------
+ TOTAL Lattice Force
+----------------------------------------------------------
+         div(a)            div(b)           div(c)
+----------------------------------------------------------
+   0.2630394317E+00   0.0000000000E+00   0.0000000000E+00
+   0.0000000000E+00   0.0000000000E+00   0.0000000000E+00
+   0.0000000000E+00   0.0000000000E+00   0.0000000000E+00
+----------------------------------------------------------
+ J Force
+--------------------------------------------------------
+   Atom   Z                Forces (au) 
+--------------------------------------------------------
+     1    6    0.0003559467 -0.0294406220  0.0000041611
+     2    1   -0.0002944108 -0.1730153007 -0.2456073877
+     3    1   -0.0003346549 -0.1730083123  0.2456121747
+     4    6   -0.0002914502  0.0302737391 -0.0000790692
+     5    1    0.0002009339  0.1727203524 -0.2458193444
+     6    1    0.0002349925  0.1726367786  0.2458785691
+     7    6    0.0002244610 -0.0297220647 -0.0000046776
+     8    1   -0.0001284062 -0.1728878154 -0.2457315369
+     9    1   -0.0001310946 -0.1728917590  0.2457283847
+    10    6   -0.0000310768  0.0301086078  0.0000446950
+    11    1   -0.0000219085  0.1727427584 -0.2457563927
+    12    1   -0.0000758387  0.1727926501  0.2457206688
+    13    6   -0.0001763156 -0.0302299798 -0.0000286291
+    14    1    0.0002053753 -0.1726898874 -0.2458522570
+    15    1    0.0002049599 -0.1726493709  0.2458826164
+    16    6    0.0005477684  0.0298550816 -0.0000737674
+    17    1   -0.0003855504  0.1728703263 -0.2456950961
+    18    1   -0.0003781450  0.1727889653  0.2457511032
+    19    6   -0.0000551012 -0.0301950138  0.0000453618
+    20    1    0.0000736432 -0.1726472891 -0.2458233447
+    21    1    0.0001218077 -0.1726932551  0.2457883769
+    22    6    0.0001688989  0.0303353627  0.0000636884
+    23    1   -0.0002298708  0.1726123823 -0.2458938726
+    24    1   -0.0001431497  0.1727069203  0.2458289855
+    25    6    0.0002089804 -0.0300063801 -0.0000261216
+    26    1   -0.0000382699 -0.1728725077 -0.2457023603
+    27    1   -0.0000106241 -0.1728339435  0.2457303101
+    28    6   -0.0002951437  0.0296806557  0.0000059418
+    29    1    0.0001777781  0.1729097347 -0.2457050135
+    30    1    0.0001576344  0.1728990717  0.2457127472
+    31    6    0.0001812850 -0.0305423594 -0.0000035654
+    32    1   -0.0001922120 -0.1725844791 -0.2459369088
+    33    1   -0.0002129200 -0.1725842439  0.2459382514
+    34    6   -0.0001244354  0.0301038852 -0.0000110621
+    35    1    0.0002522071  0.1727398204 -0.2458210566
+    36    1    0.0002323269  0.1727228790  0.2458346194
+--------------------------------------------------------
+ JForce                 :: dJ/dR CheckSum  = 0.1475476380343581D+01
+ JForce                 :: LFrcJ CheckSum  = 0.2630394316684046D+00
+ JForce                 :: CPU Sec = 0.16D+03, WALL Sec = 0.16D+03
+ JForce                 :: Allocs=71002,  DeAllocs=72, 21586032 bytes are presently allocated.
+                           A max of 23039468 bytes were allocated.
+>-Exiting JForce 01/30/08 @ 17:00:07-<
+[Overlay:Invoke]  /tmp/Mondo/bin/GONX CH2x-6_30611 ForceEvaluation 3 1 5 3 1 5
+ GONX2                  :: dKx/dR[5] CheckSum  = 0.1614071555221962D+01
+[New_CellSet_Sphere2] NEW Penetration CELLSET SPHERE, NCELL = 3
+[New_CellSet_Sphere2] NEW Overlap CELLSET SPHERE, NCELL = 3
+[PunchHDF:SetLatticeVectors] USING NEW CELL SET:
+[PunchHDF:SetLatticeVectors] Pentrat Cells = 3
+[PunchHDF:SetLatticeVectors] Overlap Cells = 3
+[Overlay:Invoke]  /tmp/Mondo/bin/MakePFFT CH2x-6_30611 OneElectronMatrices 0 1 6 3 1 5
+ MakePFFT               :: TenC CheckSum  = 0.6895850518828051D-01
+ MakePFFT               :: TenS CheckSum  = 0.0000000000000000D+00
+[Overlay:Invoke]  /tmp/Mondo/bin/MakeS CH2x-6_30611 OneElectronMatrices 0 1 6 3 1 5
+ MakeS                  :: S CheckSum  = 0.1110126294762561D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/AInv CH2x-6_30611 OneElectronMatrices 0 1 6 3 1 5
+ BlokAInv               :: Z CheckSum  = 0.1219311732991835D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/MakeT CH2x-6_30611 OneElectronMatrices 0 1 6 3 1 5
+ MakeT                  :: T CheckSum  = 0.5595894272269312D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/P2Use CH2x-6_30611 Extrapolate 0 1 6 3 1 5
+[P2Use] On extrapolation, P2Use is opening DM /tmp/CH2x-6_30611_Geom#5_Base#1_Cycl#4_Clone#1.D
+... ning Warning  Warning  Warning Wa ...
+P2Use:DMPOrder is only implimented for MD
+ P2Use                  :: P[0] CheckSum  = 0.5522051937405402D+01
+[Overlay:Invoke]  /tmp/Mondo/bin/MakeRho CH2x-6_30611 Extrapolate 0 1 6 3 1 5
+[MakeRho] Rho_tot=0.4800000001803351D+02
+[MakeRho] Rho_nuc=-.4800000000000001D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.4934568587331298D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3561930945131880D+05
+ MakeRho                :: Rho-LMNs CheckSum  = 0.5057240728255035D+03
+[Overlay:Invoke]  /tmp/Mondo/bin/QCTC CH2x-6_30611 Extrapolate 0 1 6 3 1 5
+[CalMaxEll] CalMaxEll hardwired for now at ...64
+ QCTC                   :: J[0] CheckSum  = 0.8228550625639548D+02
+[QCTC] virtual memory size = 36388 kB
+[Overlay:Invoke]  /tmp/Mondo/bin/ONX CH2x-6_30611 Extrapolate 0 1 6 3 1 5
+ ONX2                   :: Kx[0] CheckSum  = 0.1533785186640990D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/FBuild CH2x-6_30611 Extrapolate 0 1 6 3 1 5
+ FockNGrueven           :: F[0] CheckSum  = 0.4274082953637641D+02
+ FockNGrueven           :: OrthoF[0] CheckSum  = 0.3867165677459238D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/SP2 CH2x-6_30611 Extrapolate 0 1 6 3 1 5
+[SP2] FNorm(F-FT) = 0.0000000000000096
+ SP2                    :: OrthoP[1] CheckSum  = 0.6928203230767795D+01
+ SP2                    :: P[1] CheckSum  = 0.5523343676040287D+01
+[SP2] FNorm(P-PT) = 0.0000000000000063
+[Overlay:Invoke]  /tmp/Mondo/bin/SCFstats CH2x-6_30611 Extrapolate 0 1 6 3 1 5
+SCFStatus : [0,1,6]    :: <SCF> = -462.96180669, dD = 0.26D-02
+[Overlay:Invoke]  /tmp/Mondo/bin/MakeRho CH2x-6_30611 DensityNormal 1 1 6 0 1 6
+[MakeRho] Rho_tot=0.4800000005895763D+02
+[MakeRho] Rho_nuc=-.4800000000000001D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.4935218587433487D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3562306194133020D+05
+ MakeRho                :: Rho-LMNs CheckSum  = 0.5057921062605353D+03
+[Overlay:Invoke]  /tmp/Mondo/bin/QCTC CH2x-6_30611 DensityNormal 1 1 6 0 1 6
+[CalMaxEll] CalMaxEll hardwired for now at ...64
+ QCTC                   :: J[1] CheckSum  = 0.8228454530646471D+02
+[QCTC] virtual memory size = 36292 kB
+[Overlay:Invoke]  /tmp/Mondo/bin/ONX CH2x-6_30611 DensityNormal 1 1 6 0 1 6
+ ONX2                   :: Kx[1] CheckSum  = 0.1533801253653189D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/FBuild CH2x-6_30611 DensityNormal 1 1 6 0 1 6
+ FockNGrueven           :: F[1] CheckSum  = 0.4274005378814736D+02
+ FockNGrueven           :: OrthoF[1] CheckSum  = 0.3867104982415008D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/DIIS CH2x-6_30611 DensityNormal 1 1 6 0 1 6
+[DIIS] hack-alarm....
+ DIIS                   :: F_DIIS[1] CheckSum  = 0.3867104982415008D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/SP2 CH2x-6_30611 DensityNormal 1 1 6 0 1 6
+[SP2] FNorm(F-FT) = 0.0000000000000077
+ SP2                    :: OrthoP[2] CheckSum  = 0.6928203230544468D+01
+ SP2                    :: P[2] CheckSum  = 0.5523659338329742D+01
+[SP2] FNorm(P-PT) = 0.0000000000000079
+[Overlay:Invoke]  /tmp/Mondo/bin/SCFstats CH2x-6_30611 DensityNormal 1 1 6 0 1 6
+SCFStatus : [1,1,6]    :: <SCF> = -462.96206812, dD = 0.62D-03, DIIS = 0.47D-04
+[Overlay:Invoke]  /tmp/Mondo/bin/MakeRho CH2x-6_30611 DensityNormal 2 1 6 1 1 6
+[MakeRho] Rho_tot=0.4800000005772038D+02
+[MakeRho] Rho_nuc=-.4800000000000001D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.4935333746630874D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3562367951281683D+05
+ MakeRho                :: Rho-LMNs CheckSum  = 0.5058046960321998D+03
+[Overlay:Invoke]  /tmp/Mondo/bin/QCTC CH2x-6_30611 DensityNormal 2 1 6 1 1 6
+[CalMaxEll] CalMaxEll hardwired for now at ...64
+ QCTC                   :: J[2] CheckSum  = 0.8228450477072785D+02
+[QCTC] virtual memory size = 36296 kB
+[Overlay:Invoke]  /tmp/Mondo/bin/ONX CH2x-6_30611 DensityNormal 2 1 6 1 1 6
+ ONX2                   :: Kx[2] CheckSum  = 0.1533802034502902D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/FBuild CH2x-6_30611 DensityNormal 2 1 6 1 1 6
+ FockNGrueven           :: F[2] CheckSum  = 0.4274003913111155D+02
+ FockNGrueven           :: OrthoF[2] CheckSum  = 0.3867103453999074D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/DIIS CH2x-6_30611 DensityNormal 2 1 6 1 1 6
+[DIIS] hack-alarm....
+ DIIS                   :: F_DIIS[2] CheckSum  = 0.3867103453999074D+02
+[Overlay:Invoke]  /tmp/Mondo/bin/SP2 CH2x-6_30611 DensityNormal 2 1 6 1 1 6
+[SP2] FNorm(F-FT) = 0.0000000000000105
+ SP2                    :: OrthoP[3] CheckSum  = 0.6928203230682723D+01
+ SP2                    :: P[3] CheckSum  = 0.5523739200511570D+01
+[SP2] FNorm(P-PT) = 0.0000000000000079
+[Overlay:Invoke]  /tmp/Mondo/bin/SCFstats CH2x-6_30611 DensityNormal 2 1 6 1 1 6
+SCFStatus : [2,1,6]    :: <SCF> = -462.96208289, dD = 0.15D-03, DIIS = 0.14D-04
+[New_CellSet_Sphere2] NEW Penetration CELLSET SPHERE, NCELL = 3
+[New_CellSet_Sphere2] NEW Overlap CELLSET SPHERE, NCELL = 3
+[PunchHDF:SetLatticeVectors] USING NEW CELL SET:
+[PunchHDF:SetLatticeVectors] Pentrat Cells = 3
+[PunchHDF:SetLatticeVectors] Overlap Cells = 3
+[Overlay:Invoke]  /tmp/Mondo/bin/SForce CH2x-6_30611 ForceEvaluation 2 1 6 2 1 6
+ SForce                 :: dS/dR CheckSum  = 0.8647414000182172D+00
+ SForce                 :: LFrcS CheckSum  = 0.1732050807568877D+09
+[Overlay:Invoke]  /tmp/Mondo/bin/TForce CH2x-6_30611 ForceEvaluation 2 1 6 2 1 6
+ TForce                 :: dT/dR CheckSum  = 0.2222468726640080D+01
+ TForce                 :: LFrcT CheckSum  = 0.3854045326007527D+00
+[Overlay:Invoke]  /tmp/Mondo/bin/MakeRho CH2x-6_30611 ForceEvaluation 2 1 6 2 1 6
+[MakeRho] Rho_tot=0.4800000005756753D+02
+[MakeRho] Rho_nuc=-.4800000000000001D+02
+ MakeRho                :: Rho-Coef CheckSum  = 0.4935362131683094D+03
+ MakeRho                :: Rho-Expt CheckSum  = 0.3562382694643340D+05
+ MakeRho                :: Rho-LMNs CheckSum  = 0.5058080011850184D+03
+[Overlay:Invoke]  /tmp/Mondo/bin/JForce CH2x-6_30611 ForceEvaluation 2 1 6 2 1 6
+[CalMaxEll] CalMaxEll hardwired for now at ...64
+ RAW J Lattice Force
+----------------------------------------------------------
+         div(a)            div(b)           div(c)
+----------------------------------------------------------
+   0.2722747550E+00   0.0000000000E+00   0.0000000000E+00
+   0.0000000000E+00   0.0000000000E+00   0.0000000000E+00
+   0.0000000000E+00   0.0000000000E+00   0.0000000000E+00
+----------------------------------------------------------
+ J Dipole Lattice Force
+----------------------------------------------------------
+         div(a)            div(b)           div(c)
+----------------------------------------------------------
+   0.0000000000E+00   0.0000000000E+00   0.0000000000E+00
+   0.0000000000E+00   0.0000000000E+00   0.0000000000E+00
+   0.0000000000E+00   0.0000000000E+00   0.0000000000E+00
+----------------------------------------------------------
+ J  PFF   Lattice Force
+----------------------------------------------------------
+         div(a)            div(b)           div(c)
+----------------------------------------------------------
+  -0.2382183649E-08   0.0000000000E+00   0.0000000000E+00
+   0.0000000000E+00   0.0000000000E+00   0.0000000000E+00
+   0.0000000000E+00   0.0000000000E+00   0.0000000000E+00
+----------------------------------------------------------
+ TOTAL Lattice Force
+----------------------------------------------------------
+         div(a)            div(b)           div(c)
+----------------------------------------------------------
+   0.2722747526E+00   0.0000000000E+00   0.0000000000E+00
+   0.0000000000E+00   0.0000000000E+00   0.0000000000E+00
+   0.0000000000E+00   0.0000000000E+00   0.0000000000E+00
+----------------------------------------------------------
+ J Force
+--------------------------------------------------------
+   Atom   Z                Forces (au) 
+--------------------------------------------------------
+     1    6    0.0002002293  0.0033841033 -0.0000034840
+     2    1   -0.0000044714 -0.1813342504 -0.2385826285
+     3    1   -0.0000448196 -0.1813398314  0.2385807019
+     4    6    0.0000071111 -0.0035216424  0.0000009897
+     5    1   -0.0000643007  0.1813629493 -0.2385416095
+     6    1   -0.0000736650  0.1813686139  0.2385389392
+     7    6   -0.0000731660  0.0032033004  0.0000137145
+     8    1    0.0000418878 -0.1812900161 -0.2386209248
+     9    1    0.0000439218 -0.1813066177  0.2386076697
+    10    6   -0.0000206113 -0.0035453254 -0.0000009464
+    11    1    0.0000794721  0.1813610067 -0.2385344773
+    12    1    0.0000878124  0.1813777978  0.2385207512
+    13    6    0.0001070850  0.0034290139 -0.0000136009
+    14    1   -0.0001717172 -0.1813867761 -0.2385357744
+    15    1   -0.0001690992 -0.1813596359  0.2385578113
+    16    6    0.0002552828 -0.0033080389 -0.0000189124
+    17    1   -0.0000477070  0.1813332539 -0.2385647666
+    18    1   -0.0000433537  0.1813186511  0.2385765745
+    19    6   -0.0004175644  0.0034228353 -0.0000490624
+    20    1    0.0001650762 -0.1813631195 -0.2385324818
+    21    1    0.0001841582 -0.1812939172  0.2385837591
+    22    6   -0.0000403007 -0.0034484181 -0.0000606249
+    23    1    0.0000463366  0.1814038080 -0.2385338960
+    24    1    0.0000812658  0.1813513654  0.2385603257
+    25    6    0.0004017963  0.0035486311  0.0000399800
+    26    1   -0.0002222207 -0.1813779752 -0.2385342801
+    27    1   -0.0002345479 -0.1813596433  0.2385510390
+    28    6   -0.0000467451 -0.0031970168 -0.0001117671
+    29    1   -0.0000294861  0.1813567574 -0.2385694656
+    30    1   -0.0000266713  0.1812029333  0.2386727101
+    31    6    0.0000243968  0.0034632199 -0.0000339464
+    32    1    0.0000897654 -0.1813772917 -0.2385345838
+    33    1    0.0000835586 -0.1813306264  0.2385704456
+    34    6   -0.0002480032 -0.0034469410 -0.0000049127
+    35    1    0.0000400919  0.1813554107 -0.2385631163
+    36    1    0.0000392212  0.1813427404  0.2385708960
+--------------------------------------------------------
+ JForce                 :: dJ/dR CheckSum  = 0.1468095442014447D+01
+ JForce                 :: LFrcJ CheckSum  = 0.2722747526063938D+00
+ JForce                 :: CPU Sec = 0.16D+03, WALL Sec = 0.20D+03
+ JForce                 :: Allocs=69802,  DeAllocs=72, 21272688 bytes are presently allocated.
+                           A max of 22706348 bytes were allocated.
+>-Exiting JForce 01/30/08 @ 18:04:35-<
+[Overlay:Invoke]  /tmp/Mondo/bin/GONX CH2x-6_30611 ForceEvaluation 2 1 6 2 1 6
+ GONX2                  :: dKx/dR[6] CheckSum  = 0.1624231551139349D+01
+     Geometry optimization of Clone #1 converged in 6 steps.
+1 6 -462.9620828911263288
+[New_CellSet_Sphere2] NEW Penetration CELLSET SPHERE, NCELL = 3
+[New_CellSet_Sphere2] NEW Overlap CELLSET SPHERE, NCELL = 3
+[PunchHDF:SetLatticeVectors] USING NEW CELL SET:
+[PunchHDF:SetLatticeVectors] Pentrat Cells = 3
+[PunchHDF:SetLatticeVectors] Overlap Cells = 3
+Energies of final structures:
+ Clone #         Energy         
+1 -462.9620828911263288
+>-Successful MondoSCF run 01/30/08 @ 18:05:29-<

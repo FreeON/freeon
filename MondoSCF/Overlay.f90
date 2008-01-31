@@ -66,7 +66,7 @@ CONTAINS
        CALL SetArgV(Ex,N,S,M,NArg,ArgV)
 #endif
        ! This is the command line we are going to execute 
-       CmndLine=' '
+       CmndLine=''
        DO I=1,NArg
           CmndLine=TRIM(CmndLine)//Blnk//TRIM(ArgV%C(I))
           !          WRITE(*,*)I,' ARGVS <',TRIM(ArgV%C(I)),">"
