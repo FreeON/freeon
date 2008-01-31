@@ -23,6 +23,7 @@
      to return derivative works to the MondoSCF group for review, and possible
      disemination in future releases.
 */
+
 /*   FORKS A CHILD PROCESS    */
 /*   Author: Matt Challacombe */
 #include <stdio.h>
@@ -31,6 +32,7 @@
 #include <sys/wait.h>
 #include <sys/types.h>
 #include <unistd.h>
+
 /*
        pid_t fork(void);
 
@@ -72,9 +74,6 @@ int spawn_(int* nc,int* maxlen,int* ichr)
   }
   argv[*nc]=NULL;
 
-  //printf(".... ing Spawning  Spawning  Spawning  Spawning Spawn ....\n");
-  //for(i=0; i<=*nc; i++){printf("argv[%i]=<%s>\n",i,argv[i]);} 
-
   pid=fork();
   if(pid==0)
     {
@@ -96,12 +95,17 @@ int spawn_(int* nc,int* maxlen,int* ichr)
          ierr=ZERO_ERROR;
          return(ierr);
       }
-      if(WSTOPSIG   (status)!=0)ierr=SGNL_ERROR;
-#ifdef AIX
-#else     
-      if(WCOREDUMP  (status)!=0)ierr=DUMP_ERROR; 
+#ifdef HAVE_WSTOPSIG
+      if(WSTOPSIG(status)!=0) ierr=SGNL_ERROR;
 #endif
-      if(WEXITSTATUS(status)!=0)ierr=EXIT_ERROR;
+
+#ifdef HAVE_WCOREDUMP
+      if(WCOREDUMP(status)!=0) ierr=DUMP_ERROR; 
+#endif
+
+#ifdef HAVE_WEXITSTATUS
+      if(WEXITSTATUS(status)!=0) ierr=EXIT_ERROR;
+#endif
     }  
   for(i=0; i<*nc; i++){free(argv[i]);}
   return(ierr);

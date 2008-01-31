@@ -101,13 +101,86 @@ AC_PROG_RANLIB
 # Set $(MAKE).
 AC_PROG_MAKE_SET
 
-# Check for some standard headers.
-AC_HEADER_STDC
-AC_CHECK_HEADERS(sys/resource.h sys/time.h unistd.h)
-AC_CHECK_HEADERS(sys/ioctl.h sys/types.h math.h)
-
 # Check the build system.
 AC_CANONICAL_BUILD
+
+# Check for some standard headers.
+AC_LANG(C)
+AC_HEADER_STDC
+AC_CHECK_HEADERS(sys/resource.h sys/time.h unistd.h sys/ioctl.h sys/types.h \
+  math.h sys/wait.h)
+
+if test "${ac_cv_header_sys_wait_h}" = "yes"; then
+
+  AC_MSG_CHECKING([for WSTOPSIG macro])
+  AC_LINK_IFELSE([
+#include <sys/wait.h>
+
+int
+main ()
+{
+  int status = 0;
+
+  if (WSTOPSIG(status) == 0) { return 0; }
+  else { return -1; }
+}],
+  [AC_DEFINE(HAVE_WSTOPSIG, 1, [If WIFSTOPPED is true of status, this macro
+   returns the signal number of the signal that caused the child process to
+   stop.])
+  AC_MSG_RESULT([yes])],
+  [AC_MSG_RESULT([no])])
+
+  AC_MSG_CHECKING([for WCOREDUMP macro])
+  AC_LINK_IFELSE([
+#include <sys/wait.h>
+
+int
+main ()
+{
+  int status = 0;
+
+  if (WCOREDUMP(status) == 0) { return 0; }
+  else { return -1; }
+}],
+  [AC_DEFINE(HAVE_WCOREDUMP, 1, [This macro returns a nonzero value if the child
+   process terminated and produced a core dump.])
+  AC_MSG_RESULT([yes])],
+  [AC_MSG_RESULT([no])])
+
+  AC_MSG_CHECKING([for WEXITSTATUS macro])
+  AC_LINK_IFELSE([
+#include <sys/wait.h>
+
+int
+main ()
+{
+  int status = 0;
+
+  if (WEXITSTATUS(status) == 0) { return 0; }
+  else { return -1; }
+}],
+  [AC_DEFINE(HAVE_WEXITSTATUS, 1, [If WIFEXITED is true of status, this macro
+   returns the low-order 8 bits of the exit status value from the child
+   process.])
+  AC_MSG_RESULT([yes])],
+  [AC_MSG_RESULT([no])])
+
+fi
+
+AC_MSG_CHECKING([for rand48])
+AC_LINK_IFELSE([
+#include <stdlib.h>
+
+int
+main ()
+{
+  srand48(0);
+  return 0;
+}],
+  [AC_DEFINE(HAVE_SRAND48, 1, [These functions generate pseudo-random numbers
+   using the linear congruential algorithm and 48-bit integer arithmetic.])
+  AC_MSG_RESULT([yes])],
+  [AC_MSG_RESULT([no])])
 
 # Check for phipac.
 AC_MSG_CHECKING([whether to use PHiPAC])
@@ -153,27 +226,6 @@ END PROGRAM test_compiler
     [AC_MSG_RESULT([failed test])
     AC_MSG_FAILURE([the compiler does not understand the ALLOCATABLE attribute inside a type definition])])
 fi
-
-# Get the maximum source-code line length of the f90 compiler.
-AC_MSG_CHECKING([maximum line length of f90 source code])
-max_length=0
-string="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-for ((i = 70; i <= 300; ++i)); do
-  AC_COMPILE_IFELSE([
-PROGRAM linelength
-
-  IMPLICIT NONE
-  CHARACTER(LEN=*), PARAMETER :: a = '${string}'
-
-END PROGRAM linelength
-],
-  [max_length=${i}
-   string="${string}a"],
-  [break])
-done
-AC_MSG_RESULT([maximum length = ${max_length}])
-AC_DEFINE_UNQUOTED(MAX_LINE_LENGTH, [${max_length}], [The maximum length of a
-  fortran source code line.])
 
 # Find flags for static linking.
 AC_ARG_ENABLE([static],
@@ -345,6 +397,10 @@ if test "${use_internal_hdf5}" = "yes"; then
   esac
 
   AC_SUBST(HDF5_CPPFLAGS, [${HDF5_CPPFLAGS}])
+
+  # Store old CPPFLAGS.
+  old_CPPFLAGS=${CPPFLAGS}
+  CPPFLAGS="${old_CPPFLAGS} ${HDF5_CPPFLAGS}"
 
   # Set language to C.
   AC_LANG(C)
@@ -551,6 +607,9 @@ int main(void)
     AC_MSG_RESULT(yes),
     AC_MSG_RESULT(no))
 
+  # Reset the CPPFLAGS.
+  CPPFLAGS=${old_CPPFLAGS}
+
 else
 
   AC_MSG_RESULT([no])
@@ -673,14 +732,16 @@ if test -n "$ORGANIZATION"; then
 fi
 
 AC_MSG_NOTICE([***   Summary   ***])
-AC_MSG_NOTICE([CC      = ${CC}])
-AC_MSG_NOTICE([FC      = ${FC}])
-AC_MSG_NOTICE([F77     = ${F77}])
-AC_MSG_NOTICE([CFLAGS  = ${CFLAGS}])
-AC_MSG_NOTICE([FCFLAGS = ${FCFLAGS}])
-AC_MSG_NOTICE([FFLAGS  = ${FFLAGS}])
-AC_MSG_NOTICE([LDFLAGS = ${LDFLAGS}])
-AC_MSG_NOTICE([LIBS    = ${LIBS}])
+AC_MSG_NOTICE([CC            = ${CC}])
+AC_MSG_NOTICE([FC            = ${FC}])
+AC_MSG_NOTICE([F77           = ${F77}])
+AC_MSG_NOTICE([CFLAGS        = ${CFLAGS}])
+AC_MSG_NOTICE([FCFLAGS       = ${FCFLAGS}])
+AC_MSG_NOTICE([FFLAGS        = ${FFLAGS}])
+AC_MSG_NOTICE([LDFLAGS       = ${LDFLAGS}])
+AC_MSG_NOTICE([LIBS          = ${LIBS}])
+AC_MSG_NOTICE([CPPFLAGS      = ${CPPFLAGS}])
+AC_MSG_NOTICE([HDF5_CPPFLAGS = ${HDF5_CPPFLAGS}])
 AC_MSG_NOTICE([])
 if test "${use_internal_lapack}" = "yes"; then
   AC_MSG_NOTICE([Using internal lapack])

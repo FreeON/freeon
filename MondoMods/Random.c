@@ -28,9 +28,19 @@
 
 double random_(void) {
   static long int i=0;
-  if(i == 0) {
-    i = (long int) time( NULL );
+  if(i == 0)
+  {
+    i = (long int) time(NULL);
+#ifdef HAVE_SRAND48
     srand48(i);
+#else
+    srand(i);
+#endif
   }
+
+#ifdef HAVE_SRAND48
   return drand48();
+#else
+  return rand();
+#endif
 }

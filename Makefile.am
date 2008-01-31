@@ -130,6 +130,8 @@ Validate = \
   Validate/C2F4.inp \
   Validate/CH2x-6.inp \
   Validate/CH2x-6.ref \
+  Validate/CH2x-6.out \
+  Validate/CH2x-6.xyz \
   Validate/Caffiene.inp \
   Validate/Caffiene.ref \
   Validate/Chlorophyll.inp \
