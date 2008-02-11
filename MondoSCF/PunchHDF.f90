@@ -443,7 +443,7 @@ CONTAINS
     TYPE(State)    :: S
     TYPE(Options)  :: O
     INTEGER        :: LastGEO,LastBAS
-    !
+
     IF(O%Guess==GUESS_EQ_RESTART.OR.O%Guess==GUESS_EQ_NUGUESS) THEN
       LastBAS=O%RestartState%I(2)
       LastGEO=O%RestartState%I(3)

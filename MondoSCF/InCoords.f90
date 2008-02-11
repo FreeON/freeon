@@ -24,7 +24,7 @@
 !    disemination in future releases.
 !------------------------------------------------------------------------------
 MODULE InCoords
-  !
+
   USE ControlStructures
   USE DerivedTypes
   USE GlobalScalars
@@ -40,9 +40,10 @@ MODULE InCoords
   USE AInv
   USE CholFactor
   USE AtomPairs
-  !
+  USE MondoLogger
+
   IMPLICIT NONE
-  !
+
 CONTAINS
   !
   !----------------------------------------------------------------
@@ -908,12 +909,12 @@ CONTAINS
     CALL New(TorsionIJKL,(/4,NTorsion/))
     DO I=1,NTorsion
       IF(IEq(TorsionIJKLAux%I(1,I))<IEq(TorsionIJKLAux%I(4,I))) THEN
-        DO J=1,4 
-          TorsionIJKL%I(J,I)=TorsionIJKLAux%I(J,I) 
+        DO J=1,4
+          TorsionIJKL%I(J,I)=TorsionIJKLAux%I(J,I)
         ENDDO
       ELSE
-        DO J=1,4 
-          TorsionIJKL%I(5-J,I)=TorsionIJKLAux%I(J,I) 
+        DO J=1,4
+          TorsionIJKL%I(5-J,I)=TorsionIJKLAux%I(J,I)
         ENDDO
       ENDIF
     ENDDO
@@ -1735,8 +1736,8 @@ CONTAINS
       ! Check convergence
       !
       DiffMax=Zero
-      DO I=1,NIntC 
-        DiffMax=MAX(DiffMax,ABS(VectIntAux%D(I))) 
+      DO I=1,NIntC
+        DiffMax=MAX(DiffMax,ABS(VectIntAux%D(I)))
       ENDDO
       RMSD=DOT_PRODUCT(VectIntAux%D,VectIntAux%D)
       RMSD=SQRT(RMSD/DBLE(NIntC))
@@ -2107,8 +2108,8 @@ CONTAINS
     !
     IF(PBCDim>0) THEN
       CALL New(RotCarts,(/3,NatmsLoc+1/))
-      DO J=1,NatmsLoc 
-        RotCarts%D(1:3,J)=XYZ(1:3,J) 
+      DO J=1,NatmsLoc
+        RotCarts%D(1:3,J)=XYZ(1:3,J)
       ENDDO
       RotCarts%D(1:3,NatmsLoc+1)=Zero
       GTrfCtrl%ThreeAt(1)=NatmsLoc+1
@@ -2118,8 +2119,8 @@ CONTAINS
            .FALSE.,GTrfCtrl%TranslAt1, &
            GTrfCtrl%RotAt2ToX,GTrfCtrl%RotAt3ToXY, &
            DoCopy_O=.TRUE.)
-      DO J=1,NatmsLoc 
-        XYZ(1:3,J)=RotCarts%D(1:3,J) 
+      DO J=1,NatmsLoc
+        XYZ(1:3,J)=RotCarts%D(1:3,J)
       ENDDO
       XYZ(2:3,NatmsLoc-3+1)=Zero
       XYZ(3,NatmsLoc-3+2)=Zero
@@ -2734,8 +2735,8 @@ CONTAINS
          CALL Halt('DSYEV hosed in RotationsOff. INFO='&
          //TRIM(IntToChar(INFO)))
     S=BLKVECT%D
-    DO I=1,9 
-      Eigs(I)=BLKVALS%D(I) 
+    DO I=1,9
+      Eigs(I)=BLKVALS%D(I)
     ENDDO
     CALL UnSetDSYEVWork()
     !
@@ -2752,8 +2753,8 @@ CONTAINS
     IF(K<DimU) CALL Halt('K<DimU in GetPBCProj.')
     Eigs(1:9-DimU)=Zero
     Eigs(9-DimU+1:9)=One
-    DO I=1,9 
-      P1(1:9,I)=Eigs(I)*S(1:9,I) 
+    DO I=1,9
+      P1(1:9,I)=Eigs(I)*S(1:9,I)
     ENDDO
     CALL DGEMM_NTc(9,9,9,One,Zero,P1,S,P)
     !
@@ -2999,8 +3000,8 @@ CONTAINS
     IF(SQRT(Sum1) < 1.D-12) THEN  !!! V1 and V2 are parallel
       Rot=Zero
       SumU=DOT_PRODUCT(V1,V2)
-      DO I=1,3 
-        Rot(I,I)=SumU 
+      DO I=1,3
+        Rot(I,I)=SumU
       ENDDO
     ELSE
       SumU=One/SQRT(Sum1)
@@ -3743,8 +3744,8 @@ CONTAINS
     !
     CALL GetLattProj(XYZ,IntCs,PBCDim,P)
     P=-P
-    DO I=1,9 
-      P(I,I)=One+P(I,I) 
+    DO I=1,9
+      P(I,I)=One+P(I,I)
     ENDDO
     DO I=1,IntCs%N
       IF(B%BLI%I(I)/=0) THEN
@@ -3885,8 +3886,8 @@ CONTAINS
     CALL MatMul_1x1(ISpBC%I,JSpBC%I,ASpBC%D,ISpP%I,JSpP%I,ASpP%D, &
          ISpB2,JSpB2,ASpB2,IntCs%N,NCart,NCart)
     !
-    CALL Delete(ISpBC) 
-    CALL Delete(JSpBC) 
+    CALL Delete(ISpBC)
+    CALL Delete(JSpBC)
     CALL Delete(ASpBC)
     NZ=ISpB2%I(IntCs%N+1)-1
     CALL New(ISpBC,IntCs%N+1)
@@ -3896,11 +3897,11 @@ CONTAINS
     JSpBC%I(1:NZ)=JSpB2%I(1:NZ)
     ASpBC%D(1:NZ)=ASpB2%D(1:NZ)
     !
-    CALL Delete(ISpP) 
-    CALL Delete(JSpP) 
+    CALL Delete(ISpP)
+    CALL Delete(JSpP)
     CALL Delete(ASpP)
-    CALL Delete(ISpB2) 
-    CALL Delete(JSpB2) 
+    CALL Delete(ISpB2)
+    CALL Delete(JSpB2)
     CALL Delete(ASpB2)
   END SUBROUTINE CleanHardConstr
   !
@@ -3932,8 +3933,8 @@ CONTAINS
     CALL MatMul_1x1(ISpBCT%I,JSpBCT%I,ASpBCT%D, &
          ISpB%I,JSpB%I,ASpB%D, &
          ISpB1,JSpB1,ASpB1,NCart,NIntC,NCart)
-    CALL Delete(ISpBCT) 
-    CALL Delete(JSpBCT) 
+    CALL Delete(ISpBCT)
+    CALL Delete(JSpBCT)
     CALL Delete(ASpBCT)
     !
     CALL GcInvItMatr(ISpB1,JSpB1,ASpB1, &
@@ -3943,14 +3944,14 @@ CONTAINS
          ISpB1%I,JSpB1%I,ASpB1%D, &
          ISpB2,JSpB2,ASpB2,NIntC,NCart,NCart)
     !
-    CALL Delete(ISpB1) 
-    CALL Delete(JSpB1) 
+    CALL Delete(ISpB1)
+    CALL Delete(JSpB1)
     CALL Delete(ASpB1)
     ASpB2%D=-ASpB2%D
     CALL AddMat_1x1(ISpB%I,JSpB%I,ASpB%D, &
          ISpB2%I,JSpB2%I,ASpB2%D,ISpB1,JSpB1,ASpB1,NIntC,NCart)
-    CALL Delete(ISpB) 
-    CALL Delete(JSpB) 
+    CALL Delete(ISpB)
+    CALL Delete(JSpB)
     CALL Delete(ASpB)
     NZSpB=ISpB1%I(NIntC+1)-1
     CALL New(ISpB,NIntC+1)
@@ -3960,11 +3961,11 @@ CONTAINS
     JSpB%I(1:NZSpB)=JSpB1%I(1:NZSpB)
     ASpB%D(1:NZSpB)=ASpB1%D(1:NZSpB)
     !
-    CALL Delete(ISpB1) 
-    CALL Delete(JSpB1) 
+    CALL Delete(ISpB1)
+    CALL Delete(JSpB1)
     CALL Delete(ASpB1)
-    CALL Delete(ISpB2) 
-    CALL Delete(JSpB2) 
+    CALL Delete(ISpB2)
+    CALL Delete(JSpB2)
     CALL Delete(ASpB2)
     CALL Delete(CholData)
     !
@@ -4004,20 +4005,20 @@ CONTAINS
       AMP2%D=-AMP2%D
       CALL AddMat_1x1(IMP2%I,JMP2%I,AMP2%D, &
            IM%I,JM%I,AM%D,ICorr,JCorr,ACorr,NCart,NCart)
-      CALL Delete(IMP2) 
-      CALL Delete(JMP2) 
+      CALL Delete(IMP2)
+      CALL Delete(JMP2)
       CALL Delete(AMP2)
       ! Corr2=Chol*(MP2-M)*Chol
       CALL InvMatXMatr(CholData,ICorr%I,JCorr%I,ACorr%D, &
            ICorr2,JCorr2,ACorr2,NCart,NCart,1.D-8)
-      CALL Delete(ICorr) 
-      CALL Delete(JCorr) 
+      CALL Delete(ICorr)
+      CALL Delete(JCorr)
       CALL Delete(ACorr)
       ! MPnew=MP+Corr2
       CALL AddMat_1x1(ICorr2%I,JCorr2%I,ACorr2%D, &
            IMP%I,JMP%I,AMP%D,IMP2,JMP2,AMP2,NCart,NCart)
-      CALL Delete(IMP) 
-      CALL Delete(JMP) 
+      CALL Delete(IMP)
+      CALL Delete(JMP)
       CALL Delete(AMP)
       NZ=SIZE(JMP2%I)
       CALL New(IMP,NCart+1)
@@ -4027,21 +4028,21 @@ CONTAINS
       JMP%I=JMP2%I
       AMP%D=AMP2%D
       MaxCorr=MAXVAL(ACorr2%D)
-      CALL Delete(ICorr2) 
-      CALL Delete(JCorr2) 
+      CALL Delete(ICorr2)
+      CALL Delete(JCorr2)
       CALL Delete(ACorr2)
-      CALL Delete(IMP2) 
-      CALL Delete(JMP2) 
+      CALL Delete(IMP2)
+      CALL Delete(JMP2)
       CALL Delete(AMP2)
       WRITE(*,*) I,' CorrMax= ',MaxCorr
       IF(MaxCorr<ConvCrit) EXIT
     ENDDO
     !
-    CALL Delete(IGc) 
-    CALL Delete(JGc) 
+    CALL Delete(IGc)
+    CALL Delete(JGc)
     CALL Delete(AGc)
-    CALL Delete(IM)  
-    CALL Delete(JM)  
+    CALL Delete(IM)
+    CALL Delete(JM)
     CALL Delete(AM)
     NZ=SIZE(JMP%I)
     CALL New(IM,NCart+1)
@@ -4050,8 +4051,8 @@ CONTAINS
     IM%I=IMP%I
     JM%I=JMP%I
     AM%D=AMP%D
-    CALL Delete(IMP) 
-    CALL Delete(JMP) 
+    CALL Delete(IMP)
+    CALL Delete(JMP)
     CALL Delete(AMP)
   END SUBROUTINE GcInvItMatr
   !
@@ -4425,12 +4426,12 @@ CONTAINS
         JJ=3*(JJ-1)
         LL=3*(J-1)
         IF(Inv) THEN
-          DO L=1,3 
-            IF(IConstr%I(JJ+L)/=0) B%B%D(I,LL+L)=Zero 
+          DO L=1,3
+            IF(IConstr%I(JJ+L)/=0) B%B%D(I,LL+L)=Zero
           ENDDO
         ELSE
-          DO L=1,3 
-            IF(IConstr%I(JJ+L)==0) B%B%D(I,LL+L)=Zero 
+          DO L=1,3
+            IF(IConstr%I(JJ+L)==0) B%B%D(I,LL+L)=Zero
           ENDDO
         ENDIF
       ENDDO
@@ -4858,9 +4859,10 @@ CONTAINS
     CHARACTER(LEN=*)          :: SCRPath
     CHARACTER(LEN=*),OPTIONAL :: Messg_O
     CHARACTER(LEN=DCL)        :: Messg
-    !
-    write(*,*) 'RedundancyOff hardwired to return'
-    return
+
+    CALL MondoLog(DEBUG_NONE, "RedundancyOff", "hardwired to return")
+    RETURN
+
     CALL GetBMatInfo(SCRPath,ISpB,JSpB,ASpB,CholData)
     NIntC=SIZE(ISpB%I)-1
     IF(NIntC/=SIZE(Displ)) &
@@ -4869,7 +4871,7 @@ CONTAINS
     CALL New(Vect1,NCart)
     CALL New(Displ2,NIntC)
     Displ2%D=Displ
-    !
+
     CALL CALC_BxVect(ISpB,JSpB,ASpB,Displ,Vect1%D,Trp_O=.TRUE.)
     CALL GcInvIter(Vect1%D,ISpB,JSpB,ASpB,CholData,NIntC)
     CALL CALC_BxVect(ISpB,JSpB,ASpB,Displ,Vect1%D)
@@ -5393,14 +5395,14 @@ CONTAINS
     ENDIF
     J=3*(ThreeAt(1)-1)
     IF(J>=0) THEN
-      DO K=1,3 
-        CleanList%I(PermRef(J+K))=0 
+      DO K=1,3
+        CleanList%I(PermRef(J+K))=0
       ENDDO
     ENDIF
     J=3*(ThreeAt(2)-1)
     IF(J>=0) THEN
-      DO K=2,3 
-        CleanList%I(PermRef(J+K))=0 
+      DO K=2,3
+        CleanList%I(PermRef(J+K))=0
       ENDDO
     ENDIF
     J=3*(ThreeAt(3)-1)
@@ -5733,8 +5735,8 @@ CONTAINS
         Fact=SQRT(BLKVALS%D(I))
         Fact=One/SQRT(BLKVALS%D(I))
         NZ=NZ+1
-        DO J=1,NCart 
-          SQFullGc%D(J,NZ)=BLKVECT%D(J,I)*Fact 
+        DO J=1,NCart
+          SQFullGc%D(J,NZ)=BLKVECT%D(J,I)*Fact
         ENDDO
       ELSE
         Fact=Zero
@@ -5847,8 +5849,8 @@ CONTAINS
     REAL(DOUBLE)              :: X1,X2
     INTEGER                   :: I,J,NDim,I1,I2
     ! order set by decreasing x
-    DO I=1,NDim 
-      IWork(I)=I 
+    DO I=1,NDim
+      IWork(I)=I
     ENDDO
     DO I=1,NDim-1
       DO J=NDim-1,1,-1
@@ -5874,8 +5876,8 @@ CONTAINS
     REAL(DOUBLE)              :: X1,X2
     INTEGER                   :: I,J,NDim,I1,I2
     ! order set by increasing x
-    DO I=1,NDim 
-      IWork(I)=I 
+    DO I=1,NDim
+      IWork(I)=I
     ENDDO
     DO I=1,NDim-1
       DO J=1,NDim-I
@@ -6040,16 +6042,16 @@ CONTAINS
       IF(IntSet==1) THEN
         MaxBondL%D=Zero
         CALL New(FragID,NatmsLoc)
-        DO J=1,NatmsLoc 
-          FragID%I(J)=J 
+        DO J=1,NatmsLoc
+          FragID%I(J)=J
         ENDDO
         CALL New(TOPM%ITot12,NatmsLoc+1)
         CALL New(TOPM%JTot12,NatmsLoc)
-        DO J=1,NatmsLoc+1 
-          TOPM%ITot12%I(J)=J 
+        DO J=1,NatmsLoc+1
+          TOPM%ITot12%I(J)=J
         ENDDO
-        DO J=1,NatmsLoc   
-          TOPM%JTot12%I(J)=J 
+        DO J=1,NatmsLoc
+          TOPM%JTot12%I(J)=J
         ENDDO
         NFrag=NatmsLoc
         DoQuit=.FALSE.
@@ -6400,8 +6402,8 @@ CONTAINS
                           DVect=GMass*DVect
                           !write(*,*) jj2,' gmass ',gmass
                           !write(*,*) jj2,' dvect ',DVect
-                          DO J=1,3 
-                            Vects%D(ICount,J)=DVect(J) 
+                          DO J=1,3
+                            Vects%D(ICount,J)=DVect(J)
                           ENDDO
                           !DLength=DOT_PRODUCT(DVect,DVect)
                           DO I=1,3
@@ -6665,8 +6667,8 @@ CONTAINS
                           DVect=GMass*DVect
                           !write(*,*) jj2,' gmass ',gmass
                           !write(*,*) jj2,' dvect ',DVect
-                          DO J=1,3 
-                            Vects%D(ICount,J)=DVect(J) 
+                          DO J=1,3
+                            Vects%D(ICount,J)=DVect(J)
                           ENDDO
                           !DLength=DOT_PRODUCT(DVect,DVect)
                           DO I=1,3
@@ -6871,11 +6873,11 @@ CONTAINS
     NDeg=5! generates NDEG-th neighbours, NDEG+1-th neighbour is allowed for VDW connectivity
     CALL New(IUnit,NatmsLoc+1)
     CALL New(JUnit,NatmsLoc)
-    DO J=1,NatmsLoc+1 
-      IUnit%I(J)=J 
+    DO J=1,NatmsLoc+1
+      IUnit%I(J)=J
     ENDDO
-    DO J=1,NatmsLoc   
-      JUnit%I(J)=J 
+    DO J=1,NatmsLoc
+      JUnit%I(J)=J
     ENDDO
     CALL AddMat_1x1(TOPM%ITot12%I,TOPM%JTot12%I,Aux1, &
          IUnit%I,JUnit%I,Aux2, &
@@ -7141,8 +7143,8 @@ CONTAINS
     CALL New(TopVDWNew,(/NatmsLoc,Dim2+AddDim/))
     TopVDWNew%I=0
     DO I=1,NatmsLoc
-      DO J=1,Dim2 
-        TopVDWNew%I(I,J)=TopVDW%I(I,J) 
+      DO J=1,Dim2
+        TopVDWNew%I(I,J)=TopVDW%I(I,J)
       ENDDO
     ENDDO
     DO I=1,NBond
@@ -8088,12 +8090,12 @@ CONTAINS
     ! DO I=1,9 ; Proj(I,I)=Proj(I,I)+One ; ENDDO
     !
     DO I=1,SIZE(Aux9,1)
-      DO J=1,9 
-        Vect1(J)=Aux9(I,J) 
+      DO J=1,9
+        Vect1(J)=Aux9(I,J)
       ENDDO
       CALL DGEMM_NNc(9,9,1,One,One,Proj,Vect1,Vect2)
-      DO J=1,9 
-        Aux9(I,J)=Vect2(J) 
+      DO J=1,9
+        Aux9(I,J)=Vect2(J)
       ENDDO
     ENDDO
     !
@@ -8194,8 +8196,8 @@ CONTAINS
     IntC_L%Constraint%L=.TRUE.
     CALL LatticeConstrAB(XYZ,IntC_L,PBCDim,AL,BL,NCoinc)
     LattGrad=Zero
-    DO J=1,9 
-      Vect(J)=CartGrad(NCart-9+J) 
+    DO J=1,9
+      Vect(J)=CartGrad(NCart-9+J)
     ENDDO
     CALL DGEMM_NNc(NCoinc,9,1,One,Zero,AL%D,Vect,LattGrad(1:NCoinc))
     !
@@ -8229,8 +8231,8 @@ CONTAINS
     ENDDO
     !
     CALL DGEMM_NNc(1,NCoinc,9,One,Zero,LattGrad(1:NCoinc),BL%D,Vect)
-    DO J=1,9 
-      CartGrad(NCart-9+J)=Vect(J) 
+    DO J=1,9
+      CartGrad(NCart-9+J)=Vect(J)
     ENDDO
     !
     CALL Delete(IntC_L)

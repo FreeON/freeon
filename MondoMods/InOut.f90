@@ -37,6 +37,7 @@ MODULE InOut
   USE MemMan
   USE Indexing
   USE Parse
+  USE MondoLogger
 #ifdef PARALLEL
   USE MondoMPI
 #endif
@@ -1211,7 +1212,6 @@ CONTAINS
     CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Tag_O
     !-------------------------------------------------------------------------------
     !        Items that should not change with geometry...
-    !write(*,*) "putting CRDS at ", GetAddress(GM)
     CALL Put(GM%NAtms,'natoms'       ,Tag_O=Tag_O)
     CALL Put(GM%Confg,'configuration',Tag_O=Tag_O)
     CALL Put(GM%NElec,'nel'          ,Tag_O=Tag_O)
@@ -1261,8 +1261,7 @@ CONTAINS
     LOGICAL                                 :: Exists,LimitsQ
     LOGICAL                                 :: Bcast
 
-
-
+    CALL MondoLog(DEBUG_MAXIMUM, "Get_BCSR", "getting BCSR from "//TRIM(Name))
     IF(PRESENT(Bcast_O)) THEN
       Bcast = Bcast_O
     ELSE
@@ -1271,16 +1270,14 @@ CONTAINS
 #ifdef PARALLEL
     IF(MyId==0)THEN
 #endif
-!!$write(*,*)'In Get_bcsr',PRESENT(CheckPoint_O)
       IF(PRESENT(CheckPoint_O))THEN
         IF(CheckPoint_O)THEN
           NSMat=A%NSMat
           NAtms=A%NAtms
           NNon0=A%NNon0
           NBlks=A%NBlks
-          !write(*,*)'In Get_bcsr set to',A%NSMat
+
           CALL Get(NSMat,TRIM(Name)//'%NSMat')
-          !write(*,*)'In Get_bcsr get',A%NSMat
           CALL Get(NAtms,TRIM(Name)//'%NAtms')
           CALL Get(NBlks,TRIM(Name)//'%NBlks')
           CALL Get(NNon0,TRIM(Name)//'%NNon0')
@@ -1304,7 +1301,7 @@ CONTAINS
           ELSE
             CALL New(A,(/NAtms,NBlks,NNon0/),NSMat_O=NSMat)
           ENDIF
-          !
+
           CALL Get(A%RowPt,TRIM(Name)//'%RowPt')
           CALL Get(A%ColPt,TRIM(Name)//'%ColPt')
           CALL Get(A%BlkPt,TRIM(Name)//'%BlkPt')
@@ -1333,17 +1330,14 @@ CONTAINS
              FORM='UNFORMATTED',ACCESS='SEQUENTIAL')
 #endif
       ELSE
-        CALL Halt(' Get_BCSR could not find '//TRIM(FileName))
+        CALL Halt('Get_BCSR could not find '//TRIM(FileName))
       ENDIF
 
 #ifdef FORMATTED
       READ(UNIT=Seq,FMT=55,Err=1,IOSTAT=IOS)NSMat,NAtms,NNon0,NBlks
       INCLUDE 'Formats.Inc'
 #else
-      !write(*,*)'In Get_bcsr2',NSMat,A%NSMat
       READ(UNIT=Seq,Err=1,IOSTAT=IOS)NSMat,NAtms,NNon0,NBlks
-!!$write(*,*)'In Get_bcsr3',NSMat,A%NSMat
-!!$write(*,*)'In Get_bcsr3,NSMat,NAtms,NBlks,NBlks,NNon0',NSMat,NAtms,NBlks,NBlks,NNon0,AllocQ(A%Alloc)
 #endif
       IF(AllocQ(A%Alloc))THEN
         IF(NSMat.GT.A%NSMat) THEN
@@ -1355,10 +1349,10 @@ CONTAINS
              (NBlks.GT.SIZE(A%ColPt%I)).OR. &
              (NBlks.GT.SIZE(A%BlkPt%I)).OR. &
              (NNon0.GT.SIZE(A%MTrix%D))
-!!$write(*,*)'In Get_bcsr4 LimitsQ=',LimitsQ
-!!$write(*,*)'In Get_bcsr5,NSMat,NAtms,NBlks,NBlks,NNon0',A%NSMat,SIZE(A%RowPt%I),SIZE(A%ColPt%I),SIZE(A%BlkPt%I),SIZE(A%MTrix%D)
         IF(LimitsQ)THEN
-          write(*,*)'In Get_bcsr Reallocate the matrix A%NSMat.EQ.NSMat=',A%NSMat.EQ.NSMat
+          CALL MondoLog(DEBUG_NONE, "Get_BCSR", &
+            'reallocate the matrix A%NSMat.EQ.NSMat = ' &
+            //TRIM(LogicalToChar(A%NSMat.EQ.NSMat)))
           CALL Delete(A)
           CALL New(A,(/NAtoms,NBlks,NNon0/),NSMat_O=NSMat)
         ELSE
@@ -1370,7 +1364,6 @@ CONTAINS
       ELSE
         CALL New(A,(/NAtms,NBlks,NNon0/),NSMat_O=NSMat)
       ENDIF
-      !write(*,*)'In Get_bcsr4',NSMat,A%NSMat
 
 #ifdef FORMATTED
       READ(UNIT=Seq,FMT=55,Err=1,IOSTAT=IOS)(A%RowPt%I(I),I=1,NAtoms+1)
@@ -1379,11 +1372,11 @@ CONTAINS
       READ(UNIT=Seq,FMT=66,Err=1,IOSTAT=IOS)(Dummy,i=1,A%NBlks)
       READ(UNIT=Seq,FMT=66,Err=1,IOSTAT=IOS)(A%MTrix%D(I),I=1,A%NNon0)
 #else
-      READ(UNIT=Seq,Err=1,IOSTAT=IOS)(A%RowPt%I(I),I=1,NAtoms+1)
-      READ(UNIT=Seq,Err=1,IOSTAT=IOS)(A%ColPt%I(I),I=1,A%NBlks)
-      READ(UNIT=Seq,Err=1,IOSTAT=IOS)(A%BlkPt%I(I),I=1,A%NBlks)
-      READ(UNIT=Seq,Err=1,IOSTAT=IOS)(Dummy,i=1,A%NBlks)
-      READ(UNIT=Seq,Err=1,IOSTAT=IOS)(A%MTrix%D(I),I=1,A%NNon0)
+      READ(UNIT=Seq,Err=2,IOSTAT=IOS)(A%RowPt%I(I),I=1,NAtoms+1)
+      READ(UNIT=Seq,Err=3,IOSTAT=IOS)(A%ColPt%I(I),I=1,A%NBlks)
+      READ(UNIT=Seq,Err=4,IOSTAT=IOS)(A%BlkPt%I(I),I=1,A%NBlks)
+      READ(UNIT=Seq,Err=5,IOSTAT=IOS)(Dummy,i=1,A%NBlks)
+      READ(UNIT=Seq,Err=6,IOSTAT=IOS)(A%MTrix%D(I),I=1,A%NNon0)
 #endif
 
       CLOSE(UNIT=Seq,STATUS='KEEP')
@@ -1394,9 +1387,13 @@ CONTAINS
     ENDIF
 #endif
 
-    !write(*,'(A,I2,2(A,I5))') 'Get_bcsr NSMat=',A%NSMat,' A%NBlks=',A%NBlks,' size(A%BlkPt%I)=',size(A%BlkPt%I,1),trim(Name)
     RETURN
-1   CALL Halt('IO Error '//TRIM(IntToChar(IOS))//' in Get_BCSR.')
+1   CALL Halt('IO Error '//TRIM(IntToChar(IOS))//' in Get_BCSR:1340')
+2   CALL Halt('IO Error '//TRIM(IntToChar(IOS))//' in Get_BCSR reading RowPt')
+3   CALL Halt('IO Error '//TRIM(IntToChar(IOS))//' in Get_BCSR reading ColPt')
+4   CALL Halt('IO Error '//TRIM(IntToChar(IOS))//' in Get_BCSR reading BlkPt')
+5   CALL Halt('IO Error '//TRIM(IntToChar(IOS))//' in Get_BCSR reading Dummy')
+6   CALL Halt('IO Error '//TRIM(IntToChar(IOS))//' in Get_BCSR reading MTrix')
   END SUBROUTINE Get_BCSR
 
 
@@ -1448,6 +1445,9 @@ CONTAINS
     CHARACTER(LEN=DEFAULT_CHR_LEN)       :: FileName
     LOGICAL                              :: Exists
     INTEGER                              :: I,IOS
+
+    CALL MondoLog(DEBUG_MAXIMUM, "Put_BCSR", "putting BCSR into "//TRIM(Name))
+
 #ifdef PARALLEL
     IF(MyId==0)THEN
 #endif
@@ -1456,8 +1456,6 @@ CONTAINS
       ELSE
         FileName=Name
       ENDIF
-
-      !write(*,*) 'put',A%NBlks
 
       IF(PRESENT(CheckPoint_O))THEN
         IF(CheckPoint_O)THEN

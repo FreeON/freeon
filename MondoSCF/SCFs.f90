@@ -563,7 +563,7 @@ CONTAINS
       DO iCLONE=1,G%Clones
         ConvergedQ=MIN(ConvergedQ,Converged(iCLONE))
       ENDDO
-      ! Moleculr Dynamics Convergence Criteria
+      ! Molecular Dynamics Convergence Criteria
       IF(D%DoingMD) THEN
         CALL CalculateMDGeo(D,iREMOVE,MinMDGeo)
 
@@ -2237,33 +2237,36 @@ CONTAINS
 
     iREMOVE = D%MDMaxSteps+1
     SELECT CASE(D%MDGeuss)
-    CASE("DMLinear","DMTRBO","FMVerlet0")
-      iREMOVE = 3
-      MinMDGeo= 3
+    CASE("DMLinear","FMVerlet0")
+      iREMOVE  = 3
+      MinMDGeo = 3
+    CASE("DMTRBO")
+      iREMOVE  = 4
+      MinMDGeo = 4
     CASE("DMSymplectic")
-      iREMOVE = 5
-      MinMDGeo= 5
+      iREMOVE  = 5
+      MinMDGeo = 5
     CASE("FMVerlet1")
-      iREMOVE = 4
-      MinMDGeo= 4
+      iREMOVE  = 4
+      MinMDGeo = 4
     CASE('DMProj0')
-      iREMOVE = 1
-      MinMDGeo= 1
+      iREMOVE  = 1
+      MinMDGeo = 1
     CASE('DMProj1')
-      iREMOVE = 2
-      MinMDGeo= 2
+      iREMOVE  = 2
+      MinMDGeo = 2
     CASE('DMProj2')
-      iREMOVE = 3
-      MinMDGeo= 3
+      iREMOVE  = 3
+      MinMDGeo = 3
     CASE('DMProj3')
-      iREMOVE = 4
-      MinMDGeo= 4
+      iREMOVE  = 4
+      MinMDGeo = 4
     CASE('DMProj4')
-      iREMOVE = 5
-      MinMDGeo= 5
+      iREMOVE  = 5
+      MinMDGeo = 5
     CASE('DMDGeuss')
-      iREMOVE = 1
-      MinMDGeo= 1
+      iREMOVE  = 1
+      MinMDGeo = 1
     CASE DEFAULT
       CALL Halt("[SCFs.CalculateMDGeo] unknown MDGeuss")
     END SELECT

@@ -994,7 +994,7 @@ PROGRAM P2Use
 #endif
       Norm_Error = TrP-DBLE(NEl)/SFac
       Ipot_Error = One
-      !
+
       Qstep        = 0
       ConvergeAOSP = .FALSE.
       AOSPExit     = .FALSE.
@@ -1030,17 +1030,17 @@ PROGRAM P2Use
 #endif
         !          Logic
         IF(ABS(Ipot_Error) < 1.0D-10 .AND. ABS(Norm_Error) < 1.0D-10) THEN
-          AOSPExit     = .TRUE.
+          AOSPExit = .TRUE.
           ConvergeAOSP = .TRUE.
           IF(Lam > (One-1.D-14)) ConvergeAll = .TRUE.
         ELSEIF(Qstep > 5) THEN
-          AOSPExit  = .TRUE.
+          AOSPExit = .TRUE.
           IF(ABS(Ipot_Error) < 1.0D-4 .AND. ABS(Norm_Error) < 1.0D-4) ConvergeAOSP = .TRUE.
           IF(ConvergeAOSP) THEN
             IF(Lam > (One-1.D-14)) ConvergeAll = .TRUE.
           ENDIF
         ELSEIF(ABS(Norm_Error) > 100.D0*TError0) THEN
-          AOSPExit     = .TRUE.
+          AOSPExit = .TRUE.
         ENDIF
         IF(AOSPExit) EXIT
       ENDDO

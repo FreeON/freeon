@@ -280,12 +280,7 @@ PROGRAM DIIS
 #ifdef PARALLEL
     IF(MyId==ROOT)THEN
 #endif
-      CALL OpenASCII(OutFile,Out)
-      CALL PrintProtectL(Out)
-      IF(PrintFlags%Key==DEBUG_MAXIMUM) &
-           WRITE(Out,*)TRIM(Mssg)
-      CALL PrintProtectR(Out)
-      CLOSE(Out)
+      CALL MondoLog(DEBUG_MAXIMUM, "DIIS", TRIM(Mssg))
 #ifdef PARALLEL
     ENDIF
 #endif
