@@ -1,0 +1,29 @@
+<BeginOptions>
+
+Charge=0
+Multiplicity=1
+
+DebugAll=(MaxDebug,CheckSums)
+Guess=SuperPos
+SCFMethod=(TC2)
+BasisSets=(6-31G**)
+ModelChem=(HF) 
+Accuracy=(tight)
+SCFConvergence=(DIIS)
+Geometry=(InAU)
+MinSCF=12
+MaxSCF=12
+
+Grad=(MolecularDynamics)
+MDProjection=DMTRBO
+MDMethod=Verlet
+DeltaTime=0.5
+MaxMDStep=100
+MDNumSCF=2
+
+<EndOptions>
+
+<BeginGeometry>
+H     0.00000000     0.00000000     0.00000000     0.00000000     0.00000000     0.00000000  
+H     1.20000000     0.00000000     0.00000000     0.00000000     0.00000000     0.00000000
+<EndGeometry>

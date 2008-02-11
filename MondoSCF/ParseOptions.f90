@@ -38,10 +38,13 @@ MODULE ParseOptions
   USE GlobalCharacters
   USE ParsingConstants
   USE ControlStructures
+  USE MondoLogger
 #ifdef NAG
   USE F90_UNIX
 #endif
+
   IMPLICIT NONE
+
 CONTAINS
   !============================================================================
   !  LOAD THE OPTIONS OBJECT
@@ -404,8 +407,12 @@ CONTAINS
     IF(Guess==GUESS_EQ_RESTART.OR. &
          Guess==GUESS_EQ_NUGUESS.OR. &
          Guess==GUESS_EQ_NEWGEOM )THEN
-      IF(.NOT.OptCharQ(Inp,RESTART_INFO,RestartHDF))  &
-           CALL MondoHalt(PRSE_ERROR,'Restart requested, but no HDF file specified.')
+
+      ! Make sure we have the necessary information to restart.
+      IF(.NOT.OptCharQ(Inp,RESTART_INFO,RestartHDF)) THEN
+        CALL MondoHalt(PRSE_ERROR,'Restart requested, but no HDF file specified.')
+      ENDIF
+
       ! Check for relative path for HDF, and if relative, expand ...
       IF(SCAN(RestartHDF,'$')/=0)THEN
         L1=INDEX(RestartHDF,'$')
@@ -415,14 +422,19 @@ CONTAINS
         CALL GETENV(RestartHDF(L1+1:L2-1),CTmp)
         RestartHDF=RestartHDF(1:L1-1)//TRIM(CTmp)//RestartHDF(L2:L3)
       ENDIF
+
       ! Check for absolute path
-      IF(RestartHDF(1:1)/='/')  &
-           CALL MondoHalt(PRSE_ERROR,'Please use absolute path to the restart HDF file')
+      IF(RestartHDF(1:1)/='/') THEN
+        CALL MondoHalt(PRSE_ERROR,'Please use absolute path to the restart HDF file')
+      ENDIF
       CALL New(RestartState,3)
+
       ! Open the old restart HDF file
       HDF_CurrentID=OpenHDF(RestartHDF)
+
       ! Get the current state to restart from
       CALL Get(RestartState,'current_state')
+
       ! Now close the old file...
       CALL CloseHDF(HDF_CurrentID)
     ELSEIF(OptKeyQ(Inp,GUESS_OPTION,GUESS_CORE))THEN
@@ -638,16 +650,16 @@ CONTAINS
     IF(.NOT. OptDblQ(Inp,Op_Pressure, Pressure)) THEN
       Pressure = 0.0D0
     ENDIF
+
     ! Convert to Atomic Units
     Pressure = Pressure*GPaToAU
-    !
+
     IF(Pressure .NE. Zero) THEN
-      WRITE(*,*) "Pressure = ",Pressure," AU"
-      WRITE(*,*) "Pressure = ",Pressure/GPaToAU," GPa"
+      CALL MondoLog(DEBUG_NONE, "ParseMISC", "Pressure = " &
+        //TRIM(FltToChar(Pressure))//", AU")
+      CALL MondoLog(DEBUG_NONE, "ParseMISC", "Pressure = " &
+        //TRIM(FltToChar(Pressure/GPaToAU))//" GPa")
     ENDIF
-    !
+
   END SUBROUTINE ParseMISC
-  !
-  !
-  !
 END MODULE ParseOptions

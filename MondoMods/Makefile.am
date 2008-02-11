@@ -131,7 +131,8 @@ InOut.o : \
   MemMan.o \
   Indexing.o \
   Parse.o \
-  SetEq.o
+  SetEq.o \
+  MondoLogger.o
 
 DerivedTypes.o : \
   GlobalScalars.o \
@@ -202,7 +203,8 @@ PrettyPrint.o : \
   Clock.o \
   Parse.o \
   SetEq.o \
-  InOut.o
+  InOut.o \
+  MondoLogger.o
 
 LinAlg.o : \
   GlobalCharacters.o \
@@ -383,4 +385,5 @@ ProcessControl.o : \
 
 MondoLogger.o : \
   GlobalObjects.o \
-  GlobalCharacters.o
+  GlobalCharacters.o \
+  ParsingConstants.o

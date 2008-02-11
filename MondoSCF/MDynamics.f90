@@ -38,6 +38,7 @@ MODULE MDynamics
   USE SetXYZ
   USE DynamicsKeys
   USE MondoLogger
+  USE FileOperations
 
   IMPLICIT NONE
 
@@ -57,11 +58,13 @@ CONTAINS
 
     !--------------------------------------------------------------
     ! Do Molecular Dynamics:Loop over Time Steps
+
     ! Intitialize
-    C%Stat%Previous%I=(/0,1,1/)
+    C%Stat%Previous%I = (/0,1,1/)
     iGEO    = 1
     iMDStep = 1
 
+    ! Allocate some memory.
     CALL New(MDTime,C%Geos%Clones)
     CALL New(MDKin, C%Geos%Clones)
     CALL New(MDEpot,C%Geos%Clones)
@@ -70,6 +73,7 @@ CONTAINS
     CALL New(MDTave,C%Geos%Clones)
     CALL New(MDLinP,(/3,C%Geos%Clones/))
 
+    ! Set some stuff to zero.
     MDTime%D = Zero
     MDKin%D  = Zero
     MDEpot%D = Zero
@@ -80,11 +84,13 @@ CONTAINS
 
     ! Initial Guess
     IF(C%Opts%Guess==GUESS_EQ_RESTART) THEN
-      ! Init the Time
+
+      ! Init from old hdf file.
+      CALL MondoLog(DEBUG_NONE, "MD", "loading from restart hdf file "//TRIM(C%Nams%RFile))
       HDFFileID=OpenHDF(C%Nams%RFile)
       DO iCLONE=1,C%Geos%Clones
         HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
-        CALL Get(iMDStep,'iMDStep')
+        CALL Get(iMDStep,"iMDStep")
         CALL Get(MDTime%D(iCLONE),"MDTime")
         CALL Get(C%Dyns%MDGeuss,"MDGeuss")
         CALL CloseHDFGroup(HDF_CurrentID)
@@ -92,10 +98,11 @@ CONTAINS
       CALL CloseHDF(HDFFileID)
 
       ! Save to Current HDF
+      CALL MondoLog(DEBUG_NONE, "MD", "saving to current hdf file "//TRIM(C%Nams%HFile))
       HDFFileID=OpenHDF(C%Nams%HFile)
       DO iCLONE=1,C%Geos%Clones
         HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
-        CALL Put(iMDStep,'iMDStep')
+        CALL Put(iMDStep,"iMDStep")
         CALL Put(MDTime%D(iCLONE),"MDTime")
         CALL Put(.TRUE.,"DoingMD")
         CALL Put(C%Dyns%MDGeuss,"MDGeuss")
@@ -106,14 +113,33 @@ CONTAINS
       ! Determine the Begin Step
       iGEOBegin = C%Stat%Current%I(3)
       IF(iMDStep > iGEOBegin) THEN
+        CALL MondoLog(DEBUG_NONE, "MD", "iMDStep ("//TRIM(IntToChar(iMDStep)) &
+          //") > iGEOBegin ("//TRIM(IntToChar(iGEOBegin))//")")
         iMDStep = iGEOBegin
+        IF(C%Geos%Clones > 1) THEN
+          CALL MondoLog(DEBUG_NONE, "MD", "[FIXME] this might fail if you are using clones")
+        ENDIF
         MDTime%D(1) = MDTime%D(1)-C%Dyns%DTime
+
+        ! Since we are recalculating the last time step, we will add 1 step to
+        ! MDMaxSteps to account for that additional step.
+        CALL MondoLog(DEBUG_NONE, "MD", "I will recalculate the last time step")
+        C%Dyns%MDMaxSteps = C%Dyns%MDMaxSteps+1
       ENDIF
 
       ! Determine iREMOVE and MinMDGeo
       CALL CalculateMDGeo(C%Dyns,iREMOVE,MinMDGeo)
 
-      ! copy .DOsave (.FOsave) and .DOPsave (.FOPsave) matrice to there new names
+      ! Print some stuff out.
+      CALL MondoLog(DEBUG_NONE, "MD", "restarting MD calculation")
+      CALL MondoLog(DEBUG_NONE, "MD", "iMDStep    = "//TRIM(IntToChar(iMDStep)))
+      CALL MondoLog(DEBUG_NONE, "MD", "iGEOBegin  = "//TRIM(IntToChar(iGEOBegin)))
+      CALL MondoLog(DEBUG_NONE, "MD", "MDTime     = "//TRIM(FltToChar(MDTime%D(1)*InternalTimeToFemtoseconds)))
+      CALL MondoLog(DEBUG_NONE, "MD", "MinMDGeo   = "//TRIM(IntToChar(MinMDGeo)))
+      CALL MondoLog(DEBUG_NONE, "MD", "iREMOVE    = "//TRIM(IntToChar(iREMOVE)))
+      CALL MondoLog(DEBUG_NONE, "MD", "MDMaxSteps = "//TRIM(IntToChar(C%Dyns%MDMaxSteps)))
+
+      ! copy .DOsave (.FOsave) and .DOPsave (.FOPsave) matrice to their new names
       CALL CopyRestart(C,iGEOBegin,MinMDGeo)
     ELSE
       ! Init the Time
@@ -122,7 +148,7 @@ CONTAINS
       DO iCLONE=1,C%Geos%Clones
         HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
         CALL Put(MDTime%D(iCLONE),"MDTime")
-        CALL Put(.TRUE.,'DoingMD')
+        CALL Put(.TRUE.,"DoingMD")
         CALL Put(C%Dyns%MDGeuss,"MDGeuss")
         CALL CloseHDFGroup(HDF_CurrentID)
       ENDDO
@@ -133,17 +159,27 @@ CONTAINS
 
       ! Determine iREMOVE and MinMDGeo
       CALL CalculateMDGeo(C%Dyns,iREMOVE,MinMDGeo)
+
+      ! Print some stuff out.
+      CALL MondoLog(DEBUG_NONE, "MD", "iMDStep    = "//TRIM(IntToChar(iMDStep)))
+      CALL MondoLog(DEBUG_NONE, "MD", "iGEOBegin  = "//TRIM(IntToChar(iGEOBegin)))
+      CALL MondoLog(DEBUG_NONE, "MD", "MDTime     = "//TRIM(FltToChar(MDTime%D(1)*InternalTimeToFemtoseconds)))
+      CALL MondoLog(DEBUG_NONE, "MD", "MinMDGeo   = "//TRIM(IntToChar(MinMDGeo)))
+      CALL MondoLog(DEBUG_NONE, "MD", "iREMOVE    = "//TRIM(IntToChar(iREMOVE)))
+      CALL MondoLog(DEBUG_NONE, "MD", "MDMaxSteps = "//TRIM(IntToChar(C%Dyns%MDMaxSteps)))
     ENDIF
 
     ! Do MD
-    DO iGEO = iGEOBegin,C%Dyns%MDMaxSteps+iGEOBegin-1
-      IF(iGEO==1) THEN
-        IF(C%Dyns%Initial_Temp) THEN
-          CALL SetTempMaxBoltDist(C,C%Dyns%TempInit)
-        ENDIF
+    DO iGEO = iGEOBegin, C%Dyns%MDMaxSteps+iGEOBegin-1
+
+      ! Initialize with temperature distribution.
+      IF((iGEO == 1) .AND. C%Dyns%Initial_Temp) THEN
+        CALL SetTempMaxBoltDist(C,C%Dyns%TempInit)
       ENDIF
+
       ! For iMDStep <= MinMDGeo make Diagonal or Core Guess
       IF(iGEO .LE. MinMDGeo) THEN
+        CALL MondoLog(DEBUG_NONE, "MD", "iGEO <= MinMDGeo, guessing...")
         DO iBAS=1,C%Sets%NBSets
           IF(iBAS==1) THEN
             C%Opts%GeussToP2Use=SCF_SUPERPOSITION
@@ -154,8 +190,10 @@ CONTAINS
           CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
           CALL SCF(iBAS,iGEO,C)
         ENDDO
+
         ! Copy Last SCF to P(iGEO)_save
         CALL CopyMatrices(C,.TRUE.)
+
         ! Copy Last SCF to P(iGEO)_save_tilde
         CALL CopyMatrices(C,.FALSE.)
       ELSE
@@ -163,11 +201,12 @@ CONTAINS
         C%Opts%GeussTOP2Use = C%Dyns%MDGeuss
         C%Opts%MinSCF       = C%Dyns%MDNumSCF
         C%Opts%MaxSCF       = C%Dyns%MDNumSCF
-        !
+
         iBAS=C%Sets%NBSets
         CALL GeomArchive(iBAS,iGEO,C%Nams,C%Opts,C%Sets,C%Geos)
         CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
         CALL SCF(iBAS,iGEO,C)
+
         ! Copy Last SCF to P(iGEO)_save
         CALL CopyMatrices(C,.FALSE.)
       ENDIF
@@ -204,7 +243,7 @@ CONTAINS
         ENDDO
       ENDDO
 
-      ! Move the Atoms, apply the theromstats and output
+      ! Move the Atoms, apply the thermostats and print some output.
       IF(C%Dyns%MDAlgorithm == MD_AL_VERLET) THEN
         IF(C%Dyns%Const_Temp .AND. .NOT.C%Dyns%Const_Press) THEN
           CALL Halt('Constant Temperature MD Not Implemented')
@@ -223,26 +262,33 @@ CONTAINS
       ELSEIF(C%Dyns%MDAlgorithm == MD_AL_GEAR) THEN
         CALL Halt('Gear MD Not Implemented')
       ENDIF
+
       ! If Parallel Rep, switch Geometries
       IF(C%Dyns%Parallel_Rep) THEN
         CALL Halt('Parallel Replicate MD Not Implemented')
       ENDIF
+
       ! Refresh the Time and other Stuff
       HDFFileID=OpenHDF(C%Nams%HFile)
       DO iCLONE=1,C%Geos%Clones
-        iMDStep          = iMDStep+1
+        iMDStep = iMDStep+1
         MDTime%D(iCLONE) = MDTime%D(iCLONE)+C%Dyns%DTime
         HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
         CALL Put(iMDStep,'iMDStep')
         CALL Put(MDTime%D(iCLONE),"MDTime")
         CALL CloseHDFGroup(HDF_CurrentID)
+        CALL MondoLog(DEBUG_NONE, "MD", "done with time step, incrementing counters and putting to hdf")
+        CALL MondoLog(DEBUG_NONE, "MD", "iMDStep   = "//TRIM(IntToChar(iMDStep)))
+        CALL MondoLog(DEBUG_NONE, "MD", "MDTime     = "//TRIM(FltToChar(MDTime%D(1)*InternalTimeToFemtoseconds)))
       ENDDO
 
       ! Remove old Stuff from Scratch
       IF(C%Stat%Current%I(3)-iREMOVE > 0) THEN
+        CALL MondoLog(DEBUG_NONE, "MD", "removing outdated densities")
         CALL CleanScratch(C,iGEO-iREMOVE-1,.TRUE.)
       ENDIF
     ENDDO
+
   END SUBROUTINE MD
 
   !--------------------------------------------------------------
@@ -273,12 +319,14 @@ CONTAINS
         ENDIF
       ENDDO
 
+      ! Calculate total acceleration.
       Acc(1:3) = Acc(1:3)/DBLE(numberUnconstrainedAtoms)
-      CALL MondoLog(DEBUG_NONE, "MDynamics:MD_Verlet_NVE", "flying ice-cube correction:" &
-        //TRIM(DblToChar(Acc(1))) &
-        //TRIM(DblToChar(Acc(2))) &
+      CALL MondoLog(DEBUG_NONE, "MDynamics:MD_Verlet_NVE", "flying ice-cube correction: " &
+        //TRIM(DblToChar(Acc(1)))//" " &
+        //TRIM(DblToChar(Acc(2)))//" " &
         //TRIM(DblToChar(Acc(3))))
 
+      ! Make sure the total force on the system is zero.
       DO iATS = 1,C%Geos%Clone(iCLONE)%NAtms
         IF(C%Geos%Clone(iCLONE)%CConstrain%I(iATS) == 0) THEN
           C%Geos%Clone(iCLONE)%Gradients%D(1:3,iATS) = C%Geos%Clone(iCLONE)%Gradients%D(1:3,iATS)-Acc(1:3)
@@ -294,6 +342,7 @@ CONTAINS
             Mass     =  C%Geos%Clone(iCLONE)%AtMss%D(iATS)
             Vel(1:3) =  C%Geos%Clone(iCLONE)%Velocity%D(1:3,iATS)
             Acc(1:3) = -C%Geos%Clone(iCLONE)%Gradients%D(1:3,iATS)/Mass
+
             ! Velocity: v(t) = v(t-dT/2)+a(t)dT/2
             Vel(1:3) = Vel(1:3) + Acc(1:3)*dT2
             C%Geos%Clone(iCLONE)%Velocity%D(1:3,iATS) = Vel(1:3)
@@ -307,6 +356,7 @@ CONTAINS
       ! Calculate Kinectic Energy and  Temp, update Ave Temp
       CALL CalculateMDKin(C%Geos%Clone(iCLONE),MDKin%D(iCLONE),MDTemp%D(iCLONE))
       MDTave%D(iCLONE) = (DBLE(iGEO-1)/DBLE(iGEO))*MDTave%D(iCLONE) +(One/DBLE(iGEO))*MDTemp%D(iCLONE)
+
       ! Store Potential and Total Energy
       MDEpot%D(iCLONE) = C%Geos%Clone(iCLONE)%ETotal
       MDEtot%D(iCLONE) = MDEpot%D(iCLONE) + MDKin%D(iCLONE)
@@ -341,25 +391,28 @@ CONTAINS
     DO iCLONE=1,C%Geos%Clones
       DO iATS=1,C%Geos%Clone(iCLONE)%NAtms
         IF(C%Geos%Clone(iCLONE)%CConstrain%I(iATS)==0)THEN
-          Mass      =  C%Geos%Clone(iCLONE)%AtMss%D(iATS)
-          Pos(1:3)  =  C%Geos%Clone(iCLONE)%Carts%D(1:3,iATS)
-          Vel(1:3)  =  C%Geos%Clone(iCLONE)%Velocity%D(1:3,iATS)
-          Acc(1:3)  = -C%Geos%Clone(iCLONE)%Gradients%D(1:3,iATS)/Mass
+          Mass     =  C%Geos%Clone(iCLONE)%AtMss%D(iATS)
+          Pos(1:3) =  C%Geos%Clone(iCLONE)%Carts%D(1:3,iATS)
+          Vel(1:3) =  C%Geos%Clone(iCLONE)%Velocity%D(1:3,iATS)
+          Acc(1:3) = -C%Geos%Clone(iCLONE)%Gradients%D(1:3,iATS)/Mass
+
           ! Position: r(t+dT)= r(t)+v(t)*dT+a(t)*dT*dT/2
           Pos(1:3) = Pos(1:3) + Vel(1:3)*dT + Acc(1:3)*dTSq2
-          ! Update
+
+          ! Update.
           C%Geos%Clone(iCLONE)%Carts%D(1:3,iATS) = Pos(1:3)
         ENDIF
       ENDDO
     ENDDO
 
-    ! Update the Velocity
+    ! Update the Velocity.
     DO iCLONE=1,C%Geos%Clones
       DO iATS=1,C%Geos%Clone(iCLONE)%NAtms
         IF(C%Geos%Clone(iCLONE)%CConstrain%I(iATS)==0)THEN
-          Mass      =  C%Geos%Clone(iCLONE)%AtMss%D(iATS)
-          Vel(1:3)  =  C%Geos%Clone(iCLONE)%Velocity%D(1:3,iATS)
-          Acc(1:3)  = -C%Geos%Clone(iCLONE)%Gradients%D(1:3,iATS)/Mass
+          Mass     =  C%Geos%Clone(iCLONE)%AtMss%D(iATS)
+          Vel(1:3) =  C%Geos%Clone(iCLONE)%Velocity%D(1:3,iATS)
+          Acc(1:3) = -C%Geos%Clone(iCLONE)%Gradients%D(1:3,iATS)/Mass
+
           ! Velocity: v(t) = v(t-dT/2)+a(t)dT/2
           Vel(1:3) = Vel(1:3) + Acc(1:3)*dT2
           C%Geos%Clone(iCLONE)%Velocity%D(1:3,iATS) = Vel(1:3)
@@ -841,7 +894,7 @@ CONTAINS
         WRITE(Out,85)
       ENDIF
 
-      WRITE(Out,*) "---------- Start: Atom Position(3) Velocity(3)"
+      WRITE(Out,"(A)") "---------- Start: Atom Position(3) Velocity(3)"
       DO iATS=1,C%Geos%Clone(iCLONE)%NAtms
         IF(C%Geos%Clone(iCLONE)%InAU) THEN
           WRITE(Out,99) TRIM(C%Geos%Clone(iCLONE)%AtNam%C(iATS)),  &
@@ -853,7 +906,7 @@ CONTAINS
                C%Geos%Clone(iCLONE)%Velocity%D(:,iATS)*BohrsToAngstroms
         ENDIF
       ENDDO
-      WRITE(Out,*) "---------- End: Atom Position(3) Velocity(3)"
+      WRITE(Out,"(A)") "---------- End: Atom Position(3) Velocity(3)"
       CLOSE(Out)
 
       IF(C%Dyns%MDAlgorithm == MD_AL_SYMPLECTIC) THEN
@@ -1018,26 +1071,38 @@ CONTAINS
     INTEGER                        :: iCLONE,iGEO,iGEOBegin,MinMDGeo
     CHARACTER(LEN=DEFAULT_CHR_LEN) :: chGEO,chCLONE
     CHARACTER(LEN=DEFAULT_CHR_LEN) :: PoldFile,PnewFile
+    INTEGER                        :: copyStatus
 
+    CALL MondoLog(DEBUG_NONE, "CopyRestart", "copying density matrix files")
     DO iCLONE=1,C%Geos%Clones
       DO iGEO=iGEOBegin-MinMDGeo,iGEOBegin
         chCLONE = IntToChar(iCLONE)
         chGEO   = IntToChar(iGEO)
         SELECT CASE(C%Dyns%MDGeuss)
         CASE('DMLinear','DMTRBO','DMSymplectic')
+
           PoldFile = TRIM(C%Nams%RFile(1:LEN(TRIM(C%Nams%RFile))-4))//'_G#'//TRIM(chGEO)//'_C#'//TRIM(chCLONE)//'.DOsave'
-          PnewFile = TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME) //'_G#'//TRIM(chGEO)//'_C#'//TRIM(chCLONE)//'.DOsave'
-          CALL SYSTEM('/bin/mv -f  '//PoldFile//' '//PnewFile)
+          PnewFile = TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)//'_G#'//TRIM(chGEO)//'_C#'//TRIM(chCLONE)//'.DOsave'
+          CALL MondoLog(DEBUG_NONE, "CopyRestart", "/bin/cp -f "//TRIM(PoldFile)//" "//TRIM(PnewFile))
+          CALL System("/bin/cp -f "//TRIM(PoldFile)//" "//TRIM(PnewFile))
+
           PoldFile = TRIM(C%Nams%RFile(1:LEN(TRIM(C%Nams%RFile))-4))//'_G#'//TRIM(chGEO)//'_C#'//TRIM(chCLONE)//'.DOPsave'
-          PnewFile = TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME) //'_G#'//TRIM(chGEO)//'_C#'//TRIM(chCLONE)//'.DOPsave'
-          CALL SYSTEM('/bin/mv -f  '//PoldFile//' '//PnewFile)
+          PnewFile = TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)//'_G#'//TRIM(chGEO)//'_C#'//TRIM(chCLONE)//'.DOPsave'
+          CALL MondoLog(DEBUG_NONE, "CopyRestart", "/bin/cp -f "//TRIM(PoldFile)//" "//TRIM(PnewFile))
+          CALL System("/bin/cp -f "//TRIM(PoldFile)//" "//TRIM(PnewFile))
+
         CASE('FMVerlet0','FMVerlet1')
+
           PoldFile = TRIM(C%Nams%RFile(1:LEN(TRIM(C%Nams%RFile))-4))//'_G#'//TRIM(chGEO)//'_C#'//TRIM(chCLONE)//'.FOsave'
-          PnewFile = TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME) //'_G#'//TRIM(chGEO)//'_C#'//TRIM(chCLONE)//'.FOsave'
-          CALL SYSTEM('/bin/mv -f  '//PoldFile//' '//PnewFile)
+          PnewFile = TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)//'_G#'//TRIM(chGEO)//'_C#'//TRIM(chCLONE)//'.FOsave'
+          CALL MondoLog(DEBUG_NONE, "CopyRestart", "/bin/cp -f "//TRIM(PoldFile)//" "//TRIM(PnewFile))
+          CALL System("/bin/cp -f "//TRIM(PoldFile)//" "//TRIM(PnewFile))
+
           PoldFile = TRIM(C%Nams%RFile(1:LEN(TRIM(C%Nams%RFile))-4))//'_G#'//TRIM(chGEO)//'_C#'//TRIM(chCLONE)//'.FOPsave'
-          PnewFile = TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME) //'_G#'//TRIM(chGEO)//'_C#'//TRIM(chCLONE)//'.FOPsave'
-          CALL SYSTEM('/bin/mv -f  '//PoldFile//' '//PnewFile)
+          PnewFile = TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)//'_G#'//TRIM(chGEO)//'_C#'//TRIM(chCLONE)//'.FOPsave'
+          CALL MondoLog(DEBUG_NONE, "CopyRestart", "/bin/cp -f "//TRIM(PoldFile)//" "//TRIM(PnewFile))
+          CALL System("/bin/cp -f "//TRIM(PoldFile)//" "//TRIM(PnewFile))
+
         END SELECT
       ENDDO
     ENDDO

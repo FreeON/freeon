@@ -46,6 +46,7 @@ PROGRAM JForce
   USE BlokTrWdS
   USE NuklarE
   USE SetXYZ
+
   IMPLICIT NONE
 
 #ifdef PARALLEL
@@ -301,11 +302,11 @@ PROGRAM JForce
   ENDIF
 #endif
   ! Do some printing
-  CALL Print_Force(GMLoc,JFrc,'J Force')
-  CALL Print_Force(GMLoc,JFrc,'J Force',Unit_O=6)
+  !CALL Print_Force(GMLoc,JFrc,'J Force')
+  !CALL Print_Force(GMLoc,JFrc,'J Force',Unit_O=6)
   ! Do some checksumming and IO
-  CALL PChkSum(JFrc,    'dJ/dR',Proc_O=Prog)
-  CALL PChkSum(LatFrc_J,'LFrcJ',Proc_O=Prog)
+  !CALL PChkSum(JFrc,    'dJ/dR',Proc_O=Prog)
+  !CALL PChkSum(LatFrc_J,'LFrcJ',Proc_O=Prog)
   ! Save Forces to Disk
   CALL Put(GMLoc,Tag_O=CurGeom)
   ! Tidy Up

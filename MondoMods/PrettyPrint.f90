@@ -36,8 +36,8 @@ MODULE PrettyPrint
   USE Parse
   USE SetXYZ
   USE InOut
-
   USE ParsingConstants
+  USE MondoLogger
   ! USE Order
 #ifdef PARALLEL
   USE MondoMPI
@@ -88,15 +88,13 @@ CONTAINS
       CALL DATE_AND_TIME(DDate,TTime,Zone,Values)
       DDay=DDate(5:6)//'/'//DDate(7:8)//'/'//DDate(3:4)
       HMS=TTime(1:2)//':'//TTime(3:4)//':'//TTime(5:6)
-      CALL OpenASCII(OutFile,Out)
       IF(PrintFlags%Fmt==DEBUG_MMASTYLE)THEN
-        WRITE(Out,'(A)')'(*'//TRIM(Mssg)//' '//DDay//' @ '//HMS//'*)'
+        CALL MondoLogPlain('(*'//TRIM(Mssg)//' '//DDay//' @ '//HMS//'*)')
       ELSEIF(Enter)THEN
-        WRITE(Out,'(A)')'<<'//TRIM(Mssg)//' '//DDay//' @ '//HMS//'>>'
+        CALL MondoLogPlain('<<'//TRIM(Mssg)//' '//DDay//' @ '//HMS//'>>')
       ELSE
-        WRITE(Out,'(A)')'>-'//TRIM(Mssg)//' '//DDay//' @ '//HMS//'-<'
+        CALL MondoLogPlain('>-'//TRIM(Mssg)//' '//DDay//' @ '//HMS//'-<')
       ENDIF
-      CLOSE(UNIT=Out,STATUS='KEEP')
 #ifdef PARALLEL
     ENDIF
 #endif
@@ -169,10 +167,6 @@ CONTAINS
 #ifdef PARALLEL
     IF(MyId==ROOT)THEN
 #endif
-      PU=OpenPU(FileName_O,Unit_O)
-      IF(Protect) &
-           CALL PrintProtectL(PU)
-      CALL ClosePU(PU)
 #ifdef PARALLEL
     ENDIF
     IF(InParallel)THEN
@@ -191,21 +185,15 @@ CONTAINS
       ENDDO
     ELSE
 #endif
-      PU=OpenPU(FileName_O,Unit_O)
       IF(PrintFlags%Fmt==DEBUG_MMASTYLE)THEN
-        WRITE(PU,*)TRIM(Name),' = ',TRIM(CTmp),';'
+        CALL MondoLogPlain(TRIM(Name)//' = '//TRIM(CTmp)//';')
       ELSE
-        WRITE(PU,*)TRIM(Name),' := ',TRIM(CTmp)
+        CALL MondoLogPlain(TRIM(Name)//' := '//TRIM(CTmp))
       ENDIF
-      CALL ClosePU(PU)
 #ifdef PARALLEL
     ENDIF
     IF(MyId==ROOT)THEN
 #endif
-      PU=OpenPU(FileName_O,Unit_O)
-      IF(Protect) &
-           CALL PrintProtectR(PU)
-      CALL ClosePU(PU)
 #ifdef PARALLEL
     ENDIF
 #endif
@@ -219,14 +207,12 @@ CONTAINS
     CHARACTER(LEN=*), OPTIONAL,INTENT(IN) :: FileName_O
     INTEGER,          OPTIONAL,INTENT(IN) :: Unit_O
     INTEGER                               :: PU
-    PU=OpenPU(FileName_O,Unit_O)
     IF(PrintFlags%Fmt==DEBUG_MMASTYLE)THEN
-      WRITE(PU,11)Name,FRACTION(X),EXPONENT(X)
+      CALL MondoLogPlain(Name//" = "//TRIM(FltToChar(FRACTION(X))) &
+        //"*2^"//TRIM(IntToChar(EXPONENT(X)))//");")
     ELSE
-      String=TRIM(Name)//' = '//TRIM(DblToChar(X))
-      WRITE(PU,*)TRIM(String)
+      CALL MondoLogPlain(TRIM(Name)//' = '//TRIM(DblToChar(X)))
     ENDIF
-    CALL ClosePU(PU)
 11  FORMAT(1x,A,' = ',F19.16,'*2^(',I4,');')
   END SUBROUTINE Print_DBL_SCLR
   !----------------------------------------------------------------
@@ -919,9 +905,7 @@ CONTAINS
 #endif
       ChkStr=CheckSumString(Chk,Name,Proc_O)
       ! Write check string
-      PU=OpenPU(Unit_O=Unit_O)
-      WRITE(PU,'(1x,A)')TRIM(ChkStr)
-      CALL ClosePU(PU)
+      CALL MondoLogPlain(TRIM(ChkStr))
 #ifdef PARALLEL
     ENDIF
 #endif
@@ -954,9 +938,7 @@ CONTAINS
 #endif
       ChkStr=CheckSumString(Chk,Name,Proc_O)
       ! Write check string
-      PU=OpenPU(Unit_O=Unit_O)
-      WRITE(PU,'(1x,A)')TRIM(ChkStr)
-      CALL ClosePU(PU)
+      CALL MondoLogPlain(TRIM(ChkStr))
 #ifdef PARALLEL
     ENDIF
 #endif
@@ -993,9 +975,7 @@ CONTAINS
       ! Create check string
       ChkStr=CheckSumString(Chk,Name,Proc_O)
       ! Write check string
-      PU=OpenPU(Unit_O=Unit_O)
-      WRITE(PU,'(1x,A)')TRIM(ChkStr)
-      CALL ClosePU(PU)
+      CALL MondoLogPlain(TRIM(ChkStr))
 #ifdef PARALLEL
     ENDIF
 #endif
@@ -1055,7 +1035,7 @@ CONTAINS
     IF(.NOT. AllocQ(A%Alloc)) THEN
       CALL Halt(' Density not allocated in Print_CheckSum_HGRho')
     ENDIF
-    !
+
     ChkCoef=Zero
     ChkExp =Zero
     ChkLMN =Zero
@@ -1087,17 +1067,11 @@ CONTAINS
 #endif
       ! Create check string
       ChkStr=CheckSumString(ChkCoef,Name//TRIM("-Coef"),Proc_O)
-      PU=OpenPU(Unit_O=Unit_O)
-      WRITE(PU,'(1x,A)') TRIM(ChkStr)
-      CALL ClosePU(PU)
+      CALL MondoLogPlain(TRIM(ChkStr))
       ChkStr=CheckSumString(ChkExp,Name//TRIM("-Expt"),Proc_O)
-      PU=OpenPU(Unit_O=Unit_O)
-      WRITE(PU,'(1x,A)') TRIM(ChkStr)
-      CALL ClosePU(PU)
+      CALL MondoLogPlain(TRIM(ChkStr))
       ChkStr=CheckSumString(ChkLMN,Name//TRIM("-LMNs"),Proc_O)
-      PU=OpenPU(Unit_O=Unit_O)
-      WRITE(PU,'(1x,A)') TRIM(ChkStr)
-      CALL ClosePU(PU)
+      CALL MondoLogPlain(TRIM(ChkStr))
 #ifdef PARALLEL
     ENDIF
 #endif
@@ -1112,7 +1086,7 @@ CONTAINS
     CHARACTER(LEN=*),OPTIONAL            :: Proc_O
     CHARACTER(LEN=DEFAULT_CHR_LEN)       :: ChkStr
     IF(PRESENT(Proc_O).AND.PrintFlags%Fmt/=DEBUG_MMASTYLE)THEN
-      ChkStr=ProcessName(Proc_O)//TRIM(Name)//CheckEq//TRIM(DblToChar(Chk))
+      ChkStr=TRIM(ProcessName(Proc_O))//TRIM(Name)//CheckEq//TRIM(DblToChar(Chk))
     ELSEIF(PrintFlags%Fmt/=DEBUG_MMASTYLE)THEN
       ChkStr=TRIM(Name)//CheckEq//TRIM(DblToChar(Chk))
     ELSEIF(PRESENT(Proc_O).AND.PrintFlags%Fmt==DEBUG_MMASTYLE)THEN
@@ -1123,7 +1097,7 @@ CONTAINS
       ChkStr='ChkSum'//TRIM(Name)//' = '//TRIM(FltToChar(FRACTION(Chk))) &
            //'*2^('//TRIM(IntToChar(EXPONENT(Chk)))//');'
     ELSE
-      CALL Halt(' Logic error in Print_CheckSum_BCSR')
+      CALL Halt('Logic error in Print_CheckSum_BCSR')
     ENDIF
   END FUNCTION CheckSumString
   !========================================================================================
@@ -1391,11 +1365,9 @@ CONTAINS
     ELSE
       ChkStr=TRIM(Name)// " ForceSum = " //TRIM(DblToChar(ChkF))
     ENDIF
-    !
-    PU=OpenPU(Unit_O=Unit_O)
-    WRITE(PU,'(1x,A)') ChkStr
-    CALL ClosePU(PU)
-    !
+
+    CALL MondoLogPlain(ChkStr)
+
   END SUBROUTINE Print_CheckSum_Force
 #endif
   !---------------------------------------------------------------------
@@ -1528,14 +1500,11 @@ CONTAINS
     INTEGER                                 :: PU
     !------------------------------------------------------------------------------------
 #ifdef PARALLEL
-    IF(InParallel)  &
-         CALL AlignNodes()
+    IF(InParallel) CALL AlignNodes()
     IF(MyId==ROOT)THEN
 #endif
       Elapsed_CPUS=T%CPUS
       Elapsed_Wall=T%Wall
-      PU=OpenPU(FileName_O,Unit_O)
-      CALL PrintProtectL(PU)
 #ifdef PARALLEL
     ENDIF
     IF(InParallel)THEN
@@ -1554,22 +1523,23 @@ CONTAINS
     ENDIF
     !-------------------------------------------------------------------------
     IF(PRESENT(BareBones_O))THEN
-      IF(.NOT.BareBones_O)  &
-           CALL Halt(' Logic error in Print_TIME')
+      IF(.NOT.BareBones_O) CALL Halt('Logic error in Print_TIME')
 #ifdef PARALLEL
       IF(MyId==ROOT)THEN
-        WRITE(PU,10)NPrc,Elapsed_Wall,MFlops(FLOPS,Elapsed_Wall)
-10      FORMAT(I4,' ',D12.6,' ',I10)
+        CALL MondoLogPlain(TRIM(IntToChar(NPrc))//" " &
+          //"(CPU, Wall) :: " &
+          //TRIM(DblToChar(Elapsed_Wall))//" " &
+          //TRIM(IntToChar(MFlops(FLOPS,Elapsed_Wall))))
       ENDIF
 #else
-      WRITE(PU,10) Proc,Elapsed_CPUS,Elapsed_Wall
-10    FORMAT(' ',a22,' :: (CPU,WALL) = ',F16.2,' ',F16.2)
+      CALL MondoLogPlain(TRIM(IntToChar(NPrc))//" " &
+        //"(CPU, Wall) :: " &
+        //TRIM(DblToChar(Elapsed_Wall))//" " &
+        //TRIM(IntToChar(MFlops(FLOPS,Elapsed_Wall))))
 #endif
-      CALL PrintProtectR(PU)
-      CLOSE(Out)
       RETURN
     ENDIF
-    !-------------------------------------------------------------------------
+
 #ifdef PARALLEL
     IF(MyID==ROOT)THEN
 #endif
@@ -1630,9 +1600,7 @@ CONTAINS
 #endif
         ENDIF
       ENDIF
-      WRITE(PU,*)TRIM(Mssg)
-      CALL PrintProtectR(PU)
-      CLOSE(Out)
+      CALL MondoLogPlain(TRIM(Mssg))
 #ifdef PARALLEL
     ENDIF
 #endif
@@ -1664,7 +1632,7 @@ CONTAINS
     RETURN
 #endif
 
-    IF(PrintFlags%Key/=DEBUG_MAXIMUM)RETURN
+    IF(PrintFlags%Key/=DEBUG_MAXIMUM) RETURN
     L=LEN(TRIM(Proc))
 #ifdef PARALLEL
     IF(InParallel)THEN
@@ -1713,18 +1681,14 @@ CONTAINS
       ENDIF
     ELSE
 #endif
-      PU=OpenPU()
-      CALL PrintProtectL(PU)
-      Mssg=ProcessName(Proc)                                      &
+      Mssg=ProcessName(Proc)                                        &
            //'Allocs='//TRIM(IntToChar(A%Allocs))                   &
            //',  DeAllocs='//TRIM(IntToChar(A%DeAllocs))            &
            //', '//TRIM(IntToChar(A%MemTab ))                       &
            //' bytes are presently allocated.'//Rtrn                &
-           //ProcessName()//' A max of '//TRIM(IntToChar(A%MaxMem))  &
+           //ProcessName()//' A max of '//TRIM(IntToChar(A%MaxMem)) &
            //' bytes were allocated.'
-      WRITE(PU,*)TRIM(Mssg)
-      CALL PrintProtectR(PU)
-      CLOSE(PU)
+      CALL MondoLogPlain(TRIM(Mssg))
 #ifdef PARALLEL
     ENDIF
 #endif

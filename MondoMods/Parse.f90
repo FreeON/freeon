@@ -601,6 +601,15 @@ CONTAINS
     ENDIF
   END FUNCTION CharToDbl
   !------------------------------------------------------------------
+  !     Convert a short integer into a character string
+  !
+  FUNCTION ShortIntToChar(I)
+    INTEGER(KIND=1)  :: I
+    CHARACTER(LEN=INTERNAL_INT_LEN) :: ShortIntToChar
+    WRITE(UNIT=ShortIntToChar,FMT=INTERNAL_INT_FMT)I
+    ShortIntToChar=ADJUSTL(ShortIntToChar)
+  END FUNCTION ShortIntToChar
+  !------------------------------------------------------------------
   !     Convert an integer into a character string
   !
   FUNCTION IntToChar(I)

@@ -126,8 +126,9 @@ CONTAINS
     ! Print time stamp
     IF(PrintFlags%Key>DEBUG_MEDIUM)THEN
 #ifdef PARALLEL
-      IF(MyId==ROOT) &
-           CALL TimeStamp(' Entering '//TRIM(Prog),Enter_O=.TRUE.)
+      IF(MyId==ROOT) THEN
+        CALL TimeStamp('Entering '//TRIM(Prog),Enter_O=.TRUE.)
+      ENDIF
 #else
       CALL TimeStamp('Entering '//TRIM(Prog))
 #endif

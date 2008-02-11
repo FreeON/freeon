@@ -512,7 +512,6 @@ CONTAINS
                //', Grms= '//TRIM(DblToShrtChar(RMSGrad))         &
                //', Gmax= '//TRIM(DblToShrtChar(MAXGrad))         &
                //', Step= '//TRIM(DblToShrtChar(StepLength))
-          !    WRITE(*,*)TRIM(Mssg)
           CALL MondoLogPlain(Mssg)
         ENDIF
       ENDDO
@@ -521,7 +520,6 @@ CONTAINS
          //', Grms= '//TRIM(DblToShrtChar(RMSGrad))        &
          //', Gmax= '//TRIM(DblToShrtChar(MAXGrad))        &
          //', Step= '//TRIM(DblToShrtChar(StepLength))
-    !    WRITE(*,*)TRIM(Mssg)
     CALL MondoLogPlain(Mssg)
     ! Clean up
     DO iCLONE=1,C%Geos%Clones
@@ -1065,10 +1063,13 @@ CONTAINS
       ENDDO
     ENDIF
     IF(CtrlStat%GeOpConvgd) THEN
-      CALL MondoLogPlain(TRIM(IntToChar(iCLONE))//" " &
+      CALL MondoLog(DEBUG_NONE, "Optimizer", &
+        TRIM(IntToChar(iCLONE))//" " &
         //TRIM(IntToChar(iGEO))//" " &
         //TRIM(FltToChar(ETot)))
-      WRITE(*,140) MaxCGrad,(IMaxCGrad-1)/3+1
+      CALL MondoLogPlain("Max Unconstrained Cart Grad = " &
+        //TRIM(FltToChar(MaxCGrad) &
+        //'      on atom  '//TRiM(IntToChar((IMaxCGrad-1)/3+1))))
       IF(PBCDim>0) THEN
         IF(ILMaxCGrad==NatmsLoc-2) THEN
           ALatt='   A'
@@ -1082,7 +1083,7 @@ CONTAINS
       ENDIF
       RETURN
     ENDIF
-    !
+
     NStreGeOp=CtrlCoord%NStre
     NBendGeOp=CtrlCoord%NBend
     NLinBGeOp=CtrlCoord%NLinB
@@ -1139,7 +1140,7 @@ CONTAINS
       ENDIF
     ENDDO
     RMSIntDispl=SQRT(DOT_PRODUCT(IntOld%D,IntOld%D)/DBLE(NIntC))
-    !
+
     CtrlStat%MaxStreDispl=MaxStreDispl
     CtrlStat%MaxBendDispl=MaxBendDispl
     CtrlStat%MaxLinBDispl=MaxLinBDispl
@@ -1148,18 +1149,29 @@ CONTAINS
     CtrlStat%RMSIntDispl =RMSIntDispl
     !
     ! Review iterations
-    !
-    WRITE(*,399) iCLONE,iGEO,ETot
+    CALL MondoLogPlain('       Clone = '//TRIM(IntToChar(iCLONE)) &
+      //' GeOp step = '//TRIM(IntToChar(iGEO)) &
+      //' Total Energy = '//TRIM(FltToChar(ETot)))
 
     MaxStreDispl=MaxStreDispl/AngstromsToAu
     MaxBendDispl=MaxBendDispl*180.D0/PI
     MaxLinBDispl=MaxLinBDispl*180.D0/PI
     MaxOutPDispl=MaxOutPDispl*180.D0/PI
     MaxTorsDispl=MaxTorsDispl*180.D0/PI
-    !
-    WRITE(*,410) MaxGrad,IntCs%Atoms%I(IMaxGrad,1:4)
-    WRITE(*,140) MaxCGrad,IMaxCGrad
-    WRITE(*,420) RMSGrad
+
+    CALL MondoLogPlain('                   Max intl Grad = ' &
+      //TRIM(FltToChar(MaxGrad)) &
+      //' between atoms ' &
+      //TRIM(IntToChar(IntCs%Atoms%I(IMaxGrad,1)))//" " &
+      //TRIM(IntToChar(IntCs%Atoms%I(IMaxGrad,2)))//" " &
+      //TRIM(IntToChar(IntCs%Atoms%I(IMaxGrad,3)))//" " &
+      //TRIM(IntToChar(IntCs%Atoms%I(IMaxGrad,4))))
+
+    CALL MondoLogPlain('     Max Unconstrained Cart Grad = ' &
+      //TRIM(FltToChar(MaxCGrad)) &
+      //'      on atom  '//TRIM(IntToChar(IMaxCGrad)))
+    CALL MondoLogPlain('                   RMS intl Grad = ' &
+      //TRIM(FltToChar(RMSGrad)))
     IF(ILMaxCGrad==NatmsLoc-2) THEN
       ALatt='   A'
     ELSE IF(ILMaxCGrad==NatmsLoc-1) THEN
@@ -1175,7 +1187,7 @@ CONTAINS
            IntCs%Atoms%I(IMaxGradNoConstr,1:4)
       WRITE(*,520) RMSGradNoConstr
     ENDIF
-    !
+
     IF(MaxStre/=0) THEN
       WRITE(*,430) MaxStreDispl,IntCs%Atoms%I(MaxStre,1:2)
     ENDIF
@@ -1191,11 +1203,11 @@ CONTAINS
     IF(MaxTors/=0) THEN
       WRITE(*,438) MaxTorsDispl,IntCs%Atoms%I(MaxTors,1:4)
     ENDIF
-    !
+
     WRITE(*,440) RMSIntDispl
-    !
+
     IF(PBCDim>0) CALL LattReview(IntCL,LatOld,LattIntC,PBCDim)
-    !
+
 399 FORMAT('       Clone = ',I6,' GeOp step = ',I6,' Total Energy = ',F20.8)
 400 FORMAT('Total Energy at Current Geometry = ',F20.8)
 401 FORMAT('                    Total Energy = ',F20.8)
@@ -1211,7 +1223,9 @@ CONTAINS
 437 FORMAT('                  Max OUTP Displ = ',F12.6,' between atoms ',4I4)
 438 FORMAT('                  Max TORS Displ = ',F12.6,' between atoms ',4I4)
 440 FORMAT('                       RMS Displ = ',F12.6)
-    !
+
+    CALL Halt("[FIXME]")
+
   END SUBROUTINE GeOpReview
   !
   !---------------------------------------------------------------------
