@@ -182,6 +182,13 @@ EXTRA_DIST = \
 
 CLEANFILES = *~
 
+# Set the local version.
+#dist-hook :
+#git log --pretty=oneline -1 | awk '{print $1}'
+
 # Cryptographically sign the dist.
 distsign : dist
 	gpg -b $(distdir).tar.bz2
+
+uploaddist : distsign
+	rsync -v --progress $(distdir).tar.bz2 $(distdir).tar.bz2.sig nicolasbock@dl.sv.nongnu.org:/releases/freeon/

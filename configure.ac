@@ -27,7 +27,7 @@ disemination in future releases.
 
 AM_INIT_AUTOMAKE
 
-AC_DEFINE([LOCAL_VERSION], ["2d9246e1dd1be682eabc4b68de9110b5c6d975c4"], [The local version of Mondo])
+AC_DEFINE([LOCAL_VERSION], ["bb8c6c8b122a5f5658635dcdb8e3f86ae2f80966"], [The local version of Mondo])
 
 # Fix up the header definitions for hdf.
 AC_OUTPUT_COMMANDS([
@@ -85,6 +85,7 @@ AC_PROG_F77
 
 # Put the C-compiler into standard C mode.
 AC_PROG_CC_STDC
+AC_GNU_SOURCE
 
 # Set line-length limits.
 AC_MSG_CHECKING([how to set line length limits of f90 compiler])

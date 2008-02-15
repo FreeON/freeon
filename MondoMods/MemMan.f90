@@ -86,14 +86,14 @@ MODULE MemMan
     MODULE PROCEDURE SetBig_INT_VECT, SetBig_DBL_VECT
   END INTERFACE
 
-  interface
-    function GetAddress(x)
-      use DerivedTypes
-      integer :: GetAddress
-      type(CRDS) :: x
-    end function GetAddress
-  end interface
-  !
+  INTERFACE
+    FUNCTION GetAddress(x)
+      USE DerivedTypes
+      INTEGER    :: GetAddress
+      TYPE(CRDS) :: x
+    END FUNCTION GetAddress
+  END INTERFACE
+
   !-------------------------------------------------
   !  Allocation keys
   !
