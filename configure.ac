@@ -27,8 +27,13 @@ disemination in future releases.
 
 AM_INIT_AUTOMAKE
 
-. localversion
-AC_DEFINE_UNQUOTED([LOCAL_VERSION], [${localversion}], [The local version of Mondo])
+if test -f localversion; then
+  . localversion
+else
+  localversion="not-set"
+fi
+
+AC_DEFINE_UNQUOTED([LOCAL_VERSION], ["${localversion}"], [The local version of Mondo])
 AC_MSG_NOTICE([configuring local version ${localversion}])
 
 # Fix up the header definitions for hdf.
