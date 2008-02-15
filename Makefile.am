@@ -178,17 +178,20 @@ Validate = \
 
 EXTRA_DIST = \
   $(data_DATA) \
-  $(Validate)
+  $(Validate) \
+  localversion
 
 CLEANFILES = *~
 
-# Set the local version.
-#dist-hook :
-#git log --pretty=oneline -1 | awk '{print $1}'
-
 # Cryptographically sign the dist.
-distsign : dist
+dist-sign : dist
+	rm -f $(distdir).tar.bz2.sig
 	gpg -b $(distdir).tar.bz2
 
-uploaddist : distsign
+# Fix localversion.
+fix-localversion :
+	echo "localversion=`git log --pretty=oneline -1 | awk '{print $$1}'`" > localversion
+
+# Upload dist file to Savannah.
+upload-dist : fix-localversion dist-sign
 	rsync -v --progress $(distdir).tar.bz2 $(distdir).tar.bz2.sig nicolasbock@dl.sv.nongnu.org:/releases/freeon/
