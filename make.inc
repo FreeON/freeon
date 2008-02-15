@@ -67,60 +67,62 @@ endif
 
 MondoMods_DEPENDENCY_FILES = \
   ../MondoMods/libMondoMods.a \
-  ../MondoMods/globalscalars.mod \
+  ../MondoMods/ainv.mod \
+  ../MondoMods/cellsets.mod \
+  ../MondoMods/fastmatrices.mod \
+  ../MondoMods/gammaf11.mod \
+  ../MondoMods/gammaf5.mod \
   ../MondoMods/globalcharacters.mod \
-  ../MondoMods/derivedtypes.mod \
+  ../MondoMods/linalg.mod \
+  ../MondoMods/mondologger.mod \
+  ../MondoMods/parsingconstants.mod \
+  ../MondoMods/specfunmesh.mod \
+  ../MondoMods/annealmap.mod \
+  ../MondoMods/cholfactor.mod \
+  ../MondoMods/functionals.mod \
+  ../MondoMods/gammaf12.mod \
+  ../MondoMods/gammaf6.mod \
   ../MondoMods/globalobjects.mod \
-  ../MondoMods/basissetparameters.mod \
+  ../MondoMods/macros.mod \
+  ../MondoMods/mondompi.mod \
+  ../MondoMods/prettyprint.mod \
+  ../MondoMods/thresholding.mod \
+  ../MondoMods/atompairs.mod \
+  ../MondoMods/clock.mod \
+  ../MondoMods/gammaassymp.mod \
+  ../MondoMods/gammaf13.mod \
+  ../MondoMods/gammaf7.mod \
+  ../MondoMods/globalscalars.mod \
+  ../MondoMods/matfunk.mod \
   ../MondoMods/mpiinclude.mod \
   ../MondoMods/processcontrol.mod \
-  ../MondoMods/memman.mod \
-  ../MondoMods/clock.mod \
-  ../MondoMods/parsingconstants.mod \
-  ../MondoMods/parse.mod \
-  ../MondoMods/mondompi.mod \
-  ../MondoMods/indexing.mod \
-  ../MondoMods/setxyz.mod \
-  ../MondoMods/inout.mod \
-  ../MondoMods/prettyprint.mod \
-  ../MondoMods/opt_trav_band.mod \
-  ../MondoMods/annealmap.mod \
-  ../MondoMods/order.mod \
-  ../MondoMods/mcmurchie.mod \
-  ../MondoMods/gammaassymp.mod \
-  ../MondoMods/specfunmesh.mod \
-  ../MondoMods/gammaf0.mod \
-  ../MondoMods/gammaf1.mod \
-  ../MondoMods/gammaf2.mod \
-  ../MondoMods/gammaf3.mod \
-  ../MondoMods/gammaf4.mod \
-  ../MondoMods/gammaf5.mod \
-  ../MondoMods/gammaf6.mod \
-  ../MondoMods/gammaf7.mod \
-  ../MondoMods/gammaf8.mod \
-  ../MondoMods/gammaf9.mod \
-  ../MondoMods/gammaf10.mod \
-  ../MondoMods/gammaf11.mod \
-  ../MondoMods/gammaf12.mod \
-  ../MondoMods/gammaf13.mod \
-  ../MondoMods/invexp.mod \
-  ../MondoMods/erffunk.mod \
-  ../MondoMods/gammafunctions.mod \
-  ../MondoMods/specfun.mod \
-  ../MondoMods/thresholding.mod \
+  ../MondoMods/utilities.mod \
+  ../MondoMods/basissetparameters.mod \
   ../MondoMods/common_debug.mod \
-  ../MondoMods/linalg.mod \
-  ../MondoMods/matfunk.mod \
-  ../MondoMods/ainv.mod \
-  ../MondoMods/mechanics.mod \
-  ../MondoMods/functionals.mod \
-  ../MondoMods/cellsets.mod \
+  ../MondoMods/gammaf0.mod \
+  ../MondoMods/gammaf2.mod \
+  ../MondoMods/gammaf8.mod \
+  ../MondoMods/indexing.mod \
+  ../MondoMods/mcmurchie.mod \
+  ../MondoMods/opt_trav_band.mod \
+  ../MondoMods/setxyz.mod \
   ../MondoMods/boundingbox.mod \
-  ../MondoMods/atompairs.mod \
-  ../MondoMods/brabloks.mod \
-  ../MondoMods/macros.mod \
-  ../MondoMods/fastmatrices.mod \
-  ../MondoMods/cholfactor.mod \
+  ../MondoMods/derivedtypes.mod \
+  ../MondoMods/gammaf1.mod \
+  ../MondoMods/gammaf3.mod \
+  ../MondoMods/gammaf9.mod \
+  ../MondoMods/inout.mod \
+  ../MondoMods/mechanics.mod \
+  ../MondoMods/order.mod \
   ../MondoMods/slatec.mod \
+  ../MondoMods/brabloks.mod \
+  ../MondoMods/erffunk.mod \
+  ../MondoMods/gammaf10.mod \
+  ../MondoMods/gammaf4.mod \
+  ../MondoMods/gammafunctions.mod \
+  ../MondoMods/invexp.mod \
+  ../MondoMods/memman.mod \
+  ../MondoMods/parse.mod \
+  ../MondoMods/specfun.mod \
   $(INTERNAL_LAPACK_DEPENDENCY_FILES) \
   $(INTERNAL_HDF5_DEPENDENCY_FILES)

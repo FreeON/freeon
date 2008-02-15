@@ -33,6 +33,7 @@ MODULE PrintParsed
 #endif
   USE PrettyPrint
   USE ControlStructures
+  USE Utilities
 
   IMPLICIT NONE
 
@@ -41,12 +42,13 @@ CONTAINS
   ! PRINT THE MONDOSCF BANNER AND THE INPUT FILE TO THE OUTPUT FILE
   !===============================================================================================
   SUBROUTINE PrintsStartUp(N)
-    TYPE(FileNames)     :: N
-    CHARACTER(LEN=DCL)  :: OFile,M_HOST,M_MACH,M_SYST,M_VRSN,M_PLAT
-    CHARACTER(LEN=500)  :: Line
-    INTEGER             :: I
-    INTEGER             :: HDF5_majnum, HDF5_minnum, HDF5_relnum
-    INTEGER             :: StackCurrent, StackMax
+    TYPE(FileNames)    :: N
+    CHARACTER(LEN=DCL) :: OFile,M_HOST,M_MACH,M_SYST,M_VRSN,M_PLAT
+    CHARACTER(LEN=500) :: Line
+    CHARACTER(LEN=256) :: hostname
+    INTEGER            :: I
+    INTEGER            :: HDF5_majnum, HDF5_minnum, HDF5_relnum
+    INTEGER            :: StackCurrent, StackMax
     !-----------------------------------------------------------------------------------------------
     CALL GetEnv('MONDO_HOST',M_HOST)
     IF(LEN(TRIM(M_HOST)) == 0) M_HOST = HAVE_MONDO_HOST
@@ -92,19 +94,30 @@ CONTAINS
     CALL MondoLogPlain('LA-CC-04-086 (formerly 01-2)                         ')
     CALL MondoLogPlain('Copyright 2001, University of California.            ')
 
+    ! Get information about hdf version used.
+    CALL HDF5Version(HDF5_majnum, HDF5_minnum, HDF5_relnum)
+
+    ! Get information about stack.
+    CALL GetStacksizeLimit(StackCurrent, StackMax)
+
+    ! Get hostname.
+    CALL GetHostnameWrapper(hostname, 256)
+
     ! Write information on host, platform, etc
     CALL MondoLogPlain("")
     CALL MondoLogPlain("*** Summary ***")
+    CALL MondoLogPlain("")
+    CALL MondoLogPlain("running on "//TRIM(hostname))
+    CALL MondoLogPlain("")
+    CALL MondoLogPlain("** Build Information **")
+    CALL MondoLogPlain("")
     CALL MondoLogPlain("compiled for "//TRIM(M_PLAT))
-    CALL MondoLogPlain("on "//TRIM(M_HOST))
-    CALL MondoLogPlain("a "//TRIM(M_MACH)//" machine")
+    CALL MondoLogPlain("on "//TRIM(M_HOST)//", a "//TRIM(M_MACH)//" machine")
     CALL MondoLogPlain("running "//TRIM(M_SYST)//" "//TRIM(M_VRSN))
-    CALL HDF5Version(HDF5_majnum, HDF5_minnum, HDF5_relnum)
     CALL MondoLogPlain("using HDF5 library version " &
       //TRIM(IntToChar(HDF5_majnum))//"." &
       //TRIM(IntToChar(HDF5_minnum))//"." &
       //TRIM(IntToChar(HDF5_relnum)))
-    CALL GetStacksizeLimit(StackCurrent, StackMax)
     IF(StackCurrent < 0) THEN
       CALL MondoLogPlain("current stacksize limit: unlimited")
     ELSE
@@ -117,6 +130,8 @@ CONTAINS
     ENDIF
     CALL MondoLogPlain("current HDF file = "//TRIM(N%HFile))
     CALL MondoLogPlain("")
+
+    ! Print out a timestamp.
     CALL TimeStamp("Starting MondoSCF")
     CALL MondoLogPlain("")
 

@@ -13,68 +13,70 @@ SUBDIRS = $(INTERNAL_LAPACK_DIRS) $(INTERNAL_HDF5_DIRS)
 noinst_LIBRARIES = libMondoMods.a
 
 libMondoMods_a_SOURCES = \
-  DFRepository.f \
-  GlobalScalars.f90 \
-  GlobalCharacters.f90 \
-  DerivedTypes.f90 \
-  GlobalObjects.f90 \
-  BasisSetParameters.f90 \
-  MPIInclude.f90 \
-  ProcessControl.f90 \
-  Trap.c \
-  MemMan.f90 \
-  GetAddress.c \
-  Clock.f90 \
-  Seconds.c \
-  TimerWrapper.c \
-  ParsingConstants.f90 \
-  Parse.f90 \
-  MondoMPI.f90 \
-  Indexing.f90 \
-  SetEq.f90 \
-  SetEq77.f \
-  InOut.f90 \
-  HDF5Wrap.c \
-  Anneal.f90 \
-  Order.f90 \
-  Order77.f \
-  Random.c \
-  PrettyPrint.f90 \
-  MondoLogger.h \
-  MondoLogger.f90 \
-  McMurch.f90 \
-  LinAlg.f90 \
-  LinAlg77.f \
-  MatFunk.f90 \
   AInv.f90 \
-  GetLimits.c \
-  GetRUsage.c \
-  SMWrap.c \
-  SpecFun.f90 \
+  Anneal.f90 \
+  AtomPairs.f90 \
+  BasisSetParameters.f90 \
+  BoundingBox.f90 \
+  BraBloks.f90 \
+  CholFact.f90 \
+  Clock.f90 \
   D1Mach.f \
   DCSEvl.f \
   DErf.f \
   DErfc.f \
+  DFRepository.f \
   DMach.f \
-  InitDS.f \
-  Mechanics.f90 \
-  Thresholding.f90 \
-  Functionals.f90 \
-  PBC.f90 \
-  AtomPairs.f90 \
-  BoundingBox.f90 \
-  BraBloks.f90 \
-  Macros.f90 \
+  DerivedTypes.f90 \
   FastMat.f90 \
-  CholFact.f90 \
+  Functionals.f90 \
+  GetAddress.c \
+  GetHostname.c \
+  GetLimits.c \
+  GetRUsage.c \
+  GlobalCharacters.f90 \
+  GlobalObjects.f90 \
+  GlobalScalars.f90 \
+  HDF5Wrap.c \
+  InOut.f90 \
+  Indexing.f90 \
+  InitDS.f \
+  LinAlg.f90 \
+  LinAlg77.f \
+  MPIInclude.f90 \
+  Macros.f90 \
+  MatFunk.f90 \
+  McMurch.f90 \
+  Mechanics.f90 \
+  MemMan.f90 \
+  MondoLogger.f90 \
+  MondoLogger.h \
+  MondoMPI.f90 \
+  Order.f90 \
+  Order77.f \
+  PBC.f90 \
+  Parse.f90 \
+  ParsingConstants.f90 \
+  PrettyPrint.f90 \
+  ProcessControl.f90 \
+  Random.c \
+  SMWrap.c \
+  Seconds.c \
+  SetEq.f90 \
+  SetEq77.f \
   Slatec.f90 \
+  SpecFun.f90 \
+  Thresholding.f90 \
+  TimerWrapper.c \
+  Trap.c \
+  Utilities.f90 \
   mm_double_NN_1.c \
-  mm_double_NT_1.c \
-  mm_double_TN_1.c \
-  mm_double_TT_1.c \
   mm_double_NN_c.c \
+  mm_double_NT_1.c \
   mm_double_NT_c.c \
+  mm_double_TN_1.c \
   mm_double_TN_c.c \
+  mm_double_TT_1.c \
   mm_double_TT_c.c \
   phipac_dgemm.c
 

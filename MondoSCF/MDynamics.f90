@@ -38,7 +38,6 @@ MODULE MDynamics
   USE SetXYZ
   USE DynamicsKeys
   USE MondoLogger
-  USE FileOperations
 
   IMPLICIT NONE
 
