@@ -55,7 +55,7 @@ CONTAINS
     IF(isOpen) THEN
       WRITE(*,"(A,I3,A)") "[MondoLog] logfile already open (fd = ", fd_old, ")"
       IF(fd /= fd_old) THEN
-        WRITE(*,"(A)") "  WARNING: fd != fd_old"
+        WRITE(*,"(A)") "[MondoLog] WARNING: fd != fd_old"
       ENDIF
       CLOSE(fd_old)
       isOpen = .FALSE.
@@ -72,7 +72,7 @@ CONTAINS
     ELSE
 
       ! Create a new file and open it
-      WRITE(*,*) "[MondoLog] logfile does not exist, creating it"
+      WRITE(*,"(A)") "[MondoLog] logfile "//TRIM(filename)//" does not exist, creating it"
       OPEN(UNIT = fd, FILE = filename, &
         ACCESS = "SEQUENTIAL", FORM = "FORMATTED", &
         ERR = 13, IOSTAT = IOS, STATUS = "NEW")
