@@ -782,7 +782,7 @@ CONTAINS
         //TRIM(IntToChar(iGEO))// &
         "-MD-------------------------------------------"
       WRITE(Out,97) Line
-      Line = "MD Time        = "//TRIM(DblToMedmChar(MDTime%D(iCLONE)*InternalTimeToFemtoseconds))//" fs"
+      Line = "MD Time          = "//TRIM(DblToMedmChar(MDTime%D(iCLONE)*InternalTimeToFemtoseconds))//" fs"
       WRITE(Out,97) Line
 
       ! Density Maxtrix Error
@@ -791,25 +791,32 @@ CONTAINS
       CALL Get(DMax,'DMax')
       CALL CloseHDFGroup(HDF_CurrentID)
       CALL CloseHDF(HDFFileID)
-      Line = "MD DM Error    = " &
+      Line = "MD DM Error      = " &
         //TRIM(DblToMedmChar(MDTime%D(iCLONE)*InternalTimeToFemtoseconds))//" fs " &
         //TRIM(DblToChar(DMax))
       WRITE(Out,97) Line
 
       ! Energies
-      Line = "MD Kinetic     = "//TRIM(DblToChar(MDKin%D(iCLONE)))
+      Line = "MD Kinetic       = "//TRIM(DblToChar(MDKin%D(iCLONE)))
       WRITE(Out,97) Line
-      Line = "MD Potential   = "//TRIM(DblToChar(MDEPot%D(iCLONE)))
+      Line = "MD Potential     = "//TRIM(DblToChar(MDEPot%D(iCLONE)))
       WRITE(Out,97) Line
-      Line = "MD Total       = "//TRIM(DblToChar(MDEtot%D(iCLONE)))
+      Line = "MD Total         = "//TRIM(DblToChar(MDEtot%D(iCLONE)))
       WRITE(Out,97) Line
-      Line = "MD Temperature = "//TRIM(DblToChar(MDTemp%D(iCLONE)))
+      Line = "MD Temperature   = "//TRIM(DblToChar(MDTemp%D(iCLONE)))
       WRITE(Out,97) Line
-      Line = "MD L. Momentum = " &
+      Line = "MD L. Momentum   = " &
         //TRIM(DblToMedmChar(MDLinP%D(1,iCLONE)))//" " &
         //TRIM(DblToMedmChar(MDLinP%D(2,iCLONE)))//" " &
         //TRIM(DblToMedmChar(MDLinP%D(3,iCLONE)))
       WRITE(Out,97) Line
+      IF(iGEO > C%Dyns%MDDampStep) THEN
+        Line = "MD damping alpha = "//TRIM(DblToMedmChar(0.D0))//" (MDDampStep reached)"
+        WRITE(Out,97) Line
+      ELSE
+        Line = "MD damping alpha = "//TRIM(DblToMedmChar(C%Dyns%MDalpha))
+        WRITE(Out,97) Line
+      ENDIF
 
       ! Compute the Pressure
       IF(C%Geos%Clone(iCLONE)%PBC%Dimen==3) THEN
@@ -893,7 +900,7 @@ CONTAINS
         WRITE(Out,85)
       ENDIF
 
-      WRITE(Out,"(A)") "---------- Start: Atom Position(3) Velocity(3)"
+      WRITE(Out,"(A)") "Start: Atom Position(3) Velocity(3)"
       DO iATS=1,C%Geos%Clone(iCLONE)%NAtms
         IF(C%Geos%Clone(iCLONE)%InAU) THEN
           WRITE(Out,99) TRIM(C%Geos%Clone(iCLONE)%AtNam%C(iATS)),  &
@@ -905,7 +912,7 @@ CONTAINS
                C%Geos%Clone(iCLONE)%Velocity%D(:,iATS)*BohrsToAngstroms
         ENDIF
       ENDDO
-      WRITE(Out,"(A)") "---------- End: Atom Position(3) Velocity(3)"
+      WRITE(Out,"(A)") "End: Atom Position(3) Velocity(3)"
       CLOSE(Out)
 
       IF(C%Dyns%MDAlgorithm == MD_AL_SYMPLECTIC) THEN
