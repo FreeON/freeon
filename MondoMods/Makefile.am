@@ -29,6 +29,8 @@ libMondoMods_a_SOURCES = \
   DMach.f \
   DerivedTypes.f90 \
   FastMat.f90 \
+  FileCopy.c \
+  FileOperations.f90 \
   Functionals.f90 \
   GetAddress.c \
   GetHostname.c \
