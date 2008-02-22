@@ -71,6 +71,7 @@ libMondoMods_a_SOURCES = \
   Thresholding.f90 \
   TimerWrapper.c \
   Trap.c \
+  UnlimitStack.c \
   Utilities.f90 \
   mm_double_NN_1.c \
   mm_double_NN_c.c \

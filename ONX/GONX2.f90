@@ -96,20 +96,24 @@ PROGRAM GONX2
 !--------------------------------------------------------------------------------
   INTEGER :: ixyz,jxyz,A1,A2
   DoStrs=.TRUE.!.FALSE.
-  !
+
 #ifdef ONX2_PARALLEL
   CALL StartUp(Args,Prog,Serial_O=.FALSE.)
 #else
   CALL StartUp(Args,Prog)
 #endif
-  !
+
+  ! [FIXME] Fix stack (set it to unlimited). This should really be fixed so that
+  ! we don't have to screw with the stack.
+  CALL UnlimitStack()
+
   CALL Get(BSiz ,'atsiz',Tag_O=PrvBase)
   CALL Get(OffS ,'atoff',Tag_O=PrvBase)
   CALL Get(NBasF,'nbasf',Tag_O=PrvBase)
-  !
+
   CALL Get(BSc,Tag_O=CurBase)
   CALL Get(GMc,Tag_O=CurGeom)
-  !
+
   !------------------------------------------------
   ! Initialization and allocations.
   !
