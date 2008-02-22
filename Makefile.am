@@ -183,15 +183,15 @@ EXTRA_DIST = \
 
 CLEANFILES = *~
 
-# Cryptographically sign the dist.
-dist-sign : dist
-	rm -f $(distdir).tar.bz2.sig
-	gpg -b $(distdir).tar.bz2
-
 # Fix localversion.
 fix-localversion :
 	echo "localversion=`git log --pretty=oneline -1 | awk '{print $$1}'`" > localversion
 
+# Cryptographically sign the dist.
+dist-sign : fix-localversion dist
+	rm -f $(distdir).tar.bz2.sig
+	gpg -b $(distdir).tar.bz2
+
 # Upload dist file to Savannah.
-upload-dist : fix-localversion dist-sign
+upload-dist : dist-sign
 	rsync -v --progress $(distdir).tar.bz2 $(distdir).tar.bz2.sig nicolasbock@dl.sv.nongnu.org:/releases/freeon/

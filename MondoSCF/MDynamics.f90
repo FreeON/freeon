@@ -37,6 +37,7 @@ MODULE MDynamics
   USE GlobalScalars
   USE SetXYZ
   USE DynamicsKeys
+  USE FileOperations
   USE MondoLogger
 
   IMPLICIT NONE
@@ -160,6 +161,7 @@ CONTAINS
       CALL CalculateMDGeo(C%Dyns,iREMOVE,MinMDGeo)
 
       ! Print some stuff out.
+      CALL MondoLog(DEBUG_NONE, "MD", "new MD calculation")
       CALL MondoLog(DEBUG_NONE, "MD", "iMDStep    = "//TRIM(IntToChar(iMDStep)))
       CALL MondoLog(DEBUG_NONE, "MD", "iGEOBegin  = "//TRIM(IntToChar(iGEOBegin)))
       CALL MondoLog(DEBUG_NONE, "MD", "MDTime     = "//TRIM(FltToChar(MDTime%D(1)*InternalTimeToFemtoseconds)))
@@ -214,7 +216,7 @@ CONTAINS
       CALL Force(C%Sets%NBSets,iGEO,C%Nams,C%Opts,C%Stat,C%Geos,C%Sets,C%MPIs)
 
       ! Print the positions.
-      CALL MondoLogPlain("[MD] Positions:")
+      CALL MondoLog(DEBUG_NONE, "MD", "Positions:")
       DO iCLONE=1,C%Geos%Clones
         DO iATS=1,C%Geos%Clone(iCLONE)%NAtms
           CALL MondoLogPlain(&
@@ -228,7 +230,7 @@ CONTAINS
       ENDDO
 
       ! Print the forces.
-      CALL MondoLogPlain("[MD] Forces:")
+      CALL MondoLog(DEBUG_NONE, "MD", "Forces:")
       DO iCLONE=1,C%Geos%Clones
         DO iATS=1,C%Geos%Clone(iCLONE)%NAtms
           CALL MondoLogPlain(&
@@ -622,11 +624,11 @@ CONTAINS
     IF(T > 1.0d-10) THEN
       v_scale = SQRT(1 + delta_t/tau_T * (T0/T - 1))
 
-      CALL MondoLogPlain("T = "//TRIM(DblToChar(T)))
-      CALL MondoLogPlain("T0 = "//TRIM(DblToChar(T0)))
-      CALL MondoLogPlain("delta_t = "//TRIM(DblToChar(delta_t)))
-      CALL MondoLogPlain("tau_T = "//TRIM(DblToChar(tau_T)))
-      CALL MondoLogPlain("v_scale = "//TRIM(DblToChar(v_scale)))
+      CALL MondoLog(DEBUG_NONE, "Berendsen Thermostat", "T = "//TRIM(DblToChar(T)))
+      CALL MondoLog(DEBUG_NONE, "Berendsen Thermostat", "T0 = "//TRIM(DblToChar(T0)))
+      CALL MondoLog(DEBUG_NONE, "Berendsen Thermostat", "delta_t = "//TRIM(DblToChar(delta_t)))
+      CALL MondoLog(DEBUG_NONE, "Berendsen Thermostat", "tau_T = "//TRIM(DblToChar(tau_T)))
+      CALL MondoLog(DEBUG_NONE, "Berendsen Thermostat", "v_scale = "//TRIM(DblToChar(v_scale)))
 
       DO i = 1, GM%NAtms
         IF(GM%CConstrain%I(i) == 0) THEN
@@ -1089,13 +1091,13 @@ CONTAINS
 
           PoldFile = TRIM(C%Nams%RFile(1:LEN(TRIM(C%Nams%RFile))-4))//'_G#'//TRIM(chGEO)//'_C#'//TRIM(chCLONE)//'.DOsave'
           PnewFile = TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)//'_G#'//TRIM(chGEO)//'_C#'//TRIM(chCLONE)//'.DOsave'
-          CALL MondoLog(DEBUG_NONE, "CopyRestart", "/bin/cp -f "//TRIM(PoldFile)//" "//TRIM(PnewFile))
-          CALL System("/bin/cp -f "//TRIM(PoldFile)//" "//TRIM(PnewFile))
+          CALL MondoLog(DEBUG_NONE, "CopyRestart", TRIM(PoldFile)//" --> "//TRIM(PnewFile))
+          CALL FileCopy(PoldFile, PnewFile)
 
           PoldFile = TRIM(C%Nams%RFile(1:LEN(TRIM(C%Nams%RFile))-4))//'_G#'//TRIM(chGEO)//'_C#'//TRIM(chCLONE)//'.DOPsave'
           PnewFile = TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)//'_G#'//TRIM(chGEO)//'_C#'//TRIM(chCLONE)//'.DOPsave'
-          CALL MondoLog(DEBUG_NONE, "CopyRestart", "/bin/cp -f "//TRIM(PoldFile)//" "//TRIM(PnewFile))
-          CALL System("/bin/cp -f "//TRIM(PoldFile)//" "//TRIM(PnewFile))
+          CALL MondoLog(DEBUG_NONE, "CopyRestart", TRIM(PoldFile)//" --> "//TRIM(PnewFile))
+          CALL FileCopy(PoldFile, PnewFile)
 
         CASE('FMVerlet0','FMVerlet1')
 

@@ -40,13 +40,12 @@ PROGRAM GONX2
   USE Macros
   USE LinAlg
   USE Functionals
-  !
+
   USE ONX2DataType
   USE ONXCtrSclg   , ONLY: TrnMatBlk
   USE ONX2List     , ONLY: AllocList,DeAllocList,MakeGList,PrintList
   USE GONX2ComputDK, ONLY: ComputDK
 
-  !
 #ifdef ONX2_PARALLEL
   USE MondoMPI
   USE FastMatrices
@@ -95,7 +94,7 @@ PROGRAM GONX2
   TYPE(CList), DIMENSION(:), POINTER :: ListC
 #endif
 !--------------------------------------------------------------------------------
-  integer :: ixyz,jxyz,A1,A2
+  INTEGER :: ixyz,jxyz,A1,A2
   DoStrs=.TRUE.!.FALSE.
   !
 #ifdef ONX2_PARALLEL
@@ -123,22 +122,22 @@ PROGRAM GONX2
   TmTM=Zero;TmML=Zero;TmGx=Zero;TmAL=Zero;TmDL=Zero
   CALL New(GradX,(/3,NAtoms/))
   CALL DBL_VECT_EQ_DBL_SCLR(3*NAtoms,GradX%D(1,1),0.0D0)
-  !
+
   CALL New(GradAux,(/3,NAtoms/))
   CALL DBL_VECT_EQ_DBL_SCLR(3*NAtoms,GradAux%D(1,1),0.0D0)
-  !
+
   CALL New(OffArr,(/BSc%NCtrt,BSc%NKind/))
-  !
+
   !STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS 
   CALL New(BoxX,(/3,3/))
 
   CALL DBL_VECT_EQ_DBL_SCLR(9,BoxX%D(1,1),0.0D0)
   !STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS 
-  !
+
   CALL GetBufferSize(GMc,BSc,GMc,BSc)
-  !
+
   CALL GetOffArr(OffArr,BSc)
-  !
+
   !------------------------------------------------
   ! Get denstiy matrix.
   !
