@@ -34,8 +34,8 @@ frames = []
 
 for line in lines:
   line_number += 1
-  result_start = re.compile("^ Atom Position").search(line)
-  result_end = re.compile("^ End Atom Position").search(line)
+  result_start = re.compile("^Start: Atom Position").search(line)
+  result_end = re.compile("^End: Atom Position").search(line)
 
   if result_start != None:
     if not block_started:

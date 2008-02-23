@@ -1540,10 +1540,10 @@ CONTAINS
   !-------------------------------------------------------
   !
   SUBROUTINE INTCValue(IntCs,XYZ,PBCDim,LinCrit,TorsLinCrit)
-    !
-    ! Determine value of internal coordinates.
-    ! Input coordintes are now in atomic units!
-    !
+
+    ! Determine value of internal coordinates.  Input coordintes are now in
+    ! atomic units!
+
     IMPLICIT NONE
     TYPE(INTC) :: IntCs
     INTEGER :: NIntCs,I,J,K,L,I1,I2,I3,I4,NatmsLoc,PBCDim
@@ -1552,7 +1552,7 @@ CONTAINS
     REAL(DOUBLE),DIMENSION(3,3) :: BoxShapeT,BoxShape,InvBoxSh
     REAL(DOUBLE),DIMENSION(3)   :: Vect1,Vect2
     REAL(DOUBLE),DIMENSION(3,4) :: XYZAux
-    !
+
     IF(IntCs%N<=0) RETURN
     NIntCs=SIZE(IntCs%Def%C)
     NatmsLoc=SIZE(XYZ,2)-3
@@ -1563,9 +1563,9 @@ CONTAINS
     IF(PBCDim>0) THEN
       InvBoxSh=InverseMatrix(BoxShape)
     ENDIF
-    !
+
     IntCs%Value%D=Zero
-    !
+
     DO I=1,NIntCs
       IF(.NOT.IntCs%Active%L(I)) THEN
         IntCs%Value%D(I)=Zero
@@ -1574,24 +1574,24 @@ CONTAINS
       CALL PBCXYZAux(XYZ,BoxShapeT,XYZAux,IntCs,I)
       IF(IntCs%Def%C(I)(1:4)=='STRE') THEN
         CALL STRE(XYZAux(1:3,1),XYZAux(1:3,2),Value_O=IntCs%Value%D(I))
-        !
+
       ELSE IF(IntCs%Def%C(I)(1:4)=='BEND'.OR. &
            IntCs%Def%C(I)(1:5)=='ALPHA'.OR. &
            IntCs%Def%C(I)(1:4)=='BETA'.OR. &
            IntCs%Def%C(I)(1:5)=='GAMMA') THEN
         CALL BEND(XYZAux(1:3,1),XYZAux(1:3,2),XYZAux(1:3,3), &
              Value_O=IntCs%Value%D(I))
-        !
+
       ELSE IF(IntCs%Def%C(I)(1:5)=='LINB1') THEN
         I4=IntCs%Atoms%I(I,4)
         CALL LinB(XYZAux(1:3,1),XYZAux(1:3,2),XYZAux(1:3,3),XYZAux(1:3,4),I4,&
              Value1=IntCs%Value%D(I),Value2=IntCs%Value%D(I+1))
-        !
+
       ELSE IF(IntCs%Def%C(I)(1:4)=='TORS') THEN
         CALL TORS(XYZAux(1:3,1),XYZAux(1:3,2),XYZAux(1:3,3),&
              XYZAux(1:3,4),TorsLinCrit,IntCs%Active%L(I), &
              Value_O=IntCs%Value%D(I))
-        !
+
       ELSE IF(IntCs%Def%C(I)(1:4)=='OUTP') THEN
         CALL OUTP(XYZAux(1:3,1),XYZAux(1:3,2),XYZAux(1:3,4),&
              XYZAux(1:3,3),TorsLinCrit,IntCs%Active%L(I),Value_O=IntCs%Value%D(I))
@@ -1601,7 +1601,7 @@ CONTAINS
       ELSE IF(IntCs%Def%C(I)(1:6)=='AREA_L') THEN
         CALL AREA(XYZAux(1:3,1),XYZAux(1:3,2),XYZAux(1:3,3),&
              IntCs%Active%L(I),Value_O=IntCs%Value%D(I))
-        !
+
       ELSE IF(IntCs%Def%C(I)(1:4)=='CART') THEN
         Vect1=XYZAux(1:3,1)
         IF(PBCDim>0) THEN
@@ -1616,7 +1616,7 @@ CONTAINS
           IntCs%Value%D(I)=Vect1(3)
         ENDIF
       ENDIF
-      !
+
     ENDDO
   END SUBROUTINE INTCValue
   !

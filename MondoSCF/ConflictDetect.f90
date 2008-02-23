@@ -29,13 +29,14 @@ MODULE Conflicted
   USE DerivedTypes
   USE ProcessControl
   USE ControlStructures
+
   IMPLICIT NONE
-  !
+
   PRIVATE :: GlbConflictCheck1
   PRIVATE :: GeoConflictCheck1
   PRIVATE :: PBCConflictCheck1
   PRIVATE :: BStConflictCheck1
-  !
+
 CONTAINS 
 !H---------------------------------------------------------------------------------
 !H SUBROUTINE ConflictCheck1(C)

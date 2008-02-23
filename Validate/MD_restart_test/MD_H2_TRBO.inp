@@ -10,7 +10,6 @@ BasisSets=(6-31G**)
 ModelChem=(HF) 
 Accuracy=(tight)
 SCFConvergence=(DIIS)
-Geometry=(InAU)
 MinSCF=12
 MaxSCF=12
 
@@ -20,6 +19,8 @@ MDMethod=Verlet
 DeltaTime=0.5
 MaxMDStep=100
 MDNumSCF=2
+
+Geometry=(InAngstrom)
 
 <EndOptions>
 

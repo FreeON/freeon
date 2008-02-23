@@ -40,7 +40,10 @@ MODULE Massage
   USE DynamicsKeys
   USE GeometryKeys
   USE ControlStructures
+  USE MondoLogger
+
   IMPLICIT NONE
+
 CONTAINS
   !============================================================================
   ! ALL REORDERING, RESCALING, WRAPPING AND TRANSLATING OF COORDINATES OCCURS
@@ -51,7 +54,7 @@ CONTAINS
     TYPE(Geometries) :: G
     TYPE(Periodics)  :: P
     INTEGER          :: I,J,GBeg,GEnd
-    !-------------------------------------------------------------------------!
+
     IF(O%Grad==GRAD_TS_SEARCH_NEB)THEN
       GBeg=0
       GEnd=G%Clones+1
@@ -69,18 +72,23 @@ CONTAINS
   !============================================================================
   SUBROUTINE ToAtomicUnits(G)
     TYPE(CRDS) :: G
-    IF(G%InAU) RETURN
-    !G%InAU=.TRUE.
+
+    IF(G%InAU) THEN
+      CALL MondoLog(DEBUG_NONE, "ToAtomicUnits", "coordinates are already in atomic units")
+      RETURN
+    ENDIF
+
+    CALL MondoLog(DEBUG_NONE, "ToAtomicUnits", "converting coordinates into atomic units")
     G%Carts%D    = AngstromsToAU*G%Carts%D
     G%Velocity%D = AngstromsToAU*G%Velocity%D
-    !
+
     G%PBC%CellCenter%D = G%PBC%CellCenter%D*AngstromsToAU
     G%PBC%BoxShape%D   = AngstromsToAU*G%PBC%BoxShape%D
     G%PBC%InvBoxSh%D   = G%PBC%InvBoxSh%D/AngstromsToAU
     G%PBC%CellVolume   = G%PBC%CellVolume*AngstromsToAU**G%PBC%Dimen
     G%PBC%DipoleFAC    = G%PBC%DipoleFAC/(AngstromsToAU**G%PBC%Dimen)
     G%PBC%QupoleFAC    = G%PBC%QupoleFAC/(AngstromsToAU**G%PBC%Dimen)
-    !
+
   END SUBROUTINE ToAtomicUnits
   !============================================================================
   !

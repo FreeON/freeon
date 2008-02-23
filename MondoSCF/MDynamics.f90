@@ -60,6 +60,7 @@ CONTAINS
     ! Do Molecular Dynamics:Loop over Time Steps
 
     ! Intitialize
+    CALL MondoLog(DEBUG_NONE, "MD", "initializing")
     C%Stat%Previous%I = (/0,1,1/)
     iGEO    = 1
     iMDStep = 1
@@ -218,6 +219,12 @@ CONTAINS
       ! Print the positions.
       CALL MondoLog(DEBUG_NONE, "MD", "Positions:")
       DO iCLONE=1,C%Geos%Clones
+        IF(C%Geos%Clone(iCLONE)%InAU) THEN
+          CALL MondoLog(DEBUG_NONE, "MD", "length units are in atomic units")
+        ELSE
+          CALL MondoLog(DEBUG_NONE, "MD", "length units are in Angstrom")
+        ENDIF
+
         DO iATS=1,C%Geos%Clone(iCLONE)%NAtms
           CALL MondoLogPlain(&
             TRIM(IntToChar(iATS))//" "// &
@@ -279,8 +286,8 @@ CONTAINS
         CALL Put(MDTime%D(iCLONE),"MDTime")
         CALL CloseHDFGroup(HDF_CurrentID)
         CALL MondoLog(DEBUG_NONE, "MD", "done with time step, incrementing counters and putting to hdf")
-        CALL MondoLog(DEBUG_NONE, "MD", "iMDStep   = "//TRIM(IntToChar(iMDStep)))
-        CALL MondoLog(DEBUG_NONE, "MD", "MDTime     = "//TRIM(FltToChar(MDTime%D(1)*InternalTimeToFemtoseconds)))
+        CALL MondoLog(DEBUG_NONE, "MD", "iMDStep = "//TRIM(IntToChar(iMDStep)))
+        CALL MondoLog(DEBUG_NONE, "MD", "MDTime  = "//TRIM(FltToChar(MDTime%D(1)*InternalTimeToFemtoseconds)))
       ENDDO
 
       ! Remove old Stuff from Scratch
@@ -1005,7 +1012,7 @@ CONTAINS
           PnewFile = TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)  &
                //'_G#'//TRIM(chGEO)     &
                //'_C#'//TRIM(chCLONE)//'.DOPsave'
-          CALL SYSTEM('/bin/cp -f  '//PoldFile//' '//PnewFile)
+          CALL FileCopy(PoldFile, PnewFile)
         ENDDO
       CASE('FMVerlet0','FMVerlet1')
       END SELECT
@@ -1022,7 +1029,7 @@ CONTAINS
         PnewFile = TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)  &
              //'_G#'//TRIM(chGEO)     &
              //'_C#'//TRIM(chCLONE)//'.FOPsave'
-        CALL SYSTEM('/bin/cp -f  '//PoldFile//' '//PnewFile)
+        CALL FileCopy(PoldFile, PnewFile)
       ENDDO
     ELSE
       SELECT CASE(C%Dyns%MDGeuss)
@@ -1048,7 +1055,7 @@ CONTAINS
           PnewFile = TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)  &
                //'_G#'//TRIM(chGEO)     &
                //'_C#'//TRIM(chCLONE)//'.DOsave'
-          CALL SYSTEM('/bin/cp -f  '//PoldFile//' '//PnewFile)
+          CALL FileCopy(PoldFile, PnewFile)
         ENDDO
       CASE('FMVerlet0','FMVerlet1')
         DO iCLONE=1,C%Geos%Clones
@@ -1064,7 +1071,7 @@ CONTAINS
           PnewFile = TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)  &
                //'_G#'//TRIM(chGEO)     &
                //'_C#'//TRIM(chCLONE)//'.FOsave'
-          CALL SYSTEM('/bin/cp -f  '//PoldFile//' '//PnewFile)
+          CALL FileCopy(PoldFile, PnewFile)
         ENDDO
       END SELECT
     ENDIF
@@ -1103,13 +1110,13 @@ CONTAINS
 
           PoldFile = TRIM(C%Nams%RFile(1:LEN(TRIM(C%Nams%RFile))-4))//'_G#'//TRIM(chGEO)//'_C#'//TRIM(chCLONE)//'.FOsave'
           PnewFile = TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)//'_G#'//TRIM(chGEO)//'_C#'//TRIM(chCLONE)//'.FOsave'
-          CALL MondoLog(DEBUG_NONE, "CopyRestart", "/bin/cp -f "//TRIM(PoldFile)//" "//TRIM(PnewFile))
-          CALL System("/bin/cp -f "//TRIM(PoldFile)//" "//TRIM(PnewFile))
+          CALL MondoLog(DEBUG_NONE, "CopyRestart", TRIM(PoldFile)//" --> "//TRIM(PnewFile))
+          CALL FileCopy(PoldFile, PnewFile)
 
           PoldFile = TRIM(C%Nams%RFile(1:LEN(TRIM(C%Nams%RFile))-4))//'_G#'//TRIM(chGEO)//'_C#'//TRIM(chCLONE)//'.FOPsave'
           PnewFile = TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)//'_G#'//TRIM(chGEO)//'_C#'//TRIM(chCLONE)//'.FOPsave'
-          CALL MondoLog(DEBUG_NONE, "CopyRestart", "/bin/cp -f "//TRIM(PoldFile)//" "//TRIM(PnewFile))
-          CALL System("/bin/cp -f "//TRIM(PoldFile)//" "//TRIM(PnewFile))
+          CALL MondoLog(DEBUG_NONE, "CopyRestart", TRIM(PoldFile)//" --> "//TRIM(PnewFile))
+          CALL FileCopy(PoldFile, PnewFile)
 
         END SELECT
       ENDDO

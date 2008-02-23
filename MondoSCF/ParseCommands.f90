@@ -45,10 +45,11 @@ CONTAINS
     INTEGER             :: DotDex
     LOGICAL             :: Exists
     INTEGER,EXTERNAL    :: GetPID
-    !-----------------------------------------------------------------------------------------------
+
     ! Get command line arguments
     CALL Get(Args)
     IF(Args%NC==0)CALL MondoHalt(PRSE_ERROR,' No arguments to MondoSCF !')!
+
     ! Get environmental variables
     CALL GetEnv('PWD',N%M_PWD)
     CALL GetEnv('MONDO_HOME',N%M_HOME)

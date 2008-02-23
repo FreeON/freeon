@@ -24,8 +24,8 @@
 !    disemination in future releases.
 !------------------------------------------------------------------------------
 !-----------------------------------------------------------------
-!    DERIVED TYPES AND COMPOSED OBJECTS
-!    Author:  Matt Challacombe
+! DERIVED TYPES AND COMPOSED OBJECTS
+! Author:  Matt Challacombe
 !-----------------------------------------------------------------
 MODULE DerivedTypes
   USE GlobalScalars
@@ -35,10 +35,10 @@ MODULE DerivedTypes
 
   !==============================================================
   !
-  !  FUNDAMENTAL ARRAY TYPES: VECTOR => RANK FOUR ARRAY
+  ! FUNDAMENTAL ARRAY TYPES: VECTOR => RANK FOUR ARRAY
   !
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  !  INTEGER VECTOR
+  ! INTEGER VECTOR
   !
   TYPE INT_VECT
     INTEGER                      :: Alloc  !-- Allocation key (TRUE, TEMP, FALSE)
@@ -49,7 +49,7 @@ MODULE DerivedTypes
 #endif
   END TYPE INT_VECT
   !------------------------------------------------------------
-  !  INTEGER RANK2 ARRAY
+  ! INTEGER RANK2 ARRAY
   !
   TYPE INT_RNK2
     INTEGER                          :: Alloc  !-- Is the array allocated yet?
@@ -60,7 +60,7 @@ MODULE DerivedTypes
 #endif
   END TYPE INT_RNK2
   !------------------------------------------------------------
-  !  INTEGER RANK3 ARRAY
+  ! INTEGER RANK3 ARRAY
   !
   TYPE INT_RNK3
     INTEGER                          :: Alloc  !-- Is the array allocated yet?
@@ -71,7 +71,7 @@ MODULE DerivedTypes
 #endif
   END TYPE INT_RNK3
   !------------------------------------------------------------
-  !  INTEGER RANK4 ARRAY
+  ! INTEGER RANK4 ARRAY
   !
   TYPE INT_RNK4
     INTEGER                            :: Alloc  !-- Allocation key
@@ -82,7 +82,7 @@ MODULE DerivedTypes
 #endif
   END TYPE INT_RNK4
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  !  DOUBLE VECTOR
+  ! DOUBLE VECTOR
   !
   TYPE DBL_VECT
     INTEGER                           :: Alloc  !-- Allocation key (TRUE, TEMP, FALSE)
@@ -93,7 +93,7 @@ MODULE DerivedTypes
 #endif
   END TYPE DBL_VECT
   !------------------------------------------------------------
-  !  DOUBLE RANK2 ARRAY
+  ! DOUBLE RANK2 ARRAY
   !
   TYPE DBL_RNK2
     INTEGER                              :: Alloc  !-- Is the array allocated yet?
@@ -104,7 +104,7 @@ MODULE DerivedTypes
 #endif
   END TYPE DBL_RNK2
   !------------------------------------------------------------
-  !  DOUBLE RANK3 ARRAY
+  ! DOUBLE RANK3 ARRAY
   !
   TYPE DBL_RNK3
     INTEGER                               :: Alloc  !-- Is the array allocated yet?
@@ -115,7 +115,7 @@ MODULE DerivedTypes
 #endif
   END TYPE DBL_RNK3
   !------------------------------------------------------------
-  !  DOUBLE RANK4 ARRAY
+  ! DOUBLE RANK4 ARRAY
   !
   TYPE DBL_RNK4
     INTEGER                                 :: Alloc  !-- Is the array allocated yet?
@@ -126,7 +126,7 @@ MODULE DerivedTypes
 #endif
   END TYPE DBL_RNK4
   !------------------------------------------------------------
-  !  DOUBLE RANK6 ARRAY
+  ! DOUBLE RANK6 ARRAY
   !
   TYPE DBL_RNK6
     INTEGER                                     :: Alloc  !-- Is the array allocated yet?
@@ -137,13 +137,13 @@ MODULE DerivedTypes
 #endif
   END TYPE DBL_RNK6
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  !  CHARACTER STRING
+  ! CHARACTER STRING
   !
   TYPE CHR_SCLR
     CHARACTER(LEN=DEFAULT_CHR_LEN) :: C
   END TYPE CHR_SCLR
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  !  CHARACTER STRING VECTOR
+  ! CHARACTER STRING VECTOR
   !
   TYPE CHR_VECT
     INTEGER                           :: Alloc  !-- Allocation key (TRUE, TEMP, FALSE)
@@ -182,14 +182,14 @@ MODULE DerivedTypes
   !
   !==================================================================================
   !
-  !  OBJECTS DERIVED THROUGH COMPOSITION: BASIS SETS, MATRICES, ETC.
+  ! OBJECTS DERIVED THROUGH COMPOSITION: BASIS SETS, MATRICES, ETC.
   !
   !==================================================================================
   !------------------------------------------------------------
-  !  DISTRIBUTED BLOCK COMPRESSED SPARSE ROW MATRIX
+  ! DISTRIBUTED BLOCK COMPRESSED SPARSE ROW MATRIX
   !
   TYPE DBCSR
-    !     Local
+    ! Local
     INTEGER        :: NSMat  !-- Number of spin matrices
     INTEGER        :: Alloc  !-- Allocation key
     INTEGER        :: Node   !-- Node from which the data derived
@@ -200,13 +200,13 @@ MODULE DerivedTypes
     TYPE(INT_VECT) :: ColPt  !-- Coloumn index
     TYPE(INT_VECT) :: BlkPt  !-- Block index
     TYPE(DBL_VECT) :: MTrix  !-- Blocks
-    !     Global
+    ! Global
     INTEGER        :: GUpDate!-- Has the global information been uptdated?
     TYPE(INT_VECT) :: GRwPt  !-- Global row index
     TYPE(INT_VECT) :: GClPt  !-- Global col index
   END TYPE DBCSR
   !------------------------------------------------------------
-  !  BLOCK COMPRESSED SPARSE ROW MATRIX
+  ! BLOCK COMPRESSED SPARSE ROW MATRIX
   !
   TYPE BCSR
     INTEGER        :: NSMat  !-- Number of spin matrices
@@ -221,7 +221,7 @@ MODULE DerivedTypes
     TYPE(DBL_VECT) :: MTrix  !-- Blocked matrices
   END TYPE BCSR
   !------------------------------------------------------------
-  !  Basis Sets
+  ! Basis Sets
   !
   TYPE BSET
     INTEGER          :: Alloc   !-- Allocation key
@@ -248,7 +248,7 @@ MODULE DerivedTypes
     TYPE(INT_RNK3)   :: ASymm   !-- Lo-hi angular symmetry per contraction, per kind
     TYPE(DBL_RNK3)   :: Expnt   !-- Exponent per primitive, per contraction, per kind
     TYPE(DBL_RNK4)   :: CCoef   !-- Contraction coefficient, per symmetry type,
-    !   per primitive, per contraction, per kind
+    ! per primitive, per contraction, per kind
     LOGICAL          :: HasECPs
     INTEGER          :: MxProjL
     INTEGER          :: Typ1Fnk
@@ -353,29 +353,29 @@ MODULE DerivedTypes
   !
   !----------------------------------------------------------------------
   !
-  !  Coordinates
+  ! Coordinates
   !
   TYPE CRDS
-    !     Status variables
+    ! Status variables
     INTEGER          :: Alloc     !-- Allocation key
-    LOGICAL          :: InAU      !-- True if coordinates are in Atomic Units
+    LOGICAL          :: InAU      !-- True if coordinates from input are in Atomic Units (internally we work with atomic units)
     INTEGER          :: Ordrd     !-- Reordering key
     INTEGER          :: Confg     !-- Configuration number
-    !     Electronic coordinates
+    ! Electronic coordinates
     INTEGER          :: NElec     !-- Number of electrons
     INTEGER          :: Multp     !-- Total spin multplicity
     REAL(DOUBLE)     :: TotCh     !-- Total charge
     INTEGER          :: NAlph     !-- Number of alpha electrons
     INTEGER          :: NBeta     !-- Number of beta electrons
-    !     Misc
+    ! Misc
     REAL(DOUBLE)     :: ETotal    !-- Total SCF Energy at this geometry
     REAL(DOUBLE)     :: GradRMS   !-- RMS error in gradient at this geometry
     REAL(DOUBLE)     :: GradMax   !-- Max error in gradient at this geometry
     LOGICAL          :: Unstable  !-- SCF is unstable at this geometry
     TYPE(DBL_RNK2)   :: BndBox    !-- Bounding box of the system
-    !     Perodic Stuff
+    ! Perodic Stuff
     TYPE(PBCInfo)    :: PBC       !-- Periodic Information
-    !     Atomic coordinates
+    ! Atomic coordinates
     INTEGER          :: NAtms     !-- Number of atoms
     INTEGER          :: Nkind     !-- Number of atom kinds or types
     TYPE(DBL_VECT)   :: AtNum     !-- Atomic number per atom
@@ -392,12 +392,12 @@ MODULE DerivedTypes
     !
     TYPE(DBL_RNK2)   :: Displ     !-- Displaced Cartesian geometry
     TYPE(PBCInfo)    :: PBCDispl  !-- Displaced Periodic Information
-    !     Internal coordinates related arrays
+    ! Internal coordinates related arrays
     LOGICAL          :: LatticeOnly
     INTEGER          :: AltCount
   END TYPE CRDS
   !-------------------------------------------------------------------------------------
-  !  Cartesian Multipoles of the Density
+  ! Cartesian Multipoles of the Density
   !
   TYPE CMPoles
     INTEGER          :: Alloc   !-- Allocation key
@@ -405,7 +405,7 @@ MODULE DerivedTypes
     TYPE(DBL_VECT)   :: QPole   !-- Quadrupoles (Dim=6)
   END TYPE CMPoles
   !-------------------------------------------------------------------------------------
-  !  Density in a Hermite Gaussian basis
+  ! Density in a Hermite Gaussian basis
   !
   TYPE HGRho
     INTEGER          :: Alloc   !-- Allocation key
@@ -424,7 +424,7 @@ MODULE DerivedTypes
     TYPE(DBL_VECT)   :: Co      !-- Density coefficients (NCoef)
   END TYPE HGRho
   !-------------------------------------------------------------------------------------
-  !  ONX distribution buffers
+  ! ONX distribution buffers
   !
   TYPE DBuf
     INTEGER          :: Alloc   !-- Allocation key
@@ -450,7 +450,7 @@ MODULE DerivedTypes
     TYPE(DBL_VECT)   :: PrmBuf  !-- Primitive dis. buffer for 2-e computation
   END TYPE DBuf
   !-------------------------------------------------------------------------------------
-  !  ONX SL info
+  ! ONX SL info
   !
   TYPE DSL
     INTEGER          :: Alloc   !-- Allocation key
@@ -460,7 +460,7 @@ MODULE DerivedTypes
     TYPE(INT_VECT)   :: SLKey   !-- Basis set offset key (for 2-e symmetry)
   END TYPE DSL
   !-------------------------------------------------------------------------------------
-  !  ONX integral buffers
+  ! ONX integral buffers
   !
   TYPE IBuf
     INTEGER          :: Alloc   !-- Allocation key
@@ -477,7 +477,7 @@ MODULE DerivedTypes
     TYPE(DBL_RNK2)   :: WZ
   END TYPE IBuf
   !-------------------------------------------------------------------------------------
-  !  ONX integral drivers
+  ! ONX integral drivers
   !
   TYPE IDrv
     INTEGER          :: Alloc   !-- Allocation key
@@ -491,7 +491,7 @@ MODULE DerivedTypes
     TYPE(INT_RNK2)   :: SLOC
   END TYPE IDrv
   !-------------------------------------------------------------------------------------
-  !  ONX integral space
+  ! ONX integral space
   !
   TYPE ISpc
     INTEGER           :: L1,L2,L3,L4
@@ -500,7 +500,7 @@ MODULE DerivedTypes
     INTEGER           :: NVRR
   END TYPE ISpc
   !-------------------------------------------------------------------------------------
-  !  ONX gradient driver
+  ! ONX gradient driver
   !
   TYPE GradD
     INTEGER          :: Alloc   !-- Allocation key
@@ -511,7 +511,7 @@ MODULE DerivedTypes
     TYPE(INT_RNK2)   :: GDrv1,GDrv2,GDrv3,GDrv4,GDrv5
   END TYPE GradD
   !--------------------------------------------------------------------------
-  !  Bounding Box Type
+  ! Bounding Box Type
   !
   TYPE BBox
     INTEGER                            :: Tier     ! Level of this box
@@ -538,7 +538,7 @@ MODULE DerivedTypes
     LOGICAL                   :: SameAtom
   ENDTYPE AtomPair
   !------------------------------------------------------------
-  !  Numerical thresholds
+  ! Numerical thresholds
   !
   TYPE TOLS
     REAL(DOUBLE) :: Cube  !-- Cubature
@@ -549,7 +549,7 @@ MODULE DerivedTypes
     REAL(DOUBLE) :: DTol  !-- Max difference in density matrix sought
   END TYPE TOLS
   !------------------------------------------------------------
-  !  Debuging flags
+  ! Debuging flags
   !
   TYPE DEBG
     INTEGER :: Key        !-- Debug level
@@ -564,7 +564,7 @@ MODULE DerivedTypes
     INTEGER :: MM         !-- Debug molecular mechanics energies and forces
   END TYPE DEBG
   !------------------------------------------------------------
-  !  Timing/performance statistics
+  ! Timing/performance statistics
   !
   TYPE TIME
     REAL(DOUBLE) :: CPUS   !-- Accumulated CPU sec
@@ -574,7 +574,7 @@ MODULE DerivedTypes
     REAL(DOUBLE) :: FLOP   !-- Floating point opperations
   END TYPE TIME
   !------------------------------------------------------------
-  !  Memory statistics
+  ! Memory statistics
   !
   TYPE MEMS
     INTEGER :: Allocs    !-- Number of ALLOCATEs untill now
@@ -584,7 +584,7 @@ MODULE DerivedTypes
     INTEGER :: MaxAlloc  !-- Max number of bytes allocated by a call to New
   END TYPE MEMS
   !------------------------------------------------------------
-  !  Argument lists
+  ! Argument lists
   !
   TYPE ARGMT
     INTEGER        :: Alloc     !-- Allocation key
@@ -594,7 +594,7 @@ MODULE DerivedTypes
     TYPE(CHR_VECT) :: C         !-- Vector of character arguments
   END TYPE ARGMT
   !------------------------------------------------------------
-  !  MPI Derived data type pointers
+  ! MPI Derived data type pointers
   !
   TYPE MPI_INDX
     INTEGER        :: Alloc     !-- Allocation key

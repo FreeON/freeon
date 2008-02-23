@@ -35,6 +35,10 @@ MODULE ParseGeometries
   USE ls_rmsd
   USE NEB
   USE Conflicted
+  USE MondoLogger
+
+  IMPLICIT NONE
+
 CONTAINS
   !================================================================================================================
   !
@@ -49,9 +53,9 @@ CONTAINS
     REAL(DOUBLE),DIMENSION(3,3) :: U
     REAL(DOUBLE),DIMENSION(3)   :: Center1,Center2
     REAL(DOUBLE) :: Error,R2
-    !--------------------------------------------------------------------------------------------------------------!
+
     CALL OpenASCII(N%IFile,Inp)
-    !   NEB
+    ! NEB
     IF(O%Grad==GRAD_TS_SEARCH_NEB)THEN
       ! Parse for the number of clones to use in NEB
       IF(.NOT.OptIntQ(Inp,CLONES,G%Clones))THEN
@@ -167,9 +171,11 @@ CONTAINS
       IF(O%Guess==GUESS_EQ_RESTART)THEN
       ELSE
       ENDIF
-      !   Not doing any fancy shmancy with clones ...
+      ! Not doing any fancy shmancy with clones ...
     ELSE
       IF(O%Guess==GUESS_EQ_RESTART.OR.O%Guess==GUESS_EQ_NUGUESS)THEN
+        CALL MondoLog(DEBUG_NONE, "LoadCoordinates", "restart or reguess requested")
+        CALL MondoLog(DEBUG_NONE, "LoadCoordinates", "opening restart hdf "//TRIM(N%RFile))
         HDFFileID=OpenHDF(N%RFile)
         HDF_CurrentID=HDFFileID
         CALL Get(G%Clones,'clones')
@@ -181,8 +187,8 @@ CONTAINS
           DO iCLONE=1,G%Clones
             HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
             CALL Get(G%Clone(iCLONE),TAG_O=GTag(CurrentState))
-            ! Reset the atomic number in the case that we had/have atomic numbers
-            ! cooresponding to an effective core potential basis set
+            ! Reset the atomic number in the case that we had/have atomic
+            ! numbers cooresponding to an effective core potential basis set
             CALL ReSetAtNum(G%Clone(iCLONE))
             IF(iGEO/=O%RestartState%I(3))THEN
               CALL PPrint(G%Clone(iCLONE),FileName_O=N%GFile,Unit_O=Geo, &
@@ -190,6 +196,26 @@ CONTAINS
               ! CALL PPrint(G%Clone(iCLONE),Unit_O=6,PrintGeom_O=O%GeomPrint,Clone_O=iCLONE)
             ENDIF
             CALL CloseHDFGroup(HDF_CurrentID)
+
+            ! Check for coordinate unit conversions.
+            IF(G%Clone(iCLONE)%InAU) THEN
+              CALL MondoLog(DEBUG_NONE, "LoadCoordinates", "atomic units")
+            ELSE
+              CALL MondoLog(DEBUG_NONE, "LoadCoordinates", "Angstrom")
+
+              ! For now we will transform the atomic units coordinates we read
+              ! from hdf into Angstrom to get the right units after we "massage"
+              ! them later on.
+              G%Clone(iCLONE)%Carts%D    = BohrsToAngstroms*G%Clone(iCLONE)%Carts%D
+              G%Clone(iCLONE)%Velocity%D = BohrsToAngstroms*G%Clone(iCLONE)%Velocity%D
+
+              G%Clone(iCLONE)%PBC%CellCenter%D = G%Clone(iCLONE)%PBC%CellCenter%D*BohrsToAngstroms
+              G%Clone(iCLONE)%PBC%BoxShape%D   = BohrsToAngstroms*G%Clone(iCLONE)%PBC%BoxShape%D
+              G%Clone(iCLONE)%PBC%InvBoxSh%D   = G%Clone(iCLONE)%PBC%InvBoxSh%D/BohrsToAngstroms
+              G%Clone(iCLONE)%PBC%CellVolume   = G%Clone(iCLONE)%PBC%CellVolume*BohrsToAngstroms**G%Clone(iCLONE)%PBC%Dimen
+              G%Clone(iCLONE)%PBC%DipoleFAC    = G%Clone(iCLONE)%PBC%DipoleFAC/(BohrsToAngstroms**G%Clone(iCLONE)%PBC%Dimen)
+              G%Clone(iCLONE)%PBC%QupoleFAC    = G%Clone(iCLONE)%PBC%QupoleFAC/(BohrsToAngstroms**G%Clone(iCLONE)%PBC%Dimen)
+            ENDIF
           ENDDO
         ENDDO
         CALL Delete(CurrentState)
@@ -197,8 +223,9 @@ CONTAINS
       ELSE
         G%Clones=1
         ALLOCATE(G%Clone(1))
+        CALL MondoLog(DEBUG_NONE, "LoadCoordinates", "loading coordinates from input")
         CALL ParseCoordinates(GEOMETRY_BEGIN,GEOMETRY_END,G%Clone(1),O%Coordinates)
-        !          CALL PPrint(G%Clone(iCLONE),FileName_O=N%GFile,Unit_O=Geo,PrintGeom_O=O%GeomPrint)
+        ! CALL PPrint(G%Clone(iCLONE),FileName_O=N%GFile,Unit_O=Geo,PrintGeom_O=O%GeomPrint)
       ENDIF
     ENDIF
     CLOSE(UNIT=Inp,STATUS='KEEP')
@@ -343,18 +370,25 @@ CONTAINS
 
     IF(N/=G%NAtms) &
          CALL MondoHalt(PRSE_ERROR,'Atom number mismatch in ParseCoordinates')
-    !
-    !    ULTIMATELY, THE FOLLOWING ITEMS SHOULD BE ASSOCIATED WITH THE Geometries TYPE
-    !    RATHER THAN THE CRDS TYPE
-    !
+
+    ! ULTIMATELY, THE FOLLOWING ITEMS SHOULD BE ASSOCIATED WITH THE Geometries
+    ! TYPE RATHER THAN THE CRDS TYPE
+
     ! Parse coordinates determining spin coordinates
     IF(.NOT.OptDblQ(Inp,TOTAL_CHARGE,G%TotCh))  &
          CALL MondoHalt(PRSE_ERROR,TOTAL_Charge//' not found in input.')
     IF(.NOT.OptIntQ(Inp,MULTIPLICITY,G%Multp))  &
          CALL MondoHalt(PRSE_ERROR,MULTIPLICITY//' not found in input.')
     CALL SpinCoords(G) ! Compute closed shell spin coordinates
+
     ! Parsing of misc geometry info
     G%InAU=OptKeyQ(Inp,GEOMETRY,IN_AU)
+    IF(G%InAU) THEN
+      CALL MondoLog(DEBUG_NONE, "ParseCoordinates", "setting InAU to true")
+    ELSE
+      CALL MondoLog(DEBUG_NONE, "ParseCoordinates", "setting InAU to false")
+    ENDIF
+
     IF(OptKeyQ(Inp,GEOMETRY,Z_ORDER))THEN
       G%Ordrd=SFC_PEANO
     ELSEIF(OptKeyQ(Inp,GEOMETRY,RANDOM_ORDER))THEN

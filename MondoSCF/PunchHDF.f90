@@ -229,7 +229,8 @@ CONTAINS
     INTEGER            :: cBAS,cGEO,iCLONE,HDFFileID,I,NK,CF,PF
     CHARACTER(LEN=DCL) :: chGEO
     REAL(DOUBLE)       :: MinExpt
-    !---------------------------------------------------------------------------!
+
+    CALL MondoLog(DEBUG_NONE, "GeomArchive", "archiving geometry into hdf")
     chGEO=IntToChar(cGEO)
     HDFFileID=OpenHDF(N%HFile)
     DO iCLONE=1,G%Clones
@@ -255,22 +256,30 @@ CONTAINS
       G%Clone(iCLONE)%Carts%D = G%Clone(iCLONE)%Carts%D
 
       HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
+
       ! If we have ECPs, temporarily reset this geometries nuclear charges
-      IF(B%BSets(iCLONE,cBAS)%HasECPs) &
-           CALL SetAtomCharges(G%Clone(iCLONE),B%BSets(iCLONE,cBAS))
+      IF(B%BSets(iCLONE,cBAS)%HasECPs) THEN
+        CALL SetAtomCharges(G%Clone(iCLONE),B%BSets(iCLONE,cBAS))
+      ENDIF
+
       ! Put the geometry to this group ...
       CALL Put(G%Clone(iCLONE),chGEO)
+
       ! Store the CellSets
       CALL Put(CS_IN ,'CS_IN' ,Tag_O=IntToChar(cBAS))
       CALL Put(CS_OUT,'CS_OUT',Tag_O=IntToChar(cBAS))
+
       ! Close this clones group
       CALL CloseHDFGroup(HDF_CurrentID)
+
       ! And free memory for the the lattice vectors
       CALL Delete(CS_IN%CellCarts)
       CALL Delete(CS_OUT%CellCarts)
+
       ! And unset the nuclear charges in the case of ECPs
-      IF(B%BSets(iCLONE,cBAS)%HasECPs) &
-           CALL UnSetAtomCharges(G%Clone(iCLONE),B%BSets(iCLONE,cBAS))
+      IF(B%BSets(iCLONE,cBAS)%HasECPs) THEN
+        CALL UnSetAtomCharges(G%Clone(iCLONE),B%BSets(iCLONE,cBAS))
+      ENDIF
     ENDDO
     CALL CloseHDF(HDFFileID)
   END SUBROUTINE GeomArchive
