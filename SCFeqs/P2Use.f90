@@ -58,7 +58,6 @@ PROGRAM P2Use
 #else
   TYPE(BCSR) :: F,P,P0,PV,X,S,S0,S1,Tmp1,Tmp2
 #endif
-  
 
   TYPE(INT_VECT)                :: Stat
   TYPE(DBL_RNK2)                :: BlkP
@@ -133,6 +132,7 @@ PROGRAM P2Use
         !Set the P_alpha
         CALL DSCAL(MaxBlkSize**2*NAtoms,2D0*DBLE(NAlph)/DBLE(NEl)  ,BlkP%D(1,1),1)
         CALL SetToI(P,BlkP,Expert_O=1)
+
         !Set the P_beta
         CALL DSCAL(MaxBlkSize**2*NAtoms,    DBLE(NBeta)/DBLE(NAlph),BlkP%D(1,1),1)
         CALL SetToI(P,BlkP,Expert_O=2)
@@ -140,11 +140,13 @@ PROGRAM P2Use
         !Set the P_alpha
         CALL DSCAL(MaxBlkSize**2*NAtoms,2D0*DBLE(NAlph)/DBLE(NEl)  ,BlkP%D(1,1),1)
         CALL SetToI(P,BlkP,Expert_O=1)
+
         !Set the off diag bloks P_alpha,beta P_beta,alpha
         Dum=-0.1D0
         CALL DSCAL(MaxBlkSize**2*NAtoms,            Dum/DBLE(NAlph),BlkP%D(1,1),1)
         CALL SetToI(P,BlkP,Expert_O=2)
         CALL SetToI(P,BlkP,Expert_O=3)
+
         !Set the P_beta
         CALL DSCAL(MaxBlkSize**2*NAtoms,    DBLE(NBeta)/Dum        ,BlkP%D(1,1),1)
         CALL SetToI(P,BlkP,Expert_O=4)

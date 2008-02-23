@@ -133,11 +133,7 @@ CONTAINS
           IConAls   = DIIS_CONALS
           ODA_DONE  = .TRUE.
           Mssg = 'Turning on DIIS'
-          CALL MondoLogPlain(Mssg)
-          !CALL OpenASCII(OutFile,Out)
-          !WRITE(Out,*)TRIM(Mssg)
-          !WRITE(*,*)TRIM(Mssg)
-          !CLOSE(Out)
+          CALL MondoLogPlain(TRIM(Mssg))
         ELSE
           IConAls = ODA_CONALS
         ENDIF
@@ -374,14 +370,9 @@ CONTAINS
       ENDDO
       ! Convergence announcement
       IF(ConvergedQ.NE.NOT_CONVERGE.AND.cSCF>2)THEN!.AND.PrintFlags%Key>DEBUG_NONE)THEN
-        CALL MondoLogPlain(Mssg)
-        !CALL OpenASCII(OutFile,Out)
-        !WRITE(Out,*)TRIM(Mssg)
-        !WRITE(*,*)TRIM(Mssg)
-        !WRITE(Out,*)'Normal CPSCF convergence.'
-        !CLOSE(Out)
+        CALL MondoLogPlain(TRIM(Mssg))
+        CALL MondoLogPlain("Normal CPSCF convergence")
       ENDIF
-      !
     ELSE
       ! NORMAL HUMANS CONVERGENCE CRITERIA
       IF(IConAls==DIIS_CONALS) THEN
@@ -574,11 +565,7 @@ CONTAINS
         IF(cGEO > MinMDGeo .AND. cSCF .GE. MinSCF) THEN
           ConvergedQ=DID_CONVERGE
           Mssg = "MD Verlet SCF convergence"
-          !CALL OpenASCII(OutFile,Out)
-          !WRITE(Out,*)TRIM(Mssg)
-          !WRITE(*,*)TRIM(Mssg)
-          !CLOSE(Out)
-          CALL MondoLogPlain(Mssg)
+          CALL MondoLogPlain(TRIM(Mssg))
           RETURN
         ELSE
           IF(DMaxMax > DTest*1.D-2) THEN
@@ -604,11 +591,7 @@ CONTAINS
 
       ! Convergence announcement
       IF(Mssg .NE. " " .AND. cSCF >0)THEN
-        !CALL OpenASCII(OutFile,Out)
-        !WRITE(Out,*)TRIM(Mssg)
-        !WRITE(*,*)TRIM(Mssg)
-        !CLOSE(Out)
-        CALL MondoLogPlain(Mssg)
+        CALL MondoLogPlain(TRIM(Mssg))
       ENDIF
     ENDIF
   END FUNCTION ConvergedQ

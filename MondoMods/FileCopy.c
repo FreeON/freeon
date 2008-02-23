@@ -29,7 +29,14 @@
 #include <string.h>
 #include <errno.h>
 
-#define CHUNKSIZE 100
+/* The number of bytes read in one chunk when copying a file. */
+#define CHUNKSIZE 512
+
+/* This function copies a file. It does not check whether the target file exists
+ * already and overwrites it in case it does.
+ *
+ * Author: Nicolas Bock <nbock@lanl.gov>
+ */
 
 void filecopywrapper (int *lenA, char *fileA, int *lenB, char *fileB)
 {

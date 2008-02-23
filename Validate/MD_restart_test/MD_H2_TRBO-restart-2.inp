@@ -5,14 +5,13 @@ Multiplicity=1
 
 DebugAll=(MaxDebug,CheckSums)
 Guess=Restart
-HDFFile=/tmp/MD_H2_TRBO-restart-1_26832.hdf
+HDFFile=/tmp/MD_H2_TRBO-restart-1_10509.hdf
 
 SCFMethod=(TC2)
 BasisSets=(6-31G**)
 ModelChem=(HF) 
 Accuracy=(tight)
 SCFConvergence=(DIIS)
-Geometry=(InAU)
 MinSCF=12
 MaxSCF=12
 
@@ -22,6 +21,8 @@ MDMethod=Verlet
 DeltaTime=0.5
 MaxMDStep=20
 MDNumSCF=2
+
+Geometry=(InAngstrom)
 
 <EndOptions>
 

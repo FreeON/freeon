@@ -24,6 +24,10 @@
 !    disemination in future releases.
 !------------------------------------------------------------------------------
 
+! This module provides interfaces to file operation related C-wrapper programs.
+!
+! Author: Nicolas Bock <nbock@lanl.gov>
+
 MODULE FileOperations
 
   IMPLICIT NONE
