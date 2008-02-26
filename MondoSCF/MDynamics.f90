@@ -289,6 +289,7 @@ CONTAINS
         CALL MondoLog(DEBUG_NONE, "MD", "iMDStep = "//TRIM(IntToChar(iMDStep)))
         CALL MondoLog(DEBUG_NONE, "MD", "MDTime  = "//TRIM(FltToChar(MDTime%D(1)*InternalTimeToFemtoseconds)))
       ENDDO
+      CALL CloseHDF(HDFFileID)
 
       ! Remove old Stuff from Scratch
       IF(C%Stat%Current%I(3)-iREMOVE > 0) THEN
@@ -440,6 +441,7 @@ CONTAINS
     INTEGER                   :: m_step
     REAL(DOUBLE)              :: Mass,dT,dT2,dTSq2,Time,Dist
     REAL(DOUBLE),DIMENSION(3) :: Pos,Vel,Acc,PosSave,VelSave
+    REAL(DOUBLE)              :: v_scale
     !--------------------------------------------------------------
     ! Initialize
     dT    = C%Dyns%DTime
@@ -502,8 +504,17 @@ CONTAINS
       CALL MondoLogPlain("MD temperature = "//TRIM(DblToChar(MDTemp%D(1))))
       CALL MondoLogPlain("Target temperature = "//TRIM(DblToChar(C%Dyns%TargetTemp)))
       DO iCLONE = 1, C%Geos%Clones
-        CALL BerendsenThermostat(C%Geos%Clone(iCLONE), MDTemp%D(iCLONE), C%Dyns%TargetTemp, C%Dyns%DTime, C%Dyns%BerendsenTau)
+        CALL BerendsenThermostat(C%Geos%Clone(iCLONE), MDTemp%D(iCLONE), C%Dyns%TargetTemp, C%Dyns%DTime, C%Dyns%BerendsenTau, v_scale)
+
+        ! Store v_scale in hdf.
+        HDFFileID=OpenHDF(C%Nams%HFile)
+        HDF_CurrentID = OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
+        CALL Put(v_scale, "v_scale", TRIM(IntToChar(iGEO)))
+        CALL CloseHDFGroup(HDF_CurrentID)
+        CALL CloseHDF(HDFFileID)
+        CALL MondoLog(DEBUG_NONE, "MD", "putting v_scale("//TRIM(IntToChar(iGEO))//") to hdf = "//TRIM(DblToChar(v_scale)))
       ENDDO
+
     ENDIF
 
     ! Generate Output
@@ -622,14 +633,18 @@ CONTAINS
 
   END SUBROUTINE RescaleVelocity
 
-  SUBROUTINE BerendsenThermostat(GM, T, T0, delta_t, tau_T)
+  SUBROUTINE BerendsenThermostat(GM, T, T0, delta_t, tau_T, v_scale_O)
 
     TYPE(CRDS)   :: GM
     REAL(DOUBLE) :: T, T0, delta_t, tau_T, v_scale
+    REAL(DOUBLE), OPTIONAL, INTENT(OUT) :: v_scale_O
     INTEGER      :: i
 
     IF(T > 1.0d-10) THEN
       v_scale = SQRT(1 + delta_t/tau_T * (T0/T - 1))
+      IF(PRESENT(v_scale_O)) THEN
+        v_scale_O = v_scale
+      ENDIF
 
       CALL MondoLog(DEBUG_NONE, "Berendsen Thermostat", "T = "//TRIM(DblToChar(T)))
       CALL MondoLog(DEBUG_NONE, "Berendsen Thermostat", "T0 = "//TRIM(DblToChar(T0)))
@@ -656,7 +671,7 @@ CONTAINS
     REAL(DOUBLE)          :: Kin,Temp,Mass
     INTEGER               :: iATS
 
-    Kin    = Zero
+    Kin = Zero
     nATOMS = 0
     DO iATS=1,GM%NAtms
       IF(GM%CConstrain%I(iATS)==0)THEN
@@ -936,30 +951,32 @@ CONTAINS
           CLOSE(Out)
 
         ENDIF
+
       ELSE
 
         FileName = TRIM(C%Nams%SCF_NAME)//'_'//TRIM(IntToChar(iCLONE))//'_Energies.dat'
-        CALL OpenASCII(TRIM(FileName),99)
-        WRITE(99,60) MDTime%D(iCLONE)*InternalTimeToFemtoseconds,MDKin%D(iCLONE),MDEpot%D(iCLONE),MDEtot%D(iCLONE)
-        WRITE(*,*) "Time = ",MDTime%D(iCLONE)*InternalTimeToFemtoseconds, &
-          " fs Temperature = ",MDTemp%D(iCLONE),'Ave Temp = ',MDTave%D(iCLONE)
-        CLOSE(99)
+        CALL OpenASCII(TRIM(FileName),Out)
+        WRITE(Out,60) MDTime%D(iCLONE)*InternalTimeToFemtoseconds,MDKin%D(iCLONE),MDEpot%D(iCLONE),MDEtot%D(iCLONE)
+        CALL MondoLogPlain("Time = "//TRIM(FltToChar(MDTime%D(iCLONE)*InternalTimeToFemtoseconds)) &
+          //" fs, Temperature = "//TRIM(FltToChar(MDTemp%D(iCLONE))) &
+          //" K, avg. Temperature = "//TRIM(FltToChar(MDTave%D(iCLONE)))//" K")
+        CLOSE(Out)
 
       ENDIF
 
       FileName = TRIM(C%Nams%SCF_NAME)//'_'//TRIM(IntToChar(iCLONE))//'_MD_Coordinates_1.dat'
-      CALL OpenASCII(TRIM(FileName),98)
+      CALL OpenASCII(TRIM(FileName),Out)
       Pos = C%Geos%Clone(iCLONE)%Carts%D(1:3,1)
       Vel = C%Geos%Clone(iCLONE)%Velocity%D(1:3,1)
-      WRITE(98,61) MDTime%D(iCLONE)*InternalTimeToFemtoseconds,Pos(1:3),Vel(1:3)
-      CLOSE(98)
+      WRITE(Out,61) MDTime%D(iCLONE)*InternalTimeToFemtoseconds,Pos(1:3),Vel(1:3)
+      CLOSE(Out)
 
       FileName = TRIM(C%Nams%SCF_NAME)//'_'//TRIM(IntToChar(iCLONE))//'_MD_Coordinates_2.dat'
-      CALL OpenASCII(TRIM(FileName),97)
+      CALL OpenASCII(TRIM(FileName),Out)
       Pos = C%Geos%Clone(iCLONE)%Carts%D(1:3,2)
       Vel = C%Geos%Clone(iCLONE)%Velocity%D(1:3,2)
-      WRITE(97,61) MDTime%D(iCLONE)*InternalTimeToFemtoseconds,Pos(1:3),Vel(1:3)
-      CLOSE(97)
+      WRITE(Out,61) MDTime%D(iCLONE)*InternalTimeToFemtoseconds,Pos(1:3),Vel(1:3)
+      CLOSE(Out)
     ENDDO
 
 60  FORMAT(F10.4,1x,F18.12,1x,F18.12,1x,F18.12)

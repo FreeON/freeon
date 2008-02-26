@@ -61,7 +61,7 @@ PROGRAM P2Use
 
   TYPE(INT_VECT)                :: Stat
   TYPE(DBL_RNK2)                :: BlkP
-  REAL(DOUBLE)                  :: MaxDS,NoiseLevel, alpha
+  REAL(DOUBLE)                  :: MaxDS,NoiseLevel, alpha, v_scale
   INTEGER                       :: MDDampStep, nnk
   REAL(DOUBLE)                  :: Scale,Fact,ECount,RelNErr, DeltaP,OldDeltaP, &
        DensityDev,dN,MaxGDIff,GDIff,OldN,M,PNon0s,PSMin,PSMax, &
@@ -592,6 +592,11 @@ PROGRAM P2Use
 
     ! PV(n) = PV(n-1) + 4.61D0*b(nnk)*[D(n-1)-P(n-1)]
     ! P(n) = P(n-1) + a(nnk)*PV(n)
+
+    ! Get v_scale.
+    CALL Get(v_scale, "v_scale", TRIM(IntToChar(iGEO-1)))
+    CALL MondoLog(DEBUG_NONE, "P2Use", "v_scale("//TRIM(IntToChar(iGEO-1))//") = "//TRIM(DblToChar(v_scale)))
+
     ! Get D(p-1)
     FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO-1))//'_C#'//TRIM(IntToChar(MyClone))//'.PVsave'
     CALL Get(Tmp1,FileName)

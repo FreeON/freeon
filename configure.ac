@@ -104,7 +104,10 @@ else
 fi
 
 # Check for ranlib.
-AC_PROG_RANLIB
+#AC_PROG_RANLIB
+
+# Check for libtool.
+AC_PROG_LIBTOOL
 
 # Set $(MAKE).
 AC_PROG_MAKE_SET
@@ -726,6 +729,7 @@ TwoE/INT/Makefile
 TwoE/MSC/Makefile
 TwoE/VRR/Makefile
 ONX/Makefile
+RegressionTests/Makefile
 ])
 
 AC_CONFIG_HEADERS([config.h])

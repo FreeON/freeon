@@ -137,14 +137,14 @@ PROGRAM JForce
     A2=3*AtA
     F_nlm = dNukE(GMLoc,AtA)
     JFrc%D(A1:A2)= Two*F_nlm(1:3)
-    !    Store Inner Nuc Lattice Forces
+    ! Store Inner Nuc Lattice Forces
     LatFrc_J%D(1:3,1) = LatFrc_J%D(1:3,1) + F_nlm(7:9)
     LatFrc_J%D(1:3,2) = LatFrc_J%D(1:3,2) + F_nlm(10:12)
     LatFrc_J%D(1:3,3) = LatFrc_J%D(1:3,3) + F_nlm(13:15)
-    !    Outer Nuc Lattice Forces
+    ! Outer Nuc Lattice Forces
     nlm        = AtomToFrac(GMLoc,GMLoc%Carts%D(:,AtA))
     LatFrc_J%D = LatFrc_J%D + Two*LaticeForce(GMLoc,nlm,F_nlm(1:3))
-    !    Start AtB Loop
+    ! Start AtB Loop
     DO JP=P%RowPt%I(AtA),P%RowPt%I(AtA+1)-1
       AtB=P%ColPt%I(JP)
       B1=3*(AtB-1)+1
@@ -184,11 +184,11 @@ PROGRAM JForce
             ELSE
               JFrc%D(A1:A2) = JFrc%D(A1:A2) + Eight*F_nlm(1:3)
             ENDIF
-            !                Store Inner J Lattice Forces
+            ! Store Inner J Lattice Forces
             LatFrc_J%D(1:3,1) = LatFrc_J%D(1:3,1) + Two*F_nlm(7:9)
             LatFrc_J%D(1:3,2) = LatFrc_J%D(1:3,2) + Two*F_nlm(10:12)
             LatFrc_J%D(1:3,3) = LatFrc_J%D(1:3,3) + Two*F_nlm(13:15)
-            !                Outer Lattice J Forces
+            ! Outer Lattice J Forces
             nlm        = AtomToFrac(GMLoc,Pair%A)
             LatFrc_J%D = LatFrc_J%D+Four*LaticeForce(GMLoc,nlm,F_nlm(1:3))
             nlm        = AtomToFrac(GMLoc,Pair%B)
@@ -211,7 +211,7 @@ PROGRAM JForce
 #ifdef PARALLEL
   IF(MyID == ROOT) THEN
 #endif
-    !    The Dipole Contribution to the Lattice Forces
+    ! The Dipole Contribution to the Lattice Forces
     CALL New(LatFrc_J_Dip,(/3,3/))
     LatFrc_J_Dip%D = Zero
     IF(GMLoc%PBC%Dimen > 0) THEN
@@ -224,7 +224,7 @@ PROGRAM JForce
         ENDDO
       ENDDO
     ENDIF
-    !    The Farfield Contribution to the Lattice Forces
+    ! The Farfield Contribution to the Lattice Forces
     CALL New(LatFrc_J_PFF,(/3,3/))
     LatFrc_J_PFF%D = Zero
     IF(GMLoc%PBC%Dimen > 0) THEN
@@ -265,7 +265,7 @@ PROGRAM JForce
 #ifdef PARALLEL
   IF(MyID == ROOT) THEN
 #endif
-    !    Zero the Lower Triange
+    ! Zero the Lower Triange
     DO I=1,3
       DO J=1,I-1
         LatFrc_J%D(I,J)     = Zero
@@ -276,26 +276,26 @@ PROGRAM JForce
     PrintFlags%Key=DEBUG_MAXIMUM
     PrintFlags%MM=DEBUG_FRC
 
-    !    Do some printing
+    ! Do some printing
     CALL Print_LatForce(GMLoc,LatFrc_J%D,'RAW J Lattice Force')
     CALL Print_LatForce(GMLoc,LatFrc_J%D,'RAW J Lattice Force',Unit_O=6)
     CALL Print_LatForce(GMLoc,LatFrc_J_Dip%D,'J Dipole Lattice Force')
     CALL Print_LatForce(GMLoc,LatFrc_J_Dip%D,'J Dipole Lattice Force',Unit_O=6)
     CALL Print_LatForce(GMLoc,LatFrc_J_PFF%D,'J  PFF   Lattice Force')
     CALL Print_LatForce(GMLoc,LatFrc_J_PFF%D,'J  PFF   Lattice Force',Unit_O=6)
-    !    Sum in the J contribution to total force
+    ! Sum in the J contribution to total force
     DO AtA=1,NAtoms
       A1=3*(AtA-1)+1
       A2=3*AtA
       GMLoc%Gradients%D(1:3,AtA) = GMLoc%Gradients%D(1:3,AtA)+JFrc%D(A1:A2)
     ENDDO
-    !    Sum in the J contribution to total lattice force,including Dip and PFF
+    ! Sum in the J contribution to total lattice force,including Dip and PFF
     LatFrc_J%D         = LatFrc_J%D+LatFrc_J_Dip%D+LatFrc_J_PFF%D
     CALL Print_LatForce(GMLoc,LatFrc_J%D,'TOTAL Lattice Force')
     CALL Print_LatForce(GMLoc,LatFrc_J%D,'TOTAL Lattice Force',Unit_O=6)
 
     GMLoc%PBC%LatFrc%D = GMLoc%PBC%LatFrc%D+LatFrc_J%D
-    !    Tidy Up
+    ! Tidy Up
     CALL Delete(LatFrc_J_Dip)
     CALL Delete(LatFrc_J_PFF)
 #ifdef PARALLEL
@@ -307,8 +307,10 @@ PROGRAM JForce
   ! Do some checksumming and IO
   !CALL PChkSum(JFrc,    'dJ/dR',Proc_O=Prog)
   !CALL PChkSum(LatFrc_J,'LFrcJ',Proc_O=Prog)
+
   ! Save Forces to Disk
   CALL Put(GMLoc,Tag_O=CurGeom)
+
   ! Tidy Up
   CALL Delete(JFrc)
   CALL Delete(LatFrc_J)
