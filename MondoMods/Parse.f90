@@ -693,16 +693,16 @@ CONTAINS
   END FUNCTION DblToMMAChar
 
   FUNCTION TrixFile(PostFix,Args_O,OffSet_O,Name_O,Stats_O,NoTags_O,PWD_O)
-    CHARACTER(LEN=*),         INTENT(IN) :: PostFix
-    CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Name_O
-    TYPE(ARGMT),     OPTIONAL,INTENT(IN) :: Args_O
-    INTEGER,DIMENSION(3), &
-         OPTIONAL,INTENT(IN) :: Stats_O
-    INTEGER,         OPTIONAL,INTENT(IN) :: OffSet_O
-    LOGICAL,         OPTIONAL,INTENT(IN) :: NoTags_O,PWD_O
-    INTEGER                              :: OffSet
-    INTEGER, DIMENSION(3)                :: Stats
-    CHARACTER(LEN=DEFAULT_CHR_LEN)       :: Name,TrixFile,Cycl,Base,Geom
+    CHARACTER(LEN=*),         INTENT(IN)      :: PostFix
+    CHARACTER(LEN=*),OPTIONAL,INTENT(IN)      :: Name_O
+    TYPE(ARGMT),     OPTIONAL,INTENT(IN)      :: Args_O
+    INTEGER,DIMENSION(3), OPTIONAL,INTENT(IN) :: Stats_O
+    INTEGER,         OPTIONAL,INTENT(IN)      :: OffSet_O
+    LOGICAL,         OPTIONAL,INTENT(IN)      :: NoTags_O,PWD_O
+    INTEGER                                   :: OffSet
+    INTEGER, DIMENSION(3)                     :: Stats
+    CHARACTER(LEN=DEFAULT_CHR_LEN)            :: Name,TrixFile,Cycl,Base,Geom
+
     IF(PRESENT(Name_O))THEN
       IF(PRESENT(PWD_O))THEN
         Name=TRIM(MONDO_PWD)//Name_O
@@ -716,19 +716,19 @@ CONTAINS
         Name=SCRName
       ENDIF
     ELSE
-      CALL Halt(' Neither Name_O or Args_O passed to TrixFile ! ')
+      CALL Halt('Neither Name_O or Args_O passed to TrixFile!')
     ENDIF
     IF(PRESENT(Stats_O))THEN
       Stats(1:3)=Stats_O(1:3)
     ELSEIF(PRESENT(Args_O))THEN
       Stats(1:3)=Args_O%I%I(1:3)
     ELSE
-      CALL Halt(' Neither Stats_O or Args_O passed to TrixFile ! ')
+      CALL Halt('Neither Stats_O or Args_O passed to TrixFile!')
     ENDIF
     IF(PRESENT(OffSet_O))THEN
       Stats(1)=Stats(1)+OffSet_O
       IF(Stats(1)<0)THEN
-        !              Use previous if current < 0
+        ! Use previous if current < 0
         Stats=Args_O%I%I(4:6)
       ENDIF
       Cycl=IntToChar(Stats(1))
