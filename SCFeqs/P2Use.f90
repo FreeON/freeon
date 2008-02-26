@@ -534,7 +534,6 @@ PROGRAM P2Use
     iGEO = Args%I%I(3)
 
     IF(iGEO > MDDampStep) THEN
-      ! Initial damping in case of noise.
       alpha = 0.0D0
     ENDIF
 
@@ -593,14 +592,29 @@ PROGRAM P2Use
     ! PV(n) = PV(n-1) + 4.61D0*b(nnk)*[D(n-1)-P(n-1)]
     ! P(n) = P(n-1) + a(nnk)*PV(n)
 
+    ! Debugging: check.... D(n-1)-P(n-1)
+    ! Get D(n-1)
+    FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO-1))//'_C#'//TRIM(IntToChar(MyClone))//'.DOsave'
+    CALL Get(Tmp1,FileName)
+    CALL Multiply(Tmp1, -1.0D0)
+
+    ! Get P(n-1)
+    FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO-1))//'_C#'//TRIM(IntToChar(MyClone))//'.DOPsave'
+    CALL Get(Tmp2,FileName)
+    CALL Add(Tmp1,Tmp2,P)
+
+    CALL MondoLog(DEBUG_NONE, "P2Use", "FNorm(P-D) = "//TRIM(DblToChar(FNorm(P))))
+    ! End Debugging.
+
     ! Get v_scale.
     CALL Get(v_scale, "v_scale", TRIM(IntToChar(iGEO-1)))
+    !v_scale = 1D0
     CALL MondoLog(DEBUG_NONE, "P2Use", "v_scale("//TRIM(IntToChar(iGEO-1))//") = "//TRIM(DblToChar(v_scale)))
 
     ! Get D(p-1)
     FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO-1))//'_C#'//TRIM(IntToChar(MyClone))//'.PVsave'
     CALL Get(Tmp1,FileName)
-    CALL Multiply(Tmp1,1.0D0)
+    CALL Multiply(Tmp1,1.0D0*v_scale)
     CALL SetEq(PV,Tmp1)
 
     ! Get D(n-1), P(n-1)
@@ -618,10 +632,6 @@ PROGRAM P2Use
     ! PV(n) = PV(n-1) + 4.61D0*b(nnk)*[D(n-1)-P(n-1)]
     FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO))//'_C#'//TRIM(IntToChar(MyClone))//'.PVsave'
     CALL Put(PV,FileName)
-
-    IF(iGEO > MDDampStep) THEN
-      alpha = 0.0D0
-    ENDIF
 
     ! Get P(n-1)
     FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO-1))//'_C#'//TRIM(IntToChar(MyClone))//'.DOPsave'

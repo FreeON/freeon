@@ -106,10 +106,10 @@ else
 fi
 
 # Check for ranlib.
-#AC_PROG_RANLIB
+AC_PROG_RANLIB
 
 # Check for libtool.
-AC_PROG_LIBTOOL
+#AC_PROG_LIBTOOL
 
 # Set $(MAKE).
 AC_PROG_MAKE_SET
