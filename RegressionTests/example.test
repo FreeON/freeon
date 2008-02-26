@@ -1,0 +1,13 @@
+# This is an example test input script file. Comments are everything after a '#'
+# character. The following variables are known to the script:
+
+# The input file that is passed to Mondo.
+input = something.inp
+
+# The MondoSCF executable to use.
+Mondo_executable = /usr/local/Mondo/bin/MondoSCF
+
+# In case the regression test built Mondo first and we want to run this test
+# with this executable, we need to tell the regression test to set the
+# Mondo_executable variable itself.
+Mondo_tar = ../mondoscf-alpha-latest.tar.bz2

@@ -1,0 +1,2 @@
+input = MD_TRBO/MD_H2_TRBO.inp
+Mondo_executable = /tmp/Mondo/bin/MondoSCF
