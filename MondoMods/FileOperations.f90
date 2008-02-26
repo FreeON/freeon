@@ -30,6 +30,9 @@
 
 MODULE FileOperations
 
+  USE ParsingConstants
+  USE MondoLogger
+
   IMPLICIT NONE
 
   INTERFACE FileCopyWrapper
@@ -45,6 +48,7 @@ MODULE FileOperations
 
   SUBROUTINE FileCopy (fileA, fileB)
     CHARACTER(LEN=*) :: fileA, fileB
+    CALL MondoLog(DEBUG_NONE, "FileCopy", "copying "//TRIM(fileA)//" --> "//TRIM(FileB))
     CALL FileCopyWrapper(LEN(TRIM(fileA)), TRIM(fileA), LEN(TRIM(fileB)), TRIM(fileB))
   END SUBROUTINE FileCopy
 
