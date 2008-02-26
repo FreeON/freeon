@@ -90,15 +90,11 @@ void filecopywrapper (int *lenA, char *fileA_arg, int *lenB, char *fileB_arg)
     return;
   }
 
-  /* Free memory for filenames. */
-  free(fileA);
-  free(fileB);
-
   /* Allocate buffer memory. */
   buffer = (char*) malloc(CHUNKSIZE);
   while (1)
   {
-    bytes_read = fread((void*) buffer, CHUNKSIZE, 1, fdA);
+    bytes_read = fread((void*) buffer, 1, CHUNKSIZE, fdA);
     if (bytes_read < CHUNKSIZE && ferror(fdA))
     {
       printf("[filecopy] error reading from %s: %s\n", fileA, strerror(errno));
@@ -107,7 +103,7 @@ void filecopywrapper (int *lenA, char *fileA_arg, int *lenB, char *fileB_arg)
 
     if (bytes_read > 0)
     {
-      bytes_written = fwrite((void*) buffer, bytes_read, 1, fdB);
+      bytes_written = fwrite((void*) buffer, 1, bytes_read, fdB);
       if (bytes_written != bytes_read)
       {
         printf("[filecopy] I read %u bytes, but wrote %u bytes\n", bytes_read, bytes_written);
@@ -124,6 +120,10 @@ void filecopywrapper (int *lenA, char *fileA_arg, int *lenB, char *fileB_arg)
 
   /* Release memory. */
   free(buffer);
+
+  /* Free memory for filenames. */
+  free(fileA);
+  free(fileB);
 
   /* Close files. */
   fclose(fdA);
