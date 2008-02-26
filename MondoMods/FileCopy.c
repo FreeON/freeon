@@ -30,7 +30,7 @@
 #include <errno.h>
 
 /* The number of bytes read in one chunk when copying a file. */
-#define CHUNKSIZE 512
+#define CHUNKSIZE 1024
 
 /* This function copies a file. It does not check whether the target file exists
  * already and overwrites it in case it does.
@@ -38,15 +38,34 @@
  * Author: Nicolas Bock <nbock@lanl.gov>
  */
 
-void filecopywrapper (int *lenA, char *fileA, int *lenB, char *fileB)
+void filecopywrapper (int *lenA, char *fileA_arg, int *lenB, char *fileB_arg)
 {
-  char *buffer;
+  char *buffer = NULL;
+  char *fileA  = NULL;
+  char *fileB  = NULL;
+
   size_t bytes_read;
   size_t bytes_written;
+
   FILE *fdA;
   FILE *fdB;
 
+  int i;
+
   /* Fix strings. */
+  fileA = (char*) malloc(sizeof(char)*(*lenA+1));
+  fileB = (char*) malloc(sizeof(char)*(*lenB+1));
+
+  for (i = 0; i < *lenA; ++i)
+  {
+    fileA[i] = fileA_arg[i];
+  }
+
+  for (i = 0; i < *lenB; ++i)
+  {
+    fileB[i] = fileB_arg[i];
+  }
+
   fileA[*lenA] = '\0';
   fileB[*lenB] = '\0';
 
@@ -56,6 +75,8 @@ void filecopywrapper (int *lenA, char *fileA, int *lenB, char *fileB)
   {
     printf("[filecopy] error opening file %s\n", fileA);
     printf("[filecopy] %s\n", strerror(errno));
+    free(fileA);
+    free(fileB);
     return;
   }
 
@@ -64,14 +85,20 @@ void filecopywrapper (int *lenA, char *fileA, int *lenB, char *fileB)
   {
     printf("[filecopy] error opening file %s\n", fileB);
     printf("[filecopy] %s\n", strerror(errno));
+    free(fileA);
+    free(fileB);
     return;
   }
 
+  /* Free memory for filenames. */
+  free(fileA);
+  free(fileB);
+
   /* Allocate buffer memory. */
-  buffer = (char*) malloc(sizeof(char)*CHUNKSIZE);
+  buffer = (char*) malloc(CHUNKSIZE);
   while (1)
   {
-    bytes_read = fread((void*) buffer, 1, CHUNKSIZE, fdA);
+    bytes_read = fread((void*) buffer, CHUNKSIZE, 1, fdA);
     if (bytes_read < CHUNKSIZE && ferror(fdA))
     {
       printf("[filecopy] error reading from %s: %s\n", fileA, strerror(errno));
@@ -80,7 +107,7 @@ void filecopywrapper (int *lenA, char *fileA, int *lenB, char *fileB)
 
     if (bytes_read > 0)
     {
-      bytes_written = fwrite((void*) buffer, 1, bytes_read, fdB);
+      bytes_written = fwrite((void*) buffer, bytes_read, 1, fdB);
       if (bytes_written != bytes_read)
       {
         printf("[filecopy] I read %u bytes, but wrote %u bytes\n", bytes_read, bytes_written);
@@ -92,7 +119,7 @@ void filecopywrapper (int *lenA, char *fileA, int *lenB, char *fileB)
       }
     }
 
-    if (feof(fdA)) { break; }
+    if (ferror(fdB) || feof(fdA)) { break; }
   }
 
   /* Release memory. */
