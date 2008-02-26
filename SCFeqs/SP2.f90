@@ -156,5 +156,7 @@ PROGRAM DMP_SP2 ! Density matrix purification, SP2 variation
   CALL Delete(Pold)
   CALL Delete(Tmp1)
   CALL Delete(Tmp2)
+
   CALL ShutDown(Prog)
+
 END PROGRAM DMP_SP2

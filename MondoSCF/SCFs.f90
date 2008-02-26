@@ -2251,7 +2251,7 @@ CONTAINS
       iREMOVE  = 1
       MinMDGeo = 1
     CASE DEFAULT
-      CALL Halt("[SCFs.CalculateMDGeo] unknown MDGeuss")
+      CALL Halt("[SCFs.CalculateMDGeo] unknown MDGeuss "//TRIM(D%MDGeuss))
     END SELECT
   END SUBROUTINE CalculateMDGeo
 

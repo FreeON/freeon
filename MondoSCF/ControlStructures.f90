@@ -78,7 +78,7 @@ MODULE ControlStructures
 
   TYPE Dynamics
     LOGICAL           :: DoingMD
-    CHARACTER(LEN=9)  :: MDGeuss
+    CHARACTER(LEN=32) :: MDGeuss
     INTEGER           :: MDNumSCF
 
     INTEGER           :: MCMaxSteps
