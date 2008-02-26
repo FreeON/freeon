@@ -14,3 +14,6 @@ Mondo_tar = ../mondoscf-alpha-latest.tar.bz2
 
 # The configure options to be used when configuring the sources.
 configure_options = FC=ifort F77=ifort CC=icc --prefix=/tmp/blabla
+
+# In case we would like to pass some options to make (when building).
+make_options = -j2

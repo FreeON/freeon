@@ -30,7 +30,7 @@ class parse_input:
 
       # Search for known keywords.
       for fieldname in [ "input", "Mondo_executable", "Mondo_tar", \
-          "configure_options" ]:
+          "configure_options", "make_options" ]:
         check = re.compile("(^\s*" + fieldname + "\s*=)(.*$)").search(line)
         if check:
           if not check.group(2):
