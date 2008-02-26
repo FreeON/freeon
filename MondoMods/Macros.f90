@@ -217,7 +217,7 @@ CONTAINS
       CALL Delete(End)
     ENDIF
 #endif
-    !
+
     IF(PrintFlags%Key>=DEBUG_MEDIUM)THEN
       CALL Elapsed_TIME(PerfMon,'Accum',Proc_O=Prog)
       CALL PPrint(PerfMon,Prog)
@@ -231,8 +231,19 @@ CONTAINS
         CALL PPrint(PerfMon,Prog,BareBones_O=.TRUE.)
       ENDIF
     ENDIF
-    IF(PrintFlags%Key==DEBUG_MAXIMUM) &
-         CALL PPrint(MemStats,Prog)
+
+    ! Check MemStats.
+    IF(MemStats%Allocs /= MemStats%DeAllocs) THEN
+      CALL MondoLog(DEBUG_NONE, "ShutDown", "Possible memory leak. Allocs = " &
+        //TRIM(IntToChar(MemStats%Allocs))//", DeAllocs = " &
+        //TRIM(IntToChar(MemStats%DeAllocs)))
+      !CALL Halt("[FIXME]")
+    ENDIF
+
+    IF(PrintFlags%Key==DEBUG_MAXIMUM) THEN
+      CALL PPrint(MemStats,Prog)
+    ENDIF
+
     ! Now mark sucess of this program ...
     CALL Put(.FALSE.,'ProgramFailed')
     ! ... and close the HDF file ...

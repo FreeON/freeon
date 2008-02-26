@@ -148,7 +148,8 @@ MemMan.o : \
   GlobalScalars.o \
   GlobalCharacters.o \
   GlobalObjects.o \
-  ProcessControl.o
+  ProcessControl.o \
+  MondoLogger.o
 
 Parse.o : \
   DerivedTypes.o \
@@ -392,3 +393,7 @@ MondoLogger.o : \
   GlobalObjects.o \
   GlobalCharacters.o \
   ParsingConstants.o
+
+FileOperations.o : \
+  ParsingConstants.o \
+  MondoLogger.o

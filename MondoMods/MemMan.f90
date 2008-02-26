@@ -29,6 +29,7 @@ MODULE MemMan
   USE GlobalCharacters
   USE GlobalObjects
   USE ProcessControl
+  USE MondoLogger
 
   IMPLICIT NONE
 
@@ -87,10 +88,8 @@ MODULE MemMan
   END INTERFACE
 
   INTERFACE
-    FUNCTION GetAddress(x)
-      USE DerivedTypes
-      INTEGER    :: GetAddress
-      TYPE(CRDS) :: x
+    FUNCTION GetAddress()
+      INTEGER :: GetAddress
     END FUNCTION GetAddress
   END INTERFACE
 
@@ -124,11 +123,13 @@ CONTAINS
     INTEGER                        :: Ints
     INTEGER                        :: M,N
     INTEGER,OPTIONAL,INTENT(IN)    :: M_O
+
     CALL AllocChk(A%Alloc)
-    M=1; IF(PRESENT(M_O))M=M_O
+    M=1
+    IF(PRESENT(M_O)) M=M_O
     Ints=N-M+1
     ALLOCATE(A%I(M:N),STAT=MemStatus)
-    CALL IncMem(MemStatus,Ints,0)
+    CALL IncMem(MemStatus,Ints,0,address=LOC(A))
     A%Alloc=ALLOCATED_TRUE
     CALL SetToBig(A)
   END SUBROUTINE New_INT_VECT
@@ -145,7 +146,7 @@ CONTAINS
     M=1; IF(PRESENT(M_O))M=M_O
     ALLOCATE(A%I(M(1):N(1), M(2):N(2)),STAT=MemStatus)
     Ints=(N(1)-M(1)+1)*(N(2)-M(2)+1)
-    CALL IncMem(MemStatus,Ints,0)
+    CALL IncMem(MemStatus,Ints,0,address=LOC(A))
     A%Alloc=ALLOCATED_TRUE
   END SUBROUTINE New_INT_RNK2
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -162,7 +163,7 @@ CONTAINS
     ALLOCATE(A%I(M(1):N(1),M(2):N(2),M(3):N(3)),STAT=MemStatus)
     Ints=(N(1)-M(1)+1)*(N(2)-M(2)+1) &
          *(N(3)-M(3)+1)
-    CALL IncMem(MemStatus,Ints,0)
+    CALL IncMem(MemStatus,Ints,0,address=LOC(A))
     A%Alloc=ALLOCATED_TRUE
   END SUBROUTINE New_INT_RNK3
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -180,7 +181,7 @@ CONTAINS
          M(3):N(3),M(4):N(4)),STAT=MemStatus)
     Ints=(N(1)-M(1)+1)*(N(2)-M(2)+1) &
          *(N(3)-M(3)+1)*(N(4)-M(4)+1)
-    CALL IncMem(MemStatus,Ints,0)
+    CALL IncMem(MemStatus,Ints,0,address=LOC(A))
     A%Alloc=ALLOCATED_TRUE
   END SUBROUTINE New_INT_RNK4
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -195,7 +196,7 @@ CONTAINS
     M=1; IF(PRESENT(M_O))M=M_O
     ALLOCATE(A%D(M:N),STAT=MemStatus)
     Dbls=N-M+1
-    CALL IncMem(MemStatus,0,Dbls)
+    CALL IncMem(MemStatus,0,Dbls,address=LOC(A))
     A%Alloc=ALLOCATED_TRUE
     CALL SetToBig(A)
   END SUBROUTINE New_DBL_VECT
@@ -212,7 +213,7 @@ CONTAINS
     M=1; IF(PRESENT(M_O))M=M_O
     ALLOCATE(A%D(M(1):N(1), M(2):N(2)),STAT=MemStatus)
     Dbls=(N(1)-M(1)+1)*(N(2)-M(2)+1)
-    CALL IncMem(MemStatus,0,Dbls)
+    CALL IncMem(MemStatus,0,Dbls,address=LOC(A))
     A%Alloc=ALLOCATED_TRUE
   END SUBROUTINE New_DBL_RNK2
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -229,7 +230,7 @@ CONTAINS
     ALLOCATE(A%D(M(1):N(1),M(2):N(2),M(3):N(3)),STAT=MemStatus)
     Dbls=(N(1)-M(1)+1)*(N(2)-M(2)+1) &
          *(N(3)-M(3)+1)
-    CALL IncMem(MemStatus,0,Dbls)
+    CALL IncMem(MemStatus,0,Dbls,address=LOC(A))
     A%Alloc=ALLOCATED_TRUE
   END SUBROUTINE New_DBL_RNK3
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -247,7 +248,7 @@ CONTAINS
          M(3):N(3),M(4):N(4)),STAT=MemStatus)
     Dbls=(N(1)-M(1)+1)*(N(2)-M(2)+1) &
          *(N(3)-M(3)+1)*(N(4)-M(4)+1)
-    CALL IncMem(MemStatus,0,Dbls)
+    CALL IncMem(MemStatus,0,Dbls,address=LOC(A))
     A%Alloc=ALLOCATED_TRUE
   END SUBROUTINE New_DBL_RNK4
 
@@ -268,7 +269,7 @@ CONTAINS
     Dbls=(N(1)-M(1)+1)*(N(2)-M(2)+1) &
          *(N(3)-M(3)+1)*(N(4)-M(4)+1) &
          *(N(5)-M(5)+1)*(N(6)-M(6)+1)
-    CALL IncMem(MemStatus,0,Dbls)
+    CALL IncMem(MemStatus,0,Dbls,address=LOC(A))
     A%Alloc=ALLOCATED_TRUE
   END SUBROUTINE New_DBL_RNK6
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -281,7 +282,7 @@ CONTAINS
     CALL AllocChk(A%Alloc)
     M=1; IF(PRESENT(M_O))M=M_O
     ALLOCATE(A%C(M:N),STAT=MemStatus)
-    CALL IncMem(MemStatus,0,0)
+    CALL IncMem(MemStatus,0,0,address=LOC(A))
     A%Alloc=ALLOCATED_TRUE
   END SUBROUTINE New_CHR10_VECT
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -294,7 +295,7 @@ CONTAINS
     CALL AllocChk(A%Alloc)
     M=1; IF(PRESENT(M_O))M=M_O
     ALLOCATE(A%C(M:N),STAT=MemStatus)
-    CALL IncMem(MemStatus,0,0)
+    CALL IncMem(MemStatus,0,0,address=LOC(A))
     A%Alloc=ALLOCATED_TRUE
   END SUBROUTINE New_CHR_VECT
   !
@@ -306,7 +307,7 @@ CONTAINS
     CALL AllocChk(A%Alloc)
     ALLOCATE(A%L(1:N),STAT=MemStatus)
     A%L=.FALSE.
-    CALL IncMem(MemStatus,0,0)
+    CALL IncMem(MemStatus,0,0,address=LOC(A))
     A%Alloc=ALLOCATED_TRUE
   END SUBROUTINE New_LOG_VECT
   !
@@ -810,9 +811,11 @@ CONTAINS
   SUBROUTINE Delete_INT_VECT(A)
     TYPE(INT_VECT),INTENT(INOUT) :: A
     INTEGER                      :: Ints
+    INTEGER                      :: addr
     Ints=SIZE(A%I)
+    addr = LOC(A)
     DEALLOCATE(A%I,STAT=MemStatus)
-    CALL DecMem(MemStatus,Ints,0)
+    CALL DecMem(MemStatus,Ints,0,address=addr)
     A%Alloc=ALLOCATED_FALSE
   END SUBROUTINE Delete_INT_VECT
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -821,9 +824,11 @@ CONTAINS
   SUBROUTINE Delete_INT_RNK2(A)
     TYPE(INT_RNK2),INTENT(INOUT) :: A
     INTEGER                      :: Ints
+    INTEGER                      :: addr
     Ints=SIZE(A%I)
+    addr = LOC(A)
     DEALLOCATE(A%I,STAT=MemStatus)
-    CALL DecMem(MemStatus,Ints,0)
+    CALL DecMem(MemStatus,Ints,0,address=addr)
     A%Alloc=ALLOCATED_FALSE
   END SUBROUTINE Delete_INT_RNK2
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -832,9 +837,11 @@ CONTAINS
   SUBROUTINE Delete_INT_RNK3(A)
     TYPE(INT_RNK3),INTENT(INOUT) :: A
     INTEGER                      :: Ints
+    INTEGER                      :: addr
     Ints=SIZE(A%I)
+    addr = LOC(A)
     DEALLOCATE(A%I,STAT=MemStatus)
-    CALL DecMem(MemStatus,Ints,0)
+    CALL DecMem(MemStatus,Ints,0,address=addr)
     A%Alloc=ALLOCATED_FALSE
   END SUBROUTINE Delete_INT_RNK3
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -843,9 +850,11 @@ CONTAINS
   SUBROUTINE Delete_INT_RNK4(A)
     TYPE(INT_RNK4),INTENT(INOUT) :: A
     INTEGER                      :: Ints
+    INTEGER                      :: addr
     Ints=SIZE(A%I)
+    addr = LOC(A)
     DEALLOCATE(A%I,STAT=MemStatus)
-    CALL DecMem(MemStatus,Ints,0)
+    CALL DecMem(MemStatus,Ints,0,address=addr)
     A%Alloc=ALLOCATED_FALSE
   END SUBROUTINE Delete_INT_RNK4
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -854,9 +863,11 @@ CONTAINS
   SUBROUTINE Delete_DBL_VECT(A)
     TYPE(DBL_VECT),INTENT(INOUT) :: A
     INTEGER                      :: Dbls
+    INTEGER                      :: addr
     Dbls=SIZE(A%D)
+    addr = LOC(A)
     DEALLOCATE(A%D,STAT=MemStatus)
-    CALL DecMem(MemStatus,0,Dbls)
+    CALL DecMem(MemStatus,0,Dbls,address=addr)
     A%Alloc=ALLOCATED_FALSE
   END SUBROUTINE Delete_DBL_VECT
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -865,9 +876,11 @@ CONTAINS
   SUBROUTINE Delete_DBL_RNK2(A)
     TYPE(DBL_RNK2),INTENT(INOUT) :: A
     INTEGER                      :: Dbls
+    INTEGER                      :: addr
     Dbls=SIZE(A%D)
+    addr = LOC(A)
     DEALLOCATE(A%D,STAT=MemStatus)
-    CALL DecMem(MemStatus,0,Dbls)
+    CALL DecMem(MemStatus,0,Dbls,address=addr)
     A%Alloc=ALLOCATED_FALSE
   END SUBROUTINE Delete_DBL_RNK2
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -876,9 +889,11 @@ CONTAINS
   SUBROUTINE Delete_DBL_RNK3(A)
     TYPE(DBL_RNK3),INTENT(INOUT) :: A
     INTEGER                      :: Dbls
+    INTEGER                      :: addr
     Dbls=SIZE(A%D)
+    addr = LOC(A)
     DEALLOCATE(A%D,STAT=MemStatus)
-    CALL DecMem(MemStatus,0,Dbls)
+    CALL DecMem(MemStatus,0,Dbls,address=addr)
     A%Alloc=ALLOCATED_FALSE
   END SUBROUTINE Delete_DBL_RNK3
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -887,9 +902,11 @@ CONTAINS
   SUBROUTINE Delete_DBL_RNK4(A)
     TYPE(DBL_RNK4),INTENT(INOUT) :: A
     INTEGER                      :: Dbls
+    INTEGER                      :: addr
     Dbls=SIZE(A%D)
+    addr = LOC(A)
     DEALLOCATE(A%D,STAT=MemStatus)
-    CALL DecMem(MemStatus,0,Dbls)
+    CALL DecMem(MemStatus,0,Dbls,address=addr)
     A%Alloc=ALLOCATED_FALSE
   END SUBROUTINE Delete_DBL_RNK4
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -898,9 +915,11 @@ CONTAINS
   SUBROUTINE Delete_DBL_RNK6(A)
     TYPE(DBL_RNK6),INTENT(INOUT) :: A
     INTEGER                      :: Dbls
+    INTEGER                      :: addr
     Dbls=SIZE(A%D)
+    addr = LOC(A)
     DEALLOCATE(A%D,STAT=MemStatus)
-    CALL DecMem(MemStatus,0,Dbls)
+    CALL DecMem(MemStatus,0,Dbls,address=addr)
     A%Alloc=ALLOCATED_FALSE
   END SUBROUTINE Delete_DBL_RNK6
   !
@@ -908,9 +927,11 @@ CONTAINS
   !
   SUBROUTINE Delete_CHR10_VECT(A)
     TYPE(CHR10_VECT) :: A
-    INTEGER        :: MemStatus
+    INTEGER          :: MemStatus
+    INTEGER          :: addr
+    addr = LOC(A)
     DEALLOCATE(A%C,STAT=MemStatus)
-    CALL DecMem(MemStatus,0,0)
+    CALL DecMem(MemStatus,0,0,address=addr)
     A%Alloc=ALLOCATED_FALSE
   END SUBROUTINE Delete_CHR10_VECT
   !
@@ -919,8 +940,10 @@ CONTAINS
   SUBROUTINE Delete_CHR_VECT(A)
     TYPE(CHR_VECT) :: A
     INTEGER        :: MemStatus
+    INTEGER        :: addr
+    addr = LOC(A)
     DEALLOCATE(A%C,STAT=MemStatus)
-    CALL DecMem(MemStatus,0,0)
+    CALL DecMem(MemStatus,0,0,address=addr)
     A%Alloc=ALLOCATED_FALSE
   END SUBROUTINE Delete_CHR_VECT
   !
@@ -929,8 +952,10 @@ CONTAINS
   SUBROUTINE Delete_LOG_VECT(A)
     TYPE(LOG_VECT) :: A
     INTEGER        :: MemStatus
+    INTEGER        :: addr
+    addr = LOC(A)
     DEALLOCATE(A%L,STAT=MemStatus)
-    CALL DecMem(MemStatus,0,0)
+    CALL DecMem(MemStatus,0,0,address=addr)
     A%Alloc=ALLOCATED_FALSE
   END SUBROUTINE Delete_LOG_VECT
   !
@@ -954,7 +979,7 @@ CONTAINS
     CALL DecMem(MemStatus,0,0)
     A%Alloc=ALLOCATED_FALSE
   END SUBROUTINE Delete_INTC
-  !
+
   SUBROUTINE Delete_BMATR(A)
     TYPE(BMATR)    :: A
     CALL Delete(A%IB)
@@ -1320,15 +1345,18 @@ CONTAINS
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   !
   !
-  SUBROUTINE IncMem(Stats,Ints,Dbls,Proc_O)
-    INTEGER, INTENT(IN)                  :: Stats,Ints,Dbls
+  SUBROUTINE IncMem(MemStatus,Ints,Dbls,Proc_O,address)
+    INTEGER, INTENT(IN)                  :: MemStatus,Ints,Dbls
+    INTEGER, OPTIONAL, INTENT(IN)        :: address
     INTEGER                              :: MemInBytes
     CHARACTER(LEN=*), OPTIONAL           :: Proc_O
     CHARACTER(LEN=2*DEFAULT_CHR_LEN)     :: Mssg
-    CHARACTER(LEN=INTERNAL_INT_LEN)      :: ChMem,ChTab
+    CHARACTER(LEN=INTERNAL_INT_LEN)      :: ChMem,ChTab,ChMemStatus
+
     MemInBytes=ToBytes(Ints,Dbls)
     IF(MemStatus/=SUCCEED)THEN
-      WRITE(*,*)' Bombed in IncMem, MemStatus = ',Stats
+      WRITE(ChMemStatus,INTERNAL_INT_FMT) MemStatus
+      CALL MondoLog(DEBUG_NONE, "IncMem", "failed, MemStatus = "//TRIM(ChMemStatus))
       WRITE(ChMem,INTERNAL_INT_FMT)MemInBytes
       WRITE(ChTab,INTERNAL_DBL_FMT)BToMB(MemStats%MemTab)
       IF(PRESENT(Proc_O))THEN
@@ -1359,13 +1387,17 @@ CONTAINS
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   !
   !
-  SUBROUTINE DecMem(MemStatus,Ints,Dbls)
+  SUBROUTINE DecMem(MemStatus,Ints,Dbls,address)
     INTEGER, INTENT(IN)                  :: MemStatus,Ints,Dbls
+    INTEGER, OPTIONAL, INTENT(IN)        :: address
     INTEGER                              :: MemInBytes
     CHARACTER(LEN=2*DEFAULT_CHR_LEN)     :: Mssg
-    CHARACTER(LEN=INTERNAL_INT_LEN)      :: ChMem,ChTab,ChMyId
+    CHARACTER(LEN=INTERNAL_INT_LEN)      :: ChMem,ChTab,ChMyId,ChMemStatus
+
     MemInBytes=ToBytes(Ints,Dbls)
     IF(MemStatus/=SUCCEED)THEN
+      WRITE(ChMemStatus,INTERNAL_INT_FMT) MemStatus
+      CALL MondoLog(DEBUG_NONE, "DecMem", "failed, MemStatus = "//TRIM(ChMemStatus))
       WRITE(ChMem,INTERNAL_INT_FMT)MemInBytes
       WRITE(ChTab,INTERNAL_INT_FMT)MemStats%MemTab
 #ifdef PARALLEL
