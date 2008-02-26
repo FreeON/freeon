@@ -729,7 +729,6 @@ TwoE/INT/Makefile
 TwoE/MSC/Makefile
 TwoE/VRR/Makefile
 ONX/Makefile
-RegressionTests/Makefile
 ])
 
 AC_CONFIG_HEADERS([config.h])

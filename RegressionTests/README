@@ -1,0 +1,5 @@
+The regression tests are run with:
+
+make check
+
+in this directory.
