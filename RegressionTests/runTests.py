@@ -113,6 +113,7 @@ if "Mondo_tar" in testfile.field:
 
     log.debug("running " + str(configure_arguments))
     configure = subprocess.Popen(configure_arguments, \
+        stdin = subprocess.PIPE, \
         stdout = subprocess.PIPE, \
         stderr = subprocess.PIPE, \
         cwd = os.path.join(builddir, tarname))
@@ -141,9 +142,13 @@ if "Mondo_tar" in testfile.field:
 
     log.debug("building")
     make_arguments = [ "make" ]
-    log.debug("running " + str(make_arguments))
 
+    if "make_options" in testfile.field:
+      make_arguments += testfile.field["make_options"].split()
+
+    log.debug("running " + str(make_arguments))
     make = subprocess.Popen(make_arguments, \
+        stdin = subprocess.PIPE, \
         stdout = subprocess.PIPE, \
         stderr = subprocess.PIPE, \
         cwd = os.path.join(builddir, tarname))
@@ -166,8 +171,12 @@ if "Mondo_tar" in testfile.field:
 
       sys.exit(1)
 
+    else:
+      log.debug("building done")
+
     log.debug("installing binaries")
     install = subprocess.Popen([ "make", "install" ], \
+        stdin = subprocess.PIPE, \
         stdout = subprocess.PIPE, \
         stderr = subprocess.PIPE, \
         cwd = os.path.join(builddir, tarname))
@@ -190,4 +199,7 @@ if "Mondo_tar" in testfile.field:
 
       sys.exit(1)
 
-    log.info("source build and install correctly")
+    else:
+      log.debug("installing done")
+
+    log.info("sources built and install correctly")

@@ -52,8 +52,6 @@ AC_OUTPUT_COMMANDS([
 #endif
 EOF
 
-  exit
-
   # Write out H5config.h
   if test ! -f H5config.h; then
     mv -f tempconf H5config.h
@@ -107,9 +105,6 @@ fi
 
 # Check for ranlib.
 AC_PROG_RANLIB
-
-# Check for libtool.
-#AC_PROG_LIBTOOL
 
 # Set $(MAKE).
 AC_PROG_MAKE_SET

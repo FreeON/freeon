@@ -1,3 +1,5 @@
 # This test simply builds the sources.
 Mondo_tar = ../mondoscf-1.0-alpha-latest.tar.bz2
-configure_options = FC=ifort F77=ifort CC=icc --prefix=/tmp/blabla
+#configure_options = FC=ifort F77=ifort CC=icc CFLAGS=-g FFLAGS=-g FCFLAGS=-g --prefix=/tmp/blabla
+configure_options = FC=/usr/local/gcc-4.2.1/bin/gfortran F77=/usr/local/gcc-4.2.1/bin/gfortran CC=/usr/local/gcc-4.2.1/bin/gcc CFLAGS=-g FFLAGS=-g FCFLAGS=-g --prefix=/tmp/blabla
+make_options = -j2
