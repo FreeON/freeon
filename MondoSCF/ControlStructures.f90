@@ -105,8 +105,10 @@ MODULE ControlStructures
 
     REAL(DOUBLE)      :: MDalpha
     INTEGER           :: MDDampStep
-    character(len=14) :: Thermostat
-    real(DOUBLE)      :: BerendsenTau
+    CHARACTER(LEN=14) :: Thermostat
+    REAL(DOUBLE)      :: BerendsenTau
+    REAL(DOUBLE)      :: BerendsenVScale
+
   END TYPE Dynamics
 
   TYPE Geometries

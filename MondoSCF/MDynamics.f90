@@ -310,7 +310,7 @@ CONTAINS
     INTEGER                   :: numberUnconstrainedAtoms
     REAL(DOUBLE)              :: Mass,dT,dT2,dTSq2,Time,Dist
     REAL(DOUBLE),DIMENSION(3) :: Pos,Vel,Acc,PosSave,VelSave
-    !--------------------------------------------------------------
+    REAL(DOUBLE)              :: v_scale
 
     ! Initialize
     dT    = C%Dyns%DTime
@@ -375,8 +375,8 @@ CONTAINS
     IF(C%Dyns%Temp_Scaling) THEN
       IF(MOD(iGEO,C%Dyns%RescaleInt)==0) THEN
         CALL MondoLogPlain('Rescaling Temperature')
-        CALL MondoLogPlain('Target Temp = '//TRIM(DblToChar(C%Dyns%TargetTemp)))
-        CALL MondoLogPlain('MD Temp     = '//TRIM(DblToChar(MDTemp%D(1))))
+        CALL MondoLogPlain('MD temperature     = '//TRIM(DblToChar(MDTemp%D(1))))
+        CALL MondoLogPlain('Target temperature = '//TRIM(DblToChar(C%Dyns%TargetTemp)))
         DO iCLONE = 1,C%Geos%Clones
           CALL RescaleVelocity(C%Geos%Clone(iCLONE),MDTemp%D(iCLONE),C%Dyns%TargetTemp)
         ENDDO
@@ -386,10 +386,19 @@ CONTAINS
     ! Berendsen thermostat.
     IF(C%Dyns%Thermostat == MD_THERM_BERENDSEN) THEN
       CALL MondoLogPlain("Applying Berendsen thermostat")
-      CALL MondoLogPlain("MD temperature = "//TRIM(DblToChar(MDTemp%D(1))))
+      CALL MondoLogPlain("MD temperature     = "//TRIM(DblToChar(MDTemp%D(1))))
       CALL MondoLogPlain("Target temperature = "//TRIM(DblToChar(C%Dyns%TargetTemp)))
       DO iCLONE = 1, C%Geos%Clones
-        CALL BerendsenThermostat(C%Geos%Clone(iCLONE), MDTemp%D(iCLONE), C%Dyns%TargetTemp, C%Dyns%DTime, C%Dyns%BerendsenTau)
+        CALL BerendsenThermostat(C%Geos%Clone(iCLONE), MDTemp%D(iCLONE), C%Dyns%TargetTemp, C%Dyns%DTime, C%Dyns%BerendsenTau, v_scale)
+        C%Dyns%BerendsenVScale = v_scale
+
+        ! Store v_scale in hdf.
+        HDFFileID=OpenHDF(C%Nams%HFile)
+        HDF_CurrentID = OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
+        CALL Put(v_scale, "v_scale", TRIM(IntToChar(iGEO)))
+        CALL CloseHDFGroup(HDF_CurrentID)
+        CALL CloseHDF(HDFFileID)
+        CALL MondoLog(DEBUG_NONE, "MD", "putting v_scale("//TRIM(IntToChar(iGEO))//") to hdf = "//TRIM(DblToChar(v_scale)))
       ENDDO
     ENDIF
 
@@ -438,35 +447,40 @@ CONTAINS
     TYPE(Controls)            :: C
     INTEGER                   :: iGEO
     INTEGER                   :: iCLONE,iATS,AOut
+    INTEGER                   :: numberUnconstrainedAtoms
     INTEGER                   :: m_step
     REAL(DOUBLE)              :: Mass,dT,dT2,dTSq2,Time,Dist
     REAL(DOUBLE),DIMENSION(3) :: Pos,Vel,Acc,PosSave,VelSave
     REAL(DOUBLE)              :: v_scale
-    !--------------------------------------------------------------
+
     ! Initialize
     dT    = C%Dyns%DTime
     dT2   = Half*dT
     dTSq2 = Half*dT*dT
 
-    ! Reset the Linear Momentum, Compute the Kinectic Energy and Ave Kinectic Energy
-    DO iCLONE=1,C%Geos%Clones
-      ! Calculate Kinectic Energy and  Temp, update Ave Temp
-      CALL CalculateMDKin(C%Geos%Clone(iCLONE),MDKin%D(iCLONE),MDTemp%D(iCLONE))
-      MDTave%D(iCLONE) = (DBLE(iGEO-1)/DBLE(iGEO))*MDTave%D(iCLONE) +(One/DBLE(iGEO))*MDTemp%D(iCLONE)
-      ! Store Potential and Total Energy
-      MDEpot%D(iCLONE) = C%Geos%Clone(iCLONE)%ETotal
-      MDEtot%D(iCLONE) = MDEpot%D(iCLONE) + MDKin%D(iCLONE)
-    ENDDO
-
     ! Set the Sum of the Forces equal to zero
-    DO iCLONE=1,C%Geos%Clones
+    numberUnconstrainedAtoms = 0
+    DO iCLONE = 1,C%Geos%Clones
       Acc(1:3) = Zero
-      DO iATS=1,C%Geos%Clone(iCLONE)%NAtms
-        Acc(1:3) = Acc(1:3)+C%Geos%Clone(iCLONE)%Gradients%D(1:3,iATS)
+      DO iATS = 1,C%Geos%Clone(iCLONE)%NAtms
+        IF(C%Geos%Clone(iCLONE)%CConstrain%I(iATS) == 0) THEN
+          Acc(1:3) = Acc(1:3)+C%Geos%Clone(iCLONE)%Gradients%D(1:3,iATS)
+          numberUnconstrainedAtoms = numberUnconstrainedAtoms + 1
+        ENDIF
       ENDDO
-      Acc(1:3) = Acc(1:3)/DBLE(C%Geos%Clone(iCLONE)%NAtms)
-      DO iATS=1,C%Geos%Clone(iCLONE)%NAtms
-        C%Geos%Clone(iCLONE)%Gradients%D(1:3,iATS)=C%Geos%Clone(iCLONE)%Gradients%D(1:3,iATS)-Acc(1:3)
+
+      ! Calculate total acceleration.
+      Acc(1:3) = Acc(1:3)/DBLE(numberUnconstrainedAtoms)
+      CALL MondoLog(DEBUG_NONE, "MDynamics:MDSymplectic_4th_Order_NVE", "flying ice-cube correction: " &
+        //TRIM(DblToChar(Acc(1)))//" " &
+        //TRIM(DblToChar(Acc(2)))//" " &
+        //TRIM(DblToChar(Acc(3))))
+
+      ! Make sure the total force on the system is zero.
+      DO iATS = 1,C%Geos%Clone(iCLONE)%NAtms
+        IF(C%Geos%Clone(iCLONE)%CConstrain%I(iATS) == 0) THEN
+          C%Geos%Clone(iCLONE)%Gradients%D(1:3,iATS) = C%Geos%Clone(iCLONE)%Gradients%D(1:3,iATS)-Acc(1:3)
+        ENDIF
       ENDDO
     ENDDO
 
@@ -479,6 +493,7 @@ CONTAINS
             Mass      =  C%Geos%Clone(iCLONE)%AtMss%D(iATS)
             Vel(1:3)  =  C%Geos%Clone(iCLONE)%Velocity%D(1:3,iATS)
             Acc(1:3)  = -C%Geos%Clone(iCLONE)%Gradients%D(1:3,iATS)/Mass
+
             ! Velocity: v(t) = v(t-dT/2)+a(t)dT/2
             Vel(1:3) = Vel(1:3) + Acc(1:3)*dT*Symplectic_4th_Order_b(m_step)
             C%Geos%Clone(iCLONE)%Velocity%D(1:3,iATS) = Vel(1:3)
@@ -487,24 +502,37 @@ CONTAINS
       ENDDO
     ENDIF
 
+    ! Reset the Linear Momentum, Compute the Kinectic Energy and Ave Kinectic Energy
+    DO iCLONE=1,C%Geos%Clones
+      ! Calculate Kinectic Energy and  Temp, update Ave Temp
+      CALL CalculateMDKin(C%Geos%Clone(iCLONE),MDKin%D(iCLONE),MDTemp%D(iCLONE))
+      MDTave%D(iCLONE) = (DBLE(iGEO-1)/DBLE(iGEO))*MDTave%D(iCLONE) +(One/DBLE(iGEO))*MDTemp%D(iCLONE)
+
+      ! Store Potential and Total Energy
+      MDEpot%D(iCLONE) = C%Geos%Clone(iCLONE)%ETotal
+      MDEtot%D(iCLONE) = MDEpot%D(iCLONE) + MDKin%D(iCLONE)
+    ENDDO
+
     ! Thermostats
     IF(C%Dyns%Temp_Scaling) THEN
       IF(MOD(iGEO,C%Dyns%RescaleInt)==0) THEN
         CALL MondoLogPlain('Rescaling Temperature')
-        CALL MondoLogPlain('Target Temp = '//TRIM(DblToChar(C%Dyns%TargetTemp)))
-        CALL MondoLogPlain('MD Temp     = '//TRIM(DblToChar(MDTemp%D(1))))
+        CALL MondoLogPlain('MD temperature     = '//TRIM(DblToChar(MDTemp%D(1))))
+        CALL MondoLogPlain('Target temperature = '//TRIM(DblToChar(C%Dyns%TargetTemp)))
         DO iCLONE=1,C%Geos%Clones
           CALL RescaleVelocity(C%Geos%Clone(iCLONE),MDTemp%D(iCLONE),C%Dyns%TargetTemp)
         ENDDO
       ENDIF
     ENDIF
 
+    ! Berendsen thermostat.
     IF(C%Dyns%Thermostat == MD_THERM_BERENDSEN) then
       CALL MondoLogPlain("Applying Berendsen thermostat")
-      CALL MondoLogPlain("MD temperature = "//TRIM(DblToChar(MDTemp%D(1))))
+      CALL MondoLogPlain("MD temperature     = "//TRIM(DblToChar(MDTemp%D(1))))
       CALL MondoLogPlain("Target temperature = "//TRIM(DblToChar(C%Dyns%TargetTemp)))
       DO iCLONE = 1, C%Geos%Clones
         CALL BerendsenThermostat(C%Geos%Clone(iCLONE), MDTemp%D(iCLONE), C%Dyns%TargetTemp, C%Dyns%DTime, C%Dyns%BerendsenTau, v_scale)
+        C%Dyns%BerendsenVScale = v_scale
 
         ! Store v_scale in hdf.
         HDFFileID=OpenHDF(C%Nams%HFile)
@@ -517,20 +545,24 @@ CONTAINS
 
     ENDIF
 
-    ! Generate Output
-    CALL OutputMD(C,iGEO)
+    ! Generate Output.
+    IF(m_step == 1) THEN
+      CALL OutputMD(C,iGEO)
+    ENDIF
 
-    ! Update the Positions
+    ! Update the Positions.
     DO iCLONE=1,C%Geos%Clones
       DO iATS=1,C%Geos%Clone(iCLONE)%NAtms
         IF(C%Geos%Clone(iCLONE)%CConstrain%I(iATS)==0)THEN
-          Mass      =  C%Geos%Clone(iCLONE)%AtMss%D(iATS)
-          Pos(1:3)  =  C%Geos%Clone(iCLONE)%Carts%D(1:3,iATS)
-          Vel(1:3)  =  C%Geos%Clone(iCLONE)%Velocity%D(1:3,iATS)
-          Acc(1:3)  = -C%Geos%Clone(iCLONE)%Gradients%D(1:3,iATS)/Mass
+          Mass     =  C%Geos%Clone(iCLONE)%AtMss%D(iATS)
+          Pos(1:3) =  C%Geos%Clone(iCLONE)%Carts%D(1:3,iATS)
+          Vel(1:3) =  C%Geos%Clone(iCLONE)%Velocity%D(1:3,iATS)
+          Acc(1:3) = -C%Geos%Clone(iCLONE)%Gradients%D(1:3,iATS)/Mass
+
           ! Position: r(t+dT)= r(t)+v(t)*dT+a(t)*dT*dT/2
           ! Position: r(t+dT)= r(t)+v(t+Tt)*dT*a_coeff(t)
           Pos(1:3) = Pos(1:3) + Vel(1:3)*dT*Symplectic_4th_Order_a(m_step)
+
           ! Update
           C%Geos%Clone(iCLONE)%Carts%D(1:3,iATS) = Pos(1:3)
         ENDIF
@@ -808,8 +840,10 @@ CONTAINS
       WRITE(Out,97) Line
       Line = "MD Time          = "//TRIM(DblToMedmChar(MDTime%D(iCLONE)*InternalTimeToFemtoseconds))//" fs"
       WRITE(Out,97) Line
+      Line = "MD Step          = "//Trim(IntToChar(iGEO))
+      WRITE(Out,97) Line
 
-      ! Density Maxtrix Error
+      ! Density Matrix Error
       HDFFileID=OpenHDF(C%Nams%HFile)
       HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
       CALL Get(DMax,'DMax')
@@ -841,6 +875,8 @@ CONTAINS
         Line = "MD damping alpha = "//TRIM(DblToMedmChar(C%Dyns%MDalpha))
         WRITE(Out,97) Line
       ENDIF
+      Line = "MD v_scale       = "//TRIM(FltToChar(C%Dyns%BerendsenVScale))
+      WRITE(Out,97) Line
 
       ! Compute the Pressure
       IF(C%Geos%Clone(iCLONE)%PBC%Dimen==3) THEN

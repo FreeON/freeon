@@ -11,3 +11,6 @@ Mondo_executable = /usr/local/Mondo/bin/MondoSCF
 # with this executable, we need to tell the regression test to set the
 # Mondo_executable variable itself.
 Mondo_tar = ../mondoscf-alpha-latest.tar.bz2
+
+# The configure options to be used when configuring the sources.
+configure_options = FC=ifort F77=ifort CC=icc --prefix=/tmp/blabla
