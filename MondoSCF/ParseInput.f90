@@ -38,6 +38,8 @@ MODULE ParseInput
   USE ParseExtraCoords
   USE PrettyPrint
   USE ParseProperties, ONLY: LoadPropertyOptions
+  USE MondoLogger
+
 CONTAINS
   !===============================================================
   ! 'NUFF SAID
@@ -48,34 +50,52 @@ CONTAINS
 
     ! Parse command line and load env and file names
     CALL LoadCommands(C%Nams)
+
     ! Set global output and log file
     OutFile=C%Nams%OFile
     LogFile=C%Nams%LFile
+
+    CALL MondoLog(DEBUG_NONE, "ParseInput", "CWD        = "//TRIM(C%Nams%M_PWD))
+    CALL MondoLog(DEBUG_NONE, "ParseInput", 'InputFile  = '//TRIM(C%Nams%IFile))
+    CALL MondoLog(DEBUG_NONE, "ParseInput", 'OutputFile = '//TRIM(C%Nams%OFile))
+    CALL MondoLog(DEBUG_NONE, "ParseInput", 'LogFile    = '//TRIM(C%Nams%LFile))
+
     ! Allocate state variables
     CALL New(C%Stat%Current,3)
     CALL New(C%Stat%Previous,3)
+
     ! Parse generic options
     CALL LoadOptions(C%Nams,C%Opts)
+
     ! Parse dynamics options
     IF(C%Opts%Grad==GRAD_DO_DYNAMICS .OR. C%Opts%Grad==GRAD_DO_HYBRIDMC ) THEN
       CALL LoadDynamics(C%Nams,C%Opts,C%Geos,C%Dyns)
     ENDIF
+
     ! Parse geometry or get from restart HDF
     CALL LoadCoordinates(C%Nams,C%Opts,C%Dyns,C%Geos)
+
     ! Parse periodic info
     CALL LoadPeriodic(C%Nams,C%Opts,C%Geos,C%PBCs)
+
     ! Massage coodrinates, switch to AUs etc
     CALL MassageCoordinates(C%Opts,C%Geos,C%PBCs)
+
     ! Load basis sets
     CALL LoadBasisSets(C%Nams,C%Opts,C%Geos,C%Sets)
+
     ! Parse in parallel info
     CALL LoadParallel(C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
+
     ! Load control of internal coord. optimizer
     CALL LoadGeomOpt(C%Nams,C%GOpt,C%Geos%Clone(1)%PBC%Dimen)
+
     ! Load constraints and extra internal coords
     CALL LoadExtraCoords(C%GOpt,C%Opts,C%Nams,C%Geos)
+
     ! Load CPSCF options.
     CALL LoadPropertyOptions(C%Nams,C%POpt)
+
     ! Check for Global conflicts.
     CALL ConflictCheck(C)
   END SUBROUTINE ParseTheInput

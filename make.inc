@@ -80,7 +80,7 @@ MondoMods_DEPENDENCY_FILES = \
   ../MondoMods/derivedtypes.mod \
   ../MondoMods/erffunk.mod \
   ../MondoMods/fastmatrices.mod \
-  ../MondoMods/fileoperations.mod \
+  ../MondoMods/cwrappers.mod \
   ../MondoMods/functionals.mod \
   ../MondoMods/gammaassymp.mod \
   ../MondoMods/gammaf0.mod \
