@@ -37,7 +37,7 @@ MODULE MDynamics
   USE GlobalScalars
   USE SetXYZ
   USE DynamicsKeys
-  USE FileOperations
+  USE CWrappers
   USE MondoLogger
 
   IMPLICIT NONE

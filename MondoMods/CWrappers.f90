@@ -24,11 +24,11 @@
 !    disemination in future releases.
 !------------------------------------------------------------------------------
 
-! This module provides interfaces to file operation related C-wrapper programs.
+! This module provides interfaces to C-wrapper programs.
 !
 ! Author: Nicolas Bock <nbock@lanl.gov>
 
-MODULE FileOperations
+MODULE CWrappers
 
   USE ParsingConstants
   USE MondoLogger
@@ -44,6 +44,15 @@ MODULE FileOperations
 
   END INTERFACE FileCopyWrapper
 
+  INTERFACE GetPWDWrapper
+
+    SUBROUTINE GetPWDWrapper (pwd, max_length)
+      INTEGER :: max_length
+      CHARACTER(LEN=*) :: pwd
+    END SUBROUTINE GetPWDWrapper
+
+  END INTERFACE GetPWDWrapper
+
   CONTAINS
 
   SUBROUTINE FileCopy (fileA, fileB)
@@ -52,4 +61,9 @@ MODULE FileOperations
     CALL FileCopyWrapper(LEN(TRIM(fileA)), TRIM(fileA), LEN(TRIM(fileB)), TRIM(fileB))
   END SUBROUTINE FileCopy
 
-END MODULE FileOperations
+  SUBROUTINE GetPWD (pwd)
+    CHARACTER(LEN=*) :: pwd
+    CALL GetPWDWrapper(pwd, LEN(pwd))
+  END SUBROUTINE GetPWD
+
+END MODULE CWrappers
