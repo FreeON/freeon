@@ -1,5 +1,5 @@
-The regression tests are run with:
+Check example.test for how to set up a test file. Tests are then run with
 
-make check
+./runTests.py example.test
 
-in this directory.
+where the input file of course can be something other than "exmaple.test".
