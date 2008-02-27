@@ -40,8 +40,6 @@ void getpwdwrapper (char *pwd, int *max_length)
   int i;
   char *buffer = (char*) malloc(sizeof(char)*((*max_length)+1));
 
-  printf("[getpwdwrapper] max_length = %i\n", *max_length);
-
   if (getcwd(buffer, *max_length+1) == NULL)
   {
     printf("[getpwd] error %s\n", strerror(errno));

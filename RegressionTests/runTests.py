@@ -12,7 +12,6 @@ import os.path
 import shutil
 import tarfile
 import subprocess
-import regressionlib
 
 # Some variables.
 dirprefix = "/tmp/MondoRegressionTest"
@@ -138,12 +137,6 @@ if "Mondo_tar" in inputfield:
   if os.path.exists(os.path.join(builddir, tarname)):
     log.info("sources are apparently already built.")
 
-    if "Mondo_executable" in inputfield:
-      log.debug("running " + inputfield["Mondo_executable"])
-    else:
-      inputfield["Mondo_executable"] = os.path.join(installdir, "bin", "MondoSCF")
-      log.debug("constructed Mondo_executable " + inputfield["Mondo_executable"])
-
   else:
     log.info("building sources")
     try:
@@ -261,8 +254,13 @@ if "Mondo_tar" in inputfield:
 
     log.info("sources build and install correctly")
 
-if not "Mondo_executable" in inputfield:
-  log.error("where is the MondoSCF executable?")
+if "Mondo_executable" in inputfield:
+  log.debug("running " + inputfield["Mondo_executable"])
+elif "Mondo_tar" in inputfield:
+  inputfield["Mondo_executable"] = os.path.join(installdir, "bin", "MondoSCF")
+  log.debug("constructed Mondo_executable " + inputfield["Mondo_executable"])
+else:
+  log.error("no tarfile and no exectuable, I need something here....")
   sys.exit(1)
 
 if not "Mondo_input" in inputfield:
