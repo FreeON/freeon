@@ -2,4 +2,4 @@ Check example.test for how to set up a test file. Tests are then run with
 
 ./runTests.py example.test
 
-where the input file of course can be something other than "exmaple.test".
+where the input file of course can be something other than "example.test".
