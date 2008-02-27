@@ -33,7 +33,10 @@ MODULE ParseCommands
   USE F90_UNIX
 #endif
   USE ControlStructures
+  USE CWrappers
+
   IMPLICIT NONE
+
 CONTAINS
   !===============================================================================================
   ! PARSE THE COMMAND LINE AND GET RELATED ENV VARIABLES. CHECK EXISTENCE OF IN AND OUT FILES
@@ -51,7 +54,7 @@ CONTAINS
     IF(Args%NC==0)CALL MondoHalt(PRSE_ERROR,' No arguments to MondoSCF !')!
 
     ! Get environmental variables
-    CALL GetEnv('PWD',N%M_PWD)
+    CALL GetPWD(N%M_PWD)
     CALL GetEnv('MONDO_HOME',N%M_HOME)
     IF(len(trim(N%M_HOME)) == 0) THEN
       N%M_HOME = HAVE_MONDO_HOME
@@ -108,6 +111,7 @@ CONTAINS
     !    INQUIRE(FILE=N%OFile,EXIST=Exists)
     !    IF(Exists) &
     !       CALL MondoHalt(PRSE_ERROR,' Ouput file: '//TRIM(N%OFile)//' already exists! ')
+
     ! Create user defined or implicit file names
     IF(Args%NC==1)THEN
       N%OFile=TRIM(PWDName)//OutF
@@ -139,6 +143,7 @@ CONTAINS
     WRITE(*,*)' N%RFile = '//TRIM(N%RFile)
     WRITE(*,*)' N%GFile = '//TRIM(N%GFile)
 #else
+    WRITE(*,"(A)") "CWD        = "//TRIM(N%M_PWD)
     WRITE(*,"(A)") 'InputFile  = '//TRIM(N%IFile)
     WRITE(*,"(A)") 'OutputFile = '//TRIM(N%OFile)
     WRITE(*,"(A)") 'LogFile    = '//TRIM(N%LFile)
