@@ -1,0 +1,38 @@
+<BeginOptions>
+
+Charge=0
+Multiplicity=1
+DebugAll=(MinDebug,CheckSums)
+Guess=SuperPos
+SCFMethod=(TC2)
+BasisSets=(3-21G-SPLIT)
+ModelChem=(HF)
+SP2=MaxDebug
+Accuracy=(loose)
+SPTwoTrix=1.d-5
+SCFConvergence=(DIIS)
+Geometry=(InAngstroms)
+MinSCF=12
+MaxSCF=12
+
+Grad=(MolecularDynamics)
+MDProjection=DMSymplectic
+MDMethod=Symplectic
+DeltaTime=0.5
+MaxMDStep=200
+MDNumSCF=5
+Thermostat=(Berendsen)
+TempScaling=500
+TempIntScaling=100000
+BerendsenTau=5
+
+<EndOptions>
+
+<BeginGeometry>
+C        0.16831       -0.03300        0.02900
+C        1.41222        0.03700       -0.02830
+F       -0.55671       -1.00009        0.01990
+F       -0.60471        1.13909       -0.02910
+F        2.15424       -1.15109        0.04823
+F        2.20224        1.14509       -0.04087
+<EndGeometry>

@@ -104,43 +104,42 @@ data_DATA = \
 Validate = \
   Validate/AcO-.inp \
   Validate/AcO-.ref \
-  Validate/Al.inp \
-  Validate/Al.ref \
   Validate/Adenine-NumFreq.frequencies \
   Validate/Adenine-NumFreq.out \
   Validate/Adenine-Optimize.out \
   Validate/Adenine-Optimize.xyz \
   Validate/Adenine.inp \
-  Validate/Cytosine-NumFreq.frequencies \
-  Validate/Cytosine-NumFreq.out \
-  Validate/Cytosine-Optimize.out \
-  Validate/Cytosine-Optimize.xyz \
-  Validate/Cytosine.inp \
-  Validate/Guanine-NumFreq.frequencies \
-  Validate/Guanine-NumFreq.out \
-  Validate/Guanine-Optimize.out \
-  Validate/Guanine-Optimize.xyz \
-  Validate/Guanine.inp \
+  Validate/Al.inp \
+  Validate/Al.ref \
   Validate/BetaCarotene.inp \
   Validate/BetaCarotene.ref \
   Validate/Biotin.inp \
   Validate/Biotin.ref \
   Validate/BoronNitride.inp \
   Validate/BoronNitride.ref \
-  Validate/C2F4.inp \
   Validate/CH2x-6.inp \
-  Validate/CH2x-6.ref \
   Validate/CH2x-6.out \
+  Validate/CH2x-6.ref \
   Validate/CH2x-6.xyz \
   Validate/Caffiene.inp \
   Validate/Caffiene.ref \
   Validate/Chlorophyll.inp \
   Validate/Chlorophyll.ref \
+  Validate/Cytosine-NumFreq.frequencies \
+  Validate/Cytosine-NumFreq.out \
+  Validate/Cytosine-Optimize.out \
+  Validate/Cytosine-Optimize.xyz \
+  Validate/Cytosine.inp \
   Validate/Diamond.inp \
   Validate/Diamond.ref \
   Validate/DoRegTest \
   Validate/Graphite.inp \
   Validate/Graphite.ref \
+  Validate/Guanine-NumFreq.frequencies \
+  Validate/Guanine-NumFreq.out \
+  Validate/Guanine-Optimize.out \
+  Validate/Guanine-Optimize.xyz \
+  Validate/Guanine.inp \
   Validate/H2O.inp \
   Validate/H2O.ref \
   Validate/Histidine.inp \
@@ -149,6 +148,8 @@ Validate = \
   Validate/IceIh.inp \
   Validate/IceIh.ref \
   Validate/MDO2xyz.py \
+  Validate/MD_C2F4_Symplectic.inp \
+  Validate/MD_C2F4_TRBO.inp \
   Validate/MD_H2.inp \
   Validate/MD_H2_TRBO.inp \
   Validate/MD_H2_TRBO_2.inp \

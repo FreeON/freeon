@@ -234,7 +234,7 @@ CONTAINS
 
     ! Check MemStats.
     IF(MemStats%Allocs /= MemStats%DeAllocs) THEN
-      CALL MondoLog(DEBUG_NONE, "ShutDown", "Possible memory leak. Allocs = " &
+      CALL MondoLog(DEBUG_NONE, "ShutDown ("//TRIM(Prog)//")", "Possible memory leak. Allocs = " &
         //TRIM(IntToChar(MemStats%Allocs))//", DeAllocs = " &
         //TRIM(IntToChar(MemStats%DeAllocs)))
       !CALL Halt("[FIXME]")

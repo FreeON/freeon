@@ -16,9 +16,9 @@ Geometry=(InAngstroms)
 
 G#rad=(Optimize,PrimInt,NoGDIIS,BiSect)
 Grad=(MolecularDynamics)
-MDProjection=DMVerlet0
-RSProjection=20000000
+MDProjection=MDTRBO
 MDMethod=Verlet
+RSProjection=20000000
 DeltaTime=0.5
 MaxMDStep=100000
 MinSCF=12

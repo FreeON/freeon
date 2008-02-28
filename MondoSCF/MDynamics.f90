@@ -484,8 +484,59 @@ CONTAINS
       ENDDO
     ENDDO
 
-    ! Update the Velocity if not the first step
+    ! Get the symplectic counter.
     m_step = MOD(iGEO,4)+1
+
+    IF(m_step == 1) THEN
+
+      ! Reset the Linear Momentum, Compute the Kinectic Energy and Ave Kinectic Energy
+      DO iCLONE=1,C%Geos%Clones
+        ! Calculate Kinectic Energy and  Temp, update Ave Temp
+        CALL CalculateMDKin(C%Geos%Clone(iCLONE),MDKin%D(iCLONE),MDTemp%D(iCLONE))
+        MDTave%D(iCLONE) = (DBLE(iGEO-1)/DBLE(iGEO))*MDTave%D(iCLONE) +(One/DBLE(iGEO))*MDTemp%D(iCLONE)
+
+        ! Store Potential and Total Energy
+        MDEpot%D(iCLONE) = C%Geos%Clone(iCLONE)%ETotal
+        MDEtot%D(iCLONE) = MDEpot%D(iCLONE) + MDKin%D(iCLONE)
+      ENDDO
+
+      ! Thermostats
+      IF(C%Dyns%Temp_Scaling) THEN
+        IF(MOD(iGEO,C%Dyns%RescaleInt)==0) THEN
+          CALL MondoLogPlain('Rescaling Temperature')
+          CALL MondoLogPlain('MD temperature     = '//TRIM(DblToChar(MDTemp%D(1))))
+          CALL MondoLogPlain('Target temperature = '//TRIM(DblToChar(C%Dyns%TargetTemp)))
+          DO iCLONE=1,C%Geos%Clones
+            CALL RescaleVelocity(C%Geos%Clone(iCLONE),MDTemp%D(iCLONE),C%Dyns%TargetTemp)
+          ENDDO
+        ENDIF
+      ENDIF
+
+      ! Berendsen thermostat.
+      IF(C%Dyns%Thermostat == MD_THERM_BERENDSEN) then
+        CALL MondoLogPlain("Applying Berendsen thermostat")
+        CALL MondoLogPlain("MD temperature     = "//TRIM(DblToChar(MDTemp%D(1))))
+        CALL MondoLogPlain("Target temperature = "//TRIM(DblToChar(C%Dyns%TargetTemp)))
+        DO iCLONE = 1, C%Geos%Clones
+          CALL BerendsenThermostat(C%Geos%Clone(iCLONE), MDTemp%D(iCLONE), C%Dyns%TargetTemp, C%Dyns%DTime, C%Dyns%BerendsenTau, v_scale)
+          C%Dyns%BerendsenVScale = v_scale
+
+          ! Store v_scale in hdf.
+          HDFFileID=OpenHDF(C%Nams%HFile)
+          HDF_CurrentID = OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
+          CALL Put(v_scale, "v_scale", TRIM(IntToChar(iGEO)))
+          CALL CloseHDFGroup(HDF_CurrentID)
+          CALL CloseHDF(HDFFileID)
+          CALL MondoLog(DEBUG_NONE, "MD", "putting v_scale("//TRIM(IntToChar(iGEO))//") to hdf = "//TRIM(DblToChar(v_scale)))
+          CALL MondoLog(DEBUG_NONE, "MD", "a("//TRIM(IntToChar(m_step))//") = "//TRIM(FltToChar(Symplectic_4th_Order_a(m_step))))
+          CALL MondoLog(DEBUG_NONE, "MD", "b("//TRIM(IntToChar(m_step))//") = "//TRIM(FltToChar(Symplectic_4th_Order_b(m_step))))
+
+        ENDDO
+
+      ENDIF
+    ENDIF
+
+    ! Update the Velocity if not the first step.
     IF(iGEO .NE. 1) THEN
       DO iCLONE=1,C%Geos%Clones
         DO iATS=1,C%Geos%Clone(iCLONE)%NAtms
@@ -500,49 +551,6 @@ CONTAINS
           ENDIF
         ENDDO
       ENDDO
-    ENDIF
-
-    ! Reset the Linear Momentum, Compute the Kinectic Energy and Ave Kinectic Energy
-    DO iCLONE=1,C%Geos%Clones
-      ! Calculate Kinectic Energy and  Temp, update Ave Temp
-      CALL CalculateMDKin(C%Geos%Clone(iCLONE),MDKin%D(iCLONE),MDTemp%D(iCLONE))
-      MDTave%D(iCLONE) = (DBLE(iGEO-1)/DBLE(iGEO))*MDTave%D(iCLONE) +(One/DBLE(iGEO))*MDTemp%D(iCLONE)
-
-      ! Store Potential and Total Energy
-      MDEpot%D(iCLONE) = C%Geos%Clone(iCLONE)%ETotal
-      MDEtot%D(iCLONE) = MDEpot%D(iCLONE) + MDKin%D(iCLONE)
-    ENDDO
-
-    ! Thermostats
-    IF(C%Dyns%Temp_Scaling) THEN
-      IF(MOD(iGEO,C%Dyns%RescaleInt)==0) THEN
-        CALL MondoLogPlain('Rescaling Temperature')
-        CALL MondoLogPlain('MD temperature     = '//TRIM(DblToChar(MDTemp%D(1))))
-        CALL MondoLogPlain('Target temperature = '//TRIM(DblToChar(C%Dyns%TargetTemp)))
-        DO iCLONE=1,C%Geos%Clones
-          CALL RescaleVelocity(C%Geos%Clone(iCLONE),MDTemp%D(iCLONE),C%Dyns%TargetTemp)
-        ENDDO
-      ENDIF
-    ENDIF
-
-    ! Berendsen thermostat.
-    IF(C%Dyns%Thermostat == MD_THERM_BERENDSEN) then
-      CALL MondoLogPlain("Applying Berendsen thermostat")
-      CALL MondoLogPlain("MD temperature     = "//TRIM(DblToChar(MDTemp%D(1))))
-      CALL MondoLogPlain("Target temperature = "//TRIM(DblToChar(C%Dyns%TargetTemp)))
-      DO iCLONE = 1, C%Geos%Clones
-        CALL BerendsenThermostat(C%Geos%Clone(iCLONE), MDTemp%D(iCLONE), C%Dyns%TargetTemp, C%Dyns%DTime, C%Dyns%BerendsenTau, v_scale)
-        C%Dyns%BerendsenVScale = v_scale
-
-        ! Store v_scale in hdf.
-        HDFFileID=OpenHDF(C%Nams%HFile)
-        HDF_CurrentID = OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
-        CALL Put(v_scale, "v_scale", TRIM(IntToChar(iGEO)))
-        CALL CloseHDFGroup(HDF_CurrentID)
-        CALL CloseHDF(HDFFileID)
-        CALL MondoLog(DEBUG_NONE, "MD", "putting v_scale("//TRIM(IntToChar(iGEO))//") to hdf = "//TRIM(DblToChar(v_scale)))
-      ENDDO
-
     ENDIF
 
     ! Generate Output.
