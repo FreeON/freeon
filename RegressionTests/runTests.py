@@ -83,7 +83,16 @@ logging.getLogger().addHandler(console_handler)
 
 log = logging.getLogger("main")
 
+# Start...
 log.info("starting new regression test")
+
+# Read in localversion in case it exists.
+if os.path.exists("localversion"):
+  fd = open("localversion", "r")
+  fd.close()
+
+else:
+  log.info("no localversion set")
 
 if len(argument) != 1:
   log.error("I need exactly 1 input file")

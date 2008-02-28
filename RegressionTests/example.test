@@ -5,7 +5,7 @@
 Mondo_input = something.inp
 
 # The reference output file.
-Mondo_reference = something.out
+Mondo_reference = example.reference
 
 # The MondoSCF executable to use.
 Mondo_executable = /usr/local/Mondo/bin/MondoSCF

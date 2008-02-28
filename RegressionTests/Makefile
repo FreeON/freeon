@@ -9,6 +9,7 @@ DISTFILES = \
   Makefile \
   README \
   build.test \
+  example.reference \
   example.test \
   localversion \
   runTests.py

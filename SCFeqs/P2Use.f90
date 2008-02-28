@@ -62,7 +62,7 @@ PROGRAM P2Use
   TYPE(INT_VECT)                :: Stat
   TYPE(DBL_RNK2)                :: BlkP
   REAL(DOUBLE)                  :: MaxDS,NoiseLevel, alpha, v_scale
-  INTEGER                       :: MDDampStep, nnk
+  INTEGER                       :: MDDampStep, m_step
   REAL(DOUBLE)                  :: Scale,Fact,ECount,RelNErr, DeltaP,OldDeltaP, &
        DensityDev,dN,MaxGDIff,GDIff,OldN,M,PNon0s,PSMin,PSMax, &
        Ipot_Error,Norm_Error,Lam,DLam,TError0,SFac,Dum,Fmin,Fmax
@@ -545,7 +545,10 @@ PROGRAM P2Use
 
     ! Compute Pnew in ortho space: This is specifically for MD.  Save D(p-1) as
     ! P(p-1), where p < 5.
-    nnk = MOD(iGEO-1,4)+1
+
+    ! Calculate symplectic counter.
+    m_step = MOD(iGEO-1,4)+1
+
     IF(iGEO == 6) THEN
       DO I=1,5
         FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(I))//'_C#'//TRIM(IntToChar(MyClone))//'.DOsave'
@@ -589,8 +592,8 @@ PROGRAM P2Use
       CALL Put(PV,FileName)
     ENDIF
 
-    ! PV(n) = PV(n-1) + 4.61D0*b(nnk)*[D(n-1)-P(n-1)]
-    ! P(n) = P(n-1) + a(nnk)*PV(n)
+    ! PV(n) = PV(n-1) + 4.61D0*b(m_step)*[D(n-1)-P(n-1)]
+    ! P(n) = P(n-1) + a(m_step)*PV(n)
 
     ! Debugging: check.... D(n-1)-P(n-1)
     ! Get D(n-1)
@@ -606,30 +609,23 @@ PROGRAM P2Use
     CALL MondoLog(DEBUG_NONE, "P2Use", "FNorm(P-D) = "//TRIM(DblToChar(FNorm(P))))
     ! End Debugging.
 
-    ! Get v_scale.
-    CALL Get(v_scale, "v_scale", TRIM(IntToChar(iGEO-1)))
-    !v_scale = 1D0
-    CALL MondoLog(DEBUG_NONE, "P2Use", "v_scale("//TRIM(IntToChar(iGEO-1))//") = "//TRIM(DblToChar(v_scale)))
-
     ! Get D(p-1)
     FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO-1))//'_C#'//TRIM(IntToChar(MyClone))//'.PVsave'
-    CALL Get(Tmp1,FileName)
-    CALL Multiply(Tmp1,1.0D0*v_scale)
-    CALL SetEq(PV,Tmp1)
+    CALL Get(PV,FileName)
 
     ! Get D(n-1), P(n-1)
     FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO-1))//'_C#'//TRIM(IntToChar(MyClone))//'.DOsave'
     CALL Get(Tmp1,FileName)
-    CALL Multiply(Tmp1,4.61D0*Symplectic_4th_Order_b(nnk))
+    CALL Multiply(Tmp1,4.61D0*Symplectic_4th_Order_b(m_step))
 
     FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO-1))//'_C#'//TRIM(IntToChar(MyClone))//'.DOPsave'
     CALL Get(Tmp2,FileName)
-    CALL Multiply(Tmp2,-4.61D0*Symplectic_4th_Order_b(nnk))
+    CALL Multiply(Tmp2,-4.61D0*Symplectic_4th_Order_b(m_step))
     CALL Add(Tmp1,Tmp2,P)
     CALL Add(PV,P,Tmp1)
     CALL SetEq(PV,Tmp1)
 
-    ! PV(n) = PV(n-1) + 4.61D0*b(nnk)*[D(n-1)-P(n-1)]
+    ! PV(n) = PV(n-1) + 4.61D0*b(m_step)*[D(n-1)-P(n-1)]
     FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO))//'_C#'//TRIM(IntToChar(MyClone))//'.PVsave'
     CALL Put(PV,FileName)
 
@@ -637,8 +633,8 @@ PROGRAM P2Use
     FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO-1))//'_C#'//TRIM(IntToChar(MyClone))//'.DOPsave'
     CALL Get(Tmp1,FileName)
     CALL Multiply(Tmp1,1.D0-alpha)
-    CALL Multiply(PV,Symplectic_4th_Order_a(nnk))
-    ! P(n) = P(n-1) + a(nnk)*PV(n)
+    CALL Multiply(PV,Symplectic_4th_Order_a(m_step))
+    ! P(n) = P(n-1) + a(m_step)*PV(n)
     CALL Add(Tmp1,PV,Tmp2)
 
     FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO-1))//'_C#'//TRIM(IntToChar(MyClone))//'.DOsave'
@@ -648,6 +644,21 @@ PROGRAM P2Use
 
     FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO))//'_C#'//TRIM(IntToChar(MyClone))//'.DOPsave'
     CALL Put(P,FileName)
+
+    IF(m_step == 1) THEN
+      ! Get v_scale.
+      CALL Get(v_scale, "v_scale", TRIM(IntToChar(iGEO-1)))
+
+      !v_scale = 1D0
+      CALL MondoLog(DEBUG_NONE, "P2Use", "v_scale("//TRIM(IntToChar(iGEO-1))//") = "//TRIM(DblToChar(v_scale)))
+      CALL MondoLog(DEBUG_NONE, "P2Use", "a("//TRIM(IntToChar(m_step))//") = "//TRIM(FltToChar(Symplectic_4th_Order_a(m_step))))
+      CALL MondoLog(DEBUG_NONE, "P2Use", "b("//TRIM(IntToChar(m_step))//") = "//TRIM(FltToChar(Symplectic_4th_Order_b(m_step))))
+
+      CALL Multiply(PV,v_scale)
+
+      FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO))//'_C#'//TRIM(IntToChar(MyClone))//'.PVsave'
+      CALL Put(PV,FileName)
+    ENDIF
 
     ! Purify P
 #ifdef PARALLEL
