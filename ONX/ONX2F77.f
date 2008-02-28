@@ -25,6 +25,7 @@ C    disemination in future releases.
 C------------------------------------------------------------------------------
 C
       FUNCTION DGetAbsMax(N,A)
+      IMPLICIT NONE
       INTEGER N
       REAL*8 A(N)
       REAL*8 DGetAbsMax
@@ -93,8 +94,9 @@ C
       RETURN
       END
 C     
-      INTEGER FUNCTION IBinSrch(IVec,IVal,NDim)
+      FUNCTION IBinSrch(IVec,IVal,NDim)
       IMPLICIT NONE
+      INTEGER IBinSrch
       INTEGER IVal,NDim
       INTEGER IVec(NDim)
       INTEGER IMin,IMax,IMid
@@ -113,11 +115,10 @@ C
          ENDIF
       ENDDO
       RETURN
-      END FUNCTION IBinSrch
+      END
 C     
       SUBROUTINE XPose1C(M,N,A,B)
-      IMPLICIT REAL*8 (a-h,o-z)
-      IMPLICIT INTEGER (i-n)
+      IMPLICIT NONE
       INTEGER I,J,M,N
       REAL*8 A(M,N)
       REAL*8 B(N,M)
@@ -130,8 +131,7 @@ C
       END
 C     
       SUBROUTINE XPose2C(M,N,A,B)
-      IMPLICIT REAL*8 (a-h,o-z)
-      IMPLICIT INTEGER (i-n)
+      IMPLICIT NONE
       INTEGER I,J,M,N
       REAL*8 A(M,N)
       REAL*8 B(N,M)

@@ -252,6 +252,9 @@ if test "${enable_static_linking}" = "yes"; then
   elif test "`basename ${FC}`" = "ifort"; then
     static_linking_flags="-static"
     AC_MSG_CHECKING([identified intel ifort compiler, trying ${static_linking_flags} flag])
+  elif test "`basename ${FC}`" = "pgf90"; then
+    static_linking_flags="-Bstatic"
+    AC_MSG_CHECKING([identified portland group compiler, trying ${static_linking_flags} flag])
   else
     AC_MSG_NOTICE([unknown compiler, no static linking flags found])
   fi
