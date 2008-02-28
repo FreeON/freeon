@@ -394,7 +394,7 @@ AC_ARG_ENABLE([internal-hdf5],
 AM_CONDITIONAL(INTERNAL_HDF5, [test "${use_internal_hdf5}" = "yes"])
 
 if test "${use_internal_hdf5}" = "yes"; then
-
+  AC_CONFIG_SUBDIRS([MondoMods/hdf5-1.8.0])
 else
 
   AC_MSG_RESULT([no])
@@ -490,7 +490,6 @@ MondoMods/lapack/lapack_testing/Makefile
 MondoMods/lapack/lapack_testing/lin/Makefile
 MondoMods/lapack/lapack_testing/eig/Makefile
 MondoMods/lapack/lapack_testing/matgen/Makefile
-MondoMods/hdf5/Makefile
 SCFeqs/Makefile
 OneE/Makefile
 QCTC/Makefile
