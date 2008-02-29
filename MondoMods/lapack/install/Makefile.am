@@ -3,15 +3,37 @@ include ../../../make.inc
 # No linking of anything...
 LIBS =
 
+noinst_LTLIBRARIES = libMondoLAPACKEXTRA.la
+
+libMondoLAPACKEXTRA_la_SOURCES = \
+  ilaver.f \
+	lsame.f \
+	slamch.f \
+	second_@LAPACK_TIMER@.f \
+	dlamch.f \
+	dsecnd_@LAPACK_TIMER@.f
+
 noinst_PROGRAMS = testlsame testslamch testdlamch testsecond testdsecnd testieee testversion
 
-testlsame_SOURCES = lsame.f lsametst.f
-testslamch_SOURCES = slamch.f lsame.f slamchtst.f
-testdlamch_SOURCES = dlamch.f lsame.f dlamchtst.f
-testsecond_SOURCES = second_@LAPACK_TIMER@.f secondtst.f
-testdsecnd_SOURCES = dsecnd_@LAPACK_TIMER@.f dsecndtst.f
+testlsame_SOURCES = lsametst.f
+testlsame_LDADD = libMondoLAPACKEXTRA.la
+
+testslamch_SOURCES = slamchtst.f
+testslamch_LDADD = libMondoLAPACKEXTRA.la
+
+testdlamch_SOURCES = dlamchtst.f
+testdlamch_LDADD = libMondoLAPACKEXTRA.la
+
+testsecond_SOURCES = secondtst.f
+testsecond_LDADD = libMondoLAPACKEXTRA.la
+
+testdsecnd_SOURCES = dsecndtst.f
+testdsecnd_LDADD = libMondoLAPACKEXTRA.la
+
 testieee_SOURCES = tstiee.f
-testversion_SOURCES = ilaver.f LAPACK_version.f
+
+testversion_SOURCES = LAPACK_version.f
+testversion_LDADD = libMondoLAPACKEXTRA.la
 
 EXTRA_DIST = \
   dsecnd_EXT_ETIME.f \

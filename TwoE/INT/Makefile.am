@@ -1,8 +1,8 @@
 include ../../make.inc
 
-noinst_LIBRARIES = libINT.a
+noinst_LTLIBRARIES = libINT.la
 
-libINT_a_SOURCES = \
+libINT_la_SOURCES = \
   BraHRR1010.f90 \
   BraHRR101.f90 \
   BraHRR102.f90 \

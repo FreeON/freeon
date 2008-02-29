@@ -7,14 +7,16 @@ CPP = @CPP@
 AM_CPPFLAGS = @AM_CPPFLAGS@
 
 if INTERNAL_LAPACK
-  LDADD_INTERNAL_LAPACK = ../MondoMods/lapack/lapack/libMondoLAPACK.a ../MondoMods/lapack/blas/libMondoBLAS.a
+  LDADD_INTERNAL_LAPACK = ../MondoMods/lapack/lapack/libMondoLAPACK.la \
+    ../MondoMods/lapack/blas/libMondoBLAS.la \
+    ../MondoMods/lapack/install/libMondoLAPACKEXTRA.la
 endif
 
 if INTERNAL_HDF5
   LDADD_INTERNAL_HDF5 = ../MondoMods/hdf5/src/libhdf5.la
 endif
 
-LDADD_MONDOMODS = ../MondoMods/libMondoMods.a 
+LDADD_MONDOMODS = ../MondoMods/libMondoMods.la
 
 # On filesystems which are case-insensitive (which really means HFS+ on OS X)
 # we can not preprocess into a filename that differs by the case only, i.e. .C
@@ -30,7 +32,7 @@ depcheck :
 	  echo cleaning...; \
 	  $(MAKE) clean; \
 	  echo verifying `echo $$i | sed -e "s/[.][^.]\+$$//"`; \
-	  $(MAKE) `echo $$i | sed -e "s/[.][^.]\+$$//"`.o || exit 1; \
+	  $(MAKE) `echo $$i | sed -e "s/[.][^.]\+$$//"`.lo || exit 1; \
 	done
 
 CPP_COMMAND = $(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(FORTRAN_CPPFLAGS) $(CPPFLAGS) $(CPPMISC)
@@ -43,24 +45,31 @@ REMOVE_PREPROCESSED_FILES = @REMOVE_PREPROCESSED_FILES@
 
 # Suffix rules.
 .f90.o :
-	@$(CPP_COMMAND) $< | grep -v -E "^#" > $(notdir $(basename $<))$(PREPROCESSED_SUFFIX).f90
+	$(CPP_COMMAND) $< | grep -v -E "^#" > $(notdir $(basename $<))$(PREPROCESSED_SUFFIX).f90
 	$(FC_COMMAND) -c -o $@ $(notdir $(basename $<))$(PREPROCESSED_SUFFIX).f90
-	@if test "${REMOVE_PREPROCESSED_FILES}" = "yes"; then \
-	  rm $(notdir $(basename $<))$(PREPROCESSED_SUFFIX).f90; \
-	fi
+	if test "${REMOVE_PREPROCESSED_FILES}" = "yes"; then rm $(notdir $(basename $<))$(PREPROCESSED_SUFFIX).f90; fi
+
+.f90.lo :
+	$(CPP_COMMAND) $< | grep -v -E "^#" > $(notdir $(basename $<))$(PREPROCESSED_SUFFIX).f90
+	$(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(FC_COMMAND) -c -o $@ $(notdir $(basename $<))$(PREPROCESSED_SUFFIX).f90
+	if test "${REMOVE_PREPROCESSED_FILES}" = "yes"; then rm $(notdir $(basename $<))$(PREPROCESSED_SUFFIX).f90; fi
 
 .f.o :
-	@$(CPP_COMMAND) $< | grep -v -E "^#" > $(notdir $(basename $<))$(PREPROCESSED_SUFFIX).f
+	$(CPP_COMMAND) $< | grep -v -E "^#" > $(notdir $(basename $<))$(PREPROCESSED_SUFFIX).f
 	$(F77_COMMAND) -c -o $@ $(notdir $(basename $<))$(PREPROCESSED_SUFFIX).f
-	@if test "${REMOVE_PREPROCESSED_FILES}" = "yes"; then \
-	  rm $(notdir $(basename $<))$(PREPROCESSED_SUFFIX).f; \
-	fi
+	if test "${REMOVE_PREPROCESSED_FILES}" = "yes"; then rm $(notdir $(basename $<))$(PREPROCESSED_SUFFIX).f; fi
+
+.f.lo :
+	$(CPP_COMMAND) $< | grep -v -E "^#" > $(notdir $(basename $<))$(PREPROCESSED_SUFFIX).f
+	$(LIBTOOL) --tag=F77 $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(F77_COMMAND) -c -o $@ $(notdir $(basename $<))$(PREPROCESSED_SUFFIX).f
+	if test "${REMOVE_PREPROCESSED_FILES}" = "yes"; then rm $(notdir $(basename $<))$(PREPROCESSED_SUFFIX).f; fi
 
 # For dependencies of -L and -I.
 if INTERNAL_LAPACK
   INTERNAL_LAPACK_DEPENDENCY_FILES = \
-    ../MondoMods/lapack/blas/libMondoBLAS.a \
-    ../MondoMods/lapack/lapack/libMondoLAPACK.a
+    ../MondoMods/lapack/blas/libMondoBLAS.la \
+    ../MondoMods/lapack/lapack/libMondoLAPACK.la \
+    ../MondoMods/lapack/install/libMondoLAPACKEXTRA.la
 endif
 
 if INTERNAL_HDF5
@@ -68,7 +77,7 @@ if INTERNAL_HDF5
 endif
 
 MondoMods_DEPENDENCY_FILES = \
-  ../MondoMods/libMondoMods.a \
+  ../MondoMods/libMondoMods.la \
   ../MondoMods/ainv.mod \
   ../MondoMods/annealmap.mod \
   ../MondoMods/atompairs.mod \

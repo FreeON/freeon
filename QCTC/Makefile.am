@@ -50,7 +50,7 @@ MakePFFT_SOURCES = \
 	MakePFFT.f90
 
 LibQCTC_DEPENDENCY_FILES = \
-  LibQCTC/libQCTC.a \
+  LibQCTC/libQCTC.la \
   LibQCTC/eriglobals.mod \
   LibQCTC/polenodetype.mod \
   LibQCTC/poleglobals.mod
@@ -74,7 +74,7 @@ EXTRA_DIST = \
   PBCTensor/Majik_Kubic_WS2.Inc
 
 EXTRA_INCLUDES = -I../MondoMods -I../OneE -ILibQCTC
-LDADD = $(LDADD_MONDOMODS) $(LDADD_INTERNAL_LAPACK) $(LDADD_INTERNAL_HDF5) LibQCTC/libQCTC.a
+LDADD = $(LDADD_MONDOMODS) $(LDADD_INTERNAL_LAPACK) $(LDADD_INTERNAL_HDF5) LibQCTC/libQCTC.la
 CPPMISC = -DEXPLICIT_SOURCE
 
 # Dependencies.

@@ -1,8 +1,8 @@
 include ../../../make.inc
 
-noinst_LIBRARIES = libMondoBLAS.a
+noinst_LTLIBRARIES = libMondoBLAS.la
 
-libMondoBLAS_a_SOURCES = \
+libMondoBLAS_la_SOURCES = \
   caxpy.f  \
   ccopy.f  \
   cdotc.f  \

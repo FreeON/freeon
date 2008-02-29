@@ -32,22 +32,22 @@ GONX_SOURCES = \
 
 ONX_DEPENDENCIES  = \
   $(MondoMods_DEPENDENCY_FILES) \
-	../TwoE/GRD/libGRD.a \
-	../TwoE/INT/libINT.a \
-	../TwoE/VRR/libVRR.a \
-	../TwoE/HRR/libHRR.a \
-	../TwoE/MSC/libTwoEMisc.a \
+	../TwoE/GRD/libGRD.la \
+	../TwoE/INT/libINT.la \
+	../TwoE/VRR/libVRR.la \
+	../TwoE/HRR/libHRR.la \
+	../TwoE/MSC/libTwoEMisc.la \
 	../TwoE/MSC/shellpairstruct.mod \
 	../TwoE/MSC/vscratchb.mod \
 	../TwoE/MSC/getatompairmod.mod
 
 GONX_DEPENDENCIES = \
   $(MondoMods_DEPENDENCY_FILES) \
-	../TwoE/GRD/libGRD.a \
-	../TwoE/INT/libINT.a \
-	../TwoE/VRR/libVRR.a \
-	../TwoE/HRR/libHRR.a \
-	../TwoE/MSC/libTwoEMisc.a \
+	../TwoE/GRD/libGRD.la \
+	../TwoE/INT/libINT.la \
+	../TwoE/VRR/libVRR.la \
+	../TwoE/HRR/libHRR.la \
+	../TwoE/MSC/libTwoEMisc.la \
 	../TwoE/MSC/shellpairstruct.mod \
 	../TwoE/MSC/vscratchb.mod \
 	../TwoE/MSC/getatompairmod.mod
@@ -64,7 +64,7 @@ CPPMISC = -DONX2_PARALLEL -DGTRESH
 EXTRA_INCLUDES = -I../MondoMods -I../TwoE -I../TwoE/MSC -I../TwoE/INT -I../TwoE/GRD
 
 LDADD = $(LDADD_MONDOMODS) $(LDADD_INTERNAL_LAPACK) $(LDADD_INTERNAL_HDF5) \
-  ../TwoE/GRD/libGRD.a ../TwoE/INT/libINT.a ../TwoE/VRR/libVRR.a ../TwoE/HRR/libHRR.a ../TwoE/MSC/libTwoEMisc.a
+  ../TwoE/GRD/libGRD.la ../TwoE/INT/libINT.la ../TwoE/VRR/libVRR.la ../TwoE/HRR/libHRR.la ../TwoE/MSC/libTwoEMisc.la
 
 ONXInit.o : \
   ONXParameters.o

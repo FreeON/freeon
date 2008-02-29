@@ -80,6 +80,7 @@ else
 fi
 
 # Check for libtool.
+AC_DISABLE_SHARED
 AC_PROG_LIBTOOL
 
 # Set $(MAKE).
