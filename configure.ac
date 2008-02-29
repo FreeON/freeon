@@ -38,30 +38,6 @@ AC_MSG_NOTICE([configuring local version ${localversion}])
 
 # Fix up the header definitions for hdf.
 AC_OUTPUT_COMMANDS([
-  echo "creating H5config.h"
-  sed 's/#define /#define H5_/' < config.h | sed 's/#undef /#undef H5_/' > tempconf
-
-  # We don't want inline defined for C++ compilers
-  # Don't worry about the C++ ifdef wrappers in the H5pubconf file, since
-  # 'H5_inline' isn't a C++ keyword.
-  echo "adding inline statements to H5config.h"
-  cat >> tempconf <<EOF
-
-#if defined(__cplusplus) && defined(inline)
-#undef inline
-#endif
-EOF
-
-  # Write out H5config.h
-  if test ! -f H5config.h; then
-    mv -f tempconf H5config.h
-  elif (diff --brief tempconf H5config.h > /dev/null); then
-    rm -f tempconf
-    echo "H5config.h is unchanged"
-  else
-    mv -f tempconf H5config.h
-  fi
-
   echo "creating MondoConfig.h"
   grep "#define" config.h > tempconf
   if test ! -f MondoConf.h; then
