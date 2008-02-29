@@ -1,3 +1,10 @@
+# How to build H5detect for number format detection.  Use -g to force no
+# optimization since many compilers (e.g., Intel) takes a long time to compile
+# it with any optimization on.  H5detect is used to generate H5Tinit.c once. So,
+# optimization is not critical.
+noinst_PROGRAMS = H5detect
+H5detect_CFLAGS = -g
+
 noinst_LTLIBRARIES = libhdf5.la
 
 libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
