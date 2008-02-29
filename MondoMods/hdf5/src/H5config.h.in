@@ -1,4 +1,4 @@
-/* src/H5config.h.in.  Generated from configure.in by autoheader.  */
+/* src/H5config.h.in.  Generated from configure.ac by autoheader.  */
 
 /* Define if your system generates wrong code for log2 routine. */
 #undef BAD_LOG2_CODE_GENERATED
@@ -11,28 +11,11 @@
    values. */
 #undef CONVERT_DENORMAL_FLOAT
 
-/* Define if C++ compiler recognizes offsetof */
-#undef CXX_HAVE_OFFSETOF
-
 /* Define the default virtual file driver to compile */
 #undef DEFAULT_VFD
 
 /* Define if `dev_t' is a scalar */
 #undef DEV_T_IS_SCALAR
-
-/* Define to dummy `main' function (if any) required to link to the Fortran
-   libraries. */
-#undef FC_DUMMY_MAIN
-
-/* Define if F77 and FC dummy `main' functions are identical. */
-#undef FC_DUMMY_MAIN_EQ_F77
-
-/* Define to a macro mangling the given C identifier (in lower and upper
-   case), which must not contain underscores, for linking with Fortran. */
-#undef FC_FUNC
-
-/* As FC_FUNC, but for C identifiers containing underscores. */
-#undef FC_FUNC_
 
 /* Define if your system can handle overflow converting floating-point to
    integer values. */
@@ -219,12 +202,6 @@
 /* Define if MPI_File_get_size works correctly */
 #undef HAVE_MPI_GET_SIZE
 
-/* Define if `MPI_Comm_c2f' and `MPI_Comm_f2c' exists */
-#undef HAVE_MPI_MULTI_LANG_Comm
-
-/* Define if `MPI_Info_c2f' and `MPI_Info_f2c' exists */
-#undef HAVE_MPI_MULTI_LANG_Info
-
 /* Define if we have parallel support */
 #undef HAVE_PARALLEL
 
@@ -386,9 +363,6 @@
 /* Define if your system can't handle converting floating-point values to long
    long. */
 #undef HW_FP_TO_LLONG_NOT_WORKS
-
-/* Define if HDF5's high-level library headers should be included in hdf5.h */
-#undef INCLUDE_HL
 
 /* Define if your system can accurately convert from integers to long double
    values. */
