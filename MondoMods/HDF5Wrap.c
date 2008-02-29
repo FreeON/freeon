@@ -34,7 +34,7 @@
 
 #if defined (HAVE_INTERNAL_HDF5)
 #warning Using internal hdf5
-#include "hdf5-1.8.0/src/hdf5.h"
+#include "hdf5/src/hdf5.h"
 #else
 #include <hdf5.h>
 #endif
