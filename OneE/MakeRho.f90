@@ -376,7 +376,6 @@ PROGRAM MakeRho
 #endif
       CALL MondoLog(DEBUG_NONE, "MakeRho", TRIM(Mssg1))
       CALL MondoLog(DEBUG_NONE, "MakeRho", TRIM(Mssg2))
-      CALL ClosePU(I)
 #ifdef PARALLEL
     ENDIF
 #endif
@@ -385,7 +384,6 @@ PROGRAM MakeRho
     IF(MyID == ROOT) THEN
 #endif
       CALL MondoLog(DEBUG_NONE, "MakeRho", TRIM(Mssg1))
-      CALL ClosePU(I)
 #ifdef PARALLEL
     ENDIF
 #endif
