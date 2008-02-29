@@ -1,8 +1,8 @@
 include ../../make.inc
 
-noinst_LIBRARIES = libGRD.a
+noinst_LTLIBRARIES = libGRD.la
 
-libGRD_a_SOURCES = \
+libGRD_la_SOURCES = \
   BraHRR1010.f90 \
   BraHRR101.f90 \
   BraHRR103.f90 \

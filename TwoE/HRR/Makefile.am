@@ -1,8 +1,8 @@
 include ../../make.inc
 
-noinst_LIBRARIES = libHRR.a
+noinst_LTLIBRARIES = libHRR.la
 
-libHRR_a_SOURCES = \
+libHRR_la_SOURCES = \
   KetHRR1010.f90 \
   KetHRR102.f90 \
   KetHRR103.f90 \

@@ -1,8 +1,8 @@
 include ../../make.inc
 
-noinst_LIBRARIES = libVRR.a
+noinst_LTLIBRARIES = libVRR.la
 
-libVRR_a_SOURCES = \
+libVRR_la_SOURCES = \
   VRRd0d0.f90 \
   VRRd0f0.f90 \
   VRRd0g0.f90 \
@@ -67,7 +67,7 @@ libVRR_a_SOURCES = \
   VRRs0j0.f90 \
   VRRs0p0.f90
 
-libVRR_a_DEPENDENCIES = \
+libVRR_la_DEPENDENCIES = \
   $(foreach i, $(MondoMods_DEPENDENCY_FILES), ../$(i)) \
 	../MSC/shellpairstruct.mod \
 	../MSC/vscratchb.mod \

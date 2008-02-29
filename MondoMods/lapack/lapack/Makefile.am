@@ -1,8 +1,8 @@
 include ../../../make.inc
 
-noinst_LIBRARIES = libMondoLAPACK.a
+noinst_LTLIBRARIES = libMondoLAPACK.la
 
-libMondoLAPACK_a_SOURCES = \
+libMondoLAPACK_la_SOURCES = \
   cbdsqr.f  \
   cgbbrd.f  \
   cgbcon.f  \
@@ -1350,14 +1350,6 @@ libMondoLAPACK_a_SOURCES = \
   zunmtr.f  \
   zupgtr.f  \
   zupmtr.f
-
-libMondoLAPACK_a_LIBADD = \
-  ../install/ilaver.o \
-	../install/lsame.o \
-	../install/slamch.o \
-	../install/second_@LAPACK_TIMER@.o \
-	../install/dlamch.o \
-	../install/dsecnd_@LAPACK_TIMER@.o
 
 EXTRA_DIST = \
   dlamch.f \
