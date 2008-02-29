@@ -34,7 +34,7 @@
 
 #if defined (HAVE_INTERNAL_HDF5)
 #warning Using internal hdf5
-#include "hdf5/hdf5.h"
+#include "hdf5-1.8.0/src/hdf5.h"
 #else
 #include <hdf5.h>
 #endif
@@ -90,7 +90,7 @@ int hdf5openfile_(int* NC, int* IChr)
 #ifdef debug_interface
    printf("IN OPEN_HDF5_FILE: Opening <%s> \n",IntToChar(NC,IChr));
 #endif
-   H5Eset_auto(NULL, NULL);
+   H5Eset_auto(H5E_DEFAULT, NULL, NULL);
    fid=H5Fopen(IntToChar(NC,IChr),H5F_ACC_RDWR,H5P_DEFAULT);
 #ifdef debug_interface
 #ifdef debug_all
@@ -151,7 +151,7 @@ int hdf5creategroup_(int* FileID, int* NC, int* IChr)
    printf("IN CREATE_HDF5_GROUP: Creating %s \n",IntToChar(NC,IChr));
 #endif
    fid=*FileID;
-   gid=H5Gcreate(fid,IntToChar(NC,IChr),0);
+   gid=H5Gcreate1(fid,IntToChar(NC,IChr),0);
 #ifdef debug_interface
 #ifdef debug_all
    printf("IN CREATE_HDF5_GROUP: FileID = %d, GroupID= %d \n",fid,gid);
@@ -174,8 +174,8 @@ int hdf5opengroup_(int* FileID, int* NC, int* IChr)
    printf("IN OPEN_HDF5_GROUP: Opening <%s> \n",IntToChar(NC,IChr));
 #endif
    fid=*FileID;
-   H5Eset_auto(NULL, NULL);
-   gid=H5Gopen(fid,IntToChar(NC,IChr));
+   H5Eset_auto(H5E_DEFAULT, NULL, NULL);
+   gid=H5Gopen1(fid,IntToChar(NC,IChr));
 #ifdef debug_interface
 #ifdef debug_all
    printf("IN OPEN_HDF5_GROUP: FileID = %d, GroupID = %d \n",fid,gid);
@@ -229,7 +229,7 @@ void hdf5opendata_(int* FileID, int* NC, int* IChr, int* DataId, int* DataSpc)
 #endif
    printf("OPEN_HDF5_DATA:  VarName= <%s> \n",IntToChar(NC,IChr));
 #endif
-   did=H5Dopen(fid,IntToChar(NC,IChr));
+   did=H5Dopen1(fid,IntToChar(NC,IChr));
    dspc=H5Dget_space(did);
 #ifdef debug_interface
 #ifdef debug_all
@@ -352,7 +352,7 @@ void hdf5createdata_(int* FileID,int* Type,int* N,int* NC,int* IChr,int* ULimit,
 #endif
 #endif
    } 
-   did=H5Dcreate(fid,IntToChar(NC,IChr),dtyp,dspc,dprp);
+   did=H5Dcreate1(fid,IntToChar(NC,IChr),dtyp,dspc,dprp);
 #ifdef debug_interface
    printf("IN CREATE_HDF5_DATA: VarName =<%s> \n",IntToChar(NC,IChr));
    printf("IN CREATE_HDF5_DATA: DataId  = %d \n",did);

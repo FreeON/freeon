@@ -103,8 +103,8 @@ else
   AC_MSG_RESULT([not needed])
 fi
 
-# Check for ranlib.
-AC_PROG_RANLIB
+# Check for libtool.
+AC_PROG_LIBTOOL
 
 # Set $(MAKE).
 AC_PROG_MAKE_SET
@@ -312,7 +312,6 @@ LAPACK_TIMER="NONE"
 
 if test "${use_internal_lapack}" = "yes"; then
   AC_MSG_RESULT([yes])
-  INTERNAL_LAPACK_LIBS="-lMondoLAPACK -lMondoBLAS"
 
   # Test for no-optimization compiler flag.
   AC_MSG_CHECKING([for no-optmiziation flags])
@@ -331,7 +330,6 @@ if test "${use_internal_lapack}" = "yes"; then
 
 else
   AC_MSG_RESULT([no])
-  INTERNAL_LAPACK_LIBS=""
 
   AC_ARG_WITH([lapack],
     [AS_HELP_STRING([--with-lapack=DIR],
@@ -394,11 +392,13 @@ AC_ARG_ENABLE([internal-hdf5],
 AM_CONDITIONAL(INTERNAL_HDF5, [test "${use_internal_hdf5}" = "yes"])
 
 if test "${use_internal_hdf5}" = "yes"; then
+
   AC_CONFIG_SUBDIRS([MondoMods/hdf5-1.8.0])
+  AC_DEFINE(HAVE_INTERNAL_HDF5, 1, [Use the inernal hdf5 library])
+
 else
 
   AC_MSG_RESULT([no])
-  INTERNAL_HDF5_LIBS=""
 
   AC_ARG_WITH([hdf5],
     [AS_HELP_STRING([--with-hdf5=DIR],
@@ -442,12 +442,6 @@ CPP=cpp
 
 # Set some preprocessor command line options.
 FORTRAN_CPPFLAGS="-P -C -xc -traditional -I../MondoMods"
-
-if test -z "${LIBS}"; then
-  LIBS="${INTERNAL_LAPACK_LIBS} ${INTERNAL_HDF5_LIBS}"
-else
-  LIBS="${LIBS} ${INTERNAL_LAPACK_LIBS} ${INTERNAL_HDF5_LIBS}"
-fi
 
 # Set this stuff in the makefiles.
 AC_SUBST(CPP, ${CPP})

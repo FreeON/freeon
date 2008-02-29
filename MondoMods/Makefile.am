@@ -123,9 +123,10 @@ EXTRA_DIST = \
   MMA/Functionals/XG04x.Inc \
   MMA/PAC/PFunk.Inc
 
-EXTRA_INCLUDES = -IMMA/LookUpTables \
-                 -IMMA/Functionals  \
-                 -IMMA/PAC
+EXTRA_INCLUDES = \
+  -IMMA/LookUpTables \
+  -IMMA/Functionals  \
+  -IMMA/PAC
 
 SOURCES_DEPCHECK = $(libMondoMods_a_SOURCES)
 

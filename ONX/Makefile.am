@@ -63,8 +63,8 @@ CPPMISC = -DONX2_PARALLEL -DGTRESH
 
 EXTRA_INCLUDES = -I../MondoMods -I../TwoE -I../TwoE/MSC -I../TwoE/INT -I../TwoE/GRD
 
-LDADD = $(LDADD_INTERNAL_LAPACK) $(LDADD_INTERNAL_HDF5) -L../MondoMods -lMondoMods \
-  -L../TwoE/GRD -lGRD -L../TwoE/INT -lINT -L../TwoE/VRR -lVRR -L../TwoE/HRR -lHRR -L../TwoE/MSC -lTwoEMisc
+LDADD = $(LDADD_MONDOMODS) $(LDADD_INTERNAL_LAPACK) $(LDADD_INTERNAL_HDF5) \
+  ../TwoE/GRD/libGRD.a ../TwoE/INT/libINT.a ../TwoE/VRR/libVRR.a ../TwoE/HRR/libHRR.a ../TwoE/MSC/libTwoEMisc.a
 
 ONXInit.o : \
   ONXParameters.o
