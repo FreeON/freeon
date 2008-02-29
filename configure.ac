@@ -369,7 +369,7 @@ AM_CONDITIONAL(INTERNAL_HDF5, [test "${use_internal_hdf5}" = "yes"])
 
 if test "${use_internal_hdf5}" = "yes"; then
 
-  AC_CONFIG_SUBDIRS([MondoMods/hdf5-1.8.0])
+  AC_CONFIG_SUBDIRS([MondoMods/hdf5])
   AC_DEFINE(HAVE_INTERNAL_HDF5, 1, [Use the inernal hdf5 library])
 
 else
