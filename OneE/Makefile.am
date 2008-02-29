@@ -46,9 +46,9 @@ EXTRA_DIST = \
   MMA/QQuad32.Inc \
   MMA/QQuad64.Inc
 
-LDADD = $(LDADD_INTERNAL_LAPACK) $(LDADD_INTERNAL_HDF5) -L../MondoMods -lMondoMods
+LDADD = $(LDADD_MONDOMODS) $(LDADD_INTERNAL_LAPACK) $(LDADD_INTERNAL_HDF5)
 
-EXTRA_INCLUDES = -I../MondoMods -I. -IMMA
+EXTRA_INCLUDES = -I../MondoMods -IMMA
 
 # Dependencies.
 MakeU.o   : UBlok.o

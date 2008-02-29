@@ -7,12 +7,14 @@ CPP = @CPP@
 AM_CPPFLAGS = @AM_CPPFLAGS@
 
 if INTERNAL_LAPACK
-  LDADD_INTERNAL_LAPACK = -L../MondoMods/lapack/lapack -L../MondoMods/lapack/blas
+  LDADD_INTERNAL_LAPACK = ../MondoMods/lapack/lapack/libMondoLAPACK.a ../MondoMods/lapack/blas/libMondoBLAS.a
 endif
 
 if INTERNAL_HDF5
-  LDADD_INTERNAL_HDF5 = -L../MondoMods/hdf5
+  LDADD_INTERNAL_HDF5 = ../MondoMods/hdf5-1.8.0/src/libhdf5.la
 endif
+
+LDADD_MONDOMODS = ../MondoMods/libMondoMods.a 
 
 # On filesystems which are case-insensitive (which really means HFS+ on OS X)
 # we can not preprocess into a filename that differs by the case only, i.e. .C
@@ -55,14 +57,14 @@ REMOVE_PREPROCESSED_FILES = @REMOVE_PREPROCESSED_FILES@
 	fi
 
 # For dependencies of -L and -I.
-if INTERNAL_HDF5
-  INTERNAL_HDF5_DEPENDENCY_FILES = ../MondoMods/hdf5/libMondoHDF5.a
-endif
-
 if INTERNAL_LAPACK
   INTERNAL_LAPACK_DEPENDENCY_FILES = \
     ../MondoMods/lapack/blas/libMondoBLAS.a \
     ../MondoMods/lapack/lapack/libMondoLAPACK.a
+endif
+
+if INTERNAL_HDF5
+  INTERNAL_HDF5_DEPENDENCY_FILES = ../MondoMods/hdf5-1.8.0/src/libhdf5.la
 endif
 
 MondoMods_DEPENDENCY_FILES = \
