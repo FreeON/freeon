@@ -5,7 +5,7 @@ if INTERNAL_LAPACK
 endif
 
 if INTERNAL_HDF5
-  INTERNAL_HDF5_DIRS = hdf5-1.8.0
+  INTERNAL_HDF5_DIRS = hdf5
 endif
 
 SUBDIRS = $(INTERNAL_HDF5_DIRS) $(INTERNAL_LAPACK_DIRS)
@@ -14,7 +14,7 @@ SUBDIRS = $(INTERNAL_HDF5_DIRS) $(INTERNAL_LAPACK_DIRS)
 # rely on the dist target in the hdf5 directory. Updating hdf then is pretty
 # simple. Get the tar file from the hdf group, unpack it in this directory and
 # update the library dependencies in the Makefiles.
-DIST_SUBDIRS = $(INTERNAL_LAPACK_DIRS)
+#DIST_SUBDIRS = $(INTERNAL_LAPACK_DIRS)
 
 noinst_LIBRARIES = libMondoMods.a
 
@@ -91,7 +91,6 @@ libMondoMods_a_SOURCES = \
   phipac_dgemm.c
 
 EXTRA_DIST = \
-  $(INTERNAL_HDF5_DIST) \
   Final_TravO.Inc \
   MMA/LookUpTables/Erf.Inc \
   MMA/LookUpTables/ErrorFunction.Inc \

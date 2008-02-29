@@ -11,7 +11,7 @@ if INTERNAL_LAPACK
 endif
 
 if INTERNAL_HDF5
-  LDADD_INTERNAL_HDF5 = ../MondoMods/hdf5-1.8.0/src/libhdf5.la
+  LDADD_INTERNAL_HDF5 = ../MondoMods/hdf5/src/libhdf5.la
 endif
 
 LDADD_MONDOMODS = ../MondoMods/libMondoMods.a 
@@ -64,7 +64,7 @@ if INTERNAL_LAPACK
 endif
 
 if INTERNAL_HDF5
-  INTERNAL_HDF5_DEPENDENCY_FILES = ../MondoMods/hdf5-1.8.0/src/libhdf5.la
+  INTERNAL_HDF5_DEPENDENCY_FILES = ../MondoMods/hdf5/src/libhdf5.la
 endif
 
 MondoMods_DEPENDENCY_FILES = \
