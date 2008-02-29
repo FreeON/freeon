@@ -94,12 +94,6 @@ dnl set by the code which follows...
 dnl
 DEFAULT_LIBS=""
 
-dnl Support F9X variable to define Fortran compiler if FC variable is
-dnl not used.  This should be deprecated in the future.
-if test "x" = "x$FC"; then
-  FC=${F9X}
-fi
-
 dnl ----------------------------------------------------------------------
 dnl Set prefix default (install directory) to a directory in the build area.
 dnl This allows multiple src-dir builds within one host.
@@ -266,206 +260,6 @@ dnl ----------------------------------------------------------------------
 dnl Check if they would like the Fortran interface compiled
 dnl
 AC_SUBST([HDF5_INTERFACES]) HDF5_INTERFACES=""
-AC_MSG_CHECKING([if Fortran interface enabled])
-AC_ARG_ENABLE([fortran],
-              [AC_HELP_STRING([--enable-fortran],
-                              [Compile the Fortran interface [default=no]])],
-              [HDF_FORTRAN=$enableval])
-
-if test "X$HDF_FORTRAN" = "Xyes"; then
-  echo "yes"
-
-  HDF5_INTERFACES="$HDF5_INTERFACES fortran"
-
-  dnl --------------------------------------------------------------------
-  dnl HDF5 integer variables for the H5fortran_types.f90 file.
-  dnl
-  AC_SUBST([R_LARGE])
-  AC_SUBST([R_INTEGER])
-  AC_SUBST([HADDR_T])
-  AC_SUBST([HSIZE_T])
-  AC_SUBST([HSSIZE_T])
-  AC_SUBST([HID_T])
-  AC_SUBST([SIZE_T])
-  AC_SUBST([OBJECT_NAMELEN_DEFAULT_F])
-
-  dnl --------------------------------------------------------------------
-  dnl General Fortran flags
-  dnl
-  FCFLAGS="${FCFLAGS} ${FFLAGS}"
-
-  dnl --------------------------------------------------------------------
-  dnl Fortran source extention
-  dnl
-  AC_FC_SRCEXT([f90])
-
-  AC_SUBST([F9XSUFFIXFLAG])
-  AC_SUBST([FSEARCH_DIRS])
-
-  dnl --------------------------------------------------------------------
-  dnl Check for a Fortran 9X compiler and how to include modules.
-  dnl 
-  AC_PROG_FC([f90 pgf90 slf90 f95 g95 xlf95 efc ifort ftn],)
-  AC_F9X_MODS
-
-  dnl It seems that libtool (as of Libtool 1.5.14) is trying to
-  dnl configure itself for Fortran 77.
-  dnl Tell it that our F77 compiler is $FC (actually a F9X compiler)
-  F77=$FC
-
-  dnl Change to the Fortran 90 language
-  AC_LANG_PUSH(Fortran)
-
-  dnl --------------------------------------------------------------------
-  dnl Define wrappers for the C compiler to use Fortran function names
-  dnl
-  AC_FC_WRAPPERS
-
-  dnl --------------------------------------------------------------------
-  dnl See if the compiler will support the "-I." option
-  dnl
-dnl  FCFLAGS_saved=$FCFLAGS
-dnl  FCFLAGS="${FCFLAGS} -I."
-
-dnl  AC_MSG_CHECKING(if compiler supports -I. option)
-dnl  AC_TRY_FCOMPILE([
-dnl      program conftest
-dnl      end
-dnl  ], AC_MSG_RESULT(yes),
-dnl     AC_MSG_RESULT(no)
-dnl     FCFLAGS="$FCFLAGS_saved")
-
-  dnl Change back to the C language
-  AC_LANG_POP(Fortran)
-else
-  echo "no"
-fi
-
-dnl ----------------------------------------------------------------------
-dnl Check if they would like the C++ interface compiled
-dnl
-dnl We need to check for a C++ compiler unconditionally, since
-dnl AC_PROG_CXX defines some macros that Automake 1.9.x uses and will
-dnl miss even if c++ is not enabled.
-  AC_PROG_CXX
-  AC_PROG_CXXCPP	dnl this is checked for when AC_HEADER_STDC is done
-
-AC_MSG_CHECKING([if c++ interface enabled])
-
-AC_ARG_ENABLE([cxx],
-              [AC_HELP_STRING([--enable-cxx],
-                              [Compile the C++ interface [default=no]])],
-              [HDF_CXX=$enableval])
-
-if test "X$HDF_CXX" = "Xyes"; then
-  echo "yes"
-  HDF5_INTERFACES="$HDF5_INTERFACES c++"
-
-  dnl Change to the C++ language
-  AC_LANG_PUSH(C++)
-
-  AC_MSG_CHECKING([if $CXX needs old style header files in includes])
-  AC_TRY_RUN([
-#include <iostream>
-
-int main(void) { return 0; }
-  ], [
-    echo no
-  ], [
-    echo yes
-    CXXFLAGS="${CXXFLAGS} -DOLD_HEADER_FILENAME"
-  ])
-
-  AC_MSG_CHECKING([if $CXX can handle namespaces])
-  AC_TRY_RUN([
-namespace H5 {
-int fnord;
-}
-
-int main(void) {
-   using namespace H5;
-   fnord = 37;
-   return 0;
-} 
-  ], [
-     echo yes
-  ], [
-     echo no
-     CXXFLAGS="${CXXFLAGS} -DH5_NO_NAMESPACE"
-  ])
-
-  AC_MSG_CHECKING([if $CXX supports std])
-  AC_TRY_RUN([
-#include <string>
-
-using namespace std;
-
-int main(void) {
-   string myString("testing namespace std");
-   return 0;
-}
-  ], [
-     echo yes
-  ], [
-     echo no
-     CXXFLAGS="${CXXFLAGS} -DH5_NO_STD"
-  ])
-
-  AC_MSG_CHECKING([if $CXX supports bool types])
-  AC_TRY_RUN([
-int main(void) {
-   bool flag;
-   return 0;
-}
-  ], [
-     echo yes
-  ], [
-     echo no
-     CXXFLAGS="${CXXFLAGS} -DBOOL_NOTDEFINED"
-  ])
-
-  AC_MSG_CHECKING([if $CXX has offsetof extension])
-    AC_TRY_COMPILE([
-  #include <stdio.h>
-  #include <stddef.h>
-    ],[
-    struct index_st
-    {
-      unsigned char type;
-      unsigned char num;
-      unsigned int len;
-    };
-    typedef struct index_st index_t;
-    int x,y;
-    x = offsetof(struct index_st, len);
-    y = offsetof(index_t, num)
-    ],
-    AC_DEFINE([CXX_HAVE_OFFSETOF], [1],
-    [Define if C++ compiler recognizes offsetof])
-    AC_MSG_RESULT([yes]),
-    AC_MSG_RESULT([no]))
-
-  AC_MSG_CHECKING([if $CXX can handle static cast])
-  AC_TRY_RUN([
-int main(void) {
-   float test_float;
-   int test_int;
-   test_float = 37.0;
-   test_int = static_cast <int> (test_float);
-   return 0;
-}
-  ], [
-    echo yes
-  ], [
-    echo no
-    CXXFLAGS="${CXXFLAGS} -DNO_STATIC_CAST"
-  ])
-else
-  echo "no"
-fi
-
-dnl Change back to the C language
-AC_LANG_POP(C++)
 
 dnl ----------------------------------------------------------------------
 dnl If we should build only static executables
@@ -687,64 +481,6 @@ case "$CC_BASENAME" in
     ;;
 esac
 
-dnl ----------------------------------------------------------------------
-dnl If the Fortran compiler is obviously a parallel compiler then we're
-dnl building a parallel version of hdf5 and should define HAVE_PARALLEL.
-dnl Furthermore, the name of the compiler might tell us how to run the
-dnl resulting executable. For `mpif90' the executable should be run with
-dnl `mpirun' from the same directory as mpif90 if it exists.
-dnl
-if test "X$HDF_FORTRAN" = "Xyes"; then
-  dnl Change to the Fortran 90 language
-  AC_LANG_PUSH(Fortran)
-
-  case "$FC" in
-    *mpif90*)
-      dnl The Fortran mpich compiler. Use mpirun from the same directory
-      dnl if it exists.
-      PARALLEL=mpif90
-      AC_MSG_CHECKING([for mpirun])
-
-      dnl Find the path where mpif90 is located.
-      cmd=`echo $FC |cut -f1 -d' '`
-      if (echo $cmd |grep / >/dev/null); then
-        path="`echo $cmd |sed 's/\(.*\)\/.*$/\1/'`"
-      else
-        for path in `echo $PATH | ${TR} ":" " "`; do
-          if test -x $path/$cmd; then
-            break;
-          fi
-        done
-      fi
-
-      dnl Is there an mpirun at that path?
-      if test -x $path/mpirun; then
-        AC_MSG_RESULT([$path/mpirun])
-        RUNSERIAL="${RUNSERIAL:-none}"
-
-        if test -z "$RUNPARALLEL"; then
-          RUNPARALLEL="$path/mpirun -np \$\${NPROCS:=2}"
-        fi
-      else
-        AC_MSG_RESULT([none])
-      fi
-      ;;
-
-    *mpxlf* | *mpxlf_r* | *mpxlf90* | *mpxlf90_r* | *mpxlf95* | *mpxlf95_r*)
-      dnl The IBM compiler
-      PARALLEL="$FC"
-      ;;
-
-    *)
-      dnl Probably not a parallel compiler, but if `--enable-parallel'
-      dnl is defined below then we're still building a parallel hdf5.
-      ;;
-  esac
-
-  dnl Change to the C language
-  AC_LANG_POP(Fortran)
-fi
-
 dnl -----------------------------------------------------------------------------
 dnl If shared libraries are being used with parallel, disable them, unless the 
 dnl user explicity enables them via the '--enable-shared' option.
@@ -771,80 +507,6 @@ if test "X${enable_shared}" != "Xno" && \
   echo '    disabling shared libraries'
   enable_shared="no"
 fi
-
-dnl ----------------------------------------------------------------------
-dnl Many Fortran compilers don't support shared libraries.  Some of these
-dnl compilers include:
-dnl pgf90 version 6.0-4
-dnl Absoft 32bit Fortran 95 9.0
-dnl HP F90 v2.4
-dnl Intel Fortran Compiler 8.1
-dnl If any of these compilers is being used, disable shared libraries for
-dnl Fortran.  This prevents building shared libraries and also prevents
-dnl trying to link against shared libraries.
-if test "X${HDF_FORTRAN}" = "Xyes"; then
-  H5_FORTRAN_SHARED="yes"
-
-  if (${FC} -V 2>&1 | grep '^pgf90') > /dev/null; then
-    H5_FORTRAN_SHARED="no"
-  fi
-
-  if (${FC} -V 2>&1 | grep '^Intel(R) Fortran Compiler') > /dev/null; then
-    H5_FORTRAN_SHARED="no"
-  fi
-
-  if (${FC} +version 2>&1 | grep '^HP F90') > /dev/null; then
-    H5_FORTRAN_SHARED="no"
-  fi
-
-  if (${FC} -V 2>&1 | grep '^Absoft') > /dev/null; then
-    H5_FORTRAN_SHARED="no"
-  fi
-
-  if test "X${enable_shared}" != "Xno" && test "X${H5_FORTRAN_SHARED}" = "Xno"; then
-    AC_MSG_WARN([shared libraries are not supported; disabling shared Fortran libraries])
-  fi
-
-  if test "X${enable_static}" = "Xno" && test "X${H5_FORTRAN_SHARED}" = "Xno"; then
-    AC_MSG_ERROR([both static and shared Fortran libraries are disabled])
-  fi
-fi
-
-AM_CONDITIONAL([FORTRAN_SHARED_CONDITIONAL], [test "X$H5_FORTRAN_SHARED" = "Xyes"])
-
-dnl ----------------------------------------------------------------------
-dnl Shared C++ libraries seem not to work on some platforms (modi4, shanti)
-dnl when the -xarch=v9 flag is used to enable 64-bit mode.
-dnl Try to detect the -xarch=v9 flag and disable C++ shared libraries if it's
-dnl being used.
-dnl Also disable C++ shared libraries if shared libraries are disabled.
-dnl this prevents Automake from trying to link against shared libraries,
-dnl which caused problems on tg-login
-H5_CXX_SHARED="no"
-if test "X${HDF_CXX}" = "Xyes" && test "X${enable_shared}" != "Xno"; then
-  H5_CXX_SHARED="yes"
-
-  if (echo dummy ${CXX} ${CXXLD} ${CFLAGS} ${CXXFLAGS} ${LDFLAGS} | grep 'xarch') > /dev/null; then
-    echo "    warning: -xarch flag detected"
-    echo "    disabling shared C++ libraries"
-    H5_CXX_SHARED="no"
-  fi
-
-dnl Try to detect the +DD64 flag for HPUX aCC compiler and disable C++ shared libraries if it's
-dnl being used.
-
-  if (echo dummy ${CXX} ${CXXLD} ${CFLAGS} ${CXXFLAGS} ${LDFLAGS} | grep 'DD64') > /dev/null; then
-    echo "    warning: +DD64 flag detected"
-    echo "    disabling shared C++ libraries"
-    H5_CXX_SHARED="no"
-  fi
-
-  if test "X${enable_static}" = "Xno" && test "X${H5_CXX_SHARED}" = "Xno"; then
-    AC_MSG_ERROR([both static and shared C++ libraries are disabled])
-  fi
-fi
-
-AM_CONDITIONAL([CXX_SHARED_CONDITIONAL], [test "X$H5_CXX_SHARED" = "Xyes"])
 
 dnl ----------------------------------------------------------------------
 dnl pgcc version 6.0x have optimization (-O, -O2 or -O3) problem.  Detect
@@ -2313,41 +1975,6 @@ case "X-$enable_parallel" in
                   [AC_CHECK_LIB([mpio], [MPI_File_open],, [PARALLEL=no])])
     fi
 
-    if test "X$HDF_FORTRAN" = "Xyes"; then
-      dnl Change to the Fortran 90 language
-      AC_LANG_PUSH(Fortran)
-
-      dnl Try link a simple MPI program.  If fail, try again with -lmpi.
-      AC_LINK_IFELSE([
-          program main
-          include 'mpif.h'
-          integer:: ierr
-          call mpi_file_open( ierr )
-          end],,
-          AC_CHECK_LIB(mpi, [
-            include 'mpif.h'
-            integer:: ierr
-            call mpi_file_open( ierr )],, PARALLEL=no))
-
-      dnl Then try link a simple MPI-IO program.  If fail, try again with
-      dnl -lmpio.
-      if test "X$PARALLEL" = "Xyes"; then
-        AC_LINK_IFELSE([
-            program main
-            include 'mpif.h'
-            integer:: ierr
-            call mpi_file_open( ierr )
-            end],,
-            AC_CHECK_LIB(mpio, [
-              include 'mpif.h'
-              integer:: ierr
-              call mpi_file_open( ierr )],, PARALLEL=no))
-      fi
-
-      dnl Change to the C language
-      AC_LANG_POP(Fortran)
-    fi
-
     dnl Set RUNPARALLEL to mpirun if not set yet.
     if test "X$PARALLEL" = "Xyes" -a -z "$RUNPARALLEL"; then
       RUNPARALLEL="mpirun -np \$\${NPROCS:=3}"
@@ -2398,28 +2025,6 @@ if test -n "$PARALLEL"; then
   fi
   if test "X$RUNPARALLEL" = "Xnone"; then
     RUNPARALLEL=""
-  fi
-
-  if test "X$HDF_FORTRAN" = "Xyes"; then
-    ADD_PARALLEL_FILES="yes"
-    AC_MSG_CHECKING([for MPI_Comm_c2f and MPI_Comm_f2c functions])
-
-    AC_TRY_LINK([#include <mpi.h>],
-      [MPI_Comm c_comm; MPI_Comm_c2f(c_comm)],
-      AC_DEFINE([HAVE_MPI_MULTI_LANG_Comm], [1],
-                [Define if `MPI_Comm_c2f' and `MPI_Comm_f2c' exists])
-      AC_MSG_RESULT([yes]),
-      AC_MSG_RESULT([no])
-    )
-
-    AC_MSG_CHECKING([for MPI_Info_c2f and MPI_Info_f2c functions])
-    AC_TRY_LINK([#include <mpi.h>],
-      [MPI_Info c_info; MPI_Info_c2f(c_info)],
-      AC_DEFINE([HAVE_MPI_MULTI_LANG_Info], [1],
-                [Define if `MPI_Info_c2f' and `MPI_Info_f2c' exists])
-      AC_MSG_RESULT([yes]),
-      AC_MSG_RESULT([no])
-    )
   fi
 
   dnl --------------------------------------------------------------------
@@ -3550,29 +3155,6 @@ if test -n "$CPPFLAGS"; then
 fi
 
 dnl ----------------------------------------------------------------------
-dnl Check if they would like the High Level library  compiled
-dnl
-
-AC_SUBST(HL) HL=""
-# name of fortran folder inside "hl", if FORTRAN compile is requested
-AC_SUBST(HL_FOR) HL_FOR=""
-AC_MSG_CHECKING([if high level library is enabled])
-AC_ARG_ENABLE([hl],
-     [AC_HELP_STRING([--enable-hl],
-                     [Enable the high level library [default=yes]])],
-     [HDF5_HL=$enableval],
-     [HDF5_HL=yes])
-
-if test "X$HDF5_HL" = "Xyes"; then
- echo "yes"
- HL="hl"
- AC_DEFINE([INCLUDE_HL], [1],
-           [Define if HDF5's high-level library headers should be included in hdf5.h])
-else
- echo "no"
-fi
-
-dnl ----------------------------------------------------------------------
 dnl Some programs shouldn't be built by default (e.g., programs to generate
 dnl data files used by tests, some optional tests).
 dnl Check if they want such programs built anyway.
@@ -3730,67 +3312,12 @@ FORTRAN_PARALLEL_MAKE=""
 if test -n "$TESTPARALLEL"; then
   PARALLEL_MAKE="$TESTPARALLEL/Makefile $TESTPARALLEL/testph5.sh"
 
-  if test "X$HDF_FORTRAN" = "Xyes"; then
-    FORTRAN_PARALLEL_MAKE=fortran/$TESTPARALLEL/Makefile
-  fi
 fi
 
 AC_CONFIG_FILES([src/libhdf5.settings
                  Makefile
                  src/Makefile
-                 test/Makefile
-                 test/testerror.sh
-                 testpar/Makefile
-                 testpar/testph5.sh
-                 perform/Makefile
-                 tools/Makefile
-                 tools/h5dump/Makefile
-                 tools/h5dump/testh5dump.sh
-                 tools/h5dump/testh5dumpxml.sh
-                 tools/h5import/Makefile
-                 tools/h5diff/Makefile
-                 tools/h5jam/Makefile
-                 tools/h5jam/testh5jam.sh
-                 tools/h5repack/Makefile
-                 tools/h5repack/h5repack.sh
-                 tools/h5ls/Makefile
-                 tools/h5copy/Makefile
-                 tools/lib/Makefile
-                 tools/misc/Makefile
-                 tools/misc/h5cc
-                 tools/misc/testh5repart.sh
-                 tools/h5stat/testh5stat.sh
-                 tools/h5stat/Makefile
-                 examples/Makefile
-                 examples/testh5cc.sh
-                 c++/Makefile
-                 c++/src/Makefile
-                 c++/src/h5c++
-                 c++/test/Makefile
-                 c++/examples/Makefile
-                 c++/examples/testh5c++.sh
-                 fortran/Makefile
-                 fortran/src/h5fc
-                 fortran/src/libhdf5_fortran.settings
-                 fortran/src/Makefile
-                 fortran/test/Makefile
-                 fortran/testpar/Makefile
-                 fortran/examples/Makefile
-                 fortran/examples/testh5fc.sh
-                 hl/Makefile
-                 hl/src/Makefile
-                 hl/test/Makefile
-                 hl/tools/Makefile
-                 hl/tools/gif2h5/Makefile
-                 hl/examples/Makefile
-                 hl/c++/Makefile
-                 hl/c++/src/Makefile
-                 hl/c++/test/Makefile
-                 hl/c++/examples/Makefile
-                 hl/fortran/Makefile
-                 hl/fortran/src/Makefile
-                 hl/fortran/test/Makefile
-                 hl/fortran/examples/Makefile])
+])
 
 AC_OUTPUT
 no_create=$saved_no_create
@@ -3802,14 +3329,6 @@ touch ./config/stamp2
 test "$no_create" = yes || ${CONFIG_SHELL-/bin/sh} $CONFIG_STATUS || exit 1
 
 chmod 755 tools/misc/h5cc
-
-if test "X$HDF_FORTRAN" = "Xyes"; then
-  chmod 755 fortran/src/h5fc
-fi
-
-if test "X$HDF_CXX" = "Xyes"; then
-  chmod 755 c++/src/h5c++
-fi
 
 dnl We don't want inline defined for C++ compilers
 dnl Don't worry about the C++ ifdef wrappers in the H5pubconf file, since
