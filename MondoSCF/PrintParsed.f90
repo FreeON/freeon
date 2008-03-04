@@ -121,7 +121,7 @@ CONTAINS
     IF(StackCurrent < 0) THEN
       CALL MondoLogPlain("current stacksize limit: unlimited")
     ELSE
-      CALL MondoLogPlain("current stacksize limit: "//TRIM(FltToChar(StackCurrent/1024.0D0/1024.0D0))//" MB")
+      CALL MondoLogPlain("current stacksize limit: "//TRIM(FltToShrtChar(StackCurrent/1024.0D0/1024.0D0))//" MB")
       CALL MondoLogPlain("")
       CALL MondoLogPlain("Notice:")
       CALL MondoLogPlain("In case you see unexplained segmentation violations, try")

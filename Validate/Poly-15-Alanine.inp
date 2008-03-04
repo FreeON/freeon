@@ -11,11 +11,12 @@ Charge=0
 Multiplicity=1
 Guess=SuperPos
 SCFMethod=(RH)
-BasisSets=(STO-2G)
+BasisSets=(6-31G)
 ModelChem=(HF)
 Accuracy=(good)
 SCFConvergence=(DIIS)
 Geometry=(InAngstroms)
+MaxSCF=12
 
 <EndOptions>
 
