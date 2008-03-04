@@ -223,42 +223,10 @@ static_linking_flags=""
 
 if test "${enable_static_linking}" = "yes"; then
 
-  if test "`basename ${FC}`" = "gfortran"; then
-    static_linking_flags="-static"
-    AC_MSG_CHECKING([identified gfortran compiler, trying ${static_linking_flags} flag])
-  elif test "`basename ${FC}`" = "ifort"; then
-    static_linking_flags="-static"
-    AC_MSG_CHECKING([identified intel ifort compiler, trying ${static_linking_flags} flag])
-  elif test "`basename ${FC}`" = "pgf90"; then
-    static_linking_flags="-Bstatic"
-    AC_MSG_CHECKING([identified portland group compiler, trying ${static_linking_flags} flag])
+  if test -z "${LDFLAGS}"; then
+    LDFLAGS="-all-static"
   else
-    AC_MSG_NOTICE([unknown compiler, no static linking flags found])
-  fi
-
-  if test -n "${static_linking_flags}"; then
-
-    old_LDFLAGS="${LDFLAGS}"
-    if test -z "${LDFLAGS}"; then
-      LDFLAGS="${static_linking_flags}"
-    else
-      LDFLAGS="${LDFLAGS} ${static_linking_flags}"
-    fi
-
-    # Test the linking flags.
-    AC_LINK_IFELSE([
-      program link_test
-
-        write(*,*) "hmmmm"
-
-      end program link_test
-      ],
-      [AC_MSG_RESULT([yes])],
-      [AC_MSG_RESULT([no, not linking statically])
-      LDFLAGS="${old_LDFLAGS}"])
-
-    unset old_LDFLAGS
-
+    LDFLAGS="${LDFLAGS} -all-static"
   fi
 
 else
