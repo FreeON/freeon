@@ -1355,22 +1355,8 @@ EXTRA_DIST = \
   dlamch.f \
   ilaver.f
 
-slaruv.o: slaruv.f
-	$(F77_COMMAND) @NOOPT@ -c -o $@ $<
+slaruv.lo: slaruv.f
+	$(LIBTOOL) --tag=F77 $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(F77_COMMAND) @NOOPT@ -c -o $@ $<
 
-#slaruv.o: slaruv.f
-#	@echo "compiling $< with no-optimizations"
-#	@$(F77_COMMAND) @NOOPT@ -c -o $@ $< && exit 0; \
-#	  echo "The following comand failed:" 1>&2; \
-#		echo "$(F77_COMMAND) @NOOPT@ -c -o $@ $<" 1>&2; \
-#		$(F77_COMMAND) @NOOPT@ -c -o $@ $< > /dev/null 2>&1
-
-dlaruv.o: dlaruv.f
-	$(F77_COMMAND) @NOOPT@ -c -o $@ $<
-
-#dlaruv.o: dlaruv.f
-#	@echo "compiling $< with no-optimizations"
-#	@$(F77_COMMAND) @NOOPT@ -c -o $@ $< && exit 0; \
-#	  echo "The following comand failed:" 1>&2; \
-#		echo "$(F77_COMMAND) @NOOPT@ -c -o $@ $<" 1>&2; \
-#		$(F77_COMMAND) @NOOPT@ -c -o $@ $< > /dev/null 2>&1
+dlaruv.lo: dlaruv.f
+	$(LIBTOOL) --tag=F77 $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(F77_COMMAND) @NOOPT@ -c -o $@ $<

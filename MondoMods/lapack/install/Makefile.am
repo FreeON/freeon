@@ -47,22 +47,8 @@ EXTRA_DIST = \
   second_INT_ETIME.f \
   second_NONE.f
 
-slamch.o: slamch.f
-	$(F77_COMMAND) @NOOPT@ -c -o $@ $<
+slamch.lo: slamch.f
+	$(LIBTOOL) --tag=F77 $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(F77_COMMAND) @NOOPT@ -c -o $@ $<
 
-#slamch.o: slamch.f
-#	@echo "compiling $< with no-optimizations"
-#	@$(F77_COMMAND) @NOOPT@ -c -o $@ $< && exit 0; \
-#	  echo "The following comand failed:" 1>&2; \
-#		echo "$(F77_COMMAND) @NOOPT@ -c -o $@ $<" 1>&2; \
-#		$(F77_COMMAND) @NOOPT@ -c -o $@ $< > /dev/null 2>&1
-
-dlamch.o: dlamch.f
-	$(F77_COMMAND) @NOOPT@ -c -o $@ $<
-
-#dlamch.o: dlamch.f
-#	@echo "compiling $< with no-optimizations"
-#	@$(F77_COMMAND) @NOOPT@ -c -o $@ $< && exit 0; \
-#	  echo "The following comand failed:" 1>&2; \
-#		echo "$(F77_COMMAND) @NOOPT@ -c -o $@ $<" 1>&2; \
-#		$(F77_COMMAND) @NOOPT@ -c -o $@ $< > /dev/null 2>&1
+dlamch.lo: dlamch.f
+	$(LIBTOOL) --tag=F77 $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(F77_COMMAND) @NOOPT@ -c -o $@ $<
