@@ -1,4 +1,4 @@
-include ../../make.inc
+include $(top_srcdir)/make.inc
 
 noinst_LTLIBRARIES = libVRR.la
 
@@ -68,7 +68,7 @@ libVRR_la_SOURCES = \
   VRRs0p0.f90
 
 libVRR_la_DEPENDENCIES = \
-  $(foreach i, $(MondoMods_DEPENDENCY_FILES), ../$(i)) \
+  $(MondoMods_DEPENDENCY_FILES) \
 	../MSC/shellpairstruct.mod \
 	../MSC/vscratchb.mod \
 	../MSC/getatompairmod.mod

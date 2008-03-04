@@ -45,96 +45,96 @@ REMOVE_PREPROCESSED_FILES = @REMOVE_PREPROCESSED_FILES@
 
 # Suffix rules.
 .f90.o :
-	$(CPP_COMMAND) $< | grep -v -E "^#" > $(notdir $(basename $<))$(PREPROCESSED_SUFFIX).f90
-	$(FC_COMMAND) -c -o $@ $(notdir $(basename $<))$(PREPROCESSED_SUFFIX).f90
-	if test "${REMOVE_PREPROCESSED_FILES}" = "yes"; then rm $(notdir $(basename $<))$(PREPROCESSED_SUFFIX).f90; fi
+	$(CPP_COMMAND) $< | grep -v -E "^#" > $<$(PREPROCESSED_SUFFIX).f90
+	$(FC_COMMAND) -c -o $@ $<$(PREPROCESSED_SUFFIX).f90
+	@if test "${REMOVE_PREPROCESSED_FILES}" = "yes"; then rm $<$(PREPROCESSED_SUFFIX).f90; fi
 
 .f90.lo :
-	$(CPP_COMMAND) $< | grep -v -E "^#" > $(notdir $(basename $<))$(PREPROCESSED_SUFFIX).f90
-	$(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(FC_COMMAND) -c -o $@ $(notdir $(basename $<))$(PREPROCESSED_SUFFIX).f90
-	if test "${REMOVE_PREPROCESSED_FILES}" = "yes"; then rm $(notdir $(basename $<))$(PREPROCESSED_SUFFIX).f90; fi
+	$(CPP_COMMAND) $< | grep -v -E "^#" > $<$(PREPROCESSED_SUFFIX).f90
+	$(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(FC_COMMAND) -c -o $@ $<$(PREPROCESSED_SUFFIX).f90
+	@if test "${REMOVE_PREPROCESSED_FILES}" = "yes"; then rm $<$(PREPROCESSED_SUFFIX).f90; fi
 
 .f.o :
-	$(CPP_COMMAND) $< | grep -v -E "^#" > $(notdir $(basename $<))$(PREPROCESSED_SUFFIX).f
-	$(F77_COMMAND) -c -o $@ $(notdir $(basename $<))$(PREPROCESSED_SUFFIX).f
-	if test "${REMOVE_PREPROCESSED_FILES}" = "yes"; then rm $(notdir $(basename $<))$(PREPROCESSED_SUFFIX).f; fi
+	$(CPP_COMMAND) $< | grep -v -E "^#" > $<$(PREPROCESSED_SUFFIX).f
+	$(F77_COMMAND) -c -o $@ $<$(PREPROCESSED_SUFFIX).f
+	@if test "${REMOVE_PREPROCESSED_FILES}" = "yes"; then rm $<$(PREPROCESSED_SUFFIX).f; fi
 
 .f.lo :
-	$(CPP_COMMAND) $< | grep -v -E "^#" > $(notdir $(basename $<))$(PREPROCESSED_SUFFIX).f
-	$(LIBTOOL) --tag=F77 $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(F77_COMMAND) -c -o $@ $(notdir $(basename $<))$(PREPROCESSED_SUFFIX).f
-	if test "${REMOVE_PREPROCESSED_FILES}" = "yes"; then rm $(notdir $(basename $<))$(PREPROCESSED_SUFFIX).f; fi
+	$(CPP_COMMAND) $< | grep -v -E "^#" > $<$(PREPROCESSED_SUFFIX).f
+	$(LIBTOOL) --tag=F77 $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(F77_COMMAND) -c -o $@ $<$(PREPROCESSED_SUFFIX).f
+	@if test "${REMOVE_PREPROCESSED_FILES}" = "yes"; then rm $<$(PREPROCESSED_SUFFIX).f; fi
 
 # For dependencies of -L and -I.
 if INTERNAL_LAPACK
   INTERNAL_LAPACK_DEPENDENCY_FILES = \
-    ../MondoMods/lapack/blas/libMondoBLAS.la \
-    ../MondoMods/lapack/lapack/libMondoLAPACK.la \
-    ../MondoMods/lapack/install/libMondoLAPACKEXTRA.la
+    $(top_srcdir)/MondoMods/lapack/blas/libMondoBLAS.la \
+    $(top_srcdir)/MondoMods/lapack/lapack/libMondoLAPACK.la \
+    $(top_srcdir)/MondoMods/lapack/install/libMondoLAPACKEXTRA.la
 endif
 
 if INTERNAL_HDF5
-  INTERNAL_HDF5_DEPENDENCY_FILES = ../MondoMods/hdf5/src/libhdf5.la
+  INTERNAL_HDF5_DEPENDENCY_FILES = $(top_srcdir)/MondoMods/hdf5/src/libhdf5.la
 endif
 
 MondoMods_DEPENDENCY_FILES = \
-  ../MondoMods/libMondoMods.la \
-  ../MondoMods/ainv.mod \
-  ../MondoMods/annealmap.mod \
-  ../MondoMods/atompairs.mod \
-  ../MondoMods/basissetparameters.mod \
-  ../MondoMods/boundingbox.mod \
-  ../MondoMods/brabloks.mod \
-  ../MondoMods/cellsets.mod \
-  ../MondoMods/cholfactor.mod \
-  ../MondoMods/clock.mod \
-  ../MondoMods/common_debug.mod \
-  ../MondoMods/derivedtypes.mod \
-  ../MondoMods/erffunk.mod \
-  ../MondoMods/fastmatrices.mod \
-  ../MondoMods/cwrappers.mod \
-  ../MondoMods/functionals.mod \
-  ../MondoMods/gammaassymp.mod \
-  ../MondoMods/gammaf0.mod \
-  ../MondoMods/gammaf1.mod \
-  ../MondoMods/gammaf10.mod \
-  ../MondoMods/gammaf11.mod \
-  ../MondoMods/gammaf12.mod \
-  ../MondoMods/gammaf13.mod \
-  ../MondoMods/gammaf2.mod \
-  ../MondoMods/gammaf3.mod \
-  ../MondoMods/gammaf4.mod \
-  ../MondoMods/gammaf5.mod \
-  ../MondoMods/gammaf6.mod \
-  ../MondoMods/gammaf7.mod \
-  ../MondoMods/gammaf8.mod \
-  ../MondoMods/gammaf9.mod \
-  ../MondoMods/gammafunctions.mod \
-  ../MondoMods/globalcharacters.mod \
-  ../MondoMods/globalobjects.mod \
-  ../MondoMods/globalscalars.mod \
-  ../MondoMods/indexing.mod \
-  ../MondoMods/inout.mod \
-  ../MondoMods/invexp.mod \
-  ../MondoMods/linalg.mod \
-  ../MondoMods/macros.mod \
-  ../MondoMods/matfunk.mod \
-  ../MondoMods/mcmurchie.mod \
-  ../MondoMods/mechanics.mod \
-  ../MondoMods/memman.mod \
-  ../MondoMods/mondologger.mod \
-  ../MondoMods/mondompi.mod \
-  ../MondoMods/mpiinclude.mod \
-  ../MondoMods/opt_trav_band.mod \
-  ../MondoMods/order.mod \
-  ../MondoMods/parse.mod \
-  ../MondoMods/parsingconstants.mod \
-  ../MondoMods/prettyprint.mod \
-  ../MondoMods/processcontrol.mod \
-  ../MondoMods/setxyz.mod \
-  ../MondoMods/slatec.mod \
-  ../MondoMods/specfun.mod \
-  ../MondoMods/specfunmesh.mod \
-  ../MondoMods/thresholding.mod \
-  ../MondoMods/utilities.mod \
+  $(top_srcdir)/MondoMods/libMondoMods.la \
+  $(top_srcdir)/MondoMods/ainv.mod \
+  $(top_srcdir)/MondoMods/annealmap.mod \
+  $(top_srcdir)/MondoMods/atompairs.mod \
+  $(top_srcdir)/MondoMods/basissetparameters.mod \
+  $(top_srcdir)/MondoMods/boundingbox.mod \
+  $(top_srcdir)/MondoMods/brabloks.mod \
+  $(top_srcdir)/MondoMods/cellsets.mod \
+  $(top_srcdir)/MondoMods/cholfactor.mod \
+  $(top_srcdir)/MondoMods/clock.mod \
+  $(top_srcdir)/MondoMods/common_debug.mod \
+  $(top_srcdir)/MondoMods/derivedtypes.mod \
+  $(top_srcdir)/MondoMods/erffunk.mod \
+  $(top_srcdir)/MondoMods/fastmatrices.mod \
+  $(top_srcdir)/MondoMods/cwrappers.mod \
+  $(top_srcdir)/MondoMods/functionals.mod \
+  $(top_srcdir)/MondoMods/gammaassymp.mod \
+  $(top_srcdir)/MondoMods/gammaf0.mod \
+  $(top_srcdir)/MondoMods/gammaf1.mod \
+  $(top_srcdir)/MondoMods/gammaf10.mod \
+  $(top_srcdir)/MondoMods/gammaf11.mod \
+  $(top_srcdir)/MondoMods/gammaf12.mod \
+  $(top_srcdir)/MondoMods/gammaf13.mod \
+  $(top_srcdir)/MondoMods/gammaf2.mod \
+  $(top_srcdir)/MondoMods/gammaf3.mod \
+  $(top_srcdir)/MondoMods/gammaf4.mod \
+  $(top_srcdir)/MondoMods/gammaf5.mod \
+  $(top_srcdir)/MondoMods/gammaf6.mod \
+  $(top_srcdir)/MondoMods/gammaf7.mod \
+  $(top_srcdir)/MondoMods/gammaf8.mod \
+  $(top_srcdir)/MondoMods/gammaf9.mod \
+  $(top_srcdir)/MondoMods/gammafunctions.mod \
+  $(top_srcdir)/MondoMods/globalcharacters.mod \
+  $(top_srcdir)/MondoMods/globalobjects.mod \
+  $(top_srcdir)/MondoMods/globalscalars.mod \
+  $(top_srcdir)/MondoMods/indexing.mod \
+  $(top_srcdir)/MondoMods/inout.mod \
+  $(top_srcdir)/MondoMods/invexp.mod \
+  $(top_srcdir)/MondoMods/linalg.mod \
+  $(top_srcdir)/MondoMods/macros.mod \
+  $(top_srcdir)/MondoMods/matfunk.mod \
+  $(top_srcdir)/MondoMods/mcmurchie.mod \
+  $(top_srcdir)/MondoMods/mechanics.mod \
+  $(top_srcdir)/MondoMods/memman.mod \
+  $(top_srcdir)/MondoMods/mondologger.mod \
+  $(top_srcdir)/MondoMods/mondompi.mod \
+  $(top_srcdir)/MondoMods/mpiinclude.mod \
+  $(top_srcdir)/MondoMods/opt_trav_band.mod \
+  $(top_srcdir)/MondoMods/order.mod \
+  $(top_srcdir)/MondoMods/parse.mod \
+  $(top_srcdir)/MondoMods/parsingconstants.mod \
+  $(top_srcdir)/MondoMods/prettyprint.mod \
+  $(top_srcdir)/MondoMods/processcontrol.mod \
+  $(top_srcdir)/MondoMods/setxyz.mod \
+  $(top_srcdir)/MondoMods/slatec.mod \
+  $(top_srcdir)/MondoMods/specfun.mod \
+  $(top_srcdir)/MondoMods/specfunmesh.mod \
+  $(top_srcdir)/MondoMods/thresholding.mod \
+  $(top_srcdir)/MondoMods/utilities.mod \
   $(INTERNAL_LAPACK_DEPENDENCY_FILES) \
   $(INTERNAL_HDF5_DEPENDENCY_FILES)

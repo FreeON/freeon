@@ -1,4 +1,4 @@
-include ../../../make.inc
+include $(top_srcdir)/make.inc
 
 noinst_PROGRAMS = \
   xblat1s xblat1c xblat1d xblat1z \
@@ -49,7 +49,7 @@ xblat3z_SOURCES = zblat3.f
 
 LDADD = -L../blas -L../lapack
 
-CLEANFILES = \
+CLEANFILES += \
   blat1.out \
   sblat1.out \
   dblat1.out \

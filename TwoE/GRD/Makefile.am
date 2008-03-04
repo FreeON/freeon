@@ -1,4 +1,4 @@
-include ../../make.inc
+include $(top_srcdir)/make.inc
 
 noinst_LTLIBRARIES = libGRD.la
 
@@ -75,8 +75,8 @@ libGRD_la_SOURCES = \
   dIntB6060603.f90 \
   dIntB6060606.f90
 
-libGRD_a_DEPENDENCIES = \
-  $(foreach i, $(MondoMods_DEPENDENCY_FILES), ../$(i)) \
+libGRD_la_DEPENDENCIES = \
+  $(MondoMods_DEPENDENCY_FILES) \
 	../MSC/shellpairstruct.mod \
 	../MSC/vscratchb.mod \
 	../MSC/getatompairmod.mod

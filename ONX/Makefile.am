@@ -1,4 +1,4 @@
-include ../make.inc
+include $(top_srcdir)/make.inc
 
 bin_PROGRAMS = ONX GONX
 
@@ -32,25 +32,25 @@ GONX_SOURCES = \
 
 ONX_DEPENDENCIES  = \
   $(MondoMods_DEPENDENCY_FILES) \
-	../TwoE/GRD/libGRD.la \
-	../TwoE/INT/libINT.la \
-	../TwoE/VRR/libVRR.la \
-	../TwoE/HRR/libHRR.la \
-	../TwoE/MSC/libTwoEMisc.la \
-	../TwoE/MSC/shellpairstruct.mod \
-	../TwoE/MSC/vscratchb.mod \
-	../TwoE/MSC/getatompairmod.mod
+	$(top_srcdir)/TwoE/GRD/libGRD.la \
+	$(top_srcdir)/TwoE/INT/libINT.la \
+	$(top_srcdir)/TwoE/VRR/libVRR.la \
+	$(top_srcdir)/TwoE/HRR/libHRR.la \
+	$(top_srcdir)/TwoE/MSC/libTwoEMisc.la \
+	$(top_srcdir)/TwoE/MSC/shellpairstruct.mod \
+	$(top_srcdir)/TwoE/MSC/vscratchb.mod \
+	$(top_srcdir)/TwoE/MSC/getatompairmod.mod
 
 GONX_DEPENDENCIES = \
   $(MondoMods_DEPENDENCY_FILES) \
-	../TwoE/GRD/libGRD.la \
-	../TwoE/INT/libINT.la \
-	../TwoE/VRR/libVRR.la \
-	../TwoE/HRR/libHRR.la \
-	../TwoE/MSC/libTwoEMisc.la \
-	../TwoE/MSC/shellpairstruct.mod \
-	../TwoE/MSC/vscratchb.mod \
-	../TwoE/MSC/getatompairmod.mod
+	$(top_srcdir)/TwoE/GRD/libGRD.la \
+	$(top_srcdir)/TwoE/INT/libINT.la \
+	$(top_srcdir)/TwoE/VRR/libVRR.la \
+	$(top_srcdir)/TwoE/HRR/libHRR.la \
+	$(top_srcdir)/TwoE/MSC/libTwoEMisc.la \
+	$(top_srcdir)/TwoE/MSC/shellpairstruct.mod \
+	$(top_srcdir)/TwoE/MSC/vscratchb.mod \
+	$(top_srcdir)/TwoE/MSC/getatompairmod.mod
 
 SOURCES_DEPCHECK = \
   $(ONX_SOURCES) \

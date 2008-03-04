@@ -1,4 +1,4 @@
-include ../../make.inc
+include $(top_srcdir)/make.inc
 
 noinst_LTLIBRARIES = libTwoEMisc.la
 
@@ -9,7 +9,7 @@ libTwoEMisc_la_SOURCES = \
   GetAtomPair.f90 \
   InitDbl.f
 
-libTwoEMisc_la_DEPENDENCIES = $(foreach i, $(MondoMods_DEPENDENCY_FILES), ../$(i))
+libTwoEMisc_la_DEPENDENCIES = $(MondoMods_DEPENDENCY_FILES)
 
 EXTRA_INCLUDES = -I../../MondoMods
 

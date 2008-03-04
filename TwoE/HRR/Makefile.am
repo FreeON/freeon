@@ -1,4 +1,4 @@
-include ../../make.inc
+include $(top_srcdir)/make.inc
 
 noinst_LTLIBRARIES = libHRR.la
 
@@ -26,8 +26,8 @@ libHRR_la_SOURCES = \
   KetHRR64.f90 \
   KetHRR66.f90
 
-libHRR_a_DEPENDENCIES = \
-  $(foreach i, $(MondoMods_DEPENDENCY_FILES), ../$(i)) \
+libHRR_la_DEPENDENCIES = \
+  $(MondoMods_DEPENDENCY_FILES) \
 	../MSC/shellpairstruct.mod \
 	../MSC/vscratchb.mod \
 	../MSC/getatompairmod.mod

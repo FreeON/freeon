@@ -1,3 +1,5 @@
+include $(top_srcdir)/make.inc
+
 noinst_LTLIBRARIES = libQCTC.la
 
 libQCTC_la_SOURCES = \
@@ -69,11 +71,6 @@ libQCTC_la_SOURCES = \
   PoleNodeType.f90
 
 EXTRA_INCLUDES = -I../../MondoMods
-
-CPP = @CPP@
-AM_CPPFLAGS = @AM_CPPFLAGS@
-
-include ../../make.inc
 
 # Dependencies.
 AuxInt10.o : ERIGlobals.o
