@@ -1224,7 +1224,7 @@ CONTAINS
 438 FORMAT('                  Max TORS Displ = ',F12.6,' between atoms ',4I4)
 440 FORMAT('                       RMS Displ = ',F12.6)
 
-    CALL Halt("[FIXME]")
+    !CALL Halt("[FIXME]")
 
   END SUBROUTINE GeOpReview
   !
