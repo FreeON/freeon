@@ -874,6 +874,7 @@ PROGRAM P2Use
     !    Geometry Change
     !
   CASE('Extrapolate','DMProj0','DMProj1','DMProj2','DMProj3','DMProj4')
+
     ! Allocate
     CALL New(P)
     CALL New(P0)
@@ -882,17 +883,16 @@ PROGRAM P2Use
     CALL New(S1)
     CALL New(Tmp1)
     CALL New(Tmp2)
-    ! Get Marices
 
+    ! Get Matrices
     DO ICycle=1,1000
       DMFile=TRIM(SCRName)//'_Geom#'//TRIM(IntToChar(Current(3)-1)) &
            //'_Base#'//TRIM(IntToChar(Current(2))) &
            //'_Cycl#'//TRIM(IntToChar(ICycle)) &
            //'_Clone#'//TRIM(IntToChar(MyClone)) &
            //'.D'
-      !       WRITE(*,*)' Looking for ',TRIM(DMFile)
+      CALL MondoLog(DEBUG_NONE, "P2Use("//TRIM(SCFActn)//")", "Looking for "//TRIM(DMFile))
       INQUIRE(FILE=DMFile,EXIST=Present)
-      !       WRITE(*,*)' Found it? ',Present
       IF(.NOT.Present)THEN
         Cycle=ICycle-1
         DMFile=TRIM(SCRName)//'_Geom#'//TRIM(IntToChar(Current(3)-1)) &
@@ -900,10 +900,12 @@ PROGRAM P2Use
              //'_Cycl#'//TRIM(IntToChar(Cycle)) &
              //'_Clone#'//TRIM(IntToChar(MyClone)) &
              //'.D'
-        CALL MondoLog(DEBUG_NONE, "P2Use", "On extrapolation, P2Use is opening DM "//TRIM(DMFile))
+        CALL MondoLog(DEBUG_NONE, "P2Use("//TRIM(SCFActn)//")", "On extrapolation, P2Use is opening DM "//TRIM(DMFile))
         EXIT
       ENDIF
     ENDDO
+
+    CALL MondoLog(DEBUG_NONE, "P2Use("//TRIM(SCFActn)//")", "Cycle = "//TRIM(IntToChar(Cycle)))
 
     IF(Cycle<0)THEN
       CALL MondoLog(DEBUG_NONE, "P2Use", 'Assuming this is a restart!  If there is no restart, its going to die...')

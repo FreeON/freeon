@@ -600,6 +600,12 @@ CONTAINS
       READ(UNIT=C,FMT=INTERNAL_DBL_FMT)CharToDbl
     ENDIF
   END FUNCTION CharToDbl
+  ! Convert integer into string more in an fprintish way.
+
+
+
+
+
   !------------------------------------------------------------------
   !     Convert a short integer into a character string
   !

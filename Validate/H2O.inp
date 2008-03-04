@@ -36,8 +36,12 @@ Frequencies= 2171.0366 4142.8791 4392.9252
 Charge=0
 Multiplicity=1
 
-Grad=(NumFreq)
+G!rad=(NumFreq)
+Grad=(Optimize,PrimInt)
+
 DebugAll=(MinDebug,CheckSums)
+
+MaxSCF=12
 
 Guess=SuperPos
 SCFMethod=(RH)
