@@ -78,6 +78,7 @@ PROGRAM RHEqs
   ELSE
     CALL Get(sF,TrixFile('OrthoF',Args,0))    ! the orthogonalized Fock matrix
   ENDIF
+
   NSMat=sF%NSMat
   IF(NSMat.GT.1.AND.Smearing.NE.'NoSmearing')CALL Halt('Smearing with unrestricted are not supported!')
   !
@@ -236,13 +237,14 @@ PROGRAM RHEqs
   END SELECT
   !
   CALL Delete(EigenV)
-  !
+
   CALL SetEq(sX,P,nsmat_o=nsmat)          !  sX=P
   CALL New(sP,nsmat_o=nsmat)
   CALL Filter(sP,sX)        !  sP=Filter[sX]
   CALL Put(sP,TrixFile('OrthoD',Args,1))
   CALL PChkSum(sP,'OrthoP['//TRIM(NxtCycl)//']',Prog)
   CALL PPrint(sP,'OrthoP['//TRIM(NxtCycl)//']')
+
   CALL Plot(sP,'OrthoP['//TRIM(NxtCycl)//']')
   ! Transform to non-orthogonal rep
   XFile=TrixFile('X',Args)

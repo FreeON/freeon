@@ -3,8 +3,8 @@
 Charge=0
 Multiplicity=1
 
-Grad=(Optimize,PrimInt)
-G!rad=(MolecularDynamics)
+G!rad=(Optimize,PrimInt)
+Grad=(MolecularDynamics)
 
 DebugAll=(MaxDebug,CheckSums)
 Guess=SuperPos
@@ -18,12 +18,12 @@ Geometry=(InAngstroms)
 MinSCF=12
 MaxSCF=12
 
-M!DProjection=FMVerlet0
-M!DMethod=Verlet
-D!eltaTime=0.25
-M!axMDStep=10
-M!DNumSCF=2
-T!empIntScaling=600
+MDProjection=FMVerlet0
+MDMethod=Verlet
+DeltaTime=0.25
+MaxMDStep=10
+MDNumSCF=2
+TempIntScaling=600
 
 <EndOptions>
 
