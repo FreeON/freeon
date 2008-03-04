@@ -1,4 +1,4 @@
-include ../../make.inc
+include $(top_srcdir)/make.inc
 
 noinst_LTLIBRARIES = libINT.la
 
@@ -149,8 +149,8 @@ libINT_la_SOURCES = \
   IntB6060603.f90 \
   IntB6060606.f90
 
-libINT_a_DEPENDENCIES = \
-  $(foreach i, $(MondoMods_DEPENDENCY_FILES), ../$(i)) \
+libINT_la_DEPENDENCIES = \
+  $(MondoMods_DEPENDENCY_FILES) \
 	../MSC/shellpairstruct.mod \
 	../MSC/vscratchb.mod \
 	../MSC/getatompairmod.mod

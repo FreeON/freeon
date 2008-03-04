@@ -1,3 +1,5 @@
+include $(top_srcdir)/make.inc
+
 SUBDIRS = matgen lin eig
 
 TESTS = \
@@ -76,7 +78,7 @@ EXTRA_DIST = \
   zgd.in \
   zsg.in
 
-CLEANFILES = \
+CLEANFILES += \
   cnep.out \
   ctest.out \
   dsep.out \

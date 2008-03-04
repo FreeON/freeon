@@ -1,4 +1,4 @@
-include ../make.inc
+include $(top_srcdir)/make.inc
 
 bin_PROGRAMS = Make1E MakeM MakeU MakeS MakeT MakeRho SForce TForce UForce MForce THess
 

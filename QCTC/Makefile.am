@@ -1,4 +1,4 @@
-include ../make.inc
+include $(top_srcdir)/make.inc
 
 SUBDIRS = LibQCTC
 

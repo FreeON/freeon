@@ -48,6 +48,12 @@ AC_OUTPUT_COMMANDS([
   else
     mv -f tempconf MondoConf.h
   fi
+
+  # In case this is a re-run of the configure script and the only thing that
+  # changed was the --prefix, we need to make sure that we hard-code the correct
+  # path into Mondo.
+  echo "touch MondoSCF/ParseCommands.f90"
+  touch MondoSCF/ParseCommands.f90
 ])
 
 # Set the optimization flags.

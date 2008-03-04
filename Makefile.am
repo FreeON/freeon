@@ -7,7 +7,13 @@ SUBDIRS = MondoMods MondoSCF SCFeqs OneE QCTC HiCu TwoE ONX
 
 datadir = ${prefix}/BasisSets
 
-data_DATA = \
+data_DATA = $(BasisSets)
+
+EXTRA_DIST = \
+  $(data_DATA) \
+  localversion
+
+BasisSets = \
   BasisSets/3-21G-SPLIT.bas \
   BasisSets/3-21G.bas \
   BasisSets/3-21G.bas-SPLIT \
@@ -176,11 +182,6 @@ Validate = \
   Validate/Vancomycin.ref \
   Validate/WaterHexamer.inp \
   Validate/WaterHexamer.ref
-
-EXTRA_DIST = \
-  $(data_DATA) \
-  $(Validate) \
-  localversion
 
 CLEANFILES = *~
 

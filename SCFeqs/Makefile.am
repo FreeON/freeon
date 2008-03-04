@@ -1,4 +1,4 @@
-include ../make.inc
+include $(top_srcdir)/make.inc
 
 bin_PROGRAMS = IRInv ODA CPSCFStatus DDIIS FBuild TC2Response AInv LowdinO RHeqs SP2 TS4 SCFstats P2Use DIIS
 
