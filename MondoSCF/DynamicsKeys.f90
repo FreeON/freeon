@@ -75,10 +75,18 @@ MODULE DynamicsKeys
   ! Temperature Rescaling
   CHARACTER(LEN=*), PARAMETER :: MD_TEMP_SCALE      = 'TempScaling'
   CHARACTER(LEN=*), PARAMETER :: MD_TSCALE_INT      = 'TempIntScaling'
+
+  ! Thermostats.
   CHARACTER(LEN=*), PARAMETER :: MD_THERMOSTAT      = 'Thermostat'
   CHARACTER(LEN=*), PARAMETER :: MD_THERM_UNSET     = 'ThermUnset'
   CHARACTER(LEN=*), PARAMETER :: MD_THERM_BERENDSEN = 'Berendsen'
   CHARACTER(LEN=*), PARAMETER :: MD_BERENDSEN_TAU   = 'BerendsenTau'
+
+  ! Action Control Theory.
+  CHARACTER(LEN=*), PARAMETER :: MD_ACT                 = 'ActionControlTheory'
+  CHARACTER(LEN=*), PARAMETER :: MD_ACT_MAX_FORCE_ERROR = "ACTMaxForceError"
+  CHARACTER(LEN=*), PARAMETER :: MD_ACT_ALPHA           = "ACTAlpha"
+  CHARACTER(LEN=*), PARAMETER :: MD_ACT_BETA            = "ACTBeta"
 
   ! MC Inputs
   CHARACTER(LEN=*), PARAMETER :: MC_MAX_STEP        = 'MaxMCStep'

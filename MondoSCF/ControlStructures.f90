@@ -105,9 +105,12 @@ MODULE ControlStructures
 
     REAL(DOUBLE)      :: MDalpha
     INTEGER           :: MDDampStep
-    CHARACTER(LEN=14) :: Thermostat
+    CHARACTER(LEN=50) :: Thermostat
     REAL(DOUBLE)      :: BerendsenTau
     REAL(DOUBLE)      :: BerendsenVScale
+    REAL(DOUBLE)      :: ACTMaxForceError
+    REAL(DOUBLE)      :: ACTAlpha
+    REAL(DOUBLE)      :: ACTBeta
 
   END TYPE Dynamics
 
