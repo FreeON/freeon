@@ -42,8 +42,11 @@ MODULE MDynamics
 
   IMPLICIT NONE
 
-  TYPE(DBL_VECT)      :: MDTime,MDKin,MDEpot,MDEtot,MDTemp,MDTave
-  TYPE(DBL_RNK2)      :: MDLinP
+  TYPE(DBL_VECT) :: MDTime,MDKin,MDEpot,MDEtot,MDTemp,MDTave
+  TYPE(DBL_RNK2) :: MDLinP
+
+  REAL(DOUBLE) :: ACTTargetEnergy, ACTIntegratedEnergyError, ACTGamma
+  REAL(DOUBLE) :: ACTActionTransfer, ACTLambda
 
 CONTAINS
   !--------------------------------------------------------------
@@ -55,8 +58,6 @@ CONTAINS
     INTEGER         :: iGEOBegin,iMDStep
     REAL(DOUBLE)    :: Temp
     LOGICAL         :: NewECMD,OrthogDM
-    REAL(DOUBLE)    :: ACTTargetEnergy, ACTIntegratedEnergyError, ACTGamma
-    REAL(DOUBLE)    :: ACTActionTransfer, ACTLambda
 
     !--------------------------------------------------------------
     ! Do Molecular Dynamics:Loop over Time Steps
@@ -224,18 +225,23 @@ CONTAINS
       ! Apply Action Control Theory.
       IF(C%Dyns%Thermostat == MD_ACT) THEN
         CALL MondoLog(DEBUG_NONE, "MD", "applying Action Control theory")
-        IF(iGEO < C%Dyns%MDDampStep) THEN
+        IF(iGEO <= 100) THEN
           ! Find target energy.
           CALL MondoLog(DEBUG_NONE, "MD", "finding ACT Target Energy")
-          ACTTargetEnergy = ACTTargetEnergy + MDEtot%D(1)/C%Dyns%MDDampStep
+
+          ! We don't calculate MDETot until after the first step.
+          ACTTargetEnergy = ACTTargetEnergy + MDETot%D(1)/(100-1)
         ELSE
           ! Integrate energy error.
-          CALL MondoLog(DEBUG_NONE, "MD", "calculating ACT Integrated Energy Error")
-          ACTIntegratedEnergyError = ACTIntegratedEnergyError + ACTTargetEnergy - MDEtot%D(1)
+          ACTIntegratedEnergyError = ACTIntegratedEnergyError + ACTTargetEnergy - MDETot%D(1)
+          CALL MondoLog(DEBUG_NONE, "MD", "ACTTargetEnergy = "//TRIM(DblToChar(ACTTargetEnergy)))
+          CALL MondoLog(DEBUG_NONE, "MD", "calculating ACT Integrated Energy Error = "//TRIM(DblToChar(ACTIntegratedEnergyError)))
+          CALL MondoLog(DEBUG_NONE, "MD", "Energy error = "//TRIM(DblToChar(ACTTargetEnergy-MDETot%D(1))))
 
           ! Calculate gamma.
-          ACTGamma = C%Dyns%ACTAlpha*(ACTTargetEnergy-MDEtot%D(1)) &
+          ACTGamma = C%Dyns%ACTAlpha*(ACTTargetEnergy-MDETot%D(1)) &
             + C%Dyns%ACTBeta*ACTIntegratedEnergyError
+          !ACTGamma = ACTGamma/C%Geos%Clone(1)%NAmts
 
           CALL MondoLog(DEBUG_NONE, "MD", "ACTGamma = "//TRIM(DblToChar(ACTGamma)))
 
@@ -413,7 +419,7 @@ CONTAINS
 
       ! Store Potential and Total Energy
       MDEpot%D(iCLONE) = C%Geos%Clone(iCLONE)%ETotal
-      MDEtot%D(iCLONE) = MDEpot%D(iCLONE) + MDKin%D(iCLONE)
+      MDETot%D(iCLONE) = MDEpot%D(iCLONE) + MDKin%D(iCLONE)
     ENDDO
 
     ! Thermostats
@@ -930,6 +936,24 @@ CONTAINS
       ENDIF
       Line = "MD v_scale       = "//TRIM(FltToChar(C%Dyns%BerendsenVScale))
       WRITE(Out,97) Line
+      IF(C%Dyns%Thermostat == MD_ACT) THEN
+        Line = "Action Control Theory Parameters:"
+        WRITE(Out,97) Line
+        Line = "ACT Target Energy           = "//TRIM(DblToMedmChar(ACTTargetEnergy))
+        WRITE(Out,97) Line
+        Line = "ACT Energy Error            = "//TRIM(DblToMedmChar(ACTTargetEnergy-MDEtot%D(1)))
+        WRITE(Out,97) Line
+        Line = "ACT Integrated Energy Error = "//TRIM(DblToMedmChar(ACTIntegratedEnergyError))
+        WRITE(Out,97) Line
+        Line = "ACT Alpha                   = "//TRIM(DblToMedmChar(C%Dyns%ACTAlpha))
+        WRITE(Out,97) Line
+        Line = "ACT Beta                    = "//TRIM(DblToMedmChar(C%Dyns%ACTBeta))
+        WRITE(Out,97) Line
+        Line = "ACT Gamma                   = "//TRIM(DblToMedmChar(ACTGamma))
+        WRITE(Out,97) Line
+        Line = "ACT Lambda                  = "//TRIM(DblToMedmChar(ACTLambda))
+        WRITE(Out,97) Line
+      ENDIF
 
       ! Compute the Pressure
       IF(C%Geos%Clone(iCLONE)%PBC%Dimen==3) THEN
