@@ -68,9 +68,20 @@ if test -z "${FCFLAGS}"; then
 fi
 
 # Find compilers.
-AC_PROG_CC
-AC_PROG_FC
-AC_PROG_F77
+AC_PROG_CC([gcc icc])
+AC_PROG_FC([gfortran ifort pgf90])
+AC_PROG_F77([gfortran ifort pgf90])
+
+# Check whether the f90 and f77 compilers are the same. We currently need that
+# to make sure that Mondo is linked correctly. Right now automake thinks that it
+# needs to link with the f77 compiler. So we better have an f90 compiler there,
+# otherwise we can't link correctly.
+AC_MSG_CHECKING([whether F77 and F90 compilers are identical])
+if test "`basename ${FC}`" != "`basename ${F77}`"; then
+  AC_MSG_RESULT([no])
+  AC_MSG_FAILURE([F77 (${F77}) and F90 (${FC}) compilers are different. This is not going to work.])
+fi
+AC_MSG_RESULT([yes])
 
 # Put the C-compiler into standard C mode.
 AC_PROG_CC_STDC
@@ -274,6 +285,10 @@ if test "${use_internal_lapack}" = "yes"; then
     NOOPT="-O0 -fltconsistency -fp-port"
     LAPACK_TIMER="EXT_ETIME"
     AC_MSG_RESULT([identified intel ifort compiler, using ${NOOPT} no-optimization flag])
+  elif test "`basename ${FC}`" = "pgf90"; then
+    NOOPT="-O0"
+    LAPACK_TIMER="EXT_ETIME"
+    AC_MSG_RESULT([identified portland group pgf90 compiler, using ${NOOPT} no-optimization flag])
   else
     AC_MSG_RESULT([unknown compiler, no no-optimization flags found])
   fi
