@@ -55,6 +55,8 @@ CONTAINS
     INTEGER         :: iGEOBegin,iMDStep
     REAL(DOUBLE)    :: Temp
     LOGICAL         :: NewECMD,OrthogDM
+    REAL(DOUBLE)    :: ACTTargetEnergy, ACTIntegratedEnergyError, ACTGamma
+    REAL(DOUBLE)    :: ACTActionTransfer, ACTLambda
 
     !--------------------------------------------------------------
     ! Do Molecular Dynamics:Loop over Time Steps
@@ -64,6 +66,9 @@ CONTAINS
     C%Stat%Previous%I = (/0,1,1/)
     iGEO    = 1
     iMDStep = 1
+
+    ACTTargetEnergy = 0.D0
+    ACTIntegratedEnergyError = 0.D0
 
     ! Allocate some memory.
     CALL New(MDTime,C%Geos%Clones)
@@ -215,6 +220,46 @@ CONTAINS
 
       ! Calculate the Forces
       CALL Force(C%Sets%NBSets,iGEO,C%Nams,C%Opts,C%Stat,C%Geos,C%Sets,C%MPIs)
+
+      ! Apply Action Control Theory.
+      IF(C%Dyns%Thermostat == MD_ACT) THEN
+        CALL MondoLog(DEBUG_NONE, "MD", "applying Action Control theory")
+        IF(iGEO < C%Dyns%MDDampStep) THEN
+          ! Find target energy.
+          CALL MondoLog(DEBUG_NONE, "MD", "finding ACT Target Energy")
+          ACTTargetEnergy = ACTTargetEnergy + MDEtot%D(1)/C%Dyns%MDDampStep
+        ELSE
+          ! Integrate energy error.
+          CALL MondoLog(DEBUG_NONE, "MD", "calculating ACT Integrated Energy Error")
+          ACTIntegratedEnergyError = ACTIntegratedEnergyError + ACTTargetEnergy - MDEtot%D(1)
+
+          ! Calculate gamma.
+          ACTGamma = C%Dyns%ACTAlpha*(ACTTargetEnergy-MDEtot%D(1)) &
+            + C%Dyns%ACTBeta*ACTIntegratedEnergyError
+
+          CALL MondoLog(DEBUG_NONE, "MD", "ACTGamma = "//TRIM(DblToChar(ACTGamma)))
+
+          ! Calculate lambda.
+          ACTActionTransfer = 0.D0
+          DO iATS=1, C%Geos%Clone(1)%NAtms
+            ACTActionTransfer = ACTActionTransfer &
+              - C%Geos%Clone(1)%Gradients%D(1,iATS)*C%Geos%Clone(1)%Velocity%D(1,iATS) &
+              - C%Geos%Clone(1)%Gradients%D(2,iATS)*C%Geos%Clone(1)%Velocity%D(2,iATS) &
+              - C%Geos%Clone(1)%Gradients%D(3,iATS)*C%Geos%Clone(1)%Velocity%D(3,iATS)
+          ENDDO
+
+          ACTLambda = ACTGamma/ACTActionTransfer
+          IF(ACTLambda >  C%Dyns%ACTMaxForceError) ACTLambda =  C%Dyns%ACTMaxForceError
+          IF(ACTLambda < -C%Dyns%ACTMaxForceError) ACTLambda = -C%Dyns%ACTMaxForceError
+          CALL MondoLog(DEBUG_NONE, "MD", "ACTLambda = "//TRIM(DblToChar(ACTLambda)))
+
+          DO iATS=1, C%Geos%Clone(1)%NAtms
+            C%Geos%Clone(1)%Gradients%D(1,iATS) = (1+ACTLambda)*C%Geos%Clone(1)%Gradients%D(1,iATS)
+            C%Geos%Clone(1)%Gradients%D(2,iATS) = (1+ACTLambda)*C%Geos%Clone(1)%Gradients%D(2,iATS)
+            C%Geos%Clone(1)%Gradients%D(3,iATS) = (1+ACTLambda)*C%Geos%Clone(1)%Gradients%D(3,iATS)
+          ENDDO
+        ENDIF
+      ENDIF
 
       ! Print the positions.
       CALL MondoLog(DEBUG_NONE, "MD", "Positions:")

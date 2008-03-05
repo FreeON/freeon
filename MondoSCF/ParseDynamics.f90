@@ -135,15 +135,45 @@ CONTAINS
       ENDIF
 
       ! Parse for thermostat.
-      IF(OptKeyQ(Inp, MD_THERMOSTAT, MD_THERM_BERENDSEN)) then
+      IF(OptKeyQ(Inp, MD_THERMOSTAT, MD_THERM_BERENDSEN)) THEN
         CALL MondoLogPlain("Using Berendsen thermostat")
         D%Thermostat = MD_THERM_BERENDSEN
+      ELSEIF(OptKeyQ(Inp, MD_THERMOSTAT, MD_ACT)) THEN
+        CALL MondoLogPlain("Using Action Control Theory thermostat")
+        D%Thermostat = MD_ACT
       ELSE
         CALL MondoLogPlain("Unknown thermostat or thermostat not set")
         D%Thermostat = MD_THERM_UNSET
       ENDIF
 
-      IF(OptDblQ(Inp, MD_BERENDSEN_TAU, D%BerendsenTau)) then
+      IF(OptDblQ(Inp, MD_ACT_MAX_FORCE_ERROR, D%ACTMaxForceError)) THEN
+        CALL MondoLogPlain("ACT Max Force Error = "//TRIM(DblToChar(D%ACTMaxForceError)))
+      ELSE
+        IF(D%Thermostat == MD_ACT) THEN
+          D%ACTMaxForceError = 1.D-6
+          CALL MondoLogPlain("ACT Max Force Error defaults to "//TRIM(DblToChar(D%ACTMaxForceError)))
+        ENDIF
+      ENDIF
+
+      IF(OptDblQ(Inp, MD_ACT_ALPHA, D%ACTAlpha)) THEN
+        CALL MondoLogPlain("ACT alpha = "//TRIM(DblToChar(D%ACTAlpha)))
+      ELSE
+        IF(D%Thermostat == MD_ACT) THEN
+          D%ACTAlpha = 1.D0
+          CALL MondoLogPlain("ACT alpha defaults to "//TRIM(DblToChar(D%ACTAlpha)))
+        ENDIF
+      ENDIF
+
+      IF(OptDblQ(Inp, MD_ACT_BETA, D%ACTBeta)) THEN
+        CALL MondoLogPlain("ACT beta = "//TRIM(DblToChar(D%ACTBeta)))
+      ELSE
+        IF(D%Thermostat == MD_ACT) THEN
+          D%ACTBeta = 1.D-2
+          CALL MondoLogPlain("ACT beta defaults to "//TRIM(DblToChar(D%ACTBeta)))
+        ENDIF
+      ENDIF
+
+      IF(OptDblQ(Inp, MD_BERENDSEN_TAU, D%BerendsenTau)) THEN
         CALL MondoLogPlain("Using tau = "//TRIM(DblToChar(D%BerendsenTau)))
       ELSE
         CALL MondoLogPlain("BerendsenTau not specified in input: Setting tau to DeltaTime")

@@ -195,5 +195,5 @@ dist-sign : fix-localversion dist
 	gpg -b $(distdir).tar.bz2
 
 # Upload dist file to Savannah.
-upload-dist : dist-sign
+dist-upload : dist-sign
 	rsync -v --progress $(distdir).tar.bz2 $(distdir).tar.bz2.sig nicolasbock@dl.sv.nongnu.org:/releases/freeon/
