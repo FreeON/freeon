@@ -25,10 +25,10 @@ MDNumSCF=0
 MDDamping=0.2
 MDDampStep=10000
 
-Thermostat=ActionControlTheory
-ACTMaxForceError=1.D-3
-ACTAlpha=1.D-2
-ACTBeta=1.D-2
+T!hermostat=ActionControlTheory
+A!CTMaxForceError=1.D-3
+A!CTAlpha=1.D-2
+A!CTBeta=1.D-2
 
 T!hermostat=Berendsen
 T!empScaling=100
