@@ -1050,6 +1050,8 @@ CONTAINS
         ENDIF
       ENDDO
       WRITE(Out,"(A)") "End: Atom Position(3) Velocity(3)"
+
+      WRITE(Out,*)
       CLOSE(Out)
 
       IF(C%Dyns%MDAlgorithm == MD_AL_SYMPLECTIC) THEN

@@ -300,41 +300,41 @@ PROGRAM MakeRho
     RSumE2=Integrate_HGRho_new(RhoA,1,1,RhoA%NDist-NumAtoms)
     TotRSumE2 = Reduce(RSumE2)
     IF(MyID.EQ.0) THEN
-      CALL MondoLog(DEBUG_MINIMUM, "MakeRho", 'Rho_tot='//TRIM(DblToChar(TotRSumE2)))
+      CALL MondoLog(DEBUG_MINIMUM, "MakeRho", 'Rho_tot = '//TRIM(DblToChar(TotRSumE2)))
     ENDIF
   ELSEIF(NSMat.EQ.2)THEN
     RSumE2=Integrate_HGRho_new(RhoA,1,1,RhoA%NDist-NumAtoms)
     TotRSumE2 = Reduce(RSumE2)
-    IF(MyID.EQ.0) CALL MondoLog(DEBUG_MINIMUM, "MakeRho", 'Rho_tot='//TRIM(DblToChar(TotRSumE2)))
+    IF(MyID.EQ.0) CALL MondoLog(DEBUG_MINIMUM, "MakeRho", 'Rho_tot = '//TRIM(DblToChar(TotRSumE2)))
     RSumE2=Integrate_HGRho_new(RhoA,2,1,RhoA%NDist-NumAtoms)
     TotRSumE2 = Reduce(RSumE2)
-    IF(MyID.EQ.0) CALL MondoLog(DEBUG_MINIMUM, "MakeRho", 'Rho_alp='//TRIM(DblToChar(TotRSumE2)))
+    IF(MyID.EQ.0) CALL MondoLog(DEBUG_MINIMUM, "MakeRho", 'Rho_alp = '//TRIM(DblToChar(TotRSumE2)))
     RSumE2=Integrate_HGRho_new(RhoA,3,1,RhoA%NDist-NumAtoms)
     TotRSumE2 = Reduce(RSumE2)
-    IF(MyID.EQ.0) CALL MondoLog(DEBUG_MINIMUM, "MakeRho", 'Rho_bet='//TRIM(DblToChar(TotRSumE2)))
+    IF(MyID.EQ.0) CALL MondoLog(DEBUG_MINIMUM, "MakeRho", 'Rho_bet = '//TRIM(DblToChar(TotRSumE2)))
   ELSEIF(NSMat.EQ.4)THEN
     RSumE2=Integrate_HGRho_new(RhoA,1,1,RhoA%NDist-NumAtoms)
-    IF(MyID.EQ.0) CALL MondoLog(DEBUG_MINIMUM, "MakeRho", 'Rho_tot='//TRIM(DblToChar(TotRSumE2)))
+    IF(MyID.EQ.0) CALL MondoLog(DEBUG_MINIMUM, "MakeRho", 'Rho_tot = '//TRIM(DblToChar(TotRSumE2)))
   ENDIF
-  IF(MyID.EQ.0) CALL MondoLog(DEBUG_MINIMUM, "MakeRho", 'Rho_nuc='//TRIM(DblToChar(RSumN)))
+  IF(MyID.EQ.0) CALL MondoLog(DEBUG_MINIMUM, "MakeRho", 'Rho_nuc = '//TRIM(DblToChar(RSumN)))
 #else
   RSumE  =  Integrate_HGRho_new(RhoA,1,1                    ,RhoA%NDist-GM%NAtms)
   RSumN  =  Integrate_HGRho_new(RhoA,1,RhoA%NDist-GM%NAtms+1,RhoA%NDist         )
   IF(NSMat.EQ.1)THEN
     RSumE2=Integrate_HGRho_new(RhoA,1,1,RhoA%NDist-GM%NAtms)
-    CALL MondoLog(DEBUG_MINIMUM, "MakeRho", 'Rho_tot='//TRIM(DblToChar(RSumE2)))
+    CALL MondoLog(DEBUG_MINIMUM, "MakeRho", 'Rho_tot = '//TRIM(DblToChar(RSumE2)))
   ELSEIF(NSMat.EQ.2)THEN
     RSumE2=Integrate_HGRho_new(RhoA,1,1,RhoA%NDist-GM%NAtms)
-    CALL MondoLog(DEBUG_MINIMUM, "MakeRho", 'Rho_tot='//TRIM(DblToChar(RSumE2)))
+    CALL MondoLog(DEBUG_MINIMUM, "MakeRho", 'Rho_tot = '//TRIM(DblToChar(RSumE2)))
     RSumE2=Integrate_HGRho_new(RhoA,2,1,RhoA%NDist-GM%NAtms)
-    CALL MondoLog(DEBUG_MINIMUM, "MakeRho", 'Rho_alp='//TRIM(DblToChar(RSumE2)))
+    CALL MondoLog(DEBUG_MINIMUM, "MakeRho", 'Rho_alp = '//TRIM(DblToChar(RSumE2)))
     RSumE2=Integrate_HGRho_new(RhoA,3,1,RhoA%NDist-GM%NAtms)
-    CALL MondoLog(DEBUG_MINIMUM, "MakeRho", 'Rho_bet='//TRIM(DblToChar(RSumE2)))
+    CALL MondoLog(DEBUG_MINIMUM, "MakeRho", 'Rho_bet = '//TRIM(DblToChar(RSumE2)))
   ELSEIF(NSMat.EQ.4)THEN
     RSumE2=Integrate_HGRho_new(RhoA,1,1,RhoA%NDist-GM%NAtms)
-    CALL MondoLog(DEBUG_MINIMUM, "MakeRho", 'Rho_tot='//TRIM(DblToChar(RSumE2)))
+    CALL MondoLog(DEBUG_MINIMUM, "MakeRho", 'Rho_tot = '//TRIM(DblToChar(RSumE2)))
   ENDIF
-  CALL MondoLog(DEBUG_MINIMUM, "MakeRho", 'Rho_nuc='//TRIM(DblToChar(RSumN)))
+  CALL MondoLog(DEBUG_MINIMUM, "MakeRho", 'Rho_nuc = '//TRIM(DblToChar(RSumN)))
 #endif
   ! Calculate dipole and quadrupole moments
   CALL New(MP)

@@ -52,12 +52,15 @@ CONTAINS
     IF(C%Opts%Coordinates==GRAD_CART_OPT) THEN
       IF(C%Opts%DoGDIIS)THEN
         ! Follow extrapolated Cartesian gradient down hill
+        CALL MondoLog(DEBUG_NONE, "Descender", "Extrapolated Cartesian gradient downhill")
         CALL GDicer(C)
       ELSE
         ! Follow Cartesian gradient down hill
+        CALL MondoLog(DEBUG_NONE, "Descender", "Cartesian gradient downhill")
         CALL SteepD(C)
       ENDIF
     ELSE
+      CALL MondoLog(DEBUG_NONE, "Descender", "calling IntOpt")
       CALL IntOpt(C)
     ENDIF
   END SUBROUTINE Descender
@@ -544,7 +547,7 @@ CONTAINS
     TYPE(INT_VECT)            :: Convgd
     TYPE(INTC)                :: IntCES
     TYPE(State)               :: StateO
-    !
+
     iGEO=C%Stat%Previous%I(3)
     iGEOst=iGEO
     ! Set geometry optimization controls
@@ -558,13 +561,13 @@ CONTAINS
       CALL SCF(iBAS,iGEO,C)
     ENDDO
     iBAS=C%Sets%NBSets
-    !
+
     ! CALL New(IntCES,C%GOpt%ExtIntCs%N)
     ! CALL SetEq(IntCES,C%GOpt%ExtIntCs,1,C%GOpt%ExtIntCs%N,1)
     C%GOpt%GConvCrit%DoLattStep=.TRUE.
     CALL New(Convgd,C%Geos%Clones)
     Convgd%I=0
-    !
+
     IF(C%Opts%Grad==GRAD_TS_SEARCH_NEB) THEN
       CALL NEBPurify(C%Geos)
       CALL MergePrintClones(C%Geos,C%Nams,C%Opts)
@@ -581,14 +584,14 @@ CONTAINS
       GuessO=C%Opts%Guess
       CALL SCF(iBAS,iGEO,C)
       CALL BackTrack(iBAS,iGEO,C,StateO,GuessO)
-      ! Backtracking can modify geometries too, so this is the right place
-      ! to print geometries cooresponding to the energies that have just been computed
+      ! Backtracking can modify geometries too, so this is the right place to
+      ! print geometries cooresponding to the energies that have just been
+      ! computed
       DO iCLONE=1,C%Geos%Clones
         CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile,Geo,C%Opts%GeomPrint,Clone_O=iCLONE)
       ENDDO
-      !
-      CALL Force(iBAS,iGEO,C%Nams,C%Opts,C%Stat, &
-           C%Geos,C%Sets,C%MPIs)
+
+      CALL Force(iBAS,iGEO,C%Nams,C%Opts,C%Stat,C%Geos,C%Sets,C%MPIs)
       ! Loop over all clones and modify geometries.
       ConvgdAll=1
       DO iCLONE=1,C%Geos%Clones
@@ -596,12 +599,12 @@ CONTAINS
         CALL OptSingleMol(C%GOpt,C%Nams,C%Opts,C%Geos%Clone(iCLONE),Convgd%I,iGEO,iCLONE)
         ConvgdAll=ConvgdAll*Convgd%I(iCLONE)
       ENDDO
-      !
+
       IF(C%Opts%Grad==GRAD_TS_SEARCH_NEB) THEN
         CALL NEBPurify(C%Geos,Print_O=.TRUE.)
         CALL MergePrintClones(C%Geos,C%Nams,C%Opts)
       ENDIF
-      !
+
       ! Fill in new geometries
       DO iCLONE=1,C%Geos%Clones
         CALL NewGeomFill(C%Geos%Clone(iCLONE))
@@ -614,7 +617,7 @@ CONTAINS
       IF(ConvgdAll==1) EXIT
     ENDDO
     CALL Delete(Convgd)
-    !
+
     IGeo=C%Stat%Current%I(3)
     IF(IGeo>=MaxSteps) THEN
       IF(ConvgdAll/=1) THEN

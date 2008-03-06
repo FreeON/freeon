@@ -137,13 +137,5 @@ CONTAINS
     ! If restart file set, it is set in ParseOptions
     N%RFile=""
 
-#if FULL_ON_FRONT_END_DEBUG
-    WRITE(*,*)' N%IFile = '//TRIM(N%IFile)
-    WRITE(*,*)' N%OFile = '//TRIM(N%OFile)
-    WRITE(*,*)' N%LFile = '//TRIM(N%LFile)
-    WRITE(*,*)' N%HFile = '//TRIM(N%HFile)
-    WRITE(*,*)' N%RFile = '//TRIM(N%RFile)
-    WRITE(*,*)' N%GFile = '//TRIM(N%GFile)
-#endif
   END SUBROUTINE LoadCommands
 END MODULE ParseCommands
