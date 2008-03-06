@@ -242,7 +242,7 @@ CONTAINS
     CHARACTER(LEN=3)          :: At,AtTmp
     CHARACTER(LEN=DCL)        :: Line,LineLowCase
     !------------------------------------------------------------------------!
-    !   Determine the number of atoms in this block
+    ! Determine the number of atoms in this block
     N=0
     CALL Align(BeginDelimiter,Inp)
     DO
@@ -254,8 +254,11 @@ CONTAINS
     G%NAtms=N
     N=0
     CALL New(G) ! Allocate a geometry
-    !   Parse the coordinates
+    ! Parse the coordinates
     CALL Align(BeginDelimiter,Inp)
+
+    CALL MondoLog(DEBUG_NONE, "ParseCoordinates", "parsing coordinates")
+
     DO
       READ(Inp,DEFAULT_CHR_FMT,END=1)Line
       LineLowCase = Line
@@ -263,8 +266,10 @@ CONTAINS
       Call LowCase(LineLowCase)
       N=N+1
       CALL LineToChars(LineLowCase,C)
-      IF(SIZE(C%C)<4)CALL MondoHalt(PRSE_ERROR,' bad data on parsing goemetry at line = <<' &
-           //TRIM(LineLowCase)//'>>')
+
+      IF(SIZE(C%C)<4) CALL MondoHalt(PRSE_ERROR, &
+        'bad data on parsing goemetry at line = <<'//TRIM(LineLowCase)//'>>')
+
       ! Set the atom for freq calculation
       G%DoFreq%I(N)=0
       IF(SIZE(C%C)==4) THEN
@@ -368,8 +373,22 @@ CONTAINS
     IF(SUM(G%DoFreq%I).EQ.0)G%DoFreq%I=1
     !write(*,*) 'ParseGeometries: G%DoFreq%I=',G%DoFreq%I
 
-    IF(N/=G%NAtms) &
-         CALL MondoHalt(PRSE_ERROR,'Atom number mismatch in ParseCoordinates')
+    IF(N/=G%NAtms) THEN
+      CALL MondoHalt(PRSE_ERROR,'Atom number mismatch in ParseCoordinates')
+    ENDIF
+
+    ! Print something....
+    DO J=1, G%NAtms
+      CALL MondoLog(DEBUG_NONE, "ParseCoordinates", &
+        TRIM(G%AtNam%C(J))//" "// &
+        TRIM(FltToShrtChar(G%Carts%D(1,J)))//" "// &
+        TRIM(FltToShrtChar(G%Carts%D(2,J)))//" "// &
+        TRIM(FltToShrtChar(G%Carts%D(3,J)))//" "// &
+        TRIM(FltToShrtChar(G%Velocity%D(1,J)))//" "// &
+        TRIM(FltToShrtChar(G%Velocity%D(2,J)))//" "// &
+        TRIM(FltToShrtChar(G%Velocity%D(3,J)))//" "// &
+        TRIM(IntToChar(G%CConstrain%I(J))))
+    ENDDO
 
     ! ULTIMATELY, THE FOLLOWING ITEMS SHOULD BE ASSOCIATED WITH THE Geometries
     ! TYPE RATHER THAN THE CRDS TYPE

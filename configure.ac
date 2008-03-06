@@ -52,8 +52,9 @@ AC_OUTPUT_COMMANDS([
   # In case this is a re-run of the configure script and the only thing that
   # changed was the --prefix, we need to make sure that we hard-code the correct
   # path into Mondo.
-  echo "touch MondoSCF/ParseCommands.f90"
+  echo "touch MondoSCF/{PrintParsed,ParseCommands}.f90"
   touch MondoSCF/ParseCommands.f90
+  touch MondoSCF/PrintParsed.f90
 ])
 
 # Set the optimization flags.
@@ -482,6 +483,7 @@ AC_MSG_NOTICE([F77           = ${F77}])
 AC_MSG_NOTICE([CFLAGS        = ${CFLAGS}])
 AC_MSG_NOTICE([FCFLAGS       = ${FCFLAGS}])
 AC_MSG_NOTICE([FFLAGS        = ${FFLAGS}])
+AC_MSG_NOTICE([NOOPT         = ${NOOPT}])
 AC_MSG_NOTICE([LDFLAGS       = ${LDFLAGS}])
 AC_MSG_NOTICE([LIBS          = ${LIBS}])
 AC_MSG_NOTICE([CPPFLAGS      = ${CPPFLAGS}])

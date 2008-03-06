@@ -55,10 +55,12 @@ CONTAINS
     OutFile=C%Nams%OFile
     LogFile=C%Nams%LFile
 
-    CALL MondoLog(DEBUG_NONE, "ParseInput", "CWD        = "//TRIM(C%Nams%M_PWD))
-    CALL MondoLog(DEBUG_NONE, "ParseInput", 'InputFile  = '//TRIM(C%Nams%IFile))
-    CALL MondoLog(DEBUG_NONE, "ParseInput", 'OutputFile = '//TRIM(C%Nams%OFile))
-    CALL MondoLog(DEBUG_NONE, "ParseInput", 'LogFile    = '//TRIM(C%Nams%LFile))
+    ! Print out some file settings.
+    CALL MondoLog(DEBUG_NONE, "ParseInput", "CWD          = "//TRIM(C%Nams%M_PWD))
+    CALL MondoLog(DEBUG_NONE, "ParseInput", 'InputFile    = '//TRIM(C%Nams%IFile))
+    CALL MondoLog(DEBUG_NONE, "ParseInput", 'OutputFile   = '//TRIM(C%Nams%OFile))
+    CALL MondoLog(DEBUG_NONE, "ParseInput", 'LogFile      = '//TRIM(C%Nams%LFile))
+    CALL MondoLog(DEBUG_NONE, "ParseInput", 'hdf          = '//TRIM(C%Nams%HFile))
 
     ! Allocate state variables
     CALL New(C%Stat%Current,3)
@@ -66,6 +68,11 @@ CONTAINS
 
     ! Parse generic options
     CALL LoadOptions(C%Nams,C%Opts)
+
+    ! Print out some more file settings. The following filenames are only set
+    ! now after loading the options.
+    CALL MondoLog(DEBUG_NONE, "ParseInput", 'GeometryFile = '//TRIM(C%Nams%GFile))
+    CALL MondoLog(DEBUG_NONE, "ParseInput", 'RestartFile  = '//TRIM(C%Nams%RFile))
 
     ! Parse dynamics options
     IF(C%Opts%Grad==GRAD_DO_DYNAMICS .OR. C%Opts%Grad==GRAD_DO_HYBRIDMC ) THEN
