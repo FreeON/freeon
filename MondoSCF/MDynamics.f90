@@ -737,10 +737,10 @@ CONTAINS
         v_scale_O = v_scale
       ENDIF
 
-      CALL MondoLog(DEBUG_NONE, "Berendsen Thermostat", "T = "//TRIM(DblToChar(T)))
-      CALL MondoLog(DEBUG_NONE, "Berendsen Thermostat", "T0 = "//TRIM(DblToChar(T0)))
+      CALL MondoLog(DEBUG_NONE, "Berendsen Thermostat", "T       = "//TRIM(DblToChar(T)))
+      CALL MondoLog(DEBUG_NONE, "Berendsen Thermostat", "T0      = "//TRIM(DblToChar(T0)))
       CALL MondoLog(DEBUG_NONE, "Berendsen Thermostat", "delta_t = "//TRIM(DblToChar(delta_t)))
-      CALL MondoLog(DEBUG_NONE, "Berendsen Thermostat", "tau_T = "//TRIM(DblToChar(tau_T)))
+      CALL MondoLog(DEBUG_NONE, "Berendsen Thermostat", "tau_T   = "//TRIM(DblToChar(tau_T)))
       CALL MondoLog(DEBUG_NONE, "Berendsen Thermostat", "v_scale = "//TRIM(DblToChar(v_scale)))
 
       DO i = 1, GM%NAtms

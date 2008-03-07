@@ -70,8 +70,8 @@ CONTAINS
     CALL GetEnv('MONDO_SCRATCH',N%M_SCRATCH)
     IF(LEN(TRIM(N%M_SCRATCH)) == 0) THEN
       WRITE(*,"(A)") 'env variable $(MONDO_SCRATCH) not set. Using /tmp'
-      N%M_SCRATCH = "/tmp/"
-      MONDO_SCRATCH = "/tmp/"
+      N%M_SCRATCH = "/tmp"
+      MONDO_SCRATCH = "/tmp"
     ENDIF
 
     ! Set path names etc

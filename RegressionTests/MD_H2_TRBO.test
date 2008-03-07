@@ -1,4 +1,10 @@
+# The input file.
 Mondo_input = MD_H2_TRBO.inp
+
+# The build options.
 Mondo_tar = ../mondoscf-1.0-alpha-latest.tar.bz2
 configure_options = FC=/usr/local/gcc-4.2.1/bin/gfortran F77=/usr/local/gcc-4.2.1/bin/gfortran CC=/usr/local/gcc-4.2.1/bin/gcc CFLAGS=-g FFLAGS=-g FCFLAGS=-g --prefix=/tmp/blabla
 make_options = -j2
+
+# The reference files.
+Mondo_reference = MD_H2_TRBO.reference
