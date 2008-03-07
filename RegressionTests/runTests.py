@@ -62,6 +62,11 @@ parse.add_option("--verbose", "-v", \
     dest = "verbose", \
     action = "store_true")
 
+parse.add_option("--clean-run", \
+    help = "clean the run directory", \
+    dest = "clean_run", \
+    action = "store_true")
+
 option, argument = parse.parse_args()
 
 # Set up logging.
@@ -120,7 +125,9 @@ for line in lines:
     line = check.group(1)
 
   # Search for known keywords.
-  for fieldname in [ "Mondo_input", \
+  for fieldname in [ \
+      "Mondo_input", \
+      "Mondo_reference", \
       "Mondo_executable", \
       "Mondo_tar", \
       "configure_options", \
@@ -299,15 +306,17 @@ else:
 if not "Mondo_input" in inputfield:
   log.info("No Mondo_input given, we are done")
   sys.exit(0)
-else:
-  Mondo_inputbase = os.path.basename(inputfield["Mondo_input"])
+
+# Construct input filename.
+Mondo_inputbase = os.path.basename(inputfield["Mondo_input"])
 
 # Run the test.
 log.debug("creating run directory")
-try:
-  os.makedirs(rundirbase)
-except:
-  log.error("error making rundir")
+if not os.path.exists(rundirbase):
+  try:
+    os.makedirs(rundirbase)
+  except:
+    log.error("error making " + rundirbase)
 
 # Create run directory for this test.
 rundir = os.path.join(rundirbase, Mondo_inputbase)
@@ -317,9 +326,12 @@ while(True):
     break
 
 log.debug("creating directory " + rundir)
-if os.path.exists(rundir):
+if os.path.exists(rundir) and not option.clean_run:
   log.error("rundir already exists " + rundir)
   sys.exit(1)
+if os.path.exists(rundir) and option.clean_run:
+  log.info("rundir " + rundir + " already exists but I am told to wipe it")
+  shutil.rmtree(rundir)
 os.mkdir(rundir)
 
 log.debug("copying input file to rundir " + rundir)
@@ -359,3 +371,5 @@ else:
 if not "Mondo_reference" in inputfield:
   log.info("no reference given, we are done")
   sys.exit(0)
+
+# Read in 
