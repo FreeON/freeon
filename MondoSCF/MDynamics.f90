@@ -451,6 +451,19 @@ CONTAINS
         CALL CloseHDF(HDFFileID)
         CALL MondoLog(DEBUG_NONE, "MD", "putting v_scale("//TRIM(IntToChar(iGEO))//") to hdf = "//TRIM(DblToChar(v_scale)))
       ENDDO
+
+    ELSE
+
+      DO iCLONE = 1, C%Geos%Clones
+        ! Let's punch something so we don't die in P2Use.
+        HDFFileID=OpenHDF(C%Nams%HFile)
+        HDF_CurrentID = OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
+        CALL Put(0D0, "v_scale", TRIM(IntToChar(iGEO)))
+        CALL CloseHDFGroup(HDF_CurrentID)
+        CALL CloseHDF(HDFFileID)
+        CALL MondoLog(DEBUG_NONE, "MD", "putting dummy v_scale("//TRIM(IntToChar(iGEO))//") to hdf = "//TRIM(DblToChar(0D0)))
+      ENDDO
+
     ENDIF
 
     ! Generate Output
@@ -581,7 +594,18 @@ CONTAINS
           CALL MondoLog(DEBUG_NONE, "MD", "putting v_scale("//TRIM(IntToChar(iGEO))//") to hdf = "//TRIM(DblToChar(v_scale)))
           CALL MondoLog(DEBUG_NONE, "MD", "a("//TRIM(IntToChar(m_step))//") = "//TRIM(FltToChar(Symplectic_4th_Order_a(m_step))))
           CALL MondoLog(DEBUG_NONE, "MD", "b("//TRIM(IntToChar(m_step))//") = "//TRIM(FltToChar(Symplectic_4th_Order_b(m_step))))
+        ENDDO
 
+      ELSE
+
+        DO iCLONE = 1, C%Geos%Clones
+          ! Let's punch something so we don't die in P2Use.
+          HDFFileID=OpenHDF(C%Nams%HFile)
+          HDF_CurrentID = OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
+          CALL Put(0D0, "v_scale", TRIM(IntToChar(iGEO)))
+          CALL CloseHDFGroup(HDF_CurrentID)
+          CALL CloseHDF(HDFFileID)
+          CALL MondoLog(DEBUG_NONE, "MD", "putting dummy v_scale("//TRIM(IntToChar(iGEO))//") to hdf = "//TRIM(DblToChar(0D0)))
         ENDDO
 
       ENDIF
