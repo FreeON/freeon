@@ -14,5 +14,5 @@ libTwoEMisc_la_DEPENDENCIES = $(MondoMods_DEPENDENCY_FILES)
 EXTRA_INCLUDES = -I../../MondoMods
 
 # Dependencies.
-GetAtomPair.o : \
-  ShellPairStruct.o
+GetAtomPair.lo : \
+  ShellPairStruct.lo

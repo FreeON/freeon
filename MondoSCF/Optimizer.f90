@@ -1667,7 +1667,7 @@ CONTAINS
              C%Geos%Clone(iCLONE)%PBC%Dimen, &
              BoxShape_O=C%Geos%Clone(iCLONE)%PBC%BoxShape%D)
         CALL Delete(RefXYZ1)
-        !
+
         CALL New(DistVect1,NCart)
         CALL CartRNK2ToCartRNK1(DistVect1%D,GMOld%Carts%D)
         CALL New(DistVect2,NCart)
@@ -1689,17 +1689,11 @@ CONTAINS
           //' New Energy= '//TRIM(FltToChar(ENew)) &
           //' Dist= '//TRIM(FltToChar(MeanDist)) &
           //' MaxDist= '//TRIM(FltToChar(MaxDist)))
-200     FORMAT('Backtr. step= ',I3,' Old Energy= ', &
-             F20.6,' New Energy= ',F20.6,' Dist= ',F14.8, &
-             'MaxDist= ',F14.8)
 
         IF(iBStep==MaxBStep+1) THEN
           CALL MondoLogPlain('Backtracking of clone '//TRIM(IntToChar(iCLONE)) &
             //' has not converged in '//TRIM(IntToChar(MaxBStep)) &
             //' Steps. Continue with present geometry.')
-100       FORMAT('Backtracking of clone',I3, &
-               ' has not converged in ', &
-               I3,' Steps. Continue with present geometry.')
           CYCLE
         ENDIF
         IF(.NOT.DoBackTrack) CYCLE

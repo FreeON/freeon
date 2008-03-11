@@ -32,7 +32,10 @@ MODULE CholFactor
    USE MemMan
    USE PrettyPrint
    USE ParsingConstants
+   USE MondoLogger
+
 IMPLICIT NONE
+
 CONTAINS
 !
 !---------------------------------------------------------------
@@ -1845,22 +1848,16 @@ CONTAINS
      !
      CALL TriangFact(IGc,JGc,AGc,CholData)
        NZCh=CholData%ChRowPt%I(NCart+1)-1
-     !
+
      IF(Print) THEN
        SparsitySpB=DBLE(NZSpB)/DBLE(NIntC*NCart)*100.D0
        SparsityGc=DBLE(NZGc)/DBLE(NCart*NCart)*100.D0
        SparsityCh=DBLE(NZCh)/DBLE(NCart*NCart-NCart)*200.D0
-       WRITE(Out,100) SparsitySpB,NZSpB
-       WRITE(*,100) SparsitySpB,NZSpB
-       WRITE(Out,150) SparsityGc,NZGc
-       WRITE(*,150) SparsityGc,NZGc     
-       WRITE(*,200) SparsityCh,NZCh
-       WRITE(Out,200) SparsityCh,NZCh
+
+       CALL MondoLog(DEBUG_NONE, "CholFact", 'Sparsity of  B = '//TRIM(FltToMedmChar(SparsitySpB))//" %, # of SpB%NNon0 = "//TRIM(IntToChar(NZSpB)))
+       CALL MondoLog(DEBUG_NONE, "CholFact", 'Sparsity of Gc = '//TRIM(FltToMedmChar(SparsityGc)) //" %, # of  Gc%NNon0 = "//TRIM(IntToChar(NZGc)))
+       CALL MondoLog(DEBUG_NONE, "CholFact", 'Sparsity of Ch = '//TRIM(FltToMedmChar(SparsityCh)) //" %, # of  Ch%NNon0 = "//TRIM(IntToChar(NZCh)))
      ENDIF
-     !
-     100 FORMAT(' Sparsity of B= ',F6.2,' %',' # of SpB%NNon0',I10)
-     150 FORMAT('Sparsity of Gc= ',F6.2,' %',' # of  Gc%NNon0',I10)
-     200 FORMAT('Sparsity of Ch= ',F6.2,' %',' # of  Ch%NNon0',I10)
    END SUBROUTINE CholFact
 !
 !--------------------------------------------------------------------
