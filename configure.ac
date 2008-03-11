@@ -30,11 +30,12 @@ AM_INIT_AUTOMAKE
 if test -f localversion; then
   . localversion
 else
-  localversion="not-set"
+  branch="unknown"
+  localversion="not_set"
 fi
 
-AC_DEFINE_UNQUOTED([LOCAL_VERSION], ["${localversion}"], [The local version of Mondo])
-AC_MSG_NOTICE([configuring local version ${localversion}])
+AC_DEFINE_UNQUOTED([LOCAL_VERSION], ["${branch}:${localversion}"], [The local version of Mondo])
+AC_MSG_NOTICE([configuring local version ${branch}:${localversion}])
 
 # Fix up the header definitions for hdf.
 AC_OUTPUT_COMMANDS([
@@ -59,13 +60,19 @@ AC_OUTPUT_COMMANDS([
 
 # Set the optimization flags.
 if test -z "${CFLAGS}"; then
-  AC_MSG_NOTICE([Setting default optimization: CFLAGS = ${CFLAGS:=-O2}])
+  AC_MSG_NOTICE([Setting default optimization: CFLAGS  = ${CFLAGS:=-O}])
+else
+  AC_MSG_NOTICE([Using supplied optimization:  CFLAGS  = ${CFLAGS}])
 fi
 if test -z "${FFLAGS}"; then
-  AC_MSG_NOTICE([Setting default optimization: FFLAGS = ${FFLAGS:=-O2}])
+  AC_MSG_NOTICE([Setting default optimization: FFLAGS  = ${FFLAGS:=-O}])
+else
+  AC_MSG_NOTICE([Using supplied optimization:  FFLAGS  = ${FFLAGS}])
 fi
 if test -z "${FCFLAGS}"; then
-  AC_MSG_NOTICE([Setting default optimization: FCFLAGS = ${FCFLAGS:=-O2}])
+  AC_MSG_NOTICE([Setting default optimization: FCFLAGS = ${FCFLAGS:=-O}])
+else
+  AC_MSG_NOTICE([Using supplied optimization:  FCFLAGS = ${FCFLAGS}])
 fi
 
 # Find compilers.

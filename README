@@ -51,11 +51,6 @@ the configure command line.
 (6)
 ./configure FC=ifort F77=ifort CC=icc CFLAGS="-O3 -fomit-frame-pointer" FFLAGS="-O3 -fomit-frame-pointer" FCFLAGS="-O3 -fomit-frame-pointer" --prefix=/tmp/Mondo --disable-internal-lapack --with-lapack=/usr/local/lapack --with-lapacklibs="-llapack_linux-ifort-10.0.023 -lblas_linux-ifort-10.0.023"
 
-Note:
-The internal hdf5 does not seem to work well on 64-bit. You might have to add
-something like "-m32" to the compiler flags, i.e. FFLAGS="-O2 -m32" for
-instance.
-
 Some timing information:
 
 Running Validate/MD_H2.inp on MacBook Pro 1 (Core Duo) 2.16GHz

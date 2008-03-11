@@ -945,18 +945,18 @@ PROGRAM P2Use
       CALL Get(P0,DMFile)
       CALL Get(DoingMD ,'DoingMD')
       IF(DoingMD) THEN
-        DMPorder=0
+        DMPOrder=0
         CALL Get(MDGeuss ,"MDGeuss")
-        IF(MDGeuss=='DMProj0') DMPorder=0
-        IF(MDGeuss=='DMProj1') DMPorder=1
-        IF(MDGeuss=='DMProj2') DMPorder=2
-        IF(MDGeuss=='DMProj3') DMPorder=3
-        IF(MDGeuss=='DMProj4') DMPorder=4
+        IF(MDGeuss=='DMProj0') DMPOrder=0
+        IF(MDGeuss=='DMProj1') DMPOrder=1
+        IF(MDGeuss=='DMProj2') DMPOrder=2
+        IF(MDGeuss=='DMProj3') DMPOrder=3
+        IF(MDGeuss=='DMProj4') DMPOrder=4
         iGEO     = Args%I%I(3)
         DMPOrder = MIN(MAX(iGEO-2,0),DMPOrder)
         CALL DMPProj(iGEO,DMPOrder,P0,Tmp1,Tmp2)
       ELSE
-        IF(DMPorder > 0) THEN
+        IF(DMPOrder > 0) THEN
           CALL Warn('P2Use:DMPOrder is only implimented for MD')
         ENDIF
       ENDIF
@@ -989,23 +989,23 @@ PROGRAM P2Use
       CALL MondoLog(DEBUG_MAXIMUM, "P2Use", "Trace Error: Tr[P0,S1] = "//TRIM(FltToChar(TrP)))
     ENDIF
 #endif
-    !    Initialize
+    ! Initialize
     NStep       = 0
     Lam         = Zero
     DLam        = One
     ConvergeAll = .FALSE.
-    !    Purify
+    ! Purify
     DO
       NStep = NStep + 1
       Lam  = Lam + DLam
-      !       Set Up S and P
+      ! Set Up S and P
       CALL SetEq(Tmp1,S0)
       CALL SetEq(Tmp2,S1)
       CALL Multiply(Tmp1,One-Lam)
       CALL Multiply(Tmp2,Lam)
       CALL Add(Tmp1,Tmp2,S)
       CALL SetEq(P,P0)
-      !
+
 #ifdef PARALLEL
       IF(MyId==ROOT)THEN
 #endif
@@ -1015,7 +1015,7 @@ PROGRAM P2Use
 #ifdef PARALLEL
       ENDIF
 #endif
-      !
+
 #ifdef PARALLEL
       CALL Multiply(P,S,Tmp1)
       TrP        = Trace(Tmp1)
@@ -1058,7 +1058,7 @@ PROGRAM P2Use
 #ifdef PARALLEL
         ENDIF
 #endif
-        !          Logic
+        ! Logic
         IF(ABS(Ipot_Error) < 1.0D-10 .AND. ABS(Norm_Error) < 1.0D-10) THEN
           AOSPExit = .TRUE.
           ConvergeAOSP = .TRUE.
@@ -1074,13 +1074,13 @@ PROGRAM P2Use
         ENDIF
         IF(AOSPExit) EXIT
       ENDDO
-      !       Logic
+      ! Logic
       IF(ConvergeAll) THEN
         CALL SetEq(P0,P)
         EXIT
       ELSE
         IF(DLam < 1.D-2 .OR. NStep > 50) THEN
-          CALL Halt('P2Use:Density Matrix Extrapolater Failed to converge in '//TRIM(IntToChar(NStep))//' steps')
+          CALL Halt('P2Use: Density Matrix Extrapolater Failed to converge in '//TRIM(IntToChar(NStep))//' steps')
         ENDIF
         IF(.NOT. ConvergeAOSP) THEN
           Lam  = Lam - DLam
@@ -1090,10 +1090,12 @@ PROGRAM P2Use
         ENDIF
       ENDIF
     ENDDO
+
     ! Save back to be sure.
     CALL PChkSum(P,'P[0]',Prog)
     CALL Put(P,TrixFile('D',Args,0))
     CALL Put(P,'CurrentDM',CheckPoint_O=.TRUE.)
+
     ! Clean Up
     CALL Delete(P)
     CALL Delete(P0)

@@ -187,11 +187,21 @@ examples = \
 CLEANFILES = *~
 
 # Fix localversion.
-fix-localversion :
-	echo "localversion=`git log --pretty=oneline -1 | awk '{print $$1}'`" > localversion
+.PHONY : always-fix
+localversion : always-fix
+	echo "branch=`git branch | egrep '^\*' | awk '{print $$2}'`" > localversion.temp
+	echo "localversion=`git log --pretty=oneline -1 | awk '{print $$1}'`" >> localversion.temp
+	@if test -f localversion -a -z "`diff localversion localversion.temp`"; then \
+	  echo "localversion did not change"; \
+	  rm localversion.temp; \
+	else \
+	  echo "localversion updated"; \
+	  mv -f localversion.temp localversion; \
+	  touch MondoSCF/PrintParsed.f90; \
+	fi
 
 # Cryptographically sign the dist.
-dist-sign : fix-localversion dist
+dist-sign : localversion dist
 	rm -f $(distdir).tar.bz2.sig
 	gpg -b $(distdir).tar.bz2
 
