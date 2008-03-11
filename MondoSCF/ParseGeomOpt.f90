@@ -30,10 +30,12 @@ MODULE ParseGeomOpt
    USE Macros
    USE ControlStructures
    USE OptionKeys
+   USE MondoLogger
+
    IMPLICIT NONE
-   !
+
    CONTAINS
-   !
+
    SUBROUTINE LoadGeomOpt(N,GOpt,PBCDim)
      TYPE(FileNames)                :: N
      TYPE(GeomOpt)                  :: GOpt  
