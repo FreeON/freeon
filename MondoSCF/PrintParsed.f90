@@ -81,7 +81,7 @@ CONTAINS
     CALL MondoLogPlain('|__|  |__|\___/|_| |_|\____|\___/_____/  \____|__|    ')
     CALL MondoLogPlain("")
     CALL MondoLogPlain("Version "//VERSION)
-    CALL MondoLogPlain("local version: "//LOCAL_VERSION)
+    CALL MondoLogPlain("("//LOCAL_VERSION//")")
     CALL MondoLogPlain("")
     CALL MondoLogPlain('A program suite for O(N) SCF theory and ab initio MD ')
     CALL MondoLogPlain("")

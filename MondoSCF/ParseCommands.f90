@@ -58,14 +58,14 @@ CONTAINS
 
     ! Get environmental variables
     CALL GetEnv('MONDO_HOME',N%M_HOME)
-    IF(len(trim(N%M_HOME)) == 0) THEN
+    IF(LEN(TRIM(N%M_HOME)) == 0) THEN
       N%M_HOME = HAVE_MONDO_HOME
       WRITE(*,"(A)") 'env variable $(MONDO_HOME) not set. Using '//trim(N%M_HOME)
     ENDIF
     CALL GetEnv('MONDO_EXEC',N%M_EXEC)
     IF(LEN(TRIM(N%M_EXEC)) == 0) THEN
-      N%M_EXEC = HAVE_MONDO_HOME//"/bin"
-      WRITE(*,"(A)") 'env variable $(MONDO_EXEC) not set. Using '//trim(N%M_EXEC)
+      N%M_EXEC = TRIM(N%M_HOME)//"/bin"
+      WRITE(*,"(A)") 'env variable $(MONDO_EXEC) not set. Using '//TRIM(N%M_EXEC)
     ENDIF
     CALL GetEnv('MONDO_SCRATCH',N%M_SCRATCH)
     IF(LEN(TRIM(N%M_SCRATCH)) == 0) THEN
