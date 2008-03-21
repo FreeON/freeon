@@ -1729,7 +1729,9 @@ case "X-$DEBUG_PKG" in
   X-no|X-none)
     AC_MSG_RESULT([none])
     DEBUG_PKG=
-    H5_CPPFLAGS="$H5_CPPFLAGS -DNDEBUG"
+    #H5_CPPFLAGS="$H5_CPPFLAGS -DNDEBUG"
+    # For now, do not turn off assert debugging output.
+    H5_CPPFLAGS="$H5_CPPFLAGS -UNDEBUG"
     ;;
   *)
     AC_MSG_RESULT([$DEBUG_PKG])

@@ -53,9 +53,10 @@ AC_OUTPUT_COMMANDS([
   # In case this is a re-run of the configure script and the only thing that
   # changed was the --prefix, we need to make sure that we hard-code the correct
   # path into Mondo.
-  echo "touch MondoSCF/{PrintParsed,ParseCommands}.f90"
+  echo "touch MondoSCF/{PrintParsed,ParseCommands}.f90 MondoMods/Macros.f90"
   touch MondoSCF/ParseCommands.f90
   touch MondoSCF/PrintParsed.f90
+  touch MondoMods/Macros.f90
 ])
 
 # Set the optimization flags.
@@ -431,13 +432,23 @@ AC_ARG_ENABLE([delete-preprocessed-files],
 AC_MSG_RESULT([${remove_preprocessed_files}])
 AC_SUBST(REMOVE_PREPROCESSED_FILES, ${remove_preprocessed_files})
 
+# Define location of temporary Mondo files.
+AC_MSG_CHECKING([where to put MONDO_SCRATCH])
+AC_ARG_WITH([MONDO_SCRATCH],
+  [AS_HELP_STRING([--with-MONDO_SCRATCH=DIR],
+  [Specify default MONDO_SCRATCH directory])],
+  [MONDO_SCRATCH="${withval}"],
+  [MONDO_SCRATCH="."])
+AC_MSG_RESULT([using ${MONDO_SCRATCH}])
+
 # Some mondo variables.
-AC_DEFINE_UNQUOTED(HAVE_MONDO_HOME, ["${prefix}"], [Define the main installation directory.])
-AC_DEFINE_UNQUOTED(HAVE_MONDO_PLAT, ["${build}"], [Define build platform.])
-AC_DEFINE_UNQUOTED(HAVE_MONDO_HOST, ["`hostname`"], [Define hostname.])
-AC_DEFINE_UNQUOTED(HAVE_MONDO_MACH, ["${build_cpu}"], [Define build cpu.])
-AC_DEFINE_UNQUOTED(HAVE_MONDO_SYST, ["${build_os}"], [Define build system (os).])
-AC_DEFINE_UNQUOTED(HAVE_MONDO_VRSN, ["`uname -r`"], [Define build os version.])
+AC_DEFINE_UNQUOTED(HAVE_MONDO_HOME,    ["${prefix}"], [Define the main installation directory.])
+AC_DEFINE_UNQUOTED(HAVE_MONDO_PLAT,    ["${build}"], [Define build platform.])
+AC_DEFINE_UNQUOTED(HAVE_MONDO_HOST,    ["`hostname`"], [Define hostname.])
+AC_DEFINE_UNQUOTED(HAVE_MONDO_MACH,    ["${build_cpu}"], [Define build cpu.])
+AC_DEFINE_UNQUOTED(HAVE_MONDO_SYST,    ["${build_os}"], [Define build system (os).])
+AC_DEFINE_UNQUOTED(HAVE_MONDO_VRSN,    ["`uname -r`"], [Define build os version.])
+AC_DEFINE_UNQUOTED(HAVE_MONDO_SCRATCH, ["${MONDO_SCRATCH}"], [Define default MONDO_SCRATCH directory])
 
 # Enable fix for gfortran.
 if test "${ac_cv_fc_compiler_gnu}" = "yes"; then

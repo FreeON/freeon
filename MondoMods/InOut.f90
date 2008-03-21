@@ -232,13 +232,12 @@ CONTAINS
 
     Meta%Status=FAIL
     NC=StringLen(Meta%VarName)
-    CALL HDF5OpenData(HDF_CurrentID,NC,Char2Ints(NC,Meta%VarName), &
-         Meta%DataId,Meta%DataSpc)
+    CALL HDF5OpenData(HDF_CurrentID,NC,Char2Ints(NC,Meta%VarName),Meta%DataId,Meta%DataSpc)
     IF(Meta%DataId==FAIL)THEN
       IF(PRESENT(Put_O))THEN
         CALL CreateData(Meta)
       ELSE
-        CALL Halt(' Failed in OpenData:'//TRIM(MetaChar(Meta)))
+        CALL Halt('Failed in OpenData:'//TRIM(MetaChar(Meta)))
       ENDIF
     ELSE
       SizeOf=HDF5SizeOfData(Meta%DataSpc)
@@ -248,8 +247,7 @@ CONTAINS
         ELSEIF(SizeOf>Meta%Dimension)THEN
           CALL HDF5SelectData(Meta%DataId,Meta%DataSpc,Meta%Dimension)
         ELSEIF(SizeOf<Meta%Dimension)THEN
-          CALL Halt(' Failed in OpenData, need to redimension fixed form data:' &
-               //TRIM(MetaChar(Meta)))
+          CALL Halt('Failed in OpenData, need to redimension fixed form data: '//TRIM(MetaChar(Meta)))
         ENDIF
       ELSEIF(SizeOf>Meta%Dimension)THEN
         CALL HDF5SelectData(Meta%DataId,Meta%DataSpc,Meta%Dimension)
