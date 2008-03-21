@@ -61,17 +61,23 @@ CONTAINS
     IF(LEN(TRIM(N%M_HOME)) == 0) THEN
       N%M_HOME = HAVE_MONDO_HOME
       WRITE(*,"(A)") 'env variable $(MONDO_HOME) not set. Using '//trim(N%M_HOME)
+    ELSE
+      WRITE(*,"(A)") 'env variable $(MONDO_HOME) set to '//trim(N%M_HOME)
     ENDIF
     CALL GetEnv('MONDO_EXEC',N%M_EXEC)
     IF(LEN(TRIM(N%M_EXEC)) == 0) THEN
       N%M_EXEC = TRIM(N%M_HOME)//"/bin"
       WRITE(*,"(A)") 'env variable $(MONDO_EXEC) not set. Using '//TRIM(N%M_EXEC)
+    ELSE
+      WRITE(*,"(A)") 'env variable $(MONDO_EXEC) set to '//trim(N%M_EXEC)
     ENDIF
     CALL GetEnv('MONDO_SCRATCH',N%M_SCRATCH)
     IF(LEN(TRIM(N%M_SCRATCH)) == 0) THEN
-      WRITE(*,"(A)") 'env variable $(MONDO_SCRATCH) not set. Using /tmp'
-      N%M_SCRATCH = "/tmp"
-      MONDO_SCRATCH = "/tmp"
+      WRITE(*,"(A)") 'env variable $(MONDO_SCRATCH) not set. Using '//TRIM(HAVE_MONDO_SCRATCH)
+      N%M_SCRATCH = HAVE_MONDO_SCRATCH
+      MONDO_SCRATCH = HAVE_MONDO_SCRATCH
+    ELSE
+      WRITE(*,"(A)") 'env variable $(MONDO_SCRATCH) set to '//trim(N%M_SCRATCH)
     ENDIF
 
     ! Set path names etc

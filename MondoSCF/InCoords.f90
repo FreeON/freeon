@@ -2176,11 +2176,9 @@ CONTAINS
     CALL POffHardGc(VectInt,ISpB,JSpB,ASpB,CholData, &
          NCart,IntCs%N,Fact)
     IF(Print2) THEN
-      WRITE(*,100) Fact
-      WRITE(Out,100) Fact
-100   FORMAT('Percentage of Hard Constraints Projected Out= ',F6.2)
+      CALL MondoLog(DEBUG_NONE, "ProjectBCol", 'Percentage of Hard Constraints Projected Out = '//TRIM(FltToChar(Fact)))
     ENDIF
-    !
+
     CALL Delete(B)
     CALL Delete(BS)
     CALL Delete(ISpB)
@@ -2279,12 +2277,10 @@ CONTAINS
     CALL CALC_BxVect(ISpB,JSpB,ASpB,IntCDispl,CartAux%D,Trp_O=.TRUE.)
     CALL GcInvIter(CartAux%D,ISpB,JSpB,ASpB,CholData,NCart)
     CALL CALC_BxVect(ISpB,JSpB,ASpB,IntAux%D,CartAux%D)
-    Fact=DOT_PRODUCT(IntAux%D,IntCDispl)/ &
-         (DOT_PRODUCT(IntCDispl,IntCDispl)+1.D-10)*100.D0
-    WRITE(*,100) Fact
+    Fact=DOT_PRODUCT(IntAux%D,IntCDispl)/(DOT_PRODUCT(IntCDispl,IntCDispl)+1.D-10)*100.D0
     IntCDispl=IntAux%D
-100 FORMAT('Constraints projected out: ',F7.3,'%')
-    !
+    CALL MondoLog(DEBUG_NONE, "CleanConstrIntc", 'Constraints projected out: '//TRIM(FltToChar(Fact))//'%')
+
     CALL Delete(IntAux)
     CALL Delete(CartAux)
   END SUBROUTINE CleanConstrIntc
@@ -2447,18 +2443,11 @@ CONTAINS
     IF(ABS(MaxDispl)>Crit) DoRepeat=.TRUE.
     ! IF(Rigid>0.20D0) DoRepeat=.TRUE.
     IF(Print2) THEN
-      WRITE(*,*) 'Rigidity= ',Rigid
-      WRITE(Out,*) 'Rigidity= ',Rigid
+      CALL MondoLog(DEBUG_NONE, "CheckBigStep", 'Rigidity = '//TRIM(FltToChar(Rigid)))
       IF(DoRepeat) THEN
-        WRITE(*,*) IRep,' Repeat from CheckBigStep MaxDispl= ', &
-             MaxConv*MaxDispl,' on ',IMax,IntCs%Def%C(IMax)(1:8)
-        WRITE(Out,*) IRep,' Repeat from CheckBigStep MaxDispl= ', &
-             MaxConv*MaxDispl,' on ',IMax,IntCs%Def%C(IMax)(1:8)
+        WRITE(*,*) IRep,' Repeat from CheckBigStep MaxDispl= ',MaxConv*MaxDispl,' on ',IMax,IntCs%Def%C(IMax)(1:8)
       ELSE
-        WRITE(*,*) IRep,'Maximum Displacement from Backtransform.= ', &
-             MaxDispl*MaxConv,' on ',IMax,IntCs%Def%C(IMax)(1:8)
-        WRITE(Out,*) IRep,'Maximum Displacement from Backtransform.= ', &
-             MaxDispl*MaxConv,' on ',IMax,IntCs%Def%C(IMax)(1:8)
+        WRITE(*,*) IRep,'Maximum Displacement from Backtransform.= ',MaxDispl*MaxConv,' on ',IMax,IntCs%Def%C(IMax)(1:8)
       ENDIF
     ENDIF
   END SUBROUTINE CheckBigStep
@@ -2527,15 +2516,10 @@ CONTAINS
     DoPrtCells=.FALSE.
     DoPrtExternal=.FALSE.
     IF(PRESENT(PBCDim_O)) DoPrtCells=(PBCDim_O>0)
-    !
-    WRITE(*,*) TRIM(CharU)
-    WRITE(Out,*) TRIM(CharU)
-    WRITE(*,123)
-    WRITE(*,124)
-    WRITE(Out,123)
-    WRITE(Out,124)
-123 FORMAT('INTERNAL COORDINATES')
-124 FORMAT('       DEFINITION       ATOMS_INVOLVED      VALUE        CONSTRAINT    ACTIVE')
+
+    CALL MondoLogPlain(TRIM(CharU))
+    CALL MondoLogPlain('INTERNAL COORDINATES')
+    CALL MondoLogPlain('       DEFINITION       ATOMS_INVOLVED      VALUE        CONSTRAINT    ACTIVE')
     DO I=1,NIntC
       IF(IntCs%Def%C(I)(1:4)=='STRE') THEN
         SumU=Value(I)*ConvC
@@ -2562,26 +2546,19 @@ CONTAINS
         IF(IntCs%Def%C(I)(1:4)=='TORS'.OR. &
              IntCs%Def%C(I)(1:4)=='LINB'.OR. &
              IntCs%Def%C(I)(1:4)=='OUTP') THEN
-          WRITE(Out,322) IntCs%Def%C(I)(1:8),IntCs%Atoms%I(I,1:4), &
-               ' CELL ',IntCs%Cells%I(I,1:12),SumU
+          WRITE(Out,322) IntCs%Def%C(I)(1:8),IntCs%Atoms%I(I,1:4),' CELL ',IntCs%Cells%I(I,1:12),SumU
         ELSE IF(IntCs%Def%C(I)(1:4)=='BEND') THEN
-          WRITE(Out,422) IntCs%Def%C(I)(1:8),IntCs%Atoms%I(I,1:3), &
-               ' CELL ',IntCs%Cells%I(I,1:9),SumU
+          WRITE(Out,422) IntCs%Def%C(I)(1:8),IntCs%Atoms%I(I,1:3),' CELL ',IntCs%Cells%I(I,1:9),SumU
         ELSE IF(IntCs%Def%C(I)(1:4)=='STRE') THEN
-          WRITE(Out,522) IntCs%Def%C(I)(1:8),IntCs%Atoms%I(I,1:2), &
-               ' CELL ',IntCs%Cells%I(I,1:6),SumU
+          WRITE(Out,522) IntCs%Def%C(I)(1:8),IntCs%Atoms%I(I,1:2),' CELL ',IntCs%Cells%I(I,1:6),SumU
         ENDIF
 322     FORMAT(A8,4I4,A6,12I3,F12.5)
 422     FORMAT(A8,3I4,4X,A6,9I3,3X,F12.5)
 522     FORMAT(A8,2I4,2X,A6,6I3,6X,F12.5)
       ELSE
-        WRITE(*,111) I,IntCs%Def%C(I)(1:8),IntCs%Atoms%I(I,1:4),SumU, &
-             IntCs%Constraint%L(I),SumConstr,IntCs%Active%L(I)
-        WRITE(Out,111) I,IntCs%Def%C(I)(1:8),IntCs%Atoms%I(I,1:4),SumU, &
-             IntCs%Constraint%L(I),SumConstr,IntCs%Active%L(I)
+        WRITE(Out,111) I,IntCs%Def%C(I)(1:8),IntCs%Atoms%I(I,1:4),SumU,IntCs%Constraint%L(I),SumConstr,IntCs%Active%L(I)
         IF(DoPrtCells) THEN
           IF(ANY(IntCs%Cells%I(I,1:12)/=0)) THEN
-            WRITE(*,112) IntCs%Cells%I(I,1:12)
             WRITE(Out,112) IntCs%Cells%I(I,1:12)
           ENDIF
         ENDIF
@@ -2680,7 +2657,6 @@ CONTAINS
       Fact=Zero
     ENDIF
     IF(Print) THEN
-      WRITE(*,100) Fact
       WRITE(Out,100) Fact
     ENDIF
     !
@@ -4879,20 +4855,15 @@ CONTAINS
     Perc=DOT_PRODUCT(Displ,Displ2%D)/DOT_PRODUCT(Displ2%D,Displ2%D)
     Perc=(One-ABS(Perc))*100.D0
     IF(PRESENT(Messg_O)) THEN
-      Messg=TRIM(Messg_O)// &
-           " Percentage of Redundancy projected out= " &
-           //TRIM(IntToChar(INT(Perc)))
+      Messg=TRIM(Messg_O)//" Percentage of Redundancy projected out= "//TRIM(IntToChar(INT(Perc)))
     ELSE
-      Messg= &
-           " Percentage of Redundancy projected out= " &
-           //TRIM(IntToChar(INT(Perc)))
+      Messg= " Percentage of Redundancy projected out= "//TRIM(IntToChar(INT(Perc)))
     ENDIF
     IF(Print>=DEBUG_GEOP_MAX) THEN
-      WRITE(*,*) TRIM(Messg)
-      WRITE(Out,*) TRIM(Messg)
+      CALL MondoLog(DEBUG_NONE, "RedundancyOff", Messg)
     ENDIF
 100 FORMAT(F8.2)
-    !
+
     CALL Delete(Displ2)
     CALL Delete(Vect1)
     CALL Delete(ISpB)
@@ -7974,9 +7945,7 @@ CONTAINS
     !
     Fact=DOT_PRODUCT(CartGrad,CartA1%D)/DOT_PRODUCT(CartGrad,CartGrad)
     Fact=Fact*100.D0
-    WRITE(*,100) Fact
-    WRITE(Out,100) Fact
-100 FORMAT('Percentage of Constraint Force That is Projected Out= ',F8.4)
+    CALL MondoLog(DEBUG_NONE, "CleanConstrCart", 'Percentage of Constraint Force That is Projected Out = '//TRIM(FltToChar(Fact)))
     CartGrad=CartGrad-CartA1%D
     IF(PBCDim>0) THEN
       DO I=1,NatmsLoc-3

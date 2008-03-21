@@ -405,22 +405,27 @@ CONTAINS
       Guess=GUESS_EQ_NEWGEOM
     ENDIF
     IF(Guess==GUESS_EQ_RESTART.OR. &
-         Guess==GUESS_EQ_NUGUESS.OR. &
-         Guess==GUESS_EQ_NEWGEOM )THEN
+       Guess==GUESS_EQ_NUGUESS.OR. &
+       Guess==GUESS_EQ_NEWGEOM )THEN
 
       ! Make sure we have the necessary information to restart.
       IF(.NOT.OptCharQ(Inp,RESTART_INFO,RestartHDF)) THEN
         CALL MondoHalt(PRSE_ERROR,'Restart requested, but no HDF file specified.')
       ENDIF
 
+      ! Print something.
+      CALL MondoLog(DEBUG_NONE, "ParseRestart", "restarting from hdf "//TRIM(RestartHDF))
+
       ! Check for relative path for HDF, and if relative, expand ...
-      IF(SCAN(RestartHDF,'$')/=0)THEN
+      IF(SCAN(RestartHDF,'$') /= 0)THEN
+        CALL MondoLog(DEBUG_NONE, "ParseRestart", "found variable name in path, expanding...")
         L1=INDEX(RestartHDF,'$')
         L2=INDEX(RestartHDF,'/')
         L3=LEN(RestartHDF)
         ! get the relative env name
         CALL GETENV(RestartHDF(L1+1:L2-1),CTmp)
         RestartHDF=RestartHDF(1:L1-1)//TRIM(CTmp)//RestartHDF(L2:L3)
+        CALL MondoLog(DEBUG_NONE, "ParseRestart", "to "//TRIM(RestartHDF))
       ENDIF
 
       ! Check for absolute path
@@ -430,7 +435,9 @@ CONTAINS
       CALL New(RestartState,3)
 
       ! Open the old restart HDF file
+      CALL MondoLog(DEBUG_NONE, "ParseRestart", "opening hdf file")
       HDF_CurrentID=OpenHDF(RestartHDF)
+      CALL MondoLog(DEBUG_NONE, "ParseRestart", "done opening hdf file")
 
       ! Get the current state to restart from
       CALL Get(RestartState,'current_state')

@@ -23,6 +23,9 @@
 !    to return derivative works to the MondoSCF group for review, and possible
 !    disemination in future releases.
 !------------------------------------------------------------------------------
+
+#include <MondoConfig.h>
+
 MODULE Macros
   USE DerivedTypes
   USE GlobalScalars
@@ -42,7 +45,9 @@ MODULE Macros
 #ifdef NAG
   USE F90_UNIX
 #endif
+
   IMPLICIT NONE
+
   INTERFACE Init
     MODULE PROCEDURE Init_TIME, Init_DEBG, Init_MEMS
   END INTERFACE
@@ -66,13 +71,14 @@ CONTAINS
 #endif
     ! Get arguments
     CALL Get(Args)
+
     ! Get SCRATCH directory from env
     CALL GetEnv('MONDO_SCRATCH', MONDO_SCRATCH)
     if(LEN(TRIM(MONDO_SCRATCH)) == 0) then
-      !write(*,*) '$(MONDO_SCRATCH) not set. Using /tmp'
-      MONDO_SCRATCH = "/tmp"
+      MONDO_SCRATCH = HAVE_MONDO_SCRATCH
     endif
     MONDO_SCRATCH=TRIM(MONDO_SCRATCH)//'/'
+
     ! The HDF5 file name
     H5File=TRIM(MONDO_SCRATCH)//TRIM(Args%C%C(1))//TRIM(InfF)
     !write(*,*) "setting H5File to "//H5File

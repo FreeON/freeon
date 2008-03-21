@@ -92,6 +92,19 @@ CONTAINS
     CALL New(ETot,(/MaxSCFs,C%Geos%Clones/),(/0,1/))
     CALL New(DMax,(/MaxSCFs,C%Geos%Clones/),(/0,1/))
     CALL New(DIIS,(/MaxSCFs,C%Geos%Clones/),(/0,1/))
+
+    ! For now we are forcing guess to superposition when we run the optimizer.
+    ! This should get fixed in a proper way sometime.
+    IF(C%Opts%Grad == GRAD_GO_DOWNHILL) THEN
+      IF(C%Opts%Guess /= GUESS_EQ_SUPR) THEN
+        CALL MondoLog(DEBUG_NONE, "SCF", "switching guess from "// &
+          TRIM(IntToChar(C%Opts%Guess))// " to superposition")
+        C%Opts%Guess = GUESS_EQ_SUPR
+      ENDIF
+    ENDIF
+
+    CALL MondoLog(DEBUG_NONE, "SCF", "Guess = "//TRIM(IntToChar(C%Opts%Guess)))
+
     DO iSCF=0,MaxSCFs
       ! Do an SCF cycle
       IF(SCFCycle(iSCF,cBAS,cGEO,C%Nams,C%Stat,C%Opts,C%Geos,C%Dyns,C%MPIs,ETot,DMax,DIIS))THEN
@@ -763,8 +776,8 @@ CONTAINS
     INTEGER        :: cBAS
     !----------------------------------------------------------------------------!
 
-    IF(    S%Action%C(1)==CPSCF_SOLVE_SCF.OR. &
-           S%Action%C(1)==CPSCF_START_RESPONSE)THEN
+    IF(S%Action%C(1)==CPSCF_SOLVE_SCF.OR. &
+       S%Action%C(1)==CPSCF_START_RESPONSE)THEN
       CALL Invoke('TC2Response',N,S,M)
     ELSEIF(O%Methods(cBAS)==RH_R_SCF)THEN
       CALL Invoke('RHeqs',N,S,M)
