@@ -159,6 +159,8 @@ examples = \
   examples/MDO2xyz.py \
   examples/MD_C2F4_Symplectic.inp \
   examples/MD_C2F4_TRBO.inp \
+  examples/MD_F2_Symplectic.inp \
+  examples/MD_F2_TRBO.inp \
   examples/MD_H2.inp \
   examples/MD_H2_TRBO.inp \
   examples/MD_H2_TRBO_2.inp \
