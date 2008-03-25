@@ -629,7 +629,7 @@ CONTAINS
     ENDIF
 
     ! Generate Output.
-    IF(m_step == 1) THEN
+    IF(m_step == 2) THEN
       CALL OutputMD(C,iGEO)
     ENDIF
 
@@ -1079,22 +1079,33 @@ CONTAINS
       CLOSE(Out)
 
       IF(C%Dyns%MDAlgorithm == MD_AL_SYMPLECTIC) THEN
-        IF((MOD(iGEO-1,4)+1).EQ.4) THEN
 
-          FileName = TRIM(C%Nams%SCF_NAME)//'_'//TRIM(IntToChar(iCLONE))//'_Energies_Symplectic.dat'
-          CALL OpenASCII(TRIM(FileName), Out)
-          WRITE(Out,60) MDTime%D(iCLONE)*InternalTimeToFemtoseconds,MDKin%D(iCLONE),MDEpot%D(iCLONE),MDEtot%D(iCLONE)
-          CALL MondoLogPlain("Time = "//TRIM(FltToChar(MDTime%D(iCLONE)*InternalTimeToFemtoseconds)) &
-            //" fs, Temperature = "//TRIM(FltToChar(MDTemp%D(iCLONE))) &
-            //" K, avg. Temperature = "//TRIM(FltToChar(MDTave%D(iCLONE)))//" K")
-          CLOSE(Out)
+        FileName = TRIM(C%Nams%SCF_NAME)//'_'//TRIM(IntToChar(iCLONE))//'_Energies_Symplectic.dat'
+        CALL OpenASCII(TRIM(FileName), Out)
 
+        ! Add Header
+        IF(iGEO == 1) THEN
+          WRITE(Out,"(A)") "#   t [fs]         E_kin [Ry]         E_pot [Ry]         E_tot [Ry]"
         ENDIF
+
+        ! Write out energies.
+        WRITE(Out,60) MDTime%D(iCLONE)*InternalTimeToFemtoseconds,MDKin%D(iCLONE),MDEpot%D(iCLONE),MDEtot%D(iCLONE)
+        CALL MondoLogPlain("Time = "//TRIM(FltToChar(MDTime%D(iCLONE)*InternalTimeToFemtoseconds)) &
+          //" fs, Temperature = "//TRIM(FltToChar(MDTemp%D(iCLONE))) &
+          //" K, avg. Temperature = "//TRIM(FltToChar(MDTave%D(iCLONE)))//" K")
+        CLOSE(Out)
 
       ELSE
 
         FileName = TRIM(C%Nams%SCF_NAME)//'_'//TRIM(IntToChar(iCLONE))//'_Energies.dat'
         CALL OpenASCII(TRIM(FileName),Out)
+
+        ! Add Header
+        IF(iGEO == 1) THEN
+          WRITE(Out,"(A)") "# t [fs]  E_kin [Ry]        E_pot [Ry]        E_tot [Ry]"
+        ENDIF
+
+        ! Write out energies.
         WRITE(Out,60) MDTime%D(iCLONE)*InternalTimeToFemtoseconds,MDKin%D(iCLONE),MDEpot%D(iCLONE),MDEtot%D(iCLONE)
         CALL MondoLogPlain("Time = "//TRIM(FltToChar(MDTime%D(iCLONE)*InternalTimeToFemtoseconds)) &
           //" fs, Temperature = "//TRIM(FltToChar(MDTemp%D(iCLONE))) &
@@ -1102,6 +1113,15 @@ CONTAINS
         CLOSE(Out)
 
       ENDIF
+
+      FileName = TRIM(C%Nams%SCF_NAME)//'_'//TRIM(IntToChar(iCLONE))//'.xyz'
+      CALL OpenASCII(TRIM(FileName),Out)
+      Pos = C%Geos%Clone(iCLONE)%Carts%D(1:3,1)
+      Vel = C%Geos%Clone(iCLONE)%Velocity%D(1:3,1)
+      WRITE(Out,*) "MD run "//TRIM(C%Nams%SCF_NAME)//" "//TRIM(IntToChar(iCLONE))
+      WRITE(Out,*) C%Geos%Clone(iCLONE)%NAtms
+      WRITE(Out,61) MDTime%D(iCLONE)*InternalTimeToFemtoseconds,Pos(1:3),Vel(1:3)
+      CLOSE(Out)
 
       FileName = TRIM(C%Nams%SCF_NAME)//'_'//TRIM(IntToChar(iCLONE))//'_MD_Coordinates_1.dat'
       CALL OpenASCII(TRIM(FileName),Out)

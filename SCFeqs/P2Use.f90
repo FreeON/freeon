@@ -645,21 +645,6 @@ PROGRAM P2Use
     FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO))//'_C#'//TRIM(IntToChar(MyClone))//'.DOPsave'
     CALL Put(P,FileName)
 
-    IF(m_step == 1) THEN
-      ! Get v_scale.
-      CALL Get(v_scale, "v_scale", TRIM(IntToChar(iGEO-1)))
-
-      !v_scale = 1D0
-      CALL MondoLog(DEBUG_NONE, "P2Use", "v_scale("//TRIM(IntToChar(iGEO-1))//") = "//TRIM(DblToChar(v_scale)))
-      CALL MondoLog(DEBUG_NONE, "P2Use", "a("//TRIM(IntToChar(m_step))//") = "//TRIM(FltToChar(Symplectic_4th_Order_a(m_step))))
-      CALL MondoLog(DEBUG_NONE, "P2Use", "b("//TRIM(IntToChar(m_step))//") = "//TRIM(FltToChar(Symplectic_4th_Order_b(m_step))))
-
-      CALL Multiply(PV,v_scale)
-
-      FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO))//'_C#'//TRIM(IntToChar(MyClone))//'.PVsave'
-      CALL Put(PV,FileName)
-    ENDIF
-
     ! Purify P
 #ifdef PARALLEL
     CALL SetEq(P_BCSR,P)
