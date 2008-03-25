@@ -238,27 +238,6 @@ END PROGRAM test_compiler
     AC_MSG_FAILURE([the compiler does not understand the ALLOCATABLE attribute inside a type definition])])
 fi
 
-# Find flags for static linking.
-AC_ARG_ENABLE([static],
-  [AS_HELP_STRING([--disable-static],
-  [Disable static linking of MondoSCF executables.])],
-  [enable_static_linking="${enableval}"],
-  [enable_static_linking="yes"])
-
-static_linking_flags=""
-
-if test "${enable_static_linking}" = "yes"; then
-
-  if test -z "${LDFLAGS}"; then
-    LDFLAGS="-all-static"
-  else
-    LDFLAGS="${LDFLAGS} -all-static"
-  fi
-
-else
-  AC_MSG_NOTICE([static linking disabled])
-fi
-
 # Check for internal LAPACK/BLAS.
 AC_MSG_CHECKING([for internal lapack/blas])
 AC_ARG_ENABLE([internal-lapack],
@@ -410,6 +389,27 @@ else
     [],
     [AC_MSG_FAILURE([I need the hdf5 library])])
 
+fi
+
+# Find flags for static linking.
+AC_ARG_ENABLE([static],
+  [AS_HELP_STRING([--disable-static],
+  [Disable static linking of MondoSCF executables.])],
+  [enable_static_linking="${enableval}"],
+  [enable_static_linking="yes"])
+
+static_linking_flags=""
+
+if test "${enable_static_linking}" = "yes"; then
+
+  if test -z "${LDFLAGS}"; then
+    LDFLAGS="-all-static"
+  else
+    LDFLAGS="${LDFLAGS} -all-static"
+  fi
+
+else
+  AC_MSG_NOTICE([static linking disabled])
 fi
 
 # Set the preprocessor.
