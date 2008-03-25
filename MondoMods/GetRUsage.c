@@ -66,12 +66,12 @@ getmemoryusage (int * size)
     }
     fscanf(file, "%lu", & temp);
     *size = (int) round(temp/1024.);
+
+    /* Close file again. */
+    fclose(file);
   }
 
   else { *size = -1; }
-
-  /* Close file again. */
-  fclose(file);
 }
 
 void getmemoryusage_ (int * size)
