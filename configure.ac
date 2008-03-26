@@ -438,7 +438,7 @@ AC_ARG_WITH([MONDO_SCRATCH],
   [AS_HELP_STRING([--with-MONDO_SCRATCH=DIR],
   [Specify default MONDO_SCRATCH directory])],
   [MONDO_SCRATCH="${withval}"],
-  [MONDO_SCRATCH="."])
+  [MONDO_SCRATCH="/tmp"])
 AC_MSG_RESULT([using ${MONDO_SCRATCH}])
 
 # Some mondo variables.
