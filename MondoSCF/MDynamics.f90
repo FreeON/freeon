@@ -1116,11 +1116,13 @@ CONTAINS
 
       FileName = TRIM(C%Nams%SCF_NAME)//'_'//TRIM(IntToChar(iCLONE))//'.xyz'
       CALL OpenASCII(TRIM(FileName),Out)
-      Pos = C%Geos%Clone(iCLONE)%Carts%D(1:3,1)
-      Vel = C%Geos%Clone(iCLONE)%Velocity%D(1:3,1)
-      WRITE(Out,*) "MD run "//TRIM(C%Nams%SCF_NAME)//" "//TRIM(IntToChar(iCLONE))
       WRITE(Out,*) C%Geos%Clone(iCLONE)%NAtms
-      WRITE(Out,61) MDTime%D(iCLONE)*InternalTimeToFemtoseconds,Pos(1:3),Vel(1:3)
+      WRITE(Out,*) "MD run "//TRIM(C%Nams%SCF_NAME)//", Clone "//TRIM(IntToChar(iCLONE)) &
+        //", t = "//TRIM(FltToChar(MDTime%D(iCLONE)*InternalTimeToFemtoseconds))//" fs"
+      DO iATS=1,C%Geos%Clone(iCLONE)%NAtms
+        WRITE(Out,"(A,1x,F14.8,1x,F14.8,1x,F14.8)") &
+          TRIM(C%Geos%Clone(iCLONE)%AtNam%C(iATS)), C%Geos%Clone(iCLONE)%Carts%D(1:3,iATS)
+      ENDDO
       CLOSE(Out)
 
       FileName = TRIM(C%Nams%SCF_NAME)//'_'//TRIM(IntToChar(iCLONE))//'_MD_Coordinates_1.dat'
