@@ -93,16 +93,6 @@ CONTAINS
     CALL New(DMax,(/MaxSCFs,C%Geos%Clones/),(/0,1/))
     CALL New(DIIS,(/MaxSCFs,C%Geos%Clones/),(/0,1/))
 
-    ! For now we are forcing guess to superposition when we run the optimizer.
-    ! This should get fixed in a proper way sometime.
-    IF(C%Opts%Grad == GRAD_GO_DOWNHILL) THEN
-      IF(C%Opts%Guess /= GUESS_EQ_SUPR) THEN
-        CALL MondoLog(DEBUG_NONE, "SCF", "switching guess from "// &
-          TRIM(IntToChar(C%Opts%Guess))// " to superposition")
-        C%Opts%Guess = GUESS_EQ_SUPR
-      ENDIF
-    ENDIF
-
     CALL MondoLog(DEBUG_NONE, "SCF", "Guess = "//TRIM(IntToChar(C%Opts%Guess)))
 
     DO iSCF=0,MaxSCFs
