@@ -131,16 +131,6 @@ EXTRA_INCLUDES = \
 SOURCES_DEPCHECK = $(libMondoMods_la_SOURCES)
 
 # Dependencies.
-InOut.o : \
-  DerivedTypes.o \
-  GlobalScalars.o \
-  GlobalCharacters.o \
-  MemMan.o \
-  Indexing.o \
-  Parse.o \
-  SetEq.o \
-  MondoLogger.o
-
 InOut.lo : \
   DerivedTypes.lo \
   GlobalScalars.lo \
@@ -149,23 +139,12 @@ InOut.lo : \
   Indexing.lo \
   Parse.lo \
   SetEq.lo \
-  MondoLogger.lo
-
-DerivedTypes.o : \
-  GlobalScalars.o \
-  GlobalCharacters.o
+  MondoLogger.lo \
+  $(top_srcdir)/MondoConfig.h
 
 DerivedTypes.lo : \
   GlobalScalars.lo \
   GlobalCharacters.lo
-
-MemMan.o : \
-  DerivedTypes.o \
-  GlobalScalars.o \
-  GlobalCharacters.o \
-  GlobalObjects.o \
-  ProcessControl.o \
-  MondoLogger.o
 
 MemMan.lo : \
   DerivedTypes.lo \
@@ -175,14 +154,6 @@ MemMan.lo : \
   ProcessControl.lo \
   MondoLogger.lo
 
-Parse.o : \
-  DerivedTypes.o \
-  GlobalScalars.o \
-  GlobalCharacters.o \
-  ParsingConstants.o \
-  ProcessControl.o \
-  MemMan.o
-
 Parse.lo : \
   DerivedTypes.lo \
   GlobalScalars.lo \
@@ -191,23 +162,11 @@ Parse.lo : \
   ProcessControl.lo \
   MemMan.lo
 
-Clock.o : DerivedTypes.o
 Clock.lo : DerivedTypes.lo
 
-GlobalObjects.o : DerivedTypes.o
 GlobalObjects.lo : DerivedTypes.lo
 
-BasisSetParameters.o : GlobalCharacters.o
 BasisSetParameters.lo : GlobalCharacters.lo
-
-MondoMPI.o : \
-  DerivedTypes.o \
-  GlobalScalars.o \
-  GlobalObjects.o \
-  ProcessControl.o \
-  MPIInclude.o \
-  MemMan.o \
-  Parse.o
 
 MondoMPI.lo : \
   DerivedTypes.lo \
@@ -218,27 +177,11 @@ MondoMPI.lo : \
   MemMan.lo \
   Parse.lo
 
-SetEq.o : \
-  DerivedTypes.o \
-  GlobalScalars.o \
-  GlobalObjects.o \
-  MemMan.o
-
 SetEq.lo : \
   DerivedTypes.lo \
   GlobalScalars.lo \
   GlobalObjects.lo \
   MemMan.lo
-
-Order.o : \
-  DerivedTypes.o \
-  GlobalCharacters.o \
-  GlobalScalars.o \
-  GlobalObjects.o \
-  ProcessControl.o \
-  MemMan.o \
-  Anneal.o \
-  Parse.o
 
 Order.lo : \
   DerivedTypes.lo \
@@ -250,23 +193,9 @@ Order.lo : \
   Anneal.lo \
   Parse.lo
 
-Anneal.o : MemMan.o PrettyPrint.o
 Anneal.lo : MemMan.lo PrettyPrint.lo
 
-Indexing.o : DerivedTypes.o
 Indexing.lo : DerivedTypes.lo
-
-PrettyPrint.o : \
-  DerivedTypes.o \
-  GlobalCharacters.o \
-  GlobalScalars.o \
-  GlobalObjects.o \
-  BasisSetParameters.o \
-  Clock.o \
-  Parse.o \
-  SetEq.o \
-  InOut.o \
-  MondoLogger.o
 
 PrettyPrint.lo : \
   DerivedTypes.lo \
@@ -279,20 +208,6 @@ PrettyPrint.lo : \
   SetEq.lo \
   InOut.lo \
   MondoLogger.lo
-
-LinAlg.o : \
-  GlobalCharacters.o \
-  DerivedTypes.o \
-  GlobalScalars.o \
-  GlobalObjects.o \
-  ProcessControl.o \
-  PrettyPrint.o \
-  MemMan.o \
-  SetEq.o \
-  InOut.o \
-  Order.o \
-  Clock.o \
-  Thresholding.o
 
 LinAlg.lo : \
   GlobalCharacters.lo \
@@ -308,48 +223,22 @@ LinAlg.lo : \
   Clock.lo \
   Thresholding.lo
 
-GlobalCharacters.o : GlobalScalars.o
 GlobalCharacters.lo : GlobalScalars.lo
-
-McMurch.o : \
-  DerivedTypes.o \
-  GlobalScalars.o \
-  MemMan.o
 
 McMurch.lo : \
   DerivedTypes.lo \
   GlobalScalars.lo \
   MemMan.lo
 
-DerivedTypes.o : \
-  GlobalScalars.o \
-  GlobalCharacters.o
-
 DerivedTypes.lo : \
   GlobalScalars.lo \
   GlobalCharacters.lo
-
-MatFunk.o : \
-  DerivedTypes.o \
-  GlobalScalars.o \
-  GlobalCharacters.o \
-  PrettyPrint.o
 
 MatFunk.lo : \
   DerivedTypes.lo \
   GlobalScalars.lo \
   GlobalCharacters.lo \
   PrettyPrint.lo
-
-Thresholding.o : \
-  DerivedTypes.o \
-  GlobalScalars.o \
-  GlobalCharacters.o \
-  GlobalObjects.o \
-  InOut.o \
-  SpecFun.o \
-  Parse.o \
-  McMurch.o
 
 Thresholding.lo : \
   DerivedTypes.lo \
@@ -361,29 +250,15 @@ Thresholding.lo : \
   Parse.lo \
   McMurch.lo
 
-SpecFun.o : \
-  DerivedTypes.o \
-	Parse.o
-
 SpecFun.lo : \
   DerivedTypes.lo \
 	Parse.lo
 
-AtomPairs.o : DerivedTypes.o
 AtomPairs.lo : DerivedTypes.lo
 
-PBC.o : DerivedTypes.o MondoLogger.o
 PBC.lo : DerivedTypes.lo MondoLogger.lo
 
-Functional.o : DerivedTypes.o
 Functional.lo : DerivedTypes.lo
-
-BraBloks.o : \
-  DerivedTypes.o \
-  GlobalScalars.o \
-  PrettyPrint.o \
-  McMurch.o \
-  Thresholding.o
 
 BraBloks.lo : \
   DerivedTypes.lo \
@@ -392,13 +267,6 @@ BraBloks.lo : \
   McMurch.lo \
   Thresholding.lo
 
-Mechanics.o : \
-  DerivedTypes.o \
-  GlobalScalars.o \
-  GlobalCharacters.o \
-  GlobalObjects.o \
-	InOut.o
-
 Mechanics.lo : \
   DerivedTypes.lo \
   GlobalScalars.lo \
@@ -406,16 +274,7 @@ Mechanics.lo : \
   GlobalObjects.lo \
 	InOut.lo
 
-Slatec.o : GlobalScalars.o ProcessControl.o
 Slatec.lo : GlobalScalars.lo ProcessControl.lo
-
-AInv.o : \
-  DerivedTypes.o \
-  GlobalScalars.o \
-  GlobalCharacters.o \
-  MemMan.o \
-  LinAlg.o \
-  MatFunk.o
 
 AInv.lo : \
   DerivedTypes.lo \
@@ -425,30 +284,14 @@ AInv.lo : \
   LinAlg.lo \
   MatFunk.lo
 
-ParsingConstants.o : GlobalScalars.o
 ParsingConstants.lo : GlobalScalars.lo
 
-BoundingBox.o : DerivedTypes.o
 BoundingBox.lo : DerivedTypes.lo
-
-Functionals.o : \
-  DerivedTypes.o \
-  ProcessControl.o \
-  Parse.o
 
 Functionals.lo : \
   DerivedTypes.lo \
   ProcessControl.lo \
   Parse.lo
-
-FastMat.o : \
-  DerivedTypes.o \
-  GlobalScalars.o \
-  GlobalObjects.o \
-  MemMan.o \
-  Order.o \
-  LinAlg.o \
-  Thresholding.o
 
 FastMat.lo : \
   DerivedTypes.lo \
@@ -459,16 +302,6 @@ FastMat.lo : \
   LinAlg.lo \
   Thresholding.lo
 
-CholFact.o : \
-  DerivedTypes.o \
-  GlobalScalars.o \
-  GlobalObjects.o \
-  GlobalCharacters.o \
-  InOut.o \
-  MemMan.o \
-  PrettyPrint.o \
-  ParsingConstants.o
-
 CholFact.lo : \
   DerivedTypes.lo \
   GlobalScalars.lo \
@@ -478,20 +311,6 @@ CholFact.lo : \
   MemMan.lo \
   PrettyPrint.lo \
   ParsingConstants.lo
-
-Macros.o : \
-  DerivedTypes.o \
-  GlobalScalars.o \
-  GlobalObjects.o \
-  GlobalCharacters.o \
-  ParsingConstants.o \
-  PrettyPrint.o \
-  Parse.o \
-  Clock.o \
-  InOut.o \
-  Functionals.o \
-  AtomPairs.o \
-  Mechanics.o
 
 Macros.lo : \
   DerivedTypes.lo \
@@ -505,17 +324,8 @@ Macros.lo : \
   InOut.lo \
   Functionals.lo \
   AtomPairs.lo \
-  Mechanics.lo
-
-PBC.o : \
-  DerivedTypes.o \
-  GlobalScalars.o \
-  GlobalCharacters.o \
-  GlobalObjects.o \
-  PrettyPrint.o \
-  Thresholding.o \
-  Order.o \
-  MemMan.o
+  Mechanics.lo \
+  $(top_srcdir)/MondoConfig.h
 
 PBC.lo : \
   DerivedTypes.lo \
@@ -527,16 +337,6 @@ PBC.lo : \
   Order.lo \
   MemMan.lo
 
-AtomPairs.o : \
-  DerivedTypes.o \
-  GlobalScalars.o \
-  GlobalCharacters.o \
-  GlobalObjects.o \
-  BoundingBox.o \
-  Thresholding.o \
-  PBC.o \
-  LinAlg.o
-
 AtomPairs.lo : \
   DerivedTypes.lo \
   GlobalScalars.lo \
@@ -547,18 +347,7 @@ AtomPairs.lo : \
   PBC.lo \
   LinAlg.lo
 
-EllToInclude.o : DerivedTypes.o GlobalScalars.o
 EllToInclude.lo : DerivedTypes.lo GlobalScalars.lo
-
-FTest.o : \
-  DerivedTypes.o \
-	GlobalScalars.o \
-	GlobalCharacters.o \
-	InOut.o \
-	PrettyPrint.o \
-	Parse.o \
-	MemMan.o \
-	SpecFun.o
 
 FTest.lo : \
   DerivedTypes.lo \
@@ -570,16 +359,6 @@ FTest.lo : \
 	MemMan.lo \
 	SpecFun.lo
 
-SMTest.o : \
-  DerivedTypes.o \
-	GlobalScalars.o \
-	GlobalCharacters.o \
-	InOut.o \
-	PrettyPrint.o \
-	Parse.o \
-	MemMan.o \
-	Order.o
-
 SMTest.lo : \
   DerivedTypes.lo \
 	GlobalScalars.lo \
@@ -590,13 +369,6 @@ SMTest.lo : \
 	MemMan.lo \
 	Order.lo
 
-ProcessControl.o : \
-  DerivedTypes.o \
-  GlobalScalars.o \
-  GlobalCharacters.o \
-  ParsingConstants.o \
-  MondoLogger.o
-
 ProcessControl.lo : \
   DerivedTypes.lo \
   GlobalScalars.lo \
@@ -604,20 +376,17 @@ ProcessControl.lo : \
   ParsingConstants.lo \
   MondoLogger.lo
 
-MondoLogger.o : \
-  GlobalObjects.o \
-  GlobalCharacters.o \
-  ParsingConstants.o
-
 MondoLogger.lo : \
   GlobalObjects.lo \
   GlobalCharacters.lo \
   ParsingConstants.lo
 
-CWrappers.o : \
-  ParsingConstants.o \
-  MondoLogger.o
-
 CWrappers.lo : \
   ParsingConstants.lo \
   MondoLogger.lo
+
+HDF5Wrap.lo : \
+  $(top_srcdir)/config.h
+
+SMWrap.lo : \
+  $(top_srcdir)/config.h

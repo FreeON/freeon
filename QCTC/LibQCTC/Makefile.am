@@ -70,17 +70,11 @@ libQCTC_la_SOURCES = \
   PoleGlobals.f90 \
   PoleNodeType.f90
 
+SOURCES_DEPCHECK = $(libQCTC_la_SOURCES)
+
 EXTRA_INCLUDES = -I../../MondoMods
 
 # Dependencies.
-AuxInt10.o : ERIGlobals.o
-AuxInt11.o : ERIGlobals.o
-AuxInt12.o : ERIGlobals.o
-AuxInt13.o : ERIGlobals.o
-AuxInt7.o  : ERIGlobals.o
-AuxInt8.o  : ERIGlobals.o
-AuxInt9.o  : ERIGlobals.o
-
 AuxInt10.lo : ERIGlobals.lo
 AuxInt11.lo : ERIGlobals.lo
 AuxInt12.lo : ERIGlobals.lo
@@ -88,35 +82,6 @@ AuxInt13.lo : ERIGlobals.lo
 AuxInt7.lo  : ERIGlobals.lo
 AuxInt8.lo  : ERIGlobals.lo
 AuxInt9.lo  : ERIGlobals.lo
-
-CTraX107.o : ERIGlobals.o PoleNodeType.o PoleGlobals.o
-CTraX206.o : ERIGlobals.o PoleNodeType.o PoleGlobals.o
-CTraX207.o : ERIGlobals.o PoleNodeType.o PoleGlobals.o
-CTraX305.o : ERIGlobals.o PoleNodeType.o PoleGlobals.o
-CTraX306.o : ERIGlobals.o PoleNodeType.o PoleGlobals.o
-CTraX307.o : ERIGlobals.o PoleNodeType.o PoleGlobals.o
-CTraX404.o : ERIGlobals.o PoleNodeType.o PoleGlobals.o
-CTraX405.o : ERIGlobals.o PoleNodeType.o PoleGlobals.o
-CTraX406.o : ERIGlobals.o PoleNodeType.o PoleGlobals.o
-CTraX407.o : ERIGlobals.o PoleNodeType.o PoleGlobals.o
-CTraX503.o : ERIGlobals.o PoleNodeType.o PoleGlobals.o
-CTraX504.o : ERIGlobals.o PoleNodeType.o PoleGlobals.o
-CTraX505.o : ERIGlobals.o PoleNodeType.o PoleGlobals.o
-CTraX506.o : ERIGlobals.o PoleNodeType.o PoleGlobals.o
-CTraX507.o : ERIGlobals.o PoleNodeType.o PoleGlobals.o
-CTraX602.o : ERIGlobals.o PoleNodeType.o PoleGlobals.o
-CTraX603.o : ERIGlobals.o PoleNodeType.o PoleGlobals.o
-CTraX604.o : ERIGlobals.o PoleNodeType.o PoleGlobals.o
-CTraX605.o : ERIGlobals.o PoleNodeType.o PoleGlobals.o
-CTraX606.o : ERIGlobals.o PoleNodeType.o PoleGlobals.o
-CTraX607.o : ERIGlobals.o PoleNodeType.o PoleGlobals.o
-CTraX701.o : ERIGlobals.o PoleNodeType.o PoleGlobals.o
-CTraX702.o : ERIGlobals.o PoleNodeType.o PoleGlobals.o
-CTraX703.o : ERIGlobals.o PoleNodeType.o PoleGlobals.o
-CTraX704.o : ERIGlobals.o PoleNodeType.o PoleGlobals.o
-CTraX705.o : ERIGlobals.o PoleNodeType.o PoleGlobals.o
-CTraX706.o : ERIGlobals.o PoleNodeType.o PoleGlobals.o
-CTraX707.o : ERIGlobals.o PoleNodeType.o PoleGlobals.o
 
 CTraX107.lo : ERIGlobals.lo PoleNodeType.lo PoleGlobals.lo
 CTraX206.lo : ERIGlobals.lo PoleNodeType.lo PoleGlobals.lo
@@ -146,35 +111,6 @@ CTraX704.lo : ERIGlobals.lo PoleNodeType.lo PoleGlobals.lo
 CTraX705.lo : ERIGlobals.lo PoleNodeType.lo PoleGlobals.lo
 CTraX706.lo : ERIGlobals.lo PoleNodeType.lo PoleGlobals.lo
 CTraX707.lo : ERIGlobals.lo PoleNodeType.lo PoleGlobals.lo
-
-HGTraX106.o : ERIGlobals.o PoleNodeType.o
-HGTraX205.o : ERIGlobals.o PoleNodeType.o
-HGTraX206.o : ERIGlobals.o PoleNodeType.o
-HGTraX304.o : ERIGlobals.o PoleNodeType.o
-HGTraX305.o : ERIGlobals.o PoleNodeType.o
-HGTraX306.o : ERIGlobals.o PoleNodeType.o
-HGTraX403.o : ERIGlobals.o PoleNodeType.o
-HGTraX404.o : ERIGlobals.o PoleNodeType.o
-HGTraX405.o : ERIGlobals.o PoleNodeType.o
-HGTraX406.o : ERIGlobals.o PoleNodeType.o
-HGTraX502.o : ERIGlobals.o PoleNodeType.o
-HGTraX503.o : ERIGlobals.o PoleNodeType.o
-HGTraX504.o : ERIGlobals.o PoleNodeType.o
-HGTraX505.o : ERIGlobals.o PoleNodeType.o
-HGTraX506.o : ERIGlobals.o PoleNodeType.o
-HGTraX601.o : ERIGlobals.o PoleNodeType.o
-HGTraX602.o : ERIGlobals.o PoleNodeType.o
-HGTraX603.o : ERIGlobals.o PoleNodeType.o
-HGTraX604.o : ERIGlobals.o PoleNodeType.o
-HGTraX605.o : ERIGlobals.o PoleNodeType.o
-HGTraX606.o : ERIGlobals.o PoleNodeType.o
-HGTraX700.o : ERIGlobals.o PoleNodeType.o
-HGTraX701.o : ERIGlobals.o PoleNodeType.o
-HGTraX702.o : ERIGlobals.o PoleNodeType.o
-HGTraX703.o : ERIGlobals.o PoleNodeType.o
-HGTraX704.o : ERIGlobals.o PoleNodeType.o
-HGTraX705.o : ERIGlobals.o PoleNodeType.o
-HGTraX706.o : ERIGlobals.o PoleNodeType.o
 
 HGTraX106.lo : ERIGlobals.lo PoleNodeType.lo
 HGTraX205.lo : ERIGlobals.lo PoleNodeType.lo

@@ -59,7 +59,8 @@ MondoSCF_LINK = $(FCLINK)
 
 # Dependencies.
 ParseCommands.o : \
-  ControlStructures.o
+  ControlStructures.o \
+  $(top_srcdir)/MondoConfig.h
 
 ParseOptions.o : \
 	Numerics.o \
@@ -213,4 +214,5 @@ PunchHDF.o : \
 	OptionKeys.o
 
 PrintParsed.o : \
-  ControlStructures.o
+  ControlStructures.o \
+  $(top_srcdir)/MondoConfig.h
