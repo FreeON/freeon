@@ -103,13 +103,6 @@ CONTAINS
       ELSE
         ! Convert that to internal time units.
         D%DTime = D%DTime*FemtosecondsToInternalTime
-
-        ! In case we are using higher order symplectic schemes, we need to
-        ! divide the time step to account for the unphysical intermediate steps.
-        IF(D%MDAlgorithm == MD_AL_SYMPLECTIC) THEN
-          CALL MondoLog(DEBUG_NONE, "ParseDynamics", "Scaling internal deltaT")
-          D%DTime = D%DTime/4.0D0
-        ENDIF
       ENDIF
       ! MD MaxSteps
       IF(.NOT. OptIntQ(Inp,MD_MAX_STEP,D%MDMaxSteps)) THEN

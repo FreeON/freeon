@@ -331,7 +331,13 @@ CONTAINS
       HDFFileID=OpenHDF(C%Nams%HFile)
       DO iCLONE=1,C%Geos%Clones
         iMDStep = iMDStep+1
-        MDTime%D(iCLONE) = MDTime%D(iCLONE)+C%Dyns%DTime
+
+        IF(C%Dyns%MDAlgorithm == MD_AL_SYMPLECTIC) THEN
+          MDTime%D(iCLONE) = MDTime%D(iCLONE)+C%Dyns%DTime/4.0D0
+        ELSE
+          MDTime%D(iCLONE) = MDTime%D(iCLONE)+C%Dyns%DTime
+        ENDIF
+
         HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
         CALL Put(iMDStep,'iMDStep')
         CALL Put(MDTime%D(iCLONE),"MDTime")
@@ -549,7 +555,7 @@ CONTAINS
     ENDDO
 
     ! Get the symplectic counter.
-    m_step = MOD(iGEO,4)+1
+    m_step = MOD(iGEO-1,4)+1
 
     IF(m_step == 1) THEN
 
@@ -612,24 +618,22 @@ CONTAINS
     ENDIF
 
     ! Update the Velocity if not the first step.
-    IF(iGEO .NE. 1) THEN
-      DO iCLONE=1,C%Geos%Clones
-        DO iATS=1,C%Geos%Clone(iCLONE)%NAtms
-          IF(C%Geos%Clone(iCLONE)%CConstrain%I(iATS)==0)THEN
-            Mass      =  C%Geos%Clone(iCLONE)%AtMss%D(iATS)
-            Vel(1:3)  =  C%Geos%Clone(iCLONE)%Velocity%D(1:3,iATS)
-            Acc(1:3)  = -C%Geos%Clone(iCLONE)%Gradients%D(1:3,iATS)/Mass
+    DO iCLONE=1,C%Geos%Clones
+      DO iATS=1,C%Geos%Clone(iCLONE)%NAtms
+        IF(C%Geos%Clone(iCLONE)%CConstrain%I(iATS)==0)THEN
+          Mass      =  C%Geos%Clone(iCLONE)%AtMss%D(iATS)
+          Vel(1:3)  =  C%Geos%Clone(iCLONE)%Velocity%D(1:3,iATS)
+          Acc(1:3)  = -C%Geos%Clone(iCLONE)%Gradients%D(1:3,iATS)/Mass
 
-            ! Velocity: v(t) = v(t-dT/2)+a(t)dT/2
-            Vel(1:3) = Vel(1:3) + Acc(1:3)*dT*Symplectic_4th_Order_b(m_step)
-            C%Geos%Clone(iCLONE)%Velocity%D(1:3,iATS) = Vel(1:3)
-          ENDIF
-        ENDDO
+          ! Velocity: v(t) = v(t-dT/2)+a(t)dT/2
+          Vel(1:3) = Vel(1:3) + Acc(1:3)*dT*Symplectic_4th_Order_b(m_step)
+          C%Geos%Clone(iCLONE)%Velocity%D(1:3,iATS) = Vel(1:3)
+        ENDIF
       ENDDO
-    ENDIF
+    ENDDO
 
     ! Generate Output.
-    IF(m_step == 2) THEN
+    IF(m_step == 1) THEN
       CALL OutputMD(C,iGEO)
     ENDIF
 
