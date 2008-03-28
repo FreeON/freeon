@@ -141,7 +141,6 @@ examples = \
   examples/Cytosine.inp \
   examples/Diamond.inp \
   examples/Diamond.ref \
-  examples/DoRegTest \
   examples/Graphite.inp \
   examples/Graphite.ref \
   examples/Guanine-NumFreq.frequencies \
