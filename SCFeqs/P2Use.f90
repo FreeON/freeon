@@ -547,7 +547,7 @@ PROGRAM P2Use
     ! P(p-1), where p < 5.
 
     ! Calculate symplectic counter.
-    m_step = MOD(iGEO-1,4)+1
+    m_step = MOD(iGEO-2,4)+1
 
     IF(iGEO == 6) THEN
       DO I=1,5
