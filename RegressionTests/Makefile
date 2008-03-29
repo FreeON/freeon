@@ -5,21 +5,16 @@ distname = MondoRegressionTests
 DISTFILES = \
   COPYING \
   MD_H2_TRBO.inp \
+  MD_H2_TRBO.reference \
   MD_H2_TRBO.test \
-  Makefile \
   README \
   build.test \
   example.reference \
   example.test \
-  localversion \
   runTests.py
 
-# Fix localversion.
-fix-localversion :
-	echo "localversion=`git log --pretty=oneline -1 | awk '{print $$1}'`" > localversion
-
 # Make dist.
-dist : fix-localversion
+dist : clean
 	tar cf - $(DISTFILES) | bzip2 > $(distname).tar.bz2
 
 # Cryptographically sign the dist.
@@ -28,5 +23,9 @@ dist-sign : dist
 	gpg -b $(distname).tar.bz2
 
 # Upload dist file to Savannah.
-upload-dist : dist-sign
+dist-upload : dist-sign
 	rsync -v --progress $(distname).tar.bz2 $(distname).tar.bz2.sig nicolasbock@dl.sv.nongnu.org:/releases/freeon/
+
+# Clean up.
+clean :
+	rm -f *~

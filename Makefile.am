@@ -208,6 +208,7 @@ localversion : always-fix
 	      mv -f localversion.temp localversion; \
 	      touch MondoSCF/PrintParsed.f90; \
 	    fi; \
+	    echo "localversion at $${branch}:$${localversion}"; \
 	  fi
 
 # Cryptographically sign the dist.

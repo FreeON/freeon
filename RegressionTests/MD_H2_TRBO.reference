@@ -1,5 +1,59 @@
 # The file we are checking...
-output_file = MD_H2_TRBO.out
+output_file = MD_H2_TRBO_.*.out
 
 # Check for MakeRho...
-Rho_tot = 1 (1e-10)
+tag = "^\[MakeRho\] Rho_tot = (.+)$"
+value = 1
+error = 1e-10
+
+tag = "<SCF> *= *(.+)$"
+value = 3.65210325
+error = 1e-10
+
+tag = "<SCF> *= *(.+)$"
+value = -1.09927985
+error = 1e-10
+
+tag = "<SCF> *= *(.+)$"
+value = -1.12222907
+error = 1e-10
+
+tag = "<SCF> *= *(.+)$"
+value = -1.12266652
+error = 1e-10
+
+tag = "<SCF> *= *(.+)$"
+value = -1.12267624
+error = 1e-10
+
+tag = "<SCF> *= *(.+)$"
+value = -1.12267647
+error = 1e-10
+
+tag = "<SCF> *= *(.+)$"
+value = -1.12267648
+error = 1e-10
+
+tag = "<SCF> *= *(.+)$"
+value = -1.12267648
+error = 1e-10
+
+tag = "<SCF> *= *(.+)$"
+value = -1.12267648
+error = 1e-10
+
+tag = "<SCF> *= *(.+)$"
+value = -1.12267648
+error = 1e-10
+
+tag = "<SCF> *= *(.+)$"
+value = -1.12267648
+error = 1e-10
+
+tag = "<SCF> *= *(.+)$"
+value = -1.12267648
+error = 1e-10
+
+tag = "<SCF> *= *(.+)$"
+value = -1.12267648
+error = 1e-10
