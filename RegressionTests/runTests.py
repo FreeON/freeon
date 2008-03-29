@@ -67,6 +67,11 @@ parse.add_option("--clean-run", \
     dest = "clean_run", \
     action = "store_true")
 
+parse.add_option("--clean-build", \
+    help = "clean the build directory", \
+    dest = "clean_build", \
+    action = "store_true")
+
 option, argument = parse.parse_args()
 
 # Set up logging.
@@ -90,14 +95,6 @@ log = logging.getLogger("main")
 
 # Start...
 log.info("starting new regression test")
-
-# Read in localversion in case it exists.
-if os.path.exists("localversion"):
-  fd = open("localversion", "r")
-  fd.close()
-
-else:
-  log.info("no localversion set")
 
 if len(argument) != 1:
   log.error("I need exactly 1 input file")
@@ -172,6 +169,11 @@ if "Mondo_tar" in inputfield:
 
   log.debug("tar file version name is " + tarname)
   log.debug("tar extensions are " + str(tarext))
+
+  # Check for clean_build option.
+  if option.clean_build and os.path.exists(builddir):
+    log.info("wiping builddir " + builddir)
+    shutil.rmtree(builddir)
 
   # Check whether we already built this source.
   if os.path.exists(os.path.join(builddir, tarname)):
@@ -373,3 +375,127 @@ if not "Mondo_reference" in inputfield:
   sys.exit(0)
 
 # Read in 
+log.debug("reading references from " + inputfield["Mondo_reference"])
+fd = open(inputfield["Mondo_reference"])
+lines = fd.readlines()
+fd.close()
+
+# The references.
+last_tag = None
+ref = {}
+output_file = None
+
+linenumber = 0
+for line in lines:
+  line = line.strip()
+  linenumber += 1
+
+  check = re.compile("(^[^#]*)(#.+$)").search(line)
+  if check:
+    line = check.group(1).strip()
+
+  if len(line) == 0:
+    continue
+
+  check = re.compile("output_file *= *(.*)$").search(line)
+  if check:
+    log.debug("found output_file " + check.group(1).strip())
+    output_file = check.group(1).strip()
+    continue
+
+  check = re.compile("tag *= *\"(.*)\"$").search(line)
+  if check:
+    log.debug("found tag \"" + check.group(1) + "\"")
+    if not last_tag:
+      if check.group(1) in ref:
+        ref[check.group(1)]["values"].append({})
+      else:
+        ref[check.group(1)] = { "index": 0, "values": [ {} ] }
+
+      last_tag = check.group(1)
+      continue
+    else:
+      print "tags have to be followed by a value and an error"
+      print "syntax error on line " + str(linenumber) + " of " + inputfield["Mondo_reference"]
+      sys.exit(1)
+
+  for substring in [ "value", "error" ]:
+    check = re.compile(substring + " *= *([0-9.de+\-]*)").search(line)
+    if check:
+      log.debug("found " + substring + " = " + check.group(1))
+      if not last_tag:
+        print "there should be a tag before the " + substring
+        print "syntax error on line " + str(linenumber) + " of " + inputfield["Mondo_reference"]
+        sys.exit(1)
+      else:
+        if substring in ref[last_tag]["values"][-1]:
+          print "value for this tag already set"
+          print "syntax error on line " + str(linenumber) + " of " + inputfield["Mondo_reference"]
+          sys.exit(1)
+        else:
+          ref[last_tag]["values"][-1][substring] = float(check.group(1))
+          if "value" in ref[last_tag]["values"][-1] and "error" in ref[last_tag]["values"][-1]:
+            last_tag = None
+          continue
+
+log.debug("checking tags: " + str(ref))
+
+# Find the output file.
+files = os.listdir(rundir)
+output_files = []
+for file in files:
+  check = re.compile(output_file).search(file)
+  if check:
+    log.debug("found possible output file: " + file)
+    output_files.append(file)
+
+if len(output_files) > 1:
+  log.error("considered " + str(files) + " for output file")
+  log.error("found more than 1 possible output file matching " + output_file)
+  log.error(str(output_files))
+  sys.exit(1)
+
+if len(output_files) < 1:
+  log.error("considered " + str(files) + " for output file")
+  log.error("could not find output file matching " + output_file)
+  sys.exit(1)
+
+log.info("analyzing output file " + output_files[0])
+fd = open(os.path.join(rundir, output_files[0]))
+lines = fd.readlines()
+fd.close()
+
+number_errors = 0
+
+linenumber = 0
+for line in lines:
+  linenumber += 1
+  line = line.strip()
+
+  for tag in ref.keys():
+    if ref[tag]["index"] >= len(ref[tag]["values"]):
+      continue
+
+    check = re.compile(tag).search(line)
+    if check:
+      log.debug("line " + str(linenumber) + ", found tag " + tag)
+      log.debug(line)
+
+      # Convert number from f90 format.
+      value = float(check.group(1).lower().replace("d", "e"))
+      log.debug("value = " + str(value))
+
+      # Compare to reference.
+      ref_value = ref[tag]["values"][ref[tag]["index"]]["value"]
+      ref_error = ref[tag]["values"][ref[tag]["index"]]["error"]
+      if abs(value-ref_value) > ref_error:
+        number_errors += 1
+        log.error("line " + str(linenumber) + ", wrong value " + str(value) + ", " \
+          + "tag \"" + tag + "\", " \
+          + "index " + str(ref[tag]["index"]) \
+          + ", expected " + str(ref_value) \
+          + " +- " + str(ref_error))
+
+      ref[tag]["index"] += 1
+
+log.info("done analyzing, found " + str(number_errors) + " errors")
