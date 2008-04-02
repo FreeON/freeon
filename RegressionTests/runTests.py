@@ -72,6 +72,12 @@ parse.add_option("--clean-build", \
     dest = "clean_build", \
     action = "store_true")
 
+
+parse.add_option("--pretend", \
+    help = "do not run the test, simply anaylize the output file", \
+    dest = "pretend", \
+    action = "store_true")
+
 option, argument = parse.parse_args()
 
 # Set up logging.
@@ -327,54 +333,55 @@ while(True):
   if not ext:
     break
 
-log.debug("creating directory " + rundir)
-if os.path.exists(rundir) and not option.clean_run:
-  log.error("rundir already exists " + rundir)
-  sys.exit(1)
-if os.path.exists(rundir) and option.clean_run:
-  log.info("rundir " + rundir + " already exists but I am told to wipe it")
-  shutil.rmtree(rundir)
-os.mkdir(rundir)
+if not option.pretend:
+  log.debug("creating directory " + rundir)
+  if os.path.exists(rundir) and not option.clean_run:
+    log.error("rundir already exists " + rundir)
+    sys.exit(1)
+  if os.path.exists(rundir) and option.clean_run:
+    log.info("rundir " + rundir + " already exists but I am told to wipe it")
+    shutil.rmtree(rundir)
+  os.mkdir(rundir)
 
-log.debug("copying input file to rundir " + rundir)
-shutil.copy(inputfield["Mondo_input"], rundir)
+  log.debug("copying input file to rundir " + rundir)
+  shutil.copy(inputfield["Mondo_input"], rundir)
 
-Mondo_arguments = [ inputfield["Mondo_executable"], Mondo_inputbase ]
+  Mondo_arguments = [ inputfield["Mondo_executable"], Mondo_inputbase ]
 
-log.debug("running " + str(Mondo_arguments))
-Mondo = subprocess.Popen(Mondo_arguments, \
-    stdin = subprocess.PIPE, \
-    stdout = subprocess.PIPE, \
-    stderr = subprocess.PIPE, \
-    cwd = rundir)
+  log.info("running " + str(Mondo_arguments))
+  Mondo = subprocess.Popen(Mondo_arguments, \
+      stdin = subprocess.PIPE, \
+      stdout = subprocess.PIPE, \
+      stderr = subprocess.PIPE, \
+      cwd = rundir)
 
-Mondo_stdout = Mondo.stdout.readlines()
-Mondo_stderr = Mondo.stderr.readlines()
+  Mondo_stdout = Mondo.stdout.readlines()
+  Mondo_stderr = Mondo.stderr.readlines()
 
-Mondo.wait()
+  Mondo.wait()
 
-if Mondo.returncode != 0:
-  log.error("Mondo failed with return code " + str(Mondo.returncode))
+  if Mondo.returncode != 0:
+    log.error("Mondo failed with return code " + str(Mondo.returncode))
 
-  log.error("standard output:")
-  for line in Mondo_stdout:
-    log.error(line.strip())
+    log.error("standard output:")
+    for line in Mondo_stdout:
+      log.error(line.strip())
 
-  log.error("standard error:")
-  for line in Mondo_stderr:
-    log.error(line.strip())
+    log.error("standard error:")
+    for line in Mondo_stderr:
+      log.error(line.strip())
 
-  sys.exit(1)
+    sys.exit(1)
 
-else:
-  log.debug("Mondo done")
+  else:
+    log.debug("Mondo done")
 
 # Verify reference result.
 if not "Mondo_reference" in inputfield:
   log.info("no reference given, we are done")
   sys.exit(0)
 
-# Read in 
+# Read in the reference file.
 log.debug("reading references from " + inputfield["Mondo_reference"])
 fd = open(inputfield["Mondo_reference"])
 lines = fd.readlines()
@@ -385,6 +392,7 @@ last_tag = None
 ref = {}
 output_file = None
 
+log.info("anaylyzing result")
 linenumber = 0
 for line in lines:
   line = line.strip()
@@ -403,40 +411,20 @@ for line in lines:
     output_file = check.group(1).strip()
     continue
 
-  check = re.compile("tag *= *\"(.*)\"$").search(line)
+  check = re.compile("\"(.*)\" *= *([0-9.DdEe+\-]*) *\((([0-9.DdEe+\-]*))\)").search(line)
   if check:
-    log.debug("found tag \"" + check.group(1) + "\"")
-    if not last_tag:
-      if check.group(1) in ref:
-        ref[check.group(1)]["values"].append({})
-      else:
-        ref[check.group(1)] = { "index": 0, "values": [ {} ] }
-
-      last_tag = check.group(1)
-      continue
+    log.debug("found tag \"" + check.group(1) + "\", value = " + \
+        check.group(2) + ", error = " + check.group(3))
+    # Convert f90 exponential "D" to "E".
+    value = check.group(2)
+    error = check.group(3)
+    value = value.lower().replace("d", "e")
+    error = error.lower().replace("d", "e")
+    new_tag = { "value": float(value), "error": float(error) }
+    if check.group(1) in ref:
+      ref[check.group(1)]["values"].append(new_tag)
     else:
-      print "tags have to be followed by a value and an error"
-      print "syntax error on line " + str(linenumber) + " of " + inputfield["Mondo_reference"]
-      sys.exit(1)
-
-  for substring in [ "value", "error" ]:
-    check = re.compile(substring + " *= *([0-9.de+\-]*)").search(line)
-    if check:
-      log.debug("found " + substring + " = " + check.group(1))
-      if not last_tag:
-        print "there should be a tag before the " + substring
-        print "syntax error on line " + str(linenumber) + " of " + inputfield["Mondo_reference"]
-        sys.exit(1)
-      else:
-        if substring in ref[last_tag]["values"][-1]:
-          print "value for this tag already set"
-          print "syntax error on line " + str(linenumber) + " of " + inputfield["Mondo_reference"]
-          sys.exit(1)
-        else:
-          ref[last_tag]["values"][-1][substring] = float(check.group(1))
-          if "value" in ref[last_tag]["values"][-1] and "error" in ref[last_tag]["values"][-1]:
-            last_tag = None
-          continue
+      ref[check.group(1)] = { "index": 0, "values": [ new_tag ] }
 
 log.debug("checking tags: " + str(ref))
 
@@ -460,12 +448,13 @@ if len(output_files) < 1:
   log.error("could not find output file matching " + output_file)
   sys.exit(1)
 
-log.info("analyzing output file " + output_files[0])
+log.info("analyzing output file " + os.path.join(rundir, output_files[0]))
 fd = open(os.path.join(rundir, output_files[0]))
 lines = fd.readlines()
 fd.close()
 
 number_errors = 0
+number_unmatched = 0
 
 linenumber = 0
 for line in lines:
@@ -473,29 +462,38 @@ for line in lines:
   line = line.strip()
 
   for tag in ref.keys():
-    if ref[tag]["index"] >= len(ref[tag]["values"]):
-      continue
-
     check = re.compile(tag).search(line)
     if check:
-      log.debug("line " + str(linenumber) + ", found tag " + tag)
-      log.debug(line)
+      if ref[tag]["index"] >= len(ref[tag]["values"]):
+        log.error("unmatched key on line " + str(linenumber) + ": " + line)
+        number_unmatched += 1
+        continue
 
       # Convert number from f90 format.
       value = float(check.group(1).lower().replace("d", "e"))
-      log.debug("value = " + str(value))
 
       # Compare to reference.
       ref_value = ref[tag]["values"][ref[tag]["index"]]["value"]
       ref_error = ref[tag]["values"][ref[tag]["index"]]["error"]
       if abs(value-ref_value) > ref_error:
         number_errors += 1
-        log.error("line " + str(linenumber) + ", wrong value " + str(value) + ", " \
-          + "tag \"" + tag + "\", " \
-          + "index " + str(ref[tag]["index"]) \
-          + ", expected " + str(ref_value) \
-          + " +- " + str(ref_error))
+        log.error("line " + str(linenumber) + ", " + line + \
+            " <--> wrong value " + str(value) + ", " + \
+            "tag \"" + tag + "\", " + \
+            "index " + str(ref[tag]["index"]) + \
+            ", expected " + str(ref_value) + \
+            " +- " + str(ref_error))
+      else:
+        log.debug("line " + str(linenumber) + ", found tag " + \
+            tag + ": " + line + " <--> value verified")
 
       ref[tag]["index"] += 1
 
-log.info("done analyzing, found " + str(number_errors) + " errors")
+log.info("done analyzing, found " + str(number_errors) + " errors and " + \
+    str(number_unmatched) + " unmatched tags")
+
+# Exit with a proper exit code.
+if number_errors == 0:
+  sys.exit(0)
+else:
+  sys.exit(1)
