@@ -1,0 +1,30 @@
+<BeginOptions>
+
+Charge=0
+Multiplicity=1
+DebugAll=(MaxDebug,CheckSums)
+Guess=SuperPos
+SCFMethod=(RH)
+BasisSets=(STO-2G-SPLIT)
+ModelChem=(HF)
+Accuracy=(verytight)
+SCFConvergence=(DIIS)
+Geometry=(InAU)
+MinSCF=12
+MaxSCF=12
+
+Grad=(MolecularDynamics)
+MDProjection=DMSymplectic
+MDMethod=Symplectic
+DeltaTime=2.0
+MaxMDStep=600
+MDNumSCF=4
+MDDamping=0.2
+MDDampStep=200
+
+<EndOptions>
+
+<BeginGeometry>
+F     0.00000000     0.00000000     0.00000000     0.00000000      0.00000000     0.00000000
+F     2.47000000     0.00000000     0.00000000     0.00000000      0.00000000     0.00000000
+<EndGeometry>

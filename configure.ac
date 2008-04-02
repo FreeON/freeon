@@ -498,6 +498,7 @@ AC_MSG_NOTICE([LDFLAGS       = ${LDFLAGS}])
 AC_MSG_NOTICE([LIBS          = ${LIBS}])
 AC_MSG_NOTICE([CPPFLAGS      = ${CPPFLAGS}])
 AC_MSG_NOTICE([HDF5_CPPFLAGS = ${HDF5_CPPFLAGS}])
+AC_MSG_NOTICE([MONDO_SCRATCH = ${MONDO_SCRATCH}])
 AC_MSG_NOTICE([])
 if test "${use_internal_lapack}" = "yes"; then
   AC_MSG_NOTICE([Using internal lapack])
@@ -505,7 +506,7 @@ else
   AC_MSG_NOTICE([Using external lapack library])
 fi
 if test "${use_internal_hdf5}" = "yes"; then
-  AC_MSG_NOTICE([Using internal hdf5])
+  AC_MSG_NOTICE([Using internal hdf5 (1.8.0)])
 else
   AC_MSG_NOTICE([Using external hdf5 library])
 fi

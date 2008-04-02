@@ -104,9 +104,7 @@ PROGRAM DIIS
   DIISErr=SQRT(Dot(EI,EI))/DBLE(NBasF)
 
   ! Consider just damping, certainly on first go through
-  CALL MondoLog(DEBUG_NONE, "DIIS", "hack-alarm....")
-  !IF(ISCF<=1)THEN
-  IF(ISCF<=4)THEN
+  IF(ISCF<=1)THEN
     DoDIIS=-1  ! No DIIS, but damp non-extrapolated Fock matrices
     Damp=1.0D0
   ELSEIF(BMax/=0)THEN

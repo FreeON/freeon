@@ -9,7 +9,7 @@ datadir = ${prefix}/BasisSets
 
 data_DATA = $(BasisSets)
 
-include_HEADERS = MondoConfig.h
+include_HEADERS = MondoConfig.h config.h
 
 EXTRA_DIST = \
   $(data_DATA) \
