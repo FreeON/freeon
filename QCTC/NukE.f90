@@ -1,32 +1,7 @@
-!------------------------------------------------------------------------------
-!    This code is part of the MondoSCF suite of programs for linear scaling
-!    electronic structure theory and ab initio molecular dynamics.
-!
-!    Copyright (2004). The Regents of the University of California. This
-!    material was produced under U.S. Government contract W-7405-ENG-36
-!    for Los Alamos National Laboratory, which is operated by the University
-!    of California for the U.S. Department of Energy. The U.S. Government has
-!    rights to use, reproduce, and distribute this software.  NEITHER THE
-!    GOVERNMENT NOR THE UNIVERSITY MAKES ANY WARRANTY, EXPRESS OR IMPLIED,
-!    OR ASSUMES ANY LIABILITY FOR THE USE OF THIS SOFTWARE.
-!
-!    This program is free software; you can redistribute it and/or modify
-!    it under the terms of the GNU General Public License as published by the
-!    Free Software Foundation; either version 2 of the License, or (at your
-!    option) any later version. Accordingly, this program is distributed in
-!    the hope that it will be useful, but WITHOUT ANY WARRANTY; without even
-!    the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-!    PURPOSE. See the GNU General Public License at www.gnu.org for details.
-!
-!    While you may do as you like with this software, the GNU license requires
-!    that you clearly mark derivative software.  In addition, you are encouraged
-!    to return derivative works to the MondoSCF group for review, and possible
-!    disemination in future releases.
-!------------------------------------------------------------------------------
 !    COMPUTE THE NUCLEAR-TOTAL ELECTROSTATIC ENERGY IN O(N Lg N) CPU TIME
 !    Authors: Matt Challacombe and C.J. Tymczak
 !==============================================================================
-MODULE NuklarE
+MODULE NukularE
   USE DerivedTypes
   USE GlobalScalars
   USE PrettyPrint
@@ -39,64 +14,122 @@ MODULE NuklarE
   USE PoleTree 
   USE TreeWalk
   USE PBCFarField
-#ifdef PARALLEL
-  USE ParallelQCTC
-#endif
   IMPLICIT NONE
-!----------!
-  CONTAINS !
-!=============================================================================================
-!
-!=============================================================================================
-    FUNCTION NukE(GMLoc)
-      TYPE(CRDS),  INTENT(IN)         :: GMLoc
-      REAL(DOUBLE)                    :: NukE,NukeCo,NukePole,PExtent
-      REAL(DOUBLE),DIMENSION(1:1)     :: HGBra
-      REAL(DOUBLE),DIMENSION(0:0)     :: SPBraC,SPBraS
-      INTEGER                         :: NC
-      REAL(DOUBLE),DIMENSION(3)       :: PTmp
-!---------------------------------------------------------------------------------------------
-      NukE=Zero 
-      DO At=1,GMLoc%Natms 
-#ifdef PARALLEL
-      IF(At >= BegAtInd%I(MyID) .AND. At <= EndAtInd%I(MyID)) THEN
+  !----------!
+CONTAINS !
+  !=============================================================================================
+  !
+  !=============================================================================================
+  FUNCTION NukE(GMLoc,R,NoWrap_O)
+    TYPE(CRDS),  INTENT(IN)         :: GMLoc
+    REAL(DOUBLE)                    :: PiZ,NukE,NukeCo,NukePole,PExtent
+    REAL(DOUBLE),DIMENSION(1:1)     :: HGBra
+    REAL(DOUBLE),DIMENSION(0:0)     :: SPBraC,SPBraS
+    INTEGER                         :: NC,AT
+    TYPE(QCPrim)                    :: QP
+    REAL(DOUBLE),DIMENSION(3)       :: PTmp
+
+    TYPE(HGRho),OPTIONAL            :: R
+    REAL(DOUBLE)                  :: XI,XM,CI,CM,ZZ,Zeta
+    INTEGER      :: I,J,K,L,M,N,IAdd,JAdd
+    LOGICAL, OPTIONAL         :: NoWrap_O
+    LOGICAL                   :: NoWrap
+    !---------------------------------------------------------------------------------------------
+    IF(PRESENT(NoWrap_O))THEN
+       NoWrap=NoWrap_O
+    ELSE
+       NoWrap=.FALSE.
+    ENDIF
+    NukE=Zero 
+    DO At=1,GMLoc%Natms 
+       IF(GMLoc%AtNum%D(At)<105.D0.AND.GMLoc%AtNum%D(At)>=0D0)THEN
+          ! Initialize <BRA|
+          PiZ=(Pi/NuclearExpnt)**(ThreeHalves)
+          HGBra(1) =-GMLoc%AtNum%D(At)/PiZ
+          SPBraC(0)=-GMLoc%AtNum%D(At)
+          QP%Prim%Ell=0
+          QP%Prim%P=GMLoc%Carts%D(:,At)
+          QP%Prim%Zeta=NuclearExpnt
+          CALL PWrap(GM,QP%Prim,.NOT.NoWrap)
+!!$
+!!$          WRITE(*,313)QP%Prim%Pw,HGBra(1)*(QP%Prim%Zeta/Pi)**(-1.5D0)!*(2D0/4.8096748360719168D0)
+!!$313       FORMAT('N Pw = ',3(D12.6,', '),' q = ',D12.6)
+
+          !          
+#ifdef PAC_DEBUG
+          ERRBRA=Zero
 #endif
-         IF(GMLoc%AtNum%D(At)<105.D0)THEN
-!           Initialize |BRA>
-            HGBra(1) =-GMLoc%AtNum%D(At)*(NuclearExpnt/Pi)**(ThreeHalves)
-            SPBraC(0)=-GMLoc%AtNum%D(At)
-            Prim%Ell = 0
-            Prim%P   = GMLoc%Carts%D(:,At)
-            Prim%Zeta= NuclearExpnt
-!           Set the MAC
-            DP2 = (FudgeFactorial(0,SPELL+1)*ABS(GMLoc%AtNum%D(At))/TauMAC)**(Two/DBLE(SPEll+2))
-            DP2 = MIN(1.D10,DP2)
-!           Set the PAC
-            PrimWCoef = ABS(GMLoc%AtNum%D(At))
-!           Initialize <KET|
-            CALL SetKet(Prim,PExtent)
-            PTmp=GMLoc%Carts%D(:,At)
-            DO NC=1,CS_IN%NCells
-!              Set Atomic Coordinates
-               Prim%P=PTmp+CS_IN%CellCarts%D(:,NC) 
-               PBox%Center= Prim%P
-!              Walk the walk
-               CALL VWalk(PoleRoot)
-            ENDDO
-!           Reset the Atomic Coordinates
-            Prim%P=PTmp
-!           Accumulate the atomic contribution
-            NukE=NukE+HGBra(1)*HGKet(1)+SPBraC(0)*SPKetC(0)
-!           Add in the Far Field, Dipole and Quadripole  Correction 
-            IF(GMLoc%PBC%Dimen > 0) THEN
-               NukE = NukE + CTraxFF(Prim,HGBra,GMLoc)
-            ENDIF
-         ENDIF
-#ifdef PARALLEL
-      ENDIF
+#ifdef MAC_DEBUG
+          SPERRORBRAC=Zero
+          SPERRORBRAS=Zero
 #endif
-      ENDDO
-!
-    END FUNCTION NukE
-!
-END MODULE
+#ifdef PAC_DEBUG
+          ERRBRA(1)=ABS(HGBra(1))
+#endif
+#ifdef MAC_DEBUG
+          SPERRORBRAC(0)=SPBraC(0)
+          SPERRORBRAS(0)=Zero
+#endif
+          ! Set MAC and PAC
+          QP%PAC%Zeta=QP%Prim%Zeta
+          QP%PAC%Wght=GMLoc%AtNum%D(At)
+          QP%MAC%O(0)=GMLoc%AtNum%D(At)
+          QP%MAC%Delta=Zero
+          QP%IHalf=ABS(HGBra(1))  !! ??????????
+          ! Initialize the ket
+          HGKet(1)=Zero
+          SPKetC(0)=Zero
+          SPKetS(0)=Zero
+          ! Lay down the potential
+          PTmp=QP%Prim%Pw
+          DO NC=1,CS_IN%NCells
+             QP%Prim%Pw=PTmp+CS_IN%CellCarts%D(:,NC) 
+#ifdef MAC_DEBUG
+             CALL DBL_VECT_EQ_DBL_SCLR(SPLen+1,SPKetC(0),Zero)
+             CALL DBL_VECT_EQ_DBL_SCLR(SPLen+1,SPKetS(0),Zero)   
+             SPErrorKetS=Zero
+             SPErrorKetC=Zero
+#endif
+             CALL JWalk2(QP,PoleRoot,Nucular_O=.TRUE.)
+          ENDDO
+          ! Reset the primitive coordinates
+          QP%Prim%Pw=PTmp
+          ! Accumulate the atomic contribution
+          NukE=NukE+HGBra(1)*HGKet(1)+SPBraC(0)*SPKetC(0)
+          !  Add in the Far Field, Dipole and Quadripole  Correction 
+
+          IF(GMLoc%PBC%Dimen > 0) THEN
+             NukE = NukE + CTraxFF(QP%Prim,GMLoc,HGBra,PiZ)
+          ENDIF
+
+!!$          WRITE(*,*)'================================================='
+!!$          WRITE(*,*)' Nuke = ',CTraxFF(QP%Prim,HGBra,GMLoc)
+!!$          Nuke=0
+!!$          IF(PRESENT(R))THEN
+!!$             XI=GMLoc%Carts%D(1,At)
+!!$             CI=-GMLoc%AtNum%D(At)
+!!$             DO M=1,R%NExpt
+!!$                Zeta=R%Expt%D(M)
+!!$                ZZ=(Pi/R%Expt%D(M))**1.5D0
+!!$                DO N=1,R%NQ%I(M)
+!!$                   IAdd=R%OffQ%I(M)+N
+!!$                   JAdd=R%OffR%I(M)+(N-1)+1
+!!$                   XM=Rho%Qx%D(IAdd)
+!!$                   CM=Rho%Co%D(JAdd)*ZZ
+!!$                   DO L=-5000,-2,1
+!!$                      NukE=NukE+CI*CM/ABS(XI-(XM+DBLE(L)))
+!!$                   ENDDO
+!!$                   DO L=5000,2,-1
+!!$                      NukE=NukE+CI*CM/ABS(XI-(XM+DBLE(L)))
+!!$                   ENDDO                   
+!!$                ENDDO
+!!$             ENDDO
+!!$          ENDIF
+!!$          WRITE(*,*)' Nuke = ',NukE
+
+
+       ENDIF
+    ENDDO
+  END FUNCTION NukE
+END MODULE NukularE
+
