@@ -84,7 +84,7 @@ MondoMods_DEPENDENCY_FILES = \
   $(top_srcdir)/MondoMods/basissetparameters.mod \
   $(top_srcdir)/MondoMods/boundingbox.mod \
   $(top_srcdir)/MondoMods/brabloks.mod \
-  $(top_srcdir)/MondoMods/cellsets.mod \
+  $(top_srcdir)/MondoMods/pbc.mod \
   $(top_srcdir)/MondoMods/cholfactor.mod \
   $(top_srcdir)/MondoMods/clock.mod \
   $(top_srcdir)/MondoMods/common_debug.mod \

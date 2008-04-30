@@ -464,7 +464,6 @@ MondoMods/lapack/lapack_testing/matgen/Makefile
 SCFeqs/Makefile
 OneE/Makefile
 QCTC/Makefile
-QCTC/LibQCTC/Makefile
 HiCu/Makefile
 TwoE/Makefile
 TwoE/GRD/Makefile
