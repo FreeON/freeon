@@ -208,6 +208,9 @@ CONTAINS
               ! them later on.
               G%Clone(iCLONE)%Carts%D    = BohrsToAngstroms*G%Clone(iCLONE)%Carts%D
               G%Clone(iCLONE)%Velocity%D = BohrsToAngstroms*G%Clone(iCLONE)%Velocity%D
+              !
+              CALL MondoHalt(PRSE_ERROR, ' ERROR ON RESTART, MISSING IS CONVERSION TO PBCS!! ')
+              ! THIS PART IS REDUNDANT, AND SHOULD BE SORTED ON ARCHIVAL IF PBS ARE RESET PROPERLY:
 
               G%Clone(iCLONE)%PBC%CellCenter%D = G%Clone(iCLONE)%PBC%CellCenter%D*BohrsToAngstroms
               G%Clone(iCLONE)%PBC%BoxShape%D   = BohrsToAngstroms*G%Clone(iCLONE)%PBC%BoxShape%D
@@ -269,12 +272,13 @@ CONTAINS
 
       IF(SIZE(C%C)<4) CALL MondoHalt(PRSE_ERROR, &
         'bad data on parsing goemetry at line = <<'//TRIM(LineLowCase)//'>>')
-
       ! Set the atom for freq calculation
       G%DoFreq%I(N)=0
       IF(SIZE(C%C)==4) THEN
         ! Atomtype x y z
         At=TRIM(ADJUSTL(C%C(1)))
+
+        WRITE(*,*)' At = ',At
         G%Carts%D(1,N)=CharToDbl(C%C(2))
         G%Carts%D(2,N)=CharToDbl(C%C(3))
         G%Carts%D(3,N)=CharToDbl(C%C(4))
@@ -289,19 +293,15 @@ CONTAINS
         SELECT CASE (TRIM(C%C(5)))
         CASE('u')
           G%CConstrain%I(N)=0
-
         CASE('c')
           G%CConstrain%I(N)=1
-
         CASE('r')
           G%CConstrain%I(N)=2
-
         CASE('f')
           ! We found an atom for freq calculation
           G%DoFreq%I(N)=1
           ! We set the constrain for any case
           G%CConstrain%I(N)=0
-
         CASE DEFAULT
           G%CConstrain%I(N)=0
         END SELECT
@@ -328,46 +328,48 @@ CONTAINS
         SELECT CASE (TRIM(C%C(8)))
         CASE('u')
           G%CConstrain%I(N)=0
-
         CASE('c')
           G%CConstrain%I(N)=1
-
         CASE('r')
           G%CConstrain%I(N)=2
-
         CASE('f')
           ! We found an atom for freq calculation
           G%DoFreq%I(N)=1
           ! We set the constrain for any case
           G%CConstrain%I(N)=0
-
         CASE DEFAULT
           G%CConstrain%I(N)=0
         END SELECT
       ENDIF
 
       CALL Delete(C)
-      !VW    Check for multiple definition of the same atom.
-      L=SCAN(At,Numbers)
-      SELECT CASE(L)
-      CASE(0);AtTmp=At
-      CASE(2);AtTmp(1:2)=At(1:1)//' '! we need this blank to be compatible with the definition of Ats.
-      CASE(3);AtTmp(1:2)=At(1:2)
-      CASE DEFAULT;CALL MondoHalt(PRSE_ERROR,'Cannot regonize this atom At=<'//At//'>')
-      END SELECT
 
-      ! Find the atom number (elements >= 105 are ghost functions)
-      DO J=1,107
-        !vwIF(At==Ats(J))THEN
-        IF(AtTmp(1:2)==Ats(J)(1:2))THEN
-          G%AtNum%D(N)=J
-          G%AtNam%C(N)=At!vwAts(J)
-          G%AtMMTyp%C(N)='UNK'
-          G%AtMss%D(N)=AtsMss(J)
-          EXIT
-        ENDIF
-      ENDDO
+!! MC: FOLLOWING BROKE PARSING OF GHOST FUNCTIONS, REMOVED
+!!$!VW    Check for multiple definition of the same atom.
+!!$       L=SCAN(At,Numbers)
+!!$       SELECT CASE(L)
+!!$       CASE(0);AtTmp=At
+!!$       CASE(2);AtTmp(1:2)=At(1:1)//' '! we need this blank to be compatible with the definition of Ats.
+!!$       CASE(3);AtTmp(1:2)=At(1:2)
+!!$       CASE DEFAULT;CALL MondoHalt(PRSE_ERROR,'Cannot regonize this atom At=<'//At//'>')
+!!$       END SELECT
+
+       DO J=1,107
+          IF(At==Ats(J))THEN
+          !IF(AtTmp(1:2)==Ats(J)(1:2))THEN
+             IF(J<106)THEN
+                G%AtNum%D(N)=J
+             ELSE
+                G%AtNum%D(N)=0
+             ENDIF
+             G%AtNam%C(N)=Ats(J)
+!!!!!             G%AtMMTyp%C(N)='UNK' 
+             G%AtMss%D(N)=AtsMss(J)
+             EXIT
+          ENDIF
+       ENDDO
     ENDDO
+
 
     ! If no freqs have been explicitly set, then do all of them.
     IF(SUM(G%DoFreq%I).EQ.0)G%DoFreq%I=1
