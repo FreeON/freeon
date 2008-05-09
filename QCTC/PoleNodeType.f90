@@ -16,8 +16,6 @@ MODULE PoleGlobals
   INTEGER                                      :: MaxPoleEll,LenPoleEll
   ! This is the dynamically set expansion order and tensor length for cell multipole expansions 
   INTEGER                                      :: MaxPFFFEll,LenPFFFEll
-  ! This is the dynamically set number of Guassian distributions that can occuply a leaf of the tree
-  INTEGER                                      :: ClusterSize
   ! This is the fixed expansion order used for the Factorial function, scratch memory
   ! and other precomputed values
   INTEGER,PARAMETER                            :: FFELL=64
@@ -60,7 +58,11 @@ MODULE PoleNodeType
   TYPE Pole
      INTEGER                               :: Ell      ! This is the ell of the multipole expansion
      INTEGER                               :: Complex  ! The distributional complexity represented by this expansion
+     REAL(DOUBLE)                          :: Charge   ! Total nuclear charge used for wheighting translation distances
+     REAL(DOUBLE)                          :: Delta    ! For debugging 
      REAL(DOUBLE),DIMENSION(3)             :: Center   ! This is the center of the multipole expansion
+
+
 #ifdef POINTERS_IN_DERIVED_TYPES
      REAL(DOUBLE),DIMENSION(:),POINTER     :: S        ! Im component of the multipole tensor
      REAL(DOUBLE),DIMENSION(:),POINTER     :: C        ! Re component of the multipole tensor
@@ -119,15 +121,16 @@ MODULE PoleNodeType
   END TYPE QCPrim
 
   TYPE PoleNode
-     LOGICAL                               :: Leaf     ! Is this a data containing node?
-     LOGICAL                               :: ChargeSplitOK ! Has this node (and parents) maintained 
-                                                            ! a balanced charge splitting? 
-     INTEGER                               :: Bdex     ! Begining index of ORB list for this node
-     INTEGER                               :: Edex     ! ENDign index of ORB list for this node
-     INTEGER                               :: NQ       ! Number of centers
-     REAL(DOUBLE)                          :: IHalf    ! This is the max Schwartz factor (ab|ab)**0.5 used in the 
-                                                       ! locally direct part of the code
-     REAL(DOUBLE)                          :: IHMin    ! This is the cooresponding min factor for the node
+     LOGICAL                               :: Leaf      ! Is this a leaf node (containing just one atom) ?
+     INTEGER                               :: BdexE     ! Begining index of ORB charge list for this node
+     INTEGER                               :: EdexE     ! Ending index of ORB charge list for this node
+     INTEGER                               :: BdexN     ! Begining index of ORB nuclei list for this node
+     INTEGER                               :: EdexN     ! Ending index of ORB nuclei for this node
+     INTEGER                               :: NQ        ! Number of charges (distributions) bounded by this node
+     INTEGER                               :: NAtms     ! Number of nuclear centers bounded by this node
+     REAL(DOUBLE)                          :: IHalf     ! This is the max Schwartz factor (ab|ab)**0.5 used in the 
+                                                        ! locally direct part of the code
+     REAL(DOUBLE)                          :: IHMin     ! This is the cooresponding min factor for the node
      TYPE(MAC)                             :: MAC
      TYPE(PAC)                             :: PAC
      TYPE(Pole)                            :: Pole

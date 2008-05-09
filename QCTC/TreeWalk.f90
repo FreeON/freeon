@@ -1,4 +1,28 @@
 !------------------------------------------------------------------------------
+!    This code is part of the MondoSCF suite of programs for linear scaling
+!    electronic structure theory and ab initio molecular dynamics.
+!
+!    Copyright (2004). The Regents of the University of California. This
+!    material was produced under U.S. Government contract W-7405-ENG-36
+!    for Los Alamos National Laboratory, which is operated by the University
+!    of California for the U.S. Department of Energy. The U.S. Government has
+!    rights to use, reproduce, and distribute this software.  NEITHER THE
+!    GOVERNMENT NOR THE UNIVERSITY MAKES ANY WARRANTY, EXPRESS OR IMPLIED,
+!    OR ASSUMES ANY LIABILITY FOR THE USE OF THIS SOFTWARE.
+!
+!    This program is free software; you can redistribute it and/or modify
+!    it under the terms of the GNU General Public License as published by the
+!    Free Software Foundation; either version 2 of the License, or (at your
+!    option) any later version. Accordingly, this program is distributed in
+!    the hope that it will be useful, but WITHOUT ANY WARRANTY; without even
+!    the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+!    PURPOSE. See the GNU General Public License at www.gnu.org for details.
+!
+!    While you may do as you like with this software, the GNU license requires
+!    that you clearly mark derivative software.  In addition, you are encouraged
+!    to return derivative works to the MondoSCF group for review, and possible
+!    disemination in future releases.
+!------------------------------------------------------------------------------
 !    PERFORM O(Lg N) WALKS ON THE POLETREE REPRESENTATION OF THE TOTAL 
 !    ELECTRON DENSITY, USING THE K-D TREE DATA STRUCTURE TO APPLY THE 
 !    PENETRATION ACCESABILITY CRITERIA
@@ -142,27 +166,15 @@ CONTAINS
           PC2=PC2+PCHalf*PCHalf
        ENDIF
 
-!!$       PQx=QC%Prim%Pw(1)-Q%Box%Center(1)
-!!$       PQy=QC%Prim%Pw(2)-Q%Box%Center(2)
-!!$       PQz=QC%Prim%Pw(3)-Q%Box%Center(3)
-!!$       PQ2=(PQx*PQx+PQy*PQy+PQz*PQz)
-!!$       PC2=PQ2+Q%MAC%Delta*Q%MAC%Delta-Two*SQRT(PQ2)*Q%MAC%Delta
-!  
        MAC=.FALSE.
        IF(PC2>1D-1)THEN          
           RTE=QC%Prim%Zeta*Q%PAC%Zeta
           RPE=QC%Prim%Zeta+Q%PAC%Zeta
           TPAC=(RTE/RPE)*PC2
           PAC=Q%PAC%Wght*QC%PAC%Wght*EXP(-TPAC)<TauPAC*PC2
-!!          PAC=TPAC>26.0D0
 !!$
-!!$          IF(Q%PAC%Wght*QC%PAC%Wght*EXP(-TPAC)/PC2.GT.1D-14)THEN
-!!$             PAC=.FALSE.
-!!$          ELSE
-!!$             CALL ErrCompare(QC,Q,Q%PAC%Wght*QC%PAC%Wght*EXP(-TPAC)/PC2)
-!!$!             WRITE(*,*)' TPAC = ',TPAC,' Err = ',Q%PAC%Wght,QC%PAC%Wght,EXP(-TPAC)/PC2
-!!$             PAC=.TRUE.
-!!$          ENDIF
+!!$          IF(Q%Leaf)CALL ErrCompare(QC,Q,Q%PAC%Wght*QC%PAC%Wght*EXP(-TPAC)/PC2)
+
 
           IF(PAC)THEN 
              IF(Q%MAC%Delta==Zero)THEN
@@ -173,7 +185,19 @@ CONTAINS
                 PQy=QC%Prim%Pw(2)-Q%Pole%Center(2)
                 PQz=QC%Prim%Pw(3)-Q%Pole%Center(3)
                 R=SQRT(PQx*PQx+PQy*PQy+PQz*PQz)
-                IF(Q%MAC%Delta<R)THEN
+
+!!$                IF(Q%MAC%Delta<R)THEN
+!!$
+!!$                   w(1)=Q%MAC%Delta**(1+Q%Pole%Ell)*r**(-1-Q%Pole%Ell)
+!!$                   w(2)=(QC%MAC%O(0)*Q%MAC%O(0))/(-Q%MAC%Delta+r)
+!!$                   MACError=ABS(w(1)*w(2))
+!!$                   
+!!$
+!!$                   IF(Q%Leaf)THEN !MAC%Delta<Two*R)THEN
+!!$                   WRITE(*,33)Q%MAC%Delta,Q%POLE%delta,R,QC%MAC%O(0),Q%MAC%O(0),MacError,(Q%POLE%Delta/R)**(Q%POLE%Ell+1)
+!!$33                 FORMAT(' d = ',D8.2,' d2 = ',D8.2,' r = ',D8.2,' BraO = ',D8.2,' KetO = ',D8.2,' Err = ',D8.2,', ',D8.2)
+!!$                ENDIF
+!!$
                    LCode=100*QC%Prim%Ell+Q%Herm%Ell
                    SELECT CASE(LCode)
                       INCLUDE "MACErrBnd4.Inc"
@@ -181,6 +205,7 @@ CONTAINS
                       CALL Halt('No explicit code for case LCode = '  &
                            //TRIM(IntToChar(LCode))//' in MACErrBnd4.Inc')
                    END SELECT
+
 !!$
 !!$
 !!$                   w(1)=Q%MAC%Delta**(1+Q%Pole%Ell)*r**(-1-Q%Pole%Ell)
@@ -194,16 +219,17 @@ CONTAINS
 
                    MAC=MACError<TauMAC
 
+
+                   MAC=.TRUE.
 #ifdef MAC_DEBUG
                    CALL MACCompare(QC,Q,MACError)
 #endif
 
                 ENDIF
-             ENDIF  
+             ENDIF
 
 
           ENDIF
-       ENDIF
        !
 !!$
 !!$       IF(.NOT.DOMAC)MAC=.FALSE.
@@ -585,46 +611,46 @@ ENDIF
     IF(ABS(TruPACError)<1D-20)RETURN
     WRITE(*,22)Q%Box%Tier,Q%Box%Number,TotEll,LOG10(ABS(TruPACError)+1D-40),LOG10(NewPACError)
 22  FORMAT(3(2x,I4),2(2x,F9.3))
-    IF(ABS(TruPACError)>10D0*NewPACError)THEN
 
-       WRITE(*,*)' Splt = ',Q%ChargeSplitOK
-       WRITE(*,*)' Leaf = ',Q%Leaf
-       WRITE(*,*)' TruE = ',TruPACError
-       WRITE(*,*)' NewE = ',NewPACError
-       WRITE(*,*)' Tier = ',Q%Box%Tier
-       WRITE(*,*)' Numb = ',Q%Box%Number
-       WRITE(*,*)' Nq   = ',Q%HERM%Nq
-       WRITE(*,*)' TotL = ',TotEll
-       WRITE(*,*)' PEll = ',P%Prim%Ell
-       WRITE(*,*)' PCnt = ',P%Prim%Pw
-       WRITE(*,*)' PACZ = ',Q%PAC%Zeta
-       WRITE(*,*)' PWhg = ',P%PAC%Wght
-       WRITE(*,*)' QWhg = ',Q%PAC%Wght!(PACX,PACY,PACZ)
-       WRITE(*,*)' PCnt = ',P%Prim%Pw
-       WRITE(*,*)' QCnt = ',Q%Box%Center
-       WRITE(*,*)' QHlf = ',Q%Box%Half
-
-       IF(Q%Leaf)THEN
-          Ch=0D0
-          ACh=0D0
-          DO Ell=0,Q%Herm%Ell
-             DO I=1,Q%Herm%NQ(Ell)
-                IF(Q%Herm%Zeta(Ell)%D(I)<1D10)THEN
-                   PQx=P%Prim%Pw(1)-Q%Herm%Cent(Ell)%D(1,I)
-                   PQy=P%Prim%Pw(2)-Q%Herm%Cent(Ell)%D(2,I)
-                   PQz=P%Prim%Pw(3)-Q%Herm%Cent(Ell)%D(3,I)
-                   PQ2=PQx*PQx+PQy*PQy+PQz*PQz
-!                   WRITE(*,*)PQ2
-                   Ch=Ch+Q%Herm%Coef(Ell)%D(1,I)*(Pi/Q%Herm%Zeta(Ell)%D(I))**(3D0/2D0)
-                   ACh=ACh+ABS(Q%Herm%Coef(Ell)%D(1,I)*(Pi/Q%Herm%Zeta(Ell)%D(I))**(3D0/2D0))
-                END IF
-             ENDDO
-          ENDDO          
-       ENDIF
-!       WRITE(*,*)' Total Charge = ',Ch
-!       WRITE(*,*)' Total Charge = ',ACh
-       STOP
-    ENDIF
+!!$    IF(ABS(TruPACError)>NewPACError)THEN
+!!$
+!!$       WRITE(*,*)' Leaf = ',Q%Leaf
+!!$       WRITE(*,*)' TruE = ',TruPACError
+!!$       WRITE(*,*)' NewE = ',NewPACError
+!!$       WRITE(*,*)' Tier = ',Q%Box%Tier
+!!$       WRITE(*,*)' Numb = ',Q%Box%Number
+!!$       WRITE(*,*)' Nq   = ',Q%HERM%Nq
+!!$       WRITE(*,*)' TotL = ',TotEll
+!!$       WRITE(*,*)' PEll = ',P%Prim%Ell
+!!$       WRITE(*,*)' PCnt = ',P%Prim%Pw
+!!$       WRITE(*,*)' PACZ = ',Q%PAC%Zeta
+!!$       WRITE(*,*)' PWhg = ',P%PAC%Wght
+!!$       WRITE(*,*)' QWhg = ',Q%PAC%Wght!(PACX,PACY,PACZ)
+!!$       WRITE(*,*)' PCnt = ',P%Prim%Pw
+!!$       WRITE(*,*)' QCnt = ',Q%Box%Center
+!!$       WRITE(*,*)' QHlf = ',Q%Box%Half
+!!$
+!!$       IF(Q%Leaf)THEN
+!!$          Ch=0D0
+!!$          ACh=0D0
+!!$          DO Ell=0,Q%Herm%Ell
+!!$             DO I=1,Q%Herm%NQ(Ell)
+!!$                IF(Q%Herm%Zeta(Ell)%D(I)<1D10)THEN
+!!$                   PQx=P%Prim%Pw(1)-Q%Herm%Cent(Ell)%D(1,I)
+!!$                   PQy=P%Prim%Pw(2)-Q%Herm%Cent(Ell)%D(2,I)
+!!$                   PQz=P%Prim%Pw(3)-Q%Herm%Cent(Ell)%D(3,I)
+!!$                   PQ2=PQx*PQx+PQy*PQy+PQz*PQz
+!!$!                   WRITE(*,*)PQ2
+!!$                   Ch=Ch+Q%Herm%Coef(Ell)%D(1,I)*(Pi/Q%Herm%Zeta(Ell)%D(I))**(3D0/2D0)
+!!$                   ACh=ACh+ABS(Q%Herm%Coef(Ell)%D(1,I)*(Pi/Q%Herm%Zeta(Ell)%D(I))**(3D0/2D0))
+!!$                END IF
+!!$             ENDDO
+!!$          ENDDO          
+!!$       ENDIF
+!!$!       WRITE(*,*)' Total Charge = ',Ch
+!!$!       WRITE(*,*)' Total Charge = ',ACh
+!!$       STOP
+!!$    ENDIF
   END SUBROUTINE ERRCOMPARE
 
   RECURSIVE FUNCTION PACError(P,Q) RESULT(Error)
