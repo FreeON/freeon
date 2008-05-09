@@ -25,6 +25,7 @@
 !------------------------------------------------------------------------------
 MODULE MondoPoles
   USE Derivedtypes
+  USE Globals
   USE GlobalScalars   
   USE GlobalObjects
   USE PoleGlobals

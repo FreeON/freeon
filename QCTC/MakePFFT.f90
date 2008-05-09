@@ -15,12 +15,10 @@ PROGRAM MakePFFT
   USE AtomPairs
   IMPLICIT NONE
   TYPE(TIME)                     :: TimePFFT
-  TYPE(CRDS)                     :: GM
   TYPE(DBL_VECT)                 :: TenC,TenS
   TYPE(DBL_RNK2)                 :: BoxShape
   TYPE(DBL_RNK3)                 :: dTenC,dTenS
   TYPE(CellSet)                  :: CSS
-  TYPE(ARGMT)                    :: Args
   INTEGER                        :: MaxEll,I,J,K
   REAL(DOUBLE)                   :: DDelta,Rad,AtoAU,SUM
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg

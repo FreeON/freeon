@@ -18,9 +18,9 @@
 #
 # Some general things everyone needs.
 
-srcdir = .
-top_srcdir = ..
-
+srcdir = /home/mchalla/freeon/QCTC
+top_srcdir = /home/mchalla/freeon
+VPATH = /home/mchalla/freeon/QCTC
 pkgdatadir = $(datadir)/mondoscf
 pkglibdir = $(libdir)/mondoscf
 pkgincludedir = $(includedir)/mondoscf
@@ -215,7 +215,7 @@ localstatedir = ${prefix}/var
 mandir = ${prefix}/man
 mkdir_p = mkdir -p --
 oldincludedir = /usr/include
-prefix = /scratch/NEW_MONDO
+prefix = /scratch/mchalla/FREEON_HOME
 program_transform_name = s,x,x,
 sbindir = ${exec_prefix}/sbin
 sharedstatedir = ${prefix}/com
