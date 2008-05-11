@@ -146,7 +146,7 @@ C
       REAL*8 Cq(NcD,0:*),Sq(NcD,0:*)
 C
       INTEGER iClust,MxEll,MxLen
-      PARAMETER (iClust=256)
+      PARAMETER (iClust=2048)
       PARAMETER (MxEll=64)
       PARAMETER (MxLen=MxEll*(MxEll+3)/2+1)
 C

@@ -138,9 +138,9 @@ EGREP = grep -E
 EXEEXT = 
 F77 = gfortran
 FC = gfortran
-FCFLAGS = -O3  -ffree-line-length-none
+FCFLAGS = -O0 -g -fbounds-check -ffree-line-length-none
 FCFLAGS_f90 = 
-FFLAGS = -ffixed-line-length-132 -O3
+FFLAGS = -ffixed-line-length-132 -O0 -g -fbounds-check
 FORTRAN_CPPFLAGS = -P -C -xc -traditional -I../MondoMods
 INSTALL_DATA = ${INSTALL} -m 644
 INSTALL_PROGRAM = ${INSTALL}
@@ -172,7 +172,7 @@ PATH_SEPARATOR = :
 RANLIB = ranlib
 
 # Whether we should keep or remove preprocessed files.
-REMOVE_PREPROCESSED_FILES = yes
+REMOVE_PREPROCESSED_FILES = no
 SET_MAKE = 
 SHELL = /bin/sh
 STRIP = strip
