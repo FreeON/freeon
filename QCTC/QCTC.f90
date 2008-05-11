@@ -134,7 +134,6 @@ PROGRAM QCTC
   !  CALL DeleteHGLL(RhoHead)
   ! Allocate and compute multipole moments of the density
   !
-  ClusterSize=128
   MaxPFFFEll=GM%PBC%PFFMaxEll
   ! Local expansion order of the multipoles to use in the tree
   MaxPoleEll=MIN(2*(BS%NASym+4),MaxPFFFEll)
