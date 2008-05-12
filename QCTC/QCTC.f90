@@ -215,7 +215,7 @@ PROGRAM QCTC
 !!$  WRITE(*,11)' Time per MNode= ',Multipole_Time/DBLE(NFarAv)
 !!$11 FORMAT(A20,D12.6)
 !!$
-!!$  CALL PChkSum(J,'J',Prog,Unit_O=6)
+   CALL PChkSum(J,'J',Prog,Unit_O=6)
 
   CALL Elapsed_TIME(TimeMakeJ,'Accum')
   IF(SCFActn=='InkFok')THEN

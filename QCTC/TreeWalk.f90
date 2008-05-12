@@ -116,6 +116,8 @@ CONTAINS
     ENDIF
 
 
+!!    Walkies=Walkies+1
+
     !
     JWalk_Time_Start=MTimer()
     !
@@ -172,6 +174,11 @@ CONTAINS
           RPE=QC%Prim%Zeta+Q%PAC%Zeta
           TPAC=(RTE/RPE)*PC2
           PAC=Q%PAC%Wght*QC%PAC%Wght*EXP(-TPAC)<TauPAC*PC2
+
+          PAC=TPAC>10.0D0
+
+
+
 !!$
 !!$          IF(Q%Leaf)CALL ErrCompare(QC,Q,Q%PAC%Wght*QC%PAC%Wght*EXP(-TPAC)/PC2)
 
@@ -218,9 +225,6 @@ CONTAINS
 !!$
 
                    MAC=MACError<TauMAC
-
-
-                   MAC=.TRUE.
 #ifdef MAC_DEBUG
                    CALL MACCompare(QC,Q,MACError)
 #endif
@@ -231,9 +235,8 @@ CONTAINS
 
           ENDIF
        !
-!!$
-!!$       IF(.NOT.DOMAC)MAC=.FALSE.
-!!$
+
+!!       MAC=.FALSE.
        IF(MAC)THEN
           NFar=NFar+1
           Far(NFar)%P=>Q

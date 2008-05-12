@@ -55,7 +55,7 @@ MODULE PoleTree
   REAL(DOUBLE),DIMENSION(:),Allocatable :: RList,Zeta,Ext      
   TYPE(INT_RNK2)                        :: Qndx,Cndx
   LOGICAL PPPRINT
-  INTEGER                               :: MaxRhoEll
+  INTEGER                               :: MaxRhoEll,NGaussTotal
   !
   INTEGER, PARAMETER                    :: EllFit=1
   INTEGER, PARAMETER                    :: LenFit=(EllFit+1)*(EllFit+2)*(EllFit+3)/6    
@@ -102,7 +102,10 @@ CONTAINS
     NULLIFY(PoleRoot%Next)
     ! Recursively split the density into a k-d tree
     Decompose_Time_Start=MTimer()
+    NGaussTotal=0;
     CALL SplitPole(PoleRoot,PoleRoot%Next)
+    WRITE(*,*)' NGaussTotal = ',NGaussTotal
+    
     TreeMake_Time_Start=MTimer()
     Decompose_Time=TreeMake_Time_Start-Decompose_Time_Start
     ! Make PoleTree tier by tier, recuring up from the bottom
@@ -131,6 +134,7 @@ CONTAINS
   RECURSIVE SUBROUTINE SplitPole(Node,Next)
     TYPE(PoleNode), POINTER :: Node,Next
     !--------------------------------------------------------------
+! IF(Node%NAtms<10)THEN
     IF(Node%NAtms==1)THEN
        ! We are at a leaf
        NULLIFY(Node%Left)
@@ -508,6 +512,8 @@ CONTAINS
     !
     CALL HGToSP_POLENODE(Node%HERM,Node%POLE)
     CALL SetMAC(Node)
+
+    NGaussTotal=NGaussTotal+(Node%EdexE-Node%BdexE)
     !
     WRITE(*,33)Node%BOX%Number,Node%POLE%Charge,Node%EdexE-Node%BdexE,NODE%POLE%Delta
 33  FORMAT(' Node = ',I4,' Z = ',F4.1,' NGauss = ',I4,' Delta = ',D8.2)
