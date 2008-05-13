@@ -30,7 +30,7 @@ CONTAINS !
     REAL(DOUBLE),DIMENSION(3)       :: PTmp
 
     TYPE(HGRho),OPTIONAL            :: R
-    REAL(DOUBLE)                  :: XI,XM,CI,CM,ZZ,Zeta
+    REAL(DOUBLE)                  :: XI,XM,CI,CM,ZZ,Zeta,PExt
     INTEGER      :: I,J,K,L,M,N,IAdd,JAdd
     LOGICAL, OPTIONAL         :: NoWrap_O
     LOGICAL                   :: NoWrap
@@ -51,10 +51,7 @@ CONTAINS !
           QP%Prim%P=GMLoc%Carts%D(:,At)
           QP%Prim%Zeta=NuclearExpnt
           CALL PWrap(GM,QP%Prim,.NOT.NoWrap)
-!!$
-!!$          WRITE(*,313)QP%Prim%Pw,HGBra(1)*(QP%Prim%Zeta/Pi)**(-1.5D0)!*(2D0/4.8096748360719168D0)
-!!$313       FORMAT('N Pw = ',3(D12.6,', '),' q = ',D12.6)
-
+          PExt=Extent(0,NuclearExpnt,HGBra,TauPAC)
           !          
 #ifdef PAC_DEBUG
           ERRBRA=Zero
@@ -71,11 +68,11 @@ CONTAINS !
           SPERRORBRAS(0)=Zero
 #endif
           ! Set MAC and PAC
-          QP%PAC%Zeta=QP%Prim%Zeta
-          QP%PAC%Wght=GMLoc%AtNum%D(At)
+!!          QP%PAC%Zeta=QP%Prim%Zeta
+!!          QP%PAC%Wght=GMLoc%AtNum%D(At)
           QP%MAC%O(0)=GMLoc%AtNum%D(At)
           QP%MAC%Delta=Zero
-          QP%IHalf=ABS(HGBra(1))  !! ??????????
+!!          QP%IHalf=ABS(HGBra(1))  !! ??????????
           ! Initialize the ket
           HGKet(1)=Zero
           SPKetC(0)=Zero
@@ -84,6 +81,11 @@ CONTAINS !
           PTmp=QP%Prim%Pw
           DO NC=1,CS_IN%NCells
              QP%Prim%Pw=PTmp+CS_IN%CellCarts%D(:,NC) 
+             QP%Box%BndBox(:,1)=QP%Prim%Pw
+             QP%Box%BndBox(:,2)=QP%Prim%Pw
+             QP%Box=ExpandBox(QP%Box,PExt)
+
+
 #ifdef MAC_DEBUG
              CALL DBL_VECT_EQ_DBL_SCLR(SPLen+1,SPKetC(0),Zero)
              CALL DBL_VECT_EQ_DBL_SCLR(SPLen+1,SPKetS(0),Zero)   

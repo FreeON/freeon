@@ -173,6 +173,7 @@ CONTAINS
        P%Pole%Center=P%Box%Center  
        ! ... and merge the multipole expansions ...
        CALL PoleMerge(P%Left%Pole,P%Right%Pole,P%Pole)
+       CALL BoxMerge(P%Left%Box,P%Right%Box,P%Box)
        CALL SetSignedPAC(P%PAC,P)
        !       ALLOCATE(P%MAC%O(0:P%HERM%Ell),STAT=Status)
        !       CALL IncMem(Status,0,P%HERM%Ell+1)       
@@ -182,7 +183,7 @@ CONTAINS
 
   SUBROUTINE SplitPoleBox(Node,Left,Right)
     TYPE(PoleNode), POINTER     :: Node,Left,Right
-    REAL(DOUBLE)                :: Section,MaxBox,Extent,MaxExt,IHalfHalf,BalanceQ,TotCh2,ChHalf2
+    REAL(DOUBLE)                :: Section,MaxBox,Extent,MaxExt,IHalfHalf,BalanceQ,TotCh2,ChHalf2,Ex
     REAL(DOUBLE),DIMENSION(3)   :: MaxQL,MaxQH
     INTEGER                     :: Ne,Nn,Be,Ee,Bn,En,Je,Jn,ISplit,Split,I,J,k,IS,NewSplit
     INTEGER                     :: MaxBoxedEll,NBoxedEll,EllSplit,Cd,SplitI,SplitJ
@@ -256,14 +257,15 @@ CONTAINS
     Left%IHalf=-1D20
     DO I=Left%BdexE,Left%EdexE
        K=Qdex(I)
-       Left%Box%BndBox(1,1)=MIN(Left%Box%BndBox(1,1),Rho%Qx%D(K))
-       Left%Box%BndBox(1,2)=MAX(Left%Box%BndBox(1,2),Rho%Qx%D(K))
-       Left%Box%BndBox(2,1)=MIN(Left%Box%BndBox(2,1),Rho%Qy%D(K))
-       Left%Box%BndBox(2,2)=MAX(Left%Box%BndBox(2,2),Rho%Qy%D(K))
-       Left%Box%BndBox(3,1)=MIN(Left%Box%BndBox(3,1),Rho%Qz%D(K))
-       Left%Box%BndBox(3,2)=MAX(Left%Box%BndBox(3,2),Rho%Qz%D(K))
-       Left%IHMin=MIN(Left%IHMin,Ext(K))
-       Left%IHalf=MAX(Left%IHalf,Ext(K))
+       ! Ex is the penetration extent.  Here, we expand the BBox to reflect that
+       ! extent:
+       Ex=Ext(K)
+       Left%Box%BndBox(1,1)=MIN(Left%Box%BndBox(1,1),Rho%Qx%D(K)-Ex)
+       Left%Box%BndBox(1,2)=MAX(Left%Box%BndBox(1,2),Rho%Qx%D(K)+Ex)
+       Left%Box%BndBox(2,1)=MIN(Left%Box%BndBox(2,1),Rho%Qy%D(K)-Ex)
+       Left%Box%BndBox(2,2)=MAX(Left%Box%BndBox(2,2),Rho%Qy%D(K)+Ex)
+       Left%Box%BndBox(3,1)=MIN(Left%Box%BndBox(3,1),Rho%Qz%D(K)-Ex)
+       Left%Box%BndBox(3,2)=MAX(Left%Box%BndBox(3,2),Rho%Qz%D(K)+Ex)
     ENDDO
     Left%Box%Half(:)=Half*(Left%Box%BndBox(:,2)-Left%Box%BndBox(:,1))
     Left%Box%Center(:)=Left%Box%BndBox(:,1)+Left%Box%Half(:)
@@ -274,14 +276,15 @@ CONTAINS
     Right%IHalf=-1D20
     DO I=Right%BdexE,Right%EdexE
        K=Qdex(I)
-       Right%Box%BndBox(1,1)=MIN(Right%Box%BndBox(1,1),Rho%Qx%D(K))
-       Right%Box%BndBox(1,2)=MAX(Right%Box%BndBox(1,2),Rho%Qx%D(K))
-       Right%Box%BndBox(2,1)=MIN(Right%Box%BndBox(2,1),Rho%Qy%D(K))
-       Right%Box%BndBox(2,2)=MAX(Right%Box%BndBox(2,2),Rho%Qy%D(K))
-       Right%Box%BndBox(3,1)=MIN(Right%Box%BndBox(3,1),Rho%Qz%D(K))
-       Right%Box%BndBox(3,2)=MAX(Right%Box%BndBox(3,2),Rho%Qz%D(K))
-       Right%IHMin=MIN(Right%IHMin,Ext(K))
-       Right%IHalf=MAX(Right%IHalf,Ext(K))
+       ! Ex is the penetration extent.  Here, we expand the BBox to reflect that
+       ! extent:
+       Ex=Ext(K)
+       Right%Box%BndBox(1,1)=MIN(Right%Box%BndBox(1,1),Rho%Qx%D(K)-Ex)
+       Right%Box%BndBox(1,2)=MAX(Right%Box%BndBox(1,2),Rho%Qx%D(K)+Ex)
+       Right%Box%BndBox(2,1)=MIN(Right%Box%BndBox(2,1),Rho%Qy%D(K)-Ex)
+       Right%Box%BndBox(2,2)=MAX(Right%Box%BndBox(2,2),Rho%Qy%D(K)+Ex)
+       Right%Box%BndBox(3,1)=MIN(Right%Box%BndBox(3,1),Rho%Qz%D(K)-Ex)
+       Right%Box%BndBox(3,2)=MAX(Right%Box%BndBox(3,2),Rho%Qz%D(K)+Ex)
     ENDDO
     Right%Box%Half(:)=Half*(Right%Box%BndBox(:,2)-Right%Box%BndBox(:,1))
     Right%Box%Center(:)=Right%Box%BndBox(:,1)+Right%Box%Half(:)
@@ -614,13 +617,15 @@ CONTAINS
           QD=oq+Q
           CD=or+(Q-1)*LMNLen+1
 
+!!$
+          EX=Extent(Ell,ZE,Rho%Co%D(CD:CD+LMNLen-1),Tau_O=TauPAC,Potential_O=.TRUE.,ExtraEll_O=0)
+          IF(EX>Zero)THEN
+!!$
+!!$
+!!$          EX=Est%D(Q)  
+!!$          IF(EX>TauTwo*1D-5)THEN
 
-!!$          EX=Extent(Ell,ZE,Rho%Co%D(CD:CD+LMNLen-1),Tau_O=TauPAC,Potential_O=.TRUE.,ExtraEll_O=0)
-!!$          IF(EX>Zero)THEN
 
-
-          EX=Est%D(Q)  
-          IF(EX>TauTwo*1D-5)THEN
              ! Intialize PoleRoot boundaries
              PoleRoot%Box%BndBox(1,1)=MIN(PoleRoot%Box%BndBox(1,1),Rho%Qx%D(IQ))
              PoleRoot%Box%BndBox(1,2)=MAX(PoleRoot%Box%BndBox(1,1),Rho%Qx%D(IQ))

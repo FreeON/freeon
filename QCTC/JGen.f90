@@ -123,7 +123,7 @@ CONTAINS
     REAL(DOUBLE),DIMENSION(Pair%NA,Pair%NB)   :: JBlk
     REAL(DOUBLE),DIMENSION(0:SPLen)           :: SPBraC,SPBraS 
     REAL(DOUBLE),DIMENSION(3)                 :: PTmp
-    REAL(DOUBLE)                              :: ZetaA,ZetaB,EtaAB,EtaIn,  X
+    REAL(DOUBLE)                              :: ZetaA,ZetaB,EtaAB,EtaIn,PExt
     REAL(DOUBLE)                              :: XiAB,ExpAB,CA,CB,CC,Ov
     REAL(DOUBLE)                              :: PAx,PAy,PAz,PBx,PBy,PBz
     REAL(DOUBLE)                              :: MDx,MDxy,MDxyz,Amp2,MaxAmp
@@ -210,11 +210,16 @@ CONTAINS
                      ENDDO
                    ENDDO
                    !
+                   PExt=Extent(QP%Prim%Ell,QP%Prim%Zeta,TempHerm%Coef,TauPAC,ExtraEll_O=0,Potential_O=.TRUE.)
+!                   WRITE(*,*)QP%Prim%Zeta,' PExt = ',PExt
 
-                   CALL SetSerialPAC(QP%PAC,TempHerm)                   
-                   CALL SetSerialMAC(QP%MAC,TempHerm)                   
+                   !
+                   !                   CALL SetSerialPAC(QP%PAC,TempHerm)                   
                    ! The integral estimate (ab|ab)^(1/2)
-                   QP%IHalf=Estimate(QP%Prim%Ell,QP%Prim%Zeta,TempHerm%Coef(1:LenAB))
+                   !                   QP%IHalf=Estimate(QP%Prim%Ell,QP%Prim%Zeta,TempHerm%Coef(1:LenAB))
+                   
+
+                   CALL SetSerialMAC(QP%MAC,TempHerm)                   
 !                   IF(QP%IHalf<TauTwo*1D-5)CYCLE
 #ifdef PAC_DEBUG
                    DO L=1,LenAB
@@ -239,7 +244,13 @@ CONTAINS
                       SPErrorKetS=Zero
                       SPErrorKetC=Zero
 #endif
+                      !
                       QP%Prim%Pw=PTmp+CS_IN%CellCarts%D(:,NC)
+                      !
+                      QP%Box%BndBox(:,1)=QP%Prim%Pw
+                      QP%Box%BndBox(:,2)=QP%Prim%Pw
+                      QP%Box=ExpandBox(QP%Box,PExt)
+                      !
                       NNearTmp=NNearAv
                       NNearAv=0
                       CALL JWalk2(QP,PoleRoot) 

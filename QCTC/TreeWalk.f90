@@ -87,10 +87,7 @@ CONTAINS
     REAL(DOUBLE)                     :: CoTan,OneOvPQ,OneOvPQxy,RS,SQ,PQToThMnsL,LocalThresh
     REAL(DOUBLE)                     :: TT,TwoC,COne,SOne,CTwo,STwo,RTE,RPE,T,PCHalf,JTau
     REAL(DOUBLE)                     :: SqrtW,RDist,LeftS,RightS,Err,TPAC,RMnsD,R,BigR,SmallR,Xpt,ET
-    REAL(DOUBLE) :: PQX,PQY,PQZ,MACError,MACError2,PACError
-
-    REAL(DOUBLE), DIMENSION(0:2)     :: tmp
-
+    REAL(DOUBLE)                     :: PQX,PQY,PQZ,OmegaMin,MACError,MACError2,PACError
     INTEGER                          :: is,I,J,K,Ell,EllP,EllQ,LenP,LenQ,LCode
     INTEGER                          :: TotEll,PQEll,PQLen
     LOGICAL                          :: PAC,MAC,Leave
@@ -114,10 +111,6 @@ CONTAINS
     ELSE
        Nucular=.FALSE.
     ENDIF
-
-
-!!    Walkies=Walkies+1
-
     !
     JWalk_Time_Start=MTimer()
     !
@@ -127,116 +120,49 @@ CONTAINS
     Q=>P
     NFar=0
     NNear=0
-
-    JTau=TauTwo/QC%IHalf
-
-    Leave=.FALSE.
+    !
+    JTau=TauTwo !/QC%IHalf
+    !
     DO 
-       ! First check the Schwartz inequality 
-       IF(Q%IHalf<JTau)THEN
-          IF(ASSOCIATED(Q%Next))THEN
-             Q=>Q%Next
-             CYCLE 
-          ELSE
-             EXIT
-          ENDIF
-       ENDIF
        !
-       PC2=Zero
-       PCx=QC%Prim%Pw(1)-Q%Box%Center(1)
-       PCy=QC%Prim%Pw(2)-Q%Box%Center(2)
-       PCz=QC%Prim%Pw(3)-Q%Box%Center(3)
-       IF(PCx<-Q%Box%Half(1))THEN
-          PCHalf=PCx+Q%Box%Half(1)
-          PC2=PC2+PCHalf*PCHalf          
-       ELSEIF(PCx>Q%Box%Half(1))THEN
-          PCHalf=PCx-Q%Box%Half(1)
-          PC2=PC2+PCHalf*PCHalf
-       ENDIF
-       IF(PCy<-Q%Box%Half(2))THEN
-          PCHalf=PCy+Q%Box%Half(2)
-          PC2=PC2+PCHalf*PCHalf
-       ELSEIF(PCy>Q%Box%Half(2))THEN
-          PCHalf=PCy-Q%Box%Half(2)
-          PC2=PC2+PCHalf*PCHalf
-       ENDIF
-       IF(PCz<-Q%Box%Half(3))THEN
-          PCHalf=PCz+Q%Box%Half(3)
-          PC2=PC2+PCHalf*PCHalf
-       ELSEIF(PCz>Q%Box%Half(3))THEN
-          PCHalf=PCz-Q%Box%Half(3)
-          PC2=PC2+PCHalf*PCHalf
-       ENDIF
-
+       PQx=QC%Prim%Pw(1)-Q%Box%Center(1)
+       PQy=QC%Prim%Pw(2)-Q%Box%Center(2)
+       PQz=QC%Prim%Pw(3)-Q%Box%Center(3)
+       !
+!!$       PQ2=PQx*PQx+PQy*PQy+PQz*PQz
+!!$       RTE=QC%Prim%Zeta*MinZab
+!!$       RPE=QC%Prim%Zeta+MinZab
+!!$       OmegaMin=RTE/RPE 
+!!$
+!!$       T=OmegaMin*PQ2
+       !
        MAC=.FALSE.
-       IF(PC2>1D-1)THEN          
-          RTE=QC%Prim%Zeta*Q%PAC%Zeta
-          RPE=QC%Prim%Zeta+Q%PAC%Zeta
-          TPAC=(RTE/RPE)*PC2
-          PAC=Q%PAC%Wght*QC%PAC%Wght*EXP(-TPAC)<TauPAC*PC2
-
-          PAC=TPAC>10.0D0
-
-
-
-!!$
-!!$          IF(Q%Leaf)CALL ErrCompare(QC,Q,Q%PAC%Wght*QC%PAC%Wght*EXP(-TPAC)/PC2)
-
-
-          IF(PAC)THEN 
-             IF(Q%MAC%Delta==Zero)THEN
-                MAC=.TRUE.
-             ELSE	
-                ! Check to see if the multipole translation error is acceptable
-                PQx=QC%Prim%Pw(1)-Q%Pole%Center(1)
-                PQy=QC%Prim%Pw(2)-Q%Pole%Center(2)
-                PQz=QC%Prim%Pw(3)-Q%Pole%Center(3)
-                R=SQRT(PQx*PQx+PQy*PQy+PQz*PQz)
-
-!!$                IF(Q%MAC%Delta<R)THEN
-!!$
-!!$                   w(1)=Q%MAC%Delta**(1+Q%Pole%Ell)*r**(-1-Q%Pole%Ell)
-!!$                   w(2)=(QC%MAC%O(0)*Q%MAC%O(0))/(-Q%MAC%Delta+r)
-!!$                   MACError=ABS(w(1)*w(2))
-!!$                   
-!!$
-!!$                   IF(Q%Leaf)THEN !MAC%Delta<Two*R)THEN
-!!$                   WRITE(*,33)Q%MAC%Delta,Q%POLE%delta,R,QC%MAC%O(0),Q%MAC%O(0),MacError,(Q%POLE%Delta/R)**(Q%POLE%Ell+1)
-!!$33                 FORMAT(' d = ',D8.2,' d2 = ',D8.2,' r = ',D8.2,' BraO = ',D8.2,' KetO = ',D8.2,' Err = ',D8.2,', ',D8.2)
-!!$                ENDIF
-!!$
-                   LCode=100*QC%Prim%Ell+Q%Herm%Ell
-                   SELECT CASE(LCode)
-                      INCLUDE "MACErrBnd4.Inc"
-                   CASE DEFAULT
-                      CALL Halt('No explicit code for case LCode = '  &
-                           //TRIM(IntToChar(LCode))//' in MACErrBnd4.Inc')
-                   END SELECT
-
-!!$
-!!$
-!!$                   w(1)=Q%MAC%Delta**(1+Q%Pole%Ell)*r**(-1-Q%Pole%Ell)
-!!$                   w(2)=(QC%MAC%O(0)*Q%MAC%O(0))/(-Q%MAC%Delta+r)
-!!$                   
-!!$                   WRITE(*,*)' R = ',R
-!!$                   WRITE(*,*)' Delta =',Q%MAC%Delta
-!!$                   WRITE(*,*)'  MAC ZERO ORDER PRODUCT = ',QC%MAC%O(0)*Q%MAC%O(0)
-!!$                   WRITE(*,*)'  MAC ZERO ORDER ERROR ',ABS(w(1)*w(2))
-!!$
-
-                   MAC=MACError<TauMAC
+       IF(ABS(PQx)>QC%Box%Half(1)+Q%Box%Half(1).OR.  &
+          ABS(PQy)>QC%Box%Half(2)+Q%Box%Half(2).OR.  &
+          ABS(PQz)>QC%Box%Half(3)+Q%Box%Half(3))THEN !.OR.  &
+!
+!          IF(T>Gamma_Switch)THEN
+          ! To here, we are outside the PAC distance and pennetration effects are 
+          ! negligible.  Now check to see if the multipole translation error is acceptable; MAC=.TRUE.
+          PQx=QC%Prim%Pw(1)-Q%Pole%Center(1)
+          PQy=QC%Prim%Pw(2)-Q%Pole%Center(2)
+          PQz=QC%Prim%Pw(3)-Q%Pole%Center(3)
+          R=SQRT(PQx*PQx+PQy*PQy+PQz*PQz)
+          ! Compute the putative multipole translation error
+          LCode=100*QC%Prim%Ell+Q%Herm%Ell
+          SELECT CASE(LCode)
+             INCLUDE "MACErrBnd4.Inc"
+          CASE DEFAULT
+             CALL Halt('No explicit code for case LCode = '  &
+                  //TRIM(IntToChar(LCode))//' in MACErrBnd4.Inc')
+          END SELECT
+          ! Is it acceptable?
+          MAC=MACError<TauMAC          
 #ifdef MAC_DEBUG
-                   CALL MACCompare(QC,Q,MACError)
+          CALL MACCompare(QC,Q,MACError)
 #endif
-
-                ENDIF
-             ENDIF
-
-
-          ENDIF
-       !
-
-!!       MAC=.FALSE.
+       ENDIF
+       ! 
        IF(MAC)THEN
           NFar=NFar+1
           Far(NFar)%P=>Q
@@ -269,7 +195,6 @@ CONTAINS
      LCode=100*QC%Prim%Ell+MaxPoleEll
     SELECT CASE(LCode)	
     INCLUDE "CTraX.Inc"
-
      !---------------------------------------------------------------------------------------------
 !!$    DO N=1,NFar
 !!$       Q=>Far(N)%P
