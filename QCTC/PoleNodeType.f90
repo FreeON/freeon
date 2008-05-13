@@ -116,8 +116,9 @@ MODULE PoleNodeType
   TYPE QCPrim
      TYPE(PrimPair) :: Prim
      TYPE(MAC)      :: MAC
-     TYPE(PAC)      :: PAC
-     REAL(DOUBLE)   :: IHalf
+     TYPE(BBox)                            :: Box      ! 
+!     TYPE(PAC)      :: PAC
+!     REAL(DOUBLE)   :: IHalf
   END TYPE QCPrim
 
   TYPE PoleNode

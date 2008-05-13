@@ -183,11 +183,14 @@ CONTAINS
                          TempHerm%Coef(I)=MAX(TempHerm%Coef(I),MAX(ABS(BraGradP(I,K)),ABS(BraGradA(I,K))))
                       ENDDO
                    ENDDO
-                   CALL SetSerialPAC(QP%PAC,TempHerm)                   
+
+!!!!!!!!!!!                   CALL SetSerialPAC(QP%PAC,TempHerm)                   
+
+
                    CALL SetSerialMAC(QP%MAC,TempHerm)                   
                    ! The integral estimate (ab|ab)^(1/2)
-                   QP%IHalf=Estimate(QP%Prim%Ell,QP%Prim%Zeta,TempHerm%Coef(1:LenG))
-                   IF(QP%IHalf<TauTwo*1D-5)CYCLE
+!!!!!!!                   QP%IHalf=Estimate(QP%Prim%Ell,QP%Prim%Zeta,TempHerm%Coef(1:LenG))
+!!!!!!!!                   IF(QP%IHalf<TauTwo*1D-5)CYCLE
 #ifdef PAC_DEBUG
                    DO L=1,LenG
                       ERRBRA(L)=TempHerm%Coef(L)
@@ -496,11 +499,11 @@ CONTAINS
     QP%Prim%Zeta=NuclearExpnt
     CALL PWrap(GM,QP%Prim,.NOT.NoWrap)
 
-    QP%PAC%Zeta=QP%Prim%Zeta
-    QP%PAC%Wght=GMLoc%AtNum%D(At)
+!!!!!!!!!!!!    QP%PAC%Zeta=QP%Prim%Zeta
+!!!!!!!!    QP%PAC%Wght=GMLoc%AtNum%D(At)
     QP%MAC%O(0)=GMLoc%AtNum%D(At)
     QP%MAC%Delta=Zero
-    QP%IHalf=ABS(NukeCo)  !! ??????????
+!!!!    QP%IHalf=ABS(NukeCo)  !! ??????????
     ! Initialize the |KET)
     CellFrc=Zero
     AtomFrc=Zero
