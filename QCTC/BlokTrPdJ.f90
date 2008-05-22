@@ -48,7 +48,7 @@ CONTAINS
          PAx,PAy,PAz,PBx,PBy,PBz,    &
          MDx,MDxy,MDxyz,Amp2,MaxAmp, &
          Pab,JNorm,Tau,OmegaMin,     &
-         PExtent,PStrength,Ext,LTmp
+         PExtent,PStrength,Ext,LTmp, PExt
     INTEGER                                    :: KA,KB,CFA,CFB,PFA,PFB,AtA,AtB,    &
          IndexA,IndexB,              &
          StartLA,StartLB,            &
@@ -175,6 +175,7 @@ CONTAINS
                       ENDDO
                    ENDDO
                    ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+                   ! Here is our worst case Hermite-Gaussian with Ell=EllG (angular symmetry of the gradient)
                    TempHerm%Coef(:)=Zero
                    TempHerm%Ell=QP%Prim%Ell
                    TempHerm%Zeta=QP%Prim%Zeta
@@ -183,14 +184,12 @@ CONTAINS
                          TempHerm%Coef(I)=MAX(TempHerm%Coef(I),MAX(ABS(BraGradP(I,K)),ABS(BraGradA(I,K))))
                       ENDDO
                    ENDDO
-
-!!!!!!!!!!!                   CALL SetSerialPAC(QP%PAC,TempHerm)                   
-
-
+                   ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+                   ! Now set the bra side error estimates
+                   ! Here is the MAC:
                    CALL SetSerialMAC(QP%MAC,TempHerm)                   
-                   ! The integral estimate (ab|ab)^(1/2)
-!!!!!!!                   QP%IHalf=Estimate(QP%Prim%Ell,QP%Prim%Zeta,TempHerm%Coef(1:LenG))
-!!!!!!!!                   IF(QP%IHalf<TauTwo*1D-5)CYCLE
+                   ! And here is the extent of this primitive Gaussian, to be used later in setting the BBox
+                   PExt=Extent(QP%Prim%Ell,QP%Prim%Zeta,TempHerm%Coef,TauPAC,ExtraEll_O=0,Potential_O=.TRUE.)
 #ifdef PAC_DEBUG
                    DO L=1,LenG
                       ERRBRA(L)=TempHerm%Coef(L)
@@ -200,7 +199,7 @@ CONTAINS
                    CALL HGToSP_Bra(QP%Prim%Zeta,QP%Prim%Ell,TempHerm%Coef,SPErrorBraC,SPErrorBraS)
 #endif
                    ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-                   ! Initialize <KET|
+                   ! Initialize <KET| vectors
                    LenSP=LSP(QP%Prim%Ell)
                    LenHGTF=LHGTF(QP%Prim%Ell)
                    CALL DBL_VECT_EQ_DBL_SCLR(LenHGTF,HGKet(1),Zero)
@@ -221,19 +220,28 @@ CONTAINS
                       SPErrorKetC=Zero
 #endif
                       QP%Prim%Pw=PTmp+CS_IN%CellCarts%D(:,NC) 
+                      ! -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
+                      ! This bounding box is the PAC:
+                      QP%Box%BndBox(:,1)=QP%Prim%Pw
+                      QP%Box%BndBox(:,2)=QP%Prim%Pw
+                      QP%Box=ExpandBox(QP%Box,PExt)
+                      ! -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
                       ! Calculate the fractional coordinates
                       nlm=AtomToFrac(GMLoc,CS_IN%CellCarts%D(:,NC))
                       ! Store the Old Stuff
                       HGKet_old(1:LenHGTF)= HGKet(1:LenHGTF)
                       SPKetC_old(0:LenSP) = SPKetC(0:LenSP)
                       SPKetS_old(0:LenSP) = SPKetS(0:LenSP)
+                      ! -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
                       ! Walk the walk
                       NNearTmp=NNearAv
                       NNearAv=0
+                      DOMAC=.TRUE.
                       CALL JWalk2(QP,PoleRoot) 
                       NNearCount(NC)=NNearCount(NC)+NNearAv
                       NNearAv=NNearTmp+NNearAv
                       NPrim=NPrim+1
+                      ! -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
                       ! Acumulate the Lattice Forces
                       DO I=1,3
                          SPKetC_L(0:LenSP,I)=SPKetC_L(0:LenSP,I)+nlm(I)*(SPKetC(0:LenSP)-SPKetC_old(0:LenSP))
@@ -336,68 +344,8 @@ CONTAINS
           ENDDO
        ENDDO
     ENDDO
-
-
-!!$    CALL Print_LatForce(GMLoc,Lattforce,'END END',Unit_O=6) 
-!!$    WRITE(*,*)'========================================='
-
     !
   END SUBROUTINE TrPdJ2
-  !====================================================================================================
-!!$  ! Wrapped Lattice Force term involving t
-!!$  !====================================================================================================
-!!$  FUNCTION WLFCellCenter(C,dEdP,P,L)
-!!$    REAL(DOUBLE), DIMENSION(3) :: C,dEdP,P
-!!$    REAL(DOUBLE), DIMENSION(3,3) :: L, WLFCellCenter
-!!$    REAL(DOUBLE) :: p1,p2,p3,c1,c2,c3,a11,a21,a22,a31,a32,a33
-!!$    REAL(DOUBLE) :: dEdP1,dEdP2,dEdP3
-!!$    REAL(DOUBLE) :: Modu,Mod1,X
-!!$    !
-!!$    Modu(X)=MODULO(X,1D0)
-!!$    Mod1(X)=MODULO(X,1D0)-X
-!!$    !
-!!$    c1=C(1);c2=C(2);c3=C(3)
-!!$    p1=P(1);p2=P(2);p3=p(3)
-!!$    dEdP1=dEdP(1);dEdP2=dEdP(2);dEdP3=dEdP(3)
-!!$    !
-!!$    a11=L(1,1)
-!!$    a21=L(2,1)
-!!$    a31=L(3,1)
-!!$    a22=L(2,2)
-!!$    a32=L(3,2)
-!!$    a33=L(3,3)
-!!$    !
-!!$    WLFCellCenter=Zero
-!!$    !
-!!$    IF(A11==0D0)THEN
-!!$       RETURN
-!!$    ELSE
-!!$       WLFCellCenter(1,1)=dEdP1*(-(c1/a11) + modu(p1/a11))
-!!$       WLFCellCenter(2,1)=-((dEdP2*(c1 + p1 - a11*mod1(p1/a11)))/a11)
-!!$       WLFCellCenter(3,1)=-((dEdP3*(c1 + p1 - a11*mod1(p1/a11)))/a11)
-!!$    ENDIF
-!!$    !
-!!$    IF(A22==0D0)THEN
-!!$       RETURN
-!!$    ELSE
-!!$       WLFCellCenter(2,2)=(dEdP2*(a21*(c1 + p1) - a11*(c2 + p2) + a11*a22*mod1((-(a21*p1) + a11*p2)/(a11*a22))))/(a11*a22)
-!!$       WLFCellCenter(3,2)=(dEdP3*(a21*(c1 + p1) - a11*(c2 + p2) + a11*a22*mod1((-(a21*p1) + a11*p2)/(a11*a22))))/(a11*a22)
-!!$    ENDIF
-!!$    !
-!!$    IF(A33==0D0)THEN
-!!$       RETURN
-!!$    ELSE
-!!$       WLFCellCenter(3,3)=(dEdP3*(a32*(-(a21*(c1 + p1)) + a11*(c2 + p2)) + a22*(a31*(c1 + p1) - a11*(c3 + p3)) +  &
-!!$     -      a11*a22*a33*mod1((-(a22*a31*p1) + a21*a32*p1 - a11*a32*p2 + a11*a22*p3)/(a11*a22*a33))))/(a11*a22*a33)
-!!$    ENDIF    
-!!$    !
-!!$  END FUNCTION WLFCellCenter
-!!$
-!!$
-!!$
-!!$
-!!$
-
 
 
   FUNCTION WrapLattForce(dEdP,P,L)
@@ -460,7 +408,7 @@ CONTAINS
                                          dAdL,dCdL
     REAL(DOUBLE),DIMENSION(1:3,1:3)   :: LattForce,CellFrc,tmp
  
-    REAL(DOUBLE)                      :: Tau,NukeCo,NukePole,PExtent,E000,PiZ
+    REAL(DOUBLE)                      :: Tau,NukeCo,NukePole,PExtent,E000,PiZ,PExt
     REAL(DOUBLE),DIMENSION(4)         :: dBra
     REAL(DOUBLE),DIMENSION(0:SPLen)   :: SPBraC,SPBraS 
     INTEGER                           :: At,LenSP,LenHGTF,I,J,K,LM,LMN
@@ -498,12 +446,15 @@ CONTAINS
     QP%Prim%P=GMLoc%Carts%D(:,At)
     QP%Prim%Zeta=NuclearExpnt
     CALL PWrap(GM,QP%Prim,.NOT.NoWrap)
-
-!!!!!!!!!!!!    QP%PAC%Zeta=QP%Prim%Zeta
-!!!!!!!!    QP%PAC%Wght=GMLoc%AtNum%D(At)
+    ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    !
     QP%MAC%O(0)=GMLoc%AtNum%D(At)
     QP%MAC%Delta=Zero
-!!!!    QP%IHalf=ABS(NukeCo)  !! ??????????
+
+    PExt=Extent(0,NuclearExpnt,(/NukeCo/),TauPAC,Potential_O=.TRUE.)
+
+          WRITE(*,*)' Nuclear Extent = ',PExt
+
     ! Initialize the |KET)
     CellFrc=Zero
     AtomFrc=Zero
@@ -524,6 +475,11 @@ CONTAINS
 #endif
        ! Set atomic "primitive"
        QP%Prim%Pw=PTmp+CS_IN%CellCarts%D(:,NC)
+       !
+       QP%Box%BndBox(:,1)=QP%Prim%Pw
+       QP%Box%BndBox(:,2)=QP%Prim%Pw
+       QP%Box=ExpandBox(QP%Box,PExt)
+       !
        ! Calculate the fractional coordinates
        nlm = AtomToFrac(GMLoc,CS_IN%CellCarts%D(:,NC))
        ! Store the Old Stuff
@@ -531,6 +487,7 @@ CONTAINS
        SPKetC_old(0:3) = SPKetC(0:3)
        SPKetS_old(0:3) = SPKetS(0:3)
        ! Walk the walk
+       DOMAC=.TRUE.
        CALL JWalk2(QP,PoleRoot,Nucular_O=.TRUE.)
        ! Acumulate the Lattice Forces
        DO I=1,3

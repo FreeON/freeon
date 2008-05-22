@@ -46,26 +46,12 @@ PROGRAM JForce
 
   CALL Print_CRDS(GM,Unit_O=6,PrintGeom_O='XYZ')
 
-
   ! Allocate some memory for bra HG shenanigans 
   CALL NewBraBlok(BS)
   !
-
-!!$  WRITE(*,*)' JFORCE 0000000000000000000000000000000000000'
-!!$  WRITE(*,*)' JFORCE 0000000000000000000000000000000000000'
-!!$  WRITE(*,*)' JFORCE 0000000000000000000000000000000000000'
-!!$  WRITE(*,*)' JFORCE 0000000000000000000000000000000000000'
-!!$  WRITE(*,*)' JFORCE 0000000000000000000000000000000000000'
-!!$  PMat2Use=TrixFile('D',Args,0)
-
   PMat2Use=TrixFile('D',Args,1)
 
-
   CALL Get(P,TRIM(PMat2Use))
-
-!  Mssg=ProcessName('JForce','P Matrix')
-!  Mssg=TRIM(Mssg)//TRIM(PMat2Use)
-!  WRITE(*,*)TRIM(Mssg)
   !
   ! Set thresholds local to QCTC (for PAC and MAC)
   CALL SetLocalThresholds(Thresholds%TwoE)
@@ -83,7 +69,6 @@ PROGRAM JForce
   WRITE(*,*)' PUNTED IN DELETE OF DENSITY !!! SEE FOLLOWING COMMENT OUT :::: '
 !!!  CALL DeleteHGLL(RhoHead)
 
-  ClusterSize=128
   MaxPFFFEll=GM%PBC%PFFMaxEll
   ! Local expansion order of the multipoles to use in the tree
   MaxPoleEll=MIN(2*(BS%NASym+4),MaxPFFFEll)
@@ -100,7 +85,9 @@ PROGRAM JForce
   ELSE
      Mssg=ProcessName('JForce','Wrapping on')
   ENDIF
+
   Mssg=TRIM(Mssg)//' Cluster Size = '//TRIM(IntToChar(ClusterSize))//', MaxPFFEll = '//TRIM(IntToChar(MaxPFFFEll))
+
   WRITE(*,*)TRIM(Mssg)
   ! Initialize addressing for tensor contraction loops
   CALL TensorIndexingSetUp()
@@ -121,11 +108,6 @@ PROGRAM JForce
   CALL New(LatFrc_DWRAP,(/3,3/))
 
   CALL PBCFarFuckingFieldSetUp(GM,Rho,'JForce',MaxPFFFEll,ETot,LatFrc_J)
-
-
-
-
-
 
   ! Delete the auxiliary density arrays
   CALL DeleteRhoAux
@@ -154,39 +136,13 @@ PROGRAM JForce
      MA=BSiz%I(AtA)
      A1=3*(AtA-1)+1
      A2=3*AtA
-!!$     F_nlm=dNukE2(GM,AtA)
-
-!!$     PrintFlags%Key=DEBUG_MAXIMUM	
-!!$     PrintFlags%MM=DEBUG_FRC
-!!$     WRITE(*,*)' ATA = ',ATA
-!!$     CALL Print_LatForce(GM,LatFrc_J%D,'BEFRE NUC ',Unit_O=6)
-
      CALL dNuke(GM,AtA,JFrc%D(A1:A2),LatFrc_J%D,NoWrap_O=NoWrap)
-!!$
-!!$     CALL Print_LatForce(GM,LatFrc_J%D,'AFTER NUC ',Unit_O=6)
-!!$     STOP
-
-
-!!$     JFrc%D(A1:A2)=Two*F_nlm(1:3) 
-!!$     ! Store Inner Nuc Lattice Forces
-!!$     LatFrc_J%D(1:3,1) = LatFrc_J%D(1:3,1) + F_nlm(7:9)
-!!$     LatFrc_J%D(1:3,2) = LatFrc_J%D(1:3,2) + F_nlm(10:12)
-!!$     LatFrc_J%D(1:3,3) = LatFrc_J%D(1:3,3) + F_nlm(13:15)
-!!$    ! Outer Nuc Lattice Forces
-!!$     nlm        = AtomToFrac(GM,GM%Carts%D(:,AtA))
-!!$     LatFrc_J%D = LatFrc_J%D + Two*LaticeForce(GM,nlm,F_nlm(1:3))
      !
-     ! Start AtB Loop
-   
+     ! Start AtB Loop   
      DO JP=P%RowPt%I(AtA),P%RowPt%I(AtA+1)-1 
         AtB=P%ColPt%I(JP)
         B1=3*(AtB-1)+1
         B2=3*AtB
-
-
-!        WRITE(*,*)' AtA = ',AtA,' AtB = ',AtB
-
-
         IF(SetAtomPair(GM,BS,AtA,AtB,Pair)) THEN 
            Q=P%BlkPt%I(JP)
            NB=BSiz%I(AtB)
@@ -222,15 +178,6 @@ PROGRAM JForce
         ENDIF
      ENDDO
   ENDDO
-
-
-
-
-
-
-
-
-
 
   ! Zero the lower triange of the lattice forces ...
   DO I=1,3

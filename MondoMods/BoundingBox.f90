@@ -122,6 +122,22 @@ MODULE BoundingBox
         Box%Center(2)= Half*(Box%BndBox(2,2)+Box%BndBox(2,1))
         Box%Center(3)= Half*(Box%BndBox(3,2)+Box%BndBox(3,1))
       END SUBROUTINE BoxMerge
+
+      SUBROUTINE PointBoxMerge(Left,Point,Box)
+        TYPE(BBox)                :: Left,Box
+        REAL(DOUBLE),DIMENSION(3) :: Point
+        INTEGER                   :: K
+        DO K=1,3
+           Box%BndBox(K,1)=MIN(Left%BndBox(K,1),Point(K))
+           Box%BndBox(K,2)=MAX(Left%BndBox(K,2),Point(K))
+        ENDDO
+        Box%Half(1)  = Half*(Box%BndBox(1,2)-Box%BndBox(1,1))
+        Box%Half(2)  = Half*(Box%BndBox(2,2)-Box%BndBox(2,1))
+        Box%Half(3)  = Half*(Box%BndBox(3,2)-Box%BndBox(3,1))
+        Box%Center(1)= Half*(Box%BndBox(1,2)+Box%BndBox(1,1))
+        Box%Center(2)= Half*(Box%BndBox(2,2)+Box%BndBox(2,1))
+        Box%Center(3)= Half*(Box%BndBox(3,2)+Box%BndBox(3,1))
+      END SUBROUTINE PointBoxMerge
 !===============================================================================
 !     Determine if a point with extent is outside a BBox
 !===============================================================================
@@ -171,18 +187,18 @@ MODULE BoundingBox
 !==========================================================================
 !
 !==========================================================================
-      SUBROUTINE PrintBBox(Box,ZetaMin_O,MaxAmp_O)
+      SUBROUTINE PrintBBox(Box,U,ZetaMin_O,MaxAmp_O)
          TYPE(BBox)             :: Box
          REAL(DOUBLE), OPTIONAL :: ZetaMin_O,MaxAmp_O
-         INTEGER    :: Number,Tier,I,J
-         WRITE(22,*)'======================================================='
-         WRITE(22,33)Box%Number,Box%Tier
+         INTEGER    :: U,Number,Tier,I,J
+         WRITE(U,*)'======================================================='
+         WRITE(U,33)Box%Number,Box%Tier
          33 FORMAT(' Number = ',I4,' Tier = ',I3)
          IF(PRESENT(ZetaMin_O).AND.PRESENT(MaxAmp_O)) &
             WRITE(22,44)ZetaMin_O,MaxAmp_O
          44 FORMAT(' ZetaMin = ',F12.6,' MaxAmp = ',F12.6)
          DO I=1,3
-            WRITE(22,55)I,Box%BndBox(I,1),Box%BndBox(I,2),Box%Center(I),Box%Half(I)
+            WRITE(U,55)I,Box%BndBox(I,1),Box%BndBox(I,2),Box%Center(I),Box%Half(I)
          ENDDO
       55 FORMAT(I2,' Low=',F10.5,', Hi =',F10.5,', Center = ',F10.5,', Half = ',F10.5)
       END SUBROUTINE PrintBBox

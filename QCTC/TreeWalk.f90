@@ -71,8 +71,7 @@ MODULE TreeWalk
 
   REAL(DOUBLE),ALLOCATABLE,DIMENSION(:) :: TEST
 
-
-    LOGICAL DOMAC
+  LOGICAL DOMAC
 
 CONTAINS  
 
@@ -162,7 +161,7 @@ CONTAINS
           CALL MACCompare(QC,Q,MACError)
 #endif
        ENDIF
-       ! 
+       !        
        IF(MAC)THEN
           NFar=NFar+1
           Far(NFar)%P=>Q

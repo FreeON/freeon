@@ -51,7 +51,6 @@ CONTAINS !
           QP%Prim%P=GMLoc%Carts%D(:,At)
           QP%Prim%Zeta=NuclearExpnt
           CALL PWrap(GM,QP%Prim,.NOT.NoWrap)
-          PExt=Extent(0,NuclearExpnt,HGBra,TauPAC)
           !          
 #ifdef PAC_DEBUG
           ERRBRA=Zero
@@ -68,11 +67,9 @@ CONTAINS !
           SPERRORBRAS(0)=Zero
 #endif
           ! Set MAC and PAC
-!!          QP%PAC%Zeta=QP%Prim%Zeta
-!!          QP%PAC%Wght=GMLoc%AtNum%D(At)
           QP%MAC%O(0)=GMLoc%AtNum%D(At)
           QP%MAC%Delta=Zero
-!!          QP%IHalf=ABS(HGBra(1))  !! ??????????
+          PExt=Extent(0,NuclearExpnt,HGBra,TauPAC,Potential_O=.TRUE.)
           ! Initialize the ket
           HGKet(1)=Zero
           SPKetC(0)=Zero
@@ -80,18 +77,20 @@ CONTAINS !
           ! Lay down the potential
           PTmp=QP%Prim%Pw
           DO NC=1,CS_IN%NCells
+             !
              QP%Prim%Pw=PTmp+CS_IN%CellCarts%D(:,NC) 
+             !
              QP%Box%BndBox(:,1)=QP%Prim%Pw
              QP%Box%BndBox(:,2)=QP%Prim%Pw
              QP%Box=ExpandBox(QP%Box,PExt)
-
-
+             !
 #ifdef MAC_DEBUG
              CALL DBL_VECT_EQ_DBL_SCLR(SPLen+1,SPKetC(0),Zero)
              CALL DBL_VECT_EQ_DBL_SCLR(SPLen+1,SPKetS(0),Zero)   
              SPErrorKetS=Zero
              SPErrorKetC=Zero
 #endif
+             DOMAC=.FALSE.
              CALL JWalk2(QP,PoleRoot,Nucular_O=.TRUE.)
           ENDDO
           ! Reset the primitive coordinates
