@@ -136,7 +136,7 @@ PROGRAM QCTC
   !
   MaxPFFFEll=GM%PBC%PFFMaxEll
   ! Local expansion order of the multipoles to use in the tree
-  MaxPoleEll=MIN(2*(BS%NASym+4),MaxPFFFEll)
+  MaxPoleEll=MIN(2*BS%NASym+6,MaxPFFFEll)
   IF(MaxPoleEll<2*(BS%NASym+1)) &
      CALL Halt('Bombed in QCTC. Please set PFFMaxEll larger ')
   ! Find the total energy from past calculations
@@ -199,21 +199,21 @@ PROGRAM QCTC
 !     WRITE(*,*)I,NNearCount(I)
      IF(NNearCount(I)==0D0)K=K+1
   ENDDO
-!!$  WRITE(*,*)' % of NoPAC = ',DBLE(K)/DBLE(CS_IN%NCells)
-!!$
-!!$  WRITE(*,11)' Decompos_Time = ',Decompose_Time
-!!$  WRITE(*,11)' TreeMake_Time = ',TreeMake_Time
-!!$  WRITE(*,11)' JWalking_Time = ',JWalk_Time
-!!$  WRITE(*,11)' Integral_Time = ',Integral_Time
-!!$  WRITE(*,11)' Multipol_Time = ',Multipole_Time
-!!$  WRITE(*,11)' Total J Time  = ',Decompose_Time+TreeMake_Time+JWalk_Time+Multipole_Time+Integral_Time
-!!$  WRITE(*,11)' Total JWalks  = ',DBLE(NPrim)
-!!$  WRITE(*,11)' Av  Ints/Prim = ',DBLE(NInts)/DBLE(NPrim)
-!!$  WRITE(*,11)' Av  # NF/Prim = ',DBLE(NNearAv)/DBLE(NPrim)
-!!$  WRITE(*,11)' Av  # FF/Prim = ',DBLE(NFarAv)/DBLE(NPrim)
-!!$  WRITE(*,11)' Time per INode= ',Integral_Time/DBLE(NNearAv)
-!!$  WRITE(*,11)' Time per MNode= ',Multipole_Time/DBLE(NFarAv)
-!!$11 FORMAT(A20,D12.6)
+  WRITE(*,*)' % of NoPAC = ',DBLE(K)/DBLE(CS_IN%NCells)
+
+  WRITE(*,11)' Decompos_Time = ',Decompose_Time
+  WRITE(*,11)' TreeMake_Time = ',TreeMake_Time
+  WRITE(*,11)' JWalking_Time = ',JWalk_Time
+  WRITE(*,11)' Integral_Time = ',Integral_Time
+  WRITE(*,11)' Multipol_Time = ',Multipole_Time
+  WRITE(*,11)' Total J Time  = ',Decompose_Time+TreeMake_Time+JWalk_Time+Multipole_Time+Integral_Time
+  WRITE(*,11)' Total JWalks  = ',DBLE(NPrim)
+  WRITE(*,11)' Av  Ints/Prim = ',DBLE(NInts)/DBLE(NPrim)
+  WRITE(*,11)' Av  # NF/Prim = ',DBLE(NNearAv)/DBLE(NPrim)
+  WRITE(*,11)' Av  # FF/Prim = ',DBLE(NFarAv)/DBLE(NPrim)
+  WRITE(*,11)' Time per INode= ',Integral_Time/DBLE(NNearAv)
+  WRITE(*,11)' Time per MNode= ',Multipole_Time/DBLE(NFarAv)
+11 FORMAT(A20,D12.6)
 !!$
    CALL PChkSum(J,'J',Prog,Unit_O=6)
 

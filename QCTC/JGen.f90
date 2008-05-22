@@ -253,6 +253,7 @@ CONTAINS
                       !
                       NNearTmp=NNearAv
                       NNearAv=0
+                      DOMAC=.FALSE.
                       CALL JWalk2(QP,PoleRoot) 
                       NNearCount(NC)=NNearCount(NC)+NNearAv
                       NNearAv=NNearTmp+NNearAv

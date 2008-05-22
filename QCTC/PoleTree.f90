@@ -134,8 +134,10 @@ CONTAINS
   RECURSIVE SUBROUTINE SplitPole(Node,Next)
     TYPE(PoleNode), POINTER :: Node,Next
     !--------------------------------------------------------------
+    IF(Node%NQ<=ClusterSize)THEN
+
 ! IF(Node%NAtms<10)THEN
-    IF(Node%NAtms==1)THEN
+!    IF(Node%NAtms==1)THEN
        ! We are at a leaf
        NULLIFY(Node%Left)
        NULLIFY(Node%Right)
@@ -185,9 +187,9 @@ CONTAINS
     TYPE(PoleNode), POINTER     :: Node,Left,Right
     REAL(DOUBLE)                :: Section,MaxBox,Extent,MaxExt,IHalfHalf,BalanceQ,TotCh2,ChHalf2,Ex
     REAL(DOUBLE),DIMENSION(3)   :: MaxQL,MaxQH
-    INTEGER                     :: Ne,Nn,Be,Ee,Bn,En,Je,Jn,ISplit,Split,I,J,k,IS,NewSplit
+    INTEGER                     :: Ne,Nn,Be,Ee,Bn,En,Je,Jn,ISplit,Split,I,J,k,IS,NL,NR
     INTEGER                     :: MaxBoxedEll,NBoxedEll,EllSplit,Cd,SplitI,SplitJ
-    REAL(DOUBLE)                :: Volume,MaxZeta,MinZeta,ZetaHalf,ChHalf,TotCh,PiZ
+    REAL(DOUBLE)                :: Volume,MaxZeta,MinZeta,ZetaHalf,ChHalf,TotCh,PiZ,RL,RR
     REAL(DOUBLE)                :: BEBalance,ChBalance,XBalance
     INTEGER,DIMENSION(:), ALLOCATABLE :: IList,JList
     REAL(DOUBLE),DIMENSION(:), ALLOCATABLE :: XList,CList
@@ -210,20 +212,28 @@ CONTAINS
     !
     IF(Nn<1)CALL Halt(' Logic error in SplitPoleBox ')
     ! Determine the longest coordinate ...
-    MaxBox=Zero
-    DO I=1,3
-       IF(MaxBox<Node%Box%Half(I))THEN
-          MaxBox=Node%Box%Half(I)
-          ISplit=I
-       ENDIF
-    ENDDO
-    !
+    IF(Nn==1)THEN
+       ISplit=4
+    ELSE
+       MaxBox=Zero
+       DO I=1,3
+          IF(MaxBox<Node%Box%Half(I))THEN
+             MaxBox=Node%Box%Half(I)
+             ISplit=I
+          ENDIF
+       ENDDO
+    ENDIF
+    ! Orthogonal recursive bisection on charge distributions      
     IF(ISplit==1)THEN
        CALL FairSplit(Ne,Qdex(Be:Ee),Rho%Qx%D,Je,Nn,ISplit,NDex(Bn:En),GM%Carts%D,Jn)
     ELSEIF(ISplit==2)THEN
        CALL FairSplit(Ne,Qdex(Be:Ee),Rho%Qy%D,Je,Nn,ISplit,NDex(Bn:En),GM%Carts%D,Jn)
     ELSEIF(ISplit==3)THEN
        CALL FairSplit(Ne,Qdex(Be:Ee),Rho%Qz%D,Je,Nn,ISplit,NDex(Bn:En),GM%Carts%D,Jn)
+    ELSEIF(ISplit==4)THEN
+       ! Sort on PAC + HGTF distance from the nuclear center, with the goal of 
+       ! creating smaller and smaller boxes that may satisfy both MAC and PAC
+       CALL PACSplit(Ne,Qdex(Be:Ee),Ext,Rho%Qx%D,Rho%Qy%D,Rho%Qz%D,GM%Carts%D(:,NDex(Bn)),Je)
     ENDIF
     ! Split the charges
     Split=Be+Je-1
@@ -234,76 +244,130 @@ CONTAINS
     IF(Left%EdexE<Left%BdexE.OR.Right%EdexE<Right%BdexE)THEN
        CALL Halt(' Charge indexing hosed in SplitPoleBox ' )
     ENDIF
+
+    ! Split the nuclei 
+    IF(ISplit<4)THEN
+       ! If we are still doing ORB, then fill in pointer (NDex) locations
+       Split=Bn+Jn-1
+       Left%BdexN=Bn
+       Left%EdexN=Split      
+       Right%EdexN=En 
+       Right%BdexN=Split+1
+    ELSE
+       Left%BdexN=Bn
+       Left%EdexN=Bn
+       Right%BdexN=En
+       Right%EdexN=En
+    ENDIF
     ! ... L&R counters ...
     Left%NQ=Left%EdexE-Left%BdexE+1
     Right%NQ=Right%EdexE-Right%BdexE+1
-    ! Split the nuclei
-    Split=Bn+Jn-1
-    Left%BdexN=Bn
-    Left%EdexN=Split
-    Right%EdexN=En 
-    Right%BdexN=Split+1
-    IF(Left%EdexN<Left%BdexN.OR.Right%EdexN<Right%BdexN)THEN
-       CALL Halt(' Nuclei indexing hosed in SplitPoleBox ' )
-    ENDIF
-    ! ... L&R counters ...
     Left%NAtms=Left%EdexN-Left%BdexN+1
     Right%NAtms=Right%EdexN-Right%BdexN+1
-    ! Ok, I hate this part but there seems to be no escaping 
-    ! it for now.  Grit our teeth and do a top down sintering of the BBoxes
+    ! Top down sintering of the BBoxes
     Left%Box%BndBox(:,1)=1D20
     Left%Box%BndBox(:,2)=-1D20
-    Left%IHMin=1D20
-    Left%IHalf=-1D20
+    DO I=Left%BdexN,Left%EdexN
+       K=NDex(I)
+       Left%Box%BndBox(1,1)=MIN(Left%Box%BndBox(1,1),GM%Carts%D(1,K))
+       Left%Box%BndBox(1,2)=MAX(Left%Box%BndBox(1,2),GM%Carts%D(1,K))
+       Left%Box%BndBox(2,1)=MIN(Left%Box%BndBox(2,1),GM%Carts%D(2,K))
+       Left%Box%BndBox(2,2)=MAX(Left%Box%BndBox(2,2),GM%Carts%D(2,K))
+       Left%Box%BndBox(3,1)=MIN(Left%Box%BndBox(3,1),GM%Carts%D(3,K))
+       Left%Box%BndBox(3,2)=MAX(Left%Box%BndBox(3,2),GM%Carts%D(3,K))       
+    ENDDO
     DO I=Left%BdexE,Left%EdexE
        K=Qdex(I)
-       ! Ex is the penetration extent.  Here, we expand the BBox to reflect that
-       ! extent:
-       Ex=Ext(K)
-       Left%Box%BndBox(1,1)=MIN(Left%Box%BndBox(1,1),Rho%Qx%D(K)-Ex)
-       Left%Box%BndBox(1,2)=MAX(Left%Box%BndBox(1,2),Rho%Qx%D(K)+Ex)
-       Left%Box%BndBox(2,1)=MIN(Left%Box%BndBox(2,1),Rho%Qy%D(K)-Ex)
-       Left%Box%BndBox(2,2)=MAX(Left%Box%BndBox(2,2),Rho%Qy%D(K)+Ex)
-       Left%Box%BndBox(3,1)=MIN(Left%Box%BndBox(3,1),Rho%Qz%D(K)-Ex)
-       Left%Box%BndBox(3,2)=MAX(Left%Box%BndBox(3,2),Rho%Qz%D(K)+Ex)
+       Left%Box%BndBox(1,1)=MIN(Left%Box%BndBox(1,1),Rho%Qx%D(K))
+       Left%Box%BndBox(1,2)=MAX(Left%Box%BndBox(1,2),Rho%Qx%D(K))
+       Left%Box%BndBox(2,1)=MIN(Left%Box%BndBox(2,1),Rho%Qy%D(K))
+       Left%Box%BndBox(2,2)=MAX(Left%Box%BndBox(2,2),Rho%Qy%D(K))
+       Left%Box%BndBox(3,1)=MIN(Left%Box%BndBox(3,1),Rho%Qz%D(K))
+       Left%Box%BndBox(3,2)=MAX(Left%Box%BndBox(3,2),Rho%Qz%D(K))
     ENDDO
     Left%Box%Half(:)=Half*(Left%Box%BndBox(:,2)-Left%Box%BndBox(:,1))
     Left%Box%Center(:)=Left%Box%BndBox(:,1)+Left%Box%Half(:)
-    !
+   !
     Right%Box%BndBox(:,1)=1D20
     Right%Box%BndBox(:,2)=-1D20
-    Right%IHMin=1D20
-    Right%IHalf=-1D20
+    DO I=Right%BdexN,Right%EdexN
+       K=NDex(I)
+       Right%Box%BndBox(1,1)=MIN(Right%Box%BndBox(1,1),GM%Carts%D(1,K))
+       Right%Box%BndBox(1,2)=MAX(Right%Box%BndBox(1,2),GM%Carts%D(1,K))
+       Right%Box%BndBox(2,1)=MIN(Right%Box%BndBox(2,1),GM%Carts%D(2,K))
+       Right%Box%BndBox(2,2)=MAX(Right%Box%BndBox(2,2),GM%Carts%D(2,K))
+       Right%Box%BndBox(3,1)=MIN(Right%Box%BndBox(3,1),GM%Carts%D(3,K))
+       Right%Box%BndBox(3,2)=MAX(Right%Box%BndBox(3,2),GM%Carts%D(3,K))       
+    ENDDO
     DO I=Right%BdexE,Right%EdexE
        K=Qdex(I)
-       ! Ex is the penetration extent.  Here, we expand the BBox to reflect that
-       ! extent:
-       Ex=Ext(K)
-       Right%Box%BndBox(1,1)=MIN(Right%Box%BndBox(1,1),Rho%Qx%D(K)-Ex)
-       Right%Box%BndBox(1,2)=MAX(Right%Box%BndBox(1,2),Rho%Qx%D(K)+Ex)
-       Right%Box%BndBox(2,1)=MIN(Right%Box%BndBox(2,1),Rho%Qy%D(K)-Ex)
-       Right%Box%BndBox(2,2)=MAX(Right%Box%BndBox(2,2),Rho%Qy%D(K)+Ex)
-       Right%Box%BndBox(3,1)=MIN(Right%Box%BndBox(3,1),Rho%Qz%D(K)-Ex)
-       Right%Box%BndBox(3,2)=MAX(Right%Box%BndBox(3,2),Rho%Qz%D(K)+Ex)
+       Right%Box%BndBox(1,1)=MIN(Right%Box%BndBox(1,1),Rho%Qx%D(K))
+       Right%Box%BndBox(1,2)=MAX(Right%Box%BndBox(1,2),Rho%Qx%D(K))
+       Right%Box%BndBox(2,1)=MIN(Right%Box%BndBox(2,1),Rho%Qy%D(K))
+       Right%Box%BndBox(2,2)=MAX(Right%Box%BndBox(2,2),Rho%Qy%D(K))
+       Right%Box%BndBox(3,1)=MIN(Right%Box%BndBox(3,1),Rho%Qz%D(K))
+       Right%Box%BndBox(3,2)=MAX(Right%Box%BndBox(3,2),Rho%Qz%D(K))
     ENDDO
     Right%Box%Half(:)=Half*(Right%Box%BndBox(:,2)-Right%Box%BndBox(:,1))
     Right%Box%Center(:)=Right%Box%BndBox(:,1)+Right%Box%Half(:)
 
-
-!    WRITE(*,55)ISplit,Left%Box%BndBox(ISplit,1),Left%Box%BndBox(ISplit,2), &
-!                  Right%Box%BndBox(ISplit,1),Right%Box%BndBox(ISplit,2)
-!
-!55  FORMAT("  Split = ",I2," [",D12.6,", ",D12.6,"] [",D12.6,", ",D12.6," ] ")
-
-!!$    WRITE(*,55)ISplit,Node%Box%Number,Left%BdexE,Left%EDexE,Left%EdexE-Left%BDexE, &
-!!$                                      Right%BdexE,Right%EDexE,Right%EdexE-Right%BDexE, &
+!!$    IF(ISplit<4)THEN
+!!$       WRITE(*,55)ISplit,Node%Box%Number,Left%BdexE,Left%EDexE, &
+!!$                                      Right%BdexE,Right%EDexE, &
 !!$                                      Left%BdexN,Left%EDexN,Right%BdexN,Right%EDexN
+!!$       
+!!$55     FORMAT("  Split = ",I2,", Node = ",I4," [",I6,", ",I6,"] [",I6,", ",I6," ] // <",I2,", ",I2,"><",I2,", ",I2,"> ")
+!!$    ELSE
+!!$       RL=FurthestPointInBox(GM%Carts%D(:,NDex(Left%BDexN)),Left%Box)
+!!$       RR=FurthestPointInBox(GM%Carts%D(:,NDex(Right%BDexN)),Right%Box)
+!!$       NL=Left%EDexE-Left%BdexE+1
+!!$       NR=Right%EDexE-Right%BdexE+1
 !!$
-!!$55  FORMAT("  Split = ",I2,", Node = ",I4," [",I6,", ",I6,";",I6,"] [",I6,", ",I6,";",I6," ] // <",I2,", ",I2,"><",I2,", ",I2,"> ")
-
+!!$       WRITE(*,56)ISplit,Node%BdexN,GM%AtNum%D(NDex(Node%BdexN)),Left%BdexE,Left%EDexE,NL, &
+!!$                                      Right%BdexE,Right%EDexE,NR,RL,RR
+!!$       
+!!$56     FORMAT("  Split = ",I2," At = ",I2,", Z = ",F4.1," [",I5,", ",I5,";N = ",I3,"] [",I5,", ",I5,";N = ",I3,"] // <",D7.2,"><",D7.2,"> ")
+!!$
+!!$    ENDIF
 
   END SUBROUTINE SplitPoleBox
   !
+  SUBROUTINE PACSplit(Ne,Qe,Ex,Qx,Qy,Qz,Nuc,Je)
+    INTEGER :: Ne,Nn,Je,Jn,J,ISplit,K
+    REAL(DOUBLE) :: Section
+    INTEGER,DIMENSION(1:Ne) :: Qe
+    REAL(DOUBLE),DIMENSION(:) :: Ex,Qx,Qy,Qz
+    REAL(DOUBLE),DIMENSION(3) :: Nuc
+    REAL(DOUBLE),DIMENSION(1:Ne) :: X
+    TYPE(BBox)                   :: Box
+    !
+    DO J=1,Ne
+       K=Qe(J)
+       Box%BndBox(:,1)=(/Qx(K),Qy(K),Qz(K)/)
+       Box%BndBox(:,2)=(/Qx(K),Qy(K),Qz(K)/)
+       Box=ExpandBox(Box,Ex(K))
+       CALL PointBoxMerge(Box,Nuc,Box)
+       X(J)=FurthestPointInBox(Nuc,Box)       
+!       WRITE(*,33)Ex(K),(/Qx(K),Qy(K),Qz(K)/),Nuc,X(J)
+!33     format(' Ex = ',D8.2,' Q = ',3(D10.4,', '),' C = ',3(D10.4,', '),' X = ',D10.4)
+    ENDDO
+    ! Sort with increasing first, so that we terminate the tree as early as possible with
+    ! as many small distributions as possible taken care of using the multipole approximation
+    CALL DblIntSort77(Ne,X,Qe,-2)             
+    ! Here, we are not going to bisect, but just pull off the CluserSize 
+    ! large distance distributions from the bottom of the list:
+    IF(Ne<2*ClusterSize)THEN
+       Je=Ne/2
+    ELSE
+       Je=ClusterSize
+    ENDIF
+    DO J=1,Je
+       K=Qe(J)
+!       WRITE(*,*)Ex(K),X(J)
+    ENDDO
+    !
+  END SUBROUTINE PACSplit
+
   SUBROUTINE FairSplit(Ne,Qe,RhoX,Je,Nn,ISplit,Qn,NucXYZ,Jn)
     INTEGER :: Ne,Nn,Je,Jn,J,ISplit
     REAL(DOUBLE) :: Section
@@ -416,20 +480,6 @@ CONTAINS
     Cndx%I=Zero
     Qndx%I=Zero
     Node%HERM%Ell=0
-    Node%BOX%BndBOX(:,1)=1D20
-    Node%BOX%BndBOX(:,2)=-1D20
-    ! 
-    ! Order by integral magnitude
-    J=0
-    B=Node%BdexE
-    E=Node%EdexE
-    N=E-B+1
-    DO I=B,E
-       J=J+1
-       K=Qdex(I)
-       RList(J)=Ext(K)
-    ENDDO
-    CALL DblIntSort77(N,RList,Qdex(B:E),-2)
     !
     ! This for MaxEll
     iHGStack=iHGStack+1
@@ -437,9 +487,10 @@ CONTAINS
     delta=0D0
     Node%POLE%Charge=GM%AtNum%D(NDex(Node%BdexN))
     Node%POLE%Center=GM%Carts%D(:,NDex(Node%BdexN))
-
+    Node%BOX%BndBOX(:,1)=Node%POLE%Center
+    Node%BOX%BndBOX(:,2)=Node%POLE%Center
+    ! 
     DO I=Node%BdexE,Node%EdexE
-
        Qd=Qdex(I)
        !
        Ell=LDex(Qd)
@@ -453,32 +504,23 @@ CONTAINS
        ZE=Zeta(Qd)
        Cd=Cdex(Qd)
        LMNLen=LHGTF(Ell)
-       ! Set and this nodes BBOX
-       Node%BOX%BndBOX(1,1)=MIN(Node%BOX%BndBOX(1,1),Rho%Qx%D(Qd))
-       Node%BOX%BndBOX(1,2)=MAX(Node%BOX%BndBOX(1,2),Rho%Qx%D(Qd))
-       Node%BOX%BndBOX(2,1)=MIN(Node%BOX%BndBOX(2,1),Rho%Qy%D(Qd))
-       Node%BOX%BndBOX(2,2)=MAX(Node%BOX%BndBOX(2,2),Rho%Qy%D(Qd))
-       Node%BOX%BndBOX(3,1)=MIN(Node%BOX%BndBOX(3,1),Rho%Qz%D(Qd))
-       Node%BOX%BndBOX(3,2)=MAX(Node%BOX%BndBOX(3,2),Rho%Qz%D(Qd))
-
-
+       !
+       Ex=Ext(Qd)
+       Node%BOX%BndBOX(1,1)=MIN(Node%BOX%BndBOX(1,1),Rho%Qx%D(Qd)-Ex)
+       Node%BOX%BndBOX(1,2)=MAX(Node%BOX%BndBOX(1,2),Rho%Qx%D(Qd)+Ex)
+       Node%BOX%BndBOX(2,1)=MIN(Node%BOX%BndBOX(2,1),Rho%Qy%D(Qd)-Ex)
+       Node%BOX%BndBOX(2,2)=MAX(Node%BOX%BndBOX(2,2),Rho%Qy%D(Qd)+Ex)
+       Node%BOX%BndBOX(3,1)=MIN(Node%BOX%BndBOX(3,1),Rho%Qz%D(Qd)-Ex)
+       Node%BOX%BndBOX(3,2)=MAX(Node%BOX%BndBOX(3,2),Rho%Qz%D(Qd)+Ex)
+       !
        delta=MAX(delta,SQRT(DOT_PRODUCT( (/Rho%Qx%D(Qd)-NODE%Pole%Center(1),Rho%Qy%D(Qd)-NODE%Pole%Center(2),Rho%Qz%D(Qd)-NODE%Pole%Center(3)/) , &
                                          (/Rho%Qx%D(Qd)-NODE%Pole%Center(1),Rho%Qy%D(Qd)-NODE%Pole%Center(2),Rho%Qz%D(Qd)-NODE%Pole%Center(3)/) )))
 
-!!$!        Set and inflate this nodes BBox
-!!$         Node%Box%BndBox(1,:)=Rho%Qx%D(KQ)
-!!$         Node%Box%BndBox(2,:)=Rho%Qy%D(KQ)
-!!$         Node%Box%BndBox(3,:)=Rho%Qz%D(KQ)
-!!$         Node%Box=ExpandBox(Node%Box,Ext(KQ))
-
-
     ENDDO
     Node%POLE%delta=delta
-
-    ! The leaf multipole center should always be at the atomic center
     Node%BOX%Center(:)=Node%BOX%BndBOX(:,1)+Node%Box%Half    
     Node%BOX%Half(:)=Half*(Node%BOX%BndBOX(:,2)-Node%BOX%BndBOX(:,1))
-
+    !
     DO Ell=0,Node%HERM%Ell
        N=Node%HERM%NQ(Ell)
        iHGStack=iHGStack+1
@@ -495,13 +537,11 @@ CONTAINS
              Node%HERM%Coef(Ell)%D(1:LMNLen,I)=Rho%Co%D(Cd:Cd+LMNLen-1)
              Node%HERM%Cent(Ell)%D(:,I)=(/Rho%Qx%D(Qd),Rho%Qy%D(Qd),Rho%Qz%D(Qd)/)
              Node%HERM%Zeta(Ell)%D(I)=Zeta(Qd)
-             Node%HERM%IHlf(Ell)%D(I)=EXT(Qd)
-             Node%IHalf=Node%IHalf+EXT(Qd)
           ENDDO
        ENDIF
     ENDDO
-    ! Fill in the PAC and the MAC
-    CALL SetSignedPAC(Node%PAC,Node)
+!    ! Fill in the PAC and the MAC
+!    CALL SetSignedPAC(Node%PAC,Node)
     ! Fill in the multiPOLE 
     Node%POLE%Ell=MaxPoleEll
     CALL AllocSP(Node%POLE)
@@ -509,17 +549,21 @@ CONTAINS
     IF(PointOutSideBox(Node%POLE%Center,Node%BOX))THEN
        WRITE(*,32)Node%POLE%Center
 32     FORMAT(' POLE%Center = ',3(D12.6,', '))
-       CALL PrintBBox(Node%BOX)
+       CALL PrintBBox(Node%BOX,6)
        CALL Halt(' In FillRhoLeaf: Multipole center outside of BBox ')
     ENDIF
     !
     CALL HGToSP_POLENODE(Node%HERM,Node%POLE)
     CALL SetMAC(Node)
 
-    NGaussTotal=NGaussTotal+(Node%EdexE-Node%BdexE)
+    NGaussTotal=NGaussTotal+(Node%EdexE-Node%BdexE+1)
     !
-    WRITE(*,33)Node%BOX%Number,Node%POLE%Charge,Node%EdexE-Node%BdexE,NODE%POLE%Delta
-33  FORMAT(' Node = ',I4,' Z = ',F4.1,' NGauss = ',I4,' Delta = ',D8.2)
+    WRITE(*,33)Node%BOX%Number,Node%POLE%Charge,Node%EdexE-Node%BdexE+1,NODE%POLE%Delta, &
+               FurthestPointInBox(GM%Carts%D(:,NDex(Node%BDexN)),Node%Box)
+!    WRITE(*,44)Node%Box%BndBox(:,1),Node%Box%BndBox(:,2),
+!44     format('Box = /',3(D10.4,', '),'/,/',3(D10.4,', '),' C= ',3(D10.4,', ') )
+
+33  FORMAT(' Node = ',I4,' Z = ',F4.1,' NGauss = ',I4,' Delta = ',D8.2,' BoxSz = ',D8.2)
     !
   END SUBROUTINE FillRhoLeaf
   !=================================================================================
