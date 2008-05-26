@@ -80,10 +80,10 @@ CONTAINS
     !-------------------------------------------------------------------
     iHGStack=1
     ! 
-    CALL New(Qndx,(/ClusterSize,MaxRhoEll/),(/1,0/))
-    CALL New(Cndx,(/ClusterSize,MaxRhoEll/),(/1,0/))
-    CALL New(CMTmp,(/ClusterSize,SPLen/),(/1,0/))
-    CALL New(SMTmp,(/ClusterSize,SPLen/),(/1,0/))
+    CALL New(Qndx,(/MaxCluster,MaxRhoEll/),(/1,0/))
+    CALL New(Cndx,(/MaxCluster,MaxRhoEll/),(/1,0/))
+    CALL New(CMTmp,(/MaxCluster,SPLen/),(/1,0/))
+    CALL New(SMTmp,(/MaxCluster,SPLen/),(/1,0/))
     CALL SetDSYEVWork(LenFit)
     !
     PoleRoot%BdexE=1
@@ -134,7 +134,7 @@ CONTAINS
   RECURSIVE SUBROUTINE SplitPole(Node,Next)
     TYPE(PoleNode), POINTER :: Node,Next
     !--------------------------------------------------------------
-!    IF(Node%NQ<=ClusterSize)THEN
+!    IF(Node%NQ<=MaxCluster)THEN
     IF(Node%Leaf)THEN
        ! We are at a leaf
        NULLIFY(Node%Left)
@@ -270,7 +270,7 @@ CONTAINS
        Right%EdexN=En
        !
        Left%Leaf=.TRUE.
-       IF(Right%NQ<32) &
+       IF(Right%NQ<MinCluster) &
           Right%Leaf=.TRUE.
     ENDIF
     ! ... L&R atom count ...
@@ -382,10 +382,10 @@ CONTAINS
 !!$
 !!$    ! Here, we are not going to bisect, but just pull off the CluserSize 
 !!$    ! large distance distributions from the bottom of the list:
-!!$    IF(Ne<2*ClusterSize)THEN
+!!$    IF(Ne<2*MaxCluster)THEN
 !!$       Je=Ne/2
 !!$    ELSE
-!!$       Je=ClusterSize
+!!$       Je=MaxCluster
 !!$    ENDIF
 !!$    DO J=1,Je
 !!$       K=Qe(J)
