@@ -11,6 +11,6 @@ MODULE Globals
   REAL(DOUBLE)      :: ETimer(TimerSize)
   ! How many Gaussians per leaf node we can have
 
-  INTEGER,PARAMETER ::   ClusterSize=64
+  INTEGER,PARAMETER ::   ClusterSize=2048
 END MODULE Globals
 
