@@ -82,9 +82,9 @@ CONTAINS
     TYPE(PoleNode),POINTER           :: Q
     LOGICAL,OPTIONAL                 :: Nucular_O
     LOGICAL                          :: Nucular    
-    REAL(DOUBLE)                     :: PCx,PCy,PCz,PC2,PQ2
+    REAL(DOUBLE)                     :: PQ2
     REAL(DOUBLE)                     :: CoTan,OneOvPQ,OneOvPQxy,RS,SQ,PQToThMnsL,LocalThresh
-    REAL(DOUBLE)                     :: TT,TwoC,COne,SOne,CTwo,STwo,RTE,RPE,T,PCHalf,JTau
+    REAL(DOUBLE)                     :: TT,TwoC,COne,SOne,CTwo,STwo,RTE,RPE,T,PQHalf,JTau
     REAL(DOUBLE)                     :: SqrtW,RDist,LeftS,RightS,Err,TPAC,RMnsD,R,BigR,SmallR,Xpt,ET
     REAL(DOUBLE)                     :: PQX,PQY,PQZ,OmegaMin,MACError,MACError2,PACError
     INTEGER                          :: is,I,J,K,Ell,EllP,EllQ,LenP,LenQ,LCode
@@ -120,27 +120,55 @@ CONTAINS
     NFar=0
     NNear=0
     !
-    JTau=TauTwo !/QC%IHalf
+    JTau=TauTwo
     !
+    RTE=QC%Prim%Zeta*MinZab
+    RPE=QC%Prim%Zeta+MinZab
+    OmegaMin=RTE/RPE 
+    !    
     DO 
        !
        PQx=QC%Prim%Pw(1)-Q%Box%Center(1)
        PQy=QC%Prim%Pw(2)-Q%Box%Center(2)
        PQz=QC%Prim%Pw(3)-Q%Box%Center(3)
        !
-!!$       PQ2=PQx*PQx+PQy*PQy+PQz*PQz
-!!$       RTE=QC%Prim%Zeta*MinZab
-!!$       RPE=QC%Prim%Zeta+MinZab
-!!$       OmegaMin=RTE/RPE 
-!!$
+!!$       PQ2=Zero
+!!$       IF(PQx<-Q%Box%Half(1))THEN
+!!$          PQHalf=PQx+Q%Box%Half(1)
+!!$          PQ2=PQ2+PQHalf*PQHalf          
+!!$       ELSEIF(PQx>Q%Box%Half(1))THEN
+!!$          PQHalf=PQx-Q%Box%Half(1)
+!!$          PQ2=PQ2+PQHalf*PQHalf
+!!$       ENDIF
+!!$       IF(PQy<-Q%Box%Half(2))THEN
+!!$          PQHalf=PQy+Q%Box%Half(2)
+!!$          PQ2=PQ2+PQHalf*PQHalf
+!!$       ELSEIF(PQy>Q%Box%Half(2))THEN
+!!$          PQHalf=PQy-Q%Box%Half(2)
+!!$          PQ2=PQ2+PQHalf*PQHalf
+!!$       ENDIF
+!!$       IF(PQz<-Q%Box%Half(3))THEN
+!!$          PQHalf=PQz+Q%Box%Half(3)
+!!$          PQ2=PQ2+PQHalf*PQHalf
+!!$       ELSEIF(PQz>Q%Box%Half(3))THEN
+!!$          PQHalf=PQz-Q%Box%Half(3)
+!!$          PQ2=PQ2+PQHalf*PQHalf
+!!$       ENDIF
+!!$       !
 !!$       T=OmegaMin*PQ2
        !
        MAC=.FALSE.
        IF(ABS(PQx)>QC%Box%Half(1)+Q%Box%Half(1).OR.  &
           ABS(PQy)>QC%Box%Half(2)+Q%Box%Half(2).OR.  &
-          ABS(PQz)>QC%Box%Half(3)+Q%Box%Half(3))THEN !.OR.  &
-!
-!          IF(T>Gamma_Switch)THEN
+          ABS(PQz)>QC%Box%Half(3)+Q%Box%Half(3))THEN 
+!!$.OR.  &
+!!$          T>Gamma_Switch)THEN
+
+#ifdef PAC_DEBUG
+          CALL ErrCompare(QC,Q,1D-5)
+#endif
+
+
           ! To here, we are outside the PAC distance and pennetration effects are 
           ! negligible.  Now check to see if the multipole translation error is acceptable; MAC=.TRUE.
           PQx=QC%Prim%Pw(1)-Q%Pole%Center(1)
@@ -325,8 +353,6 @@ CONTAINS
 !    IF(ABS(ERR1).GT.1D30)THEN
 
     IF(ABS(TruMACError)>1D1*NewMACError.AND.NewMACError>1D-12)THEN
-!.OR. &
-!       Q%Box%Number==1.and.P%Prim%Pw(1)==9.5D0.AND.P%Prim%Zeta==1D16)THEN
 
        
        WRITE(*,*)' Numb = ',Q%Box%Number
@@ -518,10 +544,11 @@ ENDIF
     REAL(DOUBLE)                     :: RDIST,SQRTW,LEFTS,RIGHTS,NEWPACERROR,TRUPACERROR,Err,ACh,Ch
     REAL(DOUBLE)                     :: PQ2,PQ,PQxy,PQx,PQy,PQx2,PQy2,PQz,Omega, &
          CoTan,OneOvPQ,OneOvPQxy,RS,SQ,PQToThMnsL, &
-         TT,TwoC,COne,SOne,CTwo,STwo,RTE,RPE,T,Upq,PC2,Err1,Err2,Zeta,Eta
+         TT,TwoC,COne,SOne,CTwo,STwo,RTE,RPE,T,Upq,PC2,Err1,Err2,Zeta,Eta,Ex
     INTEGER                          :: I,J,Ell,LCode
     LOGICAL                          :: True
     INTEGER                          :: LP,MP,NP,LQ,MQ,NQ,PDex,QDex,PZ,QZ
+    TYPE(BBox)                       :: TmpBox
 
     TotEll = P%Prim%Ell+Q%Herm%Ell
     NewPACError=Err
@@ -538,46 +565,72 @@ ENDIF
     IF(ABS(TruPACError)<1D-20)RETURN
     WRITE(*,22)Q%Box%Tier,Q%Box%Number,TotEll,LOG10(ABS(TruPACError)+1D-40),LOG10(NewPACError)
 22  FORMAT(3(2x,I4),2(2x,F9.3))
+!!$
+    IF(ABS(TruPACError)>NewPACError)THEN
 
-!!$    IF(ABS(TruPACError)>NewPACError)THEN
-!!$
-!!$       WRITE(*,*)' Leaf = ',Q%Leaf
-!!$       WRITE(*,*)' TruE = ',TruPACError
-!!$       WRITE(*,*)' NewE = ',NewPACError
-!!$       WRITE(*,*)' Tier = ',Q%Box%Tier
-!!$       WRITE(*,*)' Numb = ',Q%Box%Number
-!!$       WRITE(*,*)' Nq   = ',Q%HERM%Nq
-!!$       WRITE(*,*)' TotL = ',TotEll
-!!$       WRITE(*,*)' PEll = ',P%Prim%Ell
-!!$       WRITE(*,*)' PCnt = ',P%Prim%Pw
-!!$       WRITE(*,*)' PACZ = ',Q%PAC%Zeta
-!!$       WRITE(*,*)' PWhg = ',P%PAC%Wght
-!!$       WRITE(*,*)' QWhg = ',Q%PAC%Wght!(PACX,PACY,PACZ)
-!!$       WRITE(*,*)' PCnt = ',P%Prim%Pw
-!!$       WRITE(*,*)' QCnt = ',Q%Box%Center
-!!$       WRITE(*,*)' QHlf = ',Q%Box%Half
-!!$
-!!$       IF(Q%Leaf)THEN
-!!$          Ch=0D0
-!!$          ACh=0D0
-!!$          DO Ell=0,Q%Herm%Ell
-!!$             DO I=1,Q%Herm%NQ(Ell)
-!!$                IF(Q%Herm%Zeta(Ell)%D(I)<1D10)THEN
-!!$                   PQx=P%Prim%Pw(1)-Q%Herm%Cent(Ell)%D(1,I)
-!!$                   PQy=P%Prim%Pw(2)-Q%Herm%Cent(Ell)%D(2,I)
-!!$                   PQz=P%Prim%Pw(3)-Q%Herm%Cent(Ell)%D(3,I)
-!!$                   PQ2=PQx*PQx+PQy*PQy+PQz*PQz
-!!$!                   WRITE(*,*)PQ2
-!!$                   Ch=Ch+Q%Herm%Coef(Ell)%D(1,I)*(Pi/Q%Herm%Zeta(Ell)%D(I))**(3D0/2D0)
-!!$                   ACh=ACh+ABS(Q%Herm%Coef(Ell)%D(1,I)*(Pi/Q%Herm%Zeta(Ell)%D(I))**(3D0/2D0))
-!!$                END IF
-!!$             ENDDO
-!!$          ENDDO          
-!!$       ENDIF
-!!$!       WRITE(*,*)' Total Charge = ',Ch
-!!$!       WRITE(*,*)' Total Charge = ',ACh
-!!$       STOP
-!!$    ENDIF
+       WRITE(*,*)' Leaf = ',Q%Leaf
+       WRITE(*,*)' TruE = ',TruPACError
+       WRITE(*,*)' NewE = ',NewPACError
+       WRITE(*,*)' Tier = ',Q%Box%Tier
+       WRITE(*,*)' Numb = ',Q%Box%Number
+       WRITE(*,*)' Nq   = ',Q%HERM%Nq
+       WRITE(*,*)' TotL = ',TotEll
+       WRITE(*,*)' PEll = ',P%Prim%Ell
+       WRITE(*,*)' --------------------------------------------------------------------'
+       WRITE(*,*)' PCnt = ',P%Prim%Pw
+       WRITE(*,*)' P Box= ',P%Box%Half
+       WRITE(*,*)' P%Zeta ',P%Prim%Zeta
+       WRITE(*,*)' --------------------------------------------------------------------'
+       WRITE(*,*)' QCnt = ',Q%Box%Center
+       WRITE(*,*)' Q Box= ',Q%Box%Half
+       WRITE(*,*)' --------------------------------------------------------------------'
+
+       IF(Q%Leaf)THEN
+          Ch=0D0
+          ACh=0D0
+          DO Ell=0,Q%Herm%Ell
+             WRITE(*,*)' Ell = ',Ell
+             DO I=1,Q%Herm%NQ(Ell)
+                IF(Q%Herm%Zeta(Ell)%D(I)<1D10)THEN
+                   PQx=P%Prim%Pw(1)-Q%Herm%Cent(Ell)%D(1,I)
+                   PQy=P%Prim%Pw(2)-Q%Herm%Cent(Ell)%D(2,I)
+                   PQz=P%Prim%Pw(3)-Q%Herm%Cent(Ell)%D(3,I)
+                   PQ2=PQx*PQx+PQy*PQy+PQz*PQz
+                   RTE=P%Prim%Zeta*Q%Herm%Zeta(Ell)%D(I)
+                   RPE=P%Prim%Zeta+Q%Herm%Zeta(Ell)%D(I)
+                   Omega=RTE/RPE 
+                   T=Omega*PQ2
+                   IF(T<1D0)THEN
+                      TmpBox%BndBox(:,1)=Q%Herm%Cent(Ell)%D(:,I)
+                      TmpBox%BndBox(:,2)=Q%Herm%Cent(Ell)%D(:,I)
+                      Ex=Extent(Ell,Q%Herm%Zeta(Ell)%D(I),Q%Herm%Coef(Ell)%D(:,I),Tau_O=TauPAC,Potential_O=.TRUE.,ExtraEll_O=0)
+                      TmpBox=ExpandBox(TmpBox,Ex)
+                      
+                      WRITE(*,*)'1 BoxOutSideBox?? ',BoxOutSideBox(Q%Box,P%Box) 
+                      WRITE(*,*)'2 BoxOutSideBox?? ',BoxOutSideBox(TmpBox,P%Box) 
+                      
+
+
+                      WRITE(*,*)' Zeta = ',Q%Herm%Zeta(Ell)%D(I),' T = ',T                      
+
+                      WRITE(*,*)' QBox = '
+                      CALL PrintBBox(Q%BOX,6)
+                      WRITE(*,*)' TmpBox = '
+                      CALL PrintBBox(TmpBox,6)
+                      CALL Halt(' In FillRhoLeaf: Multipole center outside of BBox ')
+                   ENDIF
+
+!                   WRITE(*,*)PQ2
+                   Ch=Ch+Q%Herm%Coef(Ell)%D(1,I)*(Pi/Q%Herm%Zeta(Ell)%D(I))**(3D0/2D0)
+                   ACh=ACh+ABS(Q%Herm%Coef(Ell)%D(1,I)*(Pi/Q%Herm%Zeta(Ell)%D(I))**(3D0/2D0))
+                END IF
+             ENDDO
+          ENDDO          
+       ENDIF
+       WRITE(*,*)' Total Charge = ',Ch
+       WRITE(*,*)' Total Charge = ',ACh
+       STOP
+    ENDIF
   END SUBROUTINE ERRCOMPARE
 
   RECURSIVE FUNCTION PACError(P,Q) RESULT(Error)

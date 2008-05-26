@@ -134,10 +134,8 @@ CONTAINS
   RECURSIVE SUBROUTINE SplitPole(Node,Next)
     TYPE(PoleNode), POINTER :: Node,Next
     !--------------------------------------------------------------
-    IF(Node%NQ<=ClusterSize)THEN
-
-! IF(Node%NAtms<10)THEN
-!    IF(Node%NAtms==1)THEN
+!    IF(Node%NQ<=ClusterSize)THEN
+    IF(Node%Leaf)THEN
        ! We are at a leaf
        NULLIFY(Node%Left)
        NULLIFY(Node%Right)
@@ -176,10 +174,7 @@ CONTAINS
        ! ... and merge the multipole expansions ...
        CALL PoleMerge(P%Left%Pole,P%Right%Pole,P%Pole)
        CALL BoxMerge(P%Left%Box,P%Right%Box,P%Box)
-       CALL SetSignedPAC(P%PAC,P)
-       !       ALLOCATE(P%MAC%O(0:P%HERM%Ell),STAT=Status)
-       !       CALL IncMem(Status,0,P%HERM%Ell+1)       
-	CALL SetMAC(P)
+       CALL SetMAC(P)
     ENDIF
   END SUBROUTINE MakePoleTree
 
@@ -223,6 +218,8 @@ CONTAINS
           ENDIF
        ENDDO
     ENDIF
+
+
     ! Orthogonal recursive bisection on charge distributions      
     IF(ISplit==1)THEN
        CALL FairSplit(Ne,Qdex(Be:Ee),Rho%Qx%D,Je,Nn,ISplit,NDex(Bn:En),GM%Carts%D,Jn)
@@ -231,10 +228,20 @@ CONTAINS
     ELSEIF(ISplit==3)THEN
        CALL FairSplit(Ne,Qdex(Be:Ee),Rho%Qz%D,Je,Nn,ISplit,NDex(Bn:En),GM%Carts%D,Jn)
     ELSEIF(ISplit==4)THEN
+!!$
+!!$    IF(ISplit==1)THEN
+!!$       CALL ChargeSplit(Ne,Qdex(Be:Ee),Rho%Qx%D,Je,Nn,ISplit,NDex(Bn:En),GM%Carts%D,GM%AtNum%D,Jn)
+!!$    ELSEIF(ISplit==2)THEN
+!!$       CALL ChargeSplit(Ne,Qdex(Be:Ee),Rho%Qy%D,Je,Nn,ISplit,NDex(Bn:En),GM%Carts%D,GM%AtNum%D,Jn)
+!!$    ELSEIF(ISplit==3)THEN
+!!$       CALL ChargeSplit(Ne,Qdex(Be:Ee),Rho%Qz%D,Je,Nn,ISplit,NDex(Bn:En),GM%Carts%D,GM%AtNum%D,Jn)
+!!$    ELSEIF(ISplit==4)THEN
        ! Sort on PAC + HGTF distance from the nuclear center, with the goal of 
        ! creating smaller and smaller boxes that may satisfy both MAC and PAC
        CALL PACSplit(Ne,Qdex(Be:Ee),Ext,Rho%Qx%D,Rho%Qy%D,Rho%Qz%D,GM%Carts%D(:,NDex(Bn)),Je)
     ENDIF
+
+
     ! Split the charges
     Split=Be+Je-1
     Left%BdexE=Be
@@ -244,6 +251,9 @@ CONTAINS
     IF(Left%EdexE<Left%BdexE.OR.Right%EdexE<Right%BdexE)THEN
        CALL Halt(' Charge indexing hosed in SplitPoleBox ' )
     ENDIF
+    ! ... L&R charge count ...
+    Left%NQ=Left%EdexE-Left%BdexE+1
+    Right%NQ=Right%EdexE-Right%BdexE+1
 
     ! Split the nuclei 
     IF(ISplit<4)THEN
@@ -258,10 +268,12 @@ CONTAINS
        Left%EdexN=Bn
        Right%BdexN=En
        Right%EdexN=En
+       !
+       Left%Leaf=.TRUE.
+       IF(Right%NQ<32) &
+          Right%Leaf=.TRUE.
     ENDIF
-    ! ... L&R counters ...
-    Left%NQ=Left%EdexE-Left%BdexE+1
-    Right%NQ=Right%EdexE-Right%BdexE+1
+    ! ... L&R atom count ...
     Left%NAtms=Left%EdexN-Left%BdexN+1
     Right%NAtms=Right%EdexN-Right%BdexN+1
     ! Top down sintering of the BBoxes
@@ -312,21 +324,22 @@ CONTAINS
     Right%Box%Center(:)=Right%Box%BndBox(:,1)+Right%Box%Half(:)
 
 !!$    IF(ISplit<4)THEN
-!!$       WRITE(*,55)ISplit,Node%Box%Number,Left%BdexE,Left%EDexE, &
-!!$                                      Right%BdexE,Right%EDexE, &
-!!$                                      Left%BdexN,Left%EDexN,Right%BdexN,Right%EDexN
+!!$       WRITE(*,55)ISplit,Node%Box%Number,Left%BdexE,Left%EDexE,Left%EDexE-Left%BdexE, &
+!!$                                         Right%BdexE,Right%EDexE,Right%EDexE-Right%BdexE, &
+!!$                                         SUM(GM%AtNum%D(NDex(Left%BdexN:Left%EdexN))),   &
+!!$                                         SUM(GM%AtNum%D(NDex(Right%BdexN:Right%EdexN)))
 !!$       
-!!$55     FORMAT("  Split = ",I2,", Node = ",I4," [",I6,", ",I6,"] [",I6,", ",I6," ] // <",I2,", ",I2,"><",I2,", ",I2,"> ")
+!!$55     FORMAT("  Split = ",I2,", Node = ",I4," [",I6,", ",I6,"; ",I3,"] [",I6,", ",I6,"; ",I3," ] // <",F8.2,"><",F8.2,"> ")
 !!$    ELSE
 !!$       RL=FurthestPointInBox(GM%Carts%D(:,NDex(Left%BDexN)),Left%Box)
 !!$       RR=FurthestPointInBox(GM%Carts%D(:,NDex(Right%BDexN)),Right%Box)
 !!$       NL=Left%EDexE-Left%BdexE+1
 !!$       NR=Right%EDexE-Right%BdexE+1
-!!$
 !!$       WRITE(*,56)ISplit,Node%BdexN,GM%AtNum%D(NDex(Node%BdexN)),Left%BdexE,Left%EDexE,NL, &
-!!$                                      Right%BdexE,Right%EDexE,NR,RL,RR
-!!$       
+!!$                                      Right%BdexE,Right%EDexE,NR,RL,RR       
 !!$56     FORMAT("  Split = ",I2," At = ",I2,", Z = ",F4.1," [",I5,", ",I5,";N = ",I3,"] [",I5,", ",I5,";N = ",I3,"] // <",D7.2,"><",D7.2,"> ")
+!!$
+!!$       STOP
 !!$
 !!$    ENDIF
 
@@ -354,19 +367,75 @@ CONTAINS
     ! Sort with increasing first, so that we terminate the tree as early as possible with
     ! as many small distributions as possible taken care of using the multipole approximation
     CALL DblIntSort77(Ne,X,Qe,-2)             
-    ! Here, we are not going to bisect, but just pull off the CluserSize 
-    ! large distance distributions from the bottom of the list:
-    IF(Ne<2*ClusterSize)THEN
-       Je=Ne/2
-    ELSE
-       Je=ClusterSize
-    ENDIF
-    DO J=1,Je
-       K=Qe(J)
-!       WRITE(*,*)Ex(K),X(J)
+    !    
+    Section=Half*X(1)
+    !
+    DO J=1,Ne
+       IF(X(J)<Section)THEN
+          Je=J-1
+          EXIT
+       ENDIF
     ENDDO
+
+!!!    WRITE(*,*)X(1),X(Nn),Section
+
+!!$
+!!$    ! Here, we are not going to bisect, but just pull off the CluserSize 
+!!$    ! large distance distributions from the bottom of the list:
+!!$    IF(Ne<2*ClusterSize)THEN
+!!$       Je=Ne/2
+!!$    ELSE
+!!$       Je=ClusterSize
+!!$    ENDIF
+!!$    DO J=1,Je
+!!$       K=Qe(J)
+!!$!       WRITE(*,*)Ex(K),X(J)
+!!$    ENDDO
     !
   END SUBROUTINE PACSplit
+
+  SUBROUTINE ChargeSplit(Ne,Qe,RhoX,Je,Nn,ISplit,Qn,NucXYZ,Charge,Jn)
+    INTEGER :: Ne,Nn,Je,Jn,J,ISplit
+    REAL(DOUBLE) :: Section
+    INTEGER,DIMENSION(1:Ne) :: Qe
+    INTEGER,DIMENSION(1:Nn) :: Qn
+    REAL(DOUBLE),DIMENSION(:)   :: RhoX,Charge
+    REAL(DOUBLE),DIMENSION(:,:) :: NucXYZ
+    REAL(DOUBLE),DIMENSION(1:Ne) :: X
+    !
+
+    DO J=1,Nn
+       X(J)=NucXYZ(ISplit,Qn(J))
+    ENDDO
+    CALL DblIntSort77(Nn,X,Qn,2)             
+    !
+    Section=Zero
+    DO J=1,Nn
+       Section=Section+Charge(Qn(J))*X(J)       
+    ENDDO
+    Section=Section/SUM(Charge(Qn(1:Nn)))
+    !
+    DO J=1,Nn
+       IF(X(J)>Section)THEN
+          Jn=J-1
+          EXIT
+       ENDIF
+    ENDDO
+    !
+    DO J=1,Ne
+       X(J)=RhoX(Qe(J))
+    ENDDO
+    CALL DblIntSort77(Ne,X,Qe,2)             
+    !
+    DO J=1,Ne
+       IF(X(J)>Section)THEN
+          Je=J-1
+          EXIT
+       ENDIF
+    ENDDO
+    !
+  END SUBROUTINE ChargeSplit
+
 
   SUBROUTINE FairSplit(Ne,Qe,RhoX,Je,Nn,ISplit,Qn,NucXYZ,Jn)
     INTEGER :: Ne,Nn,Je,Jn,J,ISplit
@@ -515,11 +584,11 @@ CONTAINS
        !
        delta=MAX(delta,SQRT(DOT_PRODUCT( (/Rho%Qx%D(Qd)-NODE%Pole%Center(1),Rho%Qy%D(Qd)-NODE%Pole%Center(2),Rho%Qz%D(Qd)-NODE%Pole%Center(3)/) , &
                                          (/Rho%Qx%D(Qd)-NODE%Pole%Center(1),Rho%Qy%D(Qd)-NODE%Pole%Center(2),Rho%Qz%D(Qd)-NODE%Pole%Center(3)/) )))
-
+       !
     ENDDO
     Node%POLE%delta=delta
-    Node%BOX%Center(:)=Node%BOX%BndBOX(:,1)+Node%Box%Half    
     Node%BOX%Half(:)=Half*(Node%BOX%BndBOX(:,2)-Node%BOX%BndBOX(:,1))
+    Node%BOX%Center(:)=Node%BOX%BndBOX(:,1)+Node%Box%Half    
     !
     DO Ell=0,Node%HERM%Ell
        N=Node%HERM%NQ(Ell)
@@ -537,11 +606,26 @@ CONTAINS
              Node%HERM%Coef(Ell)%D(1:LMNLen,I)=Rho%Co%D(Cd:Cd+LMNLen-1)
              Node%HERM%Cent(Ell)%D(:,I)=(/Rho%Qx%D(Qd),Rho%Qy%D(Qd),Rho%Qz%D(Qd)/)
              Node%HERM%Zeta(Ell)%D(I)=Zeta(Qd)
+
+!!$
+!!$
+!!$
+!!$       Ex=Ext(Qd)
+!!$       
+!!$       Ex=Extent(Ell,Node%Herm%Zeta(Ell)%D(I),Node%Herm%Coef(Ell)%D(:,I),Tau_O=TauPAC,Potential_O=.TRUE.,ExtraEll_O=0)
+!!$
+!!$       IF(Ex.NE.Ext(Qd))THEN
+!!$          WRITE(*,*)Ex,Ext(Qd)
+!!$          STOP
+!!$       ENDIF
+
+
+
+
+
           ENDDO
        ENDIF
     ENDDO
-!    ! Fill in the PAC and the MAC
-!    CALL SetSignedPAC(Node%PAC,Node)
     ! Fill in the multiPOLE 
     Node%POLE%Ell=MaxPoleEll
     CALL AllocSP(Node%POLE)
@@ -560,6 +644,7 @@ CONTAINS
     !
     WRITE(*,33)Node%BOX%Number,Node%POLE%Charge,Node%EdexE-Node%BdexE+1,NODE%POLE%Delta, &
                FurthestPointInBox(GM%Carts%D(:,NDex(Node%BDexN)),Node%Box)
+
 !    WRITE(*,44)Node%Box%BndBox(:,1),Node%Box%BndBox(:,2),
 !44     format('Box = /',3(D10.4,', '),'/,/',3(D10.4,', '),' C= ',3(D10.4,', ') )
 
@@ -660,16 +745,8 @@ CONTAINS
        DO Q=1,Rho%NQ%I(z)          
           QD=oq+Q
           CD=or+(Q-1)*LMNLen+1
-
-!!$
           EX=Extent(Ell,ZE,Rho%Co%D(CD:CD+LMNLen-1),Tau_O=TauPAC,Potential_O=.TRUE.,ExtraEll_O=0)
           IF(EX>Zero)THEN
-!!$
-!!$
-!!$          EX=Est%D(Q)  
-!!$          IF(EX>TauTwo*1D-5)THEN
-
-
              ! Intialize PoleRoot boundaries
              PoleRoot%Box%BndBox(1,1)=MIN(PoleRoot%Box%BndBox(1,1),Rho%Qx%D(IQ))
              PoleRoot%Box%BndBox(1,2)=MAX(PoleRoot%Box%BndBox(1,1),Rho%Qx%D(IQ))
@@ -723,257 +800,6 @@ CONTAINS
     DEALLOCATE(RList,STAT=Status) 
     CALL DecMem(Status,0,Rho%NDist)
   END SUBROUTINE DeleteRhoAux
-  !=================================================================================
-  !     
-  !=================================================================================
-  SUBROUTINE SetSignedPAC(PC,Node)
-    TYPE(PoleNode),POINTER    :: Node,Q
-    TYPE(PAC)                 :: PC
-    INTEGER                          :: Ell,L,M,N,LMN,I,J,ICrnr,LP,MP,NP,LQ,MQ,NQ,Pdex,Qdex
-    REAL(DOUBLE)                     :: RTE,RPE,T,Omega,Upq
-    REAL(DOUBLE)                     :: NodeWeightC,Zeta,Zeta2,PiZ,MinMax,ZetaFac,PCFit
-    REAL(DOUBLE)                     :: CramCo,MixMax,ScaledTau,HGInEq,ZZ,CO,PZ,MaxExtent,Ch,WMin,WMax
-    REAL(DOUBLE),DIMENSION(0:EllFit)  :: Wght
-    REAL(DOUBLE),DIMENSION(3,14)      :: Centers
-    REAL(DOUBLE),DIMENSION(LenFit,14) :: ChProj
-    REAL(DOUBLE),DIMENSION(LenFit)    :: FitMax,Fit
-    REAL(DOUBLE),DIMENSION(NAtoms)    :: NukeMask
-    REAL(DOUBLE), DIMENSION(0:2*EllFit) :: AuxR
-    REAL(DOUBLE), DIMENSION(LenFit,LenFit) :: FitTrix,InvTrix
-    REAL(DOUBLE),DIMENSION(0:2*EllFit,0:2*EllFit,0:2*EllFit,0:2*EllFit) :: MDR
-    LOGICAL PrintFlag
-    !-------------------------------------------------------------------------------    
-    ! H_n(t) < K 2^(n/2) SQRT(n!) EXP(t^2/2), with K=1.09
-    !-------------------------------------------------------------------------------    
-    PC%Zeta=PACZetaMin(Node)
-
-!    IF(PC%Zeta==NuclearExpnt)PC%Zeta=PC%Zeta-1D10
-
-
-    ! Corners
-    Centers(:,1)=(/Node%Box%BndBox(1,1),Node%Box%BndBox(2,1),Node%Box%BndBox(3,1)/)
-    Centers(:,2)=(/Node%Box%BndBox(1,1),Node%Box%BndBox(2,1),Node%Box%BndBox(3,2)/)
-    Centers(:,3)=(/Node%Box%BndBox(1,1),Node%Box%BndBox(2,2),Node%Box%BndBox(3,1)/)
-    Centers(:,4)=(/Node%Box%BndBox(1,2),Node%Box%BndBox(2,1),Node%Box%BndBox(3,1)/)
-    Centers(:,5)=(/Node%Box%BndBox(1,2),Node%Box%BndBox(2,2),Node%Box%BndBox(3,1)/)
-    Centers(:,6)=(/Node%Box%BndBox(1,2),Node%Box%BndBox(2,1),Node%Box%BndBox(3,2)/)
-    Centers(:,7)=(/Node%Box%BndBox(1,1),Node%Box%BndBox(2,2),Node%Box%BndBox(3,2)/)
-    Centers(:,8)=(/Node%Box%BndBox(1,2),Node%Box%BndBox(2,2),Node%Box%BndBox(3,2)/) 
-    ! Sides
-    Centers(:,9)=(/Node%Box%Center(1),Node%Box%BndBox(2,1),Node%Box%BndBox(3,1)/)
-    Centers(:,10)=(/Node%Box%BndBox(1,1),Node%Box%Center(2),Node%Box%BndBox(3,1)/)
-    Centers(:,11)=(/Node%Box%BndBox(1,1),Node%Box%BndBox(2,1),Node%Box%Center(3)/)
-    Centers(:,12)=(/Node%Box%Center(1),Node%Box%BndBox(2,2),Node%Box%BndBox(3,2)/)
-    Centers(:,13)=(/Node%Box%BndBox(1,2),Node%Box%Center(2),Node%Box%BndBox(3,2)/)
-    Centers(:,14)=(/Node%Box%BndBox(1,2),Node%Box%BndBox(2,2),Node%Box%Center(3)/)
-
-    ChProj=PACChargeProject(Node,PC%Zeta,Centers)
-!    WRITE(*,*)'  ChProj = ',ChProj
-
-    RTE=PC%Zeta*PC%Zeta
-    RPE=PC%Zeta+PC%Zeta
-    T=0D0
-    Omega=RTE/RPE 
-#ifdef OVERLAP_PROJECTION    
-    Upq=(Pi/RPE)**1.5D0
-    CALL OvrInts(2*EllFit,2*EllFit,AuxR,Omega,T)
-#else
-    Upq=TwoPi5x2/(RTE*SQRT(RPE))
-    CALL AuxInts(2*EllFit,2*EllFit,AuxR,Omega,T)
-#endif
-    CALL MD3TRR(2*EllFit,2*EllFit,MDR,AuxR,Upq,0D0,0D0,0D0)
-    DO LP=0,EllFit
-       DO MP=0,EllFit-LP
-          DO NP=0,EllFit-LP-MP 
-             PDex=LMNx(LP,MP,NP)                   
-             DO LQ=0,EllFit
-                DO MQ=0,EllFit-LQ
-                   DO NQ=0,EllFit-LQ-MQ
-                      QDex=LMNx(LQ,MQ,NQ)
-                      FitTrix(PDex,QDex)=MDR(LP+LQ,MP+MQ,NP+NQ,0)
-                   ENDDO
-                ENDDO
-             ENDDO
-          ENDDO
-       ENDDO
-    ENDDO
-
-    CALL FunkOnSqMat(LenFit,Inverse,FitTrix,InvTrix,PosDefMat_O=.FALSE.,EigenThresh_O=0D0)
-
-    PC%Wght=0D0
-    DO J=1,14
-       Fit=MATMUL(InvTrix,ChProj(:,J))
-       Wght=Zero
-       DO L=0,EllFit
-          DO M=0,EllFit-L
-             DO N=0,EllFit-L-M
-                LMN=LMNx(L,M,N)
-                MixMax=Fact(L)*Fact(M)*Fact(N)
-                HGInEq=SQRT(MixMax*(Two*PC%Zeta)**(L+M+N))*Fit(LMN)
-                Wght(L+M+N)=MAX(Wght(L+M+N),ABS(HGInEq))
-             ENDDO
-          ENDDO
-       ENDDO
-       PC%Wght=MAX(PC%Wght,SUM(Wght(0:EllFit)))
-    ENDDO
-    PiZ=(Pi/PC%Zeta)**(ThreeHalves)
-    PC%Wght=PC%Wght*PiZ
-    IF(EllFit.NE.0)PC%Zeta=PC%Zeta*PACFudgeFactor
-
-!!$    IF(Node%Leaf.and.PC%Wght<1D-40)THEN
-!!$       WRITE(*,*)' Leaf? = ',Node%Leaf,' Wght = ',PC%Wght
-!!$       WRITE(*,*)' Node center = ',Node%HERM%Cent(0)%D(:,1)
-!!$       WRITE(*,*)' ChProj  = ',ChProj
-!!$       WRITE(*,*)' FitTrix = ',FitTrix
-!!$       DO J=1,14
-!!$          Fit=MATMUL(InvTrix,ChProj(:,J))
-!!$          WRITE(*,*)' InVTrix = ',InvTrix
-!!$          WRITE(*,*)' Fit =',Fit
-!!$          Wght=Zero
-!!$          DO L=0,EllFit
-!!$             DO M=0,EllFit-L
-!!$                DO N=0,EllFit-L-M
-!!$                   LMN=LMNx(L,M,N)
-!!$                   MixMax=Fact(L)*Fact(M)*Fact(N)
-!!$                   HGInEq=SQRT(MixMax*(Two*PC%Zeta)**(L+M+N))*Fit(LMN)
-!!$                   Wght(L+M+N)=MAX(Wght(L+M+N),ABS(HGInEq))
-!!$                ENDDO
-!!$             ENDDO
-!!$          ENDDO
-!!$          PC%Wght=MAX(PC%Wght,SUM(Wght(0:EllFit)))
-!!$       ENDDO
-!!$       
-!!$
-!!$
-!!$!       DO I=1,14
-!!$!          WRITE(*,*)' Centers     = ',Centers(:,I)
-!!$!       ENDDO
-!!$    ENDIF
-  END SUBROUTINE SetSignedPAC
-
-  RECURSIVE FUNCTION PACChargeProject(Q,PCZeta,Corners) RESULT(ChFit)
-    TYPE(PoleNode)                 :: Q
-    REAL(DOUBLE)                   :: PCZeta,PiZ,Ch
-    REAL(DOUBLE),DIMENSION(3,14)    :: Corners
-    REAL(DOUBLE),DIMENSION(LenFit,14)      :: ChFit
-    INTEGER                        :: I,EllQ,Nuke,LenP,PQEll,EllP,PQLen,ICrnr
-    REAL(DOUBLE),DIMENSION(NAtoms) :: NukeMask
-
-    IF(Q%Leaf)THEN
-       EllP=EllFit
-       LenP=LenFit
-       ChFit=0D0
-       DO EllQ=0,Q%HERM%Ell
-          IF(Q%HERM%Nq(EllQ).NE.0)THEN 
-             PQEll=EllP+EllQ
-             PQLen=LHGTF(PQEll)
-             Nuke=0
-             DO I=1,Q%HERM%Nq(EllQ)
-!!$                IF(Q%HERM%Zeta(EllQ)%D(I)==NuclearExpnt)THEN
-!!$                   Nuke=Nuke+1
-!!$                   NukeMask(Nuke)=Q%HERM%Coef(EllQ)%D(1,I)
-!!$                   Q%HERM%Coef(EllQ)%D(1,I)=0D0
-!!$                ELSE
-
-                   PiZ=(Pi/Q%HERM%Zeta(EllQ)%D(I))**(3D0/2D0)
-
-                   !                   ChFit(1)=ChFit(1)+Q%HERM%Coef(EllQ)%D(1,I)*PiZ
-                   !                   Q%HERM%Coef(EllQ)%D(:,I)=Q%HERM%Coef(EllQ)%D(:,I)*PiZ
-!!$                ENDIF
-             ENDDO
-
-!             WRITE(*,*)' QHERM + ',Q%HERM%Coef(EllQ)%D(1,1)
-
-             DO ICrnr=1,14
-!                WRITE(*,*)' QCent = ',Q%Herm%Cent(EllQ)%D(1,1),' Corner = ',Corners(1,ICrnr)
-#ifdef OVERLAP_PROJECTION    
-                CALL AAOverlap(HGEll4,Q%HERM%Nq(EllQ),              &
-                     EllP,EllQ,LenP,LHGTF(EllQ),PQEll,PQLen,               &
-                     NuclearExpnt,1D-100,Q%HERM%IHlf(EllQ)%D(1),             &
-                     PCZeta,Q%HERM%Zeta(EllQ)%D(1),Corners(:,ICrnr),       &
-                     Q%HERM%Cent(EllQ)%D(1,1),Q%HERM%Coef(EllQ)%D(1,1),ChFit(:,ICrnr))             
-#else
-                CALL RAhmadiJAlmlof95(HGEll4,Q%HERM%Nq(EllQ),              &
-                     EllP,EllQ,LenP,LHGTF(EllQ),PQEll,PQLen,               &
-                     NuclearExpnt,1D-100,Q%HERM%IHlf(EllQ)%D(1),             &
-                     PCZeta,Q%HERM%Zeta(EllQ)%D(1),Corners(:,ICrnr),       &
-                     Q%HERM%Cent(EllQ)%D(1,1),Q%HERM%Coef(EllQ)%D(1,1),ChFit(:,ICrnr))             
-!                WRITE(*,*)' COUL = ',ChFit(:,ICrnr)             
-#endif
-
-             ENDDO
-             Nuke=0
-             DO I=1,Q%HERM%Nq(EllQ)
-!!$                IF(Q%HERM%Zeta(EllQ)%D(I)==NuclearExpnt)THEN
-!!$                   Nuke=Nuke+1
-!!$                   Q%HERM%Coef(EllQ)%D(1,I)=NukeMask(Nuke)
-!!$                ELSE
-                   PiZ=(Pi/Q%HERM%Zeta(EllQ)%D(I))**(-3D0/2D0)
-                   !                   Q%HERM%Coef(EllQ)%D(:,I)=Q%HERM%Coef(EllQ)%D(:,I)*PiZ
-!!$                ENDIF
-             ENDDO
-          ENDIF
-       ENDDO
-    ELSEIF(ASSOCIATED(Q%Left).AND.ASSOCIATED(Q%Right))THEN
-       ChFit=PACChargeProject(Q%Left,PCZeta,Corners)+PACChargeProject(Q%Right,PCZeta,Corners)
-    ELSEIF(ASSOCIATED(Q%Left))THEN
-       ChFit=PACChargeProject(Q%Left,PCZeta,Corners)
-    ELSEIF(ASSOCIATED(Q%Right))THEN
-       ChFit=PACChargeProject(Q%Right,PCZeta,Corners)
-    ENDIF
-  END FUNCTION PACChargeProject
-
-  RECURSIVE FUNCTION PACZetaMin(Q) RESULT(ZetaMin)
-    TYPE(PoleNode)   :: Q
-    REAL(DOUBLE)     :: ZetaMin
-    INTEGER          :: I,EllQ
-    IF(Q%Leaf)THEN
-       ZetaMin=1D20
-       DO EllQ=0,Q%HERM%Ell
-          DO I=1,Q%HERM%Nq(EllQ)
-             ZetaMin=MIN(ZetaMin,Q%HERM%Zeta(EllQ)%D(I))
-          ENDDO
-       ENDDO
-    ELSEIF(ASSOCIATED(Q%Left).AND.ASSOCIATED(Q%Right))THEN
-       ZetaMin=MIN(PACZetaMin(Q%Left),PACZetaMin(Q%Right))
-    ELSEIF(ASSOCIATED(Q%Left))THEN
-       ZetaMin=PACZetaMin(Q%Left)
-    ELSEIF(ASSOCIATED(Q%Right))THEN
-       ZetaMin=PACZetaMin(Q%Right)
-    ENDIF
-  END FUNCTION PACZetaMin
-  !=================================================================================
-  !     
-  !=================================================================================
-  SUBROUTINE SetSerialPAC(PC,SHG)
-    TYPE(ScalarHerm) :: SHG
-    TYPE(PAC)                 :: PC
-    INTEGER                          :: Ell,L,M,N,LMN,I,Nq,NTot,EllQ,PQLen,PQEll,EllP,LenP
-    REAL(DOUBLE)                     :: NodeWeightC,Zeta,Zeta2,PiZ,MinMax,ZetaFac,PCFit
-    REAL(DOUBLE)                     :: CramCo,MixMax,ScaledTau,HGInEq,ZZ,CO,PZ,MaxExtent
-    REAL(DOUBLE),PARAMETER           :: K3=1.09D0**3
-    REAL(DOUBLE),DIMENSION(0:SHG%Ell) :: Wght
-    !-------------------------------------------------------------------------------    
-    ! H_n(t) < K 2^(n/2) SQRT(n!) EXP(t^2/2), with K=1.09
-    !-------------------------------------------------------------------------------    
-    PC%Zeta=1D20   
-    PC%Wght=Zero
-    PC%Zeta=SHG%Zeta
-    PiZ = (Pi/PC%Zeta)**(ThreeHalves)
-    Wght = Zero
-    DO L=0,SHG%Ell
-       DO M=0,SHG%Ell-L
-          DO N=0,SHG%Ell-L-M
-             LMN=LMNDex(L,M,N)
-             MixMax=Fact(L)*Fact(M)*Fact(N)
-             HGInEq=SQRT(MixMax*(Two*PC%Zeta)**(L+M+N))*SHG%Coef(LMN)
-             Wght(L+M+N)=MAX(Wght(L+M+N),ABS(HGInEq))
-          ENDDO
-       ENDDO
-    ENDDO
-    PC%Wght=SUM(Wght(0:SHG%Ell))*PiZ
-    IF(SHG%Ell.NE.0)PC%Zeta=PC%Zeta*PACFudgeFactor
-  END SUBROUTINE SetSerialPAC
   !=================================================================================
   !     
   !=================================================================================
@@ -1060,54 +886,6 @@ CONTAINS
     ENDIF
   END SUBROUTINE MACProject
 
-  RECURSIVE FUNCTION DeltaInBox(Q,Center) RESULT(Delta)
-    TYPE(PoleNode) :: Q
-    REAL(DOUBLE), DIMENSION(3) :: Center,CQ
-    REAL(DOUBLE) :: Delta
-    INTEGER :: I,Ell
-    Delta=0D0
-    IF(Q%Leaf)THEN
-       DO Ell=0,MaxRhoEll
-          DO I=1,Q%Herm%NQ(Ell)
-             CQ=Center-Q%Herm%Cent(Ell)%D(:,I)
-             Delta=MAX(Delta,SQRT(DOT_PRODUCT(CQ,CQ)))
-          END DO
-       END DO
-    ELSEIF(ASSOCIATED(Q%Left).AND.ASSOCIATED(Q%Right))THEN
-       Delta=MAX(DeltaInBox(Q%Left,Center),DeltaInBox(Q%Right,Center))
-    ELSEIF(ASSOCIATED(Q%Left))THEN
-       Delta=DeltaInBox(Q%Left,Center)
-    ELSEIF(ASSOCIATED(Q%Right))THEN
-       Delta=DeltaInBox(Q%Right,Center)
-    ENDIF
-  END FUNCTION DeltaInBox
-
-  !
-  FUNCTION NodeWeightC(Ell,Zeta,HGCo) 
-    INTEGER                          :: Ell,L,M,N,LMN
-    REAL(DOUBLE)                     :: NodeWeightC,Zeta,Zeta2,PiZ,MinMax,ZetaFac
-    REAL(DOUBLE), DIMENSION(1:)      :: HGCo
-    REAL(DOUBLE)                    :: CramCo,MixMax,ScaledTau,HGInEq
-    REAL(DOUBLE),PARAMETER          :: K3=1.09D0**3
-    REAL(DOUBLE),DIMENSION(0:12),PARAMETER :: Fact=(/1D0,1D0,2D0,6D0,24D0,120D0,      &
-         720D0,5040D0,40320D0,362880D0,   &
-         3628800D0,39916800D0,479001600D0/)
-    !
-    ! H_n(t) < K 2^(n/2) SQRT(n!) EXP(t^2/2), with K=1.09
-    PiZ = (Pi/Zeta)**(ThreeHalves)
-    NodeWeightC = Zero
-    DO L=0,Ell
-       DO M=0,Ell-L
-          DO N=0,Ell-L-M
-             LMN=LMNDex(L,M,N)
-             MixMax=Fact(L)*Fact(M)*Fact(N)
-             HGInEq=SQRT(MixMax*(Two*Zeta)**(L+M+N))*HGCo(LMN)
-             NodeWeightC = NodeWeightC + ABS(HGInEq)
-          ENDDO
-       ENDDO
-    ENDDO
-    NodeWeightC = NodeWeightC*PiZ
-  END FUNCTION NodeWeightC
   !======================================================================
   !
   !======================================================================
@@ -1181,10 +959,6 @@ CONTAINS
 74  FORMAT('xT=',I4,', Num=',I4,', [',I6,',',I6,'], L#=',I4,' Vol=',D12.6,', L = ',I2,' I = ',D12.6)                   
 75  FORMAT('xT=',I4,', Num=',I4,', [',I6,',',I6,'], Vol=',D12.6,', L = ',I2,' I = ',D12.6)                              
   END SUBROUTINE Print_POLEROOT_BOUNDS
-
-
-
-
 
   RECURSIVE SUBROUTINE Print_POLEROOT_LEAF(A)
     TYPE(PoleNode),POINTER :: A
@@ -1413,20 +1187,6 @@ CONTAINS
 
 
 
-  SUBROUTINE BBoxCheck(P)
-    TYPE(PoleNode) :: P
-    REAL(DOUBLE) :: Delta
-    LOGICAL      :: InBox
-    Delta=DeltaInBox(P,P%Pole%Center)
-    IF(Delta>P%MAC%Delta)THEN
-       STOP 'Fucked delta'
-    ENDIF
-    InBox=DistInBox(P,P%Box)
-    IF(.NOT.InBox)THEN
-       STOP 'Fucked box'
-    ENDIF
-  END SUBROUTINE BBoxCheck
-
   RECURSIVE FUNCTION DistInBox(Q,Box) RESULT(InBox)
     TYPE(PoleNode) :: Q
     TYPE(BBox)     :: Box
@@ -1452,277 +1212,5 @@ CONTAINS
        InBox=DistInBox(Q%Right,Box)
     ENDIF
   END FUNCTION DistInBox
-
-
-!!$
-!!$
-!!$  SUBROUTINE ChargeSplit(N,Q,C,Ze,ExEst,JS) 
-!!$    INTEGER :: N,JS,I,J,K,NAts,NBnd,L,JP,JM
-!!$    REAL(DOUBLE) :: IBM,IBP,XBM,XBP
-!!$    REAL(DOUBLE) :: PiZ,IB,ChB,XB,Ch,ChLeft,ChRight,ChHalf,Section
-!!$    REAL(DOUBLE) :: ChPLeft,ChPRight,ChMLeft,ChMRight
-!!$    INTEGER,DIMENSION(:)   :: C
-!!$    INTEGER,DIMENSION(1:N) :: Q
-!!$    REAL(DOUBLE),DIMENSION(:) :: Ze,ExEst
-!!$    REAL(DOUBLE),DIMENSION(1:N) :: Charge,X
-!!$    LOGICAL OnAtom,Partitioned,FromPos,POutOfBounds,MOutOfBounds
-!!$    REAL(DOUBLE),PARAMETER :: IMax=10D0,XMax=3D0
-!!$
-!!$    DO J=1,N
-!!$       Charge(J)=ExEst(Q(J))
-!!$    ENDDO
-!!$    CALL DblIntSort77(N,Charge,Q,2)
-!!$    ! Split on order of magnitude 
-!!$    Section=10D0**(LOG10(Charge(1))+Half*(LOG10(Charge(N))-LOG10(Charge(1))))
-!!$    DO J=1,N
-!!$       IF(Charge(J)>Section)THEN
-!!$          JS=J
-!!$          EXIT
-!!$       ENDIF
-!!$    ENDDO
-!!$    IB=DBLE(N-JS)/DBLE(JS)
-!!$    IF(IB<0.5D0.OR.IB>2.0D0)THEN
-!!$       JS=N/2
-!!$    ENDIF
-!!$  END SUBROUTINE ChargeSplit
-!!$
-!!$  FUNCTION BalancedSplit(N,Q,C,Ze,RhoX,Co,JS) RESULT(Partitioned)
-!!$    INTEGER :: N,JS,I,J,K,NAts,NBnd,L,JP,JM
-!!$    REAL(DOUBLE) :: IBM,IBP,XBM,XBP
-!!$    REAL(DOUBLE) :: PiZ,IB,ChB,XB,Ch,ChLeft,ChRight,ChHalf,Section
-!!$    REAL(DOUBLE) :: ChPLeft,ChPRight,ChMLeft,ChMRight
-!!$    INTEGER,DIMENSION(:)   :: C
-!!$    INTEGER,DIMENSION(1:N) :: Q,NewQ
-!!$    REAL(DOUBLE),DIMENSION(:) :: RhoX,Ze,Co
-!!$    REAL(DOUBLE),DIMENSION(1:N) :: X,CL,Charge
-!!$    LOGICAL OnAtom,Partitioned,FromPos,POutOfBounds,MOutOfBounds
-!!$    REAL(DOUBLE),PARAMETER :: IMax=20D0,XMax=3D0 !2D0
-!!$
-!!$    Partitioned=.FALSE.
-!!$
-!!$    Ch=0D0
-!!$    DO J=1,N
-!!$       NewQ(J)=Q(J)
-!!$       X(J)=RhoX(Q(J))       
-!!$       IF(Ze(Q(J)).NE.NuclearExpnt) &
-!!$            Ch=Ch+Co(C(Q(J)))*(Pi/Ze(Q(J)))**(3D0/2D0)
-!!$    ENDDO
-!!$    !   WRITE(*,*)' CHARGE = ',Ch
-!!$
-!!$    CALL DblIntSort77(N,X,Q,2)
-!!$
-!!$    ! Eliminate redundancies
-!!$
-!!$    J=1
-!!$    NBnd=0
-!!$    Charge=0D0
-!!$    DO WHILE(J.LE.N)
-!!$       IF(Ze(Q(J)).NE.NuclearExpnt)THEN
-!!$          NBnd=NBnd+1
-!!$          X(NBnd)=RhoX(Q(J))
-!!$          Charge(NBnd)=Co(C(Q(J)))*(Pi/Ze(Q(J)))**(3D0/2D0)
-!!$          !          Ch=Ch+Co(C(Q(J)))*(Pi/Ze(Q(J)))**(3D0/2D0)
-!!$          DO K=J+1,N
-!!$             IF(X(NBnd)==RhoX(Q(K)))THEN
-!!$                IF(Ze(Q(K)).NE.NuclearExpnt)THEN
-!!$                   Charge(NBnd)=Charge(NBnd)+Co(C(Q(K)))*(Pi/Ze(Q(K)))**(3D0/2D0)
-!!$                ENDIF
-!!$             ELSE
-!!$                EXIT
-!!$             ENDIF
-!!$             J=J+1
-!!$          ENDDO
-!!$       ENDIF
-!!$       J=J+1
-!!$    ENDDO
-!!$    IF(ABS((Ch-SUM(Charge(1:NBnd)))/Ch)>1D-10)THEN       
-!!$       WRITE(*,*)' - - - - - - - - - - - - - - - - - - - - - '
-!!$       WRITE(*,*)' NEl = ',NEl/2
-!!$       WRITE(*,*)'2 CHARGE = ',Ch,SUM(Charge(1:NBnd))
-!!$       STOP
-!!$    ENDIF
-!!$    IF(Ch<0D0.OR.Ch>NEl)THEN
-!!$       Q=NewQ
-!!$       RETURN
-!!$    ENDIF
-!!$
-!!$    Section=X(1)+Half*(X(NBnd)-X(1))
-!!$    FromPos=.TRUE.
-!!$
-!!$    DO J=1,NBnd
-!!$       IF(X(J)>Section)THEN
-!!$          JS=J-1
-!!$          EXIT
-!!$       ENDIF
-!!$    ENDDO
-!!$
-!!$    ChLeft=SUM(Charge(1:JS))
-!!$    ChRight=SUM(Charge(JS+1:NBnd))
-!!$    Ch=ChLeft+ChRight
-!!$    ChB=ChRight/ChLeft   
-!!$!    WRITE(*,111)JS,ChLeft,ChRight,Ch,ChLeft/ChRight
-!!$
-!!$    IF(.NOT.(ChRight>0D0.AND.ChLeft>0D0  &   
-!!$         .AND.ChRight<Ch .AND.ChLeft<Ch) )THEN
-!!$
-!!$       JM=JS       
-!!$       DO WHILE(JM>0)
-!!$          JM=JM-1
-!!$          IBM=DBLE(JM)/DBLE(N-JM)
-!!$          IF(IBM<1D0/IMax)THEN
-!!$             WRITE(*,*)' SUCK 1 MINUS XB = ',XBM,' IBM = ',IBM,IBM<1D0/IMax,1D0/IMax
-!!$             EXIT
-!!$          ENDIF
-!!$          XBM=(X(JM)-X(1))/(X(NBnd)-X(JM))
-!!$          IF(XBM<1D0/XMax.OR.XBM>XMax)THEN
-!!$             WRITE(*,*)' SUCK 2 MINUS XB = ',XBM,' IBM = ',IBM
-!!$             EXIT
-!!$          ENDIF
-!!$          ChMLeft=SUM(Charge(1:JM))
-!!$          ChMRight=SUM(Charge(JM+1:NBnd))
-!!$          IF(ChMRight>0D0.AND.ChMLeft>0D0)EXIT
-!!$       ENDDO
-!!$
-!!$       JP=JS
-!!$       DO WHILE(JP<NBnd)
-!!$          JP=JP+1
-!!$          IBP=DBLE(JP)/DBLE(N-JP)
-!!$          IF(IBP>IMax)THEN
-!!$             WRITE(*,*)' SUCK 1 PLUS IB = ',XBP,' IBP = ',IBP
-!!$             EXIT
-!!$          ENDIF
-!!$          XBP=(X(JP)-X(1))/(X(NBnd)-X(JP))
-!!$          IF(XBP<1D0/XMax.OR.XBP>XMax)THEN
-!!$             WRITE(*,*)' SUCK 2 PLUS XB = ',XBP,' IBP = ',IBP
-!!$             EXIT 
-!!$          ENDIF
-!!$          ChPLeft=SUM(Charge(1:JP))
-!!$          ChPRight=SUM(Charge(JP+1:NBnd))
-!!$          IF(ChPRight>0D0.AND.ChPLeft>0D0)EXIT
-!!$       ENDDO
-!!$
-!!$       MOutOfBounds=XBM<=1D0/XMax.OR.XBM>=XMax.OR.IBM<=1D0/IMax.OR.IBM>=IMax
-!!$       POutOfBounds=XBP<=1D0/XMax.OR.XBP>=XMax.OR.IBP<=1D0/IMax.OR.IBP>=IMax       
-!!$
-!!$       WRITE(*,*)' XBM = ',XBM,' IBM = ',IBM
-!!$       WRITE(*,*)' MOUNT = ',XBM<1D0/XMax,XBM>XMax,IBM<1D0/IMax,IBM>IMax
-!!$       WRITE(*,*)' MOut = ',MOutOfBounds,' POut = ',POutOfBounds
-!!$
-!!$       IF(MOutOfBounds.AND.POutOfBounds)THEN
-!!$          Q=NewQ
-!!$          RETURN
-!!$       ELSEIF(.NOT.MOutOfBounds.AND..NOT.POutOfBounds)THEN
-!!$          IF(JP-JS>JS-JM)THEN
-!!$             JS=JM
-!!$             FromPos=.FALSE.
-!!$!             WRITE(*,*)' --- '
-!!$!             WRITE(*,112)JM,ChLeft,ChRight,Ch,ChLeft/ChRight
-!!$          ELSE
-!!$             JS=JP
-!!$             FromPos=.TRUE.
-!!$!             WRITE(*,*)' ++++ '
-!!$!             WRITE(*,112)JP,ChLeft,ChRight,Ch,ChLeft/ChRight
-!!$          ENDIF
-!!$       ELSEIF(.NOT.MOutOfBounds)THEN
-!!$          JS=JM
-!!$          FromPos=.FALSE.
-!!$!          WRITE(*,*)' --- '
-!!$!          WRITE(*,111)JM,ChLeft,ChRight,Ch,ChLeft/ChRight
-!!$       ELSEIF(.NOT.POutOfBounds)THEN
-!!$          JS=JP
-!!$          FromPos=.TRUE.
-!!$!          WRITE(*,*)' ++++ '
-!!$!          WRITE(*,111)JP,ChLeft,ChRight,Ch,ChLeft/ChRight
-!!$       ENDIF
-!!$
-!!$    ENDIF
-!!$
-!!$    Section=X(JS)
-!!$
-!!$    ChLeft=0D0
-!!$    DO J=1,N
-!!$       IF(RhoX(Q(J)).LE.Section.AND.Ze(Q(J)).NE.NuclearExpnt)THEN
-!!$          ChLeft=ChLeft+Co(C(Q(J)))*(Pi/Ze(Q(J)))**(3D0/2D0)!!$    NAts=0
-!!$       ENDIF
-!!$    END DO
-!!$
-!!$    ChRight=0D0
-!!$    DO J=1,N
-!!$       IF(RhoX(Q(J)).GT.Section.AND.Ze(Q(J)).NE.NuclearExpnt)THEN
-!!$          ChRight=ChRight+Co(C(Q(J)))*(Pi/Ze(Q(J)))**(3D0/2D0)!!$    NAts=0
-!!$       ENDIF
-!!$    END DO
-!!$
-!!$!    WRITE(*,111)JS,ChLeft,ChRight,ChLeft+ChRight,ChLeft/ChRight
-!!$
-!!$    DO J=1,N
-!!$       X(J)=RhoX(Q(J))
-!!$    ENDDO
-!!$
-!!$    CALL DblIntSort77(N,X,Q,2)       
-!!$
-!!$    DO J=1,N
-!!$       IF(Ze(Q(J)).NE.NuclearExpnt)THEN
-!!$          Charge(J)=Co(C(Q(J)))*(Pi/Ze(Q(J)))**(3D0/2D0)
-!!$       ENDIF
-!!$    END DO
-!!$
-!!$    IF(FromPos)THEN
-!!$       DO J=N,1,-1
-!!$          IF(X(J)==Section)THEN
-!!$             JS=J
-!!$             IBP=DBLE(JS)/DBLE(N-JS)
-!!$             IF(IBP<1D0/IMax.OR.IBP>IMax)THEN
-!!$                Q=NewQ
-!!$                RETURN
-!!$             ENDIF
-!!$             EXIT
-!!$          ENDIF
-!!$       ENDDO
-!!$       ChLeft=SUM(Charge(1:JS))
-!!$       ChRight=SUM(Charge(JS+1:N))
-!!$       !       WRITE(*,111)JS,ChLeft,ChRight,Ch,ChLeft/ChRight
-!!$    ELSE
-!!$       DO J=1,N
-!!$          IF(X(J)==Section)THEN
-!!$             JS=J
-!!$             IBM=DBLE(JS)/DBLE(N-JS)
-!!$             IF(IBM<1D0/IMax.OR.IBM>IMax)THEN
-!!$                Q=NewQ
-!!$                RETURN
-!!$             ENDIF
-!!$             EXIT
-!!$          ENDIF
-!!$       ENDDO
-!!$       ChLeft=SUM(Charge(1:JS))
-!!$       ChRight=SUM(Charge(JS+1:N))
-!!$       !       WRITE(*,111)JS,ChLeft,ChRight,Ch,ChLeft/ChRight
-!!$    ENDIF
-!!$
-!!$    ChLeft=0D0
-!!$    DO J=1,JS
-!!$       IF(Ze(Q(J)).NE.NuclearExpnt)THEN
-!!$          ChLeft=ChLeft+Co(C(Q(J)))*(Pi/Ze(Q(J)))**(3D0/2D0)!!$    NAts=0
-!!$       ENDIF
-!!$    END DO
-!!$
-!!$    ChRight=0D0
-!!$    DO J=JS+1,N
-!!$       IF(Ze(Q(J)).NE.NuclearExpnt)THEN
-!!$          ChRight=ChRight+Co(C(Q(J)))*(Pi/Ze(Q(J)))**(3D0/2D0)!!$    NAts=0
-!!$       ENDIF
-!!$    END DO
-!!$
-!!$!    WRITE(*,112)JS,ChLeft,ChRight,ChLeft+ChRight,ChLeft/ChRight
-!!$
-!!$    !    WRITE(*,55)RhoX(Q(1)),RhoX(Q(JS)),RhoX(Q(JS+1)),RhoX(Q(N))
-!!$    !55  FORMAT(" Split [",D12.6,", ",D12.6,"] [",D12.6,", ",D12.6," ]")
-!!$
-!!$    Partitioned=.TRUE.                     ! found a good partition
-!!$
-!!$111 FORMAT('  TRIAL:',I5,' ChLeft = ',D12.6,' ChRight = ',D12.6,' ChTot = ',D12.6,' Balance = ',F6.3)
-!!$112 FORMAT('  PASSD:',I5,' ChLeft = ',D12.6,' ChRight = ',D12.6,' ChTot = ',D12.6,' Balance = ',F6.3)
-!!$
-!!$  END FUNCTION BalancedSplit
 
 END MODULE PoleTree
