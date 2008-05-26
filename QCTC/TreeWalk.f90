@@ -161,8 +161,11 @@ CONTAINS
        IF(ABS(PQx)>QC%Box%Half(1)+Q%Box%Half(1).OR.  &
           ABS(PQy)>QC%Box%Half(2)+Q%Box%Half(2).OR.  &
           ABS(PQz)>QC%Box%Half(3)+Q%Box%Half(3))THEN 
+
 !!$.OR.  &
 !!$          T>Gamma_Switch)THEN
+!!$
+!!$       IF(.TRUE.)THEN
 
 #ifdef PAC_DEBUG
           CALL ErrCompare(QC,Q,1D-5)
@@ -867,11 +870,9 @@ ENDIF
        ENDDO
     ENDDO
 
-
-!!$    CALL VMD3RR(ClusterSize,HGEll4,Nc,EllPQ,LMNx(-1,-1,-1),AuxR(1,0),PQx(1),PQy(1),PQz(1),R3T(1,1))
-!!$    CALL KetKontract(ClusterSize,Nc,LenP*LenQ,PLMNx(EllP,EllQ)%I(1),QLMNx(EllP,EllQ)%I(1), &
+!!$    CALL VMD3RR(MaxCluster,HGEll4,Nc,EllPQ,LMNx(-1,-1,-1),AuxR(1,0),PQx(1),PQy(1),PQz(1),R3T(1,1))
+!!$    CALL KetKontract(MaxCluster,Nc,LenP*LenQ,PLMNx(EllP,EllQ)%I(1),QLMNx(EllP,EllQ)%I(1), &
 !!$         PQLMNx(EllP,EllQ)%I(1),R3T(1,1),QCoeff(1,1),Ket(1))
-
 !!$    LenPQ=LenP*LenQ
 !!$    DO J=1,LenPQ
 !!$       IP=PLMNx(EllP,EllQ)%I(J)

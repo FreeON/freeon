@@ -107,7 +107,7 @@ CONTAINS
        IF(HG%NQ(Ell).NE.0)THEN
           EllQ=Ell
           EllP=MaxPoleEll
-          CALL XLateV(ClusterSize,HG%NQ(Ell),EllP,EllQ,XLLen(EllP,EllQ),      &
+          CALL XLateV(MaxCluster,HG%NQ(Ell),EllP,EllQ,XLLen(EllP,EllQ),      &
                XLSgn(EllP,EllQ)%D(1,1),XLIdx(EllP,EllQ)%I(1,1),               &
                FactOlm0(0),FactOlm2(0),SP%Center,HG%Cent(EllQ)%D(1,1),        &
                CMTmp%D(1,0),SMTmp%D(1,0),SP%C(0),SP%S(0))             

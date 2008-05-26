@@ -86,9 +86,9 @@ PROGRAM JForce
      Mssg=ProcessName('JForce','Wrapping on')
   ENDIF
 
-  Mssg=TRIM(Mssg)//' Cluster Size = '//TRIM(IntToChar(ClusterSize))//', MaxPFFEll = '//TRIM(IntToChar(MaxPFFFEll))
+!  Mssg=TRIM(Mssg)//' Cluster Size = '//TRIM(IntToChar(MinCluster))//', MaxPFFEll = '//TRIM(IntToChar(MaxPFFFEll))
+!  WRITE(*,*)TRIM(Mssg)
 
-  WRITE(*,*)TRIM(Mssg)
   ! Initialize addressing for tensor contraction loops
   CALL TensorIndexingSetUp()
   ! Setup global arrays for computation of multipole tensors ...
