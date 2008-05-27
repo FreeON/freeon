@@ -156,14 +156,15 @@ CONTAINS
 !!$       ENDIF
 !!$       !
 !!$       T=OmegaMin*PQ2
+!!$.OR.  &
+!!$          T>Gamma_Switch)THEN
+
        !
        MAC=.FALSE.
        IF(ABS(PQx)>QC%Box%Half(1)+Q%Box%Half(1).OR.  &
           ABS(PQy)>QC%Box%Half(2)+Q%Box%Half(2).OR.  &
           ABS(PQz)>QC%Box%Half(3)+Q%Box%Half(3))THEN 
 
-!!$.OR.  &
-!!$          T>Gamma_Switch)THEN
 !!$
 !!$       IF(.TRUE.)THEN
 

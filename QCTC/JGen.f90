@@ -210,7 +210,7 @@ CONTAINS
                      ENDDO
                    ENDDO
                    !
-                   PExt=Extent(QP%Prim%Ell,QP%Prim%Zeta,TempHerm%Coef,TauPAC,ExtraEll_O=0,Potential_O=.TRUE.)
+                   PExt=Extent(QP%Prim%Ell,QP%Prim%Zeta,TempHerm%Coef,TauPAC,ExtraEll_O=0)!,Potential_O=.TRUE.)
 !                   WRITE(*,*)QP%Prim%Zeta,' PExt = ',PExt
 
                    !

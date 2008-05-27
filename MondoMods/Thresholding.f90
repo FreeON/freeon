@@ -239,7 +239,7 @@ MODULE Thresholding
                    MixMax=MAX(MixMax,Fact(L)*Fact(M+ExtraEll)*Fact(N))
                    MixMax=MAX(MixMax,Fact(L)*Fact(M)*Fact(N+ExtraEll))
                    HGInEq=SQRT(MixMax*(Two*Zeta)**(L+M+N+ExtraEll))*HGTF(LMN)
-                   CramCo=CramCo+ABS(HGInEq)
+                   CramCo=MAX(CramCo,ABS(HGInEq))
                 ENDDO
              ENDDO       
           ENDDO
