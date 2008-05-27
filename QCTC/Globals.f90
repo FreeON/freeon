@@ -12,6 +12,6 @@ MODULE Globals
   ! How many Gaussians per leaf node we can have:
   INTEGER,PARAMETER ::   MaxCluster=2048
   ! At what do we stop recurring on the tree:
-  INTEGER,PARAMETER ::   MinCluster=64
+  INTEGER,PARAMETER ::   MinCluster=32
 END MODULE Globals
 
