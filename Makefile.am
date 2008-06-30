@@ -205,6 +205,7 @@ localversion : always-fix
 	      rm localversion.temp; \
 	    else \
 	      echo "localversion updated"; \
+	      diff -u localversion localversion.temp; \
 	      mv -f localversion.temp localversion; \
 	      touch MondoSCF/PrintParsed.f90; \
 	    fi; \

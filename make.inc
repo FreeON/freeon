@@ -29,9 +29,9 @@ CLEANFILES = *.mod *$(PREPROCESSED_SUFFIX).f *$(PREPROCESSED_SUFFIX).f90 *$(PREP
 # Dependency check (only for debugging).
 depcheck :
 	for i in $(SOURCES_DEPCHECK); do \
-	  echo cleaning...; \
+	  echo "********************************** cleaning **********************************"; \
 	  $(MAKE) clean; \
-	  echo verifying `echo $$i | sed -e "s/[.][^.]\+$$//"`; \
+	  echo "********************************** verifying `echo $$i | sed -e "s/[.][^.]\+$$//"` **********************************"; \
 	  $(MAKE) `echo $$i | sed -e "s/[.][^.]\+$$//"`.lo || exit 1; \
 	done
 

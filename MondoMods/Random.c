@@ -23,24 +23,31 @@
      to return derivative works to the MondoSCF group for review, and possible
      disemination in future releases.
 */
+
+#include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include "config.h"
 
-double random_(void) {
-  static long int i=0;
-  if(i == 0)
+double random_(void)
+{
+  static int first_time = 1;
+  static unsigned int seed = 0;
+
+  if (first_time == 1)
   {
-    i = (long int) time(NULL);
-#ifdef HAVE_SRAND48
-    srand48(i);
+#ifdef HAVE_RANDOM_SEED
+    seed = time(NULL);
 #else
-    srand(i);
+    seed = 0;
+
+    /* Print out a warning. */
+    printf("[Random] seed random number generator with 0. This makes the random number\n");
+    printf("         generator produce a reproducible sequence or random numbers.\n");
 #endif
+    srand(seed);
+    first_time = 0;
   }
 
-#ifdef HAVE_SRAND48
-  return drand48();
-#else
-  return rand();
-#endif
+  return rand()/(double) RAND_MAX;
 }

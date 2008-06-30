@@ -84,6 +84,7 @@ CONTAINS
     INTEGER                       :: NModls,I
     INTEGER,   DIMENSION(MaxSets) :: Models
     !-------------------------------------------------------------------------!
+    CALL MondoLog(DEBUG_NONE, "ParseModelChems", "parsing models")
     NModls=0
     IF(OptKeyLocQ(Inp,MODEL_OPTION,MODEL_ExactX,MaxSets,NLoc,Location))THEN
       NModls=NModls+NLoc
@@ -537,6 +538,8 @@ CONTAINS
       IF(INDEX(Names%GFile,'.')==0) &
            Names%GFile=TRIM(Names%GFile)//'.xyz'
     ENDIF
+
+    CALL MondoLog(DEBUG_NONE, "ParsePrintFlags", "PrintFlags%Key = "//TRIM(IntToChar(PFlags%Key)))
   END SUBROUTINE ParsePrintFlags
   !===============================================================================================
   !
@@ -647,6 +650,9 @@ CONTAINS
     IF(.NOT. OptIntQ(Inp,Op_MaxSCF,MaxSCF)) THEN
       MaxSCF = 256
     ENDIF
+
+    CALL MondoLog(DEBUG_NONE, "ParseSCF", "MinSCF = "//TRIM(IntToChar(MinSCF)))
+    CALL MondoLog(DEBUG_NONE, "ParseSCF", "MaxSCF = "//TRIM(IntToChar(MaxSCF)))
   END SUBROUTINE ParseSCF
   !===============================================================================================
   !

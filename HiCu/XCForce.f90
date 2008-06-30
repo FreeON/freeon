@@ -114,8 +114,7 @@ PROGRAM XCForce
   NSDen=Rho%NSDen
 !  NSMat=1
 !  IF(NSDen.EQ.3) NSMat=2 !<<< SPIN
-  write(*,*) '_XCForce_: NSDen',NSDen
-
+  CALL MondoLog(DEBUG_NONE, TRIM(Prog), "NSDen = "//TRIM(IntToChar(NSDen)))
 
 ! Generate the grid as a 3-D BinTree 
   WBox%BndBox(1:3,1:2) = RhoRoot%Box%BndBox(1:3,1:2)
@@ -140,7 +139,11 @@ PROGRAM XCForce
 #ifdef PARALLEL 
   CALL New(P,OnAll_O=.TRUE.)
 #endif
+
+  ! Index check...
+  CALL MondoLog(DEBUG_NONE, TRIM(Prog), "Index Check: getting P from "//TRIM(TrixFile('D',Args,1)))
   CALL Get(P,TrixFile('D',Args,1),BCast_O=.TRUE.)
+
 !----------------------------------------------------------------------
 ! Compute the exchange-correlation contribution to the force in O(N)
 !

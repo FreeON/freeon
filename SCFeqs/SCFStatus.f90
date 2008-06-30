@@ -49,8 +49,7 @@ PROGRAM SCFStatus
 #else
   TYPE(BCSR)                      :: P,Tmp1,Tmp2,Tmp3
 #endif
-  REAL(DOUBLE)                    :: E_el_tot,E_nuc_tot,E_es_tot,E_ECPs,KinE,ExchE,Exc, &
-       Gap,Etot,DMax,Virial,DIISErr,S2,SFac
+  REAL(DOUBLE)                    :: E_el_tot,E_nuc_tot,E_es_tot,E_ECPs,KinE,ExchE,Exc,Gap,Etot,DMax,Virial,DIISErr,S2,SFac
 #ifdef MMech
   REAL(DOUBLE)                    :: EBOND,EANGLE,ETorsion,ELJ,EOutOfPlane,MM_COUL,MM_ENERGY
   REAL(DOUBLE)                    :: E_C_EXCL,E_LJ_EXCL
@@ -150,7 +149,7 @@ PROGRAM SCFStatus
   !   WRITE(*,*)' Elec = ',E_es_tot
   !   WRITE(*,*)' Exc  = ',Exc
   !   WRITE(*,*)' Exch = ',ExchE
-  !   WRITE(*,*)' ETot = ',ETot
+  !   WRITE(*,*)' Etot = ',Etot
   CALL Put(Etot,'Etot')
   CALL Put(Etot,'Etot',StatsToChar(Current))
   !  The Virial
@@ -227,7 +226,7 @@ PROGRAM SCFStatus
          //'       <DFT>   = '//TRIM(DblToMedmChar(Exc))//RTRN
     !     Last but not least, total SCF energy
     SCFMessage=TRIM(SCFMessage)                                           &
-         //'       <SCF>   = '//TRIM(FltToMedmChar(ETot))//RTRN
+         //'       <SCF>   = '//TRIM(FltToMedmChar(Etot))//RTRN
     !     Add in MM energies
 #ifdef MMech
     IF(HasMM()) THEN
@@ -269,13 +268,13 @@ PROGRAM SCFStatus
     ELSE
 #ifdef MMech
       IF(HasMM()) THEN
-        SCFMessage=TRIM(SCFMessage)//' <SCF> = '//TRIM(FltToMedmChar(ETot)) &
+        SCFMessage=TRIM(SCFMessage)//' <SCF> = '//TRIM(FltToMedmChar(Etot)) &
              //' <MM_ENERGY> = '//TRIM(FltToMedmChar(MM_ENERGY)) &
              //' <TOTAL ENERGY> = '//TRIM(FltToMedmChar(Etot+MM_ENERGY)) &
              //', dD = '//TRIM(DblToShrtChar(DMax))
       ELSE
 #endif
-        SCFMessage=TRIM(SCFMessage)//' <SCF> = '//TRIM(FltToMedmChar(ETot)) &
+        SCFMessage=TRIM(SCFMessage)//' <SCF> = '//TRIM(FltToMedmChar(Etot)) &
              //', dD = '//TRIM(DblToShrtChar(DMax))
 #ifdef MMech
       ENDIF

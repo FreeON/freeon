@@ -63,3 +63,19 @@ Building (4) on MacBook Pro 1 (Core Duo) 2.16GHz
 make -j1: real 23m6.268s  user 20m16.247s sys 1m38.732s
 make -j2: real 15m24.275s user 23m26.838s sys 1m49.598s
 make -j3: real 15m35.510s user 23m38.548s sys 1m49.434s
+
+
+
+
+Running Mondo:
+
+Mondo accepts several command line arguments. The most basic mode of running
+Mondo is by specifying only the input file:
+
+MondoSCF something.inp
+
+The output files will be named based on the name of the input file with an added
+PID (process ID) tag. One can also specify exactly what the output filename
+should be called by running Mondo in this way:
+
+MondoSCF something.inp something.out something.log something.geometries

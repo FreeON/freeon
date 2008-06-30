@@ -232,6 +232,8 @@ CONTAINS
 
     CALL MondoLog(DEBUG_NONE, "GeomArchive", "archiving geometry into hdf")
     chGEO=IntToChar(cGEO)
+
+    CALL MondoLog(DEBUG_NONE, "GeomArchive", "opening hdf file "//TRIM(N%HFile))
     HDFFileID=OpenHDF(N%HFile)
     DO iCLONE=1,G%Clones
       G%Clone(iCLONE)%Confg=cGEO
@@ -255,6 +257,7 @@ CONTAINS
       CALL WrapAtoms(G%Clone(iCLONE))
       G%Clone(iCLONE)%Carts%D = G%Clone(iCLONE)%Carts%D
 
+      CALL MondoLog(DEBUG_NONE, "GeomArchive", "opening hdf group "//"Clone #"//TRIM(IntToChar(iCLONE)))
       HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
 
       ! If we have ECPs, temporarily reset this geometries nuclear charges

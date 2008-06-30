@@ -30,7 +30,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <config.h>
+#include "config.h"
 
 #if defined (HAVE_INTERNAL_HDF5)
 #warning Using internal hdf5

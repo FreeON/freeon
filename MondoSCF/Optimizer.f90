@@ -1232,14 +1232,14 @@ CONTAINS
   END SUBROUTINE GeOpReview
   !
   !---------------------------------------------------------------------
-  !
+
   SUBROUTINE LattReview(IntCL,LatOld,LattIntC,PBCDim)
     TYPE(INTC)     :: IntCL
     TYPE(LattInfo) :: LattIntC
     TYPE(DBL_VECT) :: LatOld
     INTEGER        :: I,J,PBCDim,NStre,NBend
     REAL(DOUBLE)   :: Fact
-    !
+
     IF(PBCDim>0) THEN
       WRITE(*,1010)
       IF(PBCDim==1) THEN
@@ -1266,7 +1266,7 @@ CONTAINS
              LattIntC%Grad%D(I),LattIntC%Displ%D(I)*Fact, &
              IntCL%Value%D(I)*Fact
       ENDDO
-      !
+
       IF(PBCDim==3.AND.IntCL%Def%C(7)(1:8)=='VOLM_L  ') THEN
         Fact=One/(AngstromsToAu**3)
         I=7
@@ -1274,7 +1274,7 @@ CONTAINS
              LattIntC%Grad%D(I),LattIntC%Displ%D(I)*Fact, &
              IntCL%Value%D(I)*Fact
       ENDIF
-      !
+
       IF(PBCDim==2.AND.IntCL%Def%C(4)(1:8)=='AREA_L  ') THEN
         Fact=One/(AngstromsToAu**2)
         I=4
@@ -1283,10 +1283,10 @@ CONTAINS
              IntCL%Value%D(I)*Fact
       ENDIF
     ENDIF
-    !
+
 1010 FORMAT('Lattice Parameter        Old Value      Gradient    Displacement   New Value')
 1020 FORMAT(10X,A6,4X,4F14.6)
-    !
+
   END SUBROUTINE LattReview
   !
   !---------------------------------------------------------------
@@ -1392,7 +1392,7 @@ CONTAINS
     !--------------------------------------------
     !
     CALL ModifyGeom(GOpt,XYZNew%D,RefXYZ%D,AtNumNew%D, &
-         GradNew%D,Convgd,GMLoc%Etotal, &
+         GradNew%D,Convgd,GMLoc%ETotal, &
          GMLoc%PBC%Dimen,iGEO,iCLONE, &
          SCRPath,PWDPath,DoNEB,Opts%PFlags%GeOp, &
          Nams%HFile)

@@ -131,6 +131,7 @@ Overlay.o : \
   PunchHDF.o
 
 MDynamics.o : \
+  $(top_srcdir)/MondoConfig.h \
   SCFs.o \
 	Numerics.o \
 	ControlStructures.o \
@@ -166,6 +167,7 @@ Optimizer.o : \
 	QUICCA.o
 
 MondoSCF.o : \
+  $(top_srcdir)/MondoConfig.h \
   SCFs.o \
   Response.o \
   PunchHDF.o \

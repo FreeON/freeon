@@ -27,7 +27,7 @@
 !    Author: Matt Challacombe and CK Gan
 !-------------------------------------------------------------------------------
 
-#include <MondoConfig.h>
+#include "MondoConfig.h"
 
 MODULE InOut
   USE DerivedTypes

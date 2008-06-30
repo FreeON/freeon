@@ -46,7 +46,7 @@ CONTAINS
   !===============================================================
   SUBROUTINE ParseTheInput(C)
     TYPE(Controls) :: C
-    integer        :: iclone
+    INTEGER        :: iCLONE
 
     ! Parse command line and load env and file names
     CALL LoadCommands(C%Nams)
@@ -76,7 +76,7 @@ CONTAINS
 
     ! Parse dynamics options
     IF(C%Opts%Grad==GRAD_DO_DYNAMICS .OR. C%Opts%Grad==GRAD_DO_HYBRIDMC ) THEN
-      CALL LoadDynamics(C%Nams,C%Opts,C%Geos,C%Dyns)
+      CALL LoadDynamics(C%Nams,C%Opts,C%Dyns)
     ENDIF
 
     ! Parse geometry or get from restart HDF
