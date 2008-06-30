@@ -24,7 +24,7 @@
 !    disemination in future releases.
 !------------------------------------------------------------------------------
 
-#include <MondoConfig.h>
+#include "MondoConfig.h"
 
 MODULE Macros
   USE DerivedTypes
@@ -98,9 +98,11 @@ CONTAINS
     CALL New(SpaceTimeSplit,3)
     CALL Get(SpaceTimeSplit,'spacetime')
     CALL CloseHDF(HDFFileID)
+
     ! Create Cartesian topology for the clones
     MyClone=CartCommSplit(SpaceTimeSplit,Serial_O)
-    !    CALL AlignNodes(' After CartCommSplit ')
+
+    ! CALL AlignNodes(' After CartCommSplit ')
 #else
     CALL Get(MyClone,'spacetime')
     CALL CloseHDF(HDFFileID)
@@ -293,10 +295,13 @@ CONTAINS
       PrvGeom=TRIM(IntToChar(Args%I%I(3)-1))
     ENDIF
     NxtGeom=TRIM(IntToChar(Args%I%I(3)+1))
+
     ! Basis
-    CurBase=TRIM(IntToChar(Args%I%I(2)))
-    PrvBase=TRIM(IntToChar(Previous(2)))
-    ScrName=TRIM(MONDO_SCRATCH)//TRIM(Args%C%C(1))
+    CurBase = TRIM(IntToChar(Args%I%I(2)))
+    PrvBase = TRIM(IntToChar(Previous(2)))
+    ScrName = TRIM(MONDO_SCRATCH)//TRIM(Args%C%C(1))
+    PWDName = TRIM("")
+
     ! Load global file names
     CALL Get(logFile,'logfile')
     CALL Get(OutFile,'outputfile')

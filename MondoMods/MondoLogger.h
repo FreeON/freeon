@@ -1,7 +1,7 @@
 #if ! defined (__MONDOLOGGER_H)
 #define __MONDOLOGGER_H 1
 
-#include <MondoConfig.h>
+#include "MondoConfig.h"
 
 #if MAX_LINE_LENGTH
 

@@ -28,7 +28,7 @@ MODULE Overlay
   USE PunchHDF
   USE ControlStructures
   IMPLICIT NONE
-CONTAINS 
+CONTAINS
   !===============================================================
   !
   !===============================================================
@@ -40,68 +40,68 @@ CONTAINS
     INTEGER              :: I,J,K,L,NC,iCLUMP,IErr,NArg,MaxLen
     LOGICAL              :: ProgramFailed
     TYPE(CHR_VECT),SAVE  :: ArgV
-    TYPE(INT_VECT),SAVE  :: IChr 
+    TYPE(INT_VECT),SAVE  :: IChr
     CHARACTER(LEN=2*DCL) :: CmndLine
 #if PARALLEL && MPI2
     INTEGER              :: SPAWN,ALL
 #else
-    INTERFACE 
-       FUNCTION Spawn(NC,MaxLen,IChr)
-         INTEGER                         :: NC,MaxLen
-         INTEGER, DIMENSION(1:NC*MaxLen) :: IChr
-         INTEGER                                     :: Spawn
-       END FUNCTION Spawn
+    INTERFACE
+      FUNCTION Spawn(NC,MaxLen,IChr)
+        INTEGER                         :: NC,MaxLen
+        INTEGER, DIMENSION(1:NC*MaxLen) :: IChr
+        INTEGER                                     :: Spawn
+      END FUNCTION Spawn
     END INTERFACE
 #endif
     !------------------------------------------------------------!
     DO iCLUMP=1,M%Clumps
-!       WRITE(*,*)'========================================================='
-!       WRITE(*,*)' CLUMP = ',iCLUMP,' CLUMP = ',iCLUMP,' CLUMP = ',iCLUMP
-!       WRITE(*,*)'========================================================='
+      !       WRITE(*,*)'========================================================='
+      !       WRITE(*,*)' CLUMP = ',iCLUMP,' CLUMP = ',iCLUMP,' CLUMP = ',iCLUMP
+      !       WRITE(*,*)'========================================================='
 #ifdef PARALLEL
-       CALL MPIsArchive(N,M%NSpace,M%Clump%I(:,iCLUMP))
-       CALL SetArgV(Ex,N,S,M,iCLUMP,NArg,ArgV)
-#else 
-       CALL MPIsArchive(N,1,M%Clump%I(:,iCLUMP))
-       CALL SetArgV(Ex,N,S,M,NArg,ArgV)
-#endif
-       ! This is the command line we are going to execute 
-       CmndLine=TRIM(ArgV%C(1))
-       DO I=2,NArg
-          CmndLine=TRIM(CmndLine)//Blnk//TRIM(ArgV%C(I))
-       ENDDO
-
-       ! Log this run
-       CALL MondoLog(DEBUG_NONE, "Invoke", TRIM(CmndLine))
-#if MPI2
-       CALL MPI_COMM_SPAWN(ArgV%C(1),ArgV%C(2:NArg),M%NProc,MPI_INFO_NULL, &
-            ROOT,MPI_COMM_SELF,SPAWN,MPI_ERRCODES_IGNORE,IErr)
-       IF(IErr/=MPI_SUCCESS)& 
-          CALL MondoHalt(MPIS_ERROR,' Could not spawn <'//TRIM(CmndLine)//'>')
-
-       ! Merge the spawned and current local communicators
-       CALL MPI_INTERCOMM_MERGE(SPAWN,.TRUE.,ALL,IErr)
-       ! Wait for the kiddies to be done
-       CALL MPI_BARRIER(ALL,IErr)
+      CALL MPIsArchive(N,M%NSpace,M%Clump%I(:,iCLUMP))
+      CALL SetArgV(Ex,N,S,M,iCLUMP,NArg,ArgV)
 #else
-       ! Create ASCII integer array to beat F9x/C incompatibility
-       CALL CVToIV(NArg,ArgV,MaxLen,IChr)
-       ! Spawn a sub process 
-       IErr=Spawn(NArg,MaxLen,IChr%I)
-       ! Bring this run down if not successful
-       IF(IErr/=SUCCEED)CALL MondoHalt(IErr,'<'//TRIM(CmndLine)//'>')
-       ! Double check success if a MONDO Exec ...        
-       HDF_CurrentID=OpenHDF(N%HFile)       
-       CALL Get(ProgramFailed,'ProgramFailed')
-       CALL CloseHDF(HDF_CurrentID)
-       IF(ProgramFailed)CALL MondoHalt(-999,'<'//TRIM(CmndLine)//'>')
-       CALL Delete(IChr)
+      CALL MPIsArchive(N,1,M%Clump%I(:,iCLUMP))
+      CALL SetArgV(Ex,N,S,M,NArg,ArgV)
 #endif
-       CALL Delete(ArgV)
+      ! This is the command line we are going to execute
+      CmndLine=TRIM(ArgV%C(1))
+      DO I=2,NArg
+        CmndLine=TRIM(CmndLine)//Blnk//TRIM(ArgV%C(I))
+      ENDDO
+
+      ! Log this run
+      CALL MondoLog(DEBUG_NONE, "Invoke", TRIM(CmndLine))
+#if MPI2
+      CALL MPI_COMM_SPAWN(ArgV%C(1),ArgV%C(2:NArg),M%NProc,MPI_INFO_NULL, &
+           ROOT,MPI_COMM_SELF,SPAWN,MPI_ERRCODES_IGNORE,IErr)
+      IF(IErr/=MPI_SUCCESS)&
+           CALL MondoHalt(MPIS_ERROR,' Could not spawn <'//TRIM(CmndLine)//'>')
+
+      ! Merge the spawned and current local communicators
+      CALL MPI_INTERCOMM_MERGE(SPAWN,.TRUE.,ALL,IErr)
+      ! Wait for the kiddies to be done
+      CALL MPI_BARRIER(ALL,IErr)
+#else
+      ! Create ASCII integer array to beat F9x/C incompatibility
+      CALL CVToIV(NArg,ArgV,MaxLen,IChr)
+      ! Spawn a sub process
+      IErr=Spawn(NArg,MaxLen,IChr%I)
+      ! Bring this run down if not successful
+      IF(IErr/=SUCCEED)CALL MondoHalt(IErr,'<'//TRIM(CmndLine)//'>')
+      ! Double check success if a MONDO Exec ...
+      HDF_CurrentID=OpenHDF(N%HFile)
+      CALL Get(ProgramFailed,'ProgramFailed')
+      CALL CloseHDF(HDF_CurrentID)
+      IF(ProgramFailed)CALL MondoHalt(-999,'<'//TRIM(CmndLine)//'>')
+      CALL Delete(IChr)
+#endif
+      CALL Delete(ArgV)
     ENDDO
   END SUBROUTINE Invoke
   !===============================================================
-  ! CREATE A CHARACTER ARRAY OF NON-BLANK STRINGS THAT WILL 
+  ! CREATE A CHARACTER ARRAY OF NON-BLANK STRINGS THAT WILL
   ! BECOME THE ARGV ARRAY PASSED TO EXECVP BY SPAWN IF NOT MPI-2
   !===============================================================
 #ifdef PARALLEL
@@ -117,7 +117,7 @@ CONTAINS
     TYPE(CHR_VECT)     :: ArgT,ArgV
     SNC=SIZE(S%Action%C)
 
-#ifdef MPI2 
+#ifdef MPI2
     NArg=8+SNC
     CALL New(ArgT,NArg)
     ArgT%C(1) =TRIM(N%M_EXEC)//'/'//Ex
@@ -143,7 +143,7 @@ CONTAINS
     ArgT%C(6) =TRIM(N%M_EXEC)//'/'//Ex
     ArgT%C(7) =N%SCF_NAME
     DO K=1,SNC
-       ArgT%C(7+K)=S%Action%C(K)
+      ArgT%C(7+K)=S%Action%C(K)
     ENDDO
     NewDex=7+SNC
     ArgT%C(NewDex+1)=IntToChar(S%Current%I(1))
@@ -171,9 +171,9 @@ CONTAINS
     K=NArg
     NArg=0
     DO I=1,K
-       IF(ArgT%C(I)/="")THEN
-          NArg=NArg+1
-       ENDIF
+      IF(ArgT%C(I)/="")THEN
+        NArg=NArg+1
+      ENDIF
     ENDDO
 #ifdef MPI2
     ! Add space for a trailing blank	
@@ -182,11 +182,11 @@ CONTAINS
     CALL New(ArgV,NArg)
     NArg=0
     DO I=1,K
-       IF(ArgT%C(I)/="")THEN
-          NArg=NArg+1
-          ArgV%C(NArg)=ArgT%C(I)
-       ENDIF
-    ENDDO    
+      IF(ArgT%C(I)/="")THEN
+        NArg=NArg+1
+        ArgV%C(NArg)=ArgT%C(I)
+      ENDIF
+    ENDDO
 #ifdef MPI2
     ! Here is the trailing blank MPI_COMMM_SPAWN wants
     NArg=NArg+1	
@@ -195,7 +195,7 @@ CONTAINS
     CALL Delete(ArgT)
   END SUBROUTINE SetArgV
   !===============================================================
-  ! CREATE AN INTEGER ARRAY OF ASCII KEYS FROM AN ARRAY OF 
+  ! CREATE AN INTEGER ARRAY OF ASCII KEYS FROM AN ARRAY OF
   ! CHARACTER STRINGS; USE FOR PORTABLE F9x/C INTERFACE
   !===============================================================
   SUBROUTINE CVToIV(NArg,ArgV,MaxLen,IChr)
@@ -205,23 +205,23 @@ CONTAINS
     !------------------------------------------------------------!
     ! Max number of characters in an element of ArgV
     MaxLen=0
-    DO I=1,NArg   
-       MaxLen=MAX(MaxLen,LEN(TRIM(ArgV%C(I))))
+    DO I=1,NArg
+      MaxLen=MAX(MaxLen,LEN(TRIM(ArgV%C(I))))
     ENDDO
     ! Integer array to hold ASCII char-code
     CALL New(IChr,NArg*MaxLen)
     ! Convert strings to ASCII keys
     K=0
     DO I=1,NArg
-       L=LEN(TRIM(ArgV%C(I)))
-       DO J=1,MaxLen
-          K=K+1
-          IF(J<=L)THEN
-             IChr%I(K)=ICHAR(ArgV%C(I)(J:J))
-          ELSE
-             IChr%I(K)=IBlnk
-          ENDIF
-       ENDDO
+      L=LEN(TRIM(ArgV%C(I)))
+      DO J=1,MaxLen
+        K=K+1
+        IF(J<=L)THEN
+          IChr%I(K)=ICHAR(ArgV%C(I)(J:J))
+        ELSE
+          IChr%I(K)=IBlnk
+        ENDIF
+      ENDDO
     ENDDO
   END SUBROUTINE CVToIV
 END MODULE

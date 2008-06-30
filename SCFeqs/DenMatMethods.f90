@@ -181,6 +181,7 @@ CONTAINS
     IF(OldThresh==0D0) OldThresh=Thresholds%Trix
     Thresholds%Trix=MIN(0.05D0*1.093D0**MM,One)*OldThresh
     CurThresh=OldThresh
+    CALL MondoLog(DEBUG_NONE, "SetVarThresh", "current threshold = "//TRIM(FltToChar(CurThresh)))
   END SUBROUTINE SetVarThresh
   !-------------------------------------------------------------------------------
 
@@ -1262,11 +1263,12 @@ CONTAINS
     TYPE(BCSR)                    :: P0,Tmp1,Tmp2
 #endif
     CHARACTER(LEN=DEFAULT_CHR_LEN):: FileName
-    !
+
+    CALL MondoLog(DEBUG_NONE, "DMPProj", "Order = "//TRIM(IntToChar(Order)))
     IF(Order==1) THEN
       CALL SetEq(Tmp1,P0)
       CALL Multiply(Tmp1, 2.0D0)
-      !
+
       FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO-2))  &
            //'_C#'//TRIM(IntToChar(MyClone))//'.Dsave'
       CALL Get(Tmp2,FileName)
@@ -1342,6 +1344,9 @@ CONTAINS
       CALL Multiply(Tmp2, 1.0D0)
       CALL Add(Tmp1,Tmp2,P0)
       CALL SetEq(Tmp1,P0)
+
+    ELSE
+      CALL MondoLog(DEBUG_NONE, "DMPProj", "unknown order "//TRIM(IntToChar(Order)))
     ENDIF
   END SUBROUTINE DMPProj
   !-------------------------------------------------------------------------------

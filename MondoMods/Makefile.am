@@ -160,7 +160,8 @@ Parse.lo : \
   GlobalCharacters.lo \
   ParsingConstants.lo \
   ProcessControl.lo \
-  MemMan.lo
+  MemMan.lo \
+  MondoLogger.lo
 
 Clock.lo : DerivedTypes.lo
 
@@ -389,4 +390,7 @@ HDF5Wrap.lo : \
   $(top_srcdir)/config.h
 
 SMWrap.lo : \
+  $(top_srcdir)/config.h
+
+Random.lo : \
   $(top_srcdir)/config.h

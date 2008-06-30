@@ -33,6 +33,7 @@ MODULE ParseCommands
   USE F90_UNIX
 #endif
   USE ControlStructures
+  USE GlobalCharacters
   USE CWrappers
 
   IMPLICIT NONE
@@ -44,14 +45,14 @@ CONTAINS
   SUBROUTINE LoadCommands(N)
     TYPE(FileNames)     :: N
     TYPE(ARGMT)         :: Args
-    CHARACTER(LEN=DCL)  :: PROCESS_ID,PWDName,SCRName
+    CHARACTER(LEN=DCL)  :: PROCESS_ID
     INTEGER             :: DotDex
     LOGICAL             :: Exists
     INTEGER,EXTERNAL    :: GetPID
 
     ! Get command line arguments
     CALL Get(Args)
-    IF(Args%NC==0)CALL MondoHalt(PRSE_ERROR,' No arguments to MondoSCF !')!
+    IF(Args%NC==0) CALL MondoHalt(PRSE_ERROR,' No arguments to MondoSCF !')!
 
     ! Get current working directory.
     CALL GetPWD(N%M_PWD)
@@ -60,24 +61,24 @@ CONTAINS
     CALL GetEnv('MONDO_HOME',N%M_HOME)
     IF(LEN(TRIM(N%M_HOME)) == 0) THEN
       N%M_HOME = HAVE_MONDO_HOME
-      WRITE(*,"(A)") 'env variable $(MONDO_HOME) not set. Using '//trim(N%M_HOME)
+      WRITE(*,"(A)") '[LoadCommand] env variable $(MONDO_HOME) not set. Using '//trim(N%M_HOME)
     ELSE
-      WRITE(*,"(A)") 'env variable $(MONDO_HOME) set to '//trim(N%M_HOME)
+      WRITE(*,"(A)") '[LoadCommand] env variable $(MONDO_HOME) set to '//trim(N%M_HOME)
     ENDIF
     CALL GetEnv('MONDO_EXEC',N%M_EXEC)
     IF(LEN(TRIM(N%M_EXEC)) == 0) THEN
       N%M_EXEC = TRIM(N%M_HOME)//"/bin"
-      WRITE(*,"(A)") 'env variable $(MONDO_EXEC) not set. Using '//TRIM(N%M_EXEC)
+      WRITE(*,"(A)") '[LoadCommand] env variable $(MONDO_EXEC) not set. Using '//TRIM(N%M_EXEC)
     ELSE
-      WRITE(*,"(A)") 'env variable $(MONDO_EXEC) set to '//trim(N%M_EXEC)
+      WRITE(*,"(A)") '[LoadCommand] env variable $(MONDO_EXEC) set to '//trim(N%M_EXEC)
     ENDIF
     CALL GetEnv('MONDO_SCRATCH',N%M_SCRATCH)
     IF(LEN(TRIM(N%M_SCRATCH)) == 0) THEN
-      WRITE(*,"(A)") 'env variable $(MONDO_SCRATCH) not set. Using '//TRIM(HAVE_MONDO_SCRATCH)
+      WRITE(*,"(A)") '[LoadCommand] env variable $(MONDO_SCRATCH) not set. Using '//TRIM(HAVE_MONDO_SCRATCH)
       N%M_SCRATCH = HAVE_MONDO_SCRATCH
       MONDO_SCRATCH = HAVE_MONDO_SCRATCH
     ELSE
-      WRITE(*,"(A)") 'env variable $(MONDO_SCRATCH) set to '//trim(N%M_SCRATCH)
+      WRITE(*,"(A)") '[LoadCommand] env variable $(MONDO_SCRATCH) set to '//trim(N%M_SCRATCH)
     ENDIF
 
     ! Set path names etc
@@ -89,12 +90,16 @@ CONTAINS
     PROCESS_ID=IntToChar(GetPID())
     DotDex=INDEX(Args%C%C(1),'.')
     IF(DotDex==0) THEN
-      WRITE(*,"(A)") 'Parse error: no "." in input file name = <'//TRIM(N%IFile)//'>'
+      WRITE(*,"(A)") '[LoadCommand] Parse error: no "." in input file name = <'//TRIM(N%IFile)//'>'
       STOP "Termination of MondoSCF"
     ENDIF
+
     N%SCF_NAME=Args%C%C(1)(1:DotDex-1)//'_'//TRIM(PROCESS_ID)
     PWDName=TRIM(N%M_PWD)//TRIM(N%SCF_NAME)
-    SCRName=TRIM(N%M_SCRATCH)//TRIM(N%SCF_NAME)
+    ScrName=TRIM(N%M_SCRATCH)//TRIM(N%SCF_NAME)
+
+    WRITE(*,"(A)") "[LoadCommand] setting PWDName to "//TRIM(PWDName)
+    WRITE(*,"(A)") "[LoadCommand] setting ScrName to "//TRIM(ScrName)
 
     ! Input file with full path
     N%IFile=TRIM(N%M_PWD)//TRIM(Args%C%C(1))
@@ -102,7 +107,7 @@ CONTAINS
     ! Check to see that the input file exists
     INQUIRE(FILE=N%IFile,EXIST=Exists)
     IF(.NOT.Exists) THEN
-      WRITE(*,"(A)") 'Parse error: Input file "'//TRIM(N%IFile)//'" does not exist!'
+      WRITE(*,"(A)") '[LoadCommand] Parse error: Input file "'//TRIM(N%IFile)//'" does not exist!'
       STOP "Termination of MondoSCF"
     ENDIF
 
@@ -138,7 +143,7 @@ CONTAINS
       N%LFile=TRIM(N%M_PWD)//TRIM(Args%C%C(3))
       N%GFile=TRIM(N%M_PWD)//TRIM(Args%C%C(4))
     ENDIF
-    N%HFile=TRIM(SCRName)//InfF
+    N%HFile=TRIM(ScrName)//InfF
 
     ! If restart file set, it is set in ParseOptions
     N%RFile=""

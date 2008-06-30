@@ -72,10 +72,10 @@ MODULE Order
           INTEGER, DIMENSION(2)  :: Limits
           REAL(DOUBLE)           :: Delta
           REAL(DOUBLE), EXTERNAL :: Random
-!
+
           Delta=DBLE(Limits(2)-Limits(1)+1)
           RANDOM_INT=Limits(1)+INT(Delta*Random())
-!
+
        END FUNCTION RANDOM_INT
 
       FUNCTION RANDOM_DBL(Limits)
@@ -83,10 +83,10 @@ MODULE Order
          REAL(DOUBLE),DIMENSION(2) :: Limits
          REAL(DOUBLE)              :: Delta
          REAL(DOUBLE), EXTERNAL    :: Random
-!
+
          Delta=Limits(2)-Limits(1)+0.0D0
          RANDOM_DBL=Limits(1)+Delta*Random()
-!
+
       END FUNCTION RANDOM_DBL
 
 ! the following function is buggy

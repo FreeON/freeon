@@ -39,7 +39,7 @@ MODULE GlobalCharacters
    INTEGER, PARAMETER          :: INTERNAL_DBL_LEN=22
    INTEGER, PARAMETER          :: INTERNAL_FLT_LEN=22
    CHARACTER(LEN=*), PARAMETER :: INTERNAL_INT_FMT='(I22)'
-   CHARACTER(LEN=*),PARAMETER :: INTERNAL_DBL_FMT='(D22.16)'
+   CHARACTER(LEN=*),PARAMETER  :: INTERNAL_DBL_FMT='(D22.16)'
    CHARACTER(LEN=*), PARAMETER :: INTERNAL_FLT_FMT='(F22.16)'
 !   CHARACTER(LEN=*), PARAMETER :: INTERNAL_CHR_FMT='(A)'
 !-------------------------------------------------  
@@ -88,8 +88,7 @@ MODULE GlobalCharacters
 !  Title variable
 !
    INTEGER, PARAMETER          :: TITLE_LINES=10
-   CHARACTER(LEN=TITLE_LINES &
-            *DEFAULT_CHR_LEN)  :: SCFTitle
+   CHARACTER(LEN=TITLE_LINES*DEFAULT_CHR_LEN)  :: SCFTitle
 !-------------------------------------------------
 !  Misc. character variables
 !
@@ -97,7 +96,7 @@ MODULE GlobalCharacters
    CHARACTER(LEN=*), PARAMETER :: BakSlash=CHAR(92)
    CHARACTER(LEN=*), PARAMETER :: LeftParenStar='(* '//Rtrn
    CHARACTER(LEN=*), PARAMETER :: RightParenStar=Rtrn//' *)'
-   CHARACTER(LEN=*), PARAMETER:: Blanks= &
+   CHARACTER(LEN=*), PARAMETER :: Blanks= &
      '                                                                '
    CHARACTER(LEN=*), PARAMETER :: Blnk=' '
    INTEGER,          PARAMETER :: IBlnk=ICHAR(Blnk)
@@ -105,16 +104,16 @@ MODULE GlobalCharacters
 !
 ! SCF global characters
 !
-   CHARACTER(LEN=3)     :: SCFCycl
-   CHARACTER(LEN=3)     :: PrvCycl
-   CHARACTER(LEN=3)     :: CurCycl
-   CHARACTER(LEN=3)     :: NxtCycl
-   CHARACTER(LEN=20)    :: SCFActn
-   CHARACTER(LEN=3)     :: CurBase
-   CHARACTER(LEN=3)     :: PrvBase
-   CHARACTER(LEN=6)     :: CurGeom
-   CHARACTER(LEN=6)     :: PrvGeom
-   CHARACTER(LEN=6)     :: NxtGeom
+   CHARACTER(LEN=3)  :: SCFCycl
+   CHARACTER(LEN=3)  :: PrvCycl
+   CHARACTER(LEN=3)  :: CurCycl
+   CHARACTER(LEN=3)  :: NxtCycl
+   CHARACTER(LEN=20) :: SCFActn
+   CHARACTER(LEN=3)  :: CurBase
+   CHARACTER(LEN=3)  :: PrvBase
+   CHARACTER(LEN=6)  :: CurGeom
+   CHARACTER(LEN=6)  :: PrvGeom
+   CHARACTER(LEN=6)  :: NxtGeom
 !
 END MODULE
 
