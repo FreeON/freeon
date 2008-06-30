@@ -184,16 +184,16 @@ CONTAINS
     REAL(DOUBLE),DIMENSION(3)   :: MaxQL,MaxQH
     INTEGER                     :: Ne,Nn,Be,Ee,Bn,En,Je,Jn,ISplit,Split,I,J,k,IS,NL,NR
     INTEGER                     :: MaxBoxedEll,NBoxedEll,EllSplit,Cd,SplitI,SplitJ
-    REAL(DOUBLE)                :: Volume,MaxZeta,MinZeta,ZetaHalf,ChHalf,TotCh,PiZ,RL,RR
+    REAL(DOUBLE)                :: Volume,MaxZeta,MinZeta,ZetaHalf,ChHalf,TotCh,PiZ,RL,RR,RN
     REAL(DOUBLE)                :: BEBalance,ChBalance,XBalance
     INTEGER,DIMENSION(:), ALLOCATABLE :: IList,JList
     REAL(DOUBLE),DIMENSION(:), ALLOCATABLE :: XList,CList
-    LOGICAL :: Tru
+    TYPE(BBox)                  :: BB
     !--------------------------------------------------------------
     ! Indexing to start
 
-    WRITE(*,*)'===================================================================='
-    WRITE(*,*)Node%Box%Tier,Node%Box%Number
+!    WRITE(*,*)'===================================================================='
+!    WRITE(*,*)Node%Box%Tier,Node%Box%Number
 
     ! Begin and end index for charges (electrons and nuclei)
     Be=Node%BdexE
@@ -214,18 +214,17 @@ CONTAINS
                      MaxCluster,Je)       
        Jn=1
        iSplit=4
-       WRITE(*,*)' Je = ',Je
     ELSE
        CALL AxisSplit(Ne,Nn,Qdex(Be:Ee),NDex(Bn:En),Ext,Rho%Qx%D,Rho%Qy%D,Rho%Qz%D, &
                       GM%Carts%D,GM%AtNum%D,iSplit,Je,Jn)
        IF(Jn==1)THEN
           CALL PACSplit(Ne,Qdex(Be:Ee),Ext,Rho%Qx%D,Rho%Qy%D,Rho%Qz%D,GM%Carts%D(:,NDex(Bn)), &
                         MaxCluster,Je)       
-       ELSEIF(iSplit==4)THEN
+          iSplit=4 
+      ELSEIF(iSplit==4)THEN
           CALL ExtSplit(Ne,Qdex(Be:Ee),Ext,MaxCluster,Je)
        ENDIF
     ENDIF
-    WRITE(*,*)' iSplit = ',Nn,iSplit,Je,Jn
 
     ! Split the charges
     Split=Be+Je-1
@@ -254,64 +253,27 @@ CONTAINS
        Right%BdexN=Bn
        Right%EdexN=En
     ENDIF
-
-    WRITE(*,*)' NN = ',Bn,Split,En
-
-
     !
     IF(Left%NQ<=MaxCluster)Left%Leaf=.TRUE.
     IF(Right%NQ<=MaxCluster)Right%Leaf=.TRUE.
-    !
     ! ... L&R atom count ...
     Left%NAtms=Left%EdexN-Left%BdexN+1
     Right%NAtms=Right%EdexN-Right%BdexN+1
-    ! Top down sintering of the BBoxes
-    Left%Box%BndBox(:,1)=1D20
-    Left%Box%BndBox(:,2)=-1D20
-    DO I=Left%BdexN,Left%EdexN
-       K=NDex(I)
-       Left%Box%BndBox(1,1)=MIN(Left%Box%BndBox(1,1),GM%Carts%D(1,K))
-       Left%Box%BndBox(1,2)=MAX(Left%Box%BndBox(1,2),GM%Carts%D(1,K))
-       Left%Box%BndBox(2,1)=MIN(Left%Box%BndBox(2,1),GM%Carts%D(2,K))
-       Left%Box%BndBox(2,2)=MAX(Left%Box%BndBox(2,2),GM%Carts%D(2,K))
-       Left%Box%BndBox(3,1)=MIN(Left%Box%BndBox(3,1),GM%Carts%D(3,K))
-       Left%Box%BndBox(3,2)=MAX(Left%Box%BndBox(3,2),GM%Carts%D(3,K))       
-    ENDDO
-    DO I=Left%BdexE,Left%EdexE
+    !
+    K=Qdex(Left%BdexE)
+    Left%Box=ExpandPoint((/Rho%Qx%D(K),Rho%Qy%D(K),Rho%Qz%D(K)/),Ext(K),Left%Box)
+    DO I=Left%BdexE+1,Left%EdexE
        K=Qdex(I)
-       Left%Box%BndBox(1,1)=MIN(Left%Box%BndBox(1,1),Rho%Qx%D(K))
-       Left%Box%BndBox(1,2)=MAX(Left%Box%BndBox(1,2),Rho%Qx%D(K))
-       Left%Box%BndBox(2,1)=MIN(Left%Box%BndBox(2,1),Rho%Qy%D(K))
-       Left%Box%BndBox(2,2)=MAX(Left%Box%BndBox(2,2),Rho%Qy%D(K))
-       Left%Box%BndBox(3,1)=MIN(Left%Box%BndBox(3,1),Rho%Qz%D(K))
-       Left%Box%BndBox(3,2)=MAX(Left%Box%BndBox(3,2),Rho%Qz%D(K))
+       BB=ExpandPoint((/Rho%Qx%D(K),Rho%Qy%D(K),Rho%Qz%D(K)/),Ext(K))
+       CALL BoxMerge(Left%Box,BB,Left%Box)
     ENDDO
-    Left%Box%Half(:)=Half*(Left%Box%BndBox(:,2)-Left%Box%BndBox(:,1))
-    Left%Box%Center(:)=Left%Box%BndBox(:,1)+Left%Box%Half(:)
-   !
-    Right%Box%BndBox(:,1)=1D20
-    Right%Box%BndBox(:,2)=-1D20
-    DO I=Right%BdexN,Right%EdexN
-       K=NDex(I)
-       Right%Box%BndBox(1,1)=MIN(Right%Box%BndBox(1,1),GM%Carts%D(1,K))
-       Right%Box%BndBox(1,2)=MAX(Right%Box%BndBox(1,2),GM%Carts%D(1,K))
-       Right%Box%BndBox(2,1)=MIN(Right%Box%BndBox(2,1),GM%Carts%D(2,K))
-       Right%Box%BndBox(2,2)=MAX(Right%Box%BndBox(2,2),GM%Carts%D(2,K))
-       Right%Box%BndBox(3,1)=MIN(Right%Box%BndBox(3,1),GM%Carts%D(3,K))
-       Right%Box%BndBox(3,2)=MAX(Right%Box%BndBox(3,2),GM%Carts%D(3,K))       
-    ENDDO
-    DO I=Right%BdexE,Right%EdexE
+    K=Qdex(Right%BdexE)
+    Right%Box=ExpandPoint((/Rho%Qx%D(K),Rho%Qy%D(K),Rho%Qz%D(K)/),Ext(K),Right%Box)
+    DO I=Right%BdexE+1,Right%EdexE
        K=Qdex(I)
-       Right%Box%BndBox(1,1)=MIN(Right%Box%BndBox(1,1),Rho%Qx%D(K))
-       Right%Box%BndBox(1,2)=MAX(Right%Box%BndBox(1,2),Rho%Qx%D(K))
-       Right%Box%BndBox(2,1)=MIN(Right%Box%BndBox(2,1),Rho%Qy%D(K))
-       Right%Box%BndBox(2,2)=MAX(Right%Box%BndBox(2,2),Rho%Qy%D(K))
-       Right%Box%BndBox(3,1)=MIN(Right%Box%BndBox(3,1),Rho%Qz%D(K))
-       Right%Box%BndBox(3,2)=MAX(Right%Box%BndBox(3,2),Rho%Qz%D(K))
+       BB=ExpandPoint((/Rho%Qx%D(K),Rho%Qy%D(K),Rho%Qz%D(K)/),Ext(K))
+       CALL BoxMerge(Right%Box,BB,Right%Box)
     ENDDO
-    Right%Box%Half(:)=Half*(Right%Box%BndBox(:,2)-Right%Box%BndBox(:,1))
-    Right%Box%Center(:)=Right%Box%BndBox(:,1)+Right%Box%Half(:)
-
     IF(ISplit<4)THEN
        WRITE(*,55)ISplit,Node%Box%Number,Left%BdexE,Left%EDexE,Left%EDexE-Left%BdexE, &
                                          Right%BdexE,Right%EDexE,Right%EDexE-Right%BdexE, &
@@ -319,14 +281,26 @@ CONTAINS
                                          SUM(GM%AtNum%D(NDex(Right%BdexN:Right%EdexN)))
        
 55     FORMAT("  Split = ",I2,", Node = ",I4," [",I6,", ",I6,"; ",I3,"] [",I6,", ",I6,"; ",I3," ] // <",F8.2,"><",F8.2,"> ")
+    ELSEIF(Jn.NE.1)THEN
+       RL=BoxMargin(Left%Box)
+       RR=BoxMargin(Right%Box)
+       CALL BoxMerge(Left%Box,Right%Box,BB)
+       RN=BoxMargin(BB)
+       NL=Left%EDexE-Left%BdexE+1
+       NR=Right%EDexE-Right%BdexE+1
+       WRITE(*,54)ISplit,Node%BdexN,Node%EdexN,Left%BdexE,Left%EDexE,NL, &
+                                      Right%BdexE,Right%EDexE,NR,RL,RR      
+54     FORMAT("  Split = ",I2," Ats = ",I2,"-",I2," [",I5,", ",I5,";N = ",I3,"] [",I5,", ",I5,";N = ",I3, &
+              "] // <",D7.2,"><",D7.2,"> ")
     ELSE
-       RL=FurthestPointInBox(GM%Carts%D(:,NDex(Left%BDexN)),Left%Box)
-       RR=FurthestPointInBox(GM%Carts%D(:,NDex(Right%BDexN)),Right%Box)
+       RL=BoxMargin(Left%Box)
+       RR=BoxMargin(Right%Box)
        NL=Left%EDexE-Left%BdexE+1
        NR=Right%EDexE-Right%BdexE+1
        WRITE(*,56)ISplit,Node%BdexN,GM%AtNum%D(NDex(Node%BdexN)),Left%BdexE,Left%EDexE,NL, &
-                                      Right%BdexE,Right%EDexE,NR,RL,RR       
-56     FORMAT("  Split = ",I2," At = ",I2,", Z = ",F4.1," [",I5,", ",I5,";N = ",I3,"] [",I5,", ",I5,";N = ",I3,"] // <",D7.2,"><",D7.2,"> ")
+                                      Right%BdexE,Right%EDexE,NR,RL,RR
+56     FORMAT("  Split = ",I2," At = ",I2,", Z = ",F4.1," [",I5,", ",I5,";N = ",I3,"] [",I5,", ",I5,";N = ",I3, &
+              "] // <",D7.2,"><",D7.2,"> ")
 
 
     ENDIF
@@ -348,11 +322,10 @@ CONTAINS
     REAL(DOUBLE),DIMENSION(3)     :: LpRVol,LpRMrg
     REAL(DOUBLE)                  :: XnLeft,XnRight,XSplit,NodeVol,NodeMrg,MarginMin
 
-    TYPE(BBox)                    :: NodeBox,LeftBox,RightBox
+    TYPE(BBox)                    :: NodeBox
+    TYPE(BBox),DIMENSION(3)       :: LeftBox,RightBox
     TYPE(BBox),DIMENSION(1:Ne)    :: Bb
     !-------------------------------------------------------------------
-    WRITE(*,*)' Nn = ',Nn
-
     DO J=1,Ne
        K=Qe(J)
        Ue(J,:)=J          
@@ -396,16 +369,16 @@ CONTAINS
        ! Left and right should be the split interval 
        ! spanning the sep between two atoms along iDim
 
-       write(*,*)' XSplit= ',XSplit
-       WRITE(*,*)' Xn = ',Xn
-       WRITE(*,*)' Chg = ',Chg
-       WRITE(*,*)' Jn = ',Jn
+!       write(*,*)' XSplit= ',XSplit
+!       WRITE(*,*)' Xn = ',Xn
+!       WRITE(*,*)' Chg = ',Chg
+!       WRITE(*,*)' Jn = ',Jn
 
        JnLeft(iDim)=Jn
        XnLeft=Xn(Jn)
        XnRight=Xn(Jn+1)
 
-       WRITE(*,*)' Jn = ',Jn,' Xn(Jn) = ',XnLeft,XSplit,XnRight
+!       WRITE(*,*)' Jn = ',Jn,' Xn(Jn) = ',XnLeft,XSplit,XnRight
 
        !       WRITE(*,*)' Charge = ',SUM(Chg(Un(1:Jn,iDim))),SUM(Chg(Un(Jn+1:Nn,iDim)))
 
@@ -424,23 +397,28 @@ CONTAINS
              EXIT
           ENDIF
        ENDDO
+
+       JeLeft(iDim)=JeLeft(iDim)+(JeRight(iDim)-JeLeft(iDim))/2
+       JeRight(iDim)=JeLeft(iDim)+1
+
        !---------------------------------
        ! Fill in the left and right BBoxes, not including
        ! the charges sitting in the gap.  That inter-gap
        ! split is to be determined later, if we can make this split.
        !
-       LeftBox=Bb(Ue(1,iDim))
+       LeftBox(iDim)=Bb(Ue(1,iDim))
        DO J=1,JeLeft(iDim)
-          CALL BoxMerge(LeftBox,Bb(Ue(J,iDim)),LeftBox)
+          CALL BoxMerge(LeftBox(iDim),Bb(Ue(J,iDim)),LeftBox(iDim))
        ENDDO
-       RightBox=Bb(Ue(Ne,iDim))
+       RightBox(iDim)=Bb(Ue(Ne,iDim))
        DO J=Ne,JeRight(iDim),-1
-          CALL BoxMerge(RightBox,Bb(Ue(J,iDim)),RightBox)
+          CALL BoxMerge(RightBox(iDim),Bb(Ue(J,iDim)),RightBox(iDim))
        ENDDO
-       LpRMrg(iDim)=BoxMargin(LeftBox)+BoxMargin(RightBox)
-       LpRVol(iDim)=BoxVolume(LeftBox)+BoxVolume(RightBox)
+       LpRMrg(iDim)=BoxMargin(LeftBox(iDim))+BoxMargin(RightBox(iDim))
+       LpRVol(iDim)=BoxVolume(LeftBox(iDim))+BoxVolume(RightBox(iDim))
 
-       WRITE(*,*)' L+R Margin = ',LpRMrg(iDim),' (L+R)/Node = ',LpRMrg(iDim)/NodeMrg
+!       WRITE(*,*)' L  = ',BoxMargin(LeftBox(iDim)),' R = ',BoxMargin(RightBox(iDim))
+!       WRITE(*,*)' L+R Margin = ',LpRMrg(iDim),' (L+R)/Node = ',LpRMrg(iDim)/NodeMrg
 
        !
     ENDDO
@@ -457,8 +435,9 @@ CONTAINS
           ENDIF
        ENDIF
     ENDDO
-    WRITE(*,*)' MinDim = ',MinDim
 
+!    IF(MinDim.NE.0)WRITE(*,33)MinDim,LpRMrg(MinDim),BoxMargin(LeftBox(MinDim)),BoxMargin(RightBox(MinDim)),BoxMargin(NodeBox)
+33  FORMAT(I3,", ",6(D12.6,", "))
     !----------------------------------------------------
     ! Lots left to do here.  For example, can used a sorted
     ! quadratic search to find min overlap section within
@@ -494,10 +473,11 @@ CONTAINS
        ENDIF
        !
        Jn=JnLeft(MinDim)
-       Je=JeLeft(MinDim)+(JeRight(MinDim)-JeLeft(MinDim))/2
+       Je=JeLeft(MinDim)!+(JeRight(MinDim)-JeLeft(MinDim))/2
     ENDIF
     !
   END SUBROUTINE AxisSplit
+
 
   SUBROUTINE ExtSplit(Ne,Qe,Ex,MxCluster,Je)
     INTEGER :: Ne,Nn,Je,Jn,J,ISplit,K,MxCluster
@@ -522,6 +502,9 @@ CONTAINS
           EXIT
        ENDIF
     ENDDO
+
+!    WRITE(*,*)' X1 = ',X(1),' X(Ne) = ',X(Ne)
+
     ! Here we may overide the above bisection,  just pulling off the CluserSize 
     ! large distance distributions from the bottom of the list.  Thus, the left
     ! node generated from this split must be a leaf:
@@ -556,9 +539,9 @@ CONTAINS
     !    
     Section=X(1)+Half*(X(Ne)-X(1))
     !
-    WRITE(*,*)' Ne = ',Ne
-    WRITE(*,*)' Section = ',Section
-    WRITE(*,*)' X = ',X(1),X(Ne)
+!    WRITE(*,*)' Ne = ',Ne
+!    WRITE(*,*)' Section = ',Section
+!    WRITE(*,*)' X = ',X(1),X(Ne)
 
     DO J=1,Ne
        IF(X(J)<Section)THEN
