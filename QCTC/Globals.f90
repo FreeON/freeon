@@ -10,7 +10,7 @@ MODULE Globals
   INTEGER,PARAMETER :: TimerSize = 40
   REAL(DOUBLE)      :: ETimer(TimerSize)
   ! How many Gaussians per leaf node we can have:
-  INTEGER,PARAMETER ::   MaxCluster=2048
+  INTEGER,PARAMETER ::   MaxCluster=64
   ! At what do we stop recurring on the tree:
   INTEGER,PARAMETER ::   MinCluster=32
 END MODULE Globals
