@@ -305,10 +305,164 @@ CONTAINS
 
     ENDIF
 
+!    IF(Node%Box%Number>2)STOP
+
   END SUBROUTINE SplitPoleBox
   !
 
   SUBROUTINE AxisSplit(Ne,Nn,Qe,Qn,Ex,Qx,Qy,Qz,Nuc,Chg,Axis,Je,Jn)
+    INTEGER                       :: Ne,Nn,Je,Jn,J,K,Axis,iDim
+    INTEGER,DIMENSION(1:Ne)       :: Qe,Qej,QeTmp
+    INTEGER,DIMENSION(1:Nn)       :: Qn,Qnj,QnTmp
+    REAL(DOUBLE),DIMENSION(:)     :: Ex,Qx,Qy,Qz,Chg
+    REAL(DOUBLE),DIMENSION(:,:)   :: Nuc
+    INTEGER,DIMENSION(1:Ne)       :: Ue
+    INTEGER,DIMENSION(1:Nn)       :: Un
+    REAL(DOUBLE),DIMENSION(1:Ne)  :: Xe
+    REAL(DOUBLE),DIMENSION(1:Nn)  :: Xn
+    REAL(DOUBLE)                  :: LpRVol,LpRMrg,LpRSid,NodeSid
+    REAL(DOUBLE)                  :: XnLeft,XnRight,XSplit,NodeVol,NodeMrg,MarginMin,MaxDim,MaxExt
+    TYPE(BBox)                    :: NodeBox
+    TYPE(BBox)                    :: LeftBox,RightBox
+    TYPE(BBox),DIMENSION(1:Ne)    :: Bb
+    !-------------------------------------------------------------------
+    MaxExt = -BIG_DBL
+    DO J=1,Ne
+       K=Qe(J)
+       Bb(J)%BndBox(:,1)=(/Qx(K),Qy(K),Qz(K)/)
+       Bb(J)%BndBox(:,2)=(/Qx(K),Qy(K),Qz(K)/)
+       Bb(J)=ExpandBox(Bb(J),Ex(K))
+       MaxExt=MAX(MaxExt,Ex(K))
+    ENDDO
+    WRITE(*,*)'- - - - - - - - - - - - - - - - - - - - - - - - - - - -'
+    WRITE(*,*)' MaxExtent = ',MaxExt
+
+    !
+
+    NodeBox=Bb(1)
+    DO J=2,Ne
+       CALL BoxMerge(NodeBox,Bb(J),NodeBox)
+    ENDDO
+    NodeVol=BoxVolume(NodeBox)
+    NodeMrg=BoxMargin(NodeBox)
+
+    MaxDim=-BIG_DBL
+    DO iDim=1,3
+       MaxDim=MAX(MaxDim,NodeBox%BndBox(iDim,2)-NodeBox%BndBox(iDim,1))
+       WRITE(*,*)' BoxSz = ',NodeBox%BndBox(iDim,2)-NodeBox%BndBox(iDim,1)
+    ENDDO
+    DO iDim=1,3
+!       WRITE(*,*)iDIM,MaxDim==(NodeBox%BndBox(iDim,2)-NodeBox%BndBox(iDim,1))
+       IF(ABS(MaxDim-(NodeBox%BndBox(iDim,2)-NodeBox%BndBox(iDim,1)))<1D-10)THEN
+          Axis=iDim
+          Exit
+       ENDIF
+    ENDDO
+    
+    XSplit=Zero
+    DO J=1,Nn
+       K=Qn(J)
+       Qnj(J)=J
+       Xn(J)=Nuc(Axis,K)
+       XSplit=XSplit+Nuc(Axis,K)*Chg(K)
+    ENDDO
+    XSplit=XSplit/SUM(Chg(Qn(1:Nn)))
+    WRITE(*,*)' XSplit = ',NodeBox%BndBox(iDim,1),XSplit,NodeBox%BndBox(iDim,2)
+    !
+    CALL DblIntSort77(Nn,Xn,Qnj,2)                    
+    !
+    DO J=1,Nn
+       IF(Xn(J)>XSplit)THEN
+          Jn=J-1
+          EXIT
+       ENDIF
+    ENDDO
+    !
+    DO J=1,Ne
+       Qej(J)=J
+       Xe(J)=Bb(J)%Center(Axis)
+    ENDDO
+    CALL DblIntSort77(Ne,Xe,Qej,2)                    
+
+    DO J=1,Ne
+       IF(Xe(J)>XSplit)THEN
+          Je=J-1
+          EXIT
+       ENDIF
+    ENDDO    
+    !
+    LeftBox=Bb(Qej(1))
+    DO J=1,Je
+       CALL BoxMerge(LeftBox,Bb(Qej(J)),LeftBox)
+    ENDDO
+
+    RightBox=Bb(Qej(Je+1))
+    DO J=Je+1,Ne
+       CALL BoxMerge(RightBox,Bb(Qej(J)),RightBox)
+    ENDDO
+!    WRITE(*,*)'Left = ',LeftBox%BndBox(Axis,1),LeftBox%BndBox(Axis,2)
+!    WRITE(*,*)'Right = ',RightBox%BndBox(Axis,1),RightBox%BndBox(Axis,2)
+!    WRITE(*,*)' Node = ',NodeBox%BndBox(Axis,1),NodeBox%BndBox(Axis,2)
+
+!!$
+!!$    WRITE(*,*)' Node = ',NodeBox%BndBox(Axis,2)-NodeBox%BndBox(Axis,1), &
+!!$         LeftBox%BndBox(Axis,2) - LeftBox%BndBox(Axis,1) +              &
+!!$         RightBox%BndBox(Axis,2)-RightBox%BndBox(Axis,1)
+!!$
+!!$    WRITE(*,*)' Left = ',LeftBox%BndBox(Axis,2)- LeftBox%BndBox(Axis,1)
+!!$    WRITE(*,*)' Right= ',RightBox%BndBox(Axis,2)-RightBox%BndBox(Axis,1)
+
+!!$    WRITE(*,*)' % = ',One/((NodeBox%BndBox(Axis,2)-NodeBox%BndBox(Axis,1))/( &
+!!$         (LeftBox%BndBox(Axis,2)- LeftBox%BndBox(Axis,1))+  &
+!!$         (RightBox%BndBox(Axis,2)-RightBox%BndBox(Axis,1))))
+
+    NodeSid=NodeBox%BndBox(Axis,2)-NodeBox%BndBox(Axis,1)
+    LpRSid=LeftBox%BndBox(Axis,2)- LeftBox%BndBox(Axis,1)+  &
+          RightBox%BndBox(Axis,2)-RightBox%BndBox(Axis,1)
+    LpRMrg=BoxMargin(LeftBox)+BoxMargin(RightBox)
+    LpRVol=BoxVolume(LeftBox)+BoxVolume(RightBox)
+
+
+
+    WRITE(*,33)Axis,LeftBox%BndBox(Axis,2) - LeftBox%BndBox(Axis,1),     &
+                   RightBox%BndBox(Axis,2)-RightBox%BndBox(Axis,1),      &
+                   NodeSid,LpRSid/NodeSid
+
+!    WRITE(*,33)Axis,BoxMargin(LeftBox),BoxMargin(RightBox),BoxMargin(NodeBox),LpRMrg/NodeMrg
+!    WRITE(*,33)Axis,BoxMargin(LeftBox),BoxMargin(RightBox),BoxMargin(NodeBox),LpRMrg/NodeMrg
+33  FORMAT(I3,", LMarg = ",F12.6,' RMarg = ',F12.6," NodeMarg = ",F12.6," % = ",F12.6)
+    !----------------------------------------------------
+    ! Lots left to do here.  For example, can used a sorted
+    ! quadratic search to find min overlap section within
+    ! [JeLeft,JeRight], or could do a locally exponential search.
+    ! For now, just split the difference.
+    !
+!    STOP
+
+!    IF(LpRMrg>1.5D0*NodeMrg)THEN
+
+!    WRITE(*,*) LpRSid/NodeSid,LpRSid<1.3D0*NodeSid,Axis,MaxExt
+!    WRITE(*,*)'- - - - - - - - - - - - - - - - - - - - - - - - - - - -'
+    !
+!    IF(LpRSid>2D0*NodeSid)THEN
+!       Axis=4
+!       RETURN
+!    ENDIF
+    !
+    DO J=1,Ne
+       QeTmp(J)=Qe(Qej(J))
+    ENDDO
+    Qe(1:Ne)=QeTmp(1:Ne)
+    !
+    DO J=1,Nn
+       QnTmp(J)=Qn(Qnj(J))
+    ENDDO
+    Qn(1:Ne)=QnTmp(1:Nn)
+    !
+  END SUBROUTINE AxisSplit
+
+
+  SUBROUTINE AxisSplit2(Ne,Nn,Qe,Qn,Ex,Qx,Qy,Qz,Nuc,Chg,Axis,Je,Jn)
     INTEGER                       :: Ne,Nn,Je,Jn,J,K,Axis,iDim,MinDim
     INTEGER,DIMENSION(1:Ne)       :: Qe
     INTEGER,DIMENSION(1:Nn)       :: Qn
@@ -426,7 +580,7 @@ CONTAINS
     MinDim=0
     MarginMin=BIG_DBL
     DO iDim=1,3
-       IF(LpRMrg(iDim)<1.5D0*NodeMrg)THEN
+       IF(LpRMrg(iDim)<1.85D0*NodeMrg)THEN
           MarginMin=MIN(MarginMin,LpRMrg(iDim))
           IF(iDim==1)THEN
              MinDim=1
@@ -476,7 +630,7 @@ CONTAINS
        Je=JeLeft(MinDim)!+(JeRight(MinDim)-JeLeft(MinDim))/2
     ENDIF
     !
-  END SUBROUTINE AxisSplit
+  END SUBROUTINE AxisSplit2
 
 
   SUBROUTINE ExtSplit(Ne,Qe,Ex,MxCluster,Je)
@@ -503,12 +657,15 @@ CONTAINS
        ENDIF
     ENDDO
 
-!    WRITE(*,*)' X1 = ',X(1),' X(Ne) = ',X(Ne)
+    WRITE(*,*)' X1 = ',X(1),X(Je),' X(Ne) = ',X(Ne)
 
     ! Here we may overide the above bisection,  just pulling off the CluserSize 
     ! large distance distributions from the bottom of the list.  Thus, the left
     ! node generated from this split must be a leaf:
-    IF(Je>MxCluster)Je=MxCluster
+    IF(Je>MxCluster)THEN       
+       Je=MxCluster
+       WRITE(*,*)' X1 = ',X(1),X(Je),' X(Ne) = ',X(Ne)
+    ENDIF
     !
   END SUBROUTINE ExtSplit
 
