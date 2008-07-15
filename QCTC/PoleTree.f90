@@ -217,11 +217,14 @@ CONTAINS
     ELSE
        CALL AxisSplit(Ne,Nn,Qdex(Be:Ee),NDex(Bn:En),Ext,Rho%Qx%D,Rho%Qy%D,Rho%Qz%D, &
                       GM%Carts%D,GM%AtNum%D,iSplit,Je,Jn)
-       IF(Jn==1)THEN
-          CALL PACSplit(Ne,Qdex(Be:Ee),Ext,Rho%Qx%D,Rho%Qy%D,Rho%Qz%D,GM%Carts%D(:,NDex(Bn)), &
-                        MaxCluster,Je)       
-          iSplit=4 
-      ELSEIF(iSplit==4)THEN
+
+!!$       WRITE(*,*)' Jn = ',Jn
+!!$       IF(Jn==1)THEN
+!!$          CALL PACSplit(Ne,Qdex(Be:Ee),Ext,Rho%Qx%D,Rho%Qy%D,Rho%Qz%D,GM%Carts%D(:,NDex(Bn)), &
+!!$                        MaxCluster,Je)       
+!!$          iSplit=4 
+!!$      ELSE
+       IF(iSplit==4)THEN
           CALL ExtSplit(Ne,Qdex(Be:Ee),Ext,MaxCluster,Je)
        ENDIF
     ENDIF
@@ -254,21 +257,26 @@ CONTAINS
        Right%EdexN=En
     ENDIF
     !
-    IF(Left%NQ<=MaxCluster)Left%Leaf=.TRUE.
-    IF(Right%NQ<=MaxCluster)Right%Leaf=.TRUE.
+    IF(ISplit==4)THEN
+       Left%Leaf=.TRUE.
+    ELSEIF(Left%NQ<=MinCluster)THEN
+       Left%Leaf=.TRUE.
+    ENDIF
+    IF(Right%NQ<=MinCluster)Right%Leaf=.TRUE.
     ! ... L&R atom count ...
     Left%NAtms=Left%EdexN-Left%BdexN+1
     Right%NAtms=Right%EdexN-Right%BdexN+1
     !
     K=Qdex(Left%BdexE)
-    Left%Box=ExpandPoint((/Rho%Qx%D(K),Rho%Qy%D(K),Rho%Qz%D(K)/),Ext(K),Left%Box)
+    Left%Box=ExpandPoint((/Rho%Qx%D(K),Rho%Qy%D(K),Rho%Qz%D(K)/),Ext(K) ) !,Left%Box)
     DO I=Left%BdexE+1,Left%EdexE
        K=Qdex(I)
        BB=ExpandPoint((/Rho%Qx%D(K),Rho%Qy%D(K),Rho%Qz%D(K)/),Ext(K))
        CALL BoxMerge(Left%Box,BB,Left%Box)
     ENDDO
+
     K=Qdex(Right%BdexE)
-    Right%Box=ExpandPoint((/Rho%Qx%D(K),Rho%Qy%D(K),Rho%Qz%D(K)/),Ext(K),Right%Box)
+    Right%Box=ExpandPoint((/Rho%Qx%D(K),Rho%Qy%D(K),Rho%Qz%D(K)/),Ext(K) ) !,Right%Box)
     DO I=Right%BdexE+1,Right%EdexE
        K=Qdex(I)
        BB=ExpandPoint((/Rho%Qx%D(K),Rho%Qy%D(K),Rho%Qz%D(K)/),Ext(K))
@@ -280,28 +288,38 @@ CONTAINS
                                          SUM(GM%AtNum%D(NDex(Left%BdexN:Left%EdexN))),   &
                                          SUM(GM%AtNum%D(NDex(Right%BdexN:Right%EdexN)))
        
-55     FORMAT("  Split = ",I2,", Node = ",I4," [",I6,", ",I6,"; ",I3,"] [",I6,", ",I6,"; ",I3," ] // <",F8.2,"><",F8.2,"> ")
-    ELSEIF(Jn.NE.1)THEN
-       RL=BoxMargin(Left%Box)
-       RR=BoxMargin(Right%Box)
-       CALL BoxMerge(Left%Box,Right%Box,BB)
-       RN=BoxMargin(BB)
-       NL=Left%EDexE-Left%BdexE+1
-       NR=Right%EDexE-Right%BdexE+1
-       WRITE(*,54)ISplit,Node%BdexN,Node%EdexN,Left%BdexE,Left%EDexE,NL, &
-                                      Right%BdexE,Right%EDexE,NR,RL,RR      
-54     FORMAT("  Split = ",I2," Ats = ",I2,"-",I2," [",I5,", ",I5,";N = ",I3,"] [",I5,", ",I5,";N = ",I3, &
-              "] // <",D7.2,"><",D7.2,"> ")
+55     FORMAT("  Split = ",I2,", Node = ",I4," [",I6,", ",I6,"; ",I3,"] [",I6,", ",I6,"; ",I3," ] // <",F10.4,"><",F10.4,"> ")
+!!$    ELSEIF(Jn.NE.1)THEN
+!!$       RL=BoxMargin(Left%Box)
+!!$       RR=BoxMargin(Right%Box)
+!!$       CALL BoxMerge(Left%Box,Right%Box,BB)
+!!$       RN=BoxMargin(BB)
+!!$       NL=Left%EDexE-Left%BdexE+1
+!!$       NR=Right%EDexE-Right%BdexE+1
+!!$       WRITE(*,54)ISplit,Node%BdexN,Node%EdexN,Left%BdexE,Left%EDexE,NL, &
+!!$                                      Right%BdexE,Right%EDexE,NR,RL,RR      
+!!$54     FORMAT("  Split = ",I2," Ats = ",I2,"-",I2," [",I5,", ",I5,";N = ",I3,"] [",I5,", ",I5,";N = ",I3, &
+!!$              "] // <",D7.2,"><",D7.2,"> ")
     ELSE
+
+!      RL=FurthestPointInBox(GM%Carts%D(:,NDex(Left%BDexN)),Left%Box)
+!      RR=FurthestPointInBox(GM%Carts%D(:,NDex(Right%BDexN)),Right%Box)
+
+
+!      CALL PrintBBox(Right%Box,6)
+
        RL=BoxMargin(Left%Box)
        RR=BoxMargin(Right%Box)
+
        NL=Left%EDexE-Left%BdexE+1
        NR=Right%EDexE-Right%BdexE+1
        WRITE(*,56)ISplit,Node%BdexN,GM%AtNum%D(NDex(Node%BdexN)),Left%BdexE,Left%EDexE,NL, &
                                       Right%BdexE,Right%EDexE,NR,RL,RR
-56     FORMAT("  Split = ",I2," At = ",I2,", Z = ",F4.1," [",I5,", ",I5,";N = ",I3,"] [",I5,", ",I5,";N = ",I3, &
-              "] // <",D7.2,"><",D7.2,"> ")
 
+56     FORMAT("  Split = ",I2," At = ",I2,", Z = ",F4.1," [",I5,", ",I5,";N = ",I3,"] [",I5,", ",I5,";N = ",I3, &
+              "] // <",D10.5,"><",D10.5,"> ")
+
+      IF(RR>RL)STOP
 
     ENDIF
 
@@ -334,8 +352,8 @@ CONTAINS
        Bb(J)=ExpandBox(Bb(J),Ex(K))
        MaxExt=MAX(MaxExt,Ex(K))
     ENDDO
-    WRITE(*,*)'- - - - - - - - - - - - - - - - - - - - - - - - - - - -'
-    WRITE(*,*)' MaxExtent = ',MaxExt
+!    WRITE(*,*)'- - - - - - - - - - - - - - - - - - - - - - - - - - - -'
+!    WRITE(*,*)' MaxExtent = ',MaxExt
 
     !
 
@@ -349,7 +367,7 @@ CONTAINS
     MaxDim=-BIG_DBL
     DO iDim=1,3
        MaxDim=MAX(MaxDim,NodeBox%BndBox(iDim,2)-NodeBox%BndBox(iDim,1))
-       WRITE(*,*)' BoxSz = ',NodeBox%BndBox(iDim,2)-NodeBox%BndBox(iDim,1)
+!       WRITE(*,*)' BoxSz = ',NodeBox%BndBox(iDim,2)-NodeBox%BndBox(iDim,1)
     ENDDO
     DO iDim=1,3
 !       WRITE(*,*)iDIM,MaxDim==(NodeBox%BndBox(iDim,2)-NodeBox%BndBox(iDim,1))
@@ -367,7 +385,6 @@ CONTAINS
        XSplit=XSplit+Nuc(Axis,K)*Chg(K)
     ENDDO
     XSplit=XSplit/SUM(Chg(Qn(1:Nn)))
-    WRITE(*,*)' XSplit = ',NodeBox%BndBox(iDim,1),XSplit,NodeBox%BndBox(iDim,2)
     !
     CALL DblIntSort77(Nn,Xn,Qnj,2)                    
     !
@@ -377,6 +394,12 @@ CONTAINS
           EXIT
        ENDIF
     ENDDO
+
+!!$
+!!$    WRITE(*,*)' JJn= ',Jn,' NN= ',NN
+!!$    WRITE(*,*)' XSplit = ',Xn(1),XSplit,Xn(Nn)
+
+
     !
     DO J=1,Ne
        Qej(J)=J
@@ -424,12 +447,11 @@ CONTAINS
 
 
 
-    WRITE(*,33)Axis,LeftBox%BndBox(Axis,2) - LeftBox%BndBox(Axis,1),     &
-                   RightBox%BndBox(Axis,2)-RightBox%BndBox(Axis,1),      &
-                   NodeSid,LpRSid/NodeSid
+!    WRITE(*,33)Axis,LeftBox%BndBox(Axis,2) - LeftBox%BndBox(Axis,1),     &
+!                   RightBox%BndBox(Axis,2)-RightBox%BndBox(Axis,1),      &
+!                   NodeSid,LpRSid/NodeSid
 
-!    WRITE(*,33)Axis,BoxMargin(LeftBox),BoxMargin(RightBox),BoxMargin(NodeBox),LpRMrg/NodeMrg
-!    WRITE(*,33)Axis,BoxMargin(LeftBox),BoxMargin(RightBox),BoxMargin(NodeBox),LpRMrg/NodeMrg
+    WRITE(*,33)Axis,BoxMargin(LeftBox),BoxMargin(RightBox),BoxMargin(NodeBox),LpRMrg/NodeMrg
 33  FORMAT(I3,", LMarg = ",F12.6,' RMarg = ',F12.6," NodeMarg = ",F12.6," % = ",F12.6)
     !----------------------------------------------------
     ! Lots left to do here.  For example, can used a sorted
@@ -439,15 +461,15 @@ CONTAINS
     !
 !    STOP
 
-!    IF(LpRMrg>1.5D0*NodeMrg)THEN
+    IF(LpRMrg>3D0*NodeMrg)THEN
 
 !    WRITE(*,*) LpRSid/NodeSid,LpRSid<1.3D0*NodeSid,Axis,MaxExt
 !    WRITE(*,*)'- - - - - - - - - - - - - - - - - - - - - - - - - - - -'
     !
-!    IF(LpRSid>2D0*NodeSid)THEN
-!       Axis=4
-!       RETURN
-!    ENDIF
+!   IF(LpRSid>1.7D0*NodeSid)THEN
+       Axis=4
+       RETURN
+    ENDIF
     !
     DO J=1,Ne
        QeTmp(J)=Qe(Qej(J))
@@ -657,14 +679,14 @@ CONTAINS
        ENDIF
     ENDDO
 
-    WRITE(*,*)' X1 = ',X(1),X(Je),' X(Ne) = ',X(Ne)
+!    WRITE(*,*)' X1 = ',X(1),X(Je),' X(Ne) = ',X(Ne)
 
     ! Here we may overide the above bisection,  just pulling off the CluserSize 
     ! large distance distributions from the bottom of the list.  Thus, the left
     ! node generated from this split must be a leaf:
     IF(Je>MxCluster)THEN       
        Je=MxCluster
-       WRITE(*,*)' X1 = ',X(1),X(Je),' X(Ne) = ',X(Ne)
+!       WRITE(*,*)' X1 = ',X(1),X(Je),' X(Ne) = ',X(Ne)
     ENDIF
     !
   END SUBROUTINE ExtSplit
@@ -682,34 +704,61 @@ CONTAINS
     !
     DO J=1,Ne
        K=Qe(J)
-       Box%BndBox(:,1)=(/Qx(K),Qy(K),Qz(K)/)
-       Box%BndBox(:,2)=(/Qx(K),Qy(K),Qz(K)/)
-       Box=ExpandBox(Box,Ex(K))
-       CALL PointBoxMerge(Box,Nuc,Box)
+       Box%BndBox(:,1)=Nuc
+       Box%BndBox(:,2)=Nuc
+       CALL BoxMerge( Box, ExpandPoint((/Qx(K),Qy(K),Qz(K)/),Ext(K)) , Box )
        X(J)=FurthestPointInBox(Nuc,Box)       
-!       WRITE(*,33)Ex(K),(/Qx(K),Qy(K),Qz(K)/),Nuc,X(J)
-!33     format(' Ex = ',D8.2,' Q = ',3(D10.4,', '),' C = ',3(D10.4,', '),' X = ',D10.4)
+!       X(J)=BoxMargin(Box)       
+    ENDDO
+    ! Sort with increasing first, so that we terminate the tree as early as possible with
+    ! as many small distributions as possible taken care of using the multipole approximation
+    CALL DblIntSort77(Ne,X,Qe,-2)             
+    !
+    Box%BndBox(:,1)=Nuc
+    Box%BndBox(:,2)=Nuc
+    DO J=Ne,1,-1
+       K=Qe(J)
+       CALL BoxMerge( Box, ExpandPoint((/Qx(K),Qy(K),Qz(K)/),Ext(K)) , Box )
+!       X(J)=BoxVolume(Box)       
+       X(J)=BoxMargin(Box)       
+!       X(J)=FurthestPointInBox(Nuc,Box)       
     ENDDO
     ! Sort with increasing first, so that we terminate the tree as early as possible with
     ! as many small distributions as possible taken care of using the multipole approximation
     CALL DblIntSort77(Ne,X,Qe,-2)             
     !    
-    Section=X(1)+Half*(X(Ne)-X(1))
+    Section=X(Ne)+Half*(X(1)-X(Ne))
     !
-!    WRITE(*,*)' Ne = ',Ne
-!    WRITE(*,*)' Section = ',Section
-!    WRITE(*,*)' X = ',X(1),X(Ne)
-
     DO J=1,Ne
        IF(X(J)<Section)THEN
           Je=J-1
           EXIT
        ENDIF
     ENDDO
+
+!    WRITE(*,*)' Section = ',Section
+
+!    WRITE(*,*)' X = ',X(1),X(Je),X(Je+1),X(Ne)
+
+
     ! Here we may overide the above bisection,  just pulling off the CluserSize 
     ! large distance distributions from the bottom of the list.  Thus, the left
     ! node generated from this split must be a leaf:
     IF(Je>MxCluster)Je=MxCluster
+
+!!$
+!!$    Box%BndBox(:,1)=Nuc
+!!$    Box%BndBox(:,2)=Nuc
+!!$    DO J=Ne,Je+1,-1
+!!$       K=Qe(J)
+!!$       CALL BoxMerge( Box, ExpandPoint((/Qx(K),Qy(K),Qz(K)/),Ext(K)) , Box )
+!!$       WRITE(*,*)J,X(J),FurthestPointInBox(Nuc,Box)       
+!!$    ENDDO
+!!$
+
+
+!    CALL PrintBBox(Box,6)
+
     !
   END SUBROUTINE PACSplit
 
@@ -961,8 +1010,8 @@ CONTAINS
 
     NGaussTotal=NGaussTotal+(Node%EdexE-Node%BdexE+1)
     !
-    WRITE(*,33)Node%BOX%Number,Node%POLE%Charge,Node%EdexE-Node%BdexE+1,NODE%POLE%Delta, &
-               FurthestPointInBox(GM%Carts%D(:,NDex(Node%BDexN)),Node%Box)
+!    WRITE(*,33)Node%BOX%Number,Node%POLE%Charge,Node%EdexE-Node%BdexE+1,NODE%POLE%Delta, &
+!               FurthestPointInBox(GM%Carts%D(:,NDex(Node%BDexN)),Node%Box)
 
 !    WRITE(*,44)Node%Box%BndBox(:,1),Node%Box%BndBox(:,2),
 !44     format('Box = /',3(D10.4,', '),'/,/',3(D10.4,', '),' C= ',3(D10.4,', ') )
