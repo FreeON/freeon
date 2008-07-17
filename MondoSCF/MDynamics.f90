@@ -446,7 +446,8 @@ CONTAINS
       CALL MondoLogPlain("MD temperature     = "//TRIM(DblToChar(MDTemp%D(1))))
       CALL MondoLogPlain("Target temperature = "//TRIM(DblToChar(C%Dyns%TargetTemp)))
       DO iCLONE = 1, C%Geos%Clones
-        CALL BerendsenThermostat(C%Geos%Clone(iCLONE), MDTemp%D(iCLONE), C%Dyns%TargetTemp, C%Dyns%DTime, C%Dyns%BerendsenTau, v_scale)
+        CALL BerendsenThermostat(C%Geos%Clone(iCLONE), MDTemp%D(iCLONE), C%Dyns%TargetTemp,  &
+                                 C%Dyns%DTime, C%Dyns%BerendsenTau, v_scale)
         C%Dyns%BerendsenVScale = v_scale
 
         ! Store v_scale in hdf.
@@ -455,7 +456,8 @@ CONTAINS
         CALL Put(v_scale, "v_scale", TRIM(IntToChar(iGEO)))
         CALL CloseHDFGroup(HDF_CurrentID)
         CALL CloseHDF(HDFFileID)
-        CALL MondoLog(DEBUG_NONE, "MD", "putting v_scale("//TRIM(IntToChar(iGEO))//") to hdf = "//TRIM(DblToChar(v_scale)))
+        CALL MondoLog(DEBUG_NONE, "MD", "putting v_scale("//TRIM(IntToChar(iGEO))//") to hdf = " &
+                     //TRIM(DblToChar(v_scale)))
       ENDDO
 
     ELSE
@@ -588,7 +590,8 @@ CONTAINS
         CALL MondoLogPlain("MD temperature     = "//TRIM(DblToChar(MDTemp%D(1))))
         CALL MondoLogPlain("Target temperature = "//TRIM(DblToChar(C%Dyns%TargetTemp)))
         DO iCLONE = 1, C%Geos%Clones
-          CALL BerendsenThermostat(C%Geos%Clone(iCLONE), MDTemp%D(iCLONE), C%Dyns%TargetTemp, C%Dyns%DTime, C%Dyns%BerendsenTau, v_scale)
+          CALL BerendsenThermostat(C%Geos%Clone(iCLONE), MDTemp%D(iCLONE), &
+                                   C%Dyns%TargetTemp, C%Dyns%DTime, C%Dyns%BerendsenTau, v_scale)
           C%Dyns%BerendsenVScale = v_scale
 
           ! Store v_scale in hdf.
