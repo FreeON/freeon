@@ -282,46 +282,36 @@ CONTAINS
        BB=ExpandPoint((/Rho%Qx%D(K),Rho%Qy%D(K),Rho%Qz%D(K)/),Ext(K))
        CALL BoxMerge(Right%Box,BB,Right%Box)
     ENDDO
-    IF(ISplit<4)THEN
-       WRITE(*,55)ISplit,Node%Box%Number,Left%BdexE,Left%EDexE,Left%EDexE-Left%BdexE, &
-                                         Right%BdexE,Right%EDexE,Right%EDexE-Right%BdexE, &
-                                         SUM(GM%AtNum%D(NDex(Left%BdexN:Left%EdexN))),   &
-                                         SUM(GM%AtNum%D(NDex(Right%BdexN:Right%EdexN)))
-       
-55     FORMAT("  Split = ",I2,", Node = ",I4," [",I6,", ",I6,"; ",I3,"] [",I6,", ",I6,"; ",I3," ] // <",F10.4,"><",F10.4,"> ")
-!!$    ELSEIF(Jn.NE.1)THEN
+
+!!$    IF(ISplit<4)THEN
+!!$       WRITE(*,55)ISplit,Node%Box%Number,Left%BdexE,Left%EDexE,Left%EDexE-Left%BdexE, &
+!!$                                         Right%BdexE,Right%EDexE,Right%EDexE-Right%BdexE, &
+!!$                                         SUM(GM%AtNum%D(NDex(Left%BdexN:Left%EdexN))),   &
+!!$                                         SUM(GM%AtNum%D(NDex(Right%BdexN:Right%EdexN)))
+!!$       
+!!$55     FORMAT("  Split = ",I2,", Node = ",I4," [",I6,", ",I6,"; ",I3,"] [",I6,", ",I6,"; ",I3," ] // <",F10.4,"><",F10.4,"> ")
+!!$    ELSE
+!!$
+!!$!      RL=FurthestPointInBox(GM%Carts%D(:,NDex(Left%BDexN)),Left%Box)
+!!$!      RR=FurthestPointInBox(GM%Carts%D(:,NDex(Right%BDexN)),Right%Box)
+!!$
+!!$
+!!$!      CALL PrintBBox(Right%Box,6)
+!!$
 !!$       RL=BoxMargin(Left%Box)
 !!$       RR=BoxMargin(Right%Box)
-!!$       CALL BoxMerge(Left%Box,Right%Box,BB)
-!!$       RN=BoxMargin(BB)
+!!$
 !!$       NL=Left%EDexE-Left%BdexE+1
 !!$       NR=Right%EDexE-Right%BdexE+1
-!!$       WRITE(*,54)ISplit,Node%BdexN,Node%EdexN,Left%BdexE,Left%EDexE,NL, &
-!!$                                      Right%BdexE,Right%EDexE,NR,RL,RR      
-!!$54     FORMAT("  Split = ",I2," Ats = ",I2,"-",I2," [",I5,", ",I5,";N = ",I3,"] [",I5,", ",I5,";N = ",I3, &
-!!$              "] // <",D7.2,"><",D7.2,"> ")
-    ELSE
-
-!      RL=FurthestPointInBox(GM%Carts%D(:,NDex(Left%BDexN)),Left%Box)
-!      RR=FurthestPointInBox(GM%Carts%D(:,NDex(Right%BDexN)),Right%Box)
-
-
-!      CALL PrintBBox(Right%Box,6)
-
-       RL=BoxMargin(Left%Box)
-       RR=BoxMargin(Right%Box)
-
-       NL=Left%EDexE-Left%BdexE+1
-       NR=Right%EDexE-Right%BdexE+1
-       WRITE(*,56)ISplit,Node%BdexN,GM%AtNum%D(NDex(Node%BdexN)),Left%BdexE,Left%EDexE,NL, &
-                                      Right%BdexE,Right%EDexE,NR,RL,RR
-
-56     FORMAT("  Split = ",I2," At = ",I2,", Z = ",F4.1," [",I5,", ",I5,";N = ",I3,"] [",I5,", ",I5,";N = ",I3, &
-              "] // <",D10.5,"><",D10.5,"> ")
-
-      IF(RR>RL)STOP
-
-    ENDIF
+!!$       WRITE(*,56)ISplit,Node%BdexN,GM%AtNum%D(NDex(Node%BdexN)),Left%BdexE,Left%EDexE,NL, &
+!!$                                      Right%BdexE,Right%EDexE,NR,RL,RR
+!!$
+!!$56     FORMAT("  Split = ",I2," At = ",I2,", Z = ",F4.1," [",I5,", ",I5,";N = ",I3,"] [",I5,", ",I5,";N = ",I3, &
+!!$              "] // <",D10.5,"><",D10.5,"> ")
+!!$
+!!$      IF(RR>RL)STOP
+!!$
+!!$    ENDIF
 
 !    IF(Node%Box%Number>2)STOP
 
@@ -451,7 +441,7 @@ CONTAINS
 !                   RightBox%BndBox(Axis,2)-RightBox%BndBox(Axis,1),      &
 !                   NodeSid,LpRSid/NodeSid
 
-    WRITE(*,33)Axis,BoxMargin(LeftBox),BoxMargin(RightBox),BoxMargin(NodeBox),LpRMrg/NodeMrg
+!    WRITE(*,33)Axis,BoxMargin(LeftBox),BoxMargin(RightBox),BoxMargin(NodeBox),LpRMrg/NodeMrg
 33  FORMAT(I3,", LMarg = ",F12.6,' RMarg = ',F12.6," NodeMarg = ",F12.6," % = ",F12.6)
     !----------------------------------------------------
     ! Lots left to do here.  For example, can used a sorted
@@ -479,7 +469,7 @@ CONTAINS
     DO J=1,Nn
        QnTmp(J)=Qn(Qnj(J))
     ENDDO
-    Qn(1:Ne)=QnTmp(1:Nn)
+    Qn(1:Nn)=QnTmp(1:Nn)
     !
   END SUBROUTINE AxisSplit
 
@@ -950,8 +940,10 @@ CONTAINS
        Node%BOX%BndBOX(3,1)=MIN(Node%BOX%BndBOX(3,1),Rho%Qz%D(Qd)-Ex)
        Node%BOX%BndBOX(3,2)=MAX(Node%BOX%BndBOX(3,2),Rho%Qz%D(Qd)+Ex)
        !
-       delta=MAX(delta,SQRT(DOT_PRODUCT( (/Rho%Qx%D(Qd)-NODE%Pole%Center(1),Rho%Qy%D(Qd)-NODE%Pole%Center(2),Rho%Qz%D(Qd)-NODE%Pole%Center(3)/) , &
-                                         (/Rho%Qx%D(Qd)-NODE%Pole%Center(1),Rho%Qy%D(Qd)-NODE%Pole%Center(2),Rho%Qz%D(Qd)-NODE%Pole%Center(3)/) )))
+       delta=MAX(delta,SQRT(DOT_PRODUCT( (/Rho%Qx%D(Qd)-NODE%Pole%Center(1),Rho%Qy%D(Qd) &
+                               -NODE%Pole%Center(2),Rho%Qz%D(Qd)-NODE%Pole%Center(3)/) , &
+                                         (/Rho%Qx%D(Qd)-NODE%Pole%Center(1),Rho%Qy%D(Qd) &
+                                -NODE%Pole%Center(2),Rho%Qz%D(Qd)-NODE%Pole%Center(3)/) )))
        !
     ENDDO
     Node%POLE%delta=delta
