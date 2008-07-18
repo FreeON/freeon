@@ -50,8 +50,7 @@ CONTAINS
        NoWrap=.FALSE.
     ENDIF
 
-    PwMAX = 0
-
+    CALL NewBraBlok(BS)
     !
     NLink=0
     HGLink=>RhoHead
@@ -110,9 +109,6 @@ CONTAINS
                        + (Pair%A(2)-Pair%B(2))**2 &
                        + (Pair%A(3)-Pair%B(3))**2
 
-!                WRITE(*,*)' AtA = ',AtA,' AtB = ',AtB,' NC = ',NC
-
-
                 IF(TestAtomPair(Pair))THEN
                       CALL RhoPop(GM,BS,GM%InCells,NoWrap,SpinM,Psv%D(1),Pair,HGLink,NLink)
                 ENDIF
@@ -124,19 +120,15 @@ CONTAINS
     CALL Delete(Psv)
     ! Now eliminate redundancies in the density    !
     NNaive=NLink
-    CALL RhoEcon(RhoHead,NLink)
+!!    CALL RhoEcon(RhoHead,NLink)
     Mssg=ProcessName(Prog,'Density Build')
     Mssg=TRIM(Mssg)//' Econ = '//TRIM(DblToShrtChar(DBLE(NNaive)/DBLE(NLink))) &
                    //', Gaussians = '//TRIM(IntToChar(NLink))
     WRITE(*,*)TRIM(Mssg)
 
+    ! Free bra block memory, since we may need it again
+    CALL DeleteBraBlok()
 
-
-
-    WRITE(*,*)' PwMAX = ',PwMax
-
-
-    ! Next, calculate the Schwartz inequality and prune small links ???
   END SUBROUTINE MakeRhoList
   !
   SUBROUTINE Collate(GM,RhoHead,R,Prog,P,NLink)
