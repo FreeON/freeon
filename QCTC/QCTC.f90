@@ -42,6 +42,9 @@ PROGRAM QCTC
   QCTC_TotalTime_Start=MTimer()
   ! Start up macro
   CALL StartUp(Args,Prog,Serial_O=.TRUE.)
+  ! ---------------------------------------------------------------------------------
+  ! Begin building a density 
+  !
   ! Chose a density matrix
   IF(SCFActn=='BasisSetSwitch')THEN
      ! Get the previous information
@@ -105,21 +108,12 @@ PROGRAM QCTC
         ! Default
         CALL Get(Dmat,TrixFile('D',Args,0))
      ENDIF
-  ENDIF
- 
-
-!!  CALL Get(P,TrixFile('D',Args,0))
-!!$!  CALL PPrint(GM,Unit_O=6)
-!!$!  CALL PPrint(GM%PBC,Unit_O=6)
-
-  ! Allocate some memory for bra HG shenanigans 
-  CALL NewBraBlok(BS)
-  ! Set thresholds local to QCTC (for PAC and MAC)
+  ENDIF 
+  ! Set thresholds local to the density build
   CALL SetLocalThresholds(Thresholds%TwoE)
   ! RhoHead is the start of a linked density list
   ALLOCATE(RhoHead)
   RhoHead%LNum=0
-!!$
   ! Here, the LL is filled out
   CALL MakeRhoList(GM,BS,DMat,NLink,RhoHead,'QCTC',NoWrap_O=NoWrap)
   ! Add in the nuclear charges only in certain cases
@@ -129,11 +123,12 @@ PROGRAM QCTC
   ENDIF
   ! Load density into arrays and delete the linked list
   CALL Collate(GM,RhoHead,Rho,'QCTC',RhoPoles,NLink)
-!
+  CALL PChkSum(Rho,'Rho',.TRUE.,'Collate')
+
   WRITE(*,*)' PUNTED IN DELETE OF DENSITY !!! SEE FOLLOWING COMMENT OUT :::: '
   !  CALL DeleteHGLL(RhoHead)
-  ! Allocate and compute multipole moments of the density
-  !
+  ! Allocate and compute multipole moments of the density  
+!
   MaxPFFFEll=GM%PBC%PFFMaxEll
   ! Local expansion order of the multipoles to use in the tree
   MaxPoleEll=MIN(2*BS%NASym+6,MaxPFFFEll)
@@ -151,6 +146,21 @@ PROGRAM QCTC
 !!  Mssg=TRIM(Mssg)//' Gaussians in density = '//TRIM(IntToChar(NLink))//', Cluster Size = '//TRIM(IntToChar(MinCluster)) &
 !!           //', MaxPFFEll = '//TRIM(IntToChar(MaxPFFFEll))
 !!  WRITE(*,*)TRIM(Mssg)
+  ! To here, done with density build
+  ! ---------------------------------------------------------------------------------
+  ! Now that we are done with the density, lets make sure we have the 
+  ! current basis set, matrix block sizes etc:  
+  CALL Get(BS,CurBase)
+  CALL Get(BSiz,'atsiz',CurBase)
+  CALL Get(OffS,'atoff',CurBase)
+  CALL Get(NBasF,'nbasf',CurBase)
+  ! Set space for bra blocking
+  CALL NewBraBlok(BS)
+  ! Thresholds local to J matrix build
+  CALL SetThresholds(CurBase)
+  CALL SetLocalThresholds(Thresholds%TwoE)
+  ! to here, done with re-initializing the basis set 
+  ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
   ! Initialize addressing for tensor contraction loops
   CALL TensorIndexingSetUp()
@@ -217,7 +227,9 @@ PROGRAM QCTC
   WRITE(*,11)' Time per MNode= ',Multipole_Time/DBLE(NFarAv)
 11 FORMAT(A20,D12.6)
 !!$
-   CALL PChkSum(J,'J',Prog,Unit_O=6)
+
+
+  CALL PChkSum(J,'J',Prog,Unit_O=6)
 
   CALL Elapsed_TIME(TimeMakeJ,'Accum')
   IF(SCFActn=='InkFok')THEN
