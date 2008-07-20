@@ -210,9 +210,13 @@ CONTAINS
                      ENDDO
                    ENDDO
                    !
-                   PExt=Extent(QP%Prim%Ell,QP%Prim%Zeta,TempHerm%Coef,TauPAC,ExtraEll_O=0)!,Potential_O=.TRUE.)
-!                   WRITE(*,*)QP%Prim%Zeta,' PExt = ',PExt
+                   PExt=Extent(QP%Prim%Ell,QP%Prim%Zeta,TempHerm%Coef,TauPAC,ExtraEll_O=0,Potential_O=.TRUE.)
 
+                   IF(PExt<1D-20)THEN
+                      WRITE(*,*)QP%Prim%Zeta,' PExt = ',PExt
+                      WRITE(*,*)'HERMCOEF = ',TempHerm%Coef(1:LenAB)
+                      
+                   ENDIF
                    !
                    !                   CALL SetSerialPAC(QP%PAC,TempHerm)                   
                    ! The integral estimate (ab|ab)^(1/2)

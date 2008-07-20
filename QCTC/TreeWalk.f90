@@ -99,7 +99,7 @@ CONTAINS
     REAL(DOUBLE),DIMENSION(NumNodes,3)    :: PQ
     REAL(DOUBLE),DIMENSION(2*(1+MaxPoleEll*(MaxPoleEll+3)/2)*NumNodes) :: Wrk
     INTEGER                               :: N,NNear,NFar
-    REAL(DOUBLE),DIMENSION(1000) :: O,W,V
+    REAL(DOUBLE),DIMENSION(2000) :: O,W,V
 
     !-----------------------------------------------------------------------------------------------
     !  
@@ -128,6 +128,7 @@ CONTAINS
     !    
     DO 
        !
+       MAC=.FALSE.
        PQx=QC%Prim%Pw(1)-Q%Box%Center(1)
        PQy=QC%Prim%Pw(2)-Q%Box%Center(2)
        PQz=QC%Prim%Pw(3)-Q%Box%Center(3)
@@ -154,19 +155,13 @@ CONTAINS
 !!$          PQHalf=PQz-Q%Box%Half(3)
 !!$          PQ2=PQ2+PQHalf*PQHalf
 !!$       ENDIF
-!!$       !
 !!$       T=OmegaMin*PQ2
-!!$.OR.  &
-!!$          T>Gamma_Switch)THEN
-
-       !
-       MAC=.FALSE.
+!!$       IF(T>8D0)THEN
+!!$
        IF(ABS(PQx)>QC%Box%Half(1)+Q%Box%Half(1).OR.  &
           ABS(PQy)>QC%Box%Half(2)+Q%Box%Half(2).OR.  &
           ABS(PQz)>QC%Box%Half(3)+Q%Box%Half(3))THEN 
 
-!!$
-!!$       IF(.TRUE.)THEN
 
 #ifdef PAC_DEBUG
           CALL ErrCompare(QC,Q,1D-5)
@@ -182,7 +177,7 @@ CONTAINS
           ! Compute the putative multipole translation error
           LCode=100*QC%Prim%Ell+Q%Herm%Ell
           SELECT CASE(LCode)
-             INCLUDE "MACErrBnd4.Inc"
+             INCLUDE "MACErrBnd6.Inc"
           CASE DEFAULT
              CALL Halt('No explicit code for case LCode = '  &
                   //TRIM(IntToChar(LCode))//' in MACErrBnd4.Inc')
@@ -246,11 +241,11 @@ CONTAINS
     !---------------------------------------------------------------------------------------------
     Integral_Time_Start=MTimer()
     Multipole_Time=Multipole_Time+(Integral_Time_Start-Multipole_Time_Start)
-
-    DO N=1,NNear
-      is=Near(N)%P%HERM%Stack
-      CALL RAhmadiJAlmlof95c(EllP,LenP,NuclearExpnt,JTau,QC%Prim%Zeta,QC%Prim%Pw,HGKet,HGStack(is)) 
-   ENDDO
+!!$
+!!$    DO N=1,NNear
+!!$      is=Near(N)%P%HERM%Stack
+!!$      CALL RAhmadiJAlmlof95c(EllP,LenP,NuclearExpnt,JTau,QC%Prim%Zeta,QC%Prim%Pw,HGKet,HGStack(is)) 
+!!$   ENDDO
 !!$
 !!$    DO N=1,NNear
 !!$       Q=>Near(N)%P
@@ -272,24 +267,25 @@ CONTAINS
 !!$    ENDDO
 !!$
 
-!!$    DO N=1,NNear
-!!$       Q=>Near(N)%P
-!!$       EllP=QC%Prim%Ell
-!!$       LenP=LHGTF(EllP)
-!!$       DO EllQ=0,Q%HERM%Ell
-!!$          Nq=Q%HERM%Nq(EllQ)
-!!$          IF(Nq.NE.0)THEN 
-!!$             LenQ=LHGTF(EllQ)
-!!$             PQEll=EllP+EllQ
-!!$             PQLen=LHGTF(PQEll)
-!!$             CALL RAhmadiJAlmlof95(HGEll4,Nq,EllP,EllQ,LenP,LenQ,PQEll,PQLen,         &
-!!$                  NuclearExpnt,JTau,Q%HERM%IHlf(EllQ)%D(1),QC%Prim%Zeta,              &
-!!$                  Q%HERM%Zeta(EllQ)%D(1),QC%Prim%Pw(1),Q%HERM%Cent(EllQ)%D(1,1),       &
-!!$                  Q%HERM%Coef(EllQ)%D(1,1),HGKet(1))
-!!$             NInts=NInts+Nq
-!!$          ENDIF
-!!$       ENDDO
-!!$    ENDDO
+    DO N=1,NNear
+       Q=>Near(N)%P
+       EllP=QC%Prim%Ell
+       LenP=LHGTF(EllP)
+       DO EllQ=0,Q%HERM%Ell
+          Nq=Q%HERM%Nq(EllQ)
+          IF(Nq.NE.0)THEN 
+             LenQ=LHGTF(EllQ)
+             PQEll=EllP+EllQ
+             PQLen=LHGTF(PQEll)
+             CALL RAhmadiJAlmlof95(HGEll4,Nq,EllP,EllQ,LenP,LenQ,PQEll,PQLen,         &
+                  NuclearExpnt,JTau,Q%HERM%IHlf(EllQ)%D(1),QC%Prim%Zeta,              &
+                  Q%HERM%Zeta(EllQ)%D(1),QC%Prim%Pw(1),Q%HERM%Cent(EllQ)%D(1,1),       &
+                  Q%HERM%Coef(EllQ)%D(1,1),HGKet(1))
+             NInts=NInts+Nq
+          ENDIF
+       ENDDO
+    ENDDO
+
 !!$    !
     Integral_Time=Integral_Time+(MTimer()-Integral_Time_Start)
     NFarAv=NFarAv+NFar
@@ -554,6 +550,8 @@ ENDIF
     INTEGER                          :: LP,MP,NP,LQ,MQ,NQ,PDex,QDex,PZ,QZ
     TYPE(BBox)                       :: TmpBox
 
+    IF(Q%Box%Number==141)THEN
+
     TotEll = P%Prim%Ell+Q%Herm%Ell
     NewPACError=Err
     ! Compute the actual PAC error
@@ -566,7 +564,7 @@ ENDIF
     ELSE
        TruPACError=PACError(P,Q)
     ENDIF
-    IF(ABS(TruPACError)<1D-20)RETURN
+    IF(ABS(TruPACError)<1D-8)RETURN
     WRITE(*,22)Q%Box%Tier,Q%Box%Number,TotEll,LOG10(ABS(TruPACError)+1D-40),LOG10(NewPACError)
 22  FORMAT(3(2x,I4),2(2x,F9.3))
 !!$
@@ -577,6 +575,7 @@ ENDIF
        WRITE(*,*)' NewE = ',NewPACError
        WRITE(*,*)' Tier = ',Q%Box%Tier
        WRITE(*,*)' Numb = ',Q%Box%Number
+       IF(Q%Leaf)&
        WRITE(*,*)' Nq   = ',Q%HERM%Nq
        WRITE(*,*)' TotL = ',TotEll
        WRITE(*,*)' PEll = ',P%Prim%Ell
@@ -630,11 +629,15 @@ ENDIF
                 END IF
              ENDDO
           ENDDO          
+          WRITE(*,*)' Total Charge = ',Ch
+          WRITE(*,*)' Total Charge = ',ACh
        ENDIF
-       WRITE(*,*)' Total Charge = ',Ch
-       WRITE(*,*)' Total Charge = ',ACh
        STOP
     ENDIF
+
+
+    ENDIF
+
   END SUBROUTINE ERRCOMPARE
 
   RECURSIVE FUNCTION PACError(P,Q) RESULT(Error)
@@ -691,6 +694,10 @@ ENDIF
           ENDDO
        ENDDO
        Error=Err1
+
+
+       WRITE(*,*)' Err1= ',Err1
+
     ELSEIF(ASSOCIATED(Q%Left).AND.ASSOCIATED(Q%Right))THEN
        Error=PACError(P,Q%Left)+PACError(P,Q%Right)
     ELSEIF(ASSOCIATED(Q%Left))THEN

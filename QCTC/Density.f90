@@ -120,7 +120,7 @@ CONTAINS
     CALL Delete(Psv)
     ! Now eliminate redundancies in the density    !
     NNaive=NLink
-!!    CALL RhoEcon(RhoHead,NLink)
+    CALL RhoEcon(RhoHead,NLink)
     Mssg=ProcessName(Prog,'Density Build')
     Mssg=TRIM(Mssg)//' Econ = '//TRIM(DblToShrtChar(DBLE(NNaive)/DBLE(NLink))) &
                    //', Gaussians = '//TRIM(IntToChar(NLink))
