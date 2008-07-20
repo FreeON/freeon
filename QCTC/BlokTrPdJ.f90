@@ -452,9 +452,6 @@ CONTAINS
     QP%MAC%Delta=Zero
 
     PExt=Extent(0,NuclearExpnt,(/NukeCo/),TauPAC,Potential_O=.TRUE.)
-
-          WRITE(*,*)' Nuclear Extent = ',PExt
-
     ! Initialize the |KET)
     CellFrc=Zero
     AtomFrc=Zero

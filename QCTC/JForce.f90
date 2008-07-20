@@ -46,8 +46,6 @@ PROGRAM JForce
 
   CALL Print_CRDS(GM,Unit_O=6,PrintGeom_O='XYZ')
 
-  ! Allocate some memory for bra HG shenanigans 
-  CALL NewBraBlok(BS)
   !
   PMat2Use=TrixFile('D',Args,1)
 
@@ -74,6 +72,10 @@ PROGRAM JForce
   MaxPoleEll=MIN(2*(BS%NASym+4),MaxPFFFEll)
   IF(MaxPoleEll<2*(BS%NASym+1)) &
      CALL Halt('Bombed in QCTC. Please set PFFMaxEll larger ')
+
+
+  ! Allocate some memory for bra HG shenanigans 
+  CALL NewBraBlok(BS)
 
   ! Find the total energy from past calculations
   CALL Get(Etot,'Etot')!,StatsToChar(Previous))

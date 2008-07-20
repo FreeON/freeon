@@ -268,7 +268,7 @@ CONTAINS
     Right%NAtms=Right%EdexN-Right%BdexN+1
     !
     K=Qdex(Left%BdexE)
-    Left%Box=ExpandPoint((/Rho%Qx%D(K),Rho%Qy%D(K),Rho%Qz%D(K)/),Ext(K) ) !,Left%Box)
+    Left%Box=ExpandPoint((/Rho%Qx%D(K),Rho%Qy%D(K),Rho%Qz%D(K)/),Ext(K) ,Left%Box)
     DO I=Left%BdexE+1,Left%EdexE
        K=Qdex(I)
        BB=ExpandPoint((/Rho%Qx%D(K),Rho%Qy%D(K),Rho%Qz%D(K)/),Ext(K))
@@ -276,7 +276,7 @@ CONTAINS
     ENDDO
 
     K=Qdex(Right%BdexE)
-    Right%Box=ExpandPoint((/Rho%Qx%D(K),Rho%Qy%D(K),Rho%Qz%D(K)/),Ext(K) ) !,Right%Box)
+    Right%Box=ExpandPoint((/Rho%Qx%D(K),Rho%Qy%D(K),Rho%Qz%D(K)/),Ext(K) ,Right%Box)
     DO I=Right%BdexE+1,Right%EdexE
        K=Qdex(I)
        BB=ExpandPoint((/Rho%Qx%D(K),Rho%Qy%D(K),Rho%Qz%D(K)/),Ext(K))
