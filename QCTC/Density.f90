@@ -257,6 +257,7 @@ CONTAINS
        DO J=1,R%NQ%I(I)
           IAdd=R%OffQ%I(I)+J
           JAdd=R%OffR%I(I)+(J-1)*LenZ+1
+
 !!$#ifdef PRIMITIVE_CENTERING       
 !!$          ! Primitive should already be wrapped and centered centered (by PWrap)
 !!$          RX=Rho%Qx%D(IAdd)
@@ -627,6 +628,9 @@ CONTAINS
 
                       ENDDO
                    ENDDO                  
+
+
+
 
 !!$                   WRITE(*,*)'&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&'
 !!$                   ZZ=(Pi/Prim%Zeta)**1.5D0

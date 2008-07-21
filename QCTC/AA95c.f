@@ -234,6 +234,8 @@ C           CALL PAPIEX_STOP(12)
             ELSE
                STOP '(8+|0) in AA95' 
             ENDIF
+
+
          CASE DEFAULT
             STOP 'AA95 '
          END SELECT

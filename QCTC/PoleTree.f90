@@ -216,7 +216,8 @@ CONTAINS
        iSplit=4
     ELSE
        CALL AxisSplit(Ne,Nn,Qdex(Be:Ee),NDex(Bn:En),Ext,Rho%Qx%D,Rho%Qy%D,Rho%Qz%D, &
-                      GM%Carts%D,GM%AtNum%D,iSplit,Je,Jn)
+                      GM%Carts%D,GM%PBC%CellCenter%D,GM%AtNum%D,iSplit,Je,Jn)
+
 
 !!$       WRITE(*,*)' Jn = ',Jn
 !!$       IF(Jn==1)THEN
@@ -283,47 +284,48 @@ CONTAINS
        CALL BoxMerge(Right%Box,BB,Right%Box)
     ENDDO
 
-!!$    IF(ISplit<4)THEN
-!!$       WRITE(*,55)ISplit,Node%Box%Number,Left%BdexE,Left%EDexE,Left%EDexE-Left%BdexE, &
-!!$                                         Right%BdexE,Right%EDexE,Right%EDexE-Right%BdexE, &
-!!$                                         SUM(GM%AtNum%D(NDex(Left%BdexN:Left%EdexN))),   &
-!!$                                         SUM(GM%AtNum%D(NDex(Right%BdexN:Right%EdexN)))
-!!$       
-!!$55     FORMAT("  Split = ",I2,", Node = ",I4," [",I6,", ",I6,"; ",I3,"] [",I6,", ",I6,"; ",I3," ] // <",F10.4,"><",F10.4,"> ")
-!!$    ELSE
-!!$
-!!$!      RL=FurthestPointInBox(GM%Carts%D(:,NDex(Left%BDexN)),Left%Box)
-!!$!      RR=FurthestPointInBox(GM%Carts%D(:,NDex(Right%BDexN)),Right%Box)
-!!$
-!!$
-!!$!      CALL PrintBBox(Right%Box,6)
-!!$
-!!$       RL=BoxMargin(Left%Box)
-!!$       RR=BoxMargin(Right%Box)
-!!$
-!!$       NL=Left%EDexE-Left%BdexE+1
-!!$       NR=Right%EDexE-Right%BdexE+1
-!!$       WRITE(*,56)ISplit,Node%BdexN,GM%AtNum%D(NDex(Node%BdexN)),Left%BdexE,Left%EDexE,NL, &
-!!$                                      Right%BdexE,Right%EDexE,NR,RL,RR
-!!$
-!!$56     FORMAT("  Split = ",I2," At = ",I2,", Z = ",F4.1," [",I5,", ",I5,";N = ",I3,"] [",I5,", ",I5,";N = ",I3, &
-!!$              "] // <",D10.5,"><",D10.5,"> ")
-!!$
-!!$      IF(RR>RL)STOP
-!!$
-!!$    ENDIF
+    IF(ISplit<4)THEN
+       WRITE(*,55)ISplit,Node%Box%Number,Left%BdexE,Left%EDexE,Left%EDexE-Left%BdexE, &
+                                         Right%BdexE,Right%EDexE,Right%EDexE-Right%BdexE, &
+                                         SUM(GM%AtNum%D(NDex(Left%BdexN:Left%EdexN))),   &
+                                         SUM(GM%AtNum%D(NDex(Right%BdexN:Right%EdexN)))
+       
+55     FORMAT("  Split = ",I2,", Node = ",I4," [",I6,", ",I6,"; ",I3,"] [",I6,", ",I6,"; ",I3," ] // <",F10.4,"><",F10.4,"> ")
+    ELSE
+
+!      RL=FurthestPointInBox(GM%Carts%D(:,NDex(Left%BDexN)),Left%Box)
+!      RR=FurthestPointInBox(GM%Carts%D(:,NDex(Right%BDexN)),Right%Box)
+
+
+!      CALL PrintBBox(Right%Box,6)
+
+       RL=BoxMargin(Left%Box)
+       RR=BoxMargin(Right%Box)
+
+       NL=Left%EDexE-Left%BdexE+1
+       NR=Right%EDexE-Right%BdexE+1
+       WRITE(*,56)ISplit,Node%BdexN,GM%AtNum%D(NDex(Node%BdexN)),Left%BdexE,Left%EDexE,NL, &
+                                      Right%BdexE,Right%EDexE,NR,RL,RR
+
+56     FORMAT("  Split = ",I2," At = ",I2,", Z = ",F4.1," [",I5,", ",I5,";N = ",I3,"] [",I5,", ",I5,";N = ",I3, &
+              "] // <",D10.5,"><",D10.5,"> ")
+
+      IF(RR>RL)STOP
+
+    ENDIF
 
 !    IF(Node%Box%Number>2)STOP
 
   END SUBROUTINE SplitPoleBox
   !
 
-  SUBROUTINE AxisSplit(Ne,Nn,Qe,Qn,Ex,Qx,Qy,Qz,Nuc,Chg,Axis,Je,Jn)
+  SUBROUTINE AxisSplit(Ne,Nn,Qe,Qn,Ex,Qx,Qy,Qz,Nuc,Cntr,Chg,Axis,Je,Jn)
     INTEGER                       :: Ne,Nn,Je,Jn,J,K,Axis,iDim
     INTEGER,DIMENSION(1:Ne)       :: Qe,Qej,QeTmp
     INTEGER,DIMENSION(1:Nn)       :: Qn,Qnj,QnTmp
     REAL(DOUBLE),DIMENSION(:)     :: Ex,Qx,Qy,Qz,Chg
     REAL(DOUBLE),DIMENSION(:,:)   :: Nuc
+    REAL(DOUBLE),DIMENSION(3)     :: Cntr
     INTEGER,DIMENSION(1:Ne)       :: Ue
     INTEGER,DIMENSION(1:Nn)       :: Un
     REAL(DOUBLE),DIMENSION(1:Ne)  :: Xe
@@ -342,10 +344,6 @@ CONTAINS
        Bb(J)=ExpandBox(Bb(J),Ex(K))
        MaxExt=MAX(MaxExt,Ex(K))
     ENDDO
-!    WRITE(*,*)'- - - - - - - - - - - - - - - - - - - - - - - - - - - -'
-!    WRITE(*,*)' MaxExtent = ',MaxExt
-
-    !
 
     NodeBox=Bb(1)
     DO J=2,Ne
@@ -371,8 +369,8 @@ CONTAINS
     DO J=1,Nn
        K=Qn(J)
        Qnj(J)=J
-       Xn(J)=Nuc(Axis,K)
-       XSplit=XSplit+Nuc(Axis,K)*Chg(K)
+       Xn(J)=Nuc(Axis,K)-Cntr(Axis)
+       XSplit=XSplit+Xn(J)*Chg(K)
     ENDDO
     XSplit=XSplit/SUM(Chg(Qn(1:Nn)))
     !
@@ -384,11 +382,9 @@ CONTAINS
           EXIT
        ENDIF
     ENDDO
+    IF(ABS(Xn(Nn)-Xn(1))<1D-5)Jn=Nn/2
 
 !!$
-!!$    WRITE(*,*)' JJn= ',Jn,' NN= ',NN
-!!$    WRITE(*,*)' XSplit = ',Xn(1),XSplit,Xn(Nn)
-
 
     !
     DO J=1,Ne
@@ -403,6 +399,12 @@ CONTAINS
           EXIT
        ENDIF
     ENDDO    
+
+!!$
+!!$    WRITE(*,*)' Jn= ',Jn,' Nn= ',NN
+!!$    WRITE(*,*)' Je= ',Je,' Ne= ',Ne
+!!$    WRITE(*,*)' XNSplit = ',Xn(1),XSplit,Xn(Nn)
+!!$    WRITE(*,*)' XESplit = ',Xe(1),XSplit,Xe(Ne)
     !
     LeftBox=Bb(Qej(1))
     DO J=1,Je
@@ -492,9 +494,16 @@ CONTAINS
     TYPE(BBox),DIMENSION(3)       :: LeftBox,RightBox
     TYPE(BBox),DIMENSION(1:Ne)    :: Bb
     !-------------------------------------------------------------------
+
+    WRITE(*,*)' Ne = ',NE
+
     DO J=1,Ne
        K=Qe(J)
        Ue(J,:)=J          
+
+       WRITE(*,*)J,' Q = ',(/Qx(K),Qy(K),Qz(K)/)
+
+
        Bb(J)%BndBox(:,1)=(/Qx(K),Qy(K),Qz(K)/)
        Bb(J)%BndBox(:,2)=(/Qx(K),Qy(K),Qz(K)/)
        Bb(J)=ExpandBox(Bb(J),Ex(K))    
@@ -507,6 +516,10 @@ CONTAINS
     NodeVol=BoxVolume(NodeBox)
     NodeMrg=BoxMargin(NodeBox)
 !    WRITE(*,*)' NodeVolume = ',NodeVol
+
+
+
+    XSplit=0D0
 !    WRITE(*,*)' NodeMargin = ',NodeMrg
     !---------------------------------
     DO iDim=1,3

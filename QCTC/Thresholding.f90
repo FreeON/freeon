@@ -225,6 +225,7 @@ MODULE Thresholding
                    ENDDO
                 ENDDO
              ENDDO
+             WRITE(*,*)' Coef = ',Coef,' Tau= ',Tau
              ScaledTau = Tau/(Coef+SMALL_DBL)
              R         = SQRT(MAX(SMALL_DBL,-LOG(Tau/Coef)/(GFactor*Zeta)))
           ENDIF

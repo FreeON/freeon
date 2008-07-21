@@ -259,7 +259,8 @@ CONTAINS
                       DO LMN=1,LenG
                          PBCNearFieldP(K)=PBCNearFieldP(K)+Phase%D(LMN)*BraGradP(LMN,K)*HGKet(LMN)
                       ENDDO
-                      CALL HGToSP_Direct(EllG,LenG,LenGSP,PiZ,BraGradP(1:LenG,K),SPBraC(0:LenGSP),SPBraS(0:LenGSP))                            
+                      CALL HGToSP_Direct(EllG,LenG,LenGSP,PiZ,BraGradP(1:LenG,K), &
+                                         SPBraC(0:LenGSP),SPBraS(0:LenGSP))                            
                       DO LM=0,LenGSP
                          PBCNearFieldP(K)=PBCNearFieldP(K)+SPBraC(LM)*SPKetC(LM)+SPBraS(LM)*SPKetS(LM)
                       ENDDO
