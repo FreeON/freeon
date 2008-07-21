@@ -279,7 +279,7 @@ CONTAINS
              PQLen=LHGTF(PQEll)
              CALL RAhmadiJAlmlof95(HGEll4,Nq,EllP,EllQ,LenP,LenQ,PQEll,PQLen,         &
                   NuclearExpnt,JTau,Q%HERM%IHlf(EllQ)%D(1),QC%Prim%Zeta,              &
-                  Q%HERM%Zeta(EllQ)%D(1),QC%Prim%Pw(1),Q%HERM%Cent(EllQ)%D(1,1),       &
+                  Q%HERM%Zeta(EllQ)%D(1),QC%Prim%Pw(1),Q%HERM%Cent(EllQ)%D(1,1),      &
                   Q%HERM%Coef(EllQ)%D(1,1),HGKet(1))
              NInts=NInts+Nq
           ENDIF
