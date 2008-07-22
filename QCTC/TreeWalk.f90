@@ -166,8 +166,6 @@ CONTAINS
 #ifdef PAC_DEBUG
           CALL ErrCompare(QC,Q,1D-5)
 #endif
-
-
           ! To here, we are outside the PAC distance and pennetration effects are 
           ! negligible.  Now check to see if the multipole translation error is acceptable; MAC=.TRUE.
           PQx=QC%Prim%Pw(1)-Q%Pole%Center(1)
@@ -177,13 +175,13 @@ CONTAINS
           ! Compute the putative multipole translation error
           LCode=100*QC%Prim%Ell+Q%Herm%Ell
           SELECT CASE(LCode)
-             INCLUDE "MACErrBnd6.Inc"
+             INCLUDE "MACErrBnd4.Inc"
           CASE DEFAULT
              CALL Halt('No explicit code for case LCode = '  &
                   //TRIM(IntToChar(LCode))//' in MACErrBnd4.Inc')
           END SELECT
           ! Is it acceptable?
-          MAC=MACError<TauMAC          
+          MAC=MACError<TauMAC      
 #ifdef MAC_DEBUG
           CALL MACCompare(QC,Q,MACError)
 #endif
@@ -195,7 +193,7 @@ CONTAINS
           IF(ASSOCIATED(Q%Next))THEN
              Q=>Q%Next
           ELSE
-             EXIT
+             EXIT             
           ENDIF
        ELSEIF(Q%Leaf)THEN
           NNear=NNear+1
@@ -266,7 +264,7 @@ CONTAINS
 !!$       ENDDO
 !!$    ENDDO
 !!$
-
+!!$
     DO N=1,NNear
        Q=>Near(N)%P
        EllP=QC%Prim%Ell
@@ -285,7 +283,7 @@ CONTAINS
           ENDIF
        ENDDO
     ENDDO
-
+!!$
 !!$    !
     Integral_Time=Integral_Time+(MTimer()-Integral_Time_Start)
     NFarAv=NFarAv+NFar
