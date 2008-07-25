@@ -171,7 +171,14 @@ CONTAINS
        ! ... the boxes ...
        CALL BoxMerge(P%Left%Box,P%Right%Box,P%Box)
        P%Pole%Center=P%Box%Center  
-       ! ... and merge the multipole expansions ...
+       ! Merge the nuclear charges  
+
+       IF(P%Left%NAtms==1.AND.P%Right%NAtms==1.AND.P%Left%BDexN==P%Right%BDexN)THEN
+	  P%Pole%Charge=P%Right%Pole%Charge
+       ELSE	
+	  P%Pole%Charge=P%Left%Pole%Charge+P%Right%Pole%Charge
+       ENDIF	
+       ! ... and merge the multipole expansions ...        
        CALL PoleMerge(P%Left%Pole,P%Right%Pole,P%Pole)
        CALL BoxMerge(P%Left%Box,P%Right%Box,P%Box)
        CALL SetMAC(P)
@@ -210,8 +217,8 @@ CONTAINS
     IF(Nn==1)THEN
        ! Sort on PAC + HGTF distance from the nuclear center, with the goal of 
        ! creating smaller and smaller boxes that may satisfy both MAC and PAC
-       CALL PACSplit(Ne,Qdex(Be:Ee),Ext,Rho%Qx%D,Rho%Qy%D,Rho%Qz%D,GM%Carts%D(:,NDex(Bn)), &
-                     MaxCluster,Je)       
+       CALL PACSplit(Ne,Qdex(Be:Ee),Ext,Rho%Qx%D,Rho%Qy%D,Rho%Qz%D, & 
+                     GM%Carts%D(:,NDex(Bn))-GM%PBC%CellCenter%D, MaxCluster,Je)       
        Jn=1
        iSplit=4
     ELSE
@@ -263,6 +270,7 @@ CONTAINS
     ELSEIF(Left%NQ<=MinCluster)THEN
        Left%Leaf=.TRUE.
     ENDIF
+    !	
     IF(Right%NQ<=MinCluster)Right%Leaf=.TRUE.
     ! ... L&R atom count ...
     Left%NAtms=Left%EdexN-Left%BdexN+1
@@ -346,7 +354,7 @@ CONTAINS
     ENDDO
 
     NodeBox=Bb(1)
-    DO J=2,Ne
+   DO J=2,Ne
        CALL BoxMerge(NodeBox,Bb(J),NodeBox)
     ENDDO
     NodeVol=BoxVolume(NodeBox)
@@ -373,6 +381,8 @@ CONTAINS
        XSplit=XSplit+Xn(J)*Chg(K)
     ENDDO
     XSplit=XSplit/SUM(Chg(Qn(1:Nn)))
+  
+
     !
     CALL DblIntSort77(Nn,Xn,Qnj,2)                    
     !
@@ -383,9 +393,6 @@ CONTAINS
        ENDIF
     ENDDO
     IF(ABS(Xn(Nn)-Xn(1))<1D-5)Jn=Nn/2
-
-!!$
-
     !
     DO J=1,Ne
        Qej(J)=J
@@ -926,7 +933,10 @@ CONTAINS
     !
     delta=0D0
     Node%POLE%Charge=GM%AtNum%D(NDex(Node%BdexN))
-    Node%POLE%Center=GM%Carts%D(:,NDex(Node%BdexN))
+
+    Node%POLE%Center=GM%Carts%D(:,NDex(Node%BdexN))-GM%PBC%CellCenter%D
+
+
     Node%BOX%BndBOX(:,1)=Node%POLE%Center
     Node%BOX%BndBOX(:,2)=Node%POLE%Center
     ! 
@@ -1031,6 +1041,9 @@ CONTAINS
     TYPE(Pole)                        :: LPole,RPole,PPole       
     !------------------------------------------------------------------------------------       
     PPole%Ell=MAX(LPole%Ell,RPole%Ell)
+
+!!    WRITE(*,*)' CHARGE = ',LPole%Charge,RPole%Charge
+
     PPole%Center=(LPole%Charge*LPole%Center+RPole%Charge*RPole%Center)/(LPole%Charge+RPole%Charge)
      CALL AllocSP(PPole)
     ! Move the left center to the new midpoint

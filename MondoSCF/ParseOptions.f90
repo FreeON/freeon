@@ -85,6 +85,12 @@ CONTAINS
     INTEGER,   DIMENSION(MaxSets) :: Models
     !-------------------------------------------------------------------------!
     NModls=0
+    IF(OptKeyLocQ(Inp,MODEL_OPTION,MODEL_Hartree,MaxSets,NLoc,Location))THEN
+       NModls=NModls+NLoc
+       DO I=1,NLoc
+          Models(Location(I))=NO_EXCHANGE
+       ENDDO
+    ENDIF
     IF(OptKeyLocQ(Inp,MODEL_OPTION,MODEL_ExactX,MaxSets,NLoc,Location))THEN
       NModls=NModls+NLoc
       DO I=1,NLoc
