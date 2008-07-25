@@ -36,6 +36,8 @@ MODULE Functionals
    !END INTERFACE
 !  Parsing keys for <Options.Model=>
    CHARACTER(LEN=*),  PARAMETER :: MODEL_OPTION='ModelChem'
+!  Coulomb only
+   CHARACTER(LEN=*),  PARAMETER :: MODEL_Hartree       ='Hartree'
 !  Exchange only
    CHARACTER(LEN=*),  PARAMETER :: MODEL_ExactX       ='HF'
    CHARACTER(LEN=*),  PARAMETER :: MODEL_SD           ='SlaterDirac'
@@ -63,6 +65,7 @@ MODULE Functionals
    CHARACTER(LEN=*),  PARAMETER :: MODEL_X3LYP        ='X3LYP'
 !-----------------------------------------------------------------------------------------------------
 !  Numerical keys for model chemistries
+   INTEGER, PARAMETER :: NO_EXCHANGE      =      -1 ! Use no exchange (or correlation); this is bare Coulomb
    INTEGER, PARAMETER :: EXACT_EXCHANGE   =03045805 ! Use exact Hartree-Fock exchange
    INTEGER, PARAMETER :: HAS_DFT          =10000000 ! Any key above this has DFT
    INTEGER, PARAMETER :: HYBRID_B3LYP_VWN3=10268305 ! Use Beckes B3LYP model with VWN3 LSD correlation

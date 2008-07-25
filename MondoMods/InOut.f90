@@ -2027,13 +2027,14 @@ CONTAINS
               !     Get arguments from the command line
 
               SUBROUTINE Get_ARGMT(A)
+                IMPLICIT NONE
 #ifdef NAG
                 USE F90_UNIX
-                IMPLICIT NONE
+#elif PGF
+                INTEGER,EXTERNAL               :: IARGC
 #else
-                IMPLICIT NONE
-!                INTEGER,EXTERNAL               :: IARGC
 #endif
+
                 TYPE(ARGMT)                    :: A
                 CHARACTER(LEN=DEFAULT_CHR_LEN) :: Tmp1,Tmp2
                 INTEGER                        :: I,NArg,NChar,NInts

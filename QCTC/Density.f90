@@ -417,17 +417,22 @@ CONTAINS
     J=1
     DO WHILE(J.LE.NLink)
        !
+
+!	WRITE(*,*)J,ListArray1(J),ASSOCIATED(LinkArray1(ListArray1(J))%L)
+
        IF(.NOT.ASSOCIATED(LinkArray1(ListArray1(J))%L))THEN
           J=J+1
           CYCLE
        ENDIF
+
        ZJ=LinkArray1(ListArray1(J))%L%Zeta
        RJ=LinkArray1(ListArray1(J))%L%Cent
+
        L=0
        DO K=J+1,NLink
           IF(.NOT.ASSOCIATED(LinkArray1(ListArray1(K))%L))CYCLE
-          DX=ABS(RJ(ISort)-LinkArray1(ListArray1(K))%L%Cent(ISort))
-          IF(DX.GT.1D-3)EXIT
+          DX=ABS(RJ(ISort)-LinkArray1(ListArray1(K))%L%Cent(ISort))	
+          IF(DX.GT.1D0)EXIT
           ZK=LinkArray1(ListArray1(K))%L%Zeta
           RK=LinkArray1(ListArray1(K))%L%Cent
           ZZJK=ZK*ZJ/(ZK+ZJ)
@@ -437,16 +442,21 @@ CONTAINS
           RealArray1(L)=Bhatt
           ListArray2(L)=ListArray1(K)
        ENDDO
+
        IF(L>0)THEN
-          CALL DblIntSort77(L,RealArray1,ListArray2,2)
+          CALL DblIntSort77(L,RealArray1,ListArray2,2)	
+
           DO I=1,L
              IF(RealArray1(I).GT.1D-8)EXIT
              !
              JLst=ListArray1(J)
              KLst=ListArray2(I)
 
-!!$             WRITE(*,*)' Link to be retaind (J) = ',JLst
-!!$             WRITE(*,*)' Link to be removed (K) = ',KLst
+!	IF(JLst==3294.OR.KLst==3294)THEN
+!             WRITE(*,*)' Link to be retaind (J) = ',JLst
+!             WRITE(*,*)' Link to be removed (K) = ',KLst
+!        ENDIF	
+
 
              IF(KLst==1.OR.KLst==NLink)CYCLE
 
@@ -458,6 +468,12 @@ CONTAINS
              ! Add density K to J link
              !
              IF(EllJ>=EllK)THEN
+
+!	        WRITE(*,*)' JLst = ',JLst,LinkArray1(JLst)%L%LNum, &
+!                          ALLOCATED(LinkArray1(JLst)%L%Coef%D)
+!	        WRITE(*,*)' KLst = ',KLst,LinkArray1(KLst)%L%LNum, &
+!                         ALLOCATED(LinkArray1(KLst)%L%Coef%D)
+
                 LinkArray1(JLst)%L%Coef%D(1:LenK)=LinkArray1(JLst)%L%Coef%D(1:LenK) &
                                                  +LinkArray1(KLst)%L%Coef%D(1:LenK) 
              ELSE                
@@ -474,6 +490,15 @@ CONTAINS
              !
              CALL Delete(LinkArray1(KLst)%L%Coef)
              DEALLOCATE(LinkArray1(KLst)%L)             
+             NULLIFY(LinkArray1(KLst)%L)             
+
+
+!	IF(JLst==3294.OR.KLst==3294)THEN
+!	   WRITE(*,*)' DONE DELISTING '
+!	             WRITE(*,*)' Link to be retaind (J) = ',JLst
+!        	     WRITE(*,*)' Link to be removed (K) = ',KLst
+!        ENDIF
+
              !
              KLstM1=KLst-1
              IF(KLstM1<1)CYCLE
@@ -494,6 +519,12 @@ CONTAINS
                    EXIT
                 ENDIF
              ENDDO
+
+!	IF(JLst==3294.OR.KLst==3294)THEN
+!	   WRITE(*,*)' Plus Minus ',KLstM1,KLstP1
+!	   WRITE(*,*)KLST,' Associated?? ',ASSOCIATED(LinkArray1(KLst)%L)
+!        ENDIF	
+
              !
              IF(KLstM1==KLstP1)GOTO 101 
              !
@@ -608,6 +639,12 @@ CONTAINS
 
                    NULLIFY(HGLink%Next)
                    CALL New(HGLink%Coef,LenKet)
+
+!	           IF(NLink==3294)THEN
+!	             WRITE(*,*)3294, ' ALLOC? ',ALLOCATED(HGLink%Coef%D)
+!		STOP	
+!ENDIF		
+
                    HGLink%Coef%D=Zero
                    !
                    IA=IndexA
