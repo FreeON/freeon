@@ -35,7 +35,7 @@ PROGRAM MondoSCF
   USE PrintParsed
   USE MDynamics
   USE MonteCarlo
-
+  USE RayleighQuotientIteration
   IMPLICIT NONE
 
   TYPE(Controls) :: C
@@ -56,6 +56,11 @@ PROGRAM MondoSCF
     SELECT CASE(C%Opts%Grad)
     CASE(GRAD_NO_GRAD)
       CALL SinglePoints(C)
+      CALL SetFrontEndMacros(C%Geos,C%Sets)
+
+      CALL RQI(NBasF,1,C%Nams,C%Opts,C%Stat,C%Geos%Clone(1), &
+               C%Sets%BSets(1,C%Sets%NBSets))
+
       CALL CPSCF(C)
     CASE(GRAD_GO_DOWNHILL)
       CALL Descender(C)
