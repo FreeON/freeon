@@ -618,6 +618,32 @@ CONTAINS
     ENDIF
   END SUBROUTINE DensityBuild
   !===============================================================================
+  !   Subroutine to load the global macro parameters used mostly in the backend
+  !   into the front end, so that we can do kluge work. Assumes that we are
+  !   at the end of our basis set list, first clone etc. NOT APPROPRIATE for
+  !   general work.
+  !===============================================================================
+  SUBROUTINE SetFrontEndMacros(G,B)
+    TYPE(BasisSets)  :: B
+    TYPE(Geometries) :: G
+    INTEGER          :: II
+    !
+    MyClone=1
+    NBasF=B%BSets(1,B%NBSets)%NBasF
+    NAToms=G%Clone(1)%NAtms
+    MaxAtms=B%MxAts(B%NBSets)
+    MaxBlks=B%MxBlk(B%NBSets)
+    MaxNon0=B%MxN0s(B%NBSets)
+    CALL New(BSiz,NAtoms)
+    CALL New(OffS,NAtoms)
+    BSiz%I=B%BSiz(1,B%NBSets)%I
+    OffS%I=B%OffS(1,B%NBSets)%I
+    MaxBlkSize=0
+    DO II=1,G%Clone(1)%NAtms
+       MaxBlkSize=MAX(MaxBlkSize,BSiz%I(II))
+    ENDDO
+  END SUBROUTINE SetFrontEndMacros
+  !===============================================================================
   !
   !===============================================================================
   SUBROUTINE DensityLogic(cSCF,cBAS,cGEO,N,S,O,D,CPSCF_O)
