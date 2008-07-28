@@ -29,6 +29,7 @@ MondoSCF_SOURCES = \
   ParseInput.f90 \
   PunchHDF.f90 \
   Overlay.f90 \
+  RQI.f90 \
   PrintParsed.f90 \
   SCFKeys.f90 \
   SCFs.f90 \
@@ -174,7 +175,8 @@ MondoSCF.o : \
   ZippyQuote.o \
   PrintParsed.o \
   MDynamics.o \
-  MonteCarlo.o
+  MonteCarlo.o \
+  RQI.o
 
 QUICCA.o : \
   PunchHDF.o \
