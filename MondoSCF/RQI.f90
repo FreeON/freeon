@@ -53,7 +53,7 @@ CONTAINS
     REAL(DOUBLE),DIMENSION(N,N)     :: XkOld,PkOld,GkOld
     REAL(DOUBLE),DIMENSION(N)       :: Values
     REAL(DOUBLE),DIMENSION(N,N,M)   :: Vectors
-    REAL(DOUBLE),DIMENSION(N,N,N,N) :: TwoE
+    REAL(DOUBLE),DIMENSION(N,N,N,N) :: TwoE,DoubleSlash
 
 
     CALL Get(sP,TrixFile("OrthoD",PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME, &
@@ -63,37 +63,64 @@ CONTAINS
     CALL Get(sZ,TrixFile("X",PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=S%Current%I))
     !
     CALL SetEq(P,sP)
+    CALL SetEq(Q,sP)
+    P%D=Two*P%D
+    Q%D=-Two*Q%D
+    DO I=1,N 
+       Q%D(I,I)=Q%D(I,I)+Two
+    ENDDO
+    !
     CALL SetEq(F,sF)
     CALL SetEq(Z,sZ)
     !
-    CALL SetEq(Q,sP)
-    DO I=1,N 
-       Q%D(I,I)=One-P%D(I,I)
+    CALL Integrals2E(B,G,TwoE)
+    DO I=1,N
+       DO J=1,N
+          DO K=1,N
+             DO L=1,N
+                
+                DoubleSlash(I,J,K,L)=TwoE(I,J,K,L)-TwoE(I,K,J,L)/2D0
+                CALL iPrint(DoubleSlash(I,J,K,L),I,J,K,L,1,6)
+             ENDDO
+          ENDDO
+       ENDDO
     ENDDO
     !
-    CALL Integrals2E(B,G,TwoE)
-    !
-!!$    WRITE(*,*)TrixFile("OrthoD",PWD_O=N%M_SCRATCH,Name_O=Nam%SCF_NAME, &
-!!$         Stats_O=S%Current%I,OffSet_O=0)
+    WRITE(*,*)TrixFile("OrthoD",PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME, &
+         Stats_O=S%Current%I,OffSet_O=0)
+
+    CALL PPrint(P," Por ",Unit_O=6)
+    CALL PPrint(Q," Qor ",Unit_O=6)
+
+
 !!$    WRITE(*,*)TrixFile("OrthoF",PWD_O=N%M_SCRATCH,Name_O=Nam%SCF_NAME, &
 !!$         Stats_O=S%Current%I,OffSet_O=0)
 !!$    WRITE(*,*)TrixFile("X",PWD_O=N%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=S%Current%I)
-!!$    DO I=1,N
-!!$       DO J=1,N
-!!$          DO K=1,N
-!!$             DO L=1,N
-!!$                CALL iPrint(TwoE(I,J,K,L),I,J,K,L,1,6)
-!!$             ENDDO
-!!$          ENDDO
-!!$       ENDDO
-!!$    ENDDO
+
     !
     DO I=1,1 !M
        !
-       CALL RPAGuess(I,Xk)
+       CALL RPAGuess(N,Xk)
+
+       CALL PPrint(Xk," XK ",Unit_O=6)
+
        CALL Anihilate(N,P%D,Q%D,Xk)
-       CALL LOn2(N,F%D,P%D,Z%D,TwoE,Xk,LXk)
+
+       CALL PPrint(Xk," XK ",Unit_O=6)
+
+       CALL ReNorm(N,P%D,Xk)
+       CALL PPrint(Xk," Renormed Xk ",Unit_O=6)
+
+
+       CALL LOn2(N,F%D,P%D,Z%D,DoubleSlash,Xk,LXk)
+
+       CALL PPrint(LXk," LXK ",Unit_O=6)
+
+       STOP
        CALL Anihilate(N,P%D,Q%D,LXk)
+
+
+
        !
        Beta=Zero
        Ek=ThoulessQ(N,P%D,Xk,LXk) 
@@ -106,7 +133,7 @@ CONTAINS
           ENDIF
           Pk=Gk+Beta*PkOld  
           !
-          CALL LOn2(NBasF,F%D,P%D,Z%D,TwoE,Pk,LPk)
+          CALL LOn2(NBasF,F%D,P%D,Z%D,DoubleSlash,Pk,LPk)
           CALL RQILineSearch(N,P%D,Pk,Xk,LXk,LPk,Lambda)          
           !
           XkOld=Xk
@@ -118,7 +145,7 @@ CONTAINS
           !
           CALL Anihilate(N,P%D,Q%D,Xk)
           CALL ReNorm(N,P%D,Xk)
-          CALL LOn2(N,F%D,P%D,Z%D,TwoE,Xk,LXk)
+          CALL LOn2(N,F%D,P%D,Z%D,DoubleSlash,Xk,LXk)
           CALL Anihilate(N,P%D,Q%D,LXk)
           Ek=ThoulessQ(N,P%D,Xk,LXk) 
 
@@ -173,6 +200,7 @@ CONTAINS
           DO J=1,N
              K=K+1
              temp2=DSao(:,K)
+
              !		temp1(J,I)= ddot(N*N,BB,one,temp2,one)     ! This line is 
              temp1(J,I)=DOT_PRODUCT(BB,Temp2)           ! the most CPU consuming step
           ENDDO
@@ -180,43 +208,54 @@ CONTAINS
 
      END FUNCTION LiouvDot
 
-     !-------------------------------------------------------------------------------      
-     FUNCTION LiouvAO(N,For,Por,X,DSao,AA)  RESULT(BB)
-       ! Calculates action of the Liouville operator in AO space BB=L AA, (ij||kl) 
-       IMPLICIT NONE
-       INTEGER :: I,J,M,K,L,N,one
-       REAL (DOUBLE),DIMENSION(N,N)::For,Por,AA,BB,X
-       REAL(DOUBLE),DIMENSION(N,N,N,N)::	DSao                
-       REAL(DOUBLE),DIMENSION(N,N) :: temp1,temp2
-       REAL(DOUBLE) :: E,ddot
+      FUNCTION LiouvAO(N,For,Por,X,DSao,AA)  RESULT(BB)
+! Calculates action of the Liouville operator in AO space BB=L AA, (ij||kl) 
+        IMPLICIT NONE
+        INTEGER :: I,J,M,K,L,N,one
+	  REAL (DOUBLE),DIMENSION(N,N)::For,Por,AA,BB,temp1,temp2,X
+	  REAL(DOUBLE),DIMENSION(N,N,N,N)::	DSao                
+        REAL(DOUBLE) :: E,ddot
 
-       ! AA to AO
-       one=1 
-       BB=MATMUL(TRANSPOSE(X),(MATMUL(AA,X)))      
+! AA to AO
+        one=1 
+        BB=MATMUL(TRANSPOSE(X),(MATMUL(AA,X)))      
 
-       !        DO I=1,N
-       !           DO J=1,N
-       !              temp1(I,J)= 0.0
-       !              DO K=1,N
-       !                 DO L=1,N
-       !                    temp1(I,J)=temp1(I,J)+BB(K,L)*DSao(K,L,I,J)
-       !                 END DO
-       !              END DO
-       !!            temp2=DSao(:,:,I,J)       ! This and the next line is equivalent to Liouvdot 
-       !!		temp1(I,J)= ddot(N*N,BB,one,temp2,one)
-       !           END DO
-       !        END DO   
 
-       ! Extremely inefficient procedure above, trying to replace with DOT_PRODUCT or ddot
-       temp1= LiouvDot(N,BB,DSao,temp2)  
-       BB=MATMUL(For,AA)-MATMUL(AA,For)
-       ! temp back to orthog
-       temp2=MATMUL(TRANSPOSE(X),(MATMUL(temp1,X)))
-       BB=BB+MATMUL(temp2,Por)-MATMUL(Por,temp2)
 
-     END FUNCTION LiouvAO
 
-     SUBROUTINE LiouvilleAO(N,For,Por,DSao,AA,BB,temp,X)  
+        DO I=1,N
+           DO J=1,N
+              temp1(I,J)= 0.0
+              DO K=1,N
+                 DO L=1,N
+                    temp1(I,J)=temp1(I,J)+BB(K,L)*DSao(K,L,I,J)
+
+                   WRITE(*,*)I,J,K,L,BB(K,L),DSao(K,L,I,J)
+
+
+                 END DO
+              END DO
+             WRITE(*,*)I,J,Temp1(I,J)
+
+!!            temp2=DSao(:,:,I,J)       ! This and the next line is equivalent to Liouvdot 
+!!		temp1(I,J)= ddot(N*N,BB,one,temp2,one)
+           END DO
+        END DO   
+
+! Extremely inefficient procedure above, trying to replace with DOT_PRODUCT or ddot
+!        temp1= LiouvDot(N,BB,DSao,temp2)  
+
+
+	  BB=MATMUL(For,AA)-MATMUL(AA,For)
+! temp back to orthog
+        temp2=MATMUL(TRANSPOSE(X),(MATMUL(temp1,X)))
+        BB=BB+MATMUL(temp2,Por)-MATMUL(Por,temp2)
+
+      END FUNCTION LiouvAO
+
+
+
+     SUBROUTINE LiouvilleAO(N,For,Por,DSao,AA,BB,X)  
        ! Calculates action of the Liouville operator in AO space BB=L AA, (ij||kl) 
        IMPLICIT NONE
        INTEGER :: I,J,M,K,L,N
@@ -244,15 +283,15 @@ CONTAINS
      END SUBROUTINE LiouvilleAO
 
      SUBROUTINE RPAGuess(N,X)
-       INTEGER :: N
+       INTEGER :: N,I,J
        REAL(DOUBLE), DIMENSION(N,N) :: X
        X=One
-
-!!$       do i=1,N
-!!$          do j=1,N
-!!$             Xk(i,j)= 2.0*rranf()-1.0  
-!!$	  enddo
-!!$       enddo
+!!$
+       do i=1,N
+          do j=1,N
+             X(i,j)= One/Two**(I+J)
+	  enddo
+       enddo
 !!$       temp1 = ProjectPH(N,Qor,Por,Xk)       
 !!$       Xk = temp1/sqrt(abs(Pdot1(N,Por,temp1,temp1,tmp1)))
      END SUBROUTINE RPAGuess
