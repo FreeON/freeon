@@ -82,6 +82,13 @@ MODULE GlobalScalars
   REAL(DOUBLE), PARAMETER :: BohrsToAngstroms=0.5291772083D0    ! AU ->  Angstronms
   REAL(DOUBLE), PARAMETER :: AngstromsToAU=1.889725988578923D0  ! Angstronms -> AU
   REAL(DOUBLE), PARAMETER :: GPaToAU=3.398928928849693861282D-5 ! GPa -> AU
+  ! These constants not yet verified:
+  REAL(DOUBLE), PARAMETER :: au2eV=27.21139613182D0           ! au to eV
+  REAL(DOUBLE), PARAMETER :: eVK=11676.33D0                   ! eV to K
+  REAL(DOUBLE), PARAMETER :: eVcm=8065.73D0                   ! eV to cm-1  
+  REAL(DOUBLE), PARAMETER :: eVkkal=23.06035D0                ! eV to kkal     
+  REAL(DOUBLE), PARAMETER :: auDeb=4.803242                   ! exA to Debye 
+
 
   ! Symplectic expansion coefficient 4th order by McLachlan and Atela,
   ! Nonlinearity, vol 5, 541 (1992)
