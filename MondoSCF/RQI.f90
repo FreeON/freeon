@@ -98,57 +98,32 @@ CONTAINS
 !!$    WRITE(*,*)TrixFile("X",PWD_O=N%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=S%Current%I)
 
     !
+    Shift=0.1102479D0
+
     DO I=1,M
        !
        CALL RPAGuess(N,Xk)
-
-       !       CALL PPrint(Xk," XK ",Unit_O=6)
-
-       !       CALL Anihilate(N,P%D,Q%D,Xk)
        Xk=ProjectPH(N,Q%D,P%D,Xk)
-
-       !       CALL PPrint(Xk," XK ",Unit_O=6)
-
        CALL ReNorm(N,P%D,Xk)
-       !       CALL PPrint(Xk," Renormed Xk ",Unit_O=6)
 
-       Shift=0.1102479D0
 
        CALL LOn2(N,I,Shift,F%D,P%D,Z%D,DoubleSlash,Values,Vectors,Xk,LXk)
-
        LXk=Project(N,Q%D,P%D,LXk)
 
        Beta=Zero
        XkOld=Zero
        PkOld=Zero
        Ek=ThoulessQ(N,P%D,Xk,LXk) 
-
-       WRITE(*,*)' Ek = ',Ek
        !
        DO K=0,1000
-          !          WRITE(*,*)'============================================='
-
           !
           Gk=Two*(LXk-Ek*Xk)
-          !          CALL PPrint(Gk," Gk",Unit_O=6)
-          !          IF(K==4)STOP ' 1' 
-
-          IF(K>0)THEN
+          IF(K>0)  &
              Beta=Pdot1(N,P%D,Gk-Gkold,Gk)/Pdot1(N,P%D,GkOld,GkOld)    			
-          ENDIF
           Pk=Gk+Beta*PkOld  
-
-          !          CALL PPrint(Pk," Pk",Unit_O=6)
-
           !
           CALL LOn2(N,I,Shift,F%D,P%D,Z%D,DoubleSlash,Values,Vectors,Pk,LPk)
-
-
-          !          CALL PPrint(LPk," LPk",Unit_O=6)
-
           CALL RQILineSearch(N,P%D,Pk,Xk,LXk,LPk,Lambda)          
-
-          !          WRITE(*,*)' Lambda = ',Lambda
           !
           EkOld=Ek
           XkOld=Xk
@@ -157,52 +132,121 @@ CONTAINS
           PkOld=Pk	   
           !
           Xk=XkOld+Lambda*Pk
-
-          !          CALL PPrint(XkOld,"Old Xk",Unit_O=6)
-          !          CALL PPrint(Xk,"NEW Xk",Unit_O=6)
           !
-          CALL Anihilate(N,P%D,Q%D,Xk)
+          CALL Anihilate(N,P%D,Q%D,Xk,TDA_O=.TRUE.)
           CALL ReNorm(N,P%D,Xk)
 
           CALL LOn2(N,I,Shift,F%D,P%D,Z%D,DoubleSlash,Values,Vectors,Xk,LXk)
-
-          CALL Anihilate(N,P%D,Q%D,LXk)
-
+          CALL Anihilate(N,P%D,Q%D,LXk,TDA_O=.TRUE.)
+          CALL ReNorm(N,P%D,Xk)
           Ek=ThoulessQ(N,P%D,Xk,LXk) 
 
           ErrAbs=Ek-EkOld
-
           ErrRel=-1D10
           DO U=1,N
              DO V=1,N
                 ErrRel=MAX(ErrRel,ABS(Ek*Xk(U,V)-LXk(U,V))/Ek)
              ENDDO
           ENDDO
-
-          WRITE(*,*)I,Ek*27.21139613182D0,ErrRel,ErrAbs
-
-          IF(ErrRel<1D-10)EXIT
+!          WRITE(*,*)I,Ek*27.21139613182D0,ErrRel,ErrAbs
+          IF(ErrRel<1D-4)EXIT
           !
        ENDDO
-       !
+       WRITE(*,*)I,K,Ek*27.21139613182D0,ErrRel,ErrAbs
        Values(I)=Ek 
        Vectors(:,:,I)=Xk
-
-
-
-!       CALL PPrint(Vectors(:,:,1)," VV ",Unit_O=6)
-       !
     ENDDO
     !
+     WRITE(*,*)'------------------------------------------'
+
+       Shift=0.1102479D0
+
+    DO I=1,M
+       !
+       Xk=Vectors(:,:,I)
+       CALL LOn2(N,I,Shift,F%D,P%D,Z%D,DoubleSlash,Values,Vectors,Xk,LXk)
+       LXk=Project(N,Q%D,P%D,LXk)
+       Beta=Zero
+       XkOld=Zero
+       PkOld=Zero
+       Ek=ThoulessQ(N,P%D,Xk,LXk) 
+       !
+       DO K=0,1000
+          !
+          Gk=Two*(LXk-Ek*Xk)
+          IF(K>0)  &
+             Beta=Pdot1(N,P%D,Gk-Gkold,Gk)/Pdot1(N,P%D,GkOld,GkOld)    			
+          Pk=Gk+Beta*PkOld  
+          !
+          CALL LOn2(N,I,Shift,F%D,P%D,Z%D,DoubleSlash,Values,Vectors,Pk,LPk)
+          CALL RQILineSearch(N,P%D,Pk,Xk,LXk,LPk,Lambda)          
+          !
+          EkOld=Ek
+          XkOld=Xk
+          EkOld=Ek
+          GkOld=Gk
+          PkOld=Pk	   
+          !
+          Xk=XkOld+Lambda*Pk
+          !
+          CALL Anihilate(N,P%D,Q%D,Xk)
+          CALL ReNorm(N,P%D,Xk)
+
+          CALL LOn2(N,I,Shift,F%D,P%D,Z%D,DoubleSlash,Values,Vectors,Xk,LXk)
+          CALL Anihilate(N,P%D,Q%D,LXk)
+          CALL ReNorm(N,P%D,Xk)
+          Ek=ThoulessQ(N,P%D,Xk,LXk) 
+
+          ErrAbs=Ek-EkOld
+          ErrRel=-1D10
+          DO U=1,N
+             DO V=1,N
+                ErrRel=MAX(ErrRel,ABS(Ek*Xk(U,V)-LXk(U,V))/Ek)
+             ENDDO
+          ENDDO
+!          WRITE(*,*)I,Ek*27.21139613182D0,ErrRel,ErrAbs
+          IF(ErrRel<1D-4)EXIT
+          !
+       ENDDO
+       WRITE(*,*)I,K,Ek*27.21139613182D0,ErrRel,ErrAbs
+       Values(I)=Ek 
+       Vectors(:,:,I)=Xk
+    ENDDO
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   END SUBROUTINE RQI
 
 
 
-  SUBROUTINE Anihilate(N,P,Q,X)
+  SUBROUTINE Anihilate(N,P,Q,X,TDA_O)
+    LOGICAL, OPTIONAL :: TDA_O
+    LOGICAL :: TDA
     INTEGER :: N
     REAL(DOUBLE),DIMENSION(N,N) :: P,Q,X
-    !X=ProjectPH(N,Q,P,X)
-    X=Project(N,Q,P,X)
+    IF(PRESENT(TDA_O))THEN
+       TDA=TDA_O
+    ELSE
+       TDA=.FALSE.
+    ENDIF
+    IF(TDA)THEN
+       X=ProjectPH(N,Q,P,X)
+    ELSE
+       X=Project(N,Q,P,X)
+    ENDIF
   END SUBROUTINE Anihilate
 
   SUBROUTINE LOn2(N,M,Shift,F,P,Z,TwoE,Values,Vectors,X,LX)
