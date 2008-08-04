@@ -70,6 +70,9 @@ CONTAINS
        DO I=2,NArg
           CmndLine=TRIM(CmndLine)//Blnk//TRIM(ArgV%C(I))
        ENDDO
+       
+       WRITE(*,*)'CMNDLINE = ',TRIM(CMNDLINE)
+
 
        ! Log this run
        CALL MondoLog(DEBUG_NONE, "Invoke", TRIM(CmndLine))
@@ -116,7 +119,6 @@ CONTAINS
     INTEGER            :: I,K,NArg,cCLUMP,SNC,NewDex
     TYPE(CHR_VECT)     :: ArgT,ArgV
     SNC=SIZE(S%Action%C)
-
 #ifdef MPI2 
     NArg=8+SNC
     CALL New(ArgT,NArg)

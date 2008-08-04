@@ -31,6 +31,7 @@
 
 MODULE MondoLogger
 
+
   USE GlobalCharacters
   USE GlobalObjects
   USE ParsingConstants
@@ -72,7 +73,7 @@ CONTAINS
     ELSE
 
       ! Create a new file and open it
-      WRITE(*,"(A)") "[MondoLog] logfile "//TRIM(filename)//" does not exist, creating it"
+      WRITE(*,"(A)") "[MondoLog] logfile <"//TRIM(filename)//"> does not exist, creating it"
       OPEN(UNIT = fd, FILE = filename, &
         ACCESS = "SEQUENTIAL", FORM = "FORMATTED", &
         ERR = 13, IOSTAT = IOS, STATUS = "NEW")
@@ -83,17 +84,17 @@ CONTAINS
 11  WRITE(*,"(A)")    "[MondoLog.inquire] Fatal Error"
     WRITE(*,"(A,I3)") "  IOS  = ", IOS
     WRITE(*,"(A)")    "  file = "//TRIM(filename)
-    STOP
+    CALL Trap()
 
 12  WRITE(*,"(A)") "[MondoLog.append] Fatal Error"
     WRITE(*,"(A,I3)") "  IOS  = ", IOS
     WRITE(*,"(A)")    "  file = "//TRIM(filename)
-    STOP
+    CALL Trap()
 
 13  WRITE(*,"(A)") "[MondoLog.new] Fatal Error"
     WRITE(*,"(A,I3)") "  IOS  = ", IOS
     WRITE(*,"(A)")    "  file = "//TRIM(filename)
-    STOP
+    CALL Trap()
 
   END SUBROUTINE OpenLogfile
 

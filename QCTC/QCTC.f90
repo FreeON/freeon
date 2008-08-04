@@ -42,6 +42,7 @@ PROGRAM QCTC
   QCTC_TotalTime_Start=MTimer()
   ! Start up macro
   CALL StartUp(Args,Prog,Serial_O=.TRUE.)
+  NukesOn=.TRUE.
   ! Chose a density matrix
   IF(SCFActn=='BasisSetSwitch')THEN
      ! Get the previous information
@@ -101,6 +102,9 @@ PROGRAM QCTC
         CALL Halt('MakeRho: SCFActn cannot be equal to <StartResponse>')
      ELSEIF(SCFActn=='DensityPrime')THEN
         CALL Get(Dmat,TrixFile('DPrime'//TRIM(Args%C%C(3)),Args,0))
+     ELSEIF(SCFActn=='TD-SCF')THEN
+        NukesOn=.FALSE.
+        CALL Get(Dmat,TrixFile(Args%C%C(3),Args,0))
      ELSEIF(SCFActn/='Core')THEN
         ! Default
         CALL Get(Dmat,TrixFile('D',Args,0))
@@ -123,7 +127,8 @@ PROGRAM QCTC
   ! Here, the LL is filled out
   CALL MakeRhoList(GM,BS,DMat,NLink,RhoHead,'QCTC',NoWrap_O=NoWrap)
   ! Add in the nuclear charges only in certain cases
-  IF(SCFActn/='InkFok'.AND.SCFActn/='StartResponse'.AND.SCFActn/='DensityPrime')THEN
+  IF(NukesOn)THEN !.OR.SCFActn/='InkFok'.AND.SCFActn/='StartResponse'.AND.SCFActn/='DensityPrime')THEN
+     WRITE(*,*)' Adding nukes to density '
      CALL AddNukes(GM,RhoHead,NoWrap)
      NLink=NLink+GM%NAtms
   ENDIF
@@ -237,16 +242,23 @@ PROGRAM QCTC
   ELSE
      CALL Put(T1,TrixFile('J',Args,0))
   ENDIF
-  ! Compute the nuclear-total electrostatic energy in O(N Lg N)
-  IF(SCFActn=='InkFok')THEN
-     CALL Get(E_Nuc_Tot,'E_NuclearTotal')
-     CALL Elapsed_Time(TimeNukE,'Init')
-     E_Nuc_Tot=E_Nuc_Tot+NukE(GM,Rho,NoWrap)
-     CALL Elapsed_Time(TimeNukE,'Accum')
-  ELSE     
-     CALL Elapsed_Time(TimeNukE,'Init')
-     E_Nuc_Tot=NukE(GM,Rho,NoWrap)
-     CALL Elapsed_Time(TimeNukE,'Accum')
+
+  WRITE(*,*)' Wrote ',TRIM(TrixFile('J',Args,0))
+
+  IF(NukesOn)THEN
+     ! Compute the nuclear-total electrostatic energy in O(N Lg N)
+     IF(SCFActn=='InkFok')THEN
+        CALL Get(E_Nuc_Tot,'E_NuclearTotal')
+        CALL Elapsed_Time(TimeNukE,'Init')
+        E_Nuc_Tot=E_Nuc_Tot+NukE(GM,Rho,NoWrap)
+        CALL Elapsed_Time(TimeNukE,'Accum')
+     ELSE     
+        CALL Elapsed_Time(TimeNukE,'Init')
+        E_Nuc_Tot=NukE(GM,Rho,NoWrap)
+        CALL Elapsed_Time(TimeNukE,'Accum')
+     ENDIF
+  ELSE
+     E_Nuc_Tot=Zero
   ENDIF
 
 !  WRITE(*,*)' E_EL-TOT = ',Trace(DMat,T1)    

@@ -27,6 +27,7 @@ MODULE RayleighQuotientIteration
   USE InOut
   USE Macros
   USE MemMan
+  USE Overlay
   USE Indexing
   USE AtomPairs
   USE PrettyPrint
@@ -38,10 +39,11 @@ MODULE RayleighQuotientIteration
   IMPLICIT NONE
 CONTAINS
 
-  SUBROUTINE RQI(N,M,Nam,O,S,G,B)
+  SUBROUTINE RQI(N,M,Nam,O,S,MPI,G,B)
     INTEGER            :: N,M,I,J,K,L,U,V
-    TYPE(FileNames)    :: Nam
-    TYPE(State)        :: S
+    TYPE(FileNames)    :: Nam,RQINams
+    TYPE(State)        :: S,RQIStat
+    TYPE(Parallel)     :: MPI
     TYPE(Options)      :: O
     TYPE(CRDS)         :: G
     TYPE(BSET)         :: B
@@ -55,11 +57,11 @@ CONTAINS
     REAL(DOUBLE),DIMENSION(N,N,M)   :: Vectors
     REAL(DOUBLE),DIMENSION(N,N,N,N) :: TwoE,DoubleSlash
 
+    RQIStat=S
+    RQINams=Nam
 
-    CALL Get(sP,TrixFile("OrthoD",PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME, &
-         Stats_O=S%Current%I,OffSet_O=0))
-    CALL Get(sF,TrixFile("OrthoF",PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME, &
-         Stats_O=S%Current%I,OffSet_O=0))
+    CALL Get(sP,TrixFile("OrthoD",PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=S%Current%I,OffSet_O=0))
+    CALL Get(sF,TrixFile("OrthoF",PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=S%Current%I,OffSet_O=0))
     CALL Get(sZ,TrixFile("X",PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=S%Current%I))
     !
     CALL SetEq(P,sP)
@@ -79,7 +81,7 @@ CONTAINS
           DO K=1,N
              DO L=1,N
 
-                DoubleSlash(I,J,K,L)=TwoE(I,J,K,L)-TwoE(I,K,J,L)/2D0
+                DoubleSlash(I,J,K,L)=TwoE(I,J,K,L)*zero-TwoE(I,K,J,L)/2D0
                 !                CALL iPrint(DoubleSlash(I,J,K,L),I,J,K,L,1,6)
              ENDDO
           ENDDO
@@ -101,13 +103,23 @@ CONTAINS
     Shift=0.1102479D0
 
     DO I=1,M
+      
        !
        CALL RPAGuess(N,Xk)
        Xk=ProjectPH(N,Q%D,P%D,Xk)
        CALL ReNorm(N,P%D,Xk)
-
-
        CALL LOn2(N,I,Shift,F%D,P%D,Z%D,DoubleSlash,Values,Vectors,Xk,LXk)
+       CALL PPrint(LXk," LXk ",Unit_O=6)
+
+
+       CALL RPAGuess(N,Xk)
+       Xk=ProjectPH(N,Q%D,P%D,Xk)
+       CALL ReNorm(N,P%D,Xk)
+       CALL LOn2BakEnd(N,I,Shift,F%D,P%D,Xk,Values,Vectors,'X',Nam,S,MPI,LXk)
+       CALL PPrint(LXk," LXk ",Unit_O=6)
+
+       STOP
+
        LXk=Project(N,Q%D,P%D,LXk)
 
        Beta=Zero
@@ -249,6 +261,131 @@ CONTAINS
     ENDIF
   END SUBROUTINE Anihilate
 
+  SUBROUTINE LOn2BakEnd(N,I,Shift,F,P,AA,Values,Vectors,Trgt,Nam,S,MPI,LX)
+    INTEGER            :: N,I,J
+    TYPE(FileNames)    :: Nam,RQIName
+    TYPE(State)        :: S,RQIStat
+    TYPE(Parallel)     :: MPI
+    
+    TYPE(BCSR)         :: sB,sZ,sK,sJ,sJK,sT1,sX
+    TYPE(DBL_RNK2)     :: BB,JK
+
+
+    REAL(DOUBLE),DIMENSION(N,N)    :: F,P,Z,X,LX,AA,Temp2
+    REAL(DOUBLE)                   :: Shift,OmegaPls,OmegaMns,WS
+    REAL(DOUBLE),DIMENSION(:)      :: Values
+    REAL(DOUBLE),DIMENSION(:,:,:)  :: Vectors
+    CHARACTER(LEN=*)               :: Trgt 
+
+!   CALL PPrint(AA,'INPUT 1',Unit_O=6)
+   CALL New(BB,(/N,N/))
+   CALL New(JK,(/N,N/))
+    !
+    CALL New(RQIStat%Action,2)
+    CALL New(RQIStat%Current,3)
+    CALL New(RQIStat%Previous,3)
+    RQIStat%Current%I=S%Current%I
+    RQIStat%Previous%I=S%Previous%I
+    RQIStat%Action%C(1)="TD-SCF"
+    RQIStat%Action%C(2)=Trgt//TRIM(IntToChar(I))
+    !
+    RQIStat%Previous%I(1)=I-1
+    RQIStat%Current%I(1)=I
+    !
+    RQIName=Nam
+    RQIName%SCF_NAME=Nam%SCF_NAME
+    !
+    BB%D=AA
+    sX%NSMat=1
+    CALL SetEq(sX,BB)
+    !
+    CALL Get(sZ,TrixFile("X",PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=RQIStat%Current%I))    
+    !
+    CALL Multiply(sZ,sX,sT1)        
+    CALL Multiply(sT1,sZ,sX)
+    !
+    CALL Put(sX,TrixFile(RQIStat%Action%C(2),PWD_O=Nam%M_SCRATCH, &
+             Name_O=RQIName%SCF_NAME,Stats_O=RQIStat%Current%I,OffSet_O=0))
+
+!    CALL PPrint(sX,'INPUT 2',Unit_O=6)
+
+
+    CALL Invoke('QCTC',RQIName,RQIStat,MPI)
+    CALL Invoke('ONX',RQIName,RQIStat,MPI)
+    !
+    CALL Get(sJ,TrixFile("J",PWD_O=Nam%M_SCRATCH,Name_O=RQIName%SCF_NAME,Stats_O=RQIStat%Current%I,OffSet_O=0))
+    CALL Get(sK,TrixFile("K",PWD_O=Nam%M_SCRATCH,Name_O=RQIName%SCF_NAME,Stats_O=RQIStat%Current%I,OffSet_O=0))    
+    !
+    sJ%MTrix%D=Half*sJ%MTrix%D
+    sK%MTrix%D=Half*sK%MTrix%D
+
+    ! Here is a total kluge, that corrects (hopefully!!) for the
+    ! fact that K is built lower triangular, and reflected up.
+    CALL SetEq(BB,sK)
+    DO I=1,N
+       DO J=I+1,N
+          BB%D(I,J)=-BB%D(I,J)
+       ENDDO
+    ENDDO
+    CALL SetEq(sK,BB)
+
+!    CALL PPrint(sJ,'J[X]',Unit_O=6)
+!    CALL PPrint(sK,'K[X]',Unit_O=6)
+
+!    CALL Add(sJ,sK,sJK)
+    CALL SetEq(sJK,sK)
+
+    CALL Delete(sJ)
+    CALL Delete(sK)
+
+    CALL PPrint(sJK,'AO_JK[X]',Unit_O=6)
+
+    CALL Multiply(sZ,sJK,sT1)        
+    CALL Multiply(sT1,sZ,sJK)
+
+    CALL PPrint(sJK,'OR_JK[X]',Unit_O=6)
+
+!    CALL Filter(Tmp1,F)                 ! T1 =F_Orthog=Filter[Z^t.F_AO.Z]
+
+    CALL SetEq(JK,sJK)
+
+    temp2=MATMUL(JK%D,P)-MATMUL(P,JK%D)
+
+    LX=MATMUL(F,AA)-MATMUL(AA,F)
+    LX=LX+temp2
+
+    CALL PPrint(LX,'L[X]',Unit_O=6)
+
+
+    STOP
+
+    CALL Delete(JK)
+    CALL Delete(sJK)
+    CALL Delete(sB)
+    CALL Delete(sZ)
+    CALL Delete(sX)
+    CALL Delete(sT1)
+    CALL Delete(RQIStat%Action)
+    CALL Delete(RQIStat%Current)
+    CALL Delete(RQIStat%Previous)
+
+
+    !    IF(M==1)RETURN
+    IF(I>1)STOP
+!!$
+!!$!    WRITE(*,*)' Shift = ',Shift
+!!$
+!!$    WS=Values(M-1)-Values(1)+Shift 
+!!$
+!!$    Com=MATMUL(X,P)-MATMUL(P,X)
+!!$    DO J=1,M-1
+!!$       OmegaPls=Trace2(MATMUL(TRANSPOSE(Vectors(:,:,J)),Com),N)
+!!$       OmegaMns=Trace2(MATMUL(Vectors(:,:,J),Com),N)
+!!$       LX=LX+WS*(OmegaMns*TRANSPOSE(Vectors(:,:,J))+OmegaPls*Vectors(:,:,J))
+!!$    ENDDO
+
+  END SUBROUTINE LOn2BakEnd
+
   SUBROUTINE LOn2(N,M,Shift,F,P,Z,TwoE,Values,Vectors,X,LX)
     INTEGER :: N,M,J
     REAL(DOUBLE),DIMENSION(N,N)     :: F,P,Z,X,LX,AA,BB,Temp,Com
@@ -256,6 +393,8 @@ CONTAINS
     REAL(DOUBLE)                  :: Shift,OmegaPls,OmegaMns,WS
     REAL(DOUBLE),DIMENSION(:)     :: Values
     REAL(DOUBLE),DIMENSION(:,:,:) :: Vectors
+
+    CALL PPrint(X,'INPUT 1',Unit_O=6)
 
     LX=LiouvAO(N,F  ,P  ,Z,TwoE,X )  
     !
@@ -335,8 +474,7 @@ CONTAINS
     one=1 
     BB=MATMUL(TRANSPOSE(X),(MATMUL(AA,X)))      
 
-
-
+    CALL PPrint(BB,'INPUT 2',Unit_O=6)
 
     DO I=1,N
        DO J=1,N
@@ -355,9 +493,21 @@ CONTAINS
     !        temp1= LiouvDot(N,BB,DSao,temp2)  
 
 
+
+    CALL PPrint(temp1,'AO_JK[X]',Unit_O=6)
+    
     BB=MATMUL(For,AA)-MATMUL(AA,For)
+
+
+
     ! temp back to orthog
     temp2=MATMUL(TRANSPOSE(X),(MATMUL(temp1,X)))
+
+!    CALL PPrint(X,'Z',Unit_O=6)
+!    CALL PPrint(MATMUL(temp1,X),'T1',Unit_O=6)
+
+    CALL PPrint(temp2,'OR_JK[X]',Unit_O=6)
+
     BB=BB+MATMUL(temp2,Por)-MATMUL(Por,temp2)
 
   END FUNCTION LiouvAO

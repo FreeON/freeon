@@ -129,13 +129,6 @@ CONTAINS
     Mssg=TRIM(Mssg)//' Econ = '//TRIM(DblToShrtChar(DBLE(NNaive)/DBLE(NLink))) &
                    //', Gaussians = '//TRIM(IntToChar(NLink))
     WRITE(*,*)TRIM(Mssg)
-
-
-
-
-    WRITE(*,*)' PwMAX = ',PwMax
-
-
     ! Next, calculate the Schwartz inequality and prune small links ???
   END SUBROUTINE MakeRhoList
   !

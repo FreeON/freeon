@@ -99,8 +99,10 @@ CONTAINS
 #endif
        NC=StringLen(FileName)
        FileID=HDF5OpenFile(NC,Char2Ints(NC,FileName))
-       IF(FileID==FAIL) &
-            CALL Halt(' Failed to open the HDF file <'//TRIM(FileName)//'>.') 
+       IF(FileID==FAIL)THEN
+          WRITE(*,*)' Failed to open the HDF file <'//TRIM(FileName)//'>.'
+          CALL Halt(' Failed to open the HDF file <'//TRIM(FileName)//'>.') 
+       ENDIF
 #ifdef PARALLEL
     ENDIF
 #endif  
