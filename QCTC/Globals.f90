@@ -13,5 +13,8 @@ MODULE Globals
   INTEGER,PARAMETER ::   MaxCluster=2048
   ! At what do we stop recurring on the tree:
   INTEGER,PARAMETER ::   MinCluster=32
+  ! Logical variable to control "electrons" only option
+  ! Useful in case of RPA etc
+  LOGICAL           :: NukesOn
 END MODULE Globals
 
