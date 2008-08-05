@@ -102,20 +102,22 @@ CONTAINS
     !
     Shift=0.1102479D0
 
-    DO I=1,M
+    DO I=1,1
       
        !
        CALL RPAGuess(N,Xk)
        Xk=ProjectPH(N,Q%D,P%D,Xk)
        CALL ReNorm(N,P%D,Xk)
-       CALL LOn2(N,I,Shift,F%D,P%D,Z%D,DoubleSlash,Values,Vectors,Xk,LXk)
+!       CALL LOn2(N,I,Shift,F%D,P%D,Z%D,DoubleSlash,Values,Vectors,Xk,LXk)
 !       CALL PPrint(LXk," LXk ",Unit_O=6)
 
 
 !       CALL RPAGuess(N,Xk)
 !       Xk=ProjectPH(N,Q%D,P%D,Xk)
 !       CALL ReNorm(N,P%D,Xk)
-!       CALL LOn2BakEnd(N,I,0,Shift,Xk,Values,Vectors,'X',Nam,S,MPI,LXk)
+
+       CALL LOn2BakEnd(N,I,0,Shift,Xk,Values,Vectors,'Xk',Nam,S,MPI,LXk)
+
 !       CALL PPrint(LXk," LXk ",Unit_O=6)
 
 !       STOP
@@ -134,8 +136,11 @@ CONTAINS
              Beta=Pdot1(N,P%D,Gk-Gkold,Gk)/Pdot1(N,P%D,GkOld,GkOld)    			
           Pk=Gk+Beta*PkOld  
           !
-          CALL LOn2(N,I,Shift,F%D,P%D,Z%D,DoubleSlash,Values,Vectors,Pk,LPk)
-          CALL RQILineSearch(N,P%D,Pk,Xk,LXk,LPk,Lambda)          
+!          CALL LOn2(N,I,Shift,F%D,P%D,Z%D,DoubleSlash,Values,Vectors,Pk,LPk)
+          CALL LOn2BakEnd(N,I,K,Shift,Pk,Values,Vectors,'Pk',Nam,S,MPI,LPk)
+          !
+!          CALL RQILineSearch(N,P%D,Pk,Xk,LXk,LPk,Lambda)          
+          CALL RQILineSearchBakEnd(I,Nam,S,Lambda)          
           !
           EkOld=Ek
           XkOld=Xk
@@ -147,10 +152,13 @@ CONTAINS
           !
           CALL Anihilate(N,P%D,Q%D,Xk,TDA_O=.TRUE.)
           CALL ReNorm(N,P%D,Xk)
-
-          CALL LOn2(N,I,Shift,F%D,P%D,Z%D,DoubleSlash,Values,Vectors,Xk,LXk)
+          !
+!          CALL LOn2(N,I,Shift,F%D,P%D,Z%D,DoubleSlash,Values,Vectors,Xk,LXk)
+          CALL LOn2BakEnd(N,I,K,Shift,Xk,Values,Vectors,'Xk',Nam,S,MPI,LXk)
+          !
           CALL Anihilate(N,P%D,Q%D,LXk,TDA_O=.TRUE.)
           CALL ReNorm(N,P%D,Xk)
+          !
           Ek=ThoulessQ(N,P%D,Xk,LXk) 
 
           ErrAbs=Ek-EkOld
@@ -171,9 +179,10 @@ CONTAINS
     !
      WRITE(*,*)'------------------------------------------'
 
+     STOP
        Shift=0.1102479D0
 
-    DO I=1,M
+    DO I=1,1
        !
        Xk=Vectors(:,:,I)
        CALL LOn2(N,I,Shift,F%D,P%D,Z%D,DoubleSlash,Values,Vectors,Xk,LXk)
@@ -283,7 +292,7 @@ CONTAINS
     CALL SetEq(sX,BB)
     CALL Delete(BB)
     !----------------------------------------------------------------------------
-    ! End kluge, begin clean code
+    ! End kluge, begin clean backend code
     !----------------------------------------------------------------------------
     ! Set up local Invokation parameters based on ground state values
     CALL New(RQIStat%Action,2)
@@ -291,23 +300,27 @@ CONTAINS
     CALL New(RQIStat%Previous,3)
     RQIStat%Current%I=S%Current%I
     RQIStat%Previous%I=S%Previous%I
-    ! Action is TD-SCF with secondary parameter the product (L[X] or L[P]) 
-    ! tagged by the state number (I)
+    ! Action is TD-SCF with secondary parameter the product LX or LP (L[Xk], L[Pk]) 
     RQIStat%Action%C(1)="TD-SCF"
-    RQIStat%Action%C(2)=Trgt//TRIM(IntToChar(I))
-    ! Cycle is the RQI iteration number  
-    RQIStat%Current%I(1)=K
-    RQIStat%Previous%I(1)=MAX(0,K-1)
-    ! 
+    RQIStat%Action%C(2)=TRIM(Trgt) !//TRIM(IntToChar(I))
+    ! Cycle is the RQI iteration number (THOUGH NOT FOR THE MOMENT ANYWAY)  
+    !    RQIStat%Current%I(1)=K
+    !    RQIStat%Previous%I(1)=MAX(0,K-1)
+    ! "SCF cycle" is the RQI State number 
+    RQIStat%Current%I(1)=I
+    RQIStat%Previous%I(1)=I
+    !
+    ! Bit of a kluge.  Probably temporary 
+    !
+    ! This is the orthogonal transition density matrix (or CG gradient) corresponding to the 
+    ! final product of this subroutine, namely L[Xk] or L[Pk] in an orthongal representation
+    CALL Put(sX,TrixFile('Ortho'//TRIM(Trgt) ,PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=RQIStat%Current%I,OffSet_O=0))
+    !
+    ! Ground state fockian in an orthogonal representation
     CALL Get(sF,TrixFile("OrthoF",PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=S%Current%I,OffSet_O=0))
     ! T2=[Xor,For]
     CALL Multiply(sX,sF,sT2)
     CALL Multiply(sF,sX,sT2,-One)
-
-!    CALL PPrint(sT2,' X.F ',Unit_O=6)
-!    CALL PPrint(MATMUL(AA,F)-MATMUL(F,AA),' X.F -F.X',Unit_O=6)
-!    STOP
-
     ! Done with F
     CALL Delete(sF)
     ! Z is the sparse inverse factor of S  
@@ -315,8 +328,8 @@ CONTAINS
     ! Xao = Z^t.Xor.Z 
     CALL Multiply(sZ,sX,sT1)        
     CALL Multiply(sT1,sZ,sX)
-    ! This is the new transition density matrix 
-    CALL Put(sX,TrixFile(RQIStat%Action%C(2),PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=RQIStat%Current%I,OffSet_O=0))
+    ! This is the AO transition density matrix (or CG gradient) 
+    CALL Put(sX,TrixFile(Trgt,PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=RQIStat%Current%I,OffSet_O=0))
     ! Done with sX
     CALL Delete(sX)
     ! Build JK[X] in the AO basis
@@ -325,10 +338,6 @@ CONTAINS
     ! Pick up J and K
     CALL Get(sJ,TrixFile("J",PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=RQIStat%Current%I,OffSet_O=0))
     CALL Get(sK,TrixFile("K",PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=RQIStat%Current%I,OffSet_O=0))    
-    ! Done with invokation parameters
-    CALL Delete(RQIStat%Action)
-    CALL Delete(RQIStat%Current)
-    CALL Delete(RQIStat%Previous)
     ! JK=Jao[X]+Kao[X]
     CALL Add(sJ,sK,sJK)
     ! Done with J and K
@@ -347,11 +356,19 @@ CONTAINS
     ! Done with P and JK
     CALL Delete(sP)
     CALL Delete(sJK)
-    ! L[X]=[F,X]+[P,JK[X]] (orthogonal)
+    ! L[Xk]=[F,Xk]+[P,JK[X]] (orthogonal)
     CALL Add(sT1,sT2,sT3)
     ! Done with temporaries 1 and 2
     CALL Delete(sT1)
     CALL Delete(sT2)
+    ! Put orthogonal L[Xk] or L[Pk] to disk (*.LX or *.LP)
+    CALL Put(sT3,TrixFile("L"//TRIM(Trgt),PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=RQIStat%Current%I,OffSet_O=0))    
+    !    CALL Delete(sT3)
+
+    ! Done with invokation parameters
+    CALL Delete(RQIStat%Action)
+    CALL Delete(RQIStat%Current)
+    CALL Delete(RQIStat%Previous)
     !----------------------------------------------------------------------------
     ! End clean, begin kluge
     !----------------------------------------------------------------------------
@@ -359,9 +376,8 @@ CONTAINS
     LX=T3%D
     CALL Delete(sT3)
     CALL Delete(T3)
-    CALL PPrint(LX,'L[X]',Unit_O=6)
-
-    STOP
+!    CALL PPrint(LX,'L[X]',Unit_O=6)
+!    STOP
     !    IF(M==1)RETURN
     IF(I>1)STOP
 !!$
@@ -396,6 +412,112 @@ CONTAINS
     ENDDO
 
   END SUBROUTINE LOn2
+
+
+  SUBROUTINE RQILineSearchBakEnd(I,N,S,Lambda)          
+    INTEGER               :: I
+    TYPE(FileNames)       :: N
+    TYPE(State)           :: S,RQIStat
+    TYPE(Parallel)        :: MPI    
+    TYPE(BCSR)            :: sP,sXk,sPk,sLXk,sLPk,sT
+    INTEGER, DIMENSION(3) :: Cur
+    REAL(DOUBLE)          :: Lambda,Lambda_p,Lambda_m
+    REAL(DOUBLE)          :: XX,PP,XP,PX,PLP,XLP,XLX,PLX,AA,BB,CC
+    !
+    Cur=S%Current%I
+    Cur(1)=I
+    !
+    WRITE(*,*)TrixFile("OrthoD",PWD_O=N%M_SCRATCH,Name_O=N%SCF_NAME,Stats_O=S%Current%I,OffSet_O=0)
+    WRITE(*,*)TrixFile('OrthoXk',PWD_O=N%M_SCRATCH,Name_O=N%SCF_NAME,Stats_O=Cur,OffSet_O=0)
+    WRITE(*,*)TrixFile('OrthoPk',PWD_O=N%M_SCRATCH,Name_O=N%SCF_NAME,Stats_O=Cur,OffSet_O=0)
+
+    !
+    CALL Get(sP ,TrixFile("OrthoD",PWD_O=N%M_SCRATCH,Name_O=N%SCF_NAME,Stats_O=S%Current%I,OffSet_O=0))
+    CALL Get(sXk,TrixFile('OrthoXk',PWD_O=N%M_SCRATCH,Name_O=N%SCF_NAME,Stats_O=Cur,OffSet_O=0))
+    CALL Get(sPk,TrixFile('OrthoPk',PWD_O=N%M_SCRATCH,Name_O=N%SCF_NAME,Stats_O=Cur,OffSet_O=0))
+    !    
+    CALL XPose(sXk,sT)
+    XX =OneDot(sP,sXk,sT) 
+    PX =OneDot(sP,sPk,sT)
+    !
+    CALL XPose(sPk,sT)
+    PP =OneDot(sP,sPk,sT)
+    XP =OneDot(sP,sXk,sT)
+    !
+    WRITE(*,*)TrixFile('LXk',PWD_O=N%M_SCRATCH,Name_O=N%SCF_NAME,Stats_O=Cur,OffSet_O=0) 
+
+    CALL Get(sLXk,TrixFile('LXk',PWD_O=N%M_SCRATCH,Name_O=N%SCF_NAME,Stats_O=Cur,OffSet_O=0))    
+    CALL XPose(sLXk,sT)
+    CALL Delete(sLXk)
+    XLX=OneDot(sP,sXk,sT)
+    PLX=OneDot(sP,sPk,sT)
+    !
+    CALL Get(sLPk,TrixFile('LPk',PWD_O=N%M_SCRATCH,Name_O=N%SCF_NAME,Stats_O=Cur,OffSet_O=0))    
+    CALL XPose(sLPk,sT)
+    CALL Delete(sLPk)
+    PLP=OneDot(sP,sPk,sT)
+    XLP=OneDot(sP,sXk,sT)
+    !
+    CALL Delete(sP)
+    CALL Delete(sT)
+    CALL Delete(sXk)
+    CALL Delete(sPk)
+    !
+    AA=PLP*(PX+XP)-PP*(PLX+XLP)
+    BB=2.0*PLP*XX-2.0*XLX*PP
+    CC=XX*(PLX+XLP)-XLX*(PX+XP)
+    !
+    lambda_p=(-BB+SQRT(BB*BB-4.0*AA*CC))/(2.0*AA)
+    lambda_m=(-BB-SQRT(BB*BB-4.0*AA*CC))/(2.0*AA)	  
+    !
+    Lambda=Lambda_P
+    WRITE(*,*)' Lambda = ',Lambda
+    STOP
+    !
+  END SUBROUTINE RQILineSearchBakEnd
+  !---------------------------------------------------------------------
+  ! Calculates TD-SCF scalar product Tr=Tr([A,P],B^+)
+  ! Assumes B^t on input
+  !---------------------------------------------------------------------
+  FUNCTION OneDot(sP,sA,sBt) RESULT(Tr) 
+    TYPE(BCSR) :: sP,sA,sBt,sT1
+    REAL(DOUBLE) :: Tr
+    CALL Multiply(sA,sP,sT1)
+    CALL Multiply(sP,sA,sT1,-One)
+    Tr=Half*Trace(sT1,sBt)
+    CALL Delete(sT1)
+  END FUNCTION OneDot
+  !
+  Subroutine RQILineSearch(N,P,Pk,Xk,LXk,LPk,Lambda)          
+    INTEGER :: N
+    REAL(DOUBLE) :: Lambda,Lambda_p,Lambda_m
+    REAL (DOUBLE),DIMENSION(N,N)::P,Pk,Xk,LXk,LPk,Tmp1
+    REAL(DOUBLE) :: XX,PP,XP,PX,PLP,XLP,XLX,PLX,AA,BB,CC
+
+    XX =Pdot1(N,P,Xk,Xk) ! 1 - normalized by definition
+    PP =Pdot1(N,P,Pk,Pk)
+    XP =Pdot1(N,P,Xk,Pk)
+    PX =Pdot1(N,P,Pk,Xk)
+    PLP=Pdot1(N,P,Pk,LPk)
+    XLX=Pdot1(N,P,Xk,LXk)
+    XLP=Pdot1(N,P,Xk,LPk)
+    PLX=Pdot1(N,P,Pk,LXk)
+
+    AA=PLP*(PX+XP)-PP*(PLX+XLP)
+    BB=2.0*PLP*XX-2.0*XLX*PP
+    CC=XX*(PLX+XLP)-XLX*(PX+XP)
+    lambda_p=(-BB+SQRT(BB*BB-4.0*AA*CC))/(2.0*AA)
+    lambda_m=(-BB-SQRT(BB*BB-4.0*AA*CC))/(2.0*AA)	  
+    Lambda=Lambda_P
+
+    WRITE(*,*)' Lambda = ',Lambda
+    STOP
+
+  END Subroutine RQILineSearch
+
+
+
+
 
   FUNCTION ThoulessQ(N,P,X,LX) RESULT(Ek)
     !! So, where is  the denominator??
@@ -533,29 +655,6 @@ CONTAINS
   END FUNCTION ProjectPH
 
 
-
-  Subroutine RQILineSearch(N,P,Pk,Xk,LXk,LPk,Lambda)          
-    INTEGER :: N
-    REAL(DOUBLE) :: Lambda,Lambda_p,Lambda_m
-    REAL (DOUBLE),DIMENSION(N,N)::P,Pk,Xk,LXk,LPk,Tmp1
-    REAL(DOUBLE) :: XX,PP,XP,PX,PLP,XLP,XLX,PLX,AA,BB,CC
-
-    XX =Pdot1(N,P,Xk,Xk) ! 1 - normalized by definition
-    PP =Pdot1(N,P,Pk,Pk)
-    XP =Pdot1(N,P,Xk,Pk)
-    PX =Pdot1(N,P,Pk,Xk)
-    PLP=Pdot1(N,P,Pk,LPk)
-    XLX=Pdot1(N,P,Xk,LXk)
-    XLP=Pdot1(N,P,Xk,LPk)
-    PLX=Pdot1(N,P,Pk,LXk)
-
-    AA=PLP*(PX+XP)-PP*(PLX+XLP)
-    BB=2.0*PLP*XX-2.0*XLX*PP
-    CC=XX*(PLX+XLP)-XLX*(PX+XP)
-    lambda_p=(-BB+SQRT(BB*BB-4.0*AA*CC))/(2.0*AA)
-    lambda_m=(-BB-SQRT(BB*BB-4.0*AA*CC))/(2.0*AA)	  
-    Lambda=Lambda_P
-  END Subroutine RQILineSearch
 
   FUNCTION Trace2(Matrix,N) RESULT(Tr)
     IMPLICIT NONE
