@@ -81,7 +81,7 @@ CONTAINS
           DO K=1,N
              DO L=1,N
 
-                DoubleSlash(I,J,K,L)=TwoE(I,J,K,L)*zero-TwoE(I,K,J,L)/2D0
+                DoubleSlash(I,J,K,L)=TwoE(I,J,K,L)-TwoE(I,K,J,L)/2D0
                 !                CALL iPrint(DoubleSlash(I,J,K,L),I,J,K,L,1,6)
              ENDDO
           ENDDO
@@ -109,16 +109,16 @@ CONTAINS
        Xk=ProjectPH(N,Q%D,P%D,Xk)
        CALL ReNorm(N,P%D,Xk)
        CALL LOn2(N,I,Shift,F%D,P%D,Z%D,DoubleSlash,Values,Vectors,Xk,LXk)
-       CALL PPrint(LXk," LXk ",Unit_O=6)
+!       CALL PPrint(LXk," LXk ",Unit_O=6)
 
 
-       CALL RPAGuess(N,Xk)
-       Xk=ProjectPH(N,Q%D,P%D,Xk)
-       CALL ReNorm(N,P%D,Xk)
-       CALL LOn2BakEnd(N,I,Shift,F%D,P%D,Xk,Values,Vectors,'X',Nam,S,MPI,LXk)
-       CALL PPrint(LXk," LXk ",Unit_O=6)
+!       CALL RPAGuess(N,Xk)
+!       Xk=ProjectPH(N,Q%D,P%D,Xk)
+!       CALL ReNorm(N,P%D,Xk)
+!       CALL LOn2BakEnd(N,I,0,Shift,Xk,Values,Vectors,'X',Nam,S,MPI,LXk)
+!       CALL PPrint(LXk," LXk ",Unit_O=6)
 
-       STOP
+!       STOP
 
        LXk=Project(N,Q%D,P%D,LXk)
 
@@ -261,115 +261,107 @@ CONTAINS
     ENDIF
   END SUBROUTINE Anihilate
 
-  SUBROUTINE LOn2BakEnd(N,I,Shift,F,P,AA,Values,Vectors,Trgt,Nam,S,MPI,LX)
-    INTEGER            :: N,I,J
-    TYPE(FileNames)    :: Nam,RQIName
-    TYPE(State)        :: S,RQIStat
-    TYPE(Parallel)     :: MPI
-    
-    TYPE(BCSR)         :: sB,sZ,sK,sJ,sJK,sT1,sX
-    TYPE(DBL_RNK2)     :: BB,JK
+  SUBROUTINE LOn2BakEnd(N,I,K,Shift,X,Values,Vectors,Trgt,Nam,S,MPI,LX)
+    INTEGER                       :: N,I,J,K
+    TYPE(FileNames)               :: Nam
+    TYPE(State)                   :: S,RQIStat
+    TYPE(Parallel)                :: MPI    
+    REAL(DOUBLE),DIMENSION(N,N)   :: LX,X
+    TYPE(BCSR)                    :: sF,sX,sJ,sK,sZ,sP,sJK,sT1,sT2,sT3
+    REAL(DOUBLE)                  :: Shift,OmegaPls,OmegaMns,WS
+    REAL(DOUBLE),DIMENSION(:)     :: Values
+    REAL(DOUBLE),DIMENSION(:,:,:) :: Vectors
+    CHARACTER(LEN=*)              :: Trgt 
 
-
-    REAL(DOUBLE),DIMENSION(N,N)    :: F,P,Z,X,LX,AA,Temp2
-    REAL(DOUBLE)                   :: Shift,OmegaPls,OmegaMns,WS
-    REAL(DOUBLE),DIMENSION(:)      :: Values
-    REAL(DOUBLE),DIMENSION(:,:,:)  :: Vectors
-    CHARACTER(LEN=*)               :: Trgt 
-
-!   CALL PPrint(AA,'INPUT 1',Unit_O=6)
-   CALL New(BB,(/N,N/))
-   CALL New(JK,(/N,N/))
-    !
+    TYPE(DBL_RNK2)     :: BB,T3
+    !----------------------------------------------------------------------------
+    ! Begin callable kluge
+    !----------------------------------------------------------------------------
+    CALL New(BB,(/N,N/))
+    BB%D=X
+    sX%NSMat=1
+    CALL SetEq(sX,BB)
+    CALL Delete(BB)
+    !----------------------------------------------------------------------------
+    ! End kluge, begin clean code
+    !----------------------------------------------------------------------------
+    ! Set up local Invokation parameters based on ground state values
     CALL New(RQIStat%Action,2)
     CALL New(RQIStat%Current,3)
     CALL New(RQIStat%Previous,3)
     RQIStat%Current%I=S%Current%I
     RQIStat%Previous%I=S%Previous%I
+    ! Action is TD-SCF with secondary parameter the product (L[X] or L[P]) 
+    ! tagged by the state number (I)
     RQIStat%Action%C(1)="TD-SCF"
     RQIStat%Action%C(2)=Trgt//TRIM(IntToChar(I))
-    !
-    RQIStat%Previous%I(1)=I-1
-    RQIStat%Current%I(1)=I
-    !
-    RQIName=Nam
-    RQIName%SCF_NAME=Nam%SCF_NAME
-    !
-    BB%D=AA
-    sX%NSMat=1
-    CALL SetEq(sX,BB)
-    !
-    CALL Get(sZ,TrixFile("X",PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=RQIStat%Current%I))    
-    !
+    ! Cycle is the RQI iteration number  
+    RQIStat%Current%I(1)=K
+    RQIStat%Previous%I(1)=MAX(0,K-1)
+    ! 
+    CALL Get(sF,TrixFile("OrthoF",PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=S%Current%I,OffSet_O=0))
+    ! T2=[Xor,For]
+    CALL Multiply(sX,sF,sT2)
+    CALL Multiply(sF,sX,sT2,-One)
+
+!    CALL PPrint(sT2,' X.F ',Unit_O=6)
+!    CALL PPrint(MATMUL(AA,F)-MATMUL(F,AA),' X.F -F.X',Unit_O=6)
+!    STOP
+
+    ! Done with F
+    CALL Delete(sF)
+    ! Z is the sparse inverse factor of S  
+    CALL Get(sZ,TrixFile("X",PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=S%Current%I))    
+    ! Xao = Z^t.Xor.Z 
     CALL Multiply(sZ,sX,sT1)        
     CALL Multiply(sT1,sZ,sX)
-    !
-    CALL Put(sX,TrixFile(RQIStat%Action%C(2),PWD_O=Nam%M_SCRATCH, &
-             Name_O=RQIName%SCF_NAME,Stats_O=RQIStat%Current%I,OffSet_O=0))
-
-!    CALL PPrint(sX,'INPUT 2',Unit_O=6)
-
-
-    CALL Invoke('QCTC',RQIName,RQIStat,MPI)
-    CALL Invoke('ONX',RQIName,RQIStat,MPI)
-    !
-    CALL Get(sJ,TrixFile("J",PWD_O=Nam%M_SCRATCH,Name_O=RQIName%SCF_NAME,Stats_O=RQIStat%Current%I,OffSet_O=0))
-    CALL Get(sK,TrixFile("K",PWD_O=Nam%M_SCRATCH,Name_O=RQIName%SCF_NAME,Stats_O=RQIStat%Current%I,OffSet_O=0))    
-    !
-    sJ%MTrix%D=Half*sJ%MTrix%D
-    sK%MTrix%D=Half*sK%MTrix%D
-
-    ! Here is a total kluge, that corrects (hopefully!!) for the
-    ! fact that K is built lower triangular, and reflected up.
-    CALL SetEq(BB,sK)
-    DO I=1,N
-       DO J=I+1,N
-          BB%D(I,J)=-BB%D(I,J)
-       ENDDO
-    ENDDO
-    CALL SetEq(sK,BB)
-
-!    CALL PPrint(sJ,'J[X]',Unit_O=6)
-!    CALL PPrint(sK,'K[X]',Unit_O=6)
-
-!    CALL Add(sJ,sK,sJK)
-    CALL SetEq(sJK,sK)
-
-    CALL Delete(sJ)
-    CALL Delete(sK)
-
-    CALL PPrint(sJK,'AO_JK[X]',Unit_O=6)
-
-    CALL Multiply(sZ,sJK,sT1)        
-    CALL Multiply(sT1,sZ,sJK)
-
-    CALL PPrint(sJK,'OR_JK[X]',Unit_O=6)
-
-!    CALL Filter(Tmp1,F)                 ! T1 =F_Orthog=Filter[Z^t.F_AO.Z]
-
-    CALL SetEq(JK,sJK)
-
-    temp2=MATMUL(JK%D,P)-MATMUL(P,JK%D)
-
-    LX=MATMUL(F,AA)-MATMUL(AA,F)
-    LX=LX+temp2
-
-    CALL PPrint(LX,'L[X]',Unit_O=6)
-
-
-    STOP
-
-    CALL Delete(JK)
-    CALL Delete(sJK)
-    CALL Delete(sB)
-    CALL Delete(sZ)
+    ! This is the new transition density matrix 
+    CALL Put(sX,TrixFile(RQIStat%Action%C(2),PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=RQIStat%Current%I,OffSet_O=0))
+    ! Done with sX
     CALL Delete(sX)
-    CALL Delete(sT1)
+    ! Build JK[X] in the AO basis
+    CALL Invoke('ONX',Nam,RQIStat,MPI)
+    CALL Invoke('QCTC',Nam,RQIStat,MPI)
+    ! Pick up J and K
+    CALL Get(sJ,TrixFile("J",PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=RQIStat%Current%I,OffSet_O=0))
+    CALL Get(sK,TrixFile("K",PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=RQIStat%Current%I,OffSet_O=0))    
+    ! Done with invokation parameters
     CALL Delete(RQIStat%Action)
     CALL Delete(RQIStat%Current)
     CALL Delete(RQIStat%Previous)
+    ! JK=Jao[X]+Kao[X]
+    CALL Add(sJ,sK,sJK)
+    ! Done with J and K
+    CALL Delete(sJ)
+    CALL Delete(sK)
+    ! JK[X]=Zt.JKao[X].Z==JKor
+    CALL Multiply(sZ,sJK,sT1)        
+    CALL Multiply(sT1,sZ,sJK)
+    ! Done with Z
+    CALL Delete(sZ)
+    ! Get some P
+    CALL Get(sP,TrixFile("OrthoD",PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=S%Current%I,OffSet_O=0))
+    ! T1=[JKor,Por]
+    CALL Multiply(sP,sJK,sT1)
+    CALL Multiply(sJK,sP,sT1,-One)
+    ! Done with P and JK
+    CALL Delete(sP)
+    CALL Delete(sJK)
+    ! L[X]=[F,X]+[P,JK[X]] (orthogonal)
+    CALL Add(sT1,sT2,sT3)
+    ! Done with temporaries 1 and 2
+    CALL Delete(sT1)
+    CALL Delete(sT2)
+    !----------------------------------------------------------------------------
+    ! End clean, begin kluge
+    !----------------------------------------------------------------------------
+    CALL SetEq(T3,sT3)
+    LX=T3%D
+    CALL Delete(sT3)
+    CALL Delete(T3)
+    CALL PPrint(LX,'L[X]',Unit_O=6)
 
-
+    STOP
     !    IF(M==1)RETURN
     IF(I>1)STOP
 !!$
@@ -393,40 +385,15 @@ CONTAINS
     REAL(DOUBLE)                  :: Shift,OmegaPls,OmegaMns,WS
     REAL(DOUBLE),DIMENSION(:)     :: Values
     REAL(DOUBLE),DIMENSION(:,:,:) :: Vectors
-
-    CALL PPrint(X,'INPUT 1',Unit_O=6)
-
     LX=LiouvAO(N,F  ,P  ,Z,TwoE,X )  
-    !
     IF(M==1)RETURN
-
-!    WRITE(*,*)' Shift = ',Shift
     WS=Values(M-1)-Values(1)+Shift 
-
-!    WRITE(*,*)' SHIT = ',Values(M-1),Values(1),'shift', WS
-
-
-
     Com=MATMUL(X,P)-MATMUL(P,X)
     DO J=1,M-1
        OmegaPls=Trace2(MATMUL(TRANSPOSE(Vectors(:,:,J)),Com),N)
        OmegaMns=Trace2(MATMUL(Vectors(:,:,J),Com),N)
-
-!         WRITE(*,*)' Omega = ',OmegaPls,OmegaMns
-!       CALL PPrint(Vectors(:,:,J)," V ",Unit_O=6)
-
-!       WRITE(*,*)' Proj = ',OmegaPls,OmegaMns
- !      STOP
-
        LX=LX+WS*(OmegaMns*TRANSPOSE(Vectors(:,:,J))+OmegaPls*Vectors(:,:,J))
     ENDDO
-
-!    STOP
-
-
-
-
-    !         LiouvAO(N,For,Por,X,DSao,AA) 
 
   END SUBROUTINE LOn2
 
@@ -437,7 +404,6 @@ CONTAINS
     REAL(DOUBLE),DIMENSION(N,N)     :: F,P,X,LX,Tmp1
     Ek=Pdot1(N,P,X,LX)
   END FUNCTION ThoulessQ
-
 
   FUNCTION LiouvDot(N,BB,DSao,temp2)  RESULT(temp1) 
     ! Calculates action of the Coulomb operator in AO space temp1=BB * (ij||kl) 
@@ -454,7 +420,6 @@ CONTAINS
        DO J=1,N
           K=K+1
           temp2=DSao(:,K)
-
           !		temp1(J,I)= ddot(N*N,BB,one,temp2,one)     ! This line is 
           temp1(J,I)=DOT_PRODUCT(BB,Temp2)           ! the most CPU consuming step
        ENDDO
@@ -473,9 +438,7 @@ CONTAINS
     ! AA to AO
     one=1 
     BB=MATMUL(TRANSPOSE(X),(MATMUL(AA,X)))      
-
-    CALL PPrint(BB,'INPUT 2',Unit_O=6)
-
+!    CALL PPrint(BB,'INPUT 2',Unit_O=6)
     DO I=1,N
        DO J=1,N
           temp1(I,J)= 0.0
@@ -484,62 +447,14 @@ CONTAINS
                 temp1(I,J)=temp1(I,J)+BB(K,L)*DSao(K,L,I,J)
              END DO
           END DO
-          !!            temp2=DSao(:,:,I,J)       ! This and the next line is equivalent to Liouvdot 
-          !!		temp1(I,J)= ddot(N*N,BB,one,temp2,one)
        END DO
     END DO
-
-    ! Extremely inefficient procedure above, trying to replace with DOT_PRODUCT or ddot
-    !        temp1= LiouvDot(N,BB,DSao,temp2)  
-
-
-
-    CALL PPrint(temp1,'AO_JK[X]',Unit_O=6)
-    
+ !   CALL PPrint(temp1,'AO_JK[X]',Unit_O=6)    
     BB=MATMUL(For,AA)-MATMUL(AA,For)
-
-
-
     ! temp back to orthog
     temp2=MATMUL(TRANSPOSE(X),(MATMUL(temp1,X)))
-
-!    CALL PPrint(X,'Z',Unit_O=6)
-!    CALL PPrint(MATMUL(temp1,X),'T1',Unit_O=6)
-
-    CALL PPrint(temp2,'OR_JK[X]',Unit_O=6)
-
     BB=BB+MATMUL(temp2,Por)-MATMUL(Por,temp2)
-
   END FUNCTION LiouvAO
-
-
-
-  SUBROUTINE LiouvilleAO(N,For,Por,DSao,AA,BB,X)  
-    ! Calculates action of the Liouville operator in AO space BB=L AA, (ij||kl) 
-    IMPLICIT NONE
-    INTEGER :: I,J,M,K,L,N
-    REAL (DOUBLE),DIMENSION(N,N)::For,Por,AA,BB,temp,X
-    REAL(DOUBLE),DIMENSION(N,N,N,N)::	DSao                
-    REAL(DOUBLE) :: E
-
-    ! AA to AO 
-    BB=MATMUL(TRANSPOSE(X),(MATMUL(AA,X)))      
-    DO I=1,N
-       DO J=1,N
-          temp(I,J)=0.0  
-          DO K=1,N
-             DO L=1,N
-                temp(I,J)=temp(I,J)+BB(K,L)*DSao(K,L,I,J)
-             END DO
-          END DO
-       END DO
-    END DO
-    BB=MATMUL(For,AA)-MATMUL(AA,For)
-    ! temp back to orthog
-    AA=MATMUL(TRANSPOSE(X),(MATMUL(temp,X)))
-    BB=BB+MATMUL(AA,Por)-MATMUL(Por,AA)
-
-  END SUBROUTINE LiouvilleAO
 
   SUBROUTINE RPAGuess(N,X)
     INTEGER :: N,I,J

@@ -173,6 +173,11 @@ PROGRAM ONX2
      CALL Get(OffS ,'atoff',Tag_O=CurBase)
      CALL Get(NBasF,'nbasf',Tag_O=CurBase)
   ENDIF
+  IF(SCFActn=='TD-SCF')THEN   
+     NoSym=.TRUE.
+     WRITE(*,*)' NoSym = ',NoSym
+  ENDIF
+  !
   CALL Get(BSc,Tag_O=CurBase)
   CALL Get(GMc,Tag_O=CurGeom)
   !
@@ -203,6 +208,12 @@ PROGRAM ONX2
      CALL Get(D,TrixFile('DPrime'//Args%C%C(3),Args,0))
 #else
      CALL PDrv_Initialize(DFM,TrixFile('DPrime'//Args%C%C(3),Args,0),'ONXPart',Args)
+#endif
+  CASE('TD-SCF')
+#ifndef PARALLEL
+     CALL Get(D,TrixFile(Args%C%C(3),Args,0))
+#else
+     CALL PDrv_Initialize(DFM,TrixFile(Args%C%C(3),Args,0),'ONXPart',Args)
 #endif
   CASE('InkFok')
 #ifndef PARALLEL
@@ -354,9 +365,11 @@ PROGRAM ONX2
   !oCALL FillOutFastMat(BSc,GMc,KxFM)
   !otime2 = MondoTimer()
 #else
-  CALL CPU_TIME(time1)
-  CALL FillOutBCSR(BSc,GMc,Kx)
-  CALL CPU_TIME(time2)
+  IF(.NOT.NoSym)THEN
+     CALL CPU_TIME(time1)
+     CALL FillOutBCSR(BSc,GMc,Kx)
+     CALL CPU_TIME(time2)
+  ENDIF
 #endif
   TmFO = time2-time1
   !
