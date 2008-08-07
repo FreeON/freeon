@@ -128,14 +128,13 @@ PROGRAM QCTC
   CALL MakeRhoList(GM,BS,DMat,NLink,RhoHead,'QCTC',NoWrap_O=NoWrap)
   ! Add in the nuclear charges only in certain cases
   IF(NukesOn)THEN !.OR.SCFActn/='InkFok'.AND.SCFActn/='StartResponse'.AND.SCFActn/='DensityPrime')THEN
-     WRITE(*,*)' Adding nukes to density '
      CALL AddNukes(GM,RhoHead,NoWrap)
      NLink=NLink+GM%NAtms
   ENDIF
   ! Load density into arrays and delete the linked list
   CALL Collate(GM,RhoHead,Rho,'QCTC',RhoPoles,NLink)
 !
-  WRITE(*,*)' PUNTED IN DELETE OF DENSITY !!! SEE FOLLOWING COMMENT OUT :::: '
+!  WRITE(*,*)' PUNTED IN DELETE OF DENSITY !!! SEE FOLLOWING COMMENT OUT :::: '
   !  CALL DeleteHGLL(RhoHead)
   ! Allocate and compute multipole moments of the density
   !
@@ -206,23 +205,24 @@ PROGRAM QCTC
 !     WRITE(*,*)I,NNearCount(I)
      IF(NNearCount(I)==0D0)K=K+1
   ENDDO
-  WRITE(*,*)' % of NoPAC = ',DBLE(K)/DBLE(CS_IN%NCells)
 
-  WRITE(*,11)' Decompos_Time = ',Decompose_Time
-  WRITE(*,11)' TreeMake_Time = ',TreeMake_Time
-  WRITE(*,11)' JWalking_Time = ',JWalk_Time
-  WRITE(*,11)' Integral_Time = ',Integral_Time
-  WRITE(*,11)' Multipol_Time = ',Multipole_Time
-  WRITE(*,11)' Total J Time  = ',Decompose_Time+TreeMake_Time+JWalk_Time+Multipole_Time+Integral_Time
-  WRITE(*,11)' Total JWalks  = ',DBLE(NPrim)
-  WRITE(*,11)' Av  Ints/Prim = ',DBLE(NInts)/DBLE(NPrim)
-  WRITE(*,11)' Av  # NF/Prim = ',DBLE(NNearAv)/DBLE(NPrim)
-  WRITE(*,11)' Av  # FF/Prim = ',DBLE(NFarAv)/DBLE(NPrim)
-  WRITE(*,11)' Time per INode= ',Integral_Time/DBLE(NNearAv)
-  WRITE(*,11)' Time per MNode= ',Multipole_Time/DBLE(NFarAv)
-11 FORMAT(A20,D12.6)
+!!$  WRITE(*,*)' % of NoPAC = ',DBLE(K)/DBLE(CS_IN%NCells)
 !!$
-   CALL PChkSum(J,'J',Prog,Unit_O=6)
+!!$  WRITE(*,11)' Decompos_Time = ',Decompose_Time
+!!$  WRITE(*,11)' TreeMake_Time = ',TreeMake_Time
+!!$  WRITE(*,11)' JWalking_Time = ',JWalk_Time
+!!$  WRITE(*,11)' Integral_Time = ',Integral_Time
+!!$  WRITE(*,11)' Multipol_Time = ',Multipole_Time
+!!$  WRITE(*,11)' Total J Time  = ',Decompose_Time+TreeMake_Time+JWalk_Time+Multipole_Time+Integral_Time
+!!$  WRITE(*,11)' Total JWalks  = ',DBLE(NPrim)
+!!$  WRITE(*,11)' Av  Ints/Prim = ',DBLE(NInts)/DBLE(NPrim)
+!!$  WRITE(*,11)' Av  # NF/Prim = ',DBLE(NNearAv)/DBLE(NPrim)
+!!$  WRITE(*,11)' Av  # FF/Prim = ',DBLE(NFarAv)/DBLE(NPrim)
+!!$  WRITE(*,11)' Time per INode= ',Integral_Time/DBLE(NNearAv)
+!!$  WRITE(*,11)' Time per MNode= ',Multipole_Time/DBLE(NFarAv)
+!!$11 FORMAT(A20,D12.6)
+
+!!$   CALL PChkSum(J,'J',Prog,Unit_O=6)
 
   CALL Elapsed_TIME(TimeMakeJ,'Accum')
   IF(SCFActn=='InkFok')THEN
@@ -243,7 +243,7 @@ PROGRAM QCTC
      CALL Put(T1,TrixFile('J',Args,0))
   ENDIF
 
-  WRITE(*,*)' Wrote ',TRIM(TrixFile('J',Args,0))
+!  WRITE(*,*)' Wrote ',TRIM(TrixFile('J',Args,0))
 
   IF(NukesOn)THEN
      ! Compute the nuclear-total electrostatic energy in O(N Lg N)
@@ -265,7 +265,7 @@ PROGRAM QCTC
 !  WRITE(*,*)' E_NUC-TOT = ',E_Nuc_Tot
   Mssg=ProcessName(Prog, ' ')
   Mssg=TRIM(Mssg)//' Coulomb Energy      = <'//TRIM(DblToChar(E_Nuc_Tot+Trace(DMat,T1)))//'>'
-  WRITE(*,*)TRIM(Mssg)
+!  WRITE(*,*)TRIM(Mssg)
   
   CALL Put(E_Nuc_Tot,'E_NuclearTotal',StatsToChar(Current))
   !-------------------------------------------------------------------------------
@@ -303,11 +303,11 @@ PROGRAM QCTC
   Mssg=ProcessName('QCTC','Timing')
   Mssg=TRIM(Mssg)//' Total='//TRIM(DblToMedmChar(MTimer()-QCTC_TotalTime_Start)) & 
                 //'; Bisect='//TRIM(DblToShrtChar(Decompose_Time))//', Tree='//TRIM(DblToShrtChar(TreeMake_Time)) 
-  WRITE(*,*)TRIM(Mssg)
+!  WRITE(*,*)TRIM(Mssg)
   Mssg=ProcessName('QCTC','Timing')
   Mssg=TRIM(Mssg)//' Walk='//TRIM(DblToShrtChar(JWalk_Time))//', Ints='//TRIM(DblToShrtChar(Integral_Time)) &
       //', Mults='//TRIM(DblToShrtChar(Multipole_Time)) 
-  WRITE(*,*)TRIM(Mssg)
+!  WRITE(*,*)TRIM(Mssg)
 
   CALL ShutDown(Prog)
 END PROGRAM QCTC
