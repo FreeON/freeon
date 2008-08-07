@@ -128,7 +128,7 @@ CONTAINS
     Mssg=ProcessName(Prog,'Density Build')
     Mssg=TRIM(Mssg)//' Econ = '//TRIM(DblToShrtChar(DBLE(NNaive)/DBLE(NLink))) &
                    //', Gaussians = '//TRIM(IntToChar(NLink))
-    WRITE(*,*)TRIM(Mssg)
+!    WRITE(*,*)TRIM(Mssg)
     ! Next, calculate the Schwartz inequality and prune small links ???
   END SUBROUTINE MakeRhoList
   !
@@ -300,7 +300,7 @@ CONTAINS
          //', '//TRIM(DblToShrtChar(P%DPole%D(3)))        &
          //'), <r^2> = '//TRIM(DblToShrtChar(             &
          P%QPole%D(1)+P%QPole%D(2)+P%QPole%D(3)))
-    WRITE(*,*)TRIM(Mssg)
+!    WRITE(*,*)TRIM(Mssg)
 
 !    STOP
 

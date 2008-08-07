@@ -104,7 +104,7 @@ CONTAINS
     Decompose_Time_Start=MTimer()
     NGaussTotal=0;
     CALL SplitPole(PoleRoot,PoleRoot%Next)
-    WRITE(*,*)' NGaussTotal = ',NGaussTotal
+!    WRITE(*,*)' NGaussTotal = ',NGaussTotal
     
     TreeMake_Time_Start=MTimer()
     Decompose_Time=TreeMake_Time_Start-Decompose_Time_Start
@@ -642,8 +642,8 @@ CONTAINS
 
     NGaussTotal=NGaussTotal+(Node%EdexE-Node%BdexE+1)
     !
-    WRITE(*,33)Node%BOX%Number,Node%POLE%Charge,Node%EdexE-Node%BdexE+1,NODE%POLE%Delta, &
-               FurthestPointInBox(GM%Carts%D(:,NDex(Node%BDexN)),Node%Box)
+!    WRITE(*,33)Node%BOX%Number,Node%POLE%Charge,Node%EdexE-Node%BdexE+1,NODE%POLE%Delta, &
+!               FurthestPointInBox(GM%Carts%D(:,NDex(Node%BDexN)),Node%Box)
 
 !    WRITE(*,44)Node%Box%BndBox(:,1),Node%Box%BndBox(:,2),
 !44     format('Box = /',3(D10.4,', '),'/,/',3(D10.4,', '),' C= ',3(D10.4,', ') )

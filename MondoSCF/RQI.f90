@@ -87,80 +87,29 @@ CONTAINS
           ENDDO
        ENDDO
     ENDDO
-    !
-    WRITE(*,*)TrixFile("OrthoD",PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME, &
-         Stats_O=S%Current%I,OffSet_O=0)
 
-    !    CALL PPrint(P," Por ",Unit_O=6)
-    !    CALL PPrint(Q," Qor ",Unit_O=6)
+!    goto 111
 
-
-!!$    WRITE(*,*)TrixFile("OrthoF",PWD_O=N%M_SCRATCH,Name_O=Nam%SCF_NAME, &
-!!$         Stats_O=S%Current%I,OffSet_O=0)
-!!$    WRITE(*,*)TrixFile("X",PWD_O=N%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=S%Current%I)
-
-    !
     Shift=0.1102479D0
-
     DO I=1,1
-      
-       !
-       CALL RPAGuess(N,Xk)
-       Xk=ProjectPH(N,Q%D,P%D,Xk)
-       CALL ReNorm(N,P%D,Xk)
-!       CALL LOn2(N,I,Shift,F%D,P%D,Z%D,DoubleSlash,Values,Vectors,Xk,LXk)
-!       CALL PPrint(LXk," LXk ",Unit_O=6)
-
-
-!       CALL RPAGuess(N,Xk)
-!       Xk=ProjectPH(N,Q%D,P%D,Xk)
-!       CALL ReNorm(N,P%D,Xk)
-
-       CALL LOn2BakEnd(N,I,0,Shift,Xk,Values,Vectors,'Xk',Nam,S,MPI,LXk)
-
-!       CALL PPrint(LXk," LXk ",Unit_O=6)
-
-!       STOP
-
-       LXk=Project(N,Q%D,P%D,LXk)
-
-       Beta=Zero
-       XkOld=Zero
-       PkOld=Zero
-       Ek=ThoulessQ(N,P%D,Xk,LXk) 
-       !
+       CALL Nihilate0(N,I,Nam,S,MPI)
+       CALL LOn2BakEnd(N,I,0,Shift,'Xk',Nam,S,MPI)
+       CALL Nihilate1(I,Nam,S,MPI,Ek)
        DO K=0,1000
-          !
-          Gk=Two*(LXk-Ek*Xk)
-          IF(K>0)  &
-             Beta=Pdot1(N,P%D,Gk-Gkold,Gk)/Pdot1(N,P%D,GkOld,GkOld)    			
-          Pk=Gk+Beta*PkOld  
-          !
-!          CALL LOn2(N,I,Shift,F%D,P%D,Z%D,DoubleSlash,Values,Vectors,Pk,LPk)
-          CALL LOn2BakEnd(N,I,K,Shift,Pk,Values,Vectors,'Pk',Nam,S,MPI,LPk)
-          !
-!          CALL RQILineSearch(N,P%D,Pk,Xk,LXk,LPk,Lambda)          
-          CALL RQILineSearchBakEnd(I,Nam,S,Lambda)          
-          !
-          EkOld=Ek
-          XkOld=Xk
-          EkOld=Ek
-          GkOld=Gk
-          PkOld=Pk	   
-          !
-          Xk=XkOld+Lambda*Pk
-          !
-          CALL Anihilate(N,P%D,Q%D,Xk,TDA_O=.TRUE.)
-          CALL ReNorm(N,P%D,Xk)
-          !
-!          CALL LOn2(N,I,Shift,F%D,P%D,Z%D,DoubleSlash,Values,Vectors,Xk,LXk)
-          CALL LOn2BakEnd(N,I,K,Shift,Xk,Values,Vectors,'Xk',Nam,S,MPI,LXk)
-          !
-          CALL Anihilate(N,P%D,Q%D,LXk,TDA_O=.TRUE.)
-          CALL ReNorm(N,P%D,Xk)
-          !
+          ! The non-linear congjugate gradient
+          CALL NLCGBakEnd(I,K,Ek,Nam,S,MPI)
+          ! Compute L[Pk]
+          CALL LOn2BakEnd(N,I,K,Shift,'Pk',Nam,S,MPI)
+          ! Line Search: Min_Lambda{ E[Xk+Lambda*Pk] }
+          CALL RQLSBakEnd(I,Nam,S,Lambda)                    
+          ! Anhiliate and renorm Xk
+          CALL NihilateXk(I,Nam,S,MPI,Lambda,TDA_O=.TRUE.)
+          ! Compute L[Xk]
+          CALL LOn2BakEnd(N,I,K,Shift,'Xk',Nam,S,MPI)
+          ! Anihilate LXk, compute energy and error
+          ! CALL NihilateLXk( )
+          CALL Anihilate(N,P%D,Q%D,LXk,TDA_O=.TRUE.)          
           Ek=ThoulessQ(N,P%D,Xk,LXk) 
-
           ErrAbs=Ek-EkOld
           ErrRel=-1D10
           DO U=1,N
@@ -168,7 +117,7 @@ CONTAINS
                 ErrRel=MAX(ErrRel,ABS(Ek*Xk(U,V)-LXk(U,V))/Ek)
              ENDDO
           ENDDO
-!          WRITE(*,*)I,Ek*27.21139613182D0,ErrRel,ErrAbs
+
           IF(ErrRel<1D-4)EXIT
           !
        ENDDO
@@ -180,17 +129,44 @@ CONTAINS
      WRITE(*,*)'------------------------------------------'
 
      STOP
+
+111  CONTINUE
+
        Shift=0.1102479D0
 
     DO I=1,1
        !
-       Xk=Vectors(:,:,I)
+       CALL RPAGuess(N,Xk)
+       ! CALL PPrint(Xk,"RAW",Unit_O=6)
+       Xk=ProjectPH(N,Q%D,P%D,Xk)
+       ! CALL PPrint(Xk,"PROJECTED",Unit_O=6)
+
+       CALL Renorm(N,P%D,Xk)
+
+
+       !    CALL PPrint(Xk,"NORMED",Unit_O=6)
+
+
+!!$
+!!$       Xk=Vectors(:,:,I)
+
+
        CALL LOn2(N,I,Shift,F%D,P%D,Z%D,DoubleSlash,Values,Vectors,Xk,LXk)
+
+       CALL PPrint(LXk,'2LXk BEFORE ',Unit_O=6)
+
        LXk=Project(N,Q%D,P%D,LXk)
+
+       CALL PPrint(LXk,'2LXk AFTER ',Unit_O=6)
+
        Beta=Zero
        XkOld=Zero
        PkOld=Zero
        Ek=ThoulessQ(N,P%D,Xk,LXk) 
+
+       write(*,*)' ek = ',EK
+
+       STOP
        !
        DO K=0,1000
           !
@@ -199,6 +175,8 @@ CONTAINS
              Beta=Pdot1(N,P%D,Gk-Gkold,Gk)/Pdot1(N,P%D,GkOld,GkOld)    			
           Pk=Gk+Beta*PkOld  
           !
+
+
           CALL LOn2(N,I,Shift,F%D,P%D,Z%D,DoubleSlash,Values,Vectors,Pk,LPk)
           CALL RQILineSearch(N,P%D,Pk,Xk,LXk,LPk,Lambda)          
           !
@@ -234,24 +212,7 @@ CONTAINS
        Vectors(:,:,I)=Xk
     ENDDO
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   END SUBROUTINE RQI
-
-
 
   SUBROUTINE Anihilate(N,P,Q,X,TDA_O)
     LOGICAL, OPTIONAL :: TDA_O
@@ -270,7 +231,312 @@ CONTAINS
     ENDIF
   END SUBROUTINE Anihilate
 
-  SUBROUTINE LOn2BakEnd(N,I,K,Shift,X,Values,Vectors,Trgt,Nam,S,MPI,LX)
+  SUBROUTINE Nihilate0(N,I,Nam,S,MPI)
+    !
+    INTEGER               :: I,N,  ii,jj
+    REAL(DOUBLE)          :: Norm
+    TYPE(FileNames)       :: Nam
+    TYPE(State)           :: S
+    TYPE(Parallel)        :: MPI    
+    TYPE(BCSR)            :: sP,sQ,sXk,sI,sT,sT1 ! Nihilate0 delete list
+    INTEGER, DIMENSION(3) :: Cur
+    CHARACTER(LEN=DCL)    :: XkName,PName,QName
+    !
+    TYPE(DBL_RNK2)        :: X
+
+    !-----------------------------------------------------------------------------
+    ! Status same as ground state, but now SCF cycle# is RQI state#
+    Cur=S%Current%I
+    Cur(1)=I
+    ! Naming of things
+    XkName=TrixFile('OrthoXk',PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=Cur,OffSet_O=0)
+    PName= TrixFile("OrthoD", PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=S%Current%I,OffSet_O=0)
+    QName= TrixFile("OrthoQ", PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=S%Current%I,OffSet_O=0)
+    ! Get occupied projector 
+    CALL Get(sP,PName)
+    ! Generate virtual space projector if first time through
+    IF(I==1)THEN
+       CALL SetEq(sT1,sP)
+       sT1%MTrix%D=-sT1%MTrix%D
+       CALL SetToI(sI)
+       sI%MTrix%D=One
+       CALL Add(sT1,sI,sQ)
+       CALL Delete(sI)
+       CALL Delete(sT1)
+       CALL Put(sQ,QName)
+    ELSE
+       CALL Get(sQ,QName)
+    ENDIF
+    ! Start guess with particle-hole space ONLY. Starting in this space
+    ! GUARANTEES that we will only ever have positive line search solutions.
+    ! This is equivalent to the TDA.
+    !
+    CALL New(X,(/N,N/))
+    do ii=1,N
+       do jj=1,N
+          X%D(ii,jj)= One/Two**(Ii+Jj)
+       enddo
+    enddo
+    CALL SetEq(sXk,X)
+
+!    CALL PPrint(sXk,"RAW",Unit_O=6)
+
+    CALL Multiply(sQ,sXk,sT1)
+    CALL Multiply(sT1,sP,sXk)
+
+!    CALL PPrint(sXk,"PROJECTED",Unit_O=6)
+
+    CALL Delete(sQ)
+    CALL Delete(sT1)
+    ! Normalize the guess transition density.  Note factor
+    ! of two has to do with normalization of P and Q.  Here,
+    ! these projectors have eigenvalues == 1, not 2.
+    CALL XPose(sXk,sT)
+    Norm=SQRT(Two*ABS(OneDot(sP,sXk,sT)))
+    sXk%MTrix%D=sXk%MTrix%D*(One/Norm)
+
+!    WRITE(*,*)' Norm = ',Norm
+!    CALL PPrint(sXk,"NORMED",Unit_O=6)
+
+    ! Put guess Xk to disk
+    CALL Put(sXk,XkName)
+    ! Tidy up 
+    CALL Delete(sT)
+    CALL Delete(sP)
+    CALL Delete(sXk)
+    WRITE(*,*)' DONE Nihilate0'
+    ! All done
+  END SUBROUTINE Nihilate0
+
+
+  SUBROUTINE Nihilate1(I,N,S,MPI,Ek,TDA_O)
+    LOGICAL, OPTIONAL     :: TDA_O
+    LOGICAL               :: TDA
+    INTEGER               :: I
+    REAL(DOUBLE)          :: Ek
+    TYPE(FileNames)       :: N
+    TYPE(State)           :: S
+    TYPE(Parallel)        :: MPI    
+    TYPE(BCSR)            :: sP,sQ,sXk,sLXk,sT,sT1,sT2,sT3 ! Nihilate1 delete list
+    INTEGER, DIMENSION(3) :: Cur
+    CHARACTER(LEN=DCL)    :: XkName,LXkName,PName,QName
+    !-----------------------------------------------------------------------------
+    IF(PRESENT(TDA_O))THEN
+       TDA=TDA_O
+    ELSE
+       TDA=.FALSE.
+    ENDIF
+    ! Status same as ground state, but now SCF cycle# is RQI state#
+    Cur=S%Current%I
+    Cur(1)=I
+    ! Naming of things
+    XkName=TrixFile('OrthoXk',PWD_O=N%M_SCRATCH,Name_O=N%SCF_NAME,Stats_O=Cur,OffSet_O=0)
+    LXkName=TrixFile('LXk',PWD_O=N%M_SCRATCH,Name_O=N%SCF_NAME,Stats_O=Cur,OffSet_O=0)
+    PName= TrixFile("OrthoD", PWD_O=N%M_SCRATCH,Name_O=N%SCF_NAME,Stats_O=S%Current%I,OffSet_O=0)
+    QName= TrixFile("OrthoQ", PWD_O=N%M_SCRATCH,Name_O=N%SCF_NAME,Stats_O=S%Current%I,OffSet_O=0)
+    ! Get occupied projector 
+    CALL Get(sP,PName)
+    CALL Get(sQ,QName)
+    CALL Get(sLXk,LXkName)
+    ! Anihilate via TDA or TD-SCF symmetry.
+    ! Note that factor of (1/4) is not present, due to the
+    ! normalization of P to eigenvalues with 1s or 0s.
+    IF(TDA)THEN
+       ! LXk=P.LXk.Q (only h-p zapped)
+       CALL Multiply(sP,sLXk,sT1)
+       CALL Multiply(sT1,sQ,sLXk)
+       CALL Delete(sT1)
+    ELSE
+       ! LXk=(P.LXk.Q+Q.LXk.P) (both h-p and p-h zapped)
+       CALL Multiply(sP,sLXk,sT1)
+       CALL Multiply(sT1,sQ,sT2)
+       CALL Multiply(sQ,sLXk,sT1)
+       CALL Multiply(sT1,sP,sT3)
+       CALL Add(sT2,sT3,sLXk)
+       CALL Delete(sT1)
+       CALL Delete(sT2)
+       CALL Delete(sT3)
+    ENDIF
+    !
+    CALL Delete(sQ)
+    !
+    CALL Put(sLXk,LXkName)
+    !
+    CALL Get(sXk,XkName)
+    CALL XPose(sLXk,sT)
+
+    ! Again a factor of two for normalization of P
+    Ek=Two*OneDot(sP,sXk,sT)
+    !
+    CALL Delete(sP)
+    CALL Delete(sT)
+    CALL Delete(sLXk)
+    ! All done
+  END SUBROUTINE Nihilate1
+
+  SUBROUTINE NihilateXk(I,N,S,MPI,Lambda,TDA_O)
+    LOGICAL, OPTIONAL     :: TDA_O
+    LOGICAL               :: TDA
+    INTEGER               :: I
+    REAL(DOUBLE)          :: Lambda,Norm
+    TYPE(FileNames)       :: N
+    TYPE(State)           :: S
+    TYPE(Parallel)        :: MPI    
+    TYPE(BCSR)            :: sP,sQ,sXk,sPk,sLXk,sT,sT1,sT2,sT3 ! NihilateXk delete list
+    INTEGER, DIMENSION(3) :: Cur
+    CHARACTER(LEN=DCL)    :: XkName,PkName,LXkName,PName,QName
+    !-----------------------------------------------------------------------------
+    IF(PRESENT(TDA_O))THEN
+       TDA=TDA_O
+    ELSE
+       TDA=.FALSE.
+    ENDIF
+    ! Status same as ground state, but now SCF cycle# is RQI state#
+    Cur=S%Current%I
+    Cur(1)=I
+
+    ! Naming of things
+
+    XkName=TrixFile('OrthoXk',PWD_O=N%M_SCRATCH,Name_O=N%SCF_NAME,Stats_O=Cur,OffSet_O=0)
+    PkName=TrixFile('OrthoPk',PWD_O=N%M_SCRATCH,Name_O=N%SCF_NAME,Stats_O=Cur,OffSet_O=0)
+    PName= TrixFile("OrthoD", PWD_O=N%M_SCRATCH,Name_O=N%SCF_NAME,Stats_O=S%Current%I,OffSet_O=0)
+    QName= TrixFile("OrthoQ", PWD_O=N%M_SCRATCH,Name_O=N%SCF_NAME,Stats_O=S%Current%I,OffSet_O=0)
+
+    CALL New(sT1)
+    CALL New(sPk)
+    CALL New(sXk)
+
+    CALL Get(sT1,XkName)
+    CALL Get(sPk,PkName)
+    sPk%MTrix%D=sPk%MTrix%D*Lambda
+    CALL Add(sT1,sPk,sXk)
+
+    CALL Delete(sPk)
+
+    CALL Get(sP,PName)
+    CALL Get(sQ,QName)
+
+    ! Anihilate via TDA or TD-SCF symmetry.
+    ! Note that factor of (1/4) is not present, due to the
+    ! normalization of P to eigenvalues with 1s or 0s.
+    IF(TDA)THEN
+       ! Xk=P.Xk.Q (only h-p zapped)
+       CALL Multiply(sP,sXk,sT1)
+       CALL Multiply(sT1,sQ,sXk)
+       CALL Delete(sT1)
+    ELSE
+       ! Xk=(P.Xk.Q+Q.Xk.P) (both h-p and p-h zapped)
+       CALL Multiply(sP,sXk,sT1)
+       CALL Multiply(sT1,sQ,sT2)
+       CALL Multiply(sQ,sXk,sT1)
+       CALL Multiply(sT1,sP,sT3)
+       CALL Add(sT2,sT3,sXk)
+       CALL Delete(sT1)
+       CALL Delete(sT2)
+       CALL Delete(sT3)
+    ENDIF
+    !
+    CALL Delete(sQ)
+
+    ! Normalize the guess transition density.  Note factor
+    ! of two has to do with normalization of P and Q.  Here,
+    ! these projectors have eigenvalues == 1, not 2.
+    CALL XPose(sXk,sT)
+    Norm=SQRT(Two*ABS(OneDot(sP,sXk,sT)))
+    sXk%MTrix%D=sXk%MTrix%D*(One/Norm)
+
+!    WRITE(*,*)' Norm = ',Norm
+!    CALL PPrint(sXk,"NORMED",Unit_O=6)
+
+    ! Put guess Xk to disk
+    CALL Put(sXk,XkName)
+    !
+    CALL Delete(sT)
+    CALL Delete(sP)
+    CALL Delete(sXk)
+    ! All done
+  END SUBROUTINE NihilateXk
+
+
+
+  SUBROUTINE NLCGBakEnd(I,K,Ek,N,S,MPI)
+    !
+    INTEGER               :: I,K
+    REAL(DOUBLE)          :: Ek
+    TYPE(FileNames)       :: N
+    TYPE(State)           :: S
+    TYPE(Parallel)        :: MPI    
+    TYPE(BCSR)            :: sXk,sLXk,sGk,sGkOld,sPkOld,sP,sT,sT1 ! NLCGradient delete list
+    INTEGER, DIMENSION(3) :: Cur
+    REAL(DOUBLE)          :: Num,Den,Beta
+    CHARACTER(LEN=DCL)    :: XkName,LXkName,GkName,PName,GkOldName,PkOldName,PkName
+    !
+    Cur=S%Current%I
+    Cur(1)=I
+    !
+    XkName=   TrixFile('OrthoXk',PWD_O=N%M_SCRATCH,Name_O=N%SCF_NAME,Stats_O=Cur,OffSet_O=0)
+    LXkName=  TrixFile('LXk',    PWD_O=N%M_SCRATCH,Name_O=N%SCF_NAME,Stats_O=Cur,OffSet_O=0)
+    GkName=   TrixFile('Gk',     PWD_O=N%M_SCRATCH,Name_O=N%SCF_NAME,Stats_O=Cur,OffSet_O=0)
+    GkOldName=TrixFile('GkOld',  PWD_O=N%M_SCRATCH,Name_O=N%SCF_NAME,Stats_O=Cur,OffSet_O=0)
+    PkName=   TrixFile('OrthoPk',PWD_O=N%M_SCRATCH,Name_O=N%SCF_NAME,Stats_O=Cur,OffSet_O=0)
+
+    PkOldName=PkName
+
+    PName=    TrixFile("OrthoD", PWD_O=N%M_SCRATCH,Name_O=N%SCF_NAME,Stats_O=S%Current%I,OffSet_O=0)
+    !
+    ! Get Xk and LXk
+    CALL Get(sXk,XkName)
+    CALL Get(sLXk,LXkName)
+    ! Gk=Two*(LXk-Ek*Xk)
+    sXk%MTrix%D=-Ek*sXk%MTrix%D
+    CALL Add(sLXk,sXk,sGk)
+    sGk%MTrix%D=Two*sGk%MTrix%D
+    ! Gk to disk
+    CALL Put(sGk,GkName)
+    ! Done with Xk and LXk
+    CALL Delete(sXk)
+    CALL Delete(sLXk)
+    ! Beta=0 for K=0
+    IF(K==0)THEN
+       WRITE(*,*)' WRITNG OrthoPk IN NLCGBAKEND '
+       WRITE(*,*)TRIM(PkName)
+       CALL Put(sGk,PkName)
+       CALL Put(sGk,GkOldName)
+       CALL Delete(sGk)
+       RETURN
+    ENDIF
+    ! Get Pk and GkOld
+    CALL Get(sP,PName)
+    CALL Get(sGkOld,GkOldName)
+    ! Beta=(Gk-Gkold,Gk)_p/(GkOld,GkOld)_p    			
+    sGkOld%MTrix%D=-sGkOld%MTrix%D
+    CALL Add(sGk,sGkOld,sT1)
+    sGkOld%MTrix%D=-sGkOld%MTrix%D
+    CALL XPose(sGk,sT)    
+    Num=OneDot(sP,sT1,sT) 
+    CALL XPose(sGkOld,sT)    
+    Den=OneDot(sP,sGkOld,sT) 
+    Beta=Num/Den
+    ! Done with P and T
+    CALL Delete(sT)
+    CALL Delete(sP)
+    CALL Delete(sGkOld)
+    ! Pk=Gk+Beta*PkOld  
+    CALL Get(sPkOld,PkOldName)
+    sPkOld%MTrix%D=Beta*sPkOld%MTrix%D
+    CALL Add(sGk,sPkOld,sT1)
+    ! Put Pk to disk
+    WRITE(*,*)' WRITNG OrthoPk IN NLCGBAKEND '
+    WRITE(*,*)TRIM(PkName)
+    CALL Put(sT1,PkName)
+    ! Clean up and done
+    CALL Delete(sT1)
+    CALL Delete(sGk)
+    CALL Delete(sPkOld)
+    !
+  END SUBROUTINE NLCGBAKEND
+
+  SUBROUTINE LOn2BakEnd(N,I,K,Shift,Trgt,Nam,S,MPI)
     INTEGER                       :: N,I,J,K
     TYPE(FileNames)               :: Nam
     TYPE(State)                   :: S,RQIStat
@@ -278,21 +544,7 @@ CONTAINS
     REAL(DOUBLE),DIMENSION(N,N)   :: LX,X
     TYPE(BCSR)                    :: sF,sX,sJ,sK,sZ,sP,sJK,sT1,sT2,sT3
     REAL(DOUBLE)                  :: Shift,OmegaPls,OmegaMns,WS
-    REAL(DOUBLE),DIMENSION(:)     :: Values
-    REAL(DOUBLE),DIMENSION(:,:,:) :: Vectors
     CHARACTER(LEN=*)              :: Trgt 
-
-    TYPE(DBL_RNK2)     :: BB,T3
-    !----------------------------------------------------------------------------
-    ! Begin callable kluge
-    !----------------------------------------------------------------------------
-    CALL New(BB,(/N,N/))
-    BB%D=X
-    sX%NSMat=1
-    CALL SetEq(sX,BB)
-    CALL Delete(BB)
-    !----------------------------------------------------------------------------
-    ! End kluge, begin clean backend code
     !----------------------------------------------------------------------------
     ! Set up local Invokation parameters based on ground state values
     CALL New(RQIStat%Action,2)
@@ -303,19 +555,13 @@ CONTAINS
     ! Action is TD-SCF with secondary parameter the product LX or LP (L[Xk], L[Pk]) 
     RQIStat%Action%C(1)="TD-SCF"
     RQIStat%Action%C(2)=TRIM(Trgt) !//TRIM(IntToChar(I))
-    ! Cycle is the RQI iteration number (THOUGH NOT FOR THE MOMENT ANYWAY)  
-    !    RQIStat%Current%I(1)=K
-    !    RQIStat%Previous%I(1)=MAX(0,K-1)
     ! "SCF cycle" is the RQI State number 
     RQIStat%Current%I(1)=I
     RQIStat%Previous%I(1)=I
-    !
-    ! Bit of a kluge.  Probably temporary 
-    !
-    ! This is the orthogonal transition density matrix (or CG gradient) corresponding to the 
-    ! final product of this subroutine, namely L[Xk] or L[Pk] in an orthongal representation
-    CALL Put(sX,TrixFile('Ortho'//TRIM(Trgt) ,PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=RQIStat%Current%I,OffSet_O=0))
-    !
+    ! Get the orthogonal transition density matrix Xk (or CG gradient Pk) corresponding to the 
+    ! resultant of this subroutine, namely L[Xk] or L[Pk] in an orthongal representation
+    CALL New(sX) ! Kluge.  Somehow, dimensioning not quite right here:
+    CALL Get(sX,TrixFile('Ortho'//TRIM(Trgt),PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=RQIStat%Current%I,OffSet_O=0))
     ! Ground state fockian in an orthogonal representation
     CALL Get(sF,TrixFile("OrthoF",PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=S%Current%I,OffSet_O=0))
     ! T2=[Xor,For]
@@ -363,35 +609,14 @@ CONTAINS
     CALL Delete(sT2)
     ! Put orthogonal L[Xk] or L[Pk] to disk (*.LX or *.LP)
     CALL Put(sT3,TrixFile("L"//TRIM(Trgt),PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=RQIStat%Current%I,OffSet_O=0))    
-    !    CALL Delete(sT3)
-
+    ! Done with temp #3
+    CALL Delete(sT3)
     ! Done with invokation parameters
     CALL Delete(RQIStat%Action)
     CALL Delete(RQIStat%Current)
     CALL Delete(RQIStat%Previous)
     !----------------------------------------------------------------------------
-    ! End clean, begin kluge
-    !----------------------------------------------------------------------------
-    CALL SetEq(T3,sT3)
-    LX=T3%D
-    CALL Delete(sT3)
-    CALL Delete(T3)
-!    CALL PPrint(LX,'L[X]',Unit_O=6)
-!    STOP
-    !    IF(M==1)RETURN
     IF(I>1)STOP
-!!$
-!!$!    WRITE(*,*)' Shift = ',Shift
-!!$
-!!$    WS=Values(M-1)-Values(1)+Shift 
-!!$
-!!$    Com=MATMUL(X,P)-MATMUL(P,X)
-!!$    DO J=1,M-1
-!!$       OmegaPls=Trace2(MATMUL(TRANSPOSE(Vectors(:,:,J)),Com),N)
-!!$       OmegaMns=Trace2(MATMUL(Vectors(:,:,J),Com),N)
-!!$       LX=LX+WS*(OmegaMns*TRANSPOSE(Vectors(:,:,J))+OmegaPls*Vectors(:,:,J))
-!!$    ENDDO
-
   END SUBROUTINE LOn2BakEnd
 
   SUBROUTINE LOn2(N,M,Shift,F,P,Z,TwoE,Values,Vectors,X,LX)
@@ -410,14 +635,12 @@ CONTAINS
        OmegaMns=Trace2(MATMUL(Vectors(:,:,J),Com),N)
        LX=LX+WS*(OmegaMns*TRANSPOSE(Vectors(:,:,J))+OmegaPls*Vectors(:,:,J))
     ENDDO
-
   END SUBROUTINE LOn2
 
-
-  SUBROUTINE RQILineSearchBakEnd(I,N,S,Lambda)          
+  SUBROUTINE RQLSBakEnd(I,N,S,Lambda)          
     INTEGER               :: I
     TYPE(FileNames)       :: N
-    TYPE(State)           :: S,RQIStat
+    TYPE(State)           :: S
     TYPE(Parallel)        :: MPI    
     TYPE(BCSR)            :: sP,sXk,sPk,sLXk,sLPk,sT
     INTEGER, DIMENSION(3) :: Cur
@@ -426,11 +649,6 @@ CONTAINS
     !
     Cur=S%Current%I
     Cur(1)=I
-    !
-    WRITE(*,*)TrixFile("OrthoD",PWD_O=N%M_SCRATCH,Name_O=N%SCF_NAME,Stats_O=S%Current%I,OffSet_O=0)
-    WRITE(*,*)TrixFile('OrthoXk',PWD_O=N%M_SCRATCH,Name_O=N%SCF_NAME,Stats_O=Cur,OffSet_O=0)
-    WRITE(*,*)TrixFile('OrthoPk',PWD_O=N%M_SCRATCH,Name_O=N%SCF_NAME,Stats_O=Cur,OffSet_O=0)
-
     !
     CALL Get(sP ,TrixFile("OrthoD",PWD_O=N%M_SCRATCH,Name_O=N%SCF_NAME,Stats_O=S%Current%I,OffSet_O=0))
     CALL Get(sXk,TrixFile('OrthoXk',PWD_O=N%M_SCRATCH,Name_O=N%SCF_NAME,Stats_O=Cur,OffSet_O=0))
@@ -444,8 +662,6 @@ CONTAINS
     PP =OneDot(sP,sPk,sT)
     XP =OneDot(sP,sXk,sT)
     !
-    WRITE(*,*)TrixFile('LXk',PWD_O=N%M_SCRATCH,Name_O=N%SCF_NAME,Stats_O=Cur,OffSet_O=0) 
-
     CALL Get(sLXk,TrixFile('LXk',PWD_O=N%M_SCRATCH,Name_O=N%SCF_NAME,Stats_O=Cur,OffSet_O=0))    
     CALL XPose(sLXk,sT)
     CALL Delete(sLXk)
@@ -471,10 +687,8 @@ CONTAINS
     lambda_m=(-BB-SQRT(BB*BB-4.0*AA*CC))/(2.0*AA)	  
     !
     Lambda=Lambda_P
-    WRITE(*,*)' Lambda = ',Lambda
-    STOP
     !
-  END SUBROUTINE RQILineSearchBakEnd
+  END SUBROUTINE RQLSBakEnd
   !---------------------------------------------------------------------
   ! Calculates TD-SCF scalar product Tr=Tr([A,P],B^+)
   ! Assumes B^t on input
@@ -482,8 +696,8 @@ CONTAINS
   FUNCTION OneDot(sP,sA,sBt) RESULT(Tr) 
     TYPE(BCSR) :: sP,sA,sBt,sT1
     REAL(DOUBLE) :: Tr
-    CALL Multiply(sA,sP,sT1)
-    CALL Multiply(sP,sA,sT1,-One)
+    CALL Multiply(sP,sA,sT1)
+    CALL Multiply(sA,sP,sT1,-One)
     Tr=Half*Trace(sT1,sBt)
     CALL Delete(sT1)
   END FUNCTION OneDot
@@ -493,7 +707,6 @@ CONTAINS
     REAL(DOUBLE) :: Lambda,Lambda_p,Lambda_m
     REAL (DOUBLE),DIMENSION(N,N)::P,Pk,Xk,LXk,LPk,Tmp1
     REAL(DOUBLE) :: XX,PP,XP,PX,PLP,XLP,XLX,PLX,AA,BB,CC
-
     XX =Pdot1(N,P,Xk,Xk) ! 1 - normalized by definition
     PP =Pdot1(N,P,Pk,Pk)
     XP =Pdot1(N,P,Xk,Pk)
@@ -502,22 +715,13 @@ CONTAINS
     XLX=Pdot1(N,P,Xk,LXk)
     XLP=Pdot1(N,P,Xk,LPk)
     PLX=Pdot1(N,P,Pk,LXk)
-
     AA=PLP*(PX+XP)-PP*(PLX+XLP)
     BB=2.0*PLP*XX-2.0*XLX*PP
     CC=XX*(PLX+XLP)-XLX*(PX+XP)
     lambda_p=(-BB+SQRT(BB*BB-4.0*AA*CC))/(2.0*AA)
     lambda_m=(-BB-SQRT(BB*BB-4.0*AA*CC))/(2.0*AA)	  
     Lambda=Lambda_P
-
-    WRITE(*,*)' Lambda = ',Lambda
-    STOP
-
   END Subroutine RQILineSearch
-
-
-
-
 
   FUNCTION ThoulessQ(N,P,X,LX) RESULT(Ek)
     !! So, where is  the denominator??
@@ -597,6 +801,7 @@ CONTAINS
     REAL(DOUBLE) :: Norm
     REAL(DOUBLE),DIMENSION(N,N) :: P,X
     Norm=sqrt(abs(Pdot1(N,P,X,X)))
+    WRITE(*,*)' Norm = ',Norm
     X=X/Norm
   END SUBROUTINE ReNorm
 
@@ -627,7 +832,6 @@ CONTAINS
     Tr=0.5*Trace2(CC,N)
 
   END FUNCTION Pdot1
-
   !-------------------------------------------------------------------------------      
   FUNCTION Project(N,P,Q,AA)  RESULT(BB)
     ! BB=P AA Q + Q AA P
