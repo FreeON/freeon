@@ -238,13 +238,14 @@ CONTAINS
       ENDIF
     ENDIF
 
+    ! OMG,this is anoying!!
     ! Check MemStats.
-    IF(MemStats%Allocs /= MemStats%DeAllocs) THEN
-      CALL MondoLog(DEBUG_NONE, "ShutDown ("//TRIM(Prog)//")", "Possible memory leak. Allocs = " &
-        //TRIM(IntToChar(MemStats%Allocs))//", DeAllocs = " &
-        //TRIM(IntToChar(MemStats%DeAllocs)))
+!    IF(MemStats%Allocs /= MemStats%DeAllocs) THEN
+!      CALL MondoLog(DEBUG_NONE, "ShutDown ("//TRIM(Prog)//")", "Possible memory leak. Allocs = " &
+!        //TRIM(IntToChar(MemStats%Allocs))//", DeAllocs = " &
+!        //TRIM(IntToChar(MemStats%DeAllocs)))
       !CALL Halt("[FIXME]")
-    ENDIF
+!    ENDIF
 
     IF(PrintFlags%Key==DEBUG_MAXIMUM) THEN
       CALL PPrint(MemStats,Prog)

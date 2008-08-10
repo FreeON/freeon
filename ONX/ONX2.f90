@@ -175,7 +175,6 @@ PROGRAM ONX2
   ENDIF
   IF(SCFActn=='TD-SCF')THEN   
      NoSym=.TRUE.
-     WRITE(*,*)' NoSym = ',NoSym
   ENDIF
   !
   CALL Get(BSc,Tag_O=CurBase)

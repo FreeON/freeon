@@ -1,4 +1,4 @@
-!------------------------------------------------------------------------------
+ !------------------------------------------------------------------------------
 !    This code is part of the MondoSCF suite of programs for linear scaling
 !    electronic structure theory and ab initio molecular dynamics.
 !
@@ -50,7 +50,7 @@ CONTAINS
     !
     TYPE(BCSR)                      :: sP,sQ,sF,sZ
     TYPE(DBL_RNK2)                  :: P,Q,F,Z
-    REAL(DOUBLE)                    :: Ek,EkOld,Beta,Lambda,ErrRel,ErrAbs,Shift
+    REAL(DOUBLE)                    :: Ek,EkOld,dEk,Beta,Lambda,ErrRel,ErrAbs,Shift,dNorm
     REAL(DOUBLE),DIMENSION(N,N)     :: Xk,Gk,Pk,LXk,LPk
     REAL(DOUBLE),DIMENSION(N,N)     :: XkOld,PkOld,GkOld
     REAL(DOUBLE),DIMENSION(N)       :: Values
@@ -94,89 +94,88 @@ CONTAINS
     DO I=1,1
        CALL Nihilate0(N,I,Nam,S,MPI)
        CALL LOn2BakEnd(N,I,0,Shift,'Xk',Nam,S,MPI)
-       CALL Nihilate1(I,Nam,S,MPI,Ek)
-       DO K=0,1000
+       
+       GOTO 111
+
+       CALL Nihilate1(I,Nam,S,MPI,Ek,TDA_O=.TRUE.)
+!       write(*,*)' ek = ',EK
+!       GOTO 111 ! STOP
+       DO K=0,10
           ! The non-linear congjugate gradient
-          CALL NLCGBakEnd(I,K,Ek,Nam,S,MPI)
+          CALL NLCGBakEnd(I,K,Ek,Nam,S,MPI,Beta)
           ! Compute L[Pk]
           CALL LOn2BakEnd(N,I,K,Shift,'Pk',Nam,S,MPI)
           ! Line Search: Min_Lambda{ E[Xk+Lambda*Pk] }
           CALL RQLSBakEnd(I,Nam,S,Lambda)                    
           ! Anhiliate and renorm Xk
-          CALL NihilateXk(I,Nam,S,MPI,Lambda,TDA_O=.TRUE.)
+          CALL NihilateXk(I,Nam,S,MPI,Lambda,dNorm,TDA_O=.TRUE.)
           ! Compute L[Xk]
           CALL LOn2BakEnd(N,I,K,Shift,'Xk',Nam,S,MPI)
-          ! Anihilate LXk, compute energy and error
-          ! CALL NihilateLXk( )
-          CALL Anihilate(N,P%D,Q%D,LXk,TDA_O=.TRUE.)          
-          Ek=ThoulessQ(N,P%D,Xk,LXk) 
-          ErrAbs=Ek-EkOld
-          ErrRel=-1D10
-          DO U=1,N
-             DO V=1,N
-                ErrRel=MAX(ErrRel,ABS(Ek*Xk(U,V)-LXk(U,V))/Ek)
-             ENDDO
-          ENDDO
+          ! Anihilate L[Xk], compute Ek and its relative error
+          CALL NihilateLXk(I,Nam,S,MPI,Ek,dEk,TDA_O=.TRUE.)
 
-          IF(ErrRel<1D-4)EXIT
+          WRITE(*,33)I,K,Ek*27.21139613182D0,Beta,Lambda,dEk,dNorm
+
+          IF(dEk<1D-6)EXIT
           !
        ENDDO
-       WRITE(*,*)I,K,Ek*27.21139613182D0,ErrRel,ErrAbs
-       Values(I)=Ek 
-       Vectors(:,:,I)=Xk
+       WRITE(*,*)I,K,Ek*27.21139613182D0,dEk,dNorm
     ENDDO
     !
      WRITE(*,*)'------------------------------------------'
 
-     STOP
-
 111  CONTINUE
 
-       Shift=0.1102479D0
+   Shift=0.1102479D0
 
     DO I=1,1
        !
        CALL RPAGuess(N,Xk)
-       ! CALL PPrint(Xk,"RAW",Unit_O=6)
-       Xk=ProjectPH(N,Q%D,P%D,Xk)
+       CALL PPrint(Xk,"RAW",Unit_O=6)
+
+
+       Xk=ProjectPH(N,P%D,Q%D,Xk)
        ! CALL PPrint(Xk,"PROJECTED",Unit_O=6)
 
        CALL Renorm(N,P%D,Xk)
 
+!       CALL PPrint(Xk,' RAW XK = ',Unit_O=6)
 
-       !    CALL PPrint(Xk,"NORMED",Unit_O=6)
 
-
+       CALL PPrint(Xk,"NORMED",Unit_O=6)
 !!$
 !!$       Xk=Vectors(:,:,I)
 
-
        CALL LOn2(N,I,Shift,F%D,P%D,Z%D,DoubleSlash,Values,Vectors,Xk,LXk)
+       CALL PPrint(LXk,'RAW LXK',Unit_O=6)
 
-       CALL PPrint(LXk,'2LXk BEFORE ',Unit_O=6)
-
-       LXk=Project(N,Q%D,P%D,LXk)
-
-       CALL PPrint(LXk,'2LXk AFTER ',Unit_O=6)
+       STOP
+ 
+       LXk=ProjectPH(N,P%D,Q%D,LXk)
+!
+!       CALL PPrint(LXk,'PROJECTED LXK',Unit_O=6)
 
        Beta=Zero
        XkOld=Zero
        PkOld=Zero
        Ek=ThoulessQ(N,P%D,Xk,LXk) 
 
-       write(*,*)' ek = ',EK
-
-       STOP
+!       write(*,*)' ek = ',EK
        !
-       DO K=0,1000
+       DO K=0,10
           !
           Gk=Two*(LXk-Ek*Xk)
+
+!          CALL PPrint(Gk,   ' Gk    ',Unit_O=6)
+!          CALL PPrint(GkOld,' GkOld ',Unit_O=6)
+
           IF(K>0)  &
              Beta=Pdot1(N,P%D,Gk-Gkold,Gk)/Pdot1(N,P%D,GkOld,GkOld)    			
+
+!          WRITE(*,*)' Beta = ',Beta
+
           Pk=Gk+Beta*PkOld  
           !
-
-
           CALL LOn2(N,I,Shift,F%D,P%D,Z%D,DoubleSlash,Values,Vectors,Pk,LPk)
           CALL RQILineSearch(N,P%D,Pk,Xk,LXk,LPk,Lambda)          
           !
@@ -188,14 +187,12 @@ CONTAINS
           !
           Xk=XkOld+Lambda*Pk
           !
-          CALL Anihilate(N,P%D,Q%D,Xk)
+          CALL Anihilate(N,P%D,Q%D,Xk,TDA_O=.TRUE.)
+          dNorm=One-sqrt(abs(Pdot1(N,P%D,Xk,Xk)))
           CALL ReNorm(N,P%D,Xk)
-
           CALL LOn2(N,I,Shift,F%D,P%D,Z%D,DoubleSlash,Values,Vectors,Xk,LXk)
-          CALL Anihilate(N,P%D,Q%D,LXk)
-          CALL ReNorm(N,P%D,Xk)
+          CALL Anihilate(N,P%D,Q%D,LXk,TDA_O=.TRUE.)
           Ek=ThoulessQ(N,P%D,Xk,LXk) 
-
           ErrAbs=Ek-EkOld
           ErrRel=-1D10
           DO U=1,N
@@ -203,8 +200,12 @@ CONTAINS
                 ErrRel=MAX(ErrRel,ABS(Ek*Xk(U,V)-LXk(U,V))/Ek)
              ENDDO
           ENDDO
-!          WRITE(*,*)I,Ek*27.21139613182D0,ErrRel,ErrAbs
-          IF(ErrRel<1D-4)EXIT
+          WRITE(*,33)I,K,Ek*27.21139613182D0,Beta,Lambda,ErrRel,dNorm
+
+33        FORMAT('St=',I2,', It=',I2,', Ev = ',F10.6,', Bt= ',D12.6,' Lm= ',D12.6,' dE= ',D12.6,' dN= ',D12.6)
+
+
+          IF(ErrRel<1D-6)EXIT
           !
        ENDDO
        WRITE(*,*)I,K,Ek*27.21139613182D0,ErrRel,ErrAbs
@@ -225,9 +226,9 @@ CONTAINS
        TDA=.FALSE.
     ENDIF
     IF(TDA)THEN
-       X=ProjectPH(N,Q,P,X)
+       X=ProjectPH(N,P,Q,X)
     ELSE
-       X=Project(N,Q,P,X)
+       X=Project(N,P,Q,X)
     ENDIF
   END SUBROUTINE Anihilate
 
@@ -279,7 +280,7 @@ CONTAINS
     enddo
     CALL SetEq(sXk,X)
 
-!    CALL PPrint(sXk,"RAW",Unit_O=6)
+    CALL PPrint(sXk,"RAW",Unit_O=6)
 
     CALL Multiply(sQ,sXk,sT1)
     CALL Multiply(sT1,sP,sXk)
@@ -296,7 +297,8 @@ CONTAINS
     sXk%MTrix%D=sXk%MTrix%D*(One/Norm)
 
 !    WRITE(*,*)' Norm = ',Norm
-!    CALL PPrint(sXk,"NORMED",Unit_O=6)
+
+    CALL PPrint(sXk,"NORMED",Unit_O=6)
 
     ! Put guess Xk to disk
     CALL Put(sXk,XkName)
@@ -304,8 +306,7 @@ CONTAINS
     CALL Delete(sT)
     CALL Delete(sP)
     CALL Delete(sXk)
-    WRITE(*,*)' DONE Nihilate0'
-    ! All done
+     ! All done
   END SUBROUTINE Nihilate0
 
 
@@ -337,14 +338,18 @@ CONTAINS
     ! Get occupied projector 
     CALL Get(sP,PName)
     CALL Get(sQ,QName)
+    ! Kluge due to poor memory management:
+    CALL New(ST1)
+    CALL New(SLXK)
+    ! Get that should have good management (but doesnt)
     CALL Get(sLXk,LXkName)
     ! Anihilate via TDA or TD-SCF symmetry.
     ! Note that factor of (1/4) is not present, due to the
     ! normalization of P to eigenvalues with 1s or 0s.
     IF(TDA)THEN
-       ! LXk=P.LXk.Q (only h-p zapped)
-       CALL Multiply(sP,sLXk,sT1)
-       CALL Multiply(sT1,sQ,sLXk)
+       ! LXk=Q.LXk.P (only p-h zapped)
+       CALL Multiply(sQ,sLXk,sT1)
+       CALL Multiply(sT1,sP,sLXk)
        CALL Delete(sT1)
     ELSE
        ! LXk=(P.LXk.Q+Q.LXk.P) (both h-p and p-h zapped)
@@ -364,7 +369,6 @@ CONTAINS
     !
     CALL Get(sXk,XkName)
     CALL XPose(sLXk,sT)
-
     ! Again a factor of two for normalization of P
     Ek=Two*OneDot(sP,sXk,sT)
     !
@@ -374,11 +378,11 @@ CONTAINS
     ! All done
   END SUBROUTINE Nihilate1
 
-  SUBROUTINE NihilateXk(I,N,S,MPI,Lambda,TDA_O)
+  SUBROUTINE NihilateXk(I,N,S,MPI,Lambda,dNorm,TDA_O)
     LOGICAL, OPTIONAL     :: TDA_O
     LOGICAL               :: TDA
     INTEGER               :: I
-    REAL(DOUBLE)          :: Lambda,Norm
+    REAL(DOUBLE)          :: Lambda,Norm,dNorm
     TYPE(FileNames)       :: N
     TYPE(State)           :: S
     TYPE(Parallel)        :: MPI    
@@ -410,7 +414,7 @@ CONTAINS
     CALL Get(sPk,PkName)
     sPk%MTrix%D=sPk%MTrix%D*Lambda
     CALL Add(sT1,sPk,sXk)
-
+    !
     CALL Delete(sPk)
 
     CALL Get(sP,PName)
@@ -420,9 +424,9 @@ CONTAINS
     ! Note that factor of (1/4) is not present, due to the
     ! normalization of P to eigenvalues with 1s or 0s.
     IF(TDA)THEN
-       ! Xk=P.Xk.Q (only h-p zapped)
-       CALL Multiply(sP,sXk,sT1)
-       CALL Multiply(sT1,sQ,sXk)
+       ! Xk=Q.Xk.P (only p-h zapped)
+       CALL Multiply(sQ,sXk,sT1)
+       CALL Multiply(sT1,sP,sXk)
        CALL Delete(sT1)
     ELSE
        ! Xk=(P.Xk.Q+Q.Xk.P) (both h-p and p-h zapped)
@@ -437,17 +441,13 @@ CONTAINS
     ENDIF
     !
     CALL Delete(sQ)
-
     ! Normalize the guess transition density.  Note factor
     ! of two has to do with normalization of P and Q.  Here,
     ! these projectors have eigenvalues == 1, not 2.
     CALL XPose(sXk,sT)
     Norm=SQRT(Two*ABS(OneDot(sP,sXk,sT)))
+    dNorm=One-Norm
     sXk%MTrix%D=sXk%MTrix%D*(One/Norm)
-
-!    WRITE(*,*)' Norm = ',Norm
-!    CALL PPrint(sXk,"NORMED",Unit_O=6)
-
     ! Put guess Xk to disk
     CALL Put(sXk,XkName)
     !
@@ -456,17 +456,96 @@ CONTAINS
     CALL Delete(sXk)
     ! All done
   END SUBROUTINE NihilateXk
+  !
+  SUBROUTINE NihilateLXk(I,N,S,MPI,Ek,dEk,TDA_O)
+    LOGICAL, OPTIONAL     :: TDA_O
+    LOGICAL               :: TDA
+    INTEGER               :: I,L
+    REAL(DOUBLE)          :: dEk,Ek
+    TYPE(FileNames)       :: N
+    TYPE(State)           :: S
+    TYPE(Parallel)        :: MPI    
+    TYPE(BCSR)            :: sP,sQ,sXk,sPk,sLXk,sT,sT1,sT2,sT3 ! NihilateLXk delete list
+    INTEGER, DIMENSION(3) :: Cur
+    CHARACTER(LEN=DCL)    :: XkName,PkName,LXkName,PName,QName
+    !-----------------------------------------------------------------------------
+    IF(PRESENT(TDA_O))THEN
+       TDA=TDA_O
+    ELSE
+       TDA=.FALSE.
+    ENDIF
+    ! Status same as ground state, but now SCF cycle# is RQI state#
+    Cur=S%Current%I
+    Cur(1)=I
 
+    ! Naming of things
 
+    LXkName=TrixFile('LXk',PWD_O=N%M_SCRATCH,Name_O=N%SCF_NAME,Stats_O=Cur,OffSet_O=0)
+    XkName=TrixFile('OrthoXk',PWD_O=N%M_SCRATCH,Name_O=N%SCF_NAME,Stats_O=Cur,OffSet_O=0)
+    PkName=TrixFile('OrthoPk',PWD_O=N%M_SCRATCH,Name_O=N%SCF_NAME,Stats_O=Cur,OffSet_O=0)
+    PName= TrixFile("OrthoD", PWD_O=N%M_SCRATCH,Name_O=N%SCF_NAME,Stats_O=S%Current%I,OffSet_O=0)
+    QName= TrixFile("OrthoQ", PWD_O=N%M_SCRATCH,Name_O=N%SCF_NAME,Stats_O=S%Current%I,OffSet_O=0)
+    !
 
-  SUBROUTINE NLCGBakEnd(I,K,Ek,N,S,MPI)
+    CALL New(sLXk)
+    !
+    CALL Get(sP,PName)
+    CALL Get(sQ,QName)
+    CALL Get(sLXk,LXkName)
+    ! Anihilate via TDA or TD-SCF symmetry.
+    ! Note that factor of (1/4) is not present, due to the
+    ! normalization of P to eigenvalues with 1s or 0s.
+    IF(TDA)THEN
+       ! Xk=Q.Xk.P (only p-h zapped)
+       CALL Multiply(sQ,sLXk,sT1)
+       CALL Multiply(sT1,sP,sLXk)
+       CALL Delete(sT1)
+    ELSE
+       ! Xk=(P.Xk.Q+Q.Xk.P) (both h-p and p-h zapped)
+       CALL Multiply(sP,sLXk,sT1)
+       CALL Multiply(sT1,sQ,sT2)
+       CALL Multiply(sQ,sLXk,sT1)
+       CALL Multiply(sT1,sP,sT3)
+       CALL Add(sT2,sT3,sLXk)
+       CALL Delete(sT1)
+       CALL Delete(sT2)
+       CALL Delete(sT3)
+    ENDIF
+    !
+    CALL Delete(sQ)
+    ! Put the anihilated LXk to disk
+    CALL Put(sLXk,LXkName)
+    !
+    CALL Get(sXk,XkName)
+    CALL XPose(sLXk,sT)
+    ! Again a factor of two for normalization of P
+    Ek=Two*OneDot(sP,sXk,sT)
+    CALL Delete(sP)
+    CALL Delete(sT)
+    !
+    sXk%MTrix%D=-Ek*sXk%MTrix%D
+    CALL Add(sXk,sLXk,sT1)
+    !
+    dEk=-1D10
+    DO L=1,sT1%NNon0
+       dEk=MAX(dEk,ABS(sT1%MTrix%D(L)))
+    ENDDO
+    dEk=dEk/Ek
+    !
+    CALL Delete(sT1)
+    CALL Delete(sXk)
+    CALL Delete(sLXk)
+    ! All done
+  END SUBROUTINE NihilateLXk
+
+  SUBROUTINE NLCGBakEnd(I,K,Ek,N,S,MPI,Beta)
     !
     INTEGER               :: I,K
     REAL(DOUBLE)          :: Ek
     TYPE(FileNames)       :: N
     TYPE(State)           :: S
     TYPE(Parallel)        :: MPI    
-    TYPE(BCSR)            :: sXk,sLXk,sGk,sGkOld,sPkOld,sP,sT,sT1 ! NLCGradient delete list
+    TYPE(BCSR),SAVE       :: sXk,sLXk,sGk,sGkOld,sPkOld,sP,sT,sT1 ! NLCGradient delete list
     INTEGER, DIMENSION(3) :: Cur
     REAL(DOUBLE)          :: Num,Den,Beta
     CHARACTER(LEN=DCL)    :: XkName,LXkName,GkName,PName,GkOldName,PkOldName,PkName
@@ -487,10 +566,18 @@ CONTAINS
     ! Get Xk and LXk
     CALL Get(sXk,XkName)
     CALL Get(sLXk,LXkName)
+
+
     ! Gk=Two*(LXk-Ek*Xk)
+
     sXk%MTrix%D=-Ek*sXk%MTrix%D
+
     CALL Add(sLXk,sXk,sGk)
+
     sGk%MTrix%D=Two*sGk%MTrix%D
+
+!    CALL PPrint(sGk,   ' Gk    ',Unit_O=6)
+
     ! Gk to disk
     CALL Put(sGk,GkName)
     ! Done with Xk and LXk
@@ -498,8 +585,6 @@ CONTAINS
     CALL Delete(sLXk)
     ! Beta=0 for K=0
     IF(K==0)THEN
-       WRITE(*,*)' WRITNG OrthoPk IN NLCGBAKEND '
-       WRITE(*,*)TRIM(PkName)
        CALL Put(sGk,PkName)
        CALL Put(sGk,GkOldName)
        CALL Delete(sGk)
@@ -508,6 +593,13 @@ CONTAINS
     ! Get Pk and GkOld
     CALL Get(sP,PName)
     CALL Get(sGkOld,GkOldName)
+
+
+!
+
+!    CALL PPrint(sGkOld,' GkOld ',Unit_O=6)
+   
+!
     ! Beta=(Gk-Gkold,Gk)_p/(GkOld,GkOld)_p    			
     sGkOld%MTrix%D=-sGkOld%MTrix%D
     CALL Add(sGk,sGkOld,sT1)
@@ -517,17 +609,22 @@ CONTAINS
     CALL XPose(sGkOld,sT)    
     Den=OneDot(sP,sGkOld,sT) 
     Beta=Num/Den
+!    WRITE(*,*)' Beta = ',Beta
+
+
     ! Done with P and T
     CALL Delete(sT)
     CALL Delete(sP)
     CALL Delete(sGkOld)
     ! Pk=Gk+Beta*PkOld  
     CALL Get(sPkOld,PkOldName)
+
     sPkOld%MTrix%D=Beta*sPkOld%MTrix%D
+
     CALL Add(sGk,sPkOld,sT1)
+    ! Put GkOld to disk
+    CALL Put(sGk,GkOldName)
     ! Put Pk to disk
-    WRITE(*,*)' WRITNG OrthoPk IN NLCGBAKEND '
-    WRITE(*,*)TRIM(PkName)
     CALL Put(sT1,PkName)
     ! Clean up and done
     CALL Delete(sT1)
@@ -562,6 +659,7 @@ CONTAINS
     ! resultant of this subroutine, namely L[Xk] or L[Pk] in an orthongal representation
     CALL New(sX) ! Kluge.  Somehow, dimensioning not quite right here:
     CALL Get(sX,TrixFile('Ortho'//TRIM(Trgt),PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=RQIStat%Current%I,OffSet_O=0))
+
     ! Ground state fockian in an orthogonal representation
     CALL Get(sF,TrixFile("OrthoF",PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=S%Current%I,OffSet_O=0))
     ! T2=[Xor,For]
@@ -571,6 +669,10 @@ CONTAINS
     CALL Delete(sF)
     ! Z is the sparse inverse factor of S  
     CALL Get(sZ,TrixFile("X",PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=S%Current%I))    
+
+
+
+
     ! Xao = Z^t.Xor.Z 
     CALL Multiply(sZ,sX,sT1)        
     CALL Multiply(sT1,sZ,sX)
@@ -609,6 +711,9 @@ CONTAINS
     CALL Delete(sT2)
     ! Put orthogonal L[Xk] or L[Pk] to disk (*.LX or *.LP)
     CALL Put(sT3,TrixFile("L"//TRIM(Trgt),PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=RQIStat%Current%I,OffSet_O=0))    
+
+    CALL PPrint(sT3,' RAW LXK ',Unit_O=6)
+
     ! Done with temp #3
     CALL Delete(sT3)
     ! Done with invokation parameters
@@ -801,7 +906,6 @@ CONTAINS
     REAL(DOUBLE) :: Norm
     REAL(DOUBLE),DIMENSION(N,N) :: P,X
     Norm=sqrt(abs(Pdot1(N,P,X,X)))
-    WRITE(*,*)' Norm = ',Norm
     X=X/Norm
   END SUBROUTINE ReNorm
 
@@ -854,8 +958,7 @@ CONTAINS
     IMPLICIT NONE
     INTEGER :: N
     REAL (DOUBLE),DIMENSION(N,N)::P,Q,AA,BB
-    BB=0.25*(MATMUL(MATMUL(P,AA),Q))
-
+    BB=0.25D0*(MATMUL(MATMUL(Q,AA),P))
   END FUNCTION ProjectPH
 
 
