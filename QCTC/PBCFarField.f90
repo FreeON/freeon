@@ -25,14 +25,11 @@ MODULE PBCFarField
   TYPE(DBL_VECT)                      :: PFFKetC,PFFKetS
 
 
-  REAL(DOUBLE),PARAMETER              :: Half22=5D-1
-  REAL(DOUBLE),PARAMETER              :: Half11=1D0
-
   CONTAINS
 !====================================================================================
 !   Setup the PBCFarField Matrix. 
 !====================================================================================
-    SUBROUTINE PBCFarFuckingFieldSetUp(GMLoc,RhoLoc,Prog,MaxPFFFEll,ETotal,LatFrc)
+    SUBROUTINE PBCFarFieldSetUp(GMLoc,RhoLoc,Prog,MaxPFFFEll,ETotal,LatFrc)
       INTEGER                         :: MaxPFFFEll,MaxPFFFLen
       TYPE (HGRho)                    :: RhoLoc
       TYPE(PoleNode)                  :: Q
@@ -51,7 +48,11 @@ MODULE PBCFarField
       CHARACTER(LEN=DEFAULT_CHR_LEN)  :: Mssg
 
 
+
       ID(L)=L*(L+1)/2
+
+
+
       !
       IF(GMLoc%PBC%Dimen==0) RETURN
       !
@@ -111,8 +112,7 @@ MODULE PBCFarField
       E_QP=0D0
       DO I=1,3
          IF(GMLoc%PBC%AutoW%I(I)==1)E_DP=E_DP+Half*GMLoc%PBC%DipoleFAC*RhoPoles%DPole%D(I)**2
-         !!!!!!!! HALF??  HALF??  HALF??  HALF??  HALF??  HALF??  HALF??  HALF?? 
-         IF(GMLoc%PBC%AutoW%I(I)==1)E_QP=E_QP+GMLoc%PBC%QupoleFAC*RhoPoles%MPole*RhoPoles%QPole%D(I)*Half11
+         IF(GMLoc%PBC%AutoW%I(I)==1)E_QP=E_QP+GMLoc%PBC%QupoleFAC*RhoPoles%MPole*RhoPoles%QPole%D(I)
       ENDDO
       IF(.NOT.PRESENT(LatFrc))THEN
          EPFF=Zero
@@ -124,24 +124,22 @@ MODULE PBCFarField
                DeltaPFF=DeltaPFF+Two*(RhoC%D(LM)*TenRhoC%D(LM)+RhoS%D(LM)*TenRhoS%D(LM))
             ENDDO
             EPFF=EPFF+DeltaPFF
-            WRITE(*,33)L,EPFF+E_DP,EPFF,DELTAPFF
-33          FORMAT('Ell = ',I3,', ETotal = ',D12.6,', E_PFF = ',D20.12,', Delta = ',D12.6)
+!!$            WRITE(*,33)L,EPFF+E_DP,EPFF,DELTAPFF
+!!$33          FORMAT('Ell = ',I3,', ETotal = ',D12.6,', E_PFF = ',D20.12,', Delta = ',D12.6)
 
-!            IF((ABS(DeltaPFF/ETotal)<Thresholds%ETol*1D-1).AND.(L>4))THEN
-!               Ell2Use=L
-!               EXIT
-!$            ENDIF
+            IF((ABS(DeltaPFF/ETotal)<Thresholds%ETol*1D-2).AND.(L>4))THEN
+               Ell2Use=L
+               EXIT
+            ENDIF
+
          ENDDO
-
-         IF(Ell2Use==MaxPFFFEll.AND.ETotal<1D200)THEN
- !$            CALL Warn(' Maximum angular symmetry in periodic far-field expansion of the energy is too low,'//RTRN//     & 
-!!$                 '    resulting in a relative error '//TRIM(DblToShrtChar(DeltaPFF/ETotal))//" in the total energy, "//RTRN// &
-!!$                 '    which is larger than the requested accuracy goal of '//TRIM(DblToShrtChar(Thresholds%ETol))      &
-!!$                 //'. '//RTRN// &
-!!$                 '    Please consider increasing the value of PFFMaxEll from '//TRIM(IntToChar(MaxPFFFEll))//'. '//RTRN// &
-!!$                 '    Note that increasing PFFMaxEll can actually decrease the cost of QCTC ')
-
-
+         IF(Ell2Use==MaxPFFFEll.AND.ETotal.NE.1D2)THEN
+            CALL Warn(' Maximum angular symmetry in periodic far-field expansion of the energy is too low,'//RTRN//     & 
+                 '    resulting in a relative error '//TRIM(DblToShrtChar(DeltaPFF/ETotal))//" in the total energy, "//RTRN// &
+                 '    which is larger than the requested accuracy goal of '//TRIM(DblToShrtChar(Thresholds%ETol))      &
+                 //'. '//RTRN// &
+                 '    Please consider increasing the value of PFFMaxEll from '//TRIM(IntToChar(MaxPFFFEll))//'. '//RTRN// &
+                 '    Note that increasing PFFMaxEll can actually decrease the cost of QCTC ')
          ENDIF
       ELSE
         ! The crystal field contribution to the lattice forces
@@ -175,6 +173,7 @@ MODULE PBCFarField
 !!$               Ell2Use=L
 !!$               EXIT
 !!$            ENDIF
+
          ENDDO
          !
          EPFF=0D0
@@ -201,28 +200,21 @@ MODULE PBCFarField
       ! For a modern discussion of these issues, see JCP 126 p.124106 (2007)
       ! Here is the INTRINSIC energy due to the crystal Coulomb field
       ! This is the shape dependent Lorentz field + the shape dependent surface term 
-!!$      Mssg=ProcessName(Prog,'Ell = '//TRIM(IntToChar(Ell2Use)))
-!!$      Mssg=TRIM(Mssg)//' Tin Foil = <'//TRIM(DblToChar(E_DP))//'>'
-!!$      WRITE(*,*)TRIM(Mssg)
-!!$      Mssg=ProcessName(Prog,'Ell = '//TRIM(IntToChar(Ell2Use)))
-!!$      Mssg=TRIM(Mssg)//' Lorentz  = <'//TRIM(DblToChar(EPFF))//'>'
-!!$      WRITE(*,*)TRIM(Mssg)
-      Mssg=ProcessName(Prog,'Ell  = '//TRIM(IntToChar(Ell2Use)))
-      Mssg=TRIM(Mssg)//' Intrinsic Far Field  = <'//TRIM(DblToChar(EPFF+E_DP)) &
-                     //'>, Converged to within Delta=<'//TRIM(DblToShrtChar(DeltaPFF))//'>'
-      WRITE(*,*)TRIM(Mssg)
+      
+      CALL MondoLog(DEBUG_MAXIMUM,Prog,' PFFEll  = '//TRIM(IntToChar(Ell2Use))// &
+                  ', Lorentz Field = <'//TRIM(DblToChar(EPFF+E_DP)) &
+                     //'> to within <'//TRIM(DblToShrtChar(ABS(DeltaPFF)))//'>')
 
-
-!      Mssg=ProcessName(Prog,'Ell  = '//TRIM(IntToChar(Ell2Use)))
-!      Mssg=TRIM(Mssg)//' DIPOLE 1= <'//TRIM(DblToChar(RhoPoles%DPole%D(1)))//'>'
-!      Mssg=TRIM(Mssg)//' DIPOLE 2= <'//TRIM(DblToChar(RhoPoles%DPole%D(2)))//'>'
-!      Mssg=TRIM(Mssg)//' DIPOLE 3= <'//TRIM(DblToChar(RhoPoles%DPole%D(3)))//'>'
-!      Mssg=TRIM(Mssg)//' QUPOLE = <'//TRIM(DblToChar(RhoPoles%QPole%D(2)))//'>'
-!      WRITE(*,*)TRIM(Mssg)
-      Mssg=ProcessName(Prog,'Ell  = '//TRIM(IntToChar(Ell2Use)))
-      Mssg=TRIM(Mssg)//' DiP_FoilEnergy = <'//TRIM(DblToChar(E_DP))//'>'
-      Mssg=TRIM(Mssg)//' QuP_FoilEnergy = <'//TRIM(DblToChar(E_QP))//'>'
-      WRITE(*,*)TRIM(Mssg)
+!!$      Mssg=ProcessName(Prog,'Ell  = '//TRIM(IntToChar(Ell2Use)))
+!!$      Mssg=TRIM(Mssg)//' DIPOLE 1= <'//TRIM(DblToChar(RhoPoles%DPole%D(1)))//'>'
+!!$      Mssg=TRIM(Mssg)//' DIPOLE 2= <'//TRIM(DblToChar(RhoPoles%DPole%D(2)))//'>'
+!!$      Mssg=TRIM(Mssg)//' DIPOLE 3= <'//TRIM(DblToChar(RhoPoles%DPole%D(3)))//'>'
+!!$      Mssg=TRIM(Mssg)//' QUPOLE = <'//TRIM(DblToChar(RhoPoles%QPole%D(2)))//'>'
+!!$      WRITE(*,*)TRIM(Mssg)
+!!$      Mssg=ProcessName(Prog,'Ell  = '//TRIM(IntToChar(Ell2Use)))
+!!$      Mssg=TRIM(Mssg)//' DiP_FoilEnergy = <'//TRIM(DblToChar(E_DP))//'>'
+!!$      Mssg=TRIM(Mssg)//' QuP_FoilEnergy = <'//TRIM(DblToChar(E_QP))//'>'
+!!$      WRITE(*,*)TRIM(Mssg)
        !
       IF(PRESENT(LatFrc))THEN 
          CALL New(LatFrc_DiP,(/3,3/))
@@ -235,7 +227,7 @@ MODULE PBCFarField
                DO J=1,3
                   IF(GMLoc%PBC%AutoW%I(I)==1.AND.GMLoc%PBC%AutoW%I(J)==1)THEN
                      LatFrc_Dip%D(I,J)=LatFrc_Dip%D(I,J)-(E_DP)*DivCV(I,J)/GMLoc%PBC%CellVolume
-                     LatFrc_QuP%D(I,J)=LatFrc_Qup%D(I,J)-(E_QP)*DivCV(I,J)/GMLoc%PBC%CellVolume  !*Half  !*Half22
+                     LatFrc_QuP%D(I,J)=LatFrc_Qup%D(I,J)-(E_QP)*DivCV(I,J)/GMLoc%PBC%CellVolume
                   ENDIF
                ENDDO
             ENDDO
@@ -243,25 +235,25 @@ MODULE PBCFarField
          !
          ! Initialize the lattice forces with the tin foil and crystal field terms
          ! Note that both of these terms are shape dependent and that only their sum is invarient
+         LatFrc%D=LatFrc_PFF%D+LatFrc_DiP%D
+         !
+!!$         PrintFlags%Key=DEBUG_MAXIMUM	
+!!$         PrintFlags%MM=DEBUG_FRC
+!!$         CALL Print_LatForce(GMLoc,LatFrc_DiP%D,'J  Dipole Volume Lattice Force',Unit_O=6)
+!!$!!         CALL Print_LatForce(GMLoc,LatFrc_QuP%D,'J  Qupole Volume Lattice Force',Unit_O=6)
+!!$         CALL Print_LatForce(GMLoc,LatFrc_PFF%D,'J  PFF    Lattice Force',Unit_O=6)
+!!$         !
+!!$         CALL Print_LatForce(GMLoc,LatFrc%D,'J PFF+Dipole+QuadPole  Lattice Force',Unit_O=6) 
+!!$         !
 
 
-         LatFrc%D=LatFrc_PFF%D+LatFrc_DiP%D  !!+LatFrc_QuP%D
-         !
-         PrintFlags%Key=DEBUG_MAXIMUM	
-         PrintFlags%MM=DEBUG_FRC
-         CALL Print_LatForce(GMLoc,LatFrc_DiP%D,'J  Dipole Volume Lattice Force',Unit_O=6)
-!!         CALL Print_LatForce(GMLoc,LatFrc_QuP%D,'J  Qupole Volume Lattice Force',Unit_O=6)
-         CALL Print_LatForce(GMLoc,LatFrc_PFF%D,'J  PFF    Lattice Force',Unit_O=6)
-         !
-         CALL Print_LatForce(GMLoc,LatFrc%D,'J PFF+Dipole+QuadPole  Lattice Force',Unit_O=6) 
-         !
          CALL Delete(LatFrc_DiP)
          CALL Delete(LatFrc_QuP)
          CALL Delete(LatFrc_PFF)
          CALL Delete(LatFrc_Dlt)
       ENDIF
       !
-    END SUBROUTINE PBCFarFuckingFieldSetUp   
+    END SUBROUTINE PBCFarFieldSetUp
     !====================================================================================
     !   Calculate the Extrinisc (unique) Far-Field component of the J matrix, 
     !   including the non-unique surface (tin foil) and Lorentz field (Nijboer-Dewette) terms
@@ -293,9 +285,6 @@ MODULE PBCFarField
       REAL(DOUBLE),DIMENSION(0:FFLen)  :: BraC,BraS
       !
       FF=Zero
-
-!!      RETURN
-
       IF(G%PBC%Dimen==0) RETURN
       ! Transform <Bra| coefficients from HG to SP
       PiZ=(Pi/Prim%Zeta)**(ThreeHalves)
@@ -311,12 +300,6 @@ MODULE PBCFarField
          BraS(0:LenPFFFEll)=Zero 
          CALL Regular(MaxPFFFELL,PQ(1),PQ(2),PQ(3))
          CALL XLate77(MaxPFFFEll,Prim%Ell,BraC(0),BraS(0),Cpq(0),Spq(0),KetC(0),KetS(0))
-         !----------------------------------------------------------------
-         ! Note, we are leaving the L=0 (monopole) bit out. 
-         ! This can be important, eg. to get accurate finite differences 
-         ! of the Coulomb energy
-         !----------------------------------------------------------------
-!         DO LM=1,LenPFFFEll
          DO LM=0,LenPFFFEll
             FF=FF+(BraC(LM)*TenRhoC%D(LM)+BraS(LM)*TenRhoS%D(LM))
          ENDDO
@@ -342,7 +325,6 @@ MODULE PBCFarField
       DO I=1,3        
          IF(G%PBC%AutoW%I(I)==1)THEN
             TF=TF+G%PBC%DipoleFAC*DP(I)*RhoPoles%DPole%D(I)*Half 
-            !!!!!!!! HALF??  HALF??  HALF??  HALF??  HALF??  HALF??  HALF??  HALF?? 
             TF=TF+MP*G%PBC%QupoleFAC*RhoPoles%QPole%D(I)*Half 
          ENDIF
       ENDDO
@@ -361,9 +343,6 @@ MODULE PBCFarField
       REAL(DOUBLE), DIMENSION(1:) :: PdE
       INTEGER                     :: I
       TF=Zero
-
-!      RETURN
-
       PQ=P%Pw
       ! Monopole derivative
       dMP=PiZ*PdE(1)
@@ -373,8 +352,7 @@ MODULE PBCFarField
       DO I=1,3        
          IF(G%PBC%AutoW%I(I)==1)THEN
             TF=TF+G%PBC%DipoleFAC*dDP(I)*RhoPoles%DPole%D(I)*Half 
-            !!!!!!!! HALF??  HALF??  HALF??  HALF??  HALF??  HALF??  HALF??  HALF?? 
-            TF=TF+dMP*G%PBC%QupoleFAC*RhoPoles%QPole%D(I)*Half !    *Half !*Half11
+            TF=TF+dMP*G%PBC%QupoleFAC*RhoPoles%QPole%D(I)*Half
          ENDIF
       ENDDO
     END FUNCTION DTinFoil
@@ -391,9 +369,6 @@ MODULE PBCFarField
       REAL(DOUBLE), DIMENSION(3)       :: PQ,TF,HGDipole  
       INTEGER                          :: I
       TF=Zero
-
-!!     RETURN
-
       ! Note sign flip because of inverted nuclear/electron sign (electrons are positive)
       DO I=1,3
          IF(GMLoc%PBC%AutoW%I(I)==1)THEN
@@ -455,67 +430,6 @@ MODULE PBCFarField
       LOGICAL                   :: NoTranslate
       NoTranslate = (ABS(X(1)).LT.TOL) .AND. (ABS(X(2)).LT.TOL) .AND. (ABS(X(3)).LT.TOL)
     END FUNCTION NoTranslate
-
-    SUBROUTINE PBCDoubleCheck(GMLoc,R)
-      INTEGER                         :: MaxPFFFEll,MaxPFFFLen
-      TYPE (HGRho)                    :: R
-      TYPE(PoleNode)                  :: Q
-      TYPE(CRDS)                      :: GMLoc
-      INTEGER                         :: I,J,K,KKK,M,NC,L,LM,LP,Ell2Use,LL,LDX,ID, &
-IAdd,IIAdd,JAdd,JJAdd,II,JJ,EllZ,lenz
-      REAL(DOUBLE)                    :: Layers,OL,NL,FAC,Px,Py,Pz, &
-ZZ,ZZZ,rx,ry,rz,rrx,rry,rrz,rplus,rmnus,mpi,mpii
-      REAL(DOUBLE),DIMENSION(3)       :: PQ
-      TYPE(DBL_VECT)                  :: TensorC,TensorS
-      TYPE(DBL_RNK3)                  :: dTensorC,dTensorS
-      TYPE(DBL_VECT)                  :: RhoC,RhoS
-      REAL(DOUBLE)                    :: E_DP,E_QP,EPFF,DeltaPFF,DeltaFrc,TargetG,ETotal,csum
-      REAL(DOUBLE),DIMENSION(3,3)     :: DivCV
-      TYPE(DBL_RNK2)                  :: LatFrc_DiP,LatFrc_QuP,LatFrc_Dlt,LatFrc_PFF
-      CHARACTER(LEN=DEFAULT_CHR_LEN)  :: Mssg
-
-      ID(L)=L*(L+1)/2
-      !
-      CSum=0D0
-      DO I=1,R%NExpt
-         EllZ=R%Lndx%I(I)
-         LenZ=LHGTF(EllZ)
-         Zeta=R%Expt%D(I)
-         ZZ=(Pi/R%Expt%D(I))**1.5D0
-         DO J=1,R%NQ%I(I)
-            IAdd=R%OffQ%I(I)+J
-            JAdd=R%OffR%I(I)+(J-1)*LenZ+1
-            RX=Rho%Qx%D(IAdd)
-            RY=Rho%Qy%D(IAdd)
-            RZ=Rho%Qz%D(IAdd)
-            MPI=Two*R%Co%D(JAdd)*ZZ
-            !!==============================
-            DO II=1,R%NExpt
-               EllZ=R%Lndx%I(II)
-               LenZ=LHGTF(EllZ)
-               Zeta=R%Expt%D(II)
-               ZZZ=(Pi/R%Expt%D(II))**1.5D0
-               DO JJ=1,R%NQ%I(II)
-                  IIAdd=R%OffQ%I(II)+JJ
-                  JJAdd=R%OffR%I(II)+(JJ-1)*LenZ+1
-                  RRX=Rho%Qx%D(IIAdd)
-                  RRY=Rho%Qy%D(IIAdd)
-                  RRZ=Rho%Qz%D(IIAdd)
-                  MPII=Two*R%Co%D(JJAdd)*ZZZ
-                  DO KKK=2,100
-                     RPlus=ABS(RX-RRX+DBLE(KKK)*GMLoc%PBC%BoxShape%D(1,1))
-                     RMnus=ABS(RX-RRX-DBLE(KKK)*GMLoc%PBC%BoxShape%D(1,1))
-                     CSum=CSum+MPII*MPI/RPlus+MPII*MPI/RMnus
-                  ENDDO
-               ENDDO
-            ENDDO
-         ENDDO
-      ENDDO
-
-
-      WRITE(*,*)' CSum = ',CSum/2D0
-
-    END SUBROUTINE PBCDoubleCheck
 
 !
 END MODULE PBCFarField

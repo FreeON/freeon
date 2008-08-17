@@ -173,6 +173,22 @@ MODULE BoundingBox
 !============================================================================
 !     Generate an expanded BBox 
 !============================================================================
+      FUNCTION ExpandPoint(Point,Extent,Box_O) RESULT(Expando) 
+         Type(BBox)     :: Expando
+         Type(BBox),OPTIONAL  :: Box_O
+         REAL(DOUBLE),DIMENSION(3) :: Point
+         Real(Double)   :: Extent
+         Integer        :: I
+         IF(PRESENT(Box_O))THEN
+            Expando%Tier=Box_O%Tier
+            Expando%Number=Box_O%Number
+         ENDIF
+         Expando%BndBox(1:3,1)=Point-(/Extent,Extent,Extent/)
+         Expando%BndBox(1:3,2)=Point+(/Extent,Extent,Extent/)
+         Expando%Half  (1:3)  =Half*(Expando%BndBox(1:3,2)-Expando%BndBox(1:3,1))
+         Expando%Center(1:3)  =Half*(Expando%BndBox(1:3,2)+Expando%BndBox(1:3,1))
+       END FUNCTION ExpandPoint
+
       FUNCTION ExpandBox(Box,Extent) RESULT(Expando) 
          Type(BBox)     :: Box,Expando
          Real(Double)   :: Extent
@@ -184,6 +200,46 @@ MODULE BoundingBox
          Expando%Half  (1:3)  =Half*(Expando%BndBox(1:3,2)-Expando%BndBox(1:3,1))
          Expando%Center(1:3)  =Half*(Expando%BndBox(1:3,2)+Expando%BndBox(1:3,1))
       END FUNCTION ExpandBox
+
+      FUNCTION BoxVolume(Box) RESULT(Vol)
+         TYPE(BBox)     :: Box
+         REAL(Double)   :: Vol
+         Vol=(Box%BndBox(1,2)-Box%BndBox(1,1)) &
+            *(Box%BndBox(2,2)-Box%BndBox(2,1)) &
+            *(Box%BndBox(3,2)-Box%BndBox(3,1)) 
+       END FUNCTION BoxVolume
+       !
+       FUNCTION BoxMargin(Box) RESULT(Mrg)
+         TYPE(BBox)     :: Box
+         REAL(Double)   :: Mrg
+         Mrg=(Box%BndBox(1,2)-Box%BndBox(1,1)) &
+            +(Box%BndBox(2,2)-Box%BndBox(2,1)) &
+            +(Box%BndBox(3,2)-Box%BndBox(3,1)) 
+       END FUNCTION BoxMargin
+       !
+       FUNCTION BoxOverlap(Left,Right) RESULT(Vol)
+         TYPE(BBox)     :: Left,Right
+         REAL(Double)   :: Vol,Hi,Low
+         INTEGER        :: I
+         IF(BoxOutSideBox(Left,Right))THEN
+            Vol=Zero
+         ELSE
+            Vol=One
+            DO I=1,3
+               IF(Left%BndBox(I,1)<Right%BndBox(I,1))THEN
+                  Low=Right%BndBox(I,1)
+               ELSE
+                  Low=Left%BndBox(I,1)
+               ENDIF
+               IF(Left%BndBox(I,2)<Right%BndBox(I,2))THEN
+                  Hi=Right%BndBox(I,2)
+               ELSE
+                  Hi=Left%BndBox(I,2)
+               ENDIF
+               Vol=Vol*(Hi-Low)
+            ENDDO
+         ENDIF
+       END FUNCTION BoxOverlap
 !==========================================================================
 !
 !==========================================================================

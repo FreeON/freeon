@@ -1854,9 +1854,12 @@ CONTAINS
        SparsityGc=DBLE(NZGc)/DBLE(NCart*NCart)*100.D0
        SparsityCh=DBLE(NZCh)/DBLE(NCart*NCart-NCart)*200.D0
 
-       CALL MondoLog(DEBUG_NONE, "CholFact", 'Sparsity of  B = '//TRIM(FltToMedmChar(SparsitySpB))//" %, # of SpB%NNon0 = "//TRIM(IntToChar(NZSpB)))
-       CALL MondoLog(DEBUG_NONE, "CholFact", 'Sparsity of Gc = '//TRIM(FltToMedmChar(SparsityGc)) //" %, # of  Gc%NNon0 = "//TRIM(IntToChar(NZGc)))
-       CALL MondoLog(DEBUG_NONE, "CholFact", 'Sparsity of Ch = '//TRIM(FltToMedmChar(SparsityCh)) //" %, # of  Ch%NNon0 = "//TRIM(IntToChar(NZCh)))
+       CALL MondoLog(DEBUG_NONE, "CholFact", 'Sparsity of  B = '//TRIM(FltToMedmChar(SparsitySpB)) &
+                    //" %, # of SpB%NNon0 = "//TRIM(IntToChar(NZSpB)))
+       CALL MondoLog(DEBUG_NONE, "CholFact", 'Sparsity of Gc = '//TRIM(FltToMedmChar(SparsityGc))  &
+                    //" %, # of  Gc%NNon0 = "//TRIM(IntToChar(NZGc)))
+       CALL MondoLog(DEBUG_NONE, "CholFact", 'Sparsity of Ch = '//TRIM(FltToMedmChar(SparsityCh))  &
+                    //" %, # of  Ch%NNon0 = "//TRIM(IntToChar(NZCh)))
      ENDIF
    END SUBROUTINE CholFact
 !

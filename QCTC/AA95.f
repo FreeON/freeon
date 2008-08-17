@@ -58,10 +58,11 @@ C     CHECK TO SEE IF WE ARE DOING NUCLEAR-TOTAL OR ELECTRON-TOTAL INTEGRALS
 C        Special purpose (slow) code that avoids nuclear self interaction
          IF(EllP==0)THEN
             CALL ENuE0(Nc,P,Q,ZetaP,ZetaQ,QCo(1,1),Ket)
-c         ELSEIF(EllP==1)THEN
-c            CALL ENuE1(Nc,P,Q,ZetaP,ZetaQ,QCo,Ket)
+         ELSEIF(EllP==1)THEN
+            CALL ENuE1(Nc,P,Q,ZetaP,ZetaQ,QCo,Ket)
          ELSE
-            WRITE(*,*)' ZetaP = ',ZetaP,' EllQ = ',EllQ
+            WRITE(*,*)' ZetaP = ',ZetaP
+            WRITE(*,*)' STOPPED OUTWITH ELLP = ',ELLP,' ELLQ = ',ELLQ
             STOP 'No second or higher nuclear derivatives in AA.F'
          ENDIF     
       ELSE
@@ -317,7 +318,7 @@ C
             IF(EllP==0)THEN
                STOP '(0|8) in AA95 '
             ELSEIF(EllP==1)THEN
-               STOP '(1|8) in AA95 '
+               STOP '(1|7) in AA95 '
             ELSEIF(EllP==2)THEN
                CALL KTrax_2_6(Nc,Wrk(iArr),QCo,Ket)
             ELSEIF(EllP==3)THEN
@@ -336,7 +337,50 @@ C
 #ifdef PAPIEX            
             CALL PAPIEX_STOP(27)
 #endif
+         CASE(9)
+#ifdef PAPIEX            
+            CALL PAPIEX_START(25,"< AuxIGen_9 > ")
+#endif
+            CALL AuxIGen9(Nc,P,Q,ZetaP,ZetaQ,Wrk(iPQx),Wrk(iPQy),
+     >                    Wrk(iPQz),Wrk(iAux))                    
+#ifdef PAPIEX            
+            CALL PAPIEX_STOP(25)
+            CALL PAPIEX_START(26,"< MD3TRR_8 > ")
+#endif
+            CALL MD3TRR8(Nc,Wrk(iPQx),Wrk(iPQy),Wrk(iPQz),
+     >                   Wrk(iAux),Wrk(iArr))                                              
+#ifdef PAPIEX            
+            CALL PAPIEX_STOP(26)
+            CALL PAPIEX_START(27,"< KTrax_9 > ")
+#endif
+            IF(EllP==0)THEN
+               STOP '(0|9) in AA95 '
+            ELSEIF(EllP==1)THEN
+               STOP '(1|8) in AA95 '
+            ELSEIF(EllP==2)THEN
+               STOP '(2|7) in AA95 '
+            ELSEIF(EllP==3)THEN
+               CALL KTrax_3_6(Nc,Wrk(iArr),QCo,Ket)
+            ELSEIF(EllP==4)THEN
+               CALL KTrax_4_5(Nc,Wrk(iArr),QCo,Ket)
+            ELSEIF(EllP==5)THEN
+               CALL KTrax_5_4(Nc,Wrk(iArr),QCo,Ket)
+            ELSEIF(EllP==6)THEN
+               CALL KTrax_6_3(Nc,Wrk(iArr),QCo,Ket)
+            ELSEIF(EllP==7)THEN
+               CALL KTrax_7_2(Nc,Wrk(iArr),QCo,Ket)
+            ELSEIF(EllP==8)THEN
+               STOP '(8|1) in AA95 '
+            ELSE
+               STOP '(9+|0) in AA95' 
+            ENDIF
+#ifdef PAPIEX            
+            CALL PAPIEX_STOP(27)
+#endif
          CASE DEFAULT
+            
+            WRITE(*,*)' STOPPED OUTWITH ELLP = ',ELLP,' ELLQ = ',ELLQ,
+     >                ' ELLPQ = ',ELLPQ
             STOP 'AA95 '
          END SELECT
 C

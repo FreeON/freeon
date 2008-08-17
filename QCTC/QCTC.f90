@@ -30,19 +30,25 @@ PROGRAM QCTC
   TYPE(INT_VECT)                 :: Stat
   TYPE(HGLL),POINTER             :: RhoHead
   REAL(DOUBLE)                   :: E_Nuc_Tot,Etot,SdvErrorJ,MaxErrorJ,JMExact,E_PFF,D_PFF
-  REAL(DOUBLE)                   :: QCTC_TotalTime_Start
-  TYPE(TIME)                     :: TimeMakeJ,TimeMakeTree,TimeNukE
+
   CHARACTER(LEN=4),PARAMETER     :: Prog='QCTC'
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg
   INTEGER                        :: I,K,NLink,OldFileID
+
+  REAL(DOUBLE)                   :: QCTC_TotalTime_Start
+
+  TYPE(TIME)                     :: TimeMakeJ,TimeMakeTree,TimeNukE
+
   !
-!!$  LOGICAL                        :: NoWrap=.TRUE.  ! WRAPPING IS OFF
   LOGICAL                        :: NoWrap=.FALSE. ! WRAPPING IS ON
   !------------------------------------------------------------------------------- 
   QCTC_TotalTime_Start=MTimer()
   ! Start up macro
   CALL StartUp(Args,Prog,Serial_O=.TRUE.)
   NukesOn=.TRUE.
+  ! ---------------------------------------------------------------------------------
+  ! Begin building a density 
+  !
   ! Chose a density matrix
   IF(SCFActn=='BasisSetSwitch')THEN
      ! Get the previous information
@@ -109,21 +115,16 @@ PROGRAM QCTC
         ! Default
         CALL Get(Dmat,TrixFile('D',Args,0))
      ENDIF
-  ENDIF
- 
-
-!!  CALL Get(P,TrixFile('D',Args,0))
-!!$!  CALL PPrint(GM,Unit_O=6)
-!!$!  CALL PPrint(GM%PBC,Unit_O=6)
-
-  ! Allocate some memory for bra HG shenanigans 
-  CALL NewBraBlok(BS)
-  ! Set thresholds local to QCTC (for PAC and MAC)
+  ENDIF 
+  ! Set thresholds local to the density build
   CALL SetLocalThresholds(Thresholds%TwoE)
+  ! -------------------------------------------------------------------------
+  ! Build the density
+  Density_Time_Start=MTimer()
+  ! ------------------------------------------------------------------------- 
   ! RhoHead is the start of a linked density list
   ALLOCATE(RhoHead)
   RhoHead%LNum=0
-!!$
   ! Here, the LL is filled out
   CALL MakeRhoList(GM,BS,DMat,NLink,RhoHead,'QCTC',NoWrap_O=NoWrap)
   ! Add in the nuclear charges only in certain cases
@@ -133,35 +134,44 @@ PROGRAM QCTC
   ENDIF
   ! Load density into arrays and delete the linked list
   CALL Collate(GM,RhoHead,Rho,'QCTC',RhoPoles,NLink)
-!
-!  WRITE(*,*)' PUNTED IN DELETE OF DENSITY !!! SEE FOLLOWING COMMENT OUT :::: '
+  ! Delete is broken on some compilers, avoid for now
   !  CALL DeleteHGLL(RhoHead)
-  ! Allocate and compute multipole moments of the density
-  !
+  ! -------------------------------------------------------------------------
+  Density_Time=MTimer()-Density_Time_Start
+  ! Done building density
+  ! ------------------------------------------------------------------------- 
+  ! Take care of some micilaneous book keeping
+  ! ------------------------------------------------------------------------- 
+  ! Set some values of the angular symmetry for use in computing the Lorentz field
   MaxPFFFEll=GM%PBC%PFFMaxEll
   ! Local expansion order of the multipoles to use in the tree
   MaxPoleEll=MIN(2*BS%NASym+6,MaxPFFFEll)
   IF(MaxPoleEll<2*(BS%NASym+1)) &
      CALL Halt('Bombed in QCTC. Please set PFFMaxEll larger ')
   ! Find the total energy from past calculations
-  CALL Get(Etot,'Etot')
-  !
-  IF(NoWrap)THEN
-     Mssg=ProcessName('QCTC','No wrap')
+  ! Over-ride initialization to big_dbl in punchhdf, so that
+  ! PFF is computed correctly in PBCFarFieldSetUp
+  IF(SCFCycl=='0'.AND.CurGeom=='1')THEN
+     ETot=1D2
   ELSE
-     Mssg=ProcessName('QCTC','Wrapping on')
+     CALL Get(Etot,'Etot')
   ENDIF
-
-!!  Mssg=TRIM(Mssg)//' Gaussians in density = '//TRIM(IntToChar(NLink))//', Cluster Size = '//TRIM(IntToChar(MinCluster)) &
-!!           //', MaxPFFEll = '//TRIM(IntToChar(MaxPFFFEll))
-!!  WRITE(*,*)TRIM(Mssg)
-
+  ! Now that we are done with the density, lets make sure we have the 
+  ! current basis set, matrix block sizes etc:  
+  CALL Get(BS,CurBase)
+  CALL Get(BSiz,'atsiz',CurBase)
+  CALL Get(OffS,'atoff',CurBase)
+  CALL Get(NBasF,'nbasf',CurBase)
+  ! Set space for bra blocking
+  CALL NewBraBlok(BS)
+  ! Thresholds local to J matrix build (may be different from those used to build density)
+  CALL SetThresholds(CurBase)
+  CALL SetLocalThresholds(Thresholds%TwoE)
   ! Initialize addressing for tensor contraction loops
   CALL TensorIndexingSetUp()
   ! Setup global arrays for computation of multipole tensors ...
   CALL MultipoleSetUp()
   ! Initialize some counters
-  ! This preliminary density shit is very sloppy...
   MaxTier=0
   RhoLevel=0
   PoleNodes=0
@@ -175,56 +185,40 @@ PROGRAM QCTC
   NPrim=0
   NFarAv=0
   NNearAv=0
+  ! ------------------------------------------------------------------------- 
+  ! Done with book keeping.  
+  ! ------------------------------------------------------------------------- 
+  ! Now build the multipole tree
+  TreeMake_Time_Start=MTimer()
+  ! ------------------------------------------------------------------------- 
   ! Build the global PoleTree representation of the total density
   CALL RhoToPoleTree
   ! Set up the crystal field     
-  CALL PBCFarFuckingFieldSetUp(GM,Rho,'QCTC',MaxPFFFEll,ETot)
+
+
+  CALL PBCFarFieldSetUp(GM,Rho,'QCTC',MaxPFFFEll,Etot)
   ! Delete the auxiliary density arrays
   CALL DeleteRhoAux
   ! Delete the Density
-!  CALL Delete(Rho)
-  ! Allocate J
-  CALL New(J)
+  !  CALL Delete(Rho)
+  ! ------------------------------------------------------------------------- 
+  TreeMake_Time=MTimer()-TreeMake_Time_Start
+  ! Done making the pole-tree
+  ! -------------------------------------------------------------------------
   ! Compute the Coulomb matrix J in O(N Lg N)
   CALL Elapsed_Time(TimeMakeJ,'Init')
-
   JWalk_Time=0D0
   Integral_Time=0D0
   Multipole_Time=0D0
-
   ALLOCATE(NNearCount(1:CS_IN%NCells))
   NNearCount=0D0
-
-!  WRITE(*,*)' Poles(1) = ',RhoPoles%DPole%D
-!  NewPole=0D0
-
-  CALL MakeJ(J,NoWrap_O=NoWrap)
-
-  K=0
-  DO I=1,CS_IN%NCells
-!     WRITE(*,*)I,NNearCount(I)
-     IF(NNearCount(I)==0D0)K=K+1
-  ENDDO
-
-!!$  WRITE(*,*)' % of NoPAC = ',DBLE(K)/DBLE(CS_IN%NCells)
-!!$
-!!$  WRITE(*,11)' Decompos_Time = ',Decompose_Time
-!!$  WRITE(*,11)' TreeMake_Time = ',TreeMake_Time
-!!$  WRITE(*,11)' JWalking_Time = ',JWalk_Time
-!!$  WRITE(*,11)' Integral_Time = ',Integral_Time
-!!$  WRITE(*,11)' Multipol_Time = ',Multipole_Time
-!!$  WRITE(*,11)' Total J Time  = ',Decompose_Time+TreeMake_Time+JWalk_Time+Multipole_Time+Integral_Time
-!!$  WRITE(*,11)' Total JWalks  = ',DBLE(NPrim)
-!!$  WRITE(*,11)' Av  Ints/Prim = ',DBLE(NInts)/DBLE(NPrim)
-!!$  WRITE(*,11)' Av  # NF/Prim = ',DBLE(NNearAv)/DBLE(NPrim)
-!!$  WRITE(*,11)' Av  # FF/Prim = ',DBLE(NFarAv)/DBLE(NPrim)
-!!$  WRITE(*,11)' Time per INode= ',Integral_Time/DBLE(NNearAv)
-!!$  WRITE(*,11)' Time per MNode= ',Multipole_Time/DBLE(NFarAv)
-!!$11 FORMAT(A20,D12.6)
-
-!!$   CALL PChkSum(J,'J',Prog,Unit_O=6)
-
+  ! -------------------------------------------------------------------------
+  CALL New(J) 
+  CALL MakeJ(J,NoWrap_O=NoWrap) ! <<<<<<<<<
+  ! -------------------------------------------------------------------------
   CALL Elapsed_TIME(TimeMakeJ,'Accum')
+  ! Done making Coulomb matrix
+  ! -------------------------------------------------------------------------
   IF(SCFActn=='InkFok')THEN
      ! Add in correction if incremental J build
      CALL New(T1)
@@ -242,11 +236,8 @@ PROGRAM QCTC
   ELSE
      CALL Put(T1,TrixFile('J',Args,0))
   ENDIF
-
-!  WRITE(*,*)' Wrote ',TRIM(TrixFile('J',Args,0))
-
+  ! Nuclear-total density Coulomb interaction
   IF(NukesOn)THEN
-     ! Compute the nuclear-total electrostatic energy in O(N Lg N)
      IF(SCFActn=='InkFok')THEN
         CALL Get(E_Nuc_Tot,'E_NuclearTotal')
         CALL Elapsed_Time(TimeNukE,'Init')
@@ -260,18 +251,50 @@ PROGRAM QCTC
   ELSE
      E_Nuc_Tot=Zero
   ENDIF
-
-!  WRITE(*,*)' E_EL-TOT = ',Trace(DMat,T1)    
-!  WRITE(*,*)' E_NUC-TOT = ',E_Nuc_Tot
-  Mssg=ProcessName(Prog, ' ')
-  Mssg=TRIM(Mssg)//' Coulomb Energy      = <'//TRIM(DblToChar(E_Nuc_Tot+Trace(DMat,T1)))//'>'
-!  WRITE(*,*)TRIM(Mssg)
-  
+  !
   CALL Put(E_Nuc_Tot,'E_NuclearTotal',StatsToChar(Current))
+  !
   !-------------------------------------------------------------------------------
   ! Printing
+  !-------------------------------------------------------------------------------
+!!$  DO I=CS_IN%NCells,MAX(1,CS_IN%NCells-27)
+!!$     WRITE(*,55)I,100D0*NNearCount(I)/(NLeaf*NPrim)
+!!$55   FORMAT('Cell# ',I2,", % NF = ",F6.2)
+!!$  ENDDO
+!!$  WRITE(*,11)' Density_Time  = ',Density_Time
+!!$  WRITE(*,11)' TreeMake_Time = ',TreeMake_Time
+!!$  WRITE(*,11)' JWalking_Time = ',JWalk_Time
+!!$  WRITE(*,11)' Integral_Time = ',Integral_Time
+!!$  WRITE(*,11)' Multipol_Time = ',Multipole_Time
+!!$  WRITE(*,11)' Total J Time  = ',Decompose_Time+TreeMake_Time+JWalk_Time+Multipole_Time+Integral_Time
+!!$  WRITE(*,11)' Total JWalks  = ',DBLE(NPrim)
+!!$  WRITE(*,11)' Av  Ints/Prim = ',DBLE(NInts)/DBLE(NPrim)
+!!$  WRITE(*,11)' Av  # NF/Prim = ',DBLE(NNearAv)/DBLE(NPrim)
+!!$  WRITE(*,11)' Av  # FF/Prim = ',DBLE(NFarAv)/DBLE(NPrim)
+!!$  WRITE(*,11)' Time per INode= ',Integral_Time/DBLE(NNearAv)
+!!$  WRITE(*,11)' Time per MNode= ',Multipole_Time/DBLE(NFarAv)
+!!$11 FORMAT(A20,D12.6)
+
+  PerfMon%FLOP=Zero 
+  CALL MondoLog(DEBUG_MAXIMUM,Prog,' Coulomb Energy      = <'//TRIM(DblToChar(E_Nuc_Tot+Trace(DMat,T1)))//'>')
+  !
+  CALL MondoLog(DEBUG_MAXIMUM,Prog,' CPUSec='//TRIM(DblToMedmChar(MTimer()-QCTC_TotalTime_Start)) & 
+                               //'; RhoBld='//TRIM(DblToShrtChar(Density_Time))                  & 
+                               //', TreeBld='//TRIM(DblToShrtChar(TreeMake_Time))) 
+  CALL MondoLog(DEBUG_MAXIMUM,Prog,' Walk='//TRIM(DblToShrtChar(JWalk_Time))                     &
+                                //', Ints='//TRIM(DblToShrtChar(Integral_Time))                  &
+                                //', Mults='//TRIM(DblToShrtChar(Multipole_Time)))
 
 
+  IF(CS_IN%NCells>1)THEN
+     CALL MondoLog(DEBUG_MAXIMUM,Prog, &
+                   ' % Ints in UC= '//TRIM(FltToShrtChar(1D2*NNearCount(CS_IN%NCells)/(NLeaf*NPrim))) &
+                 //', % Total Ints = '//TRIM(FltToShrtChar(                                &
+                     1D2*SUM(NNearCount(1:CS_IN%NCells))/(NLeaf*NPrim*CS_IN%NCells) )))
+  ELSE
+     CALL MondoLog(DEBUG_MAXIMUM,Prog, &
+                   ' % NFInts = '//TRIM(FltToShrtChar(1D2*NNearCount(1)/(NLeaf*NPrim))))
+  ENDIF
 
   IF(SCFActn=='FockPrimeBuild'.OR.SCFActn=='StartResponse')THEN
      CALL PChkSum(T1,'J'//TRIM(Args%C%C(3))//'['//TRIM(SCFCycl)//']',Prog)
@@ -282,32 +305,17 @@ PROGRAM QCTC
      CALL PPrint( T1,'J['//TRIM(SCFCycl)//']')!,Unit_O=6)
      CALL Plot(   T1,'J['//TRIM(SCFCycl)//']')
   ENDIF
-  ! Print Periodic Info
-!  CALL Print_Periodic(GM,Prog)
-  CALL Delete(J)
-  CALL Delete(T1)
-  CALL Delete(BS)
-  CALL Delete(GM)
-  CALL Delete(Args)
-  CALL Delete(RhoPoles)
-  ! didn't count flops, any accumulation is residual from matrix routines
-  PerfMon%FLOP=Zero 
-  ! Shutdown 
-!!$  WRITE(*,11)' QCTC Total Time = ',MTimer()-QCTC_TotalTime_Start
-!!$  CALL OpenASCII("Times.dat",111)
-!!$  WRITE(111,12)DBLE(NAtoms),DBLE(NInts)/DBLE(NPrim),DBLE(NNearAv)/DBLE(NPrim),DBLE(NFarAv)/DBLE(NPrim), &
-!!$               Decompose_Time,TreeMake_Time,JWalk_Time,Integral_Time,Multipole_Time,MTimer()-QCTC_TotalTime_Start
-!!$12 FORMAT(100(" ",D12.6))
-!!$  CLOSE(111)
-!!$
-  Mssg=ProcessName('QCTC','Timing')
-  Mssg=TRIM(Mssg)//' Total='//TRIM(DblToMedmChar(MTimer()-QCTC_TotalTime_Start)) & 
-                //'; Bisect='//TRIM(DblToShrtChar(Decompose_Time))//', Tree='//TRIM(DblToShrtChar(TreeMake_Time)) 
-!  WRITE(*,*)TRIM(Mssg)
-  Mssg=ProcessName('QCTC','Timing')
-  Mssg=TRIM(Mssg)//' Walk='//TRIM(DblToShrtChar(JWalk_Time))//', Ints='//TRIM(DblToShrtChar(Integral_Time)) &
-      //', Mults='//TRIM(DblToShrtChar(Multipole_Time)) 
-!  WRITE(*,*)TRIM(Mssg)
 
+!!$
+!!$  CALL Delete(J)
+!!$  CALL Delete(T1)
+!!$  CALL Delete(BS)
+!!$  CALL Delete(GM)
+!!$  CALL Delete(Args)
+!!$  CALL Delete(RhoPoles)
+  !-------------------------------------------------------------------------------
+  ! All done
+  !-------------------------------------------------------------------------------
   CALL ShutDown(Prog)
+  !
 END PROGRAM QCTC

@@ -19,16 +19,16 @@ MODULE PBC
 
 CONTAINS
   !--------------------------------------------------------------------
-  SUBROUTINE MakeGMPeriodic(GM,BS_O,Dist_O,TwoE_O,Rescale_O)
+  SUBROUTINE MakeGMPeriodic(GM,BS_O,Dist_O,TwoE_O,Rescale_O,SoftReset_O)
     TYPE(CRDS)                     :: GM
     TYPE(BSET),OPTIONAL            :: BS_O
     REAL(DOUBLE),OPTIONAL          :: Dist_O,TwoE_O
-    LOGICAL, OPTIONAL              :: Rescale_O
+    LOGICAL, OPTIONAL              :: Rescale_O,SoftReset_O
     REAL(DOUBLE)                   :: X,Y,Z,MinExpt
     REAL(DOUBLE),DIMENSION(3,3)    :: OldInvBox
     REAL(DOUBLE),DIMENSION(3)      :: Cnt
     INTEGER                        :: I,J,K,N,CF,PF,NK
-    LOGICAL                        :: Rescale
+    LOGICAL                        :: Rescale,SoftReset
     !====================================================================================
     !  VOLUME AND ASSOCIATED CONSTANTS RELATED TO TIN-FOIL BOUNDARY CONDITIONS
     !====================================================================================
@@ -111,7 +111,7 @@ CONTAINS
     !====================================================================================
     ! CELL CENTER
     !====================================================================================
-    ! Compute the cell center with the modified positions
+    ! Compute the cell center with the modified positions (Zero for no PBCs)
     GM%PBC%CellCenter%D=CellCenter(GM) 
     ! Recompute the bounding box and ITS cell center (May be different from the PBC cell center)
     GM%BndBox%D(1:3,1)=GM%Carts%D(1:3,1)
@@ -126,8 +126,21 @@ CONTAINS
     ! To here we have set (or reset) the unit cell.  Now we set (or reset) the different 
     ! sets of periodic images (cellsets) for the sum over basis functions (outer==overlap) and 
     ! the inner sum over Coulomb boxes (inner==penetration). 
+    !====================================================================================
+    !  IF SoftReset==TRUE, THEN WE WILL NOT RECOMPUTE THE NUMBER OF CELL SETS.
+    !  WITH SoftReset==TRUE, ONLY THE NUMERICAL VALUES OF THE CELL SETS WILL CHANGE.
+    !  This option is not fully implemented, as it currently needs the optional basis
+    !  set info, so the hard/soft is controlled by that option.  This should be ok, 
+    !  except in situations where the lattice changes a lot.  
+    !====================================================================================
+    IF(PRESENT(SoftReset_O))THEN
+       SoftReset=SoftReset_O
+    ELSE
+       SoftReset=.FALSE.
+    ENDIF
+!
     IF(PRESENT(BS_O))THEN
-       CALL Warn(' Hard reset of the PBC cell-sets')
+!       CALL Warn(' Hard reset of the PBC cell-sets')
        ! Logic check for optionals
        IF(.NOT.PRESENT(Dist_O))CALL MondoHalt(DRIV_ERROR,' Missing Dist_O threshold option in MakeGMPeriodic ')
        IF(.NOT.PRESENT(TwoE_O))CALL MondoHalt(DRIV_ERROR,' Missing TwoE_O threshold option in MakeGMPeriodic ')
@@ -191,22 +204,9 @@ CONTAINS
        ENDDO
     ENDIF
 !!$
-!~    WRITE(*,*)' NOW LEAVING MAKEGMPERIODIC !!!!!!!!!!!!!!'
-!    WRITE(*,*)' BoxShape = ',GM%PBC%BoxShape%D
-!    WRITE(*,*)' InvShape = ',GM%PBC%InvBoxSh%D
 
 !    CALL Print_CRDS(GM,PrintGeom_O='XYZ')
-
-    CALL Print_CRDS(GM,Unit_O=6,PrintGeom_O='XSF')!,CrdInAng_O=.FALSE.)
-!!$
-!!$    !    CALL PPrint_CellSet(GM%OvCells,'Overlap',Unit_O=6)
-!    CALL PPrint_CellSet(GM%InCells,'Penetration',Unit_O=6)
-!    WRITE(*,*)' =========================================================='
-
-!    IF(ABS(GM%Carts%D(1,2)-1.5D0)>1D-2)THEN
-!       STOP 
-!    ENDIF
-
+!    CALL Print_CRDS(GM,Unit_O=6,PrintGeom_O='XSF')!,CrdInAng_O=.FALSE.)
     !
   END SUBROUTINE MakeGMPeriodic
   !--------------------------------------------------------------------------
@@ -857,11 +857,13 @@ CONTAINS
                 CellCenter(I)=CellCenter(I)+Half*G%PBC%BoxShape%D(I,J)
              ENDIF
           ENDDO
-       ELSE
-          DO J=1,G%NAtms
-             CellCenter(I)=CellCenter(I)+G%Carts%D(I,J)
-          ENDDO
-          CellCenter(I)=CellCenter(I)/DBLE(G%NAtms)
+
+!!$       ELSE
+!!$          DO J=1,G%NAtms
+!!$             CellCenter(I)=CellCenter(I)+G%Carts%D(I,J)
+!!$          ENDDO
+!!$          CellCenter(I)=CellCenter(I)/DBLE(G%NAtms)
+
        ENDIF
     ENDDO
 !!$    WRITE(*,*)'================================================='
