@@ -33,7 +33,6 @@ PROGRAM JForce
   REAL(DOUBLE),DIMENSION(3)    :: A,B,nlm
   REAL(DOUBLE),DIMENSION(15)   :: F_nlm
   TYPE(DBL_RNK2)               :: LatFrc_J,LatFrc_J_PFF,LatFrc_J_Dip
-!!$  LOGICAL                        :: NoWrap=.TRUE.  ! WRAPPING IS OFF
   LOGICAL                        :: NoWrap=.FALSE. ! WRAPPING IS ON
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg,PMat2Use
   !-------------------------------------------------------------------------------- 
@@ -43,13 +42,8 @@ PROGRAM JForce
   ! Get basis set and geometry
   CALL Get(BS,Tag_O=CurBase)
   CALL Get(GM,Tag_O=CurGeom)
-
-  CALL Print_CRDS(GM,Unit_O=6,PrintGeom_O='XYZ')
-
-  ! Allocate some memory for bra HG shenanigans 
-  CALL NewBraBlok(BS)
   !
-  PMat2Use=TrixFile('D',Args,1)
+  PMat2Use=TrixFile('D',Args,1) ! <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
   CALL Get(P,TRIM(PMat2Use))
   !
@@ -58,15 +52,14 @@ PROGRAM JForce
   ! RhoHead is the start of a linked density list
   ALLOCATE(RhoHead)
   RhoHead%LNum=0
-  ! Here, the LL is filled out, with no wrapping of the density
-  ! we are such pussys on this
+
   CALL MakeRhoList(GM,BS,P,NLink,RhoHead,'JForce',NoWrap_O=NoWrap)
   ! Add in the nuclear charges
   CALL AddNukes(GM,RhoHead)
   NLink=NLink+GM%NAtms
   ! Load density into arrays and delete the linked list
   CALL Collate(GM,RhoHead,Rho,'JForce',RhoPoles,NLink)
-  WRITE(*,*)' PUNTED IN DELETE OF DENSITY !!! SEE FOLLOWING COMMENT OUT :::: '
+
 !!!  CALL DeleteHGLL(RhoHead)
 
   MaxPFFFEll=GM%PBC%PFFMaxEll
@@ -74,9 +67,16 @@ PROGRAM JForce
   MaxPoleEll=MIN(2*(BS%NASym+4),MaxPFFFEll)
   IF(MaxPoleEll<2*(BS%NASym+1)) &
      CALL Halt('Bombed in QCTC. Please set PFFMaxEll larger ')
-
+  ! Allocate some memory for bra HG shenanigans 
+  CALL NewBraBlok(BS)
   ! Find the total energy from past calculations
-  CALL Get(Etot,'Etot')!,StatsToChar(Previous))
+  ! Over-ride initialization to big_dbl in punchhdf, so that
+  ! PFF is computed correctly in PBCFarFieldSetUp
+  IF(SCFCycl=='0'.AND.CurGeom=='1')THEN
+     ETot=1D2
+  ELSE
+     CALL Get(Etot,'Etot')
+  ENDIF
   ! For now, set PFFFEll to be the largest expansion length.  Reset later in FarFieldSetUp
   MaxPFFFEll=MAX(MaxPoleEll,MaxPFFFEll)
 
@@ -107,7 +107,7 @@ PROGRAM JForce
   CALL New(LatFrc_J,(/3,3/))
   CALL New(LatFrc_DWRAP,(/3,3/))
 
-  CALL PBCFarFuckingFieldSetUp(GM,Rho,'JForce',MaxPFFFEll,ETot,LatFrc_J)
+  CALL PBCFarFieldSetUp(GM,Rho,'JForce',MaxPFFFEll,ETot,LatFrc_J)
 
   ! Delete the auxiliary density arrays
   CALL DeleteRhoAux
@@ -185,11 +185,11 @@ PROGRAM JForce
         LatFrc_J%D(I,J)=Zero
      ENDDO
   ENDDO
-
-  PrintFlags%Key=DEBUG_MAXIMUM	
-  PrintFlags%MM=DEBUG_FRC
-  CALL Print_LatForce(GM,LatFrc_J%D,'TOTAL Lattice Force')
-  CALL Print_LatForce(GM,LatFrc_J%D,'TOTAL Lattice Force',Unit_O=6)
+!!$
+!!$  PrintFlags%Key=DEBUG_MAXIMUM	
+!!$  PrintFlags%MM=DEBUG_FRC
+!!$  CALL Print_LatForce(GM,LatFrc_J%D,'TOTAL Lattice Force')
+!!$  CALL Print_LatForce(GM,LatFrc_J%D,'TOTAL Lattice Force',Unit_O=6)
 
   ! ... and add them into the rest of the lattice gradients.
   GM%PBC%LatFrc%D=GM%PBC%LatFrc%D+LatFrc_J%D
@@ -224,10 +224,9 @@ PROGRAM JForce
 
   ! Tidy Up
   DEALLOCATE(TempHerm%Coef)
-  ! Do some printing
-!!$  WRITE(*,*)' JForce(1,1) = ',JFrc%D(1)
-  CALL Print_Force(GM,JFrc,'J Force')
-  CALL Print_Force(GM,JFrc,'J Force',Unit_O=6)
+!!$  ! Do some printing
+!!$  CALL Print_Force(GM,JFrc,'J Force')
+!!$  CALL Print_Force(GM,JFrc,'J Force',Unit_O=6)
   ! Do some checksumming and IO 
   CALL PChkSum(JFrc,    'dJ/dR',Proc_O=Prog)  
   CALL PChkSum(LatFrc_J,'LFrcJ',Proc_O=Prog)  

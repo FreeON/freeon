@@ -64,6 +64,7 @@ MODULE PoleTree
   REAL(DOUBLE),ALLOCATABLE,DIMENSION(:) :: HGStack
   !                               
   REAL(DOUBLE) :: PACFudgeFactor=1.0D0 ! If FF= 1/2, rigorous Cramer's bound
+  !
   REAL(DOUBLE),DIMENSION(0:12),PARAMETER :: Fact=(/1D0,1D0,2D0,6D0,24D0,120D0,      &
        720D0,5040D0,40320D0,362880D0,3628800D0,39916800D0,479001600D0/)
   !
@@ -71,6 +72,9 @@ MODULE PoleTree
 !  REAL(DOUBLE), EXTERNAL                :: MondoTimer
   REAL(DOUBLE) :: Decompose_Time_Start,Decompose_Time, &
        TreeMake_Time_Start,TreeMake_Time
+
+
+  INTEGER :: NLeaf
 CONTAINS 
   !=================================================================================
   !     
@@ -98,22 +102,13 @@ CONTAINS
     PoleRoot%NAtms=GM%NAtms
     !
     PoleRoot%Leaf=.False.
-
     NULLIFY(PoleRoot%Next)
     ! Recursively split the density into a k-d tree
-    Decompose_Time_Start=MTimer()
     NGaussTotal=0;
     CALL SplitPole(PoleRoot,PoleRoot%Next)
-!    WRITE(*,*)' NGaussTotal = ',NGaussTotal
-    
-    TreeMake_Time_Start=MTimer()
-    Decompose_Time=TreeMake_Time_Start-Decompose_Time_Start
     ! Make PoleTree tier by tier, recuring up from the bottom
     CALL MakePoleTree(PoleRoot) 
     !  CALL Print_POLEROOT_PAC(PoleRoot)
-    !  STOP
-    TreeMake_Time=MTimer()-TreeMake_Time_Start
-    !
     ! Delete global arrays etc
     CALL Delete(Qndx)
     CALL Delete(Cndx)
@@ -126,7 +121,6 @@ CONTAINS
     J=iHGStack
     iHGStack=1
     CALL PackStack(PoleRoot)    
-
   END SUBROUTINE RhoToPoleTree
   !=====================================================================================
   !     
@@ -171,7 +165,14 @@ CONTAINS
        ! ... the boxes ...
        CALL BoxMerge(P%Left%Box,P%Right%Box,P%Box)
        P%Pole%Center=P%Box%Center  
-       ! ... and merge the multipole expansions ...
+       ! Merge the nuclear charges  
+
+       IF(P%Left%NAtms==1.AND.P%Right%NAtms==1.AND.P%Left%BDexN==P%Right%BDexN)THEN
+	  P%Pole%Charge=P%Right%Pole%Charge
+       ELSE	
+	  P%Pole%Charge=P%Left%Pole%Charge+P%Right%Pole%Charge
+       ENDIF	
+       ! ... and merge the multipole expansions ...        
        CALL PoleMerge(P%Left%Pole,P%Right%Pole,P%Pole)
        CALL BoxMerge(P%Left%Box,P%Right%Box,P%Box)
        CALL SetMAC(P)
@@ -184,11 +185,11 @@ CONTAINS
     REAL(DOUBLE),DIMENSION(3)   :: MaxQL,MaxQH
     INTEGER                     :: Ne,Nn,Be,Ee,Bn,En,Je,Jn,ISplit,Split,I,J,k,IS,NL,NR
     INTEGER                     :: MaxBoxedEll,NBoxedEll,EllSplit,Cd,SplitI,SplitJ
-    REAL(DOUBLE)                :: Volume,MaxZeta,MinZeta,ZetaHalf,ChHalf,TotCh,PiZ,RL,RR
+    REAL(DOUBLE)                :: Volume,MaxZeta,MinZeta,ZetaHalf,ChHalf,TotCh,PiZ,RL,RR,RN
     REAL(DOUBLE)                :: BEBalance,ChBalance,XBalance
     INTEGER,DIMENSION(:), ALLOCATABLE :: IList,JList
     REAL(DOUBLE),DIMENSION(:), ALLOCATABLE :: XList,CList
-    LOGICAL :: Tru
+    TYPE(BBox)                  :: BB
     !--------------------------------------------------------------
     ! Indexing to start
 
@@ -206,42 +207,24 @@ CONTAINS
     Nn=En-Bn+1
     !
     IF(Nn<1)CALL Halt(' Logic error in SplitPoleBox ')
-    ! Determine the longest coordinate ...
+    !
     IF(Nn==1)THEN
-       ISplit=4
-    ELSE
-       MaxBox=Zero
-       DO I=1,3
-          IF(MaxBox<Node%Box%Half(I))THEN
-             MaxBox=Node%Box%Half(I)
-             ISplit=I
-          ENDIF
-       ENDDO
-    ENDIF
-
-
-    ! Orthogonal recursive bisection on charge distributions      
-    IF(ISplit==1)THEN
-       CALL FairSplit(Ne,Qdex(Be:Ee),Rho%Qx%D,Je,Nn,ISplit,NDex(Bn:En),GM%Carts%D,Jn)
-    ELSEIF(ISplit==2)THEN
-       CALL FairSplit(Ne,Qdex(Be:Ee),Rho%Qy%D,Je,Nn,ISplit,NDex(Bn:En),GM%Carts%D,Jn)
-    ELSEIF(ISplit==3)THEN
-       CALL FairSplit(Ne,Qdex(Be:Ee),Rho%Qz%D,Je,Nn,ISplit,NDex(Bn:En),GM%Carts%D,Jn)
-    ELSEIF(ISplit==4)THEN
-!!$
-!!$    IF(ISplit==1)THEN
-!!$       CALL ChargeSplit(Ne,Qdex(Be:Ee),Rho%Qx%D,Je,Nn,ISplit,NDex(Bn:En),GM%Carts%D,GM%AtNum%D,Jn)
-!!$    ELSEIF(ISplit==2)THEN
-!!$       CALL ChargeSplit(Ne,Qdex(Be:Ee),Rho%Qy%D,Je,Nn,ISplit,NDex(Bn:En),GM%Carts%D,GM%AtNum%D,Jn)
-!!$    ELSEIF(ISplit==3)THEN
-!!$       CALL ChargeSplit(Ne,Qdex(Be:Ee),Rho%Qz%D,Je,Nn,ISplit,NDex(Bn:En),GM%Carts%D,GM%AtNum%D,Jn)
-!!$    ELSEIF(ISplit==4)THEN
        ! Sort on PAC + HGTF distance from the nuclear center, with the goal of 
        ! creating smaller and smaller boxes that may satisfy both MAC and PAC
-       CALL PACSplit(Ne,Qdex(Be:Ee),Ext,Rho%Qx%D,Rho%Qy%D,Rho%Qz%D,GM%Carts%D(:,NDex(Bn)),Je)
+       CALL PACSplit(Ne,Qdex(Be:Ee),Ext,Rho%Qx%D,Rho%Qy%D,Rho%Qz%D, & 
+                     GM%Carts%D(:,NDex(Bn))-GM%PBC%CellCenter%D, MaxCluster,Je)       
+       Jn=1
+       iSplit=4
+    ELSE
+       ! Use the R*-Tree splitting for nuclei.  Can be extended to electrons with minor work.
+       CALL RStarSplit(Ne,Nn,Qdex(Be:Ee),NDex(Bn:En),Ext,Rho%Qx%D,Rho%Qy%D,Rho%Qz%D, &
+                      GM%Carts%D,GM%PBC%CellCenter%D,GM%AtNum%D,iSplit,Je,Jn)
+       ! So far, this option is not considered in the logic of RStarSplit.  Probably,it
+       ! should be (the early decantation of diffused Gaussians).
+       IF(iSplit==4)THEN
+          CALL ExtSplit(Ne,Qdex(Be:Ee),Ext,MaxCluster,Je)
+       ENDIF
     ENDIF
-
-
     ! Split the charges
     Split=Be+Je-1
     Left%BdexE=Be
@@ -249,6 +232,11 @@ CONTAINS
     Right%EdexE=Ee
     Right%BdexE=Split+1
     IF(Left%EdexE<Left%BdexE.OR.Right%EdexE<Right%BdexE)THEN
+       WRITE(*,*)' Node%Box%Number = ',Node%Box%Number
+       WRITE(*,*)' iSplit= ',iSplit,' Nn = ',NN,' Ne = ',Ne
+       WRITE(*,*)' Split = ',Split
+       WRITE(*,*)' Left%EdexE,Left%BdexE   = ',Left%EdexE,Left%BdexE
+       WRITE(*,*)' Right%EdexE,Right%BdexE = ',Right%EdexE,Right%BdexE
        CALL Halt(' Charge indexing hosed in SplitPoleBox ' )
     ENDIF
     ! ... L&R charge count ...
@@ -265,63 +253,37 @@ CONTAINS
        Right%BdexN=Split+1
     ELSE
        Left%BdexN=Bn
-       Left%EdexN=Bn
-       Right%BdexN=En
+       Left%EdexN=En
+       Right%BdexN=Bn
        Right%EdexN=En
-       !
-       Left%Leaf=.TRUE.
-       IF(Right%NQ<MinCluster) &
-          Right%Leaf=.TRUE.
     ENDIF
+    !
+    IF(ISplit==4)THEN
+       Left%Leaf=.TRUE.
+    ELSEIF(Left%NQ<=MinCluster)THEN
+       Left%Leaf=.TRUE.
+    ENDIF
+    !	
+    IF(Right%NQ<=MinCluster)Right%Leaf=.TRUE.
     ! ... L&R atom count ...
     Left%NAtms=Left%EdexN-Left%BdexN+1
     Right%NAtms=Right%EdexN-Right%BdexN+1
-    ! Top down sintering of the BBoxes
-    Left%Box%BndBox(:,1)=1D20
-    Left%Box%BndBox(:,2)=-1D20
-    DO I=Left%BdexN,Left%EdexN
-       K=NDex(I)
-       Left%Box%BndBox(1,1)=MIN(Left%Box%BndBox(1,1),GM%Carts%D(1,K))
-       Left%Box%BndBox(1,2)=MAX(Left%Box%BndBox(1,2),GM%Carts%D(1,K))
-       Left%Box%BndBox(2,1)=MIN(Left%Box%BndBox(2,1),GM%Carts%D(2,K))
-       Left%Box%BndBox(2,2)=MAX(Left%Box%BndBox(2,2),GM%Carts%D(2,K))
-       Left%Box%BndBox(3,1)=MIN(Left%Box%BndBox(3,1),GM%Carts%D(3,K))
-       Left%Box%BndBox(3,2)=MAX(Left%Box%BndBox(3,2),GM%Carts%D(3,K))       
-    ENDDO
-    DO I=Left%BdexE,Left%EdexE
+    !
+    K=Qdex(Left%BdexE)
+    Left%Box=ExpandPoint((/Rho%Qx%D(K),Rho%Qy%D(K),Rho%Qz%D(K)/),Ext(K) ,Left%Box)
+    DO I=Left%BdexE+1,Left%EdexE
        K=Qdex(I)
-       Left%Box%BndBox(1,1)=MIN(Left%Box%BndBox(1,1),Rho%Qx%D(K))
-       Left%Box%BndBox(1,2)=MAX(Left%Box%BndBox(1,2),Rho%Qx%D(K))
-       Left%Box%BndBox(2,1)=MIN(Left%Box%BndBox(2,1),Rho%Qy%D(K))
-       Left%Box%BndBox(2,2)=MAX(Left%Box%BndBox(2,2),Rho%Qy%D(K))
-       Left%Box%BndBox(3,1)=MIN(Left%Box%BndBox(3,1),Rho%Qz%D(K))
-       Left%Box%BndBox(3,2)=MAX(Left%Box%BndBox(3,2),Rho%Qz%D(K))
+       BB=ExpandPoint((/Rho%Qx%D(K),Rho%Qy%D(K),Rho%Qz%D(K)/),Ext(K))
+       CALL BoxMerge(Left%Box,BB,Left%Box)
     ENDDO
-    Left%Box%Half(:)=Half*(Left%Box%BndBox(:,2)-Left%Box%BndBox(:,1))
-    Left%Box%Center(:)=Left%Box%BndBox(:,1)+Left%Box%Half(:)
-   !
-    Right%Box%BndBox(:,1)=1D20
-    Right%Box%BndBox(:,2)=-1D20
-    DO I=Right%BdexN,Right%EdexN
-       K=NDex(I)
-       Right%Box%BndBox(1,1)=MIN(Right%Box%BndBox(1,1),GM%Carts%D(1,K))
-       Right%Box%BndBox(1,2)=MAX(Right%Box%BndBox(1,2),GM%Carts%D(1,K))
-       Right%Box%BndBox(2,1)=MIN(Right%Box%BndBox(2,1),GM%Carts%D(2,K))
-       Right%Box%BndBox(2,2)=MAX(Right%Box%BndBox(2,2),GM%Carts%D(2,K))
-       Right%Box%BndBox(3,1)=MIN(Right%Box%BndBox(3,1),GM%Carts%D(3,K))
-       Right%Box%BndBox(3,2)=MAX(Right%Box%BndBox(3,2),GM%Carts%D(3,K))       
-    ENDDO
-    DO I=Right%BdexE,Right%EdexE
+
+    K=Qdex(Right%BdexE)
+    Right%Box=ExpandPoint((/Rho%Qx%D(K),Rho%Qy%D(K),Rho%Qz%D(K)/),Ext(K) ,Right%Box)
+    DO I=Right%BdexE+1,Right%EdexE
        K=Qdex(I)
-       Right%Box%BndBox(1,1)=MIN(Right%Box%BndBox(1,1),Rho%Qx%D(K))
-       Right%Box%BndBox(1,2)=MAX(Right%Box%BndBox(1,2),Rho%Qx%D(K))
-       Right%Box%BndBox(2,1)=MIN(Right%Box%BndBox(2,1),Rho%Qy%D(K))
-       Right%Box%BndBox(2,2)=MAX(Right%Box%BndBox(2,2),Rho%Qy%D(K))
-       Right%Box%BndBox(3,1)=MIN(Right%Box%BndBox(3,1),Rho%Qz%D(K))
-       Right%Box%BndBox(3,2)=MAX(Right%Box%BndBox(3,2),Rho%Qz%D(K))
+       BB=ExpandPoint((/Rho%Qx%D(K),Rho%Qy%D(K),Rho%Qz%D(K)/),Ext(K))
+       CALL BoxMerge(Right%Box,BB,Right%Box)
     ENDDO
-    Right%Box%Half(:)=Half*(Right%Box%BndBox(:,2)-Right%Box%BndBox(:,1))
-    Right%Box%Center(:)=Right%Box%BndBox(:,1)+Right%Box%Half(:)
 
 !!$    IF(ISplit<4)THEN
 !!$       WRITE(*,55)ISplit,Node%Box%Number,Left%BdexE,Left%EDexE,Left%EDexE-Left%BdexE, &
@@ -329,40 +291,252 @@ CONTAINS
 !!$                                         SUM(GM%AtNum%D(NDex(Left%BdexN:Left%EdexN))),   &
 !!$                                         SUM(GM%AtNum%D(NDex(Right%BdexN:Right%EdexN)))
 !!$       
-!!$55     FORMAT("  Split = ",I2,", Node = ",I4," [",I6,", ",I6,"; ",I3,"] [",I6,", ",I6,"; ",I3," ] // <",F8.2,"><",F8.2,"> ")
+!!$55     FORMAT("  Split = ",I2,", Node = ",I4," [",I6,", ",I6,"; ",I3,"] [",I6,", ",I6,"; ",I3," ] // <",F10.4,"><",F10.4,"> ")
 !!$    ELSE
-!!$       RL=FurthestPointInBox(GM%Carts%D(:,NDex(Left%BDexN)),Left%Box)
-!!$       RR=FurthestPointInBox(GM%Carts%D(:,NDex(Right%BDexN)),Right%Box)
+!!$
+!!$!      RL=FurthestPointInBox(GM%Carts%D(:,NDex(Left%BDexN)),Left%Box)
+!!$!      RR=FurthestPointInBox(GM%Carts%D(:,NDex(Right%BDexN)),Right%Box)
+!!$
+!!$
+!!$!      CALL PrintBBox(Right%Box,6)
+!!$       RL=BoxMargin(Left%Box)
+!!$       RR=BoxMargin(Right%Box)
+!!$
 !!$       NL=Left%EDexE-Left%BdexE+1
 !!$       NR=Right%EDexE-Right%BdexE+1
 !!$       WRITE(*,56)ISplit,Node%BdexN,GM%AtNum%D(NDex(Node%BdexN)),Left%BdexE,Left%EDexE,NL, &
-!!$                                      Right%BdexE,Right%EDexE,NR,RL,RR       
-!!$56     FORMAT("  Split = ",I2," At = ",I2,", Z = ",F4.1," [",I5,", ",I5,";N = ",I3,"] [",I5,", ",I5,";N = ",I3,"] // <",D7.2,"><",D7.2,"> ")
+!!$                                      Right%BdexE,Right%EDexE,NR,RL,RR
 !!$
-!!$       STOP
+!!$56     FORMAT("  Split = ",I2," At = ",I2,", Z = ",F4.1," [",I5,", ",I5,";N = ",I3,"] [",I5,", ",I5,";N = ",I3, &
+!!$              "] // <",D10.5,"><",D10.5,"> ")
 !!$
+!!$      IF(RR>RL)STOP
 !!$    ENDIF
 
   END SUBROUTINE SplitPoleBox
   !
-  SUBROUTINE PACSplit(Ne,Qe,Ex,Qx,Qy,Qz,Nuc,Je)
-    INTEGER :: Ne,Nn,Je,Jn,J,ISplit,K
+
+  SUBROUTINE RStarSplit(Ne,Nn,Qe,Qn,Ex,Qx,Qy,Qz,Nuc,Cntr,Chg,Axis,Je,Jn)
+
+    INTEGER                       :: Ne,Nn,Je,Jn,JeLeft,JeRight,J,K,L,Axis,iDim,iBest
+    INTEGER,DIMENSION(1:Ne)       :: Qe,Qej,QeTmp
+    INTEGER,DIMENSION(1:Nn)       :: Qn,Qnj,QnTmp
+    REAL(DOUBLE),DIMENSION(:)     :: Ex,Qx,Qy,Qz,Chg
+    REAL(DOUBLE),DIMENSION(:,:)   :: Nuc
+
+
+    REAL(DOUBLE),DIMENSION(1:Ne)  :: Xe
+    REAL(DOUBLE),DIMENSION(1:Nn)  :: Xn,BestVol
+    REAL(DOUBLE),DIMENSION(3)     :: Cntr
+
+    REAL(DOUBLE)                  :: Marg,MinMarg,Vol,MinVol,Sep,MaxSep
+    REAL(DOUBLE)                  :: XnLeft,XnRight,XSplit,NodeVol,NodeMrg,MarginMin,MaxDim,MaxExt
+    TYPE(BBox)                    :: NodeBox
+    TYPE(BBox)                    :: LeftBox,RightBox
+
+    REAL(DOUBLE),DIMENSION(3)     :: Point
+
+    INTEGER,PARAMETER             :: RTreeMin=3
+    !-------------------------------------------------------------------
+    IF(Nn<=RTreeMin)THEN
+       !-------------------------------------------------------------------
+       !  Naive, splitting of largest dimension 
+       !-------------------------------------------------------------------
+       MaxSep=-BIG_DBL
+       DO iDim=1,3
+          DO J=1,Nn
+             K=Qn(J)
+             Qnj(J)=J
+             Xn(J)=Nuc(iDim,K)-Cntr(iDim)
+          ENDDO
+          CALL DblIntSort77(Nn,Xn,Qnj,2)                    
+          Sep=Xn(Nn)-Xn(1)
+          IF(Sep>MaxSep)THEN
+             Axis=iDim
+             MaxSep=Sep
+          ENDIF
+       ENDDO
+
+       XSplit=Zero
+       DO J=1,Nn
+          K=Qn(J)
+          Qnj(J)=J
+          Xn(J)=Nuc(Axis,K)-Cntr(Axis)
+          XSplit=XSplit+Xn(J)*Chg(K)
+       ENDDO
+       XSplit=XSplit/SUM(Chg(Qn(1:Nn)))
+       !
+       CALL DblIntSort77(Nn,Xn,Qnj,2)                    
+       !
+       DO J=1,Nn
+          IF(Xn(J)>XSplit)THEN
+             Jn=J-1
+             EXIT
+          ENDIF
+       ENDDO
+       IF(ABS(Xn(Nn)-Xn(1))<1D-5)Jn=Nn/2
+
+    ELSE
+       !-----------------------------------------------------------------------------
+       !  R*-Tree split based on Beckmann, Kriegel, Schneider and Seeger (1990)
+       !  Big win may be in R*-Trees for electrons.  Didn't do that yet...
+       !-----------------------------------------------------------------------------
+       !  Find the axis for which the sum of BBox margin for ALL distributions is
+       !  the least.  
+       MinMarg=BIG_DBL
+       DO iDim=1,3
+          ! Not sorting on LL and UR as in classic R*-Trees, since nuclear sort 
+          ! is just points.
+          DO J=1,Nn
+             K=Qn(J)
+             Qnj(J)=J
+             Xn(J)=Nuc(iDim,K)-Cntr(iDim)
+          ENDDO
+          CALL DblIntSort77(Nn,Xn,Qnj,2)                    
+          ! Init
+          Marg=Zero
+          ! Loop over all distributions
+          DO K=2,Nn-1         
+             ! BBox for left region
+             Point=Nuc(:,Qn(Qnj(1)))-Cntr(:)
+             LeftBox%BndBox(:,1)=Point
+             LeftBox%BndBox(:,2)=Point
+             DO J=2,K
+                Point=Nuc(:,Qn(Qnj(J)))-Cntr(:)
+                CALL PointBoxMerge(LeftBox,Point,LeftBox)
+             ENDDO
+             ! BBox for right region
+             Point=Nuc(:,Qn(Qnj(Nn)))-Cntr(:)
+             RightBox%BndBox(:,1)=Point
+             RightBox%BndBox(:,2)=Point
+             DO J=Nn-1,K+1,-1
+                Point=Nuc(:,Qn(Qnj(J)))-Cntr(:)
+                CALL PointBoxMerge(RightBox,Point,RightBox) 
+             ENDDO
+             ! Add this distributions margin to the total sum 
+             Marg=Marg+BoxMargin(LeftBox)+BoxMargin(RightBox)
+          ENDDO
+          ! Pick the axis with the smallest sum
+          IF(Marg<MinMarg)THEN
+             Axis=iDim
+             MinMarg=Marg
+          ENDIF
+       ENDDO
+       ! New sorted list on the margin minimizing axis
+       DO J=1,Nn
+          K=Qn(J)
+          Qnj(J)=J
+          Xn(J)=Nuc(Axis,K)-Cntr(Axis)
+       ENDDO
+       CALL DblIntSort77(Nn,Xn,Qnj,2)                    
+       ! Now find the distribution that minimizes the combined volume 
+       ! of left and right BBoxes.  The classic R*-Trees method looks at BBox-BBox
+       ! overlap, but we don't have that for just points.
+       MinVol = 1D10
+       ! Loop over all distributions
+       DO K=2,Nn-1          
+          ! BBox for left region
+          Point=Nuc(:,Qn(Qnj(1)))-Cntr(:)
+          LeftBox%BndBox(:,1)=Point
+          LeftBox%BndBox(:,2)=Point
+          DO J=2,K
+             Point=Nuc(:,Qn(Qnj(J)))-Cntr(:)
+             CALL PointBoxMerge(LeftBox,Point,LeftBox)
+          ENDDO
+          ! BBox for right region
+          Point=Nuc(:,Qn(Qnj(Nn)))-Cntr(:)
+          RightBox%BndBox(:,1)=Point
+          RightBox%BndBox(:,2)=Point
+          DO J=Nn-1,K+1,-1
+             Point=Nuc(:,Qn(Qnj(J)))-Cntr(:)
+             CALL PointBoxMerge(RightBox,Point,RightBox) 
+          ENDDO
+          ! Here is the total volume for this distribution
+          Vol=BoxVolume(LeftBox)+BoxVolume(RightBox)
+          ! Pick the min volume, and keep track of redundancies
+          IF(Vol<MinVol)THEN
+             iBest=1
+             MinVol=Vol
+             BestVol(iBest)=K
+          ELSEIF(ABS(Vol-MinVol)<1D-8)THEN
+             iBest=iBest+1
+             BestVol(iBest)=K
+          ENDIF
+!          WRITE(*,*)K,BoxVolume(LeftBox),BoxVolume(RightBox),BoxVolume(LeftBox)+BoxVolume(RightBox)
+       ENDDO
+
+       IF(iBest==1)THEN
+          Jn=BestVol(1)
+       ELSE
+          ! Umm... not prepared to deal with degenerate solutions! 
+          STOP "ARGHHHH"
+       ENDIF
+    ENDIF
+    ! Here is the dividing plane used to split the electons.
+    ! Could use much more sophisticated algorithms here, but for now, we just punt.    
+    XSplit=Half*(Xn(Jn)+Xn(Jn+1))
+
+!!$
+    !
+    IF(Axis==1)THEN
+       DO J=1,Ne
+          K=Qe(J)
+          Qej(J)=J
+          Xe(J)=Qx(K)
+       ENDDO
+    ELSEIF(Axis==2)THEN
+       DO J=1,Ne
+          K=Qe(J)
+          Qej(J)=J
+          Xe(J)=Qy(K)
+       ENDDO
+    ELSE
+       DO J=1,Ne
+          K=Qe(J)
+          Qej(J)=J
+          Xe(J)=Qz(K)
+       ENDDO
+    ENDIF
+    !
+    CALL DblIntSort77(Ne,Xe,Qej,2)                    
+    !
+!    WRITE(*,*)' XSplit = ',XSplit
+!    WRITE(*,*)' Xn: [',Xn(1),",",Xn(Nn),"]"
+!    WRITE(*,*)' Xe: [',Xe(1),",",Xe(Ne),"]"
+
+    DO J=1,Ne
+       IF(Xe(J)>XSplit)THEN
+          Je=J-1
+          EXIT
+       ENDIF
+    ENDDO
+
+!    WRITE(*,*)' Je = ',Je
+
+
+    DO J=1,Ne
+       QeTmp(J)=Qe(Qej(J))
+    ENDDO
+    Qe(1:Ne)=QeTmp(1:Ne)
+    !
+    DO J=1,Nn
+       QnTmp(J)=Qn(Qnj(J))
+    ENDDO
+    Qn(1:Nn)=QnTmp(1:Nn)
+    !
+  END SUBROUTINE RStarSplit
+
+
+  SUBROUTINE ExtSplit(Ne,Qe,Ex,MxCluster,Je)
+    INTEGER :: Ne,Nn,Je,Jn,J,ISplit,K,MxCluster
     REAL(DOUBLE) :: Section
     INTEGER,DIMENSION(1:Ne) :: Qe
-    REAL(DOUBLE),DIMENSION(:) :: Ex,Qx,Qy,Qz
-    REAL(DOUBLE),DIMENSION(3) :: Nuc
+    REAL(DOUBLE),DIMENSION(:) :: Ex
     REAL(DOUBLE),DIMENSION(1:Ne) :: X
-    TYPE(BBox)                   :: Box
     !
     DO J=1,Ne
        K=Qe(J)
-       Box%BndBox(:,1)=(/Qx(K),Qy(K),Qz(K)/)
-       Box%BndBox(:,2)=(/Qx(K),Qy(K),Qz(K)/)
-       Box=ExpandBox(Box,Ex(K))
-       CALL PointBoxMerge(Box,Nuc,Box)
-       X(J)=FurthestPointInBox(Nuc,Box)       
-!       WRITE(*,33)Ex(K),(/Qx(K),Qy(K),Qz(K)/),Nuc,X(J)
-!33     format(' Ex = ',D8.2,' Q = ',3(D10.4,', '),' C = ',3(D10.4,', '),' X = ',D10.4)
+       X(J)=Ex(K)
     ENDDO
     ! Sort with increasing first, so that we terminate the tree as early as possible with
     ! as many small distributions as possible taken care of using the multipole approximation
@@ -377,20 +551,86 @@ CONTAINS
        ENDIF
     ENDDO
 
-!!!    WRITE(*,*)X(1),X(Nn),Section
+!    WRITE(*,*)' X1 = ',X(1),X(Je),' X(Ne) = ',X(Ne)
+
+    ! Here we may overide the above bisection,  just pulling off the CluserSize 
+    ! large distance distributions from the bottom of the list.  Thus, the left
+    ! node generated from this split must be a leaf:
+    IF(Je>MxCluster)THEN       
+       Je=MxCluster
+!       WRITE(*,*)' X1 = ',X(1),X(Je),' X(Ne) = ',X(Ne)
+    ENDIF
+    !
+  END SUBROUTINE ExtSplit
+
+
+
+  SUBROUTINE PACSplit(Ne,Qe,Ex,Qx,Qy,Qz,Nuc,MxCluster,Je)
+    INTEGER :: Ne,Nn,Je,Jn,J,ISplit,K,MxCluster
+    REAL(DOUBLE) :: Section
+    INTEGER,DIMENSION(1:Ne) :: Qe
+    REAL(DOUBLE),DIMENSION(:) :: Ex,Qx,Qy,Qz
+    REAL(DOUBLE),DIMENSION(3) :: Nuc
+    REAL(DOUBLE),DIMENSION(1:Ne) :: X
+    TYPE(BBox)                   :: Box
+    !
+    DO J=1,Ne
+       K=Qe(J)
+       Box%BndBox(:,1)=Nuc
+       Box%BndBox(:,2)=Nuc
+       CALL BoxMerge( Box, ExpandPoint((/Qx(K),Qy(K),Qz(K)/),Ext(K)) , Box )
+       X(J)=FurthestPointInBox(Nuc,Box)       
+!       X(J)=BoxMargin(Box)       
+    ENDDO
+    ! Sort with increasing first, so that we terminate the tree as early as possible with
+    ! as many small distributions as possible taken care of using the multipole approximation
+    CALL DblIntSort77(Ne,X,Qe,-2)             
+    !
+    Box%BndBox(:,1)=Nuc
+    Box%BndBox(:,2)=Nuc
+    DO J=Ne,1,-1
+       K=Qe(J)
+       CALL BoxMerge( Box, ExpandPoint((/Qx(K),Qy(K),Qz(K)/),Ext(K)) , Box )
+!       X(J)=BoxVolume(Box)       
+       X(J)=BoxMargin(Box)       
+!       X(J)=FurthestPointInBox(Nuc,Box)       
+    ENDDO
+    ! Sort with increasing first, so that we terminate the tree as early as possible with
+    ! as many small distributions as possible taken care of using the multipole approximation
+    CALL DblIntSort77(Ne,X,Qe,-2)             
+    !    
+    Section=X(Ne)+Half*(X(1)-X(Ne))
+    !
+    DO J=1,Ne
+       IF(X(J)<Section)THEN
+          Je=J-1
+          EXIT
+       ENDIF
+    ENDDO
+
+!    WRITE(*,*)' Section = ',Section
+
+!    WRITE(*,*)' X = ',X(1),X(Je),X(Je+1),X(Ne)
+
+
+    ! Here we may overide the above bisection,  just pulling off the CluserSize 
+    ! large distance distributions from the bottom of the list.  Thus, the left
+    ! node generated from this split must be a leaf:
+    IF(Je>MxCluster)Je=MxCluster
 
 !!$
-!!$    ! Here, we are not going to bisect, but just pull off the CluserSize 
-!!$    ! large distance distributions from the bottom of the list:
-!!$    IF(Ne<2*MaxCluster)THEN
-!!$       Je=Ne/2
-!!$    ELSE
-!!$       Je=MaxCluster
-!!$    ENDIF
-!!$    DO J=1,Je
+!!$    Box%BndBox(:,1)=Nuc
+!!$    Box%BndBox(:,2)=Nuc
+!!$    DO J=Ne,Je+1,-1
 !!$       K=Qe(J)
-!!$!       WRITE(*,*)Ex(K),X(J)
+!!$       CALL BoxMerge( Box, ExpandPoint((/Qx(K),Qy(K),Qz(K)/),Ext(K)) , Box )
+!!$       WRITE(*,*)J,X(J),FurthestPointInBox(Nuc,Box)       
 !!$    ENDDO
+!!$
+
+
+!    CALL PrintBBox(Box,6)
+
     !
   END SUBROUTINE PACSplit
 
@@ -536,6 +776,9 @@ CONTAINS
     REAL(DOUBLE)            :: RhoSum,ZE,EX,delta
     !-------------------------------------------------------------------------------------
     ! Set leaf logical
+
+    NLeaf=NLeaf+1
+    !
     Node%Leaf=.True.
     !
     ALLOCATE(Node%HERM%NQ(0:MaxRhoEll))
@@ -555,7 +798,10 @@ CONTAINS
     !
     delta=0D0
     Node%POLE%Charge=GM%AtNum%D(NDex(Node%BdexN))
-    Node%POLE%Center=GM%Carts%D(:,NDex(Node%BdexN))
+
+    Node%POLE%Center=GM%Carts%D(:,NDex(Node%BdexN))-GM%PBC%CellCenter%D
+
+
     Node%BOX%BndBOX(:,1)=Node%POLE%Center
     Node%BOX%BndBOX(:,2)=Node%POLE%Center
     ! 
@@ -582,8 +828,10 @@ CONTAINS
        Node%BOX%BndBOX(3,1)=MIN(Node%BOX%BndBOX(3,1),Rho%Qz%D(Qd)-Ex)
        Node%BOX%BndBOX(3,2)=MAX(Node%BOX%BndBOX(3,2),Rho%Qz%D(Qd)+Ex)
        !
-       delta=MAX(delta,SQRT(DOT_PRODUCT( (/Rho%Qx%D(Qd)-NODE%Pole%Center(1),Rho%Qy%D(Qd)-NODE%Pole%Center(2),Rho%Qz%D(Qd)-NODE%Pole%Center(3)/) , &
-                                         (/Rho%Qx%D(Qd)-NODE%Pole%Center(1),Rho%Qy%D(Qd)-NODE%Pole%Center(2),Rho%Qz%D(Qd)-NODE%Pole%Center(3)/) )))
+       delta=MAX(delta,SQRT(DOT_PRODUCT( (/Rho%Qx%D(Qd)-NODE%Pole%Center(1),Rho%Qy%D(Qd) &
+                               -NODE%Pole%Center(2),Rho%Qz%D(Qd)-NODE%Pole%Center(3)/) , &
+                                         (/Rho%Qx%D(Qd)-NODE%Pole%Center(1),Rho%Qy%D(Qd) &
+                                -NODE%Pole%Center(2),Rho%Qz%D(Qd)-NODE%Pole%Center(3)/) )))
        !
     ENDDO
     Node%POLE%delta=delta
@@ -658,6 +906,9 @@ CONTAINS
     TYPE(Pole)                        :: LPole,RPole,PPole       
     !------------------------------------------------------------------------------------       
     PPole%Ell=MAX(LPole%Ell,RPole%Ell)
+
+!!    WRITE(*,*)' CHARGE = ',LPole%Charge,RPole%Charge
+
     PPole%Center=(LPole%Charge*LPole%Center+RPole%Charge*RPole%Center)/(LPole%Charge+RPole%Charge)
      CALL AllocSP(PPole)
     ! Move the left center to the new midpoint

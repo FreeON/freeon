@@ -90,7 +90,6 @@ CONTAINS !
              SPErrorKetS=Zero
              SPErrorKetC=Zero
 #endif
-             DOMAC=.FALSE.
              CALL JWalk2(QP,PoleRoot,Nucular_O=.TRUE.)
           ENDDO
           ! Reset the primitive coordinates

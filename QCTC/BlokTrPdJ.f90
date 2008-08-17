@@ -236,11 +236,9 @@ CONTAINS
                       ! Walk the walk
                       NNearTmp=NNearAv
                       NNearAv=0
-                      DOMAC=.TRUE.
                       CALL JWalk2(QP,PoleRoot) 
                       NNearCount(NC)=NNearCount(NC)+NNearAv
                       NNearAv=NNearTmp+NNearAv
-                      NPrim=NPrim+1
                       ! -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
                       ! Acumulate the Lattice Forces
                       DO I=1,3
@@ -250,6 +248,7 @@ CONTAINS
                       ENDDO
                    ENDDO
                    QP%Prim%Pw=PTmp
+                   NPrim=NPrim+1
                    ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
                    PBCNearFieldA=0D0
                    PBCNearFieldP=0D0
@@ -259,7 +258,8 @@ CONTAINS
                       DO LMN=1,LenG
                          PBCNearFieldP(K)=PBCNearFieldP(K)+Phase%D(LMN)*BraGradP(LMN,K)*HGKet(LMN)
                       ENDDO
-                      CALL HGToSP_Direct(EllG,LenG,LenGSP,PiZ,BraGradP(1:LenG,K),SPBraC(0:LenGSP),SPBraS(0:LenGSP))                            
+                      CALL HGToSP_Direct(EllG,LenG,LenGSP,PiZ,BraGradP(1:LenG,K), &
+                                         SPBraC(0:LenGSP),SPBraS(0:LenGSP))                            
                       DO LM=0,LenGSP
                          PBCNearFieldP(K)=PBCNearFieldP(K)+SPBraC(LM)*SPKetC(LM)+SPBraS(LM)*SPKetS(LM)
                       ENDDO
@@ -452,9 +452,6 @@ CONTAINS
     QP%MAC%Delta=Zero
 
     PExt=Extent(0,NuclearExpnt,(/NukeCo/),TauPAC,Potential_O=.TRUE.)
-
-          WRITE(*,*)' Nuclear Extent = ',PExt
-
     ! Initialize the |KET)
     CellFrc=Zero
     AtomFrc=Zero
@@ -487,7 +484,6 @@ CONTAINS
        SPKetC_old(0:3) = SPKetC(0:3)
        SPKetS_old(0:3) = SPKetS(0:3)
        ! Walk the walk
-       DOMAC=.TRUE.
        CALL JWalk2(QP,PoleRoot,Nucular_O=.TRUE.)
        ! Acumulate the Lattice Forces
        DO I=1,3

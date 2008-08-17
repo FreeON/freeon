@@ -943,8 +943,6 @@ CONTAINS
 !!! restart may cause filled up IntCs; 
 !!! this here is a temporary solution, until restart gets reprganized
 
-     WRITE(*,*)' ALLOC ALLOC INTCS = ',IntCs%Alloc
-
      IF(AllocQ(IntCs%Alloc)) CALL Delete(IntCs) 
      !
      CALL New(AtNum,NatmsLoc)

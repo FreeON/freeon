@@ -1543,10 +1543,6 @@ CONTAINS
      !
      GMLoc%Carts%D=GMLoc%Displ%D
      GMLoc%PBC%BoxShape%D=GMLoc%PBCDispl%BoxShape%D
-     WRITE(*,*)' NEWGEOMFILL MAY BE REDUNDANT !! '     
-     WRITE(*,*)' NEWGEOMFILL MAY BE REDUNDANT !! '     
-     WRITE(*,*)' NEWGEOMFILL MAY BE REDUNDANT !! '     
-     WRITE(*,*)' NEWGEOMFILL MAY BE REDUNDANT !! '
 
      CALL MakeGMPeriodic(GMLoc)
      ! Depricated:

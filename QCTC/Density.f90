@@ -26,6 +26,8 @@ MODULE Density
   !
   TYPE(HGRho)       :: Rho
   TYPE(CMPoles)     :: RhoPoles
+
+  REAL(DOUBLE) :: Density_Time_Start,Density_Time
   !
 CONTAINS 
   !
@@ -50,8 +52,7 @@ CONTAINS
        NoWrap=.FALSE.
     ENDIF
 
-    PwMAX = 0
-
+    CALL NewBraBlok(BS)
     !
     NLink=0
     HGLink=>RhoHead
@@ -110,9 +111,6 @@ CONTAINS
                        + (Pair%A(2)-Pair%B(2))**2 &
                        + (Pair%A(3)-Pair%B(3))**2
 
-!                WRITE(*,*)' AtA = ',AtA,' AtB = ',AtB,' NC = ',NC
-
-
                 IF(TestAtomPair(Pair))THEN
                       CALL RhoPop(GM,BS,GM%InCells,NoWrap,SpinM,Psv%D(1),Pair,HGLink,NLink)
                 ENDIF
@@ -125,11 +123,15 @@ CONTAINS
     ! Now eliminate redundancies in the density    !
     NNaive=NLink
     CALL RhoEcon(RhoHead,NLink)
-    Mssg=ProcessName(Prog,'Density Build')
-    Mssg=TRIM(Mssg)//' Econ = '//TRIM(DblToShrtChar(DBLE(NNaive)/DBLE(NLink))) &
-                   //', Gaussians = '//TRIM(IntToChar(NLink))
-!    WRITE(*,*)TRIM(Mssg)
+!
+    CALL MondoLog(DEBUG_MAXIMUM,Prog,' RhoEcon = '//TRIM(FltToShrtChar(DBLE(NNaive)/DBLE(NLink))) &
+                                   //', Gaussians = '//TRIM(IntToChar(NLink)))
+
     ! Next, calculate the Schwartz inequality and prune small links ???
+
+    ! Free bra block memory, since we may need it again
+    CALL DeleteBraBlok()
+
   END SUBROUTINE MakeRhoList
   !
   SUBROUTINE Collate(GM,RhoHead,R,Prog,P,NLink)
@@ -258,6 +260,7 @@ CONTAINS
        DO J=1,R%NQ%I(I)
           IAdd=R%OffQ%I(I)+J
           JAdd=R%OffR%I(I)+(J-1)*LenZ+1
+
 !!$#ifdef PRIMITIVE_CENTERING       
 !!$          ! Primitive should already be wrapped and centered centered (by PWrap)
 !!$          RX=Rho%Qx%D(IAdd)
@@ -417,17 +420,22 @@ CONTAINS
     J=1
     DO WHILE(J.LE.NLink)
        !
+
+!	WRITE(*,*)J,ListArray1(J),ASSOCIATED(LinkArray1(ListArray1(J))%L)
+
        IF(.NOT.ASSOCIATED(LinkArray1(ListArray1(J))%L))THEN
           J=J+1
           CYCLE
        ENDIF
+
        ZJ=LinkArray1(ListArray1(J))%L%Zeta
        RJ=LinkArray1(ListArray1(J))%L%Cent
+
        L=0
        DO K=J+1,NLink
           IF(.NOT.ASSOCIATED(LinkArray1(ListArray1(K))%L))CYCLE
-          DX=ABS(RJ(ISort)-LinkArray1(ListArray1(K))%L%Cent(ISort))
-          IF(DX.GT.1D-3)EXIT
+          DX=ABS(RJ(ISort)-LinkArray1(ListArray1(K))%L%Cent(ISort))	
+          IF(DX.GT.1D-6)EXIT
           ZK=LinkArray1(ListArray1(K))%L%Zeta
           RK=LinkArray1(ListArray1(K))%L%Cent
           ZZJK=ZK*ZJ/(ZK+ZJ)
@@ -437,16 +445,23 @@ CONTAINS
           RealArray1(L)=Bhatt
           ListArray2(L)=ListArray1(K)
        ENDDO
+
        IF(L>0)THEN
-          CALL DblIntSort77(L,RealArray1,ListArray2,2)
+          CALL DblIntSort77(L,RealArray1,ListArray2,2)	
+
           DO I=1,L
+!             IF(RealArray1(I).GT.1D-8)EXIT
+
+!D-3 QCTC :                 :: Coulomb Energy      = <-.1086298817449869D+05>
+!D-5 QCTC :                 :: Coulomb Energy      = <-.1083002185656237D+05>
+!D-7 QCTC :                 :: Coulomb Energy      = <-.1082871666547942D+05>
+!     QCTC :                 :: Coulomb Energy      = <-.1082871662244797D+05>
+
+
              IF(RealArray1(I).GT.1D-8)EXIT
              !
              JLst=ListArray1(J)
              KLst=ListArray2(I)
-
-!!$             WRITE(*,*)' Link to be retaind (J) = ',JLst
-!!$             WRITE(*,*)' Link to be removed (K) = ',KLst
 
              IF(KLst==1.OR.KLst==NLink)CYCLE
 
@@ -474,6 +489,7 @@ CONTAINS
              !
              CALL Delete(LinkArray1(KLst)%L%Coef)
              DEALLOCATE(LinkArray1(KLst)%L)             
+             NULLIFY(LinkArray1(KLst)%L)             
              !
              KLstM1=KLst-1
              IF(KLstM1<1)CYCLE
@@ -494,6 +510,7 @@ CONTAINS
                    EXIT
                 ENDIF
              ENDDO
+
              !
              IF(KLstM1==KLstP1)GOTO 101 
              !
@@ -608,6 +625,12 @@ CONTAINS
 
                    NULLIFY(HGLink%Next)
                    CALL New(HGLink%Coef,LenKet)
+
+!	           IF(NLink==3294)THEN
+!	             WRITE(*,*)3294, ' ALLOC? ',ALLOCATED(HGLink%Coef%D)
+!		STOP	
+!ENDIF		
+
                    HGLink%Coef%D=Zero
                    !
                    IA=IndexA
@@ -628,6 +651,9 @@ CONTAINS
 
                       ENDDO
                    ENDDO                  
+
+
+
 
 !!$                   WRITE(*,*)'&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&'
 !!$                   ZZ=(Pi/Prim%Zeta)**1.5D0
