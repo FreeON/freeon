@@ -289,7 +289,7 @@ else
     [Specify the blas/lapack libraries as specified on the linker command line (default is -lblas -llapack)])],
     [more_LIBS="${withval}"
     AC_MSG_NOTICE([using ${withval}])],
-    [more_LIBS="-lblas -llapack"])
+    [more_LIBS="-llapack -lblas"])
 
   if test -z "${LIBS}"; then
     LIBS="${more_LIBS}"
