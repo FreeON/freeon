@@ -91,6 +91,9 @@ CONTAINS
         ELSE
           REWIND(Inp)
           CALL AlignLowCase('<beginbasisset'//TRIM(B%BName(J))//'>',Inp)
+
+          WRITE(*,*)' FOUND <beginbasisset'//TRIM(B%BName(J))//'>'
+
         ENDIF
         IF(.NOT.ParseBasisSets(G%Clone(I),B%BSets(I,J),BasU,B%BSiz(I,J),B%OffS(I,J)))THEN
           CALL MondoHalt(PRSE_ERROR,'ParseBasisSets failed for basis set '//TRIM(B%BName(J)))

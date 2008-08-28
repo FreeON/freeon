@@ -690,16 +690,7 @@ CONTAINS
        CALL FracCyclic(GM,P%Pw)
        ! Convert back to wrapped atomic coordinates 
        P%Pw=FracToAtom(GM,P%Pw)
-
-
        PwMax=MAX(PwMax,SQRT(DOT_PRODUCT(P%PW,P%PW) ))
-
-       IF(SQRT(DOT_PRODUCT(P%PW,P%PW))>30.4D0)THEN
-          WRITE(*,*)' Pw = ',P%Pw,SQRT(DOT_PRODUCT(P%PW,P%PW))
-       ENDIF
-
-
-
        ! DOUBLE CHECK: WRAPPED VECTORS SHOULD NOW BE STATIONARY WRT TO WRAPPING
        ! SMALL ROUND OFF ERRORS CAN SUBVERT THIS, ADDRESSED IN FracCyclic.
        PT1=P%PW

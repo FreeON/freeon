@@ -1,0 +1,75 @@
+Reference Energy for RHF/6-31G* : -78.0300293684
+MondoSCF  Energy for RHF/6-31G* : -78.03002936
+
+Reference First RPA Excited State:  8.1872 ev
+MondoSCF  First RPA Excited State:  8.1863 ev
+MondoSCF  First TDA Excited State:  8.6924 ev
+
+<BeginOptions>
+
+MPIInvoke="mpirun"
+MPIProcessors=4
+MPIProcFlag="-np"
+MPISpatialProc=4
+MPIMachineFlag="--nper"
+MPIMachineFile="2"
+
+DebugAll=(MinDebug,CheckSums)
+
+Charge=0
+Multiplicity=1
+Guess=SuperPos
+SCFMethod=(RH,RH)
+BasisSets=(STO-2G-SPLIT,631GStar)
+ModelChem=(HF,HF)
+Accuracy =(Tight,Tight)
+SCFConvergence=(DIIS,DIIS)
+Geometry=(InAngstroms)
+
+Response=TD-SCF
+
+<EndOptions>
+
+<BeginGeometry>  
+C        0.000000      0.000000      0.662952
+H        0.000000      0.924035      1.256554
+H        0.000000     -0.924035      1.256554
+C        0.000000      0.000000     -0.662966
+H        0.000000     -0.924026     -1.256547
+H        0.000000      0.924026     -1.256547
+<EndGeometry>
+
+<BeginBasisSet631GStar>
+ H   0
+ S   3  1.00
+      18.73113700      0.03349460
+       2.82539370      0.23472695
+       0.64012170      0.81375733
+ S   1  1.00
+       0.16127780      1.00000000
+ ****
+ C   0
+ S   6  1.00
+    3047.52490000      0.00183470
+     457.36951000      0.01403730
+     103.94869000      0.06884260
+      29.21015500      0.23218440
+       9.28666300      0.46794130
+       3.16392700      0.36231200
+ S   3  1.00
+       7.86827240     -0.11933240
+       1.88128850     -0.16085420
+       0.54424930      1.14345640
+ P   3  1.00
+       7.86827240      0.06899910
+       1.88128850      0.31642400
+       0.54424930      0.74430830
+ S   1  1.00
+       0.16871440      1.00000000
+ P   1  1.00
+       0.16871440      1.00000000
+ D   1  1.00
+       0.80000000      1.00000000
+ ****
+<EndBasisSet631GStar>
+

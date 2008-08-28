@@ -25,6 +25,7 @@
 !------------------------------------------------------------------------------
 MODULE RayleighQuotientIteration
   USE InOut
+  USE SCFs
   USE Macros
   USE MemMan
   USE Overlay
@@ -38,6 +39,16 @@ MODULE RayleighQuotientIteration
   USE MondoLogger
   IMPLICIT NONE
 CONTAINS
+
+
+  SUBROUTINE TDSCF(C)
+    IMPLICIT NONE
+    TYPE(Controls)                             :: C
+    IF(.NOT. C%POpt%Resp%TD_SCF) RETURN
+    CALL SetFrontEndMacros(C%Geos,C%Sets)
+    CALL RQI(NBasF,4,C%Nams,C%Opts,C%Stat,C%MPIs,C%Geos%Clone(1), &
+             C%Sets%BSets(1,C%Sets%NBSets))
+  END SUBROUTINE TDSCF
 
   SUBROUTINE RQI(N,M,Nam,O,S,MPI,G,B)
     INTEGER            :: N,M,I,J,K,L,U,V,JTDA
@@ -62,176 +73,156 @@ CONTAINS
 
     RQIStat=S
     RQINams=Nam
+    !
+    Shift=0.1102479D0
+    !
+    CALL Get(sP,TrixFile("OrthoD",PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=S%Current%I,OffSet_O=0))
+    CALL Get(sF,TrixFile("OrthoF",PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=S%Current%I,OffSet_O=0))
+    CALL Get(sZ,TrixFile("X",PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=S%Current%I))
+    !
+    CALL SetEq(P,sP)
+    CALL SetEq(Q,sP)
+    P%D=Two*P%D
+    Q%D=-Two*Q%D
+    DO I=1,N 
+       Q%D(I,I)=Q%D(I,I)+Two
+    ENDDO
+    !
+    CALL SetEq(F,sF)
+    CALL SetEq(Z,sZ)
+    !
+    CALL Integrals2E(B,G,TwoE)
+    DO I=1,N
+       DO J=1,N
+          DO K=1,N
+             DO L=1,N
+                DoubleSlash(I,J,K,L)=TwoE(I,J,K,L)-TwoE(I,K,J,L)/2D0
+             ENDDO
+          ENDDO
+       ENDDO
+    ENDDO
+
+    goto 111
 !!$
-!!$    CALL Get(sP,TrixFile("OrthoD",PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=S%Current%I,OffSet_O=0))
-!!$    CALL Get(sF,TrixFile("OrthoF",PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=S%Current%I,OffSet_O=0))
-!!$    CALL Get(sZ,TrixFile("X",PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=S%Current%I))
-!!$    !
-!!$    CALL SetEq(P,sP)
-!!$    CALL SetEq(Q,sP)
-!!$    P%D=Two*P%D
-!!$    Q%D=-Two*Q%D
-!!$    DO I=1,N 
-!!$       Q%D(I,I)=Q%D(I,I)+Two
-!!$    ENDDO
-!!$    !
-!!$    CALL SetEq(F,sF)
-!!$    CALL SetEq(Z,sZ)
-!!$    !
-!!$    CALL Integrals2E(B,G,TwoE)
-!!$    DO I=1,N
-!!$       DO J=1,N
-!!$          DO K=1,N
-!!$             DO L=1,N
+!!$    DO I=1,1
+!!$       CALL Nihilate0(N,I,Nam,S,MPI)
+!!$       CALL LOn2BakEnd(N,I,0,Shift,'Xk',Nam,S,MPI)
+!!$       CALL Nihilate1(I,Nam,S,MPI,Ek,TDA_O=.TRUE.)
+!!$       !       write(*,*)' ek = ',EK
+!!$       !       GOTO 111 ! STOP
+!!$       DO JTDA=0,1
+!!$          IF(JTDA==0)THEN
+!!$             DoTDA=.TRUE.
+!!$          ELSE
+!!$             DoTDA=.FALSE.
+!!$          ENDIF
+!!$          DO K=0,200
+!!$             ! The non-linear congjugate gradient
+!!$             CALL NLCGBakEnd(I,K,Ek,Nam,S,MPI,Beta)
+!!$             ! Compute L[Pk]
+!!$             CALL LOn2BakEnd(N,I,K,Shift,'Pk',Nam,S,MPI)
+!!$             ! Line Search: Min_Lambda{ E[Xk+Lambda*Pk] }
+!!$             CALL RQLSBakEnd(I,Nam,S,Lambda)                    
+!!$             ! Anhiliate and renorm Xk
+!!$             CALL NihilateXk(I,Nam,S,MPI,Lambda,dNorm,TDA_O=DoTDA)
+!!$             ! Compute L[Xk]
+!!$             CALL LOn2BakEnd(N,I,K,Shift,'Xk',Nam,S,MPI)
+!!$             ! Anihilate L[Xk], compute Ek and its relative error
+!!$             CALL NihilateLXk(I,Nam,S,MPI,Ek,dEk,TDA_O=DoTDA)
 !!$
-!!$                DoubleSlash(I,J,K,L)=TwoE(I,J,K,L)-TwoE(I,K,J,L)/2D0
-!!$                !                CALL iPrint(DoubleSlash(I,J,K,L),I,J,K,L,1,6)
-!!$             ENDDO
+!!$             WRITE(*,33)I,K,Ek*27.21139613182D0,Beta,Lambda,dEk,dNorm
+!!$             WRITE(44,*)K,Ek
+!!$
+!!$             IF(ABS(dEk)<1D-2.AND.ABS(dNorm)<1D-2.AND.Ek>EkOld)THEN
+!!$                Ek=EkOld
+!!$                EXIT
+!!$             ELSEIF(ABS(dEk)<1D-4)THEN
+!!$                EXIT
+!!$             ENDIF
+!!$             EkOld=Ek
+!!$             !
 !!$          ENDDO
+!!$          WRITE(*,*)I,K,Ek*27.21139613182D0,dEk,dNorm
 !!$       ENDDO
 !!$    ENDDO
+!!$    !
+!!$    WRITE(*,*)'------------------------------------------'
+!!$
+!!$
 
-    !    goto 111
 
-    Shift=0.1102479D0
+111 CONTINUE
     DO I=1,1
-       CALL Nihilate0(N,I,Nam,S,MPI)
-       CALL LOn2BakEnd(N,I,0,Shift,'Xk',Nam,S,MPI)
-       CALL Nihilate1(I,Nam,S,MPI,Ek,TDA_O=.TRUE.)
-       !       write(*,*)' ek = ',EK
-       !       GOTO 111 ! STOP
+       !
        DO JTDA=0,1
           IF(JTDA==0)THEN
              DoTDA=.TRUE.
+             CALL RPAGuess(N,Xk)
           ELSE
              DoTDA=.FALSE.
+             Xk=Vectors(:,:,I)
           ENDIF
-          DO K=0,100
-             ! The non-linear congjugate gradient
-             CALL NLCGBakEnd(I,K,Ek,Nam,S,MPI,Beta)
-             ! Compute L[Pk]
-             CALL LOn2BakEnd(N,I,K,Shift,'Pk',Nam,S,MPI)
-             ! Line Search: Min_Lambda{ E[Xk+Lambda*Pk] }
-             CALL RQLSBakEnd(I,Nam,S,Lambda)                    
-             ! Anhiliate and renorm Xk
-             CALL NihilateXk(I,Nam,S,MPI,Lambda,dNorm,TDA_O=DoTDA)
-             ! Compute L[Xk]
-             CALL LOn2BakEnd(N,I,K,Shift,'Xk',Nam,S,MPI)
-             ! Anihilate L[Xk], compute Ek and its relative error
-             CALL NihilateLXk(I,Nam,S,MPI,Ek,dEk,TDA_O=DoTDA)
 
-             WRITE(*,33)I,K,Ek*27.21139613182D0,Beta,Lambda,dEk,dNorm
-             WRITE(44,*)K,Ek
+          CALL Anihilate(N,P%D,Q%D,Xk,TDA_O=DoTDA)
+          CALL Renorm(N,P%D,Xk)
+          CALL LOn2(N,I,Shift,F%D,P%D,Z%D,DoubleSlash,Values,Vectors,Xk,LXk)
+          CALL Anihilate(N,P%D,Q%D,LXk,TDA_O=DoTDA)
 
-             IF(ABS(dEk)<1D-2.AND.ABS(dNorm)<1D-2.AND.Ek>EkOld)THEN
-                Ek=EkOld
-                EXIT
-             ELSEIF(ABS(dEk)<1D-4)THEN
-                EXIT
-             ENDIF
+          Beta=Zero
+          XkOld=Zero
+          PkOld=Zero
+          Ek=ThoulessQ(N,P%D,Xk,LXk) 
+          DO K=0,200
+             !
+             Gk=Two*(LXk-Ek*Xk)
+
+
+!!$             IF(JTDA==1.AND.K<2)THEN
+!!$                CALL PPrint(Gk,"Gk"//TRIM(IntToChar(K)),Unit_O=6)
+!!$                CALL PPrint(GkOld,"GkOld"//TRIM(IntToChar(K)),Unit_O=6)
+!!$             ENDIF
+
+             IF(K>0)Beta=Pdot1(N,P%D,Gk,Gk-Gkold)/Pdot1(N,P%D,GkOld,GkOld)    			
+
+             Pk=Gk+Beta*PkOld  
+             !
+             CALL LOn2(N,I,Shift,F%D,P%D,Z%D,DoubleSlash,Values,Vectors,Pk,LPk)
+             CALL RQILineSearch(N,P%D,Pk,Xk,LXk,LPk,Lambda)          
+             !
              EkOld=Ek
+             XkOld=Xk
+             EkOld=Ek
+             GkOld=Gk
+             PkOld=Pk	   
+             !
+             Xk=XkOld+Lambda*Pk
+             !
+             CALL Anihilate(N,P%D,Q%D,Xk,TDA_O=DoTDA)
+             dNorm=One-sqrt(abs(Pdot1(N,P%D,Xk,Xk)))
+             CALL ReNorm(N,P%D,Xk)
+             CALL LOn2(N,I,Shift,F%D,P%D,Z%D,DoubleSlash,Values,Vectors,Xk,LXk)
+             CALL Anihilate(N,P%D,Q%D,LXk,TDA_O=DoTDA)
+             Ek=ThoulessQ(N,P%D,Xk,LXk) 
+             ErrAbs=Ek-EkOld
+             ErrRel=-1D10
+             DO U=1,N
+                DO V=1,N
+                   ErrRel=MAX(ErrRel,ABS(Ek*Xk(U,V)-LXk(U,V))/Ek)
+                ENDDO
+             ENDDO
+             WRITE(*,33)I,K,Ek*27.21139613182D0,Beta,Lambda,ErrRel,dNorm
+
+             IF(ErrRel<1D-4)EXIT
              !
           ENDDO
-          WRITE(*,*)I,K,Ek*27.21139613182D0,dEk,dNorm
+          WRITE(*,*)I,K,Ek*27.21139613182D0,ErrRel,ErrAbs
+          Values(I)=Ek 
+          Vectors(:,:,I)=Xk
+
        ENDDO
     ENDDO
-    !
-    WRITE(*,*)'------------------------------------------'
-
-111 CONTINUE
-
-33        FORMAT('St=',I2,', It=',I2,', Ev = ',F10.6,', Bt= ',D12.6,' Lm= ',D12.6,' dE= ',D12.6,' dN= ',D12.6)
-
-!!$    Shift=0.1102479D0
 !!$
-!!$    DO I=1,1
-!!$       !
-!!$       CALL RPAGuess(N,Xk)
-!!$       !       CALL PPrint(Xk,"RAW",Unit_O=6)
-!!$       !       CALL PPrint(Q,' Q = ',Unit_O=6)
-!!$       !       CALL PPrint(MATMUL(Q%D,Xk),' Q.X = ',Unit_O=6)
-!!$
-!!$       Xk=ProjectPH(N,P%D,Q%D,Xk)
-!!$
-!!$       !       CALL PPrint(Xk,"PROJECTED",Unit_O=6)
-!!$
-!!$       CALL Renorm(N,P%D,Xk)
-!!$
-!!$       !       CALL PPrint(Xk,' RAW XK = ',Unit_O=6)
-!!$
-!!$
-!!$       !       CALL PPrint(Xk,"NORMED",Unit_O=6)
-!!$       !       STOP
-!!$
-!!$
-
-       Xk=Vectors(:,:,I)
-!!$
-!!$       CALL LOn2(N,I,Shift,F%D,P%D,Z%D,DoubleSlash,Values,Vectors,Xk,LXk)
-!!$       !!       CALL PPrint(LXk,'RAW LXK',Unit_O=6)
-!!$
-!!$       LXk=ProjectPH(N,P%D,Q%D,LXk)
-!!$       !
-!!$       !       CALL PPrint(LXk,'PROJECTED LXK',Unit_O=6)
-!!$
-!!$       Beta=Zero
-!!$       XkOld=Zero
-!!$       PkOld=Zero
-!!$       Ek=ThoulessQ(N,P%D,Xk,LXk) 
-!!$
-!!$       !       write(*,*)' ek = ',EK
-!!$       !
-!!$       DO K=0,100
-!!$          !
-!!$          Gk=Two*(LXk-Ek*Xk)
-!!$
-!!$          !          CALL PPrint(Gk,   ' Gk    ',Unit_O=6)
-!!$          !          CALL PPrint(GkOld,' GkOld ',Unit_O=6)
-!!$
-!!$          IF(K>0)  &
-!!$               Beta=Pdot1(N,P%D,Gk-Gkold,Gk)/Pdot1(N,P%D,GkOld,GkOld)    			
-!!$
-!!$          !          WRITE(*,*)' Beta = ',Beta
-!!$
-!!$          Pk=Gk+Beta*PkOld  
-!!$          !
-!!$          CALL LOn2(N,I,Shift,F%D,P%D,Z%D,DoubleSlash,Values,Vectors,Pk,LPk)
-!!$          CALL RQILineSearch(N,P%D,Pk,Xk,LXk,LPk,Lambda)          
-!!$          !
-!!$          EkOld=Ek
-!!$          XkOld=Xk
-!!$          EkOld=Ek
-!!$          GkOld=Gk
-!!$          PkOld=Pk	   
-!!$          !
-!!$          Xk=XkOld+Lambda*Pk
-!!$          !
-!!$          CALL Anihilate(N,P%D,Q%D,Xk,TDA_O=DoTDA)
-!!$          dNorm=One-sqrt(abs(Pdot1(N,P%D,Xk,Xk)))
-!!$          CALL ReNorm(N,P%D,Xk)
-!!$          CALL LOn2(N,I,Shift,F%D,P%D,Z%D,DoubleSlash,Values,Vectors,Xk,LXk)
-!!$          CALL Anihilate(N,P%D,Q%D,LXk,TDA_O=DoTDA)
-!!$          Ek=ThoulessQ(N,P%D,Xk,LXk) 
-!!$          ErrAbs=Ek-EkOld
-!!$          ErrRel=-1D10
-!!$          DO U=1,N
-!!$             DO V=1,N
-!!$                ErrRel=MAX(ErrRel,ABS(Ek*Xk(U,V)-LXk(U,V))/Ek)
-!!$             ENDDO
-!!$          ENDDO
-!!$          WRITE(*,33)I,K,Ek*27.21139613182D0,Beta,Lambda,ErrRel,dNorm
-!!$
-
-!!$
-!!$
-!!$          IF(ErrRel<1D-6)EXIT
-!!$          !
-!!$       ENDDO
-!!$       WRITE(*,*)I,K,Ek*27.21139613182D0,ErrRel,ErrAbs
-!!$       Values(I)=Ek 
-!!$       Vectors(:,:,I)=Xk
-!!$    ENDDO
-
+33  FORMAT('St=',I2,', It=',I2,', Ev = ',F10.6,', Bt= ',D12.6,' Lm= ',D12.6,' dE= ',D12.6,' dN= ',D12.6) 
   END SUBROUTINE RQI
 
   SUBROUTINE Anihilate(N,P,Q,X,TDA_O)
