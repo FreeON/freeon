@@ -469,7 +469,7 @@ CONTAINS
           Jn=BestVol(1)
        ELSE
           ! Umm... not prepared to deal with degenerate solutions! 
-          STOP "ARGHHHH"
+          Jn=Nn/2
        ENDIF
     ENDIF
     ! Here is the dividing plane used to split the electons.

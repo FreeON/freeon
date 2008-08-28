@@ -591,20 +591,19 @@ MODULE PrettyPrint
 222                FORMAT(1X,A2,3(F22.16,' '),A1)
                 ENDDO
 
-!!$                DO I=1,GM%NAtms
-!!$                   IF(GM%CConstrain%I(I)==1) THEN
-!!$                      AuxChar='C'
-!!$                   ELSE IF(GM%CConstrain%I(I)==2) THEN
-!!$                      AuxChar='R'
-!!$                   ELSE
-!!$                      AuxChar=' '
-!!$                   ENDIF
-!!$                   Atom=GM%AtNam%C(I)
-!!$                   CALL UpCase(Atom)
-!!$                   WRITE(PU,223)Atom,(GM%BoxCarts%D(K,I)*AA,K=1,3),TRIM(ADJUSTL(AuxChar))
-!!$!223                FORMAT(1X,A2,3(F14.5,' '),A1,' << FRACTIONALS ')
-!!$223                FORMAT(1X,A2,3(F22.16,' '),A1,' << FRACTIONALS ')
-!!$                ENDDO
+                DO I=1,GM%NAtms
+                   IF(GM%CConstrain%I(I)==1) THEN
+                      AuxChar='C'
+                   ELSE IF(GM%CConstrain%I(I)==2) THEN
+                      AuxChar='R'
+                   ELSE
+                      AuxChar=' '
+                   ENDIF
+                   Atom=GM%AtNam%C(I)
+                   CALL UpCase(Atom)
+                   WRITE(PU,223)Atom,(GM%BoxCarts%D(K,I),K=1,3),TRIM(ADJUSTL(AuxChar))
+223                FORMAT(1X,A2,3(F22.16,' '),A1,' << FRACTIONALS ')
+                ENDDO
 
              ELSEIF(PrintGeom_O=='PDB')THEN
                 ! Print PDB format
@@ -664,6 +663,7 @@ MODULE PrettyPrint
              CALL ClosePU(PU)
              CALL Print_PBCInfo(GM%PBC,FileName_O,Unit_O)
              PU=OpenPU(FileName_O=FileName_O,Unit_O=Unit_O)
+             WRITE(PU,*)' Cartesian coordinates in AU:'
              DO I=1,GM%NAtms
                 Mssg=TRIM(IntToChar(I))//'   '//Ats(INT(GM%AtNum%D(I))) &  !!!! correct only for integer charged QM atoms
                      //'   '//DblToMedmChar(GM%Carts%D(1,I))          &

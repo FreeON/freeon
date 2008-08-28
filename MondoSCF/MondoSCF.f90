@@ -56,11 +56,8 @@ PROGRAM MondoSCF
     SELECT CASE(C%Opts%Grad)
     CASE(GRAD_NO_GRAD)
       CALL SinglePoints(C)
-!      CALL SetFrontEndMacros(C%Geos,C%Sets)
-!      CALL RQI(NBasF,4,C%Nams,C%Opts,C%Stat,C%MPIs,C%Geos%Clone(1), &
-!               C%Sets%BSets(1,C%Sets%NBSets))
-
       CALL CPSCF(C)
+      CALL TDSCF(C)
     CASE(GRAD_GO_DOWNHILL)
       CALL Descender(C)
     CASE(GRAD_TS_SEARCH_NEB)

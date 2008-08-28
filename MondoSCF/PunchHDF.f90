@@ -238,6 +238,8 @@ CONTAINS
           CALL UnSetAtomCharges(G%Clone(iCLONE),B%BSets(iCLONE,cBAS))
     ENDDO
     CALL CloseHDF(HDFFileID)
+
+!   CALL PPrint(G%Clone(1),Unit_O=6)
   END SUBROUTINE GeomArchive
 !==============================================================================
 !
