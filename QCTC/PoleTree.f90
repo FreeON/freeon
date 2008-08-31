@@ -183,7 +183,7 @@ CONTAINS
     TYPE(PoleNode), POINTER     :: Node,Left,Right
     REAL(DOUBLE)                :: Section,MaxBox,Extent,MaxExt,IHalfHalf,BalanceQ,TotCh2,ChHalf2,Ex
     REAL(DOUBLE),DIMENSION(3)   :: MaxQL,MaxQH
-    INTEGER                     :: Ne,Nn,Be,Ee,Bn,En,Je,Jn,ISplit,Split,I,J,k,IS,NL,NR
+    INTEGER                     :: Ne,Nn,Be,Ee,Bn,En,Je,Jn,ISplit,Split,I,J,k,IS,NL,NR, II
     INTEGER                     :: MaxBoxedEll,NBoxedEll,EllSplit,Cd,SplitI,SplitJ
     REAL(DOUBLE)                :: Volume,MaxZeta,MinZeta,ZetaHalf,ChHalf,TotCh,PiZ,RL,RR,RN
     REAL(DOUBLE)                :: BEBalance,ChBalance,XBalance
@@ -217,6 +217,18 @@ CONTAINS
        iSplit=4
     ELSE
        ! Use the R*-Tree splitting for nuclei.  Can be extended to electrons with minor work.
+       
+!!$       DO II=Be,Ne
+!!$          IF(Rho%Qz%D(QDex(II))<-48D0)THEN
+!!$             WRITE(*,*)' Qz = ',Rho%Qz%D(QDex(II))
+!!$          ENDIF
+!!$       ENDDO
+!!$
+!!$       WRITE(*,*)' RZZ= ',Rho%Qz%D(1)
+!!$       WRITE(*,*)' QDex(1:10)=',QDex(1:10)
+!!$       WRITE(*,*)' Be = ',Be,' Ne = ',Ne
+!!$       
+
        CALL RStarSplit(Ne,Nn,Qdex(Be:Ee),NDex(Bn:En),Ext,Rho%Qx%D,Rho%Qy%D,Rho%Qz%D, &
                       GM%Carts%D,GM%PBC%CellCenter%D,GM%AtNum%D,iSplit,Je,Jn)
        ! So far, this option is not considered in the logic of RStarSplit.  Probably,it
@@ -292,6 +304,8 @@ CONTAINS
 !!$                                         SUM(GM%AtNum%D(NDex(Right%BdexN:Right%EdexN)))
 !!$       
 !!$55     FORMAT("  Split = ",I2,", Node = ",I4," [",I6,", ",I6,"; ",I3,"] [",I6,", ",I6,"; ",I3," ] // <",F10.4,"><",F10.4,"> ")
+!!$    ENDIF
+
 !!$    ELSE
 !!$
 !!$!      RL=FurthestPointInBox(GM%Carts%D(:,NDex(Left%BDexN)),Left%Box)
@@ -329,20 +343,22 @@ CONTAINS
     REAL(DOUBLE),DIMENSION(1:Nn)  :: Xn,BestVol
     REAL(DOUBLE),DIMENSION(3)     :: Cntr
 
-    REAL(DOUBLE)                  :: Marg,MinMarg,Vol,MinVol,Sep,MaxSep
+    REAL(DOUBLE)                  :: Marg,MinMarg,Vol,MinVol,MaxSide
     REAL(DOUBLE)                  :: XnLeft,XnRight,XSplit,NodeVol,NodeMrg,MarginMin,MaxDim,MaxExt
     TYPE(BBox)                    :: NodeBox
     TYPE(BBox)                    :: LeftBox,RightBox
 
-    REAL(DOUBLE),DIMENSION(3)     :: Point
+    REAL(DOUBLE),DIMENSION(3)     :: Point,Side,Margin
 
-    INTEGER,PARAMETER             :: RTreeMin=3
+    INTEGER,PARAMETER             :: RTreeMin=2
     !-------------------------------------------------------------------
     IF(Nn<=RTreeMin)THEN
+
        !-------------------------------------------------------------------
        !  Naive, splitting of largest dimension 
        !-------------------------------------------------------------------
-       MaxSep=-BIG_DBL
+
+       MaxSide=-BIG_DBL
        DO iDim=1,3
           DO J=1,Nn
              K=Qn(J)
@@ -350,13 +366,13 @@ CONTAINS
              Xn(J)=Nuc(iDim,K)-Cntr(iDim)
           ENDDO
           CALL DblIntSort77(Nn,Xn,Qnj,2)                    
-          Sep=Xn(Nn)-Xn(1)
-          IF(Sep>MaxSep)THEN
+          Side(iDim)=Xn(Nn)-Xn(1)
+          IF(Side(iDim)>MaxSide)THEN
              Axis=iDim
-             MaxSep=Sep
+             MaxSide=Side(iDim)
           ENDIF
        ENDDO
-
+       !
        XSplit=Zero
        DO J=1,Nn
           K=Qn(J)
@@ -366,8 +382,10 @@ CONTAINS
        ENDDO
        XSplit=XSplit/SUM(Chg(Qn(1:Nn)))
        !
+
        CALL DblIntSort77(Nn,Xn,Qnj,2)                    
        !
+       Jn=1
        DO J=1,Nn
           IF(Xn(J)>XSplit)THEN
              Jn=J-1
@@ -384,15 +402,20 @@ CONTAINS
        !  Find the axis for which the sum of BBox margin for ALL distributions is
        !  the least.  
        MinMarg=BIG_DBL
+       MaxSide=-BIG_DBL
        DO iDim=1,3
           ! Not sorting on LL and UR as in classic R*-Trees, since nuclear sort 
           ! is just points.
           DO J=1,Nn
              K=Qn(J)
              Qnj(J)=J
-             Xn(J)=Nuc(iDim,K)-Cntr(iDim)
+             Xn(J)=Nuc(iDim,K)-Cntr(iDim)             
           ENDDO
+          !
           CALL DblIntSort77(Nn,Xn,Qnj,2)                    
+          !
+          Side(iDim)=Xn(Nn)-Xn(1)
+
           ! Init
           Marg=Zero
           ! Loop over all distributions
@@ -416,18 +439,43 @@ CONTAINS
              ! Add this distributions margin to the total sum 
              Marg=Marg+BoxMargin(LeftBox)+BoxMargin(RightBox)
           ENDDO
-          ! Pick the axis with the smallest sum
-          IF(Marg<MinMarg)THEN
-             Axis=iDim
-             MinMarg=Marg
-          ENDIF
+          !
+          Margin(iDim)=Marg
+          !
        ENDDO
-       ! New sorted list on the margin minimizing axis
+       !
+       ! Pick the axis with the smallest summed margin
+       ! but first check for degeneracies:
+       IF( ABS(Margin(1)-Margin(2))<1D-10 .AND. &
+           ABS(Margin(1)-Margin(3))<1D-10 )THEN  
+          ! Pick the tie breaking axis:       
+          DO iDim=1,3
+             IF(Side(iDim)>MaxSide)THEN
+                Axis=iDim
+                MaxSide=Side(iDim)
+             ENDIF
+          ENDDO
+       ELSE
+          ! Otherwise, pick the split that minimizes the TOTAL SUM of box margins 
+          ! as spelled out in the RStar-tree paper
+          MinMarg=1D10
+          DO iDim=1,3
+             IF(Margin(iDim)<MinMarg)THEN
+                Axis=iDim
+                MinMarg=Margin(iDim)
+             ENDIF
+          ENDDO
+       ENDIF
+       ! New sorted list on the optimal axis
        DO J=1,Nn
           K=Qn(J)
           Qnj(J)=J
           Xn(J)=Nuc(Axis,K)-Cntr(Axis)
+          XSplit=XSplit+Xn(J)*Chg(K)
        ENDDO
+       !
+       XSplit=XSplit/SUM(Chg(Qn(1:Nn)))
+       !
        CALL DblIntSort77(Nn,Xn,Qnj,2)                    
        ! Now find the distribution that minimizes the combined volume 
        ! of left and right BBoxes.  The classic R*-Trees method looks at BBox-BBox
@@ -464,19 +512,26 @@ CONTAINS
           ENDIF
 !          WRITE(*,*)K,BoxVolume(LeftBox),BoxVolume(RightBox),BoxVolume(LeftBox)+BoxVolume(RightBox)
        ENDDO
-
+       !
        IF(iBest==1)THEN
           Jn=BestVol(1)
        ELSE
-          ! Umm... not prepared to deal with degenerate solutions! 
-          Jn=Nn/2
+          ! Resolve degeneracies in BestVol using split of largest dimension
+          ! and center of mass split
+          Jn=1
+          DO J=1,Nn
+             IF(Xn(J)>XSplit)THEN
+                Jn=J-1
+                EXIT
+             ENDIF
+          ENDDO
+          IF(ABS(Xn(Nn)-Xn(1))<1D-5)Jn=Nn/2
+          !
        ENDIF
     ENDIF
     ! Here is the dividing plane used to split the electons.
     ! Could use much more sophisticated algorithms here, but for now, we just punt.    
     XSplit=Half*(Xn(Jn)+Xn(Jn+1))
-
-!!$
     !
     IF(Axis==1)THEN
        DO J=1,Ne
@@ -500,19 +555,18 @@ CONTAINS
     !
     CALL DblIntSort77(Ne,Xe,Qej,2)                    
     !
-!    WRITE(*,*)' XSplit = ',XSplit
-!    WRITE(*,*)' Xn: [',Xn(1),",",Xn(Nn),"]"
-!    WRITE(*,*)' Xe: [',Xe(1),",",Xe(Ne),"]"
-
     DO J=1,Ne
        IF(Xe(J)>XSplit)THEN
           Je=J-1
           EXIT
        ENDIF
     ENDDO
+!!$
 
-!    WRITE(*,*)' Je = ',Je
-
+!!$    WRITE(*,*)' XSplit = ',XSplit
+!!$    WRITE(*,*)' Xn: [',Xn(1),",",Xn(Nn),"]"
+!!$    WRITE(*,*)' Xe: [',Xe(1),",",Xe(Ne),"]"
+!!$    WRITE(*,*)' Je = ',Je
 
     DO J=1,Ne
        QeTmp(J)=Qe(Qej(J))
@@ -982,11 +1036,12 @@ CONTAINS
     DO z=1,Rho%NExpt
        oq =Rho%OffQ%I(z)   
        or =Rho%OffR%I(z)   
+
        Ell=Rho%Lndx%I(z)   
        MaxRhoEll=MAX(MaxRhoEll,Ell)
        ZE =Rho%Expt%D(z)
        LMNLen=LHGTF(Ell)
-       !
+
        CALL New(Est,Rho%NQ%I(z))
        !
        CALL IBounds(Ell,LMNLen,Rho%NQ%I(z),ZE,Rho%Co%D(or+1),  &
@@ -1014,16 +1069,25 @@ CONTAINS
              Zeta(QD)=ZE
              Ldex(QD)=Ell
              IQ=IQ+1
+          ELSE
+             WRITE(*,*)' Extent<=0, should never occur! '
+             WRITE(*,*)' EXTENT CO = ',Rho%Co%D(CD:CD+LMNLen-1)
+             STOP
           ENDIF
        ENDDO
        CALL Delete(Est)
     ENDDO
     !
     Rho%NDist=IQ-1
-    ! Number of distributions excluding nuclei (used for
-    ! identifiying nuclear selfinteraction, note that nuclei
-    ! must be in correct order for this to work...)
-    NElecDist=SUM(Rho%NQ%I(1:Rho%NExpt-1))
+    !
+    IF(NukesOn)THEN
+       ! Number of distributions excluding nuclei (used for
+       ! identifiying nuclear selfinteraction, note that nuclei
+       ! must be in correct order for this to work...)
+       NElecDist=SUM(Rho%NQ%I(1:Rho%NExpt-1))
+    ELSE
+       NElecDist=SUM(Rho%NQ%I(1:Rho%NExpt))
+    ENDIF
     ! Here is indexing of the nuclear centers only
     DO I=1,GM%NAtms
        NDex(I)=I
