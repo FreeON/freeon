@@ -9,9 +9,6 @@ MODULE PunchHDF
   USE ControlStructures
   USE OptionKeys
   IMPLICIT NONE
-!!$
-!!$  INTEGER :: KDiff
-
 CONTAINS
   !==============================================================================
   !
@@ -305,7 +302,6 @@ CONTAINS
      CALL Delete(GMLoc)
    END SUBROUTINE ReArchIGEO
    !
-   
 !==============================================================================
 !
 !==============================================================================
@@ -449,6 +445,30 @@ CONTAINS
     !write(*,*) 'UnSetAtomCharges: NElec',G%NElec,' NAlph',G%NAlph,' NBeta',G%NBeta
   END SUBROUTINE UnSetAtomCharges
 !
+  SUBROUTINE ResetThresholds(cBAS,N,O,G,ReScale)
+    TYPE(FileNames)  :: N
+    TYPE(Options)    :: O
+    TYPE(Geometries) :: G
+    TYPE(TOLS)       :: LocalTols
+    REAL(DOUBLE)     :: ReScale
+    INTEGER          :: cBAS,iCLONE,HDFFileID
+    CHARACTER(LEN=2) :: chBAS
+    !---------------------------------------------------------------------------!
+    LocalTols=O%Thresholds(cBAS)
+    LocalTols%Dist=LocalTols%Dist*ReScale
+    LocalTols%TwoE=LocalTols%Dist*ReScale
+    LocalTols%Trix=LocalTols%Dist*ReScale
+    !---------------------------------------------------------------------------!
+    chBAS=IntToChar(cBAS)
+    HDFFileID=OpenHDF(N%HFile)
+    HDF_CurrentID=HDFFileID
+    DO iCLONE=1,G%Clones
+       HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
+       CALL Put(LocalTols,chBAS)
+       CALL CloseHDFGroup(HDF_CurrentID)
+    ENDDO
+    CALL CloseHDF(HDFFileID)
+  END SUBROUTINE ResetThresholds
 !-------------------------------------------------------------------
 !
    SUBROUTINE GetRefXYZ(HFileIn,RefXYZ,iCLONE)
