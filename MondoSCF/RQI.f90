@@ -30,6 +30,7 @@ MODULE RayleighQuotientIteration
   USE Overlay
   USE Indexing
   USE AtomPairs
+  USE PunchHDF
   USE PrettyPrint
   USE GlobalScalars
   USE ControlStructures
@@ -37,6 +38,7 @@ MODULE RayleighQuotientIteration
   USE McMurchie
   USE MondoLogger
   IMPLICIT NONE
+  TYPE(TIME)          :: TimeTotal,TimeONX,TimeQCTC,TimeBCSR
 CONTAINS
 
 
@@ -45,10 +47,9 @@ CONTAINS
     TYPE(Controls)                             :: C
     IF(.NOT. C%POpt%Resp%TD_SCF) RETURN
     CALL SetFrontEndMacros(C%Geos,C%Sets)
-    CALL RQI(NBasF,4,C%Nams,C%Opts,C%Stat,C%MPIs,C%Geos%Clone(1), &
+    CALL RQI(NBasF,4,C%Nams,C%Opts,C%Stat,C%MPIs,C%Geos, &
              C%Sets%BSets(1,C%Sets%NBSets))
   END SUBROUTINE TDSCF
-
   !===============================================================================
   !   Subroutine to load the global macro parameters used mostly in the backend
   !   into the front end, so that we can do kluge work. Assumes that we are
@@ -76,18 +77,15 @@ CONTAINS
     ENDDO
   END SUBROUTINE SetFrontEndMacros
 
-
   SUBROUTINE RQI(N,M,Nam,O,S,MPI,G,B)
-    INTEGER            :: N,M,I,J,K,L,U,V,JTDA
+    INTEGER            :: N,M,I,J,K,L,U,V,JTDA,cBAS
     TYPE(FileNames)    :: Nam,RQINams
     TYPE(State)        :: S,RQIStat
     TYPE(Parallel)     :: MPI
     TYPE(Options)      :: O
-    TYPE(CRDS)         :: G
+    TYPE(Geometries)   :: G 
     TYPE(BSET)         :: B
     LOGICAL            :: DoTDA
-
-
     !
     TYPE(BCSR)                      :: sP,sQ,sF,sZ
     TYPE(DBL_RNK2)                  :: P,Q,F,Z
@@ -97,11 +95,18 @@ CONTAINS
     REAL(DOUBLE),DIMENSION(N)       :: Values
     REAL(DOUBLE),DIMENSION(N,N,M)   :: Vectors
     REAL(DOUBLE),DIMENSION(N,N,N,N) :: TwoE,DoubleSlash
-
+    !
     RQIStat=S
     RQINams=Nam
+    cBAS=RQIStat%Current%I(2)
     !
-    Shift=0.1102479D0
+    CALL Elapsed_TIME(TimeTotal,Init_O='Init')
+    CALL Elapsed_TIME(TimeONX,Init_O='Init')
+    CALL Elapsed_TIME(TimeQCTC,Init_O='Init')
+    CALL Elapsed_TIME(TimeBCSR,Init_O='Init')
+    !
+    CALL Elapsed_TIME(TimeTotal,Init_O='Start')
+
 !!$    !
 !!$    CALL Get(sP,TrixFile("OrthoD",PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=S%Current%I,OffSet_O=0))
 !!$    CALL Get(sF,TrixFile("OrthoF",PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=S%Current%I,OffSet_O=0))
@@ -137,11 +142,13 @@ CONTAINS
        !       GOTO 111 ! STOP
        DO JTDA=0,1
           IF(JTDA==0)THEN
+             CALL ResetThresholds(cBAS,Nam,O,G,1D1)
              DoTDA=.TRUE.
              CALL Nihilate0(N,I,Nam,S,MPI)
              CALL LOn2BakEnd(N,I,0,Shift,'Xk',Nam,S,MPI)
              CALL Nihilate1(I,Nam,S,MPI,Ek,TDA_O=.TRUE.)
           ELSE
+             CALL ResetThresholds(cBAS,Nam,O,G,1D-1)
              DoTDA=.FALSE.
              CALL LOn2BakEnd(N,I,0,Shift,'Xk',Nam,S,MPI)
              CALL Nihilate1(I,Nam,S,MPI,Ek,TDA_O=.FALSE.)
@@ -160,15 +167,23 @@ CONTAINS
              ! Anihilate L[Xk], compute Ek and its relative error
              CALL NihilateLXk(I,Nam,S,MPI,Ek,dEk,TDA_O=DoTDA)
 
-             WRITE(*,33)I,K,Ek*27.21139613182D0,Beta,Lambda,dEk,dNorm
-             WRITE(44,*)K,Ek
+             WRITE(*,33)I,K,Ek*27.21139613182D0,dEk,dNorm,TimeONX%Wall,TimeQCTC%Wall,TimeBCSR%Wall
 
-             IF(ABS(dEk)<1D-2.AND.ABS(dNorm)<1D-2.AND.Ek>EkOld)THEN
-                Ek=EkOld
-                EXIT
-             ELSEIF(ABS(dEk)<1D-4)THEN
-                EXIT
+             IF(ABS(dNorm)<1D-2)THEN
+                ! Look for bad behavior 
+                IF(Ek>EkOld)THEN
+                   ! Sign of variational principle broken, ostensibly due to N-scaling
+                   ! approximaitons.  If this happens, we are DONE!
+                   Ek=EkOld
+                   EXIT
+                ENDIF
+                ! Look for convergence 
+                IF(ABS(dEk)<O%Thresholds(cBAS)%ETol*1D2.AND. &
+                   ABS(dNorm)<O%Thresholds(cBAS)%DTol*1D1)THEN
+                   EXIT
+                ENDIF
              ENDIF
+             !
              EkOld=Ek
              !
           ENDDO
@@ -176,8 +191,7 @@ CONTAINS
        ENDDO
     ENDDO
     !
-    WRITE(*,*)'------------------------------------------'
-
+33  FORMAT('St=',I2,', It=',I2,', Ev = ',F10.6,', dE= ',D12.6,', dN= ',D12.6,', Tk=',D12.6,', Tj=',D12.6,', Tmm = ',D12.6) 
 
 !!$
 !!$
@@ -245,25 +259,8 @@ CONTAINS
 !!$       ENDDO
 !!$    ENDDO
 !!$
-33  FORMAT('St=',I2,', It=',I2,', Ev = ',F10.6,', Bt= ',D12.6,' Lm= ',D12.6,' dE= ',D12.6,' dN= ',D12.6) 
   END SUBROUTINE RQI
 
-  SUBROUTINE Anihilate(N,P,Q,X,TDA_O)
-    LOGICAL, OPTIONAL :: TDA_O
-    LOGICAL :: TDA
-    INTEGER :: N
-    REAL(DOUBLE),DIMENSION(N,N) :: P,Q,X
-    IF(PRESENT(TDA_O))THEN
-       TDA=TDA_O
-    ELSE
-       TDA=.FALSE.
-    ENDIF
-    IF(TDA)THEN
-       X=ProjectPH(N,P,Q,X)
-    ELSE
-       X=Project(N,P,Q,X)
-    ENDIF
-  END SUBROUTINE Anihilate
 
   SUBROUTINE Nihilate0(N,I,Nam,S,MPI)
     !
@@ -279,6 +276,7 @@ CONTAINS
     TYPE(DBL_RNK2)        :: X
 
     !-----------------------------------------------------------------------------
+    CALL Elapsed_TIME(TimeBCSR,Init_O='Start')
     ! Status same as ground state, but now SCF cycle# is RQI state#
     Cur=S%Current%I
     Cur(1)=I
@@ -347,6 +345,7 @@ CONTAINS
     CALL Delete(sP)
     CALL Delete(sXk)
      ! All done
+    CALL Elapsed_TIME(TimeBCSR,Init_O='Accum')
   END SUBROUTINE Nihilate0
 
 
@@ -362,6 +361,7 @@ CONTAINS
     INTEGER, DIMENSION(3) :: Cur
     CHARACTER(LEN=DCL)    :: XkName,LXkName,PName,QName
     !-----------------------------------------------------------------------------
+    CALL Elapsed_TIME(TimeBCSR,Init_O='Start')
     IF(PRESENT(TDA_O))THEN
        TDA=TDA_O
     ELSE
@@ -409,13 +409,16 @@ CONTAINS
     !
     CALL Get(sXk,XkName)
     CALL XPose(sLXk,sT)
+    !
     ! Again a factor of two for normalization of P
     Ek=Two*OneDot(sP,sXk,sT)
     !
     CALL Delete(sP)
     CALL Delete(sT)
+    CALL Delete(sXk)
     CALL Delete(sLXk)
     ! All done
+    CALL Elapsed_TIME(TimeBCSR,Init_O='Accum')
   END SUBROUTINE Nihilate1
 
   SUBROUTINE NihilateXk(I,N,S,MPI,Lambda,dNorm,TDA_O)
@@ -430,6 +433,7 @@ CONTAINS
     INTEGER, DIMENSION(3) :: Cur
     CHARACTER(LEN=DCL)    :: XkName,PkName,LXkName,PName,QName
     !-----------------------------------------------------------------------------
+    CALL Elapsed_TIME(TimeBCSR,Init_O='Start')
     IF(PRESENT(TDA_O))THEN
        TDA=TDA_O
     ELSE
@@ -495,6 +499,7 @@ CONTAINS
     CALL Delete(sP)
     CALL Delete(sXk)
     ! All done
+    CALL Elapsed_TIME(TimeBCSR,Init_O='Accum')
   END SUBROUTINE NihilateXk
   !
   SUBROUTINE NihilateLXk(I,N,S,MPI,Ek,dEk,TDA_O)
@@ -509,6 +514,8 @@ CONTAINS
     INTEGER, DIMENSION(3) :: Cur
     CHARACTER(LEN=DCL)    :: XkName,PkName,LXkName,PName,QName
     !-----------------------------------------------------------------------------
+    CALL Elapsed_TIME(TimeBCSR,Init_O='Start')
+
     IF(PRESENT(TDA_O))THEN
        TDA=TDA_O
     ELSE
@@ -576,6 +583,9 @@ CONTAINS
     CALL Delete(sXk)
     CALL Delete(sLXk)
     ! All done
+
+    CALL Elapsed_TIME(TimeBCSR,Init_O='Accum')
+
   END SUBROUTINE NihilateLXk
 
   SUBROUTINE NLCGBakEnd(I,K,Ek,N,S,MPI,Beta)
@@ -589,6 +599,8 @@ CONTAINS
     INTEGER, DIMENSION(3) :: Cur
     REAL(DOUBLE)          :: Num,Den,Beta
     CHARACTER(LEN=DCL)    :: XkName,LXkName,GkName,PName,GkOldName,PkOldName,PkName
+
+    CALL Elapsed_TIME(TimeBCSR,Init_O='Start')
     !
     Cur=S%Current%I
     Cur(1)=I
@@ -670,6 +682,8 @@ CONTAINS
     CALL Delete(sT1)
     CALL Delete(sGk)
     CALL Delete(sPkOld)
+
+    CALL Elapsed_TIME(TimeBCSR,Init_O='Accum')
     !
   END SUBROUTINE NLCGBAKEND
 
@@ -683,6 +697,7 @@ CONTAINS
     REAL(DOUBLE)                  :: Shift,OmegaPls,OmegaMns,WS
     CHARACTER(LEN=*)              :: Trgt 
     !----------------------------------------------------------------------------
+    CALL Elapsed_TIME(TimeBCSR,Init_O='Start')
     ! Set up local Invokation parameters based on ground state values
     CALL New(RQIStat%Action,2)
     CALL New(RQIStat%Current,3)
@@ -699,7 +714,6 @@ CONTAINS
     ! resultant of this subroutine, namely L[Xk] or L[Pk] in an orthongal representation
     CALL New(sX) ! Kluge.  Somehow, dimensioning not quite right here:
     CALL Get(sX,TrixFile('Ortho'//TRIM(Trgt),PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=RQIStat%Current%I,OffSet_O=0))
-
     ! Ground state fockian in an orthogonal representation
     CALL Get(sF,TrixFile("OrthoF",PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=S%Current%I,OffSet_O=0))
     ! T2=[Xor,For]
@@ -709,10 +723,6 @@ CONTAINS
     CALL Delete(sF)
     ! Z is the sparse inverse factor of S  
     CALL Get(sZ,TrixFile("X",PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=S%Current%I))    
-
-
-
-
     ! Xao = Z^t.Xor.Z 
     CALL Multiply(sZ,sX,sT1)        
     CALL Multiply(sT1,sZ,sX)
@@ -720,9 +730,15 @@ CONTAINS
     CALL Put(sX,TrixFile(Trgt,PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=RQIStat%Current%I,OffSet_O=0))
     ! Done with sX
     CALL Delete(sX)
+    CALL Elapsed_TIME(TimeBCSR,Init_O='Accum')
     ! Build JK[X] in the AO basis
+    CALL Elapsed_TIME(TimeONX,Init_O='Start')
     CALL Invoke('ONX',Nam,RQIStat,MPI)
+    CALL Elapsed_TIME(TimeONX,Init_O='Accum')
+    CALL Elapsed_TIME(TimeQCTC,Init_O='Start')
     CALL Invoke('QCTC',Nam,RQIStat,MPI)
+    CALL Elapsed_TIME(TimeQCTC,Init_O='Accum')
+    CALL Elapsed_TIME(TimeBCSR,Init_O='Start')
     ! Pick up J and K
     CALL Get(sJ,TrixFile("J",PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=RQIStat%Current%I,OffSet_O=0))
     CALL Get(sK,TrixFile("K",PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=RQIStat%Current%I,OffSet_O=0))    
@@ -751,36 +767,16 @@ CONTAINS
     CALL Delete(sT2)
     ! Put orthogonal L[Xk] or L[Pk] to disk (*.LX or *.LP)
     CALL Put(sT3,TrixFile("L"//TRIM(Trgt),PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=RQIStat%Current%I,OffSet_O=0))    
-
-!    CALL PPrint(sT3,' RAW LXK ',Unit_O=6)
-
     ! Done with temp #3
     CALL Delete(sT3)
     ! Done with invokation parameters
     CALL Delete(RQIStat%Action)
     CALL Delete(RQIStat%Current)
     CALL Delete(RQIStat%Previous)
+    CALL Elapsed_TIME(TimeBCSR,Init_O='Accum')
     !----------------------------------------------------------------------------
     IF(I>1)STOP
   END SUBROUTINE LOn2BakEnd
-
-  SUBROUTINE LOn2(N,M,Shift,F,P,Z,TwoE,Values,Vectors,X,LX)
-    INTEGER :: N,M,J
-    REAL(DOUBLE),DIMENSION(N,N)     :: F,P,Z,X,LX,AA,BB,Temp,Com
-    REAL(DOUBLE),DIMENSION(N,N,N,N) :: TwoE
-    REAL(DOUBLE)                  :: Shift,OmegaPls,OmegaMns,WS
-    REAL(DOUBLE),DIMENSION(:)     :: Values
-    REAL(DOUBLE),DIMENSION(:,:,:) :: Vectors
-    LX=LiouvAO(N,F  ,P  ,Z,TwoE,X )  
-    IF(M==1)RETURN
-    WS=Values(M-1)-Values(1)+Shift 
-    Com=MATMUL(X,P)-MATMUL(P,X)
-    DO J=1,M-1
-       OmegaPls=Trace2(MATMUL(TRANSPOSE(Vectors(:,:,J)),Com),N)
-       OmegaMns=Trace2(MATMUL(Vectors(:,:,J),Com),N)
-       LX=LX+WS*(OmegaMns*TRANSPOSE(Vectors(:,:,J))+OmegaPls*Vectors(:,:,J))
-    ENDDO
-  END SUBROUTINE LOn2
 
   SUBROUTINE RQLSBakEnd(I,N,S,Lambda)          
     INTEGER               :: I
@@ -792,6 +788,9 @@ CONTAINS
     REAL(DOUBLE)          :: Lambda,Lambda_p,Lambda_m
     REAL(DOUBLE)          :: XX,PP,XP,PX,PLP,XLP,XLX,PLX,AA,BB,CC
     !
+    CALL Elapsed_TIME(TimeBCSR,Init_O='Start')
+    !
+
     Cur=S%Current%I
     Cur(1)=I
     !
@@ -833,7 +832,12 @@ CONTAINS
     !
     Lambda=Lambda_P
     !
+    CALL Elapsed_TIME(TimeBCSR,Init_O='Accum')
+    !
   END SUBROUTINE RQLSBakEnd
+  !===============================================================================
+  ! HERE ARE THE CONVENTIONAL DENSE MATRIX RQI ROUTINES 
+  !===============================================================================
   !---------------------------------------------------------------------
   ! Calculates TD-SCF scalar product Tr=Tr([A,P],B^+)
   ! Assumes B^t on input
@@ -846,6 +850,41 @@ CONTAINS
     Tr=Half*Trace(sT1,sBt)
     CALL Delete(sT1)
   END FUNCTION OneDot
+  !
+  SUBROUTINE Anihilate(N,P,Q,X,TDA_O)
+    LOGICAL, OPTIONAL :: TDA_O
+    LOGICAL :: TDA
+    INTEGER :: N
+    REAL(DOUBLE),DIMENSION(N,N) :: P,Q,X
+    IF(PRESENT(TDA_O))THEN
+       TDA=TDA_O
+    ELSE
+       TDA=.FALSE.
+    ENDIF
+    IF(TDA)THEN
+       X=ProjectPH(N,P,Q,X)
+    ELSE
+       X=Project(N,P,Q,X)
+    ENDIF
+  END SUBROUTINE Anihilate
+
+  SUBROUTINE LOn2(N,M,Shift,F,P,Z,TwoE,Values,Vectors,X,LX)
+    INTEGER :: N,M,J
+    REAL(DOUBLE),DIMENSION(N,N)     :: F,P,Z,X,LX,AA,BB,Temp,Com
+    REAL(DOUBLE),DIMENSION(N,N,N,N) :: TwoE
+    REAL(DOUBLE)                  :: Shift,OmegaPls,OmegaMns,WS
+    REAL(DOUBLE),DIMENSION(:)     :: Values
+    REAL(DOUBLE),DIMENSION(:,:,:) :: Vectors
+    LX=LiouvAO(N,F  ,P  ,Z,TwoE,X )  
+    IF(M==1)RETURN
+    WS=Values(M-1)-Values(1)+Shift 
+    Com=MATMUL(X,P)-MATMUL(P,X)
+    DO J=1,M-1
+       OmegaPls=Trace2(MATMUL(TRANSPOSE(Vectors(:,:,J)),Com),N)
+       OmegaMns=Trace2(MATMUL(Vectors(:,:,J),Com),N)
+       LX=LX+WS*(OmegaMns*TRANSPOSE(Vectors(:,:,J))+OmegaPls*Vectors(:,:,J))
+    ENDDO
+  END SUBROUTINE LOn2
   !
   Subroutine RQILineSearch(N,P,Pk,Xk,LXk,LPk,Lambda)          
     INTEGER :: N
@@ -1001,8 +1040,6 @@ CONTAINS
     BB=0.25D0*(MATMUL(MATMUL(Q,AA),P))
   END FUNCTION ProjectPH
 
-
-
   FUNCTION Trace2(Matrix,N) RESULT(Tr)
     IMPLICIT NONE
     INTEGER :: I,N
@@ -1013,8 +1050,6 @@ CONTAINS
        Tr=Tr+Matrix(I,I)
     END DO
   END FUNCTION Trace2
-
-
 
 END MODULE RayleighQuotientIteration
 
