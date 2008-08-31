@@ -185,10 +185,6 @@ CONTAINS
        HGLink=>HGLink%Next
     ENDDO
     !
-!!    DO I=1,NExpt
-!!	WRITE(*,*)ZE(I),EL(I)
-!!    ENDDO	
-
     IF(SUM(NZ(1:NExpt)).NE.NLink) &
        CALL Halt(' Counting error in IntegrateNCollate ')
     !
@@ -260,18 +256,6 @@ CONTAINS
        DO J=1,R%NQ%I(I)
           IAdd=R%OffQ%I(I)+J
           JAdd=R%OffR%I(I)+(J-1)*LenZ+1
-
-!!$#ifdef PRIMITIVE_CENTERING       
-!!$          ! Primitive should already be wrapped and centered centered (by PWrap)
-!!$          RX=Rho%Qx%D(IAdd)
-!!$          RY=Rho%Qy%D(IAdd)
-!!$          RZ=Rho%Qz%D(IAdd)
-!!$#else
-!!$          RX=Rho%Qx%D(IAdd)-GM%PBC%CellCenter%D(1)
-!!$          RY=Rho%Qy%D(IAdd)-GM%PBC%CellCenter%D(2)
-!!$          RZ=Rho%Qz%D(IAdd)-GM%PBC%CellCenter%D(3)
-!!$#endif
-
           RX=Rho%Qx%D(IAdd)
           RY=Rho%Qy%D(IAdd)
           RZ=Rho%Qz%D(IAdd)
@@ -279,21 +263,8 @@ CONTAINS
           P%MPole=P%MPole+Two*R%Co%D(JAdd)*ZZ
           P%DPole%D=P%DPole%D+Two*DPole(EllZ,ZZ,RX,RY,RZ,Rho%Co%D(JAdd:JAdd+LenZ-1))
           P%QPole%D=P%QPole%D+Two*QPole(EllZ,Zeta,ZZ,RX,RY,RZ,Rho%Co%D(JAdd:JAdd+LenZ-1)) 
-
-!          WRITE(*,35)Rho%Qx%D(IAdd),Rho%Qy%D(IAdd),Rho%Qz%D(IAdd),R%Co%D(JAdd)*ZZ    !,RX*R%Co%D(JAdd)*ZZ,P%DPole%D(1)
-!35        FORMAT(6(D16.10," "))
-!35        FORMAT(6(D22.12," "))
-
-!!$
-!!$          IF(I==R%NExpt)THEN
-!!$             ChNu=ChNu+Two*R%Co%D(JAdd)*ZZ
-!!$          ELSE
-!!$             ChEl=ChEl+Two*R%Co%D(JAdd)*ZZ
-!!$          ENDIF
-          
        ENDDO
     ENDDO
-
 
     Mssg=ProcessName(Prog,'Density Build')
     Mssg=TRIM(Mssg)                                       &
@@ -303,9 +274,9 @@ CONTAINS
          //', '//TRIM(DblToShrtChar(P%DPole%D(3)))        &
          //'), <r^2> = '//TRIM(DblToShrtChar(             &
          P%QPole%D(1)+P%QPole%D(2)+P%QPole%D(3)))
-!    WRITE(*,*)TRIM(Mssg)
 
-!    STOP
+
+    CALL MondoLog(DEBUG_MAXIMUM,Prog,TRIM(Mssg))
 
 
   END SUBROUTINE Collate
@@ -564,11 +535,12 @@ CONTAINS
     REAL(DOUBLE)                            :: ZetaA,ZetaB,ZetaAB,ZetaIn,XiAB,ExpAB, &
                                                AB2,Ax,Ay,Az,Bx,By,Bz, &
                                                Px,Py,Pz,PAx,PAy,PAz,PBx,PBy,PBz, &
-                                               Ex,Exy,Exyz,CA,CB,MaxAmp           , zz
+                                               Ex,Exy,Exyz,CA,CB,MaxAmp           , zz,MaxCo
     !
     LOGICAL                                 :: AEQB,NoWrap
 
     REAL(DOUBLE),DIMENSION(3) :: R,DIPOLE
+    REAL(DOUBLE),DIMENSION(HGLen) :: TmpCo
 
     !
     KA   = Pair%KA
@@ -608,31 +580,14 @@ CONTAINS
                 IF(TestPrimPair(Prim%Xi,Prim%AB2)) THEN
                    !
                    Prim%P=(Prim%ZA*Prim%A+Prim%ZB*Prim%B)/Prim%Zeta
+                   !
                    CALL PWrap(GM,Prim,.NOT.NoWrap)
+                   !
                    CALL SetBraBlocks(Prim,BS,CompPrim_O=.FALSE.)
                    !
                    LenKet = LHGTF(Prim%Ell)
                    !
-                   ALLOCATE(HGLink%Next,STAT=Status)
-                   IF(Status/=SUCCEED)CALL Halt(' Node ALLOCATE failed in RhoPop ')
-                   HGLink=>HGLink%Next
-                   !
-                   NLink=NLink+1
-                   HGLink%LNum=NLink
-                   HGLink%Ell=Prim%Ell
-                   HGLink%Zeta=Prim%Zeta
-                   HGLink%Cent=Prim%Pw
-
-                   NULLIFY(HGLink%Next)
-                   CALL New(HGLink%Coef,LenKet)
-
-!	           IF(NLink==3294)THEN
-!	             WRITE(*,*)3294, ' ALLOC? ',ALLOCATED(HGLink%Coef%D)
-!		STOP	
-!ENDIF		
-
-                   HGLink%Coef%D=Zero
-                   !
+                   TmpCo(1:LenKet)=Zero
                    IA=IndexA
                    DO LMNA=StartLA,StopLA
                       IA=IA+1
@@ -643,29 +598,31 @@ CONTAINS
                          EllB = BS%LxDex%I(LMNB)+BS%LyDex%I(LMNB)+BS%LzDex%I(LMNB)
                          DO iSMat=1,SpinM 
                             DO LMN=1,LHGTF(EllA+EllB)
-                               HGLink%Coef%D(LMN)=HGLink%Coef%D(LMN)+HGBra%D(LMN,IA,IB)*Psv(IA,IB,iSMat) 
+                               TmpCo(LMN)=TmpCo(LMN)+HGBra%D(LMN,IA,IB)*Psv(IA,IB,iSMat) 
                             ENDDO
                          ENDDO
-
-
-
                       ENDDO
                    ENDDO                  
-
-
-
-
-!!$                   WRITE(*,*)'&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&'
-!!$                   ZZ=(Pi/Prim%Zeta)**1.5D0
-!!$                   WRITE(*,*)' P = ',Prim%P(1),' Pw = ',Prim%Pw(1),' HG = ',ZZ*HGLink%Coef%D(1)
-
-!$                   R=Prim%Pw-GM%PBC%CellCenter%D
-!!$                   ZZ=(Pi/Prim%Zeta)**1.5D0
-!!$                   DIPOLE=Two*DPole(MaxLA+MaxLB,ZZ,R(1),R(2),R(3),HGLink%Coef%D)
-!!$!                   IF(ABS(DIPOLE(1))>1D-7.AND.Prim%A(1)==0.15D0.AND.Prim%B(1)==0.20D0)THEN
-!!$                      WRITE(*,22)MaxLA,MaxLB,HGLink%Coef%D(1:2),DIPOLE(1)
-!!$22                    FORMAT('LA = ',I2,' LB = ',I2,' Co = ',2(D12.6,", "),' d = ',D12.6)
-!!$!                   ENDIF
+                   !
+                   ! Fullup cutoff for zero coefficients
+                   MaxCo=-BIG_DBL
+                   DO LMN=1,LenKet
+                      MaxCo=MAX(MaxCo,ABS(TmpCo(LMN)))
+                   ENDDO
+                   
+                   IF(MaxCo>1D-20)THEN
+                      ALLOCATE(HGLink%Next,STAT=Status)
+                      IF(Status/=SUCCEED)CALL Halt(' Node ALLOCATE failed in RhoPop ')
+                      HGLink=>HGLink%Next
+                      NLink=NLink+1
+                      HGLink%LNum=NLink
+                      HGLink%Ell=Prim%Ell
+                      HGLink%Zeta=Prim%Zeta
+                      HGLink%Cent=Prim%Pw
+                      NULLIFY(HGLink%Next)
+                      CALL New(HGLink%Coef,LenKet)
+                      HGLink%Coef%D(1:LenKet)=TmpCo(1:LenKet)
+                   ENDIF
 
                 ENDIF
                 !
