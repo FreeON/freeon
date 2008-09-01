@@ -2029,10 +2029,11 @@ CONTAINS
               !     Get arguments from the command line
 
               SUBROUTINE Get_ARGMT(A)
-                IMPLICIT NONE
 #ifdef NAG
                 USE F90_UNIX
+                IMPLICIT NONE
 #elif PGF
+                IMPLICIT NONE
                 INTEGER,EXTERNAL               :: IARGC
 #else
 #endif
