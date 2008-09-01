@@ -457,7 +457,7 @@ CONTAINS
     LocalTols=O%Thresholds(cBAS)
     LocalTols%Dist=LocalTols%Dist*ReScale
     LocalTols%TwoE=LocalTols%TwoE*ReScale
-    LocalTols%Trix=LocalTols%Trix*ReScale
+    LocalTols%Trix=LocalTols%Trix*SQRT(ReScale)
     !---------------------------------------------------------------------------!
     chBAS=IntToChar(cBAS)
     HDFFileID=OpenHDF(N%HFile)
