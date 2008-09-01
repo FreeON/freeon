@@ -473,8 +473,6 @@ CONTAINS
           XSplit=XSplit+Xn(J)*Chg(K)
        ENDDO
        XSplit=XSplit/SUM(Chg(Qn(1:Nn)))
-
-!       WRITE(*,*)' Split2 = ',XSplit,' Chg = ',SUM(Chg(Qn(1:Nn)))
        !
        CALL DblIntSort77(Nn,Xn,Qnj,2)                    
        ! Now find the distribution that minimizes the combined volume 
@@ -529,9 +527,6 @@ CONTAINS
           !
        ENDIF
     ENDIF
-    ! Here is the dividing plane used to split the electons.
-    ! Could use much more sophisticated algorithms here, but for now, we just punt.    
-!    XSplit=Half*(Xn(Jn)+Xn(Jn+1))
     !
     IF(Axis==1)THEN
        DO J=1,Ne
@@ -1069,6 +1064,13 @@ CONTAINS
              Ldex(QD)=Ell
              IQ=IQ+1
           ELSE
+             ! This should never happen.  Basically, zero extent distributions should
+             ! have been filtered out in Density/RhoPop.  There is a somewhat sloppy
+             ! relationship between the logic in Extent/PFunk and the pruning in RhoPop
+             WRITE(*,*)' Extent = ',Ex
+             WRITE(*,*)' Zeta = ',ZE
+             WRITE(*,*)' QD = ',QD
+             WRITE(*,*)' CD = ',CD
              WRITE(*,*)' Extent<=0, should never occur! '
              WRITE(*,*)' EXTENT CO = ',Rho%Co%D(CD:CD+LMNLen-1)
              STOP

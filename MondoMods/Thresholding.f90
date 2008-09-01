@@ -230,7 +230,7 @@ MODULE Thresholding
        ELSE
           ! Universal prefactor based on Cramers inequality:
           ! H_n(t) < K 2^(n/2) SQRT(n!) EXP(t^2/2), with K=1.09
-          CramCo=SMALL_DBL
+          CramCo=-BIG_DBL
           DO L=0,Ell
              DO M=0,Ell-L
                 DO N=0,Ell-L-M

@@ -42,7 +42,7 @@ CONTAINS
     REAL(DOUBLE),DIMENSION(3) :: B
     INTEGER                   :: AtA,AtB,NC,PBeg,PEnd,BlkP,RowP,NN,SpinM,NLink,NNaive
     LOGICAL, OPTIONAL         :: NoWrap_O
-    LOGICAL                   :: NoWrap
+    LOGICAL                   :: NoWrap,TestTru
     CHARACTER(LEN=*)          :: Prog
     CHARACTER(LEN=DEFAULT_CHR_LEN)  :: Mssg
     !
@@ -76,6 +76,8 @@ CONTAINS
        DO RowP=Pbeg,Pend
           AtB=P%ColPt%I(RowP)          
           IF(SetAtomPair(GM,BS,AtA,AtB,Pair)) THEN
+!          TestTru=SetAtomPair(GM,BS,AtA,AtB,Pair)
+!          IF(.TRUE.)THEN
              ! Sum this part of the DM 
              BlkP=P%BlkPt%I(RowP)
              NN=BSiz%I(AtA)*BSiz%I(AtB)
@@ -110,9 +112,8 @@ CONTAINS
                 Pair%AB2=(Pair%A(1)-Pair%B(1))**2 &
                        + (Pair%A(2)-Pair%B(2))**2 &
                        + (Pair%A(3)-Pair%B(3))**2
-
                 IF(TestAtomPair(Pair))THEN
-                      CALL RhoPop(GM,BS,GM%InCells,NoWrap,SpinM,Psv%D(1),Pair,HGLink,NLink)
+                   CALL RhoPop(GM,BS,GM%InCells,NoWrap,SpinM,Psv%D(1),Pair,HGLink,NLink)
                 ENDIF
              ENDDO
           ENDIF
@@ -551,6 +552,7 @@ CONTAINS
     !
     Prim%A=Pair%A
     Prim%B=Pair%B
+
     Prim%AB2=Pair%AB2
     Prim%KA=Pair%KA
     Prim%KB=Pair%KB
@@ -609,8 +611,13 @@ CONTAINS
                    DO LMN=1,LenKet
                       MaxCo=MAX(MaxCo,ABS(TmpCo(LMN)))
                    ENDDO
-                   
-                   IF(MaxCo>1D-20)THEN
+                   ! See similar criteria in MondoMods/Thresholding.f90 in 
+                   ! Extent/PFunk:  Basically, we are looking for HGTFs that
+                   ! are zero relative to the penetration error.  The factor
+                   ! of 1D18 is used instead of 1D20, since economization 
+                   ! can change things somewhat.  This should probably all get
+                   ! tightened up at some point.
+                   IF((TauPAC/MaxCo)*(Prim%Zeta/Pi)**(1.5D0)<1D18)THEN
                       ALLOCATE(HGLink%Next,STAT=Status)
                       IF(Status/=SUCCEED)CALL Halt(' Node ALLOCATE failed in RhoPop ')
                       HGLink=>HGLink%Next
@@ -623,7 +630,6 @@ CONTAINS
                       CALL New(HGLink%Coef,LenKet)
                       HGLink%Coef%D(1:LenKet)=TmpCo(1:LenKet)
                    ENDIF
-
                 ENDIF
                 !
              ENDDO
