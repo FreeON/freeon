@@ -151,21 +151,27 @@ CONTAINS
           IF(JTDA==0)THEN
              CALL ResetThresholds(cBAS,Nam,O,G,1D1)
              DoTDA=.TRUE.
-             XkThreshold=O%Thresholds(cBAS)%Trix
-             PkThreshold=O%Thresholds(cBAS)%Trix
+             XkThreshold=Zero!O%Thresholds(cBAS)%Trix
+             PkThreshold=Zero!O%Thresholds(cBAS)%Trix
              CALL Nihilate0(N,I,Nam,S,MPI)
              CALL LOn2BakEnd(N,I,0,Shift,'Xk',Nam,S,MPI,XkThreshold,XkNon0s)
              CALL Nihilate1(I,Nam,S,MPI,Ek,TDA_O=.TRUE.)
           ELSE
              CALL ResetThresholds(cBAS,Nam,O,G,1D-1)
              DoTDA=.FALSE.
-             XkThreshold=O%Thresholds(cBAS)%Trix
-             PkThreshold=O%Thresholds(cBAS)%Trix
+             XkThreshold=Zero!O%Thresholds(cBAS)%Trix
+             PkThreshold=Zero!O%Thresholds(cBAS)%Trix
              CALL LOn2BakEnd(N,I,0,Shift,'Xk',Nam,S,MPI,XkThreshold,XkNon0s)
              CALL Nihilate1(I,Nam,S,MPI,Ek,TDA_O=.FALSE.)
           ENDIF
           !
           DO K=0,200
+
+             IF(K>8)THEN
+                XkThreshold=O%Thresholds(cBAS)%Trix
+                PkThreshold=O%Thresholds(cBAS)%Trix
+             ENDIF
+
              ! The non-linear congjugate gradient
              CALL NLCGBakEnd(I,K,Ek,Nam,S,MPI,Beta)
              ! Compute L[Pk]
@@ -179,7 +185,7 @@ CONTAINS
              ! Anihilate L[Xk], compute Ek and its relative error
              CALL NihilateLXk(I,Nam,S,MPI,Ek,dEk,TDA_O=DoTDA)
 
-             WRITE(*,33)I,K,Ek*27.21139613182D0,dEk,dNorm,TimeONX%Wall,TimeQCTC%Wall,TimeBCSR%Wall, &
+             WRITE(*,33)I,K,Ek*27.21139613182D0,ABS(dEk),ABS(dNorm),TimeONX%Wall,TimeQCTC%Wall,TimeBCSR%Wall, &
                         100D0*DBLE(XkNon0s)/DBLE(N*N),100D0*DBLE(PkNon0s)/DBLE(N*N)
 
              IF(ABS(dNorm)<1D-2)THEN
@@ -204,8 +210,8 @@ CONTAINS
        ENDDO
     ENDDO
     !
-33  FORMAT('St=',I2,', It=',I2,', Ev = ',F10.6,', dE= ',D6.2,', dN= ',D6.2, &
-           ', Tk=',D10.4,', Tj=',D10.4,', Tmm = ',D10.4,', %Xk=',F10.6,'%Pk=',F10.6) 
+33  FORMAT('St=',I2,', It=',I2,', Ev = ',F10.6,', dE= ',D7.2,', dN= ',D7.2, &
+           ', Tk=',D10.4,', Tj=',D10.4,', Tmm = ',D10.4,', %Xk=',F10.6,', %Pk=',F10.6) 
 
 !!$
 !!$
@@ -633,7 +639,6 @@ CONTAINS
     CALL Get(sXk,XkName)
     CALL Get(sLXk,LXkName)
 
-
     ! Gk=Two*(LXk-Ek*Xk)
 
     sXk%MTrix%D=-Ek*sXk%MTrix%D
@@ -743,6 +748,9 @@ CONTAINS
     ! Filter small blocks and return the # of non zero elements
     CALL Filter(sX,Tol_O=MatrixThreshold)
     MatrixNon0s=sX%NNon0
+
+!    WRITE(*,*)Trgt,' NonZeros = ',1D2*DBLE(MatrixNon0s)/DBLE(N*N)
+
     ! This is the AO transition density matrix (or CG gradient) 
     CALL Put(sX,TrixFile(Trgt,PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=RQIStat%Current%I,OffSet_O=0))
     ! Done with sX
