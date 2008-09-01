@@ -161,7 +161,7 @@ C
       LSP(L)=L*(L+3)/2
 C
       Ell=MAX(EllP,EllQ)
-      LenSP=LSP(L)
+      LenSP=LSP(Ell)
 C
 c      DO I=0,LSP(EllQ)
 c         DO J=1,Nc
@@ -175,7 +175,13 @@ c
       IF(Nc.GT.iClust)STOP '1 in XLateV '
       IF(NcD.GT.iClust)STOP '1.5 in XLateV '
       IF(Ell.GT.MxEll)STOP '2 in XLateV '
-      IF(LenSP.GT.MxLen)STOP '3 in XLateV '
+      IF(LenSP.GT.MxLen)THEN
+         WRITE(*,*)' Ell P = ',EllP
+         WRITE(*,*)' Ell Q = ',EllQ
+         WRITE(*,*)' MxLen = ',MxLen
+         WRITE(*,*)' LenSP = ',LenSP
+         STOP '3 in XLateV '
+      ENDIF
 C
       DO I=1,Nc
          X(I)=(Q(1,I)-P(1))

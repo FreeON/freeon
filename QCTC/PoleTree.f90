@@ -382,7 +382,6 @@ CONTAINS
        ENDDO
        XSplit=XSplit/SUM(Chg(Qn(1:Nn)))
        !
-
        CALL DblIntSort77(Nn,Xn,Qnj,2)                    
        !
        Jn=1
@@ -393,7 +392,6 @@ CONTAINS
           ENDIF
        ENDDO
        IF(ABS(Xn(Nn)-Xn(1))<1D-5)Jn=Nn/2
-
     ELSE
        !-----------------------------------------------------------------------------
        !  R*-Tree split based on Beckmann, Kriegel, Schneider and Seeger (1990)
@@ -467,14 +465,16 @@ CONTAINS
           ENDDO
        ENDIF
        ! New sorted list on the optimal axis
+       XSplit=Zero
        DO J=1,Nn
           K=Qn(J)
           Qnj(J)=J
           Xn(J)=Nuc(Axis,K)-Cntr(Axis)
           XSplit=XSplit+Xn(J)*Chg(K)
        ENDDO
-       !
        XSplit=XSplit/SUM(Chg(Qn(1:Nn)))
+
+!       WRITE(*,*)' Split2 = ',XSplit,' Chg = ',SUM(Chg(Qn(1:Nn)))
        !
        CALL DblIntSort77(Nn,Xn,Qnj,2)                    
        ! Now find the distribution that minimizes the combined volume 
@@ -531,7 +531,7 @@ CONTAINS
     ENDIF
     ! Here is the dividing plane used to split the electons.
     ! Could use much more sophisticated algorithms here, but for now, we just punt.    
-    XSplit=Half*(Xn(Jn)+Xn(Jn+1))
+!    XSplit=Half*(Xn(Jn)+Xn(Jn+1))
     !
     IF(Axis==1)THEN
        DO J=1,Ne
@@ -562,7 +562,6 @@ CONTAINS
        ENDIF
     ENDDO
 !!$
-
 !!$    WRITE(*,*)' XSplit = ',XSplit
 !!$    WRITE(*,*)' Xn: [',Xn(1),",",Xn(Nn),"]"
 !!$    WRITE(*,*)' Xe: [',Xe(1),",",Xe(Ne),"]"

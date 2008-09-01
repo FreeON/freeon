@@ -131,6 +131,10 @@ ConflictDetect.o : \
 Overlay.o : \
   PunchHDF.o
 
+RQI.o : \
+  PunchHDF.o \
+  Overlay.o 
+
 MDynamics.o : \
   SCFs.o \
 	Numerics.o \
@@ -191,7 +195,7 @@ NEB.o : \
 
 Massage.o : \
 	OptionKeys.o \
-  DynamicsKeys.o \
+        DynamicsKeys.o \
 	GeometryKeys.o \
 	ControlStructures.o
 

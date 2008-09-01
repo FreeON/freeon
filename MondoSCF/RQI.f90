@@ -90,11 +90,15 @@ CONTAINS
     TYPE(BCSR)                      :: sP,sQ,sF,sZ
     TYPE(DBL_RNK2)                  :: P,Q,F,Z
     REAL(DOUBLE)                    :: Ek,EkOld,dEk,Beta,Lambda,ErrRel,ErrAbs,Shift,dNorm
-    REAL(DOUBLE),DIMENSION(N,N)     :: Xk,Gk,Pk,LXk,LPk
-    REAL(DOUBLE),DIMENSION(N,N)     :: XkOld,PkOld,GkOld
-    REAL(DOUBLE),DIMENSION(N)       :: Values
-    REAL(DOUBLE),DIMENSION(N,N,M)   :: Vectors
-    REAL(DOUBLE),DIMENSION(N,N,N,N) :: TwoE,DoubleSlash
+    INTEGER                         :: XkNon0s,PkNon0s
+    REAL(DOUBLE)                    :: XkThreshold,PkThreshold
+
+
+!!$    REAL(DOUBLE),DIMENSION(N,N)     :: Xk,Gk,Pk,LXk,LPk
+!!$    REAL(DOUBLE),DIMENSION(N,N)     :: XkOld,PkOld,GkOld
+!!$    REAL(DOUBLE),DIMENSION(N)       :: Values
+!!$    REAL(DOUBLE),DIMENSION(N,N,M)   :: Vectors
+!!$    REAL(DOUBLE),DIMENSION(N,N,N,N) :: TwoE,DoubleSlash
     !
     RQIStat=S
     RQINams=Nam
@@ -136,38 +140,47 @@ CONTAINS
 !!$
 !!$    goto 111
 
+
+
     DO I=1,1
 
        !       write(*,*)' ek = ',EK
        !       GOTO 111 ! STOP
        DO JTDA=0,1
+          !
           IF(JTDA==0)THEN
              CALL ResetThresholds(cBAS,Nam,O,G,1D1)
              DoTDA=.TRUE.
+             XkThreshold=O%Thresholds(cBAS)%Trix
+             PkThreshold=O%Thresholds(cBAS)%Trix
              CALL Nihilate0(N,I,Nam,S,MPI)
-             CALL LOn2BakEnd(N,I,0,Shift,'Xk',Nam,S,MPI)
+             CALL LOn2BakEnd(N,I,0,Shift,'Xk',Nam,S,MPI,XkThreshold,XkNon0s)
              CALL Nihilate1(I,Nam,S,MPI,Ek,TDA_O=.TRUE.)
           ELSE
              CALL ResetThresholds(cBAS,Nam,O,G,1D-1)
              DoTDA=.FALSE.
-             CALL LOn2BakEnd(N,I,0,Shift,'Xk',Nam,S,MPI)
+             XkThreshold=O%Thresholds(cBAS)%Trix
+             PkThreshold=O%Thresholds(cBAS)%Trix
+             CALL LOn2BakEnd(N,I,0,Shift,'Xk',Nam,S,MPI,XkThreshold,XkNon0s)
              CALL Nihilate1(I,Nam,S,MPI,Ek,TDA_O=.FALSE.)
           ENDIF
+          !
           DO K=0,200
              ! The non-linear congjugate gradient
              CALL NLCGBakEnd(I,K,Ek,Nam,S,MPI,Beta)
              ! Compute L[Pk]
-             CALL LOn2BakEnd(N,I,K,Shift,'Pk',Nam,S,MPI)
+             CALL LOn2BakEnd(N,I,K,Shift,'Pk',Nam,S,MPI,PkThreshold,PkNon0s)
              ! Line Search: Min_Lambda{ E[Xk+Lambda*Pk] }
              CALL RQLSBakEnd(I,Nam,S,Lambda)                    
              ! Anhiliate and renorm Xk
              CALL NihilateXk(I,Nam,S,MPI,Lambda,dNorm,TDA_O=DoTDA)
              ! Compute L[Xk]
-             CALL LOn2BakEnd(N,I,K,Shift,'Xk',Nam,S,MPI)
+             CALL LOn2BakEnd(N,I,K,Shift,'Xk',Nam,S,MPI,XkThreshold,XkNon0s)
              ! Anihilate L[Xk], compute Ek and its relative error
              CALL NihilateLXk(I,Nam,S,MPI,Ek,dEk,TDA_O=DoTDA)
 
-             WRITE(*,33)I,K,Ek*27.21139613182D0,dEk,dNorm,TimeONX%Wall,TimeQCTC%Wall,TimeBCSR%Wall
+             WRITE(*,33)I,K,Ek*27.21139613182D0,dEk,dNorm,TimeONX%Wall,TimeQCTC%Wall,TimeBCSR%Wall, &
+                        100D0*DBLE(XkNon0s)/DBLE(N*N),100D0*DBLE(PkNon0s)/DBLE(N*N)
 
              IF(ABS(dNorm)<1D-2)THEN
                 ! Look for bad behavior 
@@ -191,7 +204,8 @@ CONTAINS
        ENDDO
     ENDDO
     !
-33  FORMAT('St=',I2,', It=',I2,', Ev = ',F10.6,', dE= ',D12.6,', dN= ',D12.6,', Tk=',D12.6,', Tj=',D12.6,', Tmm = ',D12.6) 
+33  FORMAT('St=',I2,', It=',I2,', Ev = ',F10.6,', dE= ',D6.2,', dN= ',D6.2, &
+           ', Tk=',D10.4,', Tj=',D10.4,', Tmm = ',D10.4,', %Xk=',F10.6,'%Pk=',F10.6) 
 
 !!$
 !!$
@@ -687,14 +701,14 @@ CONTAINS
     !
   END SUBROUTINE NLCGBAKEND
 
-  SUBROUTINE LOn2BakEnd(N,I,K,Shift,Trgt,Nam,S,MPI)
-    INTEGER                       :: N,I,J,K
+  SUBROUTINE LOn2BakEnd(N,I,K,Shift,Trgt,Nam,S,MPI,MatrixThreshold,MatrixNon0s)
+    INTEGER                       :: N,I,J,K,MatrixNon0s
     TYPE(FileNames)               :: Nam
     TYPE(State)                   :: S,RQIStat
     TYPE(Parallel)                :: MPI    
     REAL(DOUBLE),DIMENSION(N,N)   :: LX,X
     TYPE(BCSR)                    :: sF,sX,sJ,sK,sZ,sP,sJK,sT1,sT2,sT3
-    REAL(DOUBLE)                  :: Shift,OmegaPls,OmegaMns,WS
+    REAL(DOUBLE)                  :: Shift,MatrixThreshold
     CHARACTER(LEN=*)              :: Trgt 
     !----------------------------------------------------------------------------
     CALL Elapsed_TIME(TimeBCSR,Init_O='Start')
@@ -726,6 +740,9 @@ CONTAINS
     ! Xao = Z^t.Xor.Z 
     CALL Multiply(sZ,sX,sT1)        
     CALL Multiply(sT1,sZ,sX)
+    ! Filter small blocks and return the # of non zero elements
+    CALL Filter(sX,Tol_O=MatrixThreshold)
+    MatrixNon0s=sX%NNon0
     ! This is the AO transition density matrix (or CG gradient) 
     CALL Put(sX,TrixFile(Trgt,PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=RQIStat%Current%I,OffSet_O=0))
     ! Done with sX
