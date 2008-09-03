@@ -71,7 +71,15 @@ PROGRAM LowdinO
 !--------------------------------------------------------------------
 !
 !
-  IF(Values%D(1)<Zero)CALL Halt(' S matrix is not pos def')
+  IF(Values%D(1)<Zero)THEN
+     DO I=1,NBasF
+!        IF(Values%D(I)<Zero)THEN
+           WRITE(*,*)I,Values%D(I)
+!           EXIT
+!        ENDIF
+     ENDDO
+     CALL Halt(' S matrix is not pos def')
+  ENDIF
   CondS=Values%D(NBasF)/Values%D(1)
   IF(CondS>1D4)CALL Warn('Illconditioning detected in MakeS: Cond(S)='//TRIM(DblToShrtChar(CondS)))
 !--------------------------------------------------------------------

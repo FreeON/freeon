@@ -183,7 +183,7 @@ CONTAINS
     TYPE(PoleNode), POINTER     :: Node,Left,Right
     REAL(DOUBLE)                :: Section,MaxBox,Extent,MaxExt,IHalfHalf,BalanceQ,TotCh2,ChHalf2,Ex
     REAL(DOUBLE),DIMENSION(3)   :: MaxQL,MaxQH
-    INTEGER                     :: Ne,Nn,Be,Ee,Bn,En,Je,Jn,ISplit,Split,I,J,k,IS,NL,NR, II
+    INTEGER                     :: Ne,Nn,Be,Ee,Bn,En,Je,Jn,ISplit,Split,I,J,k,IS,NL,NR,JnL,JnR
     INTEGER                     :: MaxBoxedEll,NBoxedEll,EllSplit,Cd,SplitI,SplitJ
     REAL(DOUBLE)                :: Volume,MaxZeta,MinZeta,ZetaHalf,ChHalf,TotCh,PiZ,RL,RR,RN
     REAL(DOUBLE)                :: BEBalance,ChBalance,XBalance
@@ -230,14 +230,17 @@ CONTAINS
 !!$       
 
        CALL RStarSplit(Ne,Nn,Qdex(Be:Ee),NDex(Bn:En),Ext,Rho%Qx%D,Rho%Qy%D,Rho%Qz%D, &
-                      GM%Carts%D,GM%PBC%CellCenter%D,GM%AtNum%D,iSplit,Je,Jn)
+                      GM%Carts%D,GM%PBC%CellCenter%D,GM%AtNum%D,iSplit,Je,Jn,JnL,JnR)
+
+
+
        ! So far, this option is not considered in the logic of RStarSplit.  Probably,it
        ! should be (the early decantation of diffused Gaussians).
        IF(iSplit==4)THEN
           CALL ExtSplit(Ne,Qdex(Be:Ee),Ext,MaxCluster,Je)
        ENDIF
     ENDIF
-    ! Split the charges
+    ! Split the charges.  
     Split=Be+Je-1
     Left%BdexE=Be
     Left%EdexE=Split
@@ -259,10 +262,13 @@ CONTAINS
     IF(ISplit<4)THEN
        ! If we are still doing ORB, then fill in pointer (NDex) locations
        Split=Bn+Jn-1
-       Left%BdexN=Bn
+       Left%BdexN=Bn+JnL-1
        Left%EdexN=Split      
-       Right%EdexN=En 
        Right%BdexN=Split+1
+       Right%EdexN=Bn+JnR-1 !En
+
+
+
     ELSE
        Left%BdexN=Bn
        Left%EdexN=En
@@ -298,8 +304,8 @@ CONTAINS
     ENDDO
 
 !!$    IF(ISplit<4)THEN
-!!$       WRITE(*,55)ISplit,Node%Box%Number,Left%BdexE,Left%EDexE,Left%EDexE-Left%BdexE, &
-!!$                                         Right%BdexE,Right%EDexE,Right%EDexE-Right%BdexE, &
+!!$       WRITE(*,55)ISplit,Node%Box%Number,Left%BdexN,Left%EDexN,Left%EDexE-Left%BdexE, &
+!!$                                         Right%BdexN,Right%EDexN,Right%EDexE-Right%BdexE, &
 !!$                                         SUM(GM%AtNum%D(NDex(Left%BdexN:Left%EdexN))),   &
 !!$                                         SUM(GM%AtNum%D(NDex(Right%BdexN:Right%EdexN)))
 !!$       
@@ -330,14 +336,14 @@ CONTAINS
   END SUBROUTINE SplitPoleBox
   !
 
-  SUBROUTINE RStarSplit(Ne,Nn,Qe,Qn,Ex,Qx,Qy,Qz,Nuc,Cntr,Chg,Axis,Je,Jn)
-
-    INTEGER                       :: Ne,Nn,Je,Jn,JeLeft,JeRight,J,K,L,Axis,iDim,iBest
+  SUBROUTINE RStarSplit(Ne,Nn,Qe,Qn,Ex,Qx,Qy,Qz,Nuc,Cntr,Chg,Axis,Je,Jn,JnLeft,JnRight)
+    !
+    INTEGER                       :: Ne,Nn,Je,Jn,JeLeft,JeRight,JnLeft,JnRight
+    INTEGER                       :: J,K,L,Axis,iDim,iBest
     INTEGER,DIMENSION(1:Ne)       :: Qe,Qej,QeTmp
     INTEGER,DIMENSION(1:Nn)       :: Qn,Qnj,QnTmp
     REAL(DOUBLE),DIMENSION(:)     :: Ex,Qx,Qy,Qz,Chg
     REAL(DOUBLE),DIMENSION(:,:)   :: Nuc
-
 
     REAL(DOUBLE),DIMENSION(1:Ne)  :: Xe
     REAL(DOUBLE),DIMENSION(1:Nn)  :: Xn,BestVol
@@ -372,20 +378,59 @@ CONTAINS
              MaxSide=Side(iDim)
           ENDIF
        ENDDO
-       !
-       XSplit=Zero
+       ! Sort and index electrons.  Need to do this here, so that we
+       ! can account for excluding nuclei due to electron delpletion  
+       ! as in the case of localized RPA transition densities where
+       ! the transition density can go to zero, or also the case
+       ! of difference densities when performing incremental SCF
+       IF(Axis==1)THEN
+          DO J=1,Ne
+             K=Qe(J)
+             Qej(J)=J
+             Xe(J)=Qx(K)
+          ENDDO
+       ELSEIF(Axis==2)THEN
+          DO J=1,Ne
+             K=Qe(J)
+             Qej(J)=J
+             Xe(J)=Qy(K)
+          ENDDO
+       ELSE
+          DO J=1,Ne
+             K=Qe(J)
+             Qej(J)=J
+             Xe(J)=Qz(K)
+          ENDDO
+       ENDIF
+       CALL DblIntSort77(Ne,Xe,Qej,2)                    
+       !  Search for Nuclei that are braketed by electron distributions
+       ! ... from the right ...
+       JnRight=Nn
        DO J=1,Nn
-          K=Qn(J)
-          Qnj(J)=J
-          Xn(J)=Nuc(Axis,K)-Cntr(Axis)
-          XSplit=XSplit+Xn(J)*Chg(K)
+          IF(Xn(J)<=Xe(Ne)+1D-10)THEN
+             JnRight=J
+          ELSE
+             EXIT
+          ENDIF
        ENDDO
-       XSplit=XSplit/SUM(Chg(Qn(1:Nn)))
-       !
-       CALL DblIntSort77(Nn,Xn,Qnj,2)                    
+       ! ... and the left
+       JnLeft=1
+       DO J=Nn,1,-1
+          IF(Xn(J)>=Xe(1)-1D-10)THEN
+             JnLeft=J
+          ELSE
+             EXIT
+          ENDIF
+       ENDDO
+       ! Find the center of mass split
+       XSplit=Zero
+       DO J=JnLeft,JnRight
+          XSplit=XSplit+Xn(J)*Chg(Qn(J))
+       ENDDO
+       XSplit=XSplit/SUM(Chg(Qn(JnLeft:JnRight)))
        !
        Jn=1
-       DO J=1,Nn
+       DO J=JnLeft,JnRight
           IF(Xn(J)>XSplit)THEN
              Jn=J-1
              EXIT
@@ -441,7 +486,6 @@ CONTAINS
           Margin(iDim)=Marg
           !
        ENDDO
-       !
        ! Pick the axis with the smallest summed margin
        ! but first check for degeneracies:
        IF( ABS(Margin(1)-Margin(2))<1D-10 .AND. &
@@ -463,29 +507,77 @@ CONTAINS
                 MinMarg=Margin(iDim)
              ENDIF
           ENDDO
-       ENDIF
-       ! New sorted list on the optimal axis
-       XSplit=Zero
+       ENDIF       
+       ! Sort and index nuclei along chosen axis
        DO J=1,Nn
           K=Qn(J)
           Qnj(J)=J
-          Xn(J)=Nuc(Axis,K)-Cntr(Axis)
-          XSplit=XSplit+Xn(J)*Chg(K)
+          Xn(J)=Nuc(Axis,K)-Cntr(Axis)             
        ENDDO
-       XSplit=XSplit/SUM(Chg(Qn(1:Nn)))
-       !
        CALL DblIntSort77(Nn,Xn,Qnj,2)                    
+       ! Sort and index electrons.  Need to do this here, so that we
+       ! can account for excluding nuclei due to electron delpletion  
+       ! as in the case of localized RPA transition densities where
+       ! the transition density can go to zero, or also the case
+       ! of difference densities when performing incremental SCF
+       IF(Axis==1)THEN
+          DO J=1,Ne
+             K=Qe(J)
+             Qej(J)=J
+             Xe(J)=Qx(K)
+          ENDDO
+       ELSEIF(Axis==2)THEN
+          DO J=1,Ne
+             K=Qe(J)
+             Qej(J)=J
+             Xe(J)=Qy(K)
+          ENDDO
+       ELSE
+          DO J=1,Ne
+             K=Qe(J)
+             Qej(J)=J
+             Xe(J)=Qz(K)
+          ENDDO
+       ENDIF
+       CALL DblIntSort77(Ne,Xe,Qej,2)                    
+       !  Search for Nuclei that are braketed by electron distributions
+       ! ... from the right ...
+       JnRight=Nn
+       DO J=1,Nn
+          IF(Xn(J)<=Xe(Ne)+1D-10)THEN
+             JnRight=J
+          ELSE
+             EXIT
+          ENDIF
+       ENDDO
+       ! ... and the left
+       JnLeft=1
+       DO J=Nn,1,-1
+          IF(Xn(J)>=Xe(1)-1D-10)THEN
+             JnLeft=J
+          ELSE
+             EXIT
+          ENDIF
+       ENDDO
+
+       ! Find the center of mass split
+       XSplit=Zero
+       DO J=JnLeft,JnRight
+          XSplit=XSplit+Xn(J)*Chg(Qn(J))
+       ENDDO
+       XSplit=XSplit/SUM(Chg(Qn(JnLeft:JnRight)))
        ! Now find the distribution that minimizes the combined volume 
        ! of left and right BBoxes.  The classic R*-Trees method looks at BBox-BBox
        ! overlap, but we don't have that for just points.
+       iBest=0
        MinVol = 1D10
        ! Loop over all distributions
-       DO K=2,Nn-1          
+       DO K=JnRight+1,JnLeft-1          
           ! BBox for left region
           Point=Nuc(:,Qn(Qnj(1)))-Cntr(:)
           LeftBox%BndBox(:,1)=Point
           LeftBox%BndBox(:,2)=Point
-          DO J=2,K
+          DO J=JnRight+1,K
              Point=Nuc(:,Qn(Qnj(J)))-Cntr(:)
              CALL PointBoxMerge(LeftBox,Point,LeftBox)
           ENDDO
@@ -493,7 +585,7 @@ CONTAINS
           Point=Nuc(:,Qn(Qnj(Nn)))-Cntr(:)
           RightBox%BndBox(:,1)=Point
           RightBox%BndBox(:,2)=Point
-          DO J=Nn-1,K+1,-1
+          DO J=JnLeft-1,K+1,-1
              Point=Nuc(:,Qn(Qnj(J)))-Cntr(:)
              CALL PointBoxMerge(RightBox,Point,RightBox) 
           ENDDO
@@ -517,7 +609,7 @@ CONTAINS
           ! Resolve degeneracies in BestVol using split of largest dimension
           ! and center of mass split
           Jn=1
-          DO J=1,Nn
+          DO J=JnLeft,JnRight
              IF(Xn(J)>XSplit)THEN
                 Jn=J-1
                 EXIT
@@ -528,28 +620,6 @@ CONTAINS
        ENDIF
     ENDIF
     !
-    IF(Axis==1)THEN
-       DO J=1,Ne
-          K=Qe(J)
-          Qej(J)=J
-          Xe(J)=Qx(K)
-       ENDDO
-    ELSEIF(Axis==2)THEN
-       DO J=1,Ne
-          K=Qe(J)
-          Qej(J)=J
-          Xe(J)=Qy(K)
-       ENDDO
-    ELSE
-       DO J=1,Ne
-          K=Qe(J)
-          Qej(J)=J
-          Xe(J)=Qz(K)
-       ENDDO
-    ENDIF
-    !
-    CALL DblIntSort77(Ne,Xe,Qej,2)                    
-    !
     DO J=1,Ne
        IF(Xe(J)>XSplit)THEN
           Je=J-1
@@ -559,9 +629,10 @@ CONTAINS
 !!$
 !!$    WRITE(*,*)' XSplit = ',XSplit
 !!$    WRITE(*,*)' Xn: [',Xn(1),",",Xn(Nn),"]"
+!!$    WRITE(*,*)' Xn: [',Xn(JnLeft),",",Xn(JnRight),"]"
 !!$    WRITE(*,*)' Xe: [',Xe(1),",",Xe(Ne),"]"
 !!$    WRITE(*,*)' Je = ',Je
-
+!!$
     DO J=1,Ne
        QeTmp(J)=Qe(Qej(J))
     ENDDO
@@ -574,6 +645,8 @@ CONTAINS
     !
   END SUBROUTINE RStarSplit
 
+
+!! /scratch/mchalla/FREEON_HOME/bin/QCTC C10H2_TDSCF_13079 TD-SCF Xk 1 1 1 1 1 1     
 
   SUBROUTINE ExtSplit(Ne,Qe,Ex,MxCluster,Je)
     INTEGER :: Ne,Nn,Je,Jn,J,ISplit,K,MxCluster
@@ -737,7 +810,7 @@ CONTAINS
     DO J=1,Nn
        X(J)=NucXYZ(ISplit,Qn(J))
     ENDDO
-    CALL DblIntSort77(Nn,X,Qn,2)             
+    CALL DblIntSort77(Nn,X,Qn,2)              
     !
     Jn=Nn/2
     Section=Half*(X(Jn)+X(Jn+1))

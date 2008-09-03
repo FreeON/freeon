@@ -108,7 +108,6 @@ CONTAINS
     CALL Elapsed_TIME(TimeONX,Init_O='Init')
     CALL Elapsed_TIME(TimeQCTC,Init_O='Init')
     CALL Elapsed_TIME(TimeBCSR,Init_O='Init')
-    !
     CALL Elapsed_TIME(TimeTotal,Init_O='Start')
 
 !!$    !
@@ -149,29 +148,23 @@ CONTAINS
        DO JTDA=0,1
           !
           IF(JTDA==0)THEN
-             CALL ResetThresholds(cBAS,Nam,O,G,1D1)
+!             CALL ResetThresholds(cBAS,Nam,O,G,1D2)
              DoTDA=.TRUE.
-             XkThreshold=Zero!O%Thresholds(cBAS)%Trix
-             PkThreshold=Zero!O%Thresholds(cBAS)%Trix
+             XkThreshold=O%Thresholds(cBAS)%Trix
+             PkThreshold=O%Thresholds(cBAS)%Trix
              CALL Nihilate0(N,I,Nam,S,MPI)
              CALL LOn2BakEnd(N,I,0,Shift,'Xk',Nam,S,MPI,XkThreshold,XkNon0s)
              CALL Nihilate1(I,Nam,S,MPI,Ek,TDA_O=.TRUE.)
           ELSE
-             CALL ResetThresholds(cBAS,Nam,O,G,1D-1)
+!             CALL ResetThresholds(cBAS,Nam,O,G,1D-2)
              DoTDA=.FALSE.
-             XkThreshold=Zero!O%Thresholds(cBAS)%Trix
-             PkThreshold=Zero!O%Thresholds(cBAS)%Trix
+             XkThreshold=O%Thresholds(cBAS)%Trix
+             PkThreshold=O%Thresholds(cBAS)%Trix
              CALL LOn2BakEnd(N,I,0,Shift,'Xk',Nam,S,MPI,XkThreshold,XkNon0s)
              CALL Nihilate1(I,Nam,S,MPI,Ek,TDA_O=.FALSE.)
           ENDIF
           !
           DO K=0,200
-
-             IF(K>8)THEN
-                XkThreshold=O%Thresholds(cBAS)%Trix
-                PkThreshold=O%Thresholds(cBAS)%Trix
-             ENDIF
-
              ! The non-linear congjugate gradient
              CALL NLCGBakEnd(I,K,Ek,Nam,S,MPI,Beta)
              ! Compute L[Pk]
@@ -185,12 +178,12 @@ CONTAINS
              ! Anihilate L[Xk], compute Ek and its relative error
              CALL NihilateLXk(I,Nam,S,MPI,Ek,dEk,TDA_O=DoTDA)
 
-             WRITE(*,33)I,K,Ek*27.21139613182D0,ABS(dEk),ABS(dNorm),TimeONX%Wall,TimeQCTC%Wall,TimeBCSR%Wall, &
+             WRITE(*,33)I,K,Ek*27.21139613182D0,dEk,ABS(dNorm),TimeONX%Wall,TimeQCTC%Wall,TimeBCSR%Wall, &
                         100D0*DBLE(XkNon0s)/DBLE(N*N),100D0*DBLE(PkNon0s)/DBLE(N*N)
 
-             IF(ABS(dNorm)<1D-2)THEN
+             IF(ABS(dNorm)<1D-2.AND.K>3)THEN
                 ! Look for bad behavior 
-                IF(Ek>EkOld)THEN
+                IF( Ek > EkOld.AND. (Ek-EkOld)/Ek > O%Thresholds(cBAS)%ETol*1D2 )THEN
                    ! Sign of variational principle broken, ostensibly due to N-scaling
                    ! approximaitons.  If this happens, we are DONE!
                    Ek=EkOld
@@ -206,12 +199,20 @@ CONTAINS
              EkOld=Ek
              !
           ENDDO
-          WRITE(*,*)I,K,Ek*27.21139613182D0,dEk,dNorm
+          CALL Elapsed_TIME(TimeTOTAL,Init_O='Accum')
+          IF(DoTDA)THEN
+             WRITE(*,44)'TDA:',I,K,Ek*27.21139613182D0,dEk,TimeTotal%Wall
+          ELSE
+             WRITE(*,44)'RPA:',I,K,Ek*27.21139613182D0,dEk,TimeTotal%Wall
+          ENDIF
        ENDDO
     ENDDO
     !
-33  FORMAT('St=',I2,', It=',I2,', Ev = ',F10.6,', dE= ',D7.2,', dN= ',D7.2, &
-           ', Tk=',D10.4,', Tj=',D10.4,', Tmm = ',D10.4,', %Xk=',F10.6,', %Pk=',F10.6) 
+33  FORMAT('St=',I2,', It=',I3,', Ev=',F10.6,', dE=',D8.2,', dN=',D7.2, &
+           ', Tk=',D10.4,', Tj=',D10.4,', Tmm = ',D10.4,', %Xk=',F6.2,', %Pk=',F6.2) 
+
+
+44  FORMAT(A4,' State=',I2,', Nk=',I3,', Ev=',F9.6,', dE=',D7.2,', WallSec=',D12.4)
 
 !!$
 !!$
@@ -321,12 +322,19 @@ CONTAINS
     !
     CALL New(X,(/N,N/))
 
+    X%D=Zero
+
+!!$    do ii=1,N
+!!$       do jj=1,N
+!!$          X%D(ii,jj)=One/Two**(2*II+2*JJ)
+!!$       enddo
+!!$    enddo
+
     do ii=1,N
-       do jj=1,N
-          X%D(ii,jj)=One/Two**(2*II+2*JJ)
+       do jj=MAX(1,ii-5),MIN(N,II+5)
+          X%D(ii,jj)=RANDOM_DBL((/-One,One/))
        enddo
     enddo
-
 
     CALL SetEq(sXk,X)
     CALL Delete(X)
