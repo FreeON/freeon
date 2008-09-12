@@ -91,7 +91,7 @@ CONTAINS
     TYPE(DBL_RNK2)                  :: P,Q,F,Z
     REAL(DOUBLE)                    :: Ek,EkOld,dEk,Beta,Lambda,ErrRel,ErrAbs,Shift,dNorm
     INTEGER                         :: XkNon0s,PkNon0s
-    REAL(DOUBLE)                    :: XkThreshold,PkThreshold
+    REAL(DOUBLE)                    :: XkThreshold,PkThreshold,PMax
 
 
 !!$    REAL(DOUBLE),DIMENSION(N,N)     :: Xk,Gk,Pk,LXk,LPk
@@ -139,13 +139,10 @@ CONTAINS
 !!$
 !!$    goto 111
 
-
-
     DO I=1,1
-
        !       write(*,*)' ek = ',EK
        !       GOTO 111 ! STOP
-       DO JTDA=0,1
+       DO JTDA=0,0!1
           !
           IF(JTDA==0)THEN
 !             CALL ResetThresholds(cBAS,Nam,O,G,1D2)
@@ -164,11 +161,12 @@ CONTAINS
              CALL Nihilate1(I,Nam,S,MPI,Ek,TDA_O=.FALSE.)
           ENDIF
           !
+          EkOld=BIG_DBL
           DO K=0,200
              ! The non-linear congjugate gradient
              CALL NLCGBakEnd(I,K,Ek,Nam,S,MPI,Beta)
              ! Compute L[Pk]
-             CALL LOn2BakEnd(N,I,K,Shift,'Pk',Nam,S,MPI,PkThreshold,PkNon0s)
+             CALL LOn2BakEnd(N,I,K,Shift,'Pk',Nam,S,MPI,PkThreshold,PkNon0s,PMax)
              ! Line Search: Min_Lambda{ E[Xk+Lambda*Pk] }
              CALL RQLSBakEnd(I,Nam,S,Lambda)                    
              ! Anhiliate and renorm Xk
@@ -177,26 +175,34 @@ CONTAINS
              CALL LOn2BakEnd(N,I,K,Shift,'Xk',Nam,S,MPI,XkThreshold,XkNon0s)
              ! Anihilate L[Xk], compute Ek and its relative error
              CALL NihilateLXk(I,Nam,S,MPI,Ek,dEk,TDA_O=DoTDA)
-
-             WRITE(*,33)I,K,Ek*27.21139613182D0,dEk,ABS(dNorm),TimeONX%Wall,TimeQCTC%Wall,TimeBCSR%Wall, &
-                        100D0*DBLE(XkNon0s)/DBLE(N*N),100D0*DBLE(PkNon0s)/DBLE(N*N)
-
-             IF(ABS(dNorm)<1D-2.AND.K>3)THEN
+             !
+             CALL OpenASCII(Nam%OFile,Out)
+             WRITE(*  ,33)I,K,Ek*27.21139613182D0,dEk,ABS(dNorm),TimeONX%Wall,TimeQCTC%Wall,TimeBCSR%Wall, &
+                        PMax,100D0*DBLE(XkNon0s)/DBLE(N*N),100D0*DBLE(PkNon0s)/DBLE(N*N)
+             WRITE(Out,33)I,K,Ek*27.21139613182D0,dEk,ABS(dNorm),TimeONX%Wall,TimeQCTC%Wall,TimeBCSR%Wall, &
+                        PMax,100D0*DBLE(XkNon0s)/DBLE(N*N),100D0*DBLE(PkNon0s)/DBLE(N*N)
+             CLOSE(Out,STATUS='KEEP')
+             !
+             IF(K>3.AND.dNorm<1D-2)THEN
                 ! Look for bad behavior 
-                IF( Ek > EkOld.AND. (Ek-EkOld)/Ek > O%Thresholds(cBAS)%ETol*1D2 )THEN
+                IF( Ek > EkOld .AND. ABS((Ek-EkOld)/Ek) > O%Thresholds(cBAS)%ETol )THEN
+
                    ! Sign of variational principle broken, ostensibly due to N-scaling
                    ! approximaitons.  If this happens, we are DONE!
+                   WRITE(*,*)' Converged due to variational violation ',Ek,EkOld,  &
+                              (Ek-EkOld)/Ek, O%Thresholds(cBAS)%ETol*1D2
                    Ek=EkOld
                    EXIT
                 ENDIF
-                ! Look for convergence 
-                IF(ABS(dEk)<O%Thresholds(cBAS)%ETol*1D2.AND. &
-                   ABS(dNorm)<O%Thresholds(cBAS)%DTol*1D1)THEN
+                ! Look for convergence (may be too tight)
+                IF(ABS(dEk)  <O%Thresholds(cBAS)%ETol*1D2.AND. &
+                   ABS(dNorm)<O%Thresholds(cBAS)%DTol )THEN
+                   WRITE(*,*)' Met convergence criteria ',dEk,dNorm,O%Thresholds(cBAS)%ETol, &
+                              O%Thresholds(cBAS)%DTol
                    EXIT
                 ENDIF
              ENDIF
-             !
-             EkOld=Ek
+             EkOld=MIN(EkOld,Ek)
              !
           ENDDO
           CALL Elapsed_TIME(TimeTOTAL,Init_O='Accum')
@@ -209,7 +215,7 @@ CONTAINS
     ENDDO
     !
 33  FORMAT('St=',I2,', It=',I3,', Ev=',F10.6,', dE=',D8.2,', dN=',D7.2, &
-           ', Tk=',D10.4,', Tj=',D10.4,', Tmm = ',D10.4,', %Xk=',F6.2,', %Pk=',F6.2) 
+           ', Tk=',D10.4,', Tj=',D10.4,', Tm=',D10.4,', |Gk|=',D8.2,', %Xk=',F6.2,', %Pk=',F6.2) 
 
 
 44  FORMAT(A4,' State=',I2,', Nk=',I3,', Ev=',F9.6,', dE=',D7.2,', WallSec=',D12.4)
@@ -320,41 +326,26 @@ CONTAINS
     ! GUARANTEES that we will only ever have positive line search solutions.
     ! This is equivalent to the TDA.
     !
-    CALL New(X,(/N,N/))
-
-    X%D=Zero
-
+!!$    CALL New(X,(/N,N/))
+!!$    X%D=Zero
 !!$    do ii=1,N
-!!$       do jj=1,N
-!!$          X%D(ii,jj)=One/Two**(2*II+2*JJ)
+!!$       do jj=MAX(1,ii-5),MIN(N,II+5)
+!!$          X%D(ii,jj)=RANDOM_DBL((/-One,One/))
 !!$       enddo
 !!$    enddo
-
-    do ii=1,N
-       do jj=MAX(1,ii-5),MIN(N,II+5)
-          X%D(ii,jj)=RANDOM_DBL((/-One,One/))
-       enddo
-    enddo
-
-    CALL SetEq(sXk,X)
-    CALL Delete(X)
-
-
-!    CALL PPrint(sXk,"RAW",Unit_O=6)
-!    CALL PPrint(sQ,' sQ ',Unit_O=6)
+!!$    CALL SetEq(sXk,X)
+!!$    CALL Delete(X)
+!!
+    CALL SetEq(sXk,sP)
+    DO II=1,sXk%NNon0
+       sXk%MTrix%D(II)=sXk%MTrix%D(II)*Zero + sXk%MTrix%D(II)*RANDOM_DBL((/-One,One/))
+    ENDDO
 
     CALL Multiply(sQ,sXk,sT1)
-
-!    CALL PPrint(sQ,' sQ ',Unit_O=6)
-!    CALL PPrint(sT1,'Q.X ',Unit_O=6)
-
-
     CALL Multiply(sT1,sP,sXk)
-
-!    CALL PPrint(sXk,"PROJECTED",Unit_O=6)
-
     CALL Delete(sQ)
     CALL Delete(sT1)
+
     ! Normalize the guess transition density.  Note factor
     ! of two has to do with normalization of P and Q.  Here,
     ! these projectors have eigenvalues == 1, not 2.
@@ -362,12 +353,11 @@ CONTAINS
     Norm=SQRT(Two*ABS(OneDot(sP,sXk,sT)))
     sXk%MTrix%D=sXk%MTrix%D*(One/Norm)
 
-!    WRITE(*,*)' Norm = ',Norm
-
 !    CALL PPrint(sXk,"NORMED",Unit_O=6)
 
     ! Put guess Xk to disk
     CALL Put(sXk,XkName)
+
     ! Tidy up 
     CALL Delete(sT)
     CALL Delete(sP)
@@ -673,9 +663,6 @@ CONTAINS
     CALL Get(sP,PName)
     CALL Get(sGkOld,GkOldName)
 
-
-!
-
 !    CALL PPrint(sGkOld,' GkOld ',Unit_O=6)
    
 !
@@ -714,15 +701,16 @@ CONTAINS
     !
   END SUBROUTINE NLCGBAKEND
 
-  SUBROUTINE LOn2BakEnd(N,I,K,Shift,Trgt,Nam,S,MPI,MatrixThreshold,MatrixNon0s)
+  SUBROUTINE LOn2BakEnd(N,I,K,Shift,Trgt,Nam,S,MPI,MatrixThreshold,MatrixNon0s,PMax_O)
     INTEGER                       :: N,I,J,K,MatrixNon0s
     TYPE(FileNames)               :: Nam
     TYPE(State)                   :: S,RQIStat
     TYPE(Parallel)                :: MPI    
     REAL(DOUBLE),DIMENSION(N,N)   :: LX,X
     TYPE(BCSR)                    :: sF,sX,sJ,sK,sZ,sP,sJK,sT1,sT2,sT3
-    REAL(DOUBLE)                  :: Shift,MatrixThreshold
+    REAL(DOUBLE)                  :: Shift,MatrixThreshold,LocalThreshold,PMax
     CHARACTER(LEN=*)              :: Trgt 
+    REAL(DOUBLE),OPTIONAL         :: PMax_O
     !----------------------------------------------------------------------------
     CALL Elapsed_TIME(TimeBCSR,Init_O='Start')
     ! Set up local Invokation parameters based on ground state values
@@ -753,12 +741,18 @@ CONTAINS
     ! Xao = Z^t.Xor.Z 
     CALL Multiply(sZ,sX,sT1)        
     CALL Multiply(sT1,sZ,sX)
+
+    IF(PRESENT(PMax_O))THEN
+!       PMax_O=MAX(sX)
+       PMax_O=FNorm(sX)
+       LocalThreshold=1D1*MatrixThreshold*PMax_O
+       LocalThreshold=MatrixThreshold
+    ELSE
+       LocalThreshold=MatrixThreshold
+    ENDIF
     ! Filter small blocks and return the # of non zero elements
-    CALL Filter(sX,Tol_O=MatrixThreshold)
+    CALL Filter(sX,Tol_O=LocalThreshold)
     MatrixNon0s=sX%NNon0
-
-!    WRITE(*,*)Trgt,' NonZeros = ',1D2*DBLE(MatrixNon0s)/DBLE(N*N)
-
     ! This is the AO transition density matrix (or CG gradient) 
     CALL Put(sX,TrixFile(Trgt,PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=RQIStat%Current%I,OffSet_O=0))
     ! Done with sX
