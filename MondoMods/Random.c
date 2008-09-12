@@ -1,3 +1,15 @@
+#include <stdlib.h>
+
+double random_(void) {
+  static long int i=0;
+  if(i == 0) {
+    i = (long int) time( NULL );
+    srand48(i);
+  }
+  return drand48();
+}
+
+
 /*
      This code is part of the MondoSCF suite of programs for linear scaling
      electronic structure theory and ab initio molecular dynamics.
@@ -22,7 +34,7 @@
      that you clearly mark derivative software.  In addition, you are encouraged
      to return derivative works to the MondoSCF group for review, and possible
      disemination in future releases.
-*/
+
 #include <stdlib.h>
 #include <time.h>
 
@@ -44,3 +56,6 @@ double random_(void) {
   return rand();
 #endif
 }
+
+
+*/

@@ -231,11 +231,6 @@ CONTAINS
 
        CALL RStarSplit(Ne,Nn,Qdex(Be:Ee),NDex(Bn:En),Ext,Rho%Qx%D,Rho%Qy%D,Rho%Qz%D, &
                       GM%Carts%D,GM%PBC%CellCenter%D,GM%AtNum%D,iSplit,Je,Jn,JnL,JnR)
-
-
-
-       ! So far, this option is not considered in the logic of RStarSplit.  Probably,it
-       ! should be (the early decantation of diffused Gaussians).
        IF(iSplit==4)THEN
           CALL ExtSplit(Ne,Qdex(Be:Ee),Ext,MaxCluster,Je)
        ENDIF
@@ -265,10 +260,9 @@ CONTAINS
        Left%BdexN=Bn+JnL-1
        Left%EdexN=Split      
        Right%BdexN=Split+1
-       Right%EdexN=Bn+JnR-1 !En
-
-
-
+       Right%EdexN=Bn+JnR-1 
+    ELSEIF(JnL==JnR)THEN
+       STOP "Logic gap in PoleTree" 
     ELSE
        Left%BdexN=Bn
        Left%EdexN=En
@@ -309,7 +303,7 @@ CONTAINS
 !!$                                         SUM(GM%AtNum%D(NDex(Left%BdexN:Left%EdexN))),   &
 !!$                                         SUM(GM%AtNum%D(NDex(Right%BdexN:Right%EdexN)))
 !!$       
-!!$55     FORMAT("  Split = ",I2,", Node = ",I4," [",I6,", ",I6,"; ",I3,"] [",I6,", ",I6,"; ",I3," ] // <",F10.4,"><",F10.4,"> ")
+!!$55     FORMAT("  Split = ",I2,", Node = ",I4," [",I3,", ",I3,"; ",I6,"] [",I3,", ",I3,"; ",I6," ] // <",F10.4,"><",F10.4,"> ")
 !!$    ENDIF
 
 !!$    ELSE
@@ -337,6 +331,158 @@ CONTAINS
   !
 
   SUBROUTINE RStarSplit(Ne,Nn,Qe,Qn,Ex,Qx,Qy,Qz,Nuc,Cntr,Chg,Axis,Je,Jn,JnLeft,JnRight)
+    !
+    INTEGER                       :: Ne,Nn,Je,Jn,JeLeft,JeRight,JnLeft,JnRight
+    INTEGER                       :: J,K,L,Axis,iDim,iBest,Distribution
+    INTEGER,DIMENSION(1:Ne)       :: Qe,QeJ,QeTmp !QLL,QUR,
+    INTEGER,DIMENSION(1:Nn)       :: Qn,Qnj,QnTmp
+    REAL(DOUBLE),DIMENSION(:)     :: Ex,Qx,Qy,Qz,Chg
+    REAL(DOUBLE),DIMENSION(:,:)   :: Nuc
+
+    REAL(DOUBLE),DIMENSION(1:Ne)  :: Xe!LLe,URe,
+!!    TYPE(BBox),  DIMENSION(1:Ne)  :: Be
+
+    REAL(DOUBLE),DIMENSION(1:Nn)  :: Xn
+    REAL(DOUBLE),DIMENSION(3)     :: Cntr
+
+    REAL(DOUBLE)                  :: Marg,MinMarg,Vol,Overlap,MinVol,MinOverlap,MaxSide,Extent
+    REAL(DOUBLE)                  :: XnLeft,XnRight,XSplit,NodeVol,NodeMrg,MarginMin,MaxDim,MaxExt
+    TYPE(BBox)                    :: LeftBox,RightBox,NodeBox
+
+    REAL(DOUBLE),DIMENSION(3)     :: Point,Side,Margin
+
+    INTEGER,PARAMETER             :: RTreeMin=2
+    LOGICAL                       :: LowerLeft
+    !-------------------------------------------------------------------
+
+    K=Qe(1)
+    Qej(1)=1
+    MaxExt=Ex(K)
+    NodeBox%BndBox(:,1)=(/Qx(K),Qy(K),Qz(K)/)
+    NodeBox%BndBox(:,2)=(/Qx(K),Qy(K),Qz(K)/)
+    DO J=2,Ne
+       K=Qe(J)
+       Qej(J)=J
+       MaxExt=MAX(MaxExt,Ex(K))
+       NodeBox%BndBox(1,1)=MIN(Qx(K),NodeBox%BndBox(1,1))
+       NodeBox%BndBox(2,1)=MIN(Qy(K),NodeBox%BndBox(2,1))
+       NodeBox%BndBox(3,1)=MIN(Qz(K),NodeBox%BndBox(3,1))
+       NodeBox%BndBox(1,2)=MAX(Qx(K),NodeBox%BndBox(1,2))
+       NodeBox%BndBox(2,2)=MAX(Qy(K),NodeBox%BndBox(2,2))
+       NodeBox%BndBox(3,2)=MAX(Qz(K),NodeBox%BndBox(3,2))
+    ENDDO
+    Side=NodeBox%BndBox(:,2)-NodeBox%BndBox(:,1)
+
+    ! Pick the axis:       
+    DO iDim=1,3
+       IF(Side(iDim)>MaxSide)THEN
+          Axis=iDim
+          MaxSide=Side(iDim)
+       ENDIF
+    ENDDO
+    !
+    IF( MaxSide < MaxExt )THEN
+       Axis=4
+       RETURN
+    ENDIF
+    !
+    DO J=1,Nn
+       K=Qn(J)
+       Qnj(J)=J
+       Xn(J)=Nuc(Axis,K)-Cntr(Axis)
+    ENDDO
+    CALL DblIntSort77(Nn,Xn,Qnj,2)                    
+    !
+    IF(Axis==1)THEN
+       DO J=1,Ne
+          K=Qe(J)
+          Qej(J)=J
+          Xe(J)=Qx(K)
+       ENDDO
+    ELSEIF(Axis==2)THEN
+       DO J=1,Ne
+          K=Qe(J)
+          Qej(J)=J
+          Xe(J)=Qy(K)
+       ENDDO
+    ELSE
+       DO J=1,Ne
+          K=Qe(J)
+          Qej(J)=J
+          Xe(J)=Qz(K)
+       ENDDO
+    ENDIF
+    CALL DblIntSort77(Ne,Xe,Qej,2)                    
+
+
+    !  Search for Nuclei that are braketed by electron distributions
+    ! ... from the right ...
+    JnRight=Nn
+    DO J=1,Nn
+       IF(Xn(J)<=Xe(Ne)+1D-10)THEN
+          JnRight=J
+       ELSE
+          EXIT
+       ENDIF
+    ENDDO
+    ! ... and the left
+    JnLeft=1
+    DO J=Nn,1,-1
+       IF(Xn(J)>=Xe(1)-1D-10)THEN
+          JnLeft=J
+       ELSE
+          EXIT
+       ENDIF
+    ENDDO
+
+    IF(JnLeft==JnRight)THEN
+       Axis=4
+       RETURN
+    ELSE
+       ! Find the center of mass split
+       XSplit=Zero
+       DO J=JnLeft,JnRight
+          XSplit=XSplit+Xn(J)*Chg(Qn(J))
+       ENDDO
+       XSplit=XSplit/SUM(Chg(Qn(JnLeft:JnRight)))
+       Jn=1
+       DO J=JnLeft,JnRight
+          IF(Xn(J)>XSplit)THEN
+             Jn=J-1
+             EXIT
+          ENDIF
+       ENDDO
+       IF(ABS(Xn(Nn)-Xn(1))<1D-5)Jn=Nn/2
+    ENDIF
+!
+    DO J=1,Ne
+       IF(Xe(J)>XSplit)THEN
+          Je=J-1
+          EXIT
+       ENDIF
+    ENDDO
+!!$
+!!$    WRITE(*,*)' XSplit = ',XSplit
+!!$    WRITE(*,*)' Xn: [',Xn(1),",",Xn(Nn),"]"
+!!$    WRITE(*,*)' Xn: [',Xn(JnLeft),",",Xn(JnRight),"]"
+!!$    WRITE(*,*)' Xe: [',Xe(1),",",Xe(Ne),"]"
+!!$    WRITE(*,*)' Je = ',Je
+
+    DO J=1,Ne
+       QeTmp(J)=Qe(Qej(J))
+    ENDDO
+    Qe(1:Ne)=QeTmp(1:Ne)
+    !
+    DO J=1,Nn
+       QnTmp(J)=Qn(Qnj(J))
+    ENDDO
+    Qn(1:Nn)=QnTmp(1:Nn)
+    !
+  END SUBROUTINE RStarSplit
+
+
+
+  SUBROUTINE RStarSplit2(Ne,Nn,Qe,Qn,Ex,Qx,Qy,Qz,Nuc,Cntr,Chg,Axis,Je,Jn,JnLeft,JnRight)
     !
     INTEGER                       :: Ne,Nn,Je,Jn,JeLeft,JeRight,JnLeft,JnRight
     INTEGER                       :: J,K,L,Axis,iDim,iBest
@@ -422,21 +568,31 @@ CONTAINS
              EXIT
           ENDIF
        ENDDO
-       ! Find the center of mass split
-       XSplit=Zero
-       DO J=JnLeft,JnRight
-          XSplit=XSplit+Xn(J)*Chg(Qn(J))
-       ENDDO
-       XSplit=XSplit/SUM(Chg(Qn(JnLeft:JnRight)))
-       !
-       Jn=1
-       DO J=JnLeft,JnRight
-          IF(Xn(J)>XSplit)THEN
-             Jn=J-1
-             EXIT
-          ENDIF
-       ENDDO
-       IF(ABS(Xn(Nn)-Xn(1))<1D-5)Jn=Nn/2
+
+
+       IF(JnLeft==JnRight)THEN
+          Jn=Jn/2
+          JnLeft=Jn/2
+          JnRight=Jn/2          
+          XSplit=Half*(Xe(Ne)+Xe(1))
+          Axis=4
+       ELSE
+          ! Find the center of mass split
+          XSplit=Zero
+          DO J=JnLeft,JnRight
+             XSplit=XSplit+Xn(J)*Chg(Qn(J))
+          ENDDO
+          XSplit=XSplit/SUM(Chg(Qn(JnLeft:JnRight)))
+          Jn=1
+          DO J=JnLeft,JnRight
+             IF(Xn(J)>XSplit)THEN
+                Jn=J-1
+                EXIT
+             ENDIF
+          ENDDO
+          IF(ABS(Xn(Nn)-Xn(1))<1D-5)Jn=Nn/2
+       ENDIF
+
     ELSE
        !-----------------------------------------------------------------------------
        !  R*-Tree split based on Beckmann, Kriegel, Schneider and Seeger (1990)
@@ -489,7 +645,7 @@ CONTAINS
        ! Pick the axis with the smallest summed margin
        ! but first check for degeneracies:
        IF( ABS(Margin(1)-Margin(2))<1D-10 .AND. &
-           ABS(Margin(1)-Margin(3))<1D-10 )THEN  
+            ABS(Margin(1)-Margin(3))<1D-10 )THEN  
           ! Pick the tie breaking axis:       
           DO iDim=1,3
              IF(Side(iDim)>MaxSide)THEN
@@ -507,7 +663,8 @@ CONTAINS
                 MinMarg=Margin(iDim)
              ENDIF
           ENDDO
-       ENDIF       
+       ENDIF
+
        ! Sort and index nuclei along chosen axis
        DO J=1,Nn
           K=Qn(J)
@@ -560,64 +717,73 @@ CONTAINS
           ENDIF
        ENDDO
 
-       ! Find the center of mass split
-       XSplit=Zero
-       DO J=JnLeft,JnRight
-          XSplit=XSplit+Xn(J)*Chg(Qn(J))
-       ENDDO
-       XSplit=XSplit/SUM(Chg(Qn(JnLeft:JnRight)))
-       ! Now find the distribution that minimizes the combined volume 
-       ! of left and right BBoxes.  The classic R*-Trees method looks at BBox-BBox
-       ! overlap, but we don't have that for just points.
-       iBest=0
-       MinVol = 1D10
-       ! Loop over all distributions
-       DO K=JnRight+1,JnLeft-1          
-          ! BBox for left region
-          Point=Nuc(:,Qn(Qnj(1)))-Cntr(:)
-          LeftBox%BndBox(:,1)=Point
-          LeftBox%BndBox(:,2)=Point
-          DO J=JnRight+1,K
-             Point=Nuc(:,Qn(Qnj(J)))-Cntr(:)
-             CALL PointBoxMerge(LeftBox,Point,LeftBox)
-          ENDDO
-          ! BBox for right region
-          Point=Nuc(:,Qn(Qnj(Nn)))-Cntr(:)
-          RightBox%BndBox(:,1)=Point
-          RightBox%BndBox(:,2)=Point
-          DO J=JnLeft-1,K+1,-1
-             Point=Nuc(:,Qn(Qnj(J)))-Cntr(:)
-             CALL PointBoxMerge(RightBox,Point,RightBox) 
-          ENDDO
-          ! Here is the total volume for this distribution
-          Vol=BoxVolume(LeftBox)+BoxVolume(RightBox)
-          ! Pick the min volume, and keep track of redundancies
-          IF(Vol<MinVol)THEN
-             iBest=1
-             MinVol=Vol
-             BestVol(iBest)=K
-          ELSEIF(ABS(Vol-MinVol)<1D-8)THEN
-             iBest=iBest+1
-             BestVol(iBest)=K
-          ENDIF
-!          WRITE(*,*)K,BoxVolume(LeftBox),BoxVolume(RightBox),BoxVolume(LeftBox)+BoxVolume(RightBox)
-       ENDDO
-       !
-       IF(iBest==1)THEN
-          Jn=BestVol(1)
+       IF(JnLeft==JnRight)THEN
+          Jn=Jn/2
+          JnLeft=Jn/2
+          JnRight=Jn/2          
+          XSplit=Half*(Xe(Ne)+Xe(1))
+          Axis=4
        ELSE
-          ! Resolve degeneracies in BestVol using split of largest dimension
-          ! and center of mass split
-          Jn=1
-          DO J=JnLeft,JnRight
-             IF(Xn(J)>XSplit)THEN
-                Jn=J-1
-                EXIT
+          ! Now find the distribution that minimizes the combined volume 
+          ! of left and right BBoxes.  The classic R*-Trees method looks at BBox-BBox
+          ! overlap, but we don't have that for just points.
+          iBest=0
+          MinVol = 1D10
+          ! Loop over all distributions
+          DO K=JnRight+1,JnLeft-1          
+             ! BBox for left region
+             Point=Nuc(:,Qn(Qnj(1)))-Cntr(:)
+             LeftBox%BndBox(:,1)=Point
+             LeftBox%BndBox(:,2)=Point
+             DO J=JnRight+1,K
+                Point=Nuc(:,Qn(Qnj(J)))-Cntr(:)
+                CALL PointBoxMerge(LeftBox,Point,LeftBox)
+             ENDDO
+             ! BBox for right region
+             Point=Nuc(:,Qn(Qnj(Nn)))-Cntr(:)
+             RightBox%BndBox(:,1)=Point
+             RightBox%BndBox(:,2)=Point
+             DO J=JnLeft-1,K+1,-1
+                Point=Nuc(:,Qn(Qnj(J)))-Cntr(:)
+                CALL PointBoxMerge(RightBox,Point,RightBox) 
+             ENDDO
+             ! Here is the total volume for this distribution
+             Vol=BoxVolume(LeftBox)+BoxVolume(RightBox)
+             ! Pick the min volume, and keep track of redundancies
+             IF(Vol<MinVol)THEN
+                iBest=1
+                MinVol=Vol
+                BestVol(iBest)=K
+             ELSEIF(ABS(Vol-MinVol)<1D-8)THEN
+                iBest=iBest+1
+                BestVol(iBest)=K
              ENDIF
+             !          WRITE(*,*)K,BoxVolume(LeftBox),BoxVolume(RightBox),BoxVolume(LeftBox)+BoxVolume(RightBox)
           ENDDO
-          IF(ABS(Xn(Nn)-Xn(1))<1D-5)Jn=Nn/2
           !
+          IF(iBest==1)THEN
+             Jn=BestVol(1) ! -1 ???
+             XSplit=Half*(Xn(Jn)+Xn(Jn+1))
+          ELSE
+             ! Resolve degeneracies in BestVol (punt) using split of largest dimension
+             ! and center of mass split
+             XSplit=Zero
+             DO J=JnLeft,JnRight
+                XSplit=XSplit+Xn(J)*Chg(Qn(J))
+             ENDDO
+             XSplit=XSplit/SUM(Chg(Qn(JnLeft:JnRight)))
+             Jn=1
+             DO J=JnLeft,JnRight
+                IF(Xn(J)>XSplit)THEN
+                   Jn=J-1
+                   EXIT
+                ENDIF
+             ENDDO
+             IF(ABS(Xn(Nn)-Xn(1))<1D-5)Jn=Nn/2
+             !
+          ENDIF
        ENDIF
+
     ENDIF
     !
     DO J=1,Ne
@@ -643,7 +809,7 @@ CONTAINS
     ENDDO
     Qn(1:Nn)=QnTmp(1:Nn)
     !
-  END SUBROUTINE RStarSplit
+  END SUBROUTINE RStarSplit2
 
 
 !! /scratch/mchalla/FREEON_HOME/bin/QCTC C10H2_TDSCF_13079 TD-SCF Xk 1 1 1 1 1 1     
