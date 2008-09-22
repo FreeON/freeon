@@ -368,7 +368,8 @@ CONTAINS
      EX=EXP(-X)
      XM=SQRT(X)
      !
-     G(1)=SQRT(Pi)*DERFC(XM)
+!     G(1)=SQRT(Pi)*DERFC(XM)
+     G(1)=SQRT(Pi)*ERFC(XM)
      G(0)=-DEI(-X)
      !
      XM=One/XM
@@ -396,7 +397,8 @@ CONTAINS
      EX=EXP(-X)
      SQX=SQRT(X)
      !
-     G(1)=SQRT(Pi)*DERFC(SQX)
+!     G(1)=SQRT(Pi)*DERFC(SQX)
+     G(1)=SQRT(Pi)*ERFC(SQX)
      G(0)=-DEI(-X)
      !
      XM=One
@@ -425,7 +427,8 @@ CONTAINS
      SQX=SQRT(X)
      !
      G(0)=0D0
-     G(1)=SQRT(Pi)*(DERFC(SQX)-1D0)
+!     G(1)=SQRT(Pi)*(DERFC(SQX)-1D0)
+     G(1)=SQRT(Pi)*(ERFC(SQX)-1D0)
      G(2)=EX-1D0
      XM=XM*SQX
      G(3)=XM*EX+5D-1*G(1)
