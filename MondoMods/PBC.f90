@@ -112,7 +112,7 @@ CONTAINS
     ! CELL CENTER
     !====================================================================================
     ! Compute the cell center with the modified positions (Zero for no PBCs)
-    GM%PBC%CellCenter%D=CellCenter(GM) 
+    GM%PBC%CellCenter%D=CellCenter(GM%PBC) 
     ! Recompute the bounding box and ITS cell center (May be different from the PBC cell center)
     GM%BndBox%D(1:3,1)=GM%Carts%D(1:3,1)
     GM%BndBox%D(1:3,2)=GM%Carts%D(1:3,1)
@@ -606,8 +606,6 @@ CONTAINS
     CALL Delete(CCarts)
     !
   END SUBROUTINE Sort_CellSet
-
-
   !--------------------------------------------------------------------------
   ! Test if a Cell in CS has Coordinates (x,y,z) 
   !--------------------------------------------------------------------------
@@ -634,31 +632,8 @@ CONTAINS
   FUNCTION AtomToFrac(GM,VecA) RESULT(VecF)
     TYPE(CRDS)                 :: GM 
     REAL(DOUBLE),DIMENSION(3)  :: VecA,VecF
-
-!    VecF=MATMUL(VecA,GM%PBC%InvBoxSh%D)
-
     VecF=MATMUL(GM%PBC%InvBoxSh%D,VecA)
-
-
-!!$    VecF(1) = VecA(1)*GM%PBC%InvBoxSh%D(1,1) + VecA(2)*GM%PBC%InvBoxSh%D(1,2) + VecA(3)*GM%PBC%InvBoxSh%D(1,3)
-!!$    VecF(2) = VecA(1)*GM%PBC%InvBoxSh%D(2,1) + VecA(2)*GM%PBC%InvBoxSh%D(2,2) + VecA(3)*GM%PBC%InvBoxSh%D(2,3)
-!!$    VecF(3) = VecA(1)*GM%PBC%InvBoxSh%D(3,1) + VecA(2)*GM%PBC%InvBoxSh%D(3,2) + VecA(3)*GM%PBC%InvBoxSh%D(3,3)
   END FUNCTION AtomToFrac
-
-
-  FUNCTION AtomToFrac2(GM,VecA) RESULT(VecF)
-    TYPE(CRDS)                 :: GM 
-    REAL(DOUBLE),DIMENSION(3)  :: VecA,VecF
-
-    VecF=MATMUL(VecA,GM%PBC%InvBoxSh%D)
-
-!    VecF=MATMUL(GM%PBC%InvBoxSh%D,VecA)
-
-
-!!$    VecF(1) = VecA(1)*GM%PBC%InvBoxSh%D(1,1) + VecA(2)*GM%PBC%InvBoxSh%D(1,2) + VecA(3)*GM%PBC%InvBoxSh%D(1,3)
-!!$    VecF(2) = VecA(1)*GM%PBC%InvBoxSh%D(2,1) + VecA(2)*GM%PBC%InvBoxSh%D(2,2) + VecA(3)*GM%PBC%InvBoxSh%D(2,3)
-!!$    VecF(3) = VecA(1)*GM%PBC%InvBoxSh%D(3,1) + VecA(2)*GM%PBC%InvBoxSh%D(3,2) + VecA(3)*GM%PBC%InvBoxSh%D(3,3)
-  END FUNCTION AtomToFrac2
   !-------------------------------------------------------------------------------
   ! Convert from Fractional Coordinates to Atomic Coordinates
   !-------------------------------------------------------------------------------
@@ -681,7 +656,7 @@ CONTAINS
     TYPE(CRDS)     :: GM
     TYPE(PrimPair) :: P
     LOGICAL        :: Wrap
-    REAL(DOUBLE),DIMENSION(3):: PTmp,PT1,PT2,PT3,PT4
+    REAL(DOUBLE),DIMENSION(3):: PT1,PT2,PT3,PT4
     ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
     IF(GM%PBC%Dimen>0.AND.Wrap)THEN
        ! Fractional coordinates:
@@ -701,7 +676,6 @@ CONTAINS
        IF(DOT_PRODUCT(PT4-PT1,PT4-PT1).GT.1D-8)THEN
           WRITE(*,*)'- - - - - - - - - - - - - - - '
           WRITE(*,*)' P  = ',P%P
-          WRITE(*,*)' PT = ',PTmp
           WRITE(*,*)' Pw = ',P%Pw
           WRITE(*,*)' '
           WRITE(*,*)' P1 = ',PT1
@@ -736,11 +710,9 @@ CONTAINS
   SUBROUTINE AtomCyclic(GM,VecA)
     TYPE(CRDS)                 :: GM        
     REAL(DOUBLE),DIMENSION(3)  :: VecA,VecF    
-    !
     VecF = AtomToFrac(GM,VecA)
     CALL FracCyclic(GM,VecF)
     VecA = FracToAtom(GM,VecF)
-    !
   END SUBROUTINE AtomCyclic
   !===================================================================================
   !
@@ -834,37 +806,21 @@ CONTAINS
 
   END FUNCTION InAtomBox
   !-------------------------------------------------------------------------------
-  FUNCTION CellCenter(G)
-    TYPE(CRDS)                     :: G
+  FUNCTION CellCenter(PBC)
+    TYPE(PBCInfo)                     :: PBC
     REAL(DOUBLE),DIMENSION(3)   :: CellCenter
     INTEGER                     :: I,J
-    !
     !   Find the center of the cell     
     CellCenter=0D0
     DO I=1,3
-       IF(G%PBC%AutoW%I(I)==1)THEN           
+       IF(PBC%AutoW%I(I)==1)THEN           
           DO J=1,3
-             IF(G%PBC%AutoW%I(J)==1)THEN
-                CellCenter(I)=CellCenter(I)+Half*G%PBC%BoxShape%D(I,J)
+             IF(PBC%AutoW%I(J)==1)THEN
+                CellCenter(I)=CellCenter(I)+Half*PBC%BoxShape%D(I,J)
              ENDIF
           ENDDO
-
-!!$       ELSE
-!!$          DO J=1,G%NAtms
-!!$             CellCenter(I)=CellCenter(I)+G%Carts%D(I,J)
-!!$          ENDDO
-!!$          CellCenter(I)=CellCenter(I)/DBLE(G%NAtms)
-
        ENDIF
     ENDDO
-!!$    WRITE(*,*)'================================================='
-!!$    WRITE(*,*)'================================================='
-!!$    WRITE(*,*)' CELLCENTER OVERIDE CELLCENTER OVERIDE CELLCENTER '
-!!$    WRITE(*,*)' CellCenter = ',CellCenter
-!!$    WRITE(*,*)' Halvsies   = ',Half*(G%PBC%BoxShape%D(:,1)+G%PBC%BoxShape%D(:,2)+G%PBC%BoxShape%D(:,3))
-!!$    WRITE(*,*)'================================================='
-!!$    WRITE(*,*)'================================================='
-
   END FUNCTION CellCenter
   !-------------------------------------------------------------------------------
   FUNCTION CellVolume(BoxShape,AutoW)
