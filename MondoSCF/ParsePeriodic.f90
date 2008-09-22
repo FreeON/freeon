@@ -19,6 +19,8 @@ CONTAINS
     TYPE(PBCInfo)    :: PBC
     INTEGER          :: I,GBeg,GEnd
 !-----------------------------------------------------------------------!
+    WRITE(*,*)' Load PERIODIC '
+
     IF(O%Grad==GRAD_TS_SEARCH_NEB)THEN
        GBeg=0
        GEnd=G%Clones+1
@@ -48,6 +50,7 @@ CONTAINS
        G%Clone(I)%PBC=PBC
        CALL CalculateCoordArrays(G%Clone(I))
     ENDDO
+    WRITE(*,*)' Load PERIODIC DONE'
 
   END SUBROUTINE LoadPeriodic
 !=========================================================================
@@ -164,9 +167,11 @@ CONTAINS
     REAL(DOUBLE),DIMENSION(6)       :: Vec
     REAL(DOUBLE)                    :: AngAB,AngAC,AngBC,Error
     !
-
+    ! Initialize some items that may remain zero
     PBC%TransVec%D=Zero
+    PBC%InvBoxSh%D=Zero
     PBC%BoxShape%D=Zero  
+    PBC%CellCenter%D=Zero
     DO I=1,3
        PBC%BoxShape%D(I,I)=One
        PBC%InvBoxSh%D(I,I)=One
@@ -261,92 +266,6 @@ CONTAINS
             //TRIM(END_PERIODIC)//'. You may be missing blank '  &
             //'line at the end of the inPut file.')
      END SUBROUTINE LoadLattice
-!============================================================================
-!
-!============================================================================
-  SUBROUTINE UnitCellSetUp(PBC)
-    TYPE(PBCInfo)       :: PBC
-    INTEGER             :: I,J,K,NLvec,NTvec
-
-!   CalculatetheBoxVolume
-    PBC%CellVolume=ABS(CellVolume(PBC%BoxShape%D,PBC%AutoW%I))
-!!$!   Calculate dipole and quadripole factors
-!!$    IF(PBC%Dimen<2)THEN
-!!$       PBC%DipoleFAC=Zero
-!!$       PBC%QupoleFAC=Zero
-!!$    ELSEIF(PBC%Dimen==2)THEN
-!!$       PBC%DipoleFAC=(Four*Pi/PBC%CellVolume)*(One/(PBC%Epsilon+One))
-!!$       PBC%QupoleFAC=Zero
-!!$       IF(ABS(PBC%DipoleFAC).LT.1.D-14) PBC%DipoleFAC=Zero
-!!$    ELSEIF(PBC%Dimen==3)THEN
-!!$       PBC%DipoleFAC=-(Four*Pi/PBC%CellVolume)*(One/Three-One/(Two*PBC%Epsilon+One))
-!!$       PBC%QupoleFAC=(Two*Pi/PBC%CellVolume)*(One/Three-One/(Two*PBC%Epsilon+One))
-!!$       IF(ABS(PBC%DipoleFAC).LT.1.D-14) PBC%DipoleFAC=Zero
-!!$       IF(ABS(PBC%QupoleFAC).LT.1.D-14) PBC%QupoleFAC=Zero
-!!$    ENDIF
-
-!   Find the center of the cell
-    DO I=1,3
-       PBC%CellCenter%D(I)=Zero
-       IF(PBC%AutoW%I(I)==1)THEN
-          DO J=1,3
-             IF(PBC%AutoW%I(J)==1)THEN
-                PBC%CellCenter%D(I)=PBC%CellCenter%D(I)+Half*PBC%BoxShape%D(I,J)
-             ENDIF
-          ENDDO
-       ENDIF
-    ENDDO
-
-
-    ! Compute the inverse box shape (transpose of reciprocal lattice vectors)
-    ! Note that very specific assumptions are made about orientation of 1-d and 2-d 
-    ! boundary conditions.
-    !
-    IF(PBC%Dimen==1)THEN
-       PBC%InvBoxSh%D=0D0
-       PBC%InvBoxSh%D(1,1)=One/PBC%BoxShape%D(1,1)  ! Periodic along x-axis
-    ELSEIF(PBC%Dimen==2)THEN
-       PBC%InvBoxSh%D=0D0
-       PBC%InvBoxSh%D(1:2,1:2)=InverseMatrix2x2(PBC%BoxShape%D(1:2,1:2))  ! Periodic in x-y plane
-    ELSE
-       PBC%InvBoxSh%D=InverseMatrix3x3(PBC%BoxShape%D)   
-    ENDIF
-
-    DO I=1,3
-    WRITE(*,*)' IV Box = ',(PBC%InvBoxSh%D(I,J),J=1,3)
- ENDDO
-
-  END SUBROUTINE UnitCellSetUp
-!------------------------------------------------------------------------!
-!
-!------------------------------------------------------------------------!
-  SUBROUTINE ParseSuperCell(G)
-    INTEGER,DIMENSION(3)  :: SC 
-    TYPE(CRDS)            :: G
-    INTEGER               :: I,J,K,NTot
-    SC(:)=0
-    IF(FindKey(SUPERC,Inp))THEN
-       DO K=1,10
-          IF(OptKeyLocQ(Inp,SUPERC,IntToChar(K),MaxSets,NLoc,Location)) THEN
-             Ntot = NLoc
-             DO I=1,NLoc
-                SC(Location(I)) = K
-             ENDDO
-          ENDIF
-       ENDDO
-    ELSE
-       SC(:)=1
-    ENDIF   
-    IF(SC(1)==0 .OR. SC(2)==0 .OR. SC(3)==0) THEN
-       CALL MondoHalt(PRSE_ERROR,'SupreCell=('//TRIM(IntToChar(SC(1)))//','// &
-                                                TRIM(IntToChar(SC(2)))//','// &
-                                                TRIM(IntToChar(SC(3)))//') given on input.')
-    ENDIF
-    G%PBC%SuperCell%I(1)=1
-    IF(G%PBC%AutoW%I(1)==1) G%PBC%SuperCell%I(1)=SC(1)
-    IF(G%PBC%AutoW%I(2)==1) G%PBC%SuperCell%I(2)=SC(2)
-    IF(G%PBC%AutoW%I(3)==1) G%PBC%SuperCell%I(3)=SC(3)
-  END SUBROUTINE ParseSuperCell
   !=========================================================================
   ! Inflate atomic coordinates if given in fractionals.  If atoms are outside
   ! the unit cell, wrap them back in.  Note that all of this here, and in 
