@@ -347,7 +347,7 @@ C
             CALL PAPIEX_STOP(25)
             CALL PAPIEX_START(26,"< MD3TRR_8 > ")
 #endif
-            CALL MD3TRR8(Nc,Wrk(iPQx),Wrk(iPQy),Wrk(iPQz),
+            CALL MD3TRR9(Nc,Wrk(iPQx),Wrk(iPQy),Wrk(iPQz),
      >                   Wrk(iAux),Wrk(iArr))                                              
 #ifdef PAPIEX            
             CALL PAPIEX_STOP(26)
