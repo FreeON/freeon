@@ -205,7 +205,6 @@ CONTAINS
        ELSE
           EXIT
        ENDIF
-
     ENDDO
     !
     !---------------------------------------------------------------------------------------------
@@ -239,7 +238,6 @@ CONTAINS
 !!$      is=Near(N)%P%HERM%Stack
 !!$      CALL RAhmadiJAlmlof95c(EllP,LenP,NuclearExpnt,JTau,QC%Prim%Zeta,QC%Prim%Pw,HGKet,HGStack(is)) 
 !!$   ENDDO
-!!$
 !!$    DO N=1,NNear
 !!$       Q=>Near(N)%P
 !!$       EllP=QC%Prim%Ell
@@ -278,7 +276,7 @@ CONTAINS
           ENDIF
        ENDDO
     ENDDO
-!!$    !
+    !
     Integral_Time=Integral_Time+(MTimer()-Integral_Time_Start)
     NFarAv=NFarAv+NFar
     NNearAv=NNearAv+NNear
@@ -869,6 +867,16 @@ ENDIF
           R(I,1)=AuxR(I,J)
        ENDDO
     ENDDO
+
+
+    DO I=1,LenPQ
+       WRITE(*,*)I,R(1,I)
+    ENDDO
+
+    STOP
+
+
+
 
 !!$    CALL VMD3RR(MaxCluster,HGEll4,Nc,EllPQ,LMNx(-1,-1,-1),AuxR(1,0),PQx(1),PQy(1),PQz(1),R3T(1,1))
 !!$    CALL KetKontract(MaxCluster,Nc,LenP*LenQ,PLMNx(EllP,EllQ)%I(1),QLMNx(EllP,EllQ)%I(1), &
