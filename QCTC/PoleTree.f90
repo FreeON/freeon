@@ -228,7 +228,6 @@ CONTAINS
 !!$       WRITE(*,*)' QDex(1:10)=',QDex(1:10)
 !!$       WRITE(*,*)' Be = ',Be,' Ne = ',Ne
 !!$       
-
        CALL RStarSplit(Ne,Nn,Qdex(Be:Ee),NDex(Bn:En),Ext,Rho%Qx%D,Rho%Qy%D,Rho%Qz%D, &
                       GM%Carts%D,GM%PBC%CellCenter%D,GM%AtNum%D,iSplit,Je,Jn,JnL,JnR)
        IF(iSplit==4)THEN
@@ -261,8 +260,9 @@ CONTAINS
        Left%EdexN=Split      
        Right%BdexN=Split+1
        Right%EdexN=Bn+JnR-1 
-    ELSEIF(JnL==JnR)THEN
-       STOP "Logic gap in PoleTree" 
+!!$    ELSEIF(JnL==JnR)THEN
+!!$       WRITE(*,*)' JnL = ',JnL,' JnR = ',JnR
+!!$      STOP "Logic gap in PoleTree" 
     ELSE
        Left%BdexN=Bn
        Left%EdexN=En
@@ -304,7 +304,7 @@ CONTAINS
 !!$                                         SUM(GM%AtNum%D(NDex(Right%BdexN:Right%EdexN)))
 !!$       
 !!$55     FORMAT("  Split = ",I2,", Node = ",I4," [",I3,", ",I3,"; ",I6,"] [",I3,", ",I3,"; ",I6," ] // <",F10.4,"><",F10.4,"> ")
-!!$    ENDIF
+!!$!    ENDIF
 
 !!$    ELSE
 !!$
@@ -354,7 +354,12 @@ CONTAINS
     INTEGER,PARAMETER             :: RTreeMin=2
     LOGICAL                       :: LowerLeft
     !-------------------------------------------------------------------
-
+    !
+    IF(Nn==1)THEN
+       Axis=4
+       RETURN
+    ENDIF
+    !
     K=Qe(1)
     Qej(1)=1
     MaxExt=Ex(K)
@@ -374,6 +379,7 @@ CONTAINS
     Side=NodeBox%BndBox(:,2)-NodeBox%BndBox(:,1)
 
     ! Pick the axis:       
+    MaxSide=-BIG_DBL
     DO iDim=1,3
        IF(Side(iDim)>MaxSide)THEN
           Axis=iDim
@@ -452,15 +458,20 @@ CONTAINS
              EXIT
           ENDIF
        ENDDO
-       IF(ABS(Xn(Nn)-Xn(1))<1D-5)Jn=Nn/2
     ENDIF
 !
-    DO J=1,Ne
-       IF(Xe(J)>XSplit)THEN
-          Je=J-1
-          EXIT
-       ENDIF
-    ENDDO
+    IF(ABS(Xn(Nn)-Xn(1))<1D-5)THEN
+       Jn=Nn/2
+       Je=Ne/2
+    ELSE
+       DO J=1,Ne
+          IF(Xe(J)>XSplit)THEN
+             Je=J-1
+             EXIT
+          ENDIF
+       ENDDO
+    ENDIF
+
 !!$
 !!$    WRITE(*,*)' XSplit = ',XSplit
 !!$    WRITE(*,*)' Xn: [',Xn(1),",",Xn(Nn),"]"
