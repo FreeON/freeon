@@ -40,6 +40,7 @@ PROGRAM SForce
   USE AtomPairs
   USE BraBloks
   USE BlokTrWdS
+  USE MondoLogger
 
 #ifdef PARALLEL
   USE MondoMPI
@@ -96,8 +97,10 @@ PROGRAM SForce
   ! Is this a bug if we don't use the extrapolated Fockian?
   INQUIRE(FILE=TrixFile('F_DIIS',Args,0),EXIST=Present)
   IF(Present) THEN
+    CALL MondoLog(DEBUG_NONE, "SForce", "getting F from "//TRIM(TrixFile('F_DIIS',Args,0)))
     CALL Get(F,TrixFile('F_DIIS',Args,0))
   ELSE
+    CALL MondoLog(DEBUG_NONE, "SForce", "getting F from "//TRIM(TrixFile('OrthoF',Args,0)))
     CALL Get(F,TrixFile('OrthoF',Args,0))
   ENDIF
 
@@ -111,13 +114,12 @@ PROGRAM SForce
   ENDIF
 
   ! This tests the commutator of P and F. This should be zero.
-  !CALL Multiply(P, F, T1)
-  !CALL Multiply(F, P, T2)
-  !CALL Multiply(T2, -1D0)
-  !CALL Add(T1, T2, T3)
+  CALL Multiply(P, F, T1)
+  CALL Multiply(F, P, T2)
+  CALL Multiply(T2, -1D0)
+  CALL Add(T1, T2, T3)
 
-  !WRITE(*,*) "FNorm(T3) = ", FNorm(T3)
-  !STOP
+  CALL MondoLog(DEBUG_NONE, "SForce", "DIIS error = "//TRIM(DblToChar(SQRT(Dot(T3, T3))/DBLE(NBasF))))
 
 #ifdef PARALLEL
   CALL Multiply(P_DBCSR,F,T1)       ! T1:=P.F

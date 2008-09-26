@@ -357,41 +357,42 @@ MODULE DerivedTypes
   !
   TYPE CRDS
     ! Status variables
-    INTEGER          :: Alloc     !-- Allocation key
-    LOGICAL          :: InAU      !-- True if coordinates from input are in Atomic Units (internally we work with atomic units)
-    INTEGER          :: Ordrd     !-- Reordering key
-    INTEGER          :: Confg     !-- Configuration number
+    INTEGER          :: Alloc         !-- Allocation key
+    LOGICAL          :: InAU          !-- True if coordinates from input are in Atomic Units (internally we work with atomic units)
+    INTEGER          :: Ordrd         !-- Reordering key
+    INTEGER          :: Confg         !-- Configuration number
     ! Electronic coordinates
-    INTEGER          :: NElec     !-- Number of electrons
-    INTEGER          :: Multp     !-- Total spin multplicity
-    REAL(DOUBLE)     :: TotCh     !-- Total charge
-    INTEGER          :: NAlph     !-- Number of alpha electrons
-    INTEGER          :: NBeta     !-- Number of beta electrons
+    INTEGER          :: NElec         !-- Number of electrons
+    INTEGER          :: Multp         !-- Total spin multplicity
+    REAL(DOUBLE)     :: TotCh         !-- Total charge
+    INTEGER          :: NAlph         !-- Number of alpha electrons
+    INTEGER          :: NBeta         !-- Number of beta electrons
     ! Misc
-    REAL(DOUBLE)     :: ETotal    !-- Total SCF Energy at this geometry
-    REAL(DOUBLE)     :: GradRMS   !-- RMS error in gradient at this geometry
-    REAL(DOUBLE)     :: GradMax   !-- Max error in gradient at this geometry
-    LOGICAL          :: Unstable  !-- SCF is unstable at this geometry
-    TYPE(DBL_RNK2)   :: BndBox    !-- Bounding box of the system
+    REAL(DOUBLE)     :: ETotal        !-- Total SCF Energy at this geometry
+    TYPE(DBL_VECT)   :: ETotalPerSCF  !-- Total SCF energy per SCF cycle
+    REAL(DOUBLE)     :: GradRMS       !-- RMS error in gradient at this geometry
+    REAL(DOUBLE)     :: GradMax       !-- Max error in gradient at this geometry
+    LOGICAL          :: Unstable      !-- SCF is unstable at this geometry
+    TYPE(DBL_RNK2)   :: BndBox        !-- Bounding box of the system
     ! Perodic Stuff
-    TYPE(PBCInfo)    :: PBC       !-- Periodic Information
+    TYPE(PBCInfo)    :: PBC           !-- Periodic Information
     ! Atomic coordinates
-    INTEGER          :: NAtms     !-- Number of atoms
-    INTEGER          :: Nkind     !-- Number of atom kinds or types
-    TYPE(DBL_VECT)   :: AtNum     !-- Atomic number per atom
-    TYPE(INT_VECT)   :: AtTyp     !-- Atom type or kind per atom
-    TYPE(CHR10_VECT) :: AtNam     !-- Atomname
-    TYPE(CHR10_VECT) :: AtMMTyp   !-- Molecular Mechanics atomtype
-    TYPE(DBL_VECT)   :: AtMss     !-- Atomic Mass per Atom
-    TYPE(INT_VECT)   :: CConstrain!-- Atom type or kind per atom
-    TYPE(INT_VECT)   :: DoFreq    !-- Atom included in the frequency calculation
-    TYPE(DBL_RNK2)   :: Carts     !-- Cartesian coordinates
-    TYPE(DBL_RNK2)   :: BoxCarts  !-- Lattice coordinates
-    TYPE(DBL_RNK2)   :: Velocity  !-- velocities
-    TYPE(DBL_RNK2)   :: Gradients !-- Gradients
+    INTEGER          :: NAtms         !-- Number of atoms
+    INTEGER          :: Nkind         !-- Number of atom kinds or types
+    TYPE(DBL_VECT)   :: AtNum         !-- Atomic number per atom
+    TYPE(INT_VECT)   :: AtTyp         !-- Atom type or kind per atom
+    TYPE(CHR10_VECT) :: AtNam         !-- Atomname
+    TYPE(CHR10_VECT) :: AtMMTyp       !-- Molecular Mechanics atomtype
+    TYPE(DBL_VECT)   :: AtMss         !-- Atomic Mass per Atom
+    TYPE(INT_VECT)   :: CConstrain    !-- Atom type or kind per atom
+    TYPE(INT_VECT)   :: DoFreq        !-- Atom included in the frequency calculation
+    TYPE(DBL_RNK2)   :: Carts         !-- Cartesian coordinates
+    TYPE(DBL_RNK2)   :: BoxCarts      !-- Lattice coordinates
+    TYPE(DBL_RNK2)   :: Velocity      !-- velocities
+    TYPE(DBL_RNK2)   :: Gradients     !-- Gradients
     !
-    TYPE(DBL_RNK2)   :: Displ     !-- Displaced Cartesian geometry
-    TYPE(PBCInfo)    :: PBCDispl  !-- Displaced Periodic Information
+    TYPE(DBL_RNK2)   :: Displ         !-- Displaced Cartesian geometry
+    TYPE(PBCInfo)    :: PBCDispl      !-- Displaced Periodic Information
     ! Internal coordinates related arrays
     LOGICAL          :: LatticeOnly
     INTEGER          :: AltCount
@@ -673,4 +674,3 @@ MODULE DerivedTypes
   !----------------------------------------------------------------------
   !
 END MODULE DerivedTypes
-

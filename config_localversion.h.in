@@ -1,0 +1,2 @@
+/* The local version of Mondo. */
+#define LOCAL_VERSION "@LOCAL_VERSION@"

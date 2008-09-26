@@ -218,7 +218,7 @@ PROGRAM QCTC
 #endif
     CALL Elapsed_Time(TimeNukE,'Accum')
   ENDIF
-  CALL Put(E_Nuc_Tot,'E_NuclearTotal',StatsToChar(Current))
+  CALL Put(E_Nuc_Tot,'E_NuclearTotal',Stats_O=Current)
   !-------------------------------------------------------------------------------
   ! Printing
   IF(SCFActn=='FockPrimeBuild'.OR.SCFActn=='StartResponse')THEN

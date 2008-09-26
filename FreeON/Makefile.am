@@ -1,8 +1,8 @@
 include $(top_srcdir)/make.inc
 
-bin_PROGRAMS = MondoSCF
+bin_PROGRAMS = FreeON
 
-MondoSCF_SOURCES = \
+FreeON_SOURCES = \
   ControlStructures.f90 \
   ls_rmsd.f90 \
   NEB.f90 \
@@ -42,20 +42,20 @@ MondoSCF_SOURCES = \
   ZippyQuote.f90 \
   GetPID.c \
   Spawn.c \
-  MondoSCF.f90
+  FreeON.f90
 
-MondoSCF_DEPENDENCIES = $(MondoMods_DEPENDENCY_FILES)
+FreeON_DEPENDENCIES = $(MondoMods_DEPENDENCY_FILES)
 
 SOURCES_DEPCHECK = $(MondoSCF_SOURCES)
 
 EXTRA_INCLUDES = -I../MondoMods
 
-MondoSCF_LDADD = $(LDADD_MONDOMODS) $(LDADD_INTERNAL_LAPACK) $(LDADD_INTERNAL_HDF5)
+FreeON_LDADD = $(LDADD_MONDOMODS) $(LDADD_INTERNAL_LAPACK) $(LDADD_INTERNAL_HDF5)
 
 CPPMISC = -DNEB2
 
-# Link rule for MondoSCF.
-MondoSCF_LINK = $(FCLINK)
+# Link rule for FreeON.
+FreeON_LINK = $(FCLINK)
 
 # Dependencies.
 ParseCommands.o : \
@@ -63,10 +63,11 @@ ParseCommands.o : \
   $(top_srcdir)/MondoConfig.h
 
 ParseOptions.o : \
-	Numerics.o \
+  Numerics.o \
   ConflictDetect.o \
-	OptionKeys.o \
-	ControlStructures.o
+  OptionKeys.o \
+  ControlStructures.o \
+  $(top_srcdir)/MondoConfig.h
 
 ParseGeometries.o : \
   ConflictDetect.o \
@@ -78,42 +79,42 @@ ParseGeometries.o : \
   NEB.o
 
 ParseExtraCoords.o : \
-	ControlStructures.o \
-	OptionKeys.o \
-	GeometryKeys.o \
-	ParseGeometries.o \
-	InCoords.o \
-	Massage.o
+  ControlStructures.o \
+  OptionKeys.o \
+  GeometryKeys.o \
+  ParseGeometries.o \
+  InCoords.o \
+  Massage.o
 
 ParseGeomOpt.o : \
-	GeomOptKeys.o \
+  GeomOptKeys.o \
   ControlStructures.o \
-	OptionKeys.o
+  OptionKeys.o
 
 ParseProperties.o : \
   ControlStructures.o
 
 ParseInput.o : \
   Massage.o \
-	ParseBasis.o \
-	ParseOptions.o \
-	ParseCommands.o \
-	ParseDynamics.o \
-	ParsePeriodic.o \
-	ParseGeometries.o \
-	ControlStructures.o \
-	ParseParallel.o \
-	ParseGeomOpt.o \
-	ParseExtraCoords.o \
-	ParseProperties.o
+  ParseBasis.o \
+  ParseOptions.o \
+  ParseCommands.o \
+  ParseDynamics.o \
+  ParsePeriodic.o \
+  ParseGeometries.o \
+  ControlStructures.o \
+  ParseParallel.o \
+  ParseGeomOpt.o \
+  ParseExtraCoords.o \
+  ParseProperties.o
 
 ParsePeriodic.o : \
-	OptionKeys.o \
+  OptionKeys.o \
   PeriodicKeys.o \
-	ControlStructures.o
+  ControlStructures.o
 
 ParseParallel.o : \
-	ParallelKeys.o \
+  ParallelKeys.o \
   ControlStructures.o
 
 ParseBasis.o : \
@@ -121,8 +122,8 @@ ParseBasis.o : \
 
 ParseDynamics.o : \
   DynamicsKeys.o \
-	ControlStructures.o \
-	OptionKeys.o
+  ControlStructures.o \
+  OptionKeys.o
 
 ConflictDetect.o : \
   ControlStructures.o
@@ -133,40 +134,40 @@ Overlay.o : \
 MDynamics.o : \
   $(top_srcdir)/MondoConfig.h \
   SCFs.o \
-	Numerics.o \
-	ControlStructures.o \
-	GeomOptKeys.o \
-	PunchHDF.o \
-	DynamicsKeys.o
+  Numerics.o \
+  ControlStructures.o \
+  GeomOptKeys.o \
+  PunchHDF.o \
+  DynamicsKeys.o
 
 Response.o : \
-	SCFKeys.o \
+  SCFKeys.o \
   Overlay.o \
-	PunchHDF.o \
-	OptionKeys.o \
-	ControlStructures.o \
-	NEB.o \
-	SCFs.o
+  PunchHDF.o \
+  OptionKeys.o \
+  ControlStructures.o \
+  NEB.o \
+  SCFs.o
 
 Hessian.o : \
   InCoords.o \
-	GeomOptKeys.o \
-	PunchHDF.o \
-	ControlStructures.o
+  GeomOptKeys.o \
+  PunchHDF.o \
+  ControlStructures.o
 
 MonteCarlo.o : \
   SCFs.o \
-	ControlStructures.o \
-	GeomOptKeys.o \
-	PunchHDF.o \
-	DynamicsKeys.o \
-	MDynamics.o
+  ControlStructures.o \
+  GeomOptKeys.o \
+  PunchHDF.o \
+  DynamicsKeys.o \
+  MDynamics.o
 
 Optimizer.o : \
   SCFs.o \
-	QUICCA.o
+  QUICCA.o
 
-MondoSCF.o : \
+FreeON.o : \
   $(top_srcdir)/MondoConfig.h \
   SCFs.o \
   Response.o \
@@ -180,30 +181,31 @@ MondoSCF.o : \
 
 QUICCA.o : \
   PunchHDF.o \
-	Hessian.o
+  Hessian.o
 
 ZippyQuote.o : \
   ControlStructures.o
 
 NEB.o : \
-	ls_rmsd.o \
+  ls_rmsd.o \
   ControlStructures.o
 
 Massage.o : \
-	OptionKeys.o \
+  OptionKeys.o \
   DynamicsKeys.o \
-	GeometryKeys.o \
-	ControlStructures.o
+  GeometryKeys.o \
+  ControlStructures.o
 
 SCFs.o : \
-	SCFKeys.o \
-	Overlay.o \
-	DynamicsKeys.o \
-	PunchHDF.o \
-	Numerics.o \
-	OptionKeys.o \
-	ControlStructures.o \
-	NEB.o
+  SCFKeys.o \
+  Overlay.o \
+  DynamicsKeys.o \
+  PunchHDF.o \
+  Numerics.o \
+  OptionKeys.o \
+  ControlStructures.o \
+  NEB.o \
+  $(top_srcdir)/MondoConfig.h
 
 InCoords.o : \
   ControlStructures.o
@@ -213,8 +215,9 @@ ParseGeomOpt.o : \
 
 PunchHDF.o : \
   ControlStructures.o \
-	OptionKeys.o
+  OptionKeys.o
 
 PrintParsed.o : \
   ControlStructures.o \
-  $(top_srcdir)/MondoConfig.h
+  $(top_srcdir)/MondoConfig.h \
+  $(top_srcdir)/MondoLocalVersion.h

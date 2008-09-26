@@ -1294,9 +1294,9 @@ CONTAINS
     CALL ClosePU(PU)
     !
 32  FORMAT(1X,A)
-33  FORMAT(56('-'))
+33  FORMAT(67('-'))
 34  FORMAT('   Atom   Z                Forces (au) ')
-35  FORMAT(I6,'  ',I3,'  ',3(F14.10))
+35  FORMAT(I6,'  ',I3,'  ',3(F18.10))
 40  FORMAT(3(2X,F14.10))
     !
   END SUBROUTINE Print_Force

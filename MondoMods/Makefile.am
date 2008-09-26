@@ -1,16 +1,20 @@
 include $(top_srcdir)/make.inc
 
 if INTERNAL_LAPACK
-  INTERNAL_LAPACK_DIRS = lapack
+INTERNAL_LAPACK_DIRS = lapack
 endif
 
 if INTERNAL_HDF5
-  INTERNAL_HDF5_DIRS = hdf5
+INTERNAL_HDF5_DIRS = hdf5
 endif
 
 SUBDIRS = $(INTERNAL_HDF5_DIRS) $(INTERNAL_LAPACK_DIRS)
 
+if USE_DYNAMIC_LINKING
+lib_LTLIBRARIES = libMondoMods.la
+else
 noinst_LTLIBRARIES = libMondoMods.la
+endif
 
 libMondoMods_la_SOURCES = \
   AInv.f90 \
@@ -253,7 +257,7 @@ Thresholding.lo : \
 
 SpecFun.lo : \
   DerivedTypes.lo \
-	Parse.lo
+  Parse.lo
 
 AtomPairs.lo : DerivedTypes.lo
 
@@ -273,7 +277,7 @@ Mechanics.lo : \
   GlobalScalars.lo \
   GlobalCharacters.lo \
   GlobalObjects.lo \
-	InOut.lo
+  InOut.lo
 
 Slatec.lo : GlobalScalars.lo ProcessControl.lo
 
@@ -352,23 +356,23 @@ EllToInclude.lo : DerivedTypes.lo GlobalScalars.lo
 
 FTest.lo : \
   DerivedTypes.lo \
-	GlobalScalars.lo \
-	GlobalCharacters.lo \
-	InOut.lo \
-	PrettyPrint.lo \
-	Parse.lo \
-	MemMan.lo \
-	SpecFun.lo
+  GlobalScalars.lo \
+  GlobalCharacters.lo \
+  InOut.lo \
+  PrettyPrint.lo \
+  Parse.lo \
+  MemMan.lo \
+  SpecFun.lo
 
 SMTest.lo : \
   DerivedTypes.lo \
-	GlobalScalars.lo \
-	GlobalCharacters.lo \
-	InOut.lo \
-	PrettyPrint.lo \
-	Parse.lo \
-	MemMan.lo \
-	Order.lo
+  GlobalScalars.lo \
+  GlobalCharacters.lo \
+  InOut.lo \
+  PrettyPrint.lo \
+  Parse.lo \
+  MemMan.lo \
+  Order.lo
 
 ProcessControl.lo : \
   DerivedTypes.lo \
@@ -385,12 +389,3 @@ MondoLogger.lo : \
 CWrappers.lo : \
   ParsingConstants.lo \
   MondoLogger.lo
-
-HDF5Wrap.lo : \
-  $(top_srcdir)/config.h
-
-SMWrap.lo : \
-  $(top_srcdir)/config.h
-
-Random.lo : \
-  $(top_srcdir)/config.h

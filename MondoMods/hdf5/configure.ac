@@ -534,7 +534,6 @@ dnl ----------------------------------------------------------------------
 dnl Create libtool.  If shared/static libraries are going to be enabled
 dnl or disabled, it should happen before these macros.
 AC_LIBTOOL_DLOPEN
-AC_DISABLE_SHARED
 AM_PROG_LIBTOOL
 
 dnl Post processing to patch up some deficiencies in libtool (as of

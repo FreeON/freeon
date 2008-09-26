@@ -23,6 +23,9 @@
 !    to return derivative works to the MondoSCF group for review, and possible
 !    disemination in future releases.
 !------------------------------------------------------------------------------
+
+#include "MondoConfig.h"
+
 MODULE ParseOptions
   USE InOut
   USE Parse
@@ -446,7 +449,7 @@ CONTAINS
       ! Now close the old file...
       CALL CloseHDF(HDF_CurrentID)
     ELSEIF(OptKeyQ(Inp,GUESS_OPTION,GUESS_CORE))THEN
-      CALL MondoHalt(PRSE_ERROR,'Core guess may crash the code for some simple systems.')
+      !CALL MondoHalt(PRSE_ERROR,'Core guess may crash the code for some simple systems.')
       Guess=GUESS_EQ_CORE
     ELSEIF(OptKeyQ(Inp,GUESS_OPTION,GUESS_SUPER))THEN
       Guess=GUESS_EQ_SUPR
@@ -471,6 +474,7 @@ CONTAINS
     ELSE
       PFlags%Key=DEBUG_MINIMUM
     ENDIF
+
     IF(OptKeyQ(Inp,GLOBAL_DEBUG,DBG_MATRICES) )THEN
       PFlags%Mat=DEBUG_MATRICES
     ELSEIF(OptKeyQ(Inp,GLOBAL_DEBUG,PLT_MATRICES) )THEN
@@ -478,11 +482,13 @@ CONTAINS
     ELSE
       PFlags%Mat=DEBUG_NONE
     ENDIF
+
     IF(OptKeyQ(Inp,GLOBAL_DEBUG,DBG_CHKSUMS))THEN
       PFlags%Chk=DEBUG_CHKSUMS
     ELSE
       PFlags%Chk=DEBUG_NONE
     ENDIF
+
     IF(OptKeyQ(Inp,GLOBAL_DEBUG,DBG_MMA_STYLE) )THEN
       PFlags%Fmt=DEBUG_MMASTYLE
     ELSEIF(OptKeyQ(Inp,GLOBAL_DEBUG,DBG_FLT_STYLE) )THEN
@@ -490,16 +496,19 @@ CONTAINS
     ELSE
       PFlags%Fmt=DEBUG_DBLSTYLE
     ENDIF
+
     IF(OptKeyQ(Inp,GLOBAL_DEBUG,DBG_PRT_INTS))THEN
       PFlags%Int=DEBUG_INTEGRAL
     ELSE
       PFlags%Int=DEBUG_NONE
     ENDIF
+
     IF(OptKeyQ(Inp,GLOBAL_DEBUG,DBG_PRT_SETS))THEN
       PFlags%Set=DEBUG_BASISSET
     ELSE
       PFlags%Set=DEBUG_NONE
     ENDIF
+
     IF(OptKeyQ(Inp,GLOBAL_DEBUG,DBG_GEOP_MIN))THEN
       PFlags%GeOp=DEBUG_GEOP_MIN
     ELSE IF(OptKeyQ(Inp,GLOBAL_DEBUG,DBG_GEOP_MAX))THEN
@@ -507,7 +516,7 @@ CONTAINS
     ELSE
       PFlags%GeOp=DEBUG_NONE
     ENDIF
-    !
+
     IF(OptKeyQ(Inp,GLOBAL_DEBUG,DBG_PRT_MM))THEN
       PFlags%MM=DEBUG_MM
     ELSEIF(OptKeyQ(Inp,GLOBAL_DEBUG,DBG_PRT_FRC))THEN
@@ -515,7 +524,7 @@ CONTAINS
     ELSE
       PFlags%MM=DEBUG_NONE
     ENDIF
-    !
+
     IF(OptKeyQ(Inp,OUTPUT_OPTION,OUTPUT_PDB)) THEN
       GeomPrint='PDB'
       IF(INDEX(Names%GFile,'.')==0) &
@@ -648,7 +657,7 @@ CONTAINS
       MinSCF = 0
     ENDIF
     IF(.NOT. OptIntQ(Inp,Op_MaxSCF,MaxSCF)) THEN
-      MaxSCF = 256
+      MaxSCF = HAVE_MAX_SCF
     ENDIF
 
     CALL MondoLog(DEBUG_NONE, "ParseSCF", "MinSCF = "//TRIM(IntToChar(MinSCF)))

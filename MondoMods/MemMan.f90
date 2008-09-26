@@ -23,6 +23,7 @@
 !    to return derivative works to the MondoSCF group for review, and possible
 !    disemination in future releases.
 !------------------------------------------------------------------------------
+
 MODULE MemMan
   USE DerivedTypes
   USE GlobalScalars
@@ -58,6 +59,7 @@ MODULE MemMan
          New_CellSet
 
   END INTERFACE
+
   INTERFACE Delete
     MODULE PROCEDURE Delete_INT_VECT, Delete_INT_RNK2, &
          Delete_INT_RNK3, Delete_INT_RNK4, &
@@ -579,6 +581,9 @@ CONTAINS
     CALL New(A%Gradients,(/3,A%NAtms/))
     CALL New(A%Displ,(/3,A%NAtms/))
     CALL New(A%PBCDispl)
+    !CALL MondoLog(DEBUG_NONE, "New_CRDS", "hardwiring ETotalPerSCF vector a MaxSCF of 256")
+    CALL New(A%ETotalPerSCF, 256, 0)
+    A%ETotalPerSCF%D = 0.0D0
     A%Alloc=ALLOCATED_TRUE
     A%ETotal=Zero
   END SUBROUTINE New_CRDS
@@ -990,6 +995,7 @@ CONTAINS
     CALL Delete(A%Gradients)
     CALL Delete(A%Displ)
     CALL Delete(A%PBCDispl)
+    CALL Delete(A%ETotalPerSCF)
     A%NAtms=0
     A%Alloc=ALLOCATED_FALSE
   END SUBROUTINE Delete_CRDS
@@ -1238,7 +1244,7 @@ CONTAINS
       CALL New(A%Qz  ,A%NDist)
       CALL New(A%Co  ,A%NCoef*A%NSDen)!<<< SPIN
     ENDIF
-    !
+
   END SUBROUTINE New_HGRho
   !========================================================================================
   ! Delete the density
@@ -1283,10 +1289,9 @@ CONTAINS
 #ifdef PARALLEL
       WRITE(ChMyId,INTERNAL_INT_FMT)MyId
       ChMyId=ADJUSTL(ChMyId)
-      CALL Halt(' On node '//TRIM(ChMyId)  &
-           //', Attempt to allocate memory already allocated.')
+      CALL Halt('On node '//TRIM(ChMyId)//', Attempt to allocate memory already allocated.')
 #else
-      CALL Halt(' Attempt to allocate memory already allocated.')
+      CALL Halt('Attempt to allocate memory already allocated.')
 #endif
     ENDIF
   END SUBROUTINE AllocChk
@@ -1470,5 +1475,5 @@ CONTAINS
     CALL Delete(A%PBCGrads)
     A%Alloc=ALLOCATED_FALSE
   END SUBROUTINE Delete_PBCFit
-  !
+
 END MODULE MemMan
