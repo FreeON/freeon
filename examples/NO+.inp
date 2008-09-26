@@ -13,7 +13,7 @@ Guess=SuperPos
 SCFMethod=(TRS4)
 BasisSets=(STO-3G-SPLIT)
 ModelChem=(HF)
-Accuracy =(verytight)
+Accuracy=(verytight)
 SCFConvergence=(DIIS)
 
 <EndOptions>
@@ -22,5 +22,3 @@ SCFConvergence=(DIIS)
  N  0.0 0.0 0.0
  O  1.5 0.0 0.0
 <EndGeometry>
-
-

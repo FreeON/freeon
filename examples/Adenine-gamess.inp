@@ -1,0 +1,40 @@
+<BeginTitle>
+Adenine
+<EndTitle>
+
+<BeginOptions>
+
+Grad=(OneForce)
+
+DebugAll=(MaxDebug)
+
+Charge=0
+Multiplicity=1
+
+Guess=Core
+SCFMethod=(RH)
+BasisSets=(6-31G-SPLIT)
+ModelChem=(HF)
+Accuracy=(verytight)
+SCFConvergence=(DIIS)
+Geometry=(InAngstroms)
+
+<EndOptions>
+
+<BeginGeometry>
+ N        0.45101       -1.98446       -0.00069  
+ C        1.66507       -1.36827       -0.00076  
+ N        1.93101       -0.03351       -0.00059  
+ C        0.79053        0.69999       -0.00038  
+ C       -0.53112        0.20057       -0.00013  
+ C       -0.67545       -1.20779       -0.00033  
+ N       -1.88631       -1.82250       -0.00018  
+ H       -2.73898       -1.27587       -0.00039  
+ H       -1.91827       -2.83526       -0.00089  
+ N       -1.46922        1.24502        0.00016  
+ C       -0.72222        2.35427        0.00000  
+ N        0.64775        2.08249       -0.00030  
+ H        1.41149        2.74976       -0.00061  
+ H       -1.10938        3.36662        0.00015  
+ H        2.53107       -2.03008       -0.00106  
+<EndGeometry>

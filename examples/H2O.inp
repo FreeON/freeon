@@ -39,7 +39,7 @@ Multiplicity=1
 G!rad=(NumFreq)
 Grad=(Optimize,PrimInt)
 
-DebugAll=(MinDebug,CheckSums)
+DebugAll=(MaxDebug,CheckSums)
 
 MaxSCF=12
 
