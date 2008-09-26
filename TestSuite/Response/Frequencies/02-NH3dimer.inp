@@ -1,0 +1,114 @@
+<BeginTitle>
+NH3-NH3 dimer
+
+Low frequencies from http://cccbdb.nist.gov/:
+
+89 
+112 	
+127 	
+Line around 140 missing from NIST data??
+236 	
+444 	
+1224 
+1247 	
+
+In FreeON, for different numerical differences:
+
+1D-3
+Frequencies=   76.6241
+Frequencies=  119.9057
+Frequencies=  126.6370
+Frequencies=  140.2007
+Frequencies=  265.7650
+Frequencies=  448.3410
+Frequencies= 1227.1118
+Frequencies= 1249.5225
+
+9D-4
+Frequencies=   84.2135
+Frequencies=  115.7506
+Frequencies=  126.5162
+Frequencies=  139.6218
+Frequencies=  263.6821
+Frequencies=  448.4179
+Frequencies= 1227.0514
+Frequencies= 1249.5236
+
+8D-4
+Frequencies=   88.1301
+Frequencies=  116.1184
+Frequencies=  126.6579
+Frequencies=  139.9031
+Frequencies=  268.2117
+Frequencies=  449.2646
+Frequencies= 1227.0889
+Frequencies= 1249.6482
+
+<EndTitle>
+
+<BeginOptions>
+
+G!rad=(Optimize,PrimInt)
+
+Grad=(NumFreq)
+NHessianDelta=8.0E-4
+
+Charge=0
+
+Multiplicity=1
+Guess=SuperPos
+SCFMethod=(RH)
+BasisSets=(Split6321Gs)
+ModelChem=(HF)
+Accuracy=(Verytight)
+SCFConvergence=(DIIS)
+Geometry=(InAngstroms)
+<EndOptions>
+
+<BeginGeometry>
+H  0.6632  0.8826  0.0000
+N  0.0000  1.6354  0.0000
+N  0.0000 -1.6354  0.0000
+H  0.1881  2.2010  0.8064
+H  0.1881  2.2010 -0.8064
+H -0.6632 -0.8826  0.0000
+H -0.1881 -2.2010 -0.8064
+H -0.1881 -2.2010  0.8064
+<EndGeometry>
+
+
+
+<BeginBasisSetSplit6321Gs>
+ ****
+ H   0
+ S   3  1.00
+      18.73113700      0.03349460
+       2.82539370      0.23472695
+       0.64012170      0.81375733
+ S   1  1.00
+       0.16127780      1.00000000
+ ****
+ N   0
+ S   6  1.00
+    4173.51100000      0.00183480
+     627.45790000      0.01399500
+     142.90210000      0.06858700
+      40.23433000      0.23224100
+      12.82021000      0.46907000
+       4.39043700      0.36045500
+ S   3  1.00
+      11.62635800     -0.11496100
+       2.71628000     -0.16911800
+       0.77221800      1.14585200
+ P   3  1.00
+      11.62635800      0.06758000
+       2.71628000      0.32390700
+       0.77221800      0.74089500
+ S   1  1.00
+       0.21203130      1.00000000
+ P   1  1.00
+       0.21203130      1.00000000
+ D   1  1.00
+       0.80000000      1.00000000
+ ****
+<EndBasisSetSplit6321Gs>
