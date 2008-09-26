@@ -1,0 +1,30 @@
+<BeginOptions>
+
+Charge=0
+Multiplicity=1
+
+Grad=(OneForce)
+
+DebugAll=(MaxDebug,MatDebug,CheckSums)
+
+Guess=Core
+SCFMethod=(RH)
+BasisSets=(3-21G-SPLIT)
+ModelChem=(HF)
+Accuracy=(verytight)
+SCFConvergence=(DIIS)
+DIISDelay=5
+DIISDimension=10
+
+MaxSCF=12
+MinSCF=12
+
+Geometry=(InAU)
+
+<EndOptions>
+
+<BeginGeometry>
+ O             0.0000000000        0.1344653659        0.0000000000
+ H             1.4325930734       -1.0670312121        0.0000000000
+ H            -1.4325931177       -1.0670311749        0.0000000000
+<EndGeometry>
