@@ -129,7 +129,9 @@ PROGRAM MakeRho
     ! Get the current information
     CALL Get(BS,CurBase)
     CALL Get(GM,CurGeom)
-    IF(SCFActn=='InkFok')THEN
+    SELECT CASE(SCFActn)
+
+    CASE('InkFok')
       CALL Get(D1,TrixFile('D',Args,-1))
       CALL Get(D2,TrixFile('D',Args,0))
       CALL Multiply(D1,-One)
@@ -140,16 +142,26 @@ PROGRAM MakeRho
       ENDIF
       CALL Delete(D1)
       CALL Delete(D2)
-    ELSEIF(SCFActn=='ForceEvaluation')THEN
+
+    CASE('ForceEvaluation')
+      ! Index check...
+      CALL MondoLog(DEBUG_NONE, TRIM(Prog), "Index Check: getting Dmat from "//TRIM(TrixFile('D',Args,1)))
       CALL Get(Dmat,TrixFile('D',Args,1))
-    ELSEIF(SCFActn=='StartResponse')THEN
+
+    CASE('StartResponse')
       CALL Halt('MakeRho: SCFActn cannot be equal to <StartResponse>')
-    ELSEIF(SCFActn=='DensityPrime')THEN
+
+    CASE('DensityPrime')
       CALL Get(Dmat,TrixFile('DPrime'//TRIM(Args%C%C(3)),Args,0))
-    ELSEIF(SCFActn/='Core')THEN
+
+    CASE('Core')
+      CALL Halt("I do not know what to do....")
+
+    CASE DEFAULT
       ! Default
       CALL Get(Dmat,TrixFile('D',Args,0))
-    ENDIF
+
+    END SELECT
   ENDIF
   CALL New(PTmp,4*MaxBlkSize**2)
   CALL NewBraBlok(BS)
@@ -178,7 +190,7 @@ PROGRAM MakeRho
         B = Pair%B
         DO NC = 1,CS_OUT%NCells
           Pair%B = B+CS_OUT%CellCarts%D(:,NC)
-          Pair%AB2  = (Pair%A(1)-Pair%B(1))**2 &
+          Pair%AB2 = (Pair%A(1)-Pair%B(1))**2 &
                + (Pair%A(2)-Pair%B(2))**2 &
                + (Pair%A(3)-Pair%B(3))**2
           IF(TestAtomPair(Pair)) THEN
@@ -199,7 +211,8 @@ PROGRAM MakeRho
   CASE DEFAULT
     CALL Halt('MakeRho: NSMat not valid!')
   END SELECT
-  ! Initailize  Counters
+
+  ! Initialize  Counters
   NDist = 0
   NCoef = 0
 #ifdef PARALLEL
@@ -242,9 +255,9 @@ PROGRAM MakeRho
         ! TODO something here for HiCu densities, i.e rho_a,rho_b,rho_ab
         !...
       CASE DEFAULT
-        CALL Halt(' MakeRho: NSMat doesn''t have an expected value! ')
+        CALL Halt('[MakeRho] NSMat doesn''t have an expected value! ')
       END SELECT
-      !
+
       IF(SetAtomPair(GM,BS,AtA,AtB,Pair)) THEN
         B = Pair%B
         DO NC = 1,CS_OUT%NCells
@@ -261,7 +274,7 @@ PROGRAM MakeRho
       ENDIF
     ENDDO
   ENDDO
-  !
+
   ! Don't add in nuclear charges if incremental fock builds or CPSCF.
   IF(SCFActn/='InkFok'.AND. SCFActn/='StartResponse'.AND.SCFActn/='DensityPrime') THEN
 #ifdef PARALLEL
@@ -275,10 +288,10 @@ PROGRAM MakeRho
   CALL Prune_Rho_new(Thresholds%Dist,RhoA)
   NDist_new = RhoA%NDist
   !************************************
-  !!$  EllPrune=4
-  !!$  CALL PruneEll_Rho_new(EllPrune,RhoA)
-  !!$  WRITE(*,*) 'Ell = ',EllPrune
-  !!$  WRITE(*,*) 'Number of Dists = ', RhoA%NDist,NDist_new
+!!$  EllPrune=4
+!!$  CALL PruneEll_Rho_new(EllPrune,RhoA)
+!!$  WRITE(*,*) 'Ell = ',EllPrune
+!!$  WRITE(*,*) 'Number of Dists = ', RhoA%NDist,NDist_new
   !************************************
   !
   ! Fold distributions back into the box; For ForceEvaluation, rho is not folded
@@ -394,43 +407,51 @@ PROGRAM MakeRho
     IF(MyID == ROOT) THEN
 #endif
       CALL Warn(ProcessName(Prog)//'relative error in density = '//TRIM(DblToShrtChar(RelRhoErr)) &
-        //'. Distribution threshold = '//TRIM(DblToShrtChar(Thresholds%Dist))      &
-        //'. Total charge lost = '//TRIM(DblToShrtChar(dNel)))
+           //'. Distribution threshold = '//TRIM(DblToShrtChar(Thresholds%Dist))      &
+           //'. Total charge lost = '//TRIM(DblToShrtChar(dNel)))
 #ifdef PARALLEL
     ENDIF
 #endif
   ENDIF
   !------------------------------------------------------------------------------------
   ! Put Rho and MPs to disk
-  IF(SCFActn=='ForceEvaluation')THEN
+  SELECT CASE(SCFActn)
+
+  CASE('ForceEvaluation')
 #ifdef PARALLEL
-    CALL Put_HGRho(Rho,'Rho'//IntToChar(MyID),Args,1)
+    CALL Put(Rho,'Rho'//IntToChar(MyID),Args,1)
 #else
-    CALL Put_HGRho(Rho,'Rho',Args,1)
+    CALL Put(Rho,'Rho',Args,1)
 #endif
     CALL Put(MP)
-  ELSEIF(SCFActn=='InkFok')THEN
+
+  CASE('InkFok')
 #ifdef PARALLEL
 #else
-    CALL Put_HGRho(Rho,'DeltaRho',Args,0)
+    CALL Put(Rho,'DeltaRho',Args,0)
 #endif
     CALL Put(MP,'Delta'//TRIM(SCFCycl))
-  ELSE
+
+  CASE DEFAULT
 #ifdef PARALLEL
-    CALL Put_HGRho(Rho,'Rho'//IntToChar(MyID),Args,0)
+    CALL Put(Rho,'Rho'//IntToChar(MyID),Args,0)
 #else
-    CALL Put_HGRho(Rho,'Rho',Args,0)
+    CALL Put(Rho,'Rho',Args,0)
 #endif
     CALL Put(MP)
-  ENDIF
+
+  END SELECT
+
   CALL PChkSum(Rho,'Rho',.TRUE.,Prog)
+
   ! Tidy up
   CALL Delete(GM)
   CALL Delete(Dmat)
   CALL Delete(BS)
   CALL Delete(PTmp)
   CALL DeleteBraBlok()
-  CALL Delete_HGRho(Rho)
+  CALL Delete(Rho)
   CALL Delete_HGRho_new(RhoA)
   CALL ShutDown(Prog)
+
 END PROGRAM MakeRho

@@ -89,7 +89,7 @@ PROGRAM DMP_SP2 ! Density matrix purification, SP2 variation
   CALL Xpose(F, FT)
   FT%MTrix%D = -FT%MTrix%D
   CALL Add(F, FT, Tmp1)
-  CALL MondoLog(DEBUG_NONE, "SP2", "FNorm(F-FT) = "//TRIM(FltToChar(FNorm(Tmp1))))
+  CALL MondoLog(DEBUG_NONE, Prog, "FNorm(F-FT) = "//TRIM(FltToChar(FNorm(Tmp1))))
 
   MM=0
   Ne=Half*DBLE(NEl)

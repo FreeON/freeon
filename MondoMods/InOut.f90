@@ -259,11 +259,13 @@ CONTAINS
   !===============================================================================
   SUBROUTINE CloseData(Meta)
     TYPE(META_DATA) :: Meta
-    IF(Meta%Status==FAIL) &
-         CALL Halt(' HDF R/W error for '//TRIM(MetaChar(Meta)))
+    IF(Meta%Status==FAIL) THEN
+      CALL Halt(' HDF R/W error for '//TRIM(MetaChar(Meta)))
+    ENDIF
     Meta%Status=HDF5CloseData(Meta%DataId,Meta%DataSpc)
-    IF(Meta%Status==FAIL) &
-         CALL Halt(' HDF5CloseData error for '//TRIM(MetaChar(Meta)))
+    IF(Meta%Status==FAIL) THEN
+      CALL Halt(' HDF5CloseData error for '//TRIM(MetaChar(Meta)))
+    ENDIF
   END SUBROUTINE CloseData
   !===============================================================================
   !
@@ -272,12 +274,25 @@ CONTAINS
     CHARACTER(LEN=*),         INTENT(IN)    :: VarName
     CHARACTER(LEN=*),OPTIONAL,INTENT(IN)    :: Tag_O
     CHARACTER(LEN=DEFAULT_CHR_LEN)          :: FullName
+    INTEGER                                 :: Tag_INT_old, Tag_INT_new
+
     IF(PRESENT(Tag_O))THEN
-      FullName=TRIM(VarName)//TRIM(Tag_O)
+      ! Apply recycling.
+      Tag_INT_old = CharToInt(Tag_O)
+      Tag_INT_new = MOD(Tag_INT_old, RECYCLE_HDF)
+      !IF(Tag_INT_new /= Tag_INT_old) THEN
+      !  CALL MondoLog(DEBUG_MAXIMUM, "NameTag", "recycling tag from "//TRIM(IntToChar(Tag_INT_old)) &
+      !    //" to "//TRIM(IntToChar(Tag_INT_new)))
+      !ELSE
+      !  CALL MondoLog(DEBUG_MAXIMUM, "NameTag", "no recycling necessary on Tag_O = "//TRIM(Tag_O))
+      !ENDIF
+      FullName=TRIM(VarName)//TRIM(IntToChar(Tag_INT_new))
+      !CALL MondoLog(DEBUG_MAXIMUM, "NameTag", "FullName = "//TRIM(FullName))
     ELSE
       FullName=TRIM(VarName)
     ENDIF
     CALL LowCase(FullName)
+
   END FUNCTION NameTag
   !===============================================================================
   !
@@ -344,30 +359,26 @@ CONTAINS
   !
   !===============================================================================
   SUBROUTINE WriteIntegerVector(Meta,A)
-    TYPE(META_DATA)                :: Meta
-    INTEGER,                   &
-         DIMENSION(Meta%Dimension)   :: A
+    TYPE(META_DATA)                    :: Meta
+    INTEGER, DIMENSION(Meta%Dimension) :: A
     Meta%Status=HDF5WriteIntegerVector(Meta%DataId,Meta%DataSpc,A)
   END SUBROUTINE WriteIntegerVector
 
   SUBROUTINE WriteDoubleVector(Meta,A)
-    TYPE(META_DATA)                :: Meta
-    REAL(DOUBLE),              &
-         DIMENSION(Meta%Dimension)   :: A
+    TYPE(META_DATA)                         :: Meta
+    REAL(DOUBLE), DIMENSION(Meta%Dimension) :: A
     Meta%Status=HDF5WriteDoubleVector(Meta%DataId,Meta%DataSpc,A)
   END SUBROUTINE WriteDoubleVector
 
   SUBROUTINE ReadIntegerVector(Meta,A)
-    TYPE(META_DATA)               :: Meta
-    INTEGER,                    &
-         DIMENSION(Meta%Dimension)   :: A
+    TYPE(META_DATA)                    :: Meta
+    INTEGER, DIMENSION(Meta%Dimension) :: A
     Meta%Status=HDF5ReadIntegerVector(Meta%DataId,Meta%DataSpc,A)
   END SUBROUTINE ReadIntegerVector
 
   SUBROUTINE ReadDoubleVector(Meta,A)
-    TYPE(META_DATA)               :: Meta
-    REAL(DOUBLE),              &
-         DIMENSION(Meta%Dimension)  :: A
+    TYPE(META_DATA)                         :: Meta
+    REAL(DOUBLE), DIMENSION(Meta%Dimension) :: A
     Meta%Status=HDF5ReadDoubleVector(Meta%DataId,Meta%DataSpc,A)
   END SUBROUTINE ReadDoubleVector
   !===============================================================================
@@ -382,6 +393,11 @@ CONTAINS
 #ifdef PARALLEL
     IF(MyId==ROOT)THEN
 #endif
+      IF(PRESENT(Tag_O)) THEN
+        !CALL MondoLog(DEBUG_MAXIMUM, "Get_INT_SCLR", "VarName = "//TRIM(VarName)//", Tag_O = "//TRIM(Tag_O))
+      ELSE
+        !CALL MondoLog(DEBUG_MAXIMUM, "Get_INT_SCLR", "VarName = "//TRIM(VarName)//", Tag_O not set")
+      ENDIF
       Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_INT32,1,.FALSE.)
       CALL OpenData(Meta)
       CALL ReadIntegerVector(Meta,B)
@@ -403,8 +419,12 @@ CONTAINS
 #ifdef PARALLEL
     IF(MyId==ROOT) THEN
 #endif
-      Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_INT32, &
-           SIZE(A%I,1),.FALSE.)
+      IF(PRESENT(Tag_O)) THEN
+        !CALL MondoLog(DEBUG_MAXIMUM, "Get_INT_VECT", "VarName = "//TRIM(VarName)//", Tag_O = "//TRIM(Tag_O))
+      ELSE
+        !CALL MondoLog(DEBUG_MAXIMUM, "Get_INT_VECT", "VarName = "//TRIM(VarName)//", Tag_O not set")
+      ENDIF
+      Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_INT32,SIZE(A%I,1),.FALSE.)
       CALL OpenData(Meta)
       CALL ReadIntegerVector(Meta,A%I)
       CALL CloseData(Meta)
@@ -472,8 +492,12 @@ CONTAINS
 #ifdef PARALLEL
     IF(MyId==ROOT) THEN
 #endif
-      Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_INT32, &
-           SIZE(A%I,1)*SIZE(A%I,2),.FALSE.)
+      IF(PRESENT(Tag_O)) THEN
+        !CALL MondoLog(DEBUG_MAXIMUM, "Get_INT_RNK2", "VarName = "//TRIM(VarName)//", Tag_O = "//TRIM(Tag_O))
+      ELSE
+        !CALL MondoLog(DEBUG_MAXIMUM, "Get_INT_RNK2", "VarName = "//TRIM(VarName)//", Tag_O not set")
+      ENDIF
+      Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_INT32,SIZE(A%I,1)*SIZE(A%I,2),.FALSE.)
       CALL OpenData(Meta)
       CALL ReadIntegerVector(Meta,A%I)
       CALL CloseData(Meta)
@@ -493,9 +517,12 @@ CONTAINS
 #ifdef PARALLEL
     IF(MyId==ROOT) THEN
 #endif
-      Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_INT32, &
-           SIZE(A%I,1)*SIZE(A%I,2)*SIZE(A%I,3), &
-           .FALSE.)
+      IF(PRESENT(Tag_O)) THEN
+        !CALL MondoLog(DEBUG_MAXIMUM, "Get_INT_RNK3", "VarName = "//TRIM(VarName)//", Tag_O = "//TRIM(Tag_O))
+      ELSE
+        !CALL MondoLog(DEBUG_MAXIMUM, "Get_INT_RNK3", "VarName = "//TRIM(VarName)//", Tag_O not set")
+      ENDIF
+      Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_INT32,SIZE(A%I,1)*SIZE(A%I,2)*SIZE(A%I,3),.FALSE.)
       CALL OpenData(Meta)
       CALL ReadIntegerVector(Meta,A%I)
       CALL CloseData(Meta)
@@ -515,9 +542,12 @@ CONTAINS
 #ifdef PARALLEL
     IF(MyId==ROOT) THEN
 #endif
-      Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_INT32,             &
-           SIZE(A%I,1)*SIZE(A%I,2)*SIZE(A%I,3)*SIZE(A%I,4), &
-           .FALSE.)
+      IF(PRESENT(Tag_O)) THEN
+        !CALL MondoLog(DEBUG_MAXIMUM, "Get_INT_RNK4", "VarName = "//TRIM(VarName)//", Tag_O = "//TRIM(Tag_O))
+      ELSE
+        !CALL MondoLog(DEBUG_MAXIMUM, "Get_INT_RNK4", "VarName = "//TRIM(VarName)//", Tag_O not set")
+      ENDIF
+      Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_INT32,SIZE(A%I,1)*SIZE(A%I,2)*SIZE(A%I,3)*SIZE(A%I,4),.FALSE.)
       CALL OpenData(Meta)
       CALL ReadIntegerVector(Meta,A%I)
       CALL CloseData(Meta)
@@ -527,16 +557,35 @@ CONTAINS
 #endif
   END SUBROUTINE Get_INT_RNK4
 
-  SUBROUTINE Get_DBL_SCLR(A,VarName,Tag_O)
-    REAL(DOUBLE),             INTENT(INOUT)   :: A
-    CHARACTER(LEN=*),         INTENT(IN)      :: VarName
-    CHARACTER(LEN=*),OPTIONAL,INTENT(IN)      :: Tag_O
-    REAL(DOUBLE),DIMENSION(1)                 :: B
-    TYPE(META_DATA)                           :: Meta
+  SUBROUTINE Get_DBL_SCLR(A,VarName,Stats_O,Tag_O)
+    REAL(DOUBLE),             INTENT(INOUT)  :: A
+    CHARACTER(LEN=*),         INTENT(IN)     :: VarName
+    CHARACTER(LEN=*),OPTIONAL,INTENT(IN)     :: Tag_O
+    CHARACTER(LEN=DEFAULT_CHR_LEN)           :: Tag
+    INTEGER,DIMENSION(3),OPTIONAL,INTENT(IN) :: Stats_O
+    REAL(DOUBLE),DIMENSION(1)                :: B
+    TYPE(META_DATA)                          :: Meta
 #ifdef PARALLEL
     IF(MyId==ROOT)THEN
 #endif
-      Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_DOUBLE,1,.FALSE.)
+      IF(PRESENT(Stats_O).AND.PRESENT(Tag_O)) THEN
+        CALL Halt("[Get_DBL_SCLR] either Stats_O or Tag_O")
+      ENDIF
+      IF(PRESENT(Tag_O)) THEN
+        !CALL MondoLog(DEBUG_MAXIMUM, "Get_DBL_SCLR", "VarName = "//TRIM(VarName)//", Tag_O = "//TRIM(Tag_O))
+        Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_DOUBLE,1,.FALSE.)
+      ELSEIF(PRESENT(Stats_O)) THEN
+        Tag = TRIM(IntToChar(Stats_O(3)))
+        !CALL MondoLog(DEBUG_MAXIMUM, "Get_DBL_SCLR", "VarName = "//TRIM(VarName)//", Stats_O = " &
+        !  //TRIM(IntToChar(Stats_O(1)))//" " &
+        !  //TRIM(IntToChar(Stats_O(2)))//" " &
+        !  //TRIM(IntToChar(Stats_O(3)))//", constructed Tag = "//TRIM(Tag))
+        Meta=SetMeta(NameTag(VarName,Tag),NATIVE_DOUBLE,1,.FALSE.)
+      ELSE
+        !CALL MondoLog(DEBUG_MAXIMUM, "Get_DBL_SCLR", "VarName = "//TRIM(VarName)//", Tag_O not set")
+        Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_DOUBLE,1,.FALSE.)
+      ENDIF
+
       CALL OpenData(Meta)
       CALL ReadDoubleVector(Meta,B)
       CALL CloseData(Meta)
@@ -555,8 +604,12 @@ CONTAINS
 #ifdef PARALLEL
     IF(MyId==ROOT) THEN
 #endif
-      Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_DOUBLE, &
-           SIZE(A%D,1),.FALSE.)
+      IF(PRESENT(Tag_O)) THEN
+        !CALL MondoLog(DEBUG_MAXIMUM, "Get_DBL_VECT", "VarName = "//TRIM(VarName)//", Tag_O = "//TRIM(Tag_O))
+      ELSE
+        !CALL MondoLog(DEBUG_MAXIMUM, "Get_DBL_VECT", "VarName = "//TRIM(VarName)//", Tag_O not set")
+      ENDIF
+      Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_DOUBLE,SIZE(A%D,1),.FALSE.)
       CALL OpenData(Meta)
       CALL ReadDoubleVector(Meta,A%D)
       CALL CloseData(Meta)
@@ -574,8 +627,12 @@ CONTAINS
 #ifdef PARALLEL
     IF(MyId==ROOT) THEN
 #endif
-      Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_DOUBLE, &
-           SIZE(A%D,1)*SIZE(A%D,2),.FALSE.)
+      IF(PRESENT(Tag_O)) THEN
+        !CALL MondoLog(DEBUG_MAXIMUM, "Get_DBL_RNK2", "VarName = "//TRIM(VarName)//", Tag_O = "//TRIM(Tag_O))
+      ELSE
+        !CALL MondoLog(DEBUG_MAXIMUM, "Get_DBL_RNK2", "VarName = "//TRIM(VarName)//", Tag_O not set")
+      ENDIF
+      Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_DOUBLE,SIZE(A%D,1)*SIZE(A%D,2),.FALSE.)
       CALL OpenData(Meta)
       CALL ReadDoubleVector(Meta,A%D)
       CALL CloseData(Meta)
@@ -593,9 +650,12 @@ CONTAINS
 #ifdef PARALLEL
     IF(MyId==ROOT) THEN
 #endif
-      Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_DOUBLE, &
-           SIZE(A%D,1)*SIZE(A%D,2)*SIZE(A%D,3),  &
-           .FALSE.)
+      IF(PRESENT(Tag_O)) THEN
+        !CALL MondoLog(DEBUG_MAXIMUM, "Get_DBL_RNK3", "VarName = "//TRIM(VarName)//", Tag_O = "//TRIM(Tag_O))
+      ELSE
+        !CALL MondoLog(DEBUG_MAXIMUM, "Get_DBL_RNK3", "VarName = "//TRIM(VarName)//", Tag_O not set")
+      ENDIF
+      Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_DOUBLE,SIZE(A%D,1)*SIZE(A%D,2)*SIZE(A%D,3),.FALSE.)
       CALL OpenData(Meta)
       CALL ReadDoubleVector(Meta,A%D)
       CALL CloseData(Meta)
@@ -613,9 +673,12 @@ CONTAINS
 #ifdef PARALLEL
     IF(MyId==ROOT) THEN
 #endif
-      Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_DOUBLE,            &
-           SIZE(A%D,1)*SIZE(A%D,2)*SIZE(A%D,3)*SIZE(A%D,4), &
-           .FALSE.)
+      IF(PRESENT(Tag_O)) THEN
+        !CALL MondoLog(DEBUG_MAXIMUM, "Get_DBL_RNK4", "VarName = "//TRIM(VarName)//", Tag_O = "//TRIM(Tag_O))
+      ELSE
+        !CALL MondoLog(DEBUG_MAXIMUM, "Get_DBL_RNK4", "VarName = "//TRIM(VarName)//", Tag_O not set")
+      ENDIF
+      Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_DOUBLE,SIZE(A%D,1)*SIZE(A%D,2)*SIZE(A%D,3)*SIZE(A%D,4),.FALSE.)
       CALL OpenData(Meta)
       CALL ReadDoubleVector(Meta,A%D)
       CALL CloseData(Meta)
@@ -633,9 +696,12 @@ CONTAINS
 #ifdef PARALLEL
     IF(MyId==ROOT) THEN
 #endif
-      Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_DOUBLE,            &
-           SIZE(A%D,1)*SIZE(A%D,2)*SIZE(A%D,3)*SIZE(A%D,4)  &
-           *SIZE(A%D,5)*SIZE(A%D,6),.FALSE.)
+      IF(PRESENT(Tag_O)) THEN
+        !CALL MondoLog(DEBUG_MAXIMUM, "Get_DBL_RNK6", "VarName = "//TRIM(VarName)//", Tag_O = "//TRIM(Tag_O))
+      ELSE
+        !CALL MondoLog(DEBUG_MAXIMUM, "Get_DBL_RNK6", "VarName = "//TRIM(VarName)//", Tag_O not set")
+      ENDIF
+      Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_DOUBLE,SIZE(A%D,1)*SIZE(A%D,2)*SIZE(A%D,3)*SIZE(A%D,4)*SIZE(A%D,5)*SIZE(A%D,6),.FALSE.)
       CALL OpenData(Meta)
       CALL ReadDoubleVector(Meta,A%D)
       CALL CloseData(Meta)
@@ -658,10 +724,15 @@ CONTAINS
     IF(MyId==ROOT)THEN
 #endif
       N=LEN(A)
-      IF(N>DEFAULT_CHR_LEN) &
-           CALL Halt('Static strings overrun in Get_CHR_SCLR')
-      Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_INT32, &
-           DEFAULT_CHR_LEN,.FALSE.)
+      IF(N>DEFAULT_CHR_LEN) THEN
+        CALL Halt('Static strings overrun in Get_CHR_SCLR')
+      ENDIF
+      IF(PRESENT(Tag_O)) THEN
+        !CALL MondoLog(DEBUG_MAXIMUM, "Get_CHR_SCLR", "VarName = "//TRIM(VarName)//", Tag_O = "//TRIM(Tag_O))
+      ELSE
+        !CALL MondoLog(DEBUG_MAXIMUM, "Get_CHR_SCLR", "VarName = "//TRIM(VarName)//", Tag_O not set")
+      ENDIF
+      Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_INT32,DEFAULT_CHR_LEN,.FALSE.)
       CALL OpenData(Meta)
       CALL ReadIntegerVector(Meta,B)
       DO I=1,N
@@ -685,6 +756,11 @@ CONTAINS
 #ifdef PARALLEL
     IF(MyId==ROOT)THEN
 #endif
+      IF(PRESENT(Tag_O)) THEN
+        !CALL MondoLog(DEBUG_MAXIMUM, "Get_LOG_SCLR", "VarName = "//TRIM(VarName)//", Tag_O = "//TRIM(Tag_O))
+      ELSE
+        !CALL MondoLog(DEBUG_MAXIMUM, "Get_LOG_SCLR", "VarName = "//TRIM(VarName)//", Tag_O not set")
+      ENDIF
       Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_INT32,1,.FALSE.)
       CALL OpenData(Meta)
       CALL ReadIntegerVector(Meta,ILog)
@@ -713,6 +789,11 @@ CONTAINS
 #ifdef PARALLEL
     IF(MyId==ROOT)THEN
 #endif
+      IF(PRESENT(Tag_O)) THEN
+        !CALL MondoLog(DEBUG_MAXIMUM, "Put_INT_SCLR", "VarName = "//TRIM(VarName)//", Tag_O = "//TRIM(Tag_O))
+      ELSE
+        !CALL MondoLog(DEBUG_MAXIMUM, "Put_INT_SCLR", "VarName = "//TRIM(VarName)//", Tag_O not set")
+      ENDIF
       Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_INT32,1,.FALSE.)
       CALL OpenData(Meta,.TRUE.)
       B(1)=A
@@ -739,6 +820,11 @@ CONTAINS
       ELSE
         N=SIZE(A%I,1)
       ENDIF
+      IF(PRESENT(Tag_O)) THEN
+        !CALL MondoLog(DEBUG_MAXIMUM, "Put_INT_VECT", "VarName = "//TRIM(VarName)//", Tag_O = "//TRIM(Tag_O))
+      ELSE
+        !CALL MondoLog(DEBUG_MAXIMUM, "Put_INT_VECT", "VarName = "//TRIM(VarName)//", Tag_O not set")
+      ENDIF
       Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_INT32,N,UnLimit_O)
       CALL OpenData(Meta,.TRUE.)
       CALL WriteIntegerVector(Meta,A%I)
@@ -763,6 +849,11 @@ CONTAINS
         N=N_O
       ELSE
         N=SIZE(A%I,1)*SIZE(A%I,2)
+      ENDIF
+      IF(PRESENT(Tag_O)) THEN
+        !CALL MondoLog(DEBUG_MAXIMUM, "Put_INT_RNK2", "VarName = "//TRIM(VarName)//", Tag_O = "//TRIM(Tag_O))
+      ELSE
+        !CALL MondoLog(DEBUG_MAXIMUM, "Put_INT_RNK2", "VarName = "//TRIM(VarName)//", Tag_O not set")
       ENDIF
       Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_INT32,N,UnLimit_O)
       CALL OpenData(Meta,.TRUE.)
@@ -789,6 +880,11 @@ CONTAINS
       ELSE
         N=SIZE(A%I,1)*SIZE(A%I,2)*SIZE(A%I,3)
       ENDIF
+      IF(PRESENT(Tag_O)) THEN
+        !CALL MondoLog(DEBUG_MAXIMUM, "Put_INT_RNK3", "VarName = "//TRIM(VarName)//", Tag_O = "//TRIM(Tag_O))
+      ELSE
+        !CALL MondoLog(DEBUG_MAXIMUM, "Put_INT_RNK3", "VarName = "//TRIM(VarName)//", Tag_O not set")
+      ENDIF
       Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_INT32,N,UnLimit_O)
       CALL OpenData(Meta,.TRUE.)
       CALL WriteIntegerVector(Meta,A%I)
@@ -814,6 +910,11 @@ CONTAINS
       ELSE
         N=SIZE(A%I,1)*SIZE(A%I,2)*SIZE(A%I,3)*SIZE(A%I,4)
       ENDIF
+      IF(PRESENT(Tag_O)) THEN
+        !CALL MondoLog(DEBUG_MAXIMUM, "Put_INT_RNK4", "VarName = "//TRIM(VarName)//", Tag_O = "//TRIM(Tag_O))
+      ELSE
+        !CALL MondoLog(DEBUG_MAXIMUM, "Put_INT_RNK4", "VarName = "//TRIM(VarName)//", Tag_O not set")
+      ENDIF
       Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_INT32,N,UnLimit_O)
       CALL OpenData(Meta,.TRUE.)
       CALL WriteIntegerVector(Meta,A%I)
@@ -825,16 +926,35 @@ CONTAINS
   !-------------------------------------------------------------------------------
 
   !-------------------------------------------------------------------------------
-  SUBROUTINE Put_DBL_SCLR(A,VarName,Tag_O)
-    REAL(DOUBLE),             INTENT(IN) :: A
-    CHARACTER(LEN=*),         INTENT(IN) :: VarName
-    CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Tag_O
-    REAL(DOUBLE),DIMENSION(1)            :: B
-    TYPE(META_DATA)                      :: Meta
+  SUBROUTINE Put_DBL_SCLR(A,VarName,Stats_O,Tag_O)
+    REAL(DOUBLE),             INTENT(IN)     :: A
+    CHARACTER(LEN=*),         INTENT(IN)     :: VarName
+    CHARACTER(LEN=*),OPTIONAL,INTENT(IN)     :: Tag_O
+    CHARACTER(LEN=DEFAULT_CHR_LEN)           :: Tag
+    INTEGER,DIMENSION(3),OPTIONAL,INTENT(IN) :: Stats_O
+    REAL(DOUBLE),DIMENSION(1)                :: B
+    TYPE(META_DATA)                          :: Meta
 #ifdef PARALLEL
     IF(MyId==ROOT)THEN
 #endif
-      Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_DOUBLE,1,.FALSE.)
+      IF(PRESENT(Stats_O).AND.PRESENT(Tag_O)) THEN
+        CALL Halt("[Put_DBL_SCLR] either Stats_O or Tag_O")
+      ENDIF
+      IF(PRESENT(Tag_O)) THEN
+        !CALL MondoLog(DEBUG_MAXIMUM, "Put_DBL_SCLR", "VarName = "//TRIM(VarName)//", Tag_O = "//TRIM(Tag_O))
+        Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_DOUBLE,1,.FALSE.)
+      ELSEIF(PRESENT(Stats_O)) THEN
+        Tag = TRIM(IntToChar(Stats_O(3)))
+        !CALL MondoLog(DEBUG_MAXIMUM, "Put_DBL_SCLR", "VarName = "//TRIM(VarName)//", Stats_O = " &
+        !  //TRIM(IntToChar(Stats_O(1)))//" " &
+        !  //TRIM(IntToChar(Stats_O(2)))//" " &
+        !  //TRIM(IntToChar(Stats_O(3)))//", constructed Tag = "//TRIM(Tag))
+        Meta=SetMeta(NameTag(VarName,Tag),NATIVE_DOUBLE,1,.FALSE.)
+      ELSE
+        !CALL MondoLog(DEBUG_MAXIMUM, "Put_DBL_SCLR", "VarName = "//TRIM(VarName)//", Tag_O not set")
+        Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_DOUBLE,1,.FALSE.)
+      ENDIF
+
       CALL OpenData(Meta,.TRUE.)
       B(1)=A
       CALL WriteDoubleVector(Meta,B)
@@ -859,6 +979,11 @@ CONTAINS
         N=N_O
       ELSE
         N=SIZE(A%D,1)
+      ENDIF
+      IF(PRESENT(Tag_O)) THEN
+        !CALL MondoLog(DEBUG_MAXIMUM, "Put_DBL_VECT", "VarName = "//TRIM(VarName)//", Tag_O = "//TRIM(Tag_O))
+      ELSE
+        !CALL MondoLog(DEBUG_MAXIMUM, "Put_DBL_VECT", "VarName = "//TRIM(VarName)//", Tag_O not set")
       ENDIF
       Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_DOUBLE,N,UnLimit_O)
       CALL OpenData(Meta,.TRUE.)
@@ -885,6 +1010,11 @@ CONTAINS
       ELSE
         N=SIZE(A%D,1)*SIZE(A%D,2)
       ENDIF
+      IF(PRESENT(Tag_O)) THEN
+        !CALL MondoLog(DEBUG_MAXIMUM, "Put_DBL_RNK2", "VarName = "//TRIM(VarName)//", Tag_O = "//TRIM(Tag_O))
+      ELSE
+        !CALL MondoLog(DEBUG_MAXIMUM, "Put_DBL_RNK2", "VarName = "//TRIM(VarName)//", Tag_O not set")
+      ENDIF
       Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_DOUBLE,N,UnLimit_O)
       CALL OpenData(Meta,.TRUE.)
       CALL WriteDoubleVector(Meta,A%D)
@@ -909,6 +1039,11 @@ CONTAINS
         N=N_O
       ELSE
         N=SIZE(A%D,1)*SIZE(A%D,2)*SIZE(A%D,3)
+      ENDIF
+      IF(PRESENT(Tag_O)) THEN
+        !CALL MondoLog(DEBUG_MAXIMUM, "Put_DBL_RNK3", "VarName = "//TRIM(VarName)//", Tag_O = "//TRIM(Tag_O))
+      ELSE
+        !CALL MondoLog(DEBUG_MAXIMUM, "Put_DBL_RNK3", "VarName = "//TRIM(VarName)//", Tag_O not set")
       ENDIF
       Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_DOUBLE,N,UnLimit_O)
       CALL OpenData(Meta,.TRUE.)
@@ -935,6 +1070,11 @@ CONTAINS
       ELSE
         N=SIZE(A%D,1)*SIZE(A%D,2)*SIZE(A%D,3)*SIZE(A%D,4)
       ENDIF
+      IF(PRESENT(Tag_O)) THEN
+        !CALL MondoLog(DEBUG_MAXIMUM, "Put_DBL_RNK4", "VarName = "//TRIM(VarName)//", Tag_O = "//TRIM(Tag_O))
+      ELSE
+        !CALL MondoLog(DEBUG_MAXIMUM, "Put_DBL_RNK4", "VarName = "//TRIM(VarName)//", Tag_O not set")
+      ENDIF
       Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_DOUBLE,N,UnLimit_O)
       CALL OpenData(Meta,.TRUE.)
       CALL WriteDoubleVector(Meta,A%D)
@@ -960,6 +1100,11 @@ CONTAINS
       ELSE
         N=SIZE(A%D,1)*SIZE(A%D,2)*SIZE(A%D,3) &
              *SIZE(A%D,4)*SIZE(A%D,5)*SIZE(A%D,6)
+      ENDIF
+      IF(PRESENT(Tag_O)) THEN
+        !CALL MondoLog(DEBUG_MAXIMUM, "Put_DBL_RNK6", "VarName = "//TRIM(VarName)//", Tag_O = "//TRIM(Tag_O))
+      ELSE
+        !CALL MondoLog(DEBUG_MAXIMUM, "Put_DBL_RNK6", "VarName = "//TRIM(VarName)//", Tag_O not set")
       ENDIF
       Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_DOUBLE,N,UnLimit_O)
       CALL OpenData(Meta,.TRUE.)
@@ -989,6 +1134,11 @@ CONTAINS
       DO I=1,N
         B(I)=ICHAR(A(I:I))
       ENDDO
+      IF(PRESENT(Tag_O)) THEN
+        !CALL MondoLog(DEBUG_MAXIMUM, "Put_CHR_SCLR", "VarName = "//TRIM(VarName)//", Tag_O = "//TRIM(Tag_O))
+      ELSE
+        !CALL MondoLog(DEBUG_MAXIMUM, "Put_CHR_SCLR", "VarName = "//TRIM(VarName)//", Tag_O not set")
+      ENDIF
       Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_INT32, &
            DEFAULT_CHR_LEN,.FALSE.)
       CALL OpenData(Meta,.TRUE.)
@@ -1012,6 +1162,11 @@ CONTAINS
 #endif
       ILog(1)=0
       IF(A)ILog(1)=1
+      IF(PRESENT(Tag_O)) THEN
+        !CALL MondoLog(DEBUG_MAXIMUM, "Put_LOG_SCLR", "VarName = "//TRIM(VarName)//", Tag_O = "//TRIM(Tag_O))
+      ELSE
+        !CALL MondoLog(DEBUG_MAXIMUM, "Put_LOG_SCLR", "VarName = "//TRIM(VarName)//", Tag_O not set")
+      ENDIF
       Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_INT32,1,.FALSE.)
       CALL OpenData(Meta,.TRUE.)
       CALL WriteIntegerVector(Meta,ILog)
@@ -1109,62 +1264,83 @@ CONTAINS
   !-------------------------------------------------------------------------------
   !-------------------------------------------------------------------------------
   !             Get the Periodic Info
-  SUBROUTINE Get_PBCInfo(PBC,Tag_O)
+  SUBROUTINE Get_PBCInfo(PBC,Label_O,Tag_O)
     TYPE(PBCInfo)                         :: PBC
     CHARACTER(LEN=*),OPTIONAL,INTENT(IN)  :: Tag_O
-    CALL Get(PBC%Dimen     ,'Dimension' ,Tag_O=Tag_O)
-    CALL Get(PBC%PFFMaxEll ,'PFFMaxEll' ,Tag_O=Tag_O)
-    CALL Get(PBC%PFFMaxLay ,'PFFMaxLay' ,Tag_O=Tag_O)
-    CALL Get(PBC%PFFOvRide ,'PFFOvRide' ,Tag_O=Tag_O)
-    CALL Get(PBC%AtomW     ,'AtomWrap'  ,Tag_O=Tag_O)
-    CALL Get(PBC%SuperCell ,'SuperCell' ,Tag_O=Tag_O)
-    CALL Get(PBC%InVecForm ,'VectorForm',Tag_O=Tag_O)
-    CALL Get(PBC%InAtomCrd ,'AtomicCrd' ,Tag_O=Tag_O)
-    CALL Get(PBC%Translate ,'Translate' ,Tag_O=Tag_O)
-    CALL Get(PBC%CellVolume,'CellVolume',Tag_O=Tag_O)
-    CALL Get(PBC%Epsilon   ,'Epsilon'   ,Tag_O=Tag_O)
-    CALL Get(PBC%DipoleFAC ,'DPoleFAC'  ,Tag_O=Tag_O)
-    CALL Get(PBC%QupoleFAC ,'QPoleFAC'  ,Tag_O=Tag_O)
-    CALL Get(PBC%AutoW     ,'AutoWrap'  ,Tag_O=Tag_O)
-    CALL Get(PBC%CellCenter,'CellCenter',Tag_O=Tag_O)
-    CALL Get(PBC%TransVec  ,'TransVec'  ,Tag_O=Tag_O)
-    CALL Get(PBC%BoxShape  ,'BoxShape'  ,Tag_O=Tag_O)
-    CALL Get(PBC%InvBoxSh  ,'InvBoxSh'  ,Tag_O=Tag_O)
-    CALL Get(PBC%LatFrc    ,'LatFrc'    ,Tag_O=Tag_O)
+    CHARACTER(LEN=*),OPTIONAL,INTENT(IN)  :: Label_O
+    CHARACTER(LEN=DEFAULT_CHR_LEN)        :: Label
+
+    IF(PRESENT(Label_O)) THEN
+      Label=TRIM(Label_O)
+    ELSE
+      Label=""
+    ENDIF
+
+    CALL Get(PBC%Dimen,     TRIM(Label)//'Dimension',  Tag_O=Tag_O)
+    CALL Get(PBC%PFFMaxEll, TRIM(Label)//'PFFMaxEll',  Tag_O=Tag_O)
+    CALL Get(PBC%PFFMaxLay, TRIM(Label)//'PFFMaxLay',  Tag_O=Tag_O)
+    CALL Get(PBC%PFFOvRide, TRIM(Label)//'PFFOvRide',  Tag_O=Tag_O)
+    CALL Get(PBC%AtomW,     TRIM(Label)//'AtomWrap',   Tag_O=Tag_O)
+    CALL Get(PBC%SuperCell, TRIM(Label)//'SuperCell',  Tag_O=Tag_O)
+    CALL Get(PBC%InVecForm, TRIM(Label)//'VectorForm', Tag_O=Tag_O)
+    CALL Get(PBC%InAtomCrd, TRIM(Label)//'AtomicCrd',  Tag_O=Tag_O)
+    CALL Get(PBC%Translate, TRIM(Label)//'Translate',  Tag_O=Tag_O)
+    CALL Get(PBC%CellVolume,TRIM(Label)//'CellVolume', Tag_O=Tag_O)
+    CALL Get(PBC%Epsilon,   TRIM(Label)//'Epsilon',    Tag_O=Tag_O)
+    CALL Get(PBC%DipoleFAC, TRIM(Label)//'DPoleFAC',   Tag_O=Tag_O)
+    CALL Get(PBC%QupoleFAC, TRIM(Label)//'QPoleFAC',   Tag_O=Tag_O)
+    CALL Get(PBC%AutoW,     TRIM(Label)//'AutoWrap',   Tag_O=Tag_O)
+    CALL Get(PBC%CellCenter,TRIM(Label)//'CellCenter', Tag_O=Tag_O)
+    CALL Get(PBC%TransVec,  TRIM(Label)//'TransVec',   Tag_O=Tag_O)
+    CALL Get(PBC%BoxShape,  TRIM(Label)//'BoxShape',   Tag_O=Tag_O)
+    CALL Get(PBC%InvBoxSh,  TRIM(Label)//'InvBoxSh',   Tag_O=Tag_O)
+    CALL Get(PBC%LatFrc,    TRIM(Label)//'LatFrc',     Tag_O=Tag_O)
+
   END SUBROUTINE Get_PBCInfo
   !-------------------------------------------------------------------------------
   !-------------------------------------------------------------------------------
   !             Put the Periodic Info
 
-  SUBROUTINE Put_PBCInfo(PBC,Tag_O)
+  SUBROUTINE Put_PBCInfo(PBC,Label_O,Tag_O)
     TYPE(PBCInfo),            INTENT(IN)  :: PBC
     CHARACTER(LEN=*),OPTIONAL,INTENT(IN)  :: Tag_O
-    CALL Put(PBC%Dimen     ,'Dimension' ,Tag_O=Tag_O)
-    CALL Put(PBC%PFFMaxEll ,'PFFMaxEll' ,Tag_O=Tag_O)
-    CALL Put(PBC%PFFMaxLay ,'PFFMaxLay' ,Tag_O=Tag_O)
-    CALL Put(PBC%PFFOvRide ,'PFFOvRide' ,Tag_O=Tag_O)
-    CALL Put(PBC%AtomW     ,'AtomWrap'  ,Tag_O=Tag_O)
-    CALL Put(PBC%SuperCell ,'SuperCell' ,Tag_O=Tag_O)
-    CALL Put(PBC%InVecForm ,'VectorForm',Tag_O=Tag_O)
-    CALL Put(PBC%InAtomCrd ,'AtomicCrd' ,Tag_O=Tag_O)
-    CALL Put(PBC%Translate ,'Translate' ,Tag_O=Tag_O)
-    CALL Put(PBC%CellVolume,'CellVolume',Tag_O=Tag_O)
-    CALL Put(PBC%Epsilon   ,'Epsilon'   ,Tag_O=Tag_O)
-    CALL Put(PBC%DipoleFAC ,'DPoleFAC'  ,Tag_O=Tag_O)
-    CALL Put(PBC%QupoleFAC ,'QPoleFAC'  ,Tag_O=Tag_O)
-    CALL Put(PBC%AutoW     ,'AutoWrap'  ,Tag_O=Tag_O)
-    CALL Put(PBC%CellCenter,'CellCenter',Tag_O=Tag_O)
-    CALL Put(PBC%TransVec  ,'TransVec'  ,Tag_O=Tag_O)
-    CALL Put(PBC%BoxShape  ,'BoxShape'  ,Tag_O=Tag_O)
-    CALL Put(PBC%InvBoxSh  ,'InvBoxSh'  ,Tag_O=Tag_O)
-    CALL Put(PBC%LatFrc    ,'LatFrc'    ,Tag_O=Tag_O)
+    CHARACTER(LEN=*),OPTIONAL,INTENT(IN)  :: Label_O
+    CHARACTER(LEN=DEFAULT_CHR_LEN)        :: Label
+
+    IF(PRESENT(Label_O)) THEN
+      Label=TRIM(Label_O)
+    ELSE
+      Label=""
+    ENDIF
+
+    CALL Put(PBC%Dimen,     TRIM(Label)//'Dimension',  Tag_O=Tag_O)
+    CALL Put(PBC%PFFMaxEll, TRIM(Label)//'PFFMaxEll',  Tag_O=Tag_O)
+    CALL Put(PBC%PFFMaxLay, TRIM(Label)//'PFFMaxLay',  Tag_O=Tag_O)
+    CALL Put(PBC%PFFOvRide, TRIM(Label)//'PFFOvRide',  Tag_O=Tag_O)
+    CALL Put(PBC%AtomW,     TRIM(Label)//'AtomWrap',   Tag_O=Tag_O)
+    CALL Put(PBC%SuperCell, TRIM(Label)//'SuperCell',  Tag_O=Tag_O)
+    CALL Put(PBC%InVecForm, TRIM(Label)//'VectorForm', Tag_O=Tag_O)
+    CALL Put(PBC%InAtomCrd, TRIM(Label)//'AtomicCrd',  Tag_O=Tag_O)
+    CALL Put(PBC%Translate, TRIM(Label)//'Translate',  Tag_O=Tag_O)
+    CALL Put(PBC%CellVolume,TRIM(Label)//'CellVolume', Tag_O=Tag_O)
+    CALL Put(PBC%Epsilon,   TRIM(Label)//'Epsilon',    Tag_O=Tag_O)
+    CALL Put(PBC%DipoleFAC, TRIM(Label)//'DPoleFAC',   Tag_O=Tag_O)
+    CALL Put(PBC%QupoleFAC, TRIM(Label)//'QPoleFAC',   Tag_O=Tag_O)
+    CALL Put(PBC%AutoW,     TRIM(Label)//'AutoWrap',   Tag_O=Tag_O)
+    CALL Put(PBC%CellCenter,TRIM(Label)//'CellCenter', Tag_O=Tag_O)
+    CALL Put(PBC%TransVec,  TRIM(Label)//'TransVec',   Tag_O=Tag_O)
+    CALL Put(PBC%BoxShape,  TRIM(Label)//'BoxShape',   Tag_O=Tag_O)
+    CALL Put(PBC%InvBoxSh,  TRIM(Label)//'InvBoxSh',   Tag_O=Tag_O)
+    CALL Put(PBC%LatFrc,    TRIM(Label)//'LatFrc',     Tag_O=Tag_O)
+
   END SUBROUTINE Put_PBCInfo
   !-------------------------------------------------------------------------------
   !     Get some coordinates
   SUBROUTINE Get_CRDS(GM,Tag_O)
     TYPE(CRDS)                           :: GM
     CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Tag_O
-    !write(*,*) "getting CRDS at ", GetAddress(GM)
+
+    CALL MondoLog(DEBUG_MAXIMUM, "Get_CRDS", "getting coordinates")
     IF(AllocQ(GM%Alloc)) CALL Delete(GM)
     !-------------------------------------------------------------------------------
     !        Items that should not change with geometry...
@@ -1179,29 +1355,31 @@ CONTAINS
     CALL New(GM)
     !-------------------------------------------------------------------------------
     !        Items that can change with geometry ...
-    CALL Get(GM%ETotal    ,'gm_etot'      ,Tag_O=Tag_O)
-    CALL Get(GM%Ordrd     ,'reordered'    ,Tag_O=Tag_O)
-    CALL Get(GM%AtTyp     ,'atomtype'     ,Tag_O=Tag_O)
-    CALL Get(GM%AtNum     ,'atomicnumbers',Tag_O=Tag_O)
-    CALL Get(GM%AtNam     ,'atomname'     ,Tag_O=Tag_O)
-    CALL Get(GM%AtMMTyp   ,'mmtype'       ,Tag_O=Tag_O)
-    CALL Get(GM%AtMss     ,'atomicmass'   ,Tag_O=Tag_O)
-    CALL Get(GM%PBC                       ,Tag_O=Tag_O)
-    CALL Get(GM%BndBox    ,'boundingbox'  ,Tag_O=Tag_O)
-    CALL Get(GM%CConstrain,'constraints'  ,Tag_O=Tag_O)
-    CALL Get(GM%DoFreq    ,'freqonatoms'  ,Tag_O=Tag_O)
-    CALL Get(GM%Carts     ,'cartesians'   ,Tag_O=Tag_O)
-    CALL Get(GM%BoxCarts  ,'LatticeCoord' ,Tag_O=Tag_O)
-    CALL Get(GM%Velocity  ,'Velocity'     ,Tag_O=Tag_O)
-    CALL Get(GM%Gradients ,'Gradients'    ,Tag_O=Tag_O)
-    CALL Get(GM%Displ     ,'Displ'        ,Tag_O=Tag_O)
+    CALL Get(GM%ETotal,       'gm_etot',          Tag_O=Tag_O)
+    CALL Get(GM%ETotalPerSCF, "gm_etotalperscf",  Tag_O=Tag_O)
+    CALL Get(GM%Ordrd,        'reordered',        Tag_O=Tag_O)
+    CALL Get(GM%AtTyp,        'atomtype',         Tag_O=Tag_O)
+    CALL Get(GM%AtNum,        'atomicnumbers',    Tag_O=Tag_O)
+    CALL Get(GM%AtNam,        'atomname',         Tag_O=Tag_O)
+    CALL Get(GM%AtMMTyp,      'mmtype',           Tag_O=Tag_O)
+    CALL Get(GM%AtMss,        'atomicmass',       Tag_O=Tag_O)
+    CALL Get(GM%PBC,                              Tag_O=Tag_O)
+    CALL Get(GM%BndBox,       'boundingbox',      Tag_O=Tag_O)
+    CALL Get(GM%CConstrain,   'constraints',      Tag_O=Tag_O)
+    CALL Get(GM%DoFreq,       'freqonatoms',      Tag_O=Tag_O)
+    CALL Get(GM%Carts,        'cartesians',       Tag_O=Tag_O)
+    CALL Get(GM%BoxCarts,     'LatticeCoord',     Tag_O=Tag_O)
+    CALL Get(GM%Velocity,     'Velocity',         Tag_O=Tag_O)
+    CALL Get(GM%Gradients,    'Gradients',        Tag_O=Tag_O)
+    CALL Get(GM%Displ,        'Displ',            Tag_O=Tag_O)
     IF(PRESENT(Tag_O))THEN
-      CALL Get(GM%PBCDispl  ,Tag_O='PBCDispl'//TRIM(Tag_O))
-    ELSE
-      CALL Get(GM%PBCDispl  ,Tag_O='PBCDispl')
+      CALL Get(GM%PBCDispl,   'PBCDispl',         Tag_O=Tag_O)
+   ELSE
+      CALL Get(GM%PBCDispl,   'PBCDispl')
     ENDIF
-    CALL Get(GM%LatticeOnly,'LatticeOnly' ,Tag_O=Tag_O)
-    CALL Get(GM%AltCount  ,'AltCount'     ,Tag_O=Tag_O)
+    CALL Get(GM%LatticeOnly,  'LatticeOnly',      Tag_O=Tag_O)
+    CALL Get(GM%AltCount,     'AltCount',         Tag_O=Tag_O)
+    CALL MondoLog(DEBUG_MAXIMUM, "Get_CRDS", "done getting coordinates")
   END SUBROUTINE Get_CRDS
   !-------------------------------------------------------------------------------
   !     Put a coordinate set
@@ -1209,8 +1387,10 @@ CONTAINS
   SUBROUTINE Put_CRDS(GM,Tag_O)
     TYPE(CRDS),               INTENT(IN) :: GM
     CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Tag_O
+
     !-------------------------------------------------------------------------------
     !        Items that should not change with geometry...
+    CALL MondoLog(DEBUG_MAXIMUM, "Put_CRDS", "putting coordinates")
     CALL Put(GM%NAtms,'natoms'       ,Tag_O=Tag_O)
     CALL Put(GM%Confg,'configuration',Tag_O=Tag_O)
     CALL Put(GM%NElec,'nel'          ,Tag_O=Tag_O)
@@ -1221,29 +1401,31 @@ CONTAINS
     CALL Put(GM%InAu, 'inau'         ,Tag_O=Tag_O)
     !-------------------------------------------------------------------------------
     !        Items that can change with geometry ...
-    CALL Put(GM%ETotal    ,'gm_etot'      ,Tag_O=Tag_O)
-    CALL Put(GM%Ordrd     ,'reordered'    ,Tag_O=Tag_O)
-    CALL Put(GM%AtTyp     ,'atomtype'     ,Tag_O=Tag_O)
-    CALL Put(GM%AtNum     ,'atomicnumbers',Tag_O=Tag_O)
-    CALL Put(GM%AtNam     ,'atomname'     ,Tag_O=Tag_O)
-    CALL Put(GM%AtMMTyp   ,'mmtype'       ,Tag_O=Tag_O)
-    CALL Put(GM%AtMss     ,'atomicmass'   ,Tag_O=Tag_O)
-    CALL Put(GM%PBC                       ,Tag_O=Tag_O)
-    CALL Put(GM%BndBox    ,'boundingbox'  ,Tag_O=Tag_O)
-    CALL Put(GM%CConstrain,'constraints'  ,Tag_O=Tag_O)
-    CALL Put(GM%DoFreq    ,'freqonatoms'  ,Tag_O=Tag_O)
-    CALL Put(GM%Carts     ,'cartesians'   ,Tag_O=Tag_O)
-    CALL Put(GM%BoxCarts  ,'LatticeCoord' ,Tag_O=Tag_O)
-    CALL Put(GM%Velocity  ,'Velocity'     ,Tag_O=Tag_O)
-    CALL Put(GM%Gradients ,'Gradients'    ,Tag_O=Tag_O)
-    CALL Put(GM%Displ     ,'Displ'        ,Tag_O=Tag_O)
+    CALL Put(GM%ETotal,       "gm_etot",          Tag_O=Tag_O)
+    CALL Put(GM%ETotalPerSCF, "gm_etotalperscf",  Tag_O=Tag_O)
+    CALL Put(GM%Ordrd,        "reordered",        Tag_O=Tag_O)
+    CALL Put(GM%AtTyp,        "atomtype",         Tag_O=Tag_O)
+    CALL Put(GM%AtNum,        "atomicnumbers",    Tag_O=Tag_O)
+    CALL Put(GM%AtNam,        "atomname",         Tag_O=Tag_O)
+    CALL Put(GM%AtMMTyp,      "mmtype",           Tag_O=Tag_O)
+    CALL Put(GM%AtMss,        "atomicmass",       Tag_O=Tag_O)
+    CALL Put(GM%PBC,                              Tag_O=Tag_O)
+    CALL Put(GM%BndBox,       "boundingbox",      Tag_O=Tag_O)
+    CALL Put(GM%CConstrain,   "constraints",      Tag_O=Tag_O)
+    CALL Put(GM%DoFreq,       "freqonatoms",      Tag_O=Tag_O)
+    CALL Put(GM%Carts,        "cartesians",       Tag_O=Tag_O)
+    CALL Put(GM%BoxCarts,     "LatticeCoord",     Tag_O=Tag_O)
+    CALL Put(GM%Velocity,     "Velocity",         Tag_O=Tag_O)
+    CALL Put(GM%Gradients,    "Gradients",        Tag_O=Tag_O)
+    CALL Put(GM%Displ,        "Displ",            Tag_O=Tag_O)
     IF(PRESENT(Tag_O))THEN
-      CALL Put(GM%PBCDispl  ,Tag_O='PBCDispl'//TRIM(Tag_O))
+      CALL Put(GM%PBCDispl,   'PBCDispl',         Tag_O=Tag_O)
     ELSE
-      CALL Put(GM%PBCDispl  ,Tag_O='PBCDispl')
+      CALL Put(GM%PBCDispl,   'PBCDispl')
     ENDIF
-    CALL Put(GM%LatticeOnly,'LatticeOnly' ,Tag_O=Tag_O)
-    CALL Put(GM%AltCount  ,'AltCount'     ,Tag_O=Tag_O)
+    CALL Put(GM%LatticeOnly,  'LatticeOnly',      Tag_O=Tag_O)
+    CALL Put(GM%AltCount,     'AltCount',         Tag_O=Tag_O)
+    CALL MondoLog(DEBUG_MAXIMUM, "Put_CRDS", "done putting coordinates")
   END SUBROUTINE Put_CRDS
   !-------------------------------------------------------------------------------
   !     Get a BCSR matrix
@@ -1349,7 +1531,7 @@ CONTAINS
              (NBlks.GT.SIZE(A%BlkPt%I)).OR. &
              (NNon0.GT.SIZE(A%MTrix%D))
         IF(LimitsQ)THEN
-          CALL MondoLog(DEBUG_NONE, "Get_BCSR", &
+          CALL MondoLog(DEBUG_MAXIMUM, "Get_BCSR", &
             'reallocate the matrix A%NSMat.EQ.NSMat = ' &
             //TRIM(LogicalToChar(A%NSMat.EQ.NSMat)))
           CALL Delete(A)
@@ -1524,7 +1706,6 @@ CONTAINS
     ENDIF
 #endif
 
-    !write(*,'(A,I2,2(A,I5))') 'Put_bcsr NSMat=',A%NSMat,' A%NBlks=',A%NBlks,' size(A%BlkPt%I)=',size(A%BlkPt%I,1)
     RETURN
 1   CALL Halt('IO Error '//TRIM(IntToChar(IOS))//' in Put_BCSR.')
   END SUBROUTINE Put_BCSR
@@ -2098,8 +2279,9 @@ CONTAINS
         CALL Halt(' Get_HGRho could not find '//TRIM(FileName))
       ENDIF
 
-      ! Allocate Memory
+      CALL MondoLog(DEBUG_MAXIMUM, "Get_HGRho", "getting rho from "//TRIM(FileName))
 
+      ! Allocate Memory
       READ(UNIT=Seq,Err=100,IOSTAT=IOS) NSDen,NExpt,NDist,NCoef
 #ifdef PARALLEL
     ENDIF
@@ -2112,6 +2294,13 @@ CONTAINS
     ENDIF
 #endif
     CALL New_HGRho(A,(/NExpt,NDist,NCoef,NSDen/))
+
+    !CALL MondoLog(DEBUG_MAXIMUM, "Get_HGRho", &
+    !    "NSDen = "//TRIM(IntToChar(A%NSDen))//", " &
+    !  //"NExpt = "//TRIM(IntToChar(A%NExpt))//", " &
+    !  //"NDist = "//TRIM(IntToChar(A%NDist))//", " &
+    !  //"NCoef = "//TRIM(IntToChar(A%NCoef))//", " &
+    !  //"MyID = "//TRIM(IntToChar(MyID)))
 
     ! Read In the Density
 #ifdef PARALLEL
@@ -2160,7 +2349,7 @@ CONTAINS
     CHARACTER(LEN=*)                 :: Name
     CHARACTER(LEN=DEFAULT_CHR_LEN)   :: FileName
     LOGICAL                          :: Exists
-    !
+
     FileName=TrixFile(Name,Args,SCFCycle)
     INQUIRE(FILE=FileName,EXIST=Exists)
     IF(Exists) THEN
@@ -2169,10 +2358,17 @@ CONTAINS
       OPEN(UNIT=Seq,FILE=FileName,STATUS='NEW',FORM='UNFORMATTED',ACCESS='SEQUENTIAL')
     ENDIF
 
-    !   Write density to disk
+    CALL MondoLog(DEBUG_MAXIMUM, "Put_HGRho", "putting rho to "//TRIM(FileName))
+
+    ! Write density to disk
+    !CALL MondoLog(DEBUG_MAXIMUM, "Put_HGRho", &
+    !    "NSDen = "//TRIM(IntToChar(A%NSDen))//", " &
+    !  //"NExpt = "//TRIM(IntToChar(A%NExpt))//", " &
+    !  //"NDist = "//TRIM(IntToChar(A%NDist))//", " &
+    !  //"NCoef = "//TRIM(IntToChar(A%NCoef))//", " &
+    !  //"MyID = "//TRIM(IntToChar(MyID)))
 
     WRITE(UNIT=Seq,Err=100,IOSTAT=IOS) A%NSDen,A%NExpt,A%NDist,A%NCoef
-    !write(*,'(A,5I4)') 'Put_HGRho:',A%NSDen,A%NExpt,A%NDist,A%NCoef,MyID
     WRITE(UNIT=Seq,Err=100,IOSTAT=IOS)(A%NQ%I(I)    ,I=1,A%NExpt)
     WRITE(UNIT=Seq,Err=100,IOSTAT=IOS)(A%OffQ%I(I)  ,I=1,A%NExpt)
     WRITE(UNIT=Seq,Err=100,IOSTAT=IOS)(A%OffR%I(I)  ,I=1,A%NExpt)
@@ -2187,6 +2383,7 @@ CONTAINS
     RETURN
 100 CALL Halt('IO Error '//TRIM(IntToChar(IOS))//' in Put_HGRho.')
   END SUBROUTINE Put_HGRho
+
   !===============================================================================
   ! Get Cartesian multipoles
   !===============================================================================
@@ -2341,6 +2538,11 @@ CONTAINS
       ENDDO
       IF(BufSize /= RunInd - 1) STOP 'ERR: Index problem in Put_CHR_VECT !'
       CALL Put(BufSize,NameTag(VarName,TRIM(IntToChar(0))//TRIM(Tag_O)))
+      IF(PRESENT(Tag_O)) THEN
+        !CALL MondoLog(DEBUG_MAXIMUM, "Put_CHR_VECT", "VarName = "//TRIM(VarName)//", Tag_O = "//TRIM(Tag_O))
+      ELSE
+        !CALL MondoLog(DEBUG_MAXIMUM, "Put_CHR_VECT", "VarName = "//TRIM(VarName)//", Tag_O not set")
+      ENDIF
       Meta=SetMeta(NameTag(VarName,TRIM(IntToChar(1))// &
            TRIM(Tag_O)),NATIVE_INT32,BufSize,.FALSE.)
       CALL OpenData(Meta,.TRUE.)
@@ -2394,6 +2596,11 @@ CONTAINS
       ENDDO
 #else
       NN = SIZE(A%C)
+      IF(PRESENT(Tag_O)) THEN
+        !CALL MondoLog(DEBUG_MAXIMUM, "Get_CHR_VECT", "VarName = "//TRIM(VarName)//", Tag_O = "//TRIM(Tag_O))
+      ELSE
+        !CALL MondoLog(DEBUG_MAXIMUM, "Get_CHR_VECT", "VarName = "//TRIM(VarName)//", Tag_O not set")
+      ENDIF
       Meta=SetMeta(NameTag(VarName,TRIM(IntToChar(1))//TRIM(Tag_O)),NATIVE_INT32,BufSize,.FALSE.)
       CALL OpenData(Meta)
       ALLOCATE(B(BufSize))
@@ -2427,13 +2634,13 @@ CONTAINS
   END SUBROUTINE Get_CHR_VECT
   !-------------------------------------------------------------------------------
   SUBROUTINE Put_CHR10_VECT(A,VarName,Tag_O)
-    INTEGER                              :: I,N,II,NN
-    TYPE(CHR10_VECT) :: A
-    CHARACTER(LEN=*),         INTENT(IN) :: VarName
-    CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Tag_O
-    TYPE(META_DATA)                      :: Meta
-    INTEGER,ALLOCATABLE :: B(:)
-    INTEGER :: RunInd,BufSize
+    INTEGER                               :: I,N,II,NN
+    TYPE(CHR10_VECT)                      :: A
+    CHARACTER(LEN=*),         INTENT(IN)  :: VarName
+    CHARACTER(LEN=*),OPTIONAL,INTENT(IN)  :: Tag_O
+    TYPE(META_DATA)                       :: Meta
+    INTEGER,ALLOCATABLE                   :: B(:)
+    INTEGER                               :: RunInd,BufSize
 #ifdef PARALLEL
     IF(MyId==ROOT)THEN
 #endif
@@ -2459,13 +2666,17 @@ CONTAINS
         RunInd = RunInd + 1
       ENDDO
       IF(BufSize /= RunInd - 1) STOP 'ERR: Index problem in Put_CHR10_VECT !'
-      IF(PRESENT(Tag_O))THEN
-        CALL Put(BufSize,NameTag(VarName,TRIM(IntToChar(0))//TRIM(Tag_O)))
-        Meta=SetMeta(NameTag(VarName,TRIM(IntToChar(1))// &
-             TRIM(Tag_O)),NATIVE_INT32,BufSize,.FALSE.)
+      IF(PRESENT(Tag_O)) THEN
+        !CALL MondoLog(DEBUG_MAXIMUM, "Put_CHR10_VECT", "VarName = "//TRIM(VarName)//", Tag_O = "//TRIM(Tag_O))
       ELSE
-        CALL Put(BufSize,NameTag(VarName,TRIM(IntToChar(0))))
-        Meta=SetMeta(NameTag(VarName,TRIM(IntToChar(1))),NATIVE_INT32,BufSize,.FALSE.)
+        !CALL MondoLog(DEBUG_MAXIMUM, "Put_CHR10_VECT", "VarName = "//TRIM(VarName)//", Tag_O not set")
+      ENDIF
+      IF(PRESENT(Tag_O))THEN
+        CALL Put(BufSize,NameTag(VarName//TRIM(IntToChar(0)), Tag_O))
+        Meta=SetMeta(NameTag(VarName//TRIM(IntToChar(1)), Tag_O),NATIVE_INT32,BufSize,.FALSE.)
+      ELSE
+        CALL Put(BufSize,NameTag(VarName//TRIM(IntToChar(0))))
+        Meta=SetMeta(NameTag(VarName//TRIM(IntToChar(1))),NATIVE_INT32,BufSize,.FALSE.)
       ENDIF
       CALL OpenData(Meta,.TRUE.)
       CALL WriteIntegerVector(Meta,B)
@@ -2487,19 +2698,24 @@ CONTAINS
     CHARACTER(LEN=DCL) :: TEMP
     TYPE(META_DATA)                         :: Meta
     IF(PRESENT(Tag_O))THEN
-      CALL Get(BufSize,NameTag(VarName,TRIM(IntToChar(0))//TRIM(Tag_O)))
+      CALL Get(BufSize,NameTag(VarName//TRIM(IntToChar(0)), Tag_O))
     ELSE
-      CALL Get(BufSize,NameTag(VarName,TRIM(IntToChar(0))))
+      CALL Get(BufSize,NameTag(VarName//TRIM(IntToChar(0))))
     ENDIF
 #ifdef PARALLEL
 
     IF(MyId==ROOT)THEN
 #endif
       NN = SIZE(A%C)
-      IF(PRESENT(Tag_O))THEN
-        Meta=SetMeta(NameTag(VarName,TRIM(IntToChar(1))//TRIM(Tag_O)),NATIVE_INT32,BufSize,.FALSE.)
+      IF(PRESENT(Tag_O)) THEN
+        !CALL MondoLog(DEBUG_MAXIMUM, "Get_CHR10_VECT", "VarName = "//TRIM(VarName)//", Tag_O = "//TRIM(Tag_O))
       ELSE
-        Meta=SetMeta(NameTag(VarName,TRIM(IntToChar(1))),NATIVE_INT32,BufSize,.FALSE.)
+        !CALL MondoLog(DEBUG_MAXIMUM, "Get_CHR10_VECT", "VarName = "//TRIM(VarName)//", Tag_O not set")
+      ENDIF
+      IF(PRESENT(Tag_O))THEN
+        Meta=SetMeta(NameTag(VarName//TRIM(IntToChar(1)), TRIM(Tag_O)),NATIVE_INT32,BufSize,.FALSE.)
+      ELSE
+        Meta=SetMeta(NameTag(VarName//TRIM(IntToChar(1))),NATIVE_INT32,BufSize,.FALSE.)
       ENDIF
       CALL OpenData(Meta)
       ALLOCATE(B(BufSize))
@@ -2547,6 +2763,11 @@ CONTAINS
         ILog%I(I)=0
         IF(A%L(I)) ILog%I(I)=1
       ENDDO
+      IF(PRESENT(Tag_O)) THEN
+        !CALL MondoLog(DEBUG_MAXIMUM, "Put_LOG_VECT", "VarName = "//TRIM(VarName)//", Tag_O = "//TRIM(Tag_O))
+      ELSE
+        !CALL MondoLog(DEBUG_MAXIMUM, "Put_LOG_VECT", "VarName = "//TRIM(VarName)//", Tag_O not set")
+      ENDIF
       Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_INT32,NN)
       CALL OpenData(Meta,.TRUE.)
       CALL WriteIntegerVector(Meta,ILog%I)
@@ -2569,8 +2790,12 @@ CONTAINS
 #endif
       NN=SIZE(A%L)
       CALL New(ILog,NN)
-      Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_INT32, &
-           SIZE(ILog%I,1),.FALSE.)
+      IF(PRESENT(Tag_O)) THEN
+        !CALL MondoLog(DEBUG_MAXIMUM, "Get_LOG_VECT", "VarName = "//TRIM(VarName)//", Tag_O = "//TRIM(Tag_O))
+      ELSE
+        !CALL MondoLog(DEBUG_MAXIMUM, "Get_LOG_VECT", "VarName = "//TRIM(VarName)//", Tag_O not set")
+      ENDIF
+      Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_INT32,SIZE(ILog%I,1),.FALSE.)
       CALL OpenData(Meta)
       CALL ReadIntegerVector(Meta,ILog%I)
       CALL CloseData(Meta)
@@ -2789,5 +3014,15 @@ CONTAINS
     CALL Put(A%PBCValues,TRIM(Name)//'PBCValues',Tag_O=Tag_O)
     CALL Put(A%PBCGrads,TRIM(Name)//'PBCGrads',Tag_O=Tag_O)
   END SUBROUTINE Put_PBCFit
+
+  SUBROUTINE HDF5DeleteObject(ID, groupName, objectName)
+    INTEGER, INTENT(IN)           :: ID
+    CHARACTER(LEN=*), INTENT(IN)  :: groupName, objectName
+
+    CALL HDF5Delete(ID, &
+      LEN(TRIM(groupName)), Char2Ints(LEN(TRIM(groupName)), groupName), &
+      LEN(TRIM(objectName)), Char2Ints(LEN(TRIM(objectName)), objectName))
+
+  END SUBROUTINE HDF5DeleteObject
 
 END MODULE InOut

@@ -6,17 +6,33 @@
 CPP = @CPP@
 AM_CPPFLAGS = @AM_CPPFLAGS@
 
+if USE_DYNAMIC_LINKING
+AM_LDFLAGS = -L$(libdir)
+endif
+
 if INTERNAL_LAPACK
-  LDADD_INTERNAL_LAPACK = ../MondoMods/lapack/lapack/libMondoLAPACK.la \
-    ../MondoMods/lapack/blas/libMondoBLAS.la \
-    ../MondoMods/lapack/install/libMondoLAPACKEXTRA.la
+if USE_DYNAMIC_LINKING
+LDADD_INTERNAL_LAPACK = -lMondoLAPACK -lMondoBLAS -lMondoLAPACKEXTRA
+else
+LDADD_INTERNAL_LAPACK = ../MondoMods/lapack/lapack/libMondoLAPACK.la \
+  ../MondoMods/lapack/blas/libMondoBLAS.la \
+  ../MondoMods/lapack/install/libMondoLAPACKEXTRA.la
+endif
 endif
 
 if INTERNAL_HDF5
-  LDADD_INTERNAL_HDF5 = ../MondoMods/hdf5/src/libhdf5.la
+if USE_DYNAMIC_LINKING
+LDADD_INTERNAL_HDF5 = -lhdf5
+else
+LDADD_INTERNAL_HDF5 = ../MondoMods/hdf5/src/libhdf5.la
+endif
 endif
 
+if USE_DYNAMIC_LINKING
+LDADD_MONDOMODS = -lMondoMods
+else
 LDADD_MONDOMODS = ../MondoMods/libMondoMods.la
+endif
 
 # On filesystems which are case-insensitive (which really means HFS+ on OS X)
 # we can not preprocess into a filename that differs by the case only, i.e. .C
@@ -42,17 +58,62 @@ CC_COMMAND  = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(CPPFLAGS) $(CPPMIS
 
 # Whether we should keep or remove preprocessed files.
 REMOVE_PREPROCESSED_FILES = @REMOVE_PREPROCESSED_FILES@
+HAVE_MEMORY_DEBUG = @HAVE_MEMORY_DEBUG@
 
 # Suffix rules.
 .f90.o :
-	$(CPP_COMMAND) $< | grep -v -E "^#" > $<$(PREPROCESSED_SUFFIX).f90
+	@if test "${HAVE_MEMORY_DEBUG}" = "yes"; then \
+		echo "adding memory debug statements to $<"; \
+		sed -e 's/DEALLOCATE(\(.\+\))/CALL MondoLog(DEBUG_NONE, "memory", "deallocating: \1", File_O = __FILE__, Line_O = __LINE__); DEALLOCATE(\1)/' $< | \
+		sed -e 's/ ALLOCATE(\(.\+\))/ CALL MondoLog(DEBUG_NONE, "memory", "allocating: \1", File_O = __FILE__, Line_O = __LINE__); ALLOCATE(\1)/' > $<-memory.f90; \
+	else \
+		cp $< $<-memory.f90; \
+	fi
+	$(CPP_COMMAND) $<-memory.f90 | grep -v -E "^#" > $<$(PREPROCESSED_SUFFIX).f90
 	$(FC_COMMAND) -c -o $@ $<$(PREPROCESSED_SUFFIX).f90
-	@if test "${REMOVE_PREPROCESSED_FILES}" = "yes"; then rm $<$(PREPROCESSED_SUFFIX).f90; fi
+	@if test "${REMOVE_PREPROCESSED_FILES}" = "yes"; then \
+		rm $<$(PREPROCESSED_SUFFIX).f90; \
+		rm $<-memory.f90; \
+	fi
 
 .f90.lo :
-	$(CPP_COMMAND) $< | grep -v -E "^#" > $<$(PREPROCESSED_SUFFIX).f90
+	@if test "${HAVE_MEMORY_DEBUG}" = "yes"; then \
+		echo "adding memory debug statements to $<"; \
+		sed -e 's/DEALLOCATE(\(.\+\))/CALL MondoLog(DEBUG_NONE, "memory", "deallocating: \1", File_O = __FILE__, Line_O = __LINE__); DEALLOCATE(\1)/' $< | \
+		sed -e 's/ ALLOCATE(\(.\+\))/ CALL MondoLog(DEBUG_NONE, "memory", "allocating: \1", File_O = __FILE__, Line_O = __LINE__); ALLOCATE(\1)/' > $<-memory.f90; \
+	else \
+		cp $< $<-memory.f90; \
+	fi
+	$(CPP_COMMAND) $<-memory.f90 | grep -v -E "^#" > $<$(PREPROCESSED_SUFFIX).f90
 	$(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(FC_COMMAND) -c -o $@ $<$(PREPROCESSED_SUFFIX).f90
-	@if test "${REMOVE_PREPROCESSED_FILES}" = "yes"; then rm $<$(PREPROCESSED_SUFFIX).f90; fi
+	@if test "${REMOVE_PREPROCESSED_FILES}" = "yes"; then \
+		rm $<$(PREPROCESSED_SUFFIX).f90; \
+		rm $<-memory.f90; \
+	fi
+
+#.f90.o :
+#	@$(CPP_COMMAND) $< | grep -v -E "^#" > $<$(PREPROCESSED_SUFFIX).f90 && exit 0; \
+#	  echo "The following preprocessor command failed:" 1>&2; \
+#		echo '$(CPP_COMMAND) $< | grep -v -E "^#" > $<$(PREPROCESSED_SUFFIX).f90' 1>&2; \
+#		$(CPP_COMMAND) $< | grep -v -E "^#" > $<$(PREPROCESSED_SUFFIX).f90 > /dev/null 2>&1
+#	@echo "compiling $<"
+#	@$(FC_COMMAND) -c -o $@ $<$(PREPROCESSED_SUFFIX).f90 && exit 0; \
+#	  echo "The following compiler command failed:" 1>&2; \
+#		echo '$(FC_COMMAND) -c -o $@ $<$(PREPROCESSED_SUFFIX).f90' 1>&2; \
+#		$(FC_COMMAND) -c -o $@ $<$(PREPROCESSED_SUFFIX).f90 > /dev/null 2>&1
+#	@if test "${REMOVE_PREPROCESSED_FILES}" = "yes"; then rm $<$(PREPROCESSED_SUFFIX).f90; fi
+#
+#.f90.lo :
+#	@$(CPP_COMMAND) $< | grep -v -E "^#" > $<$(PREPROCESSED_SUFFIX).f90 && exit 0; \
+#		echo "The following preprocessor command failed:" 1>&2; \
+#		echo '$(CPP_COMMAND) $< | grep -v -E "^#" > $<$(PREPROCESSED_SUFFIX).f90' 1>&2; \
+#		$(CPP_COMMAND) $< | grep -v -E "^#" > $<$(PREPROCESSED_SUFFIX).f90 > /dev/null 2>&1
+#	@echo "compiling $<"
+#	@$(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(FC_COMMAND) -c -o $@ $<$(PREPROCESSED_SUFFIX).f90 && exit 0; \
+#	  echo "The following compiler command failed:" 1>&2; \
+#		echo '$(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(FC_COMMAND) -c -o $@ $<$(PREPROCESSED_SUFFIX).f90' 1>&2; \
+#		$(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(FC_COMMAND) -c -o $@ $<$(PREPROCESSED_SUFFIX).f90 > /dev/null 2>&1
+#	@if test "${REMOVE_PREPROCESSED_FILES}" = "yes"; then rm $<$(PREPROCESSED_SUFFIX).f90; fi
 
 .f.o :
 	$(CPP_COMMAND) $< | grep -v -E "^#" > $<$(PREPROCESSED_SUFFIX).f
@@ -66,18 +127,25 @@ REMOVE_PREPROCESSED_FILES = @REMOVE_PREPROCESSED_FILES@
 
 # For dependencies of -L and -I.
 if INTERNAL_LAPACK
-  INTERNAL_LAPACK_DEPENDENCY_FILES = \
-    $(top_srcdir)/MondoMods/lapack/blas/libMondoBLAS.la \
-    $(top_srcdir)/MondoMods/lapack/lapack/libMondoLAPACK.la \
-    $(top_srcdir)/MondoMods/lapack/install/libMondoLAPACKEXTRA.la
+if ! USE_DYNAMIC_LINKING
+INTERNAL_LAPACK_DEPENDENCY_FILES = \
+  $(top_srcdir)/MondoMods/lapack/blas/libMondoBLAS.la \
+  $(top_srcdir)/MondoMods/lapack/lapack/libMondoLAPACK.la \
+  $(top_srcdir)/MondoMods/lapack/install/libMondoLAPACKEXTRA.la
+endif
 endif
 
 if INTERNAL_HDF5
-  INTERNAL_HDF5_DEPENDENCY_FILES = $(top_srcdir)/MondoMods/hdf5/src/libhdf5.la
+if ! USE_DYNAMIC_LINKING
+INTERNAL_HDF5_DEPENDENCY_FILES = $(top_srcdir)/MondoMods/hdf5/src/libhdf5.la
+endif
 endif
 
-MondoMods_DEPENDENCY_FILES = \
-  $(top_srcdir)/MondoMods/libMondoMods.la \
+if ! USE_DYNAMIC_LINKING
+MondoMods_DEPENDENCY_FILES_LIBS = $(top_srcdir)/MondoMods/libMondoMods.la
+endif
+
+MondoMods_DEPENDENCY_FILES_MODS = \
   $(top_srcdir)/MondoMods/ainv.mod \
   $(top_srcdir)/MondoMods/annealmap.mod \
   $(top_srcdir)/MondoMods/atompairs.mod \
@@ -137,4 +205,5 @@ MondoMods_DEPENDENCY_FILES = \
   $(top_srcdir)/MondoMods/thresholding.mod \
   $(top_srcdir)/MondoMods/utilities.mod \
   $(INTERNAL_LAPACK_DEPENDENCY_FILES) \
-  $(INTERNAL_HDF5_DEPENDENCY_FILES)
+  $(INTERNAL_HDF5_DEPENDENCY_FILES) \
+  $(MondoMods_DEPENDENCY_FILES_LIBS)

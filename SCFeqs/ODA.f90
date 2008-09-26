@@ -121,15 +121,15 @@ PROGRAM ODA
   ENDIF
   ! Get Energies: E_nuc and E_xc and K_xc matrices
   Current(1)=Current(1)-1
-  CALL Get(Enuc0,'E_NuclearTotal',StatsToChar(Current))
+  CALL Get(Enuc0,'E_NuclearTotal',Stats_O=Current)
   Current(1)=Current(1)+1
-  CALL Get(Enuc1,'E_NuclearTotal',StatsToChar(Current))
+  CALL Get(Enuc1,'E_NuclearTotal',Stats_O=Current)
   IF(HasDFT(ModelChem)) THEN
     Current(1)=Current(1)-1
-    CALL Get(Exc0 ,'Exc'           ,StatsToChar(Current))
+    CALL Get(Exc0 ,'Exc'           ,Stats_O=Current)
     CALL Get(K0,TrixFile('Kxc',Args,-1))
     Current(1)=Current(1)+1
-    CALL Get(Exc1 ,'Exc'           ,StatsToChar(Current))
+    CALL Get(Exc1 ,'Exc'           ,Stats_O=Current)
     CALL Get(K1,TrixFile('Kxc',Args,0))
   ENDIF
   ! Compute the Endpoint energies and Derivatives
@@ -332,7 +332,7 @@ PROGRAM ODA
   ENDIF
   ! ENucTotTilde_N = (1-L)*ENucTotTilde_(N-1)+L*ENucTotTilde_N
   ENucTotTilde=L*Enuc1+L1*Enuc0
-  CALL Put(ENucTotTilde,'E_NuclearTotal',StatsToChar(Current))
+  CALL Put(ENucTotTilde,'E_NuclearTotal',Stats_O=Current)
   ! Tidy up
   CALL Delete(P)
   CALL Delete(PTilde)

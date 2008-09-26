@@ -1,6 +1,10 @@
 include $(top_srcdir)/make.inc
 
+if USE_DYNAMIC_LINKING
+lib_LTLIBRARIES = libMondoBLAS.la
+else
 noinst_LTLIBRARIES = libMondoBLAS.la
+endif
 
 libMondoBLAS_la_SOURCES = \
   caxpy.f  \

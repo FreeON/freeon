@@ -24,7 +24,8 @@
 !    disemination in future releases.
 !------------------------------------------------------------------------------
 
-#include <MondoConfig.h>
+#include "MondoConfig.h"
+#include "MondoLocalVersion.h"
 
 MODULE PrintParsed
   USE InOut

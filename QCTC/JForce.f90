@@ -90,7 +90,12 @@ PROGRAM JForce
 #else
   !  WRITE(*,*) "JForce"
   !  WRITE(*,*) "D ",Args%I%I(4)
+
+  ! Index check...
+  CALL MondoLog(DEBUG_NONE, TRIM(Prog), "Index Check: getting P from "//TRIM(TrixFile('D',Args,1)))
   CALL Get(P,TrixFile('D',Args,1),BCast_O=.TRUE.)
+
+  CALL MondoLog(DEBUG_NONE, TRIM(Prog), "Index Check: getting Rho from "//TRIM(TrixFile('Rho',Args,1)))
   CALL Get(Rho,'Rho',Args,1,Bcast_O=.TRUE.)
 #endif
   CALL Get(RhoPoles)

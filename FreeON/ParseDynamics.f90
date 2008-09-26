@@ -65,6 +65,16 @@ CONTAINS
         D%MDGeuss=MD_DMLinear
       ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_DMTRBO)) THEN
         D%MDGeuss=MD_DMTRBO
+      ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_DMTRBO_Damp_dt3)) THEN
+        D%MDGeuss=MD_DMTRBO_Damp_dt3
+      ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_DMTRBO_Damp_dt5)) THEN
+        D%MDGeuss=MD_DMTRBO_Damp_dt5
+      ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_DMTRBO_Damp_dt7)) THEN
+        D%MDGeuss=MD_DMTRBO_Damp_dt7
+      ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_DMTRBO_Damp_dt9)) THEN
+        D%MDGeuss=MD_DMTRBO_Damp_dt9
+      ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_DMTRBO_Damp_dt11)) THEN
+        D%MDGeuss=MD_DMTRBO_Damp_dt11
       ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_DMSymplectic)) THEN
         D%MDGeuss=MD_DMSymplectic
       ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_FMVerlet0)) THEN
@@ -234,6 +244,9 @@ CONTAINS
       ! MD Time Step
       IF(.NOT. OptDblQ(Inp,MD_TIME_STEP,D%DTime)) THEN
         CALL MondoHalt(PRSE_ERROR,MD_TIME_STEP//' not found in input.')
+      ELSE
+        ! Convert that to internal time units.
+        D%DTime = D%DTime*FemtosecondsToInternalTime
       ENDIF
       ! MD MaxSteps
       IF(.NOT. OptIntQ(Inp,MD_MAX_STEP,D%MDMaxSteps)) THEN

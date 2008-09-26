@@ -1,6 +1,10 @@
 include $(top_srcdir)/make.inc
 
+if USE_DYNAMIC_LINKING
+lib_LTLIBRARIES = libMondoLAPACK.la
+else
 noinst_LTLIBRARIES = libMondoLAPACK.la
+endif
 
 libMondoLAPACK_la_SOURCES = \
   cbdsqr.f  \

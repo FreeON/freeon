@@ -72,6 +72,7 @@ CONTAINS
   !============================================================================
   SUBROUTINE ToAtomicUnits(G)
     TYPE(CRDS) :: G
+    INTEGER    :: J
 
     IF(G%InAU) THEN
       CALL MondoLog(DEBUG_NONE, "ToAtomicUnits", "coordinates are already in atomic units")
@@ -81,6 +82,19 @@ CONTAINS
     CALL MondoLog(DEBUG_NONE, "ToAtomicUnits", "converting coordinates into atomic units")
     G%Carts%D    = AngstromsToAU*G%Carts%D
     G%Velocity%D = AngstromsToAU*G%Velocity%D
+
+    CALL MondoLog(DEBUG_NONE, "ToAtomicUnits", "coordinates in atomic units")
+    DO J=1, G%NAtms
+      CALL MondoLog(DEBUG_NONE, "ToAtomicUnits", &
+        TRIM(G%AtNam%C(J))//" "// &
+        TRIM(FltToShrtChar(G%Carts%D(1,J)))//" "// &
+        TRIM(FltToShrtChar(G%Carts%D(2,J)))//" "// &
+        TRIM(FltToShrtChar(G%Carts%D(3,J)))//" "// &
+        TRIM(FltToShrtChar(G%Velocity%D(1,J)))//" "// &
+        TRIM(FltToShrtChar(G%Velocity%D(2,J)))//" "// &
+        TRIM(FltToShrtChar(G%Velocity%D(3,J)))//" "// &
+        TRIM(IntToChar(G%CConstrain%I(J))))
+    ENDDO
 
     G%PBC%CellCenter%D = G%PBC%CellCenter%D*AngstromsToAU
     G%PBC%BoxShape%D   = AngstromsToAU*G%PBC%BoxShape%D

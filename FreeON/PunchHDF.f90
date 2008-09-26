@@ -266,6 +266,7 @@ CONTAINS
       ENDIF
 
       ! Put the geometry to this group ...
+      CALL MondoLog(DEBUG_NONE, "GeomArchive", "putting geometries into group")
       CALL Put(G%Clone(iCLONE),chGEO)
 
       ! Store the CellSets
@@ -482,9 +483,9 @@ CONTAINS
       IF(Init_O)THEN
         DO iCLONE=1,G%Clones
           HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
-          CALL Put(BIG_DBL,'E_NuclearTotal',StatsToChar(S%Current%I))
-          CALL Put(BIG_DBL,'Exc',StatsToChar(S%Current%I))
-          CALL Put(BIG_DBL,'Etot',StatsToChar(S%Current%I))
+          CALL Put(BIG_DBL,'E_NuclearTotal',Stats_O=S%Current%I)
+          CALL Put(BIG_DBL,'Exc',Stats_O=S%Current%I)
+          CALL Put(BIG_DBL,'Etot',Stats_O=S%Current%I)
           CALL CloseHDFGroup(HDF_CurrentID)
         ENDDO
       ENDIF
