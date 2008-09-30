@@ -70,10 +70,13 @@ AC_OUTPUT_COMMANDS([
   fi
 ])
 
-## Store user supplied compiler flags.
-#user_CFLAGS=${CFLAGS}
-#user_FFLAGS=${FFLAGS}
-#user_FCFLAGS=${FCFLAGS}
+# Store user supplied compiler flags.
+user_CFLAGS=${CFLAGS}
+user_FFLAGS=${FFLAGS}
+user_FCFLAGS=${FCFLAGS}
+
+# Check the build system.
+AC_CANONICAL_BUILD
 
 # Find compilers.
 AC_PROG_CC([gcc icc])
@@ -84,60 +87,117 @@ AC_PROG_F77([gfortran ifort pgf90])
 case ${CC} in
   *gcc*) CC_COMPILERNAME="GCC" ;;
   *icc*) CC_COMPILERNAME="Intel" ;;
+  *pgc*) CC_COMPILERNAME="PGI" ;;
   *)     CC_COMPILERNAME="unknown" ;;
 esac
 
 case ${F77} in
   *gfortran*) F77_COMPILERNAME="GCC" ;;
   *ifort*)    F77_COMPILERNAME="Intel" ;;
+  *pgf*)      F77_COMPILERNAME="PGI" ;;
   *)          F77_COMPILERNAME="unknown" ;;
 esac
 
 case ${FC} in
   *gfortran*) FC_COMPILERNAME="GCC" ;;
   *ifort*)    FC_COMPILERNAME="Intel" ;;
+  *pgf*)      FC_COMPILERNAME="PGI" ;;
   *)          FC_COMPILERNAME="unknown" ;;
 esac
 
-## Store additional configure arguments.
-#additional_args=""
-#
-## Set the optimization flags.
-#if test -z "${user_CFLAGS}"; then
-#  case ${CC_COMPILERNAME} in
-#    GCC)   CFLAGS="-O3 -msse -msse2 -mfpmath=sse" ;;
-#    Intel) CFLAGS="-O3 -xP" ;;
-#    *)     CFLAGS="-O3" ;;
-#  esac
-#  AC_MSG_NOTICE([Setting default optimization for ${CC_COMPILERNAME} compiler: CFLAGS  = ${CFLAGS}])
-#  additional_args="${additional_args} CFLAGS=\"${CFLAGS}\""
-#else
-#  AC_MSG_NOTICE([Using supplied optimization:  CFLAGS  = ${user_CFLAGS}])
-#fi
-#
-#if test -z "${user_FFLAGS}"; then
-#  case ${F77_COMPILERNAME} in
-#    GCC)   FFLAGS="-O3 -msse -msse2 -mfpmath=sse" ;;
-#    Intel) FFLAGS="-O3 -xP" ;;
-#    *)     FFLAGS="-O3" ;;
-#  esac
-#  AC_MSG_NOTICE([Setting default optimization for ${F77_COMPILERNAME} compiler: FFLAGS  = ${FFLAGS}])
-#  additional_args="${additional_args} FFLAGS=\"${FFLAGS}\""
-#else
-#  AC_MSG_NOTICE([Using supplied optimization:  FFLAGS  = ${user_FFLAGS}])
-#fi
-#
-#if test -z "${user_FCFLAGS}"; then
-#  case ${FC_COMPILERNAME} in
-#    GCC)   FCFLAGS="-O3 -msse -msse2 -mfpmath=sse" ;;
-#    Intel) FCFLAGS="-O3 -xP" ;;
-#    *)     FCFLAGS="-O3" ;;
-#  esac
-#  AC_MSG_NOTICE([Setting default optimization for ${FC_COMPILERNAME} compiler: FCFLAGS = ${FCFLAGS}])
-#  additional_args="${additional_args} FCFLAGS=\"${FCFLAGS}\""
-#else
-#  AC_MSG_NOTICE([Using supplied optimization:  FCFLAGS = ${user_FCFLAGS}])
-#fi
+AC_MSG_NOTICE([identified C/F77/F90: ${CC_COMPILERNAME}/${F77_COMPILERNAME}/${FC_COMPILERNAME}])
+
+# Store additional optimization flags.
+optimization_flags=""
+
+# No optimizations?
+AC_MSG_CHECKING([whether to add compiler optimizations])
+AC_ARG_ENABLE([optimizations],
+  [AS_HELP_STRING([--disable-optimizations],
+    [Disables compiler optimizations])],
+  [use_optimizations="${enableval}"],
+  [use_optimizations="yes"])
+if test "${use_optimizations}" = "yes"; then
+  AC_MSG_RESULT([adding compiler optimizations])
+
+  # Set the optimization flags.
+  if test -z "${user_CFLAGS}"; then
+    case ${CC_COMPILERNAME} in
+      GCC)   CFLAGS="-O3 -msse -msse2 -mfpmath=sse" ;;
+      Intel) CFLAGS="-O3 -xP" ;;
+      *)     CFLAGS="-O3" ;;
+    esac
+    AC_MSG_NOTICE([Setting default optimization for ${CC_COMPILERNAME} compiler: CFLAGS  = ${CFLAGS}])
+    optimization_flags="${optimization_flags} CFLAGS=\"${CFLAGS}\""
+  else
+    AC_MSG_NOTICE([User supplied:  CFLAGS  = ${user_CFLAGS}])
+  fi
+
+  if test -z "${user_FFLAGS}"; then
+    case ${F77_COMPILERNAME} in
+      GCC)   FFLAGS="-O3 -msse -msse2 -mfpmath=sse" ;;
+      Intel) FFLAGS="-O3 -xP" ;;
+      *)     FFLAGS="-O3" ;;
+    esac
+    AC_MSG_NOTICE([Setting default optimization for ${F77_COMPILERNAME} compiler: FFLAGS  = ${FFLAGS}])
+    optimization_flags="${optimization_flags} FFLAGS=\"${FFLAGS}\""
+  else
+    AC_MSG_NOTICE([User supplied:  FFLAGS  = ${user_FFLAGS}])
+  fi
+
+  if test -z "${user_FCFLAGS}"; then
+    case ${FC_COMPILERNAME} in
+      GCC)   FCFLAGS="-O3 -msse -msse2 -mfpmath=sse" ;;
+      Intel) FCFLAGS="-O3 -xP" ;;
+      *)     FCFLAGS="-O3" ;;
+    esac
+    AC_MSG_NOTICE([Setting default optimization for ${FC_COMPILERNAME} compiler: FCFLAGS = ${FCFLAGS}])
+    optimization_flags="${optimization_flags} FCFLAGS=\"${FCFLAGS}\""
+  else
+    AC_MSG_NOTICE([User supplied:  FCFLAGS = ${user_FCFLAGS}])
+  fi
+
+else
+
+  AC_MSG_RESULT([no optimizations])
+
+  # Set the optimization flags.
+  if test -z "${user_CFLAGS}"; then
+    case ${CC_COMPILERNAME} in
+      GCC)   CFLAGS="-O0 -g" ;;
+      Intel) CFLAGS="-O0 -fltconsistency -fp-port -g" ;;
+      *)     CFLAGS="-O0" ;;
+    esac
+    AC_MSG_NOTICE([Setting default optimization for ${CC_COMPILERNAME} compiler: CFLAGS  = ${CFLAGS}])
+    optimization_flags="${optimization_flags} CFLAGS=\"${CFLAGS}\""
+  else
+    AC_MSG_NOTICE([User supplied:  CFLAGS  = ${user_CFLAGS}])
+  fi
+
+  if test -z "${user_FFLAGS}"; then
+    case ${F77_COMPILERNAME} in
+      GCC)   FFLAGS="-O0 -g" ;;
+      Intel) FFLAGS="-O0 -fltconsistency -fp-port -g" ;;
+      *)     FFLAGS="-O0" ;;
+    esac
+    AC_MSG_NOTICE([Setting default optimization for ${F77_COMPILERNAME} compiler: FFLAGS  = ${FFLAGS}])
+    optimization_flags="${optimization_flags} FFLAGS=\"${FFLAGS}\""
+  else
+    AC_MSG_NOTICE([User supplied:  FFLAGS  = ${user_FFLAGS}])
+  fi
+
+  if test -z "${user_FCFLAGS}"; then
+    case ${FC_COMPILERNAME} in
+      GCC)   FCFLAGS="-O0 -g" ;;
+      Intel) FCFLAGS="-O0 -fltconsistency -fp-port -g" ;;
+      *)     FCFLAGS="-O0" ;;
+    esac
+    AC_MSG_NOTICE([Setting default optimization for ${FC_COMPILERNAME} compiler: FCFLAGS = ${FCFLAGS}])
+    optimization_flags="${optimization_flags} FCFLAGS=\"${FCFLAGS}\""
+  else
+    AC_MSG_NOTICE([User supplied:  FCFLAGS = ${user_FCFLAGS}])
+  fi
+fi
 
 # Check whether the f90 and f77 compilers are the same. We currently need that
 # to make sure that Mondo is linked correctly. Right now automake thinks that it
@@ -168,9 +228,6 @@ AC_PROG_LIBTOOL
 
 # Set $(MAKE).
 AC_PROG_MAKE_SET
-
-# Check the build system.
-AC_CANONICAL_BUILD
 
 # Check for some standard headers.
 AC_LANG(C)
@@ -344,21 +401,28 @@ if test "${use_internal_lapack}" = "yes"; then
 
   # Test for no-optimization compiler flag.
   AC_MSG_CHECKING([for no-optmiziation flags])
-  if test "`basename ${FC}`" = "gfortran"; then
-    NOOPT="-O0"
-    LAPACK_TIMER="INT_ETIME"
-    AC_MSG_RESULT([identified gfortran compiler, using ${NOOPT} no-optimization flag])
-  elif test "`basename ${FC}`" = "ifort"; then
-    NOOPT="-O0 -fltconsistency -fp-port"
-    LAPACK_TIMER="EXT_ETIME"
-    AC_MSG_RESULT([identified intel ifort compiler, using ${NOOPT} no-optimization flag])
-  elif test "`basename ${FC}`" = "pgf90"; then
-    NOOPT="-O0"
-    LAPACK_TIMER="EXT_ETIME"
-    AC_MSG_RESULT([identified portland group pgf90 compiler, using ${NOOPT} no-optimization flag])
-  else
-    AC_MSG_RESULT([unknown compiler, no no-optimization flags found])
-  fi
+
+  case ${FC_COMPILERNAME} in
+    GCC)
+      NOOPT="-O0 -g"
+      LAPACK_TIMER="INT_ETIME"
+      AC_MSG_RESULT([identified gfortran compiler, using ${NOOPT} no-optimization flag])
+      ;;
+    Intel)
+      NOOPT="-O0 -fltconsistency -fp-port -g"
+      LAPACK_TIMER="EXT_ETIME"
+      AC_MSG_RESULT([identified intel ifort compiler, using ${NOOPT} no-optimization flag])
+      ;;
+    PGI)
+      NOOPT="-O0 -g"
+      LAPACK_TIMER="EXT_ETIME"
+      AC_MSG_RESULT([identified portland group pgf90 compiler, using ${NOOPT} no-optimization flag])
+      ;;
+    *)
+      AC_MSG_RESULT([unknown compiler, no no-optimization flags found])
+      ;;
+  esac
+
   AC_SUBST(NOOPT, [${NOOPT}])
 
 else
@@ -663,6 +727,6 @@ else
 fi
 AC_MSG_NOTICE([*** End Summary ***])
 
-#ac_configure_args="${ac_configure_args} ${additional_args}"
+ac_configure_args="${ac_configure_args} ${optimization_flags}"
 
 AC_OUTPUT
