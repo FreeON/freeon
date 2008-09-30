@@ -181,7 +181,7 @@ MODULE Thresholding
 !     Simple expressions to determine largest extent R for a distribution rho_LMN(R)
 !     Using a new Tighter Gramers like bound
 !===================================================================================================
-      FUNCTION Extent(Ell,Zeta,HGTF,Tau_O,ExtraEll_O,Potential_O) RESULT (R)
+      FUNCTION Extent2(Ell,Zeta,HGTF,Tau_O,ExtraEll_O,Potential_O) RESULT (R)
        INTEGER                         :: Ell,L,M,N,LMN
        REAL(DOUBLE)                    :: Zeta , TmpExt
        REAL(DOUBLE),DIMENSION(:)       :: HGTF
@@ -192,14 +192,6 @@ MODULE Thresholding
        INTEGER                         :: ExtraEll,TotEll   
        REAL(DOUBLE)                    :: R,Tau,Coef,ZetaFac,MinMax,ScaledTau,DelR,SqrtW,Fun,dFun
 
-
-
-
-
-!       TmpExt=Extent2(Ell,Zeta,HGTF,Tau_O,ExtraEll_O,Potential_O)
-
-
-!
 !      Quick turn around for nuclei
        IF(Zeta==NuclearExpnt)THEN
           R=1.D-10
@@ -287,14 +279,13 @@ MODULE Thresholding
 !!$
 !!$       ENDIF
 !
-     END FUNCTION Extent
-
+     END FUNCTION Extent2
 !===================================================================================================
 !     Simple expressions to determine largest extent R for a distribution rho_LMN(R)
 !     outside of which its value at a point is less than Tau (default) or outside 
 !     of which the error made using the classical potential is less than Tau (Potential option) 
 !===================================================================================================
-     FUNCTION Extent2(Ell,Zeta,HGTF,Tau_O,ExtraEll_O,Potential_O) RESULT (R)
+     FUNCTION Extent(Ell,Zeta,HGTF,Tau_O,ExtraEll_O,Potential_O) RESULT (R)
        INTEGER                         :: Ell
        REAL(DOUBLE)                    :: Zeta
        REAL(DOUBLE),DIMENSION(:)       :: HGTF
@@ -371,8 +362,7 @@ MODULE Thresholding
              R=SQRT(MAX(SMALL_DBL,-LOG(ScaledTau)/ZetaHalf))
           ENDIF
        ENDIF
-     END FUNCTION Extent2
-
+     END FUNCTION Extent
 !===================================================================================================
 !     Simple expressions to determine largest extent R for a distribution rho_LMN(R)
 !     outside of which its value at a point is less than Tau (default) or outside 
