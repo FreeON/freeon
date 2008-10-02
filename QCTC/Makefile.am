@@ -56,69 +56,31 @@ EXTRA_INCLUDES = -I../MondoMods -I../OneE -I../MondoMods/MMA/LookUpTables_800_6x
 LDADD = $(LDADD_MONDOMODS) $(LDADD_INTERNAL_LAPACK) $(LDADD_INTERNAL_HDF5) 
 
 # Dependencies.
-BlokTrPdJ.o : \
-  PoleTree.o \
-	TreeWalk.o \
-	Thresholds.o \
-	PBCFarField.o
 
-DivPFFTensor.o : \
-        MondoPoles.o \
-	PFFTensor.o
-
-JForce.o : \
-	ParaQ.o\
-	Globals.o \
-	PoleTree.o \
-  PBCFarField.o \
-	BlokTrPdJ.o
-
-JGen.o : \
-  Globals.o \
-	PoleTree.o \
-	TreeWalk.o \
-	PBCFarField.o
-
-MakePFFT.o : \
-  PFFTensor.o \
-  PlaneWise.o \
-  DEI.o 
-
-NukE.o : \
-  Globals.o \
-	PoleTree.o \
-	TreeWalk.o \
-	PBCFarField.o
-
-PBCFarField.o : \
-  PFFTensor.o \
-	PoleTree.o \
-	MondoPoles.o \
-	Globals.o \
-	PFFTensor.o
-
-PFFTensor.o : \
-  MondoPoles.o \
-  PlaneWise.o
+BlokTrPdJ.o: Globals.o PBCFarField.o PoleTree.o Thresholding.o TreeWalk.o
+Density.o: Thresholds.o
+DivPFFTensor.o: MondoPoles.o PFFTensor.o Thresholding.o
+Globals.o: 
+Indexing.o: PoleNodeType.o
+JForce.o: BlokTrPdJ.o Globals.o PBCFarField.o PoleTree.o
+JGen.o: Globals.o PBCFarField.o PoleTree.o Thresholds.o TreeWalk.o
+MakePFFT.o: DivPFFTensor.o PFFTensor.o
+MondoPoles.o: Globals.o Indexing.o PoleNodeType.o Thresholding.o 
+NukE.o: Globals.o PBCFarField.o PoleTree.o Thresholding.o Thresholds.o \
+	TreeWalk.o
+ParaQ.o: Globals.o PoleNodeType.o PoleTree.o
+PBCFarField.o: Globals.o MondoPoles.o PoleTree.o Thresholding.o
+PFFTensor.o: MondoPoles.o PlaneWise.o Thresholding.o
+PlaneWise.o: MondoPoles.o
+PoleNodeType.o: 
+PoleTree.o: Density.o Globals.o Indexing.o MondoPoles.o PoleNodeType.o \
+	Thresholds.o
+QCTC.o: Density.o Globals.o JGen.o NukE.o PBCFarField.o PoleTree.o \
+	Thresholds.o TreeWalk.o
+Thresholding.o: 
+Thresholds.o: PoleNodeType.o Thresholding.o
+TreeWalk.o: Globals.o Indexing.o MondoPoles.o PoleNodeType.o PoleTree.o \
+	Thresholding.o Thresholds.o 
 
 
-ParaQ.o : \
-  Globals.o \
-  PoleTree.o
 
-PoleTree.o : \
-  Thresholds.o \
-	MondoPoles.o \
-	Globals.o
-
-QCTC.o : \
-  PoleTree.o \
-	Globals.o \
-	ParaQ.o \
-	PBCFarField.o \
-	JGen.o \
-	NukE.o
-
-TreeWalk.o : \
-  Globals.o \
-  PoleTree.o
