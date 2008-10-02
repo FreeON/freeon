@@ -68,14 +68,20 @@ MODULE TreeWalk
   TYPE PolePointer
      TYPE(PoleNode),POINTER :: P
   END TYPE PolePointer
+
+
+  INTEGER,PARAMETER                     :: NumNodes=1000
+  TYPE(PolePointer),DIMENSION(NumNodes) :: Near,Far
+!  REAL(DOUBLE),DIMENSION(2*(1+MaxPoleEll*(MaxPoleEll+3)/2)*NumNodes) :: Wrk
+  REAL(DOUBLE),DIMENSION(2000) :: O,W,V
 CONTAINS  
 
   SUBROUTINE JWalk2(QC,P,Nucular_O)
 !    USE InvExp
     TYPE(QCPrim)                     :: QC
     TYPE(PoleNode),POINTER           :: P
-    TYPE(PoleNode),POINTER           :: Q
     LOGICAL,OPTIONAL                 :: Nucular_O
+    TYPE(PoleNode),POINTER           :: Q
     LOGICAL                          :: Nucular    
     REAL(DOUBLE)                     :: PQ2
     REAL(DOUBLE)                     :: CoTan,OneOvPQ,OneOvPQxy,RS,SQ,PQToThMnsL,LocalThresh
@@ -86,19 +92,14 @@ CONTAINS
     INTEGER                          :: TotEll,PQEll,PQLen
     LOGICAL                          :: PAC,MAC,Leave
     REAL(DOUBLE),DIMENSION(3)        :: Ext,PQv
-    REAL(DOUBLE),DIMENSION(0:10,0:10):: MACTnsr
     INTEGER                          :: LP,MP,NP,LQ,MQ,NQ,PDex,QDex,MinBraEll,MinKetEll,LPQ
-    REAL(DOUBLE),DIMENSION(0:2*HGEll,0:2*HGEll,0:2*HGEll,0:2*HGEll) :: MDR
-    INTEGER,PARAMETER                     :: NumNodes=10000
-    TYPE(PolePointer),DIMENSION(NumNodes) :: Near,Far
-    REAL(DOUBLE),DIMENSION(NumNodes,3)    :: PQ
-    REAL(DOUBLE),DIMENSION(2*(1+MaxPoleEll*(MaxPoleEll+3)/2)*NumNodes) :: Wrk
-    INTEGER                               :: N,NNear,NFar
-    REAL(DOUBLE),DIMENSION(2000) :: O,W,V
+    INTEGER                          :: N,NNear,NFar
 
+!!$    REAL(DOUBLE),DIMENSION(0:10,0:10):: MACTnsr
+!!$    REAL(DOUBLE),DIMENSION(NumNodes,3)    :: PQ
+!!$    REAL(DOUBLE),DIMENSION(0:2*HGEll,0:2*HGEll,0:2*HGEll,0:2*HGEll) :: MDR
     !-----------------------------------------------------------------------------------------------
-    !  
-!    RETURN
+    ! 
 
     IF(PRESENT(Nucular_O))THEN
        Nucular=Nucular_O
@@ -280,6 +281,8 @@ CONTAINS
     Integral_Time=Integral_Time+(MTimer()-Integral_Time_Start)
     NFarAv=NFarAv+NFar
     NNearAv=NNearAv+NNear
+
+    RETURN
   END SUBROUTINE JWalk2
 
 #ifdef MAC_DEBUG
@@ -302,7 +305,6 @@ CONTAINS
     NewMACError=Err
 
     PQ=(P%Prim%Pw-Q%Pole%Center)
-
 
 !    CALL CTraXE(P%Prim%Ell,Q%Pole%Ell,PQ(1),PQ(2),PQ(3), &
 !         Q%Pole%C(0),Q%Pole%S(0),SPKetC(0),SPKetS(0))
