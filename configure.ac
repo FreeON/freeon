@@ -1,6 +1,6 @@
 AC_PREREQ(2.59)
 
-AC_INIT([freeon], [1.0-alpha-Aug-25-2008], [mchalla@lanl.gov])
+AC_INIT([freeon], [1.0-alpha-Oct-03-2008], [mchalla@lanl.gov])
 AC_COPYRIGHT([
 This code is part of the MondoSCF suite of programs for linear scaling 
 electronic structure theory and ab initio molecular dynamics.
@@ -83,6 +83,18 @@ AC_PROG_CC([gcc icc])
 AC_PROG_FC([gfortran ifort pgf90])
 AC_PROG_F77([gfortran ifort pgf90])
 
+if test -z "${CC}"; then
+  AC_MSG_FAILURE([no C compiler found: set the CC variable])
+fi
+
+if test -z "${FC}"; then
+  AC_MSG_FAILURE([no F90 compiler found: set the FC variable])
+fi
+
+if test -z "${F77}"; then
+  AC_MSG_FAILURE([no F77 compiler found: set the F77 variable])
+fi
+
 # Identify compiler.
 case ${CC} in
   *gcc*) CC_COMPILERNAME="GCC" ;;
@@ -122,10 +134,14 @@ if test "${use_optimizations}" = "yes"; then
 
   # Set the optimization flags.
   if test -z "${user_CFLAGS}"; then
-    case ${CC_COMPILERNAME} in
-      GCC)   CFLAGS="-O3 -msse -msse2 -mfpmath=sse" ;;
-      Intel) CFLAGS="-O3 -xP" ;;
-      *)     CFLAGS="-O3" ;;
+    case ${build_cpu} in
+      *86)
+        case ${CC_COMPILERNAME} in
+          GCC)   CFLAGS="-O3 -msse -msse2 -mfpmath=sse" ;;
+          Intel) CFLAGS="-O3 -xP" ;;
+          *)     CFLAGS="-O3" ;;
+        esac ;;
+      *) CFLAGS="-O" ;;
     esac
     AC_MSG_NOTICE([Setting default optimization for ${CC_COMPILERNAME} compiler: CFLAGS  = ${CFLAGS}])
     optimization_flags="${optimization_flags} CFLAGS=\"${CFLAGS}\""
@@ -134,10 +150,14 @@ if test "${use_optimizations}" = "yes"; then
   fi
 
   if test -z "${user_FFLAGS}"; then
-    case ${F77_COMPILERNAME} in
-      GCC)   FFLAGS="-O3 -msse -msse2 -mfpmath=sse" ;;
-      Intel) FFLAGS="-O3 -xP" ;;
-      *)     FFLAGS="-O3" ;;
+    case ${build_cpu} in
+      *86)
+        case ${F77_COMPILERNAME} in
+          GCC)   FFLAGS="-O3 -msse -msse2 -mfpmath=sse" ;;
+          Intel) FFLAGS="-O3 -xP" ;;
+          *)     FFLAGS="-O3" ;;
+        esac ;;
+      *) FFLAGS="-O" ;;
     esac
     AC_MSG_NOTICE([Setting default optimization for ${F77_COMPILERNAME} compiler: FFLAGS  = ${FFLAGS}])
     optimization_flags="${optimization_flags} FFLAGS=\"${FFLAGS}\""
@@ -146,10 +166,14 @@ if test "${use_optimizations}" = "yes"; then
   fi
 
   if test -z "${user_FCFLAGS}"; then
-    case ${FC_COMPILERNAME} in
-      GCC)   FCFLAGS="-O3 -msse -msse2 -mfpmath=sse" ;;
-      Intel) FCFLAGS="-O3 -xP" ;;
-      *)     FCFLAGS="-O3" ;;
+    case ${build_cpu} in
+      *86)
+        case ${FC_COMPILERNAME} in
+          GCC)   FCFLAGS="-O3 -msse -msse2 -mfpmath=sse" ;;
+          Intel) FCFLAGS="-O3 -xP" ;;
+          *)     FCFLAGS="-O3" ;;
+        esac ;;
+      *) FCFLAGS="-O" ;;
     esac
     AC_MSG_NOTICE([Setting default optimization for ${FC_COMPILERNAME} compiler: FCFLAGS = ${FCFLAGS}])
     optimization_flags="${optimization_flags} FCFLAGS=\"${FCFLAGS}\""
@@ -166,7 +190,7 @@ else
     case ${CC_COMPILERNAME} in
       GCC)   CFLAGS="-O0 -g" ;;
       Intel) CFLAGS="-O0 -fltconsistency -fp-port -g" ;;
-      *)     CFLAGS="-O0" ;;
+      *)     CFLAGS="-O0 -g" ;;
     esac
     AC_MSG_NOTICE([Setting default optimization for ${CC_COMPILERNAME} compiler: CFLAGS  = ${CFLAGS}])
     optimization_flags="${optimization_flags} CFLAGS=\"${CFLAGS}\""
@@ -178,7 +202,7 @@ else
     case ${F77_COMPILERNAME} in
       GCC)   FFLAGS="-O0 -g" ;;
       Intel) FFLAGS="-O0 -fltconsistency -fp-port -g" ;;
-      *)     FFLAGS="-O0" ;;
+      *)     FFLAGS="-O0 -g" ;;
     esac
     AC_MSG_NOTICE([Setting default optimization for ${F77_COMPILERNAME} compiler: FFLAGS  = ${FFLAGS}])
     optimization_flags="${optimization_flags} FFLAGS=\"${FFLAGS}\""
@@ -190,7 +214,7 @@ else
     case ${FC_COMPILERNAME} in
       GCC)   FCFLAGS="-O0 -g" ;;
       Intel) FCFLAGS="-O0 -fltconsistency -fp-port -g" ;;
-      *)     FCFLAGS="-O0" ;;
+      *)     FCFLAGS="-O0 -g" ;;
     esac
     AC_MSG_NOTICE([Setting default optimization for ${FC_COMPILERNAME} compiler: FCFLAGS = ${FCFLAGS}])
     optimization_flags="${optimization_flags} FCFLAGS=\"${FCFLAGS}\""
@@ -203,8 +227,8 @@ fi
 # to make sure that Mondo is linked correctly. Right now automake thinks that it
 # needs to link with the f77 compiler. So we better have an f90 compiler there,
 # otherwise we can't link correctly.
-AC_MSG_CHECKING([whether F77 and F90 compilers are identical])
-if test "`basename ${FC}`" != "`basename ${F77}`"; then
+AC_MSG_CHECKING([whether F77 (${F77}) and F90 (${FC}) compilers are identical])
+if test "`$as_basename -- ${FC}`" != "`$as_basename -- ${F77}`"; then
   AC_MSG_RESULT([no])
   AC_MSG_FAILURE([F77 (${F77}) and F90 (${FC}) compilers are different. This is not going to work.])
 fi
@@ -394,6 +418,7 @@ AC_ARG_ENABLE([internal-lapack-checks],
 AM_CONDITIONAL(INTERNAL_LAPACK, [test "${use_internal_lapack}" = "yes"])
 AM_CONDITIONAL(INTERNAL_LAPACK_CHECKS, [test "${compile_internal_lapack_checks}" = "yes"])
 
+NOOPT=
 LAPACK_TIMER="NONE"
 
 if test "${use_internal_lapack}" = "yes"; then
@@ -419,11 +444,11 @@ if test "${use_internal_lapack}" = "yes"; then
       AC_MSG_RESULT([identified portland group pgf90 compiler, using ${NOOPT} no-optimization flag])
       ;;
     *)
-      AC_MSG_RESULT([unknown compiler, no no-optimization flags found])
+      NOOPT=
+      LAPACK_TIMER="NONE"
+      AC_MSG_RESULT([unknown compiler, no no-optimization flags found, using NONE timer])
       ;;
   esac
-
-  AC_SUBST(NOOPT, [${NOOPT}])
 
 else
   AC_MSG_RESULT([no])
@@ -474,6 +499,8 @@ else
     [AC_MSG_FAILURE([no])])
 fi
 
+# Set some variables.
+AC_SUBST(NOOPT, [${NOOPT}])
 AC_SUBST(LAPACK_TIMER, [${LAPACK_TIMER}])
 
 # Check for internal hdf5.
