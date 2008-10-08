@@ -3655,7 +3655,10 @@ CONTAINS
      NatmsLoc=SIZE(XYZ,2)
      NCart=3*NatmsLoc
      NIntC=SIZE(IntCs%Def%C)
-     Print2=(Print>=DEBUG_GEOP_MAX)
+     ! For some unkown reason the following statement is a memory leak
+     ! (uncommented logical opp).  Causes NaNs everywhere!!
+     Print2=.FALSE. !(Print>=DEBUG_GEOP_MAX)
+
      ShiftU=1.D-6
      IF(PRESENT(Shift_O)) THEN
        ShiftU=Shift_O
