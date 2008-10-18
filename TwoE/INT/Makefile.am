@@ -161,3 +161,7 @@ EXTRA_DIST = \
   ERIListInterfaceB.Inc
 
 EXTRA_INCLUDES = -I../../MondoMods -I../MSC
+
+# Some compilers have trouble optimizing some of the sources here. For now we
+# will turn the optimization level down...
+OPTIMIZATION_FLAGS = -O1

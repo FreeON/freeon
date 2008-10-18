@@ -27,6 +27,8 @@
 ! Authors:  Matt Challacombe and CJ Tymczak
 !===============================================================================
 
+#include "MondoConfig.h"
+
 PROGRAM QCTC
   USE DerivedTypes
   USE GlobalScalars
@@ -47,6 +49,8 @@ PROGRAM QCTC
   USE JGen
   USE NuklarE
   USE MondoLogger
+  USE Utilities
+
 #ifdef PARALLEL
   USE ParallelQCTC
   USE FastMatrices
@@ -71,7 +75,7 @@ PROGRAM QCTC
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg
   TYPE(CRDS)                     :: GM_MM
   REAL(DOUBLE)                   :: MM_COUL,E_C_EXCL,CONVF
-  INTEGER                        :: I,K,UOUT,datasize
+  INTEGER                        :: I,K,UOUT
 #ifdef PARALLEL
   ! REAL(DOUBLE),EXTERNAL          :: MondoTimer
 #endif
@@ -256,9 +260,6 @@ PROGRAM QCTC
 #endif
   ! didn't count flops, any accumulation is residual from matrix routines
   PerfMon%FLOP=Zero
-
-  CALL GetMemoryUsage(datasize)
-  CALL MondoLog(DEBUG_MINIMUM, "QCTC", "virtual memory size = "//TRIM(IntToChar(datasize))//" kB")
 
   ! Shutdown
   CALL ShutDown(Prog)
