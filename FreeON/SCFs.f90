@@ -86,7 +86,7 @@ CONTAINS
     INTEGER,PARAMETER    :: MaxSCFs = HAVE_MAX_SCF
     INTEGER              :: cBAS,cGEO,iSCF
 
-    !----------------------------------------------------------------------------!
+    ! Allocate space for action.
     CALL New(C%Stat%Action,1)
 
     ! Determine if there was a geomety or Basis Set Change
@@ -190,8 +190,8 @@ CONTAINS
     CLOSE(Inp)
 
     ! Defaults
-    IF(cSCF < 1 .AND. IConAls /= DIIS_CONALS) THEN
-      CALL MondoLog(DEBUG_NONE, "SCFLogic", "turning off IConAls because cSCF < 1 and not doing DIIS")
+    IF(cSCF < 1) THEN
+      CALL MondoLog(DEBUG_NONE, "SCFLogic", "turning off IConAls because cSCF < 1")
       IConAls = NO_CONALS
     ENDIF
 
@@ -466,7 +466,9 @@ CONTAINS
         CALL MondoLogPlain(TRIM(Mssg))
         CALL MondoLogPlain("Normal CPSCF convergence")
       ENDIF
-    ELSE
+
+    ELSE ! IF(DoCPSCF) THEN
+
       ! NORMAL HUMANS CONVERGENCE CRITERIA
       CALL MondoLog(DEBUG_NONE, "ConvergedQ", "entering else (DoSPSCF == .FALSE.)")
 
@@ -492,19 +494,23 @@ CONTAINS
       HDFFileID=OpenHDF(N%HFile)
       CALL MondoLog(DEBUG_NONE, "ConvergedQ", "looping over "//TRIM(IntToChar(G%Clones))//" clones")
       DO iCLONE=1,G%Clones
+
         HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
         ! Determine SCF if restarting MD
         MinSCF = O%MinSCF
         MaxSCF = O%MaxSCF
+
         ! Gather convergence parameters
         CALL Get(ETot%D(cSCF,iCLONE),'Etot')
         CALL Get(DMax%D(cSCF,iCLONE),'DMax')
         CALL Get(DIIS%D(cSCF,iCLONE),'DIISErr' )
+
         IF(DoODA.AND.cSCF>1)THEN
           CALL Get(ETotO,'ODAEnergy')
         ELSE
           ETotO=1D10
         ENDIF
+
         ! Load current energies
         G%Clone(iCLONE)%ETotal=ETot%D(cSCF,iCLONE)
 
@@ -707,7 +713,6 @@ CONTAINS
     TYPE(Parallel)      :: M
     INTEGER             :: oldSCF
 
-    !----------------------------------------------------------------------------!
     CALL MondoLog(DEBUG_NONE, "DensityBuild", "Action = "//TRIM(S%Action%C(1)))
     IF(TRIM(S%Action%C(1))/=SCF_DENSITY_NORMAL   .AND. &
        TRIM(S%Action%C(1))/=SCF_BASISSETSWITCH   .AND. &
@@ -721,6 +726,7 @@ CONTAINS
     IF(S%Action%C(1)/=CPSCF_START_RESPONSE) THEN
       CALL Invoke('MakeRho',N,S,M)
     ENDIF
+
   END SUBROUTINE DensityBuild
   !===============================================================================
   !
@@ -917,7 +923,7 @@ CONTAINS
     SameCrds=.TRUE.
     SameLatt=.TRUE.
     S%SameBasis = .TRUE.
-    !
+
     IF(O%Guess==GUESS_EQ_RESTART.OR.O%Guess==GUESS_EQ_NUGUESS)THEN
       DO iCLONE=1,G%Clones
         HDFFileID=OpenHDF(N%HFile)
@@ -926,10 +932,11 @@ CONTAINS
         chGEO = IntToChar(S%Current%I(3))
 
         IF(iCLONE==1)CALL Get(BS,Tag_O=chBAS)
+
         CALL Get(GM,Tag_O=chGEO)
         CALL CloseHDFGroup(HDF_CurrentID)
         CALL CloseHDF(HDFFileID)
-        !
+
         HDFFileID=OpenHDF(N%RFile)
         HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
         chBAS = IntToChar(O%RestartState%I(2))
@@ -956,20 +963,24 @@ CONTAINS
       ENDDO
     ELSE
       DO iCLONE=1,G%Clones
+
         HDFFileID=OpenHDF(N%HFile)
         HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
         chBAS = IntToChar(cBAS)
         chGEO = IntToChar(cGEO)
+
         CALL Get(GM,Tag_O=chGEO)
-        IF(iCLONE==1) &
-             CALL Get(BS,Tag_O=chBAS)
+
+        IF(iCLONE==1) CALL Get(BS,Tag_O=chBAS)
+
         chBAS = IntToChar(pBAS)
         chGEO = IntToChar(pGEO)
-        IF(iCLONE==1) &
-             CALL Get(BS_rs,Tag_O=chBAS)
+
+        IF(iCLONE==1) CALL Get(BS_rs,Tag_O=chBAS)
         CALL Get(GM_rs,Tag_O=chGEO)
         CALL CloseHDFGroup(HDF_CurrentID)
         CALL CloseHDF(HDFFileID)
+
         IF(iCLONE==1.AND.BS%BName/=BS_rs%BName)S%SameBasis=.FALSE.
         MaxDiff=Zero
         DO I=1,GM%Natms
