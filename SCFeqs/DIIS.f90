@@ -262,17 +262,51 @@ PROGRAM DIIS
       IF(MyID.EQ.ROOT) THEN
         FFile=TrixFile('OrthoE_DIIS',Args,I-iSCF)
         INQUIRE(FILE=FFile,EXIST=Present)
-        IPresent=1
-        IF(Present) IPresent=0
+        IF(Present) THEN
+          IPresent = 0
+        ELSE
+          IPresent = 1
+        ENDIF
       ENDIF
 #ifdef PARALLEL
       CALL BCast(IPresent)
 #endif
-      IF(IPresent.EQ.0) THEN
-        CALL Get(EI,TrixFile('OrthoE_DIIS',Args,I-iSCF))
+      IF(IPresent /= 0) THEN
+        CALL MondoLog(DEBUG_NONE, Prog, "no previous information on error matrix "//TRIM(TrixFile('OrthoE_DIIS',Args,I-iSCF))//" found, constructing it")
+
+        ! Construct missing E_DIIS.
+        CALL Get(F,TrixFile('F',Args,I-iSCF))
+        CALL Get(P,TrixFile('D',Args,I-iSCF))
+        CALL Multiply(P,2.0D0)
+
+        INQUIRE(FILE=TrixFile("X", Args), EXIST=Present)
+        IF(Present) THEN
+          CALL MondoLog(DEBUG_MAXIMUM, Prog, "using X for transformation")
+          CALL Get(X, TrixFile("X", Args))
+        ELSE
+          CALL MondoLog(DEBUG_MAXIMUM, Prog, "using Z and ZT for transformation")
+          CALL Get(Z, TrixFile("Z", Args))
+          CALL Get(ZT, TrixFile("ZT", Args))
+        ENDIF
+
+        CALL Multiply(S,P,Tmp1)
+        CALL Multiply(Tmp1,F,EI)
+        CALL Multiply(F,P,Tmp1)
+        CALL Multiply(Tmp1,S,EI,-One)
+
+        IF(Present) THEN
+          CALL Multiply(X, EI, Tmp1)
+          CALL Multiply(Tmp1, X, EI)
+        ELSE
+          CALL Multiply(ZT, EI, Tmp1)
+          CALL Multiply(Tmp1, Z, EI)
+        ENDIF
+
+        CALL Put(EI, TrixFile("OrthoE_DIIS", Args, I-iSCF))
+
       ELSE
-        CALL MondoLog(DEBUG_NONE, Prog, "no previous information on error matrix E_DIIS["//TRIM(IntToChar(I))//"] found, constructing it")
-        CALL Halt("what?")
+        CALL MondoLog(DEBUG_NONE, Prog, "found "//TRIM(TrixFile('OrthoE_DIIS',Args,I-iSCF)))
+        CALL Get(EI,TrixFile('OrthoE_DIIS',Args,I-iSCF))
       ENDIF
 
       ! We dont filter E for obvious reasons
