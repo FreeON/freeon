@@ -38,6 +38,7 @@ MODULE InOut
   USE Indexing
   USE Parse
   USE MondoLogger
+  USE Utilities
 
 #ifdef PARALLEL
   USE MondoMPI
@@ -229,10 +230,14 @@ CONTAINS
     TYPE(META_DATA)  :: Meta
     LOGICAL,OPTIONAL :: Put_O
     INTEGER          :: I,NC,SizeOf,SIZE_OF_HDF5_DATA
+    INTEGER, DIMENSION(:), ALLOCATABLE :: VarNameInts
 
     Meta%Status=FAIL
     NC=StringLen(Meta%VarName)
-    CALL HDF5OpenData(HDF_CurrentID,NC,Char2Ints(NC,Meta%VarName),Meta%DataId,Meta%DataSpc)
+    ALLOCATE(VarNameInts(NC))
+    VarNameInts = Char2Ints(NC,Meta%VarName)
+    CALL HDF5OpenData(HDF_CurrentID,NC,VarNameInts,Meta%DataId,Meta%DataSpc)
+    DEALLOCATE(VarNameInts)
     IF(Meta%DataId==FAIL)THEN
       IF(PRESENT(Put_O))THEN
         CALL CreateData(Meta)
@@ -347,10 +352,10 @@ CONTAINS
   !
   !===============================================================================
   FUNCTION Char2Ints(NC,String)
-    CHARACTER(LEN=*),INTENT(IN)          :: String
-    INTEGER,         INTENT(IN)          :: NC
-    INTEGER,DIMENSION(NC)                :: Char2Ints
-    INTEGER                              :: I
+    CHARACTER(LEN=*),INTENT(IN) :: String
+    INTEGER,         INTENT(IN) :: NC
+    INTEGER,DIMENSION(NC)       :: Char2Ints
+    INTEGER                     :: I
     DO I=1,NC
       Char2Ints(I)=ICHAR(String(I:I))
     ENDDO
@@ -812,6 +817,7 @@ CONTAINS
     LOGICAL,         OPTIONAL,INTENT(IN) :: UnLimit_O
     INTEGER                              :: N
     TYPE(META_DATA)                      :: Meta
+
 #ifdef PARALLEL
     IF(MyId==ROOT)THEN
 #endif
@@ -832,6 +838,7 @@ CONTAINS
 #ifdef PARALLEL
     ENDIF
 #endif
+
   END SUBROUTINE Put_INT_VECT
 
   SUBROUTINE Put_INT_RNK2(A,VarName,N_O,Tag_O,UnLimit_O)
@@ -1391,6 +1398,7 @@ CONTAINS
     !-------------------------------------------------------------------------------
     !        Items that should not change with geometry...
     CALL MondoLog(DEBUG_MAXIMUM, "Put_CRDS", "putting coordinates")
+
     CALL Put(GM%NAtms,'natoms'       ,Tag_O=Tag_O)
     CALL Put(GM%Confg,'configuration',Tag_O=Tag_O)
     CALL Put(GM%NElec,'nel'          ,Tag_O=Tag_O)
