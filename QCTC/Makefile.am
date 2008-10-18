@@ -130,6 +130,7 @@ PoleTree.o : \
 	Globals.o
 
 QCTC.o : \
+  $(top_srcdir)/MondoConfig.h \
   PoleTree.o \
 	Globals.o \
 	PBCFarField.o \
