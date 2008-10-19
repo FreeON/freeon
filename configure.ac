@@ -1,4 +1,6 @@
-AC_INIT([MondoSCF], [1.0-alpha-latest], [mchalla@lanl.gov])
+AC_PREREQ(2.59)
+
+AC_INIT([freeon], [1.0-alpha-Oct-03-2008], [mchalla@lanl.gov])
 AC_COPYRIGHT([
 This code is part of the MondoSCF suite of programs for linear scaling 
 electronic structure theory and ab initio molecular dynamics.
@@ -34,51 +36,199 @@ else
   localversion="not_set"
 fi
 
-AC_DEFINE_UNQUOTED([LOCAL_VERSION], ["${branch}:${localversion}"], [The local version of Mondo])
+AC_SUBST([LOCAL_VERSION], [${branch}:${localversion}])
 AC_MSG_NOTICE([configuring local version ${branch}:${localversion}])
 
 # Fix up the header definitions for hdf.
 AC_OUTPUT_COMMANDS([
-  echo "creating MondoConfig.h"
-  grep "#define" config.h > tempconf
-  if test ! -f MondoConf.h; then
+  echo "checking MondoConfig.h"
+  grep "#define" config.h | grep -v LOCAL_VERSION > tempconf
+  if test ! -f MondoConfig.h; then
     mv -f tempconf MondoConfig.h
-  elif (diff tempconf MondoConfig.h > /dev/null); then
+    echo "MondoConfig.h did not exist"
+  elif (diff -u tempconf MondoConfig.h > MondoConfig.diff); then
     rm -f tempconf
     echo "MondoConfig.h is unchanged"
   else
-    mv -f tempconf MondoConf.h
+    mv -f tempconf MondoConfig.h
+    echo "MondoConfig.h updated"
+    cat MondoConfig.diff
+  fi
+
+  echo "checking MondoLocalVersion.h"
+  grep LOCAL_VERSION config_localversion.h > tempconf
+  if test ! -f MondoLocalVersion.h; then
+    mv -f tempconf MondoLocalVersion.h
+    echo "MondoLocalVersion.h did not exist"
+  elif (diff -u tempconf MondoLocalVersion.h > MondoLocalVersion.diff); then
+    rm -f tempconf
+    echo "MondoLocalVersion.h unchanged"
+  else
+    mv -f tempconf MondoLocalVersion.h
+    echo "MondoLocalVersion.h updated"
+    cat MondoLocalVersion.diff
   fi
 ])
 
-# Set the optimization flags.
-if test -z "${CFLAGS}"; then
-  AC_MSG_NOTICE([Setting default optimization: CFLAGS  = ${CFLAGS:=-O}])
-else
-  AC_MSG_NOTICE([Using supplied optimization:  CFLAGS  = ${CFLAGS}])
-fi
-if test -z "${FFLAGS}"; then
-  AC_MSG_NOTICE([Setting default optimization: FFLAGS  = ${FFLAGS:=-O}])
-else
-  AC_MSG_NOTICE([Using supplied optimization:  FFLAGS  = ${FFLAGS}])
-fi
-if test -z "${FCFLAGS}"; then
-  AC_MSG_NOTICE([Setting default optimization: FCFLAGS = ${FCFLAGS:=-O}])
-else
-  AC_MSG_NOTICE([Using supplied optimization:  FCFLAGS = ${FCFLAGS}])
-fi
+# Store user supplied compiler flags.
+user_CFLAGS=${CFLAGS}
+user_FFLAGS=${FFLAGS}
+user_FCFLAGS=${FCFLAGS}
+
+# Check the build system.
+AC_CANONICAL_BUILD
 
 # Find compilers.
 AC_PROG_CC([gcc icc])
 AC_PROG_FC([gfortran ifort pgf90])
 AC_PROG_F77([gfortran ifort pgf90])
 
+if test -z "${CC}"; then
+  AC_MSG_FAILURE([no C compiler found: set the CC variable])
+fi
+
+if test -z "${FC}"; then
+  AC_MSG_FAILURE([no F90 compiler found: set the FC variable])
+fi
+
+if test -z "${F77}"; then
+  AC_MSG_FAILURE([no F77 compiler found: set the F77 variable])
+fi
+
+# Identify compiler.
+case ${CC} in
+  *gcc*) CC_COMPILERNAME="GCC" ;;
+  *icc*) CC_COMPILERNAME="Intel" ;;
+  *pgc*) CC_COMPILERNAME="PGI" ;;
+  *)     CC_COMPILERNAME="unknown" ;;
+esac
+
+case ${F77} in
+  *gfortran*) F77_COMPILERNAME="GCC" ;;
+  *ifort*)    F77_COMPILERNAME="Intel" ;;
+  *pgf*)      F77_COMPILERNAME="PGI" ;;
+  *)          F77_COMPILERNAME="unknown" ;;
+esac
+
+case ${FC} in
+  *gfortran*) FC_COMPILERNAME="GCC" ;;
+  *ifort*)    FC_COMPILERNAME="Intel" ;;
+  *pgf*)      FC_COMPILERNAME="PGI" ;;
+  *)          FC_COMPILERNAME="unknown" ;;
+esac
+
+AC_MSG_NOTICE([identified C/F77/F90: ${CC_COMPILERNAME}/${F77_COMPILERNAME}/${FC_COMPILERNAME}])
+
+# Store additional optimization flags.
+optimization_flags=""
+
+# No optimizations?
+AC_MSG_CHECKING([whether to add compiler optimizations])
+AC_ARG_ENABLE([optimizations],
+  [AS_HELP_STRING([--disable-optimizations],
+    [Disables compiler optimizations])],
+  [use_optimizations="${enableval}"],
+  [use_optimizations="yes"])
+if test "${use_optimizations}" = "yes"; then
+  AC_MSG_RESULT([adding compiler optimizations])
+
+  # Set the optimization flags.
+  if test -z "${user_CFLAGS}"; then
+    case ${build_cpu} in
+      *86)
+        case ${CC_COMPILERNAME} in
+          GCC)   CFLAGS="-O3 -msse -msse2 -mfpmath=sse" ;;
+          Intel) CFLAGS="-O3 -xP" ;;
+          *)     CFLAGS="-O3" ;;
+        esac ;;
+      *) CFLAGS="-O" ;;
+    esac
+    AC_MSG_NOTICE([Setting default optimization for ${CC_COMPILERNAME} compiler: CFLAGS  = ${CFLAGS}])
+    optimization_flags="${optimization_flags} CFLAGS=\"${CFLAGS}\""
+  else
+    AC_MSG_NOTICE([User supplied:  CFLAGS  = ${user_CFLAGS}])
+  fi
+
+  if test -z "${user_FFLAGS}"; then
+    case ${build_cpu} in
+      *86)
+        case ${F77_COMPILERNAME} in
+          GCC)   FFLAGS="-O3 -msse -msse2 -mfpmath=sse" ;;
+          Intel) FFLAGS="-O3 -xP" ;;
+          *)     FFLAGS="-O3" ;;
+        esac ;;
+      *) FFLAGS="-O" ;;
+    esac
+    AC_MSG_NOTICE([Setting default optimization for ${F77_COMPILERNAME} compiler: FFLAGS  = ${FFLAGS}])
+    optimization_flags="${optimization_flags} FFLAGS=\"${FFLAGS}\""
+  else
+    AC_MSG_NOTICE([User supplied:  FFLAGS  = ${user_FFLAGS}])
+  fi
+
+  if test -z "${user_FCFLAGS}"; then
+    case ${build_cpu} in
+      *86)
+        case ${FC_COMPILERNAME} in
+          GCC)   FCFLAGS="-O3 -msse -msse2 -mfpmath=sse" ;;
+          Intel) FCFLAGS="-O3 -xP" ;;
+          *)     FCFLAGS="-O3" ;;
+        esac ;;
+      *) FCFLAGS="-O" ;;
+    esac
+    AC_MSG_NOTICE([Setting default optimization for ${FC_COMPILERNAME} compiler: FCFLAGS = ${FCFLAGS}])
+    optimization_flags="${optimization_flags} FCFLAGS=\"${FCFLAGS}\""
+  else
+    AC_MSG_NOTICE([User supplied:  FCFLAGS = ${user_FCFLAGS}])
+  fi
+
+else
+
+  AC_MSG_RESULT([no optimizations])
+
+  # Set the optimization flags.
+  if test -z "${user_CFLAGS}"; then
+    case ${CC_COMPILERNAME} in
+      GCC)   CFLAGS="-O0 -g" ;;
+      Intel) CFLAGS="-O0 -fltconsistency -fp-port -g" ;;
+      *)     CFLAGS="-O0 -g" ;;
+    esac
+    AC_MSG_NOTICE([Setting default optimization for ${CC_COMPILERNAME} compiler: CFLAGS  = ${CFLAGS}])
+    optimization_flags="${optimization_flags} CFLAGS=\"${CFLAGS}\""
+  else
+    AC_MSG_NOTICE([User supplied:  CFLAGS  = ${user_CFLAGS}])
+  fi
+
+  if test -z "${user_FFLAGS}"; then
+    case ${F77_COMPILERNAME} in
+      GCC)   FFLAGS="-O0 -g" ;;
+      Intel) FFLAGS="-O0 -fltconsistency -fp-port -g" ;;
+      *)     FFLAGS="-O0 -g" ;;
+    esac
+    AC_MSG_NOTICE([Setting default optimization for ${F77_COMPILERNAME} compiler: FFLAGS  = ${FFLAGS}])
+    optimization_flags="${optimization_flags} FFLAGS=\"${FFLAGS}\""
+  else
+    AC_MSG_NOTICE([User supplied:  FFLAGS  = ${user_FFLAGS}])
+  fi
+
+  if test -z "${user_FCFLAGS}"; then
+    case ${FC_COMPILERNAME} in
+      GCC)   FCFLAGS="-O0 -g" ;;
+      Intel) FCFLAGS="-O0 -fltconsistency -fp-port -g" ;;
+      *)     FCFLAGS="-O0 -g" ;;
+    esac
+    AC_MSG_NOTICE([Setting default optimization for ${FC_COMPILERNAME} compiler: FCFLAGS = ${FCFLAGS}])
+    optimization_flags="${optimization_flags} FCFLAGS=\"${FCFLAGS}\""
+  else
+    AC_MSG_NOTICE([User supplied:  FCFLAGS = ${user_FCFLAGS}])
+  fi
+fi
+
 # Check whether the f90 and f77 compilers are the same. We currently need that
 # to make sure that Mondo is linked correctly. Right now automake thinks that it
 # needs to link with the f77 compiler. So we better have an f90 compiler there,
 # otherwise we can't link correctly.
-AC_MSG_CHECKING([whether F77 and F90 compilers are identical])
-if test "`basename ${FC}`" != "`basename ${F77}`"; then
+AC_MSG_CHECKING([whether F77 (${F77}) and F90 (${FC}) compilers are identical])
+if test "`$as_basename -- ${FC}`" != "`$as_basename -- ${F77}`"; then
   AC_MSG_RESULT([no])
   AC_MSG_FAILURE([F77 (${F77}) and F90 (${FC}) compilers are different. This is not going to work.])
 fi
@@ -90,7 +240,7 @@ AC_GNU_SOURCE
 
 # Set line-length limits.
 AC_MSG_CHECKING([how to set line length limits of f90 compiler])
-if test "`basename ${FC}`" = "gfortran"; then
+if test "${FC_COMPILERNAME}" = "GCC"; then
   AC_MSG_RESULT([gfortran detected, setting unlimited line-length limit (-ffree-line-length-none)])
   FCFLAGS="${FCFLAGS} -ffree-line-length-none"
 else
@@ -98,14 +248,10 @@ else
 fi
 
 # Check for libtool.
-AC_DISABLE_SHARED
 AC_PROG_LIBTOOL
 
 # Set $(MAKE).
 AC_PROG_MAKE_SET
-
-# Check the build system.
-AC_CANONICAL_BUILD
 
 # Check for some standard headers.
 AC_LANG(C)
@@ -170,37 +316,61 @@ main ()
 
 fi
 
-AC_MSG_CHECKING([for rand48])
-AC_LINK_IFELSE([
-#include <stdlib.h>
+AC_MSG_CHECKING([for random number generator seed])
+AC_ARG_ENABLE([random-seed],
+  [AS_HELP_STRING([--disable-random-seed],
+  [Disable the random seed used in the random number generator. When this is
+   disabled the random number generator is always seeded with the same seed and
+   therefore returns a predictable sequence of random numbers.])],
+  [random_seed="${enableval}"],
+  [random_seed="yes"])
 
-int
-main ()
-{
-  srand48(0);
-  return 0;
-}],
-  [AC_DEFINE(HAVE_SRAND48, 1, [These functions generate pseudo-random numbers
-   using the linear congruential algorithm and 48-bit integer arithmetic.])
-  AC_MSG_RESULT([yes])],
-  [AC_MSG_RESULT([no])])
+if test ${random_seed} = "yes"; then
+  AC_DEFINE(HAVE_RANDOM_SEED, 1, [Use random seed.])
+  AC_MSG_RESULT([use random seed])
+else
+  AC_MSG_RESULT([do _not_ use random seed, deterministic random number generator])
+fi
 
 # Check for phipac.
 AC_MSG_CHECKING([whether to use PHiPAC])
 AC_ARG_ENABLE([phipac],
   [AS_HELP_STRING([--enable-phipac],
   [Enable the use of phipac optimized dgemms.])],
-  [AC_DEFINE(PHIPAC, 1, [Use PHiPAC])
-  AC_MSG_RESULT([yes])],
-  [AC_MSG_RESULT([no])])
+  [use_phipac="${enableval}"],
+  [use_phipac="no"])
 
-# Say something about PHiPAC/BLAS.
-AC_MSG_NOTICE([*** NOTICE ***
-The only part of MondoSCF affected by this flag is MondoMods/SMWrap.C. If you
-have built MondoSCF already and you are simply changing from using PHiPAC to
-using BLAS or vice versa, you don't have to rebuild the whole code. Simply
-delete MondoMods/SMWrap.o and run make again.  This will rebuild all that is
-necessary.])
+if test "${use_phipac}" = "yes"; then
+  AC_MSG_RESULT([yes])
+  AC_DEFINE(PHIPAC, 1, [Use PHiPAC.])
+else
+  AC_MSG_RESULT([no])
+fi
+
+# Check for MD (TRBO) debugging.
+declare -i md_debug_SCFs
+AC_ARG_WITH([md-debug],
+  [AS_HELP_STRING([--with-md-debug],
+  [ Using the --with-enable-debug=N command line argument, the number of SCFs
+   used can be hardwired to something else than 2.])],
+  [md_debug_SCFs=${withval}-1],
+  [md_debug_SCFs=1])
+
+AC_MSG_CHECKING([whether to debug MD])
+AC_ARG_ENABLE([md-debug],
+  [AS_HELP_STRING([--enable-md-debug],
+  [Enable additional MD debugging. This calculates the converged electronic
+   density in addition to the density under incomplete convergence. For
+   incomplete convergence, 2 SCFs are used by default.])],
+  [enable_md_debug="${enableval}"],
+  [enable_md_debug="no"])
+
+if test "${enable_md_debug}" = "yes"; then
+  AC_DEFINE_UNQUOTED(MD_DEBUG, [${md_debug_SCFs}], [Do some MD debugging.])
+  AC_MSG_RESULT([yes, using $((md_debug_SCFs+1)) SCFs])
+else
+  AC_MSG_RESULT([no])
+fi
 
 # Test some stuff for C-code.
 AC_LANG(C)
@@ -214,9 +384,8 @@ AC_FC_SRCEXT(f90)
 AC_FC_FREEFORM
 
 # Find whether the compiler is gfortran and too old...
-if test "`basename ${FC}`" = "gfortran"; then
-  AC_MSG_CHECKING([for possible gfortran compiler problems])
-  AC_LINK_IFELSE([
+AC_MSG_CHECKING([for possible compiler problems])
+AC_LINK_IFELSE([
 PROGRAM test_compiler
 
   TYPE TestType
@@ -224,11 +393,10 @@ PROGRAM test_compiler
   END TYPE TestType
 
 END PROGRAM test_compiler
-    ],
-    [AC_MSG_RESULT([good, none found])],
-    [AC_MSG_RESULT([failed test])
-    AC_MSG_FAILURE([the compiler does not understand the ALLOCATABLE attribute inside a type definition])])
-fi
+  ],
+  [AC_MSG_RESULT([good, none found])],
+  [AC_MSG_RESULT([failed test])
+  AC_MSG_FAILURE([the compiler does not understand the ALLOCATABLE attribute inside a type definition])])
 
 # Check for internal LAPACK/BLAS.
 AC_MSG_CHECKING([for internal lapack/blas])
@@ -250,6 +418,7 @@ AC_ARG_ENABLE([internal-lapack-checks],
 AM_CONDITIONAL(INTERNAL_LAPACK, [test "${use_internal_lapack}" = "yes"])
 AM_CONDITIONAL(INTERNAL_LAPACK_CHECKS, [test "${compile_internal_lapack_checks}" = "yes"])
 
+NOOPT=
 LAPACK_TIMER="NONE"
 
 if test "${use_internal_lapack}" = "yes"; then
@@ -257,22 +426,29 @@ if test "${use_internal_lapack}" = "yes"; then
 
   # Test for no-optimization compiler flag.
   AC_MSG_CHECKING([for no-optmiziation flags])
-  if test "`basename ${FC}`" = "gfortran"; then
-    NOOPT="-O0"
-    LAPACK_TIMER="INT_ETIME"
-    AC_MSG_RESULT([identified gfortran compiler, using ${NOOPT} no-optimization flag])
-  elif test "`basename ${FC}`" = "ifort"; then
-    NOOPT="-O0 -fltconsistency -fp-port"
-    LAPACK_TIMER="EXT_ETIME"
-    AC_MSG_RESULT([identified intel ifort compiler, using ${NOOPT} no-optimization flag])
-  elif test "`basename ${FC}`" = "pgf90"; then
-    NOOPT="-O0"
-    LAPACK_TIMER="EXT_ETIME"
-    AC_MSG_RESULT([identified portland group pgf90 compiler, using ${NOOPT} no-optimization flag])
-  else
-    AC_MSG_RESULT([unknown compiler, no no-optimization flags found])
-  fi
-  AC_SUBST(NOOPT, [${NOOPT}])
+
+  case ${FC_COMPILERNAME} in
+    GCC)
+      NOOPT="-O0 -g"
+      LAPACK_TIMER="INT_ETIME"
+      AC_MSG_RESULT([identified gfortran compiler, using ${NOOPT} no-optimization flag])
+      ;;
+    Intel)
+      NOOPT="-O0 -fltconsistency -fp-port -g"
+      LAPACK_TIMER="EXT_ETIME"
+      AC_MSG_RESULT([identified intel ifort compiler, using ${NOOPT} no-optimization flag])
+      ;;
+    PGI)
+      NOOPT="-O0 -g"
+      LAPACK_TIMER="EXT_ETIME"
+      AC_MSG_RESULT([identified portland group pgf90 compiler, using ${NOOPT} no-optimization flag])
+      ;;
+    *)
+      NOOPT=
+      LAPACK_TIMER="NONE"
+      AC_MSG_RESULT([unknown compiler, no no-optimization flags found, using NONE timer])
+      ;;
+  esac
 
 else
   AC_MSG_RESULT([no])
@@ -289,7 +465,7 @@ else
     [Specify the blas/lapack libraries as specified on the linker command line (default is -lblas -llapack)])],
     [more_LIBS="${withval}"
     AC_MSG_NOTICE([using ${withval}])],
-    [more_LIBS="-lblas -llapack"])
+    [more_LIBS="-llapack -lblas"])
 
   if test -z "${LIBS}"; then
     LIBS="${more_LIBS}"
@@ -323,6 +499,8 @@ else
     [AC_MSG_FAILURE([no])])
 fi
 
+# Set some variables.
+AC_SUBST(NOOPT, [${NOOPT}])
 AC_SUBST(LAPACK_TIMER, [${LAPACK_TIMER}])
 
 # Check for internal hdf5.
@@ -334,17 +512,16 @@ AC_ARG_ENABLE([internal-hdf5],
    is.])],
   [use_internal_hdf5="${enableval}"],
   [use_internal_hdf5="yes"])
+AC_MSG_RESULT([${use_internal_hdf5}])
 
 AM_CONDITIONAL(INTERNAL_HDF5, [test "${use_internal_hdf5}" = "yes"])
 
 if test "${use_internal_hdf5}" = "yes"; then
 
-  AC_DEFINE(HAVE_INTERNAL_HDF5, 1, [Use the inernal hdf5 library])
+  AC_DEFINE(HAVE_INTERNAL_HDF5, 1, [Use the inernal hdf5 library.])
   AC_CONFIG_SUBDIRS([MondoMods/hdf5])
 
 else
-
-  AC_MSG_RESULT([no])
 
   AC_ARG_WITH([hdf5],
     [AS_HELP_STRING([--with-hdf5=DIR],
@@ -384,15 +561,19 @@ else
 fi
 
 # Find flags for static linking.
-AC_ARG_ENABLE([static],
-  [AS_HELP_STRING([--disable-static],
-  [Disable static linking of MondoSCF executables.])],
-  [enable_static_linking="${enableval}"],
-  [enable_static_linking="yes"])
+AC_MSG_CHECKING([whether to link binaries statically])
+AC_ARG_ENABLE([static-binaries],
+  [AS_HELP_STRING([--disable-static-binaries],
+  [Disable static linking of FreeON executables.])],
+  [static_linking="${enableval}"],
+  [static_linking="yes"])
+
+AC_MSG_RESULT([${static_linking}])
+AM_CONDITIONAL(USE_DYNAMIC_LINKING, [test "${static_linking}" = "no"])
 
 static_linking_flags=""
 
-if test "${enable_static_linking}" = "yes"; then
+if test "${static_linking}" = "yes"; then
 
   if test -z "${LDFLAGS}"; then
     LDFLAGS="-all-static"
@@ -400,8 +581,6 @@ if test "${enable_static_linking}" = "yes"; then
     LDFLAGS="${LDFLAGS} -all-static"
   fi
 
-else
-  AC_MSG_NOTICE([static linking disabled])
 fi
 
 # Set the preprocessor.
@@ -424,6 +603,24 @@ AC_ARG_ENABLE([delete-preprocessed-files],
 AC_MSG_RESULT([${remove_preprocessed_files}])
 AC_SUBST(REMOVE_PREPROCESSED_FILES, ${remove_preprocessed_files})
 
+AC_MSG_CHECKING([whether to use the old DIIS (for debugging)])
+AC_ARG_ENABLE([old-DIIS],
+  [AS_HELP_STRING([--enable-old-DIIS],
+  [Enable an old version of DIIS (1.3) for debugging.])],
+  [use_old_DIIS="${enableval}"],
+  [use_old_DIIS="no"])
+AC_MSG_RESULT([${use_old_DIIS}])
+AM_CONDITIONAL(OLD_DIIS, [test "${use_old_DIIS}" = "yes"])
+
+AC_MSG_CHECKING([whether to use the really old DIIS (for debugging)])
+AC_ARG_ENABLE([really-old-DIIS],
+  [AS_HELP_STRING([--enable-really-old-DIIS],
+  [Enable an old version of DIIS (2004-01-16) for debugging.])],
+  [use_really_old_DIIS="${enableval}"],
+  [use_really_old_DIIS="no"])
+AC_MSG_RESULT([${use_really_old_DIIS}])
+AM_CONDITIONAL(REALLY_OLD_DIIS, [test "${use_really_old_DIIS}" = "yes"])
+
 # Define location of temporary Mondo files.
 AC_MSG_CHECKING([where to put MONDO_SCRATCH])
 AC_ARG_WITH([MONDO_SCRATCH],
@@ -433,6 +630,26 @@ AC_ARG_WITH([MONDO_SCRATCH],
   [MONDO_SCRATCH="/tmp"])
 AC_MSG_RESULT([using ${MONDO_SCRATCH}])
 
+# Define hdf hack.
+AC_MSG_CHECKING([how many geometries to recycle])
+AC_ARG_WITH([RECYCLE_HDF],
+  [AS_HELP_STRING([--with-RECYCLE_HDF=Number_of_geometries],
+  [Specify how many geometries should be stored in hdf])],
+  [RECYCLE_HDF=${withval}],
+  [RECYCLE_HDF=20])
+AC_MSG_RESULT([keeping ${RECYCLE_HDF} geometries])
+
+AC_DEFINE_UNQUOTED(RECYCLE_HDF, [${RECYCLE_HDF}], [Only keep this many geometries in hdf file.])
+
+AC_MSG_CHECKING([whether to do some memory debugging])
+AC_ARG_ENABLE([memory-debug],
+  [AS_HELP_STRING([--enable-memory-debug],
+  [Print out some information regarding allocate() and deallocate() statements])],
+  [do_memory_debug="${enableval}"],
+  [do_memory_debug="no"])
+AC_MSG_RESULT([${do_memory_debug}])
+AC_SUBST(HAVE_MEMORY_DEBUG, ${do_memory_debug})
+
 # Some mondo variables.
 AC_DEFINE_UNQUOTED(HAVE_MONDO_HOME,    ["${prefix}"], [Define the main installation directory.])
 AC_DEFINE_UNQUOTED(HAVE_MONDO_PLAT,    ["${build}"], [Define build platform.])
@@ -440,17 +657,18 @@ AC_DEFINE_UNQUOTED(HAVE_MONDO_HOST,    ["`hostname`"], [Define hostname.])
 AC_DEFINE_UNQUOTED(HAVE_MONDO_MACH,    ["${build_cpu}"], [Define build cpu.])
 AC_DEFINE_UNQUOTED(HAVE_MONDO_SYST,    ["${build_os}"], [Define build system (os).])
 AC_DEFINE_UNQUOTED(HAVE_MONDO_VRSN,    ["`uname -r`"], [Define build os version.])
-AC_DEFINE_UNQUOTED(HAVE_MONDO_SCRATCH, ["${MONDO_SCRATCH}"], [Define default MONDO_SCRATCH directory])
+AC_DEFINE_UNQUOTED(HAVE_MONDO_SCRATCH, ["${MONDO_SCRATCH}"], [Define default MONDO_SCRATCH directory.])
 
 # Enable fix for gfortran.
 if test "${ac_cv_fc_compiler_gnu}" = "yes"; then
-  AC_DEFINE(GFORTRAN, 1, [Enable fix for gfortran])
+  AC_DEFINE(GFORTRAN, 1, [Enable fix for gfortran.])
 fi
 
 # Output all of it....
 AC_CONFIG_FILES([
+config_localversion.h
 Makefile
-MondoSCF/Makefile
+FreeON/Makefile
 MondoMods/Makefile
 MondoMods/lapack/Makefile
 MondoMods/lapack/install/Makefile
@@ -472,18 +690,26 @@ TwoE/INT/Makefile
 TwoE/MSC/Makefile
 TwoE/VRR/Makefile
 ONX/Makefile
+examples/Makefile
+examples/MD/Makefile
+examples/MD-restart/Makefile
 ])
 
 AC_CONFIG_HEADERS([config.h])
 
 # Configuration date
-AC_DEFINE_UNQUOTED(CONFIG_DATE, ["`date`"], [The date this configuration script was run])
+#AC_DEFINE_UNQUOTED(CONFIG_DATE, ["`date`"], [The date this configuration script was run.])
 
 # User doing the configuration
-AC_DEFINE_UNQUOTED(CONFIG_USER, ["`whoami`@`hostname`"], [The user running the configure script])
+AC_DEFINE_UNQUOTED(CONFIG_USER, ["`whoami`@`hostname`"], [The user running the configure script.])
 if test -n "$ORGANIZATION"; then
-  AC_DEFINE_UNQUOTED(CONFIG_USER, ["$CONFIG_USER at $ORGANIZATION"], [The user running the configure script])
+  AC_DEFINE_UNQUOTED(CONFIG_USER, ["$CONFIG_USER at $ORGANIZATION"], [The user running the configure script.])
 fi
+
+# Define the maximum number of SCF cycles.
+AC_DEFINE(HAVE_MAX_SCF, [256], [The maximum number of SCF cycles. After going
+                         through this many SCF cycles, the SCF process is
+                         declared converged.])
 
 AC_MSG_NOTICE([***   Summary   ***])
 AC_MSG_NOTICE([CC            = ${CC}])
@@ -498,6 +724,7 @@ AC_MSG_NOTICE([LIBS          = ${LIBS}])
 AC_MSG_NOTICE([CPPFLAGS      = ${CPPFLAGS}])
 AC_MSG_NOTICE([HDF5_CPPFLAGS = ${HDF5_CPPFLAGS}])
 AC_MSG_NOTICE([MONDO_SCRATCH = ${MONDO_SCRATCH}])
+AC_MSG_NOTICE([RECYCLE_HDF   = ${RECYCLE_HDF}])
 AC_MSG_NOTICE([])
 if test "${use_internal_lapack}" = "yes"; then
   AC_MSG_NOTICE([Using internal lapack])
@@ -514,6 +741,18 @@ if test "${remove_preprocessed_files}" = "yes"; then
 else
   AC_MSG_NOTICE([I will _not_ remove preprocessed files])
 fi
+if test "${use_phipac}" = "yes"; then
+  AC_MSG_NOTICE([Using phipac])
+else
+  AC_MSG_NOTICE([we are _not_ using phipac])
+fi
+if test "${enable_md_debug}" = "yes"; then
+  AC_MSG_NOTICE([The TRBO MD will use only $((md_debug_SCFs+1)) SCFs per time step.])
+else
+  AC_MSG_NOTICE([no extra TRBO MD debugging])
+fi
 AC_MSG_NOTICE([*** End Summary ***])
+
+ac_configure_args="${ac_configure_args} ${optimization_flags}"
 
 AC_OUTPUT

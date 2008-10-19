@@ -28,7 +28,7 @@
 /*    Author: Matt Challacombe                                      */
 /*------------------------------------------------------------------*/
 
-#include <config.h>
+#include "config.h"
 
 #if defined (PHIPAC)
 #warning Using PHIPAC

@@ -3,17 +3,14 @@ AUTOMAKE_OPTIONS = dist-bzip2 no-dist-gzip
 CPP = @CPP@
 AM_CPPFLAGS = @AM_CPPFLAGS@
 
-SUBDIRS = MondoMods MondoSCF SCFeqs OneE QCTC HiCu TwoE ONX
+SUBDIRS = MondoMods FreeON SCFeqs OneE QCTC HiCu TwoE ONX examples
 
 datadir = ${prefix}/BasisSets
 
 data_DATA = $(BasisSets)
 
-include_HEADERS = MondoConfig.h config.h
-
 EXTRA_DIST = \
   $(data_DATA) \
-  $(examples) \
   localversion
 
 BasisSets = \
@@ -110,83 +107,6 @@ BasisSets = \
   BasisSets/WTBS.bas \
   BasisSets/splitbas
 
-examples = \
-  examples/AcO-.inp \
-  examples/AcO-.ref \
-  examples/Adenine-NumFreq.frequencies \
-  examples/Adenine-NumFreq.out \
-  examples/Adenine-Optimize.out \
-  examples/Adenine-Optimize.xyz \
-  examples/Adenine.inp \
-  examples/Al.inp \
-  examples/Al.ref \
-  examples/BetaCarotene.inp \
-  examples/BetaCarotene.ref \
-  examples/Biotin.inp \
-  examples/Biotin.ref \
-  examples/BoronNitride.inp \
-  examples/BoronNitride.ref \
-  examples/CH2x-6.inp \
-  examples/CH2x-6.out \
-  examples/CH2x-6.ref \
-  examples/CH2x-6.xyz \
-  examples/Caffiene.inp \
-  examples/Caffiene.ref \
-  examples/Chlorophyll.inp \
-  examples/Chlorophyll.ref \
-  examples/Cytosine-NumFreq.frequencies \
-  examples/Cytosine-NumFreq.out \
-  examples/Cytosine-Optimize.out \
-  examples/Cytosine-Optimize.xyz \
-  examples/Cytosine.inp \
-  examples/Diamond.inp \
-  examples/Diamond.ref \
-  examples/Graphite.inp \
-  examples/Graphite.ref \
-  examples/Guanine-NumFreq.frequencies \
-  examples/Guanine-NumFreq.out \
-  examples/Guanine-Optimize.out \
-  examples/Guanine-Optimize.xyz \
-  examples/Guanine.inp \
-  examples/H2O.inp \
-  examples/H2O.ref \
-  examples/Histidine.inp \
-  examples/Histidine.ref \
-  examples/HybridMC_H2O.inp \
-  examples/IceIh.inp \
-  examples/IceIh.ref \
-  examples/MDO2xyz.py \
-  examples/MD_C2F4_Symplectic.inp \
-  examples/MD_C2F4_TRBO.inp \
-  examples/MD_F2_Symplectic.inp \
-  examples/MD_F2_TRBO.inp \
-  examples/MD_H2.inp \
-  examples/MD_H2_TRBO.inp \
-  examples/MD_H2_TRBO_2.inp \
-  examples/MD_H2_TRBO_3.inp \
-  examples/MD_Water10_T050_1SCF.inp \
-  examples/Malonaldahyde.inp \
-  examples/NH3.inp \
-  examples/NH3.ref \
-  examples/NO+.inp \
-  examples/NO+.ref \
-  examples/O2.inp \
-  examples/O2.ref \
-  examples/PIce.inp \
-  examples/PIce.ref \
-  examples/Peroxide.inp \
-  examples/Peroxide.ref \
-  examples/Quartz.inp \
-  examples/Quartz.ref \
-  examples/Steam.inp \
-  examples/Steam.ref \
-  examples/TEMPO.inp \
-  examples/TEMPO.ref \
-  examples/Vancomycin.inp \
-  examples/Vancomycin.ref \
-  examples/WaterHexamer.inp \
-  examples/WaterHexamer.ref
-
 CLEANFILES = *~
 
 CONFIG_STATUS_DEPENDENCIES = localversion
@@ -200,16 +120,30 @@ localversion : always-fix
 	  if test -n "$${branch}" -a -n "$${localversion}"; then \
 	    echo "branch=$${branch}" > localversion.temp; \
 	    echo "localversion=$${localversion}" >> localversion.temp; \
-	    if test -f localversion -a -z "`diff localversion localversion.temp`"; then \
-	      echo "localversion did not change"; \
-	      rm localversion.temp; \
+	    if test -f localversion; then \
+	      if test -z "`diff localversion localversion.temp`"; then \
+	        echo "localversion did not change"; \
+	        rm localversion.temp; \
+	      else \
+	        echo "localversion updated"; \
+	        diff -u localversion localversion.temp; \
+	        mv -f localversion.temp localversion; \
+	      fi; \
 	    else \
-	      echo "localversion updated"; \
+	      echo "localversion did not exist"; \
 	      mv -f localversion.temp localversion; \
-	      touch MondoSCF/PrintParsed.f90; \
 	    fi; \
 	    echo "localversion at $${branch}:$${localversion}"; \
 	  fi
+
+# Clean out everything except for things that are excrutiatingly long to
+# rebuild.
+quickclean :
+	$(MAKE) -C FreeON clean
+	$(MAKE) -C SCFeqs clean
+	$(MAKE) -C OneE clean
+	$(MAKE) -C HiCu clean
+	$(MAKE) -C ONX clean
 
 # Cryptographically sign the dist.
 dist-sign : localversion dist

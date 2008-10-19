@@ -498,25 +498,45 @@ CONTAINS
 #endif 
         END SUBROUTINE Get_INT_RNK4
 
-        SUBROUTINE Get_DBL_SCLR(A,VarName,Tag_O)
-          REAL(DOUBLE),             INTENT(INOUT)   :: A
-          CHARACTER(LEN=*),         INTENT(IN)      :: VarName
-          CHARACTER(LEN=*),OPTIONAL,INTENT(IN)      :: Tag_O
-          REAL(DOUBLE),DIMENSION(1)                 :: B
-          TYPE(META_DATA)                           :: Meta
-#ifdef PARALLEL 
-          IF(MyId==ROOT)THEN
-#endif 
-             Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_DOUBLE,1,.FALSE.)
-             CALL OpenData(Meta)
-             CALL ReadDoubleVector(Meta,B)
-             CALL CloseData(Meta)
-             A=B(1)
-#ifdef PARALLEL 
-          ENDIF
-          IF(InParallel)CALL Bcast(A)
-#endif 
-        END SUBROUTINE Get_DBL_SCLR
+  SUBROUTINE Get_DBL_SCLR(A,VarName,Stats_O,Tag_O)
+    REAL(DOUBLE),             INTENT(INOUT)  :: A
+    CHARACTER(LEN=*),         INTENT(IN)     :: VarName
+    CHARACTER(LEN=*),OPTIONAL,INTENT(IN)     :: Tag_O
+    CHARACTER(LEN=DEFAULT_CHR_LEN)           :: Tag
+    INTEGER,DIMENSION(3),OPTIONAL,INTENT(IN) :: Stats_O
+    REAL(DOUBLE),DIMENSION(1)                :: B
+    TYPE(META_DATA)                          :: Meta
+#ifdef PARALLEL
+    IF(MyId==ROOT)THEN
+#endif
+      IF(PRESENT(Stats_O).AND.PRESENT(Tag_O)) THEN
+        CALL Halt("[Get_DBL_SCLR] either Stats_O or Tag_O")
+      ENDIF
+      IF(PRESENT(Tag_O)) THEN
+        !CALL MondoLog(DEBUG_MAXIMUM, "Get_DBL_SCLR", "VarName = "//TRIM(VarName)//", Tag_O = "//TRIM(Tag_O))
+        Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_DOUBLE,1,.FALSE.)
+      ELSEIF(PRESENT(Stats_O)) THEN
+        Tag = TRIM(IntToChar(Stats_O(3)))
+        !CALL MondoLog(DEBUG_MAXIMUM, "Get_DBL_SCLR", "VarName = "//TRIM(VarName)//", Stats_O = " &
+        !  //TRIM(IntToChar(Stats_O(1)))//" " &
+        !  //TRIM(IntToChar(Stats_O(2)))//" " &
+        !  //TRIM(IntToChar(Stats_O(3)))//", constructed Tag = "//TRIM(Tag))
+        Meta=SetMeta(NameTag(VarName,Tag),NATIVE_DOUBLE,1,.FALSE.)
+      ELSE
+        !CALL MondoLog(DEBUG_MAXIMUM, "Get_DBL_SCLR", "VarName = "//TRIM(VarName)//", Tag_O not set")
+        Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_DOUBLE,1,.FALSE.)
+      ENDIF
+
+      CALL OpenData(Meta)
+      CALL ReadDoubleVector(Meta,B)
+      CALL CloseData(Meta)
+      A=B(1)
+#ifdef PARALLEL
+    ENDIF
+    IF(InParallel)CALL Bcast(A)
+#endif
+  END SUBROUTINE Get_DBL_SCLR
+
 
         SUBROUTINE Get_DBL_VECT(A,VarName,Tag_O)
           TYPE(DBL_VECT),           INTENT(INOUT) :: A
@@ -794,24 +814,45 @@ CONTAINS
            !-------------------------------------------------------------------------------
 
            !-------------------------------------------------------------------------------
-           SUBROUTINE Put_DBL_SCLR(A,VarName,Tag_O)
-             REAL(DOUBLE),             INTENT(IN) :: A
-             CHARACTER(LEN=*),         INTENT(IN) :: VarName
-             CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Tag_O
-             REAL(DOUBLE),DIMENSION(1)            :: B
-             TYPE(META_DATA)                      :: Meta
-#ifdef PARALLEL 
-             IF(MyId==ROOT)THEN
-#endif 
-                Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_DOUBLE,1,.FALSE.)
-                CALL OpenData(Meta,.TRUE.)
-                B(1)=A
-                CALL WriteDoubleVector(Meta,B)
-                CALL CloseData(Meta)
-#ifdef PARALLEL 
-             ENDIF
-#endif 
-           END SUBROUTINE Put_DBL_SCLR
+
+  SUBROUTINE Put_DBL_SCLR(A,VarName,Stats_O,Tag_O)
+    REAL(DOUBLE),             INTENT(IN)     :: A
+    CHARACTER(LEN=*),         INTENT(IN)     :: VarName
+    CHARACTER(LEN=*),OPTIONAL,INTENT(IN)     :: Tag_O
+    CHARACTER(LEN=DEFAULT_CHR_LEN)           :: Tag
+    INTEGER,DIMENSION(3),OPTIONAL,INTENT(IN) :: Stats_O
+    REAL(DOUBLE),DIMENSION(1)                :: B
+    TYPE(META_DATA)                          :: Meta
+#ifdef PARALLEL
+    IF(MyId==ROOT)THEN
+#endif
+      IF(PRESENT(Stats_O).AND.PRESENT(Tag_O)) THEN
+        CALL Halt("[Put_DBL_SCLR] either Stats_O or Tag_O")
+      ENDIF
+      IF(PRESENT(Tag_O)) THEN
+        !CALL MondoLog(DEBUG_MAXIMUM, "Put_DBL_SCLR", "VarName = "//TRIM(VarName)//", Tag_O = "//TRIM(Tag_O))
+        Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_DOUBLE,1,.FALSE.)
+      ELSEIF(PRESENT(Stats_O)) THEN
+        Tag = TRIM(IntToChar(Stats_O(3)))
+        !CALL MondoLog(DEBUG_MAXIMUM, "Put_DBL_SCLR", "VarName = "//TRIM(VarName)//", Stats_O = " &
+        !  //TRIM(IntToChar(Stats_O(1)))//" " &
+        !  //TRIM(IntToChar(Stats_O(2)))//" " &
+        !  //TRIM(IntToChar(Stats_O(3)))//", constructed Tag = "//TRIM(Tag))
+        Meta=SetMeta(NameTag(VarName,Tag),NATIVE_DOUBLE,1,.FALSE.)
+      ELSE
+        !CALL MondoLog(DEBUG_MAXIMUM, "Put_DBL_SCLR", "VarName = "//TRIM(VarName)//", Tag_O not set")
+        Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_DOUBLE,1,.FALSE.)
+      ENDIF
+
+      CALL OpenData(Meta,.TRUE.)
+      B(1)=A
+      CALL WriteDoubleVector(Meta,B)
+      CALL CloseData(Meta)
+#ifdef PARALLEL
+    ENDIF
+#endif
+  END SUBROUTINE Put_DBL_SCLR
+
 
            SUBROUTINE Put_DBL_VECT(A,VarName,N_O,Tag_O,UnLimit_O)
              TYPE(DBL_VECT),           INTENT(IN) :: A
@@ -1153,6 +1194,7 @@ CONTAINS
                 !        Items that can change with geometry ...       
 
                 CALL Get(GM%ETotal    ,'gm_etot'      ,Tag_O=Tag_O)
+                CALL Get(GM%ETotalPerSCF, "gm_etotalperscf",  Tag_O=Tag_O)
                 CALL Get(GM%Ordrd     ,'reordered'    ,Tag_O=Tag_O)
 
                 CALL Get(GM%AtTyp     ,'atomtype'     ,Tag_O=Tag_O)
@@ -1210,6 +1252,7 @@ CONTAINS
                 !-------------------------------------------------------------------------------
                 !        Items that can change with geometry ...       
                 CALL Put(GM%ETotal    ,'gm_etot'      ,Tag_O=Tag_O)
+                CALL Put(GM%ETotalPerSCF, "gm_etotalperscf",  Tag_O=Tag_O)
                 CALL Put(GM%Ordrd     ,'reordered'    ,Tag_O=Tag_O)
                 CALL Put(GM%AtTyp     ,'atomtype'     ,Tag_O=Tag_O)
                 CALL Put(GM%AtNum     ,'atomicnumbers',Tag_O=Tag_O)

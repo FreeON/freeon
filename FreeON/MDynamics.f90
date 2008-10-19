@@ -24,6 +24,8 @@
 ! disemination in future releases.
 !------------------------------------------------------------------------------
 
+#include "MondoConfig.h"
+
 MODULE MDynamics
   USE Order
   USE SCFs
@@ -48,16 +50,19 @@ MODULE MDynamics
   REAL(DOUBLE) :: ACTTargetEnergy, ACTIntegratedEnergyError, ACTGamma
   REAL(DOUBLE) :: ACTActionTransfer, ACTLambda
 
+  INTEGER :: MinMDGeo
+
 CONTAINS
   !--------------------------------------------------------------
   ! Main MD Subroutine
   !--------------------------------------------------------------
   SUBROUTINE MD(C)
     TYPE(Controls)  :: C
-    INTEGER         :: I,iSCF,iBAS,iGEO,iCLONE,iATS,iREMOVE,MinMDGeo
+    INTEGER         :: I,iSCF,iBAS,iGEO,iCLONE,iATS,iREMOVE
     INTEGER         :: iGEOBegin,iMDStep
     REAL(DOUBLE)    :: Temp
     LOGICAL         :: NewECMD,OrthogDM
+    INTEGER         :: oldState
 
     !--------------------------------------------------------------
     ! Do Molecular Dynamics:Loop over Time Steps
@@ -75,7 +80,7 @@ CONTAINS
     CALL New(MDTime,C%Geos%Clones)
     CALL New(MDKin, C%Geos%Clones)
     CALL New(MDEpot,C%Geos%Clones)
-    CALL New(MDETot,C%Geos%Clones)
+    CALL New(MDEtot,C%Geos%Clones)
     CALL New(MDTemp,C%Geos%Clones)
     CALL New(MDTave,C%Geos%Clones)
     CALL New(MDLinP,(/3,C%Geos%Clones/))
@@ -84,7 +89,7 @@ CONTAINS
     MDTime%D = Zero
     MDKin%D  = Zero
     MDEpot%D = Zero
-    MDETot%D = Zero
+    MDEtot%D = Zero
     MDTemp%D = Zero
     MDTave%D = Zero
     MDLinP%D = Zero
@@ -171,7 +176,7 @@ CONTAINS
       CALL MondoLog(DEBUG_NONE, "MD", "new MD calculation")
       CALL MondoLog(DEBUG_NONE, "MD", "iMDStep    = "//TRIM(IntToChar(iMDStep)))
       CALL MondoLog(DEBUG_NONE, "MD", "iGEOBegin  = "//TRIM(IntToChar(iGEOBegin)))
-      CALL MondoLog(DEBUG_NONE, "MD", "MDTime     = "//TRIM(FltToChar(MDTime%D(1)*InternalTimeToFemtoseconds)))
+      CALL MondoLog(DEBUG_NONE, "MD", "MDTime     = "//TRIM(FltToChar(MDTime%D(1)*InternalTimeToFemtoseconds))//" fs")
       CALL MondoLog(DEBUG_NONE, "MD", "MinMDGeo   = "//TRIM(IntToChar(MinMDGeo)))
       CALL MondoLog(DEBUG_NONE, "MD", "iREMOVE    = "//TRIM(IntToChar(iREMOVE)))
       CALL MondoLog(DEBUG_NONE, "MD", "MDMaxSteps = "//TRIM(IntToChar(C%Dyns%MDMaxSteps)))
@@ -186,7 +191,7 @@ CONTAINS
       ENDIF
 
       ! For iMDStep <= MinMDGeo make Diagonal or Core Guess
-      IF(iGEO .LE. MinMDGeo) THEN
+      IF(iGEO <= MinMDGeo) THEN
         CALL MondoLog(DEBUG_NONE, "MD", "iGEO <= MinMDGeo, guessing...")
         DO iBAS=1,C%Sets%NBSets
           IF(iBAS==1) THEN
@@ -207,8 +212,21 @@ CONTAINS
       ELSE
         ! Normal MD-SCF
         C%Opts%GeussTOP2Use = C%Dyns%MDGeuss
-        C%Opts%MinSCF       = C%Dyns%MDNumSCF
-        C%Opts%MaxSCF       = C%Dyns%MDNumSCF
+
+        IF(C%Dyns%MDNumSCF < 0) THEN
+          CALL MondoLog(DEBUG_NONE, "MD", "MDNumSCF not set")
+        ELSE
+#if defined MD_DEBUG
+          C%Opts%MinSCF = C%Dyns%MDNumSCF
+          C%Opts%MaxSCF = HAVE_MAX_SCF
+#else
+          C%Opts%MinSCF = C%Dyns%MDNumSCF
+          C%Opts%MaxSCF = C%Dyns%MDNumSCF
+#endif
+          CALL MondoLog(DEBUG_NONE, "MD", "MDNumSCF set to "//TRIM(IntToChar(C%Dyns%MDNumSCF)))
+        ENDIF
+        CALL MondoLog(DEBUG_NONE, "MD", "MinSCF = "//TRIM(IntToChar(C%Opts%MinSCF)))
+        CALL MondoLog(DEBUG_NONE, "MD", "MaxSCF = "//TRIM(IntToChar(C%Opts%MaxSCF)))
 
         iBAS=C%Sets%NBSets
         CALL GeomArchive(iBAS,iGEO,C%Nams,C%Opts,C%Sets,C%Geos)
@@ -216,11 +234,47 @@ CONTAINS
         CALL SCF(iBAS,iGEO,C)
 
         ! Copy Last SCF to P(iGEO)_save
+#if defined MD_DEBUG
+        IF(C%Dyns%MDNumSCF < 0) THEN
+          CALL MondoLog(DEBUG_NONE, "MD", "MDNumSCF not set")
+        ELSE
+          CALL MondoLog(DEBUG_NONE, "MD", "hardwiring density matrix to use result from "//TRIM(IntToChar(C%Dyns%MDNumSCF+1))//" SCFs")
+          oldState = C%Stat%Current%I(1)
+          C%Stat%Current%I(1) = C%Dyns%MDNumSCF
+        ENDIF
+#endif
         CALL CopyMatrices(C,.FALSE.)
+#if defined MD_DEBUG
+        IF(C%Dyns%MDNumSCF >= 0) THEN
+          CALL MondoLog(DEBUG_NONE, "MD", "resetting back to "//TRIM(IntToChar(oldState)))
+          C%Stat%Current%I(1) = oldState
+        ENDIF
+#endif
       ENDIF
 
-      ! Calculate the Forces
+      ! Calculate the Forces.
+      !
+      ! Hardwire force to use density after 2 SCFs.
+#if defined MD_DEBUG
+      IF(C%Dyns%MDNumSCF < 0) THEN
+        CALL MondoLog(DEBUG_NONE, "MD", "MDNumSCF not set")
+      ELSE
+        IF(iGEO > MinMDGeo) THEN
+          CALL MondoLog(DEBUG_NONE, "MD", "hardwiring force to use result from "//TRIM(IntToChar(C%Dyns%MDNumSCF+1))//" SCFs")
+          oldState = C%Stat%Current%I(1)
+          C%Stat%Current%I(1) = C%Dyns%MDNumSCF
+        ENDIF
+      ENDIF
+#endif
       CALL Force(C%Sets%NBSets,iGEO,C%Nams,C%Opts,C%Stat,C%Geos,C%Sets,C%MPIs)
+#if defined MD_DEBUG
+      IF(C%Dyns%MDNumSCF >= 0) THEN
+        IF(iGEO > MinMDGeo) THEN
+          CALL MondoLog(DEBUG_NONE, "MD", "resetting back to "//TRIM(IntToChar(oldState)))
+          C%Stat%Current%I(1) = oldState
+        ENDIF
+      ENDIF
+#endif
 
       ! Apply Action Control Theory.
       IF(C%Dyns%Thermostat == MD_ACT) THEN
@@ -229,17 +283,17 @@ CONTAINS
           ! Find target energy.
           CALL MondoLog(DEBUG_NONE, "MD", "finding ACT Target Energy")
 
-          ! We don't calculate MDETot until after the first step.
-          ACTTargetEnergy = ACTTargetEnergy + MDETot%D(1)/(100-1)
+          ! We don't calculate MDEtot until after the first step.
+          ACTTargetEnergy = ACTTargetEnergy + MDEtot%D(1)/(100-1)
         ELSE
           ! Integrate energy error.
-          ACTIntegratedEnergyError = ACTIntegratedEnergyError + ACTTargetEnergy - MDETot%D(1)
+          ACTIntegratedEnergyError = ACTIntegratedEnergyError + ACTTargetEnergy - MDEtot%D(1)
           CALL MondoLog(DEBUG_NONE, "MD", "ACTTargetEnergy = "//TRIM(DblToChar(ACTTargetEnergy)))
           CALL MondoLog(DEBUG_NONE, "MD", "calculating ACT Integrated Energy Error = "//TRIM(DblToChar(ACTIntegratedEnergyError)))
-          CALL MondoLog(DEBUG_NONE, "MD", "Energy error = "//TRIM(DblToChar(ACTTargetEnergy-MDETot%D(1))))
+          CALL MondoLog(DEBUG_NONE, "MD", "Energy error = "//TRIM(DblToChar(ACTTargetEnergy-MDEtot%D(1))))
 
           ! Calculate gamma.
-          ACTGamma = C%Dyns%ACTAlpha*(ACTTargetEnergy-MDETot%D(1)) &
+          ACTGamma = C%Dyns%ACTAlpha*(ACTTargetEnergy-MDEtot%D(1)) &
             + C%Dyns%ACTBeta*ACTIntegratedEnergyError
           !ACTGamma = ACTGamma/C%Geos%Clone(1)%NAmts
 
@@ -355,6 +409,15 @@ CONTAINS
       ENDIF
     ENDDO
 
+    ! Clean up.
+    CALL Delete(MDTime)
+    CALL Delete(MDKin)
+    CALL Delete(MDEpot)
+    CALL Delete(MDEtot)
+    CALL Delete(MDTemp)
+    CALL Delete(MDTave)
+    CALL Delete(MDLinP)
+
   END SUBROUTINE MD
 
   !--------------------------------------------------------------
@@ -387,10 +450,10 @@ CONTAINS
 
       ! Calculate total acceleration.
       Acc(1:3) = Acc(1:3)/DBLE(numberUnconstrainedAtoms)
-      CALL MondoLog(DEBUG_NONE, "MDynamics:MD_Verlet_NVE", "flying ice-cube correction: " &
+      CALL MondoLog(DEBUG_NONE, "MD:Verlet", "flying ice-cube correction: [ " &
         //TRIM(DblToChar(Acc(1)))//" " &
         //TRIM(DblToChar(Acc(2)))//" " &
-        //TRIM(DblToChar(Acc(3))))
+        //TRIM(DblToChar(Acc(3)))//" ]")
 
       ! Make sure the total force on the system is zero.
       DO iATS = 1,C%Geos%Clone(iCLONE)%NAtms
@@ -424,8 +487,25 @@ CONTAINS
       MDTave%D(iCLONE) = (DBLE(iGEO-1)/DBLE(iGEO))*MDTave%D(iCLONE) +(One/DBLE(iGEO))*MDTemp%D(iCLONE)
 
       ! Store Potential and Total Energy
+      CALL MondoLog(DEBUG_NONE, "MD:Verlet", "ETotal = "//TRIM(DblToChar(C%Geos%Clone(iCLONE)%ETotal)))
+      CALL MondoLog(DEBUG_NONE, "MD:Verlet", "ETotalPerSCF = "//TRIM(DblVectToChar(C%Geos%Clone(iCLONE)%ETotalPerSCF, (/ 0, C%Stat%Current%I(1) /))))
+#if defined MD_DEBUG
+      IF(C%Dyns%MDNumSCF < 0) THEN
+        CALL MondoLog(DEBUG_NONE, "MD:Verlet", "MDNumSCF not set")
+      ELSE
+        IF(iGEO > MinMDGeo) THEN
+          CALL MondoLog(DEBUG_NONE, "MD:Verlet", "hardwiring potential energy to use result from "//TRIM(IntToChar(C%Dyns%MDNumSCF+1))//" SCFs")
+          MDEpot%D(iCLONE) = C%Geos%Clone(iCLONE)%ETotalPerSCF%D(C%Dyns%MDNumSCF)
+        ELSE
+          MDEpot%D(iCLONE) = C%Geos%Clone(iCLONE)%ETotal
+        ENDIF
+      ENDIF
+#else
       MDEpot%D(iCLONE) = C%Geos%Clone(iCLONE)%ETotal
-      MDETot%D(iCLONE) = MDEpot%D(iCLONE) + MDKin%D(iCLONE)
+#endif
+
+      ! Calculate total energy.
+      MDEtot%D(iCLONE) = MDEpot%D(iCLONE) + MDKin%D(iCLONE)
     ENDDO
 
     ! Thermostats
@@ -453,7 +533,7 @@ CONTAINS
         ! Store v_scale in hdf.
         HDFFileID=OpenHDF(C%Nams%HFile)
         HDF_CurrentID = OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
-        CALL Put(v_scale, "v_scale", TRIM(IntToChar(iGEO)))
+        CALL Put(v_scale, "v_scale", Tag_O=TRIM(IntToChar(iGEO)))
         CALL CloseHDFGroup(HDF_CurrentID)
         CALL CloseHDF(HDFFileID)
         CALL MondoLog(DEBUG_NONE, "MD", "putting v_scale("//TRIM(IntToChar(iGEO))//") to hdf = " &
@@ -466,15 +546,17 @@ CONTAINS
         ! Let's punch something so we don't die in P2Use.
         HDFFileID=OpenHDF(C%Nams%HFile)
         HDF_CurrentID = OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
-        CALL Put(0D0, "v_scale", TRIM(IntToChar(iGEO)))
+        CALL Put(0D0, "v_scale", Tag_O=TRIM(IntToChar(iGEO)))
         CALL CloseHDFGroup(HDF_CurrentID)
         CALL CloseHDF(HDFFileID)
-        CALL MondoLog(DEBUG_NONE, "MD", "putting dummy v_scale("//TRIM(IntToChar(iGEO))//") to hdf = "//TRIM(DblToChar(0D0)))
+        CALL MondoLog(DEBUG_NONE, "MD:Verlet", "putting dummy v_scale(" &
+                      //TRIM(IntToChar(iGEO))//") to hdf = "//TRIM(DblToChar(0D0)))
       ENDDO
 
     ENDIF
 
     ! Generate Output
+    CALL MondoLog(DEBUG_NONE, "MD:Verlet", "writing output")
     CALL OutputMD(C,iGEO)
 
     ! Update the Positions
@@ -543,10 +625,10 @@ CONTAINS
 
       ! Calculate total acceleration.
       Acc(1:3) = Acc(1:3)/DBLE(numberUnconstrainedAtoms)
-      CALL MondoLog(DEBUG_NONE, "MDynamics:MDSymplectic_4th_Order_NVE", "flying ice-cube correction: " &
+      CALL MondoLog(DEBUG_NONE, "MD:Symplectic", "flying ice-cube correction: [ " &
         //TRIM(DblToChar(Acc(1)))//" " &
         //TRIM(DblToChar(Acc(2)))//" " &
-        //TRIM(DblToChar(Acc(3))))
+        //TRIM(DblToChar(Acc(3)))//" ]")
 
       ! Make sure the total force on the system is zero.
       DO iATS = 1,C%Geos%Clone(iCLONE)%NAtms
@@ -568,7 +650,26 @@ CONTAINS
         MDTave%D(iCLONE) = (DBLE(iGEO-1)/DBLE(iGEO))*MDTave%D(iCLONE) +(One/DBLE(iGEO))*MDTemp%D(iCLONE)
 
         ! Store Potential and Total Energy
+        CALL MondoLog(DEBUG_NONE, "MD:Symplectic", "ETotal = " &
+                                 //TRIM(DblToChar(C%Geos%Clone(iCLONE)%ETotal)))
+        CALL MondoLog(DEBUG_NONE, "MD:Symplectic", "ETotalPerSCF = " &
+                      //TRIM(DblVectToChar(C%Geos%Clone(iCLONE)%ETotalPerSCF, (/ 0, C%Stat%Current%I(1) /))))
+#if defined MD_DEBUG
+        IF(C%Dyns%MDNumSCF < 0) THEN
+          CALL MondoLog(DEBUG_NONE, "MD:Symplectic", "MDNumSCF not set")
+        ELSE
+          IF(iGEO > MinMDGeo) THEN
+            CALL MondoLog(DEBUG_NONE, "MD:Symplectic", "hardwiring potential energy to use result from "//TRIM(IntToChar(C%Dyns%MDNumSCF+1))//" SCFs")
+            MDEpot%D(iCLONE) = C%Geos%Clone(iCLONE)%ETotalPerSCF%D(C%Dyns%MDNumSCF)
+          ELSE
+            MDEpot%D(iCLONE) = C%Geos%Clone(iCLONE)%ETotal
+          ENDIF
+        ENDIF
+#else
         MDEpot%D(iCLONE) = C%Geos%Clone(iCLONE)%ETotal
+#endif
+
+        ! Store Potential and Total Energy
         MDEtot%D(iCLONE) = MDEpot%D(iCLONE) + MDKin%D(iCLONE)
       ENDDO
 
@@ -597,12 +698,15 @@ CONTAINS
           ! Store v_scale in hdf.
           HDFFileID=OpenHDF(C%Nams%HFile)
           HDF_CurrentID = OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
-          CALL Put(v_scale, "v_scale", TRIM(IntToChar(iGEO)))
+          CALL Put(v_scale, "v_scale", Tag_O=TRIM(IntToChar(iGEO)))
           CALL CloseHDFGroup(HDF_CurrentID)
           CALL CloseHDF(HDFFileID)
-          CALL MondoLog(DEBUG_NONE, "MD", "putting v_scale("//TRIM(IntToChar(iGEO))//") to hdf = "//TRIM(DblToChar(v_scale)))
-          CALL MondoLog(DEBUG_NONE, "MD", "a("//TRIM(IntToChar(m_step))//") = "//TRIM(FltToChar(Symplectic_4th_Order_a(m_step))))
-          CALL MondoLog(DEBUG_NONE, "MD", "b("//TRIM(IntToChar(m_step))//") = "//TRIM(FltToChar(Symplectic_4th_Order_b(m_step))))
+          CALL MondoLog(DEBUG_NONE, "MD:Symplectic", "putting v_scale(" &
+                       //TRIM(IntToChar(iGEO))//") to hdf = "//TRIM(DblToChar(v_scale)))
+          CALL MondoLog(DEBUG_NONE, "MD:Symplectic", "a("//TRIM(IntToChar(m_step)) &
+                       //") = "//TRIM(FltToChar(Symplectic_4th_Order_a(m_step))))
+          CALL MondoLog(DEBUG_NONE, "MD:Symplectic", "b("//TRIM(IntToChar(m_step)) &
+                       //") = "//TRIM(FltToChar(Symplectic_4th_Order_b(m_step))))
         ENDDO
 
       ELSE
@@ -611,16 +715,19 @@ CONTAINS
           ! Let's punch something so we don't die in P2Use.
           HDFFileID=OpenHDF(C%Nams%HFile)
           HDF_CurrentID = OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
-          CALL Put(0D0, "v_scale", TRIM(IntToChar(iGEO)))
+          CALL Put(0D0, "v_scale", Tag_O=TRIM(IntToChar(iGEO)))
           CALL CloseHDFGroup(HDF_CurrentID)
           CALL CloseHDF(HDFFileID)
-          CALL MondoLog(DEBUG_NONE, "MD", "putting dummy v_scale("//TRIM(IntToChar(iGEO))//") to hdf = "//TRIM(DblToChar(0D0)))
+          CALL MondoLog(DEBUG_NONE, "MD:Symplectic", "putting dummy v_scale(" &
+                        //TRIM(IntToChar(iGEO))//") to hdf = "//TRIM(DblToChar(0D0)))
         ENDDO
 
       ENDIF
+
     ENDIF
 
     ! Update the Velocity if not the first step.
+    !IF(iGEO > 1) THEN
     DO iCLONE=1,C%Geos%Clones
       DO iATS=1,C%Geos%Clone(iCLONE)%NAtms
         IF(C%Geos%Clone(iCLONE)%CConstrain%I(iATS)==0)THEN
@@ -634,9 +741,11 @@ CONTAINS
         ENDIF
       ENDDO
     ENDDO
+    !ENDIF
 
-    ! Generate Output.
     IF(m_step == 1) THEN
+      ! Generate Output.
+      CALL MondoLog(DEBUG_NONE, "MD:Symplectic", "writing output")
       CALL OutputMD(C,iGEO)
     ENDIF
 
@@ -852,20 +961,21 @@ CONTAINS
     REAL(DOUBLE),DIMENSION(3,3)    :: Latt,InvLatt,LattFrc
     REAL(DOUBLE),DIMENSION(3)      :: Pos,Vel
     CHARACTER(LEN=DEFAULT_CHR_LEN) :: FileName,Line
+    LOGICAL, SAVE                  :: FirstTime = .TRUE.
 
     DO iCLONE=1,C%Geos%Clones
       ! Open File
-      FileName = TRIM(C%Nams%SCF_NAME)//"_Clone#"//TRIM(IntToChar(iCLONE))//".MDO"
+      FileName = TRIM(C%Nams%SCF_NAME)//"_Clone_"//TRIM(IntToChar(iCLONE))//".MDO"
       CALL OpenASCII(FileName,Out)
 
       ! Add Header
-      IF(iGEO==1) THEN
+      IF(FirstTime) THEN
         Line = "##########################################################################"
-        WRITE(Out,97) Line
+        WRITE(Out,97) TRIM(Line)
         Line = "# MD Clone No.     = "//TRIM(IntToChar(iCLONE))
-        WRITE(Out,97) Line
+        WRITE(Out,97) TRIM(Line)
         Line = "# MD Atoms No.     = "//TRIM(IntToChar(C%Geos%Clone(iCLONE)%NAtms))
-        WRITE(Out,97) Line
+        WRITE(Out,97) TRIM(Line)
         IF(C%Dyns%MDAlgorithm == MD_AL_VERLET) THEN
           Line = "# MD Algorithm     = Verlet"
         ELSEIF(C%Dyns%MDAlgorithm == MD_AL_GEAR) THEN
@@ -875,63 +985,65 @@ CONTAINS
         ELSE
           Line = "# MD Algorithm     = unknown"
         ENDIF
-        WRITE(Out,97) Line
+        WRITE(Out,97) TRIM(Line)
         Line = "# MDGeuss          = "//TRIM(C%Dyns%MDGeuss)
-        WRITE(Out,97) Line
+        WRITE(Out,97) TRIM(Line)
         Line = "# MD Num SCF       = "//TRIM(IntToChar(C%Dyns%MDNumSCF))
-        WRITE(Out,97) Line
+        WRITE(Out,97) TRIM(Line)
         Line = "# MD Time Step     = "//TRIM(DblToMedmChar(C%Dyns%DTime*InternalTimeToSeconds/1.0D-15))//" fs"
-        WRITE(Out,97) Line
+        WRITE(Out,97) TRIM(Line)
         Line = "# MD Max Step      = "//TRIM(IntToChar(C%Dyns%MDMaxSteps))
-        WRITE(Out,97) Line
+        WRITE(Out,97) TRIM(Line)
         Line = "# MD damping alpha = "//TRIM(DblToMedmChar(C%Dyns%MDalpha))
-        WRITE(Out, 97) Line
+        WRITE(Out, 97) TRIM(Line)
         IF(C%Dyns%MDalpha > 0) THEN
           Line = "# MD damping steps = "//TRIM(IntToChar(C%Dyns%MDDampStep))
-          WRITE(Out, 97) Line
+          WRITE(Out, 97) TRIM(Line)
         ENDIF
         IF(C%Dyns%Temp_Scaling) THEN
           Line = "# Temperature  : Scaling is On: Target Temp = "//TRIM(IntToChar(INT(C%Dyns%TargetTemp)))//&
                " K  Scaling Interval     = "//TRIM(IntToChar(C%Dyns%RescaleInt))
-          WRITE(Out,97) Line
+          WRITE(Out,97) TRIM(Line)
         ELSE
           Line = "# Temperature      : Scaling is Off"
-          WRITE(Out,97) Line
+          WRITE(Out,97) TRIM(Line)
         ENDIF
         IF(C%Dyns%Const_Temp) THEN
         ELSE
           Line = "# Anderson T.S.    : Scaling is Off"
-          WRITE(Out,97) Line
+          WRITE(Out,97) TRIM(Line)
         ENDIF
         IF(C%Dyns%Const_Press) THEN
         ELSE
           Line = "# Volume           : Scaling is Off"
-          WRITE(Out,97) Line
+          WRITE(Out,97) TRIM(Line)
         ENDIF
         IF(C%Dyns%Parallel_Rep) THEN
         ELSE
           Line = "# *** Parallel Replicates are Off ***"
-          WRITE(Out,97) Line
+          WRITE(Out,97) TRIM(Line)
         ENDIF
         Line = "##########################################################################"
-        WRITE(Out,97) Line
+        WRITE(Out,97) TRIM(Line)
         WRITE(Out,*)
 
         ! Set to Zero Stuff that has not been Calculated
         MDEpot%D(iCLONE) = C%Geos%Clone(iCLONE)%ETotal
         MDEtot%D(iCLONE) = MDEpot%D(iCLONE) + MDKin%D(iCLONE)
         C%Geos%Clone(iCLONE)%PBC%LatFrc%D = Zero
+
+        FirstTime = .FALSE.
       ENDIF
 
       ! Add MD Timestep Configuration
       Line = "-------------------------------------------MD-" &
         //TRIM(IntToChar(iGEO))// &
         "-MD-------------------------------------------"
-      WRITE(Out,97) Line
+      WRITE(Out,97) TRIM(Line)
       Line = "MD Time          = "//TRIM(DblToMedmChar(MDTime%D(iCLONE)*InternalTimeToFemtoseconds))//" fs"
-      WRITE(Out,97) Line
+      WRITE(Out,97) TRIM(Line)
       Line = "MD Step          = "//Trim(IntToChar(iGEO))
-      WRITE(Out,97) Line
+      WRITE(Out,97) TRIM(Line)
 
       ! Density Matrix Error
       HDFFileID=OpenHDF(C%Nams%HFile)
@@ -942,48 +1054,48 @@ CONTAINS
       Line = "MD DM Error      = " &
         //TRIM(DblToMedmChar(MDTime%D(iCLONE)*InternalTimeToFemtoseconds))//" fs " &
         //TRIM(DblToChar(DMax))
-      WRITE(Out,97) Line
+      WRITE(Out,97) TRIM(Line)
 
       ! Energies
-      Line = "MD Kinetic       = "//TRIM(DblToChar(MDKin%D(iCLONE)))
-      WRITE(Out,97) Line
-      Line = "MD Potential     = "//TRIM(DblToChar(MDEPot%D(iCLONE)))
-      WRITE(Out,97) Line
-      Line = "MD Total         = "//TRIM(DblToChar(MDEtot%D(iCLONE)))
-      WRITE(Out,97) Line
-      Line = "MD Temperature   = "//TRIM(DblToChar(MDTemp%D(iCLONE)))
-      WRITE(Out,97) Line
+      Line = "MD Kinetic       = "//TRIM(DblToChar(MDKin%D(iCLONE)))//" Hartree"
+      WRITE(Out,97) TRIM(Line)
+      Line = "MD Potential     = "//TRIM(DblToChar(MDEpot%D(iCLONE)))//" Hartree"
+      WRITE(Out,97) TRIM(Line)
+      Line = "MD Total         = "//TRIM(DblToChar(MDEtot%D(iCLONE)))//" Hartree"
+      WRITE(Out,97) TRIM(Line)
+      Line = "MD Temperature   = "//TRIM(DblToChar(MDTemp%D(iCLONE)))//" K"
+      WRITE(Out,97) TRIM(Line)
       Line = "MD L. Momentum   = " &
         //TRIM(DblToMedmChar(MDLinP%D(1,iCLONE)))//" " &
         //TRIM(DblToMedmChar(MDLinP%D(2,iCLONE)))//" " &
         //TRIM(DblToMedmChar(MDLinP%D(3,iCLONE)))
-      WRITE(Out,97) Line
+      WRITE(Out,97) TRIM(Line)
       IF(iGEO > C%Dyns%MDDampStep) THEN
         Line = "MD damping alpha = "//TRIM(DblToMedmChar(0.D0))//" (MDDampStep reached)"
-        WRITE(Out,97) Line
+        WRITE(Out,97) TRIM(Line)
       ELSE
         Line = "MD damping alpha = "//TRIM(DblToMedmChar(C%Dyns%MDalpha))
-        WRITE(Out,97) Line
+        WRITE(Out,97) TRIM(Line)
       ENDIF
       Line = "MD v_scale       = "//TRIM(FltToChar(C%Dyns%BerendsenVScale))
-      WRITE(Out,97) Line
+      WRITE(Out,97) TRIM(Line)
       IF(C%Dyns%Thermostat == MD_ACT) THEN
         Line = "Action Control Theory Parameters:"
-        WRITE(Out,97) Line
+        WRITE(Out,97) TRIM(Line)
         Line = "ACT Target Energy           = "//TRIM(DblToMedmChar(ACTTargetEnergy))
-        WRITE(Out,97) Line
+        WRITE(Out,97) TRIM(Line)
         Line = "ACT Energy Error            = "//TRIM(DblToMedmChar(ACTTargetEnergy-MDEtot%D(1)))
-        WRITE(Out,97) Line
+        WRITE(Out,97) TRIM(Line)
         Line = "ACT Integrated Energy Error = "//TRIM(DblToMedmChar(ACTIntegratedEnergyError))
-        WRITE(Out,97) Line
+        WRITE(Out,97) TRIM(Line)
         Line = "ACT Alpha                   = "//TRIM(DblToMedmChar(C%Dyns%ACTAlpha))
-        WRITE(Out,97) Line
+        WRITE(Out,97) TRIM(Line)
         Line = "ACT Beta                    = "//TRIM(DblToMedmChar(C%Dyns%ACTBeta))
-        WRITE(Out,97) Line
+        WRITE(Out,97) TRIM(Line)
         Line = "ACT Gamma                   = "//TRIM(DblToMedmChar(ACTGamma))
-        WRITE(Out,97) Line
+        WRITE(Out,97) TRIM(Line)
         Line = "ACT Lambda                  = "//TRIM(DblToMedmChar(ACTLambda))
-        WRITE(Out,97) Line
+        WRITE(Out,97) TRIM(Line)
       ENDIF
 
       ! Compute the Pressure
@@ -1064,7 +1176,7 @@ CONTAINS
         WRITE(Out,82) "     div(c)    = ",LattFrc(3,1), LattFrc(3,2), LattFrc(3,3)
         WRITE(Out,85)
         Line = "    Pressure   = "//TRIM(DblToChar(Pressure))//" GPa"
-        WRITE(Out,97) Line
+        WRITE(Out,97) TRIM(Line)
         WRITE(Out,85)
       ENDIF
 
@@ -1085,43 +1197,22 @@ CONTAINS
       WRITE(Out,*)
       CLOSE(Out)
 
-      IF(C%Dyns%MDAlgorithm == MD_AL_SYMPLECTIC) THEN
+      FileName = TRIM(C%Nams%SCF_NAME)//'_Clone_'//TRIM(IntToChar(iCLONE))//'_Energies.dat'
+      CALL OpenASCII(TRIM(FileName), Out)
 
-        FileName = TRIM(C%Nams%SCF_NAME)//'_'//TRIM(IntToChar(iCLONE))//'_Energies_Symplectic.dat'
-        CALL OpenASCII(TRIM(FileName), Out)
-
-        ! Add Header
-        IF(iGEO == 1) THEN
-          WRITE(Out,"(A)") "#   t [fs]         E_kin [Ry]         E_pot [Ry]         E_tot [Ry]"
-        ENDIF
-
-        ! Write out energies.
-        WRITE(Out,60) MDTime%D(iCLONE)*InternalTimeToFemtoseconds,MDKin%D(iCLONE),MDEpot%D(iCLONE),MDEtot%D(iCLONE)
-        CALL MondoLogPlain("Time = "//TRIM(FltToChar(MDTime%D(iCLONE)*InternalTimeToFemtoseconds)) &
-          //" fs, Temperature = "//TRIM(FltToChar(MDTemp%D(iCLONE))) &
-          //" K, avg. Temperature = "//TRIM(FltToChar(MDTave%D(iCLONE)))//" K")
-        CLOSE(Out)
-
-      ELSE
-
-        FileName = TRIM(C%Nams%SCF_NAME)//'_'//TRIM(IntToChar(iCLONE))//'_Energies.dat'
-        CALL OpenASCII(TRIM(FileName),Out)
-
-        ! Add Header
-        IF(iGEO == 1) THEN
-          WRITE(Out,"(A)") "# t [fs]  E_kin [Ry]        E_pot [Ry]        E_tot [Ry]"
-        ENDIF
-
-        ! Write out energies.
-        WRITE(Out,60) MDTime%D(iCLONE)*InternalTimeToFemtoseconds,MDKin%D(iCLONE),MDEpot%D(iCLONE),MDEtot%D(iCLONE)
-        CALL MondoLogPlain("Time = "//TRIM(FltToChar(MDTime%D(iCLONE)*InternalTimeToFemtoseconds)) &
-          //" fs, Temperature = "//TRIM(FltToChar(MDTemp%D(iCLONE))) &
-          //" K, avg. Temperature = "//TRIM(FltToChar(MDTave%D(iCLONE)))//" K")
-        CLOSE(Out)
-
+      ! Add Header
+      IF(iGEO == 1) THEN
+        WRITE(Out,"(A)") "#   t [fs]         E_kin [Ry]         E_pot [Ry]         E_tot [Ry]"
       ENDIF
 
-      FileName = TRIM(C%Nams%SCF_NAME)//'_'//TRIM(IntToChar(iCLONE))//'.xyz'
+      ! Write out energies.
+      WRITE(Out,60) MDTime%D(iCLONE)*InternalTimeToFemtoseconds,MDKin%D(iCLONE),MDEpot%D(iCLONE),MDEtot%D(iCLONE)
+      CALL MondoLogPlain("Time = "//TRIM(FltToChar(MDTime%D(iCLONE)*InternalTimeToFemtoseconds)) &
+        //" fs, Temperature = "//TRIM(FltToChar(MDTemp%D(iCLONE))) &
+        //" K, avg. Temperature = "//TRIM(FltToChar(MDTave%D(iCLONE)))//" K")
+      CLOSE(Out)
+
+      FileName = TRIM(C%Nams%SCF_NAME)//'_Clone_'//TRIM(IntToChar(iCLONE))//'.xyz'
       CALL OpenASCII(TRIM(FileName),Out)
       WRITE(Out,*) C%Geos%Clone(iCLONE)%NAtms
       WRITE(Out,*) "MD run "//TRIM(C%Nams%SCF_NAME)//", Clone "//TRIM(IntToChar(iCLONE)) &
@@ -1130,20 +1221,6 @@ CONTAINS
         WRITE(Out,"(A,1x,F14.8,1x,F14.8,1x,F14.8)") &
           TRIM(C%Geos%Clone(iCLONE)%AtNam%C(iATS)), C%Geos%Clone(iCLONE)%Carts%D(1:3,iATS)
       ENDDO
-      CLOSE(Out)
-
-      FileName = TRIM(C%Nams%SCF_NAME)//'_'//TRIM(IntToChar(iCLONE))//'_MD_Coordinates_1.dat'
-      CALL OpenASCII(TRIM(FileName),Out)
-      Pos = C%Geos%Clone(iCLONE)%Carts%D(1:3,1)
-      Vel = C%Geos%Clone(iCLONE)%Velocity%D(1:3,1)
-      WRITE(Out,61) MDTime%D(iCLONE)*InternalTimeToFemtoseconds,Pos(1:3),Vel(1:3)
-      CLOSE(Out)
-
-      FileName = TRIM(C%Nams%SCF_NAME)//'_'//TRIM(IntToChar(iCLONE))//'_MD_Coordinates_2.dat'
-      CALL OpenASCII(TRIM(FileName),Out)
-      Pos = C%Geos%Clone(iCLONE)%Carts%D(1:3,2)
-      Vel = C%Geos%Clone(iCLONE)%Velocity%D(1:3,2)
-      WRITE(Out,61) MDTime%D(iCLONE)*InternalTimeToFemtoseconds,Pos(1:3),Vel(1:3)
       CLOSE(Out)
     ENDDO
 
@@ -1155,7 +1232,7 @@ CONTAINS
 85  FORMAT("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
 95  FORMAT(a18,F16.10,3x,E16.6)
 96  FORMAT(a18,3(F16.10,1x))
-97  FORMAT(a128)
+97  FORMAT(a)
 98  FORMAT(a18,E16.6)
 99  FORMAT(a3,6(1x,F16.10))
   END SUBROUTINE OutputMD
@@ -1165,7 +1242,7 @@ CONTAINS
   !--------------------------------------------------------------
   SUBROUTINE CopyMatrices(C,Tilde)
     TYPE(Controls)                 :: C
-    INTEGER                        :: iCLONE,iSCF,iBAS,iGEO
+    INTEGER                        :: iCLONE,iSCF,iBAS,iGEO,oldMyClone
     CHARACTER(LEN=DEFAULT_CHR_LEN) :: chSCF,chBAS,chGEO,chCLONE
     CHARACTER(LEN=DEFAULT_CHR_LEN) :: PoldFile,PnewFile
     LOGICAL                        :: Tilde
@@ -1173,10 +1250,18 @@ CONTAINS
     iSCF = C%Stat%Current%I(1)
     iBAS = C%Stat%Current%I(2)
     iGEO = C%Stat%Current%I(3)
+
+    CALL MondoLog(DEBUG_NONE, "CopyMatrices", "Current state = "//TRIM(IntVectToChar(C%Stat%Current)))
+
     IF(Tilde) THEN
       SELECT CASE(C%Dyns%MDGeuss)
       CASE('DMLinear', &
            'DMTRBO', &
+           'DMTRBO_Damp_dt3', &
+           'DMTRBO_Damp_dt5', &
+           'DMTRBO_Damp_dt7', &
+           'DMTRBO_Damp_dt9', &
+           'DMTRBO_Damp_dt11', &
            'DMSymplectic', &
            'DMProj0', &
            'DMProj1', &
@@ -1184,42 +1269,42 @@ CONTAINS
            'DMProj3', &
            'DMProj4')
 
+        oldMyClone = myClone
         DO iCLONE=1,C%Geos%Clones
-          chSCF   = IntToChar(iSCF+1)
+          myClone = iCLONE
+          CALL FileCopy(TrixFile("OrthoD",  Stats_O = C%Stat%Current%I, Offset_O = 1), &
+                        TrixFile("DOPsave", Stats_O = C%Stat%Current%I))
+        ENDDO
+        myClone = oldMyClone
+      CASE('FMVerlet0','FMVerlet1')
+        DO iCLONE=1,C%Geos%Clones
+          chSCF   = IntToChar(iSCF)
           chBAS   = IntToChar(iBAS)
           chGEO   = IntToChar(iGEO)
           chCLONE = IntToChar(iCLONE)
+
           PoldFile = TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)  &
                //'_Geom#'//TRIM(chGEO)  &
                //'_Base#'//TRIM(chBAS)  &
                //'_Cycl#'//TRIM(chSCF)  &
-               //'_Clone#'//TRIM(chCLONE)//'.OrthoD'
+               //'_Clone#'//TRIM(chCLONE)//'.OrthoF'
           PnewFile = TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)  &
                //'_G#'//TRIM(chGEO)     &
-               //'_C#'//TRIM(chCLONE)//'.DOPsave'
+               //'_C#'//TRIM(chCLONE)//'.FOPsave'
           CALL FileCopy(PoldFile, PnewFile)
         ENDDO
-      CASE('FMVerlet0','FMVerlet1')
-      END SELECT
-      DO iCLONE=1,C%Geos%Clones
-        chSCF   = IntToChar(iSCF)
-        chBAS   = IntToChar(iBAS)
-        chGEO   = IntToChar(iGEO)
-        chCLONE = IntToChar(iCLONE)
-        PoldFile = TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)  &
-             //'_Geom#'//TRIM(chGEO)  &
-             //'_Base#'//TRIM(chBAS)  &
-             //'_Cycl#'//TRIM(chSCF)  &
-             //'_Clone#'//TRIM(chCLONE)//'.OrthoF'
-        PnewFile = TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)  &
-             //'_G#'//TRIM(chGEO)     &
-             //'_C#'//TRIM(chCLONE)//'.FOPsave'
-        CALL FileCopy(PoldFile, PnewFile)
-      ENDDO
+      CASE DEFAULT
+        CALL MondoLog(DEBUG_NONE, "CopyMatrices", "in default case with tilde")
+      ENDSELECT
     ELSE
       SELECT CASE(C%Dyns%MDGeuss)
       CASE('DMLinear', &
            'DMTRBO', &
+           'DMTRBO_Damp_dt3', &
+           'DMTRBO_Damp_dt5', &
+           'DMTRBO_Damp_dt7', &
+           'DMTRBO_Damp_dt9', &
+           'DMTRBO_Damp_dt11', &
            'DMSymplectic', &
            'DMProj0', &
            'DMProj1', &
@@ -1227,21 +1312,13 @@ CONTAINS
            'DMProj3', &
            'DMProj4')
 
+        oldMyClone = myClone
         DO iCLONE=1,C%Geos%Clones
-          chSCF   = IntToChar(iSCF+1)
-          chBAS   = IntToChar(iBAS)
-          chGEO   = IntToChar(iGEO)
-          chCLONE = IntToChar(iCLONE)
-          PoldFile = TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)  &
-               //'_Geom#'//TRIM(chGEO)  &
-               //'_Base#'//TRIM(chBAS)  &
-               //'_Cycl#'//TRIM(chSCF)  &
-               //'_Clone#'//TRIM(chCLONE)//'.OrthoD'
-          PnewFile = TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)  &
-               //'_G#'//TRIM(chGEO)     &
-               //'_C#'//TRIM(chCLONE)//'.DOsave'
-          CALL FileCopy(PoldFile, PnewFile)
+          myClone = iCLONE
+          CALL FileCopy(TrixFile("OrthoD", Stats_O = C%Stat%Current%I, Offset_O = 1), &
+                        TrixFile("DOsave", Stats_O = C%Stat%Current%I))
         ENDDO
+        myClone = oldMyClone
       CASE('FMVerlet0','FMVerlet1')
         DO iCLONE=1,C%Geos%Clones
           chSCF   = IntToChar(iSCF)
@@ -1258,8 +1335,12 @@ CONTAINS
                //'_C#'//TRIM(chCLONE)//'.FOsave'
           CALL FileCopy(PoldFile, PnewFile)
         ENDDO
+      CASE DEFAULT
+        CALL MondoLog(DEBUG_NONE, "CopyMatrices", "in default case without tilde")
       END SELECT
     ENDIF
+
+    CALL MondoLog(DEBUG_NONE, "CopyMatrices", "done")
 
   END SUBROUTINE CopyMatrices
 
@@ -1279,7 +1360,14 @@ CONTAINS
         chCLONE = IntToChar(iCLONE)
         chGEO   = IntToChar(iGEO)
         SELECT CASE(C%Dyns%MDGeuss)
-        CASE('DMLinear','DMTRBO','DMSymplectic')
+        CASE('DMLinear', &
+             'DMTRBO', &
+             "DMTRBO_Damp_dt3", &
+             "DMTRBO_Damp_dt5", &
+             "DMTRBO_Damp_dt7", &
+             "DMTRBO_Damp_dt9", &
+             "DMTRBO_Damp_dt11", &
+             'DMSymplectic')
 
           PoldFile = TRIM(C%Nams%RFile(1:LEN(TRIM(C%Nams%RFile))-4))//'_G#'//TRIM(chGEO)//'_C#'//TRIM(chCLONE)//'.DOsave'
           PnewFile = TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)//'_G#'//TRIM(chGEO)//'_C#'//TRIM(chCLONE)//'.DOsave'

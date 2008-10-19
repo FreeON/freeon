@@ -252,7 +252,7 @@ PROGRAM QCTC
      E_Nuc_Tot=Zero
   ENDIF
   !
-  CALL Put(E_Nuc_Tot,'E_NuclearTotal',StatsToChar(Current))
+  CALL Put(E_Nuc_Tot,'E_NuclearTotal',Stats_O=Current)
   !
   !-------------------------------------------------------------------------------
   ! Printing

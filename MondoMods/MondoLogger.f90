@@ -44,17 +44,21 @@ MODULE MondoLogger
 CONTAINS
 
   ! Open the logfile.
-  SUBROUTINE OpenLogfile(filename, fd)
+  FUNCTION OpenLogfile(filename, fd) RESULT(fileOutput)
     CHARACTER(LEN=*), INTENT(IN) :: filename
-    INTEGER                      :: IOS, fd, fd_old
-    LOGICAL                      :: isOpen, exists
+    INTEGER, INTENT(IN)          :: fd
+    INTEGER                      :: IOS, fd_old
+    LOGICAL                      :: isOpen, exists, fileOutput
+
+    ! Set the default result.
+    fileOutput = .FALSE.
 
     ! Does the file exist?
     INQUIRE(FILE = filename, OPENED = isOpen, EXIST = exists, &
       ERR = 11, IOSTAT = IOS, NUMBER = fd_old)
 
     IF(isOpen) THEN
-      WRITE(*,"(A,I3,A)") "[MondoLog] logfile already open (fd = ", fd_old, ")"
+      !WRITE(*,"(A,I3,A)") "[MondoLog] logfile already open (fd = ", fd_old, ")"
       IF(fd /= fd_old) THEN
         WRITE(*,"(A)") "[MondoLog] WARNING: fd != fd_old"
       ENDIF
@@ -73,12 +77,13 @@ CONTAINS
     ELSE
 
       ! Create a new file and open it
-      WRITE(*,"(A)") "[MondoLog] logfile <"//TRIM(filename)//"> does not exist, creating it"
+      !WRITE(*,"(A)") "[MondoLog] logfile '"//TRIM(filename)//"' does not exist, creating it"
       OPEN(UNIT = fd, FILE = filename, &
         ACCESS = "SEQUENTIAL", FORM = "FORMATTED", &
         ERR = 13, IOSTAT = IOS, STATUS = "NEW")
 
     ENDIF
+    fileOutput = .TRUE.
     RETURN
 
 11  WRITE(*,"(A)")    "[MondoLog.inquire] Fatal Error"
@@ -90,38 +95,61 @@ CONTAINS
     WRITE(*,"(A,I3)") "  IOS  = ", IOS
     WRITE(*,"(A)")    "  file = "//TRIM(filename)
     CALL Trap()
+    !WRITE(*,"(A)") "[MondoLog.new] Fatal Error"
+    !WRITE(*,"(A,I3)") "  IOS  = ", IOS
+    !WRITE(*,"(A)")    "  file = "//TRIM(filename)
+13  RETURN
 
-13  WRITE(*,"(A)") "[MondoLog.new] Fatal Error"
-    WRITE(*,"(A,I3)") "  IOS  = ", IOS
-    WRITE(*,"(A)")    "  file = "//TRIM(filename)
-    CALL Trap()
+  END FUNCTION OpenLogfile
 
-  END SUBROUTINE OpenLogfile
+  SUBROUTINE MondoLog(logLevel, tag, message, file_O, line_O)
 
-  SUBROUTINE MondoLog(logLevel, tag, message)
-
-    CHARACTER(LEN=*), INTENT(IN) :: message
-    CHARACTER(LEN=*), INTENT(IN) :: tag
+    CHARACTER(LEN=*), INTENT(IN)            :: message
+    CHARACTER(LEN=*), INTENT(IN)            :: tag
+    CHARACTER(LEN=*), OPTIONAL, INTENT(IN)  :: file_O
+    CHARACTER(LEN=DEFAULT_CHR_LEN)          :: output
+    CHARACTER(LEN=DEFAULT_CHR_LEN)          :: line_string
+    INTEGER, OPTIONAL, INTENT(IN)           :: line_O
     INTEGER :: logLevel
-    LOGICAL :: isOpen
+    LOGICAL :: isOpen, fileOutput
 
     ! Check whether logLevel is sufficiently high.
     IF(logLevel <= PrintFlags%Key) THEN
 
       ! Open the logfile.
-      CALL OpenLogfile(OutFile, 123)
+      fileOutput = OpenLogfile(OutFile, 123)
 
-      ! Write messsage.
-      IF(LEN_TRIM(tag) > 0) THEN
-        WRITE(123,"(A,A,A,A)") "[", tag, "] ", message
-        WRITE(*,"(A,A,A,A)") "[", tag, "] ", message
-      ELSE
-        WRITE(123,"(A)") message
-        WRITE(*,"(A)") message
+      ! Convert the line number into string.
+      IF(PRESENT(line_O)) THEN
+        WRITE(UNIT=line_string,FMT="(I20)") line_O
+        line_string = ADJUSTL(line_string)
       ENDIF
 
+      ! Write messsage.
+      output = "not set"
+      IF(LEN_TRIM(tag) > 0) THEN
+        IF(PRESENT(file_O)) THEN
+          IF(PRESENT(line_O)) THEN
+            output = "["//TRIM(tag)//" "//TRIM(file_O)//":"//TRIM(line_string)//"] "//TRIM(message)
+          ELSE
+            output = "["//TRIM(tag)//" "//TRIM(file_O)//"] "//TRIM(message)
+          ENDIF
+        ELSE
+          IF(PRESENT(line_O)) THEN
+            WRITE(*,*) "what file?"
+            CALL Trap()
+          ELSE
+            output = "["//TRIM(tag)//"] "//TRIM(message)
+          ENDIF
+        ENDIF
+      ELSE
+        output = TRIM(message)
+      ENDIF
+      IF(fileOutput) WRITE(123,"(A)") TRIM(output)
+      WRITE(*,"(A)") TRIM(output)
+
       ! Close logfile.
-      CLOSE(123)
+      IF(fileOutput) CLOSE(123)
 
     ENDIF
 

@@ -24,6 +24,9 @@
 !    disemination in future releases.
 !------------------------------------------------------------------------------
 !==============================================================
+
+#include "MondoConfig.h"
+
 PROGRAM MondoSCF
   USE SCFs
   USE Macros
@@ -35,6 +38,7 @@ PROGRAM MondoSCF
   USE PrintParsed
   USE MDynamics
   USE MonteCarlo
+  USE MondoLogger
   USE RayleighQuotientIteration
   IMPLICIT NONE
 
@@ -53,6 +57,13 @@ PROGRAM MondoSCF
     ! Print startup
     CALL PrintsStartUp(C%Nams)
     ! Much ado about gradients
+
+#if defined MD_DEBUG
+    CALL MondoLog(DEBUG_NONE, "MondoSCF", "this version uses "//TRIM(IntToChar(MD_DEBUG))//" SCFs for the TRBO MD")
+#endif
+
+    CALL MondoLog(DEBUG_NONE, "MondoSCF", "the hdf stores "//TRIM(IntToChar(RECYCLE_HDF))//" geometries")
+
     SELECT CASE(C%Opts%Grad)
     CASE(GRAD_NO_GRAD)
       CALL SinglePoints(C)

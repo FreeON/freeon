@@ -235,6 +235,9 @@ CONTAINS
           !vwIF(KeyQ(Line,Ats(BS%Kinds%I(NK))).AND.KeyQ(Line,'0'))THEN
           NC=0
           KFound=KFound+1
+
+          CALL MondoLog(DEBUG_NONE, "ParseBasis", "found basis for "//TRIM(BS%AtNam%C(NK)))
+
           DO
             READ(BasU,DEFAULT_CHR_FMT,END=99)Line
             IF(INDEX(Line,'<End')/=0)RETURN
@@ -332,8 +335,8 @@ CONTAINS
 99  CONTINUE
     !   Continue On
     IF(KFound/=BS%NKind) THEN
-      WRITE(*,*) 'ParseBasis: PROBLEM <KFound/=BS%NKind>'
-      WRITE(*,*) 'ParseBasis: The basis set file may not contain the desired atoms.'
+      CALL MondoLog(DEBUG_NONE, "ParseBasis", "Could not find a basis for all atoms requested.")
+      CALL MondoLog(DEBUG_NONE, "ParseBasis", "The basis set file may not contain the desired atoms.")
       RETURN
     ENDIF
     ! Computing basis set indexing

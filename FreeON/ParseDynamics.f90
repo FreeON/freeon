@@ -40,10 +40,9 @@ CONTAINS
   !========================================================================================
   ! PARSE FOR MOLECULAR DYNAMICS DIRECTIVES AND VALUES
   !========================================================================================
-  SUBROUTINE LoadDynamics(N,O,G,D)
+  SUBROUTINE LoadDynamics(N,O,D)
     TYPE(FileNames)    :: N
     TYPE(Options)      :: O
-    TYPE(Geometries)   :: G
     TYPE(Dynamics)     :: D
     CHARACTER(LEN=DCL) :: Line
     !---------------------------------------------------------------------------------------!
@@ -66,6 +65,16 @@ CONTAINS
         D%MDGeuss=MD_DMLinear
       ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_DMTRBO)) THEN
         D%MDGeuss=MD_DMTRBO
+      ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_DMTRBO_Damp_dt3)) THEN
+        D%MDGeuss=MD_DMTRBO_Damp_dt3
+      ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_DMTRBO_Damp_dt5)) THEN
+        D%MDGeuss=MD_DMTRBO_Damp_dt5
+      ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_DMTRBO_Damp_dt7)) THEN
+        D%MDGeuss=MD_DMTRBO_Damp_dt7
+      ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_DMTRBO_Damp_dt9)) THEN
+        D%MDGeuss=MD_DMTRBO_Damp_dt9
+      ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_DMTRBO_Damp_dt11)) THEN
+        D%MDGeuss=MD_DMTRBO_Damp_dt11
       ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_DMSymplectic)) THEN
         D%MDGeuss=MD_DMSymplectic
       ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_FMVerlet0)) THEN
@@ -83,7 +92,9 @@ CONTAINS
       ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_DMP4)) THEN
         D%MDGeuss=MD_DMP4
       ELSE
-        CALL MondoLogPlain('In input file, no MD DM Projection algorithm Defined')
+        CALL MondoLogPlain('In input file, no MD DM Projection (MDProjection) algorithm defined')
+        CALL MondoLog(DEBUG_NONE, "LoadDynamics", "using DMLinear")
+        D%MDGeuss = MD_DMLinear
       ENDIF
 
       ! Parse MD Options: First MD Algorithmn
@@ -110,8 +121,8 @@ CONTAINS
       ENDIF
       ! Parse for Number of SCF cycles
       IF(.NOT. OptIntQ(Inp,MD_NUM_SCF,D%MDNumSCF)) THEN
-        CALL MondoLogPlain('Number of SCF cycles for MD is not set: DEFAULT is eight')
-        D%MDNumSCF=8
+        CALL MondoLogPlain('Number of SCF cycles for MD is not set')
+        D%MDNumSCF = -1
       ENDIF
 
       ! Parse for Initial Temp, if any
@@ -219,7 +230,7 @@ CONTAINS
       ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_DMP4)) THEN
         D%MDGeuss=MD_DMP4
       ELSE
-        CALL MondoLogPlain('In input file, no MD DM Projection algorithm Defined')
+        CALL MondoLogPlain('In input file, no MD DM Projection algorithm defined')
       ENDIF
       ! MD Algorithmn
       IF(OptKeyQ(Inp,MD_AL_OPTION,MD_AL_VERLET))THEN
@@ -233,6 +244,9 @@ CONTAINS
       ! MD Time Step
       IF(.NOT. OptDblQ(Inp,MD_TIME_STEP,D%DTime)) THEN
         CALL MondoHalt(PRSE_ERROR,MD_TIME_STEP//' not found in input.')
+      ELSE
+        ! Convert that to internal time units.
+        D%DTime = D%DTime*FemtosecondsToInternalTime
       ENDIF
       ! MD MaxSteps
       IF(.NOT. OptIntQ(Inp,MD_MAX_STEP,D%MDMaxSteps)) THEN

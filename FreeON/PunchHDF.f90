@@ -202,32 +202,19 @@ CONTAINS
     REAL(DOUBLE)       :: MinExpt
 !---------------------------------------------------------------------------!
     chGEO=IntToChar(cGEO)
+
+    CALL MondoLog(DEBUG_NONE, "GeomArchive", "opening hdf file "//TRIM(N%HFile))
     HDFFileID=OpenHDF(N%HFile)
     DO iCLONE=1,G%Clones
        G%Clone(iCLONE)%Confg=cGEO
        CALL MakeGMPeriodic(G%Clone(iCLONE),B%BSets(iCLONE,cBAS), &
                            O%Thresholds(cBAS)%Dist,O%Thresholds(cBAS)%TwoE)
-!
        HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
 !      If we have ECPs, temporarily reset this geometries nuclear charges
        IF(B%BSets(iCLONE,cBAS)%HasECPs) &
           CALL SetAtomCharges(G%Clone(iCLONE),B%BSets(iCLONE,cBAS))
 !      Put the geometry to this group ...
-!!$       
-!!$
-!!$       ! Here is a differencing ploy, that needs to be removed when
-!!$       ! debugging is done
-!!$       IF(KDIFF.NE.100)THEN
-!!$          WRITE(*,*)" KDIFF = ",KDIFF
-!!$          WRITE(*,*)" KDIFF = ",KDIFF
-!!$          WRITE(*,*)" KDIFF = ",KDIFF
-!!$          CALL Put(G%Clone(iCLONE),chGEO)
-!!$          CALL Put_CRDS(G%Clone(iCLONE),TAG_O="DIFFZERO")
-!!$       ELSE
-!!$          WRITE(*,*)" KDIFF = ",KDIFF
-          CALL Put(G%Clone(iCLONE),chGEO)
-!!$       ENDIF
-
+       CALL Put(G%Clone(iCLONE),chGEO)
 !      Close this clones group
        CALL CloseHDFGroup(HDF_CurrentID)
 !      And unset the nuclear charges in the case of ECPs
@@ -235,7 +222,6 @@ CONTAINS
           CALL UnSetAtomCharges(G%Clone(iCLONE),B%BSets(iCLONE,cBAS))
     ENDDO
     CALL CloseHDF(HDFFileID)
-
 !   CALL PPrint(G%Clone(1),Unit_O=6)
   END SUBROUTINE GeomArchive
 !==============================================================================
@@ -377,9 +363,9 @@ CONTAINS
        IF(Init_O)THEN
           DO iCLONE=1,G%Clones
              HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
-             CALL Put(BIG_DBL,'E_NuclearTotal',StatsToChar(S%Current%I))
-             CALL Put(BIG_DBL,'Exc',StatsToChar(S%Current%I))
-             CALL Put(BIG_DBL,'Etot',StatsToChar(S%Current%I))
+             CALL Put(BIG_DBL,'E_NuclearTotal',Stats_O=S%Current%I)
+             CALL Put(BIG_DBL,'Exc',Stats_O=S%Current%I)
+             CALL Put(BIG_DBL,'Etot',Stats_O=S%Current%I)
              CALL CloseHDFGroup(HDF_CurrentID)
           ENDDO
        ENDIF

@@ -551,6 +551,11 @@ MODULE MemMan
          CALL New(A%Displ,(/3,A%NAtms/))
          CALL New(A%PBCDispl)
          !--------- to here ----------------------
+
+         !CALL MondoLog(DEBUG_NONE, "New_CRDS", "hardwiring ETotalPerSCF vector a MaxSCF of 256")
+         CALL New(A%ETotalPerSCF, 256, 0)
+         A%ETotalPerSCF%D = 0.0D0
+         
          A%Alloc=ALLOCATED_TRUE
          A%ETotal=Zero
       END SUBROUTINE New_CRDS
@@ -961,7 +966,7 @@ MODULE MemMan
          CALL Delete(A%Displ)
          CALL Delete(A%PBCDispl)
          CALL Delete(A%BoxCarts)
-
+         CALL Delete(A%ETotalPerSCF)
          CALL Delete(A%InCells)
          CALL Delete(A%OvCells)
          A%NAtms=0
