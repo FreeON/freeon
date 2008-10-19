@@ -30,6 +30,8 @@
 !    Author: Matt Challacombe
 !-------------------------------------------------------------------------
 
+#include "MondoConfig.h"
+
 PROGRAM P2Use
   USE DerivedTypes
   USE GlobalScalars
@@ -61,18 +63,19 @@ PROGRAM P2Use
 
   TYPE(INT_VECT)                :: Stat
   TYPE(DBL_RNK2)                :: BlkP
-  REAL(DOUBLE)                  :: MaxDS,NoiseLevel, alpha, v_scale
-  INTEGER                       :: MDDampStep, m_step
+  REAL(DOUBLE)                  :: MaxDS,NoiseLevel, alpha, beta, v_scale
+  INTEGER                       :: MDDampStep, m_step, mm_step
   REAL(DOUBLE)                  :: Scale,Fact,ECount,RelNErr, DeltaP,OldDeltaP, &
        DensityDev,dN,MaxGDIff,GDIff,OldN,M,PNon0s,PSMin,PSMax, &
        Ipot_Error,Norm_Error,Lam,DLam,TError0,SFac,Dum,Fmin,Fmax
   INTEGER                       :: I,J,JP,AtA,Q,R,T,KA,NBFA,NPur,PcntPNon0,Qstep, &
-       OldFileID,ICart,N,NStep,iGEO,DMPOrder,NSMat,MM,ICycle,Cycle
+       OldFileID,ICart,N,NStep,iGEO,iBAS,iSCF,DMPOrder,NSMat,MM,ICycle,Cycle
   CHARACTER(LEN=2)              :: Cycl
   LOGICAL                       :: Present,DoingMD,ConvergeAOSP,ConvergeAll,AOSPExit
-  CHARACTER(LEN=DEFAULT_CHR_LEN):: Mssg,BName,FileName,DMFile
+  CHARACTER(LEN=DEFAULT_CHR_LEN):: Mssg,BName,FileName,DMFile,logtag
   CHARACTER(LEN=8)              :: MDGeuss
   CHARACTER(LEN=5),PARAMETER    :: Prog='P2Use'
+
   !-------------------------------------------------------------------------------
   ! Start up macro
   CALL StartUp(Args,Prog,Serial_O=.FALSE.)
@@ -90,10 +93,16 @@ PROGRAM P2Use
   CALL Get(BS,Tag_O=CurBase)
   CALL Get(GM,Tag_O=CurGeom)
 
+  ! Start logging.
+  logtag = TRIM(Prog)//":"//TRIM(SCFActn)
+  CALL MondoLog(DEBUG_NONE, "P2Use", "SCFActn = "//TRIM(SCFActn))
+
   ! Do what needs to be done CASE by CASE
   SELECT CASE(SCFActn)
+
     ! P=0
   CASE('GuessEqCore')
+
     CALL New(P,NSMat_O=NSMat)
     CALL New(BlkP,(/MaxBlkSize**2,NAtoms/))
     DO I=1,NAtoms
@@ -107,15 +116,18 @@ PROGRAM P2Use
     CALL PPrint( P,'P['//TRIM(Cycl)//']')
     CALL Plot(   P,'P_'//TRIM(Cycl))
     CALL Delete(P)
+
     ! Density SuperPosition
   CASE('DensitySuperposition','DMDGeuss')
+
     CALL New(P,NSMat_O=NSMat)
     CALL New(Tmp1)
     CALL New(Tmp2)
     CALL Get(BName,'bsetname',CurBase)
+
     IF(INDEX(BName,'STO')/=0)THEN
-      ! Compute a diagonal guess as the superposition of atomic lewis
-      ! structure occupancies--works only for minimal (STO) basis sets
+      ! Compute a diagonal guess as the superposition of atomic lewis structure
+      ! occupancies--works only for minimal (STO) basis sets
       CALL New(BlkP,(/MaxBlkSize**2,NAtoms/))
       DO I=1,NAtoms
         IF(GM%AtNum%D(I) < 105.D0) THEN
@@ -130,11 +142,11 @@ PROGRAM P2Use
         CALL SetToI(P,BlkP)
       ELSEIF(NSMat.EQ.2)THEN
         !Set the P_alpha
-        CALL DSCAL(MaxBlkSize**2*NAtoms,2D0*DBLE(NAlph)/DBLE(NEl)  ,BlkP%D(1,1),1)
+        CALL DSCAL(MaxBlkSize**2*NAtoms,2D0*DBLE(NAlph)/DBLE(NEl),BlkP%D(1,1),1)
         CALL SetToI(P,BlkP,Expert_O=1)
 
         !Set the P_beta
-        CALL DSCAL(MaxBlkSize**2*NAtoms,    DBLE(NBeta)/DBLE(NAlph),BlkP%D(1,1),1)
+        CALL DSCAL(MaxBlkSize**2*NAtoms,DBLE(NBeta)/DBLE(NAlph),BlkP%D(1,1),1)
         CALL SetToI(P,BlkP,Expert_O=2)
       ELSEIF(NSMat.EQ.4)THEN
         !Set the P_alpha
@@ -143,35 +155,36 @@ PROGRAM P2Use
 
         !Set the off diag bloks P_alpha,beta P_beta,alpha
         Dum=-0.1D0
-        CALL DSCAL(MaxBlkSize**2*NAtoms,            Dum/DBLE(NAlph),BlkP%D(1,1),1)
+        CALL DSCAL(MaxBlkSize**2*NAtoms,Dum/DBLE(NAlph),BlkP%D(1,1),1)
         CALL SetToI(P,BlkP,Expert_O=2)
         CALL SetToI(P,BlkP,Expert_O=3)
 
         !Set the P_beta
-        CALL DSCAL(MaxBlkSize**2*NAtoms,    DBLE(NBeta)/Dum        ,BlkP%D(1,1),1)
+        CALL DSCAL(MaxBlkSize**2*NAtoms,DBLE(NBeta)/Dum,BlkP%D(1,1),1)
         CALL SetToI(P,BlkP,Expert_O=4)
         ! BlkP%D=0d0
         ! CALL SetToI(P,BlkP,Expert_O=2)
         ! CALL SetToI(P,BlkP,Expert_O=3)
       ELSE
-        CALL Halt('P2Use: Something wrong when computing P_guess!')
+        CALL Halt("[P2Use:"//TRIM(SCFActn)//"] Something wrong when computing P_guess!")
       ENDIF
 
-      ! Check for the correct elctron count
+      ! Check for the correct electron count
       TrP=Trace(P)
-      IF(ABS(TrP-DBLE(NEl/SFac))>1.D-10) &
-             CALL Warn(' In P2Use, TrP = '//TRIM(DblToChar(TrP)))
+      IF(ABS(TrP-DBLE(NEl/SFac))>1.D-10) THEN
+        CALL Warn("[P2Use:"//TRIM(SCFActn)//"] TrP = "//TRIM(DblToChar(TrP)))
+      ENDIF
       CALL Delete(BlkP)
     ELSE
       CALL SetToI(P)
 #ifdef PARALLEL
       IF(MyID == ROOT) &
 #endif
-      CALL Warn('Attempting to use density superpostion with a non STO basis set. Going for scaled I.')
+      CALL Warn("[P2Use:"//TRIM(SCFActn)//"] Attempting to use density superpostion with a non STO basis set. Going for scaled I.")
 
       IF(NSMat.EQ.1)THEN
         !Set the P
-        CALL Multiply(P,DBLE(NEl  )/(Two*DBLE(NBasF)))
+        CALL Multiply(P,DBLE(NEl)/(Two*DBLE(NBasF)))
       ELSEIF(NSMat.EQ.2)THEN
         !Set the P_alpha
         CALL Multiply(P,DBLE(NAlph)/DBLE(NBasF),Expert_O=1)
@@ -183,14 +196,16 @@ PROGRAM P2Use
         !Set the P_beta
         CALL Multiply(P,DBLE(NBeta)/DBLE(NBasF),Expert_O=4)
         !Set the P_ab and P_ba
-        CALL Multiply(P,DBLE(NEl  )/DBLE(NBasF),Expert_O=2)
-        CALL Multiply(P,DBLE(NEl  )/DBLE(NBasF),Expert_O=3)
+        CALL Multiply(P,DBLE(NEl)/DBLE(NBasF),Expert_O=2)
+        CALL Multiply(P,DBLE(NEl)/DBLE(NBasF),Expert_O=3)
       ELSE
-        CALL Halt('P2Use: Something wrong when computing P_guess!')
+        CALL Halt("[P2Use:"//TRIM(SCFActn)//"] Something wrong when computing P_guess!")
       ENDIF
 
       TrP=Trace(P)
-      IF(ABS(TrP-DBLE(NEl/SFac))>1.D-10) CALL Warn(' In P2Use, TrP = '//TRIM(DblToChar(TrP)))
+      IF(ABS(TrP-DBLE(NEl/SFac))>1.D-10) THEN
+        CALL Warn("[P2Use:"//TRIM(SCFActn)//"] TrP = "//TRIM(DblToChar(TrP)))
+      ENDIF
     ENDIF
 #ifdef PARALLEL
     IF(MyId==ROOT)THEN
@@ -222,8 +237,10 @@ PROGRAM P2Use
     CALL Delete(X)
     CALL Delete(Tmp1)
     CALL Delete(Tmp2)
+
     ! Restarting without Geometry of BasisSet Change
   CASE('Restart')
+
     CALL New(P,NSMat_O=NSMat)
     CALL New(S)
     CALL New(Tmp1)
@@ -281,8 +298,10 @@ PROGRAM P2Use
     !CALL Delete(S)
     !CALL Delete(Tmp1)
     !CALL Delete(Tmp2)
+
     ! Restarting with BasisSet Change
   CASE('RestartBasisSwitch')
+
     ! Close Current Group
     CALL CloseHDFGroup(H5GroupID)
     CALL CloseHDF(HDFFileID)
@@ -329,42 +348,30 @@ PROGRAM P2Use
     !
   CASE("DMLinear")
 
+    iSCF = Args%I%I(1)
+    iBAS = Args%I%I(2)
     iGEO = Args%I%I(3)
 
     CALL New(P)
     CALL New(Tmp1)
     CALL New(Tmp2)
 
-    IF(iGEO .LE. 2) CALL Halt('[P2Use.DMLinear]: No PreviousDensity Matrix Defined')
-
-    ! Save P(p-1) as D(p-1), where p < 3.
-    IF(iGEO==3) THEN
-      DO I=1,2
-        FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(I))//'_C#'//TRIM(IntToChar(MyClone))//'.DOsave'
-        CALL Get(Tmp1,FileName)
-        FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(I))//'_C#'//TRIM(IntToChar(MyClone))//'.DOPsave'
-        CALL Put(Tmp1,FileName)
-      ENDDO
+    IF(iGEO <= 2) THEN
+      CALL Halt('[P2Use:Linear] No previous density matrix defined')
     ENDIF
 
-    ! P(n) = 2 D(n-1) - P(n-2)
+    ! P(n) = 2 D(n-1) - D(n-2)
 
     ! Get D(p-1)
-    FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO-1))//'_C#'//TRIM(IntToChar(MyClone))//'.DOsave'
-    CALL Get(Tmp1,FileName)
+    CALL Get(Tmp1, TrixFile("DOsave", Stats_O = (/ iSCF, iBas, iGEO-1 /)))
     CALL Multiply(Tmp1,2.0D0)
     CALL SetEq(P,Tmp1)
 
-    ! Get P(p-2,0)
-    FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO-2))//'_C#'//TRIM(IntToChar(MyClone))//'.DOPsave'
-    CALL Get(Tmp1,FileName)
+    ! Get D(p-2)
+    CALL Get(Tmp1, TrixFile("DOsave", Stats_O = (/ iSCF, iBAS, iGEO-2 /)))
     CALL Multiply(Tmp1,-1.0D0)
     CALL Add(P,Tmp1,Tmp2)
     CALL SetEq(P,Tmp2)
-
-    ! Save P(p,0)
-    FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO  ))//'_C#'//TRIM(IntToChar(MyClone))//'.DOPsave'
-    CALL Put(P,FileName)
 
     ! Purify P
 #ifdef PARALLEL
@@ -409,12 +416,19 @@ PROGRAM P2Use
     CALL Delete(Tmp1)
     CALL Delete(Tmp2)
 
-  CASE('DMTRBO')
+  CASE("DMTRBO")
+
+    iSCF = Args%I%I(1)
+    iBAS = Args%I%I(2)
+    iGEO = Args%I%I(3)
+
+    IF(iGEO <= 4) THEN
+      CALL MondoLog(DEBUG_NONE, logtag, "No previous density matrix defined")
+      CALL Halt("["//TRIM(logtag)//"] Fatal error")
+    ENDIF
 
     CALL Get(alpha, "MDalpha")
     CALL Get(MDDampStep, "MDDampStep")
-
-    iGEO = Args%I%I(3)
 
     IF(iGEO > MDDampStep) THEN
       ! Initial damping in case of noise.
@@ -424,15 +438,13 @@ PROGRAM P2Use
     CALL New(P)
     CALL New(Tmp1)
     CALL New(Tmp2)
-    IF(iGEO .LE. 2) CALL Halt('[P2Use.DMTRBO] No PreviousDensity Matrix Defined')
 
-    ! Initial boundary conditions: Save D(p-1) as P(p-1), where p < 3.
-    IF(iGEO == 4) THEN
+    IF(iGEO == 5) THEN
+      ! Initial boundary conditions: Save D(p-1) as P(p-1).
+      CALL MondoLog(DEBUG_NONE, logtag, "Initial boundary condition")
       DO I=1,3
-        FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(I))//'_C#'//TRIM(IntToChar(MyClone))//'.DOsave'
-        CALL Get(Tmp1,FileName)
-        FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(I))//'_C#'//TRIM(IntToChar(MyClone))//'.DOPsave'
-        CALL Put(Tmp1,FileName)
+        CALL Get(Tmp1, TrixFile("DOsave",  Stats_O = (/ iSCF, iBAS, iGEO-I /)))
+        CALL Put(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-I /)))
       ENDDO
     ENDIF
 
@@ -443,43 +455,62 @@ PROGRAM P2Use
     !
     ! P(n) = 2*D(n-1)-P(n-2)-0.5*alpha*(D(n-1)-2*P(n-2)+D(n-3))
 
-    ! Debugging: check.... D(n-1)-P(n-1)
+    ! Debugging: check.... P(n-1)-D(n-1)
+    !
     ! Get D(n-1)
-    FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO-1))//'_C#'//TRIM(IntToChar(MyClone))//'.DOsave'
-    CALL Get(Tmp1,FileName)
+    CALL Get(Tmp1, TrixFile("OrthoD", Stats_O = Args%I%I(4:6), Offset_O = 1))
     CALL Multiply(Tmp1, -1.0D0)
 
     ! Get P(n-1)
-    FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO-1))//'_C#'//TRIM(IntToChar(MyClone))//'.DOPsave'
-    CALL Get(Tmp2,FileName)
+    CALL Get(Tmp2, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-1 /)))
     CALL Add(Tmp1,Tmp2,P)
 
-    CALL MondoLog(DEBUG_NONE, "P2Use", "FNorm(P-D) = "//TRIM(DblToChar(FNorm(P))))
+    CALL MondoLog(DEBUG_NONE, logtag, "FNorm(P-D) = "//TRIM(DblToChar(FNorm(P))))
+
+    ! Debugging: check.... P(n-1)-D_tilde(n-1)
+    !
+    ! Get D_tilde(n-1)
+    CALL Get(Tmp1, TrixFile("DOsave", Stats_O = (/ iSCF, iBAS, iGEO-1 /)))
+    CALL Multiply(Tmp1, -1.0D0)
+
+    ! Get P(n-1)
+    CALL Get(Tmp2, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-1 /)))
+    CALL Add(Tmp1,Tmp2,P)
+
+    CALL MondoLog(DEBUG_NONE, logtag, "FNorm(P-D_tilde) = "//TRIM(DblToChar(FNorm(P))))
+
+    ! Debugging: check.... D(n-1)-D_tilde(n-1)
+    !
+    ! Get D(n-1)
+    CALL Get(Tmp1, TrixFile("OrthoD", Stats_O = Args%I%I(4:6), Offset_O = 1))
+    CALL Multiply(Tmp1, -1.0D0)
+
+    ! Get D_tilde(n-1)
+    CALL Get(Tmp2, TrixFile("DOsave", Stats_O = (/ iSCF, iBAS, iGEO-1 /)))
+    CALL Add(Tmp1,Tmp2,P)
+
+    CALL MondoLog(DEBUG_NONE, logtag, "FNorm(D-D_tilde) = "//TRIM(DblToChar(FNorm(P))))
     ! End Debugging.
 
     ! Get D(n-1)
-    FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO-1))//'_C#'//TRIM(IntToChar(MyClone))//'.DOsave'
-    CALL Get(Tmp1,FileName)
+    CALL Get(Tmp1, TrixFile("DOsave", Stats_O = (/ iSCF, iBAS, iGEO-1 /)))
     CALL Multiply(Tmp1, 2.0D0-0.5D0*alpha)
     CALL SetEq(P,Tmp1)
 
     ! Get P(n-2)
-    FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO-2))//'_C#'//TRIM(IntToChar(MyClone))//'.DOPsave'
-    CALL Get(Tmp1,FileName)
+    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-2 /)))
     CALL Multiply(Tmp1,-1.0D0+alpha)
     CALL Add(P,Tmp1,Tmp2)
     CALL SetEq(P,Tmp2)
 
     ! Get D(n-3)
-    FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO-3))//'_C#'//TRIM(IntToChar(MyClone))//'.DOsave'
-    CALL Get(Tmp1,FileName)
+    CALL Get(Tmp1, TrixFile("DOsave", Stats_O = (/ iSCF, iBAS, iGEO-3 /)))
     CALL Multiply(Tmp1,-0.5D0*alpha)
     CALL Add(P,Tmp1,Tmp2)
     CALL SetEq(P,Tmp2)
 
     ! Save P(p,0)
-    FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO  ))//'_C#'//TRIM(IntToChar(MyClone))//'.DOPsave'
-    CALL Put(P,FileName)
+    CALL Put(P, TrixFile("DOPsave", Args))
 
     ! Purify P
 #ifdef PARALLEL
@@ -498,8 +529,573 @@ PROGRAM P2Use
         IF(ABS(TrP2-Half*DBLE(NEl)) < 1.0D-8) EXIT
       ENDIF
     ENDDO
-    CALL MondoLog(DEBUG_NONE, "P2Use", "Trace(P)  = "//TRIM(DblToChar(TrP)))
-    CALL MondoLog(DEBUG_NONE, "P2Use", "Trace(P2) = "//TRIM(DblToChar(TrP2)))
+    CALL MondoLog(DEBUG_NONE, logtag, "purified after "//TRIM(IntToChar(I))//" iterations")
+    CALL MondoLog(DEBUG_NONE, logtag, "Trace(P)  = "//TRIM(DblToChar(TrP)))
+    CALL MondoLog(DEBUG_NONE, logtag, "Trace(P2) = "//TRIM(DblToChar(TrP2)))
+
+    ! Convert to AO Rep
+    INQUIRE(FILE=TrixFile('X',Args),EXIST=Present)
+    IF(Present)THEN
+      CALL Get(Tmp1,TrixFile('X',Args))   ! Z=S^(-1/2)
+      CALL Multiply(Tmp1,P,Tmp2)
+      CALL Multiply(Tmp2,Tmp1,P)
+    ELSE
+      CALL Get(Tmp1,TrixFile('Z',Args))   ! Z=S^(-L)
+      CALL Multiply(Tmp1,P,Tmp2)
+      CALL Get(Tmp1,TrixFile('ZT',Args))
+      CALL Multiply(Tmp2,Tmp1,P)
+    ENDIF
+    CALL Filter(Tmp1,P)
+
+    ! Put to Disk
+    CALL Put(Tmp1,'CurrentDM',CheckPoint_O=.TRUE.)
+    CALL Put(Tmp1,TrixFile('D',Args,0))
+    CALL PChkSum(Tmp1,'P[0]',Prog)
+
+    ! Clean Up
+    CALL Delete(P)
+    CALL Delete(Tmp1)
+    CALL Delete(Tmp2)
+
+    ! DMTRBO with solid super-duper high order damping.
+  CASE("DMTRBO_Damp_dt3")
+
+    iSCF = Args%I%I(1)
+    iBAS = Args%I%I(2)
+    iGEO = Args%I%I(3)
+
+    IF(iGEO <= 4) THEN
+      CALL MondoLog(DEBUG_NONE, logtag, "No previous density matrix defined")
+      CALL Halt("["//TRIM(logtag)//"] Fatal error")
+    ENDIF
+
+    CALL New(P)
+    CALL New(Tmp1)
+    CALL New(Tmp2)
+
+    IF(iGEO == 5) THEN
+      ! Initial boundary conditions: Save D(p-1) as P(p-1).
+      CALL MondoLog(DEBUG_NONE, logtag, "Initial boundary condition")
+      DO I=1,3
+        CALL Get(Tmp1, TrixFile("DOsave",  Stats_O = (/ iSCF, iBAS, iGEO-I /)))
+        CALL Put(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-I /)))
+      ENDDO
+    ENDIF
+
+    ! Notation: P(n) = 1.737216*D(n-1) + 0.131784*P(n-1) - 0.738*P(n-2) - 0.131*P(n-3) + T(dt^3)
+    !
+    ! We reverse the addition order, sorted from smalles prefactor to largest,
+    ! for numerical reasons.
+
+    ! Get P(n-3)
+    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-3 /)))
+    CALL Multiply(Tmp1,-0.131D0)
+    CALL Add(P,Tmp1,Tmp2)
+    CALL SetEq(P,Tmp2)
+
+    ! Get P(n-2)
+    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-2 /)))
+    CALL Multiply(Tmp1,-0.738D0)
+    CALL Add(P,Tmp1,Tmp2)
+    CALL SetEq(P,Tmp2)
+
+    ! Get P(n-1)
+    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-1 /)))
+    CALL Multiply(Tmp1,0.131784D0)
+    CALL Add(P,Tmp1,Tmp2)
+    CALL SetEq(P,Tmp2)
+
+    ! Get D(n-1)
+    CALL Get(Tmp1, TrixFile("DOsave", Stats_O = (/ iSCF, iBAS, iGEO-1 /)))
+    CALL Multiply(Tmp1,1.737216D0)
+    CALL Add(P,Tmp1,Tmp2)
+    CALL SetEq(P,Tmp2)
+
+    ! Save P(p,0)
+    CALL Put(P, TrixFile("DOPsave", Args))
+
+    ! Purify P
+#ifdef PARALLEL
+    CALL SetEq(P_BCSR,P)
+    CALL SpectralBounds(P_BCSR,Fmin,Fmax)
+    CALL Delete(P_BCSR)
+#else
+    CALL SpectralBounds(P,Fmin,Fmax)
+#endif
+    CALL Add(P,-Fmin)
+    CALL Multiply(P,One/(Fmax-Fmin))
+    MM = 0
+    DO I=1,50
+      CALL SP2(P,Tmp1,Tmp2,Half*DBLE(NEl),MM)
+      IF(ABS(TrP -Half*DBLE(NEl))< 1.0D-8) THEN
+        IF(ABS(TrP2-Half*DBLE(NEl)) < 1.D-8) EXIT
+      ENDIF
+    ENDDO
+    CALL MondoLog(DEBUG_NONE, logtag, "purified after "//TRIM(IntToChar(I))//" iterations")
+    CALL MondoLog(DEBUG_NONE, logtag, "Trace(P) = "//TRIM(DblToChar(TrP)))
+    CALL MondoLog(DEBUG_NONE, logtag, "Trace(P2) = "//TRIM(DblToChar(TrP2)))
+
+    ! Convert to AO Rep
+    INQUIRE(FILE=TrixFile('X',Args),EXIST=Present)
+    IF(Present)THEN
+      CALL Get(Tmp1,TrixFile('X',Args))   ! Z=S^(-1/2)
+      CALL Multiply(Tmp1,P,Tmp2)
+      CALL Multiply(Tmp2,Tmp1,P)
+    ELSE
+      CALL Get(Tmp1,TrixFile('Z',Args))   ! Z=S^(-L)
+      CALL Multiply(Tmp1,P,Tmp2)
+      CALL Get(Tmp1,TrixFile('ZT',Args))
+      CALL Multiply(Tmp2,Tmp1,P)
+    ENDIF
+    CALL Filter(Tmp1,P)
+
+    ! Put to Disk
+    CALL Put(Tmp1,'CurrentDM',CheckPoint_O=.TRUE.)
+    CALL Put(Tmp1,TrixFile('D',Args,0))
+    CALL PChkSum(Tmp1,'P[0]',Prog)
+
+    ! Clean Up
+    CALL Delete(P)
+    CALL Delete(Tmp1)
+    CALL Delete(Tmp2)
+
+    ! DMTRBO with solid super-duper high order damping.
+  CASE("DMTRBO_Damp_dt5")
+
+    iSCF = Args%I%I(1)
+    iBAS = Args%I%I(2)
+    iGEO = Args%I%I(3)
+
+    IF(iGEO <= 6) THEN
+      CALL MondoLog(DEBUG_NONE, logtag, "No previous density matrix defined")
+      CALL Halt("["//TRIM(logtag)//"] Fatal error")
+    ENDIF
+
+    CALL New(P)
+    CALL New(Tmp1)
+    CALL New(Tmp2)
+
+    IF(iGEO == 7) THEN
+      ! Initial boundary conditions: Save D(p-1) as P(p-1).
+      CALL MondoLog(DEBUG_NONE, logtag, "Initial boundary condition")
+      DO I=1,4
+        CALL Get(Tmp1, TrixFile("DOsave",  Stats_O = (/ iSCF, iBAS, iGEO-I /)))
+        CALL Put(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-I /)))
+      ENDDO
+    ENDIF
+
+    ! Notation: P(n) = 1.845*D(n-1) + 0.105*P(n-1) - 0.875*P(n-2) - 0.1*P(n-3) + 0.025*P(n-4) + T(dt^5)
+    !
+    ! We reverse the addition order, sorted from smalles prefactor to largest,
+    ! for numerical reasons.
+
+    ! Get P(n-4)
+    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-4 /)))
+    CALL Multiply(Tmp1,0.25D0)
+    CALL Add(P,Tmp1,Tmp2)
+    CALL SetEq(P,Tmp2)
+
+    ! Get P(n-3)
+    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-3 /)))
+    CALL Multiply(Tmp1,-0.1D0)
+    CALL Add(P,Tmp1,Tmp2)
+    CALL SetEq(P,Tmp2)
+
+    ! Get P(n-2)
+    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-2 /)))
+    CALL Multiply(Tmp1,-0.875D0)
+    CALL Add(P,Tmp1,Tmp2)
+    CALL SetEq(P,Tmp2)
+
+    ! Get P(n-1)
+    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-1 /)))
+    CALL Multiply(Tmp1,0.105D0)
+    CALL Add(P,Tmp1,Tmp2)
+    CALL SetEq(P,Tmp2)
+
+    ! Get D(n-1)
+    CALL Get(Tmp1, TrixFile("DOsave", Stats_O = (/ iSCF, iBAS, iGEO-1 /)))
+    CALL Multiply(Tmp1,1.845D0)
+    CALL Add(P,Tmp1,Tmp2)
+    CALL SetEq(P,Tmp2)
+
+    ! Save P(p,0)
+    CALL Put(P, TrixFile("DOPsave", Args))
+
+    ! Purify P
+#ifdef PARALLEL
+    CALL SetEq(P_BCSR,P)
+    CALL SpectralBounds(P_BCSR,Fmin,Fmax)
+    CALL Delete(P_BCSR)
+#else
+    CALL SpectralBounds(P,Fmin,Fmax)
+#endif
+    CALL Add(P,-Fmin)
+    CALL Multiply(P,One/(Fmax-Fmin))
+    MM = 0
+    DO I=1,50
+      CALL SP2(P,Tmp1,Tmp2,Half*DBLE(NEl),MM)
+      IF(ABS(TrP -Half*DBLE(NEl))< 1.0D-8) THEN
+        IF(ABS(TrP2-Half*DBLE(NEl)) < 1.D-8) EXIT
+      ENDIF
+    ENDDO
+    CALL MondoLog(DEBUG_NONE, logtag, "purified after "//TRIM(IntToChar(I))//" iterations")
+    CALL MondoLog(DEBUG_NONE, logtag, "Trace(P) = "//TRIM(DblToChar(TrP)))
+    CALL MondoLog(DEBUG_NONE, logtag, "Trace(P2) = "//TRIM(DblToChar(TrP2)))
+
+    ! Convert to AO Rep
+    INQUIRE(FILE=TrixFile('X',Args),EXIST=Present)
+    IF(Present)THEN
+      CALL Get(Tmp1,TrixFile('X',Args))   ! Z=S^(-1/2)
+      CALL Multiply(Tmp1,P,Tmp2)
+      CALL Multiply(Tmp2,Tmp1,P)
+    ELSE
+      CALL Get(Tmp1,TrixFile('Z',Args))   ! Z=S^(-L)
+      CALL Multiply(Tmp1,P,Tmp2)
+      CALL Get(Tmp1,TrixFile('ZT',Args))
+      CALL Multiply(Tmp2,Tmp1,P)
+    ENDIF
+    CALL Filter(Tmp1,P)
+
+    ! Put to Disk
+    CALL Put(Tmp1,'CurrentDM',CheckPoint_O=.TRUE.)
+    CALL Put(Tmp1,TrixFile('D',Args,0))
+    CALL PChkSum(Tmp1,'P[0]',Prog)
+
+    ! Clean Up
+    CALL Delete(P)
+    CALL Delete(Tmp1)
+    CALL Delete(Tmp2)
+
+    ! DMTRBO with super-duper high order damping.
+  CASE("DMTRBO_Damp_dt7")
+
+    iSCF = Args%I%I(1)
+    iBAS = Args%I%I(2)
+    iGEO = Args%I%I(3)
+
+    IF(iGEO <= 8) THEN
+      CALL MondoLog(DEBUG_NONE, logtag, "No previous density matrix defined")
+      CALL Halt("["//TRIM(logtag)//"] Fatal error")
+    ENDIF
+
+    CALL New(P)
+    CALL New(Tmp1)
+    CALL New(Tmp2)
+
+    IF(iGEO == 9) THEN
+      ! Initial boundary conditions: Save D(p-1) as P(p-1).
+      CALL MondoLog(DEBUG_NONE, logtag, "Initial boundary condition")
+      DO I=1,5
+        CALL Get(Tmp1, TrixFile("DOsave",  Stats_O = (/ iSCF, iBAS, iGEO-I /)))
+        CALL Put(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-I /)))
+      ENDDO
+    ENDIF
+
+    ! Notation: P(n) = 1.889559*D(n-1) + 0.082941*P(n-1) - 0.923*P(n-2) - 0.077*P(n-3) +
+    !                  + 0.033*P(n-4) - 0.0055*P(n-5) + T(dt^7)
+    !
+    ! We reverse the addition order, sorted from smalles prefactor to largest,
+    ! for numerical reasons.
+
+    ! Get P(n-5)
+    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-5 /)))
+    CALL Multiply(Tmp1,-0.0055D0)
+    CALL SetEq(P,Tmp1)
+
+    ! Get P(n-4)
+    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-4 /)))
+    CALL Multiply(Tmp1,0.033D0)
+    CALL Add(P,Tmp1,Tmp2)
+    CALL SetEq(P,Tmp2)
+
+    ! Get P(n-3)
+    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-3 /)))
+    CALL Multiply(Tmp1,-0.077D0)
+    CALL Add(P,Tmp1,Tmp2)
+    CALL SetEq(P,Tmp2)
+
+    ! Get P(n-2)
+    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-2 /)))
+    CALL Multiply(Tmp1,-0.923D0)
+    CALL Add(P,Tmp1,Tmp2)
+    CALL SetEq(P,Tmp2)
+
+    ! Get P(n-1)
+    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-1 /)))
+    CALL Multiply(Tmp1,0.082941D0)
+    CALL Add(P,Tmp1,Tmp2)
+    CALL SetEq(P,Tmp2)
+
+    ! Get D(n-1)
+    CALL Get(Tmp1, TrixFile("DOsave", Stats_O = (/ iSCF, iBAS, iGEO-1 /)))
+    CALL Multiply(Tmp1,1.889559D0)
+    CALL Add(P,Tmp1,Tmp2)
+    CALL SetEq(P,Tmp2)
+
+    ! Save P(p,0)
+    CALL Put(P, TrixFile("DOPsave", Args))
+
+    ! Purify P
+#ifdef PARALLEL
+    CALL SetEq(P_BCSR,P)
+    CALL SpectralBounds(P_BCSR,Fmin,Fmax)
+    CALL Delete(P_BCSR)
+#else
+    CALL SpectralBounds(P,Fmin,Fmax)
+#endif
+    CALL Add(P,-Fmin)
+    CALL Multiply(P,One/(Fmax-Fmin))
+    MM = 0
+    DO I=1,50
+      CALL SP2(P,Tmp1,Tmp2,Half*DBLE(NEl),MM)
+      IF(ABS(TrP -Half*DBLE(NEl))< 1.0D-8) THEN
+        IF(ABS(TrP2-Half*DBLE(NEl)) < 1.D-8) EXIT
+      ENDIF
+    ENDDO
+    CALL MondoLog(DEBUG_NONE, logtag, "purified after "//TRIM(IntToChar(I))//" iterations")
+    CALL MondoLog(DEBUG_NONE, logtag, "Trace(P) = "//TRIM(DblToChar(TrP)))
+    CALL MondoLog(DEBUG_NONE, logtag, "Trace(P2) = "//TRIM(DblToChar(TrP2)))
+
+    ! Convert to AO Rep
+    INQUIRE(FILE=TrixFile('X',Args),EXIST=Present)
+    IF(Present)THEN
+      CALL Get(Tmp1,TrixFile('X',Args))   ! Z=S^(-1/2)
+      CALL Multiply(Tmp1,P,Tmp2)
+      CALL Multiply(Tmp2,Tmp1,P)
+    ELSE
+      CALL Get(Tmp1,TrixFile('Z',Args))   ! Z=S^(-L)
+      CALL Multiply(Tmp1,P,Tmp2)
+      CALL Get(Tmp1,TrixFile('ZT',Args))
+      CALL Multiply(Tmp2,Tmp1,P)
+    ENDIF
+    CALL Filter(Tmp1,P)
+
+    ! Put to Disk
+    CALL Put(Tmp1,'CurrentDM',CheckPoint_O=.TRUE.)
+    CALL Put(Tmp1,TrixFile('D',Args,0))
+    CALL PChkSum(Tmp1,'P[0]',Prog)
+
+    ! Clean Up
+    CALL Delete(P)
+    CALL Delete(Tmp1)
+    CALL Delete(Tmp2)
+
+    ! DMTRBO with even more super-duper high order damping.
+  CASE("DMTRBO_Damp_dt9")
+
+    iSCF = Args%I%I(1)
+    iBAS = Args%I%I(2)
+    iGEO = Args%I%I(3)
+
+    IF(iGEO <= 10) THEN
+      CALL MondoLog(DEBUG_NONE, logtag, "No previous density matrix defined")
+      CALL Halt("["//TRIM(logtag)//"] Fatal error")
+    ENDIF
+
+    CALL New(P)
+    CALL New(Tmp1)
+    CALL New(Tmp2)
+
+    IF(iGEO == 11) THEN
+      ! Initial boundary conditions: Save D(p-1) as P(p-1).
+      CALL MondoLog(DEBUG_NONE, logtag, "Initial boundary condition")
+      DO I=1,6
+        CALL Get(Tmp1, TrixFile("DOsave",  Stats_O = (/ iSCF, iBAS, iGEO-I /)))
+        CALL Put(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-I /)))
+      ENDDO
+    ENDIF
+
+    ! Notation: P(n) = 1.912084*D(n-1) + 0.071116*P(n-1) - 0.9496*P(n-2) - 0.0576*P(n-3) +
+    !                  + 0.0324*P(n-4) - 0.0096*P(n-5)   + 0.0012*P(n-6) + T(dt^9)
+
+    ! Get P(n-6)
+    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-6 /)))
+    CALL Multiply(Tmp1,0.0012D0)
+    CALL SetEq(P,Tmp1)
+
+    ! Get P(n-5)
+    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-5 /)))
+    CALL Multiply(Tmp1,-0.0096D0)
+    CALL Add(P,Tmp1,Tmp2)
+    CALL SetEq(P,Tmp2)
+
+    ! Get P(n-4)
+    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-4 /)))
+    CALL Multiply(Tmp1,0.0324D0)
+    CALL Add(P,Tmp1,Tmp2)
+    CALL SetEq(P,Tmp2)
+
+    ! Get P(n-3)
+    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-3 /)))
+    CALL Multiply(Tmp1,-0.0576D0)
+    CALL Add(P,Tmp1,Tmp2)
+    CALL SetEq(P,Tmp2)
+
+    ! Get P(n-2)
+    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-2 /)))
+    CALL Multiply(Tmp1,-0.9496D0)
+    CALL Add(P,Tmp1,Tmp2)
+    CALL SetEq(P,Tmp2)
+
+    ! Get P(n-1)
+    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-1 /)))
+    CALL Multiply(Tmp1,0.071116D0)
+    CALL Add(P,Tmp1,Tmp2)
+    CALL SetEq(P,Tmp2)
+
+    ! Get D(n-1)
+    CALL Get(Tmp1, TrixFile("DOsave", Stats_O = (/ iSCF, iBAS, iGEO-1 /)))
+    CALL Multiply(Tmp1,1.912084D0)
+    CALL Add(P,Tmp1,Tmp2)
+    CALL SetEq(P,Tmp2)
+
+    ! Save P(p,0)
+    CALL Put(P, TrixFile("DOPsave", Args))
+
+    ! Purify P
+#ifdef PARALLEL
+    CALL SetEq(P_BCSR,P)
+    CALL SpectralBounds(P_BCSR,Fmin,Fmax)
+    CALL Delete(P_BCSR)
+#else
+    CALL SpectralBounds(P,Fmin,Fmax)
+#endif
+    CALL Add(P,-Fmin)
+    CALL Multiply(P,One/(Fmax-Fmin))
+    MM = 0
+    DO I=1,50
+      CALL SP2(P,Tmp1,Tmp2,Half*DBLE(NEl),MM)
+      IF(ABS(TrP -Half*DBLE(NEl))< 1.0D-8) THEN
+        IF(ABS(TrP2-Half*DBLE(NEl)) < 1.D-8) EXIT
+      ENDIF
+    ENDDO
+    CALL MondoLog(DEBUG_NONE, logtag, "purified after "//TRIM(IntToChar(I))//" iterations")
+    CALL MondoLog(DEBUG_NONE, logtag, "Trace(P) = "//TRIM(DblToChar(TrP)))
+    CALL MondoLog(DEBUG_NONE, logtag, "Trace(P2) = "//TRIM(DblToChar(TrP2)))
+
+    ! Convert to AO Rep
+    INQUIRE(FILE=TrixFile('X',Args),EXIST=Present)
+    IF(Present)THEN
+      CALL Get(Tmp1,TrixFile('X',Args))   ! Z=S^(-1/2)
+      CALL Multiply(Tmp1,P,Tmp2)
+      CALL Multiply(Tmp2,Tmp1,P)
+    ELSE
+      CALL Get(Tmp1,TrixFile('Z',Args))   ! Z=S^(-L)
+      CALL Multiply(Tmp1,P,Tmp2)
+      CALL Get(Tmp1,TrixFile('ZT',Args))
+      CALL Multiply(Tmp2,Tmp1,P)
+    ENDIF
+    CALL Filter(Tmp1,P)
+
+    ! Put to Disk
+    CALL Put(Tmp1,'CurrentDM',CheckPoint_O=.TRUE.)
+    CALL Put(Tmp1,TrixFile('D',Args,0))
+    CALL PChkSum(Tmp1,'P[0]',Prog)
+
+    ! Clean Up
+    CALL Delete(P)
+    CALL Delete(Tmp1)
+    CALL Delete(Tmp2)
+
+    ! DMTRBO with industrial strength super-duper high order damping.
+  CASE("DMTRBO_Damp_dt11")
+
+    iSCF = Args%I%I(1)
+    iBAS = Args%I%I(2)
+    iGEO = Args%I%I(3)
+
+    IF(iGEO <= 12) THEN
+      CALL MondoLog(DEBUG_NONE, logtag, "No previous density matrix defined")
+      CALL Halt("["//TRIM(logtag)//"] Fatal error")
+    ENDIF
+
+    CALL New(P)
+    CALL New(Tmp1)
+    CALL New(Tmp2)
+
+    IF(iGEO == 13) THEN
+      ! Initial boundary conditions: Save D(p-1) as P(p-1).
+      CALL MondoLog(DEBUG_NONE, logtag, "Initial boundary condition")
+      DO I=1,7
+        CALL Get(Tmp1, TrixFile("DOsave",  Stats_O = (/ iSCF, iBAS, iGEO-I /)))
+        CALL Put(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-I /)))
+      ENDDO
+    ENDIF
+
+    ! Notation: P(n) = 1.925628*D(n-1) + 0.062612*P(n-1) - 0.96304*P(n-2) - 0.0462*P(n-3) +
+    !                  + 0.0308*P(n-4) - 0.01232*P(n-5)  + 0.0028*P(n-6)  - 0.00028*P(n-7) + T(dt^11)
+
+    ! Get P(n-7)
+    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-7 /)))
+    CALL Multiply(Tmp1,-0.00028D0)
+    CALL SetEq(P,Tmp1)
+
+    ! Get P(n-6)
+    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-6 /)))
+    CALL Multiply(Tmp1,0.0028D0)
+    CALL Add(P,Tmp1,Tmp2)
+    CALL SetEq(P,Tmp2)
+
+    ! Get P(n-5)
+    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-5 /)))
+    CALL Multiply(Tmp1,-0.01232D0)
+    CALL Add(P,Tmp1,Tmp2)
+    CALL SetEq(P,Tmp2)
+
+    ! Get P(n-4)
+    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-4 /)))
+    CALL Multiply(Tmp1,0.0308D0)
+    CALL Add(P,Tmp1,Tmp2)
+    CALL SetEq(P,Tmp2)
+
+    ! Get P(n-3)
+    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-3 /)))
+    CALL Multiply(Tmp1,-0.0462D0)
+    CALL Add(P,Tmp1,Tmp2)
+    CALL SetEq(P,Tmp2)
+
+    ! Get P(n-2)
+    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-2 /)))
+    CALL Multiply(Tmp1,-0.96304D0)
+    CALL Add(P,Tmp1,Tmp2)
+    CALL SetEq(P,Tmp2)
+
+    ! Get P(n-1)
+    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-1 /)))
+    CALL Multiply(Tmp1,0.062612D0)
+    CALL Add(P,Tmp1,Tmp2)
+    CALL SetEq(P,Tmp2)
+
+    ! Get D(n-1)
+    CALL Get(Tmp1, TrixFile("DOsave", Stats_O = (/ iSCF, iBAS, iGEO-1 /)))
+    CALL Multiply(Tmp1,1.925628D0)
+    CALL Add(P,Tmp1,Tmp2)
+    CALL SetEq(P,Tmp2)
+
+    ! Save P(p,0)
+    CALL Put(P, TrixFile("DOPsave", Args))
+
+    ! Purify P
+#ifdef PARALLEL
+    CALL SetEq(P_BCSR,P)
+    CALL SpectralBounds(P_BCSR,Fmin,Fmax)
+    CALL Delete(P_BCSR)
+#else
+    CALL SpectralBounds(P,Fmin,Fmax)
+#endif
+    CALL Add(P,-Fmin)
+    CALL Multiply(P,One/(Fmax-Fmin))
+    MM = 0
+    DO I=1,50
+      CALL SP2(P,Tmp1,Tmp2,Half*DBLE(NEl),MM)
+      IF(ABS(TrP -Half*DBLE(NEl))< 1.0D-8) THEN
+        IF(ABS(TrP2-Half*DBLE(NEl)) < 1.D-8) EXIT
+      ENDIF
+    ENDDO
+    CALL MondoLog(DEBUG_NONE, logtag, "purified after "//TRIM(IntToChar(I))//" iterations")
+    CALL MondoLog(DEBUG_NONE, logtag, "Trace(P) = "//TRIM(DblToChar(TrP)))
+    CALL MondoLog(DEBUG_NONE, logtag, "Trace(P2) = "//TRIM(DblToChar(TrP2)))
 
     ! Convert to AO Rep
     INQUIRE(FILE=TrixFile('X',Args),EXIST=Present)
@@ -526,12 +1122,19 @@ PROGRAM P2Use
     CALL Delete(Tmp2)
 
     ! DMSymplectic for 4th order symplecitc integration scheme 4.617
-  CASE('DMSymplectic')
+  CASE("DMSymplectic")
+
+    iSCF = Args%I%I(1)
+    iBAS = Args%I%I(2)
+    iGEO = Args%I%I(3)
+
+    IF(iGEO <= 6) THEN
+      CALL MondoLog(DEBUG_NONE, logtag, "No previous density matrix defined")
+      CALL Halt("["//TRIM(logtag)//"] Fatal error")
+    ENDIF
 
     CALL Get(alpha, "MDalpha")
     CALL Get(MDDampStep, "MDDampStep")
-
-    iGEO = Args%I%I(3)
 
     IF(iGEO > MDDampStep) THEN
       alpha = 0.0D0
@@ -541,109 +1144,124 @@ PROGRAM P2Use
     CALL New(PV)
     CALL New(Tmp1)
     CALL New(Tmp2)
-    IF(iGEO .LE. 2) CALL Halt('[P2Use.DMSymplectic] No PreviousDensity Matrix Defined')
 
     ! Compute Pnew in ortho space: This is specifically for MD.  Save D(p-1) as
     ! P(p-1), where p < 5.
 
     ! Calculate symplectic counter.
     m_step = MOD(iGEO-2,4)+1
-
-    IF(iGEO == 6) THEN
-      DO I=1,5
-        FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(I))//'_C#'//TRIM(IntToChar(MyClone))//'.DOsave'
-        CALL Get(Tmp1,FileName)
-
-        FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(I))//'_C#'//TRIM(IntToChar(MyClone))//'.DOPsave'
-        CALL Put(Tmp1,FileName)
+    IF(iGEO == 7) THEN
+      CALL MondoLog(DEBUG_NONE, logtag, "Initial boundary condition")
+      DO I=1,6
+        CALL Get(Tmp1, TrixFile("DOsave",  Stats_O = (/ iSCF, iBAS, iGEO-I /)))
+        CALL Put(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-I /)))
       ENDDO
 
-      ! Calculate initial velocity v(n-1) = (1/12)*[25*X(n-1)-48*X(n-2)+36*X(n-3)-16*X(n-4)+3*X(n-5)]
-      FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO-1))//'_C#'//TRIM(IntToChar(MyClone))//'.DOsave'
-      CALL Get(Tmp1,FileName)
-      CALL Multiply(Tmp1,(25.D0/12.D0))
-      CALL SetEq(PV,Tmp1)
+      ! PV(2) = PV(1) + 4.61D0*b(1)*[D(1)-P(1)]
+      ! P(2) = P(1) + a(1)*PV(2)
 
-      FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO-2))//'_C#'//TRIM(IntToChar(MyClone))//'.DOsave'
-      CALL Get(Tmp1,FileName)
-      CALL Multiply(Tmp1,(-48.D0/12.D0))
-      CALL Add(PV,Tmp1,Tmp2)
-      CALL SetEq(PV,Tmp2)
+      ! PV(3) = PV(2) + 4.61D0*b(2)*[D(2)-P(2)]
+      ! P(3) = P(2) + a(2)*PV(3)
 
-      FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO-3))//'_C#'//TRIM(IntToChar(MyClone))//'.DOsave'
-      CALL Get(Tmp1,FileName)
-      CALL Multiply(Tmp1,(36.D0/12.D0))
-      CALL Add(PV,Tmp1,Tmp2)
-      CALL SetEq(PV,Tmp2)
+      ! PV(4) = PV(3) + 4.61D0*b(3)*[D(3)-P(3)]
+      ! P(4) = P(3) + a(3)*PV(4)
 
-      FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO-4))//'_C#'//TRIM(IntToChar(MyClone))//'.DOsave'
-      CALL Get(Tmp1,FileName)
-      CALL Multiply(Tmp1,(-16.D0/12.D0))
-      CALL Add(PV,Tmp1,Tmp2)
-      CALL SetEq(PV,Tmp2)
+      ! PV(5) = PV(4) + 4.61D0*b(4)*[D(4)-P(4)]
+      ! P(5) = P(4) + a(5)*PV(5)
 
-      FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO-5))//'_C#'//TRIM(IntToChar(MyClone))//'.DOsave'
-      CALL Get(Tmp1,FileName)
-      CALL Multiply(Tmp1,(3.D0/12.D0))
-      CALL Add(PV,Tmp1,Tmp2)
-      CALL SetEq(PV,Tmp2)
+      ! PV(n) = PV(n-1) + 4.61D0*b(m_step)*[D(n-1)-P(n-1)]
+      ! P(n) = P(n-1) + a(m_step)*PV(n)
 
-      FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO-1))//'_C#'//TRIM(IntToChar(MyClone))//'.PVsave'
-      CALL Put(PV,FileName)
+      ! mm = MOD(iGEO-1-2,4)+1
+      ! P(n-1) = P(n-2) + a(mm)*PV(n-1)
+      ! PV(n-1) = [P(n-1)-P(n-2)]/a(mm)
+
+      ! Calculate initial velocity v(n-1) = [P(n-1)-P(n-2)]/a(mm)
+      mm_step = MOD(iGEO-3,4)+1
+
+      CALL Get(Tmp1, TrixFile("DOsave", Stats_O = (/ iSCF, iBAS, iGEO-1 /)))
+      CALL Multiply(Tmp1,1.D0/Symplectic_4th_Order_a(mm_step))
+      CALL Get(Tmp2, TrixFile("DOsave", Stats_O = (/ iSCF, iBAS, iGEO-2 /)))
+      CALL Multiply(Tmp2,-1.D0/Symplectic_4th_Order_a(mm_step))
+      CALL Add(Tmp1,Tmp2,PV)
+      CALL Multiply(PV,1.D0)
+
+      CALL Put(PV, TrixFile("PVsave", Stats_O = (/ iSCF, iBAS, iGEO-1 /)))
+
     ENDIF
 
     ! PV(n) = PV(n-1) + 4.61D0*b(m_step)*[D(n-1)-P(n-1)]
     ! P(n) = P(n-1) + a(m_step)*PV(n)
 
-    ! Debugging: check.... D(n-1)-P(n-1)
-    ! Get D(n-1)
-    FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO-1))//'_C#'//TRIM(IntToChar(MyClone))//'.DOsave'
-    CALL Get(Tmp1,FileName)
-    CALL Multiply(Tmp1, -1.0D0)
-
-    ! Get P(n-1)
-    FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO-1))//'_C#'//TRIM(IntToChar(MyClone))//'.DOPsave'
-    CALL Get(Tmp2,FileName)
-    CALL Add(Tmp1,Tmp2,P)
-
-    CALL MondoLog(DEBUG_NONE, "P2Use", "FNorm(P-D) = "//TRIM(DblToChar(FNorm(P))))
-    ! End Debugging.
-
     ! Get D(p-1)
-    FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO-1))//'_C#'//TRIM(IntToChar(MyClone))//'.PVsave'
-    CALL Get(PV,FileName)
+    CALL Get(PV, TrixFile("PVsave", Stats_O = (/ iSCF, iBAS, iGEO-1 /)))
 
     ! Get D(n-1), P(n-1)
-    FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO-1))//'_C#'//TRIM(IntToChar(MyClone))//'.DOsave'
-    CALL Get(Tmp1,FileName)
+    CALL Get(Tmp1, TrixFile("DOsave", Stats_O = (/ iSCF, iBAS, iGEO-1 /)))
     CALL Multiply(Tmp1,4.61D0*Symplectic_4th_Order_b(m_step))
 
-    FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO-1))//'_C#'//TRIM(IntToChar(MyClone))//'.DOPsave'
-    CALL Get(Tmp2,FileName)
+    CALL Get(Tmp2, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-1 /)))
     CALL Multiply(Tmp2,-4.61D0*Symplectic_4th_Order_b(m_step))
     CALL Add(Tmp1,Tmp2,P)
+
+#ifdef ANDERS
+    beta = 0.00275D0
+    IF(iGEO > MDDampStep) THEN
+      CALL MondoLog(DEBUG_NONE, logtag, "Anders beta hack active now")
+      CALL Multiply(P,1.D0-beta)
+
+      CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-1 /)))
+      CALL Multiply(Tmp1,beta*Symplectic_4th_Order_b(m_step)*(-14.D0/5.D0))
+      CALL Add(P,Tmp1,Tmp2)
+      CALL SetEq(P,Tmp2)
+
+      CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-2 /)))
+      CALL Multiply(Tmp1,beta*Symplectic_4th_Order_b(m_step)*(42.D0/5.D0))
+      CALL Add(P,Tmp1,Tmp2)
+      CALL SetEq(P,Tmp2)
+
+      CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-3 /)))
+      CALL Multiply(Tmp1,beta*Symplectic_4th_Order_b(m_step)*(-48.D0/5.D0))
+      CALL Add(P,Tmp1,Tmp2)
+      CALL SetEq(P,Tmp2)
+
+      CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-4 /)))
+      CALL Multiply(Tmp1,beta*Symplectic_4th_Order_b(m_step)*(27.D0/5.D0))
+      CALL Add(P,Tmp1,Tmp2)
+      CALL SetEq(P,Tmp2)
+
+      CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-5 /)))
+      CALL Multiply(Tmp1,beta*Symplectic_4th_Order_b(m_step)*(-8.D0/5.D0))
+      CALL Add(P,Tmp1,Tmp2)
+      CALL SetEq(P,Tmp2)
+
+      CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-6 /)))
+      CALL Multiply(Tmp1,beta*Symplectic_4th_Order_b(m_step)*(1.D0/5.D0))
+      CALL Add(P,Tmp1,Tmp2)
+      CALL SetEq(P,Tmp2)
+    ENDIF
+#endif
+
     CALL Add(PV,P,Tmp1)
     CALL SetEq(PV,Tmp1)
 
     ! PV(n) = PV(n-1) + 4.61D0*b(m_step)*[D(n-1)-P(n-1)]
-    FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO))//'_C#'//TRIM(IntToChar(MyClone))//'.PVsave'
-    CALL Put(PV,FileName)
+    CALL Put(PV, TrixFile("PVsave", Args))
 
     ! Get P(n-1)
-    FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO-1))//'_C#'//TRIM(IntToChar(MyClone))//'.DOPsave'
-    CALL Get(Tmp1,FileName)
+    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-1 /)))
     CALL Multiply(Tmp1,1.D0-alpha)
-    CALL Multiply(PV,Symplectic_4th_Order_a(m_step))
+
     ! P(n) = P(n-1) + a(m_step)*PV(n)
+    CALL Multiply(PV,Symplectic_4th_Order_a(m_step))
     CALL Add(Tmp1,PV,Tmp2)
 
-    FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO-1))//'_C#'//TRIM(IntToChar(MyClone))//'.DOsave'
-    CALL Get(Tmp1,FileName)
+    ! Get D(n-1)
+    CALL Get(Tmp1, TrixFile("DOsave", Stats_O = (/ iSCF, iBAS, iGEO-1 /)))
     CALL Multiply(Tmp1,alpha)
     CALL Add(Tmp1,Tmp2,P)
 
-    FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO))//'_C#'//TRIM(IntToChar(MyClone))//'.DOPsave'
-    CALL Put(P,FileName)
+    CALL Put(P, TrixFile("DOPsave", Args))
 
     ! Purify P
 #ifdef PARALLEL
@@ -662,7 +1280,9 @@ PROGRAM P2Use
         IF(ABS(TrP2-Half*DBLE(NEl)) < 1.D-8) EXIT
       ENDIF
     ENDDO
-    CALL MondoLog(DEBUG_NONE, "P2Use", "Trace(P) = "//TRIM(FltToChar(TrP))//" "//TRIM(FltToChar(TrP2)))
+    CALL MondoLog(DEBUG_NONE, logtag, "purified after "//TRIM(IntToChar(I))//" iterations")
+    CALL MondoLog(DEBUG_NONE, logtag, "Trace(P) = "//TRIM(DblToChar(TrP)))
+    CALL MondoLog(DEBUG_NONE, logtag, "Trace(P2) = "//TRIM(DblToChar(TrP2)))
 
     ! Convert to AO Rep
     INQUIRE(FILE=TrixFile('X',Args),EXIST=Present)
@@ -690,13 +1310,16 @@ PROGRAM P2Use
     CALL Delete(Tmp2)
 
   CASE('FMVerlet0')
+
     iGEO = Args%I%I(3)
     CALL New(F)
     CALL New(P)
     CALL New(Tmp1)
     CALL New(Tmp2)
-    IF(iGEO .LE. 2) CALL Halt('P2Use:FMVerlet0: No Previous Fock Matrix Defined')
-    !
+    IF(iGEO .LE. 2) THEN
+      CALL Halt("[P2Use:FMVerlet0] No Previous Fock Matrix Defined")
+    ENDIF
+
     !    Compute Fnew in ortho space: This is specifically for MD
     !
     !    Save F(p-1,n) as F(p-1,0), when p==3
@@ -741,7 +1364,7 @@ PROGRAM P2Use
         IF(ABS(TrP2-Half*DBLE(NEl)) < 1.D-8) EXIT
       ENDIF
     ENDDO
-    CALL MondoLog(DEBUG_NONE, "P2Use", "Trace(P) = "//TRIM(FltToChar(TrP)))
+    CALL MondoLog(DEBUG_NONE, logtag, "Trace(P) = "//TRIM(FltToChar(TrP)))
 
     !    Convert to AO Rep
     INQUIRE(FILE=TrixFile('X',Args),EXIST=Present)
@@ -767,13 +1390,17 @@ PROGRAM P2Use
     CALL Delete(Tmp2)
 
   CASE('FMVerlet1')
+
     iGEO = Args%I%I(3)
+
     CALL New(F)
     CALL New(P)
     CALL New(Tmp1)
     CALL New(Tmp2)
-    IF(iGEO .LE. 4) CALL Halt('P2Use:FMVerlet0: No Previous Fock Matrix Defined')
-    !
+    IF(iGEO .LE. 4) THEN
+      CALL Halt("[P2Use:FMVerlet1] No Previous Fock Matrix Defined")
+    ENDIF
+
     !    Compute Fnew in ortho space: This is specifically for MD
     !
     !    Save F(p-1,n) as F(p-1,0), when p==3
@@ -831,7 +1458,7 @@ PROGRAM P2Use
         IF(ABS(TrP2-Half*DBLE(NEl)) < 1.D-8) EXIT
       ENDIF
     ENDDO
-    CALL MondoLog(DEBUG_NONE, "P2Use", "Trace(P) = "//TRIM(FltToChar(TrP)))
+    CALL MondoLog(DEBUG_NONE, logtag, "Trace(P) = "//TRIM(FltToChar(TrP)))
 
     !    Convert to AO Rep
     INQUIRE(FILE=TrixFile('X',Args),EXIST=Present)
@@ -855,6 +1482,7 @@ PROGRAM P2Use
     CALL Delete(P)
     CALL Delete(Tmp1)
     CALL Delete(Tmp2)
+
     !
     !    Geometry Change
     !
@@ -876,7 +1504,7 @@ PROGRAM P2Use
            //'_Cycl#'//TRIM(IntToChar(ICycle)) &
            //'_Clone#'//TRIM(IntToChar(MyClone)) &
            //'.D'
-      CALL MondoLog(DEBUG_NONE, "P2Use("//TRIM(SCFActn)//")", "Looking for "//TRIM(DMFile))
+      CALL MondoLog(DEBUG_NONE, logtag, "Looking for "//TRIM(DMFile))
       INQUIRE(FILE=DMFile,EXIST=Present)
       IF(.NOT.Present)THEN
         Cycle=ICycle-1
@@ -885,15 +1513,15 @@ PROGRAM P2Use
              //'_Cycl#'//TRIM(IntToChar(Cycle)) &
              //'_Clone#'//TRIM(IntToChar(MyClone)) &
              //'.D'
-        CALL MondoLog(DEBUG_NONE, "P2Use("//TRIM(SCFActn)//")", "On extrapolation, P2Use is opening DM "//TRIM(DMFile))
+        CALL MondoLog(DEBUG_NONE, logtag, "On extrapolation, P2Use is opening DM "//TRIM(DMFile))
         EXIT
       ENDIF
     ENDDO
 
-    CALL MondoLog(DEBUG_NONE, "P2Use("//TRIM(SCFActn)//")", "Cycle = "//TRIM(IntToChar(Cycle)))
+    CALL MondoLog(DEBUG_NONE, logtag, "Cycle = "//TRIM(IntToChar(Cycle)))
 
     IF(Cycle<0)THEN
-      CALL MondoLog(DEBUG_NONE, "P2Use", 'Assuming this is a restart!  If there is no restart, its going to die...')
+      CALL MondoLog(DEBUG_NONE, logtag, "Assuming this is a restart! If there is no restart, its going to die...")
       CALL Get(S0,TrixFile('S',Args,Stats_O=(/Current(1),Current(2),Current(3)-1/)))
       CALL Get(S1,TrixFile('S',Args,Stats_O=Current))
       ! Close Current Group
@@ -932,17 +1560,32 @@ PROGRAM P2Use
       IF(DoingMD) THEN
         DMPOrder=0
         CALL Get(MDGeuss ,"MDGeuss")
-        IF(MDGeuss=='DMProj0') DMPOrder=0
-        IF(MDGeuss=='DMProj1') DMPOrder=1
-        IF(MDGeuss=='DMProj2') DMPOrder=2
-        IF(MDGeuss=='DMProj3') DMPOrder=3
-        IF(MDGeuss=='DMProj4') DMPOrder=4
+        SELECT CASE(MDGeuss)
+
+        CASE('DMProj0')
+          DMPOrder=0
+
+        CASE('DMProj1')
+          DMPOrder=1
+
+        CASE('DMProj2')
+          DMPOrder=2
+
+        CASE('DMProj3')
+          DMPOrder=3
+
+        CASE('DMProj4')
+          DMPOrder=4
+
+        CASE DEFAULT
+          CALL Halt("illegal DMPOrder ("//TRIM(MDGeuss)//")")
+        END SELECT
         iGEO     = Args%I%I(3)
         DMPOrder = MIN(MAX(iGEO-2,0),DMPOrder)
         CALL DMPProj(iGEO,DMPOrder,P0,Tmp1,Tmp2)
       ELSE
         IF(DMPOrder > 0) THEN
-          CALL Warn('P2Use:DMPOrder is only implimented for MD')
+          CALL Warn(TRIM(logtag)//' POrder is only implimented for MD')
         ENDIF
       ENDIF
     ENDIF
@@ -951,27 +1594,19 @@ PROGRAM P2Use
     CALL Multiply(P0,S0,Tmp1)
     TError0 = ABS(Trace(Tmp1)-DBLE(NEl)/SFac)
     IF(MyID.EQ.ROOT) THEN
-      IF(PrintFlags%Key==DEBUG_MAXIMUM) THEN
-        CALL MondoLog(DEBUG_MAXIMUM, "P2Use", "Trace Error: Tr[P0,S0] = "//TRIM(IntToChar(TError0)))
-        !CALL OpenASCII(OutFile,Out)
-        !CALL PrintProtectL(Out)
-        CALL MondoLog(DEBUG_MAXIMUM, "P2Use", "Trace Error: Tr[P0,S1] = "//TRIM(IntToChar(TError0)))
-        !CALL PrintProtectR(Out)
-        !CLOSE(UNIT=Out,STATUS='KEEP')
-      ENDIF
+      CALL MondoLog(DEBUG_MAXIMUM, logtag, "Trace Error: Tr[P0,S0] = "//TRIM(IntToChar(TError0)))
+      CALL MondoLog(DEBUG_MAXIMUM, logtag, "Trace Error: Tr[P0,S1] = "//TRIM(IntToChar(TError0)))
     ENDIF
     CALL Multiply(P0,S1,Tmp1)
     TError0 = ABS(Trace(Tmp1)-DBLE(NEl)/SFac)
     IF(MyID.EQ.ROOT)THEN
-      CALL MondoLog(DEBUG_MAXIMUM, "P2Use", "Trace Error: Tr[P0,S1] = "//TRIM(IntToChar(TError0)))
+      CALL MondoLog(DEBUG_MAXIMUM, logtag, "Trace Error: Tr[P0,S1] = "//TRIM(IntToChar(TError0)))
     ENDIF
 #else
     TError0 = ABS(Trace(P0,S1)-DBLE(NEl)/SFac)
     IF(PrintFlags%Key==DEBUG_MAXIMUM) THEN
-      TrP=ABS(Trace(P0,S0)-DBLE(NEl)/SFac)
-      CALL MondoLog(DEBUG_MAXIMUM, "P2Use", "Trace Error: Tr[P0,S0] = "//TRIM(FltToChar(TrP)))
-      TrP=ABS(Trace(P0,S1)-DBLE(NEl)/SFac)
-      CALL MondoLog(DEBUG_MAXIMUM, "P2Use", "Trace Error: Tr[P0,S1] = "//TRIM(FltToChar(TrP)))
+      CALL MondoLog(DEBUG_MAXIMUM, logtag, "Trace Error: Tr[P0,S0] = "//TRIM(FltToChar(ABS(Trace(P0,S0)-DBLE(NEl)/SFac))))
+      CALL MondoLog(DEBUG_MAXIMUM, logtag, "Trace Error: Tr[P0,S1] = "//TRIM(FltToChar(ABS(Trace(P0,S1)-DBLE(NEl)/SFac))))
     ENDIF
 #endif
     ! Initialize
@@ -994,18 +1629,19 @@ PROGRAM P2Use
 #ifdef PARALLEL
       IF(MyId==ROOT)THEN
 #endif
-        CALL MondoLog(DEBUG_MEDIUM, "P2Use", ProcessName(Prog,'AO-DMX ') &
-             //' Nstep  = '//TRIM(IntToChar(NStep)) &
-             //' Lambda = '//TRIM(DblToMedmChar(Lam)))
+        CALL MondoLog(DEBUG_MEDIUM, logtag, &
+          ProcessName(Prog,'AO-DMX ')// &
+          ' Nstep  = '//TRIM(IntToChar(NStep))// &
+          ' Lambda = '//TRIM(DblToMedmChar(Lam)))
 #ifdef PARALLEL
       ENDIF
 #endif
 
 #ifdef PARALLEL
       CALL Multiply(P,S,Tmp1)
-      TrP        = Trace(Tmp1)
+      TrP = Trace(Tmp1)
 #else
-      TrP        = Trace(P,S)
+      TrP = Trace(P,S)
 #endif
       Norm_Error = TrP-DBLE(NEl)/SFac
       Ipot_Error = One
@@ -1036,7 +1672,7 @@ PROGRAM P2Use
         IF(MyId==ROOT)THEN
 #endif
           PNon0s=100.D0*DBLE(P%NNon0)/DBLE(NBasF*NBasF)
-          CALL MondoLog(DEBUG_MEDIUM, "P2Use", ProcessName(Prog,'AO-DMX ' &
+          CALL MondoLog(DEBUG_MEDIUM, logtag, ProcessName(Prog,'AO-DMX ' &
             //TRIM(IntToChar(NStep))//":"//TRIM(IntToChar(I))) &
             //' dN='//TRIM(DblToShrtChar(Norm_Error)) &
             //', %Non0='//TRIM(DblToShrtChar(PNon0s)))
@@ -1065,7 +1701,7 @@ PROGRAM P2Use
         EXIT
       ELSE
         IF(DLam < 1.D-2 .OR. NStep > 50) THEN
-          CALL Halt('P2Use: Density Matrix Extrapolater Failed to converge in '//TRIM(IntToChar(NStep))//' steps')
+          CALL Halt("[P2Use:"//TRIM(SCFActn)//"] Density Matrix Extrapolater Failed to converge in "//TRIM(IntToChar(NStep))//" steps")
         ENDIF
         IF(.NOT. ConvergeAOSP) THEN
           Lam  = Lam - DLam
@@ -1089,13 +1725,18 @@ PROGRAM P2Use
     CALL Delete(S1)
     CALL Delete(Tmp1)
     CALL Delete(Tmp2)
+
   CASE DEFAULT
-    CALL Halt(' Unknown option '//TRIM(SCFActn))
+    CALL Halt("Unknown option "//TRIM(SCFActn))
+
   END SELECT
+
+  CALL MondoLog(DEBUG_NONE, logtag, "done")
+
   ! Tidy up ...
   CALL Delete(GM)
   CALL Delete(BS)
   CALL ShutDown(Prog)
-  !
+
 END PROGRAM P2Use
 

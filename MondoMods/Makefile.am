@@ -1,16 +1,20 @@
 include $(top_srcdir)/make.inc
 
 if INTERNAL_LAPACK
-  INTERNAL_LAPACK_DIRS = lapack
+INTERNAL_LAPACK_DIRS = lapack
 endif
 
 if INTERNAL_HDF5
-  INTERNAL_HDF5_DIRS = hdf5
+INTERNAL_HDF5_DIRS = hdf5
 endif
 
 SUBDIRS = $(INTERNAL_HDF5_DIRS) $(INTERNAL_LAPACK_DIRS)
 
+if USE_DYNAMIC_LINKING
+lib_LTLIBRARIES = libMondoMods.la
+else
 noinst_LTLIBRARIES = libMondoMods.la
+endif
 
 libMondoMods_la_SOURCES = \
   AInv.f90 \
@@ -131,6 +135,7 @@ EXTRA_INCLUDES = \
 SOURCES_DEPCHECK = $(libMondoMods_la_SOURCES)
 
 # Dependencies.
+
 AInv.lo: DerivedTypes.lo GlobalCharacters.lo GlobalScalars.lo LinAlg.lo MatFunk.lo \
 	MemMan.lo
 Anneal.lo: MemMan.lo PrettyPrint.lo 
@@ -185,3 +190,4 @@ Slatec.lo: GlobalScalars.lo ProcessControl.lo
 SpecFun.lo: DerivedTypes.lo Parse.lo ProcessControl.lo SpecFun.lo 
 Thresholding.lo: DerivedTypes.lo GlobalCharacters.lo GlobalObjects.lo \
 	GlobalScalars.lo InOut.lo McMurch.lo Mechanics.lo Parse.lo SpecFun.lo
+

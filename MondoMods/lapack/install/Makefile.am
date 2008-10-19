@@ -3,7 +3,11 @@ include $(top_srcdir)/make.inc
 # No linking of anything...
 LIBS =
 
+if USE_DYNAMIC_LINKING
+lib_LTLIBRARIES = libMondoLAPACKEXTRA.la
+else
 noinst_LTLIBRARIES = libMondoLAPACKEXTRA.la
+endif
 
 libMondoLAPACKEXTRA_la_SOURCES = \
   ilaver.f \

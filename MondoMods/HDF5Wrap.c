@@ -30,7 +30,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <config.h>
+#include "config.h"
 
 #if defined (HAVE_INTERNAL_HDF5)
 #warning Using internal hdf5
@@ -40,6 +40,9 @@
 #endif
 
 #include <string.h>
+
+#include <sys/types.h>
+#include <regex.h>
 
 /*
   THESE TURN ON VARIOUS LEVELS OF DEBUG
@@ -55,7 +58,7 @@ char* IntToChar(int* NC, int* IntArray)
   int   j;
   char* VarName;
 
-  VarName = (char*) calloc(*NC+1, sizeof(char));
+  VarName = (char*) malloc((*NC+1)*sizeof(char));
   for(j=0; j < *NC; j++) { VarName[j] = (char) IntArray[j]; }
   VarName[*NC] = '\0';
   return VarName;
@@ -496,11 +499,112 @@ int hdf5readdoublevector__(int* DataId, int* DataSpc, double* Data)
 {return hdf5readdoublevector_(DataId,DataSpc,Data);}
 
 /* Get the library version. */
-int hdf5version (unsigned *majnum, unsigned *minnum, unsigned *relnum)
+int
+hdf5version (unsigned *majnum, unsigned *minnum, unsigned *relnum)
 {
   return H5get_libversion(majnum, minnum, relnum);
 }
-int hdf5version_ (unsigned *majnum, unsigned *minnum, unsigned *relnum)
+int
+hdf5version_ (unsigned *majnum, unsigned *minnum, unsigned *relnum)
 {
   return hdf5version(majnum, minnum, relnum);
+}
+
+typedef struct op_data_t
+{
+  hid_t hdfID;
+  regex_t pattern;
+}
+op_data_t;
+
+/* Deletes object from group given a name. The name can contain wildcards. */
+herr_t
+hdf5delete_op (hid_t groupID, const char *name, const H5L_info_t *info, void *op_data_arg)
+{
+  struct op_data_t *op_data = (struct op_data_t*) op_data_arg;
+  int result;
+
+  /* Debugging output. */
+  fprintf(stderr, "[hdf5delete_op] group ID %i, hdf ID %i, object name = %s... ", groupID, op_data->hdfID, name);
+
+  /* Match link name with objectName pattern. */
+  result = regexec(&(op_data->pattern), name, 0, NULL, 0);
+  if (result == 0)
+  {
+    fprintf(stderr, "found match... deleting object... ");
+    fprintf(stderr, "link type %i... ", info->type);
+
+    if ((result = H5Ldelete(op_data->hdfID, name, H5P_DEFAULT)) < 0)
+    {
+      fprintf(stderr, "%s:%i error\n", __FILE__, __LINE__);
+      H5Eprint(H5Eget_current_stack(), stderr);
+    }
+
+    else
+    {
+      fprintf(stderr, "ok\n");
+      return result;
+    }
+  }
+
+  else if (result == REG_ESPACE)
+  {
+    fprintf(stderr, "ran out of memory\n");
+  }
+
+  else
+  {
+    fprintf(stderr, "no match\n");
+  }
+
+  /* Return an error. */
+  return -1;
+}
+
+int
+hdf5delete (int* id, int* groupNameN, int* groupNameC, int* objectNameN, int* objectNameC)
+{
+  char *groupName = IntToChar(groupNameN, groupNameC);
+  char *objectName = IntToChar(objectNameN, objectNameC);
+  hid_t *hdfID = (hid_t*) id;
+  herr_t result;
+  hsize_t index = 0;
+  struct op_data_t op_data;
+
+  /* Set some data. */
+  op_data.hdfID = *hdfID;
+
+  fprintf(stderr, "[hdf5delete] hdfID %i\n", *hdfID);
+  fprintf(stderr, "[hdf5delete] searching for objects in group \"%s\"\n", groupName);
+  fprintf(stderr, "[hdf5delete] object name filter \"%s\"\n", objectName);
+
+  /* Compile regular expression pattern. */
+  if (regcomp(&(op_data.pattern), objectName, 0) != 0)
+  {
+    fprintf(stderr, "[hdf5delete] error compiling pattern %s\n", objectName);
+    exit(1);
+  }
+
+  /* More debugging. */
+  //fprintf(stderr, "[hdf5delete] pattern.allocated = %u\n", op_data.pattern.allocated);
+
+  /* Start to search. */
+  while ((result = H5Literate_by_name(*hdfID, groupName, H5_INDEX_NAME,
+          H5_ITER_NATIVE, &index, hdf5delete_op, (void*) &op_data, H5P_DEFAULT)) >= 0)
+  {}
+
+  exit(1);
+
+  /* Clean up memory. */
+  free(groupName);
+  free(objectName);
+
+  /* Return. */
+  return 0;
+}
+
+int
+hdf5delete_ (int* id, int* groupNameN, int* groupNameC, int* objectNameN, int* objectNameC)
+{
+  return hdf5delete(id, groupNameN, groupNameC, objectNameN, objectNameC);
 }

@@ -3953,7 +3953,7 @@ CONTAINS
     CLOSE(Tmp)
   END SUBROUTINE MStats
   !-------------------------------------------------------------------------------
-  !      Frobenious Norm
+  !      Frobenius Norm
   !-------------------------------------------------------------------------------
 #ifdef PARALLEL
   FUNCTION FNorm_DBCSR(M)

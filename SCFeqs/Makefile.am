@@ -15,7 +15,16 @@ SP2_SOURCES         = FillPBlok.f90 SP2.f90 DenMatMethods.f90
 TS4_SOURCES         = FillPBlok.f90 TS4.f90 DenMatMethods.f90
 SCFstats_SOURCES    = SCFStatus.f90
 P2Use_SOURCES       = FillPBlok.f90 P2Use.f90 DenMatMethods.f90
-DIIS_SOURCES        = DIIS.f90
+
+if REALLY_OLD_DIIS
+DIIS_SOURCES = DIIS_2004-01-16.f90
+else
+if OLD_DIIS
+DIIS_SOURCES = DIIS_1.3.f90
+else
+DIIS_SOURCES = DIIS.f90
+endif
+endif
 
 IRInv_DEPENDENCIES       = $(MondoMods_DEPENDENCY_FILES)
 ODA_DEPENDENCIES         = $(MondoMods_DEPENDENCY_FILES)
@@ -60,6 +69,6 @@ SP2.o            : DenMatMethods.o
 TS4.o            : DenMatMethods.o
 DenMatResponse.o : DenMatMethods.o
 LowdinO.o        : DenMatMethods.o
-P2Use.o          : DenMatMethods.o FillPBlok.o
+P2Use.o          : $(top_srcdir)/MondoConfig.h DenMatMethods.o FillPBlok.o
 RHeqs.o          : DenMatMethods.o
 BlokAInv.o       : DenMatMethods.o

@@ -78,7 +78,7 @@ MODULE MonteCarlo
     MDTime%D  = Zero
     MDKin%D   = Zero
     MDEpot%D  = Zero
-    MDETot%D  = Zero
+    MDEtot%D  = Zero
     MDTemp%D  = Zero
     MDTave%D  = Zero
     MDLinP%D  = Zero
@@ -320,7 +320,7 @@ MODULE MonteCarlo
        Line = "-------------------------------------------MC-"//TRIM(IntToChar(iMC))// &
               "-MC-------------------------------------------"
        WRITE(Out,97) Line
-       WRITE(Out,98) "MC Potential   = ",MDEPot%D(iCLONE)
+       WRITE(Out,98) "MC Potential   = ",MDEpot%D(iCLONE)
        IF(iSTATUS==0) THEN
           WRITE(Out,*) "Move Rejected"
        ELSE

@@ -1321,7 +1321,7 @@ MODULE PrettyPrint
     CALL ClosePU(PU)
 !
 32  FORMAT(1X,A)
-33  FORMAT(56('-'))
+33  FORMAT(67('-'))
 34  FORMAT('   Atom   Z                Forces (au) ')
 35  FORMAT(I6,'  ',I3,'  ',3(F16.10))
 40  FORMAT(3(2X,F14.10))

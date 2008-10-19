@@ -1,8 +1,8 @@
 include $(top_srcdir)/make.inc
 
-bin_PROGRAMS = MondoSCF
+bin_PROGRAMS = FreeON
 
-MondoSCF_SOURCES = \
+FreeON_SOURCES = \
   ControlStructures.f90 \
   ls_rmsd.f90 \
   NEB.f90 \
@@ -43,20 +43,20 @@ MondoSCF_SOURCES = \
   ZippyQuote.f90 \
   GetPID.c \
   Spawn.c \
-  MondoSCF.f90
+  FreeON.f90
 
-MondoSCF_DEPENDENCIES = $(MondoMods_DEPENDENCY_FILES)
+FreeON_DEPENDENCIES = $(MondoMods_DEPENDENCY_FILES)
 
 SOURCES_DEPCHECK = $(MondoSCF_SOURCES)
 
 EXTRA_INCLUDES = -I../MondoMods
 
-MondoSCF_LDADD = $(LDADD_MONDOMODS) $(LDADD_INTERNAL_LAPACK) $(LDADD_INTERNAL_HDF5)
+FreeON_LDADD = $(LDADD_MONDOMODS) $(LDADD_INTERNAL_LAPACK) $(LDADD_INTERNAL_HDF5)
 
 CPPMISC = -DNEB2
 
-# Link rule for MondoSCF.
-MondoSCF_LINK = $(FCLINK)
+# Link rule for FreeON.
+FreeON_LINK = $(FCLINK)
 
 # Dependencies.
 

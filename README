@@ -1,3 +1,5 @@
+********** Building FreeON **********
+
 If you checked out the sources from the git repository, then you will have to
 build the configure script before you can configure and make the sources. This
 step has to be done only once however. After subsequent updates from git through
@@ -29,6 +31,36 @@ You can change this by running configure as
 
 which will install the binaries into /some/other/directory/bin.
 
+
+
+********** Cleaning the sources **********
+
+To clean out the sources, there are several options:
+
+make quickclean
+
+will clean out most directories and avoid cleaning directories that are lengthy
+to rebuild, as for instance MondoMods.
+
+make clean
+
+will clean everything, i.e. all of the .o files and such.
+
+make distclean
+
+will really clean stuff, the directory will look like as if just unpacked from
+the tar archive.
+
+make maintainer-clean
+
+will go to town and clean out everything in addition to everything. This option
+should really only be used by someone who knows how to live with the
+consequences. It's not for the faint hearted.
+
+
+
+********** Examples for configure **********
+
 Some examples of how to configure MondoSCF. The following configure commands
 work. In order to use the PHiPAC (P3) optimized dgemms, add --enable-phipac to
 the configure command line.
@@ -51,11 +83,30 @@ the configure command line.
 (6)
 ./configure FC=ifort F77=ifort CC=icc CFLAGS="-O3 -fomit-frame-pointer" FFLAGS="-O3 -fomit-frame-pointer" FCFLAGS="-O3 -fomit-frame-pointer" --prefix=/tmp/Mondo --disable-internal-lapack --with-lapack=/usr/local/lapack --with-lapacklibs="-llapack_linux-ifort-10.0.023 -lblas_linux-ifort-10.0.023"
 
+(7)
+./configure CC=/usr/local/gcc-4.2.4/bin/gcc FC=/usr/local/gcc-4.2.4/bin/gfortran F77=/usr/local/gcc-4.2.4/bin/gfortran CFLAGS="-O3 -msse -msse2 -mfpmath=sse -ftree-vectorize" FFLAGS="-O3 -msse -msse2 -mfpmath=sse -ftree-vectorize" FCFLAGS="-O3 -msse -msse2 -mfpmath=sse -ftree-vectorize" -disable-static-binaries --prefix=/tmp/Mondo
+
+(8)
+./configure FC=ifort F77=ifort CC=icc CFLAGS="-O3 -fomit-frame-pointer -xP" FFLAGS="-O3 -fomit-frame-pointer -xP" FCFLAGS="-O3 -fomit-frame-pointer -xP" --prefix=/tmp/Mondo
+
+
+
+********** Timings **********
+
 Some timing information:
 
-Running Validate/MD_H2.inp on MacBook Pro 1 (Core Duo) 2.16GHz
+Running examples/MD/MD-H2.inp on MacBook Pro 1 (Core Duo) 2.16GHz:
+
+time (MondoSCF MD-H2.inp > /dev/null)
+
 gfortran 4.2.1, compiled with (1): real 10m39.911s user 9m46.164s sys 0m15.639s
 ifort 10.0.023, compiled with (3): real  9m10.989s user 8m14.051s sys 0m16.881s
+
+time ( MondoSCF MD-H2-BO.inp > /dev/null )
+
+gfortran 4.2.4, compiled with (7): real 3m24.527s user  2m56.920s sys 0m24.685s
+ifort 10.1.015, compiled with (4): real 2m37.621s user  2m8.828s  sys 0m23.801s
+ifort 10.1.015, compiled with (8): real 2m30.579s user  2m7.040s  sys 0m21.396s
 
 Some building information:
 
@@ -63,3 +114,19 @@ Building (4) on MacBook Pro 1 (Core Duo) 2.16GHz
 make -j1: real 23m6.268s  user 20m16.247s sys 1m38.732s
 make -j2: real 15m24.275s user 23m26.838s sys 1m49.598s
 make -j3: real 15m35.510s user 23m38.548s sys 1m49.434s
+
+
+
+
+Running Mondo:
+
+Mondo accepts several command line arguments. The most basic mode of running
+Mondo is by specifying only the input file:
+
+MondoSCF something.inp
+
+The output files will be named based on the name of the input file with an added
+PID (process ID) tag. One can also specify exactly what the output filename
+should be called by running Mondo in this way:
+
+MondoSCF something.inp something.out something.log something.geometries

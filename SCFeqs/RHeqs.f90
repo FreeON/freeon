@@ -262,13 +262,7 @@ PROGRAM RHEqs
     CALL Get(sX,TrixFile('ZT',Args))    ! X =Z^t=L^{-t}
     CALL Multiply(sTmp1,sX,sP)          ! F=Z.P_Orthog.Z^t
   ENDIF
-  CALL Filter(sTmp1,sP)                  ! T1 =P_AO=Filter[Z.P_Orthog.Z^t]
-
-  ! Symmetry check.
-  !CALL Xpose(P, PT)
-  !PT%MTrix%D = -PT%MTrix%D
-  !CALL Add(P, PT, Tmp2)
-  !WRITE(*,*) "FNorm(P-PT) = ", FNorm(Tmp2)
+  CALL Filter(sTmp1,sP)                 ! T1 =P_AO=Filter[Z.P_Orthog.Z^t]
 
   ! Archive the AO-DM
   CALL Get(DensityArchive,'ArchiveDensity')
@@ -280,7 +274,7 @@ PROGRAM RHEqs
   CALL PChkSum(sTmp1,'P['//TRIM(NxtCycl)//']',Prog)
   CALL PPrint(sTmp1,'P['//TRIM(NxtCycl)//']')
   CALL Plot(sTmp1,'P['//TRIM(NxtCycl)//']')
-  !----------------------------------------------
+
   CALL Delete(sX)
   CALL Delete(sP)
   CALL Delete(sTmp1)

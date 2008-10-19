@@ -33,6 +33,7 @@ MODULE Parse
   USE ParsingConstants
   USE ProcessControl
   USE MemMan
+  USE MondoLogger
 
   IMPLICIT NONE
 
@@ -575,7 +576,9 @@ CONTAINS
   FUNCTION CharToInt(C)
     CHARACTER(LEN=*),INTENT(IN) :: C
     INTEGER                     :: CharToInt
-    READ(UNIT=C,FMT=INTERNAL_INT_FMT)CharToInt
+    READ(UNIT=C,FMT=INTERNAL_INT_FMT,ERR=666) CharToInt
+    RETURN
+666 CALL Halt("[CharToInt] Fatal error, can not convert "//TRIM(C))
   END FUNCTION CharToInt
   !------------------------------------------------------------------
   !     Convert a character string into a double or DBLE(integer)
@@ -589,7 +592,7 @@ CONTAINS
     IF(SCAN(C,'.') == 0 .AND. SCAN(C,'e') == 0 .AND. SCAN(C,'d') == 0)THEN
       !WRITE(*,*) "[CharToDbl] could not find decimal point"
       ! Maybe its an integer, lets try that ...
-      READ(UNIT=C,FMT=INTERNAL_INT_FMT)TempInt
+      READ(UNIT=C,FMT=INTERNAL_INT_FMT,ERR=667)TempInt
       ! Now cast to double
       CharToDbl=DBLE(TempInt)
     ELSEIF(SCAN(C,".") == 0 .AND. (SCAN(C,'e') /= 0 .OR. SCAN(C,'d') /= 0)) THEN
@@ -597,14 +600,12 @@ CONTAINS
     ELSE
       !WRITE(*,*) "[CharToDbl] found decimal point"
       ! Some sort of decimal, go for the DBL_FMT
-      READ(UNIT=C,FMT=INTERNAL_DBL_FMT)CharToDbl
+      READ(UNIT=C,FMT=INTERNAL_DBL_FMT,ERR=667)CharToDbl
     ENDIF
+    RETURN
+667 CALL Halt("[CharToDbl] Fatal error, can not convert "//TRIM(C))
   END FUNCTION CharToDbl
   ! Convert integer into string more in an fprintish way.
-
-
-
-
 
   !------------------------------------------------------------------
   !     Convert a short integer into a character string
@@ -624,6 +625,73 @@ CONTAINS
     WRITE(UNIT=IntToChar,FMT=INTERNAL_INT_FMT)I
     IntToChar=ADJUSTL(IntToChar)
   END FUNCTION IntToChar
+
+  ! Convert an INT_VECT to a string.
+  FUNCTION IntVectToChar(x)
+    TYPE(INT_VECT), INTENT(IN)  :: x
+    CHARACTER(LEN=20000)        :: IntVectToChar
+    INTEGER                     :: N
+
+    ! <nbock@lanl.gov>
+    !
+    ! I hardwired the length of the returned string to 20000. This is clearly
+    ! not such a great idea and might break things in case the INT_VECT is very
+    ! long and does not fit into 20000 characters. At some point, someone should
+    ! fix this in a smarter way.
+
+    IF(x%Alloc /= ALLOCATED_TRUE) THEN
+      CALL MondoHalt(1, "[IntVectToChar] vector not allocated")
+    ENDIF
+
+    IntVectToChar = "["
+
+    DO N=1, SIZE(x%I)
+      IntVectToChar = TRIM(IntVectToChar)//" "//TRIM(IntToChar(x%I(N)))
+      IF(N < SIZE(x%I)) THEN
+        IntVectToChar = TRIM(IntVectToChar)//","
+      ENDIF
+    ENDDO
+
+    IntVectToChar = TRIM(IntVectToChar)//" ]"
+  END FUNCTION IntVectToChar
+
+  FUNCTION DblVectToChar(x, Limits_O)
+    TYPE(DBL_VECT), INTENT(IN)                  :: x
+    INTEGER, DIMENSION(2), INTENT(IN), OPTIONAL :: Limits_O
+    CHARACTER(LEN=20000)                        :: DblVectToChar
+    INTEGER                                     :: N, MStart, MEnd
+
+    ! <nbock@lanl.gov>
+    !
+    ! I hardwired the length of the returned string to 20000. This is clearly
+    ! not such a great idea and might break things in case the DBL_VECT is very
+    ! long and does not fit into 20000 characters. At some point, someone should
+    ! fix this in a smarter way.
+
+    IF(x%Alloc /= ALLOCATED_TRUE) THEN
+      CALL MondoHalt(1, "[DblVectToChar] vector not allocated")
+    ENDIF
+
+    IF(PRESENT(Limits_O)) THEN
+      MStart = Limits_O(1)
+      MEnd = Limits_O(2)
+    ELSE
+      MStart = 1
+      MEnd = MStart+SIZE(x%D)-1
+    ENDIF
+
+    DblVectToChar = "["
+
+    DO N=MStart, MEnd
+      DblVectToChar = TRIM(DblVectToChar)//" "//TRIM(DblToChar(x%D(N)))
+      IF(N < MEnd) THEN
+        DblVectToChar = TRIM(DblVectToChar)//","
+      ENDIF
+    ENDDO
+
+    DblVectToChar = TRIM(DblVectToChar)//" ]"
+  END FUNCTION DblVectToChar
+
   !------------------------------------------------------------------
   !     Convert a double into a character string
   !
@@ -694,8 +762,7 @@ CONTAINS
   FUNCTION DblToMMAChar(D)
     REAL(DOUBLE),INTENT(IN)         :: D
     CHARACTER(LEN=30) :: DblToMMAChar
-    DblToMMAChar=TRIM(FltToChar(FRACTION(D))) &
-         //'*2^('//TRIM(IntToChar(EXPONENT(D)))//')'
+    DblToMMAChar=TRIM(FltToChar(FRACTION(D)))//'*2^('//TRIM(IntToChar(EXPONENT(D)))//')'
   END FUNCTION DblToMMAChar
 
   FUNCTION TrixFile(PostFix,Args_O,OffSet_O,Name_O,Stats_O,NoTags_O,PWD_O)
@@ -709,17 +776,33 @@ CONTAINS
     INTEGER, DIMENSION(3)                     :: Stats
     CHARACTER(LEN=DEFAULT_CHR_LEN)            :: Name,TrixFile,Cycl,Base,Geom
 
+    !CALL MondoLog(DEBUG_MAXIMUM, "TrixFile", "PostFix = "//TRIM(PostFix))
     IF(PRESENT(Name_O))THEN
       IF(PRESENT(PWD_O))THEN
         Name=TRIM(PWD_O)//Name_O
       ELSE
         Name=TRIM(MONDO_SCRATCH)//Name_O
       ENDIF
-    ELSEIF(PRESENT(Args_O))THEN
-        Name=SCRName
+    ELSEIF(PRESENT(Args_O) .OR. PRESENT(Stats_O))THEN
+      IF(LEN(TRIM(PWDName)) > 0) THEN
+        !CALL MondoLog(DEBUG_MAXIMUM, "TrixFile", "PWDName = "//TRIM(PWDName))
+      ELSE
+        !CALL MondoLog(DEBUG_MAXIMUM, "TrixFile", "PWDName not set")
+      ENDIF
+      !CALL MondoLog(DEBUG_MAXIMUM, "TrixFile", "ScrName = "//TRIM(ScrName))
+      IF(PRESENT(PWD_O))THEN
+        IF(LEN(PWDName) == 0) THEN
+          CALL Halt("[TrixFile] length of PWDName is zero")
+        ENDIF
+        Name=PWDName
+      ELSE
+        Name=ScrName
+      ENDIF
     ELSE
-      CALL Halt('Neither Name_O or Args_O passed to TrixFile!')
+      CALL Halt('Neither Name_O, Args_O, or Stats_O passed to TrixFile!')
     ENDIF
+
+    !CALL MondoLog(DEBUG_MAXIMUM, "TrixFile", "Name = "//TRIM(Name))
 
     IF(PRESENT(Stats_O))THEN
       Stats(1:3)=Stats_O(1:3)
@@ -728,6 +811,7 @@ CONTAINS
     ELSE
       CALL Halt('Neither Stats_O or Args_O passed to TrixFile!')
     ENDIF
+
     IF(PRESENT(OffSet_O))THEN
       Stats(1)=Stats(1)+OffSet_O
       IF(Stats(1)<0)THEN
@@ -737,7 +821,8 @@ CONTAINS
       Cycl=IntToChar(Stats(1))
       Base=IntToChar(Stats(2))
       Geom=IntToChar(Stats(3))
-      TrixFile=TRIM(Name)//'_Geom#'//TRIM(Geom) &
+      TrixFile=TRIM(Name) &
+           //'_Geom#'//TRIM(Geom) &
            //'_Base#'//TRIM(Base) &
            //'_Cycl#'//TRIM(Cycl) &
            //'_Clone#'//TRIM(IntToChar(MyClone)) &
@@ -747,12 +832,16 @@ CONTAINS
     ELSE
       Base=IntToChar(Stats(2))
       Geom=IntToChar(Stats(3))
-      TrixFile=TRIM(Name)//'_Geom#'//TRIM(Geom) &
+      TrixFile=TRIM(Name) &
+           //'_Geom#'//TRIM(Geom) &
            //'_Base#'//TRIM(Base) &
            //'_Clone#'//TRIM(IntToChar(MyClone)) &
            //'.'//TRIM(PostFix)
     ENDIF
+
+    !CALL MondoLog(DEBUG_MAXIMUM, "TrixFile", "returning "//TRIM(TrixFile))
   END FUNCTION TrixFile
+
   !------------------------------------------------------------------
   FUNCTION StatsToChar(Stats) RESULT(StatString)
     INTEGER,DIMENSION(3) :: Stats
