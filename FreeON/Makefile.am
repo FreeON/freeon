@@ -62,6 +62,12 @@ FreeON_LINK = $(FCLINK)
 
 ConflictDetect.o: ControlStructures.o
 ControlStructures.o: 
+FreeON.o: MDynamics.o MonteCarlo.o Optimizer.o ParseInput.o PrintParsed.o \
+	PunchHDF.o RQI.o Response.o SCFs.o ZippyQuote.o
+FreeON.f90-memory.o: MDynamics.o MonteCarlo.o Optimizer.o ParseInput.o \
+	PrintParsed.o PunchHDF.o RQI.o Response.o SCFs.o ZippyQuote.o
+FreeON.f90-preprocessed.o: MDynamics.o MonteCarlo.o Optimizer.o ParseInput.o \
+	PrintParsed.o PunchHDF.o RQI.o Response.o SCFs.o ZippyQuote.o
 GeomOptKeys.o: 
 Hessian.o: ControlStructures.o GeomOptKeys.o InCoords.o PunchHDF.o
 InCoords.o: ControlStructures.o
@@ -69,8 +75,6 @@ Massage.o: ControlStructures.o DynamicsKeys.o GeometryKeys.o OptionKeys.o
 MDynamics.o: ControlStructures.o DynamicsKeys.o GeomOptKeys.o Numerics.o \
 	PunchHDF.o SCFs.o
 MLP.o: 
-MondoSCF.o: MDynamics.o MonteCarlo.o Optimizer.o ParseInput.o PrintParsed.o \
-	PunchHDF.o RQI.o Response.o SCFs.o ZippyQuote.o
 MonteCarlo.o: ControlStructures.o DynamicsKeys.o GeomOptKeys.o MDynamics.o \
 	Numerics.o PunchHDF.o SCFs.o
 NEB.o: ControlStructures.o ls_rmsd.o

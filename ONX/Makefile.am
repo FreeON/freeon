@@ -66,46 +66,23 @@ EXTRA_INCLUDES = -I../MondoMods -I../TwoE -I../TwoE/MSC -I../TwoE/INT -I../TwoE/
 LDADD = $(LDADD_MONDOMODS) $(LDADD_INTERNAL_LAPACK) $(LDADD_INTERNAL_HDF5) \
   ../TwoE/GRD/libGRD.la ../TwoE/INT/libINT.la ../TwoE/VRR/libVRR.la ../TwoE/HRR/libHRR.la ../TwoE/MSC/libTwoEMisc.la
 
-ONXInit.o : \
-  ONXParameters.o
 
-ONXFillOut.o : \
-  ONXParameters.o \
-	ONXGet.o
 
-ONXRng.o : \
-  ONXParameters.o \
-  Stats.o
-
-ONXCtrSclg.o : \
-  ONXParameters.o
-
-ONX2List.o : \
-  ONX2DataType.o \
-	ONXParameters.o
-
-ONX2ComputK.o : \
-  ONX2DataType.o \
-	ONXParameters.o
-
-ONX2.o : \
-  ONX2DataType.o \
-	ONX2List.o \
-	ONX2ComputK.o \
-	ONXInit.o \
-	ONXCtrSclg.o \
-	ONXRng.o \
-	ONXFillOut.o \
-	ONXGet.o
-
-GONX2ComputDK.o : \
-  ONX2DataType.o \
-	ONXParameters.o \
-	ONX2List.o
-
-GONX2.o : \
-  ONX2DataType.o \
-	ONXCtrSclg.o \
-	ONX2List.o \
-	GONX2ComputDK.o \
-	ONXGet.o
+GONX2.o: GONX2ComputDK.o ONX2DataType.o ONX2List.o ONXCtrSclg.o ONXGet.o \
+	PartDrv.o
+GONX2ComputDK.o: ONX2DataType.o ONX2List.o ONXParameters.o 
+ONX2.o: ONX2ComputK.f90-preprocessed.o ONX2DataType.o ONX2List.o ONXCtrSclg.o \
+	ONXFillOut.o ONXGet.o ONXInit.o ONXParameters.o ONXRng.o PartDrv.o
+ONX2ComputK.o: ONX2DataType.o ONXGet.o ONXParameters.o 
+ONX2ComputK.f90-memory.o: ONX2DataType.o ONXGet.o ONXParameters.o 
+ONX2ComputK.f90-preprocessed.o: ONX2DataType.o ONXGet.o ONXParameters.o 
+ONX2DataType.o: 
+ONX2List.o: ONX2DataType.o ONXParameters.o 
+ONXCtrSclg.o: ONXParameters.o
+ONXFillOut.o: ONXGet.o ONXParameters.o
+ONXGet.o: 
+ONXInit.o: ONXParameters.o
+ONXParameters.o: 
+ONXRng.o: ONXParameters.o Stats.o
+PartDrv.o: 
+Stats.o: 
