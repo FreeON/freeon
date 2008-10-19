@@ -28,9 +28,9 @@ MODULE Utilities
 
   INTERFACE
 
-    SUBROUTINE GetMemoryUsage(virtualMemorySize)
+    SUBROUTINE GetMemoryUsage_Wrapper(virtualMemorySize)
       INTEGER :: virtualMemorySize
-    END SUBROUTINE GetMemoryUsage
+    END SUBROUTINE GetMemoryUsage_Wrapper
 
     SUBROUTINE GetHostnameWrapper(hostname, maximumLength)
       CHARACTER(LEN=*) :: hostname
@@ -49,5 +49,16 @@ CONTAINS
     INTEGER :: i
     i = 0
   END SUBROUTINE NOP
+
+  FUNCTION GetMemoryUsage()
+    INTEGER :: GetMemoryUsage
+    INTEGER :: virtualMemorySize
+
+    CALL GetMemoryUsage_Wrapper(virtualMemorySize)
+    GetMemoryUsage = virtualMemorySize
+
+    RETURN
+
+  END FUNCTION GetMemoryUsage
 
 END MODULE Utilities

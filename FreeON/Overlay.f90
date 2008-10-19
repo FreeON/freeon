@@ -23,10 +23,12 @@
 !    to return derivative works to the MondoSCF group for review, and possible
 !    disemination in future releases.
 !------------------------------------------------------------------------------
+
 MODULE Overlay
   USE InOut
   USE PunchHDF
   USE ControlStructures
+  USE Utilities
   IMPLICIT NONE
 CONTAINS 
   !===============================================================
@@ -45,14 +47,15 @@ CONTAINS
 #if PARALLEL && MPI2
     INTEGER              :: SPAWN,ALL
 #else
-    INTERFACE 
-       FUNCTION Spawn(NC,MaxLen,IChr)
-         INTEGER                         :: NC,MaxLen
-         INTEGER, DIMENSION(1:NC*MaxLen) :: IChr
-         INTEGER                                     :: Spawn
-       END FUNCTION Spawn
+    INTERFACE
+      FUNCTION Spawn(NC,MaxLen,IChr)
+        INTEGER                         :: NC,MaxLen
+        INTEGER, DIMENSION(1:NC*MaxLen) :: IChr
+        INTEGER                         :: Spawn
+      END FUNCTION Spawn
     END INTERFACE
 #endif
+
     !------------------------------------------------------------!
     DO iCLUMP=1,M%Clumps
 !       WRITE(*,*)'========================================================='
@@ -70,9 +73,8 @@ CONTAINS
        DO I=2,NArg
           CmndLine=TRIM(CmndLine)//Blnk//TRIM(ArgV%C(I))
        ENDDO
-
-       ! Log this run
-!       CALL MondoLog(DEBUG_NONE, "Invoke", TRIM(CmndLine))
+      ! Log this run
+      CALL MondoLog(DEBUG_NONE, "Invoke", TRIM(CmndLine))
 #if MPI2
        CALL MPI_COMM_SPAWN(ArgV%C(1),ArgV%C(2:NArg),M%NProc,MPI_INFO_NULL, &
             ROOT,MPI_COMM_SELF,SPAWN,MPI_ERRCODES_IGNORE,IErr)
@@ -84,18 +86,18 @@ CONTAINS
        ! Wait for the kiddies to be done
        CALL MPI_BARRIER(ALL,IErr)
 #else
-       ! Create ASCII integer array to beat F9x/C incompatibility
-       CALL CVToIV(NArg,ArgV,MaxLen,IChr)
-       ! Spawn a sub process 
-       IErr=Spawn(NArg,MaxLen,IChr%I)
-       ! Bring this run down if not successful
-       IF(IErr/=SUCCEED)CALL MondoHalt(IErr,'<'//TRIM(CmndLine)//'>')
-       ! Double check success if a MONDO Exec ...        
-       HDF_CurrentID=OpenHDF(N%HFile)       
-       CALL Get(ProgramFailed,'ProgramFailed')
-       CALL CloseHDF(HDF_CurrentID)
-       IF(ProgramFailed)CALL MondoHalt(-999,'<'//TRIM(CmndLine)//'>')
-       CALL Delete(IChr)
+      ! Create ASCII integer array to beat F9x/C incompatibility
+      CALL CVToIV(NArg,ArgV,MaxLen,IChr)
+      ! Spawn a sub process
+      IErr=Spawn(NArg,MaxLen,IChr%I)
+      CALL Delete(IChr)
+      ! Bring this run down if not successful
+      IF(IErr/=SUCCEED) CALL MondoHalt(IErr,'<'//TRIM(CmndLine)//'>')
+      ! Double check success if a MONDO Exec ...
+      HDF_CurrentID=OpenHDF(N%HFile)
+      CALL Get(ProgramFailed,'ProgramFailed')
+      CALL CloseHDF(HDF_CurrentID)
+      IF(ProgramFailed)CALL MondoHalt(-999,'<'//TRIM(CmndLine)//'>')
 #endif
        CALL Delete(ArgV)
     ENDDO
@@ -115,6 +117,8 @@ CONTAINS
     TYPE(Parallel)     :: M
     INTEGER            :: I,K,NArg,cCLUMP,SNC,NewDex
     TYPE(CHR_VECT)     :: ArgT,ArgV
+
+    ! Start...
     SNC=SIZE(S%Action%C)
 #ifdef MPI2 
     NArg=8+SNC
@@ -175,8 +179,8 @@ CONTAINS
        ENDIF
     ENDDO
 #ifdef MPI2
-    ! Add space for a trailing blank	
-    NArg=NArg+1	
+    ! Add space for a trailing blank
+    NArg=NArg+1
 #endif
     CALL New(ArgV,NArg)
     NArg=0
@@ -188,11 +192,12 @@ CONTAINS
     ENDDO    
 #ifdef MPI2
     ! Here is the trailing blank MPI_COMMM_SPAWN wants
-    NArg=NArg+1	
+    NArg=NArg+1
     ArgV%C(NArg)= " "
 #endif
     CALL Delete(ArgT)
   END SUBROUTINE SetArgV
+
   !===============================================================
   ! CREATE AN INTEGER ARRAY OF ASCII KEYS FROM AN ARRAY OF 
   ! CHARACTER STRINGS; USE FOR PORTABLE F9x/C INTERFACE
@@ -201,14 +206,16 @@ CONTAINS
     TYPE(CHR_VECT) :: ArgV
     TYPE(INT_VECT) :: IChr
     INTEGER        :: I,J,K,L,NArg,MaxLen
-    !------------------------------------------------------------!
+
     ! Max number of characters in an element of ArgV
     MaxLen=0
     DO I=1,NArg   
        MaxLen=MAX(MaxLen,LEN(TRIM(ArgV%C(I))))
     ENDDO
+
     ! Integer array to hold ASCII char-code
     CALL New(IChr,NArg*MaxLen)
+
     ! Convert strings to ASCII keys
     K=0
     DO I=1,NArg
@@ -222,5 +229,6 @@ CONTAINS
           ENDIF
        ENDDO
     ENDDO
+
   END SUBROUTINE CVToIV
 END MODULE

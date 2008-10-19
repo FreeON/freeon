@@ -1,6 +1,6 @@
 AC_PREREQ(2.59)
 
-AC_INIT([freeon], [1.0-alpha-Oct-03-2008], [mchalla@lanl.gov])
+AC_INIT([freeon], [1.0-alpha-Oct-18-2008], [mchalla@lanl.gov])
 AC_COPYRIGHT([
 This code is part of the MondoSCF suite of programs for linear scaling 
 electronic structure theory and ab initio molecular dynamics.
@@ -129,6 +129,9 @@ AC_ARG_ENABLE([optimizations],
     [Disables compiler optimizations])],
   [use_optimizations="${enableval}"],
   [use_optimizations="yes"])
+
+AM_CONDITIONAL(USE_COMPILER_OPTIMIZATIONS, [test "${use_optimizations}" = "yes"])
+
 if test "${use_optimizations}" = "yes"; then
   AC_MSG_RESULT([adding compiler optimizations])
 
@@ -581,6 +584,12 @@ if test "${static_linking}" = "yes"; then
     LDFLAGS="${LDFLAGS} -all-static"
   fi
 
+else
+
+  case "${FC_COMPILERNAME}" in
+    "Intel") LDFLAGS="${LDFLAGS} -shared-intel" ;;
+  esac
+
 fi
 
 # Set the preprocessor.
@@ -660,7 +669,7 @@ AC_DEFINE_UNQUOTED(HAVE_MONDO_VRSN,    ["`uname -r`"], [Define build os version.
 AC_DEFINE_UNQUOTED(HAVE_MONDO_SCRATCH, ["${MONDO_SCRATCH}"], [Define default MONDO_SCRATCH directory.])
 
 # Enable fix for gfortran.
-if test "${ac_cv_fc_compiler_gnu}" = "yes"; then
+if test "${FC_COMPILERNAME}" = "GCC"; then
   AC_DEFINE(GFORTRAN, 1, [Enable fix for gfortran.])
 fi
 
@@ -697,9 +706,6 @@ examples/MD-restart/Makefile
 
 AC_CONFIG_HEADERS([config.h])
 
-# Configuration date
-#AC_DEFINE_UNQUOTED(CONFIG_DATE, ["`date`"], [The date this configuration script was run.])
-
 # User doing the configuration
 AC_DEFINE_UNQUOTED(CONFIG_USER, ["`whoami`@`hostname`"], [The user running the configure script.])
 if test -n "$ORGANIZATION"; then
@@ -710,6 +716,11 @@ fi
 AC_DEFINE(HAVE_MAX_SCF, [256], [The maximum number of SCF cycles. After going
                          through this many SCF cycles, the SCF process is
                          declared converged.])
+
+# For memory debugging.
+AC_DEFINE(LOG_MEMORY_USAGE,
+          [CALL MondoLog(DEBUG_NONE, __FILE__, "memory at "//TRIM(IntToChar(__LINE__))//": "//TRIM(IntToChar(GetMemoryUsage()))//" kiB")],
+          [A helper macro to print out memory usage.])
 
 AC_MSG_NOTICE([***   Summary   ***])
 AC_MSG_NOTICE([CC            = ${CC}])

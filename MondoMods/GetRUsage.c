@@ -41,7 +41,7 @@
  * kBytes.
  */
 void
-getmemoryusage (int * size)
+getmemoryusage_wrapper (int * size)
 {
   pid_t our_pid;
   FILE * file = NULL;
@@ -54,7 +54,7 @@ getmemoryusage (int * size)
   /* Get PID. */
   our_pid = getpid();
 
-  /* Open statm in the proc filesystem. */
+  /* Open stat in the proc filesystem. */
   sprintf(path, "/proc/%i/stat", (int) our_pid);
   file = fopen(path, "r");
 
@@ -74,7 +74,7 @@ getmemoryusage (int * size)
   else { *size = -1; }
 }
 
-void getmemoryusage_ (int * size)
+void getmemoryusage_wrapper_ (int * size)
 {
-  getmemoryusage(size);
+  getmemoryusage_wrapper(size);
 }

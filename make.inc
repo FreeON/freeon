@@ -6,41 +6,35 @@
 CPP = @CPP@
 AM_CPPFLAGS = @AM_CPPFLAGS@
 
-if USE_DYNAMIC_LINKING
-AM_LDFLAGS = -L$(libdir)
-endif
-
 if INTERNAL_LAPACK
-if USE_DYNAMIC_LINKING
-LDADD_INTERNAL_LAPACK = -lMondoLAPACK -lMondoBLAS -lMondoLAPACKEXTRA
-else
-LDADD_INTERNAL_LAPACK = ../MondoMods/lapack/lapack/libMondoLAPACK.la \
-  ../MondoMods/lapack/blas/libMondoBLAS.la \
-  ../MondoMods/lapack/install/libMondoLAPACKEXTRA.la
-endif
+LDADD_INTERNAL_LAPACK = \
+  $(top_srcdir)/MondoMods/lapack/lapack/libMondoLAPACK.la \
+  $(top_srcdir)/MondoMods/lapack/blas/libMondoBLAS.la \
+  $(top_srcdir)/MondoMods/lapack/install/libMondoLAPACKEXTRA.la
 endif
 
 if INTERNAL_HDF5
-if USE_DYNAMIC_LINKING
-LDADD_INTERNAL_HDF5 = -lhdf5
-else
-LDADD_INTERNAL_HDF5 = ../MondoMods/hdf5/src/libhdf5.la
-endif
+LDADD_INTERNAL_HDF5 = $(top_srcdir)/MondoMods/hdf5/src/libhdf5.la
 endif
 
-if USE_DYNAMIC_LINKING
-LDADD_MONDOMODS = -lMondoMods
-else
-LDADD_MONDOMODS = ../MondoMods/libMondoMods.la
-endif
+LDADD_MONDOMODS = $(top_srcdir)/MondoMods/libMondoMods.la
 
 # On filesystems which are case-insensitive (which really means HFS+ on OS X)
 # we can not preprocess into a filename that differs by the case only, i.e. .C
 # -> .c.
 PREPROCESSED_SUFFIX = -preprocessed
+MEMORY_SUFFIX = -memory
 
 # For cleanup.
-CLEANFILES = *.mod *$(PREPROCESSED_SUFFIX).f *$(PREPROCESSED_SUFFIX).f90 *$(PREPROCESSED_SUFFIX).c *~
+CLEANFILES = \
+  *.mod \
+  *$(PREPROCESSED_SUFFIX).f \
+  *$(PREPROCESSED_SUFFIX).f90 \
+  *$(PREPROCESSED_SUFFIX).c \
+  *$(MEMORY_SUFFIX).f \
+  *$(MEMORY_SUFFIX).f90 \
+  *$(MEMORY_SUFFIX).c \
+  *~
 
 # Dependency check (only for debugging).
 depcheck :
@@ -52,9 +46,16 @@ depcheck :
 	done
 
 CPP_COMMAND = $(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(FORTRAN_CPPFLAGS) $(CPPFLAGS) $(CPPMISC)
+
+if USE_COMPILER_OPTIMIZATIONS
 FC_COMMAND  = $(FC) $(AM_FCFLAGS) $(FCFLAGS) $(OPTIMIZATION_FLAGS) $(EXTRA_INCLUDES)
 F77_COMMAND = $(F77) $(AM_FFLAGS) $(FFLAGS) $(OPTIMIZATION_FLAGS) $(EXTRA_INCLUDES)
 CC_COMMAND  = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(CPPFLAGS) $(CPPMISC) $(AM_CFLAGS) $(CFLAGS) $(OPTIMIZATION_FLAGS) $(EXTRA_INCLUDES)
+else
+FC_COMMAND  = $(FC) $(AM_FCFLAGS) $(FCFLAGS) $(EXTRA_INCLUDES)
+F77_COMMAND = $(F77) $(AM_FFLAGS) $(FFLAGS) $(EXTRA_INCLUDES)
+CC_COMMAND  = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(CPPFLAGS) $(CPPMISC) $(AM_CFLAGS) $(CFLAGS) $(EXTRA_INCLUDES)
+endif
 
 # Whether we should keep or remove preprocessed files.
 REMOVE_PREPROCESSED_FILES = @REMOVE_PREPROCESSED_FILES@
@@ -65,30 +66,30 @@ HAVE_MEMORY_DEBUG = @HAVE_MEMORY_DEBUG@
 	@if test "${HAVE_MEMORY_DEBUG}" = "yes"; then \
 		echo "adding memory debug statements to $<"; \
 		sed -e 's/DEALLOCATE(\(.\+\))/CALL MondoLog(DEBUG_NONE, "memory", "deallocating: \1", File_O = __FILE__, Line_O = __LINE__); DEALLOCATE(\1)/' $< | \
-		sed -e 's/ ALLOCATE(\(.\+\))/ CALL MondoLog(DEBUG_NONE, "memory", "allocating: \1", File_O = __FILE__, Line_O = __LINE__); ALLOCATE(\1)/' > $<-memory.f90; \
+		sed -e 's/ ALLOCATE(\(.\+\))/ CALL MondoLog(DEBUG_NONE, "memory", "allocating: \1", File_O = __FILE__, Line_O = __LINE__); ALLOCATE(\1)/' > $<$(MEMORY_SUFFIX).f90; \
 	else \
-		cp $< $<-memory.f90; \
+		cp $< $<$(MEMORY_SUFFIX).f90; \
 	fi
-	$(CPP_COMMAND) $<-memory.f90 | grep -v -E "^#" > $<$(PREPROCESSED_SUFFIX).f90
+	$(CPP_COMMAND) $<$(MEMORY_SUFFIX).f90 | grep -v -E "^#" > $<$(PREPROCESSED_SUFFIX).f90
 	$(FC_COMMAND) -c -o $@ $<$(PREPROCESSED_SUFFIX).f90
 	@if test "${REMOVE_PREPROCESSED_FILES}" = "yes"; then \
 		rm $<$(PREPROCESSED_SUFFIX).f90; \
-		rm $<-memory.f90; \
+		rm $<$(MEMORY_SUFFIX).f90; \
 	fi
 
 .f90.lo :
 	@if test "${HAVE_MEMORY_DEBUG}" = "yes"; then \
 		echo "adding memory debug statements to $<"; \
 		sed -e 's/DEALLOCATE(\(.\+\))/CALL MondoLog(DEBUG_NONE, "memory", "deallocating: \1", File_O = __FILE__, Line_O = __LINE__); DEALLOCATE(\1)/' $< | \
-		sed -e 's/ ALLOCATE(\(.\+\))/ CALL MondoLog(DEBUG_NONE, "memory", "allocating: \1", File_O = __FILE__, Line_O = __LINE__); ALLOCATE(\1)/' > $<-memory.f90; \
+		sed -e 's/ ALLOCATE(\(.\+\))/ CALL MondoLog(DEBUG_NONE, "memory", "allocating: \1", File_O = __FILE__, Line_O = __LINE__); ALLOCATE(\1)/' > $<$(MEMORY_SUFFIX).f90; \
 	else \
-		cp $< $<-memory.f90; \
+		cp $< $<$(MEMORY_SUFFIX).f90; \
 	fi
-	$(CPP_COMMAND) $<-memory.f90 | grep -v -E "^#" > $<$(PREPROCESSED_SUFFIX).f90
+	$(CPP_COMMAND) $<$(MEMORY_SUFFIX).f90 | grep -v -E "^#" > $<$(PREPROCESSED_SUFFIX).f90
 	$(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(FC_COMMAND) -c -o $@ $<$(PREPROCESSED_SUFFIX).f90
 	@if test "${REMOVE_PREPROCESSED_FILES}" = "yes"; then \
 		rm $<$(PREPROCESSED_SUFFIX).f90; \
-		rm $<-memory.f90; \
+		rm $<$(MEMORY_SUFFIX).f90; \
 	fi
 
 #.f90.o :
@@ -124,26 +125,6 @@ HAVE_MEMORY_DEBUG = @HAVE_MEMORY_DEBUG@
 	$(CPP_COMMAND) $< | grep -v -E "^#" > $<$(PREPROCESSED_SUFFIX).f
 	$(LIBTOOL) --tag=F77 $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(F77_COMMAND) -c -o $@ $<$(PREPROCESSED_SUFFIX).f
 	@if test "${REMOVE_PREPROCESSED_FILES}" = "yes"; then rm $<$(PREPROCESSED_SUFFIX).f; fi
-
-# For dependencies of -L and -I.
-if INTERNAL_LAPACK
-if ! USE_DYNAMIC_LINKING
-INTERNAL_LAPACK_DEPENDENCY_FILES = \
-  $(top_srcdir)/MondoMods/lapack/blas/libMondoBLAS.la \
-  $(top_srcdir)/MondoMods/lapack/lapack/libMondoLAPACK.la \
-  $(top_srcdir)/MondoMods/lapack/install/libMondoLAPACKEXTRA.la
-endif
-endif
-
-if INTERNAL_HDF5
-if ! USE_DYNAMIC_LINKING
-INTERNAL_HDF5_DEPENDENCY_FILES = $(top_srcdir)/MondoMods/hdf5/src/libhdf5.la
-endif
-endif
-
-if ! USE_DYNAMIC_LINKING
-MondoMods_DEPENDENCY_FILES_LIBS = $(top_srcdir)/MondoMods/libMondoMods.la
-endif
 
 MondoMods_DEPENDENCY_FILES_MODS = \
   $(top_srcdir)/MondoMods/ainv.mod \
@@ -204,6 +185,6 @@ MondoMods_DEPENDENCY_FILES_MODS = \
   $(top_srcdir)/MondoMods/specfunmesh.mod \
   $(top_srcdir)/MondoMods/thresholding.mod \
   $(top_srcdir)/MondoMods/utilities.mod \
-  $(INTERNAL_LAPACK_DEPENDENCY_FILES) \
-  $(INTERNAL_HDF5_DEPENDENCY_FILES) \
-  $(MondoMods_DEPENDENCY_FILES_LIBS)
+  $(LDADD_INTERNAL_LAPACK) \
+  $(LDADD_INTERNAL_HDF5) \
+  $(LDADD_MONDOMODS)
