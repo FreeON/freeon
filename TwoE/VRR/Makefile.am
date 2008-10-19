@@ -77,4 +77,4 @@ EXTRA_INCLUDES = -I../../MondoMods -I../MSC
 
 # Some compilers have trouble optimizing some of the sources here. For now we
 # will turn the optimization level down...
-#OPTIMIZATION_FLAGS=-O0
+OPTIMIZATION_FLAGS = -O1

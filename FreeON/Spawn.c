@@ -33,23 +33,12 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-/*
-       pid_t fork(void);
-
-       #include <sys/types.h>
-       #include <sys/wait.h>
-
-       pid_t wait(int *status)
-       pid_t waitpid(pid_t pid, int *status, int options);
-*/
-
-
-int spawn_(int* nc,int* maxlen,int* ichr)
+int spawn_(int* nc, int* maxlen, int* ichr)
 {
-  int i,j,k,setnull,status;
-  int clen=*maxlen-1;
-  char* argv[100];
+  int i, j, k, status;
+  char** argv;
   pid_t pid,wpid;
+
   int ZERO_ERROR=0;
   int EXIT_ERROR=-120384;
   int FORK_ERROR=-320498;
@@ -57,57 +46,76 @@ int spawn_(int* nc,int* maxlen,int* ichr)
   int SGNL_ERROR=-674034;
   int MISC_ERROR=-843503;
   int ierr=MISC_ERROR;
-  k=0; 
-  for(i=0; i<*nc; i++){
-     argv[i] = (char*)calloc(clen+1,sizeof(char*));
-     for(j=0; j<=clen; j++){
-         argv[i][j]=(char) ichr[k]; k=k+1;
-     }
-     setnull=clen+1;
-     for(j=0; j<=clen; j++){
-       if(argv[i][j]==' '){
-          setnull=j; 
-          break;
-       }
-     }
-     argv[i][setnull]='\0';
-  }
-  argv[*nc]=NULL;
 
-  pid=fork();
+  /* Allocate argument list. */
+  argv = (char**) malloc(sizeof(char*)*(*nc+1));
+
+  for(i = 0, k = 0; i < *nc; i++)
+  {
+    argv[i] = (char*) malloc(sizeof(char*)*(*maxlen+1));
+    for(j = 0; j < *maxlen; j++, k++)
+    {
+      argv[i][j] = (char) ichr[k];
+      if (argv[i][j] == ' ') { argv[i][j] = '\0'; }
+    }
+    argv[i][*maxlen] = '\0';
+  }
+
+  /* Terminate argument list. */
+  argv[*nc] = NULL;
+
+  /* Fork process. */
+  pid = fork();
+
   if(pid==0)
+  {
+    /* This is the child process. */
+    execvp(argv[0], argv);
+    printf("Unable to EXECVP \"%s\".\n", argv[0]);
+    for(i = 0; i < *nc; i++)
     {
-      execvp(argv[0],argv);
-      printf("Unable to EXECVP <%s>.\n",argv[0]);
-      for(i=0; i<=*nc; i++){printf("argv[%i]=<%s>\n",i,argv[i]);}
-      _exit(EXIT_FAILURE);
+      printf("argv[%i] = \"%s\"\n", i, argv[i]);
     }
+    _exit(EXIT_FAILURE);
+  }
+
   else if(pid<0)
+  {
+    /* Error on fork(). */
+    printf("Unable to FORK \"%s\".\n",argv[0]);
+    for(i = 0; i < *nc; i++)
     {
-      printf("Unable to FORK <%s>.\n",argv[0]);
-      for(i=0; i<=*nc; i++){printf("argv[%i]=<%s>\n",i,argv[i]);}
-      ierr=FORK_ERROR;
+      printf("argv[%i] = \"%s\"\n", i, argv[i]);
     }
+    ierr=FORK_ERROR;
+  }
+
   else
+  {
+    /* This is the parent process. */
+    wpid = waitpid(pid, &status, 0);
+    if(wpid==pid)
     {
-      wpid=waitpid(pid,&status,0);
-      if(wpid==pid){
-         ierr=ZERO_ERROR;
-         return(ierr);
-      }
+      ierr=ZERO_ERROR;
+    }
+
 #ifdef HAVE_WSTOPSIG
-      if(WSTOPSIG(status)!=0) ierr=SGNL_ERROR;
+    if(WSTOPSIG(status)!=0) ierr=SGNL_ERROR;
 #endif
 
 #ifdef HAVE_WCOREDUMP
-      if(WCOREDUMP(status)!=0) ierr=DUMP_ERROR; 
+    if(WCOREDUMP(status)!=0) ierr=DUMP_ERROR;
 #endif
 
 #ifdef HAVE_WEXITSTATUS
-      if(WEXITSTATUS(status)!=0) ierr=EXIT_ERROR;
+    if(WEXITSTATUS(status)!=0) ierr=EXIT_ERROR;
 #endif
-    }  
-  for(i=0; i<*nc; i++){free(argv[i]);}
+  }
+
+  /* Free memory. */
+  for (i = 0; i < *nc+1; ++i) { free(argv[i]); }
+  free(argv);
+
   return(ierr);
 }
 
