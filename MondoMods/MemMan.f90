@@ -546,16 +546,13 @@ MODULE MemMan
          CALL New(A%Carts,(/3,A%NAtms/))
          CALL New(A%Velocity,(/3,A%NAtms/))
          CALL New(A%Gradients,(/3,A%NAtms/))
-         !---------Variables we REALLY want to get rid of-------
          CALL New(A%BoxCarts,(/3,A%NAtms/))
          CALL New(A%Displ,(/3,A%NAtms/))
-         CALL New(A%PBCDispl)
-         !--------- to here ----------------------
-
-         !CALL MondoLog(DEBUG_NONE, "New_CRDS", "hardwiring ETotalPerSCF vector a MaxSCF of 256")
+         CALL New(A%PBCDispl,(/3,3/))
+         !
          CALL New(A%ETotalPerSCF, 256, 0)
          A%ETotalPerSCF%D = 0.0D0
-         
+         !         
          A%Alloc=ALLOCATED_TRUE
          A%ETotal=Zero
       END SUBROUTINE New_CRDS
