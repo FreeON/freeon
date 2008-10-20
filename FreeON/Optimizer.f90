@@ -1419,7 +1419,7 @@ CONTAINS
      ENDDO
      DO K=1,3
        DO J=1,3
-         GMLoc%PBCDispl%BoxShape%D(J,K)=XYZNew%D(J,NatmsNew+K)
+         GMLoc%PBCDispl%D(J,K)=XYZNew%D(J,NatmsNew+K)
        ENDDO
      ENDDO
      !
@@ -1542,7 +1542,7 @@ CONTAINS
      TYPE(CRDS)           :: GMLoc
      !
      GMLoc%Carts%D=GMLoc%Displ%D
-     GMLoc%PBC%BoxShape%D=GMLoc%PBCDispl%BoxShape%D
+     GMLoc%PBC%BoxShape%D=GMLoc%PBCDispl%D
 
      CALL MakeGMPeriodic(GMLoc)
      ! Depricated:

@@ -364,10 +364,9 @@ MODULE DerivedTypes
       TYPE(DBL_RNK2)   :: BoxCarts  !-- Fractional coordinates 
       TYPE(DBL_RNK2)   :: Velocity  !-- velocities    
       TYPE(DBL_RNK2)   :: Gradients !-- Gradients
+      ! Used in QUICCA:
       TYPE(DBL_RNK2)   :: Displ     !-- Displaced Cartesian geometry
-      TYPE(PBCInfo)    :: PBCDispl  !-- Displaced Periodic Information
-      !--------- to here ----------------------
-!     Internal coordinates related arrays
+      TYPE(DBL_RNK2)   :: PBCDispl  !-- Displaced Box Shape
       LOGICAL          :: LatticeOnly
       INTEGER          :: AltCount   
    END TYPE 
