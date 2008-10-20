@@ -650,15 +650,6 @@ AC_MSG_RESULT([keeping ${RECYCLE_HDF} geometries])
 
 AC_DEFINE_UNQUOTED(RECYCLE_HDF, [${RECYCLE_HDF}], [Only keep this many geometries in hdf file.])
 
-AC_MSG_CHECKING([whether to do some memory debugging])
-AC_ARG_ENABLE([memory-debug],
-  [AS_HELP_STRING([--enable-memory-debug],
-  [Print out some information regarding allocate() and deallocate() statements])],
-  [do_memory_debug="${enableval}"],
-  [do_memory_debug="no"])
-AC_MSG_RESULT([${do_memory_debug}])
-AC_SUBST(HAVE_MEMORY_DEBUG, ${do_memory_debug})
-
 # Some mondo variables.
 AC_DEFINE_UNQUOTED(HAVE_MONDO_HOME,    ["${prefix}"], [Define the main installation directory.])
 AC_DEFINE_UNQUOTED(HAVE_MONDO_PLAT,    ["${build}"], [Define build platform.])

@@ -23,7 +23,6 @@ LDADD_MONDOMODS = $(top_srcdir)/MondoMods/libMondoMods.la
 # we can not preprocess into a filename that differs by the case only, i.e. .C
 # -> .c.
 PREPROCESSED_SUFFIX = -preprocessed
-MEMORY_SUFFIX = -memory
 
 # For cleanup.
 CLEANFILES = \
@@ -31,9 +30,6 @@ CLEANFILES = \
   *$(PREPROCESSED_SUFFIX).f \
   *$(PREPROCESSED_SUFFIX).f90 \
   *$(PREPROCESSED_SUFFIX).c \
-  *$(MEMORY_SUFFIX).f \
-  *$(MEMORY_SUFFIX).f90 \
-  *$(MEMORY_SUFFIX).c \
   *~
 
 # Dependency check (only for debugging).
@@ -59,37 +55,20 @@ endif
 
 # Whether we should keep or remove preprocessed files.
 REMOVE_PREPROCESSED_FILES = @REMOVE_PREPROCESSED_FILES@
-HAVE_MEMORY_DEBUG = @HAVE_MEMORY_DEBUG@
 
 # Suffix rules.
 .f90.o :
-	@if test "${HAVE_MEMORY_DEBUG}" = "yes"; then \
-		echo "adding memory debug statements to $<"; \
-		sed -e 's/DEALLOCATE(\(.\+\))/CALL MondoLog(DEBUG_NONE, "memory", "deallocating: \1", File_O = __FILE__, Line_O = __LINE__); DEALLOCATE(\1)/' $< | \
-		sed -e 's/ ALLOCATE(\(.\+\))/ CALL MondoLog(DEBUG_NONE, "memory", "allocating: \1", File_O = __FILE__, Line_O = __LINE__); ALLOCATE(\1)/' > $<$(MEMORY_SUFFIX).f90; \
-	else \
-		cp $< $<$(MEMORY_SUFFIX).f90; \
-	fi
-	$(CPP_COMMAND) $<$(MEMORY_SUFFIX).f90 | grep -v -E "^#" > $<$(PREPROCESSED_SUFFIX).f90
+	$(CPP_COMMAND) $< | grep -v -E "^#" > $<$(PREPROCESSED_SUFFIX).f90
 	$(FC_COMMAND) -c -o $@ $<$(PREPROCESSED_SUFFIX).f90
 	@if test "${REMOVE_PREPROCESSED_FILES}" = "yes"; then \
 		rm $<$(PREPROCESSED_SUFFIX).f90; \
-		rm $<$(MEMORY_SUFFIX).f90; \
 	fi
 
 .f90.lo :
-	@if test "${HAVE_MEMORY_DEBUG}" = "yes"; then \
-		echo "adding memory debug statements to $<"; \
-		sed -e 's/DEALLOCATE(\(.\+\))/CALL MondoLog(DEBUG_NONE, "memory", "deallocating: \1", File_O = __FILE__, Line_O = __LINE__); DEALLOCATE(\1)/' $< | \
-		sed -e 's/ ALLOCATE(\(.\+\))/ CALL MondoLog(DEBUG_NONE, "memory", "allocating: \1", File_O = __FILE__, Line_O = __LINE__); ALLOCATE(\1)/' > $<$(MEMORY_SUFFIX).f90; \
-	else \
-		cp $< $<$(MEMORY_SUFFIX).f90; \
-	fi
-	$(CPP_COMMAND) $<$(MEMORY_SUFFIX).f90 | grep -v -E "^#" > $<$(PREPROCESSED_SUFFIX).f90
+	$(CPP_COMMAND) $< | grep -v -E "^#" > $<$(PREPROCESSED_SUFFIX).f90
 	$(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(FC_COMMAND) -c -o $@ $<$(PREPROCESSED_SUFFIX).f90
 	@if test "${REMOVE_PREPROCESSED_FILES}" = "yes"; then \
 		rm $<$(PREPROCESSED_SUFFIX).f90; \
-		rm $<$(MEMORY_SUFFIX).f90; \
 	fi
 
 #.f90.o :

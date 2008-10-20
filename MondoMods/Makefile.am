@@ -144,6 +144,7 @@ InOut.lo : \
   Parse.lo \
   SetEq.lo \
   MondoLogger.lo \
+  Utilities.lo \
   $(top_srcdir)/MondoConfig.h
 
 DerivedTypes.lo : \
