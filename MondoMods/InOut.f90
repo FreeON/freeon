@@ -275,29 +275,27 @@ CONTAINS
   !===============================================================================
   !
   !===============================================================================
-  FUNCTION NameTag(VarName,Tag_O) RESULT(FullName)
+  FUNCTION NameTag(VarName,Tag_O,Stats_O) RESULT(FullName)
     CHARACTER(LEN=*),         INTENT(IN)    :: VarName
     CHARACTER(LEN=*),OPTIONAL,INTENT(IN)    :: Tag_O
+    INTEGER,DIMENSION(3),OPTIONAL           :: Stats_O
     CHARACTER(LEN=DEFAULT_CHR_LEN)          :: FullName
     INTEGER                                 :: Tag_INT_old, Tag_INT_new
-
-    IF(PRESENT(Tag_O))THEN
+   
+    IF(PRESENT(Tag_O).AND.PRESENT(Stats_O))THEN
+       CALL Halt(' Logic error in NameTag with both tag and stats passed through! ')
+    ELSEIF(PRESENT(Tag_O))THEN
       ! Apply recycling.
       Tag_INT_old = CharToInt(Tag_O)
       Tag_INT_new = MOD(Tag_INT_old, RECYCLE_HDF)
-      !IF(Tag_INT_new /= Tag_INT_old) THEN
-      !  CALL MondoLog(DEBUG_MAXIMUM, "NameTag", "recycling tag from "//TRIM(IntToChar(Tag_INT_old)) &
-      !    //" to "//TRIM(IntToChar(Tag_INT_new)))
-      !ELSE
-      !  CALL MondoLog(DEBUG_MAXIMUM, "NameTag", "no recycling necessary on Tag_O = "//TRIM(Tag_O))
-      !ENDIF
       FullName=TRIM(VarName)//TRIM(IntToChar(Tag_INT_new))
-      !CALL MondoLog(DEBUG_MAXIMUM, "NameTag", "FullName = "//TRIM(FullName))
+    ELSEIF(PRESENT(Stats_O))THEN
+       Stats_O(3)=MOD(Stats_O(3), RECYCLE_HDF)       
+      FullName=TRIM(VarName)//TRIM(StatsToChar(Stats_O))
     ELSE
       FullName=TRIM(VarName)
     ENDIF
     CALL LowCase(FullName)
-
   END FUNCTION NameTag
   !===============================================================================
   !
@@ -576,21 +574,7 @@ CONTAINS
       IF(PRESENT(Stats_O).AND.PRESENT(Tag_O)) THEN
         CALL Halt("[Get_DBL_SCLR] either Stats_O or Tag_O")
       ENDIF
-      IF(PRESENT(Tag_O)) THEN
-        !CALL MondoLog(DEBUG_MAXIMUM, "Get_DBL_SCLR", "VarName = "//TRIM(VarName)//", Tag_O = "//TRIM(Tag_O))
-        Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_DOUBLE,1,.FALSE.)
-      ELSEIF(PRESENT(Stats_O)) THEN
-        Tag = TRIM(IntToChar(Stats_O(3)))
-        !CALL MondoLog(DEBUG_MAXIMUM, "Get_DBL_SCLR", "VarName = "//TRIM(VarName)//", Stats_O = " &
-        !  //TRIM(IntToChar(Stats_O(1)))//" " &
-        !  //TRIM(IntToChar(Stats_O(2)))//" " &
-        !  //TRIM(IntToChar(Stats_O(3)))//", constructed Tag = "//TRIM(Tag))
-        Meta=SetMeta(NameTag(VarName,Tag),NATIVE_DOUBLE,1,.FALSE.)
-      ELSE
-        !CALL MondoLog(DEBUG_MAXIMUM, "Get_DBL_SCLR", "VarName = "//TRIM(VarName)//", Tag_O not set")
-        Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_DOUBLE,1,.FALSE.)
-      ENDIF
-
+      Meta=SetMeta(NameTag(VarName,Tag_O=Tag_O,Stats_O=Stats_O),NATIVE_DOUBLE,1,.FALSE.)
       CALL OpenData(Meta)
       CALL ReadDoubleVector(Meta,B)
       CALL CloseData(Meta)
@@ -944,28 +928,11 @@ CONTAINS
 #ifdef PARALLEL
     IF(MyId==ROOT)THEN
 #endif
-      IF(PRESENT(Stats_O).AND.PRESENT(Tag_O)) THEN
-        CALL Halt("[Put_DBL_SCLR] either Stats_O or Tag_O")
-      ENDIF
-      IF(PRESENT(Tag_O)) THEN
-        !CALL MondoLog(DEBUG_MAXIMUM, "Put_DBL_SCLR", "VarName = "//TRIM(VarName)//", Tag_O = "//TRIM(Tag_O))
-        Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_DOUBLE,1,.FALSE.)
-      ELSEIF(PRESENT(Stats_O)) THEN
-        Tag = TRIM(IntToChar(Stats_O(3)))
-        !CALL MondoLog(DEBUG_MAXIMUM, "Put_DBL_SCLR", "VarName = "//TRIM(VarName)//", Stats_O = " &
-        !  //TRIM(IntToChar(Stats_O(1)))//" " &
-        !  //TRIM(IntToChar(Stats_O(2)))//" " &
-        !  //TRIM(IntToChar(Stats_O(3)))//", constructed Tag = "//TRIM(Tag))
-        Meta=SetMeta(NameTag(VarName,Tag),NATIVE_DOUBLE,1,.FALSE.)
-      ELSE
-        !CALL MondoLog(DEBUG_MAXIMUM, "Put_DBL_SCLR", "VarName = "//TRIM(VarName)//", Tag_O not set")
-        Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_DOUBLE,1,.FALSE.)
-      ENDIF
-
-      CALL OpenData(Meta,.TRUE.)
-      B(1)=A
-      CALL WriteDoubleVector(Meta,B)
-      CALL CloseData(Meta)
+       Meta=SetMeta(NameTag(VarName,Tag_O=Tag_O,Stats_O=Stats_O),NATIVE_DOUBLE,1,.FALSE.)
+       CALL OpenData(Meta,.TRUE.)
+       B(1)=A
+       CALL WriteDoubleVector(Meta,B)
+       CALL CloseData(Meta)
 #ifdef PARALLEL
     ENDIF
 #endif
@@ -1468,13 +1435,13 @@ CONTAINS
     CHARACTER(LEN=*),OPTIONAL,INTENT(IN)    :: PFix_O
     LOGICAL,         OPTIONAL,INTENT(IN)    :: CheckPoint_O
     LOGICAL,         OPTIONAL,INTENT(IN)    :: Bcast_O
-    REAL(DOUBLE)                            :: Dummy
+    REAL(DOUBLE)                            :: Dummy,Chk
     CHARACTER(LEN=DEFAULT_CHR_LEN)          :: FileName
     INTEGER                                 :: I,NSMat,NAtms,NBlks,NNon0,IOS
     LOGICAL                                 :: Exists,LimitsQ
     LOGICAL                                 :: Bcast
 
-    CALL MondoLog(DEBUG_MAXIMUM, "Get_BCSR", "getting BCSR from "//TRIM(Name))
+
     IF(PRESENT(Bcast_O)) THEN
       Bcast = Bcast_O
     ELSE
@@ -1600,6 +1567,14 @@ CONTAINS
     ENDIF
 #endif
 
+    Chk=Zero
+    DO I=1,MIN(NBasF**2,A%NNon0)
+       Chk=Chk+A%MTrix%D(I)*A%Mtrix%D(I)
+    ENDDO
+    Chk=SQRT(Chk) 
+    CALL MondoLog(DEBUG_MAXIMUM, "Get_BCSR", "getting BCSR from "//TRIM(Name)//" Check = "//TRIM(DblToChar(Chk)))
+
+
     RETURN
 1   CALL Halt('IO Error '//TRIM(IntToChar(IOS))//' in Get_BCSR:1340')
 2   CALL Halt('IO Error '//TRIM(IntToChar(IOS))//' in Get_BCSR reading RowPt')
@@ -1659,7 +1634,13 @@ CONTAINS
     LOGICAL                              :: Exists
     INTEGER                              :: I,IOS
 
-    CALL MondoLog(DEBUG_MAXIMUM, "Put_BCSR", "putting BCSR into "//TRIM(Name))
+    REAL(DOUBLE) :: Chk
+    Chk=Zero
+    DO I=1,A%NNon0
+       Chk=Chk+A%MTrix%D(I)*A%Mtrix%D(I)
+    ENDDO
+    Chk=SQRT(Chk) 
+    CALL MondoLog(DEBUG_MAXIMUM, "Put_BCSR", "getting BCSR from "//TRIM(Name)//" Check = "//TRIM(DblToChar(Chk)))
 
 #ifdef PARALLEL
     IF(MyId==0)THEN
