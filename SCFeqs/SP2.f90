@@ -103,7 +103,7 @@ PROGRAM DMP_SP2 ! Density matrix purification, SP2 variation
 #endif
   CALL SetEq(Pold,P)
   ! Do SP2 iterations
-  DO I=1,50
+  DO I=1,150
     CALL SP2(P,Tmp1,Tmp2,Ne,MM)
     IF(CnvrgChck(Prog,I,Ne,MM,F,P,POld,Tmp1,Tmp2)) EXIT
     !idempotency_error = ABS(Trace(P) - Trace(Tmp1))
