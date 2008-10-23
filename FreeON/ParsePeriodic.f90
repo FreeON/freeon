@@ -211,6 +211,7 @@ CONTAINS
              NLvec=3
              CALL LineToDbls(Line,6,Vec)
              IF(PBC%Dimen==1)THEN
+                Vec(4)=90D0
                 Vec(5)=90D0
                 Vec(6)=90D0
                 IF(Vec(2)==0D0)THEN
@@ -222,50 +223,49 @@ CONTAINS
                    CALL Warn(' On input, found c=0.  Reset c=1, and gamma=90. ')
                 ENDIF
              ELSEIF(PBC%Dimen==2)THEN
-                Vec(6)=90D0
                 IF(Vec(3)==0D0)THEN
                    Vec(3)=1D0
                    CALL Warn(' On input, found c=0.  Reset c=1, and gamma=90. ')
                 ENDIF
              ENDIF
-                PBC%BoxShape%D(1,1)=Vec(1)
-                PBC%BoxShape%D(1,2)=Vec(2)*COS(DegToRad*Vec(6))
-                PBC%BoxShape%D(2,2)=Vec(2)*SIN(DegToRad*Vec(6))
-                PBC%BoxShape%D(1,3)=Vec(3)*COS(DegToRad*Vec(5))
-                PBC%BoxShape%D(2,3)=(Vec(2)*Vec(3)*COS(DegToRad*Vec(4)) &
-                     -PBC%BoxShape%D(1,2)*PBC%BoxShape%D(1,3))/PBC%BoxShape%D(2,2)
-                PBC%BoxShape%D(3,3)=SQRT(Vec(3)**2-PBC%BoxShape%D(1,3)**2-PBC%BoxShape%D(2,3)**2)
-             ENDIF
-          ELSE
-             EXIT
+             PBC%BoxShape%D(1,1)=Vec(1)
+             PBC%BoxShape%D(1,2)=Vec(2)*COS(DegToRad*Vec(6))
+             PBC%BoxShape%D(2,2)=Vec(2)*SIN(DegToRad*Vec(6))
+             PBC%BoxShape%D(1,3)=Vec(3)*COS(DegToRad*Vec(5))
+             PBC%BoxShape%D(2,3)=(Vec(2)*Vec(3)*COS(DegToRad*Vec(4)) &
+                  -PBC%BoxShape%D(1,2)*PBC%BoxShape%D(1,3))/PBC%BoxShape%D(2,2)
+             PBC%BoxShape%D(3,3)=SQRT(Vec(3)**2-PBC%BoxShape%D(1,3)**2-PBC%BoxShape%D(2,3)**2)
           ENDIF
-       ENDDO
-       !
-       IF(NLVec .NE. 3) THEN
-          CALL MondoHalt(PRSE_ERROR,'Lattice Vectors are incorrect')
+       ELSE
+          EXIT
        ENDIF
-       DO I=1,3
-          DO J=1,3
-             IF(ABS(PBC%BoxShape%D(I,J)).LT. 1.D-12) PBC%BoxShape%D(I,J)=Zero
-          ENDDO
+    ENDDO
+    !
+    IF(NLVec .NE. 3) THEN
+       CALL MondoHalt(PRSE_ERROR,'Lattice Vectors are incorrect')
+    ENDIF
+    DO I=1,3
+       DO J=1,3
+          IF(ABS(PBC%BoxShape%D(I,J)).LT. 1.D-12) PBC%BoxShape%D(I,J)=Zero
        ENDDO
-       !
-       PBC%InvBoxSh%D=InverseBoxShape(PBC%BoxShape%D,PBC%Dimen)
-       !
-       WRITE(*,*)' BoxShape = '
-       DO I=1,3
-          WRITE(*,*)   (PBC%BoxShape%D(I,J),J=1,3) 
-       ENDDO
-       WRITE(*,*)' InvBoxShape = '
-       DO I=1,3
-          WRITE(*,*)   (PBC%InvBoxSh%D(I,J),J=1,3) 
-       ENDDO
-       !
-       RETURN
-1      CALL Halt('While parsing '//TRIM(InpFile)//', failed to find '     &
-            //TRIM(END_PERIODIC)//'. You may be missing blank '  &
-            //'line at the end of the inPut file.')
-     END SUBROUTINE LoadLattice
+    ENDDO
+    !
+    PBC%InvBoxSh%D=InverseBoxShape(PBC%BoxShape%D,PBC%Dimen)
+    !
+    WRITE(*,*)' BoxShape = '
+    DO I=1,3
+       WRITE(*,*)   (PBC%BoxShape%D(I,J),J=1,3) 
+    ENDDO
+    WRITE(*,*)' InvBoxShape = '
+    DO I=1,3
+       WRITE(*,*)   (PBC%InvBoxSh%D(I,J),J=1,3) 
+    ENDDO
+    !
+    RETURN
+1   CALL Halt('While parsing '//TRIM(InpFile)//', failed to find '     &
+         //TRIM(END_PERIODIC)//'. You may be missing blank '  &
+         //'line at the end of the inPut file.')
+  END SUBROUTINE LoadLattice
   !=========================================================================
   ! Inflate atomic coordinates if given in fractionals.  If atoms are outside
   ! the unit cell, wrap them back in.  Note that all of this here, and in 
