@@ -267,6 +267,37 @@ CONTAINS
        ENDDO
     ENDDO
 
+!!$    P%MPole=Zero
+!!$    DO I=1,R%NExpt-1
+!!$       EllZ=R%Lndx%I(I)
+!!$       LenZ=LHGTF(EllZ)
+!!$       Zeta=R%Expt%D(I)
+!!$       ZZ=(Pi/R%Expt%D(I))**1.5D0
+!!$       DO J=1,R%NQ%I(I)
+!!$          IAdd=R%OffQ%I(I)+J
+!!$          JAdd=R%OffR%I(I)+(J-1)*LenZ+1
+!!$           ! Note factors of two to account for closed shell book-keeping
+!!$          P%MPole=P%MPole+Two*R%Co%D(JAdd)*ZZ
+!!$       ENDDO
+!!$    ENDDO
+!!$    WRITE(*,*)' Qel  = ',P%MPole
+!!$    P%MPole=Zero
+!!$    DO I=R%NExpt,R%NExpt
+!!$       EllZ=R%Lndx%I(I)
+!!$       LenZ=LHGTF(EllZ)
+!!$       Zeta=R%Expt%D(I)
+!!$       ZZ=(Pi/R%Expt%D(I))**1.5D0
+!!$       DO J=1,R%NQ%I(I)
+!!$          IAdd=R%OffQ%I(I)+J
+!!$          JAdd=R%OffR%I(I)+(J-1)*LenZ+1
+!!$           ! Note factors of two to account for closed shell book-keeping
+!!$          P%MPole=P%MPole+Two*R%Co%D(JAdd)*ZZ
+!!$       ENDDO
+!!$    ENDDO
+!!$    WRITE(*,*)' Qnuc  = ',P%MPole
+!!$    STOP
+
+
     Mssg=ProcessName(Prog,'Density Build')
     Mssg=TRIM(Mssg)                                       &
          //' <q> = '//TRIM(DblToShrtChar(P%MPole))        &
@@ -598,7 +629,7 @@ CONTAINS
                       DO LMNB=StartLB,StopLB
                          IB=IB+1
                          EllB = BS%LxDex%I(LMNB)+BS%LyDex%I(LMNB)+BS%LzDex%I(LMNB)
-                         DO iSMat=1,SpinM 
+                         DO iSMat=1,1 !SpinM 
                             DO LMN=1,LHGTF(EllA+EllB)
                                TmpCo(LMN)=TmpCo(LMN)+HGBra%D(LMN,IA,IB)*Psv(IA,IB,iSMat) 
                             ENDDO
