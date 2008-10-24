@@ -55,7 +55,7 @@ PROGRAM SCFStatus
   REAL(DOUBLE)                    :: E_C_EXCL,E_LJ_EXCL
 #endif
   LOGICAL                         :: HasECPs
-  CHARACTER(LEN=5*DEFAULT_CHR_LEN):: SCFMessage
+  CHARACTER(LEN=10*DEFAULT_CHR_LEN):: SCFMessage
   CHARACTER(LEN=9),PARAMETER      :: Prog='SCFStatus'
   CHARACTER(LEN=2)                :: CurClone
   !---------------------------------------------------------------------------------------
