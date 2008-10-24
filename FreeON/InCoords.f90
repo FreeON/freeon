@@ -3771,7 +3771,8 @@ CONTAINS
            AuxBL(K:L)=XYZ(1:3,NatmsLoc-3+I)
          ENDDO
        IF(NCoinc>0) THEN
-         CALL DGEMM_TNc(9,NCoinc,9,One,Zero,AL%D,BL%D,P)
+         P=MATMUL(TRANSPOSE(AL%D(1:NCoinc,1:9)),BL%D(1:NCoinc,1:9))
+!         CALL DGEMM_TNc(9,NCoinc,9,One,Zero,AL%D,BL%D,P) 
          CALL Delete(AL)
          CALL Delete(BL)
        ELSE
