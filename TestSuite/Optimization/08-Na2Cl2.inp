@@ -47,8 +47,7 @@ Na 0.000 -1.485	 0.000
  
 <BeginBasisSetModCEP>
 Example of a "made up" basis set CEP-31G* or SBKJC with
-an added polarization function for NA and CL.  Used by test
-Na2Cl2.inp.
+an added polarization function for NA and CL. 
 
  ****
  NA  0

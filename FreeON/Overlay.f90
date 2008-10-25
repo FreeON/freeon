@@ -74,7 +74,7 @@ CONTAINS
           CmndLine=TRIM(CmndLine)//Blnk//TRIM(ArgV%C(I))
        ENDDO
       ! Log this run
-      CALL MondoLog(DEBUG_NONE, "Invoke", TRIM(CmndLine))
+       CALL MondoLog(DEBUG_MAXIMUM,"FreeON", TRIM(CmndLine),"Invoke")
 #if MPI2
        CALL MPI_COMM_SPAWN(ArgV%C(1),ArgV%C(2:NArg),M%NProc,MPI_INFO_NULL, &
             ROOT,MPI_COMM_SELF,SPAWN,MPI_ERRCODES_IGNORE,IErr)
