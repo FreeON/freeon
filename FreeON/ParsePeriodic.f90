@@ -19,8 +19,6 @@ CONTAINS
     TYPE(PBCInfo)    :: PBC
     INTEGER          :: I,GBeg,GEnd
 !-----------------------------------------------------------------------!
-    WRITE(*,*)' Load PERIODIC '
-
     IF(O%Grad==GRAD_TS_SEARCH_NEB)THEN
        GBeg=0
        GEnd=G%Clones+1
@@ -50,7 +48,6 @@ CONTAINS
        G%Clone(I)%PBC=PBC
        CALL CalculateCoordArrays(G%Clone(I))
     ENDDO
-    WRITE(*,*)' Load PERIODIC DONE'
 
   END SUBROUTINE LoadPeriodic
 !=========================================================================
@@ -252,15 +249,7 @@ CONTAINS
     !
     PBC%InvBoxSh%D=InverseBoxShape(PBC%BoxShape%D,PBC%Dimen)
     !
-    WRITE(*,*)' BoxShape = '
-    DO I=1,3
-       WRITE(*,*)   (PBC%BoxShape%D(I,J),J=1,3) 
-    ENDDO
-    WRITE(*,*)' InvBoxShape = '
-    DO I=1,3
-       WRITE(*,*)   (PBC%InvBoxSh%D(I,J),J=1,3) 
-    ENDDO
-    !
+ 
     RETURN
 1   CALL Halt('While parsing '//TRIM(InpFile)//', failed to find '     &
          //TRIM(END_PERIODIC)//'. You may be missing blank '  &

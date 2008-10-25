@@ -6,6 +6,7 @@ MODULE PrettyPrint
    USE GlobalCharacters
    USE GlobalScalars
    USE GlobalObjects
+   USE MondoLogger
    USE BasisSetParameters
    USE Clock
    USE Parse
@@ -1492,29 +1493,6 @@ MODULE PrettyPrint
 
 #endif
   END SUBROUTINE Elapsed_TIME
-!---------------------------------------------------------------------
-!
-!---------------------------------------------------------------------
-  FUNCTION ProcessName(Proc_O,Misc_O) RESULT (Tag)
-    CHARACTER(LEN=*), OPTIONAL :: Proc_O
-    CHARACTER(LEN=*), OPTIONAL :: Misc_O
-    CHARACTER(LEN=26)          :: Tag
-    CHARACTER(LEN=26)          :: Name
-    CHARACTER(LEN=26),PARAMETER:: Blks='                        '
-    CHARACTER(LEN=3), PARAMETER:: Colon =' : '
-    CHARACTER(LEN=4), PARAMETER:: Colons=' :: '
-    IF(PRESENT(Proc_O).AND.PRESENT(Misc_O))THEN
-       Name=TRIM(ADJUSTL(TRIM(Proc_O)))//Colon//TRIM(Misc_O)
-       Name(24:26)=":: "
-       Tag=Name
-    ELSEIF(PRESENT(Proc_O))THEN
-       Name=TRIM(ADJUSTL(TRIM(Proc_O)))
-       Name(24:26)=":: "
-       Tag=Name
-    ELSE
-       Tag=Blks
-    ENDIF
-  END FUNCTION ProcessName
 !---------------------------------------------------------------------
 !
 !---------------------------------------------------------------------

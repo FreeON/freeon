@@ -174,8 +174,8 @@ CONTAINS
       ! Not doing any fancy shmancy with clones ...
     ELSE
       IF(O%Guess==GUESS_EQ_RESTART.OR.O%Guess==GUESS_EQ_NUGUESS)THEN
-        CALL MondoLog(DEBUG_NONE, "LoadCoordinates", "restart or reguess requested")
-        CALL MondoLog(DEBUG_NONE, "LoadCoordinates", "opening restart hdf "//TRIM(N%RFile))
+        CALL MondoLog(DEBUG_NONE, "FreeON", "restart or reguess requested","LoadCoordinates")
+        CALL MondoLog(DEBUG_NONE, "FreeON", "opening restart hdf "//TRIM(N%RFile),"LoadCoordinates")
         HDFFileID=OpenHDF(N%RFile)
         HDF_CurrentID=HDFFileID
         CALL Get(G%Clones,'clones')
@@ -199,9 +199,9 @@ CONTAINS
 
             ! Check for coordinate unit conversions.
             IF(G%Clone(iCLONE)%InAU) THEN
-              CALL MondoLog(DEBUG_NONE, "LoadCoordinates", "IGeo = "//TRIM(IntToChar(IGeo))//" in atomic units")
+              CALL MondoLog(DEBUG_NONE, "FreeON", "IGeo = "//TRIM(IntToChar(IGeo))//" in atomic units","LoadCoordinates")
             ELSE
-              CALL MondoLog(DEBUG_NONE, "LoadCoordinates", "IGeo = "//TRIM(IntToChar(IGeo))//" in Angstrom")
+              CALL MondoLog(DEBUG_NONE, "FreeON", "IGeo = "//TRIM(IntToChar(IGeo))//" in Angstrom","LoadCoordinates")
 
               ! For now we will transform the atomic units coordinates we read
               ! from hdf into Angstrom to get the right units after we "massage"
@@ -226,7 +226,7 @@ CONTAINS
       ELSE
         G%Clones=1
         ALLOCATE(G%Clone(1))
-        CALL MondoLog(DEBUG_NONE, "LoadCoordinates", "loading coordinates from input")
+!        CALL MondoLog(DEBUG_NONE, "LoadCoordinates", "loading coordinates from input")
         CALL ParseCoordinates(GEOMETRY_BEGIN,GEOMETRY_END,G%Clone(1),O%Coordinates)
         ! CALL PPrint(G%Clone(iCLONE),FileName_O=N%GFile,Unit_O=Geo,PrintGeom_O=O%GeomPrint)
       ENDIF
@@ -260,7 +260,7 @@ CONTAINS
     ! Parse the coordinates
     CALL Align(BeginDelimiter,Inp)
 
-    CALL MondoLog(DEBUG_NONE, "ParseCoordinates", "parsing coordinates")
+!!    CALL MondoLog(DEBUG_NONE, "ParseCoordinates", "parsing coordinates")
 
     DO
       READ(Inp,DEFAULT_CHR_FMT,END=1)Line
@@ -277,8 +277,6 @@ CONTAINS
       IF(SIZE(C%C)==4) THEN
         ! Atomtype x y z
         At=TRIM(ADJUSTL(C%C(1)))
-
-        WRITE(*,*)' At = ',At
         G%Carts%D(1,N)=CharToDbl(C%C(2))
         G%Carts%D(2,N)=CharToDbl(C%C(3))
         G%Carts%D(3,N)=CharToDbl(C%C(4))
@@ -379,18 +377,18 @@ CONTAINS
       CALL MondoHalt(PRSE_ERROR,'Atom number mismatch in ParseCoordinates')
     ENDIF
 
-    ! Print something....
-    DO J=1, G%NAtms
-      CALL MondoLog(DEBUG_NONE, "ParseCoordinates", &
-        TRIM(G%AtNam%C(J))//" "// &
-        TRIM(FltToShrtChar(G%Carts%D(1,J)))//" "// &
-        TRIM(FltToShrtChar(G%Carts%D(2,J)))//" "// &
-        TRIM(FltToShrtChar(G%Carts%D(3,J)))//" "// &
-        TRIM(FltToShrtChar(G%Velocity%D(1,J)))//" "// &
-        TRIM(FltToShrtChar(G%Velocity%D(2,J)))//" "// &
-        TRIM(FltToShrtChar(G%Velocity%D(3,J)))//" "// &
-        TRIM(IntToChar(G%CConstrain%I(J))))
-    ENDDO
+!!$    ! Print something....
+!!$    DO J=1, G%NAtms
+!!$      CALL MondoLog(DEBUG_NONE, "ParseCoordinates", &
+!!$        TRIM(G%AtNam%C(J))//" "// &
+!!$        TRIM(FltToShrtChar(G%Carts%D(1,J)))//" "// &
+!!$        TRIM(FltToShrtChar(G%Carts%D(2,J)))//" "// &
+!!$        TRIM(FltToShrtChar(G%Carts%D(3,J)))//" "// &
+!!$        TRIM(FltToShrtChar(G%Velocity%D(1,J)))//" "// &
+!!$        TRIM(FltToShrtChar(G%Velocity%D(2,J)))//" "// &
+!!$        TRIM(FltToShrtChar(G%Velocity%D(3,J)))//" "// &
+!!$        TRIM(IntToChar(G%CConstrain%I(J))))
+!!$    ENDDO
 
     ! ULTIMATELY, THE FOLLOWING ITEMS SHOULD BE ASSOCIATED WITH THE Geometries
     ! TYPE RATHER THAN THE CRDS TYPE
@@ -405,9 +403,9 @@ CONTAINS
     ! Parsing of misc geometry info
     G%InAU=OptKeyQ(Inp,GEOMETRY,IN_AU)
     IF(G%InAU) THEN
-      CALL MondoLog(DEBUG_NONE, "ParseCoordinates", "setting InAU to true")
+      CALL MondoLog(DEBUG_NONE, "FreeON", "Input coordinates read in atomic units","ParseCoordinates")
     ELSE
-      CALL MondoLog(DEBUG_NONE, "ParseCoordinates", "setting InAU to false")
+      CALL MondoLog(DEBUG_NONE, "FreeON", "Input coordinates read in Angstroms","ParseCoordinates")
     ENDIF
 
     IF(OptKeyQ(Inp,GEOMETRY,Z_ORDER))THEN

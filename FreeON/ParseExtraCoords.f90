@@ -607,11 +607,6 @@ MODULE ParseExtraCoords
      TYPE(INT_VECT)       :: Map
      !
      IF(IntCs%N==0)RETURN
-
-     WRITE(*,*)' TinCs = ',IntCs%N
-     WRITE(*,*)' SIZE = ',SIZE(IntCS%Atoms%I,1)
-     WRITE(*,*)' SIZE = ',SIZE(IntCS%Atoms%I,2)
-
      NatmsOld=SIZE(CConstr)
      NatmsNew=0
      CALL New(Map,NatmsOld)

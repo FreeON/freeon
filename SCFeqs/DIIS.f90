@@ -23,9 +23,9 @@
 !    to return derivative works to the MondoSCF group for review, and possible
 !    disemination in future releases.
 !------------------------------------------------------------------------------
-#ifdef CJ_VALERY_VERSION_OF_DIIS
+#ifdef CJVALERY_DIIS
 
-! THIS IS CJ AND VALERYS VERSION,  BASED ON OLD MATT VERSION 
+! THIS IS CJ AND VALERYS VERSION, BASED ON MATT VERSION 
 
 PROGRAM DIIS
   USE DerivedTypes
@@ -281,7 +281,7 @@ PROGRAM DIIS
 #ifdef PARALLEL
     IF(MyId==ROOT)THEN
 #endif
-      CALL MondoLog(DEBUG_MAXIMUM, "DIIS", TRIM(Mssg))
+   CALL MondoLog(DEBUG_MAXIMUM, "DIIS", TRIM(Mssg))
 #ifdef PARALLEL
     ENDIF
 #endif
@@ -389,33 +389,33 @@ PROGRAM DIIS
   ! that we only use the new Fock matrix, i.e. full propagation.
   IF(.NOT.OptDblQ(Inp,'DIISDamp',Damp)) THEN
     Damp = 0.0D0
-    CALL MondoLog(DEBUG_NONE, Prog, "DIISDamp not set in input, setting Damp = "//TRIM(FltToChar(Damp)))
+   !!$  CALL MondoLog CALL MondoLog(DEBUG_NONE, Prog, "DIISDamp not set in input, setting Damp = "//TRIM(FltToChar(Damp)))
   ELSE
-    CALL MondoLog(DEBUG_NONE, Prog, "DIISDamp set in input, Damp = "//TRIM(FltToChar(Damp)))
+  !!$  CALL MondoLog(DEBUG_NONE, Prog, "DIISDamp set in input, Damp = "//TRIM(FltToChar(Damp)))
   ENDIF
 
   ! Max number of equations to keep in DIIS
   IF(.NOT.OptIntQ(Inp,'DIISDimension',BMax)) THEN
     BMax = 8
-    CALL MondoLog(DEBUG_NONE, Prog, "DIISDimension not set in input, using BMax = "//TRIM(IntToChar(BMax)))
+  !!$  CALL MondoLog(DEBUG_NONE, Prog, "DIISDimension not set in input, using BMax = "//TRIM(IntToChar(BMax)))
   ELSEIF(BMax == 0) THEN
-    CALL MondoLog(DEBUG_NONE, Prog, "DIISDimension set to 0, which means linear mixing")
+  !!$  CALL MondoLog(DEBUG_NONE, Prog, "DIISDimension set to 0, which means linear mixing")
   ENDIF
 
   ! Set the delay, i.e. the first SCF cycle for which we will use DIIS.
   IF(.NOT.OptIntQ(Inp, "DIISDelay", DIISDelay)) THEN
     DIISDelay = 2
-    CALL MondoLog(DEBUG_NONE, Prog, "DIISDelay not set in input, using DIISDelay = "//TRIM(IntToChar(DIISDelay)))
+  !!$  CALL MondoLog(DEBUG_NONE, Prog, "DIISDelay not set in input, using DIISDelay = "//TRIM(IntToChar(DIISDelay)))
   ELSE
-    CALL MondoLog(DEBUG_NONE, Prog, "DIISDelay set in input, DIISDelay = "//TRIM(IntToChar(DIISDelay)))
+  !!$  CALL MondoLog(DEBUG_NONE, Prog, "DIISDelay set in input, DIISDelay = "//TRIM(IntToChar(DIISDelay)))
   ENDIF
 
   ! Set the first SCF cylce that will be considered for the B matrix.
   IF(.NOT.OptIntQ(Inp, "DIISFirstSCF", DIISFirstSCF)) THEN
     DIISFirstSCF = DIISDelay-1
-    CALL MondoLog(DEBUG_NONE, Prog, "DIISFirstSCF not set in input, using DIISFirstSCF = "//TRIM(IntToChar(DIISFirstSCF)))
+  !!$  CALL MondoLog(DEBUG_NONE, Prog, "DIISFirstSCF not set in input, using DIISFirstSCF = "//TRIM(IntToChar(DIISFirstSCF)))
   ELSE
-    CALL MondoLog(DEBUG_NONE, Prog, "DIISFirstSCF set in input, DIISFirstSCF = "//TRIM(IntToChar(DIISFirstSCF)))
+  !!$  CALL MondoLog(DEBUG_NONE, Prog, "DIISFirstSCF set in input, DIISFirstSCF = "//TRIM(IntToChar(DIISFirstSCF)))
   ENDIF
 
   IF(DIISDelay < 1) THEN
@@ -446,7 +446,7 @@ PROGRAM DIIS
       noise = 0.0D0
     ENDIF
 
-    CALL MondoLog(DEBUG_NONE, Prog, "DIIS random noise = "//TRIM(FltToChar(noise)))
+  !!$  CALL MondoLog(DEBUG_NONE, Prog, "DIIS random noise = "//TRIM(FltToChar(noise)))
   ENDIF
 
   CLOSE(Inp)
@@ -482,10 +482,10 @@ PROGRAM DIIS
 
   INQUIRE(FILE=TrixFile("X", Args), EXIST=Present)
   IF(Present) THEN
-    CALL MondoLog(DEBUG_MAXIMUM, Prog, "using X for transformation")
+  !!$  CALL MondoLog(DEBUG_MAXIMUM, Prog, "using X for transformation")
     CALL Get(X, TrixFile("X", Args))
   ELSE
-    CALL MondoLog(DEBUG_MAXIMUM, Prog, "using Z and ZT for transformation")
+  !!$  CALL MondoLog(DEBUG_MAXIMUM, Prog, "using Z and ZT for transformation")
     CALL Get(Z, TrixFile("Z", Args))
     CALL Get(ZT, TrixFile("ZT", Args))
   ENDIF
@@ -521,28 +521,28 @@ PROGRAM DIIS
   CALL PPrint(EI, "DIIS Error Matrix in orthogonal basis")
 
   DIISErr=SQRT(Dot(EI,EI))/DBLE(NBasF)
-  CALL MondoLog(DEBUG_NONE, Prog, "DIIS error = "//TRIM(FltToChar(DIISErr)))
+!!$  CALL MondoLog(DEBUG_NONE, Prog, "DIIS error = "//TRIM(FltToChar(DIISErr)))
 
   ! Consider just damping, certainly on first go through
   IF(iSCF < DIISDelay)THEN
-    CALL MondoLog(DEBUG_NONE, Prog, "not doing any DIIS yet")
+  !!$  CALL MondoLog(DEBUG_NONE, Prog, "not doing any DIIS yet")
     DoDIIS = 0   ! No DIIS, but damp non-extrapolated Fock matrices
   ELSEIF(BMax /= 0)THEN
-    CALL MondoLog(DEBUG_NONE, Prog, "doing DIIS")
+  !!$  CALL MondoLog(DEBUG_NONE, Prog, "doing DIIS")
     DoDIIS = 1   ! We are doing DIIS, extrapolating non-extrapolated Fock matrices
   ELSE
-    CALL MondoLog(DEBUG_NONE, Prog, "DIISDimension is zero, no DIIS")
+  !!$  CALL MondoLog(DEBUG_NONE, Prog, "DIISDimension is zero, no DIIS")
     DoDIIS = 0   ! We are purely damping, using previously extrapolated Fock matrices
   ENDIF
 
-  CALL MondoLog(DEBUG_NONE, Prog, "iSCF = "//TRIM(IntToChar(iSCF)))
+!!$  CALL MondoLog(DEBUG_NONE, Prog, "iSCF = "//TRIM(IntToChar(iSCF)))
 
   ! Build the B matrix.
   IF(DoDIIS == 1)THEN
 
     N = MIN(iSCF-DIISFirstSCF+1, BMax)+1
 
-    CALL MondoLog(DEBUG_NONE, Prog, "building "//TRIM(IntToChar(N))//"x"//TRIM(IntToChar(N))//" B matrix")
+  !!$  CALL MondoLog(DEBUG_NONE, Prog, "building "//TRIM(IntToChar(N))//"x"//TRIM(IntToChar(N))//" B matrix")
 
     CALL New(B,(/N,N/))
     CALL New(DIISInfo,2)
@@ -552,12 +552,12 @@ PROGRAM DIIS
 
     IF(DIISInfo%I(1).EQ.Args%I%I(2).AND.DIISInfo%I(2).EQ.Args%I%I(3)) THEN
       ! We didn't BS switch or new geom or oda, then build a part of the B matrix.
-      CALL MondoLog(DEBUG_NONE, Prog, "no basis set switch, new geometry, or ODA: build a part of the B matrix")
+    !!$  CALL MondoLog(DEBUG_NONE, Prog, "no basis set switch, new geometry, or ODA: build a part of the B matrix")
       B%D(1:N-2,1:N-2)=BTmp%D(1:N-2,1:N-2)
       DIISFirstSCF=iSCF
     ELSE
       ! We did BS switch or new geom or oda, then build the full B matrix.
-      CALL MondoLog(DEBUG_NONE, Prog, "basis set switch, new geometry, or ODA: build the full B matrix")
+    !!$  CALL MondoLog(DEBUG_NONE, Prog, "basis set switch, new geometry, or ODA: build the full B matrix")
       DIISInfo%I(1)=Args%I%I(2)
       DIISInfo%I(2)=Args%I%I(3)
     ENDIF
@@ -566,7 +566,7 @@ PROGRAM DIIS
     CALL Delete(DIISInfo)
 
     DO I = DIISFirstSCF, iSCF
-      CALL MondoLog(DEBUG_NONE, Prog, "I = "//TRIM(IntToChar(I)))
+    !!$  CALL MondoLog(DEBUG_NONE, Prog, "I = "//TRIM(IntToChar(I)))
       IF(MyID.EQ.ROOT) THEN
         FFile=TrixFile('OrthoE_DIIS',Args,I-iSCF)
         INQUIRE(FILE=FFile,EXIST=Present)
@@ -580,7 +580,7 @@ PROGRAM DIIS
       CALL BCast(IPresent)
 #endif
       IF(IPresent /= 0) THEN
-        CALL MondoLog(DEBUG_NONE, Prog, "no previous information on error matrix "//TRIM(TrixFile('OrthoE_DIIS',Args,I-iSCF))//" found, constructing it")
+      !!$  CALL MondoLog(DEBUG_NONE, Prog, "no previous information on error matrix "//TRIM(TrixFile('OrthoE_DIIS',Args,I-iSCF))//" found, constructing it")
 
         ! Construct missing E_DIIS.
         CALL Get(F,TrixFile('F',Args,I-iSCF))
@@ -589,10 +589,10 @@ PROGRAM DIIS
 
         INQUIRE(FILE=TrixFile("X", Args), EXIST=Present)
         IF(Present) THEN
-          CALL MondoLog(DEBUG_MAXIMUM, Prog, "using X for transformation")
+        !!$  CALL MondoLog(DEBUG_MAXIMUM, Prog, "using X for transformation")
           CALL Get(X, TrixFile("X", Args))
         ELSE
-          CALL MondoLog(DEBUG_MAXIMUM, Prog, "using Z and ZT for transformation")
+        !!$  CALL MondoLog(DEBUG_MAXIMUM, Prog, "using Z and ZT for transformation")
           CALL Get(Z, TrixFile("Z", Args))
           CALL Get(ZT, TrixFile("ZT", Args))
         ENDIF
@@ -613,13 +613,13 @@ PROGRAM DIIS
         CALL Put(EI, TrixFile("OrthoE_DIIS", Args, I-iSCF))
 
       ELSE
-        CALL MondoLog(DEBUG_NONE, Prog, "found "//TRIM(TrixFile('OrthoE_DIIS',Args,I-iSCF)))
+      !!$  CALL MondoLog(DEBUG_NONE, Prog, "found "//TRIM(TrixFile('OrthoE_DIIS',Args,I-iSCF)))
         CALL Get(EI,TrixFile('OrthoE_DIIS',Args,I-iSCF))
       ENDIF
 
       ! We dont filter E for obvious reasons
       DO J = iSCF-N+2, I
-        CALL MondoLog(DEBUG_NONE, Prog, "J = "//TRIM(IntToChar(J)))
+      !!$  CALL MondoLog(DEBUG_NONE, Prog, "J = "//TRIM(IntToChar(J)))
         IF(MyID.EQ.ROOT) THEN
           FFile=TrixFile('OrthoE_DIIS',Args,J-iSCF)
           INQUIRE(FILE=FFile,EXIST=Present)
@@ -632,7 +632,7 @@ PROGRAM DIIS
         IF(JPresent.EQ.0) then
           CALL Get(EJ,TrixFile('OrthoE_DIIS',Args,J-iSCF))
         ELSE
-          CALL MondoLog(DEBUG_NONE, Prog, "no previous information on error matrix E_DIIS["//TRIM(IntToChar(J))//"] found, constructing it")
+        !!$  CALL MondoLog(DEBUG_NONE, Prog, "no previous information on error matrix E_DIIS["//TRIM(IntToChar(J))//"] found, constructing it")
           CALL Halt("he?")
         ENDIF
 
@@ -644,8 +644,8 @@ PROGRAM DIIS
         ENDIF
         J0 = J-(iSCF-N+2)+1
 
-        CALL MondoLog(DEBUG_NONE, Prog, "I0 = "//TRIM(IntToChar(I0)))
-        CALL MondoLog(DEBUG_NONE, Prog, "J0 = "//TRIM(IntToChar(J0)))
+      !!$  CALL MondoLog(DEBUG_NONE, Prog, "I0 = "//TRIM(IntToChar(I0)))
+      !!$  CALL MondoLog(DEBUG_NONE, Prog, "J0 = "//TRIM(IntToChar(J0)))
 
         B%D(I0, J0)=Dot(EI,EJ)
         B%D(J0, I0)=B%D(I0, J0)
@@ -655,22 +655,22 @@ PROGRAM DIIS
         !B%D(I,J) = Trace(Tmp2)
         !B%D(J,I) = B%D(I,J)
 
-        CALL MondoLog(DEBUG_NONE, Prog, "Calculating B["//TRIM(IntToChar(I0))//"]["//TRIM(IntToChar(J0))//"] = "//TRIM(FltToChar(B%D(I0,J0))))
+      !!$  CALL MondoLog(DEBUG_NONE, Prog, "Calculating B["//TRIM(IntToChar(I0))//"]["//TRIM(IntToChar(J0))//"] = "//TRIM(FltToChar(B%D(I0,J0))))
       ENDDO
     ENDDO
 
-    CALL MondoLog(DEBUG_NONE, Prog, "loading normalization condition into last row and column")
+  !!$  CALL MondoLog(DEBUG_NONE, Prog, "loading normalization condition into last row and column")
     B%D(N,1:N)=One
     B%D(1:N,N)=One
     B%D(N,N)=Zero
 
     IF(N.LT.BMax+1) THEN
       ! We didn't reach the size of the matrix.
-      CALL MondoLog(DEBUG_NONE, Prog, "we did not reach the maximum size of the B matrix")
+    !!$  CALL MondoLog(DEBUG_NONE, Prog, "we did not reach the maximum size of the B matrix")
       BTmp%D(1:N-1,1:N-1)=B%D(1:N-1,1:N-1)
     ELSE
       ! We reach the size of the matrix, we reduce it.
-      CALL MondoLog(DEBUG_NONE, Prog, "we reached the maximum size of the B matrix: reducing")
+    !!$  CALL MondoLog(DEBUG_NONE, Prog, "we reached the maximum size of the B matrix: reducing")
       BTmp%D(1:N-2,1:N-2)=B%D(2:N-1,2:N-1)
     ENDIF
     CALL Put(BTmp,'diismtrix')
@@ -703,11 +703,10 @@ PROGRAM DIIS
     ENDIF
     CALL BCast(DIISCo)
 #endif
-    Mssg=ProcessName(Prog,'Pulay C1')//'DIISCo = '
 
   ELSEIF(iSCF > 0) THEN
 
-    CALL MondoLog(DEBUG_NONE, Prog, "linear mixing")
+  !!$  CALL MondoLog(DEBUG_NONE, Prog, "linear mixing")
 
     N = 3
     CALL New(DIISCo,2)
@@ -720,11 +719,10 @@ PROGRAM DIIS
     DIISCo%D(1) = ABS(DIISCo%D(1)+Random((/0.0D0, noise/)))
     DIISCo%D(2) = One-DIISCo%D(1)
 
-    Mssg=ProcessName(Prog,'Damping')//'Co = '
 
   ELSE
 
-    CALL MondoLog(DEBUG_NONE, Prog, "not doing anything")
+  !!$  CALL MondoLog(DEBUG_NONE, Prog, "not doing anything")
 
     N = 3
     CALL New(DIISCo, 2)
@@ -732,27 +730,27 @@ PROGRAM DIIS
     DIISCo%D(1) = Zero
     DIISCo%D(2) = One
 
-    Mssg = ProcessName(Prog, "no step")//"Co = "
 
   ENDIF
 
   ! IO
   CALL Put(DIISErr,'diiserr')
-  IF(PrintFlags%Key >= DEBUG_MEDIUM)THEN
-    DO I=1,N-2
-      Mssg=TRIM(Mssg)//' '//TRIM(FltToChar(DIISCo%D(I)))//','
-    ENDDO
-    Mssg=TRIM(Mssg)//' '//TRIM(FltToChar(DIISCo%D(N-1)))
-#ifdef PARALLEL
-    IF(MyId==ROOT)THEN
-#endif
-      CALL MondoLog(DEBUG_MEDIUM, "DIIS", TRIM(Mssg))
-#ifdef PARALLEL
-    ENDIF
-#endif
-  ENDIF
 
-  CALL MondoLog(DEBUG_NONE, Prog, "DIIS normalization constant = "//TRIM(FltToChar(DIISCo%D(N))))
+!  IF(PrintFlags%Key >= DEBUG_MEDIUM)THEN
+!    DO I=1,N-2
+!      Mssg=TRIM(Mssg)//' '//TRIM(FltToChar(DIISCo%D(I)))//','
+!    ENDDO
+!    Mssg=TRIM(Mssg)//' '//TRIM(FltToChar(DIISCo%D(N-1)))
+!#ifdef PARALLEL
+!    IF(MyId==ROOT)THEN
+!#endif
+!    CALL MondoLog(DEBUG_MEDIUM, "DIIS", TRIM(Mssg))
+!#ifdef PARALLEL
+!    ENDIF
+!#endif
+!  ENDIF
+
+ !!$ CALL MondoLog(DEBUG_NONE, Prog, "DIIS normalization constant = "//TRIM(FltToChar(DIISCo%D(N))))
 
   ! Allocate some indecies for re-ordering
   CALL New(Idx,N)
@@ -771,6 +769,7 @@ PROGRAM DIIS
     ENDIF
     AbsDIISCo%D(I)=ABS(DIISCo%D(I))
   ENDDO
+
   CALL Sort(AbsDIISCo,Idx,N-1,1)
 
   ! Start with a matrix of diagonal zeros...
@@ -780,8 +779,8 @@ PROGRAM DIIS
   ! And do the summation
   DO I=1,N-1
     IF(DIISCo%D(Idx%I(I)) /= Zero) THEN
-      CALL MondoLog(DEBUG_NONE, Prog, "Adding "//TRIM(FltToChar(DIISCo%D(Idx%I(I))))//" * F[" &
-        //TRIM(IntToChar(iSCF+SCFOff%I(Idx%I(I))))//"]")
+    !!$  CALL MondoLog(DEBUG_NONE, Prog, "Adding "//TRIM(FltToChar(DIISCo%D(Idx%I(I))))//" * F[" &
+    !!$    //TRIM(IntToChar(iSCF+SCFOff%I(Idx%I(I))))//"]")
 #ifdef SUM_AO
       CALL Get(Tmp1,TrixFile('F',Args,SCFOff%I(Idx%I(I))))
 #else
@@ -793,7 +792,20 @@ PROGRAM DIIS
     ENDIF
   ENDDO
 
-  CALL PPrint(F,'mixed F['//TRIM(SCFCycl)//']')
+  Mssg=""
+  DO I=1,N-2        
+     IF(MOD(I,6)==0)THEN
+        IF(I.NE.1) &
+             CALL MondoLog(DEBUG_MEDIUM, Prog, Mssg, 'coefficients')
+        Mssg=TRIM(FltToMedmChar(DIISCo%D(Idx%I(I))))//','
+     ELSE
+        Mssg=TRIM(Mssg)//TRIM(FltToMedmChar(DIISCo%D(Idx%I(I))))//','
+     ENDIF
+  ENDDO
+  Mssg=TRIM(Mssg)//TRIM(FltToMedmChar(DIISCo%D(Idx%I(N-1))))
+  CALL MondoLog(DEBUG_MEDIUM, Prog, Mssg, 'coefficients')
+  
+!!  CALL PPrint(F,'mixed F['//TRIM(SCFCycl)//']')
 
 #ifdef SUM_AO
    F^ortho = Z^t F Z.

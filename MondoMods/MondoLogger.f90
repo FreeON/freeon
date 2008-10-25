@@ -39,9 +39,35 @@ MODULE MondoLogger
   IMPLICIT NONE
   PRIVATE
 
-  PUBLIC :: MondoLog, MondoLogPlain
+  PUBLIC :: MondoLog, MondoLogPlain, ProcessName
 
 CONTAINS
+
+
+!---------------------------------------------------------------------
+!
+!---------------------------------------------------------------------
+  FUNCTION ProcessName(Proc_O,Misc_O) RESULT (Tag)
+    CHARACTER(LEN=*), OPTIONAL :: Proc_O
+    CHARACTER(LEN=*), OPTIONAL :: Misc_O
+    CHARACTER(LEN=26)          :: Tag
+    CHARACTER(LEN=26)          :: Name
+    CHARACTER(LEN=26),PARAMETER:: Blks='                        '
+    CHARACTER(LEN=3), PARAMETER:: Colon =' : '
+    CHARACTER(LEN=4), PARAMETER:: Colons=' :: '
+    IF(PRESENT(Proc_O).AND.PRESENT(Misc_O))THEN
+       Name=TRIM(ADJUSTL(TRIM(Proc_O)))//Colon//TRIM(Misc_O)
+       Name(24:26)=":: "
+       Tag=Name
+    ELSEIF(PRESENT(Proc_O))THEN
+       Name=TRIM(ADJUSTL(TRIM(Proc_O)))
+       Name(24:26)=":: "
+       Tag=Name
+    ELSE
+       Tag="" !Blks
+    ENDIF
+  END FUNCTION ProcessName
+
 
   ! Open the logfile.
   FUNCTION OpenLogfile(filename, fd) RESULT(fileOutput)
@@ -123,30 +149,49 @@ CONTAINS
       IF(PRESENT(line_O)) THEN
         WRITE(UNIT=line_string,FMT="(I20)") line_O
         line_string = ADJUSTL(line_string)
-      ENDIF
 
-      ! Write messsage.
-      output = "not set"
-      IF(LEN_TRIM(tag) > 0) THEN
-        IF(PRESENT(file_O)) THEN
-          IF(PRESENT(line_O)) THEN
-            output = "["//TRIM(tag)//" "//TRIM(file_O)//":"//TRIM(line_string)//"] "//TRIM(message)
-          ELSE
-            output = "["//TRIM(tag)//" "//TRIM(file_O)//"] "//TRIM(message)
-          ENDIF
-        ELSE
-          IF(PRESENT(line_O)) THEN
-            WRITE(*,*) "what file?"
-            CALL Trap()
-          ELSE
-            output = "["//TRIM(tag)//"] "//TRIM(message)
-          ENDIF
-        ENDIF
-      ELSE
-        output = TRIM(message)
-      ENDIF
-      IF(fileOutput) WRITE(123,"(A)") TRIM(output)
-      WRITE(*,"(A)") TRIM(output)
+        output=ProcessName(tag,line_string)
+
+     ELSEIF(PRESENT(file_O)) THEN
+
+        output=ProcessName(tag,file_O)
+
+     ELSE
+
+        output=ProcessName(tag)
+
+     ENDIF
+
+     output=TRIM(output)//' '//TRIM(message)
+
+
+!!$      ! Write messsage.
+!!$      output = "not set"
+!!$      IF(LEN_TRIM(tag) > 0) THEN
+!!$
+!!$        IF(PRESENT(file_O)) THEN
+!!$          IF(PRESENT(line_O)) THEN
+!!$            output = "["//TRIM(tag)//" "//TRIM(file_O)//":"//TRIM(line_string)//"] "//TRIM(message)
+!!$          ELSE
+!!$            output = "["//TRIM(tag)//" "//TRIM(file_O)//"] "//TRIM(message)
+!!$          ENDIF
+!!$
+!!$        ELSE
+!!$
+!!$          IF(PRESENT(line_O)) THEN
+!!$            WRITE(*,*) "what file?"
+!!$            CALL Trap()
+!!$          ELSE
+!!$            output = "["//TRIM(tag)//"] "//TRIM(message)
+!!$          ENDIF
+!!$        ENDIF
+!!$      ELSE
+!!$        output = TRIM(message)
+!!$      ENDIF
+
+      IF(fileOutput) &
+      WRITE(123,"(A)")' '//TRIM(output)
+      WRITE(*  ,"(A)")' '//TRIM(output)
 
       ! Close logfile.
       IF(fileOutput) CLOSE(123)
@@ -162,5 +207,6 @@ CONTAINS
     CALL MondoLog(DEBUG_NONE, "", message)
 
   END SUBROUTINE MondoLogPlain
+
 
 END MODULE MondoLogger

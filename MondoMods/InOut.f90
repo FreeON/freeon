@@ -1567,12 +1567,12 @@ CONTAINS
     ENDIF
 #endif
 
-    Chk=Zero
-    DO I=1,MIN(NBasF**2,A%NNon0)
-       Chk=Chk+A%MTrix%D(I)*A%Mtrix%D(I)
-    ENDDO
-    Chk=SQRT(Chk) 
-    CALL MondoLog(DEBUG_MAXIMUM, "Get_BCSR", "getting BCSR from "//TRIM(Name)//" Check = "//TRIM(DblToChar(Chk)))
+!!$    Chk=Zero
+!!$    DO I=1,MIN(NBasF**2,A%NNon0)
+!!$       Chk=Chk+A%MTrix%D(I)*A%Mtrix%D(I)
+!!$    ENDDO
+!!$    Chk=SQRT(Chk) 
+!!$    CALL MondoLog(DEBUG_MAXIMUM, "Get_BCSR", "getting BCSR from "//TRIM(Name)//" Check = "//TRIM(DblToChar(Chk)))
 
 
     RETURN
@@ -1634,13 +1634,13 @@ CONTAINS
     LOGICAL                              :: Exists
     INTEGER                              :: I,IOS
 
-    REAL(DOUBLE) :: Chk
-    Chk=Zero
-    DO I=1,A%NNon0
-       Chk=Chk+A%MTrix%D(I)*A%Mtrix%D(I)
-    ENDDO
-    Chk=SQRT(Chk) 
-    CALL MondoLog(DEBUG_MAXIMUM, "Put_BCSR", "getting BCSR from "//TRIM(Name)//" Check = "//TRIM(DblToChar(Chk)))
+!!$    REAL(DOUBLE) :: Chk
+!!$    Chk=Zero
+!!$    DO I=1,A%NNon0
+!!$       Chk=Chk+A%MTrix%D(I)*A%Mtrix%D(I)
+!!$    ENDDO
+!!$    Chk=SQRT(Chk) 
+!!$    CALL MondoLog(DEBUG_MAXIMUM, "Put_BCSR", "getting BCSR from "//TRIM(Name)//" Check = "//TRIM(DblToChar(Chk)))
 
 #ifdef PARALLEL
     IF(MyId==0)THEN
