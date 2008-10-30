@@ -106,7 +106,8 @@ PROGRAM QCTC
         CALL Get(Dmat,TrixFile('D',Args,1))
      ELSEIF(SCFActn=='StartResponse')THEN
         CALL Halt('MakeRho: SCFActn cannot be equal to <StartResponse>')
-     ELSEIF(SCFActn=='DensityPrime')THEN
+     ELSEIF(SCFActn=='FockPrimeBuild')THEN
+       NukesOn=.FALSE.
         CALL Get(Dmat,TrixFile('DPrime'//TRIM(Args%C%C(3)),Args,0))
      ELSEIF(SCFActn=='TD-SCF')THEN
         NukesOn=.FALSE.
