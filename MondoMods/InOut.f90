@@ -278,10 +278,10 @@ CONTAINS
   FUNCTION NameTag(VarName,Tag_O,Stats_O) RESULT(FullName)
     CHARACTER(LEN=*),         INTENT(IN)    :: VarName
     CHARACTER(LEN=*),OPTIONAL,INTENT(IN)    :: Tag_O
-    INTEGER,DIMENSION(3),OPTIONAL           :: Stats_O
+    INTEGER,DIMENSION(3),OPTIONAL,INTENT(IN):: Stats_O
+    INTEGER,DIMENSION(3)                    :: ReCycStats
     CHARACTER(LEN=DEFAULT_CHR_LEN)          :: FullName
-    INTEGER                                 :: Tag_INT_old, Tag_INT_new
-   
+    INTEGER                                 :: Tag_INT_old, Tag_INT_new  
     IF(PRESENT(Tag_O).AND.PRESENT(Stats_O))THEN
        CALL Halt(' Logic error in NameTag with both tag and stats passed through! ')
     ELSEIF(PRESENT(Tag_O))THEN
@@ -290,10 +290,11 @@ CONTAINS
       Tag_INT_new = MOD(Tag_INT_old, RECYCLE_HDF)
       FullName=TRIM(VarName)//TRIM(IntToChar(Tag_INT_new))
     ELSEIF(PRESENT(Stats_O))THEN
-       Stats_O(3)=MOD(Stats_O(3), RECYCLE_HDF)       
-      FullName=TRIM(VarName)//TRIM(StatsToChar(Stats_O))
+       ReCycStats=Stats_O
+       ReCycStats(3)=MOD(ReCycStats(3),RECYCLE_HDF)       
+       FullName=TRIM(VarName)//TRIM(StatsToChar(ReCycStats))
     ELSE
-      FullName=TRIM(VarName)
+       FullName=TRIM(VarName)
     ENDIF
     CALL LowCase(FullName)
   END FUNCTION NameTag
