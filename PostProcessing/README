@@ -1,0 +1,4 @@
+This directory contains some scripts that calculate some potentially useful
+quantities. Here is a list of scripts currently available here:
+
+diffusionCoefficient.py
