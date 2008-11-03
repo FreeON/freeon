@@ -1,0 +1,83 @@
+# vim: syntax=python
+
+import re, sys, logging
+
+class parseMDO:
+
+  # The internal variables.
+  filename = None
+  fd = None
+  lines = None
+
+  def __init__(self, filename):
+    log = logging.getLogger("parseMDO")
+
+    self.filename = filename
+    log.info("parsing " + self.filename)
+
+    try:
+      self.fd = open(self.filename)
+      self.lines = self.fd.readlines()
+
+    except IOError:
+      log.error("I can not open this file: " + self.filename)
+      sys.exit(1)
+
+    else:
+      self.fd.close()
+
+  def parse(self):
+    log = logging.getLogger("parseMDO")
+
+    # Reset output variables.
+    time = []
+    position = []
+    velocity = []
+
+    # Read input file.
+    read_data = False
+    line_number = 0
+    for line in self.lines:
+      line_number += 1
+
+      result_time = re.compile("MD Time").search(line.strip())
+      result_start = re.compile("Start: Atom").search(line.strip())
+      result_end = re.compile("End: Atom").search(line.strip())
+
+      if result_time != None:
+        token = line.split()
+        time.append(float(token[3].lower().replace("d", "e")))
+
+      if not read_data:
+        if result_start != None:
+          read_data = True
+          continue
+
+        if result_end != None:
+          log.error("found End tag in line " + str(line_number) + " but MD step not open yet")
+          sys.exit(1)
+
+      if read_data:
+        if result_end != None:
+          read_data = False
+          continue
+
+        if result_start != None:
+          log.error("found Start tag in line " + str(line_number) + " but MD step already open")
+          sys.exit(1)
+
+        token = line.split()
+        if len(token) != 7:
+          log.error("syntax error on line " + str(line_number))
+          sys.exit(1)
+
+        position.append([])
+        velocity.append([])
+
+        position[-1].append([ float(token[1]), float(token[2]), float(token[3]) ])
+        velocity[-1].append([ float(token[4]), float(token[5]), float(token[6]) ])
+
+    if read_data:
+      log.warning("unfinished MD step")
+
+    return ( time, position, velocity )
