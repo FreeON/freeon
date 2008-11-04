@@ -767,11 +767,11 @@ CONTAINS
 
   FUNCTION TrixFile(PostFix,Args_O,OffSet_O,Name_O,Stats_O,NoTags_O,PWD_O)
     CHARACTER(LEN=*),         INTENT(IN)      :: PostFix
-    CHARACTER(LEN=*),OPTIONAL,INTENT(IN)      :: Name_O
+    CHARACTER(LEN=*),OPTIONAL,INTENT(IN)      :: Name_O,PWD_O
     TYPE(ARGMT),     OPTIONAL,INTENT(IN)      :: Args_O
     INTEGER,DIMENSION(3), OPTIONAL,INTENT(IN) :: Stats_O
     INTEGER,         OPTIONAL,INTENT(IN)      :: OffSet_O
-    LOGICAL,         OPTIONAL,INTENT(IN)      :: NoTags_O,PWD_O
+    LOGICAL,         OPTIONAL,INTENT(IN)      :: NoTags_O
     INTEGER                                   :: OffSet
     INTEGER, DIMENSION(3)                     :: Stats
     CHARACTER(LEN=DEFAULT_CHR_LEN)            :: Name,TrixFile,Cycl,Base,Geom
@@ -779,7 +779,7 @@ CONTAINS
     !CALL MondoLog(DEBUG_MAXIMUM, "TrixFile", "PostFix = "//TRIM(PostFix))
     IF(PRESENT(Name_O))THEN
       IF(PRESENT(PWD_O))THEN
-        Name=TRIM(MONDO_PWD)//Name_O
+        Name=TRIM(PWD_O)//Name_O
       ELSE
         Name=TRIM(MONDO_SCRATCH)//Name_O
       ENDIF

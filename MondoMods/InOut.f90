@@ -275,29 +275,28 @@ CONTAINS
   !===============================================================================
   !
   !===============================================================================
-  FUNCTION NameTag(VarName,Tag_O) RESULT(FullName)
+  FUNCTION NameTag(VarName,Tag_O,Stats_O) RESULT(FullName)
     CHARACTER(LEN=*),         INTENT(IN)    :: VarName
     CHARACTER(LEN=*),OPTIONAL,INTENT(IN)    :: Tag_O
+    INTEGER,DIMENSION(3),OPTIONAL,INTENT(IN):: Stats_O
+    INTEGER,DIMENSION(3)                    :: ReCycStats
     CHARACTER(LEN=DEFAULT_CHR_LEN)          :: FullName
-    INTEGER                                 :: Tag_INT_old, Tag_INT_new
-
-    IF(PRESENT(Tag_O))THEN
+    INTEGER                                 :: Tag_INT_old, Tag_INT_new  
+    IF(PRESENT(Tag_O).AND.PRESENT(Stats_O))THEN
+       CALL Halt(' Logic error in NameTag with both tag and stats passed through! ')
+    ELSEIF(PRESENT(Tag_O))THEN
       ! Apply recycling.
       Tag_INT_old = CharToInt(Tag_O)
       Tag_INT_new = MOD(Tag_INT_old, RECYCLE_HDF)
-      !IF(Tag_INT_new /= Tag_INT_old) THEN
-      !  CALL MondoLog(DEBUG_MAXIMUM, "NameTag", "recycling tag from "//TRIM(IntToChar(Tag_INT_old)) &
-      !    //" to "//TRIM(IntToChar(Tag_INT_new)))
-      !ELSE
-      !  CALL MondoLog(DEBUG_MAXIMUM, "NameTag", "no recycling necessary on Tag_O = "//TRIM(Tag_O))
-      !ENDIF
       FullName=TRIM(VarName)//TRIM(IntToChar(Tag_INT_new))
-      !CALL MondoLog(DEBUG_MAXIMUM, "NameTag", "FullName = "//TRIM(FullName))
+    ELSEIF(PRESENT(Stats_O))THEN
+       ReCycStats=Stats_O
+       ReCycStats(3)=MOD(ReCycStats(3),RECYCLE_HDF)       
+       FullName=TRIM(VarName)//TRIM(StatsToChar(ReCycStats))
     ELSE
-      FullName=TRIM(VarName)
+       FullName=TRIM(VarName)
     ENDIF
     CALL LowCase(FullName)
-
   END FUNCTION NameTag
   !===============================================================================
   !
@@ -576,21 +575,7 @@ CONTAINS
       IF(PRESENT(Stats_O).AND.PRESENT(Tag_O)) THEN
         CALL Halt("[Get_DBL_SCLR] either Stats_O or Tag_O")
       ENDIF
-      IF(PRESENT(Tag_O)) THEN
-        !CALL MondoLog(DEBUG_MAXIMUM, "Get_DBL_SCLR", "VarName = "//TRIM(VarName)//", Tag_O = "//TRIM(Tag_O))
-        Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_DOUBLE,1,.FALSE.)
-      ELSEIF(PRESENT(Stats_O)) THEN
-        Tag = TRIM(IntToChar(Stats_O(3)))
-        !CALL MondoLog(DEBUG_MAXIMUM, "Get_DBL_SCLR", "VarName = "//TRIM(VarName)//", Stats_O = " &
-        !  //TRIM(IntToChar(Stats_O(1)))//" " &
-        !  //TRIM(IntToChar(Stats_O(2)))//" " &
-        !  //TRIM(IntToChar(Stats_O(3)))//", constructed Tag = "//TRIM(Tag))
-        Meta=SetMeta(NameTag(VarName,Tag),NATIVE_DOUBLE,1,.FALSE.)
-      ELSE
-        !CALL MondoLog(DEBUG_MAXIMUM, "Get_DBL_SCLR", "VarName = "//TRIM(VarName)//", Tag_O not set")
-        Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_DOUBLE,1,.FALSE.)
-      ENDIF
-
+      Meta=SetMeta(NameTag(VarName,Tag_O=Tag_O,Stats_O=Stats_O),NATIVE_DOUBLE,1,.FALSE.)
       CALL OpenData(Meta)
       CALL ReadDoubleVector(Meta,B)
       CALL CloseData(Meta)
@@ -944,28 +929,11 @@ CONTAINS
 #ifdef PARALLEL
     IF(MyId==ROOT)THEN
 #endif
-      IF(PRESENT(Stats_O).AND.PRESENT(Tag_O)) THEN
-        CALL Halt("[Put_DBL_SCLR] either Stats_O or Tag_O")
-      ENDIF
-      IF(PRESENT(Tag_O)) THEN
-        !CALL MondoLog(DEBUG_MAXIMUM, "Put_DBL_SCLR", "VarName = "//TRIM(VarName)//", Tag_O = "//TRIM(Tag_O))
-        Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_DOUBLE,1,.FALSE.)
-      ELSEIF(PRESENT(Stats_O)) THEN
-        Tag = TRIM(IntToChar(Stats_O(3)))
-        !CALL MondoLog(DEBUG_MAXIMUM, "Put_DBL_SCLR", "VarName = "//TRIM(VarName)//", Stats_O = " &
-        !  //TRIM(IntToChar(Stats_O(1)))//" " &
-        !  //TRIM(IntToChar(Stats_O(2)))//" " &
-        !  //TRIM(IntToChar(Stats_O(3)))//", constructed Tag = "//TRIM(Tag))
-        Meta=SetMeta(NameTag(VarName,Tag),NATIVE_DOUBLE,1,.FALSE.)
-      ELSE
-        !CALL MondoLog(DEBUG_MAXIMUM, "Put_DBL_SCLR", "VarName = "//TRIM(VarName)//", Tag_O not set")
-        Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_DOUBLE,1,.FALSE.)
-      ENDIF
-
-      CALL OpenData(Meta,.TRUE.)
-      B(1)=A
-      CALL WriteDoubleVector(Meta,B)
-      CALL CloseData(Meta)
+       Meta=SetMeta(NameTag(VarName,Tag_O=Tag_O,Stats_O=Stats_O),NATIVE_DOUBLE,1,.FALSE.)
+       CALL OpenData(Meta,.TRUE.)
+       B(1)=A
+       CALL WriteDoubleVector(Meta,B)
+       CALL CloseData(Meta)
 #ifdef PARALLEL
     ENDIF
 #endif
@@ -1270,171 +1238,195 @@ CONTAINS
   END SUBROUTINE Put_BSET
   !-------------------------------------------------------------------------------
   !-------------------------------------------------------------------------------
-  !             Get the Periodic Info
-  SUBROUTINE Get_PBCInfo(PBC,Label_O,Tag_O)
-    TYPE(PBCInfo)                         :: PBC
-    CHARACTER(LEN=*),OPTIONAL,INTENT(IN)  :: Tag_O
-    CHARACTER(LEN=*),OPTIONAL,INTENT(IN)  :: Label_O
-    CHARACTER(LEN=DEFAULT_CHR_LEN)        :: Label
+!-------------------------------------------------------------------------------
+!             Get the Periodic Info
+              SUBROUTINE Get_PBCInfo(PBC,Tag_O)
+                TYPE(PBCInfo)                         :: PBC
+                CHARACTER(LEN=*),OPTIONAL,INTENT(IN)  :: Tag_O
+                CALL Get(PBC%Dimen     ,'Dimension' ,Tag_O=Tag_O)
+                CALL Get(PBC%PFFMaxEll ,'PFFMaxEll' ,Tag_O=Tag_O)
+                CALL Get(PBC%PFFWelSep ,'PFFWelSep' ,Tag_O=Tag_O)
+                !! Depricated:                
+!!                CALL Get(PBC%AtomW     ,'AtomWrap'  ,Tag_O=Tag_O)
+                CALL Get(PBC%SuperCell ,'SuperCell' ,Tag_O=Tag_O)
+                CALL Get(PBC%InVecForm ,'VectorForm',Tag_O=Tag_O)
+                CALL Get(PBC%InAtomCrd ,'AtomicCrd' ,Tag_O=Tag_O)
+                CALL Get(PBC%Translate ,'Translate' ,Tag_O=Tag_O)
+                CALL Get(PBC%CellVolume,'CellVolume',Tag_O=Tag_O)
+                CALL Get(PBC%Epsilon   ,'Epsilon'   ,Tag_O=Tag_O)
+                CALL Get(PBC%DipoleFAC ,'DPoleFAC'  ,Tag_O=Tag_O)
+                CALL Get(PBC%QupoleFAC ,'QPoleFAC'  ,Tag_O=Tag_O)
+                CALL Get(PBC%AutoW     ,'AutoWrap'  ,Tag_O=Tag_O)
+                CALL Get(PBC%CellCenter,'CellCenter',Tag_O=Tag_O)
+                CALL Get(PBC%TransVec  ,'TransVec'  ,Tag_O=Tag_O)
+                CALL Get(PBC%BoxShape  ,'BoxShape'  ,Tag_O=Tag_O)
+                CALL Get(PBC%InvBoxSh  ,'InvBoxSh'  ,Tag_O=Tag_O)
+                CALL Get(PBC%LatFrc    ,'LatFrc'    ,Tag_O=Tag_O)
+              END SUBROUTINE Get_PBCInfo
+!-------------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
+!             Put the Periodic Info
+                                                                                                 
+              SUBROUTINE Put_PBCInfo(PBC,Tag_O)
+                TYPE(PBCInfo),            INTENT(IN)  :: PBC
+                CHARACTER(LEN=*),OPTIONAL,INTENT(IN)  :: Tag_O
+                CALL Put(PBC%Dimen     ,'Dimension' ,Tag_O=Tag_O)
+                CALL Put(PBC%PFFMaxEll ,'PFFMaxEll' ,Tag_O=Tag_O)
+                CALL Put(PBC%PFFWelSep ,'PFFWelSep' ,Tag_O=Tag_O)
+!!                Depricated:
+!!                CALL Put(PBC%AtomW     ,'AtomWrap'  ,Tag_O=Tag_O)
+                CALL Put(PBC%SuperCell ,'SuperCell' ,Tag_O=Tag_O)
+                CALL Put(PBC%InVecForm ,'VectorForm',Tag_O=Tag_O)
+                CALL Put(PBC%InAtomCrd ,'AtomicCrd' ,Tag_O=Tag_O)
+                CALL Put(PBC%Translate ,'Translate' ,Tag_O=Tag_O)
+                CALL Put(PBC%CellVolume,'CellVolume',Tag_O=Tag_O)
+                CALL Put(PBC%Epsilon   ,'Epsilon'   ,Tag_O=Tag_O)
+                CALL Put(PBC%DipoleFAC ,'DPoleFAC'  ,Tag_O=Tag_O)
+                CALL Put(PBC%QupoleFAC ,'QPoleFAC'  ,Tag_O=Tag_O)
+!                WRITE(*,*)' DIPOLEFAC  = ',PBC%DipoleFac
 
-    IF(PRESENT(Label_O)) THEN
-      Label=TRIM(Label_O)
-    ELSE
-      Label=""
-    ENDIF
+                CALL Put(PBC%AutoW     ,'AutoWrap'  ,Tag_O=Tag_O)
+                CALL Put(PBC%CellCenter,'CellCenter',Tag_O=Tag_O)
+!                WRITE(*,*)' CellCenter = ',PBC%CellCenter%D
+                CALL Put(PBC%TransVec  ,'TransVec'  ,Tag_O=Tag_O)
+!                WRITE(*,*)' TransVec = ',PBC%TransVec%D
+                CALL Put(PBC%BoxShape  ,'BoxShape'  ,Tag_O=Tag_O)
+!                WRITE(*,*)' BoxShape = ',PBC%BoxShape%D
+                CALL Put(PBC%InvBoxSh  ,'InvBoxSh'  ,Tag_O=Tag_O)
+!                WRITE(*,*)' InvBoxSh = ',PBC%InvBoxSh%D
+                CALL Put(PBC%LatFrc    ,'LatFrc'    ,Tag_O=Tag_O)
+              END SUBROUTINE Put_PBCInfo
+              !-------------------------------------------------------------------------------
+              !     Get some coordinates
+              SUBROUTINE Get_CRDS(GM,Tag_O)
+                TYPE(CRDS)                           :: GM
+                CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Tag_O
+                IF(AllocQ(GM%Alloc))CALL Delete(GM)
+                !-------------------------------------------------------------------------------
+                !        Items that should not change with geometry...
+                CALL Get(GM%NAtms,'natoms'       ,Tag_O=Tag_O)
+                CALL Get(GM%Confg,'configuration',Tag_O=Tag_O)
+                CALL Get(GM%NElec,'nel'          ,Tag_O=Tag_O)
+                CALL Get(GM%NAlph,'nelalpha'     ,Tag_O=Tag_O)
+                CALL Get(GM%NBeta,'nelbeta'      ,Tag_O=Tag_O)
+                CALL Get(GM%TotCh,'charge'       ,Tag_O=Tag_O)
+                CALL Get(GM%NKind,'nkind'        ,Tag_O=Tag_O)
+                CALL Get(GM%InAu, 'inau'         ,Tag_O=Tag_O)
+                CALL New(GM)
+                !-------------------------------------------------------------------------------
+                !        Items that can change with geometry ...       
 
-    CALL Get(PBC%Dimen,     TRIM(Label)//'Dimension',  Tag_O=Tag_O)
-    CALL Get(PBC%PFFMaxEll, TRIM(Label)//'PFFMaxEll',  Tag_O=Tag_O)
-    CALL Get(PBC%PFFMaxLay, TRIM(Label)//'PFFMaxLay',  Tag_O=Tag_O)
-    CALL Get(PBC%PFFOvRide, TRIM(Label)//'PFFOvRide',  Tag_O=Tag_O)
-    CALL Get(PBC%AtomW,     TRIM(Label)//'AtomWrap',   Tag_O=Tag_O)
-    CALL Get(PBC%SuperCell, TRIM(Label)//'SuperCell',  Tag_O=Tag_O)
-    CALL Get(PBC%InVecForm, TRIM(Label)//'VectorForm', Tag_O=Tag_O)
-    CALL Get(PBC%InAtomCrd, TRIM(Label)//'AtomicCrd',  Tag_O=Tag_O)
-    CALL Get(PBC%Translate, TRIM(Label)//'Translate',  Tag_O=Tag_O)
-    CALL Get(PBC%CellVolume,TRIM(Label)//'CellVolume', Tag_O=Tag_O)
-    CALL Get(PBC%Epsilon,   TRIM(Label)//'Epsilon',    Tag_O=Tag_O)
-    CALL Get(PBC%DipoleFAC, TRIM(Label)//'DPoleFAC',   Tag_O=Tag_O)
-    CALL Get(PBC%QupoleFAC, TRIM(Label)//'QPoleFAC',   Tag_O=Tag_O)
-    CALL Get(PBC%AutoW,     TRIM(Label)//'AutoWrap',   Tag_O=Tag_O)
-    CALL Get(PBC%CellCenter,TRIM(Label)//'CellCenter', Tag_O=Tag_O)
-    CALL Get(PBC%TransVec,  TRIM(Label)//'TransVec',   Tag_O=Tag_O)
-    CALL Get(PBC%BoxShape,  TRIM(Label)//'BoxShape',   Tag_O=Tag_O)
-    CALL Get(PBC%InvBoxSh,  TRIM(Label)//'InvBoxSh',   Tag_O=Tag_O)
-    CALL Get(PBC%LatFrc,    TRIM(Label)//'LatFrc',     Tag_O=Tag_O)
+                CALL Get(GM%ETotal    ,'gm_etot'      ,Tag_O=Tag_O)
+                CALL Get(GM%ETotalPerSCF, "gm_etotalperscf",  Tag_O=Tag_O)
+                CALL Get(GM%Ordrd     ,'reordered'    ,Tag_O=Tag_O)
 
-  END SUBROUTINE Get_PBCInfo
-  !-------------------------------------------------------------------------------
-  !-------------------------------------------------------------------------------
-  !             Put the Periodic Info
+                CALL Get(GM%AtTyp     ,'atomtype'     ,Tag_O=Tag_O)
+                CALL Get(GM%AtNum     ,'atomicnumbers',Tag_O=Tag_O)
+                CALL Get(GM%AtNam     ,'atomname'     ,Tag_O=Tag_O)
+!!!!                CALL Get(GM%AtMMTyp   ,'mmtype'       ,Tag_O=Tag_O)
+                CALL Get(GM%AtMss     ,'atomicmass'   ,Tag_O=Tag_O)
+                CALL Get(GM%PBC                       ,Tag_O=Tag_O)
+                CALL Get(GM%InCells   ,'incells'      ,Tag_O=Tag_O)
+                CALL Get(GM%OvCells   ,'ovcells'      ,Tag_O=Tag_O)
 
-  SUBROUTINE Put_PBCInfo(PBC,Label_O,Tag_O)
-    TYPE(PBCInfo),            INTENT(IN)  :: PBC
-    CHARACTER(LEN=*),OPTIONAL,INTENT(IN)  :: Tag_O
-    CHARACTER(LEN=*),OPTIONAL,INTENT(IN)  :: Label_O
-    CHARACTER(LEN=DEFAULT_CHR_LEN)        :: Label
 
-    IF(PRESENT(Label_O)) THEN
-      Label=TRIM(Label_O)
-    ELSE
-      Label=""
-    ENDIF
+                CALL Get(GM%BndBox    ,'boundingbox'  ,Tag_O=Tag_O)
+                CALL Get(GM%CConstrain,'constraints'  ,Tag_O=Tag_O)
+                CALL Get(GM%Carts     ,'cartesians'   ,Tag_O=Tag_O)
+                CALL Get(GM%Velocity  ,'Velocity'     ,Tag_O=Tag_O)
+                CALL Get(GM%Gradients ,'Gradients'    ,Tag_O=Tag_O)
 
-    CALL Put(PBC%Dimen,     TRIM(Label)//'Dimension',  Tag_O=Tag_O)
-    CALL Put(PBC%PFFMaxEll, TRIM(Label)//'PFFMaxEll',  Tag_O=Tag_O)
-    CALL Put(PBC%PFFMaxLay, TRIM(Label)//'PFFMaxLay',  Tag_O=Tag_O)
-    CALL Put(PBC%PFFOvRide, TRIM(Label)//'PFFOvRide',  Tag_O=Tag_O)
-    CALL Put(PBC%AtomW,     TRIM(Label)//'AtomWrap',   Tag_O=Tag_O)
-    CALL Put(PBC%SuperCell, TRIM(Label)//'SuperCell',  Tag_O=Tag_O)
-    CALL Put(PBC%InVecForm, TRIM(Label)//'VectorForm', Tag_O=Tag_O)
-    CALL Put(PBC%InAtomCrd, TRIM(Label)//'AtomicCrd',  Tag_O=Tag_O)
-    CALL Put(PBC%Translate, TRIM(Label)//'Translate',  Tag_O=Tag_O)
-    CALL Put(PBC%CellVolume,TRIM(Label)//'CellVolume', Tag_O=Tag_O)
-    CALL Put(PBC%Epsilon,   TRIM(Label)//'Epsilon',    Tag_O=Tag_O)
-    CALL Put(PBC%DipoleFAC, TRIM(Label)//'DPoleFAC',   Tag_O=Tag_O)
-    CALL Put(PBC%QupoleFAC, TRIM(Label)//'QPoleFAC',   Tag_O=Tag_O)
-    CALL Put(PBC%AutoW,     TRIM(Label)//'AutoWrap',   Tag_O=Tag_O)
-    CALL Put(PBC%CellCenter,TRIM(Label)//'CellCenter', Tag_O=Tag_O)
-    CALL Put(PBC%TransVec,  TRIM(Label)//'TransVec',   Tag_O=Tag_O)
-    CALL Put(PBC%BoxShape,  TRIM(Label)//'BoxShape',   Tag_O=Tag_O)
-    CALL Put(PBC%InvBoxSh,  TRIM(Label)//'InvBoxSh',   Tag_O=Tag_O)
-    CALL Put(PBC%LatFrc,    TRIM(Label)//'LatFrc',     Tag_O=Tag_O)
+                !---------Variables we REALLY want to get rid of-------
+                CALL Get(GM%BoxCarts  ,'LatticeCoord' ,Tag_O=Tag_O)
+                CALL Get(GM%Displ     ,'Displ'        ,Tag_O=Tag_O)
 
-  END SUBROUTINE Put_PBCInfo
-  !-------------------------------------------------------------------------------
-  !     Get some coordinates
-  SUBROUTINE Get_CRDS(GM,Tag_O)
-    TYPE(CRDS)                           :: GM
-    CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Tag_O
 
-    CALL MondoLog(DEBUG_MAXIMUM, "Get_CRDS", "getting coordinates")
-    IF(AllocQ(GM%Alloc)) CALL Delete(GM)
-    !-------------------------------------------------------------------------------
-    !        Items that should not change with geometry...
-    CALL Get(GM%NAtms,'natoms'       ,Tag_O=Tag_O)
-    CALL Get(GM%Confg,'configuration',Tag_O=Tag_O)
-    CALL Get(GM%NElec,'nel'          ,Tag_O=Tag_O)
-    CALL Get(GM%NAlph,'nelalpha'     ,Tag_O=Tag_O)
-    CALL Get(GM%NBeta,'nelbeta'      ,Tag_O=Tag_O)
-    CALL Get(GM%TotCh,'charge'       ,Tag_O=Tag_O)
-    CALL Get(GM%NKind,'nkind'        ,Tag_O=Tag_O)
-    CALL Get(GM%InAu, 'inau'         ,Tag_O=Tag_O)
-    CALL New(GM)
-    !-------------------------------------------------------------------------------
-    !        Items that can change with geometry ...
-    CALL Get(GM%ETotal,       'gm_etot',          Tag_O=Tag_O)
-    CALL Get(GM%ETotalPerSCF, "gm_etotalperscf",  Tag_O=Tag_O)
-    CALL Get(GM%Ordrd,        'reordered',        Tag_O=Tag_O)
-    CALL Get(GM%AtTyp,        'atomtype',         Tag_O=Tag_O)
-    CALL Get(GM%AtNum,        'atomicnumbers',    Tag_O=Tag_O)
-    CALL Get(GM%AtNam,        'atomname',         Tag_O=Tag_O)
-    CALL Get(GM%AtMMTyp,      'mmtype',           Tag_O=Tag_O)
-    CALL Get(GM%AtMss,        'atomicmass',       Tag_O=Tag_O)
-    CALL Get(GM%PBC,                              Tag_O=Tag_O)
-    CALL Get(GM%BndBox,       'boundingbox',      Tag_O=Tag_O)
-    CALL Get(GM%CConstrain,   'constraints',      Tag_O=Tag_O)
-    CALL Get(GM%DoFreq,       'freqonatoms',      Tag_O=Tag_O)
-    CALL Get(GM%Carts,        'cartesians',       Tag_O=Tag_O)
-    CALL Get(GM%BoxCarts,     'LatticeCoord',     Tag_O=Tag_O)
-    CALL Get(GM%Velocity,     'Velocity',         Tag_O=Tag_O)
-    CALL Get(GM%Gradients,    'Gradients',        Tag_O=Tag_O)
-    CALL Get(GM%Displ,        'Displ',            Tag_O=Tag_O)
-    IF(PRESENT(Tag_O))THEN
-      CALL Get(GM%PBCDispl,   'PBCDispl',         Tag_O=Tag_O)
-   ELSE
-      CALL Get(GM%PBCDispl,   'PBCDispl')
-    ENDIF
-    CALL Get(GM%LatticeOnly,  'LatticeOnly',      Tag_O=Tag_O)
-    CALL Get(GM%AltCount,     'AltCount',         Tag_O=Tag_O)
-    CALL MondoLog(DEBUG_MAXIMUM, "Get_CRDS", "done getting coordinates")
-  END SUBROUTINE Get_CRDS
-  !-------------------------------------------------------------------------------
-  !     Put a coordinate set
+                ! THIS PBC DISPL MAY BE UNCESSESARY.  LETS SEE IF WE CAN MAKEIT DIE!
+!                IF(PRESENT(Tag_O))THEN
+!                   CALL Get(GM%PBCDispl,Tag_O='KAROLYS_PBCDispl'//TRIM(Tag_O))
+!                ELSE
+!                   CALL Get(GM%PBCDispl,Tag_O='KAROLYS_PBCDispl')
+!                ENDIF
 
-  SUBROUTINE Put_CRDS(GM,Tag_O)
-    TYPE(CRDS),               INTENT(IN) :: GM
-    CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Tag_O
+                !--------- to here ----------------------
+                CALL Get(GM%LatticeOnly,'LatticeOnly' ,Tag_O=Tag_O)
+                CALL Get(GM%AltCount  ,'AltCount'     ,Tag_O=Tag_O)
+              END SUBROUTINE Get_CRDS
+              !-------------------------------------------------------------------------------
+              !     Put a coordinate set
 
-    !-------------------------------------------------------------------------------
-    !        Items that should not change with geometry...
-    CALL MondoLog(DEBUG_MAXIMUM, "Put_CRDS", "putting coordinates")
+              SUBROUTINE Put_CRDS(GM,Tag_O)
+                TYPE(CRDS),               INTENT(IN) :: GM
+                CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Tag_O
+                
+                !-------------------------------------------------------------------------------
+                !        Items that should not change with geometry...
+!!$                IF(PRESENT(Tag_O))THEN
+!!$                   WRITE(*,*)'==================================================================='
+!!$                   WRITE(*,*)'==================================================================='
+!!$                   WRITE(*,*)' PUTTING COORDINATES WITH TAG = ',TAG_O
+!!$                   WRITE(*,*)'==================================================================='
+!!$                   WRITE(*,*)'==================================================================='
+!!$                ENDIF
+                CALL Put(GM%NAtms,'natoms'       ,Tag_O=Tag_O)
+                CALL Put(GM%Confg,'configuration',Tag_O=Tag_O)
+                CALL Put(GM%NElec,'nel'          ,Tag_O=Tag_O)
+                CALL Put(GM%NAlph,'nelalpha'     ,Tag_O=Tag_O)
+                CALL Put(GM%NBeta,'nelbeta'      ,Tag_O=Tag_O)
+                CALL Put(GM%TotCh,'charge'       ,Tag_O=Tag_O)
+                CALL Put(GM%NKind,'nkind'        ,Tag_O=Tag_O)
+                CALL Put(GM%InAu, 'inau'         ,Tag_O=Tag_O)
+                !-------------------------------------------------------------------------------
+                !        Items that can change with geometry ...       
+                CALL Put(GM%ETotal    ,'gm_etot'      ,Tag_O=Tag_O)
+                CALL Put(GM%ETotalPerSCF, "gm_etotalperscf",  Tag_O=Tag_O)
+                CALL Put(GM%Ordrd     ,'reordered'    ,Tag_O=Tag_O)
+                CALL Put(GM%AtTyp     ,'atomtype'     ,Tag_O=Tag_O)
+                CALL Put(GM%AtNum     ,'atomicnumbers',Tag_O=Tag_O)
+                CALL Put(GM%AtNam     ,'atomname'     ,Tag_O=Tag_O)
+!!!!                CALL Put(GM%AtMMTyp   ,'mmtype'       ,Tag_O=Tag_O)
+                CALL Put(GM%AtMss     ,'atomicmass'   ,Tag_O=Tag_O)
+                CALL Put(GM%BndBox    ,'boundingbox'  ,Tag_O=Tag_O)
 
-    CALL Put(GM%NAtms,'natoms'       ,Tag_O=Tag_O)
-    CALL Put(GM%Confg,'configuration',Tag_O=Tag_O)
-    CALL Put(GM%NElec,'nel'          ,Tag_O=Tag_O)
-    CALL Put(GM%NAlph,'nelalpha'     ,Tag_O=Tag_O)
-    CALL Put(GM%NBeta,'nelbeta'      ,Tag_O=Tag_O)
-    CALL Put(GM%TotCh,'charge'       ,Tag_O=Tag_O)
-    CALL Put(GM%NKind,'nkind'        ,Tag_O=Tag_O)
-    CALL Put(GM%InAu, 'inau'         ,Tag_O=Tag_O)
-    !-------------------------------------------------------------------------------
-    !        Items that can change with geometry ...
-    CALL Put(GM%ETotal,       "gm_etot",          Tag_O=Tag_O)
-    CALL Put(GM%ETotalPerSCF, "gm_etotalperscf",  Tag_O=Tag_O)
-    CALL Put(GM%Ordrd,        "reordered",        Tag_O=Tag_O)
-    CALL Put(GM%AtTyp,        "atomtype",         Tag_O=Tag_O)
-    CALL Put(GM%AtNum,        "atomicnumbers",    Tag_O=Tag_O)
-    CALL Put(GM%AtNam,        "atomname",         Tag_O=Tag_O)
-    CALL Put(GM%AtMMTyp,      "mmtype",           Tag_O=Tag_O)
-    CALL Put(GM%AtMss,        "atomicmass",       Tag_O=Tag_O)
-    CALL Put(GM%PBC,                              Tag_O=Tag_O)
-    CALL Put(GM%BndBox,       "boundingbox",      Tag_O=Tag_O)
-    CALL Put(GM%CConstrain,   "constraints",      Tag_O=Tag_O)
-    CALL Put(GM%DoFreq,       "freqonatoms",      Tag_O=Tag_O)
-    CALL Put(GM%Carts,        "cartesians",       Tag_O=Tag_O)
-    CALL Put(GM%BoxCarts,     "LatticeCoord",     Tag_O=Tag_O)
-    CALL Put(GM%Velocity,     "Velocity",         Tag_O=Tag_O)
-    CALL Put(GM%Gradients,    "Gradients",        Tag_O=Tag_O)
-    CALL Put(GM%Displ,        "Displ",            Tag_O=Tag_O)
-    IF(PRESENT(Tag_O))THEN
-      CALL Put(GM%PBCDispl,   'PBCDispl',         Tag_O=Tag_O)
-    ELSE
-      CALL Put(GM%PBCDispl,   'PBCDispl')
-    ENDIF
-    CALL Put(GM%LatticeOnly,  'LatticeOnly',      Tag_O=Tag_O)
-    CALL Put(GM%AltCount,     'AltCount',         Tag_O=Tag_O)
-    CALL MondoLog(DEBUG_MAXIMUM, "Put_CRDS", "done putting coordinates")
-  END SUBROUTINE Put_CRDS
+!                WRITE(*,*)'BndBox = ',GM%BndBox%D
+
+                CALL Put(GM%CConstrain,'constraints'  ,Tag_O=Tag_O)
+                CALL Put(GM%Carts     ,'cartesians'   ,Tag_O=Tag_O)
+
+!                WRITE(*,*)' Carts = ',GM%Carts%D
+
+                CALL Put(GM%Velocity  ,'Velocity'     ,Tag_O=Tag_O)
+                CALL Put(GM%Gradients ,'Gradients'    ,Tag_O=Tag_O)
+                ! PBC INFO ONE -- THE ONE WE SHOULD KEEP
+                CALL Put(GM%PBC                       ,Tag_O=Tag_O)                
+                CALL Put(GM%InCells   ,'incells'      ,Tag_O=Tag_O)
+                CALL Put(GM%OvCells   ,'ovcells'      ,Tag_O=Tag_O)
+                !---------Variables we REALLY want to get rid of-------
+                CALL Put(GM%BoxCarts  ,'LatticeCoord' ,Tag_O=Tag_O)
+
+!                WRITE(*,*)' BoxCarts = ',GM%BoxCarts%D
+
+                CALL Put(GM%Displ     ,'Displ'        ,Tag_O=Tag_O)
+
+                ! LETS SEE IF WE CAN GET RID OF THIS ONE!! 
+                ! PBC INFO TWO -- THE ONE WE SHOULD GET RID OF:
+!                IF(PRESENT(Tag_O))THEN
+!                   CALL Put(GM%PBCDispl,Tag_O='KAROLYS_PBCDispl'//TRIM(Tag_O))
+!                ELSE
+!                   CALL Put(GM%PBCDispl,Tag_O='KAROLYS_PBCDispl')
+!                ENDIF
+
+                !--------- to here ----------------------
+                CALL Put(GM%LatticeOnly,'LatticeOnly' ,Tag_O=Tag_O)
+                CALL Put(GM%AltCount  ,'AltCount'     ,Tag_O=Tag_O)
+
+!                WRITE(*,*)'==================================================================='
+!                WRITE(*,*)'==================================================================='
+!                WRITE(*,*)' DONE DONE DONE PUTTING COORDINATES '
+!                WRITE(*,*)'==================================================================='
+!                WRITE(*,*)'==================================================================='
+
+              END SUBROUTINE Put_CRDS
   !-------------------------------------------------------------------------------
   !     Get a BCSR matrix
 
@@ -1444,13 +1436,13 @@ CONTAINS
     CHARACTER(LEN=*),OPTIONAL,INTENT(IN)    :: PFix_O
     LOGICAL,         OPTIONAL,INTENT(IN)    :: CheckPoint_O
     LOGICAL,         OPTIONAL,INTENT(IN)    :: Bcast_O
-    REAL(DOUBLE)                            :: Dummy
+    REAL(DOUBLE)                            :: Dummy,Chk
     CHARACTER(LEN=DEFAULT_CHR_LEN)          :: FileName
     INTEGER                                 :: I,NSMat,NAtms,NBlks,NNon0,IOS
     LOGICAL                                 :: Exists,LimitsQ
     LOGICAL                                 :: Bcast
 
-    CALL MondoLog(DEBUG_MAXIMUM, "Get_BCSR", "getting BCSR from "//TRIM(Name))
+
     IF(PRESENT(Bcast_O)) THEN
       Bcast = Bcast_O
     ELSE
@@ -1576,6 +1568,14 @@ CONTAINS
     ENDIF
 #endif
 
+!!$    Chk=Zero
+!!$    DO I=1,MIN(NBasF**2,A%NNon0)
+!!$       Chk=Chk+A%MTrix%D(I)*A%Mtrix%D(I)
+!!$    ENDDO
+!!$    Chk=SQRT(Chk) 
+!!$    CALL MondoLog(DEBUG_MAXIMUM, "Get_BCSR", "getting BCSR from "//TRIM(Name)//" Check = "//TRIM(DblToChar(Chk)))
+
+
     RETURN
 1   CALL Halt('IO Error '//TRIM(IntToChar(IOS))//' in Get_BCSR:1340')
 2   CALL Halt('IO Error '//TRIM(IntToChar(IOS))//' in Get_BCSR reading RowPt')
@@ -1635,7 +1635,13 @@ CONTAINS
     LOGICAL                              :: Exists
     INTEGER                              :: I,IOS
 
-    CALL MondoLog(DEBUG_MAXIMUM, "Put_BCSR", "putting BCSR into "//TRIM(Name))
+!!$    REAL(DOUBLE) :: Chk
+!!$    Chk=Zero
+!!$    DO I=1,A%NNon0
+!!$       Chk=Chk+A%MTrix%D(I)*A%Mtrix%D(I)
+!!$    ENDDO
+!!$    Chk=SQRT(Chk) 
+!!$    CALL MondoLog(DEBUG_MAXIMUM, "Put_BCSR", "getting BCSR from "//TRIM(Name)//" Check = "//TRIM(DblToChar(Chk)))
 
 #ifdef PARALLEL
     IF(MyId==0)THEN
@@ -2830,11 +2836,11 @@ CONTAINS
     IF(PRESENT(Name_O))THEN
       CALL Put(CS%Radius   ,TRIM(Name_O)//'_cell_radius',Tag_O=Tag_O)
       CALL Put(CS%NCells   ,TRIM(Name_O)//'_cell_number',Tag_O=Tag_O)
-      CALL Put(CS%CellCarts,TRIM(Name_O)//'_cell_vectors',Tag_O=Tag_O,Unlimit_O=Unlimit_O)
+      CALL Put(CS%CellCarts,TRIM(Name_O)//'_cell_vectors',Tag_O=Tag_O,Unlimit_O=.TRUE.)
     ELSE
       CALL Put(CS%Radius   ,'cell_radius',Tag_O=Tag_O)
       CALL Put(CS%NCells   ,'cell_number',Tag_O=Tag_O)
-      CALL Put(CS%CellCarts,'cell_vectors',Tag_O=Tag_O,Unlimit_O=Unlimit_O)
+      CALL Put(CS%CellCarts,TRIM(Name_O)//'_cell_vectors',Tag_O=Tag_O,Unlimit_O=.TRUE.)
     ENDIF
   END SUBROUTINE Put_CellSet
 

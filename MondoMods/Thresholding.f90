@@ -173,13 +173,17 @@ MODULE Thresholding
            TestPrimPair = .TRUE.
         ENDIF
      END FUNCTION TestPrimPair
+
+
+
+
 !===================================================================================================
 !     Simple expressions to determine largest extent R for a distribution rho_LMN(R)
 !     Using a new Tighter Gramers like bound
 !===================================================================================================
-     FUNCTION Extent(Ell,Zeta,HGTF,Tau_O,ExtraEll_O,Potential_O) RESULT (R)
+      FUNCTION Extent2(Ell,Zeta,HGTF,Tau_O,ExtraEll_O,Potential_O) RESULT (R)
        INTEGER                         :: Ell,L,M,N,LMN
-       REAL(DOUBLE)                    :: Zeta
+       REAL(DOUBLE)                    :: Zeta , TmpExt
        REAL(DOUBLE),DIMENSION(:)       :: HGTF
        REAL(DOUBLE),OPTIONAL           :: Tau_O
        INTEGER,OPTIONAL                :: ExtraEll_O
@@ -187,7 +191,7 @@ MODULE Thresholding
        LOGICAL                         :: Potential
        INTEGER                         :: ExtraEll,TotEll   
        REAL(DOUBLE)                    :: R,Tau,Coef,ZetaFac,MinMax,ScaledTau,DelR,SqrtW,Fun,dFun
-!
+
 !      Quick turn around for nuclei
        IF(Zeta==NuclearExpnt)THEN
           R=1.D-10
@@ -251,8 +255,264 @@ MODULE Thresholding
              R         = SQRT(MAX(SMALL_DBL,-LOG(Tau/Coef)/(GFactor*Zeta)))
           ENDIF
        ENDIF
+
+!!$
+!!$       IF( R > 1D1 * TmpExt .OR. TmpExt > 1D1 * R ) THEN
+!!$
+!!$          WRITE(*,*)'--------------------------------------------'
+!!$          WRITE(*,*)' Ell  = ',ell
+!!$          WRITE(*,*)' Zeta = ',Zeta
+!!$          
+!!$         
+!!$          WRITE(*,*)' HGTF = ',Coef
+!!$          WRITE(*,*)' R = ',R
+!!$          WRITE(*,*)' T = ',TmpExt
+!!$
+!!$          TmpExt=Extent3(Ell,Zeta,HGTF,Tau_O,ExtraEll_O,Potential_O)
+!!$          WRITE(*,*)' T3= ',TmpExt
+!!$
+!!$          WRITE(*,*)' ScaledTau = ',ScaledTau
+!!$          WRITE(*,*)' -LOG(Tau/Coef)/(GFactor*Zeta)) ',-LOG(Tau/Coef)/(GFactor*Zeta) 
+!!$
+!!$!          STOP
+!!$
+!!$
+!!$       ENDIF
 !
+     END FUNCTION Extent2
+!===================================================================================================
+!     Simple expressions to determine largest extent R for a distribution rho_LMN(R)
+!     outside of which its value at a point is less than Tau (default) or outside 
+!     of which the error made using the classical potential is less than Tau (Potential option) 
+!===================================================================================================
+     FUNCTION Extent(Ell,Zeta,HGTF,Tau_O,ExtraEll_O,Potential_O) RESULT (R)
+       INTEGER                         :: Ell
+       REAL(DOUBLE)                    :: Zeta
+       REAL(DOUBLE),DIMENSION(:)       :: HGTF
+       REAL(DOUBLE),OPTIONAL           :: Tau_O
+       INTEGER,OPTIONAL                :: ExtraEll_O
+       LOGICAL,OPTIONAL                :: Potential_O
+       INTEGER                         :: L,M,N,Lp,Mp,Np,LMN,ExtraEll       
+       LOGICAL                         :: Potential
+       REAL(DOUBLE)                    :: Tau,T,R,CramCo,MixMax,ScaledTau,ZetaHalf,HGInEq,TMP
+       REAL(DOUBLE),PARAMETER          :: K3=1.09D0**3
+       REAL(DOUBLE),DIMENSION(0:12),PARAMETER :: Fact=(/1D0,1D0,2D0,6D0,24D0,120D0,      &
+                                                        720D0,5040D0,40320D0,362880D0,   &
+                                                        3628800D0,39916800D0,479001600D0/)
+!------------------------------------------------------------------------------------------------------------------
+       ! Quick turn around for nuclei
+       IF(Zeta>=(NuclearExpnt-1D1))THEN
+          R=1.D-10
+          RETURN
+       ENDIF
+       ! Misc options....
+       IF(PRESENT(ExtraEll_O))THEN 
+          ExtraEll=ExtraEll_O
+       ELSE 
+          ExtraEll=0
+       ENDIF
+       IF(PRESENT(Tau_O)) THEN
+          Tau=Tau_O
+       ELSE
+          Tau=Thresholds%Dist
+       ENDIF
+       IF(PRESENT(Potential_O)) THEN
+          Potential=Potential_O
+       ELSE
+          Potential=.FALSE.
+       ENDIF
+       ! Spherical symmetry check
+       IF(Ell+ExtraEll==0)THEN
+          ! For S functions we can use tighter bounds (no halving of exponents)
+          ScaledTau=Tau/(ABS(HGTF(1))+SMALL_DBL)
+          IF(Potential)THEN
+             ! R is the boundary of the quantum/classical potential approximation
+             ! HGTF(1)*Int dr [(Pi/Zeta)^3/2 delta(r)-Exp(-Zeta r^2)]/|r-R| < Tau
+             R=PFunk(Zeta,ScaledTau)
+          ELSE
+             ! Gaussian solution gives HGTF(1)*Exp[-Zeta*R^2] <= Tau
+             R=SQRT(MAX(SMALL_DBL,-LOG(ScaledTau)/Zeta))
+          ENDIF
+       ELSE
+          ! Universal prefactor based on Cramers inequality:
+          ! H_n(t) < K 2^(n/2) SQRT(n!) EXP(t^2/2), with K=1.09
+          CramCo=-BIG_DBL
+          DO L=0,Ell
+             DO M=0,Ell-L
+                DO N=0,Ell-L-M
+                   LMN=LMNDex(L,M,N)
+                   MixMax=Fact(L+ExtraEll)*Fact(M)*Fact(N)
+                   MixMax=MAX(MixMax,Fact(L)*Fact(M+ExtraEll)*Fact(N))
+                   MixMax=MAX(MixMax,Fact(L)*Fact(M)*Fact(N+ExtraEll))
+                   HGInEq=SQRT(MixMax*(Two*Zeta)**(L+M+N+ExtraEll))*HGTF(LMN)
+                   CramCo=MAX(CramCo,ABS(HGInEq))
+                ENDDO
+             ENDDO       
+          ENDDO
+          ! Now we just use expresions based on spherical symmetry but with half the exponent ...
+          ZetaHalf=Half*Zeta
+          ! and the threshold rescaled by the Cramer coefficient:
+          ScaledTau=Tau/CramCo
+          IF(Potential)THEN
+             ! R is the boundary of the quantum/classical potential approximation
+             ! CCo*Int dr [(2 Pi/Zeta)^3/2 delta(r)-Exp(-Zeta/2 r^2)]/|r-R| < Tau
+             R=PFunk(ZetaHalf,ScaledTau)
+          ELSE
+             ! Gaussian solution gives CCo*Exp[-Zeta*R^2/2] <= Tau
+             R=SQRT(MAX(SMALL_DBL,-LOG(ScaledTau)/ZetaHalf))
+          ENDIF
+       ENDIF
      END FUNCTION Extent
+!===================================================================================================
+!     Simple expressions to determine largest extent R for a distribution rho_LMN(R)
+!     outside of which its value at a point is less than Tau (default) or outside 
+!     of which the error made using the classical potential is less than Tau (Potential option) 
+!===================================================================================================
+     FUNCTION Extent3(Ell,Zeta,HGTF,Tau_O,ExtraEll_O,Potential_O) RESULT (R)
+       INTEGER                         :: Ell
+       REAL(DOUBLE)                    :: Zeta
+       REAL(DOUBLE),DIMENSION(:)       :: HGTF
+       REAL(DOUBLE),OPTIONAL           :: Tau_O
+       INTEGER,OPTIONAL                :: ExtraEll_O
+       LOGICAL,OPTIONAL                :: Potential_O
+       INTEGER                         :: L,M,N,Lp,Mp,Np,LMN,ExtraEll       
+       LOGICAL                         :: Potential
+       REAL(DOUBLE)                    :: Tau,T,R,CramCo,MixMax,ScaledTau,ZetaHalf,HGInEq,TMP
+       REAL(DOUBLE),PARAMETER          :: K3=1.09D0**3
+       REAL(DOUBLE),DIMENSION(0:12),PARAMETER :: Fact=(/1D0,1D0,2D0,6D0,24D0,120D0,      &
+                                                        720D0,5040D0,40320D0,362880D0,   &
+                                                        3628800D0,39916800D0,479001600D0/)
+!------------------------------------------------------------------------------------------------------------------
+       ! Quick turn around for nuclei
+       IF(Zeta>=(NuclearExpnt-1D1))THEN
+          R=1.D-10
+          RETURN
+       ENDIF
+       ! Misc options....
+       IF(PRESENT(ExtraEll_O))THEN 
+          ExtraEll=ExtraEll_O
+       ELSE 
+          ExtraEll=0
+       ENDIF
+       IF(PRESENT(Tau_O)) THEN
+          Tau=Tau_O
+       ELSE
+          Tau=Thresholds%Dist
+       ENDIF
+       IF(PRESENT(Potential_O)) THEN
+          Potential=Potential_O
+       ELSE
+          Potential=.FALSE.
+       ENDIF
+       ! Spherical symmetry check
+       IF(Ell+ExtraEll==0)THEN
+          ! For S functions we can use tighter bounds (no halving of exponents)
+          ScaledTau=Tau/(ABS(HGTF(1))+SMALL_DBL)
+          IF(Potential)THEN
+             ! R is the boundary of the quantum/classical potential approximation
+             ! HGTF(1)*Int dr [(Pi/Zeta)^3/2 delta(r)-Exp(-Zeta r^2)]/|r-R| < Tau
+             R=PFunk(Zeta,ScaledTau)
+          ELSE
+             ! Gaussian solution gives HGTF(1)*Exp[-Zeta*R^2] <= Tau
+             R=SQRT(MAX(SMALL_DBL,-LOG(ScaledTau)/Zeta))
+          ENDIF
+       ELSE
+          ! Universal prefactor based on Cramers inequality:
+          ! H_n(t) < K 2^(n/2) SQRT(n!) EXP(t^2/2), with K=1.09
+          CramCo=-BIG_DBL
+          DO L=0,Ell
+             DO M=0,Ell-L
+                DO N=0,Ell-L-M
+                   LMN=LMNDex(L,M,N)
+                   MixMax=Fact(L+ExtraEll)*Fact(M)*Fact(N)
+                   MixMax=MAX(MixMax,Fact(L)*Fact(M+ExtraEll)*Fact(N))
+                   MixMax=MAX(MixMax,Fact(L)*Fact(M)*Fact(N+ExtraEll))
+                   HGInEq=SQRT(MixMax*(Two*Zeta)**(L+M+N+ExtraEll))*HGTF(LMN)
+                   CramCo=MAX(CramCo,ABS(HGInEq))
+                ENDDO
+             ENDDO       
+          ENDDO
+          ! Now we just use expresions based on spherical symmetry but with half the exponent ...
+          ZetaHalf=Half*Zeta
+          ! and the threshold rescaled by the Cramer coefficient:
+          ScaledTau=Tau/CramCo
+          IF(Potential)THEN
+             ! R is the boundary of the quantum/classical potential approximation
+             ! CCo*Int dr [(2 Pi/Zeta)^3/2 delta(r)-Exp(-Zeta/2 r^2)]/|r-R| < Tau
+             R=PFunk(ZetaHalf,ScaledTau)
+          ELSE
+             ! Gaussian solution gives CCo*Exp[-Zeta*R^2/2] <= Tau
+             WRITE(*,*)' 3 Tau    = ',Tau
+             WRITE(*,*)' 3 CramCo = ',CramCo
+             WRITE(*,*)' 3 ScaledTau= ',ScaledTau
+             WRITE(*,*)' 3 ZetaHalf = ',ZetaHalf
+             WRITE(*,*)' 3 LOGLOG   = ',-LOG(ScaledTau)/ZetaHalf
+
+             R=SQRT(MAX(SMALL_DBL,-LOG(ScaledTau)/ZetaHalf))
+          ENDIF
+       ENDIF
+     END FUNCTION Extent3
+
+!====================================================================================================
+!    COMPUTE THE R THAT SATISFIES (Pi/z)^(3/2) Erfc[Sqrt[z]*R]/R < Tau 
+!    Note: Funk is its own reward; so make my funk the p-funk.
+!====================================================================================================
+     FUNCTION PFunk(Zeta,Tau) RESULT(R)
+        REAL(DOUBLE)  :: Tau,Zeta,SqZ,NewTau,Val,Ec,R,BisR,DelR,X,CTest
+        INTEGER       :: J,K              
+        LOGICAL :: pp
+!---------------------------------------------------------------------- 
+        SqZ=SQRT(Zeta)
+        NewTau=Tau*(Zeta/Pi)**(1.5D0)
+        ! Quick check for max resolution of Erfc approx
+        IF(1D-13*SqZ/Erf_Switch>NewTau)THEN
+           R=Erf_Switch/SqZ
+           RETURN
+        ELSEIF(NewTau>1D20)THEN
+           R=Zero
+           RETURN
+        ENDIF
+        ! Ok, within resolution--do root finding...
+        DelR=Erf_Switch/SqZ
+        BisR=Zero
+        DO K=1,100
+           ! New midpoint
+           R=BisR+DelR
+           X=SqZ*R
+           ! Compute Erfc[Sqrt(Zeta)*R]https://www.blogger.com/comment.g?blogID=18675105&postID=3471233482324285043
+           IF(X>=Erf_Switch)THEN
+              Ec=Zero
+           ELSE
+              J=AINT(X*Erf_Grid)
+              Ec=One-(Erf_0(J)+X*(Erf_1(J)+X*(Erf_2(J)+X*(Erf_3(J)+X*Erf_4(J)))))
+           ENDIF           
+           Val=Ec/R
+           CTest=(Val-NewTau)/Tau
+           ! Go for relative error to get smoothness, but bail if 
+           ! absolute accuracy of erf interpolation is exceeded         
+           IF(ABS(CTest)<1D-4.OR.Tau*ABS(CTest)<1.D-12)THEN
+              ! Converged
+              RETURN           
+           ELSEIF(DelR<1D-40)THEN
+              ! This is unacceptable
+              EXIT
+           ENDIF
+           ! If still to the left, increment bisection point
+           IF(CTest>Zero)BisR=R
+           DelR=Half*DelR
+        ENDDO
+        CALL Halt(' Failed to converge in P-Funk: '//RTRN & 
+                   //'Tau = '//TRIM(DblToShrtChar(NewTau))//RTRN &
+                   //' CTest = '//TRIM(DblToShrtChar(CTest))//RTRN &
+                   //' Zeta = '//TRIM(DblToShrtChar(Zeta))//RTRN &
+                   //' R = '//TRIM(DblToShrtChar(R))//RTRN &
+                   //' Ec = '//TRIM(DblToShrtChar(Ec))//RTRN &
+                   //' dR = '//TRIM(DblToShrtChar(DelR))//RTRN &
+                   //' SqZ*R = '//TRIM(DblToMedmChar(X)))
+     END FUNCTION PFunk    
+
+
+
 !===================================================================================================
 !    Used to set up our new Cramer's like bound
 !===================================================================================================
@@ -300,7 +560,6 @@ MODULE Thresholding
         CC(0:8,6) = (/-120.0D0, 0.000D0, 720.00D0, 0.000D0,-480.00D0, 0.000D0, 64.00D0, 0.00D0, 0.00D0/)
         CC(0:8,7) = (/ 0.000D0, 1680.D0, 0.0000D0,-3360.D0, 0.0000D0, 1344.D0, 0.000D0,-128.D0, 0.00D0/)
         CC(0:8,8) = (/ 1680.D0, 0.000D0,-13440.D0, 0.000D0, 13440.D0, 0.000D0,-3584.D0, 0.00D0, 256.D0/)
-
 !
         IF(L>8) CALL Halt("FUNCTION Hermite: L>8")
         Hermite = CC(L,L)
@@ -309,6 +568,64 @@ MODULE Thresholding
            Hermite = Hermite*x+CC(J,L)
         ENDDO
       END FUNCTION Hermite
+
+
+!!$!===================================================================================================
+!!$!    Used to set up our new Cramer's like bound
+!!$!===================================================================================================
+!!$     SUBROUTINE SetAACoef()
+!!$       REAL(DOUBLE)  :: X1,X2,X3,F1,F2,F3
+!!$       INTEGER       :: L,I 
+!!$!       Solve for AACoef
+!!$       AACoef(0)= 1.D0
+!!$       DO L=1,HGEll
+!!$          X1 = SQRT(0.499D0*DBLE(L)/(1.D0-GFactor))
+!!$          X2 = 2.D0*X1
+!!$          F1 = Hermite(X1,L+1)+2.D0*GFactor*X1*Hermite(X1,L)
+!!$          F2 = Hermite(X2,L+1)+2.D0*GFactor*X2*Hermite(X2,L)
+!!$          IF(SIGN(1.D0,F1)==SIGN(1.D0,F2)) THEN
+!!$             CALL Halt('Failed to Find Root in  SetLocalCoefs')
+!!$          ENDIF
+!!$          DO I=1,100
+!!$             X3 = 0.5D0*(X1+X2)
+!!$             F3 = Hermite(X3,L+1)+2.D0*GFactor*X3*Hermite(X3,L)
+!!$             IF(SIGN(1.D0,F3)==SIGN(1.D0,F1)) THEN
+!!$                X1 = X3
+!!$             ELSE
+!!$                X2 = X3
+!!$             ENDIF
+!!$          ENDDO
+!!$          AACoef(L) = ABS(Hermite(X3,L))*EXP(-(One-GFactor)*X3*X3)
+!!$!          WRITE(*,*) 'L=',L,' X3 = ',X3,' F3 = ',F3
+!!$!          WRITE(*,*) 'AACoef = ',AACoef(L)
+!!$       ENDDO
+!!$     END SUBROUTINE SetAACoef
+!!$!=================================================================================================
+!!$!
+!!$!=================================================================================================
+!!$      FUNCTION Hermite(x,L)
+!!$        INTEGER                         :: L,I,J
+!!$        REAL(DOUBLE)                    :: Hermite,x
+!!$        REAL(DOUBLE),DIMENSION(0:8,0:8) :: CC
+!!$!
+!!$        CC(0:8,0) = (/ 1.000D0, 0.000D0, 0.0000D0, 0.000D0, 0.0000D0, 0.000D0, 0.000D0, 0.00D0, 0.00D0/)
+!!$        CC(0:8,1) = (/ 0.000D0,-2.000D0, 0.0000D0, 0.000D0, 0.0000D0, 0.000D0, 0.000D0, 0.00D0, 0.00D0/)
+!!$        CC(0:8,2) = (/-2.000D0, 0.000D0, 4.0000D0, 0.000D0, 0.0000D0, 0.000D0, 0.000D0, 0.00D0, 0.00D0/)
+!!$        CC(0:8,3) = (/ 0.000D0, 12.00D0, 0.0000D0,-8.000D0, 0.0000D0, 0.000D0, 0.000D0, 0.00D0, 0.00D0/)
+!!$        CC(0:8,4) = (/ 12.00D0, 0.000D0,-48.000D0, 0.000D0, 16.000D0, 0.000D0, 0.000D0, 0.00D0, 0.00D0/)
+!!$        CC(0:8,5) = (/ 0.000D0,-120.0D0, 0.0000D0, 160.0D0, 0.0000D0,-32.00D0, 0.000D0, 0.00D0, 0.00D0/)
+!!$        CC(0:8,6) = (/-120.0D0, 0.000D0, 720.00D0, 0.000D0,-480.00D0, 0.000D0, 64.00D0, 0.00D0, 0.00D0/)
+!!$        CC(0:8,7) = (/ 0.000D0, 1680.D0, 0.0000D0,-3360.D0, 0.0000D0, 1344.D0, 0.000D0,-128.D0, 0.00D0/)
+!!$        CC(0:8,8) = (/ 1680.D0, 0.000D0,-13440.D0, 0.000D0, 13440.D0, 0.000D0,-3584.D0, 0.00D0, 256.D0/)
+!!$
+!!$!
+!!$        IF(L>8) CALL Halt("FUNCTION Hermite: L>8")
+!!$        Hermite = CC(L,L)
+!!$        DO I=0,L-1
+!!$           J = L-1-I
+!!$           Hermite = Hermite*x+CC(J,L)
+!!$        ENDDO
+!!$      END FUNCTION Hermite
 !======================================================================================
 !
 !======================================================================================
@@ -1068,4 +1385,5 @@ MODULE Thresholding
         ENDIF
 !
       END FUNCTION RErfc12
+
 END MODULE Thresholding

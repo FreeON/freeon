@@ -55,7 +55,7 @@ PROGRAM SCFStatus
   REAL(DOUBLE)                    :: E_C_EXCL,E_LJ_EXCL
 #endif
   LOGICAL                         :: HasECPs
-  CHARACTER(LEN=5*DEFAULT_CHR_LEN):: SCFMessage
+  CHARACTER(LEN=10*DEFAULT_CHR_LEN):: SCFMessage
   CHARACTER(LEN=9),PARAMETER      :: Prog='SCFStatus'
   CHARACTER(LEN=2)                :: CurClone
   !---------------------------------------------------------------------------------------
@@ -191,63 +191,31 @@ PROGRAM SCFStatus
     CurClone=""
   ENDIF
   SCFMessage=""
+
   IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
-    !     Fancy output
-    SCFMessage=RTRN//'= = = = = SCFCycle #'//TRIM(SCFCycl)                &
-         //', Basis #'//TRIM(CurBase)               &
-         //', Geometry #'//TRIM(CurGeom)
-    IF(NClones>1)THEN
-      SCFMessage=TRIM(SCFMessage)//', Clone #'//TRIM(CurClone)
-    ENDIF
-    SCFMessage=TRIM(SCFMessage)//' = = = = ='//RTRN//RTRN
-    !     Add in gap if RH
-    IF(Gap/=Zero)                                                         &
-         SCFMessage=TRIM(SCFMessage)                                        &
-         //'       Gap     = '//TRIM(DblToShrtChar(-Gap))//RTRN
-    !     Add in Spin
-    IF(P%NSMat/=1.AND.Args%I%I(1)/=0)                                     & !<<< SPIN
-         SCFMessage=TRIM(SCFMessage)                                        &
-         //'       <S^2>   = '//TRIM(FltToShrtChar(S2))//RTRN
-    !     Add in DIIS error
-    IF(DIISErr/=Zero)                                                     &
-         SCFMessage=TRIM(SCFMessage)                                        &
-         //'       DIISErr = '//TRIM(DblToShrtChar(DIISErr))//RTRN
-    SCFMessage=TRIM(SCFMessage)                                           &
-         //'       MaxDelD = '//TRIM(DblToShrtChar(DMax))//RTRN       &
-         //'       <T>     = '//TRIM(DblToMedmChar(KinE))//RTRN       &
-         //'       <V>     = '//TRIM(DblToMedmChar( E_es_tot))//RTRN
-    !     Add in HF energy
-    IF(ExchE/=Zero)                                                       &
-         SCFMessage=TRIM(SCFMessage)                                        &
-         //'       <HF>    = '//TRIM(DblToMedmChar(ExchE))//RTRN
-    !     Add in DFT energy
-    IF(Exc/=Zero)                                                         &
-         SCFMessage=TRIM(SCFMessage)                                        &
-         //'       <DFT>   = '//TRIM(DblToMedmChar(Exc))//RTRN
-    !     Last but not least, total SCF energy
-    SCFMessage=TRIM(SCFMessage)                                           &
-         //'       <SCF>   = '//TRIM(FltToChar(Etot))//RTRN
+     CALL MondoLog(DEBUG_MAXIMUM,Prog,'+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+')
+     
+     IF(NClones>1)THEN
+        CALL MondoLog(DEBUG_MAXIMUM,Prog, 'SCFCycle #'//TRIM(SCFCycl)//', Basis #'//TRIM(CurBase)//', Geometry #'//TRIM(CurGeom))
+     ELSE
+        CALL MondoLog(DEBUG_MAXIMUM,Prog, 'SCFCycle #'//TRIM(SCFCycl)//', Basis #'//TRIM(CurBase)//', Geometry #'//TRIM(CurGeom)//', Clone #'//TRIM(CurClone))
+     ENDIF
+     IF(Gap/=Zero) &
+     CALL MondoLog(DEBUG_MAXIMUM,Prog,'Gap  = '//TRIM(DblToShrtChar(-Gap)))
+     IF(P%NSMat/=1.AND.Args%I%I(1)/=0) & 
+     CALL MondoLog(DEBUG_MAXIMUM,Prog,'<S^2>= '//TRIM(FltToShrtChar(S2)))
+     IF(DIISErr/=Zero)  &
+     CALL MondoLog(DEBUG_MAXIMUM,Prog,'DIIS  = '//TRIM(DblToShrtChar(DIISErr)))
+     CALL MondoLog(DEBUG_MAXIMUM,Prog,'DelD  = '//TRIM(DblToShrtChar(DMax)))
+     CALL MondoLog(DEBUG_MAXIMUM,Prog,'<T>   = '//TRIM(DblToMedmChar(KinE)))
+     CALL MondoLog(DEBUG_MAXIMUM,Prog,'<V>   = '//TRIM(DblToMedmChar( E_es_tot)))
+     IF(ExchE/=Zero)    &
+     CALL MondoLog(DEBUG_MAXIMUM,Prog,'<HF>  = '//TRIM(DblToMedmChar(ExchE)))
+     IF(Exc/=Zero)      &
+     CALL MondoLog(DEBUG_MAXIMUM,Prog,'<DFT> = '//TRIM(DblToMedmChar(Exc)))
+     CALL MondoLog(DEBUG_MAXIMUM,Prog,'<SCF> = '//TRIM(FltToChar(Etot)))
+     CALL MondoLog(DEBUG_MAXIMUM,Prog,'+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+')
     !     Add in MM energies
-#ifdef MMech
-    IF(HasMM()) THEN
-      SCFMessage=TRIM(SCFMessage)                                        &
-           //'     <EBOND>   = '//TRIM(DblToMedmChar(EBOND))//RTRN
-      SCFMessage=TRIM(SCFMessage)                                        &
-           //'    <EANGLE>   = '//TRIM(DblToMedmChar(EANGLE))//RTRN
-      SCFMessage=TRIM(SCFMessage)                                        &
-           //' <ETorsion>   = '//TRIM(DblToMedmChar(ETorsion))//RTRN
-      SCFMessage=TRIM(SCFMessage)                                        &
-           //' <EOutOfPlane>   = '//TRIM(DblToMedmChar(EOutOfPlane))//RTRN
-      SCFMessage=TRIM(SCFMessage)                                        &
-           //'<E_LENNARD_JONES>= '//TRIM(DblToMedmChar(ELJ))//RTRN
-      SCFMessage=TRIM(SCFMessage)                                        &
-           //'   <MM_COUL>   = '//TRIM(DblToMedmChar(MM_COUL))//RTRN
-      SCFMessage=TRIM(SCFMessage)                                        &
-           //' <MM_ENERGY>   = '//TRIM(FltToMedmChar(MM_ENERGY))//RTRN
-      SCFMessage=TRIM(SCFMessage)                                        &
-           //'<TOTAL ENERGY> = '//TRIM(FltToMedmChar(Etot+MM_ENERGY))//RTRN
-    ENDIF
-#endif
   ELSEIF(PrintFlags%Key>=DEBUG_NONE)THEN
     IF(NClones>1)THEN
       SCFMessage=ProcessName(Prog,'['//TRIM(SCFCycl)//','  &
@@ -266,19 +234,8 @@ PROGRAM SCFStatus
       !         SCFMessage=TRIM(SCFMessage)//' Restarting ... '       &
       !                                    //' MxD = '//TRIM(DblToShrtChar(DMax))
     ELSE
-#ifdef MMech
-      IF(HasMM()) THEN
-        SCFMessage=TRIM(SCFMessage)//' <SCF> = '//TRIM(FltToChar(Etot)) &
-             //' <MM_ENERGY> = '//TRIM(FltToMedmChar(MM_ENERGY)) &
-             //' <TOTAL ENERGY> = '//TRIM(FltToMedmChar(Etot+MM_ENERGY)) &
-             //', dD = '//TRIM(DblToShrtChar(DMax))
-      ELSE
-#endif
         SCFMessage=TRIM(SCFMessage)//' <SCF> = '//TRIM(FltToChar(Etot)) &
              //', dD = '//TRIM(DblToShrtChar(DMax))
-#ifdef MMech
-      ENDIF
-#endif
     ENDIF
     !     Add in DIIS error
     IF(DIISErr/=Zero)                                                     &

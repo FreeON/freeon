@@ -61,24 +61,24 @@ CONTAINS
     CALL GetEnv('MONDO_HOME',N%M_HOME)
     IF(LEN(TRIM(N%M_HOME)) == 0) THEN
       N%M_HOME = HAVE_MONDO_HOME
-      CALL MondoLog(DEBUG_NONE, "LoadCommand", "env variable $(MONDO_HOME) not set. Using "//trim(N%M_HOME))
+      CALL MondoLog(DEBUG_NONE,"FreeON", "env variable $(MONDO_HOME) not set. Using "//trim(N%M_HOME), "LoadCommand")
     ELSE
-      CALL MondoLog(DEBUG_NONE, "LoadCommand", 'env variable $(MONDO_HOME) set to '//trim(N%M_HOME))
+      CALL MondoLog(DEBUG_NONE, "FreeON", 'env variable $(MONDO_HOME) set to '//trim(N%M_HOME), "LoadCommand")
     ENDIF
     CALL GetEnv('MONDO_EXEC',N%M_EXEC)
     IF(LEN(TRIM(N%M_EXEC)) == 0) THEN
       N%M_EXEC = TRIM(N%M_HOME)//"/bin"
-      CALL MondoLog(DEBUG_NONE, "LoadCommand", 'env variable $(MONDO_EXEC) not set. Using '//TRIM(N%M_EXEC))
+      CALL MondoLog(DEBUG_NONE, "FreeON", 'env variable $(MONDO_EXEC) not set. Using '//TRIM(N%M_EXEC), "LoadCommand")
     ELSE
-      CALL MondoLog(DEBUG_NONE, "LoadCommand", 'env variable $(MONDO_EXEC) set to '//trim(N%M_EXEC))
+      CALL MondoLog(DEBUG_NONE, "FreeON", 'env variable $(MONDO_EXEC) set to '//trim(N%M_EXEC), "LoadCommand")
     ENDIF
     CALL GetEnv('MONDO_SCRATCH',N%M_SCRATCH)
     IF(LEN(TRIM(N%M_SCRATCH)) == 0) THEN
-      CALL MondoLog(DEBUG_NONE, "LoadCommand", 'env variable $(MONDO_SCRATCH) not set. Using '//TRIM(HAVE_MONDO_SCRATCH))
+      CALL MondoLog(DEBUG_NONE, "FreeON", 'env variable $(MONDO_SCRATCH) not set. Using '//TRIM(HAVE_MONDO_SCRATCH), "LoadCommand")
       N%M_SCRATCH = HAVE_MONDO_SCRATCH
       MONDO_SCRATCH = HAVE_MONDO_SCRATCH
     ELSE
-      CALL MondoLog(DEBUG_NONE, "LoadCommand", 'env variable $(MONDO_SCRATCH) set to '//trim(N%M_SCRATCH))
+      CALL MondoLog(DEBUG_NONE, "FreeON", 'env variable $(MONDO_SCRATCH) set to '//trim(N%M_SCRATCH), "LoadCommand")
     ENDIF
 
     ! Set path names etc
@@ -90,7 +90,7 @@ CONTAINS
     PROCESS_ID=IntToChar(GetPID())
     DotDex=INDEX(Args%C%C(1),'.')
     IF(DotDex==0) THEN
-      CALL MondoLog(DEBUG_NONE, "LoadCommand", 'Parse error: no "." in input file name = <'//TRIM(N%IFile)//'>')
+      CALL MondoLog(DEBUG_NONE, "FreeON", 'Parse error: no "." in input file name = <'//TRIM(N%IFile)//'>', "LoadCommand")
       STOP "Termination of MondoSCF"
     ENDIF
 
@@ -98,8 +98,8 @@ CONTAINS
     PWDName=TRIM(N%M_PWD)//TRIM(N%SCF_NAME)
     ScrName=TRIM(N%M_SCRATCH)//TRIM(N%SCF_NAME)
 
-    CALL MondoLog(DEBUG_NONE, "LoadCommand", "setting PWDName to "//TRIM(PWDName))
-    CALL MondoLog(DEBUG_NONE, "LoadCommand", "setting ScrName to "//TRIM(ScrName))
+    CALL MondoLog(DEBUG_NONE, "FreeON", "setting PWDName to "//TRIM(PWDName), "LoadCommand")
+    CALL MondoLog(DEBUG_NONE, "FreeON", "setting ScrName to "//TRIM(ScrName), "LoadCommand")
 
     ! Input file with full path
     N%IFile=TRIM(N%M_PWD)//TRIM(Args%C%C(1))
@@ -107,7 +107,7 @@ CONTAINS
     ! Check to see that the input file exists
     INQUIRE(FILE=N%IFile,EXIST=Exists)
     IF(.NOT.Exists) THEN
-      CALL MondoLog(DEBUG_NONE, "LoadCommand", 'Parse error: Input file "'//TRIM(N%IFile)//'" does not exist!')
+      CALL MondoLog(DEBUG_NONE, "FreeON", 'Parse error: Input file "'//TRIM(N%IFile)//'" does not exist!', "LoadCommand")
       STOP "Termination of MondoSCF"
     ENDIF
 

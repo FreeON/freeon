@@ -329,6 +329,7 @@ MODULE ControlStructures
   END TYPE GeomOpt
 
   TYPE RespOpts
+    LOGICAL                :: TD_SCF
     LOGICAL                :: StcAlpha
     LOGICAL, DIMENSION( 3) :: AlphaAxis
     LOGICAL                :: StcBeta

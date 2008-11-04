@@ -131,6 +131,8 @@ CONTAINS
 #ifdef ONX2_PARALLEL
     REAL(DOUBLE), EXTERNAL :: MondoTimer
 #endif
+
+    LOGICAL :: UpperT
     !-------------------------------------------------------------------
     integer :: i,isize,aalen,bblen,cclen,ddlen
     real(double) :: t1,t2,tt,fac
@@ -228,7 +230,6 @@ CONTAINS
           ! Get max of the block density matrix.
 #ifdef ONX2_PARALLEL
           Dcd=DGetAbsMax(NBFC*NBFD,U%MTrix(1,1))
-          !write(*,*) 'Dcd',Dcd,'AtC=',AtC,'AtD=',AtD,'MyID',MyID
 #else
           Dcd=DGetAbsMax(NBFC*NBFD,D%MTrix%D(iPtrD))
 #endif
@@ -244,7 +245,6 @@ CONTAINS
                             BSp%LStrt%I(1,KC),BSp%LStop%I(1,KC),      &
                             BSp%LStrt%I(1,KD),BSp%LStop%I(1,KD)       )
 #endif
-          !
 #ifdef ONX2_DBUG
           WRITE(*,*) 'Max(Dcd)=',Dcd
 #endif
@@ -291,8 +291,16 @@ CONTAINS
              !
              RnOvB: DO ! Run over AtB
                 AtB=AtBList%Atom 
+
+                IF(.NOT.NoSym)THEN
+                   UpperT=AtB.LE.AtA
+                ELSE
+                   UpperT=.TRUE.
+                ENDIF
                 !
-                IF(AtB.LE.AtA) THEN ! Symmetry of the K matrix
+
+                IF(UpperT)THEN
+
                    BDAtmInfo%NFPair=GetNonNFPair(AtBList,AtAList%RInt(1)*Dcd,Thresholds%TwoE &
 #ifdef GTRESH
                      )
@@ -433,9 +441,15 @@ CONTAINS
                    iPtrK = Kx%BlkPt%I(Ind)
                    !
                    IF(NSMat.EQ.1) THEN
+
+
                       CALL DGEMV('N',NBFA*NBFB,NBFC*NBFD,-1.0d0,C(1), &
                                  NBFA*NBFB,D%MTrix%D(iPtrD),1,1.0d0, &
                                  Kx%MTrix%D(IPtrK),1)
+
+!                      WRITE(*,*)AtA,AtB,AtC,AtD,D%MTrix%D(iPTRD),C(1),Kx%MTrix%D(IPtrK)/2D0
+!33                    FORMAT(4(I2,", "),3(D12.6,", "))
+
                    ELSE
                       CALL DGEMM('N','N',NBFA*NBFB,NSMat,NBFC*NBFD,-1.0d0,C(1), &
                                  NBFA*NBFB,D%MTrix%D(iPtrD),NBFC*NBFD,1.0d0, &
@@ -480,6 +494,7 @@ CONTAINS
 !!$                 NInts/(CS_OUT%NCells**2*DBLE(NBasF)**4)*100D0
 !!$100 FORMAT(' NInts = ',E8.2,' NIntTot = ',E8.2,' Ratio = ',E8.2,'%')
     !
+
   END SUBROUTINE ComputK
   !
   !

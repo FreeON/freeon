@@ -1,28 +1,6 @@
-!------------------------------------------------------------------------------
-!    This code is part of the MondoSCF suite of programs for linear scaling
-!    electronic structure theory and ab initio molecular dynamics.
 !
-!    Copyright (2004). The Regents of the University of California. This
-!    material was produced under U.S. Government contract W-7405-ENG-36
-!    for Los Alamos National Laboratory, which is operated by the University
-!    of California for the U.S. Department of Energy. The U.S. Government has
-!    rights to use, reproduce, and distribute this software.  NEITHER THE
-!    GOVERNMENT NOR THE UNIVERSITY MAKES ANY WARRANTY, EXPRESS OR IMPLIED,
-!    OR ASSUMES ANY LIABILITY FOR THE USE OF THIS SOFTWARE.
+!  Matt Challacombe and CJ Tymczak
 !
-!    This program is free software; you can redistribute it and/or modify
-!    it under the terms of the GNU General Public License as published by the
-!    Free Software Foundation; either version 2 of the License, or (at your
-!    option) any later version. Accordingly, this program is distributed in
-!    the hope that it will be useful, but WITHOUT ANY WARRANTY; without even
-!    the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-!    PURPOSE. See the GNU General Public License at www.gnu.org for details.
-!
-!    While you may do as you like with this software, the GNU license requires
-!    that you clearly mark derivative software.  In addition, you are encouraged
-!    to return derivative works to the MondoSCF group for review, and possible
-!    disemination in future releases.
-!------------------------------------------------------------------------------
 MODULE PFFTen
   USE Derivedtypes
   USE GlobalScalars   
@@ -37,6 +15,7 @@ MODULE PFFTen
   USE SpecFun
   USE MondoPoles  
   USE AtomPairs
+  USE PlaneWise
   IMPLICIT NONE
   ! Globals
   REAL(DOUBLE),PARAMETER              :: Small=1.0D-12
@@ -47,6 +26,11 @@ MODULE PFFTen
   CHARACTER(LEN=7),PARAMETER          :: Cube112='Cube112'
   CHARACTER(LEN=7),PARAMETER          :: Cube122='Cube122'
   CHARACTER(LEN=7),PARAMETER          :: Cube222='Cube222'
+  !
+  INTEGER,PARAMETER                   :: PlaneWiseEll=0
+  INTEGER,PARAMETER                   :: LSwitch=22
+  REAL(DOUBLE),PARAMETER              :: Accuracy = 1.D-20
+  !
 CONTAINS  
 !========================================================================================
 ! 
@@ -54,29 +38,55 @@ CONTAINS
   SUBROUTINE CalculatePFFT(MaxEll,GM,Args,CS,TenC,TenS)
     TYPE(CRDS)             :: GM
     TYPE(ARGMT)            :: Args
-    TYPE(DBL_VECT)         :: TenC,TenS
+    TYPE(DBL_VECT)         :: TenC,TenS,TenC2,TenS2
     TYPE(CellSet)          :: CS
-    INTEGER                :: MaxEll
+    INTEGER                :: MaxEll , L,M,MM,LM
     INTEGER                :: Layers,NC
-    REAL(DOUBLE)           :: Scale,R1,R2,Radius,Rx,Ry,Rz
+    REAL(DOUBLE)           :: Scale,R1,R2,Radius,Rx,Ry,Rz,ab
     CHARACTER(LEN=7)       :: CellType
 !-------------------------------------------------------------------------------------!
 !   Determine Cell Type
+
     CellType=DetCellType(GM,CS%NCells,Scale)
 !   Read from Archive or Make the Tensor
-    IF(CellType==Cube111) THEN
-       CALL GetExactTensor1L3D(2*MaxEll,GM,Scale,TenC,TenS)
-    ELSEIF(CellType==Cube222) THEN
-       CALL GetExactTensor2L3D(2*MaxEll,GM,Scale,TenC,TenS)
-    ELSE
-       IF(GM%PBC%Dimen==1) THEN
-          CALL MakeTensor1D(2*MaxEll,GM,Args,CS,TenC,TenS)
-       ELSEIF(GM%PBC%Dimen==2) THEN
-          CALL MakeTensor2D(2*MaxEll,GM,Args,CS,TenC,TenS)
-       ELSEIF(GM%PBC%Dimen==3) THEN
-          CALL MakeTensor3D(2*MaxEll,GM,Args,CS,TenC,TenS)
-       ENDIF
-    ENDIF
+!!$    IF(CellType==Cube111) THEN
+!!$       CALL GetExactTensor1L3D(2*MaxEll,GM,Scale,TenC,TenS)
+!!$    ELSEIF(CellType==Cube222) THEN
+!!$       CALL GetExactTensor2L3D(2*MaxEll,GM,Scale,TenC,TenS)
+!!$    ELSE
+    IF(GM%PBC%Dimen==1) THEN
+       CALL MakeTensor1D(2*MaxEll,GM,Args,CS,TenC,TenS)
+       !          CALL DirectTensor1D(2*MaxEll,GM,Args,CS,TenC,TenS)
+    ELSEIF(GM%PBC%Dimen==2) THEN
+       CALL MakeTensor2D(2*MaxEll,GM,Args,CS,TenC,TenS)
+    ELSEIF(GM%PBC%Dimen==3) THEN
+       CALL MakeTensor3D(2*MaxEll,GM,Args,CS,TenC,TenS)
+!!$
+!!$       CALL New(TenC2,LSP(2*MaxEll),0)
+!!$       CALL New(TenS2,LSP(2*MaxEll),0)          
+!!$       CALL GetExactTensor1L3D(2*MaxEll,GM,Scale,TenC2,TenS2)
+!!$       
+!!$       DO L=4,80!MaxEll
+!!$          DO M=0,L
+!!$             LM=LTD(L)+M   
+!!$             IF(ABS(TenC2%D(LM)).NE.0D0)THEN
+!!$                WRITE(*,*)LM,TENC2%D(LM)
+!!$                ab=ABS((TenC%D(LM)-TenC2%D(LM))/TenC2%D(LM))
+!!$                IF(ab>1D-14)THEN                   
+!!$                   WRITE(*,*)'L = ',L,' M = ',M,' Ten = ',TenC%D(LM),TenC2%D(LM)
+!!$                   DO MM=0,L
+!!$                      LM=LTD(L)+MM 
+!!$                      WRITE(*,*)'L = ',L,' M = ',MM,' Ten = ',TenC%D(LM),TenC%D(LM)-TenC2%D(LM)
+!!$                   ENDDO
+!!$                   STOP 'STOP STOP STOP STOP STOP STOP STOP STOP '
+!!$                ENDIF
+!!$             ENDIF
+!!$          ENDDO
+!!$       ENDDO
+!!$       STOP 'STOP STOP STOP STOP STOP STOP STOP STOP '
+
+   ENDIF
+
   END SUBROUTINE CalculatePFFT
 !========================================================================================
 ! 
@@ -102,6 +112,7 @@ CONTAINS
           K=K+1	
           LM=LTD(L)+M   
           TenC%D(LM)=Majik1(K)/(Scale**(DBLE(L)+One))
+          IF(L>80)TenC%D(LM)=0D0
        ENDDO
     ENDDO
 !
@@ -138,7 +149,7 @@ CONTAINS
 ! Calculate the PFFTensor 1D
 !========================================================================================
   SUBROUTINE MakeTensor1D(MaxL,GM,Args,CS,TenC,TenS)
-    INTEGER                           :: MaxL
+    INTEGER                           :: MaxL,LenL
     INTEGER                           :: I,J,L,M,LM,NC
     TYPE(CellSet)                     :: CS, CSMM
     TYPE(DBL_VECT)                    :: TenC,TenS
@@ -148,28 +159,29 @@ CONTAINS
 !
 !   Number of Inner Boxes
 !
+    LenL=LSP(MaxL)
     TenC%D=Zero
-    TenS%D=Zero
     NC = (CS%NCells-1)/2
 !
 !   One Dimension: Lef and Right
 !
     IF(GM%PBC%AutoW%I(1)==1) THEN
        CALL IrRegular(MaxL, GM%PBC%BoxShape%D(1,1),Zero,Zero)
-       TenC%D = Cpq
+       TenC%D(0:LenL) = Cpq(0:LenL)
        CALL IrRegular(MaxL,-GM%PBC%BoxShape%D(1,1),Zero,Zero)
-       TenC%D = TenC%D+Cpq
+       TenC%D(0:LenL) = TenC%D(0:LenL)+Cpq(0:LenL)
     ELSEIF(GM%PBC%AutoW%I(2)==1) THEN
        CALL IrRegular(MaxL,Zero, GM%PBC%BoxShape%D(2,2),Zero)
-       TenC%D = Cpq
+       TenC%D(0:LenL) = Cpq(0:LenL)
        CALL IrRegular(MaxL,Zero,-GM%PBC%BoxShape%D(2,2),Zero)
-       TenC%D = TenC%D+Cpq
+       TenC%D(0:LenL) = TenC%D(0:LenL)+Cpq(0:LenL)
     ELSEIF(GM%PBC%AutoW%I(3)==1) THEN      
        CALL IrRegular(MaxL,Zero,Zero, GM%PBC%BoxShape%D(3,3))
-       TenC%D = Cpq
+       TenC%D(0:LenL) = Cpq(0:LenL)
        CALL IrRegular(MaxL,Zero,Zero,-GM%PBC%BoxShape%D(3,3))
-       TenC%D = TenC%D+Cpq
+       TenC%D(0:LenL) = TenC%D(0:LenL)+Cpq(0:LenL)
     ENDIF
+
     DO L=1,MaxL
        DO M = 0,L
           LM = LTD(L)+M
@@ -177,6 +189,11 @@ CONTAINS
        ENDDO
     ENDDO
 !
+
+
+
+
+
   END SUBROUTINE MakeTensor1D
 !========================================================================================
 ! Calculate the PFFTensor 2D
@@ -184,7 +201,6 @@ CONTAINS
   SUBROUTINE MakeTensor2D(MaxL,GM,Args,CS,TenC,TenS)
     INTEGER                           :: MaxL
     INTEGER                           :: I,J,K,L,M,LM,NC
-    INTEGER                           :: LSwitch
     REAL(DOUBLE),DIMENSION(3)         :: PQ
     TYPE(DBL_VECT)                    :: TenC,TenS
     REAL(DOUBLE)                      :: CFac,SFac,BetaSq,Rad,RadSq,ExpFac
@@ -197,156 +213,45 @@ CONTAINS
     REAL(DOUBLE),DIMENSION(3,3)       :: RecpLatVec,LatVec
     TYPE(CRDS)                        :: GM
     TYPE(ARGMT)                       :: Args
-!-------------------------------------------------------------------------------------!
-!
-!   Initialize 
-!
+    COMPLEX(DOUBLE),DIMENSION(0:MaxL,0:MaxL) :: Ylm
+    !-------------------------------------------------------------------------------------
     TenC%D=Zero
     TenS%D=Zero
-    Accuracy = 1.D-14
-    Rmin     = SQRT(CS%CellCarts%D(1,1)**2+CS%CellCarts%D(2,1)**2+CS%CellCarts%D(3,1)**2)
-!
-!   Get The Lattice and Reciprocal Lattice Vectors
-!
+    !
     DO I = 1,3
        DO J = 1,3
-          RecpLatVec(I,J) = GM%PBC%InvBoxSh%D(J,I)
-          LatVec(I,J)     = GM%PBC%BoxShape%D(I,J)
+          RecpLatVec(I,J)=GM%PBC%InvBoxSh%D(J,I)
+          LatVec(I,J)    =GM%PBC%BoxShape%D(I,J)
        ENDDO
     ENDDO
-!
-!   Two Dimension
-!
-    LSwitch  = 10
-    LenScale = 6.0D0!GM%PBC%CellVolume**(Half)
-    Rmax     = Rmin+LenScale*(One/Accuracy)**(One/DBLE(LSwitch))
-    BetaSq   = One/(LenScale)**2
-    LSwitch  = MIN(MaxL,LSwitch)
-!           
-!   Sum the Real Space
-!
-    DO
-       CALL New_CellSet_Sphere(CSMM,GM%PBC%AutoW%I,LatVec,Rmax)
-       IF(CSMM%NCells .GT. 50000) THEN
-          Rmax = 0.99*Rmax
-          CALL Delete_CellSet(CSMM)
-       ELSE
-          EXIT
-       ENDIF
-    ENDDO
-    CALL Sort_CellSet(CSMM)
-!
-    DO NC = 1,CSMM%NCells
-       PQ(:) = CSMM%CellCarts%D(:,NC)
-       IF(.NOT. InCell_CellSet(CS,PQ(1),PQ(2),PQ(3))) THEN
-          RadSq = BetaSq*(PQ(1)*PQ(1)+PQ(2)*PQ(2)+PQ(3)*PQ(3))
-          CALL IrRegular(MaxL,PQ(1),PQ(2),PQ(3))
-          DO L = 1,MaxL
-             IF(L .LE. LSwitch) THEN
-                CFac = GScript(L,RadSq)
-             ELSE
-                CFac = One
-             ENDIF
-             DO M = 0,L
-                LM = LTD(L)+M
-                TenC%D(LM)=TenC%D(LM)+Cpq(LM)*CFac
-                TenS%D(LM)=TenS%D(LM)+Spq(LM)*CFac
-             ENDDO
-          ENDDO
-       ENDIF
-    ENDDO
-    CALL Delete_CellSet(CSMM)
-!
-!   Sum the Reciprical Space 
-!
-    ExpFac = Pi*Pi/BetaSq
-    Rmax = SQRT(ABS(LOG(Accuracy/(10.D0**(LSwitch)))/ExpFac))
-    DO
-       CALL New_CellSet_Sphere(CSMM,GM%PBC%AutoW%I,RecpLatVec,Rmax)
-       IF(CSMM%NCells .LT. 9) THEN
-          Rmax = 1.01D0*Rmax
-          CALL Delete_CellSet(CSMM)
-       ELSE
-          EXIT
-       ENDIF
-    ENDDO
-    CALL Sort_CellSet(CSMM)
-!
-    NDiv    = 1000
-    LenMax  = SQRT(ABS(LOG(1.D-6))/ExpFac)
-    Delt    = LenMax/DBLE(NDiv)
-    DO I=-NDiv,NDiv
-       Vec(:) = Zero
-       IF(GM%PBC%AutoW%I(1)==0) Vec(1) = I*Delt
-       IF(GM%PBC%AutoW%I(2)==0) Vec(2) = I*Delt
-       IF(GM%PBC%AutoW%I(3)==0) Vec(3) = I*Delt
-       DO NC = 1,CSMM%NCells
-          PQ(:) = CSMM%CellCarts%D(:,NC)+Vec(:)
-          Rad   = SQRT(PQ(1)*PQ(1)+PQ(2)*PQ(2)+PQ(3)*PQ(3))
-          IF(Rad .GT. 1.D-14) THEN
-             CALL IrRegular(MaxL,PQ(1),PQ(2),PQ(3))
-             DO L = 1,LSwitch
-                CFac = Delt*FT_FScriptC_3D(L,ExpFac,Rad)/GM%PBC%CellVolume
-                SFac = Delt*FT_FScriptS_3D(L,ExpFac,Rad)/GM%PBC%CellVolume
-                DO M = 0,L
-                   LM = LTD(L)+M
-                   TenC%D(LM)=TenC%D(LM)+Cpq(LM)*CFac-Spq(LM)*SFac
-                   TenS%D(LM)=TenS%D(LM)+Spq(LM)*CFac+Cpq(LM)*SFac
-                ENDDO
-             ENDDO
-          ENDIF
+    !---------------------------------------------------------------------------------
+    ! THE PLANEWISE LATTICE SUMS, PLANE <<MUST>> BE THE X,Y PLANE
+    !---------------------------------------------------------------------------------
+    Ylm=0D0
+    CALL InnPlane(MaxL,LatVec(:,1),LatVec(:,2),RecpLatVec(:,1),RecpLatVec(:,2),Ylm, &
+                  WellSepCells_O=CS) ! Last bit causes subtraction of near-field 
+    !---------------------------------------------------------------------------------
+    DO L = 0,MaxL
+       DO M = 0,L
+          LM = LTD(L)+M
+          TenC%D(LM)=(1D0, 0D0)*Ylm(L,M)*Factorial(L-M)
+          TenS%D(LM)=(0D0,-1D0)*Ylm(L,M)*Factorial(L-M)
        ENDDO
     ENDDO
-!
-!   Add in the k=0 piece for the L=2 multipoles (Zero in 3D)
-!
-    DO I=1,3
-       IF(GM%PBC%AutoW%I(I)==0) THEN
-          PQ(:) = Zero
-          PQ(I) = 1.D-10
-          Rad   = SQRT(PQ(1)*PQ(1)+PQ(2)*PQ(2)+PQ(3)*PQ(3))
-          L     = 2
-          CALL IrRegular(L,PQ(1),PQ(2),PQ(3))
-          CFac = Half*Delt*FT_FScriptC_3D(L,ExpFac,Rad)/GM%PBC%CellVolume
-          SFac = Half*Delt*FT_FScriptS_3D(L,ExpFac,Rad)/GM%PBC%CellVolume           
-          DO M = 0,L
-             LM = LTD(L)+M
-             TenC%D(LM)=TenC%D(LM)+Cpq(LM)*CFac-Spq(LM)*SFac
-             TenS%D(LM)=TenS%D(LM)+Spq(LM)*CFac+Cpq(LM)*SFac
-          ENDDO
-          PQ(:) = Zero
-          PQ(I) = -1.D-10
-          Rad   = SQRT(PQ(1)*PQ(1)+PQ(2)*PQ(2)+PQ(3)*PQ(3))
-          L     = 2
-          CALL IrRegular(L,PQ(1),PQ(2),PQ(3))
-          CFac = Half*Delt*FT_FScriptC_3D(L,ExpFac,Rad)/GM%PBC%CellVolume
-          SFac = Half*Delt*FT_FScriptS_3D(L,ExpFac,Rad)/GM%PBC%CellVolume           
-          DO M = 0,L
-             LM = LTD(L)+M
-             TenC%D(LM)=TenC%D(LM)+Cpq(LM)*CFac-Spq(LM)*SFac
-             TenS%D(LM)=TenS%D(LM)+Spq(LM)*CFac+Cpq(LM)*SFac
-          ENDDO
-       ENDIF
-    ENDDO
-    CALL Delete_CellSet(CSMM)
-!
-!   Substract the inner boxes
-!
-    DO NC = 1,CS%NCells
-       PQ(:) = CS%CellCarts%D(:,NC)
-       RadSq = BetaSq*(PQ(1)*PQ(1)+PQ(2)*PQ(2)+PQ(3)*PQ(3))
-       IF(RadSq .GT. 1.D-14) THEN
-          CALL IrRegular(MaxL,PQ(1),PQ(2),PQ(3))
-          DO L = 1,LSwitch
-             CFac = FScript(L,RadSq)
-             DO M = 0,L
-                LM = LTD(L)+M
-                TenC%D(LM)=TenC%D(LM)-Cpq(LM)*CFac
-                TenS%D(LM)=TenS%D(LM)-Spq(LM)*CFac
-             ENDDO
-          ENDDO
-       ENDIF
-    ENDDO
+!!$    !---------------------------------------------------------------------------------
+!!$    ! SUBTRACT THE RECIPROCAL SPACE PART OF THE NEAR FIELD FROM THE PLANEWISE CELLS
+!!$    !---------------------------------------------------------------------------------
+!!$    DO NC = 1,CS%NCells-1
+!!$       PQ(:) = CS%CellCarts%D(:,NC)
+!!$       CALL IrRegular(MaxL,PQ(1),PQ(2),PQ(3))
+!!$       DO L = 1,MaxL
+!!$          DO M = 0,L
+!!$             LM = LTD(L)+M
+!!$             TenC%D(LM)=TenC%D(LM)-Cpq(LM)
+!!$             TenS%D(LM)=TenS%D(LM)-Spq(LM)
+!!$          ENDDO
+!!$       ENDDO
+!!$    ENDDO
 !
   END SUBROUTINE MakeTensor2D
 !========================================================================================
@@ -355,66 +260,81 @@ CONTAINS
   SUBROUTINE MakeTensor3D(MaxL,GM,Args,CS,TenC,TenS)
     INTEGER                           :: MaxL
     INTEGER                           :: I,J,K,L,M,LM,NC
-    INTEGER                           :: LSwitch
     TYPE(DBL_VECT)                    :: TenC,TenS
     TYPE(CellSet)                     :: CS, CSMM
     REAL(DOUBLE),DIMENSION(3)         :: PQ
-    REAL(DOUBLE)                      :: CFac,SFac,BetaSq,Rad,RadSq,ExpFac
-    REAL(DOUBLE)                      :: Rmin,RMAX,Accuracy,LenScale,SUM
-!
+    REAL(DOUBLE)                      :: CFac,SFac,CFac2,SFac2,BetaSq,Rad,RadSq,ExpFac
+    REAL(DOUBLE)                      :: R,Rmin,KMin,KMax,RMax,Beta
     INTEGER                           :: NDiv
     REAL(DOUBLE)                      :: LenMax,Delt,IntFac
     REAL(DOUBLE),DIMENSION(3)         :: Vec
     REAL(DOUBLE),DIMENSION(3,3)       :: RecpLatVec,LatVec
     TYPE(CRDS)                        :: GM
     TYPE(ARGMT)                       :: Args
-!-------------------------------------------------------------------------------------!
-!
-!   Initialize 
-!
+
+    COMPLEX(DOUBLE),DIMENSION(0:PlaneWiseEll,0:PlaneWiseEll) :: Ylm
+    COMPLEX(DOUBLE) :: CmpxI=(0D0,1D0),RealI=(1D0,0D0)
+
+    INTEGER :: IFF=10
+    LOGICAL :: InCell,OutCell
+    REAL(DOUBLE) :: X,Y,Z
+    !-------------------------------------------------------------------------------------!
+    !
+    !   Initialize 
+    !
     TenC%D=Zero
     TenS%D=Zero
-    Accuracy = 1.D-12
-    Rmin     = SQRT(CS%CellCarts%D(1,1)**2+CS%CellCarts%D(2,1)**2+CS%CellCarts%D(3,1)**2)
-!
-!   Get The Lattice and Reciprocal Lattice Vectors
-!
+
+    !
     DO I = 1,3
        DO J = 1,3
           RecpLatVec(I,J) = GM%PBC%InvBoxSh%D(J,I)
           LatVec(I,J)     = GM%PBC%BoxShape%D(I,J)
        ENDDO
     ENDDO
-!
-!   Three Dimension
-!
-    LSwitch  = 10
-    LenScale = GM%PBC%CellVolume**(One/Three)
-    Rmax     = Rmin+LenScale*(One/Accuracy)**(One/DBLE(LSwitch))
-    BetaSq  = One/(LenScale)**2
-    LSwitch  = MIN(MaxL,LSwitch)
-!           
-!   Sum the Real Space
-!
-    DO
-       CALL New_CellSet_Sphere(CSMM,GM%PBC%AutoW%I,LatVec,Rmax)
-       IF(CSMM%NCells .GT. 600000) THEN
-          Rmax = 0.99*Rmax
-          CALL Delete_CellSet(CSMM)
-       ELSE
-          EXIT
-       ENDIF
+    !-------------------------------------------------------------------  
+    !  THIS NEEDS TO BE TESTED FOR REALLY FLATTENED CELLS:
+    !-------------------------------------------------------------------  
+    KMin=1D10
+    RMin=1D10
+    DO J=1,3
+       R=SQRT(LatVec(1,J)**2+LatVec(2,J)**2+LatVec(3,J)**2)
+       RMin=MIN(RMin,R)
     ENDDO
-    CALL Sort_CellSet(CSMM)
-!
-    DO NC = 1,CSMM%NCells
+    ! This is the beta that hopefully balances the reciprocal and real space
+    ! NBDW lattice sums
+    Beta=SQRT(Pi)/RMin
+    !-----------------------------------------------------------------------
+    ! OK, this bit is important.  RMax is the distance the real real space 
+    ! lattice sum is carried out over.  HOWEVER, for large L, direct summation
+    ! is used, and this MAY BE LARGER than the radius given by the balanced
+    ! value.
+    !
+    ! Here are the balanced values:
+    RMax=(One/Beta)*SQRT(ABS(LOG(Accuracy)))
+    KMax=    Beta *SQRT(ABS(LOG(Accuracy)))/Pi
+    ! And here is the value we use, which takes into account direct summation 
+    ! in the first loop below (CFac=1). 
+    RMax=MAX(RMax,Accuracy**(-One/DBLE(LSwitch+1)))
+
+    RMax=3D0*RMax
+    KMax=3D0*KMax
+
+    !---------------------------------------------------------------------------------
+    ! REAL SPACE
+    !---------------------------------------------------------------------------------
+    BetaSq=Beta**2
+    CALL SetCellSets(CSMM,GM%PBC%AutoW%I,GM%PBC%BoxShape%D,'Radial',RMin_O=RMax)
+    !
+    DO NC = 1,CSMM%NCells-1 ! Leaves out central cell (CellSet is sorted, so PQ=0 is last)
        PQ(:) = CSMM%CellCarts%D(:,NC)
        IF(.NOT. InCell_CellSet(CS,PQ(1),PQ(2),PQ(3))) THEN
           RadSq = BetaSq*(PQ(1)*PQ(1)+PQ(2)*PQ(2)+PQ(3)*PQ(3))
           CALL IrRegular(MaxL,PQ(1),PQ(2),PQ(3))
           DO L = 1,MaxL
              IF(L .LE. LSwitch) THEN
-                CFac = GScript(L,RadSq)
+                CFac=RegularizedGammaQ(DBLE(L)+5D-1,RadSq)
+!!$                CFac = GScript(L,RadSq)
              ELSE
                 CFac = One
              ENDIF
@@ -426,29 +346,30 @@ CONTAINS
           ENDDO
        ENDIF
     ENDDO
+
     CALL Delete_CellSet(CSMM)
-!
-!   Sum the Reciprical Space 
-!
+    !---------------------------------------------------------------------------------
+    ! RECIPROCAL SPACE
+    !---------------------------------------------------------------------------------
     ExpFac = Pi*Pi/BetaSq
-    Rmax   = SQRT(ABS(LOG(Accuracy/(10.D0**(LSwitch)))/ExpFac))
-    DO
-       CALL New_CellSet_Sphere(CSMM,GM%PBC%AutoW%I,RecpLatVec,Rmax)
-       IF(CSMM%NCells .LT. 27) THEN
-          Rmax = 1.01D0*Rmax
-          CALL Delete_CellSet(CSMM)
-       ELSE
-          EXIT
-       ENDIF
-    ENDDO
-    CALL Sort_CellSet(CSMM)
-!
+    !
+    CALL SetCellSets(CSMM,GM%PBC%AutoW%I,RecpLatVec,'Radial',RMin_O=KMax)
+    !
     DO NC = 1,CSMM%NCells
        PQ(:) = CSMM%CellCarts%D(:,NC)
        Rad   = SQRT(PQ(1)*PQ(1)+PQ(2)*PQ(2)+PQ(3)*PQ(3))
        IF(Rad .GT. 1.D-14) THEN 
-          CALL IrRegular(MaxL,PQ(1),PQ(2),PQ(3))
+          CALL IrRegular(LSwitch,PQ(1),PQ(2),PQ(3))
           DO L = 1,LSwitch
+!!$
+!!$          CFac2 = (SQRT(Two*Pi)**3/Two**(L-Half))/DGamma(DBLE(L)+Half) &
+!!$               *(Two*Pi*Rad)**(L-2)*EXP(-ExpFac*Rad**2) &
+!!$               * CmpxI**(L)*RealI/GM%PBC%CellVolume
+!!$
+!!$          SFac2 = -(SQRT(Two*Pi)**3/Two**(L-Half))/DGamma(DBLE(L)+Half) &
+!!$               *(Two*Pi*Rad)**(L-2)*EXP(-ExpFac*Rad**2) &
+!!$               * CmpxI**(L)*CmpxI/GM%PBC%CellVolume
+
              CFac = FT_FScriptC_3D(L,ExpFac,Rad)/GM%PBC%CellVolume
              SFac = FT_FScriptS_3D(L,ExpFac,Rad)/GM%PBC%CellVolume
              DO M = 0,L
@@ -459,17 +380,47 @@ CONTAINS
           ENDDO
        ENDIF
     ENDDO
+    !
     CALL Delete_CellSet(CSMM)
-!
-!   Substract the inner boxes
-!
+!!$    !---------------------------------------------------------------------------------
+!!$    ! PLANEWISE LATTICE SUMS (CAPABILITY IS INCOMPLETE, AS SURFACE TERM IS NOT CODED)
+!!$    !
+!!$    !---------------------------------------------------------------------------------
+!!$    Ylm=0D0
+!!$    CALL OffPlane(PlaneWiseEll,LatVec(:,1),LatVec(:,2),LatVec(:,3),RecpLatVec(:,1),RecpLatVec(:,2),Ylm)
+!!$    CALL InnPlane(PlaneWiseEll,LatVec(:,1),LatVec(:,2),RecpLatVec(:,1),RecpLatVec(:,2),Ylm)
+!!$    !---------------------------------------------------------------------------------
+!!$    DO L = 0,PlaneWiseEll
+!!$       DO M = 0,L
+!!$          LM = LTD(L)+M
+!!$          TenC%D(LM)=(1D0,0D0)*Ylm(L,M)*Factorial(L-M)
+!!$          TenS%D(LM)=(0D0,-1D0)*Ylm(L,M)*Factorial(L-M)
+!!$       ENDDO
+!!$    ENDDO
+!!$    !---------------------------------------------------------------------------------
+!!$    ! SUBTRACT THE NEAR FIELD FROM THE PLANEWISE CELLS
+!!$    !---------------------------------------------------------------------------------
+!!$    DO NC = 1,CS%NCells-1
+!!$       PQ(:) = CS%CellCarts%D(:,NC)
+!!$       CALL IrRegular(PlaneWiseEll,PQ(1),PQ(2),PQ(3))
+!!$       DO L = 1,PlaneWiseEll
+!!$          DO M = 0,L
+!!$             LM = LTD(L)+M
+!!$             TenC%D(LM)=TenC%D(LM)-Cpq(LM)
+!!$             TenS%D(LM)=TenS%D(LM)-Spq(LM)
+!!$          ENDDO
+!!$       ENDDO
+!!$    ENDDO
+    !---------------------------------------------------------------------------------
+    ! SUBTRACT THE NEAR FIELD RECIPROCAL COMPONENT FROM THE NIJBOER-DEWETTE CELLS
+    !---------------------------------------------------------------------------------
     DO NC = 1,CS%NCells
        PQ(:) = CS%CellCarts%D(:,NC)
        RadSq = BetaSq*(PQ(1)*PQ(1)+PQ(2)*PQ(2)+PQ(3)*PQ(3))
        IF(RadSq .GT. 1.D-14) THEN
-          CALL IrRegular(MaxL,PQ(1),PQ(2),PQ(3))
+          CALL IrRegular(LSwitch,PQ(1),PQ(2),PQ(3))
           DO L = 1,LSwitch
-             CFac = FScript(L,RadSq)
+             CFac=RegularizedGammaP(DBLE(L)+5D-1,RadSq)
              DO M = 0,L
                 LM = LTD(L)+M
                 TenC%D(LM)=TenC%D(LM)-Cpq(LM)*CFac
@@ -478,8 +429,190 @@ CONTAINS
           ENDDO
        ENDIF
     ENDDO
-!
+    !---------------------------------------------------------------------------------
+    ! ZERO LOW ORDER TERMS
+    !---------------------------------------------------------------------------------
+    DO L = 0,1
+       DO M = 0,L
+          LM = LTD(L)+M
+          TenC%D(LM)=0D0
+          TenS%D(LM)=0D0
+       ENDDO
+    ENDDO
+    !
   END SUBROUTINE MakeTensor3D
+
+  SUBROUTINE MakeTensor3D_MED_OLD(MaxL,GM,Args,CS,TenC,TenS)
+    INTEGER                           :: MaxL
+    INTEGER                           :: I,J,K,L,M,LM,NC
+    TYPE(DBL_VECT)                    :: TenC,TenS
+    TYPE(CellSet)                     :: CS, CSMM
+    REAL(DOUBLE),DIMENSION(3)         :: PQ
+    REAL(DOUBLE)                      :: CFac,SFac,CFac2,SFac2,BetaSq,Rad,RadSq,ExpFac
+    REAL(DOUBLE)                      :: R,Rmin,KMin,KMax,RMax,Beta
+    INTEGER                           :: NDiv
+    REAL(DOUBLE)                      :: LenMax,Delt,IntFac
+    REAL(DOUBLE),DIMENSION(3)         :: Vec
+    REAL(DOUBLE),DIMENSION(3,3)       :: RecpLatVec,LatVec
+    TYPE(CRDS)                        :: GM
+    TYPE(ARGMT)                       :: Args
+
+    COMPLEX(DOUBLE),DIMENSION(0:PlaneWiseEll,0:PlaneWiseEll) :: Ylm
+    COMPLEX(DOUBLE) :: CmpxI=(0D0,1D0),RealI=(1D0,0D0)
+
+    INTEGER :: IFF=10
+    LOGICAL :: InCell,OutCell
+    REAL(DOUBLE) :: X,Y,Z
+    !-------------------------------------------------------------------------------------!
+    !
+    !   Initialize 
+    !
+    TenC%D=Zero
+    TenS%D=Zero
+
+    !
+    DO I = 1,3
+       DO J = 1,3
+          RecpLatVec(I,J) = GM%PBC%InvBoxSh%D(J,I)
+          LatVec(I,J)     = GM%PBC%BoxShape%D(I,J)
+       ENDDO
+    ENDDO
+    !-------------------------------------------------------------------  
+    !  THIS NEEDS TO BE TESTED FOR REALLY FLATTENED CELLS:
+    !-------------------------------------------------------------------  
+    KMin=1D10
+    RMin=1D10
+    DO J=1,3
+       R=SQRT(LatVec(1,J)**2+LatVec(2,J)**2+LatVec(3,J)**2)
+       RMin=MIN(RMin,R)
+    ENDDO
+    Beta=SQRT(Pi)/RMin
+    RMax=(One/Beta)*SQRT(ABS(LOG(Accuracy)))
+    KMax=    Beta *SQRT(ABS(LOG(Accuracy)))/Pi
+
+    !---------------------------------------------------------------------------------
+    ! REAL SPACE
+    !---------------------------------------------------------------------------------
+    BetaSq=Beta**2
+    CALL SetCellSets(CSMM,GM%PBC%AutoW%I,GM%PBC%BoxShape%D,'Radial',RMin_O=RMax)
+    !
+    DO NC = 1,CSMM%NCells-1 ! Leaves out central cell (CellSet is sorted, so PQ=0 is last)
+       PQ(:) = CSMM%CellCarts%D(:,NC)
+       IF(.NOT. InCell_CellSet(CS,PQ(1),PQ(2),PQ(3))) THEN
+          RadSq = BetaSq*(PQ(1)*PQ(1)+PQ(2)*PQ(2)+PQ(3)*PQ(3))
+          CALL IrRegular(MaxL,PQ(1),PQ(2),PQ(3))
+          DO L = 1,MaxL
+             IF(L .LE. LSwitch) THEN
+                CFac=RegularizedGammaQ(DBLE(L)+5D-1,RadSq)
+!!$                CFac = GScript(L,RadSq)
+             ELSE
+                CFac = One
+             ENDIF
+             DO M = 0,L
+                LM = LTD(L)+M
+                TenC%D(LM)=TenC%D(LM)+Cpq(LM)*CFac
+                TenS%D(LM)=TenS%D(LM)+Spq(LM)*CFac
+             ENDDO
+          ENDDO
+       ENDIF
+    ENDDO
+
+    CALL Delete_CellSet(CSMM)
+    !---------------------------------------------------------------------------------
+    ! RECIPROCAL SPACE
+    !---------------------------------------------------------------------------------
+    ExpFac = Pi*Pi/BetaSq
+    !
+    CALL SetCellSets(CSMM,GM%PBC%AutoW%I,RecpLatVec,'Radial',RMin_O=KMax)
+    !
+    DO NC = 1,CSMM%NCells
+       PQ(:) = CSMM%CellCarts%D(:,NC)
+       Rad   = SQRT(PQ(1)*PQ(1)+PQ(2)*PQ(2)+PQ(3)*PQ(3))
+       IF(Rad .GT. 1.D-14) THEN 
+          CALL IrRegular(MaxL,PQ(1),PQ(2),PQ(3))
+          DO L = 1,LSwitch
+!!$
+!!$          CFac2 = (SQRT(Two*Pi)**3/Two**(L-Half))/DGamma(DBLE(L)+Half) &
+!!$               *(Two*Pi*Rad)**(L-2)*EXP(-ExpFac*Rad**2) &
+!!$               * CmpxI**(L)*RealI/GM%PBC%CellVolume
+!!$
+!!$          SFac2 = -(SQRT(Two*Pi)**3/Two**(L-Half))/DGamma(DBLE(L)+Half) &
+!!$               *(Two*Pi*Rad)**(L-2)*EXP(-ExpFac*Rad**2) &
+!!$               * CmpxI**(L)*CmpxI/GM%PBC%CellVolume
+
+             CFac = FT_FScriptC_3D(L,ExpFac,Rad)/GM%PBC%CellVolume
+             SFac = FT_FScriptS_3D(L,ExpFac,Rad)/GM%PBC%CellVolume
+             DO M = 0,L
+                LM = LTD(L)+M
+                TenC%D(LM)=TenC%D(LM)+Cpq(LM)*CFac-Spq(LM)*SFac
+                TenS%D(LM)=TenS%D(LM)+Spq(LM)*CFac+Cpq(LM)*SFac
+             ENDDO
+          ENDDO
+       ENDIF
+    ENDDO
+    !
+    CALL Delete_CellSet(CSMM)
+!!$    !---------------------------------------------------------------------------------
+!!$    ! PLANEWISE LATTICE SUMS (CAPABILITY IS INCOMPLETE, AS SURFACE TERM IS NOT CODED)
+!!$    !
+!!$    !---------------------------------------------------------------------------------
+!!$    Ylm=0D0
+!!$    CALL OffPlane(PlaneWiseEll,LatVec(:,1),LatVec(:,2),LatVec(:,3),RecpLatVec(:,1),RecpLatVec(:,2),Ylm)
+!!$    CALL InnPlane(PlaneWiseEll,LatVec(:,1),LatVec(:,2),RecpLatVec(:,1),RecpLatVec(:,2),Ylm)
+!!$    !---------------------------------------------------------------------------------
+!!$    DO L = 0,PlaneWiseEll
+!!$       DO M = 0,L
+!!$          LM = LTD(L)+M
+!!$          TenC%D(LM)=(1D0,0D0)*Ylm(L,M)*Factorial(L-M)
+!!$          TenS%D(LM)=(0D0,-1D0)*Ylm(L,M)*Factorial(L-M)
+!!$       ENDDO
+!!$    ENDDO
+!!$    !---------------------------------------------------------------------------------
+!!$    ! SUBTRACT THE NEAR FIELD FROM THE PLANEWISE CELLS
+!!$    !---------------------------------------------------------------------------------
+!!$    DO NC = 1,CS%NCells-1
+!!$       PQ(:) = CS%CellCarts%D(:,NC)
+!!$       CALL IrRegular(PlaneWiseEll,PQ(1),PQ(2),PQ(3))
+!!$       DO L = 1,PlaneWiseEll
+!!$          DO M = 0,L
+!!$             LM = LTD(L)+M
+!!$             TenC%D(LM)=TenC%D(LM)-Cpq(LM)
+!!$             TenS%D(LM)=TenS%D(LM)-Spq(LM)
+!!$          ENDDO
+!!$       ENDDO
+!!$    ENDDO
+    !---------------------------------------------------------------------------------
+    ! SUBTRACT THE NEAR FIELD RECIPROCAL COMPONENT FROM THE NIJBOER-DEWETTE CELLS
+    !---------------------------------------------------------------------------------
+    DO NC = 1,CS%NCells
+       PQ(:) = CS%CellCarts%D(:,NC)
+       RadSq = BetaSq*(PQ(1)*PQ(1)+PQ(2)*PQ(2)+PQ(3)*PQ(3))
+       IF(RadSq .GT. 1.D-14) THEN
+          CALL IrRegular(MaxL,PQ(1),PQ(2),PQ(3))
+          DO L = 1,LSwitch
+!!$             CFac = FScript(L,RadSq)
+             CFac=RegularizedGammaP(DBLE(L)+5D-1,RadSq)
+             DO M = 0,L
+                LM = LTD(L)+M
+                TenC%D(LM)=TenC%D(LM)-Cpq(LM)*CFac
+                TenS%D(LM)=TenS%D(LM)-Spq(LM)*CFac
+             ENDDO
+          ENDDO
+       ENDIF
+    ENDDO
+    !---------------------------------------------------------------------------------
+    ! ZERO LOW ORDER TERMS
+    !---------------------------------------------------------------------------------
+    DO L = 0,1
+       DO M = 0,L
+          LM = LTD(L)+M
+          TenC%D(LM)=0D0
+          TenS%D(LM)=0D0
+       ENDDO
+    ENDDO
+    !
+  END SUBROUTINE MakeTensor3D_MED_OLD
+
 !========================================================================================
 !   Determine Cell Type
 !========================================================================================
@@ -699,7 +832,144 @@ CONTAINS
     RZeta = RZeta - RSum
     !
   END FUNCTION RZeta
-!
+
+
+
+
+
+
+
+
+
+
+  !========================================================================================
+  ! Calculate the PFFTensor 3D
+  !========================================================================================
+  SUBROUTINE DirectTensor3D(MaxL,GM,Args,CS,TenC,TenS)
+    INTEGER                           :: MaxL
+    INTEGER                           :: I,J,K,L,M,LM,NC,NCell
+    INTEGER                           :: LSwitch
+    TYPE(DBL_VECT)                    :: TenC,TenS
+    TYPE(CellSet)                     :: CS, CSMM
+    REAL(DOUBLE),DIMENSION(3)         :: PQ
+    REAL(DOUBLE)                      :: CFac,SFac,BetaSq,Rad,RadSq,ExpFac
+    REAL(DOUBLE)                      :: Rmin,RMAX,Accuracy,LenScale,SUM,dum,dum2,eum,eum2
+    !
+    INTEGER                           :: NDiv,IFF,HardP
+    REAL(DOUBLE)                      :: LenMax,Delt,IntFac,X,Y,Z
+    REAL(DOUBLE),DIMENSION(3)         :: Vec
+    REAL(DOUBLE),DIMENSION(3,3)       :: RecpLatVec,LatVec
+    TYPE(CRDS)                        :: GM
+    TYPE(ARGMT)                       :: Args
+    LOGICAL :: OutCell,InCell
+
+    !-------------------------------------------------------------------------------------!
+    !
+    !   Initialize 
+    !
+    TenC%D=Zero
+    TenS%D=Zero
+
+    IFF=100
+    HardP=1
+
+    dum=0D0
+    dum2=0D0
+    eum=0D0
+    eum2=0D0
+
+    MaxL=2
+
+    NCell=0
+
+    DO IFF=100,10000,100
+
+    DO I=-IFF,IFF
+       DO J=-IFF,IFF
+          DO K=-IFF,IFF
+
+             X=I*GM%PBC%BoxShape%D(1,1)+J*GM%PBC%BoxShape%D(1,2)+K*GM%PBC%BoxShape%D(1,3)
+             Y=I*GM%PBC%BoxShape%D(2,1)+J*GM%PBC%BoxShape%D(2,2)+K*GM%PBC%BoxShape%D(2,3)
+             Z=I*GM%PBC%BoxShape%D(3,1)+J*GM%PBC%BoxShape%D(3,2)+K*GM%PBC%BoxShape%D(3,3)
+!             InCell=ABS(I).EQ.0.AND.ABS(J).EQ.0.AND.ABS(K).EQ.0
+
+             InCell=ABS(K).EQ.0
+             OutCell=.NOT.InCell
+
+             IF(OutCell)THEN          
+                CALL IrRegular(MaxL,X,Y,Z,Print_O=.TRUE.)
+                DO L = 2,2 !1,MaxL
+                   DO M = 0,0
+                      LM = LTD(L)+M
+                      TenC%D(LM)=TenC%D(LM)+Cpq(LM)
+                      TenS%D(LM)=TenS%D(LM)+Spq(LM)
+                   ENDDO
+                ENDDO
+             ENDIF
+          ENDDO
+       ENDDO
+    ENDDO
+    WRITE(*,*)IFF,TENC%D(3)
+
+ ENDDO
+
+    DO L = 1,4
+       DO M = 0,L
+          LM = LTD(L)+M
+          WRITE(*,33)L,M,TenC%D(LM)
+33        FORMAT(" L = ",I2," M = ",I2,' Sphere = ',1(D12.6,", "))
+       ENDDO
+    ENDDO
+
+    STOP
+    !
+  END SUBROUTINE DirectTensor3D
+  !========================================================================================
+  ! Calculate the PFFTensor 1D
+  !========================================================================================
+  SUBROUTINE DirectTensor1D(MaxL,GM,Args,CS,TenC,TenS)
+    INTEGER                           :: MaxL
+    INTEGER                           :: I,J,K,L,M,LM,NC,NCell
+    INTEGER                           :: LSwitch
+    TYPE(DBL_VECT)                    :: TenC,TenS
+    TYPE(CellSet)                     :: CS, CSMM
+    REAL(DOUBLE),DIMENSION(3)         :: PQ
+    REAL(DOUBLE)                      :: CFac,SFac,BetaSq,Rad,RadSq,ExpFac
+    REAL(DOUBLE)                      :: Rmin,RMAX,Accuracy,LenScale,SUM,dum,dum2,eum,eum2
+    !
+    INTEGER                           :: NDiv,IFF,HardP
+    REAL(DOUBLE)                      :: LenMax,Delt,IntFac,X,Y,Z
+    REAL(DOUBLE),DIMENSION(3)         :: Vec
+    REAL(DOUBLE),DIMENSION(3,3)       :: RecpLatVec,LatVec
+    TYPE(CRDS)                        :: GM
+    TYPE(ARGMT)                       :: Args
+    LOGICAL :: OutCell,InCell
+
+    !-------------------------------------------------------------------------------------!
+    !
+    !   Initialize 
+    !
+    TenC%D=Zero
+    TenS%D=Zero
+    IFF=4
+    DO I=-IFF,IFF
+       J=0
+       K=0
+       X=I*GM%PBC%BoxShape%D(1,1)+J*GM%PBC%BoxShape%D(1,2)+K*GM%PBC%BoxShape%D(1,3)
+       Y=I*GM%PBC%BoxShape%D(2,1)+J*GM%PBC%BoxShape%D(2,2)+K*GM%PBC%BoxShape%D(2,3)
+       Z=I*GM%PBC%BoxShape%D(3,1)+J*GM%PBC%BoxShape%D(3,2)+K*GM%PBC%BoxShape%D(3,3)
+       IF(ABS(I)>1)THEN          
+          CALL IrRegular(MaxL,X,Y,Z,Print_O=.TRUE.)
+          DO L = 0,MaxL
+             DO M = 0,L
+                LM = LTD(L)+M
+                TenC%D(LM)=TenC%D(LM)+Cpq(LM)
+                TenS%D(LM)=TenS%D(LM)+Spq(LM)
+             ENDDO
+          ENDDO
+       ENDIF
+    ENDDO
+  END SUBROUTINE DirectTensor1D
 !
 END MODULE PFFTen
 

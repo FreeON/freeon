@@ -1,43 +1,14 @@
-!------------------------------------------------------------------------------
-!    This code is part of the MondoSCF suite of programs for linear scaling
-!    electronic structure theory and ab initio molecular dynamics.
-!
-!    Copyright (2004). The Regents of the University of California. This
-!    material was produced under U.S. Government contract W-7405-ENG-36
-!    for Los Alamos National Laboratory, which is operated by the University
-!    of California for the U.S. Department of Energy. The U.S. Government has
-!    rights to use, reproduce, and distribute this software.  NEITHER THE
-!    GOVERNMENT NOR THE UNIVERSITY MAKES ANY WARRANTY, EXPRESS OR IMPLIED,
-!    OR ASSUMES ANY LIABILITY FOR THE USE OF THIS SOFTWARE.
-!
-!    This program is free software; you can redistribute it and/or modify
-!    it under the terms of the GNU General Public License as published by the
-!    Free Software Foundation; either version 2 of the License, or (at your
-!    option) any later version. Accordingly, this program is distributed in
-!    the hope that it will be useful, but WITHOUT ANY WARRANTY; without even
-!    the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-!    PURPOSE. See the GNU General Public License at www.gnu.org for details.
-!
-!    While you may do as you like with this software, the GNU license requires
-!    that you clearly mark derivative software.  In addition, you are encouraged
-!    to return derivative works to the MondoSCF group for review, and possible
-!    disemination in future releases.
-!------------------------------------------------------------------------------
-
 MODULE PunchHDF
   USE InOut
   USE MemMan
-  USE CellSets
+  USE PBC
   USE Indexing
   USE AtomPairs
   USE PrettyPrint
   USE GlobalScalars
   USE ControlStructures
   USE OptionKeys
-  USE MondoLogger
-
   IMPLICIT NONE
-
 CONTAINS
   !==============================================================================
   !
@@ -61,10 +32,10 @@ CONTAINS
     TYPE(FileNames)      :: N
     INTEGER,DIMENSION(2) :: Clump
     INTEGER              :: NSpace
-    TYPE(INT_VECT)       :: ST
+    TYPE(INT_VECT)   :: ST
     !---------------------------------------------------------------------------!
     HDF_CurrentID=OpenHDF(N%HFile)
-#ifdef PARALLEL
+#ifdef PARALLEL    
     CALL New(ST,3)
     ST%I=(/NSpace,Clump(1),Clump(2)/)
     CALL Put(ST,'SpaceTime')
@@ -217,83 +188,49 @@ CONTAINS
 #endif
     CALL CloseHDF(HDFFileID)
   END SUBROUTINE InitClones
-  !==============================================================================
-  !
-  !==============================================================================
+!==============================================================================
+!
+!==============================================================================
   SUBROUTINE GeomArchive(cBAS,cGEO,N,O,B,G)
     TYPE(Options)      :: O
     TYPE(FileNames)    :: N
     TYPE(BasisSets)    :: B
-    TYPE(Geometries)   :: G
+    TYPE(Geometries)   :: G    
     TYPE(CellSet)      :: CS_IN,CS_OUT
     INTEGER            :: cBAS,cGEO,iCLONE,HDFFileID,I,NK,CF,PF
     CHARACTER(LEN=DCL) :: chGEO
     REAL(DOUBLE)       :: MinExpt
-
-    CALL MondoLog(DEBUG_NONE, "GeomArchive", "archiving geometry into hdf")
+!---------------------------------------------------------------------------!
     chGEO=IntToChar(cGEO)
 
     CALL MondoLog(DEBUG_NONE, "GeomArchive", "opening hdf file "//TRIM(N%HFile))
     HDFFileID=OpenHDF(N%HFile)
     DO iCLONE=1,G%Clones
-      G%Clone(iCLONE)%Confg=cGEO
-
-      MinExpt=1D25
-      DO NK=1,B%BSets(iCLONE,cBAS)%NKind
-        DO CF=1,B%BSets(iCLONE,cBAS)%NCFnc%I(NK)
-          DO PF=1,B%BSets(iCLONE,cBAS)%NPFnc%I(CF,NK)
-            MinExpt=MIN(MinExpt,B%BSets(iCLONE,cBAS)%Expnt%D(PF,CF,NK))
-          ENDDO
-        ENDDO
-      ENDDO
-
-      ! Set the correct PBC cell set list
-      CALL SetLatticeVectors(G%Clone(iCLONE),B%AtomPairThresh(iCLONE,cBAS), &
-           O%Thresholds(cBAS),MinExpt,CS_IN,CS_OUT)
-
-      ! Make sure everything is wrapped correctly
-      G%Clone(iCLONE)%Carts%D = G%Clone(iCLONE)%Carts%D
-      CALL CalFracCarts(G%Clone(iCLONE))
-      CALL WrapAtoms(G%Clone(iCLONE))
-      G%Clone(iCLONE)%Carts%D = G%Clone(iCLONE)%Carts%D
-
-      CALL MondoLog(DEBUG_NONE, "GeomArchive", "opening hdf group "//"Clone #"//TRIM(IntToChar(iCLONE)))
-      HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
-
-      ! If we have ECPs, temporarily reset this geometries nuclear charges
-      IF(B%BSets(iCLONE,cBAS)%HasECPs) THEN
-        CALL SetAtomCharges(G%Clone(iCLONE),B%BSets(iCLONE,cBAS))
-      ENDIF
-
-      ! Put the geometry to this group ...
-      CALL MondoLog(DEBUG_NONE, "GeomArchive", "putting geometries into group")
-      CALL Put(G%Clone(iCLONE),chGEO)
-
-      ! Store the CellSets
-      CALL Put(CS_IN ,'CS_IN' ,Tag_O=IntToChar(cBAS))
-      CALL Put(CS_OUT,'CS_OUT',Tag_O=IntToChar(cBAS))
-
-      ! Close this clones group
-      CALL CloseHDFGroup(HDF_CurrentID)
-
-      ! And free memory for the the lattice vectors
-      CALL Delete(CS_IN%CellCarts)
-      CALL Delete(CS_OUT%CellCarts)
-
-      ! And unset the nuclear charges in the case of ECPs
-      IF(B%BSets(iCLONE,cBAS)%HasECPs) THEN
-        CALL UnSetAtomCharges(G%Clone(iCLONE),B%BSets(iCLONE,cBAS))
-      ENDIF
+       G%Clone(iCLONE)%Confg=cGEO
+       CALL MakeGMPeriodic(G%Clone(iCLONE),B%BSets(iCLONE,cBAS), &
+                           O%Thresholds(cBAS)%Dist,O%Thresholds(cBAS)%TwoE)
+       HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
+!      If we have ECPs, temporarily reset this geometries nuclear charges
+       IF(B%BSets(iCLONE,cBAS)%HasECPs) &
+          CALL SetAtomCharges(G%Clone(iCLONE),B%BSets(iCLONE,cBAS))
+!      Put the geometry to this group ...
+       CALL Put(G%Clone(iCLONE),chGEO)
+!      Close this clones group
+       CALL CloseHDFGroup(HDF_CurrentID)
+!      And unset the nuclear charges in the case of ECPs
+       IF(B%BSets(iCLONE,cBAS)%HasECPs) &
+          CALL UnSetAtomCharges(G%Clone(iCLONE),B%BSets(iCLONE,cBAS))
     ENDDO
     CALL CloseHDF(HDFFileID)
+!   CALL PPrint(G%Clone(1),Unit_O=6)
   END SUBROUTINE GeomArchive
-  !==============================================================================
-  !
-  !==============================================================================
+!==============================================================================
+!
+!==============================================================================
   SUBROUTINE GeomReArchive(N,O,G)
     TYPE(FileNames)  :: N
     TYPE(Options)    :: O
-    TYPE(Geometries) :: G
+    TYPE(Geometries) :: G    
     TYPE(CellSet)    :: CS
     INTEGER          :: cBAS,cGEO,iCLONE,HDFFileID
     INTEGER          :: LastGeo,LastBas,iGEO,NCart,NatmsLoc,iGEOStart
@@ -302,116 +239,59 @@ CONTAINS
     TYPE(CRDS)       :: GMLoc,GMAux
     !-----------------------------------------------------------------!
     ! it is supposed that the number of clones did not change at restart
-    !
+    ! 
     iGEOMem=101
     LastGeo=O%RestartState%I(3)
     LastBas=O%RestartState%I(2)
     IGEOStart=MAX(LastGeo-iGEOMem,1)
     !
     DO iCLONE=1,G%Clones
-      ! Reachive very first geometry, as it serves
+      ! Reachive very first geometry, as it serves 
       ! as a reference for PBC optimizations
-      CALL ReArchIGEO(N,O,G,iCLONE,1,LastGeo)
-      ! Reachive GMLoc-s
+      CALL ReArchIGEO(N,O,G,iCLONE,1,LastGeo) 
+      ! Reachive GMLoc-s 
       DO iGEO=iGEOStart,LastGeo
         CALL ReArchIGEO(N,O,G,iCLONE,iGEO,LastGeo)
       ENDDO
     ENDDO
   END SUBROUTINE GeomReArchive
-  !
-  !---------------------------------------------------------------
-  !
-  SUBROUTINE ReArchIGEO(N,O,G,iCLONE,iGEO,LastGeo)
-    TYPE(FileNames)  :: N
-    TYPE(Options)    :: O
-    TYPE(Geometries) :: G
-    INTEGER          :: iCLONE,HDFFileID
-    INTEGER          :: iGEO,NCart,NatmsLoc,LastGeo
-    CHARACTER(LEN=DCL) :: chGEO
-    TYPE(CRDS)       :: GMLoc,GMAux
-    !
-    NatmsLoc=G%Clone(1)%Natms
-    NCart=3*NatmsLoc
-    !
-    HDFFileID=OpenHDF(N%RFile)
-    HDF_CurrentID=OpenHDFGroup(HDFFileID, &
-         "Clone #"//TRIM(IntToChar(iCLONE)))
-    chGEO=IntToChar(iGeo)
-    CALL Get(GMLoc,chGEO)
-    CALL CloseHDFGroup(HDF_CurrentID)
-    CALL CloseHDF(HDFFileID)
-    !
-    HDFFileID=OpenHDF(N%HFile)
-    HDF_CurrentID=OpenHDFGroup(HDFFileID, &
-         "Clone #"//TRIM(IntToChar(iCLONE)))
-    chGEO=IntToChar(iGEO)
-    CALL Put(GMLoc,chGEO)
-    CALL CloseHDFGroup(HDF_CurrentID)
-    CALL CloseHDF(HDFFileID)
-    CALL Delete(GMLoc)
-  END SUBROUTINE ReArchIGEO
-  !
-  !---------------------------------------------------------------
-  !
-  !==============================================================================
-  ! SET UP SUMMATION OF LATTICE VECTORS, ACCOUNTING FOR CELL SIZE AND SHAPE
-  !==============================================================================
-  SUBROUTINE SetLatticeVectors(G,AtomPairThresh,Thresholds,MinExpt,CS_IN,CS_OUT,Rad_O)
-    TYPE(CRDS)                :: G
-    TYPE(CellSet)             :: CS_IN,CS_OUT
-    REAL(DOUBLE), OPTIONAL    :: Rad_O
-    TYPE(TOLS)                :: Thresholds
-    REAL(DOUBLE)              :: MinExpt,AtomPairThresh,Radius_in,Radius_out
-    INTEGER                   :: IL
-    INTEGER                   :: MaxCell
-    !------------------------------------------------------------------------------
-    ! CS_OUT
-    MaxCell=1
-    IF(G%PBC%Dimen==0) THEN
-      MaxCell=1
-    ELSEIF(G%PBC%Dimen==1) THEN
-      MaxCell=500
-    ELSEIF(G%PBC%Dimen==2) THEN
-      MaxCell=1000
-    ELSEIF(G%PBC%Dimen==3) THEN
-      MaxCell=5000
-    ENDIF
-    !
-    IF(PRESENT(Rad_O)) THEN
-      Radius_out = 1.0D0*Rad_O
-      Radius_in  = 1.5D0*Rad_O
-    ELSE
-      Radius_out = (One+1.D-14)*MaxBoxDim(G)+SQRT(AtomPairThresh)
-      Radius_in  = (One+1.D-14)*MaxBoxDim(G)+2.0D0*SQRT(AtomPairThresh)
-    ENDIF
-    ! Determine PFFOverde
-    IF(G%PBC%PFFOvRide) THEN
-      IL = G%PBC%PFFMaxLay
-      CALL New_CellSet_Cube(CS_OUT,G%PBC%AutoW%I,G%PBC%BoxShape%D,(/IL,IL,IL/)      ,MaxCell_O=MaxCell)
-      CALL New_CellSet_Cube(CS_IN ,G%PBC%AutoW%I,G%PBC%BoxShape%D,(/2*IL,2*IL,2*IL/),MaxCell_O=MaxCell)
-    ELSE
-
-      ! CALL New_CellSet_Sphere(CS_OUT,G%PBC%AutoW%I,G%PBC%BoxShape%D,Radius_out ,MaxCell_O=MaxCell)
-      ! CALL New_CellSet_Sphere(CS_IN ,G%PBC%AutoW%I,G%PBC%BoxShape%D,Radius_in  ,MaxCell_O=MaxCell)
-      CALL New_CellSet_Sphere2(CS_In ,G%PBC%AutoW%I,G%PBC%BoxShape%D,'Penetration', &
-           Thresholds%Dist,MinExpt,G%NElec,MaxCell_O=MaxCell)
-      CALL New_CellSet_Sphere2(CS_Out,G%PBC%AutoW%I,G%PBC%BoxShape%D,'Overlap',     &
-           Thresholds%TwoE,MinExpt,G%NElec,MaxCell_O=MaxCell)
-      CALL MondoLog(DEBUG_NONE, "PunchHDF:SetLatticeVectors", 'USING NEW CELL SET:')
-      CALL MondoLog(DEBUG_NONE, "PunchHDF:SetLatticeVectors", 'Pentrat Cells = '//TRIM(IntToChar(CS_In%NCells)))
-      CALL MondoLog(DEBUG_NONE, "PunchHDF:SetLatticeVectors", 'Overlap Cells = '//TRIM(IntToChar(CS_Out%NCells)))
-    ENDIF
-
-    CALL Sort_CellSet(CS_IN,-2)
-    CS_IN%Radius  = SQRT(CS_IN%CellCarts%D(1,1)**2 +CS_IN%CellCarts%D(2,1)**2 +CS_IN%CellCarts%D(3,1)**2)
-    CALL Sort_CellSet(CS_OUT)
-    CS_OUT%Radius = SQRT(CS_OUT%CellCarts%D(1,1)**2+CS_OUT%CellCarts%D(2,1)**2+CS_OUT%CellCarts%D(3,1)**2)
-
-  END SUBROUTINE SetLatticeVectors
-  !==============================================================================
-  !
-  !==============================================================================
-  SUBROUTINE BSetArchive(cBAS,N,O,G,B,M)
+!
+!---------------------------------------------------------------
+!
+   SUBROUTINE ReArchIGEO(N,O,G,iCLONE,iGEO,LastGeo)
+     TYPE(FileNames)  :: N
+     TYPE(Options)    :: O
+     TYPE(Geometries) :: G    
+     INTEGER          :: iCLONE,HDFFileID
+     INTEGER          :: iGEO,NCart,NatmsLoc,LastGeo
+     CHARACTER(LEN=DCL) :: chGEO
+     TYPE(CRDS)       :: GMLoc,GMAux
+     !
+     NatmsLoc=G%Clone(1)%Natms
+     NCart=3*NatmsLoc
+     !
+     HDFFileID=OpenHDF(N%RFile)
+     HDF_CurrentID=OpenHDFGroup(HDFFileID, &
+                   "Clone #"//TRIM(IntToChar(iCLONE)))
+     chGEO=IntToChar(iGeo)
+     CALL Get(GMLoc,chGEO)
+     CALL CloseHDFGroup(HDF_CurrentID)
+     CALL CloseHDF(HDFFileID)
+     !
+     HDFFileID=OpenHDF(N%HFile)
+     HDF_CurrentID=OpenHDFGroup(HDFFileID, &
+                   "Clone #"//TRIM(IntToChar(iCLONE)))
+     chGEO=IntToChar(iGEO)
+     CALL Put(GMLoc,chGEO)
+     CALL CloseHDFGroup(HDF_CurrentID)
+     CALL CloseHDF(HDFFileID)
+     CALL Delete(GMLoc)
+   END SUBROUTINE ReArchIGEO
+   !
+!==============================================================================
+!
+!==============================================================================
+  SUBROUTINE BSetArchive(cBAS,N,O,G,B,M)    
     TYPE(FileNames)  :: N
     TYPE(Options)    :: O
     TYPE(Geometries) :: G
@@ -433,30 +313,30 @@ CONTAINS
     CALL Put(M%MxN0sNode(cBAS),'maxnon0node',Tag_O=chBAS)
 #endif
     DO iCLONE=1,G%Clones
-      HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
-      CALL Put(B%NExpt(cBAS),'nexpt',chBAS)
-      CALL Put(O%Thresholds(cBAS),chBAS)
-      CALL Put(B%BSets(iCLONE,cBAS),Tag_O=chBAS)
-      CALL Put(B%BSiz(iCLONE,cBAS),'atsiz',Tag_O=chBAS)
-      CALL Put(B%OffS(iCLONE,cBAS),'atoff',Tag_O=chBAS)
-      CALL Put(B%DExpt(iCLONE,cBAS),'dexpt',Tag_O=chBAS)
-      CALL Put(B%Lndex(iCLONE,cBAS),'lndex',Tag_O=chBAS)
+       HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
+       CALL Put(B%NExpt(cBAS),'nexpt',chBAS)
+       CALL Put(O%Thresholds(cBAS),chBAS)
+       CALL Put(B%BSets(iCLONE,cBAS),Tag_O=chBAS)
+       CALL Put(B%BSiz(iCLONE,cBAS),'atsiz',Tag_O=chBAS)
+       CALL Put(B%OffS(iCLONE,cBAS),'atoff',Tag_O=chBAS)
+       CALL Put(B%DExpt(iCLONE,cBAS),'dexpt',Tag_O=chBAS)
+       CALL Put(B%Lndex(iCLONE,cBAS),'lndex',Tag_O=chBAS)
 #ifdef PARALLEL
-      CALL Put(M%Beg(iCLONE,cBAS),'beg',Tag_O=chBAS)
-      CALL Put(M%End(iCLONE,cBAS),'end',Tag_O=chBAS)
-      CALL Put(M%GLO(iCLONE,cBAS),'dbcsroffsets',Tag_O=chBAS)
+       CALL Put(M%Beg(iCLONE,cBAS),'beg',Tag_O=chBAS)
+       CALL Put(M%End(iCLONE,cBAS),'end',Tag_O=chBAS)
+       CALL Put(M%GLO(iCLONE,cBAS),'dbcsroffsets',Tag_O=chBAS)
 #endif
-      CALL CloseHDFGroup(HDF_CurrentID)
+       CALL CloseHDFGroup(HDF_CurrentID)
     ENDDO
     CALL CloseHDF(HDFFileID)
   END SUBROUTINE BSetArchive
-  !---------------------------------------------------------------------
-  !
+!---------------------------------------------------------------------
+!
   SUBROUTINE InitState(S,O)
     TYPE(State)    :: S
     TYPE(Options)  :: O
     INTEGER        :: LastGEO,LastBAS
-
+    !
     IF(O%Guess==GUESS_EQ_RESTART.OR.O%Guess==GUESS_EQ_NUGUESS) THEN
       LastBAS=O%RestartState%I(2)
       LastGEO=O%RestartState%I(3)
@@ -467,33 +347,33 @@ CONTAINS
     S%Previous%I=(/0,LastBAS,LastGEO/)
     S%Current%I=(/1,LastBAS,LastGEO/)
   END SUBROUTINE InitState
-  !-----------------------------------------------------------------
-  !
+!-----------------------------------------------------------------
+!
   SUBROUTINE StateArchive(N,G,S,Init_O)
     TYPE(FileNames) :: N
-    TYPE(Geometries):: G
+    TYPE(Geometries):: G    
     TYPE(State)     :: S
-    LOGICAL,OPTIONAL:: Init_O
+    LOGICAL,OPTIONAL:: Init_O           
     INTEGER         :: HDFFileID,iCLONE,J
     HDFFileID=OpenHDF(N%HFile)
     HDF_CurrentID=HDFFileID
     CALL Put(S%Current,'current_state')
     CALL Put(S%Previous,'previous_state')
     IF(PRESENT(Init_O))THEN
-      IF(Init_O)THEN
-        DO iCLONE=1,G%Clones
-          HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
-          CALL Put(BIG_DBL,'E_NuclearTotal',Stats_O=S%Current%I)
-          CALL Put(BIG_DBL,'Exc',Stats_O=S%Current%I)
-          CALL Put(BIG_DBL,'Etot',Stats_O=S%Current%I)
-          CALL CloseHDFGroup(HDF_CurrentID)
-        ENDDO
-      ENDIF
+       IF(Init_O)THEN
+          DO iCLONE=1,G%Clones
+             HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
+             CALL Put(BIG_DBL,'E_NuclearTotal',Stats_O=S%Current%I)
+             CALL Put(BIG_DBL,'Exc',Stats_O=S%Current%I)
+             CALL Put(BIG_DBL,'Etot',Stats_O=S%Current%I)
+             CALL CloseHDFGroup(HDF_CurrentID)
+          ENDDO
+       ENDIF
     ENDIF
     CALL CloseHDF(HDFFileID)
   END SUBROUTINE StateArchive
-  !-----------------------------------------------------------------
-  !
+!-----------------------------------------------------------------
+!
   SUBROUTINE InitGlobal(C)
     TYPE(Controls) :: C
     !
@@ -514,13 +394,13 @@ CONTAINS
     TYPE(BSET) :: B
     INTEGER    :: I,NUnPEl
     DO I=1,G%NAtms
-      G%AtNum%D(I)=G%AtNum%D(I)-B%NCoreEl%D(G%AtTyp%I(I))
+       G%AtNum%D(I)=G%AtNum%D(I)-B%NCoreEl%D(G%AtTyp%I(I))
     ENDDO
     G%NElec=0
     DO I=1,G%NAtms
-      IF(G%AtNum%D(i)<105.D0) THEN
-        G%NElec=G%NElec+G%AtNum%D(I)
-      ENDIF
+       IF(G%AtNum%D(i)<105.D0) THEN
+          G%NElec=G%NElec+G%AtNum%D(I)
+       ENDIF
     ENDDO
     G%NElec=G%NElec-G%TotCh
     ! We need to correct number of alpha/beta electron.
@@ -535,13 +415,13 @@ CONTAINS
     TYPE(BSET) :: B
     INTEGER    :: I,NUnPEl
     DO I=1,G%NAtms
-      G%AtNum%D(I)=G%AtNum%D(I)+B%NCoreEl%D(G%AtTyp%I(I))
+       G%AtNum%D(I)=G%AtNum%D(I)+B%NCoreEl%D(G%AtTyp%I(I))
     ENDDO
     G%NElec=0
     DO I=1,G%NAtms
-      IF(G%AtNum%D(i)<105.D0) THEN
-        G%NElec=G%NElec+G%AtNum%D(I)
-      ENDIF
+       IF(G%AtNum%D(i)<105.D0) THEN
+          G%NElec=G%NElec+G%AtNum%D(I)
+       ENDIF
     ENDDO
     G%NElec=G%NElec-G%TotCh
     ! We need to correct number of alpha/beta electron.
@@ -550,94 +430,112 @@ CONTAINS
     G%NBeta=(G%NElec-NUnPEl)/2
     !write(*,*) 'UnSetAtomCharges: NElec',G%NElec,' NAlph',G%NAlph,' NBeta',G%NBeta
   END SUBROUTINE UnSetAtomCharges
-  !
-  !-------------------------------------------------------------------
-  !
-  SUBROUTINE GetRefXYZ(HFileIn,RefXYZ,iCLONE)
-    TYPE(FileNames)      :: Nams
-    CHARACTER(LEN=*)     :: HFileIn
-    INTEGER              :: HDFFileID,iCLONE
-    TYPE(DBL_RNK2)       :: RefXYZ
-    !
-    HDFFileID=OpenHDF(HFileIn)
-    HDF_CurrentID= &
-         OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
-    CALL Get(RefXYZ,'cartesians',Tag_O=TRIM(IntToChar(1)))
-    CALL CloseHDFGroup(HDF_CurrentID)
-    CALL CloseHDF(HDFFileID)
-  END SUBROUTINE GetRefXYZ
-  !
-  !-------------------------------------------------------------------
-  !
-  SUBROUTINE CollectPast(RefXYZ,SRStruct,RefStruct,RefGrad,SRDispl, &
-       HFileIn,NatmsLoc,Mem,iGEO,iCLONE)
-    TYPE(DBL_RNK2)   :: SRStruct,RefStruct,RefGrad,SRDispl
-    TYPE(DBL_RNK2)   :: Aux
-    TYPE(PBCInfo)    :: PBC
-    TYPE(DBL_VECT)   :: Vect
-    INTEGER          :: NatmsLoc,Mem,iGEO,iCLONE,NCartS,NatmsS
-    CHARACTER(LEN=*) :: HFileIn
-    INTEGER          :: HDFFileID,ICount,I,J,IStart,NCart,IGeom,K,L
-    REAL(DOUBLE),DIMENSION(:,:) :: RefXYZ
-    !
-    NCart=3*NatmsLoc
-    NatmsS=NatmsLoc-3
-    NCartS=3*NatmsS
-    IStart=iGEO-Mem+1
-    !
-    ! Get GDIIS memory of Cartesian coords and grads
-    !
-    CALL New(SRStruct,(/NCart,Mem/))
-    CALL New(RefStruct,(/NCart,Mem/))
-    CALL New(RefGrad,(/NCart,Mem/))
-    CALL New(SRDispl,(/NCart,Mem/))
-    !
-    CALL New(Vect,NCartS)
-    CALL New(Aux,(/3,NatmsS/))
-    CALL New(PBC)
-    !
-    HDFFileID=OpenHDF(HFileIn)
-    HDF_CurrentID= &
-         OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
-    !
-    DO IGeom=IStart,iGEO
-      ICount=IGeom-IStart+1
-      CALL Get(PBC,Tag_O=TRIM(IntToChar(IGeom)))
-      L=NCartS
-      DO K=1,3
-        DO J=1,3
-          L=L+1
-          RefStruct%D(L,ICount)=PBC%BoxShape%D(J,K)
-          RefGrad%D(L,ICount)=  PBC%LatFrc%D(J,K)
-        ENDDO
-      ENDDO
-      CALL Get(Aux,'Displ',Tag_O=TRIM(IntToChar(IGeom)))
-      CALL CartRNK2ToCartRNK1(Vect%D,Aux%D)
-      DO J=1,NCartS
-        SRStruct%D(J,ICount)=Vect%D(J)
-      ENDDO
-      CALL Get(Aux,'cartesians',Tag_O=TRIM(IntToChar(IGeom)))
-      CALL ConvertToXYZRef(Aux%D,RefXYZ,PBC%Dimen, &
-           BoxShape_O=PBC%BoxShape%D)
-      CALL CartRNK2ToCartRNK1(Vect%D,Aux%D)
-      DO J=1,NCartS
-        RefStruct%D(J,ICount)=Vect%D(J)
-      ENDDO
-      CALL Get(Aux,'gradients',Tag_O=TRIM(IntToChar(IGeom)))
-      CALL CartRNK2ToCartRNK1(Vect%D,Aux%D)
-      DO J=1,NCartS
-        RefGrad%D(J,ICount)=Vect%D(J)
-      ENDDO
+!
+  SUBROUTINE ResetThresholds(cBAS,N,O,G,ReScale)
+    TYPE(FileNames)  :: N
+    TYPE(Options)    :: O
+    TYPE(Geometries) :: G
+    TYPE(TOLS)       :: LocalTols
+    REAL(DOUBLE)     :: ReScale
+    INTEGER          :: cBAS,iCLONE,HDFFileID
+    CHARACTER(LEN=2) :: chBAS
+    !---------------------------------------------------------------------------!
+    LocalTols=O%Thresholds(cBAS)
+    LocalTols%Dist=LocalTols%Dist*ReScale
+    LocalTols%TwoE=LocalTols%TwoE*ReScale
+    !    LocalTols%Trix=LocalTols%Trix*ReScale
+    !---------------------------------------------------------------------------!
+    chBAS=IntToChar(cBAS)
+    HDFFileID=OpenHDF(N%HFile)
+    HDF_CurrentID=HDFFileID
+    DO iCLONE=1,G%Clones
+       HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
+       CALL Put(LocalTols,chBAS)
+       CALL CloseHDFGroup(HDF_CurrentID)
     ENDDO
-    CALL Delete(Aux)
-    CALL Delete(Vect)
-    CALL Delete(PBC)
-    SRDispl%D=SRStruct%D-RefStruct%D
-    !
-    CALL CloseHDFGroup(HDF_CurrentID)
     CALL CloseHDF(HDFFileID)
-  END SUBROUTINE CollectPast
-  !
-  !-------------------------------------------------------------------
-  !
+  END SUBROUTINE ResetThresholds
+!-------------------------------------------------------------------
+!
+   SUBROUTINE GetRefXYZ(HFileIn,RefXYZ,iCLONE)
+     TYPE(FileNames)      :: Nams
+     CHARACTER(LEN=*)     :: HFileIn
+     INTEGER              :: HDFFileID,iCLONE
+     TYPE(DBL_RNK2)       :: RefXYZ
+     !
+     HDFFileID=OpenHDF(HFileIn)
+     HDF_CurrentID= &
+       OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
+     CALL Get(RefXYZ,'cartesians',Tag_O=TRIM(IntToChar(1)))
+     CALL CloseHDFGroup(HDF_CurrentID)
+     CALL CloseHDF(HDFFileID)
+   END SUBROUTINE GetRefXYZ
+!
+!-------------------------------------------------------------------
+!
+   SUBROUTINE CollectPast(RefXYZ,SRStruct,RefStruct,RefGrad,SRDispl, &
+                          HFileIn,NatmsLoc,Mem,iGEO,iCLONE)
+     TYPE(DBL_RNK2)   :: SRStruct,RefStruct,RefGrad,SRDispl
+     TYPE(DBL_RNK2)   :: Aux
+     TYPE(PBCInfo)    :: PBC
+     TYPE(DBL_VECT)   :: Vect
+     INTEGER          :: NatmsLoc,Mem,iGEO,iCLONE,NCartS,NatmsS
+     CHARACTER(LEN=*) :: HFileIn
+     INTEGER          :: HDFFileID,ICount,I,J,IStart,NCart,IGeom,K,L
+     REAL(DOUBLE),DIMENSION(:,:) :: RefXYZ
+     !
+     NCart=3*NatmsLoc
+     NatmsS=NatmsLoc-3
+     NCartS=3*NatmsS
+     IStart=iGEO-Mem+1
+     !
+     ! Get GDIIS memory of Cartesian coords and grads
+     !
+     CALL New(SRStruct,(/NCart,Mem/))
+     CALL New(RefStruct,(/NCart,Mem/))
+     CALL New(RefGrad,(/NCart,Mem/))
+     CALL New(SRDispl,(/NCart,Mem/))
+     !
+     CALL New(Vect,NCartS)
+     CALL New(Aux,(/3,NatmsS/))
+     CALL New(PBC)
+     !
+     HDFFileID=OpenHDF(HFileIn)
+     HDF_CurrentID= &
+       OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
+     !
+     DO IGeom=IStart,iGEO
+       ICount=IGeom-IStart+1
+       CALL Get(PBC,Tag_O=TRIM(IntToChar(IGeom)))
+       L=NCartS
+       DO K=1,3
+         DO J=1,3
+           L=L+1
+           RefStruct%D(L,ICount)=PBC%BoxShape%D(J,K)
+           RefGrad%D(L,ICount)=  PBC%LatFrc%D(J,K)
+         ENDDO
+       ENDDO
+       CALL Get(Aux,'Displ',Tag_O=TRIM(IntToChar(IGeom)))
+       CALL CartRNK2ToCartRNK1(Vect%D,Aux%D)
+       DO J=1,NCartS ; SRStruct%D(J,ICount)=Vect%D(J) ; ENDDO
+       CALL Get(Aux,'cartesians',Tag_O=TRIM(IntToChar(IGeom)))
+       CALL ConvertToXYZRef(Aux%D,RefXYZ,PBC%Dimen, &
+                            BoxShape_O=PBC%BoxShape%D)
+       CALL CartRNK2ToCartRNK1(Vect%D,Aux%D)
+       DO J=1,NCartS ; RefStruct%D(J,ICount)=Vect%D(J) ; ENDDO
+       CALL Get(Aux,'gradients',Tag_O=TRIM(IntToChar(IGeom)))
+       CALL CartRNK2ToCartRNK1(Vect%D,Aux%D)
+       DO J=1,NCartS ; RefGrad%D(J,ICount)=Vect%D(J) ; ENDDO
+     ENDDO
+     CALL Delete(Aux)
+     CALL Delete(Vect)
+     CALL Delete(PBC)
+       SRDispl%D=SRStruct%D-RefStruct%D
+     !
+     CALL CloseHDFGroup(HDF_CurrentID)
+     CALL CloseHDF(HDFFileID)
+   END SUBROUTINE CollectPast
+! 
+!-------------------------------------------------------------------
+!
 END MODULE PunchHDF

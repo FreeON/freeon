@@ -1,34 +1,6 @@
-!------------------------------------------------------------------------------
-!    This code is part of the MondoSCF suite of programs for linear scaling
-!    electronic structure theory and ab initio molecular dynamics.
-!
-!    Copyright (2004). The Regents of the University of California. This
-!    material was produced under U.S. Government contract W-7405-ENG-36
-!    for Los Alamos National Laboratory, which is operated by the University
-!    of California for the U.S. Department of Energy. The U.S. Government has
-!    rights to use, reproduce, and distribute this software.  NEITHER THE
-!    GOVERNMENT NOR THE UNIVERSITY MAKES ANY WARRANTY, EXPRESS OR IMPLIED,
-!    OR ASSUMES ANY LIABILITY FOR THE USE OF THIS SOFTWARE.
-!
-!    This program is free software; you can redistribute it and/or modify
-!    it under the terms of the GNU General Public License as published by the
-!    Free Software Foundation; either version 2 of the License, or (at your
-!    option) any later version. Accordingly, this program is distributed in
-!    the hope that it will be useful, but WITHOUT ANY WARRANTY; without even
-!    the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-!    PURPOSE. See the GNU General Public License at www.gnu.org for details.
-!
-!    While you may do as you like with this software, the GNU license requires
-!    that you clearly mark derivative software.  In addition, you are encouraged
-!    to return derivative works to the MondoSCF group for review, and possible
-!    disemination in future releases.
-!------------------------------------------------------------------------------
-! FAST O(N lg N) COMPUTATION OF THE COULOMB MATRIX
-! Authors:  Matt Challacombe and CJ Tymczak
+!    FAST O(N lg N) COMPUTATION OF THE COULOMB MATRIX
+!    Authors:  Matt Challacombe and CJ Tymczak
 !===============================================================================
-
-#include "MondoConfig.h"
-
 PROGRAM QCTC
   USE DerivedTypes
   USE GlobalScalars
@@ -47,220 +19,304 @@ PROGRAM QCTC
   USE Globals
   USE PBCFarField
   USE JGen
-  USE NuklarE
-  USE MondoLogger
-  USE Utilities
-
-#ifdef PARALLEL
-  USE ParallelQCTC
-  USE FastMatrices
-#endif
-
+  USE NukularE
+  USE Density
+  USE Clock
+  USE TreeWalk
   IMPLICIT NONE
-
-#ifdef PARALLEL
-  TYPE(FastMat),POINTER          :: J
-  REAL(DOUBLE)                   :: TmBegJ,TmEndJ,TmJ
-  TYPE(DBL_VECT)                 :: TmJArr
-  INTEGER                        :: IErr
-  REAL(DOUBLE)                   :: LE_Nuc_Tot
-#else
-  TYPE(BCSR)                     :: J
-#endif
+  TYPE(BCSR)                     :: J,  P
   TYPE(BCSR)                     :: T1,T2
+  TYPE(BCSR)                     :: Dmat,D1,D2
+  TYPE(INT_VECT)                 :: Stat
+  TYPE(HGLL),POINTER             :: RhoHead
+  REAL(DOUBLE)                   :: E_Nuc_Tot,Etot,SdvErrorJ,MaxErrorJ,JMExact,E_PFF,D_PFF
 
-  REAL(DOUBLE)                   :: E_Nuc_Tot,SdvErrorJ,MaxErrorJ,JMExact
-  TYPE(TIME)                     :: TimeMakeJ,TimeMakeTree,TimeNukE
   CHARACTER(LEN=4),PARAMETER     :: Prog='QCTC'
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg
-  TYPE(CRDS)                     :: GM_MM
-  REAL(DOUBLE)                   :: MM_COUL,E_C_EXCL,CONVF
-  INTEGER                        :: I,K,UOUT
-#ifdef PARALLEL
-  ! REAL(DOUBLE),EXTERNAL          :: MondoTimer
-#endif
-  !-------------------------------------------------------------------------------
-  ETimer(:) = Zero
+  INTEGER                        :: I,K,NLink,OldFileID
+
+  REAL(DOUBLE)                   :: QCTC_TotalTime_Start
+
+  TYPE(TIME)                     :: TimeMakeJ,TimeMakeTree,TimeNukE
+
+  !
+  LOGICAL                        :: NoWrap=.FALSE. ! WRAPPING IS ON
+  !------------------------------------------------------------------------------- 
+  QCTC_TotalTime_Start=MTimer()
   ! Start up macro
-  CALL StartUp(Args,Prog,Serial_O=.FALSE.)
-  ! Get basis set and geometry
-  CALL Get(BS,Tag_O=CurBase)
-  CALL Get(GM,Tag_O=CurGeom)
-  ! Allocations
-  CALL NewBraBlok(BS)
-  ! What Action to Take
-  IF(SCFActn=='InkFok')THEN
-    CALL Get(Rho,'DeltaRho',Args,0)
-    CALL Get(RhoPoles,'Delta')
-  ELSE IF(SCFActn=='ForceEvaluation')THEN
-    IF(MMOnly()) THEN
-      CALL Get(Rho,'Rho',Args,Current(1))
-      CALL Get(RhoPoles)
-    ELSE
-#ifdef PARALLEL
-      CALL GetDistrRho('Rho',Args,1)
-#else
-      CALL Get(Rho,'Rho',Args,1,Bcast_O=.TRUE.)
-#endif
-      CALL Get(RhoPoles)
-    ENDIF
+  CALL StartUp(Args,Prog,Serial_O=.TRUE.)
+  NukesOn=.TRUE.
+  ! ---------------------------------------------------------------------------------
+  ! Begin building a density 
+  !
+  ! Chose a density matrix
+  IF(SCFActn=='BasisSetSwitch')THEN
+     ! Get the previous information
+     CALL Get(BS,PrvBase)
+     CALL Get(GM,CurGeom)
+     CALL SetThresholds(PrvBase)
+     CALL Get(BSiz,'atsiz',PrvBase)
+     CALL Get(OffS,'atoff',PrvBase)
+     CALL Get(NBasF,'nbasf',PrvBase)
+     CALL Get(Dmat,TrixFile('D',Args,-1))
+  ELSEIF(SCFActn=='Restart'.OR. SCFActn=='RestartBasisSwitch')THEN
+     ! Get the current geometry from the current HDF first
+     CALL Get(GM,CurGeom)
+     ! then close current group and HDF
+     CALL CloseHDFGroup(H5GroupID)
+     CALL CloseHDF(HDFFileID)
+     ! and open the old group and HDF
+     HDF_CurrentID=OpenHDF(Restart)
+     OldFileID=HDF_CurrentID
+     CALL New(Stat,3)
+     CALL Get(Stat,'current_state')
+     HDF_CurrentID=OpenHDFGroup(HDF_CurrentID,"Clone #"//TRIM(IntToChar(MyClone)))
+     ! Get old basis set stuff
+     SCFCycl=TRIM(IntToChar(Stat%I(1)))
+     CurBase=TRIM(IntToChar(Stat%I(2)))
+     CurGeom=TRIM(IntToChar(Stat%I(3)))
+     CALL Get(BS,CurBase)
+     ! Compute a sparse matrix blocking scheme for the old BS
+     CALL BlockBuild(GM,BS,BSiz,OffS)
+     NBasF=BS%NBasF
+     ! Close the old hdf up 
+     CALL CloseHDFGroup(HDF_CurrentID)
+     CALL CloseHDF(OldFileID)
+     ! Reopen current group and HDF
+     HDFFileID=OpenHDF(H5File)
+     H5GroupID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(MyClone)))
+     HDF_CurrentID=H5GroupID
+     CALL Get(Dmat,TrixFile('D',Args,0))
   ELSE
-#ifdef PARALLEL
-    CALL GetDistrRho('Rho',Args,0)
-#else
-    CALL Get(Rho,'Rho',Args,0,Bcast_O=.TRUE.)
-#endif
-    CALL Get(RhoPoles)
-  ENDIF
-  ! Set thresholds local to QCTC (for PAC and MAC)
+     ! Get the current information
+     CALL Get(BS,CurBase)
+     CALL Get(GM,CurGeom)
+     IF(SCFActn=='InkFok')THEN
+        CALL Get(D1,TrixFile('D',Args,-1))
+        CALL Get(D2,TrixFile('D',Args,0))
+        CALL Multiply(D1,-One)
+        CALL Add(D1,D2,DMat)
+        IF(HasHF(ModelChem))THEN                
+           CALL Filter(D1,DMat)
+           CALL Put(D1,TrixFile('DeltaD',Args,0))
+        ENDIF
+        CALL Delete(D1)
+        CALL Delete(D2)
+     ELSEIF(SCFActn=='ForceEvaluation')THEN
+        CALL Get(Dmat,TrixFile('D',Args,1))
+     ELSEIF(SCFActn=='StartResponse')THEN
+        CALL Halt('MakeRho: SCFActn cannot be equal to <StartResponse>')
+     ELSEIF(SCFActn=='FockPrimeBuild')THEN
+       NukesOn=.FALSE.
+        CALL Get(Dmat,TrixFile('DPrime'//TRIM(Args%C%C(3)),Args,0))
+     ELSEIF(SCFActn=='TD-SCF')THEN
+        NukesOn=.FALSE.
+        CALL Get(Dmat,TrixFile(Args%C%C(3),Args,0))
+     ELSEIF(SCFActn/='Core')THEN
+        ! Default
+        CALL Get(Dmat,TrixFile('D',Args,0))
+     ENDIF
+  ENDIF 
+  ! Set thresholds local to the density build
   CALL SetLocalThresholds(Thresholds%TwoE)
-  ! Potentially overide local QCTC thresholds
-  IF(Args%NI==8)THEN
-    TauPAC=1D1**(-Args%I%I(7))
-    TauMAC=1D1**(-Args%I%I(8))
-    CALL OpenASCII(OutFile,Out)
-    Mssg=TRIM(ProcessName('QCTC'))//' TauPAC = '//TRIM(DblToShrtChar(TauPAC))
-    WRITE(Out,*)TRIM(Mssg)
-    Mssg=TRIM(ProcessName('QCTC'))//' TauMAC = '//TRIM(DblToShrtChar(TauMAC))
-    WRITE(Out,*)TRIM(Mssg)
-    CLOSE(Out)
-  ELSE
-    CALL OpenASCII(InpFile,Inp)
-    IF(OptDblQ(Inp,'TauPAC',TauPAC))THEN
-      Mssg=TRIM(ProcessName('QCTC'))//' TauPAC = '//TRIM(DblToShrtChar(TauPAC))
-      CALL OpenASCII(OutFile,Out)
-      WRITE(Out,*)TRIM(Mssg)
-      CLOSE(Out)
-    ENDIF
-    IF(OptDblQ(Inp,'TauMAC',TauMAC))THEN
-      Mssg=TRIM(ProcessName('QCTC'))//' TauMAC = '//TRIM(DblToShrtChar(TauMAC))
-      CALL OpenASCII(OutFile,Out)
-      WRITE(Out,*)TRIM(Mssg)
-      CLOSE(Out)
-    ENDIF
-    CLOSE(Inp)
+  ! -------------------------------------------------------------------------
+  ! Build the density
+  Density_Time_Start=MTimer()
+  ! ------------------------------------------------------------------------- 
+  ! RhoHead is the start of a linked density list
+  ALLOCATE(RhoHead)
+  RhoHead%LNum=0
+  ! Here, the LL is filled out
+  CALL MakeRhoList(GM,BS,DMat,NLink,RhoHead,'QCTC',NoWrap_O=NoWrap)
+  ! Add in the nuclear charges only in certain cases
+  IF(NukesOn)THEN !.OR.SCFActn/='InkFok'.AND.SCFActn/='StartResponse'.AND.SCFActn/='DensityPrime')THEN
+     CALL AddNukes(GM,RhoHead,NoWrap)
+     NLink=NLink+GM%NAtms
   ENDIF
+  ! Load density into arrays and delete the linked list
+  CALL Collate(GM,RhoHead,Rho,'QCTC',RhoPoles,NLink)
+  ! Delete is broken on some compilers, avoid for now
+  !  CALL DeleteHGLL(RhoHead)
+  ! -------------------------------------------------------------------------
+  Density_Time=MTimer()-Density_Time_Start
+  ! Done building density
+  ! ------------------------------------------------------------------------- 
+  ! Take care of some micilaneous book keeping
+  ! ------------------------------------------------------------------------- 
+  ! Set some values of the angular symmetry for use in computing the Lorentz field
+  MaxPFFFEll=GM%PBC%PFFMaxEll
+  ! Local expansion order of the multipoles to use in the tree
+  MaxPoleEll=MIN(2*BS%NASym+6,MaxPFFFEll)
+  IF(MaxPoleEll<2*(BS%NASym+1)) &
+     CALL Halt('Bombed in QCTC. Please set PFFMaxEll larger ')
+  ! Find the total energy from past calculations
+  ! Over-ride initialization to big_dbl in punchhdf, so that
+  ! PFF is computed correctly in PBCFarFieldSetUp
+  IF(SCFCycl=='0'.AND.CurGeom=='1')THEN
+     ETot=1D2
+  ELSE
+     CALL Get(Etot,'Etot')
+  ENDIF
+  ! Now that we are done with the density, lets make sure we have the 
+  ! current basis set, matrix block sizes etc:  
+  CALL Get(BS,CurBase)
+  CALL Get(BSiz,'atsiz',CurBase)
+  CALL Get(OffS,'atoff',CurBase)
+  CALL Get(NBasF,'nbasf',CurBase)
+  ! Set space for bra blocking
+  CALL NewBraBlok(BS)
+  ! Thresholds local to J matrix build (may be different from those used to build density)
+  CALL SetThresholds(CurBase)
+  CALL SetLocalThresholds(Thresholds%TwoE)
+  ! Initialize addressing for tensor contraction loops
+  CALL TensorIndexingSetUp()
+  ! Setup global arrays for computation of multipole tensors ...
+  CALL MultipoleSetUp()
+  ! Initialize some counters
+  MaxTier=0
+  RhoLevel=0
+  PoleNodes=0
+  ! Initialize the root node   
+  CALL NewPoleNode(PoleRoot,0)
   ! Initialize the auxiliary density arrays
   CALL InitRhoAux
-  ! Setup global arrays for computation of multipole tensors
-  CALL MultipoleSetUp()
+  ! Here we set the max multipole expansion relative
+  ! to the max angular symmetry
+  NInts=0
+  NPrim=0
+  NFarAv=0
+  NNearAv=0
+  ! ------------------------------------------------------------------------- 
+  ! Done with book keeping.  
+  ! ------------------------------------------------------------------------- 
+  ! Now build the multipole tree
+  TreeMake_Time_Start=MTimer()
+  ! ------------------------------------------------------------------------- 
   ! Build the global PoleTree representation of the total density
-  CALL Elapsed_Time(TimeMakeTree,'Init')
-#ifdef PARALLEL
-  CALL ParaRhoToPoleTree
-#else
   CALL RhoToPoleTree
-#endif
-  CALL Elapsed_TIME(TimeMakeTree,'Accum')
-#ifdef PARALLEL
-  CALL EqualTimeSetUp()
-#endif
-  ! Set the electrostatic background
-  CALL PBCFarFieldSetUp(PoleRoot,GM)
+  ! Set up the crystal field     
+
+
+  CALL PBCFarFieldSetUp(GM,Rho,'QCTC',MaxPFFFEll,Etot)
   ! Delete the auxiliary density arrays
   CALL DeleteRhoAux
   ! Delete the Density
-  CALL Delete(Rho)
-  ! Allocate J
-#ifdef PARALLEL
-  CALL New_FASTMAT(J,0,(/0,0/))
-#else
-  CALL New(J)
-#endif
+  !  CALL Delete(Rho)
+  ! ------------------------------------------------------------------------- 
+  TreeMake_Time=MTimer()-TreeMake_Time_Start
+  ! Done making the pole-tree
+  ! -------------------------------------------------------------------------
   ! Compute the Coulomb matrix J in O(N Lg N)
   CALL Elapsed_Time(TimeMakeJ,'Init')
-#ifdef PARALLEL
-  TmBegJ = MondoTimer()
-#endif
-  CALL MakeJ(J)
+  JWalk_Time=0D0
+  Integral_Time=0D0
+  Multipole_Time=0D0
+  ALLOCATE(NNearCount(1:CS_IN%NCells))
+  NNearCount=0D0
+  ! -------------------------------------------------------------------------
+  CALL New(J) 
+  CALL MakeJ(J,NoWrap_O=NoWrap) ! <<<<<<<<<
+  ! -------------------------------------------------------------------------
   CALL Elapsed_TIME(TimeMakeJ,'Accum')
-#ifdef PARALLEL
-  TmEndJ = MondoTimer()
-  TmJ = TmEndJ - TmBegJ
-#endif
-  CALL Elapsed_TIME(TimeMakeJ,'Accum')
-#ifdef PARALLEL
-  IF(SCFActn=='InkFok') THEN
-    STOP 'InkFok in PARALLEL QCTC is not supported.'
-  ENDIF
-  CALL Redistribute_FASTMAT(J)
-  CALL ET_Part
-  CALL Set_BCSR_EQ_DFASTMAT(T1,J) ! T1 is allocated in Set_BCSR...
-#else
+  ! Done making Coulomb matrix
+  ! -------------------------------------------------------------------------
   IF(SCFActn=='InkFok')THEN
-    ! Add in correction if incremental J build
-    CALL New(T1)
-    CALL New(T2)
-    CALL Get(T1,TrixFile('J',Args,-1))
-    CALL Add(T1,J,T2)
-    CALL Filter(T1,T2)
-    CALL Delete(T2)
+     ! Add in correction if incremental J build
+     CALL New(T1)
+     CALL New(T2)
+     CALL Get(T1,TrixFile('J',Args,-1))
+     CALL Add(T1,J,T2)
+     CALL Filter(T1,T2)
+     CALL Delete(T2)
   ELSE
-    CALL Filter(T1,J)
+     CALL Filter(T1,J)
   ENDIF
-#endif
   ! Put J to disk
   IF(SCFActn=='FockPrimeBuild'.OR.SCFActn=='StartResponse')THEN
-    CALL Put(T1,TrixFile('JPrime'//TRIM(Args%C%C(3)),Args,0))
+     CALL Put(T1,TrixFile('JPrime'//TRIM(Args%C%C(3)),Args,0))
   ELSE
-    CALL Put(T1,TrixFile('J',Args,0))
+     CALL Put(T1,TrixFile('J',Args,0))
   ENDIF
-  ! Compute the nuclear-total electrostatic energy in O(N Lg N)
-  IF(SCFActn=='InkFok')THEN
-    CALL Get(E_Nuc_Tot,'E_NuclearTotal')
-    CALL Elapsed_Time(TimeNukE,'Init')
-    E_Nuc_Tot=E_Nuc_Tot+NukE(GM)
-    CALL Elapsed_Time(TimeNukE,'Accum')
+  ! Nuclear-total density Coulomb interaction
+  IF(NukesOn)THEN
+     IF(SCFActn=='InkFok')THEN
+        CALL Get(E_Nuc_Tot,'E_NuclearTotal')
+        CALL Elapsed_Time(TimeNukE,'Init')
+        E_Nuc_Tot=E_Nuc_Tot+NukE(GM,Rho,NoWrap)
+        CALL Elapsed_Time(TimeNukE,'Accum')
+     ELSE     
+        CALL Elapsed_Time(TimeNukE,'Init')
+        E_Nuc_Tot=NukE(GM,Rho,NoWrap)
+        CALL Elapsed_Time(TimeNukE,'Accum')
+     ENDIF
   ELSE
-    CALL Elapsed_Time(TimeNukE,'Init')
-#ifdef PARALLEL
-    CALL NukE_ENPart(GM)
-    LE_Nuc_Tot=NukE(GM)
-    E_Nuc_Tot = Reduce(LE_Nuc_Tot)
-#else
-    E_Nuc_Tot=NukE(GM)
-#endif
-    CALL Elapsed_Time(TimeNukE,'Accum')
+     E_Nuc_Tot=Zero
   ENDIF
+  !
   CALL Put(E_Nuc_Tot,'E_NuclearTotal',Stats_O=Current)
+  !
   !-------------------------------------------------------------------------------
   ! Printing
-  IF(SCFActn=='FockPrimeBuild'.OR.SCFActn=='StartResponse')THEN
-    CALL PChkSum(T1,'J'//TRIM(Args%C%C(3))//'['//TRIM(SCFCycl)//']',Prog)
-    CALL PPrint( T1,'J'//TRIM(Args%C%C(3))//'['//TRIM(SCFCycl)//']')
-    CALL Plot(   T1,'J'//TRIM(Args%C%C(3))//'['//TRIM(SCFCycl)//']')
-  ELSE
-    CALL PChkSum(T1,'J['//TRIM(SCFCycl)//']',Prog)
-    CALL PPrint( T1,'J['//TRIM(SCFCycl)//']')
-    CALL Plot(   T1,'J['//TRIM(SCFCycl)//']')
-  ENDIF
-  ! Print Periodic Info
-  CALL Print_Periodic(GM,Prog)
-#ifdef PARALLEL
-  CALL Delete_FastMat1(J)
-#else
-  CALL Delete(J)
-#endif
-  CALL Delete(T1)
-  CALL Delete(BS)
-  CALL Delete(GM)
-  CALL Delete(Args)
-  CALL Delete(RhoPoles)
-#ifdef PARALLEL
-  CALL New(TmJArr,NPrc)
-  CALL MPI_Gather(TmJ,1,MPI_DOUBLE_PRECISION,TmJArr%D(1),1,MPI_DOUBLE_PRECISION,0,MONDO_COMM,IErr)
-  IF(MyID == ROOT) THEN
-    ! Output needs a lot of work, and should not go to STDOUT
-    ! Also, these statistics were written long ago by
-    ! Elapsed_TIME(T,Init_O,Proc_O) in PrettyPrint.  Why create
-    ! another routine to do this????
-    ! CALL PImbalance(TmJArr,NPrc,Prog_O='MakeJ')
-  ENDIF
-  CALL Delete(TmJArr)
-#endif
-  ! didn't count flops, any accumulation is residual from matrix routines
-  PerfMon%FLOP=Zero
+  !-------------------------------------------------------------------------------
+!!$  DO I=CS_IN%NCells,MAX(1,CS_IN%NCells-27)
+!!$     WRITE(*,55)I,100D0*NNearCount(I)/(NLeaf*NPrim)
+!!$55   FORMAT('Cell# ',I2,", % NF = ",F6.2)
+!!$  ENDDO
+!!$  WRITE(*,11)' Density_Time  = ',Density_Time
+!!$  WRITE(*,11)' TreeMake_Time = ',TreeMake_Time
+!!$  WRITE(*,11)' JWalking_Time = ',JWalk_Time
+!!$  WRITE(*,11)' Integral_Time = ',Integral_Time
+!!$  WRITE(*,11)' Multipol_Time = ',Multipole_Time
+!!$  WRITE(*,11)' Total J Time  = ',Decompose_Time+TreeMake_Time+JWalk_Time+Multipole_Time+Integral_Time
+!!$  WRITE(*,11)' Total JWalks  = ',DBLE(NPrim)
+!!$  WRITE(*,11)' Av  Ints/Prim = ',DBLE(NInts)/DBLE(NPrim)
+!!$  WRITE(*,11)' Av  # NF/Prim = ',DBLE(NNearAv)/DBLE(NPrim)
+!!$  WRITE(*,11)' Av  # FF/Prim = ',DBLE(NFarAv)/DBLE(NPrim)
+!!$  WRITE(*,11)' Time per INode= ',Integral_Time/DBLE(NNearAv)
+!!$  WRITE(*,11)' Time per MNode= ',Multipole_Time/DBLE(NFarAv)
+!!$11 FORMAT(A20,D12.6)
 
-  ! Shutdown
+  PerfMon%FLOP=Zero 
+  CALL MondoLog(DEBUG_MAXIMUM,Prog,' Coulomb Energy      = <'//TRIM(DblToChar(E_Nuc_Tot+Trace(DMat,T1)))//'>')
+  !
+  CALL MondoLog(DEBUG_MAXIMUM,Prog,' CPUSec='//TRIM(DblToMedmChar(MTimer()-QCTC_TotalTime_Start)) & 
+                               //'; RhoBld='//TRIM(DblToShrtChar(Density_Time))                  & 
+                               //', TreeBld='//TRIM(DblToShrtChar(TreeMake_Time))) 
+  CALL MondoLog(DEBUG_MAXIMUM,Prog,' Walk='//TRIM(DblToShrtChar(JWalk_Time))                     &
+                                //', Ints='//TRIM(DblToShrtChar(Integral_Time))                  &
+                                //', Mults='//TRIM(DblToShrtChar(Multipole_Time)))
+
+
+  IF(CS_IN%NCells>1)THEN
+     CALL MondoLog(DEBUG_MAXIMUM,Prog, &
+                   ' % Ints in UC= '//TRIM(FltToShrtChar(1D2*NNearCount(CS_IN%NCells)/(NLeaf*NPrim))) &
+                 //', % Total Ints = '//TRIM(FltToShrtChar(                                &
+                     1D2*SUM(NNearCount(1:CS_IN%NCells))/(NLeaf*NPrim*CS_IN%NCells) )))
+  ELSE
+     CALL MondoLog(DEBUG_MAXIMUM,Prog, &
+                   ' % NFInts = '//TRIM(FltToShrtChar(1D2*NNearCount(1)/(NLeaf*NPrim))))
+  ENDIF
+
+  IF(SCFActn=='FockPrimeBuild'.OR.SCFActn=='StartResponse')THEN
+     CALL PChkSum(T1,'J'//TRIM(Args%C%C(3))//'['//TRIM(SCFCycl)//']',Prog)
+     CALL PPrint( T1,'J'//TRIM(Args%C%C(3))//'['//TRIM(SCFCycl)//']')
+     CALL Plot(   T1,'J'//TRIM(Args%C%C(3))//'['//TRIM(SCFCycl)//']')
+  ELSE
+     CALL PChkSum(T1,'J['//TRIM(SCFCycl)//']',Prog)
+     CALL PPrint( T1,'J['//TRIM(SCFCycl)//']')!,Unit_O=6)
+     CALL Plot(   T1,'J['//TRIM(SCFCycl)//']')
+  ENDIF
+
+!!$
+!!$  CALL Delete(J)
+!!$  CALL Delete(T1)
+!!$  CALL Delete(BS)
+!!$  CALL Delete(GM)
+!!$  CALL Delete(Args)
+!!$  CALL Delete(RhoPoles)
+  !-------------------------------------------------------------------------------
+  ! All done
+  !-------------------------------------------------------------------------------
   CALL ShutDown(Prog)
+  !
 END PROGRAM QCTC

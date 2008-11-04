@@ -29,6 +29,7 @@ FreeON_SOURCES = \
   ParseInput.f90 \
   PunchHDF.f90 \
   Overlay.f90 \
+  RQI.f90 \
   PrintParsed.f90 \
   SCFKeys.f90 \
   SCFs.f90 \
@@ -58,166 +59,50 @@ CPPMISC = -DNEB2
 FreeON_LINK = $(FCLINK)
 
 # Dependencies.
-ParseCommands.o : \
-  ControlStructures.o \
-  $(top_srcdir)/MondoConfig.h
 
-ParseOptions.o : \
-  Numerics.o \
-  ConflictDetect.o \
-  OptionKeys.o \
-  ControlStructures.o \
-  $(top_srcdir)/MondoConfig.h
-
-ParseGeometries.o : \
-  ConflictDetect.o \
-  OptionKeys.o \
-  DynamicsKeys.o \
-  GeometryKeys.o \
-  ControlStructures.o \
-  ls_rmsd.o \
-  NEB.o
-
-ParseExtraCoords.o : \
-  ControlStructures.o \
-  OptionKeys.o \
-  GeometryKeys.o \
-  ParseGeometries.o \
-  InCoords.o \
-  Massage.o
-
-ParseGeomOpt.o : \
-  GeomOptKeys.o \
-  ControlStructures.o \
-  OptionKeys.o
-
-ParseProperties.o : \
-  ControlStructures.o
-
-ParseInput.o : \
-  Massage.o \
-  ParseBasis.o \
-  ParseOptions.o \
-  ParseCommands.o \
-  ParseDynamics.o \
-  ParsePeriodic.o \
-  ParseGeometries.o \
-  ControlStructures.o \
-  ParseParallel.o \
-  ParseGeomOpt.o \
-  ParseExtraCoords.o \
-  ParseProperties.o
-
-ParsePeriodic.o : \
-  OptionKeys.o \
-  PeriodicKeys.o \
-  ControlStructures.o
-
-ParseParallel.o : \
-  ParallelKeys.o \
-  ControlStructures.o
-
-ParseBasis.o : \
-  ControlStructures.o
-
-ParseDynamics.o : \
-  DynamicsKeys.o \
-  ControlStructures.o \
-  OptionKeys.o
-
-ConflictDetect.o : \
-  ControlStructures.o
-
-Overlay.o : \
-  PunchHDF.o
-
-MDynamics.o : \
-  $(top_srcdir)/MondoConfig.h \
-  SCFs.o \
-  Numerics.o \
-  ControlStructures.o \
-  GeomOptKeys.o \
-  PunchHDF.o \
-  DynamicsKeys.o
-
-Response.o : \
-  SCFKeys.o \
-  Overlay.o \
-  PunchHDF.o \
-  OptionKeys.o \
-  ControlStructures.o \
-  NEB.o \
-  SCFs.o
-
-Hessian.o : \
-  InCoords.o \
-  GeomOptKeys.o \
-  PunchHDF.o \
-  ControlStructures.o
-
-MonteCarlo.o : \
-  SCFs.o \
-  ControlStructures.o \
-  GeomOptKeys.o \
-  PunchHDF.o \
-  DynamicsKeys.o \
-  MDynamics.o
-
-Optimizer.o : \
-  SCFs.o \
-  QUICCA.o
-
-FreeON.o : \
-  $(top_srcdir)/MondoConfig.h \
-  SCFs.o \
-  Response.o \
-  PunchHDF.o \
-  Optimizer.o \
-  ParseInput.o \
-  ZippyQuote.o \
-  PrintParsed.o \
-  MDynamics.o \
-  MonteCarlo.o
-
-QUICCA.o : \
-  PunchHDF.o \
-  Hessian.o
-
-ZippyQuote.o : \
-  ControlStructures.o
-
-NEB.o : \
-  ls_rmsd.o \
-  ControlStructures.o
-
-Massage.o : \
-  OptionKeys.o \
-  DynamicsKeys.o \
-  GeometryKeys.o \
-  ControlStructures.o
-
-SCFs.o : \
-  SCFKeys.o \
-  Overlay.o \
-  DynamicsKeys.o \
-  PunchHDF.o \
-  Numerics.o \
-  OptionKeys.o \
-  ControlStructures.o \
-  NEB.o \
-  $(top_srcdir)/MondoConfig.h
-
-InCoords.o : \
-  ControlStructures.o
-
-ParseGeomOpt.o : \
-  GeomOptKeys.o
-
-PunchHDF.o : \
-  ControlStructures.o \
-  OptionKeys.o
-
-PrintParsed.o : \
-  ControlStructures.o \
-  $(top_srcdir)/MondoConfig.h \
-  $(top_srcdir)/MondoLocalVersion.h
+ConflictDetect.o: ControlStructures.o
+ControlStructures.o:
+FreeON.o: MDynamics.o MonteCarlo.o Optimizer.o ParseInput.o PrintParsed.o \
+	PunchHDF.o RQI.o Response.o SCFs.o ZippyQuote.o
+FreeON.f90-memory.o: MDynamics.o MonteCarlo.o Optimizer.o ParseInput.o \
+	PrintParsed.o PunchHDF.o RQI.o Response.o SCFs.o ZippyQuote.o
+FreeON.f90-preprocessed.o: MDynamics.o MonteCarlo.o Optimizer.o ParseInput.o \
+	PrintParsed.o PunchHDF.o RQI.o Response.o SCFs.o ZippyQuote.o
+GeomOptKeys.o:
+Hessian.o: ControlStructures.o GeomOptKeys.o InCoords.o PunchHDF.o
+InCoords.o: ControlStructures.o
+Massage.o: ControlStructures.o DynamicsKeys.o GeometryKeys.o OptionKeys.o
+MDynamics.o: ControlStructures.o DynamicsKeys.o GeomOptKeys.o Numerics.o \
+	PunchHDF.o SCFs.o
+MLP.o:
+MonteCarlo.o: ControlStructures.o DynamicsKeys.o GeomOptKeys.o MDynamics.o \
+	Numerics.o PunchHDF.o SCFs.o
+NEB.o: ControlStructures.o ls_rmsd.o
+Numerics.o:
+Optimizer.o: ControlStructures.o GeomOptKeys.o Hessian.o InCoords.o \
+	Numerics.o PunchHDF.o QUICCA.o SCFs.o
+Overlay.o: ControlStructures.o PunchHDF.o
+ParseBasis.o: ControlStructures.o
+ParseCommands.o: ControlStructures.o
+ParseDynamics.o: ControlStructures.o DynamicsKeys.o OptionKeys.o
+ParseExtraCoords.o: ControlStructures.o GeometryKeys.o InCoords.o Massage.o \
+	OptionKeys.o ParseGeometries.o
+ParseGeometries.o: ConflictDetect.o ControlStructures.o DynamicsKeys.o \
+	GeometryKeys.o NEB.o OptionKeys.o ls_rmsd.o
+ParseGeomOpt.o: ControlStructures.o GeomOptKeys.o OptionKeys.o
+ParseInput.o: ControlStructures.o Massage.o ParseBasis.o ParseCommands.o \
+	ParseDynamics.o ParseExtraCoords.o ParseGeomOpt.o ParseGeometries.o \
+	ParseOptions.o ParseParallel.o ParsePeriodic.o ParseProperties.o
+ParseOptions.o: ConflictDetect.o ControlStructures.o Numerics.o OptionKeys.o
+ParseParallel.o: ControlStructures.o ParallelKeys.o
+ParsePeriodic.o: ControlStructures.o OptionKeys.o PeriodicKeys.o
+ParseProperties.o: ControlStructures.o
+PrintParsed.o: ControlStructures.o
+PunchHDF.o: ControlStructures.o OptionKeys.o
+QUICCA.o: ControlStructures.o Hessian.o InCoords.o PunchHDF.o
+Response.o: ControlStructures.o NEB.o Numerics.o OptionKeys.o Overlay.o \
+	PunchHDF.o SCFKeys.o SCFs.o
+RQI.o: ControlStructures.o OptionKeys.o Overlay.o PunchHDF.o
+SCFs.o: ControlStructures.o DynamicsKeys.o NEB.o Numerics.o OptionKeys.o \
+	Overlay.o PunchHDF.o SCFKeys.o
+ZippyQuote.o: ControlStructures.o
