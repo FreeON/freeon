@@ -87,8 +87,14 @@ CONTAINS
     INTEGER                       :: NModls,I
     INTEGER,   DIMENSION(MaxSets) :: Models
     !-------------------------------------------------------------------------!
-    CALL MondoLog(DEBUG_NONE, "ParseModelChems", "parsing models")
+!    CALL MondoLog(DEBUG_NONE, "ParseModelChems", "parsing models")
     NModls=0
+    IF(OptKeyLocQ(Inp,MODEL_OPTION,MODEL_Hartree,MaxSets,NLoc,Location))THEN
+       NModls=NModls+NLoc
+       DO I=1,NLoc
+          Models(Location(I))=NO_EXCHANGE
+       ENDDO
+    ENDIF
     IF(OptKeyLocQ(Inp,MODEL_OPTION,MODEL_ExactX,MaxSets,NLoc,Location))THEN
       NModls=NModls+NLoc
       DO I=1,NLoc
@@ -474,7 +480,9 @@ CONTAINS
     ELSE
       PFlags%Key=DEBUG_MINIMUM
     ENDIF
-
+    ! And, by the way, set the global key for front end (FreeON)
+    PrintFlags%Key=PFlags%Key
+    !
     IF(OptKeyQ(Inp,GLOBAL_DEBUG,DBG_MATRICES) )THEN
       PFlags%Mat=DEBUG_MATRICES
     ELSEIF(OptKeyQ(Inp,GLOBAL_DEBUG,PLT_MATRICES) )THEN
@@ -482,13 +490,12 @@ CONTAINS
     ELSE
       PFlags%Mat=DEBUG_NONE
     ENDIF
-
     IF(OptKeyQ(Inp,GLOBAL_DEBUG,DBG_CHKSUMS))THEN
       PFlags%Chk=DEBUG_CHKSUMS
     ELSE
       PFlags%Chk=DEBUG_NONE
     ENDIF
-
+    !
     IF(OptKeyQ(Inp,GLOBAL_DEBUG,DBG_MMA_STYLE) )THEN
       PFlags%Fmt=DEBUG_MMASTYLE
     ELSEIF(OptKeyQ(Inp,GLOBAL_DEBUG,DBG_FLT_STYLE) )THEN
@@ -548,7 +555,7 @@ CONTAINS
            Names%GFile=TRIM(Names%GFile)//'.xyz'
     ENDIF
 
-    CALL MondoLog(DEBUG_NONE, "ParsePrintFlags", "PrintFlags%Key = "//TRIM(IntToChar(PFlags%Key)))
+!!    CALL MondoLog(DEBUG_NONE, "ParsePrintFlags", "PrintFlags%Key = "//TRIM(IntToChar(PFlags%Key)))
   END SUBROUTINE ParsePrintFlags
   !===============================================================================================
   !
@@ -660,8 +667,8 @@ CONTAINS
       MaxSCF = HAVE_MAX_SCF
     ENDIF
 
-    CALL MondoLog(DEBUG_NONE, "ParseSCF", "MinSCF = "//TRIM(IntToChar(MinSCF)))
-    CALL MondoLog(DEBUG_NONE, "ParseSCF", "MaxSCF = "//TRIM(IntToChar(MaxSCF)))
+!    CALL MondoLog(DEBUG_NONE, "ParseSCF", "MinSCF = "//TRIM(IntToChar(MinSCF)))
+!    CALL MondoLog(DEBUG_NONE, "ParseSCF", "MaxSCF = "//TRIM(IntToChar(MaxSCF)))
   END SUBROUTINE ParseSCF
   !===============================================================================================
   !

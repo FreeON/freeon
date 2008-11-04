@@ -71,8 +71,9 @@ PROGRAM Make1E
      CurGeom=TRIM(IntToChar(Stat%I(3)))
      CurBase=TRIM(IntToChar(Stat%I(2)))
      CALL Get(GM,Tag_O=CurGeom)
-     CALL Delete(CS_OUT%CellCarts)
-     CALL SetCellNumber(GM,CS_OUT)
+     ! Why would we want to recompute the outer cells?  
+     !     CALL Delete(CS_OUT%CellCarts)
+     !     CALL SetCellNumber(GM,CS_OUT)
      ! Close the old hdf up 
      CALL CloseHDFGroup(HDF_CurrentID)
      CALL CloseHDF(OldFileID)

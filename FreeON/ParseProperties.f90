@@ -57,10 +57,10 @@ MODULE ParseProperties
 ! PRIVATE DECLARATIONS
 !---------------------------------------------------------------------------------
   !PRIVATE :: 
-  !
   CHARACTER(LEN=*), PARAMETER, PRIVATE :: BEGIN_PROPERTIES  = '<BeginProperties>'
   CHARACTER(LEN=*), PARAMETER, PRIVATE :: END_PROPERTIES    = '<EndProperties>'
   CHARACTER(LEN=*), PARAMETER, PRIVATE :: PROP_RESPONSE     = 'Response'
+  CHARACTER(LEN=*), PARAMETER, PRIVATE :: PROP_TD_SCF       = 'TD-SCF'
   CHARACTER(LEN=*), PARAMETER, PRIVATE :: PROP_STATIC_ALPHA = 'StcAlpha'
   CHARACTER(LEN=*), PARAMETER, PRIVATE :: PROP_STATIC_BETA  = 'StcBeta'
   CHARACTER(LEN=*), PARAMETER, PRIVATE :: PROP_STATIC_GAMMA = 'StcGamma'
@@ -116,6 +116,11 @@ CONTAINS
     LOGICAL, DIMENSION(10) :: ArrTmpG
     CHARACTER(LEN=*), DIMENSION(3), PARAMETER :: Cart=(/'X','Y','Z'/)
     !-------------------------------------------------------------------
+    ! Look for TD-SCF
+    IF(OptKeyQ(Inp,PROP_RESPONSE,PROP_TD_SCF)) THEN
+       R%TD_SCF = .TRUE.
+       R%StcAlpha = .FALSE.
+    ENDIF
     !
     ! Look for Static Polarizability.
     IF(OptKeyQ(Inp,PROP_RESPONSE,PROP_STATIC_ALPHA)) THEN

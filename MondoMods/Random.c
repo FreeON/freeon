@@ -23,7 +23,6 @@
      to return derivative works to the MondoSCF group for review, and possible
      disemination in future releases.
 */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -51,3 +50,5 @@ double random_(void)
 
   return rand()/(double) RAND_MAX;
 }
+
+

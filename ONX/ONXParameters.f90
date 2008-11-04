@@ -50,4 +50,6 @@ MODULE ONXParameters
 
    LOGICAL, SAVE           :: Gradient=.FALSE.
 
+   LOGICAL, SAVE           :: NoSym=.FALSE.
+
 END MODULE ONXParameters

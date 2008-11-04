@@ -240,13 +240,14 @@ CONTAINS
       ENDIF
     ENDIF
 
+    ! OMG,this is anoying!!
     ! Check MemStats.
-    IF(MemStats%Allocs /= MemStats%DeAllocs) THEN
-      CALL MondoLog(DEBUG_NONE, "ShutDown ("//TRIM(Prog)//")", "Possible memory leak. Allocs = " &
-        //TRIM(IntToChar(MemStats%Allocs))//", DeAllocs = " &
-        //TRIM(IntToChar(MemStats%DeAllocs)))
+!    IF(MemStats%Allocs /= MemStats%DeAllocs) THEN
+!      CALL MondoLog(DEBUG_NONE, "ShutDown ("//TRIM(Prog)//")", "Possible memory leak. Allocs = " &
+!        //TRIM(IntToChar(MemStats%Allocs))//", DeAllocs = " &
+!        //TRIM(IntToChar(MemStats%DeAllocs)))
       !CALL Halt("[FIXME]")
-    ENDIF
+!    ENDIF
 
     IF(PrintFlags%Key==DEBUG_MAXIMUM) THEN
       CALL PPrint(MemStats,Prog)
@@ -367,9 +368,18 @@ CONTAINS
     CALL InitMMech()
     ! Load global thresholding values
     CALL SetThresholds(CurBase)
-    ! Load the outer and inner set of lattice vectors
-    CALL Get(CS_IN ,'CS_IN' ,Tag_O=CurBase)
-    CALL Get(CS_OUT,'CS_OUT',Tag_O=CurBase)
+    !
+    ! Note that these cell sets are duplicated in the geometry object CRDS
+    ! They are maintained here ONLY for legacy purposes, and should not be
+    ! used in future programming efforts.  They have been entirely removed
+    ! in QCTC2, and MondoSCF2
+
+    !    CALL Get(CS_IN ,'incells' ,Tag_O=CurBase)
+    !    CALL Get(CS_OUT,'ovcells',Tag_O=CurBase)
+
+    CALL Get(CS_IN ,'incells' ,Tag_O=CurGeom)
+    CALL Get(CS_OUT,'ovcells',Tag_O=CurGeom)
+
   END SUBROUTINE LoadGroupGlobals
   !=========================================================
   ! MARK FAILURE OF PROG

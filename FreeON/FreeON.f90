@@ -39,7 +39,7 @@ PROGRAM MondoSCF
   USE MDynamics
   USE MonteCarlo
   USE MondoLogger
-
+  USE RayleighQuotientIteration
   IMPLICIT NONE
 
   TYPE(Controls) :: C
@@ -68,6 +68,7 @@ PROGRAM MondoSCF
     CASE(GRAD_NO_GRAD)
       CALL SinglePoints(C)
       CALL CPSCF(C)
+      CALL TDSCF(C)
     CASE(GRAD_GO_DOWNHILL)
       CALL Descender(C)
     CASE(GRAD_TS_SEARCH_NEB)
