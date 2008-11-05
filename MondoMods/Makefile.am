@@ -135,59 +135,258 @@ EXTRA_INCLUDES = \
 SOURCES_DEPCHECK = $(libMondoMods_la_SOURCES)
 
 # Dependencies.
+InOut.lo : \
+  DerivedTypes.lo \
+  GlobalScalars.lo \
+  GlobalCharacters.lo \
+  MemMan.lo \
+  Indexing.lo \
+  Parse.lo \
+  SetEq.lo \
+  MondoLogger.lo \
+  Utilities.lo \
+  $(top_srcdir)/MondoConfig.h
 
-AInv.lo: DerivedTypes.lo GlobalCharacters.lo GlobalScalars.lo LinAlg.lo MatFunk.lo \
-	MemMan.lo
-Anneal.lo: MemMan.lo PrettyPrint.lo
-AtomPairs.lo: BoundingBox.lo DerivedTypes.lo GlobalCharacters.lo GlobalObjects.lo \
-	GlobalScalars.lo LinAlg.lo PBC.lo Thresholding.lo
-BasisSetParameters.lo: GlobalCharacters.lo
-BoundingBox.lo: DerivedTypes.lo
-BraBloks.lo: DerivedTypes.lo GlobalScalars.lo McMurch.lo Mechanics.lo \
-	PrettyPrint.lo Thresholding.lo
-CholFact.lo: DerivedTypes.lo GlobalCharacters.lo GlobalObjects.lo GlobalScalars.lo \
-	InOut.lo MemMan.lo MondoLogger.lo ParsingConstants.lo PrettyPrint.lo
-Clock.lo: DerivedTypes.lo MondoMPI.lo
-CWrappers.lo: MondoLogger.lo ParsingConstants.lo
-DerivedTypes.lo: GlobalCharacters.lo GlobalScalars.lo
-FastMat.lo: DerivedTypes.lo GlobalObjects.lo GlobalScalars.lo LinAlg.lo MemMan.lo \
-	MondoMPI.lo Order.lo Thresholding.lo
-Functionals.lo: DerivedTypes.lo Parse.lo ProcessControl.lo
-GlobalCharacters.lo: GlobalScalars.lo
-GlobalObjects.lo: DerivedTypes.lo
-Indexing.lo: DerivedTypes.lo
-InOut.lo: DerivedTypes.lo GlobalCharacters.lo GlobalScalars.lo Indexing.lo \
-	MemMan.lo MondoMPI.lo Parse.lo ProcessControl.lo SetEq.lo Utilities.lo
-LinAlg.lo: Clock.lo DerivedTypes.lo GlobalCharacters.lo GlobalObjects.lo \
-	GlobalScalars.lo InOut.lo LinAlg.lo MemMan.lo MondoMPI.lo Order.lo \
-	PrettyPrint.lo ProcessControl.lo SetEq.lo Thresholding.lo
-Macros.lo: AtomPairs.lo Clock.lo DerivedTypes.lo Functionals.lo GlobalCharacters.lo \
-	GlobalObjects.lo GlobalScalars.lo InOut.lo Mechanics.lo MondoMPI.lo \
-	Parse.lo ParsingConstants.lo PrettyPrint.lo
-MatFunk.lo: DerivedTypes.lo GlobalCharacters.lo GlobalScalars.lo PrettyPrint.lo
-McMurch.lo: DerivedTypes.lo GlobalScalars.lo MemMan.lo
-Mechanics.lo: DerivedTypes.lo GlobalCharacters.lo GlobalObjects.lo \
-	GlobalScalars.lo InOut.lo
-MemMan.lo: DerivedTypes.lo GlobalCharacters.lo GlobalObjects.lo GlobalScalars.lo \
-	ProcessControl.lo
-MondoLogger.lo: GlobalCharacters.lo GlobalObjects.lo ParsingConstants.lo
-MondoMPI.lo: DerivedTypes.lo GlobalObjects.lo GlobalScalars.lo MPIInclude.lo \
-	MemMan.lo Parse.lo ProcessControl.lo
-Order.lo: Anneal.lo DerivedTypes.lo GlobalCharacters.lo GlobalObjects.lo \
-	GlobalScalars.lo MemMan.lo Parse.lo ProcessControl.lo
-Parse.lo: DerivedTypes.lo GlobalCharacters.lo GlobalScalars.lo MemMan.lo \
-	ParsingConstants.lo ProcessControl.lo
-ParsingConstants.lo: GlobalScalars.lo
-PBC.lo: DerivedTypes.lo GlobalCharacters.lo GlobalObjects.lo GlobalScalars.lo \
-	LinAlg.lo MemMan.lo Order.lo PrettyPrint.lo Thresholding.lo
-PrettyPrint.lo: BasisSetParameters.lo Clock.lo DerivedTypes.lo GlobalCharacters.lo \
-	GlobalObjects.lo GlobalScalars.lo InOut.lo MondoMPI.lo Parse.lo \
-	ParsingConstants.lo SetEq.lo
-ProcessControl.lo: DerivedTypes.lo GlobalCharacters.lo GlobalScalars.lo \
-	MPIInclude.lo MondoLogger.lo ParsingConstants.lo
-SetEq.lo: DerivedTypes.lo GlobalObjects.lo GlobalScalars.lo MemMan.lo MondoMPI.lo
-Slatec.lo: GlobalScalars.lo ProcessControl.lo
-SpecFun.lo: DerivedTypes.lo Parse.lo ProcessControl.lo SpecFun.lo
-Thresholding.lo: DerivedTypes.lo GlobalCharacters.lo GlobalObjects.lo \
-	GlobalScalars.lo InOut.lo McMurch.lo Mechanics.lo Parse.lo SpecFun.lo
+DerivedTypes.lo : \
+  GlobalScalars.lo \
+  GlobalCharacters.lo
 
+MemMan.lo : \
+  DerivedTypes.lo \
+  GlobalScalars.lo \
+  GlobalCharacters.lo \
+  GlobalObjects.lo \
+  ProcessControl.lo \
+  MondoLogger.lo
+
+Parse.lo : \
+  DerivedTypes.lo \
+  GlobalScalars.lo \
+  GlobalCharacters.lo \
+  ParsingConstants.lo \
+  ProcessControl.lo \
+  MemMan.lo \
+  MondoLogger.lo
+
+Clock.lo : DerivedTypes.lo
+
+GlobalObjects.lo : DerivedTypes.lo
+
+BasisSetParameters.lo : GlobalCharacters.lo
+
+MondoMPI.lo : \
+  DerivedTypes.lo \
+  GlobalScalars.lo \
+  GlobalObjects.lo \
+  ProcessControl.lo \
+  MPIInclude.lo \
+  MemMan.lo \
+  Parse.lo
+
+SetEq.lo : \
+  DerivedTypes.lo \
+  GlobalScalars.lo \
+  GlobalObjects.lo \
+  MemMan.lo
+
+Order.lo : \
+  DerivedTypes.lo \
+  GlobalCharacters.lo \
+  GlobalScalars.lo \
+  GlobalObjects.lo \
+  ProcessControl.lo \
+  MemMan.lo \
+  Anneal.lo \
+  Parse.lo
+
+Anneal.lo : MemMan.lo PrettyPrint.lo
+
+Indexing.lo : DerivedTypes.lo
+
+PrettyPrint.lo : \
+  DerivedTypes.lo \
+  GlobalCharacters.lo \
+  GlobalScalars.lo \
+  GlobalObjects.lo \
+  BasisSetParameters.lo \
+  Clock.lo \
+  Parse.lo \
+  SetEq.lo \
+  InOut.lo \
+  MondoLogger.lo
+
+LinAlg.lo : \
+  GlobalCharacters.lo \
+  DerivedTypes.lo \
+  GlobalScalars.lo \
+  GlobalObjects.lo \
+  ProcessControl.lo \
+  PrettyPrint.lo \
+  MemMan.lo \
+  SetEq.lo \
+  InOut.lo \
+  Order.lo \
+  Clock.lo \
+  Thresholding.lo
+
+GlobalCharacters.lo : GlobalScalars.lo
+
+McMurch.lo : \
+  DerivedTypes.lo \
+  GlobalScalars.lo \
+  MemMan.lo
+
+DerivedTypes.lo : \
+  GlobalScalars.lo \
+  GlobalCharacters.lo
+
+MatFunk.lo : \
+  DerivedTypes.lo \
+  GlobalScalars.lo \
+  GlobalCharacters.lo \
+  PrettyPrint.lo
+
+Thresholding.lo : \
+  DerivedTypes.lo \
+  GlobalScalars.lo \
+  GlobalCharacters.lo \
+  GlobalObjects.lo \
+  InOut.lo \
+  SpecFun.lo \
+  Parse.lo \
+  McMurch.lo
+
+SpecFun.lo : \
+  DerivedTypes.lo \
+  Parse.lo
+
+AtomPairs.lo : DerivedTypes.lo
+
+PBC.lo : DerivedTypes.lo MondoLogger.lo
+
+Functional.lo : DerivedTypes.lo
+
+BraBloks.lo : \
+  DerivedTypes.lo \
+  GlobalScalars.lo \
+  PrettyPrint.lo \
+  McMurch.lo \
+  Thresholding.lo
+
+Mechanics.lo : \
+  DerivedTypes.lo \
+  GlobalScalars.lo \
+  GlobalCharacters.lo \
+  GlobalObjects.lo \
+  InOut.lo
+
+Slatec.lo : GlobalScalars.lo ProcessControl.lo
+
+AInv.lo : \
+  DerivedTypes.lo \
+  GlobalScalars.lo \
+  GlobalCharacters.lo \
+  MemMan.lo \
+  LinAlg.lo \
+  MatFunk.lo
+
+ParsingConstants.lo : GlobalScalars.lo
+
+BoundingBox.lo : DerivedTypes.lo
+
+Functionals.lo : \
+  DerivedTypes.lo \
+  ProcessControl.lo \
+  Parse.lo
+
+FastMat.lo : \
+  DerivedTypes.lo \
+  GlobalScalars.lo \
+  GlobalObjects.lo \
+  MemMan.lo \
+  Order.lo \
+  LinAlg.lo \
+  Thresholding.lo
+
+CholFact.lo : \
+  DerivedTypes.lo \
+  GlobalScalars.lo \
+  GlobalObjects.lo \
+  GlobalCharacters.lo \
+  InOut.lo \
+  MemMan.lo \
+  PrettyPrint.lo \
+  ParsingConstants.lo
+
+Macros.lo : \
+  DerivedTypes.lo \
+  GlobalScalars.lo \
+  GlobalObjects.lo \
+  GlobalCharacters.lo \
+  ParsingConstants.lo \
+  PrettyPrint.lo \
+  Parse.lo \
+  Clock.lo \
+  InOut.lo \
+  Functionals.lo \
+  AtomPairs.lo \
+  Mechanics.lo \
+  $(top_srcdir)/MondoConfig.h
+
+PBC.lo : \
+  DerivedTypes.lo \
+  GlobalScalars.lo \
+  GlobalCharacters.lo \
+  GlobalObjects.lo \
+  PrettyPrint.lo \
+  Thresholding.lo \
+  Order.lo \
+  MemMan.lo
+
+AtomPairs.lo : \
+  DerivedTypes.lo \
+  GlobalScalars.lo \
+  GlobalCharacters.lo \
+  GlobalObjects.lo \
+  BoundingBox.lo \
+  Thresholding.lo \
+  PBC.lo \
+  LinAlg.lo
+
+EllToInclude.lo : DerivedTypes.lo GlobalScalars.lo
+
+FTest.lo : \
+  DerivedTypes.lo \
+  GlobalScalars.lo \
+  GlobalCharacters.lo \
+  InOut.lo \
+  PrettyPrint.lo \
+  Parse.lo \
+  MemMan.lo \
+  SpecFun.lo
+
+SMTest.lo : \
+  DerivedTypes.lo \
+  GlobalScalars.lo \
+  GlobalCharacters.lo \
+  InOut.lo \
+  PrettyPrint.lo \
+  Parse.lo \
+  MemMan.lo \
+  Order.lo
+
+ProcessControl.lo : \
+  DerivedTypes.lo \
+  GlobalScalars.lo \
+  GlobalCharacters.lo \
+  ParsingConstants.lo \
+  MondoLogger.lo
+
+MondoLogger.lo : \
+  GlobalObjects.lo \
+  GlobalCharacters.lo \
+  ParsingConstants.lo
+
+CWrappers.lo : \
+  ParsingConstants.lo \
+  MondoLogger.lo

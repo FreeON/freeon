@@ -226,7 +226,7 @@ CONTAINS
       ELSE
         G%Clones=1
         ALLOCATE(G%Clone(1))
-!        CALL MondoLog(DEBUG_NONE, "LoadCoordinates", "loading coordinates from input")
+        !        CALL MondoLog(DEBUG_NONE, "LoadCoordinates", "loading coordinates from input")
         CALL ParseCoordinates(GEOMETRY_BEGIN,GEOMETRY_END,G%Clone(1),O%Coordinates)
         ! CALL PPrint(G%Clone(iCLONE),FileName_O=N%GFile,Unit_O=Geo,PrintGeom_O=O%GeomPrint)
       ENDIF
@@ -260,7 +260,7 @@ CONTAINS
     ! Parse the coordinates
     CALL Align(BeginDelimiter,Inp)
 
-!!    CALL MondoLog(DEBUG_NONE, "ParseCoordinates", "parsing coordinates")
+    !!    CALL MondoLog(DEBUG_NONE, "ParseCoordinates", "parsing coordinates")
 
     DO
       READ(Inp,DEFAULT_CHR_FMT,END=1)Line
@@ -271,7 +271,7 @@ CONTAINS
       CALL LineToChars(LineLowCase,C)
 
       IF(SIZE(C%C)<4) CALL MondoHalt(PRSE_ERROR, &
-        'bad data on parsing goemetry at line = <<'//TRIM(LineLowCase)//'>>')
+           'bad data on parsing goemetry at line = <<'//TRIM(LineLowCase)//'>>')
       ! Set the atom for freq calculation
       G%DoFreq%I(N)=0
       IF(SIZE(C%C)==4) THEN
@@ -342,7 +342,7 @@ CONTAINS
 
       CALL Delete(C)
 
-!! MC: FOLLOWING BROKE PARSING OF GHOST FUNCTIONS, REMOVED
+      !! MC: FOLLOWING BROKE PARSING OF GHOST FUNCTIONS, REMOVED
 !!$!VW    Check for multiple definition of the same atom.
 !!$       L=SCAN(At,Numbers)
 !!$       SELECT CASE(L)
@@ -352,20 +352,20 @@ CONTAINS
 !!$       CASE DEFAULT;CALL MondoHalt(PRSE_ERROR,'Cannot regonize this atom At=<'//At//'>')
 !!$       END SELECT
 
-       DO J=1,107
-          IF(At==Ats(J))THEN
+      DO J=1,107
+        IF(At==Ats(J))THEN
           !IF(AtTmp(1:2)==Ats(J)(1:2))THEN
-             IF(J<106)THEN
-                G%AtNum%D(N)=J
-             ELSE
-                G%AtNum%D(N)=0
-             ENDIF
-             G%AtNam%C(N)=Ats(J)
-!!!!!             G%AtMMTyp%C(N)='UNK' 
-             G%AtMss%D(N)=AtsMss(J)
-             EXIT
+          IF(J<106)THEN
+            G%AtNum%D(N)=J
+          ELSE
+            G%AtNum%D(N)=0
           ENDIF
-       ENDDO
+          G%AtNam%C(N)=Ats(J)
+!!!!!             G%AtMMTyp%C(N)='UNK'
+          G%AtMss%D(N)=AtsMss(J)
+          EXIT
+        ENDIF
+      ENDDO
     ENDDO
 
 

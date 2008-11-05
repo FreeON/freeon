@@ -76,7 +76,7 @@ CONTAINS
       BaseFile=TRIM(N%M_HOME)//'BasisSets/'//TRIM(B%BName(J))//BasF
       INQUIRE(FILE=BaseFile,EXIST=Exists)
       IF(Exists)THEN
-         CALL MondoLog(DEBUG_NONE, "FreeON","loading external basis set  "//TRIM(BaseFile),"LoadBasisSets")
+        CALL MondoLog(DEBUG_NONE, "FreeON","loading external basis set  "//TRIM(BaseFile),"LoadBasisSets")
         CALL OpenASCII(BaseFile,Bas,OldFileQ_O=.TRUE.)
         BasU=Bas
       ELSE
@@ -92,7 +92,7 @@ CONTAINS
           CALL AlignLowCase('<beginbasisset'//TRIM(B%BName(J))//'>',Inp)
         ENDIF
         IF(.NOT.ParseBasisSets(G%Clone(I),B%BSets(I,J),BasU,B%BSiz(I,J),B%OffS(I,J)))THEN
-           CALL MondoHalt(PRSE_ERROR,'ParseBasisSets failed for basis set '//TRIM(B%BName(J)))
+          CALL MondoHalt(PRSE_ERROR,'ParseBasisSets failed for basis set '//TRIM(B%BName(J)))
         ENDIF
         B%BSets(I,J)%BName=B%BName(J)
         CALL BCSRDimensions(G%Clone(I),B%BSets(I,J),O%AccuracyLevels(J), &
@@ -232,7 +232,7 @@ CONTAINS
           NC=0
           KFound=KFound+1
 
-!!          CALL MondoLog(DEBUG_NONE, "ParseBasis", "found basis for "//TRIM(BS%AtNam%C(NK)))
+          !!          CALL MondoLog(DEBUG_NONE, "ParseBasis", "found basis for "//TRIM(BS%AtNam%C(NK)))
 
           DO
             READ(BasU,DEFAULT_CHR_FMT,END=99)Line
