@@ -192,7 +192,7 @@ else
   if test -z "${user_CFLAGS}"; then
     case ${CC_COMPILERNAME} in
       GCC)   CFLAGS="-O0 -g" ;;
-      Intel) CFLAGS="-O0 -fltconsistency -fp-port -g" ;;
+      Intel) CFLAGS="-O0 -fp-port -g" ;;
       *)     CFLAGS="-O0 -g" ;;
     esac
     AC_MSG_NOTICE([Setting default optimization for ${CC_COMPILERNAME} compiler: CFLAGS  = ${CFLAGS}])

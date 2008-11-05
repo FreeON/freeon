@@ -262,7 +262,10 @@ SpecFun.lo : \
 
 AtomPairs.lo : DerivedTypes.lo
 
-PBC.lo : DerivedTypes.lo MondoLogger.lo
+PBC.lo : \
+  DerivedTypes.lo \
+  MondoLogger.lo \
+  LinAlg.lo
 
 Functional.lo : DerivedTypes.lo
 
