@@ -526,8 +526,7 @@ CONTAINS
       CALL MondoLogPlain("MD temperature     = "//TRIM(DblToChar(MDTemp%D(1))))
       CALL MondoLogPlain("Target temperature = "//TRIM(DblToChar(C%Dyns%TargetTemp)))
       DO iCLONE = 1, C%Geos%Clones
-        CALL BerendsenThermostat(C%Geos%Clone(iCLONE), MDTemp%D(iCLONE), C%Dyns%TargetTemp,  &
-                                 C%Dyns%DTime, C%Dyns%BerendsenTau, v_scale)
+        CALL BerendsenThermostat(C%Geos%Clone(iCLONE), MDTemp%D(iCLONE), C%Dyns%TargetTemp, C%Dyns%DTime, C%Dyns%BerendsenTau, v_scale)
         C%Dyns%BerendsenVScale = v_scale
 
         ! Store v_scale in hdf.
@@ -536,8 +535,7 @@ CONTAINS
         CALL Put(v_scale, "v_scale", Tag_O=TRIM(IntToChar(iGEO)))
         CALL CloseHDFGroup(HDF_CurrentID)
         CALL CloseHDF(HDFFileID)
-        CALL MondoLog(DEBUG_NONE, "MD", "putting v_scale("//TRIM(IntToChar(iGEO))//") to hdf = " &
-                     //TRIM(DblToChar(v_scale)))
+        CALL MondoLog(DEBUG_NONE, "MD:Verlet", "putting v_scale("//TRIM(IntToChar(iGEO))//") to hdf = "//TRIM(DblToChar(v_scale)))
       ENDDO
 
     ELSE
@@ -549,8 +547,7 @@ CONTAINS
         CALL Put(0D0, "v_scale", Tag_O=TRIM(IntToChar(iGEO)))
         CALL CloseHDFGroup(HDF_CurrentID)
         CALL CloseHDF(HDFFileID)
-        CALL MondoLog(DEBUG_NONE, "MD:Verlet", "putting dummy v_scale(" &
-                      //TRIM(IntToChar(iGEO))//") to hdf = "//TRIM(DblToChar(0D0)))
+        CALL MondoLog(DEBUG_NONE, "MD:Verlet", "putting dummy v_scale("//TRIM(IntToChar(iGEO))//") to hdf = "//TRIM(DblToChar(0D0)))
       ENDDO
 
     ENDIF
@@ -650,10 +647,8 @@ CONTAINS
         MDTave%D(iCLONE) = (DBLE(iGEO-1)/DBLE(iGEO))*MDTave%D(iCLONE) +(One/DBLE(iGEO))*MDTemp%D(iCLONE)
 
         ! Store Potential and Total Energy
-        CALL MondoLog(DEBUG_NONE, "MD:Symplectic", "ETotal = " &
-                                 //TRIM(DblToChar(C%Geos%Clone(iCLONE)%ETotal)))
-        CALL MondoLog(DEBUG_NONE, "MD:Symplectic", "ETotalPerSCF = " &
-                      //TRIM(DblVectToChar(C%Geos%Clone(iCLONE)%ETotalPerSCF, (/ 0, C%Stat%Current%I(1) /))))
+        CALL MondoLog(DEBUG_NONE, "MD:Symplectic", "ETotal = "//TRIM(DblToChar(C%Geos%Clone(iCLONE)%ETotal)))
+        CALL MondoLog(DEBUG_NONE, "MD:Symplectic", "ETotalPerSCF = "//TRIM(DblVectToChar(C%Geos%Clone(iCLONE)%ETotalPerSCF, (/ 0, C%Stat%Current%I(1) /))))
 #if defined MD_DEBUG
         IF(C%Dyns%MDNumSCF < 0) THEN
           CALL MondoLog(DEBUG_NONE, "MD:Symplectic", "MDNumSCF not set")
@@ -691,8 +686,7 @@ CONTAINS
         CALL MondoLogPlain("MD temperature     = "//TRIM(DblToChar(MDTemp%D(1))))
         CALL MondoLogPlain("Target temperature = "//TRIM(DblToChar(C%Dyns%TargetTemp)))
         DO iCLONE = 1, C%Geos%Clones
-          CALL BerendsenThermostat(C%Geos%Clone(iCLONE), MDTemp%D(iCLONE), &
-                                   C%Dyns%TargetTemp, C%Dyns%DTime, C%Dyns%BerendsenTau, v_scale)
+          CALL BerendsenThermostat(C%Geos%Clone(iCLONE), MDTemp%D(iCLONE), C%Dyns%TargetTemp, C%Dyns%DTime, C%Dyns%BerendsenTau, v_scale)
           C%Dyns%BerendsenVScale = v_scale
 
           ! Store v_scale in hdf.
@@ -701,12 +695,9 @@ CONTAINS
           CALL Put(v_scale, "v_scale", Tag_O=TRIM(IntToChar(iGEO)))
           CALL CloseHDFGroup(HDF_CurrentID)
           CALL CloseHDF(HDFFileID)
-          CALL MondoLog(DEBUG_NONE, "MD:Symplectic", "putting v_scale(" &
-                       //TRIM(IntToChar(iGEO))//") to hdf = "//TRIM(DblToChar(v_scale)))
-          CALL MondoLog(DEBUG_NONE, "MD:Symplectic", "a("//TRIM(IntToChar(m_step)) &
-                       //") = "//TRIM(FltToChar(Symplectic_4th_Order_a(m_step))))
-          CALL MondoLog(DEBUG_NONE, "MD:Symplectic", "b("//TRIM(IntToChar(m_step)) &
-                       //") = "//TRIM(FltToChar(Symplectic_4th_Order_b(m_step))))
+          CALL MondoLog(DEBUG_NONE, "MD:Symplectic", "putting v_scale("//TRIM(IntToChar(iGEO))//") to hdf = "//TRIM(DblToChar(v_scale)))
+          CALL MondoLog(DEBUG_NONE, "MD:Symplectic", "a("//TRIM(IntToChar(m_step))//") = "//TRIM(FltToChar(Symplectic_4th_Order_a(m_step))))
+          CALL MondoLog(DEBUG_NONE, "MD:Symplectic", "b("//TRIM(IntToChar(m_step))//") = "//TRIM(FltToChar(Symplectic_4th_Order_b(m_step))))
         ENDDO
 
       ELSE
@@ -718,8 +709,7 @@ CONTAINS
           CALL Put(0D0, "v_scale", Tag_O=TRIM(IntToChar(iGEO)))
           CALL CloseHDFGroup(HDF_CurrentID)
           CALL CloseHDF(HDFFileID)
-          CALL MondoLog(DEBUG_NONE, "MD:Symplectic", "putting dummy v_scale(" &
-                        //TRIM(IntToChar(iGEO))//") to hdf = "//TRIM(DblToChar(0D0)))
+          CALL MondoLog(DEBUG_NONE, "MD:Symplectic", "putting dummy v_scale("//TRIM(IntToChar(iGEO))//") to hdf = "//TRIM(DblToChar(0D0)))
         ENDDO
 
       ENDIF

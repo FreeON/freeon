@@ -97,28 +97,65 @@ EXTRA_INCLUDES = -I$(top_srcdir)/MondoMods -I$(top_srcdir)/OneE -I$(top_srcdir)/
 LDADD = $(LDADD_MONDOMODS) $(LDADD_INTERNAL_LAPACK) $(LDADD_INTERNAL_HDF5)
 
 # Dependencies.
+BlokTrPdJ.o : \
+  PoleTree.o \
+  TreeWalk.o \
+  Thresholds.o \
+  PBCFarField.o
 
-BlokTrPdJ.o: Globals.o PBCFarField.o PoleTree.o Thresholding.o TreeWalk.o
-Density.o: Thresholds.o
-DivPFFTensor.o: MondoPoles.o PFFTensor.o Thresholding.o
-Globals.o:
-Indexing.o: PoleNodeType.o
-JForce.o: BlokTrPdJ.o Globals.o PBCFarField.o PoleTree.o
-JGen.o: Globals.o PBCFarField.o PoleTree.o Thresholds.o TreeWalk.o
-MakePFFT.o: DivPFFTensor.o PFFTensor.o
-MondoPoles.o: Globals.o Indexing.o PoleNodeType.o Thresholding.o
-NukE.o: Globals.o PBCFarField.o PoleTree.o Thresholding.o Thresholds.o \
-	TreeWalk.o
-ParaQ.o: Globals.o PoleNodeType.o PoleTree.o
-PBCFarField.o: Globals.o MondoPoles.o PoleTree.o Thresholding.o
-PFFTensor.o: MondoPoles.o PlaneWise.o Thresholding.o
-PlaneWise.o: MondoPoles.o
-PoleNodeType.o:
-PoleTree.o: Density.o Globals.o Indexing.o MondoPoles.o PoleNodeType.o \
-	Thresholds.o
-QCTC.o: Density.o Globals.o JGen.o NukE.o PBCFarField.o PoleTree.o \
-	Thresholds.o TreeWalk.o
-Thresholding.o:
-Thresholds.o: PoleNodeType.o Thresholding.o
-TreeWalk.o: Globals.o Indexing.o MondoPoles.o PoleNodeType.o PoleTree.o \
-	Thresholding.o Thresholds.o
+DivPFFTensor.o : \
+  MondoPoles.o \
+  PFFTensor.o
+
+JForce.o : \
+  Globals.o \
+  PoleTree.o \
+  PBCFarField.o \
+  BlokTrPdJ.o
+
+JGen.o : \
+  Globals.o \
+  PoleTree.o \
+  TreeWalk.o \
+  PBCFarField.o
+
+MakePFFT.o : \
+  PFFTensor.o \
+  DivPFFTensor.o
+
+NukE.o : \
+  Globals.o \
+  PoleTree.o \
+  TreeWalk.o \
+  PBCFarField.o
+
+PBCFarField.o : \
+  PFFTensor.o \
+  PoleTree.o \
+  MondoPoles.o \
+  Globals.o \
+  PFFTensor.o
+
+PFFTensor.o : \
+  MondoPoles.o
+
+ParaQ.o : \
+  Globals.o \
+  PoleTree.o
+
+PoleTree.o : \
+  Thresholds.o \
+  MondoPoles.o \
+  Globals.o
+
+QCTC.o : \
+  $(top_srcdir)/MondoConfig.h \
+  PoleTree.o \
+  Globals.o \
+  PBCFarField.o \
+  JGen.o \
+  NukE.o
+
+TreeWalk.o : \
+  Globals.o \
+  PoleTree.o
