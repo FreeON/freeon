@@ -590,7 +590,10 @@ CONTAINS
        !
        ! Fill in new geometries
        DO iCLONE=1,C%Geos%Clones
-         CALL NewGeomFill(C%Geos%Clone(iCLONE))
+          C%Geos%Clone(iCLONE)%Carts%D=C%Geos%Clone(iCLONE)%Displ%D
+          C%Geos%Clone(iCLONE)%PBC%BoxShape%D=C%Geos%Clone(iCLONE)%PBCDispl%D          
+          CALL MakeGMPeriodic(C%Geos%Clone(iCLONE),C%Sets%BSets(iCLONE,iBAS), &
+                              C%Opts%Thresholds(iBAS)%Dist,C%Opts%Thresholds(iBAS)%TwoE)
        ENDDO
        ! Bump counter and archive new geometries 
        C%Stat%Previous%I(3)=IGeo
