@@ -157,7 +157,7 @@ GlobalCharacters.lo: GlobalScalars.lo
 GlobalObjects.lo: DerivedTypes.lo
 Indexing.lo: DerivedTypes.lo
 InOut.lo: DerivedTypes.lo GlobalCharacters.lo GlobalScalars.lo Indexing.lo \
-	MemMan.lo MondoMPI.lo Parse.lo ProcessControl.lo SetEq.lo
+	MemMan.lo MondoMPI.lo Parse.lo ProcessControl.lo SetEq.lo Utilities.lo
 LinAlg.lo: Clock.lo DerivedTypes.lo GlobalCharacters.lo GlobalObjects.lo \
 	GlobalScalars.lo InOut.lo LinAlg.lo MemMan.lo MondoMPI.lo Order.lo \
 	PrettyPrint.lo ProcessControl.lo SetEq.lo Thresholding.lo
