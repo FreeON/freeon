@@ -91,6 +91,7 @@ EXTRA_DIST = \
   HGToSP.Inc \
   HGToSP_PoleNode.Inc \
   MACErrBnd4.Inc \
+  MACErrBnd6.Inc \
   PBCTensor/Majik_Kubic_WS1.Inc \
   PBCTensor/Majik_Kubic_WS2.Inc
 
