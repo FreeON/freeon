@@ -114,6 +114,43 @@ EXTRA_DIST = \
   MMA/LookUpTables/GammaFunctions.Inc \
   MMA/LookUpTables/GammaGrid.Inc \
   MMA/LookUpTables/InverseExp.Inc \
+  MMA/LookUpTables_800_6x/F0_77.Inc \
+  MMA/LookUpTables_800_6x/F0.Inc \
+  MMA/LookUpTables_800_6x/F10_77.Inc \
+  MMA/LookUpTables_800_6x/F10.Inc \
+  MMA/LookUpTables_800_6x/F11_77.Inc \
+  MMA/LookUpTables_800_6x/F11.Inc \
+  MMA/LookUpTables_800_6x/F12_77.Inc \
+  MMA/LookUpTables_800_6x/F12.Inc \
+  MMA/LookUpTables_800_6x/F13_77.Inc \
+  MMA/LookUpTables_800_6x/F13.Inc \
+  MMA/LookUpTables_800_6x/F14_77.Inc \
+  MMA/LookUpTables_800_6x/F14.Inc \
+  MMA/LookUpTables_800_6x/F15_77.Inc \
+  MMA/LookUpTables_800_6x/F15.Inc \
+  MMA/LookUpTables_800_6x/F1_77.Inc \
+  MMA/LookUpTables_800_6x/F1.Inc \
+  MMA/LookUpTables_800_6x/F2_77.Inc \
+  MMA/LookUpTables_800_6x/F2.Inc \
+  MMA/LookUpTables_800_6x/F3_77.Inc \
+  MMA/LookUpTables_800_6x/F3.Inc \
+  MMA/LookUpTables_800_6x/F4_77.Inc \
+  MMA/LookUpTables_800_6x/F4.Inc \
+  MMA/LookUpTables_800_6x/F5_77.Inc \
+  MMA/LookUpTables_800_6x/F5.Inc \
+  MMA/LookUpTables_800_6x/F6_77.Inc \
+  MMA/LookUpTables_800_6x/F6.Inc \
+  MMA/LookUpTables_800_6x/F7_77.Inc \
+  MMA/LookUpTables_800_6x/F7.Inc \
+  MMA/LookUpTables_800_6x/F8_77.Inc \
+  MMA/LookUpTables_800_6x/F8.Inc \
+  MMA/LookUpTables_800_6x/F9_77.Inc \
+  MMA/LookUpTables_800_6x/F9.Inc \
+  MMA/LookUpTables_800_6x/GammaAssymptotics.Inc \
+  MMA/LookUpTables_800_6x/GammaDimensions_77.Inc \
+  MMA/LookUpTables_800_6x/GammaDimensions.Inc \
+  MMA/LookUpTables_800_6x/GammaGrid_77.Inc \
+  MMA/LookUpTables_800_6x/GammaGrid.Inc \
   MMA/Functionals/B88x.Inc \
   MMA/Functionals/LYPc.Inc \
   MMA/Functionals/PBEc.Inc \
