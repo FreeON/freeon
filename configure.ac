@@ -243,12 +243,21 @@ AC_GNU_SOURCE
 
 # Set line-length limits.
 AC_MSG_CHECKING([how to set line length limits of f90 compiler])
-if test "${FC_COMPILERNAME}" = "GCC"; then
-  AC_MSG_RESULT([gfortran detected, setting unlimited line-length limit (-ffree-line-length-none)])
-  FCFLAGS="${FCFLAGS} -ffree-line-length-none"
-else
-  AC_MSG_RESULT([not needed])
-fi
+case ${FC_COMPILERNAME} in
+  GCC)
+    AC_MSG_RESULT([gfortran detected, setting unlimited line-length limit (-ffree-line-length-none)])
+    FFLAGS="${FFLAGS} -ffree-line-length-none"
+    FCFLAGS="${FCFLAGS} -ffree-line-length-none"
+    ;;
+  Intel)
+    AC_MSG_RESULT([Intel detected, setting long line-length limit (-132)])
+    FFLAGS="${FFLAGS} -132"
+    FCFLAGS="${FCFLAGS} -132"
+    ;;
+  *)
+    AC_MSG_RESULT([not needed])
+    ;;
+esac
 
 # Check for libtool.
 AC_PROG_LIBTOOL
