@@ -68,7 +68,8 @@ MakePFFT_SOURCES = \
   Indexing.f90 \
   QSortI.f \
   MondoPoles.f90 \
-  DEI.f PlaneWise.f90 \
+  DEI.f \
+  PlaneWise.f90 \
   PFFTensor.f90 \
   DivPFFTensor.f90 \
   ParaQ.f90 \
@@ -117,7 +118,8 @@ JGen.o : \
   Globals.o \
   PoleTree.o \
   TreeWalk.o \
-  PBCFarField.o
+  PBCFarField.o \
+  PlaneWise.o
 
 MakePFFT.o : \
   PFFTensor.o \
@@ -137,7 +139,8 @@ PBCFarField.o : \
   PFFTensor.o
 
 PFFTensor.o : \
-  MondoPoles.o
+  MondoPoles.o \
+  PlaneWise.o
 
 ParaQ.o : \
   Globals.o \
@@ -146,7 +149,8 @@ ParaQ.o : \
 PoleTree.o : \
   Thresholds.o \
   MondoPoles.o \
-  Globals.o
+  Globals.o \
+  Density.o
 
 QCTC.o : \
   $(top_srcdir)/MondoConfig.h \
@@ -159,3 +163,19 @@ QCTC.o : \
 TreeWalk.o : \
   Globals.o \
   PoleTree.o
+
+Density.o : \
+  Thresholds.o
+
+Thresholds.o : \
+  PoleNodeType.o
+
+Indexing.o : \
+  PoleNodeType.o
+
+MondoPoles.o : \
+  Indexing.o \
+  Globals.o
+
+PlaneWise.o : \
+  MondoPoles.o
