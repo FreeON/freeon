@@ -544,122 +544,125 @@ CONTAINS
       Energies(iClone)=C%Geos%Clone(iClone)%ETotal
     ENDDO
   END FUNCTION SteepStep
-  !
-  !------------------------------------------------------------------
-  !
-  SUBROUTINE IntOpt(C)
-    TYPE(Controls)            :: C
-    INTEGER                   :: I,iBAS,iGEO,iGEOst,iCLONE
-    INTEGER                   :: AccL
-    INTEGER                   :: FirstGeom,NatmsLoc,GuessO
-    INTEGER                   :: ConvgdAll,MaxSteps,IStart,Dimen
-    TYPE(INT_VECT)            :: Convgd
-    TYPE(INTC)                :: IntCES
-    TYPE(State)               :: StateO
-    !
-    iGEO=C%Stat%Previous%I(3)
-    iGEOst=iGEO
-    ! Set geometry optimization controls
-    CALL SetGeOpCtrl(C%GOpt,C%Geos,C%Opts,C%Sets,C%Nams,iGEO)
-    ! initial geometry
-    MaxSteps=C%GOpt%GConvCrit%MaxGeOpSteps
-    ! Build the guess
-    DO iBAS=1,C%Sets%NBSets-1
-      CALL GeomArchive(iBAS,iGEO,C%Nams,C%Opts,C%Sets,C%Geos)
-      CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
-      CALL SCF(iBAS,iGEO,C)
-    ENDDO
-    iBAS=C%Sets%NBSets
-    !
-    ! CALL New(IntCES,C%GOpt%ExtIntCs%N)
-    ! CALL SetEq(IntCES,C%GOpt%ExtIntCs,1,C%GOpt%ExtIntCs%N,1)
-    C%GOpt%GConvCrit%DoLattStep=.TRUE.
-    CALL New(Convgd,C%Geos%Clones)
-    Convgd%I=0
-    !
-    IF(C%Opts%Grad==GRAD_TS_SEARCH_NEB) THEN
-      CALL NEBPurify(C%Geos)
-      CALL MergePrintClones(C%Geos,C%Nams,C%Opts)
-    ENDIF
-    CALL GeomArchive(iBAS,iGEO,C%Nams,C%Opts,C%Sets,C%Geos)
-    CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
-    ! Start optimization
-    IStart=iGEO
-    DO iGEO=IStart,MaxSteps
-      ! Calculate energy and force for all clones at once.
-      StateO%Action=C%Stat%Action
-      StateO%Current=C%Stat%Current
-      StateO%Previous=C%Stat%Previous
-      GuessO=C%Opts%Guess
-      CALL SCF(iBAS,iGEO,C)
-      CALL BackTrack(iBAS,iGEO,C,StateO,GuessO)
-      ! Backtracking can modify geometries too, so this is the right place
-      ! to print geometries cooresponding to the energies that have just been computed
-      DO iCLONE=1,C%Geos%Clones
-        CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile,Geo,C%Opts%GeomPrint,Clone_O=iCLONE)
-      ENDDO
-      !
-      CALL Force(iBAS,iGEO,C%Nams,C%Opts,C%Stat, &
-           C%Geos,C%Sets,C%MPIs)
-      ! Loop over all clones and modify geometries.
-      ConvgdAll=1
-      DO iCLONE=1,C%Geos%Clones
-        Convgd%I=0
-        CALL OptSingleMol(C%GOpt,C%Nams,C%Opts,C%Geos%Clone(iCLONE),Convgd%I,iGEO,iCLONE)
-        ConvgdAll=ConvgdAll*Convgd%I(iCLONE)
-      ENDDO
-      !
-      IF(C%Opts%Grad==GRAD_TS_SEARCH_NEB) THEN
-        CALL NEBPurify(C%Geos,Print_O=.TRUE.)
-        CALL MergePrintClones(C%Geos,C%Nams,C%Opts)
-      ENDIF
-      !
-      ! Fill in new geometries
-      DO iCLONE=1,C%Geos%Clones
-        CALL NewGeomFill(C%Geos%Clone(iCLONE))
-      ENDDO
-      ! Bump counter and archive new geometries
-      C%Stat%Previous%I(3)=IGeo
-      C%Stat%Current%I(3)=IGeo+1
-      CALL GeomArchive(iBAS,iGEO+1,C%Nams,C%Opts,C%Sets,C%Geos)
-      ! Continue optimization?
-      IF(ConvgdAll==1) EXIT
-    ENDDO
-    CALL Delete(Convgd)
-    !
-    IGeo=C%Stat%Current%I(3)
-    IF(IGeo>=MaxSteps) THEN
-      CALL OpenASCII(OutFile,Out)
-      IF(ConvgdAll/=1) THEN
-        WRITE(Out,700)
-        WRITE(*,700)
-      ELSE
-        WRITE(Out,460) iGeo-1
-        WRITE(*,460) iGeo-1
-      ENDIF
-      CLOSE(Out,STATUS='KEEP')
-    ENDIF
-    !
-    ! Convergence is reached at this point, print final energy
-    ! and finish optimization.
-    !
-    CALL OpenASCII(OutFile,Out)
-    WRITE(Out,500)
-    WRITE(*,500)
-    WRITE(Out,600)
-    WRITE(*,600)
-    DO iCLONE=1,C%Geos%Clones
-      WRITE(Out,400) iCLONE,C%Geos%Clone(iCLONE)%ETotal
-      WRITE(*,400) iCLONE,C%Geos%Clone(iCLONE)%ETotal
-    ENDDO
-    CLOSE(Out,STATUS='KEEP')
-    !
-400 FORMAT(I6,F20.10)
-500 FORMAT('Energies of final structures:')
-600 FORMAT(' Clone #         Energy         ')
-460 FORMAT('Geometry Optimization converged in ',I6,' steps.')
-700 FORMAT('Maximum number of optimization'&
-         //' steps exceeded, optimization did not converge.')
+!
+!------------------------------------------------------------------
+!
+   SUBROUTINE IntOpt(C)
+     TYPE(Controls)            :: C
+     INTEGER                   :: I,iBAS,iGEO,iGEOst,iCLONE
+     INTEGER                   :: AccL 
+     INTEGER                   :: FirstGeom,NatmsLoc,GuessO
+     INTEGER                   :: ConvgdAll,MaxSteps,IStart,Dimen
+     TYPE(INT_VECT)            :: Convgd
+     TYPE(INTC)                :: IntCES
+     TYPE(State)               :: StateO
+     !
+     iGEO=C%Stat%Previous%I(3)
+     iGEOst=iGEO
+     ! Set geometry optimization controls
+     CALL SetGeOpCtrl(C%GOpt,C%Geos,C%Opts,C%Sets,C%Nams,iGEO)
+     ! initial geometry
+     MaxSteps=C%GOpt%GConvCrit%MaxGeOpSteps
+     ! Build the guess 
+     DO iBAS=1,C%Sets%NBSets-1
+       CALL GeomArchive(iBAS,iGEO,C%Nams,C%Opts,C%Sets,C%Geos)    
+       CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
+       CALL SCF(iBAS,iGEO,C)
+     ENDDO
+     iBAS=C%Sets%NBSets
+     !
+   ! CALL New(IntCES,C%GOpt%ExtIntCs%N)
+   ! CALL SetEq(IntCES,C%GOpt%ExtIntCs,1,C%GOpt%ExtIntCs%N,1)
+     C%GOpt%GConvCrit%DoLattStep=.TRUE.
+     CALL New(Convgd,C%Geos%Clones)
+     Convgd%I=0
+     !
+     IF(C%Opts%Grad==GRAD_TS_SEARCH_NEB) THEN
+       CALL NEBPurify(C%Geos)
+       CALL MergePrintClones(C%Geos,C%Nams,C%Opts)
+     ENDIF
+     CALL GeomArchive(iBAS,iGEO,C%Nams,C%Opts,C%Sets,C%Geos)    
+     CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
+     ! Start optimization                     
+     IStart=iGEO
+     DO iGEO=IStart,MaxSteps
+       ! Calculate energy and force for all clones at once.
+       StateO%Action=C%Stat%Action
+       StateO%Current=C%Stat%Current
+       StateO%Previous=C%Stat%Previous
+       GuessO=C%Opts%Guess
+       CALL SCF(iBAS,iGEO,C)
+       CALL BackTrack(iBAS,iGEO,C,StateO,GuessO)
+       ! Backtracking can modify geometries too, so this is the right place
+       ! to print geometries cooresponding to the energies that have just been computed
+       DO iCLONE=1,C%Geos%Clones
+         CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile,Geo,C%Opts%GeomPrint,Clone_O=iCLONE)
+       ENDDO
+       ! 
+       CALL Force(iBAS,iGEO,C%Nams,C%Opts,C%Stat, &
+                  C%Geos,C%Sets,C%MPIs)
+       ! Loop over all clones and modify geometries.
+       ConvgdAll=1
+       DO iCLONE=1,C%Geos%Clones
+         Convgd%I=0
+         CALL OptSingleMol(C%GOpt,C%Nams,C%Opts,C%Geos%Clone(iCLONE),Convgd%I,iGEO,iCLONE)
+         ConvgdAll=ConvgdAll*Convgd%I(iCLONE)
+       ENDDO 
+       !
+       IF(C%Opts%Grad==GRAD_TS_SEARCH_NEB) THEN
+          CALL NEBPurify(C%Geos,Print_O=.TRUE.)
+          CALL MergePrintClones(C%Geos,C%Nams,C%Opts)
+       ENDIF
+       !
+       ! Fill in new geometries
+       DO iCLONE=1,C%Geos%Clones
+          C%Geos%Clone(iCLONE)%Carts%D=C%Geos%Clone(iCLONE)%Displ%D
+          C%Geos%Clone(iCLONE)%PBC%BoxShape%D=C%Geos%Clone(iCLONE)%PBCDispl%D          
+          CALL MakeGMPeriodic(C%Geos%Clone(iCLONE),C%Sets%BSets(iCLONE,iBAS), &
+                              C%Opts%Thresholds(iBAS)%Dist,C%Opts%Thresholds(iBAS)%TwoE)
+       ENDDO
+       ! Bump counter and archive new geometries 
+       C%Stat%Previous%I(3)=IGeo
+       C%Stat%Current%I(3)=IGeo+1
+       CALL GeomArchive(iBAS,iGEO+1,C%Nams,C%Opts,C%Sets,C%Geos)    
+       ! Continue optimization?
+       IF(ConvgdAll==1) EXIT
+     ENDDO
+     CALL Delete(Convgd)
+     !
+     IGeo=C%Stat%Current%I(3)
+     IF(IGeo>=MaxSteps) THEN
+       CALL OpenASCII(OutFile,Out)
+       IF(ConvgdAll/=1) THEN
+         WRITE(Out,700) 
+         WRITE(*,700) 
+       ELSE
+         WRITE(Out,460) iGeo-1
+         WRITE(*,460) iGeo-1
+       ENDIF          
+       CLOSE(Out,STATUS='KEEP')
+     ENDIF
+     !
+     ! Convergence is reached at this point, print final energy
+     ! and finish optimization.
+     !
+     CALL OpenASCII(OutFile,Out)
+     WRITE(Out,500)  
+     WRITE(*,500)  
+     WRITE(Out,600)  
+     WRITE(*,600)  
+     DO iCLONE=1,C%Geos%Clones
+       WRITE(Out,400) iCLONE,C%Geos%Clone(iCLONE)%ETotal
+       WRITE(*,400) iCLONE,C%Geos%Clone(iCLONE)%ETotal
+     ENDDO
+     CLOSE(Out,STATUS='KEEP')
+     !
+     400  FORMAT(I6,F20.10)
+     500  FORMAT('Energies of final structures:')
+     600  FORMAT(' Clone #         Energy         ')
+     460  FORMAT('Geometry Optimization converged in ',I6,' steps.')
+     700  FORMAT('Maximum number of optimization'&
+            //' steps exceeded, optimization did not converge.')
 
   END SUBROUTINE IntOpt
   !
