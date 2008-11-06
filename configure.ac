@@ -246,7 +246,7 @@ AC_MSG_CHECKING([how to set line length limits of f90 compiler])
 case ${FC_COMPILERNAME} in
   GCC)
     AC_MSG_RESULT([gfortran detected, setting unlimited line-length limit (-ffree-line-length-none)])
-    FFLAGS="${FFLAGS} -ffree-line-length-none"
+    FFLAGS="${FFLAGS} -ffixed-line-length-none"
     FCFLAGS="${FCFLAGS} -ffree-line-length-none"
     ;;
   Intel)
