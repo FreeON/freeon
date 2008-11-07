@@ -1190,23 +1190,6 @@ CONTAINS
           CALL Delete(Ftmp)
        ENDDO
     ENDIF
-
-    IF(.TRUE.)THEN
-       DO iCLONE=1,G%Clones
-          CALL New(Ftmp,3*G%Clone(iCLONE)%NAtms)
-          DO iATS=1,G%Clone(iCLONE)%NAtms
-             A1=3*(iATS-1)+1
-             A2=3*iATS
-             Ftmp%D(A1:A2) = G%Clone(iCLONE)%Gradients%D(1:3,iATS)
-          ENDDO
-          PrintFlags%Key=DEBUG_MAXIMUM
-          CALL Print_Force(G%Clone(iCLONE),Ftmp,'Force')
-          CALL Print_Force(G%Clone(iCLONE),Ftmp,'Force',Unit_O=6)
-          CALL Print_LatForce(G%Clone(iCLONE),G%Clone(iCLONE)%PBC%LatFrc%D,'Lattice Force')
-          CALL Print_LatForce(G%Clone(iCLONE),G%Clone(iCLONE)%PBC%LatFrc%D,'Lattice Force',Unit_O=6)
-          CALL Delete(Ftmp)
-       ENDDO
-    ENDIF
     
   END SUBROUTINE Force
   !===============================================================================
