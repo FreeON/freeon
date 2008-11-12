@@ -508,6 +508,7 @@ MODULE PrettyPrint
        CHARACTER(LEN=DEFAULT_CHR_LEN)       :: Mssg
        CHARACTER(LEN=DCL)                   :: AuxChar
        CHARACTER(LEN=2)                     :: Atom
+       CHARACTER(LEN=4)                     :: PDBAtom
        REAL(DOUBLE)                         :: AA
        REAL(DOUBLE)                         :: A,B,C,Alpha,Beta,Gamma
        !Check if the coordinates are in Angstrom.
@@ -609,7 +610,9 @@ MODULE PrettyPrint
              ELSEIF(PrintGeom_O=='PDB')THEN
                 ! Print PDB format
                 AA=One/AngstromsToAU
-                Mssg='Geom #'//TRIM(IntToChar(GM%Confg))//', <SCF> = '//TRIM(FltToMedmChar(GM%ETotal))
+                WRITE(PU,11)GM%Confg
+11              FORMAT('MODEL  ',I6)
+                Mssg=' <SCF> = '//TRIM(FltToMedmChar(GM%ETotal))//' h'
                 WRITE(PU,22)Mssg
 22              FORMAT('REMARK   1  ',A60)
                 IF(GM%PBC%Dimen/=0)THEN
@@ -618,12 +621,13 @@ MODULE PrettyPrint
 33                 FORMAT('CRYST1',3F9.3,3F7.2,1x,11A1,I4)
                 ENDIF
                 DO I=1,GM%NAtms
-!                   WRITE(PU,44)I,GM%AtNam%C(I),GM%AtMMTyp%C(I),1,(GM%Carts%D(K,I)*AA,K=1,3),One,Zero 
-                   WRITE(PU,44)I,GM%AtNam%C(I),'UNK',1,(GM%Carts%D(K,I)*AA,K=1,3),One,Zero 
-44                 FORMAT('ATOM  ',I5,1X,A5,A5,2X,I4,4X,3F8.3,2F6.2)
+                   Atom=GM%AtNam%C(I)
+                   CALL UpCase(Atom)
+                   WRITE(PU,44)'ATOM  ',  I,     Atom//'  ', ' ',  'UNK',   ' ', 1, ' ' ,   (GM%Carts%D(K,I)*AA,K=1,3),One,Zero,Atom
+44                 FORMAT(     A6,      I5, 1X,A4,    A1,   A3,  1X, A1 ,I4,  A1,3X,3F8.3,2F6.2,10X,A2,A2 )
                 ENDDO
                 WRITE(PU,55)
-55              FORMAT('END')
+55              FORMAT('ENDMDL')
              ELSEIF(PrintGeom_O=='CIF')THEN
                 CALL Print_CRDS_CIF(GM,PU)
              ENDIF
