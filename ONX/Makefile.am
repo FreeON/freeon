@@ -32,25 +32,25 @@ GONX_SOURCES = \
 
 ONX_DEPENDENCIES  = \
   $(MondoMods_DEPENDENCY_FILES) \
-	$(top_srcdir)/TwoE/GRD/libGRD.la \
-	$(top_srcdir)/TwoE/INT/libINT.la \
-	$(top_srcdir)/TwoE/VRR/libVRR.la \
-	$(top_srcdir)/TwoE/HRR/libHRR.la \
-	$(top_srcdir)/TwoE/MSC/libTwoEMisc.la \
-	$(top_srcdir)/TwoE/MSC/shellpairstruct.mod \
-	$(top_srcdir)/TwoE/MSC/vscratchb.mod \
-	$(top_srcdir)/TwoE/MSC/getatompairmod.mod
+  $(top_srcdir)/TwoE/GRD/libGRD.la \
+  $(top_srcdir)/TwoE/INT/libINT.la \
+  $(top_srcdir)/TwoE/VRR/libVRR.la \
+  $(top_srcdir)/TwoE/HRR/libHRR.la \
+  $(top_srcdir)/TwoE/MSC/libTwoEMisc.la \
+  $(top_srcdir)/TwoE/MSC/shellpairstruct.mod \
+  $(top_srcdir)/TwoE/MSC/vscratchb.mod \
+  $(top_srcdir)/TwoE/MSC/getatompairmod.mod
 
 GONX_DEPENDENCIES = \
   $(MondoMods_DEPENDENCY_FILES) \
-	$(top_srcdir)/TwoE/GRD/libGRD.la \
-	$(top_srcdir)/TwoE/INT/libINT.la \
-	$(top_srcdir)/TwoE/VRR/libVRR.la \
-	$(top_srcdir)/TwoE/HRR/libHRR.la \
-	$(top_srcdir)/TwoE/MSC/libTwoEMisc.la \
-	$(top_srcdir)/TwoE/MSC/shellpairstruct.mod \
-	$(top_srcdir)/TwoE/MSC/vscratchb.mod \
-	$(top_srcdir)/TwoE/MSC/getatompairmod.mod
+  $(top_srcdir)/TwoE/GRD/libGRD.la \
+  $(top_srcdir)/TwoE/INT/libINT.la \
+  $(top_srcdir)/TwoE/VRR/libVRR.la \
+  $(top_srcdir)/TwoE/HRR/libHRR.la \
+  $(top_srcdir)/TwoE/MSC/libTwoEMisc.la \
+  $(top_srcdir)/TwoE/MSC/shellpairstruct.mod \
+  $(top_srcdir)/TwoE/MSC/vscratchb.mod \
+  $(top_srcdir)/TwoE/MSC/getatompairmod.mod
 
 SOURCES_DEPCHECK = \
   $(ONX_SOURCES) \
@@ -71,7 +71,7 @@ ONXInit.o : \
 
 ONXFillOut.o : \
   ONXParameters.o \
-	ONXGet.o
+  ONXGet.o
 
 ONXRng.o : \
   ONXParameters.o \
@@ -82,30 +82,31 @@ ONXCtrSclg.o : \
 
 ONX2List.o : \
   ONX2DataType.o \
-	ONXParameters.o
+  ONXParameters.o
 
 ONX2ComputK.o : \
   ONX2DataType.o \
-	ONXParameters.o
+  ONXParameters.o \
+  ONXGet.o
 
 ONX2.o : \
   ONX2DataType.o \
-	ONX2List.o \
-	ONX2ComputK.o \
-	ONXInit.o \
-	ONXCtrSclg.o \
-	ONXRng.o \
-	ONXFillOut.o \
-	ONXGet.o
+  ONX2List.o \
+  ONX2ComputK.o \
+  ONXInit.o \
+  ONXCtrSclg.o \
+  ONXRng.o \
+  ONXFillOut.o \
+  ONXGet.o
 
 GONX2ComputDK.o : \
   ONX2DataType.o \
-	ONXParameters.o \
-	ONX2List.o
+  ONXParameters.o \
+  ONX2List.o
 
 GONX2.o : \
   ONX2DataType.o \
-	ONXCtrSclg.o \
-	ONX2List.o \
-	GONX2ComputDK.o \
-	ONXGet.o
+  ONXCtrSclg.o \
+  ONX2List.o \
+  GONX2ComputDK.o \
+  ONXGet.o
