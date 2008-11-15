@@ -1,5 +1,0 @@
-Mondo_input = MD_F2_TRBO_125_STO-2G-SPLIT.inp
-Mondo_tar = ../mondoscf-1.0-alpha-latest.tar.bz2
-configure_options = FC=/usr/local/gcc-4.2.1/bin/gfortran F77=/usr/local/gcc-4.2.1/bin/gfortran CC=/usr/local/gcc-4.2.1/bin/gcc CFLAGS=-g FFLAGS=-g FCFLAGS=-g --prefix=/tmp/blabla
-make_options = -j2
-Mondo_reference = MD_F2_TRBO_125_STO-2G-SPLIT.reference
