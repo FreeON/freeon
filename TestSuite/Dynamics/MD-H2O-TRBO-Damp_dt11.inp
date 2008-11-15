@@ -1,0 +1,37 @@
+This MD is stable. Compare that with MD_H2O_TRBO-no_damping.inp which is not.
+
+<BeginOptions>
+
+Charge=0
+Multiplicity=1
+
+Grad=(MolecularDynamics)
+
+DebugAll=(MaxDebug,CheckSums)
+
+Guess=SuperPos
+SCFMethod=(RH)
+BasisSets=(3-21G-SPLIT)
+
+ModelChem=(HF)
+
+Accuracy=(good)
+SCFConvergence=(DIIS)
+
+MinSCF=12
+MaxSCF=12
+
+MDNumSCF=2
+
+MaxMDStep=20000
+MDMethod=Verlet
+MDProjection=DMTRBO_Damp_dt11
+DeltaTime=0.5
+
+<EndOptions>
+
+<BeginGeometry>
+ O        0.80000        0.00000        0.50231
+ H        0.00000        0.00000        0.00000
+ H        1.60000        0.00000        0.00000
+<EndGeometry>
