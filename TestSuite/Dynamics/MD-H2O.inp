@@ -1,0 +1,34 @@
+<BeginOptions>
+
+Charge=0
+Multiplicity=1
+
+G!rad=(Optimize,PrimInt)
+Grad=(MolecularDynamics)
+
+DebugAll=(MaxDebug,CheckSums)
+Guess=SuperPos
+SCFMethod=(RH)
+BasisSets=(STO-3G-SPLIT)
+ModelChem=(HF)
+Accuracy=(verytight)
+SCFConvergence=(DIIS)
+Geometry=(InAngstroms)
+
+MinSCF=12
+MaxSCF=12
+
+MDProjection=FMVerlet0
+MDMethod=Verlet
+DeltaTime=0.25
+MaxMDStep=10
+MDNumSCF=2
+TempIntScaling=600
+
+<EndOptions>
+
+<BeginGeometry>
+O        7.16798       -1.27787        0.18222
+H        6.53299       -0.52970        0.26976
+H        7.26200       -1.57636        1.12738
+<EndGeometry>

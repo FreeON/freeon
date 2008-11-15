@@ -1,0 +1,47 @@
+<BeginOptions>
+
+Charge=0
+Multiplicity=1
+DebugAll=(MinDebug,CheckSums)
+Guess=SuperPos
+SCFMethod=(TC2)
+SP2=MaxDebug
+SPTwoTrix=1.d-5
+BasisSets=(3-21G-SPLIT)
+ModelChem=(HF)
+Accuracy=(loose)
+SCFConvergence=(DIIS)
+Geometry=(InAngstroms)
+
+MinSCF=12
+MaxSCF=12
+
+Grad=MolecularDynamics
+MDProjection=DMTRBO
+MDMethod=Verlet
+DeltaTime=0.5
+MaxMDStep=10000
+MDNumSCF=0
+MDDamping=0.2
+MDDampStep=10000
+
+T!hermostat=ActionControlTheory
+A!CTMaxForceError=1.D-3
+A!CTAlpha=1.D-2
+A!CTBeta=1.D-2
+
+T!hermostat=Berendsen
+T!empScaling=100
+T!empIntScaling=100000
+B!erendsenTau=5
+
+<EndOptions>
+
+<BeginGeometry>
+  c     0.1882033500     0.0639826296    -0.0012169723    -0.0032499362    -0.0130983851    -0.0021252018
+  c     1.4531070828     0.0170234782     0.0017072570    -0.0058720914     0.0027461767     0.0023258014
+  f    -0.6018604811    -1.0864654989     0.0263692325     0.0025532746     0.0013558534     0.0004719641
+  f    -0.5894273285     1.1546811846    -0.0254559935    -0.0000666044     0.0048402250     0.0001051056
+  f     2.1447206880    -1.1063098205     0.0402739834     0.0011904268     0.0015029977    -0.0005736212
+  f     2.2032007389     1.1224100134    -0.0428946379     0.0020899495    -0.0011542958    -0.0001302698
+<EndGeometry>
