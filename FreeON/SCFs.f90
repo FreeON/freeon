@@ -174,7 +174,7 @@ CONTAINS
         IF(SCF_STATUS == DIIS_NOPATH) THEN
           IConAls = DIIS_CONALS
           ODA_DONE = .TRUE.
-          CALL MondoLogPlain("Turning on DIIS")
+!          CALL MondoLogPlain("Turning on DIIS")
         ELSE
           IConAls = ODA_CONALS
         ENDIF
@@ -274,7 +274,6 @@ CONTAINS
     ! The options...
     IF(DoCPSCF)THEN
       CALL DensityLogic(cSCF,cBAS,cGEO,N,S,O,D,CPSCF_O=.TRUE.)
-      CALL DensityBuild(N,S,M)
       IF(cSCF.EQ.0)S%Action%C(1)=CPSCF_START_RESPONSE
       IF(cSCF.GT.0)S%Action%C(1)=CPSCF_FOCK_BUILD
       IF(cSCF.GT.0)THEN
@@ -283,6 +282,7 @@ CONTAINS
         IF(HasHF(Modl)) CALL Invoke('ONX',N,S,M)
         IF(HasDFT(Modl)) THEN
           CALL Halt('SCFs: DFT-Response not yet supported!')
+          CALL DensityBuild(N,S,M)
           CALL Invoke('HiCu',N,S,M)
         ENDIF
       ENDIF
@@ -295,41 +295,27 @@ CONTAINS
       CALL DensityLogic(cSCF,cBAS,cGEO,N,S,O,D)
       CALL DensityBuild(N,S,M)
       CALL FockBuild(cSCF,cBAS,N,S,O,M)
-
       ! Select the Case
       SELECT CASE (IConAls)
-
       CASE (DIIS_CONALS)
-  !!$      CALL MondoLog(DEBUG_MAXIMUM, "SCFCycle", "DIIS_CONALS")
         CALL Invoke('DIIS',N,S,M)
         CALL SolveSCF(cBAS,N,S,O,M)
         CALL Invoke('SCFstats',N,S,M)
-
       CASE (ODA_CONALS)
-  !!$      CALL MondoLog(DEBUG_MAXIMUM, "SCFCycle", "ODA_CONALS")
         CALL SolveSCF(cBAS,N,S,O,M)
         CALL Invoke('ODA',N,S,M)
         IF(HasDFT(O%Models(cBAS)))THEN
           ! Rebuild non-linear KS matrix
           CALL DensityLogic(cSCF,cBAS,cGEO,N,S,O,D)
           CALL DensityBuild(N,S,M)
-#ifdef DIPMW
           CALL Invoke('HiCu',N,S,M)
-          CALL Invoke('DipMW',N,S,M)
-          IF(.TRUE.) STOP
-#else
-          CALL Invoke('HiCu',N,S,M)
-#endif
           CALL Invoke('FBuild',N,S,M)
         ENDIF
         CALL SolveSCF(cBAS,N,S,O,M)
         CALL Invoke('SCFstats',N,S,M)
-
       CASE (NO_CONALS)
-  !!$      CALL MondoLog(DEBUG_MAXIMUM, "SCFCycle", "NO_CONALS")
         CALL SolveSCF(cBAS,N,S,O,M)
         CALL Invoke('SCFstats',N,S,M)
-
       CASE DEFAULT
         CALL MondoHalt(DRIV_ERROR,'Logic failure in SCFCycle')
       END SELECT
@@ -1110,13 +1096,11 @@ CONTAINS
 !!$       CALL NLATTFORCE_U(cBAS,cGEO,G,B,N,O,S,M)
        CALL Invoke('UForce',N,S,M)
     ENDIF
-    ! Build density with last DM
-    CALL Invoke('MakeRho',N,S,M)
     ! Coulomb part
     CALL Invoke('JForce',N,S,M)
     ! DFT exchange corrleation term
     IF(HasDFT(O%Models(cBas))) THEN
-!!$       CALL NLATTFORCE_XC(cBAS,cGEO,G,B,N,S,M)
+       CALL Invoke('MakeRho',N,S,M)
        CALL Invoke('XCForce',N,S,M)
     ENDIF
     ! Exact Hartree-Fock exchange component
