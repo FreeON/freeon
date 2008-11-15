@@ -145,7 +145,7 @@ PROGRAM MakeRho
 
     CASE('ForceEvaluation')
       ! Index check...
-      CALL MondoLog(DEBUG_NONE, TRIM(Prog), "Index Check: getting Dmat from "//TRIM(TrixFile('D',Args,1)))
+      CALL MondoLog(DEBUG_MAXIMUM, TRIM(Prog), "Index Check: getting Dmat from "//TRIM(TrixFile('D',Args,1)))
       CALL Get(Dmat,TrixFile('D',Args,1))
 
     CASE('StartResponse')
@@ -313,41 +313,41 @@ PROGRAM MakeRho
     RSumE2=Integrate_HGRho_new(RhoA,1,1,RhoA%NDist-NumAtoms)
     TotRSumE2 = Reduce(RSumE2)
     IF(MyID.EQ.0) THEN
-      CALL MondoLog(DEBUG_MINIMUM, "MakeRho", 'Rho_tot = '//TRIM(DblToChar(TotRSumE2)))
+      CALL MondoLog(DEBUG_MAXIMUM, "MakeRho", 'Rho_tot = '//TRIM(DblToChar(TotRSumE2)))
     ENDIF
   ELSEIF(NSMat.EQ.2)THEN
     RSumE2=Integrate_HGRho_new(RhoA,1,1,RhoA%NDist-NumAtoms)
     TotRSumE2 = Reduce(RSumE2)
-    IF(MyID.EQ.0) CALL MondoLog(DEBUG_MINIMUM, "MakeRho", 'Rho_tot = '//TRIM(DblToChar(TotRSumE2)))
+    IF(MyID.EQ.0) CALL MondoLog(DEBUG_MAXIMUM, "MakeRho", 'Rho_tot = '//TRIM(DblToChar(TotRSumE2)))
     RSumE2=Integrate_HGRho_new(RhoA,2,1,RhoA%NDist-NumAtoms)
     TotRSumE2 = Reduce(RSumE2)
-    IF(MyID.EQ.0) CALL MondoLog(DEBUG_MINIMUM, "MakeRho", 'Rho_alp = '//TRIM(DblToChar(TotRSumE2)))
+    IF(MyID.EQ.0) CALL MondoLog(DEBUG_MAXIMUM, "MakeRho", 'Rho_alp = '//TRIM(DblToChar(TotRSumE2)))
     RSumE2=Integrate_HGRho_new(RhoA,3,1,RhoA%NDist-NumAtoms)
     TotRSumE2 = Reduce(RSumE2)
-    IF(MyID.EQ.0) CALL MondoLog(DEBUG_MINIMUM, "MakeRho", 'Rho_bet = '//TRIM(DblToChar(TotRSumE2)))
+    IF(MyID.EQ.0) CALL MondoLog(DEBUG_MAXIMUM, "MakeRho", 'Rho_bet = '//TRIM(DblToChar(TotRSumE2)))
   ELSEIF(NSMat.EQ.4)THEN
     RSumE2=Integrate_HGRho_new(RhoA,1,1,RhoA%NDist-NumAtoms)
-    IF(MyID.EQ.0) CALL MondoLog(DEBUG_MINIMUM, "MakeRho", 'Rho_tot = '//TRIM(DblToChar(TotRSumE2)))
+    IF(MyID.EQ.0) CALL MondoLog(DEBUG_MAXIMUM, "MakeRho", 'Rho_tot = '//TRIM(DblToChar(TotRSumE2)))
   ENDIF
-  IF(MyID.EQ.0) CALL MondoLog(DEBUG_MINIMUM, "MakeRho", 'Rho_nuc = '//TRIM(DblToChar(RSumN)))
+  IF(MyID.EQ.0) CALL MondoLog(DEBUG_MAXIMUM, "MakeRho", 'Rho_nuc = '//TRIM(DblToChar(RSumN)))
 #else
   RSumE  =  Integrate_HGRho_new(RhoA,1,1                    ,RhoA%NDist-GM%NAtms)
   RSumN  =  Integrate_HGRho_new(RhoA,1,RhoA%NDist-GM%NAtms+1,RhoA%NDist         )
   IF(NSMat.EQ.1)THEN
     RSumE2=Integrate_HGRho_new(RhoA,1,1,RhoA%NDist-GM%NAtms)
-    CALL MondoLog(DEBUG_MINIMUM, "MakeRho", 'Rho_tot = '//TRIM(DblToChar(RSumE2)))
+    CALL MondoLog(DEBUG_MAXIMUM, "MakeRho", 'Rho_tot = '//TRIM(DblToChar(RSumE2)))
   ELSEIF(NSMat.EQ.2)THEN
     RSumE2=Integrate_HGRho_new(RhoA,1,1,RhoA%NDist-GM%NAtms)
-    CALL MondoLog(DEBUG_MINIMUM, "MakeRho", 'Rho_tot = '//TRIM(DblToChar(RSumE2)))
+    CALL MondoLog(DEBUG_MAXIMUM, "MakeRho", 'Rho_tot = '//TRIM(DblToChar(RSumE2)))
     RSumE2=Integrate_HGRho_new(RhoA,2,1,RhoA%NDist-GM%NAtms)
-    CALL MondoLog(DEBUG_MINIMUM, "MakeRho", 'Rho_alp = '//TRIM(DblToChar(RSumE2)))
+    CALL MondoLog(DEBUG_MAXIMUM, "MakeRho", 'Rho_alp = '//TRIM(DblToChar(RSumE2)))
     RSumE2=Integrate_HGRho_new(RhoA,3,1,RhoA%NDist-GM%NAtms)
-    CALL MondoLog(DEBUG_MINIMUM, "MakeRho", 'Rho_bet = '//TRIM(DblToChar(RSumE2)))
+    CALL MondoLog(DEBUG_MAXIMUM, "MakeRho", 'Rho_bet = '//TRIM(DblToChar(RSumE2)))
   ELSEIF(NSMat.EQ.4)THEN
     RSumE2=Integrate_HGRho_new(RhoA,1,1,RhoA%NDist-GM%NAtms)
-    CALL MondoLog(DEBUG_MINIMUM, "MakeRho", 'Rho_tot = '//TRIM(DblToChar(RSumE2)))
+    CALL MondoLog(DEBUG_MAXIMUM, "MakeRho", 'Rho_tot = '//TRIM(DblToChar(RSumE2)))
   ENDIF
-  CALL MondoLog(DEBUG_MINIMUM, "MakeRho", 'Rho_nuc = '//TRIM(DblToChar(RSumN)))
+  CALL MondoLog(DEBUG_MAXIMUM, "MakeRho", 'Rho_nuc = '//TRIM(DblToChar(RSumN)))
 #endif
   ! Calculate dipole and quadrupole moments
   CALL New(MP)
@@ -387,8 +387,8 @@ PROGRAM MakeRho
 #ifdef PARALLEL
     IF(MyID == ROOT) THEN
 #endif
-      CALL MondoLog(DEBUG_NONE, "MakeRho", TRIM(Mssg1))
-      CALL MondoLog(DEBUG_NONE, "MakeRho", TRIM(Mssg2))
+      CALL MondoLog(DEBUG_MAXIMUM, "MakeRho", TRIM(Mssg1))
+      CALL MondoLog(DEBUG_MAXIMUM, "MakeRho", TRIM(Mssg2))
 #ifdef PARALLEL
     ENDIF
 #endif
@@ -396,7 +396,7 @@ PROGRAM MakeRho
 #ifdef PARALLEL
     IF(MyID == ROOT) THEN
 #endif
-      CALL MondoLog(DEBUG_NONE, "MakeRho", TRIM(Mssg1))
+      CALL MondoLog(DEBUG_MAXIMUM, "MakeRho", TRIM(Mssg1))
 #ifdef PARALLEL
     ENDIF
 #endif

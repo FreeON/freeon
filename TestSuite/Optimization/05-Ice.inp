@@ -15,7 +15,7 @@ Multiplicity=1
 Guess=Superpos
 OutPut=XYZ
 Grad=(Optimize,PrimInt,NoGDIIS,BiSect,HBondOnly,NoFragmConnect,NonCovBend,NonCovTors)
-DebugAll=(MaxDebug,CheckSums)
+DebugAll=(MedDebug,CheckSums)
 
 SCFMethod=(TC2,TRS4)
 BasisSets=(STO-2G,Mod631Gss)

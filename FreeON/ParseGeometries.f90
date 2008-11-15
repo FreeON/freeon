@@ -199,9 +199,9 @@ CONTAINS
 
             ! Check for coordinate unit conversions.
             IF(G%Clone(iCLONE)%InAU) THEN
-              CALL MondoLog(DEBUG_NONE, "FreeON", "IGeo = "//TRIM(IntToChar(IGeo))//" in atomic units","LoadCoordinates")
+!              CALL MondoLog(DEBUG_NONE, "FreeON", "IGeo = "//TRIM(IntToChar(IGeo))//" in atomic units","LoadCoordinates")
             ELSE
-              CALL MondoLog(DEBUG_NONE, "FreeON", "IGeo = "//TRIM(IntToChar(IGeo))//" in Angstrom","LoadCoordinates")
+!              CALL MondoLog(DEBUG_NONE, "FreeON", "IGeo = "//TRIM(IntToChar(IGeo))//" in Angstrom","LoadCoordinates")
 
               ! For now we will transform the atomic units coordinates we read
               ! from hdf into Angstrom to get the right units after we "massage"
@@ -402,11 +402,6 @@ CONTAINS
 
     ! Parsing of misc geometry info
     G%InAU=OptKeyQ(Inp,GEOMETRY,IN_AU)
-    IF(G%InAU) THEN
-      CALL MondoLog(DEBUG_NONE, "FreeON", "Input coordinates read in atomic units","ParseCoordinates")
-    ELSE
-      CALL MondoLog(DEBUG_NONE, "FreeON", "Input coordinates read in Angstroms","ParseCoordinates")
-    ENDIF
 
     IF(OptKeyQ(Inp,GEOMETRY,Z_ORDER))THEN
       G%Ordrd=SFC_PEANO

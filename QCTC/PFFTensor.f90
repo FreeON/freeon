@@ -316,15 +316,15 @@ CONTAINS
     ! And here is the value we use, which takes into account direct summation 
     ! in the first loop below (CFac=1). 
     RMax=MAX(RMax,Accuracy**(-One/DBLE(LSwitch+1)))
-
-    RMax=3D0*RMax
-    KMax=3D0*KMax
-
+!!$
+!!$    RMax=3D0*RMax
+!!$    KMax=3D0*KMax
+!!$
     !---------------------------------------------------------------------------------
     ! REAL SPACE
     !---------------------------------------------------------------------------------
     BetaSq=Beta**2
-    CALL SetCellSets(CSMM,GM%PBC%AutoW%I,GM%PBC%BoxShape%D,'Radial',RMin_O=RMax)
+    CALL SetCellSets(CSMM,GM%PBC%AutoW%I,GM%PBC%BoxShape%D,'Tensor3D[R]','Radial',RMin_O=RMax)
     !
     DO NC = 1,CSMM%NCells-1 ! Leaves out central cell (CellSet is sorted, so PQ=0 is last)
        PQ(:) = CSMM%CellCarts%D(:,NC)
@@ -353,7 +353,7 @@ CONTAINS
     !---------------------------------------------------------------------------------
     ExpFac = Pi*Pi/BetaSq
     !
-    CALL SetCellSets(CSMM,GM%PBC%AutoW%I,RecpLatVec,'Radial',RMin_O=KMax)
+    CALL SetCellSets(CSMM,GM%PBC%AutoW%I,RecpLatVec,'Tensor3D[K]','Radial',RMin_O=KMax)
     !
     DO NC = 1,CSMM%NCells
        PQ(:) = CSMM%CellCarts%D(:,NC)
@@ -442,6 +442,7 @@ CONTAINS
     !
   END SUBROUTINE MakeTensor3D
 
+#ifdef LEGACY_CRAP
   SUBROUTINE MakeTensor3D_MED_OLD(MaxL,GM,Args,CS,TenC,TenS)
     INTEGER                           :: MaxL
     INTEGER                           :: I,J,K,L,M,LM,NC
@@ -612,7 +613,7 @@ CONTAINS
     ENDDO
     !
   END SUBROUTINE MakeTensor3D_MED_OLD
-
+#endif
 !========================================================================================
 !   Determine Cell Type
 !========================================================================================

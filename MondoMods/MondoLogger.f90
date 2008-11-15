@@ -128,7 +128,7 @@ CONTAINS
 
   END FUNCTION OpenLogfile
 
-  SUBROUTINE MondoLog(logLevel, tag, message, file_O, line_O)
+  SUBROUTINE MondoLog(logLevel, tag, message, file_O, line_O,NoIndent_O)
 
     CHARACTER(LEN=*), INTENT(IN)            :: message
     CHARACTER(LEN=*), INTENT(IN)            :: tag
@@ -136,30 +136,36 @@ CONTAINS
     CHARACTER(LEN=DEFAULT_CHR_LEN)          :: output
     CHARACTER(LEN=DEFAULT_CHR_LEN)          :: line_string
     INTEGER, OPTIONAL, INTENT(IN)           :: line_O
+    LOGICAL, OPTIONAL, INTENT(IN)           :: NoIndent_O
     INTEGER :: logLevel
     LOGICAL :: isOpen, fileOutput
 
     ! Check whether logLevel is sufficiently high.
-    IF(logLevel <= PrintFlags%Key) THEN
 
+    IF(logLevel <= PrintFlags%Key) THEN
       ! Open the logfile.
       fileOutput = OpenLogfile(OutFile, 123)
-
       ! Convert the line number into string.
       IF(PRESENT(line_O)) THEN
         WRITE(UNIT=line_string,FMT="(I20)") line_O
         line_string = ADJUSTL(line_string)
-
-        output=ProcessName(tag,line_string)
-
+        IF(PRESENT(NoIndent_O))THEN           
+           output=line_string
+        ELSE
+           output=ProcessName(tag,line_string)
+        ENDIF
      ELSEIF(PRESENT(file_O)) THEN
-
-        output=ProcessName(tag,file_O)
-
+        IF(PRESENT(NoIndent_O))THEN
+           output=line_string
+        ELSE
+           output=ProcessName(tag,file_O)
+        ENDIF
      ELSE
-
-        output=ProcessName(tag)
-
+        IF(PRESENT(NoIndent_O))THEN           
+           output=tag
+        ELSE
+           output=ProcessName(tag)
+        ENDIF
      ENDIF
 
      output=TRIM(output)//' '//TRIM(message)
@@ -204,7 +210,7 @@ CONTAINS
 
     CHARACTER(LEN=*), INTENT(IN) :: message
 
-    CALL MondoLog(DEBUG_NONE, "", message)
+    CALL MondoLog(DEBUG_NONE, "", message,NoIndent_O=.TRUE.)
 
   END SUBROUTINE MondoLogPlain
 

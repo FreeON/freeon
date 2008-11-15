@@ -590,7 +590,10 @@ CONTAINS
        !
        ! Fill in new geometries
        DO iCLONE=1,C%Geos%Clones
-         CALL NewGeomFill(C%Geos%Clone(iCLONE))
+          C%Geos%Clone(iCLONE)%Carts%D=C%Geos%Clone(iCLONE)%Displ%D
+          C%Geos%Clone(iCLONE)%PBC%BoxShape%D=C%Geos%Clone(iCLONE)%PBCDispl%D          
+          CALL MkGeomPeriodic(C%Geos%Clone(iCLONE),C%Sets%BSets(iCLONE,iBAS), &
+                              C%Opts%Thresholds(iBAS)%Dist,C%Opts%Thresholds(iBAS)%TwoE)
        ENDDO
        ! Bump counter and archive new geometries 
        C%Stat%Previous%I(3)=IGeo
@@ -1544,7 +1547,7 @@ CONTAINS
      GMLoc%Carts%D=GMLoc%Displ%D
      GMLoc%PBC%BoxShape%D=GMLoc%PBCDispl%D
 
-     CALL MakeGMPeriodic(GMLoc)
+     CALL MkGeomPeriodic(GMLoc)
      ! Depricated:
      ! CALL PBCInfoFromNewCarts(GMLoc%PBC)
    END SUBROUTINE NewGeomFill
@@ -1747,7 +1750,7 @@ CONTAINS
                              FactO*GMOld%PBC%BoxShape%D)
            ! apply lattice constraints, e.g. fixed volume
            CALL SetFixedLattice(Aux9,C%GOpt%ExtIntCs,C%GOpt%Constr,BoxShape_O=C%Geos%Clone(iCLONE)%PBC%BoxShape%D)
-!           CALL MakeGMPeriodic(C%Geos%Clone(iCLONE))
+!           CALL MkGeomPeriodic(C%Geos%Clone(iCLONE))
            ! Depricated:
            ! CALL PBCInfoFromNewCarts(C%Geos%Clone(iCLONE)%PBC)
 

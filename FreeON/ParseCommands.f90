@@ -63,14 +63,14 @@ CONTAINS
       N%M_HOME = HAVE_MONDO_HOME
       CALL MondoLog(DEBUG_NONE,"FreeON", "env variable $(MONDO_HOME) not set. Using "//trim(N%M_HOME), "LoadCommand")
     ELSE
-      CALL MondoLog(DEBUG_NONE, "FreeON", 'env variable $(MONDO_HOME) set to '//trim(N%M_HOME), "LoadCommand")
+!!      CALL MondoLog(DEBUG_NONE, "FreeON", 'env variable $(MONDO_HOME) set to '//trim(N%M_HOME), "LoadCommand")
     ENDIF
     CALL GetEnv('MONDO_EXEC',N%M_EXEC)
     IF(LEN(TRIM(N%M_EXEC)) == 0) THEN
       N%M_EXEC = TRIM(N%M_HOME)//"/bin"
       CALL MondoLog(DEBUG_NONE, "FreeON", 'env variable $(MONDO_EXEC) not set. Using '//TRIM(N%M_EXEC), "LoadCommand")
     ELSE
-      CALL MondoLog(DEBUG_NONE, "FreeON", 'env variable $(MONDO_EXEC) set to '//trim(N%M_EXEC), "LoadCommand")
+!!      CALL MondoLog(DEBUG_NONE, "FreeON", 'env variable $(MONDO_EXEC) set to '//trim(N%M_EXEC), "LoadCommand")
     ENDIF
     CALL GetEnv('MONDO_SCRATCH',N%M_SCRATCH)
     IF(LEN(TRIM(N%M_SCRATCH)) == 0) THEN
@@ -78,7 +78,7 @@ CONTAINS
       N%M_SCRATCH = HAVE_MONDO_SCRATCH
       MONDO_SCRATCH = HAVE_MONDO_SCRATCH
     ELSE
-      CALL MondoLog(DEBUG_NONE, "FreeON", 'env variable $(MONDO_SCRATCH) set to '//trim(N%M_SCRATCH), "LoadCommand")
+!!      CALL MondoLog(DEBUG_NONE, "FreeON", 'env variable $(MONDO_SCRATCH) set to '//trim(N%M_SCRATCH), "LoadCommand")
     ENDIF
 
     ! Set path names etc
@@ -98,8 +98,8 @@ CONTAINS
     PWDName=TRIM(N%M_PWD)//TRIM(N%SCF_NAME)
     ScrName=TRIM(N%M_SCRATCH)//TRIM(N%SCF_NAME)
 
-    CALL MondoLog(DEBUG_NONE, "FreeON", "setting PWDName to "//TRIM(PWDName), "LoadCommand")
-    CALL MondoLog(DEBUG_NONE, "FreeON", "setting ScrName to "//TRIM(ScrName), "LoadCommand")
+!!    CALL MondoLog(DEBUG_NONE, "FreeON", "setting PWDName to "//TRIM(PWDName), "LoadCommand")
+!!    CALL MondoLog(DEBUG_NONE, "FreeON", "setting ScrName to "//TRIM(ScrName), "LoadCommand")
 
     ! Input file with full path
     N%IFile=TRIM(N%M_PWD)//TRIM(Args%C%C(1))

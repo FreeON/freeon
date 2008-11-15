@@ -111,7 +111,7 @@ PROGRAM BlokAInv
   CALL BlockedAInv(A,Thresholds%Trix,GM,AInvDistanceThresh,Z,Zt,PerfMon)
   !CALL BlockedAInv(A,1d-12,GM,AInvDistanceThresh,Z,Zt,PerfMon)
 
-  IF(PrintFlags%Key>=DEBUG_MEDIUM)THEN
+  IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
     CALL PPrint(PerfMon,Prog)
     CALL PPrint(PerfMon,Prog,Unit_O=6)
   ENDIF
@@ -138,7 +138,7 @@ PROGRAM BlokAInv
     IF(Mx0>1.D2*Thresholds%Trix)THEN
       CALL Warn('In BlokAInv, failed test: '//TRIM(Mssg))
     ENDIF
-    CALL MondoLog(DEBUG_MAXIMUM, "BlokAInv", TRIM(ProcessName(Prog))//TRIM(Mssg))
+    CALL MondoLog(DEBUG_MEDIUM, "BlokAInv",TRIM(Mssg))
   ENDIF
   !  Put Z and ZT to disk
   CALL Put(Z,TrixFile('Z',Args))

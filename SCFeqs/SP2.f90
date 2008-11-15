@@ -82,14 +82,14 @@ PROGRAM DMP_SP2 ! Density matrix purification, SP2 variation
   CALL New(Tmp1)
   CALL New(Tmp2)
 
-  ! Some symmetry checks.
-  CALL New(PT)
-  CALL New(FT)
-
-  CALL Xpose(F, FT)
-  FT%MTrix%D = -FT%MTrix%D
-  CALL Add(F, FT, Tmp1)
-  CALL MondoLog(DEBUG_NONE, Prog, "FNorm(F-FT) = "//TRIM(FltToChar(FNorm(Tmp1))))
+!!$  ! Some symmetry checks.
+!!$  CALL New(PT)
+!!$  CALL New(FT)
+!!$
+!!$  CALL Xpose(F, FT)
+!!$  FT%MTrix%D = -FT%MTrix%D
+!!$  CALL Add(F, FT, Tmp1)
+!!$  CALL MondoLog(DEBUG_NONE, Prog, "FNorm(F-FT) = "//TRIM(FltToChar(FNorm(Tmp1))))
 
   MM=0
   Ne=Half*DBLE(NEl)
@@ -142,15 +142,15 @@ PROGRAM DMP_SP2 ! Density matrix purification, SP2 variation
   ! Orthogonal put and xform to AO rep and put
   CALL PutXForm(Prog,Args,P,POld,Tmp1)
 
-  ! Symmetry check.
-  CALL Xpose(P, PT)
-  PT%MTrix%D = -PT%MTrix%D
-  CALL Add(P, PT, Tmp2)
-  CALL MondoLog(DEBUG_NONE, "SP2", "FNorm(P-PT) = "//TRIM(FltToChar(FNorm(Tmp2))))
+!!$  ! Symmetry check.
+!!$  CALL Xpose(P, PT)
+!!$  PT%MTrix%D = -PT%MTrix%D
+!!$  CALL Add(P, PT, Tmp2)
+!!$  CALL MondoLog(DEBUG_NONE, "SP2", "FNorm(P-PT) = "//TRIM(FltToChar(FNorm(Tmp2))))
 
   ! Tidy up
-  CALL Delete(PT)
-  CALL Delete(FT)
+!!$  CALL Delete(PT)
+!!$  CALL Delete(FT)
   CALL Delete(F)
   CALL Delete(P)
   CALL Delete(Pold)

@@ -11,7 +11,7 @@
 Charge=0
 Multiplicity=2
 Grad=(Optimize,PrimInt,BiSect,NoGDIIS)
-DebugAll=(MaxDebug,CheckSums)
+DebugAll=(MinDebug,CheckSums)
 Guess=SuperPos
 SCFMethod=(RH,RH)
 BasisSets=(STO-3G,6-31G-SPLIT)

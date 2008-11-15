@@ -1427,7 +1427,7 @@ CONTAINS
       ENDDO
 
       ! Archive Geometry for next step
-      CALL MakeGMPeriodic(C%Geos%Clone(iCLONE))
+      CALL MkGeomPeriodic(C%Geos%Clone(iCLONE))
       C%Geos%Clone(1)%Carts%D = C%Geos%Clone(iCLONE)%Carts%D
       CALL GeomArchive(iBAS,iGEO+1,C%Nams,C%Opts,C%Sets,C%Geos)
 

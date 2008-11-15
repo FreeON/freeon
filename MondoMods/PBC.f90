@@ -19,7 +19,7 @@ MODULE PBC
 
 CONTAINS
   !--------------------------------------------------------------------
-  SUBROUTINE MakeGMPeriodic(GM,BS_O,Dist_O,TwoE_O,Rescale_O,SoftReset_O)
+  SUBROUTINE MkGeomPeriodic(GM,BS_O,Dist_O,TwoE_O,Rescale_O,SoftReset_O)
     TYPE(CRDS)                     :: GM
     TYPE(BSET),OPTIONAL            :: BS_O
     REAL(DOUBLE),OPTIONAL          :: Dist_O,TwoE_O
@@ -142,8 +142,8 @@ CONTAINS
     IF(PRESENT(BS_O))THEN
 !       CALL Warn(' Hard reset of the PBC cell-sets')
        ! Logic check for optionals
-       IF(.NOT.PRESENT(Dist_O))CALL MondoHalt(DRIV_ERROR,' Missing Dist_O threshold option in MakeGMPeriodic ')
-       IF(.NOT.PRESENT(TwoE_O))CALL MondoHalt(DRIV_ERROR,' Missing TwoE_O threshold option in MakeGMPeriodic ')
+       IF(.NOT.PRESENT(Dist_O))CALL MondoHalt(DRIV_ERROR,' Missing Dist_O threshold option in MkGeomPeriodic ')
+       IF(.NOT.PRESENT(TwoE_O))CALL MondoHalt(DRIV_ERROR,' Missing TwoE_O threshold option in MkGeomPeriodic ')
        IF(AllocQ(GM%OvCells%Alloc))CALL Delete(GM%OvCells)
        IF(AllocQ(GM%InCells%Alloc))CALL Delete(GM%InCells)
        ! Find the min exponents for this basis set
@@ -157,18 +157,18 @@ CONTAINS
        ENDDO
        ! Generally, the minimum Gaussian exponent (MinExpt)in this basis set determines the periodic 
        ! images to be summed over in the Coulomb sums and in the periodic sum over basis functions:
-       CALL SetCellSets(GM%OvCells,GM%PBC%AutoW%I,GM%PBC%BoxShape%D,'Overlap',Dist_O,MinExpt,GM%NElec)
+       CALL SetCellSets(GM%OvCells,GM%PBC%AutoW%I,GM%PBC%BoxShape%D,'FreeON','Overlap',Dist_O,MinExpt,GM%NElec)
        !       CALL SetCellSets(GM%OvCells,GM%PBC%AutoW%I,GM%PBC%BoxShape%D,'HardCell',HardCell_O=1)
        ! If WellSeperated (WS) criteria is not zero, then we use a strict FMM definition to 
        ! determine the penetration cell sets.  NOTE: use of WS criteria can lead to errors for small cells,
        ! and also for non-cubic cells, but is usefull in debugging Coulomb sums.
        IF(GM%PBC%PFFWelSep.NE.0)THEN
-          CALL SetCellSets(GM%InCells,GM%PBC%AutoW%I,GM%PBC%BoxShape%D,'HardCell',HardCell_O=GM%PBC%PFFWelSep)
+          CALL SetCellSets(GM%InCells,GM%PBC%AutoW%I,GM%PBC%BoxShape%D,'FreeON','HardCell',HardCell_O=GM%PBC%PFFWelSep)
           CALL Warn(' Fixed FMM style WS = '//TRIM(IntToChar(GM%PBC%PFFWelSep))//RTRN &
                //', may lead to errors for small or non-cubic cells ') 
        ELSE
           !          CALL SetCellSets(GM%InCells,GM%PBC%AutoW%I,GM%PBC%BoxShape%D,'HardCell',HardCell_O=2)
-          CALL SetCellSets(GM%InCells,GM%PBC%AutoW%I,GM%PBC%BoxShape%D,'Penetration', &
+          CALL SetCellSets(GM%InCells,GM%PBC%AutoW%I,GM%PBC%BoxShape%D,'FreeON','Penetration', &
                CellSetsThreshold_O=TwoE_O,MinExpt_O=MinExpt,NElect_O=GM%NElec,MaxEll_O=GM%PBC%PFFMaxEll)
        ENDIF
     ELSE
@@ -208,12 +208,12 @@ CONTAINS
 !    CALL Print_CRDS(GM,PrintGeom_O='XYZ')
 !    CALL Print_CRDS(GM,Unit_O=6,PrintGeom_O='XSF')!,CrdInAng_O=.FALSE.)
     !
-  END SUBROUTINE MakeGMPeriodic
+  END SUBROUTINE MkGeomPeriodic
   !--------------------------------------------------------------------------
   ! Here is the new Cell Sets routine. This should become the only routine
   ! used for setting the CellSet data structure.   
   !--------------------------------------------------------------------------
-  SUBROUTINE SetCellSets(CS,AW,MAT,Option, &
+  SUBROUTINE SetCellSets(CS,AW,MAT,Prog,Option, &
        CellSetsThreshold_O,MinExpt_O,NElect_O,MaxEll_O,Rmin_O,HardCell_O)
     TYPE(CellSet)                        :: CS
     INTEGER,DIMENSION(3)                 :: AW
@@ -223,6 +223,7 @@ CONTAINS
          MaxT,TDa,TDb,TDc
     REAL(DOUBLE),OPTIONAL                :: Rmin_O,CellSetsThreshold_O,MinExpt_O
     INTEGER,OPTIONAL                     :: NElect_O,HardCell_O,MaxEll_O
+    CHARACTER(LEN=*)                     :: Prog
     CHARACTER(LEN=*)                     :: Option
     CHARACTER(LEN=132)                   :: Mssg
     !
@@ -421,9 +422,9 @@ CONTAINS
                    !-----------------------------------------------------------------------------------
                    T=Half*MinExpt*PQ2MinSep
                    InCell=NElect*EXP(-T)>CellSetsThreshold
-
+                   IF(InCell)R2Min=MAX(PQ2MinSep,R2Min)
                 ELSE
-                   CALL Halt(' Unknown option to SetCellSets ')
+                   CALL Halt('A Unknown option to SetCellSets, OPTION=<'//Option//'>')
                 ENDIF
                 !-------------------------------------------------------------------------------------
                 ! Here we are just counting how many cells.  See below for coments re double counting
@@ -510,7 +511,7 @@ CONTAINS
                    T=Half*MinExpt*PQ2MinSep
                    InCell=NElect*EXP(-T)>CellSetsThreshold
                 ELSE
-                   CALL Halt(' Unknown option to SetCellSets ')
+                   CALL Halt('B Unknown option to SetCellSets, OPTION=<'//Option//'>')
                 ENDIF
                 !----------------------------------------------------------------------
                 ! Here is the filling in of the cell sets array
@@ -534,15 +535,10 @@ CONTAINS
        ENDIF
 
     ELSE
-       CALL Halt(' Unknown option to SetCellSets ')
+       CALL Halt('C Unknown option to SetCellSets, OPTION=<'//Option//'>')
     ENDIF
     !
     CS%Radius=SQRT(R2Min)
-
-
-!!$
-!!$    IF(Option=='Penetration')WRITE(*,*)' RADIUS/2 = ',SQRT(R2Min)/Two
-
 
     !-------------------------------------------------------------------------------
     ! Sort so that we start furthest away, adding in the smallest contributions
@@ -550,13 +546,10 @@ CONTAINS
     !-------------------------------------------------------------------------------
     CALL Sort_CellSet(CS,Order_O=2)
 
-    Mssg=ProcessName("SetCellSets",TRIM(Option))
-    Mssg=TRIM(Mssg)//' Cells = <'//TRIM(IntToChar(CS%NCells))//'>, Radius = <' &
-         //TRIM(DblToShrtChar(CS%Radius))//'>'
+    CALL MondoLog(DEBUG_MEDIUM,Prog, &
+         'Cells = <'//TRIM(IntToChar(CS%NCells))//'>, Radius = <'//TRIM(DblToShrtChar(CS%Radius))//'>' &
+         ,TRIM(Option))
 
-
-
-    WRITE(*,*)TRIM(Mssg)
     !     CALL PPrint_CellSet(CS,Option,Unit_O=6)
   END SUBROUTINE SetCellSets
   !--------------------------------------------------------------------------
