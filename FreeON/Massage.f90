@@ -62,6 +62,13 @@ CONTAINS
       GBeg=1
       GEnd=G%Clones
     ENDIF
+
+    IF(G%Clone(GBeg)%InAU) THEN
+      CALL MondoLog(DEBUG_NONE, "FreeON", "Input coordinates read in atomic units","MassageCoordinates")
+    ELSE
+      CALL MondoLog(DEBUG_NONE, "FreeON", "Input coordinates read in Angstroms","MassageCoordinates")
+    ENDIF
+
     DO I=GBeg,GEnd
       CALL ToAtomicUnits(G%Clone(I))
       CALL PeriodicXLate(G%Clone(I))
@@ -272,6 +279,7 @@ CONTAINS
   !============================================================================
   SUBROUTINE ToAtomicUnits(G)
     TYPE(CRDS) :: G
+
     IF(G%InAU) RETURN
     G%InAU=.TRUE.
     G%Carts%D    = AngstromsToAU*G%Carts%D

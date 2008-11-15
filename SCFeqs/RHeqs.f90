@@ -89,14 +89,14 @@ PROGRAM RHEqs
   CASE DEFAULT;CALL Halt(' RHeqs: sF%NSMat doesn''t have an expected value! ')
   END SELECT
 
-  ! Some symmetry checks.
-  CALL New(FT)
-
-  CALL Xpose(sF, FT)
-  FT%MTrix%D = -FT%MTrix%D
-  CALL Add(sF, FT, sTmp1)
-  CALL MondoLog(DEBUG_MINIMUM, "RHeqs", "FNorm(F-FT) = "//TRIM(DblToChar(FNorm(sTmp1))))
-  CALL Delete(FT)
+!!$  ! Some symmetry checks.
+!!$  CALL New(FT)
+!!$
+!!$  CALL Xpose(sF, FT)
+!!$  FT%MTrix%D = -FT%MTrix%D
+!!$  CALL Add(sF, FT, sTmp1)
+!!$  CALL MondoLog(DEBUG_MINIMUM, "RHeqs", "FNorm(F-FT) = "//TRIM(DblToChar(FNorm(sTmp1))))
+!!$  CALL Delete(FT)
 
   CALL New(F,(/NRow,NCol/))
   CALL SetEq(F,sF)

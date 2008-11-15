@@ -20,7 +20,7 @@
  Multiplicity=1                                                                                   
  Guess=SuperPos                                                                                   
  Grad=(Optimize,PrimInt,BiSect)                                                           
- DebugAll=(MaxDebug,CheckSums,MaxGeOp)                                                            
+ DebugAll=(MinDebug,CheckSums,MaxGeOp)                                                            
  SCFMethod=(RH)                                                                                   
  BasisSets=(STO-3G-SPLIT)                                                                         
  ModelChem=(HF)                                                                                   

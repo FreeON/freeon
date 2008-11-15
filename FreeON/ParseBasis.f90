@@ -76,11 +76,11 @@ CONTAINS
       BaseFile=TRIM(N%M_HOME)//'BasisSets/'//TRIM(B%BName(J))//BasF
       INQUIRE(FILE=BaseFile,EXIST=Exists)
       IF(Exists)THEN
-        CALL MondoLog(DEBUG_NONE, "FreeON","loading external basis set  "//TRIM(BaseFile),"LoadBasisSets")
+        CALL MondoLog(DEBUG_MAXIMUM, "FreeON","loading external basis set  "//TRIM(BaseFile),"LoadBasisSets")
         CALL OpenASCII(BaseFile,Bas,OldFileQ_O=.TRUE.)
         BasU=Bas
       ELSE
-        CALL MondoLog(DEBUG_NONE, "FreeON","looking for <BeginBasisSet"//TRIM(B%BName(J))//"> delimiter in inputfile ","LoadBasisSets")
+        CALL MondoLog(DEBUG_MAXIMUM, "FreeON","looking for <BeginBasisSet"//TRIM(B%BName(J))//"> delimiter in inputfile ","LoadBasisSets")
         CALL LowCase(B%BName(J))
         BasU=Inp
       ENDIF
@@ -232,7 +232,7 @@ CONTAINS
           NC=0
           KFound=KFound+1
 
-          !!          CALL MondoLog(DEBUG_NONE, "ParseBasis", "found basis for "//TRIM(BS%AtNam%C(NK)))
+          !!          CALL MondoLog(DEBUG_MAXIMUM, "ParseBasis", "found basis for "//TRIM(BS%AtNam%C(NK)))
 
           DO
             READ(BasU,DEFAULT_CHR_FMT,END=99)Line

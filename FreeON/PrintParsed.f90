@@ -42,7 +42,7 @@ CONTAINS
   !===============================================================================================
   ! PRINT THE MONDOSCF BANNER AND THE INPUT FILE TO THE OUTPUT FILE
   !===============================================================================================
-  SUBROUTINE PrintsStartUp(N)
+  SUBROUTINE StartUpHeader(N)
     TYPE(FileNames)    :: N
     CHARACTER(LEN=DCL) :: OFile,M_HOST,M_MACH,M_SYST,M_VRSN,M_PLAT
     CHARACTER(LEN=500) :: Line
@@ -64,7 +64,8 @@ CONTAINS
 
     ! Print the Input File to the Output File
     OPEN(UNIT=Inp,FILE=N%IFile,STATUS='Old')
-    CALL MondoLogPlain("--------- input file = "//TRIM(N%IFile))
+
+    CALL MondoLogPlain("----------->> input file = "//TRIM(N%IFile))
     DO
       READ(Inp, '(A500)', END=101) Line
       CALL MondoLogPlain(TRIM(Line))
@@ -73,35 +74,6 @@ CONTAINS
     CLOSE(Inp)
     CALL MondoLogPlain("--------- end of input file")
 
-!!$    CALL MondoLogPlain("")
-!!$    CALL MondoLogPlain("FFFFFFFFFFFFFFFFFFFFFF                                                                 OOOOOOOOO     NNNNNNNN        NNNNNNNN ")
-!!$    CALL MondoLogPlain("F::::::::::::::::::::F                                                               OO:::::::::OO   N:::::::N       N::::::N ")
-!!$    CALL MondoLogPlain("F::::::::::::::::::::F                                                             OO:::::::::::::OO N::::::::N      N::::::N ")
-!!$    CALL MondoLogPlain("FF::::::FFFFFFFFF::::F                                                            O:::::::OOO:::::::ON:::::::::N     N::::::N ")
-!!$    CALL MondoLogPlain("  F:::::F       FFFFFFrrrrr   rrrrrrrrr       eeeeeeeeeeee        eeeeeeeeeeee    O::::::O   O::::::ON::::::::::N    N::::::N ")
-!!$    CALL MondoLogPlain("  F:::::F             r::::rrr:::::::::r    ee::::::::::::ee    ee::::::::::::ee  O:::::O     O:::::ON:::::::::::N   N::::::N ")
-!!$    CALL MondoLogPlain("  F::::::FFFFFFFFFF   r:::::::::::::::::r  e::::::eeeee:::::ee e::::::eeeee:::::eeO:::::O     O:::::ON:::::::N::::N  N::::::N ")
-!!$    CALL MondoLogPlain("  F:::::::::::::::F   rr::::::rrrrr::::::re::::::e     e:::::ee::::::e     e:::::eO:::::O     O:::::ON::::::N N::::N N::::::N ")
-!!$    CALL MondoLogPlain("  F:::::::::::::::F    r:::::r     r:::::re:::::::eeeee::::::ee:::::::eeeee::::::eO:::::O     O:::::ON::::::N  N::::N:::::::N ")
-!!$    CALL MondoLogPlain("  F::::::FFFFFFFFFF    r:::::r     rrrrrrre:::::::::::::::::e e:::::::::::::::::e O:::::O     O:::::ON::::::N   N:::::::::::N ")
-!!$    CALL MondoLogPlain("  F:::::F              r:::::r            e::::::eeeeeeeeeee  e::::::eeeeeeeeeee  O:::::O     O:::::ON::::::N    N::::::::::N ")
-!!$    CALL MondoLogPlain("  F:::::F              r:::::r            e:::::::e           e:::::::e           O::::::O   O::::::ON::::::N     N:::::::::N ")
-!!$    CALL MondoLogPlain("FF:::::::FF            r:::::r            e::::::::e          e::::::::e          O:::::::OOO:::::::ON::::::N      N::::::::N ")
-!!$    CALL MondoLogPlain("F::::::::FF            r:::::r             e::::::::eeeeeeee   e::::::::eeeeeeee   OO:::::::::::::OO N::::::N       N:::::::N ")
-!!$    CALL MondoLogPlain("F::::::::FF            r:::::r              ee:::::::::::::e    ee:::::::::::::e     OO:::::::::OO   N::::::N        N::::::N ")
-!!$    CALL MondoLogPlain("FFFFFFFFFFF            rrrrrrr                eeeeeeeeeeeeee      eeeeeeeeeeeeee       OOOOOOOOO     NNNNNNNN         NNNNNNN ")
-!!$    CALL MondoLogPlain("")
-!
-!
-!    CALL MondoLogPlain("")
-!    CALL MondoLogPlain("oooooooooooo                                .oooooo.   ooooo      ooo ")
-!    CALL MondoLogPlain("`888'     `8                               d8P'  `Y8b  `888b.     `8' ")
-!    CALL MondoLogPlain(" 888         oooo d8b  .ooooo.   .ooooo.  888      888  8 `88b.    8  ")
-!    CALL MondoLogPlain(" 888oooo8    `888""8P d88' `88b d88' `88b 888      888  8   `88b.  8  ")
-!    CALL MondoLogPlain(" 888    "     888     888ooo888 888ooo888 888      888  8     `88b.8  ")
-!    CALL MondoLogPlain(" 888          888     888    .o 888    .o `88b    d88'  8       `888  ")
-!    CALL MondoLogPlain("o888o        d888b    `Y8bod8P' `Y8bod8P'  `Y8bood8P'  o8o        `8  ")
-!    
     CALL MondoLogPlain(' __________                ____________   __  ')
     CALL MondoLogPlain(' ___  ____/__________________  __ \__  | / /  ')
     CALL MondoLogPlain(' __  /_   __  ___/  _ \  _ \  / / /_   |/ /   ')
@@ -151,13 +123,20 @@ CONTAINS
       CALL MondoLogPlain("current stacksize limit: "//TRIM(FltToShrtChar(StackCurrent/1024.0D0/1024.0D0))//" MB")
       CALL MondoLogPlain("")
     ENDIF
-    CALL MondoLogPlain("current HDF file = "//TRIM(N%HFile))
-    CALL MondoLogPlain("")
+
+    ! Print out some file settings.
+    CALL MondoLog(DEBUG_MEDIUM, "FreeON", "CWD          = "//TRIM(N%M_PWD), "StartUpHeader")
+    CALL MondoLog(DEBUG_MEDIUM, "FreeON", 'InputFile    = '//TRIM(N%IFile), "StartUpHeader")
+    CALL MondoLog(DEBUG_MEDIUM, "FreeON", 'OutputFile   = '//TRIM(N%OFile), "StartUpHeader")
+    CALL MondoLog(DEBUG_MEDIUM, "FreeON", 'LogFile      = '//TRIM(N%LFile), "StartUpHeader")
+    CALL MondoLog(DEBUG_MEDIUM, "FreeON", 'hdf          = '//TRIM(N%HFile), "StartUpHeader")
+    CALL MondoLog(DEBUG_MEDIUM, "FreeON", 'GeometryFile = '//TRIM(N%GFile), "StartUpHeader")
+    CALL MondoLog(DEBUG_MEDIUM, "FreeON", 'RestartFile  = '//TRIM(N%RFile), "StartUpHeader")
 
     ! Print out a timestamp.
     CALL TimeStamp("Starting MondoSCF")
     CALL MondoLogPlain("")
 
-  END SUBROUTINE PrintsStartUp
+  END SUBROUTINE StartUpHeader
 
 END MODULE PrintParsed

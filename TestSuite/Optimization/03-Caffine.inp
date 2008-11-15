@@ -6,7 +6,7 @@
 Charge=0
 Multiplicity=1
 
-DebugAll=(MaxDebug,CheckSums)
+DebugAll=(MinDebug,CheckSums)
 
 Grad=(Optimize,PrimInt,NoGDIIS,NoBackTr,DiagHess)
 

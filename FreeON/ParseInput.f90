@@ -38,6 +38,7 @@ MODULE ParseInput
   USE ParseExtraCoords
   USE PrettyPrint
   USE ParseProperties, ONLY: LoadPropertyOptions
+  USE PrintParsed
   USE MondoLogger
 
 CONTAINS
@@ -55,24 +56,21 @@ CONTAINS
     OutFile=C%Nams%OFile
     LogFile=C%Nams%LFile
 
-    ! Print out some file settings.
-    CALL MondoLog(DEBUG_NONE, "FreeON", "CWD          = "//TRIM(C%Nams%M_PWD), "ParseTheInput")
-    CALL MondoLog(DEBUG_NONE, "FreeON", 'InputFile    = '//TRIM(C%Nams%IFile), "ParseTheInput")
-    CALL MondoLog(DEBUG_NONE, "FreeON", 'OutputFile   = '//TRIM(C%Nams%OFile), "ParseTheInput")
-    CALL MondoLog(DEBUG_NONE, "FreeON", 'LogFile      = '//TRIM(C%Nams%LFile), "ParseTheInput")
-    CALL MondoLog(DEBUG_NONE, "FreeON", 'hdf          = '//TRIM(C%Nams%HFile), "ParseTheInput")
-
     ! Allocate state variables
     CALL New(C%Stat%Current,3)
     CALL New(C%Stat%Previous,3)
 
+    ! Print startup
+    CALL StartUpHeader(C%Nams)
+
+
+
     ! Parse generic options
     CALL LoadOptions(C%Nams,C%Opts)
-
     ! Print out some more file settings. The following filenames are only set
     ! now after loading the options.
-    CALL MondoLog(DEBUG_NONE, "FreeON", 'GeometryFile = '//TRIM(C%Nams%GFile), "ParseTheInput")
-    CALL MondoLog(DEBUG_NONE, "FreeON", 'RestartFile  = '//TRIM(C%Nams%RFile), "ParseTheInput")
+
+
 
     ! Parse dynamics options
     IF(C%Opts%Grad==GRAD_DO_DYNAMICS .OR. C%Opts%Grad==GRAD_DO_HYBRIDMC ) THEN
@@ -106,6 +104,7 @@ CONTAINS
     ! Check for Global conflicts.
     CALL ConflictCheck(C)
     !
-    !CALL PPrint(C%Geos%Clone(1),Unit_O=6)
+    !CALL PPrint(C%Geos%Clone(1),PrintGeom_O='PDB',Unit_O=6)
+    !STOP
   END SUBROUTINE ParseTheInput
 END MODULE ParseInput

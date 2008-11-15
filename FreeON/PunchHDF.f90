@@ -229,11 +229,11 @@ CONTAINS
     !---------------------------------------------------------------------------!
     chGEO=IntToChar(cGEO)
 
-    CALL MondoLog(DEBUG_NONE, "GeomArchive", "opening hdf file "//TRIM(N%HFile))
+    CALL MondoLog(DEBUG_MAXIMUM, "GeomArchive", "Archiving data in HDF file "//TRIM(N%HFile))
     HDFFileID=OpenHDF(N%HFile)
     DO iCLONE=1,G%Clones
       G%Clone(iCLONE)%Confg=cGEO
-      CALL MakeGMPeriodic(G%Clone(iCLONE),B%BSets(iCLONE,cBAS), &
+      CALL MkGeomPeriodic(G%Clone(iCLONE),B%BSets(iCLONE,cBAS), &
            O%Thresholds(cBAS)%Dist,O%Thresholds(cBAS)%TwoE)
       HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
       !      If we have ECPs, temporarily reset this geometries nuclear charges

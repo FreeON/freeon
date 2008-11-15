@@ -71,6 +71,7 @@ MODULE ParsingConstants
   INTEGER, PARAMETER :: DEBUG_MEDIUM   = 2       ! + sparsity, thresholds
   INTEGER, PARAMETER :: DEBUG_CHKSUMS  = 3       ! + check sums
   INTEGER, PARAMETER :: DEBUG_MAXIMUM  = 4       ! + intermediate values
+
   INTEGER, PARAMETER :: DEBUG_MATRICES = 482842  ! Print Matrices
   INTEGER, PARAMETER :: DEBUG_DENSITY  = 490485  ! Print Density
   INTEGER, PARAMETER :: DEBUG_BASISSET = 509843  ! Print Basis sets

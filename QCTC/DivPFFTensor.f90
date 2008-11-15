@@ -373,7 +373,7 @@ CONTAINS
     !---------------------------------------------------------------------------------
     ! REAL SPACE
     !---------------------------------------------------------------------------------
-    CALL SetCellSets(CSMM,GM%PBC%AutoW%I,GM%PBC%BoxShape%D,'Radial',RMin_O=RMax)
+    CALL SetCellSets(CSMM,GM%PBC%AutoW%I,GM%PBC%BoxShape%D,'DivTensor3d[R]','Radial',RMin_O=RMax)
     !
     DO NC = 1,CSMM%NCells-1 ! Leaves out central cell (CellSet is sorted, so PQ=0 is last)
        PQ(:)  =  CSMM%CellCarts%D(:,NC)
@@ -406,7 +406,7 @@ CONTAINS
     ! RECIPROCAL SPACE
     !---------------------------------------------------------------------------------
     ExpFac = Pi*Pi/BetaSq
-    CALL SetCellSets(CSMM,GM%PBC%AutoW%I,RecpLatVec,'Radial',RMin_O=KMax)
+    CALL SetCellSets(CSMM,GM%PBC%AutoW%I,RecpLatVec,'DivTensor3D[K]','Radial',RMin_O=KMax)
     !
     DO NC = 1,CSMM%NCells-1
        PQ(:)  = CSMM%CellCarts%D(:,NC)

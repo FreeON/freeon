@@ -27,7 +27,7 @@
 
 #include "MondoConfig.h"
 
-PROGRAM MondoSCF
+PROGRAM FreeON
   USE SCFs
   USE Macros
   USE Response
@@ -35,7 +35,6 @@ PROGRAM MondoSCF
   USE Optimizer
   USE ParseInput
   USE ZippyQuote
-  USE PrintParsed
   USE MDynamics
   USE MonteCarlo
   USE MondoLogger
@@ -54,16 +53,13 @@ PROGRAM MondoSCF
     CALL ParseTheInput(C)
     ! Initialize controls
     CALL InitGlobal(C)
-    ! Print startup
-    CALL PrintsStartUp(C%Nams)
     ! Much ado about gradients
-
-#if defined MD_DEBUG
-    CALL MondoLog(DEBUG_NONE, "MondoSCF", "this version uses "//TRIM(IntToChar(MD_DEBUG))//" SCFs for the TRBO MD")
-#endif
-
-    CALL MondoLog(DEBUG_NONE, "MondoSCF", "the hdf stores "//TRIM(IntToChar(RECYCLE_HDF))//" geometries")
-
+    !
+    IF(C%Opts%Grad/=GRAD_NO_GRAD) &
+      CALL MondoLog(DEBUG_MAXIMUM, "FreeON", "Variables in HDF recycled every "//TRIM(IntToChar(RECYCLE_HDF))//" geometry steps.")    
+!    IF(C%Opts%Grad==GRAD_DO_DYNAMICS) &
+!      CALL MondoLog(DEBUG_MAXIMUM, "FreeON", "Using "//TRIM(IntToChar(MD_DEBUG))//" SCF cycels for TRBO-MD.")
+    !
     SELECT CASE(C%Opts%Grad)
     CASE(GRAD_NO_GRAD)
       CALL SinglePoints(C)
@@ -71,6 +67,7 @@ PROGRAM MondoSCF
       CALL TDSCF(C)
     CASE(GRAD_GO_DOWNHILL)
       CALL Descender(C)
+      CALL MondoLog(DEBUG_MAXIMUM, "FreeON", "The hdf recycles variables every "//TRIM(IntToChar(RECYCLE_HDF))//" geometry steps")
     CASE(GRAD_TS_SEARCH_NEB)
       ! Place holder for whatever
       CALL Descender(C)
@@ -95,8 +92,8 @@ PROGRAM MondoSCF
     !--------------------------------------------------------
 #if defined(PARALLEL) && defined(MPI2)
   ENDIF
-  CALL AlignNodes("MONDOSCF")
+  CALL AlignNodes("FreeON")
   CALL FiniMPI()
 #endif
-END PROGRAM MondoSCF
+END PROGRAM FreeON
 

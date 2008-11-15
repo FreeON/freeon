@@ -59,7 +59,7 @@ CONTAINS
     TYPE(Controls) :: C
     INTEGER        :: iBAS,iGEO,iBBegin
 
-!!$    CALL MondoLog(DEBUG_NONE, "SinglePoints", "calculating energy of single geometry")
+!!$    CALL MondoLog(DEBUG_MAXIMUM, "SinglePoints", "calculating energy of single geometry")
     ! Loop over geometry
     DO iGEO = 1,1 !C%Geos%NGeom
       ! Init previous state
@@ -96,7 +96,7 @@ CONTAINS
     CALL OneEMats(cBAS,cGEO,C%Nams,C%Sets,C%Stat,C%Opts,C%MPIs)
 
     ! Allocate space for convergence statistics
-!!$    CALL MondoLog(DEBUG_NONE, "SCF", "hardcoded upper limit for SCFs = "//TRIM(IntToChar(MaxSCFs)))
+!!$    CALL MondoLog(DEBUG_MAXIMUM, "SCF", "hardcoded upper limit for SCFs = "//TRIM(IntToChar(MaxSCFs)))
     CALL New(ETot,(/MaxSCFs,C%Geos%Clones/),(/0,1/))
     CALL New(DMax,(/MaxSCFs,C%Geos%Clones/),(/0,1/))
     CALL New(DIIS,(/MaxSCFs,C%Geos%Clones/),(/0,1/))
@@ -108,7 +108,7 @@ CONTAINS
     !IF(.FALSE.) THEN
     !  IF(C%Opts%Grad == GRAD_GO_DOWNHILL) THEN
     !    IF(C%Opts%Guess /= GUESS_EQ_SUPR) THEN
-    !      CALL MondoLog(DEBUG_NONE, "SCF", "switching guess from "// &
+    !      CALL MondoLog(DEBUG_MAXIMUM, "SCF", "switching guess from "// &
     !        TRIM(IntToChar(C%Opts%Guess))// " to superposition")
     !      C%Opts%Guess = GUESS_EQ_SUPR
     !    ENDIF
@@ -119,16 +119,16 @@ CONTAINS
 !!$    SELECT CASE(C%Opts%Guess)
 !!$
 !!$    CASE(GUESS_EQ_SUPR)
-!!$      CALL MondoLog(DEBUG_NONE, "SCF", "Guess = "//TRIM(GUESS_SUPER))
+!!$      CALL MondoLog(DEBUG_MAXIMUM, "SCF", "Guess = "//TRIM(GUESS_SUPER))
 !!$
 !!$    CASE(GUESS_EQ_CORE)
-!!$      CALL MondoLog(DEBUG_NONE, "SCF", "Guess = "//TRIM(GUESS_CORE))
+!!$      CALL MondoLog(DEBUG_MAXIMUM, "SCF", "Guess = "//TRIM(GUESS_CORE))
 !!$
 !!$    CASE(GUESS_EQ_RESTART)
-!!$      CALL MondoLog(DEBUG_NONE, "SCF", "Guess = "//TRIM(GUESS_RESTART))
+!!$      CALL MondoLog(DEBUG_MAXIMUM, "SCF", "Guess = "//TRIM(GUESS_RESTART))
 !!$
 !!$    CASE DEFAULT
-!!$      CALL MondoLog(DEBUG_NONE, "SCF", "I do not know this Guess (Guess = "//TRIM(IntToChar(C%Opts%Guess))//")")
+!!$      CALL MondoLog(DEBUG_MAXIMUM, "SCF", "I do not know this Guess (Guess = "//TRIM(IntToChar(C%Opts%Guess))//")")
 !!$
 !!$    END SELECT
 
@@ -158,7 +158,7 @@ CONTAINS
     INTEGER         :: SCF_STATUS
     LOGICAL         :: DIIS_FAIL,ODA_DONE
 
-!!$    CALL MondoLog(DEBUG_NONE, "SCFLogic", "cSCF = "//TRIM(IntToChar(cSCF))//", Action = "//TRIM(S%Action%C(1)))
+!!$    CALL MondoLog(DEBUG_MAXIMUM, "SCFLogic", "cSCF = "//TRIM(IntToChar(cSCF))//", Action = "//TRIM(S%Action%C(1)))
 
     IF(cSCF == 0) THEN
       SCF_STATUS = NOT_CONVERGE
@@ -191,22 +191,22 @@ CONTAINS
 
     ! Defaults
     IF(cSCF < 1) THEN
-!!$      CALL MondoLog(DEBUG_NONE, "SCFLogic", "turning off IConAls because cSCF < 1")
+!!$      CALL MondoLog(DEBUG_MAXIMUM, "SCFLogic", "turning off IConAls because cSCF < 1")
       IConAls = NO_CONALS
     ENDIF
 
     IF(S%Action%C(1) == SCF_GUESSEQCORE .AND. cSCF < 1) THEN
-!!$      CALL MondoLog(DEBUG_NONE, "SCFLogic", "turning off IConAls because Core guess and cSCF < 1")
+!!$      CALL MondoLog(DEBUG_MAXIMUM, "SCFLogic", "turning off IConAls because Core guess and cSCF < 1")
       IConAls = NO_CONALS
     ENDIF
 
     IF(S%Action%C(1) == SCF_BASISSETSWITCH .AND. cSCF < 2) THEN
-!!$      CALL MondoLog(DEBUG_NONE, "SCFLogic", "turning off IConAls because basis switch and cSCF < 2")
+!!$      CALL MondoLog(DEBUG_MAXIMUM, "SCFLogic", "turning off IConAls because basis switch and cSCF < 2")
       IConAls = NO_CONALS
     ENDIF
 
     IF(S%Action%C(1) == SCF_RWBSS .AND. cSCF < 2) THEN
-!!$      CALL MondoLog(DEBUG_NONE, "SCFLogic", "turning off IConAls because rwbss and cSCF < 2")
+!!$      CALL MondoLog(DEBUG_MAXIMUM, "SCFLogic", "turning off IConAls because rwbss and cSCF < 2")
       IConAls = NO_CONALS
     ENDIF
 
@@ -221,16 +221,16 @@ CONTAINS
     SELECT CASE (IConAls)
 
     CASE(NO_CONALS)
-!!$      CALL MondoLog(DEBUG_NONE, "SCFLogic", "NO_CONALS")
+!!$      CALL MondoLog(DEBUG_MAXIMUM, "SCFLogic", "NO_CONALS")
 
     CASE(DIIS_CONALS)
-!!$      CALL MondoLog(DEBUG_NONE, "SCFLogic", "DIIS_CONALS")
+!!$      CALL MondoLog(DEBUG_MAXIMUM, "SCFLogic", "DIIS_CONALS")
 
     CASE(ODA_CONALS)
-!!$      CALL MondoLog(DEBUG_NONE, "SCFLogic", "ODA_CONALS")
+!!$      CALL MondoLog(DEBUG_MAXIMUM, "SCFLogic", "ODA_CONALS")
 
     CASE DEFAULT
-!!$      CALL MondoLog(DEBUG_NONE, "SCFLogic", "unknown")
+!!$      CALL MondoLog(DEBUG_MAXIMUM, "SCFLogic", "unknown")
 
     END SELECT
 
@@ -300,13 +300,13 @@ CONTAINS
       SELECT CASE (IConAls)
 
       CASE (DIIS_CONALS)
-  !!$      CALL MondoLog(DEBUG_NONE, "SCFCycle", "DIIS_CONALS")
+  !!$      CALL MondoLog(DEBUG_MAXIMUM, "SCFCycle", "DIIS_CONALS")
         CALL Invoke('DIIS',N,S,M)
         CALL SolveSCF(cBAS,N,S,O,M)
         CALL Invoke('SCFstats',N,S,M)
 
       CASE (ODA_CONALS)
-  !!$      CALL MondoLog(DEBUG_NONE, "SCFCycle", "ODA_CONALS")
+  !!$      CALL MondoLog(DEBUG_MAXIMUM, "SCFCycle", "ODA_CONALS")
         CALL SolveSCF(cBAS,N,S,O,M)
         CALL Invoke('ODA',N,S,M)
         IF(HasDFT(O%Models(cBAS)))THEN
@@ -326,7 +326,7 @@ CONTAINS
         CALL Invoke('SCFstats',N,S,M)
 
       CASE (NO_CONALS)
-  !!$      CALL MondoLog(DEBUG_NONE, "SCFCycle", "NO_CONALS")
+  !!$      CALL MondoLog(DEBUG_MAXIMUM, "SCFCycle", "NO_CONALS")
         CALL SolveSCF(cBAS,N,S,O,M)
         CALL Invoke('SCFstats',N,S,M)
 
@@ -371,10 +371,10 @@ CONTAINS
     ENDIF
 
     ! Convergence thresholds
-    CALL MondoLog(DEBUG_NONE, "ConvergedQ", "entering ConvergedQ")
+    CALL MondoLog(DEBUG_MAXIMUM, "ConvergedQ", "entering ConvergedQ")
 
     IF(DoCPSCF) THEN
-!!$      CALL MondoLog(DEBUG_NONE, "ConvergedQ", "entering DoSPSCF")
+!!$      CALL MondoLog(DEBUG_MAXIMUM, "ConvergedQ", "entering DoSPSCF")
       ETest=RTol(O%AccuracyLevels(cBAS))
       DTest=DTol(O%AccuracyLevels(cBAS))
       IF(cSCF==0)THEN
@@ -462,7 +462,7 @@ CONTAINS
         ConvergedQ=MIN(ConvergedQ,Converged(iCLONE))
       ENDDO
       ! Convergence announcement
-      IF(ConvergedQ.NE.NOT_CONVERGE.AND.cSCF>2)THEN!.AND.PrintFlags%Key>DEBUG_NONE)THEN
+      IF(ConvergedQ.NE.NOT_CONVERGE.AND.cSCF>2)THEN!.AND.PrintFlags%Key>DEBUG_MAXIMUM)THEN
   !!$      CALL MondoLogPlain(TRIM(Mssg))
   !!$      CALL MondoLogPlain("Normal CPSCF convergence")
       ENDIF
@@ -470,18 +470,18 @@ CONTAINS
     ELSE ! IF(DoCPSCF) THEN
 
       ! NORMAL HUMANS CONVERGENCE CRITERIA
-!!$      CALL MondoLog(DEBUG_NONE, "ConvergedQ", "entering else (DoSPSCF == .FALSE.)")
+!!$      CALL MondoLog(DEBUG_MAXIMUM, "ConvergedQ", "entering else (DoSPSCF == .FALSE.)")
 
       IF(IConAls==DIIS_CONALS) THEN
-  !!$      CALL MondoLog(DEBUG_NONE, "ConvergedQ", "IConAls == DIIS_CONALS")
+  !!$      CALL MondoLog(DEBUG_MAXIMUM, "ConvergedQ", "IConAls == DIIS_CONALS")
         DoDIIS=.TRUE.
         DoODA =.FALSE.
       ELSEIF(IConAls==ODA_CONALS) THEN
-  !!$      CALL MondoLog(DEBUG_NONE, "ConvergedQ", "IConAls == ODA_CONALS")
+  !!$      CALL MondoLog(DEBUG_MAXIMUM, "ConvergedQ", "IConAls == ODA_CONALS")
         DoDIIS=.FALSE.
         DoODA =.TRUE.
       ELSE
-  !!$      CALL MondoLog(DEBUG_NONE, "ConvergedQ", "IConAls neither DIIS_CONALS nor ODA_CONALS")
+  !!$      CALL MondoLog(DEBUG_MAXIMUM, "ConvergedQ", "IConAls neither DIIS_CONALS nor ODA_CONALS")
         DoDIIS=.FALSE.
         DoODA =.FALSE.
       ENDIF
@@ -492,7 +492,7 @@ CONTAINS
       ! Accumulate current statistics
       chGEO=IntToChar(iGEO)
       HDFFileID=OpenHDF(N%HFile)
-!!$      CALL MondoLog(DEBUG_NONE, "ConvergedQ", "looping over "//TRIM(IntToChar(G%Clones))//" clones")
+!!$      CALL MondoLog(DEBUG_MAXIMUM, "ConvergedQ", "looping over "//TRIM(IntToChar(G%Clones))//" clones")
       DO iCLONE=1,G%Clones
 
         HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
@@ -515,9 +515,9 @@ CONTAINS
         G%Clone(iCLONE)%ETotal=ETot%D(cSCF,iCLONE)
 
         ! Load current energy into energy vector.
-  !!$      CALL MondoLog(DEBUG_NONE, "ConvergedQ", "loading energy "//TRIM(FltToChar(G%Clone(iCLONE)%ETotal))//" into energy vector ("//TRIM(IntToChar(cSCF))//")")
+  !!$      CALL MondoLog(DEBUG_MAXIMUM, "ConvergedQ", "loading energy "//TRIM(FltToChar(G%Clone(iCLONE)%ETotal))//" into energy vector ("//TRIM(IntToChar(cSCF))//")")
         G%Clone(iCLONE)%ETotalPerSCF%D(cSCF) = G%Clone(iCLONE)%ETotal
-  !!$      CALL MondoLog(DEBUG_NONE, "ConvergedQ", "ETotalPerSCF = "//TRIM(DblVectToChar(G%Clone(iCLONE)%ETotalPerSCF, (/ 0, cSCF /))))
+  !!$      CALL MondoLog(DEBUG_MAXIMUM, "ConvergedQ", "ETotalPerSCF = "//TRIM(DblVectToChar(G%Clone(iCLONE)%ETotalPerSCF, (/ 0, cSCF /))))
 
         Converged(iCLONE)=NOT_CONVERGE
         IF(cSCF>1)THEN
@@ -551,17 +551,17 @@ CONTAINS
             ODAQ=Zero
           ENDIF
 
-    !!$      CALL MondoLog(DEBUG_NONE, "ConvergedQ", 'ODAQ  = '//TRIM(FltToChar(ODAQ)))
-    !!$      CALL MondoLog(DEBUG_NONE, "ConvergedQ", 'ETotQ = '//TRIM(FltToChar(ETotQ)))
-    !!$      CALL MondoLog(DEBUG_NONE, "ConvergedQ", 'DIISQ = '//TRIM(FltToChar(DIISQ)))
-    !!$      CALL MondoLog(DEBUG_NONE, "ConvergedQ", 'DMaxQ = '//TRIM(FltToChar(DMaxQ)))
-    !!$      CALL MondoLog(DEBUG_NONE, "ConvergedQ", 'ETOTO = '//TRIM(FltToChar(ETotO)))
-    !!$      CALL MondoLog(DEBUG_NONE, "ConvergedQ", 'ETOTA = '//TRIM(FltToChar(ETOTA)))
-    !!$      CALL MondoLog(DEBUG_NONE, "ConvergedQ", 'ETOTB = '//TRIM(FltToChar(ETOTB)))
-    !!$      CALL MondoLog(DEBUG_NONE, "ConvergedQ", 'DIISA = '//TRIM(FltToChar(DIISA)))
-    !!$      CALL MondoLog(DEBUG_NONE, "ConvergedQ", 'DIISB = '//TRIM(FltToChar(DIISB)))
-    !!$      CALL MondoLog(DEBUG_NONE, "ConvergedQ", 'DMaxA = '//TRIM(FltToChar(DMaxA)))
-    !!$      CALL MondoLog(DEBUG_NONE, "ConvergedQ", 'DMaxB = '//TRIM(FltToChar(DMaxB)))
+    !!$      CALL MondoLog(DEBUG_MAXIMUM, "ConvergedQ", 'ODAQ  = '//TRIM(FltToChar(ODAQ)))
+    !!$      CALL MondoLog(DEBUG_MAXIMUM, "ConvergedQ", 'ETotQ = '//TRIM(FltToChar(ETotQ)))
+    !!$      CALL MondoLog(DEBUG_MAXIMUM, "ConvergedQ", 'DIISQ = '//TRIM(FltToChar(DIISQ)))
+    !!$      CALL MondoLog(DEBUG_MAXIMUM, "ConvergedQ", 'DMaxQ = '//TRIM(FltToChar(DMaxQ)))
+    !!$      CALL MondoLog(DEBUG_MAXIMUM, "ConvergedQ", 'ETOTO = '//TRIM(FltToChar(ETotO)))
+    !!$      CALL MondoLog(DEBUG_MAXIMUM, "ConvergedQ", 'ETOTA = '//TRIM(FltToChar(ETOTA)))
+    !!$      CALL MondoLog(DEBUG_MAXIMUM, "ConvergedQ", 'ETOTB = '//TRIM(FltToChar(ETOTB)))
+    !!$      CALL MondoLog(DEBUG_MAXIMUM, "ConvergedQ", 'DIISA = '//TRIM(FltToChar(DIISA)))
+    !!$      CALL MondoLog(DEBUG_MAXIMUM, "ConvergedQ", 'DIISB = '//TRIM(FltToChar(DIISB)))
+    !!$      CALL MondoLog(DEBUG_MAXIMUM, "ConvergedQ", 'DMaxA = '//TRIM(FltToChar(DMaxA)))
+    !!$      CALL MondoLog(DEBUG_MAXIMUM, "ConvergedQ", 'DMaxB = '//TRIM(FltToChar(DMaxB)))
 
           Converged(iCLONE)=NOT_CONVERGE
           ! Convergence from above +/- expected delta relative to historical
@@ -589,17 +589,17 @@ CONTAINS
           FLogic=DoODA.AND..NOT.ALogic.AND.cSCF>3
 
           ! Sort through logic hopefully in the conditionally correct order ...
-    !!$      CALL MondoLog(DEBUG_NONE, "ConvergedQ", 'ETest  = '//TRIM(FltToChar(ETest)))
-    !!$      CALL MondoLog(DEBUG_NONE, "ConvergedQ", 'DTest  = '//TRIM(FltToChar(DTest)))
-    !!$      CALL MondoLog(DEBUG_NONE, "ConvergedQ", 'ALogic = '//TRIM(LogicalToChar(ALogic)))
-    !!$      CALL MondoLog(DEBUG_NONE, "ConvergedQ", 'A2Logic= '//TRIM(LogicalToChar(A2Logic)))
-    !!$      CALL MondoLog(DEBUG_NONE, "ConvergedQ", 'ELogic = '//TRIM(LogicalToChar(ELogic)))
-    !!$      CALL MondoLog(DEBUG_NONE, "ConvergedQ", 'CLogic = '//TRIM(LogicalToChar(CLogic)))
-    !!$      CALL MondoLog(DEBUG_NONE, "ConvergedQ", 'DLogic = '//TRIM(LogicalToChar(DLogic)))
-    !!$      CALL MondoLog(DEBUG_NONE, "ConvergedQ", 'QLogic = '//TRIM(LogicalToChar(QLogic)))
-    !!$      CALL MondoLog(DEBUG_NONE, "ConvergedQ", 'ILogic = '//TRIM(LogicalToChar(ILogic)))
-    !!$      CALL MondoLog(DEBUG_NONE, "ConvergedQ", 'GLogic = '//TRIM(LogicalToChar(GLogic)))
-    !!$      CALL MondoLog(DEBUG_NONE, "ConvergedQ", 'FLogic = '//TRIM(LogicalToChar(FLogic)))
+    !!$      CALL MondoLog(DEBUG_MAXIMUM, "ConvergedQ", 'ETest  = '//TRIM(FltToChar(ETest)))
+    !!$      CALL MondoLog(DEBUG_MAXIMUM, "ConvergedQ", 'DTest  = '//TRIM(FltToChar(DTest)))
+    !!$      CALL MondoLog(DEBUG_MAXIMUM, "ConvergedQ", 'ALogic = '//TRIM(LogicalToChar(ALogic)))
+    !!$      CALL MondoLog(DEBUG_MAXIMUM, "ConvergedQ", 'A2Logic= '//TRIM(LogicalToChar(A2Logic)))
+    !!$      CALL MondoLog(DEBUG_MAXIMUM, "ConvergedQ", 'ELogic = '//TRIM(LogicalToChar(ELogic)))
+    !!$      CALL MondoLog(DEBUG_MAXIMUM, "ConvergedQ", 'CLogic = '//TRIM(LogicalToChar(CLogic)))
+    !!$      CALL MondoLog(DEBUG_MAXIMUM, "ConvergedQ", 'DLogic = '//TRIM(LogicalToChar(DLogic)))
+    !!$      CALL MondoLog(DEBUG_MAXIMUM, "ConvergedQ", 'QLogic = '//TRIM(LogicalToChar(QLogic)))
+    !!$      CALL MondoLog(DEBUG_MAXIMUM, "ConvergedQ", 'ILogic = '//TRIM(LogicalToChar(ILogic)))
+    !!$      CALL MondoLog(DEBUG_MAXIMUM, "ConvergedQ", 'GLogic = '//TRIM(LogicalToChar(GLogic)))
+    !!$      CALL MondoLog(DEBUG_MAXIMUM, "ConvergedQ", 'FLogic = '//TRIM(LogicalToChar(FLogic)))
 
           ! No message.
           Mssg=" "
@@ -638,7 +638,7 @@ CONTAINS
       CALL CloseHDF(HDFFileID)
 
       ! Print something.
-!!$      CALL MondoLog(DEBUG_NONE, "ConvergedQ", "done with loop over clones")
+!!$      CALL MondoLog(DEBUG_MAXIMUM, "ConvergedQ", "done with loop over clones")
 
       ConvergedQ=DID_CONVERGE
       DO iCLONE=1,G%Clones
@@ -690,16 +690,16 @@ CONTAINS
     SELECT CASE(ConvergedQ)
 
     CASE(NOT_CONVERGE)
-!!$      CALL MondoLog(DEBUG_NONE, "ConvergedQ", "done, not converged")
+!!$      CALL MondoLog(DEBUG_MAXIMUM, "ConvergedQ", "done, not converged")
 
     CASE(SCF_STALLED)
-!!$      CALL MondoLog(DEBUG_NONE, "ConvergedQ", "done, SCF stalled")
+!!$      CALL MondoLog(DEBUG_MAXIMUM, "ConvergedQ", "done, SCF stalled")
 
     CASE(DIIS_NOPATH)
-!!$      CALL MondoLog(DEBUG_NONE, "ConvergedQ", "done, DIIS no path")
+!!$      CALL MondoLog(DEBUG_MAXIMUM, "ConvergedQ", "done, DIIS no path")
 
     CASE(DID_CONVERGE)
-!!$      CALL MondoLog(DEBUG_NONE, "ConvergedQ", "done, converged")
+!!$      CALL MondoLog(DEBUG_MAXIMUM, "ConvergedQ", "done, converged")
 
     END SELECT
 
@@ -713,7 +713,7 @@ CONTAINS
     TYPE(Parallel)      :: M
     INTEGER             :: oldSCF
 
-    CALL MondoLog(DEBUG_NONE, "DensityBuild", "Action = "//TRIM(S%Action%C(1)))
+    CALL MondoLog(DEBUG_MAXIMUM, "DensityBuild", "Action = "//TRIM(S%Action%C(1)))
     IF(TRIM(S%Action%C(1))/=SCF_DENSITY_NORMAL   .AND. &
        TRIM(S%Action%C(1))/=SCF_BASISSETSWITCH   .AND. &
        TRIM(S%Action%C(1))/=CPSCF_START_RESPONSE .AND. &
@@ -807,7 +807,7 @@ CONTAINS
       S%Action%C(1)=O%GeussToP2Use
     ENDIF
 
-    CALL MondoLog(DEBUG_NONE, "DensityLogic", "Action = "//TRIM(S%Action%C(1)))
+    CALL MondoLog(DEBUG_MAXIMUM, "DensityLogic", "Action = "//TRIM(S%Action%C(1)))
 
     ! Reset
     S%SameBasis=.TRUE.
@@ -1092,12 +1092,12 @@ CONTAINS
        G%Clone(iCLONE)%Gradients%D=BIG_DBL
        G%Clone(iCLONE)%GradRMS = SQRT(G%Clone(iCLONE)%GradRMS)/DBLE(3*G%Clone(iCLONE)%NAtms)
     ENDDO
-!!$    CALL MondoLog(DEBUG_NONE, "Force", "N%SCF_NAME = "//TRIM(N%SCF_NAME))
+!!$    CALL MondoLog(DEBUG_MAXIMUM, "Force", "N%SCF_NAME = "//TRIM(N%SCF_NAME))
     CALL GeomArchive(cBAS,cGEO,N,O,B,G)
 
     ! Now evaluate the forces
-!!$    CALL MondoLog(DEBUG_NONE, "Force", "State%Current = "//TRIM(IntVectToChar(S%Current)))
-!!$    CALL MondoLog(DEBUG_NONE, "Force", "State%Previous = "//TRIM(IntVectToChar(S%Previous)))
+!!$    CALL MondoLog(DEBUG_MAXIMUM, "Force", "State%Current = "//TRIM(IntVectToChar(S%Current)))
+!!$    CALL MondoLog(DEBUG_MAXIMUM, "Force", "State%Previous = "//TRIM(IntVectToChar(S%Previous)))
 
     S%Action%C(1)='ForceEvaluation'
     ! The non-orthogonal response
@@ -1262,7 +1262,7 @@ CONTAINS
             Lat00 = G%Clone(iCLONE)%PBC%BoxShape%D(I,J)
             !
             G%Clone(iCLONE)%PBC%BoxShape%D(I,J) =  Lat00+DDelta
-            CALL MakeGMPeriodic(G%Clone(iCLONE))
+            CALL MkGeomPeriodic(G%Clone(iCLONE))
             CALL GeomArchive(cBAS,cGEO,N,O,B,G)
             CALL Invoke('MakeRho' ,N,S,M)
             CALL Invoke('MakePFFT',N,S,M)
@@ -1277,7 +1277,7 @@ CONTAINS
             CALL CloseHDF(HDFFileID)
             !
             G%Clone(iCLONE)%PBC%BoxShape%D(I,J) =  Lat00-DDelta
-            CALL MakeGMPeriodic(G%Clone(iCLONE))
+            CALL MkGeomPeriodic(G%Clone(iCLONE))
             CALL GeomArchive(cBAS,cGEO,N,O,B,G)
             CALL Invoke('MakeRho' ,N,S,M)
             CALL Invoke('MakePFFT',N,S,M)
@@ -1299,7 +1299,7 @@ CONTAINS
             LatFrc_J(I,J) =  (Trace(J1) + (E1-E2))/(Two*DDelta)
             !
             G%Clone(iCLONE)%PBC%BoxShape%D(I,J) =  Lat00
-            CALL MakeGMPeriodic(G%Clone(iCLONE))
+            CALL MkGeomPeriodic(G%Clone(iCLONE))
             CALL GeomArchive(cBAS,cGEO,N,O,B,G)
             !
           ENDIF
@@ -1404,7 +1404,7 @@ CONTAINS
             G%Clone(iCLONE)%PBC%BoxShape%D(I,J) =  Lat00+DDelta
             CALL CalcBoxPars(Vec,G%Clone(iCLONE)%PBC%BoxShape%D)
             CALL BoxParsToCart(Vec,G%Clone(iCLONE)%PBC%BoxShape%D)
-            CALL MakeGMPeriodic(G%Clone(iCLONE))
+            CALL MkGeomPeriodic(G%Clone(iCLONE))
             CALL GeomArchive(cBAS,cGEO,N,O,B,G)
             CALL Invoke('ONX'    ,N,S,M)
             TrixName=TRIM(N%M_SCRATCH)//TRIM(N%SCF_NAME)//'_Geom#'//TRIM(chGEO)//'_Base#'//TRIM(chBAS) &
@@ -1415,7 +1415,7 @@ CONTAINS
             G%Clone(iCLONE)%PBC%BoxShape%D(I,J) =  Lat00-DDelta
             CALL CalcBoxPars(Vec,G%Clone(iCLONE)%PBC%BoxShape%D)
             CALL BoxParsToCart(Vec,G%Clone(iCLONE)%PBC%BoxShape%D)
-            CALL MakeGMPeriodic(G%Clone(iCLONE))
+            CALL MkGeomPeriodic(G%Clone(iCLONE))
             CALL GeomArchive(cBAS,cGEO,N,O,B,G)
             CALL Invoke('ONX',N,S,M)
             TrixName=TRIM(N%M_SCRATCH)//TRIM(N%SCF_NAME)//'_Geom#'//TRIM(chGEO)//'_Base#'//TRIM(chBAS) &
@@ -1428,7 +1428,7 @@ CONTAINS
             LatFrc_X(I,J) = Trace(K1)/(Two*DDelta)
             !
             G%Clone(iCLONE)%PBC%BoxShape%D(I,J) =  Lat00
-            CALL MakeGMPeriodic(G%Clone(iCLONE))
+            CALL MkGeomPeriodic(G%Clone(iCLONE))
             CALL GeomArchive(cBAS,cGEO,N,O,B,G)
             !
           ENDIF
@@ -1532,7 +1532,7 @@ CONTAINS
             G%Clone(iCLONE)%PBC%BoxShape%D(I,J) =  Lat00+DDelta
             CALL CalcBoxPars(Vec,G%Clone(iCLONE)%PBC%BoxShape%D)
             CALL BoxParsToCart(Vec,G%Clone(iCLONE)%PBC%BoxShape%D)
-            CALL MakeGMPeriodic(G%Clone(iCLONE))
+            CALL MkGeomPeriodic(G%Clone(iCLONE))
             CALL GeomArchive(cBAS,cGEO,N,O,B,G)
             CALL Invoke('MakeU'    ,N,S,M)
             TrixName=TRIM(N%M_SCRATCH)//TRIM(N%SCF_NAME)//'_Geom#'//TRIM(chGEO)//'_Base#'//TRIM(chBAS) &
@@ -1543,7 +1543,7 @@ CONTAINS
             G%Clone(iCLONE)%PBC%BoxShape%D(I,J) =  Lat00-DDelta
             CALL CalcBoxPars(Vec,G%Clone(iCLONE)%PBC%BoxShape%D)
             CALL BoxParsToCart(Vec,G%Clone(iCLONE)%PBC%BoxShape%D)
-            CALL MakeGMPeriodic(G%Clone(iCLONE))
+            CALL MkGeomPeriodic(G%Clone(iCLONE))
             CALL GeomArchive(cBAS,cGEO,N,O,B,G)
             CALL Invoke('MakU',N,S,M)
             TrixName=TRIM(N%M_SCRATCH)//TRIM(N%SCF_NAME)//'_Geom#'//TRIM(chGEO)//'_Base#'//TRIM(chBAS) &
@@ -1556,7 +1556,7 @@ CONTAINS
             LatFrc_U(I,J) = Trace(U1)/(Two*DDelta)
             !
             G%Clone(iCLONE)%PBC%BoxShape%D(I,J) =  Lat00
-            CALL MakeGMPeriodic(G%Clone(iCLONE))
+            CALL MkGeomPeriodic(G%Clone(iCLONE))
             CALL GeomArchive(cBAS,cGEO,N,O,B,G)
             !
           ENDIF
@@ -1629,7 +1629,7 @@ CONTAINS
             Lat00 = G%Clone(iCLONE)%PBC%BoxShape%D(I,J)
             !
             G%Clone(iCLONE)%PBC%BoxShape%D(I,J) =  Lat00+DDelta
-            CALL MakeGMPeriodic(G%Clone(iCLONE))
+            CALL MkGeomPeriodic(G%Clone(iCLONE))
             CALL GeomArchive(cBAS,cGEO,N,O,B,G)
             CALL Invoke('MakeRho' ,N,S,M)
             CALL Invoke('HiCu'    ,N,S,M)
@@ -1642,7 +1642,7 @@ CONTAINS
             CALL CloseHDF(HDFFileID)
             !
             G%Clone(iCLONE)%PBC%BoxShape%D(I,J) =  Lat00-DDelta
-            CALL MakeGMPeriodic(G%Clone(iCLONE))
+            CALL MkGeomPeriodic(G%Clone(iCLONE))
             CALL GeomArchive(cBAS,cGEO,N,O,B,G)
             CALL Invoke('MakeRho' ,N,S,M)
             CALL Invoke('HiCu',N,S,M)
@@ -1656,7 +1656,7 @@ CONTAINS
             LatFrc_XC(I,J) =  (E1-E2)/(Two*DDelta)
             !
             G%Clone(iCLONE)%PBC%BoxShape%D(I,J) =  Lat00
-            CALL MakeGMPeriodic(G%Clone(iCLONE))
+            CALL MkGeomPeriodic(G%Clone(iCLONE))
             CALL GeomArchive(cBAS,cGEO,N,O,B,G)
             !
           ENDIF
@@ -1831,21 +1831,21 @@ CONTAINS
     DoingMD=.FALSE.
     IF(PRESENT(DoingMD_O)) DoingMD=DoingMD_O
 
-    CALL MondoLog(DEBUG_NONE, "CleanScratch", "doing MD = "//TRIM(LogicalToChar(DoingMD)) &
+    CALL MondoLog(DEBUG_MAXIMUM, "CleanScratch", "doing MD = "//TRIM(LogicalToChar(DoingMD)) &
       //", iGEO = "//TRIM(IntToChar(iGEO)))
 
     chGEO = IntToChar(iGEO)
     RemoveFile=TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)//'*_Geom#'//TRIM(chGEO)//"_*.*"
-    CALL MondoLog(DEBUG_NONE, "CleanScratch", "removing "//TRIM(RemoveFile))
+    CALL MondoLog(DEBUG_MAXIMUM, "CleanScratch", "removing "//TRIM(RemoveFile))
     CALL SYSTEM('/bin/rm -f  '//RemoveFile)
     IF(DoingMD) THEN
       RemoveFile=TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)//'*_G#'//TRIM(chGEO)//"_*.*"
-!!$      CALL MondoLog(DEBUG_NONE, "CleanScratch", "removing "//TRIM(RemoveFile))
+!!$      CALL MondoLog(DEBUG_MAXIMUM, "CleanScratch", "removing "//TRIM(RemoveFile))
       CALL SYSTEM('/bin/rm -f  '//RemoveFile)
     ENDIF
 
     !IF(iGEO >= 2) THEN
-    !  CALL MondoLog(DEBUG_NONE, "CleanScratch", "identifying objects in hdf group...")
+    !  CALL MondoLog(DEBUG_MAXIMUM, "CleanScratch", "identifying objects in hdf group...")
 
     !  ! Open HDF file.
     !  HDFFileID = OpenHDF(C%Nams%HFile)
@@ -2039,7 +2039,7 @@ CONTAINS
         Lat00 = C%Geos%Clone(1)%PBC%BoxShape%D(I1,I2)
         IF(C%Geos%Clone(1)%PBC%AutoW%I(I1)==1 .AND. C%Geos%Clone(1)%PBC%AutoW%I(I2)==1) THEN
           C%Geos%Clone(1)%PBC%BoxShape%D(I1,I2) = Lat00-DDelta
-          CALL MakeGMPeriodic(C%Geos%Clone(1))
+          CALL MkGeomPeriodic(C%Geos%Clone(1))
           CALL SinglePoints(C)
           !
           HDFFileID=OpenHDF(C%Nams%HFile)
@@ -2048,7 +2048,7 @@ CONTAINS
           CALL CloseHDF(HDFFileID)
           !
           C%Geos%Clone(1)%PBC%BoxShape%D(I1,I2) = Lat00+DDelta
-          CALL MakeGMPeriodic(C%Geos%Clone(1))
+          CALL MkGeomPeriodic(C%Geos%Clone(1))
           CALL SinglePoints(C)
           !
           HDFFileID=OpenHDF(C%Nams%HFile)
@@ -2059,7 +2059,7 @@ CONTAINS
           LattF%D(I1,I2) =  (E_hig-E_low)/(Two*DDelta)
           !
           C%Geos%Clone(1)%PBC%BoxShape%D(I1,I2) = Lat00
-          CALL MakeGMPeriodic(C%Geos%Clone(1))
+          CALL MkGeomPeriodic(C%Geos%Clone(1))
         ENDIF
       ENDDO
     ENDDO
@@ -2134,7 +2134,7 @@ CONTAINS
     !
     C%Stat%Action%C(1)='OneElectronMatrices'
     C%Geos%Clone(1)%PBC%BoxShape%D(I1,I2) = Lat00-DDelta
-    CALL MakeGMPeriodic(C%Geos%Clone(1))
+    CALL MkGeomPeriodic(C%Geos%Clone(1))
     CALL GeomArchive(1,1,C%Nams,C%Opts,C%Sets,C%Geos)
     CALL Invoke('MakeS',C%Nams,C%Stat,C%MPIs)
     !
@@ -2146,7 +2146,7 @@ CONTAINS
     CALL CloseHDF(HDFFileID)
     !
     C%Geos%Clone(1)%PBC%BoxShape%D(I1,I2) = Lat00+DDelta
-    CALL MakeGMPeriodic(C%Geos%Clone(1))
+    CALL MkGeomPeriodic(C%Geos%Clone(1))
     CALL GeomArchive(1,1,C%Nams,C%Opts,C%Sets,C%Geos)
     CALL Invoke('MakeS'   ,C%Nams,C%Stat,C%MPIs)
     !
@@ -2166,7 +2166,7 @@ CONTAINS
     ! Calculate 2*Trace[P*dT]
     !
     C%Geos%Clone(1)%PBC%BoxShape%D(I1,I2) = Lat00-DDelta
-    CALL MakeGMPeriodic(C%Geos%Clone(1))
+    CALL MkGeomPeriodic(C%Geos%Clone(1))
     CALL GeomArchive(1,1,C%Nams,C%Opts,C%Sets,C%Geos)
     CALL Invoke('MakeT'   ,C%Nams,C%Stat,C%MPIs)
     !
@@ -2178,7 +2178,7 @@ CONTAINS
     CALL CloseHDF(HDFFileID)
     !
     C%Geos%Clone(1)%PBC%BoxShape%D(I1,I2) = Lat00+DDelta
-    CALL MakeGMPeriodic(C%Geos%Clone(1))
+    CALL MkGeomPeriodic(C%Geos%Clone(1))
     CALL GeomArchive(1,1,C%Nams,C%Opts,C%Sets,C%Geos)
     CALL Invoke('MakeT'   ,C%Nams,C%Stat,C%MPIs)
     !
@@ -2198,7 +2198,7 @@ CONTAINS
     ! Calculate d(Exc)
     !
     C%Geos%Clone(1)%PBC%BoxShape%D(I1,I2) = Lat00-DDelta
-    CALL MakeGMPeriodic(C%Geos%Clone(1))
+    CALL MkGeomPeriodic(C%Geos%Clone(1))
     CALL GeomArchive(1,1,C%Nams,C%Opts,C%Sets,C%Geos)
     !
     CALL Invoke('MakeRho'     ,C%Nams,C%Stat,C%MPIs)
@@ -2209,7 +2209,7 @@ CONTAINS
     CALL CloseHDF(HDFFileID)
     !
     C%Geos%Clone(1)%PBC%BoxShape%D(I1,I2) = Lat00+DDelta
-    CALL MakeGMPeriodic(C%Geos%Clone(1))
+    CALL MkGeomPeriodic(C%Geos%Clone(1))
     CALL GeomArchive(1,1,C%Nams,C%Opts,C%Sets,C%Geos)
     !
     CALL Invoke('MakeRho'     ,C%Nams,C%Stat,C%MPIs)
@@ -2226,7 +2226,7 @@ CONTAINS
     WRITE(*,*)
 
     C%Geos%Clone(1)%PBC%BoxShape%D(I1,I2) = Lat00
-    CALL MakeGMPeriodic(C%Geos%Clone(1))
+    CALL MkGeomPeriodic(C%Geos%Clone(1))
     CALL GeomArchive(1,1,C%Nams,C%Opts,C%Sets,C%Geos)
     CALL Invoke('MakePFFT' ,C%Nams,C%Stat,C%MPIs)
     CALL Invoke('MakeRho'     ,C%Nams,C%Stat,C%MPIs)
@@ -2234,7 +2234,7 @@ CONTAINS
     ! Calculate 2*(Trace[P*dJ]+NukeE)
     !
     C%Geos%Clone(1)%PBC%BoxShape%D(I1,I2) = Lat00-DDelta
-    CALL MakeGMPeriodic(C%Geos%Clone(1))
+    CALL MkGeomPeriodic(C%Geos%Clone(1))
     CALL GeomArchive(1,1,C%Nams,C%Opts,C%Sets,C%Geos)
     CALL Invoke('MakePFFT' ,C%Nams,C%Stat,C%MPIs)! CALL Invoke('MakeRho'     ,C%Nams,C%Stat,C%MPIs)
     CALL Invoke('MakeRho'     ,C%Nams,C%Stat,C%MPIs)
@@ -2252,7 +2252,7 @@ CONTAINS
     !
     !
     C%Geos%Clone(1)%PBC%BoxShape%D(I1,I2) = Lat00+DDelta
-    CALL MakeGMPeriodic(C%Geos%Clone(1))
+    CALL MkGeomPeriodic(C%Geos%Clone(1))
     CALL GeomArchive(1,1,C%Nams,C%Opts,C%Sets,C%Geos)
     CALL Invoke('MakePFFT' ,C%Nams,C%Stat,C%MPIs)
     CALL Invoke('MakeRho'     ,C%Nams,C%Stat,C%MPIs)
@@ -2277,7 +2277,7 @@ CONTAINS
     !
     !
     C%Geos%Clone(1)%PBC%BoxShape%D(I1,I2) = Lat00
-    CALL MakeGMPeriodic(C%Geos%Clone(1))
+    CALL MkGeomPeriodic(C%Geos%Clone(1))
     CALL GeomArchive(1,1,C%Nams,C%Opts,C%Sets,C%Geos)
     CALL Invoke('MakePFFT' ,C%Nams,C%Stat,C%MPIs)
     CALL Invoke('MakeRho'     ,C%Nams,C%Stat,C%MPIs)

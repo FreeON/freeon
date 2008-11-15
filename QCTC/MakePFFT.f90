@@ -64,9 +64,9 @@ PROGRAM MakePFFT
 !    Print sum Checksums
      CALL PChkSum(TenC,'TenC',Proc_O=Prog)
      CALL PChkSum(TenS,'TenS',Proc_O=Prog)
-
-     CALL PChkSum(TenC,'TenC',Proc_O=Prog,Unit_O=6)
-     CALL PChkSum(TenS,'TenS',Proc_O=Prog,Unit_O=6)
+!!$
+!!$     CALL PChkSum(TenC,'TenC',Proc_O=Prog,Unit_O=6)
+!!$     CALL PChkSum(TenS,'TenS',Proc_O=Prog,Unit_O=6)
 !    Delete
      CALL Delete(TenC)
      CALL Delete(TenS)  

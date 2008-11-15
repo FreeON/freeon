@@ -676,7 +676,7 @@ PROGRAM DIIS
     CALL Put(BTmp,'diismtrix')
     CALL Delete(BTmp)
 
-    CALL PPrint(B, "DIIS B matrix")
+!!    CALL PPrint(B, "DIIS B matrix")
 
     ! Solve the least squares problem to obtain new DIIS coeficients.
     CALL New(DIISCo,N)
@@ -796,14 +796,14 @@ PROGRAM DIIS
   DO I=1,N-2        
      IF(MOD(I,6)==0)THEN
         IF(I.NE.1) &
-             CALL MondoLog(DEBUG_MEDIUM, Prog, Mssg, 'coefficients')
+             CALL MondoLog(DEBUG_MEDIUM, Prog, Mssg, 'C-1 coefficients')
         Mssg=TRIM(FltToMedmChar(DIISCo%D(Idx%I(I))))//','
      ELSE
-        Mssg=TRIM(Mssg)//TRIM(FltToMedmChar(DIISCo%D(Idx%I(I))))//','
+        Mssg=TRIM(Mssg)//'  '//TRIM(FltToMedmChar(DIISCo%D(Idx%I(I))))//','
      ENDIF
   ENDDO
-  Mssg=TRIM(Mssg)//TRIM(FltToMedmChar(DIISCo%D(Idx%I(N-1))))
-  CALL MondoLog(DEBUG_MEDIUM, Prog, Mssg, 'coefficients')
+  Mssg=TRIM(Mssg)//'  '//TRIM(FltToMedmChar(DIISCo%D(Idx%I(N-1))))
+  CALL MondoLog(DEBUG_MEDIUM, Prog, Mssg, 'C-1 coefficients')
   
 !!  CALL PPrint(F,'mixed F['//TRIM(SCFCycl)//']')
 

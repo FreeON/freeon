@@ -95,7 +95,7 @@ PROGRAM P2Use
 
   ! Start logging.
   logtag = TRIM(Prog)//":"//TRIM(SCFActn)
-  CALL MondoLog(DEBUG_NONE, "P2Use", "SCFActn = "//TRIM(SCFActn))
+  CALL MondoLog(DEBUG_MAXIMUM, "P2Use", "SCFActn = "//TRIM(SCFActn))
 
   ! Do what needs to be done CASE by CASE
   SELECT CASE(SCFActn)
@@ -423,7 +423,7 @@ PROGRAM P2Use
     iGEO = Args%I%I(3)
 
     IF(iGEO <= 4) THEN
-      CALL MondoLog(DEBUG_NONE, logtag, "No previous density matrix defined")
+      CALL MondoLog(DEBUG_MAXIMUM, logtag, "No previous density matrix defined")
       CALL Halt("["//TRIM(logtag)//"] Fatal error")
     ENDIF
 
@@ -441,7 +441,7 @@ PROGRAM P2Use
 
     IF(iGEO == 5) THEN
       ! Initial boundary conditions: Save D(p-1) as P(p-1).
-      CALL MondoLog(DEBUG_NONE, logtag, "Initial boundary condition")
+      CALL MondoLog(DEBUG_MAXIMUM, logtag, "Initial boundary condition")
       DO I=1,3
         CALL Get(Tmp1, TrixFile("DOsave",  Stats_O = (/ iSCF, iBAS, iGEO-I /)))
         CALL Put(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-I /)))
@@ -465,7 +465,7 @@ PROGRAM P2Use
     CALL Get(Tmp2, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-1 /)))
     CALL Add(Tmp1,Tmp2,P)
 
-    CALL MondoLog(DEBUG_NONE, logtag, "FNorm(P-D) = "//TRIM(DblToChar(FNorm(P))))
+    CALL MondoLog(DEBUG_MAXIMUM, logtag, "FNorm(P-D) = "//TRIM(DblToChar(FNorm(P))))
 
     ! Debugging: check.... P(n-1)-D_tilde(n-1)
     !
@@ -477,7 +477,7 @@ PROGRAM P2Use
     CALL Get(Tmp2, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-1 /)))
     CALL Add(Tmp1,Tmp2,P)
 
-    CALL MondoLog(DEBUG_NONE, logtag, "FNorm(P-D_tilde) = "//TRIM(DblToChar(FNorm(P))))
+    CALL MondoLog(DEBUG_MAXIMUM, logtag, "FNorm(P-D_tilde) = "//TRIM(DblToChar(FNorm(P))))
 
     ! Debugging: check.... D(n-1)-D_tilde(n-1)
     !
@@ -489,7 +489,7 @@ PROGRAM P2Use
     CALL Get(Tmp2, TrixFile("DOsave", Stats_O = (/ iSCF, iBAS, iGEO-1 /)))
     CALL Add(Tmp1,Tmp2,P)
 
-    CALL MondoLog(DEBUG_NONE, logtag, "FNorm(D-D_tilde) = "//TRIM(DblToChar(FNorm(P))))
+    CALL MondoLog(DEBUG_MAXIMUM, logtag, "FNorm(D-D_tilde) = "//TRIM(DblToChar(FNorm(P))))
     ! End Debugging.
 
     ! Get D(n-1)
@@ -529,9 +529,9 @@ PROGRAM P2Use
         IF(ABS(TrP2-Half*DBLE(NEl)) < 1.0D-8) EXIT
       ENDIF
     ENDDO
-    CALL MondoLog(DEBUG_NONE, logtag, "purified after "//TRIM(IntToChar(I))//" iterations")
-    CALL MondoLog(DEBUG_NONE, logtag, "Trace(P)  = "//TRIM(DblToChar(TrP)))
-    CALL MondoLog(DEBUG_NONE, logtag, "Trace(P2) = "//TRIM(DblToChar(TrP2)))
+    CALL MondoLog(DEBUG_MAXIMUM, logtag, "purified after "//TRIM(IntToChar(I))//" iterations")
+    CALL MondoLog(DEBUG_MAXIMUM, logtag, "Trace(P)  = "//TRIM(DblToChar(TrP)))
+    CALL MondoLog(DEBUG_MAXIMUM, logtag, "Trace(P2) = "//TRIM(DblToChar(TrP2)))
 
     ! Convert to AO Rep
     INQUIRE(FILE=TrixFile('X',Args),EXIST=Present)
@@ -565,7 +565,7 @@ PROGRAM P2Use
     iGEO = Args%I%I(3)
 
     IF(iGEO <= 4) THEN
-      CALL MondoLog(DEBUG_NONE, logtag, "No previous density matrix defined")
+      CALL MondoLog(DEBUG_MAXIMUM, logtag, "No previous density matrix defined")
       CALL Halt("["//TRIM(logtag)//"] Fatal error")
     ENDIF
 
@@ -575,7 +575,7 @@ PROGRAM P2Use
 
     IF(iGEO == 5) THEN
       ! Initial boundary conditions: Save D(p-1) as P(p-1).
-      CALL MondoLog(DEBUG_NONE, logtag, "Initial boundary condition")
+      CALL MondoLog(DEBUG_MAXIMUM, logtag, "Initial boundary condition")
       DO I=1,3
         CALL Get(Tmp1, TrixFile("DOsave",  Stats_O = (/ iSCF, iBAS, iGEO-I /)))
         CALL Put(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-I /)))
@@ -631,9 +631,9 @@ PROGRAM P2Use
         IF(ABS(TrP2-Half*DBLE(NEl)) < 1.D-8) EXIT
       ENDIF
     ENDDO
-    CALL MondoLog(DEBUG_NONE, logtag, "purified after "//TRIM(IntToChar(I))//" iterations")
-    CALL MondoLog(DEBUG_NONE, logtag, "Trace(P) = "//TRIM(DblToChar(TrP)))
-    CALL MondoLog(DEBUG_NONE, logtag, "Trace(P2) = "//TRIM(DblToChar(TrP2)))
+    CALL MondoLog(DEBUG_MAXIMUM, logtag, "purified after "//TRIM(IntToChar(I))//" iterations")
+    CALL MondoLog(DEBUG_MAXIMUM, logtag, "Trace(P) = "//TRIM(DblToChar(TrP)))
+    CALL MondoLog(DEBUG_MAXIMUM, logtag, "Trace(P2) = "//TRIM(DblToChar(TrP2)))
 
     ! Convert to AO Rep
     INQUIRE(FILE=TrixFile('X',Args),EXIST=Present)
@@ -667,7 +667,7 @@ PROGRAM P2Use
     iGEO = Args%I%I(3)
 
     IF(iGEO <= 6) THEN
-      CALL MondoLog(DEBUG_NONE, logtag, "No previous density matrix defined")
+      CALL MondoLog(DEBUG_MAXIMUM, logtag, "No previous density matrix defined")
       CALL Halt("["//TRIM(logtag)//"] Fatal error")
     ENDIF
 
@@ -677,7 +677,7 @@ PROGRAM P2Use
 
     IF(iGEO == 7) THEN
       ! Initial boundary conditions: Save D(p-1) as P(p-1).
-      CALL MondoLog(DEBUG_NONE, logtag, "Initial boundary condition")
+      CALL MondoLog(DEBUG_MAXIMUM, logtag, "Initial boundary condition")
       DO I=1,4
         CALL Get(Tmp1, TrixFile("DOsave",  Stats_O = (/ iSCF, iBAS, iGEO-I /)))
         CALL Put(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-I /)))
@@ -739,9 +739,9 @@ PROGRAM P2Use
         IF(ABS(TrP2-Half*DBLE(NEl)) < 1.D-8) EXIT
       ENDIF
     ENDDO
-    CALL MondoLog(DEBUG_NONE, logtag, "purified after "//TRIM(IntToChar(I))//" iterations")
-    CALL MondoLog(DEBUG_NONE, logtag, "Trace(P) = "//TRIM(DblToChar(TrP)))
-    CALL MondoLog(DEBUG_NONE, logtag, "Trace(P2) = "//TRIM(DblToChar(TrP2)))
+    CALL MondoLog(DEBUG_MAXIMUM, logtag, "purified after "//TRIM(IntToChar(I))//" iterations")
+    CALL MondoLog(DEBUG_MAXIMUM, logtag, "Trace(P) = "//TRIM(DblToChar(TrP)))
+    CALL MondoLog(DEBUG_MAXIMUM, logtag, "Trace(P2) = "//TRIM(DblToChar(TrP2)))
 
     ! Convert to AO Rep
     INQUIRE(FILE=TrixFile('X',Args),EXIST=Present)
@@ -775,7 +775,7 @@ PROGRAM P2Use
     iGEO = Args%I%I(3)
 
     IF(iGEO <= 8) THEN
-      CALL MondoLog(DEBUG_NONE, logtag, "No previous density matrix defined")
+      CALL MondoLog(DEBUG_MAXIMUM, logtag, "No previous density matrix defined")
       CALL Halt("["//TRIM(logtag)//"] Fatal error")
     ENDIF
 
@@ -785,7 +785,7 @@ PROGRAM P2Use
 
     IF(iGEO == 9) THEN
       ! Initial boundary conditions: Save D(p-1) as P(p-1).
-      CALL MondoLog(DEBUG_NONE, logtag, "Initial boundary condition")
+      CALL MondoLog(DEBUG_MAXIMUM, logtag, "Initial boundary condition")
       DO I=1,5
         CALL Get(Tmp1, TrixFile("DOsave",  Stats_O = (/ iSCF, iBAS, iGEO-I /)))
         CALL Put(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-I /)))
@@ -853,9 +853,9 @@ PROGRAM P2Use
         IF(ABS(TrP2-Half*DBLE(NEl)) < 1.D-8) EXIT
       ENDIF
     ENDDO
-    CALL MondoLog(DEBUG_NONE, logtag, "purified after "//TRIM(IntToChar(I))//" iterations")
-    CALL MondoLog(DEBUG_NONE, logtag, "Trace(P) = "//TRIM(DblToChar(TrP)))
-    CALL MondoLog(DEBUG_NONE, logtag, "Trace(P2) = "//TRIM(DblToChar(TrP2)))
+    CALL MondoLog(DEBUG_MAXIMUM, logtag, "purified after "//TRIM(IntToChar(I))//" iterations")
+    CALL MondoLog(DEBUG_MAXIMUM, logtag, "Trace(P) = "//TRIM(DblToChar(TrP)))
+    CALL MondoLog(DEBUG_MAXIMUM, logtag, "Trace(P2) = "//TRIM(DblToChar(TrP2)))
 
     ! Convert to AO Rep
     INQUIRE(FILE=TrixFile('X',Args),EXIST=Present)
@@ -889,7 +889,7 @@ PROGRAM P2Use
     iGEO = Args%I%I(3)
 
     IF(iGEO <= 10) THEN
-      CALL MondoLog(DEBUG_NONE, logtag, "No previous density matrix defined")
+      CALL MondoLog(DEBUG_MAXIMUM, logtag, "No previous density matrix defined")
       CALL Halt("["//TRIM(logtag)//"] Fatal error")
     ENDIF
 
@@ -899,7 +899,7 @@ PROGRAM P2Use
 
     IF(iGEO == 11) THEN
       ! Initial boundary conditions: Save D(p-1) as P(p-1).
-      CALL MondoLog(DEBUG_NONE, logtag, "Initial boundary condition")
+      CALL MondoLog(DEBUG_MAXIMUM, logtag, "Initial boundary condition")
       DO I=1,6
         CALL Get(Tmp1, TrixFile("DOsave",  Stats_O = (/ iSCF, iBAS, iGEO-I /)))
         CALL Put(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-I /)))
@@ -970,9 +970,9 @@ PROGRAM P2Use
         IF(ABS(TrP2-Half*DBLE(NEl)) < 1.D-8) EXIT
       ENDIF
     ENDDO
-    CALL MondoLog(DEBUG_NONE, logtag, "purified after "//TRIM(IntToChar(I))//" iterations")
-    CALL MondoLog(DEBUG_NONE, logtag, "Trace(P) = "//TRIM(DblToChar(TrP)))
-    CALL MondoLog(DEBUG_NONE, logtag, "Trace(P2) = "//TRIM(DblToChar(TrP2)))
+    CALL MondoLog(DEBUG_MAXIMUM, logtag, "purified after "//TRIM(IntToChar(I))//" iterations")
+    CALL MondoLog(DEBUG_MAXIMUM, logtag, "Trace(P) = "//TRIM(DblToChar(TrP)))
+    CALL MondoLog(DEBUG_MAXIMUM, logtag, "Trace(P2) = "//TRIM(DblToChar(TrP2)))
 
     ! Convert to AO Rep
     INQUIRE(FILE=TrixFile('X',Args),EXIST=Present)
@@ -1006,7 +1006,7 @@ PROGRAM P2Use
     iGEO = Args%I%I(3)
 
     IF(iGEO <= 12) THEN
-      CALL MondoLog(DEBUG_NONE, logtag, "No previous density matrix defined")
+      CALL MondoLog(DEBUG_MAXIMUM, logtag, "No previous density matrix defined")
       CALL Halt("["//TRIM(logtag)//"] Fatal error")
     ENDIF
 
@@ -1016,7 +1016,7 @@ PROGRAM P2Use
 
     IF(iGEO == 13) THEN
       ! Initial boundary conditions: Save D(p-1) as P(p-1).
-      CALL MondoLog(DEBUG_NONE, logtag, "Initial boundary condition")
+      CALL MondoLog(DEBUG_MAXIMUM, logtag, "Initial boundary condition")
       DO I=1,7
         CALL Get(Tmp1, TrixFile("DOsave",  Stats_O = (/ iSCF, iBAS, iGEO-I /)))
         CALL Put(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-I /)))
@@ -1093,9 +1093,9 @@ PROGRAM P2Use
         IF(ABS(TrP2-Half*DBLE(NEl)) < 1.D-8) EXIT
       ENDIF
     ENDDO
-    CALL MondoLog(DEBUG_NONE, logtag, "purified after "//TRIM(IntToChar(I))//" iterations")
-    CALL MondoLog(DEBUG_NONE, logtag, "Trace(P) = "//TRIM(DblToChar(TrP)))
-    CALL MondoLog(DEBUG_NONE, logtag, "Trace(P2) = "//TRIM(DblToChar(TrP2)))
+    CALL MondoLog(DEBUG_MAXIMUM, logtag, "purified after "//TRIM(IntToChar(I))//" iterations")
+    CALL MondoLog(DEBUG_MAXIMUM, logtag, "Trace(P) = "//TRIM(DblToChar(TrP)))
+    CALL MondoLog(DEBUG_MAXIMUM, logtag, "Trace(P2) = "//TRIM(DblToChar(TrP2)))
 
     ! Convert to AO Rep
     INQUIRE(FILE=TrixFile('X',Args),EXIST=Present)
@@ -1129,7 +1129,7 @@ PROGRAM P2Use
     iGEO = Args%I%I(3)
 
     IF(iGEO <= 6) THEN
-      CALL MondoLog(DEBUG_NONE, logtag, "No previous density matrix defined")
+      CALL MondoLog(DEBUG_MAXIMUM, logtag, "No previous density matrix defined")
       CALL Halt("["//TRIM(logtag)//"] Fatal error")
     ENDIF
 
@@ -1151,7 +1151,7 @@ PROGRAM P2Use
     ! Calculate symplectic counter.
     m_step = MOD(iGEO-2,4)+1
     IF(iGEO == 7) THEN
-      CALL MondoLog(DEBUG_NONE, logtag, "Initial boundary condition")
+      CALL MondoLog(DEBUG_MAXIMUM, logtag, "Initial boundary condition")
       DO I=1,6
         CALL Get(Tmp1, TrixFile("DOsave",  Stats_O = (/ iSCF, iBAS, iGEO-I /)))
         CALL Put(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-I /)))
@@ -1207,7 +1207,7 @@ PROGRAM P2Use
 #ifdef ANDERS
     beta = 0.00275D0
     IF(iGEO > MDDampStep) THEN
-      CALL MondoLog(DEBUG_NONE, logtag, "Anders beta hack active now")
+      CALL MondoLog(DEBUG_MAXIMUM, logtag, "Anders beta hack active now")
       CALL Multiply(P,1.D0-beta)
 
       CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-1 /)))
@@ -1280,9 +1280,9 @@ PROGRAM P2Use
         IF(ABS(TrP2-Half*DBLE(NEl)) < 1.D-8) EXIT
       ENDIF
     ENDDO
-    CALL MondoLog(DEBUG_NONE, logtag, "purified after "//TRIM(IntToChar(I))//" iterations")
-    CALL MondoLog(DEBUG_NONE, logtag, "Trace(P) = "//TRIM(DblToChar(TrP)))
-    CALL MondoLog(DEBUG_NONE, logtag, "Trace(P2) = "//TRIM(DblToChar(TrP2)))
+    CALL MondoLog(DEBUG_MAXIMUM, logtag, "purified after "//TRIM(IntToChar(I))//" iterations")
+    CALL MondoLog(DEBUG_MAXIMUM, logtag, "Trace(P) = "//TRIM(DblToChar(TrP)))
+    CALL MondoLog(DEBUG_MAXIMUM, logtag, "Trace(P2) = "//TRIM(DblToChar(TrP2)))
 
     ! Convert to AO Rep
     INQUIRE(FILE=TrixFile('X',Args),EXIST=Present)
@@ -1364,7 +1364,7 @@ PROGRAM P2Use
         IF(ABS(TrP2-Half*DBLE(NEl)) < 1.D-8) EXIT
       ENDIF
     ENDDO
-    CALL MondoLog(DEBUG_NONE, logtag, "Trace(P) = "//TRIM(FltToChar(TrP)))
+    CALL MondoLog(DEBUG_MAXIMUM, logtag, "Trace(P) = "//TRIM(FltToChar(TrP)))
 
     !    Convert to AO Rep
     INQUIRE(FILE=TrixFile('X',Args),EXIST=Present)
@@ -1458,7 +1458,7 @@ PROGRAM P2Use
         IF(ABS(TrP2-Half*DBLE(NEl)) < 1.D-8) EXIT
       ENDIF
     ENDDO
-    CALL MondoLog(DEBUG_NONE, logtag, "Trace(P) = "//TRIM(FltToChar(TrP)))
+    CALL MondoLog(DEBUG_MAXIMUM, logtag, "Trace(P) = "//TRIM(FltToChar(TrP)))
 
     !    Convert to AO Rep
     INQUIRE(FILE=TrixFile('X',Args),EXIST=Present)
@@ -1504,7 +1504,7 @@ PROGRAM P2Use
            //'_Cycl#'//TRIM(IntToChar(ICycle)) &
            //'_Clone#'//TRIM(IntToChar(MyClone)) &
            //'.D'
-      CALL MondoLog(DEBUG_NONE, logtag, "Looking for "//TRIM(DMFile))
+      CALL MondoLog(DEBUG_MAXIMUM, logtag, "Looking for "//TRIM(DMFile))
       INQUIRE(FILE=DMFile,EXIST=Present)
       IF(.NOT.Present)THEN
         Cycle=ICycle-1
@@ -1513,15 +1513,15 @@ PROGRAM P2Use
              //'_Cycl#'//TRIM(IntToChar(Cycle)) &
              //'_Clone#'//TRIM(IntToChar(MyClone)) &
              //'.D'
-        CALL MondoLog(DEBUG_NONE, logtag, "On extrapolation, P2Use is opening DM "//TRIM(DMFile))
+        CALL MondoLog(DEBUG_MAXIMUM, logtag, "On extrapolation, P2Use is opening DM "//TRIM(DMFile))
         EXIT
       ENDIF
     ENDDO
 
-    CALL MondoLog(DEBUG_NONE, logtag, "Cycle = "//TRIM(IntToChar(Cycle)))
+    CALL MondoLog(DEBUG_MAXIMUM, logtag, "Cycle = "//TRIM(IntToChar(Cycle)))
 
     IF(Cycle<0)THEN
-      CALL MondoLog(DEBUG_NONE, logtag, "Assuming this is a restart! If there is no restart, its going to die...")
+      CALL MondoLog(DEBUG_MAXIMUM, logtag, "Assuming this is a restart! If there is no restart, its going to die...")
       CALL Get(S0,TrixFile('S',Args,Stats_O=(/Current(1),Current(2),Current(3)-1/)))
       CALL Get(S1,TrixFile('S',Args,Stats_O=Current))
       ! Close Current Group
@@ -1629,10 +1629,10 @@ PROGRAM P2Use
 #ifdef PARALLEL
       IF(MyId==ROOT)THEN
 #endif
-        CALL MondoLog(DEBUG_MEDIUM, logtag, &
-          ProcessName(Prog,'AO-DMX ')// &
-          ' Nstep  = '//TRIM(IntToChar(NStep))// &
-          ' Lambda = '//TRIM(DblToMedmChar(Lam)))
+        CALL MondoLog(DEBUG_MEDIUM,Prog,  &
+          'Nstep  = '//TRIM(IntToChar(NStep))// &
+          ', Lambda = '//TRIM(DblToMedmChar(Lam)),'AO-DMX ')
+
 #ifdef PARALLEL
       ENDIF
 #endif
@@ -1672,10 +1672,11 @@ PROGRAM P2Use
         IF(MyId==ROOT)THEN
 #endif
           PNon0s=100.D0*DBLE(P%NNon0)/DBLE(NBasF*NBasF)
-          CALL MondoLog(DEBUG_MEDIUM, logtag, ProcessName(Prog,'AO-DMX ' &
-            //TRIM(IntToChar(NStep))//":"//TRIM(IntToChar(I))) &
-            //' dN='//TRIM(DblToShrtChar(Norm_Error)) &
-            //', %Non0='//TRIM(DblToShrtChar(PNon0s)))
+          CALL MondoLog(DEBUG_MEDIUM, Prog,                      &
+                        'dN='//TRIM(DblToShrtChar(Norm_Error))  &
+                      //', %Non0='//TRIM(DblToShrtChar(PNon0s)), &
+                       'AO-DMX '//TRIM(IntToChar(NStep))//":"//TRIM(IntToChar(I)))
+
 #ifdef PARALLEL
         ENDIF
 #endif
@@ -1731,7 +1732,7 @@ PROGRAM P2Use
 
   END SELECT
 
-  CALL MondoLog(DEBUG_NONE, logtag, "done")
+  CALL MondoLog(DEBUG_MAXIMUM, logtag, "done")
 
   ! Tidy up ...
   CALL Delete(GM)

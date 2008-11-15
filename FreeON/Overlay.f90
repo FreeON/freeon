@@ -77,7 +77,7 @@ CONTAINS
       ENDDO
 
       ! Log this run
-      CALL MondoLog(DEBUG_NONE, "Invoke", TRIM(CmndLine))
+      CALL MondoLog(DEBUG_MAXIMUM, "Invoke", TRIM(CmndLine))
 
 #if MPI2
       CALL MPI_COMM_SPAWN(ArgV%C(1),ArgV%C(2:NArg),M%NProc,MPI_INFO_NULL, &

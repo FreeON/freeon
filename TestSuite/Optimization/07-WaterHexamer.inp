@@ -14,7 +14,7 @@ Guess=SuperPos
 OutPut=XYZ
 Grad=(Optimize,PrimInt,NoGDIIS,BiSect,HBondOnly,NoFragmConnect,NonCovBend,NonCovTors)
 
-DebugAll=(MaxDebug,CheckSums)
+DebugAll=(MinDebug,CheckSums)
 SCFMethod=(RH)
 BasisSets=(STO-3G-SPLIT)
 ModelChem=(HF)
