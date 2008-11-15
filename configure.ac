@@ -699,9 +699,6 @@ TwoE/INT/Makefile
 TwoE/MSC/Makefile
 TwoE/VRR/Makefile
 ONX/Makefile
-examples/Makefile
-examples/MD/Makefile
-examples/MD-restart/Makefile
 ])
 
 AC_CONFIG_HEADERS([config.h])

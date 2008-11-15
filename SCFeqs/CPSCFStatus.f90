@@ -69,7 +69,7 @@ PROGRAM CPSCFSts
   INTEGER                          :: RespOrder
   CHARACTER(LEN=5*DEFAULT_CHR_LEN) :: CPSCFMessage
   CHARACTER(LEN=  DEFAULT_CHR_LEN) :: PropName
-  CHARACTER(LEN=*), PARAMETER      :: Prog='CPSCFSts'  
+  CHARACTER(LEN=*), PARAMETER      :: Prog='CPSCF'  
   CHARACTER(LEN=*), DIMENSION(3), PARAMETER :: Cart=(/'X','Y','Z'/)
   !
   !For nulear dipole moment.

@@ -50,7 +50,7 @@ PROGRAM ODA
   REAL(DOUBLE)                   :: Tmp1,Tmp2,Tmp3,Tmp4,alph
   INTEGER                        :: I,iSCF
   LOGICAL                        :: Present,HasECPs
-  CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg,MatFile
+  CHARACTER(LEN=DEFAULT_CHR_LEN) :: ODAMssg,ODATag,MatFile
   CHARACTER(LEN=3),PARAMETER     :: Prog='ODA'
   REAL(DOUBLE)                   :: TrP0T,TrP1T,TrP0F0,TrP1F1,TrP0F1,TrP1F0, &
        TrP0K1,TrP0K0,TrP1K0,TrP1K1,IKPS_Error,IKPS_denom
@@ -245,13 +245,9 @@ PROGRAM ODA
 #ifdef PARALLEL
   IF(MyId==ROOT)THEN
 #endif
-    Mssg=' Mix = '//TRIM(FltToShrtChar(L))
-    Mssg=ProcessName(Prog,TRIM(Mssg))
-    Mssg=TRIM(Mssg)//" <SCF> = "//TRIM(FltToMedmChar(EMin))//', d3 = '//TRIM(DblToShrtChar(d3))
-    CALL OpenASCII(OutFile,Out)
-    WRITE(*,*)TRIM(Mssg)
-    WRITE(Out,*)TRIM(Mssg)
-    CLOSE(Out)
+    ODATag='Mix = '//TRIM(FltToShrtChar(L))
+    ODAMssg="<SCF> = "//TRIM(FltToChar(EMin))//', d3 = '//TRIM(DblToShrtChar(d3))
+    CALL MondoLog(DEBUG_MEDIUM,Prog,ODAMssg,ODATag)
 #ifdef PARALLEL
   ENDIF
 #endif

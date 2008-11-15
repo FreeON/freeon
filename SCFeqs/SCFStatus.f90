@@ -55,8 +55,9 @@ PROGRAM SCFStatus
   REAL(DOUBLE)                    :: E_C_EXCL,E_LJ_EXCL
 #endif
   LOGICAL                         :: HasECPs
-  CHARACTER(LEN=10*DEFAULT_CHR_LEN):: SCFMessage
-  CHARACTER(LEN=9),PARAMETER      :: Prog='SCFStatus'
+  CHARACTER(LEN=DEFAULT_CHR_LEN):: SCFMessage
+  CHARACTER(LEN=DEFAULT_CHR_LEN):: SCFTag
+  CHARACTER(LEN=9),PARAMETER      :: Prog='SCF'
   CHARACTER(LEN=2)                :: CurClone
   !---------------------------------------------------------------------------------------
   !  Macro the start up
@@ -218,39 +219,23 @@ PROGRAM SCFStatus
     !     Add in MM energies
   ELSEIF(PrintFlags%Key>=DEBUG_NONE)THEN
     IF(NClones>1)THEN
-      SCFMessage=ProcessName(Prog,'['//TRIM(SCFCycl)//','  &
-           //TRIM(CurBase)//','  &
-           //TRIM(CurGeom)//','//TRIM(CurClone)//']')
+      SCFTag='['//TRIM(SCFCycl)//','//TRIM(CurBase)//','//TRIM(CurGeom)//','//TRIM(CurClone)//']'
     ELSE
-      SCFMessage=ProcessName(Prog,'['//TRIM(SCFCycl)//','  &
-           //TRIM(CurBase)//','  &
-           //TRIM(CurGeom)//']')
+      SCFTag='['//TRIM(SCFCycl)//','//TRIM(CurBase)//','//TRIM(CurGeom)//']'
     ENDIF
-    IF(SCFActn=='BasisSetSwitch')THEN
-      SCFMessage=TRIM(SCFMessage)//' Basis set switch ... '       &
-           //' MxD = '//TRIM(DblToShrtChar(DMax))
 
-      !      ELSEIF(SCFActn=='Restart')THEN
-      !         SCFMessage=TRIM(SCFMessage)//' Restarting ... '       &
-      !                                    //' MxD = '//TRIM(DblToShrtChar(DMax))
+    IF(SCFActn=='BasisSetSwitch')THEN
+      SCFMessage=' Basis set switch, MxD = '//TRIM(DblToShrtChar(DMax))
     ELSE
-        SCFMessage=TRIM(SCFMessage)//' <SCF> = '//TRIM(FltToChar(Etot)) &
-             //', dD = '//TRIM(DblToShrtChar(DMax))
+      SCFMessage='<SCF> = '//TRIM(FltToChar(Etot))//', dD = '//TRIM(DblToShrtChar(DMax))
     ENDIF
     !     Add in DIIS error
     IF(DIISErr/=Zero)                                                     &
          SCFMessage=TRIM(SCFMessage)                                        &
          //', DIIS = '//TRIM(DblToShrtChar(DIISErr))
+    CALL MondoLog(DEBUG_NONE,Prog,SCFMessage,SCFTag)
   ENDIF
-#ifdef PARALLEL
-  IF(MyId==ROOT)THEN
-#endif
-    IF(SCFActn/='Silent')THEN
-      CALL MondoLogPlain(TRIM(SCFMessage))
-    ENDIF
-#ifdef PARALLEL
-  ENDIF
-#endif
+
   CALL Delete(P)
   CALL Delete(Tmp1)
   CALL Delete(Tmp2)
