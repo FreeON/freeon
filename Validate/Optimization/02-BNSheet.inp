@@ -16,7 +16,7 @@ DebugAll=(MaxDebug,MinGeOp)
 Guess=SuperPos
 SCFMethod=(RH)
 BasisSets=(STO-2G-SPLIT)
-ModelChem=(HF)
+ModelChem=(B3LYP)
 Accuracy =(good)
 SCFConvergence=(DIIS)
 
