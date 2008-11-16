@@ -593,19 +593,19 @@ MODULE PrettyPrint
 222                FORMAT(1X,A2,3(F22.16,' '),A1)
                 ENDDO
 
-                DO I=1,GM%NAtms
-                   IF(GM%CConstrain%I(I)==1) THEN
-                      AuxChar='C'
-                   ELSE IF(GM%CConstrain%I(I)==2) THEN
-                      AuxChar='R'
-                   ELSE
-                      AuxChar=' '
-                   ENDIF
-                   Atom=GM%AtNam%C(I)
-                   CALL UpCase(Atom)
-                   WRITE(PU,223)Atom,(GM%BoxCarts%D(K,I),K=1,3),TRIM(ADJUSTL(AuxChar))
-223                FORMAT(1X,A2,3(F22.16,' '),A1,' << FRACTIONALS ')
-                ENDDO
+!!$                DO I=1,GM%NAtms
+!!$                   IF(GM%CConstrain%I(I)==1) THEN
+!!$                      AuxChar='C'
+!!$                   ELSE IF(GM%CConstrain%I(I)==2) THEN
+!!$                      AuxChar='R'
+!!$                   ELSE
+!!$                      AuxChar=' '
+!!$                   ENDIF
+!!$                   Atom=GM%AtNam%C(I)
+!!$                   CALL UpCase(Atom)
+!!$                   WRITE(PU,223)Atom,(GM%BoxCarts%D(K,I),K=1,3),TRIM(ADJUSTL(AuxChar))
+!!$223                FORMAT(1X,A2,3(F22.16,' '),A1,' << FRACTIONALS ')
+!!$                ENDDO
 
              ELSEIF(PrintGeom_O=='PDB')THEN
                 ! Print PDB format
