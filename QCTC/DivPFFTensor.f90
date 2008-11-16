@@ -108,6 +108,14 @@ CONTAINS
 !
     dTenC%D=Zero
     dTenS%D=Zero
+
+    ! Oh god, this routine is total crap.  Need to implement analytic derivatives
+    ! based on plane wise summation.  Maybe someone will do that to avoid total 
+    ! humiliation.  
+
+    Accuracy=1D-12
+
+
     Rmin     = SQRT(CS%CellCarts%D(1,1)**2+CS%CellCarts%D(2,1)**2+CS%CellCarts%D(3,1)**2)
     DivVol = DivCellVolume(GM%PBC%BoxShape%D,GM%PBC%AutoW%I)
 !
@@ -173,6 +181,8 @@ CONTAINS
 !
     ExpFac = Pi*Pi/BetaSq
     Rmax = SQRT(ABS(LOG(Accuracy/(10.D0**(LSwitch)))/ExpFac))
+
+
     DO
        CALL New_CellSet_Sphere(CSMM,GM%PBC%AutoW%I,RecpLatVec,Rmax)
        IF(CSMM%NCells .LT. 9) THEN
