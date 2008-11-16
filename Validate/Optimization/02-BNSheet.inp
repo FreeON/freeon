@@ -11,7 +11,7 @@ Charge=0
 Multiplicity=1
 
 Grad=(Optimize,PrimInt,NoBackTr,BiSect,NoGDIIS)
-DebugAll=(MinDebug,MinGeOp)
+DebugAll=(MaxDebug,MinGeOp)
 
 Guess=SuperPos
 SCFMethod=(RH)
