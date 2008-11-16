@@ -3,7 +3,7 @@ AUTOMAKE_OPTIONS = dist-bzip2 no-dist-gzip
 CPP = @CPP@
 AM_CPPFLAGS = @AM_CPPFLAGS@
 
-SUBDIRS = MondoMods FreeON SCFeqs OneE QCTC HiCu TwoE ONX examples
+SUBDIRS = MondoMods FreeON SCFeqs OneE QCTC HiCu TwoE ONX examples TestSuite
 
 datadir = ${prefix}/BasisSets
 

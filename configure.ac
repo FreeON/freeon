@@ -702,6 +702,13 @@ ONX/Makefile
 examples/Makefile
 examples/MD/Makefile
 examples/MD-restart/Makefile
+TestSuite/Makefile
+TestSuite/Optimization/Makefile
+TestSuite/Response/Makefile
+TestSuite/Response/Frequencies/Makefile
+TestSuite/Response/TDSCF/Makefile
+TestSuite/SinglePoint/Makefile
+TestSuite/SinglePoint/Restricted/Makefile
 ])
 
 AC_CONFIG_HEADERS([config.h])
