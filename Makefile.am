@@ -109,29 +109,33 @@ BasisSets = \
 
 CLEANFILES = *~
 
-CONFIG_STATUS_DEPENDENCIES = localversion
+DISTCLEANFILES = MondoConfig.h MondoLocalVersion.h
+
+CONFIG_STATUS_DEPENDENCIES = $(top_srcdir)/localversion
+
+DISTCHECK_CONFIGURE_FLAGS = --disable-optimizations
 
 # Fix localversion.
 .PHONY : always-fix
-localversion : always-fix
+$(top_srcdir)/localversion : always-fix
 	@echo "checking localversion"; \
 	  branch=`git branch 2>&1 | egrep '^\*' | awk '{print $$2}'`; \
 	  localversion=`git log --pretty=oneline -1 2>&1 | awk '{print $$1}'`; \
 	  if test -n "$${branch}" -a -n "$${localversion}"; then \
 	    echo "branch=$${branch}" > localversion.temp; \
 	    echo "localversion=$${localversion}" >> localversion.temp; \
-	    if test -f localversion; then \
-	      if test -z "`diff localversion localversion.temp`"; then \
+	    if test -f ${top_srcdir}/localversion; then \
+	      if test -z "`diff ${top_srcdir}/localversion localversion.temp`"; then \
 	        echo "localversion did not change"; \
 	        rm localversion.temp; \
 	      else \
 	        echo "localversion updated"; \
-	        diff -u localversion localversion.temp; \
-	        mv -f localversion.temp localversion; \
+	        diff -u ${top_srcdir}/localversion localversion.temp; \
+	        mv -f localversion.temp ${top_srcdir}/localversion; \
 	      fi; \
 	    else \
 	      echo "localversion did not exist"; \
-	      mv -f localversion.temp localversion; \
+	      mv -f localversion.temp ${top_srcdir}/localversion; \
 	    fi; \
 	    echo "localversion at $${branch}:$${localversion}"; \
 	  fi

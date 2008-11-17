@@ -3301,8 +3301,8 @@ dnl configuration information. See config/commence.in for the order in which
 dnl things need to be done.
 
 # First the stamp1 file for H5config.h.in
-mkdir ./config >/dev/null 2>&1
-touch ./config/stamp1
+#mkdir ./config >/dev/null 2>&1
+#touch ./config/stamp1
 
 # Then the config.status file (but not makefiles)
 saved_no_create=$no_create
@@ -3325,7 +3325,7 @@ AC_OUTPUT
 no_create=$saved_no_create
 
 # Then the stamp2 file for H5config.h
-touch ./config/stamp2
+#touch ./config/stamp2
 
 # Finally the makefiles
 test "$no_create" = yes || ${CONFIG_SHELL-/bin/sh} $CONFIG_STATUS || exit 1

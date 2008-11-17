@@ -29,8 +29,8 @@ disemination in future releases.
 
 AM_INIT_AUTOMAKE
 
-if test -f localversion; then
-  . localversion
+if test -f ${srcdir}/localversion; then
+  . ${srcdir}/localversion
 else
   branch="unknown"
   localversion="not_set"
@@ -605,12 +605,14 @@ fi
 CPP=cpp
 
 # Set some preprocessor command line options.
-FORTRAN_CPPFLAGS="-P -C -xc -traditional -I../MondoMods"
+FORTRAN_CPPFLAGS="-P -C -xc -traditional -I\$(srcdir) -I\$(top_builddir)/MondoMods"
+FORTRAN_DEFAULT_INCLUDES="-I\$(srcdir) -I\$(top_builddir)/MondoMods"
 
 # Set this stuff in the makefiles.
 AC_SUBST(CPP, ${CPP})
 AC_SUBST(AM_CPPFLAGS, ${AM_CPPFLAGS})
 AC_SUBST(FORTRAN_CPPFLAGS, ${FORTRAN_CPPFLAGS})
+AC_SUBST(FORTRAN_DEFAULT_INCLUDES, ${FORTRAN_DEFAULT_INCLUDES})
 
 AC_MSG_CHECKING([whether we should remove preprocessed files])
 AC_ARG_ENABLE([delete-preprocessed-files],
@@ -730,19 +732,21 @@ AC_DEFINE(LOG_MEMORY_USAGE,
           [A helper macro to print out memory usage.])
 
 AC_MSG_NOTICE([***   Summary   ***])
-AC_MSG_NOTICE([CC            = ${CC}])
-AC_MSG_NOTICE([FC            = ${FC}])
-AC_MSG_NOTICE([F77           = ${F77}])
-AC_MSG_NOTICE([CFLAGS        = ${CFLAGS}])
-AC_MSG_NOTICE([FCFLAGS       = ${FCFLAGS}])
-AC_MSG_NOTICE([FFLAGS        = ${FFLAGS}])
-AC_MSG_NOTICE([NOOPT         = ${NOOPT}])
-AC_MSG_NOTICE([LDFLAGS       = ${LDFLAGS}])
-AC_MSG_NOTICE([LIBS          = ${LIBS}])
-AC_MSG_NOTICE([CPPFLAGS      = ${CPPFLAGS}])
-AC_MSG_NOTICE([HDF5_CPPFLAGS = ${HDF5_CPPFLAGS}])
-AC_MSG_NOTICE([MONDO_SCRATCH = ${MONDO_SCRATCH}])
-AC_MSG_NOTICE([RECYCLE_HDF   = ${RECYCLE_HDF}])
+AC_MSG_NOTICE([CC                       = ${CC}])
+AC_MSG_NOTICE([FC                       = ${FC}])
+AC_MSG_NOTICE([F77                      = ${F77}])
+AC_MSG_NOTICE([CFLAGS                   = ${CFLAGS}])
+AC_MSG_NOTICE([FCFLAGS                  = ${FCFLAGS}])
+AC_MSG_NOTICE([FFLAGS                   = ${FFLAGS}])
+AC_MSG_NOTICE([NOOPT                    = ${NOOPT}])
+AC_MSG_NOTICE([LDFLAGS                  = ${LDFLAGS}])
+AC_MSG_NOTICE([LIBS                     = ${LIBS}])
+AC_MSG_NOTICE([CPPFLAGS                 = ${CPPFLAGS}])
+AC_MSG_NOTICE([FORTRAN_CPPFLAGS         = ${FORTRAN_CPPFLAGS}])
+AC_MSG_NOTICE([FORTRAN_DEFAULT_INCLUDES = ${FORTRAN_DEFAULT_INCLUDES}])
+AC_MSG_NOTICE([HDF5_CPPFLAGS            = ${HDF5_CPPFLAGS}])
+AC_MSG_NOTICE([MONDO_SCRATCH            = ${MONDO_SCRATCH}])
+AC_MSG_NOTICE([RECYCLE_HDF              = ${RECYCLE_HDF}])
 AC_MSG_NOTICE([])
 if test "${use_internal_lapack}" = "yes"; then
   AC_MSG_NOTICE([Using internal lapack])

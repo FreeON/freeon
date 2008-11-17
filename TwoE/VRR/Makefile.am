@@ -67,13 +67,9 @@ libVRR_la_SOURCES = \
   VRRs0j0.f90 \
   VRRs0p0.f90
 
-libVRR_la_DEPENDENCIES = \
-  $(MondoMods_DEPENDENCY_FILES) \
-	../MSC/shellpairstruct.mod \
-	../MSC/vscratchb.mod \
-	../MSC/getatompairmod.mod
+libVRR_la_DEPENDENCIES = $(MondoMods_DEPENDENCY_FILES)
 
-EXTRA_INCLUDES = -I../../MondoMods -I../MSC
+EXTRA_INCLUDES = -I$(builddir)/../MSC
 
 # Some compilers have trouble optimizing some of the sources here. For now we
 # will turn the optimization level down...

@@ -59,8 +59,6 @@ SOURCES_DEPCHECK = \
 
 LDADD = $(LDADD_MONDOMODS) $(LDADD_INTERNAL_LAPACK) $(LDADD_INTERNAL_HDF5)
 
-EXTRA_INCLUDES = -I../MondoMods -IMMA
-
 # Dependencies.
 IRInv.o          : DenMatMethods.o
 ODA.o            : DenMatMethods.o
