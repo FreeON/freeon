@@ -32,25 +32,25 @@ GONX_SOURCES = \
 
 ONX_DEPENDENCIES  = \
   $(MondoMods_DEPENDENCY_FILES) \
-  $(top_srcdir)/TwoE/GRD/libGRD.la \
-  $(top_srcdir)/TwoE/INT/libINT.la \
-  $(top_srcdir)/TwoE/VRR/libVRR.la \
-  $(top_srcdir)/TwoE/HRR/libHRR.la \
-  $(top_srcdir)/TwoE/MSC/libTwoEMisc.la \
-  $(top_srcdir)/TwoE/MSC/shellpairstruct.mod \
-  $(top_srcdir)/TwoE/MSC/vscratchb.mod \
-  $(top_srcdir)/TwoE/MSC/getatompairmod.mod
+  $(top_builddir)/TwoE/GRD/libGRD.la \
+  $(top_builddir)/TwoE/INT/libINT.la \
+  $(top_builddir)/TwoE/VRR/libVRR.la \
+  $(top_builddir)/TwoE/HRR/libHRR.la \
+  $(top_builddir)/TwoE/MSC/libTwoEMisc.la \
+  $(top_builddir)/TwoE/MSC/shellpairstruct.mod \
+  $(top_builddir)/TwoE/MSC/vscratchb.mod \
+  $(top_builddir)/TwoE/MSC/getatompairmod.mod
 
 GONX_DEPENDENCIES = \
   $(MondoMods_DEPENDENCY_FILES) \
-  $(top_srcdir)/TwoE/GRD/libGRD.la \
-  $(top_srcdir)/TwoE/INT/libINT.la \
-  $(top_srcdir)/TwoE/VRR/libVRR.la \
-  $(top_srcdir)/TwoE/HRR/libHRR.la \
-  $(top_srcdir)/TwoE/MSC/libTwoEMisc.la \
-  $(top_srcdir)/TwoE/MSC/shellpairstruct.mod \
-  $(top_srcdir)/TwoE/MSC/vscratchb.mod \
-  $(top_srcdir)/TwoE/MSC/getatompairmod.mod
+  $(top_builddir)/TwoE/GRD/libGRD.la \
+  $(top_builddir)/TwoE/INT/libINT.la \
+  $(top_builddir)/TwoE/VRR/libVRR.la \
+  $(top_builddir)/TwoE/HRR/libHRR.la \
+  $(top_builddir)/TwoE/MSC/libTwoEMisc.la \
+  $(top_builddir)/TwoE/MSC/shellpairstruct.mod \
+  $(top_builddir)/TwoE/MSC/vscratchb.mod \
+  $(top_builddir)/TwoE/MSC/getatompairmod.mod
 
 SOURCES_DEPCHECK = \
   $(ONX_SOURCES) \
@@ -61,10 +61,20 @@ EXTRA_DIST = \
 
 CPPMISC = -DONX2_PARALLEL -DGTRESH
 
-EXTRA_INCLUDES = -I../MondoMods -I../TwoE -I../TwoE/MSC -I../TwoE/INT -I../TwoE/GRD
+EXTRA_INCLUDES = \
+  -I$(top_builddir)/TwoE/INT \
+  -I$(top_srcdir)/TwoE/INT \
+  -I$(top_builddir)/TwoE/GRD \
+  -I$(top_srcdir)/TwoE/GRD \
+  -I$(top_builddir)/TwoE/MSC
 
-LDADD = $(LDADD_MONDOMODS) $(LDADD_INTERNAL_LAPACK) $(LDADD_INTERNAL_HDF5) \
-  ../TwoE/GRD/libGRD.la ../TwoE/INT/libINT.la ../TwoE/VRR/libVRR.la ../TwoE/HRR/libHRR.la ../TwoE/MSC/libTwoEMisc.la
+LDADD = \
+  $(LDADD_MONDOMODS) $(LDADD_INTERNAL_LAPACK) $(LDADD_INTERNAL_HDF5) \
+  $(builddir)/../TwoE/GRD/libGRD.la \
+  $(builddir)/../TwoE/INT/libINT.la \
+  $(builddir)/../TwoE/VRR/libVRR.la \
+  $(builddir)/../TwoE/HRR/libHRR.la \
+  $(builddir)/../TwoE/MSC/libTwoEMisc.la
 
 ONXInit.o : \
   ONXParameters.o

@@ -165,9 +165,9 @@ EXTRA_DIST = \
   MMA/PAC/PFunk.Inc
 
 EXTRA_INCLUDES = \
-  -IMMA/LookUpTables \
-  -IMMA/Functionals  \
-  -IMMA/PAC
+  -I$(srcdir)/MMA/LookUpTables \
+  -I$(srcdir)/MMA/Functionals  \
+  -I$(srcdir)/MMA/PAC
 
 SOURCES_DEPCHECK = $(libMondoMods_la_SOURCES)
 
