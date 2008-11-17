@@ -137,6 +137,7 @@ $(top_srcdir)/localversion : always-fix
 	      echo "localversion did not exist"; \
 	      mv -f localversion.temp ${top_srcdir}/localversion; \
 	    fi; \
+	      rm -f localversion.temp; \
 	    echo "localversion at $${branch}:$${localversion}"; \
 	  fi
 
