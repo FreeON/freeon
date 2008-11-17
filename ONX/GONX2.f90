@@ -26,7 +26,6 @@
 PROGRAM GONX2
 
 #ifndef PARALLEL
-#warning PARALLEL is not set.
 #undef ONX2_PARALLEL
 #endif
 
