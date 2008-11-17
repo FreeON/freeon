@@ -1,6 +1,6 @@
 AC_PREREQ(2.59)
 
-AC_INIT([freeon], [1.0-alpha-Nov-05-2008], [mchalla@lanl.gov])
+AC_INIT([freeon], [1.0-alpha-Nov-14-2008], [mchalla@lanl.gov])
 AC_COPYRIGHT([
 This code is part of the MondoSCF suite of programs for linear scaling
 electronic structure theory and ab initio molecular dynamics.
@@ -29,8 +29,8 @@ disemination in future releases.
 
 AM_INIT_AUTOMAKE
 
-if test -f localversion; then
-  . localversion
+if test -f ${srcdir}/localversion; then
+  . ${srcdir}/localversion
 else
   branch="unknown"
   localversion="not_set"
@@ -246,7 +246,7 @@ AC_MSG_CHECKING([how to set line length limits of f90 compiler])
 case ${FC_COMPILERNAME} in
   GCC)
     AC_MSG_RESULT([gfortran detected, setting unlimited line-length limit (-ffree-line-length-none)])
-    FFLAGS="${FFLAGS} -ffree-line-length-none"
+    FFLAGS="${FFLAGS} -ffixed-line-length-none"
     FCFLAGS="${FCFLAGS} -ffree-line-length-none"
     ;;
   Intel)
@@ -605,12 +605,14 @@ fi
 CPP=cpp
 
 # Set some preprocessor command line options.
-FORTRAN_CPPFLAGS="-P -C -xc -traditional -I../MondoMods"
+FORTRAN_CPPFLAGS="-P -C -xc -traditional -I\$(srcdir) -I\$(top_builddir)/MondoMods"
+FORTRAN_DEFAULT_INCLUDES="-I\$(srcdir) -I\$(top_builddir)/MondoMods"
 
 # Set this stuff in the makefiles.
 AC_SUBST(CPP, ${CPP})
 AC_SUBST(AM_CPPFLAGS, ${AM_CPPFLAGS})
 AC_SUBST(FORTRAN_CPPFLAGS, ${FORTRAN_CPPFLAGS})
+AC_SUBST(FORTRAN_DEFAULT_INCLUDES, ${FORTRAN_DEFAULT_INCLUDES})
 
 AC_MSG_CHECKING([whether we should remove preprocessed files])
 AC_ARG_ENABLE([delete-preprocessed-files],
@@ -699,6 +701,13 @@ TwoE/INT/Makefile
 TwoE/MSC/Makefile
 TwoE/VRR/Makefile
 ONX/Makefile
+Validate/Makefile
+Validate/Optimization/Makefile
+Validate/Response/Makefile
+Validate/Response/Frequencies/Makefile
+Validate/Response/TDSCF/Makefile
+Validate/SinglePoint/Makefile
+Validate/SinglePoint/Restricted/Makefile
 ])
 
 AC_CONFIG_HEADERS([config.h])
@@ -720,19 +729,21 @@ AC_DEFINE(LOG_MEMORY_USAGE,
           [A helper macro to print out memory usage.])
 
 AC_MSG_NOTICE([***   Summary   ***])
-AC_MSG_NOTICE([CC            = ${CC}])
-AC_MSG_NOTICE([FC            = ${FC}])
-AC_MSG_NOTICE([F77           = ${F77}])
-AC_MSG_NOTICE([CFLAGS        = ${CFLAGS}])
-AC_MSG_NOTICE([FCFLAGS       = ${FCFLAGS}])
-AC_MSG_NOTICE([FFLAGS        = ${FFLAGS}])
-AC_MSG_NOTICE([NOOPT         = ${NOOPT}])
-AC_MSG_NOTICE([LDFLAGS       = ${LDFLAGS}])
-AC_MSG_NOTICE([LIBS          = ${LIBS}])
-AC_MSG_NOTICE([CPPFLAGS      = ${CPPFLAGS}])
-AC_MSG_NOTICE([HDF5_CPPFLAGS = ${HDF5_CPPFLAGS}])
-AC_MSG_NOTICE([MONDO_SCRATCH = ${MONDO_SCRATCH}])
-AC_MSG_NOTICE([RECYCLE_HDF   = ${RECYCLE_HDF}])
+AC_MSG_NOTICE([CC                       = ${CC}])
+AC_MSG_NOTICE([FC                       = ${FC}])
+AC_MSG_NOTICE([F77                      = ${F77}])
+AC_MSG_NOTICE([CFLAGS                   = ${CFLAGS}])
+AC_MSG_NOTICE([FCFLAGS                  = ${FCFLAGS}])
+AC_MSG_NOTICE([FFLAGS                   = ${FFLAGS}])
+AC_MSG_NOTICE([NOOPT                    = ${NOOPT}])
+AC_MSG_NOTICE([LDFLAGS                  = ${LDFLAGS}])
+AC_MSG_NOTICE([LIBS                     = ${LIBS}])
+AC_MSG_NOTICE([CPPFLAGS                 = ${CPPFLAGS}])
+AC_MSG_NOTICE([FORTRAN_CPPFLAGS         = ${FORTRAN_CPPFLAGS}])
+AC_MSG_NOTICE([FORTRAN_DEFAULT_INCLUDES = ${FORTRAN_DEFAULT_INCLUDES}])
+AC_MSG_NOTICE([HDF5_CPPFLAGS            = ${HDF5_CPPFLAGS}])
+AC_MSG_NOTICE([MONDO_SCRATCH            = ${MONDO_SCRATCH}])
+AC_MSG_NOTICE([RECYCLE_HDF              = ${RECYCLE_HDF}])
 AC_MSG_NOTICE([])
 if test "${use_internal_lapack}" = "yes"; then
   AC_MSG_NOTICE([Using internal lapack])

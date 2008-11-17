@@ -26,10 +26,6 @@ libHRR_la_SOURCES = \
   KetHRR64.f90 \
   KetHRR66.f90
 
-libHRR_la_DEPENDENCIES = \
-  $(MondoMods_DEPENDENCY_FILES) \
-	../MSC/shellpairstruct.mod \
-	../MSC/vscratchb.mod \
-	../MSC/getatompairmod.mod
+libHRR_la_DEPENDENCIES = $(MondoMods_DEPENDENCY_FILES)
 
-EXTRA_INCLUDES = -I../../MondoMods -I../MSC
+EXTRA_INCLUDES = -I$(builddir)/../MSC

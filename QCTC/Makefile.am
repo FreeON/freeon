@@ -95,7 +95,7 @@ EXTRA_DIST = \
   PBCTensor/Majik_Kubic_WS1.Inc \
   PBCTensor/Majik_Kubic_WS2.Inc
 
-EXTRA_INCLUDES = -I$(top_srcdir)/MondoMods -I$(top_srcdir)/OneE -I$(top_srcdir)/MondoMods/MMA/LookUpTables_800_6x
+EXTRA_INCLUDES = -I$(top_builddir)/OneE -I$(top_srcdir)/MondoMods/MMA/LookUpTables_800_6x
 LDADD = $(LDADD_MONDOMODS) $(LDADD_INTERNAL_LAPACK) $(LDADD_INTERNAL_HDF5)
 
 # Dependencies.

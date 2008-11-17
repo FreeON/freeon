@@ -48,7 +48,7 @@ EXTRA_DIST = \
 
 LDADD = $(LDADD_MONDOMODS) $(LDADD_INTERNAL_LAPACK) $(LDADD_INTERNAL_HDF5)
 
-EXTRA_INCLUDES = -I../MondoMods -IMMA
+EXTRA_INCLUDES = -I$(srcdir)/MMA
 
 # Dependencies.
 MakeU.o   : UBlok.o

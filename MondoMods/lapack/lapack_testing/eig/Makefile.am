@@ -91,4 +91,4 @@ xeigtstc_SOURCES = $(CEIGTST) $(SCIGTST) $(AEIGTST)
 xeigtstd_SOURCES = $(DEIGTST) $(DZIGTST) $(AEIGTST)
 xeigtstz_SOURCES = $(ZEIGTST) $(DZIGTST) $(AEIGTST)
 
-LDADD = -L../../lapack -L../../blas -L../matgen -lMondoTMG
+LDADD = $(LDADD_INTERNAL_LAPACK) -L$(builddir)/../matgen -lMondoLAPACK -lMondoBLAS -lMondoTMG
