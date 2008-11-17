@@ -126,7 +126,8 @@ optimization_flags=""
 AC_MSG_CHECKING([whether to add compiler optimizations])
 AC_ARG_ENABLE([optimizations],
   [AS_HELP_STRING([--disable-optimizations],
-    [Disables compiler optimizations])],
+    [Disables compiler optimizations and adds compiler options such as bounds
+     checking, etc.])],
   [use_optimizations="${enableval}"],
   [use_optimizations="yes"])
 
