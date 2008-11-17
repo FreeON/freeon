@@ -34,5 +34,5 @@ unsigned int
 getaddress_ (void * x)
 {
   //printf ("Address of object is 0x%x\n", x);
-  return (unsigned int) x;
+  return (unsigned long int) x;
 }

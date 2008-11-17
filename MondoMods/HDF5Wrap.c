@@ -33,7 +33,6 @@
 #include "config.h"
 
 #if defined (HAVE_INTERNAL_HDF5)
-#warning Using internal hdf5
 #include "hdf5/src/hdf5.h"
 #else
 #include <hdf5.h>

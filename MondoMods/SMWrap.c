@@ -31,7 +31,6 @@
 #include "config.h"
 
 #if defined (PHIPAC)
-#warning Using PHIPAC
 /* C wrapper for the PHiPAC DGEMM routine mm_double_NN_1.  
    Computes C(M, N)=A(M, K).B(K, M)+beta*C(M, N) 
 */
@@ -103,7 +102,6 @@ void dgemm_ntc(int* M, int* K, int* N, double* alpha, double* beta, double* A, d
 {mm_double_TN_c(*N, *K, *M, B, A, C, *M, *N, *M, *alpha, *beta);}
 
 #else
-#warning _not_ using PHIPAC. Using BLAS...
 
 extern void dgemm_(char *, char *, int *, int *, int *, double *, double *,
   int *, double *, int *, double *, double *, int *);
