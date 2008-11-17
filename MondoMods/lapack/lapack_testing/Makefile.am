@@ -78,6 +78,8 @@ EXTRA_DIST = \
   zgd.in \
   zsg.in
 
+LDADD = $(LDADD_INTERNAL_LAPACK) -lMondoLAPACK -MondoBLAS
+
 CLEANFILES += \
   cnep.out \
   ctest.out \

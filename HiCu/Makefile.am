@@ -27,7 +27,7 @@ EXTRA_DIST = \
 
 LDADD = $(LDADD_MONDOMODS) $(LDADD_INTERNAL_LAPACK) $(LDADD_INTERNAL_HDF5)
 
-EXTRA_INCLUDES = -I../MondoMods -I../MondoMods/MMA/Functionals
+EXTRA_INCLUDES = -I$(top_srcdir)/MondoMods/MMA/Functionals
 CPPMISC = -DRULE7 -DEXPLICIT_SOURCE
 
 # Dependencies.

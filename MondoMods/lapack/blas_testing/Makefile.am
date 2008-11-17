@@ -47,7 +47,7 @@ xblat3c_SOURCES = cblat3.f
 xblat3d_SOURCES = dblat3.f 
 xblat3z_SOURCES = zblat3.f
 
-LDADD = -L../blas -L../lapack
+LDADD = $(LDADD_INTERNAL_LAPACK) -lMondoBLAS
 
 CLEANFILES += \
   blat1.out \

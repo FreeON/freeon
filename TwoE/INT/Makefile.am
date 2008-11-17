@@ -149,18 +149,14 @@ libINT_la_SOURCES = \
   IntB6060603.f90 \
   IntB6060606.f90
 
-libINT_la_DEPENDENCIES = \
-  $(MondoMods_DEPENDENCY_FILES) \
-	../MSC/shellpairstruct.mod \
-	../MSC/vscratchb.mod \
-	../MSC/getatompairmod.mod
+libINT_la_DEPENDENCIES = $(MondoMods_DEPENDENCY_FILES)
 
 EXTRA_DIST = \
   ERIInclude.Inc \
   ERIInterfaceB.Inc \
   ERIListInterfaceB.Inc
 
-EXTRA_INCLUDES = -I../../MondoMods -I../MSC
+EXTRA_INCLUDES = -I$(builddir)/../MSC
 
 # Some compilers have trouble optimizing some of the sources here. For now we
 # will turn the optimization level down...

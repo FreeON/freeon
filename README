@@ -33,6 +33,23 @@ which will install the binaries into /some/other/directory/bin.
 
 
 
+********** Making a dist (a tar file) **********
+
+The tar file is made with
+
+make dist
+
+and is uploaded to savannah with
+
+make dist-upload
+
+This will also generate a signature of the dist tar file using gpg. Please
+verify that the dist works before uploading with
+
+make distcheck
+
+
+
 ********** Cleaning the sources **********
 
 To clean out the sources, there are several options:
