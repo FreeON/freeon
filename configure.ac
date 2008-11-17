@@ -192,7 +192,7 @@ else
   # Set the optimization flags.
   if test -z "${user_CFLAGS}"; then
     case ${CC_COMPILERNAME} in
-      GCC)   CFLAGS="-O0 -g" ;;
+      GCC)   CFLAGS="-O0 -g -Wall" ;;
       Intel) CFLAGS="-O0 -fp-port -g" ;;
       *)     CFLAGS="-O0 -g" ;;
     esac
@@ -204,8 +204,8 @@ else
 
   if test -z "${user_FFLAGS}"; then
     case ${F77_COMPILERNAME} in
-      GCC)   FFLAGS="-O0 -g" ;;
-      Intel) FFLAGS="-O0 -fltconsistency -fp-port -g" ;;
+      GCC)   FFLAGS="-O0 -g -fbounds-check -Wall" ;;
+      Intel) FFLAGS="-O0 -fltconsistency -fp-port -g -check all" ;;
       *)     FFLAGS="-O0 -g" ;;
     esac
     AC_MSG_NOTICE([Setting default optimization for ${F77_COMPILERNAME} compiler: FFLAGS  = ${FFLAGS}])
@@ -216,8 +216,8 @@ else
 
   if test -z "${user_FCFLAGS}"; then
     case ${FC_COMPILERNAME} in
-      GCC)   FCFLAGS="-O0 -g" ;;
-      Intel) FCFLAGS="-O0 -fltconsistency -fp-port -g" ;;
+      GCC)   FCFLAGS="-O0 -g -fbounds-check -Wall" ;;
+      Intel) FCFLAGS="-O0 -fltconsistency -fp-port -g -check all" ;;
       *)     FCFLAGS="-O0 -g" ;;
     esac
     AC_MSG_NOTICE([Setting default optimization for ${FC_COMPILERNAME} compiler: FCFLAGS = ${FCFLAGS}])
