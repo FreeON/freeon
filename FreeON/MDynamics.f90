@@ -950,33 +950,48 @@ CONTAINS
     REAL(DOUBLE)                   :: Pressure,DMax
     REAL(DOUBLE),DIMENSION(3,3)    :: Latt,InvLatt,LattFrc
     REAL(DOUBLE),DIMENSION(3)      :: Pos,Vel
-    CHARACTER(LEN=DEFAULT_CHR_LEN) :: FileName,Line
     LOGICAL, SAVE                  :: FirstTime = .TRUE.
 
-    DO iCLONE=1,C%Geos%Clones
-      FileName = TRIM(C%Nams%SCF_NAME)//'_Clone_'//TRIM(IntToChar(iCLONE))//'.xyz'
-      CALL OpenASCII(TRIM(FileName),Out)
-      WRITE(Out,*) C%Geos%Clone(iCLONE)%NAtms
-      WRITE(Out,*) "MD run "//TRIM(C%Nams%SCF_NAME)//", Clone "//TRIM(IntToChar(iCLONE)) &
-        //", t = "//TRIM(FltToChar(MDTime%D(iCLONE)*InternalTimeToFemtoseconds))//" fs"
-      DO iATS=1,C%Geos%Clone(iCLONE)%NAtms
-        WRITE(Out,"(A,1x,F14.8,1x,F14.8,1x,F14.8)") &
-          TRIM(C%Geos%Clone(iCLONE)%AtNam%C(iATS)), C%Geos%Clone(iCLONE)%Carts%D(1:3,iATS)
-      ENDDO
-      CLOSE(Out)
-    ENDDO
+    CHARACTER(LEN=DEFAULT_CHR_LEN) :: Remark 
 
-60  FORMAT(F10.4,1x,F18.12,1x,F18.12,1x,F18.12)
-61  FORMAT(F10.4,1x,F14.8,1x,F14.8,1x,F14.8,1x,F14.8,1x,F14.8,1x,F14.8,1x)
-80  FORMAT(a18,F16.10)
-81  FORMAT(a18,F16.10,1x,F16.10)
-82  FORMAT(a18,F16.10,1x,F16.10,1x,F16.10)
-85  FORMAT("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
-95  FORMAT(a18,F16.10,3x,E16.6)
-96  FORMAT(a18,3(F16.10,1x))
-97  FORMAT(a)
-98  FORMAT(a18,E16.6)
-99  FORMAT(a3,6(1x,F16.10))
+    IF(C%Geos%Clones==1)THEN
+       Remark='Time = '//TRIM(FltToChar(MDTime%D(1)*InternalTimeToFemtoseconds))//" fs"
+       CALL PPrint(C%Geos%Clone(1), FileName_O=C%Nams%GFile,Unit_O=Geo, &
+                   PrintGeom_O=C%Opts%GeomPrint,Remark_O=Remark)
+    ELSE
+       DO iCLONE=1,C%Geos%Clones
+          Remark='Time = '//TRIM(FltToChar(MDTime%D(iCLONE)*InternalTimeToFemtoseconds))//" fs"
+          CALL PPrint(C%Geos%Clone(1), FileName_O=C%Nams%GFile,Unit_O=Geo, &
+               PrintGeom_O=C%Opts%GeomPrint,Clone_O=iCLONE,Remark_O=Remark)
+       ENDDO
+    ENDIF
+
+!!$
+!!$    DO iCLONE=1,C%Geos%Clones
+!!$      FileName = TRIM(C%Nams%SCF_NAME)//'_Clone_'//TRIM(IntToChar(iCLONE))//'.xyz'
+!!$      CALL OpenASCII(TRIM(FileName),Out)
+!!$      WRITE(Out,*) C%Geos%Clone(iCLONE)%NAtms
+!!$      WRITE(Out,*) "MD run "//TRIM(C%Nams%SCF_NAME)//", Clone "//TRIM(IntToChar(iCLONE)) &
+!!$        //", t = "//TRIM(FltToChar(MDTime%D(iCLONE)*InternalTimeToFemtoseconds))//" fs"
+!!$      DO iATS=1,C%Geos%Clone(iCLONE)%NAtms
+!!$        WRITE(Out,"(A,1x,F14.8,1x,F14.8,1x,F14.8)") &
+!!$          TRIM(C%Geos%Clone(iCLONE)%AtNam%C(iATS)), C%Geos%Clone(iCLONE)%Carts%D(1:3,iATS)
+!!$      ENDDO
+!!$      CLOSE(Out)
+!!$    ENDDO
+!!$
+!!$60  FORMAT(F10.4,1x,F18.12,1x,F18.12,1x,F18.12)
+!!$61  FORMAT(F10.4,1x,F14.8,1x,F14.8,1x,F14.8,1x,F14.8,1x,F14.8,1x,F14.8,1x)
+!!$80  FORMAT(a18,F16.10)
+!!$81  FORMAT(a18,F16.10,1x,F16.10)
+!!$82  FORMAT(a18,F16.10,1x,F16.10,1x,F16.10)
+!!$85  FORMAT("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
+!!$95  FORMAT(a18,F16.10,3x,E16.6)
+!!$96  FORMAT(a18,3(F16.10,1x))
+!!$97  FORMAT(a)
+!!$98  FORMAT(a18,E16.6)
+!!$99  FORMAT(a3,6(1x,F16.10))
+
   END SUBROUTINE OutputMD
 
   !--------------------------------------------------------------
