@@ -711,6 +711,7 @@ Validate/Response/TDSCF/Makefile
 Validate/Restart/Makefile
 Validate/SinglePoint/Makefile
 Validate/SinglePoint/Restricted/Makefile
+PostProcessing/Makefile
 ])
 
 AC_CONFIG_HEADERS([config.h])
