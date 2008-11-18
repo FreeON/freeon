@@ -1,1 +1,1 @@
-SUBDIRS = Frequencies TDSCF
+SUBDIRS = Frequencies Static TDSCF

@@ -705,8 +705,9 @@ ONX/Makefile
 Validate/Makefile
 Validate/Dynamics/Makefile
 Validate/Optimization/Makefile
-Validate/Response/Makefile
 Validate/Response/Frequencies/Makefile
+Validate/Response/Makefile
+Validate/Response/Static/Makefile
 Validate/Response/TDSCF/Makefile
 Validate/Restart/Makefile
 Validate/SinglePoint/Makefile

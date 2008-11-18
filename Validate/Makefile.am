@@ -1,1 +1,1 @@
-SUBDIRS = Optimization Response SinglePoint Dynamics
+SUBDIRS = Dynamics Optimization Response Restart SinglePoint
