@@ -14,8 +14,10 @@ libMondoBLAS_la_SOURCES = \
   icamax.f \
   idamax.f \
   isamax.f \
-  izamax.f \
-  lsame.f
+  izamax.f
+
+# This file also exists in install.
+#lsame.f
 
 # This also exists in lapack. Since we always link in both lapack and blas,
 # and lapack is linked in _after_ blas, xerbla should be defined in lapack
