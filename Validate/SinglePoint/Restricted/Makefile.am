@@ -1,1 +1,1 @@
-include $(top_srcdir)/make.inc
+include $(srcdir)/../../validate.inc

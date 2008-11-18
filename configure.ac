@@ -703,10 +703,12 @@ TwoE/MSC/Makefile
 TwoE/VRR/Makefile
 ONX/Makefile
 Validate/Makefile
+Validate/Dynamics/Makefile
 Validate/Optimization/Makefile
 Validate/Response/Makefile
 Validate/Response/Frequencies/Makefile
 Validate/Response/TDSCF/Makefile
+Validate/Restart/Makefile
 Validate/SinglePoint/Makefile
 Validate/SinglePoint/Restricted/Makefile
 ])

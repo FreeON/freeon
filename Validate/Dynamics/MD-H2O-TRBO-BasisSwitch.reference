@@ -1,0 +1,2 @@
+output_file = MD-H2O-TRBO-BasisSwitch*.out
+"ETotal = (.*)" = 1 (1e-10)

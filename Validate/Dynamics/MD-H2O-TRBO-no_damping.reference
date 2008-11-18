@@ -1,0 +1,2 @@
+output_file = MD-H2O-TRBO-no_damping*.out
+"ETotal = (.*)" = 1 (1e-10)
