@@ -14,16 +14,11 @@ libMondoBLAS_la_SOURCES = \
   icamax.f \
   idamax.f \
   isamax.f \
-  izamax.f
+  izamax.f \
+  xerbla.f
 
 # This file also exists in install.
 #lsame.f
-
-# This also exists in lapack. Since we always link in both lapack and blas,
-# and lapack is linked in _after_ blas, xerbla should be defined in lapack
-# only. Otherwise we might get linker complaints about multiply defined
-# symbols.
-#xerbla.f
 
 c_source_files = \
   caxpy.f  \

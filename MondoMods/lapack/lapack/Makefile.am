@@ -16,8 +16,12 @@ libMondoLAPACK_la_SOURCES = \
   ilaenv.f  \
   iparmq.f  \
   izmax1.f  \
-  lsamen.f  \
-  xerbla.f
+  lsamen.f
+
+# This also exists in blas. Since we always link in both lapack and blas, and
+# blas is linked in _after_ lapack, xerbla should be defined in blas only.
+# Otherwise we might get linker complaints about multiply defined symbols.
+#xerbla.f
 
 c_source_files = \
   cbdsqr.f  \
