@@ -145,6 +145,11 @@ if test "${use_optimizations}" = "yes"; then
           Intel) CFLAGS="-O3 -xP" ;;
           *)     CFLAGS="-O3" ;;
         esac ;;
+      *powerpc)
+        case ${CC_COMPILERNAME} in
+          GCC) CFLAGS="-O3 -mcpu=G5" ;;
+          *)   CFLAGS="-O3" ;;
+        esac ;;
       *) CFLAGS="-O" ;;
     esac
     AC_MSG_NOTICE([Setting default optimization for ${CC_COMPILERNAME} compiler: CFLAGS  = ${CFLAGS}])
@@ -161,6 +166,11 @@ if test "${use_optimizations}" = "yes"; then
           Intel) FFLAGS="-O3 -xP" ;;
           *)     FFLAGS="-O3" ;;
         esac ;;
+      *powerpc)
+        case ${CC_COMPILERNAME} in
+          GCC) FFLAGS="-O3 -mcpu=G5" ;;
+          *)   FFLAGS="-O3" ;;
+        esac ;;
       *) FFLAGS="-O" ;;
     esac
     AC_MSG_NOTICE([Setting default optimization for ${F77_COMPILERNAME} compiler: FFLAGS  = ${FFLAGS}])
@@ -176,6 +186,11 @@ if test "${use_optimizations}" = "yes"; then
           GCC)   FCFLAGS="-O3 -msse -msse2 -mfpmath=sse" ;;
           Intel) FCFLAGS="-O3 -xP" ;;
           *)     FCFLAGS="-O3" ;;
+        esac ;;
+      *powerpc)
+        case ${CC_COMPILERNAME} in
+          GCC) FCFLAGS="-O3 -mcpu=G5" ;;
+          *)   FCFLAGS="-O3" ;;
         esac ;;
       *) FCFLAGS="-O" ;;
     esac
