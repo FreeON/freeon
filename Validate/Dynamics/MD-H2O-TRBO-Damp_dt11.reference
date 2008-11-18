@@ -1,0 +1,2 @@
+output_file = MD-H2O-TRBO-Damp_dt11*.out
+"ETotal = (.*)" = 1 (1e-10)

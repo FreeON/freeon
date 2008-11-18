@@ -1,4 +1,4 @@
-include $(top_srcdir)/make.inc
+include $(srcdir)/../validate.inc
 
 EXTRA_DIST = \
   MD_H2_TRBO-restart-1.inp \

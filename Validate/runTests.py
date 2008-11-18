@@ -36,12 +36,14 @@ import os.path
 import shutil
 import tarfile
 import subprocess
+import tempfile
 
 # Some variables.
-dirprefix = "/tmp/MondoRegressionTest"
+#dirprefix = "/tmp/MondoRegressionTest"
+dirprefix = tempfile.mkdtemp()
 builddir = os.path.join(dirprefix, "build")
 installdir = os.path.join(dirprefix, "install")
-rundirbase = os.path.join(dirprefix, "run")
+rundirbase = tempfile.mkdtemp(dir=dirprefix, prefix="run")
 rundir = ""
 Mondo_inputbase = ""
 inputfield = {}
@@ -78,10 +80,14 @@ parse.add_option("--pretend", \
     dest = "pretend", \
     action = "store_true")
 
+parse.add_option("--FreeON",
+    help = "specify explicitly where the FreeON executable is",
+    dest = "executable")
+
 option, argument = parse.parse_args()
 
 # Set up logging.
-logging.basicConfig(level = logging.DEBUG, \
+logging.basicConfig(level = logging.INFO, \
     filename = "regression_test.log", \
     format = "%(asctime)s [%(name)s %(levelname)s] %(message)s", \
     datefmt='%y-%m-%d %H:%M:%S')
@@ -308,8 +314,8 @@ elif "Mondo_tar" in inputfield:
   inputfield["Mondo_executable"] = os.path.join(installdir, "bin", "MondoSCF")
   log.debug("constructed Mondo_executable " + inputfield["Mondo_executable"])
 else:
-  log.error("no tarfile and no exectuable, I need something here....")
-  sys.exit(1)
+  log.info("no explicit FreeON executable given, using simply FreeON")
+  inputfield["Mondo_executable"] = "FreeON"
 
 if not "Mondo_input" in inputfield:
   log.info("No Mondo_input given, we are done")
@@ -319,7 +325,7 @@ if not "Mondo_input" in inputfield:
 Mondo_inputbase = os.path.basename(inputfield["Mondo_input"])
 
 # Run the test.
-log.debug("creating run directory")
+log.info("creating run directory " + rundirbase)
 if not os.path.exists(rundirbase):
   try:
     os.makedirs(rundirbase)

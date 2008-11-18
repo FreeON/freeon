@@ -1,0 +1,2 @@
+output_file = MD_Water10_T050_1SCF*.out
+"ETotal = (.*)" = 1 (1e-10)
