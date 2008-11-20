@@ -427,53 +427,52 @@ CONTAINS
     CALL Delete(Work)
     CALL Delete(dP)
 #endif
-
+    !
+    !Default 
+    CnvrgChck_BCSR=.FALSE.
+    ! 
+    ! Early return
     IF(NPur==0)THEN
       OldE=BIG_DBL
       OldAEP=BIG_DBL
+    ELSEIF(MOD(NPur,2)==0)THEN
+       CnvrgChck_BCSR=.FALSE.
+       RETURN
     ENDIF
-    PNon0=100.D0*DBLE(P%NNon0)/DBLE(NBasF*NBasF)
     ! Density matrix errors
     CALL Multiply(Pold,-One)
     CALL Add(Pold,P,Tmp1)
     AbsErrP=ABS(Max(Tmp1)+1.D-20)
     FNormErrP=FNorm(Tmp1)
     ! Energy errors
-
     Energy=Trace(P,F)
-
     AbsErrE=ABS(OldE-Energy)
     RelErrE=AbsErrE/ABS(Energy)
-    ! Convergence check
-    CnvrgChck_BCSR=.FALSE.
-    ! Absolute convergence test
-
-!    WRITE(*,44)RelErrE,Thresholds%ETol*1D-2, AbsErrP,Thresholds%DTol*1D-1
-44  FORMAT(4(D12.6,", "))
-
-    IF(RelErrE<Thresholds%ETol*1D-2)THEN
-       CnvrgChck_RelErrE=.TRUE.
-    ENDIF
-
-    IF(AbsErrP<Thresholds%DTol*1D-1)THEN
-       CnvrgChck_AbsErrP=.TRUE.
-    ENDIF
-
-    IF(CnvrgChck_RelErrE.AND.CnvrgChck_AbsErrP)THEN
-       CnvrgChck_BCSR=.TRUE.
-       CnvrgCmmnt='Met dE/dP goals'
-    ELSE
-       ! Test in the asymptotic regime for stall out
-       IF(RelErrE<Thresholds%ETol)THEN
-          ! Check for increasing /P
+    ! Absolute convergence test (Only for NPur>10)
+    IF(NPur>10)THEN
+       IF(RelErrE<Thresholds%ETol*1D-2)THEN
+          CnvrgChck_RelErrE=.TRUE.
+       ENDIF
+       IF(AbsErrP<Thresholds%DTol*1D-1)THEN
+          CnvrgChck_AbsErrP=.TRUE.
+       ENDIF
+       IF(CnvrgChck_RelErrE.AND.CnvrgChck_AbsErrP)THEN
+          CnvrgChck_BCSR=.TRUE.
+          CnvrgCmmnt='Met dE/dP goals'
+       ELSE
+          ! Test in the asymptotic regime for stall out
+          IF(RelErrE<Thresholds%ETol)THEN
+             ! Check for increasing /P
 !!$       IF(AbsErrP>OldAEP)THEN
 !!$          CnvrgChck_BCSR=.TRUE.
 !!$          CnvrgCmmnt='Hit dP increase'
 !!$       ENDIF
-          ! Check for an increasing energy
-          IF(Energy>OldE)THEN
-             CnvrgChck_BCSR=.TRUE.
-             CnvrgCmmnt='Hit dE increase'
+
+             ! Check for an increasing energy
+             IF(Energy>OldE)THEN
+                CnvrgChck_BCSR=.TRUE.
+                CnvrgCmmnt='Hit dE increase'
+             ENDIF
           ENDIF
        ENDIF
     ENDIF
@@ -481,7 +480,9 @@ CONTAINS
     ! Updtate previous cycle values
     OldE=Energy
     OldAEP=AbsErrP
+    !
     ! Print convergence stats
+    PNon0=100.D0*DBLE(P%NNon0)/DBLE(NBasF*NBasF)
     Mssg=ProcessName(Prog,'Pure '//TRIM(IntToChar(NPur)))      &
          //'dE='//TRIM(DblToShrtChar(RelErrE))                 &
          //', dP='//TRIM(DblToShrtChar(AbsErrP))               &
