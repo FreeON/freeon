@@ -505,7 +505,7 @@ MODULE PrettyPrint
        LOGICAL,         OPTIONAL,INTENT(IN) :: NewFile_O,CrdInAng_O
        LOGICAL                              :: CrdInAng
        INTEGER                              :: I,PU
-       CHARACTER(LEN=DEFAULT_CHR_LEN)       :: Mssg
+       CHARACTER(LEN=2*DCL)                 :: Mssg
        CHARACTER(LEN=DCL)                   :: AuxChar
        CHARACTER(LEN=2)                     :: Atom
        CHARACTER(LEN=4)                     :: PDBAtom
@@ -534,10 +534,10 @@ MODULE PrettyPrint
                    Mssg=IntToChar(GM%NAtms)
                    WRITE(PU,*)TRIM(Mssg)
                    IF(PRESENT(Remark_O))THEN
-                      Mssg=TRIM(Remark_O)//', <SCF> = '//TRIM(FltToChar(GM%ETotal))
+                      Mssg=TRIM(Remark_O)//', <SCF> = '//TRIM(FltToChar(GM%ETotal))//' h'
                    ELSE
                       Mssg='Geom #'//TRIM(IntToChar(GM%Confg)) &
-                           //', <SCF> = '//TRIM(FltToChar(GM%ETotal))
+                           //', <SCF> = '//TRIM(FltToChar(GM%ETotal))//' h'
                    ENDIF
                    IF(PRESENT(Clone_O)) &
                         Mssg='Clone # '//TRIM(IntToChar(Clone_O))//" / "//TRIM(Mssg)
@@ -550,14 +550,6 @@ MODULE PrettyPrint
                            //TRIM(FltToMedmChar(alpha))//" " &
                            //TRIM(FltToMedmChar(beta))//" " &
                            //TRIM(FltToMedmChar(gamma))
-!!$
-!!$                      Mssg= &
-!!$                                     //TRIM(FltToChar(a*AA))//" " &
-!!$                                     //TRIM(FltToChar(b*AA))//" " &
-!!$                                     //TRIM(FltToChar(c*AA))//" " &
-!!$                                     //TRIM(FltToChar(alpha))//" " &
-!!$                                     //TRIM(FltToChar(beta))//" " &
-!!$                                     //TRIM(FltToChar(gamma))
                    ENDIF
                    WRITE(PU,*)TRIM(Mssg)
 !============================================================================
@@ -601,7 +593,6 @@ MODULE PrettyPrint
                    !222                FORMAT(1X,A2,3(F14.5,' '),A1)
 222                FORMAT(1X,A2,3(F22.16,' '),A1)
                 ENDDO
-
 !!$                DO I=1,GM%NAtms
 !!$                   IF(GM%CConstrain%I(I)==1) THEN
 !!$                      AuxChar='C'
@@ -615,16 +606,14 @@ MODULE PrettyPrint
 !!$                   WRITE(PU,223)Atom,(GM%BoxCarts%D(K,I),K=1,3),TRIM(ADJUSTL(AuxChar))
 !!$223                FORMAT(1X,A2,3(F22.16,' '),A1,' << FRACTIONALS ')
 !!$                ENDDO
-
 !============================================================================
              ELSEIF(PrintGeom_O=='PDB')THEN
 !============================================================================
-                ! Print PDB format
                 AA=One/AngstromsToAU
                 WRITE(PU,11)GM%Confg
 11              FORMAT('MODEL  ',I6)
                 IF(PRESENT(Remark_O))THEN
-                   Mssg=TRIM(Remark_O)//', Energy='//TRIM(FltToChar(GM%ETotal))//' h'
+                   Mssg=TRIM(Remark_O)//', <SCF> = '//TRIM(FltToChar(GM%ETotal))//' h'
                 ELSE                   
                    Mssg=' <SCF> = '//TRIM(FltToChar(GM%ETotal))//' h'
                 ENDIF
@@ -643,8 +632,9 @@ MODULE PrettyPrint
                 ENDDO
                 WRITE(PU,55)
 55              FORMAT('ENDMDL')
+!============================================================================
              ELSEIF(PrintGeom_O=='CIF')THEN
-
+!============================================================================
                 ! See http://www.iucr.ac.uk/iucr-top/cif/cifdic_html/1/cif_core.dic/index.html
                 ! for the definition of the entries.
                 !
@@ -696,13 +686,10 @@ MODULE PrettyPrint
 553             FORMAT('_atom_site_fract_y')
 554             FORMAT('_atom_site_fract_z')
 555             FORMAT(1X,A,1X,3F14.5)
-
-
-
-                !                CALL Print_CRDS_CIF(GM,PU)
              ENDIF
+!============================================================================
           ELSEIF(PrintFlags%Fmt==DEBUG_MMASTYLE)THEN
-             !             Print MMA format
+!============================================================================
              Mssg=' NAtoms = '//IntToChar(GM%NAtms)//';'
              WRITE(PU,*)TRIM(Mssg)
              WRITE(PU,*)'(* Coordinates are in AU *)'
