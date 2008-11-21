@@ -40,8 +40,10 @@ depcheck-bin :
 	  echo "********************************** verifying `echo $$i | sed -e "s/[.][^.]\+$$//"` **********************************"; \
 	  $(MAKE) `echo $$i | sed -e "s/[.][^.]\+$$//"`.o || exit 1; \
 	done
+	@echo "********************************** done checking, rebuilding **********************************"
 	$(MAKE) clean
 	$(MAKE)
+	@echo "********************************** done checking **********************************"
 
 depcheck-lib :
 	for i in $(SOURCES_DEPCHECK); do \
@@ -50,8 +52,10 @@ depcheck-lib :
 	  echo "********************************** verifying `echo $$i | sed -e "s/[.][^.]\+$$//"` **********************************"; \
 	  $(MAKE) `echo $$i | sed -e "s/[.][^.]\+$$//"`.lo || exit 1; \
 	done
+	@echo "********************************** done checking, rebuilding **********************************"
 	$(MAKE) clean
 	$(MAKE)
+	@echo "********************************** done checking **********************************"
 
 CPP_COMMAND = $(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(FORTRAN_CPPFLAGS) $(CPPFLAGS) $(CPPMISC)
 
