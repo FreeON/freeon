@@ -105,7 +105,8 @@ ParseInput.o : \
   ParseParallel.o \
   ParseGeomOpt.o \
   ParseExtraCoords.o \
-  ParseProperties.o
+  ParseProperties.o \
+  PrintParsed.o
 
 ParsePeriodic.o : \
   OptionKeys.o \
