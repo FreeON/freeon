@@ -485,7 +485,7 @@ for line in lines:
         number_errors += 1
         log.error("line " + str(linenumber) + ", " + line + \
             " <--> wrong value " + str(value) + ", " + \
-            "expected " + str(ref_value) + \
+            "expected " + str(ref_value) + ", " + \
             "difference = " + str(abs(value-ref_value)) + ", " + \
             "tag \"" + tag + "\", " + \
             "index " + str(ref[tag]["index"]) + ", " + \

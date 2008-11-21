@@ -153,4 +153,4 @@ xlintstz_SOURCES  = $(ALINTST) $(ZLINTST) $(DZLNTST)
 xlintstds_SOURCES = $(DSLINTST)
 xlintstzc_SOURCES = $(ZCLINTST)
 
-LDADD = $(LDADD_INTERNAL_LAPACK) -L$(builddir)/../matgen -lMondoTMG
+LDADD = -L$(builddir)/../matgen -lMondoTMG $(LDADD_INTERNAL_LAPACK)
