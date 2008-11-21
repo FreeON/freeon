@@ -7,7 +7,7 @@ class Validate(Test):
   name = "validate"
   description = ["validating"]
   descriptionDone = ["validate"]
-  command = ["make", "test"]
+  command = ["make", "check"]
 
   def evaluateCommand(self, cmd):
 
