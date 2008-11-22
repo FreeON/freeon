@@ -394,7 +394,7 @@ CONTAINS
     REAL(DOUBLE),SAVE    :: OldE,OldAEP
     INTEGER              :: MM,NPur
     CHARACTER(LEN=*)     :: Prog
-    CHARACTER(LEN=2*DEFAULT_CHR_LEN) :: Mssg,CnvrgCmmnt
+    CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg,CnvrgCmmnt
 #ifdef PRINT_PURE_EVALS
     INTERFACE DSYEV
       SUBROUTINE DSYEV(JOBZ,UPLO,N,A,LDA,W,WORK,LWORK,INFO)
@@ -483,21 +483,24 @@ CONTAINS
     !
     ! Print convergence stats
     PNon0=100.D0*DBLE(P%NNon0)/DBLE(NBasF*NBasF)
-    Mssg=ProcessName(Prog,'Pure '//TRIM(IntToChar(NPur)))      &
-         //'dE='//TRIM(DblToShrtChar(RelErrE))                 &
+
+!!    CALL PChkSum(P,'OrthoP['//TRIM(IntToChar(NPur))//']','sp2',Unit_O=6)
+    Mssg='dE='//TRIM(DblToShrtChar(RelErrE))                   &
          //', dP='//TRIM(DblToShrtChar(AbsErrP))               &
          //', %Non0='//TRIM(DblToShrtChar(PNon0))              &
          //', Tr[FP]='//TRIM(DblToChar(Energy)) 
+    
+    CALL MondoLog(DEBUG_MAXIMUM,Prog,TRIM(Mssg),'Pure '//TRIM(IntToChar(NPur)))
 
-    IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
-      CALL OpenASCII(OutFile,Out)
-      CALL PrintProtectL(Out)
-      WRITE(*,*)TRIM(Mssg)
-      WRITE(Out,*)TRIM(Mssg)
-      CALL PrintProtectR(Out)
-      CLOSE(UNIT=Out,STATUS='KEEP')
-    ENDIF
-
+!!$    IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
+!!$      CALL OpenASCII(OutFile,Out)
+!!$      CALL PrintProtectL(Out)
+!!$      WRITE(*,DEFAULT_CHR_FMT)TRIM(Mssg)
+!!$      WRITE(Out,DEFAULT_CHR_FMT)TRIM(Mssg)
+!!$      CALL PrintProtectR(Out)
+!!$      CLOSE(UNIT=Out,STATUS='KEEP')
+!!$    ENDIF
+!!$
 
     ! Set thresholding for next cycle
     CALL SetVarThresh(MM)
@@ -506,8 +509,9 @@ CONTAINS
       CALL SetEq(Pold,P)
       RETURN
     ENDIF
-    ! Normalize Trace
-    CALL NormTrace(P,Tmp2,Tmp1,Ne,1)
+
+    ! Causes total instability in MD:
+    ! Avoid: CALL NormTrace(P,Tmp2,Tmp1,Ne,1)
     MM=MM+1
 #ifdef COMPUTE_COMMUTATOR
     ! Commutator [F,P]
