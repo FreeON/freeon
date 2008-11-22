@@ -24,11 +24,3 @@ VALIDATE_INPUTS = \
   MD_H2_TRBO_Damp_dt7.inp \
   MD-H2-TRBO.inp \
   MD_Water10_T050_1SCF.inp
-
-VALIDATE_TESTS = $(foreach i, $(VALIDATE_INPUTS), $(basename $i).test)
-VALIDATE_REFERENCES = $(foreach i, $(VALIDATE_INPUTS), $(basename $i).reference)
-
-EXTRA_DIST = \
-	$(VALIDATE_INPUTS) \
-  $(VALIDATE_REFERENCES) \
-  $(VALIDATE_TESTS)

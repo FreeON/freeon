@@ -115,8 +115,10 @@ CONFIG_STATUS_DEPENDENCIES = $(top_srcdir)/localversion
 
 DISTCHECK_CONFIGURE_FLAGS = --disable-optimizations --enable-internal-lapack-checks
 
+# Phony targets.
+.PHONY : always-fix validate
+
 # Fix localversion.
-.PHONY : always-fix
 $(top_srcdir)/localversion : always-fix
 	@echo "checking localversion"; \
 	  branch=`git branch 2>&1 | egrep '^\*' | awk '{print $$2}'`; \
@@ -165,3 +167,9 @@ dist-upload : dist-sign
 	  rsync -lv --progress $(distdir).tar.bz2 freeon-latest.tar.bz2 $(distdir).tar.bz2.sig nicolasbock@dl.sv.nongnu.org:/releases/freeon/; \
 	  rm -f freeon-latest.tar.bz2; \
 	fi
+
+# Validate.
+validate :
+	$(MAKE) -C Validate validate
+
+TESTS = /bin/true
