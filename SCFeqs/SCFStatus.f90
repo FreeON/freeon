@@ -58,7 +58,6 @@ PROGRAM SCFStatus
   CHARACTER(LEN=DEFAULT_CHR_LEN):: SCFMessage
   CHARACTER(LEN=DEFAULT_CHR_LEN):: SCFTag
   CHARACTER(LEN=9),PARAMETER      :: Prog='SCF'
-  CHARACTER(LEN=2)                :: CurClone
   !---------------------------------------------------------------------------------------
   !  Macro the start up
   CALL StartUp(Args,Prog,Serial_O=.FALSE.)
@@ -185,12 +184,7 @@ PROGRAM SCFStatus
   CALL Get(Gap,'HomoLumoGap')
   !-----------------------------------------------------------
   !  PRINT STATISTICS
-  !
-  IF(NClones>1)THEN
-    CurClone=IntToChar(MyClone)
-  ELSE
-    CurClone=""
-  ENDIF
+
   SCFMessage=""
 
   IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN

@@ -114,6 +114,7 @@ MODULE GlobalCharacters
    CHARACTER(LEN=6)  :: CurGeom
    CHARACTER(LEN=6)  :: PrvGeom
    CHARACTER(LEN=6)  :: NxtGeom
+   CHARACTER(LEN=6)  :: CurClone
 !
 END MODULE
 
