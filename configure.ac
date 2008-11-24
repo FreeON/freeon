@@ -139,7 +139,13 @@ if test "${use_optimizations}" = "yes"; then
   # Set the optimization flags.
   if test -z "${user_CFLAGS}"; then
     case ${build_cpu} in
-      *86)
+      *x86)
+        case ${CC_COMPILERNAME} in
+          GCC)   CFLAGS="-O3 -msse -msse2 -mfpmath=sse -ftree-vectorize" ;;
+          Intel) CFLAGS="-O3 -xP" ;;
+          *)     CFLAGS="-O3" ;;
+        esac ;;
+      *x86_64)
         case ${CC_COMPILERNAME} in
           GCC)   CFLAGS="-O3 -msse -msse2 -mfpmath=sse -ftree-vectorize" ;;
           Intel) CFLAGS="-O3 -xP" ;;
@@ -160,7 +166,13 @@ if test "${use_optimizations}" = "yes"; then
 
   if test -z "${user_FFLAGS}"; then
     case ${build_cpu} in
-      *86)
+      *x86)
+        case ${F77_COMPILERNAME} in
+          GCC)   FFLAGS="-O3 -msse -msse2 -mfpmath=sse -ftree-vectorize" ;;
+          Intel) FFLAGS="-O3 -xP" ;;
+          *)     FFLAGS="-O3" ;;
+        esac ;;
+      *x86_64)
         case ${F77_COMPILERNAME} in
           GCC)   FFLAGS="-O3 -msse -msse2 -mfpmath=sse -ftree-vectorize" ;;
           Intel) FFLAGS="-O3 -xP" ;;
@@ -181,7 +193,13 @@ if test "${use_optimizations}" = "yes"; then
 
   if test -z "${user_FCFLAGS}"; then
     case ${build_cpu} in
-      *86)
+      *x86)
+        case ${FC_COMPILERNAME} in
+          GCC)   FCFLAGS="-O3 -msse -msse2 -mfpmath=sse -ftree-vectorize" ;;
+          Intel) FCFLAGS="-O3 -xP" ;;
+          *)     FCFLAGS="-O3" ;;
+        esac ;;
+      *x86_64)
         case ${FC_COMPILERNAME} in
           GCC)   FCFLAGS="-O3 -msse -msse2 -mfpmath=sse -ftree-vectorize" ;;
           Intel) FCFLAGS="-O3 -xP" ;;
