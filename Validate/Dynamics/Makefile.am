@@ -1,5 +1,8 @@
 include $(srcdir)/../validate.inc
 
+#VALIDATE_INPUTS = \
+#  MD-H2O-TRBO.inp
+
 VALIDATE_INPUTS = \
   MD_C2F4_Symplectic.inp \
   MD_C2F4_TRBO_ACT_2.inp \

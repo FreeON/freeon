@@ -23,3 +23,13 @@ make_options = -j2
 
 # Where should the test be logged?
 logfile = regressionTest.log
+
+# Suppress the copying of standard output to standard output.
+#
+# Normally a run is done such that the standard output of FreeON is copied to
+# standard output after it is parsed in the runTests.py script. This allows
+# buildbot to see that something is happening with the test. It also allows
+# buildbot to make accessible the FreeON raw output.
+#
+# Default: false
+suppress_stdout = true
