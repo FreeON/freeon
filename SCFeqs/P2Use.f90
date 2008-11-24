@@ -831,6 +831,8 @@ PROGRAM P2Use
     CALL Get(Tmp1, TrixFile("DOsave", Stats_O = (/ iSCF, iBAS, iGEO-1 /)))
     CALL Multiply(Tmp1,1.889559D0)
     CALL Add(P,Tmp1,Tmp2)
+
+!!! WE NEED TO CHECK PUTTING A FILTER HERE!!
     CALL SetEq(P,Tmp2)
 
     ! Save P(p,0)
@@ -846,16 +848,24 @@ PROGRAM P2Use
 #endif
     CALL Add(P,-Fmin)
     CALL Multiply(P,One/(Fmax-Fmin))
+
     MM = 0
-    DO I=1,50
-      CALL SP2(P,Tmp1,Tmp2,Half*DBLE(NEl),MM)
-      IF(ABS(TrP -Half*DBLE(NEl))< 1.0D-8) THEN
-        IF(ABS(TrP2-Half*DBLE(NEl)) < 1.D-8) EXIT
-      ENDIF
+    CALL New(P0)
+    CALL SetEq(P0,P)
+    ! Do SP2 iterations
+    DO I=1,150
+       CALL SP2(P,Tmp1,Tmp2,Half*DBLE(NEl),MM)
+!       IF(CnvrgChck(Prog,I,Half*DBLE(NEl),MM,F,P,POld,Tmp1,Tmp2)) EXIT
+       IF(CnvrgChck(Prog,I,Half*DBLE(NEl),MM,P,P,P0,Tmp1,Tmp2)) EXIT
     ENDDO
-    CALL MondoLog(DEBUG_MAXIMUM, logtag, "purified after "//TRIM(IntToChar(I))//" iterations")
-    CALL MondoLog(DEBUG_MAXIMUM, logtag, "Trace(P) = "//TRIM(DblToChar(TrP)))
-    CALL MondoLog(DEBUG_MAXIMUM, logtag, "Trace(P2) = "//TRIM(DblToChar(TrP2)))
+
+    CALL Delete(P0)
+
+!    CALL MondoLog(DEBUG_MAXIMUM, logtag, "purified after "//TRIM(IntToChar(I))//" iterations")
+!    CALL MondoLog(DEBUG_MAXIMUM, logtag, "Trace(P) = "//TRIM(DblToChar(TrP)))
+!    CALL MondoLog(DEBUG_MAXIMUM, logtag, "Trace(P2) = "//TRIM(DblToChar(TrP2)))
+
+
 
     ! Convert to AO Rep
     INQUIRE(FILE=TrixFile('X',Args),EXIST=Present)
