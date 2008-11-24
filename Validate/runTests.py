@@ -28,14 +28,14 @@
 #
 # Nicolas Bock <nbock@lanl.gov>
 
-import optparse
-import sys
 import logging
-import re
+import optparse
 import os.path
+import re
 import shutil
-import tarfile
 import subprocess
+import sys
+import tarfile
 import tempfile
 
 # Some variables.
@@ -73,7 +73,6 @@ parse.add_option("--clean-build", \
     help = "clean the build directory", \
     dest = "clean_build", \
     action = "store_true")
-
 
 parse.add_option("--pretend", \
     help = "do not run the test, simply anaylize the output file", \
@@ -134,14 +133,15 @@ for line in lines:
     line = check.group(1)
 
   # Search for known keywords.
-  for fieldname in [ \
-      "Mondo_input", \
-      "Mondo_reference", \
-      "Mondo_executable", \
-      "Mondo_tar", \
-      "configure_options", \
-      "make_options", \
-      "logfile" ]:
+  for fieldname in [
+      "Mondo_input",
+      "Mondo_reference",
+      "Mondo_executable",
+      "Mondo_tar",
+      "configure_options",
+      "make_options",
+      "logfile",
+      "suppress_stdout" ]:
     check = re.compile("(^\s*" + fieldname + "\s*=)(.*$)").search(line)
     if check:
       if not check.group(2):
@@ -152,6 +152,19 @@ for line in lines:
         log.debug("found input tag " + fieldname + " with value " + inputfield[fieldname])
 
   linenumber += 1
+
+# Set some values straight.
+if "suppress_stdout" not in inputfield:
+  inputfield["suppress_stdout"] = False
+
+else:
+  if inputfield["suppress_stdout"].lower() in [ "no", "false" ]:
+    inputfield["suppress_stdout"] = False
+  elif inputfield["suppress_stdout"].lower() in [ "yes", "true" ]:
+    inputfield["suppress_stdout"] = True
+  else:
+    log.error("I do not understand your input for suppress_stdout")
+    sys.exit(1)
 
 # Run the tests.
 if "Mondo_tar" in inputfield:
@@ -361,7 +374,12 @@ if not option.pretend:
       stderr = subprocess.PIPE, \
       cwd = rundir)
 
-  Mondo_stdout = Mondo.stdout.readlines()
+  Mondo_stdout = []
+  while not Mondo.stdout.closed:
+    Mondo_stdout.append(Mondo.stdout.readline())
+    if not inputfield["suppress_stdout"]:
+      print Mondo_stdout[-1].strip()
+
   Mondo_stderr = Mondo.stderr.readlines()
 
   Mondo.wait()
