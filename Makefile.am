@@ -164,7 +164,7 @@ dist-upload : dist-sign
 	else \
 	  echo "sending dist to savannah"; \
 	  ln -s $(distdir).tar.bz2 freeon-latest.tar.bz2; \
-	  rsync -lv --progress $(distdir).tar.bz2 freeon-latest.tar.bz2 $(distdir).tar.bz2.sig nicolasbock@dl.sv.nongnu.org:/releases/freeon/; \
+	  rsync -av --progress $(distdir).tar.bz2 freeon-latest.tar.bz2 $(distdir).tar.bz2.sig nicolasbock@dl.sv.nongnu.org:/releases/freeon/; \
 	  rm -f freeon-latest.tar.bz2; \
 	fi
 
