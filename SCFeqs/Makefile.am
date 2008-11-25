@@ -67,6 +67,6 @@ SP2.o            : DenMatMethods.o
 TS4.o            : DenMatMethods.o
 DenMatResponse.o : DenMatMethods.o
 LowdinO.o        : DenMatMethods.o
-P2Use.o          : $(top_srcdir)/MondoConfig.h DenMatMethods.o FillPBlok.o
+P2Use.o          : $(top_builddir)/MondoConfig.h DenMatMethods.o FillPBlok.o
 RHeqs.o          : DenMatMethods.o
 BlokAInv.o       : DenMatMethods.o

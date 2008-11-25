@@ -23,6 +23,9 @@ noinst_SCRIPTS = $(TESTS)
 
 EXTRA_DIST = \
   $(noinst_SCRIPTS) \
+  $(TEST_INPUTS)
+
+TEST_INPUTS = \
   cblat2.in \
   cblat3.in \
   dblat2.in \

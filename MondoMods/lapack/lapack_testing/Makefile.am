@@ -20,6 +20,9 @@ noinst_SCRIPTS = \
 
 EXTRA_DIST = \
   $(noinst_SCRIPTS) \
+  $(TEST_INPUTS)
+
+TEST_INPUTS = \
   cbb.in \
   cgbak.in \
   cgg.in \

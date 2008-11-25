@@ -182,7 +182,7 @@ InOut.lo : \
   SetEq.lo \
   MondoLogger.lo \
   Utilities.lo \
-  $(top_srcdir)/MondoConfig.h
+  $(top_builddir)/MondoConfig.h
 
 DerivedTypes.lo : \
   GlobalScalars.lo \
@@ -371,7 +371,7 @@ Macros.lo : \
   Functionals.lo \
   AtomPairs.lo \
   Mechanics.lo \
-  $(top_srcdir)/MondoConfig.h
+  $(top_builddir)/MondoConfig.h
 
 PBC.lo : \
   DerivedTypes.lo \
