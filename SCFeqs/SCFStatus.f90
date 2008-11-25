@@ -197,9 +197,9 @@ PROGRAM SCFStatus
      CALL MondoLog(DEBUG_MAXIMUM,Prog,'+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+')
      
      IF(NClones>1)THEN
-        CALL MondoLog(DEBUG_MAXIMUM,Prog, 'SCFCycle #'//TRIM(SCFCycl)//', Basis #'//TRIM(CurBase)//', Geometry #'//TRIM(CurGeom))
-     ELSE
         CALL MondoLog(DEBUG_MAXIMUM,Prog, 'SCFCycle #'//TRIM(SCFCycl)//', Basis #'//TRIM(CurBase)//', Geometry #'//TRIM(CurGeom)//', Clone #'//TRIM(CurClone))
+     ELSE
+        CALL MondoLog(DEBUG_MAXIMUM,Prog, 'SCFCycle #'//TRIM(SCFCycl)//', Basis #'//TRIM(CurBase)//', Geometry #'//TRIM(CurGeom))
      ENDIF
      IF(Gap/=Zero) &
      CALL MondoLog(DEBUG_MAXIMUM,Prog,'Gap  = '//TRIM(DblToShrtChar(-Gap)))
