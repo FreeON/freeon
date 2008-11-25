@@ -113,7 +113,9 @@ CONTAINS
     CALL MondoLogPlain("compiled for "//TRIM(M_PLAT))
     CALL MondoLogPlain("on "//TRIM(M_HOST)//", a "//TRIM(M_MACH)//" machine")
     CALL MondoLogPlain("running "//TRIM(M_SYST)//" "//TRIM(M_VRSN))
-    CALL MondoLogPlain(" WITH GCC VERSION # F77 VERSION # AND F90 VERSION # ")
+    CALL MondoLogPlain("with C-compiler version "//TRIM(HAVE_CC_VERSION_STRING))
+    CALL MondoLogPlain("with F77-compiler version "//TRIM(HAVE_F77_VERSION_STRING))
+    CALL MondoLogPlain("with F90-compiler version "//TRIM(HAVE_FC_VERSION_STRING))
     CALL MondoLogPlain("using HDF5 library version " &
       //TRIM(IntToChar(HDF5_majnum))//"." &
       //TRIM(IntToChar(HDF5_minnum))//"." &
