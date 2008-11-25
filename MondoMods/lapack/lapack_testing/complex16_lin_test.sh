@@ -1,4 +1,4 @@
 #!/bin/bash
-. test_functions.sh
+. ${srcdir}/test_functions.sh
 
-run_test lin/xlintstz ztest.in ztest.out || exit 1
+run_test lin/xlintstz ${srcdir}/ztest.in ztest.out || exit 1

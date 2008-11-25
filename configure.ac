@@ -454,12 +454,25 @@ AC_ARG_ENABLE([internal-lapack],
   [use_internal_lapack="${enableval}"],
   [use_internal_lapack="yes"])
 
+if test "${use_internal_lapack}" = "yes"; then
+  AC_MSG_RESULT([yes])
+else
+  AC_MSG_RESULT([no])
+fi
+
+AC_MSG_CHECKING([for whether to compile the internal lapack checks])
 AC_ARG_ENABLE([internal-lapack-checks],
   [AS_HELP_STRING([--enable-internal-lapack-checks],
   [Enable the checks in the internal lapack. Lapack can be checked by running
    "make check".])],
   [compile_internal_lapack_checks="${enableval}"],
   [compile_internal_lapack_checks="no"])
+
+if test "${compile_internal_lapack_checks}" = "yes"; then
+  AC_MSG_RESULT([yes])
+else
+  AC_MSG_RESULT([no])
+fi
 
 AM_CONDITIONAL(INTERNAL_LAPACK, [test "${use_internal_lapack}" = "yes"])
 AM_CONDITIONAL(INTERNAL_LAPACK_CHECKS, [test "${compile_internal_lapack_checks}" = "yes"])
@@ -468,8 +481,6 @@ NOOPT=
 LAPACK_TIMER="NONE"
 
 if test "${use_internal_lapack}" = "yes"; then
-  AC_MSG_RESULT([yes])
-
   # Test for no-optimization compiler flag.
   AC_MSG_CHECKING([for no-optmiziation flags])
 
@@ -497,8 +508,6 @@ if test "${use_internal_lapack}" = "yes"; then
   esac
 
 else
-  AC_MSG_RESULT([no])
-
   AC_ARG_WITH([lapack],
     [AS_HELP_STRING([--with-lapack=DIR],
     [Specify non-standard directory for the BLAS/LAPACK libraries.])],

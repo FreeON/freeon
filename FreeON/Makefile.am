@@ -59,14 +59,14 @@ FreeON_LINK = $(FCLINK)
 # Dependencies.
 ParseCommands.o : \
   ControlStructures.o \
-  $(top_srcdir)/MondoConfig.h
+  $(top_builddir)/MondoConfig.h
 
 ParseOptions.o : \
   Numerics.o \
   ConflictDetect.o \
   OptionKeys.o \
   ControlStructures.o \
-  $(top_srcdir)/MondoConfig.h
+  $(top_builddir)/MondoConfig.h
 
 ParseGeometries.o : \
   ConflictDetect.o \
@@ -132,7 +132,7 @@ Overlay.o : \
   PunchHDF.o
 
 MDynamics.o : \
-  $(top_srcdir)/MondoConfig.h \
+  $(top_builddir)/MondoConfig.h \
   SCFs.o \
   Numerics.o \
   ControlStructures.o \
@@ -168,7 +168,7 @@ Optimizer.o : \
   QUICCA.o
 
 FreeON.o : \
-  $(top_srcdir)/MondoConfig.h \
+  $(top_builddir)/MondoConfig.h \
   SCFs.o \
   Response.o \
   PunchHDF.o \
@@ -206,7 +206,7 @@ SCFs.o : \
   OptionKeys.o \
   ControlStructures.o \
   NEB.o \
-  $(top_srcdir)/MondoConfig.h
+  $(top_builddir)/MondoConfig.h
 
 InCoords.o : \
   ControlStructures.o
@@ -220,8 +220,8 @@ PunchHDF.o : \
 
 PrintParsed.o : \
   ControlStructures.o \
-  $(top_srcdir)/MondoConfig.h \
-  $(top_srcdir)/MondoLocalVersion.h
+  $(top_builddir)/MondoConfig.h \
+  $(top_builddir)/MondoLocalVersion.h
 
 RQI.o : \
 	Overlay.o \

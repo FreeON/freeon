@@ -154,7 +154,7 @@ PoleTree.o : \
   Density.o
 
 QCTC.o : \
-  $(top_srcdir)/MondoConfig.h \
+  $(top_builddir)/MondoConfig.h \
   PoleTree.o \
   Globals.o \
   PBCFarField.o \
