@@ -252,6 +252,7 @@ PROGRAM RHEqs
 #ifdef PARALLEL
   CALL BCast(Present)
 #endif
+
   IF(Present)THEN
     CALL Get(sX,XFile)                  ! X =S^{-1/2}
     CALL Multiply(sX,sP,sTmp1)          ! T1=S^{-1/2}.P_Orthog
@@ -280,4 +281,3 @@ PROGRAM RHEqs
   CALL Delete(sTmp1)
   CALL ShutDown(Prog)
 END PROGRAM  RHEqs
-

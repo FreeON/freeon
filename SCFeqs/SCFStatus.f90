@@ -189,7 +189,7 @@ PROGRAM SCFStatus
   IF(NClones>1)THEN
     CurClone=IntToChar(MyClone)
   ELSE
-    CurClone=""
+    CurClone="--"
   ENDIF
   SCFMessage=""
 

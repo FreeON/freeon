@@ -79,7 +79,7 @@ user_FCFLAGS=${FCFLAGS}
 AC_CANONICAL_BUILD
 
 # Find compilers.
-AC_PROG_CC([gcc icc])
+AC_PROG_CC([gcc icc pgc])
 AC_PROG_FC([gfortran ifort pgf90])
 AC_PROG_F77([gfortran ifort pgf90])
 
@@ -118,6 +118,28 @@ case ${FC} in
 esac
 
 AC_MSG_NOTICE([identified C/F77/F90: ${CC_COMPILERNAME}/${F77_COMPILERNAME}/${FC_COMPILERNAME}])
+
+case "${CC_COMPILERNAME}" in
+  GCC)   cc_compiler_version_string="`${CC} --version | head -n1`" ;;
+  Intel) cc_compiler_version_string="`${CC} --version | head -n1`" ;;
+  *)     cc_compiler_version_string="unset" ;;
+esac
+
+case "${F77_COMPILERNAME}" in
+  GCC)   f77_compiler_version_string="`${F77} --version | head -n1`" ;;
+  Intel) f77_compiler_version_string="`${F77} --version | head -n1`" ;;
+  *)     f77_compiler_version_string="unset" ;;
+esac
+
+case "${FC_COMPILERNAME}" in
+  GCC)   fc_compiler_version_string="`${FC} --version | head -n1`" ;;
+  Intel) fc_compiler_version_string="`${FC} --version | head -n1`" ;;
+  *)     fc_compiler_version_string="unset" ;;
+esac
+
+AC_DEFINE_UNQUOTED(HAVE_CC_VERSION_STRING,  ["${cc_compiler_version_string}"],  [The c compiler version string])
+AC_DEFINE_UNQUOTED(HAVE_F77_VERSION_STRING, ["${f77_compiler_version_string}"], [The f77 compiler version string])
+AC_DEFINE_UNQUOTED(HAVE_FC_VERSION_STRING,  ["${fc_compiler_version_string}"],  [The f90 compiler version string])
 
 # Store additional optimization flags.
 optimization_flags=""
