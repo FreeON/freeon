@@ -67,6 +67,8 @@ PROGRAM DMP_SP2 ! Density matrix purification, SP2 variation
 #endif
   ! Check for matrix threshold overide
   CALL SussTrix('SPTwoTrix',Prog)
+
+
   CALL New(F)
   FFile=TrixFile('F_DIIS',Args,0)
   INQUIRE(FILE=FFile,EXIST=Present)
@@ -95,7 +97,7 @@ PROGRAM DMP_SP2 ! Density matrix purification, SP2 variation
 #endif
   CALL SetEq(Pold,P)
   ! Do SP2 iterations
-  DO I=1,150
+  DO I=1,100
     CALL SP2(P,Tmp1,Tmp2,Ne,MM)
     IF(CnvrgChck(Prog,I,Ne,MM,F,P,POld,Tmp1,Tmp2)) EXIT
   ENDDO

@@ -95,9 +95,11 @@ PROGRAM P2Use
 
   ! Start logging.
   logtag = TRIM(Prog)//":"//TRIM(SCFActn)
-  CALL MondoLog(DEBUG_MAXIMUM, "P2Use", "SCFActn = "//TRIM(SCFActn))
-
+!  CALL MondoLog(DEBUG_NONE, "P2Use", "SCFActn = "//TRIM(SCFActn))
   ! Do what needs to be done CASE by CASE
+
+
+
   SELECT CASE(SCFActn)
 
     ! P=0
@@ -575,7 +577,7 @@ PROGRAM P2Use
 
     IF(iGEO == 5) THEN
       ! Initial boundary conditions: Save D(p-1) as P(p-1).
-      CALL MondoLog(DEBUG_MAXIMUM, logtag, "Initial boundary condition")
+!      CALL MondoLog(DEBUG_MAXIMUM, logtag, "Initial boundary condition")
       DO I=1,3
         CALL Get(Tmp1, TrixFile("DOsave",  Stats_O = (/ iSCF, iBAS, iGEO-I /)))
         CALL Put(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-I /)))
@@ -770,6 +772,7 @@ PROGRAM P2Use
     ! DMTRBO with super-duper high order damping.
   CASE("DMTRBO_Damp_dt7")
 
+
     iSCF = Args%I%I(1)
     iBAS = Args%I%I(2)
     iGEO = Args%I%I(3)
@@ -785,7 +788,7 @@ PROGRAM P2Use
 
     IF(iGEO == 9) THEN
       ! Initial boundary conditions: Save D(p-1) as P(p-1).
-      CALL MondoLog(DEBUG_MAXIMUM, logtag, "Initial boundary condition")
+!      CALL MondoLog(DEBUG_MAXIMUM, logtag, "Initial boundary condition")
       DO I=1,5
         CALL Get(Tmp1, TrixFile("DOsave",  Stats_O = (/ iSCF, iBAS, iGEO-I /)))
         CALL Put(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-I /)))
@@ -855,17 +858,9 @@ PROGRAM P2Use
     ! Do SP2 iterations
     DO I=1,150
        CALL SP2(P,Tmp1,Tmp2,Half*DBLE(NEl),MM)
-!       IF(CnvrgChck(Prog,I,Half*DBLE(NEl),MM,F,P,POld,Tmp1,Tmp2)) EXIT
-       IF(CnvrgChck(Prog,I,Half*DBLE(NEl),MM,P,P,P0,Tmp1,Tmp2)) EXIT
+       IF(CnvrgChck(Prog//'_DT7',I,Half*DBLE(NEl),MM,P0,P,P0,Tmp1,Tmp2,StartingFromP_O=.TRUE.)) EXIT
     ENDDO
-
     CALL Delete(P0)
-
-!    CALL MondoLog(DEBUG_MAXIMUM, logtag, "purified after "//TRIM(IntToChar(I))//" iterations")
-!    CALL MondoLog(DEBUG_MAXIMUM, logtag, "Trace(P) = "//TRIM(DblToChar(TrP)))
-!    CALL MondoLog(DEBUG_MAXIMUM, logtag, "Trace(P2) = "//TRIM(DblToChar(TrP2)))
-
-
 
     ! Convert to AO Rep
     INQUIRE(FILE=TrixFile('X',Args),EXIST=Present)
@@ -909,7 +904,7 @@ PROGRAM P2Use
 
     IF(iGEO == 11) THEN
       ! Initial boundary conditions: Save D(p-1) as P(p-1).
-      CALL MondoLog(DEBUG_MAXIMUM, logtag, "Initial boundary condition")
+!      CALL MondoLog(DEBUG_MAXIMUM, logtag, "Initial boundary condition")
       DO I=1,6
         CALL Get(Tmp1, TrixFile("DOsave",  Stats_O = (/ iSCF, iBAS, iGEO-I /)))
         CALL Put(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-I /)))
@@ -1026,7 +1021,7 @@ PROGRAM P2Use
 
     IF(iGEO == 13) THEN
       ! Initial boundary conditions: Save D(p-1) as P(p-1).
-      CALL MondoLog(DEBUG_MAXIMUM, logtag, "Initial boundary condition")
+!      CALL MondoLog(DEBUG_MAXIMUM, logtag, "Initial boundary condition")
       DO I=1,7
         CALL Get(Tmp1, TrixFile("DOsave",  Stats_O = (/ iSCF, iBAS, iGEO-I /)))
         CALL Put(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-I /)))
@@ -1161,7 +1156,7 @@ PROGRAM P2Use
     ! Calculate symplectic counter.
     m_step = MOD(iGEO-2,4)+1
     IF(iGEO == 7) THEN
-      CALL MondoLog(DEBUG_MAXIMUM, logtag, "Initial boundary condition")
+!      CALL MondoLog(DEBUG_MAXIMUM, logtag, "Initial boundary condition")
       DO I=1,6
         CALL Get(Tmp1, TrixFile("DOsave",  Stats_O = (/ iSCF, iBAS, iGEO-I /)))
         CALL Put(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-I /)))
@@ -1741,8 +1736,6 @@ PROGRAM P2Use
     CALL Halt("Unknown option "//TRIM(SCFActn))
 
   END SELECT
-
-  CALL MondoLog(DEBUG_MAXIMUM, logtag, "done")
 
   ! Tidy up ...
   CALL Delete(GM)
