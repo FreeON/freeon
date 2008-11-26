@@ -185,50 +185,32 @@ PROGRAM SCFStatus
   !-----------------------------------------------------------
   !  PRINT STATISTICS
 
-  SCFMessage=""
-
-  IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
-     CALL MondoLog(DEBUG_MAXIMUM,Prog,'+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+')
-     
-     IF(NClones>1)THEN
-        CALL MondoLog(DEBUG_MAXIMUM,Prog, 'SCFCycle #'//TRIM(SCFCycl)//', Basis #'//TRIM(CurBase)//', Geometry #'//TRIM(CurGeom))
-     ELSE
-        CALL MondoLog(DEBUG_MAXIMUM,Prog, 'SCFCycle #'//TRIM(SCFCycl)//', Basis #'//TRIM(CurBase)//', Geometry #'//TRIM(CurGeom)//', Clone #'//TRIM(CurClone))
-     ENDIF
-     IF(Gap/=Zero) &
-     CALL MondoLog(DEBUG_MAXIMUM,Prog,'Gap  = '//TRIM(DblToShrtChar(-Gap)))
-     IF(P%NSMat/=1.AND.Args%I%I(1)/=0) & 
-     CALL MondoLog(DEBUG_MAXIMUM,Prog,'<S^2>= '//TRIM(FltToShrtChar(S2)))
-     IF(DIISErr/=Zero)  &
-     CALL MondoLog(DEBUG_MAXIMUM,Prog,'DIIS  = '//TRIM(DblToShrtChar(DIISErr)))
-     CALL MondoLog(DEBUG_MAXIMUM,Prog,'DelD  = '//TRIM(DblToShrtChar(DMax)))
-     CALL MondoLog(DEBUG_MAXIMUM,Prog,'<T>   = '//TRIM(DblToMedmChar(KinE)))
-     CALL MondoLog(DEBUG_MAXIMUM,Prog,'<V>   = '//TRIM(DblToMedmChar( E_es_tot)))
-     IF(ExchE/=Zero)    &
-     CALL MondoLog(DEBUG_MAXIMUM,Prog,'<HF>  = '//TRIM(DblToMedmChar(ExchE)))
-     IF(Exc/=Zero)      &
-     CALL MondoLog(DEBUG_MAXIMUM,Prog,'<DFT> = '//TRIM(DblToMedmChar(Exc)))
-     CALL MondoLog(DEBUG_MAXIMUM,Prog,'<SCF> = '//TRIM(FltToChar(Etot)))
-     CALL MondoLog(DEBUG_MAXIMUM,Prog,'+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+')
-    !     Add in MM energies
-  ELSEIF(PrintFlags%Key>=DEBUG_NONE)THEN
-    IF(NClones>1)THEN
-      SCFTag='['//TRIM(SCFCycl)//','//TRIM(CurBase)//','//TRIM(CurGeom)//','//TRIM(CurClone)//']'
-    ELSE
-      SCFTag='['//TRIM(SCFCycl)//','//TRIM(CurBase)//','//TRIM(CurGeom)//']'
-    ENDIF
-
-    IF(SCFActn=='BasisSetSwitch')THEN
-      SCFMessage=' Basis set switch, MxD = '//TRIM(DblToShrtChar(DMax))
-    ELSE
-      SCFMessage='<SCF> = '//TRIM(FltToChar(Etot))//', dD = '//TRIM(DblToShrtChar(DMax))
-    ENDIF
-    !     Add in DIIS error
-    IF(DIISErr/=Zero)                                                     &
-         SCFMessage=TRIM(SCFMessage)                                        &
-         //', DIIS = '//TRIM(DblToShrtChar(DIISErr))
-    CALL MondoLog(DEBUG_NONE,Prog,SCFMessage,SCFTag)
+  IF(NClones>1)THEN
+     SCFTag='['//TRIM(SCFCycl)//','//TRIM(CurBase)//','//TRIM(CurGeom)//','//TRIM(CurClone)//']'
+  ELSE
+     SCFTag='['//TRIM(SCFCycl)//','//TRIM(CurBase)//','//TRIM(CurGeom)//']'
   ENDIF
+  !
+  SCFMessage=""
+  IF(Gap/=Zero)SCFMessage=TRIM(SCFMessage)//'Gap  = '//TRIM(DblToShrtChar(-Gap))
+  IF(P%NSMat/=1.AND.Args%I%I(1)/=0)SCFMessage=TRIM(SCFMessage)//' <S^2>= '//TRIM(FltToShrtChar(S2))
+  IF(TRIM(SCFMessage)/="") &
+  CALL MondoLog(DEBUG_MAXIMUM,Prog,SCFMessage,SCFTag)
+  !
+  SCFMessage='<T>='//TRIM(DblToMedmChar(KinE))//', <V>='//TRIM(DblToMedmChar( E_es_tot))
+  IF(ExchE/=Zero)SCFMessage=TRIM(SCFMessage)//', <HF>='//TRIM(DblToMedmChar(ExchE))
+  IF(Exc/=Zero)SCFMessage=TRIM(SCFMessage)//', <DFT>='//TRIM(DblToMedmChar(Exc))
+  CALL MondoLog(DEBUG_MAXIMUM,Prog,SCFMessage,SCFTag)
+  !
+  IF(SCFActn=='BasisSetSwitch')THEN
+     SCFMessage=' Basis set switch, MxD = '//TRIM(DblToShrtChar(DMax))
+  ELSE
+     SCFMessage='<SCF> = '//TRIM(FltToChar(Etot))//', dD = '//TRIM(DblToShrtChar(DMax))
+  ENDIF
+  ! Add in DIIS error
+  IF(DIISErr/=Zero)SCFMessage=TRIM(SCFMessage)//', DIIS = '//TRIM(DblToShrtChar(DIISErr))
+  CALL MondoLog(DEBUG_NONE,Prog,SCFMessage,SCFTag)
+
 
   CALL Delete(P)
   CALL Delete(Tmp1)
