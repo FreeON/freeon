@@ -65,8 +65,10 @@ PROGRAM DMP_SP2 ! Density matrix purification, SP2 variation
 #else
   CALL StartUp(Args,Prog)
 #endif
-  ! Suss for matrix threshold overide
+  ! Check for matrix threshold overide
   CALL SussTrix('SPTwoTrix',Prog)
+
+
   CALL New(F)
   FFile=TrixFile('F_DIIS',Args,0)
   INQUIRE(FILE=FFile,EXIST=Present)
@@ -81,18 +83,10 @@ PROGRAM DMP_SP2 ! Density matrix purification, SP2 variation
   CALL New(Pold)
   CALL New(Tmp1)
   CALL New(Tmp2)
-
-!!$  ! Some symmetry checks.
-!!$  CALL New(PT)
-!!$  CALL New(FT)
-!!$
-!!$  CALL Xpose(F, FT)
-!!$  FT%MTrix%D = -FT%MTrix%D
-!!$  CALL Add(F, FT, Tmp1)
-!!$  CALL MondoLog(DEBUG_NONE, Prog, "FNorm(F-FT) = "//TRIM(FltToChar(FNorm(Tmp1))))
-
+  !
   MM=0
   Ne=Half*DBLE(NEl)
+
   ! Guess P from F
 #ifdef PARALLEL
   CALL SetEq(F_BCSR,F)
@@ -103,20 +97,11 @@ PROGRAM DMP_SP2 ! Density matrix purification, SP2 variation
 #endif
   CALL SetEq(Pold,P)
   ! Do SP2 iterations
-  DO I=1,150
+  DO I=1,100
     CALL SP2(P,Tmp1,Tmp2,Ne,MM)
     IF(CnvrgChck(Prog,I,Ne,MM,F,P,POld,Tmp1,Tmp2)) EXIT
-    !idempotency_error = ABS(Trace(P) - Trace(Tmp1))
-    !WRITE(*,*) "I = ", I, ", idempotency_error = ", idempotency_error
-    !IF(idempotency_error < 1d-3) THEN
-    !  WRITE(*,*) "I = ", I, ", idempotency_error = ", idempotency_error
-    !  DO I2 = 1, 6
-    !    CALL SP2(P, Tmp1, Tmp2, Ne, MM)
-    !  ENDDO
-    !  EXIT
-    !ENDIF
   ENDDO
-  CALL OpenASCII(InpFile,Inp)
+
   ! If we are called without the DIIS Fockian, consider a levelshift
   IF(.NOT.PRESENT.AND.OptDblQ(Inp,'LevelShift',Lambda))THEN
     ! Get the Fock matrix back ...
@@ -137,20 +122,10 @@ PROGRAM DMP_SP2 ! Density matrix purification, SP2 variation
     CALL MondoLog(DEBUG_NONE, "SP2", TRIM(ProcessName(Prog)) &
       //' LevlShift = '//TRIM(DblToMedmChar(Lambda)))
   ENDIF
-  CLOSE(Inp)
 
   ! Orthogonal put and xform to AO rep and put
   CALL PutXForm(Prog,Args,P,POld,Tmp1)
-
-!!$  ! Symmetry check.
-!!$  CALL Xpose(P, PT)
-!!$  PT%MTrix%D = -PT%MTrix%D
-!!$  CALL Add(P, PT, Tmp2)
-!!$  CALL MondoLog(DEBUG_NONE, "SP2", "FNorm(P-PT) = "//TRIM(FltToChar(FNorm(Tmp2))))
-
-  ! Tidy up
-!!$  CALL Delete(PT)
-!!$  CALL Delete(FT)
+  !
   CALL Delete(F)
   CALL Delete(P)
   CALL Delete(Pold)

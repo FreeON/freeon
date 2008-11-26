@@ -101,7 +101,11 @@ CONTAINS
 
     ! Create Cartesian topology for the clones
     MyClone=CartCommSplit(SpaceTimeSplit,Serial_O)
-
+    IF(NClones>1)THEN
+       CurClone=IntToChar(MyClone)
+    ELSE
+       CurClone=""
+    ENDIF
     ! CALL AlignNodes(' After CartCommSplit ')
 #else
     CALL Get(MyClone,'spacetime')
@@ -320,6 +324,7 @@ CONTAINS
 #endif
     CALL Get(ModelChem,'ModelChemistry',Tag_O=CurBase)
     CALL Get(NClones,'clones')
+
   END SUBROUTINE LoadTopLevelGlobals
   !==============================================================
   ! LOAD GLOBAL VARIABLES FROM EACH CLONE/GROUP OF THE HDF FILE

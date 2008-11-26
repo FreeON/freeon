@@ -69,6 +69,169 @@ MODULE DenMatMethods
   REAL(DOUBLE)            :: TrP,TrP2,TrP3,TrP4
   REAL(DOUBLE)            :: CurThresh
 CONTAINS
+
+
+
+  FUNCTION CnvrgChck_BCSR(Prog,NPur,Ne,MM,F,P,POld,Tmp1,Tmp2,StartingFromP_O)
+
+    LOGICAL,SAVE         :: CnvrgChck_RelErrE=.FALSE.
+    LOGICAL,SAVE         :: CnvrgChck_AbsErrP=.FALSE.
+    LOGICAL              :: CnvrgChck_BCSR
+
+    TYPE(BCSR)           :: F,P,POld,Tmp1,Tmp2
+    REAL(DOUBLE)         :: Ne,Energy,AbsErrP,FNormErrP,TwoNP,N2F,  &
+         AbsErrE,RelErrE,AbsErrN,RelErrN,AveErrE,MaxCommErr,FNormCommErr,PNon0,TraceP
+
+    REAL(DOUBLE),DIMENSION(2) :: CErr
+    REAL(DOUBLE),SAVE    :: OldE,OldAEP
+    INTEGER              :: MM,NPur
+    CHARACTER(LEN=*)     :: Prog
+    CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg,CnvrgCmmnt,SCFTag
+    LOGICAL, OPTIONAL    :: StartingFromP_O
+    LOGICAL              :: StartingFromP
+
+#ifdef PRINT_PURE_EVALS
+    INTERFACE DSYEV
+      SUBROUTINE DSYEV(JOBZ,UPLO,N,A,LDA,W,WORK,LWORK,INFO)
+        USE GlobalScalars
+        CHARACTER(LEN=1), INTENT(IN)    :: JOBZ, UPLO
+        INTEGER,          INTENT(IN)    :: LDA,  LWORK, N
+        INTEGER,          INTENT(OUT)   :: INFO
+        REAL(DOUBLE),     INTENT(INOUT) :: A(LDA,*)
+        REAL(DOUBLE),     INTENT(OUT)   :: W(*)
+        REAL(DOUBLE),     INTENT(OUT)   :: WORK(*)
+      END SUBROUTINE DSYEV
+    END INTERFACE
+    TYPE(DBL_RNK2)                 :: dP
+    TYPE(DBL_VECT)                 :: EigenV,Work
+    TYPE(INT_VECT)                 :: IWork
+    INTEGER                        :: LWORK,LIWORK,Info
+
+    CALL New(dP,(/NBasF,NBasF/))
+    CALL SetEq(dP,P)
+    CALL New(EigenV,NBasF)
+    CALL SetEq(EigenV,Zero)
+    LWORK=MAX(1,3*NBasF+10)
+    CALL New(Work,LWork)
+    CALL DSYEV('V','U',NBasF,dP%D,NBasF,EigenV%D,Work%D,LWORK,Info)
+    IF(Info/=SUCCEED)CALL Halt('DSYEV flaked in FockGuess. INFO='//TRIM(IntToChar(Info)))
+    PrintFlags%Fmt=DEBUG_MMASTYLE
+    CALL Print_DBL_VECT(EigenV,'Values['//TRIM(IntToChar(NPur))//']',Unit_O=6)
+    PrintFlags%Fmt=DEBUG_DBLSTYLE
+    CALL Delete(EigenV)
+    CALL Delete(Work)
+    CALL Delete(dP)
+#endif
+    !
+    IF(PRESENT(StartingFromP_O))THEN
+       StartingFromP=StartingFromP_O
+    ELSE
+       StartingFromP=.FALSE.
+    ENDIF
+
+    !Default 
+    CnvrgChck_BCSR=.FALSE.
+    ! 
+    ! Early return
+    IF(NPur==0)THEN
+      OldE=BIG_DBL
+      OldAEP=BIG_DBL
+    ELSEIF(MOD(NPur,2)==1)THEN
+       CnvrgChck_BCSR=.FALSE.
+       RETURN
+    ENDIF
+    ! Density matrix errors
+    CALL Multiply(Pold,-One)
+    CALL Add(Pold,P,Tmp1)
+    AbsErrP=ABS(Max(Tmp1)+1.D-20)
+    FNormErrP=FNorm(Tmp1)
+    ! Energy errors
+    Energy=Trace(P,F)
+    AbsErrE=OldE-Energy
+    RelErrE=AbsErrE/ABS(Energy)
+    ! Occupation errors
+    TraceP=Trace(P)
+    AbsErrN=Two*ABS(TraceP-Ne)
+    RelErrN=AbsErrN/(Two*Ne)
+    ! Absolute convergence test (Only for NPur>10)
+    IF(NPur>10)THEN
+       IF(ABS(RelErrE)<Thresholds%ETol*1D-3)THEN
+          CnvrgChck_RelErrE=.TRUE.
+       ENDIF
+       IF(AbsErrP<Thresholds%DTol*1D-2)THEN
+          CnvrgChck_AbsErrP=.TRUE.
+       ENDIF
+       IF(CnvrgChck_RelErrE.AND.CnvrgChck_AbsErrP)THEN
+          CnvrgChck_BCSR=.TRUE.
+          IF(StartingFromP)THEN
+             CnvrgCmmnt='Met dN and dP goals'
+          ELSE
+             CnvrgCmmnt='Met dE and dP goals'
+          ENDIF
+       ELSE
+          ! Test in the asymptotic regime for stall out
+          IF(ABS(RelErrN)<Thresholds%Trix**2)THEN
+             ! Check for an increasing energy (or occupation)
+              IF(Energy>OldE)THEN
+                CnvrgChck_BCSR=.TRUE.
+                IF(StartingFromP)THEN
+                   CnvrgCmmnt='Hit dN increase'
+                ELSE
+                   CnvrgCmmnt='Hit dE increase'
+                ENDIF
+            ENDIF
+          ENDIF
+       ENDIF
+    ENDIF
+    ! Updtate previous cycle values
+    OldE=Energy
+    OldAEP=AbsErrP
+    ! Convergence stats
+    PNon0=100.D0*DBLE(P%NNon0)/DBLE(NBasF*NBasF)
+
+    IF(StartingFromP)THEN
+       Mssg='dP='//TRIM(DblToShrtChar(AbsErrP))//', dNel='//TRIM(DblToShrtChar(Two*ABS(TraceP-Ne)))//', %Non0s='//TRIM(DblToShrtChar(PNon0))
+    ELSE
+       Mssg='dE='//TRIM(DblToShrtChar(RelErrE))//', dP='//TRIM(DblToShrtChar(AbsErrP))   &
+            //', dNel='//TRIM(DblToShrtChar(Two*ABS(TraceP-Ne)))//', %Non0s='//TRIM(DblToShrtChar(PNon0))//', Tr{F.P} = '//TRIM(DblToChar(Energy))
+    ENDIF
+    CALL MondoLog(DEBUG_NONE,Prog,TRIM(Mssg),'Pure '//TRIM(IntToChar(NPur)))
+
+
+    ! Look for convergence
+
+!!$    CnvrgChck_BCSR=.FALSE.
+!!$    IF(NPur==40)THEN
+!!$       CnvrgChck_BCSR=.TRUE.
+!!$    ENDIF
+
+    IF(.NOT.CnvrgChck_BCSR)THEN
+       CALL SetEq(Pold,P)
+       RETURN
+    ENDIF
+    ! Simple renorm
+    CALL Multiply(P,Half*DBLE(Nel)/TraceP)
+    ! Converged, print summary that can be grepped and plotted
+    IF(StartingFromP)THEN
+       Mssg='ThrX='//TRIM(DblToShrtChar(Thresholds%Trix))//', dP='//TRIM(DblToShrtChar(AbsErrP)) &
+            //', dNel='//TRIM(DblToShrtChar(Two*ABS(TraceP-Ne)))             
+    ELSE
+       Mssg='ThrX='//TRIM(DblToShrtChar(Thresholds%Trix))//', dE='//TRIM(DblToShrtChar(RelErrE))//', dP='//TRIM(DblToShrtChar(AbsErrP))   &
+            //', dNel='//TRIM(DblToShrtChar(Two*ABS(TraceP-Ne)))
+    ENDIF
+    IF(NClones>1)THEN
+      SCFTag='['//TRIM(SCFCycl)//','//TRIM(CurBase)//','//TRIM(CurGeom)//','//TRIM(CurClone)//']'
+    ELSE
+      SCFTag='['//TRIM(SCFCycl)//','//TRIM(CurBase)//','//TRIM(CurGeom)//']'
+    ENDIF
+
+    CALL MondoLog(DEBUG_MEDIUM,Prog,TRIM(Mssg),SCFTag)
+    Mssg=TRIM(CnvrgCmmnt)//'; NPure='//TRIM(IntToChar(NPur))//', SpGEMMs='//TRIM(IntToChar(MM)) & 
+         //', %Non0s='//TRIM(FltToShrtChar(PNon0))
+    CALL MondoLog(DEBUG_MEDIUM,Prog,TRIM(Mssg), SCFTag)
+    !
+  END FUNCTION CnvrgChck_BCSR
+
   !-------------------------------------------------------------------------------
 
   !-------------------------------------------------------------------------------
@@ -299,15 +462,16 @@ CONTAINS
 
     ENDIF
 
-    ! Set thresholding for next cycle
-    CALL SetVarThresh(MM)
     ! Look for convergence
     IF(.NOT.CnvrgChck_DBCSR)THEN
       CALL SetEq(Pold,P)
       RETURN
     ENDIF
+
     ! Normalize Trace
     CALL NormTrace(P,Tmp2,Tmp1,Ne,1)
+
+
     MM=MM+1
 #ifdef COMPUTE_COMMUTATOR
     ! Commutator [F,P]
@@ -380,201 +544,9 @@ CONTAINS
 #endif
 
   !-------------------------------------------------------------------------------
-  FUNCTION CnvrgChck_BCSR(Prog,NPur,Ne,MM,F,P,POld,Tmp1,Tmp2)
 
-    LOGICAL,SAVE         :: CnvrgChck_RelErrE=.FALSE.
-    LOGICAL,SAVE         :: CnvrgChck_AbsErrP=.FALSE.
-    LOGICAL              :: CnvrgChck_BCSR
 
-    TYPE(BCSR)           :: F,P,POld,Tmp1,Tmp2
-    REAL(DOUBLE)         :: Ne,Energy,AbsErrP,FNormErrP,TwoNP,N2F,  &
-         AbsErrE,RelErrE,AveErrE,MaxCommErr,FNormCommErr,PNon0,TraceP
 
-    REAL(DOUBLE),DIMENSION(2) :: CErr
-    REAL(DOUBLE),SAVE    :: OldE,OldAEP
-    INTEGER              :: MM,NPur
-    CHARACTER(LEN=*)     :: Prog
-    CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg,CnvrgCmmnt
-#ifdef PRINT_PURE_EVALS
-    INTERFACE DSYEV
-      SUBROUTINE DSYEV(JOBZ,UPLO,N,A,LDA,W,WORK,LWORK,INFO)
-        USE GlobalScalars
-        CHARACTER(LEN=1), INTENT(IN)    :: JOBZ, UPLO
-        INTEGER,          INTENT(IN)    :: LDA,  LWORK, N
-        INTEGER,          INTENT(OUT)   :: INFO
-        REAL(DOUBLE),     INTENT(INOUT) :: A(LDA,*)
-        REAL(DOUBLE),     INTENT(OUT)   :: W(*)
-        REAL(DOUBLE),     INTENT(OUT)   :: WORK(*)
-      END SUBROUTINE DSYEV
-    END INTERFACE
-    TYPE(DBL_RNK2)                 :: dP
-    TYPE(DBL_VECT)                 :: EigenV,Work
-    TYPE(INT_VECT)                 :: IWork
-    INTEGER                        :: LWORK,LIWORK,Info
-
-    CALL New(dP,(/NBasF,NBasF/))
-    CALL SetEq(dP,P)
-    CALL New(EigenV,NBasF)
-    CALL SetEq(EigenV,Zero)
-    LWORK=MAX(1,3*NBasF+10)
-    CALL New(Work,LWork)
-    CALL DSYEV('V','U',NBasF,dP%D,NBasF,EigenV%D,Work%D,LWORK,Info)
-    IF(Info/=SUCCEED)CALL Halt('DSYEV flaked in FockGuess. INFO='//TRIM(IntToChar(Info)))
-    PrintFlags%Fmt=DEBUG_MMASTYLE
-    CALL Print_DBL_VECT(EigenV,'Values['//TRIM(IntToChar(NPur))//']',Unit_O=6)
-    PrintFlags%Fmt=DEBUG_DBLSTYLE
-    CALL Delete(EigenV)
-    CALL Delete(Work)
-    CALL Delete(dP)
-#endif
-    !
-    !Default 
-    CnvrgChck_BCSR=.FALSE.
-    ! 
-    ! Early return
-    IF(NPur==0)THEN
-      OldE=BIG_DBL
-      OldAEP=BIG_DBL
-    ELSEIF(MOD(NPur,2)==0)THEN
-       CnvrgChck_BCSR=.FALSE.
-       RETURN
-    ENDIF
-    ! Density matrix errors
-    CALL Multiply(Pold,-One)
-    CALL Add(Pold,P,Tmp1)
-    AbsErrP=ABS(Max(Tmp1)+1.D-20)
-    FNormErrP=FNorm(Tmp1)
-    ! Energy errors
-    Energy=Trace(P,F)
-    AbsErrE=ABS(OldE-Energy)
-    RelErrE=AbsErrE/ABS(Energy)
-    ! Absolute convergence test (Only for NPur>10)
-    IF(NPur>10)THEN
-       IF(RelErrE<Thresholds%ETol*1D-2)THEN
-          CnvrgChck_RelErrE=.TRUE.
-       ENDIF
-       IF(AbsErrP<Thresholds%DTol*1D-1)THEN
-          CnvrgChck_AbsErrP=.TRUE.
-       ENDIF
-       IF(CnvrgChck_RelErrE.AND.CnvrgChck_AbsErrP)THEN
-          CnvrgChck_BCSR=.TRUE.
-          CnvrgCmmnt='Met dE/dP goals'
-       ELSE
-          ! Test in the asymptotic regime for stall out
-          IF(RelErrE<Thresholds%ETol)THEN
-             ! Check for increasing /P
-!!$       IF(AbsErrP>OldAEP)THEN
-!!$          CnvrgChck_BCSR=.TRUE.
-!!$          CnvrgCmmnt='Hit dP increase'
-!!$       ENDIF
-
-             ! Check for an increasing energy
-             IF(Energy>OldE)THEN
-                CnvrgChck_BCSR=.TRUE.
-                CnvrgCmmnt='Hit dE increase'
-             ENDIF
-          ENDIF
-       ENDIF
-    ENDIF
-
-    ! Updtate previous cycle values
-    OldE=Energy
-    OldAEP=AbsErrP
-    !
-    ! Print convergence stats
-    PNon0=100.D0*DBLE(P%NNon0)/DBLE(NBasF*NBasF)
-
-!!    CALL PChkSum(P,'OrthoP['//TRIM(IntToChar(NPur))//']','sp2',Unit_O=6)
-    Mssg='dE='//TRIM(DblToShrtChar(RelErrE))                   &
-         //', dP='//TRIM(DblToShrtChar(AbsErrP))               &
-         //', %Non0='//TRIM(DblToShrtChar(PNon0))              &
-         //', Tr[FP]='//TRIM(DblToChar(Energy)) 
-    
-    CALL MondoLog(DEBUG_MAXIMUM,Prog,TRIM(Mssg),'Pure '//TRIM(IntToChar(NPur)))
-
-!!$    IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
-!!$      CALL OpenASCII(OutFile,Out)
-!!$      CALL PrintProtectL(Out)
-!!$      WRITE(*,DEFAULT_CHR_FMT)TRIM(Mssg)
-!!$      WRITE(Out,DEFAULT_CHR_FMT)TRIM(Mssg)
-!!$      CALL PrintProtectR(Out)
-!!$      CLOSE(UNIT=Out,STATUS='KEEP')
-!!$    ENDIF
-!!$
-
-    ! Set thresholding for next cycle
-    CALL SetVarThresh(MM)
-    ! Look for convergence
-    IF(.NOT.CnvrgChck_BCSR)THEN
-      CALL SetEq(Pold,P)
-      RETURN
-    ENDIF
-
-    ! Causes total instability in MD:
-    ! Avoid: CALL NormTrace(P,Tmp2,Tmp1,Ne,1)
-    MM=MM+1
-#ifdef COMPUTE_COMMUTATOR
-    ! Commutator [F,P]
-    N2F=FNorm(F)
-    CALL Multiply(F,P,Tmp1)
-    CALL Multiply(P,F,POld)
-    CALL Multiply(POld,-One)
-    CALL Add(Tmp1,POld,F)
-    MM=MM+2
-    FNormCommErr=FNorm(F)
-    MaxCommErr=Max(F)
-#endif
-    ! Print summary stats
-    TraceP = Trace(P)
-    IF(PrintFlags%Key>DEBUG_MINIMUM)THEN
-      CALL OpenASCII(OutFile,Out)
-      CALL PrintProtectL(Out)
-      Mssg=ProcessName(Prog,CnvrgCmmnt) &
-           //'Tr{FP}='//TRIM(DblToChar(Energy)) &
-           //', dNel = '//TRIM(DblToShrtChar(Two*ABS(TraceP-Ne)))
-      IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
-        WRITE(*,*)TRIM(Mssg)
-      ENDIF
-      WRITE(Out,*)TRIM(Mssg)
-
-      Mssg=ProcessName(Prog)//TRIM(IntToChar(NPur))//' purification steps, ' &
-           //TRIM(IntToChar(MM))//' matrix multiplies'
-      IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
-        WRITE(*,*)TRIM(Mssg)
-      ENDIF
-      WRITE(Out,*)TRIM(Mssg)
-      Mssg=ProcessName(Prog)//'Fractional occupation = '              &
-           //TRIM(DblToShrtChar(Half*DBLE(NEl)/DBLE(NBasF)))          &
-           //', ThrX='//TRIM(DblToShrtChar(Thresholds%Trix))          &
-           //', %Non0s = '//TRIM(DblToShrtChar(PNon0))
-      IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
-        WRITE(*,*)TRIM(Mssg)
-      ENDIF
-      WRITE(Out,*)TRIM(Mssg)
-      Mssg=ProcessName(Prog,'Max abs errors') &
-           //'dE='//TRIM(DblToShrtChar(AbsErrE))//', '                 &
-           //'dP='//TRIM(DblToShrtChar(AbsErrP))
-#ifdef COMPUTE_COMMUTATORS
-      Mssg=TRIM(Mssg)//', '//'[F,P]='//TRIM(DblToShrtChar(MaxCommErr))
-#endif
-      IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
-        WRITE(*,*)TRIM(Mssg)
-      ENDIF
-      WRITE(Out,*)TRIM(Mssg)
-      Mssg=ProcessName(Prog) &
-           //'Rel dE='//TRIM(DblToShrtChar(RelErrE))//', '                &
-           //'||dP||_F='//TRIM(DblToShrtChar(FNormErrP))
-#ifdef COMPUTE_COMMUTATORS
-      Mssg=TRIM(Mssg)//', '//'||[F,P]||_F='//TRIM(DblToShrtChar(FNormCommErr))
-#endif
-      IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
-        WRITE(*,*)TRIM(Mssg)
-      ENDIF
-      WRITE(Out,*)TRIM(Mssg)
-      CALL PrintProtectR(Out)
-      CLOSE(UNIT=Out,STATUS='KEEP')
-    ENDIF
-  END FUNCTION CnvrgChck_BCSR
 
   FUNCTION CommutatorErrors(F,P) RESULT(CErrs)
     REAL,DIMENSION(2) :: CErrs
