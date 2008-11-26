@@ -496,31 +496,50 @@ MODULE PrettyPrint
        CLOSE(Unit)
      END SUBROUTINE XSFPreamble
 
-     SUBROUTINE Print_CRDS(GM,FileName_O,Unit_O,PrintGeom_O,NewFile_O,Clone_O,CrdInAng_O,Remark_O)
+     SUBROUTINE Print_CRDS(GM,FileName_O,Unit_O,PrintGeom_O,NewFile_O,Clone_O,CrdInAng_O,Remark_O,Gradients_O)
        TYPE(CRDS) :: GM         
        INTEGER :: K
        LOGICAL :: Opened
        INTEGER,         OPTIONAL,INTENT(IN) :: Unit_O,Clone_O
-       CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: FileName_O,PrintGeom_O,Remark_O
+       CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: FileName_O,PrintGeom_O,Remark_O,Gradients_O
        LOGICAL,         OPTIONAL,INTENT(IN) :: NewFile_O,CrdInAng_O
        LOGICAL                              :: CrdInAng
        INTEGER                              :: I,PU
        CHARACTER(LEN=2*DCL)                 :: Mssg
        CHARACTER(LEN=DCL)                   :: AuxChar
+       CHARACTER(LEN=10)                    :: Gradients
        CHARACTER(LEN=2)                     :: Atom
        CHARACTER(LEN=4)                     :: PDBAtom
-       REAL(DOUBLE)                         :: AA
+       REAL(DOUBLE)                         :: AA,GAA
        REAL(DOUBLE), DIMENSION(3)     :: VTmp
        REAL(DOUBLE)                         :: A,B,C,Alpha,Beta,Gamma
+
+
+       ! Are we printing out gradients or forces?
+       IF(PRESENT(Gradients_O))THEN
+          Gradients=TRIM(Gradients_O)
+       ELSE
+          Gradients=""
+       ENDIF
        !Check if the coordinates are in Angstrom.
-       CrdInAng=.FALSE.
-       IF(PRESENT(CrdInAng_O))CrdInAng=CrdInAng_O
+       IF(PRESENT(CrdInAng_O))THEN
+          CrdInAng=CrdInAng_O
+       ELSE
+          CrdInAng=.FALSE.
+       ENDIF
        IF(CrdInAng)THEN
           AA=One
+          GAA=One
+       ELSEIF(TRIM(Gradients)=='Velocities')THEN
+          AA=AUToAngstroms
+          GAA=AUToAngstroms/InternalTimeToFemtoseconds
+       ELSEIF(TRIM(Gradients)=='Gradients')THEN
+          AA=AUToAngstroms
+          GAA=AU2eV*AUToAngstroms
        ELSE
-          AA=One/AngstromsToAU
+          AA=AUToAngstroms
        ENDIF
-
+       !
 #ifdef PARALLEL
        IF(MyId==ROOT)THEN
 #endif
@@ -534,10 +553,10 @@ MODULE PrettyPrint
                    Mssg=IntToChar(GM%NAtms)
                    WRITE(PU,*)TRIM(Mssg)
                    IF(PRESENT(Remark_O))THEN
-                      Mssg=TRIM(Remark_O)//', <SCF> = '//TRIM(FltToChar(GM%ETotal))//' h'
+                      Mssg=TRIM(Remark_O)//', <SCF> = '//TRIM(FltToChar(GM%ETotal*AU2Ev))//' eV'
                    ELSE
                       Mssg='Geom #'//TRIM(IntToChar(GM%Confg)) &
-                           //', <SCF> = '//TRIM(FltToChar(GM%ETotal))//' h'
+                           //', <SCF> = '//TRIM(FltToChar(GM%ETotal*AU2Ev))//' eV'
                    ENDIF
                    IF(PRESENT(Clone_O)) &
                         Mssg='Clone # '//TRIM(IntToChar(Clone_O))//" / "//TRIM(Mssg)
@@ -589,10 +608,17 @@ MODULE PrettyPrint
                    ENDIF
                    Atom=GM%AtNam%C(I)
                    CALL UpCase(Atom)
-                   WRITE(PU,222)Atom,(GM%Carts%D(K,I)*AA,K=1,3),TRIM(ADJUSTL(AuxChar))
-                   !222                FORMAT(1X,A2,3(F14.5,' '),A1)
-222                FORMAT(1X,A2,3(F22.16,' '),A1)
+                   IF(TRIM(Gradients)=="Gradients")THEN
+                      WRITE(PU,222)Atom,(GM%Carts%D(K,I)*AA,K=1,3),(-GM%Gradients%D(K,I)*GAA,K=1,3),TRIM(ADJUSTL(AuxChar))
+                   ELSEIF(TRIM(Gradients)=="Velocities")THEN
+                      WRITE(PU,222)Atom,(GM%Carts%D(K,I)*AA,K=1,3),(GM%Velocity%D(K,I)*GAA,K=1,3),TRIM(ADJUSTL(AuxChar))
+                   ELSE
+                      WRITE(PU,223)Atom,(GM%Carts%D(K,I)*AA,K=1,3),TRIM(ADJUSTL(AuxChar))
+                   ENDIF
                 ENDDO
+222             FORMAT(1X,A2,6(F22.16,' '),A1)
+223             FORMAT(1X,A2,3(F22.16,' '),A1)
+
 !!$                DO I=1,GM%NAtms
 !!$                   IF(GM%CConstrain%I(I)==1) THEN
 !!$                      AuxChar='C'
@@ -613,9 +639,9 @@ MODULE PrettyPrint
                 WRITE(PU,11)GM%Confg
 11              FORMAT('MODEL  ',I6)
                 IF(PRESENT(Remark_O))THEN
-                   Mssg=TRIM(Remark_O)//', <SCF> = '//TRIM(FltToChar(GM%ETotal))//' h'
+                   Mssg=TRIM(Remark_O)//', <SCF> = '//TRIM(FltToChar(GM%ETotal*AU2Ev))//' eV'
                 ELSE                   
-                   Mssg=' <SCF> = '//TRIM(FltToChar(GM%ETotal))//' h'
+                   Mssg=' <SCF> = '//TRIM(FltToChar(GM%ETotal*AU2Ev))//' eV'
                 ENDIF
                 WRITE(PU,22)Mssg
 22              FORMAT('REMARK   1  ',A60)
@@ -626,11 +652,27 @@ MODULE PrettyPrint
                 ENDIF
                 DO I=1,GM%NAtms
                    Atom=GM%AtNam%C(I)
+                   IF(GM%CConstrain%I(I)==1) THEN
+                      AuxChar='C'
+                   ELSE IF(GM%CConstrain%I(I)==2) THEN
+                      AuxChar='R'
+                   ELSE
+                      AuxChar=' '
+                   ENDIF
                    CALL UpCase(Atom)
-                   WRITE(PU,44)'ATOM  ',  I,     Atom//'  ', ' ',  'UNK',   ' ', 1, ' ' ,   (GM%Carts%D(K,I)*AA,K=1,3),One,Zero,Atom
-44                 FORMAT(     A6,      I5, 1X,A4,    A1,   A3,  1X, A1 ,I4,  A1,3X,3F8.3,2F6.2,10X,A2,A2 )
+                   IF(TRIM(Gradients)=='Gradients')THEN
+                      WRITE(PU,44)'ATOM  ',  I,     Atom//'  ', ' ',  'UNK',   ' ', 1, ' ' ,   (GM%Carts%D(K,I)*AA,K=1,3), &
+                                                                                              (-GM%Gradients%D(K,I)*GAA,K=1,3),AuxChar
+                   ELSEIF(TRIM(Gradients)=='Velocities')THEN
+                      WRITE(PU,44)'ATOM  ',  I,     Atom//'  ', ' ',  'UNK',   ' ', 1, ' ' ,   (GM%Carts%D(K,I)*AA,K=1,3), &
+                                                                                               (GM%Velocity%D(K,I)*GAA,K=1,3),AuxChar
+                   ELSE
+                      WRITE(PU,45)'ATOM  ',  I,     Atom//'  ', ' ',  'UNK',   ' ', 1, ' ' ,   (GM%Carts%D(K,I)*AA,K=1,3),One,Zero,AuxChar
+                   ENDIF
                 ENDDO
                 WRITE(PU,55)
+44              FORMAT(     A6,      I5, 1X,A4,    A1,   A3,  1X, A1 ,I4,  A1,3X,6F8.3,1x,A2)
+45              FORMAT(     A6,      I5, 1X,A4,    A1,   A3,  1X, A1 ,I4,  A1,3X,3F8.3,2F6.2,10X,A2,A2 )
 55              FORMAT('ENDMDL')
 !============================================================================
              ELSEIF(PrintGeom_O=='CIF')THEN
@@ -641,9 +683,9 @@ MODULE PrettyPrint
                 CALL VecToAng(GM%PBC,A,B,C,Alpha,Beta,Gamma)
                 !
                 IF(PRESENT(Remark_O))THEN
-                   Mssg='data_'//TRIM(Remark_O)//'_<SCF>_=_'//TRIM(FltToChar(GM%ETotal))
+                   Mssg='data_'//TRIM(Remark_O)//'_<SCF>_=_'//TRIM(FltToChar(GM%ETotal*AU2Ev))//' eV'
                 ELSE                   
-                   Mssg='data_'//'Geom#'//TRIM(IntToChar(GM%Confg))//'_<SCF>_=_'//TRIM(FltToChar(GM%ETotal))
+                   Mssg='data_'//'Geom#'//TRIM(IntToChar(GM%Confg))//'_<SCF>_=_'//TRIM(FltToChar(GM%ETotal*AU2Ev))//'_eV'
                 ENDIF
                 Mssg=Squish(Mssg)
                 WRITE(PU,500) Mssg
@@ -744,65 +786,6 @@ MODULE PrettyPrint
 3      FORMAT(72('='))
      END SUBROUTINE Print_CRDS
 !-----------------------------------------------------------------------------
-!    Print a CIF Geom
-!
-     SUBROUTINE Print_CRDS_CIF(GM,PU)
-       TYPE(CRDS)                     :: GM
-       INTEGER, INTENT(IN)            :: PU
-       REAL(DOUBLE), DIMENSION(3)     :: VTmp
-       INTEGER                        :: I,K
-       CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg
-       CHARACTER(LEN=2)               :: Atom
-       REAL(DOUBLE)                   :: A,B,C,Alpha,Beta,Gamma
-       !
-       ! See http://www.iucr.ac.uk/iucr-top/cif/cifdic_html/1/cif_core.dic/index.html
-       ! for the definition of the entries.
-       !
-       CALL VecToAng(GM%PBC,A,B,C,Alpha,Beta,Gamma)
-       !
-       Mssg='data_'//'Geom#'//TRIM(IntToChar(GM%Confg))//'_<SCF>_=_'//TRIM(FltToMedmChar(GM%ETotal))
-       WRITE(PU,500) Mssg
-       !Cell
-       WRITE(PU,501)
-       WRITE(PU,502) A
-       WRITE(PU,503) B
-       WRITE(PU,504) C
-       WRITE(PU,505) Alpha
-       WRITE(PU,506) Beta 
-       WRITE(PU,507) Gamma
-       WRITE(PU,508) GM%PBC%CellVolume
-       !Atoms
-       WRITE(PU,550)
-       WRITE(PU,551)
-       WRITE(PU,552)
-       WRITE(PU,553)
-       WRITE(PU,554)
-       DO I=1,GM%NAtms
-          Atom=GM%AtNam%C(I)
-          Vtmp(1:3)=MATMUL(GM%PBC%InvBoxSh%D,GM%Carts%D(1:3,I))
-          CALL UpCase(Atom)
-          WRITE(PU,555)Atom,(VTmp(K),K=1,3)
-       ENDDO
-       !
-       !Cell
-500    FORMAT(A60)
-501    FORMAT('_space_group_symop_operation_xyz ''x, y, z''')
-502    FORMAT('_cell_length_a    ',F14.5)
-503    FORMAT('_cell_length_b    ',F14.5)
-504    FORMAT('_cell_length_c    ',F14.5)
-505    FORMAT('_cell_angle_alpha ',F14.5)
-506    FORMAT('_cell_angle_beta  ',F14.5)
-507    FORMAT('_cell_angle_gamma ',F14.5)
-508    FORMAT('_cell_volume      ',F14.5)
-       !Atoms
-550    FORMAT('loop_')
-551    FORMAT('_atom_site_type_symbol')
-552    FORMAT('_atom_site_fract_x')
-553    FORMAT('_atom_site_fract_y')
-554    FORMAT('_atom_site_fract_z')
-555    FORMAT(1X,A,1X,3F14.5)
-       !
-     END SUBROUTINE Print_CRDS_CIF
 !-----------------------------------------------------------------------------
 !    Print a BCSR matrix
 !
