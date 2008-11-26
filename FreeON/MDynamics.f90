@@ -1110,9 +1110,12 @@ CONTAINS
     CHARACTER(LEN=DEFAULT_CHR_LEN) :: chGEO,chCLONE
     CHARACTER(LEN=DEFAULT_CHR_LEN) :: PoldFile,PnewFile
     INTEGER                        :: copyStatus
+    INTEGER                        :: oldMyClone
 
-    CALL MondoLog(DEBUG_NONE, "CopyRestart", "copying density matrix files")
+    CALL MondoLog(DEBUG_NONE, "CopyRestart", "copying density matrix files between "//TRIM(IntToChar(iGEOBegin-MinMDGeo))//" and "//TRIM(IntToChar(iGEOBegin)))
+    oldMyClone = MyClone
     DO iCLONE=1,C%Geos%Clones
+      MyClone = iCLONE
       DO iGEO=iGEOBegin-MinMDGeo,iGEOBegin
         chCLONE = IntToChar(iCLONE)
         chGEO   = IntToChar(iGEO)
@@ -1126,15 +1129,15 @@ CONTAINS
              "DMTRBO_Damp_dt11", &
              'DMSymplectic')
 
-          PoldFile = TRIM(C%Nams%RFile(1:LEN(TRIM(C%Nams%RFile))-4))//'_G#'//TRIM(chGEO)//'_C#'//TRIM(chCLONE)//'.DOsave'
-          PnewFile = TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)//'_G#'//TRIM(chGEO)//'_C#'//TRIM(chCLONE)//'.DOsave'
-          CALL MondoLog(DEBUG_NONE, "CopyRestart", TRIM(PoldFile)//" --> "//TRIM(PnewFile))
-          CALL FileCopy(PoldFile, PnewFile)
+          CALL FileCopy(TrixFile("DOsave", Name_O = C%Nams%RFile(1:LEN(TRIM(C%Nams%RFile))-4), &
+                                           PWD_O = "", &
+                                           Stats_O = (/ 0, 1, iGeo /)), &
+                        TrixFile("DOsave", Stats_O = (/ 0, 1, iGeo /)))
 
-          PoldFile = TRIM(C%Nams%RFile(1:LEN(TRIM(C%Nams%RFile))-4))//'_G#'//TRIM(chGEO)//'_C#'//TRIM(chCLONE)//'.DOPsave'
-          PnewFile = TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)//'_G#'//TRIM(chGEO)//'_C#'//TRIM(chCLONE)//'.DOPsave'
-          CALL MondoLog(DEBUG_NONE, "CopyRestart", TRIM(PoldFile)//" --> "//TRIM(PnewFile))
-          CALL FileCopy(PoldFile, PnewFile)
+          CALL FileCopy(TrixFile("DOPsave", Name_O = C%Nams%RFile(1:LEN(TRIM(C%Nams%RFile))-4), &
+                                            PWD_O = "", &
+                                            Stats_O = (/ 0, 1, iGeo /)), &
+                        TrixFile("DOPsave", Stats_O = (/ 0, 1, iGeo /)))
 
         CASE('FMVerlet0','FMVerlet1')
 
@@ -1151,6 +1154,7 @@ CONTAINS
         END SELECT
       ENDDO
     ENDDO
+    MyClone = oldMyClone
 
   END SUBROUTINE CopyRestart
 
