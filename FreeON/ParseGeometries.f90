@@ -206,18 +206,18 @@ CONTAINS
               ! For now we will transform the atomic units coordinates we read
               ! from hdf into Angstrom to get the right units after we "massage"
               ! them later on.
-              G%Clone(iCLONE)%Carts%D    = BohrsToAngstroms*G%Clone(iCLONE)%Carts%D
-              G%Clone(iCLONE)%Velocity%D = BohrsToAngstroms*G%Clone(iCLONE)%Velocity%D
+              G%Clone(iCLONE)%Carts%D    = AUToAngstroms*G%Clone(iCLONE)%Carts%D
+              G%Clone(iCLONE)%Velocity%D = AUToAngstroms*G%Clone(iCLONE)%Velocity%D
               !
               CALL MondoHalt(PRSE_ERROR, ' ERROR ON RESTART, MISSING IS CONVERSION TO PBCS!! ')
               ! THIS PART IS REDUNDANT, AND SHOULD BE SORTED ON ARCHIVAL IF PBS ARE RESET PROPERLY:
 
-              G%Clone(iCLONE)%PBC%CellCenter%D = G%Clone(iCLONE)%PBC%CellCenter%D*BohrsToAngstroms
-              G%Clone(iCLONE)%PBC%BoxShape%D   = BohrsToAngstroms*G%Clone(iCLONE)%PBC%BoxShape%D
-              G%Clone(iCLONE)%PBC%InvBoxSh%D   = G%Clone(iCLONE)%PBC%InvBoxSh%D/BohrsToAngstroms
-              G%Clone(iCLONE)%PBC%CellVolume   = G%Clone(iCLONE)%PBC%CellVolume*BohrsToAngstroms**G%Clone(iCLONE)%PBC%Dimen
-              G%Clone(iCLONE)%PBC%DipoleFAC    = G%Clone(iCLONE)%PBC%DipoleFAC/(BohrsToAngstroms**G%Clone(iCLONE)%PBC%Dimen)
-              G%Clone(iCLONE)%PBC%QupoleFAC    = G%Clone(iCLONE)%PBC%QupoleFAC/(BohrsToAngstroms**G%Clone(iCLONE)%PBC%Dimen)
+              G%Clone(iCLONE)%PBC%CellCenter%D = G%Clone(iCLONE)%PBC%CellCenter%D*AUToAngstroms
+              G%Clone(iCLONE)%PBC%BoxShape%D   = AUToAngstroms*G%Clone(iCLONE)%PBC%BoxShape%D
+              G%Clone(iCLONE)%PBC%InvBoxSh%D   = G%Clone(iCLONE)%PBC%InvBoxSh%D/AUToAngstroms
+              G%Clone(iCLONE)%PBC%CellVolume   = G%Clone(iCLONE)%PBC%CellVolume*AUToAngstroms**G%Clone(iCLONE)%PBC%Dimen
+              G%Clone(iCLONE)%PBC%DipoleFAC    = G%Clone(iCLONE)%PBC%DipoleFAC/(AUToAngstroms**G%Clone(iCLONE)%PBC%Dimen)
+              G%Clone(iCLONE)%PBC%QupoleFAC    = G%Clone(iCLONE)%PBC%QupoleFAC/(AUToAngstroms**G%Clone(iCLONE)%PBC%Dimen)
             ENDIF
           ENDDO
         ENDDO

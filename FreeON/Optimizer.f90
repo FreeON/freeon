@@ -569,12 +569,12 @@ CONTAINS
        CALL BackTrack(iBAS,iGEO,C,StateO,GuessO)
        ! Backtracking can modify geometries too, so this is the right place
        ! to print geometries cooresponding to the energies that have just been computed
-       DO iCLONE=1,C%Geos%Clones
-         CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile,Geo,C%Opts%GeomPrint,Clone_O=iCLONE)
-       ENDDO
-       ! 
        CALL Force(iBAS,iGEO,C%Nams,C%Opts,C%Stat, &
                   C%Geos,C%Sets,C%MPIs)
+       !
+       DO iCLONE=1,C%Geos%Clones
+         CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile,Geo,C%Opts%GeomPrint,Clone_O=iCLONE,Gradients_O='Gradients')
+       ENDDO
        ! Loop over all clones and modify geometries.
        ConvgdAll=1
        DO iCLONE=1,C%Geos%Clones
@@ -2205,9 +2205,9 @@ CONTAINS
        DO J=1,C%Geos%Clone(1)%Natms
           CALL UpCase(C%Geos%Clone(1)%AtNam%C(J))          
           WRITE(FID,'(A,3F10.5,I3,3F10.5)') TRIM(C%Geos%Clone(1)%AtNam%C(J)), &
-               & BohrsToAngstroms*C%Geos%Clone(1)%Carts%D(1,J), &
-               & BohrsToAngstroms*C%Geos%Clone(1)%Carts%D(2,J), &
-               & BohrsToAngstroms*C%Geos%Clone(1)%Carts%D(3,J), &
+               & AUToAngstroms*C%Geos%Clone(1)%Carts%D(1,J), &
+               & AUToAngstroms*C%Geos%Clone(1)%Carts%D(2,J), &
+               & AUToAngstroms*C%Geos%Clone(1)%Carts%D(3,J), &
                & 0,NMode%D(K,I),NMode%D(K+1,I),NMode%D(K+2,I)
           K=K+3
        ENDDO
@@ -2575,7 +2575,7 @@ CONTAINS
     CALL Warn(' ThermoStat: Sigma is set to 1, then change it if needed.')
     Sigma=1.0D+00
     !
-    Fac=BohrsToAngstroms**2/C_Avogadro
+    Fac=AUToAngstroms**2/C_Avogadro
     TEig(1)=Fac*TEig(1)
     TEig(2)=Fac*TEig(2)
     TEig(3)=Fac*TEig(3)
