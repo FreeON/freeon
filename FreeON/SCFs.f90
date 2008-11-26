@@ -96,7 +96,6 @@ CONTAINS
     CALL OneEMats(cBAS,cGEO,C%Nams,C%Sets,C%Stat,C%Opts,C%MPIs)
 
     ! Allocate space for convergence statistics
-!!$    CALL MondoLog(DEBUG_MAXIMUM, "SCF", "hardcoded upper limit for SCFs = "//TRIM(IntToChar(MaxSCFs)))
     CALL New(ETot,(/MaxSCFs,C%Geos%Clones/),(/0,1/))
     CALL New(DMax,(/MaxSCFs,C%Geos%Clones/),(/0,1/))
     CALL New(DIIS,(/MaxSCFs,C%Geos%Clones/),(/0,1/))
@@ -116,21 +115,21 @@ CONTAINS
     !ENDIF
     ! End of fix.....
 
-!!$    SELECT CASE(C%Opts%Guess)
-!!$
-!!$    CASE(GUESS_EQ_SUPR)
-!!$      CALL MondoLog(DEBUG_MAXIMUM, "SCF", "Guess = "//TRIM(GUESS_SUPER))
-!!$
-!!$    CASE(GUESS_EQ_CORE)
-!!$      CALL MondoLog(DEBUG_MAXIMUM, "SCF", "Guess = "//TRIM(GUESS_CORE))
-!!$
-!!$    CASE(GUESS_EQ_RESTART)
-!!$      CALL MondoLog(DEBUG_MAXIMUM, "SCF", "Guess = "//TRIM(GUESS_RESTART))
-!!$
-!!$    CASE DEFAULT
-!!$      CALL MondoLog(DEBUG_MAXIMUM, "SCF", "I do not know this Guess (Guess = "//TRIM(IntToChar(C%Opts%Guess))//")")
-!!$
-!!$    END SELECT
+    !SELECT CASE(C%Opts%Guess)
+    !
+    !CASE(GUESS_EQ_SUPR)
+    !  CALL MondoLog(DEBUG_MAXIMUM, "SCF", "Guess = "//TRIM(GUESS_SUPER))
+    !
+    !CASE(GUESS_EQ_CORE)
+    !  CALL MondoLog(DEBUG_MAXIMUM, "SCF", "Guess = "//TRIM(GUESS_CORE))
+    !
+    !CASE(GUESS_EQ_RESTART)
+    !  CALL MondoLog(DEBUG_MAXIMUM, "SCF", "Guess = "//TRIM(GUESS_RESTART))
+    !
+    !CASE DEFAULT
+    !  CALL MondoLog(DEBUG_MAXIMUM, "SCF", "I do not know this Guess (Guess = "//TRIM(IntToChar(C%Opts%Guess))//")")
+    !
+    !END SELECT
 
     DO iSCF=0,MaxSCFs
       ! Do an SCF cycle
@@ -252,7 +251,6 @@ CONTAINS
     LOGICAL            :: SCFCycle,DoCPSCF
     LOGICAL,SAVE       :: DIIS_FAIL,ODA_DONE
     REAL(DOUBLE)       :: DIISErr
-    CHARACTER(LEN=128) :: Tmp
 
     ! Initialize
     SCFCycle=.FALSE.
@@ -761,16 +759,16 @@ CONTAINS
     ELSE
       IF(O%Guess==GUESS_EQ_CORE)THEN
         O%Guess=0
-        S%Previous%I     = S%Current%I
-        S%Action%C(1)    = SCF_GUESSEQCORE
+        S%Previous%I  = S%Current%I
+        S%Action%C(1) = SCF_GUESSEQCORE
       ELSEIF(O%Guess==GUESS_EQ_SUPR)THEN
         O%Guess=0
-        S%Previous%I     = S%Current%I
-        S%Action%C(1)    = SCF_SUPERPOSITION
+        S%Previous%I  = S%Current%I
+        S%Action%C(1) = SCF_SUPERPOSITION
       ELSEIF(O%Guess==GUESS_EQ_NUGUESS)THEN
         O%Guess=0
-        S%Previous%I     = O%RestartState%I
-        S%Action%C(1)    = SCF_SUPERPOSITION
+        S%Previous%I  = O%RestartState%I
+        S%Action%C(1) = SCF_SUPERPOSITION
       ELSEIF(O%Guess==GUESS_EQ_NEWGEOM)THEN
         O%Guess=0
         S%Previous%I  = O%RestartState%I
@@ -791,14 +789,14 @@ CONTAINS
         ENDIF
       ELSEIF(S%SameBasis .AND. .NOT.S%SameGeom)THEN
         O%Guess=0
-        S%Action%C(1)    = SCF_EXTRAPOLATE
+        S%Action%C(1) = SCF_EXTRAPOLATE
       ELSEIF(.NOT. S%SameBasis .OR. pBAS /= cBAS)THEN
         O%Guess=0
-        S%Action%C(1)    = SCF_BASISSETSWITCH
-        S%Previous%I(1)  = S%Previous%I(1)+1
+        S%Action%C(1)   = SCF_BASISSETSWITCH
+        S%Previous%I(1) = S%Previous%I(1)+1
       ELSE
         O%Guess=0
-        S%Action%C(1)    = SCF_DENSITY_NORMAL
+        S%Action%C(1) = SCF_DENSITY_NORMAL
       ENDIF
     ENDIF
 
@@ -2168,7 +2166,7 @@ CONTAINS
     C%Geos%Clone(1)%PBC%BoxShape%D(I1,I2) = Lat00-DDelta
     CALL MkGeomPeriodic(C%Geos%Clone(1))
     CALL GeomArchive(1,1,C%Nams,C%Opts,C%Sets,C%Geos)
-    CALL Invoke('MakeT'   ,C%Nams,C%Stat,C%MPIs)
+    CALL Invoke('MakeT',C%Nams,C%Stat,C%MPIs)
     !
     HDFFileID=OpenHDF(C%Nams%HFile)
     HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(1)))
@@ -2180,7 +2178,7 @@ CONTAINS
     C%Geos%Clone(1)%PBC%BoxShape%D(I1,I2) = Lat00+DDelta
     CALL MkGeomPeriodic(C%Geos%Clone(1))
     CALL GeomArchive(1,1,C%Nams,C%Opts,C%Sets,C%Geos)
-    CALL Invoke('MakeT'   ,C%Nams,C%Stat,C%MPIs)
+    CALL Invoke('MakeT',C%Nams,C%Stat,C%MPIs)
     !
     HDFFileID=OpenHDF(C%Nams%HFile)
     HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(1)))

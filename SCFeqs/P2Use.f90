@@ -458,14 +458,17 @@ PROGRAM P2Use
     ! Debugging: check.... P(n-1)-D(n-1)
     !
     ! Get D(n-1)
-    CALL Get(Tmp1, TrixFile("OrthoD", Stats_O = Args%I%I(4:6), Offset_O = 1))
-    CALL Multiply(Tmp1, -1.0D0)
+    INQUIRE(FILE=TrixFile("OrthoD", Stats_O = Args%I%I(4:6), Offset_O = 1), EXIST=Present)
+    IF(Present) THEN
+      CALL Get(Tmp1, TrixFile("OrthoD", Stats_O = Args%I%I(4:6), Offset_O = 1))
+      CALL Multiply(Tmp1, -1.0D0)
 
-    ! Get P(n-1)
-    CALL Get(Tmp2, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-1 /)))
-    CALL Add(Tmp1,Tmp2,P)
+      ! Get P(n-1)
+      CALL Get(Tmp2, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-1 /)))
+      CALL Add(Tmp1,Tmp2,P)
 
-    CALL MondoLog(DEBUG_MAXIMUM, logtag, "FNorm(P-D) = "//TRIM(DblToChar(FNorm(P))))
+      CALL MondoLog(DEBUG_MAXIMUM, logtag, "FNorm(P-D) = "//TRIM(DblToChar(FNorm(P))))
+    ENDIF
 
     ! Debugging: check.... P(n-1)-D_tilde(n-1)
     !
@@ -482,14 +485,17 @@ PROGRAM P2Use
     ! Debugging: check.... D(n-1)-D_tilde(n-1)
     !
     ! Get D(n-1)
-    CALL Get(Tmp1, TrixFile("OrthoD", Stats_O = Args%I%I(4:6), Offset_O = 1))
-    CALL Multiply(Tmp1, -1.0D0)
+    INQUIRE(FILE=TrixFile("OrthoD", Stats_O = Args%I%I(4:6), Offset_O = 1), EXIST=Present)
+    IF(Present) THEN
+      CALL Get(Tmp1, TrixFile("OrthoD", Stats_O = Args%I%I(4:6), Offset_O = 1))
+      CALL Multiply(Tmp1, -1.0D0)
 
-    ! Get D_tilde(n-1)
-    CALL Get(Tmp2, TrixFile("DOsave", Stats_O = (/ iSCF, iBAS, iGEO-1 /)))
-    CALL Add(Tmp1,Tmp2,P)
+      ! Get D_tilde(n-1)
+      CALL Get(Tmp2, TrixFile("DOsave", Stats_O = (/ iSCF, iBAS, iGEO-1 /)))
+      CALL Add(Tmp1,Tmp2,P)
 
-    CALL MondoLog(DEBUG_MAXIMUM, logtag, "FNorm(D-D_tilde) = "//TRIM(DblToChar(FNorm(P))))
+      CALL MondoLog(DEBUG_MAXIMUM, logtag, "FNorm(D-D_tilde) = "//TRIM(DblToChar(FNorm(P))))
+    ENDIF
     ! End Debugging.
 
     ! Get D(n-1)

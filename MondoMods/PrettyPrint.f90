@@ -61,15 +61,13 @@ MODULE PrettyPrint
          CALL DATE_AND_TIME(DDate,TTime,Zone,Values)
          DDay=DDate(5:6)//'/'//DDate(7:8)//'/'//DDate(3:4)
          HMS=TTime(1:2)//':'//TTime(3:4)//':'//TTime(5:6)
-         CALL OpenASCII(OutFile,Out)
          IF(PrintFlags%Fmt==DEBUG_MMASTYLE)THEN
-            WRITE(Out,'(A)')'(*'//TRIM(Mssg)//' '//DDay//' @ '//HMS//'*)'
+            CALL MondoLog(DEBUG_NONE, "TimeStamp", '(*'//TRIM(Mssg)//' '//DDay//' @ '//HMS//'*)')
          ELSEIF(Enter)THEN
-            WRITE(Out,'(A)')'<<'//TRIM(Mssg)//' '//DDay//' @ '//HMS//'>>'
+            CALL MondoLog(DEBUG_NONE, "TimeStamp", '<<'//TRIM(Mssg)//' '//DDay//' @ '//HMS//'>>')
          ELSE
-            WRITE(Out,'(A)')'>-'//TRIM(Mssg)//' '//DDay//' @ '//HMS//'-<'
+            CALL MondoLog(DEBUG_NONE, "TimeStamp", '>-'//TRIM(Mssg)//' '//DDay//' @ '//HMS//'-<')
          ENDIF
-         CLOSE(UNIT=Out,STATUS='KEEP')
 #ifdef PARALLEL
          ENDIF
 #endif
