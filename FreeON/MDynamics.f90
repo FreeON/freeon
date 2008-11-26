@@ -322,39 +322,39 @@ CONTAINS
       ENDIF
 
       ! Print the positions.
-      CALL MondoLog(DEBUG_NONE, "MD", "Positions:")
-      DO iCLONE=1,C%Geos%Clones
-        IF(C%Geos%Clone(iCLONE)%InAU) THEN
-          CALL MondoLog(DEBUG_NONE, "MD", "length units are in atomic units")
-        ELSE
-          CALL MondoLog(DEBUG_NONE, "MD", "length units are in Angstrom")
-        ENDIF
-
-        DO iATS=1,C%Geos%Clone(iCLONE)%NAtms
-          CALL MondoLogPlain(&
-            TRIM(IntToChar(iATS))//" "// &
-            TRIM(C%Geos%Clone(iCLONE)%AtNam%C(iATS))//" "// &
-            TRIM(DblToMedmChar(C%Geos%Clone(iCLONE)%AtMSS%D(iATS)))//" "// &
-            TRIM(DblToMedmChar(C%Geos%Clone(iCLONE)%Carts%D(1,iATS)))//" "// &
-            TRIM(DblToMedmChar(C%Geos%Clone(iCLONE)%Carts%D(2,iATS)))//" "// &
-            TRIM(DblToMedmChar(C%Geos%Clone(iCLONE)%Carts%D(3,iATS))))
-        ENDDO
-      ENDDO
-
-      ! Print the forces.
-      CALL MondoLog(DEBUG_NONE, "MD", "Forces:")
-      DO iCLONE=1,C%Geos%Clones
-        DO iATS=1,C%Geos%Clone(iCLONE)%NAtms
-          CALL MondoLogPlain(&
-            TRIM(IntToChar(iATS))//" "// &
-            TRIM(C%Geos%Clone(iCLONE)%AtNam%C(iATS))//" "// &
-            TRIM(DblToMedmChar(C%Geos%Clone(iCLONE)%AtMSS%D(iATS)))//" "// &
-            TRIM(DblToMedmChar(-C%Geos%Clone(iCLONE)%Gradients%D(1,iATS)))//" "// &
-            TRIM(DblToMedmChar(-C%Geos%Clone(iCLONE)%Gradients%D(2,iATS)))//" "// &
-            TRIM(DblToMedmChar(-C%Geos%Clone(iCLONE)%Gradients%D(3,iATS)))//" "// &
-            TRIM(IntToChar(C%Geos%Clone(iCLONE)%CConstrain%I(iATS))))
-        ENDDO
-      ENDDO
+!!$      CALL MondoLog(DEBUG_NONE, "MD", "Positions:")
+!!$      DO iCLONE=1,C%Geos%Clones
+!!$        IF(C%Geos%Clone(iCLONE)%InAU) THEN
+!!$          CALL MondoLog(DEBUG_NONE, "MD", "length units are in atomic units")
+!!$        ELSE
+!!$          CALL MondoLog(DEBUG_NONE, "MD", "length units are in Angstrom")
+!!$        ENDIF
+!!$
+!!$        DO iATS=1,C%Geos%Clone(iCLONE)%NAtms
+!!$          CALL MondoLogPlain(&
+!!$            TRIM(IntToChar(iATS))//" "// &
+!!$            TRIM(C%Geos%Clone(iCLONE)%AtNam%C(iATS))//" "// &
+!!$            TRIM(DblToMedmChar(C%Geos%Clone(iCLONE)%AtMSS%D(iATS)))//" "// &
+!!$            TRIM(DblToMedmChar(C%Geos%Clone(iCLONE)%Carts%D(1,iATS)))//" "// &
+!!$            TRIM(DblToMedmChar(C%Geos%Clone(iCLONE)%Carts%D(2,iATS)))//" "// &
+!!$            TRIM(DblToMedmChar(C%Geos%Clone(iCLONE)%Carts%D(3,iATS))))
+!!$        ENDDO
+!!$      ENDDO
+!!$
+!!$      ! Print the forces.
+!!$      CALL MondoLog(DEBUG_NONE, "MD", "Forces:")
+!!$      DO iCLONE=1,C%Geos%Clones
+!!$        DO iATS=1,C%Geos%Clone(iCLONE)%NAtms
+!!$          CALL MondoLogPlain(&
+!!$            TRIM(IntToChar(iATS))//" "// &
+!!$            TRIM(C%Geos%Clone(iCLONE)%AtNam%C(iATS))//" "// &
+!!$            TRIM(DblToMedmChar(C%Geos%Clone(iCLONE)%AtMSS%D(iATS)))//" "// &
+!!$            TRIM(DblToMedmChar(-C%Geos%Clone(iCLONE)%Gradients%D(1,iATS)))//" "// &
+!!$            TRIM(DblToMedmChar(-C%Geos%Clone(iCLONE)%Gradients%D(2,iATS)))//" "// &
+!!$            TRIM(DblToMedmChar(-C%Geos%Clone(iCLONE)%Gradients%D(3,iATS)))//" "// &
+!!$            TRIM(IntToChar(C%Geos%Clone(iCLONE)%CConstrain%I(iATS))))
+!!$        ENDDO
+!!$      ENDDO
 
       ! Move the Atoms, apply the thermostats and print some output.
       IF(C%Dyns%MDAlgorithm == MD_AL_VERLET) THEN
@@ -957,12 +957,12 @@ CONTAINS
     IF(C%Geos%Clones==1)THEN
        Remark='Time = '//TRIM(FltToChar(MDTime%D(1)*InternalTimeToFemtoseconds))//" fs"
        CALL PPrint(C%Geos%Clone(1), FileName_O=C%Nams%GFile,Unit_O=Geo, &
-                   PrintGeom_O=C%Opts%GeomPrint,Remark_O=Remark)
+                   PrintGeom_O=C%Opts%GeomPrint,Remark_O=Remark,Gradients_O='Velocities')
     ELSE
        DO iCLONE=1,C%Geos%Clones
           Remark='Time = '//TRIM(FltToChar(MDTime%D(iCLONE)*InternalTimeToFemtoseconds))//" fs"
           CALL PPrint(C%Geos%Clone(1), FileName_O=C%Nams%GFile,Unit_O=Geo, &
-               PrintGeom_O=C%Opts%GeomPrint,Clone_O=iCLONE,Remark_O=Remark)
+               PrintGeom_O=C%Opts%GeomPrint,Clone_O=iCLONE,Remark_O=Remark,Gradients_O='Velocities')
        ENDDO
     ENDIF
 
@@ -1167,11 +1167,11 @@ CONTAINS
       WRITE(77,*) "Energy = ",C%Geos%Clone(iCLONE)%ETotal
       WRITE(77,*) 'Lattice'
       DO I=1,3
-        WRITE(77,*) (C%Geos%Clone(iCLONE)%PBC%BoxShape%D(I,J)*BohrsToAngstroms,J=1,3)
+        WRITE(77,*) (C%Geos%Clone(iCLONE)%PBC%BoxShape%D(I,J)*AUToAngstroms,J=1,3)
       ENDDO
       WRITE(77,*) 'LatFrc'
       DO I=1,3
-        WRITE(77,*) (C%Geos%Clone(iCLONE)%PBC%LatFrc%D(I,J)*BohrsToAngstroms,J=1,3)
+        WRITE(77,*) (C%Geos%Clone(iCLONE)%PBC%LatFrc%D(I,J)*AUToAngstroms,J=1,3)
       ENDDO
       CLOSE(77)
 
@@ -1179,11 +1179,11 @@ CONTAINS
       WRITE(*,*) "Energy = ",C%Geos%Clone(iCLONE)%ETotal
       WRITE(*,*) 'Lattice'
       DO I=1,3
-        WRITE(*,*) (C%Geos%Clone(iCLONE)%PBC%BoxShape%D(I,J)*BohrsToAngstroms,J=1,3)
+        WRITE(*,*) (C%Geos%Clone(iCLONE)%PBC%BoxShape%D(I,J)*AUToAngstroms,J=1,3)
       ENDDO
       WRITE(*,*) 'LatFrc'
       DO I=1,3
-        WRITE(*,*) (C%Geos%Clone(iCLONE)%PBC%LatFrc%D(I,J)*BohrsToAngstroms,J=1,3)
+        WRITE(*,*) (C%Geos%Clone(iCLONE)%PBC%LatFrc%D(I,J)*AUToAngstroms,J=1,3)
       ENDDO
 
       DO I=1,3
