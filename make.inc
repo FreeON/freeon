@@ -72,90 +72,94 @@ endif
 # Whether we should keep or remove preprocessed files.
 REMOVE_PREPROCESSED_FILES = @REMOVE_PREPROCESSED_FILES@
 
-# Suffix rules.
-.f90.o :
-	$(CPP_COMMAND) $< | grep -v -E "^#" > $(basename $@)$(PREPROCESSED_SUFFIX).f90
-	$(FC_COMMAND) -c -o $@ $(basename $@)$(PREPROCESSED_SUFFIX).f90
-	@if test "${REMOVE_PREPROCESSED_FILES}" = "yes"; then \
-	  rm $(basename $@)$(PREPROCESSED_SUFFIX).f90; \
-	fi
+# Turn off output of libtool.
+AM_LIBTOOLFLAGS = --silent
 
-.f90.lo :
-	$(CPP_COMMAND) $< | grep -v -E "^#" > $(basename $@)$(PREPROCESSED_SUFFIX).f90
-	$(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(FC_COMMAND) -c -o $@ $(basename $@)$(PREPROCESSED_SUFFIX).f90
-	@if test "${REMOVE_PREPROCESSED_FILES}" = "yes"; then \
-	  rm $(basename $@)$(PREPROCESSED_SUFFIX).f90; \
-	fi
+# Suffix rules.
 
 #.f90.o :
-#	@$(CPP_COMMAND) $< | grep -v -E "^#" > $(basename $@)$(PREPROCESSED_SUFFIX).f90 && exit 0; \
-#	  echo "The following preprocessor command failed:" 1>&2; \
-#	  echo '$(CPP_COMMAND) $< | grep -v -E "^#" > $(basename $@)$(PREPROCESSED_SUFFIX).f90' 1>&2; \
-#	  $(CPP_COMMAND) $< | grep -v -E "^#" > $(basename $@)$(PREPROCESSED_SUFFIX).f90 > /dev/null 2>&1
-#	@echo "compiling $<"
-#	@$(FC_COMMAND) -c -o $@ $(basename $@)$(PREPROCESSED_SUFFIX).f90 && exit 0; \
-#	  echo "The following compiler command failed:" 1>&2; \
-#	 	echo '$(FC_COMMAND) -c -o $@ $(basename $@)$(PREPROCESSED_SUFFIX).f90' 1>&2; \
-#	  $(FC_COMMAND) -c -o $@ $(basename $@)$(PREPROCESSED_SUFFIX).f90 > /dev/null 2>&1
+#	$(CPP_COMMAND) $< | grep -v -E "^#" > $(basename $@)$(PREPROCESSED_SUFFIX).f90
+#	$(FC_COMMAND) -c -o $@ $(basename $@)$(PREPROCESSED_SUFFIX).f90
 #	@if test "${REMOVE_PREPROCESSED_FILES}" = "yes"; then \
 #	  rm $(basename $@)$(PREPROCESSED_SUFFIX).f90; \
 #	fi
 
 #.f90.lo :
-#	@$(CPP_COMMAND) $< | grep -v -E "^#" > $(basename $@)$(PREPROCESSED_SUFFIX).f90 && exit 0; \
-#	  echo "The following preprocessor command failed:" 1>&2; \
-#	  echo '$(CPP_COMMAND) $< | grep -v -E "^#" > $(basename $@)$(PREPROCESSED_SUFFIX).f90' 1>&2; \
-#	  $(CPP_COMMAND) $< | grep -v -E "^#" > $(basename $@)$(PREPROCESSED_SUFFIX).f90 > /dev/null 2>&1
-#	@echo "compiling $<"
-#	@$(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(FC_COMMAND) -c -o $@ $(basename $@)$(PREPROCESSED_SUFFIX).f90 && exit 0; \
-#	  echo "The following compiler command failed:" 1>&2; \
-#	  echo '$(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(FC_COMMAND) -c -o $@ $(basename $@)$(PREPROCESSED_SUFFIX).f90' 1>&2; \
-#	  $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(FC_COMMAND) -c -o $@ $(basename $@)$(PREPROCESSED_SUFFIX).f90 > /dev/null 2>&1
+#	$(CPP_COMMAND) $< | grep -v -E "^#" > $(basename $@)$(PREPROCESSED_SUFFIX).f90
+#	$(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(FC_COMMAND) -c -o $@ $(basename $@)$(PREPROCESSED_SUFFIX).f90
 #	@if test "${REMOVE_PREPROCESSED_FILES}" = "yes"; then \
 #	  rm $(basename $@)$(PREPROCESSED_SUFFIX).f90; \
 #	fi
 
+.f90.o :
+	@$(CPP_COMMAND) $< | grep -v -E "^#" > $(basename $@)$(PREPROCESSED_SUFFIX).f90 && exit 0; \
+	  echo "The following preprocessor command failed:" 1>&2; \
+	  echo '$(CPP_COMMAND) $< | grep -v -E "^#" > $(basename $@)$(PREPROCESSED_SUFFIX).f90' 1>&2; \
+	  $(CPP_COMMAND) $< | grep -v -E "^#" > $(basename $@)$(PREPROCESSED_SUFFIX).f90 > /dev/null 2>&1
+	@echo "compiling $<"
+	@$(FC_COMMAND) -c -o $@ $(basename $@)$(PREPROCESSED_SUFFIX).f90 && exit 0; \
+	  echo "The following compiler command failed:" 1>&2; \
+	  echo '$(FC_COMMAND) -c -o $@ $(basename $@)$(PREPROCESSED_SUFFIX).f90' 1>&2; \
+	  $(FC_COMMAND) -c -o $@ $(basename $@)$(PREPROCESSED_SUFFIX).f90 > /dev/null 2>&1
+	@if test "${REMOVE_PREPROCESSED_FILES}" = "yes"; then \
+	  rm $(basename $@)$(PREPROCESSED_SUFFIX).f90; \
+	fi
+
+.f90.lo :
+	@$(CPP_COMMAND) $< | grep -v -E "^#" > $(basename $@)$(PREPROCESSED_SUFFIX).f90 && exit 0; \
+	  echo "The following preprocessor command failed:" 1>&2; \
+	  echo '$(CPP_COMMAND) $< | grep -v -E "^#" > $(basename $@)$(PREPROCESSED_SUFFIX).f90' 1>&2; \
+	  $(CPP_COMMAND) $< | grep -v -E "^#" > $(basename $@)$(PREPROCESSED_SUFFIX).f90 > /dev/null 2>&1
+	@echo "compiling $<"
+	@$(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(FC_COMMAND) -c -o $@ $(basename $@)$(PREPROCESSED_SUFFIX).f90 && exit 0; \
+	  echo "The following compiler command failed:" 1>&2; \
+	  echo '$(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(FC_COMMAND) -c -o $@ $(basename $@)$(PREPROCESSED_SUFFIX).f90' 1>&2; \
+	  $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(FC_COMMAND) -c -o $@ $(basename $@)$(PREPROCESSED_SUFFIX).f90 > /dev/null 2>&1
+	@if test "${REMOVE_PREPROCESSED_FILES}" = "yes"; then \
+	  rm $(basename $@)$(PREPROCESSED_SUFFIX).f90; \
+	fi
+
+#.f.o :
+#	$(CPP_COMMAND) $< | grep -v -E "^#" > $(basename $@)$(PREPROCESSED_SUFFIX).f
+#	$(F77_COMMAND) -c -o $@ $(basename $@)$(PREPROCESSED_SUFFIX).f
+#	@if test "${REMOVE_PREPROCESSED_FILES}" = "yes"; then \
+#	  rm $(basename $@)$(PREPROCESSED_SUFFIX).f; \
+#	fi
+#
+#.f.lo :
+#	$(CPP_COMMAND) $< | grep -v -E "^#" > $(basename $@)$(PREPROCESSED_SUFFIX).f
+#	$(LIBTOOL) --tag=F77 $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(F77_COMMAND) -c -o $@ $(basename $@)$(PREPROCESSED_SUFFIX).f
+#	@if test "${REMOVE_PREPROCESSED_FILES}" = "yes"; then \
+#	  rm $(basename $@)$(PREPROCESSED_SUFFIX).f; \
+#	fi
+
 .f.o :
-	$(CPP_COMMAND) $< | grep -v -E "^#" > $(basename $@)$(PREPROCESSED_SUFFIX).f
-	$(F77_COMMAND) -c -o $@ $(basename $@)$(PREPROCESSED_SUFFIX).f
+	@$(CPP_COMMAND) $< | grep -v -E "^#" > $(basename $@)$(PREPROCESSED_SUFFIX).f && exit 0; \
+	  echo "The following preprocessor command failed:" 1>&2; \
+	  echo '$(CPP_COMMAND) $< | grep -v -E "^#" > $(basename $@)$(PREPROCESSED_SUFFIX).f' 1>&2; \
+	  $(CPP_COMMAND) $< | grep -v -E "^#" > $(basename $@)$(PREPROCESSED_SUFFIX).f > /dev/null 2>&1
+	@echo "compiling $<"
+	@$(F77_COMMAND) -c -o $@ $(basename $@)$(PREPROCESSED_SUFFIX).f && exit 0; \
+	  echo "The following compiler command failed:" 1>&2; \
+	  echo '$(F77_COMMAND) -c -o $@ $(basename $@)$(PREPROCESSED_SUFFIX).f' 1>&2; \
+	  $(F77_COMMAND) -c -o $@ $(basename $@)$(PREPROCESSED_SUFFIX).f > /dev/null 2>&1
 	@if test "${REMOVE_PREPROCESSED_FILES}" = "yes"; then \
 	  rm $(basename $@)$(PREPROCESSED_SUFFIX).f; \
 	fi
 
 .f.lo :
-	$(CPP_COMMAND) $< | grep -v -E "^#" > $(basename $@)$(PREPROCESSED_SUFFIX).f
-	$(LIBTOOL) --tag=F77 $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(F77_COMMAND) -c -o $@ $(basename $@)$(PREPROCESSED_SUFFIX).f
+	@$(CPP_COMMAND) $< | grep -v -E "^#" > $(basename $@)$(PREPROCESSED_SUFFIX).f && exit 0; \
+	  echo "The following preprocessor command failed:" 1>&2; \
+	  echo '$(CPP_COMMAND) $< | grep -v -E "^#" > $(basename $@)$(PREPROCESSED_SUFFIX).f' 1>&2; \
+	  $(CPP_COMMAND) $< | grep -v -E "^#" > $(basename $@)$(PREPROCESSED_SUFFIX).f > /dev/null 2>&1
+	@echo "compiling $<"
+	@$(LIBTOOL) --tag=F77 $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(F77_COMMAND) -c -o $@ $(basename $@)$(PREPROCESSED_SUFFIX).f && exit 0; \
+	  echo "The following compiler command failed:" 1>&2; \
+	  echo '$(LIBTOOL) --tag=F77 $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(F77_COMMAND) -c -o $@ $(basename $@)$(PREPROCESSED_SUFFIX).f' 1>&2; \
+	  $(LIBTOOL) --tag=F77 $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(F77_COMMAND) -c -o $@ $(basename $@)$(PREPROCESSED_SUFFIX).f > /dev/null 2>&1
 	@if test "${REMOVE_PREPROCESSED_FILES}" = "yes"; then \
 	  rm $(basename $@)$(PREPROCESSED_SUFFIX).f; \
 	fi
-
-#.f.o :
-#	@$(CPP_COMMAND) $< | grep -v -E "^#" > $(basename $@)$(PREPROCESSED_SUFFIX).f && exit 0; \
-#	  echo "The following preprocessor command failed:" 1>&2; \
-#	  echo '$(CPP_COMMAND) $< | grep -v -E "^#" > $(basename $@)$(PREPROCESSED_SUFFIX).f' 1>&2; \
-#	  $(CPP_COMMAND) $< | grep -v -E "^#" > $(basename $@)$(PREPROCESSED_SUFFIX).f > /dev/null 2>&1
-#	@echo "compiling $<"
-#	@$(F77_COMMAND) -c -o $@ $(basename $@)$(PREPROCESSED_SUFFIX).f && exit 0; \
-#	  echo "The following compiler command failed:" 1>&2; \
-#	  echo '$(F77_COMMAND) -c -o $@ $(basename $@)$(PREPROCESSED_SUFFIX).f' 1>&2; \
-#	  $(F77_COMMAND) -c -o $@ $(basename $@)$(PREPROCESSED_SUFFIX).f > /dev/null 2>&1
-#	@if test "${REMOVE_PREPROCESSED_FILES}" = "yes"; then \
-#	  rm $(basename $@)$(PREPROCESSED_SUFFIX).f; \
-#	fi
-
-#.f.lo :
-#	@$(CPP_COMMAND) $< | grep -v -E "^#" > $(basename $@)$(PREPROCESSED_SUFFIX).f && exit 0; \
-#	  echo "The following preprocessor command failed:" 1>&2; \
-#	  echo '$(CPP_COMMAND) $< | grep -v -E "^#" > $(basename $@)$(PREPROCESSED_SUFFIX).f' 1>&2; \
-#	  $(CPP_COMMAND) $< | grep -v -E "^#" > $(basename $@)$(PREPROCESSED_SUFFIX).f > /dev/null 2>&1
-#	@echo "compiling $<"
-#	@$(LIBTOOL) --tag=F77 $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(F77_COMMAND) -c -o $@ $(basename $@)$(PREPROCESSED_SUFFIX).f && exit 0; \
-#	  echo "The following compiler command failed:" 1>&2; \
-#	  echo '$(LIBTOOL) --tag=F77 $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(F77_COMMAND) -c -o $@ $(basename $@)$(PREPROCESSED_SUFFIX).f' 1>&2; \
-#	  $(LIBTOOL) --tag=F77 $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(F77_COMMAND) -c -o $@ $(basename $@)$(PREPROCESSED_SUFFIX).f > /dev/null 2>&1
-#	@if test "${REMOVE_PREPROCESSED_FILES}" = "yes"; then \
-#	  rm $(basename $@)$(PREPROCESSED_SUFFIX).f; \
-#	fi
 
 MondoMods_DEPENDENCY_FILES_MODS = \
   $(top_builddir)/MondoMods/ainv.mod \
