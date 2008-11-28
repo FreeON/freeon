@@ -52,7 +52,15 @@ EXTRA_DIST = \
   second_NONE.f
 
 slamch.lo: slamch.f
-	$(LIBTOOL) --tag=F77 $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(F77_COMMAND) @NOOPT@ -c -o $@ $<
+	@echo "compiling $< with no-optimization"
+	@$(LIBTOOL) --tag=F77 $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(F77) $(AM_FFLAGS) $(FFLAGS) $(FORTRAN_DEFAULT_INCLUDES) $(EXTRA_INCLUDES) @NOOPT@ -c -o $@ $< > /dev/null 2>&1 && exit 0; \
+	  echo "The following compiler command failed:" 1>&2; \
+	  echo '$(LIBTOOL) --tag=F77 $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(F77) $(AM_FFLAGS) $(FFLAGS) $(FORTRAN_DEFAULT_INCLUDES) $(EXTRA_INCLUDES) @NOOPT@ -c -o $@ $<' 1>&2; \
+	  $(LIBTOOL) --tag=F77 $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(F77) $(AM_FFLAGS) $(FFLAGS) $(FORTRAN_DEFAULT_INCLUDES) $(EXTRA_INCLUDES) @NOOPT@ -c -o $@ $< > /dev/null 2>&1
 
 dlamch.lo: dlamch.f
-	$(LIBTOOL) --tag=F77 $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(F77_COMMAND) @NOOPT@ -c -o $@ $<
+	@echo "compiling $< with no-optimization"
+	@$(LIBTOOL) --tag=F77 $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(F77) $(AM_FFLAGS) $(FFLAGS) $(FORTRAN_DEFAULT_INCLUDES) $(EXTRA_INCLUDES) @NOOPT@ -c -o $@ $< > /dev/null 2>&1 && exit 0; \
+	  echo "The following compiler command failed:" 1>&2; \
+	  echo '$(LIBTOOL) --tag=F77 $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(F77) $(AM_FFLAGS) $(FFLAGS) $(FORTRAN_DEFAULT_INCLUDES) $(EXTRA_INCLUDES) @NOOPT@ -c -o $@ $<' 1>&2; \
+	  $(LIBTOOL) --tag=F77 $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(F77) $(AM_FFLAGS) $(FFLAGS) $(FORTRAN_DEFAULT_INCLUDES) $(EXTRA_INCLUDES) @NOOPT@ -c -o $@ $< > /dev/null 2>&1
