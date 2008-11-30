@@ -161,9 +161,9 @@ if test "${use_optimizations}" = "yes"; then
   # Set the optimization flags.
   if test -z "${user_CFLAGS}"; then
     case ${build_cpu} in
-      *x86)
+      *686)
         case ${CC_COMPILERNAME} in
-          GCC)   CFLAGS="-O3 -msse -msse2 -mfpmath=sse -ftree-vectorize" ;;
+          GCC)   CFLAGS="-O3 -march=i686 -msse -msse2 -mfpmath=sse -ftree-vectorize" ;;
           Intel) CFLAGS="-O3 -xP" ;;
           *)     CFLAGS="-O3" ;;
         esac ;;
@@ -178,7 +178,8 @@ if test "${use_optimizations}" = "yes"; then
           GCC) CFLAGS="-O3 -mcpu=G5" ;;
           *)   CFLAGS="-O3" ;;
         esac ;;
-      *) CFLAGS="-O" ;;
+      *) AC_MSG_NOTICE([unknown build_cpu ${build_cpu}])
+         CFLAGS="-O" ;;
     esac
     AC_MSG_NOTICE([Setting default optimization for ${CC_COMPILERNAME} compiler: CFLAGS  = ${CFLAGS}])
     optimization_flags="${optimization_flags} CFLAGS=\"${CFLAGS}\""
@@ -188,9 +189,9 @@ if test "${use_optimizations}" = "yes"; then
 
   if test -z "${user_FFLAGS}"; then
     case ${build_cpu} in
-      *x86)
+      *686)
         case ${F77_COMPILERNAME} in
-          GCC)   FFLAGS="-O3 -msse -msse2 -mfpmath=sse -ftree-vectorize" ;;
+          GCC)   FFLAGS="-O3 -march=i686 -msse -msse2 -mfpmath=sse -ftree-vectorize" ;;
           Intel) FFLAGS="-O3 -xP" ;;
           *)     FFLAGS="-O3" ;;
         esac ;;
@@ -205,7 +206,8 @@ if test "${use_optimizations}" = "yes"; then
           GCC) FFLAGS="-O3 -mcpu=G5" ;;
           *)   FFLAGS="-O3" ;;
         esac ;;
-      *) FFLAGS="-O" ;;
+      *) AC_MSG_NOTICE([unknown build_cpu ${build_cpu}])
+         FFLAGS="-O" ;;
     esac
     AC_MSG_NOTICE([Setting default optimization for ${F77_COMPILERNAME} compiler: FFLAGS  = ${FFLAGS}])
     optimization_flags="${optimization_flags} FFLAGS=\"${FFLAGS}\""
@@ -215,9 +217,9 @@ if test "${use_optimizations}" = "yes"; then
 
   if test -z "${user_FCFLAGS}"; then
     case ${build_cpu} in
-      *x86)
+      *686)
         case ${FC_COMPILERNAME} in
-          GCC)   FCFLAGS="-O3 -msse -msse2 -mfpmath=sse -ftree-vectorize" ;;
+          GCC)   FCFLAGS="-O3 -march=i686 -msse -msse2 -mfpmath=sse -ftree-vectorize" ;;
           Intel) FCFLAGS="-O3 -xP" ;;
           *)     FCFLAGS="-O3" ;;
         esac ;;
@@ -232,7 +234,8 @@ if test "${use_optimizations}" = "yes"; then
           GCC) FCFLAGS="-O3 -mcpu=G5" ;;
           *)   FCFLAGS="-O3" ;;
         esac ;;
-      *) FCFLAGS="-O" ;;
+      *) AC_MSG_NOTICE([unknown build_cpu ${build_cpu}])
+         FCFLAGS="-O" ;;
     esac
     AC_MSG_NOTICE([Setting default optimization for ${FC_COMPILERNAME} compiler: FCFLAGS = ${FCFLAGS}])
     optimization_flags="${optimization_flags} FCFLAGS=\"${FCFLAGS}\""
