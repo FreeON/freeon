@@ -103,6 +103,7 @@ PROGRAM DMP_SP2 ! Density matrix purification, SP2 variation
   ENDDO
 
   ! If we are called without the DIIS Fockian, consider a levelshift
+  CALL OpenASCII(InpFile,Inp)
   IF(.NOT.PRESENT.AND.OptDblQ(Inp,'LevelShift',Lambda))THEN
     ! Get the Fock matrix back ...
     CALL Get(F,TrixFile('OrthoF',Args,0))
@@ -122,6 +123,7 @@ PROGRAM DMP_SP2 ! Density matrix purification, SP2 variation
     CALL MondoLog(DEBUG_NONE, "SP2", TRIM(ProcessName(Prog)) &
       //' LevlShift = '//TRIM(DblToMedmChar(Lambda)))
   ENDIF
+  CLOSE(Inp)
 
   ! Orthogonal put and xform to AO rep and put
   CALL PutXForm(Prog,Args,P,POld,Tmp1)
