@@ -192,14 +192,14 @@ PROGRAM SCFStatus
   ENDIF
   !
   SCFMessage=""
-  IF(Gap/=Zero)SCFMessage=TRIM(SCFMessage)//'Gap  = '//TRIM(DblToShrtChar(-Gap))
-  IF(P%NSMat/=1.AND.Args%I%I(1)/=0)SCFMessage=TRIM(SCFMessage)//' <S^2>= '//TRIM(FltToShrtChar(S2))
-  IF(TRIM(SCFMessage)/="") &
+  IF(Gap/=Zero)SCFMessage=TRIM(SCFMessage)//'Gap = '//TRIM(DblToShrtChar(-Gap))
+  IF(P%NSMat/=1.AND.Args%I%I(1)/=0)SCFMessage=TRIM(SCFMessage)//' <S^2> = '//TRIM(FltToShrtChar(S2))
+  IF(TRIM(SCFMessage) /= "") &
   CALL MondoLog(DEBUG_MAXIMUM,Prog,SCFMessage,SCFTag)
   !
-  SCFMessage='<T>='//TRIM(DblToMedmChar(KinE))//', <V>='//TRIM(DblToMedmChar( E_es_tot))
-  IF(ExchE/=Zero)SCFMessage=TRIM(SCFMessage)//', <HF>='//TRIM(DblToMedmChar(ExchE))
-  IF(Exc/=Zero)SCFMessage=TRIM(SCFMessage)//', <DFT>='//TRIM(DblToMedmChar(Exc))
+  SCFMessage='<T> = '//TRIM(DblToMedmChar(KinE))//', <V> = '//TRIM(DblToMedmChar( E_es_tot))
+  IF(ExchE/=Zero)SCFMessage=TRIM(SCFMessage)//', <HF> = '//TRIM(DblToMedmChar(ExchE))
+  IF(Exc/=Zero)SCFMessage=TRIM(SCFMessage)//', <DFT> = '//TRIM(DblToMedmChar(Exc))
   CALL MondoLog(DEBUG_MAXIMUM,Prog,SCFMessage,SCFTag)
   !
   IF(SCFActn=='BasisSetSwitch')THEN
