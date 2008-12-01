@@ -506,6 +506,52 @@ NOOPT=
 LAPACK_TIMER="NONE"
 
 if test "${use_internal_lapack}" = "yes"; then
+  # Check for naming convention for external etime().
+  use_etime_underscore="no"
+  use_etime_without_underscore="no"
+
+  AC_LANG(Fortran 77)
+  AC_MSG_CHECKING([for naming convention for external etime()])
+
+  AC_LINK_IFELSE([
+      REAL T1
+      REAL TARRAY(2)
+      REAL etime
+      EXTERNAL etime
+
+      T1 = etime(TARRAY)
+
+      STOP
+      END
+],
+    [use_etime_without_underscore="yes"],
+    [])
+
+  AC_LINK_IFELSE([
+      REAL T1
+      REAL TARRAY(2)
+      REAL etime_
+      EXTERNAL etime_
+
+      T1 = etime_(TARRAY)
+
+      STOP
+      END
+],
+    [use_etime_underscore="yes"],
+    [])
+
+  if test "${use_etime_without_underscore}" = "yes"; then
+    use_EXT_ETIME="EXT_ETIME"
+    AC_MSG_RESULT([no underscore])
+  elif test "${use_etime_underscore}" = "yes"; then
+    use_EXT_ETIME="EXT_ETIME_"
+    AC_MSG_RESULT([with underscore])
+  else
+    AC_MSG_RESULT([can not determine])
+    AC_MSG_FAILURE([I do not know how to link to the external etime()])
+  fi
+
   # Test for no-optimization compiler flag.
   AC_MSG_CHECKING([for no-optmiziation flags])
 
@@ -516,13 +562,14 @@ if test "${use_internal_lapack}" = "yes"; then
       AC_MSG_RESULT([identified gfortran compiler, using ${NOOPT} no-optimization flag])
       ;;
     Intel)
-      NOOPT="-O0 -fltconsistency -fp-port -g -names as_is"
-      LAPACK_TIMER="EXT_ETIME_"
+      #NOOPT="-O0 -fltconsistency -fp-port -g -names as_is"
+      NOOPT="-O0 -fltconsistency -fp-port -g"
+      LAPACK_TIMER=${use_EXT_ETIME}
       AC_MSG_RESULT([identified intel ifort compiler, using ${NOOPT} no-optimization flag])
       ;;
     PGI)
       NOOPT="-O0 -g"
-      LAPACK_TIMER="EXT_ETIME"
+      LAPACK_TIMER=${use_EXT_ETIME}
       AC_MSG_RESULT([identified portland group pgf90 compiler, using ${NOOPT} no-optimization flag])
       ;;
     *)
