@@ -963,7 +963,7 @@ CONTAINS
       NDim=0
       DO
         Indx=INDEX(LineTmp,',')
-        lineTmp=TRIM(lineTmp(Indx+1:))
+        LineTmp=TRIM(LineTmp(Indx+1:))
         IF(Indx.EQ.0) EXIT
         NDim=NDim+1
       ENDDO

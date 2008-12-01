@@ -19,12 +19,12 @@
       REAL               TARRAY( 2 )
 *     ..
 *     .. External Functions ..
-      REAL               ETIME
-      EXTERNAL           ETIME
+      REAL               etime
+      EXTERNAL           etime
 *     ..
 *     .. Executable Statements ..
 *
-      T1 = ETIME( TARRAY )
+      T1 = etime( TARRAY )
       DSECND = TARRAY( 1 )
       RETURN
 *

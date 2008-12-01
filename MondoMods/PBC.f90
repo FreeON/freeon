@@ -164,7 +164,7 @@ CONTAINS
        ! and also for non-cubic cells, but is usefull in debugging Coulomb sums.
        IF(GM%PBC%PFFWelSep.NE.0)THEN
           CALL SetCellSets(GM%InCells,GM%PBC%AutoW%I,GM%PBC%BoxShape%D,'FreeON','HardCell',HardCell_O=GM%PBC%PFFWelSep)
-          CALL Warn(' Fixed FMM style WS = '//TRIM(IntToChar(GM%PBC%PFFWelSep))//RTRN &
+          CALL Warn(' Fixed FMM style WS = '//TRIM(IntToChar(GM%PBC%PFFWelSep))//Rtrn &
                //', may lead to errors for small or non-cubic cells ') 
        ELSE
           !          CALL SetCellSets(GM%InCells,GM%PBC%AutoW%I,GM%PBC%BoxShape%D,'HardCell',HardCell_O=2)

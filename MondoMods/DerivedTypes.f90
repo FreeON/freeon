@@ -352,7 +352,7 @@ MODULE DerivedTypes
       TYPE(CellSet)    :: InCells   !-- Inner (Coulomb) cell set
 !     Atomic coordinates
       INTEGER          :: NAtms     !-- Number of atoms
-      INTEGER          :: Nkind     !-- Number of atom kinds or types
+      INTEGER          :: NKind     !-- Number of atom kinds or types
       TYPE(DBL_VECT)   :: AtNum     !-- Atomic number per atom      
       TYPE(INT_VECT)   :: AtTyp     !-- Atom type or kind per atom 
       TYPE(CHR10_VECT) :: AtNam     !-- Atomname
