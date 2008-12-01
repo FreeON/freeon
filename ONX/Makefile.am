@@ -31,7 +31,7 @@ GONX_SOURCES = \
   ONX2List.f90
 
 ONX_DEPENDENCIES  = \
-  $(MondoMods_DEPENDENCY_FILES) \
+  $(LIBRARY_DEPENDENCY_FILES) \
   $(top_builddir)/TwoE/GRD/libGRD.la \
   $(top_builddir)/TwoE/INT/libINT.la \
   $(top_builddir)/TwoE/VRR/libVRR.la \
@@ -42,7 +42,7 @@ ONX_DEPENDENCIES  = \
   $(top_builddir)/TwoE/MSC/getatompairmod.mod
 
 GONX_DEPENDENCIES = \
-  $(MondoMods_DEPENDENCY_FILES) \
+  $(LIBRARY_DEPENDENCY_FILES) \
   $(top_builddir)/TwoE/GRD/libGRD.la \
   $(top_builddir)/TwoE/INT/libINT.la \
   $(top_builddir)/TwoE/VRR/libVRR.la \
