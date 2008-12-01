@@ -551,10 +551,10 @@ MODULE PrettyPrint
                    Mssg=IntToChar(GM%NAtms)
                    WRITE(PU,*)TRIM(Mssg)
                    IF(PRESENT(Remark_O))THEN
-                      Mssg=TRIM(Remark_O)//', <SCF> = '//TRIM(FltToChar(GM%ETotal*AU2Ev))//' eV'
+                      Mssg=TRIM(Remark_O)//', <SCF>='//TRIM(DblToChar(GM%ETotal*AU2Ev))//' eV'
                    ELSE
                       Mssg='Geom #'//TRIM(IntToChar(GM%Confg)) &
-                           //', <SCF> = '//TRIM(FltToChar(GM%ETotal*AU2Ev))//' eV'
+                           //', <SCF>='//TRIM(DblToChar(GM%ETotal*AU2Ev))//' eV'
                    ENDIF
                    IF(PRESENT(Clone_O)) &
                         Mssg='Clone # '//TRIM(IntToChar(Clone_O))//" / "//TRIM(Mssg)
@@ -637,9 +637,9 @@ MODULE PrettyPrint
                 WRITE(PU,11)GM%Confg
 11              FORMAT('MODEL  ',I6)
                 IF(PRESENT(Remark_O))THEN
-                   Mssg=TRIM(Remark_O)//', <SCF> = '//TRIM(FltToChar(GM%ETotal*AU2Ev))//' eV'
+                   Mssg=TRIM(Remark_O)//', <SCF>='//TRIM(DblToChar(GM%ETotal*AU2Ev))//' eV'
                 ELSE                   
-                   Mssg=' <SCF> = '//TRIM(FltToChar(GM%ETotal*AU2Ev))//' eV'
+                   Mssg=' <SCF>='//TRIM(DblToChar(GM%ETotal*AU2Ev))//' eV'
                 ENDIF
                 WRITE(PU,22)Mssg
 22              FORMAT('REMARK   1  ',A60)
@@ -681,9 +681,9 @@ MODULE PrettyPrint
                 CALL VecToAng(GM%PBC,A,B,C,Alpha,Beta,Gamma)
                 !
                 IF(PRESENT(Remark_O))THEN
-                   Mssg='data_'//TRIM(Remark_O)//'_<SCF>_=_'//TRIM(FltToChar(GM%ETotal*AU2Ev))//' eV'
+                   Mssg='data_'//TRIM(Remark_O)//'_<SCF>='//TRIM(DblToChar(GM%ETotal*AU2Ev))//'eV'
                 ELSE                   
-                   Mssg='data_'//'Geom#'//TRIM(IntToChar(GM%Confg))//'_<SCF>_=_'//TRIM(FltToChar(GM%ETotal*AU2Ev))//'_eV'
+                   Mssg='data_'//'Geom#'//TRIM(IntToChar(GM%Confg))//'_<SCF>='//TRIM(DblToChar(GM%ETotal*AU2Ev))//'eV'
                 ENDIF
                 Mssg=Squish(Mssg)
                 WRITE(PU,500) Mssg
