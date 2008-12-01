@@ -94,7 +94,7 @@ MODULE SetXYZ
         TYPE(BCSR) :: B
         TYPE(DBL_VECT) :: A
         INTEGER :: I,J,K,L,II,KK,M
-        DO II=1,B%Natms
+        DO II=1,B%NAtms
 	  DO I=B%RowPt%I(II),B%RowPt%I(II+1)-1
 	  IF(B%ColPt%I(I)==1) THEN
 	    J=II
@@ -242,7 +242,7 @@ MODULE SetXYZ
         IF(.NOT.AllocQ(B%Alloc)) CALL New(B,(/Dim,Dim/))
         B%D=Zero
 !
-        DO I=1,A%Natms
+        DO I=1,A%NAtms
               IF(OffS%I(I)>Dim) EXIT
           DO J=A%RowPt%I(I),A%RowPt%I(I+1)-1
             L=A%ColPt%I(J)
@@ -920,12 +920,12 @@ MODULE SetXYZ
 !
 !===============================================================
 !
-      SUBROUTINE Set_INTC_EQ_INTC(Intcs,IntcsCopy,From,To,Start)
+      SUBROUTINE Set_INTC_EQ_INTC(IntCs,IntCsCopy,From,To,Start)
 !
-        TYPE(INTC) :: Intcs,IntcsCopy
+        TYPE(INTC) :: IntCs,IntCsCopy
         INTEGER    :: I,J,From,To,Start,NSize,To2
 !
-        NSize=IntcsCopy%N
+        NSize=IntCsCopy%N
         IF(NSize<Start+(To-From)) THEN
           CALL Halt('Dimensionality error in IntCCopy')
         ENDIF

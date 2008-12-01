@@ -38,7 +38,7 @@ MODULE Thresholding
 #ifdef MMech
   USE Mechanics
 #endif
-!-------------------------------------------------  
+!-------------------------------------------------
 !  Primary thresholds
    TYPE(TOLS), SAVE :: Thresholds
 !-------------------------------------------------------------------------
@@ -82,7 +82,7 @@ MODULE Thresholding
      END SUBROUTINE SetThresholds
 !====================================================================================================
 !    Preliminary worst case thresholding at level of atom pairs
-!    Using Exp[-MinXab*|A-B|^2] = Tau 
+!    Using Exp[-MinXab*|A-B|^2] = Tau
 !====================================================================================================
      SUBROUTINE SetAtomPairThresh(Tau)
         REAL(DOUBLE),INTENT(IN) :: Tau
@@ -189,7 +189,7 @@ MODULE Thresholding
        INTEGER,OPTIONAL                :: ExtraEll_O
        LOGICAL,OPTIONAL                :: Potential_O
        LOGICAL                         :: Potential
-       INTEGER                         :: ExtraEll,TotEll   
+       INTEGER                         :: ExtraEll,TotEll
        REAL(DOUBLE)                    :: R,Tau,Coef,ZetaFac,MinMax,ScaledTau,DelR,SqrtW,Fun,dFun
 
 !      Quick turn around for nuclei
@@ -198,9 +198,9 @@ MODULE Thresholding
           RETURN
        ENDIF
 !      Misc options.
-       IF(PRESENT(ExtraEll_O))THEN 
+       IF(PRESENT(ExtraEll_O))THEN
           ExtraEll=ExtraEll_O
-       ELSE 
+       ELSE
           ExtraEll=0
        ENDIF
        IF(PRESENT(Tau_O)) THEN
@@ -243,7 +243,7 @@ MODULE Thresholding
                 DO M=0,Ell-L
                    DO N=0,Ell-L-M
                       LMN=LMNDex(L,M,N)
-                      ZetaFac = SQRT(Zeta**DBLE(L+M+N))  
+                      ZetaFac = SQRT(Zeta**DBLE(L+M+N))
                       MinMax  = AACoef(L+ExtraEll)*AACoef(M)*AACoef(N)
                       MinMax  = MAX(MinMax,AACoef(L)*AACoef(M+ExtraEll)*AACoef(N))
                       MinMax  = MAX(MinMax,AACoef(L)*AACoef(M)*AACoef(N+ExtraEll))
@@ -262,8 +262,8 @@ MODULE Thresholding
 !!$          WRITE(*,*)'--------------------------------------------'
 !!$          WRITE(*,*)' Ell  = ',ell
 !!$          WRITE(*,*)' Zeta = ',Zeta
-!!$          
-!!$         
+!!$
+!!$
 !!$          WRITE(*,*)' HGTF = ',Coef
 !!$          WRITE(*,*)' R = ',R
 !!$          WRITE(*,*)' T = ',TmpExt
@@ -272,7 +272,7 @@ MODULE Thresholding
 !!$          WRITE(*,*)' T3= ',TmpExt
 !!$
 !!$          WRITE(*,*)' ScaledTau = ',ScaledTau
-!!$          WRITE(*,*)' -LOG(Tau/Coef)/(GFactor*Zeta)) ',-LOG(Tau/Coef)/(GFactor*Zeta) 
+!!$          WRITE(*,*)' -LOG(Tau/Coef)/(GFactor*Zeta)) ',-LOG(Tau/Coef)/(GFactor*Zeta)
 !!$
 !!$!          STOP
 !!$
@@ -282,8 +282,8 @@ MODULE Thresholding
      END FUNCTION Extent2
 !===================================================================================================
 !     Simple expressions to determine largest extent R for a distribution rho_LMN(R)
-!     outside of which its value at a point is less than Tau (default) or outside 
-!     of which the error made using the classical potential is less than Tau (Potential option) 
+!     outside of which its value at a point is less than Tau (default) or outside
+!     of which the error made using the classical potential is less than Tau (Potential option)
 !===================================================================================================
      FUNCTION Extent(Ell,Zeta,HGTF,Tau_O,ExtraEll_O,Potential_O) RESULT (R)
        INTEGER                         :: Ell
@@ -292,7 +292,7 @@ MODULE Thresholding
        REAL(DOUBLE),OPTIONAL           :: Tau_O
        INTEGER,OPTIONAL                :: ExtraEll_O
        LOGICAL,OPTIONAL                :: Potential_O
-       INTEGER                         :: L,M,N,Lp,Mp,Np,LMN,ExtraEll       
+       INTEGER                         :: L,M,N,Lp,Mp,Np,LMN,ExtraEll
        LOGICAL                         :: Potential
        REAL(DOUBLE)                    :: Tau,T,R,CramCo,MixMax,ScaledTau,ZetaHalf,HGInEq,TMP
        REAL(DOUBLE),PARAMETER          :: K3=1.09D0**3
@@ -306,9 +306,9 @@ MODULE Thresholding
           RETURN
        ENDIF
        ! Misc options....
-       IF(PRESENT(ExtraEll_O))THEN 
+       IF(PRESENT(ExtraEll_O))THEN
           ExtraEll=ExtraEll_O
-       ELSE 
+       ELSE
           ExtraEll=0
        ENDIF
        IF(PRESENT(Tau_O)) THEN
@@ -347,7 +347,7 @@ MODULE Thresholding
                    HGInEq=SQRT(MixMax*(Two*Zeta)**(L+M+N+ExtraEll))*HGTF(LMN)
                    CramCo=MAX(CramCo,ABS(HGInEq))
                 ENDDO
-             ENDDO       
+             ENDDO
           ENDDO
           ! Now we just use expresions based on spherical symmetry but with half the exponent ...
           ZetaHalf=Half*Zeta
@@ -365,8 +365,8 @@ MODULE Thresholding
      END FUNCTION Extent
 !===================================================================================================
 !     Simple expressions to determine largest extent R for a distribution rho_LMN(R)
-!     outside of which its value at a point is less than Tau (default) or outside 
-!     of which the error made using the classical potential is less than Tau (Potential option) 
+!     outside of which its value at a point is less than Tau (default) or outside
+!     of which the error made using the classical potential is less than Tau (Potential option)
 !===================================================================================================
      FUNCTION Extent3(Ell,Zeta,HGTF,Tau_O,ExtraEll_O,Potential_O) RESULT (R)
        INTEGER                         :: Ell
@@ -375,7 +375,7 @@ MODULE Thresholding
        REAL(DOUBLE),OPTIONAL           :: Tau_O
        INTEGER,OPTIONAL                :: ExtraEll_O
        LOGICAL,OPTIONAL                :: Potential_O
-       INTEGER                         :: L,M,N,Lp,Mp,Np,LMN,ExtraEll       
+       INTEGER                         :: L,M,N,Lp,Mp,Np,LMN,ExtraEll
        LOGICAL                         :: Potential
        REAL(DOUBLE)                    :: Tau,T,R,CramCo,MixMax,ScaledTau,ZetaHalf,HGInEq,TMP
        REAL(DOUBLE),PARAMETER          :: K3=1.09D0**3
@@ -389,9 +389,9 @@ MODULE Thresholding
           RETURN
        ENDIF
        ! Misc options....
-       IF(PRESENT(ExtraEll_O))THEN 
+       IF(PRESENT(ExtraEll_O))THEN
           ExtraEll=ExtraEll_O
-       ELSE 
+       ELSE
           ExtraEll=0
        ENDIF
        IF(PRESENT(Tau_O)) THEN
@@ -430,7 +430,7 @@ MODULE Thresholding
                    HGInEq=SQRT(MixMax*(Two*Zeta)**(L+M+N+ExtraEll))*HGTF(LMN)
                    CramCo=MAX(CramCo,ABS(HGInEq))
                 ENDDO
-             ENDDO       
+             ENDDO
           ENDDO
           ! Now we just use expresions based on spherical symmetry but with half the exponent ...
           ZetaHalf=Half*Zeta
@@ -454,14 +454,14 @@ MODULE Thresholding
      END FUNCTION Extent3
 
 !====================================================================================================
-!    COMPUTE THE R THAT SATISFIES (Pi/z)^(3/2) Erfc[Sqrt[z]*R]/R < Tau 
+!    COMPUTE THE R THAT SATISFIES (Pi/z)^(3/2) Erfc[Sqrt[z]*R]/R < Tau
 !    Note: Funk is its own reward; so make my funk the p-funk.
 !====================================================================================================
      FUNCTION PFunk(Zeta,Tau) RESULT(R)
         REAL(DOUBLE)  :: Tau,Zeta,SqZ,NewTau,Val,Ec,R,BisR,DelR,X,CTest
-        INTEGER       :: J,K              
+        INTEGER       :: J,K
         LOGICAL :: pp
-!---------------------------------------------------------------------- 
+!----------------------------------------------------------------------
         SqZ=SQRT(Zeta)
         NewTau=Tau*(Zeta/Pi)**(1.5D0)
         ! Quick check for max resolution of Erfc approx
@@ -485,14 +485,14 @@ MODULE Thresholding
            ELSE
               J=AINT(X*Erf_Grid)
               Ec=One-(Erf_0(J)+X*(Erf_1(J)+X*(Erf_2(J)+X*(Erf_3(J)+X*Erf_4(J)))))
-           ENDIF           
+           ENDIF
            Val=Ec/R
            CTest=(Val-NewTau)/Tau
-           ! Go for relative error to get smoothness, but bail if 
-           ! absolute accuracy of erf interpolation is exceeded         
+           ! Go for relative error to get smoothness, but bail if
+           ! absolute accuracy of erf interpolation is exceeded
            IF(ABS(CTest)<1D-4.OR.Tau*ABS(CTest)<1.D-12)THEN
               ! Converged
-              RETURN           
+              RETURN
            ELSEIF(DelR<1D-40)THEN
               ! This is unacceptable
               EXIT
@@ -501,15 +501,15 @@ MODULE Thresholding
            IF(CTest>Zero)BisR=R
            DelR=Half*DelR
         ENDDO
-        CALL Halt(' Failed to converge in P-Funk: '//RTRN & 
-                   //'Tau = '//TRIM(DblToShrtChar(NewTau))//RTRN &
-                   //' CTest = '//TRIM(DblToShrtChar(CTest))//RTRN &
-                   //' Zeta = '//TRIM(DblToShrtChar(Zeta))//RTRN &
-                   //' R = '//TRIM(DblToShrtChar(R))//RTRN &
-                   //' Ec = '//TRIM(DblToShrtChar(Ec))//RTRN &
-                   //' dR = '//TRIM(DblToShrtChar(DelR))//RTRN &
+        CALL Halt(' Failed to converge in P-Funk: '//Rtrn &
+                   //'Tau = '//TRIM(DblToShrtChar(NewTau))//Rtrn &
+                   //' CTest = '//TRIM(DblToShrtChar(CTest))//Rtrn &
+                   //' Zeta = '//TRIM(DblToShrtChar(Zeta))//Rtrn &
+                   //' R = '//TRIM(DblToShrtChar(R))//Rtrn &
+                   //' Ec = '//TRIM(DblToShrtChar(Ec))//Rtrn &
+                   //' dR = '//TRIM(DblToShrtChar(DelR))//Rtrn &
                    //' SqZ*R = '//TRIM(DblToMedmChar(X)))
-     END FUNCTION PFunk    
+     END FUNCTION PFunk
 
 
 
@@ -518,7 +518,7 @@ MODULE Thresholding
 !===================================================================================================
      SUBROUTINE SetAACoef()
        REAL(DOUBLE)  :: X1,X2,X3,F1,F2,F3
-       INTEGER       :: L,I 
+       INTEGER       :: L,I
 !       Solve for AACoef
        AACoef(0)= 1.D0
        DO L=1,HGEll
@@ -575,7 +575,7 @@ MODULE Thresholding
 !!$!===================================================================================================
 !!$     SUBROUTINE SetAACoef()
 !!$       REAL(DOUBLE)  :: X1,X2,X3,F1,F2,F3
-!!$       INTEGER       :: L,I 
+!!$       INTEGER       :: L,I
 !!$!       Solve for AACoef
 !!$       AACoef(0)= 1.D0
 !!$       DO L=1,HGEll
@@ -629,7 +629,7 @@ MODULE Thresholding
 !======================================================================================
 !
 !======================================================================================
-      FUNCTION NodeWeight(Ell,Zeta,HGCo) 
+      FUNCTION NodeWeight(Ell,Zeta,HGCo)
         INTEGER                          :: Ell,L,M,N,LMN
         REAL(DOUBLE)                     :: NodeWeight,Zeta,PiZ
         REAL(DOUBLE), DIMENSION(1:)      :: HGCo
@@ -659,7 +659,7 @@ MODULE Thresholding
            RETURN
         ENDIF
         SELECT CASE(L)
-        CASE(0) 
+        CASE(0)
            RErfc=RErfc0(R)
         CASE(1)
            RErfc=RErfc1(R)
@@ -682,14 +682,14 @@ MODULE Thresholding
         CASE(10)
            RErfc=RErfc10(R)
         CASE(11)
-           RErfc=RErfc11(R)        
+           RErfc=RErfc11(R)
         CASE(12)
            RErfc=RErfc12(R)
         CASE DEFAULT
            CALL Halt('RErfc: L > 12')
         END SELECT
 !
-      END FUNCTION RErfc 
+      END FUNCTION RErfc
 !======================================================================================
 !
 !======================================================================================
@@ -700,7 +700,7 @@ MODULE Thresholding
         REAL(DOUBLE),PARAMETER          :: DeltaR    = 0.05931686960054D0
         REAL(DOUBLE),PARAMETER          :: OneOverDR = One/DeltaR
         REAL(DOUBLE),PARAMETER          :: MaxR      = 99D0*DeltaR
-        REAL(DOUBLE),DIMENSION(0:NGrid) :: RErfData  = (/0.00000000000000, & 
+        REAL(DOUBLE),DIMENSION(0:NGrid) :: RErfData  = (/0.00000000000000, &
         -0.069193073224990,-0.142991408326928,-0.221515189900601, &
         -0.304878985039043,-0.393191833185381,-0.486557367758120, &
         -0.585073963362215,-0.688834902998355,-0.797928560302294, &
@@ -742,7 +742,7 @@ MODULE Thresholding
            IG      = INT(DR)
            YY      = DBLE(IG+1)-DR
            RErfc0  = YY*RErfData(IG)+(One-YY)*RErfData(IG+1)
-        ENDIF 
+        ENDIF
 !
       END FUNCTION RErfc0
 !======================================================================================
@@ -753,7 +753,7 @@ MODULE Thresholding
         REAL(DOUBLE),PARAMETER          :: DeltaR    = 0.06292211887801D0
         REAL(DOUBLE),PARAMETER          :: OneOverDR = One/DeltaR
         REAL(DOUBLE),PARAMETER          :: MaxR      = 99D0*DeltaR
-        REAL(DOUBLE),DIMENSION(0:NGrid) :: RErfData = (/0.00000000000000, & 
+        REAL(DOUBLE),DIMENSION(0:NGrid) :: RErfData = (/0.00000000000000, &
         -0.000186974756964,-0.001486152993383,-0.004965342495878, &
         -0.011615198762045,-0.022329451188646,-0.037896063626369, &
         -0.058996660762918,-0.086211592623261,-0.120028398070176, &
@@ -810,7 +810,7 @@ MODULE Thresholding
         REAL(DOUBLE),PARAMETER          :: DeltaR    = 0.06650073239004D0
         REAL(DOUBLE),PARAMETER          :: OneOverDR = One/DeltaR
         REAL(DOUBLE),PARAMETER          :: MaxR      = 99D0*DeltaR
-        REAL(DOUBLE),DIMENSION(0:NGrid) :: RErfData = (/1.09861228866811, & 
+        REAL(DOUBLE),DIMENSION(0:NGrid) :: RErfData = (/1.09861228866811, &
          1.098611898560562, 1.098599922810268, 1.098519850529684, &
          1.098231189148427, 1.097481253396448, 1.095891043053229, &
          1.092956146155825, 1.088061218847890, 1.080504682183971, &
@@ -1054,7 +1054,7 @@ MODULE Thresholding
         -21.84231080258775,-22.82132364769479,-23.81465352709815, &
         -24.82227069731149,-25.84414632766920,-26.88025246490968, &
         -27.93056199935137,-28.99504863258574,-30.07368684661494, &
-        -31.16645187436438,-32.27331967150422,-33.39426688951615, & 
+        -31.16645187436438,-32.27331967150422,-33.39426688951615, &
         -34.52927084994538,-35.67830951978023,-36.84136148790473  /)
 !
         IF(R .GE. MaxR) THEN

@@ -31,7 +31,6 @@
 
 MODULE MondoLogger
 
-
   USE GlobalCharacters
   USE GlobalObjects
   USE ParsingConstants
@@ -42,7 +41,6 @@ MODULE MondoLogger
   PUBLIC :: MondoLog, MondoLogPlain, ProcessName
 
 CONTAINS
-
 
 !---------------------------------------------------------------------
 !
@@ -68,7 +66,6 @@ CONTAINS
     ENDIF
   END FUNCTION ProcessName
 
-
   ! Open the logfile.
   FUNCTION OpenLogfile(filename, fd) RESULT(fileOutput)
     CHARACTER(LEN=*), INTENT(IN) :: filename
@@ -92,7 +89,7 @@ CONTAINS
       isOpen = .FALSE.
     ENDIF
 
-    IF(exists.AND.(.NOT.isopen)) THEN
+    IF(exists.AND.(.NOT.isOpen)) THEN
 
       ! Open existing file and position at the bottom (default)
       OPEN(UNIT = fd, FILE = filename, &
@@ -170,34 +167,11 @@ CONTAINS
 
      output=TRIM(output)//' '//TRIM(message)
 
+      IF(fileOutput) THEN
+        WRITE(123,"(A)") TRIM(output)
+      ENDIF
 
-!!$      ! Write messsage.
-!!$      output = "not set"
-!!$      IF(LEN_TRIM(tag) > 0) THEN
-!!$
-!!$        IF(PRESENT(file_O)) THEN
-!!$          IF(PRESENT(line_O)) THEN
-!!$            output = "["//TRIM(tag)//" "//TRIM(file_O)//":"//TRIM(line_string)//"] "//TRIM(message)
-!!$          ELSE
-!!$            output = "["//TRIM(tag)//" "//TRIM(file_O)//"] "//TRIM(message)
-!!$          ENDIF
-!!$
-!!$        ELSE
-!!$
-!!$          IF(PRESENT(line_O)) THEN
-!!$            WRITE(*,*) "what file?"
-!!$            CALL Trap()
-!!$          ELSE
-!!$            output = "["//TRIM(tag)//"] "//TRIM(message)
-!!$          ENDIF
-!!$        ENDIF
-!!$      ELSE
-!!$        output = TRIM(message)
-!!$      ENDIF
-
-      IF(fileOutput) &
-      WRITE(123,"(A)")' '//TRIM(output)
-      WRITE(*  ,"(A)")' '//TRIM(output)
+      WRITE(*,"(A)") TRIM(output)
 
       ! Close logfile.
       IF(fileOutput) CLOSE(123)
@@ -213,6 +187,5 @@ CONTAINS
     CALL MondoLog(DEBUG_NONE, "", message,NoIndent_O=.TRUE.)
 
   END SUBROUTINE MondoLogPlain
-
 
 END MODULE MondoLogger

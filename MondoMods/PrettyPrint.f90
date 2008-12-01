@@ -33,19 +33,19 @@ MODULE PrettyPrint
                        Print_HGRho
    END INTERFACE
 !
-   INTERFACE PChkSum   
+   INTERFACE PChkSum
       MODULE PROCEDURE Print_CheckSum_DBL_VECT
       MODULE PROCEDURE Print_CheckSum_DBL_RNK2
       MODULE PROCEDURE Print_CheckSum_BCSR
       MODULE PROCEDURE Print_CheckSum_HGRho
-#ifdef PARALLEL 
-      MODULE PROCEDURE Print_CheckSum_DBCSR 
+#ifdef PARALLEL
+      MODULE PROCEDURE Print_CheckSum_DBCSR
 #endif
    END INTERFACE
 !
    CHARACTER(LEN=DEFAULT_CHR_LEN) :: String
    CHARACTER(LEN=*),PARAMETER     :: CheckEq=' CheckSum  = '
-   CONTAINS 
+   CONTAINS
       SUBROUTINE TimeStamp(Mssg,Enter_O)
          CHARACTER(LEN=*),INTENT(IN) :: Mssg
          LOGICAL,OPTIONAL,INTENT(IN) :: Enter_O
@@ -53,7 +53,7 @@ MODULE PrettyPrint
          CHARACTER(LEN=10)           :: TTime
          CHARACTER(LEN=5)            :: Zone
          INTEGER, DIMENSION(8)       :: Values
-         LOGICAL                     :: Enter 
+         LOGICAL                     :: Enter
 #ifdef PARALLEL
          IF(MyID==0)THEN
 #endif
@@ -102,7 +102,7 @@ MODULE PrettyPrint
          CHARACTER(LEN=*),INTENT(IN)          :: X
          CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Name_O,FileName_O
          INTEGER, OPTIONAL,INTENT(IN)         :: Unit_O
-         INTEGER                              :: PU               
+         INTEGER                              :: PU
          PU=OpenPU(FileName_O,Unit_O)
          IF(PrintFlags%Fmt==DEBUG_MMASTYLE.AND.PRESENT(Name_O))THEN
             WRITE(PU,11)TRIM(Name_O),TRIM(X)
@@ -115,7 +115,7 @@ MODULE PrettyPrint
          ENDIF
          CALL ClosePU(PU)
       11 FORMAT(1x,A,' = ',A,';')
-      12 FORMAT(1x,A,' = ',A) 
+      12 FORMAT(1x,A,' = ',A)
       13 FORMAT('(* ',A,' *)')
       14 FORMAT(1x,A)
       END SUBROUTINE Print_CHR_SCLR
@@ -123,10 +123,10 @@ MODULE PrettyPrint
       SUBROUTINE Print_INT_SCLR(X,Name,FileName_O,Unit_O,Protect_O)
          INTEGER,                   INTENT(IN) :: X
          CHARACTER(LEN=*),          INTENT(IN) :: Name
-         CHARACTER(LEN=*), OPTIONAL,INTENT(IN) :: FileName_O 
+         CHARACTER(LEN=*), OPTIONAL,INTENT(IN) :: FileName_O
          INTEGER,          OPTIONAL,INTENT(IN) :: Unit_O
          LOGICAL,          OPTIONAL,INTENT(IN) :: Protect_O
-         INTEGER                               :: PU               
+         INTEGER                               :: PU
          CHARACTER(LEN=INTERNAL_INT_LEN)       :: CTmp,Id
          INTEGER                               :: I,J,M,N
          LOGICAL                               :: Protect
@@ -150,7 +150,7 @@ MODULE PrettyPrint
             DO I=0,NPrc-1
                CALL AlignNodes()
                IF(MyId==I)THEN
-                  PU=OpenPU(FileName_O,Unit_O)              
+                  PU=OpenPU(FileName_O,Unit_O)
                   Id=IntToChar(MyId)
                   IF(PrintFlags%Fmt==DEBUG_MMASTYLE)THEN
                      WRITE(PU,*)TRIM(Name),'[',TRIM(Id),'] = ',TRIM(CTmp),';'
@@ -162,7 +162,7 @@ MODULE PrettyPrint
             ENDDO
          ELSE
 #endif
-            PU=OpenPU(FileName_O,Unit_O)              
+            PU=OpenPU(FileName_O,Unit_O)
             IF(PrintFlags%Fmt==DEBUG_MMASTYLE)THEN
                WRITE(PU,*)TRIM(Name),' = ',TRIM(CTmp),';'
             ELSE
@@ -189,7 +189,7 @@ MODULE PrettyPrint
          CHARACTER(LEN=*),          INTENT(IN) :: Name
          CHARACTER(LEN=*), OPTIONAL,INTENT(IN) :: FileName_O
          INTEGER,          OPTIONAL,INTENT(IN) :: Unit_O
-         INTEGER                               :: PU               
+         INTEGER                               :: PU
          PU=OpenPU(FileName_O,Unit_O)
          IF(PrintFlags%Fmt==DEBUG_MMASTYLE)THEN
             WRITE(PU,11)Name,FRACTION(X),EXPONENT(X)
@@ -204,13 +204,13 @@ MODULE PrettyPrint
 !     PRINT AN INT_VECT
 !
       SUBROUTINE Print_INT_VECT(A,Name,N_O,M_O,FileName_O,Unit_O)
-         TYPE(INT_VECT),            INTENT(IN) :: A 
+         TYPE(INT_VECT),            INTENT(IN) :: A
          CHARACTER(LEN=*),          INTENT(IN) :: Name
          CHARACTER(LEN=*), OPTIONAL,INTENT(IN) :: FileName_O
          INTEGER,          OPTIONAL,INTENT(IN) :: Unit_O,M_O,N_O
          TYPE(CHR_VECT)                        :: CA
          CHARACTER(LEN=INTERNAL_INT_LEN)       :: Id
-         INTEGER                               :: PU               
+         INTEGER                               :: PU
          INTEGER                               :: I,J,M,N
          M=1;         IF(PRESENT(M_O))M=M_O
          N=SIZE(A%I); IF(PRESENT(N_O))N=N_O
@@ -227,16 +227,16 @@ MODULE PrettyPrint
 #ifdef PARALLEL
          ENDIF
          DO I=0,NPrc-1
-            CALL AlignNodes()         
+            CALL AlignNodes()
             IF(MyId==I)THEN
-               PU=OpenPU(FileName_O,Unit_O)              
+               PU=OpenPU(FileName_O,Unit_O)
                Id=IntToChar(MyId)
                WRITE(PU,*)TRIM(Name),'[',TRIM(Id),'] := ',(TRIM(CA%C(J)),', ',J=M,N)
                CALL ClosePU(PU)
             ENDIF
          ENDDO
 #else
-         PU=OpenPU(FileName_O,Unit_O)              
+         PU=OpenPU(FileName_O,Unit_O)
          WRITE(PU,*)TRIM(Name),' := ',(TRIM(CA%C(J)),', ',J=1,N)
          CALL ClosePU(PU)
 #endif
@@ -257,13 +257,13 @@ MODULE PrettyPrint
 !     PRINT AN INT_VECT
 !
       SUBROUTINE Print_DBL_VECT(A,Name,N_O,M_O,FileName_O,Unit_O)
-         TYPE(DBL_VECT),            INTENT(IN) :: A 
+         TYPE(DBL_VECT),            INTENT(IN) :: A
          CHARACTER(LEN=*),          INTENT(IN) :: Name
          CHARACTER(LEN=*), OPTIONAL,INTENT(IN) :: FileName_O
          INTEGER,          OPTIONAL,INTENT(IN) :: Unit_O,M_O,N_O
          TYPE(CHR_VECT)                        :: CA
          CHARACTER(LEN=INTERNAL_INT_LEN)       :: Id
-         INTEGER                               :: PU               
+         INTEGER                               :: PU
          INTEGER                               :: I,J,M,N
          M=1;         IF(PRESENT(M_O))M=M_O
          N=SIZE(A%D); IF(PRESENT(N_O))N=N_O
@@ -280,16 +280,16 @@ MODULE PrettyPrint
 #ifdef PARALLEL
          ENDIF
          DO I=0,NPrc-1
-            CALL AlignNodes()         
+            CALL AlignNodes()
             IF(MyId==I)THEN
-               PU=OpenPU(FileName_O,Unit_O)              
+               PU=OpenPU(FileName_O,Unit_O)
                Id=IntToChar(MyId)
                WRITE(PU,*)TRIM(Name),'[',TRIM(Id),'] := ',(TRIM(CA%C(J)),', ',J=M,N)
                CALL ClosePU(PU)
             ENDIF
          ENDDO
 #else
-         PU=OpenPU(FileName_O,Unit_O)              
+         PU=OpenPU(FileName_O,Unit_O)
          WRITE(PU,*)TRIM(Name),' := ',(TRIM(CA%C(J)),', ',J=1,N)
          CALL ClosePU(PU)
 #endif
@@ -306,7 +306,7 @@ MODULE PrettyPrint
 #endif
          CALL Delete(CA)
       END SUBROUTINE Print_DBL_VECT
-!----------------------------------------------------------------PRINT BASIS SET 
+!----------------------------------------------------------------PRINT BASIS SET
       SUBROUTINE Print_BSET(BS,Unit_O)
         TYPE(BSET) :: BS
         INTEGER,         OPTIONAL,INTENT(IN) :: Unit_O
@@ -338,7 +338,7 @@ MODULE PrettyPrint
               ENDIF
               WRITE(PU,1005)(ASymmTyps(L),L=MinL,MaxL)
               DO K=1,NP
-                 WRITE(PU,1006)K,BS%Expnt%D(K,J,I), &             
+                 WRITE(PU,1006)K,BS%Expnt%D(K,J,I), &
                       (BS%CCoef%D(M,K,J,I),M=MinL,MaxL)
               ENDDO
 !              WRITE(PU,*)Rtrn
@@ -389,7 +389,7 @@ MODULE PrettyPrint
 !
 !----------------------------------------------------------------PRINT PBC
       SUBROUTINE Print_PBCInfo(PBC,FileName_O,Unit_O)
-        TYPE(PBCInfo)                        :: PBC         
+        TYPE(PBCInfo)                        :: PBC
         INTEGER                              :: I,K,PU
         LOGICAL                              :: Opened
         INTEGER,         OPTIONAL,INTENT(IN) :: Unit_O
@@ -402,7 +402,7 @@ MODULE PrettyPrint
         WRITE(PU,*)TRIM(Mssg)
         Mssg='PFFWellSep = '//TRIM(IntToChar(PBC%PFFWelSep))
         WRITE(PU,*)TRIM(Mssg)
-           
+
         Mssg='PBCs in '//TRIM(IntToChar(PBC%Dimen))//' dimensions'
         WRITE(PU,*)TRIM(Mssg)
 
@@ -425,28 +425,28 @@ MODULE PrettyPrint
         WRITE(PU,*)' Lattice Vectors: '
         Mssg=' a =  ('//TRIM(DblToMedmChar(PBC%BoxShape%D(1,1)))//', ' &
                       //TRIM(DblToMedmChar(PBC%BoxShape%D(2,1)))//', ' &
-                      //TRIM(DblToMedmChar(PBC%BoxShape%D(3,1)))//') '                
+                      //TRIM(DblToMedmChar(PBC%BoxShape%D(3,1)))//') '
         WRITE(PU,*)TRIM(Mssg)
         Mssg=' b =  ('//TRIM(DblToMedmChar(PBC%BoxShape%D(1,2)))//', ' &
                       //TRIM(DblToMedmChar(PBC%BoxShape%D(2,2)))//', ' &
-                      //TRIM(DblToMedmChar(PBC%BoxShape%D(3,2)))//') '                
+                      //TRIM(DblToMedmChar(PBC%BoxShape%D(3,2)))//') '
         WRITE(PU,*)TRIM(Mssg)
         Mssg=' c =  ('//TRIM(DblToMedmChar(PBC%BoxShape%D(1,3)))//', ' &
                       //TRIM(DblToMedmChar(PBC%BoxShape%D(2,3)))//', ' &
-                      //TRIM(DblToMedmChar(PBC%BoxShape%D(3,3)))//') '                
+                      //TRIM(DblToMedmChar(PBC%BoxShape%D(3,3)))//') '
         WRITE(PU,*)TRIM(Mssg)
         WRITE(PU,*)' Inverse Lattice Vectors: '
         Mssg=' 1/a = ('//TRIM(DblToMedmChar(PBC%InvBoxSh%D(1,1)))//', ' &
                        //TRIM(DblToMedmChar(PBC%InvBoxSh%D(2,1)))//', ' &
-                       //TRIM(DblToMedmChar(PBC%InvBoxSh%D(3,1)))//') '                
+                       //TRIM(DblToMedmChar(PBC%InvBoxSh%D(3,1)))//') '
         WRITE(PU,*)TRIM(Mssg)
         Mssg=' 1/b = ('//TRIM(DblToMedmChar(PBC%InvBoxSh%D(1,2)))//', ' &
                        //TRIM(DblToMedmChar(PBC%InvBoxSh%D(2,2)))//', ' &
-                       //TRIM(DblToMedmChar(PBC%InvBoxSh%D(3,2)))//') '                 
+                       //TRIM(DblToMedmChar(PBC%InvBoxSh%D(3,2)))//') '
         WRITE(PU,*)TRIM(Mssg)
         Mssg=' 1/c = ('//TRIM(DblToMedmChar(PBC%InvBoxSh%D(1,3)))//', ' &
                        //TRIM(DblToMedmChar(PBC%InvBoxSh%D(2,3)))//', ' &
-                       //TRIM(DblToMedmChar(PBC%InvBoxSh%D(3,3)))//') '                
+                       //TRIM(DblToMedmChar(PBC%InvBoxSh%D(3,3)))//') '
         WRITE(PU,*)TRIM(Mssg)
         CALL ClosePU(PU)
 !
@@ -495,9 +495,9 @@ MODULE PrettyPrint
      END SUBROUTINE XSFPreamble
 
      SUBROUTINE Print_CRDS(GM,FileName_O,Unit_O,PrintGeom_O,NewFile_O,Clone_O,CrdInAng_O,Remark_O,Gradients_O)
-       TYPE(CRDS) :: GM         
-       INTEGER :: K
-       LOGICAL :: Opened
+       TYPE(CRDS)                           :: GM
+       INTEGER                              :: K
+       LOGICAL                              :: Opened
        INTEGER,         OPTIONAL,INTENT(IN) :: Unit_O,Clone_O
        CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: FileName_O,PrintGeom_O,Remark_O,Gradients_O
        LOGICAL,         OPTIONAL,INTENT(IN) :: NewFile_O,CrdInAng_O
@@ -509,7 +509,7 @@ MODULE PrettyPrint
        CHARACTER(LEN=2)                     :: Atom
        CHARACTER(LEN=4)                     :: PDBAtom
        REAL(DOUBLE)                         :: AA,GAA
-       REAL(DOUBLE), DIMENSION(3)     :: VTmp
+       REAL(DOUBLE), DIMENSION(3)           :: VTmp
        REAL(DOUBLE)                         :: A,B,C,Alpha,Beta,Gamma
 
 
@@ -533,7 +533,7 @@ MODULE PrettyPrint
           GAA=AUToAngstroms/InternalTimeToFemtoseconds
        ELSEIF(TRIM(Gradients)=='Gradients')THEN
           AA=AUToAngstroms
-          GAA=AU2eV*AUToAngstroms
+          GAA=au2eV*AUToAngstroms
        ELSE
           AA=AUToAngstroms
        ENDIF
@@ -551,10 +551,10 @@ MODULE PrettyPrint
                    Mssg=IntToChar(GM%NAtms)
                    WRITE(PU,*)TRIM(Mssg)
                    IF(PRESENT(Remark_O))THEN
-                      Mssg=TRIM(Remark_O)//', <SCF> = '//TRIM(FltToChar(GM%ETotal*AU2Ev))//' eV'
+                      Mssg=TRIM(Remark_O)//', <SCF> = '//TRIM(FltToChar(GM%ETotal*au2eV))//' eV'
                    ELSE
                       Mssg='Geom #'//TRIM(IntToChar(GM%Confg)) &
-                           //', <SCF> = '//TRIM(FltToChar(GM%ETotal*AU2Ev))//' eV'
+                           //', <SCF> = '//TRIM(FltToChar(GM%ETotal*au2eV))//' eV'
                    ENDIF
                    IF(PRESENT(Clone_O)) &
                         Mssg='Clone # '//TRIM(IntToChar(Clone_O))//" / "//TRIM(Mssg)
@@ -637,9 +637,9 @@ MODULE PrettyPrint
                 WRITE(PU,11)GM%Confg
 11              FORMAT('MODEL  ',I6)
                 IF(PRESENT(Remark_O))THEN
-                   Mssg=TRIM(Remark_O)//', <SCF> = '//TRIM(FltToChar(GM%ETotal*AU2Ev))//' eV'
-                ELSE                   
-                   Mssg=' <SCF> = '//TRIM(FltToChar(GM%ETotal*AU2Ev))//' eV'
+                   Mssg=TRIM(Remark_O)//', <SCF> = '//TRIM(FltToChar(GM%ETotal*au2eV))//' eV'
+                ELSE
+                   Mssg=' <SCF> = '//TRIM(FltToChar(GM%ETotal*au2eV))//' eV'
                 ENDIF
                 WRITE(PU,22)Mssg
 22              FORMAT('REMARK   1  ',A60)
@@ -681,9 +681,9 @@ MODULE PrettyPrint
                 CALL VecToAng(GM%PBC,A,B,C,Alpha,Beta,Gamma)
                 !
                 IF(PRESENT(Remark_O))THEN
-                   Mssg='data_'//TRIM(Remark_O)//'_<SCF>_=_'//TRIM(FltToChar(GM%ETotal*AU2Ev))//' eV'
-                ELSE                   
-                   Mssg='data_'//'Geom#'//TRIM(IntToChar(GM%Confg))//'_<SCF>_=_'//TRIM(FltToChar(GM%ETotal*AU2Ev))//'_eV'
+                   Mssg='data_'//TRIM(Remark_O)//'_<SCF>_=_'//TRIM(FltToChar(GM%ETotal*au2eV))//' eV'
+                ELSE
+                   Mssg='data_'//'Geom#'//TRIM(IntToChar(GM%Confg))//'_<SCF>_=_'//TRIM(FltToChar(GM%ETotal*au2eV))//'_eV'
                 ENDIF
                 Mssg=Squish(Mssg)
                 WRITE(PU,500) Mssg
@@ -693,7 +693,7 @@ MODULE PrettyPrint
                 WRITE(PU,503) B
                 WRITE(PU,504) C
                 WRITE(PU,505) Alpha
-                WRITE(PU,506) Beta 
+                WRITE(PU,506) Beta
                 WRITE(PU,507) Gamma
                 WRITE(PU,508) GM%PBC%CellVolume
                 !Atoms
@@ -770,7 +770,7 @@ MODULE PrettyPrint
                 Mssg=TRIM(IntToChar(I))//'   '//Ats(INT(GM%AtNum%D(I))) &  !!!! correct only for integer charged QM atoms
                      //'   '//DblToMedmChar(GM%Carts%D(1,I))          &
                      //'   '//DblToMedmChar(GM%Carts%D(2,I))          &
-                     //'   '//DblToMedmChar(GM%Carts%D(3,I))           
+                     //'   '//DblToMedmChar(GM%Carts%D(3,I))
                 WRITE(PU,*)TRIM(Mssg)
              ENDDO
              WRITE(PU,3)
@@ -787,21 +787,21 @@ MODULE PrettyPrint
 !-----------------------------------------------------------------------------
 !    Print a BCSR matrix
 !
-     SUBROUTINE Print_BCSR(A,Name,FileName_O,Unit_O)       
+     SUBROUTINE Print_BCSR(A,Name,FileName_O,Unit_O)
         TYPE(BCSR)                           :: A
         TYPE(DBL_RNK2)                       :: B
         CHARACTER(LEN=*),INTENT(IN)          :: Name
-        INTEGER,         OPTIONAL,INTENT(IN) :: Unit_O                
-       
+        INTEGER,         OPTIONAL,INTENT(IN) :: Unit_O
+
         CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: FileName_O
-       IF(PrintFlags%Mat/=DEBUG_MATRICES.AND.(.NOT.PRESENT(Unit_O)))RETURN        
-#ifdef PARALLEL 
+       IF(PrintFlags%Mat/=DEBUG_MATRICES.AND.(.NOT.PRESENT(Unit_O)))RETURN
+#ifdef PARALLEL
         IF(MyId==ROOT)THEN
 #endif
            CALL SetEq(B,A)
            CALL Print_DBL_RNK2(B,Name,FileName_O,Unit_O)
            CALL Delete(B)
-#ifdef PARALLEL 
+#ifdef PARALLEL
         ENDIF
 #endif
      END SUBROUTINE Print_BCSR
@@ -809,7 +809,7 @@ MODULE PrettyPrint
 !-----------------------------------------------------------------------------
 !    Print a DBCSR matrix
 !
-     SUBROUTINE Print_DBCSR(A,Name,FileName_O,Node_O,Distrib_O)       
+     SUBROUTINE Print_DBCSR(A,Name,FileName_O,Node_O,Distrib_O)
         TYPE(DBCSR), INTENT(INOUT)           :: A
         TYPE(DBL_RNK2)                       :: B
         TYPE(BCSR)                           :: C
@@ -822,7 +822,7 @@ MODULE PrettyPrint
         IF(PrintFlags%Mat/=DEBUG_MATRICES)RETURN
         IF(PRESENT(Distrib_O))THEN
            IF(Distrib_O)THEN
-              CALL SetEq(B,A) 
+              CALL SetEq(B,A)
               DO I=0,NPrc-1
                  IF(InParallel)CALL AlignNodes()
                  IF(MyId==I)THEN
@@ -833,10 +833,10 @@ MODULE PrettyPrint
               CALL Delete(B)
            ELSE
               CALL Halt(' Logic error 1 in Print_DBCSR ')
-           ENDIF          
+           ENDIF
         ELSEIF(PRESENT(Node_O))THEN
            IF(MyId==Node_O)THEN
-              CALL SetEq(B,A) 
+              CALL SetEq(B,A)
               Name2=TRIM(Name)//'['//TRIM(IntToChar(Node_O))//']'
               CALL Print_DBL_RNK2(B,Name2,OutFile)
               CALL Delete(B)
@@ -849,10 +849,10 @@ MODULE PrettyPrint
      END SUBROUTINE Print_DBCSR
 #endif
 
-     SUBROUTINE Print_DBL_RNK2(A,Name,FileName_O,Unit_O)       
+     SUBROUTINE Print_DBL_RNK2(A,Name,FileName_O,Unit_O)
         TYPE(DBL_RNK2)             :: A
         CHARACTER(LEN=*)           :: Name
-        INTEGER, OPTIONAL          :: Unit_O                
+        INTEGER, OPTIONAL          :: Unit_O
         CHARACTER(LEN=*), OPTIONAL :: FileName_O
         IF(.NOT.AllocQ(A%Alloc)) &
            CALL Halt(' Matrix not allocated in Print_DBL_RNK2.')
@@ -868,14 +868,14 @@ MODULE PrettyPrint
         Unit=Out; IF(PRESENT(Unit_O))Unit=Unit_O
         IF(PRESENT(FileName_O).AND.Unit/=6)THEN
            CALL OpenASCII(FileName_O,Unit)
-        ELSEIF(Unit/=6)THEN            
+        ELSEIF(Unit/=6)THEN
            CALL OpenASCII(OutFile,Unit)
         ENDIF
-        M=SIZE(A,1); N=SIZE(A,2)        
+        M=SIZE(A,1); N=SIZE(A,2)
         IF(PrintFlags%Fmt==DEBUG_MMASTYLE)THEN
            IF(M/=N) &
               CALL Halt(' Print_DBL_Rank2A does not currently'//   &
-                        ' support rectangular matrices with'//     & 
+                        ' support rectangular matrices with'//     &
                         ' PrintFlags%Fmt==DEBUG_MMASTYLE:'//Rtrn// &
                         ' attempting to print '//TRIM(NAME))
            WRITE(Unit,100)
@@ -884,9 +884,9 @@ MODULE PrettyPrint
            DO I=1,N,2
               K=MIN(I+1,N)
               IF(K-I+1.EQ.2)THEN
-                 WRITE(Unit,202)(J,J=I,K)  
+                 WRITE(Unit,202)(J,J=I,K)
               ELSEIF(K-I+1.EQ.1)THEN
-                 WRITE(Unit,201)(J,J=I,K)  
+                 WRITE(Unit,201)(J,J=I,K)
               ENDIF
               DO L=1,N
                   IF(K-I+1.EQ.2)THEN
@@ -906,7 +906,7 @@ MODULE PrettyPrint
 !
            DO I=1,N,10
               K=MIN(I+9,N)
-              WRITE(Unit,501)(J,J=I,K)  
+              WRITE(Unit,501)(J,J=I,K)
               DO L=1,M
                 WRITE(Unit,701) L,(A(L,J),J=I,K)
               ENDDO
@@ -938,7 +938,7 @@ MODULE PrettyPrint
 !==================================================================
 !
 !    Print Check Sums
-!      
+!
 !==================================================================
    SUBROUTINE Print_CheckSum_DBL_VECT(A,Name,Unit_O,Proc_O)
         TYPE(DBL_VECT), INTENT(IN)           :: A
@@ -951,13 +951,13 @@ MODULE PrettyPrint
 !----------------------------------------------------------------------------------------
         IF(PrintFlags%Key/=DEBUG_MAXIMUM.AND. &
            PrintFlags%Chk/=DEBUG_CHKSUMS)RETURN
-!---------------------------------------------------------------------------------------   
+!---------------------------------------------------------------------------------------
 !       Compute check sum
         Chk=Zero
         DO I=LBOUND(A%D,1),UBOUND(A%D,1)
            Chk=Chk+A%D(I)*A%D(I)
         ENDDO
-        Chk=SQRT(Chk) 
+        Chk=SQRT(Chk)
 #ifdef PARALLEL
         IF(MyID==ROOT)THEN
 #endif
@@ -984,7 +984,7 @@ MODULE PrettyPrint
 !----------------------------------------------------------------------------------------
         IF(PrintFlags%Key/=DEBUG_MAXIMUM.AND. &
            PrintFlags%Chk/=DEBUG_CHKSUMS)RETURN
-!---------------------------------------------------------------------------------------   
+!---------------------------------------------------------------------------------------
 !       Compute check sum
         Chk=Zero
         DO I=LBOUND(A%D,1),UBOUND(A%D,1)
@@ -992,7 +992,7 @@ MODULE PrettyPrint
               Chk=Chk+A%D(I,J)*A%D(I,J)
            ENDDO
         ENDDO
-        Chk=SQRT(Chk) 
+        Chk=SQRT(Chk)
 #ifdef PARALLEL
         IF(MyID==ROOT)THEN
 #endif
@@ -1020,7 +1020,7 @@ MODULE PrettyPrint
 !----------------------------------------------------------------------------------------
         IF(PrintFlags%Key/=DEBUG_MAXIMUM .AND. &
              PrintFlags%Chk/=DEBUG_CHKSUMS)RETURN
-!---------------------------------------------------------------------------------------   
+!---------------------------------------------------------------------------------------
 !       Compute check sum
 #ifdef PARALLEL
         IF(MyID==ROOT)THEN
@@ -1029,7 +1029,7 @@ MODULE PrettyPrint
         DO I=1,A%NNon0
            Chk=Chk+A%MTrix%D(I)*A%Mtrix%D(I)
         ENDDO
-        Chk=SQRT(Chk) 
+        Chk=SQRT(Chk)
 !#ifdef PARALLEL
 !        IF(MyID==ROOT)THEN
 !#endif
@@ -1046,7 +1046,7 @@ MODULE PrettyPrint
       END SUBROUTINE Print_CheckSum_BCSR
 !----------------------------------------------------------------------------------------
 !
-!----------------------------------------------------------------------------------------   
+!----------------------------------------------------------------------------------------
 #ifdef PARALLEL
    SUBROUTINE Print_CheckSum_DBCSR(A,Name,Proc_O,Unit_O)
       TYPE(DBCSR), INTENT(IN)   :: A
@@ -1061,14 +1061,14 @@ MODULE PrettyPrint
 !----------------------------------------------------------------------------------------
     IF(PrintFlags%Key/=DEBUG_MAXIMUM.AND. &
        PrintFlags%Chk/=DEBUG_CHKSUMS)RETURN
-!---------------------------------------------------------------------------------------   
+!---------------------------------------------------------------------------------------
       Chk=Zero
       DO I=1,A%NNon0
          Chk=Chk+A%MTrix%D(I)*A%Mtrix%D(I)
       ENDDO
       DotPrd=Reduce(Chk)
       IF(MyID==ROOT)THEN
-         Chk=SQRT(DotPrd) 
+         Chk=SQRT(DotPrd)
          ! Create check string
          ChkStr=CheckSumString(Chk,Name,Proc_O)
          PU=OpenPU(Unit_O=Unit_O)
@@ -1082,7 +1082,7 @@ MODULE PrettyPrint
 !----------------------------------------------------------------------------------------
   SUBROUTINE Print_CheckSum_HGRho(A,Name,DistRho,Proc_O,Unit_O)
     TYPE(HGRho)                          :: A
-    CHARACTER(LEN=*)                     :: Name   
+    CHARACTER(LEN=*)                     :: Name
     INTEGER,         OPTIONAL,INTENT(IN) :: Unit_O
     CHARACTER(LEN=*),OPTIONAL            :: Proc_O
     LOGICAL                              :: DistRho
@@ -1095,7 +1095,7 @@ MODULE PrettyPrint
 !----------------------------------------------------------------------------------------
     IF(PrintFlags%Key/=DEBUG_MAXIMUM.AND. &
        PrintFlags%Chk/=DEBUG_CHKSUMS)RETURN
-!---------------------------------------------------------------------------------------   
+!---------------------------------------------------------------------------------------
     IF(.NOT. AllocQ(A%Alloc)) THEN
        CALL Halt(' Density not allocated in Print_CheckSum_HGRho')
     ENDIF
@@ -1107,11 +1107,11 @@ MODULE PrettyPrint
        Zt =A%Expt%D(zq)
        oq =A%OffQ%I(zq)
        orr=A%OffR%I(zq)
-       Ell    = A%Lndx%I(zq) 
+       Ell    = A%Lndx%I(zq)
        LenKet = LHGTF(Ell)
        DO iq=1,A%NQ%I(zq)
           jadd=orr+(iq-1)*LenKet
-          DO LMN=1,LenKet  
+          DO LMN=1,LenKet
              ChkCoef=ChkCoef+ ABS(A%Co%D(jadd+LMN))
              ChkExp =ChkExp + Zt*ABS(A%Co%D(jadd+LMN))
              ChkLMN =ChkLMN + DBLE(LMN)*ABS(A%Co%D(jadd+LMN))
@@ -1122,7 +1122,7 @@ MODULE PrettyPrint
     SChkCoef = Reduce(ChkCoef)
     SChkExp  = Reduce(ChkExp)
     SChkLMN  = Reduce(ChkLMN)
-    IF(MyID == ROOT) THEN   
+    IF(MyID == ROOT) THEN
        IF(DistRho) THEN
           ChkCoef = SChkCoef
           ChkExp  = SChkExp
@@ -1166,16 +1166,16 @@ MODULE PrettyPrint
     ELSEIF(PrintFlags%Fmt==DEBUG_MMASTYLE)THEN
        ChkStr='ChkSum'//TRIM(Name)//' = '//TRIM(FltToChar(FRACTION(Chk))) &
             //'*2^('//TRIM(IntToChar(EXPONENT(Chk)))//');'
-    ELSE 
+    ELSE
        CALL Halt(' Logic error in Print_CheckSum_BCSR')
     ENDIF
   END FUNCTION CheckSumString
 !========================================================================================
-!     Print Out the Density 
+!     Print Out the Density
 !========================================================================================
   SUBROUTINE Print_HGRho(A,Name,FileName_O,Unit_O)
     TYPE(HGRho)                      :: A
-    CHARACTER(LEN=*)                 :: Name   
+    CHARACTER(LEN=*)                 :: Name
     CHARACTER(LEN=*),OPTIONAL        :: FileName_O
     INTEGER,OPTIONAL                 :: Unit_O
     INTEGER                          :: PU
@@ -1196,7 +1196,7 @@ MODULE PrettyPrint
        DO zq=1,A%NExpt-1
           oq =A%OffQ%I(zq)
           orr=A%OffR%I(zq)
-          Ell=A%Lndx%I(zq) 
+          Ell=A%Lndx%I(zq)
           LenKet=LHGTF(Ell)
           Strng=Squish('zeta='//DblToMMAChar(A%Expt%D(zq))//';')
           WRITE(PU,*)TRIM(Strng)
@@ -1207,7 +1207,7 @@ MODULE PrettyPrint
                 iadd=oq+iq
                 jadd=orr+(iq-1)*LenKet
                 Strng=Squish('Q={'//DblToMMAChar(A%Qx%D(iadd))   &
-                             //','//DblToMMAChar(A%Qy%D(iadd))   &  
+                             //','//DblToMMAChar(A%Qy%D(iadd))   &
                              //','//DblToMMAChar(A%Qz%D(iadd))//'};')
                 WRITE(PU,*)TRIM(Strng)
                 WRITE(PU,*)'RQ=R-Q;'
@@ -1223,7 +1223,7 @@ MODULE PrettyPrint
                    LMN=LMNDex(L,M,N)+jadd
                    Strng=Squish('RhoSum=RhoSum+Lx['//IntToChar(L)//']*Ly['//IntToChar(M) &
                               //']*Lz['//IntToChar(N)//']'//'*ExpRQ*'//DblToMMAChar(A%Co%D(LMN))//';')
-                   WRITE(PU,*)TRIM(Strng)                    
+                   WRITE(PU,*)TRIM(Strng)
                 ENDDO
                 ENDDO
                 ENDDO
@@ -1231,7 +1231,7 @@ MODULE PrettyPrint
           ENDIF
        ENDDO
        WRITE(PU,*)'RhoSum];'
-    ELSEIF(PrintFlags%Key==DEBUG_MEDIUM .OR. PrintFlags%Key==DEBUG_MAXIMUM.OR.PU==6) THEN 
+    ELSEIF(PrintFlags%Key==DEBUG_MEDIUM .OR. PrintFlags%Key==DEBUG_MAXIMUM.OR.PU==6) THEN
        NPrim=0
        WRITE(PU,30) Name
        WRITE(PU,31)
@@ -1243,7 +1243,7 @@ MODULE PrettyPrint
           DO zq=1,A%NExpt
              oq =A%OffQ%I(zq)
              orr=A%OffR%I(zq)
-             Ell    = A%Lndx%I(zq) 
+             Ell    = A%Lndx%I(zq)
              LenKet = LHGTF(Ell)
              IF(A%NQ%I(zq).NE.0) THEN
                 DO iq=1,A%NQ%I(zq)
@@ -1275,8 +1275,8 @@ MODULE PrettyPrint
 !
 10  FORMAT(' zeta[',I4,']=SetPrecision[',F19.16,'*2^(' ,I4, ')},50];')
 11  FORMAT(' Ell[',I4,']=',I2,';')
-12  FORMAT(' Q[',I4,']=SetPrecision[{',F19.16,'*2^(' ,I4, '),', & 
-                                       F19.16,'*2^(' ,I4, '),', & 
+12  FORMAT(' Q[',I4,']=SetPrecision[{',F19.16,'*2^(' ,I4, '),', &
+                                       F19.16,'*2^(' ,I4, '),', &
                                        F19.16,'*2^(' ,I4, ')},50];')
 14  FORMAT(' Co[',I4,', ',I2,', ',I2,', ',I2,']=SetPrecision[',F19.16,'*2^(',I4,'),50];')
 15  FORMAT(' NPrim=',I6)
@@ -1320,8 +1320,8 @@ MODULE PrettyPrint
 #ifdef CJsStuff
     WRITE(PU,10)
     WRITE(PU,11) Strng
-    WRITE(PU,12) 
-    WRITE(PU,20) A%DPole%D(1),A%DPole%D(2),A%DPole%D(3)      
+    WRITE(PU,12)
+    WRITE(PU,20) A%DPole%D(1),A%DPole%D(2),A%DPole%D(3)
     WRITE(PU,13)
     WRITE(PU,20) A%QPole%D(1),A%QPole%D(2),A%QPole%D(3)
     WRITE(PU,14)
@@ -1339,7 +1339,7 @@ MODULE PrettyPrint
 !========================================================================================
 ! Print The Forces
 !========================================================================================
-  SUBROUTINE Print_Force(GM,Frc,Name_O,Unit_O) 
+  SUBROUTINE Print_Force(GM,Frc,Name_O,Unit_O)
     TYPE(CRDS)                     :: GM
     TYPE(DBL_VECT)                 :: Frc
     CHARACTER(LEN=*),OPTIONAL      :: Name_O
@@ -1354,13 +1354,13 @@ MODULE PrettyPrint
     IF(PRESENT(Name_O)) WRITE(PU,32) TRIM(Name_O)
     WRITE(PU,33)
     WRITE(PU,34)
-    WRITE(PU,33) 
+    WRITE(PU,33)
     DO AtA = 1,GM%Natms
        A1=3*(AtA-1)+1
        A2=3*AtA
        WRITE(PU,35) AtA,INT(GM%AtNum%D(AtA)),Frc%D(A1:A2)
     ENDDO
-    WRITE(PU,33) 
+    WRITE(PU,33)
     CALL ClosePU(PU)
 !
 32  FORMAT(1X,A)
@@ -1373,7 +1373,7 @@ MODULE PrettyPrint
 !========================================================================================
 ! Print The Lattice Forces
 !========================================================================================
-  SUBROUTINE Print_LatForce(GM,LFrc,Name_O,Unit_O) 
+  SUBROUTINE Print_LatForce(GM,LFrc,Name_O,Unit_O)
     TYPE(CRDS)                     :: GM
     REAL(DOUBLE),DIMENSION(3,3)    :: LFrc
     CHARACTER(LEN=*),OPTIONAL      :: Name_O
@@ -1394,7 +1394,7 @@ MODULE PrettyPrint
        DO I=1,3
           WRITE(PU,40) LFrc(I,1:3)
        ENDDO
-       WRITE(PU,33) 
+       WRITE(PU,33)
     ENDIF
     CALL ClosePU(PU)
 !
@@ -1432,7 +1432,7 @@ MODULE PrettyPrint
 !
     IF(PRESENT(Proc_O)) THEN
        ChkStr=ProcessName(Proc_O)//TRIM(Name)// " ForceSum = " //TRIM(DblToChar(ChkF))
-    ELSE          
+    ELSE
        ChkStr=TRIM(Name)// " ForceSum = " //TRIM(DblToChar(ChkF))
     ENDIF
 !
@@ -1471,7 +1471,7 @@ MODULE PrettyPrint
     ENDIF
   END FUNCTION BlockIndexString
 !---------------------------------------------------------------------
-!     
+!
 !---------------------------------------------------------------------
   SUBROUTINE Elapsed_TIME(T,Init_O,Proc_O)
     TYPE(TIME),           INTENT(INOUT)  :: T
@@ -1513,7 +1513,7 @@ MODULE PrettyPrint
           TimeMin=Reduce(T%Wall,MPI_MIN)
        ENDIF
        IF(MyId==ROOT.AND.InParallel.AND.PrintFlags%Key>=DEBUG_MEDIUM)THEN
-          ! Compute relative imbalance 
+          ! Compute relative imbalance
           TimeAve=TimeTot/DBLE(NPrc)
           IF(TimeTot/=Zero)THEN
              Imb=ABS(TimeMax-TimeAve)/TimeAve
@@ -1526,9 +1526,9 @@ MODULE PrettyPrint
           Mssg=       '                    Imblnce = '//TRIM(DblToShrtChar(Imb))      &
                //Rtrn//'                     MinTime = '//TRIM(DblToShrtChar(TimeMin)) &
                //Rtrn//'                     AvgTime = '//TRIM(DblToShrtChar(TimeAve)) &
-               //Rtrn//'                     MaxTime = '//TRIM(DblToShrtChar(TimeMax)) 
+               //Rtrn//'                     MaxTime = '//TRIM(DblToShrtChar(TimeMax))
           WRITE(PU,*)TRIM(Mssg)
-          CLOSE(Out)          
+          CLOSE(Out)
        ENDIF
     ENDIF
 #endif
@@ -1600,7 +1600,7 @@ MODULE PrettyPrint
              Mssg=ProcessName(TRIM(Proc))//'CPU (Sec,MFLOPS) = (' &
                   //TRIM(DblToShrtChar(Elapsed_CPUS))//', '     &
                   //TRIM(IntToChar(MFlops(FLOPS,Elapsed_CPUS))) &
-                  //'),'//RTRN//ProcessName()//' WALL(Sec,MFLOPS) = ('                  &
+                  //'),'//Rtrn//ProcessName()//' WALL(Sec,MFLOPS) = ('                  &
                   //TRIM(DblToShrtChar(Elapsed_Wall))//', '     &
                   //TRIM(IntToChar(MFlops(FLOPS,Elapsed_Wall))) &
                   //'), NProc = '//TRIM(IntToChar(NPrc))
@@ -1608,7 +1608,7 @@ MODULE PrettyPrint
              Mssg=ProcessName(TRIM(Proc))//'CPU (Sec,MFLOPS) = (' &
                   //TRIM(DblToShrtChar(Elapsed_CPUS))//', '     &
                   //TRIM(IntToChar(MFlops(FLOPS,Elapsed_CPUS))) &
-                  //'),'//RTRN//ProcessName()//' WALL(Sec,MFLOPS) = ('                  &
+                  //'),'//Rtrn//ProcessName()//' WALL(Sec,MFLOPS) = ('                  &
                   //TRIM(DblToShrtChar(Elapsed_Wall))//', '     &
                   //TRIM(IntToChar(MFlops(FLOPS,Elapsed_Wall))) &
                   //')'
@@ -1638,7 +1638,7 @@ MODULE PrettyPrint
              Mssg=ProcessName(TRIM(Proc))//'CPU Sec = '  &
                   //TRIM(DblToShrtChar(Elapsed_CPUS))  &
                   //', WALL Sec = '                    &
-                  //TRIM(DblToShrtChar(Elapsed_Wall))   
+                  //TRIM(DblToShrtChar(Elapsed_Wall))
 #endif
           ELSE
 #ifdef PARALLEL
@@ -1660,24 +1660,24 @@ MODULE PrettyPrint
   END SUBROUTINE Print_TIME
 !---------------------------------------------------------------------
 !
-!---------------------------------------------------------------------     
+!---------------------------------------------------------------------
   FUNCTION MFlops(Flops,Sec)
     REAL(DOUBLE), INTENT(IN) :: Flops,Sec
     INTEGER                  :: MFlops
     IF(Sec<=Zero.OR.Flops<=Zero)THEN
        MFlops=0
     ELSE
-       MFlops=INT(Flops*1.0D-6/Sec)         
+       MFlops=INT(Flops*1.0D-6/Sec)
     ENDIF
   END FUNCTION MFlops
 !---------------------------------------------------------------------
 !    PRINT MEMORY STATISTICS
-!---------------------------------------------------------------------     
+!---------------------------------------------------------------------
   SUBROUTINE Print_MEMS(A,Proc,Unit_O)
-    TYPE(MEMS),INTENT(IN)       :: A
-    CHARACTER(LEN=*),INTENT(IN) :: Proc
-    INTEGER,OPTIONAL            :: Unit_O
-    INTEGER                     :: I,L,PU
+    TYPE(MEMS),INTENT(IN)            :: A
+    CHARACTER(LEN=*),INTENT(IN)      :: Proc
+    INTEGER,OPTIONAL                 :: Unit_O
+    INTEGER                          :: I,L,PU
     CHARACTER(LEN=2*DEFAULT_CHR_LEN) :: Mssg
 #ifdef PARALLEL
     INTEGER :: MaxAllocs,MaxDeAllocs,IErr,MaxMemTab,MaxMaxMem
@@ -1720,9 +1720,9 @@ MODULE PrettyPrint
                   //' bytes are presently allocated.'//Rtrn                    &
                   //ProcessName()//' A max of '//TRIM(IntToChar(A%MaxMem)) &
                   //' bytes were allocated.'
-             PU=OpenPU(Unit_O=Unit_O) 
-             WRITE(PU,*)Mssg 
-             CLOSE(PU) 
+             PU=OpenPU(Unit_O=Unit_O)
+             WRITE(PU,*)Mssg
+             CLOSE(PU)
           ENDIF
        ENDDO
        CALL AlignNodes()
@@ -1745,7 +1745,7 @@ MODULE PrettyPrint
             //' bytes were allocated.'
        WRITE(PU,*)TRIM(Mssg)
        CALL PrintProtectR(PU)
-       CLOSE(PU) 
+       CLOSE(PU)
 #ifdef PARALLEL
     ENDIF
 #endif
@@ -1767,12 +1767,12 @@ MODULE PrettyPrint
 !--------------------------------------------------------------------------
   SUBROUTINE PPrint_CellSet(CS,Name,FileName_O,Unit_O)
     TYPE(CellSet)                    :: CS
-    CHARACTER(LEN=*)                 :: Name   
+    CHARACTER(LEN=*)                 :: Name
     CHARACTER(LEN=*),OPTIONAL        :: FileName_O
     INTEGER,OPTIONAL                 :: Unit_O
     INTEGER                          :: OutU
     INTEGER                          :: NC
-    REAL(DOUBLE)                     :: RMax,R2 
+    REAL(DOUBLE)                     :: RMax,R2
 !
     IF(.NOT. AllocQ(CS%Alloc)) THEN
        CALL Halt(' Cells are  not allocated in PPrint_CellSet')
@@ -1877,7 +1877,7 @@ MODULE PrettyPrint
 !==================================================================
 !
 !    PLOT A BCSR MATRIX
-!      
+!
 !==================================================================
 !      FUNCTION Dot(N,V1,V2)
 !         REAL(DOUBLE) :: Dot
@@ -1889,4 +1889,4 @@ MODULE PrettyPrint
 !         ENDDO
 !      END FUNCTION Dot
 !
-END MODULE 
+END MODULE
