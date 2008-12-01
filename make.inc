@@ -161,7 +161,11 @@ AM_LIBTOOLFLAGS = --silent
 	  rm $(basename $@)$(PREPROCESSED_SUFFIX).f; \
 	fi
 
-MondoMods_DEPENDENCY_FILES_MODS = \
+LIBRARY_DEPENDENCY_FILES = \
+  $(LIBRARY_DEPENDENCY_FILES_MODS) \
+  $(LIBRARY_DEPENDENCY_FILES_LIBS)
+
+LIBRARY_DEPENDENCY_FILES_MODS = \
   $(top_builddir)/MondoMods/ainv.mod \
   $(top_builddir)/MondoMods/annealmap.mod \
   $(top_builddir)/MondoMods/atompairs.mod \
@@ -219,7 +223,9 @@ MondoMods_DEPENDENCY_FILES_MODS = \
   $(top_builddir)/MondoMods/specfun.mod \
   $(top_builddir)/MondoMods/specfunmesh.mod \
   $(top_builddir)/MondoMods/thresholding.mod \
-  $(top_builddir)/MondoMods/utilities.mod \
+  $(top_builddir)/MondoMods/utilities.mod
+
+LIBRARY_DEPENDENCY_FILES_LIBS = \
   $(LDADD_INTERNAL_LAPACK) \
   $(LDADD_INTERNAL_HDF5) \
   $(LDADD_MONDOMODS)

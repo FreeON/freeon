@@ -5,8 +5,8 @@ bin_PROGRAMS = HiCu XCForce
 HiCu_SOURCES    = Grid.f90 Thresholds.f90 RhoTree.f90 CubeTree.f90 TreeWalk.f90 KxcGen.f90 ParaHiCu.f90 HiCu.f90
 XCForce_SOURCES = Grid.f90 Thresholds.f90 RhoTree.f90 CubeTree.f90 TreeWalk.f90 KxcGen.f90 ParaHiCu.f90 dXCBlok.f90 XCForce.f90
 
-HiCu_DEPENDENCIES    = $(MondoMods_DEPENDENCY_FILES)
-XCForce_DEPENDENCIES = $(MondoMods_DEPENDENCY_FILES)
+HiCu_DEPENDENCIES    = $(LIBRARY_DEPENDENCY_FILES)
+XCForce_DEPENDENCIES = $(LIBRARY_DEPENDENCY_FILES)
 
 SOURCES_DEPCHECK = \
   $(HiCu_SOURCES) \
