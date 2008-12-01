@@ -66,7 +66,7 @@ PROGRAM DMP_SP2 ! Density matrix purification, SP2 variation
   CALL StartUp(Args,Prog)
 #endif
   ! Check for matrix threshold overide
-  CALL SussTrix('SPTwoTrix',Prog)
+  CALL SussTrix('TCTwoTrix',Prog)
 
 
   CALL New(F)
