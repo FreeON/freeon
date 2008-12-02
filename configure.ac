@@ -119,6 +119,7 @@ esac
 
 AC_MSG_NOTICE([identified C/F77/F90: ${CC_COMPILERNAME}/${F77_COMPILERNAME}/${FC_COMPILERNAME}])
 
+# Get compiler version.
 case "${CC_COMPILERNAME}" in
   GCC)   cc_compiler_version_string="`${CC} --version | head -n1`" ;;
   Intel) cc_compiler_version_string="`${CC} --version | head -n1`" ;;
@@ -140,6 +141,10 @@ esac
 AC_DEFINE_UNQUOTED(HAVE_CC_VERSION_STRING,  ["${cc_compiler_version_string}"],  [The c compiler version string])
 AC_DEFINE_UNQUOTED(HAVE_F77_VERSION_STRING, ["${f77_compiler_version_string}"], [The f77 compiler version string])
 AC_DEFINE_UNQUOTED(HAVE_FC_VERSION_STRING,  ["${fc_compiler_version_string}"],  [The f90 compiler version string])
+
+# Put the C-compiler into standard C mode.
+AC_PROG_CC_STDC
+AC_GNU_SOURCE
 
 # Store additional optimization flags.
 optimization_flags=""
@@ -181,6 +186,21 @@ if test "${use_optimizations}" = "yes"; then
       *) AC_MSG_NOTICE([unknown build_cpu ${build_cpu}])
          CFLAGS="-O" ;;
     esac
+
+    # Test whether these flags actually produce runnable code.
+    AC_LANG(C)
+    AC_RUN_IFELSE([
+int
+main ()
+{
+  int i = 1;
+  return 0;
+}
+],
+      [],
+      [AC_MSG_NOTICE([resetting CFLAGS])
+       CFLAGS="-O"])
+
     AC_MSG_NOTICE([Setting default optimization for ${CC_COMPILERNAME} compiler: CFLAGS  = ${CFLAGS}])
     optimization_flags="${optimization_flags} CFLAGS=\"${CFLAGS}\""
   else
@@ -209,6 +229,20 @@ if test "${use_optimizations}" = "yes"; then
       *) AC_MSG_NOTICE([unknown build_cpu ${build_cpu}])
          FFLAGS="-O" ;;
     esac
+
+    # Test whether these flags actually produce runnable code.
+    AC_LANG(Fortran 77)
+    AC_RUN_IFELSE([
+      INTEGER I
+
+      I = 1
+      STOP
+      END
+],
+      [],
+      [AC_MSG_NOTICE([resetting FFLAGS])
+       FFLAGS="-O"])
+
     AC_MSG_NOTICE([Setting default optimization for ${F77_COMPILERNAME} compiler: FFLAGS  = ${FFLAGS}])
     optimization_flags="${optimization_flags} FFLAGS=\"${FFLAGS}\""
   else
@@ -237,6 +271,23 @@ if test "${use_optimizations}" = "yes"; then
       *) AC_MSG_NOTICE([unknown build_cpu ${build_cpu}])
          FCFLAGS="-O" ;;
     esac
+
+    # Test whether these flags actually produce runnable code.
+    AC_LANG(Fortran)
+    AC_FC_SRCEXT(f90)
+    AC_RUN_IFELSE([
+program runtest
+
+  integer :: i
+
+  i = 1
+
+end program runtest
+],
+      [],
+      [AC_MSG_NOTICE([resetting FCFLAGS])
+       FCFLAGS="-O"])
+
     AC_MSG_NOTICE([Setting default optimization for ${FC_COMPILERNAME} compiler: FCFLAGS = ${FCFLAGS}])
     optimization_flags="${optimization_flags} FCFLAGS=\"${FCFLAGS}\""
   else
@@ -295,10 +346,6 @@ if test "`$as_basename -- ${FC}`" != "`$as_basename -- ${F77}`"; then
   AC_MSG_FAILURE([F77 (${F77}) and F90 (${FC}) compilers are different. This is not going to work.])
 fi
 AC_MSG_RESULT([yes])
-
-# Put the C-compiler into standard C mode.
-AC_PROG_CC_STDC
-AC_GNU_SOURCE
 
 # Set line-length limits.
 AC_MSG_CHECKING([how to set line length limits of f90 compiler])
