@@ -50,8 +50,8 @@ c_source_files = \
   cgehrd.f  \
   cgelq2.f  \
   cgelqf.f  \
-  cgels.f   \
   cgelsd.f  \
+  cgels.f   \
   cgelss.f  \
   cgelsx.f  \
   cgelsy.f  \
@@ -66,8 +66,8 @@ c_source_files = \
   cgerqf.f  \
   cgesc2.f  \
   cgesdd.f  \
-  cgesv.f   \
   cgesvd.f  \
+  cgesv.f   \
   cgesvx.f  \
   cgetc2.f  \
   cgetf2.f  \
@@ -94,23 +94,23 @@ c_source_files = \
   cgttrf.f  \
   cgttrs.f  \
   cgtts2.f  \
-  chbev.f   \
   chbevd.f  \
+  chbev.f   \
   chbevx.f  \
   chbgst.f  \
-  chbgv.f   \
   chbgvd.f  \
+  chbgv.f   \
   chbgvx.f  \
   chbtrd.f  \
   checon.f  \
-  cheev.f   \
   cheevd.f  \
+  cheev.f   \
   cheevr.f  \
   cheevx.f  \
   chegs2.f  \
   chegst.f  \
-  chegv.f   \
   chegvd.f  \
+  chegv.f   \
   chegvx.f  \
   cherfs.f  \
   chesv.f   \
@@ -123,12 +123,12 @@ c_source_files = \
   chetrs.f  \
   chgeqz.f  \
   chpcon.f  \
-  chpev.f   \
   chpevd.f  \
+  chpev.f   \
   chpevx.f  \
   chpgst.f  \
-  chpgv.f   \
   chpgvd.f  \
+  chpgv.f   \
   chpgvx.f  \
   chprfs.f  \
   chpsv.f   \
@@ -200,8 +200,8 @@ c_source_files = \
   clar1v.f  \
   clar2v.f  \
   clarcm.f  \
-  clarf.f   \
   clarfb.f  \
+  clarf.f   \
   clarfg.f  \
   clarft.f  \
   clarfx.f  \
@@ -210,8 +210,8 @@ c_source_files = \
   clarrv.f  \
   clartg.f  \
   clartv.f  \
-  clarz.f   \
   clarzb.f  \
+  clarz.f   \
   clarzt.f  \
   clascl.f  \
   claset.f  \
@@ -371,8 +371,8 @@ d_source_files = \
   dgehrd.f  \
   dgelq2.f  \
   dgelqf.f  \
-  dgels.f   \
   dgelsd.f  \
+  dgels.f   \
   dgelss.f  \
   dgelsx.f  \
   dgelsy.f  \
@@ -387,8 +387,8 @@ d_source_files = \
   dgerqf.f  \
   dgesc2.f  \
   dgesdd.f  \
-  dgesv.f   \
   dgesvd.f  \
+  dgesv.f   \
   dgesvx.f  \
   dgetc2.f  \
   dgetf2.f  \
@@ -491,8 +491,8 @@ d_source_files = \
   dlaqtr.f  \
   dlar1v.f  \
   dlar2v.f  \
-  dlarf.f   \
   dlarfb.f  \
+  dlarf.f   \
   dlarfg.f  \
   dlarft.f  \
   dlarfx.f  \
@@ -511,8 +511,8 @@ d_source_files = \
   dlartg.f  \
   dlartv.f  \
   dlaruv.f  \
-  dlarz.f   \
   dlarzb.f  \
+  dlarz.f   \
   dlarzt.f  \
   dlas2.f   \
   dlascl.f  \
@@ -614,22 +614,22 @@ d_source_files = \
   dpttrs.f  \
   dptts2.f  \
   drscl.f   \
-  dsbev.f   \
   dsbevd.f  \
+  dsbev.f   \
   dsbevx.f  \
   dsbgst.f  \
-  dsbgv.f   \
   dsbgvd.f  \
+  dsbgv.f   \
   dsbgvx.f  \
   dsbtrd.f  \
   dsgesv.f  \
   dspcon.f  \
-  dspev.f   \
   dspevd.f  \
+  dspev.f   \
   dspevx.f  \
   dspgst.f  \
-  dspgv.f   \
   dspgvd.f  \
+  dspgv.f   \
   dspgvx.f  \
   dsprfs.f  \
   dspsv.f   \
@@ -645,19 +645,19 @@ d_source_files = \
   dstemr.f  \
   dsteqr.f  \
   dsterf.f  \
-  dstev.f   \
   dstevd.f  \
+  dstev.f   \
   dstevr.f  \
   dstevx.f  \
   dsycon.f  \
-  dsyev.f   \
   dsyevd.f  \
+  dsyev.f   \
   dsyevr.f  \
   dsyevx.f  \
   dsygs2.f  \
   dsygst.f  \
-  dsygv.f   \
   dsygvd.f  \
+  dsygv.f   \
   dsygvx.f  \
   dsyrfs.f  \
   dsysv.f   \
@@ -727,8 +727,8 @@ s_source_files = \
   sgehrd.f  \
   sgelq2.f  \
   sgelqf.f  \
-  sgels.f   \
   sgelsd.f  \
+  sgels.f   \
   sgelss.f  \
   sgelsx.f  \
   sgelsy.f  \
@@ -743,8 +743,8 @@ s_source_files = \
   sgerqf.f  \
   sgesc2.f  \
   sgesdd.f  \
-  sgesv.f   \
   sgesvd.f  \
+  sgesv.f   \
   sgesvx.f  \
   sgetc2.f  \
   sgetf2.f  \
@@ -797,8 +797,8 @@ s_source_files = \
   slaein.f  \
   slaev2.f  \
   slaexc.f  \
-  slag2.f   \
   slag2d.f  \
+  slag2.f   \
   slags2.f  \
   slagtf.f  \
   slagtm.f  \
@@ -847,8 +847,8 @@ s_source_files = \
   slaqtr.f  \
   slar1v.f  \
   slar2v.f  \
-  slarf.f   \
   slarfb.f  \
+  slarf.f   \
   slarfg.f  \
   slarft.f  \
   slarfx.f  \
@@ -867,8 +867,8 @@ s_source_files = \
   slartg.f  \
   slartv.f  \
   slaruv.f  \
-  slarz.f   \
   slarzb.f  \
+  slarz.f   \
   slarzt.f  \
   slas2.f   \
   slascl.f  \
@@ -970,21 +970,21 @@ s_source_files = \
   spttrs.f  \
   sptts2.f  \
   srscl.f   \
-  ssbev.f   \
   ssbevd.f  \
+  ssbev.f   \
   ssbevx.f  \
   ssbgst.f  \
-  ssbgv.f   \
   ssbgvd.f  \
+  ssbgv.f   \
   ssbgvx.f  \
   ssbtrd.f  \
   sspcon.f  \
-  sspev.f   \
   sspevd.f  \
+  sspev.f   \
   sspevx.f  \
   sspgst.f  \
-  sspgv.f   \
   sspgvd.f  \
+  sspgv.f   \
   sspgvx.f  \
   ssprfs.f  \
   sspsv.f   \
@@ -1000,19 +1000,19 @@ s_source_files = \
   sstemr.f  \
   ssteqr.f  \
   ssterf.f  \
-  sstev.f   \
   sstevd.f  \
+  sstev.f   \
   sstevr.f  \
   sstevx.f  \
   ssycon.f  \
-  ssyev.f   \
   ssyevd.f  \
+  ssyev.f   \
   ssyevr.f  \
   ssyevx.f  \
   ssygs2.f  \
   ssygst.f  \
-  ssygv.f   \
   ssygvd.f  \
+  ssygv.f   \
   ssygvx.f  \
   ssyrfs.f  \
   ssysv.f   \
@@ -1080,8 +1080,8 @@ z_source_files = \
   zgehrd.f  \
   zgelq2.f  \
   zgelqf.f  \
-  zgels.f   \
   zgelsd.f  \
+  zgels.f   \
   zgelss.f  \
   zgelsx.f  \
   zgelsy.f  \
@@ -1096,8 +1096,8 @@ z_source_files = \
   zgerqf.f  \
   zgesc2.f  \
   zgesdd.f  \
-  zgesv.f   \
   zgesvd.f  \
+  zgesv.f   \
   zgesvx.f  \
   zgetc2.f  \
   zgetf2.f  \
@@ -1124,23 +1124,23 @@ z_source_files = \
   zgttrf.f  \
   zgttrs.f  \
   zgtts2.f  \
-  zhbev.f   \
   zhbevd.f  \
+  zhbev.f   \
   zhbevx.f  \
   zhbgst.f  \
-  zhbgv.f   \
   zhbgvd.f  \
+  zhbgv.f   \
   zhbgvx.f  \
   zhbtrd.f  \
   zhecon.f  \
-  zheev.f   \
   zheevd.f  \
+  zheev.f   \
   zheevr.f  \
   zheevx.f  \
   zhegs2.f  \
   zhegst.f  \
-  zhegv.f   \
   zhegvd.f  \
+  zhegv.f   \
   zhegvx.f  \
   zherfs.f  \
   zhesv.f   \
@@ -1153,12 +1153,12 @@ z_source_files = \
   zhetrs.f  \
   zhgeqz.f  \
   zhpcon.f  \
-  zhpev.f   \
   zhpevd.f  \
+  zhpev.f   \
   zhpevx.f  \
   zhpgst.f  \
-  zhpgv.f   \
   zhpgvd.f  \
+  zhpgv.f   \
   zhpgvx.f  \
   zhprfs.f  \
   zhpsv.f   \
@@ -1230,8 +1230,8 @@ z_source_files = \
   zlar1v.f  \
   zlar2v.f  \
   zlarcm.f  \
-  zlarf.f   \
   zlarfb.f  \
+  zlarf.f   \
   zlarfg.f  \
   zlarft.f  \
   zlarfx.f  \
@@ -1240,8 +1240,8 @@ z_source_files = \
   zlarrv.f  \
   zlartg.f  \
   zlartv.f  \
-  zlarz.f   \
   zlarzb.f  \
+  zlarz.f   \
   zlarzt.f  \
   zlascl.f  \
   zlaset.f  \

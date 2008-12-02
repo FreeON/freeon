@@ -568,7 +568,7 @@ MODULE PrettyPrint
                            //TRIM(FltToMedmChar(beta))//" " &
                            //TRIM(FltToMedmChar(gamma))
                    ENDIF
-                   WRITE(PU,"(A256)")TRIM(Mssg)
+                   WRITE(PU,"(A)") TRIM(Mssg)
 !============================================================================
                 ELSE  !! XSF
 !============================================================================

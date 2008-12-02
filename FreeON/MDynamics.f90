@@ -955,12 +955,12 @@ CONTAINS
     CHARACTER(LEN=DEFAULT_CHR_LEN) :: Remark 
 
     IF(C%Geos%Clones==1)THEN
-       Remark='t='//TRIM(DblToMedmChar(MDTime%D(1)*InternalTimeToFemtoseconds))//" fs"
+       Remark='t = '//TRIM(DblToMedmChar(MDTime%D(1)*InternalTimeToFemtoseconds))//" fs"
        CALL PPrint(C%Geos%Clone(1), FileName_O=C%Nams%GFile,Unit_O=Geo, &
                    PrintGeom_O=C%Opts%GeomPrint,Remark_O=Remark,Gradients_O='Velocities')
     ELSE
        DO iCLONE=1,C%Geos%Clones
-          Remark='t='//TRIM(DblToMedmChar(MDTime%D(iCLONE)*InternalTimeToFemtoseconds))//" fs"
+          Remark='t = '//TRIM(DblToMedmChar(MDTime%D(iCLONE)*InternalTimeToFemtoseconds))//" fs"
           CALL PPrint(C%Geos%Clone(1), FileName_O=C%Nams%GFile,Unit_O=Geo, &
                PrintGeom_O=C%Opts%GeomPrint,Clone_O=iCLONE,Remark_O=Remark,Gradients_O='Velocities')
        ENDDO

@@ -33,13 +33,13 @@ c_source_files = \
   chbmv.f  \
   chemm.f  \
   chemv.f  \
-  cher.f   \
   cher2.f  \
   cher2k.f \
+  cher.f   \
   cherk.f  \
   chpmv.f  \
-  chpr.f   \
   chpr2.f  \
+  chpr.f   \
   crotg.f  \
   cscal.f  \
   csrot.f  \
@@ -75,14 +75,14 @@ d_source_files = \
   dsbmv.f  \
   dscal.f  \
   dspmv.f  \
-  dspr.f   \
   dspr2.f  \
+  dspr.f   \
   dswap.f  \
   dsymm.f  \
   dsymv.f  \
-  dsyr.f   \
   dsyr2.f  \
   dsyr2k.f \
+  dsyr.f   \
   dsyrk.f  \
   dtbmv.f  \
   dtbsv.f  \
@@ -116,14 +116,14 @@ s_source_files = \
   ssbmv.f  \
   sscal.f  \
   sspmv.f  \
-  sspr.f   \
   sspr2.f  \
+  sspr.f   \
   sswap.f  \
   ssymm.f  \
   ssymv.f  \
-  ssyr.f   \
   ssyr2.f  \
   ssyr2k.f \
+  ssyr.f   \
   ssyrk.f  \
   stbmv.f  \
   stbsv.f  \
@@ -149,13 +149,13 @@ z_source_files = \
   zhbmv.f  \
   zhemm.f  \
   zhemv.f  \
-  zher.f   \
   zher2.f  \
   zher2k.f \
+  zher.f   \
   zherk.f  \
   zhpmv.f  \
-  zhpr.f   \
   zhpr2.f  \
+  zhpr.f   \
   zrotg.f  \
   zscal.f  \
   zswap.f  \
