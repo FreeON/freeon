@@ -201,7 +201,7 @@ MODULE PBCFarField
       ! Here is the INTRINSIC energy due to the crystal Coulomb field
       ! This is the shape dependent Lorentz field + the shape dependent surface term 
       
-      CALL MondoLog(DEBUG_MAXIMUM,Prog,' PFFEll  = '//TRIM(IntToChar(Ell2Use))// &
+      CALL MondoLog(DEBUG_MAXIMUM,Prog,'PFFEll  = '//TRIM(IntToChar(Ell2Use))// &
                   ', Lorentz Field = <'//TRIM(DblToChar(EPFF+E_DP)) &
                      //'> to within <'//TRIM(DblToShrtChar(ABS(DeltaPFF)))//'>')
 
