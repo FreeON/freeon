@@ -83,7 +83,7 @@ CONTAINS
          AbsErrE,RelErrE,AbsErrN,RelErrN,AveErrE,MaxCommErr,FNormCommErr,PNon0,TraceP
 
     REAL(DOUBLE),DIMENSION(2) :: CErr
-    REAL(DOUBLE),SAVE    :: OldE,OldAEP
+    REAL(DOUBLE),SAVE    :: OldE,OldAEP,OldAEN
     INTEGER              :: MM,NPur
     CHARACTER(LEN=*)     :: Prog
     CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg,CnvrgCmmnt,SCFTag
@@ -132,11 +132,11 @@ CONTAINS
     !Default 
     CnvrgChck_BCSR=.FALSE.
     ! 
-    ! Early return
-    IF(NPur==0)THEN
+    IF(NPur==0)THEN 
       OldE=BIG_DBL
       OldAEP=BIG_DBL
-    ELSEIF(MOD(NPur,2)==1)THEN
+      OldAEN=BIG_DBL
+    ELSEIF(MOD(NPur,2)==1)THEN      
        CnvrgChck_BCSR=.FALSE.
        RETURN
     ENDIF
@@ -144,56 +144,39 @@ CONTAINS
     CALL Multiply(Pold,-One)
     CALL Add(Pold,P,Tmp1)
     AbsErrP=ABS(Max(Tmp1)+1.D-20)
-    FNormErrP=FNorm(Tmp1)
-    ! Energy errors
-    Energy=Trace(P,F)
-    AbsErrE=OldE-Energy
-    RelErrE=AbsErrE/ABS(Energy)
     ! Occupation errors
     TraceP=Trace(P)
     AbsErrN=Two*ABS(TraceP-Ne)
     RelErrN=AbsErrN/(Two*Ne)
+    ! Energy errors
+    Energy=Trace(P,F)
+    AbsErrE=OldE-Energy
+    RelErrE=ABS(AbsErrE)/ABS(Energy)
     ! Absolute convergence test (Only for NPur>10)
     IF(NPur>10)THEN
-       IF(ABS(RelErrE)<Thresholds%ETol*1D-3)THEN
-          CnvrgChck_RelErrE=.TRUE.
-       ENDIF
-       IF(AbsErrP<Thresholds%DTol*1D-2)THEN
-          CnvrgChck_AbsErrP=.TRUE.
-       ENDIF
-       IF(CnvrgChck_RelErrE.AND.CnvrgChck_AbsErrP)THEN
-          CnvrgChck_BCSR=.TRUE.
-          IF(StartingFromP)THEN
-             CnvrgCmmnt='Met dN and dP goals'
-          ELSE
-             CnvrgCmmnt='Met dE and dP goals'
-          ENDIF
-       ELSE
-          ! Test in the asymptotic regime for stall out
-          IF(ABS(RelErrN)<Thresholds%Trix**2)THEN
-             ! Check for an increasing energy (or occupation)
-              IF(Energy>OldE)THEN
-                CnvrgChck_BCSR=.TRUE.
-                IF(StartingFromP)THEN
-                   CnvrgCmmnt='Hit dN increase'
-                ELSE
-                   CnvrgCmmnt='Hit dE increase'
-                ENDIF
-            ENDIF
+       ! Test for the asymptotic regime 
+       IF(RelErrE<Thresholds%ETol*1D-1.AND. &
+          AbsErrP<Thresholds%DTol)THEN
+          ! Check for increasing errors in occupation
+          IF(AbsErrN>OldAEN.OR.AbsErrP>OldAEP)THEN
+             CnvrgChck_BCSR=.TRUE.
+          ELSEIF(AbsErrN<Thresholds%Trix**2)THEN
+             CnvrgChck_BCSR=.TRUE.
           ENDIF
        ENDIF
     ENDIF
     ! Updtate previous cycle values
     OldE=Energy
     OldAEP=AbsErrP
+    OldAEN=AbsErrN
     ! Convergence stats
     PNon0=100.D0*DBLE(P%NNon0)/DBLE(NBasF*NBasF)
 
     IF(StartingFromP)THEN
        Mssg='dP='//TRIM(DblToShrtChar(AbsErrP))//', dNel='//TRIM(DblToShrtChar(Two*ABS(TraceP-Ne)))//', %Non0s='//TRIM(DblToShrtChar(PNon0))
     ELSE
-       Mssg='dE='//TRIM(DblToShrtChar(RelErrE))//', dP='//TRIM(DblToShrtChar(AbsErrP))   &
-            //', dNel='//TRIM(DblToShrtChar(Two*ABS(TraceP-Ne)))//', %Non0s='//TRIM(DblToShrtChar(PNon0))//', Tr{F.P} = '//TRIM(DblToChar(Energy))
+       Mssg=' dP='//TRIM(DblToShrtChar(AbsErrP))   &
+            //', dNel='//TRIM(DblToShrtChar(Two*ABS(TraceP-Ne)))//', %Non0s='//TRIM(DblToShrtChar(PNon0))//', TrFP='//TRIM(DblToMedmChar(Energy))
     ENDIF
     CALL MondoLog(DEBUG_NONE,Prog,TRIM(Mssg),'Pure '//TRIM(IntToChar(NPur)))
 
@@ -201,14 +184,15 @@ CONTAINS
     ! Look for convergence
 
 !!$    CnvrgChck_BCSR=.FALSE.
-!!$    IF(NPur==40)THEN
+!!$    IF(NPur==44)THEN
 !!$       CnvrgChck_BCSR=.TRUE.
 !!$    ENDIF
-
+!!$
     IF(.NOT.CnvrgChck_BCSR)THEN
        CALL SetEq(Pold,P)
        RETURN
     ENDIF
+
     ! Simple renorm
     CALL Multiply(P,Half*DBLE(Nel)/TraceP)
     ! Converged, print summary that can be grepped and plotted
@@ -226,11 +210,171 @@ CONTAINS
     ENDIF
 
     CALL MondoLog(DEBUG_MEDIUM,Prog,TRIM(Mssg),SCFTag)
-    Mssg=TRIM(CnvrgCmmnt)//'; NPure='//TRIM(IntToChar(NPur))//', SpGEMMs='//TRIM(IntToChar(MM)) & 
+    Mssg='NPure='//TRIM(IntToChar(NPur))//', SpGEMMs='//TRIM(IntToChar(MM)) & 
          //', %Non0s='//TRIM(FltToShrtChar(PNon0))
     CALL MondoLog(DEBUG_MEDIUM,Prog,TRIM(Mssg), SCFTag)
     !
   END FUNCTION CnvrgChck_BCSR
+
+
+!!$  FUNCTION CnvrgChck_BCSR_old(Prog,NPur,Ne,MM,F,P,POld,Tmp1,Tmp2,StartingFromP_O)
+!!$
+!!$    LOGICAL,SAVE         :: CnvrgChck_RelErrE=.FALSE.
+!!$    LOGICAL,SAVE         :: CnvrgChck_AbsErrP=.FALSE.
+!!$    LOGICAL              :: CnvrgChck_BCSR
+!!$
+!!$    TYPE(BCSR)           :: F,P,POld,Tmp1,Tmp2
+!!$    REAL(DOUBLE)         :: Ne,Energy,AbsErrP,FNormErrP,TwoNP,N2F,  &
+!!$         AbsErrE,RelErrE,AbsErrN,RelErrN,AveErrE,MaxCommErr,FNormCommErr,PNon0,TraceP
+!!$
+!!$    REAL(DOUBLE),DIMENSION(2) :: CErr
+!!$    REAL(DOUBLE),SAVE    :: OldE,OldAEP
+!!$    INTEGER              :: MM,NPur
+!!$    CHARACTER(LEN=*)     :: Prog
+!!$    CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg,CnvrgCmmnt,SCFTag
+!!$    LOGICAL, OPTIONAL    :: StartingFromP_O
+!!$    LOGICAL              :: StartingFromP
+!!$
+!!$#ifdef PRINT_PURE_EVALS
+!!$    INTERFACE DSYEV
+!!$      SUBROUTINE DSYEV(JOBZ,UPLO,N,A,LDA,W,WORK,LWORK,INFO)
+!!$        USE GlobalScalars
+!!$        CHARACTER(LEN=1), INTENT(IN)    :: JOBZ, UPLO
+!!$        INTEGER,          INTENT(IN)    :: LDA,  LWORK, N
+!!$        INTEGER,          INTENT(OUT)   :: INFO
+!!$        REAL(DOUBLE),     INTENT(INOUT) :: A(LDA,*)
+!!$        REAL(DOUBLE),     INTENT(OUT)   :: W(*)
+!!$        REAL(DOUBLE),     INTENT(OUT)   :: WORK(*)
+!!$      END SUBROUTINE DSYEV
+!!$    END INTERFACE
+!!$    TYPE(DBL_RNK2)                 :: dP
+!!$    TYPE(DBL_VECT)                 :: EigenV,Work
+!!$    TYPE(INT_VECT)                 :: IWork
+!!$    INTEGER                        :: LWORK,LIWORK,Info
+!!$
+!!$    CALL New(dP,(/NBasF,NBasF/))
+!!$    CALL SetEq(dP,P)
+!!$    CALL New(EigenV,NBasF)
+!!$    CALL SetEq(EigenV,Zero)
+!!$    LWORK=MAX(1,3*NBasF+10)
+!!$    CALL New(Work,LWork)
+!!$    CALL DSYEV('V','U',NBasF,dP%D,NBasF,EigenV%D,Work%D,LWORK,Info)
+!!$    IF(Info/=SUCCEED)CALL Halt('DSYEV flaked in FockGuess. INFO='//TRIM(IntToChar(Info)))
+!!$    PrintFlags%Fmt=DEBUG_MMASTYLE
+!!$    CALL Print_DBL_VECT(EigenV,'Values['//TRIM(IntToChar(NPur))//']',Unit_O=6)
+!!$    PrintFlags%Fmt=DEBUG_DBLSTYLE
+!!$    CALL Delete(EigenV)
+!!$    CALL Delete(Work)
+!!$    CALL Delete(dP)
+!!$#endif
+!!$    !
+!!$    IF(PRESENT(StartingFromP_O))THEN
+!!$       StartingFromP=StartingFromP_O
+!!$    ELSE
+!!$       StartingFromP=.FALSE.
+!!$    ENDIF
+!!$
+!!$    !Default 
+!!$    CnvrgChck_BCSR=.FALSE.
+!!$    ! 
+!!$    IF(NPur==0)THEN 
+!!$      OldE=BIG_DBL
+!!$      OldAEP=BIG_DBL
+!!$    ELSEIF(MOD(NPur,2)==1)THEN      
+!!$       CnvrgChck_BCSR=.FALSE.
+!!$       RETURN
+!!$    ENDIF
+!!$    ! Density matrix errors
+!!$    CALL Multiply(Pold,-One)
+!!$    CALL Add(Pold,P,Tmp1)
+!!$    AbsErrP=ABS(Max(Tmp1)+1.D-20)
+!!$    FNormErrP=FNorm(Tmp1)
+!!$    ! Energy errors
+!!$    Energy=Trace(P,F)
+!!$    AbsErrE=OldE-Energy
+!!$    RelErrE=AbsErrE/ABS(Energy)
+!!$    ! Occupation errors
+!!$    TraceP=Trace(P)
+!!$    AbsErrN=Two*ABS(TraceP-Ne)
+!!$    RelErrN=AbsErrN/(Two*Ne)
+!!$    ! Absolute convergence test (Only for NPur>10)
+!!$    IF(NPur>10)THEN
+!!$       IF(ABS(RelErrE)<Thresholds%ETol*1D-3)THEN
+!!$          CnvrgChck_RelErrE=.TRUE.
+!!$       ENDIF
+!!$       IF(AbsErrP<Thresholds%DTol*1D-2)THEN
+!!$          CnvrgChck_AbsErrP=.TRUE.
+!!$       ENDIF
+!!$       IF(CnvrgChck_RelErrE.AND.CnvrgChck_AbsErrP)THEN
+!!$          CnvrgChck_BCSR=.TRUE.
+!!$          IF(StartingFromP)THEN
+!!$             CnvrgCmmnt='Met dN and dP goals'
+!!$          ELSE
+!!$             CnvrgCmmnt='Met dE and dP goals'
+!!$          ENDIF
+!!$       ELSE
+!!$          ! Test in the asymptotic regime for stall out
+!!$          IF(ABS(RelErrN)<Thresholds%Trix**2)THEN
+!!$             ! Check for an increasing energy (or occupation)
+!!$              IF(Energy>OldE)THEN
+!!$                CnvrgChck_BCSR=.TRUE.
+!!$                IF(StartingFromP)THEN
+!!$                   CnvrgCmmnt='Hit dN increase'
+!!$                ELSE
+!!$                   CnvrgCmmnt='Hit dE increase'
+!!$                ENDIF
+!!$            ENDIF
+!!$          ENDIF
+!!$       ENDIF
+!!$    ENDIF
+!!$    ! Updtate previous cycle values
+!!$    OldE=Energy
+!!$    OldAEP=AbsErrP
+!!$    ! Convergence stats
+!!$    PNon0=100.D0*DBLE(P%NNon0)/DBLE(NBasF*NBasF)
+!!$
+!!$    IF(StartingFromP)THEN
+!!$       Mssg='dP='//TRIM(DblToShrtChar(AbsErrP))//', dNel='//TRIM(DblToShrtChar(Two*ABS(TraceP-Ne)))//', %Non0s='//TRIM(DblToShrtChar(PNon0))
+!!$    ELSE
+!!$       Mssg='dE='//TRIM(DblToShrtChar(RelErrE))//', dP='//TRIM(DblToShrtChar(AbsErrP))   &
+!!$            //', dNel='//TRIM(DblToShrtChar(Two*ABS(TraceP-Ne)))//', %Non0s='//TRIM(DblToShrtChar(PNon0))//', Tr{F.P} = '//TRIM(DblToChar(Energy))
+!!$    ENDIF
+!!$    CALL MondoLog(DEBUG_NONE,Prog,TRIM(Mssg),'Pure '//TRIM(IntToChar(NPur)))
+!!$
+!!$
+!!$    ! Look for convergence
+!!$
+!!$    CnvrgChck_BCSR=.FALSE.
+!!$    IF(NPur==40)THEN
+!!$       CnvrgChck_BCSR=.TRUE.
+!!$    ENDIF
+!!$
+!!$    IF(.NOT.CnvrgChck_BCSR)THEN
+!!$       CALL SetEq(Pold,P)
+!!$       RETURN
+!!$    ENDIF
+!!$    ! Simple renorm
+!!$    CALL Multiply(P,Half*DBLE(Nel)/TraceP)
+!!$    ! Converged, print summary that can be grepped and plotted
+!!$    IF(StartingFromP)THEN
+!!$       Mssg='ThrX='//TRIM(DblToShrtChar(Thresholds%Trix))//', dP='//TRIM(DblToShrtChar(AbsErrP)) &
+!!$            //', dNel='//TRIM(DblToShrtChar(Two*ABS(TraceP-Ne)))             
+!!$    ELSE
+!!$       Mssg='ThrX='//TRIM(DblToShrtChar(Thresholds%Trix))//', dE='//TRIM(DblToShrtChar(RelErrE))//', dP='//TRIM(DblToShrtChar(AbsErrP))   &
+!!$            //', dNel='//TRIM(DblToShrtChar(Two*ABS(TraceP-Ne)))
+!!$    ENDIF
+!!$    IF(NClones>1)THEN
+!!$      SCFTag='['//TRIM(SCFCycl)//','//TRIM(CurBase)//','//TRIM(CurGeom)//','//TRIM(CurClone)//']'
+!!$    ELSE
+!!$      SCFTag='['//TRIM(SCFCycl)//','//TRIM(CurBase)//','//TRIM(CurGeom)//']'
+!!$    ENDIF
+!!$
+!!$    CALL MondoLog(DEBUG_MEDIUM,Prog,TRIM(Mssg),SCFTag)
+!!$    Mssg=TRIM(CnvrgCmmnt)//'; NPure='//TRIM(IntToChar(NPur))//', SpGEMMs='//TRIM(IntToChar(MM)) & 
+!!$         //', %Non0s='//TRIM(FltToShrtChar(PNon0))
+!!$    CALL MondoLog(DEBUG_MEDIUM,Prog,TRIM(Mssg), SCFTag)
+!!$    !
+!!$  END FUNCTION CnvrgChck_BCSR_old
 
   !-------------------------------------------------------------------------------
 
