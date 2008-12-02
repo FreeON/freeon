@@ -42,9 +42,6 @@ MODULE MondoLogger
 
 CONTAINS
 
-!---------------------------------------------------------------------
-!
-!---------------------------------------------------------------------
   FUNCTION ProcessName(Proc_O,Misc_O) RESULT (Tag)
     CHARACTER(LEN=*), OPTIONAL :: Proc_O
     CHARACTER(LEN=*), OPTIONAL :: Misc_O
@@ -54,56 +51,65 @@ CONTAINS
     CHARACTER(LEN=3), PARAMETER:: Colon =' : '
     CHARACTER(LEN=4), PARAMETER:: Colons=' :: '
     IF(PRESENT(Proc_O).AND.PRESENT(Misc_O))THEN
-       Name=TRIM(ADJUSTL(TRIM(Proc_O)))//Colon//TRIM(Misc_O)
-       Name(24:26)=":: "
-       Tag=Name
+      Name=TRIM(ADJUSTL(TRIM(Proc_O)))//Colon//TRIM(Misc_O)
+      Name(24:26)=":: "
+      Tag=Name
     ELSEIF(PRESENT(Proc_O))THEN
-       Name=TRIM(ADJUSTL(TRIM(Proc_O)))
-       Name(24:26)=":: "
-       Tag=Name
+      Name=TRIM(ADJUSTL(TRIM(Proc_O)))
+      Name(24:26)=":: "
+      Tag=Name
     ELSE
-       Tag="" !Blks
+      Tag="" !Blks
     ENDIF
   END FUNCTION ProcessName
 
   ! Open the logfile.
   FUNCTION OpenLogfile(filename, fd) RESULT(fileOutput)
-    CHARACTER(LEN=*), INTENT(IN) :: filename
-    INTEGER, INTENT(IN)          :: fd
-    INTEGER                      :: IOS, fd_old
-    LOGICAL                      :: isOpen, exists, fileOutput
+    CHARACTER(LEN=*), INTENT(IN)    :: filename
+    INTEGER, INTENT(IN)             :: fd
+    INTEGER                         :: IOS, fd_old
+    LOGICAL                         :: isOpen, exists, fileOutput
+    CHARACTER(LEN=INTERNAL_INT_LEN) :: fd_string
 
     ! Set the default result.
     fileOutput = .FALSE.
 
     ! Does the file exist?
     INQUIRE(FILE = filename, OPENED = isOpen, EXIST = exists, &
-      ERR = 11, IOSTAT = IOS, NUMBER = fd_old)
+         ERR = 11, IOSTAT = IOS, NUMBER = fd_old)
 
     IF(isOpen) THEN
-      !WRITE(*,"(A,I3,A)") "[MondoLog] logfile already open (fd = ", fd_old, ")"
+      ! The log file was opened somewhere else in the code and not closed
+      ! properly. This indicates a possible bug.
+      WRITE(*,"(A,I3,A)") "[MondoLog] logfile already open (fd = ", fd_old, ")"
       IF(fd /= fd_old) THEN
         WRITE(*,"(A)") "[MondoLog] WARNING: fd != fd_old"
       ENDIF
       CLOSE(fd_old)
       isOpen = .FALSE.
+
+      ! Log this also. Now that we have closed the log file we can use
+      ! MondoLogger itself to properly log this event.
+      WRITE(UNIT=fd_string, FMT="(I3)") fd_old
+      fd_string = ADJUSTL(fd_string)
+      CALL MondoLog(DEBUG_NONE, "OpenLogFile", "logfile already open (fd = "//TRIM(fd_string)//")")
     ENDIF
 
     IF(exists.AND.(.NOT.isOpen)) THEN
 
       ! Open existing file and position at the bottom (default)
       OPEN(UNIT = fd, FILE = filename, &
-        ACCESS = "SEQUENTIAL", FORM = "FORMATTED", &
-        POSITION = "APPEND", ERR = 12, IOSTAT = IOS, &
-        STATUS = "OLD")
+           ACCESS = "SEQUENTIAL", FORM = "FORMATTED", &
+           POSITION = "APPEND", ERR = 12, IOSTAT = IOS, &
+           STATUS = "OLD")
 
     ELSE
 
       ! Create a new file and open it
       !WRITE(*,"(A)") "[MondoLog] logfile '"//TRIM(filename)//"' does not exist, creating it"
       OPEN(UNIT = fd, FILE = filename, &
-        ACCESS = "SEQUENTIAL", FORM = "FORMATTED", &
-        ERR = 13, IOSTAT = IOS, STATUS = "NEW")
+           ACCESS = "SEQUENTIAL", FORM = "FORMATTED", &
+           ERR = 13, IOSTAT = IOS, STATUS = "NEW")
 
     ENDIF
     fileOutput = .TRUE.
@@ -142,30 +148,36 @@ CONTAINS
     IF(logLevel <= PrintFlags%Key) THEN
       ! Open the logfile.
       fileOutput = OpenLogfile(OutFile, 123)
+
       ! Convert the line number into string.
       IF(PRESENT(line_O)) THEN
         WRITE(UNIT=line_string,FMT="(I20)") line_O
         line_string = ADJUSTL(line_string)
-        IF(PRESENT(NoIndent_O))THEN           
-           output=line_string
-        ELSE
-           output=ProcessName(tag,line_string)
-        ENDIF
-     ELSEIF(PRESENT(file_O)) THEN
         IF(PRESENT(NoIndent_O))THEN
-           output=line_string
+          output=line_string
         ELSE
-           output=ProcessName(tag,file_O)
+          output=ProcessName(tag,line_string)
         ENDIF
-     ELSE
-        IF(PRESENT(NoIndent_O))THEN           
-           output=tag
-        ELSE
-           output=ProcessName(tag)
-        ENDIF
-     ENDIF
 
-     output=TRIM(output)//' '//TRIM(message)
+      ELSEIF(PRESENT(file_O)) THEN
+        IF(PRESENT(NoIndent_O))THEN
+          output=line_string
+        ELSE
+          output=ProcessName(tag,file_O)
+        ENDIF
+      ELSE
+        IF(PRESENT(NoIndent_O))THEN
+          output=tag
+        ELSE
+          output=ProcessName(tag)
+        ENDIF
+      ENDIF
+
+      IF(LEN(TRIM(output)) > 0) THEN
+        output = TRIM(output)//' '//TRIM(message)
+      ELSE
+        output = TRIM(message)
+      ENDIF
 
       IF(fileOutput) THEN
         WRITE(123,"(A)") TRIM(output)
@@ -184,7 +196,7 @@ CONTAINS
 
     CHARACTER(LEN=*), INTENT(IN) :: message
 
-    CALL MondoLog(DEBUG_NONE, "", message,NoIndent_O=.TRUE.)
+    CALL MondoLog(DEBUG_NONE, "",message, NoIndent_O=.TRUE.)
 
   END SUBROUTINE MondoLogPlain
 
