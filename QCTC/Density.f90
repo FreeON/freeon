@@ -125,7 +125,7 @@ CONTAINS
     NNaive=NLink
     CALL RhoEcon(RhoHead,NLink)
 !
-    CALL MondoLog(DEBUG_MAXIMUM,Prog,' RhoEcon = '//TRIM(FltToShrtChar(DBLE(NNaive)/DBLE(NLink))) &
+    CALL MondoLog(DEBUG_MAXIMUM,Prog,'RhoEcon = '//TRIM(FltToShrtChar(DBLE(NNaive)/DBLE(NLink))) &
                                    //', Gaussians = '//TRIM(IntToChar(NLink)))
 
     ! Next, calculate the Schwartz inequality and prune small links ???

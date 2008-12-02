@@ -175,7 +175,7 @@ CONTAINS
     IF(StartingFromP)THEN
        Mssg='dP='//TRIM(DblToShrtChar(AbsErrP))//', dNel='//TRIM(DblToShrtChar(Two*ABS(TraceP-Ne)))//', %Non0s='//TRIM(DblToShrtChar(PNon0))
     ELSE
-       Mssg=' dP='//TRIM(DblToShrtChar(AbsErrP))   &
+       Mssg='dP='//TRIM(DblToShrtChar(AbsErrP))   &
             //', dNel='//TRIM(DblToShrtChar(Two*ABS(TraceP-Ne)))//', %Non0s='//TRIM(DblToShrtChar(PNon0))//', TrFP='//TRIM(DblToMedmChar(Energy))
     ENDIF
     CALL MondoLog(DEBUG_NONE,Prog,TRIM(Mssg),'Pure '//TRIM(IntToChar(NPur)))

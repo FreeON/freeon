@@ -44,7 +44,7 @@ MODULE PrettyPrint
    END INTERFACE
 !
    CHARACTER(LEN=DEFAULT_CHR_LEN) :: String
-   CHARACTER(LEN=*),PARAMETER     :: CheckEq=' CheckSum  = '
+   CHARACTER(LEN=*),PARAMETER     :: CheckEq = ' CheckSum = '
    CONTAINS
       SUBROUTINE TimeStamp(Mssg,Enter_O)
          CHARACTER(LEN=*),INTENT(IN) :: Mssg
@@ -195,10 +195,10 @@ MODULE PrettyPrint
             WRITE(PU,11)Name,FRACTION(X),EXPONENT(X)
          ELSE
             String=TRIM(Name)//' = '//TRIM(DblToChar(X))
-            WRITE(PU,*)TRIM(String)
+            WRITE(PU,"(A)")TRIM(String)
          ENDIF
          CALL ClosePU(PU)
-      11 FORMAT(1x,A,' = ',F19.16,'*2^(',I4,');')
+      11 FORMAT(A,' = ',F19.16,'*2^(',I4,');')
       END SUBROUTINE Print_DBL_SCLR
 !----------------------------------------------------------------
 !     PRINT AN INT_VECT
@@ -290,7 +290,7 @@ MODULE PrettyPrint
          ENDDO
 #else
          PU=OpenPU(FileName_O,Unit_O)
-         WRITE(PU,*)TRIM(Name),' := ',(TRIM(CA%C(J)),', ',J=1,N)
+         WRITE(PU,*)TRIM(Name), ' := ', (TRIM(CA%C(J)), ', ', J=1, N)
          CALL ClosePU(PU)
 #endif
 #ifdef PARALLEL
@@ -964,7 +964,7 @@ MODULE PrettyPrint
            ChkStr=CheckSumString(Chk,Name,Proc_O)
 !          Write check string
            PU=OpenPU(Unit_O=Unit_O)
-           WRITE(PU,'(1x,A)')TRIM(ChkStr)
+           WRITE(PU,'(A)')TRIM(ChkStr)
            CALL ClosePU(PU)
 #ifdef PARALLEL
         ENDIF
@@ -999,7 +999,7 @@ MODULE PrettyPrint
            ChkStr=CheckSumString(Chk,Name,Proc_O)
 !          Write check string
            PU=OpenPU(Unit_O=Unit_O)
-           WRITE(PU,'(1x,A)')TRIM(ChkStr)
+           WRITE(PU,'(A)')TRIM(ChkStr)
            CALL ClosePU(PU)
 #ifdef PARALLEL
         ENDIF
@@ -1038,7 +1038,7 @@ MODULE PrettyPrint
            ChkStr=CheckSumString(Chk,Name,Proc_O)
 !          Write check string
            PU=OpenPU(Unit_O=Unit_O)
-           WRITE(PU,'(1x,A)')TRIM(ChkStr)
+           WRITE(PU,'(A)')TRIM(ChkStr)
            CALL ClosePU(PU)
 #ifdef PARALLEL
         ENDIF
@@ -1072,7 +1072,7 @@ MODULE PrettyPrint
          ! Create check string
          ChkStr=CheckSumString(Chk,Name,Proc_O)
          PU=OpenPU(Unit_O=Unit_O)
-         WRITE(PU,'(1x,A)')ChkStr
+         WRITE(PU,'(A)')ChkStr
          CALL ClosePU(PU)
       ENDIF
    END SUBROUTINE Print_CheckSum_DBCSR
@@ -1132,15 +1132,15 @@ MODULE PrettyPrint
 !      Create check string
        ChkStr=CheckSumString(ChkCoef,Name//TRIM("-Coef"),Proc_O)
        PU=OpenPU(Unit_O=Unit_O)
-       WRITE(PU,'(1x,A)') TRIM(ChkStr)
+       WRITE(PU,'(A)') TRIM(ChkStr)
        CALL ClosePU(PU)
        ChkStr=CheckSumString(ChkExp,Name//TRIM("-Expt"),Proc_O)
        PU=OpenPU(Unit_O=Unit_O)
-       WRITE(PU,'(1x,A)') TRIM(ChkStr)
+       WRITE(PU,'(A)') TRIM(ChkStr)
        CALL ClosePU(PU)
        ChkStr=CheckSumString(ChkLMN,Name//TRIM("-LMNs"),Proc_O)
        PU=OpenPU(Unit_O=Unit_O)
-       WRITE(PU,'(1x,A)') TRIM(ChkStr)
+       WRITE(PU,'(A)') TRIM(ChkStr)
        CALL ClosePU(PU)
 #ifdef PARALLEL
     ENDIF
@@ -1167,7 +1167,7 @@ MODULE PrettyPrint
        ChkStr='ChkSum'//TRIM(Name)//' = '//TRIM(FltToChar(FRACTION(Chk))) &
             //'*2^('//TRIM(IntToChar(EXPONENT(Chk)))//');'
     ELSE
-       CALL Halt(' Logic error in Print_CheckSum_BCSR')
+       CALL Halt('Logic error in Print_CheckSum_BCSR')
     ENDIF
   END FUNCTION CheckSumString
 !========================================================================================
@@ -1363,7 +1363,7 @@ MODULE PrettyPrint
     WRITE(PU,33)
     CALL ClosePU(PU)
 !
-32  FORMAT(1X,A)
+32  FORMAT(A)
 33  FORMAT(67('-'))
 34  FORMAT('   Atom   Z                Forces (au) ')
 35  FORMAT(I6,'  ',I3,'  ',3(F16.10))
@@ -1398,7 +1398,7 @@ MODULE PrettyPrint
     ENDIF
     CALL ClosePU(PU)
 !
-32  FORMAT(1X,A)
+32  FORMAT(A)
 33  FORMAT(58('-'))
 35  FORMAT(I6,'  ',I3,'  ',3(F14.10))
 40  FORMAT(3(1X,E18.10))
@@ -1437,7 +1437,7 @@ MODULE PrettyPrint
     ENDIF
 !
     PU=OpenPU(Unit_O=Unit_O)
-    WRITE(PU,'(1x,A)') ChkStr
+    WRITE(PU,'(A)') ChkStr
     CALL ClosePU(PU)
 !
   END SUBROUTINE Print_CheckSum_Force
@@ -1600,7 +1600,7 @@ MODULE PrettyPrint
              Mssg=ProcessName(TRIM(Proc))//'CPU (Sec,MFLOPS) = (' &
                   //TRIM(DblToShrtChar(Elapsed_CPUS))//', '     &
                   //TRIM(IntToChar(MFlops(FLOPS,Elapsed_CPUS))) &
-                  //'),'//Rtrn//ProcessName()//' WALL(Sec,MFLOPS) = ('                  &
+                  //'),'//Rtrn//ProcessName()//'WALL(Sec,MFLOPS) = ('                  &
                   //TRIM(DblToShrtChar(Elapsed_Wall))//', '     &
                   //TRIM(IntToChar(MFlops(FLOPS,Elapsed_Wall))) &
                   //'), NProc = '//TRIM(IntToChar(NPrc))
@@ -1608,7 +1608,7 @@ MODULE PrettyPrint
              Mssg=ProcessName(TRIM(Proc))//'CPU (Sec,MFLOPS) = (' &
                   //TRIM(DblToShrtChar(Elapsed_CPUS))//', '     &
                   //TRIM(IntToChar(MFlops(FLOPS,Elapsed_CPUS))) &
-                  //'),'//Rtrn//ProcessName()//' WALL(Sec,MFLOPS) = ('                  &
+                  //'),'//Rtrn//ProcessName()//'WALL(Sec,MFLOPS) = ('                  &
                   //TRIM(DblToShrtChar(Elapsed_Wall))//', '     &
                   //TRIM(IntToChar(MFlops(FLOPS,Elapsed_Wall))) &
                   //')'
@@ -1651,7 +1651,7 @@ MODULE PrettyPrint
 #endif
           ENDIF
        ENDIF
-       WRITE(PU,*)TRIM(Mssg)
+       WRITE(PU,"(A)")TRIM(Mssg)
        CALL PrintProtectR(PU)
        CLOSE(Out)
 #ifdef PARALLEL
@@ -1706,7 +1706,7 @@ MODULE PrettyPrint
              //', MaxMemTab='//TRIM(IntToChar(MaxMemTab)) &
             //', MaxMaxMem='//TRIM(IntToChar(MaxMaxMem))//Rtrn
          PU=OpenPU(Unit_O=Unit_O)
-         WRITE(PU,*) TRIM(Mssg)
+         WRITE(PU,"(A)") TRIM(Mssg)
          CLOSE(PU)
        ENDIF
 #else
@@ -1718,10 +1718,10 @@ MODULE PrettyPrint
                   //',  DeAllocs='//TRIM(IntToChar(A%DeAllocs))            &
                   //', '//TRIM(IntToChar(A%MemTab ))                       &
                   //' bytes are presently allocated.'//Rtrn                    &
-                  //ProcessName()//' A max of '//TRIM(IntToChar(A%MaxMem)) &
+                  //ProcessName()//'A max of '//TRIM(IntToChar(A%MaxMem)) &
                   //' bytes were allocated.'
              PU=OpenPU(Unit_O=Unit_O)
-             WRITE(PU,*)Mssg
+             WRITE(PU,"(A)")Mssg
              CLOSE(PU)
           ENDIF
        ENDDO
@@ -1741,9 +1741,9 @@ MODULE PrettyPrint
             //',  DeAllocs='//TRIM(IntToChar(A%DeAllocs))            &
             //', '//TRIM(IntToChar(A%MemTab ))                       &
             //' bytes are presently allocated.'//Rtrn                &
-            //ProcessName()//' A max of '//TRIM(IntToChar(A%MaxMem))  &
+            //ProcessName()//'A max of '//TRIM(IntToChar(A%MaxMem))  &
             //' bytes were allocated.'
-       WRITE(PU,*)TRIM(Mssg)
+       WRITE(PU,"(A)")TRIM(Mssg)
        CALL PrintProtectR(PU)
        CLOSE(PU)
 #ifdef PARALLEL
