@@ -392,7 +392,7 @@ PROGRAM P2Use
         IF(ABS(TrP2-Half*DBLE(NEl)) < 1.D-8) EXIT
       ENDIF
     ENDDO
-    CALL MondoLogPlain("Trace(P) = "//DblToChar(TrP)//" "//DblToChar(TrP2))
+    CALL MondoLog(DEBUG_NONE, logtag, "Trace(P) = "//DblToChar(TrP)//" "//DblToChar(TrP2))
 
     ! Convert to AO Rep
     INQUIRE(FILE=TrixFile('X',Args),EXIST=Present)

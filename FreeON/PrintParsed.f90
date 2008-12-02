@@ -74,23 +74,24 @@ CONTAINS
     CLOSE(Inp)
     CALL MondoLogPlain("--------- end of input file")
 
+    CALL MondoLogPlain("")
     CALL MondoLogPlain(' __________                ____________   __  ')
     CALL MondoLogPlain(' ___  ____/__________________  __ \__  | / /  ')
     CALL MondoLogPlain(' __  /_   __  ___/  _ \  _ \  / / /_   |/ /   ')
     CALL MondoLogPlain(' _  __/   _  /   /  __/  __/ /_/ /_  /|  /    ')
     CALL MondoLogPlain(' /_/      /_/    \___/\___/\____/ /_/ |_/     ')
-!
-    CALL MondoLogPlain("                                                                      ")
+
+    CALL MondoLogPlain("")
     CALL MondoLogPlain("Version "//VERSION)
     CALL MondoLogPlain("("//LOCAL_VERSION//")                                                 ")
-    CALL MondoLogPlain("                                                                      ")
-    CALL MondoLogPlain('A program suite for O(N) electronic structure theory and ab initio MD ') 
-    CALL MondoLogPlain("                                                                      ")
+    CALL MondoLogPlain("")
+    CALL MondoLogPlain('A program suite for O(N) electronic structure theory and ab initio MD ')
+    CALL MondoLogPlain("")
     CALL MondoLogPlain("Authors:                                                              ")
     CALL MondoLogPlain('Nicolas Bock, Matt Challacombe, Chee Kwan Gan, Graeme Henkelman,      ')
     CALL MondoLogPlain('Karoly Nemeth, Anders Niklasson, Eric Schwegler, C.J. Tymczak         ')
     CALL MondoLogPlain('and Valery Weber                                                      ')
-    CALL MondoLogPlain("                                                                      ")
+    CALL MondoLogPlain("")
     CALL MondoLogPlain('Los Alamos National Laboratory [LA-CC-04-086; LA-CC-01-2]             ')
 
     ! Get information about hdf version used.
@@ -104,11 +105,9 @@ CONTAINS
 
     ! Write information on host, platform, etc
     CALL MondoLogPlain("")
-    CALL MondoLogPlain("*** Summary ***")
-    CALL MondoLogPlain("")
     CALL MondoLogPlain("running on "//TRIM(hostname))
     CALL MondoLogPlain("")
-    CALL MondoLogPlain("** Build Information **")
+    CALL MondoLogPlain("*** Build Information ***")
     CALL MondoLogPlain("")
     CALL MondoLogPlain("compiled for "//TRIM(M_PLAT))
     CALL MondoLogPlain("on "//TRIM(M_HOST)//", a "//TRIM(M_MACH)//" machine")
