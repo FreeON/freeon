@@ -506,14 +506,23 @@ NOOPT=
 LAPACK_TIMER="NONE"
 
 if test "${use_internal_lapack}" = "yes"; then
+
   # Check for naming convention for external etime().
-  use_etime_underscore="no"
-  use_etime_without_underscore="no"
+  case ${F77_COMPILERNAME} in
+    GCC)   use_external_timer="no" ;;
+    Intel) use_external_timer="yes" ;;
+    PGI)   use_external_timer="yes" ;;
+    *)     use_external_timer="yes" ;;
+  esac
 
-  AC_LANG(Fortran 77)
-  AC_MSG_CHECKING([for naming convention for external etime()])
+  if test "${use_external_timer}" = "yes"; then
+    use_etime_underscore="no"
+    use_etime_without_underscore="no"
 
-  AC_LINK_IFELSE([
+    AC_LANG(Fortran 77)
+    AC_MSG_CHECKING([for naming convention for external etime()])
+
+    AC_LINK_IFELSE([
       REAL T1
       REAL TARRAY(2)
       REAL etime
@@ -524,10 +533,10 @@ if test "${use_internal_lapack}" = "yes"; then
       STOP
       END
 ],
-    [use_etime_without_underscore="yes"],
-    [])
+      [use_etime_without_underscore="yes"],
+      [])
 
-  AC_LINK_IFELSE([
+    AC_LINK_IFELSE([
       REAL T1
       REAL TARRAY(2)
       REAL etime_
@@ -538,24 +547,28 @@ if test "${use_internal_lapack}" = "yes"; then
       STOP
       END
 ],
-    [use_etime_underscore="yes"],
-    [])
+      [use_etime_underscore="yes"],
+      [])
 
-  if test "${use_etime_without_underscore}" = "yes"; then
-    use_EXT_ETIME="EXT_ETIME"
-    AC_MSG_RESULT([no underscore])
-  elif test "${use_etime_underscore}" = "yes"; then
-    use_EXT_ETIME="EXT_ETIME_"
-    AC_MSG_RESULT([with underscore])
+    if test "${use_etime_without_underscore}" = "yes"; then
+      use_EXT_ETIME="EXT_ETIME"
+      AC_MSG_RESULT([no underscore])
+    elif test "${use_etime_underscore}" = "yes"; then
+      use_EXT_ETIME="EXT_ETIME_"
+      AC_MSG_RESULT([with underscore])
+    else
+      AC_MSG_RESULT([can not determine])
+      AC_MSG_FAILURE([I do not know how to link to the external etime()])
+    fi
+
   else
-    AC_MSG_RESULT([can not determine])
-    AC_MSG_FAILURE([I do not know how to link to the external etime()])
+    AC_MSG_NOTICE([using internal etime()])
   fi
 
   # Test for no-optimization compiler flag.
   AC_MSG_CHECKING([for no-optmiziation flags])
 
-  case ${FC_COMPILERNAME} in
+  case ${F77_COMPILERNAME} in
     GCC)
       NOOPT="-O0 -g"
       LAPACK_TIMER="INT_ETIME"
