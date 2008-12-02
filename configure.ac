@@ -138,9 +138,13 @@ case "${FC_COMPILERNAME}" in
   *)     fc_compiler_version_string="unset" ;;
 esac
 
-AC_DEFINE_UNQUOTED(HAVE_CC_VERSION_STRING,  ["${cc_compiler_version_string}"],  [The c compiler version string])
+AC_DEFINE_UNQUOTED(HAVE_CC_VERSION_STRING,  ["${cc_compiler_version_string}"],  [The C compiler version string])
 AC_DEFINE_UNQUOTED(HAVE_F77_VERSION_STRING, ["${f77_compiler_version_string}"], [The f77 compiler version string])
 AC_DEFINE_UNQUOTED(HAVE_FC_VERSION_STRING,  ["${fc_compiler_version_string}"],  [The f90 compiler version string])
+
+AC_MSG_NOTICE([C compiler version:   ${cc_compiler_version_string}])
+AC_MSG_NOTICE([f77 compiler version: ${f77_compiler_version_string}])
+AC_MSG_NOTICE([f90 compiler version: ${fc_compiler_version_string}])
 
 # Put the C-compiler into standard C mode.
 AC_PROG_CC_STDC
