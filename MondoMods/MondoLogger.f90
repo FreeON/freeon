@@ -131,7 +131,7 @@ CONTAINS
 
   END FUNCTION OpenLogfile
 
-  SUBROUTINE MondoLog(logLevel, tag, message, file_O, line_O,NoIndent_O)
+  SUBROUTINE MondoLog(logLevel, tag, message, file_O, line_O, NoIndent_O)
 
     CHARACTER(LEN=*), INTENT(IN)            :: message
     CHARACTER(LEN=*), INTENT(IN)            :: tag

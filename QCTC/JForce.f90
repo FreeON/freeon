@@ -243,18 +243,10 @@ PROGRAM JForce
   ! didn't count flops, any accumulation is residual from matrix routines
   PerfMon%FLOP=Zero 
 
-  Mssg=ProcessName('JForce','Timing')
-  Mssg=TRIM(Mssg)//' Total='//TRIM(DblToMedmChar(MTimer()-JFORCE_TotalTime_Start)) & 
-                //'; Bisect='//TRIM(DblToShrtChar(Decompose_Time))//', Tree='//TRIM(DblToShrtChar(TreeMake_Time)) 
-  WRITE(*,*)TRIM(Mssg)
-  Mssg=ProcessName('JForce','Timing')
-  Mssg=TRIM(Mssg)//' Walk='//TRIM(DblToShrtChar(JWalk_Time))//', Ints='//TRIM(DblToShrtChar(Integral_Time)) &
-      //', Mults='//TRIM(DblToShrtChar(Multipole_Time)) 
-
-  WRITE(*,*)TRIM(Mssg)
-
-
-!!  WRITE(*,11)' JFORCE Total Time = ',MTimer()-JFORCE_TotalTime_Start
+  CALL MondoLog(DEBUG_NONE, "JForce", 'Total='//TRIM(DblToMedmChar(MTimer()-JFORCE_TotalTime_Start)) & 
+    //'; Bisect='//TRIM(DblToShrtChar(Decompose_Time))//', Tree='//TRIM(DblToShrtChar(TreeMake_Time)), "Timing")
+  CALL MondoLog(DEBUG_NONE, "JForce", 'Walk='//TRIM(DblToShrtChar(JWalk_Time))//', Ints='//TRIM(DblToShrtChar(Integral_Time)) &
+    //', Mults='//TRIM(DblToShrtChar(Multipole_Time)), "Timing")
 
   CALL ShutDown(Prog)
 END PROGRAM JForce

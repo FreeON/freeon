@@ -1600,7 +1600,7 @@ MODULE PrettyPrint
              Mssg=ProcessName(TRIM(Proc))//'CPU (Sec,MFLOPS) = (' &
                   //TRIM(DblToShrtChar(Elapsed_CPUS))//', '     &
                   //TRIM(IntToChar(MFlops(FLOPS,Elapsed_CPUS))) &
-                  //'),'//Rtrn//ProcessName()//'WALL(Sec,MFLOPS) = ('                  &
+                  //'), WALL(Sec,MFLOPS) = ('                  &
                   //TRIM(DblToShrtChar(Elapsed_Wall))//', '     &
                   //TRIM(IntToChar(MFlops(FLOPS,Elapsed_Wall))) &
                   //'), NProc = '//TRIM(IntToChar(NPrc))
@@ -1608,7 +1608,7 @@ MODULE PrettyPrint
              Mssg=ProcessName(TRIM(Proc))//'CPU (Sec,MFLOPS) = (' &
                   //TRIM(DblToShrtChar(Elapsed_CPUS))//', '     &
                   //TRIM(IntToChar(MFlops(FLOPS,Elapsed_CPUS))) &
-                  //'),'//Rtrn//ProcessName()//'WALL(Sec,MFLOPS) = ('                  &
+                  //'), WALL(Sec,MFLOPS) = ('                  &
                   //TRIM(DblToShrtChar(Elapsed_Wall))//', '     &
                   //TRIM(IntToChar(MFlops(FLOPS,Elapsed_Wall))) &
                   //')'
@@ -1704,7 +1704,7 @@ MODULE PrettyPrint
          Mssg=TRIM(Proc)//' :: MaxAllocs='//TRIM(IntToChar(MaxAllocs)) &
               //', MaxDeAllocs='//TRIM(IntToChar(MaxDeAllocs)) &
              //', MaxMemTab='//TRIM(IntToChar(MaxMemTab)) &
-            //', MaxMaxMem='//TRIM(IntToChar(MaxMaxMem))//Rtrn
+            //', MaxMaxMem='//TRIM(IntToChar(MaxMaxMem))
          PU=OpenPU(Unit_O=Unit_O)
          WRITE(PU,"(A)") TRIM(Mssg)
          CLOSE(PU)
@@ -1713,12 +1713,12 @@ MODULE PrettyPrint
        DO I=0,NPrc-1
           IF(InParallel)CALL AlignNodes()
           IF(MyId==I)THEN
-             Mssg=TRIM(Proc)//'#'//TRIM(IntToChar(I))                    &
-                  //' :: Allocs='//TRIM(IntToChar(A%Allocs))               &
-                  //',  DeAllocs='//TRIM(IntToChar(A%DeAllocs))            &
-                  //', '//TRIM(IntToChar(A%MemTab ))                       &
-                  //' bytes are presently allocated.'//Rtrn                    &
-                  //ProcessName()//'A max of '//TRIM(IntToChar(A%MaxMem)) &
+             Mssg=TRIM(Proc)//'#'//TRIM(IntToChar(I))           &
+                  //' :: Allocs='//TRIM(IntToChar(A%Allocs))    &
+                  //',  DeAllocs='//TRIM(IntToChar(A%DeAllocs)) &
+                  //', '//TRIM(IntToChar(A%MemTab ))            &
+                  //' bytes are presently allocated. '          &
+                  //'A max of '//TRIM(IntToChar(A%MaxMem))      &
                   //' bytes were allocated.'
              PU=OpenPU(Unit_O=Unit_O)
              WRITE(PU,"(A)")Mssg
@@ -1736,12 +1736,12 @@ MODULE PrettyPrint
 #endif
        PU=OpenPU()
        CALL PrintProtectL(PU)
-       Mssg=ProcessName(Proc)                                      &
-            //'Allocs='//TRIM(IntToChar(A%Allocs))                   &
-            //',  DeAllocs='//TRIM(IntToChar(A%DeAllocs))            &
-            //', '//TRIM(IntToChar(A%MemTab ))                       &
-            //' bytes are presently allocated.'//Rtrn                &
-            //ProcessName()//'A max of '//TRIM(IntToChar(A%MaxMem))  &
+       Mssg=ProcessName(Proc)                             &
+            //'Allocs='//TRIM(IntToChar(A%Allocs))        &
+            //',  DeAllocs='//TRIM(IntToChar(A%DeAllocs)) &
+            //', '//TRIM(IntToChar(A%MemTab ))            &
+            //' bytes are presently allocated. '          &
+            //'A max of '//TRIM(IntToChar(A%MaxMem))      &
             //' bytes were allocated.'
        WRITE(PU,"(A)")TRIM(Mssg)
        CALL PrintProtectR(PU)
@@ -1750,17 +1750,6 @@ MODULE PrettyPrint
     ENDIF
 #endif
   END SUBROUTINE Print_MEMS
-
-
-
-
-
-
-
-
-
-
-
 
 !--------------------------------------------------------------------------
 ! Print the CellSet
