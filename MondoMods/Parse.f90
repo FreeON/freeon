@@ -130,6 +130,28 @@ CONTAINS
       IF(J.NE.0)String(I:I)=Upper(J:J)
     ENDDO
   END SUBROUTINE UpCase
+
+  ! Remove comments on line. A comment is everything after the character '#',
+  ! just like in any good shell.
+  SUBROUTINE RemoveComments(Line)
+    CHARACTER(LEN=*), INTENT(INOUT) :: Line
+    INTEGER                         :: i, length
+    LOGICAL                         :: erase
+
+    erase = .FALSE.
+    length = LEN(TRIM(Line))
+    DO i = 1, length
+      IF(Line(i:i) == "#") THEN
+        erase = .TRUE.
+      ENDIF
+
+      IF(erase) THEN
+        Line(i:i) = " "
+      ENDIF
+    ENDDO
+
+  END SUBROUTINE RemoveComments
+
   !======================================================================
   !     Determine if an option has a defined key set.
   !======================================================================
@@ -148,6 +170,7 @@ CONTAINS
     LD=LEN(Delimiters)-1 ! to avoid the blank!
     DO
       READ(Unit,DEFAULT_CHR_FMT,END=1)Line
+      CALL RemoveComments(Line)
       LCLine=Line
       !          Make options case sensitive
       !          CALL LowCase(LCLine)
@@ -205,6 +228,7 @@ CONTAINS
     !write(*,*) "OptLC = ", OptLC
     DO
       READ(Unit,DEFAULT_CHR_FMT,END=1)Line
+      CALL RemoveComments(Line)
       CALL LowCase(Line)
       IF(INDEX(Line,TRIM(OptLC))/=0)THEN
         !write(*,*) "found OptLC in line ", Line
@@ -235,6 +259,7 @@ CONTAINS
     CALL LowCase(OptLC)
     DO
       READ(Unit,DEFAULT_CHR_FMT,END=1)Line
+      CALL RemoveComments(Line)
       CALL LowCase(Line)
       IF(INDEX(Line,TRIM(OptLC))/=0)THEN
         !               WRITE(*,*)' OptLC = <',TRIM(OptLC),'>'
@@ -270,10 +295,10 @@ CONTAINS
     CALL LowCase(OptLC)
     DO
       READ(Unit,DEFAULT_CHR_FMT,END=1)Line
+      CALL RemoveComments(Line)
       CALL LowCase(Line)
-      IF(INDEX(Line,TRIM(OptLC))/=0)THEN
-        !WRITE(*,*)' OptLC = <',TRIM(OptLC),'>'
-        !WRITE(*,*)' Line = <',TRIM(Line),'>'
+      IF(INDEX(Line,TRIM(OptLC)) /= 0) THEN
+        CALL MondoLog(DEBUG_NONE, "OptDblQ", "found option "//TRIM(OptLC)//" in line "//TRIM(Line))
         J=1
         L=LEN(Line)
         S1=SCAN(Line(J:L),Numbers)
@@ -300,8 +325,7 @@ CONTAINS
     INTEGER                        :: J,L,M,N, &
          K1,S1,K2,S2,Mns1,Pls1
     LOGICAL                        :: KeyQ
-    !WRITE(*,*)' Line = ',TRIM(Line)
-    !WRITE(*,*)' Key  = ',TRIM(Key)
+
     KeyQ=.FALSE.
     TmpLine=Line
     TmpKey=Key
@@ -363,6 +387,7 @@ CONTAINS
     LD=LEN(Delimiters)-1 ! to avoid the blank!
     DO
       READ(Unit,DEFAULT_CHR_FMT,END=1)Line
+      CALL RemoveComments(Line)
       LCLine=Line
       CALL LowCase(LCLine)
       IF(INDEX(LCLine,TRIM(OptLC))/=0)THEN
