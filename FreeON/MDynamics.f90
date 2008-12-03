@@ -489,6 +489,7 @@ CONTAINS
       ! Store Potential and Total Energy
       CALL MondoLog(DEBUG_NONE, "MD:Verlet", "ETotal = "//TRIM(DblToChar(C%Geos%Clone(iCLONE)%ETotal)))
       CALL MondoLog(DEBUG_NONE, "MD:Verlet", "ETotalPerSCF = "//TRIM(DblVectToChar(C%Geos%Clone(iCLONE)%ETotalPerSCF, (/ 0, C%Stat%Current%I(1) /))))
+      CALL MondoLog(DEBUG_NONE, "MD:Verlet", "T = "//TRIM(DblToChar(MDTemp%D(iCLONE)))//" K")
 #if defined MD_DEBUG
       IF(C%Dyns%MDNumSCF < 0) THEN
         CALL MondoLog(DEBUG_NONE, "MD:Verlet", "MDNumSCF not set")
@@ -512,7 +513,7 @@ CONTAINS
     IF(C%Dyns%Temp_Scaling) THEN
       IF(MOD(iGEO,C%Dyns%RescaleInt)==0) THEN
         CALL MondoLogPlain('Rescaling Temperature')
-        CALL MondoLogPlain('MD temperature     = '//TRIM(DblToChar(MDTemp%D(1))))
+        CALL MondoLogPlain('MD temperature     = '//TRIM(DblToChar(MDTemp%D(1)))//" K")
         CALL MondoLogPlain('Target temperature = '//TRIM(DblToChar(C%Dyns%TargetTemp)))
         DO iCLONE = 1,C%Geos%Clones
           CALL RescaleVelocity(C%Geos%Clone(iCLONE),MDTemp%D(iCLONE),C%Dyns%TargetTemp)
@@ -523,7 +524,7 @@ CONTAINS
     ! Berendsen thermostat.
     IF(C%Dyns%Thermostat == MD_THERM_BERENDSEN) THEN
       CALL MondoLogPlain("Applying Berendsen thermostat")
-      CALL MondoLogPlain("MD temperature     = "//TRIM(DblToChar(MDTemp%D(1))))
+      CALL MondoLogPlain("MD temperature     = "//TRIM(DblToChar(MDTemp%D(1)))//" K")
       CALL MondoLogPlain("Target temperature = "//TRIM(DblToChar(C%Dyns%TargetTemp)))
       DO iCLONE = 1, C%Geos%Clones
         CALL BerendsenThermostat(C%Geos%Clone(iCLONE), MDTemp%D(iCLONE), C%Dyns%TargetTemp, C%Dyns%DTime, C%Dyns%BerendsenTau, v_scale)
@@ -647,6 +648,7 @@ CONTAINS
         MDTave%D(iCLONE) = (DBLE(iGEO-1)/DBLE(iGEO))*MDTave%D(iCLONE) +(One/DBLE(iGEO))*MDTemp%D(iCLONE)
 
         ! Store Potential and Total Energy
+        CALL MondoLog(DEBUG_NONE, "MD:Symplectic", "T = "//TRIM(DblToChar(MDTemp%D(iCLONE)))//" K")
         CALL MondoLog(DEBUG_NONE, "MD:Symplectic", "ETotal = "//TRIM(DblToChar(C%Geos%Clone(iCLONE)%ETotal)))
         CALL MondoLog(DEBUG_NONE, "MD:Symplectic", "ETotalPerSCF = "//TRIM(DblVectToChar(C%Geos%Clone(iCLONE)%ETotalPerSCF, (/ 0, C%Stat%Current%I(1) /))))
 #if defined MD_DEBUG
@@ -954,43 +956,12 @@ CONTAINS
 
     CHARACTER(LEN=DEFAULT_CHR_LEN) :: Remark 
 
-    IF(C%Geos%Clones==1)THEN
-       Remark='t = '//TRIM(DblToMedmChar(MDTime%D(1)*InternalTimeToFemtoseconds))//" fs"
-       CALL PPrint(C%Geos%Clone(1), FileName_O=C%Nams%GFile,Unit_O=Geo, &
-                   PrintGeom_O=C%Opts%GeomPrint,Remark_O=Remark,Gradients_O='Velocities')
-    ELSE
-       DO iCLONE=1,C%Geos%Clones
-          Remark='t = '//TRIM(DblToMedmChar(MDTime%D(iCLONE)*InternalTimeToFemtoseconds))//" fs"
-          CALL PPrint(C%Geos%Clone(1), FileName_O=C%Nams%GFile,Unit_O=Geo, &
-               PrintGeom_O=C%Opts%GeomPrint,Clone_O=iCLONE,Remark_O=Remark,Gradients_O='Velocities')
-       ENDDO
-    ENDIF
-
-!!$
-!!$    DO iCLONE=1,C%Geos%Clones
-!!$      FileName = TRIM(C%Nams%SCF_NAME)//'_Clone_'//TRIM(IntToChar(iCLONE))//'.xyz'
-!!$      CALL OpenASCII(TRIM(FileName),Out)
-!!$      WRITE(Out,*) C%Geos%Clone(iCLONE)%NAtms
-!!$      WRITE(Out,*) "MD run "//TRIM(C%Nams%SCF_NAME)//", Clone "//TRIM(IntToChar(iCLONE)) &
-!!$        //", t = "//TRIM(FltToChar(MDTime%D(iCLONE)*InternalTimeToFemtoseconds))//" fs"
-!!$      DO iATS=1,C%Geos%Clone(iCLONE)%NAtms
-!!$        WRITE(Out,"(A,1x,F14.8,1x,F14.8,1x,F14.8)") &
-!!$          TRIM(C%Geos%Clone(iCLONE)%AtNam%C(iATS)), C%Geos%Clone(iCLONE)%Carts%D(1:3,iATS)
-!!$      ENDDO
-!!$      CLOSE(Out)
-!!$    ENDDO
-!!$
-!!$60  FORMAT(F10.4,1x,F18.12,1x,F18.12,1x,F18.12)
-!!$61  FORMAT(F10.4,1x,F14.8,1x,F14.8,1x,F14.8,1x,F14.8,1x,F14.8,1x,F14.8,1x)
-!!$80  FORMAT(a18,F16.10)
-!!$81  FORMAT(a18,F16.10,1x,F16.10)
-!!$82  FORMAT(a18,F16.10,1x,F16.10,1x,F16.10)
-!!$85  FORMAT("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
-!!$95  FORMAT(a18,F16.10,3x,E16.6)
-!!$96  FORMAT(a18,3(F16.10,1x))
-!!$97  FORMAT(a)
-!!$98  FORMAT(a18,E16.6)
-!!$99  FORMAT(a3,6(1x,F16.10))
+    DO iCLONE=1,C%Geos%Clones
+      Remark = 't = '//TRIM(DblToMedmChar(MDTime%D(iCLONE)*InternalTimeToFemtoseconds))//" fs, "// &
+               "T = "//TRIM(DblToMedmChar(MDTemp%D(iCLONE)))//" K"
+      CALL PPrint(C%Geos%Clone(iCLONE), FileName_O=C%Nams%GFile, Unit_O=Geo, &
+                  PrintGeom_O=C%Opts%GeomPrint, Clone_O=iCLONE, Remark_O=Remark, Gradients_O='Velocities')
+    ENDDO
 
   END SUBROUTINE OutputMD
 
@@ -1096,8 +1067,6 @@ CONTAINS
         CALL MondoLog(DEBUG_NONE, "CopyMatrices", "in default case without tilde")
       END SELECT
     ENDIF
-
-    CALL MondoLog(DEBUG_NONE, "CopyMatrices", "done")
 
   END SUBROUTINE CopyMatrices
 

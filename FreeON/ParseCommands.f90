@@ -52,7 +52,7 @@ CONTAINS
 
     ! Get command line arguments
     CALL Get(Args)
-    IF(Args%NC==0) CALL MondoHalt(PRSE_ERROR,' No arguments to MondoSCF !')!
+    IF(Args%NC==0) CALL MondoHalt(PRSE_ERROR,' No arguments to FreeON !')!
 
     ! Get current working directory.
     CALL GetPWD(N%M_PWD)
@@ -91,7 +91,7 @@ CONTAINS
     DotDex=INDEX(Args%C%C(1),'.')
     IF(DotDex==0) THEN
       CALL MondoLog(DEBUG_NONE, "FreeON", 'Parse error: no "." in input file name = <'//TRIM(N%IFile)//'>', "LoadCommand")
-      STOP "Termination of MondoSCF"
+      STOP "Termination of FreeON"
     ENDIF
 
     N%SCF_NAME=Args%C%C(1)(1:DotDex-1)//'_'//TRIM(PROCESS_ID)
@@ -108,7 +108,7 @@ CONTAINS
     INQUIRE(FILE=N%IFile,EXIST=Exists)
     IF(.NOT.Exists) THEN
       CALL MondoLog(DEBUG_NONE, "FreeON", 'Parse error: Input file "'//TRIM(N%IFile)//'" does not exist!', "LoadCommand")
-      STOP "Termination of MondoSCF"
+      STOP "Termination of FreeON"
     ENDIF
 
     ! Determine if input file has a '.' in it.  If so, create SCF name from string up to the '.'

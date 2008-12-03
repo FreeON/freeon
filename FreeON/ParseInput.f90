@@ -48,6 +48,7 @@ CONTAINS
   SUBROUTINE ParseTheInput(C)
     TYPE(Controls) :: C
     INTEGER        :: iCLONE
+    REAL(DOUBLE)   :: cellVolume, cellDensity
 
     ! Parse command line and load env and file names
     CALL LoadCommands(C%Nams)
@@ -63,14 +64,10 @@ CONTAINS
     ! Print startup
     CALL StartUpHeader(C%Nams)
 
-
-
     ! Parse generic options
     CALL LoadOptions(C%Nams,C%Opts)
     ! Print out some more file settings. The following filenames are only set
     ! now after loading the options.
-
-
 
     ! Parse dynamics options
     IF(C%Opts%Grad==GRAD_DO_DYNAMICS .OR. C%Opts%Grad==GRAD_DO_HYBRIDMC ) THEN
@@ -83,8 +80,14 @@ CONTAINS
     ! Parse periodic info
     CALL LoadPeriodic(C%Nams,C%Opts,C%Geos,C%PBCs)
 
-    ! Massage coodrinates, switch to AUs etc
+    ! Massage coordinates, switch to AUs etc
     CALL MassageCoordinates(C%Opts,C%Geos,C%PBCs)
+
+    ! Calculate some information about the input.
+    cellVolume = 0
+    cellDensity = 0
+    CALL MondoLog(DEBUG_NONE, "ParseInput", "volume of cell = "//TRIM(DblToChar(cellVolume))//" A^{3}")
+    CALL MondoLog(DEBUG_NONE, "ParseInput", "density        = "//TRIM(DblToChar(cellDensity))//" kg m^{-3}")
 
     ! Load basis sets
     CALL LoadBasisSets(C%Nams,C%Opts,C%Geos,C%Sets)
@@ -103,7 +106,7 @@ CONTAINS
 
     ! Check for Global conflicts.
     CALL ConflictCheck(C)
-    !
+
     !CALL PPrint(C%Geos%Clone(1),PrintGeom_O='PDB',Unit_O=6)
     !STOP
   END SUBROUTINE ParseTheInput

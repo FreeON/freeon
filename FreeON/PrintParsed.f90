@@ -136,7 +136,7 @@ CONTAINS
     CALL MondoLog(DEBUG_MEDIUM, "FreeON", 'RestartFile  = '//TRIM(N%RFile), "StartUpHeader")
 
     ! Print out a timestamp.
-    CALL TimeStamp("Starting MondoSCF")
+    CALL TimeStamp("Starting FreeON")
     CALL MondoLogPlain("")
 
   END SUBROUTINE StartUpHeader

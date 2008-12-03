@@ -59,7 +59,7 @@ PROGRAM FreeON
       CALL MondoLog(DEBUG_MAXIMUM, "FreeON", "Variables in HDF recycled every "//TRIM(IntToChar(RECYCLE_HDF))//" geometry steps.")    
 !    IF(C%Opts%Grad==GRAD_DO_DYNAMICS) &
 !      CALL MondoLog(DEBUG_MAXIMUM, "FreeON", "Using "//TRIM(IntToChar(MD_DEBUG))//" SCF cycels for TRBO-MD.")
-    !
+
     SELECT CASE(C%Opts%Grad)
     CASE(GRAD_NO_GRAD)
       CALL SinglePoints(C)
@@ -88,7 +88,7 @@ PROGRAM FreeON
     ! Something surreal to celebrate this run
     CALL ZippySez(C)
     !--------------------------------------------------------
-    CALL TimeStamp('Successful MondoSCF run',.FALSE.)
+    CALL TimeStamp('Successful FreeON run',.FALSE.)
     !--------------------------------------------------------
 #if defined(PARALLEL) && defined(MPI2)
   ENDIF
