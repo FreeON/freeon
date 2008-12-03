@@ -318,7 +318,8 @@ else
   if test -z "${user_FFLAGS}"; then
     case ${F77_COMPILERNAME} in
       GCC)   FFLAGS="-O0 -g -fbounds-check -Wall" ;;
-      Intel) FFLAGS="-O0 -fltconsistency -fp-port -g -check all -names as_is" ;;
+      #Intel) FFLAGS="-O0 -fltconsistency -fp-port -g -check all -names as_is" ;;
+      Intel) FFLAGS="-O0 -fltconsistency -fp-port -g -check all" ;;
       *)     FFLAGS="-O0 -g" ;;
     esac
     AC_MSG_NOTICE([Setting default optimization for ${F77_COMPILERNAME} compiler: FFLAGS  = ${FFLAGS}])
@@ -330,7 +331,8 @@ else
   if test -z "${user_FCFLAGS}"; then
     case ${FC_COMPILERNAME} in
       GCC)   FCFLAGS="-O0 -g -fbounds-check -Wall" ;;
-      Intel) FCFLAGS="-O0 -fltconsistency -fp-port -g -check all -names as_is" ;;
+      #Intel) FCFLAGS="-O0 -fltconsistency -fp-port -g -check all -names as_is" ;;
+      Intel) FCFLAGS="-O0 -fltconsistency -fp-port -g -check all" ;;
       *)     FCFLAGS="-O0 -g" ;;
     esac
     AC_MSG_NOTICE([Setting default optimization for ${FC_COMPILERNAME} compiler: FCFLAGS = ${FCFLAGS}])
@@ -891,6 +893,7 @@ Validate/Restart/Makefile
 Validate/SinglePoint/Makefile
 Validate/SinglePoint/Restricted/Makefile
 PostProcessing/Makefile
+BasisSets/Makefile
 ])
 
 AC_CONFIG_HEADERS([config.h])

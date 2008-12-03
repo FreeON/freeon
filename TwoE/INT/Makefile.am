@@ -160,4 +160,6 @@ EXTRA_INCLUDES = -I$(builddir)/../MSC
 
 # Some compilers have trouble optimizing some of the sources here. For now we
 # will turn the optimization level down...
+if USE_COMPILER_OPTIMIZATIONS
 OPTIMIZATION_FLAGS = -O1
+endif
