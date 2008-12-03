@@ -298,7 +298,7 @@ CONTAINS
       CALL RemoveComments(Line)
       CALL LowCase(Line)
       IF(INDEX(Line,TRIM(OptLC)) /= 0) THEN
-        CALL MondoLog(DEBUG_NONE, "OptDblQ", "found option "//TRIM(OptLC)//" in line "//TRIM(Line))
+        !CALL MondoLog(DEBUG_NONE, "OptDblQ", "found option "//TRIM(OptLC)//" in line "//TRIM(Line))
         J=1
         L=LEN(Line)
         S1=SCAN(Line(J:L),Numbers)

@@ -86,8 +86,7 @@ CONTAINS
   SUBROUTINE ParseModelChems(NModls,Models)
     INTEGER                       :: NModls,I
     INTEGER,   DIMENSION(MaxSets) :: Models
-    !-------------------------------------------------------------------------!
-!    CALL MondoLog(DEBUG_NONE, "ParseModelChems", "parsing models")
+
     NModls=0
     IF(OptKeyLocQ(Inp,MODEL_OPTION,MODEL_Hartree,MaxSets,NLoc,Location))THEN
        NModls=NModls+NLoc

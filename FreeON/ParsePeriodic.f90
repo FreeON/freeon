@@ -48,7 +48,7 @@ CONTAINS
     IF(O%Grad==GRAD_TS_SEARCH_NEB)THEN
       GBeg=0
       GEnd=G%Clones+1
-    ELSE	
+    ELSE
       GBeg=1
       GEnd=G%Clones
     ENDIF

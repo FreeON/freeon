@@ -210,7 +210,7 @@ CONTAINS
           ENDDO
           R2(iCLONE)=SQRT(R2(iCLONE))/G%Clone(0)%NAtms
        ENDDO
-       Mssg=ProcessName('MondoSCF','NEBPurify')//'RMSDs = '
+       Mssg=ProcessName('FreeON','NEBPurify')//'RMSDs = '
        DO I=1,G%Clones
           IF(MOD(I,4)==0)THEN
              Mssg=TRIM(Mssg)//RTRN//ProcessName() &
