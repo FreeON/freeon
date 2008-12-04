@@ -50,11 +50,13 @@ PROGRAM FreeON
   InParallel=.FALSE.
   IF(MyID==0)THEN
 #endif
+    ! Load the input file.
     CALL ParseTheInput(C)
+
     ! Initialize controls
     CALL InitGlobal(C)
+
     ! Much ado about gradients
-    !
     IF(C%Opts%Grad/=GRAD_NO_GRAD) &
       CALL MondoLog(DEBUG_MAXIMUM, "FreeON", "Variables in HDF recycled every "//TRIM(IntToChar(RECYCLE_HDF))//" geometry steps.")    
 !    IF(C%Opts%Grad==GRAD_DO_DYNAMICS) &

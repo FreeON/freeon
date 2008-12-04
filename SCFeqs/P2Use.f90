@@ -95,10 +95,8 @@ PROGRAM P2Use
 
   ! Start logging.
   logtag = TRIM(Prog)//":"//TRIM(SCFActn)
-!  CALL MondoLog(DEBUG_NONE, "P2Use", "SCFActn = "//TRIM(SCFActn))
+  ! CALL MondoLog(DEBUG_NONE, "P2Use", "SCFActn = "//TRIM(SCFActn))
   ! Do what needs to be done CASE by CASE
-
-
 
   SELECT CASE(SCFActn)
 

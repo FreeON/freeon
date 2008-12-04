@@ -560,7 +560,7 @@ MODULE PrettyPrint
                         Mssg='Clone # '//TRIM(IntToChar(Clone_O))//" / "//TRIM(Mssg)
                    IF(GM%PBC%Dimen/=0)THEN
                       CALL VecToAng(GM%PBC,a,b,c,alpha,beta,gamma)
-                      Mssg=TRIM(Mssg)//", PBC= " &
+                      Mssg=TRIM(Mssg)//", PBC = " &
                            //TRIM(FltToMedmChar(a*AA))//" " &
                            //TRIM(FltToMedmChar(b*AA))//" " &
                            //TRIM(FltToMedmChar(c*AA))//" " &
@@ -641,8 +641,8 @@ MODULE PrettyPrint
                 ELSE
                    Mssg=' <SCF> = '//TRIM(DblToChar(GM%ETotal*au2eV))//' eV'
                 ENDIF
-                WRITE(PU,22)Mssg
-22              FORMAT('REMARK   1  ',A60)
+                WRITE(PU,22) TRIM(Mssg)
+22              FORMAT('REMARK   1  ', A)
                 IF(GM%PBC%Dimen/=0)THEN
                    CALL VecToAng(GM%PBC,a,b,c,alpha,beta,gamma)
                    WRITE(PU,33)a*AA,b*AA,c*AA,alpha,beta,gamma

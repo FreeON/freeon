@@ -173,7 +173,7 @@ CONTAINS
         IF(SCF_STATUS == DIIS_NOPATH) THEN
           IConAls = DIIS_CONALS
           ODA_DONE = .TRUE.
-          CALL MondoLogPlain("Turning on DIIS")
+          CALL MondoLog(DEBUG_NONE, "SCFLogic", "Turning on DIIS")
         ELSE
           IConAls = ODA_CONALS
         ENDIF
