@@ -48,6 +48,7 @@ CONTAINS
     REWIND(UNIT=Unit)
     DO
       READ(Unit,DEFAULT_CHR_FMT,END=99)Line
+      CALL RemoveComments(Line)
       IF(INDEX(Line,Key)/=0)RETURN
     ENDDO
 99  CALL Halt(' Key not found in input : '//TRIM(Key))
@@ -62,7 +63,8 @@ CONTAINS
     REWIND(UNIT=Unit)
     DO
       READ(Unit,DEFAULT_CHR_FMT,END=99)Line
-      Call LowCase(Line)
+      CALL RemoveComments(Line)
+      CALL LowCase(Line)
       IF(INDEX(Line,Key)/=0)RETURN
     ENDDO
 99  CALL Halt(' Key not found in input : '//TRIM(Key))
@@ -79,6 +81,7 @@ CONTAINS
     REWIND(UNIT=Unit)
     DO
       READ(Unit,DEFAULT_CHR_FMT,END=99)Line
+      CALL RemoveComments(Line)
       IF(INDEX(Line,Key)/=0)RETURN
     ENDDO
 99  CONTINUE
@@ -99,6 +102,7 @@ CONTAINS
     CALL LowCase(KeyLC)
     DO
       READ(Unit,DEFAULT_CHR_FMT,END=99)Line
+      CALL RemoveComments(Line)
       LineLC=Line
       CALL LowCase(LineLC)
       IF(INDEX(LineLC,KeyLC(1:N))/=0)RETURN

@@ -48,7 +48,6 @@ CONTAINS
   SUBROUTINE ParseTheInput(C)
     TYPE(Controls) :: C
     INTEGER        :: iCLONE
-    REAL(DOUBLE)   :: cellVolume, cellDensity
 
     ! Parse command line and load env and file names
     CALL LoadCommands(C%Nams)
@@ -82,12 +81,6 @@ CONTAINS
 
     ! Massage coordinates, switch to AUs etc
     CALL MassageCoordinates(C%Opts,C%Geos,C%PBCs)
-
-    ! Calculate some information about the input.
-    cellVolume = 0
-    cellDensity = 0
-    CALL MondoLog(DEBUG_NONE, "ParseInput", "volume of cell = "//TRIM(DblToChar(cellVolume))//" A^{3}")
-    CALL MondoLog(DEBUG_NONE, "ParseInput", "density        = "//TRIM(DblToChar(cellDensity))//" kg m^{-3}")
 
     ! Load basis sets
     CALL LoadBasisSets(C%Nams,C%Opts,C%Geos,C%Sets)

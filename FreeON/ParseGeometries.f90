@@ -218,6 +218,8 @@ CONTAINS
               G%Clone(iCLONE)%PBC%CellVolume   = G%Clone(iCLONE)%PBC%CellVolume*AUToAngstroms**G%Clone(iCLONE)%PBC%Dimen
               G%Clone(iCLONE)%PBC%DipoleFAC    = G%Clone(iCLONE)%PBC%DipoleFAC/(AUToAngstroms**G%Clone(iCLONE)%PBC%Dimen)
               G%Clone(iCLONE)%PBC%QupoleFAC    = G%Clone(iCLONE)%PBC%QupoleFAC/(AUToAngstroms**G%Clone(iCLONE)%PBC%Dimen)
+
+              CALL MondoLog(DEBUG_NONE, "LoadCoordinates", "Cell Volume = "//TRIM(DblToChar(G%Clone(iCLONE)%PBC%CellVolume))//" A^3")
             ENDIF
           ENDDO
         ENDDO
@@ -250,6 +252,7 @@ CONTAINS
     CALL Align(BeginDelimiter,Inp)
     DO
       READ(Inp,DEFAULT_CHR_FMT,END=1)Line
+      CALL RemoveComments(Line)
       LineLowCase = Line
       IF(INDEX(LineLowCase,EndDelimiter)/=0)EXIT
       N=N+1
@@ -264,6 +267,7 @@ CONTAINS
 
     DO
       READ(Inp,DEFAULT_CHR_FMT,END=1)Line
+      CALL RemoveComments(Line)
       LineLowCase = Line
       IF(INDEX(LineLowCase,EndDelimiter)/=0)EXIT
       Call LowCase(LineLowCase)

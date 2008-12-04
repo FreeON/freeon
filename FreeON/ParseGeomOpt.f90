@@ -279,6 +279,7 @@ MODULE ParseGeomOpt
        CALL AlignLowCase(TRIM(Line),Inp)
        DO 
          READ(Inp,DEFAULT_CHR_FMT,END=1) Line
+         CALL RemoveComments(Line)
          IF(INDEX(Line,QChar)/=0) THEN
            READ(Line,*) Aux(1:ChLen),(Ratio(J),J=1,3)
            EXIT

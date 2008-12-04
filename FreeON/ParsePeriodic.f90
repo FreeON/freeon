@@ -33,6 +33,7 @@ MODULE ParsePeriodic
   USE OptionKeys
   USE PeriodicKeys
   USE ControlStructures
+
 CONTAINS
   !=========================================================================
   !
@@ -73,6 +74,7 @@ CONTAINS
     DO I=GBeg,GEnd
       G%Clone(I)%PBC=PBC
       CALL CalculateCoordArrays(G%Clone(I))
+      CALL MondoLog(DEBUG_NONE, "LoadPeriodic", "Cell volume = "//TRIM(DblToChar(CellVolume(G%Clone(I)%PBC%BoxShape%D,G%Clone(I)%PBC%AutoW%I)))//" A^3")
     ENDDO
 
   END SUBROUTINE LoadPeriodic
@@ -210,6 +212,7 @@ CONTAINS
     CALL Align(BEGIN_PERIODIC,Inp)
     DO
       READ(Inp,DEFAULT_CHR_FMT,END=1) Line
+      CALL RemoveComments(Line)
       IF(INDEX(Line,END_PERIODIC)==0) THEN
         LowLine=Line
         CALL LowCase(LowLine)

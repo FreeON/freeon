@@ -92,7 +92,7 @@ CONTAINS
       ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_DMP4)) THEN
         D%MDGeuss=MD_DMP4
       ELSE
-        CALL MondoLogPlain('In input file, no MD DM Projection (MDProjection) algorithm defined')
+        CALL MondoLog(DEBUG_NONE, "LoadDynamics", 'In input file, no MD DM Projection (MDProjection) algorithm defined')
         CALL MondoLog(DEBUG_NONE, "LoadDynamics", "using DMLinear")
         D%MDGeuss = MD_DMLinear
       ENDIF
@@ -105,7 +105,7 @@ CONTAINS
       ELSEIF(OptKeyQ(Inp, MD_AL_OPTION, MD_AL_SYMPLECTIC)) THEN
         D%MDAlgorithm = MD_AL_SYMPLECTIC
       ELSE
-        WRITE(*,*) "No MD algorithm specified, setting to Verlet"
+        CALL MondoLog(DEBUG_NONE, "LoadDynamics", "No MD algorithm specified, setting to Verlet")
         D%MDAlgorithm = MD_AL_VERLET
       ENDIF
       ! MD Time Step
@@ -121,7 +121,7 @@ CONTAINS
       ENDIF
       ! Parse for Number of SCF cycles
       IF(.NOT. OptIntQ(Inp,MD_NUM_SCF,D%MDNumSCF)) THEN
-        CALL MondoLogPlain('Number of SCF cycles for MD is not set')
+        CALL MondoLog(DEBUG_NONE, "LoadDynamics", 'Number of SCF cycles for MD is not set')
         D%MDNumSCF = -1
       ENDIF
 
@@ -147,47 +147,48 @@ CONTAINS
 
       ! Parse for thermostat.
       IF(OptKeyQ(Inp, MD_THERMOSTAT, MD_THERM_BERENDSEN)) THEN
-        CALL MondoLogPlain("Using Berendsen thermostat")
+        CALL MondoLog(DEBUG_NONE, "LoadDynamics", "Using Berendsen thermostat")
         D%Thermostat = MD_THERM_BERENDSEN
       ELSEIF(OptKeyQ(Inp, MD_THERMOSTAT, MD_ACT)) THEN
-        CALL MondoLogPlain("Using Action Control Theory thermostat")
+        CALL MondoLog(DEBUG_NONE, "LoadDynamics", "Using Action Control Theory thermostat")
         D%Thermostat = MD_ACT
       ELSE
-        CALL MondoLogPlain("Unknown thermostat or thermostat not set")
+        CALL MondoLog(DEBUG_NONE, "LoadDynamics", "Unknown thermostat or thermostat not set")
         D%Thermostat = MD_THERM_UNSET
       ENDIF
 
       IF(OptDblQ(Inp, MD_ACT_MAX_FORCE_ERROR, D%ACTMaxForceError)) THEN
-        CALL MondoLogPlain("ACT Max Force Error = "//TRIM(DblToChar(D%ACTMaxForceError)))
+        CALL MondoLog(DEBUG_NONE, "LoadDynamics", "ACT Max Force Error = "//TRIM(DblToChar(D%ACTMaxForceError)))
       ELSE
         IF(D%Thermostat == MD_ACT) THEN
           D%ACTMaxForceError = 1.D-6
-          CALL MondoLogPlain("ACT Max Force Error defaults to "//TRIM(DblToChar(D%ACTMaxForceError)))
+          CALL MondoLog(DEBUG_NONE, "LoadDynamics", "ACT Max Force Error defaults to "//TRIM(DblToChar(D%ACTMaxForceError)))
         ENDIF
       ENDIF
 
       IF(OptDblQ(Inp, MD_ACT_ALPHA, D%ACTAlpha)) THEN
-        CALL MondoLogPlain("ACT alpha = "//TRIM(DblToChar(D%ACTAlpha)))
+        CALL MondoLog(DEBUG_NONE, "LoadDynamics", "ACT alpha = "//TRIM(DblToChar(D%ACTAlpha)))
       ELSE
         IF(D%Thermostat == MD_ACT) THEN
           D%ACTAlpha = 1.D0
-          CALL MondoLogPlain("ACT alpha defaults to "//TRIM(DblToChar(D%ACTAlpha)))
+          CALL MondoLog(DEBUG_NONE, "LoadDynamics", "ACT alpha defaults to "//TRIM(DblToChar(D%ACTAlpha)))
         ENDIF
       ENDIF
 
       IF(OptDblQ(Inp, MD_ACT_BETA, D%ACTBeta)) THEN
-        CALL MondoLogPlain("ACT beta = "//TRIM(DblToChar(D%ACTBeta)))
+        CALL MondoLog(DEBUG_NONE, "LoadDynamics", "ACT beta = "//TRIM(DblToChar(D%ACTBeta)))
       ELSE
         IF(D%Thermostat == MD_ACT) THEN
           D%ACTBeta = 1.D-2
-          CALL MondoLogPlain("ACT beta defaults to "//TRIM(DblToChar(D%ACTBeta)))
+          CALL MondoLog(DEBUG_NONE, "LoadDynamics", "ACT beta defaults to "//TRIM(DblToChar(D%ACTBeta)))
         ENDIF
       ENDIF
 
       IF(OptDblQ(Inp, MD_BERENDSEN_TAU, D%BerendsenTau)) THEN
-        CALL MondoLogPlain("Using tau = "//TRIM(DblToChar(D%BerendsenTau)))
+        D%BerendsenTau = D%BerendsenTau*FemtosecondsToInternalTime
+        CALL MondoLog(DEBUG_NONE, "LoadDynamics", "Using tau = "//TRIM(DblToChar(D%BerendsenTau*InternalTimeToFemtoseconds))//" fs")
       ELSE
-        CALL MondoLogPlain("BerendsenTau not specified in input: Setting tau to DeltaTime")
+        CALL MondoLog(DEBUG_NONE, "LoadDynamics", "BerendsenTau not specified in input: Setting tau to DeltaTime")
         D%BerendsenTau = D%DTime
       ENDIF
 
@@ -230,7 +231,7 @@ CONTAINS
       ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_DMP4)) THEN
         D%MDGeuss=MD_DMP4
       ELSE
-        CALL MondoLogPlain('In input file, no MD DM Projection algorithm defined')
+        CALL MondoLog(DEBUG_NONE, "LoadDynamics", 'In input file, no MD DM Projection algorithm defined')
       ENDIF
       ! MD Algorithmn
       IF(OptKeyQ(Inp,MD_AL_OPTION,MD_AL_VERLET))THEN
@@ -238,7 +239,7 @@ CONTAINS
       ELSEIF(OptKeyQ(Inp,MD_AL_OPTION,MD_AL_GEAR)) THEN
         D%MDAlgorithm = MD_AL_GEAR
       ELSE
-        WRITE(*,*) "No MD algorithm specified, setting to Verlet"
+        CALL MondoLog(DEBUG_NONE, "LoadDynamics", "No MD algorithm specified, setting to Verlet")
         D%MDAlgorithm = MD_AL_VERLET
       ENDIF
       ! MD Time Step
