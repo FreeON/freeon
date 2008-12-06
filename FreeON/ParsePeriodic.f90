@@ -44,7 +44,8 @@ CONTAINS
     TYPE(Geometries) :: G
     TYPE(Periodics)  :: P
     TYPE(PBCInfo)    :: PBC
-    INTEGER          :: I,GBeg,GEnd
+    INTEGER          :: I,atomID, GBeg,GEnd
+    REAL(DOUBLE)     :: totalMass, volume
     !-----------------------------------------------------------------------!
     IF(O%Grad==GRAD_TS_SEARCH_NEB)THEN
       GBeg=0
@@ -74,7 +75,24 @@ CONTAINS
     DO I=GBeg,GEnd
       G%Clone(I)%PBC=PBC
       CALL CalculateCoordArrays(G%Clone(I))
-      CALL MondoLog(DEBUG_NONE, "LoadPeriodic", "Cell volume = "//TRIM(DblToChar(CellVolume(G%Clone(I)%PBC%BoxShape%D,G%Clone(I)%PBC%AutoW%I)))//" A^3")
+
+      ! Print out some information regarding the density of the system.
+      totalMass = 0.0D0
+      DO atomID = 1, G%Clone(I)%NAtms
+        totalMass = totalMass+G%Clone(I)%AtMss%D(atomID)
+      ENDDO
+
+      ! Get the volume.
+      volume = CellVolume(G%Clone(I)%PBC%BoxShape%D,G%Clone(I)%PBC%AutoW%I)
+
+      CALL MondoLog(DEBUG_NONE, "LoadPeriodic", "volume = "//TRIM(DblToMedmChar(volume))//" A^3")
+      CALL MondoLog(DEBUG_NONE, "LoadPeriodic", "volume per atom = " &
+        //TRIM(FltToShrtChar(volume/G%Clone(I)%NAtms))//" A^3 = " &
+        //TRIM(FltToShrtChar(volume/G%Clone(I)%NAtms*AngstromsToAU*AngstromsToAU*AngstromsToAU))//" a_B^3")
+      CALL MondoLog(DEBUG_NONE, "LoadPeriodic", "mass = " &
+        //TRIM(DblToMedmChar(totalMass*amuToKg))//" kg = " &
+        //TRIM(DblToMedmChar(totalMass))//" u")
+      CALL MondoLog(DEBUG_NONE, "LoadPeriodic", "density = "//TRIM(DblToMedmChar(totalMass*amuToKg/(volume*1D-30)))//" kg/m^3")
     ENDDO
 
   END SUBROUTINE LoadPeriodic
