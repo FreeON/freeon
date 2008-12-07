@@ -1143,21 +1143,29 @@ CONTAINS
              ENDDO
           ENDDO
        ENDIF
-       ! Zero forces on constrained atoms and compute stats (MAX/RMS)
-       G%Clone(iCLONE)%GradMax=Zero
-       G%Clone(iCLONE)%GradRMS=Zero
+!      Zero forces on constrained atoms 
        DO iATS=1,G%Clone(iCLONE)%NAtms
-          IF(G%Clone(iCLONE)%CConstrain%I(iATS)==0)THEN
-             DO J=1,3
-                GradVal=G%Clone(iCLONE)%Gradients%D(J,iATS)
-                G%Clone(iCLONE)%GradRMS=G%Clone(iCLONE)%GradRMS+GradVal**2
-                G%Clone(iCLONE)%GradMax=MAX(G%Clone(iCLONE)%GradMax,ABS(GradVal))
-             ENDDO
-          ELSE
+          IF(G%Clone(iCLONE)%CConstrain%I(iATS)==1 .OR. G%Clone(iCLONE)%CConstrain%I(iATS)==2)THEN
              IF(O%Coordinates/=GRAD_INTS_OPT) THEN
                 G%Clone(iCLONE)%Gradients%D(1:3,iATS)=Zero
              ENDIF
           ENDIF
+       ENDDO
+!      Add additional External Forces to Atoms
+       DO iATS=1,G%Clone(iCLONE)%NAtms
+          IF(G%Clone(iCLONE)%CConstrain%I(iATS)==3)THEN
+             G%Clone(iCLONE)%Gradients%D(1:3,iATS)=G%Clone(iCLONE)%Gradients%D(1:3,iATS)+G%Clone(iCLONE)%Velocity%D(1:3,iATS)
+          ENDIF
+       ENDDO
+!      Calculate GrandMax and GrandRMS
+       G%Clone(iCLONE)%GradMax=Zero
+       G%Clone(iCLONE)%GradRMS=Zero
+       DO iATS=1,G%Clone(iCLONE)%NAtms
+          DO J=1,3
+             GradVal=G%Clone(iCLONE)%Gradients%D(J,iATS)
+             G%Clone(iCLONE)%GradRMS=G%Clone(iCLONE)%GradRMS+GradVal**2
+             G%Clone(iCLONE)%GradMax=MAX(G%Clone(iCLONE)%GradMax,ABS(GradVal))
+          ENDDO
        ENDDO
        G%Clone(iCLONE)%GradRMS=SQRT(G%Clone(iCLONE)%GradRMS/DBLE(3*G%Clone(iCLONE)%NAtms))
     ENDDO
