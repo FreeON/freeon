@@ -334,6 +334,11 @@ CONTAINS
           G%CConstrain%I(N)=1
         CASE('r')
           G%CConstrain%I(N)=2
+!
+!       Add an external force to an atom
+!
+        CASE('fext')
+          G%CConstrain%I(N)=3
         CASE('f')
           ! We found an atom for freq calculation
           G%DoFreq%I(N)=1
