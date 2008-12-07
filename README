@@ -7,17 +7,15 @@ step has to be done only once however. After subsequent updates from git through
 
 In order to build the configure script run the following commands:
 
-aclocal
-autoconf
-autoheader
-automake --add-missing
-
-This whole procedure can be done in one single command:
-
 autoreconf -i -s
 
-Once the sources are configured (run "./configure --help" to get a list of
-options it understands) run
+which executes a series of commands that generate the configure script at the
+end. Now run the configure script. Run "./configure --help" to get a list of
+options it understands.
+
+./configure
+
+Once the sources are configured run
 
 make
 make install
