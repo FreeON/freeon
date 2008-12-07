@@ -153,6 +153,7 @@ AC_GNU_SOURCE
 # Switch to fortran 90 for tests.
 AC_LANG(Fortran)
 AC_FC_SRCEXT(f90)
+AC_FC_FREEFORM
 
 # Store additional optimization flags.
 optimization_flags=""
@@ -282,7 +283,6 @@ main ()
 
     # Test whether these flags actually produce runnable code.
     AC_LANG(Fortran)
-    AC_FC_SRCEXT(f90)
     AC_RUN_IFELSE([
 program runtest
 
@@ -508,8 +508,6 @@ AC_CHECK_LIB([m], [round], [],
 
 # Switch tests to fortran.
 AC_LANG(Fortran)
-AC_FC_SRCEXT(f90)
-AC_FC_FREEFORM
 
 # Find whether the compiler is gfortran and too old...
 AC_MSG_CHECKING([for possible compiler problems])
