@@ -96,3 +96,5 @@ BasisSets = \
   WTBS-SPLIT.bas \
   WTBS.bas \
   splitbas
+
+CLEANFILES = *~

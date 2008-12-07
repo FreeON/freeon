@@ -150,6 +150,10 @@ AC_MSG_NOTICE([f90 compiler version: ${fc_compiler_version_string}])
 AC_PROG_CC_STDC
 AC_GNU_SOURCE
 
+# Switch to fortran 90 for tests.
+AC_LANG(Fortran)
+AC_FC_SRCEXT(f90)
+
 # Store additional optimization flags.
 optimization_flags=""
 
@@ -914,6 +918,7 @@ AC_DEFINE(LOG_MEMORY_USAGE,
           [CALL MondoLog(DEBUG_NONE, __FILE__, "memory at "//TRIM(IntToChar(__LINE__))//": "//TRIM(IntToChar(GetMemoryUsage()))//" kiB")],
           [A helper macro to print out memory usage.])
 
+# Print out a summary of options used to compile.
 AC_MSG_NOTICE([***   Summary   ***])
 AC_MSG_NOTICE([CC                       = ${CC}])
 AC_MSG_NOTICE([FC                       = ${FC}])
@@ -958,6 +963,7 @@ else
 fi
 AC_MSG_NOTICE([*** End Summary ***])
 
+# Pass the optimization flags to the hdf configure script.
 ac_configure_args="${ac_configure_args} ${optimization_flags}"
 
 AC_OUTPUT
