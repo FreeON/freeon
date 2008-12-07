@@ -322,7 +322,6 @@ else
   if test -z "${user_FFLAGS}"; then
     case ${F77_COMPILERNAME} in
       GCC)   FFLAGS="-O0 -g -fbounds-check -Wall" ;;
-      #Intel) FFLAGS="-O0 -fltconsistency -fp-port -g -check all -names as_is" ;;
       Intel) FFLAGS="-O0 -fltconsistency -fp-port -g -check all" ;;
       *)     FFLAGS="-O0 -g" ;;
     esac
@@ -335,7 +334,6 @@ else
   if test -z "${user_FCFLAGS}"; then
     case ${FC_COMPILERNAME} in
       GCC)   FCFLAGS="-O0 -g -fbounds-check -Wall" ;;
-      #Intel) FCFLAGS="-O0 -fltconsistency -fp-port -g -check all -names as_is" ;;
       Intel) FCFLAGS="-O0 -fltconsistency -fp-port -g -check all" ;;
       *)     FCFLAGS="-O0 -g" ;;
     esac
@@ -344,6 +342,34 @@ else
   else
     AC_MSG_NOTICE([User supplied:  FCFLAGS = ${user_FCFLAGS}])
   fi
+fi
+
+# Check whether to check for case differences in names.
+AC_MSG_CHECKING([whether to check for case differences in names])
+AC_ARG_ENABLE([case-check],
+  [AS_HELP_STRING([--enable-case-check],
+  [Enables extra checks on case consistency of object names in fortran.
+   Normally fortran is case insensitive, this options enables extra checks
+   that make names case sensitive. This currently only works with Intel's
+   fortran compiler, ifort.])],
+  [use_case_check="${enableval}"],
+  [use_case_check="no"])
+
+if test ${use_case_check} = "yes"; then
+  AC_MSG_RESULT([yes])
+
+  case ${F77_COMPILERNAME} in
+    Intel) FFLAGS="${FFLAGS} -names as_is" ;;
+    *)     AC_MSG_NOTICE([unsupported compiler for case-check]) ;;
+  esac
+
+  case ${FC_COMPILERNAME} in
+    Intel) FCFLAGS="${FCFLAGS} -names as_is" ;;
+    *)     AC_MSG_NOTICE([unsupported compiler for case-check]) ;;
+  esac
+
+else
+  AC_MSG_RESULT([no])
 fi
 
 # Check whether the f90 and f77 compilers are the same. We currently need that
@@ -630,7 +656,6 @@ if test "${use_internal_lapack}" = "yes"; then
       AC_MSG_RESULT([identified gfortran compiler, using ${NOOPT} no-optimization flag])
       ;;
     Intel)
-      #NOOPT="-O0 -fltconsistency -fp-port -g -names as_is"
       NOOPT="-O0 -fltconsistency -fp-port -g"
       LAPACK_TIMER=${use_EXT_ETIME}
       AC_MSG_RESULT([identified intel ifort compiler, using ${NOOPT} no-optimization flag])
@@ -962,6 +987,6 @@ fi
 AC_MSG_NOTICE([*** End Summary ***])
 
 # Pass the optimization flags to the hdf configure script.
-ac_configure_args="${ac_configure_args} ${optimization_flags}"
+#ac_configure_args="${ac_configure_args} ${optimization_flags}"
 
 AC_OUTPUT

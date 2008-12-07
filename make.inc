@@ -105,6 +105,22 @@ AM_LIBTOOLFLAGS = --silent
 #	  rm $(basename $@)$(PREPROCESSED_SUFFIX).f; \
 #	fi
 
+#.c.o:
+#	@echo "compiling $<"
+#	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $< > /dev/null 2>&1 && exit 0; \
+#	  echo "The following compiler command failed:" 1>&2; \
+#	  echo '$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<' 1>&2; \
+#	  $(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
+#	@mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+#
+#.c.lo:
+#	@echo "compiling $<"
+#	$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $< > /dev/null 2>&1 && exit 0; \
+#	  echo "The following compiler command failed:" 1>&2; \
+#	  echo '$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<' 1>&2; \
+#	  $(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
+#	@mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
+
 .f90.o :
 	@$(CPP_COMMAND) $< | grep -v -E "^#" > $(basename $@)$(PREPROCESSED_SUFFIX).f90 && exit 0; \
 	  echo "The following preprocessor command failed:" 1>&2; \
