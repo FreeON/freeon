@@ -23,9 +23,11 @@
 !    to return derivative works to the MondoSCF group for review, and possible
 !    disemination in future releases.
 !------------------------------------------------------------------------------
+
 MODULE GlobalObjects
   USE DerivedTypes
   IMPLICIT NONE
+
   !-------------------------------------------------
   !  Global time/flop accumulator
   !
@@ -56,7 +58,5 @@ MODULE GlobalObjects
   !
   !  TYPE(INT_VECT), SAVE :: ShredSched
 #endif
-  !
-  !-----------------------------------------------------------
-  !
+
 END MODULE GlobalObjects

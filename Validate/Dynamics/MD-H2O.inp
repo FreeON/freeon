@@ -25,6 +25,8 @@ MaxMDStep=10
 MDNumSCF=2
 TempIntScaling=600
 
+CleanScratch = no
+
 <EndOptions>
 
 <BeginGeometry>

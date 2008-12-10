@@ -96,6 +96,7 @@ PROGRAM DMP_SP2 ! Density matrix purification, SP2 variation
   CALL FockGuess(F,P,Ne,1)
 #endif
   CALL SetEq(Pold,P)
+
   ! Do SP2 iterations
   DO I=1,100
     CALL SP2(P,Tmp1,Tmp2,Ne,MM)

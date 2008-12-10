@@ -57,11 +57,6 @@ PROGRAM FreeON
     CALL InitGlobal(C)
 
     ! Much ado about gradients
-    IF(C%Opts%Grad/=GRAD_NO_GRAD) &
-      CALL MondoLog(DEBUG_MAXIMUM, "FreeON", "Variables in HDF recycled every "//TRIM(IntToChar(RECYCLE_HDF))//" geometry steps.")    
-!    IF(C%Opts%Grad==GRAD_DO_DYNAMICS) &
-!      CALL MondoLog(DEBUG_MAXIMUM, "FreeON", "Using "//TRIM(IntToChar(MD_DEBUG))//" SCF cycels for TRBO-MD.")
-
     SELECT CASE(C%Opts%Grad)
     CASE(GRAD_NO_GRAD)
       CALL SinglePoints(C)
@@ -69,7 +64,6 @@ PROGRAM FreeON
       CALL TDSCF(C)
     CASE(GRAD_GO_DOWNHILL)
       CALL Descender(C)
-      CALL MondoLog(DEBUG_MAXIMUM, "FreeON", "The hdf recycles variables every "//TRIM(IntToChar(RECYCLE_HDF))//" geometry steps")
     CASE(GRAD_TS_SEARCH_NEB)
       ! Place holder for whatever
       CALL Descender(C)

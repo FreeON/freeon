@@ -858,17 +858,6 @@ AC_ARG_WITH([MONDO_SCRATCH],
   [MONDO_SCRATCH="/tmp"])
 AC_MSG_RESULT([using ${MONDO_SCRATCH}])
 
-# Define hdf hack.
-AC_MSG_CHECKING([how many geometries to recycle])
-AC_ARG_WITH([RECYCLE_HDF],
-  [AS_HELP_STRING([--with-RECYCLE_HDF=Number_of_geometries],
-  [Specify how many geometries should be stored in hdf])],
-  [RECYCLE_HDF=${withval}],
-  [RECYCLE_HDF=20])
-AC_MSG_RESULT([keeping ${RECYCLE_HDF} geometries])
-
-AC_DEFINE_UNQUOTED(RECYCLE_HDF, [${RECYCLE_HDF}], [Only keep this many geometries in hdf file.])
-
 # Some mondo variables.
 AC_DEFINE_UNQUOTED(HAVE_MONDO_HOME,    ["${prefix}"], [Define the main installation directory.])
 AC_DEFINE_UNQUOTED(HAVE_MONDO_PLAT,    ["${build}"], [Define build platform.])
@@ -957,7 +946,6 @@ AC_MSG_NOTICE([FORTRAN_CPPFLAGS         = ${FORTRAN_CPPFLAGS}])
 AC_MSG_NOTICE([FORTRAN_DEFAULT_INCLUDES = ${FORTRAN_DEFAULT_INCLUDES}])
 AC_MSG_NOTICE([HDF5_CPPFLAGS            = ${HDF5_CPPFLAGS}])
 AC_MSG_NOTICE([MONDO_SCRATCH            = ${MONDO_SCRATCH}])
-AC_MSG_NOTICE([RECYCLE_HDF              = ${RECYCLE_HDF}])
 AC_MSG_NOTICE([])
 if test "${use_internal_lapack}" = "yes"; then
   AC_MSG_NOTICE([Using internal lapack])

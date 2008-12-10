@@ -287,11 +287,11 @@ CONTAINS
     ELSEIF(PRESENT(Tag_O))THEN
       ! Apply recycling.
       Tag_INT_old = CharToInt(Tag_O)
-      Tag_INT_new = MOD(Tag_INT_old, RECYCLE_HDF)
+      Tag_INT_new = MOD(Tag_INT_old, RecycleHDF)
       FullName=TRIM(VarName)//TRIM(IntToChar(Tag_INT_new))
     ELSEIF(PRESENT(Stats_O))THEN
       ReCycStats=Stats_O
-      ReCycStats(3)=MOD(ReCycStats(3),RECYCLE_HDF)
+      ReCycStats(3)=MOD(ReCycStats(3), RecycleHDF)
       FullName=TRIM(VarName)//TRIM(StatsToChar(ReCycStats))
     ELSE
       FullName=TRIM(VarName)
