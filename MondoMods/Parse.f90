@@ -439,6 +439,62 @@ CONTAINS
     ENDIF
   END FUNCTION OptKeyLocQ
 
+  ! Find a logical. Allowed values are:
+  !
+  ! yes, true --> .TRUE.
+  ! no, false --> .FALSE.
+  !
+  ! The return values only reflect the fact whether the key was found or not,
+  ! not what value it was set to. That ends up in Value.
+  FUNCTION OptLogicalQ(Unit, Option, Value)
+    LOGICAL                        :: OptLogicalQ
+    INTEGER, INTENT(IN)            :: Unit
+    CHARACTER(LEN=*), INTENT(IN)   :: Option
+    CHARACTER(LEN=DEFAULT_CHR_LEN) :: OptionLow
+    LOGICAL, INTENT(INOUT)         :: Value
+    CHARACTER(LEN=DEFAULT_CHR_LEN) :: Line
+    CHARACTER(LEN=DEFAULT_CHR_LEN) :: TempValue
+
+    ! Rewind input file.
+    OptionLow = Option
+    CALL LowCase(OptionLow)
+    REWIND(Unit)
+
+    ! Let's look for the Option string.
+    DO
+      READ(Unit, DEFAULT_CHR_FMT, END=7)Line
+      CALL RemoveComments(Line)
+      CALL LowCase(Line)
+      IF(INDEX(Line, TRIM(OptionLow)) /= 0) THEN
+        IF(SCAN(Line, "=") == 0) THEN
+          CALL Halt("Found "//TRIM(OptionLow)//" without a value")
+        ELSE
+          TempValue = Line(SCAN(Line, "=")+1:)
+
+          ! Remove leading whitespaces.
+          DO WHILE(TempValue(1:1) == " ")
+            TempValue = TempValue(2:)
+          ENDDO
+
+          ! Check the value.
+          IF(TRIM(TempValue) == "yes" .OR. TRIM(TempValue) == "true") THEN
+            OptLogicalQ = .TRUE.
+            Value = .TRUE.
+            RETURN
+          ELSEIF(TRIM(TempValue) == "no" .OR. TRIM(TempValue) == "false") THEN
+            OptLogicalQ = .TRUE.
+            Value = .FALSE.
+            RETURN
+          ELSE
+            CALL Halt("illegal value "//TRIM(TempValue))
+          ENDIF
+        ENDIF
+      ENDIF
+    ENDDO
+
+7   OptLogicalQ = .FALSE.
+  END FUNCTION OptLogicalQ
+
   !------------------------------------------------------------------
   !     Resolve a line into geometry components (AtomType,X,Y,Z)
   !

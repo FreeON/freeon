@@ -358,5 +358,6 @@ MODULE ControlStructures
   INTEGER                     :: NLoc
   INTEGER, DIMENSION(MaxSets) :: Location
   CHARACTER(LEN=DCL)          :: Mssg
+  LOGICAL                     :: doCleanScratch
 
 END MODULE ControlStructures

@@ -55,7 +55,8 @@ CONTAINS
   SUBROUTINE LoadOptions(N,O)
     TYPE(FileNames) :: N
     TYPE(Options)   :: O
-    !-------------------------------------------------------------------------!
+    INTEGER         :: HDFFileID
+
     CALL OpenASCII(N%IFile,Inp)
     ! Check for restart, and extract the current state from the restart HDF file
     CALL ParseRestart(N%M_PWD,N%NewFileID,O%Guess,N%RFile,O%RestartState)
@@ -673,7 +674,8 @@ CONTAINS
   !
   !===============================================================================================
   SUBROUTINE ParseMISC(Pressure)
-    REAL(DOUBLE)           :: Pressure
+    REAL(DOUBLE) :: Pressure
+
     ! Parse the Pressure, used in Optimizer, MD and MC routines
     IF(.NOT. OptDblQ(Inp,Op_Pressure, Pressure)) THEN
       Pressure = 0.0D0
@@ -687,6 +689,20 @@ CONTAINS
         //TRIM(FltToChar(Pressure))//", AU")
       CALL MondoLog(DEBUG_NONE, "ParseMISC", "Pressure = " &
         //TRIM(FltToChar(Pressure/GPaToAU))//" GPa")
+    ENDIF
+
+    IF(.NOT.OptIntQ(Inp, RECYCLE_HDF_OPTION, RecycleHDF)) THEN
+      RecycleHDF = 20
+    ENDIF
+
+    IF(.NOT.OptLogicalQ(Inp, CLEAN_SCRATCH_OPTION, doCleanScratch)) THEN
+      doCleanScratch = .TRUE.
+    ENDIF
+
+    IF(doCleanScratch) THEN
+      CALL MondoLog(DEBUG_NONE, "ParseMISC", "cleaning out scratch")
+    ELSE
+      CALL MondoLog(DEBUG_NONE, "ParseMISC", "I will not clean out scratch")
     ENDIF
 
   END SUBROUTINE ParseMISC

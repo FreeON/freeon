@@ -122,7 +122,7 @@ CONTAINS
     CALL Delete(Work)
     CALL Delete(dP)
 #endif
-    !
+
     IF(PRESENT(StartingFromP_O))THEN
        StartingFromP=StartingFromP_O
     ELSE
@@ -131,7 +131,7 @@ CONTAINS
 
     !Default 
     CnvrgChck_BCSR=.FALSE.
-    ! 
+
     IF(NPur==0)THEN 
       OldE=BIG_DBL
       OldAEP=BIG_DBL

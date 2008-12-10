@@ -81,7 +81,7 @@ CONTAINS
 
     ! The HDF5 file name
     H5File=TRIM(MONDO_SCRATCH)//TRIM(Args%C%C(1))//TRIM(InfF)
-    !write(*,*) "setting H5File to "//H5File
+    !WRITE(*,*) "setting H5File to "//TRIM(H5File)
     InfFile=H5File
     ! Open the HDF file
     HDFFileID=OpenHDF(H5File)
@@ -280,8 +280,9 @@ CONTAINS
     TYPE(ARGMT) :: Args
     INTEGER :: I,ChkNPrc
     !-----------------------------------------------------------!
-    IF(Args%NC>=2) &
-         SCFActn=TRIM(Args%C%C(2))
+    IF(Args%NC>=2) THEN
+      SCFActn=TRIM(Args%C%C(2))
+    ENDIF
     Current=Args%I%I(1:3)
     Previous=Args%I%I(4:6)
     ! SCF Cycle
@@ -308,6 +309,7 @@ CONTAINS
     PWDName = TRIM("")
 
     ! Load global file names
+    CALL Get(RecycleHDF, "RecycleHDF")
     CALL Get(logFile,'logfile')
     CALL Get(OutFile,'outputfile')
     CALL Get(InpFile,'inputfile')

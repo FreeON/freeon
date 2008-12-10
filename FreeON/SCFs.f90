@@ -1838,7 +1838,7 @@ CONTAINS
     CALL SYSTEM('/bin/rm -f  '//RemoveFile)
     IF(DoingMD) THEN
       RemoveFile=TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)//'*_G#'//TRIM(chGEO)//"_*.*"
-!!$      CALL MondoLog(DEBUG_MAXIMUM, "CleanScratch", "removing "//TRIM(RemoveFile))
+      !CALL MondoLog(DEBUG_MAXIMUM, "CleanScratch", "removing "//TRIM(RemoveFile))
       CALL SYSTEM('/bin/rm -f  '//RemoveFile)
     ENDIF
 

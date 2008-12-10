@@ -101,6 +101,8 @@ MODULE GlobalCharacters
    CHARACTER(LEN=*), PARAMETER :: Blnk=' '
    INTEGER,          PARAMETER :: IBlnk=ICHAR(Blnk)
    CHARACTER(LEN=*), PARAMETER :: Delta='/'//BakSlash
+   INTEGER                     :: RecycleHDF
+
 !
 ! SCF global characters
 !

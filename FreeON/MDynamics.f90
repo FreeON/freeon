@@ -73,8 +73,8 @@ CONTAINS
     iGEO    = 1
     iMDStep = 1
 
-    ACTTargetEnergy = 0.D0
-    ACTIntegratedEnergyError = 0.D0
+    ! Some output.
+    CALL MondoLog(DEBUG_MAXIMUM, "FreeON", "Variables in HDF recycled every "//TRIM(IntToChar(RecycleHDF))//" geometry steps.")
 
     ! Allocate some memory.
     CALL New(MDTime,C%Geos%Clones)
@@ -325,7 +325,9 @@ CONTAINS
       ! Remove old Stuff from Scratch
       IF(C%Stat%Current%I(3)-iREMOVE > 0) THEN
         CALL MondoLog(DEBUG_NONE, "MD", "removing outdated densities")
-        CALL CleanScratch(C,iGEO-iREMOVE-1,.TRUE.)
+        IF(doCleanScratch) THEN
+          CALL CleanScratch(C,iGEO-iREMOVE-1,.TRUE.)
+        ENDIF
       ENDIF
     ENDDO
 

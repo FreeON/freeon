@@ -49,6 +49,7 @@ CONTAINS
     CALL Put(N%HFile,'infofile')
     CALL Put(N%LFile,'logfile')
     CALL Put(N%OFile,'outPutfile')
+    CALL Put(RecycleHDF, "RecycleHDF")
     CALL CloseHDF(HDF_CurrentID)
   END SUBROUTINE InitArchive
   !==============================================================================
@@ -96,6 +97,7 @@ CONTAINS
     chGEO=IntToChar(iGEO)
     HDFFileID=OpenHDF(N%HFile)
     HDF_CurrentID=HDFFileID
+
     ! Find max dimensions for BCSR matrices
     MaxAtoms=0
     MaxBloks=0
