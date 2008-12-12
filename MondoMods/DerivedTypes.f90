@@ -364,6 +364,7 @@ MODULE DerivedTypes
       TYPE(DBL_RNK2)   :: BoxCarts  !-- Fractional coordinates 
       TYPE(DBL_RNK2)   :: Velocity  !-- velocities    
       TYPE(DBL_RNK2)   :: Gradients !-- Gradients
+      TYPE(DBL_RNK2)   :: Fext      !-- An External Force
       ! Used in QUICCA:
       TYPE(DBL_RNK2)   :: Displ     !-- Displaced Cartesian geometry
       TYPE(DBL_RNK2)   :: PBCDispl  !-- Displaced Box Shape
