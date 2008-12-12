@@ -277,7 +277,8 @@ CONTAINS
       IF(SIZE(C%C)<4) CALL MondoHalt(PRSE_ERROR, &
            'bad data on parsing goemetry at line = <<'//TRIM(LineLowCase)//'>>')
       ! Set the atom for freq calculation
-      G%DoFreq%I(N)=0
+      G%DoFreq%I(N)   = 0
+      G%Fext%D(1:3,N) = Zero
       IF(SIZE(C%C)==4) THEN
         ! Atomtype x y z
         At=TRIM(ADJUSTL(C%C(1)))
@@ -337,8 +338,10 @@ CONTAINS
 !
 !       Add an external force to an atom
 !
-        CASE('fext')
+        CASE('fext')    
           G%CConstrain%I(N)=3
+          G%Fext%D(1:3,N)    =G%Velocity%D(1:3,N)
+          G%Velocity%D(1:3,N)=Zero
         CASE('f')
           ! We found an atom for freq calculation
           G%DoFreq%I(N)=1
@@ -347,8 +350,8 @@ CONTAINS
         CASE DEFAULT
           G%CConstrain%I(N)=0
         END SELECT
-      ENDIF
 
+      ENDIF
       CALL Delete(C)
 
       !! MC: FOLLOWING BROKE PARSING OF GHOST FUNCTIONS, REMOVED
@@ -376,8 +379,6 @@ CONTAINS
         ENDIF
       ENDDO
     ENDDO
-
-
     ! If no freqs have been explicitly set, then do all of them.
     IF(SUM(G%DoFreq%I).EQ.0)G%DoFreq%I=1
     !write(*,*) 'ParseGeometries: G%DoFreq%I=',G%DoFreq%I

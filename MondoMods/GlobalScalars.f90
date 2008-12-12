@@ -115,8 +115,8 @@ MODULE GlobalScalars
   REAL(DOUBLE), PARAMETER :: InternalTimeToFemtoseconds=1.032749873D0
   REAL(DOUBLE), PARAMETER :: SecondsToInternalTime=One/InternalTimeToSeconds
   REAL(DOUBLE), PARAMETER :: FemtosecondsToInternalTime=One/InternalTimeToFemtoseconds
-  REAL(DOUBLE), PARAMETER :: AUToAngstroms=0.52917720859D0 ! AU ->  Angstroms
-  REAL(DOUBLE), PARAMETER :: AngstromsToAU=One/AUToAngstroms  ! Angstroms -> AU
+  REAL(DOUBLE), PARAMETER :: AUToAngstroms=0.52917720859D0      ! AU ->  Angstroms
+  REAL(DOUBLE), PARAMETER :: AngstromsToAU=One/AUToAngstroms    ! Angstroms -> AU
   REAL(DOUBLE), PARAMETER :: GPaToAU=3.398928928849693861282D-5 ! GPa -> AU
 #endif
   ! These constants not yet verified:

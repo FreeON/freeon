@@ -1335,6 +1335,7 @@ CONTAINS
     CALL Get(GM%Carts     ,'cartesians'   ,Tag_O=Tag_O)
     CALL Get(GM%Velocity  ,'Velocity'     ,Tag_O=Tag_O)
     CALL Get(GM%Gradients ,'Gradients'    ,Tag_O=Tag_O)
+    CALL Get(GM%Fext      ,'Fext'         ,Tag_O=Tag_O)
 
     !---------Variables we REALLY want to get rid of-------
     CALL Get(GM%BoxCarts  ,'LatticeCoord' ,Tag_O=Tag_O)
@@ -1397,6 +1398,7 @@ CONTAINS
 
     CALL Put(GM%Velocity  ,'Velocity'     ,Tag_O=Tag_O)
     CALL Put(GM%Gradients ,'Gradients'    ,Tag_O=Tag_O)
+    CALL Put(GM%Fext      ,'Fext'         ,Tag_O=Tag_O)
     ! PBC INFO ONE -- THE ONE WE SHOULD KEEP
     CALL Put(GM%PBC                       ,Tag_O=Tag_O)
     CALL Put(GM%InCells   ,'incells'      ,Tag_O=Tag_O)

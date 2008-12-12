@@ -76,9 +76,7 @@ CONTAINS
        DO iCLONE=1,C%Geos%Clones
           C%Geos%Clone(iCLONE)%Displ%D=C%Geos%Clone(iCLONE)%Carts%D
        ENDDO
-
        ExitQ=SteepStep(iBAS,iGEO,Energy(:,iGEO),C)
-
        IF(C%Opts%Grad==GRAD_TS_SEARCH_NEB)THEN
           ! Overwrite the most recent GFile (doing transition state)
           !          CALL OpenASCII(C%Nams%GFile,Geo,NewFile_O=.TRUE.)
@@ -110,7 +108,7 @@ CONTAINS
           C%Geos%Clone(iCLONE)%Carts%D=OldXYZ%D
        ENDDO
        CALL Delete(OldXYZ)
-       CALL GeomArchive(iBAS,iGEO,C%Nams,C%Opts,C%Sets,C%Geos)    
+       CALL GeomArchive(iBAS,iGEO,C%Nams,C%Opts,C%Sets,C%Geos)     
        DO iCLONE=1,C%Geos%Clones
           C%Geos%Clone(iCLONE)%Carts%D=C%Geos%Clone(iCLONE)%Displ%D
        ENDDO
@@ -444,7 +442,7 @@ CONTAINS
        ENDIF
     ELSE
        ! Take some steps 
-       StepLength=2D0
+       StepLength=2.D0
        DO iSTEP=1,MaxSTEP
           StepLength=StepLength/Two
           ! Step the absolute positions
