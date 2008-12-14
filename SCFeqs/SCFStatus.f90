@@ -205,7 +205,7 @@ PROGRAM SCFStatus
   IF(SCFActn=='BasisSetSwitch')THEN
      SCFMessage=' Basis set switch, MxD = '//TRIM(DblToShrtChar(DMax))
   ELSE
-     SCFMessage='<SCF> = '//TRIM(FltToChar(Etot))//', dD = '//TRIM(DblToShrtChar(DMax))
+     SCFMessage='<SCF> = '//TRIM(DblToChar(Etot*au2eV))//' eV, dD = '//TRIM(DblToShrtChar(DMax))
   ENDIF
   ! Add in DIIS error
   IF(DIISErr/=Zero)SCFMessage=TRIM(SCFMessage)//', DIIS = '//TRIM(DblToShrtChar(DIISErr))
