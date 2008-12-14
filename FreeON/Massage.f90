@@ -284,7 +284,7 @@ CONTAINS
     G%InAU=.TRUE.
     G%Carts%D    = AngstromsToAU*G%Carts%D
     G%Velocity%D =(AngstromsToAU/FemtosecondsToInternalTime)*G%Velocity%D
-    G%Fext%D     =(AngstromsToAU/au2eV)*G%Fext%D 
+    G%Fext%D     =(AngstromsToAU/au2eV)*G%Fext%D
     !
     G%PBC%CellCenter%D = G%PBC%CellCenter%D*AngstromsToAU
     G%PBC%BoxShape%D   = AngstromsToAU*G%PBC%BoxShape%D

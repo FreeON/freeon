@@ -338,7 +338,7 @@ CONTAINS
 !
 !       Add an external force to an atom
 !
-        CASE('fext')    
+        CASE('fext')
           G%CConstrain%I(N)=3
           G%Fext%D(1:3,N)    =G%Velocity%D(1:3,N)
           G%Velocity%D(1:3,N)=Zero
