@@ -122,9 +122,9 @@ MODULE GlobalScalars
   ! These constants not yet verified:
   REAL(DOUBLE), PARAMETER :: au2eV=27.21139613182D0           ! au to eV
   REAL(DOUBLE), PARAMETER :: eVK=11676.33D0                   ! eV to K
-  REAL(DOUBLE), PARAMETER :: eVcm=8065.73D0                   ! eV to cm-1  
-  REAL(DOUBLE), PARAMETER :: eVkkal=23.06035D0                ! eV to kkal     
-  REAL(DOUBLE), PARAMETER :: auDeb=4.803242                   ! exA to Debye 
+  REAL(DOUBLE), PARAMETER :: eVcm=8065.73D0                   ! eV to cm-1
+  REAL(DOUBLE), PARAMETER :: eVkkal=23.06035D0                ! eV to kkal
+  REAL(DOUBLE), PARAMETER :: auDeb=4.803242                   ! exA to Debye
   REAL(DOUBLE), PARAMETER :: amuToKg = 1.66053886D-27         ! atomic mass units into kg.
 
   ! Symplectic expansion coefficient 4th order by McLachlan and Atela,

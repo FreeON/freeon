@@ -1143,13 +1143,13 @@ CONTAINS
              ENDDO
           ENDDO
        ENDIF
-!      Zero forces on constrained atoms 
+!      Zero forces on constrained atoms
        DO iATS=1,G%Clone(iCLONE)%NAtms
           IF(G%Clone(iCLONE)%CConstrain%I(iATS)==1 .OR. G%Clone(iCLONE)%CConstrain%I(iATS)==2)THEN
              IF(O%Coordinates/=GRAD_INTS_OPT) THEN
                 G%Clone(iCLONE)%Gradients%D(1:3,iATS)=Zero
              ENDIF
-          ENDIF 
+          ENDIF
        ENDDO
 !      Add additional External Forces to Atoms
        DO iATS=1,G%Clone(iCLONE)%NAtms
@@ -1161,7 +1161,7 @@ CONTAINS
        G%Clone(iCLONE)%GradMax=Zero
        G%Clone(iCLONE)%GradRMS=Zero
        DO iATS=1,G%Clone(iCLONE)%NAtms
-          DO J=1,3 
+          DO J=1,3
              GradVal=G%Clone(iCLONE)%Gradients%D(J,iATS)
              G%Clone(iCLONE)%GradRMS=G%Clone(iCLONE)%GradRMS+GradVal**2
              G%Clone(iCLONE)%GradMax=MAX(G%Clone(iCLONE)%GradMax,ABS(GradVal))
@@ -1196,7 +1196,7 @@ CONTAINS
           CALL Delete(Ftmp)
        ENDDO
     ENDIF
-    
+
   END SUBROUTINE Force
   !===============================================================================
   ! Numerically compute Lattice Forces for J

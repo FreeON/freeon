@@ -4,10 +4,10 @@ MODULE Optimizer
   USE MatFunk
   USE Numerics
   USE AtomPairs
-  USE ControlStructures  
+  USE ControlStructures
   USE InCoords
   USE QUICCAMod
-  USE GeomOptKeys     
+  USE GeomOptKeys
   USE PunchHDF
   USE GlobalScalars
   USE HessianMod
@@ -16,7 +16,7 @@ MODULE Optimizer
 CONTAINS
   !=====================================================================================
   !
-  !=====================================================================================  
+  !=====================================================================================
   SUBROUTINE Descender(C)
     TYPE(Controls) :: C
     !----------------------------------------------------------------------------------!
@@ -30,11 +30,11 @@ CONTAINS
       ENDIF
     ELSE
       CALL IntOpt(C)
-    ENDIF 
+    ENDIF
   END SUBROUTINE Descender
   !=====================================================================================
   !
-  !=====================================================================================  
+  !=====================================================================================
   SUBROUTINE SteepD(C)
     TYPE(Controls) :: C
     INTEGER        :: iBAS,iGEO,iCLONE
@@ -53,9 +53,9 @@ CONTAINS
     ! initial geometry
     iGEO=C%Stat%Previous%I(3)
     NatmsLoc=C%Geos%Clone(1)%Natms
-    ! Build the guess 
+    ! Build the guess
     DO iBAS=1,C%Sets%NBSets
-       CALL GeomArchive(iBAS,iGEO,C%Nams,C%Opts,C%Sets,C%Geos)    
+       CALL GeomArchive(iBAS,iGEO,C%Nams,C%Opts,C%Sets,C%Geos)
        CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
        CALL SCF(iBAS,iGEO,C)
     ENDDO
@@ -85,7 +85,7 @@ CONTAINS
              CALL XSFPreamble(C%Geos%Clones+2,C%Nams%GFile,Geo)
           DO iCLONE=GBeg,GEnd
              ! If transition states, geometry is the image number
-             ! otherwise, it is the step number 
+             ! otherwise, it is the step number
              gtmp=C%Geos%Clone(iCLONE)%Confg
              C%Geos%Clone%Confg=iCLONE+1
             !CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile,Geo,C%Opts%GeomPrint)
@@ -93,7 +93,7 @@ CONTAINS
              C%Geos%Clone%Confg=gtmp
           ENDDO
        ELSE
-          ! No transitions states, just good old downhill 
+          ! No transitions states, just good old downhill
           IF(C%Opts%GeomPrint=='XSF') &
              CALL XSFPreamble(C%Geos%Clone(1)%Confg,C%Nams%GFile,Geo)
           DO iCLONE=1,C%Geos%Clones
@@ -108,11 +108,11 @@ CONTAINS
           C%Geos%Clone(iCLONE)%Carts%D=OldXYZ%D
        ENDDO
        CALL Delete(OldXYZ)
-       CALL GeomArchive(iBAS,iGEO,C%Nams,C%Opts,C%Sets,C%Geos)     
+       CALL GeomArchive(iBAS,iGEO,C%Nams,C%Opts,C%Sets,C%Geos)
        DO iCLONE=1,C%Geos%Clones
           C%Geos%Clone(iCLONE)%Carts%D=C%Geos%Clone(iCLONE)%Displ%D
        ENDDO
-       CALL GeomArchive(iBAS,iGEO+1,C%Nams,C%Opts,C%Sets,C%Geos)    
+       CALL GeomArchive(iBAS,iGEO+1,C%Nams,C%Opts,C%Sets,C%Geos)
 !       CALL MergePrintClones(C%Geos,C%Nams,C%Opts)
     ENDDO
   END SUBROUTINE SteepD
@@ -131,7 +131,7 @@ CONTAINS
     GBeg=0
     GEnd=Geos%Clones+1
     NatmsMerge=Geos%Clone(GBeg)%Natms*(GEnd-GBeg+1)
-    Length=Zero 
+    Length=Zero
     DO iCLONE=GBeg,GEnd
     ! CME1=Zero
     ! CME2=Zero
@@ -143,7 +143,7 @@ CONTAINS
     ! CME2=CME2/DBLE(Geos%Clone(iCLONE)%Natms)
     ! TR=CME2-CME1
     ! TR=TR/SQRT(DOT_PRODUCT(TR,TR))
-   
+
       ! find bounding box
       Geos%Clone(iCLONE)%BndBox%D(1:3,1) = Geos%Clone(iCLONE)%Carts%D(1:3,1)
       Geos%Clone(iCLONE)%BndBox%D(1:3,2) = Geos%Clone(iCLONE)%Carts%D(1:3,1)
@@ -175,13 +175,13 @@ CONTAINS
     CALL PPrint(GMMerge,TRIM(Nams%SCF_NAME)//'.merged',Geo,Opts%GeomPrint)
     CALL Delete(GMMerge)
   END SUBROUTINE MergePrintClones
-  !=====================================================================================  
+  !=====================================================================================
   SUBROUTINE GDicer(C)
     TYPE(Controls)         :: C
     TYPE(DBL_VECT)         :: GradMax,GradRMS,Grad
     REAL(DOUBLE)           :: DIISErr,GRMSQ,GMAXQ
-    ! Initial step 
-    REAL(DOUBLE),PARAMETER :: StepLength=2D0 
+    ! Initial step
+    REAL(DOUBLE),PARAMETER :: StepLength=2D0
     INTEGER                :: iBAS,iGEO,iCLONE,AccL,IStart
     INTEGER                :: Relaxations=3   ! This should be an input variable at some point
     LOGICAL                :: Converged,Steep
@@ -192,16 +192,16 @@ CONTAINS
     ! Start with the first geometry
     iGEO=C%Stat%Previous%I(3)
     NatmsLoc=C%Geos%Clone(1)%Natms
-    ! Build the guess 
+    ! Build the guess
     DO iBAS=1,C%Sets%NBSets
-       CALL GeomArchive(iBAS,iGEO,C%Nams,C%Opts,C%Sets,C%Geos)    
+       CALL GeomArchive(iBAS,iGEO,C%Nams,C%Opts,C%Sets,C%Geos)
        CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
        CALL SCF(iBAS,iGEO,C)
-    ENDDO    
+    ENDDO
     ! Space for accumulating convergence statistics
     CALL New(GradMax,C%Opts%NSteps)
     CALL New(GradRMS,C%Opts%NSteps)
-    ! Use just the last basis 
+    ! Use just the last basis
     iBAS=C%Sets%NBSets
     AccL=C%Opts%AccuracyLevels(iBAS)
     ! Use simple Cartesian GDIIS to go down hill
@@ -219,12 +219,12 @@ CONTAINS
        Mssg='Gmax='//TRIM(DblToShrtChar(GradMAX%D(iGEO)))//', Grms='//TRIM(DblToShrtChar(GradRMS%D(iGEO)))
        ! Go downhill by following the gradient or with GDIIS
        IF(iGEO>Relaxations)THEN
-          ! GDIIS extrapolation 
+          ! GDIIS extrapolation
           ! Put the geometries to HDF
             DO iCLONE=1,C%Geos%Clones
               C%Geos%Clone(iCLONE)%Displ%D=C%Geos%Clone(iCLONE)%Carts%D
             ENDDO
-            CALL GeomArchive(iBAS,iGEO,C%Nams,C%Opts,C%Sets,C%Geos)    
+            CALL GeomArchive(iBAS,iGEO,C%Nams,C%Opts,C%Sets,C%Geos)
           CALL ForceDStep(iGEO,C%Nams,C%Geos,DIISErr)
             CALL New(OldXYZ,(/3,NatmsLoc/))
             DO iCLONE=1,C%Geos%Clones
@@ -233,19 +233,19 @@ CONTAINS
               C%Geos%Clone(iCLONE)%Carts%D=OldXYZ%D
             ENDDO
             CALL Delete(OldXYZ)
-            CALL GeomArchive(iBAS,iGEO,C%Nams,C%Opts,C%Sets,C%Geos)    
+            CALL GeomArchive(iBAS,iGEO,C%Nams,C%Opts,C%Sets,C%Geos)
             DO iCLONE=1,C%Geos%Clones
               C%Geos%Clone(iCLONE)%Carts%D=C%Geos%Clone(iCLONE)%Displ%D
             ENDDO
-            CALL GeomArchive(iBAS,iGEO+1,C%Nams,C%Opts,C%Sets,C%Geos)    
+            CALL GeomArchive(iBAS,iGEO+1,C%Nams,C%Opts,C%Sets,C%Geos)
           Mssg=TRIM(Mssg)//', Ediis='//TRIM(DblToShrtChar(DIISErr))
           ! Check for absolute convergence
           Converged=.FALSE.
           IF(GradMAX%D(iGEO)<GTol(AccL).AND.GradRMS%D(iGEO)<GTol(AccL))THEN
              Converged=.TRUE.
-             Mssg=ProcessName('GDicer',' Converged!')//TRIM(Mssg)     
+             Mssg=ProcessName('GDicer',' Converged!')//TRIM(Mssg)
           ELSE
-             Mssg=ProcessName('GDicer',' GDIIS # '//TRIM(IntToChar(iGEO)))//TRIM(Mssg)          
+             Mssg=ProcessName('GDicer',' GDIIS # '//TRIM(IntToChar(iGEO)))//TRIM(Mssg)
           ENDIF
           CALL OpenASCII(C%Nams%OFile,Out)
           WRITE(Out,*)TRIM(Mssg)
@@ -257,13 +257,13 @@ CONTAINS
              C%Geos%Clone(iCLONE)%Displ%D=C%Geos%Clone(iCLONE)%Carts%D &
                                       -StepLength*C%Geos%Clone(iCLONE)%Gradients%D
           ENDDO
-            CALL GeomArchive(iBAS,iGEO,C%Nams,C%Opts,C%Sets,C%Geos)    
+            CALL GeomArchive(iBAS,iGEO,C%Nams,C%Opts,C%Sets,C%Geos)
           DO iCLONE=1,C%Geos%Clones
              C%Geos%Clone(iCLONE)%Carts%D=C%Geos%Clone(iCLONE)%Displ%D
           ENDDO
-            CALL GeomArchive(iBAS,iGEO+1,C%Nams,C%Opts,C%Sets,C%Geos)    
+            CALL GeomArchive(iBAS,iGEO+1,C%Nams,C%Opts,C%Sets,C%Geos)
           ! Put the geometries to HDF
-          ! And here is some 
+          ! And here is some
           Mssg=TRIM(Mssg)//', Step='//TRIM(DblToShrtChar(StepLength))
           Mssg=ProcessName('GDicer',' Relax # '//TRIM(IntToChar(iGEO)))//TRIM(Mssg)
           CALL OpenASCII(C%Nams%OFile,Out)
@@ -283,7 +283,7 @@ CONTAINS
   END SUBROUTINE GDicer
   !=====================================================================================
   ! EXTRAPOLATED GEOMETRY STEP USEING GDIIS WITH CARTESIAN FORCE ERRORS
-  !=====================================================================================  
+  !=====================================================================================
   SUBROUTINE ForceDStep(cGEO,N,G,DIISError)
     TYPE(FileNames)        :: N
     TYPE(Geometries)       :: G
@@ -306,7 +306,7 @@ CONTAINS
        CALL New(GradJ,G%Clone(iCLONE)%NAtms*3)
        CALL New(XYZAux,(/3,G%Clone(iCLONE)%NAtms/))
 1      DIISError=Zero
-       ! How far back we will go 
+       ! How far back we will go
        mGEO=MAX(1,cGEO-nDIIS+2)
        ! Allocate work space
        CALL SetDSYEVWork(nDIIS**2)
@@ -339,7 +339,7 @@ CONTAINS
        CALL FunkOnSqMat(nDIIS,Inverse,A%D,AInvM%D,CoNo_O=CoNo, &
                         Unit_O=6,PosDefMat_O=.FALSE.)
        CALL DGEMV('N',nDIIS,nDIIS,One,AInvM%D,nDIIS,V%D,1,Zero,DIISCo%D,1)
-       ! Here is the DIIS error (resdiual)       
+       ! Here is the DIIS error (resdiual)
        DIISError=MAX(DIISError,ABS(DIISCo%D(nDIIS)))
        IF(CoNo>MaxCoNo)THEN
           ! Clean up ...
@@ -367,9 +367,9 @@ CONTAINS
           CALL Delete(Carts)
        ELSE
           ! Stalled, freshen things up with a steepest descent move
-          G%Clone(iCLONE)%Carts%D=G%Clone(iCLONE)%Carts%D-5D-1*G%Clone(iCLONE)%Gradients%D          
+          G%Clone(iCLONE)%Carts%D=G%Clone(iCLONE)%Carts%D-5D-1*G%Clone(iCLONE)%Gradients%D
        ENDIF
-       ! Clean up a bit 
+       ! Clean up a bit
        CALL Delete(XYZAux)
        CALL Delete(GradI)
        CALL Delete(GradJ)
@@ -382,7 +382,7 @@ CONTAINS
   END SUBROUTINE ForceDStep
   !=====================================================================================
   !
-  !=====================================================================================  
+  !=====================================================================================
   FUNCTION SteepStep(cBAS,cGEO,Energies,C) RESULT(Converged)
     TYPE(Controls)                           :: C
     TYPE(DBL_RNK2), DIMENSION(C%Geos%Clones) :: Carts
@@ -420,9 +420,9 @@ CONTAINS
        ! Purify NEB images
        CALL NEBPurify(C%Geos)
        ! Archive geometries
-       CALL GeomArchive(cBAS,cGEO+1,C%Nams,C%Opts,C%Sets,C%Geos)    
+       CALL GeomArchive(cBAS,cGEO+1,C%Nams,C%Opts,C%Sets,C%Geos)
        ! Evaluate energies at the new geometry
-       CALL SCF(cBAS,cGEO+1,C)          
+       CALL SCF(cBAS,cGEO+1,C)
        ! Relative change in the total Energy
        RelErrE=-1D10
        DO iCLONE=1,C%Geos%Clones
@@ -430,18 +430,18 @@ CONTAINS
                /C%Geos%Clone(iCLONE)%ETotal)
        ENDDO
        ! Gradients only convergence criteria
-       GCnvrgd=RMSGrad<GTol(AL).AND.MaxGrad<GTol(AL)       
-!       GCnvrgd=MaxGrad<GTol(AL)       
+       GCnvrgd=RMSGrad<GTol(AL).AND.MaxGrad<GTol(AL)
+!       GCnvrgd=MaxGrad<GTol(AL)
        IF(GCnvrgd)THEN
           ! Cool, we are done
-          Converged=.TRUE.   
+          Converged=.TRUE.
           Mssg=ProcessName('SteepStep','Converged #'//TRIM(chGEO))
        ELSE
-          Converged=.FALSE.  
+          Converged=.FALSE.
           Mssg=ProcessName('SteepStep','Descent #'//TRIM(chGEO))
        ENDIF
     ELSE
-       ! Take some steps 
+       ! Take some steps
        StepLength=2.D0
        DO iSTEP=1,MaxSTEP
           StepLength=StepLength/Two
@@ -450,16 +450,16 @@ CONTAINS
              C%Geos%Clone(iCLONE)%Carts%D=Carts(iCLONE)%D-StepLength*C%Geos%Clone(iCLONE)%Gradients%D
           ENDDO
           ! Archive geometries
-          CALL GeomArchive(cBAS,cGEO+1,C%Nams,C%Opts,C%Sets,C%Geos)    
+          CALL GeomArchive(cBAS,cGEO+1,C%Nams,C%Opts,C%Sets,C%Geos)
           ! Evaluate energies at the new geometry
-          CALL SCF(cBAS,cGEO+1,C)          
+          CALL SCF(cBAS,cGEO+1,C)
           ! Relative change in the total Energy
           RelErrE=-1D10
           DO iCLONE=1,C%Geos%Clones
              RelErrE=MAX(RelErrE,(Energies(iCLONE)-C%Geos%Clone(iCLONE)%ETotal) &
                   /C%Geos%Clone(iCLONE)%ETotal)
           ENDDO
-          ! Check for going downhill, convergence or stall  
+          ! Check for going downhill, convergence or stall
           IF(MaxStep==1)THEN
              ECnvrgd=ABS(RelErrE)<1D1*ETol(AL)
           ELSE
@@ -469,48 +469,48 @@ CONTAINS
           !       IF(ECnvrgd.OR.(GCnvrgd.AND.XCnvrgd))THEN
           IF(ECnvrgd.OR.GCnvrgd)THEN
              ! Cool, we are done
-             Converged=.TRUE.   
+             Converged=.TRUE.
              Mssg=ProcessName('SteepStep','Converged #'//TRIM(chGEO))
              EXIT
           ELSEIF(RelErrE<Zero)THEN
              ! Went down hill but not converged
-             Converged=.FALSE.  
+             Converged=.FALSE.
              Mssg=ProcessName('SteepStep','Descent #'//TRIM(chGEO))
              EXIT
           ELSEIF(iSTEP==MaxSTEP)THEN
-             ! Probably need to readjust thresholds/accuracy goals 
+             ! Probably need to readjust thresholds/accuracy goals
              CALL MondoHalt(DRIV_ERROR,' Reached max resolution in energy = '   &
-                  //TRIM(DblToShrtChar(RelErrE))//' in SteepStep.')          
+                  //TRIM(DblToShrtChar(RelErrE))//' in SteepStep.')
           ELSE
              ! Need to shorten the step length.  Try again ...
-             Mssg=ProcessName('SteepStep','BkTrack #'//TRIM(chGEO))          
+             Mssg=ProcessName('SteepStep','BkTrack #'//TRIM(chGEO))
              Mssg=TRIM(Mssg)//' dE= '//TRIM(DblToShrtChar(RelErrE))  &
                   //', Grms= '//TRIM(DblToShrtChar(RMSGrad))         &
                   //', Gmax= '//TRIM(DblToShrtChar(MAXGrad))         &
                   //', Step= '//TRIM(DblToShrtChar(StepLength))
-             !    WRITE(*,*)TRIM(Mssg)             
+             !    WRITE(*,*)TRIM(Mssg)
              CALL OpenASCII(OutFile,Out)
-             WRITE(*,*)TRIM(Mssg)             
-             WRITE(Out,*)TRIM(Mssg)             
+             WRITE(*,*)TRIM(Mssg)
+             WRITE(Out,*)TRIM(Mssg)
              CLOSE(Out)
           ENDIF
        ENDDO
     ENDIF
     Mssg=TRIM(Mssg)//' dE= '//TRIM(DblToShrtChar(RelErrE)) &
-         //', Grms= '//TRIM(DblToShrtChar(RMSGrad))        & 
+         //', Grms= '//TRIM(DblToShrtChar(RMSGrad))        &
          //', Gmax= '//TRIM(DblToShrtChar(MAXGrad))        &
          //', Step= '//TRIM(DblToShrtChar(StepLength))
-    !    WRITE(*,*)TRIM(Mssg)             
+    !    WRITE(*,*)TRIM(Mssg)
     CALL OpenASCII(OutFile,Out)
-    WRITE(*,*)TRIM(Mssg)             
-    WRITE(Out,*)TRIM(Mssg)             
+    WRITE(*,*)TRIM(Mssg)
+    WRITE(Out,*)TRIM(Mssg)
     CLOSE(Out)
     ! Clean up
     DO iCLONE=1,C%Geos%Clones
        CALL Delete(Carts(iCLONE))
     ENDDO
     ! Keep geometry
-    CALL GeomArchive(cBAS,cGEO,C%Nams,C%Opts,C%Sets,C%Geos)    
+    CALL GeomArchive(cBAS,cGEO,C%Nams,C%Opts,C%Sets,C%Geos)
     ! Store the current minimum energies ...
     DO iCLONE=1,C%Geos%Clones
        Energies(iClone)=C%Geos%Clone(iClone)%ETotal
@@ -522,7 +522,7 @@ CONTAINS
    SUBROUTINE IntOpt(C)
      TYPE(Controls)            :: C
      INTEGER                   :: I,iBAS,iGEO,iGEOst,iCLONE
-     INTEGER                   :: AccL 
+     INTEGER                   :: AccL
      INTEGER                   :: FirstGeom,NatmsLoc,GuessO
      INTEGER                   :: ConvgdAll,MaxSteps,IStart,Dimen
      TYPE(INT_VECT)            :: Convgd
@@ -535,9 +535,9 @@ CONTAINS
      CALL SetGeOpCtrl(C%GOpt,C%Geos,C%Opts,C%Sets,C%Nams,iGEO)
      ! initial geometry
      MaxSteps=C%GOpt%GConvCrit%MaxGeOpSteps
-     ! Build the guess 
+     ! Build the guess
      DO iBAS=1,C%Sets%NBSets-1
-       CALL GeomArchive(iBAS,iGEO,C%Nams,C%Opts,C%Sets,C%Geos)    
+       CALL GeomArchive(iBAS,iGEO,C%Nams,C%Opts,C%Sets,C%Geos)
        CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
        CALL SCF(iBAS,iGEO,C)
      ENDDO
@@ -553,9 +553,9 @@ CONTAINS
        CALL NEBPurify(C%Geos)
        CALL MergePrintClones(C%Geos,C%Nams,C%Opts)
      ENDIF
-     CALL GeomArchive(iBAS,iGEO,C%Nams,C%Opts,C%Sets,C%Geos)    
+     CALL GeomArchive(iBAS,iGEO,C%Nams,C%Opts,C%Sets,C%Geos)
      CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
-     ! Start optimization                     
+     ! Start optimization
      IStart=iGEO
      DO iGEO=IStart,MaxSteps
        ! Calculate energy and force for all clones at once.
@@ -579,7 +579,7 @@ CONTAINS
          Convgd%I=0
          CALL OptSingleMol(C%GOpt,C%Nams,C%Opts,C%Geos%Clone(iCLONE),Convgd%I,iGEO,iCLONE)
          ConvgdAll=ConvgdAll*Convgd%I(iCLONE)
-       ENDDO 
+       ENDDO
        !
        IF(C%Opts%Grad==GRAD_TS_SEARCH_NEB) THEN
           CALL NEBPurify(C%Geos,Print_O=.TRUE.)
@@ -589,14 +589,14 @@ CONTAINS
        ! Fill in new geometries
        DO iCLONE=1,C%Geos%Clones
           C%Geos%Clone(iCLONE)%Carts%D=C%Geos%Clone(iCLONE)%Displ%D
-          C%Geos%Clone(iCLONE)%PBC%BoxShape%D=C%Geos%Clone(iCLONE)%PBCDispl%D          
+          C%Geos%Clone(iCLONE)%PBC%BoxShape%D=C%Geos%Clone(iCLONE)%PBCDispl%D
           CALL MkGeomPeriodic(C%Geos%Clone(iCLONE),C%Sets%BSets(iCLONE,iBAS), &
                               C%Opts%Thresholds(iBAS)%Dist,C%Opts%Thresholds(iBAS)%TwoE)
        ENDDO
-       ! Bump counter and archive new geometries 
+       ! Bump counter and archive new geometries
        C%Stat%Previous%I(3)=IGeo
        C%Stat%Current%I(3)=IGeo+1
-       CALL GeomArchive(iBAS,iGEO+1,C%Nams,C%Opts,C%Sets,C%Geos)    
+       CALL GeomArchive(iBAS,iGEO+1,C%Nams,C%Opts,C%Sets,C%Geos)
        ! Continue optimization?
        IF(ConvgdAll==1) EXIT
      ENDDO
@@ -606,12 +606,12 @@ CONTAINS
      IF(IGeo>=MaxSteps) THEN
        CALL OpenASCII(OutFile,Out)
        IF(ConvgdAll/=1) THEN
-         WRITE(Out,700) 
-         WRITE(*,700) 
+         WRITE(Out,700)
+         WRITE(*,700)
        ELSE
          WRITE(Out,460) iGeo-1
          WRITE(*,460) iGeo-1
-       ENDIF          
+       ENDIF
        CLOSE(Out,STATUS='KEEP')
      ENDIF
      !
@@ -619,10 +619,10 @@ CONTAINS
      ! and finish optimization.
      !
      CALL OpenASCII(OutFile,Out)
-     WRITE(Out,500)  
-     WRITE(*,500)  
-     WRITE(Out,600)  
-     WRITE(*,600)  
+     WRITE(Out,500)
+     WRITE(*,500)
+     WRITE(Out,600)
+     WRITE(*,600)
      DO iCLONE=1,C%Geos%Clones
        WRITE(Out,400) iCLONE,C%Geos%Clone(iCLONE)%ETotal
        WRITE(*,400) iCLONE,C%Geos%Clone(iCLONE)%ETotal
@@ -671,7 +671,7 @@ CONTAINS
      !
      ! Project out constraints, translations and rotations
      ! WARNING! For the case of water with a constrained H and H-O-H
-     ! angle, the order of projections was very important: 
+     ! angle, the order of projections was very important:
      ! first constraints, then the rest.
      !
      CALL CartRNK2ToCartRNK1(CartGrad%D,GradIn)
@@ -694,7 +694,7 @@ CONTAINS
      !
    ! CALL GradConv(GOpt%GOptStat,GOpt%GConvCrit,GOpt%Constr)
      !
-     ! Do we have to refresh internal coord defs?   
+     ! Do we have to refresh internal coord defs?
      !
      CALL IntCReDef(GOpt,Refresh,iGEO)
      !
@@ -703,7 +703,7 @@ CONTAINS
      IF(Refresh/=0) THEN
        CALL GetIntCs(XYZ,AtNum,IntCs,Refresh,SCRPath, &
                      GOpt%CoordCtrl,GOpt%Constr,GOpt%GConvCrit, &
-                     GOpt%GDIIS%MaxMem,GOpt%ExtIntCs,PBCDim,iGEO)  
+                     GOpt%GDIIS%MaxMem,GOpt%ExtIntCs,PBCDim,iGEO)
        IF(IntCs%N==0) CALL Halt('Molecule has dissociated,'// &
                     'optimizer has not found any internal coordinates.')
      ENDIF
@@ -732,7 +732,7 @@ CONTAINS
        IF(PBCDim>0) CALL PrtPBCs(XYZ)
      ENDIF
      !
-     ! Calculate simple relaxation step 
+     ! Calculate simple relaxation step
      !
      IF(.NOT.GOpt%GOptStat%GeOpConvgd) THEN
        CALL RelaxGeom(GOpt,XYZ,RefXYZ,AtNum,CartGrad%D,iCLONE,ETot, &
@@ -767,7 +767,7 @@ CONTAINS
    SUBROUTINE GradConv(CtrlStat,GConvCr,CtrlConstr,PBCDim)
      TYPE(GOptStat)             :: CtrlStat
      TYPE(Constr)               :: CtrlConstr
-     TYPE(GConvCrit)            :: GConvCr    
+     TYPE(GConvCrit)            :: GConvCr
      INTEGER                    :: J,N,PBCDim
      !
      IF(PBCDim==0) THEN
@@ -786,10 +786,10 @@ CONTAINS
      TYPE(GeomOpt)               :: GOpt
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ,RefXYZ
      REAL(DOUBLE),DIMENSION(:)   :: AtNum,CartGrad
-     REAL(DOUBLE)                :: ETot     
+     REAL(DOUBLE)                :: ETot
      TYPE(INTC)                  :: IntCs
      INTEGER                     :: iGEO,iCLONE,Refresh,Print,PBCDim
-     CHARACTER(LEN=*)            :: SCRPath,HFileIn,PWDPath 
+     CHARACTER(LEN=*)            :: SCRPath,HFileIn,PWDPath
      TYPE(DBL_RNK2)              :: SRStruct,RefGrad,RefStruct,SRDispl
      !
      ! Relax geometry
@@ -798,7 +798,7 @@ CONTAINS
      CASE(GRAD_DIAGHESS_OPT)
        CALL RelaxDiagHess(GOpt,SCRPath,PWDPath,CartGrad,IntCs,AtNum,&
                           iGEO,XYZ,Print,PBCDim)
-     CASE(GRAD_BiSect_OPT) 
+     CASE(GRAD_BiSect_OPT)
        IF(iGEO<2) THEN
          CALL RelaxDiagHess(GOpt,SCRPath,PWDPath,CartGrad,IntCs,AtNum,&
                             iGEO,XYZ,Print,PBCDim)
@@ -849,7 +849,7 @@ CONTAINS
      !
      CALL New(RefPoints,IntCs%N)
      RefPoints%D=IntCValues%D(:,NDim)
-     DO I=1,NDim    
+     DO I=1,NDim
        CALL SetBackToRefs(IntCValues%D(:,I),IntCs,RefPoints%D)
      ENDDO
      IF(DoMix) THEN
@@ -871,7 +871,7 @@ CONTAINS
    ! CALL CleanConstrIntc(Displ%D,XYZ,GOpt%ExtIntCs,SCRPath,&
    !                      GOpt%TrfCtrl,GOpt%CoordCtrl,GOpt%GConvCrit, &
    !                      PBCDim,Print)
-   ! CALL RedundancyOff(Displ%D,SCRPath,Print)  
+   ! CALL RedundancyOff(Displ%D,SCRPath,Print)
    ! CALL POffHardGc(IntCs,XYZ,PBCDim,Displ%D,SCRPath,Print2)
      PredVals%D=IntCs%Value%D+Displ%D
      !
@@ -887,13 +887,13 @@ CONTAINS
                            GOpt%GConvCrit,GOpt%Constr,PBCDim,SCRPath, &
                            PWDPath,GOpt%ExtIntCs,iGEO_O=iGEO)
      ENDIF
-     ! 
+     !
      IF(DoMix) THEN
        CALL Delete(MixMat)
      ENDIF
-     ! 
+     !
      ! Now, add fitting along correlation coordinates
-     ! 
+     !
  !   IF(NDim>2) THEN
  !     CALL ModeFit(IntCs,IntCGrads%D,IntCValues%D,RefPoints%D,PBCDim, &
  !                  GOpt,PredVals%D,PWDPath,SCRPath,XYZ,NCart,iGEO, &
@@ -903,12 +903,12 @@ CONTAINS
  !                         GOpt%Constr,PBCDim,SCRPath,PWDPath, &
  !                         GOpt%ExtIntCs,iGEO_O=iGEO)
  !   ENDIF
-     ! 
+     !
      CALL Delete(SRStruct)
      CALL Delete(RefStruct)
      CALL Delete(RefGrad)
      CALL Delete(SRDispl)
-     ! 
+     !
      CALL Delete(IntCGrads)
      CALL Delete(IntCValues)
      CALL Delete(PredVals)
@@ -960,9 +960,9 @@ CONTAINS
     !CALL CutOffDispl(Displ%D,IntCs, &
     !                 GOpt%CoordCtrl%MaxStre,GOpt%CoordCtrl%MaxAngle)
      CALL CutOffDispl(Displ%D,IntCs,0.10D0,0.10D0)
-   ! CALL RedundancyOff(Displ%D,SCRPath,Print)  
+   ! CALL RedundancyOff(Displ%D,SCRPath,Print)
    ! CALL POffHardGc(IntCs,XYZ,PBCDim,Displ%D,SCRPath,Print2)
-     ! 
+     !
    ! CALL CleanConstrIntc(Displ%D,XYZ,GOpt%ExtIntCs,SCRPath,&
    !                      GOpt%TrfCtrl,GOpt%CoordCtrl,GOpt%GConvCrit, &
    !                      PBCDim,Print)
@@ -972,8 +972,8 @@ CONTAINS
                          RefPoints%D,Print,GOpt%BackTrf,GOpt%TrfCtrl, &
                          GOpt%CoordCtrl,GOpt%GConvCrit,GOpt%Constr, &
                          PBCDim,SCRPath, &
-                         PWDPath,GOpt%ExtIntCs,iGEO_O=iGEO)  
-     ! 
+                         PWDPath,GOpt%ExtIntCs,iGEO_O=iGEO)
+     !
      CALL Delete(RefPoints)
      CALL Delete(Displ)
      CALL Delete(Grad)
@@ -1003,8 +1003,8 @@ CONTAINS
                        LattIntC,PBCDim)
      TYPE(GOptStat)             :: CtrlStat
      TYPE(Constr)               :: CtrlConstr
-     TYPE(CoordCtrl)            :: CtrlCoord  
-     TYPE(GConvCrit)            :: GConvCr    
+     TYPE(CoordCtrl)            :: CtrlCoord
+     TYPE(GConvCrit)            :: GConvCr
      TYPE(LattInfo)             :: LattIntC
      REAL(DOUBLE),DIMENSION(:,:):: XYZ
      TYPE(INTC)                 :: IntCs,IntCL
@@ -1020,24 +1020,24 @@ CONTAINS
      REAL(DOUBLE)               :: StreConvCrit,BendConvCrit
      REAL(DOUBLE)               :: LinBConvCrit,OutPConvCrit
      REAL(DOUBLE)               :: TorsConvCrit
-     !                      
+     !
      INTEGER                    :: I,J,K,L
      INTEGER                    :: NCart,NIntC,NatmsLoc
      REAL(DOUBLE)               :: RMSGrad,MaxGrad,MaxCGrad,LMaxCGrad
      REAL(DOUBLE)               :: RMSGradNoConstr,MaxGradNoConstr
      REAL(DOUBLE)               :: Etot,Sum,Fact
-     !                      
+     !
      INTEGER                    :: NStreGeOp,NBendGeOp,NLinBGeOp
      INTEGER                    :: NOutPGeOp,NTorsGeOp
      INTEGER                    :: MaxStre,MaxBend,MaxLinB
      INTEGER                    :: MaxOutP,MaxTors
-     !                      
+     !
      INTEGER                    :: IMaxGrad,IMaxCGrad,IMaxGradNoConstr
      INTEGER                    :: ILMaxCGrad
      LOGICAL                    :: GradConv
      CHARACTER(LEN=4)           :: ALatt
      !
-     NIntC=IntCs%N      
+     NIntC=IntCs%N
      NatmsLoc=SIZE(XYZ,2)
      NCart=3*NatmsLoc
      !
@@ -1066,11 +1066,11 @@ CONTAINS
        WRITE(Out,140) MaxCGrad,(IMaxCGrad-1)/3+1
        IF(PBCDim>0) THEN
          IF(ILMaxCGrad==NatmsLoc-2) THEN
-           ALatt='   A' 
+           ALatt='   A'
          ELSE IF(ILMaxCGrad==NatmsLoc-1) THEN
-           ALatt='   B' 
+           ALatt='   B'
          ELSE
-           ALatt='   C' 
+           ALatt='   C'
          ENDIF
          WRITE(*,145) LMaxCGrad,ALAtt
          WRITE(Out,145) LMaxCGrad,ALAtt
@@ -1100,9 +1100,9 @@ CONTAINS
      MaxLinBDispl=-One
      MaxOutPDispl=-One
      MaxTorsDispl=-One
-     DO I=1,NIntC 
+     DO I=1,NIntC
        IF(.NOT.IntCs%Active%L(I)) CYCLE
-        IF(IntCs%Def%C(I)(1:4)=='STRE') THEN 
+        IF(IntCs%Def%C(I)(1:4)=='STRE') THEN
           Sum=ABS(IntOld%D(I))
           IF(MaxStreDispl<Sum) THEN
             MaxStre=I
@@ -1160,11 +1160,11 @@ CONTAINS
      WRITE(Out,410) MaxGrad,IntCs%Atoms%I(IMaxGrad,1:4)
      WRITE(Out,140) MaxCGrad,IMaxCGrad
      IF(ILMaxCGrad==NatmsLoc-2) THEN
-       ALatt='   A' 
+       ALatt='   A'
      ELSE IF(ILMaxCGrad==NatmsLoc-1) THEN
-       ALatt='   B' 
+       ALatt='   B'
      ELSE
-       ALatt='   C' 
+       ALatt='   C'
      ENDIF
      IF(PBCDim>0) THEN
        WRITE(*,145) LMaxCGrad,ALAtt
@@ -1234,8 +1234,8 @@ CONTAINS
      REAL(DOUBLE)   :: Fact
      !
      IF(PBCDim>0) THEN
-       WRITE(*,1010) 
-       WRITE(Out,1010) 
+       WRITE(*,1010)
+       WRITE(Out,1010)
        IF(PBCDim==1) THEN
          NStre=1
          NBend=0
@@ -1352,7 +1352,7 @@ CONTAINS
      CALL New(RefXYZ1,(/3,GMLoc%Natms/))
      CALL GetRefXYZ(Nams%HFile,RefXYZ1,iCLONE)
      !
-     ! Now, cut out that part of the molecule, which is 
+     ! Now, cut out that part of the molecule, which is
      ! not rigidly fixed and pass it in to the optimizer
      !
      NatmsNew=0
@@ -1394,7 +1394,7 @@ CONTAINS
      CALL OpenASCII(OutFile,Out)
      CALL OpenAlternate(GOpt,XYZNew%D,GradNew%D,Opts%PFlags%GeOp, &
                        GMLoc%BoxCarts%D,GMLoc%PBC%Dimen,GMLoc%AltCount,&
-                       EIntcSave,ConstrSave,SCRPath,GMLoc%LatticeOnly) 
+                       EIntcSave,ConstrSave,SCRPath,GMLoc%LatticeOnly)
      !
      !--------------------------------------------
      !
@@ -1407,7 +1407,7 @@ CONTAINS
      !--------------------------------------------
      !
      CALL CloseAlternate(GOpt%ExtIntCs,GOpt%GConvCrit%Alternate, &
-                        GOpt%Constr,EIntcSave,ConstrSave)  
+                        GOpt%Constr,EIntcSave,ConstrSave)
      CLOSE(Out,STATUS='KEEP')
      ! Put back modified geometry into GMLoc array
      !
@@ -1434,7 +1434,7 @@ CONTAINS
 !
    SUBROUTINE SetGConvCrit(GConv,Hess,AccL,NatmsLoc)
      TYPE(GConvCrit) :: GConv
-     TYPE(Hessian)   :: Hess 
+     TYPE(Hessian)   :: Hess
      INTEGER         :: AccL,NatmsLoc
      REAL(DOUBLE)    :: GCrit
      !
@@ -1458,7 +1458,7 @@ CONTAINS
      !
      GD%Init    = 3
      IF(GOptimizer==GRAD_BiSect_OPT) THEN
-       GD%MaxMem  = 7 
+       GD%MaxMem  = 7
      ELSE
        GD%MaxMem  = 7
      ENDIF
@@ -1472,10 +1472,10 @@ CONTAINS
      TYPE(GrdTrf)    :: GT
      TYPE(GConvCrit) :: GConv
      !
-     GT%MaxIt_GrdTrf = 10 
+     GT%MaxIt_GrdTrf = 10
     !GT%GrdTrfCrit   = 0.1D0*GConv%Grad
      GT%GrdTrfCrit   = 1.D-7
-     GT%MaxGradDiff  = 5.D+2      
+     GT%MaxGradDiff  = 5.D+2
    END SUBROUTINE SetGrdTrf
 !
 !-------------------------------------------------------------------
@@ -1487,8 +1487,8 @@ CONTAINS
      BackT%MaxIt_CooTrf = 50
    ! BackT%CooTrfCrit   = MIN(GConv%Stre/10.D0,1.D-6)
      BackT%CooTrfCrit   = 1.D-5
-     BackT%RMSCrit      = 0.75D0 
-     BackT%MaxCartDiff  = 0.50D0  
+     BackT%RMSCrit      = 0.75D0
+     BackT%MaxCartDiff  = 0.50D0
      BackT%DistRefresh  = BackT%MaxCartDiff*BackT%RMSCrit
    END SUBROUTINE SetBackTrf
 !
@@ -1532,8 +1532,8 @@ CONTAINS
    SUBROUTINE SetCoordCtrl(CoordC)
      TYPE(CoordCtrl) :: CoordC
      !
-     CoordC%LinCrit = 5.D0 
-     CoordC%TorsLinCrit = 5.D0      
+     CoordC%LinCrit = 5.D0
+     CoordC%TorsLinCrit = 5.D0
      CoordC%OutPCrit=CoordC%LinCrit
    END SUBROUTINE SetCoordCtrl
 !
@@ -1555,12 +1555,12 @@ CONTAINS
    SUBROUTINE GetCGradMax(CartGrad,NCart,IMaxCGrad,MaxCGrad, &
                           ILMaxCGrad,LMaxCGrad,PBCDim)
      REAL(DOUBLE),DIMENSION(:) :: CartGrad
-     REAL(DOUBLE),DIMENSION(3) :: Vect    
+     REAL(DOUBLE),DIMENSION(3) :: Vect
      REAL(DOUBLE)              :: MaxCGrad,Sum,LMaxCGrad
      INTEGER                   :: Nat,NCart,I,I1,I2,IMaxCGrad,ILMaxCGrad
      INTEGER                   :: PBCDim
      !
-     IMaxCGrad=1   
+     IMaxCGrad=1
      MaxCGrad=Zero
      Nat=NCart/3
      DO I=1,Nat-3
@@ -1575,7 +1575,7 @@ CONTAINS
      ENDDO
      !
      LMaxCGrad=Zero
-     ILMaxCGrad=0   
+     ILMaxCGrad=0
      IF(PBCDim>0) THEN
        DO I=Nat-2,Nat
          I1=3*(I-1)+1
@@ -1695,7 +1695,7 @@ CONTAINS
            I2=3*(I-1)+3
            Fact=SQRT(DOT_PRODUCT(DistVect2%D(I1:I2),DistVect2%D(I1:I2)))
            MaxDist=MAX(MaxDist,Fact)
-         ENDDO 
+         ENDDO
          CALL Delete(DistVect1)
          CALL Delete(DistVect2)
          !
@@ -1729,11 +1729,11 @@ CONTAINS
            CALL DGEMM_NNc(3,3,1,One,Zero, &
                 C%Geos%Clone(iCLONE)%PBC%InvBoxSh%D, &
                 C%Geos%Clone(iCLONE)%Carts%D(1:3,I), &
-                C%Geos%Clone(iCLONE)%BoxCarts%D(1:3,I))   
+                C%Geos%Clone(iCLONE)%BoxCarts%D(1:3,I))
            CALL DGEMM_NNc(3,3,1,One,Zero, &
                 GMOld%PBC%InvBoxSh%D, &
                 GMOld%Carts%D(1:3,I), &
-                GMOld%BoxCarts%D(1:3,I))   
+                GMOld%BoxCarts%D(1:3,I))
          ENDDO
          !
          ! do bisection
@@ -1763,13 +1763,13 @@ CONTAINS
              CALL DGEMM_NNc(3,3,1,One,Zero, &
                   C%Geos%Clone(iCLONE)%PBC%BoxShape%D, &
                   C%Geos%Clone(iCLONE)%BoxCarts%D(1:3,I), &
-                  C%Geos%Clone(iCLONE)%Carts%D(1:3,I))   
+                  C%Geos%Clone(iCLONE)%Carts%D(1:3,I))
            ENDDO
          ENDIF
        ENDDO
        !
        IF(DoBackTrackAll) THEN
-       ! C%Stat%Action     =StateO%Action   
+       ! C%Stat%Action     =StateO%Action
          C%Stat%Current%I     = StateO%Current%I
          C%Stat%Previous%I    = StateO%Previous%I
          C%Stat%Current%I(3)  = iGEO
@@ -1780,15 +1780,15 @@ CONTAINS
 !!$            C%Opts%Guess=GUESS_EQ_SUPR
 !!$         ENDIF
 
-         CALL GeomArchive(iBAS,iGEO,C%Nams,C%Opts,C%Sets,C%Geos)    
+         CALL GeomArchive(iBAS,iGEO,C%Nams,C%Opts,C%Sets,C%Geos)
          CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
          CALL SCF(iBAS,iGEO,C)
        ELSE
          EXIT
        ENDIF
      ENDDO
-     ! In the present version do not do any overwriting of 
-     ! the GMOld%Displ, since it refers 
+     ! In the present version do not do any overwriting of
+     ! the GMOld%Displ, since it refers
      ! strictly to the simple relaxation step, for GDIIS.
      !
      CALL Delete(GMOld)
@@ -1879,7 +1879,7 @@ CONTAINS
          GOpt%ExtIntCs%Def%C(II+2)(1:10)='CARTY     '
          GOpt%ExtIntCs%Def%C(II+3)(1:10)='CARTZ     '
          DO J=1,3
-           GOpt%ExtIntCs%Atoms%I(II+J,1)=I     
+           GOpt%ExtIntCs%Atoms%I(II+J,1)=I
            GOpt%ExtIntCs%Constraint%L(II+J)=.TRUE.
            GOpt%ExtIntCs%Active%L(II+J)=.TRUE.
            GOpt%ExtIntCs%ConstrValue%D(II+J)=BoxCarts(J,I)
@@ -1972,7 +1972,7 @@ CONTAINS
 !------------------------------------------------------------------
 !
    SUBROUTINE CloseAlternate(ExtIntCs,Alternate, &
-                             GConstr,EIntcSave,ConstrSave) 
+                             GConstr,EIntcSave,ConstrSave)
      TYPE(INTC)   :: ExtIntCs,EIntcSave
      TYPE(Constr) :: GConstr,ConstrSave
      LOGICAL      :: Alternate
@@ -2041,9 +2041,9 @@ CONTAINS
     CALL New(NMode,(/N,N/))
     !CALL New(Dipole,3)
     !
-    ! Build the guess 
+    ! Build the guess
     DO iBAS=1,C%Sets%NBSets
-       CALL GeomArchive(iBAS,iGEO,C%Nams,C%Opts,C%Sets,C%Geos)    
+       CALL GeomArchive(iBAS,iGEO,C%Nams,C%Opts,C%Sets,C%Geos)
        CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
        CALL SCF(iBAS,iGEO,C)
     ENDDO
@@ -2166,7 +2166,7 @@ CONTAINS
        Freqs%D(I)=SQRT(ABS(FreqToWaveNbr*Freqs%D(I)))
     ENDDO
     !
-    ! Convert normal mode displacements from mass 
+    ! Convert normal mode displacements from mass
     ! weighted cartesian to cartesian.
     DO AtB=1,NatmsLoc
        DO J=1,3
@@ -2201,7 +2201,7 @@ CONTAINS
        WRITE(FID,'(F8.2)') Freqs%D(I)
        K=1
        DO J=1,C%Geos%Clone(1)%Natms
-          CALL UpCase(C%Geos%Clone(1)%AtNam%C(J))          
+          CALL UpCase(C%Geos%Clone(1)%AtNam%C(J))
           WRITE(FID,'(A,3F10.5,I3,3F10.5)') TRIM(C%Geos%Clone(1)%AtNam%C(J)), &
                & AUToAngstroms*C%Geos%Clone(1)%Carts%D(1,J), &
                & AUToAngstroms*C%Geos%Clone(1)%Carts%D(2,J), &
@@ -2333,7 +2333,7 @@ CONTAINS
        IF(ABS(EigenV%D(1))+ABS(EigenV%D(2))+ABS(EigenV%D(3)).LT.1.0D-8) THEN
           WRITE(*,*) 'Is it an atom?'
           WRITE(*,*) 'STOPPED in ProjOut'
-          STOP 
+          STOP
        ENDIF
        ! Linear systems.
        ! X.eq.0 and Y,Z.ne.0
@@ -2363,7 +2363,7 @@ CONTAINS
     ELSE
        ! Non-linear systems.
        ITheta%D(:,:)=InverseMatrix3x3(Theta%D(:,:))
-       !CALL Print_DBL_RNK2(ITheta,'Inv(I0)',Unit_O=6)    
+       !CALL Print_DBL_RNK2(ITheta,'Inv(I0)',Unit_O=6)
     ENDIF
     CALL Delete(EigenV)
     !CALL Print_DBL_RNK2(ITheta,'Inv(I0)',Unit_O=6)
@@ -2649,14 +2649,14 @@ CONTAINS
     CpTot= CpElec+CpTran+CpRot+CpVib
 
     WRITE(*,  *)
-    WRITE(*,907) 
+    WRITE(*,907)
     WRITE(*,908) 'Elec ',QElec,LOG(QElec)
     WRITE(*,908) 'Trans',QTran,LOG(QTran)
     WRITE(*,908) 'Rot  ',QRot ,LOG(QRot )
     WRITE(*,908) 'Vib  ',QVib ,LOG(QVib )
     WRITE(*,908) 'Tot  ',QTot ,LOG(QTot )
     WRITE(*,  *)
-    WRITE(*,909) 
+    WRITE(*,909)
     WRITE(*,910) '    KJ/Mol','    KJ/Mol','    KJ/Mol','    J/MolK','    J/MolK','    J/MolK'
     WRITE(*,911) 'Elec ',UElec,HElec,GElec,CvElec,CpElec,SElec
     WRITE(*,911) 'Trans',UTran,HTran,GTran,CvTran,CpTran,STran
@@ -2664,7 +2664,7 @@ CONTAINS
     WRITE(*,911) 'Vib  ',UVib ,HVib ,GVib ,CvVib ,CpVib ,SVib
     WRITE(*,911) 'Tot  ',UTot ,HTot ,GTot ,CvTot ,CpTot ,STot
     WRITE(*,  *)
-    WRITE(*,909) 
+    WRITE(*,909)
     WRITE(*,910) '  KCal/Mol','  KCal/Mol','  KCal/Mol','  Cal/MolK','  Cal/MolK','  Cal/MolK'
     WRITE(*,911) 'Elec ',UElec*JouleToCal,HElec*JouleToCal,GElec*JouleToCal,CvElec*JouleToCal, &
          & CpElec*JouleToCal,SElec*JouleToCal
@@ -2820,7 +2820,7 @@ CONTAINS
 !!$
 !!$    CALL Get(P,TrixName)
 !!$    CALL Print_BCSR(P,'DM',Unit_O=6)
-!!$    ! 
+!!$    !
 !!$write(*,*) 'dipoleComp 00'
 !!$    ! Compute dipole matrix.
 !!$    S%Action%C(1)='DipoleBuild'
