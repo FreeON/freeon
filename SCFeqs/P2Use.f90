@@ -356,7 +356,7 @@ PROGRAM P2Use
     CALL New(Tmp1)
     CALL New(Tmp2)
 
-    IF(iGEO <= 2) THEN
+    IF(iGEO < 3) THEN
       CALL Halt('[P2Use:Linear] No previous density matrix defined')
     ENDIF
 
@@ -422,7 +422,7 @@ PROGRAM P2Use
     iBAS = Args%I%I(2)
     iGEO = Args%I%I(3)
 
-    IF(iGEO <= 4) THEN
+    IF(iGEO < 4) THEN
       CALL MondoLog(DEBUG_MAXIMUM, logtag, "No previous density matrix defined")
       CALL Halt("["//TRIM(logtag)//"] Fatal error")
     ENDIF
@@ -439,7 +439,7 @@ PROGRAM P2Use
     CALL New(Tmp1)
     CALL New(Tmp2)
 
-    IF(iGEO == 5) THEN
+    IF(iGEO == 4) THEN
       ! Initial boundary conditions: Save D(p-1) as P(p-1).
       CALL MondoLog(DEBUG_MAXIMUM, logtag, "Initial boundary condition")
       DO I=1,3
@@ -570,7 +570,7 @@ PROGRAM P2Use
     iBAS = Args%I%I(2)
     iGEO = Args%I%I(3)
 
-    IF(iGEO <= 4) THEN
+    IF(iGEO < 4) THEN
       CALL MondoLog(DEBUG_MAXIMUM, logtag, "No previous density matrix defined")
       CALL Halt("["//TRIM(logtag)//"] Fatal error")
     ENDIF
@@ -579,9 +579,9 @@ PROGRAM P2Use
     CALL New(Tmp1)
     CALL New(Tmp2)
 
-    IF(iGEO == 5) THEN
+    IF(iGEO == 4) THEN
       ! Initial boundary conditions: Save D(p-1) as P(p-1).
-!      CALL MondoLog(DEBUG_MAXIMUM, logtag, "Initial boundary condition")
+      CALL MondoLog(DEBUG_MAXIMUM, logtag, "Initial boundary condition")
       DO I=1,3
         CALL Get(Tmp1, TrixFile("DOsave",  Stats_O = (/ iSCF, iBAS, iGEO-I /)))
         CALL Put(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-I /)))
@@ -672,7 +672,7 @@ PROGRAM P2Use
     iBAS = Args%I%I(2)
     iGEO = Args%I%I(3)
 
-    IF(iGEO <= 6) THEN
+    IF(iGEO < 5) THEN
       CALL MondoLog(DEBUG_MAXIMUM, logtag, "No previous density matrix defined")
       CALL Halt("["//TRIM(logtag)//"] Fatal error")
     ENDIF
@@ -681,7 +681,7 @@ PROGRAM P2Use
     CALL New(Tmp1)
     CALL New(Tmp2)
 
-    IF(iGEO == 7) THEN
+    IF(iGEO == 5) THEN
       ! Initial boundary conditions: Save D(p-1) as P(p-1).
       CALL MondoLog(DEBUG_MAXIMUM, logtag, "Initial boundary condition")
       DO I=1,4
@@ -776,12 +776,11 @@ PROGRAM P2Use
     ! DMTRBO with super-duper high order damping.
   CASE("DMTRBO_Damp_dt7")
 
-
     iSCF = Args%I%I(1)
     iBAS = Args%I%I(2)
     iGEO = Args%I%I(3)
 
-    IF(iGEO <= 8) THEN
+    IF(iGEO < 6) THEN
       CALL MondoLog(DEBUG_MAXIMUM, logtag, "No previous density matrix defined")
       CALL Halt("["//TRIM(logtag)//"] Fatal error")
     ENDIF
@@ -790,9 +789,9 @@ PROGRAM P2Use
     CALL New(Tmp1)
     CALL New(Tmp2)
 
-    IF(iGEO == 9) THEN
+    IF(iGEO == 6) THEN
       ! Initial boundary conditions: Save D(p-1) as P(p-1).
-!      CALL MondoLog(DEBUG_MAXIMUM, logtag, "Initial boundary condition")
+      CALL MondoLog(DEBUG_MAXIMUM, logtag, "Initial boundary condition")
       DO I=1,5
         CALL Get(Tmp1, TrixFile("DOsave",  Stats_O = (/ iSCF, iBAS, iGEO-I /)))
         CALL Put(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-I /)))
@@ -897,7 +896,7 @@ PROGRAM P2Use
     iBAS = Args%I%I(2)
     iGEO = Args%I%I(3)
 
-    IF(iGEO <= 10) THEN
+    IF(iGEO < 7) THEN
       CALL MondoLog(DEBUG_MAXIMUM, logtag, "No previous density matrix defined")
       CALL Halt("["//TRIM(logtag)//"] Fatal error")
     ENDIF
@@ -906,9 +905,9 @@ PROGRAM P2Use
     CALL New(Tmp1)
     CALL New(Tmp2)
 
-    IF(iGEO == 11) THEN
+    IF(iGEO == 7) THEN
       ! Initial boundary conditions: Save D(p-1) as P(p-1).
-!      CALL MondoLog(DEBUG_MAXIMUM, logtag, "Initial boundary condition")
+      CALL MondoLog(DEBUG_MAXIMUM, logtag, "Initial boundary condition")
       DO I=1,6
         CALL Get(Tmp1, TrixFile("DOsave",  Stats_O = (/ iSCF, iBAS, iGEO-I /)))
         CALL Put(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-I /)))
@@ -1014,7 +1013,7 @@ PROGRAM P2Use
     iBAS = Args%I%I(2)
     iGEO = Args%I%I(3)
 
-    IF(iGEO <= 12) THEN
+    IF(iGEO < 8) THEN
       CALL MondoLog(DEBUG_MAXIMUM, logtag, "No previous density matrix defined")
       CALL Halt("["//TRIM(logtag)//"] Fatal error")
     ENDIF
@@ -1023,9 +1022,9 @@ PROGRAM P2Use
     CALL New(Tmp1)
     CALL New(Tmp2)
 
-    IF(iGEO == 13) THEN
+    IF(iGEO == 8) THEN
       ! Initial boundary conditions: Save D(p-1) as P(p-1).
-!      CALL MondoLog(DEBUG_MAXIMUM, logtag, "Initial boundary condition")
+      CALL MondoLog(DEBUG_MAXIMUM, logtag, "Initial boundary condition")
       DO I=1,7
         CALL Get(Tmp1, TrixFile("DOsave",  Stats_O = (/ iSCF, iBAS, iGEO-I /)))
         CALL Put(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-I /)))
@@ -1137,7 +1136,7 @@ PROGRAM P2Use
     iBAS = Args%I%I(2)
     iGEO = Args%I%I(3)
 
-    IF(iGEO <= 6) THEN
+    IF(iGEO < 7) THEN
       CALL MondoLog(DEBUG_MAXIMUM, logtag, "No previous density matrix defined")
       CALL Halt("["//TRIM(logtag)//"] Fatal error")
     ENDIF
@@ -1160,7 +1159,7 @@ PROGRAM P2Use
     ! Calculate symplectic counter.
     m_step = MOD(iGEO-2,4)+1
     IF(iGEO == 7) THEN
-!      CALL MondoLog(DEBUG_MAXIMUM, logtag, "Initial boundary condition")
+      CALL MondoLog(DEBUG_MAXIMUM, logtag, "Initial boundary condition")
       DO I=1,6
         CALL Get(Tmp1, TrixFile("DOsave",  Stats_O = (/ iSCF, iBAS, iGEO-I /)))
         CALL Put(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-I /)))
