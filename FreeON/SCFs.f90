@@ -2309,26 +2309,26 @@ CONTAINS
     iREMOVE = D%MDMaxSteps+1
     SELECT CASE(D%MDGeuss)
     CASE("DMLinear","FMVerlet0")
+      iREMOVE  = 2
+      MinMDGeo = 2
+    CASE("DMTRBO")
       iREMOVE  = 3
       MinMDGeo = 3
-    CASE("DMTRBO")
-      iREMOVE  = 4
-      MinMDGeo = 4
     CASE("DMTRBO_Damp_dt3")
+      iREMOVE  = 3
+      MinMDGeo = 3
+    CASE("DMTRBO_Damp_dt5")
       iREMOVE  = 4
       MinMDGeo = 4
-    CASE("DMTRBO_Damp_dt5")
+    CASE("DMTRBO_Damp_dt7")
+      iREMOVE  = 5
+      MinMDGeo = 5
+    CASE("DMTRBO_Damp_dt9")
       iREMOVE  = 6
       MinMDGeo = 6
-    CASE("DMTRBO_Damp_dt7")
-      iREMOVE  = 8
-      MinMDGeo = 8
-    CASE("DMTRBO_Damp_dt9")
-      iREMOVE  = 10
-      MinMDGeo = 10
     CASE("DMTRBO_Damp_dt11")
-      iREMOVE  = 12
-      MinMDGeo = 12
+      iREMOVE  = 7
+      MinMDGeo = 7
     CASE("DMSymplectic")
       iREMOVE  = 6
       MinMDGeo = 6
