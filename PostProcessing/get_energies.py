@@ -1,4 +1,6 @@
 #!/usr/bin/python
+#
+# vim: tw=0
 
 import sys, re, optparse
 
@@ -36,7 +38,7 @@ for file in argument:
 
   for line in lines:
     lineNumber += 1
-    result = re.compile("SCF.+\[([0-9]+),([0-9]+),([0-9]+)\].+<SCF> = ([^,]+), dD = ([^,]+)").search(line)
+    result = re.compile("SCF.+\[([0-9]+),([0-9]+),([0-9]+)\].+<SCF> = ([-+0.123456789dDeE]+).*dD = ([-+0.123456789dDeE]+).*").search(line)
     if result:
       lastSCFCycle = SCFCycle
       lastBasis    = Basis
@@ -50,8 +52,17 @@ for file in argument:
         print lastGeometry, SCFEnergy, lastSCFCycle, dD
 
       try:
-        SCFEnergy = float(result.group(4))
+        SCFEnergy = float(result.group(4).lower().replace("d", "e"))
+      except ValueError, message:
+        print "anaylzing line " + str(lineNumber) + ": " + line.strip()
+        print result.group(1) + " " + result.group(2) + " " + result.group(3) + " " + result.group(4) + " " + result.group(5)
+        print "ValueError (SCF) in input file " + file + " on line " + str(lineNumber) + ": \"" + result.group(4) + "\" -> " + str(message)
+        sys.exit(1)
+
+      try:
         dD = float(result.group(5).lower().replace("d", "e"))
       except ValueError, message:
-        print "ValueError in input file " + file + " on line " + str(lineNumber) + ": ", message
+        print "anaylzing line " + str(lineNumber) + ": " + line.strip()
+        print result.group(1) + " " + result.group(2) + " " + result.group(3) + " " + result.group(4) + " " + result.group(5)
+        print "ValueError (dD) in input file " + file + " on line " + str(lineNumber) + ": \"" + result.group(5) + "\" -> " + str(message)
         sys.exit(1)
