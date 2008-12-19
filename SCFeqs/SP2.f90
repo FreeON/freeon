@@ -68,7 +68,6 @@ PROGRAM DMP_SP2 ! Density matrix purification, SP2 variation
   ! Check for matrix threshold overide
   CALL SussTrix('TCTwoTrix',Prog)
 
-
   CALL New(F)
   FFile=TrixFile('F_DIIS',Args,0)
   INQUIRE(FILE=FFile,EXIST=Present)
