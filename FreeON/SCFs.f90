@@ -2315,20 +2315,20 @@ CONTAINS
       iREMOVE  = 3
       MinMDGeo = 3
     CASE("DMTRBO_Damp_dt3")
-      iREMOVE  = 3
-      MinMDGeo = 3
-    CASE("DMTRBO_Damp_dt5")
       iREMOVE  = 4
       MinMDGeo = 4
+    CASE("DMTRBO_Damp_dt5")
+      iREMOVE  = 5
+      MinMDGeo = 5
     CASE("DMTRBO_Damp_dt7")
       iREMOVE  = 6
       MinMDGeo = 6
     CASE("DMTRBO_Damp_dt9")
-      iREMOVE  = 6
-      MinMDGeo = 6
-    CASE("DMTRBO_Damp_dt11")
       iREMOVE  = 7
       MinMDGeo = 7
+    CASE("DMTRBO_Damp_dt11")
+      iREMOVE  = 8
+      MinMDGeo = 8
     CASE("DMSymplectic")
       iREMOVE  = 6
       MinMDGeo = 6
