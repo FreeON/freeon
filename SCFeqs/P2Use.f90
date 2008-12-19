@@ -619,7 +619,7 @@ PROGRAM P2Use
     ! Do SP2 iterations
     DO I=1,100
       CALL SP2(P,Tmp1,Tmp2,Half*DBLE(NEl),MM)
-      IF(CnvrgChck(Prog//'_dt7',I,Half*DBLE(NEl),MM,P0,P,P0,Tmp1,Tmp2,StartingFromP_O=.TRUE.,NPurMin_O=2)) EXIT
+      IF(CnvrgChck(Prog//'_dt3',I,Half*DBLE(NEl),MM,P0,P,P0,Tmp1,Tmp2,StartingFromP_O=.TRUE.,NPurMin_O=2)) EXIT
     ENDDO
     CALL Delete(P0)
     CALL MondoLog(DEBUG_MAXIMUM, logtag, "purified after "//TRIM(IntToChar(I))//" iterations")
@@ -726,7 +726,7 @@ PROGRAM P2Use
     ! Do SP2 iterations
     DO I=1,100
       CALL SP2(P,Tmp1,Tmp2,Half*DBLE(NEl),MM)
-      IF(CnvrgChck(Prog//'_dt7',I,Half*DBLE(NEl),MM,P0,P,P0,Tmp1,Tmp2,StartingFromP_O=.TRUE.,NPurMin_O=2)) EXIT
+      IF(CnvrgChck(Prog//'_dt5',I,Half*DBLE(NEl),MM,P0,P,P0,Tmp1,Tmp2,StartingFromP_O=.TRUE.,NPurMin_O=2)) EXIT
     ENDDO
     CALL MondoLog(DEBUG_MAXIMUM, logtag, "purified after "//TRIM(IntToChar(I))//" iterations")
     CALL MondoLog(DEBUG_MAXIMUM, logtag, "Trace(P) = "//TRIM(DblToChar(TrP)))
@@ -959,7 +959,7 @@ PROGRAM P2Use
     ! Do SP2 iterations
     DO I=1,100
       CALL SP2(P,Tmp1,Tmp2,Half*DBLE(NEl),MM)
-      IF(CnvrgChck(Prog//'_dt7',I,Half*DBLE(NEl),MM,P0,P,P0,Tmp1,Tmp2,StartingFromP_O=.TRUE.,NPurMin_O=2)) EXIT
+      IF(CnvrgChck(Prog//'_dt9',I,Half*DBLE(NEl),MM,P0,P,P0,Tmp1,Tmp2,StartingFromP_O=.TRUE.,NPurMin_O=2)) EXIT
     ENDDO
     CALL Delete(P0)
     CALL MondoLog(DEBUG_MAXIMUM, logtag, "purified after "//TRIM(IntToChar(I))//" iterations")
@@ -1085,7 +1085,7 @@ PROGRAM P2Use
     ! Do SP2 iterations
     DO I=1,100
       CALL SP2(P,Tmp1,Tmp2,Half*DBLE(NEl),MM)
-      IF(CnvrgChck(Prog//'_dt7',I,Half*DBLE(NEl),MM,P0,P,P0,Tmp1,Tmp2,StartingFromP_O=.TRUE.,NPurMin_O=2)) EXIT
+      IF(CnvrgChck(Prog//'_dt11',I,Half*DBLE(NEl),MM,P0,P,P0,Tmp1,Tmp2,StartingFromP_O=.TRUE.,NPurMin_O=2)) EXIT
     ENDDO
     CALL MondoLog(DEBUG_MAXIMUM, logtag, "purified after "//TRIM(IntToChar(I))//" iterations")
     CALL MondoLog(DEBUG_MAXIMUM, logtag, "Trace(P) = "//TRIM(DblToChar(TrP)))
