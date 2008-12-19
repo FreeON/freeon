@@ -519,22 +519,15 @@ PROGRAM P2Use
     CALL Put(P, TrixFile("DOPsave", Args))
 
     ! Purify P
-#ifdef PARALLEL
-    CALL SetEq(P_BCSR,P)
-    CALL SpectralBounds(P_BCSR,Fmin,Fmax)
-    CALL Delete(P_BCSR)
-#else
-    CALL SpectralBounds(P,Fmin,Fmax)
-#endif
-    CALL Add(P,-Fmin)
-    CALL Multiply(P,One/(Fmax-Fmin))
     MM = 0
-    DO I=1,40
+    CALL New(P0)
+    CALL SetEq(P0,P)
+    ! Do SP2 iterations
+    DO I=1,100
       CALL SP2(P,Tmp1,Tmp2,Half*DBLE(NEl),MM)
-      IF(ABS(TrP-Half*DBLE(NEl)) < 1.0D-8) THEN
-        IF(ABS(TrP2-Half*DBLE(NEl)) < 1.0D-8) EXIT
-      ENDIF
+      IF(CnvrgChck(Prog//'_dt7',I,Half*DBLE(NEl),MM,P0,P,P0,Tmp1,Tmp2,StartingFromP_O=.TRUE.,NPurMin_O=2)) EXIT
     ENDDO
+    CALL Delete(P0)
     CALL MondoLog(DEBUG_MAXIMUM, logtag, "purified after "//TRIM(IntToChar(I))//" iterations")
     CALL MondoLog(DEBUG_MAXIMUM, logtag, "Trace(P)  = "//TRIM(DblToChar(TrP)))
     CALL MondoLog(DEBUG_MAXIMUM, logtag, "Trace(P2) = "//TRIM(DblToChar(TrP2)))
@@ -570,7 +563,7 @@ PROGRAM P2Use
     iBAS = Args%I%I(2)
     iGEO = Args%I%I(3)
 
-    IF(iGEO < 4) THEN
+    IF(iGEO < 5) THEN
       CALL MondoLog(DEBUG_MAXIMUM, logtag, "No previous density matrix defined")
       CALL Halt("["//TRIM(logtag)//"] Fatal error")
     ENDIF
@@ -579,41 +572,40 @@ PROGRAM P2Use
     CALL New(Tmp1)
     CALL New(Tmp2)
 
-    IF(iGEO == 4) THEN
+    IF(iGEO == 5) THEN
       ! Initial boundary conditions: Save D(p-1) as P(p-1).
       CALL MondoLog(DEBUG_MAXIMUM, logtag, "Initial boundary condition")
-      DO I=1,3
+      DO I=1,4
         CALL Get(Tmp1, TrixFile("DOsave",  Stats_O = (/ iSCF, iBAS, iGEO-I /)))
         CALL Put(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-I /)))
       ENDDO
     ENDIF
 
-    ! Notation: P(n) = 1.737216*D(n-1) + 0.131784*P(n-1) - 0.738*P(n-2) - 0.131*P(n-3) + T(dt^3)
+    !  P(n+1) = 1.692*D(n) + 0.008*P(n) - 0.55*P(n-1) + 0*P(n-2) - 0.15*P(n-3)
     !
-    ! We reverse the addition order, sorted from smalles prefactor to largest,
+    ! We reverse the addition order, sorted from smallest prefactor to largest,
     ! for numerical reasons.
 
     ! Get P(n-3)
-    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-3 /)))
-    CALL Multiply(Tmp1,-0.131D0)
-    CALL Add(P,Tmp1,Tmp2)
-    CALL SetEq(P,Tmp2)
-
-    ! Get P(n-2)
-    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-2 /)))
-    CALL Multiply(Tmp1,-0.738D0)
-    CALL Add(P,Tmp1,Tmp2)
-    CALL SetEq(P,Tmp2)
+    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-4 /)))
+    CALL Multiply(Tmp1, -0.15D0)
+    CALL SetEq(P,Tmp1)
 
     ! Get P(n-1)
-    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-1 /)))
-    CALL Multiply(Tmp1,0.131784D0)
+    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-2 /)))
+    CALL Multiply(Tmp1, -0.55D0)
     CALL Add(P,Tmp1,Tmp2)
     CALL SetEq(P,Tmp2)
 
-    ! Get D(n-1)
+    ! Get P(n)
+    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-1 /)))
+    CALL Multiply(Tmp1, 0.008D0)
+    CALL Add(P,Tmp1,Tmp2)
+    CALL SetEq(P,Tmp2)
+
+    ! Get D(n)
     CALL Get(Tmp1, TrixFile("DOsave", Stats_O = (/ iSCF, iBAS, iGEO-1 /)))
-    CALL Multiply(Tmp1,1.737216D0)
+    CALL Multiply(Tmp1, 1.692D0)
     CALL Add(P,Tmp1,Tmp2)
     CALL SetEq(P,Tmp2)
 
@@ -621,22 +613,15 @@ PROGRAM P2Use
     CALL Put(P, TrixFile("DOPsave", Args))
 
     ! Purify P
-#ifdef PARALLEL
-    CALL SetEq(P_BCSR,P)
-    CALL SpectralBounds(P_BCSR,Fmin,Fmax)
-    CALL Delete(P_BCSR)
-#else
-    CALL SpectralBounds(P,Fmin,Fmax)
-#endif
-    CALL Add(P,-Fmin)
-    CALL Multiply(P,One/(Fmax-Fmin))
     MM = 0
-    DO I=1,50
+    CALL New(P0)
+    CALL SetEq(P0,P)
+    ! Do SP2 iterations
+    DO I=1,100
       CALL SP2(P,Tmp1,Tmp2,Half*DBLE(NEl),MM)
-      IF(ABS(TrP -Half*DBLE(NEl))< 1.0D-8) THEN
-        IF(ABS(TrP2-Half*DBLE(NEl)) < 1.D-8) EXIT
-      ENDIF
+      IF(CnvrgChck(Prog//'_dt7',I,Half*DBLE(NEl),MM,P0,P,P0,Tmp1,Tmp2,StartingFromP_O=.TRUE.,NPurMin_O=2)) EXIT
     ENDDO
+    CALL Delete(P0)
     CALL MondoLog(DEBUG_MAXIMUM, logtag, "purified after "//TRIM(IntToChar(I))//" iterations")
     CALL MondoLog(DEBUG_MAXIMUM, logtag, "Trace(P) = "//TRIM(DblToChar(TrP)))
     CALL MondoLog(DEBUG_MAXIMUM, logtag, "Trace(P2) = "//TRIM(DblToChar(TrP2)))
@@ -672,7 +657,7 @@ PROGRAM P2Use
     iBAS = Args%I%I(2)
     iGEO = Args%I%I(3)
 
-    IF(iGEO < 5) THEN
+    IF(iGEO < 6) THEN
       CALL MondoLog(DEBUG_MAXIMUM, logtag, "No previous density matrix defined")
       CALL Halt("["//TRIM(logtag)//"] Fatal error")
     ENDIF
@@ -681,47 +666,53 @@ PROGRAM P2Use
     CALL New(Tmp1)
     CALL New(Tmp2)
 
-    IF(iGEO == 5) THEN
+    IF(iGEO == 6) THEN
       ! Initial boundary conditions: Save D(p-1) as P(p-1).
       CALL MondoLog(DEBUG_MAXIMUM, logtag, "Initial boundary condition")
-      DO I=1,4
+      DO I=1,5
         CALL Get(Tmp1, TrixFile("DOsave",  Stats_O = (/ iSCF, iBAS, iGEO-I /)))
         CALL Put(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-I /)))
       ENDDO
     ENDIF
 
-    ! Notation: P(n) = 1.845*D(n-1) + 0.105*P(n-1) - 0.875*P(n-2) - 0.1*P(n-3) + 0.025*P(n-4) + T(dt^5)
+    !  P(n+1) = 1.75*D(n) + 0.079*P(n) - 0.658*P(n-1) - 0.114*P(n-2) -
+    !  0.114*P(n-3) + 0.057*P(n-4)
     !
-    ! We reverse the addition order, sorted from smalles prefactor to largest,
+    ! We reverse the addition order, sorted from smallest prefactor to largest,
     ! for numerical reasons.
 
     ! Get P(n-4)
-    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-4 /)))
-    CALL Multiply(Tmp1,0.25D0)
-    CALL Add(P,Tmp1,Tmp2)
-    CALL SetEq(P,Tmp2)
+    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-5 /)))
+    CALL Multiply(Tmp1, 0.057D0)
+    CALL SetEq(P,Tmp1)
 
     ! Get P(n-3)
-    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-3 /)))
-    CALL Multiply(Tmp1,-0.1D0)
+    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-4 /)))
+    CALL Multiply(Tmp1, -0.114D0)
     CALL Add(P,Tmp1,Tmp2)
     CALL SetEq(P,Tmp2)
 
     ! Get P(n-2)
-    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-2 /)))
-    CALL Multiply(Tmp1,-0.875D0)
+    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-3 /)))
+    CALL Multiply(Tmp1, -0.114D0)
     CALL Add(P,Tmp1,Tmp2)
     CALL SetEq(P,Tmp2)
 
     ! Get P(n-1)
-    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-1 /)))
-    CALL Multiply(Tmp1,0.105D0)
+    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-2 /)))
+    CALL Multiply(Tmp1, -0.658D0)
     CALL Add(P,Tmp1,Tmp2)
     CALL SetEq(P,Tmp2)
 
-    ! Get D(n-1)
+    ! Get P(n)
+    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-1 /)))
+    CALL Multiply(Tmp1, 0.079D0)
+    CALL Add(P,Tmp1,Tmp2)
+    CALL SetEq(P,Tmp2)
+
+    ! Get D(n)
     CALL Get(Tmp1, TrixFile("DOsave", Stats_O = (/ iSCF, iBAS, iGEO-1 /)))
-    CALL Multiply(Tmp1,1.845D0)
+    CALL Multiply(Tmp1, 1.75D0)
     CALL Add(P,Tmp1,Tmp2)
     CALL SetEq(P,Tmp2)
 
@@ -729,21 +720,13 @@ PROGRAM P2Use
     CALL Put(P, TrixFile("DOPsave", Args))
 
     ! Purify P
-#ifdef PARALLEL
-    CALL SetEq(P_BCSR,P)
-    CALL SpectralBounds(P_BCSR,Fmin,Fmax)
-    CALL Delete(P_BCSR)
-#else
-    CALL SpectralBounds(P,Fmin,Fmax)
-#endif
-    CALL Add(P,-Fmin)
-    CALL Multiply(P,One/(Fmax-Fmin))
     MM = 0
-    DO I=1,50
+    CALL New(P0)
+    CALL SetEq(P0,P)
+    ! Do SP2 iterations
+    DO I=1,100
       CALL SP2(P,Tmp1,Tmp2,Half*DBLE(NEl),MM)
-      IF(ABS(TrP -Half*DBLE(NEl))< 1.0D-8) THEN
-        IF(ABS(TrP2-Half*DBLE(NEl)) < 1.D-8) EXIT
-      ENDIF
+      IF(CnvrgChck(Prog//'_dt7',I,Half*DBLE(NEl),MM,P0,P,P0,Tmp1,Tmp2,StartingFromP_O=.TRUE.,NPurMin_O=2)) EXIT
     ENDDO
     CALL MondoLog(DEBUG_MAXIMUM, logtag, "purified after "//TRIM(IntToChar(I))//" iterations")
     CALL MondoLog(DEBUG_MAXIMUM, logtag, "Trace(P) = "//TRIM(DblToChar(TrP)))
@@ -860,6 +843,9 @@ PROGRAM P2Use
       IF(CnvrgChck(Prog//'_dt7',I,Half*DBLE(NEl),MM,P0,P,P0,Tmp1,Tmp2,StartingFromP_O=.TRUE.,NPurMin_O=2)) EXIT
     ENDDO
     CALL Delete(P0)
+    CALL MondoLog(DEBUG_MAXIMUM, logtag, "purified after "//TRIM(IntToChar(I))//" iterations")
+    CALL MondoLog(DEBUG_MAXIMUM, logtag, "Trace(P) = "//TRIM(DblToChar(TrP)))
+    CALL MondoLog(DEBUG_MAXIMUM, logtag, "Trace(P2) = "//TRIM(DblToChar(TrP2)))
 
     ! Convert to AO Rep
     INQUIRE(FILE=TrixFile('X',Args),EXIST=Present)
@@ -892,7 +878,7 @@ PROGRAM P2Use
     iBAS = Args%I%I(2)
     iGEO = Args%I%I(3)
 
-    IF(iGEO < 7) THEN
+    IF(iGEO < 8) THEN
       CALL MondoLog(DEBUG_MAXIMUM, logtag, "No previous density matrix defined")
       CALL Halt("["//TRIM(logtag)//"] Fatal error")
     ENDIF
@@ -901,56 +887,65 @@ PROGRAM P2Use
     CALL New(Tmp1)
     CALL New(Tmp2)
 
-    IF(iGEO == 7) THEN
+    IF(iGEO == 8) THEN
       ! Initial boundary conditions: Save D(p-1) as P(p-1).
       CALL MondoLog(DEBUG_MAXIMUM, logtag, "Initial boundary condition")
-      DO I=1,6
+      DO I=1,7
         CALL Get(Tmp1, TrixFile("DOsave",  Stats_O = (/ iSCF, iBAS, iGEO-I /)))
         CALL Put(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-I /)))
       ENDDO
     ENDIF
 
-    ! Notation: P(n) = 1.912084*D(n-1) + 0.071116*P(n-1) - 0.9496*P(n-2) - 0.0576*P(n-3) +
-    !                  + 0.0324*P(n-4) - 0.0096*P(n-5)   + 0.0012*P(n-6) + T(dt^9)
+    ! P(n+1) = 1.838*D(n) + 0.085*P(n) - 0.802*P(n-1) - 0.1485*P(n-2) -
+    ! 0.011*P(n-3) + 0.066*P(n-4) - 0.033*P(n-5) + 0.0055*P(n-6)
+    !
+    ! We reverse the addition order, sorted from smallest prefactor to largest,
+    ! for numerical reasons.
 
     ! Get P(n-6)
-    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-6 /)))
-    CALL Multiply(Tmp1,0.0012D0)
+    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-7 /)))
+    CALL Multiply(Tmp1, 0.0055D0)
     CALL SetEq(P,Tmp1)
 
     ! Get P(n-5)
-    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-5 /)))
-    CALL Multiply(Tmp1,-0.0096D0)
+    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-6 /)))
+    CALL Multiply(Tmp1, -0.033D0)
     CALL Add(P,Tmp1,Tmp2)
     CALL SetEq(P,Tmp2)
 
     ! Get P(n-4)
-    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-4 /)))
-    CALL Multiply(Tmp1,0.0324D0)
+    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-5 /)))
+    CALL Multiply(Tmp1, 0.066D0)
     CALL Add(P,Tmp1,Tmp2)
     CALL SetEq(P,Tmp2)
 
     ! Get P(n-3)
-    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-3 /)))
-    CALL Multiply(Tmp1,-0.0576D0)
+    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-4 /)))
+    CALL Multiply(Tmp1, 0.011D0)
     CALL Add(P,Tmp1,Tmp2)
     CALL SetEq(P,Tmp2)
 
     ! Get P(n-2)
-    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-2 /)))
-    CALL Multiply(Tmp1,-0.9496D0)
+    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-3 /)))
+    CALL Multiply(Tmp1, -0.1485D0)
     CALL Add(P,Tmp1,Tmp2)
     CALL SetEq(P,Tmp2)
 
     ! Get P(n-1)
-    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-1 /)))
-    CALL Multiply(Tmp1,0.071116D0)
+    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-2 /)))
+    CALL Multiply(Tmp1, -0.802D0)
     CALL Add(P,Tmp1,Tmp2)
     CALL SetEq(P,Tmp2)
 
-    ! Get D(n-1)
+    ! Get P(n)
+    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-1 /)))
+    CALL Multiply(Tmp1, 0.085D0)
+    CALL Add(P,Tmp1,Tmp2)
+    CALL SetEq(P,Tmp2)
+
+    ! Get D(n)
     CALL Get(Tmp1, TrixFile("DOsave", Stats_O = (/ iSCF, iBAS, iGEO-1 /)))
-    CALL Multiply(Tmp1,1.912084D0)
+    CALL Multiply(Tmp1, 1.838D0)
     CALL Add(P,Tmp1,Tmp2)
     CALL SetEq(P,Tmp2)
 
@@ -958,22 +953,15 @@ PROGRAM P2Use
     CALL Put(P, TrixFile("DOPsave", Args))
 
     ! Purify P
-#ifdef PARALLEL
-    CALL SetEq(P_BCSR,P)
-    CALL SpectralBounds(P_BCSR,Fmin,Fmax)
-    CALL Delete(P_BCSR)
-#else
-    CALL SpectralBounds(P,Fmin,Fmax)
-#endif
-    CALL Add(P,-Fmin)
-    CALL Multiply(P,One/(Fmax-Fmin))
     MM = 0
-    DO I=1,50
+    CALL New(P0)
+    CALL SetEq(P0,P)
+    ! Do SP2 iterations
+    DO I=1,100
       CALL SP2(P,Tmp1,Tmp2,Half*DBLE(NEl),MM)
-      IF(ABS(TrP -Half*DBLE(NEl))< 1.0D-8) THEN
-        IF(ABS(TrP2-Half*DBLE(NEl)) < 1.D-8) EXIT
-      ENDIF
+      IF(CnvrgChck(Prog//'_dt7',I,Half*DBLE(NEl),MM,P0,P,P0,Tmp1,Tmp2,StartingFromP_O=.TRUE.,NPurMin_O=2)) EXIT
     ENDDO
+    CALL Delete(P0)
     CALL MondoLog(DEBUG_MAXIMUM, logtag, "purified after "//TRIM(IntToChar(I))//" iterations")
     CALL MondoLog(DEBUG_MAXIMUM, logtag, "Trace(P) = "//TRIM(DblToChar(TrP)))
     CALL MondoLog(DEBUG_MAXIMUM, logtag, "Trace(P2) = "//TRIM(DblToChar(TrP2)))
@@ -1009,7 +997,7 @@ PROGRAM P2Use
     iBAS = Args%I%I(2)
     iGEO = Args%I%I(3)
 
-    IF(iGEO < 8) THEN
+    IF(iGEO < 9) THEN
       CALL MondoLog(DEBUG_MAXIMUM, logtag, "No previous density matrix defined")
       CALL Halt("["//TRIM(logtag)//"] Fatal error")
     ENDIF
@@ -1018,62 +1006,72 @@ PROGRAM P2Use
     CALL New(Tmp1)
     CALL New(Tmp2)
 
-    IF(iGEO == 8) THEN
+    IF(iGEO == 9) THEN
       ! Initial boundary conditions: Save D(p-1) as P(p-1).
       CALL MondoLog(DEBUG_MAXIMUM, logtag, "Initial boundary condition")
-      DO I=1,7
+      DO I=1,8
         CALL Get(Tmp1, TrixFile("DOsave",  Stats_O = (/ iSCF, iBAS, iGEO-I /)))
         CALL Put(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-I /)))
       ENDDO
     ENDIF
 
-    ! Notation: P(n) = 1.925628*D(n-1) + 0.062612*P(n-1) - 0.96304*P(n-2) - 0.0462*P(n-3) +
-    !                  + 0.0308*P(n-4) - 0.01232*P(n-5)  + 0.0028*P(n-6)  - 0.00028*P(n-7) + T(dt^11)
+    !  P(n+1) = 1.861*D(n) + 0.0814*P(n) - 0.8416*P(n-1) - 0.1408*P(n-2) +
+    !  0.0176*P(n-3) + 0.0512*P(n-4) - 0.04*P(n-5) + 0.0128*P(n-6) -
+    !  0.0016*P(n-7)
+    !
+    ! We reverse the addition order, sorted from smallest prefactor to largest,
+    ! for numerical reasons.
 
     ! Get P(n-7)
-    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-7 /)))
-    CALL Multiply(Tmp1,-0.00028D0)
+    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-8 /)))
+    CALL Multiply(Tmp1, 0.0016D0)
     CALL SetEq(P,Tmp1)
 
     ! Get P(n-6)
-    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-6 /)))
-    CALL Multiply(Tmp1,0.0028D0)
+    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-7 /)))
+    CALL Multiply(Tmp1, 0.0128D0)
     CALL Add(P,Tmp1,Tmp2)
     CALL SetEq(P,Tmp2)
 
     ! Get P(n-5)
-    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-5 /)))
-    CALL Multiply(Tmp1,-0.01232D0)
+    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-6 /)))
+    CALL Multiply(Tmp1, -0.04D0)
     CALL Add(P,Tmp1,Tmp2)
     CALL SetEq(P,Tmp2)
 
     ! Get P(n-4)
-    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-4 /)))
-    CALL Multiply(Tmp1,0.0308D0)
+    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-5 /)))
+    CALL Multiply(Tmp1, 0.0512D0)
     CALL Add(P,Tmp1,Tmp2)
     CALL SetEq(P,Tmp2)
 
     ! Get P(n-3)
-    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-3 /)))
-    CALL Multiply(Tmp1,-0.0462D0)
+    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-4 /)))
+    CALL Multiply(Tmp1, 0.0176D0)
     CALL Add(P,Tmp1,Tmp2)
     CALL SetEq(P,Tmp2)
 
     ! Get P(n-2)
-    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-2 /)))
-    CALL Multiply(Tmp1,-0.96304D0)
+    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-3 /)))
+    CALL Multiply(Tmp1, -0.1408D0)
     CALL Add(P,Tmp1,Tmp2)
     CALL SetEq(P,Tmp2)
 
     ! Get P(n-1)
-    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-1 /)))
-    CALL Multiply(Tmp1,0.062612D0)
+    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-2 /)))
+    CALL Multiply(Tmp1, -0.8416D0)
     CALL Add(P,Tmp1,Tmp2)
     CALL SetEq(P,Tmp2)
 
-    ! Get D(n-1)
+    ! Get P(n)
+    CALL Get(Tmp1, TrixFile("DOPsave", Stats_O = (/ iSCF, iBAS, iGEO-1 /)))
+    CALL Multiply(Tmp1, 0.0814D0)
+    CALL Add(P,Tmp1,Tmp2)
+    CALL SetEq(P,Tmp2)
+
+    ! Get D(n)
     CALL Get(Tmp1, TrixFile("DOsave", Stats_O = (/ iSCF, iBAS, iGEO-1 /)))
-    CALL Multiply(Tmp1,1.925628D0)
+    CALL Multiply(Tmp1, 1.861D0)
     CALL Add(P,Tmp1,Tmp2)
     CALL SetEq(P,Tmp2)
 
@@ -1081,21 +1079,13 @@ PROGRAM P2Use
     CALL Put(P, TrixFile("DOPsave", Args))
 
     ! Purify P
-#ifdef PARALLEL
-    CALL SetEq(P_BCSR,P)
-    CALL SpectralBounds(P_BCSR,Fmin,Fmax)
-    CALL Delete(P_BCSR)
-#else
-    CALL SpectralBounds(P,Fmin,Fmax)
-#endif
-    CALL Add(P,-Fmin)
-    CALL Multiply(P,One/(Fmax-Fmin))
     MM = 0
-    DO I=1,50
+    CALL New(P0)
+    CALL SetEq(P0,P)
+    ! Do SP2 iterations
+    DO I=1,100
       CALL SP2(P,Tmp1,Tmp2,Half*DBLE(NEl),MM)
-      IF(ABS(TrP -Half*DBLE(NEl))< 1.0D-8) THEN
-        IF(ABS(TrP2-Half*DBLE(NEl)) < 1.D-8) EXIT
-      ENDIF
+      IF(CnvrgChck(Prog//'_dt7',I,Half*DBLE(NEl),MM,P0,P,P0,Tmp1,Tmp2,StartingFromP_O=.TRUE.,NPurMin_O=2)) EXIT
     ENDDO
     CALL MondoLog(DEBUG_MAXIMUM, logtag, "purified after "//TRIM(IntToChar(I))//" iterations")
     CALL MondoLog(DEBUG_MAXIMUM, logtag, "Trace(P) = "//TRIM(DblToChar(TrP)))
