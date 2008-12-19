@@ -24,7 +24,6 @@ MODULE PBCFarField
   TYPE(DBL_VECT)                      :: PFFBraC,PFFBraS
   TYPE(DBL_VECT)                      :: PFFKetC,PFFKetS
 
-
   CONTAINS
 !====================================================================================
 !   Setup the PBCFarField Matrix. 
@@ -47,13 +46,8 @@ MODULE PBCFarField
       CHARACTER(LEN=*)                :: Prog
       CHARACTER(LEN=DEFAULT_CHR_LEN)  :: Mssg
 
-
-
       ID(L)=L*(L+1)/2
 
-
-
-      !
       IF(GMLoc%PBC%Dimen==0) RETURN
       !
       IF(MaxPFFFEll>FFEll) &
@@ -201,7 +195,7 @@ MODULE PBCFarField
       ! Here is the INTRINSIC energy due to the crystal Coulomb field
       ! This is the shape dependent Lorentz field + the shape dependent surface term 
       
-      CALL MondoLog(DEBUG_MAXIMUM,Prog,'PFFEll  = '//TRIM(IntToChar(Ell2Use))// &
+      CALL MondoLog(DEBUG_MAXIMUM,Prog,'PFFEll = '//TRIM(IntToChar(Ell2Use))// &
                   ', Lorentz Field = <'//TRIM(DblToChar(EPFF+E_DP)) &
                      //'> to within <'//TRIM(DblToShrtChar(ABS(DeltaPFF)))//'>')
 

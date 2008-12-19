@@ -2321,8 +2321,8 @@ CONTAINS
       iREMOVE  = 4
       MinMDGeo = 4
     CASE("DMTRBO_Damp_dt7")
-      iREMOVE  = 5
-      MinMDGeo = 5
+      iREMOVE  = 6
+      MinMDGeo = 6
     CASE("DMTRBO_Damp_dt9")
       iREMOVE  = 6
       MinMDGeo = 6
