@@ -84,7 +84,7 @@ PROGRAM SCFStatus
   !  S**2
   CALL Get(Tmp1,TrixFile('S',Args))
   S2=GetS2(P,Tmp1,Tmp2)
-  !
+
   !  KinE=<T>=Tr{P.T}
   CALL Get(Tmp1,TrixFile('T',Args))
 #ifdef PARALLEL

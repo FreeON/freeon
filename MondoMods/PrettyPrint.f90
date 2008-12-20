@@ -260,6 +260,7 @@ MODULE PrettyPrint
          TYPE(DBL_VECT),            INTENT(IN) :: A
          CHARACTER(LEN=*),          INTENT(IN) :: Name
          CHARACTER(LEN=*), OPTIONAL,INTENT(IN) :: FileName_O
+         CHARACTER(LEN=DEFAULT_CHR_LEN)        :: outputString
          INTEGER,          OPTIONAL,INTENT(IN) :: Unit_O,M_O,N_O
          TYPE(CHR_VECT)                        :: CA
          CHARACTER(LEN=INTERNAL_INT_LEN)       :: Id
@@ -289,9 +290,8 @@ MODULE PrettyPrint
             ENDIF
          ENDDO
 #else
-         PU=OpenPU(FileName_O,Unit_O)
-         WRITE(PU,*)TRIM(Name), ' := ', (TRIM(CA%C(J)), ', ', J=1, N)
-         CALL ClosePU(PU)
+         WRITE(outputString, *) TRIM(Name), ' := ', (TRIM(CA%C(J)), ', ', J=1, N)
+         CALL MondoLog(DEBUG_NONE, "", TRIM(outputString))
 #endif
 #ifdef PARALLEL
          IF(MyId==ROOT)THEN
