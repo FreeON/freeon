@@ -98,11 +98,15 @@ CONTAINS
     PWDName=TRIM(N%M_PWD)//TRIM(N%SCF_NAME)
     ScrName=TRIM(N%M_SCRATCH)//TRIM(N%SCF_NAME)
 
-!!    CALL MondoLog(DEBUG_NONE, "FreeON", "setting PWDName to "//TRIM(PWDName), "LoadCommand")
-!!    CALL MondoLog(DEBUG_NONE, "FreeON", "setting ScrName to "//TRIM(ScrName), "LoadCommand")
-
     ! Input file with full path
-    N%IFile=TRIM(N%M_PWD)//TRIM(Args%C%C(1))
+    N%IFile = TRIM(Args%C%C(1))
+    IF(N%IFile(1:1) == '/') THEN
+      ! This is an absolute path.
+      N%IFile = TRIM(Args%C%C(1))
+    ELSE
+      ! Relative path, make it absolute.
+      N%IFile=TRIM(N%M_PWD)//TRIM(Args%C%C(1))
+    ENDIF
 
     ! Check to see that the input file exists
     INQUIRE(FILE=N%IFile,EXIST=Exists)

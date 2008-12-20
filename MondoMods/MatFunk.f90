@@ -101,11 +101,12 @@ CONTAINS
     !
     BLKVECT%D(1:N,1:N)=A(1:N,1:N)
     !     CALL PPrint(A,'A',Unit_O=6)
-    !
+
     CALL DSYEV('V','U',N,BLKVECT%D,BIGBLOK,BLKVALS%D,BLKWORK%D,BLKLWORK,INFO)
-    IF(INFO/=SUCCEED) &
-         CALL Halt('DSYEV hosed in FunkOnSqMat. INFO='//TRIM(IntToChar(INFO)))
-    !
+    IF(INFO/=SUCCEED) THEN
+      CALL Halt('DSYEV hosed in FunkOnSqMat. INFO='//TRIM(IntToChar(INFO)))
+    ENDIF
+
     IF(PrintValues)THEN
       CALL PPrint(BLKVALS,'EigenValues',N,FileName_O=FileName_O,Unit_O=Unit_O)
     ENDIF
@@ -121,14 +122,12 @@ CONTAINS
     IF(PRESENT(CoNo_O))CoNo_O=CondA
 
     IF(PrintCond)THEN
-      String="Cond# = "//TRIM(DblToShrtChar(CondA)) &
-           //', MIN(E) = '//TRIM(DblToShrtChar(Mn))
+      String = "Cond# = "//TRIM(DblToShrtChar(CondA))//', MIN(E) = '//TRIM(DblToShrtChar(Mn))
       IF(PRESENT(Prog_O))THEN
-        String=ProcessName(Prog_O)//TRIM(String)
+        CALL MondoLog(DEBUG_NONE, ProcessName(Prog_O), TRIM(String))
+      ELSE
+        CALL MondoLog(DEBUG_NONE, "", TRIM(String))
       ENDIF
-      PU=OpenPU(FileName_O,Unit_O)
-      WRITE(PU,*)TRIM(String)
-      CALL ClosePU(PU)
     ENDIF
     !
     !     Apply the function to eigenvalues of the matrix, projecting out "zeros"
