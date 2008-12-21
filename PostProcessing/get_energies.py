@@ -38,7 +38,7 @@ for file in argument:
 
   for line in lines:
     lineNumber += 1
-    result = re.compile("SCF.+\[([0-9]+),([0-9]+),([0-9]+)\].+<SCF> = ([-+0.123456789dDeE]+).*dD = ([-+0.123456789dDeE]+).*").search(line)
+    result = re.compile("SCF.+\[([0-9]+),([0-9]+),([0-9]+)\].+<SCF> = ([-+.0-9dDeE]+).*dD = ([-+.0-9dDeE]+).*").search(line)
     if result:
       lastSCFCycle = SCFCycle
       lastBasis    = Basis
