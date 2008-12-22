@@ -43,7 +43,7 @@ PROGRAM FockNGrueven
 #ifdef PARALLEL
   TYPE(DBCSR)                    :: F,V,T,J,K,X,Tmp1
 #else
-  TYPE(BCSR)                     :: F,V,T,J,K,X,Tmp1 
+  TYPE(BCSR)                     :: F,V,T,J,K,X,Tmp1
 #endif
   TYPE(ARGMT)                    :: Args
   TYPE(CRDS)                     :: GM
@@ -54,7 +54,7 @@ PROGRAM FockNGrueven
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: XFile,DevFile,Mssg,ResponsePostFix
   CHARACTER(LEN=12),PARAMETER    :: Prog='FockNGrueven'
   LOGICAL                        :: Present,ExchangeShift,HasECPs
-!------------------------------------------------------------------ 
+!------------------------------------------------------------------
   CALL StartUp(Args,Prog,Serial_O=.FALSE.)
   ISCF=Args%I%I(1)
   Cycl=IntToChar(ISCF)
@@ -84,14 +84,14 @@ PROGRAM FockNGrueven
            CALL Multiply(X,F,Tmp1)          ! T1=S^{-1/2}.F
            CALL Multiply(Tmp1,X,F)          ! T1=S^{-1/2}.F.S^{-1/2}
         ELSE
-           CALL Get(X,TrixFile('ZT',Args))  ! X =Z^t=L^{-t}           
+           CALL Get(X,TrixFile('ZT',Args))  ! X =Z^t=L^{-t}
            CALL Multiply(X,F,Tmp1)          ! T1=Z^t.F_AO
            CALL Get(X,TrixFile('Z',Args))   ! X=Z=L^{-1}
            CALL Multiply(Tmp1,X,F)          ! F=Z^t.F_AO.Z
         ENDIF
         CALL Filter(Tmp1,F)                 ! T1 =F_Orthog=Filter[Z^t.F_AO.Z]
         !
-        CALL Put(Tmp1,TrixFile('Ortho'//TRIM(Args%C%C(4))//TRIM(Args%C%C(5)),Args)) 
+        CALL Put(Tmp1,TrixFile('Ortho'//TRIM(Args%C%C(4))//TRIM(Args%C%C(5)),Args))
         CALL PChkSum(Tmp1,'Ortho'//TRIM(Args%C%C(4))//TRIM(Args%C%C(5)),Prog)
         CALL PPrint(Tmp1,'Ortho'//TRIM(Args%C%C(4))//TRIM(Args%C%C(5)))
         CALL Plot(Tmp1,'Ortho'//TRIM(Args%C%C(4))//TRIM(Args%C%C(5)))
@@ -120,7 +120,7 @@ PROGRAM FockNGrueven
      CASE(1)
         ResponsePostFix=TRIM(Args%C%C(4))//TRIM(Args%C%C(5))
         CALL Get(T,TrixFile(ResponsePostFix,Args))            ! T=M_{x} or whatever...
-        CALL Add(J,T,F)                                       ! F=J+T    
+        CALL Add(J,T,F)                                       ! F=J+T
      CASE(2); CALL SetEq(F,J)                                 ! F=J
      CASE(3); CALL SetEq(F,J)                                 ! F=J
      CASE DEFAULT; CALL Halt('Response order unknown! RespOrder='//TRIM(IntToChar(RespOrder)))
@@ -128,17 +128,17 @@ PROGRAM FockNGrueven
   ELSE
      ! Start with the Coulomb matrix
      CALL Get(J,TrixFile('J',Args,0))                      ! J=J_Coulomb[Rho_Total(Nuc+El)]
-     ! Doing normal SCF, add in the kinetic energy 
+     ! Doing normal SCF, add in the kinetic energy
      CALL Get(T,TrixFile('T',Args))                        ! T=T_{Kinetic}
-     CALL Add(J,T,F)                                       ! F=J+T    
+     CALL Add(J,T,F)                                       ! F=J+T
   ENDIF
   ! Check to see if we have ECPs
   CALL Get(HasECPs,'hasecps',Tag_O=CurBase)
   IF(HasECPs)THEN
      CALL SetEq(J,F)
-     ! Get the pseudopotential matrix U 
+     ! Get the pseudopotential matrix U
      CALL Get(T,TrixFile('U',Args))                        ! T=U_{ECP}
-     CALL Add(T,J,F)     
+     CALL Add(T,J,F)
   ENDIF
   !
   IF(AllocQ(T%Alloc)) CALL Delete(T)
@@ -147,7 +147,7 @@ PROGRAM FockNGrueven
   IF(SCFActn/='GuessEqCore'.AND.SCFActn.NE.'StartResponse')THEN
      CALL New(K)
      IF(HasHF(ModelChem).AND.HasDFT(ModelChem))THEN
-        ! Add in Hartree-Fock exact exchange 
+        ! Add in Hartree-Fock exact exchange
         IF(SCFActn=='FockPrimeBuild') THEN
            CALL Halt('Response with DFT does not work yet.')
            CALL Get(K,TrixFile('KPrime'//TRIM(Args%C%C(3)),Args,0))   ! K=K_hf
@@ -166,7 +166,7 @@ PROGRAM FockNGrueven
         ENDIF
         CALL Add(K,Tmp1,F)                                            ! F=J+T+KShift*K_hf+K_xc
      ELSEIF(HasHF(ModelChem))THEN
-        !  Add in Hartree-Fock exact exchange 
+        !  Add in Hartree-Fock exact exchange
         IF(SCFActn=='FockPrimeBuild')THEN
            CALL Get(K,TrixFile('KPrime'//TRIM(Args%C%C(3)),Args,0))   ! K=K_hf
         ELSE
@@ -190,7 +190,7 @@ PROGRAM FockNGrueven
 !
   IF(SCFActn=='FockPrimeBuild'.OR.SCFActn=='StartResponse') THEN
      !I do not need that! (vw)
-     CALL Put(F,TrixFile('FPrime'//TRIM(Args%C%C(3)),Args,0)) 
+     CALL Put(F,TrixFile('FPrime'//TRIM(Args%C%C(3)),Args,0))
      CALL PChkSum(F,'FPrime'//TRIM(Args%C%C(3))//'['//TRIM(SCFCycl)//']',Prog)
      CALL PPrint( F,'FPrime'//TRIM(Args%C%C(3))//'['//TRIM(SCFCycl)//']')
      !CALL Print_BCSR(F,'FPrime'//TRIM(Args%C%C(3))//'['//TRIM(SCFCycl)//']',Unit_O=6)
@@ -217,7 +217,7 @@ PROGRAM FockNGrueven
      CALL Multiply(X,F,Tmp1)          ! T1=S^{-1/2}.F
      CALL Multiply(Tmp1,X,F)          ! T1=S^{-1/2}.F.S^{-1/2}
   ELSE
-     CALL Get(X,TrixFile('ZT',Args))  ! X =Z^t=L^{-t}           
+     CALL Get(X,TrixFile('ZT',Args))  ! X =Z^t=L^{-t}
      CALL Multiply(X,F,Tmp1)          ! T1=Z^t.F_AO
      CALL Get(X,TrixFile('Z',Args))   ! X=Z=L^{-1}
      CALL Multiply(Tmp1,X,F)          ! F=Z^t.F_AO.Z
@@ -225,12 +225,12 @@ PROGRAM FockNGrueven
   CALL Filter(Tmp1,F)                 ! T1 =F_Orthog=Filter[Z^t.F_AO.Z]
 !
   IF(SCFActn=='FockPrimeBuild'.OR.SCFActn=='StartResponse') THEN
-     CALL Put(Tmp1,TrixFile('OrthoFPrime'//TRIM(Args%C%C(3)),Args,0)) 
+     CALL Put(Tmp1,TrixFile('OrthoFPrime'//TRIM(Args%C%C(3)),Args,0))
      CALL PChkSum(Tmp1,'OrthoFPrime'//TRIM(Args%C%C(3))//'['//TRIM(SCFCycl)//']',Prog)
      CALL PPrint( Tmp1,'OrthoFPrime'//TRIM(Args%C%C(3))//'['//TRIM(SCFCycl)//']')
      CALL Plot(   Tmp1,'OrthoFPrime'//TRIM(Args%C%C(3))//'_'//TRIM(SCFCycl))
   ELSE
-     CALL Put(Tmp1,TrixFile('OrthoF',Args,0)) 
+     CALL Put(Tmp1,TrixFile('OrthoF',Args,0))
      CALL PChkSum(Tmp1,'OrthoF['//TRIM(SCFCycl)//']',Prog)
      CALL PPrint(Tmp1,'OrthoF['//TRIM(SCFCycl)//']')
      CALL Plot(Tmp1,'OrthoF_'//TRIM(SCFCycl))
