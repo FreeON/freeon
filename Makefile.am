@@ -68,6 +68,21 @@ dist-upload : dist-sign
 	  rm -f freeon-latest.tar.bz2; \
 	fi
 
+# Download all files in Downloads area.
+download :
+	if test ! -d Downloads; then \
+	  mkdir Downloads; \
+	fi
+	rsync -ave ssh --progress --partial --delete nicolasbock@dl.sv.nongnu.org:/releases/freeon/ Downloads/
+
+# Upload all files in Downloads area.
+upload :
+	if test ! -d Downloads; then \
+	  echo "there is no Downloads folder"; \
+	  exit 1; \
+	fi
+	rsync -ave ssh --progress --partial --delete Downloads/ nicolasbock@dl.sv.nongnu.org:/releases/freeon/
+
 # Validate.
 validate :
 	$(MAKE) -C Validate validate
