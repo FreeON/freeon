@@ -374,23 +374,18 @@ PROGRAM P2Use
     CALL SetEq(P,Tmp2)
 
     ! Purify P
-#ifdef PARALLEL
-    CALL SetEq(P_BCSR,P)
-    CALL SpectralBounds(P_BCSR,Fmin,Fmax)
-    CALL Delete(P_BCSR)
-#else
-    CALL SpectralBounds(P,Fmin,Fmax)
-#endif
-    CALL Add(P,-Fmin)
-    CALL Multiply(P,One/(Fmax-Fmin))
     MM = 0
-    DO I=1,40
+    CALL New(P0)
+    CALL SetEq(P0,P)
+    ! Do SP2 iterations
+    DO I=1,100
       CALL SP2(P,Tmp1,Tmp2,Half*DBLE(NEl),MM)
-      IF(ABS(TrP -Half*DBLE(NEl))< 1.0D-8) THEN
-        IF(ABS(TrP2-Half*DBLE(NEl)) < 1.D-8) EXIT
-      ENDIF
+      IF(CnvrgChck(Prog//'_DMLinear',I,Half*DBLE(NEl),MM,P0,P,P0,Tmp1,Tmp2,StartingFromP_O=.TRUE.,NPurMin_O=8)) EXIT
     ENDDO
-    CALL MondoLog(DEBUG_NONE, logtag, "Trace(P) = "//DblToChar(TrP)//" "//DblToChar(TrP2))
+    CALL Delete(P0)
+    CALL MondoLog(DEBUG_MAXIMUM, logtag, "purified after "//TRIM(IntToChar(I))//" iterations")
+    CALL MondoLog(DEBUG_MAXIMUM, logtag, "Trace(P)  = "//TRIM(DblToChar(TrP)))
+    CALL MondoLog(DEBUG_MAXIMUM, logtag, "Trace(P2) = "//TRIM(DblToChar(TrP2)))
 
     ! Convert to AO Rep
     INQUIRE(FILE=TrixFile('X',Args),EXIST=Present)
