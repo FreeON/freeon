@@ -33,11 +33,19 @@ for file in argument:
   Geometry = 1
   SCFEnergy = 0.0
   dD = 0.0
+  MDTime = 0.0
 
   lineNumber = 0
 
   for line in lines:
     lineNumber += 1
+
+    # Get simulation time.
+    result = re.compile("MDTime += ([-+.0-9dDeE]+)").search(line)
+    if result:
+      MDTime = float(result.group(1))
+
+    # Get SCF energy and other stuff.
     result = re.compile("SCF.+\[([0-9]+),([0-9]+),([0-9]+)\].+<SCF> = ([-+.0-9dDeE]+).*dD = ([-+.0-9dDeE]+).*").search(line)
     if result:
       lastSCFCycle = SCFCycle
@@ -49,7 +57,7 @@ for file in argument:
       Geometry = int(result.group(3))
 
       if Geometry > lastGeometry:
-        print lastGeometry, SCFEnergy, lastSCFCycle, dD
+        print MDTime, SCFEnergy, lastGeometry, lastSCFCycle, dD
 
       try:
         SCFEnergy = float(result.group(4).lower().replace("d", "e"))
