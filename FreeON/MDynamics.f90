@@ -146,7 +146,7 @@ CONTAINS
       CALL MondoLog(DEBUG_NONE, "MD", "restarting MD calculation")
       CALL MondoLog(DEBUG_NONE, "MD", "iMDStep    = "//TRIM(IntToChar(iMDStep)))
       CALL MondoLog(DEBUG_NONE, "MD", "iGEOBegin  = "//TRIM(IntToChar(iGEOBegin)))
-      CALL MondoLog(DEBUG_NONE, "MD", "MDTime     = "//TRIM(FltToChar(MDTime%D(1)*InternalTimeToFemtoseconds)))
+      CALL MondoLog(DEBUG_NONE, "MD", "MDTime     = "//TRIM(FltToChar(MDTime%D(1)*InternalTimeToFemtoseconds))//" fs")
       CALL MondoLog(DEBUG_NONE, "MD", "MinMDGeo   = "//TRIM(IntToChar(MinMDGeo)))
       CALL MondoLog(DEBUG_NONE, "MD", "iREMOVE    = "//TRIM(IntToChar(iREMOVE)))
       CALL MondoLog(DEBUG_NONE, "MD", "MDMaxSteps = "//TRIM(IntToChar(C%Dyns%MDMaxSteps)))
@@ -318,7 +318,7 @@ CONTAINS
         CALL CloseHDFGroup(HDF_CurrentID)
         CALL MondoLog(DEBUG_NONE, "MD", "done with time step, incrementing counters and putting to hdf")
         CALL MondoLog(DEBUG_NONE, "MD", "iMDStep = "//TRIM(IntToChar(iMDStep)))
-        CALL MondoLog(DEBUG_NONE, "MD", "MDTime  = "//TRIM(FltToChar(MDTime%D(1)*InternalTimeToFemtoseconds)))
+        CALL MondoLog(DEBUG_NONE, "MD", "MDTime  = "//TRIM(FltToChar(MDTime%D(1)*InternalTimeToFemtoseconds))//" fs")
       ENDDO
       CALL CloseHDF(HDFFileID)
 
