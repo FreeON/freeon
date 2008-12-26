@@ -62,7 +62,7 @@ MODULE MonteCarlo
 !
     CALL New(MDIter ,C%Geos%Clones)
     CALL New(MDTime ,C%Geos%Clones)
-    CALL New(MDKin  ,C%Geos%Clones)
+    CALL New(MDEkin ,C%Geos%Clones)
     CALL New(MDEpot ,C%Geos%Clones)
     CALL New(MDEtot ,C%Geos%Clones)
     CALL New(MDTemp ,C%Geos%Clones)
@@ -76,7 +76,7 @@ MODULE MonteCarlo
 !
     MDIter%I  = 1
     MDTime%D  = Zero
-    MDKin%D   = Zero
+    MDEkin%D  = Zero
     MDEpot%D  = Zero
     MDEtot%D  = Zero
     MDTemp%D  = Zero
