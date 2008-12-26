@@ -21,7 +21,7 @@ DISTCHECK_CONFIGURE_FLAGS = --disable-optimizations --enable-internal-lapack-che
 # Fix localversion.
 $(top_srcdir)/localversion : always-fix
 	@echo "checking localversion"; \
-	  branch=`git branch 2>&1 | egrep '^\*' | awk '{print $$2}' | sed -e 's/\([ ()]\)/\\\1/g'`; \
+	  branch=`git branch 2>&1 | egrep '^\*' | sed -e 's/^\* //' | sed -e 's/[()]//g' | sed -e 's/ /_/g'`; \
 	  localversion=`git log --pretty=oneline -1 2>&1 | awk '{print $$1}'`; \
 	  if test -n "$${branch}" -a -n "$${localversion}"; then \
 	    echo "branch=$${branch}" > localversion.temp; \
