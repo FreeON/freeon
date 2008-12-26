@@ -44,7 +44,7 @@ MODULE MDynamics
 
   IMPLICIT NONE
 
-  TYPE(DBL_VECT) :: MDTime,MDKin,MDEpot,MDEtot,MDTemp,MDTave
+  TYPE(DBL_VECT) :: MDTime,MDEkin,MDEpot,MDEtot,MDTemp,MDTave
   TYPE(DBL_RNK2) :: MDLinP
 
   REAL(DOUBLE) :: ACTTargetEnergy, ACTIntegratedEnergyError, ACTGamma
@@ -78,7 +78,7 @@ CONTAINS
 
     ! Allocate some memory.
     CALL New(MDTime,C%Geos%Clones)
-    CALL New(MDKin, C%Geos%Clones)
+    CALL New(MDEkin,C%Geos%Clones)
     CALL New(MDEpot,C%Geos%Clones)
     CALL New(MDEtot,C%Geos%Clones)
     CALL New(MDTemp,C%Geos%Clones)
@@ -87,7 +87,7 @@ CONTAINS
 
     ! Set some stuff to zero.
     MDTime%D = Zero
-    MDKin%D  = Zero
+    MDEkin%D = Zero
     MDEpot%D = Zero
     MDEtot%D = Zero
     MDTemp%D = Zero
@@ -318,7 +318,11 @@ CONTAINS
         CALL CloseHDFGroup(HDF_CurrentID)
         CALL MondoLog(DEBUG_NONE, "MD", "done with time step, incrementing counters and putting to hdf")
         CALL MondoLog(DEBUG_NONE, "MD", "iMDStep = "//TRIM(IntToChar(iMDStep)))
-        CALL MondoLog(DEBUG_NONE, "MD", "MDTime  = "//TRIM(FltToChar(MDTime%D(1)*InternalTimeToFemtoseconds))//" fs")
+        CALL MondoLog(DEBUG_NONE, "MD", "MDTime = "//TRIM(FltToChar(MDTime%D(1)*InternalTimeToFemtoseconds))//" fs")
+        CALL MondoLog(DEBUG_NONE, "MD", "MDEtot = "//TRIM(DblToChar(MDEtot%D(iCLONE)))//" Hartree")
+        CALL MondoLog(DEBUG_NONE, "MD", "MDEkin = "//TRIM(DblToChar(MDEkin%D(iCLONE)))//" Hartree")
+        CALL MondoLog(DEBUG_NONE, "MD", "MDEpot = "//TRIM(DblToChar(MDEpot%D(iCLONE)))//" Hartree")
+        CALL MondoLog(DEBUG_NONE, "MD", "T = "//TRIM(DblToChar(MDTemp%D(iCLONE)))//" K")
       ENDDO
       CALL CloseHDF(HDFFileID)
 
@@ -333,7 +337,7 @@ CONTAINS
 
     ! Clean up.
     CALL Delete(MDTime)
-    CALL Delete(MDKin)
+    CALL Delete(MDEkin)
     CALL Delete(MDEpot)
     CALL Delete(MDEtot)
     CALL Delete(MDTemp)
@@ -405,13 +409,13 @@ CONTAINS
     ! Reset the linear momentum, compute the kinetic energy and average kinectic energy.
     DO iCLONE = 1,C%Geos%Clones
       ! Calculate kinetic energy and temperature, update average temperature.
-      CALL CalculateMDKin(C%Geos%Clone(iCLONE),MDKin%D(iCLONE),MDTemp%D(iCLONE))
+      CALL CalculateMDKin(C%Geos%Clone(iCLONE),MDEkin%D(iCLONE),MDTemp%D(iCLONE))
       MDTave%D(iCLONE) = (DBLE(iGEO-1)/DBLE(iGEO))*MDTave%D(iCLONE) +(One/DBLE(iGEO))*MDTemp%D(iCLONE)
 
       ! Store Potential and Total Energy
-      CALL MondoLog(DEBUG_NONE, "MD:Verlet_NVE", "ETotal = "//TRIM(DblToChar(C%Geos%Clone(iCLONE)%ETotal))//" H")
-      CALL MondoLog(DEBUG_NONE, "MD:Verlet_NVE", "ETotalPerSCF = "//TRIM(DblVectToChar(C%Geos%Clone(iCLONE)%ETotalPerSCF, (/ 0, C%Stat%Current%I(1) /)))//" H")
-      CALL MondoLog(DEBUG_NONE, "MD:Verlet_NVE", "EKin = "//TRIM(DblToChar(MDKin%D(iCLONE)))//" H")
+      CALL MondoLog(DEBUG_NONE, "MD:Verlet_NVE", "ETotal = "//TRIM(DblToChar(C%Geos%Clone(iCLONE)%ETotal))//" Hartree")
+      CALL MondoLog(DEBUG_NONE, "MD:Verlet_NVE", "ETotalPerSCF = "//TRIM(DblVectToChar(C%Geos%Clone(iCLONE)%ETotalPerSCF, (/ 0, C%Stat%Current%I(1) /)))//" Hartree")
+      CALL MondoLog(DEBUG_NONE, "MD:Verlet_NVE", "EKin = "//TRIM(DblToChar(MDEkin%D(iCLONE)))//" Hartree")
       CALL MondoLog(DEBUG_NONE, "MD:Verlet_NVE", "T = "//TRIM(DblToChar(MDTemp%D(iCLONE)))//" K")
 #if defined MD_DEBUG
       IF(C%Dyns%MDNumSCF < 0) THEN
@@ -429,7 +433,7 @@ CONTAINS
 #endif
 
       ! Calculate total energy.
-      MDEtot%D(iCLONE) = MDEpot%D(iCLONE) + MDKin%D(iCLONE)
+      MDEtot%D(iCLONE) = MDEpot%D(iCLONE) + MDEkin%D(iCLONE)
     ENDDO
 
     ! Thermostats
@@ -567,7 +571,7 @@ CONTAINS
       ! Reset the Linear Momentum, Compute the Kinectic Energy and Ave Kinectic Energy
       DO iCLONE=1,C%Geos%Clones
         ! Calculate Kinectic Energy and  Temp, update Ave Temp
-        CALL CalculateMDKin(C%Geos%Clone(iCLONE),MDKin%D(iCLONE),MDTemp%D(iCLONE))
+        CALL CalculateMDKin(C%Geos%Clone(iCLONE),MDEkin%D(iCLONE),MDTemp%D(iCLONE))
         MDTave%D(iCLONE) = (DBLE(iGEO-1)/DBLE(iGEO))*MDTave%D(iCLONE) +(One/DBLE(iGEO))*MDTemp%D(iCLONE)
 
         ! Store Potential and Total Energy
@@ -590,7 +594,7 @@ CONTAINS
 #endif
 
         ! Store Potential and Total Energy
-        MDEtot%D(iCLONE) = MDEpot%D(iCLONE) + MDKin%D(iCLONE)
+        MDEtot%D(iCLONE) = MDEpot%D(iCLONE) + MDEkin%D(iCLONE)
       ENDDO
 
       ! Thermostats
@@ -718,11 +722,11 @@ CONTAINS
       CALL RescaleVelocity(C%Geos%Clone(iCLONE),Temp,Temp0)
       CALL CalculateMDKin(C%Geos%Clone(iCLONE),Kin,Temp)
 
-      MDKin%D(iCLONE)  = Kin
+      MDEkin%D(iCLONE)  = Kin
       MDTemp%D(iCLONE) = Temp
       MDTave%D(iCLONE) = Temp
       MDEpot%D(iCLONE) = C%Geos%Clone(iCLONE)%ETotal
-      MDEtot%D(iCLONE) = MDEpot%D(iCLONE) + MDKin%D(iCLONE)
+      MDEtot%D(iCLONE) = MDEpot%D(iCLONE) + MDEkin%D(iCLONE)
 
     ENDDO
   END SUBROUTINE SetTempMaxBoltDist
