@@ -1,6 +1,6 @@
 MODULE Density
   USE Derivedtypes
-  USE GlobalScalars   
+  USE GlobalScalars
   USE GlobalObjects
   USE ProcessControl
   USE QCTCThresholds
@@ -16,7 +16,7 @@ MODULE Density
      REAL(DOUBLE)              :: Zeta     ! The true zeta for the distributions
      REAL(DOUBLE)              :: Schw     ! The value to use in the Schartz inequality: ( | )^1/2
      REAL(DOUBLE),DIMENSION(3) :: Cent     ! This is the center of the distribution
-     TYPE(DBL_VECT)            :: Coef     ! Coefficients of the HGTF density     
+     TYPE(DBL_VECT)            :: Coef     ! Coefficients of the HGTF density
      TYPE(HGLL),POINTER        :: Next     ! Next link in the chain
   END TYPE HGLL
   !
@@ -29,12 +29,12 @@ MODULE Density
 
   REAL(DOUBLE) :: Density_Time_Start,Density_Time
   !
-CONTAINS 
+CONTAINS
   !
   SUBROUTINE MakeRhoList(GM,BS,P,NLink,RhoHead,Prog,NoWrap_O)
     !
     TYPE(CRDS)                :: GM
-    TYPE(BSET)                :: BS 
+    TYPE(BSET)                :: BS
     TYPE(BCSR)                :: P
     TYPE(HGLL), POINTER       :: RhoHead,HGLink
     TYPE(AtomPair)            :: Pair
@@ -74,11 +74,11 @@ CONTAINS
        Pbeg = P%RowPt%I(AtA)
        Pend = P%RowPt%I(AtA+1)-1
        DO RowP=Pbeg,Pend
-          AtB=P%ColPt%I(RowP)          
+          AtB=P%ColPt%I(RowP)
           IF(SetAtomPair(GM,BS,AtA,AtB,Pair)) THEN
 !          TestTru=SetAtomPair(GM,BS,AtA,AtB,Pair)
 !          IF(.TRUE.)THEN
-             ! Sum this part of the DM 
+             ! Sum this part of the DM
              BlkP=P%BlkPt%I(RowP)
              NN=BSiz%I(AtA)*BSiz%I(AtB)
              SELECT CASE(P%NSMat)
@@ -91,7 +91,7 @@ CONTAINS
                 !(Pa+Pb)/2->Ptot
                 CALL DAXPY(NN,1D0,P%MTrix%D(BlkP+NN),1,Psv%D(1),1)
                 ! Scale the total density matrix.
-                CALL DSCAL(NN,0.5D0,Psv%D(1),1) 
+                CALL DSCAL(NN,0.5D0,Psv%D(1),1)
                 !Pa
                 CALL DCOPY(NN,P%MTrix%D(BlkP),1,Psv%D(NN+1),1)
                 !Pb
@@ -102,12 +102,12 @@ CONTAINS
                 !(Pa+Pb)/2->Ptot
                 CALL DAXPY(NN,1D0,P%MTrix%D(BlkP+3*NN),1,Psv%D(1),1)
                 ! Scale the total density matrix.
-                CALL DSCAL(NN,0.5D0,Psv%D(1),1) 
+                CALL DSCAL(NN,0.5D0,Psv%D(1),1)
              CASE DEFAULT
                 CALL Halt(' MakeRho: P%NSMat doesnt have an expected value! ')
              END SELECT
              B=Pair%B
-             DO NC=1,GM%OvCells%NCells                
+             DO NC=1,GM%OvCells%NCells
                 Pair%B=B+GM%OvCells%CellCarts%D(:,NC)
                 Pair%AB2=(Pair%A(1)-Pair%B(1))**2 &
                        + (Pair%A(2)-Pair%B(2))**2 &
@@ -158,8 +158,8 @@ CONTAINS
     HGLink=>RhoHead%Next
     !
     NExpt=1
-    NL(1)=1 
-    NZ(1)=1  
+    NL(1)=1
+    NZ(1)=1
     El(1)=HGLink%Ell
     Ze(1)=HGLink%Zeta
     !
@@ -193,7 +193,7 @@ CONTAINS
     DO I=1,NExpt
        IZ(I)=I
        NCoef=NCoef+NZ(I)*LHGTF(El(I))
-    ENDDO 
+    ENDDO
     !
     CALL New(R,(/NExpt,NLink,NCoef,1/))
     !
@@ -263,7 +263,7 @@ CONTAINS
           ! Note factors of two to account for closed shell book-keeping
           P%MPole=P%MPole+Two*R%Co%D(JAdd)*ZZ
           P%DPole%D=P%DPole%D+Two*DPole(EllZ,ZZ,RX,RY,RZ,Rho%Co%D(JAdd:JAdd+LenZ-1))
-          P%QPole%D=P%QPole%D+Two*QPole(EllZ,Zeta,ZZ,RX,RY,RZ,Rho%Co%D(JAdd:JAdd+LenZ-1)) 
+          P%QPole%D=P%QPole%D+Two*QPole(EllZ,Zeta,ZZ,RX,RY,RZ,Rho%Co%D(JAdd:JAdd+LenZ-1))
        ENDDO
     ENDDO
 
@@ -315,7 +315,7 @@ CONTAINS
   !
   SUBROUTINE DeleteHGLL(RhoHead)
     TYPE(HGLL),POINTER  :: RhoHead,HGLink,RMLink
-    HGLink=>RhoHead%Next 
+    HGLink=>RhoHead%Next
     DEALLOCATE(RhoHead)
     NULLIFY(RhoHead)
     DO WHILE(ASSOCIATED(HGLink))
@@ -363,7 +363,7 @@ CONTAINS
        HGLink%Cent=Prim%Pw
 
        CALL New(HGLink%Coef,1)
-       ! Note factor of 1/2 
+       ! Note factor of 1/2
        HGLink%Coef%D(1)=-Half*GM%AtNum%D(N)*GSpike
     ENDDO
     NULLIFY(HGLink%Next)
@@ -403,7 +403,7 @@ CONTAINS
        MinZ=MIN(MinZ,HGLink%Cent(3))
        HGLink=>HGLink%Next
     ENDDO
-    !    
+    !
     IF(MaxX-MinX>=MAX(MaxY-MinY,MaxZ-MinZ))THEN
        ISort=1
     ELSEIF(MaxY-MinY>=MAX(MaxX-MinX,MaxZ-MinZ))THEN
@@ -443,7 +443,7 @@ CONTAINS
           RK=LinkArray1(ListArray1(K))%L%Cent
           ZZJK=ZK*ZJ/(ZK+ZJ)
           RJK2=DOT_PRODUCT(RJ-RK,RJ-RK)
-          Bhatt=ABS(1D0-EXP(-0.25D0*RJK2*ZZJK)*SQRT(2D0*SQRT(ZK*ZJ)/(ZK+ZJ)))          
+          Bhatt=ABS(1D0-EXP(-0.25D0*RJK2*ZZJK)*SQRT(2D0*SQRT(ZK*ZJ)/(ZK+ZJ)))
           L=L+1
           RealArray1(L)=Bhatt
           ListArray2(L)=ListArray1(K)
@@ -453,15 +453,7 @@ CONTAINS
           CALL DblIntSort77(L,RealArray1,ListArray2,2)	
 
           DO I=1,L
-!             IF(RealArray1(I).GT.1D-8)EXIT
-
-!D-3 QCTC :                 :: Coulomb Energy      = <-.1086298817449869D+05>
-!D-5 QCTC :                 :: Coulomb Energy      = <-.1083002185656237D+05>
-!D-7 QCTC :                 :: Coulomb Energy      = <-.1082871666547942D+05>
-!     QCTC :                 :: Coulomb Energy      = <-.1082871662244797D+05>
-
-
-             IF(RealArray1(I).GT.1D-8)EXIT
+             IF(RealArray1(I).GT.1D-12)EXIT
              !
              JLst=ListArray1(J)
              KLst=ListArray2(I)
@@ -477,22 +469,22 @@ CONTAINS
              !
              IF(EllJ>=EllK)THEN
                 LinkArray1(JLst)%L%Coef%D(1:LenK)=LinkArray1(JLst)%L%Coef%D(1:LenK) &
-                                                 +LinkArray1(KLst)%L%Coef%D(1:LenK) 
-             ELSE                
+                                                 +LinkArray1(KLst)%L%Coef%D(1:LenK)
+             ELSE
                 LinkArray1(KLst)%L%Coef%D(1:LenJ)=LinkArray1(JLst)%L%Coef%D(1:LenJ) &
-                                                 +LinkArray1(KLst)%L%Coef%D(1:LenJ) 
+                                                 +LinkArray1(KLst)%L%Coef%D(1:LenJ)
                 CALL Delete(LinkArray1(JLst)%L%Coef)
                 CALL New(LinkArray1(JLst)%L%Coef,LenK)
                 LinkArray1(JLst)%L%Ell=EllK
                 EllJ=EllK
-                LinkArray1(JLst)%L%Coef%D(1:LenK)=LinkArray1(KLst)%L%Coef%D(1:LenK)                
+                LinkArray1(JLst)%L%Coef%D(1:LenK)=LinkArray1(KLst)%L%Coef%D(1:LenK)
              ENDIF
              !
              ! Remove link K from the list
              !
              CALL Delete(LinkArray1(KLst)%L%Coef)
-             DEALLOCATE(LinkArray1(KLst)%L)             
-             NULLIFY(LinkArray1(KLst)%L)             
+             DEALLOCATE(LinkArray1(KLst)%L)
+             NULLIFY(LinkArray1(KLst)%L)
              !
              KLstM1=KLst-1
              IF(KLstM1<1)CYCLE
@@ -515,7 +507,7 @@ CONTAINS
              ENDDO
 
              !
-             IF(KLstM1==KLstP1)GOTO 101 
+             IF(KLstM1==KLstP1)GOTO 101
              !
              LinkArray1(KLstM1)%L%Next=>LinkArray1(KLstP1)%L
              !
@@ -528,7 +520,7 @@ CONTAINS
     HGLink=>RhoHead%Next
     DO WHILE(ASSOCIATED(HGLink))
        NLink=NLink+1
-       HGLink=>HGLink%Next       
+       HGLink=>HGLink%Next
     ENDDO
     RETURN
     !
@@ -576,7 +568,7 @@ CONTAINS
 
     !
     KA   = Pair%KA
-    KB   = Pair%KB  
+    KB   = Pair%KB
     NBFA = Pair%NA
     NBFB = Pair%NB
     AEQB = Pair%SameAtom
@@ -588,12 +580,12 @@ CONTAINS
     Prim%KA=Pair%KA
     Prim%KB=Pair%KB
     !
-    DO CFA=1,BS%NCFnc%I(KA)       
+    DO CFA=1,BS%NCFnc%I(KA)
        IndexA  = CFBlokDex(BS,CFA,KA)
-       StartLA = BS%LStrt%I(CFA,KA)        
+       StartLA = BS%LStrt%I(CFA,KA)
        StopLA  = BS%LStop%I(CFA,KA)
        MaxLA   = BS%ASymm%I(2,CFA,KA)
-       DO CFB=1,BS%NCFnc%I(KB)                       
+       DO CFB=1,BS%NCFnc%I(KB)
           IndexB  = CFBlokDex(BS,CFB,KB)
           StartLB = BS%LStrt%I(CFB,KB)
           StopLB  = BS%LStop%I(CFB,KB)
@@ -601,9 +593,9 @@ CONTAINS
           Prim%CFA=CFA
           Prim%CFB=CFB
           Prim%Ell=MaxLA+MaxLB
-          DO PFA=1,BS%NPFnc%I(CFA,KA)                ! 
-             Prim%PFA=PFA 
-             DO PFB=1,BS%NPFnc%I(CFB,KB) 
+          DO PFA=1,BS%NPFnc%I(CFA,KA)                !
+             Prim%PFA=PFA
+             DO PFB=1,BS%NPFnc%I(CFB,KB)
                 Prim%PFB=PFB
                 Prim%ZA=BS%Expnt%D(PFA,CFA,KA)
                 Prim%ZB=BS%Expnt%D(PFB,CFB,KB)
@@ -629,23 +621,23 @@ CONTAINS
                       DO LMNB=StartLB,StopLB
                          IB=IB+1
                          EllB = BS%LxDex%I(LMNB)+BS%LyDex%I(LMNB)+BS%LzDex%I(LMNB)
-                         DO iSMat=1,1 !SpinM 
+                         DO iSMat=1,1 !SpinM
                             DO LMN=1,LHGTF(EllA+EllB)
-                               TmpCo(LMN)=TmpCo(LMN)+HGBra%D(LMN,IA,IB)*Psv(IA,IB,iSMat) 
+                               TmpCo(LMN)=TmpCo(LMN)+HGBra%D(LMN,IA,IB)*Psv(IA,IB,iSMat)
                             ENDDO
                          ENDDO
                       ENDDO
-                   ENDDO                  
+                   ENDDO
                    !
                    ! Fullup cutoff for zero coefficients
                    MaxCo=-BIG_DBL
                    DO LMN=1,LenKet
                       MaxCo=MAX(MaxCo,ABS(TmpCo(LMN)))
                    ENDDO
-                   ! See similar criteria in MondoMods/Thresholding.f90 in 
+                   ! See similar criteria in MondoMods/Thresholding.f90 in
                    ! Extent/PFunk:  Basically, we are looking for HGTFs that
                    ! are zero relative to the penetration error.  The factor
-                   ! of 1D18 is used instead of 1D20, since economization 
+                   ! of 1D18 is used instead of 1D20, since economization
                    ! can change things somewhat.  This should probably all get
                    ! tightened up at some point.
                    IF((TauPAC/MaxCo)*(Prim%Zeta/Pi)**(1.5D0)<1D18)THEN
@@ -698,16 +690,16 @@ CONTAINS
     REAL(DOUBLE),DIMENSION(6) :: QPole
     REAL(DOUBLE),DIMENSION(:) :: Coef
 !
-    RX2 = Half/Expt + RX*RX 
-    RY2 = Half/Expt + RY*RY    
-    RZ2 = Half/Expt + RZ*RZ 
+    RX2 = Half/Expt + RX*RX
+    RY2 = Half/Expt + RY*RY
+    RZ2 = Half/Expt + RZ*RZ
 !!$
 
 !!$    WRITE(*,*)' half'
 !!$    !
-!!$    RX2=+RX*RX 
-!!$    RY2=+RY*RY    
-!!$    RZ2=+RZ*RZ 
+!!$    RX2=+RX*RX
+!!$    RY2=+RY*RY
+!!$    RZ2=+RZ*RZ
     !
     SELECT CASE(LQ)
     CASE(0)
@@ -732,9 +724,8 @@ CONTAINS
        QPole(5) = PiExpt*(Coef(1)*RX*RZ + Coef(2)*RZ + Coef(4)*RX + Coef(8))
        QPole(6) = PiExpt*(Coef(1)*RY*RZ + Coef(3)*RZ + Coef(4)*RY + Coef(9))
     END SELECT
-!  
-  END FUNCTION QPole
 
+  END FUNCTION QPole
 
   !
 END MODULE Density
