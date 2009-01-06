@@ -568,11 +568,11 @@ CONTAINS
 
     IF(m_step == 1) THEN
 
-      ! Reset the Linear Momentum, Compute the Kinectic Energy and Ave Kinectic Energy
+      ! Reset the linear momentum, compute the kinectic energy and ave kinectic energy
       DO iCLONE=1,C%Geos%Clones
-        ! Calculate Kinectic Energy and  Temp, update Ave Temp
+        ! Calculate kinectic energy and temp, update ave temp
         CALL CalculateMDKin(C%Geos%Clone(iCLONE),MDEkin%D(iCLONE),MDTemp%D(iCLONE))
-        MDTave%D(iCLONE) = (DBLE(iGEO-1)/DBLE(iGEO))*MDTave%D(iCLONE) +(One/DBLE(iGEO))*MDTemp%D(iCLONE)
+        MDTave%D(iCLONE) = (DBLE(iGEO-1)/DBLE(iGEO))*MDTave%D(iCLONE)+(One/DBLE(iGEO))*MDTemp%D(iCLONE)
 
         ! Store Potential and Total Energy
         CALL MondoLog(DEBUG_NONE, "MD:Symplectic", "T = "//TRIM(DblToChar(MDTemp%D(iCLONE)))//" K")
@@ -892,11 +892,13 @@ CONTAINS
     REAL(DOUBLE),DIMENSION(3,3)    :: Latt,InvLatt,LattFrc
     REAL(DOUBLE),DIMENSION(3)      :: Pos,Vel
     LOGICAL, SAVE                  :: FirstTime = .TRUE.
-
     CHARACTER(LEN=DEFAULT_CHR_LEN) :: Remark
 
     DO iCLONE=1,C%Geos%Clones
       Remark = 't = '//TRIM(DblToMedmChar(MDTime%D(iCLONE)*InternalTimeToFemtoseconds))//" fs, "// &
+               "Ekin = "//TRIM(DblToChar(MDEkin%D(iCLONE)*au2eV))//" eV, "// &
+               "Epot = "//TRIM(DblToChar(MDEpot%D(iCLONE)*au2eV))//" eV, "// &
+               "Etot = "//TRIM(DblToChar(MDEtot%D(iCLONE)*au2eV))//" eV, "// &
                "T = "//TRIM(DblToMedmChar(MDTemp%D(iCLONE)))//" K"
       CALL PPrint(C%Geos%Clone(iCLONE), FileName_O=C%Nams%GFile, Unit_O=Geo, &
                   PrintGeom_O=C%Opts%GeomPrint, Clone_O=iCLONE, Remark_O=Remark, Gradients_O='Velocities')
