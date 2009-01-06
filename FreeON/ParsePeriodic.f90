@@ -82,17 +82,20 @@ CONTAINS
         totalMass = totalMass+G%Clone(I)%AtMss%D(atomID)
       ENDDO
 
-      ! Get the volume.
-      volume = CellVolume(G%Clone(I)%PBC%BoxShape%D,G%Clone(I)%PBC%AutoW%I)
-
-      CALL MondoLog(DEBUG_NONE, "LoadPeriodic", "volume = "//TRIM(DblToMedmChar(volume))//" A^3")
-      CALL MondoLog(DEBUG_NONE, "LoadPeriodic", "volume per atom = " &
-        //TRIM(FltToShrtChar(volume/G%Clone(I)%NAtms))//" A^3 = " &
-        //TRIM(FltToShrtChar(volume/G%Clone(I)%NAtms*AngstromsToAU*AngstromsToAU*AngstromsToAU))//" a_B^3")
       CALL MondoLog(DEBUG_NONE, "LoadPeriodic", "mass = " &
         //TRIM(DblToMedmChar(totalMass*amuToKg))//" kg = " &
         //TRIM(DblToMedmChar(totalMass))//" u")
-      CALL MondoLog(DEBUG_NONE, "LoadPeriodic", "density = "//TRIM(DblToMedmChar(totalMass*amuToKg/(volume*1D-30)))//" kg/m^3")
+
+      IF(G%Clone(I)%PBC%Dimen /= 0) THEN
+        ! Get the volume.
+        volume = CellVolume(G%Clone(I)%PBC%BoxShape%D,G%Clone(I)%PBC%AutoW%I)
+
+        CALL MondoLog(DEBUG_NONE, "LoadPeriodic", "volume = "//TRIM(DblToMedmChar(volume))//" A^3")
+        CALL MondoLog(DEBUG_NONE, "LoadPeriodic", "volume per atom = " &
+          //TRIM(FltToShrtChar(volume/G%Clone(I)%NAtms))//" A^3 = " &
+          //TRIM(FltToShrtChar(volume/G%Clone(I)%NAtms*AngstromsToAU*AngstromsToAU*AngstromsToAU))//" a_B^3")
+        CALL MondoLog(DEBUG_NONE, "LoadPeriodic", "density = "//TRIM(DblToMedmChar(totalMass*amuToKg/(volume*1D-30)))//" kg/m^3")
+      ENDIF
     ENDDO
 
   END SUBROUTINE LoadPeriodic
